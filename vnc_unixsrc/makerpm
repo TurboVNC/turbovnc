@@ -1,13 +1,14 @@
 #!/bin/bash
 
-if [ $1 = "clean" ]; then
+if [ "$1" = "clean" ]; then
 make clean || exit -1
 cd Xvnc
 make clean || exit -1
 cd ..
 fi
 
-make || exit -1
+xmkmf || exit -1
+make World || exit -1
 cd Xvnc
 ./configure || exit -1
 make || exit -1
