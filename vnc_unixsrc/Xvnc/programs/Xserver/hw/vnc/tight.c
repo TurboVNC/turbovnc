@@ -47,23 +47,25 @@ static Bool usePixelFormat24;
 
 typedef struct TIGHT_CONF_s {
     int maxRectSize, maxRectWidth;
+    int rawZlibLevel;
 } TIGHT_CONF;
 
 static TIGHT_CONF tightConf[1] = {
 #if 0
-    {   512,   32 },
-    {  2048,  128 },
-    {  6144,  256 },
-    { 10240, 1024 },
-    { 16384, 2048 },
-    { 32768, 2048 },
-    { 65536, 2048 },
-    { 65536, 2048 },
-    { 65536, 2048 },
+    {   512,   32, 0 },
+    {  2048,  128, 1 },
+    {  6144,  256, 2 },
+    { 10240, 1024, 3 },
+    { 16384, 2048, 4 },
+    { 32768, 2048, 5 },
+    { 65536, 2048, 6 },
+    { 65536, 2048, 7 },
+    { 65536, 2048, 8 },
 #endif
-    { 65536, 2048 }
+    { 65536, 2048, 9 }
 };
 
+#define JPEGTHRESHOLD 1024
 static int compressLevel;
 static int qualityLevel;
 
@@ -99,7 +101,10 @@ static Bool SendSubrect       (rfbClientPtr cl, int x, int y, int w, int h);
 static Bool SendTightHeader   (rfbClientPtr cl, int x, int y, int w, int h);
 
 static Bool SendSolidRect     (rfbClientPtr cl);
+static Bool SendFullColorRect (rfbClientPtr cl, int w, int h);
 
+static Bool CompressData(rfbClientPtr cl, int streamId, int dataLen,
+                         int zlibLevel, int zlibStrategy);
 static Bool SendCompressedData(rfbClientPtr cl, int compressedLen);
 
 static void Pack24(char *buf, rfbPixelFormat *fmt, int count);
@@ -490,7 +495,10 @@ SendSubrect(cl, x, y, w, h)
                        &cl->format, fbptr, tightBeforeBuf,
                        rfbScreen.paddedWidthInBytes, w, h);
 
-    success = SendJpegRect(cl, x, y, w, h, qualityLevel);
+    if((rfbScreen.bitsPerPixel / 8) * w * h > JPEGTHRESHOLD)
+	    success = SendJpegRect(cl, x, y, w, h, qualityLevel);
+    else
+        success = SendFullColorRect(cl, w, h);
 
     return success;
 }
@@ -551,6 +559,88 @@ SendSolidRect(cl)
     cl->rfbBytesSent[rfbEncodingTight] += len + 1;
 
     return TRUE;
+}
+
+static Bool
+SendFullColorRect(cl, w, h)
+    rfbClientPtr cl;
+    int w, h;
+{
+    int streamId = 0;
+    int len;
+
+    if (ublen + TIGHT_MIN_TO_COMPRESS + 1 > UPDATE_BUF_SIZE) {
+        if (!rfbSendUpdateBuf(cl))
+            return FALSE;
+    }
+
+    updateBuf[ublen++] = 0x00;  /* stream id = 0, no flushing, no filter */
+    cl->rfbBytesSent[rfbEncodingTight]++;
+
+    if (usePixelFormat24) {
+        Pack24(tightBeforeBuf, &cl->format, w * h);
+        len = 3;
+    } else
+        len = cl->format.bitsPerPixel / 8;
+
+    return CompressData(cl, streamId, w * h * len,
+                        tightConf[0].rawZlibLevel,
+                        Z_DEFAULT_STRATEGY);
+}
+
+static Bool
+CompressData(cl, streamId, dataLen, zlibLevel, zlibStrategy)
+    rfbClientPtr cl;
+    int streamId, dataLen, zlibLevel, zlibStrategy;
+{
+    z_streamp pz;
+    int err;
+
+    if (dataLen < TIGHT_MIN_TO_COMPRESS) {
+        memcpy(&updateBuf[ublen], tightBeforeBuf, dataLen);
+        ublen += dataLen;
+        cl->rfbBytesSent[rfbEncodingTight] += dataLen;
+        return TRUE;
+    }
+
+    pz = &cl->zsStruct[streamId];
+
+    /* Initialize compression stream if needed. */
+    if (!cl->zsActive[streamId]) {
+        pz->zalloc = Z_NULL;
+        pz->zfree = Z_NULL;
+        pz->opaque = Z_NULL;
+
+        err = deflateInit2 (pz, zlibLevel, Z_DEFLATED, MAX_WBITS,
+                            MAX_MEM_LEVEL, zlibStrategy);
+        if (err != Z_OK)
+            return FALSE;
+
+        cl->zsActive[streamId] = TRUE;
+        cl->zsLevel[streamId] = zlibLevel;
+    }
+
+    /* Prepare buffer pointers. */
+    pz->next_in = (Bytef *)tightBeforeBuf;
+    pz->avail_in = dataLen;
+    pz->next_out = (Bytef *)tightAfterBuf;
+    pz->avail_out = tightAfterBufSize;
+
+    /* Change compression parameters if needed. */
+    if (zlibLevel != cl->zsLevel[streamId]) {
+        if (deflateParams (pz, zlibLevel, zlibStrategy) != Z_OK) {
+            return FALSE;
+        }
+        cl->zsLevel[streamId] = zlibLevel;
+    }
+
+    /* Actual compression. */
+    if ( deflate (pz, Z_SYNC_FLUSH) != Z_OK ||
+         pz->avail_in != 0 || pz->avail_out == 0 ) {
+        return FALSE;
+    }
+
+    return SendCompressedData(cl, tightAfterBufSize - pz->avail_out);
 }
 
 static Bool SendCompressedData(cl, compressedLen)
