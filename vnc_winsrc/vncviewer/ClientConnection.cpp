@@ -698,14 +698,7 @@ void ClientConnection::CreateLocalFramebuffer() {
 }
 
 void ClientConnection::SetupPixelFormat() {
-	// Have we requested a reduction to 8-bit?
-    if (m_opts.m_Use8Bit) {		
-      
-		vnclog.Print(2, _T("Requesting 8-bit truecolour\n"));  
-		m_myFormat = vnc8bitFormat;
-    
-		// We don't support colormaps so we'll ask the server to convert
-    } else if (!m_si.format.trueColour) {
+    if (!m_si.format.trueColour) {
         
         // We'll just request a standard 16-bit truecolor
         vnclog.Print(2, _T("Requesting 16-bit truecolour\n"));
@@ -819,7 +812,7 @@ void ClientConnection::SetFormatAndEncodings()
 	}
 
 	// Request desired compression level if applicable
-	if ( useCompressLevel && m_opts.m_useCompressLevel &&
+	if ( useCompressLevel &&
 		 m_opts.m_compressLevel >= 0 &&
 		 m_opts.m_compressLevel <= 2) {
 		encs[se->nEncodings++] = Swap32IfLE( rfbEncodingCompressLevel0 +
@@ -835,8 +828,7 @@ void ClientConnection::SetFormatAndEncodings()
 	}
 
 	// Request JPEG quality level if JPEG compression was enabled by user
-	if ( m_opts.m_enableJpegCompression &&
-		 m_opts.m_jpegQualityLevel >= 0 &&
+	if ( m_opts.m_jpegQualityLevel >= 0 &&
 		 m_opts.m_jpegQualityLevel <= 100) {
 		encs[se->nEncodings++] = Swap32IfLE( rfbJpegQualityLevel0 +
 											 m_opts.m_jpegQualityLevel );
