@@ -1,4 +1,4 @@
-TurboVNC 0.1.1 Binary Distribution for Windows platforms
+TurboVNC 0.2 Binary Distribution for Windows platforms
 ======================================================
 
 This software is a stripped-down version of TightVNC 1.2.9, supporting only

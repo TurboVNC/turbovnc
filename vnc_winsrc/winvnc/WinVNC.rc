@@ -107,7 +107,7 @@ BEGIN
                     IDC_STATIC,134,87,185,28
     LTEXT           "Based on WinVNC 3.3.3r9 by James Weatherall\nCopyright (C) 1998-2001 AT&&T Laboratories Cambridge\nhttp://www.uk.research.att.com/vnc/",
                     IDC_STATIC,134,57,185,29
-    LTEXT           "TurboVNC Server version 0.1.1\nhttp://virtualgl.sourceforge.net",
+    LTEXT           "TurboVNC Server version 0.2\nhttp://virtualgl.sourceforge.net",
                     IDC_STATIC,134,7,185,18
 END
 
@@ -292,8 +292,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,1,1,0
- PRODUCTVERSION 0,1,1,0
+ FILEVERSION 0,2,0,0
+ PRODUCTVERSION 0,2,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -326,14 +326,14 @@ BEGIN
             VALUE "Comments", "Based on TridiaVNC by Tridia Corporation, Based on TightVNC by Constantin Kaplinsky\0"
             VALUE "CompanyName", "The VirtualGL Project\0"
             VALUE "FileDescription", "TurboVNC Win32 Server\0"
-            VALUE "FileVersion", "0, 1, 1, 0\0"
+            VALUE "FileVersion", "0, 2, 0, 0\0"
             VALUE "InternalName", "WinVNC\0"
             VALUE "LegalCopyright", "Copyright (C) 1998-2002 [many holders]\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "WinVNC.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "TurboVNC Win32 Server\0"
-            VALUE "ProductVersion", "0, 1, 1, 0\0"
+            VALUE "ProductVersion", "0, 2, 0, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END
