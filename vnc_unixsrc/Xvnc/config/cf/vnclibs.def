@@ -14,7 +14,7 @@ VNCSYSLIBS = /usr/local/lib/libjpeg.a /usr/local/lib/libz.a
 #ifdef SunArchitecture
 VNCSYSLIBS = -L/usr/local/lib -R/opt/SUNWtvnc/lib -L$(TOP)/../../../vgl/solaris/lib -lhpjpeg -lz
 #else
-VNCSYSLIBS = -L/usr/local/lib -Xlinker -rpath /opt/TurboVNC/lib -L$(TOP)/../../../vgl/linux/lib -lhpjpeg -lz
+VNCSYSLIBS = -L/usr/local/lib -Xlinker -rpath -Xlinker /opt/TurboVNC/lib -L$(TOP)/../../../vgl/linux/lib -lhpjpeg -lz
 #endif
 #endif
 
