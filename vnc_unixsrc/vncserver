@@ -27,6 +27,14 @@
 # First make sure we're operating in a sane environment.
 #
 
+$exedir = "";
+$slashndx = rindex($0, "/");
+if($slashndx>=0) {
+    $exedir = substr($0, 0, $slashndx+1);
+}
+
+$vncClasses = "";
+
 &SanityCheck();
 
 #
@@ -36,7 +44,6 @@
 $geometry = "1024x768";
 $depth = 24;
 $desktopName = "X";
-$vncClasses = "/usr/local/vnc/classes";
 $vncUserDir = "$ENV{HOME}/.vnc";
 $fontPath = "unix/:7100";
 
@@ -128,7 +135,7 @@ if (-e _ && (!-f _ || !-o _)) {
 }
 if (!-e _ || ($mode & 077) != 0) {
     warn "\nYou will require a password to access your desktops.\n\n";
-    system("vncpasswd $vncUserDir/passwd");
+    system($exedir."vncpasswd $vncUserDir/passwd");
     if (($? & 0xFF00) != 0) {
         exit 1;
     }
@@ -168,7 +175,7 @@ system("xauth -f $xauthorityFile add $host/unix:$displayNumber . $cookie");
 
 # Now start the X VNC Server
 
-$cmd = "Xvnc :$displayNumber";
+$cmd = $exedir."Xvnc :$displayNumber";
 $cmd .= " -desktop " . &quotedString($desktopName);
 $cmd .= " -httpd $vncClasses";
 $cmd .= " -auth $xauthorityFile";
@@ -558,13 +565,37 @@ sub SanityCheck
     #
 
  cmd:
-    foreach $cmd ("uname","xauth","Xvnc","vncpasswd") {
+    foreach $cmd ("uname","xauth") {
 	for (split(/:/,$ENV{PATH})) {
-	    if (-x "$_/$cmd" || -x "$cmd") {
+	    if (-x "$_/$cmd") {
 		next cmd;
 	    }
 	}
 	die "$prog: couldn't find \"$cmd\" on your PATH.\n";
+    }
+    if($exedir eq "") {
+      cmd2:
+	foreach $cmd ("Xvnc","vncpasswd") {
+	    for (split(/:/,$ENV{PATH})) {
+		if (-x "$_/$cmd") {
+		    $vncClasses = "$_/../vnc/classes";
+		    next cmd2;
+		}
+	    }
+	    die "$prog: couldn't find \"$cmd\" on your PATH.\n";
+	}
+    }
+    else {
+      cmd3:
+	foreach $cmd ($exedir."Xvnc",$exedir."vncpasswd") {
+	    for (split(/:/,$ENV{PATH})) {
+		if (-x "$cmd") {
+		    $vncClasses = $exedir."../vnc/classes";
+		    next cmd3;
+		}
+	    }
+	    die "$prog: couldn't find \"$cmd\".\n";
+	}
     }
 
     #

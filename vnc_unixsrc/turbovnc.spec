@@ -39,8 +39,10 @@ mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_mandir}/man1
 ./vncinstall %{buildroot}%{_bindir} %{buildroot}%{_mandir}
 
-mkdir -p %{buildroot}%{_datadir}/vnc
-cp -aR classes %{buildroot}%{_datadir}/vnc
+mkdir -p %{buildroot}%{_datadir}/vnc/classes
+for i in classes/*.class; do install -m 644 $i %{buildroot}%{_datadir}/vnc/classes; done
+for i in classes/*.jar; do install -m 644 $i %{buildroot}%{_datadir}/vnc/classes; done
+for i in classes/*.vnc; do install -m 644 $i %{buildroot}%{_datadir}/vnc/classes; done
 
 strip %{buildroot}%{_bindir}/* || :
 
@@ -78,14 +80,6 @@ Exec=%{_bindir}/vncviewer
 Terminal=0
 Type=Application
 EOF
-
-rm -f %{buildroot}/%{_bindir}/vncserver
-cat vncserver   | \
-sed -e 's@$vncClasses = "/usr/local@$vncClasses = "%{_datadir}@g' | \
-sed -e 's@$cmd = "Xvnc :@$cmd = "%{_bindir}/Xvnc :@g' | \
-sed -e 's@foreach $cmd (\"uname\",\"xauth\",\"Xvnc\",\"vncpasswd\")@foreach $cmd (\"uname\",\"xauth\",\"%{_bindir}/Xvnc\",\"%{_bindir}/vncpasswd\")@g' \
- > %{buildroot}/%{_bindir}/vncserver
-chmod 555 %{buildroot}/%{_bindir}/vncserver
 
 %clean
 rm -rf %{buildroot}
