@@ -446,7 +446,7 @@ sub removeSlashes
 
 sub Usage
 {
-    die("TightVNC server version 1.2.9\n".
+    die("TurboVNC server version 0.1.2\n".
 	"\n".
 	"Usage: $prog [<OPTIONS>] [:<DISPLAY#>]\n".
 	"       $prog -kill :<DISPLAY#>\n".
@@ -560,7 +560,7 @@ sub SanityCheck
  cmd:
     foreach $cmd ("uname","xauth","Xvnc","vncpasswd") {
 	for (split(/:/,$ENV{PATH})) {
-	    if (-x "$_/$cmd") {
+	    if (-x "$_/$cmd" || -x "$cmd") {
 		next cmd;
 	    }
 	}
