@@ -14,9 +14,9 @@
 [ ${NETWORKING} = "no" ] && exit 0
 
 VNCSERVERS=""
-[ -f /etc/sysconfig/vncservers ] && . /etc/sysconfig/vncservers
+[ -f /etc/sysconfig/tvncservers ] && . /etc/sysconfig/tvncservers
 
-prog=$"VNC server"
+prog=$"TurboVNC server"
 
 start() {
     echo -n $"Starting $prog: "
@@ -34,7 +34,7 @@ start() {
     [ "$RETVAL" -eq 0 ] && success $"vncserver startup" || \
         failure $"vncserver start"
     echo
-    [ "$RETVAL" -eq 0 ] && touch /var/lock/subsys/vncserver
+    [ "$RETVAL" -eq 0 ] && touch /var/lock/subsys/tvncserver
 }
 
 stop() {
@@ -50,7 +50,7 @@ stop() {
     [ "$RETVAL" -eq 0 ] && success $"vncserver shutdown" || \
         failure $"vncserver shutdown"
     echo
-    [ "$RETVAL" -eq 0 ] && rm -f /var/lock/subsys/vncserver
+    [ "$RETVAL" -eq 0 ] && rm -f /var/lock/subsys/tvncserver
 }
 
 # See how we were called.
@@ -66,7 +66,7 @@ case "$1" in
 	start
 	;;
   condrestart)
-	if [ -f /var/lock/subsys/vncserver ]; then
+	if [ -f /var/lock/subsys/tvncserver ]; then
 	    stop
 	    start
 	fi
