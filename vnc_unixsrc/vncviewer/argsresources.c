@@ -31,7 +31,7 @@
 
 char *fallback_resources[] = {
 
-  "Vncviewer.title: TightVNC: %s",
+  "Vncviewer.title: TurboVNC: %s",
 
   "Vncviewer.translations:\
     <Enter>: SelectionToVNC()\\n\
@@ -64,7 +64,7 @@ char *fallback_resources[] = {
   "*passwordDialog.dialog.value.translations: #override\\n\
      <Key>Return: PasswordDialogDone()",
 
-  "*popup.title: TightVNC popup",
+  "*popup.title: TurboVNC popup",
   "*popup*background: grey",
   "*popup*font: -*-helvetica-bold-r-*-*-16-*-*-*-*-*-*-*",
   "*popup.buttonForm.Command.borderWidth: 0",
@@ -158,24 +158,6 @@ static XtResource appDataResourceList[] = {
   {"encodings", "Encodings", XtRString, sizeof(String),
    XtOffsetOf(AppData, encodingsString), XtRImmediate, (XtPointer) 0},
 
-  {"useBGR233", "UseBGR233", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, useBGR233), XtRImmediate, (XtPointer) False},
-
-  {"nColours", "NColours", XtRInt, sizeof(int),
-   XtOffsetOf(AppData, nColours), XtRImmediate, (XtPointer) 256},
-
-  {"useSharedColours", "UseSharedColours", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, useSharedColours), XtRImmediate, (XtPointer) True},
-
-  {"forceOwnCmap", "ForceOwnCmap", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, forceOwnCmap), XtRImmediate, (XtPointer) False},
-
-  {"forceTrueColour", "ForceTrueColour", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, forceTrueColour), XtRImmediate, (XtPointer) False},
-
-  {"requestedDepth", "RequestedDepth", XtRInt, sizeof(int),
-   XtOffsetOf(AppData, requestedDepth), XtRImmediate, (XtPointer) 0},
-
   {"useSharedMemory", "UseSharedMemory", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, useShm), XtRImmediate, (XtPointer) True},
 
@@ -204,13 +186,10 @@ static XtResource appDataResourceList[] = {
    XtOffsetOf(AppData, bumpScrollPixels), XtRImmediate, (XtPointer) 20},
 
   {"compressLevel", "CompressionLevel", XtRInt, sizeof(int),
-   XtOffsetOf(AppData, compressLevel), XtRImmediate, (XtPointer) -1},
+   XtOffsetOf(AppData, compressLevel), XtRImmediate, (XtPointer) 0},
 
   {"qualityLevel", "QualityLevel", XtRInt, sizeof(int),
-   XtOffsetOf(AppData, qualityLevel), XtRImmediate, (XtPointer) 6},
-
-  {"enableJPEG", "EnableJPEG", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, enableJPEG), XtRImmediate, (XtPointer) True},
+   XtOffsetOf(AppData, qualityLevel), XtRImmediate, (XtPointer) 95},
 
   {"useRemoteCursor", "UseRemoteCursor", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, useRemoteCursor), XtRImmediate, (XtPointer) True},
@@ -236,14 +215,8 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-noraiseonbeep", "*raiseOnBeep",        XrmoptionNoArg,  "False"},
   {"-passwd",        "*passwordFile",       XrmoptionSepArg, 0},
   {"-encodings",     "*encodings",          XrmoptionSepArg, 0},
-  {"-bgr233",        "*useBGR233",          XrmoptionNoArg,  "True"},
-  {"-owncmap",       "*forceOwnCmap",       XrmoptionNoArg,  "True"},
-  {"-truecolor",     "*forceTrueColour",    XrmoptionNoArg,  "True"},
-  {"-truecolour",    "*forceTrueColour",    XrmoptionNoArg,  "True"},
-  {"-depth",         "*requestedDepth",     XrmoptionSepArg, 0},
   {"-compresslevel", "*compressLevel",      XrmoptionSepArg, 0},
   {"-quality",       "*qualityLevel",       XrmoptionSepArg, 0},
-  {"-nojpeg",        "*enableJPEG",         XrmoptionNoArg,  "False"},
   {"-nocursorshape", "*useRemoteCursor",    XrmoptionNoArg,  "False"},
   {"-x11cursor",     "*useX11Cursor",       XrmoptionNoArg,  "True"},
 
@@ -295,7 +268,7 @@ void
 usage(void)
 {
   fprintf(stderr,
-	  "TightVNC viewer version 1.2.9\n"
+	  "TurboVNC viewer version 0.1\n"
 	  "\n"
 	  "Usage: %s [<OPTIONS>] [<HOST>][:<DISPLAY#>]\n"
 	  "       %s [<OPTIONS>] [<HOST>][::<PORT#>]\n"
@@ -311,13 +284,8 @@ usage(void)
 	  "        -noraiseonbeep\n"
 	  "        -passwd <PASSWD-FILENAME>\n"
 	  "        -encodings <ENCODING-LIST> (e.g. \"tight copyrect\")\n"
-	  "        -bgr233\n"
-	  "        -owncmap\n"
-	  "        -truecolour\n"
-	  "        -depth <DEPTH>\n"
-	  "        -compresslevel <COMPRESS-VALUE> (0..9: 0-fast, 9-best)\n"
-	  "        -quality <JPEG-QUALITY-VALUE> (0..9: 0-low, 9-high)\n"
-	  "        -nojpeg\n"
+	  "        -compresslevel <COMPRESS-VALUE> (0=4:4:4, 1=4:1:1, 2=4:2:2)\n"
+	  "        -quality <JPEG-QUALITY-VALUE> (0..100: 0-low, 100-high)\n"
 	  "        -nocursorshape\n"
 	  "        -x11cursor\n"
 	  "\n"
