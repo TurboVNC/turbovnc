@@ -173,9 +173,6 @@ static XtResource appDataResourceList[] = {
   {"debug", "Debug", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, debug), XtRImmediate, (XtPointer) False},
 
-  {"rawDelay", "RawDelay", XtRInt, sizeof(int),
-   XtOffsetOf(AppData, rawDelay), XtRImmediate, (XtPointer) 0},
-
   {"copyRectDelay", "CopyRectDelay", XtRInt, sizeof(int),
    XtOffsetOf(AppData, copyRectDelay), XtRImmediate, (XtPointer) 0},
 

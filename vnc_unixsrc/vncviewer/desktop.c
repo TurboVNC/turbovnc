@@ -367,6 +367,7 @@ CreateDotCursor()
 void
 CopyDataToScreen(char *buf, int x, int y, int width, int height)
 {
+#if 0
   if (appData.rawDelay != 0) {
     XFillRectangle(dpy, desktopWin, gc, x, y, width, height);
 
@@ -374,6 +375,7 @@ CopyDataToScreen(char *buf, int x, int y, int width, int height)
 
     usleep(appData.rawDelay * 1000);
   }
+#endif
 
   if (buf) {
     int h;

@@ -81,7 +81,6 @@ typedef struct {
   char *passwordFile;
   Bool passwordDialog;
 
-  int rawDelay;
   int copyRectDelay;
 
   Bool debug;
