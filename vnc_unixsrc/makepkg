@@ -2,16 +2,26 @@
 #
 
 if [ "$1" = "clean" ]; then
-gmake clean || exit -1
-cd Xvnc
-gmake clean || exit -1
-cd ..
-fi
-
 xmkmf || exit -1
-gmake World || exit -1
+gmake clean || exit -1
 cd Xvnc
 ./configure || exit -1
+gmake clean || exit -1
+./configure || exit -1
+cd ..
+if [ ! -f ../../vgl/Makefile ]; then
+	echo Could not find VirtualGL build directory at ../../vgl !
+	exit -1
+else
+	__PWD=`pwd`
+	cd ../../vgl
+	gmake M32=yes DISTRO=vnc clean
+	cd $__PWD
+fi
+fi
+
+gmake World || exit -1
+cd Xvnc
 gmake || exit -1
 cd ..
 
@@ -34,11 +44,12 @@ P SUNWxwplt     X Windows platform software
 P SUNWmlib      mediaLib - Shared Libraries
 EOF
 
+_VERSION=0.2
 cat > $pkgtmpdir/pkginfo <<EOF 
 ARCH=sparc
 PKG=SUNWtvnc
 NAME=TurboVNC server and client
-VERSION=0.2
+VERSION=$_VERSION
 SUNW_PRODNAME=TurboVNC
 SUNW_PRODVERS=1.0
 SUNW_PKGVERS=1.0
@@ -104,19 +115,20 @@ if [ ! -f ../../vgl/Makefile ]; then
 	echo Could not find VirtualGL build directory at ../../vgl !
 	exit -1
 else
-	PWD=`pwd`
+	__PWD=`pwd`
 	cd ../../vgl
-	gmake M32=yes
-	cd $PWD
-	cp ../../vgl/solaris/lib/libhpjpeg.so $pkgdir/lib
+	gmake M32=yes DISTRO=vnc jpeg
+	gmake M32=yes DISTRO=vnc jpeg
+	cd $__PWD
+	cp ../../vgl/solaris/vnc/lib/libhpjpeg.so $pkgdir/lib
 fi
 
 cp -prf classes $pkgdir/vnc
 
 cd $pkgtmpdir
 pkgmk -o -r opt -d . -a `uname -p` -f proto
-pkgtrans -s . ../$pkgname.pkg $pkgname
+pkgtrans -s . ../$pkgname-$_VERSION.pkg $pkgname
 cd ..
-rm -f $pkgname.pkg.bz2
-bzip2 $pkgname.pkg
+rm -f $pkgname-$_VERSION.pkg.bz2
+bzip2 $pkgname-$_VERSION.pkg
 /bin/rm -rf $pkgtmpdir
