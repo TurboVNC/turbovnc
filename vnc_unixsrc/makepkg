@@ -33,7 +33,6 @@ else
 	gmake M32=yes DISTRO=vnc jpeg
 	gmake M32=yes DISTRO=vnc jpeg
 	cd $__PWD
-	cp ../../vgl/solaris/vnc/lib/libhpjpeg.so $pkgdir/lib
 fi
 
 make World || exit -1
@@ -127,6 +126,7 @@ mkdir -p $pkgdir/vnc
 mkdir -p $pkgdir/man/man1
 
 ./vncinstall $pkgdir/bin $pkgdir/man
+cp ../../vgl/solaris/vnc/lib/libhpjpeg.so $pkgdir/lib
 
 cp -prf classes $pkgdir/vnc
 
