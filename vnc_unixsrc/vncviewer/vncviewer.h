@@ -73,13 +73,6 @@ typedef struct {
 
   String encodingsString;
 
-  Bool useBGR233;
-  int nColours;
-  Bool useSharedColours;
-  Bool forceOwnCmap;
-  Bool forceTrueColour;
-  int requestedDepth;
-
   Bool useShm;
 
   int wmDecorationWidth;
@@ -100,7 +93,6 @@ typedef struct {
 
   int compressLevel;
   int qualityLevel;
-  Bool enableJPEG;
   Bool useRemoteCursor;
   Bool useX11Cursor;
 
