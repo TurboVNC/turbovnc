@@ -1,5 +1,20 @@
 #!/bin/sh
 #
+
+if [ "$1" = "clean" ]; then
+gmake clean || exit -1
+cd Xvnc
+gmake clean || exit -1
+cd ..
+fi
+
+xmkmf || exit -1
+gmake World || exit -1
+cd Xvnc
+./configure || exit -1
+gmake || exit -1
+cd ..
+
 pkgtmpdir=pkgbuild
 pkgname=SUNWtvnc
 
@@ -23,7 +38,7 @@ cat > $pkgtmpdir/pkginfo <<EOF
 ARCH=sparc
 PKG=SUNWtvnc
 NAME=TurboVNC server and client
-VERSION=0.1.2
+VERSION=0.2
 SUNW_PRODNAME=TurboVNC
 SUNW_PRODVERS=1.0
 SUNW_PKGVERS=1.0
