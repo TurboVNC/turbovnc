@@ -16,6 +16,7 @@ P SUNWkvm       Core Architecture, (Kvm)
 P SUNWcsr       Core Solaris, (Root)
 P SUNWcsu       Core Solaris, (Usr)
 P SUNWxwplt     X Windows platform software
+P SUNWmlib      mediaLib - Shared Libraries
 EOF
 
 cat > $pkgtmpdir/pkginfo <<EOF 
@@ -94,13 +95,6 @@ else
 	cd $PWD
 	cp ../../vgl/solaris/lib/libhpjpeg.so $pkgdir/lib
 fi
-
-/bin/rm -f $pkgdir/bin/vncserver
-cat vncserver	|
-sed -e 's@$vncClasses = "/usr/local@$vncClasses = "/opt/SUNWtvnc@g' | \
-sed -e 's@$cmd = "Xvnc :@$cmd = "/opt/SUNWtvnc/bin/Xvnc :@g' | \
-sed -e 's@foreach $cmd (\"uname\",\"xauth\",\"Xvnc\",\"vncpasswd\")@foreach $cmd (\"uname\",\"xauth\",\"/opt/SUNWtvnc/bin/Xvnc\",\"/opt/SUNWtvnc/bin/vncpasswd\")@g' \
- > $pkgdir/bin/vncserver
 
 cp -prf classes $pkgdir/vnc
 
