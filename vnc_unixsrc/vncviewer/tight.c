@@ -543,7 +543,7 @@ DecompressJpegRectBPP(int x, int y, int w, int h)
   int compressedLen;
   CARD8 *compressedData;
   unsigned char *dstptr;
-  int ps;
+  int ps, flags=0;
 
   compressedLen = (int)ReadCompactLen();
   if (compressedLen <= 0) {
@@ -570,9 +570,14 @@ DecompressJpegRectBPP(int x, int y, int w, int h)
   }     
 
   ps=image->bits_per_pixel/8;
+  if(myFormat.bigEndian && ps==4) flags|=HPJ_ALPHAFIRST;
+  if(myFormat.redShift==16 && myFormat.blueShift==0)
+    flags|=HPJ_BGR;
+  if(myFormat.bigEndian) flags^=HPJ_BGR;
+
   dstptr=&image->data[image->bytes_per_line*y+x*ps];
   if(hpjDecompress(hpjhnd, (unsigned char *)compressedData, (unsigned long)compressedLen,
-    dstptr, w, image->bytes_per_line, h, ps, myFormat.bigEndian?0:HPJ_BGR)==-1) {
+    dstptr, w, image->bytes_per_line, h, ps, flags)==-1) {
     fprintf(stderr, "HPJPEG error: %s\n", hpjGetErrorStr());
     return False;
   }
