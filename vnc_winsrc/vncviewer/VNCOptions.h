@@ -64,7 +64,6 @@ public:
 	// default connection options - can be set through Dialog
 	bool	m_ViewOnly;
 	bool	m_FullScreen;
-	bool	m_Use8Bit;
 	int		m_PreferredEncoding;
 	bool	m_SwapMouse;
 	bool    m_Emul3Buttons; 
@@ -76,9 +75,7 @@ public:
 	int     m_localCursor;
 	bool	m_scaling;
 	int		m_scale_num, m_scale_den; // Numerator & denominator
-	bool	m_useCompressLevel;
 	int		m_compressLevel;
-	bool	m_enableJpegCompression;
 	int		m_jpegQualityLevel;
 	bool	m_requestShapeUpdates;
 	bool	m_ignoreShapeUpdates;
