@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 winmm.lib omnithread.lib zlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib hpjpeg.lib fbx.lib /nologo /subsystem:windows /machine:I386 /libpath:"omnithread/Release" /libpath:"zlib/Release" /libpath:"libjpeg/Release" /libpath:"..\..\..\vgl\windows\lib"
+# ADD LINK32 winmm.lib omnithread.lib zlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib hpjpeg.lib fbx.lib /nologo /subsystem:windows /machine:I386 /libpath:"omnithread/Release" /libpath:"zlib/Release" /libpath:"libjpeg/Release" /libpath:"..\..\..\vgl\windows\vnc\lib"
 
 !ELSEIF  "$(CFG)" == "vncviewer - Win32 Debug"
 
@@ -80,7 +80,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 ole32.lib oleaut32.lib winmm.lib omnithread.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib hpjpeg.lib fbx.lib /nologo /subsystem:windows /map /debug /machine:I386 /pdbtype:sept /libpath:"./omnithread/Debug" /libpath:"..\..\..\vgl\windows\libd"
+# ADD LINK32 ole32.lib oleaut32.lib winmm.lib omnithread.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib hpjpeg.lib fbx.lib /nologo /subsystem:windows /map /debug /machine:I386 /pdbtype:sept /libpath:"./omnithread/Debug" /libpath:"..\..\..\vgl\windows\dbg\lib"
 
 !ELSEIF  "$(CFG)" == "vncviewer - Win32 Profile"
 
@@ -107,7 +107,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 ole32.lib oleaut32.lib winmm.lib omnithread.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"./omnithread/Debug"
-# ADD LINK32 ole32.lib oleaut32.lib winmm.lib omnithread.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib hpjpeg.lib fbx.lib zlib.lib /nologo /subsystem:windows /profile /debug /machine:I386 /libpath:"./omnithread/Debug" /libpath:"..\..\..\vgl\windows\libd"
+# ADD LINK32 ole32.lib oleaut32.lib winmm.lib omnithread.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib hpjpeg.lib fbx.lib zlib.lib /nologo /subsystem:windows /profile /debug /machine:I386 /libpath:"./omnithread/Debug" /libpath:"..\..\..\vgl\windows\dbg\lib"
 
 !ENDIF 
 
