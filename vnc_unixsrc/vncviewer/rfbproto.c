@@ -560,9 +560,9 @@ HandleRFBServerMessage()
       rect.encoding = Swap32IfLE(rect.encoding);
       if (rect.encoding == rfbEncodingLastRect) {
         while (appData.doubleBuffer && list != NULL) {
+	  rfbFramebufferUpdateRectHeader* r1;
           node = list;
-
-	  rfbFramebufferUpdateRectHeader* r1 = &node->region;
+	  r1 = &node->region;
 
 	  if (r1->encoding == rfbEncodingTight) {
 	     SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h); 
@@ -696,8 +696,9 @@ HandleRFBServerMessage()
 
     if (appData.doubleBuffer) {
   	while (list != NULL) {
+	  rfbFramebufferUpdateRectHeader* r1;
   	  node = list;
-	  rfbFramebufferUpdateRectHeader* r1 = &node->region;
+	  r1 = &node->region;
 
 	  if (r1->encoding == rfbEncodingTight) {
 	    SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
