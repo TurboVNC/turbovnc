@@ -84,8 +84,8 @@ from the X Consortium.
 #include <vncserverctrl.h>
 #endif
 
-#define RFB_DEFAULT_WIDTH  640
-#define RFB_DEFAULT_HEIGHT 480
+#define RFB_DEFAULT_WIDTH  1024
+#define RFB_DEFAULT_HEIGHT 768
 #define RFB_DEFAULT_DEPTH  24
 #define RFB_DEFAULT_WHITEPIXEL 0
 #define RFB_DEFAULT_BLACKPIXEL 1
@@ -275,10 +275,12 @@ ddxProcessArgument (argc, argv, i)
 	return 1;
     }
 
+#if 0
     if (strcmp(argv[i], "-lazytight") == 0) {
 	rfbTightDisableGradient = TRUE;
 	return 1;
     }
+#endif
 
     if (strcmp(argv[i], "-desktop") == 0) {	/* -desktop desktop-name */
 	if (i + 1 >= argc) UseMsg();
@@ -914,8 +916,10 @@ ddxUseMsg()
     ErrorF("-deferupdate time      time in ms to defer updates "
 							     "(default 40)\n");
     ErrorF("-economictranslate     less memory-hungry translation\n");
+#if 0
     ErrorF("-lazytight             disable \"gradient\" filter in tight "
 								"encoding\n");
+#endif
     ErrorF("-desktop name          VNC desktop name (default x11)\n");
     ErrorF("-alwaysshared          always treat new clients as shared\n");
     ErrorF("-nevershared           never treat new clients as shared\n");
