@@ -37,6 +37,7 @@ VNCOptions::VNCOptions()
 		m_UseEnc[i] = false;
 	
 	m_UseEnc[rfbEncodingTight] = true;
+	m_UseEnc[rfbEncodingCopyRect] = true;
 
 	m_ViewOnly = false;
 	m_FullScreen = false;
