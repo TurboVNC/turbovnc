@@ -1,12 +1,11 @@
-Summary:   A remote display system.
-Name:      tightvnc
-Version:   1.2.9
+Summary:   A remote display system for hardware-accelerated 3D applications
+Name:      turbovnc
+Version:   0.1
 Release:   1
-URL:       http://www.tightvnc.com/
-Source0:   tightvnc-%{version}_unixsrc.tar.bz2
+URL:       http://virtualgl.sourceforge.net
+Source0:   turbovnc-%{version}_unixsrc.tar.gz
 License:   GPL
 Group:     User Interface/Desktops
-Packager:  Constantin Kaplinsky <const@ce.cctpu.edu.ru>
 Obsoletes: vnc
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildPrereq: /usr/bin/perl tcp_wrappers
@@ -17,12 +16,12 @@ ExclusiveArch: i386 alpha sparc ppc s390 s390x
 Virtual Network Computing (VNC) is a remote display system which
 allows you to view a computing 'desktop' environment not only on the
 machine where it is running, but from anywhere on the Internet and
-from a wide variety of machine architectures. TightVNC is an enhanced
-VNC distribution. This package contains a client which will allow you
-to connect to other desktops running a VNC or a TightVNC server.
+from a wide variety of machine architectures.  TurboVNC is a sleak and
+fast VNC distribution, containing a high-performance implementation of
+tight JPEG encoding designed to work in conjunction with VirtualGL.
 
 %package server
-Summary: TightVNC server
+Summary: TurboVNC server
 Obsoletes: vnc-server
 Requires: XFree86 bash >= 2.0
 Group: User Interface/X
@@ -30,8 +29,8 @@ Prereq: /sbin/chkconfig /sbin/service /etc/init.d
 
 %description server
 The VNC system allows you to access the same desktop from a wide
-variety of platforms. TightVNC is an enhanced VNC distribution. This
-package is a TightVNC server, allowing others to access the desktop on
+variety of platforms. TurboVNC is an enhanced VNC distribution. This
+package is a TurboVNC server, allowing others to access the desktop on
 your machine.
 
 %prep
@@ -134,6 +133,9 @@ fi
 %{_mandir}/man1/vncpasswd.1*
 
 %changelog
+* Mon Oct 4 2004 Darrell Commander <dcommander@users.sourceforge.net>
+- TurboVNC 0.1
+
 * Thu Jul 31 2003 Constantin Kaplinsky <const@ce.cctpu.edu.ru>
 - TightVNC 1.2.9 update.
 
