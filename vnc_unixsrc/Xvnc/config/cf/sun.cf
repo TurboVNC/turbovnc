@@ -149,16 +149,16 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
  * Assume /opt/SUNWspro/bin/ contains symlinks to the appropriate tools
  */
 #ifndef  CcCmd
-# define CcCmd		/opt/SUNWspro/bin/cc
+# define CcCmd		cc
 #endif
 #ifndef  CplusplusCmd
-# define CplusplusCmd	/opt/SUNWspro/bin/CC
+# define CplusplusCmd	CC
 #endif
 #ifndef  CplusplusFilt
-# define CplusplusFilt	/opt/SUNWspro/bin/c++filt
+# define CplusplusFilt	c++filt
 #endif
 #ifndef  CplusplusDependIncludes
-# define CplusplusDependIncludes	-I/opt/SUNWspro/SC3.0/include/CC
+# define CplusplusDependIncludes	
 #endif
 #endif
 
