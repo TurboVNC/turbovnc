@@ -1,0 +1,8 @@
+#!/bin/bash
+
+mkdir -p rpms/BUILD
+mkdir -p rpms/RPMS
+mkdir -p rpms/SOURCES
+mkdir -p rpms/SRPMS
+
+rpmbuild -ba --define "_topdir `pwd`/rpms" turbovnc.spec
