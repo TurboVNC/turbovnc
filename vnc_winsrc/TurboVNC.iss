@@ -3,8 +3,8 @@
 
 [Setup]
 AppName=TurboVNC
-AppVerName=TurboVNC 0.1
-AppVersion=0.1
+AppVerName=TurboVNC 0.1.1
+AppVersion=0.1.1
 AppPublisher=Darrell Commander
 AppPublisherURL=http://VirtualGL.sourceforge.net
 AppSupportURL=http://VirtualGL.sourceforge.net
