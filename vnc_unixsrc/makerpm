@@ -39,9 +39,15 @@ rm -rf rpms/
 mkdir -p rpms/RPMS
 cd rpms; ln -fs .. BUILD; cd ..
 
+BUILD=`date +%Y%m%d`
 rpmbuild -bb --buildroot `pwd`/rpms/TurboVNC-buildroot --define "_topdir `pwd`/rpms" \
 	--define "_bindir /opt/TurboVNC/bin" --define "_mandir /opt/TurboVNC/man" \
 	--define "_datadir /opt/TurboVNC" --define "_libdir /opt/TurboVNC/lib" \
-	--define "_build `date +%Y%m%d`" --define "_srclibdir ../../vgl/linux/vnc/lib" turbovnc.spec
-mv rpms/RPMS/i386/turbovnc*.rpm .
+	--define "_build $BUILD" --define "_srclibdir ../../vgl/linux/vnc/lib" turbovnc.spec
+
+RPMTAG=glibc`rpm -q glibc | cut -f2 -d- | cut -f1,2 -d. | sed s/\\\.//g`
+for i in rpms/RPMS/i386/turbovnc*.rpm; do
+	mv $i `basename $i | sed s@$BUILD@$RPMTAG@g`
+done
+
 rm -rf rpms/
