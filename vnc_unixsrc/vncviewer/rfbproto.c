@@ -31,20 +31,6 @@
 #include <zlib.h>
 #include "hpjpeg.h"
 
-#if 0
-static Bool HandleRRE8(int rx, int ry, int rw, int rh);
-static Bool HandleRRE16(int rx, int ry, int rw, int rh);
-static Bool HandleRRE32(int rx, int ry, int rw, int rh);
-static Bool HandleCoRRE8(int rx, int ry, int rw, int rh);
-static Bool HandleCoRRE16(int rx, int ry, int rw, int rh);
-static Bool HandleCoRRE32(int rx, int ry, int rw, int rh);
-static Bool HandleHextile8(int rx, int ry, int rw, int rh);
-static Bool HandleHextile16(int rx, int ry, int rw, int rh);
-static Bool HandleHextile32(int rx, int ry, int rw, int rh);
-static Bool HandleZlib8(int rx, int ry, int rw, int rh);
-static Bool HandleZlib16(int rx, int ry, int rw, int rh);
-static Bool HandleZlib32(int rx, int ry, int rw, int rh);
-#endif
 static Bool HandleTight16(int rx, int ry, int rw, int rh);
 static Bool HandleTight32(int rx, int ry, int rw, int rh);
 
@@ -300,8 +286,6 @@ SetFormatAndEncodings()
   rfbSetEncodingsMsg *se = (rfbSetEncodingsMsg *)buf;
   CARD32 *encs = (CARD32 *)(&buf[sz_rfbSetEncodingsMsg]);
   int len = 0;
-  Bool requestCompressLevel = False;
-  Bool requestQualityLevel = False;
   Bool requestLastRectEncoding = False;
 
   spf.type = rfbSetPixelFormat;
@@ -328,30 +312,11 @@ SetFormatAndEncodings()
 	encStrLen = strlen(encStr);
       }
 
-#if 0
-      if (strncasecmp(encStr,"raw",encStrLen) == 0) {
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRaw);
-#endif
       if (strncasecmp(encStr,"copyrect",encStrLen) == 0) {
 	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingCopyRect);
       } else if (strncasecmp(encStr,"tight",encStrLen) == 0) {
 	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingTight);
 	requestLastRectEncoding = True;
-	if (appData.compressLevel >= 0 && appData.compressLevel <= 2)
-	  requestCompressLevel = True;
-	  requestQualityLevel = True;
-#if 0
-      } else if (strncasecmp(encStr,"hextile",encStrLen) == 0) {
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingHextile);
-      } else if (strncasecmp(encStr,"zlib",encStrLen) == 0) {
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingZlib);
-	if (appData.compressLevel >= 0 && appData.compressLevel <= 9)
-	  requestCompressLevel = True;
-      } else if (strncasecmp(encStr,"corre",encStrLen) == 0) {
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingCoRRE);
-      } else if (strncasecmp(encStr,"rre",encStrLen) == 0) {
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRRE);
-#endif
       } else {
 	fprintf(stderr,"Unknown encoding '%.*s'\n",encStrLen,encStr);
       }
@@ -359,16 +324,18 @@ SetFormatAndEncodings()
       encStr = nextEncStr;
     } while (encStr && se->nEncodings < MAX_ENCODINGS);
 
-    if (se->nEncodings < MAX_ENCODINGS && requestCompressLevel) {
+    if (se->nEncodings < MAX_ENCODINGS) {
+      if (appData.compressLevel < 0 || appData.compressLevel > 2)
+        appData.compressLevel = 0;
       encs[se->nEncodings++] = Swap32IfLE(appData.compressLevel +
-					  rfbEncodingCompressLevel0);
+					  rfbJpegSubsamp444);
     }
 
-    if (se->nEncodings < MAX_ENCODINGS && requestQualityLevel) {
-      if (appData.qualityLevel < 0 || appData.qualityLevel > 100)
+    if (se->nEncodings < MAX_ENCODINGS) {
+      if (appData.qualityLevel < 1 || appData.qualityLevel > 100)
         appData.qualityLevel = 95;
       encs[se->nEncodings++] = Swap32IfLE(appData.qualityLevel +
-					  rfbJpegQualityLevel0);
+					  rfbJpegQualityLevel1 - 1);
     }
 
     if (appData.useRemoteCursor) {
@@ -403,19 +370,13 @@ SetFormatAndEncodings()
 
     if (appData.compressLevel >= 0 && appData.compressLevel <= 2) {
       encs[se->nEncodings++] = Swap32IfLE(appData.compressLevel +
-					  rfbEncodingCompressLevel0);
-    } else if (!tunnelSpecified) {
-      /* If -tunnel option was provided, we assume that server machine is
-	 not in the local network so we use default compression level for
-	 tight encoding instead of fast compression. Thus we are
-	 requesting level 1 compression only if tunneling is not used. */
-      encs[se->nEncodings++] = Swap32IfLE(rfbEncodingCompressLevel1);
+					  rfbJpegSubsamp444);
     }
 
-      if (appData.qualityLevel < 0 || appData.qualityLevel > 100)
+      if (appData.qualityLevel < 1 || appData.qualityLevel > 100)
 	appData.qualityLevel = 95;
       encs[se->nEncodings++] = Swap32IfLE(appData.qualityLevel +
-					  rfbJpegQualityLevel0);
+					  rfbJpegQualityLevel1 - 1);
 
     if (appData.useRemoteCursor) {
       encs[se->nEncodings++] = Swap32IfLE(rfbEncodingXCursor);
@@ -634,29 +595,6 @@ HandleRFBServerMessage()
 
       switch (rect.encoding) {
 
-#if 0
-      case rfbEncodingRaw:
-
-	bytesPerLine = rect.r.w * myFormat.bitsPerPixel / 8;
-	linesToRead = BUFFER_SIZE / bytesPerLine;
-
-	while (rect.r.h > 0) {
-	  if (linesToRead > rect.r.h)
-	    linesToRead = rect.r.h;
-
-	  if (!ReadFromRFBServer(buffer,bytesPerLine * linesToRead))
-	    return False;
-
-	  CopyDataToScreen(buffer, rect.r.x, rect.r.y, rect.r.w,
-			   linesToRead);
-
-	  rect.r.h -= linesToRead;
-	  rect.r.y += linesToRead;
-
-	}
-	break;
-#endif
-
       case rfbEncodingCopyRect:
       {
 	rfbCopyRect cr;
@@ -691,91 +629,9 @@ HandleRFBServerMessage()
 	break;
       }
 
-#if 0
-      case rfbEncodingRRE:
-      {
-	switch (myFormat.bitsPerPixel) {
-	case 8:
-	  if (!HandleRRE8(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-	    return False;
-	  break;
-	case 16:
-	  if (!HandleRRE16(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-	    return False;
-	  break;
-	case 32:
-	  if (!HandleRRE32(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-	    return False;
-	  break;
-	}
-	break;
-      }
-
-      case rfbEncodingCoRRE:
-      {
-	switch (myFormat.bitsPerPixel) {
-	case 8:
-	  if (!HandleCoRRE8(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-	    return False;
-	  break;
-	case 16:
-	  if (!HandleCoRRE16(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-	    return False;
-	  break;
-	case 32:
-	  if (!HandleCoRRE32(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-	    return False;
-	  break;
-	}
-	break;
-      }
-
-      case rfbEncodingHextile:
-      {
-	switch (myFormat.bitsPerPixel) {
-	case 8:
-	  if (!HandleHextile8(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-	    return False;
-	  break;
-	case 16:
-	  if (!HandleHextile16(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-	    return False;
-	  break;
-	case 32:
-	  if (!HandleHextile32(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-	    return False;
-	  break;
-	}
-	break;
-      }
-
-      case rfbEncodingZlib:
-      {
-	switch (myFormat.bitsPerPixel) {
-	case 8:
-	  if (!HandleZlib8(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-	    return False;
-	  break;
-	case 16:
-	  if (!HandleZlib16(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-	    return False;
-	  break;
-	case 32:
-	  if (!HandleZlib32(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-	    return False;
-	  break;
-	}
-	break;
-     }
-#endif
-
       case rfbEncodingTight:
       {
 	switch (myFormat.bitsPerPixel) {
-//	case 8:
-//	  if (!HandleTight8(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
-//	    return False;
-//	  break;
 	case 16:
 	  if (!HandleTight16(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
 	    return False;
@@ -876,25 +732,10 @@ HandleRFBServerMessage()
 #define CONCAT2(a,b) a##b
 #define CONCAT2E(a,b) CONCAT2(a,b)
 
-//#define BPP 8
-//#include "rre.c"
-//#include "corre.c"
-//#include "hextile.c"
-//#include "zlib.c"
-//#include "tight.c"
-//#undef BPP
 #define BPP 16
-//#include "rre.c"
-//#include "corre.c"
-//#include "hextile.c"
-//#include "zlib.c"
 #include "tight.c"
 #undef BPP
 #define BPP 32
-//#include "rre.c"
-//#include "corre.c"
-//#include "hextile.c"
-//#include "zlib.c"
 #include "tight.c"
 #undef BPP
 
