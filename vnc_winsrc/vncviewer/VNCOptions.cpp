@@ -366,36 +366,6 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 				Load(m_configFilename);
 				m_configSpecified = true;
 			}
-#if 0
-		} else if ( SwitchMatch(args[j], _T("encoding") )) {
-			if (++j == i) {
-				ArgError(_T("No encoding specified"));
-				continue;
-			}
-			int enc = -1;
-			if (_tcsicmp(args[j], _T("raw")) == 0) {
-				enc = rfbEncodingRaw;
-			} else if (_tcsicmp(args[j], _T("rre")) == 0) {
-				enc = rfbEncodingRRE;
-			} else if (_tcsicmp(args[j], _T("corre")) == 0) {
-				enc = rfbEncodingCoRRE;
-			} else if (_tcsicmp(args[j], _T("hextile")) == 0) {
-				enc = rfbEncodingHextile;
-			} else if (_tcsicmp(args[j], _T("zlib")) == 0) {
-				enc = rfbEncodingZlib;
-			} else if (_tcsicmp(args[j], _T("tight")) == 0) {
-				enc = rfbEncodingTight;
-			} else if (_tcsicmp(args[j], _T("zlibhex")) == 0) {
-				enc = rfbEncodingZlibHex;
-			} else {
-				ArgError(_T("Invalid encoding specified"));
-				continue;
-			}
-			if (enc != -1) {
-				m_UseEnc[enc] = true;
-				m_PreferredEncoding = enc;
-			}
-#endif
 		} else if ( SwitchMatch(args[j], _T("compresslevel") )) {
 			if (++j == i) {
 				ArgError(_T("No compression level specified"));
@@ -570,7 +540,7 @@ void VNCOptions::ShowUsage(LPTSTR info) {
 			"  vncviewer [/shared] [/noshared] [/swapmouse] \n\r"
 			"      [/belldeiconify] [/listen] [/fullscreen] [/viewonly] \n\r"
 			"      [/emulate3] [/scale a/b] [/config configfile] \n\r"
-			"      [/compresslevel 0=4:4:4, 1=4:1:1, 2=4:2:2] [/quality 0-100] \n\r"
+			"      [/compresslevel 0=4:4:4, 1=4:1:1, 2=4:2:2] [/quality 1-100] \n\r"
 			"      [/nocursorshape] [/noremotecursor] server[:display]\n\r"
 			"For full details see documentation."), 
 #endif
@@ -665,13 +635,6 @@ BOOL CALLBACK VNCOptions::OptDlgProc(  HWND hwnd,  UINT uMsg,
 		switch (LOWORD(wParam)) {
 		case IDOK:
 			{
-#if 0
-				for (int i = rfbEncodingRaw; i <= LASTENCODING; i++) {
-					HWND hPref = GetDlgItem(hwnd, IDC_RAWRADIO+i-rfbEncodingRaw);
-					if (SendMessage(hPref, BM_GETCHECK, 0, 0) == BST_CHECKED)
-						_this->m_PreferredEncoding = i;
-				}
-#endif
 				
 				HWND hCopyRect = GetDlgItem(hwnd, ID_SESSION_SET_CRECT);
 				_this->m_UseEnc[rfbEncodingCopyRect] =
@@ -728,7 +691,7 @@ BOOL CALLBACK VNCOptions::OptDlgProc(  HWND hwnd,  UINT uMsg,
 					_this->m_compressLevel = 0;
 
 				_this->m_jpegQualityLevel = GetDlgItemInt( hwnd, IDC_QUALITYLEVEL, NULL, TRUE);
-				if ( _this->m_jpegQualityLevel < 0 ) { _this->m_jpegQualityLevel = 0; }
+				if ( _this->m_jpegQualityLevel < 1 ) { _this->m_jpegQualityLevel = 1; }
 				if ( _this->m_jpegQualityLevel > 100 ) { _this->m_jpegQualityLevel = 100; }
 
 				_this->m_requestShapeUpdates = false;
