@@ -1,0 +1,14 @@
+
+#ifdef SunArchitecture
+EXTRA_DEFINES = -D__EXTENSIONS__
+#endif
+
+SRCS = vncauth.c d3des.c
+
+OBJS = vncauth.o d3des.o
+
+INCLUDES = -I. -I../include
+
+NormalLibraryTarget(vncauth,$(OBJS))
+
+DependTarget()

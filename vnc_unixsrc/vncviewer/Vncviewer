@@ -1,0 +1,138 @@
+!
+! Application defaults file for vncviewer.
+!
+
+
+!
+! The title of the main window.  "%s" will be replaced by the desktop name.
+! 
+
+Vncviewer.title: TightVNC: %s
+
+
+!
+! Translations on the main window.
+!
+
+Vncviewer.translations:\
+  <Enter>: SelectionToVNC()\n\
+  <Leave>: SelectionFromVNC()
+
+
+!
+! Uncomment to grab the keyboard in full-screen mode.
+!
+
+! Vncviewer.grabKeyboard: True
+
+
+!
+! Background around a small desktop in full-screen mode.
+!
+
+*form.background: black
+
+
+!
+! Use scrollbars on right and bottom for window smaller than desktop.
+!
+
+*viewport.allowHoriz: True
+*viewport.allowVert: True
+*viewport.useBottom: True
+*viewport.useRight: True
+*viewport*Scrollbar*thumb: None
+
+
+!
+! Default translations on desktop window.
+!
+
+*desktop.baseTranslations:\
+  <Key>F8: ShowPopup()\n\
+  <ButtonPress>: SendRFBEvent()\n\
+  <ButtonRelease>: SendRFBEvent()\n\
+  <Motion>: SendRFBEvent()\n\
+  <KeyPress>: SendRFBEvent()\n\
+  <KeyRelease>: SendRFBEvent()
+
+
+!
+! Dialog boxes
+!
+
+*serverDialog.dialog.label: VNC server:
+*serverDialog.dialog.value:
+*serverDialog.dialog.value.translations: #override\n\
+  <Key>Return: ServerDialogDone()
+
+*passwordDialog.dialog.label: Password:
+*passwordDialog.dialog.value:
+*passwordDialog.dialog.value.AsciiSink.echo: False
+*passwordDialog.dialog.value.translations: #override\n\
+  <Key>Return: PasswordDialogDone()
+
+
+!
+! Popup window appearance
+!
+
+*popup.title: TightVNC popup
+*popup*background: grey
+*popup*font: -*-helvetica-bold-r-*-*-16-*-*-*-*-*-*-*
+*popup.buttonForm.Command.borderWidth: 0
+*popup.buttonForm.Toggle.borderWidth: 0
+
+!
+! Translations on popup window - send key presses through
+!
+
+*popup.translations: #override <Message>WM_PROTOCOLS: HidePopup()
+*popup.buttonForm.translations: #override\n\
+  <KeyPress>: SendRFBEvent() HidePopup()
+
+
+!
+! Popup buttons
+!
+
+*popupButtonCount: 8
+
+*popup*button1.label: Dismiss popup
+*popup*button1.translations: #override\n\
+  <Btn1Down>,<Btn1Up>: HidePopup()
+
+*popup*button2.label: Quit viewer
+*popup*button2.translations: #override\n\
+  <Btn1Down>,<Btn1Up>: Quit()
+
+*popup*button3.label: Full screen
+*popup*button3.type: toggle
+*popup*button3.translations: #override\n\
+  <Visible>: SetFullScreenState()\n\
+  <Btn1Down>,<Btn1Up>: toggle() HidePopup() ToggleFullScreen()
+
+*popup*button4.label: Clipboard: local -> remote
+*popup*button4.translations: #override\n\
+  <Btn1Down>,<Btn1Up>: SelectionToVNC(always) HidePopup()
+
+*popup*button5.label: Clipboard: local <- remote
+*popup*button5.translations: #override\n\
+  <Btn1Down>,<Btn1Up>: SelectionFromVNC(always) HidePopup()
+
+*popup*button6.label: Request refresh
+*popup*button6.translations: #override\n\
+  <Btn1Down>,<Btn1Up>: SendRFBEvent(fbupdate) HidePopup()
+
+*popup*button7.label: Send ctrl-alt-del
+*popup*button7.translations: #override\n\
+  <Btn1Down>,<Btn1Up>: SendRFBEvent(keydown,Control_L)\
+                       SendRFBEvent(keydown,Alt_L)\
+                       SendRFBEvent(key,Delete)\
+                       SendRFBEvent(keyup,Alt_L)\
+                       SendRFBEvent(keyup,Control_L)\
+                       HidePopup()
+
+*popup*button8.label: Send F8
+*popup*button8.translations: #override\n\
+  <Btn1Down>,<Btn1Up>: SendRFBEvent(key,F8) HidePopup()

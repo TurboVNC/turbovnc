@@ -1,0 +1,5 @@
+XCOMM $XConsortium: Imakefile,v 1.1 94/04/13 18:44:40 rws Exp $
+           SRCS = mkshadow.c savedir.c wildmat.c
+           OBJS = mkshadow.o savedir.o wildmat.o
+
+ComplexProgramTarget(mkshadow)

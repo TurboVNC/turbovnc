@@ -1,0 +1,9 @@
+
+#ifdef SunArchitecture
+EXTRA_DEFINES = -D__EXTENSIONS__
+#endif
+
+all:: vncconnect
+
+NormalProgramTarget(vncconnect,vncconnect.o,$(DEPXLIB),$(XLIB),)
+DependTarget()
