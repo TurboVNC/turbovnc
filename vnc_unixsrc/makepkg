@@ -84,8 +84,10 @@ mkdir -p $pkgdir/man/man1
 
 /bin/rm -f $pkgdir/bin/vncserver
 cat vncserver	|
-sed -e 's@$vncClasses = "/usr/local@$vncClasses = "/opt/SUNWtvnc@g' |
-sed -e 's@$cmd = "Xvnc :@$cmd = "/opt/SUNWtvnc/bin/Xvnc :@g' > $pkgdir/bin/vncserver
+sed -e 's@$vncClasses = "/usr/local@$vncClasses = "/opt/SUNWtvnc@g' | \
+sed -e 's@$cmd = "Xvnc :@$cmd = "/opt/SUNWtvnc/bin/Xvnc :@g' | \
+sed -e 's@foreach $cmd (\"uname\",\"xauth\",\"Xvnc\",\"vncpasswd\")@foreach $cmd (\"uname\",\"xauth\",\"/opt/SUNWtvnc/bin/Xvnc\",\"/opt/SUNWtvnc/bin/vncpasswd\")@g' \
+ > $pkgdir/bin/vncserver
 
 cp -prf classes $pkgdir/vnc
 
