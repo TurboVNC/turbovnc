@@ -560,7 +560,7 @@ rfbProcessClientNormalMessage(cl)
 
 	msg.se.nEncodings = Swap16IfLE(msg.se.nEncodings);
 
-	cl->preferredEncoding = rfbEncodingTight;
+	cl->preferredEncoding = -1;
 	cl->useCopyRect = FALSE;
 	cl->enableCursorShapeUpdates = FALSE;
 	cl->enableCursorPosUpdates = FALSE;
@@ -582,7 +582,6 @@ rfbProcessClientNormalMessage(cl)
 	    case rfbEncodingCopyRect:
 		cl->useCopyRect = TRUE;
 		break;
-#if 0
 	    case rfbEncodingRaw:
 		if (cl->preferredEncoding == -1) {
 		    cl->preferredEncoding = enc;
@@ -618,7 +617,6 @@ rfbProcessClientNormalMessage(cl)
 			   cl->host);
 		}
               break;
-#endif
 	    case rfbEncodingTight:
 		if (cl->preferredEncoding == -1) {
 		    cl->preferredEncoding = enc;
@@ -660,7 +658,12 @@ rfbProcessClientNormalMessage(cl)
 		}
 		break;
 	    default:
-		if ( enc >= (CARD32)rfbJpegSubsamp444 &&
+		if ( enc >= (CARD32)rfbEncodingCompressLevel0 &&
+		     enc <= (CARD32)rfbEncodingCompressLevel9 ) {
+		    cl->zlibCompressLevel = enc & 0x0F;
+		    rfbLog("Using compression level %d for client %s\n",
+			   cl->zlibCompressLevel, cl->host);
+		} else if ( enc >= (CARD32)rfbJpegSubsamp444 &&
 			 enc <= (CARD32)rfbJpegSubsamp422 ) {
 		    cl->tightCompressLevel = enc & 0xFF;
 		    rfbLog("Using compression level %d for client %s\n",
@@ -969,6 +972,28 @@ rfbSendFramebufferUpdate(cl)
 
     cl->rfbFramebufferUpdateMessagesSent++;
 
+    if (cl->preferredEncoding == rfbEncodingCoRRE) {
+	nUpdateRegionRects = 0;
+
+	for (i = 0; i < REGION_NUM_RECTS(&updateRegion); i++) {
+	    int x = REGION_RECTS(&updateRegion)[i].x1;
+	    int y = REGION_RECTS(&updateRegion)[i].y1;
+	    int w = REGION_RECTS(&updateRegion)[i].x2 - x;
+	    int h = REGION_RECTS(&updateRegion)[i].y2 - y;
+	    nUpdateRegionRects += (((w-1) / cl->correMaxWidth + 1)
+				     * ((h-1) / cl->correMaxHeight + 1));
+	}
+    } else if (cl->preferredEncoding == rfbEncodingZlib) {
+	nUpdateRegionRects = 0;
+
+	for (i = 0; i < REGION_NUM_RECTS(&updateRegion); i++) {
+	    int x = REGION_RECTS(&updateRegion)[i].x1;
+	    int y = REGION_RECTS(&updateRegion)[i].y1;
+	    int w = REGION_RECTS(&updateRegion)[i].x2 - x;
+	    int h = REGION_RECTS(&updateRegion)[i].y2 - y;
+	    nUpdateRegionRects += (((h-1) / (ZLIB_MAX_SIZE( w ) / w)) + 1);
+	}
+    } else if (cl->preferredEncoding == rfbEncodingTight) {
 	nUpdateRegionRects = 0;
 
 	for (i = 0; i < REGION_NUM_RECTS(&updateRegion); i++) {
@@ -983,6 +1008,9 @@ rfbSendFramebufferUpdate(cl)
 	    }
 	    nUpdateRegionRects += n;
 	}
+    } else {
+	nUpdateRegionRects = REGION_NUM_RECTS(&updateRegion);
+    }
 
     fu->type = rfbFramebufferUpdate;
     if (nUpdateRegionRects != 0xFFFF) {
@@ -1025,10 +1053,44 @@ rfbSendFramebufferUpdate(cl)
 	cl->rfbRawBytesEquivalent += (sz_rfbFramebufferUpdateRectHeader
 				      + w * (cl->format.bitsPerPixel / 8) * h);
 
+	switch (cl->preferredEncoding) {
+	case rfbEncodingRaw:
+	    if (!rfbSendRectEncodingRaw(cl, x, y, w, h)) {
+		REGION_UNINIT(pScreen,&updateRegion);
+		return FALSE;
+	    }
+	    break;
+	case rfbEncodingRRE:
+	    if (!rfbSendRectEncodingRRE(cl, x, y, w, h)) {
+		REGION_UNINIT(pScreen,&updateRegion);
+		return FALSE;
+	    }
+	    break;
+	case rfbEncodingCoRRE:
+	    if (!rfbSendRectEncodingCoRRE(cl, x, y, w, h)) {
+		REGION_UNINIT(pScreen,&updateRegion);
+		return FALSE;
+	    }
+	    break;
+	case rfbEncodingHextile:
+	    if (!rfbSendRectEncodingHextile(cl, x, y, w, h)) {
+		REGION_UNINIT(pScreen,&updateRegion);
+		return FALSE;
+	    }
+	    break;
+	case rfbEncodingZlib:
+	    if (!rfbSendRectEncodingZlib(cl, x, y, w, h)) {
+		REGION_UNINIT(pScreen,&updateRegion);
+		return FALSE;
+	    }
+	    break;
+	case rfbEncodingTight:
 	    if (!rfbSendRectEncodingTight(cl, x, y, w, h)) {
 		REGION_UNINIT(pScreen,&updateRegion);
 		return FALSE;
 	    }
+	    break;
+	}
     }
 
     REGION_UNINIT(pScreen,&updateRegion);
@@ -1137,6 +1199,74 @@ rfbSendCopyRegion(cl, reg, dx, dy)
     }
 
     return TRUE;
+}
+
+
+/*
+ * Send a given rectangle in raw encoding (rfbEncodingRaw).
+ */
+
+Bool
+rfbSendRectEncodingRaw(cl, x, y, w, h)
+    rfbClientPtr cl;
+    int x, y, w, h;
+{
+    rfbFramebufferUpdateRectHeader rect;
+    int nlines;
+    int bytesPerLine = w * (cl->format.bitsPerPixel / 8);
+    char *fbptr = (rfbScreen.pfbMemory + (rfbScreen.paddedWidthInBytes * y)
+		   + (x * (rfbScreen.bitsPerPixel / 8)));
+
+    /* Flush the buffer to guarantee correct alignment for translateFn(). */
+    if (ublen > 0) {
+	if (!rfbSendUpdateBuf(cl))
+	    return FALSE;
+    }
+
+    rect.r.x = Swap16IfLE(x);
+    rect.r.y = Swap16IfLE(y);
+    rect.r.w = Swap16IfLE(w);
+    rect.r.h = Swap16IfLE(h);
+    rect.encoding = Swap32IfLE(rfbEncodingRaw);
+
+    memcpy(&updateBuf[ublen], (char *)&rect,sz_rfbFramebufferUpdateRectHeader);
+    ublen += sz_rfbFramebufferUpdateRectHeader;
+
+    cl->rfbRectanglesSent[rfbEncodingRaw]++;
+    cl->rfbBytesSent[rfbEncodingRaw]
+	+= sz_rfbFramebufferUpdateRectHeader + bytesPerLine * h;
+
+    nlines = (UPDATE_BUF_SIZE - ublen) / bytesPerLine;
+
+    while (TRUE) {
+	if (nlines > h)
+	    nlines = h;
+
+	(*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
+			   &cl->format, fbptr, &updateBuf[ublen],
+			   rfbScreen.paddedWidthInBytes, w, nlines);
+
+	ublen += nlines * bytesPerLine;
+	h -= nlines;
+
+	if (h == 0)	/* rect fitted in buffer, do next one */
+	    return TRUE;
+
+	/* buffer full - flush partial rect and do another nlines */
+
+	if (!rfbSendUpdateBuf(cl))
+	    return FALSE;
+
+	fbptr += (rfbScreen.paddedWidthInBytes * nlines);
+
+	nlines = (UPDATE_BUF_SIZE - ublen) / bytesPerLine;
+	if (nlines == 0) {
+	    rfbLog("rfbSendRectEncodingRaw: send buffer too small for %d "
+		   "bytes per line\n", bytesPerLine);
+	    rfbCloseSock(cl->sock);
+	    return FALSE;
+	}
+    }
 }
 
 
