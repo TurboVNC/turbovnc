@@ -11,7 +11,7 @@ VNCLIBS = $(TOP)/../libvncauth/libvncauth.a
 /* Avoid linking with different libjpeg in /usr/shlib under Tru64. */
 VNCSYSLIBS = /usr/local/lib/libjpeg.a /usr/local/lib/libz.a
 #else
-VNCSYSLIBS = -L/usr/local/lib -ljpeg -lz
+VNCSYSLIBS = -L/usr/local/lib -L$(TOP)/../../../vgl/linux/lib -lhpjpeg -lz
 #endif
 
 VNCCPPFLAGS = -I$(TOP)/../include -I/usr/local/include

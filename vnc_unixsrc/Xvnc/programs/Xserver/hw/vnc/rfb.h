@@ -504,7 +504,8 @@ extern Bool rfbSendRectEncodingZlib(rfbClientPtr cl, int x, int y, int w,
 
 /* tight.c */
 
-#define TIGHT_DEFAULT_COMPRESSION  6
+#define TIGHT_DEFAULT_COMPRESSION  0
+#define TIGHT_DEFAULT_QUALITY      95
 
 extern Bool rfbTightDisableGradient;
 

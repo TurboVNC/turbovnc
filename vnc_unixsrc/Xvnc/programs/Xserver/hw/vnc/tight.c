@@ -26,7 +26,7 @@
 
 #include <stdio.h>
 #include "rfb.h"
-#include <jpeglib.h>
+#include "hpjpeg.h"
 
 
 /* Note: The following constant should not be changed. */
@@ -57,7 +57,8 @@ typedef struct TIGHT_CONF_s {
     int jpegQuality, jpegThreshold, jpegThreshold24;
 } TIGHT_CONF;
 
-static TIGHT_CONF tightConf[10] = {
+static TIGHT_CONF tightConf[1] = {
+#if 0
     {   512,   32,   6, 65536, 0, 0, 0, 0,   0,   0,   4,  5, 10000, 23000 },
     {  2048,  128,   6, 65536, 1, 1, 1, 0,   0,   0,   8, 10,  8000, 18000 },
     {  6144,  256,   8, 65536, 3, 3, 2, 0,   0,   0,  24, 15,  6500, 15000 },
@@ -67,6 +68,7 @@ static TIGHT_CONF tightConf[10] = {
     { 65536, 2048,  16,  4096, 7, 7, 6, 4, 170, 420,  48, 60,  2000,  5000 },
     { 65536, 2048,  16,  4096, 8, 8, 7, 5, 180, 450,  64, 70,  1000,  2500 },
     { 65536, 2048,  32,  8192, 9, 9, 8, 6, 190, 475,  64, 75,   500,  1200 },
+#endif
     { 65536, 2048,  32,  8192, 9, 9, 9, 6, 200, 500,  96, 80,   200,   500 }
 };
 
@@ -164,16 +166,6 @@ static unsigned long DetectSmoothImage32(rfbPixelFormat *fmt, int w, int h);
 
 static Bool SendJpegRect(rfbClientPtr cl, int x, int y, int w, int h,
                          int quality);
-static void PrepareRowForJpeg(CARD8 *dst, int x, int y, int count);
-static void PrepareRowForJpeg24(CARD8 *dst, int x, int y, int count);
-static void PrepareRowForJpeg16(CARD8 *dst, int x, int y, int count);
-static void PrepareRowForJpeg32(CARD8 *dst, int x, int y, int count);
-
-static void JpegInitDestination(j_compress_ptr cinfo);
-static boolean JpegEmptyOutputBuffer(j_compress_ptr cinfo);
-static void JpegTermDestination(j_compress_ptr cinfo);
-static void JpegSetDstManager(j_compress_ptr cinfo);
-
 
 /*
  * Tight encoding implementation.
@@ -192,8 +184,8 @@ rfbNumCodedRectsTight(cl, x, y, w, h)
     if (cl->enableLastRectEncoding && w * h >= MIN_SPLIT_RECT_SIZE)
       return 0;
 
-    maxRectSize = tightConf[cl->tightCompressLevel].maxRectSize;
-    maxRectWidth = tightConf[cl->tightCompressLevel].maxRectWidth;
+    maxRectSize = tightConf[0].maxRectSize;
+    maxRectWidth = tightConf[0].maxRectWidth;
 
     if (w > maxRectWidth || w * h > maxRectSize) {
         subrectMaxWidth = (w > maxRectWidth) ? maxRectWidth : w;
@@ -245,8 +237,8 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
     {
         int maxRectSize, maxRectWidth, nMaxWidth;
 
-        maxRectSize = tightConf[compressLevel].maxRectSize;
-        maxRectWidth = tightConf[compressLevel].maxRectWidth;
+        maxRectSize = tightConf[0].maxRectSize;
+        maxRectWidth = tightConf[0].maxRectWidth;
         nMaxWidth = (w > maxRectWidth) ? maxRectWidth : w;
         nMaxRows = maxRectSize / nMaxWidth;
     }
@@ -490,8 +482,8 @@ SendRectSimple(cl, x, y, w, h)
     int dx, dy;
     int rw, rh;
 
-    maxRectSize = tightConf[compressLevel].maxRectSize;
-    maxRectWidth = tightConf[compressLevel].maxRectWidth;
+    maxRectSize = tightConf[0].maxRectSize;
+    maxRectWidth = tightConf[0].maxRectWidth;
 
     maxBeforeSize = maxRectSize * (cl->format.bitsPerPixel / 8);
     maxAfterSize = maxBeforeSize + (maxBeforeSize + 99) / 100 + 12;
@@ -558,9 +550,9 @@ SendSubrect(cl, x, y, w, h)
                        &cl->format, fbptr, tightBeforeBuf,
                        rfbScreen.paddedWidthInBytes, w, h);
 
-    paletteMaxColors = w * h / tightConf[compressLevel].idxMaxColorsDivisor;
+    paletteMaxColors = w * h / tightConf[0].idxMaxColorsDivisor;
     if ( paletteMaxColors < 2 &&
-         w * h >= tightConf[compressLevel].monoMinRectSize ) {
+         w * h >= tightConf[0].monoMinRectSize ) {
         paletteMaxColors = 2;
     }
     switch (cl->format.bitsPerPixel) {
@@ -573,7 +565,9 @@ SendSubrect(cl, x, y, w, h)
     default:
         FillPalette32(w * h);
     }
+    success = SendJpegRect(cl, x, y, w, h, qualityLevel);
 
+#if 0
     switch (paletteNumColors) {
     case 0:
         /* Truecolor image */
@@ -607,6 +601,7 @@ SendSubrect(cl, x, y, w, h)
             success = SendIndexedRect(cl, w, h);
         }
     }
+#endif
     return success;
 }
 
@@ -729,7 +724,7 @@ SendMonoRect(cl, w, h)
     }
 
     return CompressData(cl, streamId, dataLen,
-                        tightConf[compressLevel].monoZlibLevel,
+                        tightConf[0].monoZlibLevel,
                         Z_DEFAULT_STRATEGY);
 }
 
@@ -791,7 +786,7 @@ SendIndexedRect(cl, w, h)
     }
 
     return CompressData(cl, streamId, w * h,
-                        tightConf[compressLevel].idxZlibLevel,
+                        tightConf[0].idxZlibLevel,
                         Z_DEFAULT_STRATEGY);
 }
 
@@ -818,7 +813,7 @@ SendFullColorRect(cl, w, h)
         len = cl->format.bitsPerPixel / 8;
 
     return CompressData(cl, streamId, w * h * len,
-                        tightConf[compressLevel].rawZlibLevel,
+                        tightConf[0].rawZlibLevel,
                         Z_DEFAULT_STRATEGY);
 }
 
@@ -857,7 +852,7 @@ SendGradientRect(cl, w, h)
     }
 
     return CompressData(cl, streamId, w * h * len,
-                        tightConf[compressLevel].gradientZlibLevel,
+                        tightConf[0].gradientZlibLevel,
                         Z_FILTERED);
 }
 
@@ -1443,7 +1438,7 @@ DetectSmoothImage (fmt, w, h)
         }
     } else {
         if ( rfbTightDisableGradient ||
-             w * h < tightConf[compressLevel].gradientMinRectSize ) {
+             w * h < tightConf[0].gradientMinRectSize ) {
             return 0;
         }
     }
@@ -1452,9 +1447,9 @@ DetectSmoothImage (fmt, w, h)
         if (usePixelFormat24) {
             avgError = DetectSmoothImage24(fmt, w, h);
             if (qualityLevel != -1) {
-                return (avgError < tightConf[qualityLevel].jpegThreshold24);
+                return (avgError < tightConf[0].jpegThreshold24);
             }
-            return (avgError < tightConf[compressLevel].gradientThreshold24);
+            return (avgError < tightConf[0].gradientThreshold24);
         } else {
             avgError = DetectSmoothImage32(fmt, w, h);
         }
@@ -1462,9 +1457,9 @@ DetectSmoothImage (fmt, w, h)
         avgError = DetectSmoothImage16(fmt, w, h);
     }
     if (qualityLevel != -1) {
-        return (avgError < tightConf[qualityLevel].jpegThreshold);
+        return (avgError < tightConf[0].jpegThreshold);
     }
-    return (avgError < tightConf[compressLevel].gradientThreshold);
+    return (avgError < tightConf[0].gradientThreshold);
 }
 
 static unsigned long
@@ -1614,9 +1609,8 @@ DEFINE_DETECT_FUNCTION(32)
  * JPEG compression stuff.
  */
 
-static struct jpeg_destination_mgr jpegDstManager;
-static Bool jpegError;
-static int jpegDstDataLen;
+static unsigned long jpegDstDataLen;
+static hpjhandle j=NULL;
 
 static Bool
 SendJpegRect(cl, x, y, w, h, quality)
@@ -1624,51 +1618,40 @@ SendJpegRect(cl, x, y, w, h, quality)
     int x, y, w, h;
     int quality;
 {
-    struct jpeg_compress_struct cinfo;
-    struct jpeg_error_mgr jerr;
-    CARD8 *srcBuf;
-    JSAMPROW rowPointer[1];
     int dy;
+    char *srcbuf;
+    int ps=rfbServerFormat.bitsPerPixel/8;
+    int subsamp=compressLevel==1? HPJ_411: (compressLevel==2? HPJ_422:HPJ_444);
+    unsigned long size;
 
-    if (rfbServerFormat.bitsPerPixel == 8)
-        return SendFullColorRect(cl, w, h);
+    if (ps < 3) return SendFullColorRect(cl, w, h);
 
-    srcBuf = (CARD8 *)xalloc(w * 3);
-    if (srcBuf == NULL) {
-        return SendFullColorRect(cl, w, h);
-    }
-    rowPointer[0] = srcBuf;
-
-    cinfo.err = jpeg_std_error(&jerr);
-    jpeg_create_compress(&cinfo);
-
-    cinfo.image_width = w;
-    cinfo.image_height = h;
-    cinfo.input_components = 3;
-    cinfo.in_color_space = JCS_RGB;
-
-    jpeg_set_defaults(&cinfo);
-    jpeg_set_quality(&cinfo, quality, TRUE);
-
-    JpegSetDstManager (&cinfo);
-
-    jpeg_start_compress(&cinfo, TRUE);
-
-    for (dy = 0; dy < h; dy++) {
-        PrepareRowForJpeg(srcBuf, x, y + dy, w);
-        jpeg_write_scanlines(&cinfo, rowPointer, 1);
-        if (jpegError)
-            break;
+    if(!j) {
+      if((j=hpjInitCompress())==NULL) {
+        rfbLog("JPEG Error: %s\n", hpjGetErrorStr());  return 0;
+      }
     }
 
-    if (!jpegError)
-        jpeg_finish_compress(&cinfo);
+    if (tightAfterBufSize < HPJBUFSIZE(w,h)) {
+        if (tightAfterBuf == NULL)
+            tightAfterBuf = (char *)xalloc(HPJBUFSIZE(w,h));
+        else
+            tightAfterBuf = (char *)xrealloc(tightAfterBuf,
+                                             HPJBUFSIZE(w,h));
+        if(!tightAfterBuf) {
+            rfbLog("Memory allocation failure!\n");
+            return 0;
+        }
+        tightAfterBufSize = HPJBUFSIZE(w,h);
+    }
 
-    jpeg_destroy_compress(&cinfo);
-    xfree((char *)srcBuf);
-
-    if (jpegError)
-        return SendFullColorRect(cl, w, h);
+    srcbuf=&rfbScreen.pfbMemory[y * rfbScreen.paddedWidthInBytes + x * ps];
+    if(hpjCompress(j, (unsigned char *)srcbuf, w, rfbScreen.paddedWidthInBytes,
+      h, ps, (unsigned char *)tightAfterBuf, &jpegDstDataLen, subsamp, quality,
+      rfbServerFormat.bigEndian?0:HPJ_BGR)==-1) {
+      rfbLog("JPEG Error: %s\n", hpjGetErrorStr());
+      return 0;
+    }
 
     if (ublen + TIGHT_MIN_TO_COMPRESS + 1 > UPDATE_BUF_SIZE) {
         if (!rfbSendUpdateBuf(cl))
@@ -1680,116 +1663,3 @@ SendJpegRect(cl, x, y, w, h, quality)
 
     return SendCompressedData(cl, jpegDstDataLen);
 }
-
-static void
-PrepareRowForJpeg(dst, x, y, count)
-    CARD8 *dst;
-    int x, y, count;
-{
-    if (rfbServerFormat.bitsPerPixel == 32) {
-        if ( rfbServerFormat.redMax == 0xFF &&
-             rfbServerFormat.greenMax == 0xFF &&
-             rfbServerFormat.blueMax == 0xFF ) {
-            PrepareRowForJpeg24(dst, x, y, count);
-        } else {
-            PrepareRowForJpeg32(dst, x, y, count);
-        }
-    } else {
-        /* 16 bpp assumed. */
-        PrepareRowForJpeg16(dst, x, y, count);
-    }
-}
-
-static void
-PrepareRowForJpeg24(dst, x, y, count)
-    CARD8 *dst;
-    int x, y, count;
-{
-    CARD32 *fbptr;
-    CARD32 pix;
-
-    fbptr = (CARD32 *)
-        &rfbScreen.pfbMemory[y * rfbScreen.paddedWidthInBytes + x * 4];
-
-    while (count--) {
-        pix = *fbptr++;
-        *dst++ = (CARD8)(pix >> rfbServerFormat.redShift);
-        *dst++ = (CARD8)(pix >> rfbServerFormat.greenShift);
-        *dst++ = (CARD8)(pix >> rfbServerFormat.blueShift);
-    }
-}
-
-#define DEFINE_JPEG_GET_ROW_FUNCTION(bpp)                                   \
-                                                                            \
-static void                                                                 \
-PrepareRowForJpeg##bpp(dst, x, y, count)                                    \
-    CARD8 *dst;                                                             \
-    int x, y, count;                                                        \
-{                                                                           \
-    CARD##bpp *fbptr;                                                       \
-    CARD##bpp pix;                                                          \
-    int inRed, inGreen, inBlue;                                             \
-                                                                            \
-    fbptr = (CARD##bpp *)                                                   \
-        &rfbScreen.pfbMemory[y * rfbScreen.paddedWidthInBytes +             \
-                             x * (bpp / 8)];                                \
-                                                                            \
-    while (count--) {                                                       \
-        pix = *fbptr++;                                                     \
-                                                                            \
-        inRed = (int)                                                       \
-            (pix >> rfbServerFormat.redShift   & rfbServerFormat.redMax);   \
-        inGreen = (int)                                                     \
-            (pix >> rfbServerFormat.greenShift & rfbServerFormat.greenMax); \
-        inBlue  = (int)                                                     \
-            (pix >> rfbServerFormat.blueShift  & rfbServerFormat.blueMax);  \
-                                                                            \
-	*dst++ = (CARD8)((inRed   * 255 + rfbServerFormat.redMax / 2) /     \
-                         rfbServerFormat.redMax);                           \
-	*dst++ = (CARD8)((inGreen * 255 + rfbServerFormat.greenMax / 2) /   \
-                         rfbServerFormat.greenMax);                         \
-	*dst++ = (CARD8)((inBlue  * 255 + rfbServerFormat.blueMax / 2) /    \
-                         rfbServerFormat.blueMax);                          \
-    }                                                                       \
-}
-
-DEFINE_JPEG_GET_ROW_FUNCTION(16)
-DEFINE_JPEG_GET_ROW_FUNCTION(32)
-
-/*
- * Destination manager implementation for JPEG library.
- */
-
-static void
-JpegInitDestination(j_compress_ptr cinfo)
-{
-    jpegError = FALSE;
-    jpegDstManager.next_output_byte = (JOCTET *)tightAfterBuf;
-    jpegDstManager.free_in_buffer = (size_t)tightAfterBufSize;
-}
-
-static boolean
-JpegEmptyOutputBuffer(j_compress_ptr cinfo)
-{
-    jpegError = TRUE;
-    jpegDstManager.next_output_byte = (JOCTET *)tightAfterBuf;
-    jpegDstManager.free_in_buffer = (size_t)tightAfterBufSize;
-
-    return TRUE;
-}
-
-static void
-JpegTermDestination(j_compress_ptr cinfo)
-{
-    jpegDstDataLen = tightAfterBufSize - jpegDstManager.free_in_buffer;
-}
-
-static void
-JpegSetDstManager(j_compress_ptr cinfo)
-{
-    jpegDstManager.init_destination = JpegInitDestination;
-    jpegDstManager.empty_output_buffer = JpegEmptyOutputBuffer;
-    jpegDstManager.term_destination = JpegTermDestination;
-    cinfo->dest = &jpegDstManager;
-}
-
