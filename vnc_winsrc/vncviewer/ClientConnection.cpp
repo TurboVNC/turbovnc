@@ -1904,6 +1904,10 @@ void* ClientConnection::run_undetached(void* arg) {
 		if (!m_bKillThread) {
 			e.Report();
 		}
+	} catch (ErrorException &e) {
+		m_running = false;
+		e.Report();
+		PostMessage(m_hwnd, WM_CLOSE, 0, 0);
 	} catch (QuietException &e) {
 		m_running = false;
 		e.Report();
