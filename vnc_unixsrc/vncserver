@@ -64,10 +64,28 @@ $fontPath = "unix/:7100";
 
 $defaultXStartup
     = ("#!/bin/sh\n\n".
+       "if [ -x /etc/X11/xinit/xinitrc ]; then\n".
+       "  exec /etc/X11/xinit/xinitrc\n".
+       "fi\n".
+       "if [ -f \$HOME/.dt/sessions/lastsession ]; then\n".
+       "  exec `cat \$HOME/.dt/sessions/lastsession`\n".
+       "fi\n".
        "xrdb \$HOME/.Xresources\n".
        "xsetroot -solid grey\n".
        "xterm -geometry 80x24+10+10 -ls -title \"\$VNCDESKTOP Desktop\" &\n".
-       "twm &\n");
+       "if [ -x /usr/dt/bin/dtwm ]; then\n".
+       "  /usr/dt/bin/dtwm &\n".
+       "else\n".
+       "  if [ -x /opt/sfw/bin/fvwm2 ]; then\n".
+       "    /opt/sfw/bin/fvwm2 &\n".
+       "  else\n".
+       "    if [ -x `which fvwm2` ]; then\n".
+       "      fvwm2 &\n".
+       "    else\n".
+       "      twm &\n".
+       "    fi\n".
+       "  fi\n".
+       "fi\n");
 
 $xauthorityFile = "$ENV{XAUTHORITY}";
 
