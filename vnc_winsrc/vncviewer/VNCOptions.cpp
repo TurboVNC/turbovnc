@@ -34,9 +34,9 @@
 VNCOptions::VNCOptions()
 {
 	for (int i = rfbEncodingRaw; i<= LASTENCODING; i++)
-		m_UseEnc[i] = true;
+		m_UseEnc[i] = false;
 	
-	m_UseEnc[3] = false;
+	m_UseEnc[rfbEncodingTight] = true;
 
 	m_ViewOnly = false;
 	m_FullScreen = false;
@@ -73,10 +73,10 @@ VNCOptions::VNCOptions()
 	m_listenPort = INCOMING_PORT_OFFSET;
 	m_restricted = false;
 
-	m_useCompressLevel = false;
-	m_compressLevel = 6;
+	m_useCompressLevel = true;
+	m_compressLevel = 0;
 	m_enableJpegCompression = true;
-	m_jpegQualityLevel = 6;
+	m_jpegQualityLevel = 95;
 	m_requestShapeUpdates = true;
 	m_ignoreShapeUpdates = false;
 
@@ -254,8 +254,10 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			m_ViewOnly = true;
 		} else if ( SwitchMatch(args[j], _T("fullscreen"))) {
 			m_FullScreen = true;
+#if 0
 		} else if ( SwitchMatch(args[j], _T("8bit"))) {
 			m_Use8Bit = true;
+#endif
 		} else if ( SwitchMatch(args[j], _T("shared"))) {
 			m_Shared = true;
 		} else if ( SwitchMatch(args[j], _T("noshared"))) {
@@ -274,13 +276,16 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			m_Emul3Buttons = true;
 		} else if ( SwitchMatch(args[j], _T("noemulate3") )) {
 			m_Emul3Buttons = false;
+#if 0
 		} else if ( SwitchMatch(args[j], _T("nojpeg") )) {
 			m_enableJpegCompression = false;
+#endif
 		} else if ( SwitchMatch(args[j], _T("nocursorshape") )) {
 			m_requestShapeUpdates = false;
 		} else if ( SwitchMatch(args[j], _T("noremotecursor") )) {
 			m_requestShapeUpdates = true;
 			m_ignoreShapeUpdates = true;
+#if 0
 		} else if ( SwitchMatch(args[j], _T("scale") )) {
 			if (++j == i) {
 				ArgError(_T("No scaling factor specified"));
@@ -293,7 +298,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			}
 			if (numscales == 1) 
 				m_scale_den = 1; // needed if you're overriding a previous setting
-
+#endif
 		} else if ( SwitchMatch(args[j], _T("emulate3timeout") )) {
 			if (++j == i) {
 				ArgError(_T("No timeout specified"));
@@ -375,6 +380,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 				Load(m_configFilename);
 				m_configSpecified = true;
 			}
+#if 0
 		} else if ( SwitchMatch(args[j], _T("encoding") )) {
 			if (++j == i) {
 				ArgError(_T("No encoding specified"));
@@ -403,6 +409,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 				m_UseEnc[enc] = true;
 				m_PreferredEncoding = enc;
 			}
+#endif
 		} else if ( SwitchMatch(args[j], _T("compresslevel") )) {
 			if (++j == i) {
 				ArgError(_T("No compression level specified"));
@@ -695,11 +702,13 @@ BOOL CALLBACK VNCOptions::OptDlgProc(  HWND hwnd,  UINT uMsg,
 		switch (LOWORD(wParam)) {
 		case IDOK:
 			{
+#if 0
 				for (int i = rfbEncodingRaw; i <= LASTENCODING; i++) {
 					HWND hPref = GetDlgItem(hwnd, IDC_RAWRADIO+i-rfbEncodingRaw);
 					if (SendMessage(hPref, BM_GETCHECK, 0, 0) == BST_CHECKED)
 						_this->m_PreferredEncoding = i;
 				}
+#endif
 				
 				HWND hCopyRect = GetDlgItem(hwnd, ID_SESSION_SET_CRECT);
 				_this->m_UseEnc[rfbEncodingCopyRect] =
@@ -718,9 +727,11 @@ BOOL CALLBACK VNCOptions::OptDlgProc(  HWND hwnd,  UINT uMsg,
 					(SendMessage(hDisableClip, BM_GETCHECK, 0, 0) == BST_CHECKED);
 #endif
 
+#if 0
 				HWND h8bit = GetDlgItem(hwnd, IDC_8BITCHECK);
 				_this->m_Use8Bit =
 					(SendMessage(h8bit, BM_GETCHECK, 0, 0) == BST_CHECKED);
+#endif
 				
 				HWND hShared = GetDlgItem(hwnd, IDC_SHARED);
 				_this->m_Shared =
@@ -730,6 +741,7 @@ BOOL CALLBACK VNCOptions::OptDlgProc(  HWND hwnd,  UINT uMsg,
 				_this->m_ViewOnly = 
 					(SendMessage(hViewOnly, BM_GETCHECK, 0, 0) == BST_CHECKED);
 
+#if 0
 				HWND hScaling = GetDlgItem(hwnd, IDC_SCALING);
 				_this->m_scaling = 
 					(SendMessage(hScaling, BM_GETCHECK, 0, 0) == BST_CHECKED);
@@ -744,6 +756,7 @@ BOOL CALLBACK VNCOptions::OptDlgProc(  HWND hwnd,  UINT uMsg,
 					_this->m_scale_num = 1;
 					_this->m_scale_den = 1;
 				}
+#endif
 
 #ifndef UNDER_CE
 				HWND hFullScreen = GetDlgItem(hwnd, IDC_FULLSCREEN);
@@ -755,21 +768,25 @@ BOOL CALLBACK VNCOptions::OptDlgProc(  HWND hwnd,  UINT uMsg,
 				  (SendMessage(hEmulate, BM_GETCHECK, 0, 0) == BST_CHECKED);
 #endif
 
+#if 0
 				HWND hAllowCompressLevel = GetDlgItem(hwnd, IDC_ALLOW_COMPRESSLEVEL);
 				_this->m_useCompressLevel = 
 					(SendMessage(hAllowCompressLevel, BM_GETCHECK, 0, 0) == BST_CHECKED);
+#endif
 
 				_this->m_compressLevel = GetDlgItemInt( hwnd, IDC_COMPRESSLEVEL, NULL, TRUE);
-				if ( _this->m_compressLevel < 0 ) { _this->m_compressLevel = 0; }
-				if ( _this->m_compressLevel > 9 ) { _this->m_compressLevel = 9; }
+				if ( _this->m_compressLevel != 1 && _this->m_compressLevel != 2 )
+					_this->m_compressLevel = 0;
 
+#if 0
 				HWND hAllowJpeg = GetDlgItem(hwnd, IDC_ALLOW_JPEG);
 				_this->m_enableJpegCompression = 
 					(SendMessage(hAllowJpeg, BM_GETCHECK, 0, 0) == BST_CHECKED);
+#endif
 
 				_this->m_jpegQualityLevel = GetDlgItemInt( hwnd, IDC_QUALITYLEVEL, NULL, TRUE);
 				if ( _this->m_jpegQualityLevel < 0 ) { _this->m_jpegQualityLevel = 0; }
-				if ( _this->m_jpegQualityLevel > 9 ) { _this->m_jpegQualityLevel = 9; }
+				if ( _this->m_jpegQualityLevel > 100 ) { _this->m_jpegQualityLevel = 100; }
 
 				_this->m_requestShapeUpdates = false;
 				_this->m_ignoreShapeUpdates = false;

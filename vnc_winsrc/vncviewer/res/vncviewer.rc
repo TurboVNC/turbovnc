@@ -160,26 +160,26 @@ CAPTION "Connection Options..."
 FONT 8, "MS Sans Serif"
 BEGIN
     CONTROL         "Tight",IDC_TIGHTRADIO,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP | WS_TABSTOP,15,19,32,10
+                    WS_DISABLED | WS_GROUP | WS_TABSTOP,15,19,32,10
     CONTROL         "ZlibHex (mix)",IDC_ZLIBHEXRADIO,"Button",
-                    BS_AUTORADIOBUTTON,66,19,56,10
-    CONTROL         "Hextile",IDC_HEXTILERADIO,"Button",BS_AUTORADIOBUTTON,
-                    15,31,37,10
-    CONTROL         "Zlib (pure)",IDC_ZLIBRADIO,"Button",BS_AUTORADIOBUTTON,
-                    66,31,47,10
-    CONTROL         "CoRRE",IDC_CORRERADIO,"Button",BS_AUTORADIOBUTTON,15,43,
-                    40,10
-    CONTROL         "RRE",IDC_RRERADIO,"Button",BS_AUTORADIOBUTTON,66,43,31,
-                    10
-    CONTROL         "Raw",IDC_RAWRADIO,"Button",BS_AUTORADIOBUTTON,15,55,31,
-                    10
+                    BS_AUTORADIOBUTTON | WS_DISABLED,66,19,56,10
+    CONTROL         "Hextile",IDC_HEXTILERADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_DISABLED,15,31,37,10
+    CONTROL         "Zlib (pure)",IDC_ZLIBRADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_DISABLED,66,31,47,10
+    CONTROL         "CoRRE",IDC_CORRERADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_DISABLED,15,43,40,10
+    CONTROL         "RRE",IDC_RRERADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_DISABLED,66,43,31,10
+    CONTROL         "Raw",IDC_RAWRADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_DISABLED,15,55,31,10
     CONTROL         "Allow CopyRect encoding",ID_SESSION_SET_CRECT,"Button",
                     BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,15,68,97,10
-    CONTROL         "Custom compression level:",IDC_ALLOW_COMPRESSLEVEL,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,81,99,10
+    CONTROL         "JPEG subsampling",IDC_ALLOW_COMPRESSLEVEL,"Button",
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,15,81,75,10
     EDITTEXT        IDC_COMPRESSLEVEL,30,92,15,12,ES_AUTOHSCROLL | ES_NUMBER
-    CONTROL         "Allow JPEG compression:",IDC_ALLOW_JPEG,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,15,107,96,10
+    CONTROL         "JPEG quality",IDC_ALLOW_JPEG,"Button",BS_AUTOCHECKBOX | 
+                    WS_DISABLED | WS_TABSTOP,15,107,56,10
     EDITTEXT        IDC_QUALITYLEVEL,30,119,15,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Request shared session",IDC_SHARED,"Button",
                     BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,15,152,91,10
@@ -201,19 +201,21 @@ BEGIN
     CONTROL         "Don't show remote cursor",IDC_CSHAPE_IGNORE_RADIO,
                     "Button",BS_AUTORADIOBUTTON,148,83,96,10
     CONTROL         "Restrict pixels to 8-bit (for slow networks)",
-                    IDC_8BITCHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | 
-                    WS_TABSTOP,148,113,143,10
+                    IDC_8BITCHECK,"Button",BS_AUTOCHECKBOX | WS_DISABLED | 
+                    WS_GROUP | WS_TABSTOP,148,113,143,10
     CONTROL         "View only (inputs ignored)",IDC_VIEWONLY,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,148,125,96,10
     CONTROL         "Full-screen mode",IDC_FULLSCREEN,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,148,137,69,8
     CONTROL         "Scale by",IDC_SCALING,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,148,148,43,10
-    EDITTEXT        IDC_SCALE_NUM,195,147,15,12,ES_AUTOHSCROLL | ES_NUMBER
-    EDITTEXT        IDC_SCALE_DEN,221,147,14,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "level (1=fast, 9=best)",IDC_STATIC,49,95,81,9,NOT 
+                    WS_DISABLED | WS_TABSTOP,148,148,43,10
+    EDITTEXT        IDC_SCALE_NUM,195,147,15,12,ES_AUTOHSCROLL | ES_NUMBER | 
+                    WS_DISABLED
+    EDITTEXT        IDC_SCALE_DEN,221,147,14,12,ES_AUTOHSCROLL | ES_NUMBER | 
+                    WS_DISABLED
+    LTEXT           "0=none, 1=4:1:1, 2=4:2:2",IDC_STATIC,49,95,81,9,NOT 
                     WS_GROUP
-    LTEXT           "quality (0=poor, 9=best)",IDC_STATIC,49,121,81,9
+    LTEXT           "JPEG quality (0-100)",IDC_STATIC,49,121,81,9
     CTEXT           "/",IDC_STATIC,211,150,8,8,0,WS_EX_TRANSPARENT
     LTEXT           "(experimental)",IDC_STATIC,241,150,44,8
     GROUPBOX        "Preferred encoding",IDC_STATIC,7,7,123,131
@@ -224,9 +226,9 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,197,173,50,14,WS_GROUP
     PUSHBUTTON      "Cancel",IDCANCEL,255,173,50,14
     CONTROL         "crect",IDC_CRECTRADIO,"Button",BS_AUTORADIOBUTTON | NOT 
-                    WS_VISIBLE,66,55,32,10
+                    WS_VISIBLE | WS_DISABLED,66,55,32,10
     CONTROL         "enc3",IDC_RBSRADIO,"Button",BS_AUTORADIOBUTTON | NOT 
-                    WS_VISIBLE,98,55,32,10
+                    WS_VISIBLE | WS_DISABLED,98,55,32,10
 END
 
 IDD_SESSION_DLG DIALOG DISCARDABLE  0, 0, 245, 63
