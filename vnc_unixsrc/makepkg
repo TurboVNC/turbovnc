@@ -3,11 +3,15 @@
 
 if [ "$1" = "clean" ]; then
 xmkmf || exit -1
-gmake clean || exit -1
+make clean || exit -1
 cd Xvnc
-./configure || exit -1
-gmake clean || exit -1
-./configure || exit -1
+if [ -f Makefile ]; then
+	make clean || exit -1
+	./configure || exit -1
+else
+	./configure || exit -1
+	make clean || exit -1
+fi
 cd ..
 if [ ! -f ../../vgl/Makefile ]; then
 	echo Could not find VirtualGL build directory at ../../vgl !
@@ -20,9 +24,9 @@ else
 fi
 fi
 
-gmake World || exit -1
+make World || exit -1
 cd Xvnc
-gmake || exit -1
+make || exit -1
 cd ..
 
 pkgtmpdir=pkgbuild
@@ -45,15 +49,16 @@ P SUNWmlib      mediaLib - Shared Libraries
 EOF
 
 _VERSION=0.2
+_BUILD=`date %Y%m%d`
 cat > $pkgtmpdir/pkginfo <<EOF 
 ARCH=sparc
 PKG=SUNWtvnc
 NAME=TurboVNC server and client
-VERSION=$_VERSION
+VERSION=$_VERSION,REV=$_BUILD
 SUNW_PRODNAME=TurboVNC
 SUNW_PRODVERS=1.0
 SUNW_PKGVERS=1.0
-DESC=TurboVNC is a sleak and fast VNC distribution, containing a high-performance implementation of tight JPEG encoding designed to work in conjunction with VirtualGL.
+DESC=TurboVNC is a sleek and fast VNC distribution, containing a high-performance implementation of tight JPEG encoding designed to work in conjunction with VirtualGL.
 VENDOR=The VirtualGL Project
 HOTLINE=Please contact your local service provider
 EMAIL=dcommander@users.sourceforge.net
