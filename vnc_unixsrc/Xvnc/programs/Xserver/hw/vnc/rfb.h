@@ -507,8 +507,6 @@ extern Bool rfbSendRectEncodingZlib(rfbClientPtr cl, int x, int y, int w,
 #define TIGHT_DEFAULT_COMPRESSION  0
 #define TIGHT_DEFAULT_QUALITY      95
 
-extern Bool rfbTightDisableGradient;
-
 extern int rfbNumCodedRectsTight(rfbClientPtr cl, int x,int y,int w,int h);
 extern Bool rfbSendRectEncodingTight(rfbClientPtr cl, int x,int y,int w,int h);
 
