@@ -1,8 +1,10 @@
 #!/bin/bash
 
-mkdir -p rpms/BUILD
+rm -rf rpms/
 mkdir -p rpms/RPMS
-mkdir -p rpms/SOURCES
-mkdir -p rpms/SRPMS
+cd rpms; ln -fs .. BUILD; cd ..
 
-rpmbuild -ba --define "_topdir `pwd`/rpms" turbovnc.spec
+rpmbuild -bb --buildroot `pwd`/rpms/TurboVNC-buildroot --define "_topdir `pwd`/rpms" \
+	--define "_bindir /opt/TurboVNC/bin" --define "_mandir /opt/TurboVNC/man" \
+	--define "_datadir /opt/TurboVNC" turbovnc.spec
+mv rpms/RPMS/i386/turbovnc*.rpm .
