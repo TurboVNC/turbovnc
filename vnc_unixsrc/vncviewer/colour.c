@@ -74,6 +74,7 @@ static Bool AllocateBGR233Colour(int r, int g, int b);
 void
 SetVisualAndCmap()
 {
+#if 0
   if (appData.forceOwnCmap) {
     if (!si.format.trueColour) {
       if (GetPseudoColorVisualAndCmap(si.format.depth))
@@ -83,12 +84,11 @@ SetVisualAndCmap()
       return;
     fprintf(stderr,"Couldn't find a matching PseudoColor visual.\n");
   }
+#endif
 
-  if (appData.forceTrueColour) {
-    if (GetTrueColorVisualAndCmap(appData.requestedDepth))
+  if (GetTrueColorVisualAndCmap(24))
       return;
-    fprintf(stderr,"Couldn't find a matching TrueColor visual.\n");
-  }
+  fprintf(stderr,"Couldn't find a matching TrueColor visual.\n");
 
   /* just use default visual and colormap */
 
@@ -96,8 +96,6 @@ SetVisualAndCmap()
   visdepth = DefaultDepth(dpy,DefaultScreen(dpy));
   visbpp = GetBPPForDepth(visdepth);
   cmap = DefaultColormap(dpy,DefaultScreen(dpy));
-
-  if (!appData.useBGR233 && (vis->class == TrueColor)) {
 
     myFormat.bitsPerPixel = visbpp;
     myFormat.depth = visdepth;
@@ -114,8 +112,8 @@ SetVisualAndCmap()
 	    "Using default colormap which is TrueColor.  Pixel format:\n");
     PrintPixelFormat(&myFormat);
     return;
-  }
 
+#if 0
   appData.useBGR233 = True;
 
   myFormat.bitsPerPixel = 8;
@@ -134,6 +132,7 @@ SetVisualAndCmap()
   PrintPixelFormat(&myFormat);
 
   SetupBGR233Map();
+#endif
 }
 
 
@@ -143,6 +142,7 @@ SetVisualAndCmap()
  * sets the appropriate resources on the toplevel widget.
  */
 
+#if 0
 static Bool
 GetPseudoColorVisualAndCmap(int depth)
 {
@@ -190,6 +190,7 @@ GetPseudoColorVisualAndCmap(int depth)
 
   return False;
 }
+#endif
 
 
 /*
@@ -303,6 +304,7 @@ GetBPPForDepth(int depth)
  * then we also use other clients' "shared" colours available in the colormap.
  */
 
+#if 0
 static void
 SetupBGR233Map()
 {
@@ -546,3 +548,4 @@ AllocateBGR233Colour(int r, int g, int b)
 
   return True;
 }
+#endif
