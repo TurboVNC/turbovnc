@@ -34,12 +34,7 @@
 
 #include "vncDesktop.h"
 #include "vncEncoder.h"
-#include "vncEncodeRRE.h"
-#include "vncEncodeCoRRE.h"
-#include "vncEncodeHexT.h"
-#include "vncEncodeZlib.h"
 #include "vncEncodeTight.h"
-#include "vncEncodeZlibHex.h"
 #include "MinMax.h"
 
 #include "vncBuffer.h"
@@ -176,7 +171,7 @@ vncBuffer::CheckBuffer()
 
 	// If the client has not selected an encoding then set one for it
 	if (m_encoder == NULL) {
-	    if (!SetEncoding(rfbEncodingRaw))
+	    if (!SetEncoding(rfbEncodingTight))
 		return FALSE;
 	}
 
@@ -460,6 +455,7 @@ vncBuffer::SetEncoding(CARD32 encoding)
 	switch(encoding)
 	{
 
+#if 0
 	case rfbEncodingRaw:
 
 		vnclog.Print(LL_INTINFO, VNCLOG("raw encoder requested\n"));
@@ -519,6 +515,7 @@ vncBuffer::SetEncoding(CARD32 encoding)
 			return FALSE;
 		zlib_encoder_in_use = true;
 		break;
+#endif
 
 	case rfbEncodingTight:
 
@@ -540,6 +537,7 @@ vncBuffer::SetEncoding(CARD32 encoding)
 		tight_encoder_in_use = true;
 		break;
 
+#if 0
 	case rfbEncodingZlibHex:
 
 		vnclog.Print(LL_INTINFO, VNCLOG("ZlibHex encoder requested\n"));
@@ -559,6 +557,7 @@ vncBuffer::SetEncoding(CARD32 encoding)
 			return FALSE;
 		zlibhex_encoder_in_use = true;
 		break;
+#endif
 
 	default:
 		// An unknown encoding was specified
@@ -590,7 +589,7 @@ vncBuffer::SetEncoding(CARD32 encoding)
 void
 vncBuffer::SetCompressLevel(int level)
 {
-	m_compresslevel = (level >= 0 && level <= 9) ? level : 6;
+	m_compresslevel = (level >= 0 && level <= 2) ? level : 0;
 	if (m_encoder != NULL)
 		m_encoder->SetCompressLevel(m_compresslevel);
 }
@@ -598,7 +597,7 @@ vncBuffer::SetCompressLevel(int level)
 void
 vncBuffer::SetQualityLevel(int level)
 {
-	m_qualitylevel = (level >= 0 && level <= 9) ? level : -1;
+	m_qualitylevel = (level >= 0 && level <= 100) ? level : 95;
 	if (m_encoder != NULL)
 		m_encoder->SetQualityLevel(m_qualitylevel);
 }
