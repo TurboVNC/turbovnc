@@ -62,6 +62,7 @@ public:
 	bool	m_restricted;
 
 	// default connection options - can be set through Dialog
+	bool	m_DoubleBuffer;
 	bool	m_ViewOnly;
 	bool	m_FullScreen;
 	int		m_PreferredEncoding;

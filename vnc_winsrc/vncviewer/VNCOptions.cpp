@@ -40,6 +40,7 @@ VNCOptions::VNCOptions()
 	m_UseEnc[rfbEncodingCopyRect] = true;
 
 
+	m_DoubleBuffer = true;
 	m_ViewOnly = false;
 	m_FullScreen = false;
 	m_PreferredEncoding = rfbEncodingTight;
@@ -100,6 +101,7 @@ VNCOptions& VNCOptions::operator=(VNCOptions& s)
 	for (int i = rfbEncodingRaw; i<= LASTENCODING; i++)
 		m_UseEnc[i] = s.m_UseEnc[i];
 	
+	m_DoubleBuffer      = s.m_DoubleBuffer;
 	m_ViewOnly			= s.m_ViewOnly;
 	m_FullScreen		= s.m_FullScreen;
 	m_PreferredEncoding = s.m_PreferredEncoding;
@@ -244,6 +246,8 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 				}
 				j++;
 			}
+		} else if ( SwitchMatch(args[j], _T("singlebuffer"))) {
+			m_DoubleBuffer = false;
 		} else if ( SwitchMatch(args[j], _T("restricted"))) {
 			m_restricted = true;
 		} else if ( SwitchMatch(args[j], _T("viewonly"))) {
@@ -533,7 +537,7 @@ void VNCOptions::ShowUsage(LPTSTR info) {
 #ifdef UNDER_CE
 		_T("%s\n\rUsage includes:\n\r")
 			_T("vncviewer [/swapmouse] [/shared] [/belldeiconify] \n\r")
-			_T(" [/hpc | /palm] [/slow] server[:display] \n\r")
+			_T(" [/hpc | /palm] [/slow] [/singlebuffer] server[:display] \n\r")
 			_T("For full details see documentation."),
 #else
 		_T("%s\n\rUsage includes:\n\r"
@@ -541,7 +545,8 @@ void VNCOptions::ShowUsage(LPTSTR info) {
 			"      [/belldeiconify] [/listen] [/fullscreen] [/viewonly] \n\r"
 			"      [/emulate3] [/scale a/b] [/config configfile] \n\r"
 			"      [/compresslevel 0=4:4:4, 1=4:1:1, 2=4:2:2] [/quality 1-100] \n\r"
-			"      [/nocursorshape] [/noremotecursor] server[:display]\n\r"
+			"      [/nocursorshape] [/noremotecursor] [/singlebuffer] \n\r"
+			"      server[:display]\n\r"
 			"For full details see documentation."), 
 #endif
         tmpinf);
