@@ -5,7 +5,8 @@ Release:   %{_build}
 URL:       http://virtualgl.sourceforge.net
 License:   GPL
 Group:     User Interface/Desktops
-Obsoletes: vnc
+Requires:  XFree86 bash >= 2.0
+Prereq:    /sbin/chkconfig /sbin/service /etc/init.d
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildPrereq: /usr/bin/perl tcp_wrappers
 BuildRequires: zlib-devel libjpeg-devel
@@ -18,19 +19,6 @@ machine where it is running, but from anywhere on the Internet and
 from a wide variety of machine architectures.  TurboVNC is a sleek and
 fast VNC distribution, containing a high-performance implementation of
 tight JPEG encoding designed to work in conjunction with VirtualGL.
-
-%package server
-Summary: TurboVNC server
-Obsoletes: vnc-server
-Requires: XFree86 bash >= 2.0
-Group: User Interface/X
-Prereq: /sbin/chkconfig /sbin/service /etc/init.d
-
-%description server
-The VNC system allows you to access the same desktop from a wide
-variety of platforms. TurboVNC is an enhanced VNC distribution. This
-package is a TurboVNC server, allowing others to access the desktop on
-your machine.
 
 %install
 rm -rf %{buildroot}
@@ -87,34 +75,30 @@ install -m 755 %{_srclibdir}/libhpjpeg.so %{buildroot}%{_libdir}
 %clean
 rm -rf %{buildroot}
 
-%post server
+%post
 if [ "$1" = 1 ]; then
   /sbin/chkconfig --add tvncserver
 fi
 
-%preun server
+%preun
 if [ "$1" = 0 ]; then
   /sbin/service tvncserver stop >/dev/null 2>&1
   /sbin/chkconfig --del tvncserver
 fi
 
-%postun server
+%postun
 if [ "$1" -ge "1" ]; then
   /sbin/service tvncserver condrestart >/dev/null 2>&1
 fi
 
 %files
 %defattr(-,root,root)
+%attr(0755,root,root) %config /etc/rc.d/init.d/tvncserver
+%config(noreplace) /etc/sysconfig/tvncservers
 %doc LICENCE.TXT README WhatsNew ChangeLog
 %{_bindir}/vncviewer
 %config(noreplace) /etc/X11/applnk/Applications/tvncviewer.desktop
 %{_mandir}/man1/vncviewer.1*
-
-%files server
-%defattr(-,root,root)
-%doc LICENCE.TXT README WhatsNew ChangeLog
-%attr(0755,root,root) %config /etc/rc.d/init.d/tvncserver
-%config(noreplace) /etc/sysconfig/tvncservers
 %{_bindir}/Xvnc
 %{_bindir}/vncserver
 %{_bindir}/vncpasswd
