@@ -168,8 +168,10 @@ void ClientConnection::Init(VNCviewerApp *pApp)
 
 	m_pApp->RegisterConnection(this);
 
+
 	memset(&fb, 0, sizeof(fb));
     if((j=hpjInitDecompress())==NULL) throw(ErrorException(hpjGetErrorStr()));
+
 }
 
 // 
@@ -815,7 +817,7 @@ void ClientConnection::SetFormatAndEncodings()
 	if ( useCompressLevel &&
 		 m_opts.m_compressLevel >= 0 &&
 		 m_opts.m_compressLevel <= 2) {
-		encs[se->nEncodings++] = Swap32IfLE( rfbEncodingCompressLevel0 +
+		encs[se->nEncodings++] = Swap32IfLE( rfbJpegSubsamp444 +
 											 m_opts.m_compressLevel );
 	}
 
@@ -828,9 +830,9 @@ void ClientConnection::SetFormatAndEncodings()
 	}
 
 	// Request JPEG quality level if JPEG compression was enabled by user
-	if ( m_opts.m_jpegQualityLevel >= 0 &&
+	if ( m_opts.m_jpegQualityLevel >= 1 &&
 		 m_opts.m_jpegQualityLevel <= 100) {
-		encs[se->nEncodings++] = Swap32IfLE( rfbJpegQualityLevel0 +
+		encs[se->nEncodings++] = Swap32IfLE( rfbJpegQualityLevel1 - 1 +
 											 m_opts.m_jpegQualityLevel );
 	}
 
@@ -2009,36 +2011,12 @@ void ClientConnection::ReadScreenUpdate() {
 		SoftCursorLockArea(surh.r.x, surh.r.y, surh.r.w, surh.r.h);
 
 		switch (surh.encoding) {
-#if 0
-		case rfbEncodingRaw:
-			ReadRawRect(&surh);
-			break;
-#endif
 		case rfbEncodingCopyRect:
 			ReadCopyRect(&surh);
 			break;
-#if 0
-		case rfbEncodingRRE:
-			ReadRRERect(&surh);
-			break;
-		case rfbEncodingCoRRE:
-			ReadCoRRERect(&surh);
-			break;
-		case rfbEncodingHextile:
-			ReadHextileRect(&surh);
-			break;
-		case rfbEncodingZlib:
-			ReadZlibRect(&surh);
-			break;
-#endif
 		case rfbEncodingTight:
 			ReadTightRect(&surh);
 			break;
-#if 0
-		case rfbEncodingZlibHex:
-			ReadZlibHexRect(&surh);
-			break;
-#endif
 		default:
 			vnclog.Print(0, _T("Unknown encoding %d - not supported!\n"), surh.encoding);
 			break;

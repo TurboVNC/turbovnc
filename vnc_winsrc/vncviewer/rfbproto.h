@@ -305,8 +305,11 @@ typedef struct _rfbServerInitMsg {
  *   0xFFFFFFF0 .. 0xFFFFFFFF -- cross-encoding compression levels.
  */
 
-#define rfbJpegQualityLevel0       0xFFFFFE00
+#define rfbJpegQualityLevel1       0xFFFFFE01
 #define rfbJpegQualityLevel100     0xFFFFFE64
+#define rfbJpegSubsamp444          0xFFFFFD00
+#define rfbJpegSubsamp411          0xFFFFFD01
+#define rfbJpegSubsamp422          0xFFFFFD02
 
 #define rfbEncodingCompressLevel0  0xFFFFFF00
 #define rfbEncodingCompressLevel1  0xFFFFFF01
