@@ -36,10 +36,10 @@ Widget form, viewport, desktop;
 
 static Bool modifierPressed[256];
 
-static XImage *image = NULL;
+XImage *image = NULL;
 
 static Cursor CreateDotCursor();
-static void CopyBGR233ToScreen(CARD8 *buf, int x, int y, int width,int height);
+//static void CopyBGR233ToScreen(CARD8 *buf, int x, int y, int width,int height);
 static void HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev,
 				    Boolean *cont);
 
@@ -375,7 +375,7 @@ CopyDataToScreen(char *buf, int x, int y, int width, int height)
     usleep(appData.rawDelay * 1000);
   }
 
-  if (!appData.useBGR233) {
+  if (buf) {
     int h;
     int widthInBytes = width * myFormat.bitsPerPixel / 8;
     int scrWidthInBytes = si.framebufferWidth * myFormat.bitsPerPixel / 8;
@@ -388,9 +388,9 @@ CopyDataToScreen(char *buf, int x, int y, int width, int height)
       buf += widthInBytes;
       scr += scrWidthInBytes;
     }
-  } else {
-    CopyBGR233ToScreen((CARD8 *)buf, x, y, width, height);
-  }
+  }// else {
+//    CopyBGR233ToScreen((CARD8 *)buf, x, y, width, height);
+//  }
 
 #ifdef MITSHM
   if (appData.useShm) {
@@ -405,7 +405,7 @@ CopyDataToScreen(char *buf, int x, int y, int width, int height)
 /*
  * CopyBGR233ToScreen.
  */
-
+#if 0
 static void
 CopyBGR233ToScreen(CARD8 *buf, int x, int y, int width, int height)
 {
@@ -468,3 +468,4 @@ CopyBGR233ToScreen(CARD8 *buf, int x, int y, int width, int height)
     break;
   }
 }
+#endif
