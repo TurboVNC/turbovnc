@@ -1,5 +1,12 @@
 #!/bin/bash
 
+M32=
+TARGET=
+if [ `uname -m` = 'x86_64' ];then
+	M32='M32=yes'
+	TARGET='--target i386'
+fi
+
 if [ "$1" = "clean" ]; then
 xmkmf || exit -1
 make clean || exit -1
@@ -18,7 +25,7 @@ if [ ! -f ../../vgl/Makefile ]; then
 else
 	__PWD=`pwd`
 	cd ../../vgl
-	make DISTRO=vnc clean
+	make DISTRO=vnc $M32 clean
 	cd $__PWD
 fi
 fi
@@ -34,8 +41,8 @@ if [ ! -f ../../vgl/Makefile ]; then
 else
 	__PWD=`pwd`
 	cd ../../vgl
-	make DISTRO=vnc jpeg
-	make DISTRO=vnc jpeg
+	make DISTRO=vnc $M32 jpeg
+	make DISTRO=vnc $M32 jpeg
 	cd $__PWD
 fi
 
@@ -47,9 +54,10 @@ BUILD=`date +%Y%m%d`
 rpmbuild -bb --buildroot `pwd`/rpms/TurboVNC-buildroot --define "_topdir `pwd`/rpms" \
 	--define "_bindir /opt/TurboVNC/bin" --define "_mandir /opt/TurboVNC/man" \
 	--define "_datadir /opt/TurboVNC" --define "_libdir /opt/TurboVNC/lib" \
-	--define "_build $BUILD" --define "_srclibdir ../../vgl/linux/vnc/lib" turbovnc.spec
+	--define "_build $BUILD" --define "_srclibdir ../../vgl/linux/vnc/lib" \
+	$TARGET turbovnc.spec
 
-RPMTAG=glibc`rpm -q glibc | cut -f2 -d- | cut -f1,2 -d. | sed s/\\\.//g`
+RPMTAG=glibc`rpm -q glibc | uniq | cut -f2 -d- | cut -f1,2 -d. | sed s/\\\.//g`
 for i in rpms/RPMS/i386/turbovnc*.rpm; do
 	mv $i `basename $i | sed s@$BUILD@$RPMTAG@g`
 done

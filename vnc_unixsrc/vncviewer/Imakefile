@@ -2,6 +2,10 @@
 #ifdef SunArchitecture
 EXTRA_DEFINES = -D__EXTENSIONS__
 #endif
+#ifdef x86_64Architecture
+EXTRA_DEFINES = -m32 -D__i386__
+EXTRA_LDOPTIONS = -m32 -L/usr/X11R6/lib
+#endif
 
 XCOMM Shared memory support works OK on x86 linux, not tested elsewhere but
 XCOMM seems to cause problems on Digital Unix.

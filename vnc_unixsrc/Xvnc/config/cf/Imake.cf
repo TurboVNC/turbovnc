@@ -750,6 +750,12 @@ XCOMM Keep cpp from replacing path elements containing i486/i586/i686
 #  endif
 #  undef __ia64__
 # endif
+# ifdef __x86_64__
+#  ifndef x86_64Architecture
+#   define x86_64Architecture
+#  endif
+#  undef __x86_64__
+# endif
 # if defined(mips) || defined(__mips__)
 #  define MipsArchitecture
 #  undef mips

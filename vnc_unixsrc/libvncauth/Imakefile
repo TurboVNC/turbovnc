@@ -2,6 +2,9 @@
 #ifdef SunArchitecture
 EXTRA_DEFINES = -D__EXTENSIONS__
 #endif
+#ifdef x86_64Architecture
+EXTRA_DEFINES = -m32 -D__i386__
+#endif
 
 SRCS = vncauth.c d3des.c
 

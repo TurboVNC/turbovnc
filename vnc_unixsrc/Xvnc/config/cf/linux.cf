@@ -43,7 +43,8 @@ XCOMM platform:  $XFree86: xc/config/cf/linux.cf,v 3.57.2.12 1998/03/01 01:57:10
 #if defined(AlphaArchitecture) || defined(PowerPCArchitecture) || \
     defined(SparcArchitecture) || defined(ArmArchitecure) || \
     defined(i386Architecture) || defined(s390Architecture) || \
-    defined(s390xArchitecture) || defined(ia64Architecture)
+    defined(s390xArchitecture) || defined(ia64Architecture) || \
+    defined(x86_64Architecture)
 #define DefaultLinuxCLibMajorVersion	6
 #else
 #define DefaultLinuxCLibMajorVersion	5
@@ -254,12 +255,19 @@ XCOMM binutils:	(LinuxBinUtilsMajorVersion)
 #define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
 #endif /* i386Architecture */
 
+#ifdef x86_64Architecture
+#define OptimizedCDebugFlags	-O2 -m32
+#define LinuxMachineDefines	-D__i386__
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+#endif /* x86_64Architecture */
+
 #ifdef ia64Architecture
 #define OptimizedCDebugFlags	-O2
 #define LinuxMachineDefines	-D__ia64__
 #define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
 #define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
-#endif /* i386Architecture */
+#endif /* ia64Architecture */
 
 #ifdef AlphaArchitecture
 #define OptimizedCDebugFlags	-O2
