@@ -14,7 +14,7 @@ if [ ! -f ../../vgl/Makefile ]; then
 else
 	__PWD=`pwd`
 	cd ../../vgl
-	make M32=yes DISTRO=vnc clean
+	make DISTRO=vnc clean
 	cd $__PWD
 fi
 fi
@@ -30,8 +30,8 @@ if [ ! -f ../../vgl/Makefile ]; then
 else
 	__PWD=`pwd`
 	cd ../../vgl
-	make M32=yes DISTRO=vnc jpeg
-	make M32=yes DISTRO=vnc jpeg
+	make DISTRO=vnc jpeg
+	make DISTRO=vnc jpeg
 	cd $__PWD
 fi
 
