@@ -86,7 +86,7 @@ from the X Consortium.
 
 #define RFB_DEFAULT_WIDTH  640
 #define RFB_DEFAULT_HEIGHT 480
-#define RFB_DEFAULT_DEPTH  8
+#define RFB_DEFAULT_DEPTH  24
 #define RFB_DEFAULT_WHITEPIXEL 0
 #define RFB_DEFAULT_BLACKPIXEL 1
 
@@ -181,6 +181,7 @@ ddxProcessArgument (argc, argv, i)
     {
 	if (i + 1 >= argc) UseMsg();
 	rfbScreen.depth = atoi(argv[i+1]);
+	if (rfbScreen.depth < 24) rfbScreen.depth = 24;
 #ifdef CORBA
 	screenDepth= rfbScreen.depth;
 #endif
@@ -203,6 +204,9 @@ ddxProcessArgument (argc, argv, i)
 	    ErrorF("Invalid pixel format %s\n", argv[i+1]);
 	    UseMsg();
 	}
+	if (redBits < 8) redBits = 8;
+	if (greenBits < 8) greenBits = 8;
+	if (blueBits < 8) blueBits = 8;
 
 	return 2;
     }
@@ -899,7 +903,6 @@ void
 ddxUseMsg()
 {
     ErrorF("-geometry WxH          set framebuffer width & height\n");
-    ErrorF("-depth D               set framebuffer depth\n");
     ErrorF("-pixelformat format    set pixel format (BGRnnn or RGBnnn)\n");
     ErrorF("-udpinputport port     UDP port for keyboard/pointer data\n");
     ErrorF("-rfbport port          TCP port for RFB protocol\n");
