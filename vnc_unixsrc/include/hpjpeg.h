@@ -33,10 +33,10 @@ enum {HPJ_444=0, HPJ_422, HPJ_411};
 /* Flags */
 #define HPJ_BGR       1
 #define HPJ_BOTTOMUP  2
-#define HPJ_FORCEMMX  8   // Force IPP to use MMX code even if SSE available
-#define HPJ_FORCESSE  16  // Force IPP to use SSE1 code even if SSE2 available
-#define HPJ_FORCESSE2 32  // Force IPP to use SSE2 code (useful if auto-detect is not working properly)
-#define HPJ_ALPHAFIRST 64 // BGR buffer is ABGR and RGB buffer is ARGB
+#define HPJ_FORCEMMX  8   /* Force IPP to use MMX code even if SSE available */
+#define HPJ_FORCESSE  16  /* Force IPP to use SSE1 code even if SSE2 available */
+#define HPJ_FORCESSE2 32  /* Force IPP to use SSE2 code (useful if auto-detect is not working properly) */
+#define HPJ_ALPHAFIRST 64 /* BGR buffer is ABGR and RGB buffer is ARGB */
 
 typedef void* hpjhandle;
 
