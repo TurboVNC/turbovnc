@@ -24,6 +24,18 @@ else
 fi
 fi
 
+if [ ! -f ../../vgl/Makefile ]; then
+	echo Could not find VirtualGL build directory at ../../vgl !
+	exit -1
+else
+	__PWD=`pwd`
+	cd ../../vgl
+	gmake M32=yes DISTRO=vnc jpeg
+	gmake M32=yes DISTRO=vnc jpeg
+	cd $__PWD
+	cp ../../vgl/solaris/vnc/lib/libhpjpeg.so $pkgdir/lib
+fi
+
 make World || exit -1
 cd Xvnc
 make || exit -1
@@ -115,18 +127,6 @@ mkdir -p $pkgdir/vnc
 mkdir -p $pkgdir/man/man1
 
 ./vncinstall $pkgdir/bin $pkgdir/man
-
-if [ ! -f ../../vgl/Makefile ]; then
-	echo Could not find VirtualGL build directory at ../../vgl !
-	exit -1
-else
-	__PWD=`pwd`
-	cd ../../vgl
-	gmake M32=yes DISTRO=vnc jpeg
-	gmake M32=yes DISTRO=vnc jpeg
-	cd $__PWD
-	cp ../../vgl/solaris/vnc/lib/libhpjpeg.so $pkgdir/lib
-fi
 
 cp -prf classes $pkgdir/vnc
 

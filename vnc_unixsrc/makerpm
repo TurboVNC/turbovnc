@@ -30,11 +30,6 @@ else
 fi
 fi
 
-make World || exit -1
-cd Xvnc
-make || exit -1
-cd ..
-
 if [ ! -f ../../vgl/Makefile ]; then
 	echo Could not find VirtualGL build directory at ../../vgl !
 	exit -1
@@ -45,6 +40,11 @@ else
 	make DISTRO=vnc $M32 jpeg
 	cd $__PWD
 fi
+
+make World || exit -1
+cd Xvnc
+make || exit -1
+cd ..
 
 rm -rf rpms/
 mkdir -p rpms/RPMS
