@@ -61,6 +61,22 @@ static void rfbProcessClientInitMessage(rfbClientPtr cl);
 static Bool rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy);
 static Bool rfbSendLastRectMarker(rfbClientPtr cl);
 
+/*
+ * Map of quality levels to JPEG quality levels (experimentally determined by
+ * studying compression ratios of sample images)
+ * 9 ~= 6:1,   8 ~= 8:1,   7 ~= 10:1,  6 ~= 12:1,  5 ~= 14:1,
+ * 4 ~= 16:1,  3 ~= 18:1,  2 ~= 20:1,  1 ~= 22:1,  0 ~= 24:1
+ * This is to provide compatibility with TightVNC clients
+ */
+
+static int JPEG_QUAL[10] = {
+   41, 48, 57, 56, 66, 74, 72, 81, 88, 94
+};
+
+static int JPEG_SUBSAMP[10] = {
+   1, 1, 1, 2, 2, 2, 0, 0, 0, 0
+};
+
 
 /*
  * rfbNewClientConnection is called from sockets.c when a new connection
@@ -644,13 +660,18 @@ rfbProcessClientNormalMessage(cl)
 		}
 		break;
 	    default:
-		if ( enc >= (CARD32)rfbEncodingCompressLevel0 &&
-		     enc <= (CARD32)rfbEncodingCompressLevel2 ) {
-		    cl->zlibCompressLevel = enc & 0x0F;
-		    cl->tightCompressLevel = enc & 0x0F;
+		if ( enc >= (CARD32)rfbJpegSubsamp444 &&
+			 enc <= (CARD32)rfbJpegSubsamp422 ) {
+		    cl->tightCompressLevel = enc & 0xFF;
 		    rfbLog("Using compression level %d for client %s\n",
 			   cl->tightCompressLevel, cl->host);
-		} else if ( enc >= (CARD32)rfbJpegQualityLevel0 &&
+		} else if ( enc >= (CARD32)rfbEncodingQualityLevel0 &&
+			    enc <= (CARD32)rfbEncodingQualityLevel9 ) {
+		    cl->tightQualityLevel = JPEG_QUAL[enc & 0x0F];
+		    cl->tightCompressLevel = JPEG_SUBSAMP[enc & 0x0F];
+		    rfbLog("Using JPEG subsampling %d, Q%d for client %s\n",
+			   cl->tightCompressLevel, cl->tightQualityLevel, cl->host);
+		} else if ( enc >= (CARD32)rfbJpegQualityLevel1 &&
 			    enc <= (CARD32)rfbJpegQualityLevel100 ) {
 		    cl->tightQualityLevel = enc & 0xFF;
 		    rfbLog("Using image quality level %d for client %s\n",
@@ -948,30 +969,6 @@ rfbSendFramebufferUpdate(cl)
 
     cl->rfbFramebufferUpdateMessagesSent++;
 
-#if 0
-    if (cl->preferredEncoding == rfbEncodingCoRRE) {
-	nUpdateRegionRects = 0;
-
-	for (i = 0; i < REGION_NUM_RECTS(&updateRegion); i++) {
-	    int x = REGION_RECTS(&updateRegion)[i].x1;
-	    int y = REGION_RECTS(&updateRegion)[i].y1;
-	    int w = REGION_RECTS(&updateRegion)[i].x2 - x;
-	    int h = REGION_RECTS(&updateRegion)[i].y2 - y;
-	    nUpdateRegionRects += (((w-1) / cl->correMaxWidth + 1)
-				     * ((h-1) / cl->correMaxHeight + 1));
-	}
-    } else if (cl->preferredEncoding == rfbEncodingZlib) {
-	nUpdateRegionRects = 0;
-
-	for (i = 0; i < REGION_NUM_RECTS(&updateRegion); i++) {
-	    int x = REGION_RECTS(&updateRegion)[i].x1;
-	    int y = REGION_RECTS(&updateRegion)[i].y1;
-	    int w = REGION_RECTS(&updateRegion)[i].x2 - x;
-	    int h = REGION_RECTS(&updateRegion)[i].y2 - y;
-	    nUpdateRegionRects += (((h-1) / (ZLIB_MAX_SIZE( w ) / w)) + 1);
-	}
-    } else if (cl->preferredEncoding == rfbEncodingTight) {
-#endif
 	nUpdateRegionRects = 0;
 
 	for (i = 0; i < REGION_NUM_RECTS(&updateRegion); i++) {
@@ -986,11 +983,6 @@ rfbSendFramebufferUpdate(cl)
 	    }
 	    nUpdateRegionRects += n;
 	}
-#if 0
-    } else {
-	nUpdateRegionRects = REGION_NUM_RECTS(&updateRegion);
-    }
-#endif
 
     fu->type = rfbFramebufferUpdate;
     if (nUpdateRegionRects != 0xFFFF) {
@@ -1033,46 +1025,10 @@ rfbSendFramebufferUpdate(cl)
 	cl->rfbRawBytesEquivalent += (sz_rfbFramebufferUpdateRectHeader
 				      + w * (cl->format.bitsPerPixel / 8) * h);
 
-	switch (cl->preferredEncoding) {
-#if 0
-	case rfbEncodingRaw:
-	    if (!rfbSendRectEncodingRaw(cl, x, y, w, h)) {
-		REGION_UNINIT(pScreen,&updateRegion);
-		return FALSE;
-	    }
-	    break;
-	case rfbEncodingRRE:
-	    if (!rfbSendRectEncodingRRE(cl, x, y, w, h)) {
-		REGION_UNINIT(pScreen,&updateRegion);
-		return FALSE;
-	    }
-	    break;
-	case rfbEncodingCoRRE:
-	    if (!rfbSendRectEncodingCoRRE(cl, x, y, w, h)) {
-		REGION_UNINIT(pScreen,&updateRegion);
-		return FALSE;
-	    }
-	    break;
-	case rfbEncodingHextile:
-	    if (!rfbSendRectEncodingHextile(cl, x, y, w, h)) {
-		REGION_UNINIT(pScreen,&updateRegion);
-		return FALSE;
-	    }
-	    break;
-	case rfbEncodingZlib:
-	    if (!rfbSendRectEncodingZlib(cl, x, y, w, h)) {
-		REGION_UNINIT(pScreen,&updateRegion);
-		return FALSE;
-	    }
-	    break;
-#endif
-	case rfbEncodingTight:
 	    if (!rfbSendRectEncodingTight(cl, x, y, w, h)) {
 		REGION_UNINIT(pScreen,&updateRegion);
 		return FALSE;
 	    }
-	    break;
-	}
     }
 
     REGION_UNINIT(pScreen,&updateRegion);
@@ -1182,76 +1138,6 @@ rfbSendCopyRegion(cl, reg, dx, dy)
 
     return TRUE;
 }
-
-
-/*
- * Send a given rectangle in raw encoding (rfbEncodingRaw).
- */
-
-#if 0
-Bool
-rfbSendRectEncodingRaw(cl, x, y, w, h)
-    rfbClientPtr cl;
-    int x, y, w, h;
-{
-    rfbFramebufferUpdateRectHeader rect;
-    int nlines;
-    int bytesPerLine = w * (cl->format.bitsPerPixel / 8);
-    char *fbptr = (rfbScreen.pfbMemory + (rfbScreen.paddedWidthInBytes * y)
-		   + (x * (rfbScreen.bitsPerPixel / 8)));
-
-    /* Flush the buffer to guarantee correct alignment for translateFn(). */
-    if (ublen > 0) {
-	if (!rfbSendUpdateBuf(cl))
-	    return FALSE;
-    }
-
-    rect.r.x = Swap16IfLE(x);
-    rect.r.y = Swap16IfLE(y);
-    rect.r.w = Swap16IfLE(w);
-    rect.r.h = Swap16IfLE(h);
-    rect.encoding = Swap32IfLE(rfbEncodingRaw);
-
-    memcpy(&updateBuf[ublen], (char *)&rect,sz_rfbFramebufferUpdateRectHeader);
-    ublen += sz_rfbFramebufferUpdateRectHeader;
-
-    cl->rfbRectanglesSent[rfbEncodingRaw]++;
-    cl->rfbBytesSent[rfbEncodingRaw]
-	+= sz_rfbFramebufferUpdateRectHeader + bytesPerLine * h;
-
-    nlines = (UPDATE_BUF_SIZE - ublen) / bytesPerLine;
-
-    while (TRUE) {
-	if (nlines > h)
-	    nlines = h;
-
-	(*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
-			   &cl->format, fbptr, &updateBuf[ublen],
-			   rfbScreen.paddedWidthInBytes, w, nlines);
-
-	ublen += nlines * bytesPerLine;
-	h -= nlines;
-
-	if (h == 0)	/* rect fitted in buffer, do next one */
-	    return TRUE;
-
-	/* buffer full - flush partial rect and do another nlines */
-
-	if (!rfbSendUpdateBuf(cl))
-	    return FALSE;
-
-	fbptr += (rfbScreen.paddedWidthInBytes * nlines);
-
-	nlines = (UPDATE_BUF_SIZE - ublen) / bytesPerLine;
-	if (nlines == 0) {
-	    rfbLog("rfbSendRectEncodingRaw: send buffer too small for %d "
-		   "bytes per line\n", bytesPerLine);
-	    rfbCloseSock(cl->sock);
-	    return FALSE;
-	}
-    }
-}
-#endif
 
 
 /*
