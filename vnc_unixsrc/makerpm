@@ -1,18 +1,39 @@
 #!/bin/bash
 
 if [ "$1" = "clean" ]; then
-make clean || exit -1
-cd Xvnc
-make clean || exit -1
-cd ..
-fi
-
 xmkmf || exit -1
-make World || exit -1
+make clean || exit -1
 cd Xvnc
 ./configure || exit -1
+make clean || exit -1
+./configure || exit -1
+cd ..
+if [ ! -f ../../vgl/Makefile ]; then
+	echo Could not find VirtualGL build directory at ../../vgl !
+	exit -1
+else
+	__PWD=`pwd`
+	cd ../../vgl
+	make M32=yes DISTRO=vnc clean
+	cd $__PWD
+fi
+fi
+
+make World || exit -1
+cd Xvnc
 make || exit -1
 cd ..
+
+if [ ! -f ../../vgl/Makefile ]; then
+	echo Could not find VirtualGL build directory at ../../vgl !
+	exit -1
+else
+	__PWD=`pwd`
+	cd ../../vgl
+	make M32=yes DISTRO=vnc jpeg
+	make M32=yes DISTRO=vnc jpeg
+	cd $__PWD
+fi
 
 rm -rf rpms/
 mkdir -p rpms/RPMS
@@ -20,6 +41,7 @@ cd rpms; ln -fs .. BUILD; cd ..
 
 rpmbuild -bb --buildroot `pwd`/rpms/TurboVNC-buildroot --define "_topdir `pwd`/rpms" \
 	--define "_bindir /opt/TurboVNC/bin" --define "_mandir /opt/TurboVNC/man" \
-	--define "_datadir /opt/TurboVNC" --define "_build `date +%Y%m%d`" turbovnc.spec
+	--define "_datadir /opt/TurboVNC" --define "_libdir /opt/TurboVNC/lib" \
+	--define "_build `date +%Y%m%d`" --define "_srclibdir ../../vgl/linux/vnc/lib" turbovnc.spec
 mv rpms/RPMS/i386/turbovnc*.rpm .
 rm -rf rpms/
