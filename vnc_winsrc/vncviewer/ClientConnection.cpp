@@ -167,6 +167,9 @@ void ClientConnection::Init(VNCviewerApp *pApp)
 	CheckBufferSize(INITIALNETBUFSIZE);
 
 	m_pApp->RegisterConnection(this);
+
+	memset(&fb, 0, sizeof(fb));
+    if((j=hpjInitDecompress())==NULL) throw(ErrorException(hpjGetErrorStr()));
 }
 
 // 
@@ -656,20 +659,18 @@ void ClientConnection::CreateLocalFramebuffer() {
 
 	// Remove old bitmap object if it already exists
 	bool bitmapExisted = false;
-	if (m_hBitmap != NULL) {
-		DeleteObject(m_hBitmap);
+	if (fb.bits != NULL) {
 		bitmapExisted = true;
 	}
 
 	// We create a bitmap which has the same pixel characteristics as
 	// the local display, in the hope that blitting will be faster.
-	
-	TempDC hdc(m_hwnd);
-	m_hBitmap = ::CreateCompatibleBitmap(hdc, m_si.framebufferWidth,
-										 m_si.framebufferHeight);
-	
-	if (m_hBitmap == NULL)
-		throw WarningException("Error creating local image of screen.");
+	if(fbx_init(&fb, m_hwnd, m_si.framebufferWidth, m_si.framebufferHeight,
+		1)==-1)	
+		throw ErrorException(fbx_geterrmsg());
+
+	m_hBitmapDC = fb.hmdc;
+	m_hBitmap = fb.hdib;
 	
 	// Select this bitmap into the DC with an appropriate palette
 	ObjectSelector b(m_hBitmapDC, m_hBitmap);
@@ -820,7 +821,7 @@ void ClientConnection::SetFormatAndEncodings()
 	// Request desired compression level if applicable
 	if ( useCompressLevel && m_opts.m_useCompressLevel &&
 		 m_opts.m_compressLevel >= 0 &&
-		 m_opts.m_compressLevel <= 9) {
+		 m_opts.m_compressLevel <= 2) {
 		encs[se->nEncodings++] = Swap32IfLE( rfbEncodingCompressLevel0 +
 											 m_opts.m_compressLevel );
 	}
@@ -836,8 +837,8 @@ void ClientConnection::SetFormatAndEncodings()
 	// Request JPEG quality level if JPEG compression was enabled by user
 	if ( m_opts.m_enableJpegCompression &&
 		 m_opts.m_jpegQualityLevel >= 0 &&
-		 m_opts.m_jpegQualityLevel <= 9) {
-		encs[se->nEncodings++] = Swap32IfLE( rfbEncodingQualityLevel0 +
+		 m_opts.m_jpegQualityLevel <= 100) {
+		encs[se->nEncodings++] = Swap32IfLE( rfbJpegQualityLevel0 +
 											 m_opts.m_jpegQualityLevel );
 	}
 
@@ -892,6 +893,9 @@ ClientConnection::~ClientConnection()
 		DeleteObject(m_hPalette);
 	
 	m_pApp->DeregisterConnection(this);
+
+	fbx_term(&fb);
+    if(j) {hpjDestroy(j);  j=NULL;}
 }
 
 // You can specify a dx & dy outside the limits; the return value will
@@ -2013,12 +2017,15 @@ void ClientConnection::ReadScreenUpdate() {
 		SoftCursorLockArea(surh.r.x, surh.r.y, surh.r.w, surh.r.h);
 
 		switch (surh.encoding) {
+#if 0
 		case rfbEncodingRaw:
 			ReadRawRect(&surh);
 			break;
+#endif
 		case rfbEncodingCopyRect:
 			ReadCopyRect(&surh);
 			break;
+#if 0
 		case rfbEncodingRRE:
 			ReadRRERect(&surh);
 			break;
@@ -2031,12 +2038,15 @@ void ClientConnection::ReadScreenUpdate() {
 		case rfbEncodingZlib:
 			ReadZlibRect(&surh);
 			break;
+#endif
 		case rfbEncodingTight:
 			ReadTightRect(&surh);
 			break;
+#if 0
 		case rfbEncodingZlibHex:
 			ReadZlibHexRect(&surh);
 			break;
+#endif
 		default:
 			vnclog.Print(0, _T("Unknown encoding %d - not supported!\n"), surh.encoding);
 			break;

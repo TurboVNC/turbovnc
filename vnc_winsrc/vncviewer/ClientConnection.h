@@ -40,9 +40,8 @@
 #include "VNCviewerApp.h"
 #include "KeyMap.h"
 #include "zlib/zlib.h"
-extern "C" {
-#include "libjpeg/jpeglib.h"
-}
+#include "hpjpeg.h"
+#include "fbx.h"
 
 #define SETTINGS_KEY_NAME "Software\\ORL\\VNCviewer\\Settings"
 #define MAX_HOST_NAME_LEN 250
@@ -340,6 +339,8 @@ private:
 	int m_emulateButtonPressedX;
 	int m_emulateButtonPressedY;
 
+    hpjhandle j;
+	fbx_struct fb;
 };
 
 // Some handy classes for temporary GDI object selection

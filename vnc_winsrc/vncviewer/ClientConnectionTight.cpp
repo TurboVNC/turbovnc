@@ -31,6 +31,7 @@
 #include "stdhdrs.h"
 #include "vncviewer.h"
 #include "ClientConnection.h"
+#include "Exception.h"
 
 #define TIGHT_MIN_TO_COMPRESS 12
 #define TIGHT_BUFFER_SIZE (2048 * 200)
@@ -526,16 +527,8 @@ void ClientConnection::FilterPalette (int numRows)
 // JPEG decompression code.
 //
 
-static bool jpegError;
-
-static void JpegSetSrcManager(j_decompress_ptr cinfo, char *compressedData,
-							  int compressedLen);
-
 void ClientConnection::DecompressJpegRect(int x, int y, int w, int h)
 {
-  struct jpeg_decompress_struct cinfo;
-  struct jpeg_error_mgr jerr;
-
   int compressedLen = (int)ReadCompactLen();
   if (compressedLen <= 0) {
     vnclog.Print(0, _T("Incorrect data received from the server.\n"));
@@ -545,113 +538,10 @@ void ClientConnection::DecompressJpegRect(int x, int y, int w, int h)
   CheckBufferSize(compressedLen);
   ReadExact(m_netbuf, compressedLen);
 
-  cinfo.err = jpeg_std_error(&jerr);
-  jpeg_create_decompress(&cinfo);
-
-  JpegSetSrcManager(&cinfo, m_netbuf, compressedLen);
-
-  jpeg_read_header(&cinfo, TRUE);
-  cinfo.out_color_space = JCS_RGB;
-
-  jpeg_start_decompress(&cinfo);
-  if ((int)cinfo.output_width != w || (int)cinfo.output_height != h ||
-      cinfo.output_components != 3) {
-    vnclog.Print(0, _T("Tight Encoding: Wrong JPEG data received.\n"));
-    jpeg_destroy_decompress(&cinfo);
-    return;
-  }
-
   omni_mutex_lock l(m_bitmapdcMutex);
   ObjectSelector b(m_hBitmapDC, m_hBitmap);
-  PaletteSelector p(m_hBitmapDC, m_hPalette);
 
-  // Two scanlines: for 24bit and COLORREF samples
-  CheckZlibBufferSize(2*2048*4);
-
-  JSAMPROW rowPointer[1];
-  rowPointer[0] = (JSAMPROW)m_zlibbuf;
-
-  COLORREF *pixelPtr;
-  for (int dy = 0; cinfo.output_scanline < cinfo.output_height; dy++) {
-    jpeg_read_scanlines(&cinfo, rowPointer, 1);
-    if (jpegError) {
-      break;
-    }
-    pixelPtr = (COLORREF *)&m_zlibbuf[2048*4];
-    for (int dx = 0; dx < w; dx++) {
-      *pixelPtr++ = COLOR_FROM_PIXEL24_ADDRESS(&m_zlibbuf[dx*3]);
-    }
-    SETPIXELS_NOCONV(&m_zlibbuf[2048*4], x, y + dy, w, 1);
-  }
-
-  if (!jpegError)
-    jpeg_finish_decompress(&cinfo);
-
-  jpeg_destroy_decompress(&cinfo);
+  if((hpjDecompress(j, (unsigned char *)m_netbuf, (unsigned long)compressedLen,
+    (unsigned char *)&fb.bits[y*fb.pitch+x*fb.ps], w, fb.pitch, h, fb.ps, fb.bgr?HPJ_BGR:0))==-1)
+    throw(ErrorException(hpjGetErrorStr()));
 }
-
-//
-// A "Source manager" for the JPEG library.
-//
-
-static struct jpeg_source_mgr jpegSrcManager;
-static JOCTET *jpegBufferPtr;
-static size_t jpegBufferLen;
-
-static void JpegInitSource(j_decompress_ptr cinfo);
-static boolean JpegFillInputBuffer(j_decompress_ptr cinfo);
-static void JpegSkipInputData(j_decompress_ptr cinfo, long num_bytes);
-static void JpegTermSource(j_decompress_ptr cinfo);
-
-static void
-JpegInitSource(j_decompress_ptr cinfo)
-{
-  jpegError = false;
-}
-
-static boolean
-JpegFillInputBuffer(j_decompress_ptr cinfo)
-{
-  jpegError = true;
-  jpegSrcManager.bytes_in_buffer = jpegBufferLen;
-  jpegSrcManager.next_input_byte = (JOCTET *)jpegBufferPtr;
-
-  return TRUE;
-}
-
-static void
-JpegSkipInputData(j_decompress_ptr cinfo, long num_bytes)
-{
-  if (num_bytes < 0 || (size_t)num_bytes > jpegSrcManager.bytes_in_buffer) {
-    jpegError = true;
-    jpegSrcManager.bytes_in_buffer = jpegBufferLen;
-    jpegSrcManager.next_input_byte = (JOCTET *)jpegBufferPtr;
-  } else {
-    jpegSrcManager.next_input_byte += (size_t) num_bytes;
-    jpegSrcManager.bytes_in_buffer -= (size_t) num_bytes;
-  }
-}
-
-static void
-JpegTermSource(j_decompress_ptr cinfo)
-{
-  /* No work necessary here. */
-}
-
-static void
-JpegSetSrcManager(j_decompress_ptr cinfo, char *compressedData, int compressedLen)
-{
-  jpegBufferPtr = (JOCTET *)compressedData;
-  jpegBufferLen = (size_t)compressedLen;
-
-  jpegSrcManager.init_source = JpegInitSource;
-  jpegSrcManager.fill_input_buffer = JpegFillInputBuffer;
-  jpegSrcManager.skip_input_data = JpegSkipInputData;
-  jpegSrcManager.resync_to_restart = jpeg_resync_to_restart;
-  jpegSrcManager.term_source = JpegTermSource;
-  jpegSrcManager.next_input_byte = jpegBufferPtr;
-  jpegSrcManager.bytes_in_buffer = jpegBufferLen;
-
-  cinfo->src = &jpegSrcManager;
-}
-
