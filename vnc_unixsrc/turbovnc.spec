@@ -10,7 +10,7 @@ Obsoletes: vnc
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildPrereq: /usr/bin/perl tcp_wrappers
 BuildRequires: zlib-devel libjpeg-devel
-ExclusiveArch: i386 alpha sparc ppc s390 s390x
+ExclusiveArch: i386 alpha sparc ppc s390 s390x ia64
 
 %description
 Virtual Network Computing (VNC) is a remote display system which
