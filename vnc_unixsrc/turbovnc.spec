@@ -1,9 +1,8 @@
 Summary:   A remote display system for hardware-accelerated 3D applications
 Name:      turbovnc
-Version:   0.1.1
+Version:   0.1.2
 Release:   1
 URL:       http://virtualgl.sourceforge.net
-Source0:   turbovnc-%{version}_unixsrc.tar.gz
 License:   GPL
 Group:     User Interface/Desktops
 Obsoletes: vnc
@@ -33,22 +32,6 @@ variety of platforms. TurboVNC is an enhanced VNC distribution. This
 package is a TurboVNC server, allowing others to access the desktop on
 your machine.
 
-%prep
-%setup -q -n vnc_unixsrc
-
-perl -pi -e "s|/usr/local/vnc/classes|%{_datadir}/vnc/classes|" vncserver
-
-%build
-# Use xinit's Xclients script to start the session (bug #52711)
-patch < vnc-xclients.patch
-
-xmkmf -a
-make CDEBUGFLAGS="$RPM_OPT_FLAGS" World
-cd Xvnc
-./configure
-make EXTRA_LIBRARIES="-lwrap -lnss_nis" CDEBUGFLAGS="$RPM_OPT_FLAGS" \
-     EXTRA_DEFINES="-DUSE_LIBWRAP=1"
-
 %install
 rm -rf %{buildroot}
 
@@ -62,10 +45,15 @@ cp -aR classes %{buildroot}%{_datadir}/vnc
 strip %{buildroot}%{_bindir}/* || :
 
 mkdir -p %{buildroot}/etc/rc.d/init.d
-install -m755 vncserver.init %{buildroot}/etc/rc.d/init.d/vncserver
+
+cat vncserver.init   | \
+sed -e 's@vncserver :${display\%\%:@%{_bindir}/vncserver :${display\%\%:@g' | \
+sed -e 's@vncserver -kill :${display\%\%:@%{_bindir}/vncserver -kill :${display\%\%:@g' \
+ > %{buildroot}/etc/rc.d/init.d/tvncserver
+chmod 755 %{buildroot}/etc/rc.d/init.d/tvncserver
 
 mkdir -p %{buildroot}/etc/sysconfig
-cat > %{buildroot}/etc/sysconfig/vncservers << EOF
+cat > %{buildroot}/etc/sysconfig/tvncservers << EOF
 # The VNCSERVERS variable is a list of display:user pairs.
 #
 # Uncomment the line below to start a VNC server on display :1
@@ -79,49 +67,57 @@ cat > %{buildroot}/etc/sysconfig/vncservers << EOF
 
 # VNCSERVERS="1:myusername"
 EOF
-chmod 644 %{buildroot}/etc/sysconfig/vncservers
+chmod 644 %{buildroot}/etc/sysconfig/tvncservers
 
 mkdir -p %{buildroot}/etc/X11/applnk/Applications
-cat > %{buildroot}/etc/X11/applnk/Applications/vncviewer.desktop << EOF
+cat > %{buildroot}/etc/X11/applnk/Applications/tvncviewer.desktop << EOF
 [Desktop Entry]
-Name=VNC Viewer
-Comment=VNC client application
-Exec=/usr/bin/vncviewer
+Name=TurboVNC Viewer
+Comment=TurboVNC client application
+Exec=%{_bindir}/vncviewer
 Terminal=0
 Type=Application
 EOF
+
+rm -f %{buildroot}/%{_bindir}/vncserver
+cat vncserver   | \
+sed -e 's@$vncClasses = "/usr/local@$vncClasses = "%{_datadir}@g' | \
+sed -e 's@$cmd = "Xvnc :@$cmd = "%{_bindir}/Xvnc :@g' | \
+sed -e 's@foreach $cmd (\"uname\",\"xauth\",\"Xvnc\",\"vncpasswd\")@foreach $cmd (\"uname\",\"xauth\",\"%{_bindir}/Xvnc\",\"%{_bindir}/vncpasswd\")@g' \
+ > %{buildroot}/%{_bindir}/vncserver
+chmod 555 %{buildroot}/%{_bindir}/vncserver
 
 %clean
 rm -rf %{buildroot}
 
 %post server
 if [ "$1" = 1 ]; then
-  /sbin/chkconfig --add vncserver
+  /sbin/chkconfig --add tvncserver
 fi
 
 %preun server
 if [ "$1" = 0 ]; then
-  /sbin/service vncserver stop >/dev/null 2>&1
-  /sbin/chkconfig --del vncserver
+  /sbin/service tvncserver stop >/dev/null 2>&1
+  /sbin/chkconfig --del tvncserver
 fi
 
 %postun server
 if [ "$1" -ge "1" ]; then
-  /sbin/service vncserver condrestart >/dev/null 2>&1
+  /sbin/service tvncserver condrestart >/dev/null 2>&1
 fi
 
 %files
 %defattr(-,root,root)
 %doc LICENCE.TXT README WhatsNew ChangeLog
 %{_bindir}/vncviewer
-%config(noreplace) /etc/X11/applnk/Applications/vncviewer.desktop
+%config(noreplace) /etc/X11/applnk/Applications/tvncviewer.desktop
 %{_mandir}/man1/vncviewer.1*
 
 %files server
 %defattr(-,root,root)
 %doc LICENCE.TXT README WhatsNew ChangeLog
-%attr(0755,root,root) %config /etc/rc.d/init.d/vncserver
-%config(noreplace) /etc/sysconfig/vncservers
+%attr(0755,root,root) %config /etc/rc.d/init.d/tvncserver
+%config(noreplace) /etc/sysconfig/tvncservers
 %{_bindir}/Xvnc
 %{_bindir}/vncserver
 %{_bindir}/vncpasswd
@@ -133,6 +129,9 @@ fi
 %{_mandir}/man1/vncpasswd.1*
 
 %changelog
+* Tue Mar 1 2005 Darrell Commander <dcommander@users.sourceforge.net>
+- TurboVNC 0.1.2
+
 * Mon Oct 25 2004 Darrell Commander <dcommander@users.sourceforge.net>
 - TurboVNC 0.1.1
 
