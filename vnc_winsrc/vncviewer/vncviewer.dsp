@@ -137,6 +137,14 @@ SOURCE=.\res\toolbar1.bmp
 # End Source File
 # Begin Source File
 
+SOURCE=.\res\turbovnc.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\turbovnc48.bmp
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\vnc.bmp
 # End Source File
 # Begin Source File
