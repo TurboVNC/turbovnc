@@ -15,7 +15,7 @@ ExclusiveArch: i386 alpha sparc ppc s390 s390x ia64
 Virtual Network Computing (VNC) is a remote display system which
 allows you to view a computing 'desktop' environment not only on the
 machine where it is running, but from anywhere on the Internet and
-from a wide variety of machine architectures.  TurboVNC is a sleak and
+from a wide variety of machine architectures.  TurboVNC is a sleek and
 fast VNC distribution, containing a high-performance implementation of
 tight JPEG encoding designed to work in conjunction with VirtualGL.
 
