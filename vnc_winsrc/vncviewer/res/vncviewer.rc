@@ -157,7 +157,7 @@ END
 IDD_OPTIONDIALOG DIALOGEX 0, 0, 312, 194
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Connection Options..."
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Sans Serif"
 BEGIN
     CONTROL         "Tight",IDC_TIGHTRADIO,"Button",BS_AUTORADIOBUTTON | 
                     WS_DISABLED | WS_GROUP | WS_TABSTOP,15,19,32,10
@@ -175,12 +175,10 @@ BEGIN
                     WS_DISABLED,15,55,31,10
     CONTROL         "Allow CopyRect encoding",ID_SESSION_SET_CRECT,"Button",
                     BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,15,68,97,10
-    CONTROL         "JPEG subsampling",IDC_ALLOW_COMPRESSLEVEL,"Button",
-                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,15,81,75,10
-    EDITTEXT        IDC_COMPRESSLEVEL,30,92,15,12,ES_AUTOHSCROLL | ES_NUMBER
-    CONTROL         "JPEG quality",IDC_ALLOW_JPEG,"Button",BS_AUTOCHECKBOX | 
-                    WS_DISABLED | WS_TABSTOP,15,107,56,10
-    EDITTEXT        IDC_QUALITYLEVEL,30,119,15,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "JPEG subsampling",IDC_STATIC,15,81,75,10
+    EDITTEXT        IDC_COMPRESSLEVEL,15,92,15,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "JPEG quality",IDC_STATIC,15,107,56,10
+    EDITTEXT        IDC_QUALITYLEVEL,15,119,15,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Request shared session",IDC_SHARED,"Button",
                     BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,15,152,91,10
     CONTROL         "Deiconify on Bell",IDC_BELLDEICONIFY,"Button",
@@ -200,22 +198,17 @@ BEGIN
                     71,145,10
     CONTROL         "Don't show remote cursor",IDC_CSHAPE_IGNORE_RADIO,
                     "Button",BS_AUTORADIOBUTTON,148,83,96,10
-    CONTROL         "Restrict pixels to 8-bit (for slow networks)",
-                    IDC_8BITCHECK,"Button",BS_AUTOCHECKBOX | WS_DISABLED | 
-                    WS_GROUP | WS_TABSTOP,148,113,143,10
     CONTROL         "View only (inputs ignored)",IDC_VIEWONLY,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,148,125,96,10
     CONTROL         "Full-screen mode",IDC_FULLSCREEN,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,148,137,69,8
     CONTROL         "Scale by",IDC_SCALING,"Button",BS_AUTOCHECKBOX | 
-                    WS_DISABLED | WS_TABSTOP,148,148,43,10
-    EDITTEXT        IDC_SCALE_NUM,195,147,15,12,ES_AUTOHSCROLL | ES_NUMBER | 
-                    WS_DISABLED
-    EDITTEXT        IDC_SCALE_DEN,221,147,14,12,ES_AUTOHSCROLL | ES_NUMBER | 
-                    WS_DISABLED
-    LTEXT           "0=none, 1=4:1:1, 2=4:2:2",IDC_STATIC,49,95,81,9,NOT 
+                    WS_TABSTOP,148,148,43,10
+    EDITTEXT        IDC_SCALE_NUM,195,147,15,12,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_SCALE_DEN,221,147,14,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "0=none, 1=4:1:1, 2=4:2:2",IDC_STATIC,35,95,81,9,NOT 
                     WS_GROUP
-    LTEXT           "JPEG quality (0-100)",IDC_STATIC,49,121,81,9
+    LTEXT           "0 to 100 (inclusive)",IDC_STATIC,34,121,81,9
     CTEXT           "/",IDC_STATIC,211,150,8,8,0,WS_EX_TRANSPARENT
     LTEXT           "(experimental)",IDC_STATIC,241,150,44,8
     GROUPBOX        "Preferred encoding",IDC_STATIC,7,7,123,131
