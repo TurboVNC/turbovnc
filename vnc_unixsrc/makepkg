@@ -7,7 +7,7 @@ pkgname=SUNWtvnc
 mkdir -p $pkgtmpdir
 
 cat > $pkgtmpdir/copyright <<EOF 
-Use is subject to the terms of the GNU General Public LIcense, Version 2
+Use is subject to the terms of the GNU General Public License, Version 2
 EOF
 
 cat > $pkgtmpdir/depend <<EOF 
@@ -16,7 +16,6 @@ P SUNWkvm       Core Architecture, (Kvm)
 P SUNWcsr       Core Solaris, (Root)
 P SUNWcsu       Core Solaris, (Usr)
 P SUNWxwplt     X Windows platform software
-P SUNWvgl       VirtualGL 32-bit server, client, and diagnostic utilities
 EOF
 
 cat > $pkgtmpdir/pkginfo <<EOF 
@@ -48,6 +47,8 @@ f none SUNWtvnc/bin/vncviewer 0755 root bin
 f none SUNWtvnc/bin/vncserver 0755 root bin
 f none SUNWtvnc/bin/vncconnect 0755 root bin
 f none SUNWtvnc/bin/Xvnc 0755 root bin
+d none SUNWtvnc/lib 0755 root bin
+f none SUNWtvnc/lib/libhpjpeg.so 0755 root bin
 d none SUNWtvnc/man 0755 root bin
 d none SUNWtvnc/man/man1 0755 root bin
 f none SUNWtvnc/man/man1/vncpasswd.1 0644 root bin
@@ -77,10 +78,22 @@ EOF
 pkgdir=$pkgtmpdir/opt/$pkgname
 
 mkdir -p $pkgdir/bin
+mkdir -p $pkgdir/lib
 mkdir -p $pkgdir/vnc
 mkdir -p $pkgdir/man/man1
 
 ./vncinstall $pkgdir/bin $pkgdir/man
+
+if [ ! -f ../../vgl/Makefile ]; then
+	echo Could not find VirtualGL build directory at ../../vgl !
+	exit -1
+else
+	PWD=`pwd`
+	cd ../../vgl
+	gmake M32=yes
+	cd $PWD
+	cp ../../vgl/solaris/lib/libhpjpeg.so $pkgdir/lib
+fi
 
 /bin/rm -f $pkgdir/bin/vncserver
 cat vncserver	|
