@@ -641,6 +641,7 @@ SendJpegRect(cl, x, y, w, h, quality)
     int ps=rfbServerFormat.bitsPerPixel/8;
     int subsamp=compressLevel==1? HPJ_411: (compressLevel==2? HPJ_422:HPJ_444);
     unsigned long size;
+    int flags=0;
 
     if (ps < 3) {
       rfbLog("Error: Server must be run with 24-bit or 32-bit depth\n");  return 0;
@@ -665,10 +666,15 @@ SendJpegRect(cl, x, y, w, h, quality)
         tightAfterBufSize = HPJBUFSIZE(w,h);
     }
 
+    if(rfbServerFormat.bigEndian && ps==4) flags|=HPJ_ALPHAFIRST;
+    if(rfbServerFormat.redShift==16 && rfbServerFormat.blueShift==0)
+        flags|=HPJ_BGR;
+    if(rfbServerFormat.bigEndian) flags^=HPJ_BGR;
+
     srcbuf=&rfbScreen.pfbMemory[y * rfbScreen.paddedWidthInBytes + x * ps];
     if(hpjCompress(j, (unsigned char *)srcbuf, w, rfbScreen.paddedWidthInBytes,
       h, ps, (unsigned char *)tightAfterBuf, &jpegDstDataLen, subsamp, quality,
-      rfbServerFormat.bigEndian?0:HPJ_BGR)==-1) {
+      flags)==-1) {
       rfbLog("JPEG Error: %s\n", hpjGetErrorStr());
       return 0;
     }

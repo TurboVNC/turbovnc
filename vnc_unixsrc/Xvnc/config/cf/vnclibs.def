@@ -11,7 +11,11 @@ VNCLIBS = $(TOP)/../libvncauth/libvncauth.a
 /* Avoid linking with different libjpeg in /usr/shlib under Tru64. */
 VNCSYSLIBS = /usr/local/lib/libjpeg.a /usr/local/lib/libz.a
 #else
+#ifdef SunArchitecture
+VNCSYSLIBS = -L/usr/local/lib -R/opt/SUNWvgl/lib -L/opt/SUNWvgl/lib -L$(TOP)/../../../vgl/linux/lib -lhpjpeg -lz
+#else
 VNCSYSLIBS = -L/usr/local/lib -L$(TOP)/../../../vgl/linux/lib -lhpjpeg -lz
+#endif
 #endif
 
 VNCCPPFLAGS = -I$(TOP)/../include -I/usr/local/include

@@ -19,7 +19,11 @@ ZLIB_LIB = -L/usr/local/lib -lz
 XCOMM Avoid linking with different libjpeg in /usr/shlib under Tru64.
 JPEG_LIB = /usr/local/lib/libjpeg.a
 #else
+#ifdef SunArchitecture
+JPEG_LIB = -L/usr/local/lib -R/opt/SUNWvgl/lib -L/opt/SUNWvgl/lib -L../../../vgl/linux/lib -lhpjpeg
+#else
 JPEG_LIB = -L/usr/local/lib  -L../../../vgl/linux/lib -lhpjpeg
+#endif
 #endif
 
 DEPLIBS = XawClientDepLibs $(VNCAUTH_LIB)
