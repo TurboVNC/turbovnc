@@ -2068,7 +2068,7 @@ void ClientConnection::ReadScreenUpdate() {
 
 		// Tell the system to update a screen rectangle. Note that
 		// InvalidateScreenRect member function knows about scaling.
-		if(!m_opts.m_DoubleBuffer) {
+		if(!m_opts.m_DoubleBuffer || surh.encoding==rfbEncodingCopyRect) {
 			RECT rect;
 			SetRect(&rect, surh.r.x, surh.r.y,
 					surh.r.x + surh.r.w, surh.r.y + surh.r.h);
