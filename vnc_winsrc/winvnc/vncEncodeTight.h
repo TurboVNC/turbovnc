@@ -37,9 +37,7 @@ class vncEncodeTight;
 #include "vncEncoder.h"
 
 #include "zlib/zlib.h"
-extern "C" {
-#include "libjpeg/jpeglib.h"
-}
+#include "hpjpeg.h"
 
 // Minimum amount of data to be compressed. This value should not be
 // changed, doing so will break compatibility with existing clients.
@@ -120,7 +118,7 @@ protected:
 
 	bool m_usePixelFormat24;
 
-	static const TIGHT_CONF m_conf[10];
+	static const TIGHT_CONF m_conf[1];
 
 	// Protected member functions.
 
@@ -178,11 +176,12 @@ protected:
 	unsigned long DetectSmoothImage16 (int w, int h);
 	unsigned long DetectSmoothImage32 (int w, int h);
 
-	int SendJpegRect(BYTE *dst, int w, int h, int quality);
+	int SendJpegRect(BYTE *src, BYTE *dst, int x, int y, int w, int h, int quality);
 	void PrepareRowForJpeg(BYTE *dst, int y, int w);
 	void PrepareRowForJpeg24(BYTE *dst, CARD32 *src, int count);
 	void PrepareRowForJpeg16(BYTE *dst, CARD16 *src, int count);
 	void PrepareRowForJpeg32(BYTE *dst, CARD32 *src, int count);
+	hpjhandle hpjhnd;
 };
 
 #endif // _WINVNC_ENCODETIGHT
