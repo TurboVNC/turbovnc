@@ -1,0 +1,98 @@
+#!/bin/sh
+#
+pkgtmpdir=pkgbuild
+pkgname=SUNWtvnc
+
+/bin/rm -rf $pkgtmpdir
+mkdir -p $pkgtmpdir
+
+cat > $pkgtmpdir/copyright <<EOF 
+Use is subject to the terms of the GNU General Public LIcense, Version 2
+EOF
+
+cat > $pkgtmpdir/depend <<EOF 
+P SUNWcar       Core Architecture, (Root)
+P SUNWkvm       Core Architecture, (Kvm)
+P SUNWcsr       Core Solaris, (Root)
+P SUNWcsu       Core Solaris, (Usr)
+P SUNWxwplt     X Windows platform software
+P SUNWvgl       VirtualGL 32-bit server, client, and diagnostic utilities
+EOF
+
+cat > $pkgtmpdir/pkginfo <<EOF 
+ARCH=sparc
+PKG=SUNWtvnc
+NAME=TurboVNC server and client
+VERSION=0.1.2
+SUNW_PRODNAME=TurboVNC
+SUNW_PRODVERS=1.0
+SUNW_PKGVERS=1.0
+DESC=TurboVNC is a sleak and fast VNC distribution, containing a high-performance implementation of tight JPEG encoding designed to work in conjunction with VirtualGL.
+VENDOR=The VirtualGL Project
+HOTLINE=Please contact your local service provider
+EMAIL=dcommander@users.sourceforge.net
+MAXINST=1000
+CATEGORY=application
+BASEDIR=/opt
+CLASSES=none
+EOF
+
+cat > $pkgtmpdir/proto <<EOF
+i copyright
+i depend
+i pkginfo
+d none SUNWtvnc 0755 root bin
+d none SUNWtvnc/bin 0755 root bin
+f none SUNWtvnc/bin/vncpasswd 0755 root bin
+f none SUNWtvnc/bin/vncviewer 0755 root bin
+f none SUNWtvnc/bin/vncserver 0755 root bin
+f none SUNWtvnc/bin/vncconnect 0755 root bin
+f none SUNWtvnc/bin/Xvnc 0755 root bin
+d none SUNWtvnc/man 0755 root bin
+d none SUNWtvnc/man/man1 0755 root bin
+f none SUNWtvnc/man/man1/vncpasswd.1 0644 root bin
+f none SUNWtvnc/man/man1/vncviewer.1 0644 root bin
+f none SUNWtvnc/man/man1/vncserver.1 0644 root bin
+f none SUNWtvnc/man/man1/vncconnect.1 0644 root bin
+f none SUNWtvnc/man/man1/Xvnc.1 0644 root bin
+d none SUNWtvnc/vnc 0755 root bin
+d none SUNWtvnc/vnc/classes 0755 root bin
+f none SUNWtvnc/vnc/classes/AuthPanel.class 0644 root bin
+f none SUNWtvnc/vnc/classes/ButtonPanel.class 0644 root bin
+f none SUNWtvnc/vnc/classes/ClipboardFrame.class 0644 root bin
+f none SUNWtvnc/vnc/classes/DesCipher.class 0644 root bin
+f none SUNWtvnc/vnc/classes/HTTPConnectSocket.class 0644 root bin
+f none SUNWtvnc/vnc/classes/HTTPConnectSocketFactory.class 0644 root bin
+f none SUNWtvnc/vnc/classes/OptionsFrame.class 0644 root bin
+f none SUNWtvnc/vnc/classes/RecordingFrame.class 0644 root bin
+f none SUNWtvnc/vnc/classes/ReloginPanel.class 0644 root bin
+f none SUNWtvnc/vnc/classes/RfbProto.class 0644 root bin
+f none SUNWtvnc/vnc/classes/SessionRecorder.class 0644 root bin
+f none SUNWtvnc/vnc/classes/SocketFactory.class 0644 root bin
+f none SUNWtvnc/vnc/classes/VncCanvas.class 0644 root bin
+f none SUNWtvnc/vnc/classes/VncViewer.class 0644 root bin
+f none SUNWtvnc/vnc/classes/index.vnc 0644 root bin
+EOF
+
+pkgdir=$pkgtmpdir/opt/$pkgname
+
+mkdir -p $pkgdir/bin
+mkdir -p $pkgdir/vnc
+mkdir -p $pkgdir/man/man1
+
+./vncinstall $pkgdir/bin $pkgdir/man
+
+/bin/rm -f $pkgdir/bin/vncserver
+cat vncserver	|
+sed -e 's@$vncClasses = "/usr/local@$vncClasses = "/opt/SUNWtvnc@g' |
+sed -e 's@$cmd = "Xvnc :@$cmd = "/opt/SUNWtvnc/bin/Xvnc :@g' > $pkgdir/bin/vncserver
+
+cp -prf classes $pkgdir/vnc
+
+cd $pkgtmpdir
+pkgmk -o -r opt -d . -a `uname -p` -f proto
+pkgtrans -s . ../$pkgname.pkg $pkgname
+cd ..
+rm -f $pkgname.pkg.bz2
+bzip2 $pkgname.pkg
+/bin/rm -rf $pkgtmpdir
