@@ -34,7 +34,7 @@ Source: "WinVNC\No_CORBA\omnithread_rt.dll"; DestDir: "{app}"; CopyMode: alwayso
 Source: "WinVNC\No_CORBA\zlib.dll"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: restartreplace; Components: server
 Source: "..\..\vgl\windows\bin\hpjpeg.dll"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "VNCViewer\Release\vncviewer.exe"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Components: viewer
-Source: "README-bin.txt"; DestDir: "README.txt"; CopyMode: alwaysoverwrite
+Source: "README-bin.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "LICENCE.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "TurboVNC.url"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 ;Source: "Web\*"; DestDir: "{app}\Web"; CopyMode: alwaysoverwrite; Components: webdoc
@@ -57,7 +57,8 @@ Name: "{group}\Administration\Run Service Helper";    FileName: "{app}\WinVNC.ex
 Name: "{group}\Administration\Show Default Settings"; FileName: "{app}\WinVNC.exe";    Parameters: "-defaultsettings"; WorkingDir: "{app}";     Components: server
 ;Name: "{group}\Documentation\About VNC and TurboVNC"; FileName: "{app}\Web\index.html";                                WorkingDir: "{app}\Web"; Components: webdoc
 ;Name: "{group}\Documentation\Installation and Getting Started"; FileName: "{app}\Web\winst.html";                      WorkingDir: "{app}\Web"; Components: webdoc
-;Name: "{group}\Documentation\Licensing Terms";        FileName: "{app}\LICENCE.txt";                                   WorkingDir: "{app}"
+Name: "{group}\Documentation\Read Me";        FileName: "{app}\README-bin.txt";                                   WorkingDir: "{app}"
+Name: "{group}\Documentation\Licensing Terms";        FileName: "{app}\LICENCE.txt";                                   WorkingDir: "{app}"
 Name: "{group}\Documentation\TurboVNC Web Site";      FileName: "{app}\TurboVNC.url"
 ;Name: "{group}\Documentation\What's New (Detailed Log)"; FileName: "{app}\Web\changelog-win32.html";                   WorkingDir: "{app}\Web"; Components: webdoc
 ;Name: "{group}\Documentation\What's New (Summary)";   FileName: "{app}\Web\whatsnew.html";                             WorkingDir: "{app}\Web"; Components: webdoc
