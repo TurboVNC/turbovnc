@@ -753,6 +753,7 @@ XCOMM Keep cpp from replacing path elements containing i486/i586/i686
 # ifdef __x86_64__
 #  ifndef x86_64Architecture
 #   define x86_64Architecture
+#   undef i386Architecture
 #  endif
 #  undef __x86_64__
 # endif
