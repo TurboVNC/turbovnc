@@ -47,8 +47,8 @@ vncEncoder::vncEncoder()
 	m_transtable = NULL;
 	m_localpalette = NULL;
 	m_bytesPerRow = 0;
-	m_compresslevel = 6;
-	m_qualitylevel = -1;
+	m_compresslevel = 0;
+	m_qualitylevel = 95;
 	m_use_xcursor = FALSE;
 	m_use_richcursor = FALSE;
 	m_use_lastrect = FALSE;
@@ -154,7 +154,7 @@ vncEncoder::EncodeRect(BYTE *source, BYTE *dest, const RECT &rect)
 	surh->r.y = Swap16IfLE(surh->r.y);
 	surh->r.w = Swap16IfLE(surh->r.w);
 	surh->r.h = Swap16IfLE(surh->r.h);
-	surh->encoding = Swap32IfLE(rfbEncodingRaw);
+	surh->encoding = Swap32IfLE(rfbEncodingTight);
 
 	// Update raw encoding statistics
 	rectangleOverhead += sz_rfbFramebufferUpdateRectHeader;
@@ -430,13 +430,13 @@ vncEncoder::SetRemoteFormat(rfbPixelFormat &pixformat)
 void
 vncEncoder::SetCompressLevel(int level)
 {
-	m_compresslevel = (level >= 0 && level <= 9) ? level : 6;
+	m_compresslevel = (level >= 0 && level <= 2) ? level : 0;
 }
 
 void
 vncEncoder::SetQualityLevel(int level)
 {
-	m_qualitylevel = (level >= 0 && level <= 9) ? level : -1;
+	m_qualitylevel = (level >= 0 && level <= 100) ? level : 95;
 }
 
 //

@@ -47,7 +47,8 @@
 // NOTE: m_conf[9].maxRectSize should be >= m_conf[i].maxRectSize,
 // where i in [0..8]. RequiredBuffSize() method depends on this.
 
-const TIGHT_CONF vncEncodeTight::m_conf[10] = {
+const TIGHT_CONF vncEncodeTight::m_conf[1] = {
+#if 0
 	{   512,   32,   6, 65536, 0, 0, 0, 0,   0,   0,   4,  5, 10000, 23000 },
 	{  2048,  128,   6, 65536, 1, 1, 1, 0,   0,   0,   8, 10,  8000, 18000 },
 	{  6144,  256,   8, 65536, 3, 3, 2, 0,   0,   0,  24, 15,  6500, 15000 },
@@ -57,6 +58,7 @@ const TIGHT_CONF vncEncodeTight::m_conf[10] = {
 	{ 65536, 2048,  16,  4096, 7, 7, 6, 4, 170, 420,  48, 60,  2000,  5000 },
 	{ 65536, 2048,  16,  4096, 8, 8, 7, 5, 180, 450,  64, 70,  1000,  2500 },
 	{ 65536, 2048,  32,  8192, 9, 9, 8, 6, 190, 475,  64, 75,   500,  1200 },
+#endif
 	{ 65536, 2048,  32,  8192, 9, 9, 9, 6, 200, 500,  96, 80,   200,   500 }
 };
 
@@ -70,6 +72,8 @@ vncEncodeTight::vncEncodeTight()
 
 	for (int i = 0; i < 4; i++)
 		m_zsActive[i] = false;
+
+	hpjhnd=NULL;
 }
 
 vncEncodeTight::~vncEncodeTight()
@@ -86,6 +90,8 @@ vncEncodeTight::~vncEncodeTight()
 			deflateEnd(&m_zsStruct[i]);
 		m_zsActive[i] = false;
 	}
+
+	if(hpjhnd) hpjDestroy(hpjhnd);
 }
 
 void
@@ -104,9 +110,9 @@ UINT
 vncEncodeTight::RequiredBuffSize(UINT width, UINT height)
 {
 	// FIXME: Use actual compression level instead of 9?
-	int result = m_conf[9].maxRectSize * (m_remoteformat.bitsPerPixel / 8);
+	int result = m_conf[0].maxRectSize * (m_remoteformat.bitsPerPixel / 8);
 	result += result / 100 + 16;
-
+	if(result<HPJBUFSIZE(width, height)) result=HPJBUFSIZE(width, height);
 	return result;
 }
 
@@ -122,8 +128,8 @@ vncEncodeTight::NumCodedRects(RECT &rect)
 		return 0;
 	}
 
-	const int maxRectSize = m_conf[m_compresslevel].maxRectSize;
-	const int maxRectWidth = m_conf[m_compresslevel].maxRectWidth;
+	const int maxRectSize = m_conf[0].maxRectSize;
+	const int maxRectWidth = m_conf[0].maxRectWidth;
 
 	if (w > maxRectWidth || w * h > maxRectSize) {
 		const int subrectMaxWidth = (w > maxRectWidth) ? maxRectWidth : w;
@@ -142,7 +148,7 @@ vncEncodeTight::EncodeRect(BYTE *source, VSocket *outConn, BYTE *dest,
 	int x = rect.left, y = rect.top;
 	int w = rect.right - x, h = rect.bottom - y;
 
-	const int maxRectSize = m_conf[m_compresslevel].maxRectSize;
+	const int maxRectSize = m_conf[0].maxRectSize;
 	const int rawDataSize = maxRectSize * (m_remoteformat.bitsPerPixel / 8);
 
 	if (m_bufflen < rawDataSize) {
@@ -170,8 +176,8 @@ vncEncodeTight::EncodeRect(BYTE *source, VSocket *outConn, BYTE *dest,
 
 	int nMaxRows;
 	{
-		int maxRectSize = m_conf[m_compresslevel].maxRectSize;
-		int maxRectWidth = m_conf[m_compresslevel].maxRectWidth;
+		int maxRectSize = m_conf[0].maxRectSize;
+		int maxRectWidth = m_conf[0].maxRectWidth;
 		int nMaxWidth = (w > maxRectWidth) ? maxRectWidth : w;
 		nMaxRows = maxRectSize / nMaxWidth;
 	}
@@ -408,8 +414,8 @@ vncEncodeTight::EncodeRectSimple(BYTE *source, VSocket *outConn, BYTE *dest,
 	const int x = rect.left, y = rect.top;
 	const int w = rect.right - x, h = rect.bottom - y;
 
-	const int maxRectSize = m_conf[m_compresslevel].maxRectSize;
-	const int maxRectWidth = m_conf[m_compresslevel].maxRectWidth;
+	const int maxRectSize = m_conf[0].maxRectSize;
+	const int maxRectWidth = m_conf[0].maxRectWidth;
 
 	int partialSize = 0;
 
@@ -448,9 +454,9 @@ vncEncodeTight::EncodeSubrect(BYTE *source, VSocket *outConn, BYTE *dest,
 	r.right = x + w; r.bottom = y + h;
 	Translate(source, m_buffer, r);
 
-	m_paletteMaxColors = w * h / m_conf[m_compresslevel].idxMaxColorsDivisor;
+	m_paletteMaxColors = w * h / m_conf[0].idxMaxColorsDivisor;
 	if ( m_paletteMaxColors < 2 &&
-		 w * h >= m_conf[m_compresslevel].monoMinRectSize ) {
+		 w * h >= m_conf[0].monoMinRectSize ) {
 		m_paletteMaxColors = 2;
 	}
 	switch (m_remoteformat.bitsPerPixel) {
@@ -463,8 +469,10 @@ vncEncodeTight::EncodeSubrect(BYTE *source, VSocket *outConn, BYTE *dest,
 	default:
 		FillPalette32(w * h);
 	}
-
 	int encDataSize;
+	encDataSize = SendJpegRect(source, dest, x, y, w, h, m_qualitylevel);
+
+#if 0
 	switch (m_paletteNumColors) {
 	case 0:
 		// Truecolor image
@@ -498,6 +506,7 @@ vncEncodeTight::EncodeSubrect(BYTE *source, VSocket *outConn, BYTE *dest,
 			encDataSize = SendIndexedRect(dest, w, h);
 		}
 	}
+#endif
 
 	if (encDataSize < 0)
 		return vncEncoder::EncodeRect(source, dest, r);
@@ -600,7 +609,7 @@ vncEncodeTight::SendMonoRect(BYTE *dest, int w, int h)
 	}
 
 	return CompressData(dest, streamId, dataLen,
-						m_conf[m_compresslevel].monoZlibLevel,
+						m_conf[0].monoZlibLevel,
 						Z_DEFAULT_STRATEGY);
 }
 
@@ -654,7 +663,7 @@ vncEncodeTight::SendIndexedRect(BYTE *dest, int w, int h)
 	}
 
 	return CompressData(dest, streamId, w * h,
-						m_conf[m_compresslevel].idxZlibLevel,
+						m_conf[0].idxZlibLevel,
 						Z_DEFAULT_STRATEGY);
 }
 
@@ -673,7 +682,7 @@ vncEncodeTight::SendFullColorRect(BYTE *dest, int w, int h)
 		len = m_remoteformat.bitsPerPixel / 8;
 
 	return CompressData(dest, streamId, w * h * len,
-						m_conf[m_compresslevel].rawZlibLevel,
+						m_conf[0].rawZlibLevel,
 						Z_DEFAULT_STRATEGY);
 }
 
@@ -704,7 +713,7 @@ vncEncodeTight::SendGradientRect(BYTE *dest, int w, int h)
 	}
 
 	return CompressData(dest, streamId, w * h * len,
-						m_conf[m_compresslevel].gradientZlibLevel,
+						m_conf[0].gradientZlibLevel,
 						Z_FILTERED);
 }
 
@@ -1258,7 +1267,7 @@ vncEncodeTight::DetectSmoothImage (int w, int h)
 			return 0;
 		}
 	} else {
-		if (w * h < m_conf[m_compresslevel].gradientMinRectSize) {
+		if (w * h < m_conf[0].gradientMinRectSize) {
 			return 0;
 		}
 	}
@@ -1268,9 +1277,9 @@ vncEncodeTight::DetectSmoothImage (int w, int h)
 		if (m_usePixelFormat24) {
 			avgError = DetectSmoothImage24(w, h);
 			if (m_qualitylevel != -1) {
-				return (avgError < m_conf[m_qualitylevel].jpegThreshold24);
+				return (avgError < m_conf[0].jpegThreshold24);
 			}
-			return (avgError < m_conf[m_compresslevel].gradientThreshold24);
+			return (avgError < m_conf[0].gradientThreshold24);
 		} else {
 			avgError = DetectSmoothImage32(w, h);
 		}
@@ -1278,9 +1287,9 @@ vncEncodeTight::DetectSmoothImage (int w, int h)
 		avgError = DetectSmoothImage16(w, h);
 	}
 	if (m_qualitylevel != -1) {
-		return (avgError < m_conf[m_qualitylevel].jpegThreshold);
+		return (avgError < m_conf[0].jpegThreshold);
 	}
-	return (avgError < m_conf[m_compresslevel].gradientThreshold);
+	return (avgError < m_conf[0].gradientThreshold);
 }
 
 unsigned long
@@ -1424,174 +1433,34 @@ DEFINE_DETECT_FUNCTION(32)
 // JPEG compression stuff.
 //
 
-static bool jpegError;
-static int jpegDstDataLen;
-
-static void JpegSetDstManager(j_compress_ptr cinfo, JOCTET *buf, size_t buflen);
-
 int
-vncEncodeTight::SendJpegRect(BYTE *dst, int w, int h, int quality)
+vncEncodeTight::SendJpegRect(BYTE *src, BYTE *dst, int x, int y, int w, int h, int quality)
 {
-	struct jpeg_compress_struct cinfo;
-	struct jpeg_error_mgr jerr;
+	BYTE *srcbuf;
+	int ps=m_localformat.bitsPerPixel/8;
+	int subsamp=m_compresslevel==1? HPJ_411: (m_compresslevel==2? HPJ_422:HPJ_444);
+	unsigned long jpegDstDataLen;
 
-	if (m_localformat.bitsPerPixel == 8)
-		return SendFullColorRect(dst, w, h);
+	if (ps < 3) return SendFullColorRect(dst, w, h);
 
-	BYTE *srcBuf = new byte[w * 3];
-	JSAMPROW rowPointer[1];
-	rowPointer[0] = (JSAMPROW)srcBuf;
-
-	cinfo.err = jpeg_std_error(&jerr);
-	jpeg_create_compress(&cinfo);
-
-	cinfo.image_width = w;
-	cinfo.image_height = h;
-	cinfo.input_components = 3;
-	cinfo.in_color_space = JCS_RGB;
-
-	jpeg_set_defaults(&cinfo);
-	jpeg_set_quality(&cinfo, quality, TRUE);
-
-	JpegSetDstManager (&cinfo, dst, w * h * (m_localformat.bitsPerPixel / 8));
-
-	jpeg_start_compress(&cinfo, TRUE);
-
-	for (int dy = 0; dy < h; dy++) {
-		PrepareRowForJpeg(srcBuf, dy, w);
-		jpeg_write_scanlines(&cinfo, rowPointer, 1);
-		if (jpegError)
-			break;
+	if(!hpjhnd) {
+		if((hpjhnd=hpjInitCompress())==NULL) {
+			vnclog.Print(LL_INTERR, VNCLOG("JPEG Error: %s\n"), hpjGetErrorStr());
+			return 0;
+		}
 	}
 
-	if (!jpegError)
-		jpeg_finish_compress(&cinfo);
+	srcbuf=&src[y*m_bytesPerRow + x*ps];
+	if(hpjCompress(hpjhnd, (unsigned char *)srcbuf, w, m_bytesPerRow,
+		h, ps, (unsigned char *)dst, &jpegDstDataLen, subsamp, quality,
+		m_localformat.bigEndian?0:HPJ_BGR)==-1) {
+		vnclog.Print(LL_INTERR, VNCLOG("JPEG Error: %s\n"), hpjGetErrorStr());
+		return 0;
+	}
 
-	jpeg_destroy_compress(&cinfo);
-	delete[] srcBuf;
-
-	if (jpegError)
-		return SendFullColorRect(dst, w, h);
 
 	m_hdrBuffer[m_hdrBufferBytes++] = rfbTightJpeg << 4;
 
 	return SendCompressedData(jpegDstDataLen);
-}
-
-void
-vncEncodeTight::PrepareRowForJpeg(BYTE *dst, int y, int w)
-{
-	if (m_remoteformat.bitsPerPixel == 32) {
-		CARD32 *src = (CARD32 *)&m_buffer[y * w * sizeof(CARD32)];
-		if (m_usePixelFormat24) {
-			PrepareRowForJpeg24(dst, src, w);
-		} else {
-			PrepareRowForJpeg32(dst, src, w);
-		}
-	} else {
-		// 16 bpp assumed.
-		CARD16 *src = (CARD16 *)&m_buffer[y * w * sizeof(CARD16)];
-		PrepareRowForJpeg16(dst, src, w);
-	}
-}
-
-void
-vncEncodeTight::PrepareRowForJpeg24(BYTE *dst, CARD32 *src, int count)
-{
-	int r_shift, g_shift, b_shift;
-	if (!m_localformat.bigEndian == !m_remoteformat.bigEndian) {
-		r_shift = m_remoteformat.redShift;
-		g_shift = m_remoteformat.greenShift;
-		b_shift = m_remoteformat.blueShift;
-	} else {
-		r_shift = 24 - m_remoteformat.redShift;
-		g_shift = 24 - m_remoteformat.greenShift;
-		b_shift = 24 - m_remoteformat.blueShift;
-	}
-
-	CARD32 pix;
-	while (count--) {
-		pix = *src++;
-		*dst++ = (BYTE)(pix >> r_shift);
-		*dst++ = (BYTE)(pix >> g_shift);
-		*dst++ = (BYTE)(pix >> b_shift);
-	}
-}
-
-#define DEFINE_JPEG_GET_ROW_FUNCTION(bpp)									\
-																			\
-void																		\
-vncEncodeTight::PrepareRowForJpeg##bpp(BYTE *dst, CARD##bpp *src, int count)\
-{																			\
-	bool endianMismatch =													\
-		(!m_localformat.bigEndian != !m_remoteformat.bigEndian);			\
-																			\
-	int r_shift = m_remoteformat.redShift;									\
-	int g_shift = m_remoteformat.greenShift;								\
-	int b_shift = m_remoteformat.blueShift; 								\
-	int r_max = m_remoteformat.redMax;										\
-	int g_max = m_remoteformat.greenMax;									\
-	int b_max = m_remoteformat.blueMax; 									\
-																			\
-	CARD##bpp pix;															\
-	while (count--) {														\
-		pix = *src++;														\
-		if (endianMismatch) {												\
-			pix = Swap##bpp(pix);											\
-		}																	\
-		*dst++ = (BYTE)((pix >> r_shift & r_max) * 255 / r_max);			\
-		*dst++ = (BYTE)((pix >> g_shift & g_max) * 255 / g_max);			\
-		*dst++ = (BYTE)((pix >> b_shift & b_max) * 255 / b_max);			\
-	}																		\
-}
-
-DEFINE_JPEG_GET_ROW_FUNCTION(16)
-DEFINE_JPEG_GET_ROW_FUNCTION(32)
-
-/*
- * Destination manager implementation for JPEG library.
- */
-
-static struct jpeg_destination_mgr jpegDstManager;
-static JOCTET *jpegDstBuffer;
-static size_t jpegDstBufferLen;
-
-static void JpegInitDestination(j_compress_ptr cinfo);
-static boolean JpegEmptyOutputBuffer(j_compress_ptr cinfo);
-static void JpegTermDestination(j_compress_ptr cinfo);
-
-static void
-JpegInitDestination(j_compress_ptr cinfo)
-{
-	jpegError = false;
-	jpegDstManager.next_output_byte = jpegDstBuffer;
-	jpegDstManager.free_in_buffer = jpegDstBufferLen;
-}
-
-static boolean
-JpegEmptyOutputBuffer(j_compress_ptr cinfo)
-{
-	jpegError = true;
-	jpegDstManager.next_output_byte = jpegDstBuffer;
-	jpegDstManager.free_in_buffer = jpegDstBufferLen;
-
-	return TRUE;
-}
-
-static void
-JpegTermDestination(j_compress_ptr cinfo)
-{
-	jpegDstDataLen = jpegDstBufferLen - jpegDstManager.free_in_buffer;
-}
-
-static void
-JpegSetDstManager(j_compress_ptr cinfo, JOCTET *buf, size_t buflen)
-{
-	jpegDstBuffer = buf;
-	jpegDstBufferLen = buflen;
-	jpegDstManager.init_destination = JpegInitDestination;
-	jpegDstManager.empty_output_buffer = JpegEmptyOutputBuffer;
-	jpegDstManager.term_destination = JpegTermDestination;
-	cinfo->dest = &jpegDstManager;
 }
 

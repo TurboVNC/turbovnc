@@ -549,8 +549,8 @@ vncClientThread::run(void *arg)
 				break;
 			}
 
-			m_client->m_buffer->SetQualityLevel(-1);
-			m_client->m_buffer->SetCompressLevel(6);
+			m_client->m_buffer->SetQualityLevel(95);
+			m_client->m_buffer->SetCompressLevel(0);
 			m_client->m_buffer->EnableXCursor(FALSE);
 			m_client->m_buffer->EnableRichCursor(FALSE);
 			m_client->m_buffer->EnableLastRect(FALSE);
@@ -610,7 +610,7 @@ vncClientThread::run(void *arg)
 
 					// Is this a CompressLevel encoding?
 					if ((Swap32IfLE(encoding) >= rfbEncodingCompressLevel0) &&
-						(Swap32IfLE(encoding) <= rfbEncodingCompressLevel9))
+						(Swap32IfLE(encoding) <= rfbEncodingCompressLevel2))
 					{
 						// Client specified encoding-specific compression level
 						int level = (int)(Swap32IfLE(encoding) - rfbEncodingCompressLevel0);
@@ -620,11 +620,11 @@ vncClientThread::run(void *arg)
 					}
 
 					// Is this a QualityLevel encoding?
-					if ((Swap32IfLE(encoding) >= rfbEncodingQualityLevel0) &&
-						(Swap32IfLE(encoding) <= rfbEncodingQualityLevel9))
+					if ((Swap32IfLE(encoding) >= rfbJpegQualityLevel0) &&
+						(Swap32IfLE(encoding) <= rfbJpegQualityLevel100))
 					{
 						// Client specified image quality level used for JPEG compression
-						int level = (int)(Swap32IfLE(encoding) - rfbEncodingQualityLevel0);
+						int level = (int)(Swap32IfLE(encoding) - rfbJpegQualityLevel0);
 						m_client->m_buffer->SetQualityLevel(level);
 						vnclog.Print(LL_INTINFO, VNCLOG("image quality level requested: %d\n"), level);
 						continue;
@@ -669,7 +669,7 @@ vncClientThread::run(void *arg)
 
 					vnclog.Print(LL_INTINFO, VNCLOG("defaulting to raw encoder\n"));
 
-					if (!m_client->m_buffer->SetEncoding(Swap32IfLE(rfbEncodingRaw)))
+					if (!m_client->m_buffer->SetEncoding(Swap32IfLE(rfbEncodingTight)))
 					{
 						vnclog.Print(LL_INTERR, VNCLOG("failed to select raw encoder!\n"));
 

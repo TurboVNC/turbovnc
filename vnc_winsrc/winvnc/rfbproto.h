@@ -283,14 +283,20 @@ typedef struct _rfbServerInitMsg {
  *
  *****************************************************************************/
 
+#if 0
 #define rfbEncodingRaw       0
+#endif
 #define rfbEncodingCopyRect  1
+#if 0
 #define rfbEncodingRRE       2
 #define rfbEncodingCoRRE     4
 #define rfbEncodingHextile   5
 #define rfbEncodingZlib      6
+#endif
 #define rfbEncodingTight     7
+#if 0
 #define rfbEncodingZlibHex   8
+#endif
 
 /*
  * Special encoding numbers:
@@ -301,6 +307,9 @@ typedef struct _rfbServerInitMsg {
  *   0xFFFFFFE0 .. 0xFFFFFFEF -- quality level for JPEG compressor;
  *   0xFFFFFFF0 .. 0xFFFFFFFF -- cross-encoding compression levels.
  */
+
+#define rfbJpegQualityLevel0       0xFFFFFE00
+#define rfbJpegQualityLevel100     0xFFFFFE64
 
 #define rfbEncodingCompressLevel0  0xFFFFFF00
 #define rfbEncodingCompressLevel1  0xFFFFFF01
