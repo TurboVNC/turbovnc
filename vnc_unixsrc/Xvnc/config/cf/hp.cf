@@ -1,0 +1,210 @@
+XCOMM platform:  $TOG: hp.cf /main/85 1997/04/17 14:11:34 barstow $
+
+#ifndef OSName
+# define OSName		DefaultOSName
+#endif
+#ifndef OSMajorVersion
+# define OSMajorVersion	DefaultOSMajorVersion
+#endif
+#ifndef OSMinorVersion
+# define OSMinorVersion	DefaultOSMinorVersion
+#endif
+#ifndef OSTeenyVersion
+# define OSTeenyVersion	DefaultOSTeenyVersion
+#endif
+XCOMM operating system:  OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
+
+
+/* The default yacc options are too small for Uil.y. */
+#define YaccFlags -Nm15000
+
+/*
+ * C++ compiler setup.  This file knows what options to use with 
+ * certain compilers, including HP C++ and CenterLine C++.
+ * 
+ * For HP C++, define HasHPCplusplus to YES in site.def.  
+ * For CenterLine C++, define HasCenterLineCplusplus to YES in site.def.
+ * For other compilers, define HasCplusplus to YES in site.def, and 
+ *    check to see if you need to provide values for CplusplusOptions
+ *    and/or DefaultCplusplusOptions.
+ *
+ * In any case, you may also need to set CplusplusDependIncludes.
+ */
+
+#if HasHPCplusplus
+# ifndef  HasCplusplus
+#  define HasCplusplus YES
+# endif
+# ifndef  DefaultCplusplusOptions
+#  define DefaultCplusplusOptions	-Aa
+# endif
+# ifndef  CplusplusOptions
+#  define CplusplusOptions		-Aa
+# endif
+# ifndef  CplusplusCmd
+#  define CplusplusCmd 			/opt/CC/bin/CC
+# endif
+# ifndef  CplusplusDependIncludes 
+#  define CplusplusDependIncludes	-I/opt/CC/include/CC
+# endif
+#endif
+
+#ifndef  CcCmd
+# define CcCmd			/opt/ansic/bin/cc
+#endif
+#ifndef  YaccCmd
+# define YaccCmd		/opt/langtools/bin/yacc
+#endif
+#ifndef  LexCmd
+# define LexCmd			/opt/langtools/bin/lex
+#endif
+#ifndef  LintCmd
+# define LintCmd		/opt/ansic/bin/lint
+#endif
+
+#if HasCenterLineCplusplus
+# ifndef HasCplusplus
+#  define HasCplusplus			YES
+# endif
+# ifndef OptimizedCplusplusDebugFlags
+#  define OptimizedCplusplusDebugFlags	-O
+# endif
+# ifndef CplusplusDependIncludes 
+#  define CplusplusDependIncludes -I/usr/local/CenterLine/clc++/pa-hpux8/incl
+# endif
+#endif
+
+
+#define SystemV				YES
+#define Malloc0ReturnsNull		YES
+
+#ifdef __hp9000s800
+# ifndef OptimizedCDebugFlags
+#  define OptimizedCDebugFlags		+O1
+# endif
+# ifndef DefaultCCOptions
+#  define DefaultCCOptions		-Ae +ESlit
+# endif
+# ifndef SharedLibraryCCOptions
+#  define SharedLibraryCCOptions	-Ae
+# endif
+# if OSMajorVersion > 9
+#  define StandardDefines		-Dhpux -DSYSV -DHPUX_10
+# else
+# define StandardDefines		-Dhpux -DSYSV
+# endif
+# define ServerExtraDefines		-DXOS -DBSTORE -DSOFTWARE_CURSOR -DNO_ALLOCA -DSCREEN_PIXMAPS -DMERGE_SAVE_UNDERS -DHAS_IFREQ -DFORCE_SEPARATE_PRIVATE
+
+# if OSMajorVersion > 9
+#  include <hpLib.rules>
+# endif
+
+#else /* __hp9000s800 */
+# define StandardDefines	-Dhpux -DSYSV
+# if OSMajorVersion < 8
+#  define DefaultCCOptions	-Wc,-Nd4000,-Ns4100,-Ne700,-Np200,-Nw300
+#  define PexCCOptions		-Wp,-H150000 -Wc,-Nd4000,-Ns8100,-Ne700,-Np200
+# else
+#  define OptimizedCDebugFlags	+O1
+#  define PexCCOptions		-Wp,-H250000
+# endif
+# define PexShmIPC		NO
+# define LintOpts		-ax -Nd4000 -Ns8000 -Ne700 -Np200 -Na25000
+#endif
+#define MvCmd			mv -f
+#define LdCombineFlags		-r
+#define ExecableScripts		YES
+#define HasVFork		YES
+#define HasPoll			YES
+#define RemoveTargetProgramByMoving	YES
+#define ExpandManNames		YES
+#define HasPutenv		YES
+#define HasNdbm			YES
+#define DBMLibrary		/usr/lib/libdbm.a
+#define PrimaryScreenResolution	91
+#define ExtensionOSDefines	-DHPINPUT -DXTESTEXT1
+#ifndef XhpServer
+#define XhpServer		YES
+#endif
+#define ServerExtraSysLibs	-ldld
+#ifndef BuildXInputExt
+# define BuildXInputExt		YES
+#endif
+#define HPFastScrolling		YES
+#ifndef BuildServer
+# define BuildServer		__hp9000s700
+#define NeedBerklib		(BuildServer|BuildFontServer)
+#endif
+#define XawI18nDefines		-DHAS_WCHAR_H -DHAS_ISW_FUNCS
+
+#if OSMajorVersion < 6 || (OSMajorVersion == 6 && OSMinorVersion < 2)
+# define ConnectionFlags	-DTCPCONN	/* no unix sockets */
+#endif
+
+#if OSMajorVersion > 8
+#define HasWChar32             YES
+#define HasPlugin              YES
+#endif
+
+#ifdef __hp9000s300
+# ifndef CompatabilityDefines
+#  define CompatabilityDefines -D__hp9000s300 -Dhp9000s300
+# endif
+#elif defined(__hp9000s700)
+# ifndef CompatabilityDefines
+#  define CompatabilityDefines -D__hp9000s800 -Dhp9000s800 -D__hp9000s700
+# endif
+#else
+# ifndef CompatabilityDefines
+#  define CompatabilityDefines -D__hp9000s800 -Dhp9000s800
+# endif
+#endif
+
+#ifndef OsDefines
+# if OSMajorVersion > 9
+#  define OsDefines	-DhpV4 -DHPUX
+# else
+#  define OsDefines	-DHPUX
+# endif
+#endif
+
+#if OSMajorVersion > 9
+# if ThreadedX
+#  define MTSafeAPIDefines	-DXUSE_MTSAFE_API -DXUSE_NETDB_R_API
+# endif
+# define CppCmd			/opt/langtools/lbin/cpp
+#endif
+
+/* CC does not recognize -Ae, and has a different meaning for +e. */
+/* +e also confuses cpp. */
+#define AnsiDefines		-Ae -D_HPUX_SOURCE
+#define CplusplusAnsiDefines	-Aa -D_HPUX_SOURCE
+
+#define BuildLibPathVar	SHLIB_PATH
+
+#define CdeBaseProjectDefines \
+	-DNLS16 -DMALLOC_0_RETURNS_NULL -DMERGE -D__hpux \
+	-DOSMAJORVERSION=OSMajorVersion -DOSMINORVERSION=OSMinorVersion \
+	CompatabilityDefines OsDefines
+
+#define CdeProjectDefines	CdeBaseProjectDefines AnsiDefines
+#define CdeCplusplusProjectDefines	\
+				CdeBaseProjectDefines CplusplusAnsiDefines
+
+#define DtSvcDefines		-DXK_MISCELLANY -DMULTIBYTE -DMESSAGE_CAT
+#define DtSearchDefines		-DI18N_MSG DtSvcDefines
+#define DtWidgetDefines		DtSearchDefines
+#define DtPrintDefines		DtSearchDefines
+#if OSMajorVersion > 9
+#define DtMailDefines		\
+  -DBIG_ENDIAN -DDO_ANONYMOUS_MAP -DNEED_MMAP_WRAPPER -DSENDMAIL_LOCKS \
+  -DMAILGROUP_REQUIRED -DMAIL_SPOOL_PATH=\"/var/mail/%s\"
+#else
+#define DtMailDefines		\
+  -DBIG_ENDIAN -DDO_ANONYMOUS_MAP -DNEED_MMAP_WRAPPER -DSENDMAIL_LOCKS \
+  -DMAILGROUP_REQUIRED -DMAIL_SPOOL_PATH=\"/usr/mail/%s\"
+#endif
+
+#define ArchitectureDefines	-DHP_ARCHITECTURE
+
+#define ExportListGenSource	elistgen.hp

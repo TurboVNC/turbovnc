@@ -1,0 +1,101 @@
+XCOMM $XFree86: xc/config/cf/lnxdoc.tmpl,v 3.5 1997/01/26 05:10:26 dawes Exp $
+XCOMM
+
+#ifndef HasLinuxDoc
+#define HasLinuxDoc		NO
+#endif
+
+#ifndef HasSgmlFmt
+#define HasSgmlFmt		NO
+#endif
+
+#ifndef LinuxDocDir
+#define LinuxDocDir		/usr/local/linuxdoc-sgml
+#endif
+
+#ifndef LinuxDocBinDir
+#define LinuxDocBinDir		$(LINUXDOCPATH)/bin
+#endif
+
+#ifndef LinuxDocFormatCmd
+#define LinuxDocFormatCmd	$(LINUXDOCBIN)/ldformat
+#endif
+
+#ifndef LinuxDocRoffCmd
+#define LinuxDocRoffCmd		$(LINUXDOCBIN)/qroff
+#endif
+
+#ifndef XFree86IdentFix
+#define XFree86IdentFix		sed '/\$$\XFree86:/s/\$$/Generated from /'
+#endif
+
+#ifndef LinuxDocFixrefCmd
+#define LinuxDocFixrefCmd	$(LINUXDOCBIN)/fixref
+#endif
+
+#ifndef LinuxDocPreHtmlCmd
+#define LinuxDocPreHtmlCmd	$(LINUXDOCBIN)/prehtml
+#endif
+
+#ifndef LinuxDocHtmlCmd
+#define LinuxDocHtmlCmd		$(LINUXDOCBIN)/html2html
+#endif
+
+#ifndef HasLatex
+#define HasLatex		NO
+#endif
+
+#ifndef LinuxDocLatexCmd
+#define LinuxDocLatexCmd	$(LINUXDOCBIN)/qtex
+#endif
+
+#ifndef SgmlFmtCmd
+#define SgmlFmtCmd		sgmlfmt
+#endif
+
+#ifndef HasDvips
+#define HasDvips		NO
+#endif
+
+#ifndef DvipsOptions
+#define DvipsOptions		/**/
+#endif
+
+#ifndef DvipsCmd
+#define DvipsCmd		dvips
+#endif
+
+#ifndef BuildLinuxDocText
+#define BuildLinuxDocText	HasLinuxDoc
+#endif
+
+#ifndef BuildLinuxDocHtml
+#define BuildLinuxDocHtml	NO
+#endif
+
+#ifndef BuildLinuxDocPS
+#define BuildLinuxDocPS		(HasLatex && HasDvips) || HasSgmlFmt
+#endif
+
+
+     LINUXDOCPATH = LinuxDocDir
+      LINUXDOCENV = LINUXDOC=$(LINUXDOCPATH)
+      LINUXDOCBIN = LinuxDocBinDir
+   LINUXDOCFORMAT = $(LINUXDOCENV) LinuxDocFormatCmd
+     LINUXDOCROFF = $(LINUXDOCENV) LinuxDocRoffCmd
+    LINUXDOCLATEX = $(LINUXDOCENV) LinuxDocLatexCmd
+   LINUXDOCFIXREF = $(LINUXDOCENV) LinuxDocFixrefCmd
+  LINUXDOCPREHTML = $(LINUXDOCENV) LinuxDocPreHtmlCmd
+     LINUXDOCHTML = $(LINUXDOCENV) LinuxDocHtmlCmd
+  XFREE86IDENTFIX = XFree86IdentFix
+            DVIPS = DvipsCmd
+     DVIPSOPTIONS = DvipsOptions
+       SGMLFMTCMD = SgmlFmtCmd
+
+XCOMM Some extra things to clean
+
+#ifdef ExtraFilesToClean
+#undef ExtraFilesToClean
+#endif
+#define ExtraFilesToClean *.aux *.dvi *.log *.tex *.toc *.html *.ps *.latin1
+

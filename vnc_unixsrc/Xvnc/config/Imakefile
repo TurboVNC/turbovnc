@@ -1,0 +1,12 @@
+XCOMM $XConsortium: Imakefile /main/6 1996/09/28 16:04:42 rws $
+#define IHaveSubdirs
+#define PassCDebugFlags CDEBUGFLAGS="$(CDEBUGFLAGS)"
+
+#undef BootstrapCleanSubdirs
+#define BootstrapCleanSubdirs BOOTSTRAPSUBDIRS="$(BOOTSTRAPSUBDIRS)"
+
+BOOTSTRAPSUBDIRS = imake makedepend
+SUBDIRS = cf $(BOOTSTRAPSUBDIRS) util
+
+MakeSubdirs($(SUBDIRS))
+DependSubdirs($(SUBDIRS))

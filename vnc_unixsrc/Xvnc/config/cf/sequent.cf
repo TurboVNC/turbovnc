@@ -1,0 +1,84 @@
+XCOMM platform:  $XConsortium: sequent.cf /main/4 1996/12/04 10:10:49 swick $
+/*
+ * SET VERSION NUMBERS BEFORE MAKING MAKEFILES; also, you'll need to install
+ * util/scripts/bsdinstall.sh before doing a "make install"
+ */
+
+#if defined(DynixPtxArchitecture) || defined(_SEQUENT_)
+
+# ifndef OSName
+#  define OSName		Dynix/ptx
+# endif
+# ifndef OSMajorVersion
+#  define OSMajorVersion	2
+# endif
+# ifndef OSMinorVersion
+#  define OSMinorVersion	0
+# endif
+
+# define SystemV		YES
+# define SymbolTableFlags
+# define DefaultCCOptions	SymbolTableFlags
+# define SharedLibraryCCOptions	DefaultCCOptions
+# define StandardDefines		-DSYSV
+# define MotifDefines		-DSTRINGS_ALIGNED -DNO_REGCOMP
+# define ExtraLibraries		$(XBSDLIB) -lsocket -linet -lnsl -lseq
+# define XmExtraLibraries	/* -lgen (not official i386 ABI?) */
+
+# define NeedBerklib		YES
+# define HasShadowPasswd	YES
+# define InstallXdmConfig	YES
+# define HasSockets		YES
+
+/*
+ * Plan to remove Prototypes defines and use -Xc with
+ * Dynix/ptx:
+ *   OSMajorVersion=4
+ *   OSMinorVersion=0
+ * Using -Xc with Version 4.0 will elliminate most warnings
+ */
+# define NeedFunctionPrototypes	YES
+# define NeedNestedPrototypes	YES
+# define NeedConstPrototypes	YES
+# define NeedVarargsPrototypes	YES
+
+
+/*
+ * unfortunately pbmplus uses this...
+ */
+RANLIB = :
+
+#endif /* defined(DynixPtxArchitecture) || defined(_SEQUENT_) */
+
+#if defined(Dynix3Architecture) || defined(sequent)
+
+# ifndef OSName
+#  define OSName		Dynix 3
+# endif
+# ifndef OSMajorVersion
+#  define OSMajorVersion	3
+# endif
+# ifndef OSMinorVersion
+#  define OSMinorVersion	2
+# endif
+
+# define SymbolTableFlags	-W0,-Nn7500 -W0,-Nd10000
+# define DefaultCCOptions	SymbolTableFlags
+# define StandardDefines	-DX_NOT_STDC_ENV -DX_NOT_POSIX
+# define ExtraLibraries		-lseq
+
+# define HasVoidSignalReturn	NO
+# define HasBsearch		NO
+
+# define SetTtyGroup		YES
+
+#endif /* defined(Dynix3Architecture) || defined(sequent) */
+
+#define BuildServer		NO
+#define BuildXInputLib		NO
+#define BuildPexClients		NO
+
+#define LnCmd			ln -s
+
+/* libgen is not part of the i386 ABI.  (Are both architectures i386??) */
+#define UseLocalRegex		YES

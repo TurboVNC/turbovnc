@@ -1,0 +1,142 @@
+XCOMM $XConsortium: Imakefile /main/38 1996/11/07 14:43:46 kaleb $
+XCOMM $XFree86: xc/config/cf/Imakefile,v 3.13.2.2 1997/07/27 02:41:03 dawes Exp $
+
+XCOMM Some compilers generate fatal errors if an -L directory does
+XCOMM not exist.  Since BUILDLIBDIR may not exist yet suppress its use.
+         LDPRELIB =
+        LDPRELIBS =
+
+#ifdef LocalConfigFiles
+LOCALFILES = LocalConfigFiles
+#endif
+
+#ifndef InstallEmptyHostDef
+HOSTDEFFILES = \
+host.def
+#endif
+
+DEFFILES = \
+xf86site.def \
+$(HOSTDEFFILES) \
+site.def
+
+RULEFILES = \
+Imake.rules \
+Motif.rules \
+Win32.rules \
+X11.rules \
+bsdLib.rules \
+cde.rules \
+hpLib.rules \
+ibmLib.rules \
+lnxLib.rules \
+lnxdoc.rules \
+necLib.rules \
+noop.rules \
+oldlib.rules \
+os2.rules \
+os2Lib.rules \
+os2Lib.rules \
+osfLib.rules \
+scoLib.rules \
+sgiLib.rules \
+sunLib.rules \
+sv3Lib.rules \
+sv4Lib.rules \
+xf86.rules
+
+TMPLFILES = \
+Imake.tmpl \
+Library.tmpl \
+Motif.tmpl \
+Server.tmpl \
+ServerLib.tmpl \
+Threads.tmpl \
+WinLib.tmpl \
+X11.tmpl \
+bsdLib.tmpl \
+cde.tmpl \
+hpLib.tmpl \
+ibmLib.tmpl \
+lnxLib.tmpl \
+lnxdoc.tmpl \
+necLib.tmpl \
+os2Lib.tmpl \
+osfLib.tmpl \
+sgiLib.tmpl \
+sunLib.tmpl \
+sv3Lib.tmpl \
+sv4Lib.tmpl \
+xf86.tmpl
+
+CFFILES = \
+Imake.cf \
+Amoeba.cf \
+DGUX.cf \
+FreeBSD.cf \
+Mips.cf \
+NetBSD.cf \
+OpenBSD.cf \
+Oki.cf \
+Win32.cf \
+apollo.cf \
+bsd.cf \
+bsdi.cf \
+convex.cf \
+cray.cf \
+fujitsu.cf \
+generic.cf \
+hp.cf \
+ibm.cf \
+isc.cf \
+linux.cf \
+luna.cf \
+macII.cf \
+mach.cf \
+minix.cf \
+moto.cf \
+ncr.cf \
+nec.cf \
+os2.cf \
+osf1.cf \
+pegasus.cf \
+sco.cf \
+sco5.cf \
+sequent.cf \
+sgi.cf \
+sony.cf \
+sun.cf \
+svr3.cf \
+svr4.cf \
+ultrix.cf \
+usl.cf \
+lynx.cf \
+x386.cf \
+xfree86.cf
+
+INSTFILES = $(RULEFILES) $(TMPLFILES) $(DEFFILES) $(CFFILES) $(LOCALFILES)
+
+all::
+
+InstallMultipleDestFlags(install,$(INSTFILES),$(CONFIGDIR),$(INSTDATFLAGS))
+InstallLinkKitMultipleDestFlags($(INSTFILES),$(LINKKITDIR)/config/cf,$(INSTDATFLAGS))
+
+#ifdef InstallEmptyHostDef
+install::
+	@(TMP=/tmp/tmp.$$$$; \
+	RemoveFile($${TMP}); \
+	echo "" > $${TMP}; \
+	$(INSTALL) $(INSTALLFLAGS) $(INSTDATFLAGS) $${TMP} \
+		$(DESTDIR)$(CONFIGDIR)/host.def; \
+	RemoveFile($${TMP}))
+
+#ifdef XFree86Version
+install.linkkit::
+	@(TMP=/tmp/tmp.$$$$; \
+	RemoveFile($${TMP}); \
+	echo "" > $${TMP}; \
+	$(INSTALL) $(INSTALLFLAGS) $(INSTDATFLAGS) $${TMP} \
+		$(DESTDIR)$(LINKKITDIR)/config/cf/host.def; \
+	RemoveFile($${TMP}))
+#endif
+#endif

@@ -1,0 +1,118 @@
+XCOMM $XConsortium: osfLib.rules /main/16 1996/09/28 16:11:55 rws $
+
+/*
+ * OSF/1 shared library rules
+ */
+
+#ifndef HasSharedLibraries
+#define HasSharedLibraries YES
+#endif
+#ifndef SeparateSharedCompile
+#define SeparateSharedCompile NO
+#endif
+#ifndef SharedDataSeparation
+#define SharedDataSeparation NO
+#endif
+#ifndef SharedCodeDef
+#define SharedCodeDef /**/
+#endif
+#ifndef SharedLibraryDef
+#define SharedLibraryDef /**/
+#endif
+#ifndef ShLibIncludeFile
+#define ShLibIncludeFile <osfLib.tmpl>
+#endif
+#ifndef SharedLibraryLoadFlags
+#define SharedLibraryLoadFlags -shared -no_archive
+#endif
+
+#ifndef PositionIndependentCFlags
+#define PositionIndependentCFlags /**/
+#endif
+
+/*
+ * InstallSharedLibrary - generate rules to install the shared library.
+ */
+#ifndef InstallSharedLibrary
+#define	InstallSharedLibrary(libname,rev,dest)				@@\
+install:: Concat(lib,libname.so.rev) 					@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS) Concat(lib,libname.so.rev) $(DESTDIR)dest @@\
+	$(RM) Concat($(DESTDIR)dest/lib,libname.so)			@@\
+	cd $(DESTDIR)dest; $(LN) Concat(lib,libname.so.rev) Concat(lib,libname.so)
+
+#endif /* InstallSharedLibrary */
+
+/*
+ * InstallSharedLibraryData - generate rules to install the shared library data
+ */
+#ifndef InstallSharedLibraryData
+#define	InstallSharedLibraryData(libname,rev,dest)
+#endif /* InstallSharedLibraryData */
+
+#ifndef PackageName(libname)
+#if ModernOSF1
+#define PackageName(libname) /**/
+#define Objects(objlist) -all objlist -none 
+#else
+#define PackageName(libname) -package libname
+#define Objects(objlist) objlist
+#endif
+#endif
+#if ThreadedX && ModernOSF1 && OSMajorVersion < 4
+#define BaseShLibReqs -lc_r -lc
+#else
+#define BaseShLibReqs -lc
+#endif
+
+/*
+ * SharedLibraryTarget - generate rules to create a shared library;
+ * build it into a different name so that we do not hose people by having
+ * the library gone for long periods.
+ */
+#ifndef SharedLibraryTarget
+#if SeparateSharedCompile
+#define SharedLibraryTarget(libname,rev,solist,down,up)			@@\
+AllTarget(Concat(lib,libname.so.rev))					@@\
+									@@\
+Concat(lib,libname.so.rev):  solist $(EXTRALIBRARYDEPS)			@@\
+	$(RM) $@~							@@\
+	(cd down; $(LD) -o up/$@~ $(SHLIBLDFLAGS) PackageName($@) \	@@\
+		-soname $@ Objects(solist) \				@@\
+		$(REQUIREDLIBS) BaseShLibReqs) 				@@\
+	$(RM) $@ 							@@\
+	$(MV) $@~ $@							@@\
+	$(RM) Concat(lib,libname.so)					@@\
+	$(LN) $@ Concat(lib,libname.so)					@@\
+	LinkBuildLibrary($@)						@@\
+	LinkBuildLibrary(Concat(lib,libname.so))			@@\
+									@@\
+clean::									@@\
+	$(RM) Concat(lib,libname.so.rev) Concat(lib,libname.so)
+#else
+#define SharedLibraryTarget(libname,rev,solist,down,up)			@@\
+AllTarget(Concat(lib,libname.so.rev))					@@\
+									@@\
+Concat(lib,libname.so.rev):  solist $(EXTRALIBRARYDEPS)			@@\
+	$(RM) $@~							@@\
+	$(LD) -o $@~ $(SHLIBLDFLAGS) PackageName($@) \			@@\
+		-soname $@ Objects(solist) \				@@\
+		$(REQUIREDLIBS) BaseShLibReqs 				@@\
+	$(RM) $@ 							@@\
+	$(MV) $@~ $@							@@\
+	$(RM) Concat(lib,libname.so)					@@\
+	$(LN) $@ Concat(lib,libname.so)					@@\
+	LinkBuildLibrary($@)						@@\
+	LinkBuildLibrary(Concat(lib,libname.so))			@@\
+									@@\
+clean::									@@\
+	$(RM) Concat(lib,libname.so.rev) Concat(lib,libname.so)
+#endif /* SeparateSharedCompile */
+#endif /* SharedLibraryTarget */
+
+/*
+ * SharedLibraryDataTarget - generate rules to create shlib data file;
+ */
+#ifndef SharedLibraryDataTarget
+#define SharedLibraryDataTarget(libname,rev,salist)
+#endif /* SharedLibraryTarget */

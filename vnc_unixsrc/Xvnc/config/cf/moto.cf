@@ -1,0 +1,58 @@
+XCOMM platform:  $XConsortium: moto.cf /main/16 1996/09/28 16:11:24 rws $
+
+#if defined(MotoR3Architecture)
+
+#ifndef OSName
+#define OSName                 Motorola R32V2/R3V6.2
+#endif
+#ifndef OSMajorVersion
+#define OSMajorVersion         3
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion         2
+#endif
+
+#define SystemV			YES
+#define BootstrapCFlags		-DSYSV -DMOTOROLA
+#define StandardDefines		-DSYSV -DUSG -DMOTOROLA
+#define Malloc0ReturnsNull	YES
+#define BuildServer		NO
+#define UseCCMakeDepend		YES
+#define OptimizedCDebugFlags	/* -O */
+
+#define DefaultUserPath   	:/bin:/usr/bin:$(BINDIR)
+#define DefaultSystemPath 	/etc:/bin:/usr/bin:$(BINDIR)
+
+#endif /* MotoR3Architecture */
+
+
+#if defined(MotoR4Architecture)
+
+#ifndef OSName
+#define OSName			Motorola R40V4
+#endif
+#ifndef OSMajorVersion
+#define OSMajorVersion		4
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion		4
+#endif
+
+#define SystemV4		YES
+#define BootstrapCFlags		-DSVR4 -DMOTOROLA
+#define StandardDefines         -DSVR4 -DMOTOROLA
+#define BuildServer		NO
+
+#define CppCmd                  /usr/ccs/lib/cpp
+#define LdCmd                   /usr/ccs/bin/ld
+#define LexCmd                  /usr/ccs/bin/lex
+#define MakeCmd                 /usr/ccs/bin/make
+#define YaccCmd                 /usr/ccs/bin/yacc
+#define CcCmd                   /bin/cc     /* a front-end to gcc/CI5 */
+#define DefaultCCOptions                    /* -Xc  no longer needed */
+
+#include <sv4Lib.rules>
+
+#endif /* MotoR4Architecture */
+
+XCOMM operating system:  OSName

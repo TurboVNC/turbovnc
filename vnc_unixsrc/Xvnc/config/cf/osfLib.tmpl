@@ -1,0 +1,52 @@
+XCOMM $XConsortium: osfLib.tmpl /main/22 1996/09/28 16:12:00 rws $
+
+/*
+ * OSF/1 shared library template
+ */
+
+#if ThreadedX && ModernOSF1
+#if OSMajorVersion < 4
+#define SharedX11Reqs -lpthreads -lmach
+#endif
+#endif
+#define SharedOldXReqs $(LDPRELIBS) $(XLIBONLY)
+
+#if ThreadedX && ModernOSF1 && OSMajorVersion < 4
+#define SharedThreadReqs -lpthreads -lmach
+#else
+#define SharedThreadReqs /**/
+#endif
+#define SharedXtReqs $(LDPRELIBS) $(XLIBONLY) $(SMLIB) $(ICELIB) SharedThreadReqs
+#if ModernOSF1
+#define SharedXawReqs $(LDPRELIBS) $(XMULIB) $(XTOOLLIB) $(XLIB)
+#else
+#define SharedXawReqs $(LDPRELIBS) $(XMULIB) $(XTOOLLIB) $(XLIB) -init _XawFixupVendorShell
+#endif
+#define SharedXmuReqs $(LDPRELIBS) $(XTOOLLIB) $(XLIB)
+#define SharedXextReqs $(LDPRELIBS) $(XLIBONLY)
+#define SharedXiReqs $(LDPRELIBS) $(XLIB)
+#define SharedPexReqs $(LDPRELIBS) $(XLIBONLY) MathLibrary
+#define SharedXtstReqs $(LDPRELIBS) $(XLIB)
+#define SharedXieReqs $(LDPRELIBS) $(XLIBONLY)
+#define SharedSMReqs $(LDPRELIBS) $(ICELIB)
+#define SharedXpReqs $(LDPRELIBS) $(XLIB)
+
+#define SharedXReqs $(XTOOLLIB) $(XPLIB) $(XLIB) SharedThreadReqs $(LDPOSTLIBS)
+#define SharedXmReqs $(LDPRELIBS) SharedXReqs
+#define SharedMrmReqs $(LDPRELIBS) $(XMLIB) SharedXReqs
+#define SharedUilReqs $(LDPRELIBS) $(MRESOURCELIB) $(XMLIB) SharedXReqs
+
+/* #define SharedPamReqs */
+#define SharedTtReqs $(LDPRELIBS) $(XTOOLLIB) $(XLIB) SharedThreadReqs $(CXXLIB)
+#define SharedDtSvcReqs $(LDPRELIBS) $(TTLIB) $(XMLIB) SharedXReqs -lm $(CXXLIB)
+#define SharedDtMmdbReqs $(LDPRELIBS) $(DTSVCLIB) $(TTLIB) $(XMLIB) SharedXReqs -lm $(CXXLIB)
+#define SharedDtSearchReqs $(LDPRELIBS) -lm
+#define SharedDtWidgetReqs $(LDPRELIBS) $(DTSVCLIB) $(XMLIB) SharedXReqs -lm $(CXXLIB)
+#define SharedDtHelpReqs $(LDPRELIBS) $(DTSVCLIB) $(XMLIB) SharedXReqs -lm -liconv
+#define SharedDtPrintReqs $(LDPRELIBS) $(DTSVCLIB) $(DTHELPLIB) $(XMLIB) SharedXReqs -lm $(CXXLIB)
+#define SharedDtTermReqs $(LDPRELIBS) $(DTHELPLIB) $(DTSVCLIB) $(XMLIB) SharedXReqs -lm
+#define SharedDtMrmReqs $(LDPRELIBS) $(DTTERMLIB) $(DTPRINTLIB) $(DTHELPLIB) $(DTWIDGETLIB) $(MRESOURCELIB) $(XMLIB) SharedXReqs -lm
+#define SharedDtMailReqs $(LDPRELIBS) $(DTHELPLIB) $(DTSVCLIB) $(XMLIB) SharedXReqs -liconv -lm $(CXXLIB)
+#define SharedCsaReqs $(LDPRELIBS) $(DTSVCLIB) $(XMLIB) SharedXReqs -lm
+
+ICONVSYSLIB = -liconv

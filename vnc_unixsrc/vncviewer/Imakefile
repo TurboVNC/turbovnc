@@ -1,0 +1,47 @@
+
+#ifdef SunArchitecture
+EXTRA_DEFINES = -D__EXTENSIONS__
+#endif
+
+XCOMM Shared memory support works OK on x86 linux, not tested elsewhere but
+XCOMM seems to cause problems on Digital Unix.
+
+#if defined(i386Architecture) && defined(LinuxArchitecture)
+DEFINES = -DMITSHM
+#endif
+
+ZLIB_INC = -I/usr/local/include
+JPEG_INC = -I/usr/local/include
+INCLUDES = -I../include -I. $(ZLIB_INC) $(JPEG_INC) -I/usr/include
+VNCAUTH_LIB = ../libvncauth/libvncauth.a
+ZLIB_LIB = -L/usr/local/lib -lz
+#ifdef OSF1Architecture
+XCOMM Avoid linking with different libjpeg in /usr/shlib under Tru64.
+JPEG_LIB = /usr/local/lib/libjpeg.a
+#else
+JPEG_LIB = -L/usr/local/lib -ljpeg
+#endif
+
+DEPLIBS = XawClientDepLibs $(VNCAUTH_LIB)
+LOCAL_LIBRARIES = XawClientLibs $(VNCAUTH_LIB) $(ZLIB_LIB) $(JPEG_LIB)
+
+SRCS = \
+  argsresources.c \
+  colour.c \
+  cursor.c \
+  desktop.c \
+  dialogs.c \
+  fullscreen.c \
+  listen.c \
+  misc.c \
+  popup.c \
+  rfbproto.c \
+  selection.c \
+  shm.c \
+  sockets.c \
+  tunnel.c \
+  vncviewer.c
+
+OBJS = $(SRCS:.c=.o)
+
+ComplexProgramTarget(vncviewer)

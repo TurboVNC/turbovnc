@@ -1,0 +1,98 @@
+XCOMM $XConsortium: Threads.tmpl /main/11 1996/09/28 16:07:06 rws $
+XCOMM $XFree86: xc/config/cf/Threads.tmpl,v 3.2 1996/12/23 05:50:12 dawes Exp $
+
+/*
+ * For a multi-threaded application or library,
+ * Define LocalThreadsDefines in your Imakefile (unless you like the
+ * project default), then include this file.
+ * Everything else should be automatic. 
+ */
+
+#ifndef LocalThreadsDefines
+#ifdef ProjectThreadsDefines
+#define LocalThreadsDefines ProjectThreadsDefines
+#else
+#define LocalThreadsDefines /**/
+#endif
+#endif
+
+#ifndef LocalThreads
+#ifdef ThreadedProject
+#define LocalThreads ThreadedProject
+#else
+#define LocalThreads YES
+#endif
+#endif
+
+#ifndef ThreadTypeDefines
+#if HasCThreads
+#define ThreadTypeDefines -DCTHREADS
+#else
+#define ThreadTypeDefines /**/
+#endif
+#endif
+#ifndef SystemMTDefines
+#define SystemMTDefines /**/
+#endif
+#ifndef LibraryMTDefines
+#define LibraryMTDefines /**/
+#endif
+#ifndef HasThreadSafeAPI		/* does it have getpwnam_r, etc. */
+#define HasThreadSafeAPI YES
+#endif
+#ifndef MTSafeAPIDefines
+#if HasThreadSafeAPI
+#define MTSafeAPIDefines -DXUSE_MTSAFE_API
+#else
+#define MTSafeAPIDefines /**/
+#endif
+#endif
+#ifndef ThreadPreStdAPIDefines
+#define ThreadPreStdAPIDefines /* nominally for POSIX P1003.4a (Draft 4) API */
+#endif
+#ifndef CplusplusSystemMTDefines
+# ifdef SystemMTDefines
+#  define CplusplusSystemMTDefines SystemMTDefines
+# else
+#  define CplusplusSystemMTDefines /**/
+# endif
+#endif
+#ifndef ThreadsCompileFlags
+#define ThreadsCompileFlags /**/
+#endif
+#ifndef ThreadsCplusplusCompileFlags
+# ifdef ThreadsCompileFlags
+#  define ThreadsCplusplusCompileFlags ThreadsCompileFlags
+# else
+#  define ThreadsCplusplusCompileFlags /**/
+# endif
+#endif
+
+#ifndef ThreadsLibraries
+#define ThreadsLibraries /**/
+#endif
+#ifndef ThreadsCplusplusLibraries
+# ifdef ThreadsLibraries
+#  define ThreadsCplusplusLibraries ThreadsLibraries
+# else
+#  define ThreadsCplusplusLibraries /**/
+# endif
+#endif
+#ifndef ThreadsLoadFlags
+#define ThreadsLoadFlags ThreadsCompileFlags
+#endif
+#ifndef ThreadsCplusplusLoadFlags
+#define ThreadsCplusplusLoadFlags ThreadsCplusplusCompileFlags
+#endif
+
+#if LocalThreads
+    THREADS_CFLAGS = ThreadsCompileFlags
+   THREADS_DEFINES = LocalThreadsDefines ThreadTypeDefines SystemMTDefines MTSafeAPIDefines ThreadPreStdAPIDefines $(LIB_MT_DEFINES)
+   THREADS_LDFLAGS = ThreadsLoadFlags
+      THREADS_LIBS = ThreadsLibraries
+
+  THREADS_CXXFLAGS = ThreadsCplusplusCompileFlags
+THREADS_CXXDEFINES = LocalThreadsDefines ThreadTypeDefines CplusplusSystemMTDefines MTSafeAPIDefines ThreadPreStdAPIDefines $(LIB_MT_DEFINES)
+THREADS_CXXLDFLAGS = ThreadsCplusplusLoadFlags
+   THREADS_CXXLIBS = ThreadsCplusplusLibraries
+#endif

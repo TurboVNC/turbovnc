@@ -1,0 +1,681 @@
+$TOG: README /main/66 1997/05/20 10:05:36 kaleb $
+
+
+
+
+$XFree86: xc/config/cf/README,v 1.1.1.9.2.3 1998/01/23 12:35:07 dawes Exp $
+
+The easiest way to write an Imakefile is to find another one that does
+something similar and copy/modify it!
+
+To change any of these variables, edit the site.def file.
+
+Imake.tmpl provides defaults for the following variables:
+
+	AlternateIncRoot	compiler needs -I to find project includes
+	AlternateUsrLibDir	linker needs -L to find project libraries
+	ArCmd			command used to create libraries
+	ArCmdBase		program name part of ArCmd
+	ArAddCmd		flags to have ArCmdBase add files to a library
+	ArExtCmd		flags to have ArCmdBase extract files
+	AsCmd			command used to run assembler
+	BootstrapCFlags		missing cpp symbols needed to get started
+	BourneShell		command used to run Bourne Shell
+	CCsuf			suffix that C++ source files have
+	CURDIR			current directory relative to top of sources
+	CcCmd			command to run C compiler
+	CompressCmd		command to run compress program
+	GzipCmd			command to run gzip program
+	ConstructMFLAGS		System V option to set MFLAGS make variable
+	CpCmd			command to copy one file to another
+	CplusplusCmd		command to run C++ compiler
+	CplusplusFilt		command to run C++ name demangler
+	CplusplusYaccCmd	command to produce C++ source from yacc source
+	CppCmd			command to run C preprocessor
+	CrossCompiling		cross compiling? (not fully supported)
+	DebuggableCDebugFlags	C compiler -I's and -D's to turn on debug info
+	DefaultCCOptions	default special C compiler options
+	DefaultCDebugFlags	debug/optimize flags for programs
+	DefaultUsrBin		program directory used even if PATH not set
+	DependFlags		extra makedepend flags
+	DoRanlibCmd		boolean for system uses ranlib
+	EqnCmd			command used for eqn
+	ExecableScripts		boolean for systems that can exec() #!/bin/sh
+	ExpandManNames		boolean to expand man pages names to long form
+	ExtraFilesToClean	extra files to remove on make clean
+	ExtraLibraries		system-specific libraries need to link
+	ExtraLoadFlags		system-specific loader flags
+	FileManSuffix		man suffix for file format pages
+	FilesToClean		files to delete in make clean
+	FortranCmd		command to run Fortran compiler
+	FortranDebugFlags	flags for Fortran debug info
+	FortranFlags		Fortran compiler flags
+	HasBSD44Sockets		boolean for system has BSD4.4 sockets
+	HasBsdMake		use the 4.4BSD variant of the make program?
+	HasBsearch		boolean for libc has bsearch()
+	HasBrokenCCForLink	boolean for brain damaged cc driver
+	HasCenterLineC		boolean for system has CenterLine C compiler
+	HasCenterLineCplusplus	boolean for system has CenterLine C++ compiler
+	HasClearmake		use Clearcase's clearmake make program?
+	HasCodeCenter		boolean for system has CodeCenter
+	HasCplusplus		system has a C++ compiler?
+	HasDECnet		system has DECnet?
+	HasFortran		boolean for system has Fortran compiler
+	HasGcc			boolean for system has GNU gcc compiler
+	HasGcc2			boolean for system has GNU gcc 2.x compiler
+	HasGcc2ForCplusplus	use gcc 2 for C++ programs?
+	HasGnuMake		use the GNU make program?
+	HasKrb5			system has Kerberos version 5 support?
+	HasLargeTmp		boolean for system has /tmp space
+	HasLatex		system has LaTeX document preparation software
+	HasLibCrypt		boolean for system has libcrypt
+	HasNdbm			boolean for system has ndbm routines
+	HasPoll			use poll() syscall?
+	HasPurify		boolean for system has Purify
+	HasPutenv		boolean for libc has putenv()
+	HasSecureRPC		boolean for Sun Secure RPC
+	HasSetUserContext	boolean for setusercontext()
+	HasSentinel		boolean for system has Sentinel available
+	HasSharedLibraries	boolean for system has shared libraries
+	HasShm			boolean for System V shared memory
+	HasSockets		boolean for system has BSD sockets
+	HasStrcasecmp		boolean for system implements str[n]casecmp
+	HasStreams		use STREAMS I/O interface?
+	HasSymLinks		boolean for system has symbolic links
+	HasTestCenter		boolean for system has TestCenter
+	HasVarDirectory		boolean for system has /var
+	HasVFork		boolean for system has vfork()
+	HasVoidSignalReturn	boolean for POSIX signal() procs
+	HasZlib			boolean for system has libz
+	IncRoot			parent of X11 include directory
+	InstBinFlags		install flags for binaries
+	InstDatFlags		install flags for data files
+	InstIncFlags		install flags for header files
+	InstKmemFlags		install flags for xload to get at /dev/kmem
+	InstLibFlags		install flags for libraries
+	InstManFlags		install flags for manual pages
+	InstPgmFlags		install flags for normal programs
+	InstUidFlags		install flags for xterm to chown /dev/ptys
+	InstallCmd		command to install files
+	Krb5Includes		where to include Kerberos header files from
+	Krb5Libraries		where to load Kerberos libraries from
+	LdCmd			command to run loader
+	LdCombineFlags		flags for incremental loading
+	LexCmd			command to run lex
+	LexLib			library for programs using lex output
+	LintCmd			command to run lint
+	LintLibFlag		flags to generate lint libraries
+	LintOpts		lint options to control strictness
+	LnCmd			command to link two files
+	LoaderLibPrefix		loader flags before libraries
+	LocalRulesFile		site-specific file with additional imake rules
+	LocalTmplFile		file with additional imake variables
+	MacroFile		name of machine-dependent config params file
+	MacroIncludeFile	<MacroFile>
+	MakeCmd			command to run make
+	Malloc0ReturnsNull	boolean for malloc(0) == NULL
+	Malloc0ReturnsNullDefines -D's to build libX11/libXt
+	MathLibrary		library for programs using C math functions
+	MsMacros		macro flag for TroffCmd, normally "-ms"
+	MvCmd			command to rename a file
+	NdbmDefines		-D's to turn on use of ndbm routines
+	NeedConstPrototoypes	whether const is supported
+	NeedFunctionPrototypes	whether or not to force function prototypes
+	NeedNestedPrototypes	whether nested prototypes are supported
+	NeedVarargsPrototypes	whether varargs prototypes are supported
+	NeedWidePrototypes	whether or not to widen function prototypes
+	NoOpCDebugFlags		C compiler flags to not debug or optimize
+	NoRConst		YES if const for structs of funcs is bad
+	OSMajorVersion		major version number of operating system
+	OSMinorVersion		minor version number of operating system
+	OptimizedCDebugFlags	C compiler flags to turn on optimization
+	PreProcessCmd		command to run /lib/cpp on scripts
+	RanlibCmd		command to clean up libraries
+	RanlibInstFlags		flags to ranlib after copying
+	RmCmd			command to delete files
+	ShLibDir		directory in which to install shared libraries
+	StandardCppDefines	-D's for running cpp
+	StandardDefines		-D's for running C compiler
+	StandardIncludes	-I's for running C compiler
+	StripInstalledPrograms	boolean for sites that want to install -s
+	SystemV			boolean for systems that are at least SVR2
+	SystemV4		boolean for SVR4 systems
+	TOPDIR			relative path to top of sources
+	TagsCmd			command to run tags
+	TblCmd			command to run tbl
+	TroffCmd		command to run troff to get PostScript
+	UNCOMPRESSPATH		command to run uncompress
+	UnalignedReferencesAllowed	boolean for unaligned copies ok
+	UsrLibDir		directory in which to install libraries
+	VarDirectory		directory in /var for logs, etc., and config
+	YaccCmd			command to run yacc
+
+X11.tmpl provides defaults for the following variables:
+
+	AdmDir			directory containing system log files
+	AllocateLocalDefines	-D's to turn on alloca()
+	BDFTOSNFFILT		command to run bdftosnf
+	BaseExtensionDefines	universal extensions to use
+	BinDir			directory in which to install programs
+	BuildAppgroup		build AppGroup extension
+	BuildFontServer		build font server
+	BuildFonts		build pcf fonts
+	BuildIncRoot		relative path to location of headers in build
+	BuildIncTop		path from build includes directory to top
+	BuildLBX		build LBX (aka X.fast) server extension
+	BuildPexExt		build PEX server extension and fonts
+	BuildPhigs		build Phigs (obsolete)
+	BuildServer		build X server
+	BuildXAudio		build Audio 
+	BuildXAServer		build Audio server
+	BuildXIE		build X Image Extension
+	BuildDIS		build Document Imaging Subset of XIE
+	BuildXCSecurity		Build Security Extension
+	BuildXInputExt		build X Input extension (requires ddx support,
+					which exists only in Xhp)
+	BuildXInputLib		build X Input library
+	BuildXKB		build X Keyboard Extension?
+	BuildXKBlib		build X Keyboard Extension into Xlib?
+	UseXKBInClients		Use XKB functions in normal clients?
+	BuildDBE		build DOUBLE-BUFFER extension
+	BuildMultibuffer	build Multibuffer extension (obsolete)
+	BuildRECORD		Build RECORD extension
+	BuildPlugin		build xrx plug-in for web browsers
+	ConfigDir		install directory for config files
+	ConnectionFlags		-D's for supported transports
+	ContribDir		location of user-contributed sources
+	DebugLibFS		build libFS_d.a
+	DebugLibICE		build libICE_d.a
+	DebugLibPex		build libPEX5_d.a
+	DebugLibSM		build libSM_d.a
+	DebugLibX11		build libX11_d.a
+	DebugLibXau		build libXau_d.a
+	DebugLibXaw		build libXaw_d.a
+	DebugLibXdmcp		build libXdmcp_d.a
+	DebugLibXext		build libXext_d.a
+	DebugLibXi		build libXi_d.a
+	DebugLibXie		build libXie_d.a
+	DebugLibXmu		build libXmu_d.a
+	DebugLibXt		build libXt_d.a
+	DebugLibXtst		build libXtst_d.a
+	DebugLibXag		build libXag_d.a
+	DebugOldX		build liboldX_d.a
+	DefaultFSConfigFile	default font server config file
+	DefaultFontPath		default server font path
+	DefaultRGBDatabase	default server rgb color database
+	DefaultSystemPath	default system xdm PATH environment variable
+	DefaultSystemShell	default /bin/sh
+	DefaultUserPath		default user xdm PATH environment variable
+	DependCmd		command to run makedepend
+	DependDir		build directory containing makedepend program
+	ExtensionDefines	-D's for universal extensions
+	ExtensionOSDefines	-D's for additional extensions
+	FontCompilerFlags	flags for bdftosnf
+	FontDefines		-D's to turn on font options
+	FontDir			directory in which to install fonts
+	FontFilters		-D's to specify font conversion filters
+	FontOSDefines		-D's for which fonts to support
+	ForceNormalLib		force building of .a in addition to shared lib
+	GzipFontCompression	boolean for using gzip instead of compress
+	HasXdmAuth		boolean for using XDM-AUTHORIZATION-1;
+					needs Wraphelp.c, see Release Notes
+	InstallAppDefFiles	install new app defaults files over old?
+	InstallFSConfig		install fs config file over old?
+	InstallLibManPages	boolean for installing library man pages
+	InstallSecurityConfig	install server security policy file over old?
+	InstallXdmConfig	install xdm config files over old?
+	InstallXinitConfig	install xinit config files over old?
+	LibDir			directory in which to install X11 support files
+	LibManSuffix		man suffix for library pages
+	LibmanDir		directory in which to install library man pages
+	LintlibDir		directory in which to install lint libs
+	ManDir			directory in which to install program man pages
+	ManDirectoryRoot	parent of man directories relative to root
+	ManPath			full path of parent directory
+	ManSourcePath		common prefix of man page directories
+	ManSuffix		man suffix for programs
+	NeedDefaultDepLibs	boolean for enabling default DEPLIBS
+	NlsDir			directory in which to install nls files
+	NormalLibFS		build libFS.a
+	NormalLibICE		build libICE.a
+	NormalLibPex		build libPEX5.a
+	NormalLibPhigs		build libphigs.a
+	NormalLibSM		build libSM.a
+	NormalLibX11		build libX11.a
+	NormalLibXau		build libXau.a
+	NormalLibXaw		build libXaw.a
+	NormalLibXdmcp		build libXdmcp.a
+	NormalLibXext		build libXext.a
+	NormalLibXi		build libXi.a
+	NormalLibXie		build libXie.a
+	NormalLibXmu		build libXmu.a
+	NormalLibXt		build libXt.a
+	NormalLibXtst		build libXtst.a
+	NormalLibXag		build libXag.a
+	NormalOldX		build liboldX.a
+	OsNameDefines		beats me
+	PexApiDir		PEX include file location
+	PexCCOptions		special options for building PEX library
+	PexCDebugFlags		special flags for building PEX library
+	PexClientDefines	special -D's for building PEX clients
+	PexDipexDefines		special -D's for building PEX di files
+	PexPhigsDefines		special -D's for building PEX library
+	PexShmIPC		boolean for using shared memory in phigsmon
+	PhigsInclude		include directory for phigs clients
+	PrimaryScreenResolution	resolution of default server screen
+	ProfileLibFS		build libFS_p.a
+	ProfileLibICE		build libICE_p.a
+	ProfileLibPex		build libPEX5_p.a
+	ProfileLibSM		build libSM_p.a
+	ProfileLibX11		build libX11_p.a
+	ProfileLibXau		build libXau_p.a
+	ProfileLibXaw		build libXaw_p.a
+	ProfileLibXdmcp		build libXdmcp_p.a
+	ProfileLibXext		build libXext_p.a
+	ProfileLibXi		build libXi_p.a
+	ProfileLibXie		build libXie_p.a
+	ProfileLibXmu		build libXmu_p.a
+	ProfileLibXt		build libXt_p.a
+	ProfileLibXtst		build libXtst_p.a
+	ProfileLibXag		build libXag_p.a
+	ProfileOldX		build liboldX_p.a
+	ProjectX		version indicating this is the X Window System
+	RemoveTargetProgramByMoving	boolean for rm -f that doesn't
+	SHELLPATH		-D for /bin/sh
+	ServerConfigDir		directory for server security config files
+	ServerDefines		complete -D's for server
+	ServerExtraDefines	special -D's for server
+	ServerOSDefines		OS -D's for server
+	ServerAssertDefines	-DNDEBUG for no assertions, /**/ for assertions
+	SharedLibFS		boolean for making sharable libFS.so
+	SharedLibICE		boolean for making sharable libICE.so
+	SharedLibPex		boolean for making sharable libPEX5.so
+	SharedLibPhigs		boolean for making sharable libphigs.so
+	SharedLibSM		boolean for making sharable libSM.so
+	SharedLibX11		boolean for making sharable libX11.so
+	SharedLibXau		boolean for making sharable libXau.so
+	SharedLibXaw		boolean for making sharable libXaw.so
+	SharedLibXdmcp		boolean for making sharable libXdmcp.so
+	SharedLibXext		boolean for making sharable libXext.so
+	SharedLibXi		boolean for making sharable libXi.so
+	SharedLibXie		boolean for making sharable libXie.so
+	SharedLibXmu		boolean for making sharable libXmu.so
+	SharedLibXt		boolean for making sharable libXt.so
+	SharedLibXtst		boolean for making sharable libXtst.so
+	SharedLibXag		boolean for making sharable libXag.so
+	SharedOldX		boolean for making sharable liboldX.so
+	ShmDefines		MIT-SHM define
+	TwmDir			directory in which to install twm config files
+	UseCCMakeDepend		boolean for using alternate makedepend script
+	UseRgbTxt		use rgb.txt file as is instead of DBM-compiled
+	VendorHasX11R6_3libXext	don't need Security & AppGroup in xrx plug-in
+	XAppLoadDir		directory in which to install app defaults
+	XFileSearchPathBase	base file search path
+	XFileSearchPathDefault	default path to search for app defaults files
+	XInputDefines		XINPUT define
+	XMalloc0ReturnsNullDefines -D's specifically for libX11
+	XawClientDepLibs	DEPLIBS for clients that use Xaw
+	XawClientLibs		LOCAL_LIBRARIES for clients that use Xaw
+	XdmConfigurationSubdirectory	name of default xdm configuration
+	XdmDir			directory in which to install xdm files
+	XdmServersType		type of xdm Xservers file to install
+	XinitDir		directory in which to install xinit files
+	XPrintDir		parent of X Print server config directory
+	XprtServer		build the X Print server
+	XmanLocalSearchPath	non-standard path for man pages
+	XtErrorPrefix		leading text in XtError() msg; eg. 'X Toolkit '
+	XtWarningPrefix		leading text in XtWarning()msg, same as above
+	XtMalloc0ReturnsNullDefines -D's specifically for libXt
+	ZBDFTOSNFFILT		-D to run uncompress and bdftosnf
+
+
+Library.tmpl provides defaults for the following variables:
+
+	AvoidNullMakeCommand	for makes that spout about $(_NULLCMD_)
+	LibraryCCOptions	special C compiler options for libraries
+	LibraryCDebugFlags	library debug/optimize flags to override defs
+	LibraryCcCmd		command to run C compiler in libraries
+	LibraryCplusplusOptions special C++ options for libraries
+	LibraryCplusplusDebugFlags  library debug/optimize flags for C++
+	LibraryCplusplusCmd	command to run C++ compiler in libraries
+	LibraryDefines		-D's for libraries
+	SeparateSharedCompile	shared and unshared libs use same binaries?
+
+
+Server.tmpl provides defaults for the following variables:
+
+	ServerCCOptions		server C compiler options to override defaults
+	ServerCcCmd		command to run C compiler in server
+	ServerCDebugFlags	server debug/opt compiler flags
+	ServerDefines		server standard -D's
+	InstallServerSetUID	does this system need X server suid to root?
+
+
+Threads.tmpl provides defaults for the following variables:
+
+	LocalThreads		whether to enable multi-threading support
+	LocalThreadsDefines	-D flags needed in this directory
+
+
+An <os>Lib.rules file provides defaults for the following variables:
+
+	HasSharedLibraries	boolean for using shared libraries
+	SharedDataSeparation	boolean indicating separate data/code
+	SharedCodeDef		-D's for compiling shared library files
+	SharedLibraryDef	-D's for defining which kind of shared lib
+	ShLibIncludeFile	location of the <os>Lib.tmpl file
+	SharedLibraryLoadFlags	loader flags when making the library
+	UseExportLists		boolean for using an export list
+	PositionIndependentCFlags 		PIC compiler flags for C
+	PositionIndependentCplusplusFlags	PIC compiler flags for C++
+
+	  Note: PositionIndependentCplusplusFlags is only required if the 
+	  C and C++ compilers use different flags to build PIC code.  The
+	  default configuration will try to use PositionIndependentCFlags 
+	  for both C and C++ compiles.
+
+An <os>Lib.tmpl file provides defaults for the following variables:
+
+	SharedFSReqs		required libs for libFS.so
+	SharedFSRev		version number for libFS.so
+	SharedICEReqs		required libs for libICE.so
+	SharedICERev		version number for libICE.so
+	SharedOldXReqs		required libs for liboldX.so
+	SharedOldXRev		version number for liboldX.so
+	SharedPexReqs		required libs for libPEX5.so
+	SharedPexRev		version number for libPEX5.so
+	SharedSMReqs		required libs for libSM.so
+	SharedSMRev		version number for libSM.so
+	SharedX11Reqs		required libs for libX11.so
+	SharedX11Rev		version number for libX11.so
+	SharedXauReqs		required libs for libXau.so
+	SharedXauRev		version number for libXau.so
+	SharedXawReqs		required libs for libXaw.so
+	SharedXawRev		version number for libXaw.so
+	SharedXdmcpReqs		required libs for libXdmcp.so
+	SharedXdmcpRev		version number for libXdmcp.so
+	SharedXextReqs		required libs for libXext.so
+	SharedXextRev		version number for libXext.so
+	SharedXiReqs		required libs for libXi.so
+	SharedXiRev		version number for libXi.so
+	SharedXieReqs		required libs for libXie.so
+	SharedXieRev		version number for libXie.so
+	SharedXmuReqs		required libs for libXmu.so
+	SharedXmuRev		version number for libXmu.so
+	SharedXtReqs		required libs for libXt.so
+	SharedXtRev		version number for libXt.so
+	SharedXtstReqs		required libs for libXtst.so
+	SharedXtstRev		version number for libXtst.so
+	SharedXmReqs		required libs for libXm.so
+	SharedXmRev		version number for libXm.so
+	SharedMrmReqs		required libs for libMrm.so
+	SharedMrmRev		version number for libMrm.so
+	SharedUilReqs		required libs for libUil.so
+	SharedUilRev		version number for libUil.so
+	SharedTtReqs		required libs for libtt.so
+	SharedTtRev		version number for libtt.so
+	SharedPamReqs		required libs for libpam.so
+	SharedPamRev		version number for libpam.so
+	SharedDtSvcReqs		required libs for libDtSvc.so
+	SharedDtSvcRev		version number for libDtSvc.so
+	SharedDtSearchReqs	required libs for libDtSearch.so
+	SharedDtSearchRev	version number for libDtSearch.so
+	SharedDtWidgetReqs	required libs for libDtWidget.so
+	SharedDtWidgetRev	version number for libDtWidget.so
+	SharedDtHelpReqs	required libs for libDtHelp.so
+	SharedDtHelpRev		version number for libDtHelp.so
+	SharedDtPrintReqs	required libs for libDtPrint.so
+	SharedDtPrintRev	version number for libDtPrint.so
+	SharedDtTermReqs	required libs for libDtTerm.so
+	SharedDtTermRev		version number for libDtTerm.so
+	SharedDtMrmReqs		required libs for libDtMrm.so
+	SharedDtMrmRev		version number for libDtMrm.so
+
+The following variables are used by some part of the tree:
+
+	AckToolset		programs/Xserver/hw/xfree86
+	BuildChooser		build the xdm chooser program?
+	SharedLibXdmGreet	use xdm shared dynamic greeter library?
+	LatexCmd		command to run LaTeX on a document
+	DvipsCmd		command to turn .dvi file into PostScript
+	MotifBC			using Motif 1.1.1, 1.1.2, or 1.1.3?
+	GetValuesBC		compat GetValues behavior for broken apps?
+	NeedBerklib		application needs libXbsd?
+	SvgaConfig		default SVGA configuration
+	HasGetReturnAddress	util/memleak
+	HasShadowPasswd		system has getspnam() function
+	XnestServer		build X server with Xlib-based ddx
+	XVirtualFramebufferServer	build X server with virtual memory framebuffer
+	XpRasterDDX		include the raster print ddx driver
+	XpColorPclDDX		include the color PCL print ddx driver
+	XpMonoPclDDX		include the monochrome PCL print ddx driver
+	XpPostScriptDDX		include the PostScript print ddx driver
+	WebServer		host:port of your Web server (see programs/xrx)
+	HtmlDir			path used by Web server for HTML and RX docs
+	CgiBinDir		path used by Web server for CGI programs
+	ProxyManager		ICE network ID to contact a running proxymngr
+
+
+Make Variables
+
+The following make variables are used by imake rules and may be set in
+an individual Imakefile.
+
+DEFINES			program-specific -D flags and other arguments
+			to pass to the C compiler, lint, and makedepend.
+DEPEND_DEFINES		program-specific flags in addition to
+			$(DEFINES) to pass to lint and makedepend.
+			This is usually used when there are special
+			compilation rules for individual files, and
+			the defines passed to those files affect
+			makedepend results.  If they can be passed to
+			all files during the makedepend step without
+			affecting the results for other files,
+			DEPEND_DEFINES is used to do that.  Example is
+			the Xlib Imakefile.
+INCLUDES		program-specific -I flags.
+HEADERS			.h files to install with "make includes" and
+			"make install".  If this Imakefile includes
+			Library.tmpl there are no headers, include
+			this line instead of a HEADERS definition:
+			#define LibHeaders NO
+REQUIREDLIBS		when building a shared library, other libraries used
+			by this library that should be referenced at
+			link time.
+LINTLIBS		program-specific libraries for lint.
+LOCAL_LDFLAGS		program-specific flags for the linker.
+LOCAL_LIBRARIES		project libraries (usually specified
+			as -lname) needed by this program.
+			For example, "-lXt -lXext -lX11".
+			Used by SimpleProgramTarget and
+			ComplexProgramTarget* rules.
+			Do not include any system-specific libraries here.
+SYS_LIBRARIES		system libraries (usually specified
+			as -lname) needed by this program.
+			For example "MathLibrary".
+			Do not include any system-specific libraries
+			such as "-lnsl" here; they are automatically
+			added to the link command by the
+			vendor-specific .cf file.
+SUBDIRS			for an Imakefile in a directory containing
+			subdirectories, this names the subdirectories.
+			Such an Imakefile also needs to #define IHaveSubdirs
+			and call MakeSubdirs() and DependSubdirs().
+MANSUFFIX		suffix used by InstallManPage* rules.
+			May be set to $(LIBMANSUFFIX) or $(FILEMANSUFFIX) in
+			directories for libraries or data files.
+
+
+Rule-specific variables that may be set in an individual Imakefile.
+If you aren't using these rules, you may need variables with a similar
+function, but you need not use these names.  However, following these
+conventions may make your Imakefile easier to read and maintain.
+
+DEPLIBS			library dependencies for ComplexProgramTarget
+SRCS			source files used by ComplexProgramTarget and
+			DependTarget.
+OBJS			object files used by ComplexProgramTarget
+PROGRAMS		default target used with ComplexProgramTarget_(n)
+SRCS1			source files used by ComplexProgramTarget_1
+OBJS1			object files used by ComplexProgramTarget_1
+DEPLIBS1		library dependencies for ComplexProgramTarget_1
+SRCS2			source files used by ComplexProgramTarget_2
+OBJS2			object files used by ComplexProgramTarget_2
+DEPLIBS2		library dependencies for ComplexProgramTarget_2
+SRCS3			source files used by ComplexProgramTarget_3
+OBJS3			object files used by ComplexProgramTarget_3
+DEPLIBS3		library dependencies for ComplexProgramTarget_3
+
+Variables that can be set on the make command line:
+
+DESTDIR			directory under which "make install" should
+			install instead of "/"; used only for testing
+			"make install" rules.
+FILE			file for "lint1" target to run lint on.
+CDEBUGFLAGS		-g and/or -O flag to control C compiler optimization.
+CXXDEBUGFLAGS		-g and/or -O flag to control C++ optimization.
+LDSTRIPFLAGS		flag to have linker strip objects (typically -x).
+			Typically set to the empty string to prevent
+			the linker from stripping objects; use this
+			way when setting CDEBUGFLAGS to "-g".
+
+These variables are set in project-specific files such as X11.tmpl.
+They should NOT be set in an Imakefile.  These variables are sometimes
+misused; they are included here to remind Imakefile writers NOT to use
+them:
+
+EXTRA_DEFINES		project-specific -D flags
+EXTRA_INCLUDES		project-specific -I flags
+EXTRA_ICONFIGFILES	Additional project-specific imake config files
+			to add to ICONFIGFILES.
+			This is a list of files that define variables
+			that might affect compilation of some files.
+
+Many other make variables are set up by the imake config files and can
+be used in an Imakefile.  The easiest way to discover them is to look
+at the Makefile generated by an empty Imakefile.
+
+
+Comments
+
+Use C comment syntax in an Imakefile for comments that should not
+appear in the resulting Makefile.
+Use "XCOMM" at the start of each
+line to produce a comment that will appear in the Makefile.
+(The "XCOMM" will
+be translated into the Makefile comment character "#" by imake.)
+Do NOT use "#" as a comment character in Imakefiles; it confuses the C
+preprocessor used by imake on some systems.
+
+
+Imake variables
+
+Don't abuse the variables in X11.tmpl that describe
+particular pieces of X by using them to describe your own subsystems.
+Instead, create new variables that are defaulted using
+Imake.tmpl variables.
+
+
+Examples
+
+Since the easiest way to write an Imakefile is to start with one that
+works, here are some short, easy-to-read Imakefile examples in the X
+distribution:
+
+with subdirs:	config/Imakefile
+library:	lib/Xau/Imakefile
+simple program: programs/xdpyinfo/Imakefile
+complex progs:  programs/xclipboard/Imakefile
+complex prog:	programs/xmodmap/Imakefile
+
+Common Rules
+
+Here are some of the common rules for building programs.  How to use
+them is described in Imake.rules and in the O'Reilly book "Software
+Portability with imake."
+
+Basic program-building rules
+
+All of these except NormalProgramTarget also generate rules to install
+the program and its manual page, and to generate dependencies.
+
+SimpleProgramTarget	Use if there is only one program to be made
+			and it has only one source file.
+
+ComplexProgramTarget	Use if there is only one program to be made
+			and it has multiple source files.  Set SRCS to
+			the names of the source files, set OBJS to
+			the names of the object files, and set DEPLIBS
+			to the libraries that this program depends on.
+
+ComplexProgramTarget_1	Like ComplexProgramTarget, but uses SRCS1,
+			OBJS1, and DEPLIBS1 and can be used with
+			ComplexProgramTarget_2 and ComplexProgramTarget_3
+			to build up to three programs in the same directory.
+			Set PROGRAMS to the programs built by all of
+			these rules.  For more than 3 programs, use
+			NormalProgramTarget for each.
+ComplexProgramTarget_2	Use after ComplexProgramTarget_1 for the
+			second program in a directory.  Uses SRCS2,
+			OBJS2, and DEPLIBS2.
+ComplexProgramTarget_3	Use after ComplexProgramTarget_2 for the
+			third program in a directory.  Uses SRCS3,
+			OBJS3, and DEPLIBS3.
+
+NormalProgramTarget	Build a program.  Can be used multiple times
+			with different arguments in the same Imakefile.
+
+Lower level rules, often used with NormalProgramTarget
+
+InstallProgram		install a program.
+
+InstallManPage		install a manual page.
+
+DependTarget()		include once at end of Imakefile with
+			NormalProgramTarget rules or that uses Library.tmpl.
+			Generates dependencies for files named in SRCS.
+
+Manual page rules, commonly used only in special documentation directories:
+
+InstallManPage
+InstallManPageLong
+InstallManPageAliases
+
+Other rules:
+
+SpecialCObjectRule	Compile a C file with special flags.
+AllTarget		Declare additional targets to build.
+InstallAppDefaults	Install X application defaults file.
+
+Imakefile for directory with subdirectories
+
+XCOMM this is a sample Imakefile for a directory containing subdirectories
+#define IHaveSubdirs
+#define PassCDebugFlags CDEBUGFLAGS="$(CDEBUGFLAGS)"
+SUBDIRS = list of subdirs ...
+MakeSubdirs($(SUBDIRS))
+DependSubdirs($(SUBDIRS))
+
+
+Common Targets
+
+These targets are typically NOT defined explicitly by the Imakefile
+writer; rather they are generated automatically by imake rules.
+They are listed here for the convenience of people using the resulting
+Makefile, not people writing the original Imakefile.
+
+all			Default rule; builds whatever is in this directory.
+Makefile		Remake the Makefile (use after changing Imakefile).
+			Run "make depend" after.
+Makefiles		Remake all Makefiles in subdirectories.  (Does
+			nothing if no subdirectories.)
+			Run "make depend" after.
+includes		Generate and install in the tree any necessary
+			header files.
+depend			Update dependencies in the Makefile calculated
+			by examining the source files.
+install			Install what "make all" built on the system.
+install.man		Install manual pages.
+clean			Remove built objects and other derived files.
+lint			Run lint.
+tags			Create a tags file.

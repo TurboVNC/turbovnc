@@ -1,0 +1,953 @@
+XCOMM $Xorg: Imake.cf,v 1.4 2000/08/17 19:41:45 cpqbld Exp $
+/*
+ * To add support for another platform:
+ * 
+ *     1.  Identify a machine-specific cpp symbol.  If your preprocessor 
+ *         does not have any built in, you will need to add the symbol to the
+ *         cpp_argv table in config/imake/imakemdep.h and rebuild imake with
+ *         the BOOTSTRAPCFLAGS variable set (see the macII for an example).
+ *
+ *     2.  Add all machine-specific cpp symbols (either defined by you or by
+ *         the preprocessor or compiler) to the predefs table in 
+ *         config/imake/imakemdep.h.
+ *
+ *     3.  But a new #ifdef block below that defines MacroIncludeFile and
+ *         MacroFile for your new platform and then #undefs the machine-
+ *         specific preprocessor symbols (to avoid problems with file names).
+ *
+ *     4.  Create a .cf file with the name given by MacroFile.
+ */
+XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.66 2001/04/18 16:13:17 dawes Exp $
+
+#if defined(__APPLE__)
+# undef __APPLE__
+# define MacroIncludeFile <darwin.cf>
+# define MacroFile darwin.cf
+# define DarwinArchitecture
+# ifdef __ppc__
+#  define PpcDarwinArchitecture
+#  undef __ppc__
+# endif
+# ifdef __i386__
+#  define i386DarwinArchitecture
+#  undef __i386__
+# endif
+#endif
+
+#if defined(clipper) || defined(__clipper__)
+# undef clipper
+# define MacroIncludeFile <ingr.cf>
+# define MacroFile ingr.cf
+# define IngrArchitecture
+#endif /* clipper */
+
+#ifdef __CYGWIN__
+#define MacroIncludeFile <cygwin.cf>
+#define MacroFile cygwin.cf
+#define cygwinArchitecture
+#define i386Architecture
+#undef i386
+#undef __i386__
+#undef _X86_
+#undef __CYGWIN__
+#endif /* CYGWIN */
+
+#ifdef ultrix
+# define MacroIncludeFile <ultrix.cf>
+# define MacroFile ultrix.cf
+# ifdef vax
+#  undef vax
+#  define VaxArchitecture
+# endif
+# ifdef mips
+#  undef mips
+#  define MipsArchitecture
+#  define MipselArchitecture
+# endif
+# undef ultrix
+# define UltrixArchitecture
+#endif /* ultrix */
+
+#if defined(vax) && !defined(UltrixArchitecture)
+# define MacroIncludeFile <bsd.cf>
+# define MacroFile bsd.cf
+# undef vax
+# define BSDArchitecture
+# define VaxArchitecture
+#endif /* vax */
+
+#ifdef bsdi
+# define MacroIncludeFile <bsdi.cf>
+# define MacroFile bsdi.cf
+# undef bsdi
+# define BSDOSArchitecture
+# if defined(__i386__) || defined(i386)
+#  define i386BsdArchitecture
+#  define i386Architecture
+#  undef i386
+#  undef __i386__
+# endif
+# if defined(__sparc__) || defined(__sparc_v9__) || defined(sparc)
+#  define SparcArchitecture
+#  undef sparc
+#  undef __sparc__
+#  undef __sparc_v9__
+# endif
+#endif /* bsdi */
+
+#ifdef __OpenBSD__
+# undef __OpenBSD__
+# undef __NetBSD__
+# define OpenBSDArchitecture
+# define MacroIncludeFile <OpenBSD.cf>
+# define MacroFile OpenBSD.cf
+# ifdef __i386__
+#  define i386BsdArchitecture
+#  define i386Architecture
+#  undef i386
+# endif
+# if defined(__sparc__) || defined(sparc)
+#  define SparcArchitecture
+#  undef sparc
+# endif
+# ifdef mips
+#   define MipsArchitecture
+#   ifdef arc
+#     define ArcArchitecture
+#     undef arc
+#   endif
+#   ifdef pmax
+#     define PmaxArchitecture
+#     undef pmax
+#   endif
+#   undef mips
+# endif
+# ifdef __alpha__
+#   define AlphaArchitecture
+#   undef __alpha__
+# endif
+# ifdef mc68020
+#  define Mc68020Architecture
+#  if defined(amiga)
+#   define AmigaArchitecture
+#   undef amiga
+#  endif
+#  if defined(hp300)
+#   define Hp300Architecture
+#   undef hp300
+#  endif
+#  if defined(mac68k)
+#    define Mac68kArchitecture
+#    undef mac68k
+#  endif
+#  if defined(mvme68k)
+#   define Mvme68kArchitecture
+#   undef mvme68k
+#  endif
+#  if defined(sun3) 
+#   define Sun3Architecture
+#   undef sun3
+#  endif
+#  undef mc68000
+# endif
+# ifdef __powerpc__
+#  define PpcArchitecture
+#  undef __powerpc__
+# endif
+#endif /* OpenBSD */
+
+#ifdef __NetBSD__
+# define MacroIncludeFile <NetBSD.cf>
+# define MacroFile NetBSD.cf
+# undef __NetBSD__
+# define NetBSDArchitecture
+# ifdef __i386__
+#  define i386BsdArchitecture
+#  define i386Architecture
+#  undef i386
+# endif
+# if defined(__sparc__) || defined(sparc)
+#  define SparcArchitecture
+#  undef sparc
+# endif
+# ifdef mips
+#   define MipsArchitecture
+#   define ArcArchitecture
+#   undef mips
+# endif
+# ifdef __alpha__
+#   define AlphaArchitecture
+#   undef __alpha__
+# endif
+# ifdef mc68000
+#   define Mc68020Architecture
+# endif
+# ifdef __arm32__
+#   define Arm32Architecture
+#   undef __arm32__
+# endif
+# ifdef __vax__
+#   define VaxArchitecture
+#   undef __vax__
+# endif
+# ifdef __powerpc__
+#   define PpcArchitecture
+#   undef __powerpc__
+# endif
+#endif /* NetBSD */
+
+#ifdef __FreeBSD__
+# define MacroIncludeFile <FreeBSD.cf>
+# define MacroFile FreeBSD.cf
+# undef __FreeBSD__
+# define FreeBSDArchitecture
+# ifdef __i386__
+#  define i386BsdArchitecture
+#  define i386Architecture
+#  undef i386
+# endif
+# ifdef __alpha__
+#  define AlphaBsdArchitecture
+#  define AlphaArchitecture
+#  undef __alpha__
+# endif
+#endif /* __FreeBSD__ */
+
+#ifdef AMOEBA
+ /* Should be before the 'sun' entry because we may be cross-compiling */
+# define MacroIncludeFile <Amoeba.cf>
+# define MacroFile Amoeba.cf
+# if defined(i80386) || defined(__i80386__)
+#  undef i80386
+#  define i386Architecture
+# else
+#  if defined(mc68000) || defined(__mc68000__)
+#   undef mc68000
+#   define Sun3Architecture
+#   define SunArchitecture
+#  else
+#   if defined(sparc) || defined(__sparc__)
+#    undef sparc
+#    define SparcArchitecture
+#    define SunArchitecture
+#   endif
+#  endif
+#  undef sun
+# endif
+#endif /* AMOEBA */
+
+#ifdef sun
+# define MacroIncludeFile <sun.cf>
+# define MacroFile sun.cf
+# ifdef SVR4
+#  undef SVR4
+#  define SVR4Architecture
+# endif
+# ifdef sparc
+#  undef sparc
+# define SparcArchitecture
+# endif
+# ifdef mc68000
+#  undef mc68000
+# define Sun3Architecture
+# endif
+# ifdef i386
+#  undef i386
+#  define i386Architecture
+# endif
+# undef sun
+# define SunArchitecture
+#endif /* sun */
+
+#ifdef __hpux
+# define MacroIncludeFile <hp.cf>
+# define MacroFile hp.cf
+# undef __hpux
+# define HPArchitecture
+#endif /* __hpux */
+
+#ifdef sco
+# define MacroIncludeFile <sco5.cf>
+# define MacroFile sco5.cf
+# undef sco
+# undef USL
+# undef SYSV
+# undef i386
+# undef SCO
+# undef SVR4
+# define i386Architecture
+# define SCOArchitecture
+# define i386SVR3Architecture
+# define SVR3Architecture
+# define i386ScoArchitecture
+# define i386Sco325Architecture
+#endif /* sco - SCO Open Server 5 */
+
+#ifdef USL
+# define MacroIncludeFile <usl.cf>
+# define MacroFile usl.cf
+# undef USL
+# undef SVR4
+# undef i386
+# define SVR4Architecture
+# define i386Architecture
+# define USLArchitecture
+#endif /* USL */
+
+#ifdef NCR
+# define MacroIncludeFile <ncr.cf>
+# define MacroFile ncr.cf
+# undef NCR
+# undef SVR4
+# undef i386
+# define SVR4Architecture
+# define i386Architecture
+# define NCRArchitecture
+#endif /* NCR */
+
+#ifdef apollo
+# define MacroIncludeFile <apollo.cf>
+# define MacroFile apollo.cf
+# undef apollo
+# define ApolloArchitecture
+#endif /* apollo */
+
+#ifdef sony
+# define MacroIncludeFile <sony.cf>
+# define MacroFile sony.cf
+# undef sony
+# undef sony_news
+# define SonyArchitecture
+# ifdef mc68020
+#  undef mc68020
+#  undef mc68030
+#  define Mc68020Architecture
+# endif
+# ifdef mips
+#  undef mips
+#  define MipsArchitecture
+# endif
+# ifdef __svr4
+#  define SVR4Architecture
+# else
+#  if !defined(bsd43) || defined(SYSTYPE_SYSV) || defined(_SYSTYPE_SYSV)
+#   define SonySysvArchitecture
+#  else
+#   define SonyBsdArchitecture
+#  endif
+# endif
+#endif /* sony */
+
+#ifdef M4310
+# define MacroIncludeFile <pegasus.cf>
+# define MacroFile pegasus.cf
+# undef M4310
+# define PegasusArchitecture
+#endif /* M4310 */
+
+#ifdef M4330
+# define MacroIncludeFile <m4330.cf>
+# define MacroFile m4330.cf
+# undef  M4330
+# define M4330Architecture
+#endif /* M4330 */
+
+#ifdef macII
+# define MacroIncludeFile <macII.cf>
+# define MacroFile macII.cf
+# undef  macII
+# define MacIIArchitecture
+#endif /* macII */
+
+#ifdef _CRAY
+# define MacroIncludeFile <cray.cf>
+# define MacroFile cray.cf
+# undef cray
+# undef CRAY
+# undef CRAY1
+# undef CRAY2
+# undef YMP
+# define CrayArchitecture
+#endif /* _CRAY */
+
+#ifdef sgi
+# define MacroIncludeFile <sgi.cf>
+# define MacroFile sgi.cf
+# undef sgi
+# define SGIArchitecture
+# undef mips
+# undef __mips
+# define MipsArchitecture
+# ifdef _SVR4
+#  undef _SVR4
+#  define SVR4Architecture
+# endif
+# ifdef _SYSTYPE_SVR4
+#  undef _SYSTYPE_SVR4
+#  define SVR4Architecture
+# endif
+#endif /* sgi */
+
+#ifdef stellar
+# define MacroIncludeFile <stellar.cf>
+# define MacroFile stellar.cf
+# undef stellar
+# define StellarArchitecture
+#endif /* stellar */
+
+#if defined(ibm) || defined(_IBMR2) || defined(ibm032) || defined(aix)
+# define MacroIncludeFile <ibm.cf>
+# define MacroFile ibm.cf
+# ifdef ibm
+#  undef ibm
+# endif
+# define IBMArchitecture
+# ifdef i386
+#  undef i386
+#  define PS2Architecture
+# endif
+# ifdef ibm032
+#  undef ibm032
+#  define RtArchitecture
+# endif
+# ifdef aix
+#  undef aix
+#  define AIXArchitecture
+# endif
+# ifdef _IBMR2
+#  undef _IBMR2
+#  define RsArchitecture
+# endif
+#endif /* ibm */
+
+#ifdef luna
+# undef luna
+# define MacroIncludeFile <luna.cf>
+# define MacroFile luna.cf
+# define LunaArchitecture
+# ifdef mc68000
+#  undef mc68000
+#  define Mc68000Architecture
+# else
+#  undef mc88000
+#  define Mc88000Architecture
+# endif
+#endif /* luna */
+
+#ifdef Mips
+#  define MacroIncludeFile <Mips.cf>
+#  define MacroFile Mips.cf
+#  undef Mips
+#  undef mips
+#  if defined(SYSTYPE_BSD43) || defined(BSD) || defined(BSD43)
+#    define MipsBsdArchitecture
+#  else /* BSD */
+#    define MipsSysvArchitecture
+#  endif /* BSD */
+#endif /* Mips */
+
+#ifdef MOTOROLA
+# define MacroIncludeFile <moto.cf>
+# define MacroFile moto.cf
+# undef MOTOROLA	
+# ifdef SYSV
+#  define MotoR3Architecture
+# endif
+# ifdef SVR4
+#  define MotoR4Architecture
+# endif
+#endif /* MOTOROLA */
+
+#if defined(SVR4) && !defined(DGUX)
+# ifdef i386
+#  define i386Architecture
+#  undef i386
+# endif
+# ifdef PC98
+#  define PANIX98Architecture
+#  undef PC98
+# endif
+# define SVR4Architecture
+# define MacroIncludeFile <svr4.cf>
+# define MacroFile svr4.cf
+# undef SVR4
+#endif /* SVR4 */
+
+#ifdef SYSV
+# ifdef i386
+# undef i386
+#  ifdef ISC
+#   define i386Architecture	
+#   define i386SVR3Architecture	
+#   define MacroIncludeFile <isc.cf>
+#   define MacroFile isc.cf
+#   define i386IscArchitecture
+#   undef ISC
+#   ifdef ISC202
+#    define IscVersion 202
+#    undef ISC202
+#   else
+#    ifdef ISC30
+#     define IscVersion 300
+#     undef ISC30
+#    else
+#     ifdef ISC40
+#      define IscVersion 400
+#      undef ISC40
+#     else
+#      define IscVersion 221
+#     endif /* ISC40 */
+#    endif /* ISC30 */
+#   endif /* ISC202 */
+#  endif /* ISC */
+#  ifndef MacroFile
+#   define i386SVR3Architecture
+#   define MacroIncludeFile <x386.cf>
+#   define MacroFile x386.cf
+#  endif /* MacroFile */
+# endif /* i386 */
+#endif /* SYSV */
+
+/* SYSV386 is here for backward compatibility only */
+#ifdef SYSV386
+# undef i386
+# ifdef SVR4
+#  define i386Architecture
+#  define SVR4Architecture
+#  define i386SVR4Architecture
+#  define MacroIncludeFile <svr4.cf>
+#  define MacroFile svr4.cf
+#  undef SVR4
+# else /* ! SVR4 */
+#  ifdef ISC
+#   define i386Architecture	
+#   define i386SVR3Architecture	
+#   define MacroIncludeFile <isc.cf>
+#   define MacroFile isc.cf
+#   define i386IscArchitecture
+#   undef ISC
+#   ifdef ISC202
+#    define IscVersion 202
+#    undef ISC202
+#   else
+#    ifdef ISC30
+#     define IscVersion 300
+#     undef ISC30
+#    else
+#     ifdef ISC40
+#      define IscVersion 400
+#      undef ISC40
+#     else
+#      define IscVersion 221
+#     endif /* ISC40 */
+#    endif /* ISC30 */
+#   endif /* ISC202 */
+#  endif /* ISC */
+#  ifndef MacroFile
+#   define i386SVR3Architecture
+#   define MacroIncludeFile <x386.cf>
+#   define MacroFile x386.cf
+#  endif /* MacroFile */
+# endif /* ! SVR4 */
+#endif /* SYSV386 */
+
+#ifdef DGUX
+# define i386Architecture
+# define SVR4Architecture
+# define MacroIncludeFile <DGUX.cf>
+# define MacroFile DGUX.cf
+# undef DGUX
+# define DguxArchitecture
+#endif /* DGUX */
+
+#ifdef __convex__
+# define MacroIncludeFile <convex.cf>
+# define MacroFile convex.cf
+# ifdef convex
+#  undef convex
+# endif
+# define ConvexArchitecture
+#endif /* _convex_ */
+
+#ifdef __osf__
+# define MacroIncludeFile <osf1.cf>
+# define MacroFile osf1.cf
+# define OSF1Architecture
+# undef __osf__
+# ifdef __mips__
+#  undef __mips__
+#  define MipsArchitecture
+#  define MipselArchitecture
+# endif
+# ifdef __alpha
+#  undef __alpha
+#  define AlphaArchitecture
+# endif
+#endif /* __osf__ */
+
+#ifdef Oki
+# define MacroIncludeFile <Oki.cf>
+# define MacroFile Oki.cf
+# undef Oki
+# define i860SVR4Architecture
+# define SVR4Architecture
+# undef SVR4
+#endif /* Oki */
+
+#ifdef WIN32
+# define MacroIncludeFile <Win32.cf>
+# define MacroFile Win32.cf
+# define Win32Architecture
+#endif /* WIN32 */
+
+#ifdef linux 
+# define MacroIncludeFile <linux.cf>
+# define MacroFile linux.cf
+# undef linux
+# define LinuxArchitecture
+# ifdef i386
+#  ifndef i386Architecture
+#   define i386Architecture
+#  endif
+#  undef i386
+XCOMM Keep cpp from replacing path elements containing i486/i586/i686
+#  ifdef i486
+#  ifndef i386Architecture
+#   define i386Architecture
+#  endif
+#   undef i486
+#  endif
+#  ifdef i586
+#  ifndef i386Architecture
+#   define i386Architecture
+#  endif
+#   undef i586
+#  endif
+#  ifdef i686
+#  ifndef i386Architecture
+#   define i386Architecture
+#  endif
+#   undef i686
+#  endif
+#  ifdef k6
+#  ifndef i386Architecture
+#   define i386Architecture
+#  endif
+#   undef k6
+#  endif
+# endif /* k6 */
+# ifdef __i386__
+#  ifndef i386Architecture
+#   define i386Architecture
+#  endif
+#  undef __i386__
+# endif /* __i386__ */
+# ifdef __i486__
+#  ifndef i386Architecture
+#   define i386Architecture
+#  endif
+#  undef __i486__
+# endif /* __i486__ */
+# ifdef __i586__
+#  ifndef i386Architecture
+#   define i386Architecture
+#  endif
+#  undef __i586__
+# endif /* __i586__ */
+# ifdef __i686__
+#  ifndef i386Architecture
+#   define i386Architecture
+#  endif
+#  undef __i686__
+# endif /* __i686__ */
+# ifdef __k6__
+#  ifndef i386Architecture
+#   define i386Architecture
+#  endif
+#  undef __k6__
+# endif /* __k6__ */
+# ifdef __i386
+#  ifndef i386Architecture
+#   define i386Architecture
+#  endif
+#  undef __i386
+# endif /* __i386 */
+# ifdef __i486
+#  ifndef i386Architecture
+#   define i386Architecture
+#  endif
+#  undef __i486
+# endif /* __i486 */
+# ifdef __i586
+#  ifndef i386Architecture
+#   define i386Architecture
+#  endif
+#  undef __i586
+# endif /* __i586 */
+# ifdef __i686
+#  ifndef i386Architecture
+#   define i386Architecture
+#  endif
+#  undef __i686
+# endif /* __i686 */
+# ifdef __k6
+#  ifndef i386Architecture
+#   define i386Architecture
+#  endif
+#  undef __k6
+# endif /* __k6 */
+# ifdef __s390__
+#   define s390Architecture
+#  undef __s390__
+# endif /* s390 */
+# ifdef __alpha
+#  define AlphaArchitecture
+#  undef __alpha
+# endif /* __alpha */
+# ifdef __alpha__
+#  ifndef AlphaArchitecture
+#   define AlphaArchitecture
+#  endif
+#  undef __alpha__
+# endif /* __alpha__ */
+# ifdef __arm__
+#  define Arm32Architecture
+#  undef arm
+#  undef __arm
+#  undef __arm__
+# endif
+# ifdef mc68000
+#  define Mc68020Architecture
+#  undef mc68000
+# endif /* mc68000 */
+# ifdef powerpc
+#  define PpcArchitecture
+#  undef powerpc
+# endif
+# ifdef __powerpc__
+#  ifndef PpcArchitecture
+#   define PpcArchitecture
+#  endif
+#  undef __powerpc__
+# endif
+# ifdef sparc
+#  define SparcArchitecture
+#  undef sparc
+# endif
+# ifdef __sparc__
+#  ifndef SparcArchitecture
+#   define SparcArchitecture
+#  endif
+#  undef __sparc__
+# endif
+# ifdef ia64 
+#  define ia64Architecture
+#  undef ia64 
+# endif
+# ifdef __ia64__
+#  ifndef ia64Architecture
+#   define ia64Architecture
+#  endif
+#  undef __ia64__
+# endif
+# if defined(mips) || defined(__mips__)
+#  define MipsArchitecture
+#  undef mips
+#  undef __mips__
+#  if defined(MIPSEL) || defined(_MIPSEL)
+#   define MipselArchitecture
+#  endif
+#  undef MIPSEL
+#  undef _MIPSEL
+# endif
+# ifdef __hppa__
+#  ifndef HPArchitecture
+#   define HPArchitecture
+#  endif
+#  undef __hppa__
+# endif /* __hppa__ */
+# ifdef __sh__
+#  ifndef SuperHArchitecture
+#   define SuperHArchitecture
+#  endif
+#  ifdef __BIG_ENDIAN__
+#   ifndef SuperHebArchitecture
+#    define SuperHebArchitecture
+#   endif
+#  endif
+#  undef __sh__
+# endif /* __sh__ */
+# if defined(__SH3__) || defined(__sh3__)
+#  ifndef SuperH3Architecture
+#   define SuperH3Architecture
+#  endif
+#  undef __SH3__
+#  undef __sh3__
+# endif /* __SH3__ or __sh3__ */
+# ifdef __SH4__
+#  ifdef __SH4_NOFPU__
+#   ifndef SuperH4NOFPUArchitecture
+#    define SuperH4NOFPUArchitecture
+#   endif
+#   undef __SH4_NOFPU__
+#  else
+#   ifndef SuperH4Architecture
+#    define SuperH4Architecture
+#   endif
+#  endif
+#  undef __SH4__
+# endif /* __SH4__ */
+XCOMM  for compatibility with 3.3.x 
+# ifdef PpcArchitecture
+#  define PowerPCArchitecture
+# endif
+#endif /* linux */
+
+#if (defined(__Lynx__) || defined(Lynx)) && (defined(i386) || defined(__i386__) || defined(__x86__) || defined(__powerpc__) || defined(__sparc__) || defined(sparc))
+# define MacroIncludeFile <lynx.cf>
+# define MacroFile lynx.cf
+# define LynxOSArchitecture
+# undef __Lynx__
+# undef Lynx
+# undef lynx
+# if defined(i386) || defined(__i386__) || defined(__x86__)
+#  define i386Architecture
+#  undef i386
+#  undef __i386__
+#  undef __x86__
+# endif
+# ifdef __powerpc__
+#  define PpcArchitecture
+#  undef __powerpc__
+# endif
+# if defined(sparc) || defined(__sparc__)
+#  define SparcArchitecture
+#  undef sparc
+#  undef __sparc__
+# endif
+/* for compatibility with 3.3.x */
+# ifdef PpcArchitecture
+#  define PowerPCArchitecture
+# endif
+#endif /* LynxOS AT/PPC/microSPARC */
+
+#ifdef __uxp__
+# define MacroIncludeFile <fujitsu.cf>
+# define MacroFile fujitsu.cf
+# define FujitsuArchitecture
+# undef __uxp__
+# define UXPArchitecture
+# define SVR4Architecture
+# ifdef sparc
+#  undef sparc
+#  define SparcArchitecture
+# endif
+#endif /* __uxp__ */
+
+#ifdef __sxg__
+# define MacroIncludeFile <fujitsu.cf>
+# define MacroFile fujitsu.cf
+# define FujitsuArchitecture
+# undef __sxg__
+# define mc68000Architecture
+#endif /* __sxg__ */
+
+#ifdef _SEQUENT_
+/* undefine assignments resulting from -DSVR4 */
+# undef MacroIncludeFile
+# define MacroIncludeFile <sequent.cf>
+# undef MacroFile
+# define MacroFile sequent.cf
+# undef _SEQUENT_
+# define DynixPtxArchitecture
+# define SequentArchitecture
+#endif
+
+#if defined(_nec_ews_svr4) || defined(nec_ews_svr4) || defined(nec_ews_svr2) || defined(SX) || defined(_nec_up) || defined(_nec_ft) || defined(PC_UX)
+# ifdef nec
+#  undef nec
+# endif
+# define MacroIncludeFile <nec.cf>
+# define MacroFile nec.cf
+# define NecArchitecture
+#endif
+
+#ifdef minix 
+#define MacroIncludeFile <minix.cf>
+#define MacroFile minix.cf
+#undef minix
+#define MinixArchitecture
+#define i386Architecture
+#endif /* minix */
+
+#ifdef MACH
+#ifdef __GNU__
+#define MacroIncludeFile <gnu.cf>
+#define MacroFile gnu.cf
+#define GNUMachArchitecture
+#else
+#define MacroIncludeFile <mach.cf>
+#define MacroFile mach.cf
+#endif
+#undef MACH
+#ifdef	i386
+#define i386MachArchitecture
+#define i386Architecture
+#endif	/* i386 */
+#undef i386
+#endif /* MACH */
+
+/* On NetBSD, `unix' is not defined, and cpp emits a warning every time
+ * it sees a test using the `unix' symbol */
+#if !defined(NetBSDArchitecture) || (defined(NetBSDArchitecture) && DefaultOSMajorVersion == 1 && DefaultOSMinorVersion <= 3)
+#ifdef unix
+#undef unix
+#endif
+#endif
+
+#ifdef emxos2
+#define MacroIncludeFile <os2.cf>
+#define MacroFile os2.cf
+#define OS2Architecture
+#define i386Architecture
+#endif /* emxos2 */
+
+#if defined(__QNX__) && !defined(__QNXNTO__)
+#define MacroIncludeFile <QNX4.cf>
+#define MacroFile QNX4.cf
+#define QNX4Architecture
+#define i386Architecture
+#endif /* QNX4 */
+
+#ifdef __QNXNTO__
+#define MacroIncludeFile <nto.cf>
+#define MacroFile nto.cf
+#define NTOArchitecture
+#ifdef PPC
+# define PPCArchitecture
+# undef PPC
+#else
+#ifdef MIPS
+# define mipsArchitecture
+# undef MIPS
+#else
+#ifdef i386
+# define i386Architecture
+# undef i386
+#endif
+#endif
+#endif
+#endif /* QNX/Neutrino */
+
+#ifdef SparcArchitecture
+# if defined(__sparc_v9) || defined(__arch64__)
+#  define Sparc64Architecture
+# endif
+#endif
+
+#ifndef MacroIncludeFile
+XCOMM WARNING:  Imake.cf not configured; guessing at definitions!!!
+XCOMM This might mean that BOOTSTRAPCFLAGS was not set when building imake.
+#define MacroIncludeFile <generic.cf>
+#define MacroFile generic.cf
+#endif

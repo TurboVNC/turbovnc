@@ -1,0 +1,35 @@
+XCOMM $XConsortium: Imakefile /main/12 1995/12/07 21:15:22 gildea $
+XCOMM $XFree86: xc/lib/font/Imakefile,v 3.5.4.2 1997/05/11 05:04:09 dawes Exp $
+#include <Server.tmpl>
+
+#define	IHaveSubdirs
+
+SUBDIRS = bitmap fontfile fc Speedo Type1 util
+OBJS = bitmap/?*.o fontfile/?*.o fc/?*.o Speedo/?*.o Type1/?*.o util/?*.o
+DONES = bitmap/DONE fontfile/DONE fc/DONE Speedo/DONE Type1/DONE util/DONE
+
+#if HasParallelMake
+MakeMutex($(SUBDIRS) $(DONES))
+#endif
+
+#if HasGnuMake || HasBsdMake
+$(DONES): $(SUBDIRS)
+#endif
+
+#undef _LinkBuildLibrary
+#define _LinkBuildLibrary(lib) LinkBuildLibrary(lib)
+
+#ifndef OS2Architecture
+NormalDepLibraryTarget(font,$(SUBDIRS) $(DONES),$(OBJS))
+#else
+all:: DONE
+	cp $(OBJS) .
+
+NormalDepLibraryTarget(font,$(DONES),?*.o)
+#endif
+
+InstallLinkKitLibrary(font,$(LINKKITDIR)/lib)
+
+ForceSubdirs($(SUBDIRS))
+
+DependSubdirs($(SUBDIRS))

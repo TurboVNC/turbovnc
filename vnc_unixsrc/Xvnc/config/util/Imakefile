@@ -1,0 +1,101 @@
+XCOMM $XConsortium: Imakefile /main/16 1996/11/13 14:43:28 lehors $
+XCOMM $XFree86: xc/config/util/Imakefile,v 3.15 1996/12/23 05:56:12 dawes Exp $
+
+#if UseCCMakeDepend
+MDEP_PROG = makedepend
+#endif
+
+#ifdef ExportListGenSource
+EXPORTLISTGEN = exportlistgen
+#endif
+
+#ifdef Win32Architecture
+CMKDIRHIER = mkdirhier.exe
+#endif
+
+#ifndef OS2Architecture
+GCCMDEP_PROG = gccmakedep
+#endif
+
+PROGRAMS = xmkmf $(MDEP_PROG) $(GCCMDEP_PROG) mergelib ProgramTargetName(makestrs) $(EXPORTLISTGEN) $(CMKDIRHIER)
+DEPLIBS =
+#ifndef Win32Architecture
+  EXTRA_LIBRARIES =
+#endif
+
+XCOMM Some compilers generate fatal errors if an -L directory does
+XCOMM not exist.  Since BUILDLIBDIR may not exist yet suppress its use.
+         LDPRELIB =
+        LDPRELIBS =
+
+all:: $(PROGRAMS)
+
+#if HasGcc
+GCCCMD = $(CC)
+#else
+GCCCMD = gcc
+#endif
+
+includes:: ProgramTargetName(makestrs)
+
+#ifdef ExportListGenSource
+CppScriptTarget(exportlistgen,ExportListGenSource,-DCXXFILT=$(CXXFILT),)
+InstallNamedProg(exportlistgen,exportlistgen,$(BINDIR))
+#endif
+
+CppScriptTarget(xmkmf,xmkmf.cpp,-DCONFIGDIRSPEC='"'"-I$(CONFIGDIR)"'"',$(ICONFIGFILES))
+CppScriptTarget(makedepend,mdepend.cpp,-DPREPROC='"'"$(PREPROCESSCMD)"'"',$(ICONFIGFILES))
+CppScriptTarget(mergelib,mergelib.cpp,"-DARCMD=$(AR)" "-DRANLIB=$(RANLIB)",$(ICONFIGFILES))
+#ifndef OS2Architecture
+CppScriptTarget(gccmakedep,gccmdep.cpp,-DCCCMD='"'"$(GCCCMD)"'"' -DRMCMD='"'"$(RM)"'"' -DLNCMD='"'"$(LN)"'"' -DMVCMD='"'"$(MV)"'"',$(ICONFIGFILES))
+#endif
+
+#if HasSymLinks
+#if CrossCompiling
+SimpleHostProgramTarget(lndir)
+#else
+SimpleProgramTarget(lndir)
+#endif
+#endif
+
+#ifdef Win32Architecture
+SimpleProgramTarget(mkdirhier)
+#endif
+
+NormalProgramTarget(makestrs,makestrs.o,,,)
+
+InstallManPage(makestrs,$(MANDIR))
+
+InstallManPage(xmkmf,$(MANDIR))
+
+#if defined(OS2Architecture)
+includes:: makestrs.exe
+	ImakeHelper 7 makestrs.exe /makestrs.exe
+
+InstallNamedProg(mkdirhier.cmd,mkdirhier.cmd,$(BINDIR))
+InstallNamedProg(indir.cmd,indir.cmd,$(BINDIR))
+InstallNamedProg(os2inst.cmd,os2inst.cmd,$(BINDIR))
+InstallNamedProg(xmkmf.cmd,xmkmf.cmd,$(BINDIR))
+InstallNamedProg(xmake.cmd,make.cmd,$(BINDIR))
+InstallLinkKitNamedProg(mkdirhier.cmd,mkdirhier.cmd,$(LINKKITDIR)/config/util)
+InstallLinkKitNamedProg(indir.cmd,indir.cmd,$(LINKKITDIR)/config/util)
+InstallLinkKitNamedProg(os2inst.cmd,os2inst.cmd,$(LINKKITDIR)/config/util)
+#else
+InstallNamedProg(xmkmf,xmkmf,$(BINDIR))
+InstallNamedProg(mkdirhier.sh,mkdirhier,$(BINDIR))
+InstallNamedProg(gccmakedep,gccmakedep,$(BINDIR))
+InstallLinkKitNamedProg(mkdirhier.sh,mkdirhier.sh,$(LINKKITDIR)/config/util)
+InstallLinkKitNamedProg(gccmakedep,gccmakedep,$(LINKKITDIR)/config/util)
+InstallNamedProg(mergelib,mergelib,$(BINDIR))
+InstallNamedProg(makeg.sh,makeg,$(BINDIR))
+InstallManPage(makeg,$(MANDIR))
+#endif
+InstallManPage(mkdirhier,$(MANDIR))
+#if UseCCMakeDepend
+InstallNamedProg(makedepend,makedepend,$(BINDIR))
+InstallLinkKitNamedProg(makedepend,makedepend,$(LINKKITDIR)/config/util)
+#endif
+#if SystemV || SystemV4
+InstallNamedProg(bsdinst.sh,bsdinst,$(BINDIR))
+InstallLinkKitNamedProg(bsdinst.sh,bsdinst.sh,$(LINKKITDIR)/config/util)
+#endif

@@ -1,0 +1,20 @@
+XCOMM $XConsortium: Imakefile,v 1.11 94/02/07 16:07:31 gildea Exp $
+#include <Server.tmpl>
+
+        INCLUDES = -I$(FONTINCSRC) -I../include
+         HEADERS = 
+#ifdef FontFormatDefines
+     FORMAT_DEFS = FontFormatDefines
+#endif
+            SRCS = utilbitmap.c fontnames.c fontutil.c fontxlfd.c format.c \
+		   fontaccel.c atom.c miscutil.c private.c patcache.c
+
+            OBJS = utilbitmap.o fontnames.o fontutil.o fontxlfd.o format.o \
+		   fontaccel.o atom.o miscutil.o private.o patcache.o
+
+SubdirLibraryRule($(OBJS))
+NormalLibraryObjectRule()
+NormalLintTarget($(SRCS))
+
+DependTarget()
+

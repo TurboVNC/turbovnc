@@ -1,0 +1,156 @@
+/*****************************************************************************/
+/*
+ * vnc.def
+ *
+ * Some imake configuration defines for building Xvnc.  If you build Xvnc
+ * on a new platform you may need to change things in here.  If possible
+ * try and make changes here rather than in the vendor .cf file to make it
+ * easier to upgrade to later versions of the XFree86 distribution.
+ */
+
+#ifdef BeforeVendorCF
+
+#include "platform.def"
+
+/*****************************************************************************/
+/*
+ * First try to switch off all the extras that we don't want.  This includes
+ * all sorts of extensions, and any X servers for particular hardware.  You
+ * should be able to put back any extensions you want by getting the code from
+ * the XFree86 distribution and changing the #define here to YES.
+ */
+
+#define BuildFontServer		NO
+#define BuildFonts		NO
+#define BuildXInputExt		NO
+#define BuildScreenSaverExt	NO
+#define BuildPexExt		NO
+#define BuildXIE		NO
+#define BuildXIElib		NO
+#define BuildGlxExt             NO
+#define BuildXKB		NO
+#define BuildXKBlib		NO
+#define BuildLBX		NO
+#define BuildXprint		NO
+#define BuildDBE		NO
+#define BuildDBElib		NO
+#define BuildRECORD		NO
+#define BuildRECORDlib		NO
+#define BuildScreenSaverLibrary	NO
+#define BuildXF86MiscLibrary	NO
+#define BuildXF86DGALibrary	NO
+#define BuildXF86VidModeLibrary	NO
+#define BuildDPMSLibrary	NO
+#define BuildXKBuilib		NO
+#define BuildXF86DGA		NO
+#define BuildDPMSExt		NO
+#define BuildXF86VidModeExt	NO
+#define BuildXF86MiscExt	NO
+#define BuildXF86Setup		NO
+#define BuildAppgroup		NO
+#define BuildXCSecurity		NO
+#define BuildPC98Servers	NO
+
+#define X386Server              NO
+#define XF68FBDevServer         NO
+#define XF86AGXServer           NO
+#define XF86I128Server          NO
+#define XF86I8514Server         NO
+#define XF86Mach32Server        NO
+#define XF86Mach64Server        NO
+#define XF86Mach8Server         NO
+#define XF86MonoDualServer      NO
+#define XF86MonoServer          NO
+#define XF86P9000Server         NO
+#define XF86S3Server            NO
+#define XF86S3VServer           NO
+#define XF86SVGAServer          NO
+#define XF86TGAServer           NO
+#define XF86VGA16DualServer     NO
+#define XF86VGA16Server         NO
+#define XF86W32Server           NO
+#define XF98EGCServer           NO
+#define XF98GA968Server         NO
+#define XF98GANBWAPServer       NO
+#define XF98MGAServer           NO
+#define XF98NEC480Server        NO
+#define XF98NECS3Server         NO
+#define XF98NKVNECServer        NO
+#define XF98PWLBServer          NO
+#define XF98PWSKBServer         NO
+#define XF98SVGAServer          NO
+#define XF98TGUIServer          NO
+#define XF98WABEPServer         NO
+#define XF98WABSServer          NO
+#define XF98WSNAServer          NO
+#define XVirtualFramebufferServer	NO
+#define XdecServer              NO
+#define XhpServer               NO
+#define XmacIIServer            NO
+#define XmipsServer             NO
+#define XnestServer             NO
+#define XprtServer              NO
+#define Xsun24Server            NO
+#define XsunAmoebaMonoServer    NO
+#define XsunAmoebaServer        NO
+#define XsunMonoServer          NO
+#define XsunServer              NO
+
+
+/*****************************************************************************/
+/*
+ * All we want to build is the Xvnc server
+ */
+
+#define XvncServer		YES
+#define BuildServersOnly	YES
+#define BuildServer		YES
+
+#define XVendorString		\"AT&T Laboratories Cambridge\"
+#define XVendorRelease		3332
+#define XvncRelease		\"tight1.2.9\"
+
+
+/*****************************************************************************/
+/*
+ * Try to work out the default X installation place for various platforms.
+ * You may need to change this.
+ */
+
+#ifdef SunArchitecture
+#define ProjectRoot /usr/openwin
+#else
+#ifdef LinuxArchitecture
+#define ProjectRoot /usr/X11R6
+#endif
+#endif
+
+#endif /* BeforeVendorCF */
+
+#ifdef AfterVendorCF
+
+#ifdef AIXArchitecture
+#ifdef XibmServer
+# undef XibmServer
+#endif
+#define XibmServer NO
+
+#ifdef ExtensionOSDefines
+# undef ExtensionOSDefines
+#endif 
+#define ExtensionOSDefines 
+#endif
+
+#ifdef HPArchitecture
+#ifdef XhpServer
+# undef XhpServer
+#endif
+#define XhpServer NO
+
+#ifdef ExtensionOSDefines
+# undef ExtensionOSDefines
+#endif 
+#define ExtensionOSDefines 
+#endif
+
+#endif /* AfterVendorCF */

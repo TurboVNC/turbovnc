@@ -1,0 +1,364 @@
+XCOMM platform:  $TOG: FreeBSD.cf /main/18 1997/06/12 07:40:35 kaleb $
+XCOMM platform:  $XFree86: xc/config/cf/FreeBSD.cf,v 3.58.2.11 1998/03/01 01:08:59 dawes Exp $
+
+#ifndef OSName
+#define OSName			DefaultOSName
+#endif
+#ifndef OSVendor
+#define OSVendor		/**/
+#endif
+#ifndef OSMajorVersion
+#define OSMajorVersion		DefaultOSMajorVersion
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion		DefaultOSMinorVersion
+#endif
+#ifndef OSTeenyVersion
+#define OSTeenyVersion		DefaultOSTeenyVersion
+#endif
+XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVersion)
+
+#define HasGcc			YES
+#define HasGcc2			YES
+#define HasCplusplus		YES
+#define HasGcc2ForCplusplus	YES
+#define GccUsesGas		YES
+#define UseGas			YES
+#define GnuCpp			YES
+#define HasNdbm         	YES
+#define HasPutenv       	YES
+#define HasSnprintf		YES
+#define HasBSD44Sockets 	YES
+#ifndef HasLibCrypt
+# define HasLibCrypt		YES
+#endif
+#ifndef HasShm
+# define HasShm          	YES
+#endif
+#define HasWChar32		YES
+
+#define AvoidNullMakeCommand	YES
+#define StripInstalledPrograms	YES
+#define CompressAllFonts	YES
+#define Malloc0ReturnsNull	YES
+#define NeedConstPrototypes	YES
+#define NeedFunctionPrototypes	YES
+#define NeedNestedPrototypes	YES
+#define NeedVarargsPrototypes	YES
+#define NeedWidePrototypes	NO
+
+#define MkdirHierCmd		mkdir -p
+
+#define CcCmd			cc
+#define CppCmd			/usr/libexec/cpp
+#define PreProcessCmd		CppCmd
+#define StandardCppDefines	-traditional
+#if defined(UseInstalled) && (!defined(XF86LinkKit) || !XF86LinkKit)
+#define DefaultCCOptions	/**/
+#else
+#define DefaultCCOptions	-ansi -pedantic -Dasm=__asm
+#endif
+#ifndef ExtraLibraries
+#define ExtraLibraries		/**/
+#endif
+#ifndef UseGnuMalloc
+/* 2.2 doesn't really have GnuMalloc */
+#if OSMajorVersion < 2 || (OSMajorVersion == 2 && OSMinorVersion < 2)
+#define UseGnuMalloc		YES
+#else
+#define UseGnuMalloc		NO
+#endif
+#endif
+
+/* 2.2.2 and later has setusercontext() */
+#if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion > 2) || \
+     (OSMajorVersion == 2 && OSMinorVersion == 2 && OSTeenyVersion >= 2)
+#define HasSetUserContext	YES
+#endif
+
+/* 
+ * This doesn't work the way it does on every other system. On FreeBSD it's
+ * only a "hint, not a demand", whatever that means. Note that this is not 
+ * what it says in the ld and ld.so man pages, which are rather vague on the
+ * matter.
+ *
+ * But we do know that if a) you do what the X Project team does and set your 
+ * ProjectRoot to something like "/X11", and b) you have other X libraries, 
+ * e.g. in /usr/X11R6/lib, and you have added /usr/X11R6/lib to your 
+ * ld.so.cache with ldconfig, then any programs linked with this "hint" will
+ * find that ld.so ignores the "hint" at runtime and loads the libraries in 
+ * the ld.so.cache, i.e.the wrong ones, instead! Empirically we find that
+ * the run-path is only used as a last resort to find the libraries, after
+ * the LD_LIBRARY_PATH and ld.so.cache.
+ *
+ * N. B. to FreeBSD users who are not familiar with the semantics of the run-
+ * path on other systems. The run-path is akin to a per-program ld.so.cache. 
+ * If a program is linked with a run-path, that run-path should take 
+ * precedence over _everything_ else! In my opinion ldconfig and the 
+ * ld.so.cache should be deprecated immediately now that FreeBSD has run-
+ * paths. Any program that needs libraries that are outside the "well known" 
+ * locations should be linked with a run-path.
+ *
+ * All of which begs the question: If this option doesn't work in any useful
+ * way, why did they (FreeBSD) bother to add it? It would be nice if FreeBSD
+ * would fix ld.so so that run-paths are truly useful.
+ *
+ * Using run-paths is added with the intent that vendors who ship X for 
+ * FreeBSD should use it too. Once everyone uses it then there will be no 
+ * reason for FreeBSD to assume that it knows where X libraries are installed 
+ * and they can remove it from the list of directories they add to ld.so.cache 
+ * in their /etc/rc file.
+ */
+#if OSMajorVersion > 2 || (OsMajorVersion == 2 && OSMinorVersion >= 2)
+#ifndef ExtraLoadFlags
+#define ExtraLoadFlags		-Wl,-R,$(USRLIBDIRPATH)
+#endif
+#endif
+
+#ifndef GnuMallocLibrary
+#define GnuMallocLibrary	-lgnumalloc
+#endif
+
+#if (OSMajorVersion > 2) || (OSMajorVersion == 2 && OSMinorVersion >= 2) \
+	|| (OSMajorVersion == 2 && OSMinorVersion == 1 && OSTeenyVersion >= 6)
+/* 2.1.6 and 2.2 have libz */
+#ifndef HasZlib
+#define HasZlib		YES
+#endif
+#endif
+
+#if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion >= 2) || \
+    (OSMajorVersion == 2 && OSMinorVersion == 2 && OSTeenyVersion > 2)
+/*
+ * FreeBSD 2.2.5 or later.
+ *
+ * Don't make any assumptions about the version of Tcl in the base OS.
+ * These settings assume that the tcl-7.6 and tk-4.2 packages have been
+ * installed.
+ *
+ * Note the static libs in some versions of the FreeBSD packages are
+ * broken.  The symptom of this is unresolved symbols when linking
+ * XF86Setup.  If you run into this problem, either build your own
+ * static libs from the standard Tcl and Tk source, or change the
+ * definitions of XF86SetupUsesStatic{Tcl,Tk}.  The latter is not
+ * recommended for binaries that are going to be redistributed.
+ */
+#ifndef TkLibName
+#define TkLibName		tk42
+#endif
+#ifndef TkIncDir
+#define TkIncDir		/usr/local/include/tk4.2
+#endif
+#ifndef TclLibName
+#define TclLibName		tcl76
+#endif
+#ifndef TclIncDir
+#define TclIncDir		/usr/local/include/tcl7.6
+#endif
+#else
+#if OSMajorVersion == 2 && OSMinorVersion == 2
+/*
+ * FreeBSD 2.2 prior to 2.2.5
+ *
+ * Note: the tk-4.1 package for FreeBSD doesn't have the static lib, so
+ * you'll have to build it yourself, or change the definition of
+ * XF86SetupUsesStaticTk.
+ */
+#ifndef TkLibName
+#define TkLibName		tk41
+#endif
+#ifndef TclLibName
+#define TclLibName		tcl
+#endif
+#ifndef TclLibDir
+#define TclLibDir		/usr/lib
+#endif
+#ifndef TclIncDir
+#define TclIncDir		/usr/include
+#endif
+/* FreeBSD 2.2 has libtcl in the base system */
+#ifndef XF86SetupUsesStaticTcl
+#define XF86SetupUsesStaticTcl	NO
+#endif
+
+#else /* ! 2.2 or later */
+
+#if OSMajorVersion == 2 && OSMinorVersion == 1 && OSTeenyVersion >= 6
+
+/*
+ * 2.1.x with x >=6 has tk 4.1 and tcl 7.5 in the packages collection.
+ * Neither packages include the static libs, so you either need to build
+ * them yourself or set XF86SetupUsesStaticTcl and XF86SetupUsesStaticTk
+ * to NO.  This isn't the default because we don't want the XFree86
+ * binaries to have these packages as a dependency.
+ */
+
+#ifndef TkLibName
+#define TkLibName		tk41
+#endif
+#ifndef TclLibName
+#define TclLibName		tcl75
+#endif
+
+#else /* ! 2.1.6 or later */
+
+#ifndef TkLibName
+#define TkLibName		tk40
+#endif
+#ifndef TclLibName
+#define TclLibName		tcl74
+#endif
+
+#endif
+#endif
+#endif
+
+#undef  InstallCmd
+#define InstallCmd		/usr/bin/install
+
+#if GccUsesGas
+# define GccGasOption 		-DGCCUSESGAS
+# define AsmDefines		-DUSE_GAS
+#else
+# define GccGasOption /**/
+#endif
+
+#define ServerExtraDefines GccGasOption XFree86ServerDefines
+
+#define StandardDefines	-DCSRG_BASED
+
+#if OSMajorVersion > 1
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME
+#define XawI18nDefines		-DUSE_XWCHAR_STRING
+#define HasMakefileSafeInclude	YES
+#define IncludeMakefile(file) @@# dependencies are in .depend
+#define DependFileName		.depend
+#ifndef BuildDynamicLoading
+#define BuildDynamicLoading	YES
+#endif
+#ifndef ForceNormalLib
+#define ForceNormalLib		YES
+#endif
+#define HasMkstemp		YES
+#else
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DXNO_SYSCONF
+#define XawI18nDefines		-DUSE_XWCHAR_STRING -DUSE_XMBTOWC
+#endif
+
+/* The GCC strength-reduce bug is fixed for FreeBSD 2.1.5 and later */
+#ifndef DefaultGcc2i386Opt
+#if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion > 1) || (OSMajorVersion == 2 && OSMinorVersion == 1 && OSTeenyVersion >= 5)
+#define DefaultGcc2i386Opt -O2
+#endif
+#endif
+
+#ifdef i386Architecture
+# define OptimizedCDebugFlags DefaultGcc2i386Opt
+#else
+# define OptimizedCDebugFlags -O2
+#endif
+
+#ifndef PreIncDir
+# define PreIncDir	/usr/include
+#endif
+
+#define TroffCmd        groff -Tps
+#define SetTtyGroup     YES
+
+#ifndef ExtraFilesToClean
+# define ExtraFilesToClean *.core
+#endif
+
+#define DefaultUserPath		/bin:/usr/bin:/sbin:/usr/sbin:$(BINDIR):/usr/gnu/bin:/usr/local/bin
+#define DefaultSystemPath	/bin:/usr/bin:/sbin:/usr/sbin:$(BINDIR)
+#ifndef SystemManDirectory
+#define SystemManDirectory	/usr/share/man
+#endif
+
+#define InstKmemFlags	-g kmem -m 2755
+
+/*
+ * Compress manual pages
+ */
+#ifndef CompressManPages
+# define CompressManPages        YES
+#endif
+
+#if CompressManPages
+
+#ifndef CompressManCmd
+# define CompressManCmd		gzip -n
+#endif
+   COMPRESSMANCMD = CompressManCmd
+
+#ifndef InstallManPageLong
+#define InstallManPageLong(file,destdir,dest)                           @@\
+install.man:: file.man                                                  @@\
+	MakeDir($(DESTDIR)destdir)                                      @@\
+	$(RM) $(DESTDIR)destdir/dest.$(MANSUFFIX)*                      @@\
+	$(INSTALL) -c $(INSTMANFLAGS) file.man \                        @@\
+          $(DESTDIR)destdir/dest.$(MANSUFFIX)                           @@\
+	-$(COMPRESSMANCMD) $(DESTDIR)destdir/dest.$(MANSUFFIX)
+#endif
+
+#ifndef InstallGenManPageLong
+#define InstallGenManPageLong(file,destdir,dest,suffix)                 @@\
+install.man:: file.man                                                  @@\
+	MakeDir($(DESTDIR)destdir)                                      @@\
+	$(RM) $(DESTDIR)destdir/dest.suffix*                            @@\
+	$(INSTALL) -c $(INSTMANFLAGS) file.man \                        @@\
+          $(DESTDIR)destdir/dest.suffix                                 @@\
+	-$(COMPRESSMANCMD) $(DESTDIR)destdir/dest.suffix
+#endif
+
+#ifndef InstallMultipleMan
+#define InstallMultipleMan(list,dest)                                   @@\
+install.man:: list                                                      @@\
+	MakeDir($(DESTDIR)dest)						@@\
+	@case '${MFLAGS}' in *[i]*) set +e;; esac; \                    @@\
+	for i in list; do \                                             @@\
+	        (set -x; \                                              @@\
+	        MNAME=`echo $$i | cut -f1 -d.`; \			@@\
+	        $(RM) $(DESTDIR)dest/$${MNAME}*; \                      @@\
+	        $(INSTALL) -c $(INSTMANFLAGS) $$i \                     @@\
+		  $(DESTDIR)dest/$${MNAME}.$(MANSUFFIX); \              @@\
+	        $(COMPRESSMANCMD) $(DESTDIR)dest/$${MNAME}.$(MANSUFFIX)); \  @@\
+	done
+#endif
+
+/*
+ * InstallManPageAliases - install soft links for aliases.
+ */
+#ifndef InstallManPageAliases
+#define InstallManPageAliases(file,destdir,aliases)                     @@\
+install.man::                                                           @@\
+	@(SUFFIX=`echo $(DESTDIR)destdir/file.* | sed -e 's,.*/[^\.]*.,,'`; \ @@\
+	for i in aliases; do (set -x; \                                 @@\
+	$(RM) $(DESTDIR)destdir/$$i.*; \                                @@\
+	(cd $(DESTDIR)destdir; $(LN) file.$${SUFFIX} \                  @@\
+	$$i.$${SUFFIX})); \                                             @@\
+	done)
+#endif
+
+/*
+ * InstallGenManPageAliases - install soft links for aliases.
+ */
+#ifndef InstallGenManPageAliases
+#define InstallGenManPageAliases(file,destdir,suffix,aliases)              @@\
+	InstallManPageAliases(file,destdir,aliases)
+#endif
+#endif
+
+#if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion >= 1)
+#define HasBsdMake	YES
+#endif
+
+#ifndef StaticLibrary
+#define StaticLibrary(libpath,libname) -Wl,-Bstatic Concat(-L,libpath) Concat(-l,libname) -Wl,-Bdynamic
+#endif
+
+#include <bsdLib.rules>
+
+#ifdef i386Architecture
+#include <xfree86.cf>
+#endif

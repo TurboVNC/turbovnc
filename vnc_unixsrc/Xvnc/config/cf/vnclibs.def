@@ -1,0 +1,17 @@
+/*
+ * vnclibs.def - tells Xvnc where to pick up VNC libraries (i.e. libvncauth)
+ *
+ * Don't forget you need to remake the Makefiles in programs/Xserver
+ * and programs/Xserver/hw/vnc whenever you change this file.
+ */
+
+VNCLIBS = $(TOP)/../libvncauth/libvncauth.a
+
+#ifdef OSF1Architecture
+/* Avoid linking with different libjpeg in /usr/shlib under Tru64. */
+VNCSYSLIBS = /usr/local/lib/libjpeg.a /usr/local/lib/libz.a
+#else
+VNCSYSLIBS = -L/usr/local/lib -ljpeg -lz
+#endif
+
+VNCCPPFLAGS = -I$(TOP)/../include -I/usr/local/include

@@ -1,0 +1,159 @@
+'\" t
+.\" ** The above line should force tbl to be a preprocessor **
+.\" Man page for Xvnc
+.\"
+.\" Copyright (C) 1998 Marcus.Brinkmann@ruhr-uni-bochum.de
+.\" Copyright (C) 2000, 2001 Red Hat, Inc.
+.\" Copyright (C) 2001, 2002 Constantin Kaplinsky <const@ce.cctpu.edu.ru>
+.\"
+.\" You may distribute under the terms of the GNU General Public
+.\" License as specified in the file LICENCE.TXT that comes with the
+.\" TightVNC distribution.
+.\"
+.TH Xvnc 1 "August 2002" "" "TightVNC"
+.SH NAME
+Xvnc \- an X server providing VNC connectivity
+.SH SYNOPSIS
+.TP
+\fBXvnc\fR
+[:\fIdisplay\fR]
+[\-geometry \fIwidth\fRx\fIheight\fR] [\-depth \fIdepth\fR]
+[\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-udpinputport \fIport\fR]
+[\-rfbport \fIport\fR] [\-rfbwait \fItime\fR] [\-nocursor]
+[\-rfbauth \fIpasswd-file\fR] [\-httpd \fIdir\fR]
+[\-httpport \fIport\fR] [\-deferupdate \fItime\fR]
+[\-economictranslate] [\-lazytight] [\-desktop \fIname\fR] [\-alwaysshared]
+[\-nevershared] [\-dontdisconnect] [\-viewonly] [\-localhost]
+[\-interface ipaddr] [\-inetd] [\-compatiblekbd]
+[\fIX-options\fR...]
+.SH DESCRIPTION
+\fBXvnc\fR is a VNC (Virtual Network Computing) server. It acts like
+an X server with a virtual display. The display can be seen by a VNC
+viewer application, which may be running on a different machine: see
+\fBvncviewer\fR(1). Xvnc is built inside the source code tree of
+XFree86, and shares many options with it.
+
+Normally, you don't need to start Xvnc manually; use the
+\fBvncserver\fR(1) wrapper script instead. This script sets reasonable
+defaults for Xvnc session, checks many error conditions etc.
+
+Please read the \fBBUGS\fR section if you plan to use VNC on an
+untrusted network.
+.SH OPTIONS
+Xvnc supports many standard X server options and a number of
+VNC-specific options. To see what standard X server options are
+supported, please look at the \fBXvnc\fR \fI\-help\fR output and read
+the \fBXserver\fR(1) manual page for details on those options.
+
+The VNC-specific options are as follows:
+.TP
+\fB\-geometry\fR \fIwidth\fR\fBx\fR\fIheight\fR
+Set desktop width and height.
+.TP
+\fB\-depth\fR \fIdepth\fR
+Set the colour depth of the visual to provide, in bits per pixel. Must
+be a value between 8 and 32.
+.TP
+\fB\-pixelformat\fR \fBrgb\fR\fINNN\fR|\fBbgr\fR\fINNN\fR
+Set colour format for pixels representation. The viewer can do the
+conversion to any other pixel format, but it is faster if the depth
+and pixel format of the server is the same as the equivalent values on
+the viewer display.
+.TP
+\fB\-udpinputport\fR \fIport\fR
+UDP port for keyboard/pointer data.
+.TP
+\fB\-rfbport\fR \fIport\fR
+TCP port for RFB protocol. The RFB protocol is used for commnunication
+between VNC server and clients.
+.TP
+\fB\-rfbwait\fR \fItime\fR
+Maximum time, in milliseconds, to wait for an RFB client (VNC viewer).
+.TP
+\fB\-nocursor\fR
+Don't put up a pointer cursor on the desktop.
+.TP
+\fB\-rfbauth\fR \fIpasswd-file\fR
+Use authentication on RFB protocol from the specified file. The
+\fIpasswd-file\fR can be created using the \fBvncpasswd\fR(1) utility.
+.TP
+\fB\-httpd\fR \fIdir\fR
+Serve files via HTTP protocol from the specified directory. Normally,
+Java viewer classes are stored in such directory.
+.TP
+\fB\-httpport\fR \fIport\fR
+TCP port on which Xvnc should listen for incoming HTTP connections (to
+allow access to the desktop from any Java-capable browser).
+.TP
+\fB\-deferupdate\fR \fItime\fR
+Time in milliseconds, to defer screen updates (default 40). Deferring
+updates helps to coalesce many small desktop changes into a few larger
+updates thus saving network bandwidth.
+.TP
+\fB\-economictranslate\fR
+Use less memory-hungry pixel format translation.
+.TP
+\fB\-lazytight\fR
+Disable the "gradient" filter in Tight encoding (TightVNC-specific).
+The "gradient" filter often helps to improve data compression ratios,
+but may slow down the server performance. Please note that this filter
+is never used when a client enables JPEG compression in the Tight
+encoding.
+.TP
+\fB\-desktop\fR \fIname\fR
+Set VNC desktop name ("x11" by default).
+.TP
+\fB\-alwaysshared\fR
+Always treat new clients as shared, never disconnect existing client
+on a new client connection.
+.TP
+\fB\-nevershared\fR
+Never treat new clients as shared, do not allow several simultaneous
+client connections.
+.TP
+\fB\-dontdisconnect\fR
+Don't disconnect existing clients when a new non-shared connection
+comes in, refuse new connection instead.
+.TP
+\fB\-viewonly\fR
+Don't accept keboard and pointer events from clients. All clients will
+be able to see the desktop but won't be able to control it.
+.TP
+\fB\-localhost\fR
+Only allow loopback connections from localhost. This option is useful
+in conjunction with SSH tunneling.
+.TP
+\fB\-interface\fR \fIipaddr\fR
+Listen for client connections only on the network interface with given
+\fIipaddr\fR.
+.TP
+\fB\-inetd\fR
+Xvnc is launched by inetd. This option causes \fBXvnc\fR to redirect
+network input/output to stdin/stdout.
+.TP
+\fB\-compatiblekbd\fR
+Set META and ALT keys to the same X modifier flag, as in the original
+version of Xvnc by AT&T labs (TightVNC-specific).
+.SH BUGS
+There are many security problems in current Xvnc implementation. It's
+recommended to restrict network access to Xvnc servers from untrusted
+network adresses. Probably, the best way to secure Xvnc server is to
+allow only loopback connections from the server machine (the
+\fI\-localhost\fR option) and to use SSH tunneling for remote access
+to the Xvnc server. For details on SSH tunneling, see
+<URL:http://www.uk.research.att.com/vnc/sshvnc.html> .
+.SH SEE ALSO
+\fBvncserver\fR(1), \fBvncviewer\fR(1), \fBvncpasswd\fR(1),
+\fBvncconnect\fR(1), \fBsshd\fR(1)
+.SH AUTHORS
+Original VNC was developed in AT&T Laboratories Cambridge. TightVNC
+additions was implemented by Constantin Kaplinsky. Many other people
+participated in development, testing and support.
+
+\fBMan page authors:\fR
+.br
+Marcus Brinkmann <Marcus.Brinkmann@ruhr-uni-bochum.de>,
+.br
+Tim Waugh <twaugh@redhat.com>,
+.br
+Constantin Kaplinsky <const@ce.cctpu.edu.ru>

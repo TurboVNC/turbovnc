@@ -1,0 +1,33 @@
+'\" t
+.\" ** The above line should force tbl to be a preprocessor **
+.\" Man page for X vncconnect
+.\"
+.\" Copyright (C) 2000,2001 Red Hat, Inc.
+.\" Copyright (C) 2001-2003 Constantin Kaplinsky <const@ce.cctpu.edu.ru>
+.\"
+.\" You may distribute under the terms of the GNU General Public
+.\" License as specified in the file LICENCE.TXT that comes with the
+.\" TightVNC distribution.
+.\"
+.TH vncconnect 1 "February 2003" "" "TightVNC"
+.SH NAME
+vncconnect \- connect a VNC server to a VNC viewer
+.SH SYNOPSIS
+.nf
+\fBvncconnect\fR [\-display \fIXvnc-display\fR] \fIhost\fR[:\fIport\fR]
+.fi
+.SH DESCRIPTION
+Tells \fBXvnc\fR(1) to connect to a listening VNC viewer on the given
+host and port.
+.SH SEE ALSO
+\fBvncviewer\fR(1), \fBvncserver\fR(1), \fBXvnc\fR(1), \fBvncpasswd\fR(1)
+.SH AUTHORS
+Original VNC was developed in AT&T Laboratories Cambridge. TightVNC
+additions was implemented by Constantin Kaplinsky. Many other people
+participated in development, testing and support.
+
+\fBMan page authors:\fR
+.br
+Tim Waugh <twaugh@redhat.com>,
+.br
+Constantin Kaplinsky <const@ce.cctpu.edu.ru>

@@ -1,0 +1,989 @@
+XCOMM $TOG: Imakefile /main/196 1997/05/20 10:06:09 kaleb $
+
+
+
+
+XCOMM $XFree86: xc/lib/X11/Imakefile,v 3.19.2.2 1997/05/21 15:02:16 dawes Exp $
+#define DoNormalLib NormalLibX11
+#define DoSharedLib SharedLibX11
+#define DoDebugLib DebugLibX11
+#define DoProfileLib ProfileLibX11
+#define LibName X11
+#define SoRev SOXLIBREV
+#define HugeLibrary YES
+#define IncSubdir X11
+
+#include <Threads.tmpl>
+
+#ifndef MotifBC
+#define MotifBC NO
+#endif
+
+#ifdef SharedX11Reqs
+REQUIREDLIBS = SharedX11Reqs
+#endif
+#if defined(MacIIArchitecture) || defined(SequentArchitecture) || defined(i386ScoArchitecture)
+XBSDLIB = /**/
+#endif
+#if defined(LunaArchitecture) && defined(Mc88000Architecture)
+EXTRA_LIBRARIES = /**/
+#endif
+#if Malloc0ReturnsNull
+     MALLOC_DEFINES = XMalloc0ReturnsNullDefines
+#endif
+#if HasXdmAuth
+        XDMAUTHDEFS = -DHASXDMAUTH
+        XDMAUTHOBJS = Wrap.o Wraphelp.o
+        XDMAUTHSRCS = Wrap.c Wraphelp.c
+#endif
+#if BuildXKBlib
+    XKB_DEFINES = -DXKB 
+        XKBSRCS = XKB.c XKBBind.c XKBCompat.c XKBCtrls.c XKBCvt.c XKBGetMap.c \
+	          XKBGetByName.c XKBNames.c XKBRdBuf.c XKBSetMap.c XKBUse.c \
+		  XKBleds.c XKBBell.c XKBGeom.c XKBSetGeom.c XKBExtDev.c \
+		  XKBList.c XKBMisc.c \
+		  XKBMAlloc.c XKBGAlloc.c XKBAlloc.c
+        XKBOBJS = XKB.o XKBBind.o XKBCompat.o XKBCtrls.o XKBCvt.o XKBGetMap.o \
+		  XKBGetByName.o XKBNames.o XKBRdBuf.o XKBSetMap.o XKBUse.o \
+		  XKBleds.o XKBBell.o XKBGeom.o XKBSetGeom.o XKBExtDev.o \
+		  XKBList.o XKBMisc.o \
+		  XKBMAlloc.o XKBGAlloc.o XKBAlloc.o
+#endif
+#if HasSecureRPC
+        RPCDEFS = -DSECURE_RPC
+#endif
+#if HasPoll
+   POLL_DEFINES = -DUSE_POLL
+#endif
+   CONN_DEFINES = ConnectionFlags
+   XTRANS_X_DEFINES = -DX11_t -DTRANS_CLIENT
+   XTRANS_XIM_DEFINES = -DXIM_t -DTRANS_CLIENT
+#if HasBSD44Sockets
+   SOCK_DEFINES = -DBSD44SOCKETS
+#endif
+     EDB_DEFINES = -DERRORDB=\"$(LIBDIR)/XErrorDB\"
+     KDB_DEFINES = -DKEYSYMDB=\"$(LIBDIR)/XKeysymDB\"
+     CMS_DEFINES = -DXCMSDB=\"$(LIBDIR)/Xcms.txt\"
+#if HasSnprintf
+    MISC_DEFINES = -DHAS_SNPRINTF -DLIBX11
+#endif
+#if MotifBC
+      BC_DEFINES = -DMOTIFBC
+#endif
+#if NoRConst
+ RCONST_DEFINES = -DNORCONST
+#endif
+    XLC_DEFINES = -DXLOCALEDIR=\"$(XLOCALEDIR)\"
+#if HasKrb5
+         K5OBJS = k5encode.o
+         K5SRCS = k5encode.c
+         K5INCL = Krb5Includes
+         K5DEFS = Krb5Defines
+#endif
+#if !HasSnprintf
+       MISCSRCS = snprintf.c
+       MISCOBJS = snprintf.o
+#endif
+#if NeedLibInsideFlag
+    LIB_DEFINES = -D_XLIBINT_
+#endif
+        DEFINES = $(MALLOC_DEFINES) $(LIB_DEFINES)
+   OPEN_DEFINES = -I$(EXTINCSRC) $(K5INCL) $(K5DEFS)
+ DEPEND_DEFINES = $(OPEN_DEFINES) $(TRANS_INCLUDES) $(CONN_DEFINES) $(THREADS_DEFINES)
+       AUTHOBJS = AuDispose.o AuGetBest.o AuFileName.o AuRead.o
+       AUTHSRCS = AuDispose.c AuGetBest.c AuFileName.c AuRead.c
+           SRCS = $(SRCS1) $(SRCS2) $(SRCS3) /* try *.c if you have trouble */
+        HEADERS = Xlib.h Xresource.h Xutil.h cursorfont.h Xlibint.h \
+			Xcms.h Xlocale.h XKBlib.h
+       LINTLIBS =
+
+SRCS1 = \
+	Context.c \
+	Depths.c \
+	ParseCmd.c \
+	Quarks.c \
+	AllCells.c \
+	AllPlanes.c \
+	AllowEv.c \
+	AutoRep.c \
+	Backgnd.c \
+	BdrWidth.c \
+	Bell.c \
+	Border.c \
+	ChAccCon.c \
+	ChClMode.c \
+	ChActPGb.c \
+	ChCmap.c \
+	ChGC.c \
+	ChKeyCon.c \
+	ChPntCon.c \
+	ChProp.c \
+	ChSaveSet.c \
+	ChWAttrs.c \
+	ChWindow.c \
+	ChkIfEv.c \
+	ChkMaskEv.c \
+	ChkWinEv.c \
+	ChkTypEv.c \
+	ChkTypWEv.c \
+	CirWin.c \
+	CirWinDn.c \
+	CirWinUp.c \
+	ClDisplay.c \
+	Clear.c \
+	ClearArea.c \
+	ConfWind.c \
+	ConnDis.c \
+	ConvSel.c \
+	CopyArea.c \
+	CopyCmap.c \
+	CopyGC.c \
+	CopyPlane.c \
+	CrBFData.c \
+	CrCmap.c \
+	CrCursor.c \
+	CrGC.c \
+	CrGlCur.c \
+	CrPFBData.c \
+	CrPixmap.c \
+	CrWindow.c \
+	Cursor.c \
+	DefCursor.c \
+	DelProp.c \
+	DestSubs.c \
+	DestWind.c \
+	DisName.c \
+	DrArc.c \
+	DrArcs.c \
+	DrLine.c \
+	DrLines.c \
+	DrPoint.c \
+	DrPoints.c \
+	DrRect.c \
+	DrRects.c \
+	DrSegs.c \
+	ErrDes.c \
+	ErrHndlr.c \
+	EvToWire.c \
+	FetchName.c \
+	FillArc.c \
+	FillArcs.c \
+	FillPoly.c \
+	FillRct.c \
+	FillRcts.c \
+	Flush.c \
+	Font.c \
+	FontNames.c \
+	FontInfo.c \
+	FreeCmap.c \
+	FreeCols.c \
+	FreeCurs.c \
+	FreeEData.c \
+	FreeGC.c \
+	FreePix.c \
+	FSSaver.c \
+	GCMisc.c \
+	Geom.c \
+	GetAtomNm.c \
+	GetColor.c \
+	GetDflt.c \
+	GetFPath.c \
+	GetFProp.c \
+	GetGeom.c \
+	GetHColor.c \
+	GetHints.c \
+	GetIFocus.c \
+	GetImage.c \
+	GetKCnt.c \
+	GetMoEv.c \
+	GetPCnt.c \
+	GetPntMap.c \
+	GetProp.c \
+	GetSOwner.c \
+	GetSSaver.c \
+	GetStCmap.c \
+	GetWAttrs.c \
+	GrButton.c \
+	GrKey.c \
+	GrKeybd.c \
+	GrPointer.c \
+	GrServer.c \
+	Host.c \
+	IfEvent.c \
+	ImUtil.c \
+	ImText.c \
+	ImText16.c \
+	InitExt.c \
+	InsCmap.c \
+	IntAtom.c \
+	KeyBind.c \
+	KeysymStr.c \
+	KillCl.c \
+	LiHosts.c \
+	LiICmaps.c \
+	LiProps.c \
+	ListExt.c \
+	LoadFont.c \
+	LookupCol.c \
+	LowerWin.c 
+
+OBJS1 = \
+	Context.o \
+	Depths.o \
+	ParseCmd.o \
+	Quarks.o \
+	AllCells.o \
+	AllPlanes.o \
+	AllowEv.o \
+	AutoRep.o \
+	Backgnd.o \
+	BdrWidth.o \
+	Bell.o \
+	Border.o \
+	ChAccCon.o \
+	ChClMode.o \
+	ChActPGb.o \
+	ChCmap.o \
+	ChGC.o \
+	ChKeyCon.o \
+	ChPntCon.o \
+	ChProp.o \
+	ChSaveSet.o \
+	ChWAttrs.o \
+	ChWindow.o \
+	ChkIfEv.o \
+	ChkMaskEv.o \
+	ChkWinEv.o \
+	ChkTypEv.o \
+	ChkTypWEv.o \
+	CirWin.o \
+	CirWinDn.o \
+	CirWinUp.o \
+	ClDisplay.o \
+	Clear.o \
+	ClearArea.o \
+	ConfWind.o \
+	ConnDis.o \
+	ConvSel.o \
+	CopyArea.o \
+	CopyCmap.o \
+	CopyGC.o \
+	CopyPlane.o \
+	CrBFData.o \
+	CrCmap.o \
+	CrCursor.o \
+	CrGC.o \
+	CrGlCur.o \
+	CrPFBData.o \
+	CrPixmap.o \
+	CrWindow.o \
+	Cursor.o \
+	DefCursor.o \
+	DelProp.o \
+	DestSubs.o \
+	DestWind.o \
+	DisName.o \
+	DrArc.o \
+	DrArcs.o \
+	DrLine.o \
+	DrLines.o \
+	DrPoint.o \
+	DrPoints.o \
+	DrRect.o \
+	DrRects.o \
+	DrSegs.o \
+	ErrDes.o \
+	ErrHndlr.o \
+	EvToWire.o \
+	FetchName.o \
+	FillArc.o \
+	FillArcs.o \
+	FillPoly.o \
+	FillRct.o \
+	FillRcts.o \
+	Flush.o \
+	Font.o \
+	FontNames.o \
+	FontInfo.o \
+	FreeCmap.o \
+	FreeCols.o \
+	FreeCurs.o \
+	FreeEData.o \
+	FreeGC.o \
+	FreePix.o \
+	FSSaver.o \
+	GCMisc.o \
+	Geom.o \
+	GetAtomNm.o \
+	GetColor.o \
+	GetDflt.o \
+	GetFPath.o \
+	GetFProp.o \
+	GetGeom.o \
+	GetHColor.o \
+	GetHints.o \
+	GetIFocus.o \
+	GetImage.o \
+	GetKCnt.o \
+	GetMoEv.o \
+	GetPCnt.o \
+	GetPntMap.o \
+	GetProp.o \
+	GetSOwner.o \
+	GetSSaver.o \
+	GetStCmap.o \
+	GetWAttrs.o \
+	GrButton.o \
+	GrKey.o \
+	GrKeybd.o \
+	GrPointer.o \
+	GrServer.o \
+	Host.o \
+	IfEvent.o \
+	ImUtil.o \
+	ImText.o \
+	ImText16.o \
+	InitExt.o \
+	InsCmap.o \
+	IntAtom.o \
+	KeyBind.o \
+	KeysymStr.o \
+	KillCl.o \
+	LiHosts.o \
+	LiICmaps.o \
+	LiProps.o \
+	ListExt.o \
+	LoadFont.o \
+	LookupCol.o \
+	LowerWin.o 
+
+SRCS2 = \
+	Macros.c \
+	MapRaised.c \
+	MapSubs.c \
+	MapWindow.c \
+	MaskEvent.c \
+	Misc.c \
+	ModMap.c \
+	MoveWin.c \
+	NextEvent.c \
+	OpenDis.c \
+	ParseCol.c \
+	ParseGeom.c \
+	PeekEvent.c \
+	PeekIfEv.c \
+	Pending.c \
+	PmapBgnd.c \
+	PmapBord.c \
+	PolyReg.c \
+	PolyTxt.c \
+	PolyTxt16.c \
+	PutBEvent.c \
+	PutImage.c \
+	QuBest.c \
+	QuColor.c \
+	QuColors.c \
+	QuCurShp.c \
+	QuExt.c \
+	QuKeybd.c \
+	QuPntr.c \
+	QuStipShp.c \
+	QuTextE16.c \
+	QuTextExt.c \
+	QuTileShp.c \
+	QuTree.c \
+	RaiseWin.c \
+	RdBitF.c \
+	RecolorC.c \
+	ReconfWin.c \
+	Region.c \
+	RepWindow.c \
+	RestackWs.c \
+	RotProp.c \
+	ScrResStr.c \
+	SelInput.c \
+	SendEvent.c \
+	SetBack.c \
+	SetCRects.c \
+	SetClMask.c \
+	SetClOrig.c \
+	SetDashes.c \
+	SetFPath.c \
+	SetFont.c \
+	SetFore.c \
+	SetFunc.c \
+	SetHints.c \
+	SetIFocus.c \
+	SetLStyle.c \
+	SetPMask.c \
+	SetPntMap.c \
+	SetSOwner.c \
+	SetSSaver.c \
+	SetState.c \
+	SetStip.c \
+	SetStCmap.c \
+	SetTile.c \
+	SetTSOrig.c \
+	StBytes.c \
+	StColor.c \
+	StColors.c \
+	StNColor.c \
+	StName.c \
+	StrKeysym.c \
+	Sync.c \
+	Synchro.c \
+	Text.c \
+	Text16.c \
+	TextExt.c \
+	TextExt16.c \
+	TrCoords.c \
+	UndefCurs.c \
+	UngrabBut.c \
+	UngrabKbd.c \
+	UngrabKey.c \
+	UngrabPtr.c \
+	UngrabSvr.c \
+	UninsCmap.c \
+	UnldFont.c \
+	UnmapSubs.c \
+	UnmapWin.c \
+	VisUtil.c \
+	WarpPtr.c \
+	WinEvent.c \
+	Window.c \
+	WrBitF.c \
+	XlibAsync.c \
+	XlibInt.c \
+	Xrm.c \
+	evtomask.c \
+	globals.c \
+	GetGCVals.c \
+	GetNrmHint.c \
+	GetRGBCMap.c \
+	GetTxtProp.c \
+	GetWMCMapW.c \
+	GetWMProto.c \
+	Iconify.c \
+	PixFormats.c \
+	PropAlloc.c \
+	ReconfWM.c \
+	SetNrmHint.c \
+	SetRGBCMap.c \
+	SetTxtProp.c \
+	SetWMCMapW.c \
+	SetWMProto.c \
+	StrToText.c \
+	TextToStr.c \
+	Withdraw.c \
+	WMGeom.c \
+	WMProps.c \
+	$(AUTHSRCS) $(XDMAUTHSRCS) $(K5SRCS)
+
+OBJS2 = \
+	Macros.o \
+	MapRaised.o \
+	MapSubs.o \
+	MapWindow.o \
+	MaskEvent.o \
+	Misc.o \
+	ModMap.o \
+	MoveWin.o \
+	NextEvent.o \
+	OpenDis.o \
+	ParseCol.o \
+	ParseGeom.o \
+	PeekEvent.o \
+	PeekIfEv.o \
+	Pending.o \
+	PmapBgnd.o \
+	PmapBord.o \
+	PolyReg.o \
+	PolyTxt.o \
+	PolyTxt16.o \
+	PutBEvent.o \
+	PutImage.o \
+	QuBest.o \
+	QuColor.o \
+	QuColors.o \
+	QuCurShp.o \
+	QuExt.o \
+	QuKeybd.o \
+	QuPntr.o \
+	QuStipShp.o \
+	QuTextE16.o \
+	QuTextExt.o \
+	QuTileShp.o \
+	QuTree.o \
+	RaiseWin.o \
+	RdBitF.o \
+	RecolorC.o \
+	ReconfWin.o \
+	Region.o \
+	RepWindow.o \
+	RestackWs.o \
+	RotProp.o \
+	ScrResStr.o \
+	SelInput.o \
+	SendEvent.o \
+	SetBack.o \
+	SetCRects.o \
+	SetClMask.o \
+	SetClOrig.o \
+	SetDashes.o \
+	SetFPath.o \
+	SetFont.o \
+	SetFore.o \
+	SetFunc.o \
+	SetHints.o \
+	SetIFocus.o \
+	SetLStyle.o \
+	SetPMask.o \
+	SetPntMap.o \
+	SetSOwner.o \
+	SetSSaver.o \
+	SetState.o \
+	SetStip.o \
+	SetStCmap.o \
+	SetTile.o \
+	SetTSOrig.o \
+	StBytes.o \
+	StColor.o \
+	StColors.o \
+	StNColor.o \
+	StName.o \
+	StrKeysym.o \
+	Sync.o \
+	Synchro.o \
+	Text.o \
+	Text16.o \
+	TextExt.o \
+	TextExt16.o \
+	TrCoords.o \
+	UndefCurs.o \
+	UngrabBut.o \
+	UngrabKbd.o \
+	UngrabKey.o \
+	UngrabPtr.o \
+	UngrabSvr.o \
+	UninsCmap.o \
+	UnldFont.o \
+	UnmapSubs.o \
+	UnmapWin.o \
+	VisUtil.o \
+	WarpPtr.o \
+	WinEvent.o \
+	Window.o \
+	WrBitF.o \
+	XlibAsync.o \
+	XlibInt.o \
+	Xrm.o \
+	evtomask.o \
+	globals.o \
+	GetGCVals.o \
+	GetNrmHint.o \
+	GetRGBCMap.o \
+	GetTxtProp.o \
+	GetWMCMapW.o \
+	GetWMProto.o \
+	Iconify.o \
+	PixFormats.o \
+	PropAlloc.o \
+	ReconfWM.o \
+	SetNrmHint.o \
+	SetRGBCMap.o \
+	SetTxtProp.o \
+	SetWMCMapW.o \
+	SetWMProto.o \
+	StrToText.o \
+	TextToStr.o \
+	Withdraw.o \
+	WMGeom.o \
+	WMProps.o \
+	$(AUTHOBJS) \
+	$(XDMAUTHOBJS) \
+	$(K5OBJS)
+
+SRCS3 = \
+	Lab.c \
+	LabGcC.c \
+	LabGcL.c \
+	LabGcLC.c \
+	LabMnL.c \
+	LabMxC.c \
+	LabMxL.c \
+	LabMxLC.c \
+	LabWpAj.c \
+	Luv.c \
+	LuvGcC.c \
+	LuvGcL.c \
+	LuvGcLC.c \
+	LuvMnL.c \
+	LuvMxC.c \
+	LuvMxL.c \
+	LuvMxLC.c \
+	LuvWpAj.c \
+	XYZ.c \
+	uvY.c \
+	xyY.c \
+	HVC.c \
+	HVCGcC.c \
+	HVCGcV.c \
+	HVCGcVC.c \
+	HVCMnV.c \
+	HVCMxC.c \
+	HVCMxV.c \
+	HVCMxVC.c \
+	HVCMxVs.c \
+	HVCWpAj.c \
+	UNDEFINED.c \
+	AddDIC.c \
+	AddSF.c \
+	cmsAllNCol.c \
+	cmsAllCol.c \
+	CCC.c \
+	cmsCmap.c \
+	cmsColNm.c \
+	CvColW.c \
+	CvCols.c \
+	cmsGlobls.c \
+	IdOfPr.c \
+	cmsInt.c \
+	LRGB.c \
+	cmsLkCol.c \
+	cmsMath.c \
+	OfCCC.c \
+	PrOfId.c \
+	cmsProp.c \
+	QBlack.c \
+	QBlue.c \
+	QGreen.c \
+	QRed.c \
+	QWhite.c \
+	QuCol.c \
+	QuCols.c \
+	SetCCC.c \
+	SetGetCols.c \
+	StCol.c \
+	StCols.c \
+	cmsTrig.c \
+	XRGB.c \
+	FSWrap.c \
+	ICWrap.c \
+	IMWrap.c \
+	OCWrap.c \
+	OMWrap.c \
+	lcWrap.c \
+	mbWMProps.c \
+	mbWrap.c \
+	wcWrap.c \
+	FilterEv.c \
+	RegstFlt.c \
+	locking.c \
+	LockDis.c \
+	x11trans.c \
+	ximtrans.c \
+	$(XKBSRCS) $(LCSRCS) $(MISCSRCS)
+
+OBJS3 = \
+	Lab.o \
+	LabGcC.o \
+	LabGcL.o \
+	LabGcLC.o \
+	LabMnL.o \
+	LabMxC.o \
+	LabMxL.o \
+	LabMxLC.o \
+	LabWpAj.o \
+	Luv.o \
+	LuvGcC.o \
+	LuvGcL.o \
+	LuvGcLC.o \
+	LuvMnL.o \
+	LuvMxC.o \
+	LuvMxL.o \
+	LuvMxLC.o \
+	LuvWpAj.o \
+	XYZ.o \
+	uvY.o \
+	xyY.o \
+	HVC.o \
+	HVCGcC.o \
+	HVCGcV.o \
+	HVCGcVC.o \
+	HVCMnV.o \
+	HVCMxC.o \
+	HVCMxV.o \
+	HVCMxVC.o \
+	HVCMxVs.o \
+	HVCWpAj.o \
+	UNDEFINED.o \
+	AddDIC.o \
+	AddSF.o \
+	cmsAllNCol.o \
+	cmsAllCol.o \
+	CCC.o \
+	cmsCmap.o \
+	cmsColNm.o \
+	CvColW.o \
+	CvCols.o \
+	cmsGlobls.o \
+	IdOfPr.o \
+	cmsInt.o \
+	LRGB.o \
+	cmsLkCol.o \
+	cmsMath.o \
+	OfCCC.o \
+	PrOfId.o \
+	cmsProp.o \
+	QBlack.o \
+	QBlue.o \
+	QGreen.o \
+	QRed.o \
+	QWhite.o \
+	QuCol.o \
+	QuCols.o \
+	SetCCC.o \
+	SetGetCols.o \
+	StCol.o \
+	StCols.o \
+	cmsTrig.o \
+	XRGB.o \
+	FSWrap.o \
+	ICWrap.o \
+	IMWrap.o \
+	OCWrap.o \
+	OMWrap.o \
+	lcWrap.o \
+	mbWMProps.o \
+	mbWrap.o \
+	wcWrap.o \
+	FilterEv.o \
+	RegstFlt.o \
+	locking.o \
+	LockDis.o \
+	x11trans.o \
+	ximtrans.o \
+	$(XKBOBJS) $(LCOBJS) $(MISCOBJS)
+
+#ifdef RsArchitecture
+LCDEPSYMSRCS = aixlcLoad.c
+#endif
+#ifdef OS2Architecture
+LCDEPSYMSRCS = os2Stubs.c
+#endif
+
+LCSRCS = \
+	SetLocale.c \
+	$(LCDEPSYMSRCS) \
+	imCallbk.c \
+	imConv.c \
+	imDefFlt.c \
+	imDefIc.c \
+	imDefIm.c \
+	imDefLkup.c \
+	imDispch.c \
+	imEvToWire.c \
+	imExten.c \
+	imImSw.c \
+	imInsClbk.c \
+	imInt.c \
+	imLcFlt.c \
+	imLcGIc.c \
+	imLcIc.c \
+	imLcIm.c \
+	imLcLkup.c \
+	imLcPrs.c \
+	imLcSIc.c \
+	imRm.c \
+	imRmAttr.c \
+	imThaiFlt.c \
+	imThaiIc.c \
+	imThaiIm.c \
+	imTrX.c \
+	imTransR.c \
+	imTrans.c \
+	lcCT.c \
+	lcCharSet.c \
+	lcConv.c \
+	lcDB.c \
+	lcDefConv.c \
+	lcEuc.c \
+	lcFile.c \
+	lcGenConv.c \
+	lcGeneric.c \
+	lcInit.c \
+	lcJis.c \
+	lcPrTxt.c \
+	lcPubWrap.c \
+	lcPublic.c \
+	lcRM.c \
+	lcSjis.c \
+	lcStd.c \
+	lcTxtPr.c \
+	lcUTF.c \
+	lcUtil.c \
+	omDefault.c \
+	omGeneric.c \
+	omImText.c \
+	omText.c \
+	omTextEsc.c \
+	omTextExt.c \
+	omTextPer.c \
+	omXChar.c
+
+/*
+#if defined(SunArchitecture) && defined(HasSharedLibraries)
+LCDEPOBJS = XsunDL.o
+#endif
+*/
+#ifdef RsArchitecture
+LCDEPOBJS = aixlcLoad.o
+#endif
+#ifdef OS2Architecture
+LCDEPOBJS = os2Stubs.o
+#endif
+
+LCOBJS = \
+	SetLocale.o \
+	$(LCDEPOBJS) \
+	imCallbk.o \
+	imConv.o \
+	imDefFlt.o \
+	imDefIc.o \
+	imDefIm.o \
+	imDefLkup.o \
+	imDispch.o \
+	imEvToWire.o \
+	imExten.o \
+	imImSw.o \
+	imInsClbk.o \
+	imInt.o \
+	imLcFlt.o \
+	imLcGIc.o \
+	imLcIc.o \
+	imLcIm.o \
+	imLcLkup.o \
+	imLcPrs.o \
+	imLcSIc.o \
+	imRm.o \
+	imRmAttr.o \
+	imThaiFlt.o \
+	imThaiIc.o \
+	imThaiIm.o \
+	imTrX.o \
+	imTransR.o \
+	imTrans.o \
+	lcCT.o \
+	lcCharSet.o \
+	lcConv.o \
+	lcDB.o \
+	lcDefConv.o \
+	lcEuc.o \
+	lcFile.o \
+	lcGenConv.o \
+	lcGeneric.o \
+	lcInit.o \
+	lcJis.o \
+	lcPrTxt.o \
+	lcPubWrap.o \
+	lcPublic.o \
+	lcRM.o \
+	lcSjis.o \
+	lcStd.o \
+	lcTxtPr.o \
+	lcUTF.o \
+	lcUtil.o \
+	omDefault.o \
+	omGeneric.o \
+	omImText.o \
+	omText.o \
+	omTextEsc.o \
+	omTextExt.o \
+	omTextPer.o \
+	omXChar.o
+
+OBJS = $(OBJS1) $(OBJS2) $(OBJS3)
+
+#if !BuildServersOnly || XnestServer
+#include <Library.tmpl>
+
+SpecialCLibObjectRule(ErrDes,$(ICONFIGFILES),$(EDB_DEFINES))
+SpecialCLibObjectRule(StrKeysym,$(ICONFIGFILES),$(KDB_DEFINES))
+SpecialCLibObjectRule(ConnDis,$(ICONFIGFILES),$(XDMAUTHDEFS) $(RPCDEFS) $(CONN_DEFINES) $(SOCK_DEFINES) $(POLL_DEFINES) $(XTRANS_X_DEFINES) $(K5INCL) $(K5DEFS))
+SpecialCLibObjectRule(x11trans,$(ICONFIGFILES),$(TRANS_INCLUDES) $(CONN_DEFINES) $(SOCK_DEFINES) $(XTRANS_X_DEFINES) $(POLL_DEFINES))
+LinkFile(x11trans.c,$(TRANSCOMMSRC)/transport.c)
+SpecialCLibObjectRule(ximtrans,$(ICONFIGFILES),$(TRANS_INCLUDES) $(CONN_DEFINES) $(SOCK_DEFINES) $(XTRANS_XIM_DEFINES) $(POLL_DEFINES))
+LinkFile(ximtrans.c,$(TRANSCOMMSRC)/transport.c)
+SpecialCLibObjectRule(OpenDis,$(ICONFIGFILES),$(BC_DEFINES) $(OPEN_DEFINES) $(XTRANS_X_DEFINES) $(XKB_DEFINES))
+SpecialCLibObjectRule(Wrap,$(ICONFIGFILES),$(XDMAUTHDEFS))
+SpecialCLibObjectRule(XlibInt,$(ICONFIGFILES),-I$(EXTINCSRC) $(CONN_DEFINES) $(POLL_DEFINES) $(XTRANS_X_DEFINES))
+SpecialCLibObjectRule(cmsColNm,$(ICONFIGFILES),$(CMS_DEFINES))
+SpecialCLibObjectRule(globals,$(ICONFIGFILES),$(CONN_DEFINES))
+SpecialCLibObjectRule(Context,$(ICONFIGFILES),$(BC_DEFINES))
+SpecialCLibObjectRule(Xrm,$(_NOOP_),$(RCONST_DEFINES))
+SpecialCLibObjectRule(imTransR,$(ICONFIGFILES),$(CONN_DEFINES) $(XTRANS_XIM_DEFINES))
+SpecialCLibObjectRule(imTrans,$(ICONFIGFILES),$(CONN_DEFINES) $(XTRANS_XIM_DEFINES))
+SpecialCLibObjectRule(lcFile,$(ICONFIGFILES),$(XLC_DEFINES))
+#if BuildXKBlib
+SpecialCLibObjectRule(XKBCvt,$(_NOOP_),$(RCONST_DEFINES))
+SpecialCLibObjectRule(KeyBind,$(ICONFIGFILES),$(XKB_DEFINES))
+SpecialCLibObjectRule(XKBBind,$(ICONFIGFILES),$(XKB_DEFINES))
+SpecialCLibObjectRule(imConv,$(ICONFIGFILES),$(XKB_DEFINES))
+#endif
+#if HasKrb5
+SpecialCLibObjectRule(k5encode,$(_NOOP_),$(K5INCL))
+#endif
+#ifdef MinixArchitecture
+SpecialCLibObjectRule(IMWrap,$(ICONFIGFILES),-DX11_TINY_IM)
+SpecialCLibObjectRule(lcInit,$(ICONFIGFILES),-DX11_TINY_LC)
+#endif
+
+#if InstallXcmsTxt
+InstallNonExecFile(Xcms.txt,$(LIBDIR))
+#endif
+InstallNonExecFile(XErrorDB,$(LIBDIR))
+InstallNonExecFile(XKeysymDB,$(LIBDIR))
+InstallLintLibrary(X11,$(LINTLIBDIR))
+
+
+LinkSourceFile(AuDispose.c,$(XAUTHSRC))
+LinkSourceFile(AuGetBest.c,$(XAUTHSRC))
+LinkSourceFile(AuFileName.c,$(XAUTHSRC))
+LinkSourceFile(AuRead.c,$(XAUTHSRC))
+#if HasKrb5
+LinkSourceFile(k5encode.c,$(XAUTHSRC))
+#endif
+#if HasXdmAuth
+LinkSourceFile(Wrap.h,$(XDMCPLIBSRC))
+LinkSourceFile(Wrap.c,$(XDMCPLIBSRC))
+LinkSourceFile(Wraphelp.c,$(XDMCPLIBSRC))
+#endif
+
+#if !HasSnprintf
+LinkSourceFile(snprintf.c,../misc)
+SpecialCLibObjectRule(snprintf,$(ICONFIGFILES),-DLIBX11)
+#endif
+LinkSourceFile(snprintf.h,../misc)
+
+MAKEKEYS = ./makekeys
+
+ks_tables.h: $(XINCLUDESRC)/keysymdef.h util/makekeys.c
+	RemoveFiles($@ ProgramTargetName(makekeys) makekeys.Osuf)
+	-HostLinkRule(ProgramTargetName(makekeys),$(CFLAGS) $(LOCAL_LDFLAGS),util/makekeys.c,$(LDLIBS))
+	RunProgram(MAKEKEYS,< $(XINCLUDESRC)/keysymdef.h > ks_tables_h)
+	$(MV) ks_tables_h $@
+	RemoveFiles(ProgramTargetName(makekeys) makekeys.Osuf ks_tables_h)
+
+includes:: ks_tables.h
+
+depend:: ks_tables.h
+
+clean::
+	RemoveFiles(ks_tables_h ks_tables.h ProgramTargetName(makekeys))
+
+DependTarget3($(SRCS1),$(SRCS2),$(SRCS3))
+#else
+all::
+
+BuildIncludes($(HEADERS),IncSubdir,..)
+#endif

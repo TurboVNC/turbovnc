@@ -1,0 +1,40 @@
+XCOMM $XConsortium: Imakefile /main/14 1996/11/03 19:58:41 kaleb $
+XCOMM $XFree86: xc/lib/font/fontfile/Imakefile,v 3.4 1996/12/26 03:41:32 dawes Exp $
+#include <Server.tmpl>
+
+#if !HasZlib
+    ZLIBINC = /usr/local/include
+#endif
+   INCLUDES = -I$(FONTINCSRC) -I../include -I$(SERVERSRC)/include -I$(ZLIBINC)
+    HEADERS = 
+#ifdef FontFormatDefines
+FORMAT_DEFS = FontFormatDefines
+#endif
+
+#if GzipFontCompression
+ GUNZIP_SRC = gunzip.c
+ GUNZIP_OBJ = gunzip.o
+  GZIP_DEFS = -DX_GZIP_FONT_COMPRESSION
+#endif
+
+ ATTRIBDEFS = -DFONTDIRATTRIB
+
+    DEFINES = $(ATTRIBDEFS)
+
+
+
+       SRCS = dirfile.c fontdir.c fontfile.c fileio.c fontscale.c \
+              defaults.c bitsource.c register.c renderers.c bufio.c \
+              decompress.c filewr.c printerfont.c ffcheck.c $(GUNZIP_SRC)
+       OBJS = dirfile.o fontdir.o fontfile.o fileio.o fontscale.o \
+              defaults.o bitsource.o register.o renderers.o bufio.o \
+              decompress.o filewr.o printerfont.o ffcheck.o $(GUNZIP_OBJ)
+
+SpecialCObjectRule(fileio,$(ICONFIGFILES),$(GZIP_DEFS))
+
+SubdirLibraryRule($(OBJS))
+NormalLibraryObjectRule()
+NormalLintTarget($(SRCS))
+
+DependTarget()
+

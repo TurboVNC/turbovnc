@@ -1,0 +1,137 @@
+XCOMM $XConsortium: sv4Lib.rules /main/18 1996/09/28 16:13:29 rws $
+XCOMM $XFree86: xc/config/cf/sv4Lib.rules,v 3.4 1996/12/23 05:50:34 dawes Exp $
+
+/*
+ * SVR4 shared library rules
+ */
+
+#ifndef HasSharedLibraries
+# define HasSharedLibraries YES
+#endif
+#ifndef SharedDataSeparation
+# define SharedDataSeparation NO
+#endif
+#ifndef SharedCodeDef
+# define SharedCodeDef /**/
+#endif
+#ifndef SharedLibraryDef
+# define SharedLibraryDef /**/
+#endif
+#ifndef ShLibIncludeFile
+# define ShLibIncludeFile <sv4Lib.tmpl>
+#endif
+#ifndef SharedLibraryLoadFlags
+# define SharedLibraryLoadFlags -G -z text
+#endif
+#ifndef PositionIndependentCFlags
+# if HasGcc2
+#  define PositionIndependentCFlags -fpic
+# else
+#  define PositionIndependentCFlags -K PIC
+# endif
+#endif
+#ifndef PositionIndependentCplusplusFlags
+# if HasGcc2ForCplusplus
+#  define PositionIndependentCplusplusFlags -fpic
+# else
+#  define PositionIndependentCplusplusFlags -K PIC
+# endif
+#endif
+#ifndef UseExportLists
+# define UseExportLists NO
+#endif
+
+/*
+ * InstallSharedLibrary - generate rules to install the shared library.
+ */
+#ifndef InstallSharedLibrary
+#if StripInstalledPrograms
+# define InstallSharedLibrary(libname,rev,dest)				@@\
+install:: Concat(lib,libname.so.rev) 					@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS) Concat(lib,libname.so.rev) $(DESTDIR)dest @@\
+	mcs -d Concat($(DESTDIR)dest/lib,libname.so.rev)		@@\
+	$(RM) Concat($(DESTDIR)dest/lib,libname.so)			@@\
+	cd $(DESTDIR)dest; $(LN) Concat(lib,libname.so.rev) Concat(lib,libname.so)
+#else
+# define InstallSharedLibrary(libname,rev,dest)				@@\
+install:: Concat(lib,libname.so.rev) 					@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS) Concat(lib,libname.so.rev) $(DESTDIR)dest @@\
+	$(RM) Concat($(DESTDIR)dest/lib,libname.so)			@@\
+	cd $(DESTDIR)dest; $(LN) Concat(lib,libname.so.rev) Concat(lib,libname.so)
+#endif
+
+#endif /* InstallSharedLibrary */
+
+/*
+ * InstallSharedLibraryData - generate rules to install the shared library data
+ */
+#ifndef InstallSharedLibraryData
+# define InstallSharedLibraryData(libname,rev,dest)
+#endif /* InstallSharedLibraryData */
+
+#ifndef LinkWithExports
+# if UseExportLists
+#  define LinkWithExports(libname,rev,solist,down,up) \
+	(cd down; $(CCENVSETUP) $(LD) -o up/$@~ $(SHLIBLDFLAGS) -h $@ solist $(REQUIREDLIBS))	@@\
+	if [ -f Concat(lib,libname.elist) ]; then \			@@\
+	    $(RM) down/$@.exports $@.list; \				@@\
+	    $(CPP) $(ALLINCLUDES) $(EXTRA_DEFINES) $(PROTO_DEFINES) $(THREADS_DEFINES) $(DEFINES) Concat(lib,libname.elist) | CppSedMagic >$@.list; \	@@\
+	    $(EXPORTLISTGEN) $@~ $@.list > down/$@.exports; \		@@\
+	    (cd down; $(CCENVSETUP) $(LD) -o up/$@~ $(SHLIBLDFLAGS) -h $@ ShlibExportListOpt($@.exports) solist $(REQUIREDLIBS)); \	@@\
+	    $(RM) down/$@.exports $@.list; \				@@\
+	fi;
+# else
+#  define LinkWithExports(libname,rev,solist,down,up) \
+	(cd down; $(CCENVSETUP) $(LD) -o up/$@~ $(SHLIBLDFLAGS) -h $@ solist $(REQUIREDLIBS))
+# endif
+#endif
+
+/*
+ * SharedLibraryTarget - generate rules to create a shared library;
+ * build it into a different name so that we do not hose people by having
+ * the library gone for long periods.
+ */
+#ifndef SharedLibraryTarget
+# define SharedLibraryTarget(libname,rev,solist,down,up)		@@\
+AllTarget(Concat(lib,libname.so.rev))					@@\
+									@@\
+Concat(lib,libname.so.rev):  solist $(EXTRALIBRARYDEPS)			@@\
+	$(RM) $@~							@@\
+	LinkWithExports(libname,rev,solist,down,up)			@@\
+	$(RM) $@ 							@@\
+	$(MV) $@~ $@							@@\
+	$(RM) Concat(lib,libname.so)					@@\
+	$(LN) $@ Concat(lib,libname.so)					@@\
+	LinkBuildLibrary($@)						@@\
+	LinkBuildLibrary(Concat(lib,libname.so))			@@\
+									@@\
+clean::									@@\
+	$(RM) Concat(lib,libname.so.rev) Concat(lib,libname.so)
+
+#endif /* SharedLibraryTarget */
+
+
+#ifndef SharedDepModuleTarget
+#define SharedDepModuleTarget(name,deps,solist)				@@\
+AllTarget(name)								@@\
+									@@\
+name: deps								@@\
+	$(RM) $@~							@@\
+	$(LD) -o $@~ $(SHLIBLDFLAGS) solist $(REQUIREDLIBS)		@@\
+	$(RM) $@							@@\
+	$(MV) $@~ $@							@@\
+									@@\
+clean::									@@\
+	$(RM) name
+
+#endif /* SharedDepModuleTarget */
+
+
+/*
+ * SharedLibraryDataTarget - generate rules to create shlib data file;
+ */
+#ifndef SharedLibraryDataTarget
+# define SharedLibraryDataTarget(libname,rev,salist)
+#endif /* SharedLibraryTarget */

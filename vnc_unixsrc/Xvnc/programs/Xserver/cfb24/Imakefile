@@ -1,0 +1,5 @@
+XCOMM $XFree86: xc/programs/Xserver/cfb24/Imakefile,v 3.0 1996/06/29 09:06:07 dawes Exp $
+#define PixelSize	24
+#define LinkDirectory ../cfb
+
+#include "../cfb/Imakefile"

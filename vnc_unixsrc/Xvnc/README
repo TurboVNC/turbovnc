@@ -1,0 +1,23 @@
+=======================
+Xvnc - the VNC X server
+=======================
+
+This is the top level directory for Xvnc, the VNC X server (or the X VNC
+server, depending on how you look at it).
+
+It is based on the XFree86 3.3.2 "server only" distribution, which in turn is
+based on the X11R6.3 distribution from the X consortium.
+
+To build Xvnc, simply do "make World" in this directory.  If the build is
+successful, the binary will be left in programs/Xserver.
+
+If you have trouble building you may need to play around with the imake
+configuration files in the directory config/cf.  Read the X consortium files
+RELNOTES.TXT and INSTALL.TXT.  Also see the file config/cf/vnc.def for
+information specific to Xvnc.
+
+The code specific to the TightVNC X server is located in the
+programs/Xserver/hw/vnc directory.  The rest of the code is a cut-down
+version of the standard XFree86 distribution without many of the later
+X extensions or hardware-specific code.  See the file DIFFS for details
+of all changes made to files from the XFree86 distribution.

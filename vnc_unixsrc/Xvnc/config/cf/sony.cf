@@ -1,0 +1,103 @@
+XCOMM platform:  $XConsortium: sony.cf /main/69 1996/09/29 18:19:36 kaleb $
+
+#ifdef SonyBsdArchitecture
+
+#ifndef OSName
+#define OSName                  NEWS-OS 4.2.1C
+#endif
+#ifndef OSMajorVersion
+#define OSMajorVersion          4
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion          2
+#endif
+#ifndef OSTeenyVersion
+#define OSTeenyVersion          1
+#endif
+#define SetTtyGroup             YES
+#define HasVoidSignalReturn     NO
+#define HasNdbm                 YES
+#define DirFailPrefix -
+#define InstKmemFlags		-g kmem -m 2711
+#define DefaultUserPath :/bin:/usr/bin:$(BINDIR):/usr/ucb:/usr/sony/bin:
+#define DefaultSystemPath /etc:/usr/etc:/bin:/usr/bin:$(BINDIR):/usr/ucb:/usr/sony/bin:
+#ifdef MipsArchitecture
+#define ExtraLibraries		-lmld
+#define LintOpts		-ax
+#define LintLibFlag		-o
+#define DefaultCCOptions	-Wf,-XNh2000,-XNd6000,-XNp10000 -Olimit 2000
+#define PexCCOptions		-Wf,-XNh2000,-XNd15000,-XNp15000 -Olimit 2000
+#else
+#define HasFortran		YES
+#endif
+#if OSMajorVersion >= 4
+#define HasShm			YES
+#define HasPutenv		YES
+#define HasSecureRPC		YES
+#define XdmDir			/etc/xdm
+#if OSMinorVersion >= 1
+#define HasBsearch		YES
+#else
+#define HasBsearch		NO
+#endif
+#else
+#define StandardDefines		-DNOSTDHDRS
+#define HasBsearch		NO
+#endif
+
+#else
+
+#ifndef OSName
+#define OSName			DefaultOSName
+#endif
+#ifndef OSMajorVersion
+#define OSMajorVersion		DefaultOSMajorVersion
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion		DefaultOSMinorVersion
+#endif
+#ifndef OSTeenyVersion
+#define OSTeenyVersion		DefaultOSTeenyVersion
+#endif
+XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVersion)
+
+#define BootstrapCFlags		-Dsony
+#define SystemV4		YES
+#define HasVFork		NO
+#define CcCmd			/usr/bin/cc
+#define LdCmd			/usr/bin/ld
+#if OSMajorVersion >= 6
+#define DefaultCCOptions	-Xa -Wf,-XNp9000,-XNd6000
+#define PexCCOptions		-Xa -Wf,-XNp15000,-XNd15000
+#define SharedLibraryLoadFlags -G -rpath $(USRLIBDIRPATH)
+#define PositionIndependentCFlags -K PIC -Wx,-G 0
+#define PositionIndependentCplusplusFlags -K PIC -Wx,-G 0
+#define SharedXmuReqs $(LDPRELIBS) $(XTOOLLIB) $(XLIB)
+#define FixupLibReferences() /**/
+#include <sv4Lib.rules>
+#else
+#define DefaultCCOptions	-Wf,-XNp9000,-XNd6000
+#define PexCCOptions		-Wf,-XNp15000,-XNd15000
+#endif
+
+#endif
+
+/*
+ * SONY C++ compiler is based on vanilla cfront, which means it
+ * refuses to compile files unless their names end in ".C".  We
+ * have to completely override .SUFFIXES to avoid using the builtin
+ * .C to .o rule in cases where the link to foo.C is already there,
+ * because the builtin rule doesn't use the right compilation flags.
+ */
+
+.SUFFIXES:
+.SUFFIXES: .o .c .y .l .s .sh .h .f .Y .L .cxx
+
+#define NormalLibObjCplusplusCompile(options) test -r $*.C || $(LN) $*.CCsuf $*.C @@\
+	$(CXX) -c $(CXXFLAGS) options $*.C
+
+XCOMM operating system:  OSName
+
+#ifndef BuildServer
+#define BuildServer             NO
+#endif

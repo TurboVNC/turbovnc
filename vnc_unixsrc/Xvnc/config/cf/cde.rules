@@ -1,0 +1,226 @@
+/* 
+ *  @OSF_COPYRIGHT@
+ *  COPYRIGHT NOTICE
+ *  Copyright (c) 1990, 1991, 1992, 1993 Open Software Foundation, Inc.
+ *  ALL RIGHTS RESERVED (MOTIF). See the file named COPYRIGHT.MOTIF for
+ *  the full copyright text.
+ *
+ * (c) Copyright 1996 Digital Equipment Corporation.
+ * (c) Copyright 1996 Hewlett-Packard Company.
+ * (c) Copyright 1996 International Business Machines Corp.
+ * (c) Copyright 1996 Sun Microsystems, Inc.
+ * (c) Copyright 1996 Novell, Inc. 
+ * (c) Copyright 1996 FUJITSU LIMITED.
+ * (c) Copyright 1996 Hitachi.
+ */ 
+XCOMM $XConsortium: cde.rules /main/2 1996/12/04 10:13:04 swick $
+
+/* Note whether we are the top level project. */
+#ifndef SeenTopLevelProject
+# define SeenTopLevelProject	YES
+# define CDEIsTopLevelProject	YES
+#else
+# define CDEIsTopLevelProject	NO
+#endif
+
+/* Include the Motif project rules file. */
+#include <Motif.rules>
+
+
+/* Use the in-tree CDE by default. */
+#ifndef UseInstalledCDE
+# define UseInstalledCDE	NO
+#endif
+#ifdef UseInstalled
+# undef UseInstalledCDE
+# define UseInstalledCDE	YES
+#endif
+
+#ifndef ImportCDE
+# ifdef UseImports
+#  define ImportCDE		YES
+# else
+#  define ImportCDE		NO
+# endif
+#endif
+#if UseInstalledCDE
+# undef ImportCDE
+# define ImportCDE		NO
+#endif
+
+/* If CDE has a different ProjectRoot we need to search the regular ones too. */
+#ifdef CDEProjectRoot
+# define CUsrLibDirPath	Concat(MUsrLibDirPath,:$(CDEPROJECTROOT)/lib)
+#else
+# define CUsrLibDirPath	MUsrLibDirPath
+#endif
+#ifdef UsrLibDirPath
+# undef UsrLibDirPath
+#endif
+#define UsrLibDirPath	CUsrLibDirPath
+
+#if ImportCDE
+# define CLdPreLibs	-L$(CDELIBSRC)
+#elif defined(UseInstalledCDE) && defined(CDEProjectRoot)
+# define CLdPreLibs	-L$(CDEPROJECTROOT)/lib
+#else
+# define CLdPreLibs	/**/
+#endif
+#ifdef LdPreLibs
+# undef LdPreLibs
+#endif
+#define LdPreLibs	LdPreLib CLdPreLibs MLdPreLibs XLdPreLibs
+
+#ifdef CDEProjectRoot
+# define CLdPostLibs	-L$(CDEPROJECTROOT)/lib
+#else
+# define CLdPostLibs	/**/
+#endif
+#ifdef LdPostLibs
+# undef LdPostLibs
+#endif
+#define LdPostLibs	LdPostLib CLdPostLibs MLdPostLibs XLdPostLibs
+
+#ifdef TopIncludes
+# undef TopIncludes
+#endif
+#define TopIncludes	TopInclude $(TOP_CDE_INCLUDES) $(TOP_MOTIF_INCLUDES) $(TOP_X_INCLUDES)
+
+#if UseInstalledCDE && defined(CdeProjectRoot)
+# define CDEBuildLibPath	$(CDEPROJECTROOT)/lib
+#elif UseInstalledCDE
+# define CDEBuildLibPath	$(USRLIBDIR)
+#elif ImportCDE
+# define CDEBuildLibPath	$(CDELIBSRC)
+#else
+# define CDEBuildLibPath	$(TOP)/exports/lib
+#endif
+#ifdef BuildLibPath
+# undef BuildLibPath
+#endif
+#ifdef SystemBuildLibPath
+# define BuildLibPath		\
+$(DTENVLIBDIR):$(MOTIFENVLIBDIR):$(XENVLIBDIR):$(SYSTEMENVLIBDIR)
+#else
+# define BuildLibPath		$(DTENVLIBDIR):$(MOTIFENVLIBDIR):$(XENVLIBDIR)
+#endif
+
+
+#ifndef CdeInstallationTop
+# define CdeInstallationTop	/usr/dt
+#endif
+#ifndef CdeConfigurationTop
+# define CdeConfigurationTop	/etc/dt
+#endif
+#ifndef CdeLogFilesTop
+# define CdeLogFilesTop		/var/dt
+#endif
+#ifndef CdeUserTop
+# define CdeUserTop		.dt
+#endif
+
+#ifndef CdeProjectDefines
+# define CdeProjectDefines	\
+	-DANSICPP -DMULTIBYTE -DNLS16 \
+	-DOSMAJORVERSION=OSMajorVersion -DOSMINORVERSION=OSMinorVersion
+#endif
+#ifdef ProjectDefines
+# undef ProjectDefines
+#endif
+#define ProjectDefines	X11ProjectDefines MotifProjectDefines CdeProjectDefines
+
+#ifndef CdeCplusplusProjectDefines
+# define CdeCplusplusProjectDefines	CdeProjectDefines
+#endif
+#ifdef CplusplusProjectDefines
+# undef CplusplusProjectDefines
+#endif
+#define CplusplusProjectDefines	\
+	X11CplusplusProjectDefines MotifCplusplusProjectDefines CdeCplusplusProjectDefines
+
+/*
+ * Doc build rules
+ */
+
+/*
+ * MakeSdlVolume - generate rules to create an SDL volume, in the specified
+ * directory, from an SGML source doc.
+ * Note: the volume name must match the directory name.
+ */
+#ifndef MakeSdlVolume
+#define MakeSdlVolume(vol,dir,env,opts,dep)				@@\
+all:: dir/vol.sdl							@@\
+									@@\
+dir/vol.sdl: dep							@@\
+	MakeDir(dir)							@@\
+	env $(DTDOCBOOK) $(DTDOCBOOKOPTIONS) opts -o dir/vol.sdl vol/book.sgm	@@\
+									@@\
+clean::									@@\
+	$(RM) dir/vol.sdl vol/book.log
+#endif
+
+/*
+ * MakeTocFile - generate rules to create an SGML TOC file.
+ * Note: the volume name must match the directory name.
+ */
+#ifndef MakeTocFile
+#define MakeTocFile(vol,env,opts,ttle,ident,dep)					@@\
+all:: vol/TOC.sgm							@@\
+									@@\
+vol/TOC.sgm: dep							@@\
+	MakeDir($(DTINFOGENTMPDIR))					@@\
+	env $(DTINFOGEN) tocgen -T $(DTINFOGENTMPDIR) $(DTINFOGENOPTIONS) opts -f vol/TOC.sgm -id ident -title ttle vol/book.sgm	@@\
+									@@\
+clean::									@@\
+	$(RM) vol/TOC.sgm
+#endif
+
+#ifndef MakeTocFile3
+#define MakeTocFile3(vol,env,opts,ttle,ident,dep1,dep2,dep3)			@@\
+all:: vol/TOC.sgm							@@\
+									@@\
+vol/TOC.sgm: dep1							@@\
+vol/TOC.sgm: dep2							@@\
+vol/TOC.sgm: dep3							@@\
+	MakeDir($(DTINFOGENTMPDIR))					@@\
+	env $(DTINFOGEN) tocgen -T $(DTINFOGENTMPDIR) $(DTINFOGENOPTIONS) opts -f vol/TOC.sgm -id ident -title ttle vol/book.sgm	@@\
+									@@\
+clean::									@@\
+	$(RM) vol/TOC.sgm
+#endif
+
+/*
+ * TocFileDep - generate TOC file dependency rule
+ */
+#ifndef TocFileDep
+#define TocFileDep(vol,dep)						@@\
+vol/TOC.sgm: dep
+#endif
+
+/*
+ * MakeInfolib - generate rules to create an infolib.
+ */
+#ifndef MakeInfolib
+#define MakeInfolib(infolib,bkcase,env,opts,dep)			@@\
+all:: infolib/bkcase/dtsearch/dtsearch.ocf				@@\
+									@@\
+infolib/bkcase/dtsearch/dtsearch.ocf: dep				@@\
+	MakeDir($(DTINFOGENTMPDIR))					@@\
+	MakeDir(infolib)						@@\
+	env $(DTINFOGEN) build -T $(DTINFOGENTMPDIR) $(DTINFOGENOPTIONS) opts -l infolib bookcase.bc
+#endif
+
+/*
+ * InfolibDep - generate infolib dependency rule - Highly depending on MMDB!
+ */
+#ifndef InfolibDep
+#define InfolibDep(infolib,bkcase,dep)					@@\
+infolib/bkcase/dtsearch/dtsearch.ocf: dep
+#endif
+
+#ifndef InfolibDep3
+#define InfolibDep3(infolib,bkcase,dep1,dep2,dep3)			@@\
+infolib/bkcase/dtsearch/dtsearch.ocf: dep1				@@\
+infolib/bkcase/dtsearch/dtsearch.ocf: dep2				@@\
+infolib/bkcase/dtsearch/dtsearch.ocf: dep3
+#endif

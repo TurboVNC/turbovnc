@@ -1,0 +1,90 @@
+'\" t
+.\" ** The above line should force tbl to be a preprocessor **
+.\" Man page for vncserver
+.\"
+.\" Copyright (C) 1998 Marcus.Brinkmann@ruhr-uni-bochum.de
+.\" Copyright (C) 2000, opal@debian.org
+.\" Copyright (C) 2000, 2001 Red Hat, Inc.
+.\" Copyright (C) 2001, 2002 Constantin Kaplinsky <const@ce.cctpu.edu.ru>
+.\"
+.\" You may distribute under the terms of the GNU General Public
+.\" License as specified in the file LICENCE.TXT that comes with the
+.\" TightVNC distribution.
+.\"
+.TH vncserver 1 "August 2002" "" "TightVNC"
+.SH NAME
+vncserver \- a wrapper to launch an X server for VNC.
+.SH SYNOPSIS
+\fBvncserver\fR
+[:\fIdisplay\fR] [\-geometry \fIwidth\fRx\fIheight\fR] [\-depth \fIdepth\fR]
+[\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-name \fIdesktop\-name\fR]
+[\fIXvnc\-options\fR...]
+.TP
+\fBvncserver\fR \-kill :\fIdisplay\fR
+.TP
+\fBvncserver\fR \-help
+.SH DESCRIPTION
+\fBvncserver\fR is a wrapper script for \fBXvnc\fR, the free X server
+for VNC (Virtual Network Computing). It provides all capabilities of a
+standard X server, but does not connect to a display for itself.
+Instead, \fBXvnc\fR creates a virtual desktop you can view or control
+remotely using a VNC viewer.
+.SH OPTIONS
+You can add \fBXvnc\fR options at the command line. They will be added
+to the invocation of Xvnc without changes. The options provided by the
+\fBvncserver\fR itself are as follows:
+.TP
+\fB:\fR\fIdisplay\fR
+The display number to use. If omitted, the next free display number
+is used.
+.TP
+\fB\-geometry\fR \fIwidth\fR\fBx\fR\fIheight\fR
+Set desktop width and height.
+.TP
+\fB\-depth\fR \fIdepth\fR
+Set the colour depth of the visual to provide, in bits per pixel. Must
+be a value between 8 and 32.
+.TP
+\fB\-pixelformat\fR \fBrgb\fR\fINNN\fR|\fBbgr\fR\fINNN\fR
+Set colour format for pixels representation. The viewer can do the
+conversion to any other pixel format, but it is faster if the depth
+and pixel format of the server is the same as the equivalent values on
+the viewer display.
+.TP
+\fB\-name\fR \fIstring\fR
+This specifies the name of the desktop.
+.TP
+\fB\-kill\fR \fB:\fR\fIdisplay\fR
+Stops the session running on the specified display.
+.TP
+\fB\-help\fR
+Prints a short usage notice to stderr.
+.SH EXAMPLES
+.TP
+\fBvncserver\fR
+Invokes \fBXvnc\fR on the next available display and with suitable
+defaults.
+.TP
+\fBvncserver\fR \fI:1\fR
+Invokes \fBXvnc\fR on display :1.
+.TP
+\fBvncserver\fR \fI\-geometry 800x600 \-depth 16 :1\fR
+Invokes \fBXvnc\fR on display :1 with desktop size of 800x600 pixels
+and color depth of 16 bits per pixel.
+.TP
+\fBvncserver\fR \fI\-kill :1\fR
+Shuts down \fBXvnc\fR server on display :1.
+.SH SEE ALSO
+\fBXvnc\fR(1), \fBvncviewer\fR(1), \fBvncpasswd\fR(1), \fBvncconnect\fR(1)
+.SH AUTHORS
+Original VNC was developed in AT&T Laboratories Cambridge. TightVNC
+additions was implemented by Constantin Kaplinsky. Many other people
+participated in development, testing and support.
+
+\fBMan page authors:\fR
+.br
+Marcus Brinkmann <Marcus.Brinkmann@ruhr-uni-bochum.de>,
+.br
+Tim Waugh <twaugh@redhat.com>,
+.br
+Constantin Kaplinsky <const@ce.cctpu.edu.ru>

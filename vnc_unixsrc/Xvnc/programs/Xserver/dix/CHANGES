@@ -1,0 +1,17 @@
+The following changes have been made to this directory since R3 (for
+a full description, see doc/Server/r4.tbl.ms):
+
+     o  Windows restructured (memory reduction, devPrivates and speedups)
+     o  GCs restructured (memory reduction, devPrivates and wrappers)
+     o  Screens restructured (window ops merged in, devPrivates)
+     o  Pixmaps restructured (drawable changes mostly)
+     o  Cursors restructured (shares glyph bits now)
+     o  Visuals restructured (screen index removed, fields rearranged)
+     o  Devices restructured (input extension changes)
+     o  Out of memory changes.  Many interfaces now return OutOfMemory
+     	status.
+     o  Synchronous grab code rewritten.  Should conform to our
+     	understanding of the protocol now.  Be careful when time
+	stamping events (don't allow time to run backwards).
+     o  Resource types redesigned and rewritten.
+     o  Internal fake color allocation routine for software cursors.

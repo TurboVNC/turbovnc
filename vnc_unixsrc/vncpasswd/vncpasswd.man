@@ -1,0 +1,87 @@
+'\" t
+.\" ** The above line should force tbl to be a preprocessor **
+.\" Man page for X vncpasswd
+.\"
+.\" Copyright (C) 1998 Marcus.Brinkmann@ruhr-uni-bochum.de
+.\" Copyright (C) 2000 Red Hat, Inc.
+.\" Copyright (C) 2001-2003 Constantin Kaplinsky <const@ce.cctpu.edu.ru>
+.\"
+.\" You may distribute under the terms of the GNU General Public
+.\" License as specified in the file LICENCE.TXT that comes with the
+.\" TightVNC distribution.
+.\"
+.TH vncpasswd 1 "March 2003" "" "TightVNC"
+.SH NAME
+vncpasswd \- set passwords for VNC server
+.SH SYNOPSIS
+.B vncpasswd
+.RI [\| file \|]
+.br
+.B vncpasswd
+.IR \-t
+.br
+.B vncpasswd
+.IR \-f
+.br
+.SH DESCRIPTION
+The \fBvncpasswd\fR utility should be used to create and change
+passwords for the TightVNC server authentication. \fBXvnc\fR uses such
+passwords when started with the \fB\-rfbauth\fR command-line option
+(or when started from the \fBvncserver\fR script).
+
+\fBvncpasswd\fR allows to enter either one or two passwords. The first
+password is the primary one, the second password can be used for
+view-only authentication. \fBXvnc\fR will restrict mouse and keyboard
+input from clients who authenticated with the view-only password. The
+\fBvncpasswd\fR utility asks interactively if it should set the second
+password.
+
+The password file name defaults to \fB$HOME/.vnc/passwd\fR unless the
+\fB\-t\fR command-line option was used (see the OPTIONS section
+below). The \fB$HOME/.vnc/\fR directory will be created if it does not
+exist.
+
+Each password has to be longer than five characters (unless the
+\fB\-f\fR command-line option was used, see its description below). 
+Only the first eight characters are significant. If the primary
+password is too short, the program will abort. If the view-only
+password is too short, then only the primary password will be saved.
+
+Unless a file name was provided in the command-line explicitly, this
+utility may perform certain sanity checks to prevent writing a
+password file into some hazardous place.
+
+If at least one password was saved successfully, \fBvncpasswd\fR will
+exit with status code 0. Otherwise the returned status code will be
+set to 1.
+.br
+.SH OPTIONS
+.TP
+\fB\-t\fR
+Write passwords into \fB/tmp/$USER-vnc/passwd\fR, creating the
+\fB/tmp/$USER-vnc/\fR directory if it does not exist, and checking the
+permissions on that directory (the mode must be 700). This option can
+help to improve security when your home partition may be shared via
+network (e.g. when using NFS).
+.TP
+\fB\-f\fR
+Filter mode. Read plain-text passwords from stdin, write encrypted
+versions to stdout. One or two passwords (full-control and view-only)
+can be supplied in the input stream, newline terminates a password. 
+Note that in the filter mode, short or even empty passwords will be
+silently accepted.
+.SH SEE ALSO
+\fBvncserver\fR(1), \fBXvnc\fR(1), \fBvncviewer\fR(1),
+\fBvncconnect\fR(1)
+.SH AUTHORS
+Original VNC was developed in AT&T Laboratories Cambridge. TightVNC
+additions was implemented by Constantin Kaplinsky. Many other people
+participated in development, testing and support.
+
+\fBMan page authors:\fR
+.br
+Marcus Brinkmann <Marcus.Brinkmann@ruhr-uni-bochum.de>,
+.br
+Tim Waugh <twaugh@redhat.com>,
+.br
+Constantin Kaplinsky <const@ce.cctpu.edu.ru>

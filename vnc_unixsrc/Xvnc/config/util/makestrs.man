@@ -1,0 +1,213 @@
+.\" $XConsortium: makestrs.man /main/3 1996/09/28 16:16:52 rws $
+.\" Copyright (c) 1993, 1994  X Consortium
+.\" 
+.\" Permission is hereby granted, free of charge, to any person obtaining a
+.\" copy of this software and associated documentation files (the "Software"), 
+.\" to deal in the Software without restriction, including without limitation 
+.\" the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+.\" and/or sell copies of the Software, and to permit persons to whom the 
+.\" Software furnished to do so, subject to the following conditions:
+.\" 
+.\" The above copyright notice and this permission notice shall be included in
+.\" all copies or substantial portions of the Software.
+.\" 
+.\" THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+.\" IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+.\" FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL 
+.\" THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+.\" WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF 
+.\" OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+.\" SOFTWARE.
+.\" 
+.\" Except as contained in this notice, the name of the X Consortium shall not 
+.\" be used in advertising or otherwise to promote the sale, use or other 
+.\" dealing in this Software without prior written authorization from the 
+.\" X Consortium.
+.TH MAKESTRS 1 "Release 6.1" "X Version 11"
+.SH NAME
+makestrs \- makes string table C source and header(s)
+.SH SYNOPSIS
+.B makestrs [-f source] [-abioptions ...]
+.SH DESCRIPTION
+The
+.I makestrs
+command creates string table C source files and headers.
+If
+.I -f
+.I source
+is not specified
+.I makestrs
+will read from
+.I stdin.
+The C source file is always written to
+.I stdout.
+.I makestrs
+creates one or more C header files as specified in the source file.
+The following options may be specified:
+.I -sparcabi,
+.I -intelabi,
+.I -functionabi,
+.I -arrayperabi,
+and
+.I -defaultabi.
+.LP
+.I -sparcabi 
+is used on SPARC platforms conforming to the SPARC 
+Compliance Definition, i.e. SVR4/Solaris.
+.LP
+.I -intelabi 
+is used on Intel platforms conforming to the System 
+V Application Binary Interface, i.e. SVR4.
+.LP
+.I -earlyR6abi 
+may be used in addition to 
+.I -intelabi 
+for situations 
+where the vendor wishes to maintain binary compatiblity between 
+X11R6 public-patch 11 (and earlier) and X11R6 public-patch 12 (and later).
+.LP
+.I -functionabi 
+generates a functional abi to the string table. This 
+mechanism imposes a severe performance penalty and it's recommended 
+that you not use it.
+.LP
+.I -arrayperabi 
+results in a separate array for each string. This is 
+the default behavior if makestrs was compiled with -DARRAYPERSTR 
+(it almost never is).
+.LP
+.I -defaultabi 
+forces the generation of the "normal" string table even 
+if makestrs was compiled with -DARRAYPERSTR. Since makestrs is almost 
+never compiled with -DARRAYPERSTR this is the default behavior if 
+no abioptions are specified.
+.SH SYNTAX
+The syntax for string-list file is (items in square brackets are optional):
+.RS 4
+#prefix <text>
+.RE
+.RS 4
+#feature <text>
+.RE
+.RS 4
+#externref <text>
+.RE
+.RS 4
+#externdef [<text>]
+.RE
+.RS 4
+[#ctempl <text>]
+.RE
+.LP
+.RS 4
+#file <filename>
+.RE
+.RS 4
+#table <tablename>
+.RE
+.RS 4
+[#htempl]
+.RE
+.RS 4
+<text>
+.RE
+.RS 4
+...
+.RE
+.RS 4
+<text>
+.RE
+.RS 4
+[#table <tablename>
+.RE
+.RS 4
+<text>
+.RE
+.RS 4
+...
+.RE
+.RS 4
+<text>
+.RE
+.RS 4
+...
+.RE
+.RS 4
+#table <tablename>
+.RE
+.RS 4
+...]
+.RE
+.RS 4
+[#file <filename>
+.RE
+.RS 4
+...]
+.RE
+.LP
+In words you may have one or more #file directives. Each #file may have
+one or more #table directives.
+.LP
+The #prefix directive determines the string that makestr will prefix
+to each definition.
+.LP
+The #feature directive determines the string that makestr will use
+for the feature-test macro, e.g. X[TM]STRINGDEFINES.
+.LP
+The #externref directive determines the string that makestr will use
+for the extern clause, typically this will be "extern" but Motif wants
+it to be "externalref"
+.LP
+The #externdef directive determines the string that makestr will use
+for the declaration, typically this will be the null string (note that
+makestrs requires a trailing space in this case, i.e. "#externdef "),
+and Motif will use "externaldef(_xmstrings).
+.LP
+The #ctmpl directive determines the name of the file used as a template
+for the C source file that is generated
+.LP
+Each #file <filename> directive will result in a corresponding header 
+file by that name containing the appropriate definitions as specified
+by command line options. A single C source file containing the
+declarations for the definitions in all the headers will be printed
+to stdout.
+.LP
+The #htmpl directive determines the name of the file used as a template
+for the C header file that is generated.
+.LP
+Each #table <tablename> directive will be processed in accordance with
+the ABI. On most platforms all tables will be catenated into a single
+table with the name of the first table for that file. To conform to
+the Intel ABI separate tables will be generated with the names indicated.
+.LP
+The template files specified by the #ctmpl and #htmpl directives
+are processed by copying line for line from the template file to
+the appropriate output file. The line containing the string
+.I <<<STRING_TABLE_GOES_HERE>>>
+is not copied to the output file. The appropriate data is then
+copied to the output file and then the remainder of the template
+file is copied to the output file.
+.SH BUGS
+makestrs is not very forgiving of syntax errors. Sometimes you need
+a trailing space after # directives, other times they will mess you
+up. No warning messages are emitted.
+.SH SEE ALSO
+SPARC Compliance Definition 2.2., SPARC International Inc.,
+535 Middlefield Road, Suite 210, Menlo Park, CA  94025
+.LP
+System V Application Binary Interface, Third Edition, 
+ISBN 0-13-100439-5
+UNIX Press, PTR Prentice Hall, 113 Sylvan Avenue, Englewood Cliffs, 
+NJ  07632
+.LP
+System V Application Binary Interface, Third Edition, Intel386
+Architecture Processor Supplement
+ISBN 0-13-104670-5
+UNIX Press, PTR Prentice Hall, 113 Sylvan Avenue, Englewood Cliffs, 
+NJ  07632
+.LP
+System V Application Binary Interface, Third Edition, SPARC
+Architecture Processor Supplement
+ISBN 0-13-104696-9
+UNIX Press, PTR Prentice Hall, 113 Sylvan Avenue, Englewood Cliffs, 
+NJ  07632

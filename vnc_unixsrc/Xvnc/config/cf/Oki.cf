@@ -1,0 +1,30 @@
+XCOMM platform:  $XConsortium: Oki.cf /main/16 1996/09/28 16:06:53 rws $
+
+#ifndef OSName
+#define OSName			Unix System V/860 Release 4.0 Version 3
+#endif
+XCOMM operating system:  OSName
+#ifndef OSMajorVersion
+#define OSMajorVersion		4
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion		0
+#endif
+#ifndef OSTeenyVersion
+#define OSTeenyVersion		3
+#endif
+
+#define BootstrapCFlags		-DOki
+#define SystemV4		YES
+#define HasLdRunPath		YES
+#define ConnectionFlags		-DTCPCONN -DUNIXCONN -DLOCALCONN
+#define SetTtyGroup		YES
+#define HasPutenv		YES
+#define HasPoll                 YES
+#define PatheticCpp		YES
+#define CcCmd			/usr/bin/cc
+#define StandardDefines -DSVR4 -Di860
+#define DefaultCCOptions	-Xa
+#define BuildServer             NO
+#define ToolkitStringsABIOptions -intelabi
+#include <sv4Lib.rules>

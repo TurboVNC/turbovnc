@@ -1,0 +1,15 @@
+--- vnc_unixsrc/vncserver.xclients	Tue Aug 27 19:10:20 2002
++++ vnc_unixsrc/vncserver	Fri Aug 30 15:09:13 2002
+@@ -57,10 +57,8 @@
+ 
+ $defaultXStartup
+     = ("#!/bin/sh\n\n".
+-       "xrdb \$HOME/.Xresources\n".
+-       "xsetroot -solid grey\n".
+-       "xterm -geometry 80x24+10+10 -ls -title \"\$VNCDESKTOP Desktop\" &\n".
+-       "twm &\n");
++       "# Red Hat Linux VNC session startup script\n".
++       "exec /etc/X11/xinit/xinitrc\n");
+ 
+ $xauthorityFile = "$ENV{XAUTHORITY}";
+ 

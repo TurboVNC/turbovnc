@@ -1,0 +1,81 @@
+#!/bin/bash
+#
+# chkconfig: - 91 35
+# description: Starts and stops vncserver. \
+#	       used to provide remote X administration services.
+
+# Source function library.
+. /etc/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ ${NETWORKING} = "no" ] && exit 0
+
+VNCSERVERS=""
+[ -f /etc/sysconfig/vncservers ] && . /etc/sysconfig/vncservers
+
+prog=$"VNC server"
+
+start() {
+    echo -n $"Starting $prog: "
+    ulimit -S -c 0 >/dev/null 2>&1
+    RETVAL=0
+    for display in ${VNCSERVERS}
+    do
+        echo -n "${display} "
+	unset BASH_ENV ENV
+        initlog $INITLOG_ARGS -c \
+            "su ${display##*:} -c \"cd ~${display##*:} && [ -f .vnc/passwd ] && vncserver :${display%%:*}\""
+        RETVAL=$?
+        [ "$RETVAL" -ne 0 ] && break
+    done
+    [ "$RETVAL" -eq 0 ] && success $"vncserver startup" || \
+        failure $"vncserver start"
+    echo
+    [ "$RETVAL" -eq 0 ] && touch /var/lock/subsys/vncserver
+}
+
+stop() {
+    echo -n $"Shutting down $prog: "
+    for display in ${VNCSERVERS}
+    do
+        echo -n "${display} "
+	unset BASH_ENV ENV
+        initlog $INITLOG_ARGS -c \
+	    "su ${display##*:} -c \"vncserver -kill :${display%%:*}\" >/dev/null 2>&1"
+    done
+    RETVAL=$?
+    [ "$RETVAL" -eq 0 ] && success $"vncserver shutdown" || \
+        failure $"vncserver shutdown"
+    echo
+    [ "$RETVAL" -eq 0 ] && rm -f /var/lock/subsys/vncserver
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  restart|reload)
+	stop
+	start
+	;;
+  condrestart)
+	if [ -f /var/lock/subsys/vncserver ]; then
+	    stop
+	    start
+	fi
+	;;
+  status)
+	status Xvnc
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+	exit 1
+esac
+

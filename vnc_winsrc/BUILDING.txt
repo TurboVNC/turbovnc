@@ -1,0 +1,43 @@
+BUILDING vncviewer and WinVNC (TightVNC 1.2.9 release)
+======================================================
+
+This distibution requires two third-party libraries for successfull
+compilation. They are NOT included in this archive. These are are zlib
+and JPEG libraries freely available in the source form from following
+locations:
+
+  ftp://ftp.uu.net/graphics/jpeg/jpegsrc.v6b.tar.gz
+  http://prdownloads.sourceforge.net/libpng/zlib-1.1.4.tar.gz
+
+Please download these libraries prior to compilation. Note that these
+archives are in tar+gzip format not very popular in Windows
+environments. Here I won't explain how to unpack them, please find
+appropriate extractors yourself or unpack them on Unix-like machines.
+
+After you have downloaded and unpacked libraries, place their source
+files to the locations listed below, NOT overriding existing files:
+
+  zlib library:
+    vnc_winsrc/vncviewer/zlib/
+    vnc_winsrc/winvnc/zlib/
+
+  JPEG library:
+    vnc_winsrc/vncviewer/libjpeg/
+    vnc_winsrc/winvnc/libjpeg/
+
+Compilation has been checked under MS Visual C++ 6.0. Workspace files
+(*.dsw) for this environment are included in the distribution. It is
+also possible to build TightVNC using "free" Borland C++ 5.5 compiler,
+please read BUILDING-bcc32.txt for details.
+
+Important note regarding WinVNC compilation:
+
+  The AT&T internal version of WinVNC uses CORBA.
+  This is not included in the distributed version.
+
+  You should therefore build WinVNC using the No_CORBA configuration.
+
+  Debug, Release etc will give errors.
+
+  This is not the case with vncviewer.
+

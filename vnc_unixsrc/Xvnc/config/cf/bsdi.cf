@@ -1,0 +1,151 @@
+XCOMM platform:  $XConsortium: bsdi.cf /main/22 1996/09/28 16:09:30 rws $
+XCOMM platform:  $XFree86: xc/config/cf/bsdi.cf,v 3.23.2.5 1998/02/09 14:33:21 robin Exp $
+
+#ifndef OSName
+#define OSName            BSD/OS 2.0
+#endif
+#ifndef OSVendor
+#define OSVendor          BSDI
+#endif
+XCOMM operating system:  OSName
+#ifndef OSMajorVersion
+#define OSMajorVersion    2
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion    0
+#endif
+
+#define HasPutenv	YES
+#define HasBSD44Sockets	YES
+
+XCOMM BSD/OS 2.0 comes with gcc 2.6.3 installed as gcc2 and gcc.
+XCOMM gcc 1.42 is installed as cc.
+XCOMM BSD/386 1.1 comes with gcc 2.5.8 installed as gcc2.
+XCOMM BSD/386 1.0 comes with gcc 1.40 as the only compiler.
+XCOMM The default is to use gcc2 on release 2.0 and 1.1 and gcc1 on 1.0
+XCOMM The defaults can be altered by defining "HasGcc2" as YES or NO in
+XCOMM xf86site.def
+
+#ifndef HasGcc
+# define HasGcc			YES
+#endif
+#if OSMajorVersion > 1 || OSMinorVersion >= 1
+# ifndef HasGcc2
+#  define HasGcc2		YES
+# endif
+#endif
+#if HasGcc2
+# ifndef HasGcc2ForCplusplus
+#  define HasGcc2ForCplusplus	YES
+# endif
+# define CcCmd			gcc2
+# define OptimizedCDebugFlags	DefaultGcc2i386Opt
+#else
+# define CcCmd			cc
+# define OptimizedCDebugFlags	-O
+#endif
+#define CppCmd		/usr/bin/cpp
+#define TroffCmd	groff -Tps
+#define MkdirHierCmd	mkdir -p
+#define SetTtyGroup	YES
+#define HasNdbm		YES
+#define HasWChar32      YES
+#define DirFailPrefix -
+#define AvoidNullMakeCommand YES
+# ifndef GccUsesGas
+#  define GccUsesGas    YES
+# endif
+#if HasGcc
+#if defined(UseInstalled) && (!defined(XF86LinkKit) || !XF86LinkKit)
+#define DefaultCCOptions	/**/
+#else
+#define DefaultCCOptions	-ansi
+#endif
+#endif
+
+#if GccUsesGas
+# define GccGasOption -DGCCUSESGAS
+#else
+# define GccGasOption /**/
+#endif
+
+#define HasShm	YES
+#define ServerExtraDefines GccGasOption XFree86ServerDefines
+#define ServerOSDefines XFree86ServerOSDefines -DDDXTIME
+#define XFree86ConsoleDefines /**/
+#define AsmDefines -DUSE_GAS
+
+#define StandardDefines	-DCSRG_BASED
+
+#define InstallCmd /usr/bin/install
+#define	EqnCmd eqn -Tps
+#define	NeqnCmd eqn -Tascii
+          COL = col
+         NEQN = NeqnCmd
+        NROFF = nroff
+
+#define DefaultUserPath		:/bin:/usr/bin:/usr/local/bin:$(BINDIR)
+#define DefaultSystemPath	/sbin:/usr/sbin:/bin:/usr/bin:$(BINDIR)
+
+XCOMM Man pages need to be formatted when installed, so override the default
+XCOMM imake rules.
+
+#define ManSuffix       1
+#define ManSourcePath   $(MANPATH)/cat
+
+#define InstallManPageLong(file,destdir,dest)                           @@\
+all:: file.0								@@\
+									@@\
+file.0:: file.man							@@\
+	@if [ -f file.man ]; \						@@\
+	then \								@@\
+	cat file.man | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) | $(COL) >/tmp/$$$$.man; \	@@\
+	cp /tmp/$$$$.man file.0; \					@@\
+	$(RM) /tmp/$$$$.man; \						@@\
+	fi 								@@\
+									@@\
+file.man::								@@\
+									@@\
+install.man::                                                           @@\
+	MakeDir($(DESTDIR)destdir)					@@\
+	-@if [ -f file.0 ]; \						@@\
+	then \								@@\
+	$(INSTALL) -c $(INSTMANFLAGS) file.0 $(DESTDIR)destdir/dest.0; \@@\
+	fi
+
+#define InstallGenManPageLong(file,destdir,dest,suffix)			@@\
+	InstallManPageLong(file,destdir,dest)
+
+#define InstallMultipleManSuffix(list,dest,suff)                        @@\
+install.man:: 								@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	case '${MFLAGS}' in *[i]*) set +e;; esac; \			@@\
+	for i in list; do \                                             @@\
+	  (set -x; \							@@\
+	  cat $$i.suff | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) | $(COL) >/tmp/$$$$.suff; \	@@\
+	  $(INSTALL) -c $(INSTMANFLAGS) /tmp/$$$$.suff $(DESTDIR)dest/$$i.0; \	@@\
+	  $(RM) /tmp/$$$$.suff); \						@@\
+	done
+
+#define InstallMultipleMan(list,dest)                                   @@\
+	InstallMultipleManSuffix(list,dest,man)
+
+#define InstallManPageAliases(file,destdir,aliases)                     @@\
+install.man:: 								@@\
+	@case '${MFLAGS}' in *[i]*) set +e;; esac; \                    @@\
+	for i in aliases; do \                                          @@\
+		(set -x; \						@@\
+		$(RM) $(DESTDIR)destdir/$$i.0;\  			@@\
+		(cd $(DESTDIR)destdir; $(LN) file.0 $$i.0);\  		@@\
+		); \							@@\
+	done
+
+#define InstallGenManPageAliases(file,destdir,suffix,aliases)		@@\
+	InstallManPageAliases(file,destdir,aliases)
+
+/*
+ * These seem redundant, but leave them in for now.
+ */
+#define i386Bsd 1
+#define i386Bsdi 1
+#include <xfree86.cf>

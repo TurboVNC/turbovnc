@@ -1,0 +1,92 @@
+XCOMM $TOG: Imakefile /main/27 1997/04/30 15:38:09 kaleb $
+XCOMM
+XCOMM
+XCOMM
+XCOMM
+XCOMM $XFree86: xc/config/makedepend/Imakefile,v 3.4.2.1 1997/06/11 12:08:35 dawes Exp $
+
+    SRCS = include.c main.c parse.c pr.c cppsetup.c ifparser.c 
+    OBJS = include.o main.o parse.o pr.o cppsetup.o ifparser.o 
+
+XCOMM Some compilers generate fatal errors if an -L directory does
+XCOMM not exist.  Since BUILDLIBDIR may not exist yet suppress its use.
+         LDPRELIB =
+        LDPRELIBS =
+
+#if HasGcc && !defined(PreIncDir)
+#define PreIncDir /usr/local/lib/gcc-include
+#endif
+#ifdef PreIncDir
+PREINCDIR = PreIncDir
+PREINC_DEFINES = -DPREINCDIR=\"$(PREINCDIR)\"
+#endif
+#ifndef StdIncDir
+#define StdIncDir /usr/include
+#endif
+STDINCDIR = StdIncDir
+STDINC_DEFINES = -DINCLUDEDIR=\"$(STDINCDIR)\"
+#ifdef PostIncDir
+POSTINCDIR = PostIncDir
+POSTINC_DEFINES = -DPOSTINCDIR=\"$(POSTINCDIR)\"
+#endif
+INC_DEFINES = $(PREINC_DEFINES) $(STDINC_DEFINES) $(POSTINC_DEFINES)
+OSUF = .Osuf
+OSUF_DEFINES = -DOBJSUFFIX=\"$(OSUF)\"
+MAIN_DEFINES = $(INC_DEFINES) $(SIGNAL_DEFINES) $(OSUF_DEFINES)
+INCLUDES = -I$(IMAKESRC) -I$(TOP)/include $(TOP_X_INCLUDES)/X11
+
+ DEPLIBS =
+
+#if defined(MacIIArchitecture) || defined(SequentArchitecture) || defined(i386ScoArchitecture)
+ XBSDLIB = /**/
+#endif
+
+AllTarget(ProgramTargetName(makedepend))
+
+/*
+ * bootstrapping: want to build the real makedepend
+ * only after we've run "make depend" here.  That way
+ * the program has the right dependencies for clearmake.
+ * Save the bootstrap original files so they can be winked in
+ * to other views.
+ */
+
+#if HasClearmake
+bootstrap:
+	test -h X11 || $(LN) TOPDIR/include X11
+	$(MAKE) -f Makefile.proto TOP_INCLUDES=-I. makedepend
+
+depend::
+	$(MAKE) -f Makefile.proto depend
+	test -d bootstrap || mkdir bootstrap
+	$(MV) *.o makedepend bootstrap
+	$(MAKE) -f Makefile.proto makedepend
+
+clean::
+	$(RM) -r bootstrap
+	$(RM) X11
+#else
+bootstrap:
+#endif /* HasClearmake */
+
+clean::
+	$(RM) Makefile.proto
+
+#undef InstallManPage
+#define InstallManPage(file,dest) /* as nothing */
+#if CrossCompiling
+ComplexHostProgramTarget(makedepend)
+#else
+ComplexProgramTarget(makedepend)
+#endif
+
+SpecialCObjectRule(main,$(ICONFIGFILES),$(MAIN_DEFINES))
+
+InstallManPageLong(mkdepend,$(MANDIR),makedepend)
+
+#ifdef OS2Architecture
+all::
+	$(CP) ProgramTargetName(makedepend) /
+#endif
+
+InstallLinkKitNamedProg(makedepend,makedepend,$(LINKKITDIR)/config/makedepend)

@@ -1,0 +1,528 @@
+XCOMM platform:  $XConsortium: Win32.rules /main/49 1996/12/02 14:12:47 kaleb $
+
+#define HasSharedLibraries YES
+#define NeedLibInsideFlag YES
+#define SharedLibXaw NO
+#define SharedLibXmu NO
+#define SharedLibXt NO
+#define SharedDataSeparation NO
+#define SharedCodeDef /**/
+#define SharedLibraryDef /**/
+#define ShLibIncludeFile <WinLib.tmpl>
+#define SharedLibraryLoadFlags -dll
+#define PositionIndependentCFlags /**/
+
+.c.obj:
+	$(CC) -c $*.c @<<
+	$(CFLAGS)
+<<
+
+#if HasCplusplus
+.CCsuf.obj:
+	$(CXX) -c $*.CCsuf @<<
+	$(CFLAGS)
+<<
+#endif
+
+#define ProgramTargetName(target) target.exe
+
+#define RunProgram(progvar,options) $(progvar:/=\) options
+
+#define RemoveFile(file) if exist file $(RM) file
+
+#define RemoveFiles(files) @$(MAKE) $(MFLAGS) -f <<			@@\
+.SUFFIXES:								@@\
+									@@\
+all: files								@@\
+	!for %%i in ( Avoid.Error $$** ) do if exist %%i $(RM) %%i	@@\
+									@@\
+Avoid.Error files:							@@\
+<<
+
+#define MakeDir(dir) -$(MKDIRHIER) dir
+
+#define ObjectCompile(options) RemoveFile($@)				@@\
+	$(CC) -c $*.c @<<						@@\
+	$(CFLAGS) options						@@\
+<<
+
+#define LibObjCompile(dir,options) RemoveFiles($@ dir\$@)		@@\
+	$(CC) -c  $*.c @<<						@@\
+	$(CCOPTIONS) $(ALLDEFINES) options				@@\
+<<									@@\
+	$(MV) $@ dir\$@
+
+#define BuildIncludesTop(srclist,dstsubdir,dstupdir)			@@\
+includes:: srclist							@@\
+	MakeDir($(BUILDINCDIR:/=\))					@@\
+	@$(MAKE) $(MFLAGS) -f <<					@@\
+.SUFFIXES:								@@\
+									@@\
+all: srclist								@@\
+	cd $(BUILDINCDIR:/=\)						@@\
+	!RemoveFile($$**)						@@\
+	!$(LN) $(BUILDINCTOP:/=\)\$(CURRENT_DIR:/=\)\$$** .		@@\
+									@@\
+Avoid.Error srclist:							@@\
+<<
+
+#define BuildIncludes(srclist,dstsubdir,dstupdir)			@@\
+XVARdef0 = $(BUILDINCDIR)/dstsubdir					@@\
+XVARdef1 = $(BUILDINCTOP)/dstupdir/$(CURRENT_DIR)			@@\
+									@@\
+includes:: srclist							@@\
+	MakeDir($(XVARuse0:/=\))					@@\
+	@$(MAKE) -A $(MFLAGS) -f <<					@@\
+.SUFFIXES:								@@\
+									@@\
+all: srclist								@@\
+	cd $(XVARuse0:/=\)						@@\
+	!RemoveFile($$**)						@@\
+	!$(LN) $(XVARuse1:/=\)\$$** .					@@\
+									@@\
+Avoid.Error srclist:							@@\
+<<
+
+#define LinkFileList(step,list,dir,sub)					@@\
+XVARdef0 = dir								@@\
+XVARdef1 = sub								@@\
+XVARdef2 = list								@@\
+									@@\
+step:: $(XVARuse2:/=\)							@@\
+	cd $(XVARuse0:/=\)						@@\
+	!RemoveFile($**)						@@\
+	!$(LN) $(XVARuse1:/=\)\\$** .
+
+#define LinkRule(program,options,objects,libraries) \
+$(CCLINK) Concat(-Fe,program) options objects libraries $(EXTRA_LOAD_FLAGS)
+
+#define NormalProgramTarget(program,objects,deplibs,locallibs,syslibs)	@@\
+XVARdef0 = objects							@@\
+									@@\
+ProgramTargetName(program): $(XVARuse0:.o=.obj) deplibs			@@\
+	RemoveTargetProgram($@)						@@\
+	LinkRule($@,$(LDOPTIONS),$(XVARuse0:.o=.obj),locallibs $(LDLIBS) syslibs) @@\
+									@@\
+clean::									@@\
+	RemoveFile(ProgramTargetName(program))
+
+#define ProgramTargetHelper(program,srcs,objs,deplib,locallib,syslib)	@@\
+ProgramTargetName(program): $(objs:.o=.obj) $(deplib)			@@\
+	RemoveTargetProgram($@)						@@\
+	LinkRule($@,$(LDOPTIONS),$(objs:.o=.obj),locallib $(LDLIBS) syslib) @@\
+									@@\
+InstallProgram(program,$(BINDIR))					@@\
+InstallManPage(program,$(MANDIR))
+
+#define ComplexProgramTarget(program)					@@\
+PROGRAM = ProgramTargetName(program)					@@\
+									@@\
+AllTarget(ProgramTargetName(program))					@@\
+									@@\
+ProgramTargetHelper(program,SRCS,OBJS,DEPLIBS,$(LOCAL_LIBRARIES),NullParameter) @@\
+									@@\
+DependTarget()								@@\
+LintTarget()								@@\
+									@@\
+clean::									@@\
+	RemoveFile($(PROGRAM))
+
+#define ComplexProgramTarget_1(program,locallib,syslib)			@@\
+OBJS = $(OBJS1) $(OBJS2) $(OBJS3)					@@\
+SRCS = $(SRCS1) $(SRCS2) $(SRCS3)					@@\
+PROGRAM1 = ProgramTargetName(program)					@@\
+									@@\
+AllTarget($(PROGRAM1) $(PROGRAM2) $(PROGRAM3))				@@\
+									@@\
+ProgramTargetHelper(program,SRCS1,OBJS1,DEPLIBS1,locallib,syslib)	@@\
+									@@\
+DependTarget()								@@\
+LintTarget()								@@\
+									@@\
+clean::									@@\
+	for %%i in ($(PROGRAMS)) do $(RM) ProgramTargetName(%%i)
+
+#define ComplexProgramTarget_2(program,locallib,syslib)			@@\
+PROGRAM2 = ProgramTargetName(program)					@@\
+									@@\
+ProgramTargetHelper(program,SRCS2,OBJS2,DEPLIBS2,locallib,syslib)
+
+#define ComplexProgramTarget_3(program,locallib,syslib)			@@\
+PROGRAM3 = ProgramTargetName(program)					@@\
+									@@\
+ProgramTargetHelper(program,SRCS3,OBJS3,DEPLIBS3,locallib,syslib)
+
+#define MoveToBakFile(file) -@if exist file $(MV) file file.bak
+
+#define RMoveToBakFile(file) -RemoveFile(file.bak)			@@\
+	-@if exist file $(MV) file file.bak
+
+#define InstallMultipleDestFlags(step,list,dest,flags)			@@\
+XVARdef0 = $(DESTDIR)dest						@@\
+									@@\
+step:: list								@@\
+	MakeDir($(XVARuse0:/=\))					@@\
+	!$(INSTALL) $(INSTALLFLAGS) flags $** $(XVARuse0:/=\)
+
+#define	CleanTarget()							@@\
+clean::									@@\
+	RemoveFiles(FilesToClean ExtraFilesToClean)
+
+#define LibraryTargetName(libname)libname.lib
+
+#define LibraryTargetNameSuffix(libname,suffix)Concat(libname,suffix.lib)
+
+#define MakeLibrary(libname,objlist) $(AR) @<<				@@\
+-out:libname objlist							@@\
+<<
+
+#define LinkSourceFile(src,dir)						@@\
+XVARdef0 = dir/src							@@\
+									@@\
+src:  $(XVARuse0:/=\)							@@\
+	RemoveFile($@)							@@\
+	$(LN) $? $@							@@\
+									@@\
+includes:: src								@@\
+									@@\
+depends:: src								@@\
+									@@\
+clean::									@@\
+	RemoveFile(src)
+
+#define LinkFile(tofile,fromfile)					@@\
+XVARdef0 = fromfile							@@\
+tofile:: $(XVARuse0:/=\)						@@\
+	RemoveFile($@)							@@\
+	$(LN) $? $@							@@\
+									@@\
+includes:: tofile							@@\
+									@@\
+depend:: tofile								@@\
+									@@\
+clean::									@@\
+	RemoveFile(tofile)
+
+
+#define	NormalLibraryTarget(libname,objlist)				@@\
+AllTarget(LibraryTargetName(libname))					@@\
+									@@\
+XVARdef0 = objlist							@@\
+									@@\
+LibraryTargetName(libname): $(XVARuse0:.o=.obj) $(EXTRALIBRARYDEPS)	@@\
+	RemoveFile($@)							@@\
+	MakeLibrary($@,$(XVARuse0:.o=.obj))				@@\
+	LinkBuildLibrary($@)
+
+#define	NormalLibraryTarget2(libname,objlist1,objlist2)			@@\
+NormalLibraryTarget(libname,objlist1 objlist2)
+
+#define	NormalLibraryTarget3(libname,objlist1,objlist2,objlist3)	@@\
+NormalLibraryTarget(libname,objlist1 objlist2 objlist3)
+
+#define	NormalDepLibraryTarget(libname,deplist,objlist)			@@\
+AllTarget(LibraryTargetName(libname))					@@\
+									@@\
+XVARdef0 = deplist							@@\
+XVARdef1 = objlist							@@\
+XVARdef2 = $(XVARuse1:/=\)						@@\
+									@@\
+LibraryTargetName(libname): $(XVARuse0:/=\) $(EXTRALIBRARYDEPS)		@@\
+	RemoveFile($@)							@@\
+	MakeLibrary($@,$(XVARuse2:.o=.obj))				@@\
+	LinkBuildLibrary($@)
+
+#define	ProfiledLibraryTarget(libname,objlist)				@@\
+AllTarget(LibraryTargetNameSuffix(libname,_p))				@@\
+									@@\
+XVARdef0 = objlist							@@\
+									@@\
+LibraryTargetNameSuffix(libname,_p): $(XVARuse0:.o=.obj) $(EXTRALIBRARYDEPS)	@@\
+	RemoveFile($@)							@@\
+	cd profiled							@@\
+	MakeLibrary(..\$@,$(XVARuse0:.o=.obj))				@@\
+	cd ..
+
+#define	DebuggedLibraryTarget(libname,objlist)				@@\
+AllTarget(LibraryTargetNameSuffix(libname,_d))				@@\
+									@@\
+XVARdef0 = objlist							@@\
+									@@\
+LibraryTargetNameSuffix(libname,_d): $(XVARuse0:.o=.obj) $(EXTRALIBRARYDEPS)	@@\
+	RemoveFile($@)							@@\
+	cd debugger							@@\
+	MakeLibrary(..\$@,$(XVARuse0:.o=.obj))				@@\
+	cd ..
+
+#ifndef UseInstalled
+#define ImakeDependency(target)						@@\
+target:: ProgramTargetName($(IMAKE))					@@\
+									@@\
+ProgramTargetName($(IMAKE)):						@@\
+	<<tmp.bat							@@\
+	cd $(IMAKESRC:/=\)						@@\
+	if exist Makefile $(MAKE) all					@@\
+	if not exist Makefile $(MAKE) -f Makefile.ini BOOTSTRAPCFLAGS="$(BOOTSTRAPCFLAGS)" @@\
+<<
+#endif
+
+#ifndef UseInstalled
+#define DependDependency() 						@@\
+depend:: ProgramTargetName($(DEPEND))					@@\
+									@@\
+ProgramTargetName($(DEPEND)):						@@\
+	<<tmp.bat							@@\
+	cd $(DEPENDSRC:/=\)						@@\
+	$(MAKE)								@@\
+<<
+#endif
+
+#define	DependTarget()							@@\
+DependDependency()							@@\
+									@@\
+depend::								@@\
+	$(DEPEND:/=\) @<<						@@\
+$(DEPENDFLAGS) -- $(ALLDEFINES) $(DEPEND_DEFINES) -- $(SRCS)		@@\
+<<
+
+#define	DependTarget3(srcs1,srcs2,srcs3)				@@\
+DependDependency()							@@\
+									@@\
+depend::								@@\
+	$(DEPEND:/=\) @<<						@@\
+$(DEPENDFLAGS) -- $(ALLDEFINES) $(DEPEND_DEFINES) -- srcs1 srcs2 srcs3	@@\
+<<
+
+#define ForceSubdirs(dirs)						@@\
+Avoid.Error dirs: FRC							@@\
+	@cd $@								@@\
+	@echo making all in $(CURRENT_DIR)/$@...			@@\
+	$(MAKE) $(MFLAGS) PassCDebugFlags all				@@\
+	cd ..								@@\
+									@@\
+FRC:
+
+#define MakeMakeSubdirs(dirs,target)					@@\
+XVARdef0 = dirs								@@\
+XVARdef1 = $$								@@\
+									@@\
+target::								@@\
+	@$(MAKE) -A $(MFLAGS) -f <<					@@\
+.SUFFIXES:								@@\
+									@@\
+all: $(XVARuse0:/=\)							@@\
+									@@\
+Avoid.Error $(XVARuse0:/=\):						@@\
+	cd $(XVARuse1)@							@@\
+	RMoveToBakFile(Makefile)					@@\
+	ImakeSubCmdHelper -DTOPDIR=../$(TOP) -DCURDIR=$(CURRENT_DIR)/$(XVARuse1)@ @@\
+	$(MAKE) $(MFLAGS) Makefiles					@@\
+	cd ..								@@\
+<<
+
+#ifdef UseInstalled
+# define ImakeSubCmdHelper $(IMAKE_CMD)
+#else
+# define ImakeSubCmdHelper ..\$(IMAKE) -I../$(IRULESRC) $(IMAKE_DEFINES)
+#endif
+
+#define NamedTargetSubdirs(name,dirs,verb,flags,subname)		@@\
+XVARdef0 = dirs								@@\
+XVARdef1 = $$								@@\
+									@@\
+name::									@@\
+	@$(MAKE) -A $(MFLAGS) -f <<					@@\
+.SUFFIXES:								@@\
+									@@\
+all: $(XVARuse0:/=\)							@@\
+									@@\
+Avoid.Error $(XVARuse0:/=\):						@@\
+	cd $(XVARuse1)@							@@\
+	@echo verb in $(CURRENT_DIR)/$(XVARuse1)@...			@@\
+	$(MAKE) $(MFLAGS) flags subname					@@\
+	cd ..								@@\
+<<
+
+#define UnsharedLibReferences(varname,libname,libsource)		@@\
+Concat3(DEP,varname,LIB) = _UseCat($(USRLIBDIR)/,libsource/,libname.lib) @@\
+Concat(varname,LIB) = LoaderLibPrefix _Use(libname.lib,$(Concat3(DEP,varname,LIB))) @@\
+LintLibReferences(varname,libname,libsource)
+
+#define SharedLibReferences(varname,libname,libsource,revname,rev)	@@\
+revname = rev								@@\
+UnsharedLibReferences(varname,libname,libsource)
+
+#define	SubdirLibraryRule(objlist)					@@\
+XVARdef0 = objlist							@@\
+									@@\
+all:: DONE								@@\
+									@@\
+DONE: $(XVARuse0:.o=.obj)						@@\
+	RemoveFile($@)							@@\
+	echo - > $@							@@\
+									@@\
+clean::									@@\
+	RemoveFile(DONE)
+
+#define CppScriptTarget(dst,src,defs,deplist)				@@\
+dst::									@@\
+	@echo sorry, unable to make $@
+
+#define CppFileTarget(dst,src,defs,deplist)				@@\
+XFAKEVAR = X								@@\
+dst::  src deplist							@@\
+	RemoveFile($@)							@@\
+	$(PREPROCESSCMD) -I. <<CppTmpFile.c @<< >$@			@@\
+	XCOMM define $(XFAKEVAR)COMM XCOMM				@@\
+	XCOMM include <src>						@@\
+<<									@@\
+	defs								@@\
+<<									@@\
+									@@\
+clean::									@@\
+	RemoveFiles(dst)
+
+#define InstallNamedTarget(step,srcname,flags,dest,dstname)		@@\
+XVARdef0 = $(DESTDIR)dest						@@\
+									@@\
+step:: srcname								@@\
+	MakeDir($(XVARuse0:/=\))					@@\
+	$(INSTALL) $(INSTALLFLAGS) flags srcname $(XVARuse0:/=\)\\dstname
+
+#define InstallNamedTargetNoClobber(step,srcname,flags,dest,dstname)	@@\
+XVARdef0 = $(DESTDIR)dest						@@\
+									@@\
+step:: srcname								@@\
+	MakeDir($(XVARuse0:/=\))					@@\
+	@if exist $(XVARuse0:/=\)\\dstname echo Not overwriting existing $(XVARuse0:/=\)\\dstname @@\
+	if not exist $(XVARuse0:/=\)\\dstname $(INSTALL) $(INSTALLFLAGS) flags srcname $(XVARuse0:/=\)\\dstname
+
+
+#define	InstallLibrary(libname,dest)					@@\
+InstallTarget(install,LibraryTargetName(libname),$(INSTLIBFLAGS),dest)
+
+#define	InstallScript(program,dest) /**/
+
+#define	InstallNamedProg(srcname,dstname,dest)				@@\
+install:: srcname							@@\
+	@echo sorry, unable to install srcname
+
+#define	InstallSharedLibrary(libname,rev,dest)				@@\
+InstallTarget(install,LibraryTargetName(libname),$(INSTLIBFLAGS),$(USRLIBDIR)) @@\
+InstallTarget(install,libname.dll,$(INSTLIBFLAGS),dest)
+
+#define	InstallSharedLibraryData(libname,rev,dest)
+
+#define MakeDLL(libname,solist) $(LD) @<<				@@\
+SharedLibraryLoadFlags -out:libname.dll libname.exp solist		@@\
+<<
+
+#define SharedLibraryTarget(libname,rev,solist,down,up)			@@\
+AllTarget(libname.dll)							@@\
+									@@\
+CppFileTarget(libname.def,libname-def.cpp,-DLIBRARY_VERSION=rev,$(ICONFIGFILES)) @@\
+									@@\
+XVARdef0 = solist							@@\
+									@@\
+LibraryTargetName(libname): $(XVARuse0:.o=.obj) libname.def $(EXTRALIBRARYDEPS)	@@\
+	RemoveFile($@)							@@\
+	MakeLibrary($@,-def:libname.def $(XVARuse0:.o=.obj))		@@\
+	LinkBuildLibrary($@)						@@\
+	RemoveFile(libname.dll)						@@\
+	MakeDLL(libname,$(XVARuse0:.o=.obj) $(REQUIREDLIBS) $(EXTRA_LIBRARIES)) @@\
+	LinkBuildDLL(libname.dll)					@@\
+									@@\
+libname.dll: LibraryTargetName(libname) $(EXTRALIBRARYDEPS)		@@\
+	RemoveFile(libname.dll)						@@\
+	MakeDLL(libname,$(XVARuse0:.o=.obj) $(REQUIREDLIBS) $(EXTRA_LIBRARIES)) @@\
+	LinkBuildDLL(libname.dll)					@@\
+									@@\
+clean::									@@\
+	RemoveFile(LibraryTargetName(libname))				@@\
+	RemoveFile(libname.dll)
+
+#define SharedLibraryDataTarget(libname,rev,salist)
+
+#define ObjectCplusplusCompile(options) RemoveFile($@)			@@\
+	$(CXX) -c $*.CCsuf @<<						@@\
+	$(CFLAGS) options						@@\
+<<
+
+#define CplusplusLinkRule LinkRule
+
+#define CplusplusProgramTargetHelper ProgramTargetHelper
+
+#ifndef ComplexCplusplusProgramTarget
+#define	ComplexCplusplusProgramTarget(program)				@@\
+        PROGRAM = ProgramTargetName(program)				@@\
+									@@\
+AllTarget(ProgramTargetName(program))					@@\
+									@@\
+CplusplusProgramTargetHelper(program,SRCS,OBJS,DEPLIBS,$(LOCAL_LIBRARIES),NullParameter) @@\
+									@@\
+DependTarget()								@@\
+LintTarget()								@@\
+									@@\
+clean::									@@\
+	RemoveFile(ProgramTargetName(program))
+#endif /* ComplexCplusplusProgramTarget */
+
+#ifndef UseInstalled
+# define LinkBuildDLL(binary) MakeDir($(BUILDBINDIR:/=\))		@@\
+	RemoveFile(Concat($(BUILDBINDIR:/=\)\,binary))			@@\
+	cd $(BUILDBINDIR:/=\) && $(LN) Concat($(BUILDBINTOP:/=\)\$(CURRENT_DIR:/=\)\,binary) .
+
+# ifdef LinkBuildBinary
+#  undef LinkBuildBinary
+# endif
+# define LinkBuildBinary(binary)					@@\
+all:: $(BUILDBINDIR)\ProgramTargetName(binary) ProgramTargetName(binary) @@\
+									@@\
+$(BUILDBINDIR)\ProgramTargetName(binary): ProgramTargetName(binary)	@@\
+	MakeDir($(BUILDBINDIR:/=\))					@@\
+	RemoveFile($(BUILDBINDIR:/=\)\ProgramTargetName(binary)))	@@\
+	cd $(BUILDBINDIR:/=\) && $(LN) $(BUILDBINTOP:/=\)\$(CURRENT_DIR:/=\)\ProgramTargetName(binary) .
+
+# ifdef LinkBuildLibrary
+#  undef LinkBuildLibrary
+# endif
+# define LinkBuildLibrary(lib) MakeDir($(BUILDLIBDIR:/=\))		@@\
+	RemoveFile(Concat($(BUILDLIBDIR:/=\)\,lib))			@@\
+	cd $(BUILDLIBDIR:/=\) && $(LN) Concat($(BUILDLIBTOP:/=\)\$(CURRENT_DIR:/=\)\,lib) .
+
+#endif
+
+#ifndef ProjectUnsharedLibReferences
+#define ProjectUnsharedLibReferences(varname,libname,libsource,buildlibdir) @@\
+Concat3(DEP,varname,LIB) = _UseCat($(USRLIBDIR)/lib,buildlibdir/,libname.lib)	@@\
+Concat(varname,LIB) = $(Concat3(DEP,varname,LIB))			@@\
+LintLibReferences(varname,libname,libsource)
+#endif
+
+
+/*
+ * ServerTargetWithFlags - generate rules to compile, link, and relink a server
+ */
+#ifndef ServerTargetWithFlags
+#define	ServerTargetWithFlags(server,subdirs,objects,libs,syslibs,flags) @@\
+XVARdef0 = objects							@@\
+									@@\
+AllTarget(ProgramTargetName(server))					@@\
+ProgramTargetName(server): subdirs $(XVARuse0:.o=.obj) libs		@@\
+	MoveToBakFile($@)						@@\
+	LinkRule($@,$(LDOPTIONS),$(XVARuse0:.o=.obj),libs $(LDLIBS) syslibs) @@\
+									@@\
+Concat(load,server):							@@\
+	MoveToBakFile(ProgramTargetName(server))			@@\
+	LinkRule(ProgramTargetName(server),$(LDOPTIONS),$(XVARuse0:.o=.obj),libs $(LDLIBS) syslibs) @@\
+									@@\
+loadX:: Concat(load,server)						@@\
+									@@\
+ProofProgramTarget(server,subdirs objects libs,objects libs $(LDLIBS) syslibs) @@\
+ProofLinkTarget(Concat(load,server),server,objects libs $(LDLIBS) syslibs) @@\
+									@@\
+InstallProgramWithFlags(server,$(BINDIR),flags)				@@\
+									@@\
+clean::									@@\
+	RemoveFile(ProgramTargetName(server))
+#endif /* ServerTargetWithFlags */

@@ -1,0 +1,128 @@
+XCOMM platform:  $XConsortium: Win32.cf /main/51 1996/12/19 14:20:08 lehors $
+
+#ifndef OSName
+#define OSName			Microsoft Windows NT 4.0
+#endif
+XCOMM operating system:  OSName
+#ifndef OSMajorVersion
+#define OSMajorVersion		4
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion		0
+#endif
+#ifndef OSTeenyVersion
+#define OSTeenyVersion		0
+#endif
+
+#ifndef CompilerMajorVersion
+/* 0 == NT 3.1 Win32 SDK, 2 == MSVC++ 2, 4 == MSVC 4 */
+#define CompilerMajorVersion	4	
+#endif
+
+#define BootstrapCFlags		-DWIN32
+#ifdef _M_IX86
+#define CpuDefines -D_X86_
+#endif
+/* brain-damaged windows headers will not compile with -Za */
+#define StandardDefines -DWIN32 -DWIN32_LEAN_AND_MEAN -D_DLL -D_MT -D__STDC__ CpuDefines
+#if CompilerMajorVersion < 4
+#define DefaultCCOptions -nologo -batch -G4 -W2
+#else
+#define DefaultCCOptions -nologo -G4 -W2
+#endif
+#if CompilerMajorVersion < 4
+#define DebuggableCDebugFlags -Zi
+#else
+#define DebuggableCDebugFlags -Zi -Od
+#endif
+#define ThreadedX		YES
+#define HasThreadSafeAPI	NO
+#define CpCmd copy
+#define LnCmd copy
+#define MvCmd ren
+#define RmCmd del
+#ifndef RmTreeCmd
+/*#define RmTreeCmd del /q /s */
+#define RmTreeCmd rm -rfx
+#endif
+#define CcCmd cl
+#define HasCplusplus		YES
+#define CplusplusCmd cl
+#if CompilerMajorVersion < 4
+#define PreProcessCmd CcCmd -nologo -batch -EP
+#define CppCmd  CcCmd -nologo -batch -E
+#else
+#define PreProcessCmd CcCmd -nologo -EP
+#define CppCmd  CcCmd -nologo -E
+#endif
+#define PatheticCpp		YES
+#define ConstructMFLAGS		YES
+#if (CompilerMajorVersion == 0)
+#define ArCmdBase lib32
+#else
+#define ArCmdBase lib
+#endif
+#define ArCmd ArCmdBase
+#define CplusplusCmd cl
+#define MkdirHierCmd mkdir
+#define InstallCmd copy
+#define InstPgmFlags /**/
+#define InstBinFlags /**/
+#define InstUidFlags /**/
+#define InstLibFlags /**/
+#define InstIncFlags /**/
+#define InstManFlags /**/
+#define InstDatFlags /**/
+#define InstallFlags /**/
+#if (CompilerMajorVersion == 0)
+#define ExtraLibraries crtdll.lib kernel32.lib wsock32.lib
+#elif (CompilerMajorVersion < 4)
+#define ExtraLibraries msvcrt.lib kernel32.lib wsock32.lib
+#else
+#define ExtraLibraries msvcrt.lib kernel32.lib wsock32.lib -link -nodefaultlib:libc
+#endif
+#define MakeCmd nmake -nologo
+#if (CompilerMajorVersion == 0)
+#define LdCmd link32
+#else
+#define LdCmd link
+#endif
+#define MathLibrary
+#define HasSymLinks		NO
+#define HasVarDirectory		NO
+#define HasPutenv		YES
+#define Osuf obj
+#ifndef CCsuf
+#define CCsuf cxx
+#endif
+#define BuildServer		NO
+#define ConnectionFlags		-DTCPCONN
+
+/* override as necessary in site.def/host.def */
+#ifndef StdIncDir
+#define StdIncDir 		C:/MSDEVSTD/INCLUDE
+#endif
+#define LdPreLib /**/
+#define LdPostLib /**/
+#ifndef UseInstalled
+#define ImakeCmd $(IMAKESRC:/=\)\imake
+#define DependCmd $(DEPENDSRC:/=\)\makedepend
+#endif
+#define DependFlags -D_WIN32
+#define FilesToClean *.bak *.obj *.lib make.log
+#define ShLibDir $(BINDIR)
+
+#define XFileSearchPathBase Concat4($(LIBDIR)/;L/;T/;N;C,;S:$(LIBDIR)/;l/;T/;N;C,;S:$(LIBDIR)/;T/;N;C,;S:$(LIBDIR)/;L/;T/;N;S:$(LIBDIR)/;l/;T/;N;S:$(LIBDIR)/;T/;N;S)
+
+#define XawI18nDefines		-DHAS_WCHAR_H
+#define UseRgbTxt  YES
+#define HasCbrt NO
+#define HasFfs NO
+#define HasXdmAuth NO
+
+/* the following components haven't been ported yet */
+#define BuildLBX NO
+#define BuildXprint NO
+#define XprtServer NO
+
+#include <Win32.rules>

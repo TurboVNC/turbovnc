@@ -1,0 +1,537 @@
+XCOMM $XConsortium: os2.rules /main/1 1996/10/31 14:47:27 kaleb $
+
+
+
+XCOMM platform:  $XFree86: xc/config/cf/os2.rules,v 3.15 1997/01/05 11:49:39 dawes Exp $
+
+.SUFFIXES: .Osuf .c .CCsuf
+
+.c.Osuf:
+	$(CC) $(CFLAGS) -c $*.c
+
+#if HasCplusplus
+.CCsuf.Osuf:
+	$(CXX) $(CFLAGS) -c $*.CCsuf
+#endif
+
+#ifndef UseInstalled
+#define ImakeHelper \imakesvc
+#define IMmode n
+#define ImakeIndir \indir
+#define ImakeSubCmdHelper \imake -I$(IRULESRC) $(IMAKE_DEFINES)
+#define Fontc \bdftopcf
+#define MkFontDir \mkfontdir
+#define XkbComp \xkbcomp
+#else
+#define ImakeHelper imakesvc
+#define IMmode u
+#define ImakeIndir indir
+#define ImakeSubCmdHelper $(IMAKE_CMD)
+#define Fontc bdftopcf
+#define MkFontDir mkfontdir
+#define XkbComp xkbcomp
+#endif
+
+#define echo ImakeHelper 8 
+#define RunProgram(progvar,options) $(subst /,\,$(progvar)) options
+#define RemoveFile(file) $(RM) file
+#define RemoveFiles(files) $(RM) files
+#define NeedLdLibraryPathForXkbComp NO
+
+#define LibObjCompile(dir,options) RemoveFiles($@ dir\$@)		@@\
+	$(CC) $(CCOPTIONS) $(ALLDEFINES) options -c  $*.c		@@\
+	$(MV) $@ dir\$@
+
+#define MakeDir(dir) $(MKDIRHIER) dir
+
+#define BuildIncludesTop(srclist)					@@\
+includes:: srclist							@@\
+	MakeDir($(BUILDINCDIR))						@@\
+	@for %i in (srclist) do ImakeHelper 2 $(BUILDINCDIR) $(BUILDINCTOP) $(CURRENT_DIR) %i
+
+#define	ProgramTargetHelper(program,srcs,objs,deplib,locallib,syslib)	@@\
+ProgramTargetName(program): $(objs) 					@@\
+	RemoveTargetProgram($@)						@@\
+	LinkRule($@,$(LDOPTIONS),$(objs),locallib $(LDLIBS) syslib)	@@\
+									@@\
+InstallProgram(program,$(BINDIR))					@@\
+InstallManPage(program,$(MANDIR))
+
+#if 0
+#define	ProgramTargetHelperNoMan(program,srcs,objs,deplib,locallib,syslib)	@@\
+ProgramTargetName(program): $(objs) 					@@\
+	RemoveTargetProgram($@)						@@\
+	LinkRule($@,$(LDOPTIONS),$(objs),locallib $(LDLIBS) syslib)	@@\
+									@@\
+InstallProgram(program,$(BINDIR))
+#endif
+
+
+#define BuildIncludes(srclist,dstsubdir,dstupdir)			@@\
+includes:: srclist							@@\
+	MakeDir($(BUILDINCDIR)/dstsubdir)				@@\
+	@for %i in (srclist) do ImakeHelper 3 $(BUILDINCTOP)/dstupdir/$(CURRENT_DIR) $(BUILDINCDIR)/dstsubdir %i
+
+#define LinkFileList(step,list,dir,sub)					@@\
+step::  list								@@\
+	@for %i in (list) do ImakeHelper 3 sub dir %i
+
+#define ComplexProgramTarget(program)					@@\
+PROGRAM = ProgramTargetName(program)					@@\
+									@@\
+AllTarget(ProgramTargetName(program))					@@\
+									@@\
+ProgramTargetHelper(program,SRCS,OBJS,DEPLIBS,$(LOCAL_LIBRARIES),NullParameter) @@\
+									@@\
+DependTarget()								@@\
+LintTarget()								@@\
+									@@\
+clean::									@@\
+	RemoveFile($(PROGRAM))
+
+#define ComplexProgramTarget_1(program,locallib,syslib)			@@\
+OBJS = $(OBJS1) $(OBJS2) $(OBJS3)					@@\
+SRCS = $(SRCS1) $(SRCS2) $(SRCS3)					@@\
+PROGRAM1 = ProgramTargetName(program)					@@\
+									@@\
+AllTarget($(PROGRAM1) $(PROGRAM2) $(PROGRAM3))				@@\
+									@@\
+ProgramTargetHelper(program,SRCS1,OBJS1,DEPLIBS1,locallib,syslib)	@@\
+									@@\
+DependTarget()								@@\
+LintTarget()								@@\
+									@@\
+clean::									@@\
+	RemoveFiles($(PROGRAMS))
+
+#define ComplexProgramTarget_2(program,locallib,syslib)			@@\
+PROGRAM2 = ProgramTargetName(program)					@@\
+									@@\
+ProgramTargetHelper(program,SRCS2,OBJS2,DEPLIBS2,locallib,syslib)
+
+#define ComplexProgramTarget_3(program,locallib,syslib)			@@\
+PROGRAM3 = ProgramTargetName(program)					@@\
+									@@\
+ProgramTargetHelper(program,SRCS3,OBJS3,DEPLIBS3,locallib,syslib)
+
+#define NormalProgramTarget(program,objects,deplibs,locallibs,syslibs)	@@\
+ProgramTargetName(program): objects 					@@\
+	RemoveTargetProgram($@)						@@\
+	LinkRule($@,$(LDOPTIONS),objects,locallibs $(LDLIBS) syslibs)	@@\
+									@@\
+clean::									@@\
+	RemoveFile(ProgramTargetName(program))
+
+#if 0
+#define ComplexProgramTargetNoMan(program)				@@\
+PROGRAM = ProgramTargetName(program)					@@\
+									@@\
+AllTarget(ProgramTargetName(program))					@@\
+									@@\
+ProgramTargetHelperNoMan(program,SRCS,OBJS,DEPLIBS,$(LOCAL_LIBRARIES),NullParameter) @@\
+									@@\
+DependTarget()								@@\
+LintTarget()								@@\
+									@@\
+clean::									@@\
+	RemoveFile($(PROGRAM))
+#endif
+
+#define MoveToBakFile(file) ImakeHelper 5 file
+
+#define RMoveToBakFile(file) ImakeHelper 6 file
+
+#define InstallMultipleDestFlags(step,list,dest,flags)			@@\
+step:: list								@@\
+	MakeDir($(DESTDIR)dest)							@@\
+	$(INSTALL) $(INSTALLFLAGS) flags list $(subst /,\,$(DESTDIR)dest)
+
+#define	CleanTarget()							@@\
+clean::									@@\
+	RemoveFiles(FilesToClean ExtraFilesToClean)
+
+#define LinkSourceFile(src,dir)						@@\
+src:									@@\
+	ImakeHelper 3 dir . src						@@\
+									@@\
+includes:: src								@@\
+									@@\
+depends:: src								@@\
+									@@\
+clean::									@@\
+	RemoveFile(src)
+
+#define LinkFile(tofile,fromfile)					@@\
+tofile:: fromfile							@@\
+	ImakeHelper 7 fromfile tofile					@@\
+									@@\
+includes:: tofile							@@\
+									@@\
+depend:: tofile								@@\
+									@@\
+clean::									@@\
+	RemoveFile(tofile)
+
+#ifndef UseInstalled
+#define ImakeDependency(target)						@@\
+target:: ProgramTargetName($(IMAKE))					@@\
+									@@\
+ProgramTargetName($(IMAKE)):						@@\
+	@ImakeIndir $(IMAKESRC) if exist Makefile $(MAKE) SHELL= MAKE=x11make all		@@\
+	@ImakeIndir $(IMAKESRC) if not exist Makefile $(MAKE) SHELL= MAKE=x11make -f Makefile.ini BOOTSTRAPCFLAGS="$(BOOTSTRAPCFLAGS)"
+#endif
+
+#ifndef UseInstalled
+#define DependDependency() 						@@\
+depend:: ProgramTargetName($(DEPEND))					@@\
+									@@\
+ProgramTargetName($(DEPEND)):						@@\
+	@ImakeIndir $(DEPENDSRC) $(MAKE) SHELL= MAKE=x11make 
+#endif
+
+#define	DependTarget()							@@\
+DependDependency()							@@\
+									@@\
+depend::								@@\
+	$(subst /,\,$(DEPEND)) $(DEPENDFLAGS) -- $(ALLDEFINES) $(DEPEND_DEFINES) -- $(SRCS)
+
+#define	DependTarget3(srcs1,srcs2,srcs3)				@@\
+DependDependency()							@@\
+
+/* Currently this stuff doesn't work correctly for libX11
+depend::								@@\
+	$(subst /,\,$(DEPEND)) $(DEPENDFLAGS) -- $(ALLDEFINES) $(DEPEND_DEFINES) -- srcs1 @@\
+	$(subst /,\,$(DEPEND)) $(DEPENDFLAGS) -- $(ALLDEFINES) $(DEPEND_DEFINES) -- srcs2 @@\
+	$(subst /,\,$(DEPEND)) $(DEPENDFLAGS) -- $(ALLDEFINES) $(DEPEND_DEFINES) -- srcs3
+*/
+
+#define ForceSubdirs(dirs)						@@\
+dirs: DONE								@@\
+									@@\
+DONE:									@@\
+	@for %i in (dirs) do ImakeIndir %i $(MAKE) SHELL= MAKE=x11make $(MFLAGS) PassCDebugFlags all @@\
+	touch DONE							@@\
+									@@\
+clean::									@@\
+	RemoveFile(DONE)
+
+#define MakeMakeSubdirs(dirs,target)					@@\
+MMSDIRS = dirs								@@\
+MMSTOP = $(TOP)								@@\
+MMSRULES = $(IRULESRC)							@@\
+MMSCUR = $(CURRENT_DIR)							@@\
+target::								@@\
+	@for %i in ($(subst /,\,$(MMSDIRS))) do ImakeHelper 1 IMmode %i $(MMSRULES) $(MMSTOP) $(MMSCUR)
+
+#define NamedTargetSubdirs(name,dirs,verb,flags,subname)		@@\
+Concat(SUBST,name) = dirs						@@\
+name::									@@\
+	@for %i in ($(subst /,\,$(Concat(SUBST,name)))) do ImakeIndir %i $(MAKE) SHELL= MAKE=x11make $(MFLAGS) flags subname
+
+#define InstallNamedTarget(step,srcname,flags,dest,dstname)		@@\
+step:: srcname								@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) $(INSTALLFLAGS) flags srcname $(subst \,/,$(DESTDIR)dest)/dstname
+
+#define	BuildMakefileTarget(notused,imakeflags)				@@\
+ImakeDependency(Makefile)						@@\
+									@@\
+Makefile:: 								@@\
+	RMoveToBakFile(Makefile)					@@\
+	ImakeSubCmdHelper -DTOPDIR=$(TOP) -DCURDIR=$(CURRENT_DIR) imakeflags
+
+#define AssembleObject(flags) $(RM) $@                                  @@\
+	$(CPP) AsmDefines $(DEFINES) $(INCLUDES) flags $*.s | \         @@\
+	    grep -v '^\#' > _tmp_.s                                     @@\
+	$(CC) $(CFLAGS) -o $*.Osuf -c _tmp_.s                           @@\
+	$(RM) _tmp_.s
+
+#define NormalAsmObjectRule()                                           @@\
+.s.Osuf:                                                                @@\
+	AssembleObject($(_NOOP_))
+
+#define ObjectMapIncludeFromSpecialSource(dst,src,flags)		@@\
+dst.c: src.c								@@\
+	ImakeHelper 9 $@ mfbmap.h $?					@@\
+									@@\
+SpecialCObjectRule(dst,NullParameter,flags)				@@\
+									@@\
+depend:: dst.c								@@\
+									@@\
+clean::									@@\
+	RemoveFile(dst.c)
+
+#define FontBaseObj(basename)basename.pcf
+/*
+ * UncompressedFontTarget
+ */
+#define UncompressedFontTarget(basename)				@@\
+FontBaseObj(basename):  FontSrc(basename)				@@\
+	Fontc $(FONTCFLAGS) $? -o $@
+
+/*
+ * CompressedFontTarget
+ */
+#ifndef CompressedFontTarget
+#if GzipFontCompression
+#define CompressedFontTarget(basename)					@@\
+FontBaseObj(basename).gz:  FontSrc(basename)				@@\
+	Fontc $(FONTCFLAGS) $? | $(GZIPCMD) > $@
+#else
+#define CompressedFontTarget(basename)					@@\
+FontBaseObj(basename).Z:  FontSrc(basename)				@@\
+	Fontc $(FONTCFLAGS) $? | $(COMPRESS) > $@
+#endif
+#endif
+
+/*
+ * MakeFontsDir - generate rules to build fonts.dir database.
+ */
+#define MakeFontsDir(deplist)						@@\
+all:: fonts.dir								@@\
+									@@\
+fonts.dir:  deplist							@@\
+	MkFontDir .							@@\
+									@@\
+clean::									@@\
+	RemoveFile(fonts.dir)
+
+/* OS/2 scripts are based on REXX
+ * it is just the SHELL variable that is messed up that forces me to
+ * modify this rule
+ */
+#define ConfigTargetLong(target,dep,script,args,extra)			@@\
+all:: Configure								@@\
+									@@\
+Configure:: target.o							@@\
+									@@\
+target.c: script dep							@@\
+	$(MAKE) SHELL= MAKE=x11make $(MFLAGS) extra Concat(Build,target)			@@\
+									@@\
+Concat(Build,target):							@@\
+	$(RM) target.c							@@\
+	script args							@@\
+									@@\
+clean::									@@\
+	$(RM) target.c
+
+#ifndef ServerTargetWithFlags
+#define	ServerTargetWithFlags(server,subdirs,objects,libs,syslibs,flags) @@\
+AllTarget(ProgramTargetName(server))					@@\
+ProgramTargetName(server): subdirs objects libs				@@\
+	MoveToBakFile($@)						@@\
+	LinkRule($@,$(LDOPTIONS),objects,libs $(LDLIBS) syslibs)	@@\
+	emxbind -a ProgramTargetName(server) -h255			@@\
+									@@\
+Concat(load,server):							@@\
+	MoveToBakFile(ProgramTargetName(server))			@@\
+	LinkRule(ProgramTargetName(server),$(LDOPTIONS),objects,libs $(LDLIBS) syslibs) @@\
+									@@\
+loadX:: Concat(load,server)						@@\
+									@@\
+SentinelProgramTarget(server,subdirs objects libs,objects libs $(LDLIBS) syslibs) @@\
+SentinelLinkTarget(Concat(load,server),server,objects libs $(LDLIBS) syslibs) @@\
+PurifyProgramTarget(server,subdirs objects libs,objects libs $(LDLIBS) syslibs) @@\
+PurifyLinkTarget(Concat(load,server),server,objects libs $(LDLIBS) syslibs) @@\
+ProofProgramTarget(server,subdirs objects libs,objects libs $(LDLIBS) syslibs) @@\
+ProofLinkTarget(Concat(load,server),server,objects libs $(LDLIBS) syslibs) @@\
+									@@\
+InstallProgramWithFlags(server,$(BINDIR),flags)				@@\
+									@@\
+clean::									@@\
+	RemoveFile(ProgramTargetName(server))
+#endif /* ServerTargetWithFlags */
+
+/*
+ * ServerTarget - rules to compile, link, and relink a normal server
+ * Need a .def file for OS/2
+ */
+#ifndef ServerTarget
+#define	ServerTarget(server,subdirs,objects,libs,syslibs)		@@\
+ServerTargetWithFlags(server,subdirs,objects,libs,syslibs server.def,$(_NOOP_)) @@\
+									@@\
+ProgramTargetName(server): server.def
+#endif /* ServerTarget */
+
+/*
+ * ToolkitMakeStrings generates a string-table, i.e., a C source
+ * file and the matching header(s), e.g., Xt's StringDefs.c, StringDefs.h,
+ * and Shell.h files; or Motif's XmStrDefs.c and XmStrDefs.h files.
+ *
+ * The 'files' argument is the list of files that will be produced by
+ * this rule, e.g., for Xt they would be "Shell.h StringDefs.c StringDefs.h"
+ * and for Motif they would be "XmStrDefs.c XmStrDefs.h".
+ *
+ * The 'source' argument is the string-list file to be parsed, e.g., in
+ * Xt that would be "util/string.list".  For Motif 2.0 it would be
+ * "../../tools/makestr/xmstring.list", and for Motif-CDE1 it would be
+ * "util/xmstring.list".
+ *
+ * The 'options' argument is passed by the library's Imakefile, see the
+ * Xt Imakefile for an example.  Typically this would be nothing, -intelabi,
+ * or -sparcabi; there are other choices, but these are typical.
+ *
+ * The 'depends' argument names additional files the target files
+ * depend on.  It should name the #ctmpl and #htmpl files from the
+ * 'source' file.
+ *
+ * The 'dest' argument is the C source output file.  For Xt this should
+ * be "StringDefs.c", and for all versions of Motif it would be "XmStrDefs.c"
+ *
+ * Headers are generated and named according to data in the 'source'
+ * file.
+ */
+
+#ifndef ToolkitMakeStrings
+#define ToolkitMakeStrings(files,source,options,depends,dest)		@@\
+MAKESTRS = $(CONFIGSRC)/util/makestrs					@@\
+MAKESTRS1 = /makestrs.exe						@@\
+									@@\
+ProgramTargetName($(MAKESTRS)): $(MAKESTRS).c				@@\
+	ImakeIndir $(CONFIGSRC)/util make SHELL= ProgramTargetName(makestrs)	@@\
+	ImakeHelper 7 $(CONFIGSRC)/util/makestrs.exe /			@@\
+									@@\
+files: ProgramTargetName($(MAKESTRS)) source depends			@@\
+	RemoveFiles(files)						@@\
+	RunProgram(MAKESTRS1,options < source > dest)			@@\
+									@@\
+AllTarget(files)							@@\
+									@@\
+includes:: files							@@\
+									@@\
+depend:: files								@@\
+									@@\
+clean::									@@\
+	RemoveFiles(files)
+
+#endif /* ToolkitMakeStrings */
+
+/*#define CppSedMagic SedMagic*/
+#define CppSedMagic sed -e '/^#  *[0-9][0-9]*  *.*$$/d' -e 's/^XCOMM/#/g' -e 's/^XCOMM[^a-zA-Z0-9_]/#/g'
+
+#ifndef InstallNamedTargetNoClobber
+#define InstallNamedTargetNoClobber(step,srcname,flags,dest,dstname)	@@\
+step:: srcname								@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	if not exist $(subst /,\,$(DESTDIR)dest)\dstname $(INSTALL) $(INSTALLFLAGS) flags srcname $(DESTDIR)dest/dstname
+
+#endif /* InstallNamedTargetNoClobber */
+
+#if CompressManPages
+
+#ifndef InstallManPageLong
+#define InstallManPageLong(file,destdir,dest)                           @@\
+install.man:: file.man                                                  @@\
+	MakeDir($(DESTDIR)destdir)					@@\
+	ImakeHelper 12 file $(DESTDIR)destdir dest
+#endif
+
+#ifndef InstallManPageAliases
+#define InstallManPageAliases(file,destdir,aliases)                     @@\
+install.man::                                                           @@\
+	MakeDir($(DESTDIR)destdir)					@@\
+	for %i in (aliases) do $(INSTALL) $(DESTDIR)destdir/file.gz $(DESTDIR)destdir/%i.gz
+#endif
+
+#ifndef InstallGenManPageLong
+#define InstallGenManPageLong(file,destdir,dest,suffix)                 @@\
+install.man:: file.man                                                  @@\
+	MakeDir($(DESTDIR)destdir)					@@\
+	ImakeHelper 12 file $(DESTDIR)destdir dest
+#endif
+
+#ifndef InstallMultipleMan
+#define InstallMultipleMan(list,dest)                                   @@\
+install.man:: list                                                      @@\
+	MakeDir($(DESTDIR)dest)						@@\
+	for %i in (list) do ImakeHelper 12 %i $(DESTDIR)dest %i
+#endif
+
+#else /* CompressManPages */
+
+#ifndef InstallManPageLong
+#define InstallManPageLong(file,destdir,dest)                           @@\
+install.man:: file.man                                                  @@\
+	MakeDir($(DESTDIR)destdir)					@@\
+	ImakeHelper 10 file $(DESTDIR)destdir dest $(MANSUFFIX)
+#endif
+
+#ifndef InstallManPageAliases
+#define InstallManPageAliases(file,destdir,aliases)                     @@\
+install.man::                                                           @@\
+	MakeDir($(DESTDIR)destdir)					@@\
+	for %i in (aliases) do $(INSTALL) $(DESTDIR)destdir/file.$(MANSUFFIX) $(DESTDIR)destdir/%i.$(MANSUFFIX) 
+#endif
+
+#ifndef InstallGenManPageLong
+#define InstallGenManPageLong(file,destdir,dest,suffix)                 @@\
+install.man:: file.man                                                  @@\
+	MakeDir($(DESTDIR)destdir)					@@\
+	ImakeHelper 10 file $(DESTDIR)destdir dest suffix
+#endif
+
+#ifndef InstallMultipleMan
+#define InstallMultipleMan(list,dest)                                   @@\
+install.man:: list                                                      @@\
+	MakeDir($(DESTDIR)dest)						@@\
+	for %i in (list) do ImakeHelper 10 %i $(DESTDIR)dest %i $(MANSUFFIX)
+#endif
+
+#endif
+
+#ifndef NormalLintTarget
+#define NormalLintTarget(srclist)
+#endif /* NormalLintTarget */
+
+#ifndef MakeDirectories
+#define MakeDirectories(step,dirs)					@@\
+step::									@@\
+	-for %i in (dirs) do $(MKDIRHIER) $(DESTDIR)%i
+#endif /* MakeDirectories */
+
+#ifndef YaccFile
+#define YaccFile(file,flags)						@@\
+depend:: file.c								@@\
+									@@\
+file.h file.c: file.y							@@\
+	$(YACC) flags file.y						@@\
+	$(MV) y.tab.c file.c						@@\
+	@if exist y.tab.h $(MV) y.tab.h file.h				@@\
+									@@\
+clean::									@@\
+	RemoveFiles(y.tab.c y.tab.h file.h file.c)
+#endif /* YaccFile */
+
+#ifndef StaticLibrary
+#define StaticLibrary(libpath,libname) Concat4(libpath,/,libname,_s.a)
+#endif
+
+#ifndef MakeXkbDir
+#define MakeXkbDir(basedir,subdir)					@@\
+all::	Concat(subdir,.dir)						@@\
+									@@\
+Concat(subdir,.dir):							@@\
+	$(XKBCOMPCMD) -lfhlpR -o Concat(subdir,.dir) *			@@\
+									@@\
+InstallTarget(install,Concat(subdir,.dir),$(INSTDATFLAGS),basedir)
+#endif
+
+/* This is to replace an ugly hack in /xc/nls/XLC_LOCALE */
+/* the corresponding Imake.rules rule would be:
+   define LinkFileSpecial(gotodir,tofile,fromfile)	@@\
+        @MakeFlagsToShellFlags(i,set +e); \		@@\
+	cd dir && (set -x; RemoveFile(tofile); $(LN) fromfile tofile)
+ */
+#ifndef LinkFileSpecial
+#define LinkFileSpecial(gotodir,tofile,fromfile)			@@\
+	ImakeHelper 13 gotodir fromfile tofile
+#endif
+
+#ifndef LinkBuildBinary
+#define LinkBuildBinary(binary)						@@\
+all:: $(BUILDBINDIR)/binary binary					@@\
+									@@\
+$(BUILDBINDIR)/binary: binary						@@\
+	ImakeHelper 13 $(BUILDBINDIR) $(BUILDBINTOP)/$(CURRENT_DIR)/binary binary @@\
+	$(CP) binary /
+#endif /* LinkBuildBinary */

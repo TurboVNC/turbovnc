@@ -1,0 +1,64 @@
+#!/bin/sh
+#
+#  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
+#  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+#
+#  This is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This software is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this software; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
+#  USA.
+#
+
+#
+# vncinstall - copy the VNC programs to an installation directory.
+#
+
+if [ $# -ne 1 -a $# -ne 2 -o ! -d "$1" ]; then 
+  echo "Usage: $0 <INSTALLATION-DIRECTORY> [<MANUAL-PAGES-DIRECTORY>]"
+  echo "  e.g. $0 /usr/local/bin /usr/local/man"
+  exit 1
+fi
+
+bin_dst=$1
+if [ $# -eq 2 -a ! -d "$2" ]; then
+  echo "Warning: $2 is not a directory; not installing manual pages"
+elif [ ! -d "$2/man1" ]; then
+  echo "Warning: directory $2/man1 not found; not installing manual pages"
+else
+  man_dst="$2/man1"
+fi
+
+for f in Xvnc/programs/Xserver/Xvnc vncviewer/vncviewer \
+	 vncpasswd/vncpasswd vncconnect/vncconnect vncserver; do
+
+  # Installing binaries
+  if cmp -s $f $bin_dst/`basename $f`; then
+    echo "`basename $f` hasn't changed"
+  else
+    echo "Copying $f -> $bin_dst/`basename $f`"
+    cp -pf $f $bin_dst
+    chmod 0555 $bin_dst/`basename $f`
+  fi
+
+  # Installing man pages
+  if [ "$man_dst" != "" ]; then
+    if cmp -s $f.man $man_dst/`basename $f.man`; then
+      echo "`basename $f.man` hasn't changed"
+    else
+      echo "Copying $f.man -> $man_dst/`basename $f.1`"
+      cp -pf $f.man $man_dst/`basename $f.1`
+      chmod 0644 $man_dst/`basename $f.1`
+    fi
+  fi
+
+done

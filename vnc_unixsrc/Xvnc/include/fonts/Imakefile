@@ -1,0 +1,14 @@
+XCOMM $XConsortium: Imakefile /main/6 1996/09/28 16:32:27 rws $
+XCOMM $XFree86: xc/include/fonts/Imakefile,v 3.3 1996/12/23 05:58:37 dawes Exp $
+
+    HEADERS = FS.h FSproto.h fsmasks.h
+
+all::
+    
+BuildIncludes($(HEADERS),X11/fonts,../..)
+InstallMultipleFlags($(HEADERS),$(INCDIR)/X11/fonts,$(INSTINCFLAGS))
+
+InstallLinkKitNonExecFile(fontstruct.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(font.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(fsmasks.h,$(LINKKITDIR)/include)
+

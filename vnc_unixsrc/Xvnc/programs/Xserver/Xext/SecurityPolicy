@@ -1,0 +1,88 @@
+version-1 
+
+# $XConsortium: SecurityPolicy /main/3 1996/12/20 20:27:48 swick $
+
+# The site policy fields are interpreted by the XC-QUERY-SECURITY-1
+# authorization protocol.  The values are arbitrary and site-specific.
+# Refer to the Security Extension Specification for the usage of the policies.
+#sitepolicy A
+#sitepolicy B
+#sitepolicy C
+
+# Property access rules:
+# property <property> <window> <permissions>
+# <window> ::= any | root | <propertyselector>
+# <propertyselector> ::= <property> | <property>=<value>
+# <permissions> :== [ <operation> | <action> | <space> ]*
+# <operation> :== r | w | d
+#	r	read
+#	w	write
+#	d	delete
+# <action> :== a | i | e
+#	a	allow
+#	i	ignore
+#	e	error
+
+# Allow reading of application resources, but not writing.
+property RESOURCE_MANAGER	root	ar iw
+property SCREEN_RESOURCES	root	ar iw
+
+# Ignore attempts to use cut buffers.  Giving errors causes apps to crash,
+# and allowing access may give away too much information.
+property CUT_BUFFER0	root	irw
+property CUT_BUFFER1	root	irw
+property CUT_BUFFER2	root	irw
+property CUT_BUFFER3	root	irw
+property CUT_BUFFER4	root	irw
+property CUT_BUFFER5	root	irw
+property CUT_BUFFER6	root	irw
+property CUT_BUFFER7	root	irw
+
+# If you are using Motif, you probably want these.
+property _MOTIF_DEFAULT_BINDINGS	root	ar iw
+property _MOTIF_DRAG_WINDOW	root	ar iw
+property _MOTIF_DRAG_TARGETS	any 	ar iw
+property _MOTIF_DRAG_ATOMS	any 	ar iw
+property _MOTIF_DRAG_ATOM_PAIRS	any 	ar iw
+
+# If you are running CDE you also need these
+property _MOTIF_WM_INFO		root	arw
+property TT_SESSION		root	irw
+property WM_ICON_SIZE		root	irw
+property "SDT Pixel Set"	any	irw
+
+# The next two rules let xwininfo -tree work when untrusted.
+property WM_NAME	any	ar
+
+# Allow read of WM_CLASS, but only for windows with WM_NAME.
+# This might be more restrictive than necessary, but demonstrates
+# the <required property> facility, and is also an attempt to
+# say "top level windows only."
+property WM_CLASS	WM_NAME	ar
+
+# These next three let xlsclients work untrusted.  Think carefully
+# before including these; giving away the client machine name and command
+# may be exposing too much.
+property WM_STATE	WM_NAME	ar
+property WM_CLIENT_MACHINE	WM_NAME	ar
+property WM_COMMAND	WM_NAME	ar
+
+# To let untrusted clients use the standard colormaps created by
+# xstdcmap, include these lines.
+property RGB_DEFAULT_MAP	root	ar
+property RGB_BEST_MAP	root	ar
+property RGB_RED_MAP	root	ar
+property RGB_GREEN_MAP	root	ar
+property RGB_BLUE_MAP	root	ar
+property RGB_GRAY_MAP	root	ar
+
+# To let untrusted clients use the color management database created
+# by xcmsdb, include these lines.
+property XDCCC_LINEAR_RGB_CORRECTION	root	ar
+property XDCCC_LINEAR_RGB_MATRICES	root	ar
+property XDCCC_GRAY_SCREENWHITEPOINT	root	ar
+property XDCCC_GRAY_CORRECTION	root	ar
+
+# To let untrusted clients use the overlay visuals that many vendors
+# support, include this line.
+property SERVER_OVERLAY_VISUALS	root	ar

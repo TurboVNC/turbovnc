@@ -1,0 +1,64 @@
+#!/bin/sh
+# configure
+#
+# This script sets up for a build.  It has been tested on the following
+# Operating System versions (uname outputs):
+#
+#    Solaris 7 & 8 (SunOS, 5.7 or 5.8)
+#    Tru64 4.0F & 5.1 (OSF1, V4.0 or V5.1)
+#    Linux 2.4 (Linux, 2.4.0-4GB)
+#    Irix 6.2 (IRIX, 6.2)
+
+SYSNAME=`uname -s`
+
+if [ "$SYSNAME" = AIX ]
+then
+    MAJOR=`uname -v`
+    MINOR=`uname -r`
+    TEENY=0
+else
+    REV=`uname -r`
+
+    if [ "$SYSNAME" = HP-UX ]
+    then
+        REV=`echo $REV | sed -e 's/^[^.]*\.//'`
+    else
+        if [ "$SYSNAME" != Darwin ]
+        then
+            REV=`echo $REV | sed -e 's/^V//' -e 's/-.*$//'`
+        fi
+    fi
+
+    MAJOR=`echo $REV | awk -F. 'NF < 1 {print "0"} {print $1}'`
+    MINOR=`echo $REV | awk -F. 'NF < 2 {print "0"} {print $2}'`
+    TEENY=`echo $REV | awk -F. 'NF < 3 {print "0"} {print $3}'`
+fi
+
+echo "#define OSName $SYSNAME" > config/cf/platform.def
+echo "#define OSMajorVersion $MAJOR" >> config/cf/platform.def
+echo "#define OSMinorVersion $MINOR" >> config/cf/platform.def
+echo "#define OSTeenyVersion $TEENY" >> config/cf/platform.def
+
+if [ "$SYSNAME" = AIX ]
+then
+#  xmkmf and imake are broken on AIX
+    cd config/imake
+    imake -I../cf -DTOPDIR=../.. -DCURDIR=.
+    make Makefiles
+    make includes
+    make depend
+    make
+    cd ../..
+    imake -I./config/cf -DTOPDIR=./ -DCURDIR=.
+    make Makefiles
+    make includes
+    make depend
+else
+    cd config/imake
+    xmkmf ../../
+    make
+    cd ../..
+    xmkmf -a ./
+fi
+
+exit 0

@@ -1,0 +1,430 @@
+XCOMM platform:  $XConsortium: Amoeba.cf /main/12 1996/09/28 16:04:48 rws $
+XCOMM platform:  $XFree86: xc/config/cf/Amoeba.cf,v 3.9 1996/12/23 05:50:00 dawes Exp $
+
+/*  The presence of this configuration file in the X distribution
+ *  does not imply full support for the system it describes.
+ *  Additional patches from The XFree86 Project, Inc. will be required to 
+ *  compile the X distribution on Amoeba.  According to them, these patches
+ *  will also be made available at the regular Amoeba ftp site
+ *  ftp.am.cs.vu.nl.
+ */
+
+/*
+ * Configuration file for Amoeba 5.2
+ */
+
+#ifndef OSName
+#define OSName                  Amoeba 5.2
+#endif
+XCOMM operating system:  OSName
+#ifndef OSMajorVersion
+#define OSMajorVersion          5
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion          2
+#endif
+#ifndef OSTeenyVersion
+#define OSTeenyVersion          0
+#endif
+#ifndef OSVendor
+#define OSVendor                Vrije Universiteit
+#endif
+
+#define AmoebaArchitecture	YES
+
+/* Configuration defaults */
+#ifndef AmoebaTop
+#define AmoebaTop		__AM_TOP__
+#endif
+#ifndef AmoebaBin
+#define AmoebaBin		$(ATOP)/bin.sun4
+#endif
+#ifndef AmoebaConf
+#define AmoebaConf		__AM_CONF__
+#endif
+
+#define HasNdbm			YES
+#define NeedSdbm		YES
+#define HasShm			NO
+#define HasSecureRPC		NO
+#define SetTtyGroup		NO
+#define HasPutenv		YES
+#define HasSockets              NO
+#define HasStreams              NO
+
+#if defined(Sun3Architecture) || defined(SparcArchitecture)
+#define XsunAmoebaServer	YES
+#define XsunAmoebaMonoServer	YES
+#endif
+
+#define BuildFonts              NO
+#define BuildFontServer         NO
+#define BuildPexExt		NO
+#define BuildXIE		NO
+
+#define YaccCmd                 byacc
+#define TermcapLibrary          /* in libajax */
+#define LexLib			/* not needed */
+
+#define PexCCOptions		DefaultCCOptions
+#define ServerOSDefines		XFree86ServerOSDefines
+
+#define UsrLibDir               $(DESTDIR)/profile/module/x11/lib
+#define LibDir                  $(DESTDIR)/profile/module/x11/lib
+#define ManDirectoryRoot        $(DESTDIR)/profile/module/x11/man
+#define BinDir                  $(DESTDIR)/profile/module/x11/bin
+#define IncRoot                 $(DESTDIR)/profile/module/x11/include
+#define FontDir                 $(DESTDIR)/profile/module/x11/fonts/$(ARCH)
+#define DefaultRGBDatabase      $(DESTDIR)/profile/module/x11/lib/rgb/$(ARCH)/rgb
+
+#define ManSuffix               1
+#define ManPath                 ManDirectoryRoot
+#define XmanLocalSearchPath     ManDirectoryRoot
+
+#define DefaultUserPath         :/bin:$(BINDIR)
+#define DefaultSystemPath       /bin:$(BINDIR):
+
+#define StandardIncludes        -I$(ATOP)/src/h \
+				-I$(ATOP)/src/h/posix \
+				-I$(ATOP)/src/h/posix/machdep/$(ARCH) \
+				-I$(ATOP)/src/h/machdep/arch/$(ARCH) \
+				-I$(ATOP)/src/h/toolset/$(TOOLSET)
+
+#define Malloc0ReturnsNull      YES
+#define ServerInstallFlags      -s 32
+#define FontDefines             -DFONT_SNF
+#define ConnectionFlags         -DAMTCPCONN -DAMRPCCONN
+#define ServerXdmcpDefines	/* no -DXDMCP */
+#define UseRgbTxt		YES
+#define NdbmDefines		-DSDBM -DNDBM -I$(XINCLUDESRC)
+#define DBMLibrary		/* $(LIBSRC)/sdbm/libsdbm.a */
+
+#if defined(i386Architecture)
+#ifndef AckToolset
+#define AckToolset              YES
+#define ExtraFPLoadFlags	-fp
+#endif
+#define XF86MonoServer		YES
+#endif
+
+#if defined(Sun3Architecture)
+#ifndef AckToolset
+#define AckToolset              YES
+#endif
+#endif
+
+#if AckToolset
+#define CcCmd                   ack
+#define ServerCcCmd             ack
+#define LdCmd                   ack
+#define AckArchOption		-mam_$(ARCH)
+#define DefaultCCOptions        AckArchOption
+#define LibraryCCOptions        AckArchOption
+#define LdCombineFlags          -Rled-r -c.out
+#define ArCmd 			aal clrv
+#define RanlibCmd		/bin/true
+#define AsCmd			AmoebaConf/$(ARCH).$(TOOLSET)/toolset/do_as AckArchOption
+#define AsIncl			-I$(ATOP)/src/h/machdep/arch/$(ARCH)
+#define AsmDefines		-DACK_ASSEMBLER
+#define LdPreLib		/**/
+#define LdPostLib		/**/
+#endif
+
+#if defined(SparcArchitecture)
+#define AllocateLocalDefines	-DINCLUDE_ALLOCA_H
+
+#define CcCmd                   cc
+#define ServerCcCmd             cc
+#define LdCmd                   AmoebaConf/$(ARCH).$(TOOLSET)/toolset/do_gld
+#define DefaultCCOptions        -sun4
+#define LibraryCCOptions        -sun4
+#define AmoebaCompilerDefs	-Usun
+#define ServerExtraDefines	AllocateLocalDefines
+#define LdPostLib		/**/
+#endif
+
+#ifndef AmoebaCompilerDefs
+#define AmoebaCompilerDefs	/**/
+#endif
+
+#define CommonAmoebaDefines     -DAMOEBA -D$(ARCH) AmoebaCompilerDefs
+#define StandardDefines         CommonAmoebaDefines
+#define StandardCppDefines      StandardDefines
+
+#ifndef ExtraFPLoadFlags
+#define ExtraFPLoadFlags
+#endif
+#define MathLibrary		$(ALIB)/math/libmath.a
+#define OSLibraries             $(ALIB)/ajax/libajax.a \
+				$(ALIB)/amoeba/libamoeba.a \
+				MathLibrary \
+				ExtraFPLoadFlags
+#define ServerExtraSysLibs	$(CBRT) OSLibraries
+#define ExtraLoadFlags		OSLibraries
+
+ATOP            = AmoebaTop
+ALIB            = AmoebaConf/$(ARCH).$(TOOLSET)/lib
+#if AckToolset 
+/* The ACK toolset already links in the appropriate head.o by default */
+HEAD            =
+#else
+HEAD            = $(ALIB)/head/head.o
+#endif
+
+ABIN            = AmoebaBin
+AINSTALL        = /bin/sh $(CONFIGSRC)/util/aminstall.sh $(ABIN)
+AINSTALLFLAGS   =
+TOB             = /bin/sh $(CONFIGSRC)/util/aminstall.sh $(ABIN)
+MKXDIRHIER      = /bin/sh $(CONFIGSRC)/util/ammkdirhier.sh $(ABIN)
+
+/* Make wizardy: */
+COMPILE.c=$(CC) $(CFLAGS) $(CPPFLAGS) -c
+LINK.c=$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
+
+#if defined(i386Architecture)
+ARCH            = i80386
+TOOLSET         = ack
+ALDFLAGS        = /* -mam_i80386 now in CCopts */ -.c -Rcv-s32
+
+#include <xfree86.cf>
+#endif
+
+#if defined(Sun3Architecture)
+ARCH            = mc68000
+TOOLSET         = ack
+ALDFLAGS        =  -.c -Rcv-s32
+#endif
+
+#if defined(SparcArchitecture)
+ARCH            = sparc
+TOOLSET         = sun
+SPARCLIBDIR     = AmoebaBin/gnu/sparc
+ALDFLAGS        = -mam_sparc -n -Ttext 40000 -Bstatic -e start -L$(SPARCLIBDIR)
+#endif
+
+#define BootstrapCFlags		-DAMOEBA -DCROSS_$(ARCH) -DCROSS_COMPILE
+
+/*
+ * The rest of this files consists of rules to allow cross-compilation
+ * and installation of binaries and data files from the Unix host to
+ * the Amoeba file system.
+ */
+
+/* #ifdef CROSS_COMPILING */
+#define CrossCompiling          YES
+
+#define HostLinkRule(target, flags, src, libs)  cc -o target src
+
+#define LinkRule(program,options,objects,libraries) \
+$(LD) $(ALDFLAGS) $(HEAD) -o program options objects libraries $(EXTRA_LOAD_FLAGS)
+
+/* ComplexHostProgramTarget - Compile a program such that we can run
+ * it on this host, i.e., don't use the default cross compiler.
+ */
+#ifndef ComplexHostProgramTarget
+#define	ComplexHostProgramTarget(program)				@@\
+              CC=cc							@@\
+    STD_INCLUDES=							@@\
+          CFLAGS=$(TOP_INCLUDES) $(INCLUDES) $(BOOTSTRAPCFLAGS)		@@\
+EXTRA_LOAD_FLAGS=							@@\
+        PROGRAM = program						@@\
+									@@\
+AllTarget(program)							@@\
+									@@\
+program: $(OBJS) $(DEPLIBS)						@@\
+	RemoveTargetProgram($@)						@@\
+	HostLinkRule($@,$(_NOOP_),$(OBJS),$(DEPLIBS) $(LOCAL_LIBRARIES)) @@\
+									@@\
+DependTarget()								@@\
+									@@\
+LintTarget()								@@\
+									@@\
+clean::									@@\
+	RemoveFile(ProgramTargetName(program))
+#endif /* ComplexHostProgramTarget */
+
+#ifndef SimpleHostProgramTarget
+#define SimpleHostProgramTarget(program)				@@\
+           OBJS = program.o						@@\
+           SRCS = program.c						@@\
+									@@\
+ComplexHostProgramTarget(program)
+#endif /* SimpleHostProgramTarget */
+
+
+#ifndef Concat
+#if (__STDC__ && !defined(UnixCpp)) || defined(AnsiCpp)
+#define Concat(a,b)a##b
+#else
+#define Concat(a,b)a/**/b
+#endif
+#endif
+
+/*
+ * LintLibReferences - variables for lint libraries
+ */
+#ifndef LintLibReferences
+#define LintLibReferences(varname,libname,libsource)			@@\
+Concat(LINT,varname) = Concat(libsource/llib-,libname.ln)
+#endif
+
+/*
+ * UnsharedLibReferences - variables for unshared libraries
+ */
+#ifndef UnsharedLibReferences
+#define UnsharedLibReferences(varname,libname,libsource)		@@\
+Concat3(DEP,varname,LIB) = Concat($(BUILDLIBDIR)/lib,libname.a)		@@\
+     Concat(varname,LIB) = Concat($(BUILDLIBDIR)/lib,libname.a)		@@\
+LintLibReferences(varname,libname,libsource)
+#endif
+
+#ifndef InstallLibrary
+#define	InstallLibrary(libname,dest)					@@\
+install:: Concat(lib,libname.a)						@@\
+	@echo '** TODO: Install Library ' Concat(lib,libname.a)
+#endif /* InstallLibrary */
+
+#ifndef MergeIntoInstalledLibrary
+#define MergeIntoInstalledLibrary(tolib,fromlib)			@@\
+install::  fromlib							@@\
+	@echo '** TODO: merge ' fromlib into tolib
+#endif /* MergeIntoInstalledLibrary */
+
+#ifndef InstallLibraryAlias
+#define	InstallLibraryAlias(libname,alias,dest)				@@\
+install::								@@\
+	@echo '** TODO: Install lib alias ' libname alias dest
+#endif /* InstallLibraryAlias */
+
+#ifndef InstallLintLibrary
+#define	InstallLintLibrary(libname,dest)				@@\
+install.ln:: Concat(llib-l,libname.ln)					@@\
+	@echo '** TODO: Install lintlib ' Concat(llib-l,libname.ln)
+#endif /* InstallLintLibrary */
+
+#ifndef InstallManPageLong
+#define	InstallManPageLong(file,destdir,dest)				@@\
+install.man:: file.man							@@\
+	@echo '** TODO: Install man page ' file.man
+#endif /* InstallManPageLong */
+
+#ifndef InstallGenManPageLong
+#define	InstallGenManPageLong(file,destdir,dest,suffix)			@@\
+install.man:: file.man							@@\
+	@echo '** TODO: Install man page ' file.man
+#endif /* InstallGenManPageLong */
+
+#ifndef InstallManPageAliases
+#define	InstallManPageAliases(file,destdir,aliases)			@@\
+install.man::								@@\
+	@(TMP=/tmp/tmp.$$$$; \						@@\
+	$(RM) $${TMP}; \						@@\
+	echo .so `basename destdir`/file.$(MANSUFFIX) > $${TMP}; \	@@\
+	for i in aliases; do (set -x; \					@@\
+	$(TOB) $${TMP} $(DESTDIR)destdir/$$i.$(MANSUFFIX)); \ 		@@\
+	done; \								@@\
+	$(RM) $${TMP})
+#endif /* InstallManPageAliases */
+
+#ifndef InstallGenManPageAliases
+#define	InstallGenManPageAliases(file,destdir,suffix,aliases)		@@\
+install.man::								@@\
+	@(TMP=/tmp/tmp.$$$$; \						@@\
+	$(RM) $${TMP}; \						@@\
+	echo .so `basename destdir`/file.suffix > $${TMP}; \		@@\
+	for i in aliases; do (set -x; \					@@\
+	$(TOB) $${TMP} $(DESTDIR)destdir/$$i.suffix); \ 		@@\
+	done; \								@@\
+	$(RM) $${TMP})
+#endif /* InstallGenManPageAliases */
+
+#ifndef InstallNamedNonExec
+#define	InstallNamedNonExec(srcname,dstname,dest)			@@\
+install:: srcname							@@\
+	$(MKXDIRHIER) $(DESTDIR)dest					@@\
+	$(TOB) srcname $(DESTDIR)dest/dstname
+#endif /* InstallNamedNonExec */
+
+#ifndef InstallNonExecFile
+#define	InstallNonExecFile(file,dest)					@@\
+install:: file								@@\
+	$(MKXDIRHIER) dest						@@\
+	$(TOB) file dest/file
+#endif /* InstallNonExecFile */
+
+#ifndef InstallNonExec
+#define	InstallNonExec(file,dest)					@@\
+install:: file								@@\
+	$(TOB) file dest/file
+#endif /* InstallNonExec */
+
+#ifndef InstallProgramWithFlags
+#define InstallProgramWithFlags(program,dest,flags)			@@\
+install:: program							@@\
+	$(MKXDIRHIER) dest/program					@@\
+	$(AINSTALL) $(AINSTALLFLAGS) program dest/program/pd.$(ARCH)
+#endif /* InstallProgramWithFlags */
+
+#ifndef InstallScript
+#define	InstallScript(program,dest)					@@\
+install:: program.script						@@\
+	$(TOB) program.script dest/program
+#endif /* InstallScript */
+
+#ifndef InstallNamedScript
+#define	InstallNamedScript(srcname,dstname,dest)			@@\
+install:: srcname							@@\
+	$(TOB) srcname dest/dstname
+#endif /* InstallNamedScript */
+
+#ifndef InstallNamedProg
+#define	InstallNamedProg(srcname,dstname,dest)				@@\
+install:: srcname							@@\
+	$(MKXDIRHIER) $(DESTDIR)dest/dstname				@@\
+	$(AINSTALL) $(AINSTALLFLAGS) srcname $(DESTDIR)dest/dstname/pd.$(ARCH)
+#endif /* InstallNamedProg */
+
+#ifndef InstallMultipleDestFlags
+#define InstallMultipleDestFlags(step,list,dest,flags)			@@\
+step:: list								@@\
+	$(MKXDIRHIER) $(DESTDIR)dest					@@\
+	@case '${MFLAGS}' in *[i]*) set +e;; esac; \			@@\
+	for i in list; do \						@@\
+		(set -x; $(TOB) $$i dest/$$i); \			@@\
+	done
+#endif /* InstallMultipleDestFlags */
+
+#ifndef InstallMultipleProg
+#define InstallMultipleProg(list,dest)					@@\
+install:: list								@@\
+	@case '${MFLAGS}' in *[i]*) set +e;; esac; \			@@\
+	for i in list; do \						@@\
+	    (set -x; \ 							@@\
+	  	$(MKXDIRHIER) $(DESTDIR)dest/$$i; \			@@\
+		$(AINSTALL) $(AINSTALLFLAGS) $$i dest/$$i/pd.$(ARCH));\	@@\
+	done
+#endif /* InstallMultipleProg */
+
+#ifndef InstallAppDefaults
+#if InstallAppDefFiles
+#define	InstallAppDefaults(class)					@@\
+install:: class.ad							@@\
+	$(MKXDIRHIER) $(XAPPLOADDIR)					@@\
+	$(TOB) class.ad $(DESTDIR)$(XAPPLOADDIR)/class
+#else
+#define	InstallAppDefaults(class)
+#endif /* InstallAppDefFiles */
+#endif /* InstallAppDefaults */
+
+#ifndef InstallAppDefaultsLong
+#if InstallAppDefFiles
+#define	InstallAppDefaultsLong(file,class)				@@\
+install:: file.ad							@@\
+	$(MKXDIRHIER) $(DESTDIR)$(XAPPLOADDIR)				@@\
+	$(TOB) file.ad $(DESTDIR)$(XAPPLOADDIR)/class
+#else
+#define	InstallAppDefaultsLong(file,class)
+#endif /* InstallAppDefFiles */
+#endif /* InstallAppDefaultsLong */
+
+/* #endif CROSS_COMPILE */

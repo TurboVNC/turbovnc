@@ -1,0 +1,65 @@
+XCOMM $XConsortium: xf86.tmpl /main/2 1996/10/31 15:01:41 kaleb $
+
+
+
+XCOMM $XFree86: xc/config/cf/xf86.tmpl,v 3.11 1996/12/27 06:50:30 dawes Exp $
+
+#if XF86LinkKit
+    TOP_INCLUDES = TopIncludes
+   IMAKE_DEFINES = -DXF86LinkKit=1
+#ifdef UseInstalled
+       IMAKE_CMD = $(IMAKE) -DUseInstalled -I$(TOP) -I$(IRULESRC) \
+		   $(IMAKE_DEFINES)
+#else
+       IMAKE_CMD = $(IMAKE) -I$(TOP) -I$(IRULESRC) $(IMAKE_DEFINES)
+#endif
+
+#undef ImakeSubCmdHelper
+#ifdef UseInstalled
+#define ImakeSubCmdHelper $(IMAKE) -DUseInstalled -I$(IMAKETOP) \
+			  -I$(IRULESRC) $(IMAKE_DEFINES)
+#else
+#define ImakeSubCmdHelper $(IMAKEPREFIX)$(IMAKE) -I$(IMAKETOP) \
+			  -I$(IMAKEPREFIX)$(IRULESRC) $(IMAKE_DEFINES)
+#endif
+#endif
+
+#ifndef JoystickSupport
+#define JoystickSupport		NO
+#endif
+#ifndef WacomSupport
+#define WacomSupport		NO
+#endif
+#ifndef ElographicsSupport
+#define ElographicsSupport	NO
+#endif
+#ifndef SummaSketchSupport
+#define SummaSketchSupport	NO
+#endif
+
+#if BuildDynamicLoading
+       MODULEDIR = $(USRLIBDIR)/modules
+#endif
+
+#if !BuildDynamicLoading && BuildXInputExt
+# if JoystickSupport
+#  define JoystickDefines -DJOYSTICK_SUPPORT
+# else
+#  define JoystickDefines
+# endif
+# if WacomSupport
+#  define WacomDefines -DWACOM_SUPPORT
+# else
+#  define WacomDefines
+# endif
+# if ElographicsSupport
+#  define ElographicsDefines -DELOGRAPHICS_SUPPORT
+# else
+#  define ElographicsDefines
+# endif
+# if SummaSketchSupport
+#  define SummaSketchDefines -DSUMMASKETCH_SUPPORT
+# else
+#  define SummaSketchDefines
+# endif
+#endif

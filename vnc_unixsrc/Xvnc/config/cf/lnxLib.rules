@@ -1,0 +1,565 @@
+XCOMM $XConsortium: lnxLib.rules /main/13 1996/09/28 16:11:01 rws $
+XCOMM $XFree86: xc/config/cf/lnxLib.rules,v 3.28.2.3 1997/06/22 10:32:20 dawes Exp $
+
+/*
+ * Linux shared library rules (DLL & ELF versions)
+ */
+#ifndef HasSharedLibraries
+#define HasSharedLibraries YES
+#endif
+#ifndef ForceNormalLib
+#define ForceNormalLib NO
+#endif
+
+#define SharedOldX NO
+
+#if UseElfFormat
+
+#if (LinuxCLibMajorVersion >= 5 && LinuxCLibMinorVersion >= 4) || LinuxCLibMajorVersion >= 6
+#undef SpecialMalloc
+#define SpecialMalloc NO
+#undef UseInternalMalloc
+#define UseInternalMalloc NO
+#endif
+
+/*
+ *	#define BaseShLibReqs	-lc
+ *
+ * I don't want to use this since the normal ELF executables should
+ * be linked with libc.so. If it is not, i.e., static, the variables in
+ * libc.so which is loaded in because of the other shared libraries
+ * may have different values than the ones in the static ELF
+ * executables. That happens if the binaries are linked with libg.a
+ * or libc_p.a.
+ *
+ * If an ELF executable linked with libg.a or libc_p.a loads a shared
+ * object which needs libc.so via dlopen (), I think it should fail.
+ * It is a very bad idea. The moral story is DON'T USE dlopen () IN
+ * ELF EXECUTABLES LINKED WITH libg.a OR libc_p.a. H.J.
+ *
+ */
+#define BaseShLibReqs
+
+#ifndef SharedDataSeparation
+#define SharedDataSeparation NO
+#endif
+#ifndef SharedCodeDef
+#define SharedCodeDef /**/
+#endif
+#ifndef SharedLibraryDef
+#define SharedLibraryDef /**/
+#endif
+#ifndef ShLibIncludeFile
+#define ShLibIncludeFile <lnxLib.tmpl>
+#endif
+#ifndef SharedLibraryLoadFlags
+#define SharedLibraryLoadFlags -shared
+#endif
+#ifndef PositionIndependentCFlags
+#define PositionIndependentCFlags -fPIC
+#endif
+#ifndef PositionIndependentCplusplusFlags
+#define PositionIndependentCplusplusFlags -fPIC
+#endif
+#ifndef ExtraLoadFlags
+#if LinuxBinUtilsMajorVersion >= 26
+#ifdef UseInstalled
+#if LinuxBinUtilsMajorVersion < 27
+#define ExtraLoadFlags -Wl,-rpath-link,$(USRLIBDIRPATH)
+#endif
+#else
+#define ExtraLoadFlags -Wl,-rpath-link,$(BUILDLIBDIR)
+#endif
+#else
+#define ExtraLoadFlags -Wl,-rpath,$(USRLIBDIRPATH)
+#endif
+#endif
+
+/*
+ * InstallSharedLibrary - generate rules to install the shared library.
+ * NOTE: file must be executable, hence "INSTBINFLAGS"
+ */
+#ifndef InstallSharedLibrary
+#define	InstallSharedLibrary(libname,rev,dest)				@@\
+install:: Concat(lib,libname.so.rev) 					@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) $(INSTALLFLAGS) $(INSTBINFLAGS) Concat(lib,libname.so.rev) $(DESTDIR)dest @@\
+	@T=`echo Concat($(DESTDIR)dest/lib,libname.so.rev) | sed 's/\.[^\.]*$$//'`;\
+	  set -x; $(RM) $$T && $(LN) Concat(lib,libname.so.rev) $$T	@@\
+	$(RM) Concat($(DESTDIR)dest/lib,libname.so)			@@\
+	$(LN) Concat(lib,libname.so.rev) Concat($(DESTDIR)dest/lib,libname.so)
+#endif /* InstallSharedLibrary */
+
+/*
+ * InstallSharedLibraryData - generate rules to install the shared library data
+ */
+#ifndef InstallSharedLibraryData
+#define	InstallSharedLibraryData(libname,rev,dest)
+#endif /* InstallSharedLibraryData */
+
+
+/*
+ * SharedLibraryTarget - generate rules to create a shared library;
+ * build it into a different name so that we do not hose people by having
+ * the library gone for long periods.
+ */
+#ifndef SharedLibraryTarget
+#ifdef UseInstalled
+#define LinkBuildSonameLibrary(lib) true
+#else
+#define LinkBuildSonameLibrary(lib) (RemoveFile($(BUILDLIBDIR)/lib); \
+	cd $(BUILDLIBDIR); $(LN) $(BUILDINCTOP)/$(CURRENT_DIR)/lib .)
+#endif
+
+#define SharedLibraryTarget(libname,rev,solist,down,up)			@@\
+AllTarget(Concat(lib,libname.so.rev))					@@\
+									@@\
+Concat(lib,libname.so.rev):  solist $(EXTRALIBRARYDEPS)			@@\
+	$(RM) $@~							@@\
+	@SONAME=`echo $@ | sed 's/\.[^\.]*$$//'`; set -x; \		@@\
+		(cd down; $(CC) -o up/$@~ $(SHLIBLDFLAGS) -Wl,-soname,$$SONAME solist $(REQUIREDLIBS) BaseShLibReqs); \ @@\
+		$(RM) $$SONAME; $(LN) $@ $$SONAME; \			@@\
+		LinkBuildSonameLibrary($$SONAME)			@@\
+	$(RM) $@ 							@@\
+	$(MV) $@~ $@							@@\
+	$(RM) Concat(lib,libname.so)					@@\
+	$(LN) $@ Concat(lib,libname.so)					@@\
+	LinkBuildLibrary($@)						@@\
+	LinkBuildLibrary(Concat(lib,libname.so))			@@\
+									@@\
+clean::									@@\
+	@MAJREV=`expr rev : '\(.*\)\.'`; \				@@\
+	set -x; $(RM) Concat(lib,libname.so.$$MAJREV)			@@\
+	$(RM) Concat(lib,libname.so.rev) Concat(lib,libname.so)
+
+#endif /* SharedLibraryTarget */
+
+#ifndef SharedDepModuleTarget
+#define SharedDepModuleTarget(name,deps,solist)				@@\
+AllTarget(name)								@@\
+									@@\
+name: deps								@@\
+	$(RM) $@~							@@\
+	$(CC) -o $@~ $(SHLIBLDFLAGS) solist $(REQUIREDLIBS) BaseShLibReqs @@\
+	$(RM) $@							@@\
+	$(MV) $@~ $@							@@\
+									@@\
+clean::									@@\
+	$(RM) name
+
+#endif /* SharedDepModuleTarget */
+
+/*
+ * SharedLibraryDataTarget - generate rules to create shlib data file;
+ */
+#ifndef SharedLibraryDataTarget
+#define SharedLibraryDataTarget(libname,rev,salist)
+#endif /* SharedLibraryTarget */
+
+#else /* UseElfFormat */
+
+#ifndef SharedDataSeparation
+#define SharedDataSeparation NO
+#endif
+#ifndef SharedCodeDef
+#define SharedCodeDef /**/
+#endif
+#ifndef SharedLibraryDef
+#define SharedLibraryDef /**/
+#endif
+#ifndef ShLibIncludeFile
+#define ShLibIncludeFile <lnxLib.tmpl>
+#endif
+#ifndef SharedLibraryLoadFlags
+#define SharedLibraryLoadFlags /**/
+#endif
+#ifndef PositionIndependentCFlags
+#define PositionIndependentCFlags -B/usr/bin/jump
+#endif
+
+/*
+ * These definitions are now extended to work with the X sources and
+ * external sources wishing to build shared libs.
+ *
+ * A library can create it's own shlibs (.so) or can be incorporated into
+ * another "host" lib. All libraries generate stub (.sa) files.
+ * A "host" lib does all the work to generate the stubs for itself and its
+ * "guests", invoking the "guest" Makefiles to create the objects for
+ * inclusion into the "host" shlib. A "guest" lib will ask the "host" to
+ * create the stubfiles, then copy its own into its directory.
+ * Most external libs are "host" libs; the concept of "guest" is a holdover
+ * from older libs during the days of scarce shared library address space.
+ *
+ * To create a simple "host" shared lib, Xfoo, define:
+ *
+ *  JUMP_ROOT_Xfoo = <source directory>
+ *  JUMP_IS_HOST_Xfoo = YES
+ *  JUMP_STUBLIBS_Xfoo = libXfoo.sa
+ *  JUMP_DIR_Xfoo = $(JUMP_ROOT_Xfoo)/shared		<work directory>
+ *  JUMP_DEFS_Xfoo = -DFOO				<defs for jump files>
+ *  JUMP_VARS_Xfoo = $(JUMP_ROOT_Xfoo)/jump_vars	<see DLL docs>
+ *  JUMP_FUNCS_Xfoo = $(JUMP_ROOT_Xfoo)/jump_funcs	<see DLL docs>
+ *  JUMP_IGNORE_Xfoo = $(JUMP_ROOT_Xfoo)/jump_ignore	<see DLL docs>
+ *  JUMP_EXPORT_Xfoo = $(JUMP_DIR_Xfoo)/jump.vars	<exported symbols>
+ *  JUMP_IMPORT_Xfoo = $(JUMP_EXPORT_Xbar)		<imported symbols>
+ *  JUMP_ADDRESS_Xfoo = 0xXXXXXXXX			<fill in with address>
+ *  JUMP_JUMPTABLESIZE_Xfoo = 0x4000			<adjust if necessary>
+ *  JUMP_GOTSIZE_Xfoo = 4096				<adjust if necessary>
+ *  JUMP_STUBNAMES_Xfoo = libXfoo			<and others>
+ *  JUMP_STUBS_IMPORT_Xfoo = /usr/lib/libc.sa		<and others>
+ *  JUMP_LDLIBS_Xfoo = `$(CC) --print-libgcc-file-name` -lc <and others>
+ *
+ * To create a complex "host", you need to add
+ *  JUMP_SIBARS_Xt = jump/libXbar.a~			<and others>
+ * These are the archives of the shared objects of the "guest" libs. They
+ * need to be added to the JUMP_LDLIBS_Xfoo lines.
+ *
+ * For further clarification, study the definitions of libXaw, a simple "host"
+ * lib, libXt, a complex "host" lib, and libXmu, one of libXts "guests".
+ *
+ * As a hint of how to start (with the DLL docs), touch jump_vars, jump_funcs
+ * and jump_ignore, then compile. Then massage the jump.vars and jump.funcs
+ * files in the shared subdirectory into jump_xxx files.
+ */
+
+#ifndef UseInstalled
+XCOMM These are only needed to build the server
+
+#if LinuxElfDefault
+LIBC_SA = /usr/i486-linuxaout/lib/libc.sa
+LIBM_SA = /usr/i486-linuxaout/lib/libm.sa
+#else
+LIBC_SA = /usr/lib/libc.sa
+LIBM_SA = /usr/lib/libm.sa
+#endif
+
+JUMP_LDLIBS_libc = `$(CC) --print-libgcc-file-name` -lc
+
+XCOMM libX11.so (X11, SM, ICE)
+JUMP_ROOT_X11 = $(XLIBSRC)
+JUMP_IS_HOST_X11 = YES
+JUMP_STUBLIBS_X11 = libX11.sa libSM.sa libICE.sa
+JUMP_SIBDIRS_X11 = $(JUMP_ROOT_SM) $(JUMP_ROOT_ICE)
+JUMP_DIR_X11 = $(JUMP_ROOT_X11)/shared
+JUMP_DEFS_X11 = $(XDMAUTHDEFS) $(XKB_DEFINES)
+JUMP_VARS_X11 = $(JUMP_ROOT_X11)/jump_vars
+JUMP_FUNCS_X11 = $(JUMP_ROOT_X11)/jump_funcs
+JUMP_IGNORE_X11 = $(JUMP_ROOT_X11)/jump_ignore
+JUMP_EXPORT_X11 = $(JUMP_DIR_X11)/jump.vars
+JUMP_ADDRESS_X11 = 0x60200000
+JUMP_JUMPTABLESIZE_X11 = 0x4000
+JUMP_GOTSIZE_X11 = 4096
+JUMP_STUBNAMES_X11 = libX11 libSM libICE
+JUMP_STUBS_IMPORT_X11 = $(LIBC_SA)
+JUMP_SIBARS_X11 = jump/libSM.a~ jump/libICE.a~
+JUMP_LDLIBS_X11 = $(JUMP_SIBARS_X11) $(JUMP_LDLIBS_libc)
+
+XCOMM libSM (part of libX11.so)
+JUMP_ROOT_SM = $(SMSRC)
+JUMP_IS_HOST_SM = NO
+JUMP_HOST_SM = $(JUMP_ROOT_X11)
+JUMP_DIR_SM = $(JUMP_DIR_X11)
+
+XCOMM libICE (part of libX11.so)
+JUMP_ROOT_ICE = $(ICESRC)
+JUMP_IS_HOST_ICE = NO
+JUMP_HOST_ICE = $(JUMP_ROOT_X11)
+JUMP_DIR_ICE = $(JUMP_DIR_X11)
+
+XCOMM libXt.so (Xt, Xmu, Xext, Xi, Xtst, Xp)
+JUMP_ROOT_Xt = $(TOOLKITSRC)
+JUMP_IS_HOST_Xt = YES
+JUMP_STUBLIBS_Xt = libXt.sa libXmu.sa libXext.sa libXi.sa libXtst.sa libXp.sa
+JUMP_SUBDIRS_Xt = $(JUMP_ROOT_X11)
+JUMP_SIBDIRS_Xt = $(JUMP_ROOT_Xmu) $(JUMP_ROOT_Xext) \
+	$(JUMP_ROOT_Xi) $(JUMP_ROOT_Xtst) $(JUMP_ROOT_Xp)
+JUMP_DIR_Xt = $(JUMP_ROOT_Xt)/shared
+JUMP_VARS_Xt = $(JUMP_ROOT_Xt)/jump_vars
+JUMP_FUNCS_Xt = $(JUMP_ROOT_Xt)/jump_funcs
+JUMP_IGNORE_Xt = $(JUMP_ROOT_Xt)/jump_ignore
+JUMP_EXPORT_Xt = $(JUMP_DIR_Xt)/jump.vars
+JUMP_IMPORT_Xt = $(JUMP_EXPORT_X11)
+JUMP_ADDRESS_Xt = 0x602a0000
+JUMP_JUMPTABLESIZE_Xt = 0x4000
+JUMP_GOTSIZE_Xt = 4096
+JUMP_STUBNAMES_Xt = libXt libXmu libXext libXi libXtst libXp
+JUMP_STUBS_IMPORT_Xt = $(JUMP_STUBS_IMPORT_X11)
+JUMP_SIBARS_Xt = jump/libXmu.a~ jump/libXext.a~ jump/libXi.a~ jump/libXtst.a~ jump/libXp.a~
+JUMP_LDLIBS_Xt = $(JUMP_SIBARS_Xt) $(JUMP_ROOT_ICE)/libICE.sa \
+	$(JUMP_ROOT_SM)/libSM.sa $(JUMP_ROOT_X11)/libX11.sa $(JUMP_LDLIBS_libc)
+
+XCOMM libXmu (part of libXt.so)
+JUMP_ROOT_Xmu = $(XMUSRC)
+JUMP_IS_HOST_Xmu = NO
+JUMP_HOST_Xmu = $(JUMP_ROOT_Xt)
+JUMP_DIR_Xmu = $(JUMP_DIR_Xt)
+
+XCOMM libXext (part of libXt.so)
+JUMP_ROOT_Xext = $(XEXTLIBSRC)
+JUMP_IS_HOST_Xext = NO
+JUMP_HOST_Xext = $(JUMP_ROOT_Xt)
+JUMP_DIR_Xext = $(JUMP_DIR_Xt)
+
+XCOMM libXi (part of libXt.so)
+JUMP_ROOT_Xi = $(XILIBSRC)
+JUMP_IS_HOST_Xi = NO
+JUMP_HOST_Xi = $(JUMP_ROOT_Xt)
+JUMP_DIR_Xi = $(JUMP_DIR_Xt)
+
+XCOMM libXtst (part of libXt.so)
+JUMP_ROOT_Xtst = $(XTESTLIBSRC)
+JUMP_IS_HOST_Xtst = NO
+JUMP_HOST_Xtst = $(JUMP_ROOT_Xt)
+JUMP_DIR_Xtst = $(JUMP_DIR_Xt)
+
+XCOMM libXp (part of libXt.so)
+JUMP_ROOT_Xp = $(XPLIBSRC)
+JUMP_IS_HOST_Xp = NO
+JUMP_HOST_Xp = $(JUMP_ROOT_Xt)
+JUMP_DIR_Xp = $(JUMP_DIR_Xt)
+
+XCOMM libXaw.so (Xaw)
+JUMP_ROOT_Xaw = $(AWIDGETSRC)
+JUMP_IS_HOST_Xaw = YES
+JUMP_STUBLIBS_Xaw = libXaw.sa
+JUMP_SUBDIRS_Xaw = $(JUMP_ROOT_Xt)
+JUMP_DIR_Xaw = $(JUMP_ROOT_Xaw)/shared
+JUMP_VARS_Xaw = $(JUMP_ROOT_Xaw)/jump_vars
+JUMP_FUNCS_Xaw = $(JUMP_ROOT_Xaw)/jump_funcs
+JUMP_IGNORE_Xaw = $(JUMP_ROOT_Xaw)/jump_ignore
+JUMP_EXPORT_Xaw = $(JUMP_DIR_Xaw)/jump.vars
+JUMP_IMPORT_Xaw = $(JUMP_EXPORT_Xt) $(JUMP_EXPORT_X11)
+JUMP_ADDRESS_Xaw = 0x60300000
+JUMP_JUMPTABLESIZE_Xaw = 0x4000
+JUMP_GOTSIZE_Xaw = 4096
+JUMP_STUBNAMES_Xaw = libXaw
+JUMP_STUBS_IMPORT_Xaw = $(JUMP_STUBS_IMPORT_X11)
+JUMP_LDLIBS_Xaw = $(JUMP_ROOT_Xt)/libXt.sa $(JUMP_ROOT_Xt)/libXmu.sa \
+	$(JUMP_ROOT_Xt)/libXext.sa $(JUMP_ROOT_X11)/libX11.sa \
+	$(JUMP_LDLIBS_libc)
+
+# libPEX.so (PEX5)
+JUMP_ROOT_PEX5 = $(PEXLIBSRC)
+JUMP_IS_HOST_PEX5 = YES
+JUMP_STUBLIBS_PEX5 = libPEX5.sa
+JUMP_SUBDIRS_PEX5 = $(JUMP_ROOT_X11)
+JUMP_DIR_PEX5 = $(JUMP_ROOT_PEX5)/shared
+JUMP_VARS_PEX5 = $(JUMP_ROOT_PEX5)/jump_vars
+JUMP_FUNCS_PEX5 = $(JUMP_ROOT_PEX5)/jump_funcs
+JUMP_IGNORE_PEX5 = $(JUMP_ROOT_PEX5)/jump_ignore
+JUMP_EXPORT_PEX5 = $(JUMP_DIR_PEX5)/jump.vars
+JUMP_IMPORT_PEX5 = $(JUMP_EXPORT_X11)
+JUMP_ADDRESS_PEX5 = 0x60b00000
+JUMP_JUMPTABLESIZE_PEX5 = 0x4000
+JUMP_GOTSIZE_PEX5 = 4096
+JUMP_STUBNAMES_PEX5 = libPEX5
+JUMP_STUBS_IMPORT_PEX5 = $(JUMP_STUBS_IMPORT_X11) $(LIBM_SA)
+JUMP_LDLIBS_PEX5 = $(JUMP_ROOT_X11)/libX11.sa $(JUMP_LDLIBS_libc) -lm
+
+# libXIE.so (XIE)
+JUMP_ROOT_XIE = $(XIELIBSRC)
+JUMP_IS_HOST_XIE = YES
+JUMP_STUBLIBS_XIE = libXIE.sa
+JUMP_SUBDIRS_XIE = $(JUMP_ROOT_X11)
+JUMP_DIR_XIE = $(JUMP_ROOT_XIE)/shared
+JUMP_VARS_XIE = $(JUMP_ROOT_XIE)/jump_vars
+JUMP_FUNCS_XIE = $(JUMP_ROOT_XIE)/jump_funcs
+JUMP_IGNORE_XIE = $(JUMP_ROOT_XIE)/jump_ignore
+JUMP_EXPORT_XIE = $(JUMP_DIR_XIE)/jump.vars
+JUMP_IMPORT_XIE = $(JUMP_EXPORT_X11)
+JUMP_ADDRESS_XIE = 0x60be0000
+JUMP_JUMPTABLESIZE_XIE = 0x4000
+JUMP_GOTSIZE_XIE = 4096
+JUMP_STUBNAMES_XIE = libXIE
+JUMP_STUBS_IMPORT_XIE = $(JUMP_STUBS_IMPORT_X11) $(LIBM_SA)
+JUMP_LDLIBS_XIE = $(JUMP_ROOT_X11)/libX11.sa $(JUMP_LDLIBS_libc) -lm
+
+#endif /* !UseInstalled */
+
+/*
+ * SharedLibraryDataTarget - generate rules to create shared data file
+ */
+#ifndef SharedLibraryDataTarget
+#define SharedLibraryDataTarget(libname,rev,salist)
+#endif
+
+/*
+ * SharedLibraryTarget - generate rules to create a shared library;
+ * There are two basic flavors of libs: self-generating, which create
+ * their own (and possibly other) libs, and hosted, which rely on another
+ * lib for all the work.
+ */
+#ifndef SharedLibraryTarget
+#define SharedLibraryTarget(libname,rev,solist,down,up)			@@\
+XCOMM This logic is such to compile the libs in their proper order,	@@\
+XCOMM remain dependent on subsidiary libs, and yet minimize local work	@@\
+									@@\
+JUMP_DIR=./jump								@@\
+JUMP_LIB=Concat(lib,libname)						@@\
+									@@\
+XCOMM  this is needed for newer gnumake versions			@@\
+export JUMP_DIR JUMP_LIB						@@\
+									@@\
+JUMP_IS_HOST=$(Concat(JUMP_IS_HOST_,libname))				@@\
+JUMP_AR=$(JUMP_DIR)/Concat(lib,libname.a~)				@@\
+JUMP_SA=Concat(lib,libname.sa)						@@\
+JUMP_SO=Concat(lib,libname.so.rev)					@@\
+									@@\
+JUMP_HOST=$(Concat(JUMP_HOST_,libname))					@@\
+									@@\
+INSTSOLIBFLAGS=-m 0555							@@\
+									@@\
+AllTarget($(BUILDLIBDIR)/$(JUMP_SA))					@@\
+									@@\
+$(BUILDLIBDIR)/$(JUMP_SA): $(JUMP_SA)					@@\
+	LinkBuildLibrary($(JUMP_SA))					@@\
+									@@\
+$(JUMP_SA) $(Concat(JUMP_STUBLIBS_,libname)) do_JUMP_SA: \
+		down/mk_JUMP_SA_$(JUMP_IS_HOST)				@@\
+									@@\
+down/mk_JUMP_SA_0:: mk_JUMP_HOST					@@\
+									@@\
+down/mk_JUMP_SA_0:: $(JUMP_HOST)/$(JUMP_SA)				@@\
+	$(RM) $(JUMP_SA)						@@\
+	$(LN) $(JUMP_HOST)/$(JUMP_SA) $(JUMP_SA)			@@\
+	touch $@							@@\
+									@@\
+down/mk_JUMP_SA_1:: $(JUMP_SO)						@@\
+									@@\
+down/mk_JUMP_SA_1:: down/mk_JUMP_SO_2					@@\
+	$(RM) $(Concat(JUMP_STUBLIBS_,libname))				@@\
+	mkstubs -v rev -l $(JUMP_LIB) \
+		-a $(Concat(JUMP_ADDRESS_,libname)) \
+		-j $(Concat(JUMP_JUMPTABLESIZE_,libname)) \
+		-g $(Concat(JUMP_GOTSIZE_,libname)) \
+		-- $(Concat(JUMP_STUBNAMES_,libname))			@@\
+	verify-shlib -l $(JUMP_SO) \
+		$(Concat(JUMP_STUBLIBS_,libname))			@@\
+	$(MV) verify.out $(JUMP_DIR)					@@\
+	touch $@							@@\
+									@@\
+mk_JUMP_HOST:								@@\
+	@echo checking stub library $(JUMP_SA) in $(JUMP_HOST)...	@@\
+	@(cd $(JUMP_HOST); $(MAKE) $(MFLAGS) $(JUMP_SA)) || exit 1	@@\
+	@echo ok. continuing in $(Concat(JUMP_ROOT_,libname))...	@@\
+									@@\
+$(JUMP_SO): down/mk_JUMP_SO_$(JUMP_IS_HOST)				@@\
+									@@\
+down/mk_JUMP_SO_0:							@@\
+									@@\
+down/mk_JUMP_SO_1:: $(JUMP_AR) mk_JUMP_SIBDIRS down/mk_JUMP_SO_2	@@\
+									@@\
+down/mk_JUMP_SO_2: down/mk_JUMP_AR $(Concat(JUMP_SIBARS_,libname))	@@\
+	$(RM) $(JUMP_SO)						@@\
+	mkimage -f -v rev -l $(JUMP_LIB) \
+		-a $(Concat(JUMP_ADDRESS_,libname)) \
+		-j $(Concat(JUMP_JUMPTABLESIZE_,libname)) \
+		-g $(Concat(JUMP_GOTSIZE_,libname)) \
+		-- $(JUMP_AR) $(Concat(JUMP_LDLIBS_,libname))		@@\
+	$(RM) $(JUMP_DIR)/__jump.s $(JUMP_DIR)/__jump.o			@@\
+	LinkBuildLibrary($(JUMP_SO))					@@\
+	touch $@							@@\
+									@@\
+mk_JUMP_SIBDIRS:							@@\
+	@for d in $(Concat(JUMP_SIBDIRS_,libname)); do \
+		echo checking ar library in $$d...; \
+		(cd $$d ; $(MAKE) $(MFLAGS) fastdo_JUMP_AR) || exit 1; \
+		echo ok. continuing in $(Concat(JUMP_ROOT_,libname))...;done@@\
+									@@\
+fastdo_JUMP_AR: $(JUMP_DIR) down/mk_JUMP_AR				@@\
+									@@\
+$(JUMP_AR) do_JUMP_AR:: jumpsetup down/mk_JUMP_AR			@@\
+									@@\
+jumpsetup: $(JUMP_DIR) jumpsetup_$(JUMP_IS_HOST)			@@\
+									@@\
+$(JUMP_DIR):								@@\
+	$(RM) jump							@@\
+	LibMkdir($(Concat(JUMP_DIR_,libname)))				@@\
+	$(LN) $(Concat(JUMP_DIR_,libname)) jump				@@\
+									@@\
+jumpsetup_0:								@@\
+	@echo doing jump setup in host $(JUMP_HOST)...			@@\
+	@(cd $(JUMP_HOST); $(MAKE) $(MFLAGS) jumpsetup) || exit 1	@@\
+	@echo ok. continuing in $(Concat(JUMP_ROOT_,libname))...	@@\
+									@@\
+jumpsetup_1::								@@\
+	@for d in $(Concat(JUMP_SUBDIRS_,libname)); do \
+		echo checking stub library in $$d...; \
+		(cd $$d ; $(MAKE) $(MFLAGS) do_JUMP_SA) || exit 1; \
+		echo ok. continuing in $(Concat(JUMP_ROOT_,libname))...;done@@\
+									@@\
+jumpsetup_1:: $(JUMP_DIR)/jump.funcs $(JUMP_DIR)/jump.vars \
+	$(JUMP_DIR)/jump.ignore $(JUMP_DIR)/jump.import			@@\
+									@@\
+$(JUMP_DIR)/jump.funcs: $(Concat(JUMP_FUNCS_,libname))			@@\
+	$(RM) $(JUMP_DIR)/jump.funcs					@@\
+	cat $(Concat(JUMP_FUNCS_,libname)) | \
+		$(CPP) $(ALLDEFINES) $(Concat(JUMP_DEFS_,libname)) > $@	@@\
+									@@\
+$(JUMP_DIR)/jump.vars: $(Concat(JUMP_VARS_,libname))			@@\
+	$(RM) $(JUMP_DIR)/jump.vars					@@\
+	cat $(Concat(JUMP_VARS_,libname)) | \
+		$(CPP) $(ALLDEFINES) $(Concat(JUMP_DEFS_,libname)) > $@	@@\
+									@@\
+$(JUMP_DIR)/jump.ignore: $(Concat(JUMP_IGNORE_,libname))		@@\
+	$(RM) $(JUMP_DIR)/jump.ignore					@@\
+	cat $(Concat(JUMP_IGNORE_,libname)) | \
+		$(CPP) $(ALLDEFINES) $(Concat(JUMP_DEFS_,libname)) > $@	@@\
+									@@\
+$(JUMP_DIR)/jump.import: $(JUMP_DIR)/stubs.import \
+		$(Concat(JUMP_IMPORT_,libname))				@@\
+	$(RM) $(JUMP_DIR)/jump.import					@@\
+	cat $(JUMP_DIR)/stubs.import $(Concat(JUMP_IMPORT_,libname)) > $@ @@\
+									@@\
+$(JUMP_DIR)/stubs.import: $(Concat(JUMP_STUBS_IMPORT_,libname))		@@\
+	$(RM) $(JUMP_DIR)/stubs.import					@@\
+	nm --no-cplus $(Concat(JUMP_STUBS_IMPORT_,libname)) | grep '__GOT__' | \
+		sed 's/__GOT__/_/' > $@					@@\
+									@@\
+down/mk_JUMP_AR: solist							@@\
+	$(RM) $(JUMP_AR)						@@\
+	@if [ -s $(JUMP_DIR)/jump.log ]; then \
+		echo "Error: Leftover globals for shared lib"; \
+		exit 1; fi						@@\
+	(cd down; $(AR) up/$(JUMP_AR) solist) || exit 1			@@\
+	$(RANLIB) $(JUMP_AR)						@@\
+	touch $@							@@\
+									@@\
+clean:: jumpclean							@@\
+									@@\
+jumpclean: jumpclean_$(JUMP_IS_HOST)					@@\
+	$(RM) $(JUMP_SA) down/mk_JUMP_AR				@@\
+	$(RM) -r $(JUMP_DIR)						@@\
+									@@\
+jumpclean_0:								@@\
+	$(RM) down/mk_JUMP_SA_0						@@\
+	$(RM) $(JUMP_HOST)/$(JUMP_SA)					@@\
+									@@\
+jumpclean_1:								@@\
+	$(RM) -r $(JUMP_SO) $(Concat(JUMP_DIR_,libname)) \		@@\
+		down/mk_JUMP_SA_1 down/mk_JUMP_SO_1 down/mk_JUMP_SO_2
+#endif /* SharedLibraryTarget */
+
+/*
+ * InstallSharedLibrary - generate rules to install the shared library.
+ */
+#ifndef InstallSharedLibrary
+#define	InstallSharedLibrary(libname,rev,dest)				@@\
+install:: $(JUMP_SA) $(JUMP_SO)						@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	@if [ "$(JUMP_IS_HOST)" = YES ]; then \
+		(T=$(DESTDIR)dest/`echo $(JUMP_SO)|sed 's/\.[^\.]*$$//'`;\
+		set -x; \
+		$(INSTALL) -s -c $(INSTSOLIBFLAGS) $(JUMP_SO) $(DESTDIR)dest; \
+		$(RM) $$T && $(LN) $(JUMP_SO) $$T); fi			@@\
+	$(INSTALL) -c $(INSTLIBFLAGS) $(JUMP_SA) $(DESTDIR)dest
+#endif /* InstallSharedLibrary */
+
+/*
+ * InstallSharedLibraryData - generate rules to install the shared library data
+ */
+#ifndef InstallSharedLibraryData
+#define	InstallSharedLibraryData(libname,rev,dest)
+#endif /* InstallSharedLibraryData */
+
+#endif /* UseElfFormat */

@@ -1,0 +1,389 @@
+XCOMM platform:  $TOG: sun.cf /main/163 1997/06/08 20:08:23 kaleb $
+
+
+
+
+XCOMM platform:  $XFree86: xc/config/cf/sun.cf,v 3.31.2.7 1997/12/01 13:31:17 dawes Exp $
+
+#ifndef OSName
+# define OSName		DefaultOSName
+#endif
+#ifndef OSMajorVersion
+# define OSMajorVersion	DefaultOSMajorVersion
+#endif
+#ifndef OSMinorVersion
+# define OSMinorVersion	DefaultOSMinorVersion
+#endif
+#ifndef OSTeenyVersion
+# define OSTeenyVersion	DefaultOSTeenyVersion
+#endif
+XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVersion)
+
+/*
+ * Compiler setup.  This sun.cf file knows what options to use with 
+ * certain compilers, including Sun C, CenterLine C, and gcc.  It 
+ * also understands how to set some of the options for various C++
+ * compilers, including Sun C++ and CenterLine C++.
+ *
+ * === C Compiler Setup ==========================================
+ *
+ * For SunPro C, define HasSunC to YES in site.def.  
+ * For CenterLine C, define HasCenterLineC to YES in site.def
+ * For gcc or gcc2, define HasGcc or HasGcc2 to YES in site.def
+ * For other compilers, define HasSunC to NO in site.def, then 
+ *    provide appropriate values for the various compiler related
+ *    configuration varibles used here.
+ * 
+ * If you say you have the SunPro C compiler, we assume you have 
+ * version 2.0.x of the compiler.  If you have version 3.0.x instead, 
+ * define CCompilerMajorVersion as 3 in site.def
+ *
+ * If you don't tell us which C compiler you have, we assume you have 
+ * the SunPro C compiler under Solaris 2.x, and the bundled /bin/cc 
+ * under SunOS 4.1.x
+ *
+ * === C++ Compiler Setup ==========================================
+ *
+ * For SunPro C++, define HasSunCplusplus to YES in site.def
+ * For CenterLine C++, define HasCenterLineCplusplus to YES in site.def
+ * For Gnu g++ 2.6.x, define HasGcc2ForCplusplus to YES in site.def
+ * For other compilers, define HasCplusplus to YES in site.def, and 
+ *    check to see if you need to provide values for CplusplusOptions
+ *    and/or DefaultCplusplusOptions.
+ *
+ * In any case, you may also need to set CplusplusDependIncludes.
+ *
+ * If you say you have the SunPro C++ compiler, we assume you have 
+ * version 3.0.x of the compiler.  If you have version 4.0.x instead, 
+ * define CplusplusCompilerMajorVersion as 4 in site.def.
+ *
+ */
+
+#ifndef HasGcc2
+#define HasGcc2 NO
+#endif
+#ifndef HasGcc
+#define HasGcc HasGcc2
+#endif
+
+#ifndef HasSunC
+# if (HasCenterLineC || HasGcc || HasGcc2 || OSMajorVersion < 5)
+#  define HasSunC NO
+# else
+#  define HasSunC YES
+# endif
+#endif
+
+#if HasSunC 
+# ifndef CCompilerMajorVersion
+#  define CCompilerMajorVersion 3
+#  define DefaultCDebugFlags	-xO3
+#  define OptimizedCDebugFlags	-xO3
+# endif
+#endif
+
+#if HasSunCplusplus
+# ifndef HasCplusplus
+#  define HasCplusplus YES
+#  define OptimizedCplusplusDebugFlags	-xO3
+# endif
+# ifndef CplusplusCompilerMajorVersion
+#  define CplusplusCompilerMajorVersion	4
+# endif
+#endif
+
+#if HasCenterLineC
+# ifndef CcCmd
+#  define CcCmd clcc
+# endif
+#endif
+
+#if HasCenterLineCplusplus
+# ifndef HasCplusplus
+#  define HasCplusplus YES
+# endif
+# ifndef DefaultCplusplusOptions
+#  define DefaultCplusplusOptions -Xa
+# endif
+# ifndef CplusplusOptions
+#  define CplusplusOptions -Xa
+# endif
+#endif
+
+
+#if OSMajorVersion < 4 || (OSMajorVersion == 4 && OSMinorVersion < 1)
+/* We do not guarantee this will work */
+# define BootstrapCFlags	-DNOSTDHDRS
+# define StandardDefines	-DNOSTDHDRS
+# define XawI18nDefines		-DUSE_XWCHAR_STRING -DUSE_XMBTOWC
+#endif
+
+#if OSMajorVersion == 4 
+# if OSMinorVersion == 1
+#  define HasPoll		YES
+# endif
+# if OSMinorVersion > 1 || (OSMinorVersion == 1 && OSTeenyVersion > 1)
+/* You ALSO need this if you have Sun ld patch 100170-06 or later to 4.1.1 */
+#  define SunPost411FCSLd	YES
+# endif
+#endif
+
+#ifdef i386Architecture
+# if OSMajorVersion > 4
+#  define ServerExtraDefines AllocateLocalDefines XFree86ServerDefines -D__EXTENSIONS__
+#  define ServerOSDefines    XFree86ServerOSDefines
+# else
+#  define ServerExtraDefines AllocateLocalDefines
+#  define ServerOSDefines   -DDDXOSINIT
+# endif
+#else
+# define ServerExtraDefines AllocateLocalDefines
+# define ServerOSDefines   -DDDXOSINIT
+#endif
+
+#define XkbServerDefines  -DXKB_ALWAYS_USES_SOFT_REPEAT
+
+#if OSMajorVersion > 4
+#if HasSunC
+/* 
+ * Assume /opt/SUNWspro/bin/ contains symlinks to the appropriate tools
+ */
+#ifndef  CcCmd
+# define CcCmd		/opt/SUNWspro/bin/cc
+#endif
+#ifndef  CplusplusCmd
+# define CplusplusCmd	/opt/SUNWspro/bin/CC
+#endif
+#ifndef  CplusplusFilt
+# define CplusplusFilt	/opt/SUNWspro/bin/c++filt
+#endif
+#ifndef  CplusplusDependIncludes
+# define CplusplusDependIncludes	-I/opt/SUNWspro/SC3.0/include/CC
+#endif
+#endif
+
+# if HasSunC && (CCompilerMajorVersion < 3)
+#  define BootstrapCFlags	-DSVR4
+# else
+#  define BootstrapCFlags	/* none needed */
+# endif
+# ifndef XawI18nDefines
+#  if OSMinorVersion < 4
+#   define XawI18nDefines    -DHAS_WCTYPE_H -DHAS_ISW_FUNCS
+#  else
+#   define XawI18nDefines    -DHAS_WCHAR_H -DHAS_ISW_FUNCS
+#  endif
+# endif
+# if OSMinorVersion > 3
+#  define InstallCmd	    /usr/ucb/install
+# endif
+# ifdef i386Architecture
+#  define StandardDefines	  -Dsun -Di386 -DSVR4 -D__i386
+#  define ToolkitStringsABIOptions	-intelabi
+# else
+#  define StandardDefines	  -Dsun -DSVR4
+#  define ToolkitStringsABIOptions	-sparcabi
+#  define HasPlugin         YES
+# endif
+# define ExtraLibraries    -lsocket -lnsl
+# if OSMinorVersion > 1
+#  define ThreadedX	  YES
+#  define MTSafeAPIDefines	-DXUSE_MTSAFE_API -DXUSE_NETDB_R_API
+#  if HasSunC && CCompilerMajorVersion > 2
+#   define ThreadsCompileFlags -mt
+#  else
+#   define SystemMTDefines -D_REENTRANT
+#   define ThreadsLibraries -lthread
+#  endif
+#  if HasSunCplusplus && CplusplusCompilerMajorVersion > 3
+#   define ThreadsCplusplusCompileFlags -mt
+#  else
+#   define CplusplusSystemMTDefines -D_REENTRANT
+#   define ThreadsCplusplusLibraries -lthread
+#  endif
+# endif 		/* OSMinorVersion > 1 */
+# ifndef UseExportLists
+#  if OSMinorVersion > 4
+#   define UseExportLists YES
+#  else
+#   define UseExportLists NO
+#  endif
+# endif
+# define HasVFork          NO
+# define InstKmemFlags	  -g sys -m 2711
+# define ShLibIncludeFile <sunLib.tmpl>
+/*
+ * Set flags for position independent code before including sv4Lib.rules
+ * if the compiler in use doesn't use standard SVR4 flags
+ */
+# if HasSunC || HasCenterLineC
+#  define PositionIndependentCFlags -Kpic
+#  define LargePositionIndependentCFlags -KPIC
+# endif
+# if HasSunCplusplus || HasCenterLineCplusplus
+#  define PositionIndependentCplusplusFlags -pic
+#  define LargePositionIndependentCplusplusFlags -PIC
+# endif
+#else /* not OSMajorVersion > 4 */
+#define InstKmemFlags	  -g kmem -m 2711
+#include <sunLib.rules>
+#endif /* OSMajorVersion > 4 (else) */
+
+#define BuildLibPathVar	  LD_LIBRARY_PATH
+#define HasNdbm		  YES
+#define HasShm		  YES
+#define HasSecureRPC	  YES
+#define SetTtyGroup	  YES
+#define HasPutenv	  YES
+#ifndef i386Architecture
+# ifndef Xsun24Server
+#  define Xsun24Server	  NO		/* color, mono, multiple depths */
+# endif
+# ifndef XsunServer
+#  define XsunServer	  YES		/* color and mono, 8 bit only */
+# endif
+# ifndef XsunMonoServer
+#  define XsunMonoServer	  NO		/* monochrome only */
+# endif
+# ifndef BuildPexExt
+#  define BuildPexExt	  (XsunServer || Xsun24Server)
+# endif
+#endif /* not i386Architecture */
+
+#if (OSMajorVersion > 4) && defined(i386Architecture)
+#ifndef HasSolx86ApertureDriver
+#define HasSolx86ApertureDriver	YES
+#endif
+#endif
+
+#if HasGcc
+# if OSMajorVersion > 4 && defined(i386Architecture)
+#  ifndef DefaultCCOptions
+#   if UseInstalled
+#    define DefaultCCOptions -DNO_ASM
+#   else
+#    if OSMinorVersion > 3
+#     define DefaultCCOptions -ansi -pedantic -DNO_ASM
+#    else
+#     define DefaultCCOptions -DNO_ASM
+#    endif
+#   endif
+#  endif
+# endif
+# if HasGcc2
+#  ifndef OptimizedCDebugFlags
+#   ifdef i386Architecture
+#    define OptimizedCDebugFlags DefaultGcc2i386Opt
+#   else
+#    define OptimizedCDebugFlags -O2
+#   endif
+#  endif
+# else
+#  define SharedLibraryCcCmd cc
+#  define ExtraLoadFlags -B/usr/bin/
+#  define AllocateLocalDefines /**/
+
+.c.o:
+	ClearmakeOSName	$(CC) -c $(CFLAGS) $*.c
+
+# endif /* HasGcc2 (else) */
+
+#else /* not HasGcc */
+
+# define AllocateLocalDefines -DINCLUDE_ALLOCA_H
+
+/* Set up compiler-dependent options for Sun C */
+
+# if HasSunC
+#  ifdef Sun3Architecture
+#   ifndef DefaultCCOptions
+#    define DefaultCCOptions -f68881 -pipe
+#   endif
+#  else	/* not defined(Sun3Architecture) */
+#   if OSMajorVersion < 5
+#    ifndef DefaultCCOptions
+#     define DefaultCCOptions -pipe
+#    endif
+#   else /* OSMajorVersion >= 5*/
+#    ifndef DefaultCCOptions
+#     define DefaultCCOptions -Xa
+#    endif
+#   endif	
+#  endif	
+# endif
+
+/* Set compiler-dependent options for CenterLine C */
+
+# if HasCenterLineC
+#  ifndef DefaultCCOptions
+#   define DefaultCCOptions -Xt -w1 -DANSICPP -U__HIGHC__
+#  endif
+#  ifndef NeedConstPrototypes
+#   define NeedConstPrototypes YES
+#  endif
+#  ifndef NeedNestedPrototypes
+#   define NeedNestedPrototypes YES
+#  endif
+#  ifndef NeedVarargsPrototypes
+#   define NeedVarargsPrototypes YES
+#  endif
+# endif
+
+
+# define PexCCOptions DefaultCCOptions
+
+#endif /* HasGcc (else) */
+
+#if OSMajorVersion < 5
+# define SharedAllocateLocalDefines -DINCLUDE_ALLOCA_H
+# define LibraryCCOptions /* don't want special floating point */
+#endif /* OSMajorVersion < 5 */
+
+#if OSMajorVersion > 4
+# include <svr4.cf>
+#endif
+
+#ifndef ManKeywordsTarget
+# define ManKeywordsTarget(manpath)					@@\
+man_keywords::								@@\
+	catman -M $(DESTDIR)manpath -w
+#endif
+
+#if !defined(UsePamLibrary)
+# if (OSMajorVersion > 5) || ((OSMajorVersion == 5) && (OSMinorVersion >= 4))
+#  define UsePamLibrary		YES
+# endif
+#endif
+
+#define MotifDefines			\
+	-DNO_ISDIR -DNO_REGCOMP -DNO_ALLOCA -DBOGUS_MB_MAX -DNO_CONST
+#define PamUnixDefines		-DPAM_NIS
+#define TtLargePICTable		YES
+#define DtSvcDefines		-DXK_MISCELLANY -DMULTIBYTE -DNO_REGCOMP
+#define DtSearchDefines		-DI18N_MSG DtSvcDefines
+#define DtWidgetDefines		DtSearchDefines
+#define DtPrintDefines		DtSearchDefines
+
+#define baseDtMailDefines	\
+	-DSunOS=OSMajorVersion\#\#OSMinorVersion -DMMAP_NORESERVE -DSPRO_V2
+#ifndef i386Architecture
+# define DtMailDefines		baseDtMailDefines
+#else
+# define DtMailDefines		-DBIG_ENDIAN baseDtMailDefines
+#endif
+
+#define ArchitectureDefines	-DSUN_ARCHITECTURE
+
+#define TtClientExtraLibs	ExtraLibraries -ldl -lintl
+
+#define ExportListGenSource	elistgen.sun
+#define ShlibExportListOpt(filename)	-M filename
+
+#define CdeProjectDefines \
+	-DMULTIBYTE -DNLS16 -DMESSAGE_CAT -D_XOPEN_VERSION=4 \
+	-D_XOPEN_SOURCE -D__EXTENSIONS__ \
+	-DOSMAJORVERSION=OSMajorVersion -DOSMINORVERSION=OSMinorVersion
+
+#ifdef SparcArchitecture
+# define AsmDefines	/**/
+#endif

@@ -1,0 +1,476 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_PROPERTIES DIALOG DISCARDABLE  0, 0, 376, 196
+STYLE DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Property Page"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Incoming Connections",IDC_STATIC,5,5,143,123
+    CONTROL         "Accept socket connections",IDC_CONNECT_SOCK,"Button",
+                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,13,16,128,12
+    LTEXT           "Password:",IDC_PASSWORD_LABEL,19,30,44,12,
+                    SS_CENTERIMAGE | NOT WS_GROUP
+    EDITTEXT        IDC_PASSWORD,69,30,66,12,ES_PASSWORD | ES_AUTOHSCROLL
+    LTEXT           "Password\n(view only):",IDC_PASSWORD_VIEWONLY_LABEL,19,
+                    45,44,19,NOT WS_GROUP
+    EDITTEXT        IDC_PASSWORD_VIEWONLY,69,49,66,12,ES_PASSWORD | 
+                    ES_AUTOHSCROLL
+    LTEXT           "Display or port numbers to use:",IDC_STATIC,18,67,121,
+                    11,NOT WS_GROUP
+    CONTROL         "auto",IDC_PORTNO_AUTO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP | WS_TABSTOP,18,81,33,12
+    CONTROL         "display:",IDC_SPECDISPLAY,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,58,81,46,12
+    EDITTEXT        IDC_DISPLAYNO,108,81,27,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "ports:",IDC_SPECPORT,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,18,98,35,12
+    EDITTEXT        IDC_PORTRFB,58,98,27,12,ES_AUTOHSCROLL | ES_NUMBER
+    CTEXT           "and",IDC_STATIC,90,98,12,12,SS_CENTERIMAGE
+    EDITTEXT        IDC_PORTHTTP,108,98,27,12,ES_AUTOHSCROLL | ES_NUMBER
+    CTEXT           "(main)",IDC_STATIC,58,113,27,10,SS_CENTERIMAGE
+    CTEXT           "(HTTP)",IDC_STATIC,108,113,27,10,SS_CENTERIMAGE
+    GROUPBOX        "When Last Client Disconnects",IDC_STATIC,5,133,143,56
+    CONTROL         "Do nothing",IDC_LOCKSETTING_NOTHING,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,13,144,122,12
+    CONTROL         "Lock workstation",IDC_LOCKSETTING_LOCK,"Button",
+                    BS_AUTORADIOBUTTON | WS_TABSTOP,13,158,122,12
+    CONTROL         "Logoff workstation",IDC_LOCKSETTING_LOGOFF,"Button",
+                    BS_AUTORADIOBUTTON | WS_TABSTOP,13,172,122,12
+    GROUPBOX        "Input Handling",IDC_STATIC,156,5,215,43
+    CONTROL         "Disable remote keyboard and pointer (view-only mode)",
+                    IDC_DISABLE_INPUTS,"Button",BS_AUTOCHECKBOX | WS_GROUP | 
+                    WS_TABSTOP,164,16,201,12
+    CONTROL         "Disable local keyboard and pointer",
+                    IDC_DISABLE_LOCAL_INPUTS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,164,31,201,12
+    GROUPBOX        "Update Handling",IDC_STATIC,156,53,215,59
+    CONTROL         "Poll foreground window",IDC_POLL_FOREGROUND,"Button",
+                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,164,64,98,13
+    CONTROL         "Poll window under cursor",IDC_POLL_UNDER_CURSOR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,164,79,98,13
+    CONTROL         "Poll full screen",IDC_POLL_FULLSCREEN,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,164,94,98,13
+    CONTROL         "Poll console windows only",IDC_CONSOLE_ONLY,"Button",
+                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,263,64,102,
+                    13
+    CONTROL         "Poll on event received only",IDC_ONEVENT_ONLY,"Button",
+                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,263,79,102,
+                    13
+    GROUPBOX        "Bandwidth Optimizations",IDC_STATIC,156,117,215,29
+    CONTROL         "Remove desktop wallpaper on client connections",
+                    IDC_REMOVE_WALLPAPER,"Button",BS_AUTOCHECKBOX | WS_GROUP | 
+                    WS_TABSTOP,164,128,201,12
+    DEFPUSHBUTTON   "&OK",IDOK,156,174,47,15,WS_GROUP
+    PUSHBUTTON      "&Apply",IDC_APPLY,208,174,47,15
+    PUSHBUTTON      "&Cancel",IDCANCEL,260,174,47,15
+    PUSHBUTTON      "Ad&vanced...",IDADVANCED,319,174,52,15
+END
+
+IDD_ABOUT DIALOG DISCARDABLE  0, 0, 326, 122
+STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About WinVNC"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,134,100,50,14
+    CONTROL         132,IDC_VNCLOGO,"Static",SS_BITMAP | SS_SUNKEN,13,7,81,
+                    66
+    LTEXT           "TightVNC Server version 1.2.9\nCopyright (C) 2000-2003 Constantin Kaplinsky\nhttp://www.tightvnc.com/",
+                    IDC_STATIC,134,7,185,27
+    LTEXT           "Includes code from TridiaVNC 1.4.0\nCopyright (C) 2000, 2001 Tridia Corporation\nhttp://www.tridiavnc.com/",
+                    IDC_STATIC,134,66,185,28
+    LTEXT           "Based on WinVNC 3.3.3r9 by James Weatherall\nCopyright (C) 1998-2001 AT&&T Laboratories Cambridge\nhttp://www.uk.research.att.com/vnc/",
+                    IDC_STATIC,134,36,185,29
+END
+
+IDD_OUTGOING_CONN DIALOG DISCARDABLE  0, 0, 246, 65
+STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Initiate Outgoing Connection (Add New Client)"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_HOSTNAME_EDIT,55,6,130,14,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,192,6,47,14
+    PUSHBUTTON      "Cancel",IDCANCEL,192,25,47,14
+    LTEXT           "Host name:",IDC_HOSTNAME_STATIC,7,6,43,14,
+                    SS_CENTERIMAGE | NOT WS_GROUP
+    LTEXT           "Formats host:display and host::port are supported.\nThe default is to use display 0 or port 5500.",
+                    IDC_STATIC,7,27,178,18,NOT WS_GROUP
+    LTEXT           "Note: Host must be running VNC viewer in 'listen' mode.",
+                    IDC_STATIC,7,48,232,10,SS_CENTERIMAGE | NOT WS_GROUP
+END
+
+IDD_ACCEPT_CONN DIALOG DISCARDABLE  0, 0, 235, 102
+STYLE DS_SYSMODAL | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | 
+    WS_CAPTION
+CAPTION "Accept WinVNC Connection?"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "&Accept",IDACCEPT,7,78,53,17
+    PUSHBUTTON      "&Reject",IDREJECT,175,78,53,17
+    CTEXT           "WinVNC has received an incoming connection from",
+                    IDC_STATIC_TEXT1,7,2,221,17,SS_CENTERIMAGE
+    CTEXT           "<unknown host>",IDC_ACCEPT_IP,7,21,221,16,
+                    SS_CENTERIMAGE
+    CTEXT           "Do you wish to Accept or Reject the connection?",
+                    IDC_STATIC_TEXT,7,38,221,15,SS_CENTERIMAGE
+    CTEXT           "AutoReject:",IDC_ACCEPT_TIMEOUT,7,58,221,14,
+                    SS_CENTERIMAGE
+    PUSHBUTTON      "Accept without &Password",IDACCEPT_NOPASS,70,78,95,17
+END
+
+IDD_ADVPROPERTIES DIALOG DISCARDABLE  0, 0, 309, 186
+STYLE DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Advanced Properties"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Query Settings",IDC_STATIC,5,5,223,76
+    CONTROL         "Query console on incoming connections",IDQUERY,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,17,211,12
+    LTEXT           "Query timeout:",IDC_STATIC,25,32,67,12,SS_CENTERIMAGE
+    EDITTEXT        IDQUERYTIMEOUT,95,32,22,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "seconds",IDC_STATIC,123,32,101,12,SS_CENTERIMAGE
+    LTEXT           "Default action:",IDC_STATIC,25,47,67,12,SS_CENTERIMAGE
+    CONTROL         "Refuse",IDC_ACTION_REFUSE,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP | WS_TABSTOP,95,47,57,12
+    CONTROL         "Accept",IDC_ACTION_ACCEPT,"Button",BS_AUTORADIOBUTTON,
+                    152,47,72,12
+    CONTROL         "Allow option to accept without authentication",
+                    IDQUERYALLOWNOPASS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    13,62,211,12
+    GROUPBOX        "Administration",IDC_STATIC,5,85,156,96
+    CONTROL         "Disable empty passwords",IDREQUIREAUTH,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,97,144,12
+    CONTROL         "Allow loopback connections",IDALLOWLOOPBACK,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,112,144,12
+    CONTROL         "Allow only loopback connections",IDONLYLOOPBACK,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,25,127,132,12
+    CONTROL         "Log information to WinVNC.log",IDLOG,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,142,144,12
+    CONTROL         "Log detailed debugging information",IDLOGLOTS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,25,157,132,12
+    GROUPBOX        "Web access",IDC_STATIC,167,85,137,31
+    CONTROL         "Enable built-in HTTP daemon",IDENABLEHTTPD,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,180,98,123,10
+    GROUPBOX        "Connection Priority",IDC_STATIC,167,120,137,60
+    CONTROL         "Disconnect existing connections",IDPRIORITY0,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,180,132,123,
+                    12
+    CONTROL         "Automatic shared sessions",IDPRIORITY1,"Button",
+                    BS_AUTORADIOBUTTON,180,147,123,12
+    CONTROL         "Refuse concurrent connections",IDPRIORITY2,"Button",
+                    BS_AUTORADIOBUTTON,180,162,123,12
+    DEFPUSHBUTTON   "&OK",IDOK,238,5,66,14
+    PUSHBUTTON      "&Apply",IDC_APPLY,238,23,66,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,238,41,66,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_PROPERTIES, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 371
+        VERTGUIDE, 13
+        VERTGUIDE, 111
+        VERTGUIDE, 135
+        VERTGUIDE, 148
+        VERTGUIDE, 156
+        VERTGUIDE, 164
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 189
+        HORZGUIDE, 22
+        HORZGUIDE, 87
+        HORZGUIDE, 104
+        HORZGUIDE, 118
+        HORZGUIDE, 128
+        HORZGUIDE, 133
+    END
+
+    IDD_ABOUT, DIALOG
+    BEGIN
+        LEFTMARGIN, 13
+        RIGHTMARGIN, 319
+        VERTGUIDE, 134
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 114
+    END
+
+    IDD_OUTGOING_CONN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 239
+        VERTGUIDE, 50
+        VERTGUIDE, 55
+        VERTGUIDE, 185
+        VERTGUIDE, 192
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 58
+        HORZGUIDE, 20
+        HORZGUIDE, 25
+    END
+
+    IDD_ACCEPT_CONN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        VERTGUIDE, 60
+        VERTGUIDE, 70
+        VERTGUIDE, 165
+        VERTGUIDE, 175
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 95
+        HORZGUIDE, 24
+        HORZGUIDE, 30
+        HORZGUIDE, 46
+        HORZGUIDE, 50
+        HORZGUIDE, 65
+        HORZGUIDE, 78
+    END
+
+    IDD_ADVPROPERTIES, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 304
+        VERTGUIDE, 13
+        VERTGUIDE, 25
+        VERTGUIDE, 134
+        VERTGUIDE, 142
+        VERTGUIDE, 155
+        VERTGUIDE, 175
+        VERTGUIDE, 185
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 181
+        HORZGUIDE, 32
+        HORZGUIDE, 85
+        HORZGUIDE, 97
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,2,9,0
+ PRODUCTVERSION 1,2,9,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080904b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "AT&T Research Labs Cambridge\0"
+            VALUE "FileDescription", "VNC server for Win32\0"
+            VALUE "FileVersion", "3, 3, 3, 9\0"
+            VALUE "InternalName", "WinVNC\0"
+            VALUE "LegalCopyright", "Copyright AT&T Research Labs Cambridge  1998-2000\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "WinVNC.exe\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "AT&T Research Labs Cambridge - WinVNC\0"
+            VALUE "ProductVersion", "3, 3, 3, 9\0"
+            VALUE "SpecialBuild", "\0"
+        END
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "Based on TridiaVNC by Tridia Corporation\0"
+            VALUE "CompanyName", "Constantin Kaplinsky\0"
+            VALUE "FileDescription", "TightVNC Win32 Server\0"
+            VALUE "FileVersion", "1, 2, 9, 0\0"
+            VALUE "InternalName", "WinVNC\0"
+            VALUE "LegalCopyright", "Copyright (C) 1998-2002 [many holders]\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "WinVNC.exe\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "TightVNC Win32 Server\0"
+            VALUE "ProductVersion", "1, 2, 9, 0\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200, 0x809, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_WINVNC              ICON    DISCARDABLE     "res\\WinVNC.ico"
+IDI_FLASH               ICON    DISCARDABLE     "res\\icon1.ico"
+IDI_DISABLED            ICON    DISCARDABLE     "res\\ico00001.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_TRAYMENU MENU DISCARDABLE 
+BEGIN
+    POPUP "tray"
+    BEGIN
+        MENUITEM "&Properties",                 ID_PROPERTIES
+        MENUITEM SEPARATOR
+        MENUITEM "Add &New Client",             ID_OUTGOING_CONN
+        MENUITEM "&Kill All Clients",           ID_KILLCLIENTS
+        MENUITEM "&Disable New Clients",        ID_DISABLE_CONN
+        MENUITEM SEPARATOR
+        MENUITEM "&About WinVNC",               ID_ABOUT
+        MENUITEM SEPARATOR
+        MENUITEM "&Close VNC",                  ID_CLOSE
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// JAVAARCHIVE
+//
+
+IDR_VNCVIEWER_JAR       JAVAARCHIVE DISCARDABLE "res\\VncViewer.jar"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// JAVACLASS
+//
+
+IDR_AUTHPANEL_CLASS     JAVACLASS DISCARDABLE   "res\\AuthPanel.class"
+IDR_CLIPBOARDFRAME_CLASS JAVACLASS DISCARDABLE   "res\\ClipboardFrame.class"
+IDR_OPTIONSFRAME_CLASS  JAVACLASS DISCARDABLE   "res\\OptionsFrame.class"
+IDR_RFBPROTO_CLASS      JAVACLASS DISCARDABLE   "res\\RfbProto.class"
+IDR_VNCCANVAS_CLASS     JAVACLASS DISCARDABLE   "res\\VncCanvas.class"
+IDR_VNCVIEWER_CLASS     JAVACLASS DISCARDABLE   "res\\VncViewer.class"
+IDR_BUTTONPANEL_CLASS   JAVACLASS DISCARDABLE   "res\\ButtonPanel.class"
+IDR_DESCIPHER_CLASS     JAVACLASS DISCARDABLE   "res\\DesCipher.class"
+IDR_RECFRAME_CLASS      JAVACLASS DISCARDABLE   "res\\RecordingFrame.class"
+IDR_SESSIONREC_CLASS    JAVACLASS DISCARDABLE   "res\\SessionRecorder.class"
+IDR_RELOGINPANEL_CLASS  JAVACLASS DISCARDABLE   "res\\ReloginPanel.class"
+IDR_SOCKFACTORY_CLASS   JAVACLASS DISCARDABLE   "res\\SocketFactory.class"
+IDR_HTTPCONNSOCKFACTORY_CLASS JAVACLASS DISCARDABLE   "res\\HTTPConnectSocketFactory.class"
+IDR_HTTPCONNSOCK_CLASS  JAVACLASS DISCARDABLE   "res\\HTTPConnectSocket.class"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_VNCLOGO             BITMAP  DISCARDABLE     "res\\tightvnc.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDI_WINVNC              "WinVNC"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.K.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.K.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

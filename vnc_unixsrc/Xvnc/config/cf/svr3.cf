@@ -1,0 +1,335 @@
+XCOMM $XConsortium: svr3.cf /main/1 1996/10/31 14:47:37 kaleb $
+
+
+
+XCOMM $XFree86: xc/config/cf/svr3.cf,v 3.9.2.1 1997/05/24 13:38:09 dawes Exp $
+
+#ifndef HasGcc
+#define HasGcc      YES
+#endif
+#ifndef HasGcc2
+#define HasGcc2     YES
+#endif
+#ifndef GccUsesGas
+#define GccUsesGas  NO
+#endif
+#ifndef UseGas
+#define UseGas      NO
+#endif
+#ifndef GnuCpp
+#define GnuCpp      NO
+#endif
+
+#ifndef Gcc2MOption
+# if HasGcc2
+#  define Gcc2MOption /* */
+# else
+#  define Gcc2MOption /* */
+# endif
+#endif
+
+#ifndef HasShadowPasswd
+# define HasShadowPasswd	YES
+#endif
+
+#ifndef HasLibCrypt
+# define HasLibCrypt		NO
+#endif
+
+#ifndef HasSVR3mmapDrv
+# define HasSVR3mmapDrv		NO
+#endif
+
+#if HasSVR3mmapDrv
+# define SVR3mmapFlags		-DHAS_SVR3_MMAPDRV
+#else
+# define SVR3mmapFlags 		/**/
+#endif
+
+#ifndef HasSockets
+# define HasSockets		YES
+#endif
+
+#ifndef XmanSearchPath
+#define XmanSearchPath		/usr/man
+#endif
+
+/*
+ *	Most SVR3 do not have symbolic links, only some of the newer ones
+ */
+#ifndef HasSymLinks
+# define HasSymLinks NO
+#endif
+
+#ifndef StripInstalledPrograms
+# define StripInstalledPrograms	YES
+#endif
+
+#ifndef MotifBC
+# define MotifBC	       	YES
+#endif
+
+#ifndef CompressAllFonts
+# define CompressAllFonts	YES
+#endif
+
+/*
+ * A default OS name
+ */
+#ifndef OSName
+#ifdef i386Architecture
+#define	OSName	UNIX System V/386 Release 3
+#else
+#define	OSName	UNIX System V Release 3
+#endif
+#endif
+#ifndef OSVendor
+#define OSVendor /**/
+#endif
+
+/*
+ * The default version will be 3.0.0 which should be
+ * the least common denominator of all SVR3
+ */
+
+#ifndef OSMajorVersion
+#define	OSMajorVersion	3
+#endif
+#ifndef OSMinorVersion
+#define	OSMinorVersion	0
+#endif
+#ifndef OSTeenyVersion
+#define	OSTeenyVersion	0
+#endif
+#ifndef BootstrapCFlags
+#ifdef SYSV386
+#define BootstrapCFlags         -DSYSV -DSYSV386
+#else
+#define BootstrapCFlags         -DSYSV
+#endif
+#endif
+
+/* Some stuff that all SYSV's should have */
+
+#define SystemV	YES
+
+#ifndef NeedBerklib
+#define NeedBerklib	YES
+#endif
+#ifndef HasPoll
+#define HasPoll		YES
+#endif
+#ifndef SVR3Architecture
+#define SVR3Architecture
+#endif
+#ifndef PatheticCpp
+#define PatheticCpp	YES
+#endif
+
+#ifndef StandardDefines
+#ifdef i386Architecture
+#define StandardDefines		-DSYSV OSDefines -Di386
+#else
+#define StandardDefines		-DSYSV OSDefines
+#endif
+#endif
+
+#ifndef ServerOSDefines
+# ifdef i386Architecture
+#  define ServerOSDefines -DDDXTIME XFree86ServerOSDefines -DPART_NET
+# else
+#  define ServerOSDefines -DDDXTIME
+# endif
+#endif
+
+#ifndef XawI18nDefines
+# define XawI18nDefines          -DUSE_XWCHAR_STRING
+#endif
+
+#ifndef DefaultCDebugFlags
+# if HasGcc2
+#  if defined(i386Architecture)
+#   define DefaultCDebugFlags DefaultGcc2i386Opt
+#  else
+#   define DefaultCDebugFlags -O2
+#  endif
+# else
+#  define DefaultCDebugFlags -O
+# endif
+#endif
+
+#ifndef LdCombineFlags
+#define LdCombineFlags	-r
+#endif
+
+#if HasGcc
+# if HasGcc2
+#  define DefaultCCOptions Gcc2MOption -DNO_ASM -fpcc-struct-return \
+			   -fwritable-strings
+#  define LibraryCCOptions Gcc2MOption -DNO_ASM -fpcc-struct-return
+#  if defined(i386Architecture)
+#   define OptimizedCDebugFlags DefaultGcc2i386Opt
+#  else
+#   define OptimizedCDebugFlags -O2
+#  endif
+# else
+#  define DefaultCCOptions -DNO_ASM -fpcc-struct-return -fwritable-strings
+#  define LibraryCCOptions -DNO_ASM -fpcc-struct-return
+#  define OptimizedCDebugFlags -O -fstrength-reduce
+# endif
+# define ShlibDefines -D__GNUC__ $(XDMAUTHDEFS)
+#else
+# define ShlibDefines $(XDMAUTHDEFS)
+#endif
+
+#ifndef Malloc0ReturnsNull
+#define Malloc0ReturnsNull	YES
+#endif
+
+#ifndef SocketLibraries
+# define SocketLibraries /**/
+#endif
+#ifndef LocalLibraries
+# define LocalLibraries /**/
+#endif
+#ifndef ExtraLibraries
+# if HasSockets
+#  define ExtraLibraries SocketLibraries LocalLibraries
+# else
+#  define ExtraLibraries LocalLibraries
+# endif
+#endif
+
+#if RemoveDSDENroffMacros
+# define RemoveDSDENroffMacrosCmd sed -e '/^\.D[S|E]$$/d' 
+#else
+# define RemoveDSDENroffMacrosCmd cat
+#endif
+
+#ifndef ConnectionFlags
+# define ConnectionFlags	-DLOCALCONN -DTCPCONN
+#endif
+
+#ifndef FormattedManPages
+# define FormattedManPages	YES
+#endif
+
+#ifndef ManSuffix
+# define ManSuffix               1x
+# define ManDir			$(MANSOURCEPATH)1
+#endif
+#ifndef LibManSuffix
+# define LibManSuffix            3x
+# define LibmanDir		$(MANSOURCEPATH)3
+#endif
+#ifndef FileManSuffix
+# define FileManSuffix           4
+#endif
+
+/*
+ * Compress manual pages, default on ISC and SCO
+ */
+#ifndef CompressManPages
+# define CompressManPages        YES
+#endif
+
+/*
+ * The .DS and .DE macros used in some manual pages are obsolete
+ * in the often used ISC's Textprocessing Workbench 2.1.0 and break it,
+ * so it's better to remove these previously
+ */
+#ifndef RemoveDSDENroffMacros
+# define RemoveDSDENroffMacros   NO
+#endif
+
+#if RemoveDSDENroffMacros
+# define RemoveDSDENroffMacrosCmd sed -e '/^\.D[S|E]$$/d' 
+#else
+# define RemoveDSDENroffMacrosCmd cat
+#endif
+
+#ifndef CompressManCmd
+# define CompressManCmd @true
+#endif
+
+     RMDSDEMACCMD = RemoveDSDENroffMacrosCmd
+   COMPRESSMANCMD = CompressManCmd
+
+#if FormattedManPages
+
+#ifndef InstallManPageLong
+#define InstallManPageLong(file,destdir,dest)                           @@\
+install.man:: file.man                                                  @@\
+        MakeDir($(DESTDIR)destdir)                                      @@\
+        $(RM) $(DESTDIR)destdir/dest.$(MANSUFFIX)*                      @@\
+        $(RMDSDEMACCMD) file.man | neqn | nroff -man >/tmp/file.man     @@\
+        $(INSTALL) -c $(INSTMANFLAGS) /tmp/file.man $(DESTDIR)destdir/dest.$(MANSUFFIX) @@\
+        -$(COMPRESSMANCMD) $(DESTDIR)destdir/dest.$(MANSUFFIX)          @@\
+        $(RM) /tmp/file.man
+#endif
+
+#ifndef InstallGenManPageLong
+#define InstallGenManPageLong(file,destdir,dest,suffix)                 @@\
+install.man:: file.man                                                  @@\
+        MakeDir($(DESTDIR)destdir)                                      @@\
+        $(RM) $(DESTDIR)destdir/dest.suffix*                            @@\
+        $(RMDSDEMACCMD) file.man | neqn | nroff -man >/tmp/file.man     @@\
+        $(INSTALL) -c $(INSTMANFLAGS) /tmp/file.man $(DESTDIR)destdir/dest.suffix @@\
+        -$(COMPRESSMANCMD) $(DESTDIR)destdir/dest.suffix                @@\
+        $(RM) /tmp/file.man
+#endif
+
+#ifndef InstallMultipleMan
+#define InstallMultipleMan(list,dest)                                   @@\
+install.man:: list                                                      @@\
+	MakeDir($(DESTDIR)dest)						@@\
+        @case '${MFLAGS}' in *[i]*) set +e;; esac; \                    @@\
+        for i in list; do \                                             @@\
+                (set -x; \                                              @@\
+                MNAME=`echo $$i | cut -f1 -d.`; \			@@\
+                $(RM) $(DESTDIR)dest/$${MNAME}*; \                      @@\
+                $(RMDSDEMACCMD) $$i | neqn | nroff -man >/tmp/$$i; \    @@\
+                $(INSTALL) -c $(INSTMANFLAGS) /tmp/$$i $(DESTDIR)dest/$${MNAME}.$(MANSUFFIX); \      @@\
+                $(COMPRESSMANCMD) $(DESTDIR)dest/$${MNAME}.$(MANSUFFIX); \  @@\
+                $(RM) /tmp/$$i); \                                      @@\
+        done
+#endif
+
+/*
+ * InstallManPageAliases - generate rules to install manual page aliases.
+ * (Make hard links on SVR3.)
+ */
+#ifndef InstallManPageAliases
+#define InstallManPageAliases(file,destdir,aliases)                     @@\
+install.man::                                                           @@\
+        @(SUFFIX=`echo $(DESTDIR)destdir/file.* | cut -f2,3 -d.`; \     @@\
+        for i in aliases; do (set -x; \                                 @@\
+        $(RM) $(DESTDIR)destdir/$$i.*; \                                @@\
+        (cd $(DESTDIR)destdir; $(LN) file.$${SUFFIX} \                  @@\
+        $$i.$${SUFFIX})); \                                             @@\
+        done)
+#endif
+
+#ifndef InstallGenManPageAliases
+#define InstallGenManPageAliases(file,destdir,suffix,aliases)		@@\
+	InstallManPageAliases(file,destdir,aliases)
+#endif
+
+#endif /* FormattedManPages */
+
+/* If you have trouble with make bombing out in Xlib, try uncommenting this. */
+/* You will not get dependencies as a result, but better than nothing. */
+#ifndef MakeHashTableBug
+#define MakeHashTableBug        NO
+#endif
+
+#if MakeHashTableBug
+#define DependTarget3(srcs1,srcs2,srcs3)
+#endif
+
+#include <sv3Lib.rules>
+
+#ifdef i386Architecture
+#include <xfree86.cf>
+#endif
+

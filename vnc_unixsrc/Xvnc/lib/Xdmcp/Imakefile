@@ -1,0 +1,113 @@
+XCOMM $XConsortium: Imakefile /main/25 1996/09/28 16:43:40 rws $
+XCOMM $XFree86: xc/lib/Xdmcp/Imakefile,v 3.2 1996/12/23 06:00:48 dawes Exp $
+#define DoNormalLib NormalLibXdmcp
+#define DoSharedLib SharedLibXdmcp
+#define DoDebugLib DebugLibXdmcp
+#define DoProfileLib ProfileLibXdmcp
+#define LibName Xdmcp
+#define SoRev SOXDMCPREV
+#define IncSubdir X11
+
+#if HasXdmAuth
+AUTHDEFS = -DHASXDMAUTH
+AUTHSRCS = Wrap.c Unwrap.c Wraphelp.c
+AUTHOBJS = Wrap.o Unwrap.o Wraphelp.o
+#endif
+
+DEFINES = $(AUTHDEFS)
+
+HEADERS = Xdmcp.h
+
+SRCS = \
+	A8Eq.c \
+	AA8.c \
+	AA16.c \
+	AA32.c \
+	AofA8.c \
+	CA8.c \
+	DA8.c \
+	DA16.c \
+	DA32.c \
+	DAofA8.c \
+	Fill.c \
+	Flush.c \
+	RA8.c \
+	RA16.c \
+	RA32.c \
+	RAofA8.c \
+	RC8.c \
+	RC16.c \
+	RC32.c \
+	RHead.c \
+	RR.c \
+	RaA8.c \
+	RaA16.c \
+	RaA32.c \
+	RaAoA8.c \
+	WA8.c \
+	WA16.c \
+	WA32.c \
+	WAofA8.c \
+	WC8.c \
+	WC16.c \
+	WC32.c \
+	Whead.c \
+	Alloc.c \
+	CmpKey.c \
+	DecKey.c \
+	GenKey.c \
+	IncKey.c \
+	$(AUTHSRCS)
+
+OBJS = \
+	A8Eq.o \
+	AA8.o \
+	AA16.o \
+	AA32.o \
+	AofA8.o \
+	CA8.o \
+	DA8.o \
+	DA16.o \
+	DA32.o \
+	DAofA8.o \
+	Fill.o \
+	Flush.o \
+	RA8.o \
+	RA16.o \
+	RA32.o \
+	RAofA8.o \
+	RC8.o \
+	RC16.o \
+	RC32.o \
+	RHead.o \
+	RR.o \
+	RaA8.o \
+	RaA16.o \
+	RaA32.o \
+	RaAoA8.o \
+	WA8.o \
+	WA16.o \
+	WA32.o \
+	WAofA8.o \
+	WC8.o \
+	WC16.o \
+	WC32.o \
+	Whead.o \
+	Alloc.o \
+	CmpKey.o \
+	DecKey.o \
+	GenKey.o \
+	IncKey.o \
+	$(AUTHOBJS)
+
+#include <Library.tmpl>
+
+#ifdef WraphelpSourceRule
+WraphelpSourceRule()
+#endif
+SpecialCLibObjectRule(Fill,$(ICONFIGFILES),ConnectionFlags)
+SpecialCLibObjectRule(Flush,$(ICONFIGFILES),ConnectionFlags)
+
+InstallLinkKitLibrary(Xdmcp,$(LINKKITDIR)/lib)
+
+DependTarget()

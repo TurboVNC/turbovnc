@@ -1,0 +1,1430 @@
+XCOMM ----------------------------------------------------------------------
+XCOMM Makefile generated from IMAKE_TEMPLATE and INCLUDE_IMAKEFILE
+XCOMM $TOG: Imake.tmpl /main/245 1997/05/20 10:05:47 kaleb $
+XCOMM
+XCOMM
+XCOMM
+XCOMM
+XCOMM $XFree86: xc/config/cf/Imake.tmpl,v 3.32.2.8 1998/02/08 11:19:24 dawes Exp $
+XCOMM ----------------------------------------------------------------------
+
+/*
+ * generic imake template
+ */
+
+/*
+ * Modify Imake.cf when adding a new architecture, do not modify this file.
+ * Platform-specific parameters may be set in the appropriate <vendor>.cf
+ * configuration files.  Site-specific parameters should be set in the file
+ * site.def.  Full rebuilds are recommended if any parameters are changed.
+ * If your C preprocessor does not define any unique symbols, you will need
+ * to set BOOTSTRAPCFLAGS when rebuilding imake (usually when doing
+ * "make World" the first time).
+ */
+
+#define ImakeConfigRelease 6
+
+#define	YES	1
+#define NO	0
+
+/* Ensure that "all" is the default target in the Makefile. */
+all::
+
+.SUFFIXES: .i
+
+#include <Imake.cf>
+
+XCOMM -----------------------------------------------------------------------
+XCOMM site-specific configuration parameters that need to come before
+XCOMM the platform-specific parameters - edit site.def to change
+#define BeforeVendorCF
+#include <site.def>
+#undef BeforeVendorCF
+
+#if defined(HasGcc2) && !defined(HasGcc)
+# define HasGcc HasGcc2
+#endif
+
+#ifndef HasClearmake
+# define HasClearmake NO
+#endif
+
+/*
+ * ClearmakeOSName - insert the current OS type into the clearmake
+ * build script, so .o files from different platforms cannot be winked in.
+ * If clearmake finds the build script for two .o files is the same, it
+ * will share the .o, even across different architectures.  Inserting the
+ * O/S name into the build script in a comment prevents unwanted sharing.
+ * Note the trailing double-@ in the macro: end a line using this macro
+ * with backslash without the double-@ usually used.
+ * Like this:
+ *
+ * #define SomeRule() @@\
+ *     something or other @@\
+ *     ClearmakeOSName \
+ *     something else @@\
+ *     and more
+ */
+#ifndef ClearmakeOSName
+# if HasClearmake
+#  define ClearmakeOSName @ XCOMM $(OSNAME) @@
+# else
+#  define ClearmakeOSName /**/
+# endif
+#endif
+
+#if HasClearmake
+# ifndef MakeCmd
+#  define MakeCmd clearmake
+# endif
+#endif
+
+#if HasClearmake
+XCOMM ----------------------------------------------------------------------
+.c.o:
+	ClearmakeOSName	$(CC) -c $(CFLAGS) $*.c
+#endif
+
+XCOMM ----------------------------------------------------------------------
+XCOMM platform-specific configuration parameters - edit MacroFile to change
+#include MacroIncludeFile
+
+XCOMM ----------------------------------------------------------------------
+XCOMM site-specific configuration parameters that go after
+XCOMM the platform-specific parameters - edit site.def to change
+#define AfterVendorCF
+#include <site.def>
+#undef AfterVendorCF
+
+/*
+ * defaults for various generic parameters; set in site.def if needed
+ */
+
+/* the following are needed before we can include Imake.rules */
+
+#ifndef HasVarDirectory
+#define HasVarDirectory		NO
+#endif
+#ifndef HasSymLinks
+#define HasSymLinks		YES
+#endif
+#ifndef SystemV
+#define SystemV			NO	/* SYSV (R3) */
+#endif
+#ifndef SystemV4
+#define SystemV4		NO	/* SVR4 */
+#endif
+#ifndef HasCodeCenter
+#define HasCodeCenter		NO
+#endif
+#ifndef HasSentinel
+#define HasSentinel		NO
+#endif
+#ifndef HasPurify
+#define HasPurify		NO
+#endif
+#ifndef HasTestCenter
+#define HasTestCenter		NO
+#endif
+#ifndef HasBsdMake
+#define HasBsdMake		NO
+#endif
+#ifndef HasGnuMake
+#define HasGnuMake		NO
+#endif
+#ifndef HasParallelMake
+#define HasParallelMake		NO
+#endif
+#ifndef RemoveTargetProgramByMoving
+#define RemoveTargetProgramByMoving NO
+#endif
+#ifndef DoRanlibCmd
+#if SystemV || SystemV4
+#define DoRanlibCmd NO
+#else
+#define DoRanlibCmd YES
+#endif
+#endif
+#ifndef ExecableScripts
+#if SystemV
+#define ExecableScripts		NO
+#else
+#define ExecableScripts		YES	/* kernel exec() can handle #! */
+#endif
+#endif
+
+#ifndef HasMakefileSafeInclude	    /* -include or sinclude in a Makefile */
+#if HasClearmake || HasBsdMake
+#define HasMakefileSafeInclude YES
+#else
+#define HasMakefileSafeInclude NO   /* see also vendor-specific .cf files */
+#endif
+#endif
+
+#include <Imake.rules>
+
+#ifndef HasSharedLibraries
+#define HasSharedLibraries NO
+#endif
+#ifndef OSMajorVersion
+#define OSMajorVersion          0
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion          0
+#endif
+#ifndef OSTeenyVersion
+#define OSTeenyVersion          0
+#endif
+#ifndef UnalignedReferencesAllowed
+#define UnalignedReferencesAllowed NO	/* if arbitrary deref is okay */
+#endif
+#ifndef AvoidNullMakeCommand
+#if !HasBsdMake
+#define AvoidNullMakeCommand NO
+#else
+#define AvoidNullMakeCommand YES
+#endif
+#endif
+#if AvoidNullMakeCommand
+#ifndef NullMakeCommand
+#define NullMakeCommand		@ echo -n
+#endif
+/*
+ * An obscure bug in BSD4.3's original make causes it not to recognize a
+ * macro definition if the macro name starts with a non-alpha and in
+ * column one.
+ */
+ _NULLCMD_ = NullMakeCommand
+#endif
+
+#ifndef CrossCompiling
+#define CrossCompiling		NO
+#endif
+#ifndef BourneShell			/* to force shell in makefile */
+#define BourneShell		/bin/sh
+#endif
+#ifndef ConstructMFLAGS
+#if SystemV
+#define ConstructMFLAGS		YES	/* build MFLAGS from MAKEFLAGS */
+#else
+#define ConstructMFLAGS		NO	/* build MFLAGS from MAKEFLAGS */
+#endif
+#endif
+
+#ifndef ConstructMAKEFLAGS		/* needed on old BSD-based? */
+#define ConstructMAKEFLAGS	NO	/* build MAKEFLAGS from MFLAGS */
+#endif
+
+#ifndef HasLargeTmp
+#define HasLargeTmp		NO	/* be paranoid */
+#endif
+
+#ifndef HasBSD44Sockets
+#define HasBSD44Sockets		NO
+#endif
+#ifndef HasSockets
+#define HasSockets		YES
+#endif
+#ifndef HasStreams
+#define HasStreams		!HasSockets
+#endif
+#ifndef HasDECnet
+#define HasDECnet		NO
+#endif
+#ifndef HasPoll
+#if SystemV || SystemV4
+#define HasPoll			YES
+#else
+#define HasPoll			NO
+#endif
+#endif
+#ifndef HasVFork
+#if SystemV
+#define HasVFork		NO	/* not yet... */
+#else
+#define HasVFork		YES
+#endif
+#endif
+#ifndef HasSetUserContext
+#define HasSetUserContext	NO
+#endif
+#ifndef HasLibCrypt
+#define HasLibCrypt		NO
+#endif
+#ifndef HasPutenv
+#define HasPutenv		NO	/* assume not */
+#endif
+#ifndef HasVoidSignalReturn
+#define HasVoidSignalReturn	YES	/* assume yes */
+#endif
+#ifndef HasBsearch
+#define HasBsearch		YES	/* assume yes */
+#endif
+#ifndef HasSnprintf
+#define HasSnprintf		NO	/* assume not */
+#endif
+#ifndef HasMkstemp
+#define HasMkstemp		NO	/* assume not */
+#endif
+#ifndef HasFortran
+#define HasFortran		NO
+#endif
+#ifndef HasCplusplus
+#if HasGcc2ForCplusplus
+#define HasCplusplus		YES
+#else
+#define HasCplusplus		NO
+#endif
+#endif
+#ifndef HasNdbm
+#define HasNdbm			NO
+#endif
+#ifndef HasSecureRPC
+#define HasSecureRPC		NO	/* if you have Secure RPC */
+#endif
+#ifndef HasKrb5
+#define HasKrb5			NO      /* if you have Kerberos V5 */
+#endif
+#ifndef HasLatex
+#define HasLatex		YES
+#endif
+#ifndef HasShm
+#if SystemV || SystemV4
+#define HasShm			YES
+#else
+#define HasShm			NO
+#endif
+#endif
+#ifndef HasCbrt
+#define HasCbrt			YES
+#endif
+#ifndef HasFfs
+#define HasFfs			YES
+#endif
+#ifndef HasZlib
+#define HasZlib			NO
+#endif
+#if !HasZlib		/* GzipLibrary was valid only if HasZlib */
+#define GzipLibrary -L/usr/local/lib -lz
+#endif
+#ifndef GzipLibrary	/* if OS config didn't define it, assume it's -lz */
+#define GzipLibrary -lz
+#endif
+#if HasKrb5
+#ifndef Krb5Includes
+#define Krb5Includes -I/krb5/include
+#endif
+#ifndef Krb5Libraries
+#define Krb5Libraries -L/krb5/lib -L/usr/isode/lib -lkrb5 -lcrypto -lisode -lcom_err -ldbm
+#endif
+#else
+#undef Krb5Includes
+#define Krb5Includes /**/
+#undef Krb5Libraries
+#define Krb5Libraries /**/
+#endif
+#ifndef UseGnuMalloc
+#define UseGnuMalloc		NO
+#endif
+#ifndef GnuMallocLibrary
+#define GnuMallocLibrary -lgmalloc
+#endif
+#ifndef MallocLibraries
+#if UseGnuMalloc
+#define MallocLibraries	GnuMallocLibrary
+#else
+#define MallocLibraries	/**/
+#endif
+#endif
+#ifndef HasTk
+#define HasTk NO
+#endif
+#ifndef TkLibName
+#if HasTk
+#define TkLibName tk
+#else
+#define TkLibName
+#endif
+#endif
+TKLIBNAME = TkLibName
+#ifndef TkLibDir
+#if HasTk
+#define TkLibDir /usr/local/lib
+#else
+#define TkLibDir
+#endif
+#endif
+TKLIBDIR = TkLibDir
+#ifndef TkIncDir
+#if HasTk
+#define TkIncDir /usr/local/include
+#else
+#define TkIncDir
+#endif
+#endif
+#ifndef TkLibrary
+#ifdef HasTk
+#define TkLibrary Concat(-L,$(TKLIBDIR)) Concat(-l,$(TKLIBNAME))
+#else
+#define TkLibrary
+#endif
+#endif
+#ifndef HasTcl
+#define HasTcl NO
+#endif
+#ifndef TclLibName
+#if HasTcl
+#define TclLibName tcl
+#else
+#define TclLibName
+#endif
+#endif
+TCLLIBNAME = TclLibName
+#ifndef TclLibDir
+#if HasTcl
+#define TclLibDir /usr/local/lib
+#else
+#define TclLibDir
+#endif
+#endif
+TCLIBDIR = TclLibDir
+#ifndef TclIncDir
+#if HasTcl
+#define TclIncDir /usr/local/include
+#else
+#define TclIncDir
+#endif
+#endif
+#ifndef TclLibrary
+#ifdef HasTcl
+#define TclLibrary Concat(-L,$(TCLLIBDIR)) Concat(-l,$(TCLLIBNAME))
+#else
+#define TclLibrary
+#endif
+#endif
+#ifndef NeedConstPrototypes
+#define NeedConstPrototypes	NO
+#endif
+#ifndef NeedVarargsPrototypes
+#define NeedVarargsPrototypes	NO
+#endif
+#ifndef NeedNestedPrototypes
+#define NeedNestedPrototypes	NO
+#endif
+#ifndef NeedFunctionPrototypes
+#define NeedFunctionPrototypes (NeedVarargsPrototypes || NeedNestedPrototypes)
+#endif
+#ifndef NeedWidePrototypes
+#define NeedWidePrototypes	YES	/* mix and match ANSI-C, non-ANSI */
+#endif
+
+#ifndef StripInstalledPrograms
+#define StripInstalledPrograms NO	/* leave symbol table just in case */
+#endif
+#ifndef UseCCMakeDepend			/* use slow cc -E script */
+#define UseCCMakeDepend NO
+#endif
+#ifndef UseGccMakeDepend		/* use slowish but correct gcc -M */
+#define UseGccMakeDepend NO
+#endif
+
+/* DefaultUsrBin is independent of ProjectRoot.
+   This is a directory where programs will be found even if PATH
+   is not set, for example when coming in remotely via rsh. */
+#ifndef DefaultUsrBin
+#define	DefaultUsrBin /usr/bin
+#endif
+
+#ifndef UsrLibDir
+#ifdef ProjectRoot
+#define UsrLibDir Concat(ProjectRoot,/lib)
+#ifndef AlternateUsrLibDir
+#define AlternateUsrLibDir YES
+#endif
+#else
+#define UsrLibDir /usr/lib
+#ifndef AlternateUsrLibDir
+#define AlternateUsrLibDir NO
+#endif
+#endif
+#else
+#ifndef AlternateUsrLibDir
+#define AlternateUsrLibDir YES
+#endif
+#endif
+#ifndef VarLibDir
+#ifdef ProjectVar
+#define VarLibDir Concat(ProjectVar,/lib)
+#else
+#define VarLibDir /var/lib
+#endif
+#endif
+
+#ifndef ShLibDir
+#define ShLibDir UsrLibDir
+#endif
+#ifndef IncRoot
+#ifdef ProjectRoot
+#define IncRoot Concat(ProjectRoot,/include)
+#ifndef AlternateIncRoot
+#define AlternateIncRoot YES
+#endif
+#else
+#define IncRoot /usr/include
+#ifndef AlternateIncRoot
+#define AlternateIncRoot NO
+#endif
+#endif
+#else
+#ifndef AlternateIncRoot
+#define AlternateIncRoot YES
+#endif
+#endif
+#ifndef LintlibDir
+#define LintlibDir $(USRLIBDIR)/lint
+#endif
+#ifndef SystemManDirectory
+#if SystemV4
+#define SystemManDirectory /usr/share/man
+#else
+#define SystemManDirectory /usr/man
+#endif
+#endif
+#ifndef ManDirectoryRoot
+#ifdef ProjectRoot
+#define ManDirectoryRoot Concat(ProjectRoot,/man)
+#else
+#define ManDirectoryRoot SystemManDirectory
+#endif
+#endif
+#ifndef ManPath
+#define ManPath ManDirectoryRoot
+#endif
+#ifndef ManSourcePath
+#define ManSourcePath $(MANPATH)/man
+#endif
+#ifndef ManDir
+#define ManDir $(MANSOURCEPATH)$(MANSUFFIX)
+#endif
+#ifndef LibmanDir
+#define LibmanDir $(MANSOURCEPATH)$(LIBMANSUFFIX)
+#endif
+#ifndef FileManDir
+#define FileManDir $(MANSOURCEPATH)$(FILEMANSUFFIX)
+#endif
+#ifndef ConfigSrc
+#define ConfigSrc $(TOP)/config
+#endif
+#ifndef DependDir
+#if UseCCMakeDepend || UseGccMakeDepend
+#define DependDir $(CONFIGSRC)/util
+#else
+#define DependDir $(CONFIGSRC)/makedepend
+#endif
+#endif
+#ifndef UNCOMPRESSPATH
+#define UNCOMPRESSPATH /usr/ucb/uncompress
+#endif
+#ifndef OptimizedCDebugFlags
+#define OptimizedCDebugFlags -O
+#endif
+#ifndef OptimizedCplusplusDebugFlags
+#define OptimizedCplusplusDebugFlags OptimizedCDebugFlags
+#endif
+#ifndef DebuggableCDebugFlags
+#define DebuggableCDebugFlags -g
+#endif
+#ifndef DebuggableCplusplusDebugFlags
+#define DebuggableCplusplusDebugFlags DebuggableCDebugFlags
+#endif
+#ifndef ProfiledCDebugFlags
+#define ProfiledCDebugFlags -pg
+#endif
+#ifndef ProfiledCplusplusDebugFlags
+#define ProfiledCplusplusDebugFlags ProfiledCDebugFlags
+#endif
+#ifndef NoOpCDebugFlags
+#define NoOpCDebugFlags /**/
+#endif
+#ifndef DefaultCDebugFlags
+#define DefaultCDebugFlags OptimizedCDebugFlags
+#endif
+#ifndef DefaultCplusplusDebugFlags
+#define DefaultCplusplusDebugFlags OptimizedCplusplusDebugFlags
+#endif
+#ifndef DefaultCCOptions
+#define DefaultCCOptions /* floating point, etc. */
+#endif
+#ifndef DefaultCplusplusOptions
+#define DefaultCplusplusOptions /* floating point, etc. */
+#endif
+#ifndef NoRConst
+#define NoRConst NO /* YES if const for structs of funcs is bad */
+#endif
+#ifndef InstPgmFlags
+#define InstPgmFlags -s
+#endif
+#ifndef InstBinFlags
+#define InstBinFlags -m 0755
+#endif
+#ifndef InstUidFlags
+#define InstUidFlags -m 4711
+#endif
+#ifndef InstLibFlags
+#define InstLibFlags -m 0644
+#endif
+#ifndef InstIncFlags
+#define InstIncFlags -m 0444
+#endif
+#ifndef InstManFlags
+#define InstManFlags -m 0444
+#endif
+#ifndef InstDatFlags
+#define InstDatFlags -m 0444
+#endif
+#ifndef InstKmemFlags     /* put -g kmem -m 2711 in site.def... */
+#define InstKmemFlags InstUidFlags
+#endif
+#ifndef ParallelMakeFlags
+#define ParallelMakeFlags /**/
+#endif
+#ifndef ArCmdBase
+#define ArCmdBase ar
+#endif
+#ifndef ArCmd
+#if HasLargeTmp || SystemV4
+#define ArCmd ArCmdBase cq
+#else
+#define ArCmd ArCmdBase clq
+#endif
+#endif
+#ifndef ArAddCmd
+#if HasLargeTmp || SystemV4
+#define ArAddCmd ArCmdBase ru
+#else
+#define ArAddCmd ArCmdBase rul
+#endif
+#endif
+#ifndef ArExtCmd
+#if HasLargeTmp || SystemV4
+#define ArExtCmd ArCmdBase x
+#else
+#define ArExtCmd ArCmdBase xl
+#endif
+#endif
+#ifndef BootstrapCFlags
+#define BootstrapCFlags /**/
+#endif
+#ifndef HasGcc2
+#define HasGcc2 NO
+#endif
+#ifndef HasGcc
+#define HasGcc HasGcc2
+#endif
+#ifndef HasGcc2ForCplusplus
+#define HasGcc2ForCplusplus NO
+#endif
+#ifndef HasCenterLineC
+#define HasCenterLineC NO
+#endif
+#ifndef HasCenterLineCplusplus
+#define HasCenterLineCplusplus NO
+#endif
+#ifndef CcCmd
+#if HasGcc2
+#define CcCmd gcc -fpcc-struct-return 
+#else
+#if HasGcc
+#define CcCmd gcc -fstrength-reduce -fpcc-struct-return 
+#else
+#if HasCenterLineC
+#define CcCmd clcc
+#else
+#define CcCmd cc
+#endif
+#endif
+#endif
+#endif
+#ifndef CplusplusCmd
+#if HasGcc2ForCplusplus
+#define CplusplusCmd g++
+#else
+#define CplusplusCmd CC
+#endif
+#endif
+#ifndef CplusplusFilt
+# define CplusplusFilt	c++filt
+#endif
+#ifndef CplusplusLibC
+#define CplusplusLibC /**/
+#endif
+#ifndef CplusplusStandardDefines
+#define CplusplusStandardDefines StandardDefines
+#endif
+#ifndef CplusplusExtraDefines
+#define CplusplusExtraDefines /**/
+#endif
+#ifndef CplusplusExtraIncludes
+#define CplusplusExtraIncludes /**/
+#endif
+#ifndef CplusplusDependIncludes
+#define CplusplusDependIncludes /**/
+#endif
+#ifndef CplusplusOptions
+#define CplusplusOptions /**/
+#endif
+#ifndef CplusplusSpecialOptions
+#define CplusplusSpecialOptions /**/
+#endif
+#if HasFortran
+#ifndef FortranCmd
+#define FortranCmd f77
+#endif
+#ifndef FortranFlags
+#define FortranFlags /**/
+#endif
+#ifndef FortranDebugFlags	/* for -O or -g */
+#define FortranDebugFlags /**/
+#endif
+#endif
+#ifndef AsCmd
+#define AsCmd as
+#endif
+#ifndef CompressCmd
+#define CompressCmd compress
+#endif
+#ifndef GzipCmd
+#define GzipCmd gzip
+#endif
+#ifndef CppCmd
+#define CppCmd /lib/cpp
+#endif
+#ifndef CppNoLineInfoOption
+#define CppNoLineInfoOption /**/
+#endif
+#ifndef PreProcessCmd
+#define PreProcessCmd CcCmd -E
+#endif
+#ifndef InstallCmd		/* hack should be in project */
+#if SystemV || SystemV4
+#ifdef UseInstalled		/* assume BINDIR in path */
+#define InstallCmd bsdinst
+#else
+#define InstallCmd $(SHELL) $(CONFIGSRC)/util/bsdinst.sh
+#endif
+#else
+#define InstallCmd install
+#endif
+#endif
+#ifndef InstallFlags
+#define InstallFlags -c
+#endif
+#ifndef LdCmd
+#define LdCmd ld
+#endif
+#ifndef LexCmd
+#define LexCmd lex
+#endif
+#ifndef LexLib
+#define LexLib -ll
+#endif
+#ifndef YaccCmd
+#define YaccCmd yacc
+#endif
+#ifndef CplusplusYaccCmd
+#define CplusplusYaccCmd YaccCmd
+#endif
+#ifndef LintCmd
+#define LintCmd lint
+#endif
+#ifndef LintLibFlag
+#if SystemV || SystemV4
+#define LintLibFlag -o
+#else
+#define LintLibFlag -C
+#endif
+#endif
+#ifndef LintOpts
+#if SystemV || SystemV4
+#define LintOpts -bh
+#else
+#define LintOpts -axz
+#endif
+#endif
+#ifndef CpCmd
+#define CpCmd cp
+#endif
+#ifndef LnCmd /* can use cp instead of ln if necessary */
+#if HasSymLinks
+#define LnCmd ln -s
+#else
+#define LnCmd ln
+#endif
+#endif
+#ifndef MakeCmd
+#define MakeCmd make
+#endif
+#ifndef MvCmd
+#define MvCmd mv -f
+#endif
+#ifndef RanlibCmd
+#define RanlibCmd ranlib
+#endif
+#ifndef RanlibInstFlags
+#define RanlibInstFlags /**/
+#endif
+#ifndef RmCmd
+#define RmCmd rm -f
+#endif
+#ifndef StandardIncludes	/* for platform-specifics */
+#define StandardIncludes /**/
+#endif
+#ifndef StandardDefines
+#if SystemV
+#define StandardDefines -DSYSV
+#else
+#if SystemV4
+#define StandardDefines -DSVR4
+#else
+#define StandardDefines /**/
+#endif
+#endif
+#endif
+#ifndef StandardCppDefines
+#define StandardCppDefines StandardDefines
+#endif
+#ifndef Malloc0ReturnsNull
+#if UseGnuMalloc
+#define Malloc0ReturnsNull YES
+#else
+#define Malloc0ReturnsNull NO
+#endif
+#endif
+#if Malloc0ReturnsNull
+#ifndef Malloc0ReturnsNullDefines
+#define Malloc0ReturnsNullDefines -DMALLOC_0_RETURNS_NULL
+#endif
+#endif
+#ifndef ToolkitStringsABIOptions
+#define ToolkitStringsABIOptions /**/
+#endif
+#ifndef NdbmDefines
+#if HasNdbm
+#define NdbmDefines -DNDBM
+#else
+#define NdbmDefines /**/
+#endif
+#endif
+#ifndef LdPreLib
+#if !defined(UseInstalled)
+#define LdPreLib -L$(BUILDLIBDIR)
+#else
+#if AlternateUsrLibDir
+#define LdPreLib -L$(USRLIBDIR)
+#else
+#define LdPreLib /**/
+#endif
+#endif
+#endif
+#ifndef LdPostLib
+#if !defined(UseInstalled) && AlternateUsrLibDir && !HasLdRunPath
+#define LdPostLib -L$(USRLIBDIR)
+#else
+#define LdPostLib /**/
+#endif
+#endif
+#ifndef MathLibrary
+#define MathLibrary -lm
+#endif
+#ifndef DBMLibrary
+#define DBMLibrary -ldbm
+#endif
+#ifndef DlLibrary
+#define DlLibrary -ldl
+#endif
+#ifndef ExtraLibraries
+#if SystemV4
+#if HasSockets
+#define ExtraLibraries -lsocket -lnsl -lw
+#else
+#define ExtraLibraries -lnsl -lw
+#endif
+#else
+#define ExtraLibraries /**/
+#endif
+#endif
+#ifndef ExtraLoadOptions
+#define ExtraLoadOptions /**/
+#endif
+#ifndef ExtraLoadFlags
+#define ExtraLoadFlags /**/
+#endif
+#ifndef LdCombineFlags
+#if SystemV4
+#define LdCombineFlags -r
+#else
+#define LdCombineFlags -X -r
+#endif
+#endif
+#ifndef LdStripFlags
+#define LdStripFlags -x
+#endif
+#ifndef TagsCmd
+#define TagsCmd ctags
+#endif
+#ifndef LoaderLibPrefix
+#define LoaderLibPrefix /**/
+#endif
+#ifndef ImakeCmd
+#ifdef UseInstalled		/* assume BINDIR in path */
+#define ImakeCmd imake
+#else
+#define ImakeCmd $(IMAKESRC)/imake
+#endif
+#endif
+#ifndef DependCmd
+#if UseGccMakeDepend
+#ifdef UseInstalled		/* assume BINDIR in path */
+#define DependCmd gccmakedep
+#else
+#define DependCmd $(DEPENDSRC)/gccmakedep
+#endif
+#else
+#ifdef UseInstalled		/* assume BINDIR in path */
+#define DependCmd makedepend
+#else
+#define DependCmd $(DEPENDSRC)/makedepend
+#endif
+#endif
+#endif
+#ifndef DependFlags
+#define DependFlags /**/
+#endif
+#ifndef DependFileName
+#if !HasBsdMake
+#define DependFileName Makefile.dep
+#else
+#define DependFileName .depend
+#endif
+#endif
+#ifndef ExportListCmd
+# ifndef ExportListGenSource
+#  define ExportListCmd		/**/
+# else
+#  if !defined(UseInstalled)
+#   define ExportListCmd		$(CONFIGSRC)/util/exportlistgen
+#  else
+#   define ExportListCmd		exportlistgen
+#  endif
+# endif
+#endif
+#ifndef MkdirHierCmd
+#ifdef UseInstalled		/* assume BINDIR in path */
+#define MkdirHierCmd mkdirhier
+#else
+#define MkdirHierCmd $(SHELL) $(CONFIGSRC)/util/mkdirhier.sh
+#endif
+#endif
+#ifndef TroffCmd
+#define TroffCmd psroff
+#endif
+#ifndef NroffCmd
+#define NroffCmd nroff
+#endif
+#ifndef MsMacros
+#define MsMacros -ms
+#endif
+#ifndef ManMacros
+#define ManMacros -man
+#endif
+#ifndef TblCmd
+#define TblCmd tbl
+#endif
+#ifndef EqnCmd
+#define EqnCmd eqn
+#endif
+#ifndef NeqnCmd
+#define NeqnCmd neqn
+#endif
+#ifndef ColCmd
+#define ColCmd col
+#endif
+#ifndef DvipsCmd
+#define DvipsCmd dvips
+#endif
+#ifndef LatexCmd
+#define LatexCmd latex
+#endif
+#if HasSentinel
+#ifndef SentinelCmd
+#define SentinelCmd sentinel
+#endif
+#ifndef SentinelOptions
+#define SentinelOptions /**/
+#endif
+#endif
+#if HasPurify
+#ifndef PurifyCmd
+#define PurifyCmd purify
+#endif
+#ifndef PurifyOptions
+#define PurifyOptions /**/
+#endif
+#endif
+#if HasTestCenter
+#ifndef ProofCmd
+#define ProofCmd proof
+#endif
+#ifndef ProofOptions
+#define ProofOptions /**/
+#endif
+#endif
+#ifndef PathSeparator
+#define PathSeparator /
+#endif
+#ifndef Osuf
+#define Osuf o
+#endif
+#ifndef CCsuf
+#define CCsuf cc
+#endif
+#ifndef SHsuf
+#define SHsuf sh
+#endif
+#ifndef ManSuffix
+#define ManSuffix	n		/* use just one tab or cpp will die */
+#endif
+#ifndef LibManSuffix
+#define LibManSuffix	3		/* use just one tab or cpp will die */
+#endif
+#ifndef FileManSuffix
+#if SystemV || SystemV4 || defined(OSF1Architecture)
+#define FileManSuffix	4		/* use just one tab or cpp will die */
+#else
+#define FileManSuffix	5		/* use just one tab or cpp will die */
+#endif
+#endif
+#ifndef ExpandManNames
+#if SystemV
+#define ExpandManNames NO
+#else
+#define ExpandManNames YES
+#endif
+#endif
+#ifndef TOPDIR
+#define TOPDIR .
+#endif
+#ifndef CURDIR
+#define CURDIR .
+#endif
+#ifndef SiteIConfigFiles
+#define SiteIConfigFiles /**/
+#endif
+#ifndef OtherIConfigFiles
+#define OtherIConfigFiles /**/
+#endif
+#ifndef ExtraFilesToClean
+#define ExtraFilesToClean /**/
+#endif
+#ifndef FilesToClean
+#define FilesToClean *.CKP *.ln *.BAK *.bak *.Osuf core errs ,* *~ *.a .emacs_* tags TAGS make.log MakeOut 
+#endif
+
+          PATHSEP = PathSeparator
+            SHELL = BourneShell
+
+              TOP = TOPDIR
+      CURRENT_DIR = CURDIR
+
+            IMAKE = ImakeCmd
+           DEPEND = DependCmd
+        MKDIRHIER = MkdirHierCmd
+    EXPORTLISTGEN = ExportListCmd
+        CONFIGSRC = ConfigSrc
+         IMAKESRC = $(CONFIGSRC)/imake
+        DEPENDSRC = DependDir
+
+          INCROOT = IncRoot		/* base of where to put header files */
+        USRLIBDIR = UsrLibDir		/* nonshared libraries */
+        VARLIBDIR = VarLibDir		/* xdm runtime files */
+         SHLIBDIR = ShLibDir            /* shared libraries */
+       LINTLIBDIR = LintlibDir		/* lint libraries */
+          MANPATH = ManPath		/* top of manual page tree */
+    MANSOURCEPATH = ManSourcePath	/* prefix for man page sources */
+           MANDIR = ManDir		/* man pages for commands */
+        LIBMANDIR = LibmanDir		/* man pages for library routines */
+       FILEMANDIR = FileManDir		/* man pages for config files */
+
+               AR = ArCmd
+  BOOTSTRAPCFLAGS = BootstrapCFlags	/* set if cpp does not have uniq sym */
+               CC = CcCmd
+               AS = AsCmd
+#if HasFortran
+               FC = FortranCmd
+      FDEBUGFLAGS = FortranDebugFlags
+          FCFLAGS = FortranFlags $(FDEBUGFLAGS)
+#endif
+#if HasCplusplus
+
+.SUFFIXES: .CCsuf
+
+              CXX = CplusplusCmd
+          CXXFILT = CplusplusFilt
+           CXXLIB = CplusplusLibC
+    CXXDEBUGFLAGS = DefaultCplusplusDebugFlags
+CXXDEPENDINCLUDES = CplusplusDependIncludes
+ CXXEXTRA_DEFINES = CplusplusExtraDefines
+CXXEXTRA_INCLUDES = CplusplusExtraIncludes
+   CXXSTD_DEFINES = CplusplusStandardDefines $(CXXPROJECT_DEFINES)
+       CXXOPTIONS = CplusplusOptions
+      CXXINCLUDES = $(INCLUDES) $(TOP_INCLUDES) $(CXXEXTRA_INCLUDES) 
+       CXXDEFINES = $(CXXINCLUDES) $(CXXSTD_DEFINES) $(THREADS_CXXDEFINES) $(CXXEXTRA_DEFINES) $(DEFINES)
+         CXXFLAGS = $(CXXDEBUGFLAGS) $(CXXOPTIONS) $(THREADS_CXXFLAGS) $(CXXDEFINES)
+#endif
+         COMPRESS = CompressCmd
+          GZIPCMD = GzipCmd
+              CPP = CppCmd $(STD_CPP_DEFINES)		/* simple filters */
+    PREPROCESSCMD = PreProcessCmd $(STD_CPP_DEFINES)	/* prefered; mdep */
+          INSTALL = InstallCmd
+     INSTALLFLAGS = InstallFlags
+               LD = LdCmd
+              LEX = LexCmd
+           LEXLIB = LexLib
+             YACC = YaccCmd
+           CCYACC = CplusplusYaccCmd
+             LINT = LintCmd
+      LINTLIBFLAG = LintLibFlag
+         LINTOPTS = LintOpts
+               LN = LnCmd
+             MAKE = MakeCmd
+               MV = MvCmd
+               CP = CpCmd
+#if DoRanlibCmd
+           RANLIB = RanlibCmd
+  RANLIBINSTFLAGS = RanlibInstFlags
+#endif
+               RM = RmCmd
+        MANSUFFIX = ManSuffix		/* suffix for command man pages */
+     LIBMANSUFFIX = LibManSuffix	/* suffix for library man pages */
+    FILEMANSUFFIX = FileManSuffix	/* suffix for config file man pages */
+            TROFF = TroffCmd
+            NROFF = NroffCmd
+         MSMACROS = MsMacros
+        MANMACROS = ManMacros
+              TBL = TblCmd
+              EQN = EqnCmd
+             NEQN = NeqnCmd
+              COL = ColCmd
+#if HasLatex
+            DVIPS = DvipsCmd
+            LATEX = LatexCmd
+#endif
+#if HasSentinel
+         SENTINEL = SentinelCmd
+  SENTINELOPTIONS = SentinelOptions
+#endif
+#if HasPurify
+           PURIFY = PurifyCmd
+    PURIFYOPTIONS = PurifyOptions
+#endif
+#if HasTestCenter
+           PROOF = ProofCmd
+    PROOFOPTIONS = ProofOptions
+#endif
+     STD_INCLUDES = StandardIncludes
+  STD_CPP_DEFINES = StandardCppDefines $(PROJECT_DEFINES)
+      STD_DEFINES = StandardDefines $(PROJECT_DEFINES)
+ EXTRA_LOAD_FLAGS = ExtraLoadFlags
+  EXTRA_LDOPTIONS = ExtraLoadOptions
+  EXTRA_LIBRARIES = MallocLibraries ExtraLibraries Krb5Libraries
+             TAGS = TagsCmd
+#if ConstructMFLAGS
+           MFLAGS = -$(MAKEFLAGS)
+#endif
+#if ConstructMAKEFLAGS
+        MAKEFLAGS = $(MFLAGS)
+#endif
+   PARALLELMFLAGS = ParallelMakeFlags
+#if HasSharedLibraries
+    SHAREDCODEDEF = SharedCodeDef
+         SHLIBDEF = SharedLibraryDef
+#ifdef SharedLibraryLoadFlags
+     SHLIBLDFLAGS = SharedLibraryLoadFlags
+#endif
+/*
+ * Here we set up flags needed to produce position-independent code 
+ * when doing C and C++ compilation.  The default if you specify C
+ * PIC flags without also specifying C++ PIC flags is to assume that 
+ * the C flags work for both.  If your C++ compiler requires different
+ * flags, specify them explicitly in PositionIndependentCplusplusFlags.
+ */
+#ifdef PositionIndependentCFlags
+         PICFLAGS = PositionIndependentCFlags
+#endif
+#ifdef PositionIndependentCplusplusFlags
+      CXXPICFLAGS = PositionIndependentCplusplusFlags
+#else
+#ifdef PositionIndependentCFlags
+      CXXPICFLAGS = PositionIndependentCFlags
+#endif
+#endif
+#endif
+#if !HasVoidSignalReturn
+   SIGNAL_DEFINES = -DSIGNALRETURNSINT
+#endif
+/*
+ * The following supports forcing of function prototypes
+ */
+#if NeedFunctionPrototypes && NeedVarargsPrototypes && NeedConstPrototypes && NeedNestedPrototypes
+#define _funcprotodef -DFUNCPROTO=15
+#else
+#if NeedFunctionPrototypes && NeedVarargsPrototypes && NeedNestedPrototypes
+#define _funcprotodef -DFUNCPROTO=11
+#else
+#if NeedFunctionPrototypes && NeedNestedPrototypes
+#define _funcprotodef -DFUNCPROTO=9
+#else
+#if NeedFunctionPrototypes && NeedVarargsPrototypes && NeedConstPrototypes
+#define _funcprotodef -DFUNCPROTO=7
+#else
+#if NeedFunctionPrototypes && NeedConstPrototypes
+#define _funcprotodef -DFUNCPROTO=5
+#else
+#if NeedFunctionPrototypes && NeedVarargsPrototypes
+#define _funcprotodef -DFUNCPROTO=3
+#else
+#if NeedFunctionPrototypes
+#define _funcprotodef -DFUNCPROTO
+#else
+#define _funcprotodef /**/
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+#if NeedWidePrototypes
+#define _wideprotodef /**/
+#else
+#define _wideprotodef -DNARROWPROTO
+#endif
+    PROTO_DEFINES = _funcprotodef _wideprotodef 
+#undef _funcprotodef
+#undef _wideprotodef
+
+#if StripInstalledPrograms
+     INSTPGMFLAGS = InstPgmFlags	/* install flags for stripping */
+#else
+     INSTPGMFLAGS = 
+#endif
+     INSTBINFLAGS = InstBinFlags	/* install flags for programs */
+     INSTUIDFLAGS = InstUidFlags	/* install flags for setuid programs */
+     INSTLIBFLAGS = InstLibFlags	/* install flags for libraries */
+     INSTINCFLAGS = InstIncFlags	/* install flags for headers */
+     INSTMANFLAGS = InstManFlags	/* install flags for man pages */
+     INSTDATFLAGS = InstDatFlags	/* install flags for data files */
+    INSTKMEMFLAGS = InstKmemFlags	/* install flags for /dev/kmem progs */
+
+#ifdef ProjectRoot
+      PROJECTROOT = ProjectRoot
+#endif
+#ifdef UseInstalled
+# if AlternateIncRoot
+#  define TopInclude	-I$(INCROOT)
+# else
+#  define TopInclude	/**/
+# endif
+#else
+# define TopInclude	-I$(TOP)
+#endif
+      CDEBUGFLAGS = DefaultCDebugFlags
+        CCOPTIONS = DefaultCCOptions	/* to distinguish from param flags */
+/*
+ * STD_INCLUDES contains system-specific includes
+ * TOP_INCLUDES specifies how to get to /usr/include or its build substitute
+ * EXTRA_INCLUDES contains project-specific includes set in project incfiles
+ * INCLUDES contains client-specific includes set in Imakefile
+ * LOCAL_LDFLAGS contains client-specific ld flags flags set in Imakefile
+ */
+      ALLINCLUDES = $(INCLUDES) $(EXTRA_INCLUDES) $(TOP_INCLUDES) $(STD_INCLUDES)
+       ALLDEFINES = $(ALLINCLUDES) $(STD_DEFINES) $(EXTRA_DEFINES) $(PROTO_DEFINES) $(THREADS_DEFINES) $(DEFINES)
+           CFLAGS = $(CDEBUGFLAGS) $(CCOPTIONS) $(THREADS_CFLAGS) $(ALLDEFINES)
+        LINTFLAGS = $(LINTOPTS) -DLINT $(ALLDEFINES) $(DEPEND_DEFINES)
+         LDPRELIB = LdPreLib
+        LDPOSTLIB = LdPostLib
+        LDOPTIONS = $(CDEBUGFLAGS) $(CCOPTIONS)  $(EXTRA_LDOPTIONS) $(THREADS_LDFLAGS) $(LOCAL_LDFLAGS) $(LDPRELIBS)
+     CXXLDOPTIONS = $(CXXDEBUGFLAGS) $(CXXOPTIONS) $(EXTRA_LDOPTIONS) $(THREADS_CXXLDFLAGS) $(LOCAL_LDFLAGS) $(LDPRELIBS)
+
+           LDLIBS = $(LDPOSTLIBS) $(THREADS_LIBS) $(SYS_LIBRARIES) $(EXTRA_LIBRARIES)
+#if HasBrokenCCForLink
+           CCLINK = LdCmd
+#else
+#if AlternateUsrLibDir && HasLdRunPath
+       CCENVSETUP = LD_RUN_PATH=$(USRLIBDIRPATH)
+           CCLINK = $(CCENVSETUP) $(CC)
+#else
+           CCLINK = $(CC)
+#endif
+#endif
+#if AlternateUsrLibDir && HasLdRunPath
+      CXXENVSETUP = LD_RUN_PATH=$(USRLIBDIRPATH)
+          CXXLINK = $(CXXENVSETUP) $(CXX)
+#else
+          CXXLINK = $(CXX)
+#endif
+     LDSTRIPFLAGS = LdStripFlags
+   LDCOMBINEFLAGS = LdCombineFlags
+      DEPENDFLAGS = DependFlags
+
+XCOMM Not sure this belongs here
+         TKLIBDIR = TkLibDir
+         TKINCDIR = TkIncDir
+        TKLIBNAME = TkLibName
+        TKLIBRARY = TkLibrary
+        TCLLIBDIR = TclLibDir
+        TCLINCDIR = TclIncDir
+       TCLLIBNAME = TclLibName
+       TCLLIBRARY = TclLibrary
+
+        MACROFILE = MacroFile
+           RM_CMD = $(RM)
+
+    IMAKE_DEFINES = /* leave blank, for command line use only */
+#ifdef UseInstalled
+         IRULESRC = $(CONFIGDIR)	/* used in rules file */
+        IMAKE_CMD = $(IMAKE) -DUseInstalled -I$(IRULESRC) $(IMAKE_DEFINES)
+#else
+         IRULESRC = $(CONFIGSRC)/cf
+        IMAKE_CMD = $(IMAKE) -I$(IRULESRC) $(IMAKE_DEFINES)
+#endif
+#if !HasClearmake
+     /* clearmake records relevant defines and flags in the build script,
+	so it knows when they change and we don't need this coarser-level
+	dependency.  We also don't want it, since it prevents sharing if
+	even one config file, say site.def or host.def, changes. */
+     ICONFIGFILES = $(IRULESRC)/Imake.tmpl $(IRULESRC)/X11.tmpl \
+			$(IRULESRC)/site.def $(IRULESRC)/$(MACROFILE) \
+			OtherIConfigFiles SiteIConfigFiles $(EXTRA_ICONFIGFILES)
+#endif
+
+#ifndef TopLevelProject
+# define TopLevelProject	X11
+#endif
+#ifndef ProjectRulesFile
+# define ProjectRulesFile	Concat3(<,TopLevelProject,.rules>)
+#endif
+#include ProjectRulesFile
+#ifndef LocalRulesFile
+/* need this to make ANSI-style preprocessors happy */
+#define LocalRulesFile <noop.rules>
+#endif
+#include LocalRulesFile
+
+/*
+ * get project-specific configuration and rules
+ */
+#ifndef ProjectTmplFile
+#define ProjectTmplFile		Concat3(<,TopLevelProject,.tmpl>)
+#endif
+#include ProjectTmplFile
+#ifndef LocalTmplFile
+/* need this to make ANSI-style preprocessors happy */
+#define LocalTmplFile <noop.rules>
+#endif
+#include LocalTmplFile
+
+#ifdef FixupLibReferences
+FixupLibReferences()
+#endif
+
+/* ConfigDir comes from X11.tmpl */
+        CONFIGDIR = ConfigDir		/* build configuration information */
+#if HasClearmake
+           OSNAME = OSName
+#endif
+    USRLIBDIRPATH = UsrLibDirPath
+        LDPRELIBS = LdPreLibs
+       LDPOSTLIBS = LdPostLibs
+     TOP_INCLUDES = TopIncludes
+  PROJECT_DEFINES = ProjectDefines
+#if HasCplusplus
+CXXPROJECT_DEFINES = CplusplusProjectDefines
+#endif
+
+XCOMM ----------------------------------------------------------------------
+XCOMM start of Imakefile
+#include INCLUDE_IMAKEFILE
+
+XCOMM ----------------------------------------------------------------------
+XCOMM common rules for all Makefiles - do not edit
+
+.c.i:
+	CPPOnlyCompile($*.c,$(_NOOP_))
+/*
+ * These need to be here so that rules in Imakefile occur first;  the blank
+ * emptyrule is to make sure that an empty Imakefile does not default to make
+ * clean.
+ */
+emptyrule::
+
+CleanTarget()
+
+#ifndef IHaveSpecialMakefileTarget
+MakefileTarget()
+#endif
+
+TagsTarget()
+#ifdef MakefileAdditions
+MakefileAdditions()
+#endif
+
+CenterLoadTarget(debug_src,$(SRCS),NullParameter,$(ALLDEFINES))
+
+CenterLoadTarget(debug_obj,$(OBJS),NullParameter,$(ALLDEFINES))
+
+ManKeywordsTarget($(MANPATH))
+
+#ifdef IHaveSubdirs
+XCOMM ----------------------------------------------------------------------
+XCOMM rules for building in SUBDIRS - do not edit
+
+InstallSubdirs($(SUBDIRS))
+InstallManSubdirs($(SUBDIRS))
+InstallLinkKitSubdirs($(SUBDIRS))
+CleanSubdirs($(SUBDIRS))
+TagSubdirs($(SUBDIRS))
+MakefileSubdirs($(SUBDIRS))
+IncludesSubdirs($(SUBDIRS))
+
+#endif
+
+/* must be after all install.man rules that install anything */
+#if MakeManKeywords		/* typically only at top level */
+install.man:: man_keywords
+#endif
+
+#ifndef IHaveSubdirs
+XCOMM ----------------------------------------------------------------------
+XCOMM empty rules for directories that do not have SUBDIRS - do not edit
+
+install::
+	@echo "install in $(CURRENT_DIR) done"
+
+install.man::
+	@echo "install.man in $(CURRENT_DIR) done"
+
+install.linkkit::
+	@echo "install.linkkit in $(CURRENT_DIR) done"
+
+Makefiles::
+
+includes::
+
+depend::
+
+#endif /* if subdirectory rules are needed */
+
+XCOMM ----------------------------------------------------------------------
+XCOMM dependencies generated by makedepend
+IncludeMakefile(DependFileName)

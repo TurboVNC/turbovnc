@@ -1,0 +1,50 @@
+XCOMM platform:  $XConsortium: cray.cf /main/52 1996/09/28 16:09:55 rws $
+
+#ifndef OSName
+#define OSName			UNICOS 8.0
+#endif
+XCOMM operating system:  OSName
+#ifndef OSMajorVersion
+#define OSMajorVersion		8
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion		0
+#endif
+
+#define SystemV			YES
+#define Malloc0ReturnsNull	YES
+#define RemoveTargetProgramByMoving YES
+#define ArCmd			bld cr
+#define StandardDefines		-DSYSV -DUSG
+#define ExecableScripts		NO
+#define HasPoll			NO
+#define HasXServer		NO
+#define ConnectionFlags		-DTCPCONN
+#define HasShm			NO
+#define PexNativeFPFormat	PEXCRAY_Floating
+#define NativeFPFormat		CRAY_Float
+#ifdef UseInstalled
+#define InstallCmd              install
+#else
+#define InstallCmd              $(SHELL) $(CONFIGSRC)/util/install.sh
+#endif
+
+#ifdef _CRAY2
+#define DefaultCCOptions	-hpagelm -hlimitlm
+#endif
+
+#if OSMajorVersion >= 6
+#define PreProcessCmd 		/lib/pcpp
+#define CppCmd	 		/lib/pcpp
+#else
+#  if OSMajorVersion == 5
+#  define PreProcessCmd 	/lib/cpp
+#  define CppCmd	 	/lib/cpp
+#  define ExtraLoadFlags        -lnet
+#  endif
+#endif
+
+/* XKB library code does not work here yet */
+#define BuildXKBlib NO
+
+#define MotifDefines		-DNO_REGEX -DNO_REGCOMP

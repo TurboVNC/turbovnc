@@ -1,0 +1,439 @@
+XCOMM $XConsortium: cde.tmpl /main/2 1996/12/04 10:13:09 swick $
+
+/* Include the Motif project template file. */
+#include <Motif.tmpl>
+
+#ifndef _CUse
+# if UseInstalledCDE
+#  define _CUse(a,b) a
+# else
+#  define _CUse(a,b) b
+# endif
+#endif
+
+#ifndef _CUseCat
+# if (defined(__STDC__) && !defined(UnixCpp)) || defined(AnsiCpp)
+#  if UseInstalledCDE
+#   define _CUseCat(a,b,c) a##c
+#  else
+#   define _CUseCat(a,b,c) b##c
+#  endif
+# else
+#  if UseInstalledCDE
+#   define _CUseCat(a,b,c) a/**/c
+#  else
+#   define _CUseCat(a,b,c) b/**/c
+#  endif
+# endif
+#endif
+
+#ifndef CDETop
+# if ImportCDE
+#  define CDETop $(TOP)/imports/cde
+# else
+#  define CDETop $(TOP)
+# endif
+#endif
+
+#define CDESharedRev		2.1
+
+#ifndef SharedLibPam
+# define SharedLibPam		HasSharedLibraries
+#endif
+#ifndef NormalLibPam
+# define NormalLibPam		(!SharedLibPam | ForceNormalLib)
+#endif
+#ifndef DebugLibPam
+# define DebugLibPam		NO
+#endif
+#ifndef ProfileLibPam
+# define ProfileLibPam		NO
+#endif
+#ifndef SharedPamRev
+# define SharedPamRev		CDESharedRev
+#endif
+
+#ifndef SharedLibTt
+# define SharedLibTt		HasSharedLibraries
+#endif
+#ifndef NormalLibTt
+# define NormalLibTt		(!SharedLibTt | ForceNormalLib)
+#endif
+#ifndef DebugLibTt
+# define DebugLibTt		NO
+#endif
+#ifndef ProfileLibTt
+# define ProfileLibTt		NO
+#endif
+#ifndef SharedTtRev
+# define SharedTtRev		CDESharedRev
+#endif
+
+#ifndef SharedLibDtSvc
+# define SharedLibDtSvc		HasSharedLibraries
+#endif
+#ifndef NormalLibDtSvc
+# define NormalLibDtSvc		(!SharedLibDtSvc | ForceNormalLib)
+#endif
+#ifndef DebugLibDtSvc
+# define DebugLibDtSvc		NO
+#endif
+#ifndef ProfileLibDtSvc
+# define ProfileLibDtSvc	NO
+#endif
+#ifndef SharedDtSvcRev
+# define SharedDtSvcRev		CDESharedRev
+#endif
+
+#ifndef SharedLibDtSearch
+# define SharedLibDtSearch	HasSharedLibraries
+#endif
+#ifndef NormalLibDtSearch
+# define NormalLibDtSearch	(!SharedLibDtSearch | ForceNormalLib)
+#endif
+#ifndef DebugLibDtSearch
+# define DebugLibDtSearch	NO
+#endif
+#ifndef ProfileLibDtSearch
+# define ProfileLibDtSearch	NO
+#endif
+#ifndef SharedDtSearchRev
+# define SharedDtSearchRev	CDESharedRev
+#endif
+
+#ifndef SharedLibDtWidget
+# define SharedLibDtWidget	HasSharedLibraries
+#endif
+#ifndef NormalLibDtWidget
+# define NormalLibDtWidget	(!SharedLibDtWidget | ForceNormalLib)
+#endif
+#ifndef DebugLibDtWidget
+# define DebugLibDtWidget	NO
+#endif
+#ifndef ProfileLibDtWidget
+# define ProfileLibDtWidget	NO
+#endif
+#ifndef SharedDtWidgetRev
+# define SharedDtWidgetRev	CDESharedRev
+#endif
+
+#ifndef SharedLibDtHelp
+# define SharedLibDtHelp	HasSharedLibraries
+#endif
+#ifndef NormalLibDtHelp
+# define NormalLibDtHelp	(!SharedLibDtHelp | ForceNormalLib)
+#endif
+#ifndef DebugLibDtHelp
+# define DebugLibDtHelp		NO
+#endif
+#ifndef ProfileLibDtHelp
+# define ProfileLibDtHelp	NO
+#endif
+#ifndef SharedDtHelpRev
+# define SharedDtHelpRev	CDESharedRev
+#endif
+
+#ifndef SharedLibDtPrint
+# define SharedLibDtPrint	HasSharedLibraries
+#endif
+#ifndef NormalLibDtPrint
+# define NormalLibDtPrint	(!SharedLibDtPrint | ForceNormalLib)
+#endif
+#ifndef DebugLibDtPrint
+# define DebugLibDtPrint	NO
+#endif
+#ifndef ProfileLibDtPrint
+# define ProfileLibDtPrint	NO
+#endif
+#ifndef SharedDtPrintRev
+# define SharedDtPrintRev	CDESharedRev
+#endif
+
+#ifndef SharedLibDtTerm
+# define SharedLibDtTerm	HasSharedLibraries
+#endif
+#ifndef NormalLibDtTerm
+# define NormalLibDtTerm	(!SharedLibDtTerm | ForceNormalLib)
+#endif
+#ifndef DebugLibDtTerm
+# define DebugLibDtTerm		NO
+#endif
+#ifndef ProfileLibDtTerm
+# define ProfileLibDtTerm	NO
+#endif
+#ifndef SharedDtTermRev
+# define SharedDtTermRev	CDESharedRev
+#endif
+
+#ifndef SharedLibDtMrm
+# define SharedLibDtMrm		HasSharedLibraries
+#endif
+#ifndef NormalLibDtMrm
+# define NormalLibDtMrm		(!SharedLibDtMrm | ForceNormalLib)
+#endif
+#ifndef DebugLibDtMrm
+# define DebugLibDtMrm		NO
+#endif
+#ifndef ProfileLibDtMrm
+# define ProfileLibDtMrm	NO
+#endif
+#ifndef SharedDtMrmRev
+# define SharedDtMrmRev		CDESharedRev
+#endif
+
+#ifndef SharedLibDtMmdb
+# define SharedLibDtMmdb	HasSharedLibraries
+#endif
+#ifndef NormalLibDtMmdb
+# define NormalLibDtMmdb	(!SharedLibDtMmdb | ForceNormalLib)
+#endif
+#ifndef DebugLibDtMmdb
+# define DebugLibDtMmdb		NO
+#endif
+#ifndef ProfileLibDtMmdb
+# define ProfileLibDtMmdb	NO
+#endif
+#ifndef SharedDtMmdbRev
+# define SharedDtMmdbRev	CDESharedRev
+#endif
+
+#ifndef SharedLibCsa
+# define SharedLibCsa		HasSharedLibraries
+#endif
+#ifndef NormalLibCsa
+# define NormalLibCsa		(!SharedLibCsa | ForceNormalLib)
+#endif
+#ifndef DebugLibCsa
+# define DebugLibCsa		NO
+#endif
+#ifndef ProfileLibCsa
+# define ProfileLibCsa		NO
+#endif
+#ifndef SharedCsaRev
+# define SharedCsaRev		CDESharedRev
+#endif
+
+#ifndef DtLocalesToBuild
+#define DtLocalesToBuild de_DE.ISO8859-1 es_ES.ISO8859-1 fr_FR.ISO8859-1 it_IT.ISO8859-1 ja_JP.dt-eucJP
+#endif
+
+#ifndef DtCodeGen
+# if UseInstalledCDE
+#  define DtCodeGen dtcodegen
+# else
+#  define DtCodeGen $(CLIENTENVSETUP) $(CDESRC)/dtappbuilder/src/abmf/dtcodegen
+# endif
+#endif
+
+#ifndef BuildCDEDoc
+# define BuildCDEDoc YES
+#endif
+
+#ifndef UseNSGMLS
+# ifdef SunArchitecture
+#  define UseNSGMLS NO
+# else
+#  define UseNSGMLS YES
+# endif
+#endif
+#ifndef SGMLParser
+# if UseNSGMLS
+#  define SGMLDir $(NSGMLSSRC)
+#  define SGMLParser $(NSGMLSSRC)/nsgmls
+# else
+#  define SGMLDir $(SGMLSSRC)
+#  define SGMLParser $(SGMLSSRC)/sgmls
+# endif
+#endif
+
+#ifndef DtInfoGen
+# if UseInstalledCDE
+#  define DtInfoGen dtinfogen
+# else
+#  define DtInfoGen $(CLIENTENVSETUP) $(DTLCXENVSETUP) DTINFO_HOME=$(DTINFOGENSRC) DTINFO_BIN=$(DTINFOGENSRC)/install:$(DTINFOGENSRC)/mmdb/StyleSheet:$(DTINFOGENSRC)/mmdb/src:SGMLDir:$(CDESRC)/dtsr $(DTINFOGENSRC)/infolib/etc/dtinfogen
+# endif
+#endif
+#ifndef DtInfoGenTmpDir
+#  define DtInfoGenTmpDir $(TOP)/doc/tmp
+#endif
+
+#ifndef DtDocBook
+# if UseInstalledCDE
+#  define DtDocBook dtdocbook
+# else
+#  define DtDocBook $(CLIENTENVSETUP) $(DTLCXENVSETUP) $(CDESRC)/dtdocbook/doc2sdl/dtdocbook
+# endif
+#endif
+#ifndef DtDocBookOptions
+# if UseInstalledCDE
+#  define DtDocBookOptions
+# else
+#  define DtDocBookOptions -t $(CDESRC)/dtdocbook/doc2sdl -H $(HELPTAGPASS2DEF) -I $(CDESRC)/dtdocbook/instant/instant -L $(CDESRC)/dtdocbook/xlate_locale/xlate_locale -S SGMLParser
+# endif
+#endif
+
+           CDETOP = CDETop
+#if ImportCDE || UseInstalledCDE
+    CDEINCLUDESRC = $(CDETOP)/include
+#else
+    CDEINCLUDESRC = $(CDETOP)/exports/include
+#endif
+ TOP_CDE_INCLUDES = -I$(CDEINCLUDESRC)
+        CDELIBSRC = $(CDETOP)/lib
+           PAMSRC = $(CDELIBSRC)/pam/libpam
+            TTSRC = $(CDELIBSRC)/tt
+         DTSVCSRC = $(CDELIBSRC)/DtSvc
+      DTSEARCHSRC = $(CDELIBSRC)/DtSearch
+      DTWIDGETSRC = $(CDELIBSRC)/DtWidget
+        DTHELPSRC = $(CDELIBSRC)/DtHelp
+       DTPRINTSRC = $(CDELIBSRC)/DtPrint
+        DTTERMSRC = $(CDELIBSRC)/DtTerm
+         DTMRMSRC = $(CDELIBSRC)/DtMrm
+        DTMMDBSRC = $(CDELIBSRC)/DtMmdb
+           CSASRC = $(CDELIBSRC)/csa
+           CDESRC = $(CDETOP)/programs
+#ifdef BuildLibPathVar
+      DTENVLIBDIR = CDEBuildLibPath
+#endif
+#ifdef CDEProjectRoot
+   CDEPROJECTROOT = CDEProjectRoot
+#endif
+ CDE_INSTALLATION_TOP = CdeInstallationTop
+CDE_CONFIGURATION_TOP = CdeConfigurationTop
+     CDE_LOGFILES_TOP = CdeLogFilesTop
+         CDE_USER_TOP = CdeUserTop
+
+        DTCODEGEN = DtCodeGen
+    HELPPARSERSRC = $(CDESRC)/dthelp/parser
+          HELPTAG = _CUseCat($(BINDIR),$(HELPPARSERSRC)/helptag,/dthelptag)
+  HELPTAGPASS1DEF = _CUseCat($(BINDIR),$(HELPPARSERSRC)/pass1/helptag,/dthelp_htag1)
+  HELPTAGPASS2DEF = _CUseCat($(BINDIR),$(HELPPARSERSRC)/pass2/htag2,/dthelp_htag2)
+        DTDOCBOOK = DtDocBook
+ DTDOCBOOKOPTIONS = DtDocBookOptions
+#if UseNSGMLS
+        NSGMLSSRC = $(CDESRC)/nsgmls
+#else
+         SGMLSSRC = $(CDESRC)/dtdocbook/sgmls
+#endif
+     DTINFOGENSRC = $(CDESRC)/dtinfo/dtinfogen
+        DTINFOGEN = DtInfoGen
+  DTINFOGENTMPDIR = DtInfoGenTmpDir
+#ifdef DtInfoGenOptions
+ DTINFOGENOPTIONS = DtInfoGenOptions
+#endif
+#ifdef ArchitectureDefines
+ ARCHITECTURE_DEFINES = ArchitectureDefines
+#endif
+#if !UseInstalledCDE
+DTLCXENVSETUP = DTLCXSEARCHPATH=$(DTHELPSRC)
+#endif
+
+#ifndef TtClientLibs
+# define TtClientLibs $(TTLIB) $(XLIB)
+#endif
+#ifndef TtClientDepLibs
+# define TtClientDepLibs $(DEPTTLIB) $(DEPXLIB)
+#endif
+
+/* These libraries use UseInstalledCDE instead of UseInstalled. */
+#undef _Use
+#undef _UseCat
+#define _Use    _CUse
+#define _UseCat _CUseCat
+
+#ifndef CDEBuildLibDir
+# define CDEBuildLibDir	BuildLibDir
+#endif
+
+#if SharedLibPam
+SharedLibReferences(PAM,pam,$(PAMSRC),SOPAMREV,SharedPamRev)
+#else
+ProjectUnsharedLibReferences(PAM,pam,$(PAMSRC),CDEBuildLibDir)
+#endif
+
+#if SharedLibTt
+SharedLibReferences(TT,tt,$(TTSRC)/lib,SOTTREV,SharedTtRev)
+#else
+ProjectUnsharedLibReferences(TT,tt,$(TTSRC)/lib,CDEBuildLibDir)
+#endif
+
+#if SharedLibDtSvc
+SharedLibReferences(DTSVC,DtSvc,$(DTSVCSRC),SODTSVCREV,SharedDtSvcRev)
+#else
+ProjectUnsharedLibReferences(DTSVC,DtSvc,$(DTSVCSRC),CDEBuildLibDir)
+#endif
+
+#if SharedLibDtSearch
+SharedLibReferences(DTSEARCH,DtSearch,$(DTSEARCHSRC),SODTSEARCHREV,SharedDtSearchRev)
+#else
+ProjectUnsharedLibReferences(DTSEARCH,DtSearch,$(DTSEARCHSRC),CDEBuildLibDir)
+#endif
+
+#if SharedLibDtWidget
+SharedLibReferences(DTWIDGET,DtWidget,$(DTWIDGETSRC),SODTWIDGETREV,SharedDtWidgetRev)
+#else
+ProjectUnsharedLibReferences(DTWIDGET,DtWidget,$(DTWIDGETSRC),CDEBuildLibDir)
+#endif
+
+#if SharedLibDtHelp
+SharedLibReferences(DTHELP,DtHelp,$(DTHELPSRC),SODTHELPREV,SharedDtHelpRev)
+#else
+ProjectUnsharedLibReferences(DTHELP,DtHelp,$(DTHELPSRC),CDEBuildLibDir)
+#endif
+
+#if SharedLibDtPrint
+SharedLibReferences(DTPRINT,DtPrint,$(DTPRINTSRC),SODTPRINTREV,SharedDtPrintRev)
+#else
+ProjectUnsharedLibReferences(DTPRINT,DtPrint,$(DTPRINTSRC),CDEBuildLibDir)
+#endif
+
+#if SharedLibDtTerm
+SharedLibReferences(DTTERM,DtTerm,$(DTTERMSRC),SODTTERMREV,SharedDtTermRev)
+#else
+ProjectUnsharedLibReferences(DTTERM,DtTerm,$(DTTERMSRC),CDEBuildLibDir)
+#endif
+
+#if SharedLibDtMrm
+SharedLibReferences(DTMRM,DtMrm,$(DTMRMSRC),SODTMRMREV,SharedDtMrmRev)
+#else
+ProjectUnsharedLibReferences(DTMRM,DtMrm,$(DTMRMSRC),CDEBuildLibDir)
+#endif
+
+#if SharedLibDtMmdb
+SharedLibReferences(DTMMDB,DtMmdb,$(DTMMDBSRC),SODTMMDBREV,SharedDtMmdbRev)
+#else
+ProjectUnsharedLibReferences(DTMMDB,DtMmdb,$(DTMMDBSRC),CDEBuildLibDir)
+#endif
+
+#if SharedLibDtCm
+SharedLibReferences(DTCM,DtCm,$(DTCMSRC),SODTCMREV,SharedDtCmRev)
+#else
+ProjectUnsharedLibReferences(DTCM,DtCm,$(DTCMSRC),CDEBuildLibDir)
+#endif
+
+#if SharedLibCsa
+SharedLibReferences(CSA,csa,$(CSASRC),SOCSAREV,SharedCsaRev)
+#else
+ProjectUnsharedLibReferences(CSA,csa,$(CSASRC),CDEBuildLibDir)
+#endif
+
+
+/* Revert to the normal library rules. */
+#undef _Use
+#undef _UseCat
+#define _Use    _XUse
+#define _UseCat _XUseCat
+
+
+#ifndef DtClientLibs
+# define DtClientLibs $(DTPRINTLIB) $(DTHELPLIB) $(DTWIDGETLIB) $(DTSVCLIB) $(TTLIB) $(XMLIB) $(XTOOLLIB) $(XPLIB) $(XLIB)
+#endif
+#ifndef DepDtClientLibs
+# define DepDtClientLibs $(DEPDTPRINTLIB) $(DEPDTHELPLIB) $(DEPDTWIDGETLIB) $(DEPDTSVCLIB) $(DEPTTLIB) $(DEPXMLIB) $(DEPXTOOLLIB) $(DEPXPLIB) $(DEPXLIB)
+#endif
+#ifndef DtClientSysLibs
+# define DtClientSysLibs $(DYNLIBSYSLIB) $(ICONVSYSLIB) $(REGEXSYSLIB) -lm
+#endif
+#ifndef DtClientExtraLibs
+# define DtClientExtraLibs /**/
+#endif

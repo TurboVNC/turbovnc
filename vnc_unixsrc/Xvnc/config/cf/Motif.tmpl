@@ -1,0 +1,568 @@
+/* 
+ *  @OSF_COPYRIGHT@
+ *  COPYRIGHT NOTICE
+ *  Copyright (c) 1990, 1991, 1992, 1993 Open Software Foundation, Inc.
+ *  ALL RIGHTS RESERVED (MOTIF). See the file named COPYRIGHT.MOTIF for
+ *  the full copyright text.
+ *
+ * (c) Copyright 1996 Digital Equipment Corporation.
+ * (c) Copyright 1996 Hewlett-Packard Company.
+ * (c) Copyright 1996 International Business Machines Corp.
+ * (c) Copyright 1996 Sun Microsystems, Inc.
+ * (c) Copyright 1996 Novell, Inc. 
+ * (c) Copyright 1996 FUJITSU LIMITED.
+ * (c) Copyright 1996 Hitachi.
+ */ 
+XCOMM $XConsortium: Motif.tmpl /main/2 1996/12/04 10:12:55 swick $
+
+/* Include the X11 project template file. */
+#include <X11.tmpl>
+
+#ifdef AUTOMATION
+# ifndef Automation
+#  define Automation 	YES
+# endif
+#else
+# define NO_AUTOMATION
+#endif
+
+#ifdef USE_VISTACC
+# ifndef UseVista
+#  define UseVista
+# endif
+# ifndef CATCMD
+#  define CATCMD cat
+# endif
+#endif
+
+#ifdef USE_PURIFY
+# ifndef UsePurify
+#  define UsePurify
+# endif
+#endif
+
+#ifdef DEBUG_GEOMETRY
+# ifndef DebugGeometry
+#  define DebugGeometry YES
+# endif
+#endif
+
+
+#ifndef _MUse
+# if UseInstalledMotif
+#  define _MUse(a,b) a
+# else
+#  define _MUse(a,b) b
+# endif
+#endif
+
+#ifndef _MUseCat
+# if (defined(__STDC__) && !defined(UnixCpp)) || defined(AnsiCpp)
+#  if UseInstalledMotif
+#   define _MUseCat(a,b,c) a##c
+#  else
+#   define _MUseCat(a,b,c) b##c
+#  endif
+# else
+#  if UseInstalledMotif
+#   define _MUseCat(a,b,c) a/**/c
+#  else
+#   define _MUseCat(a,b,c) b/**/c
+#  endif
+# endif
+#endif
+
+#ifndef MTop
+# if ImportMotif
+#  define MTop $(TOP)/imports/motif
+# else
+#  define MTop $(TOP)
+# endif
+#endif
+
+#ifndef BuildDocDir
+# define BuildDocDir $(BUILDINCROOT)/doc
+#endif
+#ifndef BuildLocDir
+# define BuildLocDir $(BUILDINCROOT)/localized
+#endif
+
+#ifndef MotifDefines
+# define MotifDefines /**/
+#endif
+
+#ifndef XmDefines
+# define XmDefines  /**/
+#endif
+
+/* To compile without SHAPE extension, set this to -DNO_SHAPE */
+#ifndef MwmDefines
+# define MwmDefines /**/
+#endif
+
+#ifndef UilFlags
+# define UilFlags /**/
+#endif
+
+#ifndef TestDefines
+# define TestDefines /**/
+#endif
+
+#ifndef AutoDefines
+# if Automation
+#  define AutoDefines -DAUTOMATION
+# else
+#  define AutoDefines /**/
+# endif
+#endif
+
+#ifndef AutoIncludes
+# if Automation
+#  define AutoIncludes -I$(AUTOSCRIPTSRC)
+# else
+#  define AutoIncludes /**/
+# endif
+#endif
+
+#ifdef UsePurify
+# define PurifyFilesToClean *.pure_linkinfo *.pure_hardlink
+#else
+# define PurifyFilesToClean
+#endif
+#if Automation
+# define TestExtraFilesToClean *.Dat *.Scr PurifyFilesToClean
+#else 
+# define TestExtraFilesToClean *.Dat PurifyFilesToClean
+#endif 
+
+#ifndef UsrIncDir
+# define UsrIncDir IncRoot
+#endif
+
+/* Place to install .uid files */
+#ifndef UidDir
+# define UidDir $(LIBDIR)/uid
+#endif
+
+#ifndef XmExtraLibraries
+# define XmExtraLibraries /**/
+#endif
+
+#ifndef YaccFlags
+# define YaccFlags /**/
+#endif
+
+#define MotifSharedRev		2.1
+
+#ifndef SharedLibXm
+# define SharedLibXm		HasSharedLibraries
+#endif
+#ifndef NormalLibXm
+# define NormalLibXm		(!SharedLibXm | ForceNormalLib)
+#endif
+#ifndef DebugLibXm
+# define DebugLibXm		NO
+#endif
+#ifndef ProfileLibXm
+# define ProfileLibXm		NO
+#endif
+#ifndef SharedXmRev
+# define SharedXmRev		MotifSharedRev
+#endif
+
+#ifndef SharedLibMrm
+# define SharedLibMrm		HasSharedLibraries
+#endif
+#ifndef NormalLibMrm
+# define NormalLibMrm		(!SharedLibMrm | ForceNormalLib)
+#endif
+#ifndef DebugLibMrm
+# define DebugLibMrm		NO
+#endif
+#ifndef ProfileLibMrm
+# define ProfileLibMrm		NO
+#endif
+#ifndef SharedMrmRev
+# define SharedMrmRev		MotifSharedRev
+#endif
+
+#ifndef SharedLibUil
+# define SharedLibUil		HasSharedLibraries
+#endif
+#ifndef NormalLibUil
+# define NormalLibUil		(!SharedLibUil | ForceNormalLib)
+#endif
+#ifndef DebugLibUil
+# define DebugLibUil		NO
+#endif
+#ifndef ProfileLibUil
+# define ProfileLibUil		NO
+#endif
+#ifndef SharedUilRev
+# define SharedUilRev		MotifSharedRev
+#endif
+
+#ifndef SharedLibACommon
+# define SharedLibACommon	HasSharedLibraries
+#endif
+#ifndef NormalLibACommon
+# define NormalLibACommon	(!SharedLibACommon | ForceNormalLib)
+#endif
+#ifndef DebugLibACommon
+# define DebugLibACommon	NO
+#endif
+#ifndef ProfileLibACommon
+# define ProfileLibACommon	NO
+#endif
+#ifndef SharedACommonRev
+# define SharedACommonRev	MotifSharedRev
+#endif
+
+#ifndef SharedLibScript
+# define SharedLibScript	HasSharedLibraries
+#endif
+#ifndef NormalLibScript
+# define NormalLibScript	(!SharedLibScript | ForceNormalLib)
+#endif
+#ifndef DebugLibScript
+# define DebugLibScript		NO
+#endif
+#ifndef ProfileLibScript
+# define ProfileLibScript	NO
+#endif
+#ifndef SharedScriptRev
+# define SharedScriptRev	MotifSharedRev
+#endif
+
+#ifndef SharedLibUtil
+# define SharedLibUtil		HasSharedLibraries
+#endif
+#ifndef NormalLibUtil
+# define NormalLibUtil		(!SharedLibUtil | ForceNormalLib)
+#endif
+#ifndef DebugLibUtil
+# define DebugLibUtil		NO
+#endif
+#ifndef ProfileLibUtil
+# define ProfileLibUtil		NO
+#endif
+#ifndef SharedUtilRev
+# define SharedUtilRev		MotifSharedRev
+#endif
+
+#ifndef SharedLibCreate
+# define SharedLibCreate	HasSharedLibraries
+#endif
+#ifndef NormalLibCreate
+# define NormalLibCreate	(!SharedLibCreate | ForceNormalLib)
+#endif
+#ifndef DebugLibCreate
+# define DebugLibCreate		NO
+#endif
+#ifndef ProfileLibCreate
+# define ProfileLibCreate	NO
+#endif
+#ifndef SharedCreateRev
+# define SharedCreateRev	MotifSharedRev
+#endif
+
+#ifndef SharedLibVisual
+# define SharedLibVisual	HasSharedLibraries
+#endif
+#ifndef NormalLibVisual
+# define NormalLibVisual	(!SharedLibVisual | ForceNormalLib)
+#endif
+#ifndef DebugLibVisual
+# define DebugLibVisual		NO
+#endif
+#ifndef ProfileLibVisual
+# define ProfileLibVisual	NO
+#endif
+#ifndef SharedVisualRev
+# define SharedVisualRev	MotifSharedRev
+#endif
+
+#ifndef SharedLibSynth
+# define SharedLibSynth		HasSharedLibraries
+#endif
+#ifndef NormalLibSynth
+# define NormalLibSynth		(!SharedLibSynth | ForceNormalLib)
+#endif
+#ifndef DebugLibSynth
+# define DebugLibSynth		NO
+#endif
+#ifndef ProfileLibSynth
+# define ProfileLibSynth	NO
+#endif
+#ifndef SharedSynthRev
+# define SharedSynthRev		MotifSharedRev
+#endif
+
+#ifndef SharedLibMCommon
+# define SharedLibMCommon	HasSharedLibraries
+#endif
+#ifndef NormalLibMCommon
+# define NormalLibMCommon	(!SharedLibMCommon | ForceNormalLib)
+#endif
+#ifndef DebugLibMCommon
+# define DebugLibMCommon	NO
+#endif
+#ifndef ProfileLibMCommon
+# define ProfileLibMCommon	NO
+#endif
+#ifndef SharedMCommonRev
+# define SharedMCommonRev	MotifSharedRev
+#endif
+
+#ifndef XmClientLibs
+# define XmClientLibs $(XMLIB) $(XTOOLLIB) $(XPLIB) $(XLIB) $(XMEXTRA_LIBS)
+#endif
+#ifndef XmClientDepLibs
+# define XmClientDepLibs $(DEPXMLIB) $(DEPXTOOLLIB) $(DEPXPLIB) $(DEPXLIB)
+#endif
+
+#ifndef MrmClientLibs 
+# define MrmClientLibs $(MRESOURCELIB) $(XMLIB) $(XTOOLLIB) $(XPLIB) $(XLIB) $(XMEXTRA_LIBS)
+#endif
+#ifndef MrmClientDepLibs
+# define MrmClientDepLibs $(DEPMRESOURCELIB) $(DEPXMLIB) $(DEPXTOOLLIB) $(DEPXPLIB) $(DEPXLIB)
+#endif
+
+#ifndef UilClientLibs
+# define UilClientLibs $(UILLIB) $(MRESOURCELIB) $(XMLIB) $(XTOOLLIB) $(XPLIB) $(XLIB) $(XMEXTRA_LIBS)
+#endif
+#ifndef UilClientDepLibs
+# define UilClientDepLibs $(DEPUILLIB) $(DEPMRESOURCELIB) $(DEPXMLIB) $(DEPXTOOLLIB) $(DEPXPLIB) $(DEPXLIB)
+#endif
+
+#ifndef TestClientLibs
+# define TestClientLibs $(PURIFYLIBS) $(TESTCOMLIB) \
+		$(AUTOSCRIPTLIB) $(AUTOUTILLIB) \
+		$(AUTOCREATELIB) $(AUTOVISUALLIB) $(AUTOSYNTHLIB) \
+	$(XMLIB) $(TESTGEOLIB) $(XTOOLLIB) $(XPLIB) $(XLIB) \
+	$(AUTOEXTRALIBS) $(XMEXTRA_LIBS)
+#endif
+#ifndef TestUilClientLibs
+# define TestUilClientLibs $(PURIFYLIBS) $(TESTUILCOMLIB) $(TESTCOMLIB) \
+		$(AUTOSCRIPTLIB) $(AUTOUTILLIB) \
+		$(AUTOCREATELIB) $(AUTOVISUALLIB) $(AUTOSYNTHLIB) \
+	$(UILLIB) $(MRESOURCELIB) $(XMLIB) $(TESTGEOLIB) \
+	$(XTOOLLIB) $(XPLIB) $(XLIB) $(AUTOEXTRALIBS) $(XMEXTRA_LIBS)
+#endif
+#ifndef TestClientDepLibs
+# define TestClientDepLibs XmClientDepLibs
+#endif
+#ifndef TestUilClientDepLibs
+# define TestUilClientDepLibs UilClientDepLibs
+#endif
+
+
+              MTOP = MTop
+TOP_MOTIF_INCLUDES = -I$(MINCLUDESRC)
+#if defined(UseInstalled) || (UseInstalledMotif && UseInstalledX11)
+      UIL_INCLUDES = -I$(USRINCDIR)/uil
+#else
+      UIL_INCLUDES = -I$(UILSRC)
+#endif
+#ifdef BuildLibPathVar
+    MOTIFENVLIBDIR = MotifBuildLibPath
+#endif
+
+/* Message catalog usage */
+#ifndef GencatCmd
+# define GencatCmd		gencat
+#endif
+#ifndef GencatFlags
+# define GencatFlags		/**/
+#endif
+#if defined(NoMessageCatalog)
+# define BuildMessageCatalog	NO
+# define MessageCatalogDefines	-DNO_MESSAGE_CATALOG
+#else
+# define BuildMessageCatalog	YES 
+# define MessageCatalogDefines	/**/
+#endif
+#ifndef MessageCatalogRule
+# if BuildMessageCatalog
+#  define MessageCatalogRule(prefix)	Real_MessageCatalogRule(prefix)
+# else
+#  define MessageCatalogRule(prefix)	Stub_MessageCatalogRule(prefix)
+# endif
+#endif
+
+      USRINCDIR = UsrIncDir
+         UIDDIR = UidDir
+        TESTSRC = $(MTOP)/tests
+        TESTLIB = $(TESTSRC)/lib
+  GENERALSRCLIB = $(TESTSRC)/General/lib
+  GENERALSRCBIN = $(TESTSRC)/General/bin
+   MANUALSRCLIB = $(TESTSRC)/Manual/lib
+   MANUALSRCBIN = $(TESTSRC)/Manual/bin
+     AUTOSRCLIB = $(TESTSRC)/Auto/lib
+     AUTOSRCBIN = $(TESTSRC)/Auto/bin
+       COMMONPP = $(GENERALSRCBIN)/Commonpp
+         GENRUN = $(GENERALSRCBIN)/Genrun
+         MANRUN = $(GENERALSRCBIN)/Manrun
+#ifdef DebugLib
+  TESTMALLOCSRC = $(GENERALSRCLIB)/Malloc
+#endif
+#ifdef DebugGeometry
+     TESTGEOSRC = $(TESTLIB)/Geometry
+#endif
+#ifdef Automation
+     TESTCOMSRC = $(AUTOSRCLIB)/Common
+  AUTOSCRIPTSRC = $(AUTOSRCLIB)/Script
+   AUTOSYNTHSRC = $(AUTOSRCLIB)/Synth
+  AUTOCREATESRC = $(AUTOSRCLIB)/Create
+  AUTOVISUALSRC = $(AUTOSRCLIB)/Visual
+    AUTOUTILSRC = $(AUTOSRCLIB)/Util
+  AUTOEXTRALIBS = -ll -ly -lm
+#else
+     TESTCOMSRC = $(MANUALSRCLIB)/Common
+#endif
+
+    BUILDDOCDIR = BuildDocDir
+    BUILDLOCDIR = BuildLocDir
+
+/* MTOOLKITSRC  should be removed */
+    MTOOLKITSRC = $(TOOLKITSRC)
+#if ImportMotif || UseInstalledMotif
+    MINCLUDESRC = $(MTOP)/include
+        MDOCSRC = $(MTOP)/doc
+        MLOCSRC = $(MTOP)/localized
+#else
+    MINCLUDESRC = $(MTOP)/exports/include
+        MLOCSRC = $(MTOP)/exports/localized
+#endif
+        MLIBSRC = $(MTOP)/lib
+     MCLIENTSRC = $(MTOP)/clients
+       MDEMOSRC = $(MTOP)/demos
+     MWIDGETSRC = $(MLIBSRC)/Xm
+   MRESOURCESRC = $(MLIBSRC)/Mrm
+         UILSRC = $(MCLIENTSRC)/uil
+#ifdef MotifProjectRoot
+   MPROJECTROOT = MotifProjectRoot
+#endif
+
+            UIL = _MUse(uil,$(UILSRC)/uil)
+         DEPUIL = _MUseCat($(BINDIR),$(UILSRC),/uil)
+
+   XMEXTRA_LIBS = XmExtraLibraries
+
+/* These libraries use UseInstalledMotif instead of UseInstalled. */
+#undef _Use
+#undef _UseCat
+#define _Use    _MUse
+#define _UseCat _MUseCat
+
+#ifndef MBuildLibDir
+# define MBuildLibDir	BuildLibDir
+#endif
+
+#if SharedLibXm
+SharedLibReferences(XM,Xm,$(MWIDGETSRC),SOXMREV,SharedXmRev)
+#else
+ProjectUnsharedLibReferences(XM,Xm,$(MWIDGETSRC),MBuildLibDir)
+#endif
+
+#if SharedLibMrm
+SharedLibReferences(MRESOURCE,Mrm,$(MRESOURCESRC),SOMRMREV,SharedMrmRev)
+#else
+ProjectUnsharedLibReferences(MRESOURCE,Mrm,$(MRESOURCESRC),MBuildLibDir)
+#endif
+
+#if SharedLibUil
+SharedLibReferences(UIL,Uil,$(UILSRC),SOUILREV,SharedUilRev)
+#else
+ProjectUnsharedLibReferences(UIL,Uil,$(UILSRC),MBuildLibDir)
+#endif
+
+#ifdef DebugGeometry
+ProjectUnsharedLibReferences(TESTGEO,XtGeo,$(TESTGEOSRC),MBuildLibDir)
+#endif
+
+#if Automation
+
+# if SharedLibACommon
+SharedLibReferences(TESTCOM,ACommon,$(TESTCOMSRC),SOACOMMONREV,SharedACommonRev)
+# else
+ProjectUnsharedLibReferences(TESTCOM,ACommon,$(TESTCOMSRC),MBuildLibDir)
+# endif
+
+TESTUILCOMLIB = $(TESTCOMSRC)/libACommonUil.a
+
+# if SharedLibScript
+SharedLibReferences(AUTOSCRIPT,Script,$(AUTOSCRIPTSRC),SOSCRIPTREV,SharedScriptRev)
+# else
+ProjectUnsharedLibReferences(AUTOSCRIPT,Script,$(AUTOSCRIPTSRC),MBuildLibDir)
+# endif
+
+# if SharedLibSynth
+SharedLibReferences(AUTOSYNTH,Synth,$(AUTOSYNTHSRC),SOSYNTHREV,SharedSynthRev)
+# else
+ProjectUnsharedLibReferences(AUTOSYNTH,Synth,$(AUTOSYNTHSRC),MBuildLibDir)
+# endif
+
+# if SharedLibCreate
+SharedLibReferences(AUTOCREATE,Create,$(AUTOCREATESRC),SOCREATEREV,SharedCreateRev)
+# else
+ProjectUnsharedLibReferences(AUTOCREATE,Create,$(AUTOCREATESRC),MBuildLibDir)
+# endif
+
+# if SharedLibVisual
+SharedLibReferences(AUTOVISUAL,Visual,$(AUTOVISUALSRC),SOVISUALREV,SharedVisualRev)
+# else
+ProjectUnsharedLibReferences(AUTOVISUAL,Visual,$(AUTOVISUALSRC),MBuildLibDir)
+# endif
+
+# if SharedLibUtil
+SharedLibReferences(AUTOUTIL,Util,$(AUTOUTILSRC),SOUTILREV,SharedUtilRev)
+# else
+ProjectUnsharedLibReferences(AUTOUTIL,Util,$(AUTOUTILSRC),MBuildLibDir)
+# endif
+
+#else   /* Manual */
+
+# if SharedLibMCommon
+SharedLibReferences(TESTCOM,MCommon,$(TESTCOMSRC),SOMCOMMONREV,SharedMCommonRev)
+# else
+ProjectUnsharedLibReferences(TESTCOM,MCommon,$(TESTCOMSRC),MBuildLibDir)
+# endif
+TESTUILCOMLIB = $(TESTCOMSRC)/libMCommonUil.a
+
+#endif  /* Automation */
+
+
+/* Revert to the normal library rules. */
+#undef _Use
+#undef _UseCat
+#define _Use    _XUse
+#define _UseCat _XUseCat
+
+
+#ifdef UsePurify
+     PURIFYLIBS = $(PURIFYHOME)/purify_stubs.a
+#endif
+  LINTMRESOURCE = $(MRESOURCESRC)/libMrm.a
+LINTXMWIDGETLIB = $(MWIDGETSRC)/llib-l/Xm.ln
+     LINTXMTOOL = $(MTOOLKITSRC)/llib-lXt.ln
+     LINTUILLIB = $(UILSRC)/llib-lUil.ln
+
+      YACCFLAGS = YaccFlags
+       UILFLAGS = UilFlags
+    GENCATFLAGS = GencatFlags
+         GENCAT = GencatCmd $(GENCATFLAGS)
+      MKCATTOOL = $(MLOCSRC)/util/mkcatdefs
+
+         RM_CMD = $(RM) FilesToClean ExtraFilesToClean TestExtraFilesToClean
+
+#if NeedDefaultDepLibs
+# if HasSharedLibraries || defined(UseInstalled)
+        DEPLIBS = $(DEPXMLIB) $(DEPXTOOLLIB) $(DEPXPLIB) $(DEPXLIB)
+# else
+        DEPLIBS = $(LOCAL_LIBRARIES)
+# endif
+        DEPLIBS1 = $(DEPLIBS)
+        DEPLIBS2 = $(DEPLIBS)
+        DEPLIBS3 = $(DEPLIBS)
+#endif /* NeedDefaultDepLibs */

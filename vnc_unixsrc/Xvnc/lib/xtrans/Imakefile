@@ -1,0 +1,8 @@
+XCOMM $XConsortium: Imakefile /main/12 1996/09/28 16:50:08 rws $
+
+#define IncSubdir X11
+
+all::
+
+DependTarget()
+BuildIncludes(Xtrans.h,IncSubdir,..)

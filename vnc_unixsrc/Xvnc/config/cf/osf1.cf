@@ -1,0 +1,206 @@
+XCOMM platform:  $TOG: osf1.cf /main/74 1997/05/27 15:51:24 kaleb $
+/* only tested with Digital OSF/1 */
+
+#ifndef OSName
+# define OSName		DefaultOSName
+#endif
+#ifndef OSMajorVersion
+# define OSMajorVersion	DefaultOSMajorVersion
+#endif
+#ifndef OSMinorVersion
+# define OSMinorVersion DefaultOSMinorVersion
+#endif
+XCOMM operating system: OSName (OSMajorVersion.OSMinorVersion)
+
+#define StandardCppDefines	-D__osf__ StandardDefines
+#define BuildLibPathVar		_RLD_ROOT=/dev/null LD_LIBRARY_PATH
+#define HasPutenv		YES
+#define Malloc0ReturnsNull	YES
+#define HasNdbm			YES
+#define HasShm			YES
+#define AvoidNullMakeCommand	YES
+#define NullMakeCommand		@ echo
+#define HasPosixThreads		YES
+#define SystemMTDefines		-D_REENTRANT
+#define CplusplusSystemMTDefines -D_REENTRANT
+#define HasPoll			YES
+#define HasVFork                NO
+#define HasPlugin		YES
+#define InstallCmd		installbsd
+#define RanlibCmd		ranlib -t
+#if OSMajorVersion > 1 || OSMinorVersion > 0
+#define ModernOSF1		YES
+#else
+#define ModernOSF1		NO
+#define ShLibDir		/usr/shlib
+#define SharedLibPex		NO  /* losing, no shared -lm */
+#endif
+#define ThreadedX		ModernOSF1
+
+#if ThreadedX
+#define MTSafeAPIDefines	-DXUSE_MTSAFE_API -DXUSE_NETDB_R_API
+#if OSMajorVersion < 4
+#define ThreadsLibraries		-lpthreads -lmach -lc_r
+#define ThreadsCplusplusLibraries	-lpthreads -lmach
+#define ThreadPreStdAPIDefines		-DXPRE_STANDARD_API
+#else
+#define ThreadsLibraries		-lpthread -lmach -lexc -lc
+#define ThreadsCplusplusLibraries	-lpthread -lmach -lexc
+#define LibraryMTDefines		-DUSE_TIS_SUPPORT
+#endif
+#endif
+
+#if ModernOSF1
+#ifndef OptimizedCDebugFlags
+#define OptimizedCDebugFlags	-O2 -Olimit 2000
+#endif
+#ifndef ExtraLoadFlags
+/*
+ * In OSF/1 3.0 Digital has shared libXdmcp and libXau. What's more,
+ * the link editor has different search semantics, i.e. it will search
+ * for shared libraries first, then, if it can't find a shared lib, it
+ * will use a static lib. By using -oldstyle_liblookup the linker will
+ * follow "normal" semantics for linking libraries and will get the
+ * static libraries we really want. By 3.2 they no longer have libXdmcp 
+ * and libXau as shared libraries and we can omit -oldstyle_liblookup. 
+ * (What did they have in 3.1?)
+ */
+#if OSMajorVersion == 3 && OSMinorVersion == 0
+#define ExtraLoadFlags		-Wl,-rpath,$(USRLIBDIRPATH),-oldstyle_liblookup
+#else
+#define ExtraLoadFlags 		-Wl,-rpath,$(USRLIBDIRPATH)
+#endif
+#endif
+#if OSMajorVersion > 3
+#define TermcapLibrary		-lcurses
+#endif
+#if OSMajorVersion >= 3
+#define HasMkstemp		YES
+#endif
+#endif
+
+/*
+ * C++ compiler setup.  This file knows what options to use with the
+ * DEC C++ compiler, and may learn about other compilers in the future.
+ * 
+ * For DEC C++, define HasDECCplusplus to YES in site.def.  
+ *
+ * For g++ 2.6.x, define HasGcc2ForCplusplus to YES in site.def.
+ *
+ * For other compilers, define HasCplusplus to YES in site.def, and 
+ *    check to see if you need to provide values for CplusplusOptions
+ *    and/or DefaultCplusplusOptions.
+ *
+ * In any case, you may also need to set CplusplusDependIncludes.
+ *
+ * Note: For DEC C++, the -call_shared option really only needs to 
+ * appear when linking C++ executables, not when actually compiling
+ * the C++ sources.  But since there's no imake variable that lets
+ * us insert flags only into the C++ link stage, we use -call_shared
+ * on all compilations when building executables.  This could be 
+ * considered a deficiency in the current imake configuration
+ */
+
+#if HasDECCplusplus
+#ifndef HasCplusplus 
+#define HasCplusplus YES
+#endif
+#ifndef CplusplusCmd
+#define CplusplusCmd /usr/bin/cxx
+#endif
+#ifndef CplusplusFilt
+# define CplusplusFilt /usr/bin/demangle
+#endif
+#ifndef CplusplusDependIncludes 
+#define CplusplusDependIncludes -D__DECCXX -I/usr/include/cxx
+#endif
+#ifndef CplusplusLibDir
+#define CplusplusLibDir /usr/lib/cmplrs/cxx
+#endif
+#ifndef CplusplusLibC
+#define CplusplusLibC -L/usr/lib/cmplrs/cxx -lcxx
+#endif
+#ifndef CplusplusOptions
+#define CplusplusOptions -call_shared
+#endif
+#endif /* HasDECCplusplus */
+
+
+#if HasGcc2ForCplusplus
+#ifndef CplusplusLibC
+#define CplusplusLibC `$(CXX) -print-libgcc-file-name`
+#endif 
+#endif /* HasGcc2ForCplusplus */
+
+#ifdef CplusplusLibDir
+# define SystemBuildLibPath	\
+/usr/shlib:/usr/ccs/lib:CplusplusLibDir:/usr/lib/cmplrs/cc:/usr/lib:/usr/local/lib:/var/shlib
+#else
+# define SystemBuildLibPath	\
+/usr/shlib:/usr/ccs/lib:/usr/lib/cmplrs/cc:/usr/lib:/usr/local/lib:/var/shlib
+#endif
+
+#include <osfLib.rules>
+#define NoRConst		YES
+
+#ifdef AlphaArchitecture
+#ifndef HasWChar32
+#define HasWChar32		YES
+#endif
+#define ServerExtraDefines	-D_XSERVER64
+#define ServerOSDefines		-DDDXTIME
+#ifndef DefaultCCOptions
+#define DefaultCCOptions	-std1
+#endif
+#ifndef XawI18nDefines
+#define XawI18nDefines		-DHAS_WCHAR_H
+#endif
+#ifndef BuildServer
+#define BuildServer		NO
+#endif
+
+/* For DtHelp's TIFF processing routines. */
+#define LSBBitOrder		YES
+
+#define MotifDefines		-DNO_REGCOMP -DNO_REGEX -DSTRINGS_ALIGNED
+#define DtSvcDefines		-DXK_MISCELLANY -DMULTIBYTE -DMESSAGE_CAT
+#define DtSearchDefines		-DI18N_MSG DtSvcDefines
+#define DtWidgetDefines		DtSearchDefines
+#define DtPrintDefines		DtSearchDefines
+#define DtMailDefines		\
+  -DNEED_MMAP_WRAPPER -DSENDMAIL_LOCKS -DMAIL_SPOOL_PATH=\"/var/spool/mail/%s\"
+
+#define ArchitectureDefines	-DALPHA_ARCHITECTURE
+#endif
+
+#ifdef MipsArchitecture
+#define DefaultCCOptions	-Xa
+#define XdecServer YES
+#define ServerOSDefines -DDDXTIME
+#define PexCCOptions -Xa -Wf,-XNp15000,-XNd15000
+#define NormalLibObjCompile(options) 	ClearmakeOSName			  \
+	$(RM) $@ $*.os \						@@\
+	&& $(CC) -c options $(CFLAGS) $*.c \				@@\
+	&& $(LD) $(LDSTRIPFLAGS) -r $@ -o $*.os \			@@\
+	&& $(MV) $*.os $@
+#endif
+
+#if !HasClearmake
+#ifndef HasMakefileSafeInclude
+#define HasMakefileSafeInclude YES
+#endif
+#ifndef IncludeMakefile
+#define IncludeMakefile(file) @@-include file
+#endif
+#endif
+
+#ifndef ManKeywordsTarget
+#define ManKeywordsTarget(manpath)					@@\
+man_keywords::								@@\
+	catman -M $(DESTDIR)manpath -w
+#endif
+
+#define CdeTicDefines	-DHAS_KNL -DHAS_KTAB
+#define CdeProjectDefines \
+	-DDEC -DMULTIBYTE -DNLS16 \
+	-DOSMAJORVERSION=OSMajorVersion -DOSMINORVERSION=OSMinorVersion

@@ -1,0 +1,64 @@
+XCOMM $XConsortium: minix.cf /main/1 1996/10/31 14:47:22 kaleb $
+
+
+
+XCOMM platform:  $XFree86: xc/config/cf/minix.cf,v 3.4 1996/12/27 06:50:21 dawes Exp $
+
+
+/*
+ * If you want to change any of these, do it in the BeforeVendorCF part
+ * of site.def
+ */
+#define OSName			Minix-386vm
+#define OSVendor		/* philip@cs.vu.nl */
+#define OSMajorVersion		1
+#define OSMinorVersion		6
+#define OSTeenyVersion		25.1.0
+
+#define AcdGcc
+
+#ifdef AcdGcc
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+#define AsmDefines 		-DUSE_GAS
+#define GccGasOption		-DGCCUSESGAS /* For SuperProbe */
+#endif
+
+/* Defaults for Minix */
+
+#define ConnectionFlags		-DMNX_TCPCONN
+#define StandardDefines		-D_MINIX -DMINIX -D_POSIX_SOURCE
+#define StandardIncludes	
+
+#define DoRanlibCmd		NO
+#define AvoidNullMakeCommand	YES
+#define HasSockets		NO
+#define HasStreams		NO
+#define HasVFork		NO
+#define HasNdbm			YES
+#define	ExtraLibraries		-lnbio
+#define NeedConstPrototypes	YES
+#define NeedVarargsPrototypes	YES
+#define NeedNestedPrototypes	YES
+/* #define UseCCMakeDepend		YES */
+#define	DefaultCCOptions	-wo -fsoft
+#define ArCmd			CcCmd -c.a -o
+#define ArAddCmd		ArCmd
+#define CcCmd			acd -descr gcc -name cc
+#define AsCmd			CcCmd -c
+#define CppCmd			/usr/lib/cpp
+#define LdCmd			CcCmd
+#define LdCombineFlags		-r
+#define LexLib			/* */
+
+#define	SetTtyGroup		YES	/* for xterm */
+#define HasPutenv		YES	/* for xsm */
+
+#ifndef AssembleObject
+#define AssembleObject(flags) $(RM) $@                                    @@\
+	$(CPP) AsmDefines $(DEFINES) $(INCLUDES) flags $*.s | \           @@\
+	    grep -v '^\#' > $*.i.s                                        @@\
+	$(AS) -o $*.o $*.i.s                                              @@\
+	$(RM) $*.i.s
+#endif
+
+#include <xfree86.cf>

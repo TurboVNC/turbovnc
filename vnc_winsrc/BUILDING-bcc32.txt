@@ -1,0 +1,38 @@
+TightVNC compilation notes for Borland C++ 5.5 users
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You have to perform two steps in order to build the project with Borland C++
+5.5 "free" compiler:
+
+1. Make sure the compiler is installed correctly.
+
+   You have to put path to Borland C++ binaries to your PATH environment
+   variable (this path is "C:\Borland\BCC55\Bin" by default) and to prepare
+   correct configuration files for compiler and linker. Please read the
+   document available at
+
+     http://www.objectcentral.com/vide/help/videdoc/bcc32.html
+
+   for more details on correct Borland C++ 5.5 installation. Here are
+   example configuration files that were used to build TightVNC for Windows
+   95/98 and Windows NT 4.0:
+
+   C:\Borland\BCC55\Bin\bcc32.cfg: =========================================
+
+     -I"c:\Borland\Bcc55\include"
+     -L"c:\Borland\Bcc55\lib;c:\Borland\Bcc55\lib\psdk"
+     -DWINVER=0x0400
+     -D_WIN32_WINNT=0x0400
+
+   C:\Borland\BCC55\Bin\ilink32.cfg: =======================================
+
+     -L"c:\Borland\Bcc55\lib;c:\Borland\Bcc55\lib\psdk"
+
+   =========================================================================
+
+2. Run build-bcc32.bat from the top-level directory ("vnc_winsrc").
+
+   This command file will try to build TightVNC (both server and viewer
+   parts) using Borland C++ 5.x command-line tools. It will create the
+   "binaries" sub-directory and copy three files there: vncviewer.exe and
+   two files WinVNC server consist of: winvnc.exe and VNCHooks.dll.

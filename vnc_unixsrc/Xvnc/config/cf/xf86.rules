@@ -1,0 +1,186 @@
+XCOMM $XConsortium: xf86.rules /main/9 1996/10/31 14:54:26 kaleb $
+XCOMM $XFree86: xc/config/cf/xf86.rules,v 3.16.2.1 1997/05/18 12:00:01 dawes Exp $
+
+/*
+ * These rules are needed to build the Xfree86 X Servers
+ */
+
+#ifndef CPPOnlyAsm
+#define CPPOnlyAsm(basename,options) RemoveFile(basename.i)		@@\
+	$(CPP) AsmDefines $(DEFINES) $(INCLUDES) options basename.s | \	@@\
+		grep -v '^\#' > basename.i
+#endif
+
+#ifndef AssembleObject
+#define AssembleObject(flags) CPPOnlyAsm($*,flags)			@@\
+	RemoveFile($*.o)						@@\
+	$(AS) -o $*.o $*.i						@@\
+	RemoveFile($*.i)
+#endif
+
+#ifndef NormalAsmObjectRule
+#define NormalAsmObjectRule()						@@\
+.s.o:									@@\
+	AssembleObject($(_NOOP_))					@@\
+									@@\
+.s.i:									@@\
+	CPPOnlyAsm($*,$(_NOOP_))
+#endif
+
+#ifndef ObjectFromSpecialAsmSource
+#define ObjectFromSpecialAsmSource(dst,src,flags)			@@\
+dst.s:  src.s								@@\
+	RemoveFile($@)							@@\
+	$(LN) $? $@							@@\
+									@@\
+dst.o:  dst.s								@@\
+	AssembleObject(flags)						@@\
+									@@\
+dst.i:  dst.s								@@\
+	CPPOnlyAsm(dst,flags)						@@\
+									@@\
+depend:: dst.s								@@\
+									@@\
+clean::									@@\
+	RemoveFile(dst.s)
+#endif
+
+#ifndef ObjectFromAsmSource
+#define ObjectFromAsmSource(src,flags)					@@\
+									@@\
+src.o:  src.s								@@\
+	AssembleObject(flags)						@@\
+									@@\
+src.i:  src.s								@@\
+	CPPOnlyAsm(dst,flags)						@@\
+									@@\
+depend:: src.s
+#endif
+
+#ifndef ObjectMapIncludeFromSpecialSource
+#define ObjectMapIncludeFromSpecialSource(dst,src,flags)		@@\
+dst.c:	src.c								@@\
+	RemoveFile($@)							@@\
+	echo "#include \"mfbmap.h\"" > $@				@@\
+	echo "#include \"$?\"" >> $@					@@\
+									@@\
+SpecialCObjectRule(dst,NullParameter,flags)				@@\
+									@@\
+depend::	dst.c							@@\
+									@@\
+clean::									@@\
+	RemoveFile(dst.c)
+#endif
+
+
+/*
+ * Rules for building config files from scripts
+ */
+
+#ifndef Depend
+# define Depend depend
+#endif
+ 
+#ifndef ConfigTargetLong
+#define ConfigTargetLong(target,dep,script,args,extra)			@@\
+all:: Configure								@@\
+									@@\
+Configure:: target.o							@@\
+									@@\
+target.c: script dep							@@\
+	$(MAKE) $(MFLAGS) Makefile					@@\
+	$(MAKE) $(MFLAGS) extra Concat(Build,target)			@@\
+									@@\
+Concat(Build,target):							@@\
+	$(RM) target.c							@@\
+	$(SHELL) script args						@@\
+									@@\
+clean::									@@\
+	$(RM) target.c
+#endif
+
+#define ConfigTarget(target,dep,script,args) ConfigTargetLong(target,dep,script,args,Depend)
+
+#define ConfigTargetNoDepend(target,dep,script,args) ConfigTargetLong(target,dep,script,args,)
+
+#if !XF86LinkKit
+
+/*
+ * Rules for installing LinkKit parts (target is install.linkkit)
+ */
+
+#ifndef InstallLinkKitNonExecFile
+#define InstallLinkKitNonExecFile(file,dest)				@@\
+install.linkkit:: file							@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTDATFLAGS) file $(DESTDIR)dest
+#endif
+
+#ifndef InstallLinkKitLibrary
+#define InstallLinkKitLibrary(libname,dest)				@@\
+install.linkkit:: Concat(lib,libname.a)					@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTLIBFLAGS) Concat(lib,libname.a) $(DESTDIR)dest @@\
+	RanLibrary($(RANLIBINSTFLAGS) Concat($(DESTDIR)dest/lib,libname.a))
+#endif
+
+#ifndef InstallLinkKitNamedLibrary
+#define InstallLinkKitNamedLibrary(libname,dlibname,dest)		@@\
+install.linkkit:: Concat(lib,libname.a)					@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTLIBFLAGS) Concat(lib,libname.a) \		@@\
+	  Concat($(DESTDIR)dest/lib,dlibname.a)				@@\
+	RanLibrary($(RANLIBINSTFLAGS) Concat($(DESTDIR)dest/lib,dlibname.a))
+#endif
+
+#ifndef InstallLinkKitNamedNonExec
+#define InstallLinkKitNamedNonExec(srcname,dstname,dest)		@@\
+install.linkkit:: srcname						@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTDATFLAGS) srcname $(DESTDIR)dest/dstname
+#endif
+
+#ifndef InstallLinkKitNamedProg
+#define InstallLinkKitNamedProg(srcname,dstname,dest)			@@\
+install.linkkit:: srcname						@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTBINFLAGS) srcname $(DESTDIR)dest/dstname
+#endif
+
+#ifndef InstallLinkKitSubdirs
+#define InstallLinkKitSubdirs(dirs) \
+NamedTargetSubdirs(install.linkkit,dirs,"installing link kit",DESTDIR='$(DESTDIR)',install.linkkit)
+#endif
+
+#ifndef InstallLinkKitMultipleDestFlags
+#define InstallLinkKitMultipleDestFlags(list,dest,flags) \
+InstallMultipleDestFlags(install.linkkit,list,dest,flags)
+#endif
+
+#endif /* !XF86LinkKit */
+
+/*
+ * DynamicModuleTarget - build a module to be dynamically loaded
+ */
+#ifndef DynamicModuleTarget
+#define DynamicModuleTarget(module,modlist)				@@\
+AllTarget(module)							@@\
+									@@\
+module: modlist								@@\
+	RemoveFile($@)							@@\
+	$(LD) -o $@ $(SHLIBLDFLAGS) modlist				@@\
+									@@\
+clean::									@@\
+	RemoveFile(module)
+#endif /* DynamicModuleTarget */
+
+/*
+ * InstallDynamicModule - install a dynamic module
+ */
+#ifndef InstallDynamicModule
+#define InstallDynamicModule(module,dest)				@@\
+install:: module							@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c module $(DESTDIR)dest
+#endif
+

@@ -1,0 +1,22 @@
+If you're upgrading TightVNC remotely, working in an active VNC session, please
+read and understand the following:
+
+ * Remote upgrade requires rebooting the computer. If you want to be able to
+   access your computer after the reboot, make sure you're running WinVNC
+   as a service, not in the application mode.
+
+ * If you're running WinVNC service from some another VNC distribution, this
+   installation procedure won't replace it with the TightVNC service by default. 
+   This is a limitation that may be solved in future versions. However, there is
+   a way to perform such an upgrade: install TightVNC into the same directory
+   where old VNC files (WinVNC.exe and VNCHooks.dll) are installed. In this
+   case, old binaries will be replaced by the new ones during the reboot, and
+   there will be no need to re-install the service. Please note that the installer
+   should show you the reboot prompt at the end of the installation, otherwise
+   you probably selected wrong installation directory.
+
+ * There is a number of things that can prevent the machine to reboot correctly,
+   and that can cause losing the control over the computer. In other words, there
+   is NO WARRANTY that the remote upgrade procedure is absolutely reliable.
+   To minimize possible risks, close all the running applications (besides the
+   WinVNC service itself) before launching the TightVNC installer.

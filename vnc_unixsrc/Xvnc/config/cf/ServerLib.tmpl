@@ -1,0 +1,141 @@
+XCOMM $XFree86: xc/config/cf/ServerLib.tmpl,v 3.0 1996/10/03 08:28:07 dawes Exp $
+/*
+ * Server Library imakefile info - this contains any special
+ * redefinitions, etc. that Imakefiles in the various server library 
+ * subtrees will need.
+ *
+ * Before including this, you must set the following boolean variables:
+ * DoSharedLib, DoNormalLib, DoDebugLib, DoProfileLib
+ *
+ */
+
+#ifndef DoNormalLib
+#define DoNormalLib 	YES
+#endif
+
+#ifndef LibraryDefines
+#define LibraryDefines StandardDefines
+#endif
+#ifndef LibraryCDebugFlags
+#define LibraryCDebugFlags DefaultCDebugFlags
+#endif
+#ifndef SeparateSharedCompile
+#define SeparateSharedCompile YES
+#endif
+#ifndef SharedServerLibraryDef
+#define SharedServerLibraryDef $(__NOOP__)
+#endif
+
+#ifndef LibraryCcCmd
+#if DoSharedLib && defined(SharedLibraryCcCmd)
+#define LibraryCcCmd SharedLibraryCcCmd
+#else
+#define LibraryCcCmd CcCmd
+#endif
+#endif
+#ifndef LibraryCCOptions
+#if DoSharedLib && defined(SharedLibraryCCOptions)
+#define LibraryCCOptions SharedLibraryCCOptions
+#else
+#define LibraryCCOptions DefaultCCOptions
+#endif
+#endif
+
+#if DoDebugLib
+#define _DebuggedLibMkdir() LibMkdir(debugger)
+#define _DebuggedObjCompile(options) DebuggedLibObjCompile(options)
+#define _DebuggedCleanDir() LibCleanDir(debugger)
+#else
+#define _DebuggedLibMkdir() $(_NULLCMD_)
+#define _DebuggedObjCompile(options) $(_NULLCMD_)
+#define _DebuggedCleanDir() $(_NULLCMD_)
+#endif
+
+#if DoProfileLib
+#define _ProfiledLibMkdir() LibMkdir(profiled)
+#define _ProfiledObjCompile(options) ProfiledLibObjCompile(options)
+#define _ProfiledCleanDir() LibCleanDir(profiled)
+#else
+#define _ProfiledLibMkdir() $(_NULLCMD_)
+#define _ProfiledObjCompile(options) $(_NULLCMD_)
+#define _ProfiledCleanDir() $(_NULLCMD_)
+#endif
+
+#if !DoNormalLib
+#define _NormalLibMkdir() $(_NULLCMD_)
+#define _NormalObjCompile(options) $(_NULLCMD_)
+#define _NormalCleanDir() $(_NULLCMD_)
+#else
+#if DoSharedLib && SeparateSharedCompile
+#define _NormalLibMkdir() LibMkdir(unshared)
+#define _NormalObjCompile(options) UnsharedLibObjCompile(options)
+#define _NormalCleanDir() LibCleanDir(unshared)
+#else
+#define _NormalLibMkdir() $(_NULLCMD_)
+#define _NormalObjCompile(options) NormalLibObjCompile(options)
+#define _NormalCleanDir() $(_NULLCMD_)
+#endif
+#endif
+
+#if !DoSharedLib || (DoNormalLib && !SeparateSharedCompile)
+#define _SharedObjCompile(options) $(_NULLCMD_)
+#else
+#if SeparateSharedCompile
+#define _SharedObjCompile(options) NormalSharedLibObjCompile(options)
+#else
+#define _SharedObjCompile(options) NormalLibObjCompile(options)
+#endif
+#endif
+
+#define SRCsuf c
+
+#ifndef LibraryObjectRule
+#define LibraryObjectRule()						@@\
+all::									@@\
+	_DebuggedLibMkdir()						@@\
+	_ProfiledLibMkdir()						@@\
+	_NormalLibMkdir()						@@\
+									@@\
+includes::								@@\
+	_DebuggedLibMkdir()						@@\
+	_ProfiledLibMkdir()						@@\
+	_NormalLibMkdir()						@@\
+									@@\
+.SRCsuf.Osuf:								@@\
+	_DebuggedObjCompile($(_NOOP_))					@@\
+	_ProfiledObjCompile($(_NOOP_))					@@\
+	_NormalObjCompile($(_NOOP_))					@@\
+	_SharedObjCompile(SharedServerLibraryDef)			@@\
+									@@\
+clean::									@@\
+	_DebuggedCleanDir()						@@\
+	_ProfiledCleanDir()						@@\
+	_NormalCleanDir()						@@\
+
+#endif /* LibraryObjectRule */
+
+#ifndef SpecialLibObjectRule
+#define SpecialLibObjectRule(objs,depends,options)			@@\
+objs: depends								@@\
+	_DebuggedObjCompile(options)					@@\
+	_ProfiledObjCompile(options)					@@\
+	_NormalObjCompile(options)					@@\
+	_SharedObjCompile(options)					@@\
+
+#endif /* SpecialLibObjectRule */
+
+#ifndef SpecialCLibObjectRule
+#define SpecialCLibObjectRule(basename,depends,options)			@@\
+SpecialLibObjectRule(basename.Osuf,basename.SRCsuf depends,options)	@@\
+									@@\
+basename.i: basename.SRCsuf depends					@@\
+	CPPOnlyCompile(basename.SRCsuf,options)				@@\
+									@@\
+CenterLoadTarget(debug_src,basename.SRCsuf,NullParameter,$(ALLDEFINES) options)
+#endif /* SpecialCLibObjectRule */
+
+#if DoSharedLib
+LibraryObjectRule()
+#else
+NormalLibraryObjectRule()
+#endif

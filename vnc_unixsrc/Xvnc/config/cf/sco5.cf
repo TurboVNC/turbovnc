@@ -1,0 +1,139 @@
+XCOMM $XFree86: xc/config/cf/sco5.cf,v 3.1.2.4 1997/07/19 04:59:08 dawes Exp $
+
+/*
+ * This is for SCO Open Server 5.0.2 or later.
+ */
+
+#ifndef ScoOsMouse
+# define ScoOsMouse             YES
+#endif
+
+#ifndef OSName
+#define OSName                  UNIX System V/386 Open Server 5.0.4
+#endif
+#ifndef OSVendor
+#define OSVendor                SCO
+#endif
+#ifndef OSMajorVersion
+#define OSMajorVersion          5
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion          0
+#endif
+#ifndef OSTeenyVersion
+#define OSTeenyVersion          4
+#endif
+
+/*
+ * Note: We define FD_SETSIZE here (as opposed to in ConnectionFlags) to
+ * guarantee that the same FD_SETSIZE is used. Havoc abounds if we do not
+ * do this, as some files which include sys/socket.h and sys/types.h will
+ * have different values for FD_SETSIZE.
+ */
+
+#define StandardDefines         -Dsco -DSCO -DSYSV -Di386 -DSCO325 -DFD_SETSIZE=256 -D_NO_STATIC
+#ifdef HasGcc2
+# define DefaultCCOptions       -melf
+# define CcCmd                  gcc
+# define ExtraLoadOptions       -melf
+# define DefaultCDebugFlags     -O
+# define OptimizedCDebugFlags   -O
+#else
+# define DefaultCCOptions       -dy 
+# define CcCmd                  cc
+# define ExtraLoadOptions       -b elf
+# define DefaultCDebugFlags     -O
+# define OptimizedCDebugFlags   -O
+#endif
+
+#ifndef PexDynamicModule
+#define PexDynamicModule        YES
+#endif
+#ifndef XieDynamicModule
+#define XieDynamicModule        YES
+#endif
+
+#ifndef HasSymLinks
+# define HasSymLinks            YES
+#endif
+
+#ifdef BuildDynamicLoading
+#define SCODynamicFlags         -Wl,-Bexport
+#endif
+
+#define XawI18nDefines          -DHAS_WCHAR_H -DHAS_ISW_FUNCS
+#if ScoOsMouse
+# define ServerExtraSysLibs     $(CBRT) -lm -levent SCODynamicFlags
+# define ServerExtraDefines     ServerCCOptions -DUSE_OSMOUSE XFree86ServerDefines
+#else
+# define ServerExtraSysLibs     $(CBRT) -lm SCODynamicFlags
+# define ServerExtraDefines     ServerCCOptions XFree86ServerDefines
+#endif
+#define ExtraLibraries          -lsocket
+#define NeedWidePrototypes      NO
+#define ServerOSDefines         -DDDXTIME
+#define ToolkitStringsABIOptions -intelabi
+#define ThreadedX               NO
+#define HasThreadSafeAPI        NO
+#define HasNdbm                 YES
+#define HasVFork                YES
+#define HasPutenv               YES
+#define ExecableScripts         YES
+#define HasShadowPasswd         YES
+#define ManSourcePath           $(MANPATH)/cat.
+#define Malloc0ReturnsNull      YES
+#define RemoveDSDENroffMacros   NO
+#define CompressManPages        YES
+
+#ifndef HasLibCrypt
+# define HasLibCrypt            YES
+# define SpecialLibCrypt        -lcrypt
+#endif
+#define PosixLibraries          /**/
+
+#ifndef ForceNormalLib
+# define ForceNormalLib         YES 
+#endif
+
+#define SharedLibXmu            NO
+#define SystemV                 YES
+#define LdCombineFlags          -r 
+
+#define HasLdRunPath            YES
+#define HasPoll                 NO
+#define PatheticCpp             YES
+
+#define ArCmdBase               ar
+#define AsCmd                   as
+#define CppCmd                  /lib/cpp
+#define LdCmd                   ld
+#define LexCmd                  lex
+#define MakeCmd	                make
+#define YaccCmd                 yacc
+
+#define DefaultUserPath         /bin:/usr/bin:$(BINDIR):/usr/bin/X11:/usr/local/bin:/etc
+#define DefaultSystemPath       /etc:/bin:/usr/bin:$(BINDIR):/usr/bin/X11
+
+/*
+ * If you are compiling on an SCO Open Server release prior to 5.0.2,
+ * you may need to remove -DLOCALCONN. There have been reports of it
+ * working on some 5.0.0 machines but not others.
+ */
+#define ConnectionFlags         -DLOCALCONN -DTCPCONN -DUNIXCONN
+
+#define InstallManPageAliases(file,destdir,aliases)                     @@\
+install.man::                                                           @@\
+        @(SUFFIX=`echo $(DESTDIR)destdir/file.* | cut -f3,4 -d.`; \     @@\
+        for i in aliases; do (set -x; \                                 @@\
+        $(RM) $(DESTDIR)destdir/$$i.*; \                                @@\
+        (cd $(DESTDIR)destdir; $(LN) file.$${SUFFIX} \                  @@\
+        $$i.$${SUFFIX})); \                                             @@\
+        done)
+
+#include <scoLib.rules>  /* minor changes to sv4Lib.rules */
+#include <sv4Lib.rules>
+
+#ifdef i386Architecture
+#include <xfree86.cf>
+#endif
+

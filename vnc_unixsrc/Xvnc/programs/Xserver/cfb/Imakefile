@@ -1,0 +1,252 @@
+XCOMM $XConsortium: Imakefile /main/67 1996/12/02 10:19:53 lehors $
+XCOMM $XFree86: xc/programs/Xserver/cfb/Imakefile,v 3.9.2.1 1997/05/03 09:45:03 dawes Exp $
+#include <Server.tmpl>
+
+#ifndef PixelSize
+#define PixelSize 8
+#endif
+
+#if PixelSize == 8
+/* cfb8cppl.c MUST come last to avoid confusing makedepend */
+PSZSRCS = cfb8bit.c cfbteblt8.c cfbglrop8.c cfbpush8.c cfbrctstp8.c cfb8cppl.c
+PSZOBJS = cfb8bit.o cfbteblt8.o cfbglrop8.o cfbpush8.o cfbrctstp8.o cfb8cppl.o
+#ifdef MipsArchitecture
+#ifndef ArcArchitecture
+#ifndef Mips64Architecture
+STIPPLESRC = stipmips.s stipmipste.s
+STIPPLEOBJ = stipmips.o stipmipste.o
+STIPPLEDEF = -DHAS_STIPPLE_CODE
+#endif
+#endif
+#endif
+#ifdef SparcArchitecture
+STIPPLESRC = stipsparc.s stipsparcte.s
+STIPPLEOBJ = stipsparc.o stipsparcte.o
+STIPPLEDEF = -DHAS_STIPPLE_CODE
+#endif
+#endif
+
+#if PixelSize == 32
+#ifdef SparcArchitecture
+STIPPLESRC = stipsprc32.s stipsprcte32.s
+STIPPLEOBJ = stipsprc32.o stipsprcte32.o
+STIPPLEDEF = -DHAS_STIPPLE_CODE
+#endif
+#endif
+
+
+SRCS =	 cfbgc.c cfbrrop.c cfbwindow.c \
+	 cfbpntwin.c cfbmskbits.c cfbpixmap.c cfbbitblt.c \
+	 cfbfillsp.c cfbsetsp.c cfbscrinit.c cfballpriv.c \
+	 cfbgetsp.c cfbfillrct.c \
+	 cfbsolidC.c cfbsolidX.c cfbsolidG.c \
+	 cfbtileoddC.c cfbtileoddG.c cfbtile32C.c cfbtile32G.c \
+	 cfbcmap.c cfbzerarcC.c cfbzerarcX.c cfbzerarcG.c \
+	 cfbfillarcC.c cfbfillarcG.c \
+	 cfbigblt8.c cfbglblt8.c cfbtegblt.c cfbbstore.c \
+	 cfbbltC.c cfbbltX.c cfbbltO.c cfbbltG.c \
+	 cfbpolypnt.c \
+	 cfbbres.c cfbline.c cfbhrzvert.c cfbbresd.c cfbimage.c cfbseg.c \
+	 cfb8lineCO.c cfb8lineX.c cfb8lineG.c cfb8lineCP.c \
+	 cfb8segC.c cfb8segX.c cfb8segG.c cfb8segCS.c \
+	 cfbply1rctC.c cfbply1rctG.c $(PSZSRCS)
+
+OBJS =   cfbgc.o cfbrrop.o cfbwindow.o \
+	 cfbgetsp.o cfbfillrct.o \
+	 cfbsolidC.o cfbsolidX.o cfbsolidG.o \
+	 cfbtileoddC.o cfbtileoddG.o cfbtile32C.o cfbtile32G.o \
+	 cfbfillsp.o cfbsetsp.o cfbscrinit.o cfballpriv.o \
+	 cfbpntwin.o cfbmskbits.o cfbpixmap.o \
+	 cfbcmap.o cfbzerarcC.o cfbzerarcX.o cfbzerarcG.o \
+	 cfbfillarcC.o cfbfillarcG.o \
+	 cfbigblt8.o cfbglblt8.o cfbtegblt.o cfbbstore.o \
+	 cfbpolypnt.o \
+	 cfbbres.o cfbline.o cfbhrzvert.o cfbbresd.o cfbimage.o cfbseg.o \
+	 cfb8lineCO.o cfb8lineX.o cfb8lineG.o cfb8lineCP.o \
+	 cfb8segCS.o cfb8segX.o cfb8segG.o cfb8segC.o \
+	 cfbbitblt.o cfbbltC.o cfbbltX.o cfbbltO.o cfbbltG.o \
+	 cfbply1rctC.o cfbply1rctG.o $(PSZOBJS) $(STIPPLEOBJ)
+
+#ifdef XFree86Version
+EXTRAINCLUDES = -I../hw/xfree86/common
+EXTRADEFINES  = -DXFREE86
+#endif
+   INCLUDES = -I. -I../cfb -I../mfb -I../mi -I../include -I$(XINCLUDESRC) \
+	      -I$(FONTINCSRC) $(EXTRAINCLUDES)
+   LINTLIBS = ../dix/llib-ldix.ln ../os/llib-los.ln \
+	     ../mfb/llib-lmfb.ln ../mi/llib-lmi.ln
+    DEFINES = -DPSZ=PixelSize $(EXTRADEFINES)
+
+NormalLibraryObjectRule()
+NormalLibraryTarget(cfb,$(OBJS))
+LintLibraryTarget(cfb,$(SRCS))
+
+NormalLintTarget($(SRCS))
+
+#ifdef LinkDirectory
+
+LinkSourceFile(cfb.h,LinkDirectory)
+LinkSourceFile(cfbmap.h,LinkDirectory)
+LinkSourceFile(cfballpriv.c,LinkDirectory)
+LinkSourceFile(cfbbitblt.c,LinkDirectory)
+LinkSourceFile(cfbblt.c,LinkDirectory)
+LinkSourceFile(cfbbres.c,LinkDirectory)
+LinkSourceFile(cfbbresd.c,LinkDirectory)
+LinkSourceFile(cfbbstore.c,LinkDirectory)
+LinkSourceFile(cfbcmap.c,LinkDirectory)
+LinkSourceFile(cfbfillarc.c,LinkDirectory)
+LinkSourceFile(cfbfillrct.c,LinkDirectory)
+LinkSourceFile(cfbfillsp.c,LinkDirectory)
+LinkSourceFile(cfbgc.c,LinkDirectory)
+LinkSourceFile(cfbgetsp.c,LinkDirectory)
+LinkSourceFile(cfbhrzvert.c,LinkDirectory)
+LinkSourceFile(cfbimage.c,LinkDirectory)
+LinkSourceFile(cfbline.c,LinkDirectory)
+LinkSourceFile(cfb8line.c,LinkDirectory)
+LinkSourceFile(cfbmskbits.c,LinkDirectory)
+LinkSourceFile(cfbmskbits.h,LinkDirectory)
+LinkSourceFile(cfbpixmap.c,LinkDirectory)
+LinkSourceFile(cfbply1rct.c,LinkDirectory)
+LinkSourceFile(cfbpntwin.c,LinkDirectory)
+LinkSourceFile(cfbpolypnt.c,LinkDirectory)
+LinkSourceFile(cfbrrop.c,LinkDirectory)
+LinkSourceFile(cfbrrop.h,LinkDirectory)
+LinkSourceFile(cfbscrinit.c,LinkDirectory)
+LinkSourceFile(cfbsetsp.c,LinkDirectory)
+LinkSourceFile(cfbsolid.c,LinkDirectory)
+LinkSourceFile(cfbigblt8.c,LinkDirectory)
+LinkSourceFile(cfbglblt8.c,LinkDirectory)
+LinkSourceFile(cfbtegblt.c,LinkDirectory)
+LinkSourceFile(cfbtileodd.c,LinkDirectory)
+LinkSourceFile(cfbtile32.c,LinkDirectory)
+LinkSourceFile(cfbwindow.c,LinkDirectory)
+LinkSourceFile(cfbzerarc.c,LinkDirectory)
+LinkSourceFile(cfb8bit.h,LinkDirectory)
+#if PixelSize == 8
+LinkSourceFile(cfb8bit.c,LinkDirectory)
+LinkSourceFile(cfb8cppl.c,LinkDirectory)
+LinkSourceFile(cfbpush8.c,LinkDirectory)
+LinkSourceFile(cfbrctstp8.c,LinkDirectory)
+LinkSourceFile(cfbteblt8.c,LinkDirectory)
+#ifdef MipsArchitecture
+LinkSourceFile(stipmips.s,LinkDirectory)
+#endif
+#ifdef SparcArchitecture
+LinkSourceFile(stipsparc.s,LinkDirectory)
+#endif
+#endif
+#if PixelSize == 32
+#ifdef SparcArchitecture
+LinkSourceFile(stipsprc32.s,LinkDirectory)
+#endif
+#endif
+#endif
+
+ObjectFromSpecialSource(cfbseg,cfbline,-DPOLYSEGMENT)
+
+ObjectFromSpecialSource(cfbfillarcC,cfbfillarc,-DRROP=GXcopy)
+ObjectFromSpecialSource(cfbfillarcG,cfbfillarc,-DRROP=GXset)
+
+ObjectFromSpecialSource(cfbzerarcC,cfbzerarc,-DRROP=GXcopy)
+ObjectFromSpecialSource(cfbzerarcX,cfbzerarc,-DRROP=GXxor)
+ObjectFromSpecialSource(cfbzerarcG,cfbzerarc,-DRROP=GXset)
+
+ObjectFromSpecialSource(cfbbltC,cfbblt,-DMROP=Mcopy)
+ObjectFromSpecialSource(cfbbltX,cfbblt,-DMROP=Mxor)
+ObjectFromSpecialSource(cfbbltO,cfbblt,-DMROP=Mor)
+ObjectFromSpecialSource(cfbbltG,cfbblt,-DMROP=0)
+
+ObjectFromSpecialSource(cfbsolidC,cfbsolid,-DRROP=GXcopy)
+ObjectFromSpecialSource(cfbsolidX,cfbsolid,-DRROP=GXxor)
+ObjectFromSpecialSource(cfbsolidG,cfbsolid,-DRROP=GXset)
+
+ObjectFromSpecialSource(cfbtileoddC,cfbtileodd,-DMROP=Mcopy)
+ObjectFromSpecialSource(cfbtileoddG,cfbtileodd,-DMROP=0)
+
+ObjectFromSpecialSource(cfbtile32C,cfbtile32,-DMROP=Mcopy)
+ObjectFromSpecialSource(cfbtile32G,cfbtile32,-DMROP=0)
+
+ObjectFromSpecialSource(cfb8lineCO,cfb8line,-DRROP=GXcopy)
+ObjectFromSpecialSource(cfb8lineCP,cfb8line,-DRROP=GXcopy -DPREVIOUS)
+ObjectFromSpecialSource(cfb8lineX,cfb8line,-DRROP=GXxor)
+ObjectFromSpecialSource(cfb8lineG,cfb8line,-DRROP=GXset)
+
+ObjectFromSpecialSource(cfb8segCS,cfb8line,-DRROP=GXcopy -DPOLYSEGMENT -DWIDTH_SHIFT)
+ObjectFromSpecialSource(cfb8segC,cfb8line,-DRROP=GXcopy -DPOLYSEGMENT)
+ObjectFromSpecialSource(cfb8segX,cfb8line,-DRROP=GXxor -DPOLYSEGMENT)
+ObjectFromSpecialSource(cfb8segG,cfb8line,-DRROP=GXset -DPOLYSEGMENT)
+
+ObjectFromSpecialSource(cfbply1rctC,cfbply1rct,-DRROP=GXcopy)
+ObjectFromSpecialSource(cfbply1rctG,cfbply1rct,-DRROP=GXset)
+
+SpecialCObjectRule(cfbglblt8,$(_NOOP_),$(STIPPLEDEF))
+SpecialCObjectRule(cfbpixmap,$(ICONFIGFILES),$(_NOOP_))
+SpecialCObjectRule(cfbcmap,$(ICONFIGFILES),$(EXT_DEFINES) $(GLX_DEFINES))
+
+#if PixelSize == 8
+ObjectFromSpecialSource(cfbglrop8,cfbglblt8,-DGLYPHROP)
+
+#ifdef MipsArchitecture
+stipmipste.s: stipmips.s
+	$(RM) $@
+	$(LN) stipmips.s stipmipste.s
+clean::
+	$(RM) stipmipste.s
+
+stipmipste.o: stipmipste.s
+	$(AS) -o $@ -DTETEXT stipmipste.s
+#endif
+
+#ifdef SparcArchitecture
+stipsparcte.s: stipsparc.s
+	$(RM) $@
+	$(LN) stipsparc.s stipsparcte.s
+clean::
+	$(RM) stipsparcte.s
+
+stipsparc.o: stipsparc.s
+	$(CPP) AsmDefines stipsparc.s | $(AS) -o $@ -
+
+stipsparcte.o: stipsparcte.s
+	$(CPP) AsmDefines -DTETEXT stipsparcte.s | $(AS) -o $@ -
+#endif
+#endif
+
+#if PixelSize == 32
+#ifdef SparcArchitecture
+stipsprcte32.s: stipsprc32.s
+	$(RM) $@
+	$(LN) stipsprc32.s stipsprcte32.s
+clean::
+	$(RM) stipsprcte32.s
+
+stipsprc32.o: stipsprc32.s
+	$(CPP) AsmDefines stipsprc32.s | $(AS) -o $@ -
+
+stipsprcte32.o: stipsprcte32.s
+	$(CPP) AsmDefines -DTETEXT stipsprcte32.s | $(AS) -o $@ -
+#endif
+#endif
+
+#if PixelSize == 32
+InstallLinkKitNamedLibrary(cfb,cfb32,$(LINKKITDIR)/lib)
+#endif
+#if PixelSize == 24
+InstallLinkKitNamedLibrary(cfb,cfb24,$(LINKKITDIR)/lib)
+#endif
+#if PixelSize == 16
+InstallLinkKitNamedLibrary(cfb,cfb16,$(LINKKITDIR)/lib)
+#endif
+#if PixelSize == 8
+InstallLinkKitLibrary(cfb,$(LINKKITDIR)/lib)
+InstallLinkKitNonExecFile(cfb.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(cfb8bit.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(cfbmap.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(cfbmskbits.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(cfbrrop.h,$(LINKKITDIR)/include)
+#endif
+
+#ifndef OS2Architecture
+DependTarget()
+#endif
+

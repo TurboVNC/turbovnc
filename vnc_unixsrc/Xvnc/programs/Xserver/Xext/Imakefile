@@ -1,0 +1,80 @@
+XCOMM $XConsortium: Imakefile /main/56 1996/11/26 16:07:54 swick $
+XCOMM $XFree86: xc/programs/Xserver/Xext/Imakefile,v 3.11.2.1 1998/01/23 12:35:11 dawes Exp $
+#include <Server.tmpl>
+
+#if HasShm
+  SHMSRCS = shm.c
+  SHMOBJS = shm.o
+#endif
+
+#if BuildScreenSaverExt
+  SCRNSAVSRC = saver.c
+  SCRNSAVOBJ = saver.o
+#endif
+
+#if BuildXF86VidModeExt
+ VIDMODESRCS = xf86vmode.c
+ VIDMODEOBJS = xf86vmode.o
+#endif
+
+#if BuildXF86MiscExt
+XF86MISCSRCS = xf86misc.c
+XF86MISCOBJS = xf86misc.o
+#endif
+
+#if BuildXF86DGA
+ XF86DGASRCS = xf86dga.c
+ XF86DGAOBJS = xf86dga.o
+#endif
+
+#if BuildDPMSExt
+ DPMSSRCS = dpms.c
+ DPMSOBJS = dpms.o
+#endif
+
+#if BuildAppgroup
+  APPGROUPSRCS = appgroup.c
+  APPGROUPOBJS = appgroup.o
+#endif
+#if BuildXCSecurity
+    SECURITYSRCS = security.c
+    SECURITYOBJS = security.o
+ SERVERCONFIGDIR = ServerConfigDir
+   POLICYFILEDEF = -DDEFAULTPOLICYFILE=\"$(SERVERCONFIGDIR)/SecurityPolicy\"
+#endif
+
+       SRCS = shape.c $(SHMSRCS) mbuf.c \
+              mitmisc.c xtest.c xtest1di.c xtest1dd.c sleepuntil.c \
+	      bigreq.c sync.c $(SCRNSAVSRC) xcmisc.c $(VIDMODESRCS) \
+	      $(XF86MISCSRCS) $(XF86DGASRCS) $(SECURITYSRCS) \
+	      $(DPMSSRCS) \
+	      $(APPGROUPSRCS) xprint.c
+       OBJS = shape.o $(SHMOBJS) mbuf.o \
+              mitmisc.o xtest.o xtest1di.o xtest1dd.o sleepuntil.o \
+              bigreq.o sync.o $(SCRNSAVOBJ) xcmisc.o $(VIDMODEOBJS) \
+	      $(XF86MISCOBJS) $(XF86DGAOBJS) $(SECURITYOBJS) \
+	      $(DPMSOBJS) \
+	      $(APPGROUPOBJS) xprint.o
+
+XF86INCLUDES = -I../hw/xfree86/common -I../hw/xfree86/os-support
+    INCLUDES = -I../include -I$(XINCLUDESRC) -I$(EXTINCSRC) $(XF86INCLUDES)
+    LINTLIBS = ../dix/llib-ldix.ln ../os/llib-los.ln
+
+NormalLibraryObjectRule()
+NormalLibraryTarget(ext,$(OBJS))
+LintLibraryTarget(ext,$(SRCS))
+NormalLintTarget($(SRCS))
+
+#if BuildXCSecurity
+SpecialCObjectRule(security,$(ICONFIGFILES),$(POLICYFILEDEF))
+#endif
+
+InstallLinkKitLibrary(ext,$(LINKKITDIR)/lib)
+
+LinkVarDirectory(xserver,.,xserver,.)
+
+#if BuildXCSecurity && InstallSecurityConfig
+InstallNonExecFile(SecurityPolicy,$(SERVERCONFIGDIR))
+#endif
+
+DependTarget()

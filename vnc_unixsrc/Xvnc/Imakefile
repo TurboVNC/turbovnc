@@ -1,0 +1,192 @@
+XCOMM $XConsortium: Imakefile /main/137 1996/10/08 07:38:14 swick $
+XCOMM $XFree86: xc/Imakefile,v 3.11.2.2 1998/02/28 04:47:00 dawes Exp $
+#define IHaveSubdirs
+#define PassCDebugFlags CDEBUGFLAGS="$(CDEBUGFLAGS)"
+
+RELEASE = "Release 6.3"
+#ifndef OSName
+#define OSName Unknown Operating System!
+#endif
+
+#if !BuildServersOnly
+#if BuildFonts
+        FONTSDIR = fonts
+#endif
+#ifndef Win32Architecture
+        DOCSDIR = doc
+        NLSSUBDIR = nls
+#endif
+#endif
+
+        SUBDIRS = include config lib $(NLSSUBDIR) \
+                  programs $(FONTSDIR) $(DOCSDIR)
+  LNINSTALLDIRS = lib
+
+#if HasParallelMake
+#ifdef ParallelDefines
+        PARALLELOPTS = ParallelDefines
+#endif
+#endif
+
+MakeSubdirs($(SUBDIRS))
+
+MakeLintSubdirs($(LNINSTALLDIRS),install.ln,install.ln)
+
+MakeLintSubdirs($(LNINSTALLDIRS),external.ln,lintlib)
+
+DependSubdirs($(SUBDIRS))
+
+#define IHaveSpecialMakefileTarget
+
+#ifndef Win32Architecture
+#ifndef OS2Architecture
+VerifyOS::
+	@echo ""
+	@echo Building on OSName "("OSMajorVersion"."OSMinorVersion"."OSTeenyVersion")."
+	@echo ""
+#ifdef LinuxArchitecture
+	@echo libc version LinuxCLibMajorVersion"."LinuxCLibMinorVersion"."LinuxCLibTeenyVersion
+	@echo ""
+#endif
+
+includes::
+	MakeDir($(BUILDINCDIR))
+	MakeDir($(BUILDBINDIR))
+
+XCOMM
+XCOMM Watch out!!!  Make sure you do make includes after removing X11....
+XCOMM
+clean::
+	$(RM) -r $(BUILDINCDIR)
+	$(RM) -r $(BUILDLIBDIR)
+	$(RM) -r $(BUILDBINDIR)
+
+World::
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) $(PARALLELOPTS) all
+
+Everything::
+	@echo ""
+	@echo Rebuilding $(RELEASE) of the X Window System.
+	@echo ""
+	@date
+	@echo ""
+	cd $(IMAKESRC) && if [ -f Makefile ]; then \
+	    $(MAKE) $(MFLAGS) BOOTSTRAPCFLAGS="$(BOOTSTRAPCFLAGS)"; \
+	else \
+	    $(MAKE) $(MFLAGS) -f Makefile.ini BOOTSTRAPCFLAGS="$(BOOTSTRAPCFLAGS)"; \
+	fi
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) Makefiles
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) includes
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) depend
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) $(WORLDOPTS)
+	@echo ""
+	@date
+	@echo ""
+	@echo Rebuild of $(RELEASE) of the X Window System complete.
+	@echo ""
+
+XCOMM clean out link tree looking for stuff that should get checked in
+dangerous_strip_clean::
+	$(MAKE) -k clean
+	find . -type l -exec rm {} \;
+	find . \( \! \( -type d -o -name Makefile \) \) -print
+
+#else /* OS2Architecture */
+VerifyOS::
+	@echo :
+	@echo Building on OSName.
+	@echo :
+
+includes::
+	MakeDir($(subst /,\,$(BUILDINCDIR)))
+
+XCOMM
+XCOMM Watch out!!!  Make sure you do make includes after removing X11....
+XCOMM
+clean::
+	$(RM) -r $(BUILDINCDIR)
+	$(RM) -r $(BUILDLIBDIR)
+
+Everything::
+	@echo :
+	@echo Building $(RELEASE) of the X Window System on OS/2
+	@echo :
+	@echo :
+	\indir $(IMAKESRC) $(MAKE) $(MFLAGS) SHELL= -f Makefile.ini BOOTSTRAPCFLAGS=-Zexe
+	if exist Makefile.bak del Makefile.bak
+	if exist MAkefile ren Makefile Makefile.bak
+	$(MAKE) $(MFLAGS) -f Makefile.bak Makefile
+	$(MAKE) $(MFLAGS) SHELL= VerifyOS
+	$(MAKE) $(MFLAGS) SHELL= Makefiles
+	$(MAKE) $(MFLAGS) SHELL= clean
+	$(MAKE) $(MFLAGS) SHELL= includes
+	$(MAKE) $(MFLAGS) SHELL= depend
+	$(MAKE) $(MFLAGS)
+	@echo :
+	@echo :
+	@echo Rebuild of $(RELEASE) of the X Window System complete.
+	@echo :
+
+#ifdef ProjectRoot
+install::
+	MakeDir($(subst /,\,$(PROJECTROOT)))
+#endif
+
+install::
+	MakeDir($(subst /,\,$(INCROOT)))
+	MakeDir($(subst /,\,$(USRLIBDIR)))
+	MakeDir($(subst /,\,$(LIBDIR)))
+
+#endif
+#else /* not Win32Architecture else */
+VerifyOS::
+	@echo :
+	@echo Building on OSName.
+	@echo :
+
+includes::
+	MakeDir($(BUILDINCDIR:/=\))
+
+XCOMM
+XCOMM Watch out!!!  Make sure you do make includes after removing X11....
+XCOMM
+clean::
+	RmTreeCmd $(BUILDINCDIR:/=\)
+	RmTreeCmd $(BUILDLIBDIR:/=\)
+
+Everything::
+	@echo :
+	@echo Rebuilding $(RELEASE) of the X Window System.
+	@echo :
+	@echo :
+	cd $(IMAKESRC)
+	$(MAKE) $(MFLAGS) -f Makefile.ini imake.exe
+	cd ..\..
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) Makefiles
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) includes
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) depend
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) $(WORLDOPTS)
+	@echo :
+	@echo :
+	@echo Rebuild of $(RELEASE) of the X Window System complete.
+	@echo :
+
+#ifdef ProjectRoot
+install::
+	MakeDir($(PROJECTROOT:/=\))
+#endif
+
+install::
+	MakeDir($(INCROOT:/=\))
+	MakeDir($(USRLIBDIR:/=\))
+	MakeDir($(LIBDIR:/=\))
+
+#endif /* not Win32Architecture else */
+
+#ifndef MakeManKeywords
+#define MakeManKeywords YES	/* install.man rebuilds "man -k" database? */
+#endif
+
+#undef BootstrapCleanSubdirs
+#define BootstrapCleanSubdirs BOOTSTRAPSUBDIRS="$(BOOTSTRAPSUBDIRS)"
+BOOTSTRAPSUBDIRS = imake makedepend

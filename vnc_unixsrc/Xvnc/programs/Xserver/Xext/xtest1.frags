@@ -1,0 +1,90 @@
+There are several code fragments that need to be placed in the device
+dependent part of the server.  These are described below.  These code
+fragments are device and implementation dependent.
+
+This code fragment should go in your ddx InitInput() routine:
+
+#ifdef XTESTEXT1
+extern KeyCode xtest_command_key;
+#endif
+
+#ifdef XTESTEXT1
+    xtest_command_key = <whatever-is-a-good-keycode-for-your-keyboard>;
+#endif
+
+This code fragment should go at the front of the file that handles
+keyboards:
+
+#ifdef XTESTEXT1
+/*
+ * defined in xtestext1di.c
+ */
+extern int	on_steal_input;
+extern Bool	XTestStealKeyData();
+#endif XTESTEXT1
+
+This code fragment should go in the function that parses input from the
+keyboard or pointer after you know what input action has occurred, but before
+you have told the server about it.  If conditionalizes the actual function
+call to pass the information on:
+
+#ifdef XTESTEXT1
+	if (!on_steal_input ||
+	    XTestStealKeyData(code, direction, dev_type, x, y))
+#endif /* XTESTEXT1 */
+	handle_device_event(...);
+
+This code fragment should go in the function that handles mouse motion after
+you have figured out how much the mouse has moved:
+
+#ifdef XTESTEXT1
+	if (on_steal_input)
+	    XTestStealMotionData(dx, dy, dev, x, y);
+#endif XTESTEXT1
+
+
+This code fragment should go at the front of the os-specific code where
+you wait (by doing a select on the socket in our implementation) for
+something to happen:
+
+#ifdef	XTESTEXT1
+extern int	playback_on;
+void XTestComputeWaitTime();
+#endif  XTESTEXT1
+
+These code fragments should go in the os-specific code on both sides of
+where you wait (by doing a select on the socket in our implementation)
+for something to happen:
+
+#ifdef XTESTEXT1
+	    if (playback_on)
+		    XTestComputeWaitTime(wt = &waittime);
+#endif XTESTEXT1
+	    ... code to do select ...
+	    WakeupHandler(i, LastSelectMask);
+#ifdef XTESTEXT1
+	    if (playback_on)
+		    i = XTestProcessInputAction(i, &waittime);
+#endif XTESTEXT1
+
+
+You also need to implement the following routines (documentation
+is needed; for now, see server/ddx/hp/hp/x_hil.c):
+
+void
+XTestGenerateEvent(dev_type, keycode, keystate, mousex, mousey)
+	int	dev_type;
+	int	keycode;
+	int	keystate;
+	int	mousex;
+	int	mousey;
+
+void
+XTestGetPointerPos(fmousex, fmousey)
+	short *fmousex, *fmousey;
+
+void
+XTestJumpPointer(jx, jy, dev_type)
+	int	jx;
+	int	jy;
+	int	dev_type;

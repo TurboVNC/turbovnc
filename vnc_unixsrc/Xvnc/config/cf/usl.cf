@@ -1,0 +1,112 @@
+XCOMM platform:  $TOG: usl.cf /main/50 1997/04/17 14:11:39 barstow $
+
+
+
+
+XCOMM platform:  $XFree86: xc/config/cf/usl.cf,v 3.13.2.1 1997/05/03 09:43:10 dawes Exp $
+
+#ifndef OSName
+# define OSName		DefaultOSName
+#endif
+#ifndef OSMajorVersion
+# define OSMajorVersion	DefaultOSMajorVersion
+#endif
+#ifndef OSMinorVersion
+# define OSMinorVersion	DefaultOSMinorVersion
+#endif
+#ifndef OSTeenyVersion
+# define OSTeenyVersion	DefaultOSTeenyVersion
+#endif
+XCOMM operating system: OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVersion)
+
+#ifndef  CcCmd
+# define CcCmd			/usr/ccs/bin/cc
+#endif
+#ifndef  CplusplusCmd
+# define CplusplusCmd		/usr/ccs/bin/CC
+#endif
+#ifndef  CplusplusFilt
+# define CplusplusFilt		/usr/ccs/bin/c++filt
+#endif
+#ifndef  CplusplusDependIncludes
+# define CplusplusDependIncludes	-I/usr/include/CC
+#endif
+
+#define BootstrapCFlags		/* none needed */
+#define StandardDefines		-DUSL -DSVR4 -Di386
+#define NeedWidePrototypes	NO	/* experimental */
+#define ServerExtraDefines	-D__USLC__ XFree86ServerDefines
+#define ServerOSDefines		-DDDXTIME XFree86ServerOSDefines
+#define ToolkitStringsABIOptions -intelabi
+#if OSMajorVersion < 2
+#define XawI18nDefines		-DHAS_WCTYPE_H -DHAS_ISW_FUNCS
+#else
+#define XawI18nDefines		-DHAS_WCHAR_H -DHAS_ISW_FUNCS
+#endif
+#if OSTeenyVersion > 1
+# define ExtraLibraries		-lsocket -lnsl -lgen -lw
+# define ThreadedX		YES
+# define HasThreadSafeAPI	NO
+/* UnixWare does not have MT-safe pwd routines. */
+# define MTSafeAPIDefines	\
+-DXUSE_MTSAFE_API -DXNO_MTSAFE_PWDAPI -DXNO_MTSAFE_GRPAPI
+# define SystemMTDefines	-D_REENTRANT
+# define ThreadsLibraries	-lthread
+# define ThreadsCplusplusLibraries	-lthread
+# define DefaultCCOptions	-W0,-2A -Xa -Dasm=__asm
+#endif
+#define BuildLibPathVar	  LD_LIBRARY_PATH
+
+#ifndef UseExportLists
+# define UseExportLists YES
+#endif
+
+#define GencatFlags		-m
+
+#include <svr4.cf>
+
+/*
+ * When generating templates the UnixWare 2.02 C++ compiler leaves
+ * protected .i files behind.  Remove them so other people can
+ * compile too.
+ */
+#ifndef ObjectCplusplusCompile
+#define ObjectCplusplusCompile(options) RemoveFiles($@ $*.i)		@@\
+	ClearmakeOSName \
+	$(CXX) -c $(CXXFLAGS) options $*.CCsuf
+#endif
+
+/* USL does not have a shared regex library. */
+#define UseLocalRegex		YES
+
+#define XmDefines		\
+	-DNO_REGCOMP -DNEED_STRCASECMP \
+	-DSUPPORT_ZERO_WIDTH -DHAS_WIDECHAR_FUNCTIONS
+#define DtSvcDefines		-DXK_MISCELLANY -DMULTIBYTE -DNO_REGCOMP
+#define DtSearchDefines		-DI18N_MSG DtSvcDefines
+#define DtWidgetDefines		DtSearchDefines
+#define DtPrintDefines		DtSearchDefines
+
+#define HasStrcasecmp		NO
+
+/* For DtHelp's TIFF processing routines. */
+#define LSBBitOrder		YES
+
+#define ArchitectureDefines	-DUSL_ARCHITECTURE
+
+#define ExportListGenSource	elistgen.usl
+#define ShlibExportListOpt(filename)	Concat(-Bexport:,filename)
+
+/* Remove -lc because select.o is not relocatable. */
+/* Remove -lgen (and set UseLocalRegex) because no shared library exists. */
+#define SharedXmReqs $(LDPRELIBS) SharedXReqs -lsocket -lnsl -lw
+#define SharedMrmReqs $(LDPRELIBS) $(XMLIB) SharedXReqs -lsocket -lnsl -lw
+#define SharedUilReqs $(LDPRELIBS) $(MRESOURCELIB) $(XMLIB) SharedXReqs -lsocket -lnsl -lw
+  
+/* <X11/Xos_r.h> requires process locking for missing _r functions */
+#define TtClientLibs $(TTLIB) $(XTOOLLIB) $(XLIB)
+#define TtClientDepLibs $(DEPTTLIB) $(DEPXTOOLLIB) $(DEPXLIB)
+
+#define CdeProjectDefines \
+	-DANSICPP -DMULTIBYTE -DNLS16 -DNEED_STRCASECMP \
+	-DOSMAJORVERSION=OSMajorVersion -DOSMINORVERSION=OSMinorVersion

@@ -1,0 +1,53 @@
+XCOMM $XConsortium: Imakefile,v 1.5 93/09/04 16:43:32 rws Exp $
+
+#include <Server.tmpl>
+
+INCLUDES = -I$(FONTINCSRC) -I../include
+
+SRCS =          \
+       arith.c         \
+       curves.c        \
+       fontfcn.c       \
+       hints.c         \
+       lines.c         \
+       objects.c       \
+       paths.c         \
+       regions.c       \
+       scanfont.c      \
+       spaces.c        \
+       t1funcs.c       \
+       t1info.c        \
+       t1io.c          \
+       t1malloc.c      \
+       t1snap.c        \
+       t1stub.c       \
+       token.c         \
+       type1.c         \
+       util.c
+
+OBJS =          \
+       arith.o         \
+       curves.o        \
+       fontfcn.o       \
+       hints.o         \
+       lines.o         \
+       objects.o       \
+       paths.o         \
+       regions.o       \
+       scanfont.o      \
+       spaces.o        \
+       t1funcs.o       \
+       t1info.o        \
+       t1io.o          \
+       t1malloc.o      \
+       t1snap.o        \
+       t1stub.o       \
+       token.o         \
+       type1.o         \
+       util.o
+
+SubdirLibraryRule($(OBJS))
+NormalLibraryObjectRule()
+NormalLintTarget($(SRCS))
+
+DependTarget()

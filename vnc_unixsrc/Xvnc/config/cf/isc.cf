@@ -1,0 +1,214 @@
+XCOMM $XConsortium: isc.cf /main/1 1996/10/31 14:45:18 kaleb $
+
+
+
+XCOMM platform:  $XFree86: xc/config/cf/isc.cf,v 3.11.2.1 1998/02/15 16:08:33 hohndel Exp $
+
+#ifndef HasGcc2
+#define HasGcc2			YES
+#endif
+
+/* INTERACTIVE UNIX SYSTEM (IUS) Version 3.x 4.x */
+
+#if IscVersion > 300
+# define ISCVerDef -DISC40 -DISC30
+# define OSVendor		(IUS Version 4.x)
+#else
+# if IscVersion == 300
+#  define ISCVerDef -DISC30
+#  define OSVendor		(ISC Version 3.0)
+# else
+#  if IscVersion == 202
+#   define OSVendor		(ISC Version 2.0.2)
+#   define ISCVerDef -DISC202
+#  else
+#   define OSVendor		(ISC Version 2.2.1)
+#   define ISCVerDef -DISC22
+#  endif
+# endif
+#endif
+
+/* gcc 2.7.2 tested Optimization Flags                               */
+#ifndef DefaultGcc2i386Opt
+# define DefaultGcc2i386Opt	-m486 -O2 -fno-strength-reduce -malign-loops=2 -malign-jumps=2 -malign-functions=2
+/* -fomit-frame-pointer */ 
+#endif
+
+/* For a POSIXized build on Interactive maybe needed to use gcc2.7.2 */
+#ifndef UsePosix
+# define UsePosix		YES
+#endif
+
+/* ISC 4.1Mu 
+#define IscCompileVersion	410
+*/
+
+#if !defined(IscCompileVersion) && IscVersion < 410
+/* ISC 4.0 compatible */
+#define IscCompileVersion	400
+#endif
+
+#if IscCompileVersion == 400
+
+/* binaries which should run on ISC 4.0 or for the build on a real 4.0 System */
+# define UseChmod		YES
+
+/* for compatibility with ISC 4.0 - reported by Ami Fischmann            */
+/* troubles when linking with libX11.a build on ISC4.1 and used with 4.0 */
+# define HasSnprintf		NO
+# define UseXwctomb		YES
+
+#endif
+
+#if defined(UseXwctomb)
+# define XwctombDefine	-DUSE_XMBTOWC 
+#else
+# define XwctombDefine	
+#endif 
+
+#if defined(UseChmod)
+# define IscCompatDefines	XwctombDefine -DUSE_CHMOD
+#else
+# define IscCompatDefines	XwctombDefine
+#endif 
+
+#ifdef UsePosix
+# define PosixDefines		-posix -D_SYSV3 -D_POSIX_SOURCE 
+#else
+# define PosixDefines
+#endif
+
+#define OSDefines		-DISC ISCVerDef IscCompatDefines
+
+/*
+#define OSName			Unix System V/386 Release 3.2
+#define OSMajorVersion		3
+#define OSMinorVersion		2
+*/
+#ifndef OSMajorVersion
+#define OSMajorVersion		DefaultOSMajorVersion
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion		DefaultOSMinorVersion
+#endif
+#ifndef OSTeenyVersion
+#define OSTeenyVersion		DefaultOSTeenyVersion
+#endif
+
+#ifndef OSName
+#define OSName			INTERACTIVE UNIX System V/386 Release 3.2
+#endif
+
+XCOMM operating system: OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVersion)
+
+/* Note, cpp already does -Di386 */
+#define BootstrapCFlags		OSDefines -DSYSV
+
+#if IscVersion > 202
+# define LocalLibraries	-lpt
+# define PosixLibraries	-lcposix
+#else
+# define LocalLibraries        MallocLibrary -lpt
+# define PosixLibraries
+#endif
+
+#define SocketLibraries		-linet
+
+#ifndef GnuMallocLibrary
+#ifndef UseIscLd
+# define GnuMallocLibrary	-L/usr/local/lib -lgmalloc
+#else
+# define GnuMallocLibrary       /usr/local/lib/libgmalloc.a
+#endif
+#endif
+
+#ifndef MallocLibrary
+# if UseGnuMalloc
+#  define MallocLibrary		GnuMallocLibrary
+# else
+#  define MallocLibrary		-lmalloc
+# endif
+#endif
+
+#ifndef ExtraLibraries
+# if UseGnuMalloc
+#  define ExtraLibraries SocketLibraries LocalLibraries MallocLibrary PosixLibraries
+# else
+#  define ExtraLibraries SocketLibraries LocalLibraries PosixLibraries
+# endif
+#endif
+
+/* Don't know if this is necessary, but it avoids breaking the current setup */
+#define MallocLibraries		/**/
+
+#if UseXwctomb
+#define XawI18nDefines		-DUSE_XWCHAR_STRING
+#else
+#define XawI18nDefines		-DUSE_XWCHAR_STRING -DUSE_XMBTOWC
+#endif
+
+#if HasCbrt
+#define MathLibrary -loptm
+#endif
+
+#ifdef UseInlineMath
+#define InlineMathDefines	-DUseInlineMath
+#if !HasCbrt
+#define ServerExtraSysLibs	$(CBRT) MathLibrary
+#endif
+#endif
+
+#ifndef ServerExtraSysLibs
+#define ServerExtraSysLibs	$(CBRT)
+#endif
+
+#define ServerExtraDefines	SVR3mmapFlags XFree86ServerDefines
+
+#if IscVersion > 300
+# ifndef HasSymLinks
+#  define HasSymLinks           YES
+# endif
+#endif
+
+#define HasShm			YES
+
+#ifndef HasSnprintf
+#define HasSnprintf		YES
+#endif
+
+#ifndef HasLibCrypt
+#define HasLibCrypt		YES
+#define SpecialLibCrypt        -lcrypt
+#endif
+
+#ifndef DefaultCDebugFlags
+# if HasGcc2
+#  define DefaultCDebugFlags DefaultGcc2i386Opt PosixDefines InlineMathDefines
+# else
+#  define DefaultCDebugFlags -O PosixDefines InlineMathDefines
+# endif
+#endif
+
+#if HasGcc2
+# define CcCmd gcc 
+#endif
+
+#ifndef DefaultCplusplusOptions
+#define DefaultCplusplusOptions	-fno-implicit-templates
+#endif
+
+#ifndef ConnectionFlags
+#define ConnectionFlags -DLOCALCONN -DTCPCONN 
+/* -DSTREAMSCONN -DUNIXCONN -- does not work on ISC SVR3 */
+#endif
+
+#define CompressManCmd $(COMPRESS) -v
+
+#define XmanSearchPath /usr/catman
+
+#ifndef RemoveDSDENroffMacros
+#define RemoveDSDENroffMacros   YES
+#endif
+
+#include <svr3.cf>
+

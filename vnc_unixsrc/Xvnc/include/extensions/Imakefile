@@ -1,0 +1,42 @@
+XCOMM $XConsortium: Imakefile /main/46 1996/09/28 16:17:59 rws $
+XCOMM $XFree86: xc/include/extensions/Imakefile,v 3.13 1997/01/12 10:39:14 dawes Exp $
+
+#if BuildScreenSaverLibrary
+SCREENSAVERHEADERS = saver.h saverproto.h scrnsaver.h
+#endif
+
+#if BuildXF86MiscLibrary
+XF86MISCHEADERS = xf86misc.h xf86mscstr.h
+#endif
+#if BuildXF86VidModeLibrary
+XF86VIDMODEHEADERS = xf86vmode.h xf86vmstr.h
+#endif
+#if BuildXF86DGALibrary
+XF86DGAHEADERS = xf86dga.h xf86dgastr.h
+#endif
+#if BuildLBX
+LBXHEADERS = lbxbuf.h lbxbufstr.h lbxdeltastr.h lbximage.h lbxopts.h lbxstr.h lbxzlib.h
+#endif
+#if BuildDPMSLibrary
+DPMSHEADERS = dpms.h dpmsstr.h
+#endif
+
+EXTRAHEADERS = $(SCREENSAVERHEADERS) $(XF86VIDMODEHEADERS) $(XF86DGAHEADERS) $(XF86MISCHEADERS) $(LBXHEADERS) $(DPMSHEADERS)
+
+
+
+HEADERS = Xext.h multibuf.h shape.h XShm.h MITMisc.h XI.h XInput.h XIproto.h \
+	XTest.h xtestext1.h XIE.h XIEproto.h XIEprotost.h sync.h \
+	XKB.h XKBgeom.h XKBproto.h XKBstr.h XKBsrv.h Xdbe.h Xdbeproto.h \
+	Xag.h Xagstr.h Xagsrv.h \
+	record.h recordstr.h \
+        lbxbuf.h lbxbufstr.h lbxdeltastr.h lbximage.h \
+        lbxopts.h lbxstr.h lbxzlib.h \
+	security.h securstr.h \
+	Print.h Printstr.h $(EXTRAHEADERS)
+
+all::
+
+BuildIncludes($(HEADERS),X11/extensions,../..)
+InstallMultipleFlags($(HEADERS),$(INCDIR)/X11/extensions,$(INSTINCFLAGS))
+InstallLinkKitMultipleDestFlags($(EXTRAHEADERS),$(LINKKITDIR)/include/X11/extensions,$(INSTDATFLAGS))

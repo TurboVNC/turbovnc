@@ -1,0 +1,379 @@
+XCOMM platform:  $TOG: linux.cf /main/36 1997/06/16 22:21:03 kaleb $
+XCOMM platform:  $XFree86: xc/config/cf/linux.cf,v 3.57.2.12 1998/03/01 01:57:10 dawes Exp $
+
+#ifndef LinuxElfDefault
+#define LinuxElfDefault		YES
+#endif
+
+#ifndef UseElfFormat
+#define UseElfFormat		LinuxElfDefault
+#endif
+
+#ifndef OSBinaryType
+#if UseElfFormat
+#define OSBinaryType		[ELF]
+#else
+#ifdef AlphaArchitecture
+#define OSBinaryType		[ECOFF]
+#else
+#define OSBinaryType		[a.out]
+#endif
+#endif
+#endif
+
+#ifndef OSName
+#define OSName			DefaultOSName OSBinaryType
+#endif
+
+#ifndef OSVendor
+#define OSVendor		/**/
+#endif
+#ifndef OSMajorVersion
+#define OSMajorVersion		DefaultOSMajorVersion
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion		DefaultOSMinorVersion
+#endif
+#ifndef OSTeenyVersion
+#define OSTeenyVersion		DefaultOSTeenyVersion
+#endif
+
+/* Set some defaults for the Default* values in case imake doesn't find them */
+#ifndef DefaultLinuxCLibMajorVersion
+#if defined(AlphaArchitecture) || defined(PowerPCArchitecture) || \
+    defined(SparcArchitecture) || defined(ArmArchitecure) || \
+    defined(i386Architecture) || defined(s390Architecture) || \
+    defined(s390xArchitecture)
+#define DefaultLinuxCLibMajorVersion	6
+#else
+#define DefaultLinuxCLibMajorVersion	5
+#endif
+#endif
+#ifndef DefaultLinuxCLibMinorVersion
+#if DefaultLinuxCLibMajorVersion > 5
+#define DefaultLinuxCLibMinorVersion	0
+#else
+#define DefaultLinuxCLibMinorVersion	4
+#endif
+#endif
+#ifndef DefaultLinuxCLibTeenyVersion
+#define DefaultLinuxCLibTeenyVersion	0
+#endif
+
+#ifndef LinuxCLibMajorVersion
+#define LinuxCLibMajorVersion	DefaultLinuxCLibMajorVersion
+#endif
+#ifndef LinuxCLibMinorVersion
+#define LinuxCLibMinorVersion	DefaultLinuxCLibMinorVersion
+#endif
+#ifndef LinuxCLibTeenyVersion
+#define LinuxCLibTeenyVersion	DefaultLinuxCLibTeenyVersion
+#endif
+
+#ifndef LinuxBinUtilsMajorVersion
+#define LinuxBinUtilsMajorVersion	DefaultLinuxBinUtilsMajorVersion
+#endif
+
+XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVersion)
+XCOMM libc:	(LinuxCLibMajorVersion./**/LinuxCLibMinorVersion./**/LinuxCLibTeenyVersion)
+XCOMM binutils:	(LinuxBinUtilsMajorVersion)
+
+/*
+ * The Linux BinUtils major version.  25 => 2.5.x, which is what is included
+ * with Slackware 3.0
+ *
+ * This remains for compatibility only.
+ *
+ */
+#ifndef BinUtilsMajorVersion
+#define BinUtilsMajorVersion	LinuxBinUtilsMajorVersion
+#endif
+
+#if LinuxCLibMajorVersion >= 6 || \
+	(LinuxCLibMajorVersion == 5 && LinuxCLibMinorVersion == 99)
+#define LinuxSourceDefines	-D_POSIX_C_SOURCE=199309L \
+				-D_POSIX_SOURCE -D_XOPEN_SOURCE=500L \
+				-D_BSD_SOURCE -D_SVID_SOURCE
+#define XawI18nDefines		-DHAS_WCHAR_H -DHAS_WCTYPE_H -DNO_WIDEC_H
+#if !defined(AlphaArchitecture)
+#define HasPosixThreads		YES
+#define ThreadedX		YES
+#define HasThreadSafeAPI	YES
+#define ThreadsLibraries	-lpthread
+#define SystemMTDefines		-D_REENTRANT
+#endif
+#ifndef HasLibCrypt
+#define HasLibCrypt		YES
+#endif
+#else
+#define LinuxSourceDefines	-D_POSIX_SOURCE \
+				-D_BSD_SOURCE -D_SVID_SOURCE -DX_LOCALE
+#define XawI18nDefines		-DUSE_XWCHAR_STRING -DUSE_XMBTOWC
+#ifndef HasLibCrypt
+#define HasLibCrypt		NO
+#endif
+#endif
+
+/* For compatibility */
+#define SourceDefines		LinuxSourceDefines
+
+#define HasGcc			YES
+#define HasGcc2			YES
+#ifndef HasGcc2ForCplusplus
+# define HasGcc2ForCplusplus	YES
+#endif
+#define GccUsesGas		YES
+#define UseGas			YES
+#define GnuCpp			YES
+#ifndef HasShadowPasswd
+# if UseElfFormat
+#  define HasShadowPasswd	YES
+# else
+#  define HasShadowPasswd	NO
+# endif
+#endif
+#define HasPutenv		YES
+#define HasShm			YES
+#define HasSockets		YES
+#if UseElfFormat || defined(AlphaArchitecture)
+#define HasSnprintf		YES
+#define HasMkstemp		YES
+#endif
+
+#define AvoidNullMakeCommand	YES
+#define StripInstalledPrograms	YES
+#define CompressAllFonts	YES
+#define Malloc0ReturnsNull	YES
+#define NeedConstPrototypes	YES
+#define NeedFunctionPrototypes	YES
+#define NeedNestedPrototypes	YES
+#define NeedVarargsPrototypes	YES
+#ifndef NeedWidePrototypes
+#define NeedWidePrototypes	NO
+#endif
+#define SetTtyGroup		YES
+
+#ifndef UseStaticTermcapLib
+#define UseStaticTermcapLib	NO
+#endif
+
+#define MkdirHierCmd		mkdir -p
+#if LinuxElfDefault
+#if UseElfFormat
+#define CcCmd			gcc
+#define AsCmd			as
+#define LdCmd			ld
+#define AsmDefines		-D__ELF__
+#define CplusplusCmd		c++
+#if UseStaticTermcapLib
+#define TermcapLibrary		StaticLibrary(/usr/lib/termcap,termcap)
+#endif
+#else
+#ifdef AlphaArchitecture
+#define CcCmd			gcc -b alpha-linuxecoff
+#define CplusplusCmd		g++ -b alpha-linuxecoff
+#define AsCmd			/usr/alpha-linuxecoff/bin/as
+#define LdCmd			/usr/alpha-linuxecoff/bin/ld -m alpha
+#define AsmDefines		-DUSE_GAS -U__ELF__
+#endif /* AlphaArchitecture */
+#ifdef SparcArchitecture
+#define AsmDefines		-D__ELF__
+#endif /* SparcArchitecture */
+#ifdef i386Architecture
+#define CcCmd			gcc -b i486-linuxaout
+#define CplusplusCmd		g++ -b i486-linuxaout
+#define AsCmd			/usr/i486-linuxaout/bin/as
+#define LdCmd			/usr/i486-linuxaout/bin/ld -m i386linux
+#define AsmDefines		-DUSE_GAS -U__ELF__
+#endif /* i386Architecture */
+#ifdef Mc68020Architecture
+#define CcCmd			gcc -b m68k-linuxaout
+#define CplusplusCmd		g++ -b m68k-linuxaout
+#define AsCmd			/usr/m68k-linuxaout/bin/as
+#define LdCmd			/usr/m68k-linuxaout/bin/ld -m m68klinux
+#define AsmDefines		-DUSE_GAS -U__ELF__
+#endif /* Mc68020Architecture */
+#endif
+#else
+#if UseElfFormat
+#ifdef AlphaArchitecture
+#define CcCmd			gcc -b alpha-linux
+#define AsCmd			/usr/alpha-linux/bin/as
+#define LdCmd			ld -m elf64alpha
+#define AsmDefines		-D__ELF__
+#define CplusplusCmd		c++ -b alpha-linux
+#endif /* AlphaArchitecture */
+#ifdef SparcArchitecture
+#define AsmDefines		-D__ELF__
+#endif /* SparcArchitecture */
+#ifdef i386Architecture
+#define CcCmd			gcc -b i486-linux
+#define AsCmd			/usr/i486-linux/bin/as
+#define LdCmd			ld -m elf_i386
+#define AsmDefines		-D__ELF__
+#define CplusplusCmd		c++ -b i486-linux
+#endif /* i386Architecture */
+#ifdef Mc68020Architecture
+#define CcCmd			gcc -b m68k-linux
+#define AsCmd			/usr/m68k-linux/bin/as
+#define LdCmd			ld -m m68kelf
+#define AsmDefines		-D__ELF__
+#define CplusplusCmd		c++ -b m68k-linux
+#endif /* Mc68020Architecture */
+#else
+#define CcCmd			gcc
+#define AsCmd			as
+#define LdCmd			ld
+#define AsmDefines		-DUSE_GAS
+#endif
+#endif
+#if UseElfFormat
+#ifndef BuildDynamicLoading
+#define BuildDynamicLoading	YES
+#endif
+#endif
+#define CppCmd			/lib/cpp
+#ifdef USE_BYACC
+#define YaccCmd			byacc
+#else
+#define YaccCmd			bison -y
+#endif
+#define LexCmd			flex -l
+#define LexLib			-lfl
+#define PreProcessCmd		CcCmd -E
+#define PostIncDir		DefaultGccIncludeDir
+#define LdCombineFlags		-r
+#define LdPostLib		/* Never needed */
+#define HasWChar32		YES
+#define StandardCppDefines	-traditional StandardDefines
+
+#ifdef i386Architecture
+#define OptimizedCDebugFlags	DefaultGcc2i386Opt
+#define LinuxMachineDefines	-D__i386__
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+#endif /* i386Architecture */
+
+#ifdef AlphaArchitecture
+#define OptimizedCDebugFlags	-O2
+#define LinuxMachineDefines	-D__alpha__
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
+#endif /* AlphaArchitecture */
+
+#ifdef Mc68020Architecture
+#define OptimizedCDebugFlags	-O2
+#define LinuxMachineDefines 	-D__mc68000__
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+#endif /* Mc68020Architecture */
+
+#ifdef s390Architecture
+#define OptimzedCDebugFlags	-O2
+#define LinuxMachineDefines	-D__s390__
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+#endif /* s390Architecture */
+
+#ifdef s390xArchitecture
+#define OptimzedCDebugFlags	-O2
+#define LinuxMachineDefines	-D__s390x__
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+#endif /* s390xArchitecture */
+
+#ifdef PowerPCArchitecture
+#define DefaultCCOptions        -fsigned-char
+#define OptimizedCDebugFlags	-O2
+#define LinuxMachineDefines 	-D__powerpc__
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+#endif /* PowerPCArchitecture */
+
+#ifdef ArmArchitecture
+#define DefaultCCOptions	-fsigned-char
+#define OptimizedCDebugFlags	-O2
+#define LinuxMachineDefines	-D__arm__
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+#endif /* Arm */
+
+#ifdef SparcArchitecture
+#define OptimizedCDebugFlags	-O2
+#define LinuxMachineDefines 	-D__sparc__
+#define ServerOSDefines		-DDDXOSINIT
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+#define AsVISOption		-Av9a
+#ifdef Sparc64Architecture
+#define AsOutputArchSize	64
+#else
+#define AsOutputArchSize	32
+#endif
+#if LinuxCLibMajorVersion <= 5
+/* Why we lack this when everybody else has it? */
+#define HasCbrt NO
+#endif
+#endif /* SparcArchitecture */
+
+/*================================================================
+   BEGIN ORL VNC modification
+   Always define _REENTRANT since we may use threaded libraries */
+
+/* REMOVE
+#define StandardDefines		-Dlinux LinuxMachineDefines LinuxSourceDefines
+*/
+
+#define StandardDefines		-Dlinux LinuxMachineDefines \
+				LinuxSourceDefines -D_REENTRANT
+
+/* END ORL VNC modification
+================================================================*/
+
+#if UseElfFormat
+#define DlLibrary		-rdynamic -ldl
+#else
+#define DlLibrary		/**/
+#endif
+
+#if BuildDynamicLoading
+#define ServerExtraSysLibs	DlLibrary
+#else
+#define ServerExtraSysLibs	/**/
+#endif
+#define ConnectionFlags		-DUNIXCONN -DTCPCONN
+
+/* Some of these man page defaults are overriden in the above OS sections */
+#ifndef ManSuffix
+# define ManSuffix	1x
+#endif
+#ifndef ManDir
+# define ManDir		$(MANSOURCEPATH)1
+#endif
+#ifndef LibManSuffix
+# define LibManSuffix	3x
+#endif
+#ifndef LibmanDir
+# define LibmanDir	$(MANSOURCEPATH)3
+#endif
+#ifndef FileManSuffix
+# define FileManSuffix	5x
+#endif
+#ifndef FileManDir
+# define FileManDir	$(MANSOURCEPATH)5
+#endif
+
+#ifndef StaticLibrary
+#define StaticLibrary(libpath,libname) -Wl,-Bstatic Concat(-L,libpath) Concat(-l,libname) -Wl,-Bdynamic
+#endif
+
+#define HasGnuMake	YES
+
+#define MakeNamedTargetSubdir(dir,flags,subname)\
+	$(MAKE) -C dir $(MFLAGS) $(PARALLELMFLAGS) flags subname
+
+#ifndef HasZlib
+# define HasZlib	YES
+#endif
+
+#include <lnxLib.rules>
+#include <xfree86.cf>

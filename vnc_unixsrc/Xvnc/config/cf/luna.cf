@@ -1,0 +1,117 @@
+XCOMM platform:  $XConsortium: luna.cf /main/35 1996/09/28 16:11:11 rws $
+/*
+ *	Please set the values for OSMajorVerion and OSMinorVersion
+ *	before making makefiles.	 
+ *
+ *	The Luna version of the make program doesn't define the standard
+ *	macro MAKE, so you must run it as "make MAKE=make" at top level,
+ *	e.g., "make MAKE=make World"
+ */
+
+#ifdef Mc68000Architecture
+# ifdef luna2
+#ifndef OSName
+#define OSName            Mach 2.5 Vers 1.40
+#endif
+#ifndef OSMajorVersion
+#define OSMajorVersion    1
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion    40
+#endif
+# else 
+#ifndef OSName
+#define OSName            UNIOS-B 4.3BSD UNIX: 2.00
+#endif
+#ifndef OSMajorVersion
+#define OSMajorVersion    2
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion    0
+#endif
+#define DirFailPrefix -
+# endif
+#else  /* Mc88000Architecture */
+#ifndef OSName
+#define OSName            Mach 2.5 Vers 2.00.1
+#endif
+#ifndef OSMajorVersion
+#define OSMajorVersion    2
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion    0
+#endif
+#ifndef OSTeenyVersion
+#define OSTeenyVersion    1
+#endif
+#endif
+XCOMM operating system:  OSName
+
+#define HasBsearch		NO
+#define HasVoidSignalReturn	NO
+#define HasGcc			YES
+#define HasCThreads		YES
+#define HasThreadSafeAPI	NO
+#define Malloc0ReturnsNull	HasCThreads    /* -lthreads fails, -lc works */
+#define XawI18nDefines		-DHAS_WCHAR_H -DHAS_ISW_FUNCS
+#define BootstrapCFlags		-DUSE_CC_E -DNFS_STDOUT_BUG
+
+#define ThreadsLibraries		-lthreads -lmach
+#define ThreadsCplusplusLibraries	-lthreads -lmach
+
+#define PrimaryScreenResolution 100
+#define	BuildXKB	YES
+
+#ifdef Mc68000Architecture
+#ifdef	luna2
+#if ((OSMajorVersion <= 1) && (OSMinorVersion < 40))
+#define ServerExtraDefines -DUNUSE_DRV_TIME -DUNUSE_SIGIO_SIGNAL 
+#endif
+#else	/* luna1 */
+#if ((OSMajorVersion <= 1) && (OSMinorVersion <= 60))
+#define StandardDefines         -Dluna -Duniosb
+#endif
+#if ((OSMajorVersion < 2) || ((OSMajorVersion == 2) && (OSMinorVersion < 1)))
+#define ServerExtraDefines -DUNUSE_DRV_TIME -DUNUSE_SIGIO_SIGNAL 
+#endif
+#endif	/* luna2 */
+#if HasGcc
+#define OptimizedCDebugFlags    -O -traditional
+#define ServerCDebugFlags       -Dmc68020 -O -traditional
+#else	/* cc */
+#define OptimizedCDebugFlags    -O -Z18
+#define ServerCDebugFlags       -Dmc68020 -O -Z18
+#endif /* HasGcc */
+#endif /* Mc68000Architecture */
+
+
+#ifdef Mc88000Architecture
+#if ((OSMajorVersion <= 1) && (OSMinorVersion <= 12))
+#define ServerExtraDefines -DUNUSE_DRV_TIME -DUNUSE_SIGIO_SIGNAL 
+#endif
+#define HasNdbm			YES
+#define ExtraLibraries		-li18n
+#if HasGcc
+#define CcCmd                   gcc -fstrength-reduce
+#define PreIncDir		/usr/local/lib/gcc/gcc-include
+#define OptimizedCDebugFlags    -O2 /* -traditional */
+#else
+#define PreIncDir		/usr/lib/ccom/include
+#endif
+#define PostIncDir		/usr/mach/include
+#endif
+
+#ifdef Mc68000Architecture
+#define UnalignedReferencesAllowed YES  /* if arbitrary deref is okay */
+#define BuildPexExt		NO		
+#define XlunaServer 		YES
+#endif
+
+#ifdef Mc88000Architecture
+#define BuildPexExt		NO
+#define XlunaServer 		YES
+#endif
+
+#if ((OSMajorVersion >= 2) && (OSMinorVersion >= 0) && (OSTeenyVersion >= 1))
+#define HasWChar32              YES
+#endif

@@ -1,0 +1,91 @@
+XCOMM $XConsortium: Imakefile /main/52 1996/12/02 10:20:03 lehors $
+XCOMM $XFree86: xc/programs/Xserver/dix/Imakefile,v 3.8 1997/01/08 20:32:47 dawes Exp $
+#include <Server.tmpl>
+
+#if PrintOnlyServer
+XPSRC = xpstubs.c
+XPOBJ = xpstubs.o
+#endif
+
+#if !HasFfs
+FFS_SRC = ffs.c
+FFS_OBJ = ffs.o
+#endif
+
+SRCS = atom.c colormap.c cursor.c devices.c dispatch.c dixutils.c events.c \
+	extension.c gc.c globals.c glyphcurs.c grabs.c \
+	main.c property.c resource.c swaprep.c swapreq.c \
+	tables.c window.c initatoms.c dixfonts.c privates.c pixmap.c $(FFS_SRC)
+OBJS = atom.o colormap.o cursor.o devices.o dispatch.o dixutils.o events.o \
+	extension.o gc.o globals.o glyphcurs.o grabs.o \
+	main.o property.o resource.o swaprep.o swapreq.o \
+	tables.o window.o initatoms.o dixfonts.o privates.o pixmap.o $(FFS_OBJ)
+
+    INCLUDES = -I../include -I$(XINCLUDESRC) -I$(FONTINCSRC) -I$(EXTINCSRC)
+    LINTLIBS = ../os/llib-los.ln
+
+/*
+ * The following configuration parameters may be set in the appropriate
+ * .macros files or site.def in the directory util/imake.includes/:
+ *
+ *     DefaultFontPath                COMPILEDDEFAULTFONTPATH
+ *     DefaultRGBDatabase             RGB_DB
+ *
+ * The sample util/imake.includes/Imake.tmpl will provide generic defaults.
+ * The values in site.h are simply a last line of defense and should not be
+ * changed.
+ */
+
+#ifdef DefaultFontPath
+DEFAULTFONTPATH = DefaultFontPath
+SITE_FONT_PATH = -DCOMPILEDDEFAULTFONTPATH=\"$(DEFAULTFONTPATH)\"
+#endif
+
+#ifdef DefaultRGBDatabase
+DEFAULTRGBDATABASE = DefaultRGBDatabase
+   SITE_RGB_DB = -DRGB_DB=\"$(DEFAULTRGBDATABASE)\"
+#endif
+
+#ifdef DefaultDisplayClass
+DEFAULTDISPLAYCLASS = DefaultDisplayClass
+   SITE_DISPLAY_CLASS = -DCOMPILEDDISPLAYCLASS=\"$(DEFAULTDISPLAYCLASS)\"
+#endif
+
+#ifdef XVendorString
+VENDORSTRING = XVendorString
+   VENDOR_STRING = -DVENDOR_STRING="$(VENDORSTRING)"
+#endif
+
+#ifdef XVendorRelease
+VENDORRELEASE = XVendorRelease
+   VENDOR_RELEASE = -DVENDOR_RELEASE=$(VENDORRELEASE)
+#endif
+
+#if HasKrb5
+         K5DEFS = Krb5Defines
+#endif
+
+SITE_DEFINES = $(SITE_FONT_PATH) $(SITE_RGB_DB) $(SITE_DISPLAY_CLASS)
+
+VENDOR_DEFINES = $(VENDOR_STRING) $(VENDOR_RELEASE)
+
+NormalLibraryObjectRule()
+NormalLibraryTarget(dix,$(OBJS))
+LintLibraryTarget(dix,$(SRCS) $(XPSRC))
+NormalLintTarget($(SRCS) $(XPSRC))
+
+SpecialCObjectRule(globals,$(ICONFIGFILES),$(SITE_DEFINES))
+SpecialCObjectRule(tables,$(ICONFIGFILES),$(K5DEFS))
+SpecialCObjectRule(dispatch,$(ICONFIGFILES),$(K5DEFS))
+SpecialCObjectRule(main,$(ICONFIGFILES),$(VENDOR_DEFINES))
+SpecialCObjectRule(pixmap,$(ICONFIGFILES),$(_NOOP_))
+SpecialCObjectRule(privates,$(ICONFIGFILES),$(_NOOP_))
+
+#if PrintOnlyServer
+NormalLibraryTarget(xpstubs,$(XPOBJ))
+#endif
+
+InstallLinkKitLibrary(dix,$(LINKKITDIR)/lib)
+InstallLinkKitLibrary(xpstubs,$(LINKKITDIR)/lib)
+
+DependTarget()

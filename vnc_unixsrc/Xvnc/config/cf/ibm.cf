@@ -1,0 +1,168 @@
+XCOMM platform:  $XConsortium: ibm.cf /main/80 1996/12/26 08:52:31 kaleb $
+
+#ifndef OSName
+# define OSName		DefaultOSName
+#endif
+#ifndef OSMajorVersion
+# define OSMajorVersion	DefaultOSMajorVersion
+#endif
+#ifndef OSMinorVersion
+# define OSMinorVersion	DefaultOSMinorVersion
+#endif
+#ifndef OSTeenyVersion
+# ifdef DefaultOSTeenyVersion
+#  define OSTeenyVersion	DefaultOSTeenyVersion
+# elif (OSMajorVersion == 4) && (OSMinorVersion == 1)
+#  define OSTeenyVersion	3
+# else
+#  define OSTeenyVersion	0
+# endif
+#endif
+XCOMM operating system:  OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
+
+#if OSMajorVersion > 3 || (OSMajorVersion == 3 && OSMinorVersion >= 2)
+#define HasBSD44Sockets		YES
+#define HasPutenv		YES
+/*
+ * If you do not have threads support installed, put
+ * #define HasPosixThreads	NO
+ * in the BeforeVendorCF section of your site.def.
+ */
+#if !defined(HasPosixThreads) && ((OSMajorVersion == 3 && (OSMinorVersion > 2 || (OSMinorVersion == 2 && OSTeenyVersion > 4))) || (OSMajorVersion == 4 && (OSMinorVersion > 1 || (OSMinorVersion == 1 && OSTeenyVersion > 1))))
+#define HasPosixThreads		YES
+#endif
+#if HasPosixThreads
+#ifndef ThreadedX
+#define ThreadedX		YES
+#define MTSafeAPIDefines	-DXUSE_MTSAFE_API -DXUSE_NETDB_R_API
+#endif
+#endif
+#endif /* OS > 3.2 */
+
+/*
+ * For IBM platforms, we must define both the location of the compiler
+ * and the location of its standard C++ library.  The library location
+ * is needed to resolve dependent library symbols if we build our own
+ * C++ shared libraries.
+ */
+
+#if !HasGcc2ForCplusplus
+# ifndef CplusplusCmd
+#  if ThreadedX
+#   define CplusplusCmd		xlC_r
+#  else
+#   define CplusplusCmd		xlC
+#  endif
+# endif
+#endif
+
+#ifndef CplusplusFilt
+# define CplusplusFilt		/usr/lpp/xlC/bin/c++filt
+#endif
+#ifndef CplusplusLibC
+# if ThreadedX
+#  define CplusplusLibC		/usr/lpp/xlC/lib/libC.a
+# else
+#  define CplusplusLibC		/usr/lpp/xlC/lib/libC_r.a
+# endif
+#endif
+#if !HasGcc2ForCplusplus
+# ifndef CplusplusDependIncludes
+#  define CplusplusDependIncludes -I/usr/lpp/xlC/include
+# endif
+#endif
+
+/*
+ * IBM's xlC refuses to compile files unless their names end in ".C".
+ * As an alternative to this fix, one could edit /etc/xlC.cfg
+ * to change the suffix accepted by the compiler, but we prefer not 
+ * requiring users to reconfigure their C++ compilers to make them work.
+ * We also have to override the default SUFFIXES to defeat the use of
+ * the builtin .C -> .o file, which doesn't use the right flags.
+ */
+
+.SUFFIXES:
+.SUFFIXES: .o .c .y .l .s .sh .h .f .Y .L .cxx
+
+#define NormalLibObjCplusplusCompile(options) test -r $*.C || $(LN) $*.CCsuf $*.C @@\
+	$(CXX) -c $(CXXFLAGS) options $*.C
+
+#define SpecialCplusplusObjectRule(baseobj,basedep,options)		@@\
+baseobj.Osuf:	basedep.CCsuf						@@\
+	test -r basedep.C || $(LN) basedep.CCsuf basedep.C		@@\
+	$(CXX) -c $(CXXFLAGS) options basedep.C
+
+
+#define BuildLibPathVar		LIBPATH
+#define SystemV			YES
+#define LdCombineFlags		-r
+#define ExecableScripts		YES
+#define Malloc0ReturnsNull	YES
+#define CppCmd			/usr/ccs/lib/cpp
+#define ExpandManNames		YES
+#define ExtensionOSDefines	-DXTESTEXT1
+#define XibmServer		YES
+#define ibmIncludeSKYWAY	YES
+
+/* IBM cpp has slightly non-standard line directives, but supports -P */
+#define CppNoLineInfoOption	-P
+
+#if OSMajorVersion > 3
+#define StandardDefines		-DSYSV -DAIXV3 -DAIXV4 -D_ALL_SOURCE
+#define XawI18nDefines		-DHAS_WCHAR_H -DHAS_ISW_FUNCS
+#define ServerExtraDefines	-D_IBM_LFT
+#if ThreadedX
+#define CcCmd			xlc_r
+#else
+#define CcCmd			xlc
+#endif
+#define SystemMTDefines		/* xlc_r defines -D_THREAD_SAFE */
+#define ThreadsLibraries	-lpthreads /* xlc_r does -lc_r */
+#define ThreadsCplusplusLibraries	-lpthreads
+#define AvoidNullMakeCommand	YES
+#define NullMakeCommand		@ echo
+/* AIX 4 appends all MAKEFLAGS (even dups), so cannot pass on command line. */
+#define ConstructMFLAGS		NO
+#define LdPreLib		_Use(-L$(USRLIBDIR),-L$(BUILDLIBDIR))
+#define ExtraFilesToClean	*.inp
+#else 	/* OSMajorVersion < 4 */
+#define StandardDefines         -DSYSV -DAIXV3 -D_ALL_SOURCE
+#define ServerExtraDefines	-D_IBM_HFT
+#define CcCmd			xlc
+#define ThreadPreStdAPIDefines	-DXPRE_STANDARD_API
+#define SystemMTDefines		-D_THREAD_SAFE
+#define ThreadsLibraries	-lpthreads -lc_r
+#endif	/* OSMajorVersion */
+
+#define OPERATING_SYSTEM 	AIX /* directory name under server/ddx/ibm/ */
+#define InstallCmd              /usr/ucb/install
+#include <ibmLib.rules>
+
+#ifndef ManKeywordsTarget
+#define ManKeywordsTarget(manpath)					@@\
+man_keywords::								@@\
+	/usr/lib/makewhatis $(DESTDIR)manpath
+#endif
+
+#define DtMailDefines		\
+  -DI_HAVE_NO_BOOL -DI_HAVE_SELECT_H \
+  -DBIG_ENDIAN -DSTRCASECMP_NOT_DEFINED -DDO_ANONYMOUS_MAP -DSENDMAIL_LOCKS \
+  -DMAILGROUP_REQUIRED -DMAIL_SPOOL_PATH=\"/var/spool/mail/%s\"
+
+#define ArchitectureDefines	-DIBM_ARCHITECTURE
+
+#define ExportListGenSource	elistgen.ibm
+
+#define CdeProjectDefines \
+	-D_AIX -D__AIX -D__aix -D_aix -Daix -DMULTIBYTE -DNLS16 -DMESSAGE_CAT \
+	-DOSMAJORVERSION=OSMajorVersion -DOSMINORVERSION=OSMinorVersion -DAIX
+
+/*
+ * -D__STR31__ disables inlining of memcpy to work around optimization bug
+ * in XLC v1.2.0.7. Bug report filed as PMR 8X196, branch 060.
+ */
+#ifndef OptimizedCDebugFlags
+#define OptimizedCDebugFlags	-O -D__STR31__ -DNDEBUG
+#endif
+
+#define CdeTicDefines	-DHAS_KNL -DHAS_KTAB

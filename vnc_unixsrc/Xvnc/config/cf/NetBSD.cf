@@ -1,0 +1,377 @@
+XCOMM platform:  $XConsortium: NetBSD.cf /main/16 1996/10/31 14:47:14 kaleb $
+
+
+
+XCOMM platform:  $XFree86: xc/config/cf/NetBSD.cf,v 3.49.2.9 1997/07/26 06:30:39 dawes Exp $
+
+
+#ifndef OSName
+#define OSName			DefaultOSName OSBinaryType
+#endif
+#ifndef OSMajorVersion
+#define OSMajorVersion		DefaultOSMajorVersion
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion		DefaultOSMinorVersion
+#endif
+#ifndef OSTeenyVersion
+#define OSTeenyVersion		DefaultOSTeenyVersion
+#endif
+
+
+#ifndef OSVendor
+#define	OSVendor	/**/
+#endif
+XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVersion)
+
+/*
+ * C library features
+ */
+#if ((OSMajorVersion > 1) || \
+     (OSMajorVersion == 1 && OSMinorVersion > 2) || \
+     (OSMajorVersion == 1 && OSMinorVersion == 2 && OSTeenyVersion > 1))
+#  define HasPoll			YES
+#endif
+#define HasNdbm         	YES
+#define HasPutenv       	YES
+#define HasSnprintf		YES
+#define HasBSD44Sockets 	YES
+#define Malloc0ReturnsNull	NO
+#define SetTtyGroup     	YES
+#define DBMLibrary		/**/
+#ifndef HasLibCrypt
+# define HasLibCrypt		YES
+#endif
+#ifndef HasShm
+# if OSMajorVersion == 0 && OSMinorVersion == 9 && OSTeenyVersion == 2
+/*
+ * Shm memory was removed in 0.9B because it was encumbered.
+ * A free version was added in 0.9C
+ */
+#  define HasShm          	NO
+# else
+#  define HasShm          	YES
+# endif
+#endif
+#define HasWChar32		YES
+/*
+ * There's a bug in NetBSD 1.0, 1.1 and 1.2 dlsym()
+ */
+#if ((OSMajorVersion == 1 && OSMinorVersion < 2) || \
+     (OSMajorVersion == 1 && OSMinorVersion == 2 && OSTeenyVersion < 2))
+#  define HasDlsymBug		YES
+#endif
+/* Mkstemp is there since 1.2 (at least) */
+#if (!(OSMajorVersion == 0 || \
+       (OSMajorVersion == 1 && OSMinorVersion < 2))) 
+#define HasMkstemp		YES
+#endif
+/*
+ * Compiler Features
+ */
+#undef HasGcc
+#define HasGcc			YES
+#define HasGcc2			YES
+#ifndef HasGcc2ForCplusplus
+#define HasGcc2ForCplusplus	YES
+#endif
+#define GccUsesGas		YES
+#define UseGas			YES
+#define GnuCpp			YES
+
+#define NeedConstPrototypes	YES
+#define NeedFunctionPrototypes	YES
+#define NeedNestedPrototypes	YES
+#define NeedVarargsPrototypes	YES
+#define NeedWidePrototypes	NO
+
+#define MkdirHierCmd		mkdir -p
+
+#define CppCmd          	/usr/libexec/cpp
+#define StandardCppDefines	-traditional
+#define PreProcessCmd   	CppCmd
+#define PreIncDir		/usr/include
+
+#undef CcCmd
+#define CcCmd 			gcc
+#if defined(UseInstalled) && (!defined(XF86LinkKit) || !XF86LinkKit)
+#define DefaultCCOptions 	/**/
+#else
+#define DefaultCCOptions 	-ansi -Dasm=__asm
+#endif
+
+#define GccGasOption 		-DGCCUSESGAS
+#define AsmDefines 		-DUSE_GAS
+
+/* UseElfFormat defaults to YES if __ELF__ set */
+#ifndef UseElfFormat
+# ifdef __ELF__
+#  undef __ELF__			/* other imake files shouldn't care */
+#  define UseElfFormat YES
+# else
+#  define UseElfFormat NO
+# endif
+#endif
+
+/*
+ * Dynamic loading supported starting in 1.0 on a.out platforms,
+ * and on all ELF platforms.
+ *
+ * XXX May not be correct on NetBSD/pmax (ELF, but might not have
+ * working shared libs).
+ */
+#if ((OSMajorVersion > 0) && \
+     !defined(AlphaArchitecture) && !defined(MipsArchitecture)) || \
+    UseElfFormat
+# ifndef BuildDynamicLoading
+# define BuildDynamicLoading	YES
+# endif
+#endif
+
+#if UseElfFormat
+#define DlLibrary		-rdynamic /* no -ldl yet */
+#else
+#define DlLibrary		/**/
+#endif
+
+#ifdef i386Architecture
+# define OptimizedCDebugFlags 	DefaultGcc2i386Opt
+# if OSMajorVersion < 1
+#  define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME -DXNO_SYSCONF
+# else
+#  define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
+# endif
+# if OSMajorVersion == 1 && OSMinorVersion >= 1 || OSMajorVersion >= 2
+#  define ServerExtraSysLibs	-li386 DlLibrary
+# endif
+#else
+# define OptimizedCDebugFlags 	-O2
+# if defined(SparcArchitecture) || defined(AlphaArchitecture)
+#  define ServerOSDefines 	-DDDXOSINIT
+# else
+#  define ServerOSDefines 	/**/
+# endif
+# if BuildDynamicLoading
+#  define ServerExtraSysLibs	DlLibrary
+# else
+#  define ServerExtraSysLibs	/**/
+# endif
+#endif
+#ifdef i386Architecture
+# define ServerExtraDefines GccGasOption XFree86ServerDefines
+# ifndef XFree86ConsoleDefines
+#  define XFree86ConsoleDefines -DPCCONS_SUPPORT -DPCVT_SUPPORT
+# endif
+#else
+# if defined(AlphaArchitecture)
+#  define ServerExtraDefines GccGasOption -D_XSERVER64
+# else
+#  define ServerExtraDefines GccGasOption
+# endif
+#endif
+
+#define StandardDefines	-DCSRG_BASED
+#define XawI18nDefines	-DUSE_XWCHAR_STRING -DUSE_XMBTOWC
+
+#ifndef ExtraLibraries
+#define ExtraLibraries		/**/
+#endif
+#ifndef UseGnuMalloc
+#  define UseGnuMalloc		YES
+#endif
+#ifndef GnuMallocLibrary
+#define GnuMallocLibrary	-lgnumalloc
+#endif
+
+#if ((OSMajorVersion > 1) || \
+     (OSMajorVersion == 1 && OSMinorVersion > 2) || \
+     (OSMajorVersion == 1 && OSMinorVersion == 2 && OSTeenyVersion > 1))
+#ifndef HasZlib
+#define HasZlib			  YES
+#endif
+#endif 
+
+#define	AdmDir			/var/log
+
+/*
+ * Make & install Features
+ */
+#define HasBsdMake		YES
+#define StripInstalledPrograms	YES
+#define CompressAllFonts	YES
+#define GzipFontCompression	YES
+#define DefaultUserPath		/bin:/usr/bin:/usr/local/bin:$(BINDIR)
+#define DefaultSystemPath	/sbin:/usr/sbin:/bin:/usr/bin:$(BINDIR)
+
+#ifdef  InstallCmd
+# undef  InstallCmd
+# define InstallCmd 		/usr/bin/install
+#endif
+
+#ifndef ExtraFilesToClean
+# define ExtraFilesToClean 	*.core
+#endif
+
+/*
+ * Documentation formatting
+ */
+#define NeqnCmd			neqn -Tlatin1
+#define NroffCmd		nroff -Tlatin1
+#define	EqnCmd 			eqn -Tps
+#define TroffCmd        	groff -Tps
+
+/*
+ * To use the NetBSD Aperture driver
+ */
+#if defined(i386Architecture)
+#ifndef HasNetBSDApertureDriver
+#define HasNetBSDApertureDriver	YES
+#endif
+#endif
+
+/*
+ * ForceSubdirs - force make to build subdirectories
+ * 
+ * For BSD 4.4 make 
+ */
+#define ForceSubdirs(dirs)						@@\
+dirs:	.EXEC								@@\
+	@cd $@ ; echo "making all in $(CURRENT_DIR)/$@..."; \		@@\
+	$(MAKE) $(MFLAGS) PassCDebugFlags all				@@\
+									@@\
+.EXEC:
+
+XCOMM Man pages need to be formatted when installed, so override the default
+XCOMM imake rules.
+
+#define ManSuffix	1
+#define FileManSuffix	5
+#define ManSourcePath	$(MANPATH)/cat
+
+#define InstallManPageLong(file,destdir,dest)                           @@\
+all:: file.0								@@\
+									@@\
+file.0:: file.man							@@\
+	@if [ -f file.man ]; \						@@\
+	then \								@@\
+	cat file.man | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) | $(COL) >/tmp/$$$$.man; \	@@\
+	cp /tmp/$$$$.man file.0; \					@@\
+	$(RM) /tmp/$$$$.man; \						@@\
+	fi 								@@\
+									@@\
+install.man::                                                           @@\
+	MakeDir($(DESTDIR)destdir)					@@\
+	-@if [ -f file.0 ]; \						@@\
+	then \								@@\
+	$(INSTALL) -c $(INSTMANFLAGS) file.0 $(DESTDIR)destdir/dest.0; \@@\
+	fi
+
+#define InstallGenManPageLong(file,destdir,dest,suffix)			@@\
+	InstallManPageLong(file,destdir,dest)
+
+#define InstallMultipleManSuffix(list,dest,suff)                        @@\
+install.man:: 								@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	case '${MFLAGS}' in *[i]*) set +e;; esac; \			@@\
+	for i in list; do \                                             @@\
+	  (set -x; \							@@\
+	  cat $$i.suff | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) | $(COL) >/tmp/$$$$.suff; \	@@\
+	  $(INSTALL) -c $(INSTMANFLAGS) /tmp/$$$$.suff $(DESTDIR)dest/$$i.0; \	@@\
+	  $(RM) /tmp/$$$$.suff); \						@@\
+	done
+
+#define InstallMultipleMan(list,dest)                                   @@\
+	InstallMultipleManSuffix(list,dest,man)
+
+#define InstallManPageAliases(file,destdir,aliases)                     @@\
+install.man:: 								@@\
+	@case '${MFLAGS}' in *[i]*) set +e;; esac; \                    @@\
+	for i in aliases; do \                                          @@\
+		(set -x; \						@@\
+		$(RM) $(DESTDIR)destdir/$$i.0;\  			@@\
+		(cd $(DESTDIR)/destdir; $(LN) file.0 $$i.0);\ 		@@\
+		); \							@@\
+	done
+
+#define InstallGenManPageAliases(file,destdir,suffix,aliases)		@@\
+	InstallManPageAliases(file,destdir,aliases)
+
+/*
+ * Shared libraries supported starting in 1.0 on a.out platforms,
+ * and on all ELF platforms.
+ *
+ * XXX May not be correct on NetBSD/pmax (ELF, but might not have
+ * working shared libs).
+ */
+#if ((OSMajorVersion > 0) && \
+     !defined(AlphaArchitecture) && !defined(MipsArchitecture)) || \
+    UseElfFormat
+# ifndef HasSharedLibraries
+# define HasSharedLibraries	YES
+# endif
+#endif
+
+#ifndef OSBinaryType
+#if UseElfFormat
+#define OSBinaryType	[ELF]
+#else
+#define OSBinaryType	/**/
+#endif
+#endif
+
+#ifndef HasSharedLibraries
+#define HasSharedLibraries	NO
+#endif 
+
+#if HasSharedLibraries
+#include <bsdLib.rules>
+#endif /* HasSharedLibraries */
+
+#ifdef i386Architecture
+# include <xfree86.cf>
+#endif
+
+/*
+ * Definitions for the SUN server on NetBSD/sparc
+ */
+#ifdef SparcArchitecture
+#ifndef Xsun24Server
+#define Xsun24Server	NO
+#endif
+#ifndef XsunServer
+#define XsunServer	YES
+#endif
+#ifndef XsunMonoServer
+#define XsunMonoServer	YES
+#endif
+#ifndef BuildScreenSaverLibrary
+#define BuildScreenSaverLibrary	YES
+#endif
+/*
+ * XFree86 uses its own (more portable) database routines to speed up 
+ * the RGB database lookups
+ * However, if you want to use ndbm anyway, you can set that to NO in 
+ * site.def
+ */
+#ifndef UseRgbTxt
+#define UseRgbTxt	YES
+#endif
+#endif
+
+/*
+ * Definition for compiling on MIPS machines
+ */
+#ifdef MipsArchitecture
+#define PositionIndependentCFlags
+#define SharedLibraryLoadFlags -x -shared --whole-archive -soname `echo $@ |
+sed 's/\.[0-9]*$$//'`
+#define SharedXtReqs $(XLIBONLY) $(SMLIB) $(ICELIB)
+#define SharedXmuReqs $(LDPRELIB) $(XTOOLONLYLIB) $(XONLYLIB) $(EXTENSIONLIB)
+#endif
+
+/*
+ * Definition for compiling on Alpha machines
+ */
+#ifdef AlphaArchitecture
+#define	BuildServer	NO
+#endif

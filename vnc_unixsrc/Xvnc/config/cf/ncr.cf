@@ -1,0 +1,125 @@
+XCOMM platform:  $XConsortium: ncr.cf /main/28 1996/09/28 16:11:31 rws $
+XCOMM platform:  $XFree86: xc/config/cf/ncr.cf,v 3.18 1996/12/27 06:50:22 dawes Exp $
+
+#ifndef OSName
+#define OSName			Unix System V Release 4/MP-RAS
+#endif
+#ifndef OSVendor
+#define OSVendor		NCR
+#endif
+XCOMM operating system:  OSName
+
+#define BootstrapCFlags		-DNCR
+#define HasStreams		YES
+#define XawI18nDefines		-DUSE_XWCHAR_STRING
+
+/* Build Flags */
+
+XCOMM
+XCOMM These flags build correctly on SVR4/MP-RAS 3.0. If building on
+XCOMM SVR4/MP-RAS 2.X, you must add -DWINTCP to StandardDefines
+XCOMM
+#define StandardDefines		-DSVR4 -DNCR -Di386
+#define DefaultCCOptions	-Xa -Hnocopyr -W0,-asm
+#define DefaultCDebugFlags	-O3
+#define AllocateLocalDefines	-DINCLUDE_ALLOCA_H
+#define ServerExtraDefines      -DNO_SECONDARY AllocateLocalDefines XFree86ServerDefines
+#define ServerOSDefines         -DDDXTIME XFree86ServerOSDefines
+#define ToolkitStringsABIOptions -intelabi
+
+XCOMM This has not been tested, don't turn it on yet.
+XCOMM #define ExtensionOSDefines	-DXTESTEXT1
+
+#define ExtraLoadFlags -lc -L/usr/ucblib -lucb -lm -lgen -lcmd
+
+/* Setup proper ownership of installed files */
+
+#define StripInstalledPrograms	YES
+#define InstPgmFlags		-s -m 0711 -o bin -g bin
+#define InstBinFlags		-m 0755 -o bin -g bin
+#define InstUidFlags		-m 4711 -o root -g bin
+#define InstLibFlags		-m 0644 -o bin -g bin
+#define InstIncFlags		-m 0444 -o bin -g bin
+#define InstManFlags		-m 0444 -o bin -g bin
+#define InstDatFlags		-m 0444 -o bin -g bin
+
+/* Various Configuration settings */
+
+#define DefaultUserPath		/bin:/sbin:/usr/bin:/usr/sbin:$(BINDIR):/usr/ucb
+#define DefaultSystemPath	/etc:/bin:/usr/bin:/sbin:/usr/sbin:$(BINDIR):/usr/ucb
+#define ExtraFilesToClean	*.z
+
+/* Create man pages properly */
+ 
+#define BookFormatManPages	YES
+#define ManDirectoryRoot	/usr/catman/X115
+#define ManSuffix		1X
+#define LibManSuffix		3X
+#define FileManSuffix		4X
+#define ManSourcePath		$(MANPATH)/g
+#define XmanSearchPath		/usr/catman
+
+#define	TblCmd /usr/ucb/tbl
+#define	EqnCmd /usr/ucb/eqn
+#define ColCmd /usr/bin/col
+#define NeqnCmd /usr/ucb/neqn
+#define NroffCmd /usr/ucb/nroff -Tlp
+
+/*
+ * Man pages need to be formatted when installed, so override the default
+ * imake rules.
+ */
+#define InstallManPageLong(file,destdir,dest)                           @@\
+all:: file.z								@@\
+									@@\
+file.z:: file.man							@@\
+	@if [ -f file.man ]; \						@@\
+	then \								@@\
+	cat file.man | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) | $(COL) >/tmp/$$$$.man; \	@@\
+	$(RM) /tmp/$$$$.man.z; \					@@\
+	pack -f /tmp/$$$$.man; \					@@\
+	cp /tmp/$$$$.man.z file.z; \					@@\
+	$(RM) /tmp/$$$$.man.z; \					@@\
+	fi 								@@\
+									@@\
+file.man::								@@\
+									@@\
+install.man::                                                           @@\
+	MakeDir($(DESTDIR)destdir)					@@\
+	-@if [ -f file.z ]; \						@@\
+	then \								@@\
+	$(INSTALL) -c $(INSTMANFLAGS) file.z $(DESTDIR)destdir/dest.z; \@@\
+	fi
+
+#define InstallGenManPageLong(file,destdir,dest,suffix)			@@\
+	InstallManPageLong(file,destdir,dest)
+
+#define InstallMultipleManSuffix(list,dest,suff)                        @@\
+install.man:: 								@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	MakeFlagsToShellFlags(i,set +e); \				@@\
+	for i in list; do \                                             @@\
+	  (set -x; \							@@\
+	  cat $$i.suff | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) | $(COL) >/tmp/$$$$.suff; \	@@\
+	  pack -f /tmp/$$$$.suff; \					@@\
+	  $(INSTALL) -c $(INSTMANFLAGS) /tmp/$$$$.suff.z $(DESTDIR)dest/$$i.z; \	@@\
+	  $(RM) /tmp/$$$$.suff.z); \						@@\
+	done
+
+#define InstallMultipleMan(list,dest)                                   @@\
+	InstallMultipleManSuffix(list,dest,man)
+
+#define InstallManPageAliases(file,destdir,aliases)                     @@\
+install.man:: 								@@\
+	@MakeFlagsToShellFlags(i,set +e); \				@@\
+	for i in aliases; do \                                          @@\
+		(set -x; \						@@\
+		$(RM) $(DESTDIR)destdir/$$i.z;\  			@@\
+		(cd $(DESTDIR)destdir; $(LN) file.z $$i.z);\		@@\
+		); \							@@\
+	done
+
+#define InstallGenManPageAliases(file,destdir,suffix,aliases)		@@\
+	InstallManPageAliases(file,destdir,aliases)
+
+#include <svr4.cf>

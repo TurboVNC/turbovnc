@@ -1,0 +1,709 @@
+/* 
+ *  @OSF_COPYRIGHT@
+ *  COPYRIGHT NOTICE
+ *  Copyright (c) 1990, 1991, 1992, 1993 Open Software Foundation, Inc.
+ *  ALL RIGHTS RESERVED (MOTIF). See the file named COPYRIGHT.MOTIF for
+ *  the full copyright text.
+ *
+ * (c) Copyright 1996 Digital Equipment Corporation.
+ * (c) Copyright 1996 Hewlett-Packard Company.
+ * (c) Copyright 1996 International Business Machines Corp.
+ * (c) Copyright 1996 Sun Microsystems, Inc.
+ * (c) Copyright 1996 Novell, Inc. 
+ * (c) Copyright 1996 FUJITSU LIMITED.
+ * (c) Copyright 1996 Hitachi.
+ */ 
+XCOMM $TOG: Motif.rules /main/3 1997/03/24 09:10:35 mgreess $
+
+/* Note whether we are the top level project. */
+#ifndef SeenTopLevelProject
+# define SeenTopLevelProject	YES
+# define MotifIsTopLevelProject	YES
+#else
+# define MotifIsTopLevelProject	NO
+#endif
+
+/* Include the X11 project rules file. */
+#include <X11.rules>
+
+
+/* Use the in-tree Motif by default. */
+#ifndef UseInstalledMotif
+# define UseInstalledMotif	NO
+#endif
+#ifdef UseInstalled
+# undef UseInstalledMotif
+# define UseInstalledMotif	YES
+#endif
+
+#ifndef ImportMotif
+# ifdef UseImports
+#  define ImportMotif		YES
+# else
+#  define ImportMotif		NO
+# endif
+#endif
+#if UseInstalledMotif
+# undef ImportMotif
+# define ImportMotif		NO
+#endif
+
+#ifndef MSimpleProgramTarget
+#define MSimpleProgramTarget(program)                                   @@\
+AllTarget(program)                                                      @@\
+	                                                                @@\
+program: program.o $(DEPS) $(DEPLIBS)					@@\
+	RemoveTargetProgram($@)                                         @@\
+	$(CC) -o $@ program.o $(LDOPTIONS) $(DEPS) $(LOCAL_LIBRARIES) $(LDLIBS) $(EXTRA_LOAD_FLAGS)  @@\
+	                                                                @@\
+clean::                                                                 @@\
+	$(RM) program
+#endif
+
+#ifndef MSimpleUilTarget
+#define MSimpleUilTarget(program)                                       @@\
+MSimpleProgramTarget(program)						@@\
+									@@\
+InstallProgram(program,$(BINDIR))					@@\
+									@@\
+MSimpleUidTarget(program)
+#endif
+
+/*
+ * UILFLAGS contains site/vendor-specific flags
+ * defined by UilFlags, which supposed to be set in *.cf or
+ * site.def files.
+ * LOCAL_UILFLAGS(_n) contains client-specific uil flags set in Imakefile
+ */
+
+#ifndef MSimpleUidTarget
+#define MSimpleUidTarget(program)                                       @@\
+AllTarget(program.uid)                                                  @@\
+	                                                                @@\
+program.uid: program.uil $(DEPUIL)                                      @@\
+	RemoveTargetProgram($@)                                         @@\
+	$(CLIENTENVSETUP) $(UIL) $(UILFLAGS) $(LOCAL_UILFLAGS) -o $@ program.uil $(UIL_INCLUDES)	@@\
+	                                                                @@\
+InstallNonExecFile(program.uid,$(UIDDIR))                               @@\
+                                                                        @@\
+clean::                                                                 @@\
+	$(RM) program.uid
+#endif
+
+#ifndef MSimpleUidLocaleTarget
+#define MSimpleUidLocaleTarget(program,locale)                          @@\
+AllTarget(program.uid)                                                  @@\
+	                                                                @@\
+program.uid: program.uil $(DEPUIL)                                      @@\
+	RemoveTargetProgram($@)                                         @@\
+	$(CLIENTENVSETUP) $(UIL) $(UILFLAGS) $(LOCAL_UILFLAGS) -o $@ program.uil $(UIL_INCLUDES)	@@\
+	                                                                @@\
+InstallNonExecFile(program.uid,$(LIBDIR)/locale/uid)                    @@\
+                                                                        @@\
+clean::                                                                 @@\
+	$(RM) program.uid
+#endif
+
+#ifndef MComplexUidTarget_1
+#define MComplexUidTarget_1(program)                                    @@\
+	                                                                @@\
+AllTarget(program.uid)                                                  @@\
+	                                                                @@\
+program.uid:  $(UILS1) $(DEPUIL)                                        @@\
+	RemoveTargetProgram($@)                                         @@\
+	$(CLIENTENVSETUP) $(UIL) $(UILFLAGS) $(LOCAL_UILFLAGS_1) -o $@ program.uil $(UIL_INCLUDES)	@@\
+	                                                                @@\
+InstallNonExecFile(program.uid,$(UIDDIR))                               @@\
+                                                                        @@\
+clean::                                                                 @@\
+	$(RM) program.uid
+#endif
+
+#ifndef MComplexUidTarget_2
+#define MComplexUidTarget_2(program)                                    @@\
+	                                                                @@\
+AllTarget(program.uid)                                                  @@\
+	                                                                @@\
+program.uid:  $(UILS2) $(DEPUIL)                                        @@\
+	RemoveTargetProgram($@)                                         @@\
+	$(CLIENTENVSETUP) $(UIL) $(UILFLAGS) $(LOCAL_UILFLAGS_2) -o $@ program.uil $(UIL_INCLUDES)	@@\
+	                                                                @@\
+InstallNonExecFile(program.uid,$(UIDDIR))                               @@\
+                                                                        @@\
+clean::                                                                 @@\
+	$(RM) program.uid
+#endif
+
+#ifndef MComplexUidTarget_3
+#define MComplexUidTarget_3(program)                                    @@\
+	                                                                @@\
+AllTarget(program.uid)                                                  @@\
+	                                                                @@\
+program.uid:  $(UILS3) $(DEPUIL)                                        @@\
+	RemoveTargetProgram($@)                                         @@\
+	$(CLIENTENVSETUP) $(UIL) $(UILFLAGS) $(LOCAL_UILFLAGS_3) -o $@ program.uil $(UIL_INCLUDES)	@@\
+	                                                                @@\
+InstallNonExecFile(program.uid,$(UIDDIR))                               @@\
+                                                                        @@\
+clean::                                                                 @@\
+	$(RM) program.uid
+#endif
+
+#ifndef MComplexUidTarget_4
+#define MComplexUidTarget_4(program)                                    @@\
+	                                                                @@\
+AllTarget(program.uid)                                                  @@\
+	                                                                @@\
+program.uid:  $(UILS4) $(DEPUIL)                                        @@\
+	RemoveTargetProgram($@)                                         @@\
+	$(CLIENTENVSETUP) $(UIL) $(UILFLAGS) $(LOCAL_UILFLAGS_4) -o $@ program.uil $(UIL_INCLUDES)	@@\
+	                                                                @@\
+InstallNonExecFile(program.uid,$(UIDDIR))                               @@\
+                                                                        @@\
+clean::                                                                 @@\
+	$(RM) program.uid
+#endif
+
+#ifndef MComplexUidTarget_5
+#define MComplexUidTarget_5(program)                                    @@\
+	                                                                @@\
+AllTarget(program.uid)                                                  @@\
+	                                                                @@\
+program.uid:  $(UILS5) $(DEPUIL)                                        @@\
+	RemoveTargetProgram($@)                                         @@\
+	$(CLIENTENVSETUP) $(UIL) $(UILFLAGS) $(LOCAL_UILFLAGS_5) -o $@ program.uil $(UIL_INCLUDES)	@@\
+	                                                                @@\
+InstallNonExecFile(program.uid,$(UIDDIR))                               @@\
+                                                                        @@\
+clean::                                                                 @@\
+	$(RM) program.uid
+#endif
+
+#ifndef MComplexUidTarget_6
+#define MComplexUidTarget_6(program)                                    @@\
+	                                                                @@\
+AllTarget(program.uid)                                                  @@\
+	                                                                @@\
+program.uid:  $(UILS6) $(DEPUIL)                                        @@\
+	RemoveTargetProgram($@)                                         @@\
+	$(CLIENTENVSETUP) $(UIL) $(UILFLAGS) $(LOCAL_UILFLAGS_6) -o $@ program.uil $(UIL_INCLUDES)	@@\
+	                                                                @@\
+InstallNonExecFile(program.uid,$(UIDDIR))                               @@\
+                                                                        @@\
+clean::                                                                 @@\
+	$(RM) program.uid
+#endif
+
+#ifndef MComplexUidTarget_7
+#define MComplexUidTarget_7(program)                                    @@\
+	                                                                @@\
+AllTarget(program.uid)                                                  @@\
+	                                                                @@\
+program.uid:  $(UILS7) $(DEPUIL)                                        @@\
+	RemoveTargetProgram($@)                                         @@\
+	$(CLIENTENVSETUP) $(UIL) $(UILFLAGS) $(LOCAL_UILFLAGS_7) -o $@ program.uil $(UIL_INCLUDES)	@@\
+	                                                                @@\
+InstallNonExecFile(program.uid,$(UIDDIR))                               @@\
+                                                                        @@\
+clean::                                                                 @@\
+	$(RM) program.uid
+#endif
+
+#ifndef MComplexUidTarget_8
+#define MComplexUidTarget_8(program)                                    @@\
+	                                                                @@\
+AllTarget(program.uid)                                                  @@\
+	                                                                @@\
+program.uid:  $(UILS8) $(DEPUIL)                                        @@\
+	RemoveTargetProgram($@)                                         @@\
+	$(CLIENTENVSETUP) $(UIL) $(UILFLAGS) $(LOCAL_UILFLAGS_8) -o $@ program.uil $(UIL_INCLUDES)	@@\
+	                                                                @@\
+InstallNonExecFile(program.uid,$(UIDDIR))                               @@\
+                                                                        @@\
+clean::                                                                 @@\
+	$(RM) program.uid
+#endif
+
+#ifndef MComplexUidTarget_9
+#define MComplexUidTarget_9(program)                                    @@\
+	                                                                @@\
+AllTarget(program.uid)                                                  @@\
+	                                                                @@\
+program.uid:  $(UILS9) $(DEPUIL)                                        @@\
+	RemoveTargetProgram($@)                                         @@\
+	$(CLIENTENVSETUP) $(UIL) $(UILFLAGS) $(LOCAL_UILFLAGS_9) -o $@ program.uil $(UIL_INCLUDES)	@@\
+	                                                                @@\
+InstallNonExecFile(program.uid,$(UIDDIR))                               @@\
+                                                                        @@\
+clean::                                                                 @@\
+	$(RM) program.uid
+#endif
+
+#ifndef MComplexUidTarget_10
+#define MComplexUidTarget_10(program)                                   @@\
+	                                                                @@\
+AllTarget(program.uid)                                                  @@\
+	                                                                @@\
+program.uid:  $(UILS10) $(DEPUIL)                                       @@\
+	RemoveTargetProgram($@)                                         @@\
+	$(CLIENTENVSETUP) $(UIL) $(UILFLAGS) $(LOCAL_UILFLAGS_10) -o $@ program.uil $(UIL_INCLUDES)	@@\
+	                                                                @@\
+InstallNonExecFile(program.uid,$(UIDDIR))                               @@\
+                                                                        @@\
+clean::                                                                 @@\
+	$(RM) program.uid
+#endif
+
+#ifndef MComplexProgramTarget
+#define	MComplexProgramTarget(program,locallib,syslib)			@@\
+        PROGRAM = program						@@\
+									@@\
+AllTarget(program)							@@\
+									@@\
+program: $(OBJS) $(DEPLIBS)						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CC) -o $@ $(LDOPTIONS) $(OBJS) locallib $(LDLIBS) syslib $(EXTRA_LOAD_FLAGS)	@@\
+									@@\
+CenterProgramTarget(program,$(SRCS),$(OBJS),locallib,syslib)		@@\
+									@@\
+InstallProgram(program,$(BINDIR))					@@\
+									@@\
+install.man::								@@\
+	@echo To install documentation for $(PROGRAM), consult the Release Notes	@@\
+	@echo and/or README file in the current directory.		@@\
+DependTarget()								@@\
+LintTarget()								@@\
+									@@\
+clean::									@@\
+	$(RM) $(PROGRAM)
+#endif
+
+#ifndef MComplexProgramTarget_1
+#define	MComplexProgramTarget_1(program,locallib,syslib)		@@\
+            OBJS = $(OBJS1) $(OBJS2) $(OBJS3)				@@\
+            SRCS = $(SRCS1) $(SRCS2) $(SRCS3)				@@\
+									@@\
+AllTarget($(PROGRAMS))							@@\
+									@@\
+program: $(OBJS1) $(DEPLIBS1)						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CC) -o $@ $(LDOPTIONS) $(OBJS1) locallib $(LDLIBS) syslib $(EXTRA_LOAD_FLAGS)	@@\
+									@@\
+CenterProgramTarget(program,$(SRCS1),$(OBJS1),locallib,syslib)		@@\
+									@@\
+InstallProgram(program,$(BINDIR))					@@\
+									@@\
+install.man::								@@\
+	@echo To install documentation for $(PROGRAMS), consult the Release Notes	@@\
+	@echo and/or README file in the current directory.		@@\
+DependTarget()								@@\
+LintTarget()								@@\
+									@@\
+clean::									@@\
+	$(RM) $(PROGRAMS)
+#endif
+
+#ifndef MComplexProgramTarget_2
+#define	MComplexProgramTarget_2(program,locallib,syslib)		@@\
+program: $(OBJS2) $(DEPLIBS2)						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CC) -o $@ $(LDOPTIONS) $(OBJS2) locallib $(LDLIBS) syslib $(EXTRA_LOAD_FLAGS)	@@\
+									@@\
+CenterProgramTarget(program,$(SRCS2),$(OBJS2),locallib,syslib)		@@\
+									@@\
+InstallProgram(program,$(BINDIR))
+#endif
+
+#ifndef MComplexProgramTarget_3
+#define	MComplexProgramTarget_3(program,locallib,syslib)		@@\
+        PROGRAM_3 = program					@@\
+program: $(OBJS3) $(DEPLIBS3)						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CC) -o $@ $(LDOPTIONS) $(OBJS3) locallib $(LDLIBS) syslib $(EXTRA_LOAD_FLAGS)	@@\
+									@@\
+CenterProgramTarget(program,$(SRCS3),$(OBJS3),locallib,syslib)		@@\
+									@@\
+InstallProgram(program,$(BINDIR))
+#endif
+
+#ifndef MComplexProgramTarget_4
+#define	MComplexProgramTarget_4(program,locallib,syslib)		@@\
+        PROGRAM_4 = program					@@\
+program: $(OBJS4) $(DEPLIBS4)						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CC) -o $@ $(LDOPTIONS) $(OBJS4) locallib $(LDLIBS) syslib $(EXTRA_LOAD_FLAGS)	@@\
+									@@\
+CenterProgramTarget(program,$(SRCS4),$(OBJS4),locallib,syslib)		@@\
+									@@\
+InstallProgram(program,$(BINDIR))
+#endif
+
+#ifndef MComplexProgramTarget_5
+#define	MComplexProgramTarget_5(program,locallib,syslib)		@@\
+        PROGRAM_5 = program					@@\
+program: $(OBJS5) $(DEPLIBS5)						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CC) -o $@ $(LDOPTIONS) $(OBJS5) locallib $(LDLIBS) syslib $(EXTRA_LOAD_FLAGS)	@@\
+									@@\
+CenterProgramTarget(program,$(SRCS5),$(OBJS5),locallib,syslib)		@@\
+									@@\
+InstallProgram(program,$(BINDIR))
+#endif
+
+#ifndef MComplexProgramTarget_6
+#define	MComplexProgramTarget_6(program,locallib,syslib)		@@\
+        PROGRAM_6 = program					@@\
+program: $(OBJS6) $(DEPLIBS6)						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CC) -o $@ $(LDOPTIONS) $(OBJS6) locallib $(LDLIBS) syslib $(EXTRA_LOAD_FLAGS)	@@\
+									@@\
+CenterProgramTarget(program,$(SRCS6),$(OBJS6),locallib,syslib)		@@\
+									@@\
+InstallProgram(program,$(BINDIR))
+#endif
+
+#ifndef MComplexProgramTarget_7
+#define	MComplexProgramTarget_7(program,locallib,syslib)		@@\
+        PROGRAM_7 = program					@@\
+program: $(OBJS7) $(DEPLIBS7)						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CC) -o $@ $(LDOPTIONS) $(OBJS7) locallib $(LDLIBS) syslib $(EXTRA_LOAD_FLAGS)	@@\
+									@@\
+CenterProgramTarget(program,$(SRCS7),$(OBJS7),locallib,syslib)		@@\
+									@@\
+InstallProgram(program,$(BINDIR))
+#endif
+
+#ifndef MComplexProgramTarget_8
+#define	MComplexProgramTarget_8(program,locallib,syslib)		@@\
+        PROGRAM_8 = program					@@\
+program: $(OBJS8) $(DEPLIBS8)						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CC) -o $@ $(LDOPTIONS) $(OBJS8) locallib $(LDLIBS) syslib $(EXTRA_LOAD_FLAGS)	@@\
+									@@\
+CenterProgramTarget(program,$(SRCS8),$(OBJS8),locallib,syslib)		@@\
+									@@\
+InstallProgram(program,$(BINDIR))
+#endif
+
+#ifndef MComplexProgramTarget_9
+#define	MComplexProgramTarget_9(program,locallib,syslib)		@@\
+        PROGRAM_9 = program					@@\
+program: $(OBJS9) $(DEPLIBS9)						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CC) -o $@ $(LDOPTIONS) $(OBJS9) locallib $(LDLIBS) syslib $(EXTRA_LOAD_FLAGS)	@@\
+									@@\
+CenterProgramTarget(program,$(SRCS9),$(OBJS9),locallib,syslib)		@@\
+									@@\
+InstallProgram(program,$(BINDIR))
+#endif
+
+#ifdef AUTOMATION
+#ifndef TestPPTarget
+#define TestPPTarget(root)						@@\
+all:: root.Scr root.Dat							@@\
+									@@\
+root.Dat: root.dat							@@\
+	$(RM) root.Dat							@@\
+	$(COMMONPP) $(DEFINES) root.dat					@@\
+root.Scr: root.scr							@@\
+	$(RM) root.Scr							@@\
+	$(COMMONPP) $(DEFINES) root.scr
+#endif 
+#else
+#ifndef TestPPTarget
+#define TestPPTarget(root)                                              @@\
+all:: root.Dat                                                          @@\
+                                                                        @@\
+root.Dat: root.dat                                                      @@\
+	$(RM) root.Dat                                                  @@\
+	$(COMMONPP) $(DEFINES) root.dat
+#endif
+#endif
+
+#ifdef AUTOMATION
+#ifndef TestPPTargetScr
+#define TestPPTargetScr(root)                                           @@\
+all:: root.Scr                                                          @@\
+                                                                        @@\
+root.Scr: root.scr							@@\
+	$(RM) root.Scr							@@\
+	$(COMMONPP) $(DEFINES) root.scr
+#endif
+#else
+#ifndef TestPPTargetScr
+#define TestPPTargetScr(root)  /**/
+#endif
+#endif
+
+#ifdef AUTOMATION
+#ifndef TestPPTargetDat
+#define TestPPTargetDat(root)                                              @@\
+all:: root.Dat                                                          @@\
+                                                                        @@\
+root.Dat: root.dat                                                      @@\
+	$(RM) root.Dat                                                  @@\
+	$(COMMONPP) $(DEFINES) root.dat
+#endif
+#endif
+#ifndef AUTOMATION
+#ifndef TestPPTargetDat
+#define TestPPTargetDat(root)                                              @@\
+all:: root.Dat                                                          @@\
+                                                                        @@\
+root.Dat: root.dat                                                      @@\
+	$(RM) root.Dat                                                  @@\
+	$(COMMONPP) $(DEFINES) root.dat
+#endif
+#endif
+
+
+#ifndef NO_AUTOMATION
+#ifndef RunTarget
+#define RunTarget()							@@\
+all::	RUN								@@\
+									@@\
+RUN:	always								@@\
+	$(GENRUN) $(CURRENT_DIR) $(MTOP) $(DEFINES)			@@\
+									@@\
+always: 								@@\
+	$(RM) RUN
+#endif
+#else
+#ifdef UseVista
+#ifndef RunTarget
+#define RunTarget()							@@\
+all::	RUN								@@\
+									@@\
+RUN:	always								@@\
+	$(MANRUN) $(CURRENT_DIR) $(MTOP) $(DEFINES)			@@\
+									@@\
+always: 								@@\
+	$(RM) RUN
+#endif
+#else
+#ifdef UsePurify
+#ifndef RunTarget
+#define RunTarget()							@@\
+all::	RUN								@@\
+									@@\
+RUN:	always								@@\
+	$(MANRUN) $(CURRENT_DIR) $(MTOP) $(DEFINES)			@@\
+									@@\
+always: 								@@\
+	$(RM) RUN
+#endif
+#else
+#ifndef RunTarget
+#define RunTarget()							@@\
+all::	RUN								@@\
+									@@\
+RUN:	always								@@\
+									@@\
+always: 								@@\
+
+#endif
+#endif
+#endif
+#endif
+#ifdef UseVista
+#ifndef VistaMapRule
+#define VistaMapRule(targetmap,depend)					@@\
+all:: targetmap								@@\
+									@@\
+targetmap: depend 							@@\
+	$(RM) $(MTOP)/tests/Vista/targetmap				@@\
+	CATCMD *.M > $(MTOP)/tests/Vista/targetmap
+#endif
+#ifndef ComplexVistaMapRule
+#define ComplexVistaMapRule(program,filelist)				@@\
+all::	program.M							@@\
+									@@\
+program.M: filelist							@@\
+	$(RM) program.vista.tmpfile					@@\
+	touch program.vista.tmpfile					@@\
+	@case '${MFLAGS}' in *[ik]*) set +e;; esac;			@@\
+	@for i in filelist; do \					@@\
+		cat `basename $$i .o`.M >> program.vista.tmpfile ; done	@@\
+	$(RM) program.M							@@\
+	$(MV) program.vista.tmpfile program.M				@@\
+									@@\
+clean::									@@\
+	$(RM) *.M
+#endif
+
+#endif
+
+/*  Rule for making shadow trees.	*/
+#ifndef MakeShadowTree
+#define MakeShadowTree(name,dirs)			@@\
+all::							@@\
+	@case '${MFLAGS}' in *[ik]*) set +e;; esac;	@@\
+	MakeDir(name)					@@\
+	@for i in dirs; \				@@\
+        do if [ -d $$i/name ]; then \			@@\
+        exit 0; else set -x; mkdir $$i/name; fi \	@@\
+	done						@@\
+	@for i in dirs; \				@@\
+	do if [ -r name/$$i ]; then \			@@\
+		set +x; \				@@\
+		else (set -x; $(LN) ../$$i/name  name/$$i); fi \@@\
+	done
+#endif
+
+#ifdef BuildPlusPlus
+
+/* Rules for C++ */
+
+/*
+ * "CPlusPlusObjectCompile" - compile fragment for a normal C++ object file
+*/
+#ifndef CPlusPlusObjectCompile
+#define CPlusPlusObjectCompile(options) $(RM) $@                       @@\
+	$(CPLUSPLUSCOM) -c $(CPLUSPLUSFLAGS) options $*.cxx
+#endif
+
+#ifndef CPlusPlusObjectRule
+#define CPlusPlusObjectRule()						@@\
+.cxx.o:									@@\
+	CPlusPlusObjectCompile($(_NOOP_))
+#endif /* CPlusPlusObjectRule */
+
+#ifndef MCPlusPlusSimpleProgramTarget
+#define MCPlusPlusSimpleProgramTarget(program)                          @@\
+AllTarget(program)                                                      @@\
+	                                                                @@\
+program: program.o $(DEPS) $(DEPLIBS)					@@\
+	RemoveTargetProgram($@)                                         @@\
+	$(CPLUSPLUSLINKCOM) -o $@ program.o $(LDOPTIONS) $(DEPS) $(LOCAL_LIBRARIES) $(CPLUSPLUSLIBS) $(LDLIBS) $(EXTRA_LOAD_FLAGS)  @@\
+	                                                                @@\
+clean::                                                                 @@\
+	$(RM) program
+#endif
+
+#ifndef MCPlusPlusComplexProgramTarget
+#define	MCPlusPlusComplexProgramTarget(program,locallib,syslib)		@@\
+        PROGRAM = program						@@\
+									@@\
+AllTarget(program)							@@\
+									@@\
+program: $(OBJS) $(DEPLIBS)						@@\
+	RemoveTargetProgram($@)						@@\
+	$(CPLUSPLUSLINKCOM) -o $@ $(LDOPTIONS) $(OBJS) locallib $(CPLUSPLUSLIBS) $(LDLIBS) syslib $(EXTRA_LOAD_FLAGS)	@@\
+									@@\
+CenterProgramTarget(program,$(SRCS),$(OBJS),locallib,syslib)		@@\
+									@@\
+InstallProgram(program,$(BINDIR))					@@\
+									@@\
+install.man::								@@\
+	@echo To install documentation for $(PROGRAM), consult the Release Notes	@@\
+	@echo and/or README file in the current directory.		@@\
+DependTarget()								@@\
+LintTarget()								@@\
+									@@\
+clean::									@@\
+	$(RM) $(PROGRAM)
+#endif
+
+#endif /* BuildPlusPlus */
+
+/* Rules for message catalog building */
+#ifndef Real_MessageCatalogRule
+#define Real_MessageCatalogRule(prefix)					@@\
+prefix.cat Concat(prefix,MsgCatI.h):					@@\
+	$(RM) Concat(prefix,MsgCatI.h) prefix.cat $(MLOCSRC)/C/msg/prefix.msg	@@\
+	$(MKCATTOOL) Concat(prefix,MsgCatI.h) prefix.msg > $(MLOCSRC)/C/msg/prefix.msg	@@\
+	$(GENCAT) prefix.cat $(MLOCSRC)/C/msg/prefix.msg		@@\
+									@@\
+includes:: prefix.cat Concat(prefix,MsgCatI.h)				@@\
+									@@\
+depend:: prefix.cat Concat(prefix,MsgCatI.h)				@@\
+									@@\
+all:: prefix.cat							@@\
+									@@\
+clean::									@@\
+	$(RM) prefix.cat Concat(prefix,MsgCatI.h)
+#endif
+#define Stub_MessageCatalogRule(prefix)	/**/
+
+
+/* The X BuildLibDir is now an import, not an export. */
+#if UseImports || ImportX11
+# ifndef XBuildLibDir
+#  define XBuildLibDir $(TOP)/imports/x11/lib
+# endif
+#endif
+
+
+/* Search the Motif ProjectRoot too if it is different. */
+#ifdef MotifProjectRoot
+# define MUsrLibDirPath	Concat(XUsrLibDirPath,:$(MPROJECTROOT)/lib)
+#else
+# define MUsrLibDirPath	XUsrLibDirPath
+#endif
+#ifdef UsrLibDirPath
+# undef UsrLibDirPath
+#endif
+#define UsrLibDirPath	MUsrLibDirPath
+
+#if ImportMotif
+# define MLdPreLibs	-L$(MLIBSRC)
+#elif defined(UseInstalledMotif) && defined(MotifProjectRoot)
+# define MLdPreLibs	-L$(MPROJECTROOT)/lib
+#else
+# define MLdPreLibs	/**/
+#endif
+#ifdef LdPreLibs
+# undef LdPreLibs
+#endif
+#define LdPreLibs	LdPreLib MLdPreLibs XLdPreLibs
+
+#ifdef LdPostLibs
+# undef LdPostLibs
+#endif
+#ifdef MotifProjectRoot
+# define MLdPostLibs	-L$(MPROJECTROOT)/lib
+#else
+# define MLdPostLibs	/**/
+#endif
+#define LdPostLibs	LdPostLib MLdPostLibs XLdPostLibs
+
+#ifdef TopIncludes
+# undef TopIncludes
+#endif
+#define TopIncludes	TopInclude $(TOP_MOTIF_INCLUDES) $(TOP_X_INCLUDES)
+
+#if UseInstalledMotif && defined(MotifProjectRoot)
+# define MotifBuildLibPath	$(MPROJECTROOT)/lib
+#elif UseInstalledMotif
+# define MotifBuildLibPath	$(USRLIBDIR)
+#elif ImportMotif
+# define MotifBuildLibPath	$(MLIBSRC)
+#else
+# define MotifBuildLibPath	$(TOP)/exports/lib
+#endif
+#ifdef BuildLibPath
+# undef BuildLibPath
+#endif
+#ifdef SystemBuildLibPath
+# define BuildLibPath	$(MOTIFENVLIBDIR):$(XENVLIBDIR):$(SYSTEMENVLIBDIR)
+#else
+# define BuildLibPath	$(MOTIFENVLIBDIR):$(XENVLIBDIR)
+#endif
+
+#ifndef MotifProjectDefines
+# define MotifProjectDefines	MotifDefines MessageCatalogDefines
+#endif
+#ifdef ProjectDefines
+# undef ProjectDefines
+#endif
+#define ProjectDefines	X11ProjectDefines MotifProjectDefines
+
+#ifndef MotifCplusplusProjectDefines
+# define MotifCplusplusProjectDefines	MotifProjectDefines
+#endif
+#ifdef CplusplusProjectDefines
+# undef CplusplusProjectDefines
+#endif
+#define CplusplusProjectDefines	\
+	X11CplusplusProjectDefines MotifCplusplusProjectDefines

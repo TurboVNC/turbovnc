@@ -1,0 +1,41 @@
+XCOMM $XConsortium: lnxLib.tmpl,v 1.5 95/01/11 21:44:44 kaleb Exp $
+XCOMM $XFree86: xc/config/cf/lnxLib.tmpl,v 3.9 1996/02/24 04:32:52 dawes Exp $
+
+/*
+ * Linux shared library template
+ */
+
+#if UseElfFormat
+
+#ifndef FixupLibReferences
+#define FixupLibReferences()						@@\
+XMULIBONLY = -lXmu							@@\
+XMULIB = $(XMULIBONLY) $(XTOOLLIB) $(XLIB)
+#endif
+
+#ifndef XawClientLibs
+#define XawClientLibs $(XAWLIB) $(XMULIBONLY) $(XTOOLLIB) $(XLIB)
+#endif
+
+#define CplusplusLibC
+
+#define SharedX11Reqs
+#define SharedOldXReqs	$(LDPRELIB) $(XLIBONLY)
+#define SharedXtReqs	$(LDPRELIB) $(XLIBONLY) $(SMLIB) $(ICELIB)
+#define SharedXawReqs	$(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XLIB)
+#define SharedXmuReqs	$(LDPRELIB) $(XTOOLLIB) $(XLIB)
+#define SharedXextReqs	$(LDPRELIB) $(XLIBONLY)
+#define SharedXiReqs	$(LDPRELIB) $(XLIB)
+#define SharedPexReqs	$(LDPRELIB) $(XLIBONLY) MathLibrary
+#define SharedXtstReqs	$(LDPRELIB) $(XLIB)
+#define SharedXieReqs	$(LDPRELIB) $(XLIBONLY)
+#define SharedSMReqs	$(LDPRELIB) $(ICELIB)
+
+#else	/* UseElfFormat */
+
+#ifndef FixupLibReferences
+#define FixupLibReferences()						@@\
+XMULIB = -lXmu $(XLIB)
+#endif
+
+#endif	/* UseElfFormat */

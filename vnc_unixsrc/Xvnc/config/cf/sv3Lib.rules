@@ -1,0 +1,232 @@
+XCOMM $XConsortium: sv3Lib.rules /main/1 1996/10/31 14:47:33 kaleb $
+
+
+
+XCOMM $XFree86: xc/config/cf/sv3Lib.rules,v 3.1 1996/12/27 06:50:27 dawes Exp $
+/*
+ * SVR3 shared library rules
+ * Copyright (c) 1992, 1993 by Thomas Wolfram, Berlin, Germany
+ * Author: Thomas Wolfram, thomas@aeon.in-berlin.de, wolf@prz.tu-berlin.de
+ * Conception derived partially from work of Thomas Roell
+ */
+
+#ifndef HasSharedLibraries
+#define HasSharedLibraries NO		/* JUST FOR NOW */
+#endif
+#ifndef ForceNormalLib
+#define ForceNormalLib YES
+#endif
+
+#ifndef SharedLibSM
+#define SharedLibSM HasSharedLibraries
+#endif
+#ifndef SharedLibXau
+#define SharedLibXau HasSharedLibraries
+#endif
+#ifndef SharedLibXdmcp
+#define SharedLibXdmcp HasSharedLibraries
+#endif
+#ifndef SharedLibXi
+#define SharedLibXi HasSharedLibraries
+#endif
+#ifndef SharedLibXie
+#define SharedLibXie HasSharedLibraries
+#endif
+#ifndef SharedLibXtst
+#define SharedLibXtst HasSharedLibraries
+#endif
+#ifndef SharedLibPhigs
+#define SharedLibPhigs HasSharedLibraries
+#endif
+#ifndef SharedLibICE
+#define SharedLibICE HasSharedLibraries
+#endif
+#ifndef SharedLibFS
+#define SharedLibFS HasSharedLibraries
+#endif
+#ifndef SharedLibX11
+#define SharedLibX11 HasSharedLibraries
+#endif
+#ifndef SharedOldX
+#define SharedOldX NO		/* it's obsolete */
+#endif
+#ifndef SharedLibXt
+#define SharedLibXt HasSharedLibraries
+#endif
+#ifndef SharedLibXaw
+#define SharedLibXaw HasSharedLibraries
+#endif
+#ifndef SharedLibXmu
+#define SharedLibXmu HasSharedLibraries
+#endif
+#ifndef SharedLibXext
+#define SharedLibXext HasSharedLibraries
+#endif
+#ifndef SharedLibPex
+#define SharedLibPex NO
+#endif
+
+#ifndef SharedDataSeparation
+#define SharedDataSeparation NO
+#endif
+#ifndef SharedCodeDef
+#define SharedCodeDef /**/
+#endif
+#ifndef SharedLibraryDef
+#define SharedLibraryDef -DSVR3SHLIB
+#endif
+#ifndef ShLibIncludeFile
+#define ShLibIncludeFile <sv3Lib.tmpl>
+#endif
+#ifndef SharedLibraryLoadFlags
+#define SharedLibraryLoadFlags -q
+#endif
+
+#ifndef PositionIndependentCFlags
+# if HasGcc2
+#  define PositionIndependentCFlags -msvr3-shlib  
+# else
+#  define PositionIndependentCFlags /**/
+# endif
+#endif
+
+#ifndef PositionIndependentCplusplusFlags
+# if HasGcc2
+#  define PositionIndependentCplusplusFlags -msvr3-shlib  
+# else
+#  define PositionIndependentCplusplusFlags /**/
+# endif
+#endif
+
+#if 0
+/*
+ * LibCleanDir - helper for cleaning library object subdirectories
+ */
+#ifndef LibCleanDir
+#define LibCleanDir(dir) -@if [ -d dir ]; then \                           @@\
+                (set -x; cd dir; $(RM) *.o *.sd); else exit 0; fi
+#endif
+
+/*
+ * SharedLibObjCompile - compile fragment for shared objects
+ */
+#ifndef SharedLibObjCompile
+#define SharedLibObjCompile(options) $(RM) shared/$@ 	                   @@\
+	cat import.h $*.c >_$*.c                                           @@\
+        $(CC) -c $(ANSICCOPTIONS) $(CCOPTIONS) $(ALLDEFINES) options \     @@\
+$(SHLIBDEF) $(SHAREDCODEDEF) $(PICFLAGS) $(CDEBUGFLAGS) _$*.c              @@\
+	$(MV) _$*.o shared/$@                                              @@\
+	$(RM) _$*.c
+#endif
+
+/*
+ * NormalSharedLibObjCompile - compile fragment for shared object when
+ * a normal library is not being built
+ */
+#ifndef NormalSharedLibObjCompile
+#define NormalSharedLibObjCompile(options) $(RM) $@                        @@\
+	cat import.h $*.c >_$*.c                                           @@\
+        $(CC) -c $(CFLAGS) options $(SHLIBDEF) $(SHAREDCODEDEF) $(PICFLAGS) _$*.c @@\
+	$(MV) _$*.o $@                                                     @@\
+	$(RM) _$*.c
+#endif
+
+
+#ifndef LibraryObjectRule
+#define LibraryObjectRule()                                             @@\
+all::                                                                   @@\
+        _DebuggedLibMkdir()                                             @@\
+        _ProfiledLibMkdir()                                             @@\
+        _SharedLibMkdir()                                               @@\
+                                                                        @@\
+includes::                                                              @@\
+        _DebuggedLibMkdir()                                             @@\
+        _ProfiledLibMkdir()                                             @@\
+        _SharedLibMkdir()                                               @@\
+                                                                        @@\
+.c.o:                                                                   @@\
+        _DebuggedObjCompile($(_NOOP_))                                  @@\
+        _ProfiledObjCompile($(_NOOP_))                                  @@\
+        _SharedObjCompile($(_NOOP_))                                    @@\
+        _NormalObjCompile($(_NOOP_))                                    @@\
+                                                                        @@\
+.SUFFIXES: .sd                                                          @@\
+.c.sd:                                                                  @@\
+        _SharedDatCompile(-DSVR3SHDAT)                                  @@\
+                                                                        @@\
+clean::                                                                 @@\
+        _DebuggedCleanDir()                                             @@\
+        _ProfiledCleanDir()                                             @@\
+        _SharedCleanDir()                                               @@\
+
+#endif /* LibraryObjectRule */
+
+
+/*
+ * InstallSharedLibrary - generate rules to install the shared library.
+ */
+#ifndef InstallSharedLibrary
+#if StripInstalledPrograms
+#define	InstallSharedLibrary(libname,rev,dest)				@@\
+install:: Concat(lib,libname.rev) 					@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTLIBFLAGS) Concat3(lib,libname,_s.a) $(DESTDIR)dest @@\
+	MakeDir($(DESTDIR)$(LIBDIR)/shlib)                              @@\
+        $(INSTALL) -c $(INSTPGMFLAGS) Concat(lib,libname.rev) \         @@\
+	$(DESTDIR)$(LIBDIR)/shlib                                       @@\
+	strip Concat($(DESTDIR)$(LIBDIR)/shlib/lib,libname.rev)         @@\
+	mcs -d Concat($(DESTDIR)$(LIBDIR)/shlib/lib,libname.rev)
+#else
+#define	InstallSharedLibrary(libname,rev,dest)				@@\
+install:: Concat(lib,libname.rev) 					@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTLIBFLAGS) Concat3(lib,libname,_s.a) $(DESTDIR)dest @@\
+	MakeDir($(DESTDIR)$(LIBDIR)/shlib)                              @@\
+        $(INSTALL) -c $(INSTPGMFLAGS) Concat(lib,libname.rev) \         @@\
+	$(DESTDIR)$(LIBDIR)/shlib
+#endif
+
+#endif /* InstallSharedLibrary */
+
+/*
+ * InstallSharedLibraryData - generate rules to install the shared library data
+ */
+#ifndef InstallSharedLibraryData
+#define	InstallSharedLibraryData(libname,rev,dest)
+#endif /* InstallSharedLibraryData */
+
+
+/*
+ * SharedLibraryTarget - generate rules to create a shared library;
+ * build it into a different name so that we do not hose people by having
+ * the library gone for long periods.
+ */
+#ifndef SharedLibraryTarget
+#define SharedLibraryTarget(libname,rev,solist,down,up)			@@\
+AllTarget(Concat(lib,libname.rev))					@@\
+									@@\
+Concat(lib,libname.rev):  solist					@@\
+	$(RM) $@ Concat3(lib,libname,_s.a)				@@\
+        $(CPP) -DDOWN=down ConnectionFlags ShlibDefines Concat(lib,libname.def) | \ @@\
+        sed -e '/^#  *[0-9][0-9]*  *.*$$/d; /^$$/d' >spec.cpp           @@\
+        sed -e '1,/#libraries/d; /#externals/,$$d' spec.cpp | \         @@\
+        nawk '{ system("ar x " $$1 " " $$2 )}'                          @@\
+        echo "#target " Concat($(LIBDIR)/shlib/lib,libname.rev) >spec   @@\
+        sed -e '/#libraries/,$$d' spec.cpp >>spec                             @@\
+        mkshlib -s spec -t $@ -h Concat3(lib,libname,_s.a) $(SHLIBLDFLAGS)    @@\
+        ar rulv Concat3(lib,libname,_s.a) `sed -e '1,/#externals/d' spec.cpp` @@\
+        $(RM) spec.cpp spec                                             @@\
+									@@\
+clean::									@@\
+	$(RM) Concat(lib,libname.rev) Concat3(lib,libname,_s.a)
+
+#endif /* SharedLibraryTarget */
+
+/*
+ * SharedLibraryDataTarget - generate rules to create shlib data file;
+ */
+#ifndef SharedLibraryDataTarget
+#define SharedLibraryDataTarget(libname,rev,salist)
+#endif /* SharedLibraryTarget */
+
+#endif

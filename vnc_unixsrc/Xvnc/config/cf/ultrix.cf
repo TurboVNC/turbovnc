@@ -1,0 +1,77 @@
+XCOMM platform:  $XConsortium: ultrix.cf /main/68 1996/09/28 16:13:46 rws $
+
+#ifndef OSName
+# define OSName		DefaultOSName
+#endif
+#ifndef OSMajorVersion
+# define OSMajorVersion	DefaultOSMajorVersion
+#endif
+#ifndef OSMinorVersion
+# define OSMinorVersion DefaultOSMinorVersion
+#endif
+XCOMM operating system: OSName (OSMajorVersion.OSMinorVersion)
+
+#define HasNdbm YES
+#define HasPutenv YES
+#define HasShm YES
+#define LintLibFlag -o
+#define LintOpts -ax
+
+#if HasDECnet
+#define ExtraLibraries -ldnet
+#endif
+
+#if ThreadedX
+/* if you want to experiment, turn this on, but no guarantees */
+#define HasThreadSafeAPI	NO
+#define HasPosixThreads		YES
+#define ThreadPreStdAPIDefines	-DXPRE_STANDARD_API
+#define ExtraLibraries		-lpthreads -li
+#endif
+
+#ifdef VaxArchitecture
+#define PexNativeFPFormat PEXDEC_F_Floating
+#define NativeFPFormat DEC_F_Float
+#define UnalignedReferencesAllowed YES	       /* if arbitrary deref is okay */
+#define BuildServer NO
+#endif
+
+#ifdef MipsArchitecture
+#if OSMajorVersion > 4 || (OSMajorVersion == 4 && OSMinorVersion >= 2)
+/*#define XdecServer YES
+#define ServerOSDefines -DDDXTIME*/
+/* Even under ultrix 4.2, the compiler miscompiles some alloca calls */
+#define AllocateLocalDefines /* -DINCLUDE_ALLOCA_H */
+#else
+#define BuildServer NO
+#define AllocateLocalDefines /**/
+#endif
+#if !HasGcc
+#define NeedFunctionPrototypes YES
+#define PexCCOptions -Wf,-XNp15000,-XNd15000
+/*
+ * NormalLibObjCompile - compile fragment for a library object file
+ * 	do ld -x to remove line number symbols for libraries
+ */
+#define NormalLibObjCompile(options) $(RM) $@ $*.os \			@@\
+	&& $(CC) -c options $(CFLAGS) $*.c \				@@\
+	&& $(LD) $(LDSTRIPFLAGS) -r $@ -o $*.os \			@@\
+	&& $(MV) $*.os $@
+#endif
+#endif
+
+#if HasGcc
+#ifdef VaxArchitecture
+#define CcCmd gcc -ansi -Dvax -Dultrix -fpcc-struct-return
+#endif
+#ifdef MipsArchitecture
+#define CcCmd gcc -ansi -Dmips -Dultrix -fpcc-struct-return
+#endif
+#define ServerCCOptions /* */
+#define AllocateLocalDefines /* */
+#endif
+
+#define ServerExtraDefines AllocateLocalDefines
+#define HasWChar32 YES
+
+#define MotifDefines		-DNO_REGEX -DNO_REGCOMP -DNO_CONST

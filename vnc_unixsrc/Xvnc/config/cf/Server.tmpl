@@ -1,0 +1,95 @@
+/*
+ * Server imakefile info  - this contains any special redefinitions, etc.
+ * that Imakefiles in the server subtree will need.
+ */
+
+XCOMM $XConsortium: Server.tmpl /main/14 1996/04/30 14:37:27 mw $
+XCOMM $XFree86: xc/config/cf/Server.tmpl,v 3.3.2.3 1998/02/07 00:54:21 dawes Exp $
+
+#define PassCDebugFlags CDEBUGFLAGS="$(CDEBUGFLAGS)" LDSTRIPFLAGS="$(LDSTRIPFLAGS)"
+
+#ifndef ServerCcCmd
+#define ServerCcCmd CcCmd
+#endif
+#ifndef ServerCCOptions
+#define ServerCCOptions DefaultCCOptions
+#endif
+#ifndef ServerDefines
+#define ServerDefines StandardDefines
+#endif
+#ifndef ServerCDebugFlags
+#define ServerCDebugFlags DefaultCDebugFlags
+#endif
+#ifndef DoThreadedServer
+#define DoThreadedServer NO
+#endif
+#ifndef XserverNeedsSetUID
+#define XserverNeedsSetUID NO
+#endif
+#ifndef UseXserverWrapper
+#define UseXserverWrapper XserverNeedsSetUID
+#endif
+#ifndef InstallServerSetUID
+#define InstallServerSetUID (XserverNeedsSetUID && !UseXserverWrapper)
+#endif
+
+/*
+ * SetUIDServerTarget - compile, link, and relink a setuid server
+ */
+#ifndef SetUIDServerTarget
+#if InstallServerSetUID
+#define	SetUIDServerTarget(server,subdirs,objects,libs,syslibs)		@@\
+ServerTargetWithFlags(server,subdirs,objects,libs,syslibs,$(INSTUIDFLAGS))
+#else
+#define	SetUIDServerTarget ServerTarget
+#endif
+#endif /* SetUIDServerTarget */
+
+/*
+ * BuildDynamicLoading - dynamic module support
+ */
+#ifndef BuildDynamicLoading
+#define BuildDynamicLoading		NO
+#endif
+
+/*
+ * ExtensionsDynamicModules - compile server extensions as dynamic modules
+ */
+#ifndef ExtensionsDynamicModules
+#define ExtensionsDynamicModules	BuildDynamicLoading
+#endif
+
+#ifndef PexDynamicModule
+#define PexDynamicModule	ExtensionsDynamicModules
+#endif
+#ifndef XieDynamicModule
+#define XieDynamicModule	ExtensionsDynamicModules
+#endif
+#ifndef GlxModule
+#define GlxModule	ExtensionsDynamicModules
+#endif
+
+         CC = ServerCcCmd
+  CCOPTIONS = ServerCCOptions
+#if DoThreadedServer
+SERVER_THREAD_DEFINES = XThreadsDefines ThreadTypeDefines
+#endif
+STD_DEFINES = ServerDefines $(SERVER_THREAD_DEFINES)
+CDEBUGFLAGS = ServerCDebugFlags
+EXT_DEFINES = ExtensionDefines
+
+#if GlxModule | DoLoadableServer
+GLX_DEFINES = GlxDefines -DGLX_MODULE
+#else
+GLX_DEFINES = GlxDefines
+#endif
+
+#ifndef GlxStaticServerLib
+#define GlxStubLib	YES
+#else
+#define GlxStubLib	NO
+#endif
+
+#ifdef XFree86Version
+#include <xf86.tmpl>
+#endif

@@ -1,0 +1,57 @@
+# This makefile is for command-line Borland C++ 5.5 compiler (Win32).
+# It builds vncviewer.exe.
+
+CC=bcc32
+LD=ilink32
+
+CFLAGS= -v- -O2 -3 -tWM -xd- -q -w-8004 -w-8057 -w-8066 -w-8027 -Iomnithread -DXMD_H
+LDFLAGS= /c /Tpe /aa /Gn /B:0x400000
+
+OBJS=AboutBox.obj AuthDialog.obj ClientConnection.obj \
+	ClientConnectionClipboard.obj ClientConnectionCopyRect.obj \
+	ClientConnectionCoRRE.obj ClientConnectionCursor.obj \
+	ClientConnectionFile.obj ClientConnectionFullScreen.obj \
+	ClientConnectionHextile.obj ClientConnectionRaw.obj \
+	ClientConnectionRRE.obj ClientConnectionTight.obj \
+	ClientConnectionZlib.obj ClientConnectionZlibHex.obj \
+	d3des.obj Daemon.obj Exception.obj Flasher.obj KeyMap.obj \
+	Log.obj MRU.obj SessionDialog.obj stdhdrs.obj vncauth.obj \
+	VNCOptions.obj vncviewer.obj VNCviewerApp.obj VNCviewerApp32.obj \
+	omnithread\omnithread.obj
+
+LIBS=zlib\zlib.lib libjpeg\libjpeg.lib
+
+RES=res\vncviewer.res
+
+.autodepend
+.c.obj:
+	$(CC) -c $(CFLAGS) $<
+.cpp.obj:
+	$(CC) -c $(CFLAGS) $<
+
+vncviewer.exe: $(OBJS) $(LIBS) $(RES)
+	$(LD) $(LDFLAGS) c0w32 $(OBJS), $@, , $(LIBS) import32 cw32mt, , $(RES)
+
+zlib\zlib.lib:
+	cd zlib
+	make -fMakefile.bcc32 -s
+	cd ..
+
+libjpeg\libjpeg.lib:
+	cd libjpeg
+	make -fMakefile.bcc32 -s
+	cd ..
+
+omnithread\omnithread.obj:
+	cd omnithread
+	build-bcc32.bat
+	cd ..
+
+res\vncviewer.res:
+	cd res
+	build-bcc32.bat
+	cd ..
+
+clean:
+	del *.obj vncviewer.exe
+

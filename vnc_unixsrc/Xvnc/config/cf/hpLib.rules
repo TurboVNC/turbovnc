@@ -1,0 +1,119 @@
+XCOMM $XConsortium: hpLib.rules /main/16 1996/12/04 11:44:35 swick $
+
+/*
+ * HP shared library rules
+ */
+
+#ifndef HasSharedLibraries
+# define HasSharedLibraries YES
+#endif
+#ifndef SharedDataSeparation
+# define SharedDataSeparation NO
+#endif
+#ifndef SharedCodeDef
+# define SharedCodeDef /**/
+#endif
+#ifndef SharedLibraryDef
+# define SharedLibraryDef /**/
+#endif
+#ifndef ShLibIncludeFile
+# define ShLibIncludeFile <hpLib.tmpl>
+#endif
+#ifndef SharedLibraryLoadFlags
+# define SharedLibraryLoadFlags -b
+#endif
+#ifndef PositionIndependentCFlags
+# define PositionIndependentCFlags +z
+#endif
+#ifndef LargePositionIndependentCFlags
+# define LargePositionIndependentCFlags +Z
+#endif
+#ifndef InstLibFlags
+# define InstLibFlags -m 0555
+#endif
+#ifndef UseInstalled
+/* assert: LdPostLib pulls in -L$(USRLIBDIR), so it doesn't need to be here */
+# define ExtraLoadFlags -Wl,+s -Wl,+b$(USRLIBDIRPATH)
+#endif
+#ifndef UseExportLists
+# define UseExportLists	YES
+#endif
+
+/* Pre-linking shared libraries is supported in HP/UX 10. */
+#if OSMajorVersion > 9
+# define HPRequiredLibs	$(LDPRELIBS) $(REQUIREDLIBS) +s +b $(USRLIBDIRPATH)
+#else
+# define HPRequiredLibs	$(REQUIREDLIBS)
+#endif
+
+#ifndef LinkWithExports
+# if UseExportLists
+#  define LinkWithExports(libname,rev,solist,down,up) \
+	(cd down; $(LD) -o up/$@~ $(SHLIBLDFLAGS) +h $@ solist HPRequiredLibs)	@@\
+	if [ -f Concat(lib,libname.elist) ]; then \			@@\
+	    RemoveFiles($@.exports $@.list); \				@@\
+	    $(CPP) $(ALLINCLUDES) $(EXTRA_DEFINES) $(PROTO_DEFINES) $(THREADS_DEFINES) $(DEFINES) Concat(lib,libname.elist) | CppSedMagic >$@.list; \	@@\
+	    $(EXPORTLISTGEN) $@~ $@.list > $@.exports; \		@@\
+	    (cd down; $(LD) -c up/$@.exports -o up/$@~ $(SHLIBLDFLAGS) +h $@ solist HPRequiredLibs); \ @@\
+	    RemoveFiles($@.exports $@.list); \				@@\
+	fi
+# else
+#  define LinkWithExports(libname,rev,solist,down,up) \
+	(cd down; $(LD) -o up/$@~ $(SHLIBLDFLAGS) +h $@ solist HPRequiredLibs)
+# endif
+#endif
+
+/*
+ * InstallSharedLibrary - generate rules to install the shared library.
+ */
+#ifndef InstallSharedLibrary
+# define InstallSharedLibrary(libname,rev,dest)				@@\
+install:: Concat(lib,libname.sl.rev) 					@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	RMoveToBakFile(Concat($(DESTDIR)dest/lib,libname.sl.rev))	@@\
+	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS) Concat(lib,libname.sl.rev) $(DESTDIR)dest @@\
+	$(RM) Concat($(DESTDIR)dest/lib,libname.sl)			@@\
+	cd $(DESTDIR)dest; $(LN) Concat(lib,libname.sl.rev) Concat(lib,libname.sl) @@\
+	-RemoveFile(Concat(lib,libname.sl.rev.bak))
+
+#endif /* InstallSharedLibrary */
+
+/*
+ * InstallSharedLibraryData - generate rules to install the shared library data
+ */
+#ifndef InstallSharedLibraryData
+# define InstallSharedLibraryData(libname,rev,dest)
+#endif /* InstallSharedLibraryData */
+
+
+/*
+ * SharedLibraryTarget - generate rules to create a shared library;
+ * build it into a different name so that we do not hose people by having
+ * the library gone for long periods.
+ */
+#ifndef SharedLibraryTarget
+# define SharedLibraryTarget(libname,rev,solist,down,up)		@@\
+AllTarget(Concat(lib,libname.sl.rev))					@@\
+									@@\
+Concat(lib,libname.sl.rev):  solist $(EXTRALIBRARYDEPS)			@@\
+	$(RM) $@~							@@\
+	LinkWithExports(libname,rev,solist,down,up)			@@\
+	-RemoveFiles($@ $@.bak)						@@\
+	MoveToBakFile($@)						@@\
+	$(MV) $@~ $@							@@\
+	$(RM) Concat(lib,libname.sl)					@@\
+	$(LN) $@ Concat(lib,libname.sl)					@@\
+	LinkBuildLibrary($@)						@@\
+	LinkBuildLibrary(Concat(lib,libname.sl))			@@\
+									@@\
+clean::									@@\
+	$(RM) Concat(lib,libname.sl.rev) Concat(lib,libname.sl)
+
+#endif /* SharedLibraryTarget */
+
+/*
+ * SharedLibraryDataTarget - generate rules to create shlib data file;
+ */
+#ifndef SharedLibraryDataTarget
+# define SharedLibraryDataTarget(libname,rev,salist)
+#endif /* SharedLibraryTarget */

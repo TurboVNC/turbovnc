@@ -1,0 +1,43 @@
+XCOMM $XConsortium: scoLib.rules /main/2 1996/09/28 16:12:20 rws $
+XCOMM $XFree86: xc/config/cf/scoLib.rules,v 1.1.1.2.2.2 1997/07/19 12:59:10 dawes Exp $
+
+/*
+ * SharedLibraryTarget3 - generate rules to create a shared library;
+ * build it into a different name so that we do not hose people by having
+ * the library gone for long periods.  
+ *
+ * Work around SCO sh enviroment size problem.
+ */
+#ifndef SharedLibraryTarget3
+#define SharedLibraryTarget3(libname,rev,solist1,solist2,solist3,down,up)	@@\
+AllTarget(Concat(lib,libname.so.rev))					@@\
+									@@\
+Concat(lib,libname.so.rev): solist1 solist2 solist3 $(EXTRALIBRARYDEPS)	@@\
+	$(RM) $@~							@@\
+	echo -n $(LD) -o up/$@~ $(SHLIBLDFLAGS) -h $(DESTDIR)$(SHLIBDIR)/$@ solist1 " " > Concat(down/lib,cmd) 	@@\
+	echo -n solist2 " " >> Concat(down/lib,cmd)			@@\
+	echo -n solist3  >> Concat(down/lib,cmd)			@@\
+	(cd down; $(SHELL) Concat(./lib,cmd))				@@\
+	$(RM) $@ Concat(lib,tmp1) Concat(lib,tmp2)			@@\
+	$(MV) $@~ $@							@@\
+	$(RM) Concat(lib,libname.so)					@@\
+	$(LN) $@ Concat(lib,libname.so)					@@\
+	LinkBuildLibrary($@)						@@\
+	LinkBuildLibrary(Concat(lib,libname.so))			@@\
+									@@\
+clean::									@@\
+	$(RM) Concat(lib,libname.so.rev) Concat(lib,libname.so)
+
+#endif /* SharedLibraryTarget */
+
+/*
+ * Redefine this so we can drop -b elf and build COFF objects for the
+ * archived library.  This assumes -b elf is hanging out in CCOPTIONS
+ */
+#ifndef UnsharedLibObjCompile
+#define UnsharedLibObjCompile(options) RemoveFile($@)                  @@\
+        ClearmakeOSName                                                  \
+        $(CC) -c $(CDEBUGFLAGS) $(THREADS_CFLAGS) $(ALLDEFINES) options $*.c @@\
+        $(MV) $@ unshared/$@
+#endif
+

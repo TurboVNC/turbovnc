@@ -1,0 +1,252 @@
+XCOMM $XConsortium: os2.cf /main/1 1996/10/31 14:47:25 kaleb $
+
+
+
+XCOMM platform:  $XFree86: xc/config/cf/os2.cf,v 3.18.2.4 1998/02/22 01:04:50 robin Exp $
+
+#define OSName           OS/2
+#define OSVendor	 IBM
+#define OSMajorVersion    3
+#define OSMinorVersion    0
+
+/*
+ * C library features
+ */
+#ifdef __EMX__
+
+/* set this to what you like (almost :-) 
+ * OS/2 does a nonstandard bootstrap of imake 
+ */
+#define BootstrapCFlags   -DBSD43
+
+/* X_WCHAR and X_LOCALE are set in Xosdefs.h */
+#define StandardDefines   /**/
+#define XawI18nDefines    -DUSE_XWCHAR_STRING -DUSE_XMBTOWC
+
+/* This will redirect everything to /XFree86
+ * Care will be taken that programs that need a file from this tree
+ * will add the environment variable X11ROOT to the search path
+ * so you can redirect the stuff to a different drive
+ */
+#ifdef ProjectRoot
+#undef ProjectRoot
+#endif
+/* This will be mangled with a drive letter in most OS/2 rules ... */
+#define ProjectRoot	/XFree86
+
+/* ... but not when a user tries to compile something from a different drive 
+ * Please report any directories missed to Holger.Veit@gmd.de 
+*/
+#ifdef UseInstalled
+#define IncRoot $(X11ROOT)/XFree86/include
+#define LdPreLib -L$(X11ROOT)/XFree86/lib
+#endif
+
+/* more directories */
+#define AdmDir		        $(LIBDIR)/adm
+#define ConfigDir		$(X11ROOT)$(LIBDIR)/config
+        DESTDIR = $(X11ROOT)
+
+/* for the man pages */
+#define BookFormatManPages	YES
+#define ManDirectoryRoot /XFree86/man/man
+#define ManSuffix	1
+#define LibManSuffix	3
+#define FileManSuffix	4
+#define XmanSearchPath	/XFree86/man/man
+#define ManSourcePath	$(MANPATH)
+
+/* you must have installed groff! */
+#define TblCmd		tbl
+#define ColCmd		cat
+#define NeqnCmd		eqn 
+#define NroffCmd	groff -Tascii
+#define	EqnCmd 		eqn -Tascii
+#define TroffCmd        groff -Tps
+         NEQN = NeqnCmd
+        NROFF = NroffCmd
+
+/* A set of standard defines: */
+#define OSDefines		-D__EMX__ -D__i386__ -Demxos2 -D_POSIX_SOURCE \
+				-D_BSD_SOURCE -D_GNU_SOURCE
+
+#define BuildXKB		YES
+#define BuildImplibs		YES
+#define BuildLBX		YES
+
+/* some more properties of the OS/2 implementation */
+#define HasNdbm         	YES
+#define HasPutenv       	YES
+#define HasSockets		YES
+#define HasSnprintf		YES
+#define HasBsearch		NO
+#define HasLargeTmp		NO
+#define HasPoll			NO
+#define HasBSD44Sockets 	NO
+#define HasSecureRPC		NO
+#define	HasSymLinks		NO
+#define HasVFork		NO
+#define HasVarDirectory		NO
+#define HasStrcasecmp		NO
+#define Malloc0ReturnsNull	YES
+#define SetTtyGroup     	NO
+#ifndef HasLibCrypt
+# define HasLibCrypt		NO
+#endif
+#ifndef HasShm
+# define HasShm          	YES
+#endif
+#define ConnectionFlags		-DTCPCONN -DOS2PIPECONN
+#define StdIncDir $(C_INCLUDE_PATH)
+
+/* XF86Setup stuff - does not work yet! */
+#define HasTcl			NO
+/*define TclLibDir		$(X11ROOT)$(SHLIBDIR)*/
+/*define TclIncDir		$(X11ROOT)$(INCROOT)/tcl*/
+/*define TclLibName		xtcl*/
+
+#define HasTk			NO
+/*define TkLibDir		$(X11ROOT)$(SHLIBDIR)*/
+/*define TkIncDir		$(X11ROOT)$(INCROOT)/tk*/
+/*define TkLibName		xtk*/
+
+/*
+ * Compiler Features
+ */
+#define HasGcc			YES
+#define HasGcc2			YES
+#define HasCplusplus		YES
+#define HasGcc2ForCplusplus	YES
+#define GccUsesGas		YES
+#define UseGas			YES
+#define GnuCpp			YES
+#define DoRanlibCmd		YES
+#define NeedConstPrototypes	YES
+#define NeedFunctionPrototypes	YES
+#define NeedNestedPrototypes	YES
+#define NeedVarargsPrototypes	YES
+#define NeedWidePrototypes	NO
+
+#define CppCmd	cpp
+#define StandardCppDefines	-traditional
+#define PreProcessCmd	CppCmd
+
+#define CcCmd	gcc
+#define DefaultCCOptions	-D__ST_MT_ERRNO__ -Zmtd -Zsysv-signals
+#define LibraryCCOptions	-D__ST_MT_ERRNO__ -Zmtd -Zsysv-signals
+#define ServerCCOptions	-D__ST_MT_ERRNO__ -Zmtd -Zsysv-signals
+
+#define CplusplusCmd g++
+#define CplusplusOptions	-Zmtd -Zsysv-signals
+
+#define MakeCmd x11make 
+#define AsCmd	gcc -S
+#define GccGasOption	-DGCCUSESGAS
+#define AsmDefines	-DUSE_GAS
+
+#define InstallCmd	install
+
+#define LdCmd	ld
+#define ExtraLoadFlags	-Zbin-files
+#define ExtraLibraries	-lsocket -lbsd
+
+/* quite a number of programs you need, most of them the same as
+ * with Unix, but listed here for completeness
+ */
+#define ArCmd	ar cq
+#define RanlibCmd	ar s
+#define BourneShell	/**/
+#define LexCmd	flex -l
+#define LexLib	-lfl
+#define YaccCmd	yacc
+#define LintCmd	/**/
+#define MvCmd	mv
+#define CompressCmd	compress
+#define GzipCmd	gzip
+#define LnCmd cp
+#define CpCmd cp
+#define RmCmd	ImakeHelper 4 
+
+#ifndef UseInstalled
+#define ImakeCmd \imake
+#define MkdirHierCmd \mkdirhier
+#define DependCmd \makedepend
+#else
+/* imake and mkdirhier come from Imake.tmpl, but DependCmd must be overriden */
+#define DependCmd makedepend
+#endif
+
+/* "shell scripts" in OS/2 have this extension */
+#define SHsuf cmd
+
+#define InstPgmFlags /**/
+#define InstBinFlags /**/
+#define InstUidFlags /**/
+#define InstLibFlags /**/
+#define InstIncFlags /**/
+#define InstManFlags /**/
+#define InstDatFlags /**/
+#define InstallFlags /**/
+
+#define OptimizedCDebugFlags 	DefaultGcc2i386Opt
+#define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
+#define ServerExtraDefines GccGasOption XFree86ServerDefines
+
+#if HasShm
+# define ServerExtraSysLibs	-lshm
+#endif
+
+/*
+ * Make & install Features
+ */
+
+#define AvoidNullMakeCommand 	YES
+_NULLCMD_ = @ rem
+#define NullMakeCommand	@ rem
+#define StripInstalledPrograms	NO
+#define CompressAllFonts	YES
+#define CompressManPages	YES
+#define GzipFontCompression	YES
+#define DefaultUserPath		.;/os2;/emx/bin;/tcpip/bin;$(BINDIR)
+#define DefaultSystemPath	/os2;/emx/bin;$(BINDIR)
+
+#ifndef ExtraFilesToClean
+# define ExtraFilesToClean 	*.~* *.exe *.dll *.obj *.lib *.map
+#endif
+
+#if CompressManPages
+#define CompressManCmd	gzip -n
+   COMPRESSMANCMD = CompressManCmd
+#endif
+
+#define ProgramTargetName(target)target.exe
+
+/* we don't name libraries lib*.a */
+#define LibraryTargetName(libname) libname.a
+#define LibraryTargetNameSuffix(libname,suffix)Concat(libname,suffix.a)
+
+/* ... and we even don't do it in rules that should have used the above
+ * LibraryTargetName macro
+ */
+#ifndef UnSharedLibReferences
+#define UnsharedLibReferences(varname,libname,libsource)		@@\
+Concat3(DEP,varname,LIB) = _UseCat($(USRLIBDIR)/,$(BUILDLIBDIR)/,libname.a)	@@\
+Concat(varname,LIB) = LoaderLibPrefix Concat(-l,libname)		@@\
+LintLibReferences(varname,libname,libsource)
+#endif
+
+#ifndef SharedLibReferences
+#define SharedLibReferences(varname,libname,libsource,revname,rev)	@@\
+Concat3(DEP,varname,LIB) = SharedLibDependencies(libname,libsource,revname) @@\
+Concat(varname,LIB) = LoaderLibPrefix Concat(-l,libname)		@@\
+LintLibReferences(varname,libname,libsource)
+#endif
+
+#include <os2.rules>
+#include <os2Lib.rules>
+
+# include <xfree86.cf>
+
+#else
+#error You must edit os2.cf for your (non-EMX) OS/2 dev system
+#endif

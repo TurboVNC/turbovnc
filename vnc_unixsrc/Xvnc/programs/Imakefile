@@ -1,0 +1,72 @@
+XCOMM $XConsortium: Imakefile /main/83 1996/12/18 16:29:30 lehors $
+XCOMM $XFree86: xc/programs/Imakefile,v 3.15.2.2 1998/02/15 16:08:40 hohndel Exp $
+#define IHaveSubdirs
+#define PassCDebugFlags CDEBUGFLAGS="$(CDEBUGFLAGS)"
+
+#if BuildServer
+       RGBSRCDIR = rgb
+        XSSRCDIR = Xserver
+#endif
+#ifndef Win32Architecture
+#if HasXServer
+     XINITSRCDIR = xinit
+#endif
+#if BuildFontServer
+       XFSSRCDIR = xfs
+#endif
+#if BuildXKBlib
+      XKBSRCDIRS = setxkbmap xkbcomp xkbevd xkbprint xkbutils
+#endif
+#if BuildScreenSaverExt
+SCREENSAVESRCDIR = beforelight
+#endif
+#if BuildXF86VidModeExt
+  XVIDTUNESRCDIR = xvidtune
+#endif
+#if BuildXF86DGA
+   XF86DGASRCDIR = xf86dga
+#endif
+#if BuildXAServer
+       XASSRCDIR = Xaserver
+#endif
+#if BuildLBX
+  LBXPROXYSRCDIR = lbxproxy
+#endif
+  PROXYMGRSRCDIR = proxymngr
+    RSTARTSRCDIR = rstart
+   SMPROXYSRCDIR = smproxy
+       TWMSRCDIR = twm
+  XCONSOLESRCDIR = xconsole
+       XDMSRCDIR = xdm
+XFINDPROXYSRCDIR = xfindproxy
+      XFWPSRCDIR = xfwp
+     XHOSTSRCDIR = xhost
+       XMHSRCDIR = xmh
+       XRXSRCDIR = xrx
+       XSMSRCDIR = xsm
+     XTERMSRCDIR = xterm
+      SCRIPTSDIR = scripts
+#endif
+
+#if BuildServersOnly
+SUBDIRS = $(XSSRCDIR)
+#else
+SUBDIRS = \
+	appres bdftopcf bitmap $(SCREENSAVESRCDIR) editres fsinfo \
+	fslsfonts fstobdf \
+	iceauth mkfontdir oclock $(PROXYMGRSRCDIR) \
+	$(RGBSRCDIR) $(RSTARTSRCDIR) $(SMPROXYSRCDIR) $(TWMSRCDIR) x11perf \
+	xauth xclipboard xclock xcmsdb $(XCONSOLESRCDIR) $(XDMSRCDIR) \
+	xdpyinfo $(XF86DGASRCDIR) xfd $(XFSSRCDIR) $(XFINDPROXYSRCDIR) \
+	$(XFWPSRCDIR) \
+	$(XHOSTSRCDIR) xieperf $(XINITSRCDIR) $(XKBSRCDIRS) xkill xlogo \
+	xlsatoms xlsclients xlsfonts xmag $(XMHSRCDIR) xmodmap xprop \
+	xrdb xrefresh $(XRXSRCDIR) xset xsetroot $(XSMSRCDIR) xstdcmap \
+	xsetmode xsetpointer \
+	$(XTERMSRCDIR) $(XVIDTUNESRCDIR) xwd xwininfo xwud \
+	$(XSSRCDIR) $(XASSRCDIR) \
+	$(LBXPROXYSRCDIR) $(SCRIPTSDIR)
+#endif
+
+MakeSubdirs($(SUBDIRS))
+DependSubdirs($(SUBDIRS))

@@ -1,0 +1,1629 @@
+/* $XConsortium: registry /main/119 1996/10/08 12:31:00 swick $ */
+
+				  X Registry
+
+The X Consortium is maintaining a registry of certain X-related items, to
+aid in avoiding conflicts and to aid in sharing of such items.  Requests to
+register items, or questions about registration, should be addressed to
+	xregistry@x.org
+or to
+	Registry
+	X Consortium
+	201 Broadway
+	Cambridge MA 02139-1955
+	USA
+
+Electronic mail will be acknowledged upon receipt.  Please allow up to 4 weeks
+for a formal response to registration and inquiries.
+
+The registry is published as part of the X software distribution from the
+X Consortium.  It is also usually available by sending a message to
+xstuff@x.org.  The message can have a subject line and no body, or a
+single-line body and no subject, in either case the line looking like:
+	send docs registry
+
+All registered items must have the postal address of someone responsible for
+the item, or a reference to a document describing the item and the postal
+address of where to write to obtain the document.
+
+Registration of conflicting items will not be permitted (the same value will
+not be assigned two different meanings) except where explicitly indicated.
+
+1. ORGANIZATION NAMES
+
+These should generally be used as prefixes for other registered names.
+
+Name						Reference
+----						---------
+"Acorn"						[49]
+"Adobe"						[69]
+"AIX"						[33]
+"ALLINK"					[99]
+"APOLLO"					[1]
+"Apple"						[22]
+"ARDENT"					[2]
+"BBN"						[61]
+"CRAB"						[84]
+"CRUC"						[30]
+"DEC"						[82]
+"DG"						[48]
+"DME"						[7]
+"Dt"						[114]
+"EFW"						[124]
+"ES"						[75]
+"FXD"						[55]
+"FUJITSU"					[87]
+"IBM"						[33]
+"ICS"						[31]
+"ILA"						[62]
+"IPSYS"						[59]
+"IXI"						[20]
+"JCC"						[90]
+"JUP"						[93]
+"KPC"						[98]
+"LJK"						[56]
+"LTA"						[60]
+"MEGATEK"					[112]
+"Metheus"					[117]
+"MIT"						[8]
+"MOTIF"						[7]
+"NCD"						[66]
+"OMRON"						[45]
+"ORL"						[65]
+"OSF"						[7]
+"Panasonic"					[52]
+"PERITEK"					[116]
+"PFU"						[32]
+"RATIONAL"					[88]
+"SGCS"						[83]
+"SGI"						[6]
+"SONY"						[37]
+"stellar"					[28]
+"STI"						[73]
+"Sun"						[58]
+"Tech-Source"					[106]
+"TEK"						[43]
+"visual"					[5]
+"VIT"						[46]
+"WN"						[103]
+"WRI"						[102]
+"WYSE"						[68]
+"X/software"					[115]
+"X3D"						[8]
+"XC"						[104]
+"Xerox"						[91]
+"XFree86"					[113]
+"XUG"						[31]
+
+
+2. KEYSYMS
+
+Only "private" keysyms (with 29th bit set) can be registered by organizations;
+standard keysyms must be approved by the Consortium.  Since keysym numeric
+values are explicitly private, we will permit (but not encourage) conflicting
+registration here.
+
+Name			Value			Reference
+----			-----			---------
+hpXK_mute_acute		0x100000A8		[36]
+hpXK_mute_grave		0x100000A9		[36]
+hpXK_mute_asciicircum	0x100000AA		[36]
+hpXK_mute_diaeresis	0x100000AB		[36]
+hpXK_mute_asciitilde	0x100000AC		[36]
+hpXK_lira		0x100000AF		[36]
+hpXK_guilder		0x100000BE		[36]
+hpXK_Ydiaeresis		0x100000EE		[36]
+hpXK_IO			0x100000EE		[36]
+hpXK_longminus		0x100000F6		[36]
+hpXK_block		0x100000FC		[36]
+apXK_LineDel		0x1000FF00		[1]
+apXK_CharDel		0x1000FF01		[1]
+apXK_Copy		0x1000FF02		[1]
+apXK_Cut		0x1000FF03		[1]
+apXK_Paste		0x1000FF04		[1]
+apXK_Move		0x1000FF05		[1]
+apXK_Grow		0x1000FF06		[1]
+apXK_Cmd		0x1000FF07		[1]
+apXK_Shell		0x1000FF08		[1]
+apXK_LeftBar		0x1000FF09		[1]
+apXK_RightBar		0x1000FF0A		[1]
+apXK_LeftBox		0x1000FF0B		[1]
+apXK_RightBox		0x1000FF0C		[1]
+apXK_UpBox		0x1000FF0D		[1]
+apXK_DownBox		0x1000FF0E		[1]
+apXK_Pop		0x1000FF0F		[1]
+apXK_Read		0x1000FF10		[1]
+apXK_Edit		0x1000FF11		[1]
+apXK_Save		0x1000FF12		[1]
+apXK_Exit		0x1000FF13		[1]
+apXK_Repeat		0x1000FF14		[1]
+hpXK_Modelock1		0x1000FF48		[36]
+hpXK_Modelock2		0x1000FF49		[36]
+hpXK_Reset		0x1000FF6C		[36]
+hpXK_System		0x1000FF6D		[36]
+hpXK_User		0x1000FF6E		[36]
+hpXK_ClearLine		0x1000FF6F		[36]
+hpXK_InsertLine		0x1000FF70		[36]
+hpXK_DeleteLine		0x1000FF71		[36]
+hpXK_InsertChar		0x1000FF72		[36]
+hpXK_DeleteChar		0x1000FF73		[36]
+hpXK_BackTab		0x1000FF74		[36]
+hpXK_KP_BackTab		0x1000FF75		[36]
+apXK_KP_parenleft	0x1000FFA8		[1]
+apXK_KP_parenright	0x1000FFA9		[1]
+
+IXK_2ND_FUNC_L		0x10004001		[50]
+IXK_2ND_FUNC_R		0x10004002		[50]
+IXK_REMOVE		0x10004003		[50]
+IXK_REPEAT		0x10004004		[50]
+IXK_A1			0x10004101		[50]
+IXK_A2			0x10004102		[50]
+IXK_A3			0x10004103		[50]
+IXK_A4			0x10004104		[50]
+IXK_A5			0x10004105		[50]
+IXK_A6			0x10004106		[50]
+IXK_A7			0x10004107		[50]
+IXK_A8			0x10004108		[50]
+IXK_A9			0x10004109		[50]
+IXK_A10			0x1000410A		[50]
+IXK_A11			0x1000410B		[50]
+IXK_A12			0x1000410C		[50]
+IXK_A13			0x1000410D		[50]
+IXK_A14			0x1000410E		[50]
+IXK_A15			0x1000410F		[50]
+IXK_B1			0x10004201		[50]
+IXK_B2			0x10004202		[50]
+IXK_B3			0x10004203		[50]
+IXK_B4			0x10004204		[50]
+IXK_B5			0x10004205		[50]
+IXK_B6			0x10004206		[50]
+IXK_B7			0x10004207		[50]
+IXK_B8			0x10004208		[50]
+IXK_B9			0x10004209		[50]
+IXK_B10			0x1000420A		[50]
+IXK_B11			0x1000420B		[50]
+IXK_B12			0x1000420C		[50]
+IXK_B13			0x1000420D		[50]
+IXK_B14			0x1000420E		[50]
+IXK_B15			0x1000420F		[50]
+IXK_B16			0x10004210		[50]
+
+DXK_Remove		0x1000FF00		[27]
+DXK_ring_accent		0x1000FEB0		[27]
+DXK_circumflex_accent	0x1000FE5E		[27]
+DXK_cedilla_accent	0x1000FE2C		[27]
+DXK_acute_accent	0x1000FE27		[27]
+DXK_grave_accent	0x1000FE60		[27]
+DXK_tilde		0x1000FE7E		[27]
+DXK_diaeresis		0x1000FE22		[27]
+
+osfXK_Copy		0x1004FF02		[7]
+osfXK_Cut		0x1004FF03		[7]
+osfXK_Paste		0x1004FF04		[7]
+osfXK_BackTab		0x1004FF07		[7]
+osfXK_BackSpace		0x1004FF08		[7]
+osfXK_Clear		0x1004FF0B		[7]
+osfXK_Escape		0x1004FF1B		[7]
+osfXK_AddMode		0x1004FF31		[7]
+osfXK_PrimaryPaste	0x1004FF32		[7]
+osfXK_QuickPaste	0x1004FF33		[7]
+osfXK_PageLeft		0x1004FF40		[7]
+osfXK_PageUp		0x1004FF41		[7]
+osfXK_PageDown		0x1004FF42		[7]
+osfXK_PageRight		0x1004FF43		[7]
+osfXK_Activate		0x1004FF44		[7]
+osfXK_MenuBar		0x1004FF45		[7]
+osfXK_Left		0x1004FF51		[7]
+osfXK_Up		0x1004FF52		[7]
+osfXK_Right		0x1004FF53		[7]
+osfXK_Down		0x1004FF54		[7]
+osfXK_Prior		0x1004FF55		[7]
+osfXK_Next		0x1004FF56		[7]
+osfXK_EndLine		0x1004FF57   		[7]
+osfXK_BeginLine		0x1004FF58   		[7]
+osfXK_EndData		0x1004FF59		[7]
+osfXK_BeginData		0x1004FF5A   		[7]
+osfXK_PrevMenu		0x1004FF5B		[7]
+osfXK_NextMenu		0x1004FF5C		[7]
+osfXK_PrevField		0x1004FF5D		[7]
+osfXK_NextField		0x1004FF5E		[7]
+osfXK_Select		0x1004FF60		[7]
+osfXK_Insert		0x1004FF63		[7]
+osfXK_Undo		0x1004FF65		[7]
+osfXK_Menu		0x1004FF67		[7]
+osfXK_Cancel		0x1004FF69		[7]
+osfXK_Help		0x1004FF6A		[7]
+osfXK_SelectAll		0x1004FF71		[7]
+osfXK_DeselectAll	0x1004FF72		[7]
+osfXK_Reselect		0x1004FF73		[7]
+osfXK_Extend		0x1004FF74		[7]
+osfXK_Restore		0x1004FF78		[7]
+osfXK_SwitchDirection	0x1004FF7E		[7]
+osfXK_PriorMinor	0x1004FFF5		[7]
+osfXK_NextMinor		0x1004FFF6		[7]
+osfXK_RightLine		0x1004FFF7		[7]
+osfXK_LeftLine		0x1004FFF8		[7]
+osfXK_Delete		0x1004FFFF		[7]
+
+SunXK_FA_Grave		0x1005FF00		[58]
+SunXK_FA_Circum		0x1005FF01		[58]
+SunXK_FA_Tilde		0x1005FF02		[58]
+SunXK_FA_Acute		0x1005FF03		[58]
+SunXK_FA_Diaeresis	0x1005FF04		[58]
+SunXK_FA_Cedilla	0x1005FF05		[58]
+SunXK_F36		0x1005FF10		[58]
+SunXK_F37		0x1005FF11		[58]
+SunXK_Sys_Req		0x1005FF60		[58]
+SunXK_Props		0x1005FF70		[58]
+SunXK_Front		0x1005FF71		[58]
+SunXK_Copy		0x1005FF72		[58]
+SunXK_Open		0x1005FF73		[58]
+SunXK_Paste		0x1005FF74		[58]
+SunXK_Cut		0x1005FF75		[58]
+SunXK_PowerSwitch		0x1005FF76	[58]
+SunXK_AudioLowerVolume		0x1005FF77	[58]
+SunXK_AudioMute			0x1005FF78	[58]
+SunXK_AudioRaiseVolume		0x1005FF79	[58]
+SunXK_VideoDegauss		0x1005FF7A	[58]
+SunXK_VideoLowerBrightness	0x1005FF7B  	[58]
+SunXK_VideoRaiseBrightness	0x1005FF7C	[58]
+SunXK_PowerSwitchShift		0x1005FF7D	[58]
+
+WYXK_Setup		0x1006FF00		[68]
+
+ncdXK_Setup		0x1006FF00		[66]
+
+XeroxXK_PointerButton1	0x10070001		[91]
+XeroxXK_PointerButton2	0x10070002		[91]
+XeroxXK_PointerButton3	0x10070003		[91]
+XeroxXK_PointerButton4	0x10070004		[91]
+XeroxXK_PointerButton5	0x10070005		[91]
+
+XF86XK_ModeLock		0x1008FF01		[113]
+
+Range 0x11000000 to 0x1100FFFF is allocated for keypad keysyms.
+
+
+3. AUTHORIZATION PROTOCOL NAMES
+
+See Section 8 of the protocol.  Names should generally have an organizational
+prefix.
+
+Name						Reference
+----						---------
+"MIT-KERBEROS-4"				[21]
+"MIT-KERBEROS-5"				[21]
+"MIT-MAGIC-COOKIE-1"				[8]
+"SUN-DES-1"					[57]
+"XC-QUERY-SECURITY-1"				[8]
+"XDM-AUTHORIZATION-1"				[8], [11]
+
+4. VENDOR STRING FORMATS
+      
+See Section 8 of the protocol.
+
+String						Reference
+----						---------
+"Acorn Computers Ltd"				[49]
+"Apollo Computer Inc."				[1]
+"Apple Computer, Inc."				[22]
+"Ardent Computer Corporation"			[2]
+"Crab Advanced Technologies Ltd"		[84]
+"Crucible"					[30]
+"Data General Corporation"			[48]
+"Digital Equipment Corporation"			[82]
+"EFW, Inc."					[124]
+"Evans & Sutherland"				[75]
+"FUJITSU LIMITED"				[87]
+"International Business Machines"		[33]
+"JAPAN COMPUTER CORP."				[90]
+"Jupiter Systems Inc."				[93]
+"Kubota Pacific Computer"			[98]
+"Matsushita Electric Industrial Co., Ltd."	[52]
+"Megatek Corporation"				[112]
+"Metheus Corporation"				[117]
+"MIT X Consortium"				[8]
+"Network Computing Devices Inc."		[66]
+"OMRON Corporation"				[45]
+"Peritek Corporation"				[116]
+"PFU LIMITED"					[32]
+"Silicon Graphics Computer Systems"		[6]
+"Snitily Graphics Consulting Services"		[83]
+"Sony Corporation"				[37]
+"Stellar Computer Inc."				[28]
+"Sun Microsystems, Inc."			[101]
+"Tech-Source Inc."				[106]
+"The XFree86 Project, Inc"			[113]
+"VIT-Visual Information Technologies, Inc (VITec)"	[46]
+"Wolfram Research, Inc."			[102]
+"Wyse Technology Inc."				[68]
+"X/software Germany"				[115]
+"X11/NeWS - Sun Microsystems, Inc."		[58]
+"X Consortium"					[104]
+
+5. PROTOCOL EXTENSION NAMES
+
+As used in the QueryExtension and ListExtensions protocol requests.
+The name should generally have an organizational prefix.
+
+Name						Reference
+----						---------
+"Acorn-Noise"					[49]
+"Adobe-DPS-Extension"				[42]
+"AixDeviceControlExtension"			[33]
+"AixExtension"					[33]
+"AixEventControlExtension"			[33]
+"AixStatExtension"				[33]
+"AixDialExtension"				[33]
+"AixLpfkExtension"				[33]
+"APOLLO-SHARE"					[1]
+"ARDENT-XDoubleBuffer"				[2], [3]
+"ARDENT-XTitan"					[2], [4]
+"bezier"					[34]
+"BIG-REQUESTS"					[97]
+"DEC-XTRAP"					[51]
+"DOUBLE-BUFFER"					[123]
+"ESMultiScreenExtension"			[75]
+"ESSetBitsExtension"				[75]
+"ESTraverse3DExtension"				[75]
+"ESVideoModeExtension"				[75]
+"ESLayersExtension"				[75]
+"ESCursorAttrExtension"				[75]
+"ESPickExtension"				[75]
+"FUJITSU-Control-Modifiers"			[87]
+"FUJITSU-VX-VideoControl"			[87]
+"FUJITSU-VX-DeviceControl"			[87]
+"JUPMISC"					[93]
+"KPC-XPeer"					[98]
+"LBX"						[125]
+"MEX-Metheus-Extension-to-X"			[117]
+"MIT-SCREEN-SAVER"				[96]
+"MIT-SHM"					[8]
+"MIT-SUNDRY-NONSTANDARD"			[8]
+"Multi-Buffering"				[8], [10]
+"NCD-SIE"					[66]
+"ORL-SYNC"					[65]
+"PanasonicDosEmulatorExtension"			[52]
+"PFU-GAOpAttr"					[32]
+"RECORD"					[122]
+"SECURITY"					[126]
+"SGI-GLX"					[6]
+"SGI-XGL"					[6]
+"SGI-MISCELLANEOUS"				[6]
+"SHAPE"						[8], [13]
+"SonyKeyboardExtension"				[37]
+"SonySoundExtension"				[37]
+"SonyVideoExtension"				[37]
+"SonyPrinterExtension"				[37]
+"stellar-cm"					[29]
+"stellar-db"					[29]
+"stellar-im"					[29]
+"stellar-shmLink"				[28]
+"stellar-xfdi"					[29]
+"stellar-xtest"					[28]
+"SUN_TSOL"					[121]
+"SYNC"						[108]
+"TsiOvlExtension"				[106]
+"TekCms"					[43]
+"TeKDisplayListExtension"			[43]
+"TeKHardCopySupport"				[43]
+"TeKPeerWindows"				[43]
+"VEX"						[14]
+"VIT-Image Display List Extension"		[46]
+"X/software X/bigX"				[115]
+"X/software X/keymapX"				[115]
+"X/software X/metaX"				[115]
+"X/software X/shadowX"				[115]
+"X/software X/translucentX"			[115]
+"X3D-PEX"					[8], [9]
+"XC-APPGROUP"					[127]
+"XC-MISC"					[109]
+"XFree86-VidModeExtension"			[113]
+"XIE"						[110]
+"XInputExtension"				[128]
+"XKEYBOARD"					[111]
+"XPRINT"					[129]
+"XTEST"						[8]
+"XTestExtension1"				[35]
+"XVideo"					[118]
+"ZoidExtension"					[34]
+
+6. HOST FAMILIES
+
+See the "family" component of the HOST structure in the protocol.
+Values for private families will be assigned by the X Consortium.
+
+Value	Name					Reference
+-----	----					---------
+0	Internet				[23]
+1	DECnet					[23]
+2	Chaos					[23]
+252	LocalHost				[105]
+253	Kerberos5Principal			[94]
+254	Netname					[57]
+
+7. PROPERTY NAMES
+
+As stored on windows in the server.  See Sections 4.1.2, 4.1.3, 5.1.1, and
+6.4 of the ICCCM, and Section 14.1 of the Xlib manual.  Registration must
+include the context in which the property is used (e.g. root window, top-level
+client window).  In general, private property names should start with a
+leading underscore, followed by the organizational prefix, followed by another
+underscore.
+
+Name						Reference
+----						---------
+"RGB_DEFAULT_MAP"				[18]
+"RGB_BEST_MAP"					[18]
+"RGB_RED_MAP"					[18]
+"RGB_GREEN_MAP"					[18]
+"RGB_BLUE_MAP"					[18]
+"RGB_GRAY_MAP"					[18]
+"WM_CLASS"					[16]
+"WM_CLIENT_MACHINE"				[16]
+"WM_COLORMAP_WINDOW"				[16]
+"WM_COMMAND"					[16]
+"WM_HINTS"					[16]
+"WM_ICON_NAME"					[16]
+"WM_ICON_SIZE"					[16]
+"WM_NAME"					[16]
+"WM_NORMAL_HINTS"				[16]
+"WM_PROTOCOLS"					[16]
+"WM_STATE"					[16]
+"WM_TRANSIENT_FOR"				[16]
+"WM_ZOOM_HINTS"					[17], [18]
+"_MIT_OBJ_CLASS"				[94]
+"_NCD_WM_RUNNING"				[66]
+"_RATIONAL_ROSE_TAG"				[88]
+"_RATIONAL_ROSE_MSG"				[88]
+"_SGI_GL_COLORMAP"				[6]
+
+8. PROPERTY TYPE NAMES
+
+See "PROPERTY NAMES" above.
+
+Name						Reference
+----						---------
+"ATOM"						[16]
+"ATOM_PAIR"					[16]
+"BITMAP"					[16]
+"COMPOUND_TEXT"					[8], [12]
+"DRAWABLE"					[16]
+"INCR"						[16]
+"INCREMENTAL"					[17], [16]
+"INTEGER"					[16]
+"PIXMAP"					[16]
+"RGB_COLOR_MAP"					[18]
+"SPAN"						[16]
+"STRING"					[16]
+"WINDOW"					[16]
+"WM_HINTS"					[16]
+"WM_ICON_SIZE"					[16]
+"WM_SIZE_HINTS"					[16]
+"WM_STATE"					[16]
+"_SONY_CDFF"					[37]
+"_SONY_XWD"					[37]
+"_SONY_XPICT"					[37]
+"_SJIS_STRING"					[37]
+"_EUC_STRING"					[37]
+"_JIS_STRING"					[37]
+"_WRI_XWD_RLED"					[102]
+"_XWNMO"					[45]
+
+9. SELECTION NAMES
+
+See Section 2.6.1 of the ICCCM.  In general, private selection names should
+start with a leading underscore, followed by the organizational prefix,
+followed by another underscore.
+
+Name						Reference
+----						---------
+"CLIPBOARD"					[16]
+"PD_SELECTION"					[37]
+"PRIMARY"					[16]
+"PRIMARY_FONT"					[47]
+"SECONDARY"					[16]
+"_JAPANESE_CONVERSION"				[37]
+"_CHINESE_CONVERSION"				[37]
+"_HUNGLE_CONVERSION"				[37]
+"_EUROPEAN_CONVERSION"				[37]
+"__SAM_" (prefix)				[67]
+
+10. SELECTION TARGETS
+
+See Section 2.6.2 of the ICCCM.  In general, private selection targets should
+start with a leading underscore, followed by the organizational prefix,
+followed by another underscore.
+
+Name						Reference
+----						---------
+"BACKGROUND"					[16]
+"BITMAP"					[16]
+"CHARACTER_POSITION"				[16]
+"CLASS"						[16]
+"CLIENT_WINDOW"					[16]
+"COLORMAP"					[16]
+"COLUMN_NUMBER"					[16]
+"COMPOUND_TEXT"					[8], [12]
+"DELETE"					[16]
+"DRAWABLE"					[16]
+"FILE_NAME"					[16]
+"FOREGROUND"					[16]
+"HOST_NAME"					[16]
+"INSERT_PROPERTY"				[16]
+"INSERT_SELECTION"				[16]
+"LENGTH"					[16]
+"LINE_NUMBER"					[16]
+"LIST_LENGTH"					[16]
+"MODULE"					[16]
+"MULTIPLE"					[16]
+"NAME"						[16]
+"ODIF"						[16]
+"OWNER_OS"					[16]
+"PIXMAP"					[16]
+"PROCEDURE"					[16]
+"PROCESS"					[16]
+"STRING"					[16]
+"TARGETS"					[16]
+"TASK"						[16]
+"TEXT"						[16]
+"TIMESTAMP"					[16]
+"USER"						[16]
+"_ADOBE_EPS"					[69]
+"_ADOBE_EPSI"					[69]
+"_SONY_CDFF"					[37]
+"_SONY_XWD"					[37]
+"_SONY_XPICT"					[37]
+"_SJIS_STRING"					[37]
+"_EUC_STRING"					[37]
+"_JIS_STRING"					[37]
+"_WRI_XWD_RLED"					[102]
+
+11. WM_PROTOCOLS PROTOCOLS
+
+See Section 4.1.2.7 of the ICCCM.  In general, private protocols should start
+with a leading underscore, followed by the organizational prefix, followed by
+another underscore.
+
+Name						Reference
+----						---------
+"WM_DELETE_WINDOW"				[16]
+"WM_TAKE_FOCUS"					[16]
+"WM_SAVE_YOURSELF"				[16]
+
+12. CLIENTMESSAGE TYPES
+
+See the "type" field in the ClientMessage event in the protocol, and Section
+4.2.8 of the ICCCM.  In general, private types should start with a leading
+underscore, followed by the organizational prefix, followed by another
+underscore.
+
+Name						Reference
+----						---------
+"PD_ACTIVE"					[37]
+"WM_CHANGE_STATE"				[16]
+"WM_PROTOCOLS"					[16]
+"_CONVERSION_REQUEST"				[37]
+"_CONVERSION_NOTIFY"				[37]
+"_CONVERSION_END"				[37]
+
+13. FONT FOUNDRY NAMES
+
+See Section 3.1.2.1 of the XLFD.  This will typically be an organization name.
+
+Name						Reference
+----						---------
+"Acorn"						[49]
+"Adobe"						[24]
+"AIX"						[33]
+"Apple"						[22]
+"Bitstream"					[25]
+"Cognition"					[89]
+"Cronyx"					[120]
+"DEC"						[27]
+"eands"						[75]
+"fujitsu"					[87]
+"FujiXerox"					[64]
+"IBM"						[33]
+"IPSYS"						[59]
+"Metheus"					[117]
+"MISC"						[8]
+"NCD"						[66]
+"omron"						[45]
+"Panasonic"					[52]
+"Sony"						[37]
+"Sun"						[92]
+
+14. FONT CHARSET (REGISTRY AND ENCODING) NAMES
+
+See Sections 3.1.2.12 of the XLFD.  For ISO standards, the format
+will generally be: "ISO" + <standard-number> + "-" + <part-number>
+
+Name						Reference
+----						---------
+"DEC"						[27]
+	registry prefix
+"DEC.CNS11643.1986-2"				[53]
+	CNS11643 2-plane using the encoding
+	suggested in that standard
+"DEC.DTSCS.1990-2"				[54]
+	DEC Taiwan Supplemental Character Set
+"fujitsu.u90x01.1991-0"				[87]
+"fujitsu.u90x03.1991-0"				[87]
+"GB2312.1980-0"					[39],[12]
+	China (PRC) Hanzi, GL encoding
+"GB2312.1980-1"					[39]
+	(deprecated)
+	China (PRC) Hanzi, GR encoding
+"HP-Arabic8"					[36]
+	HPARABIC8 8-bit character set
+"HP-East8"					[36]
+	HPEAST8 8-bit character set
+"HP-Greek8"					[36]
+	HPGREEK8 8-bit character set
+"HP-Hebrew8"					[36]
+	HPHEBREW8 8-bit character set
+"HP-Japanese15"					[36]
+	HPJAPAN15 15-bit characer set,
+	modified from industry defacto
+	standard Shift-JIS
+"HP-Kana8"					[36]
+	HPKANA8 8-bit character set
+"HP-Korean15"					[36]
+	HPKOREAN15 15-bit character set
+"HP-Roman8"					[36]
+	HPROMAN8 8-bit character set
+"HP-SChinese15"					[36]
+	HPSCHINA15 15-bit character set for
+	support of Simplified Chinese
+"HP-TChinese15"					[36]
+	HPTCHINA15 15-bit character set for
+	support of Traditional Chinese
+"HP-Turkish8"					[36]
+	HPTURKISH8 8-bit character set
+"IPSYS"						[59]
+	registry prefix
+"IPSYS.IE-1"					[59]
+"ISO2022"<REG>"-"<ENC>				[44]
+"ISO646.1991-IRV"				[107]
+	ISO 646 International Reference Version
+"ISO8859-1"					[15],[12]
+	ISO Latin alphabet No. 1
+"ISO8859-2"					[15],[12]
+	ISO Latin alphabet No. 2
+"ISO8859-3"					[15],[12]
+	ISO Latin alphabet No. 3
+"ISO8859-4"					[15],[12]
+	ISO Latin alphabet No. 4
+"ISO8859-5"					[15],[12]
+	ISO Latin/Cyrillic alphabet
+"ISO8859-6"					[15],[12]
+	ISO Latin/Arabic alphabet
+"ISO8859-7"					[15],[12]
+	ISO Latin/Greek alphabet
+"ISO8859-8"					[15],[12]
+	ISO Latin/Hebrew alphabet
+"ISO8859-9"					[15],[12]
+	ISO Latin alphabet No. 5
+"JISX0201.1976-0"				[38],[12]
+	8-Bit Alphanumeric-Katakana Code
+"JISX0208.1983-0"				[40],[12]
+	Japanese Graphic Character Set,
+	GL encoding
+"JISX0208.1990-0"				[71]
+	Japanese Graphic Character Set,
+	GL encoding
+"JISX0208.1983-1"				[40]
+	(deprecated)
+	Japanese Graphic Character Set,
+	GL encoding
+"JISX0212.1990-0"				[72]
+	Supplementary Japanese Graphic Character Set,
+	GL encoding
+"KOI8-R"					[119]
+"KSC5601.1987-0"				[41],[12]
+	Korean Graphic Character Set,
+	GL encoding
+"KSC5601.1987-1"				[41]
+	(deprecated)
+	Korean Graphic Character Set,
+	GL encoding
+"omron_CNS11643-0"				[45]
+"omron_CNS11643-1"				[45]
+"omron_BIG5-0"					[45]
+"omron_BIG5-1"					[45]
+"wn.tamil.1993"					[103]
+
+
+15. FONT PROPERTY NAMES
+
+See QueryFont in the protocol, and Section 3.2 of the XLFD.  In general,
+private properties should start with a leading underscore, followed by the
+organizational prefix, followed by another underscore.
+
+Name						Reference
+----						---------
+"ADD_STYLE_NAME"				[19]
+"AVERAGE_WIDTH"					[19]
+"AVG_CAPITAL_WIDTH"				[19]
+"AVG_LOWERCASE_WIDTH"				[19]
+"CAP_HEIGHT"					[19]
+"CHARSET_ENCODING"				[19]
+"CHARSET_REGISTRY"				[19]
+"COPYRIGHT"					[19]
+"DESTINATION"					[19]
+"END_SPACE"					[19]
+"FACE_NAME"					[19]
+"FIGURE_WIDTH"					[19]
+"FOUNDRY"					[19]
+"FAMILY_NAME"					[19]
+"ITALIC_ANGLE"					[19]
+"MAX_SPACE"					[19]
+"MIN_SPACE"					[19]
+"NORM_SPACE"					[19]
+"NOTICE"					[19]
+"PIXEL_SIZE"					[19]
+"POINT_SIZE"					[19]
+"QUAD_WIDTH"					[17], [19]
+"RELATIVE_SETWIDTH"				[19]
+"RELATIVE_WEIGHT"				[19]
+"RESOLUTION"					[17], [19]
+"RESOLUTION_X"					[19]
+"RESOLUTION_Y"					[19]
+"SETWIDTH_NAME"					[19]
+"SLANT"						[19]
+"SMALL_CAP_SIZE"				[19]
+"SPACING"					[19]
+"STRIKEOUT_ASCENT"				[19]
+"STRIKEOUT_DESCENT"				[19]
+"SUBSCRIPT_SIZE"				[19]
+"SUBSCRIPT_X"					[19]
+"SUBSCRIPT_Y"					[19]
+"SUPERSCRIPT_SIZE"				[19]
+"SUPERSCRIPT_X"					[19]
+"SUPERSCRIPT_Y"					[19]
+"UNDERLINE_POSITION"				[19]
+"UNDERLINE_THICKNESS"				[19]
+"X_HEIGHT"					[19]
+"WEIGHT"					[19]
+"WEIGHT_NAME"					[19]
+"_ADOBE_POSTSCRIPT_FONTNAME"			[69]
+
+16. RESOURCE TYPES
+
+See Chapter 15 of the Xlib manual and Section 9.1 of the Xt manual.
+
+Name						Reference
+----						---------
+"AcceleratorTable"				[26]
+"Bool"						[26]
+"Boolean"					[26]
+"Callback"					[26]
+"CallProc"					[26]
+"CharSet"					[37]
+"Color"						[26]
+"CompoundText"					[12]
+"Cursor"					[26]
+"Dimension"					[26]
+"Display"					[26]
+"EditMode"					[26]
+"File"						[26]
+"Float"						[26]
+"Font"						[26]
+"FontList"					[37]
+"FontStruct"					[26]
+"Function"					[26]
+"Geometry"					[26]
+"Immediate"					[26]
+"Int"						[26]
+"Justify"					[26]
+"KeyboardType"					[37]
+"Language"					[37]
+"Orientation"					[26]
+"PEXtClipIndicator"				[75]
+"PEXtColorBundle"				[75]
+"PEXtControlFlag"				[75]
+"PEXtCullMode"					[75]
+"PEXtDeferralMode"				[75]
+"PEXtDepthCueMode"				[75]
+"PEXtDistinguishMode"				[75]
+"PEXtEdgeFlag"					[75]
+"PEXtGeneralColor"				[75]
+"PEXtGravity"					[75]
+"PEXtHLHSRMode"					[75]
+"PEXtIntList"					[75]
+"PEXtInteriorStyle"				[75]
+"PEXtLightSourceType"				[75]
+"PEXtLimit"					[75]
+"PEXtLimit3"					[75]
+"PEXtLineType"					[75]
+"PEXtModificationMode"				[75]
+"PEXtPickHighlightMode"				[75]
+"PEXtPickMode"					[75]
+"PEXtPoint"					[75]
+"PEXtPoint3"					[75]
+"PEXtProjectionType"				[75]
+"PEXtReflectanceEquation"			[75]
+"PEXtResizePolicy"				[75]
+"PEXtShadingMethod"				[75]
+"PEXtTraversalPolicy"				[75]
+"PEXtVector"					[75]
+"PEXtVector3"					[75]
+"PEXtWorkstationType"				[75]
+"Pixel"						[26]
+"Pixmap"					[26]
+"Pointer"					[26]
+"Position"					[26]
+"Short"						[26]
+"String"					[18],[26]
+"StringTable"					[26]
+"TranslationTable"				[26]
+"UnsignedChar"					[26]
+"Widget"					[26]
+"Window"					[26]
+"Xai" (prefix)					[59]
+"Xi" (prefix)					[31]
+"XMex" (prefix)					[117]
+
+17. APPLICATION CLASSES
+
+See Section 4.1.2.5 of the ICCCM and Section 14.1.8 of the Xlib manual.
+[Only class names, not instance names.]
+
+Name						Reference
+----						---------
+"BuilderXcessory"				[31]
+"BX"						[31]
+"Clock"						[47]
+"Csm"						[75]
+"Exterm"					[45]
+"Listres"					[47]
+"Medit"						[45]
+"Xai"						[59]
+"Xbiff"						[47]
+"XCalc"						[47]
+"XClipboard"					[47]
+"XClock"					[47]
+"XCutsel"					[47]
+"Xditview"					[47]
+"Xedit"						[47]
+"XEyes"						[47]
+"Xfd"						[47]
+"XFontSel"					[47]
+"Xgc"						[47]
+"XLogo"						[47]
+"Xman"						[47]
+"Xmh"						[47]
+"Xsm"						[49]
+"XTerm"						[47]
+"Xwnmo"						[45]
+
+
+18. CLASS EXTENSION RECORD TYPES
+
+See Section 1.4.12 of the Xt Intrinsics manual.
+
+Name						Reference
+----						---------
+"Xai" (prefix)					[59]
+"XaiCoreClassExtension"				[59]
+
+19. DISPLAY MANUFACTURER ID
+
+See Section 9 of the X Display Manager Control Protocol.
+
+Name						Reference
+----						---------
+"Acorn"						[49]
+"CRAB"						[84]
+"EFW"						[124]
+"FUJITSU"					[87]
+"HDS"						[70]
+"JCC"						[90]
+"Jupiter"					[93]
+"TD"						[63]
+"Metheus"					[117]
+"MIT"						[8]
+"NCD"						[66]
+"PERITEK"					[116]
+"WYSE"						[68]
+"X/software-X/bigX"				[115]
+
+
+20. NON-STANDARD CHARACTER SET ENCODINGS
+
+See Section 6 of the Compound Text standard.
+
+Name						Reference
+----						---------
+"DEC.CNS11643.1986-2"				[53]
+	CNS11643 2-plane using the recommended
+	internal representation scheme
+"DEC.DTSCS.1990-2"				[54]
+	DEC Taiwan Supplemental Character Set
+"fujitsu.u90x03"				[87]
+"ILA"						[62]
+	registry prefix
+"IPSYS"						[59]
+	registry prefix
+"omron_UDC"					[45]
+        omron User Defined Charset
+"omron_UDC_ja"					[45]
+        omron User Defined Charset for Japanese
+"omron_UDC_zh"					[45]
+        omron User Defined Charset for Chinese(Main land)
+"omron_UDC_tw"					[45]
+        omron User Defined Charset for Chinese(Taiwan)
+
+
+21. PEX VENDOR ID
+
+For identifying GDPs, GSEs, enum values/types, OC types, table types.
+See PEX 5.1 interoperability conventions.
+
+Value	Name					Reference
+-----	----					---------
+1	MIT					[8]
+2	GfxBase, Inc.				[74]
+3	Silicon Graphics Computer Systems	[6]
+4	Evans & Sutherland			[75]
+5	Sun Microsystems, Inc.			[76]
+6	Sumitomo Electric Workstation Corp.	[77]
+7	Hewlett-Packard Co.			[78]
+8	Metro Link Inc.				[79]
+9	Stardent Computer			[80]
+10	Sony Microsystems			[81]
+11	Digital Equipment Corp.			[82]
+12	Network Computing Devices		[66]
+13	ShoGraphics, Inc.			[85]
+14	Tektronix, Inc.				[86]
+15	FUJITSU LIMITED				[87]
+16	International Business Machines		[33]
+17	Kubota Pacific Computer			[95]
+18	Hitachi, Ltd.				[100]
+19	Megatek Corporation			[112]
+20	The XFree86 Project, Inc		[113]
+21	Metheus Corp.				[117]
+
+
+22. XIM ENCODINGS
+
+Names of encodings used for text exchanged in the Input Method Protocol.
+See XIM_ENCODING_NEGOTIATION in section 4.6 of the XIM standard.
+
+"COMPOUND_TEXT"					[104]
+
+
+REFERENCES
+
+[1]	Keith Dawson
+	MS: CHR 03 DE
+	Apollo Computer Inc.
+	300 Apollo Drive
+	Chelmsford, MA 01824
+
+[2]	Mark Patrick
+	Ardent Computer
+	880 West Maude Avenue
+	Sunnyvale, CA 94086
+
+[3]	X+ Multiple Buffering/Stereo Library Extension
+	Mark Patrick, Ardent
+
+[4]	Ardent X Server Private Extension
+	Mark Patrick, Ardent
+
+[5]	Visual Technology, Inc.
+
+[6]	Philip Karlton
+	System Software Division
+	Silicon Graphics Computer Systems
+	2011 N. Shoreline Blvd.
+	Mountain View, CA 94309-7311
+
+[7]	Ellis Cohen
+	Open Softare Foundation
+	11 Cambridge Center
+	Cambridge MA 02142
+
+[8]	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[9]	PEX Protocol Specification
+	PEX Protocol Encoding
+	PEX Introduction and Overview
+	Randi Rost, Digital, document editor
+
+[10]	Extending X for Double-Buffering, Multi-Buffering, and Stereo
+	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[11]	X Display Manager Control Protocol
+	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[12]	Compound Text Encoding
+	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[13]	X11 Nonrectangular Window Shape Extension
+	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[14]	VEX - Video Extension to X
+	Todd Brunhoff, Tektronix
+
+[15]	ISO 8859, Information processing - 8-bit single-byte coded graphic
+	character sets, parts 1 through 9
+
+[16]	Inter-Client Communication Conventions Manual
+	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[17]	Obsolete
+
+[18]	Xlib Manual
+	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[19]	X Logical Font Description Conventions
+	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[20]	IXI Limited
+
+[21]	MIT Project Athena
+
+[22]	Apple Computer, Inc.
+
+[23]	X Window System Protocol
+	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[24]	Adobe Systems, Inc.
+
+[25]	Bitstream, Inc.
+
+[26]	Xt Intrinsics Manual
+	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[27]	Digital Equipment Corporation
+
+[28]	Steve Pitschke
+	Stellar Computer, Inc.
+	95 Wells Ave.
+	Newton, MA 02159
+
+[29]	Jeff Vroom
+	Stellar Computer, Inc.
+	95 Wells Ave.
+	Newton, MA 02159
+
+[30]	Crucible
+	Santa Cruz, CA
+
+[31]	Chris D. Peterson
+	Integrated Computer Solutions, Inc.
+	201 Broadway
+	Cambridge, MA  02139
+
+[32]	Kyou Katoh
+	PFU LIMITED
+	687-1 Tsuruma 7 Gou Machida-shi
+	Tokyo 194, Japan
+
+[33]	Jeanne K. Smith
+	D46/996    3500
+	International Business Machines
+	11400 Burnet Road
+	Austin, TX  78758
+
+[34]	Anonymous
+	MIT Software Distribution
+
+[35]	Larry Woestman
+	Hewlett Packard Co.
+	Corvallis Workstation Operation
+	1000 NE Circle Blvd.
+	Corvallis, OR 97330
+
+[36]	Tom McFarland
+	Hewlett-Packard, Co.
+	Corvallis Information Systems
+	1000 N.E. Circle Blvd.
+	Covallis, OR  97330
+
+[37]	Hideo Irie
+	Work Station Division
+	SuperMicro Systems Group
+	Sony Corporation
+	6-7-35 Kitasinagawa Sinagawa-ku
+	Tokyo, Japan
+
+[38]	JIS X 0201-1976 (reaffirmed 1984)
+
+[39]	GB2312-1980
+
+[40]	JIS X 0208-1983
+
+[41]	KS C5601-1987
+
+[42]	Linda Gass
+	Adobe Systems
+	PO Box 7900
+	Mountain View, CA 94039-7900
+
+[43]	Dave Cassing
+	X Strategy Team 
+	Tektronix, Inc.
+	PO Box 1000
+	Wilsonville, Oregon 97070-1000
+
+[44]	ISO2022<REG>-<ENC>
+
+	REG := [_L_<GL_register>][_R_<GR_register>]
+	ENC := [L<GL_EscapeSequence>][R<GR_EscapeSequence>]
+	<GL_EscapeSequence> :=
+		<Left_set><intermediate characters><Final_byte>
+	<GR_EscapeSequence> :=
+		<Right_set><intermediate characters><Final_byte>
+	<Left_set> :=
+		  '4'	/* 94-character sets */
+		| 'M'	/* Multiple-byte character sets */
+	<Right_set> :=
+		  <Left_set>
+		| '6'	/* 96-character sets */
+	<Final_byte> :=
+		"30" - "7E" /* hex encoding of Latin-1 3/0 - 7/14 */
+	<intermediate characters> :=
+		  <empty>
+		| <intermediate character><intermediate characters>
+	<intermediate character> :=
+		  "20" - "2F" /* hex encoding of Latin-1 2/0 - Latin-1 2/15 */
+
+	The "ISO2022" prefix identifies this as an ISO2022-conforming encoding.
+	[] denotes an optional construct.  <GL_register> and <GR_register> are
+	organizational strings that identify this encoding as having a GL or GR
+	component that is not registered with ECMA, but rather is private to
+	the given organization.  At least one of L<GL_EscapeSequence> or
+	R<GR_EscapeSequence> must be present.  If one is missing, the contents
+	of the font in that graphics half is undefined.
+
+[45]	Hiroshi Kuribayashi
+	OMRON Corporation
+	Computer System R&D Laboratory
+	Shimokaiinji, Nagaokakyo-city
+	Kyoto, 617, Japan
+
+[46]	Kyle Marvin
+	Visual Information Technologies, Inc. (VITec)
+	3460 Lotus Drive
+	Plano, TX 75075
+
+[47]	X11R4
+
+[48]	Data General Corp.
+	62 T.W. Alexander Dr.
+	R.T.P. NC, 27709
+	Attn: Janet Leising
+
+[49]	John Bowler
+	Acorn Computers Limited
+	Cambridge Technopark
+	645 Newmarket Road
+	Cambridge
+	CB5 8PB
+	England
+
+[50]	Rick Franklin
+	Intergraph Corporation
+	One Madison Industrial Park
+	Huntsville, Al.  35894-0001
+
+[51]	Dan Coutu
+	Digital Equipment Corporation ZKO 3-3/T13
+	110 Spitbrook Rd.
+	Nashua, NH 03062-2698
+
+[52]	Takayuki Kageyama
+	Computer Division
+	Information Equipment Sector
+	Matsushita Electric Industrial Co., Ltd.
+	1006, Kadoma, Osaka, 571 Japan
+
+[53]	CNS11643
+	National Bureau of Standards
+	Taiwan, Republic of China
+
+[54]	KH Chan
+	Digital Equipment Co.
+	2-4/F Henan Building
+	90 Jaffe Road, Wanchai,
+	Hong Kong
+
+[55]	Mike Wexler
+	FXD/Telerate, Inc.
+	2091 Landings Drive
+	Mountain View, CA 94043
+
+[56]	Lawrence J. Kilgallen
+	Box 81
+	MIT Station
+	Cambridge, MA 02139-0901
+
+[57]	David Rosenthal
+	Sun Microsystems, Inc.
+	2550 Garcia Avenue
+	Mountain View, CA  94043
+
+[58]	Murali V. Srinivasan
+	MTV21-228
+	Sun Microsystems, Inc.
+	2550 Garcia Avenue
+	Mountain View, CA  94043-1100
+
+[59]	Keith Robson
+	Ipsys Software plc
+	Marlborough Court, Pickford St.,
+	Macclesfield, Cheshire, SK11 6JD
+	England
+
+[60]	David Lewis
+	Lewis, Trachtenberg & Associates
+	One Kendall Square	(Building 200, Fourth Floor)
+	Cambridge, MA 02139-1564
+
+[61]	James J Dempsey
+	Bolt Beranek and Newman Inc.
+	150 CambridgePark Drive
+	Cambridge MA 02140
+
+[62]	Glenn Adams
+	International Lisp Associates
+	114 Mount Auburn Street
+	Cambridge, MA 02138
+
+[63]	Sigvald Refsum
+	Tandberg Data A/S
+	PO Box 9
+	Korsvoll, N-0808 OSLO 8
+
+[64]	Masahiko Muramatsu
+	System Techonology Development Center
+	Fuji Xerox Co.,LTD.
+	KSP/R&D Business Park Bldg.
+	100-1, Sakado, Takatsu-ku, Kawasaki-City, Kanagawa-Ken,
+	213 JAPAN
+
+[65]	Tim Glauert
+	Olivetti Research Limited
+	24a Trumpington Street
+	Cambridge, England
+
+[66]	Jim Fulton
+	Network Computing Devices
+	350 North Bernardo Ave.
+	Mountain View, CA  94043
+
+[67]	John Mackin
+	6/23 Northwood Street
+	Camperdown 2050
+	AUSTRALIA
+
+[68]	Bill Rainey
+	Wyse Technology
+	3471 N. First Street
+	San Jose, CA 95134
+
+[69]	PostScript Developer Support
+	Adobe Systems Incorporated
+	PO Box 7900
+	Mountain View, CA 94039-7900
+
+[70]	Adrian Bereanu
+	Human Designed Systems
+
+[71]	JIS X 0208-1990
+
+[72]	JIS X 0212-1990
+
+[73]	Dan Greening
+	Software Transformation
+	1601 Saratoga-Sunnyvale Rd
+	Cupertino, CA 95014
+
+[74]	Dale Luck
+	GfxBase, Inc.
+	1881 Ellwell Dr.
+	Milpitas, CA 95035
+
+[75]	Gary G. Cannon
+	Evans & Sutherland
+	580 Arapeen Dr.
+	P.O. Box 58700
+	Salt Lake City, UT 84158
+
+[76]	Cheryl Huntington
+	MS. MTV21-04
+	Sun Microsystems
+	2550 Garcia Ave.
+	Mountain View, CA.  94043-1100
+
+[77]	Junichi Hiramoto
+	Manager, Engineering Department
+	Sumitomo Electric Workstation Corp.
+	No. 30 Kowa Bldg.  2-4-5 Roppongi, Minato-ku
+	Tokyo, 106 Japan
+
+[78]	Jeff Stevenson; MS 74
+	Hewlett-Packard Co.
+	3404 E. Harmony Road
+	Fort Collins, CO  80525-9599
+
+[79]	Garry M. Paxinos
+	Metro Link Incorporated
+	2213 W. McNab Rd
+	Pompano Beach, FL 33069
+
+[80]	John Dennis
+	Stardent Computer
+	6 New England Tech Center
+	521 Virginia Road
+	Concord, MA 01742
+
+[81]	Mark Patrick
+	Sony Microsystems
+	651 River Oaks Parkway
+	San Jose, CA 95134
+
+[82]	Dick Coulter
+	MLO1-2/U2
+	Digital Equipment Corp.
+	146 Main St.
+	Maynard, MA  01754
+
+[83]	Mark W. Snitily
+	Snitily Graphics Consulting Services
+	894 Brookgrove Lane
+	Cupertino, CA 95014
+
+[84]	Paul Verey
+	Crab Advanced Technologies Ltd.
+	First Base, Beacontree Plaza, Gillette Way
+	Reading, RG2 0BP
+
+[85]	Ken Garnett
+	ShoGraphics, Inc.
+	1890 N. Shoreline Blvd.
+	Mountain View, CA 94043
+
+[86]	Michael F. Cripps
+	Tektronix, Inc
+	P.O Boc 1000 MS 60-850
+	Wilsonville, OR 97070-1000
+
+[87]	Kyou Katoh
+	FUJITSU LIMITED
+	1015 Kamikodanaka Nakahara-ku
+	Kawasaki 221, Japan
+
+[88]	David Kaelbling
+	Rational
+	12 Mountain Rock Ln.
+	Norfolk, MA 02056
+
+[89]	Hal Berman
+	Cognition Corporation
+	755 Middlesex Turnpike
+	Billerica, MA 01821
+
+[90]	Takatoshi Ishii
+	Japan Computer Corp.
+	2-6-9, Higashi Kanda, Chiyoda-ku,
+	Tokyo 101 Japan
+
+[91]	Bill Janssen
+	Xerox PARC
+	3333 Coyote Hill Rd.
+	Palo Alto, CA 94304
+
+[92]	Rick Heli
+	Sun Microsystems, Inc.
+	2550 Garcia Avenue
+	Mountain View, CA  94043-1100
+
+[93]	Russell Leefer
+	Jupiter Systems
+	Suite 200
+	1351 Harbor Bay Parkway
+	Alameda, CA 94501
+
+[94]	Bob Scheifler
+	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[95]	Greg Stiehl
+	Kubota Pacific Computer
+	2630 Walsh Avenue
+	Santa Clara, CA 95051-0905
+
+[96]	MIT Screen Saver Extension
+	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[97]	Big Requests Extension
+	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[98]	Randi Rost
+	Kubota Pacific Computer
+	2630 Walsh Avenue
+	Santa Clara, CA 95051-0905
+
+[99]	Ilan Aisic
+	NYNEX ALLINK Co.
+	4 Gannett Drive
+	White Plains, NY 10604
+
+[100]	Toshiyuki Kuwana
+	Information Equipment Engineering Dept.
+	Omika Works, Hitatchi Ltd.
+	5-2-1 Omika-cho, Hitachi-shi, Ibaraki-ken, 319-12 Japan
+
+[101]	Milind Pansare
+	Mailstop MTV21-228
+	Sun Microsystems, Inc.
+	2550 Garcia Ave.,
+	Mountain View CA. 94043
+
+[102]	John L. Cwikla
+	Wolfram Research, Inc.
+	100 Trade Center Drive
+	Champaign IL, 61820-7237
+
+[103]	University of Washington
+	for WM Tamil fonts
+
+[104]	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[105]	Stephen Gildea
+	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[106]	Selwyn Henriques
+	Tech-Source, Inc.
+	442 S North Lake Blvd.
+	Altamonte Springs FL 32701
+
+[107]	ISO/IEC 646:1991, Information technology -- ISO 7-bit coded
+	character set for information interchange
+
+[108]	X Synchronization Extension
+	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[109]	XC-MISC Extension
+	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[110]	X Image Extension
+	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[111]	X Keyboard Extension
+	X Consortium
+	201 Broadway
+	Cambridge MA 01239-1955
+
+[112]	Allan Frankel
+	Megatek Corporation
+	16868 Via Del Campo Court
+	San Diego, CA  92127-1714
+
+[113]	David Wexelblat
+	The XFree86 Project, Inc.
+	c/o AIB Software Corporation
+	46030 Manekin Plaza, Suite 160
+	Dulles, VA  20166
+
+[114]	Stuart W. Marks
+	SunSoft, Inc.
+	2550 Garcia Avenue, Mail Stop UMTV 21-122
+	Mountain View, CA  94043-1100
+
+[115]	Michael Gehret
+	X/software
+	Marktstrasse 8, D-87730
+	Groenenbach, Germany
+
+[116]	Bob Schulman
+	Peritek Corp.
+	5550 Redwood Road
+	Oakland, CA 94619
+
+[117]	Alan Ricker
+	Metheus Coporation
+	1600 NW Compton Dr.
+	Beaverton OR, 97006
+
+[118]	X Video Extension Protocol Description
+	Version 2, 25-JUL-91
+	David Carver
+
+[119]	Network Working Group's RFC1489
+
+[120]   Cronyx Ltd.
+	Research Computer Center
+	Moscow State University
+	Moscow 119899, Russia
+	Phone: +7 (095) 939-2323
+	Fax: +7 (095) 939-0300
+	E-mail: info@cronyx.ru
+
+[121]	Sun Microsystems Federal, Inc.  Trusted Solaris Extension, 
+	Milind Pansare
+	Secure User Interface Group,
+	Sun Microsystems Federal, Inc.
+	Mail Stop MIL06-94
+	2550 Garcia Avenue,
+	Mountain View, CA 94043-1100
+
+[122]	Record Extension
+	X Consortium
+	201 Broadway
+	Cambridge MA 02139-1955
+
+[123]	Double Buffer Extension Specification
+	X Consortium
+	201 Broadway
+	Cambridge MA 02139-1955
+
+[124]	James A. Moulton
+	EFW, Inc
+	4700 Marine Creek Parkway
+	Ft. Worth, Texas 76136
+
+[125]	Low Bandwidth X Extension Specification
+	X Consortium
+	201 Broadway
+	Cambridge MA 02139-1955
+
+[126]	Security Extension Specification
+	X Consortium
+	201 Broadway
+	Cambridge MA 02139-1955
+
+[127]	Application Group Extension Specification
+	X Consortium
+	201 Broadway
+	Cambridge MA 02139-1955
+
+[128]	X11 Input Extension Protocol Specification
+	X Consortium
+	201 Broadway
+	Cambridge MA 02139-1955
+
+[129]	X Print Extension Protocol Specification
+	X Consortium
+	201 Broadway
+	Cambridge MA 02139-1955

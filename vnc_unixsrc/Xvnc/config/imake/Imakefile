@@ -1,0 +1,54 @@
+XCOMM $TOG: Imakefile /main/10 1997/04/30 15:39:17 kaleb $
+XCOMM
+XCOMM
+XCOMM
+XCOMM
+XCOMM $XFree86: xc/config/imake/Imakefile,v 3.6.2.1 1997/06/11 12:08:33 dawes Exp $
+
+XCOMM Some compilers generate fatal errors if an -L directory does
+XCOMM not exist.  Since BUILDLIBDIR may not exist yet suppress its use.
+         LDPRELIB =
+        LDPRELIBS =
+
+DEPLIBS = 
+
+INCLUDES = -I$(TOP)/include $(TOP_X_INCLUDES)/X11
+CPP_PROGRAM = CppCmd
+CPP_DEFINES = -DCPP_PROGRAM="\"$(CPP_PROGRAM)\""
+DEFINES = $(SIGNAL_DEFINES) $(BOOTSTRAPCFLAGS) $(CPP_DEFINES)
+
+#if defined(MacIIArchitecture) || defined(SequentArchitecture) || defined(i386ScoArchitecture)
+XBSDLIB = /**/
+#endif
+
+#if !defined(OS2Architecture)
+#undef ImakeDependency
+#define ImakeDependency(dummy) @@\
+Makefile::  ProgramTargetName(imake)
+
+#if CrossCompiling
+SimpleHostProgramTarget(imake)
+#else
+SimpleProgramTarget(imake)
+#endif
+InstallLinkKitNamedProg(imake,imake,$(LINKKITDIR)/config/imake)
+#else /* OS2Architecture */
+all::
+
+CCOPTIONS = -Zsysv-signals
+EXTRA_LIBRARIES = /*nothing*/
+SimpleProgramTarget(imake)
+InstallLinkKitNamedProg(imake,imake,$(LINKKITDIR)/config/imake)
+InstallNamedProg(imakesvc.cmd,imakesvc.cmd,$(BINDIR))
+InstallLinkKitNamedProg(imakesvc.cmd,imakesvc.cmd,$(LINKKITDIR)/config/imake)
+#endif
+
+#if HasClearmake
+bootstrapdepend: depend
+#else
+bootstrapdepend:
+#endif
+
+clean::
+	RemoveFile(ProgramTargetName(ccimake))
+	$(RM) -r bootstrap

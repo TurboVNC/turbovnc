@@ -1,0 +1,2050 @@
+2003-07-31 07:19  const_k
+
+	* README, tightvnc.spec, vncserver, Xvnc/config/cf/vnc.def,
+	vncviewer/README, vncviewer/argsresources.c: Version strings
+	changed, version 1.2.9.
+
+2003-07-31 01:55  const_k
+
+	* classes/HTTPConnectSocket.class: file HTTPConnectSocket.class was
+	initially added on branch BRANCH_1_2_STABLE.
+
+2003-07-31 01:55  const_k
+
+	* classes/: HTTPConnectSocket.class,
+	HTTPConnectSocketFactory.class, RfbProto.class, VncViewer.class,
+	VncViewer.jar: The Java viewer classes updated for the 1.2.9
+	release.
+
+2003-07-31 01:55  const_k
+
+	* classes/HTTPConnectSocketFactory.class: file
+	HTTPConnectSocketFactory.class was initially added on branch
+	BRANCH_1_2_STABLE.
+
+2003-07-31 01:05  const_k
+
+	* vncviewer/tunnel.c: From the head branch -- Fixed a problem with
+	incorrect port interpretation when the -tunnel option is used.
+
+2003-07-31 00:38  const_k
+
+	* Xvnc/programs/Xserver/cfb/cfbtile32.c: From the head branch --
+	Applied a patch from the RealVNC distribution, to fix Xvnc crashes
+	under Sparc, in 16-bit and 32-bit pixel formats.
+
+2003-07-30 22:01  const_k
+
+	* vncviewer/desktop.c: From the head branch -- Applied a patch from
+	Greg Breland, to fix the input focus problem.
+
+2003-04-08 15:20  const_k
+
+	* Xvnc/programs/Xserver/hw/vnc/httpd.c: Minor code cleanup.
+
+2003-03-01 08:59  const_k
+
+	* vncpasswd/vncpasswd.c: Fixed a buffer overflow caused by long
+	file names in the vncpasswd command line.
+
+2003-03-01 08:48  const_k
+
+	* libvncauth/vncauth.c, vncpasswd/vncpasswd.c,
+	vncpasswd/vncpasswd.man: Implemented new vncpasswd -f command-line
+	option which allows to provide passwords on stdin and write
+	encrypted passwords to stdout.	Also, the password file name "-"
+	now denotes stdout.
+
+2003-02-19 08:39  const_k
+
+	* Xvnc/: configure, config/cf/darwin.cf, config/imake/imakemdep.h,
+	programs/Xserver/include/servermd.h, programs/Xserver/mi/miarc.c: A
+	set of changes to Xvnc to get it to build and run on Mac OS X 10.2;
+	a patch from Ki Networks, Inc.
+
+2003-02-07 02:30  const_k
+
+	* vncviewer/: README, Vncviewer, argsresources.c, desktop.c:
+	Implemented a new SendRFBEvent(fbupdate) action, and a
+	corresponding "Request refresh" button in the popup menu.
+
+2003-02-06 10:11  const_k
+
+	* Xvnc/config/cf/Imake.cf: Compilation fixes for HP-UX, from Ki
+	Networks, Inc.
+
+2003-02-05 06:56  const_k
+
+	* vncconnect/vncconnect.man: Minor correction in the AUTHORS
+	heading, and updated copyright strings.
+
+2003-01-29 08:03  const_k
+
+	* README, tightvnc.spec, vncserver, Xvnc/config/cf/vnc.def,
+	vncviewer/README, vncviewer/argsresources.c: Version strings
+	changed, version 1.2.8. Also, a small change was made in the .spec
+	file, to remove viewer's dependences on /sbin/service and
+	/sbin/chkconfig.
+
+2003-01-29 05:55  const_k
+
+	* Xvnc/config/cf/Imake.cf: Applied
+	tightvnc-1.2.6-platform-fixes-imake-cf.patch from Debian Linux.
+	This should solve build problems under some particular
+	architectures.
+
+2003-01-29 05:52  const_k
+
+	* Xvnc/: config/cf/xfree86.cf, config/imake/imakemdep.h,
+	programs/Xserver/os/rpcauth.c, programs/Xserver/os/xalloc.c:
+	Applied tightvnc-1.2.6-platform-fixes.patch from Debian Linux. This
+	should solve build problems under some particular architectures.
+
+2003-01-29 05:50  const_k
+
+	* Xvnc/: config/cf/site.def, lib/Xdmcp/Wraphelp.c: Applied
+	vnc-3.3.3-10-xdm-auth-support.patch from Debian Linux.
+
+2003-01-29 04:36  const_k
+
+	* vncviewer/argsresources.c: Making sure that if there is no tty an
+	X window will be displayed even if hostname is supplied; a patch
+	from Debian Linux, authored by William Thompson.
+
+2003-01-29 04:35  const_k
+
+	* Xvnc/config/makedepend/: def.h, main.c, parse.c: Applied a fix
+	for a getline incompatibility; a patch from the Debian Bug Tracking
+	System for the bug #114343, authored by LaMont Jones.
+
+2003-01-29 04:34  const_k
+
+	* Xvnc/lib/xtrans/: Xtranslcl.c, Xtranssock.c: If the directory
+	/tmp/X11-unix did not exist, Xvnc created it without +t
+	permissions; a patch from the Debian Bug Tracking System for the
+	bug #128096, authored by Oryn.
+
+2003-01-29 04:33  const_k
+
+	* Xvnc/programs/Xserver/os/connection.c: Uncommented the code to
+	enable sending SIGUSR1 to (gdm/xdm/kdm) when Xvnc is ready to
+	accept connections; a patch from the Debian Bug Tracking System for
+	the bug #122561 authored by Nick Phillips.
+
+2003-01-29 04:32  const_k
+
+	* Xvnc/programs/Xserver/hw/vnc/httpd.c: The "\n\n" sequences in
+	NOT_FOUND_STR and OK_STR have been changed to "\r\n\r\n"; a patch
+	from the Debian Bug Tracking System for the bug #174688 reported by
+	C. Scott Ananian.
+
+2003-01-17 06:14  const_k
+
+	* vncpasswd/: vncpasswd.c, vncpasswd.man: Support for saving two
+	passwords, full-control and view-only.
+
+2003-01-17 06:12  const_k
+
+	* libvncauth/vncauth.c: (vncEncryptAndStorePasswd2): Fixed
+	incorrect return codes.
+
+2003-01-15 02:44  const_k
+
+	* Xvnc/programs/Xserver/hw/vnc/: auth.c, rfb.h, rfbserver.c:
+	Support for two passwords, for full-control and view-only client
+	authentication.
+
+2003-01-15 01:46  const_k
+
+	* vncviewer/: argsresources.c, cursor.c, desktop.c, rfbproto.c,
+	vncviewer.h, vncviewer.man: New -x11cursor option, a patch from
+	Peter Astrand.
+
+2003-01-14 23:58  const_k
+
+	* vncviewer/: README, argsresources.c, misc.c, vncviewer.h: Applied
+	a patch from Peter Astrand: "This patch adds a new command to the
+	X11 vncviewer popup menu: RunCommand. It can be used to run
+	arbitrary commands or applications from the popup."
+
+2003-01-14 22:23  const_k
+
+	* libvncauth/vncauth.c: Two new functions vncEncryptAndStorePasswd2
+	and vncDecryptPasswdFromFile2 were added in addition to
+	vncEncryptAndStorePasswd and vncDecryptPasswdFromFile functions.
+	New ones can handle two passwords in a file, for full-control and
+	read-only access.
+
+2003-01-13 14:25  const_k
+
+	* Xvnc/lib/font/fc/fserve.c: Fixed a problem with Xvnc eating all
+	CPU time after xfs restarts, a patch from Martin Koegler.
+
+2002-11-14 08:57  const_k
+
+	* vncserver: Minor change in the vncserver -help output.
+
+2002-11-14 08:56  const_k
+
+	* tightvnc.spec: Spec file vnc.spec renamed to tightvnc.spec, and
+	updated for the version 1.2.7.
+
+2002-11-13 10:03  const_k
+
+	* README, vncserver, Xvnc/config/cf/vnc.def, vncviewer/README,
+	vncviewer/argsresources.c: Version strings changed, version 1.2.7.
+
+2002-11-13 05:51  const_k
+
+	* classes/: OptionsFrame.class, RecordingFrame.class,
+	ReloginPanel.class, RfbProto.class, SocketFactory.class,
+	VncCanvas.class, VncViewer.class, VncViewer.jar, index.vnc: Java
+	viewer updated to the most recent version.
+
+2002-11-03 23:41  const_k
+
+	* vncserver: Minor change in the usage help message.
+
+2002-11-03 12:55  const_k
+
+	* vncviewer/: argsresources.c, tunnel.c, vncviewer.man: Added
+	support for the format "host::port" in the command line, in
+	addition to the standard "host:display" format.
+
+2002-11-03 02:38  const_k
+
+	* vncviewer/vncviewer.man: Documented new -nojpeg option and
+	enableJPEG resource. Updated to reflect recent changes in handling
+	of the JPEG compression in the Tight encoding by default.
+
+2002-11-03 02:08  const_k
+
+	* vncviewer/: README, argsresources.c, rfbproto.c, vncviewer.h:
+	Enabling JPEG compression in the Tight encoding by default.
+
+2002-10-30 07:37  const_k
+
+	* vncviewer/vncviewer.man: The BUGS section of the manual page has
+	been removed to reflect the latest improvements in local cursor
+	handling.
+
+2002-10-30 03:28  const_k
+
+	* Xvnc/programs/Xserver/hw/vnc/: cursor.c, rfb.h, rfbserver.c,
+	sprite.c, sprite.h, stats.c: Added support for new CursorPos
+	pseudo-encoding which allows to transmit pointer position from
+	server to clients.
+
+2002-10-29 06:18  const_k
+
+	* include/rfbproto.h, vncviewer/cursor.c, vncviewer/rfbproto.c:
+	Added support for new CursorPos pseudo-encoding which allows to
+	transmit pointer position from server to clients.
+
+2002-10-27 04:36  const_k
+
+	* Xvnc/programs/Xserver/hw/vnc/: init.c, sockets.c: Bugfix for
+	Xvnc's -localhost and -interface options that were broken on some
+	systems e.g. on NetBSD, a patch from Luke Mewburn.
+
+2002-10-26 23:40  const_k
+
+	* Xvnc/programs/Xserver/hw/vnc/init.c: Xvnc -version option has
+	been implemented.
+
+2002-10-16 05:22  const_k
+
+	* vncviewer/vncviewer.man: Minor correction.
+
+2002-10-15 08:02  const_k
+
+	* include/rfbproto.h: Documented the Tight encoding.
+
+2002-09-10 01:17  const_k
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Decreased JPEG quality
+	factors for low quality levels.  Added one comment to document the
+	CheckSolidTile() function.
+
+2002-09-06 04:16  const_k
+
+	* Xvnc/programs/Xserver/os/utils.c: A porting fix from Ki Networks,
+	to build correctly under AIX 4 or 5.
+
+2002-09-06 04:15  const_k
+
+	* include/rfbproto.h: Documented the first byte of a Tight-encoded
+	rectangle. :-)
+
+2002-08-30 07:56  const_k
+
+	* vncviewer/fullscreen.c: Improved scrolling in the full-screen
+	mode, modified patch from Ville Herva.
+
+2002-08-30 02:16  const_k
+
+	* vnc-xclients.patch, vncserver.init: Added files to simplify
+	building of Linux RPMs, thanks to Peter Astrand.
+
+2002-08-28 23:31  const_k
+
+	* libvncauth/vncauth.c: Fixed a repeated challenge replay attack
+	vulnerability, bugtraq id 5296.
+
+2002-08-27 05:19  const_k
+
+	* README, vncserver, Xvnc/config/cf/vnc.def, vncviewer/README,
+	vncviewer/argsresources.c: Version strings changed, version 1.2.6.
+
+2002-08-27 05:10  const_k
+
+	* vncserver: Cosmetic changes not affecting functionality.
+
+2002-08-27 04:47  const_k
+
+	* vncserver: Fixed the bug preventing the vncserver script from
+	working properly when the XAUTHORITY environment variable is not
+	set.
+
+2002-08-27 04:36  const_k
+
+	* libvncauth/vncauth.c: Reverted the change from chmod() to
+	fchmod() introduced in the previous release. That change introduced
+	a bug not allowing fchmod() work correctly. Now we're using chmod()
+	again because it's more portable.
+
+2002-08-07 23:23  const
+
+	* README, vncserver, Xvnc/config/cf/vnc.def, vncviewer/README,
+	vncviewer/argsresources.c: Version strings changed, version 1.2.5.
+
+2002-08-07 23:15  const
+
+	* vncpasswd/vncpasswd.c: Improved error message on mkdir() failure.
+
+2002-08-07 23:13  const
+
+	* vncserver: Improved support of users' vnc directories under /tmp.
+
+2002-08-07 15:17  const
+
+	* vncserver: Added possibility to keep users' vnc directories under
+	/tmp, as suggested by Ivan Popov. This mode can be enabled by
+	setting the $vncUserDirUnderTmp to non-zero in the vncserver
+	script. Note that "vncpasswd -t" should be used to change passwords
+	kept under /tmp.
+
+2002-08-07 14:38  const
+
+	* vncpasswd/: vncpasswd.c, vncpasswd.man: New vncpasswd -t option
+	allowing to write password files under /tmp.
+
+2002-08-07 08:04  const
+
+	* vncpasswd/vncpasswd.c: Minor cleanup.
+
+2002-08-07 07:45  const
+
+	* vncserver.man, vncconnect/vncconnect.man,
+	vncpasswd/vncpasswd.man, vncviewer/vncviewer.man: Dates updated.
+
+2002-08-07 07:42  const
+
+	* Xvnc/programs/Xserver/Xvnc.man: Documented the -viewonly
+	command-line  option.
+
+2002-08-07 07:38  const
+
+	* Xvnc/programs/Xserver/hw/vnc/httpd.c, classes/index.vnc:
+	Implemented a possibility to specify applet parameters in the URL
+	request for the HTTP server.
+
+2002-08-07 05:25  const
+
+	* Xvnc/programs/Xserver/hw/vnc/: init.c, rfb.h, rfbserver.c: Xvnc
+	-viewonly patch from Ehud Karni.
+
+2002-08-07 04:42  const
+
+	* Xvnc/programs/Xserver/include/servermd.h: Linux/PowerPC fix from
+	Peter A. Castro.
+
+2002-08-07 04:39  const
+
+	* libvncauth/vncauth.c: chmod() call replaced by fchmod().
+
+2002-08-04 09:44  const
+
+	* classes/: ButtonPanel.class, OptionsFrame.class,
+	RecordingFrame.class, RfbProto.class, SessionRecorder.class,
+	VncCanvas.class, VncViewer.class, VncViewer.jar: Java viewer
+	updated to the most recent version.
+
+2002-07-04 23:42  const
+
+	* Xvnc/programs/Xserver/hw/vnc/rfbserver.c: The server failed to
+	reset compression level and JPEG image quality on reading client's
+	encoding list.
+
+2002-06-29 20:20  const
+
+	* vncviewer/: cursor.c, rfbproto.c, vncviewer.h: Handle XCursor
+	encoding operating on the framebuffer instead of setting new
+	cursors directly in X.
+
+2002-06-27 22:53  const
+
+	* Xvnc/config/cf/vnclibs.def, Xvnc/programs/Xserver/os/osinit.c,
+	vncviewer/Imakefile: Porting fixes from Ki Networks, Inc.
+
+2002-06-27 22:52  const
+
+	* Xvnc/programs/Xserver/hw/vnc/init.c: Minor changes to write
+	information about TightVNC into the log file.
+
+2002-05-19 06:35  const
+
+	* classes/: RfbProto.class, VncCanvas.class, VncViewer.class,
+	VncViewer.jar: Updated Java viewer.
+
+2002-05-15 05:14  const
+
+	* README, vncserver, Xvnc/config/cf/vnc.def, vncviewer/README,
+	vncviewer/argsresources.c: Version strings changed for version
+	1.2.4.
+
+2002-05-15 05:05  const
+
+	* vncserver.man, Xvnc/programs/Xserver/Xvnc.man,
+	vncconnect/vncconnect.man, vncpasswd/vncpasswd.man,
+	vncviewer/vncviewer.man: Dates fixed.
+
+2002-05-15 05:02  const
+
+	* vncviewer/: README, Vncviewer, argsresources.c, fullscreen.c,
+	vncviewer.h, vncviewer.man: Made grabbing the keyboard optional in
+	full-screen mode, new boolean "grabKeyboard" X resource added to
+	control this behavior.
+
+2002-05-08 23:10  const
+
+	* vncviewer/: argsresources.c, rfbproto.c, vncviewer.h: The
+	-autopass option removed.
+
+2002-05-08 22:00  const
+
+	* README: Minor correction.
+
+2002-05-08 21:56  const
+
+	* libvncauth/vncauth.c: Added a possibility to denote standard
+	input with the "-" file name.
+
+2002-04-30 06:07  const
+
+	* Imakefile, README, Xvnc/Imakefile, Xvnc/configure,
+	Xvnc/config/cf/Imake.cf, Xvnc/config/cf/Imake.tmpl,
+	Xvnc/config/cf/hp.cf, Xvnc/config/cf/site.def,
+	Xvnc/config/cf/sun.cf, Xvnc/config/cf/vnc.def,
+	Xvnc/config/cf/vnclibs.def, Xvnc/config/util/makestrs.c,
+	Xvnc/include/Xpoll.h, Xvnc/lib/font/Type1/token.c,
+	Xvnc/lib/font/bitmap/bdfutils.c, Xvnc/lib/font/fc/fsio.c,
+	Xvnc/lib/font/fontfile/Imakefile, Xvnc/lib/font/fontfile/bufio.c,
+	Xvnc/programs/Xserver/Xext/xprint.c,
+	Xvnc/programs/Xserver/dix/Imakefile,
+	Xvnc/programs/Xserver/dix/gc.c,
+	Xvnc/programs/Xserver/hw/vnc/Imakefile,
+	Xvnc/programs/Xserver/mi/miexpose.c,
+	Xvnc/programs/Xserver/os/osinit.c,
+	Xvnc/programs/Xserver/os/utils.c, libvncauth/Imakefile,
+	vncconnect/Imakefile, vncpasswd/Imakefile, vncpasswd/vncpasswd.c,
+	vncviewer/Imakefile, vncviewer/argsresources.c, vncviewer/colour.c,
+	vncviewer/fullscreen.c, vncviewer/rfbproto.c, vncviewer/tight.c,
+	vncviewer/vncviewer.h: Applied patch from Ki Networks, Inc. solving
+	build problems on a number of commercial Unix systems, fixing a
+	number of minor bugs and typos, and adding the -autopass option to
+	the vncviewer.
+
+2002-04-25 06:15  const
+
+	* vncviewer/fullscreen.c: Applied patch to solve keyboard focus
+	problems in the full-screen mode, from Peter Astrand. The patch
+	does not seem to solve all the issues, but makes things better
+	nevertheless.
+
+2002-04-25 04:54  const
+
+	* classes/: AuthPanel.class, ButtonPanel.class, OptionsFrame.class,
+	VncCanvas.class, VncViewer.class, VncViewer.jar: Updated Java
+	viewer.
+
+2002-04-23 07:01  const
+
+	* vncpasswd/vncpasswd.c: Fixed a bug causing vncpasswd work
+	incorrectly when a file name argument was given. Minor cleanup in
+	the message "Passwords do not match" :-).
+
+2002-03-25 02:19  const
+
+	* vncconnect/vncconnect.man: The date was incorrect.
+
+2002-03-20 02:49  const
+
+	* Xvnc/config/cf/linux.cf: Forcing Xvnc to link dynamically to the
+	system zlib library.
+
+2002-03-20 02:38  const
+
+	* Imakefile, README, Xvnc/config/cf/Imake.tmpl,
+	Xvnc/config/cf/vnclibs.def, Xvnc/lib/Imakefile,
+	Xvnc/lib/font/fontfile/Imakefile, vncviewer/Imakefile: Zlib library
+	was removed from the core X sources. Instead, both vncviewer and
+	Xvnc now can use either system zlib and JPEG libraries, or ones
+	packaged within TightVNC source archive in the lib/ directory. 
+	This allows to distribute two version of the source archive: one
+	with these libraries for those who don't have them installed in the
+	system, and another version without libraries, directly from CVS,
+	for those who do have zlib and/or JPEG libraries installed. In the
+	former case, build procedure would include additional "make libs"
+	step. System libraries will be linked dynamically, libraries
+	included in the source archive will be linked in statically.
+
+2002-03-19 21:57  const
+
+	* Xvnc/config/cf/linux.cf: Cleanups in code layout.
+
+2002-03-19 21:40  const
+
+	* vncserver: Removed extra 2-seconds delay after Xvnc startup.
+
+2002-03-19 21:38  const
+
+	* vncserver: Made default color depth 24 instead of 8.
+
+2002-03-19 21:36  const
+
+	* Xvnc/: config/cf/Imake.cf, config/cf/linux.cf,
+	config/imake/imakemdep.h, programs/Xserver/include/servermd.h:
+	Support for s390 and s390x architectures under Linux, patch from
+	RedHat vnc RPM.
+
+2002-03-19 21:16  const
+
+	* Xvnc/: config/cf/Imake.cf, config/cf/linux.cf, config/cf/vnc.def,
+	config/imake/imakemdep.h, programs/Xserver/cfb/Imakefile,
+	programs/Xserver/cfb/stipsparc.s,
+	programs/Xserver/cfb/stipsprc32.s: Applied vnc-imake patch from
+	RedHat vnc RPM. This should add support for more architechtures
+	under Linux.
+
+2002-03-19 09:59  const
+
+	* Xvnc/programs/Xserver/hw/vnc/: httpd.c, sockets.c: Changes
+	allowing to use libwrap library from tcp_wrappers for server access
+	control, modified patch from RedHat vnc package.
+
+2002-03-19 09:25  const
+
+	* Xvnc/programs/Xserver/hw/vnc/rfbserver.c: Fixed memory alignment
+	problem in Raw encoder for architectures like Sparc that force
+	words to be aligned on word boundaries in memory.
+
+2002-03-19 07:23  const
+
+	* Xvnc/programs/Xserver/hw/vnc/httpd.c: Fixed blocking I/O problem
+	which led to easy denial-of-service attacks via built-in HTTP
+	server, modified patch from Tim Waugh.
+
+2002-03-19 03:44  const
+
+	* README, vncinstall: The vncinstall script now understands
+	two-argument form allowing to install manual pages.
+
+2002-03-19 03:12  const
+
+	* vncserver: Variable names changed: vncFontPath to fontPath,
+	vncColorsPath to colorPath, to correspond to configuration variable
+	names found in the /etc/vnc.conf of Debian GNU/Linux.
+
+2002-03-19 02:56  const
+
+	* vncserver: Trying to check if Xvnc was started, on failure trying
+	to start it once more with default font path; modified patch from
+	Tim Waugh.  Added valiables $vncFontPath and $vncColorsPath to the
+	configuration section in the beginning of the script.
+
+2002-03-19 02:29  const
+
+	* Xvnc/lib/font/fc/fserve.c: Fixed Xvnc crash in the font server
+	code, patch from Tim Waugh.
+
+2002-03-19 02:25  const
+
+	* vncserver: vncserver -help output made similar to vncviewer -help
+	output.
+
+2002-03-19 00:51  const
+
+	* Xvnc/programs/Xserver/Xvnc.man: Xvnc manual page prepared.
+
+2002-03-19 00:50  const
+
+	* vncserver.man: Minor correction.
+
+2002-03-17 21:54  const
+
+	* vncserver.man: Corrected a double occurence of a word.
+
+2002-03-17 21:51  const
+
+	* vncserver.man: A manual page for vncserver script prepared.
+
+2002-03-07 09:28  const
+
+	* classes/: VncCanvas.class, VncViewer.jar: Java viewer update.
+
+2002-03-05 01:06  const
+
+	* vncconnect/vncconnect.man, vncpasswd/vncpasswd.man: Minor
+	corrections in comments.
+
+2002-03-04 21:28  const
+
+	* README, Xvnc/config/cf/vnc.def, vncviewer/README,
+	vncviewer/argsresources.c: Version strings changed, version 1.2.3.
+
+2002-03-04 09:55  const
+
+	* classes/: AuthPanel.class, ButtonPanel.class,
+	ClipboardFrame.class, OptionsFrame.class, RfbProto.class,
+	VncCanvas.class, VncViewer.class, VncViewer.jar, index.vnc: Updated
+	version of the Java viewer.
+
+2002-02-28 02:57  const
+
+	* vncpasswd/vncpasswd.man: Man page for vncpasswd prepared.
+
+2002-02-28 02:56  const
+
+	* vncviewer/vncviewer.man: Release date updated.
+
+2002-02-20 01:27  const
+
+	* vncviewer/vncviewer.man: A small correction in the description of
+	the -compresslevel option.
+
+2002-01-02 01:00  const
+
+	* vncconnect/vncconnect.man: Man page for vncconnect prepared.
+
+2002-01-02 00:57  const
+
+	* vncviewer/: README, vncviewer.man: Man page for vncviewer
+	prepared, README file updated.
+
+2001-12-12 01:52  const
+
+	* vncviewer/argsresources.c: Minor correction in the vncviewer
+	-help output.
+
+2001-11-26 09:29  const
+
+	* vncviewer/argsresources.c: Minor change in the vncviewer -help
+	output.
+
+2001-11-26 04:04  const
+
+	* README, Xvnc/config/cf/vnc.def, vncviewer/README,
+	vncviewer/argsresources.c: Version strings changed, version 1.2.2. 
+	Minor bugfix in fprintf() for vncviewer -help.
+
+2001-11-25 06:15  const
+
+	* vncviewer/argsresources.c: Changes in the vncviewer -help output.
+
+2001-11-24 03:01  const
+
+	* Xvnc/programs/Xserver/hw/vnc/cursor.c: Minor bugfix which should
+	prevent potential dereference of a NULL pointer.
+
+2001-11-22 04:13  const
+
+	* vncviewer/: argsresources.c, rfbproto.c, vncviewer.h: Now viewer
+	window is raised on beep, unless -noraiseonbeep option is provided
+	or raiseOnBeep resource set to False.
+
+2001-11-13 03:31  const
+
+	* vncviewer/Imakefile: "ComplexProgramTargetNoMan" directive
+	causing problems on many non-XFree86 systems changed back to
+	"ComplexProgramTarget".
+
+2001-09-16 00:18  const
+
+	* README, Xvnc/config/cf/vnc.def, vncviewer/README: Version strings
+	changed.
+
+2001-09-15 22:58  const
+
+	* vncviewer/: argsresources.c, tunnel.c, vncviewer.c, vncviewer.h:
+	New -via <GATEWAY> vncviewer option providing enhanced tunneling
+	functionality. Now one can make vncviewer tunnel connections to a
+	VNC host via third machine acting as a gateway. Tunneling command
+	template can be provided in the VNC_VIA_CMD environment variable
+	containing %H, %L, %R, %G patterns where %G denotes host address of
+	the gateway machine (%H, %L, %R patterns are similar to ones used
+	in the VNC_TUNNEL_CMD template for -tunnel option). Default command
+	template for the -via option invokes SSH port forwarding.
+
+2001-09-15 04:12  const
+
+	* vncviewer/vncviewer.h: Tunneling command template has been
+	changed, to allow tunneled connections to hosts where only loopback
+	VNC connections are enabled.
+
+2001-09-06 00:34  const
+
+	* vncpasswd/vncpasswd.c: Creating ~/.vnc directory if it does not
+	exist, modified patch by Tim Waugh.
+
+2001-08-22 08:23  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Minor cleanup: parens
+	around arguments of HASH_FUNCxx macros.
+
+2001-08-04 04:48  const
+
+	* Xvnc/config/cf/: linux.cf, Imake.cf: PowerPC support, patch from
+	Debian.
+
+2001-08-03 03:40  const
+
+	* vncviewer/rfbproto.c: Checking return value after malloc().
+
+2001-06-25 00:59  const
+
+	* README, Xvnc/config/cf/vnc.def, vncviewer/README,
+	vncviewer/argsresources.c: Version strings changed.
+
+2001-06-25 00:52  const
+
+	* vncserver: Added an example to set fontpath when using font
+	server.
+
+2001-06-25 00:49  const
+
+	* vncviewer/argsresources.c: Clarification in vncviewer -help
+	output for -compresslevel and -quality options.
+
+2001-06-25 00:43  const
+
+	* vncserver: A patch for vncserver script to respect the XAUTHORITY
+	environment variable applied, from Red Hat Linux RPM.
+
+2001-06-18 06:17  const
+
+	* vncviewer/Imakefile: Imakefile fix to compile the source under
+	XFree86 4.1.0, the patch sent by Tim Waugh.
+
+2001-03-01 00:48  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Two changes to lower
+	latencies: (1) now we send pending data prior to processing of each
+	rectangle if there is at least 128 bytes pending; (2) now, when we
+	are trying to find solid-color areas and already have passed an
+	amount of data which should be split anyway, we are sending them
+	immediately.  A number of other minor clean-ups and fixes.
+
+2001-03-01 00:35  const
+
+	* Xvnc/programs/Xserver/hw/vnc/cursor.c: Contents of update buffer
+	is not sent immediately any more. This change should prevent
+	calling rfbSendUpdateBuf() with ublen==0 after a framebuffer
+	update.
+
+2001-03-01 00:31  const
+
+	* Xvnc/programs/Xserver/hw/vnc/rfbserver.c: Minor formatting
+	clean-up and a check in rfbSendUpdateBuf() to make sure that (ublen
+	> 0).
+
+2001-02-28 20:35  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Minor clean-ups to get rid
+	of all warnings on compilation with -Wall gcc option.
+
+2001-02-17 07:50  const
+
+	* README, Xvnc/config/cf/vnc.def, vncviewer/README,
+	vncviewer/argsresources.c: Version strings changed.
+
+2001-02-16 14:38  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Enhanced technique to split
+	large rectangles: now we're trying to maximize dimensions of
+	solid-color areas found.  Minor code clean-ups and formating fixes.
+
+2001-02-15 01:21  const
+
+	* Xvnc/programs/Xserver/hw/vnc/: rfb.h, rfbserver.c, tight.c:
+	LastRect markers are not being sent when an update consist of small
+	rectangles not to be searched for solid-color areas.  Minor
+	performance fix: searches for solid-color areas might have been
+	performed several times in the same area of rectangle.	Minor
+	terminology fixes in names of functions implementing tight encoder
+	and other minor code clean-ups.
+
+2001-02-14 04:34  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Order in which parts of
+	large rectangles are being sent is now strictly top-to-bottom,
+	left-to-right. Such behaviour look better at client side.
+
+2001-02-07 16:25  const
+
+	* README, Xvnc/config/cf/vnc.def, vncviewer/README,
+	vncviewer/argsresources.c: Version strings changed.
+
+2001-02-07 15:52  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Parameters for algorithms
+	to split screen rectangles has been changed; this can improve both
+	compression ratios and CPU usage.
+
+2001-02-07 15:47  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Important bugfix in Xvnc
+	tight encoder: the code to split large rectangles behaved
+	incorrectly; this caused compression ratios to be worse than
+	expected and could result segfaults in certain situations.
+
+2001-02-02 14:48  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Bugfix: a typo fixed in the
+	Xvnc that prevented it to communicate correctly with older viewers
+	without JPEG compression support.
+
+2001-02-01 00:24  const
+
+	* vncviewer/: cursor.c, tight.c, argsresources.c: Tiny clean-up in
+	vncviewer -help message.
+
+2001-02-01 00:23  const
+
+	* Xvnc/programs/Xserver/hw/vnc/stats.c: Protocol overhead produced
+	by LastRect is not counted as part of real framebuffer updates when
+	statistics is dumped. This seems to be more correct.
+
+2001-02-01 00:21  const
+
+	* Xvnc/programs/Xserver/hw/vnc/rfbserver.c: Bug fixed: LastRect
+	pseudo-encoding worked incorrectly when preferred encoding was not
+	Tight.
+
+2001-01-31 16:57  const
+
+	* README, Xvnc/config/cf/vnc.def, vncviewer/README,
+	vncviewer/argsresources.c: Version strings changed.
+
+2001-01-31 15:56  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Rectangles prepared for
+	indexed-color encoding are now may be compressed with JPEG on low
+	quality levels.
+
+2001-01-31 15:04  const
+
+	* Xvnc/programs/Xserver/hw/vnc/: rfb.h, rfbserver.c, stats.c,
+	tight.c: Large rectangles now should be split according to their
+	contents: encoder tries to find large solid-color areas and to
+	encode them in separate rectangles. This often reduces amount of
+	data sent, improves compression speed and lowers latencies.
+
+2001-01-31 08:37  const
+
+	* vncviewer/rfbproto.c: Support for LastRect pseudo-encoding added.
+	This fake encoding is used in empty rectangles indicating that
+	there will be no more rectangles in current framebuffer update.
+
+2001-01-30 08:24  const
+
+	* Xvnc/programs/Xserver/hw/vnc/: rfb.h, rfbserver.c, tight.c: JPEG
+	image quality in Xvnc tight encoder is now configurable.
+
+2001-01-30 03:55  const
+
+	* include/rfbproto.h, vncviewer/argsresources.c,
+	vncviewer/rfbproto.c, vncviewer/vncviewer.h: Support for JPEG
+	quality level setting in vncviewer, -quality option implemented.
+
+2001-01-30 03:53  const
+
+	* vncviewer/tight.c: Bugfix in colorspace translation from JPEG
+	data.
+
+2001-01-30 03:52  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: JPEG compression is now
+	supported with any 16bpp and 32bpp server pixel formats.
+
+2001-01-29 13:24  const
+
+	* Xvnc/config/cf/vnclibs.def, Xvnc/programs/Xserver/hw/vnc/tight.c,
+	include/rfbproto.h, vncviewer/Imakefile, vncviewer/rfbproto.c,
+	vncviewer/tight.c: Preliminary implementation of JPEG compression.
+	It works perfectly, but there are things to do: client should send
+	explicit request for JPEG compression with quality level,
+	algorithms to decide if a rectangle may be compressed by JPEG
+	should be designed and implemented (for now JPEG compression just
+	replaces Gradient filter).
+
+2001-01-28 04:21  const
+
+	* classes/: DesCipher.class, index.vnc: VNC Java viewer classes and
+	HTML templates replaced with recently implemented Java version of
+	TightVNC viewer.
+
+2001-01-28 04:16  const
+
+	* README, Xvnc/README, Xvnc/config/cf/vnc.def,
+	Xvnc/programs/Xserver/hw/vnc/README,
+	Xvnc/programs/Xserver/hw/vnc/cursor.c,
+	Xvnc/programs/Xserver/hw/vnc/tight.c, vncviewer/README,
+	vncviewer/argsresources.c, vncviewer/tight.c, vncviewer/tunnel.c:
+	Copyright and version strings changed.
+
+2001-01-25 11:39  const
+
+	* vncviewer/cursor.c: Bugfix: locked screen area calculation was
+	broken on locks > 1.  Minor bugfix: there was 1 pixel error (safe)
+	in code to determine collisions between software cursor and locked
+	area.
+
+2001-01-25 11:33  const
+
+	* include/rfbproto.h: rfbEncodingLastRect added to list of known
+	ensodings.
+
+2001-01-24 09:53  const
+
+	* vncviewer/cursor.c: Minor cleanups.
+
+2001-01-21 20:52  const
+
+	* vncviewer/: Vncviewer, argsresources.c: vncviewer now requests
+	shared session by default, "-noshared" option supported to alter
+	this behaviour.
+
+2001-01-17 03:03  const
+
+	* Xvnc/programs/Xserver/hw/vnc/: init.c, rfb.h, sockets.c: Code
+	cleanup in Xvnc -interface option implementation, from TridiaVNC.
+
+2001-01-16 15:17  const
+
+	* vncviewer/cursor.c: Minor code cleanups.
+
+2001-01-16 14:26  const
+
+	* Xvnc/programs/Xserver/hw/vnc/corre.c: Bug fixed: CoRRE
+	implementation refused to check return codes after writing data to
+	clients; this caused Xvnc crashes after write operation into closed
+	descriptor.
+
+2001-01-16 13:37  const
+
+	* vncviewer/desktop.c: Minor change in dot cursor shape (rounded).
+
+2001-01-16 12:47  const
+
+	* Xvnc/programs/Xserver/hw/vnc/cursor.c: Transparent 1x1 cursor is
+	treated as "no cursor" (width 0, height 0).
+
+2001-01-16 12:20  const
+
+	* Xvnc/programs/Xserver/hw/vnc/: init.c, kbdptr.c, rfb.h: New
+	-compatiblekbd option implemented in Xvnc to force META and ALT
+	keys behave the same way as they do in the original AT&T's version
+	(they both correspond to the Mod1 modifier there).
+
+2001-01-16 11:55  const
+
+	* Xvnc/programs/Xserver/hw/vnc/: init.c, rfb.h, sockets.c: Support
+	for Xvnc -interface option added (patch from Tim Waught).
+
+2001-01-16 00:16  const
+
+	* Xvnc/programs/Xserver/hw/vnc/Imakefile,
+	Xvnc/programs/Xserver/hw/vnc/rfb.h,
+	Xvnc/programs/Xserver/hw/vnc/rfbserver.c,
+	Xvnc/programs/Xserver/hw/vnc/zlib.c, include/rfbproto.h,
+	vncviewer/rfbproto.c, vncviewer/vncviewer.h, vncviewer/zlib.c: Zlib
+	encoding support merged from the TridiaVNC code.
+
+2001-01-16 00:07  const
+
+	* vncviewer/listen.c: XBell volume changed from 100 to 0.
+
+2001-01-16 00:07  const
+
+	* vncviewer/: Vncviewer, argsresources.c: Version info changed,
+	minor typo fixed.
+
+2001-01-15 23:17  const
+
+	* Xvnc/config/cf/vnc.def: Version string changed to indicate Tight
+	Encoder version.
+
+2001-01-15 21:17  const
+
+	* Xvnc/programs/Xserver/hw/vnc/rfbserver.c: Server-side priorities
+	for XCursor vs. RichCursor encodings have been changed: now XCursor
+	is used for any client supporting this encoding even if it sends
+	request for RichCursor encoding first.
+
+2001-01-15 18:10  const
+
+	* vncviewer/rfbproto.c: Minor cosmetic change.
+
+2001-01-15 17:45  const
+
+	* vncviewer/: cursor.c, rfbproto.c, vncviewer.h: RichCursor
+	encoding support is finished.
+
+2001-01-15 08:34  const
+
+	* vncviewer/cursor.c: Code cleanups.
+
+2001-01-14 19:54  const
+
+	* vncviewer/: argsresources.c, cursor.c, rfbproto.c, sockets.c,
+	tight.c, tunnel.c, vncviewer.c, vncviewer.h: Coding style fixes,
+	spaces -> tabs (mostly in my own code).
+
+2001-01-14 14:55  const
+
+	* vncviewer/: cursor.c, rfbproto.c, vncviewer.h: Preliminary
+	client-side RichCursor encoding support. Currently it works but the
+	way to prevent collisions between framebuffer updates and cursor
+	drawing operations is not reliable enough.
+
+2001-01-14 14:51  const
+
+	* Xvnc/programs/Xserver/hw/vnc/cursor.c: Bug with
+	XCursor->RichCursor format translation fixed.
+
+2001-01-11 16:36  const
+
+	* vncviewer/rfbproto.c: Requesting RichCursor encoding, processing
+	RichCursor updates.
+
+2001-01-11 16:35  const
+
+	* vncviewer/vncviewer.h: MAX_ENCODINGS raised to 20.
+
+2001-01-11 16:19  const
+
+	* vncviewer/: Imakefile, cursor.c, rfbproto.c, vncviewer.h: All
+	XCursor stuff moved from rfbproto.c to a new file, cursor.c.
+
+2001-01-06 07:00  const
+
+	* Xvnc/programs/Xserver/hw/vnc/cursor.c: Xvnc bit-order problems in
+	XCursor/RichCursor encodings hopefully fixed.
+
+2001-01-05 11:05  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Constant sets for
+	compression levels 0 and 1 changed.  Minor code cleanups and
+	optimizations.	Comments clarified, typos in comments fixed.
+
+2001-01-05 11:02  const
+
+	* vncviewer/tight.c: Tiny typo fixed in comment.
+
+2000-12-08 15:28  const
+
+	* vncviewer/tight.c: Bugfix: viewer crashed in rare situations
+	after inflate() call when decompressed data filled the whole output
+	buffer but there was no more input data.  Additionally, one more
+	sprintf(stderr, ...) added to inflate() error processing code to
+	catch such kind of errors in the future.
+
+2000-11-30 12:22  const
+
+	* vncviewer/rfbproto.c: Buffer size for incoming compressed data
+	decreased to lower latencies.
+
+2000-11-20 10:18  const
+
+	* Xvnc/programs/Xserver/hw/vnc/cursor.c: Minor change in comment.
+
+2000-11-16 19:02  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Unused variable removed.
+
+2000-11-14 06:07  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Code cleanups. No logic
+	changes.
+
+2000-11-10 02:20  const
+
+	* vncconnect/vncconnect.c: Tiny patch from Tim Waugh applied to
+	correct typo in a message text.
+
+2000-11-10 02:18  const
+
+	* Xvnc/programs/Xserver/cfb/cfbcmap.c: Order and priority of color
+	components in default pixel format have been changed. This should
+	resolve problems with imlib renderer and get rid of unneeded pixel
+	format translations in many cases.
+
+2000-11-02 13:55  const
+
+	* vncviewer/: rfbproto.c, tunnel.c, vncviewer.h: When -tunnel
+	option was specified in the command line, special rules are used to
+	choose preferred encoding. Now viewer does not think that server is
+	running on the same machine when tunneling is on and preferred
+	encoding is "tight" with default compression instead of raw.
+
+2000-11-02 13:05  const
+
+	* Xvnc/programs/Xserver/cfb/cfbcmap.c: Rules to set default pixel
+	formats have been changed: if depth/3 is not integral number, then
+	red component will take (depth+1)/3 bits instead of (depth+2)/3
+	bits. So default pixel format for 16bpp is BGR565 instead of
+	BGR556.
+
+2000-10-31 11:57  const
+
+	* Xvnc/programs/Xserver/hw/vnc/Imakefile,
+	Xvnc/programs/Xserver/hw/vnc/cursor.c,
+	Xvnc/programs/Xserver/hw/vnc/rfb.h,
+	Xvnc/programs/Xserver/hw/vnc/rfbserver.c,
+	Xvnc/programs/Xserver/hw/vnc/stats.c, include/rfbproto.h,
+	vncviewer/rfbproto.c: New "RichCursor" encoding implemented. 
+	Background and foreground colors are not sent for empty XCursor
+	updates any more. Note: compatibility with previous XCursor code
+	lost.  Actual bit order in X11 bitmaps did not correspond to
+	XCursor encoding specification. Note: compatibility with previous
+	XCursor code lost.
+
+2000-10-31 02:13  const
+
+	* Xvnc/programs/Xserver/hw/vnc/rfbserver.c: (rfbSendXCursorShape):
+	XCursor encoding change: order in which transparency and data
+	bitmaps follow is now opposite (first data, then mask).
+
+2000-10-31 01:46  const
+
+	* vncviewer/rfbproto.c: (HandleXCursor): XCursor encoding change:
+	order in which transparency and data bitmaps follow is now opposite
+	(first data, then mask).
+
+2000-10-31 01:43  const
+
+	* include/rfbproto.h: Description for XCursor encoding changed,
+	order in which transparency and data bitmaps follow is now opposite
+	(first data, then mask).
+
+2000-10-31 01:31  const
+
+	* include/rfbproto.h: Preparing for RichCursor encoding
+	implementation.
+
+2000-10-31 01:20  const
+
+	* Xvnc/programs/Xserver/hw/vnc/kbdptr.c: META key fix -- still not
+	sure if this solution is correct.
+
+2000-10-30 04:44  const
+
+	* Xvnc/programs/Xserver/hw/vnc/rfb.h,
+	Xvnc/programs/Xserver/hw/vnc/rfbserver.c,
+	Xvnc/programs/Xserver/hw/vnc/sprite.c,
+	Xvnc/programs/Xserver/hw/vnc/sprite.h,
+	Xvnc/programs/Xserver/hw/vnc/spritest.h,
+	Xvnc/programs/Xserver/hw/vnc/stats.c, include/rfbproto.h,
+	vncviewer/argsresources.c, vncviewer/desktop.c,
+	vncviewer/rfbproto.c, vncviewer/vncviewer.h: "XCursor" encoding
+	implemented. It's used to send X-style cursor shape information
+	from server to clients so cursor movement can be processed at
+	client side.
+
+2000-10-29 11:30  const
+
+	* vncviewer/: argsresources.c, vncviewer.h: Vncviewer's
+	-nolocalcursor option removed.
+
+2000-10-26 13:42  const
+
+	* vncviewer/argsresources.c: Version string changed.
+
+2000-10-26 13:02  const
+
+	* include/rfbproto.h: Additions and cleanups on comment regarding
+	XCursor encoding.
+
+2000-10-26 12:19  const
+
+	* Imakefile, README, vncinstall, vncserver, Xvnc/config/cf/vnc.def,
+	Xvnc/programs/Xserver/hw/vnc/Imakefile,
+	Xvnc/programs/Xserver/hw/vnc/cutpaste.c,
+	Xvnc/programs/Xserver/hw/vnc/draw.c,
+	Xvnc/programs/Xserver/hw/vnc/hextile.c,
+	Xvnc/programs/Xserver/hw/vnc/init.c,
+	Xvnc/programs/Xserver/hw/vnc/kbdptr.c,
+	Xvnc/programs/Xserver/hw/vnc/rfb.h,
+	Xvnc/programs/Xserver/hw/vnc/rfbserver.c,
+	Xvnc/programs/Xserver/hw/vnc/sockets.c, vncconnect/Imakefile,
+	vncconnect/vncconnect.c, vncviewer/dialogs.c: Changes from AT&T
+	merged into the sourse, now the code is based on version 3.3.3r2,
+	not on 3.3.3r1.
+
+2000-10-26 11:56  const
+
+	* include/rfbproto.h: Preparing for local cursor implementation.
+	New constants and comments.
+
+2000-10-26 04:59  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: (PaletteReset): Minor speed
+	optimization.
+
+2000-10-26 04:15  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: (SendIndexedRect): The
+	function has been split into two functions: SendIndexedRect and
+	SendMonoRect.
+
+2000-10-25 14:27  const
+
+	* Xvnc/programs/Xserver/hw/vnc/rfbserver.c, include/rfbproto.h,
+	vncviewer/argsresources.c, vncviewer/rfbproto.c,
+	vncviewer/vncviewer.h: Setting compression levels in Xvnc tight
+	encoder.  New "-compresslevel" option added to vncviewer.  New
+	"-nolocalcursor" option added to vncviewer, but it's not used yet.
+
+2000-10-25 14:24  const
+
+	* Xvnc/programs/Xserver/hw/vnc/translate.c:
+	(rfbSetTranslateFunction): Small cleanup in log message.
+
+2000-10-25 12:57  const
+
+	* Xvnc/programs/Xserver/hw/vnc/: rfb.h, rfbserver.c, tight.c:
+	Compression level made configurable in tight encoder.
+
+2000-10-17 02:43  const
+
+	* vncviewer/dialogs.c: A patch by Tim Waugh to correct misuse of
+	XawDialogGetValueString function in vncviewer has been applied.
+
+2000-10-17 01:51  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Encoding of indexed
+	rectangles mostly rewritten for speed optimization.  Usual code
+	cleanups.
+
+2000-10-03 14:25  const
+
+	* Xvnc/programs/Xserver/hw/vnc/hextile.c: Fix for "0 bpp" problem
+	from Michael A. Fetterman has been applied.
+
+2000-09-29 09:03  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: (FillPaletteNN): Unused
+	arguments removed.
+
+2000-09-29 08:56  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Hash function for palette
+	lookups has been changed to address byte-order issues.
+
+2000-09-27 08:08  const
+
+	* vncviewer/tight.c: Obsolete comment removed.
+
+2000-09-26 04:46  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Rules to identify
+	rectangles as suitable for ``gradient'' filter were not strict
+	enough.
+
+2000-09-25 04:59  const
+
+	* Xvnc/programs/Xserver/hw/vnc/: init.c, rfb.h, tight.c:
+	``-lazytight'' option added to Xvnc to disable ``gradient'' filter
+	in tight encoding.
+
+2000-09-24 19:25  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: New code to determine image
+	type. It is used to guess is it helpful to use ``gradient'' filter
+	on full-color rectangle.  Byte order problems have been hopefully
+	fixed.	Various code cleanups and optimizations.
+
+2000-09-06 20:49  const
+
+	* vncviewer/rfbproto.c: Bell volume for XBell changed from 100 to
+	0.
+
+2000-09-03 13:32  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: ``Gradient'' filter
+	implemented, but currently it's very inefficient.
+
+2000-09-03 13:30  const
+
+	* vncviewer/tight.c: (FilterGradientBPP): Bug in the ``gradient''
+	filter code fixed.
+
+2000-09-01 02:04  const
+
+	* include/rfbproto.h, vncviewer/tight.c: Minor code cleanups.
+
+2000-08-30 03:15  const
+
+	* Xvnc/programs/Xserver/hw/vnc/: rfb.h, rfbserver.c, tight.c:
+	Better way to split rectangle into smaller parts.
+
+2000-08-30 00:08  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Hash function for palette
+	lookups simplified.
+
+2000-08-29 11:05  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c, include/rfbproto.h: Stupid
+	bug fixed: extra unused color was included in palettes in many
+	cases; compression ratios used to be smaller than they should be. 
+	Parts of code rewritten or reorganized for speed optimization. Code
+	cleanups.
+
+2000-08-17 22:13  const
+
+	* vncviewer/rfbproto.c: Telling the server that we support tight
+	encoding.
+
+2000-08-17 22:12  const
+
+	* Xvnc/programs/Xserver/hw/vnc/rfb.h: Constants moved back to
+	header file.
+
+2000-08-17 22:12  const
+
+	* Xvnc/programs/Xserver/hw/vnc/rfbserver.c: Tuning for better
+	compression ratios.
+
+2000-08-17 22:12  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Prevention of compressing
+	very small updates.  Tuning for better compression ratios.
+
+2000-08-17 22:11  const
+
+	* vncviewer/tight.c: Prevention of compressing very small updates.
+
+2000-08-17 21:03  const
+
+	* Xvnc/programs/Xserver/hw/vnc/: rfb.h, tight.c: Constants moved
+	from rfb.h to tight.c. One nasty bug fixed.
+
+2000-08-17 11:42  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Statistics about bytes sent
+	was not computed correctly.
+
+2000-08-17 11:25  const
+
+	* vncviewer/tight.c: Debugging messages removed or changed.
+
+2000-08-17 11:25  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Support for 24-bit color
+	samples implemented.  Debugging messages removed.
+
+2000-08-17 11:24  const
+
+	* Xvnc/programs/Xserver/hw/vnc/rfb.h: Unused constant removed.
+
+2000-08-17 10:00  const
+
+	* Xvnc/programs/Xserver/hw/vnc/tight.c: Palette for 8-bit samples
+	restricted to 2 colors.  Other code cleanups.
+
+2000-08-17 08:51  const
+
+	* Xvnc/programs/Xserver/hw/vnc/stats.c,
+	Xvnc/programs/Xserver/hw/vnc/tight.c, include/rfbproto.h,
+	vncviewer/tight.c: Working version of tight encoding. The only
+	thing still missed is support for 24-bit samples in Xnvc.
+
+2000-08-17 02:35  const
+
+	* Xvnc/programs/Xserver/hw/vnc/: Imakefile, rfb.h, rfbserver.c,
+	tight.c: Interim version of tight encoding.
+
+2000-08-15 22:23  const
+
+	* vncviewer/tight.c: Debugging finished for 24-bit mode, several
+	bugs fixed.  Some debugging messages added.
+
+2000-08-15 14:44  const
+
+	* vncviewer/tight.c: Support for 24-bit RGB background color for
+	solid areas was missing.
+
+2000-08-15 13:09  const
+
+	* vncviewer/tight.c: Fixed bug in ``gradient'' filter.
+
+2000-08-15 09:11  const
+
+	* include/rfbproto.h, vncviewer/rfbproto.c, vncviewer/tight.c:
+	Filters ``gradient'' and ``palette'' added to the ``tight''
+	encoding implementation.
+
+2000-08-14 14:24  const
+
+	* include/rfbproto.h, vncviewer/rfbproto.c, vncviewer/tight.c:
+	Redesigned implementation of the ``tight'' encoding.
+
+2000-08-08 01:34  const
+
+	* vncviewer/: argsresources.c, listen.c, tunnel.c, vncviewer.c,
+	vncviewer.h: Working support for SSH tunneling.
+
+2000-08-07 14:46  const
+
+	* vncviewer/: Imakefile, argsresources.c, sockets.c, tunnel.c,
+	vncviewer.c, vncviewer.h: First snapshot of support for
+	SSH-tunneled connections; not works yet.
+
+2000-08-02 09:26  const
+
+	* vncviewer/tight.c: First working snapshot of pre-``tight''
+	encoding.  Currently it's equivalent to pure zlib compression.
+
+2000-08-02 07:07  const
+
+	* vncviewer/tight.c: Fixed one typo, partially fixed incorrect
+	FilterHdiff implementation.
+
+2000-08-02 03:58  const
+
+	* vncviewer/: rfbproto.c, tight.c: Draft version of ``tight''
+	encoding finished.
+
+2000-08-01 13:23  const
+
+	* vncviewer/: Imakefile, rfbproto.c, tight.c: Next non-working
+	snapshot of ``tight'' encoding which. It's the first version which
+	can be compiled.
+
+2000-08-01 04:24  const
+
+	* vncviewer/: rfbproto.c, tight.c: Next unfinished snapshot of
+	``tight'' encoding implementation.
+
+2000-07-31 12:03  const
+
+	* include/rfbproto.h, vncviewer/tight.c: Half-finished snapshot of
+	``tight'' encoding.
+
+2000-06-11 05:00  const
+
+	* Imakefile, README, vncinstall, vncserver, Xvnc/Imakefile,
+	Xvnc/README, Xvnc/config/cf/Imake.cf, Xvnc/config/cf/Imake.tmpl,
+	Xvnc/config/cf/hp.cf, Xvnc/config/cf/linux.cf,
+	Xvnc/config/cf/site.def, Xvnc/config/cf/sun.cf,
+	Xvnc/config/cf/vnc.def, Xvnc/config/cf/vnclibs.def,
+	Xvnc/config/cf/xfree86.cf, Xvnc/config/imake/imakemdep.h,
+	Xvnc/config/makedepend/def.h, Xvnc/config/makedepend/main.c,
+	Xvnc/config/makedepend/parse.c, Xvnc/config/util/makestrs.c,
+	Xvnc/programs/Xserver/Xext/xprint.c,
+	Xvnc/programs/Xserver/cfb/Imakefile,
+	Xvnc/programs/Xserver/cfb/cfbcmap.c,
+	Xvnc/programs/Xserver/cfb/stipsparc.s,
+	Xvnc/programs/Xserver/cfb/stipsprc32.s,
+	Xvnc/programs/Xserver/dix/Imakefile,
+	Xvnc/programs/Xserver/dix/gc.c, Xvnc/include/Xpoll.h,
+	Xvnc/lib/Imakefile, Xvnc/lib/font/Type1/token.c,
+	Xvnc/lib/font/bitmap/bdfutils.c, Xvnc/lib/font/fc/fserve.c,
+	Xvnc/programs/Xserver/hw/vnc/Imakefile,
+	Xvnc/programs/Xserver/hw/vnc/README,
+	Xvnc/programs/Xserver/hw/vnc/auth.c,
+	Xvnc/programs/Xserver/hw/vnc/corre.c,
+	Xvnc/programs/Xserver/hw/vnc/cutpaste.c,
+	Xvnc/programs/Xserver/hw/vnc/draw.c,
+	Xvnc/programs/Xserver/hw/vnc/hextile.c,
+	Xvnc/programs/Xserver/hw/vnc/httpd.c,
+	Xvnc/programs/Xserver/hw/vnc/init.c,
+	Xvnc/programs/Xserver/hw/vnc/kbdptr.c,
+	Xvnc/programs/Xserver/hw/vnc/rfb.h,
+	Xvnc/programs/Xserver/hw/vnc/rfbserver.c,
+	Xvnc/programs/Xserver/hw/vnc/sockets.c,
+	Xvnc/programs/Xserver/hw/vnc/sprite.c,
+	Xvnc/programs/Xserver/hw/vnc/sprite.h,
+	Xvnc/programs/Xserver/hw/vnc/spritest.h,
+	Xvnc/programs/Xserver/hw/vnc/stats.c,
+	Xvnc/programs/Xserver/hw/vnc/translate.c,
+	Xvnc/programs/Xserver/include/servermd.h,
+	Xvnc/programs/Xserver/mi/miarc.c,
+	Xvnc/programs/Xserver/mi/miexpose.c,
+	Xvnc/programs/Xserver/os/connection.c,
+	Xvnc/programs/Xserver/os/osinit.c,
+	Xvnc/programs/Xserver/os/rpcauth.c,
+	Xvnc/programs/Xserver/os/utils.c,
+	Xvnc/programs/Xserver/os/xalloc.c, Xvnc/lib/font/fc/fsio.c,
+	Xvnc/lib/font/fontfile/Imakefile, Xvnc/lib/font/fontfile/bufio.c,
+	Xvnc/lib/xtrans/Xtranslcl.c, Xvnc/lib/xtrans/Xtranssock.c,
+	classes/DesCipher.class, classes/index.vnc, include/rfbproto.h,
+	libvncauth/Imakefile, libvncauth/vncauth.c, vncpasswd/Imakefile,
+	vncpasswd/vncpasswd.c, vncviewer/Imakefile, vncviewer/README,
+	vncviewer/Vncviewer, vncviewer/argsresources.c, vncviewer/colour.c,
+	vncviewer/desktop.c, vncviewer/dialogs.c, vncviewer/fullscreen.c,
+	vncviewer/listen.c, vncviewer/misc.c, vncviewer/rfbproto.c,
+	vncviewer/sockets.c, vncviewer/vncviewer.c, vncviewer/vncviewer.h:
+	Initial revision
+
+2000-06-11 05:00  const
+
+	* LICENCE.TXT, Xvnc/DIFFS, Xvnc/INSTALL.PS, Xvnc/INSTALL.TXT,
+	Xvnc/LABEL, Xvnc/Makefile, Xvnc/RELNOTES.PS, Xvnc/RELNOTES.TXT,
+	Xvnc/bug-report, Xvnc/registry, Xvnc/config/Imakefile,
+	Xvnc/config/cf/Amoeba.cf, Xvnc/config/cf/DGUX.cf,
+	Xvnc/config/cf/FreeBSD.cf, Xvnc/config/cf/Imake.rules,
+	Xvnc/config/cf/Imakefile, Xvnc/config/cf/Library.tmpl,
+	Xvnc/config/cf/Mips.cf, Xvnc/config/cf/Motif.rules,
+	Xvnc/config/cf/Motif.tmpl, Xvnc/config/cf/NetBSD.cf,
+	Xvnc/config/cf/Oki.cf, Xvnc/config/cf/OpenBSD.cf,
+	Xvnc/config/cf/README, Xvnc/config/cf/Server.tmpl,
+	Xvnc/config/cf/ServerLib.tmpl, Xvnc/config/cf/Threads.tmpl,
+	Xvnc/config/cf/Win32.cf, Xvnc/config/cf/Win32.rules,
+	Xvnc/config/cf/WinLib.tmpl, Xvnc/config/cf/X11.rules,
+	Xvnc/config/cf/X11.tmpl, Xvnc/config/cf/apollo.cf,
+	Xvnc/config/cf/bsd.cf, Xvnc/config/cf/bsdLib.rules,
+	Xvnc/config/cf/bsdLib.tmpl, Xvnc/config/cf/bsdi.cf,
+	Xvnc/config/cf/cde.rules, Xvnc/config/cf/cde.tmpl,
+	Xvnc/config/cf/convex.cf, Xvnc/config/cf/cray.cf,
+	Xvnc/config/cf/fujitsu.cf, Xvnc/config/cf/generic.cf,
+	Xvnc/config/cf/hpLib.rules, Xvnc/config/cf/hpLib.tmpl,
+	Xvnc/config/cf/ibm.cf, Xvnc/config/cf/ibmLib.rules,
+	Xvnc/config/cf/ibmLib.tmpl, Xvnc/config/cf/isc.cf,
+	Xvnc/config/cf/lnxLib.rules, Xvnc/config/cf/lnxLib.tmpl,
+	Xvnc/config/cf/lnxdoc.rules, Xvnc/config/cf/lnxdoc.tmpl,
+	Xvnc/config/cf/luna.cf, Xvnc/config/cf/lynx.cf,
+	Xvnc/config/cf/macII.cf, Xvnc/config/cf/mach.cf,
+	Xvnc/config/cf/minix.cf, Xvnc/config/cf/moto.cf,
+	Xvnc/config/cf/ncr.cf, Xvnc/config/cf/nec.cf,
+	Xvnc/config/cf/necLib.rules, Xvnc/config/cf/necLib.tmpl,
+	Xvnc/config/cf/noop.rules, Xvnc/config/cf/oldlib.rules,
+	Xvnc/config/cf/os2.cf, Xvnc/config/cf/os2.rules,
+	Xvnc/config/cf/os2Lib.rules, Xvnc/config/cf/os2Lib.tmpl,
+	Xvnc/config/cf/osf1.cf, Xvnc/config/cf/osfLib.rules,
+	Xvnc/config/cf/osfLib.tmpl, Xvnc/config/cf/pegasus.cf,
+	Xvnc/config/cf/sco.cf, Xvnc/config/cf/sco5.cf,
+	Xvnc/config/cf/scoLib.rules, Xvnc/config/cf/sequent.cf,
+	Xvnc/config/cf/sgi.cf, Xvnc/config/cf/sgiLib.rules,
+	Xvnc/config/cf/sgiLib.tmpl, Xvnc/config/cf/sony.cf,
+	Xvnc/config/cf/sunLib.rules, Xvnc/config/cf/sunLib.tmpl,
+	Xvnc/config/cf/sv3Lib.rules, Xvnc/config/cf/sv3Lib.tmpl,
+	Xvnc/config/cf/sv4Lib.rules, Xvnc/config/cf/sv4Lib.tmpl,
+	Xvnc/config/cf/svr3.cf, Xvnc/config/cf/svr4.cf,
+	Xvnc/config/cf/ultrix.cf, Xvnc/config/cf/usl.cf,
+	Xvnc/config/cf/x386.cf, Xvnc/config/cf/xf86.rules,
+	Xvnc/config/cf/xf86.tmpl, Xvnc/config/cf/xf86site.def,
+	Xvnc/config/imake/Imakefile, Xvnc/config/imake/Makefile.ini,
+	Xvnc/config/imake/ccimake.c, Xvnc/config/imake/imake.c,
+	Xvnc/config/imake/imake.man, Xvnc/config/imake/imakesvc.cmd,
+	Xvnc/config/makedepend/Imakefile, Xvnc/config/makedepend/cpp.ed,
+	Xvnc/config/makedepend/cppsetup.c,
+	Xvnc/config/makedepend/ifparser.c,
+	Xvnc/config/makedepend/ifparser.h,
+	Xvnc/config/makedepend/include.c,
+	Xvnc/config/makedepend/mkdepend.man, Xvnc/config/makedepend/pr.c,
+	Xvnc/config/util/Imakefile, Xvnc/config/util/Makefile.ini,
+	Xvnc/config/util/added.cmd, Xvnc/config/util/aminstall.sh,
+	Xvnc/config/util/bsdinst.sh, Xvnc/config/util/buildos2.cmd,
+	Xvnc/config/util/checktree.c, Xvnc/config/util/chownxterm.c,
+	Xvnc/config/util/crayar.sh, Xvnc/config/util/elistgen.hp,
+	Xvnc/config/util/elistgen.ibm, Xvnc/config/util/elistgen.sun,
+	Xvnc/config/util/elistgen.usl, Xvnc/config/util/gccmdep.cpp,
+	Xvnc/config/util/indir.cmd, Xvnc/config/util/install.sh,
+	Xvnc/config/util/instos2.cmd, Xvnc/config/util/lndir.c,
+	Xvnc/config/util/lndir.man, Xvnc/config/util/makeg.man,
+	Xvnc/config/util/makeg.sh, Xvnc/config/util/makestrs.man,
+	Xvnc/config/util/mdepend.cpp, Xvnc/config/util/mergelib.cpp,
+	Xvnc/config/util/mkdirhier.c, Xvnc/config/util/mkdirhier.cmd,
+	Xvnc/config/util/mkdirhier.man, Xvnc/config/util/mkdirhier.sh,
+	Xvnc/config/util/os2inst.cmd, Xvnc/config/util/remove.cmd,
+	Xvnc/config/util/syminst.sh, Xvnc/config/util/x11mf.sh,
+	Xvnc/config/util/xmake.cmd, Xvnc/config/util/xmkmf.cmd,
+	Xvnc/config/util/xmkmf.cpp, Xvnc/config/util/xmkmf.man,
+	Xvnc/config/util/mkshadow/Imakefile,
+	Xvnc/config/util/mkshadow/README,
+	Xvnc/config/util/mkshadow/mkshadow.c,
+	Xvnc/config/util/mkshadow/savedir.c,
+	Xvnc/config/util/mkshadow/wildmat.c, Xvnc/programs/Imakefile,
+	Xvnc/programs/Xserver/Imakefile, Xvnc/programs/Xserver/Xserver.man,
+	Xvnc/programs/Xserver/Xext/Imakefile,
+	Xvnc/programs/Xserver/Xext/SecurityPolicy,
+	Xvnc/programs/Xserver/Xext/appgroup.c,
+	Xvnc/programs/Xserver/Xext/bigreq.c,
+	Xvnc/programs/Xserver/Xext/dpms.c,
+	Xvnc/programs/Xserver/Xext/mbuf.c,
+	Xvnc/programs/Xserver/Xext/mbufbf.c,
+	Xvnc/programs/Xserver/Xext/mbufpx.c,
+	Xvnc/programs/Xserver/Xext/mitmisc.c,
+	Xvnc/programs/Xserver/Xext/saver.c,
+	Xvnc/programs/Xserver/Xext/security.c,
+	Xvnc/programs/Xserver/Xext/shape.c,
+	Xvnc/programs/Xserver/Xext/shm.c,
+	Xvnc/programs/Xserver/Xext/sleepuntil.c,
+	Xvnc/programs/Xserver/Xext/sync.c,
+	Xvnc/programs/Xserver/Xext/xcmisc.c,
+	Xvnc/programs/Xserver/Xext/xf86dga.c,
+	Xvnc/programs/Xserver/Xext/xf86misc.c,
+	Xvnc/programs/Xserver/Xext/xf86vmode.c,
+	Xvnc/programs/Xserver/Xext/xtest.c,
+	Xvnc/programs/Xserver/Xext/xtest1.frags,
+	Xvnc/programs/Xserver/Xext/xtest1dd.c,
+	Xvnc/programs/Xserver/Xext/xtest1dd.h,
+	Xvnc/programs/Xserver/Xext/xtest1di.c,
+	Xvnc/programs/Xserver/Xprint/DiPrint.h,
+	Xvnc/programs/Xserver/cfb/cfb.h,
+	Xvnc/programs/Xserver/cfb/cfb8bit.c,
+	Xvnc/programs/Xserver/cfb/cfb8bit.h,
+	Xvnc/programs/Xserver/cfb/cfb8cppl.c,
+	Xvnc/programs/Xserver/cfb/cfb8line.c,
+	Xvnc/programs/Xserver/cfb/cfballpriv.c,
+	Xvnc/programs/Xserver/cfb/cfbbitblt.c,
+	Xvnc/programs/Xserver/cfb/cfbblt.c,
+	Xvnc/programs/Xserver/cfb/cfbbres.c,
+	Xvnc/programs/Xserver/cfb/cfbbresd.c,
+	Xvnc/programs/Xserver/cfb/cfbbstore.c,
+	Xvnc/programs/Xserver/cfb/cfbfillarc.c,
+	Xvnc/programs/Xserver/cfb/cfbfillrct.c,
+	Xvnc/programs/Xserver/cfb/cfbfillsp.c,
+	Xvnc/programs/Xserver/cfb/cfbgc.c,
+	Xvnc/programs/Xserver/cfb/cfbgetsp.c,
+	Xvnc/programs/Xserver/cfb/cfbglblt8.c,
+	Xvnc/programs/Xserver/cfb/cfbhrzvert.c,
+	Xvnc/programs/Xserver/cfb/cfbigblt8.c,
+	Xvnc/programs/Xserver/cfb/cfbimage.c,
+	Xvnc/programs/Xserver/cfb/cfbline.c,
+	Xvnc/programs/Xserver/cfb/cfbmap.h,
+	Xvnc/programs/Xserver/cfb/cfbmskbits.c,
+	Xvnc/programs/Xserver/cfb/cfbmskbits.h,
+	Xvnc/programs/Xserver/cfb/cfbpixmap.c,
+	Xvnc/programs/Xserver/cfb/cfbply1rct.c,
+	Xvnc/programs/Xserver/cfb/cfbpntwin.c,
+	Xvnc/programs/Xserver/cfb/cfbpolypnt.c,
+	Xvnc/programs/Xserver/cfb/cfbpush8.c,
+	Xvnc/programs/Xserver/cfb/cfbrctstp8.c,
+	Xvnc/programs/Xserver/cfb/cfbrrop.c,
+	Xvnc/programs/Xserver/cfb/cfbrrop.h,
+	Xvnc/programs/Xserver/cfb/cfbscrinit.c,
+	Xvnc/programs/Xserver/cfb/cfbsetsp.c,
+	Xvnc/programs/Xserver/cfb/cfbsolid.c,
+	Xvnc/programs/Xserver/cfb/cfbteblt8.c,
+	Xvnc/programs/Xserver/cfb/cfbtegblt.c,
+	Xvnc/programs/Xserver/cfb/cfbtile32.c,
+	Xvnc/programs/Xserver/cfb/cfbtileodd.c,
+	Xvnc/programs/Xserver/cfb/cfbwindow.c,
+	Xvnc/programs/Xserver/cfb/cfbzerarc.c,
+	Xvnc/programs/Xserver/cfb/stip68kgnu.h,
+	Xvnc/programs/Xserver/cfb/stipmips.s,
+	Xvnc/programs/Xserver/cfb/stipple68k.s,
+	Xvnc/programs/Xserver/cfb16/Imakefile,
+	Xvnc/programs/Xserver/cfb24/Imakefile,
+	Xvnc/programs/Xserver/cfb24/cfbrrop24.h,
+	Xvnc/programs/Xserver/cfb32/Imakefile,
+	Xvnc/programs/Xserver/dix/BuiltInAtoms,
+	Xvnc/programs/Xserver/dix/CHANGES,
+	Xvnc/programs/Xserver/dix/atom.c,
+	Xvnc/programs/Xserver/dix/buildatoms,
+	Xvnc/programs/Xserver/dix/colormap.c,
+	Xvnc/programs/Xserver/dix/cursor.c,
+	Xvnc/programs/Xserver/dix/devices.c,
+	Xvnc/programs/Xserver/dix/dispatch.c,
+	Xvnc/programs/Xserver/dix/dispatch.h,
+	Xvnc/programs/Xserver/dix/dixfonts.c,
+	Xvnc/programs/Xserver/dix/dixutils.c,
+	Xvnc/programs/Xserver/dix/events.c,
+	Xvnc/programs/Xserver/dix/extension.c,
+	Xvnc/programs/Xserver/dix/ffs.c,
+	Xvnc/programs/Xserver/dix/globals.c,
+	Xvnc/programs/Xserver/dix/glyphcurs.c,
+	Xvnc/programs/Xserver/dix/grabs.c,
+	Xvnc/programs/Xserver/dix/initatoms.c,
+	Xvnc/programs/Xserver/dix/main.c,
+	Xvnc/programs/Xserver/dix/pixmap.c,
+	Xvnc/programs/Xserver/dix/privates.c,
+	Xvnc/programs/Xserver/dix/property.c,
+	Xvnc/programs/Xserver/dix/resource.c,
+	Xvnc/programs/Xserver/dix/swaprep.c,
+	Xvnc/programs/Xserver/dix/swapreq.c,
+	Xvnc/programs/Xserver/dix/swapreq.h,
+	Xvnc/programs/Xserver/dix/tables.c,
+	Xvnc/programs/Xserver/dix/window.c, Xvnc/include/DECkeysym.h,
+	Xvnc/include/HPkeysym.h, Xvnc/include/Imakefile,
+	Xvnc/include/Sunkeysym.h, Xvnc/include/X.h, Xvnc/include/XWDFile.h,
+	Xvnc/include/Xalloca.h, Xvnc/include/Xatom.h,
+	Xvnc/include/Xfuncproto.h, Xvnc/include/Xfuncs.h,
+	Xvnc/include/Xmd.h, Xvnc/include/Xos.h, Xvnc/include/Xos_r.h,
+	Xvnc/include/Xosdefs.h, Xvnc/include/Xproto.h,
+	Xvnc/include/Xprotostr.h, Xvnc/include/Xthreads.h,
+	Xvnc/include/Xw32defs.h, Xvnc/include/Xwinsock.h,
+	Xvnc/include/ap_keysym.h, Xvnc/include/keysym.h,
+	Xvnc/include/keysymdef.h, Xvnc/include/bitmaps/1x1,
+	Xvnc/include/bitmaps/2x2, Xvnc/include/bitmaps/Imakefile,
+	Xvnc/include/bitmaps/black, Xvnc/include/bitmaps/boxes,
+	Xvnc/include/bitmaps/calculator, Xvnc/include/bitmaps/cntr_ptr,
+	Xvnc/include/bitmaps/cntr_ptrmsk, Xvnc/include/bitmaps/cross_weave,
+	Xvnc/include/bitmaps/dimple1, Xvnc/include/bitmaps/dimple3,
+	Xvnc/include/bitmaps/dot, Xvnc/include/bitmaps/dropbar7,
+	Xvnc/include/bitmaps/dropbar8, Xvnc/include/bitmaps/escherknot,
+	Xvnc/include/bitmaps/flagdown, Xvnc/include/bitmaps/flagup,
+	Xvnc/include/bitmaps/flipped_gray, Xvnc/include/bitmaps/gray,
+	Xvnc/include/bitmaps/gray1, Xvnc/include/bitmaps/gray3,
+	Xvnc/include/bitmaps/grid16, Xvnc/include/bitmaps/grid2,
+	Xvnc/include/bitmaps/grid4, Xvnc/include/bitmaps/grid8,
+	Xvnc/include/bitmaps/hlines2, Xvnc/include/bitmaps/hlines3,
+	Xvnc/include/bitmaps/icon, Xvnc/include/bitmaps/keyboard16,
+	Xvnc/include/bitmaps/left_ptr, Xvnc/include/bitmaps/left_ptrmsk,
+	Xvnc/include/bitmaps/letters, Xvnc/include/bitmaps/light_gray,
+	Xvnc/include/bitmaps/mailempty, Xvnc/include/bitmaps/mailemptymsk,
+	Xvnc/include/bitmaps/mailfull, Xvnc/include/bitmaps/mailfullmsk,
+	Xvnc/include/bitmaps/mensetmanus, Xvnc/include/bitmaps/menu10,
+	Xvnc/include/bitmaps/menu12, Xvnc/include/bitmaps/menu16,
+	Xvnc/include/bitmaps/menu6, Xvnc/include/bitmaps/menu8,
+	Xvnc/include/bitmaps/noletters, Xvnc/include/bitmaps/opendot,
+	Xvnc/include/bitmaps/opendotMask, Xvnc/include/bitmaps/plaid,
+	Xvnc/include/bitmaps/right_ptr, Xvnc/include/bitmaps/right_ptrmsk,
+	Xvnc/include/bitmaps/root_weave, Xvnc/include/bitmaps/scales,
+	Xvnc/include/bitmaps/sipb, Xvnc/include/bitmaps/star,
+	Xvnc/include/bitmaps/starMask, Xvnc/include/bitmaps/stipple,
+	Xvnc/include/bitmaps/target, Xvnc/include/bitmaps/terminal,
+	Xvnc/include/bitmaps/tie_fighter, Xvnc/include/bitmaps/vlines2,
+	Xvnc/include/bitmaps/vlines3, Xvnc/include/bitmaps/weird_size,
+	Xvnc/include/bitmaps/wide_weave, Xvnc/include/bitmaps/wingdogs,
+	Xvnc/include/bitmaps/woman, Xvnc/include/bitmaps/xfd_icon,
+	Xvnc/include/bitmaps/xlogo11, Xvnc/include/bitmaps/xlogo16,
+	Xvnc/include/bitmaps/xlogo32, Xvnc/include/bitmaps/xlogo64,
+	Xvnc/include/bitmaps/xsnow, Xvnc/include/extensions/Imakefile,
+	Xvnc/include/extensions/MITMisc.h, Xvnc/include/extensions/Print.h,
+	Xvnc/include/extensions/Printstr.h, Xvnc/include/extensions/XI.h,
+	Xvnc/include/extensions/XIE.h, Xvnc/include/extensions/XIEproto.h,
+	Xvnc/include/extensions/XIEprotost.h,
+	Xvnc/include/extensions/XInput.h,
+	Xvnc/include/extensions/XIproto.h, Xvnc/include/extensions/XKB.h,
+	Xvnc/include/extensions/XKBgeom.h,
+	Xvnc/include/extensions/XKBproto.h,
+	Xvnc/include/extensions/XKBsrv.h, Xvnc/include/extensions/XKBstr.h,
+	Xvnc/include/extensions/XLbx.h, Xvnc/include/extensions/XShm.h,
+	Xvnc/include/extensions/XTest.h, Xvnc/include/extensions/Xag.h,
+	Xvnc/include/extensions/Xagsrv.h, Xvnc/include/extensions/Xagstr.h,
+	Xvnc/include/extensions/Xdbe.h,
+	Xvnc/include/extensions/Xdbeproto.h,
+	Xvnc/include/extensions/Xext.h,
+	Xvnc/include/extensions/bigreqstr.h,
+	Xvnc/include/extensions/dpms.h, Xvnc/include/extensions/dpmsstr.h,
+	Xvnc/include/extensions/extutil.h,
+	Xvnc/include/extensions/lbxbuf.h,
+	Xvnc/include/extensions/lbxbufstr.h,
+	Xvnc/include/extensions/lbxdeltastr.h,
+	Xvnc/include/extensions/lbximage.h,
+	Xvnc/include/extensions/lbxopts.h,
+	Xvnc/include/extensions/lbxstr.h,
+	Xvnc/include/extensions/lbxzlib.h,
+	Xvnc/include/extensions/mitmiscstr.h,
+	Xvnc/include/extensions/multibuf.h,
+	Xvnc/include/extensions/multibufst.h,
+	Xvnc/include/extensions/record.h,
+	Xvnc/include/extensions/recordstr.h,
+	Xvnc/include/extensions/saver.h,
+	Xvnc/include/extensions/saverproto.h,
+	Xvnc/include/extensions/scrnsaver.h,
+	Xvnc/include/extensions/security.h,
+	Xvnc/include/extensions/securstr.h,
+	Xvnc/include/extensions/shape.h,
+	Xvnc/include/extensions/shapestr.h,
+	Xvnc/include/extensions/shmstr.h, Xvnc/include/extensions/sync.h,
+	Xvnc/include/extensions/syncstr.h,
+	Xvnc/include/extensions/xcmiscstr.h,
+	Xvnc/include/extensions/xf86dga.h,
+	Xvnc/include/extensions/xf86dgastr.h,
+	Xvnc/include/extensions/xf86misc.h,
+	Xvnc/include/extensions/xf86mscstr.h,
+	Xvnc/include/extensions/xf86vmode.h,
+	Xvnc/include/extensions/xf86vmstr.h,
+	Xvnc/include/extensions/xtestext1.h,
+	Xvnc/include/extensions/xteststr.h, Xvnc/include/fonts/FS.h,
+	Xvnc/include/fonts/FSproto.h, Xvnc/include/fonts/Imakefile,
+	Xvnc/include/fonts/font.h, Xvnc/include/fonts/fontstruct.h,
+	Xvnc/include/fonts/fsmasks.h, Xvnc/lib/X11/Imakefile,
+	Xvnc/lib/X11/XKBlib.h, Xvnc/lib/X11/Xcms.h, Xvnc/lib/X11/Xlib.h,
+	Xvnc/lib/X11/Xlibint.h, Xvnc/lib/X11/Xlocale.h,
+	Xvnc/lib/X11/Xresource.h, Xvnc/lib/X11/Xutil.h,
+	Xvnc/lib/X11/cursorfont.h, Xvnc/lib/Xau/AuDispose.c,
+	Xvnc/lib/Xau/AuFileName.c, Xvnc/lib/Xau/AuGetAddr.c,
+	Xvnc/lib/Xau/AuGetBest.c, Xvnc/lib/Xau/AuLock.c,
+	Xvnc/lib/Xau/AuRead.c, Xvnc/lib/Xau/AuUnlock.c,
+	Xvnc/lib/Xau/AuWrite.c, Xvnc/lib/Xau/Autest.c,
+	Xvnc/lib/Xau/Imakefile, Xvnc/lib/Xau/README, Xvnc/lib/Xau/Xauth.h,
+	Xvnc/lib/Xau/k5encode.c, Xvnc/lib/Xdmcp/A8Eq.c,
+	Xvnc/lib/Xdmcp/AA16.c, Xvnc/lib/Xdmcp/AA32.c, Xvnc/lib/Xdmcp/AA8.c,
+	Xvnc/lib/Xdmcp/Alloc.c, Xvnc/lib/Xdmcp/AofA8.c,
+	Xvnc/lib/Xdmcp/CA8.c, Xvnc/lib/Xdmcp/CmpKey.c,
+	Xvnc/lib/Xdmcp/DA16.c, Xvnc/lib/Xdmcp/DA32.c, Xvnc/lib/Xdmcp/DA8.c,
+	Xvnc/lib/Xdmcp/DAofA8.c, Xvnc/lib/Xdmcp/DecKey.c,
+	Xvnc/lib/Xdmcp/Fill.c, Xvnc/lib/Xdmcp/Flush.c,
+	Xvnc/lib/Xdmcp/GenKey.c, Xvnc/lib/Xdmcp/Imakefile,
+	Xvnc/lib/Xdmcp/IncKey.c, Xvnc/lib/Xdmcp/RA16.c,
+	Xvnc/lib/Xdmcp/RA32.c, Xvnc/lib/Xdmcp/RA8.c,
+	Xvnc/lib/Xdmcp/RAofA8.c, Xvnc/lib/Xdmcp/RC16.c,
+	Xvnc/lib/Xdmcp/RC32.c, Xvnc/lib/Xdmcp/RC8.c,
+	Xvnc/lib/Xdmcp/RHead.c, Xvnc/lib/Xdmcp/RR.c,
+	Xvnc/lib/Xdmcp/RaA16.c, Xvnc/lib/Xdmcp/RaA32.c,
+	Xvnc/lib/Xdmcp/RaA8.c, Xvnc/lib/Xdmcp/RaAoA8.c,
+	Xvnc/lib/Xdmcp/Unwrap.c, Xvnc/lib/Xdmcp/WA16.c,
+	Xvnc/lib/Xdmcp/WA32.c, Xvnc/lib/Xdmcp/WA8.c,
+	Xvnc/lib/Xdmcp/WAofA8.c, Xvnc/lib/Xdmcp/WC16.c,
+	Xvnc/lib/Xdmcp/WC32.c, Xvnc/lib/Xdmcp/WC8.c,
+	Xvnc/lib/Xdmcp/Whead.c, Xvnc/lib/Xdmcp/Wrap.c,
+	Xvnc/lib/Xdmcp/Wrap.h, Xvnc/lib/Xdmcp/Xdmcp.h,
+	Xvnc/lib/font/Imakefile, Xvnc/lib/font/Speedo/Imakefile,
+	Xvnc/lib/font/Speedo/adobe-iso.h, Xvnc/lib/font/Speedo/bics-iso.h,
+	Xvnc/lib/font/Speedo/do_char.c, Xvnc/lib/font/Speedo/do_trns.c,
+	Xvnc/lib/font/Speedo/htest.c, Xvnc/lib/font/Speedo/iface.c,
+	Xvnc/lib/font/Speedo/keys.h, Xvnc/lib/font/Speedo/nsample.c,
+	Xvnc/lib/font/Speedo/out_bl2d.c, Xvnc/lib/font/Speedo/out_blk.c,
+	Xvnc/lib/font/Speedo/out_outl.c, Xvnc/lib/font/Speedo/out_scrn.c,
+	Xvnc/lib/font/Speedo/out_util.c, Xvnc/lib/font/Speedo/reset.c,
+	Xvnc/lib/font/Speedo/set_spcs.c, Xvnc/lib/font/Speedo/set_trns.c,
+	Xvnc/lib/font/Speedo/spdo_prv.h, Xvnc/lib/font/Speedo/speedo.h,
+	Xvnc/lib/font/Speedo/spencode.c, Xvnc/lib/font/Speedo/sperr.c,
+	Xvnc/lib/font/Speedo/spfile.c, Xvnc/lib/font/Speedo/spfont.c,
+	Xvnc/lib/font/Speedo/spfuncs.c, Xvnc/lib/font/Speedo/spglyph.c,
+	Xvnc/lib/font/Speedo/spinfo.c, Xvnc/lib/font/Speedo/spint.h,
+	Xvnc/lib/font/Speedo/sptobdf.c, Xvnc/lib/font/Speedo/useropt.h,
+	Xvnc/lib/font/Type1/Imakefile, Xvnc/lib/font/Type1/arith.c,
+	Xvnc/lib/font/Type1/arith.h, Xvnc/lib/font/Type1/blues.h,
+	Xvnc/lib/font/Type1/cluts.h, Xvnc/lib/font/Type1/curves.c,
+	Xvnc/lib/font/Type1/curves.h, Xvnc/lib/font/Type1/digit.h,
+	Xvnc/lib/font/Type1/fontfcn.c, Xvnc/lib/font/Type1/fontfcn.h,
+	Xvnc/lib/font/Type1/fonts.h, Xvnc/lib/font/Type1/hdigit.h,
+	Xvnc/lib/font/Type1/hints.c, Xvnc/lib/font/Type1/hints.h,
+	Xvnc/lib/font/Type1/lines.c, Xvnc/lib/font/Type1/lines.h,
+	Xvnc/lib/font/Type1/minimain.c, Xvnc/lib/font/Type1/objects.c,
+	Xvnc/lib/font/Type1/objects.h, Xvnc/lib/font/Type1/paths.c,
+	Xvnc/lib/font/Type1/paths.h, Xvnc/lib/font/Type1/pictures.h,
+	Xvnc/lib/font/Type1/regions.c, Xvnc/lib/font/Type1/regions.h,
+	Xvnc/lib/font/Type1/scanfont.c, Xvnc/lib/font/Type1/spaces.c,
+	Xvnc/lib/font/Type1/spaces.h, Xvnc/lib/font/Type1/strokes.h,
+	Xvnc/lib/font/Type1/t1funcs.c, Xvnc/lib/font/Type1/t1hdigit.h,
+	Xvnc/lib/font/Type1/t1imager.h, Xvnc/lib/font/Type1/t1info.c,
+	Xvnc/lib/font/Type1/t1intf.h, Xvnc/lib/font/Type1/t1io.c,
+	Xvnc/lib/font/Type1/t1malloc.c, Xvnc/lib/font/Type1/t1snap.c,
+	Xvnc/lib/font/Type1/t1stdio.h, Xvnc/lib/font/Type1/t1stub.c,
+	Xvnc/lib/font/Type1/t1test.c, Xvnc/lib/font/Type1/token.h,
+	Xvnc/lib/font/Type1/tokst.h, Xvnc/lib/font/Type1/trig.h,
+	Xvnc/lib/font/Type1/type1.c, Xvnc/lib/font/Type1/util.c,
+	Xvnc/lib/font/Type1/util.h, Xvnc/lib/font/bitmap/Imakefile,
+	Xvnc/lib/font/bitmap/bdfint.h, Xvnc/lib/font/bitmap/bdfread.c,
+	Xvnc/lib/font/bitmap/bitmap.c, Xvnc/lib/font/bitmap/bitmapfunc.c,
+	Xvnc/lib/font/bitmap/bitmaputil.c, Xvnc/lib/font/bitmap/bitscale.c,
+	Xvnc/lib/font/bitmap/fontink.c, Xvnc/lib/font/bitmap/pcf.h,
+	Xvnc/lib/font/bitmap/pcfread.c, Xvnc/lib/font/bitmap/pcfwrite.c,
+	Xvnc/lib/font/bitmap/snfread.c, Xvnc/lib/font/bitmap/snfstr.h,
+	Xvnc/lib/font/fc/Imakefile, Xvnc/lib/font/fc/fsconvert.c,
+	Xvnc/lib/font/fc/fserve.h, Xvnc/programs/Xserver/dix/xpstubs.c,
+	Xvnc/programs/Xserver/hw/vnc/cmap.c,
+	Xvnc/programs/Xserver/hw/vnc/dispcur.c,
+	Xvnc/programs/Xserver/hw/vnc/rre.c,
+	Xvnc/programs/Xserver/hw/vnc/tableinitcmtemplate.c,
+	Xvnc/programs/Xserver/hw/vnc/tableinittctemplate.c,
+	Xvnc/programs/Xserver/hw/vnc/tabletranstemplate.c,
+	Xvnc/programs/Xserver/hw/xfree86/common/compiler.h,
+	Xvnc/programs/Xserver/hw/xfree86/common/scoasm.h,
+	Xvnc/programs/Xserver/include/Imakefile,
+	Xvnc/programs/Xserver/include/XIstubs.h,
+	Xvnc/programs/Xserver/include/closestr.h,
+	Xvnc/programs/Xserver/include/closure.h,
+	Xvnc/programs/Xserver/include/colormap.h,
+	Xvnc/programs/Xserver/include/colormapst.h,
+	Xvnc/programs/Xserver/include/cursor.h,
+	Xvnc/programs/Xserver/include/cursorstr.h,
+	Xvnc/programs/Xserver/include/dix.h,
+	Xvnc/programs/Xserver/include/dixevents.h,
+	Xvnc/programs/Xserver/include/dixfont.h,
+	Xvnc/programs/Xserver/include/dixfontstr.h,
+	Xvnc/programs/Xserver/include/dixgrabs.h,
+	Xvnc/programs/Xserver/include/dixstruct.h,
+	Xvnc/programs/Xserver/include/exevents.h,
+	Xvnc/programs/Xserver/include/extension.h,
+	Xvnc/programs/Xserver/include/extinit.h,
+	Xvnc/programs/Xserver/include/extnsionst.h,
+	Xvnc/programs/Xserver/include/gc.h,
+	Xvnc/programs/Xserver/include/gcstruct.h,
+	Xvnc/programs/Xserver/include/input.h,
+	Xvnc/programs/Xserver/include/inputstr.h,
+	Xvnc/programs/Xserver/include/misc.h,
+	Xvnc/programs/Xserver/include/miscstruct.h,
+	Xvnc/programs/Xserver/include/opaque.h,
+	Xvnc/programs/Xserver/include/os.h,
+	Xvnc/programs/Xserver/include/pixmap.h,
+	Xvnc/programs/Xserver/include/pixmapstr.h,
+	Xvnc/programs/Xserver/include/property.h,
+	Xvnc/programs/Xserver/include/propertyst.h,
+	Xvnc/programs/Xserver/include/region.h,
+	Xvnc/programs/Xserver/include/regionstr.h,
+	Xvnc/programs/Xserver/include/resource.h,
+	Xvnc/programs/Xserver/include/rgb.h,
+	Xvnc/programs/Xserver/include/screenint.h,
+	Xvnc/programs/Xserver/include/scrnintstr.h,
+	Xvnc/programs/Xserver/include/selection.h,
+	Xvnc/programs/Xserver/include/site.h,
+	Xvnc/programs/Xserver/include/swaprep.h,
+	Xvnc/programs/Xserver/include/validate.h,
+	Xvnc/programs/Xserver/include/window.h,
+	Xvnc/programs/Xserver/include/windowstr.h,
+	Xvnc/programs/Xserver/mfb/Imakefile,
+	Xvnc/programs/Xserver/mfb/fastblt.h,
+	Xvnc/programs/Xserver/mfb/maskbits.c,
+	Xvnc/programs/Xserver/mfb/maskbits.h,
+	Xvnc/programs/Xserver/mfb/mergerop.h,
+	Xvnc/programs/Xserver/mfb/mfb.h,
+	Xvnc/programs/Xserver/mfb/mfbbitblt.c,
+	Xvnc/programs/Xserver/mfb/mfbblt.c,
+	Xvnc/programs/Xserver/mfb/mfbbres.c,
+	Xvnc/programs/Xserver/mfb/mfbbresd.c,
+	Xvnc/programs/Xserver/mfb/mfbbstore.c,
+	Xvnc/programs/Xserver/mfb/mfbclip.c,
+	Xvnc/programs/Xserver/mfb/mfbcmap.c,
+	Xvnc/programs/Xserver/mfb/mfbfillarc.c,
+	Xvnc/programs/Xserver/mfb/mfbfillrct.c,
+	Xvnc/programs/Xserver/mfb/mfbfillsp.c,
+	Xvnc/programs/Xserver/mfb/mfbfont.c,
+	Xvnc/programs/Xserver/mfb/mfbgc.c,
+	Xvnc/programs/Xserver/mfb/mfbgetsp.c,
+	Xvnc/programs/Xserver/mfb/mfbhrzvert.c,
+	Xvnc/programs/Xserver/mfb/mfbimage.c,
+	Xvnc/programs/Xserver/mfb/mfbimggblt.c,
+	Xvnc/programs/Xserver/mfb/mfbline.c,
+	Xvnc/programs/Xserver/mfb/mfbmisc.c,
+	Xvnc/programs/Xserver/mfb/mfbpixmap.c,
+	Xvnc/programs/Xserver/mfb/mfbply1rct.c,
+	Xvnc/programs/Xserver/mfb/mfbplygblt.c,
+	Xvnc/programs/Xserver/mfb/mfbpntarea.c,
+	Xvnc/programs/Xserver/mfb/mfbpntwin.c,
+	Xvnc/programs/Xserver/mfb/mfbpolypnt.c,
+	Xvnc/programs/Xserver/mfb/mfbpushpxl.c,
+	Xvnc/programs/Xserver/mfb/mfbscrclse.c,
+	Xvnc/programs/Xserver/mfb/mfbscrinit.c,
+	Xvnc/programs/Xserver/mfb/mfbsetsp.c,
+	Xvnc/programs/Xserver/mfb/mfbtegblt.c,
+	Xvnc/programs/Xserver/mfb/mfbtile.c,
+	Xvnc/programs/Xserver/mfb/mfbwindow.c,
+	Xvnc/programs/Xserver/mfb/mfbzerarc.c,
+	Xvnc/programs/Xserver/mi/Imakefile,
+	Xvnc/programs/Xserver/mi/cbrt.c, Xvnc/programs/Xserver/mi/mi.h,
+	Xvnc/programs/Xserver/mi/mibitblt.c,
+	Xvnc/programs/Xserver/mi/mibstore.c,
+	Xvnc/programs/Xserver/mi/mibstore.h,
+	Xvnc/programs/Xserver/mi/mibstorest.h,
+	Xvnc/programs/Xserver/mi/miclipn.c,
+	Xvnc/programs/Xserver/mi/micursor.c,
+	Xvnc/programs/Xserver/mi/midash.c,
+	Xvnc/programs/Xserver/mi/midispcur.c,
+	Xvnc/programs/Xserver/mi/mieq.c,
+	Xvnc/programs/Xserver/mi/mifillarc.c,
+	Xvnc/programs/Xserver/mi/mifillarc.h,
+	Xvnc/programs/Xserver/mi/mifillrct.c,
+	Xvnc/programs/Xserver/mi/mifpoly.h,
+	Xvnc/programs/Xserver/mi/mifpolycon.c,
+	Xvnc/programs/Xserver/mi/migc.c, Xvnc/programs/Xserver/mi/migc.h,
+	Xvnc/programs/Xserver/mi/miglblt.c,
+	Xvnc/programs/Xserver/mi/miinitext.c,
+	Xvnc/programs/Xserver/mi/miline.h,
+	Xvnc/programs/Xserver/mi/mipointer.c,
+	Xvnc/programs/Xserver/mi/mipointer.h,
+	Xvnc/programs/Xserver/mi/mipointrst.h,
+	Xvnc/programs/Xserver/mi/mipoly.c,
+	Xvnc/programs/Xserver/mi/mipoly.h,
+	Xvnc/programs/Xserver/mi/mipolycon.c,
+	Xvnc/programs/Xserver/mi/mipolygen.c,
+	Xvnc/programs/Xserver/mi/mipolypnt.c,
+	Xvnc/programs/Xserver/mi/mipolyrect.c,
+	Xvnc/programs/Xserver/mi/mipolyseg.c,
+	Xvnc/programs/Xserver/mi/mipolytext.c,
+	Xvnc/programs/Xserver/mi/mipolyutil.c,
+	Xvnc/programs/Xserver/mi/mipushpxl.c,
+	Xvnc/programs/Xserver/mi/miregion.c,
+	Xvnc/programs/Xserver/mi/miscanfill.h,
+	Xvnc/programs/Xserver/mi/miscrinit.c,
+	Xvnc/programs/Xserver/mi/mispans.c,
+	Xvnc/programs/Xserver/mi/mispans.h,
+	Xvnc/programs/Xserver/mi/misprite.c,
+	Xvnc/programs/Xserver/mi/misprite.h,
+	Xvnc/programs/Xserver/mi/mispritest.h,
+	Xvnc/programs/Xserver/mi/mistruct.h,
+	Xvnc/programs/Xserver/mi/mivalidate.h,
+	Xvnc/programs/Xserver/mi/mivaltree.c,
+	Xvnc/programs/Xserver/mi/miwideline.c,
+	Xvnc/programs/Xserver/mi/miwideline.h,
+	Xvnc/programs/Xserver/mi/miwindow.c,
+	Xvnc/programs/Xserver/mi/mizerarc.c,
+	Xvnc/programs/Xserver/mi/mizerarc.h,
+	Xvnc/programs/Xserver/mi/mizerline.c,
+	Xvnc/programs/Xserver/os/Imakefile,
+	Xvnc/programs/Xserver/os/WaitFor.c,
+	Xvnc/programs/Xserver/os/access.c, Xvnc/programs/Xserver/os/auth.c,
+	Xvnc/programs/Xserver/os/decompress.c,
+	Xvnc/programs/Xserver/os/genalloca.c,
+	Xvnc/programs/Xserver/os/hpsocket.c, Xvnc/programs/Xserver/os/io.c,
+	Xvnc/programs/Xserver/os/iopreader.c,
+	Xvnc/programs/Xserver/os/k5auth.c,
+	Xvnc/programs/Xserver/os/lbxio.c,
+	Xvnc/programs/Xserver/os/mitauth.c,
+	Xvnc/programs/Xserver/os/oscolor.c,
+	Xvnc/programs/Xserver/os/osdep.h,
+	Xvnc/programs/Xserver/os/secauth.c,
+	Xvnc/programs/Xserver/os/wrapper.c,
+	Xvnc/programs/Xserver/os/xdmauth.c,
+	Xvnc/programs/Xserver/os/xdmcp.c, Xvnc/lib/font/fc/fservestr.h,
+	Xvnc/lib/font/fc/fsio.h, Xvnc/lib/font/fc/fslibos.h,
+	Xvnc/lib/font/fontfile/bitsource.c,
+	Xvnc/lib/font/fontfile/decompress.c,
+	Xvnc/lib/font/fontfile/defaults.c,
+	Xvnc/lib/font/fontfile/dirfile.c, Xvnc/lib/font/fontfile/ffcheck.c,
+	Xvnc/lib/font/fontfile/fileio.c, Xvnc/lib/font/fontfile/filewr.c,
+	Xvnc/lib/font/fontfile/fontdir.c,
+	Xvnc/lib/font/fontfile/fontfile.c,
+	Xvnc/lib/font/fontfile/fontscale.c,
+	Xvnc/lib/font/fontfile/gunzip.c,
+	Xvnc/lib/font/fontfile/printerfont.c,
+	Xvnc/lib/font/fontfile/register.c,
+	Xvnc/lib/font/fontfile/renderers.c, Xvnc/lib/font/include/bitmap.h,
+	Xvnc/lib/font/include/bufio.h, Xvnc/lib/font/include/fntfil.h,
+	Xvnc/lib/font/include/fntfilio.h, Xvnc/lib/font/include/fntfilst.h,
+	Xvnc/lib/font/include/fontmisc.h, Xvnc/lib/font/include/fontshow.h,
+	Xvnc/lib/font/include/fontxlfd.h, Xvnc/lib/font/util/Imakefile,
+	Xvnc/lib/font/util/atom.c, Xvnc/lib/font/util/fontaccel.c,
+	Xvnc/lib/font/util/fontnames.c, Xvnc/lib/font/util/fontutil.c,
+	Xvnc/lib/font/util/fontxlfd.c, Xvnc/lib/font/util/format.c,
+	Xvnc/lib/font/util/miscutil.c, Xvnc/lib/font/util/patcache.c,
+	Xvnc/lib/font/util/private.c, Xvnc/lib/font/util/utilbitmap.c,
+	Xvnc/lib/xtrans/Imakefile, Xvnc/lib/xtrans/Xtrans.c,
+	Xvnc/lib/xtrans/Xtrans.h, Xvnc/lib/xtrans/Xtransam.c,
+	Xvnc/lib/xtrans/Xtransdnet.c, Xvnc/lib/xtrans/Xtransint.h,
+	Xvnc/lib/xtrans/Xtransmnx.c, Xvnc/lib/xtrans/Xtransos2.c,
+	Xvnc/lib/xtrans/Xtranstli.c, Xvnc/lib/xtrans/Xtransutil.c,
+	Xvnc/lib/xtrans/transport.c, include/vncauth.h, libvncauth/d3des.c,
+	libvncauth/d3des.h, vncviewer/corre.c, vncviewer/hextile.c,
+	vncviewer/popup.c, vncviewer/rre.c, vncviewer/selection.c,
+	vncviewer/shm.c: Imported VNC 3.3.3r1 unix sources
+

@@ -1,0 +1,206 @@
+XCOMM platform:  $XConsortium: sco.cf /main/5 1996/12/04 10:12:36 swick $
+XCOMM platform:  $XFree86: xc/config/cf/sco.cf,v 3.12.2.1 1997/05/24 13:38:09 dawes Exp $
+
+/*
+ * This is sco.cf, for SCO Open Server 5.0.2 and SCO UNIX.
+ * Please mail hug@netcom.com with any questions.
+ *
+ * This section is common to all versions of SCO
+ */
+
+#ifndef ScoOsMouse
+# define ScoOsMouse             YES
+#endif
+
+#ifndef OSVendor
+#define OSVendor                Santa Cruz Operation
+#endif
+
+#define PosixLibraries          /**/
+#define Malloc0ReturnsNull      YES
+#define RemoveDSDENroffMacros   NO
+#define ExtraLibraries          -lsocket -lmalloc -lpt
+
+#define ManSourcePath           $(MANPATH)/cat.
+
+#ifndef CompressManPages
+#define CompressManPages        YES
+#endif
+
+#if ScoOsMouse
+# define ServerExtraDefines     -DUSE_OSMOUSE XFree86ServerDefines
+# define ServerExtraSysLibs     $(CBRT) -lm -levent
+#else
+# define ServerExtraSysLibs     $(CBRT) -lm
+#endif
+
+/*
+ * XBSDLIB is included with the Socket libraries, because SCO needs Xbsd
+ * as its bcopy routine doesn't handle overlapping regions. If HasSockets
+ * If HasSockets is false the XINETLIB does it for us anyway.
+ */
+#define SocketLibraries	        $(XBSDLIB) -lsocket
+
+#define ConnectionFlags         -DLOCALCONN -DTCPCONN -DFD_SETSIZE=256
+
+#if defined(i386Sco324Architecture) || defined(i386Sco325Architecture)
+# ifndef HasSymLinks
+#  define HasSymLinks           YES
+# endif
+# define CompressManCmd         $(COMPRESS) -v
+#else /* SCO 3.2.2 */
+# ifndef HasSymLinks
+#  define HasSymLinks           NO
+# endif
+# define CommpressManCmd        pack
+#endif
+
+/*
+ * Due to the extra '.' chars in the SCO man pages file name we have
+ * to provide our own version of this macro.
+ */
+
+#define InstallManPageAliases(file,destdir,aliases)                     @@\
+install.man::                                                           @@\
+        @(SUFFIX=`echo $(DESTDIR)destdir/file.* | cut -f3,4 -d.`; \     @@\
+        for i in aliases; do (set -x; \                                 @@\
+        $(RM) $(DESTDIR)destdir/$$i.*; \                                @@\
+        (cd $(DESTDIR)destdir; $(LN) file.$${SUFFIX} \                  @@\
+        $$i.$${SUFFIX})); \                                             @@\
+        done)
+
+/*
+ * This is the SCO Open Server 5.0.2 section. BOOTSTRAPCFLAGS is computed
+ * automatically. You can simply run make World.
+ */
+#ifdef i386Sco325Architecture
+#ifndef OSName
+#define OSName                  OpenServer Release 5
+#endif
+#ifndef OSMajorVersion
+#define OSMajorVersion          5
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion          0
+#endif
+#ifndef OSTeenyVersion
+#define OSTeenyVersion          2
+#endif
+
+#define StandardDefines         -Dsco -DSCO -DSYSV -Di386 -DSCO325 -DSCO324
+#ifdef HasGcc2
+# define DefaultCCOptions       -melf
+# define CcCmd                  gcc
+# define ExtraLoadOptions       -melf
+# define DefaultCDebugFlags     DefaultGcc2i386Opt
+# define OptimizedCDebugFlags   DefaultGcc2i386Opt
+#else
+# define DefaultCCOptions       -dy 
+# define CcCmd                  cc
+# define ExtraLoadOptions       -b elf
+# define DefaultCDebugFlags     -O2
+# define OptimizedCDebugFlags   -O2
+#endif
+
+#define XawI18nDefines          -DHAS_WCHAR_H -DHAS_ISW_FUNCS
+#define NeedWidePrototypes      NO
+#define ServerOSDefines         -DDDXTIME
+#define ToolkitStringsABIOptions -intelabi
+#define ThreadedX               NO
+#define HasThreadSafeAPI        NO
+#define HasNdbm                 YES
+#define HasVFork                YES
+#define HasPutenv               YES
+#define ExecableScripts         YES
+#define HasShadowPasswd         YES
+
+#ifndef HasLibCrypt
+# define HasLibCrypt            YES
+# define SpecialLibCrypt        -lcrypt
+#endif
+
+#ifndef ForceNormalLib
+# define ForceNormalLib         YES 
+#endif
+
+#define SharedLibXmu            NO
+#define SystemV                 YES
+#define LdCombineFlags          -r 
+
+#define HasLdRunPath            YES
+#define HasPoll                 YES
+#define PatheticCpp             YES
+
+#define ArCmdBase               ar
+#define AsCmd                   as
+#define CppCmd                  /lib/cpp
+#define LdCmd                   ld
+#define LexCmd                  lex
+#define MakeCmd                 make
+#define YaccCmd                 yacc
+
+#include <scoLib.rules>  /* minor changes to sv4Lib.rules */
+#include <sv4Lib.rules>
+
+#define DtSvcDefines		-DXK_MISCELLANY -DMULTIBYTE
+#define DtSearchDefines		-DI18N_MSG DtSvcDefines
+#define DtWidgetDefines		DtSearchDefines
+#define DtPrintDefines		DtSearchDefines
+
+#else /* !i386Sco325Architecture */
+/*
+ * This is the SCO 3.2v4.x and SCO 3.2v2.x section
+ */
+
+/* You must manually compute BootstrapCFlags for initial build */
+
+#define	OSMinorVersion	2
+
+#ifdef i386Sco324Architecture
+# define BootstrapCFlags        -DSYSV -Di386 -DSCO -DSCO324
+# define OSTeenyVersion         4
+# define OSName                 (SCO Version 3.2.4)
+# define OSDefines              -DSCO -DSCO324 -Dsco -Dsco324 -DBROKEN_FTOL \
+                                -D_NO_PROTOTYPE -D_SVID
+#else
+# define BootstrapCFlags        -DSYSV -Di386 -DSCO
+# define OSTeenyVersion         2
+# define OSName                 (SCO Version 3.2.2)
+# define OSDefines              -DSCO -Dsco -DBROKEN_FTOL -DNO_PROTOTYPE \
+                                -D_SVID
+#endif
+
+#ifdef i386Sco324Architecture
+/*
+ * if your gcc is compiled with STDC_VALUE=0 then change the 1 to 0
+ */
+# define GCC_STDC_VALUE         1
+# if !GCC_STDC_VALUE
+#  define OSDefines             -DSCO -DSCO324 -Dsco -Dsco324 -DBROKEN_FTOL \
+                                -D_NO_PROTOTYPE -D_SVID -D__STDC__=1
+#  undef StandardCppDefines
+#  define StandardCppDefines    -DUNIXCPP=1 StandardDefines
+# endif
+#endif
+
+#define XawI18nDefines		    -DUSE_XWCHAR_STRING -DUSE_XMBTOWC
+
+/*
+ * The user should override this in their site.def if they have the real
+ * crypt library. We default to the international crypt library here as
+ * anyone may obtain that.
+ */
+
+#ifndef HasLibCrypt
+# define HasLibCrypt            YES
+# define SpecialLibCrypt        -lcrypt_i
+#endif
+
+#include <svr3.cf>
+
+#endif /* SCO 3.2.4 and SCO 3.2.2 section */
+
+#ifdef i386Architecture
+#include <xfree86.cf>
+#endif
+
