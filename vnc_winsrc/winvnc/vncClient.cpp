@@ -55,6 +55,22 @@
 #include "vncAcceptDialog.h"
 // #include "rfb.h"
 
+/*
+ * Map of quality levels to JPEG quality levels (experimentally determined by
+ * studying compression ratios of sample images)
+ * 9 ~= 6:1,   8 ~= 8:1,   7 ~= 10:1,  6 ~= 12:1,  5 ~= 14:1,
+ * 4 ~= 16:1,  3 ~= 18:1,  2 ~= 20:1,  1 ~= 22:1,  0 ~= 24:1
+ * This is to provide compatibility with TightVNC clients
+ */
+
+static int JPEG_QUAL[10] = {
+   41, 48, 57, 56, 66, 74, 72, 81, 88, 94
+};
+
+static int JPEG_SUBSAMP[10] = {
+   1, 1, 1, 2, 2, 2, 0, 0, 0, 0
+};
+
 // vncClient thread class
 
 class vncClientThread : public omni_thread
@@ -609,22 +625,33 @@ vncClientThread::run(void *arg)
 					}
 
 					// Is this a CompressLevel encoding?
-					if ((Swap32IfLE(encoding) >= rfbEncodingCompressLevel0) &&
-						(Swap32IfLE(encoding) <= rfbEncodingCompressLevel2))
+					if ((Swap32IfLE(encoding) >= rfbJpegSubsamp444) &&
+						(Swap32IfLE(encoding) <= rfbJpegSubsamp422))
 					{
 						// Client specified encoding-specific compression level
-						int level = (int)(Swap32IfLE(encoding) - rfbEncodingCompressLevel0);
+						int level = (int)(Swap32IfLE(encoding) - rfbJpegSubsamp444);
 						m_client->m_buffer->SetCompressLevel(level);
-						vnclog.Print(LL_INTINFO, VNCLOG("compression level requested: %d\n"), level);
+						vnclog.Print(LL_INTINFO, VNCLOG("subsampling level requested: %d\n"), level);
 						continue;
 					}
 
 					// Is this a QualityLevel encoding?
-					if ((Swap32IfLE(encoding) >= rfbJpegQualityLevel0) &&
+					if ((Swap32IfLE(encoding) >= rfbEncodingQualityLevel0) &&
+						(Swap32IfLE(encoding) <= rfbEncodingQualityLevel9))
+					{
+						// Client specified image quality level used for JPEG compression
+						int qual = JPEG_QUAL[Swap32IfLE(encoding) - rfbEncodingQualityLevel0];
+						int level = JPEG_SUBSAMP[Swap32IfLE(encoding) - rfbEncodingQualityLevel0];
+						m_client->m_buffer->SetQualityLevel(qual);
+						m_client->m_buffer->SetCompressLevel(level);
+						vnclog.Print(LL_INTINFO, VNCLOG("image compression level requested: %d, Q%d\n"), level, qual);
+						continue;
+					}
+					if ((Swap32IfLE(encoding) >= rfbJpegQualityLevel1) &&
 						(Swap32IfLE(encoding) <= rfbJpegQualityLevel100))
 					{
 						// Client specified image quality level used for JPEG compression
-						int level = (int)(Swap32IfLE(encoding) - rfbJpegQualityLevel0);
+						int level = (int)(Swap32IfLE(encoding) - rfbJpegQualityLevel1 + 1);
 						m_client->m_buffer->SetQualityLevel(level);
 						vnclog.Print(LL_INTINFO, VNCLOG("image quality level requested: %d\n"), level);
 						continue;
