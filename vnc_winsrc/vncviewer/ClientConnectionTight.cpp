@@ -93,12 +93,17 @@ void ClientConnection::ReadTightRect(rfbFramebufferUpdateRectHeader *pfburh)
       }
     }
 
-    omni_mutex_lock l(m_bitmapdcMutex);
-    ObjectSelector b(m_hBitmapDC, m_hBitmap);
-    PaletteSelector p(m_hBitmapDC, m_hPalette);
-
-    FillSolidRect(pfburh->r.x, pfburh->r.y, pfburh->r.w, pfburh->r.h,
-                  fillColour);
+    if (m_opts.m_DoubleBuffer) {
+        node->isFill = 1;
+        node->fillColour = fillColour;
+	}
+    else {
+        omni_mutex_lock l(m_bitmapdcMutex);
+        ObjectSelector b(m_hBitmapDC, m_hBitmap);
+        PaletteSelector p(m_hBitmapDC, m_hPalette);
+        FillSolidRect(pfburh->r.x, pfburh->r.y, pfburh->r.w, pfburh->r.h,
+                      fillColour);
+    }
     return;
   }
 

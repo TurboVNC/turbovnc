@@ -53,6 +53,14 @@
 class ClientConnection;
 typedef void (ClientConnection:: *tightFilterFunc)(int);
 
+typedef struct _UpdateList
+{
+	rfbFramebufferUpdateRectHeader region;
+	COLORREF fillColour;
+	struct _UpdateList *next;
+	bool isFill;
+} UpdateList;
+
 class ClientConnection  : public omni_thread
 {
 public:
@@ -339,8 +347,11 @@ private:
 	int m_emulateButtonPressedX;
 	int m_emulateButtonPressedY;
 
-    hpjhandle j;
+	hpjhandle j;
 	fbx_struct fb;
+
+	/* For double buffering */
+	UpdateList *list, *node, *tail;
 };
 
 // Some handy classes for temporary GDI object selection

@@ -172,6 +172,7 @@ void ClientConnection::Init(VNCviewerApp *pApp)
 	memset(&fb, 0, sizeof(fb));
     if((j=hpjInitDecompress())==NULL) throw(ErrorException(hpjGetErrorStr()));
 
+	node = list = tail = NULL;
 }
 
 // 
@@ -1981,6 +1982,8 @@ void ClientConnection::ReadScreenUpdate() {
     sut.nRects = Swap16IfLE(sut.nRects);
 	if (sut.nRects == 0) return;
 	
+	if (m_opts.m_DoubleBuffer) list = NULL;
+
 	for (int i=0; i < sut.nRects; i++) {
 
 		rfbFramebufferUpdateRectHeader surh;
@@ -1992,8 +1995,32 @@ void ClientConnection::ReadScreenUpdate() {
 		surh.r.w = Swap16IfLE(surh.r.w);
 		surh.r.h = Swap16IfLE(surh.r.h);
 
-		if (surh.encoding == rfbEncodingLastRect)
+		if (surh.encoding == rfbEncodingLastRect) {
+			while (m_opts.m_DoubleBuffer && list != NULL) {
+				rfbFramebufferUpdateRectHeader* r1;
+				node = list;
+				r1 = &node->region;
+
+				if (r1->encoding == rfbEncodingTight) {
+					SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h); 
+					if (node->isFill) {
+						omni_mutex_lock l(m_bitmapdcMutex);
+						ObjectSelector b(m_hBitmapDC, m_hBitmap);
+						PaletteSelector p(m_hBitmapDC, m_hPalette);
+						FillSolidRect(r1->r.x, r1->r.y, r1->r.w, r1->r.h,
+							node->fillColour);
+					}
+					RECT rect;
+					SetRect(&rect, r1->r.x, r1->r.y,
+						r1->r.x + r1->r.w, r1->r.y + r1->r.h);
+					InvalidateScreenRect(&rect);
+				}
+				list = list->next;
+				free(node);
+			}
+			SoftCursorUnlockScreen(); 
 			break;
+		}
 		if (surh.encoding == rfbEncodingNewFBSize) {
 			ReadNewFBSize(&surh);
 			break;
@@ -2014,6 +2041,19 @@ void ClientConnection::ReadScreenUpdate() {
 		// between framebuffer updates and cursor drawing operations.
 		SoftCursorLockArea(surh.r.x, surh.r.y, surh.r.w, surh.r.h);
 
+		if (m_opts.m_DoubleBuffer) {
+			node = (UpdateList *)malloc(sizeof(UpdateList));
+			node->next = NULL;
+			node->isFill = 0;
+			memcpy(&(node->region), &surh, sz_rfbFramebufferUpdateRectHeader);
+			if (list == NULL)
+				tail = list = node;
+			else {
+				tail->next = node;
+				tail = node;
+			}
+		}
+
 		switch (surh.encoding) {
 		case rfbEncodingCopyRect:
 			ReadCopyRect(&surh);
@@ -2028,14 +2068,42 @@ void ClientConnection::ReadScreenUpdate() {
 
 		// Tell the system to update a screen rectangle. Note that
 		// InvalidateScreenRect member function knows about scaling.
-		RECT rect;
-		SetRect(&rect, surh.r.x, surh.r.y,
-				surh.r.x + surh.r.w, surh.r.y + surh.r.h);
-		InvalidateScreenRect(&rect);
+		if(!m_opts.m_DoubleBuffer) {
+			RECT rect;
+			SetRect(&rect, surh.r.x, surh.r.y,
+					surh.r.x + surh.r.w, surh.r.y + surh.r.h);
+			InvalidateScreenRect(&rect);
+		}
 
 		// Now we may discard "soft cursor locks".
 		SoftCursorUnlockScreen();
 	}	
+
+	if (m_opts.m_DoubleBuffer) {
+		while (list != NULL) {
+			rfbFramebufferUpdateRectHeader* r1;
+			node = list;
+			r1 = &node->region;
+
+			if (r1->encoding == rfbEncodingTight) {
+				SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
+				if (node->isFill) {
+					omni_mutex_lock l(m_bitmapdcMutex);
+					ObjectSelector b(m_hBitmapDC, m_hBitmap);
+					PaletteSelector p(m_hBitmapDC, m_hPalette);
+					FillSolidRect(r1->r.x, r1->r.y, r1->r.w, r1->r.h,
+					node->fillColour);
+				}
+				RECT rect;
+				SetRect(&rect, r1->r.x, r1->r.y,
+					r1->r.x + r1->r.w, r1->r.y + r1->r.h);
+				InvalidateScreenRect(&rect);
+			}
+			list = list->next;
+			free(node);
+		}
+		SoftCursorUnlockScreen();
+	}
 
 	// Inform the other thread that an update is needed.
 	PostMessage(m_hwnd, WM_REGIONUPDATED, NULL, NULL);
