@@ -81,6 +81,9 @@ Terminal=0
 Type=Application
 EOF
 
+mkdir -p %{buildroot}%{_libdir}
+install -m 755 %{_srclibdir}/libhpjpeg.so %{buildroot}%{_libdir}
+
 %clean
 rm -rf %{buildroot}
 
@@ -121,6 +124,7 @@ fi
 %{_mandir}/man1/vncserver.1*
 %{_mandir}/man1/vncconnect.1*
 %{_mandir}/man1/vncpasswd.1*
+%{_libdir}/libhpjpeg.so
 
 %changelog
 * Fri Mar 11 2005 Darrell Commander <dcommander@users.sourceforge.net>
