@@ -1,7 +1,7 @@
 Summary:   A remote display system for hardware-accelerated 3D applications
 Name:      turbovnc
-Version:   0.1.2
-Release:   1
+Version:   0.2
+Release:   %{_build}
 URL:       http://virtualgl.sourceforge.net
 License:   GPL
 Group:     User Interface/Desktops
@@ -123,8 +123,8 @@ fi
 %{_mandir}/man1/vncpasswd.1*
 
 %changelog
-* Tue Mar 1 2005 Darrell Commander <dcommander@users.sourceforge.net>
-- TurboVNC 0.1.2
+* Fri Mar 11 2005 Darrell Commander <dcommander@users.sourceforge.net>
+- TurboVNC 0.2
 
 * Mon Oct 25 2004 Darrell Commander <dcommander@users.sourceforge.net>
 - TurboVNC 0.1.1
