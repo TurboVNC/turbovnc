@@ -3,9 +3,9 @@
 
 [Setup]
 AppName=TurboVNC
-AppVerName=TurboVNC 0.1.1
-AppVersion=0.1.1
-AppPublisher=Darrell Commander
+AppVerName=TurboVNC 0.2
+AppVersion=0.2
+AppPublisher=The VirtualGL Project
 AppPublisherURL=http://VirtualGL.sourceforge.net
 AppSupportURL=http://VirtualGL.sourceforge.net
 AppUpdatesURL=http://VirtualGL.sourceforge.net
@@ -32,7 +32,7 @@ Source: "WinVNC\No_CORBA\WinVNC.exe"; DestDir: "{app}"; CopyMode: alwaysoverwrit
 Source: "WinVNC\No_CORBA\VNCHooks.dll"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: restartreplace; Components: server
 Source: "WinVNC\No_CORBA\omnithread_rt.dll"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: restartreplace; Components: server
 Source: "WinVNC\No_CORBA\zlib.dll"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: restartreplace; Components: server
-Source: "..\..\vgl\windows\bin\hpjpeg.dll"; DestDir: "{app}"; CopyMode: alwaysoverwrite
+Source: "..\..\vgl\windows\vnc\bin\hpjpeg.dll"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "VNCViewer\Release\vncviewer.exe"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Components: viewer
 Source: "README-bin.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "LICENCE.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
