@@ -41,19 +41,19 @@ const char HTTP_MSG_OK[] = "HTTP/1.0 200 OK\n\n";
 
 const char HTTP_FMT_INDEX[] =
 "<HTML>\n"
-"  <HEAD><TITLE>TightVNC desktop [%.256s]</TITLE></HEAD>\n"
+"  <HEAD><TITLE>TurboVNC desktop [%.256s]</TITLE></HEAD>\n"
 "  <BODY>\n"
 "    <APPLET CODE=VncViewer.class ARCHIVE=VncViewer.jar WIDTH=%d HEIGHT=%d>\n"
 "      <PARAM NAME=\"PORT\" VALUE=\"%d\">\n"
 "%.1024s"
 "    </APPLET><BR>\n"
-"    <A HREF=\"http://www.tightvnc.com/\">www.TightVNC.com</A>\n"
+"    <A HREF=\"http://virtualgl.sourceforge.net/\">virtualgl.sourceforge.net</A>\n"
 "  </BODY>\n"
 "</HTML>\n";
 
 const char HTTP_MSG_NOSOCKCONN [] =
 "<HTML>\n"
-"  <HEAD><TITLE>TightVNC desktop</TITLE></HEAD>\n"
+"  <HEAD><TITLE>TurboVNC desktop</TITLE></HEAD>\n"
 "  <BODY>\n"
 "    <H1>Connections Disabled</H1>\n"
 "    The requested desktop is not configured to accept incoming connections.\n"
@@ -62,7 +62,7 @@ const char HTTP_MSG_NOSOCKCONN [] =
 
 const char HTTP_MSG_BADPARAMS [] =
 "<HTML>\n"
-"  <HEAD><TITLE>TightVNC desktop</TITLE></HEAD>\n"
+"  <HEAD><TITLE>TurboVNC desktop</TITLE></HEAD>\n"
 "  <BODY>\n"
 "    <H1>Bad Parameters</H1>\n"
 "    The sequence of applet parameters specified within the URL is invalid.\n"

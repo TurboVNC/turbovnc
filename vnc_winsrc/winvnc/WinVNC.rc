@@ -93,20 +93,22 @@ BEGIN
     PUSHBUTTON      "Ad&vanced...",IDADVANCED,319,174,52,15
 END
 
-IDD_ABOUT DIALOG DISCARDABLE  0, 0, 326, 122
+IDD_ABOUT DIALOG DISCARDABLE  0, 0, 326, 146
 STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About WinVNC"
 FONT 8, "MS Sans Serif"
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,134,100,50,14
-    CONTROL         132,IDC_VNCLOGO,"Static",SS_BITMAP | SS_SUNKEN,13,7,81,
-                    66
-    LTEXT           "TightVNC Server version 1.2.9\nCopyright (C) 2000-2003 Constantin Kaplinsky\nhttp://www.tightvnc.com/",
-                    IDC_STATIC,134,7,185,27
+    DEFPUSHBUTTON   "OK",IDOK,134,124,50,14
+    CONTROL         132,IDC_VNCLOGO,"Static",SS_BITMAP | SS_SUNKEN,13,7,87,
+                    80
+    LTEXT           "Based on TightVNC Server version 1.2.9\nCopyright (C) 2000-2003 Constantin Kaplinsky\nhttp://www.tightvnc.com/",
+                    IDC_STATIC,134,28,185,27
     LTEXT           "Includes code from TridiaVNC 1.4.0\nCopyright (C) 2000, 2001 Tridia Corporation\nhttp://www.tridiavnc.com/",
-                    IDC_STATIC,134,66,185,28
+                    IDC_STATIC,134,87,185,28
     LTEXT           "Based on WinVNC 3.3.3r9 by James Weatherall\nCopyright (C) 1998-2001 AT&&T Laboratories Cambridge\nhttp://www.uk.research.att.com/vnc/",
-                    IDC_STATIC,134,36,185,29
+                    IDC_STATIC,134,57,185,29
+    LTEXT           "TurboVNC Server version 0.1\nhttp://virtualgl.sourceforge.net",
+                    IDC_STATIC,134,7,185,18
 END
 
 IDD_OUTGOING_CONN DIALOG DISCARDABLE  0, 0, 246, 65
@@ -227,7 +229,7 @@ BEGIN
         RIGHTMARGIN, 319
         VERTGUIDE, 134
         TOPMARGIN, 7
-        BOTTOMMARGIN, 114
+        BOTTOMMARGIN, 138
     END
 
     IDD_OUTGOING_CONN, DIALOG
@@ -290,8 +292,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,2,9,0
- PRODUCTVERSION 1,2,9,0
+ FILEVERSION 0,1,0,0
+ PRODUCTVERSION 0,1,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -321,17 +323,17 @@ BEGIN
         END
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "Based on TridiaVNC by Tridia Corporation\0"
-            VALUE "CompanyName", "Constantin Kaplinsky\0"
-            VALUE "FileDescription", "TightVNC Win32 Server\0"
-            VALUE "FileVersion", "1, 2, 9, 0\0"
+            VALUE "Comments", "Based on TridiaVNC by Tridia Corporation, Based on TightVNC by Constantin Kaplinsky\0"
+            VALUE "CompanyName", "The VirtualGL Project\0"
+            VALUE "FileDescription", "TurboVNC Win32 Server\0"
+            VALUE "FileVersion", "0, 1, 0, 0\0"
             VALUE "InternalName", "WinVNC\0"
             VALUE "LegalCopyright", "Copyright (C) 1998-2002 [many holders]\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "WinVNC.exe\0"
             VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "TightVNC Win32 Server\0"
-            VALUE "ProductVersion", "1, 2, 9, 0\0"
+            VALUE "ProductName", "TurboVNC Win32 Server\0"
+            VALUE "ProductVersion", "0, 1, 0, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END
@@ -409,7 +411,7 @@ IDR_HTTPCONNSOCK_CLASS  JAVACLASS DISCARDABLE   "res\\HTTPConnectSocket.class"
 // Bitmap
 //
 
-IDB_VNCLOGO             BITMAP  DISCARDABLE     "res\\tightvnc.bmp"
+IDB_VNCLOGO             BITMAP  DISCARDABLE     "res\\turbovnc.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
