@@ -147,7 +147,7 @@ rfbNewClient(sock)
     cl->reverseConnection = FALSE;
     cl->readyForSetColourMapEntries = FALSE;
     cl->useCopyRect = FALSE;
-    cl->preferredEncoding = rfbEncodingRaw;
+    cl->preferredEncoding = rfbEncodingTight;
     cl->correMaxWidth = 48;
     cl->correMaxHeight = 48;
 
@@ -170,7 +170,7 @@ rfbNewClient(sock)
     cl->translateLookupTable = NULL;
 
     cl->tightCompressLevel = TIGHT_DEFAULT_COMPRESSION;
-    cl->tightQualityLevel = -1;
+    cl->tightQualityLevel = TIGHT_DEFAULT_QUALITY;
     for (i = 0; i < 4; i++)
         cl->zsActive[i] = FALSE;
 
@@ -544,13 +544,13 @@ rfbProcessClientNormalMessage(cl)
 
 	msg.se.nEncodings = Swap16IfLE(msg.se.nEncodings);
 
-	cl->preferredEncoding = -1;
+	cl->preferredEncoding = rfbEncodingTight;
 	cl->useCopyRect = FALSE;
 	cl->enableCursorShapeUpdates = FALSE;
 	cl->enableCursorPosUpdates = FALSE;
 	cl->enableLastRectEncoding = FALSE;
 	cl->tightCompressLevel = TIGHT_DEFAULT_COMPRESSION;
-	cl->tightQualityLevel = -1;
+	cl->tightQualityLevel = TIGHT_DEFAULT_QUALITY;
 
 	for (i = 0; i < msg.se.nEncodings; i++) {
 	    if ((n = ReadExact(cl->sock, (char *)&enc, 4)) <= 0) {
@@ -566,6 +566,7 @@ rfbProcessClientNormalMessage(cl)
 	    case rfbEncodingCopyRect:
 		cl->useCopyRect = TRUE;
 		break;
+#if 0
 	    case rfbEncodingRaw:
 		if (cl->preferredEncoding == -1) {
 		    cl->preferredEncoding = enc;
@@ -601,6 +602,7 @@ rfbProcessClientNormalMessage(cl)
 			   cl->host);
 		}
               break;
+#endif
 	    case rfbEncodingTight:
 		if (cl->preferredEncoding == -1) {
 		    cl->preferredEncoding = enc;
@@ -643,14 +645,14 @@ rfbProcessClientNormalMessage(cl)
 		break;
 	    default:
 		if ( enc >= (CARD32)rfbEncodingCompressLevel0 &&
-		     enc <= (CARD32)rfbEncodingCompressLevel9 ) {
+		     enc <= (CARD32)rfbEncodingCompressLevel2 ) {
 		    cl->zlibCompressLevel = enc & 0x0F;
 		    cl->tightCompressLevel = enc & 0x0F;
 		    rfbLog("Using compression level %d for client %s\n",
 			   cl->tightCompressLevel, cl->host);
-		} else if ( enc >= (CARD32)rfbEncodingQualityLevel0 &&
-			    enc <= (CARD32)rfbEncodingQualityLevel9 ) {
-		    cl->tightQualityLevel = enc & 0x0F;
+		} else if ( enc >= (CARD32)rfbJpegQualityLevel0 &&
+			    enc <= (CARD32)rfbJpegQualityLevel100 ) {
+		    cl->tightQualityLevel = enc & 0xFF;
 		    rfbLog("Using image quality level %d for client %s\n",
 			   cl->tightQualityLevel, cl->host);
 		} else {
@@ -661,7 +663,7 @@ rfbProcessClientNormalMessage(cl)
 	}
 
 	if (cl->preferredEncoding == -1) {
-	    cl->preferredEncoding = rfbEncodingRaw;
+	    cl->preferredEncoding = rfbEncodingTight;
 	}
 
 	if (cl->enableCursorPosUpdates && !cl->enableCursorShapeUpdates) {
@@ -946,6 +948,7 @@ rfbSendFramebufferUpdate(cl)
 
     cl->rfbFramebufferUpdateMessagesSent++;
 
+#if 0
     if (cl->preferredEncoding == rfbEncodingCoRRE) {
 	nUpdateRegionRects = 0;
 
@@ -968,6 +971,7 @@ rfbSendFramebufferUpdate(cl)
 	    nUpdateRegionRects += (((h-1) / (ZLIB_MAX_SIZE( w ) / w)) + 1);
 	}
     } else if (cl->preferredEncoding == rfbEncodingTight) {
+#endif
 	nUpdateRegionRects = 0;
 
 	for (i = 0; i < REGION_NUM_RECTS(&updateRegion); i++) {
@@ -982,9 +986,11 @@ rfbSendFramebufferUpdate(cl)
 	    }
 	    nUpdateRegionRects += n;
 	}
+#if 0
     } else {
 	nUpdateRegionRects = REGION_NUM_RECTS(&updateRegion);
     }
+#endif
 
     fu->type = rfbFramebufferUpdate;
     if (nUpdateRegionRects != 0xFFFF) {
@@ -1028,6 +1034,7 @@ rfbSendFramebufferUpdate(cl)
 				      + w * (cl->format.bitsPerPixel / 8) * h);
 
 	switch (cl->preferredEncoding) {
+#if 0
 	case rfbEncodingRaw:
 	    if (!rfbSendRectEncodingRaw(cl, x, y, w, h)) {
 		REGION_UNINIT(pScreen,&updateRegion);
@@ -1058,6 +1065,7 @@ rfbSendFramebufferUpdate(cl)
 		return FALSE;
 	    }
 	    break;
+#endif
 	case rfbEncodingTight:
 	    if (!rfbSendRectEncodingTight(cl, x, y, w, h)) {
 		REGION_UNINIT(pScreen,&updateRegion);
@@ -1180,6 +1188,7 @@ rfbSendCopyRegion(cl, reg, dx, dy)
  * Send a given rectangle in raw encoding (rfbEncodingRaw).
  */
 
+#if 0
 Bool
 rfbSendRectEncodingRaw(cl, x, y, w, h)
     rfbClientPtr cl;
@@ -1242,6 +1251,7 @@ rfbSendRectEncodingRaw(cl, x, y, w, h)
 	}
     }
 }
+#endif
 
 
 /*
