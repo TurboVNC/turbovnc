@@ -71,6 +71,7 @@ EOF
 
 mkdir -p %{buildroot}%{_libdir}
 install -m 755 %{_srclibdir}/libhpjpeg.so %{buildroot}%{_libdir}
+chmod 644 LICENCE.TXT README WhatsNew ChangeLog
 
 %clean
 rm -rf %{buildroot}
