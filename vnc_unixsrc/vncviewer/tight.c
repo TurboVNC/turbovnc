@@ -135,8 +135,13 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
     gcv.foreground = fill_colour;
 #endif
 
-    XChangeGC(dpy, gc, GCForeground, &gcv);
-    XFillRectangle(dpy, desktopWin, gc, rx, ry, rw, rh);
+    if (appData.doubleBuffer) {
+      node->isFill = 1;
+      memcpy(&node->gcv , &gcv, sizeof(XGCValues));
+    } else {
+      XChangeGC(dpy, gc, GCForeground, &gcv);
+      XFillRectangle(dpy, desktopWin, gc, rx, ry, rw, rh);
+    }
     return True;
   }
 
@@ -581,7 +586,9 @@ DecompressJpegRectBPP(int x, int y, int w, int h)
     fprintf(stderr, "HPJPEG error: %s\n", hpjGetErrorStr());
     return False;
   }
-  CopyDataToScreen(NULL, x, y, w, h);
+
+  if (!appData.doubleBuffer)
+    CopyDataToScreen(NULL, x, y, w, h);
 
   free(compressedData);
 

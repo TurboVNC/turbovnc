@@ -95,6 +95,8 @@ typedef struct {
   Bool useRemoteCursor;
   Bool useX11Cursor;
 
+  Bool doubleBuffer;
+
 } AppData;
 
 extern AppData appData;
@@ -215,6 +217,15 @@ extern Bool SendClientCutText(char *str, int len);
 extern Bool HandleRFBServerMessage();
 
 extern void PrintPixelFormat(rfbPixelFormat *format);
+
+typedef struct _UpdateList {
+   rfbFramebufferUpdateRectHeader region;
+   XGCValues gcv;
+   struct _UpdateList *next;
+   Bool isFill;
+} UpdateList;
+
+extern UpdateList *list, *node, *tail;
 
 /* selection.c */
 

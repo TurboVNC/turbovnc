@@ -44,6 +44,9 @@ char *serverCutText = NULL;
 Bool newServerCutText = False;
 hpjhandle hpjhnd=NULL;
 
+/* For double buffering */
+UpdateList *list, *node, *tail;
+
 int endianTest = 1;
 
 
@@ -547,13 +550,37 @@ HandleRFBServerMessage()
 
     msg.fu.nRects = Swap16IfLE(msg.fu.nRects);
 
+    if (appData.doubleBuffer)
+	list = NULL;
+
     for (i = 0; i < msg.fu.nRects; i++) {
       if (!ReadFromRFBServer((char *)&rect, sz_rfbFramebufferUpdateRectHeader))
 	return False;
 
       rect.encoding = Swap32IfLE(rect.encoding);
-      if (rect.encoding == rfbEncodingLastRect)
+      if (rect.encoding == rfbEncodingLastRect) {
+        while (appData.doubleBuffer && list != NULL) {
+          node = list;
+
+	  rfbFramebufferUpdateRectHeader* r1 = &node->region;
+
+	  if (r1->encoding == rfbEncodingTight) {
+	     SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h); 
+	     if (node->isFill) {
+	       XChangeGC(dpy, gc, GCForeground, &node->gcv);
+	       XFillRectangle(dpy, desktopWin, gc,
+			      r1->r.x, r1->r.y, r1->r.w, r1->r.h);
+
+	     } else
+	        CopyDataToScreen(NULL, r1->r.x, r1->r.y, r1->r.w, r1->r.h);
+	   }
+
+	   list = list->next;
+	   free(node);
+	}
+	SoftCursorUnlockScreen(); 
 	break;
+      }
 
       rect.r.x = Swap16IfLE(rect.r.x);
       rect.r.y = Swap16IfLE(rect.r.y);
@@ -592,6 +619,19 @@ HandleRFBServerMessage()
       /* If RichCursor encoding is used, we should prevent collisions
 	 between framebuffer updates and cursor drawing operations. */
       SoftCursorLockArea(rect.r.x, rect.r.y, rect.r.w, rect.r.h);
+
+      if (appData.doubleBuffer) {
+        node = (UpdateList *)malloc(sizeof(UpdateList));
+	node->next = NULL;
+	node->isFill = 0;
+	memcpy(&(node->region), &rect, sz_rfbFramebufferUpdateRectHeader);
+	if (list == NULL)
+	  tail = list = node;
+	else {
+	  tail->next = node;
+	  tail = node;
+	}
+      }
 
       switch (rect.encoding) {
 
@@ -652,6 +692,28 @@ HandleRFBServerMessage()
 
       /* Now we may discard "soft cursor locks". */
       SoftCursorUnlockScreen();
+    }
+
+    if (appData.doubleBuffer) {
+  	while (list != NULL) {
+  	  node = list;
+	  rfbFramebufferUpdateRectHeader* r1 = &node->region;
+
+	  if (r1->encoding == rfbEncodingTight) {
+	    SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
+	    if (node->isFill) {
+		XChangeGC(dpy, gc, GCForeground, &node->gcv);
+		XFillRectangle(dpy, desktopWin, gc,
+				r1->r.x, r1->r.y, r1->r.w, r1->r.h);
+
+	    } else
+		CopyDataToScreen(NULL, r1->r.x, r1->r.y, r1->r.w, r1->r.h);
+           }
+
+	   list = list->next;
+	   free(node);
+        }
+	SoftCursorUnlockScreen();
     }
 
 #ifdef MITSHM

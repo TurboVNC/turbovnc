@@ -196,6 +196,9 @@ static XtResource appDataResourceList[] = {
 
   {"grabKeyboard", "GrabKeyboard", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, grabKeyboard), XtRImmediate, (XtPointer) False},
+
+  {"doubleBuffer", "DoubleBuffer", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, doubleBuffer), XtRImmediate, (XtPointer) True},
 };
 
 
@@ -216,6 +219,7 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-quality",       "*qualityLevel",       XrmoptionSepArg, 0},
   {"-nocursorshape", "*useRemoteCursor",    XrmoptionNoArg,  "False"},
   {"-x11cursor",     "*useX11Cursor",       XrmoptionNoArg,  "True"},
+  {"-singlebuffer",  "*doubleBuffer",       XrmoptionNoArg,  "False"},
 
 };
 
@@ -285,6 +289,7 @@ usage(void)
 	  "        -quality <JPEG-QUALITY-VALUE> (0..100: 0-low, 100-high)\n"
 	  "        -nocursorshape\n"
 	  "        -x11cursor\n"
+	  "        -singlebuffer\n"
 	  "\n"
 	  "Option names may be abbreviated, e.g. -bgr instead of -bgr233.\n"
 	  "See the manual page for more information."
@@ -344,6 +349,9 @@ GetArgsAndResources(int argc, char **argv)
     if (vncServerName[0] == '-')
       usage();
   }
+
+  if (appData.doubleBuffer)
+    appData.useX11Cursor = True;
 
   if (strlen(vncServerName) > 255) {
     fprintf(stderr,"VNC server name too long\n");
