@@ -542,6 +542,6 @@ void ClientConnection::DecompressJpegRect(int x, int y, int w, int h)
   ObjectSelector b(m_hBitmapDC, m_hBitmap);
 
   if((hpjDecompress(j, (unsigned char *)m_netbuf, (unsigned long)compressedLen,
-    (unsigned char *)&fb.bits[y*fb.pitch+x*fb.ps], w, fb.pitch, h, fb.ps, fb.bgr?HPJ_BGR:0))==-1)
+    (unsigned char *)&fb.bits[y*fb.pitch+x*fbx_ps[fb.format]], w, fb.pitch, h, fbx_ps[fb.format], fbx_bgr[fb.format]?HPJ_BGR:0))==-1)
     throw(ErrorException(hpjGetErrorStr()));
 }
