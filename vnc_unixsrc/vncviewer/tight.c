@@ -535,16 +535,15 @@ FilterPaletteBPP (int numRows, CARDBPP *dst)
      static size_t *jpegBufferLen;
 */
 
+extern XImage *image;
+
 static Bool
 DecompressJpegRectBPP(int x, int y, int w, int h)
 {
-  struct jpeg_decompress_struct cinfo;
-  struct jpeg_error_mgr jerr;
   int compressedLen;
   CARD8 *compressedData;
-  CARDBPP *pixelPtr;
-  JSAMPROW rowPointer[1];
-  int dx, dy;
+  unsigned char *dstptr;
+  int ps;
 
   compressedLen = (int)ReadCompactLen();
   if (compressedLen <= 0) {
@@ -563,46 +562,25 @@ DecompressJpegRectBPP(int x, int y, int w, int h)
     return False;
   }
 
-  cinfo.err = jpeg_std_error(&jerr);
-  jpeg_create_decompress(&cinfo);
+  if(!hpjhnd) {
+    if((hpjhnd=hpjInitDecompress())==NULL) {
+      fprintf(stderr, "HPJPEG error: %s\n", hpjGetErrorStr());
+      return False;
+    }
+  }     
 
-  JpegSetSrcManager(&cinfo, compressedData, compressedLen);
-
-  jpeg_read_header(&cinfo, TRUE);
-  cinfo.out_color_space = JCS_RGB;
-
-  jpeg_start_decompress(&cinfo);
-  if (cinfo.output_width != w || cinfo.output_height != h ||
-      cinfo.output_components != 3) {
-    fprintf(stderr, "Tight Encoding: Wrong JPEG data received.\n");
-    jpeg_destroy_decompress(&cinfo);
-    free(compressedData);
+  ps=image->bits_per_pixel/8;
+  dstptr=&image->data[image->bytes_per_line*y+x*ps];
+  if(hpjDecompress(hpjhnd, (unsigned char *)compressedData, (unsigned long)compressedLen,
+    dstptr, w, image->bytes_per_line, h, ps, myFormat.bigEndian?0:HPJ_BGR)==-1) {
+    fprintf(stderr, "HPJPEG error: %s\n", hpjGetErrorStr());
     return False;
   }
+  CopyDataToScreen(NULL, x, y, w, h);
 
-  rowPointer[0] = (JSAMPROW)buffer;
-  dy = 0;
-  while (cinfo.output_scanline < cinfo.output_height) {
-    jpeg_read_scanlines(&cinfo, rowPointer, 1);
-    if (jpegError) {
-      break;
-    }
-    pixelPtr = (CARDBPP *)&buffer[BUFFER_SIZE / 2];
-    for (dx = 0; dx < w; dx++) {
-      *pixelPtr++ =
-	RGB24_TO_PIXEL(BPP, buffer[dx*3], buffer[dx*3+1], buffer[dx*3+2]);
-    }
-    CopyDataToScreen(&buffer[BUFFER_SIZE / 2], x, y + dy, w, 1);
-    dy++;
-  }
-
-  if (!jpegError)
-    jpeg_finish_decompress(&cinfo);
-
-  jpeg_destroy_decompress(&cinfo);
   free(compressedData);
 
-  return !jpegError;
+  return True;
 }
 
 #endif
