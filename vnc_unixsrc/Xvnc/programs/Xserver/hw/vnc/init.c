@@ -54,6 +54,7 @@ from the X Consortium.
 /* Use ``#define CORBA'' to enable CORBA control interface */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -105,9 +106,14 @@ Atom VNC_CONNECT;
 static HWEventQueueType alwaysCheckForInput[2] = { 0, 1 };
 static HWEventQueueType *mieqCheckForInput[2];
 
+#ifdef sun
+// Use ABGR instead of ARGB because it performs better.
+static char primaryOrder[4] = "bgr";
+static int redBits=8, greenBits=8, blueBits=8;
+#else
 static char primaryOrder[4] = "";
 static int redBits, greenBits, blueBits;
-
+#endif
 
 static Bool rfbScreenInit(int index, ScreenPtr pScreen, int argc,
 			  char **argv);
