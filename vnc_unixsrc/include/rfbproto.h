@@ -286,20 +286,14 @@ typedef struct {
  *
  *****************************************************************************/
 
-#if 0
 #define rfbEncodingRaw 0
-#endif
 #define rfbEncodingCopyRect 1
-#if 0
 #define rfbEncodingRRE 2
 #define rfbEncodingCoRRE 4
 #define rfbEncodingHextile 5
 #define rfbEncodingZlib 6
-#endif
 #define rfbEncodingTight 7
-#if 0
 #define rfbEncodingZlibHex 8
-#endif
 
 /*
  * Special encoding numbers:
