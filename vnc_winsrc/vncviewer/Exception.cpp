@@ -82,7 +82,7 @@ void WarningException::Report()
 #ifdef _MSC_VER
 	_RPT1(_CRT_WARN, "Warning : %s\n", m_info);
 #endif
-	MessageBox(NULL, m_info, "TightVNC info", MB_OK| MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
+	MessageBox(NULL, m_info, "TurboVNC info", MB_OK| MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
 }
 
 // ---------------------------------------
@@ -102,7 +102,7 @@ void ErrorException::Report()
 #ifdef _MSC_VER
 	_RPT1(_CRT_WARN, "Warning : %s\n", m_info);
 #endif
-	MessageBox(NULL, m_info, "TightVNC info", MB_OK | MB_ICONSTOP | MB_SETFOREGROUND | MB_TOPMOST);
+	MessageBox(NULL, m_info, "TurboVNC info", MB_OK | MB_ICONSTOP | MB_SETFOREGROUND | MB_TOPMOST);
 }
 
 // ---------------------------------------
@@ -122,5 +122,5 @@ void AuthException::Report()
 #ifdef _MSC_VER
 	_RPT1(_CRT_WARN, "Warning : %s\n", m_info);
 #endif
-	MessageBox(NULL, m_info, "TightVNC authentication info", MB_OK| MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
+	MessageBox(NULL, m_info, "TurboVNC authentication info", MB_OK| MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
 }

@@ -59,17 +59,17 @@ BEGIN
         END
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "Based on TridiaVNC by Tridia Corporation\0"
-            VALUE "CompanyName", "Constantin Kaplinsky\0"
+            VALUE "Comments", "Based on TridiaVNC by Tridia Corporation, Based on TightVNC by Constantin Kaplinsky\0"
+            VALUE "CompanyName", "The VirtualGL Project\0"
             VALUE "FileDescription", "vncviewer\0"
-            VALUE "FileVersion", "1, 2, 9, 0\0"
+            VALUE "FileVersion", "0, 1, 0, 0\0"
             VALUE "InternalName", "vncviewer\0"
             VALUE "LegalCopyright", "Copyright (C) 1999-2002 [many holders]\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "vncviewer.exe\0"
             VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "TightVNC Win32 Viewer\0"
-            VALUE "ProductVersion", "1, 2, 9, 0\0"
+            VALUE "ProductName", "TurboVNC Win32 Viewer\0"
+            VALUE "ProductVersion", "0, 1, 0, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END
@@ -157,7 +157,7 @@ END
 IDD_OPTIONDIALOG DIALOGEX 0, 0, 312, 194
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Connection Options..."
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "Tight",IDC_TIGHTRADIO,"Button",BS_AUTORADIOBUTTON | 
                     WS_DISABLED | WS_GROUP | WS_TABSTOP,15,19,32,10
@@ -259,19 +259,21 @@ BEGIN
                     ES_AUTOHSCROLL | ES_READONLY
 END
 
-IDD_APP_ABOUT DIALOG DISCARDABLE  0, 0, 332, 122
+IDD_APP_ABOUT DIALOG DISCARDABLE  0, 0, 332, 146
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About VNCviewer"
 FONT 8, "MS Sans Serif"
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,135,100,50,14
-    CONTROL         106,IDC_STATIC,"Static",SS_BITMAP | SS_SUNKEN,19,7,81,66
-    LTEXT           "TightVNC Viewer version 1.2.9\nCopyright (C) 2000-2002 Constantin Kaplinsky\nhttp://www.tightvnc.com/",
-                    IDC_STATIC,135,7,190,27
+    DEFPUSHBUTTON   "OK",IDOK,135,124,50,14
+    CONTROL         106,IDC_STATIC,"Static",SS_BITMAP | SS_SUNKEN,19,7,87,80
+    LTEXT           "Based on TightVNC Viewer version 1.2.9\nCopyright (C) 2000-2002 Constantin Kaplinsky\nhttp://www.tightvnc.com/",
+                    IDC_STATIC,135,30,190,27
     LTEXT           "Includes code from TridiaVNC 1.4.0\nCopyright (C) 2000, 2001 Tridia Corporation\nhttp://www.tridiavnc.com/",
-                    IDC_STATIC,135,66,190,28
+                    IDC_STATIC,135,89,190,28
     LTEXT           "Based on VNC Viewer 3.3.3r3 by Quentin Stafford-Fraser\nCopyright (C) 1999 AT&&T Laboratories Cambridge\nhttp://www.uk.research.att.com/vnc/",
-                    IDC_STATIC,135,36,190,29
+                    IDC_STATIC,135,59,190,29
+    LTEXT           "TurboVNC Viewer version 0.1\nhttp://virtualgl.sourceforge.net",
+                    IDC_STATIC,135,7,190,18
 END
 
 
@@ -331,7 +333,7 @@ BEGIN
         RIGHTMARGIN, 325
         VERTGUIDE, 135
         TOPMARGIN, 7
-        BOTTOMMARGIN, 114
+        BOTTOMMARGIN, 138
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -355,8 +357,8 @@ END
 // Bitmap
 //
 
-IDB_VNCBITMAP           BITMAP  DISCARDABLE     "tightvnc.bmp"
-IDB_VNC32               BITMAP  DISCARDABLE     "tightvnc48.BMP"
+IDB_VNCBITMAP           BITMAP  DISCARDABLE     "turbovnc.bmp"
+IDB_VNC32               BITMAP  DISCARDABLE     "turbovnc48.BMP"
 
 /////////////////////////////////////////////////////////////////////////////
 //
