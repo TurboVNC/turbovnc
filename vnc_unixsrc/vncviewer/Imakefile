@@ -22,7 +22,7 @@ JPEG_LIB = /usr/local/lib/libjpeg.a
 #ifdef SunArchitecture
 JPEG_LIB = -L/usr/local/lib -R/opt/SUNWtvnc/lib -L../../../vgl/solaris/lib -lhpjpeg
 #else
-JPEG_LIB = -L/usr/local/lib -Xlinker -rpath /opt/TurboVNC/lib -L../../../vgl/linux/lib -lhpjpeg
+JPEG_LIB = -L/usr/local/lib -Xlinker -rpath -Xlinker /opt/TurboVNC/lib -L../../../vgl/linux/lib -lhpjpeg
 #endif
 #endif
 
