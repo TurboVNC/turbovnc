@@ -7,7 +7,7 @@
 ! The title of the main window.  "%s" will be replaced by the desktop name.
 ! 
 
-Vncviewer.title: TightVNC: %s
+Vncviewer.title: TurboVNC: %s
 
 
 !
@@ -77,7 +77,7 @@ Vncviewer.translations:\
 ! Popup window appearance
 !
 
-*popup.title: TightVNC popup
+*popup.title: TurboVNC popup
 *popup*background: grey
 *popup*font: -*-helvetica-bold-r-*-*-16-*-*-*-*-*-*-*
 *popup.buttonForm.Command.borderWidth: 0
