@@ -5,11 +5,11 @@ Release:   %{_build}
 URL:       http://virtualgl.sourceforge.net
 License:   GPL
 Group:     User Interface/Desktops
-Requires:  XFree86 bash >= 2.0
+Requires:  bash >= 2.0
 Prereq:    /sbin/chkconfig /sbin/service /etc/init.d
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildPrereq: /usr/bin/perl tcp_wrappers
-BuildRequires: zlib-devel libjpeg-devel
+BuildRequires: zlib-devel
 ExclusiveArch: i386 alpha sparc ppc s390 s390x ia64
 
 %description
