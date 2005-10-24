@@ -19,26 +19,6 @@ else
 	make clean || exit -1
 fi
 cd ..
-if [ ! -f ../../vgl/Makefile ]; then
-	echo Could not find VirtualGL build directory at ../../vgl !
-	exit -1
-else
-	__PWD=`pwd`
-	cd ../../vgl
-	make DISTRO=vnc $M32 clean
-	cd $__PWD
-fi
-fi
-
-if [ ! -f ../../vgl/Makefile ]; then
-	echo Could not find VirtualGL build directory at ../../vgl !
-	exit -1
-else
-	__PWD=`pwd`
-	cd ../../vgl
-	make DISTRO=vnc $M32 jpeg
-	make DISTRO=vnc $M32 jpeg
-	cd $__PWD
 fi
 
 make World || exit -1
@@ -51,15 +31,13 @@ mkdir -p rpms/RPMS
 cd rpms; ln -fs .. BUILD; cd ..
 
 BUILD=`date +%Y%m%d`
+VERSION=0.2
 rpmbuild -bb --buildroot `pwd`/rpms/TurboVNC-buildroot --define "_topdir `pwd`/rpms" \
 	--define "_bindir /opt/TurboVNC/bin" --define "_mandir /opt/TurboVNC/man" \
-	--define "_datadir /opt/TurboVNC" --define "_libdir /opt/TurboVNC/lib" \
-	--define "_build $BUILD" --define "_srclibdir ../../vgl/linux/vnc/lib" \
+	--define "_datadir /opt/TurboVNC" --define "_version $VERSION" \
+	--define "_build $BUILD" \
 	$TARGET turbovnc.spec
 
-RPMTAG=glibc`rpm -q glibc | uniq | cut -f2 -d- | cut -f1,2 -d. | sed s/\\\.//g`
-for i in rpms/RPMS/i386/turbovnc*.rpm; do
-	mv $i `basename $i | sed s@$BUILD@$RPMTAG@g`
-done
+mv rpms/RPMS/i386/turbovnc-$VERSION-$BUILD.i386.rpm turbovnc.i386.rpm
 
 rm -rf rpms/

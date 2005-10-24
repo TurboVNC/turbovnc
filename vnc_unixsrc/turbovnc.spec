@@ -1,14 +1,14 @@
 Summary:   A remote display system for hardware-accelerated 3D applications
 Name:      turbovnc
-Version:   0.2
+Version:   %{_version}
 Release:   %{_build}
 URL:       http://virtualgl.sourceforge.net
 License:   GPL
 Group:     User Interface/Desktops
 Requires:  bash >= 2.0
-Prereq:    /sbin/chkconfig /sbin/service /etc/init.d
+Prereq:    /sbin/chkconfig /sbin/service /etc/init.d turbojpeg >= 1.0
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
-BuildPrereq: /usr/bin/perl tcp_wrappers
+BuildPrereq: /usr/bin/perl tcp_wrappers turbojpeg
 BuildRequires: zlib-devel
 ExclusiveArch: i386 alpha sparc ppc s390 s390x ia64
 
@@ -69,8 +69,6 @@ Terminal=0
 Type=Application
 EOF
 
-mkdir -p %{buildroot}%{_libdir}
-install -m 755 %{_srclibdir}/libhpjpeg.so %{buildroot}%{_libdir}
 chmod 644 LICENCE.TXT README WhatsNew ChangeLog
 
 %clean
@@ -109,7 +107,6 @@ fi
 %{_mandir}/man1/vncserver.1*
 %{_mandir}/man1/vncconnect.1*
 %{_mandir}/man1/vncpasswd.1*
-%{_libdir}/libhpjpeg.so
 
 %changelog
 * Fri Mar 11 2005 Darrell Commander <dcommander@users.sourceforge.net>

@@ -12,9 +12,9 @@ VNCLIBS = $(TOP)/../libvncauth/libvncauth.a
 VNCSYSLIBS = /usr/local/lib/libjpeg.a /usr/local/lib/libz.a
 #else
 #ifdef SunArchitecture
-VNCSYSLIBS = -L/usr/local/lib -R/opt/SUNWtvnc/lib -L$(TOP)/../../../vgl/solaris/vnc/lib -lhpjpeg -lz
+VNCSYSLIBS = -L/usr/local/lib -R/opt/SUNWtvnc/lib -L$(TOP)/../../../vgl/solaris/vnc/lib -lturbojpeg -lz
 #else
-VNCSYSLIBS = -L/usr/local/lib -Xlinker -rpath -Xlinker /opt/TurboVNC/lib -L$(TOP)/../../../vgl/linux/vnc/lib -lhpjpeg -lz
+VNCSYSLIBS = -L/usr/local/lib -lturbojpeg -lz
 #endif
 #endif
 
