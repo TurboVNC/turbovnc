@@ -29,7 +29,7 @@
 #include <vncviewer.h>
 #include <vncauth.h>
 #include <zlib.h>
-#include "hpjpeg.h"
+#include "turbojpeg.h"
 
 static Bool HandleTight16(int rx, int ry, int rw, int rh);
 static Bool HandleTight32(int rx, int ry, int rw, int rh);
@@ -42,7 +42,7 @@ rfbPixelFormat myFormat;
 rfbServerInitMsg si;
 char *serverCutText = NULL;
 Bool newServerCutText = False;
-hpjhandle hpjhnd=NULL;
+tjhandle tjhnd=NULL;
 
 /* For double buffering */
 UpdateList *list, *node, *tail;

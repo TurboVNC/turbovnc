@@ -26,7 +26,7 @@
 
 #include <stdio.h>
 #include "rfb.h"
-#include "hpjpeg.h"
+#include "turbojpeg.h"
 
 
 /* Note: The following constant should not be changed. */
@@ -718,7 +718,7 @@ static void Pack24(buf, fmt, count)
  */
 
 static unsigned long jpegDstDataLen;
-static hpjhandle j=NULL;
+static tjhandle j=NULL;
 
 static Bool
 SendJpegRect(cl, x, y, w, h, quality)
@@ -729,7 +729,7 @@ SendJpegRect(cl, x, y, w, h, quality)
     int dy;
     char *srcbuf;
     int ps=rfbServerFormat.bitsPerPixel/8;
-    int subsamp=compressLevel==1? HPJ_411: (compressLevel==2? HPJ_422:HPJ_444);
+    int subsamp=compressLevel==1? TJ_411: (compressLevel==2? TJ_422:TJ_444);
     unsigned long size;
     int flags=0;
 
@@ -738,34 +738,34 @@ SendJpegRect(cl, x, y, w, h, quality)
     }
 
     if(!j) {
-      if((j=hpjInitCompress())==NULL) {
-        rfbLog("JPEG Error: %s\n", hpjGetErrorStr());  return 0;
+      if((j=tjInitCompress())==NULL) {
+        rfbLog("JPEG Error: %s\n", tjGetErrorStr());  return 0;
       }
     }
 
-    if (tightAfterBufSize < HPJBUFSIZE(w,h)) {
+    if (tightAfterBufSize < TJBUFSIZE(w,h)) {
         if (tightAfterBuf == NULL)
-            tightAfterBuf = (char *)xalloc(HPJBUFSIZE(w,h));
+            tightAfterBuf = (char *)xalloc(TJBUFSIZE(w,h));
         else
             tightAfterBuf = (char *)xrealloc(tightAfterBuf,
-                                             HPJBUFSIZE(w,h));
+                                             TJBUFSIZE(w,h));
         if(!tightAfterBuf) {
             rfbLog("Memory allocation failure!\n");
             return 0;
         }
-        tightAfterBufSize = HPJBUFSIZE(w,h);
+        tightAfterBufSize = TJBUFSIZE(w,h);
     }
 
-    if(rfbServerFormat.bigEndian && ps==4) flags|=HPJ_ALPHAFIRST;
+    if(rfbServerFormat.bigEndian && ps==4) flags|=TJ_ALPHAFIRST;
     if(rfbServerFormat.redShift==16 && rfbServerFormat.blueShift==0)
-        flags|=HPJ_BGR;
-    if(rfbServerFormat.bigEndian) flags^=HPJ_BGR;
+        flags|=TJ_BGR;
+    if(rfbServerFormat.bigEndian) flags^=TJ_BGR;
 
     srcbuf=&rfbScreen.pfbMemory[y * rfbScreen.paddedWidthInBytes + x * ps];
-    if(hpjCompress(j, (unsigned char *)srcbuf, w, rfbScreen.paddedWidthInBytes,
+    if(tjCompress(j, (unsigned char *)srcbuf, w, rfbScreen.paddedWidthInBytes,
       h, ps, (unsigned char *)tightAfterBuf, &jpegDstDataLen, subsamp, quality,
       flags)==-1) {
-      rfbLog("JPEG Error: %s\n", hpjGetErrorStr());
+      rfbLog("JPEG Error: %s\n", tjGetErrorStr());
       return 0;
     }
 

@@ -567,23 +567,23 @@ DecompressJpegRectBPP(int x, int y, int w, int h)
     return False;
   }
 
-  if(!hpjhnd) {
-    if((hpjhnd=hpjInitDecompress())==NULL) {
-      fprintf(stderr, "HPJPEG error: %s\n", hpjGetErrorStr());
+  if(!tjhnd) {
+    if((tjhnd=tjInitDecompress())==NULL) {
+      fprintf(stderr, "TurboJPEG error: %s\n", tjGetErrorStr());
       return False;
     }
   }     
 
   ps=image->bits_per_pixel/8;
-  if(myFormat.bigEndian && ps==4) flags|=HPJ_ALPHAFIRST;
+  if(myFormat.bigEndian && ps==4) flags|=TJ_ALPHAFIRST;
   if(myFormat.redShift==16 && myFormat.blueShift==0)
-    flags|=HPJ_BGR;
-  if(myFormat.bigEndian) flags^=HPJ_BGR;
+    flags|=TJ_BGR;
+  if(myFormat.bigEndian) flags^=TJ_BGR;
 
   dstptr=&image->data[image->bytes_per_line*y+x*ps];
-  if(hpjDecompress(hpjhnd, (unsigned char *)compressedData, (unsigned long)compressedLen,
+  if(tjDecompress(tjhnd, (unsigned char *)compressedData, (unsigned long)compressedLen,
     dstptr, w, image->bytes_per_line, h, ps, flags)==-1) {
-    fprintf(stderr, "HPJPEG error: %s\n", hpjGetErrorStr());
+    fprintf(stderr, "TurboJPEG error: %s\n", tjGetErrorStr());
     return False;
   }
 
