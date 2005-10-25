@@ -4,6 +4,236 @@
 |   in TightVNC source and binary archives.                          |
 +--------------------------------------------------------------------+
 
+* TightVNC 1.3dev7, release candidate version
+
+  - Win32 server: Fixed the problem with "olemainthreadwndname not
+    responding" in service mode under Windows NT 4.0. Under that OS,
+    the TightVNC service could hang on logoff.
+
+  - Win32 server: Removed the code for "desktop optimizations" that
+    was rather harmful than useful. Hopefully, this should fix
+    problems with crashing Delphi application. Also this should
+    prevent settings like font smoothing always set to true on
+    disconnect.
+
+  - Win32 server: Fixed the issue with port number edit boxes that
+    were labeled incorrectly in the Properties dialog.
+
+  - Win32 server: Disallowing clipboard transfers in view-only mode.
+
+  - Win32 server: Fixed the problem with carriage return/linefeed
+    conversion of clipboard data.
+
+  - Win32 server: Fixed the problem with wallpaper being removed only
+    after completing the initial screen transmission.
+
+  - Win32 server: Minor improvements in the File Transfers dialog.
+
+  - Win32 server: More context help messages in Properties and File
+    Transfers dialogs.
+
+  - Unix server: Fixed a serious bug with sending cursor updates when
+    there was no FrameBufferUpdateRequest from that client.
+
+  - Unix server: Fixed problems with building Xvnc on modern linux
+    distributions, such as Fedora Core 3.
+
+  - Unix server: Disallowing clipboard transfers for view-only
+    clients.
+
+  - Other improvements and bugfixes, see ChangeLog files within the
+    distribution for more details.
+
+* TightVNC 1.3dev6, Win32 release candidate version
+
+  - Win32 server: Improved layout of the Properties dialog, added
+    context help for every option. Also, current mirror driver status
+    is shown in the Hooks tab.
+
+  - Win32 server: Implemented new checkbox "Enable applet params in
+    URLs" corresponding to EnableURLParams registry setting.
+
+  - Win32 server: The option "Don't use mirror display driver even if
+    available" is now functional.
+
+  - Win32 server: New option "Blank screen on client connections". 
+    When set and new client connects, the server's monitor is forced
+    to go to power saving mode.
+
+  - Win32 server: Fixed bugs with saving certain settings in the
+    registry, and bugs with setting default values when the registry
+    is not writable.
+
+  - Win32 server: Fixed a problem with one-pixel mouse offset.
+
+  - Win32 server: Fixed problems with inter-thread locking, this
+    should solve "Unhandled message type received" problems.
+
+  - Win32 server: Fixed a problem with the setting "Block remote input
+    on local activity", it was not working with DLL hooks disabled.
+
+  - Win32 server: Fixed various problems with file transfer
+    implementation. Error handling was improved, the C: drive bug
+    under Win98/Me seems to be solved.
+
+  - Win32 viewer: New "Auto" scaling mode. In this mode, the viewer
+    scales remote desktop to fit local window or screen size. If the
+    window size is changed, the scaling factor is adjusted
+    automatically.
+
+  - Win32 viewer: Now the viewer checks server's capabilities and does
+    not ever use non-standard protocol messages not supported by the
+    server. This change affects file transfers only, as other features
+    do not use non-standard protocol messages..
+
+  - Java viewer: New "scale remote cursor" option has been added. It
+    allows to reduce or enlarge cursor image in the full-control mode.
+
+  - Java viewer: A cursor repaint problem has been fixed.
+
+  - Other improvements and bugfixes, see ChangeLog files within the
+    distribution for more details.
+
+* TightVNC 1.3dev5, development version
+
+  - Win32 server: Support for the "DFMirage" mirror video driver has
+    been added (the driver itself will be available separately). Using
+    the mirror driver greatly increases the speed and reliability of
+    updates, and also desreases CPU utilization on the server.
+
+  - Win32 server: New polling algorithm has been implemented. It's
+    similar to that found in x0rfbserver. New algorithm uses minimum
+    CPU time when there are no changes on the screen, and detects
+    major changes very quickly, resulting in greatly improved
+    responsiveness on the client side.
+
+  - Win32 server: Improved methods for filtering screen changes that
+    actually do not change anything. New algorithm not only works
+    faster, but it also detects changes much more accurately, leaving
+    less work to encoders.
+
+  - Win32 viewer: A special mode for Unix users has been implemented:
+    when ScrollLock is on, the viewer will send Meta on pressing Alt
+    keys.
+
+  - Win32 server: Fixed a problem with view-only clients that were
+    enabled full control on just opening the Properties dialog of the
+    server.
+
+  - Win32 server: It should not ever hang any more on changing ports
+    or the LoopbackOnly setting.
+
+  - Win32 server: DisableTrayIcon and RemoveWallpaper settings are
+    working again.
+
+  - Win32 server: The problem with not saving Query Settings has been
+    fixed.
+
+  - Win32 server: The polling mode "on event received only" has been
+    fixed - it did not work correctly in previous version.
+
+  - Win32 server: Fixed a number of issues with mouse handling,
+    including that annoying problem with pointer jumping on slow
+    connections.
+
+  - Win32 server: Applied a bugfix from HorizonLive solving the
+    problem with crashes or incorrect operation after color depth
+    changes on the server's desktop.
+
+  - Win32 viewer: It does not crash any more on entering long
+    passwords in the authentication window.
+
+  - Win32 viewer: Positioning and resizing logic of the viewer window
+    has been improved.
+
+  - Win32 viewer: Now the viewer chooses more reasonable file names
+    for saved .vnc sessions.
+
+  - Win32 viewer: In the full-screen mode, the viewer allows other
+    windows to be shown above the remote desktop. This makes hotkeys
+    such as Shift-Ctrl-Alt-O useful in the full-screen mode.
+
+  - Unix version: A number of bugfixes -- copying clipboard to
+    non-authenticated clients in Xvnc, delayed cursor shape updates in
+    Xvnc, and crashing on switching between KDE virtual desktops in
+    vncviewer.
+
+  - Unix viewer: Support for the new -autopass option has been added,
+    a patch from Ki NETWORKS, Inc.
+
+  - Other changes, see ChangeLog files within the distribution for
+    more details.
+
+* TightVNC 1.3dev4, development version
+
+  - Featuring updated Unix version and Java viewer, supporting RFB
+    protocol version 3.7, with or without TightVNC protocol
+    extensions. Version 3.3 of the protocol is supported as well.
+
+  - Win32 version: Built-in Java viewer was absent in the previous
+    development version; now it's available again.
+
+  - Win32 version: Now the server does not crash on remote
+    Ctrl-Alt-Del events, and on changing display modes.
+
+  - Win32 version: A problem with reinstalling the service has been
+    fixed (WinVNC -reinstall command-line option). In previous
+    versions, reinstalling the service could fail if a user did not
+    close "Service unregistered" message box within a few seconds.
+
+  - Win32 version: Now the server does not hang on selecting equal RFB
+    and HTTP port numbers. A warning is shown instead.
+
+  - Win32 version: The server does not hang on toggling loopback
+    connection options, and on changing port/display numbers.
+
+  - Win32 version: WinVNC does not crash on choosing "Kill All
+    Clients" during file download.
+
+  - Win32 version: CopyRect handling in the server has been fixed, the
+    CopyRect encoding is enabled again.
+
+  - Win32 version: The Advanced Properties dialog of the server has
+    been removed. The controls of that dialog has been moved to tabs
+    in the Properties dialog.
+
+  - Win32 version: Context help in the server's Properties dialog has
+    been implemented (although not all descriptions are ready yet).
+
+  - Unix viewer: Fixed a bug with the viewer crashing on selecting
+    text in Xvnc, and then choosing F8 / Clipboard: local -> remote,
+    twice.
+
+  - There was some progress on supporting pluggable encryption and
+    authentication methods, in both Win32 and Unix versions, and in
+    the Java viewer.
+
+  - Other changes, see ChangeLog files within the distribution for
+    more details.
+
+----------------------------------------------------------------------
+
+* TightVNC 1.3dev3, Win32 development (unstable) version
+
+  - All features and fixes from 1.2.9 and 1.3dev1 versions included.
+
+  - Improved GUI of the viewer featuring toolbar, hotkeys, pre-set
+    connection profiles, more configuration options, context help in
+    dialogs, and more. Finally, the viewer remembers all
+    per-connection and global settings in the registry.
+
+  - File transfers between viewer and server machines.
+
+  - Support for RFB protocol version 3.7, with TightVNC extensions.
+
+  - A possibility to turn off hooking via VNCHooks.dll in WinVNC while
+    full screen polling is in use.
+
+  - Other changes, see ChangeLog files within the distribution for
+    more details.
+
+----------------------------------------------------------------------
+
 * TightVNC 1.2.9
 
   - Win32 version: Major security-related bug in the server has been
@@ -175,6 +405,27 @@
     execution of the JAR file, using java -jar command-line option.
 
   - Other minor improvements and bugfixes.
+
+----------------------------------------------------------------------
+
+* TightVNC 1.3dev1, Win32 development (unstable) version
+
+  - Implemented partial screen sharing. Any single window or any
+    rectangular screen area can be shared instead of the whole screen.
+    The position and dimensions of the shared screen area can be
+    changed dynamically, and client windows will adjust their
+    dimensions on the fly. The user interface to choose shared screen
+    area is very intuitive and easy to use.
+
+  - Screen resolution changes won't cause WinVNC to disconnect clients
+    any more (but changes in screen color format still result in
+    disconnects, this will be fixed later).
+
+  - It's possible to make WinVNC ignore remote inputs when local mouse
+    or keyboard is in use. Remote events will be re-enabled after a
+    specified timeout (3 seconds by default).
+
+  - There may be other changes I forgot to mention. :-)
 
 ----------------------------------------------------------------------
 
