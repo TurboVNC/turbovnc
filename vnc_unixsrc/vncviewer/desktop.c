@@ -76,7 +76,7 @@ DesktopInitBeforeRealization()
   XtVaSetValues(desktop, XtNwidth, si.framebufferWidth,
 		XtNheight, si.framebufferHeight, NULL);
 
-  XtAddEventHandler(desktop, ExposureMask,
+  XtAddEventHandler(desktop, LeaveWindowMask|ExposureMask,
 		    True, HandleBasicDesktopEvent, NULL);
 
   for (i = 0; i < 256; i++)
@@ -142,9 +142,6 @@ DesktopInitAfterRealization()
   }
 
   XChangeWindowAttributes(dpy, desktopWin, valuemask, &attr);
-
-  XtAddEventHandler(desktop, FocusChangeMask, True,
-		    HandleBasicDesktopEvent, NULL);
 }
 
 
@@ -179,12 +176,7 @@ HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev, Boolean *cont)
 				 ev->xexpose.width, ev->xexpose.height, False);
     break;
 
-  case FocusIn:
-      XSetInputFocus(dpy, XtWindowOfObject(desktop), RevertToPointerRoot,
-		     CurrentTime);
-    break;
-
-  case FocusOut:
+  case LeaveNotify:
     for (i = 0; i < 256; i++) {
       if (modifierPressed[i]) {
 	SendKeyEvent(XKeycodeToKeysym(dpy, i, 0), False);

@@ -152,6 +152,9 @@ static XtResource appDataResourceList[] = {
   {"passwordFile", "PasswordFile", XtRString, sizeof(String),
    XtOffsetOf(AppData, passwordFile), XtRImmediate, (XtPointer) 0},
 
+  {"userLogin", "UserLogin", XtRString, sizeof(String),
+   XtOffsetOf(AppData, userLogin), XtRImmediate, (XtPointer) 0},
+
   {"passwordDialog", "PasswordDialog", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, passwordDialog), XtRImmediate, (XtPointer) False},
 
@@ -199,6 +202,9 @@ static XtResource appDataResourceList[] = {
 
   {"doubleBuffer", "DoubleBuffer", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, doubleBuffer), XtRImmediate, (XtPointer) True},
+
+  {"autoPass", "AutoPass", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, autoPass), XtRImmediate, (XtPointer) False}
 };
 
 
@@ -214,12 +220,14 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-fullscreen",    "*fullScreen",         XrmoptionNoArg,  "True"},
   {"-noraiseonbeep", "*raiseOnBeep",        XrmoptionNoArg,  "False"},
   {"-passwd",        "*passwordFile",       XrmoptionSepArg, 0},
+  {"-user",          "*userLogin",          XrmoptionSepArg, 0},
   {"-encodings",     "*encodings",          XrmoptionSepArg, 0},
   {"-compresslevel", "*compressLevel",      XrmoptionSepArg, 0},
   {"-quality",       "*qualityLevel",       XrmoptionSepArg, 0},
   {"-nocursorshape", "*useRemoteCursor",    XrmoptionNoArg,  "False"},
   {"-x11cursor",     "*useX11Cursor",       XrmoptionNoArg,  "True"},
   {"-singlebuffer",  "*doubleBuffer",       XrmoptionNoArg,  "False"},
+  {"-autopass",      "*autoPass",           XrmoptionNoArg,  "True"}
 
 };
 
@@ -269,7 +277,7 @@ void
 usage(void)
 {
   fprintf(stderr,
-	  "TurboVNC viewer version 0.2\n"
+	  "TurboVNC viewer version 0.3\n"
 	  "\n"
 	  "Usage: %s [<OPTIONS>] [<HOST>][:<DISPLAY#>]\n"
 	  "       %s [<OPTIONS>] [<HOST>][::<PORT#>]\n"
@@ -283,12 +291,14 @@ usage(void)
 	  "        -viewonly\n"
 	  "        -fullscreen\n"
 	  "        -noraiseonbeep\n"
-	  "        -passwd <PASSWD-FILENAME>\n"
+	  "        -passwd <PASSWD-FILENAME> (standard VNC authentication)\n"
+	  "        -user <USERNAME> (Unix login authentication)\n"
 	  "        -encodings <ENCODING-LIST> (e.g. \"tight copyrect\")\n"
 	  "        -compresslevel <COMPRESS-VALUE> (0=4:4:4, 1=4:1:1, 2=4:2:2)\n"
 	  "        -quality <JPEG-QUALITY-VALUE> (0..100: 0-low, 100-high)\n"
 	  "        -nocursorshape\n"
 	  "        -x11cursor\n"
+	  "        -autopass\n"
 	  "        -singlebuffer\n"
 	  "\n"
 	  "Option names may be abbreviated, e.g. -bgr instead of -bgr233.\n"

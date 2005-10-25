@@ -15,7 +15,7 @@ DEFINES = -DMITSHM
 #endif
 
 ZLIB_INC = -I/usr/local/include
-JPEG_INC = -I/usr/local/include -I../../../vgl/include
+JPEG_INC = -I/usr/local/include
 INCLUDES = -I../include -I. $(ZLIB_INC) $(JPEG_INC) -I/usr/include
 VNCAUTH_LIB = ../libvncauth/libvncauth.a
 ZLIB_LIB = -L/usr/local/lib -lz
@@ -35,6 +35,7 @@ LOCAL_LIBRARIES = XawClientLibs $(VNCAUTH_LIB) $(ZLIB_LIB) $(JPEG_LIB)
 
 SRCS = \
   argsresources.c \
+  caps.c \
   colour.c \
   cursor.c \
   desktop.c \
