@@ -21,8 +21,10 @@ fi
 cd ..
 fi
 
+xmkmf || exit -1
 make World || exit -1
 cd Xvnc
+./configure || exit -1
 make || exit -1
 cd ..
 
@@ -31,7 +33,7 @@ mkdir -p rpms/RPMS
 cd rpms; ln -fs .. BUILD; cd ..
 
 BUILD=`date +%Y%m%d`
-VERSION=0.2
+VERSION=0.3
 rpmbuild -bb --buildroot `pwd`/rpms/TurboVNC-buildroot --define "_topdir `pwd`/rpms" \
 	--define "_bindir /opt/TurboVNC/bin" --define "_mandir /opt/TurboVNC/man" \
 	--define "_datadir /opt/TurboVNC" --define "_version $VERSION" \
