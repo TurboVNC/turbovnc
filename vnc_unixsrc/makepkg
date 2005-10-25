@@ -35,8 +35,10 @@ else
 	cd $__PWD
 fi
 
+xmkmf || exit -1
 make World || exit -1
 cd Xvnc
+./configure || exit -1
 make || exit -1
 cd ..
 
@@ -59,7 +61,7 @@ P SUNWxwplt     X Windows platform software
 P SUNWmlib      mediaLib - Shared Libraries
 EOF
 
-_VERSION=0.2
+_VERSION=0.3
 _BUILD=`date +%Y%m%d`
 cat > $pkgtmpdir/pkginfo <<EOF 
 ARCH=sparc
@@ -105,8 +107,6 @@ f none SUNWtvnc/vnc/classes/AuthPanel.class 0644 root bin
 f none SUNWtvnc/vnc/classes/ButtonPanel.class 0644 root bin
 f none SUNWtvnc/vnc/classes/ClipboardFrame.class 0644 root bin
 f none SUNWtvnc/vnc/classes/DesCipher.class 0644 root bin
-f none SUNWtvnc/vnc/classes/HTTPConnectSocket.class 0644 root bin
-f none SUNWtvnc/vnc/classes/HTTPConnectSocketFactory.class 0644 root bin
 f none SUNWtvnc/vnc/classes/OptionsFrame.class 0644 root bin
 f none SUNWtvnc/vnc/classes/RecordingFrame.class 0644 root bin
 f none SUNWtvnc/vnc/classes/ReloginPanel.class 0644 root bin
