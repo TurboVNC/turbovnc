@@ -133,6 +133,14 @@ FullScreenOn()
 
   XReparentWindow(dpy, XtWindow(toplevel), DefaultRootWindow(dpy), 0, 0);
 
+  /* Some WMs does not obey x,y values of XReparentWindow; the window
+     is not placed in the upper, left corner. The code below fixes
+     this: It manually moves the window, after the Xserver is done
+     with XReparentWindow. The last XSync seems to prevent losing
+     focus, but I don't know why. */
+  XSync(dpy, False);
+  XMoveWindow(dpy, XtWindow(toplevel), 0, 0);
+  XSync(dpy, False);
 
   /* Now we want to fix the size of "viewport".  We shouldn't just change it
      directly.  Instead we set "toplevel" to the required size (which should

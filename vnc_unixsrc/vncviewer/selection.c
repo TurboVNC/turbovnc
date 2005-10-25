@@ -293,7 +293,7 @@ ConvertSelection(Widget w, Atom* selection, Atom* target, Atom* type,
 		 XtPointer* value, unsigned long* length, int* format)
 {
 
-  if (*target == XA_STRING) {
+  if (*target == XA_STRING && serverCutText != NULL) {
     *type = XA_STRING;
     *length = strlen(serverCutText);
     *value = (XtPointer)XtMalloc(*length);

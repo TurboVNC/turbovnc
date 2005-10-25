@@ -27,7 +27,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+#include <sys/types.h>
 #include <unistd.h>
+#include <pwd.h>
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
 #include <X11/Shell.h>
@@ -36,6 +38,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xmu/StdSel.h>
 #include "rfbproto.h"
+#include "caps.h"
 
 extern int endianTest;
 
@@ -78,6 +81,8 @@ typedef struct {
   int wmDecorationWidth;
   int wmDecorationHeight;
 
+  char *userLogin;
+
   char *passwordFile;
   Bool passwordDialog;
 
@@ -94,6 +99,7 @@ typedef struct {
   int qualityLevel;
   Bool useRemoteCursor;
   Bool useX11Cursor;
+  Bool autoPass;
 
   Bool doubleBuffer;
 

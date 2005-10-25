@@ -31,9 +31,20 @@
 #include <zlib.h>
 #include "turbojpeg.h"
 
+static void InitCapabilities(void);
+static Bool SetupTunneling(void);
+static int ReadSecurityType(void);
+static int SelectSecurityType(void);
+static Bool PerformAuthenticationTight(void);
+static Bool AuthenticateVNC(void);
+static Bool AuthenticateUnixLogin(void);
+static Bool ReadInteractionCaps(void);
+static Bool ReadCapabilityList(CapsContainer *caps, int count);
+
 static Bool HandleTight16(int rx, int ry, int rw, int rh);
 static Bool HandleTight32(int rx, int ry, int rw, int rh);
 
+static void ReadConnFailedReason(void);
 static long ReadCompactLen (void);
 
 int rfbsock;
@@ -48,6 +59,13 @@ tjhandle tjhnd=NULL;
 UpdateList *list, *node, *tail;
 
 int endianTest = 1;
+
+static Bool tightVncProtocol = False;
+static CapsContainer *tunnelCaps;    /* known tunneling/encryption methods */
+static CapsContainer *authCaps;	     /* known authentication schemes       */
+static CapsContainer *serverMsgCaps; /* known non-standard server messages */
+static CapsContainer *clientMsgCaps; /* known non-standard client messages */
+static CapsContainer *encodingCaps;  /* known encodings besides Raw        */
 
 
 /* Note that the CoRRE encoding uses this buffer and assumes it is big enough
@@ -92,6 +110,48 @@ static int rectWidth, rectColors;
 static char tightPalette[256*4];
 static CARD8 tightPrevRow[2048*3*sizeof(CARD16)];
 
+
+/*
+ * InitCapabilities.
+ */
+
+static void
+InitCapabilities(void)
+{
+  tunnelCaps    = CapsNewContainer();
+  authCaps      = CapsNewContainer();
+  serverMsgCaps = CapsNewContainer();
+  clientMsgCaps = CapsNewContainer();
+  encodingCaps  = CapsNewContainer();
+
+  /* Supported authentication methods */
+  CapsAdd(authCaps, rfbAuthVNC, rfbStandardVendor, sig_rfbAuthVNC,
+	  "Standard VNC password authentication");
+  CapsAdd(authCaps, rfbAuthUnixLogin, rfbTightVncVendor, sig_rfbAuthUnixLogin,
+	  "Login-style Unix authentication");
+
+  /* Supported encoding types */
+  CapsAdd(encodingCaps, rfbEncodingCopyRect, rfbStandardVendor,
+	  sig_rfbEncodingCopyRect, "Standard CopyRect encoding");
+  CapsAdd(encodingCaps, rfbEncodingTight, rfbTightVncVendor,
+	  sig_rfbEncodingTight, "Tight encoding by Constantin Kaplinsky");
+
+  /* Supported "fake" encoding types */
+  CapsAdd(encodingCaps, rfbEncodingCompressLevel0, rfbTightVncVendor,
+	  sig_rfbEncodingCompressLevel0, "Compression level");
+  CapsAdd(encodingCaps, rfbEncodingQualityLevel0, rfbTightVncVendor,
+	  sig_rfbEncodingQualityLevel0, "JPEG quality level");
+  CapsAdd(encodingCaps, rfbEncodingXCursor, rfbTightVncVendor,
+	  sig_rfbEncodingXCursor, "X-style cursor shape update");
+  CapsAdd(encodingCaps, rfbEncodingRichCursor, rfbTightVncVendor,
+	  sig_rfbEncodingRichCursor, "Rich-color cursor shape update");
+  CapsAdd(encodingCaps, rfbEncodingPointerPos, rfbTightVncVendor,
+	  sig_rfbEncodingPointerPos, "Pointer position update");
+  CapsAdd(encodingCaps, rfbEncodingLastRect, rfbTightVncVendor,
+	  sig_rfbEncodingLastRect, "LastRect protocol extension");
+}
+
+
 /*
  * ConnectToRFBServer.
  */
@@ -122,16 +182,13 @@ ConnectToRFBServer(const char *hostname, int port)
  */
 
 Bool
-InitialiseRFBConnection()
+InitialiseRFBConnection(void)
 {
   rfbProtocolVersionMsg pv;
-  int major,minor;
-  CARD32 authScheme, reasonLen, authResult;
-  char *reason;
-  CARD8 challenge[CHALLENGESIZE];
-  char *passwd;
-  int i;
+  int server_major, server_minor;
+  int viewer_major, viewer_minor;
   rfbClientInitMsg ci;
+  int secType;
 
   /* if the connection is immediately closed, don't report anything, so
        that pmw's monitor can make test connections */
@@ -139,113 +196,73 @@ InitialiseRFBConnection()
   if (listenSpecified)
     errorMessageOnReadFailure = False;
 
-  if (!ReadFromRFBServer(pv, sz_rfbProtocolVersionMsg)) return False;
+  if (!ReadFromRFBServer(pv, sz_rfbProtocolVersionMsg))
+    return False;
 
   errorMessageOnReadFailure = True;
 
   pv[sz_rfbProtocolVersionMsg] = 0;
 
-  if (sscanf(pv,rfbProtocolVersionFormat,&major,&minor) != 2) {
+  if (sscanf(pv, rfbProtocolVersionFormat,
+	     &server_major, &server_minor) != 2) {
     fprintf(stderr,"Not a valid VNC server\n");
     return False;
   }
 
-  fprintf(stderr,"VNC server supports protocol version %d.%d (viewer %d.%d)\n",
-	  major, minor, rfbProtocolMajorVersion, rfbProtocolMinorVersion);
+  viewer_major = rfbProtocolMajorVersion;
+  if (server_major == 3 && server_minor >= rfbProtocolMinorVersion) {
+    /* the server supports at least the standard protocol 3.7 */
+    viewer_minor = rfbProtocolMinorVersion;
+  } else {
+    /* any other server version, request the standard 3.3 */
+    viewer_minor = rfbProtocolFallbackMinorVersion;
+  }
 
-  major = rfbProtocolMajorVersion;
-  minor = rfbProtocolMinorVersion;
+  fprintf(stderr, "Connected to RFB server, using protocol version %d.%d\n",
+	  viewer_major, viewer_minor);
 
-  sprintf(pv,rfbProtocolVersionFormat,major,minor);
+  sprintf(pv, rfbProtocolVersionFormat, viewer_major, viewer_minor);
 
-  if (!WriteExact(rfbsock, pv, sz_rfbProtocolVersionMsg)) return False;
-
-  if (!ReadFromRFBServer((char *)&authScheme, 4)) return False;
-
-  authScheme = Swap32IfLE(authScheme);
-
-  switch (authScheme) {
-
-  case rfbConnFailed:
-    if (!ReadFromRFBServer((char *)&reasonLen, 4)) return False;
-    reasonLen = Swap32IfLE(reasonLen);
-
-    reason = malloc(reasonLen);
-
-    if (!ReadFromRFBServer(reason, reasonLen)) return False;
-
-    fprintf(stderr,"VNC connection failed: %.*s\n",(int)reasonLen, reason);
+  if (!WriteExact(rfbsock, pv, sz_rfbProtocolVersionMsg))
     return False;
 
-  case rfbNoAuth:
-    fprintf(stderr,"No authentication needed\n");
+  /* Read or select the security type. */
+  if (viewer_minor == rfbProtocolMinorVersion) {
+    secType = SelectSecurityType();
+  } else {
+    secType = ReadSecurityType();
+  }
+  if (secType == rfbSecTypeInvalid)
+    return False;
+
+  switch (secType) {
+  case rfbSecTypeNone:
+    fprintf(stderr, "No authentication needed\n");
     break;
-
-  case rfbVncAuth:
-    if (!ReadFromRFBServer((char *)challenge, CHALLENGESIZE)) return False;
-
-    if (appData.passwordFile) {
-      passwd = vncDecryptPasswdFromFile(appData.passwordFile);
-      if (!passwd) {
-	fprintf(stderr,"Cannot read valid password from file \"%s\"\n",
-		appData.passwordFile);
-	return False;
-      }
-    } else if (appData.passwordDialog) {
-      passwd = DoPasswordDialog();
-    } else {
-      passwd = getpass("Password: ");
-    }
-
-    if ((!passwd) || (strlen(passwd) == 0)) {
-      fprintf(stderr,"Reading password failed\n");
+  case rfbSecTypeVncAuth:
+    if (!AuthenticateVNC())
       return False;
-    }
-    if (strlen(passwd) > 8) {
-      passwd[8] = '\0';
-    }
-
-    vncEncryptBytes(challenge, passwd);
-
-	/* Lose the password from memory */
-    for (i = strlen(passwd); i >= 0; i--) {
-      passwd[i] = '\0';
-    }
-
-    if (!WriteExact(rfbsock, (char *)challenge, CHALLENGESIZE)) return False;
-
-    if (!ReadFromRFBServer((char *)&authResult, 4)) return False;
-
-    authResult = Swap32IfLE(authResult);
-
-    switch (authResult) {
-    case rfbVncAuthOK:
-      fprintf(stderr,"VNC authentication succeeded\n");
-      break;
-    case rfbVncAuthFailed:
-      fprintf(stderr,"VNC authentication failed\n");
-      return False;
-    case rfbVncAuthTooMany:
-      fprintf(stderr,"VNC authentication failed - too many tries\n");
-      return False;
-    default:
-      fprintf(stderr,"Unknown VNC authentication result: %d\n",
-	      (int)authResult);
-      return False;
-    }
     break;
-
-  default:
-    fprintf(stderr,"Unknown authentication scheme from VNC server: %d\n",
-	    (int)authScheme);
+  case rfbSecTypeTight:
+    tightVncProtocol = True;
+    InitCapabilities();
+    if (!SetupTunneling())
+      return False;
+    if (!PerformAuthenticationTight())
+      return False;
+    break;
+  default:                      /* should never happen */
+    fprintf(stderr, "Internal error: Invalid security type\n");
     return False;
   }
 
   ci.shared = (appData.shareDesktop ? 1 : 0);
 
-  if (!WriteExact(rfbsock, (char *)&ci, sz_rfbClientInitMsg)) return False;
+  if (!WriteExact(rfbsock, (char *)&ci, sz_rfbClientInitMsg))
+    return False;
 
-  if (!ReadFromRFBServer((char *)&si, sz_rfbServerInitMsg)) return False;
+  if (!ReadFromRFBServer((char *)&si, sz_rfbServerInitMsg))
+    return False;
 
   si.framebufferWidth = Swap16IfLE(si.framebufferWidth);
   si.framebufferHeight = Swap16IfLE(si.framebufferHeight);
@@ -254,6 +271,7 @@ InitialiseRFBConnection()
   si.format.blueMax = Swap16IfLE(si.format.blueMax);
   si.nameLength = Swap32IfLE(si.nameLength);
 
+  /* FIXME: Check arguments to malloc() calls. */
   desktopName = malloc(si.nameLength + 1);
   if (!desktopName) {
     fprintf(stderr, "Error allocating memory for desktop name, %lu bytes\n",
@@ -267,11 +285,402 @@ InitialiseRFBConnection()
 
   fprintf(stderr,"Desktop name \"%s\"\n",desktopName);
 
-  fprintf(stderr,"Connected to VNC server, using protocol version %d.%d\n",
-	  rfbProtocolMajorVersion, rfbProtocolMinorVersion);
-
   fprintf(stderr,"VNC server default format:\n");
   PrintPixelFormat(&si.format);
+
+  if (tightVncProtocol) {
+    /* Read interaction capabilities (protocol 3.7t) */
+    if (!ReadInteractionCaps())
+      return False;
+  }
+
+  return True;
+}
+
+
+/*
+ * Read security type from the server (protocol version 3.3)
+ */
+
+static int
+ReadSecurityType(void)
+{
+  CARD32 secType;
+
+  /* Read the security type */
+  if (!ReadFromRFBServer((char *)&secType, sizeof(secType)))
+    return rfbSecTypeInvalid;
+
+  secType = Swap32IfLE(secType);
+
+  if (secType == rfbSecTypeInvalid) {
+    ReadConnFailedReason();
+    return rfbSecTypeInvalid;
+  }
+
+  if (secType != rfbSecTypeNone && secType != rfbSecTypeVncAuth) {
+    fprintf(stderr, "Unknown security type from RFB server: %d\n",
+            (int)secType);
+    return rfbSecTypeInvalid;
+  }
+
+  return (int)secType;
+}
+
+
+/*
+ * Select security type from the server's list (protocol version 3.7)
+ */
+
+static int
+SelectSecurityType(void)
+{
+  CARD8 nSecTypes;
+  char *secTypeNames[] = {"None", "VncAuth"};
+  CARD8 knownSecTypes[] = {rfbSecTypeNone, rfbSecTypeVncAuth};
+  int nKnownSecTypes = sizeof(knownSecTypes);
+  CARD8 *secTypes;
+  CARD8 secType = rfbSecTypeInvalid;
+  int i, j;
+
+  /* Read the list of secutiry types. */
+  if (!ReadFromRFBServer((char *)&nSecTypes, sizeof(nSecTypes)))
+    return rfbSecTypeInvalid;
+
+  if (nSecTypes == 0) {
+    ReadConnFailedReason();
+    return rfbSecTypeInvalid;
+  }
+
+  secTypes = malloc(nSecTypes);
+  if (!ReadFromRFBServer((char *)secTypes, nSecTypes))
+    return rfbSecTypeInvalid;
+
+  /* Find out if the server supports TightVNC protocol extensions */
+  for (j = 0; j < (int)nSecTypes; j++) {
+    if (secTypes[j] == rfbSecTypeTight) {
+      free(secTypes);
+      secType = rfbSecTypeTight;
+      if (!WriteExact(rfbsock, (char *)&secType, sizeof(secType)))
+        return rfbSecTypeInvalid;
+      fprintf(stderr, "Enabling TightVNC protocol extensions\n");
+      return rfbSecTypeTight;
+    }
+  }
+
+  /* Find first supported security type */
+  for (j = 0; j < (int)nSecTypes; j++) {
+    for (i = 0; i < nKnownSecTypes; i++) {
+      if (secTypes[j] == knownSecTypes[i]) {
+        secType = secTypes[j];
+        if (!WriteExact(rfbsock, (char *)&secType, sizeof(secType))) {
+          free(secTypes);
+          return rfbSecTypeInvalid;
+        }
+        break;
+      }
+    }
+    if (secType != rfbSecTypeInvalid) break;
+  }
+
+  free(secTypes);
+
+  if (secType == rfbSecTypeInvalid)
+    fprintf(stderr, "Server did not offer supported security type\n");
+
+  return (int)secType;
+}
+
+
+/*
+ * Setup tunneling (protocol version 3.7t).
+ */
+
+static Bool
+SetupTunneling(void)
+{
+  rfbTunnelingCapsMsg caps;
+  CARD32 tunnelType;
+
+  /* In the protocol version 3.7t, the server informs us about
+     supported tunneling methods. Here we read this information. */
+
+  if (!ReadFromRFBServer((char *)&caps, sz_rfbTunnelingCapsMsg))
+    return False;
+
+  caps.nTunnelTypes = Swap32IfLE(caps.nTunnelTypes);
+
+  if (caps.nTunnelTypes) {
+    if (!ReadCapabilityList(tunnelCaps, caps.nTunnelTypes))
+      return False;
+
+    /* We cannot do tunneling anyway yet. */
+    tunnelType = Swap32IfLE(rfbNoTunneling);
+    if (!WriteExact(rfbsock, (char *)&tunnelType, sizeof(tunnelType)))
+      return False;
+  }
+
+  return True;
+}
+
+
+/*
+ * Negotiate authentication scheme (protocol version 3.7t)
+ */
+
+static Bool
+PerformAuthenticationTight(void)
+{
+  rfbAuthenticationCapsMsg caps;
+  CARD32 authScheme;
+  int i;
+
+  /* In the protocol version 3.7t, the server informs us about supported
+     authentication schemes. Here we read this information. */
+
+  if (!ReadFromRFBServer((char *)&caps, sz_rfbAuthenticationCapsMsg))
+    return False;
+
+  caps.nAuthTypes = Swap32IfLE(caps.nAuthTypes);
+
+  if (!caps.nAuthTypes) {
+    fprintf(stderr, "No authentication needed\n");
+    return True;
+  }
+
+  if (!ReadCapabilityList(authCaps, caps.nAuthTypes))
+    return False;
+
+  /* Prefer Unix login authentication if a user name was given. */
+  if (appData.userLogin && CapsIsEnabled(authCaps, rfbAuthUnixLogin)) {
+    authScheme = Swap32IfLE(rfbAuthUnixLogin);
+    if (!WriteExact(rfbsock, (char *)&authScheme, sizeof(authScheme)))
+      return False;
+    return AuthenticateUnixLogin();
+  }
+
+  /* Otherwise, try server's preferred authentication scheme. */
+  for (i = 0; i < CapsNumEnabled(authCaps); i++) {
+    authScheme = CapsGetByOrder(authCaps, i);
+    if (authScheme != rfbAuthUnixLogin && authScheme != rfbAuthVNC)
+      continue;                 /* unknown scheme - cannot use it */
+    authScheme = Swap32IfLE(authScheme);
+    if (!WriteExact(rfbsock, (char *)&authScheme, sizeof(authScheme)))
+      return False;
+    authScheme = Swap32IfLE(authScheme); /* convert it back */
+    if (authScheme == rfbAuthUnixLogin) {
+      return AuthenticateUnixLogin();
+    } else if (authScheme == rfbAuthVNC) {
+      return AuthenticateVNC();
+    } else {
+      /* Should never happen. */
+      fprintf(stderr, "Assertion failed: unknown authentication scheme\n");
+      return False;
+    }
+  }
+
+  fprintf(stderr, "No suitable authentication schemes offered by server\n");
+  return False;
+}
+
+
+/*
+ * Standard VNC authentication.
+ */
+
+static Bool
+AuthenticateVNC(void)
+{
+  CARD32 authScheme, authResult;
+  CARD8 challenge[CHALLENGESIZE];
+  char *passwd;
+  char  buffer[64];
+  char* cstatus;
+  int   len;
+
+  fprintf(stderr, "Performing standard VNC authentication\n");
+
+  if (!ReadFromRFBServer((char *)challenge, CHALLENGESIZE))
+    return False;
+
+  if (appData.passwordFile) {
+    passwd = vncDecryptPasswdFromFile(appData.passwordFile);
+    if (!passwd) {
+      fprintf(stderr, "Cannot read valid password from file \"%s\"\n",
+	      appData.passwordFile);
+      return False;
+    }
+  } else if (appData.autoPass) {
+    passwd = buffer;
+    cstatus = fgets(buffer, sizeof buffer, stdin);
+    if (cstatus == NULL)
+       buffer[0] = '\0';
+    else
+    {
+       len = strlen(buffer);
+       if (len > 0 && buffer[len - 1] == '\n')
+	  buffer[len - 1] = '\0';
+    }
+  } else if (appData.passwordDialog) {
+    passwd = DoPasswordDialog();
+  } else {
+    passwd = getpass("Password: ");
+  }
+
+  if (!passwd || strlen(passwd) == 0) {
+    fprintf(stderr, "Reading password failed\n");
+    return False;
+  }
+  if (strlen(passwd) > 8) {
+    passwd[8] = '\0';
+  }
+
+  vncEncryptBytes(challenge, passwd);
+
+  /* Lose the password from memory */
+  memset(passwd, '\0', strlen(passwd));
+
+  if (!WriteExact(rfbsock, (char *)challenge, CHALLENGESIZE))
+    return False;
+
+  if (!ReadFromRFBServer((char *)&authResult, 4))
+    return False;
+
+  authResult = Swap32IfLE(authResult);
+
+  switch (authResult) {
+  case rfbVncAuthOK:
+    fprintf(stderr, "VNC authentication succeeded\n");
+    break;
+  case rfbVncAuthFailed:
+    fprintf(stderr, "VNC authentication failed\n");
+    return False;
+  case rfbVncAuthTooMany:
+    fprintf(stderr, "VNC authentication failed - too many tries\n");
+    return False;
+  default:
+    fprintf(stderr, "Unknown VNC authentication result: %d\n",
+	    (int)authResult);
+    return False;
+  }
+
+  return True;
+}
+
+/*
+ * Unix login-style authentication.
+ */
+
+static Bool
+AuthenticateUnixLogin(void)
+{
+  CARD32 loginLen, passwdLen, authResult;
+  char *login;
+  char *passwd;
+  struct passwd *ps;
+
+  fprintf(stderr, "Performing Unix login-style authentication\n");
+
+  if (appData.userLogin) {
+    login = appData.userLogin;
+  } else {
+    ps = getpwuid(getuid());
+    login = ps->pw_name;
+  }
+
+  fprintf(stderr, "Using user name \"%s\"\n", login);
+
+  if (appData.passwordDialog) {
+    passwd = DoPasswordDialog();
+  } else {
+    passwd = getpass("Password: ");
+  }
+  if (!passwd || strlen(passwd) == 0) {
+    fprintf(stderr, "Reading password failed\n");
+    return False;
+  }
+
+  loginLen = Swap32IfLE((CARD32)strlen(login));
+  passwdLen = Swap32IfLE((CARD32)strlen(passwd));
+
+  if (!WriteExact(rfbsock, (char *)&loginLen, sizeof(loginLen)) ||
+      !WriteExact(rfbsock, (char *)&passwdLen, sizeof(passwdLen)))
+    return False;
+
+  if (!WriteExact(rfbsock, login, strlen(login)) ||
+      !WriteExact(rfbsock, passwd, strlen(passwd)))
+    return False;
+
+  /* Lose the password from memory */
+  memset(passwd, '\0', strlen(passwd));
+
+  if (!ReadFromRFBServer((char *)&authResult, sizeof(authResult)))
+    return False;
+
+  authResult = Swap32IfLE(authResult);
+
+  switch (authResult) {
+  case rfbVncAuthOK:
+    fprintf(stderr, "Authentication succeeded\n");
+    break;
+  case rfbVncAuthFailed:
+    fprintf(stderr, "Authentication failed\n");
+    return False;
+  case rfbVncAuthTooMany:
+    fprintf(stderr, "Authentication failed - too many tries\n");
+    return False;
+  default:
+    fprintf(stderr, "Unknown authentication result: %d\n",
+	    (int)authResult);
+    return False;
+  }
+
+  return True;
+}
+
+
+/*
+ * In the protocol version 3.7t, the server informs us about supported
+ * protocol messages and encodings. Here we read this information.
+ */
+
+static Bool
+ReadInteractionCaps(void)
+{
+  rfbInteractionCapsMsg intr_caps;
+
+  /* Read the counts of list items following */
+  if (!ReadFromRFBServer((char *)&intr_caps, sz_rfbInteractionCapsMsg))
+    return False;
+  intr_caps.nServerMessageTypes = Swap16IfLE(intr_caps.nServerMessageTypes);
+  intr_caps.nClientMessageTypes = Swap16IfLE(intr_caps.nClientMessageTypes);
+  intr_caps.nEncodingTypes = Swap16IfLE(intr_caps.nEncodingTypes);
+
+  /* Read the lists of server- and client-initiated messages */
+  return (ReadCapabilityList(serverMsgCaps, intr_caps.nServerMessageTypes) &&
+	  ReadCapabilityList(clientMsgCaps, intr_caps.nClientMessageTypes) &&
+	  ReadCapabilityList(encodingCaps, intr_caps.nEncodingTypes));
+}
+
+
+/*
+ * Read the list of rfbCapabilityInfo structures and enable corresponding
+ * capabilities in the specified container. The count argument specifies how
+ * many records to read from the socket.
+ */
+
+static Bool
+ReadCapabilityList(CapsContainer *caps, int count)
+{
+  rfbCapabilityInfo msginfo;
+  int i;
+
+  for (i = 0; i < count; i++) {
+    if (!ReadFromRFBServer((char *)&msginfo, sz_rfbCapabilityInfo))
+      return False;
+    msginfo.code = Swap32IfLE(msginfo.code);
+    CapsEnable(caps, &msginfo);
+  }
 
   return True;
 }
@@ -802,6 +1211,31 @@ HandleRFBServerMessage()
 #include "tight.c"
 #undef BPP
 
+/*
+ * Read the string describing the reason for a connection failure.
+ */
+
+static void
+ReadConnFailedReason(void)
+{
+  CARD32 reasonLen;
+  char *reason = NULL;
+
+  if (ReadFromRFBServer((char *)&reasonLen, sizeof(reasonLen))) {
+    reasonLen = Swap32IfLE(reasonLen);
+    if ((reason = malloc(reasonLen)) != NULL &&
+        ReadFromRFBServer(reason, reasonLen)) {
+      fprintf(stderr,"VNC connection failed: %.*s\n", (int)reasonLen, reason);
+      free(reason);
+      return;
+    }
+  }
+
+  fprintf(stderr, "VNC connection failed\n");
+
+  if (reason != NULL)
+    free(reason);
+}
 
 /*
  * PrintPixelFormat.
@@ -832,6 +1266,11 @@ PrintPixelFormat(format)
     }
   }
 }
+
+/*
+ * Read an integer value encoded in 1..3 bytes. This function is used
+ * by the Tight decoder.
+ */
 
 static long
 ReadCompactLen (void)
