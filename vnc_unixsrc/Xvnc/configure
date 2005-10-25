@@ -38,6 +38,7 @@ echo "#define OSName $SYSNAME" > config/cf/platform.def
 echo "#define OSMajorVersion $MAJOR" >> config/cf/platform.def
 echo "#define OSMinorVersion $MINOR" >> config/cf/platform.def
 echo "#define OSTeenyVersion $TEENY" >> config/cf/platform.def
+echo "#define LinuxCLibMajorVersion 6" >> config/cf/platform.def
 
 if [ "$SYSNAME" = AIX ]
 then

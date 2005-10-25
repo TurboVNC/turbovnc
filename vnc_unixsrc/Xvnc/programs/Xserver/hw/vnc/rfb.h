@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2000, 2001 Const Kaplinsky.  All Rights Reserved.
+ *  Copyright (C) 2000-2004 Const Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -31,7 +31,11 @@
 #include <vncauth.h>
 #include <zlib.h>
 
+/* It's a good idea to keep these values a bit greater than required. */
 #define MAX_ENCODINGS 10
+#define MAX_SECURITY_TYPES 4
+#define MAX_TUNNELING_CAPS 16
+#define MAX_AUTH_CAPS 16
 
 extern char *display;
 
@@ -127,10 +131,19 @@ typedef struct rfbClientRec {
 
     int sock;
     char *host;
-				/* Possible client states: */
+    char *login;
+
+    int protocol_minor_ver;	/* RFB protocol minor version in use */
+    Bool protocol_tightvnc;     /* TightVNC protocol extensions enabled */
+
+    /* Possible client states: */
+
     enum {
 	RFB_PROTOCOL_VERSION,	/* establishing protocol version */
-	RFB_AUTHENTICATION,	/* authenticating */
+	RFB_SECURITY_TYPE,	/* negotiating security (RFB v.3.7) */
+	RFB_TUNNELING_TYPE,	/* establishing tunneling (RFB v.3.7t) */
+	RFB_AUTH_TYPE,		/* negotiating authentication (RFB v.3.7t) */
+	RFB_AUTHENTICATION,	/* authenticating (VNC authentication) */
 	RFB_INITIALISATION,	/* sending initialisation messages */
 	RFB_NORMAL		/* normal protocol messages */
     } state;
@@ -144,6 +157,22 @@ typedef struct rfbClientRec {
     Bool useCopyRect;
     int preferredEncoding;
     int correMaxWidth, correMaxHeight;
+
+    /* The list of security types sent to this client (protocol 3.7).
+       Note that the first entry is the number of list items following. */
+
+    CARD8 securityTypes[MAX_SECURITY_TYPES + 1];
+
+    /* Lists of capability codes sent to clients. We remember these
+       lists to restrict clients from choosing those tunneling and
+       authentication types that were not advertised. */
+
+    int nAuthCaps;
+    CARD32 authCaps[MAX_AUTH_CAPS];
+
+    /* This is not useful while we don't support tunneling:
+    int nTunnelingCaps;
+    CARD32 tunnelingCaps[MAX_TUNNELING_CAPS]; */
 
     /* The following member is only used during VNC authentication */
 
@@ -300,14 +329,33 @@ typedef struct {
 		   (((l) & 0x0000ff00) << 8)  | \
 		   ((l) << 24))
 
-
-/* init.c */
-
 static const int rfbEndianTest = 1;
 
 #define Swap16IfLE(s) (*(const char *)&rfbEndianTest ? Swap16(s) : (s))
 
 #define Swap32IfLE(l) (*(const char *)&rfbEndianTest ? Swap32(l) : (l))
+
+
+/*
+ * Macro to fill in an rfbCapabilityInfo structure (protocol 3.7t).
+ * Normally, using macros is no good, but this macro saves us from
+ * writing constants twice -- it constructs signature names from codes.
+ * Note that "code_sym" argument should be a single symbol, not an expression.
+ */
+
+#define SetCapInfo(cap_ptr, code_sym, vendor)		\
+{							\
+    rfbCapabilityInfo *pcap;				\
+    pcap = (cap_ptr);					\
+    pcap->code = Swap32IfLE(code_sym);			\
+    memcpy(pcap->vendorSignature, (vendor),		\
+	   sz_rfbCapabilityInfoVendor);			\
+    memcpy(pcap->nameSignature, sig_##code_sym,		\
+	   sz_rfbCapabilityInfoName);			\
+}
+
+
+/* init.c */
 
 extern char *desktopName;
 extern char rfbThisHost[];
@@ -462,11 +510,24 @@ extern void httpCheckFds();
 /* auth.c */
 
 extern char *rfbAuthPasswdFile;
-extern Bool rfbAuthenticating;
 
-extern void rfbAuthNewClientConnection(rfbClientPtr cl);
-extern void rfbAuthProcessClientMessage(rfbClientPtr cl);
+extern void rfbAuthNewClient(rfbClientPtr cl);
+extern void rfbProcessClientSecurityType(rfbClientPtr cl);
+extern void rfbProcessClientTunnelingType(rfbClientPtr cl);
+extern void rfbProcessClientAuthType(rfbClientPtr cl);
+extern void rfbVncAuthProcessResponse(rfbClientPtr cl);
 
+/* Functions to prevent too many successive authentication failures */
+extern Bool rfbAuthConsiderBlocking(void);
+extern void rfbAuthUnblock(void);
+extern Bool rfbAuthIsBlocked(void);
+
+
+/* loginauth.c */
+
+extern Bool loginAuthEnabled;
+
+extern void rfbLoginAuthProcessClientMessage(rfbClientPtr cl);
 
 /* rre.c */
 

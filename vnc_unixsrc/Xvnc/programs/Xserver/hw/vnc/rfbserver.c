@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2000-2002 Constantin Kaplinsky.  All Rights Reserved.
+ *  Copyright (C) 2000-2004 Constantin Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -58,6 +58,8 @@ static rfbClientPtr rfbNewClient(int sock);
 static void rfbProcessClientProtocolVersion(rfbClientPtr cl);
 static void rfbProcessClientNormalMessage(rfbClientPtr cl);
 static void rfbProcessClientInitMessage(rfbClientPtr cl);
+static void rfbSendInteractionCaps(rfbClientPtr cl);
+static void rfbProcessClientNormalMessage(rfbClientPtr cl);
 static Bool rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy);
 static Bool rfbSendLastRectMarker(rfbClientPtr cl);
 
@@ -157,6 +159,7 @@ rfbNewClient(sock)
     getpeername(sock, (struct sockaddr *)&addr, &addrlen);
     cl->host = strdup(inet_ntoa(addr.sin_addr));
 
+    /* Dispatch client input to rfbProcessClientProtocolVersion(). */
     cl->state = RFB_PROTOCOL_VERSION;
 
     cl->viewOnly = FALSE;
@@ -243,7 +246,12 @@ rfbClientConnectionGone(sock)
 	return;
     }
 
-    rfbLog("Client %s gone\n",cl->host);
+    if (cl->login != NULL) {
+	rfbLog("Client %s (%s) gone\n", cl->login, cl->host);
+	free(cl->login);
+    } else {
+	rfbLog("Client %s gone\n", cl->host);
+    }
     free(cl->host);
 
     /* Release the compression state structures if any. */
@@ -312,16 +320,24 @@ rfbProcessClientMessage(sock)
     switch (cl->state) {
     case RFB_PROTOCOL_VERSION:
 	rfbProcessClientProtocolVersion(cl);
-	return;
+	break;
+    case RFB_SECURITY_TYPE:	/* protocol 3.7 */
+	rfbProcessClientSecurityType(cl);
+	break;
+    case RFB_TUNNELING_TYPE:	/* protocol 3.7t */
+	rfbProcessClientTunnelingType(cl);
+	break;
+    case RFB_AUTH_TYPE:		/* protocol 3.7t */
+	rfbProcessClientAuthType(cl);
+	break;
     case RFB_AUTHENTICATION:
-	rfbAuthProcessClientMessage(cl);
-	return;
+	rfbVncAuthProcessResponse(cl);
+	break;
     case RFB_INITIALISATION:
 	rfbProcessClientInitMessage(cl);
-	return;
+	break;
     default:
 	rfbProcessClientNormalMessage(cl);
-	return;
     }
 }
 
@@ -337,7 +353,7 @@ rfbProcessClientProtocolVersion(cl)
 {
     rfbProtocolVersionMsg pv;
     int n, major, minor;
-    char failureReason[256];
+    Bool mismatch;
 
     if ((n = ReadExact(cl->sock, pv, sz_rfbProtocolVersionMsg)) <= 0) {
 	if (n == 0)
@@ -354,31 +370,38 @@ rfbProcessClientProtocolVersion(cl)
 	rfbCloseSock(cl->sock);
 	return;
     }
-    rfbLog("Protocol version %d.%d\n", major, minor);
+    rfbLog("Using protocol version %d.%d\n", major, minor);
 
     if (major != rfbProtocolMajorVersion) {
-	/* Major version mismatch - send a ConnFailed message */
-
-	rfbLog("Major version mismatch\n");
-	sprintf(failureReason,
-		"RFB protocol version mismatch - server %d.%d, client %d.%d",
-		rfbProtocolMajorVersion,rfbProtocolMinorVersion,major,minor);
-	rfbClientConnFailed(cl, failureReason);
+	rfbLog("RFB protocol version mismatch - server %d.%d, client %d.%d\n",
+	       rfbProtocolMajorVersion, rfbProtocolMinorVersion, major, minor);
+	rfbCloseSock(cl->sock);
 	return;
     }
 
-    if (minor != rfbProtocolMinorVersion) {
-	/* Minor version mismatch - warn but try to continue */
-	rfbLog("Ignoring minor version mismatch\n");
+    /* Always use one of the two standard versions of the RFB protocol. */
+    cl->protocol_minor_ver = minor;
+    if (minor > rfbProtocolMinorVersion) {
+	cl->protocol_minor_ver = rfbProtocolMinorVersion;
+    } else if (minor < rfbProtocolMinorVersion) {
+	cl->protocol_minor_ver = rfbProtocolFallbackMinorVersion;
     }
+    if (minor != rfbProtocolMinorVersion &&
+	minor != rfbProtocolFallbackMinorVersion) {
+	rfbLog("Non-standard protocol version %d.%d, using %d.%d instead\n",
+	       major, minor, rfbProtocolMajorVersion, cl->protocol_minor_ver);
+    }
+
+    /* TightVNC protocol extensions are not enabled yet. */
+    cl->protocol_tightvnc = FALSE;
 
     rfbAuthNewClient(cl);
 }
 
 
 /*
- * rfbClientConnFailed is called when a client connection has failed either
- * because it talks the wrong protocol or it has failed authentication.
+ * rfbClientConnFailed is called when a client connection has failed
+ * before the authentication stage.
  */
 
 void
@@ -386,17 +409,20 @@ rfbClientConnFailed(cl, reason)
     rfbClientPtr cl;
     char *reason;
 {
-    char *buf;
-    int len = strlen(reason);
+    int headerLen, reasonLen;
+    char buf[8];
 
-    buf = (char *)xalloc(8 + len);
-    ((CARD32 *)buf)[0] = Swap32IfLE(rfbConnFailed);
-    ((CARD32 *)buf)[1] = Swap32IfLE(len);
-    memcpy(buf + 8, reason, len);
+    headerLen = (cl->protocol_minor_ver >= 7) ? 1 : 4;
+    reasonLen = strlen(reason);
+    ((CARD32 *)buf)[0] = 0;
+    ((CARD32 *)buf)[1] = Swap32IfLE(reasonLen);
 
-    if (WriteExact(cl->sock, buf, 8 + len) < 0)
+    if ( WriteExact(cl->sock, buf, headerLen) < 0 ||
+	 WriteExact(cl->sock, buf + 4, 4) < 0 ||
+	 WriteExact(cl->sock, reason, reasonLen) < 0 ) {
 	rfbLogPerror("rfbClientConnFailed: write");
-    xfree(buf);
+    }
+
     rfbCloseSock(cl->sock);
 }
 
@@ -454,6 +480,10 @@ rfbProcessClientInitMessage(cl)
 	return;
     }
 
+    if (cl->protocol_tightvnc)
+	rfbSendInteractionCaps(cl); /* protocol 3.7t */
+
+    /* Dispatch client input to rfbProcessClientNormalMessage(). */
     cl->state = RFB_NORMAL;
 
     if (!cl->reverseConnection &&
@@ -479,6 +509,97 @@ rfbProcessClientInitMessage(cl)
 	    }
 	}
     }
+}
+
+
+/*
+ * rfbSendInteractionCaps is called after sending the server
+ * initialisation message, only if TightVNC protocol extensions were
+ * enabled (protocol 3.7t). In this function, we send the lists of
+ * supported protocol messages and encodings.
+ */
+
+/* Update these constants on changing capability lists below! */
+#define N_SMSG_CAPS  0
+#define N_CMSG_CAPS  0
+#define N_ENC_CAPS  12
+
+void
+rfbSendInteractionCaps(cl)
+    rfbClientPtr cl;
+{
+    rfbInteractionCapsMsg intr_caps;
+    rfbCapabilityInfo enc_list[N_ENC_CAPS];
+    int i;
+
+    /* Fill in the header structure sent prior to capability lists. */
+    intr_caps.nServerMessageTypes = Swap16IfLE(N_SMSG_CAPS);
+    intr_caps.nClientMessageTypes = Swap16IfLE(N_CMSG_CAPS);
+    intr_caps.nEncodingTypes = Swap16IfLE(N_ENC_CAPS);
+    intr_caps.pad = 0;
+
+    /* Supported server->client message types. */
+    /* For future file transfer support:
+    i = 0;
+    SetCapInfo(&smsg_list[i++], rfbFileListData,           rfbTightVncVendor);
+    SetCapInfo(&smsg_list[i++], rfbFileDownloadData,       rfbTightVncVendor);
+    SetCapInfo(&smsg_list[i++], rfbFileUploadCancel,       rfbTightVncVendor);
+    SetCapInfo(&smsg_list[i++], rfbFileDownloadFailed,     rfbTightVncVendor);
+    if (i != N_SMSG_CAPS) {
+	rfbLog("rfbSendInteractionCaps: assertion failed, i != N_SMSG_CAPS\n");
+	rfbCloseSock(cl->sock);
+	return;
+    }
+    */
+
+    /* Supported client->server message types. */
+    /* For future file transfer support:
+    i = 0;
+    SetCapInfo(&cmsg_list[i++], rfbFileListRequest,        rfbTightVncVendor);
+    SetCapInfo(&cmsg_list[i++], rfbFileDownloadRequest,    rfbTightVncVendor);
+    SetCapInfo(&cmsg_list[i++], rfbFileUploadRequest,      rfbTightVncVendor);
+    SetCapInfo(&cmsg_list[i++], rfbFileUploadData,         rfbTightVncVendor);
+    SetCapInfo(&cmsg_list[i++], rfbFileDownloadCancel,     rfbTightVncVendor);
+    SetCapInfo(&cmsg_list[i++], rfbFileUploadFailed,       rfbTightVncVendor);
+    if (i != N_CMSG_CAPS) {
+	rfbLog("rfbSendInteractionCaps: assertion failed, i != N_CMSG_CAPS\n");
+	rfbCloseSock(cl->sock);
+	return;
+    }
+    */
+
+    /* Encoding types. */
+    i = 0;
+    SetCapInfo(&enc_list[i++],  rfbEncodingCopyRect,       rfbStandardVendor);
+    SetCapInfo(&enc_list[i++],  rfbEncodingRRE,            rfbStandardVendor);
+    SetCapInfo(&enc_list[i++],  rfbEncodingCoRRE,          rfbStandardVendor);
+    SetCapInfo(&enc_list[i++],  rfbEncodingHextile,        rfbStandardVendor);
+    SetCapInfo(&enc_list[i++],  rfbEncodingZlib,           rfbTridiaVncVendor);
+    SetCapInfo(&enc_list[i++],  rfbEncodingTight,          rfbTightVncVendor);
+    SetCapInfo(&enc_list[i++],  rfbEncodingCompressLevel0, rfbTightVncVendor);
+    SetCapInfo(&enc_list[i++],  rfbEncodingQualityLevel0,  rfbTightVncVendor);
+    SetCapInfo(&enc_list[i++],  rfbEncodingXCursor,        rfbTightVncVendor);
+    SetCapInfo(&enc_list[i++],  rfbEncodingRichCursor,     rfbTightVncVendor);
+    SetCapInfo(&enc_list[i++],  rfbEncodingPointerPos,     rfbTightVncVendor);
+    SetCapInfo(&enc_list[i++],  rfbEncodingLastRect,       rfbTightVncVendor);
+    if (i != N_ENC_CAPS) {
+	rfbLog("rfbSendInteractionCaps: assertion failed, i != N_ENC_CAPS\n");
+	rfbCloseSock(cl->sock);
+	return;
+    }
+
+    /* Send header and capability lists */
+    if (WriteExact(cl->sock, (char *)&intr_caps,
+		   sz_rfbInteractionCapsMsg) < 0 ||
+	WriteExact(cl->sock, (char *)&enc_list[0],
+		   sz_rfbCapabilityInfo * N_ENC_CAPS) < 0) {
+	rfbLogPerror("rfbSendInteractionCaps: write");
+	rfbCloseSock(cl->sock);
+	return;
+    }
+
+    /* Dispatch client input to rfbProcessClientNormalMessage(). */
+    cl->state = RFB_NORMAL;
 }
 
 
@@ -834,7 +955,7 @@ rfbProcessClientNormalMessage(cl)
 	}
 
 	/* NOTE: We do not accept cut text from a view-only client */
-	if (!cl->viewOnly)
+	if (!rfbViewOnly && !cl->viewOnly)
 	    rfbSetXCutText(str, msg.cct.length);
 
 	xfree(str);
@@ -1394,6 +1515,8 @@ rfbSendBell()
 
     for (cl = rfbClientHead; cl; cl = nextCl) {
 	nextCl = cl->next;
+	if (cl->state != RFB_NORMAL)
+	  continue;
 	b.type = rfbBell;
 	if (WriteExact(cl->sock, (char *)&b, sz_rfbBellMsg) < 0) {
 	    rfbLogPerror("rfbSendBell: write");
@@ -1413,8 +1536,13 @@ rfbSendServerCutText(char *str, int len)
     rfbClientPtr cl, nextCl;
     rfbServerCutTextMsg sct;
 
+    if (rfbViewOnly)
+	return;
+
     for (cl = rfbClientHead; cl; cl = nextCl) {
 	nextCl = cl->next;
+	if (cl->state != RFB_NORMAL || cl->viewOnly)
+	  continue;
 	sct.type = rfbServerCutText;
 	sct.length = Swap32IfLE(len);
 	if (WriteExact(cl->sock, (char *)&sct,
