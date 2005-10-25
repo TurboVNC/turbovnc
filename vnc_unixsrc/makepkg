@@ -91,7 +91,7 @@ f none SUNWtvnc/bin/vncserver 0755 root bin
 f none SUNWtvnc/bin/vncconnect 0755 root bin
 f none SUNWtvnc/bin/Xvnc 0755 root bin
 d none SUNWtvnc/lib 0755 root bin
-f none SUNWtvnc/lib/libhpjpeg.so 0755 root bin
+f none SUNWtvnc/lib/libturbojpeg.so 0755 root bin
 d none SUNWtvnc/man 0755 root bin
 d none SUNWtvnc/man/man1 0755 root bin
 f none SUNWtvnc/man/man1/vncpasswd.1 0644 root bin
@@ -126,7 +126,7 @@ mkdir -p $pkgdir/vnc
 mkdir -p $pkgdir/man/man1
 
 ./vncinstall $pkgdir/bin $pkgdir/man
-cp ../../vgl/solaris/vnc/lib/libhpjpeg.so $pkgdir/lib
+cp ../../vgl/solaris/vnc/lib/libturbojpeg.so $pkgdir/lib
 
 cp -prf classes $pkgdir/vnc
 
