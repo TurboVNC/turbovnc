@@ -56,7 +56,6 @@ Bool rfbViewOnly = FALSE; /* run server in view only mode - Ehud Karni SW */
 
 static rfbClientPtr rfbNewClient(int sock);
 static void rfbProcessClientProtocolVersion(rfbClientPtr cl);
-static void rfbProcessClientNormalMessage(rfbClientPtr cl);
 static void rfbProcessClientInitMessage(rfbClientPtr cl);
 static void rfbSendInteractionCaps(rfbClientPtr cl);
 static void rfbProcessClientNormalMessage(rfbClientPtr cl);
@@ -158,6 +157,7 @@ rfbNewClient(sock)
     cl->sock = sock;
     getpeername(sock, (struct sockaddr *)&addr, &addrlen);
     cl->host = strdup(inet_ntoa(addr.sin_addr));
+    cl->login = NULL;
 
     /* Dispatch client input to rfbProcessClientProtocolVersion(). */
     cl->state = RFB_PROTOCOL_VERSION;
