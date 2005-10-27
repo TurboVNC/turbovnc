@@ -44,7 +44,8 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /Ob0 /I "omnithread" /I "..\..\..\vgl\include" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "__NT__" /D "_WINSTATIC" /D "__WIN32__" /D "XMD_H" /D "NEED_FAR_POINTERS" /FR /YX"stdhdrs.h" /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /Ob0 /I "omnithread" /I "..\..\..\vgl\include" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "__NT__" /D "_WINSTATIC" /D "__WIN32__" /D "XMD_H" /D "NEED_FAR_POINTERS" /YX"stdhdrs.h" /FD /c
+# SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -54,7 +55,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 winmm.lib omnithread.lib zlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib hpjpeg.lib fbx.lib /nologo /subsystem:windows /machine:I386 /libpath:"omnithread/Release" /libpath:"zlib/Release" /libpath:"libjpeg/Release" /libpath:"..\..\..\vgl\windows\vnc\lib"
+# ADD LINK32 winmm.lib omnithread.lib zlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib turbojpeg.lib fbx.lib /nologo /subsystem:windows /machine:I386 /libpath:"omnithread/Release" /libpath:"zlib/Release" /libpath:"..\..\..\vgl\windows\vnc\lib"
 
 !ELSEIF  "$(CFG)" == "vncviewer - Win32 Debug"
 
@@ -70,7 +71,8 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "omnithread" /I "..\..\..\vgl\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "__NT__" /D "_WINSTATIC" /D "__WIN32__" /D "XMD_H" /FR /YX"stdhdrs.h" /FD /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "omnithread" /I "..\..\..\vgl\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "__NT__" /D "_WINSTATIC" /D "__WIN32__" /D "XMD_H" /YX"stdhdrs.h" /FD /c
+# SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -80,7 +82,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 ole32.lib oleaut32.lib winmm.lib omnithread.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib hpjpeg.lib fbx.lib /nologo /subsystem:windows /map /debug /machine:I386 /pdbtype:sept /libpath:"./omnithread/Debug" /libpath:"..\..\..\vgl\windows\dbg\lib"
+# ADD LINK32 ole32.lib oleaut32.lib winmm.lib omnithread.lib zlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib turbojpeg.lib fbx.lib /nologo /subsystem:windows /map /debug /machine:I386 /pdbtype:sept /libpath:"./omnithread/Debug" /libpath:"zlib/Debug" /libpath:"..\..\..\vgl\windows\vnc\dbg\lib"
 
 !ELSEIF  "$(CFG)" == "vncviewer - Win32 Profile"
 
@@ -97,7 +99,8 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /I "omnithread" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "__NT__" /D "_WINSTATIC" /FR /YX"stdhdrs.h" /FD /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "omnithread" /I "..\..\..\vgl\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "__NT__" /D "_WINSTATIC" /D "__WIN32__" /FR /YX"stdhdrs.h" /FD /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "omnithread" /I "..\..\..\vgl\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "__NT__" /D "_WINSTATIC" /D "__WIN32__" /YX"stdhdrs.h" /FD /c
+# SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -107,7 +110,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 ole32.lib oleaut32.lib winmm.lib omnithread.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"./omnithread/Debug"
-# ADD LINK32 ole32.lib oleaut32.lib winmm.lib omnithread.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib hpjpeg.lib fbx.lib zlib.lib /nologo /subsystem:windows /profile /debug /machine:I386 /libpath:"./omnithread/Debug" /libpath:"..\..\..\vgl\windows\dbg\lib"
+# ADD LINK32 ole32.lib oleaut32.lib winmm.lib omnithread.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib turbojpeg.lib fbx.lib zlib.lib /nologo /subsystem:windows /profile /debug /machine:I386 /libpath:"./omnithread/Debug" /libpath:"zlib/Debug" /libpath:"..\..\..\vgl\windows\vnc\dbg\lib"
 
 !ENDIF 
 
