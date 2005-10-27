@@ -1,17 +1,18 @@
 
-TightVNC 1.2.9 Source Distribution for Windows platforms
-========================================================
+TightVNC 1.3dev7 Source Distribution for Windows platforms
+==========================================================
+
+IMPORTANT NOTE: this is a development version and may be unstable.
+It's not recommended for production use.
 
 This distribution is based on the standard VNC source and includes new
 TightVNC-specific features and fixes, such as additional low-bandwidth
-optimizations ("Tight" encoding with optional JPEG compression, "local
-cursor" feature), improved WinVNC advanced settings, and more.
+optimizations, major GUI improvements, file transfers, and more.
 
 	Copyright (C) 1999 AT&T Laboratories Cambridge.
 	Copyright (C) 2000 Tridia Corp.
-	Copyright (C) 2002 RealVNC Ltd.
-	Copyright (C) 2000,2001,2002,2003 Constantin Kaplinsky.
-	Copyright (C) 2001,2002,2003 HorizonLive.com, Inc.
+	Copyright (C) 2000-2004 Constantin Kaplinsky.
+	Copyright (C) 2001-2004 HorizonLive.com, Inc.
 	All rights reserved.
 
 This software is distributed under the GNU General Public Licence as
@@ -28,9 +29,8 @@ There are two programs here in the two subdirectories:
 	winvnc - this is the VNC server for Win32. It allows an NT desktop
 	       to be accessed remotely using a VNC viewer.
 
-The executables can be built using Borland C++ 5.5, Microsoft Visual C++
-6.0, or Microsoft Visual Studio 7. See BUILDING.txt files for more details
-on compilation.
+The executables can be built using Microsoft Visual C++ 6.0.
+See BUILDING.txt files for more details on compilation.
 
 
 ACKNOWLEDGEMENTS
