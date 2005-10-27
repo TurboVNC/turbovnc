@@ -73,7 +73,7 @@ vncEncodeTight::vncEncodeTight()
 	for (int i = 0; i < 4; i++)
 		m_zsActive[i] = false;
 
-	hpjhnd=NULL;
+	tjhnd=NULL;
 }
 
 vncEncodeTight::~vncEncodeTight()
@@ -91,7 +91,7 @@ vncEncodeTight::~vncEncodeTight()
 		m_zsActive[i] = false;
 	}
 
-	if(hpjhnd) hpjDestroy(hpjhnd);
+	if(tjhnd) tjDestroy(tjhnd);
 }
 
 void
@@ -112,7 +112,7 @@ vncEncodeTight::RequiredBuffSize(UINT width, UINT height)
 	// FIXME: Use actual compression level instead of 9?
 	int result = m_conf[0].maxRectSize * (m_remoteformat.bitsPerPixel / 8);
 	result += result / 100 + 16;
-	if(result<HPJBUFSIZE(width, height)) result=HPJBUFSIZE(width, height);
+	if(result<TJBUFSIZE(width, height)) result=TJBUFSIZE(width, height);
 	return result;
 }
 
@@ -1438,23 +1438,23 @@ vncEncodeTight::SendJpegRect(BYTE *src, BYTE *dst, int x, int y, int w, int h, i
 {
 	BYTE *srcbuf;
 	int ps=m_localformat.bitsPerPixel/8;
-	int subsamp=m_compresslevel==1? HPJ_411: (m_compresslevel==2? HPJ_422:HPJ_444);
+	int subsamp=m_compresslevel==1? TJ_411: (m_compresslevel==2? TJ_422:TJ_444);
 	unsigned long jpegDstDataLen;
 
 	if (ps < 3) return SendFullColorRect(dst, w, h);
 
-	if(!hpjhnd) {
-		if((hpjhnd=hpjInitCompress())==NULL) {
-			vnclog.Print(LL_INTERR, VNCLOG("JPEG Error: %s\n"), hpjGetErrorStr());
+	if(!tjhnd) {
+		if((tjhnd=tjInitCompress())==NULL) {
+			vnclog.Print(LL_INTERR, VNCLOG("JPEG Error: %s\n"), tjGetErrorStr());
 			return 0;
 		}
 	}
 
 	srcbuf=&src[y*m_bytesPerRow + x*ps];
-	if(hpjCompress(hpjhnd, (unsigned char *)srcbuf, w, m_bytesPerRow,
+	if(tjCompress(tjhnd, (unsigned char *)srcbuf, w, m_bytesPerRow,
 		h, ps, (unsigned char *)dst, &jpegDstDataLen, subsamp, quality,
-		m_localformat.bigEndian?0:HPJ_BGR)==-1) {
-		vnclog.Print(LL_INTERR, VNCLOG("JPEG Error: %s\n"), hpjGetErrorStr());
+		m_localformat.bigEndian?0:TJ_BGR)==-1) {
+		vnclog.Print(LL_INTERR, VNCLOG("JPEG Error: %s\n"), tjGetErrorStr());
 		return 0;
 	}
 

@@ -37,7 +37,7 @@ class vncEncodeTight;
 #include "vncEncoder.h"
 
 #include "zlib/zlib.h"
-#include "hpjpeg.h"
+#include "turbojpeg.h"
 
 // Minimum amount of data to be compressed. This value should not be
 // changed, doing so will break compatibility with existing clients.
@@ -181,7 +181,7 @@ protected:
 	void PrepareRowForJpeg24(BYTE *dst, CARD32 *src, int count);
 	void PrepareRowForJpeg16(BYTE *dst, CARD16 *src, int count);
 	void PrepareRowForJpeg32(BYTE *dst, CARD32 *src, int count);
-	hpjhandle hpjhnd;
+	tjhandle tjhnd;
 };
 
 #endif // _WINVNC_ENCODETIGHT
