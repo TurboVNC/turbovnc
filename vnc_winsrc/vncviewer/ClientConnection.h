@@ -40,7 +40,7 @@
 #include "VNCviewerApp.h"
 #include "KeyMap.h"
 #include "zlib/zlib.h"
-#include "hpjpeg.h"
+#include "turbojpeg.h"
 #include "fbx.h"
 
 #define SETTINGS_KEY_NAME "Software\\ORL\\VNCviewer\\Settings"
@@ -347,7 +347,7 @@ private:
 	int m_emulateButtonPressedX;
 	int m_emulateButtonPressedY;
 
-	hpjhandle j;
+	tjhandle j;
 	fbx_struct fb;
 
 	/* For double buffering */

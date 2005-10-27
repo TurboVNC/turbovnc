@@ -170,7 +170,7 @@ void ClientConnection::Init(VNCviewerApp *pApp)
 
 
 	memset(&fb, 0, sizeof(fb));
-    if((j=hpjInitDecompress())==NULL) throw(ErrorException(hpjGetErrorStr()));
+    if((j=tjInitDecompress())==NULL) throw(ErrorException(tjGetErrorStr()));
 
 	node = list = tail = NULL;
 }
@@ -890,7 +890,7 @@ ClientConnection::~ClientConnection()
 	m_pApp->DeregisterConnection(this);
 
 	fbx_term(&fb);
-    if(j) {hpjDestroy(j);  j=NULL;}
+    if(j) {tjDestroy(j);  j=NULL;}
 }
 
 // You can specify a dx & dy outside the limits; the return value will

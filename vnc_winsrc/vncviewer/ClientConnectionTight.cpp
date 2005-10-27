@@ -546,7 +546,7 @@ void ClientConnection::DecompressJpegRect(int x, int y, int w, int h)
   omni_mutex_lock l(m_bitmapdcMutex);
   ObjectSelector b(m_hBitmapDC, m_hBitmap);
 
-  if((hpjDecompress(j, (unsigned char *)m_netbuf, (unsigned long)compressedLen,
-    (unsigned char *)&fb.bits[y*fb.pitch+x*fbx_ps[fb.format]], w, fb.pitch, h, fbx_ps[fb.format], fbx_bgr[fb.format]?HPJ_BGR:0))==-1)
-    throw(ErrorException(hpjGetErrorStr()));
+  if((tjDecompress(j, (unsigned char *)m_netbuf, (unsigned long)compressedLen,
+    (unsigned char *)&fb.bits[y*fb.pitch+x*fbx_ps[fb.format]], w, fb.pitch, h, fbx_ps[fb.format], fbx_bgr[fb.format]?TJ_BGR:0))==-1)
+    throw(ErrorException(tjGetErrorStr()));
 }
