@@ -41,6 +41,15 @@
 #define NOCURSOR 0
 #define DOTCURSOR 1
 #define NORMALCURSOR 2
+#define SMALLCURSOR 3
+#define MAX_LEN_COMBO 1
+
+#define KEY_VNCVIEWER_HISTORI _T("Software\\ORL\\VNCviewer\\History")
+
+struct COMBOSTRING {
+		TCHAR NameString[20];
+		int rfbEncoding;
+};
 
 class VNCOptions  
 {
@@ -52,19 +61,29 @@ public:
 	// Save and load a set of options from a config file
 	void Save(char *fname);
 	void Load(char *fname);
-
+	void VNCOptions::LoadOpt(char subkey[256],char keyname[256]);
+	int VNCOptions::read(HKEY hkey,char *name,int retrn);
+	void VNCOptions::save(HKEY hkey,char *name, int value);
+	void VNCOptions::LoadGenOpt();
+	void VNCOptions::SaveGenOpt();
+	void VNCOptions::delkey(char subkey[256],char keyname[256]);
+	void VNCOptions::SaveOpt(char subkey[256],char keyname[256]);
 	// process options
 	bool	m_listening;
 	int		m_listenPort;
+	TCHAR	m_display[256];
+	bool	m_toolbar;
+	bool	m_skipprompt;
+	int		m_historyLimit;
 	bool	m_connectionSpecified;
 	bool	m_configSpecified;
 	TCHAR   m_configFilename[_MAX_PATH];
 	bool	m_restricted;
 
 	// default connection options - can be set through Dialog
-	bool	m_DoubleBuffer;
 	bool	m_ViewOnly;
 	bool	m_FullScreen;
+	bool	m_DoubleBuffer;
 	int		m_PreferredEncoding;
 	bool	m_SwapMouse;
 	bool    m_Emul3Buttons; 
@@ -75,6 +94,7 @@ public:
 	bool	m_DisableClipboard;
 	int     m_localCursor;
 	bool	m_scaling;
+	bool	m_FitWindow;
 	int		m_scale_num, m_scale_den; // Numerator & denominator
 	int		m_compressLevel;
 	int		m_jpegQualityLevel;
@@ -111,19 +131,28 @@ public:
 	void SetFromCommandLine(LPTSTR szCmdLine);
 
 
-	static BOOL CALLBACK OptDlgProc(  HWND hwndDlg,  UINT uMsg, 
-		WPARAM wParam, LPARAM lParam );
-
+	static BOOL CALLBACK DlgProc(HWND hwndDlg, UINT uMsg,
+		WPARAM wParam, LPARAM lParam);
+	static BOOL CALLBACK DlgProcConnOptions(HWND hwnd, UINT uMsg,
+		WPARAM wParam, LPARAM lParam);
+	static BOOL CALLBACK DlgProcGlobalOptions(HWND hwnd, UINT uMsg,
+		WPARAM wParam, LPARAM lParam);
+	static void Lim(HWND hwnd,int control,DWORD min, DWORD max);
 	// Register() makes this viewer the app invoked for .vnc files
 	static void Register();
-
-private:
-    void ShowUsage(LPTSTR info = NULL);
+	HWND m_hPageConnection, m_hPageGeneral, m_hTab, m_hParent, m_hWindow;
 	void FixScaling();
 
+private:
+	void BrowseLogFile();
+	void EnableCompress(HWND hwnd, bool enable);
+	void EnableJpeg(HWND hwnd, bool enable);
+	void EnableLog(HWND hwnd, bool enable);
+	
 	// Just for temporary use
 	bool m_running;
-
+	
+	
 };
 
 #endif // VNCOPTIONS_H__
