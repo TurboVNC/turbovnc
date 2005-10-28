@@ -258,15 +258,12 @@ int SessionDialog::cmp(HWND hwnd)
 	HWND hLocNetRadio = GetDlgItem(hwnd, IDC_LOC_NET_RADIO);
 	int i;
 	for (i = rfbEncodingRaw; i <= LASTENCODING; i++)
-		if ((m_pOpt->m_UseEnc[i] != true) && (i != 3)) a = 0;
-	if (m_pOpt->m_UseEnc[3] != false) a = 0;
+		if ((m_pOpt->m_UseEnc[i] != false) && (i != rfbEncodingTight && i != rfbEncodingCopyRect)) a = 0;
+	if (m_pOpt->m_UseEnc[rfbEncodingTight] != true) a = 0;
+	if (m_pOpt->m_UseEnc[rfbEncodingCopyRect] != true) a = 0;
 	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
-	if (m_pOpt->m_Use8Bit != true) a = 0;
-	if (m_pOpt->m_useCompressLevel != true) {
-		a = 0;
-	} else {
-		if (m_pOpt->m_compressLevel != 6) a = 0;
-	}
+	if (m_pOpt->m_compressLevel != 1) a = 0;
+	if (m_pOpt->m_jpegQualityLevel != 40) a = 0;
 	if (a == 1) {
 		SendMessage(hModemRadio, BM_CLICK, 0, 0);
 		return a;
@@ -274,11 +271,13 @@ int SessionDialog::cmp(HWND hwnd)
 
 	a = 2;
 	for (i = rfbEncodingRaw; i <= LASTENCODING; i++)
-		if ((m_pOpt->m_UseEnc[i] != true) && (i != 3)) a = 0;
-	if (m_pOpt->m_UseEnc[3] != false) a = 0;
-	if (m_pOpt->m_Use8Bit != false) a = 0;
-	if (m_pOpt->m_PreferredEncoding != rfbEncodingHextile) a = 0;
-		
+		if ((m_pOpt->m_UseEnc[i] != false) && (i != rfbEncodingTight && i != rfbEncodingCopyRect)) a = 0;
+	if (m_pOpt->m_UseEnc[rfbEncodingTight] != true) a = 0;
+	if (m_pOpt->m_UseEnc[rfbEncodingCopyRect] != true) a = 0;
+	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
+	if (m_pOpt->m_compressLevel != 0) a = 0;
+	if (m_pOpt->m_jpegQualityLevel != 95) a = 0;
+
 	if (a == 2) {
 		SendMessage(hLocNetRadio, BM_CLICK, 0, 0);
 		return a;
@@ -286,16 +285,12 @@ int SessionDialog::cmp(HWND hwnd)
 
 	a = 3;
 	for (i = rfbEncodingRaw; i <= LASTENCODING; i++)
-		if ((m_pOpt->m_UseEnc[i] != true) && (i != 3)) a = 0;
-	if (m_pOpt->m_UseEnc[3] != false) a = 0;
+		if ((m_pOpt->m_UseEnc[i] != false) && (i != rfbEncodingTight && i != rfbEncodingCopyRect)) a = 0;
+	if (m_pOpt->m_UseEnc[rfbEncodingTight] != true) a = 0;
+	if (m_pOpt->m_UseEnc[rfbEncodingCopyRect] != true) a = 0;
 	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
-	if (m_pOpt->m_useCompressLevel != false) a = 0;
-	if (m_pOpt->m_Use8Bit != false) a = 0;
-	if (m_pOpt->m_enableJpegCompression != true) {
-		a = 0;
-	} else {
-		if (m_pOpt->m_jpegQualityLevel != 6) a = 0;
-	}
+	if (m_pOpt->m_compressLevel != 0) a = 0;
+	if (m_pOpt->m_jpegQualityLevel != 95) a = 0;
 	if (a == 3) {
 		SendMessage(hCustomRadio, BM_CLICK, 0, 0);
 		return a;
@@ -312,25 +307,25 @@ int SessionDialog::cmp(HWND hwnd)
 void SessionDialog::SetConnectionProfile(bool LowBandwidth, bool HighSpeed) 
 {
 	for (int i = rfbEncodingRaw; i <= LASTENCODING; i++)
-		m_pOpt->m_UseEnc[i] = true;
+		m_pOpt->m_UseEnc[i] = false;
 
-	m_pOpt->m_UseEnc[3] = false;	
+	m_pOpt->m_UseEnc[rfbEncodingTight] = true;
+	m_pOpt->m_UseEnc[rfbEncodingCopyRect] = true;
+
 	if (!LowBandwidth && !HighSpeed) {
 		m_pOpt->m_PreferredEncoding = rfbEncodingTight;
-		m_pOpt->m_useCompressLevel = false;
-		m_pOpt->m_enableJpegCompression = true;
-		m_pOpt->m_jpegQualityLevel = 6;
-		m_pOpt->m_Use8Bit = false;
+		m_pOpt->m_compressLevel = 0;
+		m_pOpt->m_jpegQualityLevel = 95;
 	}
 	if (LowBandwidth && !HighSpeed) {
 		m_pOpt->m_PreferredEncoding = rfbEncodingTight;
-		m_pOpt->m_useCompressLevel = true;
-		m_pOpt->m_compressLevel = 6;
-		m_pOpt->m_Use8Bit = true;
+		m_pOpt->m_compressLevel = 1;
+		m_pOpt->m_jpegQualityLevel = 40;
 	}
 	if (!LowBandwidth && HighSpeed) {
-		m_pOpt->m_PreferredEncoding = rfbEncodingHextile;
-		m_pOpt->m_Use8Bit = false;
+		m_pOpt->m_PreferredEncoding = rfbEncodingTight;
+		m_pOpt->m_compressLevel = 0;
+		m_pOpt->m_jpegQualityLevel = 95;
 	}
 }
 	
