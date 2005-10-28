@@ -38,7 +38,7 @@
 
 AuthDialog::AuthDialog()
 {
-	m_passwd[0]=__T('\0');
+	m_passwd[0] = TEXT('\0');
 }
 
 AuthDialog::~AuthDialog()

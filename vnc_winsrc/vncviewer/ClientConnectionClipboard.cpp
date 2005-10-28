@@ -79,7 +79,7 @@ void ClientConnection::ProcessLocalClipboardChange()
 					SendClientCutText(unixcontents, strlen(unixcontents));
 				} catch (WarningException &e) {
 					vnclog.Print(0, _T("Exception while sending clipboard text : %s\n"), e.m_info);
-					DestroyWindow(m_hwnd);
+					DestroyWindow(m_hwnd1);
 				}
 				delete [] contents; 
 				delete [] unixcontents;

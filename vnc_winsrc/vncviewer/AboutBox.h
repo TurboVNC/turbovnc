@@ -27,3 +27,4 @@
 // Display the about box!
 
 void ShowAboutBox();
+void ShowHelpBox(LPTSTR title);

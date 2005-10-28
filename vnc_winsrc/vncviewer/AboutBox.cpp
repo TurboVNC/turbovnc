@@ -29,19 +29,20 @@
 #include "vncviewer.h"
 
 // Process the About dialog.
+
 static LRESULT CALLBACK AboutDlgProc(HWND hwnd, UINT iMsg, 
-										   WPARAM wParam, LPARAM lParam) {
+									WPARAM wParam, LPARAM lParam) 
+{
 	switch (iMsg) {
-	case WM_INITDIALOG:
-		{
-			CentreWindow(hwnd);
-			return TRUE;
-		}
+	case WM_INITDIALOG: 
+		CentreWindow(hwnd);
+		return TRUE;
+		
 	case WM_CLOSE:
 		EndDialog(hwnd, TRUE);
 		return TRUE;
 	case WM_COMMAND:
-		if (LOWORD(wParam) == IDOK) {
+		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
 			EndDialog(hwnd, TRUE);
 		}
 	}
@@ -51,7 +52,39 @@ static LRESULT CALLBACK AboutDlgProc(HWND hwnd, UINT iMsg,
 void ShowAboutBox()
 {
 	int res = DialogBox(pApp->m_instance, 
- 		DIALOG_MAKEINTRESOURCE(IDD_APP_ABOUT),
-		NULL, (DLGPROC) AboutDlgProc);
+ 						DIALOG_MAKEINTRESOURCE(IDD_APP_ABOUT),
+						NULL, (DLGPROC) AboutDlgProc);
 }
-	
+
+static LRESULT CALLBACK HelpDlgProc(HWND hwnd, UINT iMsg, 
+									WPARAM wParam, LPARAM lParam) 
+{
+	switch (iMsg) {
+	case WM_INITDIALOG: 
+		{
+			TCHAR buf [2048];
+			LoadString(pApp->m_instance, IDS_HELP, buf, sizeof(buf));
+			SetDlgItemText(hwnd, IDC_EDIT_HELP, buf);
+			SetWindowText(hwnd, (LPTSTR)lParam);
+			CentreWindow(hwnd);
+			return TRUE;
+		}
+	case WM_CLOSE:
+		EndDialog(hwnd, TRUE);
+		return TRUE;
+	case WM_COMMAND:
+		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
+			EndDialog(hwnd, TRUE);
+		}
+	}
+	return FALSE;
+}
+
+void ShowHelpBox(LPTSTR title)
+{
+	int res = DialogBoxParam(pApp->m_instance, 
+ 							 DIALOG_MAKEINTRESOURCE(IDD_HELP),
+							 NULL, (DLGPROC)HelpDlgProc,
+							 (LPARAM)title);
+}
+

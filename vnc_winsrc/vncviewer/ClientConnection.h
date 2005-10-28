@@ -36,9 +36,12 @@
 #else
 #include "omnithread.h"
 #endif
+#include "CapsContainer.h"
 #include "VNCOptions.h"
 #include "VNCviewerApp.h"
 #include "KeyMap.h"
+#include "ConnectingDialog.h"
+#include "FileTransfer.h"
 #include "zlib/zlib.h"
 #include "turbojpeg.h"
 #include "fbx.h"
@@ -72,36 +75,55 @@ public:
 	void Run();
 	void KillThread();
 	void CopyOptions(ClientConnection *source);
-
-	// Exceptions 
-	class UserCancelExc {};
-	class AuthenticationExc {};
-	class SocketExc {};
-	class ProtocolExc {};
-	class Fatal {};
+	int  LoadConnection(char *fname, bool sess);
+	void UnloadConnection() { m_opts.m_configSpecified = false; }
+	int m_port;
+    TCHAR m_host[MAX_HOST_NAME_LEN];
+	HWND m_hSess;
 
 private:
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
+	static LRESULT CALLBACK WndProc1(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
+	static LRESULT CALLBACK Proc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
+	static LRESULT CALLBACK ScrollProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
 	void DoBlit();
 	VNCviewerApp *m_pApp;
-	int m_port;
-    TCHAR m_host[MAX_HOST_NAME_LEN];
+	ConnectingDialog *m_connDlg;
+
+	bool m_enableFileTransfers;
+	bool m_fileTransferDialogShown;
+	friend class FileTransfer;
+	FileTransfer *m_pFileTransfer;
+
 	SOCKET m_sock;
 	bool m_serverInitiated;
-	HWND m_hwnd, m_hbands;
-
+	HWND m_hwnd, m_hbands, m_hwnd1, 
+		 m_hToolbar, m_hwndscroll;
+		
 	void Init(VNCviewerApp *pApp);
+	void InitCapabilities();
 	void CreateDisplay();
+	HWND CreateToolbar();
 	void GetConnectDetails();
 	void Connect();
 	void SetSocketOptions();
-	void Authenticate();
 	void NegotiateProtocolVersion();
+	void PerformAuthentication();
+	int ReadSecurityType();
+	int SelectSecurityType();
+	void SetupTunneling();
+	void PerformAuthenticationTight();
+	void Authenticate(CARD32 authScheme);
+	bool AuthenticateVNC(char *errBuf, int errBufSize, bool *again);
+	bool AuthenticateUnixLogin(char *errBuf, int errBufSize, bool *again);
+	bool AuthenticateExternal(char *errBuf, int errBufSize, bool *again);
 	void ReadServerInit();
+	void ReadInteractionCaps();
+	void ReadCapabilityList(CapsContainer *caps, int count);
 	void SendClientInit();
 	void CreateLocalFramebuffer();
 	void SaveConnection();
-	int  LoadConnection(char *fname);
+	void SaveListConnection();
 	
 	void SetupPixelFormat();
 	void SetFormatAndEncodings();
@@ -117,12 +139,16 @@ private:
 	void SendPointerEvent(int x, int y, int buttonMask);
     void ProcessKeyEvent(int virtkey, DWORD keyData);
 	void SendKeyEvent(CARD32 key, bool down);
+	void SwitchOffKey();
 
 	void ReadScreenUpdate();
 	void Update(RECT *pRect);
 	void SizeWindow(bool centered);
+	void PositionChildWindow();
 	bool ScrollScreen(int dx, int dy);
 	void UpdateScrollbars();
+	void EnableFullControlOptions();
+	void EnableAction(int id, bool enable);
 
 	void InvalidateScreenRect(const RECT *pRect);
 
@@ -211,13 +237,11 @@ private:
 
 	void ReadBell();
 
-	void ReadEnableExtension();
-	void ReadExtensionData();
-	
 	void SendRFBMsg(CARD8 msgType, void* data, int length);
 	void ReadExact(char *buf, int bytes);
 	void ReadString(char *buf, int length);
 	void WriteExact(char *buf, int bytes);
+	char *ReadFailureReason();
 
 	// This is what controls the thread
 	void * run_undetached(void* arg);
@@ -302,12 +326,24 @@ private:
 
 	// RFB settings
 	VNCOptions m_opts;
+
+	// Protocol capabilities
+	CapsContainer m_tunnelCaps;		// known tunneling/encryption methods
+	CapsContainer m_authCaps;		// known authentication schemes
+	CapsContainer m_serverMsgCaps;	// known non-standard server messages
+	CapsContainer m_clientMsgCaps;	// known non-standard client messages
+	CapsContainer m_encodingCaps;	// known encodings besides Raw
+
 	TCHAR *m_desktopName;
 	unsigned char m_encPasswd[8];
+	char m_usernameExt[256];
+	unsigned char m_encPasswdExt[512];
+	int m_authScheme;
 	rfbServerInitMsg m_si;
 	rfbPixelFormat m_myFormat, m_pendingFormat;
 	// protocol version in use.
 	int m_majorVersion, m_minorVersion;
+	bool m_tightVncProtocol;
 	bool m_threadStarted, m_running;
 	// mid-connection format change requested
 	bool m_pendingFormatChange;
@@ -316,12 +352,12 @@ private:
 
 	// Window may be scrollable - these control the scroll position
 	int m_hScrollPos, m_hScrollMax, m_vScrollPos, m_vScrollMax;
-	// The current window size
-	int m_winwidth, m_winheight;
+
 	// The size of the current client area
 	int m_cliwidth, m_cliheight;
 	// The size of a window needed to hold entire screen without scrollbars
 	int m_fullwinwidth, m_fullwinheight;
+	int m_winwidth, m_winheight;	
 	// The size of the CE CommandBar
 	int m_barheight;
 
