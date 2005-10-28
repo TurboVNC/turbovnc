@@ -1,3 +1,4 @@
+//  Copyright (C) 2003 Constantin Kaplinsky. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -23,59 +24,27 @@
 // whence you received this file, check http://www.uk.research.att.com/vnc or contact
 // the authors on vnc@uk.research.att.com for information on obtaining it.
 
-//
-// MRU maintains a list of 'Most Recently Used' strings in the registry
-// 
 
-#ifndef MRU_H__
-#define MRU_H__
+#ifndef LOGINAUTHDIALOG_H__
+#define LOGINAUTHDIALOG_H__
 
 #pragma once
 
-#include <windows.h>
-#include <tchar.h>
-
-class MRU  
+class LoginAuthDialog  
 {
 public:
+	TCHAR m_username[256];
+	TCHAR m_passwd[256];
 
-    // Create an MRU and initialise it from the key.
-    // Key created if not existant.
+	LoginAuthDialog(char *vnchost, char *title = NULL, char *username = NULL);
+	virtual ~LoginAuthDialog();
+	int DoDialog();
 
-    MRU(LPTSTR keyname, unsigned int maxnum = 8);
-
-    // Add the item specified at the front of the list
-    // Move it there if not already.  If this makes the
-    // list longer than the maximum, older ones are deleted.
-    void AddItem(LPTSTR txt);
-
-    // How many items are on the list?
-    int NumItems();
-
-    // Return them in order. 0 is the newest.
-    // NumItems()-1 is the oldest.
-    int GetItem(int index, LPTSTR buf, int buflen);
-
-    // Remove the specified item if it exists.
-    void RemoveItem(LPTSTR txt);
-
-    // Remove the item with the given index.
-    // If this is greater than NumItems()-1 it will be ignored.
-    void RemoveItem(int index);
-
-	virtual ~MRU();
-
+	static BOOL CALLBACK DlgProc(HWND hwndDlg, UINT uMsg,
+								 WPARAM wParam, LPARAM lParam);
 private:
-	void ReadIndex();
-
-    TCHAR m_index[28];  // allow a bit of workspace beyond maximum of 26
-    HKEY m_hRegKey;
-    unsigned int m_maxnum;
-
-    void Tidy();
-protected:
-	void WriteIndex();
+	char m_title[256];
+	char *m_vnchost;
 };
 
-#endif // MRU_H__
-
+#endif // LOGINAUTHDIALOG_H__

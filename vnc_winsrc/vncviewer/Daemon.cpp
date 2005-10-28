@@ -169,10 +169,7 @@ LRESULT CALLBACK Daemon::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPa
 
 	case WM_SOCKEVENT:
 		{
-			// Ignore errors.
-			if (HIWORD(lParam) != 0) {
-				return 0;
-			}
+			assert(HIWORD(lParam) == 0);
 			// A new socket created by accept might send messages to
 			// this procedure. We can ignore them.
 			if(wParam != _this->m_sock) {
@@ -214,6 +211,7 @@ LRESULT CALLBACK Daemon::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPa
 			break;
 		case IDC_OPTIONBUTTON:
 			pApp->m_options.DoDialog();
+			pApp->m_options.SaveOpt(".listen", KEY_VNCVIEWER_HISTORI);
 			break;
 		case ID_CLOSEDAEMON:
 			PostQuitMessage(0);
@@ -230,7 +228,7 @@ LRESULT CALLBACK Daemon::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPa
 				// double click: execute first menu item
 				::SendMessage(_this->m_nid.hWnd, WM_COMMAND, 
 					GetMenuItemID(hSubMenu, 0), 0);
-			} else if (lParam==WM_RBUTTONUP || lParam==WM_LBUTTONUP) {
+			} else if (lParam==WM_RBUTTONUP) {
 				if (hSubMenu == NULL) { 
 					vnclog.Print(2, _T("No systray submenu\n"));
 					return 0;
@@ -264,6 +262,7 @@ LRESULT CALLBACK Daemon::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPa
 
 Daemon::~Daemon()
 {
+	
 	KillTimer(m_hwnd, m_timer);
 	RemoveTrayIcon();
 	DestroyMenu(m_hmenu);
