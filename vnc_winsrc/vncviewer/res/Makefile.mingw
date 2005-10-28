@@ -1,0 +1,13 @@
+
+RC = i386-mingw32msvc-windres
+
+default: vncviewer.o
+
+afxres.h:
+	echo "#include <windows.h>" > $@
+	echo "#ifndef IDC_STATIC" >> $@
+	echo "#define IDC_STATIC (-1)" >> $@
+	echo "#endif" >> $@
+
+vncviewer.o: vncviewer.rc afxres.h
+	$(RC) -i $< -o $@
