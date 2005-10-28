@@ -1,7 +1,7 @@
 # Microsoft Developer Studio Generated NMAKE File, Based on zlib.dsp
 !IF "$(CFG)" == ""
-CFG=zlib - Win32 Debug
-!MESSAGE No configuration specified. Defaulting to zlib - Win32 Debug.
+CFG=zlib - Win32 Release
+!MESSAGE No configuration specified. Defaulting to zlib - Win32 Release.
 !ENDIF 
 
 !IF "$(CFG)" != "zlib - Win32 Release" && "$(CFG)" != "zlib - Win32 Debug"
@@ -30,10 +30,10 @@ RSC=rc.exe
 
 !IF  "$(CFG)" == "zlib - Win32 Release"
 
-OUTDIR=.\Release
-INTDIR=.\Release
+OUTDIR=.\../Release
+INTDIR=.\../Release
 # Begin Custom Macros
-OutDir=.\Release
+OutDir=.\../Release
 # End Custom Macros
 
 ALL : "$(OUTDIR)\zlib.lib"
@@ -90,10 +90,10 @@ LIB32_OBJS= \
 
 !ELSEIF  "$(CFG)" == "zlib - Win32 Debug"
 
-OUTDIR=.\Debug
-INTDIR=.\Debug
+OUTDIR=.\../Debug
+INTDIR=.\../Debug
 # Begin Custom Macros
-OutDir=.\Debug
+OutDir=.\../Debug
 # End Custom Macros
 
 ALL : "$(OUTDIR)\zlib.lib"

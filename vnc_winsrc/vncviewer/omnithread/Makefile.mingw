@@ -1,0 +1,6 @@
+
+CXX = g++
+CFLAGS = -O2
+
+omnithread.obj: nt.cpp nt.h omnithread.h
+	$(CXX) -c $(CFLAGS) -o $@ $< 
