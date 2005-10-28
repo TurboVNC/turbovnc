@@ -1,0 +1,56 @@
+
+CXX = g++
+CC = gcc
+
+CFLAGS = -O2 -I. -Iomnithread -DXMD_H 
+LDFLAGS = 
+WINLIBS = -lws2_32 -lgdi32 -lcomdlg32 -lwinmm
+
+OBJS=AboutBox.obj AuthDialog.obj ClientConnection.obj \
+	ClientConnectionClipboard.obj ClientConnectionCopyRect.obj \
+	ClientConnectionCoRRE.obj ClientConnectionCursor.obj \
+	ClientConnectionFile.obj ClientConnectionFullScreen.obj \
+	ClientConnectionHextile.obj ClientConnectionRaw.obj \
+	ClientConnectionRRE.obj ClientConnectionTight.obj \
+	ClientConnectionZlib.obj ClientConnectionZlibHex.obj \
+	d3des.obj Daemon.obj Exception.obj Flasher.obj KeyMap.obj \
+	Log.obj MRU.obj SessionDialog.obj stdhdrs.obj vncauth.obj \
+	VNCOptions.obj vncviewer.obj VNCviewerApp.obj VNCviewerApp32.obj \
+	omnithread/omnithread.obj
+
+LIBS=libjpeg/libjpeg.a zlib/libz.a
+
+RES=res/vncviewer.o
+
+default: vncviewer.exe
+
+.SUFFIXES: .cpp 
+%.obj: %.cpp
+	$(CXX) -c $(CFLAGS) -o $@ $<
+
+vncviewer.exe: $(LIBS) $(OBJS) $(RES)
+	$(CXX) $(LDFLAGS) $(OBJS) $(RES) -o $@ $(LIBS) $(WINLIBS) -mwindows
+
+d3des.obj: d3des.c d3des.h
+	$(CC) -c $(CFLAGS) -o $@ $<
+
+vncauth.obj: vncauth.c vncauth.h
+	$(CC) -c $(CFLAGS) -o $@ $<
+
+zlib/libz.a:
+	(cd zlib && ./configure)
+	make -C zlib
+
+libjpeg/libjpeg.a:
+	(cd libjpeg && ./configure)
+	make -C libjpeg
+
+omnithread/omnithread.obj:
+	make -C omnithread -f Makefile.mingw
+
+$(RES):
+	make -C res -f Makefile.mingw
+
+clean:
+	del *.obj vncviewer.exe
+

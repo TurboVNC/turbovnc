@@ -34,7 +34,9 @@
 #include <stdio.h>
 #include <process.h>
 #include <assert.h>
+#ifndef __MINGW32__
 #include <crtdbg.h>
+#endif
 #include <locale.h>
 #include <time.h>
 #include <tchar.h>

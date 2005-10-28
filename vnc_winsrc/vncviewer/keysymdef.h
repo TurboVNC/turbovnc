@@ -44,6 +44,7 @@
 #define XK_dead_acute       0xFE51
 #define XK_dead_circumflex  0xFE52
 #define XK_dead_tilde       0xFE53
+#define XK_dead_diaeresis   0xFE57
 
 #define XK_Home			0xFF50
 #define XK_Left			0xFF51	

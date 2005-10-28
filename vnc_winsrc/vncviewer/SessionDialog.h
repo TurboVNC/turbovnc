@@ -30,23 +30,28 @@
 #pragma once
 
 #include "VNCOptions.h"
-#include "MRU.h"
-
+#include "VNCviewerApp.h"
+#include "VNCviewerApp32.h"
 class SessionDialog  
 {
 public:
-
+    
 	// Create a connection dialog, with the options to be
 	// displayed if the options.. button is clicked.
-	SessionDialog(VNCOptions *pOpt);
+	SessionDialog(VNCOptions *pOpt,ClientConnection *cc);
 	int DoDialog();
 	int m_port;
 	TCHAR m_host[256];
    	virtual ~SessionDialog();
-
+    HKEY m_hRegKey;
+	
 private:
+	void SetConnectionProfile(bool LowBandwidth, bool HighSpeed);
+	int cmp(HWND hwnd);
+	ClientConnection *m_cc;
 	VNCOptions *m_pOpt;
-	MRU *m_pMRU;
+	TCHAR keyname[40];
+	
 	static BOOL CALLBACK SessDlgProc(  HWND hwndDlg,  UINT uMsg, 
 		WPARAM wParam, LPARAM lParam );
 };

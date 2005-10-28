@@ -42,7 +42,7 @@ class VNCviewerApp;
 class VNCviewerApp {
 public:
 	VNCviewerApp(HINSTANCE hInstance, LPTSTR szCmdLine);
-
+	virtual void ListenMode()=0;
 	virtual void NewConnection() = 0;
 	virtual void NewConnection(TCHAR *host, int port) = 0;
 	virtual void NewConnection(SOCKET sock) = 0;

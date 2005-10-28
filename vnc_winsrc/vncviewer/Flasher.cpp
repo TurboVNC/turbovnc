@@ -162,10 +162,8 @@ LRESULT CALLBACK Flasher::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lP
 
 	case WM_SOCKEVENT:
 		{
-			// Ignore errors.
-			if (HIWORD(lParam) != 0) {
-				return 0;
-			}
+			assert(HIWORD(lParam) == 0);
+
 			// A new socket created by accept might send messages to
 			// this procedure. We can ignore them.
 			if(wParam != _this->m_sock) {

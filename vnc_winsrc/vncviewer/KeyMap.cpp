@@ -159,7 +159,16 @@ KeyActionSpec KeyMap::PCtoX(UINT virtkey, DWORD keyData) {
     
 
     if (numkeys != 0) {
+		// A special case - use Meta instead of Alt if ScrollLock is on.
         UINT key = kas.keycodes[numkeys-1];
+		if ( (key == XK_Alt_L || key == XK_Alt_R) &&
+			 GetKeyState(VK_SCROLL) ) {
+			if (key == XK_Alt_L) {
+				kas.keycodes[numkeys-1] = XK_Meta_L;
+			} else {
+				kas.keycodes[numkeys-1] = XK_Meta_R;
+			}
+		}
         vnclog.Print(8, _T("keymap gives %u (%x) "), key, key);
 
     } else {
@@ -234,6 +243,16 @@ KeyActionSpec KeyMap::PCtoX(UINT virtkey, DWORD keyData) {
 					kas.keycodes[numkeys++] = XK_dead_tilde; break;
 				case '^':
 					kas.keycodes[numkeys++] = XK_dead_circumflex; break;
+                case 168:
+					// dead_tilde / dead_diaeresis
+					if ( (GetKeyState(VK_CONTROL) & 0x8000) &&
+						 (GetKeyState(VK_MENU) & 0x8000) ) {
+						// AltGr is pressed
+						kas.keycodes[numkeys++] = XK_dead_tilde;
+					} else {
+						kas.keycodes[numkeys++] = XK_dead_diaeresis;
+					}
+					break;
 				}
             }
             // if this works, and it's a regular printable character, we just send that

@@ -36,6 +36,8 @@
 
 // All logging is done via the log object
 Log vnclog;
+VNCHelp help;
+HotKeys hotkeys;
 
 #ifdef UNDER_CE
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR szCmdLine, int iCmdShow)
@@ -61,11 +63,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	}
 
 	MSG msg;
-	
+	std::list<HWND>::iterator iter;
+
 	try {
-		while ( GetMessage(&msg, NULL, 0,0) ) {
-			DispatchMessage(&msg);
-		} 
+		while (GetMessage(&msg, NULL, 0, 0)) {
+			if ( !hotkeys.TranslateAccel(&msg) &&
+				 !help.TranslateMsg(&msg) &&
+				 !app.ProcessDialogMessage(&msg) ) {
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
+		}
 	} catch (WarningException &e) {
 		e.Report();
 	} catch (QuietException &e) {
@@ -115,6 +123,8 @@ void CentreWindow(HWND hwnd)
 // Takes initial string, addresses of results and size of host buffer in wchars.
 // If the display info passed in is longer than the size of the host buffer, it
 // is assumed to be invalid, so false is returned.
+// If the function returns true, then it also replaces the display[]
+// string with its canonical representation.
 bool ParseDisplay(LPTSTR display, LPTSTR phost, int hostlen, int *pport) 
 {
     if (hostlen < (int)_tcslen(display))
@@ -141,7 +151,21 @@ bool ParseDisplay(LPTSTR display, LPTSTR phost, int hostlen, int *pport)
 		}
 	}
     *pport = tmp_port;
+
+	// FIXME: We should not overwrite display[] here, buffer overflow
+	// is possible.
+	
+	FormatDisplay(tmp_port, display, phost);
     return true;
 }
 
-
+void FormatDisplay(int port, LPTSTR display, LPTSTR host)
+{
+	if (port == 5900) {
+		_tcscpy(display, host);
+	} else if (port > 5900 && port <= 5999) {
+			_stprintf(display, TEXT("%s:%d"), host, port - 5900);
+	} else {
+		_stprintf(display, TEXT("%s::%d"), host, port);
+	}
+}
