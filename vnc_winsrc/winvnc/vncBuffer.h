@@ -58,20 +58,15 @@ public:
 	RECT GetSize();
 	rfbPixelFormat GetLocalFormat();
 	BYTE *GetClientBuffer();
-	UINT GetClientBuffSize();
 	BOOL GetRemotePalette(RGBQUAD *quadbuff, UINT ncolours);
 
 	// BUFFER MANIPULATION
 	BOOL CheckBuffer();
 
 	// SCREEN SCANNING
-	void Clear(RECT &rect);
-	void GetChangedRegion(vncRegion &rgn, RECT &rect);											
 	UINT GetNumCodedRects(RECT &rect);
 
 	// SCREEN CAPTURE
-	void GrabRect(RECT &rect);
-	void CopyRect(RECT &dest, POINT &source);
 	RECT GrabMouse();
 	BOOL SetClientFormat(rfbPixelFormat &format);
 
@@ -85,22 +80,21 @@ public:
 
 	// ENCODING
 	BOOL SetEncoding(CARD32 encoding);
-	UINT TranslateRect(const RECT &rect, VSocket *outConn);
+	UINT TranslateRect(const RECT &rect, VSocket *outConn, int offsetx, int offsety);
 
 	// SENDING CURSOR SHAPE UPDATES
 	BOOL IsCursorUpdatePending();
 	BOOL SendCursorShape(VSocket *outConn);
 	BOOL SendEmptyCursorShape(VSocket *outConn);
+	void UpdateLocalFormat();
 
 // Implementation
 protected:
 
 	// Routine to verify the mainbuff handle hasn't changed
-	inline BOOL FastCheckMainbuffer();
+	//inline BOOL FastCheckMainbuffer();
 	
 	BYTE		*m_mainbuff;
-	BOOL		m_freemainbuff;
-	BYTE		*m_backbuff;
 	UINT		m_mainsize;
 
 	BYTE		*m_clientbuff;

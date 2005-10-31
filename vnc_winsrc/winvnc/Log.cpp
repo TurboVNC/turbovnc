@@ -9,13 +9,17 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
+#if (defined(_UNICODE) || defined(_MBCS))
+#error Cannot compile with multibyte/wide character support
+#endif
+
 const int Log::ToDebug   =  1;
 const int Log::ToFile    =  2;
 const int Log::ToConsole =  4;
 
 const static int LINE_BUFFER_SIZE = 1024;
 
-Log::Log(int mode, int level, LPSTR filename, bool append)
+Log::Log(int mode, int level, char *filename, bool append)
 {
 	m_lastLogTime = 0;
 	m_filename = NULL;
@@ -24,8 +28,21 @@ Log::Log(int mode, int level, LPSTR filename, bool append)
     m_todebug = false;
     m_toconsole = false;
     m_tofile = false;
+
     SetFile(filename, append);
     SetMode(mode);
+	SetLevel(level);
+
+	// If the compiler returns full path names in __FILE__,
+	// remember the path prefix, to remove it from the log messages.
+	char *path = __FILE__;
+	char *ptr = strrchr(path, '\\');
+	if (ptr != NULL) {
+		m_prefix_len = ptr + 1 - path;
+		m_prefix = (char *)malloc(m_prefix_len + 1);
+		memcpy(m_prefix, path, m_prefix_len);
+		m_prefix[m_prefix_len] = '\0';
+	}
 }
 
 void Log::SetMode(int mode) {
@@ -66,7 +83,15 @@ int Log::GetLevel() {
 	return m_level;
 }
 
-void Log::SetFile(LPSTR filename, bool append) 
+void Log::SetStyle(int style) {
+	m_style = style;
+}
+
+int Log::GetStyle() {
+	return m_style;
+}
+
+void Log::SetFile(const char *filename, bool append)
 {
 	CloseFile();
 	if (m_filename != NULL)
@@ -89,7 +114,8 @@ void Log::OpenFile()
 	}
 
     m_tofile  = true;
-    
+	m_lastLogTime = 0;
+
 	// If there's an existing log and we're not appending then move it
 	if (!m_append)
 	{
@@ -108,10 +134,14 @@ void Log::OpenFile()
 	}
 
     // If filename is NULL or invalid we should throw an exception here
-    hlogfile = CreateFile(
-        m_filename,  GENERIC_WRITE, FILE_SHARE_READ, NULL,
-        OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL  );
-    
+    hlogfile = CreateFile(m_filename,
+						  GENERIC_WRITE,
+						  FILE_SHARE_READ | FILE_SHARE_WRITE,
+						  NULL,
+						  OPEN_ALWAYS,
+						  FILE_ATTRIBUTE_NORMAL,
+						  NULL);
+
     if (hlogfile == INVALID_HANDLE_VALUE) {
         // We should throw an exception here
         m_todebug = true;
@@ -119,9 +149,9 @@ void Log::OpenFile()
         Print(0, "Error opening log file %s\n", m_filename);
     }
     if (m_append) {
-        SetFilePointer( hlogfile, 0, NULL, FILE_END );
+        SetFilePointer(hlogfile, 0, NULL, FILE_END);
     } else {
-        SetEndOfFile( hlogfile );
+        SetEndOfFile(hlogfile);
     }
 }
 
@@ -133,45 +163,71 @@ void Log::CloseFile() {
     }
 }
 
-inline void Log::ReallyPrintLine(LPSTR line) 
+inline void Log::ReallyPrintLine(char *line) 
 {
     if (m_todebug) OutputDebugString(line);
     if (m_toconsole) {
         DWORD byteswritten;
-        WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), line, strlen(line), &byteswritten, NULL); 
-    };
+        WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), line, strlen(line), &byteswritten, NULL);
+    }
     if (m_tofile && (hlogfile != NULL)) {
         DWORD byteswritten;
         WriteFile(hlogfile, line, strlen(line), &byteswritten, NULL); 
     }
 }
 
-void Log::ReallyPrint(LPSTR format, va_list ap) 
+void Log::ReallyPrint(char *format, va_list ap) 
 {
 	// Write current time to the log if necessary
-	time_t current = time(0);
+	time_t current = time(NULL);
 	if (current != m_lastLogTime) {
 		m_lastLogTime = current;
 
 		char time_str[32];
 		strncpy(time_str, ctime(&m_lastLogTime), 24);
-		strcpy(&time_str[24], "\r\n");
+		if (m_style & TIME_INLINE) {
+			strcpy(&time_str[24], " - ");
+		} else {
+			strcpy(&time_str[24], "\r\n");
+		}
 		ReallyPrintLine(time_str);
 	}
 
-	// Prepare the complete log message
-	TCHAR line[LINE_BUFFER_SIZE];
-	_vsnprintf(line, sizeof(line) - 2 * sizeof(TCHAR), format, ap);
-	line[LINE_BUFFER_SIZE-2] = (TCHAR)'\0';
-#if (!defined(_UNICODE) && !defined(_MBCS))
-	int len = strlen(line);
-	if (len > 0 && len <= sizeof(line) - 2 * sizeof(TCHAR) && line[len-1] == (TCHAR)'\n') {
-		// Replace trailing '\n' with MS-DOS style end-of-line.
-		line[len-1] = (TCHAR)'\r';
-		line[len] =   (TCHAR)'\n';
-		line[len+1] = (TCHAR)'\0';
-	}
+	// Exclude path prefix from the format string if needed
+	char *format_ptr = format;
+	if (m_prefix != NULL && strlen(format) > m_prefix_len + 4) {
+#ifndef _DEBUG
+		if (memcmp(format, m_prefix, m_prefix_len) == 0)
+			format_ptr = format + m_prefix_len;
+#else
+		if (_strnicmp(format, m_prefix, m_prefix_len) == 0)
+			format_ptr = format + m_prefix_len;
 #endif
+	}
+
+	// Prepare the complete log message
+	char line[LINE_BUFFER_SIZE];
+	_vsnprintf(line, LINE_BUFFER_SIZE - 2, format_ptr, ap);
+	line[LINE_BUFFER_SIZE - 2] = '\0';
+	int len = strlen(line);
+	if (len > 0 && len <= LINE_BUFFER_SIZE - 2 && line[len - 1] == '\n') {
+		// Replace trailing '\n' with MS-DOS style end-of-line.
+		line[len-1] = '\r';
+		line[len] =   '\n';
+		line[len+1] = '\0';
+	}
+	if (m_style & (NO_FILE_NAMES | NO_TAB_SEPARATOR)) {
+		char *ptr = strchr(line, '\t');
+		if (ptr != NULL) {
+			// Print without file names if desired
+			if (m_style & NO_FILE_NAMES) {
+				ReallyPrintLine(ptr + 1);
+				return;
+			} else if (m_style & NO_TAB_SEPARATOR) {
+				*ptr = ' ';
+			}
+		}
+	}
 	ReallyPrintLine(line);
 }
 
@@ -179,5 +235,7 @@ Log::~Log()
 {
 	if (m_filename != NULL)
 		free(m_filename);
+	if (m_prefix != NULL)
+		free(m_prefix);
     CloseFile();
 }

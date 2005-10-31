@@ -28,10 +28,11 @@
 #define KEYMAP_H__
 
 #include "rfb.h"
+#include "vncServer.h"
 
 class vncKeymap {
 public:
-  static void keyEvent(CARD32 keysym, bool down);
+  static void keyEvent(CARD32 keysym, bool down, vncServer *server);
   static void ClearShiftKeys();
 };
 

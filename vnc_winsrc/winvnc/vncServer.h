@@ -74,9 +74,8 @@ public:
 	virtual void DisableClients(BOOL state);
 	virtual BOOL ClientsDisabled();
 	virtual vncClientId AddClient(VSocket *socket, BOOL auth, BOOL shared);
-	virtual vncClientId AddClient(VSocket *socket,
-		BOOL auth, BOOL shared, BOOL teleport, int capability,
-		BOOL keysenabled, BOOL ptrenabled);
+	virtual vncClientId AddClient(VSocket *socket, BOOL auth, BOOL shared,
+								  BOOL keysenabled, BOOL ptrenabled);
 	virtual BOOL Authenticated(vncClientId client);
 	virtual void KillClient(vncClientId client);
 
@@ -89,19 +88,15 @@ public:
 	virtual void KillUnauthClients();
 	virtual void WaitUntilUnauthEmpty();
 
+	// Has at least one client had a remote event?
+	virtual BOOL RemoteEventReceived();
+
 	// Client info retrieval/setup
 	virtual vncClient* GetClient(vncClientId clientid);
 	virtual vncClientList ClientList();
 
-	virtual void SetTeleport(vncClientId client, BOOL teleport);
-	virtual void SetCapability(vncClientId client, int capability);
-	virtual void SetKeyboardEnabled(vncClientId client, BOOL enabled);
-	virtual void SetPointerEnabled(vncClientId client, BOOL enabled);
+	virtual void BlockRemoteInput(BOOL block);
 
-	virtual BOOL IsTeleport(vncClientId client);
-	virtual int GetCapability(vncClientId client);
-	virtual BOOL GetKeyboardEnabled(vncClientId client);
-	virtual BOOL GetPointerEnabled(vncClientId client);
 	virtual const char* GetClientName(vncClientId client);
 
 	// Let a client remove itself
@@ -110,6 +105,10 @@ public:
 	// Connect/disconnect notification
 	virtual BOOL AddNotify(HWND hwnd);
 	virtual BOOL RemNotify(HWND hwnd);
+
+	// Check mirror driver status
+	virtual BOOL DesktopActive() { return m_desktop != NULL; }
+	virtual BOOL DriverActive();
 
 protected:
 	// Send a notification message
@@ -135,6 +134,10 @@ public:
 	virtual BOOL PollForeground() {return m_poll_foreground;};
 	virtual void PollFullScreen(BOOL enable) {m_poll_fullscreen = enable;};
 	virtual BOOL PollFullScreen() {return m_poll_fullscreen;};
+	virtual void DontSetHooks(BOOL enable);
+	virtual BOOL DontSetHooks() {return m_dont_set_hooks;};
+	virtual void DontUseDriver(BOOL enable);
+	virtual BOOL DontUseDriver() {return m_dont_use_driver;};
 
 	virtual void PollConsoleOnly(BOOL enable) {m_poll_consoleonly = enable;};
 	virtual BOOL PollConsoleOnly() {return m_poll_consoleonly;};
@@ -170,6 +173,10 @@ public:
 	virtual void GetPassword(char *passwd);
 	virtual void SetPasswordViewOnly(const char *passwd);
 	virtual void GetPasswordViewOnly(char *passwd);
+
+	// External authentication
+	virtual BOOL ExternalAuthEnabled();
+	virtual void EnableExternalAuth(BOOL enable);
 
 	// Remote input handling
 	virtual void EnableRemoteInputs(BOOL enable);
@@ -251,6 +258,47 @@ public:
 	virtual void EnableRemoveWallpaper(const BOOL enable) {m_remove_wallpaper = enable;};
 	virtual BOOL RemoveWallpaperEnabled() {return m_remove_wallpaper;};
 
+	virtual void SetBlankScreen(const BOOL enable) {m_blank_screen = enable;};
+	virtual BOOL GetBlankScreen() {return m_blank_screen;};
+
+	// Whether or not to allow file transfers
+	virtual void EnableFileTransfers(const BOOL enable) {m_enable_file_transfers = enable;}
+	virtual BOOL FileTransfersEnabled() {return m_enable_file_transfers;}
+
+    // Patrial desktop sharing
+    virtual void WindowShared(BOOL enable) { m_WindowShared = enable; }
+    virtual BOOL WindowShared() { return m_WindowShared; }
+    virtual void SetMatchSizeFields(int left, int top, int right, int bottom);
+	virtual RECT GetScreenAreaRect() { return m_screenarea_rect; }
+	virtual void SetWindowShared(HWND hWnd);
+    virtual HWND GetWindowShared() { return m_hwndShared; }
+	virtual RECT GetSharedRect () { return m_shared_rect; }
+	virtual void SetSharedRect (RECT rect) { m_shared_rect = rect; }
+	virtual BOOL FullScreen() { return m_full_screen; }
+	virtual void FullScreen(BOOL enable) { m_full_screen = enable; }
+	virtual BOOL ScreenAreaShared() { return m_screen_area; }
+	virtual void ScreenAreaShared(BOOL enable) { m_screen_area = enable; }
+	virtual void SetNewFBSize(BOOL sendnewfb);
+	virtual BOOL FullRgnRequested();
+	virtual BOOL IncrRgnRequested();
+	virtual	void UpdateLocalFormat();
+	                                                                                     
+	// Blocking remote input
+	virtual void LocalInputPriority(BOOL enable);
+	virtual BOOL LocalInputPriority() { return m_local_input_priority; }
+	virtual void SetKeyboardCounter(int count);
+	virtual int KeyboardCounter() { return m_remote_keyboard; }
+	virtual void SetMouseCounter(int count, POINT &cursor_pos, BOOL mousemove);
+	virtual int MouseCounter() { return m_remote_mouse; }
+	virtual UINT DisableTime() { return m_disable_time; }
+	virtual void SetDisableTime(UINT disabletime) { m_disable_time = disabletime; }
+	virtual UINT GetPollingCycle() { return m_polling_cycle; }
+	virtual void SetPollingCycle(UINT msec);
+	virtual BOOL PollingCycleChanged() { return m_polling_cycle_changed; }
+	virtual void PollingCycleChanged(BOOL change) { m_polling_cycle_changed = change; }
+
+  BOOL checkPointer(vncClient *pClient);
+
 	// Internal stuffs
 protected:
 	// Connection servers
@@ -264,10 +312,13 @@ protected:
 	// General preferences
 	UINT				m_port;
 	UINT				m_port_http;
+	RECT			    m_shared_rect;
+	RECT			    m_screenarea_rect;
 	BOOL				m_autoportselect;
 	char				m_password[MAXPWLEN];
 	char				m_password_viewonly[MAXPWLEN];
 	BOOL				m_passwd_required;
+	BOOL				m_external_auth;
 	BOOL				m_loopback_allowed;
 	BOOL				m_httpd_enabled;
 	BOOL				m_httpd_params_enabled;
@@ -286,8 +337,11 @@ protected:
 	BOOL				m_queryallownopass;
 	BOOL				m_clients_disabled;
 	UINT				m_idle_timeout;
+	UINT				m_disable_time;
 
 	BOOL				m_remove_wallpaper;
+	BOOL				m_blank_screen;
+	BOOL				m_enable_file_transfers;
 
 	// Polling preferences
 	BOOL				m_poll_fullscreen;
@@ -296,6 +350,25 @@ protected:
 
 	BOOL				m_poll_oneventonly;
 	BOOL				m_poll_consoleonly;
+
+	BOOL				m_dont_set_hooks;
+	BOOL				m_dont_use_driver;
+
+	// screen area sharing preferences                                                   
+	BOOL				m_shared_oneapplionly;               
+	HWND				m_hwndShared;  
+	BOOL				m_WindowShared;                      
+	BOOL				m_full_screen;                       
+	BOOL				m_screen_area;                       
+
+	// local event priority stuff                                        
+	BOOL				m_local_input_priority;                    
+	INT					m_remote_mouse;              
+	INT					m_remote_keyboard;           
+	POINT				m_cursor_pos;
+
+	UINT				m_polling_cycle;
+	BOOL				m_polling_cycle_changed;
 
 	// Name of this desktop
 	char				*m_name;

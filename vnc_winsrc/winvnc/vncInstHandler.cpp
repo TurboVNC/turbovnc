@@ -33,10 +33,22 @@
 #include "vncInstHandler.h"
 
 // Name of the mutex
-
+#ifdef HORIZONLIVE
+const char mutexname [] = "AppShareHost_Instance_Mutex";
+#else
 const char mutexname [] = "WinVNC_Win32_Instance_Mutex";
-
+#endif
 // The class methods
+
+vncInstHandler::vncInstHandler() : m_mutex(NULL)
+{
+}
+
+vncInstHandler::~vncInstHandler()
+{
+	// make sure mutex is cleared as we exit
+	Release();
+}
 
 BOOL
 vncInstHandler::Init()
@@ -51,4 +63,32 @@ vncInstHandler::Init()
 		return FALSE;
 
 	return TRUE;
+}
+
+//
+// allow mutex to be explicitely cleared
+//
+
+DWORD
+vncInstHandler::Release() 
+{
+	//
+	// CloseHandle() will throw an exception when
+	// passed an invalid handle
+	//
+	try 
+	{ 
+		CloseHandle(m_mutex);
+	}
+	catch (...)
+	{
+		//
+		// Release() should be called once from the user code,
+		// and a second time by the object's destructor. 
+		// the second call will cause an exception.
+		// we can just ignore it.
+		//
+	}
+
+	return GetLastError();
 }

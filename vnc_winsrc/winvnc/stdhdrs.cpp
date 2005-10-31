@@ -26,4 +26,8 @@
 #include "stdhdrs.h"
 
 // Create the main log object
+#ifdef HORIZONLIVE
+Log vnclog( 0, 1, NULL, true ) ;
+#else
 Log vnclog(0, 1, "WinVNC.log", false);
+#endif

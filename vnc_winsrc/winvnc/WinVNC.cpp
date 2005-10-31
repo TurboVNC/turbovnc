@@ -47,6 +47,7 @@
 // Application instance and name
 HINSTANCE	hAppInstance;
 const char	*szAppName = "WinVNC";
+
 DWORD		mainthreadId;
 
 // WinMain parses the command line and either calls the main App
@@ -87,14 +88,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	}
 
 	BOOL argfound = FALSE;
+	char *connectName = NULL;
+	int connectPort;
+	bool cancelConnect = false;
+
 	for (i = 0; i < strlen(szCmdLine); i++)
 	{
 		if (szCmdLine[i] <= ' ')
 			continue;
 		argfound = TRUE;
 
+		// Determine the length of current argument in the command line
+		size_t arglen = strcspn(&szCmdLine[i], " \t\r\n\v\f");
+
 		// Now check for command-line arguments
-		if (strncmp(&szCmdLine[i], winvncRunServiceHelper, strlen(winvncRunServiceHelper)) == 0)
+		if (strncmp(&szCmdLine[i], winvncRunServiceHelper, arglen) == 0 &&
+			arglen == strlen(winvncRunServiceHelper))
 		{
 			// NB : This flag MUST be parsed BEFORE "-service", otherwise it will match
 			// the wrong option!  (This code should really be replaced with a simple
@@ -104,76 +113,138 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 			vncService::PostUserHelperMessage();
 			return 0;
 		}
-		if (strncmp(&szCmdLine[i], winvncRunService, strlen(winvncRunService)) == 0)
+		if (strncmp(&szCmdLine[i], winvncRunService, arglen) == 0 &&
+			arglen == strlen(winvncRunService))
 		{
 			// Run WinVNC as a service
 			return vncService::WinVNCServiceMain();
 		}
-		if (strncmp(&szCmdLine[i], winvncRunAsUserApp, strlen(winvncRunAsUserApp)) == 0)
+		if (strncmp(&szCmdLine[i], winvncRunAsUserApp, arglen) == 0 &&
+			arglen == strlen(winvncRunAsUserApp))
 		{
 			// WinVNC is being run as a user-level program
 			return WinVNCAppMain();
 		}
-		if (strncmp(&szCmdLine[i], winvncInstallService, strlen(winvncInstallService)) == 0)
+		if (strncmp(&szCmdLine[i], winvncInstallService, arglen) == 0 &&
+			arglen == strlen(winvncInstallService))
 		{
 			// Install WinVNC as a service
 			vncService::InstallService();
-			i+=strlen(winvncInstallService);
+			i += arglen;
 			continue;
 		}
-		if (strncmp(&szCmdLine[i], winvncReinstallService, strlen(winvncReinstallService)) == 0)
+		if (strncmp(&szCmdLine[i], winvncReinstallService, arglen) == 0 &&
+			arglen == strlen(winvncReinstallService))
 		{
 			// Silently remove WinVNC, then re-install it
 			vncService::ReinstallService();
-			i+=strlen(winvncReinstallService);
+			i += arglen;
 			continue;
 		}
-		if (strncmp(&szCmdLine[i], winvncRemoveService, strlen(winvncRemoveService)) == 0)
+		if (strncmp(&szCmdLine[i], winvncRemoveService, arglen) == 0 &&
+			arglen == strlen(winvncRemoveService))
 		{
 			// Remove the WinVNC service
 			vncService::RemoveService();
-			i+=strlen(winvncRemoveService);
+			i += arglen;
 			continue;
 		}
-		if (strncmp(&szCmdLine[i], winvncReload, strlen(winvncReload)) == 0)
+		if (strncmp(&szCmdLine[i], winvncReload, arglen) == 0 &&
+			arglen == strlen(winvncReload))
 		{
 			// Reload Properties from the registry
 			vncService::PostReloadMessage();
-			i+=strlen(winvncReload);
+			i += arglen;
 			continue;
 		}
-		if (strncmp(&szCmdLine[i], winvncShowProperties, strlen(winvncShowProperties)) == 0)
+		if (strncmp(&szCmdLine[i], winvncShowProperties, arglen) == 0 &&
+			arglen == strlen(winvncShowProperties))
 		{
 			// Show the Properties dialog of an existing instance of WinVNC
 			vncService::ShowProperties();
-			i+=strlen(winvncShowProperties);
+			i += arglen;
 			continue;
 		}
-		if (strncmp(&szCmdLine[i], winvncShowDefaultProperties, strlen(winvncShowDefaultProperties)) == 0)
+		if (strncmp(&szCmdLine[i], winvncShowDefaultProperties, arglen) == 0 &&
+			arglen == strlen(winvncShowDefaultProperties))
 		{
 			// Show the Properties dialog of an existing instance of WinVNC
 			vncService::ShowDefaultProperties();
-			i+=strlen(winvncShowDefaultProperties);
+			i += arglen;
 			continue;
 		}
-		if (strncmp(&szCmdLine[i], winvncShowAbout, strlen(winvncShowAbout)) == 0)
+		if (strncmp(&szCmdLine[i], winvncShowAbout, arglen) == 0 &&
+			arglen == strlen(winvncShowAbout))
 		{
 			// Show the About dialog of an existing instance of WinVNC
 			vncService::ShowAboutBox();
-			i+=strlen(winvncShowAbout);
+			i += arglen;
 			continue;
 		}
-		if (strncmp(&szCmdLine[i], winvncKillRunningCopy, strlen(winvncKillRunningCopy)) == 0)
+		if (strncmp(&szCmdLine[i], winvncKillAllClients, arglen) == 0 &&
+			arglen == strlen(winvncKillAllClients))
+		{
+			// NB : This flag MUST be parsed BEFORE "-kill", otherwise it will match
+			// the wrong option!
+
+			// Kill all connected clients
+			vncService::KillAllClients();
+			i += arglen;
+			continue;
+		}
+		if (strncmp(&szCmdLine[i], winvncKillRunningCopy, arglen) == 0 &&
+			arglen == strlen(winvncKillRunningCopy))
 		{
 			// Kill any already running copy of WinVNC
 			vncService::KillRunningCopy();
-			i+=strlen(winvncKillRunningCopy);
+			i += arglen;
 			continue;
 		}
-		if (strncmp(&szCmdLine[i], winvncAddNewClient, strlen(winvncAddNewClient)) == 0)
+		if (strncmp(&szCmdLine[i], winvncShareWindow, arglen) == 0 &&
+			arglen == strlen(winvncShareWindow))
+		{
+			// Find a window to share, by its title
+			i += arglen;
+
+			cancelConnect = true;	// Ignore the -connect option unless
+									// there will be valid window to share
+
+			int start = i, end;
+			while (szCmdLine[start] && szCmdLine[start] <= ' ') start++;
+			if (szCmdLine[start] == '"') {
+				start++;
+				char *ptr = strchr(&szCmdLine[start], '"');
+				if (ptr == NULL) {
+					end = strlen(szCmdLine);
+					i = end;
+				} else {
+					end = ptr - szCmdLine;
+					i = end + 1;
+				}
+			} else {
+				end = start;
+				while (szCmdLine[end] > ' ') end++;
+				i = end;
+			}
+			if (end - start > 0) {
+				char *title = new char[end - start + 1];
+				if (title != NULL) {
+					strncpy(title, &szCmdLine[start], end - start);
+					title[end - start] = 0;
+					HWND hwndFound = vncService::FindWindowByTitle(title);
+					if (hwndFound != NULL)
+						cancelConnect = false;
+					vncService::NewSharedWindow(hwndFound);
+					delete [] title;
+				}
+			}
+			continue;
+		}
+		if (strncmp(&szCmdLine[i], winvncAddNewClient, arglen) == 0 &&
+			arglen == strlen(winvncAddNewClient) && connectName == NULL)
 		{
 			// Add a new client to an existing copy of winvnc
-			i+=strlen(winvncAddNewClient);
+			i += arglen;
 
 			// First, we have to parse the command line to get the hostname to use
 			int start, end;
@@ -182,34 +253,28 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 			end = start;
 			while (szCmdLine[end] > ' ') end++;
 
+			connectName = new char[end-start+1];
+
 			// Was there a hostname (and optionally a port number) given?
 			if (end-start > 0) {
-				char *name = new char[end-start+1];
-				if (name != NULL) {
-					strncpy(name, &(szCmdLine[start]), end-start);
-					name[end-start] = 0;
+				if (connectName != NULL) {
+					strncpy(connectName, &(szCmdLine[start]), end-start);
+					connectName[end-start] = 0;
 
-					int port = INCOMING_PORT_OFFSET;
-					char *portp = strchr(name, ':');
+					connectPort = INCOMING_PORT_OFFSET;
+					char *portp = strchr(connectName, ':');
 					if (portp != NULL) {
 						*portp++ = '\0';
 						if (*portp == ':') {
-							port = atoi(++portp);
+							connectPort = atoi(++portp);	// host::port
 						} else {
-							port += atoi(portp);
+							connectPort += atoi(portp);		// host:display
 						}
 					}
-
-					VCard32 address = VSocket::Resolve(name);
-					if (address != 0) {
-						// Post the IP address to the server
-						vncService::PostAddNewClient(address, port);
-					}
-					delete [] name;
 				}
 			} else {
-				// Tell the server to show the Add New Client dialog
-				vncService::PostAddNewClient(0, 0);
+				if (connectName != NULL)
+					connectName[0] = '\0';
 			}
 			i = end;
 			continue;
@@ -220,11 +285,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 		// Show the usage dialog
 		MessageBox(NULL, winvncUsageText, "WinVNC Usage", MB_OK | MB_ICONINFORMATION);
 		break;
-	};
+	}
 
 	// If no arguments were given then just run
 	if (!argfound)
 		return WinVNCAppMain();
+
+	// Process the -connect option at the end
+	if (connectName != NULL && !cancelConnect) {
+		if (connectName[0] != '\0') {
+			VCard32 address = VSocket::Resolve(connectName);
+			if (address != 0) {
+				// Post the IP address to the server
+				vncService::PostAddNewClient(address, connectPort);
+			}
+		} else {
+			// Tell the server to show the Add New Client dialog
+			vncService::PostAddNewClient(0, 0);
+		}
+	}
+	if (connectName != NULL)
+		delete[] connectName;
 
 	return 0;
 }
@@ -267,8 +348,7 @@ int WinVNCAppMain()
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0,0) ) {
 		vnclog.Print(LL_INTINFO, VNCLOG("message %d received\n"), msg.message);
-
-		TranslateMessage(&msg);  // convert key ups and downs to chars
+		TranslateMessage(&msg);	// convert key ups and downs to chars
 		DispatchMessage(&msg);
 	}
 
@@ -278,4 +358,4 @@ int WinVNCAppMain()
 		delete menu;
 
 	return msg.wParam;
-};
+}

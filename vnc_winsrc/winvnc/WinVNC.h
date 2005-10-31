@@ -26,8 +26,16 @@
 
 // WinVNC header file
 
+#ifdef HORIZONLIVE
+#include "horizon/horizonMain.h"
+#else
+
+#ifndef __WINVNC_H
+#define __WINVNC_H
+
 #include "stdhdrs.h"
 #include "resource.h"
+#include "VNCHelp.h"
 
 // Application specific messages
 
@@ -39,11 +47,13 @@
 #define WM_SRV_CLIENT_AUTHENTICATED	WM_USER+3
 #define WM_SRV_CLIENT_DISCONNECT	WM_USER+4
 
+#define WINVNC_REGISTRY_KEY "Software\\ORL\\WinVNC3"
+
 // Export the application details
 extern HINSTANCE	hAppInstance;
 extern const char	*szAppName;
 extern DWORD		mainthreadId;
-
+extern VNCHelp		help;
 // Main VNC server routine
 extern int WinVNCAppMain();
 
@@ -62,12 +72,21 @@ const char winvncShowDefaultProperties[]	= "-defaultsettings";
 const char winvncShowAbout[]		= "-about";
 const char winvncKillRunningCopy[]	= "-kill";
 
+const char winvncShareWindow[]		= "-sharewindow";
+
 const char winvncAddNewClient[]		= "-connect";
+const char winvncKillAllClients[]	= "-killallclients";
 
 const char winvncShowHelp[]			= "-help";
 
 // Usage string
-const char winvncUsageText[]		= "winvnc [-run] [-kill] [-connect [host[:display]]]"
-									  " [-connect [host[::port]]]\n"
-									  " [-install] [-remove] [-reinstall] [-settings]"
-									  " [-defaultsettings] [-about]\n";
+const char winvncUsageText[] =
+	"winvnc [-run] [-kill] [-service] [-servicehelper]\n"
+	" [-connect [host[:display]]] [-connect [host[::port]]]\n"
+	" [-install] [-remove] [-reinstall] [-reload]\n"
+	" [-settings] [-defaultsettings] [-killallclients]\n"
+	" [-sharewindow  \"title\"] [-about] [-help]\n";
+
+#endif // __WINVNC_H
+
+#endif // HORIZONLIVE

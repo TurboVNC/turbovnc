@@ -93,26 +93,43 @@ public:
 	virtual void UpdateClipText(LPSTR text);
 	virtual void UpdatePalette();
 
-	// Functions for setting & getting the client settings
-	virtual void SetTeleport(BOOL teleport) {m_teleport = teleport;};
-	virtual void EnableKeyboard(BOOL enable) {m_keyboardenabled = enable;};
-	virtual void EnablePointer(BOOL enable) {m_pointerenabled = enable;};
-	virtual void SetCapability(int capability) {m_capability = capability;};
+	// Has the client sent an input event?
+	virtual BOOL RemoteEventReceived() {
+		BOOL result = m_remoteevent;
+		m_remoteevent = FALSE;
+		return result;
+	}
 
-	virtual BOOL IsTeleport() {return m_teleport;};
-	virtual BOOL IsKeyboardEnabled() {return m_keyboardenabled;};
-	virtual BOOL IsPointerEnabled() {return m_pointerenabled;};
-	virtual int GetCapability() {return m_capability;};
+	virtual void SetCursorPosChanged() {
+		if (time(NULL) - m_pointer_event_time > 1) {
+			m_cursor_pos_changed = TRUE;
+		}
+	}
+
+	// Functions for setting & getting the client settings
+	virtual void EnableKeyboard(BOOL enable) { m_keyboardenabled = enable; }
+	virtual void EnablePointer(BOOL enable)  { m_pointerenabled = enable;  }
+	virtual void BlockInput(BOOL block)      { m_inputblocked = block; }
+	virtual BOOL IsKeyboardEnabled() { return m_keyboardenabled; }
+	virtual BOOL IsPointerEnabled()  { return m_pointerenabled;  }
+	virtual BOOL IsInputEnabled()    { return m_keyboardenabled || m_pointerenabled; }
+	virtual BOOL IsInputBlocked()    { return m_inputblocked; }
+
 	virtual const char *GetClientName();
+	virtual const char *GetServerName();
 	virtual vncClientId GetClientId() {return m_id;};
+
+	BOOL SetNewFBSize(BOOL sendnewfb);
+	BOOL IncrRgnRequested(){return !m_incr_rgn.IsEmpty();};
+	BOOL FullRgnRequested(){return !m_full_rgn.IsEmpty();};
+	void UpdateLocalFormat();
+
+
 
 	// Update routines
 protected:
 	BOOL SendUpdate();
 	BOOL SendRFBMsg(CARD8 type, BYTE *buffer, int buflen);
-	void CheckRects(vncRegion &rgn, rectlist &rects);
-	void ClearRects(vncRegion &rgn, rectlist &rects);
-	void GrabRegion(vncRegion &rgn);
 	BOOL SendRectangles(rectlist &rects);
 	BOOL SendRectangle(RECT &rect);
 	BOOL SendCopyRect(RECT &dest, POINT &source);
@@ -121,15 +138,16 @@ protected:
 	BOOL SendLastRect();
 	BOOL SendPalette();
 
-	void PollWindow(HWND hwnd);
+
 
 	// Internal stuffs
 protected:
 	// Per-client settings
-	BOOL			m_teleport;
+	int				m_protocol_minor_version;
+	BOOL			m_protocol_tightvnc;
 	BOOL			m_keyboardenabled;
 	BOOL			m_pointerenabled;
-	int				m_capability;
+	BOOL			m_inputblocked;
 	BOOL			m_copyrect_use;
 	vncClientId		m_id;
 
@@ -142,6 +160,7 @@ protected:
 	// The socket
 	VSocket			*m_socket;
 	char			*m_client_name;
+	char			*m_server_name;
 
 	// The client thread
 	omni_thread		*m_thread;
@@ -149,16 +168,20 @@ protected:
 	// Flag to indicate whether the client is ready for RFB messages
 	BOOL			m_protocol_ready;
 
+	// Flag to indicate that our framebuffer size has changed before
+	// the client has told that it supports NewFBSize message
+	BOOL			m_fb_size_changed;
+
 	// User input information
 	RECT			m_oldmousepos;
 	BOOL			m_mousemoved;
 	rfbPointerEventMsg	m_ptrevent;
-	vncKeymap		m_keymap;
 
 	// Support for cursor shape updates (XCursor, RichCursor encodings)
 	BOOL			m_cursor_update_pending;
 	BOOL			m_cursor_update_sent;
 	BOOL			m_cursor_pos_changed;
+	time_t			m_pointer_event_time;
 	HCURSOR			m_hcursor;
 	POINT			m_cursor_pos;
 
@@ -182,11 +205,33 @@ protected:
 	BOOL			m_palettechanged;
 
 	// Information used in polling mode!
-	RECT			m_qtrscreen;
-	UINT			m_pollingcycle;
 	BOOL			m_remoteevent;
 
+	BOOL			m_use_NewFBSize;
 	BOOL			m_use_PointerPos;
+
+	omni_mutex		m_sendUpdateLock;
+
+private:
+	unsigned int FiletimeToTime70(FILETIME filetime);
+	void SendFileDownloadData(unsigned short sizeFile, char *pFile);
+	void SendFileDownloadData(unsigned int mTime);
+	void SendFileUploadCancel(unsigned short reasonLen, char *reason);
+	void SendFileDownloadFailed(unsigned short reasonLen, char *reason);
+	void CloseUndoneFileTransfer();
+	BOOL m_bUploadStarted;
+	BOOL m_bDownloadStarted;
+	HANDLE m_hFileToRead;
+	HANDLE m_hFileToWrite;
+	char m_UploadFilename[MAX_PATH];
+	char m_DownloadFilename[MAX_PATH];
+	void Time70ToFiletime(unsigned int mTime, FILETIME *pFiletime);
+	unsigned int m_modTime;
+	unsigned int beginUploadTime;
+	unsigned int endUploadTime;
+	DWORD m_rfbBlockSize;
+public:
+	void SendFileDownloadPortion();
 };
 
 #endif

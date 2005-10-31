@@ -110,7 +110,7 @@ public:
   // Connect
   //        Make a stream socket connection to the specified port
   //        on the named machine.
-  VBool Connect(const VString address, const VCard port);
+  VBool Connect(VStringConst address, const VCard port);
 
   // Listen
   //        Set the attached socket to listen for connections
@@ -121,6 +121,13 @@ public:
   //        call blocks waiting for an incoming connection, then
   //        returns a new socket object for the new connection
   VSocket *Accept();
+
+  // TryAccept
+  //        Non-blocking version of Accept. It waits for an
+  //        incoming connection only for the specified number of
+  //        milliseconds. It returns VFalse on error, otherwise stores
+  //        either pointer to the new VSocket, or NULL on timeout
+  VBool TryAccept(VSocket **new_socket, long ms);
 
   // GetPeerName
   //        If the socket is connected then this returns the name
@@ -137,7 +144,7 @@ public:
   // Resolve
   //        Uses the Winsock API to resolve the supplied DNS name to
   //        an IP address and returns it as an Int32
-  static VCard32 Resolve(const VString name);
+  static VCard32 Resolve(VStringConst name);
 
   // SetTimeout
   //        Sets the socket timeout on reads and writes.

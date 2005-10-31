@@ -45,6 +45,7 @@ class vncDesktop;
 #include "RectList.h"
 #include "translate.h"
 #include <omnithread.h>
+#include "VideoDriver.h"
 
 // Constants
 extern const UINT RFB_SCREEN_UPDATE;
@@ -74,25 +75,18 @@ public:
 
 	BOOL Init(vncServer *pSrv);
 
+	// Hooking stuff
+	void TryActivateHooks();
+	BOOL DriverActive() { return m_videodriver != NULL; }
+
 	// Routine to signal a vncServer to trigger an update
 	void RequestUpdate();
 
 	// Screen translation, capture, info
 	void FillDisplayInfo(rfbServerInitMsg *scrInfo);
-	void Translate(
-		rfbTranslateFnType	translator,
-		char				*dest,
-		char				*scrBuff,
-		rfbPixelFormat		cli_pf,
-		const RECT			&rect
-		);
-	void CaptureScreen(RECT &UpdateArea, BYTE *scrBuff, UINT scrBuffSize);
-	rectlist ChangedAreas(
-		RECT				&ChangedArea,
-		rectlist			&existingRects,
-		BYTE				*scrBuff,
-		BYTE				*oldBuff
-		);
+	void SetLocalInputDisableHook(BOOL enable);
+	void SetLocalInputPriorityHook(BOOL enable);
+	void CaptureScreen(RECT &UpdateArea, BYTE *scrBuff);
 	int ScreenBuffSize();
 	HWND Window() { return m_hwnd; }
 
@@ -104,13 +98,15 @@ public:
 	HCURSOR GetCursor() { return m_hcursor; }
 
 	// Clipboard manipulation
+	static void ConvertClipText(char *dst, const char *src);
 	void SetClipText(LPSTR text);
 
 	// Method to obtain the DIBsection buffer if fast blits are enabled
 	// If they're disabled, it'll return NULL
-	inline VOID *OptimisedBlitBuffer() {return m_DIBbits;};
+	inline BYTE *MainBuffer() {return m_mainbuff;};
+	void CopyRect(RECT &dest, POINT &source);
 
-	BOOL	m_initialClipBoardSeen;
+	BOOL			m_initialClipBoardSeen;
 
 	// Implementation
 protected:
@@ -118,18 +114,15 @@ protected:
 	// Routines to hook and unhook us
 	BOOL Startup();
 	BOOL Shutdown();
-	
+	void ActivateHooks();
+	void ShutdownHooks();
+
 	// Init routines called by the child thread
 	BOOL InitDesktop();
 	void KillScreenSaver();
-	void KillWallpaper();
-	void RestoreWallpaper();
 
 	void ChangeResNow();
-	void DisablePattern();
-	void DisableIfRegSystemParameter(char *regName, int spiCommand, int spiParamInt, void* spiParamPtr, int spiUpdate);
 	void SetupDisplayForConnection();
-	BOOL OptimizeDisplayForConnection();
 	void ResetDisplayToNormal();
 
 	BOOL InitBitmap();
@@ -140,11 +133,12 @@ protected:
 	BOOL InitHooks();
 	BOOL SetPalette();
 
-	void CopyToBuffer(RECT &rect, BYTE *scrBuff, UINT scrBuffSize);
+	void CopyToBuffer(RECT &rect, BYTE *scrBuff);
+	void CopyRectToBuffer(RECT &dest, POINT &source);
 	void CalcCopyRects();
-
+	
 	// Routine to attempt enabling optimised DIBsection blits
-	void EnableOptimisedBlits();
+	BOOL CreateBuffers();
 
 	// Convert a bit mask eg. 00111000 to max=7, shift=3
 	static void MaskToMaxAndShift(DWORD mask, CARD16 &max, CARD8 &shift);
@@ -152,15 +146,50 @@ protected:
 	// Enabling & disabling clipboard handling
 	void SetClipboardActive(BOOL active) {m_clipboard_active = active;};
 
+	// Detecting updates
+	BOOL CheckUpdates();
+	void SetPollingTimer();
+	void SetPollingFlag(BOOL set) { m_polling_flag = set; }
+	BOOL GetPollingFlag() { return m_polling_flag; }
+	void PerformPolling();
+	void PollWindow(HWND hwnd);
+	void PollArea(RECT &rect);
+	void CheckRects(vncRegion &rgn, rectlist &rects);
+	void GetChangedRegion(vncRegion &rgn, const RECT &rect);
+	void UpdateChangedRect(vncRegion &rgn, const RECT &rect);
+	void UpdateChangedSubRect(vncRegion &rgn, const RECT &rect);
+
+	// Blank screen feature
+	void UpdateBlankScreenTimer();
+	void BlankScreen(BOOL set);
+
+	// Timer identifiers (the third one is not used in any real timer)
+	enum TimerID {
+		POLL = 1,
+		BLANK_SCREEN = 2,
+		RESTORE_SCREEN = 3
+	};
+
+	// Video driver stuff
+	BOOL InitVideoDriver();
+	void ShutdownVideoDriver();
+
 	// DATA
 
 	// Generally useful stuff
 	vncServer 		*m_server;
 	omni_thread 	*m_thread;
 	HWND			m_hwnd;
-	UINT			m_timerid;
+	BOOL			m_polling_flag;
+	UINT			m_timer_polling;
+	UINT			m_timer_blank_screen;
 	HWND			m_hnextviewer;
 	BOOL			m_clipboard_active;
+	BOOL			m_hooks_active;
+	BOOL			m_hooks_may_change;
+
+	// Video driver stuff
+	vncVideoDriver	*m_videodriver;
 
 	// device contexts for memory and the screen
 	HDC				m_hmemdc;
@@ -191,8 +220,7 @@ protected:
 	HCURSOR			m_hcursor;
 	// Handle of the basic arrow cursor
 	HCURSOR			m_hdefcursor;
-	// The mousemoved flag & current mouse position
-	BOOL			m_cursormoved;
+	// The current mouse position
 	RECT			m_cursorpos;
 
 	// Boolean flag to indicate when the display resolution has changed
@@ -200,11 +228,22 @@ protected:
 
 	// Extra vars used for the DIBsection optimisation
 	VOID			*m_DIBbits;
+	BYTE			*m_mainbuff;
+	BYTE			*m_backbuff;
+	BOOL			m_freemainbuff;
 	BOOL			m_formatmunged;
 
 	DEVMODE			*lpDevMode; // *** used for res changes - Jeremy Peaks
 	long			origPelsWidth; // *** To set the original resolution
 	long			origPelsHeight; // *** - Jeremy Peaks
+	
+	vncRegion		m_changed_rgn;
+	BOOL			m_copyrect_set;
+	RECT			m_copyrect_rect;
+	POINT			m_copyrect_src;
+
+	static const int m_pollingOrder[32];
+	static int		m_pollingStep;
 };
 
 #endif // _WINVNC_VNCDESKTOP

@@ -39,6 +39,8 @@ class vncService;
 
 #include "stdhdrs.h"
 
+BOOL PostToWinVNC(UINT message, WPARAM wParam, LPARAM lParam);
+
 // The NT-specific code wrapper class
 class vncService
 {
@@ -107,6 +109,9 @@ public:
 	// Properties dialog, to allow the user to make changes to their settings
 	static BOOL ShowProperties();
 
+	static BOOL NewSharedWindow(HWND hwndwindow);
+	static HWND FindWindowByTitle(char *substr);
+
 	// Routine to make any currently running version of WinVNC show the
 	// Properties dialog for the default settings, so the user can make changes
 	static BOOL ShowDefaultProperties();
@@ -115,9 +120,18 @@ public:
 	// About box so you can check the version!
 	static BOOL ShowAboutBox();
 
+#ifdef HORIZONLIVE
+	static void SetNoSettings(bool flag);
+	static BOOL GetNoSettings();
+#endif
+
 	// Routine to make an already running copy of WinVNC form an outgoing
 	// connection to a new VNC client
 	static BOOL PostAddNewClient(unsigned long ipaddress, unsigned short port);
+
+	// Routine to make an already running copy of WinVNC disconnect all
+	// connected clients
+	static BOOL KillAllClients();
 };
 
 #endif

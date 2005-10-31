@@ -77,9 +77,8 @@ typedef char VChar;
 ////////////////////////////
 // Compound data types
 
-// #include "rfbgui/VPoint.h"
-// #include "rfbgui/VRect.h"
 typedef VChar * VString;
+typedef const VChar * VStringConst;
 
 #endif // _ATT_VTYPES_DEFINED
 

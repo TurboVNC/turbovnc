@@ -56,6 +56,10 @@ BOOL	g_impersonating_user = 0;
 DWORD	g_version_major;
 DWORD	g_version_minor;
 
+#ifdef HORIZONLIVE
+BOOL	g_nosettings_flag;
+#endif
+
 vncService::vncService()
 {
     OSVERSIONINFO osversioninfo;
@@ -67,7 +71,27 @@ vncService::vncService()
     g_platform_id = osversioninfo.dwPlatformId;
 	g_version_major = osversioninfo.dwMajorVersion;
 	g_version_minor = osversioninfo.dwMinorVersion;
+#ifdef HORIZONLIVE
+	g_nosettings_flag = false;
+#endif
+
 }
+
+
+#ifdef HORIZONLIVE
+void
+vncService::SetNoSettings(bool flag)
+{
+	g_nosettings_flag = flag;
+}
+
+BOOL vncService::GetNoSettings()
+{
+	return g_nosettings_flag;
+}
+
+#endif
+
 
 // GetCurrentUser - fills a buffer with the name of the current user!
 BOOL
@@ -468,6 +492,57 @@ vncService::ShowProperties()
 	return TRUE;
 }
 
+// Static routine to find a window by its title substring (case-insensitive).
+// Window titles and search substrings will be truncated at length 255.
+
+HWND
+vncService::FindWindowByTitle(char *substr)
+{
+	char l_substr[256];
+	strncpy(l_substr, substr, 255);
+	l_substr[255] = 0;
+	int i;
+	for (i = 0; i < strlen(substr); i++) {
+		l_substr[i] = tolower(l_substr[i]);
+	}
+
+	char title[256];
+	HWND hWindow = GetForegroundWindow();
+	while (hWindow != NULL) {
+		int len = GetWindowText(hWindow, title, 256);
+		for (i = 0; i < len; i++) {
+			title[i] = tolower(title[i]);
+		}
+		DWORD style = GetWindowLong(hWindow, GWL_STYLE);
+		if ((style & WS_VISIBLE) != 0 && strstr(title, l_substr) != NULL) {
+			if (IsIconic(hWindow))
+				SendMessage(hWindow, WM_SYSCOMMAND, SC_RESTORE, 0);
+			SetForegroundWindow(hWindow);
+			break;
+		}
+		hWindow = GetNextWindow(hWindow, GW_HWNDNEXT);
+	}
+	if (hWindow == NULL) {
+		MessageBox(NULL, "Unable to find a window with the specified title.",
+				   szAppName, MB_ICONEXCLAMATION | MB_OK);
+	}
+	return hWindow;
+}
+
+BOOL
+vncService::NewSharedWindow(HWND hwndwindow)
+{
+	
+	// Post to the WinVNC menu window
+	if (!PostToWinVNC(MENU_SERVER_SHAREWINDOW, (WPARAM)hwndwindow, 0))
+	{
+		MessageBox(NULL, "No existing instance of WinVNC could be contacted", szAppName, MB_ICONEXCLAMATION | MB_OK);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 // Static routine to show the Default Properties dialog for a currently-running
 // copy of WinVNC, (usually a servicified version.)
 
@@ -508,6 +583,22 @@ vncService::PostAddNewClient(unsigned long ipaddress, unsigned short port)
 {
 	// Post to the WinVNC menu window
 	if (!PostToWinVNC(MENU_ADD_CLIENT_MSG, (WPARAM)port, (LPARAM)ipaddress))
+	{
+		MessageBox(NULL, "No existing instance of WinVNC could be contacted", szAppName, MB_ICONEXCLAMATION | MB_OK);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+// Static routine to tell a locally-running instance of the server
+// to disconnect all connected clients.
+
+BOOL
+vncService::KillAllClients()
+{
+	// Post to the WinVNC menu window
+	if (!PostToWinVNC(MENU_KILL_ALL_CLIENTS_MSG, 0, 0))
 	{
 		MessageBox(NULL, "No existing instance of WinVNC could be contacted", szAppName, MB_ICONEXCLAMATION | MB_OK);
 		return FALSE;
@@ -875,12 +966,14 @@ vncService::InstallService(BOOL silent)
 			RegCloseKey(runservices);
 
 			// We have successfully installed the service!
-			vncTimedMsgBox::Do(
-				"The WinVNC service was successfully installed\n"
-				"The service will start now and will automatically\n"
-				"be run the next time this machine is reset",
-				szAppName,
-				MB_ICONINFORMATION | MB_OK);
+			if (!silent) {
+				vncTimedMsgBox::Do(
+					"The WinVNC service was successfully installed\n"
+					"The service will start now and will automatically\n"
+					"be run the next time this machine is reset",
+					szAppName,
+					MB_ICONINFORMATION | MB_OK);
+			}
 
 			// Run the service...
 			STARTUPINFO si;
@@ -999,12 +1092,14 @@ vncService::InstallService(BOOL silent)
 			}
 
 			// Everything went fine
-			vncTimedMsgBox::Do(
-				"The WinVNC service was successfully registered\n"
-				"The service may be started from the Control Panel, and will\n"
-				"automatically be run the next time this machine is reset",
-				szAppName,
-				MB_ICONINFORMATION | MB_OK);
+			if (!silent) {
+				vncTimedMsgBox::Do(
+					"The WinVNC service was successfully registered\n"
+					"The service may be started from the Control Panel, and will\n"
+					"automatically be run the next time this machine is reset",
+					szAppName,
+					MB_ICONINFORMATION | MB_OK);
+			}
 		}
 		break;
 	};
@@ -1061,7 +1156,9 @@ vncService::RemoveService(BOOL silent)
 			}
 
 			// We have successfully removed the service!
-			vncTimedMsgBox::Do("The WinVNC service has been unregistered", szAppName, MB_ICONINFORMATION | MB_OK);
+			if (!silent) {
+				vncTimedMsgBox::Do("The WinVNC service has been unregistered", szAppName, MB_ICONINFORMATION | MB_OK);
+			}
 		}
 		break;
 
@@ -1120,8 +1217,10 @@ vncService::RemoveService(BOOL silent)
 					}
 
 					// Now remove the service from the SCM
-					if(DeleteService(hservice)) {
-						vncTimedMsgBox::Do("The WinVNC service has been unregistered", szAppName, MB_ICONINFORMATION | MB_OK);
+					if (DeleteService(hservice)) {
+						if (!silent) {
+							vncTimedMsgBox::Do("The WinVNC service has been unregistered", szAppName, MB_ICONINFORMATION | MB_OK);
+						}
 					} else {
 						DWORD error = GetLastError();
 						if (error == ERROR_SERVICE_MARKED_FOR_DELETE) {

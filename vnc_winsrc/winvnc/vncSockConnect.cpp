@@ -73,20 +73,20 @@ void *vncSockConnectThread::run_undetached(void * arg)
 	vnclog.Print(LL_STATE, VNCLOG("started socket connection thread\n"));
 
 	// Go into a loop, listening for connections on the given socket
-	for (;;) {
+	while (!m_shutdown) {
 		// Accept an incoming connection
-		VSocket *new_socket = m_socket->Accept();
-		if (new_socket == NULL || m_shutdown)
+		VSocket *new_socket;
+		if (!m_socket->TryAccept(&new_socket, 100))
 			break;
-
-		vnclog.Print(LL_CLIENTS, VNCLOG("accepted connection from %s\n"),
-					 new_socket->GetPeerName());
-
-		// Successful accept - start the client unauthenticated
-		m_server->AddClient(new_socket, FALSE, FALSE);
+		if (new_socket != NULL) {
+			vnclog.Print(LL_CLIENTS, VNCLOG("accepted connection from %s\n"),
+						 new_socket->GetPeerName());
+			// Successful accept - start the client unauthenticated
+			m_server->AddClient(new_socket, FALSE, FALSE);
+		}
 	}
-	vnclog.Print(LL_STATE, VNCLOG("quitting socket connection thread\n"));
 
+	vnclog.Print(LL_STATE, VNCLOG("quitting socket connection thread\n"));
 	return NULL;
 }
 
@@ -102,23 +102,14 @@ vncSockConnect::~vncSockConnect()
     m_socket.Shutdown();
 
     // Join with our lovely thread
-    if (m_thread != NULL)
-    {
-	// *** This is a hack to force the listen thread out of the accept call,
-	// because Winsock accept semantics are broken
-	((vncSockConnectThread *)m_thread)->m_shutdown = TRUE;
+    if (m_thread != NULL) {
+		((vncSockConnectThread *)m_thread)->m_shutdown = TRUE;
 
-	VSocket socket;
-	socket.Create();
-	socket.Bind(0);
-	socket.Connect("localhost", m_port);
-	socket.Close();
+		void *returnval;
+		m_thread->join(&returnval);
+		m_thread = NULL;
 
-	void *returnval;
-	m_thread->join(&returnval);
-	m_thread = NULL;
-
-	m_socket.Close();
+		m_socket.Close();
     }
 }
 

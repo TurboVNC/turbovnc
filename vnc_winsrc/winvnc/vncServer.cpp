@@ -81,6 +81,9 @@ vncServer::vncServer()
 	m_poll_oneventonly = FALSE;
 	m_poll_consoleonly = TRUE;
 
+	m_dont_set_hooks = FALSE;
+	m_dont_use_driver = FALSE;
+
 	// General options
 	m_loopbackOnly = FALSE;
 	m_disableTrayIcon = FALSE;
@@ -102,6 +105,34 @@ vncServer::vncServer()
 	// Signal set when a client quits
 	m_clientquitsig = new omni_condition(&m_clientsLock);
 	m_clients_disabled = FALSE;
+	m_local_input_priority = FALSE;
+
+	m_full_screen = TRUE;
+	m_WindowShared= FALSE;
+	m_hwndShared = NULL;
+	m_screen_area = FALSE;
+	m_disable_time = 3;
+	RECT temp;
+	GetWindowRect(GetDesktopWindow(), &temp);
+	SetSharedRect(temp);
+	SetPollingCycle(300);
+	PollingCycleChanged(false);
+	m_cursor_pos.x = 0;
+	m_cursor_pos.y = 0;
+
+	// initialize
+	m_enable_file_transfers = FALSE;
+	m_remove_wallpaper = FALSE;
+	m_blank_screen = FALSE;
+
+#ifdef HORIZONLIVE
+	m_full_screen = FALSE;
+	m_WindowShared= TRUE;
+	m_local_input_priority = TRUE;
+	m_remote_mouse = 1;
+	m_remote_keyboard = 1;
+#endif
+
 }
 
 vncServer::~vncServer()
@@ -183,12 +214,11 @@ vncServer::ClientsDisabled()
 vncClientId
 vncServer::AddClient(VSocket *socket, BOOL auth, BOOL shared)
 {
-	return AddClient(socket, auth, shared, FALSE, 0, TRUE, TRUE); 
+	return AddClient(socket, auth, shared, TRUE, TRUE);
 }
 
 vncClientId
 vncServer::AddClient(VSocket *socket, BOOL auth, BOOL shared,
-					 BOOL teleport, int capability,
 					 BOOL keysenabled, BOOL ptrenabled)
 {
 	vncClient *client;
@@ -218,8 +248,6 @@ vncServer::AddClient(VSocket *socket, BOOL auth, BOOL shared,
 	}
 
 	// Set the client's settings
-	client->SetTeleport(teleport);
-	client->SetCapability(capability);
 	client->EnableKeyboard(keysenabled && m_enable_remote_inputs);
 	client->EnablePointer(ptrenabled && m_enable_remote_inputs);
 
@@ -449,6 +477,21 @@ vncServer::WaitUntilUnauthEmpty()
 	}
 }
 
+BOOL
+vncServer::RemoteEventReceived()
+{
+	vncClientList::iterator i;
+	BOOL result = FALSE;
+	omni_mutex_lock l(m_clientsLock);
+
+	// Iterate over the authorised clients
+	for (i = m_authClients.begin(); i != m_authClients.end(); i++)
+	{
+		result = result || GetClient(*i)->RemoteEventReceived();
+	}
+	return result;
+}
+
 // Client info retrieval/setup
 vncClient*
 vncServer::GetClient(vncClientId clientid)
@@ -471,87 +514,13 @@ vncServer::ClientList()
 }
 
 void
-vncServer::SetTeleport(vncClientId clientid, BOOL teleport)
+vncServer::BlockRemoteInput(BOOL block)
 {
 	omni_mutex_lock l(m_clientsLock);
 
-	vncClient *client = GetClient(clientid);
-	if (client != NULL)
-		client->SetTeleport(teleport);
-}
-
-void
-vncServer::SetCapability(vncClientId clientid, int capability)
-{
-	omni_mutex_lock l(m_clientsLock);
-
-	vncClient *client = GetClient(clientid);
-	if (client != NULL)
-		client->SetCapability(capability);
-}
-
-void
-vncServer::SetKeyboardEnabled(vncClientId clientid, BOOL enabled)
-{
-	omni_mutex_lock l(m_clientsLock);
-
-	vncClient *client = GetClient(clientid);
-	if (client != NULL)
-		client->EnableKeyboard(enabled);
-}
-
-void
-vncServer::SetPointerEnabled(vncClientId clientid, BOOL enabled)
-{
-	omni_mutex_lock l(m_clientsLock);
-
-	vncClient *client = GetClient(clientid);
-	if (client != NULL)
-		client->EnablePointer(enabled);
-}
-
-BOOL
-vncServer::IsTeleport(vncClientId clientid)
-{
-	omni_mutex_lock l(m_clientsLock);
-
-	vncClient *client = GetClient(clientid);
-	if (client != NULL)
-		return client->IsTeleport();
-	return FALSE;
-}
-
-int
-vncServer::GetCapability(vncClientId clientid)
-{
-	omni_mutex_lock l(m_clientsLock);
-
-	vncClient *client = GetClient(clientid);
-	if (client != NULL)
-		return client->GetCapability();
-	return 0;
-}
-
-BOOL
-vncServer::GetKeyboardEnabled(vncClientId clientid)
-{
-	omni_mutex_lock l(m_clientsLock);
-
-	vncClient *client = GetClient(clientid);
-	if (client != NULL)
-		return client->IsKeyboardEnabled();
-	return FALSE;
-}
-
-BOOL
-vncServer::GetPointerEnabled(vncClientId clientid)
-{
-	omni_mutex_lock l(m_clientsLock);
-
-	vncClient *client = GetClient(clientid);
-	if (client != NULL)
-		return client->IsPointerEnabled();
-	return FALSE;
+	vncClientList::iterator i;
+	for (i = m_authClients.begin(); i != m_authClients.end(); i++)
+		GetClient(*i)->BlockInput(block);
 }
 
 const char*
@@ -630,7 +599,7 @@ vncServer::RemoveClient(vncClientId clientid)
 		// Are there locksettings set?
 		if (LockSettings() == 1)
 		{
-		    // Yes - lock the machine on disconnect!
+			// Yes - lock the machine on disconnect!
 			vncService::LockWorkstation();
 		} else if (LockSettings() > 1)
 		{
@@ -746,6 +715,8 @@ vncServer::UpdateRect(RECT &rect)
 	}
 }
 
+
+
 void
 vncServer::UpdateRegion(vncRegion &region)
 {
@@ -753,11 +724,12 @@ vncServer::UpdateRegion(vncRegion &region)
 	
 	omni_mutex_lock l(m_clientsLock);
 
+		
 	// Post this update to all the connected clients
 	for (i = m_authClients.begin(); i != m_authClients.end(); i++)
 	{
 		// Post the update
-		GetClient(*i)->UpdateRegion(region);
+			GetClient(*i)->UpdateRegion(region);
 	}
 }
 
@@ -830,6 +802,24 @@ vncServer::UpdateLocalClipText(LPSTR text)
 		m_desktop->SetClipText(text);
 }
 
+// Changing hook settings
+
+void
+vncServer::DontSetHooks(BOOL enable)
+{
+	m_dont_set_hooks = enable;
+	if (m_desktop != NULL)
+		m_desktop->TryActivateHooks();
+}
+
+// Changing use driver settings
+
+void
+vncServer::DontUseDriver(BOOL enable)
+{
+	m_dont_use_driver = enable;
+}
+
 // Name and port number handling
 void
 vncServer::SetName(const char * name)
@@ -884,6 +874,19 @@ vncServer::GetPasswordViewOnly(char *passwd)
 	memcpy(passwd, m_password_viewonly, MAXPWLEN);
 }
 
+// External authentication
+void
+vncServer::EnableExternalAuth(BOOL enable)
+{
+	m_external_auth = enable;
+}
+
+BOOL
+vncServer::ExternalAuthEnabled()
+{
+	return m_external_auth;
+}
+
 // Remote input handling
 void
 vncServer::EnableRemoteInputs(BOOL enable)
@@ -900,13 +903,33 @@ BOOL vncServer::RemoteInputsEnabled()
 void
 vncServer::DisableLocalInputs(BOOL disable)
 {
-	m_disable_local_inputs = disable;
+	if ( m_disable_local_inputs != disable )
+	{
+		m_disable_local_inputs = disable;
+		if ( AuthClientCount() != 0 )
+			m_desktop->SetLocalInputDisableHook(disable);
+	}
 }
 
 BOOL vncServer::LocalInputsDisabled()
 {
 	return m_disable_local_inputs;
 }
+
+void vncServer::LocalInputPriority(BOOL disable)
+{
+	if( m_local_input_priority != disable )
+	{
+		m_local_input_priority = disable;
+		m_remote_mouse = 0;
+		m_remote_keyboard = 0;
+		if ( AuthClientCount() != 0 )
+			m_desktop->SetLocalInputPriorityHook(disable);
+	}
+	
+}  
+
+
 
 // Socket connection handling
 BOOL
@@ -969,7 +992,11 @@ vncServer::SockConnect(BOOL On)
 			}
 
 			// Now let's start the HTTP connection stuff
-			if (m_httpConn == NULL && m_httpd_enabled) {
+			if (m_port_http == m_port) {
+				vnclog.Print(LL_INTERR, VNCLOG("cannot start both RFB and HTTP servers "
+											   "on the same port\n"));
+			}
+            if (m_httpConn == NULL && m_httpd_enabled && m_port_http != m_port) {
 				m_httpConn = new vncHTTPConnect;
 				if (m_httpConn != NULL) {
 					// Start up the HTTP server
@@ -986,10 +1013,12 @@ vncServer::SockConnect(BOOL On)
 	else
 	{
 		// *** JNW - Trying to fix up a lock-up when the listening socket closes
+#ifndef HORIZONLIVE
 		KillAuthClients();
 		KillUnauthClients();
 		WaitUntilAuthEmpty();
 		WaitUntilUnauthEmpty();
+#endif
 
 		// Is there a listening socket?
 		if (m_socketConn != NULL)
@@ -1146,14 +1175,17 @@ vncServer::GetScreenInfo(int &width, int &height, int &depth)
 	}
 
 	// Get the info from the scrinfo structure
-	width = scrinfo.framebufferWidth;
-	height = scrinfo.framebufferHeight;
+	width = m_shared_rect.right - m_shared_rect.left;
+	height = m_shared_rect.bottom - m_shared_rect.top;
 	depth = scrinfo.format.bitsPerPixel;
 }
 
 void
 vncServer::SetAuthHosts(const char*hostlist) {
 	omni_mutex_lock l(m_clientsLock);
+
+	if (m_auth_hosts != 0)
+		free(m_auth_hosts);
 
 	if (hostlist == 0) {
 		vnclog.Print(LL_INTINFO, VNCLOG("authhosts cleared\n"));
@@ -1162,9 +1194,6 @@ vncServer::SetAuthHosts(const char*hostlist) {
 	}
 
 	vnclog.Print(LL_INTINFO, VNCLOG("authhosts set to \"%s\"\n"), hostlist);
-	if (m_auth_hosts != 0)
-		free(m_auth_hosts);
-
 	m_auth_hosts = strdup(hostlist);
 }
 
@@ -1429,4 +1458,160 @@ vncServer::RemAuthHostsBlacklist(const char *machine) {
 		previous = current;
 		current = current->_next;
 	}
+}
+
+void
+vncServer::SetWindowShared(HWND hWnd)
+{
+	m_hwndShared=hWnd;
+}
+
+void 
+vncServer::SetMatchSizeFields(int left,int top,int right,int bottom)
+{
+	RECT trect;
+	GetWindowRect(GetDesktopWindow(), &trect);
+
+/*	if ( right - left < 32 )
+		right = left + 32;
+	
+	if ( bottom - top < 32)
+		bottom = top + 32 ;*/
+
+	if( right > trect.right )
+		right = trect.right;
+	if( bottom > trect.bottom )
+		bottom = trect.bottom;
+	if( left < trect.left)
+		left = trect.left;
+	if( top < trect.top)
+		top = trect.top;
+
+ 
+	m_screenarea_rect.left=left;
+	m_screenarea_rect.top=top;
+	m_screenarea_rect.bottom=bottom;
+	m_screenarea_rect.right=right;
+}
+
+
+void 
+vncServer::SetKeyboardCounter(int count)
+{
+		
+	omni_mutex_lock l(m_clientsLock);
+	if (LocalInputPriority() && vncService::IsWin95())
+	{
+		m_remote_keyboard += count;
+		if (count == 0)
+			m_remote_keyboard = 0;
+	}       
+	
+}
+
+void 
+vncServer::SetMouseCounter(int count, POINT &cursor_pos, BOOL mousemove)
+{
+	if( (mousemove) && ( abs (m_cursor_pos.x - cursor_pos.x)==0 
+		&&  abs (m_cursor_pos.y - cursor_pos.y)==0 ) ) 
+		return;
+	
+	omni_mutex_lock l(m_clientsLock);
+	if (LocalInputPriority() && vncService::IsWin95())
+	{
+		m_remote_mouse += count;
+		if (count == 0)
+			m_remote_mouse = 0;
+
+		m_cursor_pos.x = cursor_pos.x;
+		m_cursor_pos.y = cursor_pos.y;
+		
+	
+	}
+	
+}
+
+void 
+vncServer::SetNewFBSize(BOOL sendnewfb)
+{
+	vncClientList::iterator i;
+	omni_mutex_lock l(m_clientsLock);
+
+	// Post new framebuffer size update to all the connected clients
+	for (i = m_authClients.begin(); i != m_authClients.end(); i++)
+	{
+		// Post the update
+		GetClient(*i)->SetNewFBSize( sendnewfb);
+	}
+}
+
+
+BOOL 
+vncServer::FullRgnRequested()
+{
+	vncClientList::iterator i;
+	omni_mutex_lock l(m_clientsLock);
+
+	// Iterate over the authorised clients
+	for (i = m_authClients.begin(); i != m_authClients.end(); i++)
+	{
+		if (GetClient(*i)->FullRgnRequested())
+			return TRUE;
+	}
+	return FALSE;
+}
+
+BOOL 
+vncServer::IncrRgnRequested()
+{
+	vncClientList::iterator i;
+	omni_mutex_lock l(m_clientsLock);
+
+	// Iterate over the authorised clients
+	for (i = m_authClients.begin(); i != m_authClients.end(); i++)
+	{
+		if (GetClient(*i)->IncrRgnRequested())
+			return TRUE;
+	}
+	return FALSE;
+}
+
+void 
+vncServer::UpdateLocalFormat()
+{
+	vncClientList::iterator i;
+	omni_mutex_lock l(m_clientsLock);
+
+	// Iterate over the authorised clients
+	for (i = m_authClients.begin(); i != m_authClients.end(); i++)
+	{
+		GetClient(*i)->UpdateLocalFormat();
+			
+	}
+	return;
+}
+
+void 
+vncServer::SetPollingCycle(UINT msec)
+{
+	if (m_polling_cycle != msec && msec > 10) {
+		m_polling_cycle = msec;
+		PollingCycleChanged(true);
+	}
+}
+
+BOOL
+vncServer::checkPointer(vncClient *pClient)
+{
+  vncClientList::iterator i;
+  for (i = m_authClients.begin(); i != m_authClients.end(); i++)
+  {
+    if (GetClient(*i) == pClient) return TRUE;
+  }
+  return FALSE;
+}
+
+BOOL
+vncServer::DriverActive() {
+	return (m_desktop != NULL) ? m_desktop->DriverActive() : FALSE;
 }

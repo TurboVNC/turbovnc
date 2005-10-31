@@ -33,6 +33,10 @@
 // The Properties dialog also takes care of loading the program
 // settings and saving them on exit.
 
+#ifdef HORIZONLIVE
+#include "horizon/horizonProperties.h"
+#else
+
 class vncProperties;
 
 #if (!defined(_WINVNC_VNCPROPERTIES))
@@ -41,7 +45,14 @@ class vncProperties;
 // Includes
 #include "stdhdrs.h"
 #include "vncServer.h"
-
+#include "MatchWindow.h"
+#include "PollControls.h"
+#include "InputHandlingControls.h" 
+#include "SharedDesktopArea.h"
+#include "IncomingConnectionsControls.h"
+#include "QuerySettingsControls.h"
+#include "AdministrationControls.h"
+#include "commctrl.h"
 // The vncProperties class itself
 class vncProperties
 {
@@ -54,7 +65,12 @@ public:
 	BOOL Init(vncServer *server);
 
 	// The dialog box window proc
-	static BOOL CALLBACK DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	static BOOL CALLBACK ParentDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	static BOOL CALLBACK IncomingDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	static BOOL CALLBACK PollDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	static BOOL CALLBACK SharedDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	static BOOL CALLBACK QuerySettingsDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	static BOOL CALLBACK AdministrationDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	// Display the properties dialog
 	// If usersettings is TRUE then the per-user settings come up
@@ -70,8 +86,17 @@ public:
 	BOOL AllowShutdown() {return m_allowshutdown;};
 	BOOL AllowEditClients() {return m_alloweditclients;};
 
+	BOOL GetPrefWindowShared() {return m_pref_WindowShared;};
+	BOOL GetPrefFullScreen() {return m_pref_FullScreen;};
+	BOOL GetPrefScreenAreaShared() {return m_pref_ScreenAreaShared;};
+
+	void SetPrefWindowShared(BOOL set) {m_pref_WindowShared = set;};
+	void SetPrefFullScreen(BOOL set) {m_pref_FullScreen = set;};
+	void SetPrefScreenAreaShared(BOOL set) {m_pref_ScreenAreaShared = set;};
+
 	// Implementation
 protected:
+
 	// The server object to which this properties object is attached.
 	vncServer *			m_server;
 
@@ -104,7 +129,8 @@ protected:
 
 	// Making the loaded user prefs active
 	void ApplyUserPrefs();
-	
+	void SetWindowCaption(HWND hWnd);
+
 	BOOL m_returncode_valid;
 	BOOL m_dlgvisible;
 
@@ -117,6 +143,7 @@ protected:
 	BOOL m_pref_BeepDisconnect;
 	char m_pref_passwd[MAXPWLEN];
 	char m_pref_passwd_viewonly[MAXPWLEN];
+	BOOL m_pref_externalAuth;
 	BOOL m_pref_CORBAConn;
 	UINT m_pref_QuerySetting;
 	UINT m_pref_QueryTimeout;
@@ -124,17 +151,46 @@ protected:
 	BOOL m_pref_QueryAllowNoPass;
 	UINT m_pref_IdleTimeout;
 	BOOL m_pref_RemoveWallpaper;
+	BOOL m_pref_BlankScreen;
+	BOOL m_pref_EnableFileTransfers;
 	BOOL m_pref_EnableRemoteInputs;
-	int m_pref_LockSettings;
+	int  m_pref_LockSettings;
 	BOOL m_pref_DisableLocalInputs;
 	BOOL m_pref_PollUnderCursor;
 	BOOL m_pref_PollForeground;
 	BOOL m_pref_PollFullScreen;
 	BOOL m_pref_PollConsoleOnly;
 	BOOL m_pref_PollOnEventOnly;
+	BOOL m_pref_PollingCycle;
+	BOOL m_pref_DontSetHooks;
+	BOOL m_pref_DontUseDriver;
+	BOOL m_pref_WindowShared;
+	BOOL m_pref_FullScreen;
+	BOOL m_pref_ScreenAreaShared;
+	UINT m_pref_PriorityTime;
+	BOOL m_pref_LocalInputPriority;
+	BOOL m_pref_AllowLoopback;
+	BOOL m_pref_OnlyLoopback;
+	BOOL m_pref_RequireAuth;
+	BOOL m_pref_Log;
+	BOOL m_pref_LogLots;
+	int m_pref_Priority;
 
 private:
-	void InitPortSettings(HWND hwnd);
+	HWND m_hTab;
+	HWND m_hIncoming;
+	HWND m_hShared;
+	HWND m_hPoll;
+	HWND m_hQuerySettings;
+	HWND m_hAdministration;
+	CMatchWindow* m_pMatchWindow;
+	PollControls* m_pollcontrols;
+	InputHandlingControls* m_inputhandcontr;
+	SharedDesktopArea* m_shareddtarea;
+	IncomingConnectionsControls* m_incConnCtrl;
+	QuerySettingsControls * m_QSControls;
+	AdministrationControls * m_AdminControls;
 };
 
 #endif // _WINVNC_VNCPROPERTIES
+#endif // HORIZONLIVE

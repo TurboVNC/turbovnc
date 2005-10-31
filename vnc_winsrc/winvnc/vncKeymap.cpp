@@ -30,6 +30,7 @@
 // virtual keycodes.  Now it actually does the local-end simulation of
 // key presses, to keep this messy code on one place!
 
+// Disable warnings about truncated names caused by #include <map>
 #pragma warning(disable : 4786)
 
 #include "vncKeymap.h"
@@ -39,8 +40,6 @@
 #include "vncService.h"
 
 #include <map>
-
-#pragma warning(default : 4786)
 
 // Mapping of X keysyms to windows VK codes.  Ordering here is the same as
 // keysymdef.h to make checking easier
@@ -167,7 +166,10 @@ static keymap_t keymap[] = {
 // doKeyboardEvent wraps the system keybd_event function and attempts to find
 // the appropriate scancode corresponding to the supplied virtual keycode.
 
-inline void doKeyboardEvent(BYTE vkCode, DWORD flags) {
+inline void doKeyboardEvent(BYTE vkCode, vncServer *server, DWORD flags) {
+  if (server != NULL) {
+    server->SetKeyboardCounter(1);
+  }
   keybd_event(vkCode, MapVirtualKey(vkCode, 0), flags, 0);
 }
 
@@ -180,29 +182,30 @@ inline void doKeyboardEvent(BYTE vkCode, DWORD flags) {
 
 class KeyStateModifier {
 public:
-  KeyStateModifier(int vkCode_, int flags_=0)
-    : vkCode(vkCode_), flags(flags_), pressed(false), released(false)
+  KeyStateModifier(int vkCode_, vncServer *server_, int flags_=0)
+    : vkCode(vkCode_), flags(flags_), server(server_),
+      pressed(false), released(false)
   {}
   void press() {
     if (!(GetAsyncKeyState(vkCode) & 0x8000)) {
-      doKeyboardEvent(vkCode, flags);
+      doKeyboardEvent(vkCode, server, flags);
       vnclog.Print(LL_INTINFO, "fake %d down\n", vkCode);
       pressed = true;
     }
   }
   void release() {
     if (GetAsyncKeyState(vkCode) & 0x8000) {
-      doKeyboardEvent(vkCode, flags | KEYEVENTF_KEYUP);
+      doKeyboardEvent(vkCode, server, flags | KEYEVENTF_KEYUP);
       vnclog.Print(LL_INTINFO, "fake %d up\n", vkCode);
       released = true;
     }
   }
   ~KeyStateModifier() {
     if (pressed) {
-      doKeyboardEvent(vkCode, flags | KEYEVENTF_KEYUP);
+      doKeyboardEvent(vkCode, server, flags | KEYEVENTF_KEYUP);
       vnclog.Print(LL_INTINFO, "fake %d up\n", vkCode);
     } else if (released) {
-      doKeyboardEvent(vkCode, flags);
+      doKeyboardEvent(vkCode, server, flags);
       vnclog.Print(LL_INTINFO, "fake %d down\n", vkCode);
     }
   }
@@ -210,6 +213,8 @@ public:
   int flags;
   bool pressed;
   bool released;
+private:
+  vncServer *server;
 };
 
 // Keymapper - a single instance of this class is used to generate Windows key
@@ -226,7 +231,7 @@ public:
     }
   }
 
-  void keyEvent(CARD32 keysym, bool down)
+  void keyEvent(CARD32 keysym, bool down, vncServer *server)
   {
     if ((keysym >= 32 && keysym <= 126) ||
         (keysym >= 160 && keysym <= 255))
@@ -242,11 +247,11 @@ public:
 
       BYTE vkCode = LOBYTE(s);
 
-      KeyStateModifier ctrl(VK_CONTROL);
-      KeyStateModifier alt(VK_MENU);
-      KeyStateModifier shift(VK_SHIFT);
-      KeyStateModifier lshift(VK_LSHIFT);
-      KeyStateModifier rshift(VK_RSHIFT);
+      KeyStateModifier ctrl(VK_CONTROL, server);
+      KeyStateModifier alt(VK_MENU, server);
+      KeyStateModifier shift(VK_SHIFT, server);
+      KeyStateModifier lshift(VK_LSHIFT, server);
+      KeyStateModifier rshift(VK_RSHIFT, server);
 
       if (down) {
         BYTE modifierState = HIBYTE(s);
@@ -267,7 +272,7 @@ public:
                    "latin-1 key: keysym %d(0x%x) vkCode 0x%x down %d\n",
                    keysym, keysym, vkCode, down);
 
-      doKeyboardEvent(vkCode, down ? 0 : KEYEVENTF_KEYUP);
+      doKeyboardEvent(vkCode, server, down ? 0 : KEYEVENTF_KEYUP);
 
     } else {
 
@@ -303,7 +308,7 @@ public:
         }
       }
 
-      doKeyboardEvent(vkCode, flags);
+      doKeyboardEvent(vkCode, server, flags);
     }
   }
 
@@ -312,9 +317,9 @@ private:
   std::map<CARD32,bool> extendedMap;
 } key_mapper;
 
-void vncKeymap::keyEvent(CARD32 keysym, bool down)
+void vncKeymap::keyEvent(CARD32 keysym, bool down, vncServer *server)
 {
-  key_mapper.keyEvent(keysym, down);
+  key_mapper.keyEvent(keysym, down, server);
 }
 
 
@@ -334,7 +339,7 @@ SetShiftState(BYTE key, BOOL down)
 		down ? "down" : "up");
 
 	// Now send a key event to set the key to the new value
-	doKeyboardEvent(key, down ? 0 : KEYEVENTF_KEYUP);
+	doKeyboardEvent(key, NULL, down ? 0 : KEYEVENTF_KEYUP);
 	keystate = (GetAsyncKeyState(key) & 0x8000) != 0;
 
 	vnclog.Print(LL_INTINFO,

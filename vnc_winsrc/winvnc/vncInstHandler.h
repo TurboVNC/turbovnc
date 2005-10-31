@@ -43,8 +43,15 @@ class vncInstHandler;
 class vncInstHandler
 {
 public:
-	// Constructor/destructor
+	vncInstHandler();
+	~vncInstHandler();
+
+	// check to see if an instance is already running
 	BOOL Init();
+	DWORD Release();
+
+private:
+	HANDLE m_mutex;
 };
 
 #endif // _WINVNC_VNCINSTHANDLER
