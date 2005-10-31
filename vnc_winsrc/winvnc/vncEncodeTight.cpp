@@ -143,10 +143,12 @@ vncEncodeTight::NumCodedRects(RECT &rect)
 
 UINT
 vncEncodeTight::EncodeRect(BYTE *source, VSocket *outConn, BYTE *dest,
-						   const RECT &rect)
+						   const RECT &rect, int offx, int offy)
 {
 	int x = rect.left, y = rect.top;
 	int w = rect.right - x, h = rect.bottom - y;
+	offsetx = offx;
+	offsety = offy;
 
 	const int maxRectSize = m_conf[0].maxRectSize;
 	const int rawDataSize = maxRectSize * (m_remoteformat.bitsPerPixel / 8);
@@ -157,7 +159,7 @@ vncEncodeTight::EncodeRect(BYTE *source, VSocket *outConn, BYTE *dest,
 
 		m_buffer = new BYTE [rawDataSize+1];
 		if (m_buffer == NULL)
-			return vncEncoder::EncodeRect(source, dest, rect);
+			return vncEncoder::EncodeRect(source, dest, rect, offsetx, offsety);
 
 		m_bufflen = rawDataSize;
 	}
@@ -265,7 +267,7 @@ vncEncodeTight::EncodeRect(BYTE *source, VSocket *outConn, BYTE *dest,
 						 rects[i].top  == rects[i].bottom ) {
 						continue;
 					}
-					int size = EncodeRect(source, outConn, dest, rects[i]);
+					int size = EncodeRect(source, outConn, dest, rects[i], offsetx, offsety);
 					outConn->SendQueued((char *)dest, size);
 				}
 
@@ -509,7 +511,7 @@ vncEncodeTight::EncodeSubrect(BYTE *source, VSocket *outConn, BYTE *dest,
 #endif
 
 	if (encDataSize < 0)
-		return vncEncoder::EncodeRect(source, dest, r);
+		return vncEncoder::EncodeRect(source, dest, r, 0, 0);
 
 	outConn->SendQueued((char *)m_hdrBuffer, m_hdrBufferBytes);
 
@@ -524,8 +526,8 @@ vncEncodeTight::SendTightHeader(int x, int y, int w, int h)
 {
 	rfbFramebufferUpdateRectHeader rect;
 
-	rect.r.x = Swap16IfLE(x);
-	rect.r.y = Swap16IfLE(y);
+	rect.r.x = Swap16IfLE(x - offsetx);
+	rect.r.y = Swap16IfLE(y - offsety);
 	rect.r.w = Swap16IfLE(w);
 	rect.r.h = Swap16IfLE(h);
 	rect.encoding = Swap32IfLE(rfbEncodingTight);

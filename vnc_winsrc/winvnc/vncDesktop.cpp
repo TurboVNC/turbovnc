@@ -1,4 +1,5 @@
-//  Copyright (C) 2001 Constantin Kaplinsky. All Rights Reserved.
+//  Copyright (C) 2001-2004 HorizonLive.com, Inc. All Rights Reserved.
+//  Copyright (C) 2001-2004 TightVNC Team. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -38,16 +39,32 @@
 #include "rectlist.h"
 #include "vncDesktop.h"
 #include "vncService.h"
+#include "WallpaperUtils.h"
+#include <fstream.h>
 
 // Constants
 const UINT RFB_SCREEN_UPDATE = RegisterWindowMessage("WinVNC.Update.DrawRect");
 const UINT RFB_COPYRECT_UPDATE = RegisterWindowMessage("WinVNC.Update.CopyRect");
 const UINT RFB_MOUSE_UPDATE = RegisterWindowMessage("WinVNC.Update.Mouse");
+// Messages for blocking remote input events
+const UINT RFB_LOCAL_KEYBOARD = RegisterWindowMessage("WinVNC.Local.Keyboard");
+const UINT RFB_LOCAL_MOUSE = RegisterWindowMessage("WinVNC.Local.Mouse");
+
 const char szDesktopSink[] = "WinVNC desktop sink";
 
 // Atoms
 const char *VNC_WINDOWPOS_ATOMNAME = "VNCHooks.CopyRect.WindowPos";
 ATOM VNC_WINDOWPOS_ATOM = NULL;
+
+// Static members to use with new polling algorithm
+const int vncDesktop::m_pollingOrder[32] = {
+	 0, 16,  8, 24,  4, 20, 12, 28,
+	10, 26, 18,  2, 22,  6, 30, 14,
+	 1, 17,  9, 25,  7, 23, 15, 31,
+	19,  3, 27, 11, 29, 13,  5, 21
+};
+int vncDesktop::m_pollingStep = 0;
+
 
 // The desktop handler thread
 // This handles the messages posted by RFBLib to the vncDesktop window
@@ -55,13 +72,14 @@ ATOM VNC_WINDOWPOS_ATOM = NULL;
 class vncDesktopThread : public omni_thread
 {
 public:
-	vncDesktopThread() {m_returnsig = NULL;};
+	vncDesktopThread() { m_returnsig = NULL; }
 protected:
-	~vncDesktopThread() {if (m_returnsig != NULL) delete m_returnsig;};
+	~vncDesktopThread() { if (m_returnsig != NULL) delete m_returnsig; }
 public:
 	virtual BOOL Init(vncDesktop *desktop, vncServer *server);
 	virtual void *run_undetached(void *arg);
 	virtual void ReturnVal(BOOL result);
+
 protected:
 	vncServer *m_server;
 	vncDesktop *m_desktop;
@@ -114,15 +132,30 @@ vncDesktopThread::run_undetached(void *arg)
 	HDESK home_desktop = GetThreadDesktop(GetCurrentThreadId());
 
 	// Attempt to initialise and return success or failure
-	if (!m_desktop->Startup())
-	{
+	if (!m_desktop->Startup()) {
 		vncService::SelectHDESK(home_desktop);
 		ReturnVal(FALSE);
 		return NULL;
 	}
 
+	RECT rect;
+	if (m_server->WindowShared()) {
+		GetWindowRect(m_server->GetWindowShared(), &rect);
+	} else if (m_server->ScreenAreaShared()) {
+		rect = m_server->GetScreenAreaRect();
+	} else {
+		rect = m_desktop->m_bmrect;
+	}
+
+	IntersectRect(&rect, &rect, &m_desktop->m_bmrect);
+	m_server->SetSharedRect(rect);
+
 	// Succeeded to initialise ok
 	ReturnVal(TRUE);
+
+	WallpaperUtils wputils;
+	if (m_server->RemoveWallpaperEnabled())
+		wputils.KillWallpaper();
 
 	// START PROCESSING DESKTOP MESSAGES
 
@@ -130,134 +163,131 @@ vncDesktopThread::run_undetached(void *arg)
 	// to handle clipboard messages
 	m_desktop->SetClipboardActive(TRUE);
 
-	// All UpdateRect messages are cached into a region cache object and are
-	// only passed to clients immediately before TriggerUpdate is called!
-	vncRegion rgncache;
-	rgncache.Clear();
+	SYSTEMTIME systime;
+	FILETIME ftime;
+	ULARGE_INTEGER now, droptime;
+	droptime.QuadPart = 0;
 
-	BOOL unhandled;
 	MSG msg;
 	while (TRUE)
 	{
-		unhandled = TRUE;
-
-		if (!PeekMessage(&msg, m_desktop->Window(), NULL, NULL, PM_NOREMOVE))
+		if (!PeekMessage(&msg, m_desktop->Window(), NULL, NULL, PM_REMOVE))
 		{
-			// Thread has gone idle.  Now would be a good time to send an update.
-			// First, we must check that the screen hasnt changed too much.
+			// Whenever the message queue becomes empty, we check to see whether
+			// there are updates to be passed to clients
+			if (!m_desktop->CheckUpdates())
+				break;
 
-			// While we're doing heavy processing, set the thread to normal priority
-			omni_thread::set_priority(omni_thread::PRIORITY_NORMAL);
-
-			// Has the display resolution or desktop changed?
-			if (m_desktop->m_displaychanged || !vncService::InputDesktopSelected())
-			{
-				vnclog.Print(LL_STATE, VNCLOG("display resolution or desktop changed.\n"));
-
-				rfbServerInitMsg oldscrinfo = m_desktop->m_scrinfo;
-				m_desktop->m_displaychanged = FALSE;
-
-				// Attempt to close the old hooks
-				if (!m_desktop->Shutdown())
-				{
-					vnclog.Print(LL_INTERR, VNCLOG("failed to close desktop server.\n"));
-					m_server->KillAuthClients();
-					break;
-				}
-
-				// Now attempt to re-install them!
-				if (!m_desktop->Startup())
-				{
-					vnclog.Print(LL_INTERR, VNCLOG("failed to re-start desktop server.\n"));
-					m_server->KillAuthClients();
-					break;
-				}
-
-				// Check that the screen info hasn't changed
-				vnclog.Print(LL_INTINFO,
-							 VNCLOG("SCR: old screen format %dx%dx%d\n"),
-							 oldscrinfo.framebufferWidth,
-							 oldscrinfo.framebufferHeight,
-							 oldscrinfo.format.bitsPerPixel);
-				vnclog.Print(LL_INTINFO,
-							 VNCLOG("SCR: new screen format %dx%dx%d\n"),
-							 m_desktop->m_scrinfo.framebufferWidth,
-							 m_desktop->m_scrinfo.framebufferHeight,
-							 m_desktop->m_scrinfo.format.bitsPerPixel);
-				if (memcmp(&m_desktop->m_scrinfo, &oldscrinfo, sizeof(oldscrinfo)) != 0)
-				{
-					vnclog.Print(LL_CONNERR, VNCLOG("screen format has changed - disconnecting clients.\n"));
-					m_server->KillAuthClients();
-					break;
-				}
-
-				// Add a full screen update to all the clients
-				RECT rect = m_desktop->m_bmrect;
-				m_server->UpdateRect(rect);
-				m_server->UpdatePalette();
+			// Now wait for more messages to be queued
+			if (!WaitMessage()) {
+				vnclog.Print(LL_INTERR, VNCLOG("WaitMessage() failed\n"));
+				break;
 			}
-	
-			// TRIGGER THE UPDATE
-
-			// Update the mouse if required
-			if (m_desktop->m_cursormoved)
-			{
-				m_desktop->m_cursormoved = FALSE;
-
-				// Tell the server that the cursor has moved!
-				m_server->UpdateMouse();
-			}
-
-			// Check for moved windows
-			m_desktop->CalcCopyRects();
-
-			// Flush the cached region data to all clients
-			m_server->UpdateRegion(rgncache);
-			rgncache.Clear();
-
-			// Trigger an update to be sent
-			m_server->TriggerUpdate();
-
-			// Increase our priority while we process messages, to avoid "busy" applications
-			// flooding us with messages
-			omni_thread::set_priority(omni_thread::PRIORITY_HIGH);
 		}
-
-		// Now wait on further messages, or quit if told to
-		if (!GetMessage(&msg, m_desktop->Window(), 0,0))
-			break;
-
-		// Now switch, dependent upon the message type recieved
-		if (msg.message == RFB_SCREEN_UPDATE)
+		else if (msg.message == RFB_SCREEN_UPDATE)
 		{
-			// An area of the screen has changed
-			RECT rect;
-			rect.left =	(SHORT) LOWORD(msg.wParam);
-			rect.top = (SHORT) HIWORD(msg.wParam);
-			rect.right = (SHORT) LOWORD(msg.lParam);
-			rect.bottom = (SHORT) HIWORD(msg.lParam);
-			if ((rect.left < 0) || (rect.top < 0) ||
-				(rect.right > m_desktop->m_bmrect.right) || (rect.bottom > m_desktop->m_bmrect.bottom))
-				vnclog.Print(50, VNCLOG("update:%d,%dx%d,%d\n"),
-					rect.left, rect.top, rect.right, rect.bottom);
-
-			rgncache.AddRect(rect);
-//			m_server->UpdateRect(rect);
-
-			unhandled = FALSE;
+			// An area of the screen has changed (ignore if we have a driver)
+			if (m_desktop->m_videodriver == NULL) {
+				RECT rect;
+				rect.left =	(SHORT)LOWORD(msg.wParam);
+				rect.top = (SHORT)HIWORD(msg.wParam);
+				rect.right = (SHORT)LOWORD(msg.lParam);
+				rect.bottom = (SHORT)HIWORD(msg.lParam);
+				m_desktop->m_changed_rgn.AddRect(rect);
+			}
 		}
-
-		if (msg.message == RFB_MOUSE_UPDATE)
+		else if (msg.message == RFB_MOUSE_UPDATE)
 		{
 			// Save the cursor ID
 			m_desktop->SetCursor((HCURSOR) msg.wParam);
-			m_desktop->m_cursormoved = TRUE;
-			unhandled = FALSE;
+		}
+		else if (msg.message == RFB_LOCAL_KEYBOARD)
+		{
+			// Block remote input events if necessary
+			if (vncService::IsWin95()) {
+				m_server->SetKeyboardCounter(-1);
+				if (m_server->KeyboardCounter() < 0) {
+					GetSystemTime(&systime);
+					SystemTimeToFileTime(&systime, &ftime);
+					droptime.LowPart = ftime.dwLowDateTime; 
+					droptime.HighPart = ftime.dwHighDateTime;
+					droptime.QuadPart /= 10000000;	// convert into seconds
+					m_server->BlockRemoteInput(true);
+				}
+			} else {
+				GetSystemTime(&systime);
+				SystemTimeToFileTime(&systime, &ftime);
+				droptime.LowPart = ftime.dwLowDateTime; 
+				droptime.HighPart = ftime.dwHighDateTime;
+				droptime.QuadPart /= 10000000;	// convert into seconds
+				m_server->BlockRemoteInput(true);
+			}
+		}
+		else if (msg.message == RFB_LOCAL_MOUSE)
+		{
+			// Block remote input events if necessary
+			if (vncService::IsWin95()) {
+				if (msg.wParam == WM_MOUSEMOVE) {
+					m_server->SetMouseCounter(-1, msg.pt, true);
+				} else {
+					m_server->SetMouseCounter(-1, msg.pt, false);
+				}
+				if (m_server->MouseCounter() < 0 && droptime.QuadPart == 0) {
+					GetSystemTime(&systime);
+					SystemTimeToFileTime(&systime, &ftime);
+					droptime.LowPart = ftime.dwLowDateTime; 
+					droptime.HighPart = ftime.dwHighDateTime;
+					droptime.QuadPart /= 10000000;	// convert into seconds
+					m_server->BlockRemoteInput(true);
+				}
+			} else {
+				GetSystemTime(&systime);
+				SystemTimeToFileTime(&systime, &ftime);
+				droptime.LowPart = ftime.dwLowDateTime; 
+				droptime.HighPart = ftime.dwHighDateTime;
+				droptime.QuadPart /= 10000000;	// convert into seconds
+				m_server->BlockRemoteInput(true);
+			}
+		}
+		else if (msg.message == WM_QUIT)
+		{
+			break;
+		}
+#ifdef HORIZONLIVE
+		else if (msg.message == LS_QUIT)
+		{
+			// this is our custom quit message
+			vnclog.Print(LL_INTINFO, VNCLOG("Received LS_QUIT message.\n"));
+			break;
+		}
+#endif
+		else
+		{
+			// Process any other messages normally
+			DispatchMessage(&msg);
 		}
 
-		if (unhandled)
-			DispatchMessage(&msg);
+		// Check timer to unblock remote input events if necessary
+		// FIXME: rewrite this stuff to eliminate code duplication (ses above).
+		// FIXME: Use time() instead of GetSystemTime().
+		// FIXME: It's not necessary to do this on receiving _each_ message.
+		if (m_server->LocalInputPriority() && droptime.QuadPart != 0) {
+			GetSystemTime(&systime);
+			SystemTimeToFileTime(&systime, &ftime);
+			now.LowPart = ftime.dwLowDateTime;
+			now.HighPart = ftime.dwHighDateTime;
+			now.QuadPart /= 10000000;	// convert into seconds
+
+			if (now.QuadPart - m_server->DisableTime() >= droptime.QuadPart) {
+				m_server->BlockRemoteInput(false);
+				droptime.QuadPart = 0;
+				m_server->SetKeyboardCounter(0);
+				m_server->SetMouseCounter(0, msg.pt, false);
+			}
+		}
 	}
+
+	wputils.RestoreWallpaper();
 
 	m_desktop->SetClipboardActive(FALSE);
 	
@@ -265,6 +295,10 @@ vncDesktopThread::run_undetached(void *arg)
 
 	// Clear all the hooks and close windows, etc.
 	m_desktop->Shutdown();
+	// Return display settings to previous values.
+	m_desktop->ResetDisplayToNormal();
+	// Turn on the screen.
+	m_desktop->BlankScreen(FALSE);
 
 	// Clear the shift modifier keys, now that there are no remote clients
 	vncKeymap::ClearShiftKeys();
@@ -275,17 +309,18 @@ vncDesktopThread::run_undetached(void *arg)
 	return NULL;
 }
 
-// Implementation
+// Implementation of the vncDesktop class
 
 vncDesktop::vncDesktop()
 {
 	m_thread = NULL;
 
 	m_hwnd = NULL;
-	m_timerid = 0;
+	m_polling_flag = FALSE;
+	m_timer_polling = 0;
+	m_timer_blank_screen = 0;
 	m_hnextviewer = NULL;
 	m_hcursor = NULL;
-	m_cursormoved = TRUE;
 
 	m_displaychanged = FALSE;
 
@@ -297,9 +332,20 @@ vncDesktop::vncDesktop()
 
 	// Vars for Will Dean's DIBsection patch
 	m_DIBbits = NULL;
+	m_freemainbuff = FALSE;
 	m_formatmunged = FALSE;
+	m_mainbuff = NULL;
+	m_backbuff = NULL;
 
 	m_clipboard_active = FALSE;
+	m_hooks_active = FALSE;
+	m_hooks_may_change = FALSE;
+	lpDevMode = NULL;
+	m_copyrect_set = FALSE;
+
+	m_videodriver = NULL;
+
+	m_timer_blank_screen = 0;
 }
 
 vncDesktop::~vncDesktop()
@@ -321,6 +367,7 @@ vncDesktop::~vncDesktop()
 
 	// Let's call Shutdown just in case something went wrong...
 	Shutdown();
+
 }
 
 // Routine to startup and install all the hooks and stuff
@@ -335,6 +382,9 @@ vncDesktop::Startup()
 	if (!InitDesktop())
 		return FALSE;
 
+	if (InitVideoDriver())
+		InvalidateRect(NULL,NULL,TRUE);
+
 	if (!InitBitmap())
 		return FALSE;
 
@@ -344,7 +394,8 @@ vncDesktop::Startup()
 	if (!SetPixFormat())
 		return FALSE;
 
-	EnableOptimisedBlits();
+	if (!CreateBuffers())
+		return FALSE;
 
 	if (!SetPixShifts())
 		return FALSE;
@@ -356,26 +407,28 @@ vncDesktop::Startup()
 		return FALSE;
 
 	// Add the system hook
-	if (!SetHook(
-		m_hwnd,
-		RFB_SCREEN_UPDATE,
-		RFB_COPYRECT_UPDATE,
-		RFB_MOUSE_UPDATE
-		))
-	{
-		vnclog.Print(LL_INTERR, VNCLOG("failed to set system hooks\n"));
-		// Switch on full screen polling, so they can see something, at least...
-		m_server->PollFullScreen(TRUE);
-	}
+	ActivateHooks();
+	m_hooks_may_change = true;
 
+#ifndef HORIZONLIVE
 	// Start up the keyboard and mouse filters
 	SetKeyboardFilterHook(m_server->LocalInputsDisabled());
 	SetMouseFilterHook(m_server->LocalInputsDisabled());
+#endif
+
+	// Start up the keyboard and mouse hooks  for 
+	// local event priority over remote impl.
+	if (m_server->LocalInputPriority())
+		SetLocalInputPriorityHook(true);
 
 	// Start a timer to handle Polling Mode.  The timer will cause
-	// an "idle" event once every second, which is necessary if Polling
-	// Mode is being used, to cause TriggerUpdate to be called.
-	m_timerid = SetTimer(m_hwnd, 1, 1000, NULL);
+	// an "idle" event, which is necessary if Polling Mode is being used,
+	// to cause TriggerUpdate to be called.
+	SetPollingFlag(FALSE);
+	SetPollingTimer();
+
+	// If necessary, start a separate timer to preserve the diplay turned off.
+	UpdateBlankScreenTimer();
 
 	// Get hold of the WindowPos atom!
 	if ((VNC_WINDOWPOS_ATOM = GlobalAddAtom(VNC_WINDOWPOS_ATOMNAME)) == 0) {
@@ -391,16 +444,30 @@ vncDesktop::Startup()
 BOOL
 vncDesktop::Shutdown()
 {
-	// If we created a timer then kill it
-	if (m_timerid != NULL)
-		KillTimer(NULL, m_timerid);
+	// If we created timers then kill them
+	if (m_timer_polling) {
+		KillTimer(Window(), TimerID::POLL);
+		m_timer_polling = 0;
+	}
+	if (m_timer_blank_screen) {
+		KillTimer(Window(), TimerID::BLANK_SCREEN);
+		m_timer_blank_screen = 0;
+	}
 
 	// If we created a window then kill it and the hooks
-	if(m_hwnd != NULL)
+	if (m_hwnd != NULL)
 	{	
-		// Remove the system hooks
-		UnSetHook(m_hwnd);
+		//Remove the system hooks
+		//Unset keyboard and mouse hooks
+		SetLocalInputPriorityHook(false);
+		m_hooks_may_change = false;
+		ShutdownHooks();
 
+#ifndef HORIZONLIVE
+		// Stop the keyboard and mouse filters
+		SetKeyboardFilterHook(false);
+		SetMouseFilterHook(false);
+#endif
 		// The window is being closed - remove it from the viewer list
 		ChangeClipboardChain(m_hwnd, m_hnextviewer);
 
@@ -439,6 +506,23 @@ vncDesktop::Shutdown()
 		m_membitmap = NULL;
 	}
 
+	// Free back buffer
+	if (m_backbuff != NULL)
+	{
+		delete [] m_backbuff;
+		m_backbuff = NULL;
+	}
+
+	if (m_freemainbuff) {
+		// Slow blits were enabled - free the slow blit buffer
+		if (m_mainbuff != NULL)
+		{
+			delete [] m_mainbuff;
+			m_mainbuff = NULL;
+		}
+	}
+
+
 	// Free the WindowPos atom!
 	if (VNC_WINDOWPOS_ATOM != NULL) {
 		if (GlobalDeleteAtom(VNC_WINDOWPOS_ATOM) != 0) {
@@ -446,10 +530,44 @@ vncDesktop::Shutdown()
 		}
 	}
 
-	// Return display settings to previous values.
-	ResetDisplayToNormal();
+	ShutdownVideoDriver();
 
 	return TRUE;
+}
+
+// Routines to set/unset hooks via VNCHooks.dll
+
+void
+vncDesktop::ActivateHooks()
+{
+	BOOL enable = !(m_server->DontSetHooks() && m_server->PollFullScreen());
+	if (enable && !m_hooks_active) {
+		m_hooks_active = SetHook(m_hwnd,
+								 RFB_SCREEN_UPDATE,
+								 RFB_COPYRECT_UPDATE,
+								 RFB_MOUSE_UPDATE);
+		if (!m_hooks_active) {
+			vnclog.Print(LL_INTERR, VNCLOG("failed to set system hooks\n"));
+			// Switch on full screen polling, so they can see something, at least...
+			m_server->PollFullScreen(TRUE);
+		}
+	} else if (!enable) {
+		ShutdownHooks();
+	}
+}
+
+void
+vncDesktop::ShutdownHooks()
+{
+	if (m_hooks_active)
+		m_hooks_active = !UnSetHook(m_hwnd);
+}
+
+void
+vncDesktop::TryActivateHooks()
+{
+	if (m_hooks_may_change)
+		ActivateHooks();
 }
 
 // Routine to ensure we're on the correct NT desktop
@@ -559,9 +677,9 @@ void vncDesktop::ChangeResNow()
 	origPelsHeight = lpDevMode->dmPelsHeight; // *** - Jeremy Peaks
 
 	// *** Open the registry key for resolution settings
-	HKEY checkdetails = NULL;
+	HKEY checkdetails;
 	RegOpenKeyEx(HKEY_LOCAL_MACHINE, 
-				"Software\\ORL\\WinVNC3",
+				WINVNC_REGISTRY_KEY,
 				0,
 				KEY_READ,
 				&checkdetails);
@@ -624,268 +742,31 @@ void vncDesktop::ChangeResNow()
 	}
 }
 
-// *** This method is a front-end for the SystemParameterInfo() call.
-// *** First the HKLM\\Software\\ORL\\WinVNC\\<regName> string is checkted
-// *** for presence, string type and Yes/yes/Y/y, if so, SystemParameterInfo
-// *** is called.
-void
-vncDesktop::DisableIfRegSystemParameter(char *regName,
-										int spiCommand,
-										int spiParamInt,
-										void* spiParamPtr,
-										int spiUpdate)
-{
-	// *** Checks to see if reg key is set, then disables the
-	// *** system parameter by invoking SystemParameterInfo().
-	// *** This is placed here rather than vncHooks.cpp as it causes
-	// *** VNC to crash if put there. - Jeremy Peaks
-
-	HKEY checkdetails;
-	RegOpenKeyEx(HKEY_LOCAL_MACHINE, 
-				"Software\\ORL\\WinVNC3",
-				0,
-				KEY_READ,
-				&checkdetails);
-
-	int slen=MAX_REG_ENTRY_LEN;
-	int valType;
-	char inouttext[MAX_REG_ENTRY_LEN];
-
-	memset(inouttext, 0, MAX_REG_ENTRY_LEN);
-
-	// *** Get the registry value - Jeremy Peaks
-	RegQueryValueEx(checkdetails,
-		regName,
-		NULL,
-		(LPDWORD) &valType,
-		(LPBYTE) &inouttext,
-		(LPDWORD) &slen);
-
-	// *** If regName = Yes/yes/Y/y then disable setting
-	// *** - Jeremy Peaks & W. Brian Blevins
-	if ((valType == REG_SZ) &&
-		(inouttext[0] == 'Y' || inouttext[0] == 'y')) {
-
-		vnclog.Print(LL_INTINFO, VNCLOG("SCR-WBB: attempting to %s.\n"), regName);
-
-		SystemParametersInfo(spiCommand, spiParamInt, spiParamPtr, spiUpdate);
-		// SystemParametersInfo(SPI_SETDESKPATTERN, 0, 0, 0);
-	}
-
-	if (checkdetails != NULL) {
-		RegCloseKey(checkdetails);
-	}
-	
-}
-
-// *** Prepare the display settings for the new connection.
-// *** The precise changes depend on a number of registry settings.
 void
 vncDesktop::SetupDisplayForConnection()
 {
-
 	KillScreenSaver();
 
 	ChangeResNow(); // *** - Jeremy Peaks
-	
-	// If all optimizatations are not already enabled, then
-	// check each one individually.
-	if (! OptimizeDisplayForConnection())
-	{
-		DisableIfRegSystemParameter("DisablePattern",
-									SPI_SETDESKPATTERN,
-									0,
-									0,
-									SPIF_SENDCHANGE);
-
-		DisableIfRegSystemParameter("DisableWallpaper",
-									SPI_SETDESKWALLPAPER,
-									0,
-									"",
-									SPIF_SENDCHANGE);
-
-		DisableIfRegSystemParameter("DisableFontSmoothing",
-									SPI_SETFONTSMOOTHING,
-									FALSE,
-									0,
-									SPIF_SENDCHANGE);
-
-		DisableIfRegSystemParameter("DisableFullWindowDrag",
-									SPI_SETDRAGFULLWINDOWS,
-									FALSE,
-									0,
-									SPIF_SENDCHANGE);
-	}
-
-}
-
-// *** If configured, perform a set of display optimizations to
-// *** improve performance over the remote connection.
-BOOL
-vncDesktop::OptimizeDisplayForConnection()
-{
-
-	BOOL result;
-	HKEY checkdetails;
-
-	result = FALSE;
-
-	RegOpenKeyEx(HKEY_LOCAL_MACHINE, 
-				"Software\\ORL\\WinVNC3",
-				0,
-				KEY_READ,
-				&checkdetails);
-
-	int slen=MAX_REG_ENTRY_LEN;
-	int valType;
-	char inouttext[MAX_REG_ENTRY_LEN];
-
-	memset(inouttext, 0, MAX_REG_ENTRY_LEN);
-
-	// *** Get the DisablePattern value - Jeremy Peaks
-	RegQueryValueEx(checkdetails,
-		"OptimizeDesktop",
-		NULL,
-		(LPDWORD) &valType,
-		(LPBYTE) &inouttext,
-		(LPDWORD) &slen);
-
-	// *** If Optimize = Yes/yes/Y/y then turn on all optimizations
-	// *** - W. Brian Blevins
-	if ((valType == REG_SZ) &&
-		(inouttext[0] == 'Y' || inouttext[0] == 'y')) {
-
-		vnclog.Print(LL_INTINFO, VNCLOG("SCR-WBB: desktop optimization enabled.\n"));
-		result = TRUE;
-
-		vnclog.Print(LL_INTINFO, VNCLOG("SCR-WBB: attempting to disable pattern.\n"));
-		SystemParametersInfo(SPI_SETDESKPATTERN, 0, 0, SPIF_SENDCHANGE);
-
-		vnclog.Print(LL_INTINFO, VNCLOG("SCR-WBB: attempting to disable wallpaper.\n"));
-		SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, "", SPIF_SENDCHANGE);
-
-		vnclog.Print(LL_INTINFO, VNCLOG("SCR-WBB: attempting to disable font smoothing.\n"));
-		SystemParametersInfo(SPI_SETFONTSMOOTHING, FALSE, 0, SPIF_SENDCHANGE);
-
-		vnclog.Print(LL_INTINFO, VNCLOG("SCR-WBB: attempting to disable full window drags.\n"));
-		SystemParametersInfo(SPI_SETDRAGFULLWINDOWS, FALSE, 0, SPIF_SENDCHANGE);
-
-	}
-
-	if (checkdetails != NULL) {
-		RegCloseKey(checkdetails);
-	}
-
-	return result;
 }
 
 void
 vncDesktop::ResetDisplayToNormal()
 {
-
-	int slen=MAX_REG_ENTRY_LEN;
-	int valType;
-	char inouttext[MAX_REG_ENTRY_LEN];
-
-	if ( lpDevMode != NULL ) {
+	if (lpDevMode != NULL) {
 
 		// *** In case the resolution was changed, revert to original settings now
 		lpDevMode->dmPelsWidth = origPelsWidth;
 		lpDevMode->dmPelsHeight = origPelsHeight;
 
-		long resultOfResChange = ChangeDisplaySettings( lpDevMode, CDS_TEST);
+		long resultOfResChange = ChangeDisplaySettings(lpDevMode, CDS_TEST);
 		if (resultOfResChange == DISP_CHANGE_SUCCESSFUL)
-			ChangeDisplaySettings( lpDevMode, CDS_UPDATEREGISTRY);
+			ChangeDisplaySettings(lpDevMode, CDS_UPDATEREGISTRY);
 
 		delete lpDevMode;
 		lpDevMode = NULL;
 	}
-
-	// *** The following fixes a bug that existed in that WinNT users
-	// *** wallpapers reverted back to default system settings, rather than
-	// *** their own wallpaper.  The value is now taken from HKEY_CURRENT_USER
-
-	// *** Open the registry key for current users settings
-	HKEY checkdetails;
-	RegOpenKeyEx(HKEY_CURRENT_USER, 
-				"Control Panel\\Desktop",
-				0,
-				KEY_READ,
-				&checkdetails);
-	
-	memset(inouttext, 0, MAX_REG_ENTRY_LEN);
-	
-	// *** Get the Wallpaper value - Jeremy Peaks
-	RegQueryValueEx(checkdetails,
-		"Wallpaper",
-		NULL,
-		(LPDWORD) &valType,
-		(LPBYTE) &inouttext,
-		(LPDWORD) &slen);
-
-	// *** Disconnected now, so just in case the wallpaper was disabled
-	// *** earlier, revert to saved wallpaper settings. - Jeremy Peaks
-	SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, inouttext, SPIF_SENDCHANGE);
-
-	memset(inouttext, 0, MAX_REG_ENTRY_LEN);
-
-	// *** Get the FontSmoothing value - Jeremy Peaks
-	RegQueryValueEx(checkdetails,
-		"FontSmoothing",
-		NULL,
-		(LPDWORD) &valType,
-		(LPBYTE) &inouttext,
-		(LPDWORD) &slen);
-
-	// *** Just in case font smoothing was disabled, re-enable it now
-	// *** - Jeremy Peaks
-	if (valType == REG_SZ && atoi(inouttext) > 0) {
-		SystemParametersInfo(SPI_SETFONTSMOOTHING, TRUE, 0, SPIF_SENDCHANGE);
-	}
-	
-	// *** Get the Pattern value - Jeremy Peaks
-	long sllen = MAX_REG_ENTRY_LEN;
-
-	memset(inouttext, 0, MAX_REG_ENTRY_LEN);
-
-	RegQueryValueEx(checkdetails,
-		"Pattern",
-		NULL,
-		(LPDWORD) &valType,
-		(LPBYTE) &inouttext,
-		(LPDWORD) &sllen);
-
-
-	// *** Just in case the pattern was disabled, re-enable it now
-	// *** - Jeremy Peaks
-	SystemParametersInfo(SPI_SETDESKPATTERN, 0, inouttext, SPIF_SENDCHANGE);
-
-	memset(inouttext, 0, MAX_REG_ENTRY_LEN);
-
-	// *** Get the DragFullWindows value - W. Brian Blevins
-	RegQueryValueEx(checkdetails,
-		"DragFullWindows",
-		NULL,
-		(LPDWORD) &valType,
-		(LPBYTE) &inouttext,
-		(LPDWORD) &slen);
-
-	// *** Just in case full window dragging was disabled, re-enable it now
-	// *** - W. Brian Blevins
-	if ((valType == REG_SZ) &&
-		(inouttext[0] == '1')) {
-
-		SystemParametersInfo(SPI_SETDRAGFULLWINDOWS, TRUE, 0, SPIF_SENDCHANGE);
-
-	}
-	
-	if (checkdetails != NULL) {
-		RegCloseKey(checkdetails);
-		RegCloseKey(HKEY_CURRENT_USER);
-	}
-
 }
-
 
 BOOL
 vncDesktop::InitBitmap()
@@ -900,8 +781,7 @@ vncDesktop::InitBitmap()
 	m_bmrect.left = m_bmrect.top = 0;
 	m_bmrect.right = GetDeviceCaps(m_hrootdc, HORZRES);
 	m_bmrect.bottom = GetDeviceCaps(m_hrootdc, VERTRES);
-	vnclog.Print(LL_INTINFO, VNCLOG("bitmap dimensions are %d x %d\n"),
-				 m_bmrect.right, m_bmrect.bottom);
+	vnclog.Print(LL_INTINFO, VNCLOG("bitmap dimensions are %dx%d\n"), m_bmrect.right, m_bmrect.bottom);
 
 	// Create a compatible memory DC
 	m_hmemdc = CreateCompatibleDC(m_hrootdc);
@@ -914,7 +794,6 @@ vncDesktop::InitBitmap()
 	// Check that the device capabilities are ok
 	if ((GetDeviceCaps(m_hrootdc, RASTERCAPS) & RC_BITBLT) == 0)
 	{
-		vnclog.Print(LL_INTERR, VNCLOG("BitBlt() is not supported\n"));
 		MessageBox(
 			NULL,
 			"vncDesktop : root device doesn't support BitBlt\n"
@@ -926,7 +805,6 @@ vncDesktop::InitBitmap()
 	}
 	if ((GetDeviceCaps(m_hmemdc, RASTERCAPS) & RC_DI_BITMAP) == 0)
 	{
-		vnclog.Print(LL_INTERR, VNCLOG("GetDIBits() is not supported\n"));
 		MessageBox(
 			NULL,
 			"vncDesktop : memory device doesn't support GetDIBits\n"
@@ -947,16 +825,15 @@ vncDesktop::InitBitmap()
 	vnclog.Print(LL_INTINFO, VNCLOG("created memory bitmap\n"));
 
 	// Get the bitmap's format and colour details
+	int result;
 	m_bminfo.bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	m_bminfo.bmi.bmiHeader.biBitCount = 0;
-	if (::GetDIBits(m_hmemdc, m_membitmap, 0, 1, NULL,
-					&m_bminfo.bmi, DIB_RGB_COLORS) == 0) {
-		vnclog.Print(LL_INTERR, VNCLOG("GetDIBits() failed, call #1\n"));
+	result = ::GetDIBits(m_hmemdc, m_membitmap, 0, 1, NULL, &m_bminfo.bmi, DIB_RGB_COLORS);
+	if (result == 0) {
 		return FALSE;
 	}
-	if (::GetDIBits(m_hmemdc, m_membitmap, 0, 1, NULL,
-					&m_bminfo.bmi, DIB_RGB_COLORS) == 0) {
-		vnclog.Print(LL_INTERR, VNCLOG("GetDIBits() failed, call #2\n"));
+	result = ::GetDIBits(m_hmemdc, m_membitmap, 0, 1, NULL, &m_bminfo.bmi, DIB_RGB_COLORS);
+	if (result == 0) {
 		return FALSE;
 	}
 	vnclog.Print(LL_INTINFO, VNCLOG("got bitmap format\n"));
@@ -964,7 +841,6 @@ vncDesktop::InitBitmap()
 	vnclog.Print(LL_INTINFO, VNCLOG("DBG:memory context has %d planes!\n"), GetDeviceCaps(m_hmemdc, PLANES));
 	if (GetDeviceCaps(m_hmemdc, PLANES) != 1)
 	{
-		vnclog.Print(LL_INTERR, VNCLOG("number of planes in memory context is more than 1\n"));
 		MessageBox(
 			NULL,
 			"vncDesktop : current display is PLANAR, not CHUNKY!\n"
@@ -983,6 +859,7 @@ vncDesktop::InitBitmap()
 
 	return TRUE;
 }
+
 
 BOOL
 vncDesktop::ThunkBitmapInfo()
@@ -1054,6 +931,7 @@ vncDesktop::SetPixFormat()
 	m_scrinfo.format.bitsPerPixel = (CARD8) m_bminfo.bmi.bmiHeader.biBitCount;
 	m_scrinfo.format.depth        = (CARD8) m_bminfo.bmi.bmiHeader.biBitCount;
 
+	
 	// Calculate the number of bytes per row
 	m_bytesPerRow = m_scrinfo.framebufferWidth * m_scrinfo.format.bitsPerPixel / 8;
 
@@ -1247,61 +1125,36 @@ vncDesktop::InitWindow()
 	return TRUE;
 }
 
-void
-vncDesktop::EnableOptimisedBlits()
+BOOL
+vncDesktop::CreateBuffers()
 {
-	vnclog.Print(LL_INTINFO, VNCLOG("attempting to enable DIBsection blits\n"));
-
-	if (m_formatmunged) {
-		vnclog.Print(LL_INTINFO, VNCLOG("unable to enable fast blits\n"));
-		return;
-	}
-
-/*
-	// Prepare the bitmapinfo palette if necessary (*** DOESN'T QUITE WORK!)
-	if (!m_bminfo.truecolour) {
-		LOGPALETTE *palette;
-		UINT size = sizeof(LOGPALETTE) + (sizeof(PALETTEENTRY) * 256);
-
-		palette = (LOGPALETTE *) new char[size];
-		if (palette == NULL) {
-			vnclog.Print(LL_INTERR, VNCLOG("failed to create temp fast palette - disabling fast blits\n"));
-			return;
-		}
-
-		// Initialise the structure
-		palette->palVersion = 0x300;
-		palette->palNumEntries = 256;
-
-		// Get the system colours
-		if (GetSystemPaletteEntries(m_hrootdc,
-			0, 256, palette->palPalEntry) == 0) {
-			delete [] palette;
-			vnclog.Print(LL_INTERR, VNCLOG("failed to init fast palette - disabling fast blits\n"));
-			return;
-		}
-
-		// Copy the system palette into the bitmap info
-		for (int i=0; i<256; i++) {
-			m_bminfo.bmi.bmiColors[i].rgbReserved = 0;
-			m_bminfo.bmi.bmiColors[i].rgbRed = palette->palPalEntry[i].peRed;
-			m_bminfo.bmi.bmiColors[i].rgbGreen = palette->palPalEntry[i].peGreen;
-			m_bminfo.bmi.bmiColors[i].rgbBlue = palette->palPalEntry[i].peBlue;
-		}
-
-		// It worked!
-		delete [] palette;
-
-		vnclog.Print(LL_INTINFO, VNCLOG("initialised fast palette OK\n"));
-	}
-*/
+	vnclog.Print(LL_INTINFO, VNCLOG("attempting to create main and back buffers\n"));
 
 	// Create a new DIB section ***
 	HBITMAP tempbitmap = CreateDIBSection(m_hmemdc, &m_bminfo.bmi, DIB_RGB_COLORS, &m_DIBbits, NULL, 0);
-	if (tempbitmap == NULL) {
+
+	m_freemainbuff = false;
+
+	if (tempbitmap == NULL || m_formatmunged) {
 		vnclog.Print(LL_INTWARN, VNCLOG("failed to build DIB section - reverting to slow blits\n"));
 		m_DIBbits = NULL;
-		return;
+		// create our own buffer to copy blits through
+		if ((m_mainbuff = new BYTE [ScreenBuffSize()]) == NULL) {
+				vnclog.Print(LL_INTERR, VNCLOG("unable to allocate main buffer[%d]\n"), ScreenBuffSize());
+				return FALSE;
+		}
+		m_freemainbuff = true;
+		if ((m_backbuff = new BYTE [ScreenBuffSize()]) == NULL) {
+			vnclog.Print(LL_INTERR, VNCLOG("unable to allocate back buffer[%d]\n"), ScreenBuffSize());
+			return FALSE;
+		}
+		return TRUE;
+	}
+	
+	// Create our own buffer to copy blits through
+	if ((m_backbuff = new BYTE [ScreenBuffSize()]) == NULL) {
+		vnclog.Print(LL_INTERR, VNCLOG("unable to allocate back buffer[%d]\n"), ScreenBuffSize());
+		return FALSE;
 	}
 
 	// Delete the old memory bitmap
@@ -1312,8 +1165,9 @@ vncDesktop::EnableOptimisedBlits()
 
 	// Replace old membitmap with DIB section
 	m_membitmap = tempbitmap;
-
+	m_mainbuff = (BYTE *)m_DIBbits;
 	vnclog.Print(LL_INTINFO, VNCLOG("enabled fast DIBsection blits OK\n"));
+	return TRUE;
 }
 
 BOOL
@@ -1339,7 +1193,7 @@ vncDesktop::Init(vncServer *server)
 void
 vncDesktop::RequestUpdate()
 {
-	PostMessage(m_hwnd, WM_TIMER, 0, 0);
+	PostMessage(m_hwnd, WM_TIMER, TimerID::POLL, 0);
 }
 
 int
@@ -1359,8 +1213,9 @@ vncDesktop::FillDisplayInfo(rfbServerInitMsg *scrinfo)
 // Function to capture an area of the screen immediately prior to sending
 // an update.
 void
-vncDesktop::CaptureScreen(RECT &rect, BYTE *scrBuff, UINT scrBuffSize)
+vncDesktop::CaptureScreen(RECT &rect, BYTE *scrBuff)
 {
+	
 	// Protect the memory bitmap
 	omni_mutex_lock l(m_bitbltlock);
 
@@ -1375,17 +1230,17 @@ vncDesktop::CaptureScreen(RECT &rect, BYTE *scrBuff, UINT scrBuffSize)
 		return;
 
 	// Capture screen into bitmap
-	BOOL blitok = BitBlt(m_hmemdc, rect.left, rect.top,
-		(rect.right-rect.left),
-		(rect.bottom-rect.top),
-		m_hrootdc, rect.left, rect.top, SRCCOPY);
+	BOOL blitok;
+	blitok = BitBlt(m_hmemdc, rect.left, rect.top,
+					rect.right - rect.left, rect.bottom - rect.top,
+					m_hrootdc, rect.left, rect.top,	SRCCOPY);
 
 	// Select the old bitmap back into the memory DC
 	SelectObject(m_hmemdc, oldbitmap);
-
+	
 	if (blitok) {
 		// Copy the new data to the screen buffer (CopyToBuffer optimises this if possible)
-		CopyToBuffer(rect, scrBuff, scrBuffSize);
+		CopyToBuffer(rect, scrBuff);
 	}
 
 }
@@ -1411,13 +1266,16 @@ vncDesktop::CaptureMouse(BYTE *scrBuff, UINT scrBuffSize)
 	// Translate position for hotspot
 	if (GetIconInfo(m_hcursor, &IconInfo))
 	{
+		
 		CursorPos.x -= ((int) IconInfo.xHotspot);
 		CursorPos.y -= ((int) IconInfo.yHotspot);
+		
 		if (IconInfo.hbmMask != NULL)
 			DeleteObject(IconInfo.hbmMask);
 		if (IconInfo.hbmColor != NULL)
 			DeleteObject(IconInfo.hbmColor);
 	}
+	
 
 	// Select the memory bitmap into the memory DC
 	HBITMAP oldbitmap;
@@ -1443,17 +1301,12 @@ vncDesktop::CaptureMouse(BYTE *scrBuff, UINT scrBuffSize)
 	m_cursorpos.top = CursorPos.y;
 	m_cursorpos.right = CursorPos.x + GetSystemMetrics(SM_CXCURSOR);
 	m_cursorpos.bottom = CursorPos.y + GetSystemMetrics(SM_CYCURSOR);
-
+	
 	// Clip the bounding rect to the screen
-	RECT screen;
-	screen.left=0;
-	screen.top=0;
-	screen.right=m_scrinfo.framebufferWidth;
-	screen.bottom=m_scrinfo.framebufferHeight;
-
+	RECT screen = m_server->GetSharedRect();
 	// Copy the mouse cursor into the screen buffer, if any of it is visible
 	if (IntersectRect(&m_cursorpos, &m_cursorpos, &screen))
-		CopyToBuffer(m_cursorpos, scrBuff, scrBuffSize);
+		CopyToBuffer(m_cursorpos, scrBuff);
 }
 
 // Obtain cursor image data in server's local format.
@@ -1512,7 +1365,75 @@ vncDesktop::SetCursor(HCURSOR cursor)
 		m_hcursor = cursor;
 }
 
+//
+// DEBUG: Some visualization for LF->CRLF conversion code.
+//
+/*
+static void ShowClipText(char *caption, char *text)
+{
+	int len = strlen(text);
+	char *out_text = new char[len * 4 + 8];
+	int pos = 0;
+
+	out_text[pos++] = '"';
+	for (int i = 0; i < len; i++) {
+		if (text[i] == '\r') {
+			strcpy(&out_text[pos], "\\r");
+			pos += 2;
+		} else if (text[i] == '\n') {
+			strcpy(&out_text[pos], "\\n");
+			pos += 2;
+		} else if (text[i] < ' ') {
+			strcpy(&out_text[pos], "\\?");
+			pos += 2;
+		} else {
+			out_text[pos++] = text[i];
+		}
+	}
+	out_text[pos++] = '"';
+	out_text[pos++] = '\0';
+
+	MessageBox(NULL, out_text, caption, MB_OK);
+
+	delete[] out_text;
+}
+*/
+
+//
+// Convert text from Unix (LF only) format to CR+LF.
+// NOTE: The size of dst[] buffer must be at least (strlen(src) * 2 + 1).
+//
+
+void
+vncDesktop::ConvertClipText(char *dst, const char *src)
+{
+	const char *ptr0 = src;
+	const char *ptr1;
+	int dst_pos = 0;
+
+	while ((ptr1 = strchr(ptr0, '\n')) != NULL) {
+		// Copy the string before the LF
+		if (ptr1 != ptr0) {
+			memcpy(&dst[dst_pos], ptr0, ptr1 - ptr0);
+			dst_pos += ptr1 - ptr0;
+		}
+		// Don't insert CR if there is one already
+		if (ptr1 == ptr0 || *(ptr1 - 1) != '\r') {
+			dst[dst_pos++] = '\r';
+		}
+		// Append LF
+		dst[dst_pos++] = '\n';
+		// Next position in the source text
+		ptr0 = ptr1 + 1;
+	}
+	// Copy the last string with no LF, but with '\0'
+	memcpy(&dst[dst_pos], ptr0, &src[strlen(src)] - ptr0 + 1);
+}
+
+//
 // Manipulation of the clipboard
+//
+
 void
 vncDesktop::SetClipText(LPSTR text)
 {
@@ -1522,14 +1443,15 @@ vncDesktop::SetClipText(LPSTR text)
 		// Empty it
 		if (EmptyClipboard())
 		{
-			HANDLE hMem = GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, strlen(text)+1);
+			HANDLE hMem = GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE,
+									  strlen(text) * 2 + 1);
 
 			if (hMem != NULL)
 			{
 				LPSTR pMem = (char*)GlobalLock(hMem);
 
-				// Get the data
-				strcpy(pMem, text);
+				// Get the data (with line endings converted to CR+LF)
+				ConvertClipText(pMem, text);
 
 				// Tell the clipboard
 				GlobalUnlock(hMem);
@@ -1554,7 +1476,7 @@ vncDesktop::MaskToMaxAndShift(DWORD mask, CARD16 &max, CARD8 &shift)
 
 // Copy data from the memory bitmap into a buffer
 void
-vncDesktop::CopyToBuffer(RECT &rect, BYTE *destbuff, UINT destbuffsize)
+vncDesktop::CopyToBuffer(RECT &rect, BYTE *destbuff)
 {
 	// Are we being asked to blit from the DIBsection to itself?
 	if (destbuff == m_DIBbits) {
@@ -1614,67 +1536,85 @@ vncDesktop::CopyToBuffer(RECT &rect, BYTE *destbuff, UINT destbuffsize)
 
 // Callback routine used internally to catch window movement...
 BOOL CALLBACK
-EnumWindowsFn(HWND hwnd, LPARAM arg)
+EnumWindowsFnCopyRect(HWND hwnd, LPARAM arg)
 {
-	HANDLE prop = GetProp(hwnd, (LPCTSTR) MAKELONG(VNC_WINDOWPOS_ATOM, 0));
-	if (prop != NULL)
+
+	//For excluding the popup windows
+	if ((GetWindowLong( hwnd, GWL_STYLE) & WS_POPUP) ==0)
 	{
-		if (IsWindowVisible(hwnd))
-		{
-			RECT dest;
-			POINT source;
+	
+		HANDLE prop = GetProp(hwnd, (LPCTSTR) MAKELONG(VNC_WINDOWPOS_ATOM, 0));
+		if (prop != NULL) {
+			
+			if (IsWindowVisible(hwnd)) {
+				
+				RECT dest;
+				POINT source;
 
-			// Get the window rectangle
-			if (GetWindowRect(hwnd, &dest))
-			{
-				// Old position
-				source.x = (SHORT) LOWORD(prop);
-				source.y = (SHORT) HIWORD(prop);
+				// Get the window rectangle
+				if (GetWindowRect(hwnd, &dest)) {
+					// Old position
+					source.x = (SHORT) LOWORD(prop);
+					source.y = (SHORT) HIWORD(prop);
 
-				// Got the destination position.  Now send to clients!
-				if ((source.x != dest.left) || (source.y != dest.top))
-				{
-					// Update the property entry
+					// Got the destination position.  Now send to clients!
+					if ((source.x != dest.left) || (source.y != dest.top)) {
+						// Update the property entry
+						SHORT x = (SHORT) dest.left;
+						SHORT y = (SHORT) dest.top;
+						SetProp(hwnd,
+							(LPCTSTR) MAKELONG(VNC_WINDOWPOS_ATOM, 0),
+							(HANDLE) MAKELONG(x, y));
+
+						// Store of the copyrect 
+						((vncDesktop*)arg)->CopyRect(dest, source);
+						
+					}
+				} else {
+					RemoveProp(hwnd, (LPCTSTR) MAKELONG(VNC_WINDOWPOS_ATOM, 0));
+				}
+			} else {
+				RemoveProp(hwnd, (LPCTSTR) MAKELONG(VNC_WINDOWPOS_ATOM, 0));
+			}
+		} else {
+			// If the window has become visible then save its position!
+			if (IsWindowVisible(hwnd)) {
+				RECT dest;
+
+				if (GetWindowRect(hwnd, &dest)) {
 					SHORT x = (SHORT) dest.left;
 					SHORT y = (SHORT) dest.top;
 					SetProp(hwnd,
 						(LPCTSTR) MAKELONG(VNC_WINDOWPOS_ATOM, 0),
 						(HANDLE) MAKELONG(x, y));
-
-					// Notify all clients of the copyrect
-					((vncServer*)arg)->CopyRect(dest, source);
-
-					// Get the client to check for damage
-					((vncServer*)arg)->UpdateRect(dest);
 				}
 			}
-			else
-				RemoveProp(hwnd, (LPCTSTR) MAKELONG(VNC_WINDOWPOS_ATOM, 0));
-		}
-		else
-		{
-			RemoveProp(hwnd, (LPCTSTR) MAKELONG(VNC_WINDOWPOS_ATOM, 0));
 		}
 	}
-	else
-	{
-		// If the window has become visible then save its position!
-		if (IsWindowVisible(hwnd))
-		{
-			RECT dest;
-
-			if (GetWindowRect(hwnd, &dest))
-			{
-				SHORT x = (SHORT) dest.left;
-				SHORT y = (SHORT) dest.top;
-				SetProp(hwnd,
-					(LPCTSTR) MAKELONG(VNC_WINDOWPOS_ATOM, 0),
-					(HANDLE) MAKELONG(x, y));
-			}
-		}
-	}
-
 	return TRUE;
+}
+
+
+void
+vncDesktop::SetLocalInputDisableHook(BOOL enable)
+{
+	SetKeyboardFilterHook(enable);
+	SetMouseFilterHook(enable);
+}
+
+void
+vncDesktop::SetLocalInputPriorityHook(BOOL enable)
+{
+	if (vncService::IsWin95()) {
+		SetKeyboardPriorityHook(m_hwnd,enable,RFB_LOCAL_KEYBOARD);
+		SetMousePriorityHook(m_hwnd,enable,RFB_LOCAL_MOUSE);
+	} else {
+		SetKeyboardPriorityLLHook(m_hwnd,enable,RFB_LOCAL_KEYBOARD);
+		SetMousePriorityLLHook(m_hwnd,enable,RFB_LOCAL_MOUSE);
+	}
+
+	if (!enable)
+		m_server->BlockRemoteInput(false);
 }
 
 // Routine to find out which windows have moved
@@ -1682,8 +1622,9 @@ void
 vncDesktop::CalcCopyRects()
 {
 	// Enumerate all the desktop windows for movement
-	EnumWindows((WNDENUMPROC)EnumWindowsFn, (LPARAM) m_server);
+	EnumWindows((WNDENUMPROC)EnumWindowsFnCopyRect, (LPARAM) this);
 }
+
 
 // Window procedure for the Desktop window
 LRESULT CALLBACK
@@ -1710,9 +1651,23 @@ DesktopWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		// Get the system palette
 		if (!_this->SetPalette())
 			PostQuitMessage(0);
-
 		// Update any palette-based clients, too
 		_this->m_server->UpdatePalette();
+		return 0;
+
+	case WM_TIMER:
+		switch (wParam) {
+		case vncDesktop::TimerID::POLL:
+			_this->SetPollingFlag(true);
+			break;
+		case vncDesktop::TimerID::BLANK_SCREEN:
+			if (_this->m_server->GetBlankScreen())
+				_this->BlankScreen(TRUE);
+			break;
+		case vncDesktop::TimerID::RESTORE_SCREEN:
+			_this->BlankScreen(FALSE);
+			break;
+		}
 		return 0;
 
 		// CLIPBOARD MESSAGES
@@ -1802,3 +1757,680 @@ DesktopWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		return DefWindowProc(hwnd, iMsg, wParam, lParam);
 	}
 }
+
+BOOL
+vncDesktop::CheckUpdates()
+{
+	// Re-install polling timer if necessary
+	if (m_server->PollingCycleChanged()) {
+		SetPollingTimer();
+		m_server->PollingCycleChanged(false);
+	}
+
+	// Update the state of blank screen timer
+	UpdateBlankScreenTimer();
+
+	// Has the display resolution or desktop changed?
+	if (m_displaychanged || !vncService::InputDesktopSelected())
+	{
+		vnclog.Print(LL_STATE, VNCLOG("display resolution or desktop changed.\n"));
+
+		rfbServerInitMsg oldscrinfo = m_scrinfo;
+		m_displaychanged = FALSE;
+
+		// Attempt to close the old hooks
+		if (!Shutdown()) {
+			vnclog.Print(LL_INTERR, VNCLOG("failed to close desktop server.\n"));
+			m_server->KillAuthClients();
+			return FALSE;
+		}
+
+		// Now attempt to re-install them!
+		ChangeResNow();
+
+		if (!Startup()) {
+			vnclog.Print(LL_INTERR, VNCLOG("failed to re-start desktop server.\n"));
+			m_server->KillAuthClients();
+			return FALSE;
+		}
+
+		// Check if the screen info has changed
+		vnclog.Print(LL_INTINFO,
+					 VNCLOG("SCR: old screen format %dx%dx%d\n"),
+					 oldscrinfo.framebufferWidth,
+					 oldscrinfo.framebufferHeight,
+					 oldscrinfo.format.bitsPerPixel);
+		vnclog.Print(LL_INTINFO,
+					 VNCLOG("SCR: new screen format %dx%dx%d\n"),
+					 m_scrinfo.framebufferWidth,
+					 m_scrinfo.framebufferHeight,
+					 m_scrinfo.format.bitsPerPixel);
+		if (memcmp(&m_scrinfo, &oldscrinfo, sizeof(oldscrinfo)) != 0) {
+			vnclog.Print(LL_INTINFO, VNCLOG("screen format has changed.\n"));
+		}
+
+		// Call this regardless of screen format change
+		m_server->UpdateLocalFormat();
+
+		// Add a full screen update to all the clients
+		m_changed_rgn.AddRect(m_bmrect);
+		m_server->UpdatePalette();
+	}
+
+	// TRIGGER THE UPDATE
+
+	RECT rect;
+	rect = m_server->GetSharedRect();
+
+	RECT new_rect;
+	if (m_server->WindowShared()) {
+		GetWindowRect(m_server->GetWindowShared(), &new_rect);
+	} else if (m_server->ScreenAreaShared()) {
+		new_rect = m_server->GetScreenAreaRect();
+	} else {
+		new_rect = m_bmrect;
+	}
+	IntersectRect(&new_rect, &new_rect, &m_bmrect);
+
+	// Update screen size if required
+	if (!EqualRect(&new_rect, &rect)) {
+		m_server->SetSharedRect(new_rect);
+		bool sendnewfb = false;
+
+		if ( rect.right - rect.left != new_rect.right - new_rect.left ||
+			 rect.bottom - rect.top != new_rect.bottom - new_rect.top )
+			sendnewfb = true;
+
+		// FIXME: We should not send NewFBSize if a client
+		//        did not send framebuffer update request.
+		m_server->SetNewFBSize(sendnewfb);
+		m_changed_rgn.Clear();
+		rect = new_rect;
+		return TRUE;
+	}
+
+	// If we have clients full region requests
+	if (m_server->FullRgnRequested()) {
+		// Capture screen to main buffer
+		CaptureScreen(rect, m_mainbuff);
+		// If we have a video driver - reset counter
+		if ( m_videodriver != NULL &&
+			 m_videodriver->driver )
+			m_videodriver->ResetCounter();
+	}
+
+	// DEBUG: Continue auditing the code from this point.
+
+	// If we have incremental update requests
+	if (m_server->IncrRgnRequested()) {
+
+		vncRegion rgn;
+
+		// Use either a mirror video driver, or perform polling
+		if (m_videodriver != NULL) {
+			// FIXME: If there were no incremental update requests
+			//        for some time, we will loose updates.
+			if (m_videodriver->driver)
+				m_videodriver->HandleDriverChanges(m_changed_rgn);
+		} else {
+			if (GetPollingFlag()) {
+				SetPollingFlag(false);
+				PerformPolling();
+			}
+		}
+
+		// Check for moved windows
+		if (m_server->FullScreen())
+			CalcCopyRects();
+
+		if (m_copyrect_set) {
+			// Send copyrect to all clients
+			m_server->CopyRect(m_copyrect_rect, m_copyrect_src);
+			m_copyrect_set = false;
+
+			// Copy new window rect to main buffer
+			CaptureScreen(m_copyrect_rect, m_mainbuff);
+			// Copy old window rect to back buffer
+			CopyRectToBuffer(m_copyrect_rect, m_copyrect_src);
+			// Get changed pixels to rgn
+			GetChangedRegion(rgn,m_copyrect_rect);
+			RECT rect;
+			rect.left= m_copyrect_src.x;
+			rect.top = m_copyrect_src.y;
+			rect.right = rect.left + (m_copyrect_rect.right - m_copyrect_rect.left);
+			rect.bottom = rect.top + (m_copyrect_rect.bottom - m_copyrect_rect.top);
+			// Refresh old window rect
+			m_changed_rgn.AddRect(rect);					
+			// Don't refresh new window rect
+			m_changed_rgn.SubtractRect(m_copyrect_rect);				
+		} 
+
+		// Get only desktop area
+		vncRegion temprgn;
+		temprgn.Clear();
+		temprgn.AddRect(rect);
+		m_changed_rgn.Intersect(temprgn);
+
+		// Get list of rectangles for checking
+		rectlist rectsToScan;
+		m_changed_rgn.Rectangles(rectsToScan);
+
+		// Capture and check them
+		CheckRects(rgn, rectsToScan);
+
+		// Update the mouse
+		m_server->UpdateMouse();
+
+		// Send changed region data to all clients
+		m_server->UpdateRegion(rgn);
+
+		// Clear changed region
+		m_changed_rgn.Clear();
+	}
+
+	// Trigger an update to be sent
+	if (m_server->FullRgnRequested() || m_server->IncrRgnRequested())
+		m_server->TriggerUpdate();
+
+	return TRUE;
+}
+
+void
+vncDesktop::SetPollingTimer()
+{
+	const UINT driverCycle = 30;
+	const UINT minPollingCycle = 5;
+
+	UINT msec;
+	if (m_videodriver != NULL) {
+		msec = driverCycle;
+	} else {
+		msec = m_server->GetPollingCycle() / 16;
+		if (msec < minPollingCycle) {
+			msec = minPollingCycle;
+		}
+	}
+	m_timer_polling = SetTimer(Window(), TimerID::POLL, msec, NULL);
+}
+
+inline void
+vncDesktop::CheckRects(vncRegion &rgn, rectlist &rects)
+{
+	rectlist::iterator i;
+
+	for (i = rects.begin(); i != rects.end(); i++)
+	{
+		// Copy data to the main buffer
+		// FIXME: Maybe call CaptureScreen() just once?
+		//        Check what would be more efficient.
+		CaptureScreen(*i, m_mainbuff);
+
+		// Check for changes in the rectangle
+		GetChangedRegion(rgn, *i);
+	}
+}
+
+// This notably improves performance when using Visual C++ 6.0 compiler
+#pragma function(memcpy, memcmp)
+
+static const int BLOCK_SIZE = 32;
+
+void
+vncDesktop::GetChangedRegion(vncRegion &rgn, const RECT &rect)
+{
+	const UINT bytesPerPixel = m_scrinfo.format.bitsPerPixel / 8;
+	const int bytes_per_scanline = (rect.right - rect.left) * bytesPerPixel;
+
+	const int offset = rect.top * m_bytesPerRow + rect.left * bytesPerPixel;
+	unsigned char *o_ptr = m_backbuff + offset;
+	unsigned char *n_ptr = m_mainbuff + offset;
+
+	RECT new_rect = rect;
+
+	// Fast processing for small rectangles
+	if ( rect.right - rect.left <= BLOCK_SIZE &&
+		 rect.bottom - rect.top <= BLOCK_SIZE ) {
+		for (int y = rect.top; y < rect.bottom; y++) {
+			if (memcmp(o_ptr, n_ptr, bytes_per_scanline) != 0) {
+				new_rect.top = y;
+				UpdateChangedSubRect(rgn, new_rect);
+				break;
+			}
+			o_ptr += m_bytesPerRow;
+			n_ptr += m_bytesPerRow;
+		}
+		return;
+	}
+
+	// Process bigger rectangles
+	new_rect.top = -1;
+	for (int y = rect.top; y < rect.bottom; y++) {
+		if (memcmp(o_ptr, n_ptr, bytes_per_scanline) != 0) {
+			if (new_rect.top == -1) {
+				new_rect.top = y;
+			}
+			// Skip a number of lines after a non-matched one
+			int n = BLOCK_SIZE / 2 - 1;
+			y += n;
+			o_ptr += n * m_bytesPerRow;
+			n_ptr += n * m_bytesPerRow;
+		} else {
+			if (new_rect.top != -1) {
+				new_rect.bottom = y;
+				UpdateChangedRect(rgn, new_rect);
+				new_rect.top = -1;
+			}
+		}
+		o_ptr += m_bytesPerRow;
+		n_ptr += m_bytesPerRow;
+	}
+	if (new_rect.top != -1) {
+		new_rect.bottom = rect.bottom;
+		UpdateChangedRect(rgn, new_rect);
+	}
+}
+
+void
+vncDesktop::UpdateChangedRect(vncRegion &rgn, const RECT &rect)
+{
+	// Pass small rectangles directly to UpdateChangedSubRect
+	if ( rect.right - rect.left <= BLOCK_SIZE &&
+		 rect.bottom - rect.top <= BLOCK_SIZE ) {
+		UpdateChangedSubRect(rgn, rect);
+		return;
+	}
+
+	const UINT bytesPerPixel = m_scrinfo.format.bitsPerPixel / 8;
+
+	RECT new_rect;
+	int x, y, ay;
+
+	// Scan down the rectangle
+	const int offset = rect.top * m_bytesPerRow + rect.left * bytesPerPixel;
+	unsigned char *o_topleft_ptr = m_backbuff + offset;
+	unsigned char *n_topleft_ptr = m_mainbuff + offset;
+
+	for (y = rect.top; y < rect.bottom; y += BLOCK_SIZE)
+	{
+		// Work out way down the bitmap
+		unsigned char *o_row_ptr = o_topleft_ptr;
+		unsigned char *n_row_ptr = n_topleft_ptr;
+
+		const int blockbottom = Min(y + BLOCK_SIZE, rect.bottom);
+		new_rect.bottom = blockbottom;
+		new_rect.left = -1;
+
+		for (x = rect.left; x < rect.right; x += BLOCK_SIZE)
+		{
+			// Work our way across the row
+			unsigned char *n_block_ptr = n_row_ptr;
+			unsigned char *o_block_ptr = o_row_ptr;
+
+			const UINT blockright = Min(x + BLOCK_SIZE, rect.right);
+			const UINT bytesPerBlockRow = (blockright-x) * bytesPerPixel;
+
+			// Scan this block
+			for (ay = y; ay < blockbottom; ay++) {
+				if (memcmp(n_block_ptr, o_block_ptr, bytesPerBlockRow) != 0)
+					break;
+				n_block_ptr += m_bytesPerRow;
+				o_block_ptr += m_bytesPerRow;
+			}
+			if (ay < blockbottom) {
+				// There were changes, so this block will need to be updated
+				if (new_rect.left == -1) {
+					new_rect.left = x;
+					new_rect.top = ay;
+				} else if (ay < new_rect.top) {
+					new_rect.top = ay;
+				}
+			} else {
+				// No changes in this block, process previous changed blocks if any
+				if (new_rect.left != -1) {
+					new_rect.right = x;
+					UpdateChangedSubRect(rgn, new_rect);
+					new_rect.left = -1;
+				}
+			}
+
+			o_row_ptr += bytesPerBlockRow;
+			n_row_ptr += bytesPerBlockRow;
+		}
+
+		if (new_rect.left != -1) {
+			new_rect.right = rect.right;
+			UpdateChangedSubRect(rgn, new_rect);
+		}
+
+		o_topleft_ptr += m_bytesPerRow * BLOCK_SIZE;
+		n_topleft_ptr += m_bytesPerRow * BLOCK_SIZE;
+	}
+}
+
+void
+vncDesktop::UpdateChangedSubRect(vncRegion &rgn, const RECT &rect)
+{
+	const UINT bytesPerPixel = m_scrinfo.format.bitsPerPixel / 8;
+	int bytes_in_row = (rect.right - rect.left) * bytesPerPixel;
+	int y, i;
+
+	// Exclude unchanged scan lines at the bottom
+	int offset = (rect.bottom - 1) * m_bytesPerRow + rect.left * bytesPerPixel;
+	unsigned char *o_ptr = m_backbuff + offset;
+	unsigned char *n_ptr = m_mainbuff + offset;
+	RECT final_rect = rect;
+	final_rect.bottom = rect.top + 1;
+	for (y = rect.bottom - 1; y > rect.top; y--) {
+		if (memcmp(o_ptr, n_ptr, bytes_in_row) != 0) {
+			final_rect.bottom = y + 1;
+			break;
+		}
+		n_ptr -= m_bytesPerRow;
+		o_ptr -= m_bytesPerRow;
+	}
+
+	// Exclude unchanged pixels at left and right sides
+	offset = final_rect.top * m_bytesPerRow + final_rect.left * bytesPerPixel;
+	o_ptr = m_backbuff + offset;
+	n_ptr = m_mainbuff + offset;
+	int left_delta = bytes_in_row - 1;
+	int right_delta = 0;
+	for (y = final_rect.top; y < final_rect.bottom; y++) {
+		for (i = 0; i < bytes_in_row - 1; i++) {
+			if (n_ptr[i] != o_ptr[i]) {
+				if (i < left_delta)
+					left_delta = i;
+				break;
+			}
+		}
+		for (i = bytes_in_row - 1; i > 0; i--) {
+			if (n_ptr[i] != o_ptr[i]) {
+				if (i > right_delta)
+					right_delta = i;
+				break;
+			}
+		}
+		n_ptr += m_bytesPerRow;
+		o_ptr += m_bytesPerRow;
+	}
+	final_rect.right = final_rect.left + right_delta / bytesPerPixel + 1;
+	final_rect.left += left_delta / bytesPerPixel;
+
+	// Update the rectangle
+	rgn.AddRect(final_rect);
+
+	// Copy the changes to the back buffer
+	offset = final_rect.top * m_bytesPerRow + final_rect.left * bytesPerPixel;
+	o_ptr = m_backbuff + offset;
+	n_ptr = m_mainbuff + offset;
+	bytes_in_row = (final_rect.right - final_rect.left) * bytesPerPixel;
+	for (y = final_rect.top; y < final_rect.bottom; y++) {
+		memcpy(o_ptr, n_ptr, bytes_in_row);
+		n_ptr += m_bytesPerRow;
+		o_ptr += m_bytesPerRow;
+	}
+}
+
+void
+vncDesktop::PerformPolling()
+{
+	if (m_server->PollFullScreen())	{
+		// Poll full screen
+		RECT full_rect = m_server->GetSharedRect();
+		PollArea(full_rect);
+	} else {
+		// Poll a window
+		if (m_server->PollForeground())	{
+			// Get the window rectangle for the currently selected window
+			HWND hwnd = GetForegroundWindow();
+			if (hwnd != NULL)
+				PollWindow(hwnd);
+		}
+		if (m_server->PollUnderCursor()) {
+			// Find the mouse position
+			POINT mousepos;
+			if (GetCursorPos(&mousepos)) {
+				// Find the window under the mouse
+				HWND hwnd = WindowFromPoint(mousepos);
+				if (hwnd != NULL)
+					PollWindow(hwnd);
+			}
+		}
+	}
+}
+
+void
+vncDesktop::PollWindow(HWND hwnd)
+{
+	// Are we set to low-load polling?
+	if (m_server->PollOnEventOnly())
+	{
+		// Yes, so only poll if the remote user has done something
+		if (!m_server->RemoteEventReceived()) {
+			return;
+		}
+	}
+
+	// Does the client want us to poll only console windows?
+	if (m_server->PollConsoleOnly())
+	{
+		char classname[20];
+
+		// Yes, so check that this is a console window...
+		if (GetClassName(hwnd, classname, sizeof(classname))) {
+			if ((strcmp(classname, "tty") != 0) &&
+				(strcmp(classname, "ConsoleWindowClass") != 0)) {
+				return;
+			}
+		}
+	}
+
+	RECT full_rect = m_server->GetSharedRect();
+	RECT rect;
+
+	// Get the rectangle
+	if (GetWindowRect(hwnd, &rect)) {
+		if (IntersectRect(&rect, &rect, &full_rect)) {
+			PollArea(rect);
+		}
+	}
+}
+
+//
+// Implementation of the polling algorithm.
+//
+
+void
+vncDesktop::PollArea(RECT &rect)
+{
+	int scanLine = m_pollingOrder[m_pollingStep++ % 32];
+	const UINT bytesPerPixel = m_scrinfo.format.bitsPerPixel / 8;
+
+	// Align 32x32 tiles to the left top corner of the shared area
+	RECT shared = m_server->GetSharedRect();
+	int leftAligned = ((rect.left - shared.left) & 0xFFFFFFE0) + shared.left;
+	int topAligned = (rect.top - shared.top) & 0xFFFFFFE0;
+	if (topAligned + scanLine < rect.top - shared.top)
+		topAligned += 32;
+	topAligned += shared.top;
+
+	RECT rowRect = rect;	// we'll need left and right borders
+	RECT tileRect;
+
+	for (int y = topAligned; y < rect.bottom; y += 32) {
+		int tile_h = (rect.bottom - y >= 32) ? 32 : rect.bottom - y;
+		if (scanLine >= tile_h)
+			continue;
+		int scan_y = y + scanLine;
+		rowRect.top = scan_y;
+		rowRect.bottom = scan_y + 1;
+		CaptureScreen(rowRect, m_mainbuff);
+		int offset = scan_y * m_bytesPerRow + leftAligned * bytesPerPixel;
+		unsigned char *o_ptr = m_backbuff + offset;
+		unsigned char *n_ptr = m_mainbuff + offset;
+		for (int x = leftAligned; x < rect.right; x += 32) {
+			int tile_w = (rect.right - x >= 32) ? 32 : rect.right - x;
+			int nBytes = tile_w * bytesPerPixel;
+			if (memcmp(o_ptr, n_ptr, nBytes) != 0) {
+				SetRect(&tileRect, x, y, x + tile_w, y + tile_h);
+				m_changed_rgn.AddRect(tileRect);
+			}
+			o_ptr += nBytes;
+			n_ptr += nBytes;
+		}
+	}
+}
+
+void
+vncDesktop::CopyRect(RECT &dest, POINT &source)
+{
+	// Clip the destination to the screen
+	RECT destrect;
+	if (!IntersectRect(&destrect, &dest, &m_server->GetSharedRect()))
+		return;
+	
+	// Adjust the source correspondingly
+	source.x = source.x + (destrect.left - dest.left);
+	source.y = source.y + (destrect.top - dest.top);
+
+	// Work out the source rectangle
+	RECT srcrect;
+
+	// Is this a continuation of an earlier window drag?
+	if (m_copyrect_set &&
+		((source.x == m_copyrect_rect.left) && (source.y == m_copyrect_rect.top))) {
+		// Yes, so use the old source position
+		srcrect.left = m_copyrect_src.x;
+		srcrect.top = m_copyrect_src.y;
+	} else {
+		// No, so use this source position
+		srcrect.left = source.x;
+		srcrect.top = source.y;
+	}
+	
+	// And fill out the right & bottom using the dest rect
+	srcrect.right = destrect.right-destrect.left + srcrect.left;
+	srcrect.bottom = destrect.bottom-destrect.top + srcrect.top;
+
+	// Clip the source to the screen
+	RECT srcrect2;
+	if (!IntersectRect(&srcrect2, &srcrect, &m_server->GetSharedRect()))
+		return;
+
+	// Correct the destination rectangle
+	destrect.left += (srcrect2.left - srcrect.left);
+	destrect.top += (srcrect2.top - srcrect.top);
+	destrect.right = srcrect2.right-srcrect2.left + destrect.left;
+	destrect.bottom = srcrect2.bottom-srcrect2.top + destrect.top;
+
+	// Is there an existing CopyRect rectangle?
+	if (m_copyrect_set) {
+		// Yes, so compare their areas!
+		if (((destrect.right-destrect.left) * (destrect.bottom-destrect.top))
+			< ((m_copyrect_rect.right-m_copyrect_rect.left) * (m_copyrect_rect.bottom-m_copyrect_rect.top)))
+			return;
+	}
+
+	// Set the copyrect...
+	m_copyrect_rect = destrect;
+	m_copyrect_src.x = srcrect2.left;
+	m_copyrect_src.y = srcrect2.top;
+	m_copyrect_set = TRUE;
+	
+}
+
+void
+vncDesktop::CopyRectToBuffer(RECT &dest, POINT &source)
+{
+	// Copy the data from one region of the back-buffer to another!
+	BYTE *srcptr = m_mainbuff + (source.y * m_bytesPerRow) +
+		(source.x * m_scrinfo.format.bitsPerPixel/8);
+	BYTE *destptr = m_backbuff + (dest.top * m_bytesPerRow) +
+		(dest.left * m_scrinfo.format.bitsPerPixel/8);
+	const UINT bytesPerLine = (dest.right-dest.left)*(m_scrinfo.format.bitsPerPixel/8);
+	if (dest.top < source.y) {
+		for (int y=dest.top; y < dest.bottom; y++)
+		{
+			memmove(destptr, srcptr, bytesPerLine);
+			srcptr+=m_bytesPerRow;
+			destptr+=m_bytesPerRow;
+		}
+	} else {
+		srcptr += (m_bytesPerRow * ((dest.bottom-dest.top)-1));
+		destptr += (m_bytesPerRow * ((dest.bottom-dest.top)-1));
+		for (int y=dest.bottom; y > dest.top; y--)
+		{
+			memmove(destptr, srcptr, bytesPerLine);
+			srcptr-=m_bytesPerRow;
+			destptr-=m_bytesPerRow;
+		}
+	}
+}
+
+BOOL
+vncDesktop::InitVideoDriver()
+{
+	// Mirror video drivers supported only under Win2K and WinXP
+	if (vncService::VersionMajor() != 5)
+		return FALSE;
+
+	if (m_server->DontUseDriver()) {
+		vnclog.Print(LL_INTINFO, VNCLOG("not activating video driver interface\n"));
+		return FALSE;
+	}
+
+	if (m_videodriver != NULL && m_videodriver->TestMapped()) {
+		vnclog.Print(LL_INTINFO, VNCLOG("video driver interface already active\n"));
+		return TRUE;
+	}
+	
+	m_videodriver = new vncVideoDriver;
+	m_videodriver->Activate_video_driver();
+
+	if (m_videodriver->MapSharedbuffers()) {
+		vnclog.Print(LL_INTINFO, VNCLOG("video driver interface activated\n"));
+		return TRUE;
+	} else {
+		delete m_videodriver;
+		m_videodriver = NULL;
+		vnclog.Print(LL_INTERR, VNCLOG("failed to activate video driver interface\n"));
+		return FALSE;
+	}
+}
+
+void
+vncDesktop::ShutdownVideoDriver()
+{
+	if (vncService::VersionMajor() != 5 || m_videodriver == NULL)
+		return;
+
+	delete m_videodriver;
+	m_videodriver = NULL;
+	vnclog.Print(LL_INTINFO, VNCLOG("video driver interface deactivated\n"));
+}
+
+void
+vncDesktop::UpdateBlankScreenTimer()
+{
+	BOOL active = m_server->GetBlankScreen();
+	if (active && !m_timer_blank_screen) {
+		m_timer_blank_screen = SetTimer(Window(), TimerID::BLANK_SCREEN, 50, NULL);
+	} else if (!active && m_timer_blank_screen) {
+		KillTimer(Window(), TimerID::BLANK_SCREEN);
+		m_timer_blank_screen = 0;
+		PostMessage(m_hwnd, WM_TIMER, TimerID::RESTORE_SCREEN, 0);
+	}
+}
+
+void
+vncDesktop::BlankScreen(BOOL set)
+{
+	if (set) {
+		SystemParametersInfo(SPI_SETPOWEROFFACTIVE, 1, NULL, 0);
+		SendMessage(GetDesktopWindow(), WM_SYSCOMMAND, SC_MONITORPOWER, (LPARAM)2);
+	} else {
+		SystemParametersInfo(SPI_SETPOWEROFFACTIVE, 0, NULL, 0);
+		SendMessage(GetDesktopWindow(), WM_SYSCOMMAND, SC_MONITORPOWER, (LPARAM)-1);
+	}
+}
+

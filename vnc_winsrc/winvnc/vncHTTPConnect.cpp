@@ -100,10 +100,11 @@ const FileMap filemapping [] = {
 	{"/SessionRecorder.class", "JavaClass", IDR_SESSIONREC_CLASS},
 	{"/ReloginPanel.class", "JavaClass", IDR_RELOGINPANEL_CLASS},
 	{"/SocketFactory.class", "JavaClass", IDR_SOCKFACTORY_CLASS},
-	{"/HTTPConnectSocket.class", "JavaClass", IDR_HTTPCONNSOCK_CLASS},
-	{"/HTTPConnectSocketFactory.class", "JavaClass", IDR_HTTPCONNSOCKFACTORY_CLASS}
+	{"/AuthUnixLoginPanel.class", "JavaClass", IDR_AUTHUNIXLOGIN_CLASS},
+	{"/CapabilityInfo.class", "JavaClass", IDR_CAPINFO_CLASS},
+	{"/CapsContainer.class", "JavaClass", IDR_CAPSCONTAINER_CLASS}
 };
-const int filemappingsize		= 15;
+const int filemappingsize		= 16;
 
 //
 // Connection thread -- one per each client connection.
@@ -154,8 +155,6 @@ void vncHTTPConnectThread::run(void *arg)
 	DoHTTP(m_socket);
 
 	// And close the client
-	m_socket->Shutdown();
-	m_socket->Close();
 	delete m_socket;
 
 	vnclog.Print(LL_INTINFO, VNCLOG("quitting HTTP client thread\n"));
@@ -485,23 +484,23 @@ void *vncHTTPListenThread::run_undetached(void * arg)
 	vnclog.Print(LL_INTINFO, VNCLOG("started HTTP server thread\n"));
 
 	// Go into a loop, listening for connections on the given socket
-	for (;;) {
+	while (!m_shutdown) {
 		// Accept an incoming connection
-		VSocket *new_socket = m_listen_socket->Accept();
-		if (new_socket == NULL || m_shutdown)
+		VSocket *new_socket;
+		if (!m_listen_socket->TryAccept(&new_socket, 100))
 			break;
-
-		// Start a client thread for this connection
-		vnclog.Print(LL_CLIENTS, VNCLOG("HTTP client connected\n"));
-		omni_thread *m_thread = new vncHTTPConnectThread;
-		if (m_thread == NULL)
-			break;
-		((vncHTTPConnectThread *)m_thread)->Init(new_socket, m_server,
-												 m_allow_params);
+		if (new_socket != NULL) {
+			// Start a client thread for this connection
+			vnclog.Print(LL_CLIENTS, VNCLOG("HTTP client connected\n"));
+			omni_thread *m_thread = new vncHTTPConnectThread;
+			if (m_thread == NULL)
+				break;
+			((vncHTTPConnectThread *)m_thread)->Init(new_socket, m_server,
+													 m_allow_params);
+		}
 	}
 
 	vnclog.Print(LL_INTINFO, VNCLOG("quitting HTTP server thread\n"));
-
 	return NULL;
 }
 
@@ -547,14 +546,7 @@ vncHTTPConnect::~vncHTTPConnect()
 
 	// Join with our lovely thread
 	if (m_listen_thread != NULL) {
-		// *** This is a hack to force the listen thread out of the accept call,
-		// because Winsock accept semantics are broken.
 		((vncHTTPListenThread *)m_listen_thread)->m_shutdown = TRUE;
-
-		VSocket tmp_socket;
-		tmp_socket.Create();
-		tmp_socket.Connect("localhost", m_listen_port);
-		tmp_socket.Close();
 
 		void *returnval;
 		m_listen_thread->join(&returnval);
