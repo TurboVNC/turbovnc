@@ -61,11 +61,18 @@ extern "C"
 		UINT MouseMsg
 		);											// Set the hook
 	DllExport BOOL UnSetHook(HWND hWnd);			// Remove it
-
+	
+	// Control keyboard filtering
 	DllExport BOOL SetKeyboardFilterHook(BOOL activate);
-													// Control keyboard filtering
+	// Control mouse filtering
 	DllExport BOOL SetMouseFilterHook(BOOL activate);
-													// Control mouse filtering
+	// hooks for Local event priority impl. (win9x)
+	DllExport BOOL SetKeyboardPriorityHook(HWND hwnd, BOOL activate,UINT LocalMsg);
+	DllExport BOOL SetMousePriorityHook(HWND hwnd, BOOL activate,UINT LocalMsg);
+	// hooks for Local event priority impl. (winNT)
+	DllExport BOOL SetKeyboardPriorityLLHook(HWND hwnd, BOOL activate,UINT LocalMsg);
+	DllExport BOOL SetMousePriorityLLHook(HWND hwnd, BOOL activate,UINT LocalMsg);
+
 }
 
 #endif // !defined(_VNCHOOKS_DLL_)
