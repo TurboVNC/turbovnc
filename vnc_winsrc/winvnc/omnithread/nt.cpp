@@ -27,7 +27,7 @@
 
 #include <stdlib.h>
 #include <errno.h>
-#include <omnithread.h>
+#include "omnithread.h"
 #include <process.h>
 
 #define DB(x) // x 
@@ -559,7 +559,7 @@ omni_thread::common_constructor(void* arg, priority_t pri, int det)
 omni_thread::~omni_thread(void)
 {
     DB(cerr << "destructor called for thread " << id() << endl);
-    if (!CloseHandle(handle))
+    if ((handle != NULL) && !CloseHandle(handle))
 	throw omni_thread_fatal(GetLastError());
     if (!CloseHandle(cond_semaphore))
 	throw omni_thread_fatal(GetLastError());

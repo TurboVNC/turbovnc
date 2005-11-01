@@ -1,0 +1,6 @@
+# Microsoft Developer Studio Generated Dependency File, included by VNCHooks.mak
+
+.\VNCHooks.cpp : \
+	".\SharedData.h"\
+	".\VNCHooks.h"\
+	

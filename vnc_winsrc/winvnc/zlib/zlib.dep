@@ -1,0 +1,106 @@
+# Microsoft Developer Studio Generated Dependency File, included by zlib.mak
+
+.\adler32.c : \
+	".\zconf.h"\
+	".\zlib.h"\
+	
+
+.\compress.c : \
+	".\zconf.h"\
+	".\zlib.h"\
+	
+
+.\crc32.c : \
+	".\zconf.h"\
+	".\zlib.h"\
+	
+
+.\deflate.c : \
+	".\deflate.h"\
+	".\zconf.h"\
+	".\zlib.h"\
+	".\zutil.h"\
+	
+
+.\infblock.c : \
+	".\infblock.h"\
+	".\infcodes.h"\
+	".\inftrees.h"\
+	".\infutil.h"\
+	".\zconf.h"\
+	".\zlib.h"\
+	".\zutil.h"\
+	
+
+.\infcodes.c : \
+	".\infblock.h"\
+	".\infcodes.h"\
+	".\inffast.h"\
+	".\inftrees.h"\
+	".\infutil.h"\
+	".\zconf.h"\
+	".\zlib.h"\
+	".\zutil.h"\
+	
+
+.\inffast.c : \
+	".\infblock.h"\
+	".\infcodes.h"\
+	".\inffast.h"\
+	".\inftrees.h"\
+	".\infutil.h"\
+	".\zconf.h"\
+	".\zlib.h"\
+	".\zutil.h"\
+	
+
+.\inflate.c : \
+	".\infblock.h"\
+	".\zconf.h"\
+	".\zlib.h"\
+	".\zutil.h"\
+	
+
+.\inftrees.c : \
+	".\inffixed.h"\
+	".\inftrees.h"\
+	".\zconf.h"\
+	".\zlib.h"\
+	".\zutil.h"\
+	
+
+.\infutil.c : \
+	".\infblock.h"\
+	".\infcodes.h"\
+	".\inftrees.h"\
+	".\infutil.h"\
+	".\zconf.h"\
+	".\zlib.h"\
+	".\zutil.h"\
+	
+
+.\maketree.c : \
+	".\inftrees.h"\
+	".\zconf.h"\
+	".\zlib.h"\
+	".\zutil.h"\
+	
+
+.\trees.c : \
+	".\deflate.h"\
+	".\trees.h"\
+	".\zconf.h"\
+	".\zlib.h"\
+	".\zutil.h"\
+	
+
+.\uncompr.c : \
+	".\zconf.h"\
+	".\zlib.h"\
+	
+
+.\zutil.c : \
+	".\zconf.h"\
+	".\zlib.h"\
+	".\zutil.h"\
+	
