@@ -26,88 +26,21 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // Dialog
 //
 
-IDD_PROPERTIES DIALOG DISCARDABLE  0, 0, 376, 196
-STYLE DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | 
-    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Property Page"
-FONT 8, "MS Sans Serif"
-BEGIN
-    GROUPBOX        "Incoming Connections",IDC_STATIC,5,5,143,123
-    CONTROL         "Accept socket connections",IDC_CONNECT_SOCK,"Button",
-                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,13,16,128,12
-    LTEXT           "Password:",IDC_PASSWORD_LABEL,19,30,44,12,
-                    SS_CENTERIMAGE | NOT WS_GROUP
-    EDITTEXT        IDC_PASSWORD,69,30,66,12,ES_PASSWORD | ES_AUTOHSCROLL
-    LTEXT           "Password\n(view only):",IDC_PASSWORD_VIEWONLY_LABEL,19,
-                    45,44,19,NOT WS_GROUP
-    EDITTEXT        IDC_PASSWORD_VIEWONLY,69,49,66,12,ES_PASSWORD | 
-                    ES_AUTOHSCROLL
-    LTEXT           "Display or port numbers to use:",IDC_STATIC,18,67,121,
-                    11,NOT WS_GROUP
-    CONTROL         "auto",IDC_PORTNO_AUTO,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP | WS_TABSTOP,18,81,33,12
-    CONTROL         "display:",IDC_SPECDISPLAY,"Button",BS_AUTORADIOBUTTON | 
-                    WS_TABSTOP,58,81,46,12
-    EDITTEXT        IDC_DISPLAYNO,108,81,27,12,ES_AUTOHSCROLL | ES_NUMBER
-    CONTROL         "ports:",IDC_SPECPORT,"Button",BS_AUTORADIOBUTTON | 
-                    WS_TABSTOP,18,98,35,12
-    EDITTEXT        IDC_PORTRFB,58,98,27,12,ES_AUTOHSCROLL | ES_NUMBER
-    CTEXT           "and",IDC_STATIC,90,98,12,12,SS_CENTERIMAGE
-    EDITTEXT        IDC_PORTHTTP,108,98,27,12,ES_AUTOHSCROLL | ES_NUMBER
-    CTEXT           "(main)",IDC_STATIC,58,113,27,10,SS_CENTERIMAGE
-    CTEXT           "(HTTP)",IDC_STATIC,108,113,27,10,SS_CENTERIMAGE
-    GROUPBOX        "When Last Client Disconnects",IDC_STATIC,5,133,143,56
-    CONTROL         "Do nothing",IDC_LOCKSETTING_NOTHING,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,13,144,122,12
-    CONTROL         "Lock workstation",IDC_LOCKSETTING_LOCK,"Button",
-                    BS_AUTORADIOBUTTON | WS_TABSTOP,13,158,122,12
-    CONTROL         "Logoff workstation",IDC_LOCKSETTING_LOGOFF,"Button",
-                    BS_AUTORADIOBUTTON | WS_TABSTOP,13,172,122,12
-    GROUPBOX        "Input Handling",IDC_STATIC,156,5,215,43
-    CONTROL         "Disable remote keyboard and pointer (view-only mode)",
-                    IDC_DISABLE_INPUTS,"Button",BS_AUTOCHECKBOX | WS_GROUP | 
-                    WS_TABSTOP,164,16,201,12
-    CONTROL         "Disable local keyboard and pointer",
-                    IDC_DISABLE_LOCAL_INPUTS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,164,31,201,12
-    GROUPBOX        "Update Handling",IDC_STATIC,156,53,215,59
-    CONTROL         "Poll foreground window",IDC_POLL_FOREGROUND,"Button",
-                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,164,64,98,13
-    CONTROL         "Poll window under cursor",IDC_POLL_UNDER_CURSOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,164,79,98,13
-    CONTROL         "Poll full screen",IDC_POLL_FULLSCREEN,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,164,94,98,13
-    CONTROL         "Poll console windows only",IDC_CONSOLE_ONLY,"Button",
-                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,263,64,102,
-                    13
-    CONTROL         "Poll on event received only",IDC_ONEVENT_ONLY,"Button",
-                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,263,79,102,
-                    13
-    GROUPBOX        "Bandwidth Optimizations",IDC_STATIC,156,117,215,29
-    CONTROL         "Remove desktop wallpaper on client connections",
-                    IDC_REMOVE_WALLPAPER,"Button",BS_AUTOCHECKBOX | WS_GROUP | 
-                    WS_TABSTOP,164,128,201,12
-    DEFPUSHBUTTON   "&OK",IDOK,156,174,47,15,WS_GROUP
-    PUSHBUTTON      "&Apply",IDC_APPLY,208,174,47,15
-    PUSHBUTTON      "&Cancel",IDCANCEL,260,174,47,15
-    PUSHBUTTON      "Ad&vanced...",IDADVANCED,319,174,52,15
-END
-
-IDD_ABOUT DIALOG DISCARDABLE  0, 0, 326, 146
+IDD_ABOUT DIALOG DISCARDABLE  0, 0, 326, 162
 STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About WinVNC"
 FONT 8, "MS Sans Serif"
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,134,124,50,14
+    DEFPUSHBUTTON   "OK",IDOK,134,140,50,14
     CONTROL         132,IDC_VNCLOGO,"Static",SS_BITMAP | SS_SUNKEN,13,7,87,
                     80
-    LTEXT           "Based on TightVNC Server version 1.2.9\nCopyright (C) 2000-2003 Constantin Kaplinsky\nhttp://www.tightvnc.com/",
-                    IDC_STATIC,134,28,185,27
+    LTEXT           "Based on TightVNC Server version 1.3dev7\nCopyright (C) 2000-2005 Constantin Kaplinsky\nhttp://www.tightvnc.com\nCopyright (C) 2001-2004 HorizonLive.com, Inc.\nhttp://www.horizonlive.com/",
+                    IDC_STATIC,134,28,185,45
     LTEXT           "Includes code from TridiaVNC 1.4.0\nCopyright (C) 2000, 2001 Tridia Corporation\nhttp://www.tridiavnc.com/",
-                    IDC_STATIC,134,87,185,28
+                    IDC_STATIC,134,103,185,28
     LTEXT           "Based on WinVNC 3.3.3r9 by James Weatherall\nCopyright (C) 1998-2001 AT&&T Laboratories Cambridge\nhttp://www.uk.research.att.com/vnc/",
-                    IDC_STATIC,134,57,185,29
-    LTEXT           "TurboVNC Server version 0.2\nhttp://virtualgl.sourceforge.net",
+                    IDC_STATIC,134,73,185,29
+    LTEXT           "TurboVNC Server version 0.3\nhttp://virtualgl.sourceforge.net",
                     IDC_STATIC,134,7,185,18
 END
 
@@ -147,51 +80,273 @@ BEGIN
     PUSHBUTTON      "Accept without &Password",IDACCEPT_NOPASS,70,78,95,17
 END
 
-IDD_ADVPROPERTIES DIALOG DISCARDABLE  0, 0, 309, 186
-STYLE DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | 
+#if defined(APSTUDIO_INVOKED) || defined(HORIZONLIVE)
+#if defined(APSTUDIO_INVOKED)
+IDD_LIVESHAREPROP$(HORIZONLIVE) DIALOGEX 0, 0, 262, 118
+#else
+IDD_LIVESHAREPROP DIALOGEX 0, 0, 262, 118
+#endif
+STYLE DS_MODALFRAME | DS_3DLOOK | DS_CENTER | DS_CONTEXTHELP | WS_POPUP | 
     WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_CONTEXTHELP
+CAPTION "AppShare Settings"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "Select Sharing Area",IDC_SHARINGAREA_BORDER,5,5,188,55
+    CONTROL         "Window",IDC_WINDOW,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,10,18,42,10
+    CONTROL         "Screen Area",IDC_SCREEN,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,10,33,55,10
+    CONTROL         "Full Desktop",IDC_FULLSCREEN,"Button",
+                    BS_AUTORADIOBUTTON | WS_TABSTOP,10,48,55,10
+    CONTROL         139,IDC_BMPCURSOR,"Static",SS_BITMAP,55,15,21,17
+    EDITTEXT        IDC_NAME_APPLI,81,15,105,14,ES_AUTOHSCROLL | ES_READONLY
+    GROUPBOX        "Connect with AppShare Key",IDC_LIVESHARE_BORDER,5,65,
+                    187,45
+    LTEXT           "AppShare Key:",IDC_LIVESHARE_LABEL,10,77,54,8
+    EDITTEXT        IDC_LIVESHARE,67,75,121,14,ES_AUTOHSCROLL
+    LTEXT           "Enter the AppShare Key in the box above and click 'OK' to begin sharing your computer ",
+                    IDC_STATIC,10,90,176,16
+    DEFPUSHBUTTON   "&OK",IDOK,199,9,58,15
+    PUSHBUTTON      "&Cancel",IDCANCEL,199,29,58,15
+    PUSHBUTTON      "&Apply",IDC_APPLY,199,49,58,15
+    PUSHBUTTON      "Ad&vanced ...",IDADVANCED,199,69,58,15
+END
+#endif
+
+#if defined(APSTUDIO_INVOKED) || defined(HORIZONLIVE)
+#if defined(APSTUDIO_INVOKED)
+IDD_LIVESHAREADVPROP$(HORIZONLIVE) DIALOGEX 0, 0, 280, 138
+#else
+IDD_LIVESHAREADVPROP DIALOGEX 0, 0, 280, 138
+#endif
+STYLE DS_MODALFRAME | DS_3DLOOK | DS_CENTER | DS_CONTEXTHELP | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_CONTEXTHELP
 CAPTION "Advanced Properties"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "Update Handling",IDC_UPDATE_BORDER,5,5,196,92
+    CONTROL         "Poll Full Screen",IDC_POLL_FULLSCREEN,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,10,14,105,15
+    CONTROL         "Poll Foreground Window",IDC_POLL_FOREGROUND,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,10,35,105,15
+    CONTROL         "Poll Window Under Cursor",IDC_POLL_UNDER_CURSOR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,10,54,105,16
+    CONTROL         "Poll Console Windows Only",IDC_CONSOLE_ONLY,"Button",
+                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,115,14,65,15
+    CONTROL         "Poll On Event Received Only",IDC_ONEVENT_ONLY,"Button",
+                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,115,35,65,15
+    EDITTEXT        IDC_POLLING_CYCLE,115,55,22,12,ES_AUTOHSCROLL
+    CONTROL         "Polling cycle, ms",IDC_POLCYCLMS_LABEL,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,142,58,56,11
+    CONTROL         "Don't use VNCHooks.DLL while polling full screen",
+                    IDC_DONT_SET_HOOKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    10,76,186,13
+    CONTROL         "Log info to Winvnc.log",IDLOG,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,5,105,120,12
+    CONTROL         "Log extensive debug info",IDLOGLOTS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,19,119,100,12
+    CONTROL         "Disable remote control while local keyboard or mouse in use",
+                    IDC_REMOTE_DISABLE,"Button",BS_AUTOCHECKBOX | BS_TOP | 
+                    BS_MULTILINE | WS_TABSTOP,150,107,125,20
+    DEFPUSHBUTTON   "&OK",IDOK,208,5,67,15
+    PUSHBUTTON      "&Cancel",IDCANCEL,208,25,67,15
+    PUSHBUTTON      "&Apply",IDC_APPLY,207,45,67,15
+END
+#endif
+
+#if defined(APSTUDIO_INVOKED) || defined(HORIZONLIVE)
+#if defined(APSTUDIO_INVOKED)
+IDD_ACCEPT_REVERSE$(HORIZONLIVE) DIALOGEX 0, 0, 179, 55
+#else
+IDD_ACCEPT_REVERSE DIALOGEX 0, 0, 179, 55
+#endif
+STYLE DS_SYSMODAL | DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Begin AppShare Session?"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "&OK",IDACCEPT,17,31,47,17
+    PUSHBUTTON      "&Cancel",IDREJECT,113,31,48,17,0,WS_EX_TRANSPARENT
+    CTEXT           "Would you like to share your computer desktop via AppShare now?",
+                    IDC_STATIC_TEXT2,8,2,163,17
+END
+#endif
+
+IDD_PROPERTIES_PARENT DIALOGEX 0, 0, 304, 212
+STYLE DS_MODALFRAME | DS_CENTER | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+EXSTYLE WS_EX_CONTEXTHELP | WS_EX_CONTROLPARENT
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL         "Tab1",IDC_TAB,"SysTabControl32",WS_GROUP | WS_TABSTOP,5,
+                    5,294,183
+    DEFPUSHBUTTON   "&OK",IDOK,139,193,50,14,WS_GROUP
+    PUSHBUTTON      "&Cancel",IDCANCEL,194,193,50,14
+    PUSHBUTTON      "&Apply",IDC_APPLY,249,193,50,14
+END
+
+IDD_SHARED_DESKTOP_AREA DIALOG DISCARDABLE  0, 0, 235, 90
+STYLE DS_CONTROL | WS_CHILD | WS_VISIBLE
 FONT 8, "MS Sans Serif"
 BEGIN
-    GROUPBOX        "Query Settings",IDC_STATIC,5,5,223,76
+    CONTROL         "Full desktop",IDC_FULLSCREEN,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,7,7,100,13
+    CONTROL         "Window:",IDC_WINDOW,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,7,23,44,13
+    CONTROL         "Rectangular area",IDC_SCREEN,"Button",
+                    BS_AUTORADIOBUTTON | WS_TABSTOP,7,39,100,13
+    CONTROL         139,IDC_BMPCURSOR,"Static",SS_BITMAP,63,21,21,17
+    EDITTEXT        IDC_NAME_APPLI,91,23,137,12,ES_AUTOHSCROLL | ES_READONLY
+END
+
+IDD_INCOMING DIALOG DISCARDABLE  0, 0, 288, 166
+STYLE DS_CONTROL | WS_CHILD | WS_VISIBLE
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Incoming connections",IDC_STATIC_INCOMING,5,5,139,63
+    CONTROL         "Accept socket connections",IDC_CONNECT_SOCK,"Button",
+                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,13,16,128,12
+    LTEXT           "Primary password:",IDC_PASSWORD_LABEL,19,30,69,12,
+                    SS_CENTERIMAGE | NOT WS_GROUP
+    EDITTEXT        IDC_PASSWORD,91,30,44,12,ES_PASSWORD | ES_AUTOHSCROLL
+    LTEXT           "View-only password:",IDC_PASSWORD_VIEWONLY_LABEL,19,47,
+                    69,12,SS_CENTERIMAGE | NOT WS_GROUP
+    EDITTEXT        IDC_PASSWORD_VIEWONLY,91,47,44,12,ES_PASSWORD | 
+                    ES_AUTOHSCROLL
+    GROUPBOX        "Display or port numbers to use",IDC_STATIC_DISPLAY_PORT,
+                    152,5,131,63
+    CONTROL         "Auto",IDC_PORTNO_AUTO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP | WS_TABSTOP,160,17,33,12
+    CONTROL         "Display:",IDC_SPECDISPLAY,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,200,17,40,12
+    CONTROL         "Ports:",IDC_SPECPORT,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,160,36,35,12
+    EDITTEXT        IDC_DISPLAYNO,247,17,27,12,ES_AUTOHSCROLL | ES_NUMBER | 
+                    WS_GROUP
+    EDITTEXT        IDC_PORTRFB,200,36,27,12,ES_AUTOHSCROLL | ES_NUMBER
+    CTEXT           "and",IDC_STATIC_AND,230,36,14,12,SS_CENTERIMAGE
+    EDITTEXT        IDC_PORTHTTP,247,36,27,12,ES_AUTOHSCROLL | ES_NUMBER
+    CTEXT           "(main)",IDC_MAIN_LABEL,200,51,27,10,SS_CENTERIMAGE | 
+                    NOT WS_GROUP
+    CTEXT           "(HTTP)",IDC_HTTP_LABEL,247,51,27,10,SS_CENTERIMAGE | 
+                    NOT WS_GROUP
+    GROUPBOX        "Input handling",IDC_STATIC_INPUT,5,72,139,88
+    CONTROL         "Block remote input events",IDC_DISABLE_INPUTS,"Button",
+                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,13,84,128,12
+    CONTROL         "Block remote input on local activity",
+                    IDC_REMOTE_DISABLE,"Button",BS_AUTOCHECKBOX | BS_TOP | 
+                    BS_MULTILINE | WS_TABSTOP,13,99,128,12
+    LTEXT           "Inactivity timeout:",IDC_TIMEOUT_LABEL,19,112,59,12,
+                    SS_CENTERIMAGE | NOT WS_GROUP
+    EDITTEXT        IDC_DISABLE_TIME,79,112,23,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "seconds",IDC_SECONDS_LABEL,107,112,34,12,SS_CENTERIMAGE | 
+                    NOT WS_GROUP
+    CONTROL         "No local input during client sessions",
+                    IDC_DISABLE_LOCAL_INPUTS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,13,126,128,12
+    CONTROL         "Blank screen on client connections",IDC_BLANK_SCREEN,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,140,128,12
+    GROUPBOX        "When last client disconnects",IDC_STATIC_DISCONNECT,152,
+                    72,131,57
+    CONTROL         "Do nothing",IDC_LOCKSETTING_NOTHING,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,160,84,117,12
+    CONTROL         "Lock workstation",IDC_LOCKSETTING_LOCK,"Button",
+                    BS_AUTORADIOBUTTON,160,98,117,12
+    CONTROL         "Logoff workstation",IDC_LOCKSETTING_LOGOFF,"Button",
+                    BS_AUTORADIOBUTTON,160,112,117,12
+    CONTROL         "Enable file transfers",IDC_ENABLE_FILE_TRANSFERS,"Button",
+                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,160,135,110,12
+    CONTROL         "Remove desktop wallpaper",IDC_REMOVE_WALLPAPER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,160,149,110,12
+END
+
+IDD_UPDATE_HANDLING DIALOG DISCARDABLE  0, 0, 288, 132
+STYLE DS_CONTROL | WS_CHILD | WS_VISIBLE
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Polling modes",IDC_STATIC_POLLING,5,5,133,74
+    CONTROL         "Poll foreground window",IDC_POLL_FOREGROUND,"Button",
+                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,13,16,120,12
+    CONTROL         "Poll window under cursor",IDC_POLL_UNDER_CURSOR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,31,120,12
+    CONTROL         "Poll full screen",IDC_POLL_FULLSCREEN,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,46,120,12
+    LTEXT           "Polling cycle:",IDC_STATIC_PCYCLE,26,61,49,12,
+                    SS_CENTERIMAGE | NOT WS_GROUP
+    EDITTEXT        IDC_POLLING_CYCLE,78,61,27,12,ES_AUTOHSCROLL
+    LTEXT           "ms",IDC_STATIC_MS,112,61,19,12,SS_CENTERIMAGE | NOT 
+                    WS_GROUP
+    GROUPBOX        "Window polling",IDC_STATIC_WNDPOLLING,147,5,136,43
+    CONTROL         "Poll console windows only",IDC_CONSOLE_ONLY,"Button",
+                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,155,16,125,
+                    12
+    CONTROL         "Poll on event received only",IDC_ONEVENT_ONLY,"Button",
+                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,155,31,125,
+                    12
+    GROUPBOX        "Mirror driver status",IDC_STATIC_DRVSTATUS,147,52,136,
+                    27
+    LTEXT           "No information - no clients connected",
+                    IDC_STATIC_DRVINFO,155,62,125,12,SS_CENTERIMAGE
+    GROUPBOX        "Troubleshooting",IDC_STATIC_TRSH,5,83,278,44
+    CONTROL         "Don't use VNCHooks.DLL while polling full screen",
+                    IDC_DONT_SET_HOOKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    13,94,209,12
+    CONTROL         "Don't use mirror display driver even if available",
+                    IDC_DONT_USE_DRIVER,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,13,109,209,12
+END
+
+IDD_QUERY_SETTINGS DIALOG DISCARDABLE  0, 0, 237, 90
+STYLE DS_CONTROL | WS_CHILD | WS_VISIBLE
+FONT 8, "MS Sans Serif"
+BEGIN
     CONTROL         "Query console on incoming connections",IDQUERY,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,13,17,211,12
-    LTEXT           "Query timeout:",IDC_STATIC,25,32,67,12,SS_CENTERIMAGE
-    EDITTEXT        IDQUERYTIMEOUT,95,32,22,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "seconds",IDC_STATIC,123,32,101,12,SS_CENTERIMAGE
-    LTEXT           "Default action:",IDC_STATIC,25,47,67,12,SS_CENTERIMAGE
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,7,211,12
+    LTEXT           "Query timeout:",IDC_STATIC_TIMEOUT,19,23,67,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDQUERYTIMEOUT,89,22,22,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Default action:",IDC_STATIC_ACTION,19,37,67,12,
+                    SS_CENTERIMAGE
     CONTROL         "Refuse",IDC_ACTION_REFUSE,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP | WS_TABSTOP,95,47,57,12
+                    WS_GROUP | WS_TABSTOP,89,37,57,12
     CONTROL         "Accept",IDC_ACTION_ACCEPT,"Button",BS_AUTORADIOBUTTON,
-                    152,47,72,12
+                    146,37,72,12
     CONTROL         "Allow option to accept without authentication",
                     IDQUERYALLOWNOPASS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    13,62,211,12
-    GROUPBOX        "Administration",IDC_STATIC,5,85,156,96
+                    7,52,211,12
+    LTEXT           "seconds",IDC_STATIC_SECONDS,115,23,35,11,SS_CENTERIMAGE
+END
+
+IDD_ADMINISTRATION DIALOG DISCARDABLE  0, 0, 288, 111
+STYLE DS_CONTROL | WS_CHILD | WS_VISIBLE
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Administration",IDC_STATIC_ADMINISTR,5,5,142,101
     CONTROL         "Disable empty passwords",IDREQUIREAUTH,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,13,97,144,12
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,17,129,12
     CONTROL         "Allow loopback connections",IDALLOWLOOPBACK,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,13,112,144,12
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,32,132,12
     CONTROL         "Allow only loopback connections",IDONLYLOOPBACK,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,25,127,132,12
+                    BS_AUTOCHECKBOX | WS_TABSTOP,20,47,117,12
     CONTROL         "Log information to WinVNC.log",IDLOG,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,13,142,144,12
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,62,125,12
     CONTROL         "Log detailed debugging information",IDLOGLOTS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,25,157,132,12
-    GROUPBOX        "Web access",IDC_STATIC,167,85,137,31
-    CONTROL         "Enable built-in HTTP daemon",IDENABLEHTTPD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,180,98,123,10
-    GROUPBOX        "Connection Priority",IDC_STATIC,167,120,137,60
+                    BS_AUTOCHECKBOX | WS_TABSTOP,20,77,123,12
+    GROUPBOX        "HTTP server",IDC_STATIC_TEMPORARY,155,5,128,40
+    CONTROL         "Enable built-in HTTP server",IDENABLEHTTPD,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,163,16,115,10
+    CONTROL         "Enable applet params in URLs",IDC_URL_PARAMS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,163,30,115,10
+    GROUPBOX        "Connection Priority",IDC_STATIC_CONN_PRIOR,155,49,128,
+                    57
     CONTROL         "Disconnect existing connections",IDPRIORITY0,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,180,132,123,
-                    12
+                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,163,62,115,10
     CONTROL         "Automatic shared sessions",IDPRIORITY1,"Button",
-                    BS_AUTORADIOBUTTON,180,147,123,12
+                    BS_AUTORADIOBUTTON,163,76,115,10
     CONTROL         "Refuse concurrent connections",IDPRIORITY2,"Button",
-                    BS_AUTORADIOBUTTON,180,162,123,12
-    DEFPUSHBUTTON   "&OK",IDOK,238,5,66,14
-    PUSHBUTTON      "&Apply",IDC_APPLY,238,23,66,14
-    PUSHBUTTON      "&Cancel",IDCANCEL,238,41,66,14
+                    BS_AUTORADIOBUTTON,163,90,115,10
 END
 
 
@@ -203,33 +358,14 @@ END
 #ifdef APSTUDIO_INVOKED
 GUIDELINES DESIGNINFO DISCARDABLE 
 BEGIN
-    IDD_PROPERTIES, DIALOG
-    BEGIN
-        LEFTMARGIN, 5
-        RIGHTMARGIN, 371
-        VERTGUIDE, 13
-        VERTGUIDE, 111
-        VERTGUIDE, 135
-        VERTGUIDE, 148
-        VERTGUIDE, 156
-        VERTGUIDE, 164
-        TOPMARGIN, 5
-        BOTTOMMARGIN, 189
-        HORZGUIDE, 22
-        HORZGUIDE, 87
-        HORZGUIDE, 104
-        HORZGUIDE, 118
-        HORZGUIDE, 128
-        HORZGUIDE, 133
-    END
-
     IDD_ABOUT, DIALOG
     BEGIN
         LEFTMARGIN, 13
         RIGHTMARGIN, 319
+        VERTGUIDE, 100
         VERTGUIDE, 134
         TOPMARGIN, 7
-        BOTTOMMARGIN, 138
+        BOTTOMMARGIN, 122
     END
 
     IDD_OUTGOING_CONN, DIALOG
@@ -264,10 +400,40 @@ BEGIN
         HORZGUIDE, 78
     END
 
-    IDD_ADVPROPERTIES, DIALOG
+    "IDD_LIVESHAREPROP$(HORIZONLIVE)", DIALOG
     BEGIN
         LEFTMARGIN, 5
-        RIGHTMARGIN, 304
+        RIGHTMARGIN, 257
+        VERTGUIDE, 10
+        VERTGUIDE, 18
+        VERTGUIDE, 75
+        VERTGUIDE, 115
+        VERTGUIDE, 120
+        VERTGUIDE, 155
+        VERTGUIDE, 160
+        VERTGUIDE, 174
+        VERTGUIDE, 199
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 110
+        HORZGUIDE, 15
+        HORZGUIDE, 20
+        HORZGUIDE, 25
+        HORZGUIDE, 30
+        HORZGUIDE, 40
+        HORZGUIDE, 45
+        HORZGUIDE, 50
+        HORZGUIDE, 60
+        HORZGUIDE, 65
+        HORZGUIDE, 70
+        HORZGUIDE, 80
+        HORZGUIDE, 83
+    END
+
+    "IDD_LIVESHAREADVPROP$(HORIZONLIVE)", DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 275
+        VERTGUIDE, 10
         VERTGUIDE, 13
         VERTGUIDE, 25
         VERTGUIDE, 134
@@ -276,10 +442,99 @@ BEGIN
         VERTGUIDE, 175
         VERTGUIDE, 185
         TOPMARGIN, 5
-        BOTTOMMARGIN, 181
+        BOTTOMMARGIN, 131
         HORZGUIDE, 32
         HORZGUIDE, 85
         HORZGUIDE, 97
+    END
+
+    "IDD_ACCEPT_REVERSE$(HORIZONLIVE)", DIALOG
+    BEGIN
+        LEFTMARGIN, 8
+        RIGHTMARGIN, 171
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 48
+    END
+
+    IDD_PROPERTIES_PARENT, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 299
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 207
+    END
+
+    IDD_SHARED_DESKTOP_AREA, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 83
+    END
+
+    IDD_INCOMING, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 283
+        VERTGUIDE, 13
+        VERTGUIDE, 19
+        VERTGUIDE, 58
+        VERTGUIDE, 91
+        VERTGUIDE, 108
+        VERTGUIDE, 135
+        VERTGUIDE, 141
+        VERTGUIDE, 144
+        VERTGUIDE, 152
+        VERTGUIDE, 160
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 161
+        HORZGUIDE, 36
+        HORZGUIDE, 53
+        HORZGUIDE, 68
+        HORZGUIDE, 72
+        HORZGUIDE, 90
+        HORZGUIDE, 118
+    END
+
+    IDD_UPDATE_HANDLING, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 283
+        VERTGUIDE, 13
+        VERTGUIDE, 26
+        VERTGUIDE, 133
+        VERTGUIDE, 147
+        VERTGUIDE, 155
+        VERTGUIDE, 280
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 127
+        HORZGUIDE, 22
+        HORZGUIDE, 37
+        HORZGUIDE, 79
+    END
+
+    IDD_QUERY_SETTINGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 230
+        VERTGUIDE, 19
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 83
+        HORZGUIDE, 28
+        HORZGUIDE, 43
+    END
+
+    IDD_ADMINISTRATION, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 283
+        VERTGUIDE, 13
+        VERTGUIDE, 20
+        VERTGUIDE, 155
+        VERTGUIDE, 164
+        VERTGUIDE, 278
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 106
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -292,8 +547,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,2,0,0
- PRODUCTVERSION 0,2,0,0
+ FILEVERSION 0,3,0,0
+ PRODUCTVERSION 0,3,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -326,14 +581,14 @@ BEGIN
             VALUE "Comments", "Based on TridiaVNC by Tridia Corporation, Based on TightVNC by Constantin Kaplinsky\0"
             VALUE "CompanyName", "The VirtualGL Project\0"
             VALUE "FileDescription", "TurboVNC Win32 Server\0"
-            VALUE "FileVersion", "0, 2, 0, 0\0"
+            VALUE "FileVersion", "0, 3, 0, 0\0"
             VALUE "InternalName", "WinVNC\0"
-            VALUE "LegalCopyright", "Copyright (C) 1998-2002 [many holders]\0"
+            VALUE "LegalCopyright", "Copyright (C) 1998-2005 [many holders]\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "WinVNC.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "TurboVNC Win32 Server\0"
-            VALUE "ProductVersion", "0, 2, 0, 0\0"
+            VALUE "ProductVersion", "0, 3, 0, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END
@@ -356,6 +611,9 @@ END
 IDI_WINVNC              ICON    DISCARDABLE     "res\\WinVNC.ico"
 IDI_FLASH               ICON    DISCARDABLE     "res\\icon1.ico"
 IDI_DISABLED            ICON    DISCARDABLE     "res\\ico00001.ico"
+IDI_LIVESHARE           ICON    DISCARDABLE     "res\\ico00002.ico"
+IDI_LIVESHARE_NOCON     ICON    DISCARDABLE     "res\\ico00003.ico"
+IDI_LIVESHARE_CON       ICON    DISCARDABLE     "res\\ico00004.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -378,33 +636,142 @@ BEGIN
     END
 END
 
+IDR_LSHTRAYMENU MENU DISCARDABLE 
+BEGIN
+    POPUP "tray"
+    BEGIN
+        MENUITEM "AppShare &Settings...",       ID_PROPERTIES
+        MENUITEM SEPARATOR
+        MENUITEM "&About AppShare",             ID_ABOUT
+        MENUITEM SEPARATOR
+        MENUITEM "&Quit",                       ID_CLOSE
+    END
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // JAVAARCHIVE
 //
 
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_VNCVIEWER_JAR$(WITH_JAVA_VIEWER) JAVAARCHIVE DISCARDABLE "res\\VncViewer.jar"
+#else
 IDR_VNCVIEWER_JAR       JAVAARCHIVE DISCARDABLE "res\\VncViewer.jar"
+#endif
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // JAVACLASS
 //
 
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_AUTHPANEL_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\AuthPanel.class"
+#else
 IDR_AUTHPANEL_CLASS     JAVACLASS DISCARDABLE   "res\\AuthPanel.class"
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_CLIPBOARDFRAME_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\ClipboardFrame.class"
+#else
 IDR_CLIPBOARDFRAME_CLASS JAVACLASS DISCARDABLE   "res\\ClipboardFrame.class"
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_OPTIONSFRAME_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\OptionsFrame.class"
+#else
 IDR_OPTIONSFRAME_CLASS  JAVACLASS DISCARDABLE   "res\\OptionsFrame.class"
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_RFBPROTO_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\RfbProto.class"
+#else
 IDR_RFBPROTO_CLASS      JAVACLASS DISCARDABLE   "res\\RfbProto.class"
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_VNCCANVAS_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\VncCanvas.class"
+#else
 IDR_VNCCANVAS_CLASS     JAVACLASS DISCARDABLE   "res\\VncCanvas.class"
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_VNCVIEWER_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\VncViewer.class"
+#else
 IDR_VNCVIEWER_CLASS     JAVACLASS DISCARDABLE   "res\\VncViewer.class"
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_BUTTONPANEL_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\ButtonPanel.class"
+#else
 IDR_BUTTONPANEL_CLASS   JAVACLASS DISCARDABLE   "res\\ButtonPanel.class"
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_DESCIPHER_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\DesCipher.class"
+#else
 IDR_DESCIPHER_CLASS     JAVACLASS DISCARDABLE   "res\\DesCipher.class"
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_RECFRAME_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\RecordingFrame.class"
+#else
 IDR_RECFRAME_CLASS      JAVACLASS DISCARDABLE   "res\\RecordingFrame.class"
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_SESSIONREC_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\SessionRecorder.class"
+#else
 IDR_SESSIONREC_CLASS    JAVACLASS DISCARDABLE   "res\\SessionRecorder.class"
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_RELOGINPANEL_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\ReloginPanel.class"
+#else
 IDR_RELOGINPANEL_CLASS  JAVACLASS DISCARDABLE   "res\\ReloginPanel.class"
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_SOCKFACTORY_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\SocketFactory.class"
+#else
 IDR_SOCKFACTORY_CLASS   JAVACLASS DISCARDABLE   "res\\SocketFactory.class"
-IDR_HTTPCONNSOCKFACTORY_CLASS JAVACLASS DISCARDABLE   "res\\HTTPConnectSocketFactory.class"
-IDR_HTTPCONNSOCK_CLASS  JAVACLASS DISCARDABLE   "res\\HTTPConnectSocket.class"
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_AUTHUNIXLOGIN_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\AuthUnixLoginPanel.class"
+#else
+IDR_AUTHUNIXLOGIN_CLASS JAVACLASS DISCARDABLE   "res\\AuthUnixLoginPanel.class"
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_CAPINFO_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\CapabilityInfo.class"
+#else
+IDR_CAPINFO_CLASS       JAVACLASS DISCARDABLE   "res\\CapabilityInfo.class"
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_CAPSCONTAINER_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\CapsContainer.class"
+#else
+IDR_CAPSCONTAINER_CLASS JAVACLASS DISCARDABLE   "res\\CapsContainer.class"
+#endif
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -412,6 +779,16 @@ IDR_HTTPCONNSOCK_CLASS  JAVACLASS DISCARDABLE   "res\\HTTPConnectSocket.class"
 //
 
 IDB_VNCLOGO             BITMAP  DISCARDABLE     "res\\turbovnc.bmp"
+IDB_BITMAP1             BITMAP  DISCARDABLE     "res\\bitmap1.bmp"
+IDB_BITMAP2             BITMAP  DISCARDABLE     "res\\bitmap2.bmp"
+IDB_BITMAP3             BITMAP  DISCARDABLE     "res\\bitmap3.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDC_CURSOR1             CURSOR  DISCARDABLE     "res\\cursor1.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -420,7 +797,114 @@ IDB_VNCLOGO             BITMAP  DISCARDABLE     "res\\turbovnc.bmp"
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDI_WINVNC              "WinVNC"
+    IDI_WINVNC              "TightVNC Server"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDI_LIVESHARE           "AppShare"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDC_STATIC_DRVINFO      "Here you can see information about using the mirror display driver."
+    IDC_CONNECT_SOCK        "This option controls whether it is possible to connect to this computer with a VNC Viewer. Clearing the checkbox will ensure that remote connections won't be accepted."
+    IDC_BLANK_SCREEN        "Blank local screen when sharing the computer."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDC_DISPLAYNO           "The display number determines which TCP ports will be used for accepting client connections. Display 0 corresponds to ports 5900 (VNC port) and 5800 (HTTP port), display 1 to ports 5901 and 5801 and so on."
+    IDC_PASSWORD            "Users authenticated with the primary password are given full control over the server's desktop. Note that only first 8 characters of passwords are used in the standard VNC authentication."
+    IDC_UPDATE_BORDER       "Update handling options determine what methods are used to detect screen updates."
+    IDC_POLL_FULLSCREEN     "Scan the whole screen contents for changes. Setting this option guarantees reliable update detection but can notably increase CPU usage. Note that polling is not used with mirror display driver."
+    IDC_CONSOLE_ONLY        "When set, window polling is performed only for console windows. Pixel changes in console windows cannot be detected by the hooks DLL, so this option is set by default."
+    IDC_POLL_FOREGROUND     "Poll the foreground (active) window. This is the default polling mode. Note that polling is not used with mirror display driver."
+    IDC_POLL_UNDER_CURSOR   "Poll the window under cursor. Note that polling is not used with mirror display driver."
+    IDC_ONEVENT_ONLY        "When set, window polling is performed only on receiving keyboard or mouse events from a VNC viewer."
+    IDC_REMOTE_DISABLE      "Set this option to give higher priority to local keyboard and pointer. This blocks remote input while local keyboard or mouse is in use."
+    IDC_PORTHTTP            "TCP port of the built-in Web server serving the Java viewer applet."
+    IDC_PORTRFB             "TCP port used for VNC data exchange (pixel data, input events, file transfers etc.)"
+    IDC_PASSWORD_VIEWONLY   "Users authenticated with view-only password are allowed to view the server's desktop, but cannot control it with their mouse and keyboard. Note that only first 8 characters of passwords are used in the standard VNC authentication."
+    IDC_URL_PARAMS          "When set, the HTTP server passes parameters from the URL to the Java viewer applet. For example, you could write http://myvnchost:5800/?view+only=yes&restricted+colors=yes"
+    IDC_STATIC_TRSH         "Change these options if something goes wrong."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDC_SPECPORT            "Specify arbitrary TCP port numbers for incoming VNC and HTTP connections."
+    IDC_POLLING_CYCLE       "Specify how often polling should be performed. Lowering the value improves responsiveness but also increases CPU usage."
+    IDC_ACTION_REFUSE       "Reject the connection if the confirmation dialog was timed out."
+    IDC_ACTION_ACCEPT       "Accept the connection if the confirmation dialog was timed out."
+    IDC_REMOVE_WALLPAPER    "Do not show the desktop wallpaper while at least one viewer is connected to this server. This both saves bandwidth and decreases CPU utilization on the server, resulting in better responsiveness of the remote desktop."
+    IDC_LOCKSETTING_NOTHING "Do nothing when a viewer disconnects. This is the default option."
+    IDC_LOCKSETTING_LOCK    "Lock workstation on disconnect. This option is supported under Windows 2000/XP only."
+    IDC_LOCKSETTING_LOGOFF  "Logoff workstation on disconnect."
+    IDC_DONT_SET_HOOKS      "Full-screen polling can detect updates without using the hooks DLL, which is used by default to detect screen changes. Use this option for troubleshouting when the hooks DLL causes side effects in other applications."
+    IDC_ENABLE_FILE_TRANSFERS 
+                            "When this option is set, remote viewers will be allowed to transfer any files between their local computers and this server."
+    IDC_TAB                 "Here you can choose a group of configuration settings to edit."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDC_STATIC_ACTION       "Default action determines what should be done if the confirmation dialog was timed out with no user input."
+    IDC_STATIC_TEMPORARY    "Configuration of the built-in HTTP server."
+    IDC_STATIC_CONN_PRIOR   "Connection priority determines what to do if a VNC viewer requests non-shared session, and there is another connection active."
+    IDC_STATIC_ADMINISTR    "Administration settings."
+    IDC_STATIC_DISPLAY_PORT "Here you can specify which TCP ports should be used for incoming client connections."
+    IDC_DONT_USE_DRIVER     "Don't ever try to use mirror display driver. Use this option for troubleshooting purposes. Note that toggling this option does not take immediate effect if there is at least one viewer connected."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDC_SHARINGAREA_BORDER  "Select Sharing Area"
+    IDC_LIVESHARE_BORDER    "Connect with AppShare Key"
+    IDC_NAME_APPLI          "Window name. You cannot enter the text here. To choose a window to share, drag the ""target"" icon to the selected window."
+    IDC_LIVESHARE           "AppShare Key:"
+    IDC_BMPCURSOR           "To choose a window to share, drag this ""target"" to the selected window."
+    IDC_WINDOW              "Share one partucular window. To choose a window to share, drag the ""target"" icon to the selected window."
+    IDC_SCREEN              "Share a rectangular part of the desktop."
+    IDC_FULLSCREEN          "Share the whole desktop of this computer."
+    IDC_DISABLE_TIME        "Specify how many seconds should pass between local keyboard or mouse activity and enabling remote input."
+    IDC_STATIC_INCOMING     "Options controlling incoming connections from remote clients."
+    IDC_STATIC_INPUT        "Controlling input events during client connections."
+    IDC_STATIC_DISCONNECT   "Action performed when last VNC client disconnects from this server."
+    IDC_STATIC_POLLING      "Select which parts of the screen should be scanned to detect changes."
+    IDC_SPECDISPLAY         "Specify a display number. The VNC port is calculated as 5900 plus display, the HTTP port is 5800 plus display."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDC_DISABLE_INPUTS      "If set, no keyboard or mouse control will be allowed to remote VNC viewers. Toggling this option does not take immediate effect if there is at least one viewer connected."
+    IDC_APPLY               "Apply the changes but do not close the dialog box."
+    IDC_PORTNO_AUTO         "When this option is set, the server will automatically find available port numbers, starting from port 5900 (corresponding to display 0). If built-in Web server is enabled, HTTP port will be set to VNC port minus 100."
+    IDC_DISABLE_LOCAL_INPUTS 
+                            "If set, local keyboard and mouse will be blocked while at least one VNC viewer is connected to this computer."
+    IDC_STATIC_WNDPOLLING   "Choose poling options for window polling modes."
+    IDADVANCED              "Advanced..."
+    IDQUERY                 "When a client connects, show a confirmation window allowing either to accept or to reject the connection."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDOK                    "Apply the changes and close the dialog box."
+    IDCANCEL                "Cancel any input and close the dialog box."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDQUERYTIMEOUT          "Wait for the specified number of seconds, before the confirmation dialog will be closed and the default action will be performed."
+    IDREQUIREAUTH           "Normally, authentication is always required and empty passwords are not allowed. By unchecking this option, it's possible to allow VNC access without authentication. Note that passwordless access can be a security risk."
+    IDQUERYALLOWNOPASS      "Normally, authentication is required if the connection is accepted. Setting this option activates additional button to accept connection without authentication (remote user is not asked for a password)."
+    IDONLYLOOPBACK          "If set, don't allow any connections unless they are originated from the same machine. This can be used for testing purposes, or with port forwarding programs like SSH."
+    IDLOGLOTS               "Check this to increase amount of the information in the log file. There may be a lot of unnecessary data in the log, but this mode can be very useful for debugging and troubleshooting purposes."
+    IDALLOWLOOPBACK         "Normally, connections from the same machine are disabled. Checking this option allows such connections. This can be used for testing purposes, or with port forwarding programs like SSH."
+    IDLOG                   "Check this to enable logging. The log file is called WinVNC.log (created in the current folder). If the TightVNC Server is running as a system service, the file is typically found in the Windows system folder."
+    IDPRIORITY0             "Disconnect existing connections, accept new connections."
+    IDPRIORITY2             "Preserve existing connections, refuse new connections."
+    IDPRIORITY1             "Preserve existing connections, accept new connections."
+    IDENABLEHTTPD           "Enable built-in Web server which can deliver Java viewer to Web clients."
 END
 
 #endif    // English (U.S.) resources
