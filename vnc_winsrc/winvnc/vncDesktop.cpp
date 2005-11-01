@@ -40,7 +40,7 @@
 #include "vncDesktop.h"
 #include "vncService.h"
 #include "WallpaperUtils.h"
-#include <fstream.h>
+//#include <fstream.h>
 
 // Constants
 const UINT RFB_SCREEN_UPDATE = RegisterWindowMessage("WinVNC.Update.DrawRect");
