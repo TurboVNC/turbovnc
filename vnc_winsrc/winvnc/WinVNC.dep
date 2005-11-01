@@ -1,0 +1,820 @@
+# Microsoft Developer Studio Generated Dependency File, included by WinVNC.mak
+
+.\AdministrationControls.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\AdministrationControls.h"\
+	".\Log.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncPasswd.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	
+
+.\d3des.c : \
+	".\d3des.h"\
+	
+
+.\FileTransferItemInfo.cpp : \
+	".\FileTransferItemInfo.h"\
+	
+
+.\IncomingConnectionsControls.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\IncomingConnectionsControls.h"\
+	".\Log.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\VNCHelp.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncPasswd.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	".\WinVNC.h"\
+	
+
+.\InputHandlingControls.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\InputHandlingControls.h"\
+	".\Log.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncPasswd.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	
+
+.\Log.cpp : \
+	".\Log.h"\
+	".\stdhdrs.h"\
+	
+
+.\MatchWindow.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\AdministrationControls.h"\
+	".\IncomingConnectionsControls.h"\
+	".\InputHandlingControls.h"\
+	".\Log.h"\
+	".\MatchWindow.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\PollControls.h"\
+	".\QuerySettingsControls.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\SharedDesktopArea.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\VNCHelp.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncPasswd.h"\
+	".\vncProperties.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	".\WinVNC.h"\
+	
+
+.\MinMax.cpp : \
+	".\MinMax.h"\
+	
+
+.\PollControls.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\Log.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\PollControls.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncPasswd.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	
+
+.\QuerySettingsControls.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\Log.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\QuerySettingsControls.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncPasswd.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	
+
+.\RectList.cpp : \
+	".\Log.h"\
+	".\RectList.h"\
+	".\stdhdrs.h"\
+	
+
+.\SharedDesktopArea.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\AdministrationControls.h"\
+	".\IncomingConnectionsControls.h"\
+	".\InputHandlingControls.h"\
+	".\Log.h"\
+	".\MatchWindow.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\PollControls.h"\
+	".\QuerySettingsControls.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\SharedDesktopArea.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\VNCHelp.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncPasswd.h"\
+	".\vncProperties.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	".\WinVNC.h"\
+	
+
+.\stdhdrs.cpp : \
+	".\Log.h"\
+	".\stdhdrs.h"\
+	
+
+.\translate.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\Log.h"\
+	".\rfb.h"\
+	".\stdhdrs.h"\
+	".\tableinitcmtemplate.cpp"\
+	".\tableinittctemplate.cpp"\
+	".\tabletranstemplate.cpp"\
+	".\translate.h"\
+	
+
+.\VideoDriver.cpp : \
+	".\Log.h"\
+	".\RectList.h"\
+	".\stdhdrs.h"\
+	".\VideoDriver.h"\
+	".\vncRegion.h"\
+	
+
+.\vncAbout.cpp : \
+	".\Log.h"\
+	".\stdhdrs.h"\
+	".\vncAbout.h"\
+	".\VNCHelp.h"\
+	".\WinVNC.h"\
+	
+
+.\vncAcceptDialog.cpp : \
+	".\Log.h"\
+	".\stdhdrs.h"\
+	".\vncAcceptDialog.h"\
+	".\VNCHelp.h"\
+	".\vncService.h"\
+	".\WinVNC.h"\
+	
+
+.\vncAcceptReverseDlg.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\AdministrationControls.h"\
+	".\IncomingConnectionsControls.h"\
+	".\InputHandlingControls.h"\
+	".\Log.h"\
+	".\MatchWindow.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\PollControls.h"\
+	".\QuerySettingsControls.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\SharedDesktopArea.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncAbout.h"\
+	".\vncAcceptReverseDlg.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\VNCHelp.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncMenu.h"\
+	".\vncPasswd.h"\
+	".\vncProperties.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncService.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	".\WinVNC.h"\
+	
+
+.\vncauth.c : \
+	".\d3des.h"\
+	".\vncauth.h"\
+	
+
+.\vncBuffer.cpp : \
+	"..\..\..\vgl\include\turbojpeg.h"\
+	"..\rfb\rfbproto.h"\
+	".\Log.h"\
+	".\MinMax.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\vncEncodeTight.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncPasswd.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	".\zlib\zconf.h"\
+	".\zlib\zlib.h"\
+	
+
+.\vncClient.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\AdministrationControls.h"\
+	".\d3des.h"\
+	".\FileTransferItemInfo.h"\
+	".\IncomingConnectionsControls.h"\
+	".\InputHandlingControls.h"\
+	".\Log.h"\
+	".\MatchWindow.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\PollControls.h"\
+	".\QuerySettingsControls.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\SharedDesktopArea.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncAbout.h"\
+	".\vncAcceptDialog.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\VNCHelp.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncMenu.h"\
+	".\vncPasswd.h"\
+	".\vncProperties.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncService.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	".\WinVNC.h"\
+	
+
+.\vncConnDialog.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\Log.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncConnDialog.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\VNCHelp.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncPasswd.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	".\WinVNC.h"\
+	
+
+.\vncDesktop.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\Log.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\VNCHelp.h"\
+	".\VNCHooks\VNCHooks.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncPasswd.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncService.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	".\WallpaperUtils.h"\
+	".\WinVNC.h"\
+	
+
+.\vncEncoder.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\Log.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncPasswd.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	
+
+.\vncEncodeTight.cpp : \
+	"..\..\..\vgl\include\turbojpeg.h"\
+	"..\rfb\rfbproto.h"\
+	".\Log.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\vncEncodeTight.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncPasswd.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	".\zlib\zconf.h"\
+	".\zlib\zlib.h"\
+	
+
+.\VNCHelp.cpp : \
+	".\Log.h"\
+	".\stdhdrs.h"\
+	".\VNCHelp.h"\
+	".\WinVNC.h"\
+	{$(INCLUDE)}"HtmlHelp.h"\
+	
+
+.\vncHTTPConnect.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\Log.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncPasswd.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	
+
+.\vncInstHandler.cpp : \
+	".\Log.h"\
+	".\stdhdrs.h"\
+	".\vncInstHandler.h"\
+	
+
+.\vncKeymap.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\keysymdef.h"\
+	".\Log.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncPasswd.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncService.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	
+
+.\vncMenu.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\AdministrationControls.h"\
+	".\IncomingConnectionsControls.h"\
+	".\InputHandlingControls.h"\
+	".\Log.h"\
+	".\MatchWindow.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\PollControls.h"\
+	".\QuerySettingsControls.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\SharedDesktopArea.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncAbout.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncConnDialog.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\VNCHelp.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncMenu.h"\
+	".\vncPasswd.h"\
+	".\vncProperties.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncService.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	".\WinVNC.h"\
+	
+
+.\vncProperties.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\AdministrationControls.h"\
+	".\IncomingConnectionsControls.h"\
+	".\InputHandlingControls.h"\
+	".\Log.h"\
+	".\MatchWindow.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\PollControls.h"\
+	".\QuerySettingsControls.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\SharedDesktopArea.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\VNCHelp.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncPasswd.h"\
+	".\vncProperties.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncService.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	".\WinVNC.h"\
+	
+
+.\vncRegion.cpp : \
+	".\Log.h"\
+	".\RectList.h"\
+	".\stdhdrs.h"\
+	".\vncRegion.h"\
+	
+
+.\vncServer.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\Log.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\VNCHelp.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncPasswd.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncService.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	".\WinVNC.h"\
+	
+
+.\vncService.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\AdministrationControls.h"\
+	".\IncomingConnectionsControls.h"\
+	".\InputHandlingControls.h"\
+	".\Log.h"\
+	".\MatchWindow.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\PollControls.h"\
+	".\QuerySettingsControls.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\SharedDesktopArea.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncAbout.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\VNCHelp.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncMenu.h"\
+	".\vncPasswd.h"\
+	".\vncProperties.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncService.h"\
+	".\vncSockConnect.h"\
+	".\vncTimedMsgBox.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	".\WinVNC.h"\
+	
+
+.\vncSockConnect.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\Log.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\vncHTTPConnect.h"\
+	".\vncKeymap.h"\
+	".\vncPasswd.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	
+
+.\vncTimedMsgBox.cpp : \
+	".\Log.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\stdhdrs.h"\
+	".\vncTimedMsgBox.h"\
+	
+
+.\VSocket.cpp : \
+	".\Log.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\stdhdrs.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	
+
+.\WallpaperUtils.cpp : \
+	".\Log.h"\
+	".\stdhdrs.h"\
+	".\VNCHelp.h"\
+	".\WallpaperUtils.h"\
+	".\WinVNC.h"\
+	
+
+.\WinVNC.cpp : \
+	"..\rfb\rfbproto.h"\
+	".\AdministrationControls.h"\
+	".\IncomingConnectionsControls.h"\
+	".\InputHandlingControls.h"\
+	".\Log.h"\
+	".\MatchWindow.h"\
+	".\omnithread\nt.h"\
+	".\omnithread\omnithread.h"\
+	".\PollControls.h"\
+	".\QuerySettingsControls.h"\
+	".\RectList.h"\
+	".\rfb.h"\
+	".\SharedDesktopArea.h"\
+	".\stdhdrs.h"\
+	".\translate.h"\
+	".\VideoDriver.h"\
+	".\vncAbout.h"\
+	".\vncauth.h"\
+	".\vncBuffer.h"\
+	".\vncClient.h"\
+	".\vncCorbaConnect.h"\
+	".\vncDesktop.h"\
+	".\vncEncoder.h"\
+	".\VNCHelp.h"\
+	".\vncHTTPConnect.h"\
+	".\vncInstHandler.h"\
+	".\vncKeymap.h"\
+	".\vncMenu.h"\
+	".\vncPasswd.h"\
+	".\vncProperties.h"\
+	".\vncRegion.h"\
+	".\vncServer.h"\
+	".\vncService.h"\
+	".\vncSockConnect.h"\
+	".\VSocket.h"\
+	".\VTypes.h"\
+	".\WinVNC.h"\
+	
