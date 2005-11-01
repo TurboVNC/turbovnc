@@ -1,20 +1,25 @@
 @echo off
 
 if "%1"=="clean" (
-	msdev vncviewer\vncviewer.dsw /make "vncviewer - Win32 Release" /clean
+	cd vncviewer
+	nmake /f vncviewer.mak cfg="vncviewer - Win32 Release" recurse=1 clean
 	if errorlevel 1 goto abort
-	msdev winvnc\winvnc.dsw /make "winvnc - Win32 No_CORBA" /clean
+	cd ..
+	cd winvnc
+	nmake /f winvnc.mak cfg="WinVNC - Win32 Release" recurse=1 clean
 	if errorlevel 1 goto abort
+	cd ..
 	if not exist ..\..\vgl\Makefile (
 		echo Could not find VirtualGL build directory at ..\..\vgl !
 		goto abort
 	) else (
 		set _PWD=%CD%
 		cd ..\..\vgl
-		make DISTRO=vnc jpeg clean
+		make DISTRO=vnc clean
 		if errorlevel 1 goto abort
 		cd %_PWD%
 	)
+	goto abort
 )
 
 if exist TurboVNC.exe del /q TurboVNC.exe 
@@ -27,10 +32,14 @@ make DISTRO=vnc jpeg
 if errorlevel 1 goto abort
 cd %_PWD%
 
-msdev vncviewer\vncviewer.dsw /make "vncviewer - Win32 Release"
+cd vncviewer
+nmake vncviewer.mak cfg="vncviewer - Win32 Release"
 if errorlevel 1 goto abort
-msdev winvnc\winvnc.dsw /make "winvnc - Win32 No_CORBA"
+cd ..
+cd winvnc
+nmake winvnc.mak cfg="WinVNC - Win32 Release"
 if errorlevel 1 goto abort
+cd ..
 
 compil32 /cc TurboVNC.iss
 if errorlevel 1 goto abort
