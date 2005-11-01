@@ -137,7 +137,7 @@ vncEncoder::Translate(BYTE *source, BYTE *dest, int w, int h, int bytesPerRow)
 
 // Encode a rectangle
 inline UINT
-vncEncoder::EncodeRect(BYTE *source, BYTE *dest, const RECT &rect)
+vncEncoder::EncodeRect(BYTE *source, BYTE *dest, const RECT &rect, int offsetx, int offsety)
 {
 
 	const rectW = rect.right - rect.left;
@@ -146,8 +146,9 @@ vncEncoder::EncodeRect(BYTE *source, BYTE *dest, const RECT &rect)
 
 	// Create the header for the update in the destination area
 	rfbFramebufferUpdateRectHeader *surh = (rfbFramebufferUpdateRectHeader *)dest;
-	surh->r.x = (CARD16) rect.left;
-	surh->r.y = (CARD16) rect.top;
+	surh->r.x = (CARD16) rect.left - offsetx;
+	surh->r.y = (CARD16) rect.top - offsety;
+
 	surh->r.w = (CARD16) rectW;
 	surh->r.h = (CARD16) rectH;
 	surh->r.x = Swap16IfLE(surh->r.x);
@@ -179,10 +180,10 @@ vncEncoder::EncodeRect(BYTE *source, BYTE *dest, const RECT &rect)
 // transmit partial data during the encoding process.  This can improve
 // performance considerably for slower (more complex) encoding algorithms.
 inline UINT
-vncEncoder::EncodeRect(BYTE *source, VSocket *outConn, BYTE *dest, const RECT &rect)
+vncEncoder::EncodeRect(BYTE *source, VSocket *outConn, BYTE *dest, const RECT &rect, int offsetx, int offsety)
 {
 
-	return EncodeRect(source, dest, rect);
+	return EncodeRect(source, dest, rect, offsetx, offsety);
 
 }
 

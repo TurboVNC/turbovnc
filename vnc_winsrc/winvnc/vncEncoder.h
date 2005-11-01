@@ -72,8 +72,8 @@ public:
 	//  - Dest is the base address to encode the rect to.  The rect will be encoded
 	//    into a contiguous region of the buffer.
 	virtual void Translate(BYTE *source, BYTE *dest, const RECT &rect);
-	virtual UINT EncodeRect(BYTE *source, BYTE *dest, const RECT &rect);
-	virtual UINT EncodeRect(BYTE *source, VSocket *outConn, BYTE *dest, const RECT &rect);
+	virtual UINT EncodeRect(BYTE *source, BYTE *dest, const RECT &rect, int offsetx, int offsety);
+	virtual UINT EncodeRect(BYTE *source, VSocket *outConn, BYTE *dest, const RECT &rect, int offsetx, int offsety);
 
 	// Additional translation function for cursor shape data (overloaded!)
 	void Translate(BYTE *source, BYTE *dest, int w, int h, int bytesPerRow);

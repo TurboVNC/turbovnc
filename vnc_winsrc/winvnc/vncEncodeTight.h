@@ -98,7 +98,7 @@ public:
 	virtual UINT RequiredBuffSize(UINT width, UINT height);
 	virtual UINT NumCodedRects(RECT &rect);
 
-	virtual UINT EncodeRect(BYTE *source, VSocket *outConn, BYTE *dest, const RECT &rect);
+	virtual UINT EncodeRect(BYTE *source, VSocket *outConn, BYTE *dest, const RECT &rect, int offx, int offy);
 
 // Implementation
 protected:
@@ -115,6 +115,8 @@ protected:
 	BYTE *m_buffer;
 	int m_bufflen;
 	int *m_prevRowBuf;
+	int	offsetx;
+	int	offsety;
 
 	bool m_usePixelFormat24;
 
