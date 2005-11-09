@@ -265,7 +265,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 		if ( SwitchMatch(args[j], _T("help")) ||
 			SwitchMatch(args[j], _T("?")) ||
 			SwitchMatch(args[j], _T("h"))) {
-			ShowHelpBox(_T("TightVNC Usage Help"));
+			ShowHelpBox(_T("TurboVNC Usage Help"));
 			exit(1);
 		} else if ( SwitchMatch(args[j], _T("listen"))) {
 			m_listening = true;
@@ -286,6 +286,8 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			m_toolbar = false;
 		} else if ( SwitchMatch(args[j], _T("singlebuffer"))) {
 			m_DoubleBuffer = false;
+		} else if ( SwitchMatch(args[j], _T("doublebuffer"))) {
+			m_DoubleBuffer = true;
 		} else if ( SwitchMatch(args[j], _T("shared"))) {
 			m_Shared = true;
 		} else if ( SwitchMatch(args[j], _T("noshared"))) {
@@ -404,24 +406,30 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 				Load(m_configFilename);
 				m_configSpecified = true;
 			}
-		} else if ( SwitchMatch(args[j], _T("compresslevel") )) {
+		} else if ( SwitchMatch(args[j], _T("subsamp") )) {
 			if (++j == i) {
-				ArgError(_T("No compression level specified"));
+				ArgError(_T("No subsampling specified"));
 				continue;
 			}
-			if (_stscanf(args[j], _T("%d"), &m_compressLevel) != 1) {
-				ArgError(_T("Invalid compression level specified"));
+			int subsamp=-1;
+			if (_stscanf(args[j], _T("%d"), &subsamp) != 1
+				|| subsamp<0 || subsamp>2) {
+				ArgError(_T("Invalid subsampling specified"));
 				continue;
 			}
+			m_compressLevel = subsamp;
 		} else if ( SwitchMatch(args[j], _T("quality") )) {
 			if (++j == i) {
 				ArgError(_T("No image quality level specified"));
 				continue;
 			}
-			if (_stscanf(args[j], _T("%d"), &m_jpegQualityLevel) != 1) {
+			int quality=-1;
+			if (_stscanf(args[j], _T("%d"), &quality) != 1
+				|| quality<1 || quality>100) {
 				ArgError(_T("Invalid image quality level specified"));
 				continue;
 			}
+			m_jpegQualityLevel = quality;
 		} else if ( SwitchMatch(args[j], _T("register") )) {
 			Register();
 			exit(1);
@@ -484,7 +492,7 @@ void VNCOptions::Save(char *fname)
 	saveInt("scale_num",			m_scale_num,		fname);
 	saveInt("cursorshape",			m_requestShapeUpdates, fname);
 	saveInt("noremotecursor",		m_ignoreShapeUpdates, fname);	
-	saveInt("compresslevel", m_compressLevel,	fname);	
+	saveInt("subsampling", m_compressLevel,	fname);	
 	saveInt("quality", m_jpegQualityLevel,	fname);
 
 }
@@ -514,7 +522,7 @@ void VNCOptions::Load(char *fname)
 	m_scale_num =			readInt("scale_num",		m_scale_num,	fname);
 	m_requestShapeUpdates =	readInt("cursorshape",		m_requestShapeUpdates, fname) != 0;
 	m_ignoreShapeUpdates =	readInt("noremotecursor",	m_ignoreShapeUpdates, fname) != 0;
-	int level =				readInt("compresslevel",	-1,				fname);
+	int level =				readInt("subsampling",	-1,				fname);
 	if (level != -1) {
 		m_compressLevel = level;
 	}
@@ -697,7 +705,7 @@ static COMBOSTRING rfbcombo[MAX_LEN_COMBO] = {
 };
 
 static const char *subsampstr[3] = {
-	"4:4:4", "4:1:1", "4:2:2"
+	"None", "4:1:1", "4:2:2"
 };
 
 BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
@@ -1249,7 +1257,7 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 	m_scale_num =			read(RegKey, "scale_num",         m_scale_num	         );
 	m_requestShapeUpdates =	read(RegKey, "cursorshape",       m_requestShapeUpdates	 ) != 0;
 	m_ignoreShapeUpdates =	read(RegKey, "noremotecursor",    m_ignoreShapeUpdates   ) != 0;
-	int level		 =		read(RegKey, "compresslevel",     -1				     );
+	int level		 =		read(RegKey, "subsampling",     -1				     );
 	if (level != -1) {
 		m_compressLevel = level;
 	}
@@ -1305,7 +1313,7 @@ int VNCOptions::read(HKEY hkey, char *name, int retrn)
 	save(RegKey, "scale_num",			m_scale_num			);
 	save(RegKey, "cursorshape",			m_requestShapeUpdates );
 	save(RegKey, "noremotecursor",		m_ignoreShapeUpdates );	
-	save(RegKey, "compresslevel", m_compressLevel );	
+	save(RegKey, "subsampling", m_compressLevel );	
 	save(RegKey, "quality",	m_jpegQualityLevel );
 	
 	

@@ -82,7 +82,7 @@ BEGIN
                     TBS_AUTOTICKS | WS_TABSTOP,31,54,72,12
     LTEXT           "best",IDC_STATIC_BEST,103,55,18,10
     RTEXT           "Subsampling:",IDC_STATIC_TEXT_LEVEL,35,68,43,10
-    LTEXT           "4:4:4",IDC_STATIC_LEVEL,83,68,28,10
+    LTEXT           "None",IDC_STATIC_LEVEL,83,68,28,10
     LTEXT           "JPEG Image Quality:",IDC_STATIC_QUAL,12,80,109,10
     RTEXT           "poor",IDC_STATIC_POOR,12,94,18,10
     CONTROL         "Slider1",IDC_QUALITYLEVEL,"msctls_trackbar32",
@@ -208,19 +208,21 @@ BEGIN
                     ES_AUTOHSCROLL | ES_READONLY
 END
 
-IDD_APP_ABOUT DIALOG DISCARDABLE  0, 0, 334, 122
+IDD_APP_ABOUT DIALOG DISCARDABLE  0, 0, 334, 146
 STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About TurboVNC Viewer"
 FONT 8, "MS Sans Serif"
 BEGIN
-    DEFPUSHBUTTON   "&OK",IDOK,135,100,50,14
-    CONTROL         106,IDC_STATIC,"Static",SS_BITMAP | SS_SUNKEN,19,7,81,66
+    DEFPUSHBUTTON   "&OK",IDOK,135,124,50,14
+    CONTROL         106,IDC_STATIC,"Static",SS_BITMAP | SS_SUNKEN,19,7,87,80
     LTEXT           "Based on TightVNC Viewer version 1.3dev7 (release candidate)\nCopyright (C) 2000-2005 Constantin Kaplinsky\nhttp://www.tightvnc.com/",
-                    IDC_STATIC,135,7,190,27
+                    IDC_STATIC,135,30,190,27
     LTEXT           "Includes code from TridiaVNC 1.4.0\nCopyright (C) 2000, 2001 Tridia Corporation\nhttp://www.tridiavnc.com/",
-                    IDC_STATIC,135,66,190,28
+                    IDC_STATIC,135,89,190,28
     LTEXT           "Based on VNC Viewer 3.3.3r3 by Quentin Stafford-Fraser\nCopyright (C) 1999 AT&&T Laboratories Cambridge\nhttp://www.uk.research.att.com/vnc/",
-                    IDC_STATIC,135,36,190,29
+                    IDC_STATIC,135,59,190,29
+    LTEXT           "TurboVNC Viewer version 0.3\nhttp://virtualgl.sourceforge.net",
+                    IDC_STATIC,135,7,190,18
 END
 
 IDD_GENERAL_OPTION DIALOG DISCARDABLE  0, 0, 300, 179
@@ -467,36 +469,36 @@ BEGIN
     ID_CLOSEDAEMON          "Stop listening for incoming connections"
     ID_SHOWWINDOW           "Display a connection window"
     ID_NEWCONN              "Make a manual connection"
-    IDS_HELP                "vncviewer [/8bit] [/shared] [/noshared] [/swapmouse] \r\n      [/belldeiconify] [/listen [<port>]] [/fullscreen] [/restricted] [/viewonly] \r\n      [/emulate3] [/noemulate3] [/emulate3timeout <ms>] [/emulate3fuzz <pixels>] \r\n      [/notoolbar] [/scale <percentage>] [/config <filename>] [/disableclipboard] \r\n      [/encoding <encname>] [/compresslevel <n>] [/quality <n>] \r\n      [/loglevel <n>] [/logfile <filename>] [/register] \r\n      [/nocursor] [/dotcursor] [/smalldotcursor] [/normalcursor] [/help] \r\n      [/nojpeg] [/nocursorshape] [/noremotecursor] [<server>[:<display>]] \r\n\r\nFor full details, see the documentation."
+    IDS_HELP                "vncviewer [/shared] [/noshared] [/swapmouse] \r\n      [/belldeiconify] [/listen [<port>]] [/fullscreen] [/restricted] [/viewonly] \r\n      [/emulate3] [/noemulate3] [/emulate3timeout <ms>] [/emulate3fuzz <pixels>] \r\n      [/notoolbar] [/scale <percentage>] [/config <filename>] [/disableclipboard] \r\n      [/subsamp 0=None, 1=4:1:1, 2=4:2:2] [/quality 1-100] \r\n      [/loglevel <n>] [/logfile <filename>] [/register] \r\n      [/nocursor] [/dotcursor] [/smalldotcursor] [/normalcursor] [/help] \r\n      [/nocursorshape] [/noremotecursor] [/singlebuffer] [/doublebuffer] \r\n      [<server>[:<display>]] \r\n\r\nFor full details, see the documentation."
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDC_TAB                 "Here you can choose editing either connection-specific options, or global settings of the viewer."
-    IDC_OPTIONBUTTON        "Edit connection-specific options for the specified VNC server, or change the configuration of the viewer."
-    IDC_DBCHECK             "If this option is enabled, TurboVNC will wait until the window has finished redrawing on the server before it redraws the window on the client. This prevents tearing with 3D and video applications."
+    IDC_TAB                 "Here you can choose whether to edit connection-specific options or global settings for the viewer."
+    IDC_OPTIONBUTTON        "Edit connection-specific options for the specified VNC server or change the global configuration of the viewer."
+    IDC_DBCHECK             "If this option is checked, TurboVNC will wait until the window has finished redrawing on the server before it redraws the window on the client. This prevents tearing with 3D and video applications."
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDC_LOC_NET_RADIO       "Optimize for high-speed network connection. Choose this profile if your connection is fast enough, e.g. if you are accessing a server in the same Ethernet LAN."
-    IDC_MODEM_RADIO         "Optimize for low-bandwidth network connection. Choose this profile if your connection is slow, e.g. if you are accessing a server behind a 56Kbit modem line."
+    IDC_LOC_NET_RADIO       "Choose compression settings appropriate for high-bandwidth networks. Choose this profile if connecting over a local area network."
+    IDC_MODEM_RADIO         "Choose compression settings appropriate for low-bandwidth networks. Choose this profile if connecting over broadband, T1, or similar."
     IDC_CUSTOM_RADIO        "Use default connection options for the specified server."
     IDC_OK                  "Connect to the specified VNC server."
-    IDC_LIST_MODE           "Switch to the listening mode, and close the dialog box. The listening viewer will wait for incoming connections from VNC servers. To connect to a listening viewer, choose ""Add New Client..."" from the TurboVNC Server's tray menu."
-    IDC_CHECK_MESSAGE       "If set, the viewer will show a warning before switching to the full-screen mode. The warning reminds how to exit that mode."
-    IDC_CHECK_TOOLBAR       "This option tells the viewer if it should show toolbars in desktop windows. You can always show/hide the toolbar using the system menu, while this option sets the default behavior."
-    IDC_EDIT_AMOUNT_LIST    "The viewer automatically saves host names and settings for past connections. This option tells the viewer how many connections to remember."
-    IDC_BUTTON_CLEAR_LIST   "Pressing this button will remove the list of past connections from the system registry. This will remove all corresponding connection settings as well."
+    IDC_LIST_MODE           "Switch to listen mode and close the dialog box. The listening viewer will wait for incoming connections from VNC servers. To connect to a listening viewer, choose ""Add New Client..."" from the TurboVNC Server's tray menu."
+    IDC_CHECK_MESSAGE       "If this option is set, the viewer will show a warning before switching to full-screen mode. The warning reminds you how to exit that mode."
+    IDC_CHECK_TOOLBAR       "If this option is set, then new viewer windows will have a toolbar by default. You can always show/hide the toolbar using the system menu, but this option sets the default behavior."
+    IDC_EDIT_AMOUNT_LIST    "The viewer automatically saves host names and settings for past connections. This option specifies how many connections to remember."
+    IDC_BUTTON_CLEAR_LIST   "Pressing this button will remove the list of past connections and their associated connection settings from the system registry."
     IDC_CHECK_LOG_FILE      "Check this to enable logging."
     IDC_EDIT_LOG_FILE       "Specify a location and a name for the log file."
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDC_HOSTNAME_EDIT       "Specify a VNC server to connect to, in one of the following formats: host, host:display, host::port. Host can be either an IP address, or a domain name. Display is an offset from the TCP port 5900. Display 0 will be used if not specified."
-    IDC_BELLDEICONIFY       "If checked, the minimized viewer window will be restored on receiving a remote ""Bell"" event."
-    IDC_VIEWONLY            "If checked, you will see the remote desktop, but won't be able to control it remotely with your mouse and keyboard."
+    IDC_HOSTNAME_EDIT       "The IP address or host name of the VNC server to which you want to connect. Append :<display number> or ::<port number> to the host name (e.g. ""myhost:1"" or ""myhost::5901"") to connect to a specific display number or TCP port."
+    IDC_BELLDEICONIFY       "If this option is checked, a minimized viewer window will be restored upon receiving a remote ""Bell"" event."
+    IDC_VIEWONLY            "If this option is checked, you will be able to see but not control the remote desktop."
 END
 
 STRINGTABLE DISCARDABLE 
@@ -507,55 +509,55 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDC_EDIT_LOG_LEVEL      "Specify how many details to write into the log file. The level 0 causes the viewer to log only the most important events, the highest level of 12 produces a lot of debugging output."
-    IDC_SHARED              "Enable multiple simultaneous viewer connections to the same server desktop. For non-shared sesstions, only one viewer can be connected to the same server at the same time. Unlike the standard VNC, TurboVNC defaults to shared sessions."
-    IDC_ENCODING            "Encoding refers to the representation of graphics sent over the network. Encodings differ at the required bandwidth and CPU usage. Use Hextile encoding on fast networks, and Tight over slow connections. Raw encoding means no compression at all."
-    IDC_SCALE_EDIT          "Reduce or enlarge local copy of the remote dektop."
+    IDC_EDIT_LOG_LEVEL      "Specifies the level of detail to include in the log file. Level 0 causes the viewer to log only the most important events, whereas Level 12 generates a lot of debugging output."
+    IDC_SHARED              "Enable multiple simultaneous viewer connections to the same server desktop. If the session is not shared, then only one viewer can connect to the same session at the same time. Unlike the standard VNC, TurboVNC uses shared sessions by default."
+    IDC_ENCODING            "TurboVNC uses only Tight encoding, so this option has no effect."
+    IDC_SCALE_EDIT          "Reduce or enlarge the image of the remote dektop."
     IDC_DOTCURSOR_RADIO     "Show local cursor position as a dot."
-    IDC_NOCURSOR_RADIO      "Don't show local cursor position."
+    IDC_NOCURSOR_RADIO      "Do not show local cursor position."
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDC_EMULATECHECK        "Check this if you have two-button mouse but want to send presses of the third button as well. If this option is enabled, pressing left and right buttons at the same time will emulate pressing the middle button."
-    IDC_FULLSCREEN          "In this mode, the viewer will show only the remote desktop - no local desktop, no toolbar, and no window decorations."
-    IDC_DISABLECLIPBOARD    "If checked, the viewer won't try to propagate local clibboard changes to the server."
+    IDC_EMULATECHECK        "If this option is checked, pressing the left and right mouse buttons simultaneously will emulate a middle button click. This is useful if your mouse lacks a middle button."
+    IDC_FULLSCREEN          "In full-screen mode, the viewer will show only the remote desktop. The local desktop, toolbar, and window decorations will not be shown."
+    IDC_DISABLECLIPBOARD    "If this option is checked, the viewer will not send local clipboard changes to the server."
     IDC_CSHAPE_DISABLE_RADIO 
-                            "Receive the remote mouse pointer as usual pixel graphics. This is a compatibility mode - the standard VNC always uses this technique. Mouse movements can be painfully slow, so use this option only if you have troubles with the default setting."
-    IDC_QUALITYLEVEL        "Higher JPEG quality levels result less compression but better image quality."
-    IDC_COMPRESSLEVEL       "Subsampling blah blah blah"
-    IDC_CSHAPE_ENABLE_RADIO "Draw and position the remote mouse pointer locally, on the viewer side. This results in the best mouse responsiveness. The server will send only changes in the cursor shape and, sometimes, new cursor coordinates."
-    IDC_CSHAPE_IGNORE_RADIO "In this mode, the remote mouse pointer won't be shown at all. Cursor shape updates and new coordinates received from the server will be ignored."
+                            "In this mode, the server draws the mouse cursor and sends it to the client as an image. Mouse movements can be painfully slow in this mode, so use it only if the default setting does not work."
+    IDC_QUALITYLEVEL        "Higher JPEG quality levels result in less compression but better image quality."
+    IDC_COMPRESSLEVEL       "Each pixel in a JPEG image is represented as a brightness (luminance) value and a color (chrominance) value. Chrominance subsampling discards every other chrominance value to reduce the image size, but it can create visible artifacts."
+    IDC_CSHAPE_ENABLE_RADIO "In this mode, the server sends only changes to the remote cursor's shape and position. This results in the best mouse responsiveness."
+    IDC_CSHAPE_IGNORE_RADIO "In this mode, the remote mouse cursor will not be shown at all. Cursor shape updates and new coordinates received from the server will be ignored."
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_SESSION_SET_CRECT    "CopyRect encoding is used to save bandwidth when some screen area on the server changes its position. CopyRect allows to send only coordinates instead of pixel arrays. Normally, you should keep this option checked."
+    ID_SESSION_SET_CRECT    "When a rectangular area on the server's display changes position (such as when a window is moved), CopyRect encoding allows the server to send only the coordinates of the new position rather than completely re-sending the rectangular area."
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_SESSION_SWAPMOUSE    "Normally, the right mouse button generates button 2 events, the middle mouse button is treated as button 3. Checking this option swaps events generated by these two mouse buttons."
+    ID_SESSION_SWAPMOUSE    "If this option is checked, clicking the right mouse button will send a middle button click to the server, whereas clicking the middle mouse button will send a right button click."
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDC_FTCANCEL            "Cansel file transfer in progress."
+    IDC_FTCANCEL            "Cancel the file transfer in progress."
     IDC_EXIT                "Close the file transfer dialog box."
     IDC_FTPROGRESS          "Progress for current file transfer operation."
-    IDC_LOAD                "Load connection info from a file, assuming it was saved earlier by choosing ""Save connection info as..."" in the viewer's system menu."
+    IDC_LOAD                "Load saved connection info from a file. You can save connection info to a file by selecting ""Save connection info as..."" in the viewer's system menu."
     IDC_SERVERRELOAD        "Reload server-side file list."
-    IDC_CONN_PROF           "Choosing a connection profile allows you to select connection  options suitable for a particular network environment."
+    IDC_CONN_PROF           "Choosing a connection profile allows you to select connection options suitable for a particular network environment."
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDC_FTCOPY              "Use this button to transfer files. Choose one file at the left to upload it to the remote server, or choose one file at the right to download it. Arrows on this button shows the direction for file transfers."
+    IDC_FTCOPY              "Use this button to transfer files. Select a file on the left to upload it to the remote server, or select a file on the right to download it. Arrows on this button show the direction for file transfers."
     IDC_SMALLDOTCURSOR_RADIO "Show local cursor position as a smaller dot."
-    IDC_LOCAL_COMP_LABEL    "The left side of the dialog represents files and directories on this computer."
-    IDC_TVNC_SERV_LABEL     "The right side of the dialog represents files and directories on the remote server."
+    IDC_LOCAL_COMP_LABEL    "The left side of this window shows files and directories on this computer."
+    IDC_TVNC_SERV_LABEL     "The right side of this window shows files and directories on the remote server."
     IDC_FTSTATUS            "Status of the current (or previous) file transfer operation."
-    IDC_LISTEN_PORT         "TCP port number to listen for incoming connections from VNC servers. The default port number is 5500."
+    IDC_LISTEN_PORT         "TCP port number to use when listening for incoming connections from VNC servers. The default port number is 5500."
     IDC_SERVERUP            "Up one level in remote filesystem."
 END
 
@@ -579,15 +581,15 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDC_STATIC_FORMAT       "Protocol options affecting pixel representation - that is, color format and compression."
+    IDC_STATIC_FORMAT       "Protocol options affecting how pixels are transferred from server to client."
     IDC_STATIC_RESTRICTIONS "Disabling particular protocol features."
     IDC_STATIC_DISPLAY      "Client-side display options."
     IDC_STATIC_MOUSE        "Mouse configuration."
     IDC_STATIC_MCURSOR      "Handling of remote mouse cursor."
-    IDC_STATIC_IOPTIONS     "Options affecting user interface of the viewer."
-    IDC_STATIC_LOGGING      "The viewer can log its activity in a text file. Logging options allow to customize this facility."
-    IDC_STATIC_LCURSOR      "Sometimes, local mouse cursor and the remote pointer have different locations on the screen. Customizing the shape of the local cursor can help at improving local cursor tracking."
-    IDC_STATIC_LMODE        "Options specific to the listening mode which is used for ""reverse"" server-to-client connections."
+    IDC_STATIC_IOPTIONS     "Options affecting the viewer's user interface."
+    IDC_STATIC_LOGGING      "The viewer can log its activity in a text file. Logging options allow you to customize this facility."
+    IDC_STATIC_LCURSOR      "Sometimes, the local mouse cursor and the remote pointer are at different screen locations. Customizing the shape of the local cursor can make it easier to track."
+    IDC_STATIC_LMODE        "Options specific to the listening mode, which is used for ""reverse"" server-to-client connections."
     IDC_STATIC_PICTURE      "TurboVNC is an enhanced version of VNC. Visit http://virtualgl.sourceforge.net/ for more information."
 END
 
