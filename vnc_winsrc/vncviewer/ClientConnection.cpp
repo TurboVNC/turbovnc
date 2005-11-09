@@ -2247,9 +2247,11 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
 	ClientConnection *_this = (ClientConnection *) GetWindowLong(hwnd, GWL_USERDATA);
 
 	switch (iMsg) {
+	case WM_FBUPDATERECVD:
+		_this->SendAppropriateFramebufferUpdateRequest();
+		return 0;
 	case WM_REGIONUPDATED:
 		_this->DoBlit();
-		_this->SendAppropriateFramebufferUpdateRequest();		
 		return 0;
 	case WM_PAINT:
 		_this->DoBlit();		
@@ -3050,6 +3052,8 @@ void ClientConnection::ReadScreenUpdate() {
 	if (sut.nRects == 0) return;
 	
 	if (m_opts.m_DoubleBuffer) list = NULL;
+
+	PostMessage(m_hwnd, WM_FBUPDATERECVD, NULL, NULL);
 
 	for (int i=0; i < sut.nRects; i++) {
 
