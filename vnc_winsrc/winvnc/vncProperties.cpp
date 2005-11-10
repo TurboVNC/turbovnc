@@ -901,12 +901,12 @@ vncProperties::Load(BOOL usersettings)
 	m_pref_DisableLocalInputs=FALSE;
 	m_pref_LockSettings=-1;
 	m_pref_PollUnderCursor=FALSE;
-	m_pref_PollForeground=TRUE;
-	m_pref_PollFullScreen=FALSE;
+	m_pref_PollForeground=FALSE;
+	m_pref_PollFullScreen=TRUE;
 	m_pref_PollConsoleOnly=TRUE;
 	m_pref_PollOnEventOnly=FALSE;
 	m_pref_DontSetHooks=FALSE;
-	m_pref_DontUseDriver=FALSE;
+	m_pref_DontUseDriver=TRUE;
 	m_pref_RemoveWallpaper=TRUE;
 	m_pref_BlankScreen = FALSE;
 	m_pref_EnableFileTransfers = TRUE;
@@ -918,7 +918,7 @@ vncProperties::Load(BOOL usersettings)
 	m_pref_ScreenAreaShared = FALSE;
 	m_pref_PriorityTime = 3;
 	m_pref_LocalInputPriority = FALSE;
-	m_pref_PollingCycle = 300;
+	m_pref_PollingCycle = 50;
 
 	// Load the local prefs for this user
 	if (hkDefault != NULL)

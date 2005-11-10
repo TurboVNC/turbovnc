@@ -74,15 +74,15 @@ vncServer::vncServer()
 	m_lock_on_exit = 0;
 
 	// Set the polling mode options
-	m_poll_fullscreen = FALSE;
+	m_poll_fullscreen = TRUE;
 	m_poll_foreground = FALSE;
-	m_poll_undercursor = TRUE;
+	m_poll_undercursor = FALSE;
 
 	m_poll_oneventonly = FALSE;
 	m_poll_consoleonly = TRUE;
 
 	m_dont_set_hooks = FALSE;
-	m_dont_use_driver = FALSE;
+	m_dont_use_driver = TRUE;
 
 	// General options
 	m_loopbackOnly = FALSE;
@@ -115,7 +115,7 @@ vncServer::vncServer()
 	RECT temp;
 	GetWindowRect(GetDesktopWindow(), &temp);
 	SetSharedRect(temp);
-	SetPollingCycle(300);
+	SetPollingCycle(50);
 	PollingCycleChanged(false);
 	m_cursor_pos.x = 0;
 	m_cursor_pos.y = 0;
