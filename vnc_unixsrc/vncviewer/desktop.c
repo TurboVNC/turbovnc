@@ -184,6 +184,14 @@ HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev, Boolean *cont)
       }
     }
     break;
+
+  case ClientMessage:
+      if(ev->xclient.window==XtWindow(desktop)
+        && ev->xclient.message_type==XA_INTEGER
+        && ev->xclient.format==8
+        && !strcmp(ev->xclient.data.b, "SendRFBUpdate"))
+        SendIncrementalFramebufferUpdateRequest();
+    break;
   }
 }
 

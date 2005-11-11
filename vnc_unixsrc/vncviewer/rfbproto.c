@@ -952,6 +952,15 @@ HandleRFBServerMessage()
     int bytesPerLine;
     int i;
     int usecs;
+    XEvent ev;
+
+    memset(&ev, 0, sizeof(ev));
+    ev.xclient.type=ClientMessage;
+    ev.xclient.window=XtWindow(desktop);
+    ev.xclient.message_type=XA_INTEGER;
+    ev.xclient.format=8;
+    strcpy(ev.xclient.data.b, "SendRFBUpdate");
+    XSendEvent(dpy, XtWindow(desktop), False, 0, &ev);
 
     if (!ReadFromRFBServer(((char *)&msg.fu) + 1,
 			   sz_rfbFramebufferUpdateMsg - 1))
@@ -1135,9 +1144,6 @@ HandleRFBServerMessage()
     if (appData.useShm)
       XSync(dpy, False);
 #endif
-
-    if (!SendIncrementalFramebufferUpdateRequest())
-      return False;
 
     break;
   }
