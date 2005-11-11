@@ -222,7 +222,7 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-passwd",        "*passwordFile",       XrmoptionSepArg, 0},
   {"-user",          "*userLogin",          XrmoptionSepArg, 0},
   {"-encodings",     "*encodings",          XrmoptionSepArg, 0},
-  {"-compresslevel", "*compressLevel",      XrmoptionSepArg, 0},
+  {"-subsamp",       "*compressLevel",      XrmoptionSepArg, 0},
   {"-quality",       "*qualityLevel",       XrmoptionSepArg, 0},
   {"-nocursorshape", "*useRemoteCursor",    XrmoptionNoArg,  "False"},
   {"-x11cursor",     "*useX11Cursor",       XrmoptionNoArg,  "True"},
@@ -294,8 +294,8 @@ usage(void)
 	  "        -passwd <PASSWD-FILENAME> (standard VNC authentication)\n"
 	  "        -user <USERNAME> (Unix login authentication)\n"
 	  "        -encodings <ENCODING-LIST> (e.g. \"tight copyrect\")\n"
-	  "        -compresslevel <COMPRESS-VALUE> (0=4:4:4, 1=4:1:1, 2=4:2:2)\n"
-	  "        -quality <JPEG-QUALITY-VALUE> (0..100: 0-low, 100-high)\n"
+	  "        -subsamp <SUBSAMPLING-VALUE> (0=None, 1=4:1:1, 2=4:2:2)\n"
+	  "        -quality <JPEG-QUALITY-VALUE> (1..100: 1-low, 100-high)\n"
 	  "        -nocursorshape\n"
 	  "        -x11cursor\n"
 	  "        -autopass\n"
