@@ -23,7 +23,7 @@ BackColor2=clBlue
 ChangesAssociations=yes
 
 [Components]
-Name: "server"; Description: "TurboVNC Server"; Types: full compact custom;
+Name: "server"; Description: "TurboVNC Server"; Types: custom;
 Name: "viewer"; Description: "TurboVNC Viewer"; Types: full compact custom;
 ;Name: "webdoc"; Description: "Web pages and documentation"; Types: full custom;
 
