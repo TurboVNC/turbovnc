@@ -263,7 +263,7 @@ int SessionDialog::cmp(HWND hwnd)
 	if (m_pOpt->m_UseEnc[rfbEncodingCopyRect] != true) a = 0;
 	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
 	if (m_pOpt->m_compressLevel != 1) a = 0;
-	if (m_pOpt->m_jpegQualityLevel != 40) a = 0;
+	if (m_pOpt->m_jpegQualityLevel != 30) a = 0;
 	if (a == 1) {
 		SendMessage(hModemRadio, BM_CLICK, 0, 0);
 		return a;
@@ -320,7 +320,7 @@ void SessionDialog::SetConnectionProfile(bool LowBandwidth, bool HighSpeed)
 	if (LowBandwidth && !HighSpeed) {
 		m_pOpt->m_PreferredEncoding = rfbEncodingTight;
 		m_pOpt->m_compressLevel = 1;
-		m_pOpt->m_jpegQualityLevel = 40;
+		m_pOpt->m_jpegQualityLevel = 30;
 	}
 	if (!LowBandwidth && HighSpeed) {
 		m_pOpt->m_PreferredEncoding = rfbEncodingTight;
