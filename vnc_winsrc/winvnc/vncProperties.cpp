@@ -344,9 +344,9 @@ vncProperties::ParentDlgProc(HWND hwnd,
 
 			// Set the dialog box's title to indicate which Properties we're editting
 			if (_this->m_usersettings) {
-				SetWindowText(hwnd, "TightVNC Server: Current User Properties");
+				SetWindowText(hwnd, "TurboVNC Server: Current User Properties");
 			} else {
-				SetWindowText(hwnd, "TightVNC Server: Default Local System Properties");
+				SetWindowText(hwnd, "TurboVNC Server: Default Local System Properties");
 			}						
 				
 			// We return FALSE because we set the keyboard focus explicitly.

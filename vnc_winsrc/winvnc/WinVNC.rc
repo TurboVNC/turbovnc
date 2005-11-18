@@ -797,7 +797,7 @@ IDC_CURSOR1             CURSOR  DISCARDABLE     "res\\cursor1.cur"
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDI_WINVNC              "TightVNC Server"
+    IDI_WINVNC              "TurboVNC Server"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -900,7 +900,7 @@ BEGIN
     IDONLYLOOPBACK          "If set, don't allow any connections unless they are originated from the same machine. This can be used for testing purposes, or with port forwarding programs like SSH."
     IDLOGLOTS               "Check this to increase amount of the information in the log file. There may be a lot of unnecessary data in the log, but this mode can be very useful for debugging and troubleshooting purposes."
     IDALLOWLOOPBACK         "Normally, connections from the same machine are disabled. Checking this option allows such connections. This can be used for testing purposes, or with port forwarding programs like SSH."
-    IDLOG                   "Check this to enable logging. The log file is called WinVNC.log (created in the current folder). If the TightVNC Server is running as a system service, the file is typically found in the Windows system folder."
+    IDLOG                   "Check this to enable logging. The log file is called WinVNC.log (created in the current folder). If the TurboVNC Server is running as a system service, the file is typically found in the Windows system folder."
     IDPRIORITY0             "Disconnect existing connections, accept new connections."
     IDPRIORITY2             "Preserve existing connections, refuse new connections."
     IDPRIORITY1             "Preserve existing connections, accept new connections."
