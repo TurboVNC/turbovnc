@@ -884,6 +884,100 @@ SendKeyEvent(CARD32 key, Bool down)
 
 
 /*
+ * UpdateQual
+ */
+void
+UpdateQual(void)
+{
+  char *titleFormat, title[1024], *ptr;
+  SetFormatAndEncodings();
+  XtVaGetValues(toplevel, XtNtitle, &titleFormat, NULL);
+  strncpy(title, titleFormat, 1023);
+  if((ptr=strrchr(title, '['))!=NULL)
+  {
+    sprintf(ptr, "[%s Q%d]", appData.compressLevel==1?"4:1:1":
+      appData.compressLevel==2?"4:2:2":"4:4:4", appData.qualityLevel);
+    XtVaSetValues(toplevel, XtNtitle, title, XtNiconName, title, NULL);
+  }
+}
+
+/*
+ * QualMinus5
+ */
+void
+QualMinus5(Widget w, XEvent *e, String *s, Cardinal *c)
+{
+  appData.qualityLevel-=5;
+  if(appData.qualityLevel<1) appData.qualityLevel=1;
+  UpdateQual();
+}
+
+/*
+ * QualPlus5
+ */
+void
+QualPlus5(Widget w, XEvent *e, String *s, Cardinal *c)
+{
+  appData.qualityLevel+=5;
+  if(appData.qualityLevel>100) appData.qualityLevel=100;
+  UpdateQual();
+}
+
+/*
+ * Send411
+ */
+void
+Send411(Widget w, XEvent *e, String *s, Cardinal *c)
+{
+  appData.compressLevel=1;
+  UpdateQual();
+}
+
+/*
+ * Send422
+ */
+
+void
+Send422(Widget w, XEvent *e, String *s, Cardinal *c)
+{
+  appData.compressLevel=2;
+  UpdateQual();
+}
+
+/*
+ * Send444
+ */
+void
+Send444(Widget w, XEvent *e, String *s, Cardinal *c)
+{
+  appData.compressLevel=0;
+  UpdateQual();
+}
+
+/*
+ * QualHigh
+ */
+void
+QualHigh(Widget w, XEvent *e, String *s, Cardinal *c)
+{
+  appData.compressLevel=0;
+  appData.qualityLevel=95;
+  UpdateQual();
+}
+
+/*
+ * QualLow
+ */
+void
+QualLow(Widget w, XEvent *e, String *s, Cardinal *c)
+{
+  appData.compressLevel=1;
+  appData.qualityLevel=30;
+  UpdateQual();
+}
+
+
+/*
  * SendClientCutText.
  */
 

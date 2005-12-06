@@ -51,11 +51,17 @@ ToplevelInitBeforeRealization()
   char *titleFormat;
   char *title;
   char *geometry;
+  char temps[80];
 
   XtVaGetValues(toplevel, XtNtitle, &titleFormat, NULL);
-  title = XtMalloc(strlen(titleFormat) + strlen(desktopName) + 1);
+  sprintf(temps, " [%s Q%d] ", appData.compressLevel==1?"4:1:1":
+    appData.compressLevel==2?"4:2:2":"4:4:4", appData.qualityLevel);
+  title = XtMalloc(strlen(titleFormat) + strlen(desktopName)
+    + strlen(temps) + 1);
   sprintf(title, titleFormat, desktopName);
+  strncat(title,  temps, strlen(temps));
   XtVaSetValues(toplevel, XtNtitle, title, XtNiconName, title, NULL);
+  XtFree(title);
 
   XtVaSetValues(toplevel, XtNmaxWidth, si.framebufferWidth,
 		XtNmaxHeight, si.framebufferHeight, NULL);

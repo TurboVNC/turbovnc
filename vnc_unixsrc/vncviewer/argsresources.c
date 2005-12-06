@@ -74,7 +74,7 @@ char *fallback_resources[] = {
   "*popup.buttonForm.translations: #override\\n\
      <KeyPress>: SendRFBEvent() HidePopup()",
 
-  "*popupButtonCount: 8",
+  "*popupButtonCount: 15",
 
   "*popup*button1.label: Dismiss popup",
   "*popup*button1.translations: #override\\n\
@@ -111,8 +111,36 @@ char *fallback_resources[] = {
                           SendRFBEvent(keyup,Control_L)\
                           HidePopup()",
 
-  "*popup*button8.label: Send F8",
+  "*popup*button8.label: Low-Bandwidth Connection",
   "*popup*button8.translations: #override\\n\
+     <Btn1Down>,<Btn1Up>: QualLow() HidePopup()",
+
+  "*popup*button9.label: High-Speed Network",
+  "*popup*button9.translations: #override\\n\
+     <Btn1Down>,<Btn1Up>: QualHigh() HidePopup()",
+
+  "*popup*button10.label: 4:1:1 Subsampling",
+  "*popup*button10.translations: #override\\n\
+     <Btn1Down>,<Btn1Up>: Send411() HidePopup()",
+
+  "*popup*button11.label: 4:2:2 Subsampling",
+  "*popup*button11.translations: #override\\n\
+     <Btn1Down>,<Btn1Up>: Send422() HidePopup()",
+
+  "*popup*button12.label: No Subsampling",
+  "*popup*button12.translations: #override\\n\
+     <Btn1Down>,<Btn1Up>: Send444() HidePopup()",
+
+  "*popup*button13.label: Quality -5",
+  "*popup*button13.translations: #override\\n\
+     <Btn1Down>,<Btn1Up>: QualMinus5() HidePopup()",
+
+  "*popup*button14.label: Quality +5",
+  "*popup*button14.translations: #override\\n\
+     <Btn1Down>,<Btn1Up>: QualPlus5() HidePopup()",
+
+  "*popup*button15.label: Send F8",
+  "*popup*button15.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: SendRFBEvent(key,F8) HidePopup()",
 
   NULL
@@ -240,6 +268,13 @@ int numCmdLineOptions = XtNumber(cmdLineOptions);
 
 static XtActionsRec actions[] = {
     {"SendRFBEvent", SendRFBEvent},
+    {"Send411", Send411},
+    {"Send422", Send422},
+    {"Send444", Send444},
+    {"QualPlus5", QualPlus5},
+    {"QualMinus5", QualMinus5},
+    {"QualHigh", QualHigh},
+    {"QualLow", QualLow},
     {"ShowPopup", ShowPopup},
     {"HidePopup", HidePopup},
     {"ToggleFullScreen", ToggleFullScreen},
