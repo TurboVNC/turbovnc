@@ -1332,7 +1332,7 @@ void VNCOptions::delkey(char subkey[256], char keyname[256])
 void VNCOptions::save(HKEY hkey, char *name, int value) 
 {
 	RegSetValueEx( hkey, name, 
-            NULL, REG_DWORD, 
+            0, REG_DWORD, 
             (CONST BYTE *)&value, 4);
 }
 
@@ -1394,27 +1394,27 @@ void VNCOptions::SaveGenOpt()
 	RegCreateKey(HKEY_CURRENT_USER,
 					SETTINGS_KEY_NAME, &hRegKey);
 	RegSetValueEx( hRegKey, "LocalCursor", 
-					NULL, REG_DWORD, 
+					0, REG_DWORD, 
 					(CONST BYTE *)&m_localCursor,
 					4);
 				
 	RegSetValueEx( hRegKey, "HistoryLimit", 
-					NULL, REG_DWORD, 
+					0, REG_DWORD, 
 					(CONST BYTE *)&m_historyLimit,
 					4);
 				
 	RegSetValueEx( hRegKey, "LogLevel", 
-					NULL, REG_DWORD, 
+					0, REG_DWORD, 
 					(CONST BYTE *)&m_logLevel,
 					4);
 				
 	strcpy(buf, m_logFilename);
 	RegSetValueEx( hRegKey, "LogFileName", 
-					NULL, REG_SZ , 
+					0, REG_SZ , 
 					(CONST BYTE *)buf, (_tcslen(buf)+1));				
 				
 	RegSetValueEx( hRegKey, "ListenPort", 
-					NULL, REG_DWORD, 
+					0, REG_DWORD, 
 					(CONST BYTE *)&m_listenPort,
 					4);
 	if (m_logToFile) {
@@ -1423,7 +1423,7 @@ void VNCOptions::SaveGenOpt()
 		buffer = 0;
 	}
 	RegSetValueEx( hRegKey, "LogToFile" , 
-					NULL, REG_DWORD, 
+					0, REG_DWORD, 
 					(CONST BYTE *)&buffer,
 					4);
 	if (m_skipprompt) {
@@ -1432,7 +1432,7 @@ void VNCOptions::SaveGenOpt()
 		buffer = 0;
 	}
 	RegSetValueEx( hRegKey, "SkipFullScreenPrompt", 
-					NULL,REG_DWORD, 
+					0,REG_DWORD, 
 					(CONST BYTE *)&buffer,
 					4);
 	if (m_toolbar) {
@@ -1441,7 +1441,7 @@ void VNCOptions::SaveGenOpt()
 		buffer = 0;
 	}
 	RegSetValueEx( hRegKey, "NoToolbar", 
-					NULL, REG_DWORD, 
+					0, REG_DWORD, 
 					(CONST BYTE *)&buffer,
 					4);
 				
