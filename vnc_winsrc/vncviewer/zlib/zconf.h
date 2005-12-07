@@ -3,7 +3,7 @@
  * For conditions of distribution and use, see copyright notice in zlib.h 
  */
 
-/* @(#) $Id: zconf.h,v 1.1 2005-03-18 22:23:09 dcommander Exp $ */
+/* @(#) $Id: zconf.h,v 1.2 2005-12-07 23:38:57 dcommander Exp $ */
 
 #ifndef _ZCONF_H
 #define _ZCONF_H
@@ -196,7 +196,7 @@
 #  endif
 #endif
 
-#if defined (_MSC_VER)
+#if defined (_MSC_VER) || defined (__MINGW32__)
 #  if defined (ZLIB_DLL)
 #    define ZEXTERN __declspec(dllexport)
 #  elif defined (_WINSTATIC)
