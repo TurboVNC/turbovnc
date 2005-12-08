@@ -1315,7 +1315,7 @@ vncClientThread::run(void *arg)
 						char *backslash = strrchr(drive, '\\');
 						if (backslash != NULL)
 							*backslash = '\0';
-						ftii.Add(drive, -1, 0);
+						ftii.Add(drive, (unsigned int)-1, 0);
 						free(drive);
 						i += strcspn(&szDrivesList[i], "\0") + 1;
 					}
@@ -1334,9 +1334,9 @@ vncClientThread::run(void *arg)
 								LARGE_INTEGER li;
 								li.LowPart = FindFileData.ftLastWriteTime.dwLowDateTime;
 								li.HighPart = FindFileData.ftLastWriteTime.dwHighDateTime;							
-								li.QuadPart = (li.QuadPart - 1164444736000000000) / 10000000;
+								li.QuadPart = (li.QuadPart - 1164444736000000000LL) / 10000000LL;
 								if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {	
-									ftii.Add(FindFileData.cFileName, -1, 0);
+									ftii.Add(FindFileData.cFileName, (unsigned int)-1, 0);
 								} else {
 									if (!(msg.flr.flags & 0x10))
 										ftii.Add(FindFileData.cFileName, FindFileData.nFileSizeLow, li.HighPart);
@@ -1806,7 +1806,8 @@ vncClient::UpdateMouse()
 	if (!m_mousemoved && !m_cursor_update_sent)	{
 		omni_mutex_lock l(m_regionLock);
 
-		if (IntersectRect(&m_oldmousepos, &m_oldmousepos, &m_server->GetSharedRect()))
+		RECT shrect=m_server->GetSharedRect();
+		if (IntersectRect(&m_oldmousepos, &m_oldmousepos, &shrect))
 			m_changed_rgn.AddRect(m_oldmousepos);
 
 		m_mousemoved = TRUE;
@@ -1826,7 +1827,8 @@ vncClient::UpdateRect(RECT &rect)
 
 	omni_mutex_lock l(m_regionLock);
 
-	if (IntersectRect(&rect, &rect, &m_server->GetSharedRect()))
+	RECT shrect=m_server->GetSharedRect();
+	if (IntersectRect(&rect, &rect, &shrect))
 		m_changed_rgn.AddRect(rect);
 }
 
@@ -1842,7 +1844,8 @@ vncClient::UpdateRegion(vncRegion &region)
 
 		// Merge the two
 		vncRegion dummy;
-		dummy.AddRect(m_server->GetSharedRect());
+		RECT shrect=m_server->GetSharedRect();
+		dummy.AddRect(shrect);
 		region.Intersect(dummy);
 
 		m_changed_rgn.Combine(region);
@@ -1863,8 +1866,8 @@ vncClient::CopyRect(RECT &dest, POINT &source)
 		omni_mutex_lock l(m_regionLock);
 
 		// Clip the destination to the screen
-		RECT destrect;
-		if (!IntersectRect(&destrect, &dest, &m_server->GetSharedRect()))
+		RECT destrect, shrect=m_server->GetSharedRect();
+		if (!IntersectRect(&destrect, &dest, &shrect))
 			return;
 
 		// Adjust the source correspondingly
@@ -1895,7 +1898,8 @@ vncClient::CopyRect(RECT &dest, POINT &source)
 
 		// Clip the source to the screen
 		RECT srcrect2;
-		if (!IntersectRect(&srcrect2, &srcrect, &m_server->GetSharedRect()))
+		shrect=m_server->GetSharedRect();
+		if (!IntersectRect(&srcrect2, &srcrect, &shrect))
 			return;
 
 		// Correct the destination rectangle
@@ -2055,12 +2059,14 @@ vncClient::SendUpdate()
 				// If the mouse has moved (or otherwise needs an update):
 				if (m_mousemoved) {
 					// Include an update for its previous position
-					if (IntersectRect(&m_oldmousepos, &m_oldmousepos, &m_server->GetSharedRect())) 
+					RECT shrect=m_server->GetSharedRect();
+					if (IntersectRect(&m_oldmousepos, &m_oldmousepos, &shrect)) 
 						toBeSent.AddRect(m_oldmousepos);
 					// Update the cached mouse position
 					m_oldmousepos = m_buffer->GrabMouse();
 					// Include an update for its current position
-					if (IntersectRect(&m_oldmousepos, &m_oldmousepos, &m_server->GetSharedRect())) 
+					shrect=m_server->GetSharedRect();
+					if (IntersectRect(&m_oldmousepos, &m_oldmousepos, &shrect)) 
 						toBeSent.AddRect(m_oldmousepos);
 					// Indicate the move has been handled
 					m_mousemoved = FALSE;
@@ -2400,7 +2406,7 @@ vncClient::SendFileUploadCancel(unsigned short reasonLen, char *reason)
 void 
 vncClient::Time70ToFiletime(unsigned int mTime, FILETIME *pFiletime)
 {
-	LONGLONG ll = Int32x32To64(mTime, 10000000) + 116444736000000000;
+	LONGLONG ll = Int32x32To64(mTime, 10000000LL) + 116444736000000000LL;
 	pFiletime->dwLowDateTime = (DWORD) ll;
 	pFiletime->dwHighDateTime = ll >> 32;
 }
@@ -2485,7 +2491,7 @@ vncClient::FiletimeToTime70(FILETIME filetime)
 	LARGE_INTEGER uli;
 	uli.LowPart = filetime.dwLowDateTime;
 	uli.HighPart = filetime.dwHighDateTime;
-	uli.QuadPart = (uli.QuadPart - 116444736000000000) / 10000000;
+	uli.QuadPart = (uli.QuadPart - 116444736000000000LL) / 10000000LL;
 	return uli.LowPart;
 }
 

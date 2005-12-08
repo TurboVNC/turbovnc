@@ -216,7 +216,8 @@ vncBuffer::GetNumCodedRects(RECT &rect)
 RECT
 vncBuffer::GrabMouse()
 {
-	m_desktop->CaptureScreen(m_desktop->MouseRect(), m_mainbuff);
+	RECT rect=m_desktop->MouseRect();
+	m_desktop->CaptureScreen(rect, m_mainbuff);
 	m_desktop->CaptureMouse(m_mainbuff, m_mainsize);
 
 	return m_desktop->MouseRect();

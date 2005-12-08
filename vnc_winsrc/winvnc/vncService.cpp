@@ -628,7 +628,7 @@ vncService::KillAllClients()
 SERVICE_STATUS          g_srvstatus;       // current status of the service
 SERVICE_STATUS_HANDLE   g_hstatus;
 DWORD                   g_error = 0;
-DWORD					g_servicethread = NULL;
+DWORD					g_servicethread = 0;
 char*                   g_errortext[256];
 
 // Forward defines of internal service functions
@@ -797,13 +797,13 @@ vncService::WinVNCServiceMain()
 				break;
 
 			// Register this process with the OS as a service!
-			RegisterService(NULL, RSP_SIMPLE_SERVICE);
+			RegisterService(0, RSP_SIMPLE_SERVICE);
 
 			// Run the service itself
 			WinVNCAppMain();
 
 			// Then remove the service from the system service table
-			RegisterService(NULL, RSP_UNREGISTER_SERVICE);
+			RegisterService(0, RSP_UNREGISTER_SERVICE);
 
 			// Free the kernel library
 			FreeLibrary(kerneldll);
@@ -885,7 +885,7 @@ void ServiceWorkThread(void *arg)
 	WinVNCAppMain();
 
 	// Mark that we're no longer running
-	g_servicethread = NULL;
+	g_servicethread = 0;
 
 	// Tell the service manager that we've stopped.
     ReportStatus(
@@ -898,7 +898,7 @@ void ServiceWorkThread(void *arg)
 void ServiceStop()
 {
 	// Post a quit message to the main service thread
-	if (g_servicethread != NULL)
+	if (g_servicethread != 0)
 	{
 		vnclog.Print(LL_INTINFO, VNCLOG("quitting from ServiceStop\n"));
 		PostThreadMessage(g_servicethread, WM_QUIT, 0, 0);

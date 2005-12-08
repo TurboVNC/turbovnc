@@ -140,8 +140,8 @@ inline UINT
 vncEncoder::EncodeRect(BYTE *source, BYTE *dest, const RECT &rect, int offsetx, int offsety)
 {
 
-	const rectW = rect.right - rect.left;
-	const rectH = rect.bottom - rect.top;
+	const int rectW = rect.right - rect.left;
+	const int rectH = rect.bottom - rect.top;
 
 
 	// Create the header for the update in the destination area

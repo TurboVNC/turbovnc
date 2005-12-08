@@ -54,7 +54,7 @@ const char szDesktopSink[] = "WinVNC desktop sink";
 
 // Atoms
 const char *VNC_WINDOWPOS_ATOMNAME = "VNCHooks.CopyRect.WindowPos";
-ATOM VNC_WINDOWPOS_ATOM = NULL;
+ATOM VNC_WINDOWPOS_ATOM = 0;
 
 // Static members to use with new polling algorithm
 const int vncDesktop::m_pollingOrder[32] = {
@@ -153,9 +153,11 @@ vncDesktopThread::run_undetached(void *arg)
 	// Succeeded to initialise ok
 	ReturnVal(TRUE);
 
+	#ifndef __GNUC__
 	WallpaperUtils wputils;
 	if (m_server->RemoveWallpaperEnabled())
 		wputils.KillWallpaper();
+	#endif
 
 	// START PROCESSING DESKTOP MESSAGES
 
@@ -171,7 +173,7 @@ vncDesktopThread::run_undetached(void *arg)
 	MSG msg;
 	while (TRUE)
 	{
-		if (!PeekMessage(&msg, m_desktop->Window(), NULL, NULL, PM_REMOVE))
+		if (!PeekMessage(&msg, m_desktop->Window(), 0, 0, PM_REMOVE))
 		{
 			// Whenever the message queue becomes empty, we check to see whether
 			// there are updates to be passed to clients
@@ -287,7 +289,9 @@ vncDesktopThread::run_undetached(void *arg)
 		}
 	}
 
+	#ifndef __GNUC__
 	wputils.RestoreWallpaper();
+	#endif
 
 	m_desktop->SetClipboardActive(FALSE);
 	
@@ -446,11 +450,11 @@ vncDesktop::Shutdown()
 {
 	// If we created timers then kill them
 	if (m_timer_polling) {
-		KillTimer(Window(), TimerID::POLL);
+		KillTimer(Window(), POLL);
 		m_timer_polling = 0;
 	}
 	if (m_timer_blank_screen) {
-		KillTimer(Window(), TimerID::BLANK_SCREEN);
+		KillTimer(Window(), BLANK_SCREEN);
 		m_timer_blank_screen = 0;
 	}
 
@@ -524,7 +528,7 @@ vncDesktop::Shutdown()
 
 
 	// Free the WindowPos atom!
-	if (VNC_WINDOWPOS_ATOM != NULL) {
+	if (VNC_WINDOWPOS_ATOM != 0) {
 		if (GlobalDeleteAtom(VNC_WINDOWPOS_ATOM) != 0) {
 			vnclog.Print(LL_INTERR, VNCLOG("failed to delete atom!\n"));
 		}
@@ -1193,7 +1197,7 @@ vncDesktop::Init(vncServer *server)
 void
 vncDesktop::RequestUpdate()
 {
-	PostMessage(m_hwnd, WM_TIMER, TimerID::POLL, 0);
+	PostMessage(m_hwnd, WM_TIMER, POLL, 0);
 }
 
 int
@@ -1657,14 +1661,14 @@ DesktopWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_TIMER:
 		switch (wParam) {
-		case vncDesktop::TimerID::POLL:
+		case vncDesktop::POLL:
 			_this->SetPollingFlag(true);
 			break;
-		case vncDesktop::TimerID::BLANK_SCREEN:
+		case vncDesktop::BLANK_SCREEN:
 			if (_this->m_server->GetBlankScreen())
 				_this->BlankScreen(TRUE);
 			break;
-		case vncDesktop::TimerID::RESTORE_SCREEN:
+		case vncDesktop::RESTORE_SCREEN:
 			_this->BlankScreen(FALSE);
 			break;
 		}
@@ -1950,7 +1954,7 @@ vncDesktop::SetPollingTimer()
 			msec = minPollingCycle;
 		}
 	}
-	m_timer_polling = SetTimer(Window(), TimerID::POLL, msec, NULL);
+	m_timer_polling = SetTimer(Window(), POLL, msec, NULL);
 }
 
 inline void
@@ -2285,8 +2289,8 @@ void
 vncDesktop::CopyRect(RECT &dest, POINT &source)
 {
 	// Clip the destination to the screen
-	RECT destrect;
-	if (!IntersectRect(&destrect, &dest, &m_server->GetSharedRect()))
+	RECT destrect, shrect=m_server->GetSharedRect();
+	if (!IntersectRect(&destrect, &dest, &shrect))
 		return;
 	
 	// Adjust the source correspondingly
@@ -2314,7 +2318,8 @@ vncDesktop::CopyRect(RECT &dest, POINT &source)
 
 	// Clip the source to the screen
 	RECT srcrect2;
-	if (!IntersectRect(&srcrect2, &srcrect, &m_server->GetSharedRect()))
+	shrect=m_server->GetSharedRect();
+	if (!IntersectRect(&srcrect2, &srcrect, &shrect))
 		return;
 
 	// Correct the destination rectangle
@@ -2414,11 +2419,11 @@ vncDesktop::UpdateBlankScreenTimer()
 {
 	BOOL active = m_server->GetBlankScreen();
 	if (active && !m_timer_blank_screen) {
-		m_timer_blank_screen = SetTimer(Window(), TimerID::BLANK_SCREEN, 50, NULL);
+		m_timer_blank_screen = SetTimer(Window(), BLANK_SCREEN, 50, NULL);
 	} else if (!active && m_timer_blank_screen) {
-		KillTimer(Window(), TimerID::BLANK_SCREEN);
+		KillTimer(Window(), BLANK_SCREEN);
 		m_timer_blank_screen = 0;
-		PostMessage(m_hwnd, WM_TIMER, TimerID::RESTORE_SCREEN, 0);
+		PostMessage(m_hwnd, WM_TIMER, RESTORE_SCREEN, 0);
 	}
 }
 
