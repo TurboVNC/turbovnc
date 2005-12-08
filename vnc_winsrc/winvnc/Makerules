@@ -1,0 +1,37 @@
+CXX = g++ -mno-cygwin
+CC = gcc -mno-cygwin
+RC = windres -DNDEBUG
+
+ifeq ($(TOPDIR),)
+TOPDIR = .
+endif
+
+ODIR = $(TOPDIR)/Release
+OPTFLAG = -O2 -DNDEBUG
+ifeq ($(DEBUG), yes)
+ODIR = $(TOPDIR)/Debug
+OPTFLAG = -O0 -ggdb -D_DEBUG
+RC = windres -D_DEBUG
+endif
+
+_DUMMY := $(shell mkdir -p $(ODIR))
+
+.SUFFIXES: .cpp
+$(ODIR)/%.o: %.cpp
+	$(CXX) $(CFLAGS) -c $*.cpp -o $(ODIR)/$*.o
+	$(CXX) $(CFLAGS) -MM $*.cpp > $(ODIR)/$*.d
+	@mv -f $(ODIR)/$*.d $(ODIR)/$*.d.tmp
+	@sed -e 's|.*:|$(ODIR)\/$*.o:|' < $(ODIR)/$*.d.tmp > $(ODIR)/$*.d
+	@sed -e 's/.*://' -e 's/\\$$//' < $(ODIR)/$*.d.tmp | \
+	  sed -e 's/^ *//' -e 's/$$/:/' >> $(ODIR)/$*.d
+	@rm -f $(ODIR)/$*.d.tmp
+
+.SUFFIXES: .c
+$(ODIR)/%.o: %.c
+	$(CC) $(CFLAGS) -c $*.c -o $(ODIR)/$*.o
+	$(CC) $(CFLAGS) -MM $*.c > $(ODIR)/$*.d
+	@mv -f $(ODIR)/$*.d $(ODIR)/$*.d.tmp
+	@sed -e 's|.*:|$(ODIR)\/$*.o:|' < $(ODIR)/$*.d.tmp > $(ODIR)/$*.d
+	@sed -e 's/.*://' -e 's/\\$$//' < $(ODIR)/$*.d.tmp | \
+	  sed -e 's/^ *//' -e 's/$$/:/' >> $(ODIR)/$*.d
+	@rm -f $(ODIR)/$*.d.tmp

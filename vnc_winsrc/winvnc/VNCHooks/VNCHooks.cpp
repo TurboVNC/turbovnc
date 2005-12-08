@@ -30,38 +30,52 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#ifndef __GNUC__
 #include <crtdbg.h>
+#endif
+
+#ifndef LLMHF_INJECTED
+#define LLMHF_INJECTED 0x00000001
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // Storage for the global data in the DLL
 // Note: For Borland C++ compilers, this data segment is defined in a
 //       separate file, SharedData.cpp.
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__MINGW32__)
 
 // MSVC is bugged - if a default value is missed off from one of the following
 // variables then that variable is process-specific for some reason!
 
+#ifdef _MSC_VER
 #pragma data_seg(".SharedData")
-HWND hVeneto = NULL;
-HWND hKeyboardPriorityWindow = NULL;
-HWND hMousePriorityWindow = NULL;
-UINT UpdateRectMessage = 0;
-UINT CopyRectMessage = 0;
-UINT MouseMoveMessage = 0;
-UINT LocalMouseMessage = 0;
-UINT LocalKeyboardMessage = 0;
-HHOOK hCallWndHook = NULL;							// Handle to the CallWnd hook
-HHOOK hGetMsgHook = NULL;							// Handle to the GetMsg hook
-HHOOK hDialogMsgHook = NULL;						// Handle to the DialogMsg hook
-HHOOK hLLKeyboardHook = NULL;						// Handle to LowLevel kbd hook
-HHOOK hLLMouseHook = NULL;							// Handle to LowLevel mouse hook
-HHOOK hLLKeyboardPrHook = NULL;						// Handle to LowLevel kbd hook for local event priority
-HHOOK hLLMousePrHook = NULL;						// Handle to LowLevel mouse hook for local event priority
-HHOOK hKeyboardHook = NULL;							// Handle to kbd hook
-HHOOK hMouseHook = NULL;							// Handle to mouse hook
+#define SHSECT
+#elif defined(__MINGW32__)
+#define SHSECT __attribute__((section (".SharedData"), shared))
+#endif
 
+HWND hVeneto SHSECT = NULL;
+HWND hKeyboardPriorityWindow SHSECT = NULL;
+HWND hMousePriorityWindow SHSECT = NULL;
+UINT UpdateRectMessage SHSECT = 0;
+UINT CopyRectMessage SHSECT = 0;
+UINT MouseMoveMessage SHSECT = 0;
+UINT LocalMouseMessage SHSECT = 0;
+UINT LocalKeyboardMessage SHSECT = 0;
+HHOOK hCallWndHook SHSECT = NULL;							// Handle to the CallWnd hook
+HHOOK hGetMsgHook SHSECT = NULL;							// Handle to the GetMsg hook
+HHOOK hDialogMsgHook SHSECT = NULL;						// Handle to the DialogMsg hook
+HHOOK hLLKeyboardHook SHSECT = NULL;						// Handle to LowLevel kbd hook
+HHOOK hLLMouseHook SHSECT = NULL;							// Handle to LowLevel mouse hook
+HHOOK hLLKeyboardPrHook SHSECT = NULL;						// Handle to LowLevel kbd hook for local event priority
+HHOOK hLLMousePrHook SHSECT = NULL;						// Handle to LowLevel mouse hook for local event priority
+HHOOK hKeyboardHook SHSECT = NULL;							// Handle to kbd hook
+HHOOK hMouseHook SHSECT = NULL;							// Handle to mouse hook
+
+#ifdef _MSC_VER
 #pragma data_seg( )
+#endif
 
 #else
 
@@ -97,8 +111,8 @@ const UINT VNC_DEFERRED_UPDATE = RegisterWindowMessage("VNCHooks.Deferred.Update
 // Atoms
 const char *VNC_WINDOWPOS_ATOMNAME = "VNCHooks.CopyRect.WindowPos";
 const char *VNC_POPUPSELN_ATOMNAME = "VNCHooks.PopUpMenu.Selected";
-ATOM VNC_WINDOWPOS_ATOM = NULL;
-ATOM VNC_POPUPSELN_ATOM = NULL;
+ATOM VNC_WINDOWPOS_ATOM = 0;
+ATOM VNC_POPUPSELN_ATOM = 0;
 
 /////////////////////////////////////////////////////////////////////////////
 // The DLL functions
@@ -253,7 +267,7 @@ DllExport BOOL UnSetHook(HWND hWnd)
 	BOOL unHooked = TRUE;
 	
 	// Remove the extra property value from all local windows
-	EnumWindows((WNDENUMPROC) &KillPropsProc, NULL);
+	EnumWindows((WNDENUMPROC) &KillPropsProc, 0);
 
 	// Stop the keyboard & mouse hooks
 	unHooked = unHooked && SetKeyboardFilterHook(FALSE);
@@ -1246,10 +1260,10 @@ BOOL InitInstance()
 {
 	// Create the global atoms
 	VNC_WINDOWPOS_ATOM = GlobalAddAtom(VNC_WINDOWPOS_ATOMNAME);
-	if (VNC_WINDOWPOS_ATOM == NULL)
+	if (VNC_WINDOWPOS_ATOM == 0)
 		return FALSE;
 	VNC_POPUPSELN_ATOM = GlobalAddAtom(VNC_POPUPSELN_ATOMNAME);
-	if (VNC_POPUPSELN_ATOM == NULL)
+	if (VNC_POPUPSELN_ATOM == 0)
 		return FALSE;
 
 	// Get the module name
@@ -1310,15 +1324,15 @@ BOOL InitInstance()
 BOOL ExitInstance() 
 {
 	// Free the created atoms
-	if (VNC_WINDOWPOS_ATOM != NULL)
+	if (VNC_WINDOWPOS_ATOM != 0)
 	{
 		GlobalDeleteAtom(VNC_WINDOWPOS_ATOM);
-		VNC_WINDOWPOS_ATOM = NULL;
+		VNC_WINDOWPOS_ATOM = 0;
 	}
-	if (VNC_POPUPSELN_ATOM != NULL)
+	if (VNC_POPUPSELN_ATOM != 0)
 	{
 		GlobalDeleteAtom(VNC_POPUPSELN_ATOM);
-		VNC_POPUPSELN_ATOM = NULL;
+		VNC_POPUPSELN_ATOM = 0;
 	}
 
 	// Write the module settings to disk

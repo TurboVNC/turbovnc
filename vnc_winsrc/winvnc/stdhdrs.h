@@ -31,7 +31,11 @@
 #include <windows.h>
 #include <stdio.h>
 #include <process.h>
+#ifdef __GNUC__
+#define _ASSERT(c) ((void)0)
+#else
 #include <crtdbg.h>
+#endif
 
 // LOGGING SUPPORT
 

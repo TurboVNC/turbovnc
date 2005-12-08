@@ -380,7 +380,7 @@ VSocket::TryAccept(VSocket **new_socket, long ms)
 {
 	// Check this socket
 	if (sock < 0)
-		return NULL;
+		return 0;
 
 	struct fd_set fds;
 	struct timeval tm;
