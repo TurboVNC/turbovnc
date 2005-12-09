@@ -319,8 +319,8 @@
 	
 
 .\vncBuffer.cpp : \
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\Log.h"\
 	".\MinMax.h"\
 	".\omnithread\nt.h"\
@@ -478,8 +478,8 @@
 	
 
 .\vncEncodeTight.cpp : \
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\Log.h"\
 	".\omnithread\nt.h"\
 	".\omnithread\omnithread.h"\
