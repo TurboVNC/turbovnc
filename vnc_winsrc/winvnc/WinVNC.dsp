@@ -469,6 +469,10 @@ SOURCE=.\translate.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\turbojpeg\turbojpeg.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\VideoDriver.h
 # End Source File
 # Begin Source File
@@ -731,6 +735,77 @@ SOURCE=.\BUILDING.txt
 # Begin Source File
 
 SOURCE=.\History.txt
+# End Source File
+# Begin Source File
+
+SOURCE=..\turbojpeg\turbojpeg.def
+
+!IF  "$(CFG)" == "WinVNC - Win32 Release"
+
+# Begin Custom Build
+IntDir=.\Release
+InputPath=..\turbojpeg\turbojpeg.def
+
+BuildCmds= \
+	link /lib /out:$(IntDir)/turbojpeg.lib /def:$(InputPath) /machine:x86
+
+"$(IntDir)/turbojpeg.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(IntDir)/turbojpeg.exp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "WinVNC - Win32 Debug"
+
+# Begin Custom Build
+IntDir=.\Debug
+InputPath=..\turbojpeg\turbojpeg.def
+
+BuildCmds= \
+	link /lib /out:$(IntDir)/turbojpeg.lib /def:$(InputPath) /machine:x86
+
+"$(IntDir)/turbojpeg.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(IntDir)/turbojpeg.exp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "WinVNC - Win32 Profile"
+
+# Begin Custom Build
+IntDir=.\Profile
+InputPath=..\turbojpeg\turbojpeg.def
+
+BuildCmds= \
+	link /lib /out:$(IntDir)/turbojpeg.lib /def:$(InputPath) /machine:x86
+
+"$(IntDir)/turbojpeg.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(IntDir)/turbojpeg.exp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "WinVNC - Win32 HorizonLive"
+
+# Begin Custom Build
+IntDir=.\HorizonLive
+InputPath=..\turbojpeg\turbojpeg.def
+
+BuildCmds= \
+	link /lib /out:$(IntDir)/turbojpeg.lib /def:$(InputPath) /machine:x86
+
+"$(IntDir)/turbojpeg.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(IntDir)/turbojpeg.exp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Target
 # End Project
