@@ -27,6 +27,10 @@ NULL=
 NULL=nul
 !ENDIF 
 
+CPP=cl.exe
+MTL=midl.exe
+RSC=rc.exe
+
 !IF  "$(CFG)" == "WinVNC - Win32 Release"
 
 OUTDIR=.\Release
@@ -37,11 +41,11 @@ OutDir=.\Release
 
 !IF "$(RECURSE)" == "0" 
 
-ALL : "$(OUTDIR)\WinVNC.exe"
+ALL : ".\Release/turbojpeg.lib" ".\Release/turbojpeg.exp" "$(OUTDIR)\WinVNC.exe"
 
 !ELSE 
 
-ALL : "zlib - Win32 Release" "omnithread - Win32 Release" "VNCHooks - Win32 Release" "$(OUTDIR)\WinVNC.exe"
+ALL : "zlib - Win32 Release" "omnithread - Win32 Release" "VNCHooks - Win32 Release" ".\Release/turbojpeg.lib" ".\Release/turbojpeg.exp" "$(OUTDIR)\WinVNC.exe"
 
 !ENDIF 
 
@@ -92,53 +96,23 @@ CLEAN :
 	-@erase "$(INTDIR)\WinVNC.obj"
 	-@erase "$(INTDIR)\WinVNC.res"
 	-@erase "$(OUTDIR)\WinVNC.exe"
+	-@erase ".\Release/turbojpeg.exp"
+	-@erase ".\Release/turbojpeg.lib"
 
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-CPP=cl.exe
-CPP_PROJ=/nologo /MT /W3 /GX /O2 /I "./omnithread" /I "./zlib" /I ".." /I "../../../vgl/include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "__WIN32__" /D "__NT__" /D "__x86__" /D "_WINSTATIC" /D "NCORBA" /Fp"$(INTDIR)\WinVNC.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
-
-.c{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cpp{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cxx{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.c{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cpp{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cxx{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-MTL=midl.exe
+CPP_PROJ=/nologo /MT /W3 /GX /O2 /I "./omnithread" /I "./zlib" /I ".." /I "../turbojpeg" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "__WIN32__" /D "__NT__" /D "__x86__" /D "_WINSTATIC" /D "NCORBA" /Fp"$(INTDIR)\WinVNC.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 MTL_PROJ=/nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32 
-RSC=rc.exe
 RSC_PROJ=/l 0x809 /fo"$(INTDIR)\WinVNC.res" /d "NDEBUG" /d "WITH_JAVA_VIEWER" 
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(OUTDIR)\WinVNC.bsc" 
 BSC32_SBRS= \
 	
 LINK32=link.exe
-LINK32_FLAGS=wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib htmlhelp.lib turbojpeg.lib /nologo /subsystem:windows /incremental:no /pdb:"$(OUTDIR)\WinVNC.pdb" /machine:I386 /nodefaultlib:"LIBC" /out:"$(OUTDIR)\WinVNC.exe" /libpath:"../../../vgl/windows/vnc/lib" 
+LINK32_FLAGS=wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib htmlhelp.lib turbojpeg.lib /nologo /subsystem:windows /incremental:no /pdb:"$(OUTDIR)\WinVNC.pdb" /machine:I386 /nodefaultlib:"LIBC" /def:"..\turbojpeg\turbojpeg.def" /out:"$(OUTDIR)\WinVNC.exe" 
+DEF_FILE= \
+	"..\turbojpeg\turbojpeg.def"
 LINK32_OBJS= \
 	"$(INTDIR)\AdministrationControls.obj" \
 	"$(INTDIR)\d3des.obj" \
@@ -180,6 +154,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\WallpaperUtils.obj" \
 	"$(INTDIR)\WinVNC.obj" \
 	"$(INTDIR)\WinVNC.res" \
+	"$(INTDIR)\turbojpeg.lib" \
 	"$(OUTDIR)\VNCHooks.lib" \
 	"$(OUTDIR)\omnithread.lib" \
 	"$(OUTDIR)\zlib.lib"
@@ -199,11 +174,11 @@ OutDir=.\Debug
 
 !IF "$(RECURSE)" == "0" 
 
-ALL : "$(OUTDIR)\WinVNC.exe"
+ALL : ".\Debug/turbojpeg.lib" ".\Debug/turbojpeg.exp" "$(OUTDIR)\WinVNC.exe"
 
 !ELSE 
 
-ALL : "zlib - Win32 Debug" "omnithread - Win32 Debug" "VNCHooks - Win32 Debug" "$(OUTDIR)\WinVNC.exe"
+ALL : "zlib - Win32 Debug" "omnithread - Win32 Debug" "VNCHooks - Win32 Debug" ".\Debug/turbojpeg.lib" ".\Debug/turbojpeg.exp" "$(OUTDIR)\WinVNC.exe"
 
 !ENDIF 
 
@@ -258,53 +233,23 @@ CLEAN :
 	-@erase "$(OUTDIR)\WinVNC.ilk"
 	-@erase "$(OUTDIR)\WinVNC.map"
 	-@erase "$(OUTDIR)\WinVNC.pdb"
+	-@erase ".\Debug/turbojpeg.exp"
+	-@erase ".\Debug/turbojpeg.lib"
 
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-CPP=cl.exe
-CPP_PROJ=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "./omnithread" /I "./zlib" /I ".." /I "../../../vgl/include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "__WIN32__" /D "__NT__" /D "_WINSTATIC" /D "__x86__" /D "NCORBA" /Fp"$(INTDIR)\WinVNC.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
-
-.c{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cpp{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cxx{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.c{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cpp{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cxx{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-MTL=midl.exe
+CPP_PROJ=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "./omnithread" /I "./zlib" /I ".." /I "../turbojpeg" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "__WIN32__" /D "__NT__" /D "_WINSTATIC" /D "__x86__" /D "NCORBA" /Fp"$(INTDIR)\WinVNC.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 MTL_PROJ=/nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32 
-RSC=rc.exe
 RSC_PROJ=/l 0x809 /fo"$(INTDIR)\WinVNC.res" /d "_DEBUG" /d "WITH_JAVA_VIEWER" 
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(OUTDIR)\WinVNC.bsc" 
 BSC32_SBRS= \
 	
 LINK32=link.exe
-LINK32_FLAGS=wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib htmlhelp.lib turbojpeg.lib /nologo /subsystem:windows /incremental:yes /pdb:"$(OUTDIR)\WinVNC.pdb" /map:"$(INTDIR)\WinVNC.map" /debug /machine:I386 /nodefaultlib:"LIBCD" /out:"$(OUTDIR)\WinVNC.exe" /pdbtype:sept /libpath:"../../../vgl/windows/vnc/dbg/lib" 
+LINK32_FLAGS=wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib htmlhelp.lib turbojpeg.lib /nologo /subsystem:windows /incremental:yes /pdb:"$(OUTDIR)\WinVNC.pdb" /map:"$(INTDIR)\WinVNC.map" /debug /machine:I386 /nodefaultlib:"LIBCD" /def:"..\turbojpeg\turbojpeg.def" /out:"$(OUTDIR)\WinVNC.exe" /pdbtype:sept 
+DEF_FILE= \
+	"..\turbojpeg\turbojpeg.def"
 LINK32_OBJS= \
 	"$(INTDIR)\AdministrationControls.obj" \
 	"$(INTDIR)\d3des.obj" \
@@ -346,6 +291,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\WallpaperUtils.obj" \
 	"$(INTDIR)\WinVNC.obj" \
 	"$(INTDIR)\WinVNC.res" \
+	"$(INTDIR)\turbojpeg.lib" \
 	"$(OUTDIR)\VNCHooks.lib" \
 	"$(OUTDIR)\omnithread.lib" \
 	"$(OUTDIR)\zlib.lib"
@@ -365,11 +311,11 @@ OutDir=.\Profile
 
 !IF "$(RECURSE)" == "0" 
 
-ALL : "$(OUTDIR)\WinVNC.exe"
+ALL : ".\Profile/turbojpeg.lib" ".\Profile/turbojpeg.exp" "$(OUTDIR)\WinVNC.exe"
 
 !ELSE 
 
-ALL : "zlib - Win32 Profile" "omnithread - Win32 Profile" "VNCHooks - Win32 Profile" "$(OUTDIR)\WinVNC.exe"
+ALL : "zlib - Win32 Profile" "omnithread - Win32 Profile" "VNCHooks - Win32 Profile" ".\Profile/turbojpeg.lib" ".\Profile/turbojpeg.exp" "$(OUTDIR)\WinVNC.exe"
 
 !ENDIF 
 
@@ -422,53 +368,23 @@ CLEAN :
 	-@erase "$(INTDIR)\WinVNC.res"
 	-@erase "$(OUTDIR)\WinVNC.exe"
 	-@erase "$(OUTDIR)\WinVNC.map"
+	-@erase ".\Profile/turbojpeg.exp"
+	-@erase ".\Profile/turbojpeg.lib"
 
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-CPP=cl.exe
-CPP_PROJ=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "./omnithread" /I "./zlib" /I ".." /I "../../../vgl/include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "__WIN32__" /D "__NT__" /D "_WINSTATIC" /D "__x86__" /D "NCORBA" /Fp"$(INTDIR)\WinVNC.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
-
-.c{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cpp{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cxx{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.c{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cpp{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cxx{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-MTL=midl.exe
+CPP_PROJ=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "./omnithread" /I "./zlib" /I ".." /I "../turbojpeg" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "__WIN32__" /D "__NT__" /D "_WINSTATIC" /D "__x86__" /D "NCORBA" /Fp"$(INTDIR)\WinVNC.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 MTL_PROJ=/nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32 
-RSC=rc.exe
 RSC_PROJ=/l 0x809 /fo"$(INTDIR)\WinVNC.res" /d "_DEBUG" /d "WITH_JAVA_VIEWER" 
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(OUTDIR)\WinVNC.bsc" 
 BSC32_SBRS= \
 	
 LINK32=link.exe
-LINK32_FLAGS=wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib htmlhelp.lib turbojpeg.lib /nologo /subsystem:windows /profile /map:"$(INTDIR)\WinVNC.map" /debug /machine:I386 /out:"$(OUTDIR)\WinVNC.exe" /libpath:"../../../vgl/windows/vnc/dbg/lib" 
+LINK32_FLAGS=wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib htmlhelp.lib turbojpeg.lib /nologo /subsystem:windows /profile /map:"$(INTDIR)\WinVNC.map" /debug /machine:I386 /def:"..\turbojpeg\turbojpeg.def" /out:"$(OUTDIR)\WinVNC.exe" 
+DEF_FILE= \
+	"..\turbojpeg\turbojpeg.def"
 LINK32_OBJS= \
 	"$(INTDIR)\AdministrationControls.obj" \
 	"$(INTDIR)\d3des.obj" \
@@ -510,6 +426,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\WallpaperUtils.obj" \
 	"$(INTDIR)\WinVNC.obj" \
 	"$(INTDIR)\WinVNC.res" \
+	"$(INTDIR)\turbojpeg.lib" \
 	"$(OUTDIR)\VNCHooks.lib" \
 	"$(OUTDIR)\omnithread.lib" \
 	"$(OUTDIR)\zlib.lib"
@@ -529,11 +446,11 @@ OutDir=.\HorizonLive
 
 !IF "$(RECURSE)" == "0" 
 
-ALL : "$(OUTDIR)\AppShare.exe"
+ALL : ".\HorizonLive/turbojpeg.lib" ".\HorizonLive/turbojpeg.exp" "$(OUTDIR)\AppShare.exe"
 
 !ELSE 
 
-ALL : "zlib - Win32 HorizonLive" "omnithread - Win32 HorizonLive" "VNCHooks - Win32 HorizonLive" "$(OUTDIR)\AppShare.exe"
+ALL : "zlib - Win32 HorizonLive" "omnithread - Win32 HorizonLive" "VNCHooks - Win32 HorizonLive" ".\HorizonLive/turbojpeg.lib" ".\HorizonLive/turbojpeg.exp" "$(OUTDIR)\AppShare.exe"
 
 !ENDIF 
 
@@ -584,53 +501,23 @@ CLEAN :
 	-@erase "$(INTDIR)\WinVNC.obj"
 	-@erase "$(INTDIR)\WinVNC.res"
 	-@erase "$(OUTDIR)\AppShare.exe"
+	-@erase ".\HorizonLive/turbojpeg.exp"
+	-@erase ".\HorizonLive/turbojpeg.lib"
 
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-CPP=cl.exe
-CPP_PROJ=/nologo /MT /W3 /GX /O2 /I "./omnithread" /I "./zlib" /I ".." /I "../../../vgl/include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "__WIN32__" /D "__NT__" /D "__x86__" /D "_WINSTATIC" /D "NCORBA" /D "XMD_H" /D "HORIZONLIVE" /Fp"$(INTDIR)\WinVNC.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
-
-.c{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cpp{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cxx{$(INTDIR)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.c{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cpp{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cxx{$(INTDIR)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-MTL=midl.exe
+CPP_PROJ=/nologo /MT /W3 /GX /O2 /I "./omnithread" /I "./zlib" /I ".." /I "../turbojpeg" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "__WIN32__" /D "__NT__" /D "__x86__" /D "_WINSTATIC" /D "NCORBA" /D "XMD_H" /D "HORIZONLIVE" /Fp"$(INTDIR)\WinVNC.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 MTL_PROJ=/nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32 
-RSC=rc.exe
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\WinVNC.res" /d "NDEBUG" 
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(OUTDIR)\WinVNC.bsc" 
 BSC32_SBRS= \
 	
 LINK32=link.exe
-LINK32_FLAGS=wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib htmlhelp.lib turbojpeg.lib /nologo /subsystem:windows /incremental:no /pdb:"$(OUTDIR)\AppShare.pdb" /machine:I386 /nodefaultlib:"LIBC" /out:"$(OUTDIR)\AppShare.exe" /libpath:"../../../vgl/windows/vnc/lib" 
+LINK32_FLAGS=wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib htmlhelp.lib turbojpeg.lib /nologo /subsystem:windows /incremental:no /pdb:"$(OUTDIR)\AppShare.pdb" /machine:I386 /nodefaultlib:"LIBC" /def:"..\turbojpeg\turbojpeg.def" /out:"$(OUTDIR)\AppShare.exe" 
+DEF_FILE= \
+	"..\turbojpeg\turbojpeg.def"
 LINK32_OBJS= \
 	"$(INTDIR)\AdministrationControls.obj" \
 	"$(INTDIR)\d3des.obj" \
@@ -672,6 +559,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\WallpaperUtils.obj" \
 	"$(INTDIR)\WinVNC.obj" \
 	"$(INTDIR)\WinVNC.res" \
+	"$(INTDIR)\turbojpeg.lib" \
 	"$(OUTDIR)\VNCHooks.lib" \
 	"$(OUTDIR)\omnithread.lib" \
 	"$(OUTDIR)\zlib.lib"
@@ -682,6 +570,36 @@ LINK32_OBJS= \
 <<
 
 !ENDIF 
+
+.c{$(INTDIR)}.obj::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+.cpp{$(INTDIR)}.obj::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+.cxx{$(INTDIR)}.obj::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+.c{$(INTDIR)}.sbr::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+.cpp{$(INTDIR)}.sbr::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+.cxx{$(INTDIR)}.sbr::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
 
 
 !IF "$(NO_EXTERNAL_DEPS)" != "1"
@@ -1045,6 +963,58 @@ SOURCE=.\WinVNC.rc
    cd ".\zlib"
    $(MAKE) /$(MAKEFLAGS) /F .\zlib.mak CFG="zlib - Win32 HorizonLive" RECURSE=1 CLEAN 
    cd ".."
+
+!ENDIF 
+
+SOURCE=..\turbojpeg\turbojpeg.def
+
+!IF  "$(CFG)" == "WinVNC - Win32 Release"
+
+IntDir=.\Release
+InputPath=..\turbojpeg\turbojpeg.def
+
+"$(INTDIR)\turbojpeg.lib"	"$(INTDIR)\turbojpeg.exp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	<<tempfile.bat 
+	@echo off 
+	link /lib /out:$(IntDir)/turbojpeg.lib /def:$(InputPath) /machine:x86
+<< 
+	
+
+!ELSEIF  "$(CFG)" == "WinVNC - Win32 Debug"
+
+IntDir=.\Debug
+InputPath=..\turbojpeg\turbojpeg.def
+
+"$(INTDIR)\turbojpeg.lib"	"$(INTDIR)\turbojpeg.exp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	<<tempfile.bat 
+	@echo off 
+	link /lib /out:$(IntDir)/turbojpeg.lib /def:$(InputPath) /machine:x86
+<< 
+	
+
+!ELSEIF  "$(CFG)" == "WinVNC - Win32 Profile"
+
+IntDir=.\Profile
+InputPath=..\turbojpeg\turbojpeg.def
+
+"$(INTDIR)\turbojpeg.lib"	"$(INTDIR)\turbojpeg.exp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	<<tempfile.bat 
+	@echo off 
+	link /lib /out:$(IntDir)/turbojpeg.lib /def:$(InputPath) /machine:x86
+<< 
+	
+
+!ELSEIF  "$(CFG)" == "WinVNC - Win32 HorizonLive"
+
+IntDir=.\HorizonLive
+InputPath=..\turbojpeg\turbojpeg.def
+
+"$(INTDIR)\turbojpeg.lib"	"$(INTDIR)\turbojpeg.exp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	<<tempfile.bat 
+	@echo off 
+	link /lib /out:$(IntDir)/turbojpeg.lib /def:$(InputPath) /machine:x86
+<< 
+	
 
 !ENDIF 
 
