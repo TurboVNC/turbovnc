@@ -55,8 +55,13 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib htmlhelp.lib turbojpeg.lib /nologo /subsystem:windows /machine:I386 /nodefaultlib:"LIBC"
+# ADD LINK32 wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib htmlhelp.lib Release/turbojpeg.lib /nologo /subsystem:windows /machine:I386 /nodefaultlib:"LIBC"
 # SUBTRACT LINK32 /pdb:none
+# Begin Special Build Tool
+IntDir=.\Release
+SOURCE="$(InputPath)"
+PreLink_Cmds=link /lib /def:..\turbojpeg\turbojpeg.def /out:$(IntDir)\turbojpeg.lib
+# End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "WinVNC - Win32 Debug"
 
@@ -83,8 +88,13 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib htmlhelp.lib turbojpeg.lib /nologo /subsystem:windows /map /debug /machine:I386 /nodefaultlib:"LIBCD" /pdbtype:sept
+# ADD LINK32 wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib htmlhelp.lib Debug/turbojpeg.lib /nologo /subsystem:windows /map /debug /machine:I386 /nodefaultlib:"LIBCD" /pdbtype:sept
 # SUBTRACT LINK32 /incremental:no
+# Begin Special Build Tool
+IntDir=.\Debug
+SOURCE="$(InputPath)"
+PreLink_Cmds=link /lib /def:..\turbojpeg\turbojpeg.def /out:$(IntDir)\turbojpeg.lib
+# End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "WinVNC - Win32 Profile"
 
@@ -111,7 +121,12 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 wsock32.lib omniORB2_rtd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"o:\release\lib\x86_nt_3.5"
-# ADD LINK32 wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib htmlhelp.lib turbojpeg.lib /nologo /subsystem:windows /profile /map /debug /machine:I386
+# ADD LINK32 wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib htmlhelp.lib Profile/turbojpeg.lib /nologo /subsystem:windows /profile /map /debug /machine:I386
+# Begin Special Build Tool
+IntDir=.\Profile
+SOURCE="$(InputPath)"
+PreLink_Cmds=link /lib /def:..\turbojpeg\turbojpeg.def /out:$(IntDir)\turbojpeg.lib
+# End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "WinVNC - Win32 HorizonLive"
 
@@ -141,8 +156,13 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib /nologo /subsystem:windows /machine:I386 /nodefaultlib:"LIBC"
 # SUBTRACT BASE LINK32 /pdb:none /nodefaultlib
-# ADD LINK32 wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib htmlhelp.lib turbojpeg.lib /nologo /subsystem:windows /machine:I386 /nodefaultlib:"LIBC" /out:"HorizonLive/AppShare.exe"
+# ADD LINK32 wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib htmlhelp.lib HorizonLive/turbojpeg.lib /nologo /subsystem:windows /machine:I386 /nodefaultlib:"LIBC" /out:"HorizonLive/AppShare.exe"
 # SUBTRACT LINK32 /pdb:none /nodefaultlib
+# Begin Special Build Tool
+IntDir=.\HorizonLive
+SOURCE="$(InputPath)"
+PreLink_Cmds=link /lib /def:..\turbojpeg\turbojpeg.def /out:$(IntDir)\turbojpeg.lib
+# End Special Build Tool
 
 !ENDIF 
 
@@ -735,77 +755,6 @@ SOURCE=.\BUILDING.txt
 # Begin Source File
 
 SOURCE=.\History.txt
-# End Source File
-# Begin Source File
-
-SOURCE=..\turbojpeg\turbojpeg.def
-
-!IF  "$(CFG)" == "WinVNC - Win32 Release"
-
-# Begin Custom Build
-IntDir=.\Release
-InputPath=..\turbojpeg\turbojpeg.def
-
-BuildCmds= \
-	link /lib /out:$(IntDir)/turbojpeg.lib /def:$(InputPath) /machine:x86
-
-"$(IntDir)/turbojpeg.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(IntDir)/turbojpeg.exp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "WinVNC - Win32 Debug"
-
-# Begin Custom Build
-IntDir=.\Debug
-InputPath=..\turbojpeg\turbojpeg.def
-
-BuildCmds= \
-	link /lib /out:$(IntDir)/turbojpeg.lib /def:$(InputPath) /machine:x86
-
-"$(IntDir)/turbojpeg.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(IntDir)/turbojpeg.exp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "WinVNC - Win32 Profile"
-
-# Begin Custom Build
-IntDir=.\Profile
-InputPath=..\turbojpeg\turbojpeg.def
-
-BuildCmds= \
-	link /lib /out:$(IntDir)/turbojpeg.lib /def:$(InputPath) /machine:x86
-
-"$(IntDir)/turbojpeg.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(IntDir)/turbojpeg.exp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "WinVNC - Win32 HorizonLive"
-
-# Begin Custom Build
-IntDir=.\HorizonLive
-InputPath=..\turbojpeg\turbojpeg.def
-
-BuildCmds= \
-	link /lib /out:$(IntDir)/turbojpeg.lib /def:$(InputPath) /machine:x86
-
-"$(IntDir)/turbojpeg.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(IntDir)/turbojpeg.exp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
 # End Source File
 # End Target
 # End Project
