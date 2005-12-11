@@ -88,7 +88,7 @@ CLEAN :
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-CPP_PROJ=/nologo /MT /W3 /GX /O2 /Ob0 /I "omnithread" /I ".." /I "..\..\..\vgl\include" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "__NT__" /D "_WINSTATIC" /D "__WIN32__" /D "XMD_H" /Fp"$(INTDIR)\vncviewer.pch" /YX"stdhdrs.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MT /W3 /GX /O2 /Ob0 /I "omnithread" /I ".." /I "..\turbojpeg" /I "..\..\..\vgl\include" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "__NT__" /D "_WINSTATIC" /D "__WIN32__" /D "XMD_H" /Fp"$(INTDIR)\vncviewer.pch" /YX"stdhdrs.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 MTL_PROJ=/nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32 
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\vncviewer.res" /d "NDEBUG" 
 BSC32=bscmake.exe
@@ -96,7 +96,7 @@ BSC32_FLAGS=/nologo /o"$(OUTDIR)\vncviewer.bsc"
 BSC32_SBRS= \
 	
 LINK32=link.exe
-LINK32_FLAGS=winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib comctl32.lib htmlhelp.lib turbojpeg.lib fbx.lib /nologo /subsystem:windows /incremental:no /pdb:"$(OUTDIR)\vncviewer.pdb" /machine:I386 /out:"$(OUTDIR)\vncviewer.exe" /libpath:"..\..\..\vgl\windows\vnc\lib" 
+LINK32_FLAGS=winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib comctl32.lib htmlhelp.lib Release/turbojpeg.lib fbx.lib /nologo /subsystem:windows /incremental:no /pdb:"$(OUTDIR)\vncviewer.pdb" /machine:I386 /out:"$(OUTDIR)\vncviewer.exe" /libpath:"..\..\..\vgl\windows\vnc\lib" 
 LINK32_OBJS= \
 	"$(INTDIR)\AboutBox.obj" \
 	"$(INTDIR)\AuthDialog.obj" \
@@ -132,9 +132,13 @@ LINK32_OBJS= \
 	"$(OUTDIR)\zlib.lib"
 
 "$(OUTDIR)\vncviewer.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
-    $(LINK32) @<<
+   link /lib /def:..\turbojpeg\turbojpeg.def /out:.\Release\turbojpeg.lib
+	 $(LINK32) @<<
   $(LINK32_FLAGS) $(LINK32_OBJS)
 <<
+
+IntDir=.\Release
+SOURCE="$(InputPath)"
 
 !ELSEIF  "$(CFG)" == "vncviewer - Win32 Debug"
 
@@ -200,7 +204,7 @@ CLEAN :
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-CPP_PROJ=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "omnithread" /I ".." /I "..\..\..\vgl\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "__NT__" /D "_WINSTATIC" /D "__WIN32__" /D "XMD_H" /Fp"$(INTDIR)\vncviewer.pch" /YX"stdhdrs.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "omnithread" /I ".." /I "..\turbojpeg" /I "..\..\..\vgl\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "__NT__" /D "_WINSTATIC" /D "__WIN32__" /D "XMD_H" /Fp"$(INTDIR)\vncviewer.pch" /YX"stdhdrs.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 MTL_PROJ=/nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32 
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\vncviewer.res" /d "_DEBUG" 
 BSC32=bscmake.exe
@@ -208,7 +212,7 @@ BSC32_FLAGS=/nologo /o"$(OUTDIR)\vncviewer.bsc"
 BSC32_SBRS= \
 	
 LINK32=link.exe
-LINK32_FLAGS=winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib comctl32.lib htmlhelp.lib turbojpeg.lib fbx.lib /nologo /subsystem:windows /incremental:yes /pdb:"$(OUTDIR)\vncviewer.pdb" /map:"$(INTDIR)\vncviewer.map" /debug /machine:I386 /nodefaultlib:"libcd" /out:"$(OUTDIR)\vncviewer.exe" /pdbtype:sept /libpath:"..\..\..\vgl\windows\vnc\dbg\lib" 
+LINK32_FLAGS=winmm.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib uuid.lib wsock32.lib comctl32.lib htmlhelp.lib Debug/turbojpeg.lib fbx.lib /nologo /subsystem:windows /incremental:yes /pdb:"$(OUTDIR)\vncviewer.pdb" /map:"$(INTDIR)\vncviewer.map" /debug /machine:I386 /nodefaultlib:"libcd" /out:"$(OUTDIR)\vncviewer.exe" /pdbtype:sept /libpath:"..\..\..\vgl\windows\vnc\dbg\lib" 
 LINK32_OBJS= \
 	"$(INTDIR)\AboutBox.obj" \
 	"$(INTDIR)\AuthDialog.obj" \
@@ -244,9 +248,13 @@ LINK32_OBJS= \
 	"$(OUTDIR)\zlib.lib"
 
 "$(OUTDIR)\vncviewer.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
-    $(LINK32) @<<
+   link /lib /def:..\turbojpeg\turbojpeg.def /out:.\Debug\turbojpeg.lib
+	 $(LINK32) @<<
   $(LINK32_FLAGS) $(LINK32_OBJS)
 <<
+
+IntDir=.\Debug
+SOURCE="$(InputPath)"
 
 !ENDIF 
 
@@ -464,7 +472,7 @@ SOURCE=.\stdhdrs.cpp
 
 !IF  "$(CFG)" == "vncviewer - Win32 Release"
 
-CPP_SWITCHES=/nologo /MT /W3 /GX /O2 /Ob0 /I "omnithread" /I ".." /I "..\..\..\vgl\include" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "__NT__" /D "_WINSTATIC" /D "__WIN32__" /D "XMD_H" /Fp"$(INTDIR)\vncviewer.pch" /YX"stdhdrs.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_SWITCHES=/nologo /MT /W3 /GX /O2 /Ob0 /I "omnithread" /I ".." /I "..\turbojpeg" /I "..\..\..\vgl\include" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "__NT__" /D "_WINSTATIC" /D "__WIN32__" /D "XMD_H" /Fp"$(INTDIR)\vncviewer.pch" /YX"stdhdrs.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 "$(INTDIR)\stdhdrs.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) @<<
@@ -474,7 +482,7 @@ CPP_SWITCHES=/nologo /MT /W3 /GX /O2 /Ob0 /I "omnithread" /I ".." /I "..\..\..\v
 
 !ELSEIF  "$(CFG)" == "vncviewer - Win32 Debug"
 
-CPP_SWITCHES=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "omnithread" /I ".." /I "..\..\..\vgl\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "__NT__" /D "_WINSTATIC" /D "__WIN32__" /D "XMD_H" /Fp"$(INTDIR)\vncviewer.pch" /Yc"stdhdrs.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_SWITCHES=/nologo /MTd /W3 /Gm /GX /ZI /Od /I "omnithread" /I ".." /I "..\turbojpeg" /I "..\..\..\vgl\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "__NT__" /D "_WINSTATIC" /D "__WIN32__" /D "XMD_H" /Fp"$(INTDIR)\vncviewer.pch" /Yc"stdhdrs.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 
 "$(INTDIR)\stdhdrs.obj"	"$(INTDIR)\vncviewer.pch" : $(SOURCE) "$(INTDIR)"
 	$(CPP) @<<
