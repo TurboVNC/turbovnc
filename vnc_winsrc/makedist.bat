@@ -26,18 +26,18 @@ if exist TurboVNC.exe del /q TurboVNC.exe
 
 set _PWD=%CD%
 cd ..\..\vgl
-make DISTRO=vnc jpeg
+make vnc
 if errorlevel 1 goto abort
-make DISTRO=vnc jpeg
+make vnc
 if errorlevel 1 goto abort
 cd %_PWD%
 
 cd vncviewer
-nmake vncviewer.mak cfg="vncviewer - Win32 Release"
+nmake /f vncviewer.mak cfg="vncviewer - Win32 Release"
 if errorlevel 1 goto abort
 cd ..
 cd winvnc
-nmake winvnc.mak cfg="WinVNC - Win32 Release"
+nmake /f winvnc.mak cfg="WinVNC - Win32 Release"
 if errorlevel 1 goto abort
 cd ..
 
