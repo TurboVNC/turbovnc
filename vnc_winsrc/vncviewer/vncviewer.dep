@@ -2,8 +2,8 @@
 
 .\AboutBox.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
@@ -39,8 +39,8 @@
 
 .\AuthDialog.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\AuthDialog.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
@@ -85,8 +85,8 @@
 
 .\ClientConnection.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\AboutBox.h"\
 	".\AuthDialog.h"\
 	".\CapsContainer.h"\
@@ -132,8 +132,8 @@
 
 .\ClientConnectionClipboard.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
@@ -170,8 +170,8 @@
 
 .\ClientConnectionCopyRect.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
@@ -207,8 +207,8 @@
 
 .\ClientConnectionCursor.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
@@ -244,8 +244,8 @@
 
 .\ClientConnectionFile.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
@@ -283,8 +283,8 @@
 
 .\ClientConnectionFullScreen.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
@@ -320,8 +320,8 @@
 
 .\ClientConnectionTight.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
@@ -358,8 +358,8 @@
 
 .\ConnectingDialog.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
@@ -399,8 +399,8 @@
 
 .\Daemon.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\AboutBox.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
@@ -446,8 +446,8 @@
 
 .\FileTransfer.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
@@ -490,8 +490,8 @@
 
 .\Flasher.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
@@ -529,8 +529,8 @@
 
 .\HotKeys.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
@@ -566,8 +566,8 @@
 
 .\KeyMap.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
@@ -610,8 +610,8 @@
 
 .\LoginAuthDialog.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
@@ -649,8 +649,8 @@
 
 .\SessionDialog.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
@@ -706,8 +706,8 @@
 
 .\VNCHelp.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
@@ -744,8 +744,8 @@
 
 .\VNCOptions.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\AboutBox.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
@@ -784,8 +784,8 @@
 
 .\vncviewer.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
@@ -825,8 +825,8 @@
 
 .\VNCviewerApp.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
@@ -863,8 +863,8 @@
 
 .\VNCviewerApp32.cpp : \
 	"..\..\..\vgl\include\fbx.h"\
-	"..\..\..\vgl\include\turbojpeg.h"\
 	"..\rfb\rfbproto.h"\
+	"..\turbojpeg\turbojpeg.h"\
 	".\CapsContainer.h"\
 	".\ClientConnection.h"\
 	".\ConnectingDialog.h"\
