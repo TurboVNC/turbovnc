@@ -1,0 +1,38 @@
+if [ "$1" = "clean" ]; then
+	cd vncviewer
+	nmake /f vncviewer.mak cfg="vncviewer - Win32 Release" recurse=1 clean || exit 1
+	cd ..
+	cd winvnc
+	nmake /f winvnc.mak cfg="WinVNC - Win32 Release" recurse=1 clean || exit 1
+	cd ..
+	if [ ! -f ../../vgl/Makefile ]; then
+		echo Could not find VirtualGL build directory at ../../vgl !
+		exit 1
+	else
+		_PWD=`pwd`
+		cd ../../vgl
+		make DISTRO=vnc clean || exit 1
+		cd $_PWD
+	fi
+	exit 0
+fi
+
+if [ -f TurboVNC.exe ]; then rm -f TurboVNC.exe; fi
+
+_PWD=`pwd`
+cd ../../vgl
+make vnc || exit 1
+make vnc || exit 1
+cd $_PWD
+
+cd vncviewer
+nmake /f vncviewer.mak cfg="vncviewer - Win32 Release" || exit 1
+cd ..
+cd winvnc
+nmake /f winvnc.mak cfg="WinVNC - Win32 Release" || exit 1
+cd ..
+
+compil32 /cc TurboVNC.iss || exit 1
+
+mv output/setup.exe TurboVNC.exe
+rmdir output
