@@ -23,18 +23,6 @@
 	".\VNCviewerApp.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\AuthDialog.cpp : \
@@ -62,18 +50,6 @@
 	".\VNCviewerApp.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\CapsContainer.cpp : \
@@ -116,18 +92,6 @@
 	".\VNCviewerApp32.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\ClientConnectionClipboard.cpp : \
@@ -154,18 +118,6 @@
 	".\VNCviewerApp.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\ClientConnectionCopyRect.cpp : \
@@ -191,18 +143,6 @@
 	".\VNCviewerApp.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\ClientConnectionCursor.cpp : \
@@ -228,18 +168,6 @@
 	".\VNCviewerApp.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\ClientConnectionFile.cpp : \
@@ -267,18 +195,6 @@
 	".\VNCviewerApp.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\ClientConnectionFullScreen.cpp : \
@@ -304,18 +220,6 @@
 	".\VNCviewerApp.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\ClientConnectionTight.cpp : \
@@ -342,18 +246,6 @@
 	".\VNCviewerApp.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\ConnectingDialog.cpp : \
@@ -379,18 +271,6 @@
 	".\VNCviewerApp.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\d3des.c : \
@@ -423,18 +303,6 @@
 	".\VNCviewerApp.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\Exception.cpp : \
@@ -470,18 +338,6 @@
 	".\VNCviewerApp32.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\FileTransferItemInfo.cpp : \
@@ -513,18 +369,6 @@
 	".\VNCviewerApp.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\HotKeys.cpp : \
@@ -550,18 +394,6 @@
 	".\VNCviewerApp.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\KeyMap.cpp : \
@@ -587,18 +419,6 @@
 	".\VNCviewerApp.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\Log.cpp : \
@@ -633,18 +453,6 @@
 	".\VNCviewerApp.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\SessionDialog.cpp : \
@@ -675,19 +483,7 @@
 	".\VNCviewerApp32.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
 	{$(INCLUDE)}"Htmlhelp.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\stdhdrs.cpp : \
@@ -727,19 +523,7 @@
 	".\VNCviewerApp.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
 	{$(INCLUDE)}"Htmlhelp.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\VNCOptions.cpp : \
@@ -767,19 +551,7 @@
 	".\VNCviewerApp.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
 	{$(INCLUDE)}"Htmlhelp.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\vncviewer.cpp : \
@@ -809,18 +581,6 @@
 	".\VNCviewerApp32.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\VNCviewerApp.cpp : \
@@ -847,18 +607,6 @@
 	".\VNCviewerApp.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
 	
 
 .\VNCviewerApp32.cpp : \
@@ -888,16 +636,3 @@
 	".\VNCviewerApp32.h"\
 	".\zlib\zconf.h"\
 	".\zlib\zlib.h"\
-	{$(INCLUDE)}"basetsd.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbe.h"\
-	{$(INCLUDE)}"X11\extensions\Xdbeproto.h"\
-	{$(INCLUDE)}"X11\extensions\XShm.h"\
-	{$(INCLUDE)}"X11\hclshm.h"\
-	{$(INCLUDE)}"X11\shm.h"\
-	{$(INCLUDE)}"X11\X.h"\
-	{$(INCLUDE)}"X11\Xfuncproto.h"\
-	{$(INCLUDE)}"X11\Xlib.h"\
-	{$(INCLUDE)}"X11\Xmd.h"\
-	{$(INCLUDE)}"X11\Xosdefs.h"\
-	{$(INCLUDE)}"X11\Xutil.h"\
-	
