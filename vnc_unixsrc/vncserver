@@ -198,6 +198,7 @@ $cmd = $exedir."Xvnc :$displayNumber";
 $cmd .= " -desktop " . &quotedString($desktopName);
 $cmd .= " -httpd $vncClasses";
 $cmd .= " -auth $xauthorityFile";
+$cmd .= " -dontdisconnect";
 $cmd .= " -geometry $geometry" if ($geometry);
 $cmd .= " -depth $depth" if ($depth);
 $cmd .= " -pixelformat $pixelformat" if ($pixelformat);
