@@ -177,8 +177,8 @@ static XtResource appDataResourceList[] = {
   {"passwordDialog", "PasswordDialog", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, passwordDialog), XtRImmediate, (XtPointer) False},
 
-  {"encodings", "Encodings", XtRString, sizeof(String),
-   XtOffsetOf(AppData, encodingsString), XtRImmediate, (XtPointer) 0},
+  {"useCopyRect", "UseCopyRect", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, useCopyRect), XtRImmediate, (XtPointer) True},
 
   {"useSharedMemory", "UseSharedMemory", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, useShm), XtRImmediate, (XtPointer) True},
@@ -240,7 +240,7 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-noraiseonbeep", "*raiseOnBeep",        XrmoptionNoArg,  "False"},
   {"-passwd",        "*passwordFile",       XrmoptionSepArg, 0},
   {"-user",          "*userLogin",          XrmoptionSepArg, 0},
-  {"-encodings",     "*encodings",          XrmoptionSepArg, 0},
+  {"-nocopyrect",    "*useCopyRect",        XrmoptionNoArg,  "False"},
   {"-subsamp",       "*compressLevel",      XrmoptionSepArg, 0},
   {"-quality",       "*qualityLevel",       XrmoptionSepArg, 0},
   {"-nocursorshape", "*useRemoteCursor",    XrmoptionNoArg,  "False"},
@@ -314,7 +314,7 @@ usage(void)
 	  "        -noraiseonbeep\n"
 	  "        -passwd <PASSWD-FILENAME> (standard VNC authentication)\n"
 	  "        -user <USERNAME> (Unix login authentication)\n"
-	  "        -encodings <ENCODING-LIST> (e.g. \"tight copyrect\")\n"
+	  "        -nocopyrect\n"
 	  "        -subsamp <SUBSAMPLING-VALUE> (0=None, 1=4:1:1, 2=4:2:2)\n"
 	  "        -quality <JPEG-QUALITY-VALUE> (1..100: 1-low, 100-high)\n"
 	  "        -nocursorshape\n"

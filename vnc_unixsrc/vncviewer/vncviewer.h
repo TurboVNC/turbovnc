@@ -74,7 +74,7 @@ typedef struct {
   Bool grabKeyboard;
   Bool raiseOnBeep;
 
-  String encodingsString;
+  Bool useCopyRect;
 
   Bool useShm;
 

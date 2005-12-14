@@ -712,6 +712,7 @@ SetFormatAndEncodings()
   se->type = rfbSetEncodings;
   se->nEncodings = 0;
 
+#if 0
   if (appData.encodingsString) {
     char *encStr = appData.encodingsString;
     int encStrLen;
@@ -764,16 +765,10 @@ SetFormatAndEncodings()
     }
   }
   else {
-    if (SameMachine(rfbsock)) {
-      if (!tunnelSpecified) {
-	fprintf(stderr,"Same machine: preferring tight encoding\n");
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingTight);
-      } else {
-	fprintf(stderr,"Tunneling active: preferring tight encoding\n");
-      }
-    }
+#endif
 
-    encs[se->nEncodings++] = Swap32IfLE(rfbEncodingCopyRect);
+    if (appData.useCopyRect)
+	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingCopyRect);
     encs[se->nEncodings++] = Swap32IfLE(rfbEncodingTight);
 //    encs[se->nEncodings++] = Swap32IfLE(rfbEncodingHextile);
 //    encs[se->nEncodings++] = Swap32IfLE(rfbEncodingZlib);
@@ -797,7 +792,7 @@ SetFormatAndEncodings()
     }
 
     encs[se->nEncodings++] = Swap32IfLE(rfbEncodingLastRect);
-  }
+//  }
 
   len = sz_rfbSetEncodingsMsg + se->nEncodings * 4;
 
