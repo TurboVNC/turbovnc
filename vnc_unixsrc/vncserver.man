@@ -17,7 +17,7 @@ vncserver \- a wrapper to launch an X server for VNC.
 .SH SYNOPSIS
 \fBvncserver\fR
 [:\fIdisplay\fR] [\-geometry \fIwidth\fRx\fIheight\fR]
-[\-pixelformat rgb\fI888\fR|bgr\fI888\fR] [\-name \fIdesktop\-name\fR]
+[\-pixelformat rgb888|bgr888] [\-name \fIdesktop\-name\fR]
 [\fIXvnc\-options\fR...]
 .TP
 \fBvncserver\fR \-kill :\fIdisplay\fR
