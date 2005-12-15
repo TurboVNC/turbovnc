@@ -47,6 +47,9 @@ static Bool HandleTight32(int rx, int ry, int rw, int rh);
 static void ReadConnFailedReason(void);
 static long ReadCompactLen (void);
 
+extern void UpdateQual(void);
+extern Bool HandleCursorPos(int, int);
+
 int rfbsock;
 char *desktopName;
 rfbPixelFormat myFormat;
@@ -453,7 +456,7 @@ PerformAuthenticationTight(void)
 
   /* Prefer Unix login authentication if a user name was given. */
   if (appData.userLogin && CapsIsEnabled(authCaps, rfbAuthUnixLogin)) {
-    authScheme = Swap32IfLE(rfbAuthUnixLogin);
+    authScheme = Swap32IfLE((unsigned int)rfbAuthUnixLogin);
     if (!WriteExact(rfbsock, (char *)&authScheme, sizeof(authScheme)))
       return False;
     return AuthenticateUnixLogin();

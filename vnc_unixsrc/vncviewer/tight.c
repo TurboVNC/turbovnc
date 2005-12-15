@@ -547,7 +547,7 @@ DecompressJpegRectBPP(int x, int y, int w, int h)
 {
   int compressedLen;
   CARD8 *compressedData;
-  unsigned char *dstptr;
+  char *dstptr;
   int ps, flags=0;
 
   compressedLen = (int)ReadCompactLen();
@@ -582,7 +582,7 @@ DecompressJpegRectBPP(int x, int y, int w, int h)
 
   dstptr=&image->data[image->bytes_per_line*y+x*ps];
   if(tjDecompress(tjhnd, (unsigned char *)compressedData, (unsigned long)compressedLen,
-    dstptr, w, image->bytes_per_line, h, ps, flags)==-1) {
+    (unsigned char *)dstptr, w, image->bytes_per_line, h, ps, flags)==-1) {
     fprintf(stderr, "TurboJPEG error: %s\n", tjGetErrorStr());
     return False;
   }
