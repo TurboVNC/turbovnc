@@ -89,9 +89,9 @@ vncEncryptAndStorePasswd2(char *passwd, char *passwdViewOnly, char *fname)
       fp = stdout;
     }
 
-    strncpy(encryptedPasswd, passwd, 8);
+    strncpy((char *)encryptedPasswd, passwd, 8);
     if (passwdViewOnly != NULL)
-	strncpy(encryptedPasswd + 8, passwdViewOnly, 8);
+	strncpy((char *)encryptedPasswd + 8, passwdViewOnly, 8);
 
     /* Do encryption in-place - this way we overwrite our copies of
        plaintext passwords. */
@@ -177,14 +177,14 @@ vncDecryptPasswdFromFile2(char *fname,
 
     /* Decoding first (full-control) password */
     if (passwdFullControl != NULL) {
-	des(passwd, passwd);
+	des((unsigned char *)passwd, (unsigned char *)passwd);
 	memcpy(passwdFullControl, passwd, 8);
 	passwdFullControl[8] = '\0';
     }
 
     /* Decoding second (view-only) password if available */
     if (i == 16 && passwdViewOnly != NULL) {
-	des(&passwd[8], &passwd[8]);
+	des((unsigned char *)(&passwd[8]), (unsigned char *)(&passwd[8]));
 	memcpy(passwdViewOnly, &passwd[8], 8);
 	passwdViewOnly[8] = '\0';
     }
