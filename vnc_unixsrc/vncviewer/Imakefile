@@ -10,7 +10,7 @@ EXTRA_LDOPTIONS = -m32 -L/usr/X11R6/lib
 XCOMM Shared memory support works OK on x86 linux, not tested elsewhere but
 XCOMM seems to cause problems on Digital Unix.
 
-#if defined(i386Architecture) && defined(LinuxArchitecture)
+#if defined(LinuxArchitecture) || defined(SunArchitecture)
 DEFINES = -DMITSHM
 #endif
 
@@ -24,7 +24,11 @@ XCOMM Avoid linking with different libjpeg in /usr/shlib under Tru64.
 JPEG_LIB = /usr/local/lib/libjpeg.a
 #else
 #ifdef SunArchitecture
+#ifdef i386Architecture
+JPEG_LIB = -L/usr/local/lib -R/opt/SUNWtvnc/lib -L../../../vgl/solx86/vnc/lib -lturbojpeg
+#else
 JPEG_LIB = -L/usr/local/lib -R/opt/SUNWtvnc/lib -L../../../vgl/solaris/vnc/lib -lturbojpeg
+#endif
 #else
 JPEG_LIB = -L/usr/local/lib -lturbojpeg
 #endif
