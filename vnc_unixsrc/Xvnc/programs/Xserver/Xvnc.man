@@ -10,15 +10,15 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "August 2002" "" "TightVNC"
+.TH Xvnc 1 "December 2005" "" "TurboVNC"
 .SH NAME
 Xvnc \- an X server providing VNC connectivity
 .SH SYNOPSIS
 .TP
 \fBXvnc\fR
 [:\fIdisplay\fR]
-[\-geometry \fIwidth\fRx\fIheight\fR] [\-depth \fIdepth\fR]
-[\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-udpinputport \fIport\fR]
+[\-geometry \fIwidth\fRx\fIheight\fR]
+[\-pixelformat rgb888|bgr888] [\-udpinputport \fIport\fR]
 [\-rfbport \fIport\fR] [\-rfbwait \fItime\fR] [\-nocursor]
 [\-rfbauth \fIpasswd-file\fR] [\-httpd \fIdir\fR]
 [\-httpport \fIport\fR] [\-deferupdate \fItime\fR]
@@ -27,117 +27,113 @@ Xvnc \- an X server providing VNC connectivity
 [\-interface ipaddr] [\-inetd] [\-compatiblekbd]
 [\fIX-options\fR...]
 .SH DESCRIPTION
-\fBXvnc\fR is a VNC (Virtual Network Computing) server. It acts like
-an X server with a virtual display. The display can be seen by a VNC
-viewer application, which may be running on a different machine: see
-\fBvncviewer\fR(1). Xvnc is built inside the source code tree of
-XFree86, and shares many options with it.
+\fBXvnc\fR is a VNC (Virtual Network Computing) server for Unix and Linux
+systems. It acts like a normal X server, except that it sends its output
+to a virtual rather than a physical display. Remote machines can connect
+to the VNC server and see/control the output of this virtual display
+[see \fBvncviewer\fR(1).] Xvnc is built using the XFree86 source code and
+shares many options with it.
 
-Normally, you don't need to start Xvnc manually; use the
+Normally, you don't need to start Xvnc manually-- use the
 \fBvncserver\fR(1) wrapper script instead. This script sets reasonable
-defaults for Xvnc session, checks many error conditions etc.
+defaults for the Xvnc session, checks many error conditions, etc.
 
 Please read the \fBBUGS\fR section if you plan to use VNC on an
 untrusted network.
 .SH OPTIONS
 Xvnc supports many standard X server options and a number of
-VNC-specific options. To see what standard X server options are
+VNC-specific options. To see which standard X server options are
 supported, please look at the \fBXvnc\fR \fI\-help\fR output and read
 the \fBXserver\fR(1) manual page for details on those options.
 
 The VNC-specific options are as follows:
 .TP
 \fB\-geometry\fR \fIwidth\fR\fBx\fR\fIheight\fR
-Set desktop width and height.
+Set width and height of the virtual desktop.
 .TP
-\fB\-depth\fR \fIdepth\fR
-Set the colour depth of the visual to provide, in bits per pixel. Must
-be a value between 8 and 32.
+\fB\-pixelformat\fR \fBrgb888\fR
+On Big Endian systems (e.g. Sparc), this causes the TurboVNC server to
+use ARGB pixel ordering for the virtual desktop instead of the default
+of ABGR.
 .TP
-\fB\-pixelformat\fR \fBrgb\fR\fINNN\fR|\fBbgr\fR\fINNN\fR
-Set colour format for pixels representation. The viewer can do the
-conversion to any other pixel format, but it is faster if the depth
-and pixel format of the server is the same as the equivalent values on
-the viewer display.
+\fB\-pixelformat\fR \fBbgr888\fR
+On Little Endian systems (e.g. x86), this causes the TurboVNC server
+to use RGBA pixel ordering for the virtual desktop instead of the
+default of BGRA.
 .TP
 \fB\-udpinputport\fR \fIport\fR
 UDP port for keyboard/pointer data.
 .TP
 \fB\-rfbport\fR \fIport\fR
-TCP port for RFB protocol. The RFB protocol is used for commnunication
-between VNC server and clients.
+TCP port that the server should use when listening for connections from normal VNC
+clients.
 .TP
 \fB\-rfbwait\fR \fItime\fR
-Maximum time, in milliseconds, to wait for an RFB client (VNC viewer).
+Maximum time, in milliseconds, to wait for an RFB client (VNC viewer.)
 .TP
 \fB\-nocursor\fR
-Don't put up a pointer cursor on the desktop.
+Don't display a mouse pointer on the remote desktop.
 .TP
 \fB\-rfbauth\fR \fIpasswd-file\fR
-Use authentication on RFB protocol from the specified file. The
+Use standard VNC authentication and read the VNC password from the specified file. The
 \fIpasswd-file\fR can be created using the \fBvncpasswd\fR(1) utility.
 .TP
 \fB\-httpd\fR \fIdir\fR
-Serve files via HTTP protocol from the specified directory. Normally,
-Java viewer classes are stored in such directory.
+Specify directory where the Java viewer classes are located.
 .TP
 \fB\-httpport\fR \fIport\fR
-TCP port on which Xvnc should listen for incoming HTTP connections (to
-allow access to the desktop from any Java-capable browser).
+TCP port that the server should use when listening for connections from Java-enabled
+web browsers.
 .TP
 \fB\-deferupdate\fR \fItime\fR
-Time in milliseconds, to defer screen updates (default 40). Deferring
+Time, in milliseconds, for which to defer screen updates (default: 40). Deferring
 updates helps to coalesce many small desktop changes into a few larger
-updates thus saving network bandwidth.
+updates, thus saving network bandwidth.
 .TP
 \fB\-economictranslate\fR
 Use less memory-hungry pixel format translation.
-.TP
-\fB\-lazytight\fR
-Disable the "gradient" filter in Tight encoding (TightVNC-specific).
-The "gradient" filter often helps to improve data compression ratios,
-but may slow down the server performance. Please note that this filter
-is never used when a client enables JPEG compression in the Tight
-encoding.
 .TP
 \fB\-desktop\fR \fIname\fR
 Set VNC desktop name ("x11" by default).
 .TP
 \fB\-alwaysshared\fR
-Always treat new clients as shared, never disconnect existing client
-on a new client connection.
+Always treat new connections as shared. Never disconnect existing users
+or deny new connections when a new user tries to connect to a VNC session that
+is already occupied.
 .TP
 \fB\-nevershared\fR
-Never treat new clients as shared, do not allow several simultaneous
-client connections.
+Never treat new connections as shared. Do not allow simultaneous user
+connections to the same VNC session.
 .TP
 \fB\-dontdisconnect\fR
-Don't disconnect existing clients when a new non-shared connection
-comes in, refuse new connection instead.
+Don't disconnect existing users when a new non-shared connection is
+established. Instead, refuse the new connection. The vncserver script
+for TurboVNC sets this as the default, but you can modify the script
+if you want to change the behavior.
 .TP
 \fB\-viewonly\fR
-Don't accept keboard and pointer events from clients. All clients will
+Don't accept keyboard and pointer events from clients. All clients will
 be able to see the desktop but won't be able to control it.
 .TP
 \fB\-localhost\fR
 Only allow loopback connections from localhost. This option is useful
 in conjunction with SSH tunneling.
+
 .TP
 \fB\-interface\fR \fIipaddr\fR
-Listen for client connections only on the network interface with given
-\fIipaddr\fR.
+Listen only on the network interface with the given \fIipaddr\fR.
 .TP
 \fB\-inetd\fR
-Xvnc is launched by inetd. This option causes \fBXvnc\fR to redirect
+If Xvnc is launched by inetd, this option causes \fBXvnc\fR to redirect
 network input/output to stdin/stdout.
 .TP
 \fB\-compatiblekbd\fR
 Set META and ALT keys to the same X modifier flag, as in the original
-version of Xvnc by AT&T labs (TightVNC-specific).
+version of Xvnc by AT&T labs (TightVNC\-/TurboVNC\-specific.)
 .SH BUGS
-There are many security problems in current Xvnc implementation. It's
-recommended to restrict network access to Xvnc servers from untrusted
-network adresses. Probably, the best way to secure Xvnc server is to
+There are many security problems in the current Xvnc implementation. It is
+recommended that you restrict network access to Xvnc servers from untrusted
+network addresses. Probably the best way to secure an Xvnc server is to
 allow only loopback connections from the server machine (the
 \fI\-localhost\fR option) and to use SSH tunneling for remote access
 to the Xvnc server. For details on SSH tunneling, see
@@ -146,8 +142,9 @@ to the Xvnc server. For details on SSH tunneling, see
 \fBvncserver\fR(1), \fBvncviewer\fR(1), \fBvncpasswd\fR(1),
 \fBvncconnect\fR(1), \fBsshd\fR(1)
 .SH AUTHORS
-Original VNC was developed in AT&T Laboratories Cambridge. TightVNC
-additions was implemented by Constantin Kaplinsky. Many other people
+VNC was originally developed at AT&T Laboratories Cambridge. TightVNC
+additions were implemented by Constantin Kaplinsky. TurboVNC, based
+on TightVNC, is provided by The VirtualGL Project. Many other people
 participated in development, testing and support.
 
 \fBMan page authors:\fR
@@ -157,3 +154,5 @@ Marcus Brinkmann <Marcus.Brinkmann@ruhr-uni-bochum.de>,
 Tim Waugh <twaugh@redhat.com>,
 .br
 Constantin Kaplinsky <const@ce.cctpu.edu.ru>
+.br
+Darrell Commander <dcommander@users.sourceforge.net>
