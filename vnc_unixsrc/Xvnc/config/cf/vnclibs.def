@@ -12,7 +12,11 @@ VNCLIBS = $(TOP)/../libvncauth/libvncauth.a
 VNCSYSLIBS = /usr/local/lib/libjpeg.a /usr/local/lib/libz.a -lcrypt
 #else
 #ifdef SunArchitecture
+#ifdef i386Architecture
+VNCSYSLIBS = -L/usr/local/lib -R/opt/SUNWtvnc/lib -L$(TOP)/../../../vgl/solx86/vnc/lib -lturbojpeg -lz -lcrypt
+#else
 VNCSYSLIBS = -L/usr/local/lib -R/opt/SUNWtvnc/lib -L$(TOP)/../../../vgl/solaris/vnc/lib -lturbojpeg -lz -lcrypt
+#endif
 #else
 VNCSYSLIBS = -L/usr/local/lib -lturbojpeg -lz -lcrypt
 #endif
