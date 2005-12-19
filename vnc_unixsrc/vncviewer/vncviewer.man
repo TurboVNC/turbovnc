@@ -141,6 +141,24 @@ the viewer is running in full\-screen mode.
 \fB\-autopass\fR
 Read a plain-text password from stdin. This option has no effect if
 Unix login authentication is enabled.
+.TP
+\fB\-singlebuffer\fR
+Normally, TurboVNC will wait until a window has finished redrawing
+on the server before it redraws the window on the client. This is
+called "double buffering", and it prevents tearing artifacts when
+a 3D or video application switches frames. Disabling double
+buffering makes TurboVNC behave more like other VNC implementations.
+Normally, you shouldn't need to change this setting unless
+something isn't working right.
+.TP
+\fB\-broadband\fR
+Set the JPEG quality to a relatively low level, which will provide
+optimum performance on low-bandwidth connections by sacrificing
+image quality. The "broadband" quality preset maintains a
+usable image quality, but it will produce visible compression artifacts.
+You may need to increase the quality if you are doing work that
+requires a high level of detail. You can fine-tune the image quality
+by using TurboVNC's F8 popup menu.
 .SH RESOURCES
 X resources that \fBvncviewer\fR knows about, aside from the
 normal Xt resources, are as follows:
@@ -182,6 +200,10 @@ Equivalent of the \fB\-subsamp\fR option (TurboVNC\-specific).
 .TP
 .B qualityLevel
 Equivalent of the \fB\-quality\fR option (TurboVNC\-specific).
+.TP
+.B doubleBuffer
+If set to false, this is the equivalent of the \fB\-singlebuffer\fR option. Default
+true. (TurboVNC\-specific)
 .TP
 .B useRemoteCursor
 If set to false, this is the equivalent of the \fB\-nocursorshape\fR option.
