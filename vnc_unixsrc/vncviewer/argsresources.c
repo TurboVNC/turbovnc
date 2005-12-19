@@ -246,7 +246,8 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-nocursorshape", "*useRemoteCursor",    XrmoptionNoArg,  "False"},
   {"-x11cursor",     "*useX11Cursor",       XrmoptionNoArg,  "True"},
   {"-singlebuffer",  "*doubleBuffer",       XrmoptionNoArg,  "False"},
-  {"-autopass",      "*autoPass",           XrmoptionNoArg,  "True"}
+  {"-autopass",      "*autoPass",           XrmoptionNoArg,  "True"},
+  {"-broadband",     "*qualityLevel",       XrmoptionNoArg,  "-1"}
 
 };
 
@@ -321,8 +322,9 @@ usage(void)
 	  "        -x11cursor\n"
 	  "        -autopass\n"
 	  "        -singlebuffer\n"
+	  "        -broadband\n"
 	  "\n"
-	  "Option names may be abbreviated, e.g. -bgr instead of -bgr233.\n"
+	  "Option names may be abbreviated, e.g. -q instead of -quality.\n"
 	  "See the manual page for more information."
 	  "\n", programName, programName, programName, programName);
   exit(1);
@@ -347,6 +349,13 @@ GetArgsAndResources(int argc, char **argv)
 
   XtGetApplicationResources(toplevel, &appData, appDataResourceList,
 			    XtNumber(appDataResourceList), 0, 0);
+
+  /* -broadband switch was used */
+
+  if(appData.qualityLevel==-1) {
+    appData.qualityLevel=30;
+    appData.compressLevel=1;
+  }
 
   /* Add our actions to the actions table so they can be used in widget
      resource specs */
