@@ -3,6 +3,7 @@ Name:      turbovnc
 Version:   %{_version}
 Release:   %{_build}
 URL:       http://virtualgl.sourceforge.net
+#-->Source0: http://prdownloads.sourceforge.net/virtualgl/turbovnc-%{version}-unixsrc.tar.gz
 License:   GPL
 Group:     User Interface/Desktops
 Requires:  bash >= 2.0
@@ -19,6 +20,17 @@ machine where it is running, but from anywhere on the Internet and
 from a wide variety of machine architectures.  TurboVNC is a sleek and
 fast VNC distribution, containing a high-performance implementation of
 tight JPEG encoding designed to work in conjunction with VirtualGL.
+#-->%prep
+#-->%setup -q -n vnc/vnc_unixsrc
+
+#-->%build
+#-->xmkmf
+#-->make World
+#-->cd Xvnc
+#-->./configure
+#-->make
+#-->cd ..
+
 
 %install
 rm -rf %{buildroot}

@@ -1,0 +1,28 @@
+#!/bin/bash
+
+VERSION=0.3
+BUILD=1
+TARGET=
+if [ `uname -m` = 'x86_64' ];then
+	TARGET='--target i386'
+fi
+
+if [ -d ./rpms ]; then rm -rf ./rpms; fi
+mkdir -p ./rpms/RPMS
+mkdir -p ./rpms/SRPMS
+mkdir -p ./rpms/BUILD
+mkdir -p ./rpms/SOURCES
+mkdir -p ./rpms/SPECS
+cp turbovnc-$VERSION-unixsrc.tar.gz ./rpms/SOURCES || exit 1
+cat turbovnc.spec | sed s/%{_version}/$VERSION/g | sed s/%{_build}/$BUILD/g \
+	| sed s@%{_bindir}@/opt/TurboVNC/bin@g \
+	| sed s@%{_mandir}@/opt/TurboVNC/man@g \
+	| sed s@%{_datadir}@/opt/TurboVNC@g \
+	| sed s/#--\>//g > ./rpms/SPECS/turbovnc.spec || exit 1
+rpmbuild -ba --define "_topdir `pwd`/rpms" $TARGET ./rpms/SPECS/turbovnc.spec \
+	|| exit 1
+
+mv rpms/RPMS/i386/turbovnc-$VERSION-$BUILD.i386.rpm . || exit 1
+mv rpms/SRPMS/turbovnc-$VERSION-$BUILD.src.rpm . || exit 1
+
+rm -rf rpms/
