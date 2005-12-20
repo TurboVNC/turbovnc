@@ -7,11 +7,10 @@ URL:       http://virtualgl.sourceforge.net
 License:   GPL
 Group:     User Interface/Desktops
 Requires:  bash >= 2.0
-Prereq:    /sbin/chkconfig /sbin/service /etc/init.d turbojpeg >= 1.0
+Prereq:    /sbin/chkconfig /etc/init.d turbojpeg >= 1.0
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
-BuildPrereq: /usr/bin/perl tcp_wrappers turbojpeg
+BuildPrereq: /usr/bin/perl turbojpeg
 BuildRequires: zlib-devel
-ExclusiveArch: i386 alpha sparc ppc s390 s390x ia64
 
 %description
 Virtual Network Computing (VNC) is a remote display system which
