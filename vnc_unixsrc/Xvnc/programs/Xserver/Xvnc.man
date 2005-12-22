@@ -22,7 +22,7 @@ Xvnc \- an X server providing VNC connectivity
 [\-rfbport \fIport\fR] [\-rfbwait \fItime\fR] [\-nocursor]
 [\-rfbauth \fIpasswd-file\fR] [\-httpd \fIdir\fR]
 [\-httpport \fIport\fR] [\-deferupdate \fItime\fR]
-[\-economictranslate] [\-lazytight] [\-desktop \fIname\fR] [\-alwaysshared]
+[\-economictranslate] [\-desktop \fIname\fR] [\-alwaysshared]
 [\-nevershared] [\-dontdisconnect] [\-viewonly] [\-localhost]
 [\-interface ipaddr] [\-inetd] [\-compatiblekbd]
 [\fIX-options\fR...]
