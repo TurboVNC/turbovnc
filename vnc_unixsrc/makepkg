@@ -126,8 +126,11 @@ mkdir -p $pkgdir/vnc
 mkdir -p $pkgdir/man/man1
 
 ./vncinstall $pkgdir/bin $pkgdir/man
-cp ../../vgl/solaris/vnc/lib/libturbojpeg.so $pkgdir/lib
-
+if [ `uname -m` = i86pc ]; then
+	cp ../../vgl/solx86/vnc/lib/libturbojpeg.so $pkgdir/lib
+else
+	cp ../../vgl/solaris/vnc/lib/libturbojpeg.so $pkgdir/lib
+fi
 cp -prf classes $pkgdir/vnc
 
 cd $pkgtmpdir
