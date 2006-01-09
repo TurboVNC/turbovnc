@@ -115,6 +115,7 @@ f none SUNWtvnc/vnc/classes/SessionRecorder.class 0644 root bin
 f none SUNWtvnc/vnc/classes/SocketFactory.class 0644 root bin
 f none SUNWtvnc/vnc/classes/VncCanvas.class 0644 root bin
 f none SUNWtvnc/vnc/classes/VncViewer.class 0644 root bin
+f none SUNWtvnc/vnc/classes/VncViewer.jar 0644 root bin
 f none SUNWtvnc/vnc/classes/index.vnc 0644 root bin
 EOF
 
