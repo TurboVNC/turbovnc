@@ -120,6 +120,9 @@ fi
 %{_mandir}/man1/vncpasswd.1*
 
 %changelog
+* Fri May 19 2006 Darrell Commander <dcommander@users.sourceforge.net>
+- TurboVNC 0.3.1
+
 * Mon Dec 19 2005 Darrell Commander <dcommander@users.sourceforge.net>
 - TurboVNC 0.3
 
