@@ -64,10 +64,16 @@ char *fallback_resources[] = {
   "*passwordDialog.dialog.value.translations: #override\\n\
      <Key>Return: PasswordDialogDone()",
 
-  "*qualLabel.label: JPEG Quality Slider\\n[Use middle mouse button]",
+  "*qualLabel.label: JPEG Quality",
   "*qualBar.length: 100",
   "*qualBar.width: 130",
   "*qualBar.orientation: horizontal",
+  "*qualBar.translations: #override\\n\
+     <Btn1Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\\n\
+     <Btn1Motion>: MoveThumb() NotifyThumb()\\n\
+     <Btn3Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\\n\
+     <Btn3Motion>: MoveThumb() NotifyThumb()",
+    
   "*qualText.label: 000",
 
   "*subsampLabel.label: JPEG Subsampling\\n[4:1:1 = fastest]\\n[None = best quality]",
