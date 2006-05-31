@@ -40,7 +40,7 @@ BEGIN
                     IDC_STATIC,134,103,185,28
     LTEXT           "Based on WinVNC 3.3.3r9 by James Weatherall\nCopyright (C) 1998-2001 AT&&T Laboratories Cambridge\nhttp://www.uk.research.att.com/vnc/",
                     IDC_STATIC,134,73,185,29
-    LTEXT           "TurboVNC Server version 0.3\nhttp://virtualgl.sourceforge.net",
+    LTEXT           "TurboVNC Server version 0.3.1\nhttp://virtualgl.sourceforge.net",
                     IDC_STATIC,134,7,185,18
 END
 

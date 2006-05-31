@@ -221,7 +221,7 @@ BEGIN
                     IDC_STATIC,135,89,190,28
     LTEXT           "Based on VNC Viewer 3.3.3r3 by Quentin Stafford-Fraser\nCopyright (C) 1999 AT&&T Laboratories Cambridge\nhttp://www.uk.research.att.com/vnc/",
                     IDC_STATIC,135,59,190,29
-    LTEXT           "TurboVNC Viewer version 0.3\nhttp://virtualgl.sourceforge.net",
+    LTEXT           "TurboVNC Viewer version 0.3.1\nhttp://virtualgl.sourceforge.net",
                     IDC_STATIC,135,7,190,18
 END
 

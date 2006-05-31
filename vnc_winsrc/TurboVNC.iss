@@ -3,8 +3,8 @@
 
 [Setup]
 AppName=TurboVNC
-AppVerName=TurboVNC 0.3
-AppVersion=0.3
+AppVerName=TurboVNC 0.3.1
+AppVersion=0.3.1
 AppPublisher=The VirtualGL Project
 AppPublisherURL=http://VirtualGL.sourceforge.net
 AppSupportURL=http://VirtualGL.sourceforge.net

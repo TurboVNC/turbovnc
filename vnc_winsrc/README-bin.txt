@@ -1,5 +1,5 @@
-TurboVNC 0.3 Binary Distribution for Windows platforms
-======================================================
+TurboVNC 0.3.1 Binary Distribution for Windows platforms
+========================================================
 
 This software is a stripped-down version of TightVNC 1.3, supporting only
 tight encoding and true color displays.  The tight encoding features are
