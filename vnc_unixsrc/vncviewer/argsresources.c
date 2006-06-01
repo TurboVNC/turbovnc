@@ -259,9 +259,7 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-singlebuffer",  "*doubleBuffer",       XrmoptionNoArg,  "False"},
   {"-autopass",      "*autoPass",           XrmoptionNoArg,  "True"},
   {"-broadband",     "*qualityLevel",       XrmoptionNoArg,  "-1"},
-  {"-hispeed",       "*qualityLevel",       XrmoptionNoArg,  "-2"},
   {"-wan",           "*optimizeForWAN",     XrmoptionNoArg,  "True"},
-  {"-lan",           "*optimizeForWAN",     XrmoptionNoArg,  "False"}
 
 };
 
@@ -336,10 +334,8 @@ usage(void)
 	  "        -x11cursor\n"
 	  "        -autopass\n"
 	  "        -singlebuffer\n"
-	  "        -lan\n"
 	  "        -wan\n"
 	  "        -broadband (preset for -wan -subsamp 1 -quality 30)\n"
-	  "        -hispeed (preset for -lan -subsamp 0 -quality 95)\n"
 	  "\n"
 	  "Option names may be abbreviated, e.g. -q instead of -quality.\n"
 	  "See the manual page for more information."
@@ -373,14 +369,6 @@ GetArgsAndResources(int argc, char **argv)
     appData.qualityLevel=30;
     appData.compressLevel=1;
     appData.optimizeForWAN=1;
-  }
-
-  /* -hispeed switch was used */
-
-  if(appData.qualityLevel==-2) {
-    appData.qualityLevel=95;
-    appData.compressLevel=0;
-    appData.optimizeForWAN=0;
   }
 
   /* Add our actions to the actions table so they can be used in widget
