@@ -385,6 +385,7 @@ private:
 
 	tjhandle j;
 	fbx_struct fb;
+	bool m_optimizeForWAN;
 
 	/* For double buffering */
 	UpdateList *list, *node, *tail;
