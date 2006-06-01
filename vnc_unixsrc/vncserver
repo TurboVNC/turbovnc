@@ -262,6 +262,7 @@ if (-e "/tmp/.X11-unix/X$displayNumber") {
     $ENV{DISPLAY}= "$host:$displayNumber";
 }
 $ENV{VNCDESKTOP}= $desktopName;
+$ENV{VGL_COMPRESS}= "0";
 
 system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1 &");
 
