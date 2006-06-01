@@ -2252,6 +2252,8 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
 		return 0;
 	case WM_REGIONUPDATED:
 		_this->DoBlit();
+		if(!_this->m_opts.m_optimizeForWAN)
+			_this->SendAppropriateFramebufferUpdateRequest();
 		return 0;
 	case WM_PAINT:
 		_this->DoBlit();		
@@ -3053,7 +3055,7 @@ void ClientConnection::ReadScreenUpdate() {
 	
 	if (m_opts.m_DoubleBuffer) list = NULL;
 
-	PostMessage(m_hwnd, WM_FBUPDATERECVD, 0, 0);
+	if (m_opts.m_optimizeForWAN) PostMessage(m_hwnd, WM_FBUPDATERECVD, 0, 0);
 
 	for (int i=0; i < sut.nRects; i++) {
 
