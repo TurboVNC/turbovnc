@@ -81,6 +81,8 @@ char *fallback_resources[] = {
   "*subsamp422.label: 4:2:2",
   "*subsamp444.label: None",
 
+  "*wanopt.label: Optimize for High-Latency Network",
+
   "*popup.title: TurboVNC popup",
   "*popup*background: grey",
   "*popup*font: -*-helvetica-bold-r-*-*-16-*-*-*-*-*-*-*",
@@ -132,11 +134,11 @@ char *fallback_resources[] = {
   "*popup*button8.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: SendRFBEvent(key,F8) HidePopup()",
 
-  "*popup*button9.label: Qual Preset: Broadband/T1",
+  "*popup*button9.label: Preset: Broadband/T1",
   "*popup*button9.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualLow()",
 
-  "*popup*button10.label: Qual Preset: LAN (default)",
+  "*popup*button10.label: Preset: LAN (default)",
   "*popup*button10.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualHigh()",
 
@@ -228,6 +230,9 @@ static XtResource appDataResourceList[] = {
   {"doubleBuffer", "DoubleBuffer", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, doubleBuffer), XtRImmediate, (XtPointer) True},
 
+  {"optimizeForWAN", "OptimizeForWAN", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, optimizeForWAN), XtRImmediate, (XtPointer) False},
+
   {"autoPass", "AutoPass", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, autoPass), XtRImmediate, (XtPointer) False}
 };
@@ -253,7 +258,10 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-x11cursor",     "*useX11Cursor",       XrmoptionNoArg,  "True"},
   {"-singlebuffer",  "*doubleBuffer",       XrmoptionNoArg,  "False"},
   {"-autopass",      "*autoPass",           XrmoptionNoArg,  "True"},
-  {"-broadband",     "*qualityLevel",       XrmoptionNoArg,  "-1"}
+  {"-broadband",     "*qualityLevel",       XrmoptionNoArg,  "-1"},
+  {"-hispeed",       "*qualityLevel",       XrmoptionNoArg,  "-2"},
+  {"-wan",           "*optimizeForWAN",     XrmoptionNoArg,  "True"},
+  {"-lan",           "*optimizeForWAN",     XrmoptionNoArg,  "False"}
 
 };
 
@@ -305,7 +313,7 @@ void
 usage(void)
 {
   fprintf(stderr,
-	  "TurboVNC viewer version 0.3\n"
+	  "TurboVNC viewer version 0.3.1\n"
 	  "\n"
 	  "Usage: %s [<OPTIONS>] [<HOST>][:<DISPLAY#>]\n"
 	  "       %s [<OPTIONS>] [<HOST>][::<PORT#>]\n"
@@ -328,7 +336,10 @@ usage(void)
 	  "        -x11cursor\n"
 	  "        -autopass\n"
 	  "        -singlebuffer\n"
-	  "        -broadband\n"
+	  "        -lan\n"
+	  "        -wan\n"
+	  "        -broadband (preset for -wan -subsamp 1 -quality 30)\n"
+	  "        -hispeed (preset for -lan -subsamp 0 -quality 95)\n"
 	  "\n"
 	  "Option names may be abbreviated, e.g. -q instead of -quality.\n"
 	  "See the manual page for more information."
@@ -361,6 +372,15 @@ GetArgsAndResources(int argc, char **argv)
   if(appData.qualityLevel==-1) {
     appData.qualityLevel=30;
     appData.compressLevel=1;
+    appData.optimizeForWAN=1;
+  }
+
+  /* -hispeed switch was used */
+
+  if(appData.qualityLevel==-2) {
+    appData.qualityLevel=95;
+    appData.compressLevel=0;
+    appData.optimizeForWAN=0;
   }
 
   /* Add our actions to the actions table so they can be used in widget

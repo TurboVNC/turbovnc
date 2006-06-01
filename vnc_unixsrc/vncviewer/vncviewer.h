@@ -102,6 +102,7 @@ typedef struct {
   Bool autoPass;
 
   Bool doubleBuffer;
+  Bool optimizeForWAN;
 
 } AppData;
 
