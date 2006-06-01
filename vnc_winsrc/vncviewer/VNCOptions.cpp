@@ -86,6 +86,7 @@ VNCOptions::VNCOptions()
 	m_jpegQualityLevel = 95;
 	m_requestShapeUpdates = true;
 	m_ignoreShapeUpdates = false;
+	m_optimizeForWAN = false;
 
 	LoadGenOpt();
 
@@ -155,6 +156,7 @@ VNCOptions& VNCOptions::operator=(VNCOptions& s)
 	m_jpegQualityLevel		= s.m_jpegQualityLevel;
 	m_requestShapeUpdates	= s.m_requestShapeUpdates;
 	m_ignoreShapeUpdates	= s.m_ignoreShapeUpdates;
+	m_optimizeForWAN		= s.m_optimizeForWAN;
 
 #ifdef UNDER_CE
 	m_palmpc			= s.m_palmpc;
@@ -315,6 +317,10 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			m_ignoreShapeUpdates = true;
 		} else if ( SwitchMatch(args[j], _T("fitwindow") )) {
 			m_FitWindow = true;
+		} else if ( SwitchMatch(args[j], _T("wan"))) {
+			m_optimizeForWAN = true;
+		} else if ( SwitchMatch(args[j], _T("lan"))) {
+			m_optimizeForWAN = false;
 		} else if ( SwitchMatch(args[j], _T("scale") )) {
 			if (++j == i) {
 				ArgError(_T("No scaling factor specified"));
@@ -494,6 +500,7 @@ void VNCOptions::Save(char *fname)
 	saveInt("noremotecursor",		m_ignoreShapeUpdates, fname);	
 	saveInt("subsampling", m_compressLevel,	fname);	
 	saveInt("quality", m_jpegQualityLevel,	fname);
+	saveInt("optimizeforwan",		m_optimizeForWAN, fname);	
 
 }
 
@@ -522,6 +529,8 @@ void VNCOptions::Load(char *fname)
 	m_scale_num =			readInt("scale_num",		m_scale_num,	fname);
 	m_requestShapeUpdates =	readInt("cursorshape",		m_requestShapeUpdates, fname) != 0;
 	m_ignoreShapeUpdates =	readInt("noremotecursor",	m_ignoreShapeUpdates, fname) != 0;
+	m_optimizeForWAN =		readInt("optimizeforwan",	m_optimizeForWAN, fname) != 0;
+
 	int level =				readInt("subsampling",	-1,				fname);
 	if (level != -1) {
 		m_compressLevel = level;
@@ -799,6 +808,9 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 			if(_this->m_jpegQualityLevel>=1 && _this->m_jpegQualityLevel<=100)
 				SetDlgItemInt(hwnd, IDC_STATIC_QUALITY, _this->m_jpegQualityLevel, FALSE);
 
+			HWND hOptimizeForWAN = GetDlgItem(hwnd, ID_SESSION_SET_WAN);
+			SendMessage(hOptimizeForWAN, BM_SETCHECK, _this->m_optimizeForWAN, 0);
+
 			HWND hRemoteCursor;
 			if (_this->m_requestShapeUpdates && !_this->m_ignoreShapeUpdates) {
 				hRemoteCursor = GetDlgItem(hwnd, IDC_CSHAPE_ENABLE_RADIO);
@@ -919,6 +931,10 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 				HWND hJpeg = GetDlgItem(hwnd, IDC_QUALITYLEVEL);
 				_this->m_jpegQualityLevel = SendMessage(hJpeg,TBM_GETPOS , 0, 0);
 				
+				HWND hOptimizeForWAN = GetDlgItem(hwnd, ID_SESSION_SET_WAN);
+				_this->m_optimizeForWAN =
+					(SendMessage(hOptimizeForWAN, BM_GETCHECK, 0, 0) == BST_CHECKED);
+
 				_this->m_requestShapeUpdates = false;
 				_this->m_ignoreShapeUpdates = false;
 				HWND hRemoteCursor = GetDlgItem(hwnd, IDC_CSHAPE_ENABLE_RADIO);
@@ -1257,6 +1273,7 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 	m_scale_num =			read(RegKey, "scale_num",         m_scale_num	         );
 	m_requestShapeUpdates =	read(RegKey, "cursorshape",       m_requestShapeUpdates	 ) != 0;
 	m_ignoreShapeUpdates =	read(RegKey, "noremotecursor",    m_ignoreShapeUpdates   ) != 0;
+	m_optimizeForWAN =		read(RegKey, "optimizeforwan",    m_optimizeForWAN       ) != 0;
 	int level		 =		read(RegKey, "subsampling",     -1				     );
 	if (level != -1) {
 		m_compressLevel = level;
@@ -1315,6 +1332,7 @@ int VNCOptions::read(HKEY hkey, char *name, int retrn)
 	save(RegKey, "noremotecursor",		m_ignoreShapeUpdates );	
 	save(RegKey, "subsampling", m_compressLevel );	
 	save(RegKey, "quality",	m_jpegQualityLevel );
+	save(RegKey, "optimizeforwan",		m_optimizeForWAN );
 	
 	
 	RegCloseKey(RegKey);

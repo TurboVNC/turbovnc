@@ -79,6 +79,7 @@ public:
 	bool	m_configSpecified;
 	TCHAR   m_configFilename[_MAX_PATH];
 	bool	m_restricted;
+	bool	m_optimizeForWAN;
 
 	// default connection options - can be set through Dialog
 	bool	m_ViewOnly;
