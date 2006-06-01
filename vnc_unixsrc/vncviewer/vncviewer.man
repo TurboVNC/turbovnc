@@ -151,9 +151,17 @@ buffering makes TurboVNC behave more like other VNC implementations.
 Normally, you shouldn't need to change this setting unless
 something isn't working right.
 .TP
+\fB\-wan\fR
+Enable protocol enhancements which will improve performance on
+high-latency, low-bandwidth networks (e.g. broadband, T1.) These
+optimizations will likely decrease TurboVNC's performance on fast
+networks (e.g. Ethernet) and thus should not be used on such networks.
+.TP
 \fB\-broadband\fR
-Set the JPEG quality to a relatively low level, which will provide
-optimum performance on low-bandwidth connections by sacrificing
+Preset for \fB\-wan -subsamp 1 -quality 30\fR.
+
+This preset sets the JPEG quality to a relatively low level, which will
+provide optimum performance on low-bandwidth connections by sacrificing
 image quality. The "broadband" quality preset maintains a
 usable image quality, but it will produce visible compression artifacts.
 You may need to increase the quality if you are doing work that
