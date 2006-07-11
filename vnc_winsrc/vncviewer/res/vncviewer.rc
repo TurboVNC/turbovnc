@@ -535,7 +535,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_SESSION_SET_CRECT    "When a rectangular area on the server's display changes position (such as when a window is moved), CopyRect encoding allows the server to send only the coordinates of the new position rather than completely re-sending the rectangular area."
-    ID_SESSION_SET_WAN      "Enable protocol enhancements which will improve performance on high-latency, low-bandwidth networks (e.g. broadband, T1.) These optimizations will likely decrease TurboVNC's performance on fast networks (e.g. Ethernet) and should not be used on such networks."
+    ID_SESSION_SET_WAN      "Enable protocol enhancements which will improve performance on high-latency, low-bandwidth networks (e.g. broadband, T1.) These optimizations will likely decrease TurboVNC's performance on fast networks (e.g. Ethernet.)"
 END
 
 STRINGTABLE DISCARDABLE 
