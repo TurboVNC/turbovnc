@@ -61,7 +61,7 @@ P SUNWxwplt     X Windows platform software
 P SUNWmlib      mediaLib - Shared Libraries
 EOF
 
-_VERSION=0.3.1
+_VERSION=0.3.2
 _BUILD=`date +%Y%m%d`
 cat > $pkgtmpdir/pkginfo <<EOF 
 ARCH=sparc
