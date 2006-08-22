@@ -1,3 +1,44 @@
+2006-08-15 14:05  const_k
+
+	* Xvnc/programs/Xserver/hw/vnc/init.c: Year changed in copyright
+	statement.
+
+2006-08-15 13:10  const_k
+
+	* vncserver.man, Xvnc/programs/Xserver/Xvnc.man,
+	vncconnect/vncconnect.man, vncpasswd/vncpasswd.man,
+	vncviewer/vncviewer.man: Updated e-mails and dates in man pages,
+	typos fixed.
+
+2006-08-11 09:09  const_k
+
+	* tightvnc.spec: Updated for version 1.3.8.
+
+2006-08-10 18:01  const_k
+
+	* README, vncserver, Xvnc/config/cf/vnc.def, vncviewer/README,
+	vncviewer/argsresources.c: Version strings changed, version 1.3.8.
+
+2006-08-10 17:59  const_k
+
+	* README, vncserver, Xvnc/config/cf/vnc.def, vncviewer/README,
+	vncviewer/argsresources.c: Preparing for stable version numbering -
+	replaced 1.3dev7 with 1.3.7, fixed text for automated
+	version/copyright updating, etc.
+
+2006-07-21 09:51  const_k
+
+	* vncviewer/listen.c: Port numbers are calculated modulo 65536 with
+	vncviewer's -listen option.  That makes it possible to listen on
+	port 443 with the command "vncviewer -listen 60479" (because 443 +
+	65536 - 5500 = 60479).
+
+2006-06-15 20:55  const_k
+
+	* classes/: AuthPanel.class, OptionsFrame.class, RfbProto.class,
+	VncCanvas.class, VncViewer.class, VncViewer.jar: Built-in Java
+	viewer updated to the latest version.
+
 2005-07-05 00:40  const_k
 
 	* README, vncserver, Xvnc/config/cf/vnc.def, vncviewer/README,

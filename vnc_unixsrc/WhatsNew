@@ -4,6 +4,46 @@
 |   in TightVNC source and binary archives.                          |
 +--------------------------------------------------------------------+
 
+* TightVNC 1.3.8, release candidate version
+
+  - Win32 server: Fixed major problem with disconnecting clients on
+    screen locking, user logoff and logon, in the service mode.
+
+  - Win32 server: Added support for DFMirage driver direct screen
+    access mode (from DemoForge LLC).
+
+  - Win32 server: Added support for multiple monitors (from DemoForge
+    LLC).
+
+  - Win32 server: Improved layout and functionality of the Properties
+    dialog.
+
+  - Win32 server: More accurate password handling - now the server
+    code tries to distinguish between "empty" and "unset" passwords
+    better.
+
+  - Win32 server: New -shareall, -shareprimary and -sharearea
+    command-line options, working similarly to the -sharewindow
+    option.
+
+  - Win32 server: Fixed problems with restoring desktop wallpaper.
+
+  - Win32 viewer: Fixed bug with not enabling JPEG compression by
+    default.
+
+  - Win32 viewer: Fixed bug with not setting proper size of the viewer
+    window.
+
+  - Unix server: Port numbers are now calculated modulo 65536 with
+    vncviewer's -listen option. That makes it possible to listen on
+    TCP ports under 5900.
+
+  - Java viewer: Automatic encoding selection based on measuring
+    current network throughput.
+
+  - Other improvements and bugfixes, see ChangeLog files within the
+    distribution for more details.
+
 * TightVNC 1.3dev7, release candidate version
 
   - Win32 server: Fixed the problem with "olemainthreadwndname not
@@ -12,7 +52,7 @@
 
   - Win32 server: Removed the code for "desktop optimizations" that
     was rather harmful than useful. Hopefully, this should fix
-    problems with crashing Delphi application. Also this should
+    problems with crashing Delphi applications. Also this should
     prevent settings like font smoothing always set to true on
     disconnect.
 
@@ -441,7 +481,7 @@
     fail when the XAUTHORITY environment variable was not set.
 
   - Unix version: Fixed the bug which prevented the vncpasswd utility
-    from setting correct permissions on the passwd file.
+    from setting correct permissons on the passwd file.
 
   - Unix version: Fixed a repeated challenge replay attack
     vulnerability, bugtraq id 5296.

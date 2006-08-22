@@ -70,8 +70,8 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
   if (listenArgIndex+1 < *argc && argv[listenArgIndex+1][0] >= '0' &&
 					    argv[listenArgIndex+1][0] <= '9') {
 
-    listenPort = LISTEN_PORT_OFFSET + atoi(argv[listenArgIndex+1]);
-    flashPort = FLASH_PORT_OFFSET + atoi(argv[listenArgIndex+1]);
+    listenPort = (LISTEN_PORT_OFFSET + atoi(argv[listenArgIndex+1])) & 0xFFFF;
+    flashPort = (FLASH_PORT_OFFSET + atoi(argv[listenArgIndex+1])) & 0xFFFF;
     removeArgs(argc, argv, listenArgIndex, 2);
 
   } else {
