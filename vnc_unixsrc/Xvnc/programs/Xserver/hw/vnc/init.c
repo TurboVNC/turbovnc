@@ -420,7 +420,7 @@ InitOutput(screenInfo, argc, argv)
     initOutputCalled = TRUE;
 
     rfbLog("Xvnc version %s\n", XVNCRELEASE);
-    rfbLog("Copyright (C) 2000-2003 Constantin Kaplinsky\n");
+    rfbLog("Copyright (C) 2000-2006 Constantin Kaplinsky\n");
     rfbLog("Copyright (C) 1999 AT&T Laboratories Cambridge\n");
     rfbLog("All Rights Reserved.\n");
     rfbLog("See http://www.tightvnc.com/ for information on TightVNC\n");

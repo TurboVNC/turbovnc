@@ -4,13 +4,13 @@
 .\"
 .\" Copyright (C) 1998 Marcus.Brinkmann@ruhr-uni-bochum.de
 .\" Copyright (C) 2000,2001 Red Hat, Inc.
-.\" Copyright (C) 2001-2003 Constantin Kaplinsky <const@ce.cctpu.edu.ru>
+.\" Copyright (C) 2001-2003 Constantin Kaplinsky
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TurboVNC distribution.
 .\"
-.TH vncviewer 1 "December 2005" "" "TurboVNC"
+.TH vncviewer 1 "August 2006" "" "TurboVNC"
 .SH NAME
 vncviewer \- an X11 viewer client for TurboVNC
 .SH SYNOPSIS
@@ -285,6 +285,6 @@ Terran Melconian <terran@consistent.org>,
 .br
 Tim Waugh <twaugh@redhat.com>,
 .br
-Constantin Kaplinsky <const@ce.cctpu.edu.ru>
+Constantin Kaplinsky <const@tightvnc.com>
 .br
 Darrell Commander <dcommander@users.sourceforge.net>
