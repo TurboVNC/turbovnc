@@ -210,21 +210,20 @@ BEGIN
                     ES_AUTOHSCROLL | ES_READONLY
 END
 
-IDD_APP_ABOUT DIALOG DISCARDABLE  0, 0, 334, 146
+IDD_APP_ABOUT DIALOG DISCARDABLE  0, 0, 334, 155
 STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About TurboVNC Viewer"
 FONT 8, "MS Sans Serif"
 BEGIN
-    DEFPUSHBUTTON   "&OK",IDOK,135,124,50,14
-    CONTROL         106,IDC_STATIC,"Static",SS_BITMAP | SS_SUNKEN,19,7,87,80
-    LTEXT           "Based on TightVNC Viewer version 1.3dev7 (release candidate)\nCopyright (C) 2000-2005 Constantin Kaplinsky\nhttp://www.tightvnc.com/",
-                    IDC_STATIC,135,30,190,27
-    LTEXT           "Includes code from TridiaVNC 1.4.0\nCopyright (C) 2000, 2001 Tridia Corporation\nhttp://www.tridiavnc.com/",
-                    IDC_STATIC,135,89,190,28
-    LTEXT           "Based on VNC Viewer 3.3.3r3 by Quentin Stafford-Fraser\nCopyright (C) 1999 AT&&T Laboratories Cambridge\nhttp://www.uk.research.att.com/vnc/",
-                    IDC_STATIC,135,59,190,29
-    LTEXT           "TurboVNC Viewer version 0.3.1\nhttp://virtualgl.sourceforge.net",
-                    IDC_STATIC,135,7,190,18
+    DEFPUSHBUTTON   "&OK",IDOK,135,133,50,14
+    CONTROL         106,IDC_STATIC,"Static",SS_BITMAP | SS_NOTIFY | 
+                    SS_SUNKEN,19,7,87,80
+    LTEXT           "Based on TightVNC Viewer version 1.3.8\nCopyright (C) 2000-2006 Constantin Kaplinsky\nCopyright (C) 2000-2006 TightVNC Group\nhttp://www.tightvnc.com/",
+                    IDC_STATIC,135,48,190,36
+    LTEXT           "Based on VNC software\nCopyright (C) 1999-2001 AT&&T Laboratories Cambridge\nCopyright (C) 2002-2003 RealVNC Ltd.\nhttp://www.realvnc.com/",
+                    IDC_STATIC,135,89,190,36
+    LTEXT           "TurboVNC Viewer version 0.3.2\nCopyright (C) 2004 Landmark Graphics Corporation\nCopyright (C) 2004-2006 Sun Microsystems, Inc.\nhttp://virtualgl.sourceforge.net",
+                    IDC_STATIC,135,7,190,36
 END
 
 IDD_GENERAL_OPTION DIALOG DISCARDABLE  0, 0, 300, 179
@@ -312,8 +311,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,3,0,0
- PRODUCTVERSION 0,3,0,0
+ FILEVERSION 0,3,2,0
+ PRODUCTVERSION 0,3,2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -328,38 +327,23 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "Based on TridiaVNC by Tridia Corporation, Based on TightVNC by Constantin Kaplinsky\0"
+            VALUE "Comments", "Based on TightVNC by Constantin Kaplinsky; Based on VNC by AT&T Research Labs Cambridge, RealVNC Ltd.\0"
             VALUE "CompanyName", "The VirtualGL Project\0"
             VALUE "FileDescription", "vncviewer\0"
-            VALUE "FileVersion", "0, 3, 0, 0\0"
+            VALUE "FileVersion", "0, 3, 2, 0\0"
             VALUE "InternalName", "vncviewer\0"
-            VALUE "LegalCopyright", "Copyright   1999-2004 [many holders]\0"
+            VALUE "LegalCopyright", "Copyright © 1999-2006 [many holders]\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "vncviewer.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "TurboVNC Win32 Viewer\0"
-            VALUE "ProductVersion", "0, 3, 0, 0\0"
-            VALUE "SpecialBuild", "\0"
-        END
-        BLOCK "080904b0"
-        BEGIN
-            VALUE "Comments", "by Quentin Stafford-Fraser\0"
-            VALUE "CompanyName", "AT&T Laboratories Cambridge\0"
-            VALUE "FileDescription", "vncviewer\0"
-            VALUE "FileVersion", "1, 3, 7, 0\0"
-            VALUE "InternalName", "vncviewer\0"
-            VALUE "LegalCopyright", "Copyright (C) 1999-2004 [many holders]\0"
-            VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "vncviewer.exe\0"
-            VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "TightVNC Win32 Viewer\0"
-            VALUE "ProductVersion", "1, 3, 7, 0\0"
+            VALUE "ProductVersion", "0, 3, 2, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END
     BLOCK "VarFileInfo"
     BEGIN
-        VALUE "Translation", 0x409, 1200, 0x809, 1200
+        VALUE "Translation", 0x409, 1200
     END
 END
 
@@ -428,6 +412,7 @@ END
 // Dialog Info
 //
 
+#ifndef __GNUC__
 IDD_SESSION_DLG DLGINIT
 BEGIN
     IDC_HOSTNAME_EDIT, 0x403, 1, 0
@@ -445,6 +430,7 @@ BEGIN
 "\000" 
     0
 END
+#endif
 
 
 /////////////////////////////////////////////////////////////////////////////
