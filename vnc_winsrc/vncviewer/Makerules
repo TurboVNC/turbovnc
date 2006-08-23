@@ -1,4 +1,4 @@
-CXX = g++ -mno-cygwin
+CXX = g++ -mno-cygwin -mthreads
 CC = gcc -mno-cygwin
 RC = windres -DNDEBUG
 
