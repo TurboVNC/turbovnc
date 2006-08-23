@@ -46,7 +46,7 @@ vncRegion::~vncRegion()
 	Clear();
 }
 
-void vncRegion::AddRect(RECT &new_rect)
+void vncRegion::AddRect(const RECT &new_rect)
 {
 	HRGN newregion;
 
@@ -67,6 +67,15 @@ void vncRegion::AddRect(RECT &new_rect)
 		// Now delete the temporary region
 		DeleteObject(newregion);
 	}
+}
+
+void vncRegion::AddRect(RECT R, int xoffset, int yoffset)
+{
+	R.left += xoffset;
+	R.top += yoffset;
+	R.right += xoffset;
+	R.bottom += yoffset;
+	AddRect(R);
 }
 
 void vncRegion::SubtractRect(RECT &new_rect)
@@ -159,7 +168,7 @@ BOOL vncRegion::Rectangles(rectlist &rects)
 		return FALSE;
 
 	// Get the size of buffer required
-	buffsize = GetRegionData(region, 0, 0);
+	buffsize = GetRegionData(region, NULL, 0);
 	buff = (RGNDATA *) new BYTE [buffsize];
 	if (buff == NULL)
 		return FALSE;
