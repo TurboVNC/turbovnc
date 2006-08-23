@@ -80,14 +80,14 @@ unsigned int FileTransferItemInfo::GetSizeAt(int Number)
 {
 	if ((Number >= 0) && (Number <= m_NumEntries)) 
 		return m_pEntries[Number].Size; 
-	return 0;
+	return NULL;
 }
 
 unsigned int FileTransferItemInfo::GetDataAt(int Number)
 {
 	if ((Number >= 0) && (Number <= m_NumEntries)) 
 		return m_pEntries[Number].Data; 
-	return 0;
+	return NULL;
 }
 
 int FileTransferItemInfo::GetNumEntries()

@@ -57,30 +57,14 @@ typedef enum
 } dmf_UpdEvent;
 
 
-#ifndef CDS_UPDATEREGISTRY
 #define CDS_UPDATEREGISTRY  0x00000001
-#endif
-#ifndef CDS_TEST
 #define CDS_TEST            0x00000002
-#endif
-#ifndef CDS_FULLSCREEN
 #define CDS_FULLSCREEN      0x00000004
-#endif
-#ifndef CDS_GLOBAL
 #define CDS_GLOBAL          0x00000008
-#endif
-#ifndef CDS_SET_PRIMARY
 #define CDS_SET_PRIMARY     0x00000010
-#endif
-#ifndef CDS_RESET
 #define CDS_RESET           0x40000000
-#endif
-#ifndef CDS_SETRECT
 #define CDS_SETRECT         0x20000000
-#endif
-#ifndef CDS_NORESET
 #define CDS_NORESET         0x10000000
-#endif
 
 typedef BOOL (WINAPI* pEnumDisplayDevices)(PVOID,DWORD,PVOID,DWORD);
 typedef LONG (WINAPI* pChangeDisplaySettingsEx)(LPCTSTR, LPDEVMODE, HWND, DWORD, LPVOID);
