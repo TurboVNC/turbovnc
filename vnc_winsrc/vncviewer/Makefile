@@ -1,7 +1,7 @@
 include Makerules
 
 CFLAGS = $(OPTFLAG) -I. -I.. -I../../../vgl/include -Iomnithread -DXMD_H \
-	-DWIN32 -D_WINDOWS -D__NT__ -D_WINSTATIC -D__WIN32__
+	-DWIN32 -D_WINDOWS -D__NT__ -D_WINSTATIC -D__WIN32__ -D_WIN32_IE=0x400
 LDFLAGS = $(OPTFLAG)
 WINLIBS = -lwsock32 -lgdi32 -lcomdlg32 -lwinmm -lhtmlhelp -lcomctl32 \
 	-L../../../vgl/windows/vnc/lib -lturbojpeg -lfbx
@@ -43,12 +43,16 @@ RES = $(ODIR)/vncviewer.res.o
 
 TARGETS = $(ODIR)/vncviewer.exe
 
-default: $(TARGETS)
+default: zlib res $(TARGETS)
 
 -include $(OBJS:.o=.d)
 
 $(ODIR)/vncviewer.exe: $(LIBS) $(OBJS) $(RES)
 	$(CXX) $(LDFLAGS) $(OBJS) $(RES) -o $@ $(LIBS) $(WINLIBS) -mwindows
+
+.PHONY: zlib res
+zlib res:
+	make -C $@
 
 $(ODIR)/libz.a:
 	make -C zlib
