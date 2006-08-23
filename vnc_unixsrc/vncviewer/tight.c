@@ -1,4 +1,6 @@
 /*
+ *  Copyright (C) 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
+ *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  *  Copyright (C) 2000, 2001 Const Kaplinsky.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
