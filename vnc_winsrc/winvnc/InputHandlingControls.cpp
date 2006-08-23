@@ -54,7 +54,7 @@ InputHandlingControls::InputHandlingControls(HWND hwnd, vncServer *server)
 	HWND hDisableTime = GetDlgItem(hwnd, IDC_DISABLE_TIME);
 	SetDlgItemInt(hwnd, IDC_DISABLE_TIME, m_server->DisableTime(), FALSE);
 			
-	EnableRemote(hwnd);
+	EnableRemote(hwnd, false);
 	EnableInputs(hwnd);
 }
 void InputHandlingControls::ApplyInputsControlsContents(HWND hwnd)
@@ -97,17 +97,19 @@ void InputHandlingControls::EnableInputs(HWND hwnd)
 	if (!enabled)
 		SendMessage(hRemoteDisable, BM_SETCHECK, enabled, 0);
 }
-void InputHandlingControls::EnableRemote(HWND hwnd)
+
+void InputHandlingControls::EnableRemote(HWND hwnd, bool mayMoveFocus)
 {
 	HWND hDisableTime = GetDlgItem(hwnd, IDC_DISABLE_TIME);
 	HWND hRemoteDisable = GetDlgItem(hwnd, IDC_REMOTE_DISABLE);
 	bool enabled = (SendMessage(hRemoteDisable, BM_GETCHECK, 0, 0) == BST_CHECKED);
 	EnableTime(hwnd, enabled);
-	if (enabled) {
+	if (enabled && mayMoveFocus) {
 		SetFocus(hDisableTime);
 		SendMessage(hDisableTime, EM_SETSEL, 0, (LPARAM)-1);
 	}
 }
+
 void InputHandlingControls::EnableTime(HWND hwnd, bool enable)
 {
 	HWND hDisableTime = GetDlgItem(hwnd, IDC_DISABLE_TIME);

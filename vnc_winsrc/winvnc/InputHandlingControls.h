@@ -35,7 +35,7 @@ public:
 	InputHandlingControls(HWND hwnd, vncServer *server);
 	void ApplyInputsControlsContents(HWND hwnd);
 	void EnableInputs(HWND hwnd);
-	void EnableRemote(HWND hwnd);
+	void EnableRemote(HWND hwnd, bool mayMoveFocus = true);
 	virtual ~InputHandlingControls();
 private:
 	void EnableTime(HWND hwnd, bool enable);
