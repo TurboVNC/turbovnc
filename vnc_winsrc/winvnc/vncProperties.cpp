@@ -68,9 +68,11 @@ vncProperties::vncProperties()
 	m_allowshutdown = TRUE;
 	m_dlgvisible = FALSE;
 	m_usersettings = TRUE;
-	m_inadvanced = FALSE;	
 
 	m_pMatchWindow = NULL;
+
+	m_tab_id = 0;
+	m_tab_id_restore = false;
 }
 
 vncProperties::~vncProperties()
@@ -83,28 +85,27 @@ vncProperties::Init(vncServer *server)
 {
 	// Save the server pointer
 	m_server = server;
-	
-	m_inadvanced = FALSE;
-	
-	// Load the settings from the registry
-	Load(TRUE);
 
-	if (m_pMatchWindow == NULL) 
-	{
+	if (m_pMatchWindow == NULL) {
 		RECT temp;
 		GetWindowRect(GetDesktopWindow(), &temp);
-		m_pMatchWindow=new CMatchWindow(m_server,temp.left+5,temp.top+5,temp.right/2,temp.bottom/2);
+		m_pMatchWindow = new CMatchWindow(m_server,
+										  temp.left + 5, temp.top + 5,
+										  temp.right/2, temp.bottom/2);
 		m_pMatchWindow->CanModify(TRUE);
 	}
 
+	// Load the settings from the registry
+	Load(TRUE);
+
 	// If the password is empty then always show a dialog
 	char passwd[MAXPWLEN];
-	m_server->GetPassword(passwd);
+	BOOL passwd_set = m_server->GetPassword(passwd);
 	{
-	    vncPasswd::ToText plain(passwd);
-	    if (strlen(plain) == 0)
+		vncPasswd::ToText plain(passwd);
+		if (!passwd_set || strlen(plain) == 0) {
 			if (!m_allowproperties) {
-				if(m_server->AuthRequired()) {
+				if (!passwd_set || m_server->AuthRequired()) {
 					MessageBox(NULL, NO_PASSWD_NO_OVERRIDE_ERR,
 								"WinVNC Error",
 								MB_OK | MB_ICONSTOP);
@@ -116,7 +117,7 @@ vncProperties::Init(vncServer *server)
 				}
 			} else {
 				// If null passwords are not allowed, ensure that one is entered!
-				if (m_server->AuthRequired()) {
+				if (!passwd_set || m_server->AuthRequired()) {
 					char username[UNLEN+1];
 					if (!vncService::CurrentUser(username, sizeof(username)))
 						return FALSE;
@@ -124,12 +125,13 @@ vncProperties::Init(vncServer *server)
 						MessageBox(NULL, NO_CURRENT_USER_ERR,
 									"WinVNC Error",
 									MB_OK | MB_ICONEXCLAMATION);
-						Show(TRUE, FALSE);
+						Show(TRUE, FALSE, TRUE);
 					} else {
-						Show(TRUE, TRUE);
+						Show(TRUE, TRUE, TRUE);
 					}
 				}
 			}
+		}
 	}
 
 	return TRUE;
@@ -137,11 +139,10 @@ vncProperties::Init(vncServer *server)
 
 // Dialog box handling functions
 void
-vncProperties::Show(BOOL show, BOOL usersettings)
+vncProperties::Show(BOOL show, BOOL usersettings, BOOL passwordfocused)
 {
 	if (show)
 	{
-		m_inadvanced = FALSE;
 		if (!m_allowproperties)
 		{
 			// If the user isn't allowed to override the settings then tell them
@@ -193,6 +194,8 @@ vncProperties::Show(BOOL show, BOOL usersettings)
 			{
 				m_returncode_valid = FALSE;
 
+				m_tab_id_restore = !passwordfocused && usersettings;
+
 				// Do the dialog box
 				int result = DialogBoxParam(hAppInstance,
 				    MAKEINTRESOURCE(IDD_PROPERTIES_PARENT), 
@@ -213,20 +216,12 @@ vncProperties::Show(BOOL show, BOOL usersettings)
 				}
 
 				// We're allowed to exit if the password is not empty
-				char passwd[MAXPWLEN];
-				char passwd_viewonly[MAXPWLEN];
-				m_server->GetPassword(passwd);
-				m_server->GetPasswordViewOnly(passwd_viewonly);
 				{
-				    vncPasswd::ToText plain(passwd);
-					vncPasswd::ToText plain_viewonly(passwd_viewonly);
-					if ((strlen(plain) != 0) || !m_server->AuthRequired()) {
-						if (strlen(passwd_viewonly) == 0) {
-							m_server->GetPassword(passwd);
-							m_server->SetPasswordViewOnly(passwd);
-						}
+					char passwd[MAXPWLEN];
+					BOOL passwd_set = m_server->GetPassword(passwd);
+					vncPasswd::ToText plain(passwd);
+					if (passwd_set && (strlen(plain) != 0 || !m_server->AuthRequired()))
 						break;
-					}
 				}
 
 				vnclog.Print(LL_INTERR, VNCLOG("warning - empty password\n"));
@@ -284,12 +279,14 @@ vncProperties::ParentDlgProc(HWND hwnd,
 			TabCtrl_InsertItem(_this->m_hTab, 0, &item);
 			item.pszText = "Hooks";
 			TabCtrl_InsertItem(_this->m_hTab, 1, &item);
-			item.pszText = "Sharing";
+			item.pszText = "Display";
 			TabCtrl_InsertItem(_this->m_hTab, 2, &item);
 			item.pszText = "Query";
 			TabCtrl_InsertItem(_this->m_hTab, 3, &item);
 			item.pszText = "Administration";
 			TabCtrl_InsertItem(_this->m_hTab, 4, &item);
+			int tab_id = (_this->m_tab_id_restore) ? _this->m_tab_id : 0;
+			TabCtrl_SetCurSel(_this->m_hTab, tab_id);
 
 			_this->m_hShared = CreateDialogParam(hAppInstance, 
 				MAKEINTRESOURCE(IDD_SHARED_DESKTOP_AREA),
@@ -328,19 +325,19 @@ vncProperties::ParentDlgProc(HWND hwnd,
 			TabCtrl_AdjustRect(_this->m_hTab, FALSE, &rc);
 			SetWindowPos(_this->m_hIncoming, HWND_TOP, rc.left, rc.top,
 						 rc.right - rc.left, rc.bottom - rc.top,
-						 SWP_SHOWWINDOW);
+						 (tab_id == 0) ? SWP_SHOWWINDOW : SWP_HIDEWINDOW);
 			SetWindowPos(_this->m_hPoll, HWND_TOP, rc.left, rc.top,
 						 rc.right - rc.left, rc.bottom - rc.top,
-						 SWP_HIDEWINDOW);
+						 (tab_id == 1) ? SWP_SHOWWINDOW : SWP_HIDEWINDOW);
 			SetWindowPos(_this->m_hShared, HWND_TOP, rc.left, rc.top,
 						 rc.right - rc.left, rc.bottom - rc.top,
-						 SWP_HIDEWINDOW);
+						 (tab_id == 2) ? SWP_SHOWWINDOW : SWP_HIDEWINDOW);
 			SetWindowPos(_this->m_hQuerySettings, HWND_TOP, rc.left, rc.top,
 						 rc.right - rc.left, rc.bottom - rc.top,
-						 SWP_HIDEWINDOW);
+						 (tab_id == 3) ? SWP_SHOWWINDOW : SWP_HIDEWINDOW);
 			SetWindowPos(_this->m_hAdministration, HWND_TOP, rc.left, rc.top,
 						 rc.right - rc.left, rc.bottom - rc.top,
-						 SWP_HIDEWINDOW);
+						 (tab_id == 4) ? SWP_SHOWWINDOW : SWP_HIDEWINDOW);
 
 			// Set the dialog box's title to indicate which Properties we're editting
 			if (_this->m_usersettings) {
@@ -349,8 +346,9 @@ vncProperties::ParentDlgProc(HWND hwnd,
 				SetWindowText(hwnd, "TurboVNC Server: Default Local System Properties");
 			}						
 				
-			// We return FALSE because we set the keyboard focus explicitly.
-			return FALSE;
+			// If the first tab is selected, then return FALSE because in that case
+			// we set the keyboard focus explicitly (on the password field).
+			return (tab_id != 0);
 		}
 	case WM_HELP:	
 		VNCHelp::Popup(lParam);
@@ -361,32 +359,31 @@ vncProperties::ParentDlgProc(HWND hwnd,
 			switch (pn->idFrom) {
 			case IDC_TAB:
 				{
-				int i = TabCtrl_GetCurFocus(_this->m_hTab);
-				DWORD style;
-				if (pn->code == TCN_SELCHANGE)
-					style = SW_SHOW;
-				if (pn->code == TCN_SELCHANGING)
-					style = SW_HIDE;
-				if ((style != SW_HIDE) && (style != SW_SHOW))
+					int id = TabCtrl_GetCurSel(_this->m_hTab);
+					DWORD style;
+					if (pn->code == TCN_SELCHANGE) {
+						style = SW_SHOW;
+					} else if (pn->code == TCN_SELCHANGING) {
+						style = SW_HIDE;
+					} else {
+						return 0;
+					}
+					// FIXME: Map between tab IDs and subdialogs in one place.
+					const HWND subDialogList[5] = {
+						_this->m_hIncoming,
+						_this->m_hPoll,
+						_this->m_hShared,
+						_this->m_hQuerySettings,
+						_this->m_hAdministration
+					};
+					if (id >= 5) {
+						// Invalid tab ID.
+						return 0;
+					}
+					HWND subDialog = subDialogList[id];
+					ShowWindow(subDialog, style);						
+					SetFocus(subDialog);
 					return 0;
-				switch (i) {
-				case 0:
-					ShowWindow(_this->m_hIncoming, style);
-					return 0;
-				case 1:
-					ShowWindow(_this->m_hPoll, style);						
-					return 0;
-				case 2:
-					ShowWindow(_this->m_hShared, style);						
-					return 0;
-				case 3:
-					ShowWindow(_this->m_hQuerySettings, style);						
-					return 0;
-				case 4:
-					ShowWindow(_this->m_hAdministration, style);						
-					return 0;
-				}
-				return 0;
 				}
 			}
 			return 0;
@@ -396,12 +393,15 @@ vncProperties::ParentDlgProc(HWND hwnd,
 		{
 		case IDOK:
 		case IDC_APPLY:
-			{	
 			SendMessage(_this->m_hIncoming, WM_COMMAND, IDC_APPLY,0);
 			SendMessage(_this->m_hPoll, WM_COMMAND, IDC_APPLY,0);
 			SendMessage(_this->m_hShared, WM_COMMAND, IDC_APPLY,0);
 			SendMessage(_this->m_hQuerySettings, WM_COMMAND, IDC_APPLY,0);
 			SendMessage(_this->m_hAdministration, WM_COMMAND, IDC_APPLY,0);
+
+			// Remember selected tab, except when in default settings.
+			if (_this->m_usersettings)
+				_this->m_tab_id = TabCtrl_GetCurFocus(_this->m_hTab);
 
 			_this->Save();
         
@@ -418,7 +418,6 @@ vncProperties::ParentDlgProc(HWND hwnd,
 				_this->m_hTab = NULL;
 			}
 			return TRUE;
-			}
 		case IDCANCEL:
 			vnclog.Print(LL_INTINFO, VNCLOG("enddialog (CANCEL)\n"));
 			_this->m_returncode_valid = TRUE;
@@ -572,9 +571,7 @@ BOOL CALLBACK vncProperties::SharedDlgProc(HWND hwnd, UINT uMsg,
 			vncProperties *_this = (vncProperties *) lParam;
 			
 			_this->m_shareddtarea = new SharedDesktopArea(hwnd,
-				_this->m_pMatchWindow,
-				_this,
-				_this->m_server);
+				_this->m_pMatchWindow, _this->m_server);
 
 			return 0;
 		}
@@ -585,21 +582,15 @@ BOOL CALLBACK vncProperties::SharedDlgProc(HWND hwnd, UINT uMsg,
 		switch (LOWORD(wParam))
 		{
 		case IDC_FULLSCREEN:
-			_this->m_shareddtarea->FullScreen();
-			return TRUE;
-			
-		case IDC_WINDOW:
-			_this->m_shareddtarea->SharedWindow();
-			return TRUE;
-			
+		case IDC_PRIMARY_DISPLAY_ONLY:
 		case IDC_SCREEN:
-			_this->m_shareddtarea->SharedScreen();
+		case IDC_WINDOW:
+			_this->m_shareddtarea->Validate();
 			return TRUE;
 
 		case IDC_APPLY:
 		case IDOK:
-
-			_this->m_shareddtarea->ApplySharedControls();
+			_this->m_shareddtarea->Apply();
 			return TRUE;
 		}
 		return 0;
@@ -726,7 +717,7 @@ vncProperties::LoadInt(HKEY key, LPCSTR valname, LONG defval)
 	return pref;
 }
 
-void
+BOOL
 vncProperties::LoadPassword(HKEY key, char *buffer, const char *entry_name)
 {
 	DWORD type = REG_BINARY;
@@ -734,7 +725,7 @@ vncProperties::LoadPassword(HKEY key, char *buffer, const char *entry_name)
 	char inouttext[MAXPWLEN];
 
 	if (key == NULL)
-		return;
+		return FALSE;
 
 	// Retrieve the encrypted password
 	if (RegQueryValueEx(key,
@@ -743,12 +734,13 @@ vncProperties::LoadPassword(HKEY key, char *buffer, const char *entry_name)
 		&type,
 		(LPBYTE) &inouttext,
 		(LPDWORD) &slen) != ERROR_SUCCESS)
-		return;
+		return FALSE;
 
 	if (slen > MAXPWLEN)
-		return;
+		return FALSE;
 
 	memcpy(buffer, inouttext, MAXPWLEN);
+	return TRUE;
 }
 
 char *
@@ -889,9 +881,10 @@ vncProperties::Load(BOOL usersettings)
 	{
 		vncPasswd::FromClear crypt;
 		memcpy(m_pref_passwd, crypt, MAXPWLEN);
+		m_pref_passwd_set = FALSE;
 		memcpy(m_pref_passwd_viewonly, crypt, MAXPWLEN);
+		m_pref_passwd_viewonly_set = FALSE;
 	}
-	m_pref_externalAuth=FALSE;
 	m_pref_QuerySetting=2;
 	m_pref_QueryTimeout=30;
 	m_pref_QueryAccept=FALSE;
@@ -901,24 +894,22 @@ vncProperties::Load(BOOL usersettings)
 	m_pref_DisableLocalInputs=FALSE;
 	m_pref_LockSettings=-1;
 	m_pref_PollUnderCursor=FALSE;
-	m_pref_PollForeground=FALSE;
-	m_pref_PollFullScreen=TRUE;
+	m_pref_PollForeground=TRUE;
+	m_pref_PollFullScreen=FALSE;
 	m_pref_PollConsoleOnly=TRUE;
 	m_pref_PollOnEventOnly=FALSE;
 	m_pref_DontSetHooks=FALSE;
-	m_pref_DontUseDriver=TRUE;
+	m_pref_DontUseDriver=FALSE;
+	m_pref_DriverDirectAccess=TRUE;
 	m_pref_RemoveWallpaper=TRUE;
 	m_pref_BlankScreen = FALSE;
 	m_pref_EnableFileTransfers = TRUE;
 	m_alloweditclients = TRUE;
 	m_allowshutdown = TRUE;
 	m_allowproperties = TRUE;
-	m_pref_FullScreen = TRUE;
-	m_pref_WindowShared = FALSE;
-	m_pref_ScreenAreaShared = FALSE;
 	m_pref_PriorityTime = 3;
 	m_pref_LocalInputPriority = FALSE;
-	m_pref_PollingCycle = 50;
+	m_pref_PollingCycle = 300;
 
 	// Load the local prefs for this user
 	if (hkDefault != NULL)
@@ -1008,12 +999,11 @@ vncProperties::LoadUserPrefs(HKEY appkey)
 	m_server->SetQueryAllowNoPass(m_pref_QueryAllowNoPass);
 
 	// Load the primary password
-	LoadPassword(appkey, m_pref_passwd, "Password");
-	// Load the view-only password, default to the primary one
-	memcpy(m_pref_passwd_viewonly, m_pref_passwd, MAXPWLEN);
-	LoadPassword(appkey, m_pref_passwd_viewonly, "PasswordViewOnly");
-	// External authentication (disabled in the public version)
-	// m_pref_externalAuth=LoadInt(appkey, "ExternalAuth", m_pref_externalAuth);
+	m_pref_passwd_set =
+		LoadPassword(appkey, m_pref_passwd, "Password");
+	// Load the view-only password
+	m_pref_passwd_viewonly_set =
+		LoadPassword(appkey, m_pref_passwd_viewonly, "PasswordViewOnly");
 	// CORBA Settings
 	m_pref_CORBAConn=LoadInt(appkey, "CORBAConnect", m_pref_CORBAConn);
 
@@ -1031,11 +1021,7 @@ vncProperties::LoadUserPrefs(HKEY appkey)
 	m_pref_PollOnEventOnly=LoadInt(appkey, "OnlyPollOnEvent", m_pref_PollOnEventOnly);
 	m_pref_DontSetHooks=LoadInt(appkey, "DontSetHooks", m_pref_DontSetHooks);
 	m_pref_DontUseDriver=LoadInt(appkey, "DontUseDriver", m_pref_DontUseDriver);
-
-	// screen area sharing prefs
-	m_pref_FullScreen = m_server->FullScreen();
-	m_pref_WindowShared = m_server->WindowShared();
-	m_pref_ScreenAreaShared = m_server->ScreenAreaShared();
+	m_pref_DriverDirectAccess=LoadInt(appkey, "DriverDirectAccess", m_pref_DriverDirectAccess);
 
 	m_pref_LocalInputPriority=LoadInt(appkey, "LocalInputsPriority", m_pref_LocalInputPriority);
 }
@@ -1055,8 +1041,8 @@ vncProperties::ApplyUserPrefs()
 	m_server->EnableFileTransfers(m_pref_EnableFileTransfers);
 
 	// Update the password
-	m_server->SetPassword(m_pref_passwd);
-	m_server->SetPasswordViewOnly(m_pref_passwd_viewonly);
+	m_server->SetPassword(m_pref_passwd_set, m_pref_passwd);
+	m_server->SetPasswordViewOnly(m_pref_passwd_viewonly_set, m_pref_passwd_viewonly);
 
 	// Now change the listening port settings
 	m_server->SetAutoPortSelect(m_pref_AutoPortSelect);
@@ -1078,8 +1064,6 @@ vncProperties::ApplyUserPrefs()
 	m_server->SetDisableTime(m_pref_PriorityTime);
 	m_server->SetPollingCycle(m_pref_PollingCycle);
 
-	// Enable/disable external authentication
-	m_server->EnableExternalAuth(m_pref_externalAuth);
 	m_server->SockConnect(m_pref_SockConnect);
 	// Polling prefs
 	m_server->PollUnderCursor(m_pref_PollUnderCursor);
@@ -1089,10 +1073,7 @@ vncProperties::ApplyUserPrefs()
 	m_server->PollOnEventOnly(m_pref_PollOnEventOnly);
 	m_server->DontSetHooks(m_pref_DontSetHooks);
 	m_server->DontUseDriver(m_pref_DontUseDriver);
-
-	m_server->FullScreen(m_pref_FullScreen);
-	m_server->WindowShared(m_pref_WindowShared);
-	m_server->ScreenAreaShared(m_pref_ScreenAreaShared);
+	m_server->DriverDirectAccess(m_pref_DriverDirectAccess);
 
 	m_server->LocalInputPriority(m_pref_LocalInputPriority);
 }
@@ -1222,10 +1203,10 @@ vncProperties::SaveUserPrefs(HKEY appkey)
 
 	// Save the password
 	char passwd[MAXPWLEN];
-	m_server->GetPassword(passwd);
-	SavePassword(appkey, passwd, "Password");
-	m_server->GetPasswordViewOnly(passwd);
-	SavePassword(appkey, passwd, "PasswordViewOnly");
+	if (m_server->GetPassword(passwd))
+		SavePassword(appkey, passwd, "Password");
+	if (m_server->GetPasswordViewOnly(passwd))
+		SavePassword(appkey, passwd, "PasswordViewOnly");
 
 #if(defined(_CORBA))
 	// Don't save the CORBA enabled flag if CORBA is not compiled in!
@@ -1243,8 +1224,7 @@ vncProperties::SaveUserPrefs(HKEY appkey)
 
 	SaveInt(appkey, "DontSetHooks", m_server->DontSetHooks());
 	SaveInt(appkey, "DontUseDriver", m_server->DontUseDriver());
+	SaveInt(appkey, "DriverDirectAccess", m_server->DriverDirectAccess());
 
 	SaveInt(appkey, "LocalInputsPriority", m_server->LocalInputPriority());
 }
-
-

@@ -502,7 +502,7 @@ vncService::FindWindowByTitle(char *substr)
 	strncpy(l_substr, substr, 255);
 	l_substr[255] = 0;
 	int i;
-	for (i = 0; i < strlen(substr); i++) {
+	for (i = 0; i < (int)strlen(substr); i++) {
 		l_substr[i] = tolower(l_substr[i]);
 	}
 
@@ -530,11 +530,50 @@ vncService::FindWindowByTitle(char *substr)
 }
 
 BOOL
-vncService::NewSharedWindow(HWND hwndwindow)
+vncService::PostShareAll()
 {
-	
 	// Post to the WinVNC menu window
-	if (!PostToWinVNC(MENU_SERVER_SHAREWINDOW, (WPARAM)hwndwindow, 0))
+	if (!PostToWinVNC(MENU_SERVER_SHAREALL, 0, 0))
+	{
+		MessageBox(NULL, "No existing instance of WinVNC could be contacted", szAppName, MB_ICONEXCLAMATION | MB_OK);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+BOOL
+vncService::PostSharePrimary()
+{
+	// Post to the WinVNC menu window
+	if (!PostToWinVNC(MENU_SERVER_SHAREPRIMARY, 0, 0))
+	{
+		MessageBox(NULL, "No existing instance of WinVNC could be contacted", szAppName, MB_ICONEXCLAMATION | MB_OK);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+BOOL
+vncService::PostShareArea(unsigned short x, unsigned short y,
+						  unsigned short w, unsigned short h)
+{
+	// Post to the WinVNC menu window
+	if (!PostToWinVNC(MENU_SERVER_SHAREAREA,
+					  MAKEWPARAM(x,y), MAKELPARAM(w,h))) {
+		MessageBox(NULL, "No existing instance of WinVNC could be contacted", szAppName, MB_ICONEXCLAMATION | MB_OK);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+BOOL
+vncService::PostShareWindow(HWND hwnd)
+{
+	// Post to the WinVNC menu window
+	if (!PostToWinVNC(MENU_SERVER_SHAREWINDOW, (WPARAM)hwnd, 0))
 	{
 		MessageBox(NULL, "No existing instance of WinVNC could be contacted", szAppName, MB_ICONEXCLAMATION | MB_OK);
 		return FALSE;
@@ -628,7 +667,7 @@ vncService::KillAllClients()
 SERVICE_STATUS          g_srvstatus;       // current status of the service
 SERVICE_STATUS_HANDLE   g_hstatus;
 DWORD                   g_error = 0;
-DWORD					g_servicethread = 0;
+DWORD					g_servicethread = NULL;
 char*                   g_errortext[256];
 
 // Forward defines of internal service functions
@@ -797,13 +836,13 @@ vncService::WinVNCServiceMain()
 				break;
 
 			// Register this process with the OS as a service!
-			RegisterService(0, RSP_SIMPLE_SERVICE);
+			RegisterService(NULL, RSP_SIMPLE_SERVICE);
 
 			// Run the service itself
 			WinVNCAppMain();
 
 			// Then remove the service from the system service table
-			RegisterService(0, RSP_UNREGISTER_SERVICE);
+			RegisterService(NULL, RSP_UNREGISTER_SERVICE);
 
 			// Free the kernel library
 			FreeLibrary(kerneldll);
@@ -885,7 +924,7 @@ void ServiceWorkThread(void *arg)
 	WinVNCAppMain();
 
 	// Mark that we're no longer running
-	g_servicethread = 0;
+	g_servicethread = NULL;
 
 	// Tell the service manager that we've stopped.
     ReportStatus(
@@ -898,7 +937,7 @@ void ServiceWorkThread(void *arg)
 void ServiceStop()
 {
 	// Post a quit message to the main service thread
-	if (g_servicethread != 0)
+	if (g_servicethread != NULL)
 	{
 		vnclog.Print(LL_INTINFO, VNCLOG("quitting from ServiceStop\n"));
 		PostThreadMessage(g_servicethread, WM_QUIT, 0, 0);

@@ -44,6 +44,9 @@
 
 // Constants
 const UINT MENU_PROPERTIES_SHOW = RegisterWindowMessage("WinVNC.Properties.User.Show");
+const UINT MENU_SERVER_SHAREALL = RegisterWindowMessage("WinVNC.Server.ShareAll");
+const UINT MENU_SERVER_SHAREPRIMARY = RegisterWindowMessage("WinVNC.Server.SharePrimary");
+const UINT MENU_SERVER_SHAREAREA = RegisterWindowMessage("WinVNC.Server.ShareArea");
 const UINT MENU_SERVER_SHAREWINDOW = RegisterWindowMessage("WinVNC.Server.ShareWindow");
 const UINT MENU_DEFAULT_PROPERTIES_SHOW = RegisterWindowMessage("WinVNC.Properties.Default.Show");
 const UINT MENU_ABOUTBOX_SHOW = RegisterWindowMessage("WinVNC.AboutBox.Show");
@@ -294,13 +297,27 @@ LRESULT CALLBACK vncMenu::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lP
 		break;
 
 		// DEAL WITH NOTIFICATIONS FROM THE SERVER:
+
 	case WM_SRV_CLIENT_AUTHENTICATED:
+		_this->m_properties.ResetTabId();
+		_this->FlashTrayIcon(TRUE);
+		return 0;
+
 	case WM_SRV_CLIENT_DISCONNECT:
-		// Adjust the icon accordingly
-		_this->FlashTrayIcon(_this->m_server->AuthClientCount() != 0);
+		_this->m_properties.ResetTabId();
+		if (_this->m_server->AuthClientCount() == 0) {
+			_this->FlashTrayIcon(FALSE);
+			_this->m_wputils.RestoreWallpaper();
+		}
+		return 0;
+
+	case WM_SRV_CLIENT_HIDEWALLPAPER:
+		_this->m_wputils.KillWallpaper();
+		_this->m_server->ClearWallpaperWait();
 		return 0;
 
 		// STANDARD MESSAGE HANDLING
+
 	case WM_CREATE:
 		return 0;
 
@@ -502,14 +519,50 @@ LRESULT CALLBACK vncMenu::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lP
 			PostMessage(hwnd, WM_COMMAND, MAKELONG(ID_PROPERTIES, 0), 0);
 			return 0;
 		}
+		if (iMsg == MENU_SERVER_SHAREALL)
+		{
+			_this->m_properties.HideMatchWindow();
+			_this->m_server->FullScreen(true);
+			_this->m_server->PrimaryDisplayOnlyShared(false);
+			_this->m_server->ScreenAreaShared(false);
+			_this->m_server->WindowShared(false);
+			return 0;
+		}
+		if (iMsg == MENU_SERVER_SHAREPRIMARY)
+		{
+			_this->m_properties.HideMatchWindow();
+			_this->m_server->FullScreen(false);
+			_this->m_server->PrimaryDisplayOnlyShared(true);
+			_this->m_server->ScreenAreaShared(false);
+			_this->m_server->WindowShared(false);
+			return 0;
+		}
+		if (iMsg == MENU_SERVER_SHAREAREA)
+		{
+			int left = LOWORD(wParam);
+			int right = left + LOWORD(lParam);
+			int top = HIWORD(wParam);
+			int bottom = top + HIWORD(lParam);
+			_this->m_properties.MoveMatchWindow(left, top, right, bottom);
+			_this->m_properties.ShowMatchWindow();
+			_this->m_server->SetMatchSizeFields(left, top, right, bottom);
+			_this->m_server->FullScreen(false);
+			_this->m_server->PrimaryDisplayOnlyShared(false);
+			_this->m_server->ScreenAreaShared(true);
+			_this->m_server->WindowShared(false);
+			return 0;
+		}
 		if (iMsg == MENU_SERVER_SHAREWINDOW)
 		{
 			HWND hWindowShared = (HWND)wParam;
-			if (hWindowShared != NULL) {
-			_this->m_server->SetWindowShared(hWindowShared);
-			_this->m_server->FullScreen(false);
-			_this->m_server->ScreenAreaShared(false);
-			_this->m_server->WindowShared(true);
+			if (hWindowShared != NULL)
+			{
+				_this->m_properties.HideMatchWindow();
+				_this->m_server->SetWindowShared(hWindowShared);
+				_this->m_server->FullScreen(false);
+				_this->m_server->PrimaryDisplayOnlyShared(false);
+				_this->m_server->ScreenAreaShared(false);
+				_this->m_server->WindowShared(true);
 			}
 			return 0;
 		}

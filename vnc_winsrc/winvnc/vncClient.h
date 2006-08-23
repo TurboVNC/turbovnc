@@ -109,7 +109,7 @@ public:
 	// Functions for setting & getting the client settings
 	virtual void EnableKeyboard(BOOL enable) { m_keyboardenabled = enable; }
 	virtual void EnablePointer(BOOL enable)  { m_pointerenabled = enable;  }
-	virtual void BlockInput(BOOL block)      { m_inputblocked = block; }
+	virtual void BlockInput(BOOL block) { m_inputblocked = block; }
 	virtual BOOL IsKeyboardEnabled() { return m_keyboardenabled; }
 	virtual BOOL IsPointerEnabled()  { return m_pointerenabled;  }
 	virtual BOOL IsInputEnabled()    { return m_keyboardenabled || m_pointerenabled; }

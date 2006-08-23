@@ -42,8 +42,12 @@ class vncMenu;
 #include "vncServer.h"
 #include "vncProperties.h"
 #include "vncAbout.h"
+#include "WallpaperUtils.h"
 
 // Constants
+extern const UINT MENU_SERVER_SHAREALL;
+extern const UINT MENU_SERVER_SHAREPRIMARY;
+extern const UINT MENU_SERVER_SHAREAREA;
 extern const UINT MENU_SERVER_SHAREWINDOW;
 extern const UINT MENU_PROPERTIES_SHOW;
 extern const UINT MENU_DEFAULT_PROPERTIES_SHOW;
@@ -74,9 +78,6 @@ protected:
 
 	// Fields
 protected:
-	// Check that the password has been set
-	void CheckPassword();
-
 	// The server that this tray icon handles
 	vncServer		*m_server;
 
@@ -85,6 +86,9 @@ protected:
 
 	// About dialog for this server
 	vncAbout		m_about;
+
+	// The object to hide/show wallpaper and ActiveDesktop
+	WallpaperUtils	m_wputils;
 
 	HWND			m_hwnd;
 	HMENU			m_hmenu;

@@ -238,7 +238,7 @@ public:
     {
       // ordinary Latin-1 character
 
-      SHORT s = VkKeyScan(keysym);
+      SHORT s = VkKeyScan((CHAR)keysym);
       if (s == -1) {
         vnclog.Print(LL_INTWARN, "ignoring unrecognised Latin-1 keysym %d\n",
                      keysym);

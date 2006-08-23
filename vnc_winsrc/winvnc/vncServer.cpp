@@ -63,7 +63,9 @@ vncServer::vncServer()
 	{
 		vncPasswd::FromClear clearPWD;
 		memcpy(m_password, clearPWD, MAXPWLEN);
+		m_password_set = FALSE;
 		memcpy(m_password_viewonly, clearPWD, MAXPWLEN);
+		m_password_viewonly_set = FALSE;
 	}
 	m_querysetting = 2;
 	m_querytimeout = 10;
@@ -74,15 +76,16 @@ vncServer::vncServer()
 	m_lock_on_exit = 0;
 
 	// Set the polling mode options
-	m_poll_fullscreen = TRUE;
+	m_poll_fullscreen = FALSE;
 	m_poll_foreground = FALSE;
-	m_poll_undercursor = FALSE;
+	m_poll_undercursor = TRUE;
 
 	m_poll_oneventonly = FALSE;
 	m_poll_consoleonly = TRUE;
 
 	m_dont_set_hooks = FALSE;
-	m_dont_use_driver = TRUE;
+	m_dont_use_driver = FALSE;
+	m_driver_direct_access_en = TRUE;
 
 	// General options
 	m_loopbackOnly = FALSE;
@@ -111,11 +114,10 @@ vncServer::vncServer()
 	m_WindowShared= FALSE;
 	m_hwndShared = NULL;
 	m_screen_area = FALSE;
+	m_primary_display_only_shared = FALSE;
 	m_disable_time = 3;
-	RECT temp;
-	GetWindowRect(GetDesktopWindow(), &temp);
-	SetSharedRect(temp);
-	SetPollingCycle(50);
+	SetSharedRect(GetScreenRect());
+	SetPollingCycle(300);
 	PollingCycleChanged(false);
 	m_cursor_pos.x = 0;
 	m_cursor_pos.y = 0;
@@ -133,6 +135,7 @@ vncServer::vncServer()
 	m_remote_keyboard = 1;
 #endif
 
+	m_wallpaper_wait = FALSE;
 }
 
 vncServer::~vncServer()
@@ -296,6 +299,10 @@ vncServer::Authenticated(vncClientId clientid)
 			// Create the screen handler if necessary
 			if (m_desktop == NULL)
 			{
+				if (RemoveWallpaperEnabled()) {
+					m_wallpaper_wait = TRUE;
+					DoNotify(WM_SRV_CLIENT_HIDEWALLPAPER, 0, 0);
+				}
 				m_desktop = new vncDesktop();
 				if (m_desktop == NULL)
 				{
@@ -820,6 +827,12 @@ vncServer::DontUseDriver(BOOL enable)
 	m_dont_use_driver = enable;
 }
 
+void
+vncServer::DriverDirectAccess(BOOL enable)
+{
+	m_driver_direct_access_en = enable;
+}
+
 // Name and port number handling
 void
 vncServer::SetName(const char * name)
@@ -851,40 +864,31 @@ vncServer::SetPorts(const UINT port_rfb, const UINT port_http)
 }
 
 void
-vncServer::SetPassword(const char *passwd)
+vncServer::SetPassword(BOOL activate, const char *passwd)
 {
+	m_password_set = activate;
 	memcpy(m_password, passwd, MAXPWLEN);
 }
 
-void
+BOOL
 vncServer::GetPassword(char *passwd)
 {
 	memcpy(passwd, m_password, MAXPWLEN);
+	return m_password_set;
 }
 
 void
-vncServer::SetPasswordViewOnly(const char *passwd)
+vncServer::SetPasswordViewOnly(BOOL activate, const char *passwd)
 {
+	m_password_viewonly_set = activate;
 	memcpy(m_password_viewonly, passwd, MAXPWLEN);
 }
 
-void
+BOOL
 vncServer::GetPasswordViewOnly(char *passwd)
 {
 	memcpy(passwd, m_password_viewonly, MAXPWLEN);
-}
-
-// External authentication
-void
-vncServer::EnableExternalAuth(BOOL enable)
-{
-	m_external_auth = enable;
-}
-
-BOOL
-vncServer::ExternalAuthEnabled()
-{
-	return m_external_auth;
+	return m_password_viewonly_set;
 }
 
 // Remote input handling
@@ -1466,11 +1470,9 @@ vncServer::SetWindowShared(HWND hWnd)
 	m_hwndShared=hWnd;
 }
 
-void 
-vncServer::SetMatchSizeFields(int left,int top,int right,int bottom)
+void  vncServer::SetMatchSizeFields(int left,int top,int right,int bottom)
 {
-	RECT trect;
-	GetWindowRect(GetDesktopWindow(), &trect);
+	RECT trect = GetScreenRect();
 
 /*	if ( right - left < 32 )
 		right = left + 32;
@@ -1614,4 +1616,54 @@ vncServer::checkPointer(vncClient *pClient)
 BOOL
 vncServer::DriverActive() {
 	return (m_desktop != NULL) ? m_desktop->DriverActive() : FALSE;
+}
+
+typedef HMONITOR (WINAPI* pMonitorFromPoint)(POINT,DWORD);
+typedef BOOL (WINAPI* pGetMonitorInfo)(HMONITOR,LPMONITORINFO);
+
+BOOL vncServer::SetShareMonitorFromPoint(POINT pt)
+{
+	HINSTANCE  hInstUser32 = LoadLibrary("User32.DLL");
+	if (!hInstUser32) return FALSE;  
+	pMonitorFromPoint pMFP = (pMonitorFromPoint)GetProcAddress(hInstUser32, "MonitorFromPoint");
+	pGetMonitorInfo pGMI = (pGetMonitorInfo)GetProcAddress(hInstUser32, "GetMonitorInfoA");
+	if (!pMFP || !pGMI)
+	{
+		vnclog.Print(
+			LL_INTERR,
+			VNCLOG("Can not import '%s' and '%s' from '%s'.\n"),
+			"MonitorFromPoint",
+			"GetMonitorInfoA",
+			"User32.DLL");
+		FreeLibrary(hInstUser32);
+		return FALSE;
+	}
+
+	HMONITOR hm = pMFP(pt, MONITOR_DEFAULTTONEAREST);
+	if (!hm)
+	{
+		FreeLibrary(hInstUser32);
+		return FALSE;
+	}
+	MONITORINFO	moninfo;
+	moninfo.cbSize = sizeof(moninfo);
+	if (!pGMI(hm, &moninfo))
+	{
+		FreeLibrary(hInstUser32);
+		return FALSE;
+	}
+
+	FullScreen(FALSE);
+	WindowShared(FALSE);
+	ScreenAreaShared(TRUE);
+	PrimaryDisplayOnlyShared(FALSE);
+
+	SetMatchSizeFields(
+		moninfo.rcMonitor.left,
+		moninfo.rcMonitor.top,
+		moninfo.rcMonitor.right,
+		moninfo.rcMonitor.bottom);
+
+	FreeLibrary(hInstUser32);
+	return TRUE;
 }

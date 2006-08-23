@@ -27,14 +27,6 @@ WallpaperUtils::WallpaperUtils()
 {
 	m_restore_ActiveDesktop = false;
 	m_restore_wallpaper = false;
-
-	// NOTE: All functions must be called in the same thread.
-	CoInitialize(NULL);
-}
-
-WallpaperUtils::~WallpaperUtils()
-{
-	CoUninitialize();
 }
 
 void
@@ -91,7 +83,9 @@ WallpaperUtils::KillWallpaper()
 		m_restore_wallpaper = true;
 	}
 
+	CoInitialize(NULL);
 	KillActiveDesktop();
+	CoUninitialize();
 }
 
 void
@@ -137,7 +131,9 @@ WallpaperUtils::RestoreActiveDesktop()
 void
 WallpaperUtils::RestoreWallpaper()
 {
+	CoInitialize(NULL);
 	RestoreActiveDesktop();
+	CoUninitialize();
 
 	if (m_restore_wallpaper) {
 		SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, NULL, SPIF_SENDCHANGE);

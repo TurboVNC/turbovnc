@@ -37,12 +37,13 @@ class WallpaperUtils
 {
 public:
 	WallpaperUtils();
-	~WallpaperUtils();
 
 	void KillWallpaper();
 	void RestoreWallpaper();
 
 protected:
+	// NOTE: Before using any of the following two functions, the caller MUST
+	//       initialize the COM library, e.g. by calling CoInitialize(NULL).
 	void KillActiveDesktop();
 	void RestoreActiveDesktop();
 

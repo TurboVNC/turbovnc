@@ -200,6 +200,46 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 			i += arglen;
 			continue;
 		}
+		if (strncmp(&szCmdLine[i], winvncShareAll, arglen) == 0 &&
+			arglen == strlen(winvncShareAll))
+		{
+			// Show full desktop to VNC clients
+			vncService::PostShareAll();
+			i += arglen;
+			continue;
+		}
+		if (strncmp(&szCmdLine[i], winvncSharePrimary, arglen) == 0 &&
+			arglen == strlen(winvncSharePrimary))
+		{
+			// Show only the primary display to VNC clients
+			vncService::PostSharePrimary();
+			i += arglen;
+			continue;
+		}
+		if (strncmp(&szCmdLine[i], winvncShareArea, arglen) == 0 &&
+			arglen == strlen(winvncShareArea))
+		{
+			// Show a specified rectangular area to VNC clients
+			i += arglen;
+
+			// First, we have to parse the command line to get an argument
+			int start, end;
+			start = i;
+			while (szCmdLine[start] && szCmdLine[start] <= ' ') start++;
+			end = start;
+			while (szCmdLine[end] > ' ') end++;
+			i = end;
+			if (end == start)
+				continue;
+
+			// Parse the argument -- it should look like 640x480+320+240
+			unsigned short x, y, w, h;
+			int n = sscanf(&szCmdLine[start], "%hux%hu+%hu+%hu", &w, &h, &x, &y);
+			if (n == 4 && w > 0 && h > 0)
+				vncService::PostShareArea(x, y, w, h);
+
+			continue;
+		}
 		if (strncmp(&szCmdLine[i], winvncShareWindow, arglen) == 0 &&
 			arglen == strlen(winvncShareWindow))
 		{
@@ -234,7 +274,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 					HWND hwndFound = vncService::FindWindowByTitle(title);
 					if (hwndFound != NULL)
 						cancelConnect = false;
-					vncService::NewSharedWindow(hwndFound);
+					vncService::PostShareWindow(hwndFound);
 					delete [] title;
 				}
 			}
