@@ -3,6 +3,8 @@
  */
 
 /*
+ *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
+ *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  *  Copyright (C) 2000-2004 Constantin Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.

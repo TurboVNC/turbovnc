@@ -3,6 +3,7 @@
  */
 
 /*
+ *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -420,10 +421,12 @@ InitOutput(screenInfo, argc, argv)
     initOutputCalled = TRUE;
 
     rfbLog("Xvnc version %s\n", XVNCRELEASE);
+    rfbLog("Copyright (C) 2004-2006 Sun Microsystems, Inc.\n");
+    rfbLog("Copyright (C) 2004 Landmark Graphics Corporation\n");
     rfbLog("Copyright (C) 2000-2006 Constantin Kaplinsky\n");
     rfbLog("Copyright (C) 1999 AT&T Laboratories Cambridge\n");
     rfbLog("All Rights Reserved.\n");
-    rfbLog("See http://www.tightvnc.com/ for information on TightVNC\n");
+    rfbLog("See http://virtualgl.sourceforge.net/ for more info\n");
     rfbLog("Desktop name '%s' (%s:%s)\n",desktopName,rfbThisHost,display);
     rfbLog("Protocol versions supported: %d.%dt, %d.%d, %d.%d\n",
 	   rfbProtocolMajorVersion, rfbProtocolMinorVersion,
