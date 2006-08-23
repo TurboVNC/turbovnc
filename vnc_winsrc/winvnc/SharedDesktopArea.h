@@ -1,4 +1,4 @@
-// Copyright (C) 2004 TightVNC Development Team. All Rights Reserved.
+// Copyright (C) 2004-2006 TightVNC Group. All Rights Reserved.
 //
 //  TightVNC is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -34,17 +34,15 @@ class SharedDesktopArea;
 class SharedDesktopArea  
 {
 public:
-	SharedDesktopArea(HWND hwnd, CMatchWindow *matchwindow,
-					  vncProperties *vncprop, vncServer *server);
-	bool ApplySharedControls();
-	void FullScreen();
-	void SharedWindow();
-	void SharedScreen();
+	SharedDesktopArea(HWND hwnd, CMatchWindow *matchwindow, vncServer *server);
 	virtual ~SharedDesktopArea();
 
+	void Validate();
+	bool Apply();
+
 protected:
+	// FIXME: hwndShared instead of hWnd argument?
 	void SetWindowCaption(HWND hWnd);
-	HWND m_hWindowName;
 
 private:
 	void Init();
@@ -52,12 +50,27 @@ private:
 	static void DrawFrameAroundWindow(HWND hWnd);
 	static LRESULT CALLBACK BmpWndProc(HWND, UINT, WPARAM, LPARAM);
 
+	void EnableWinSelectionControls(BOOL bEnable, LPCTSTR szWinText);
+
+	inline void Enable(int id, BOOL enable) {
+		EnableWindow(GetDlgItem(m_hwnd, id), enable);
+	}
+	inline void SetChecked(int id, BOOL checked) {
+		SendDlgItemMessage(m_hwnd, id, BM_SETCHECK, checked, 0);
+	}
+	inline BOOL IsChecked(int id) {
+		return (SendDlgItemMessage(m_hwnd, id, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	}
+	inline void SetText(int id, LPCTSTR szText) {
+		::SetWindowText(GetDlgItem(m_hwnd, id), szText);
+	}
+
 	HWND m_hwnd;
 	LONG m_OldBmpWndProc;
 	BOOL m_bCaptured;
 	HWND m_KeepHandle;
+	HWND m_hwndShared;
 	vncServer *m_server;
-	vncProperties *m_vncprop;
 
 	CMatchWindow *m_pMatchWindow;
 	bool m_deleteMatchWindow;

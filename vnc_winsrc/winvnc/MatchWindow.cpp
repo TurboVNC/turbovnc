@@ -40,7 +40,6 @@ int iCornerNumber;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-
 CMatchWindow::CMatchWindow(vncServer* pServer,int left,int top,int right,int bottom)
 {
 	m_bSized=FALSE;
@@ -118,32 +117,32 @@ LRESULT CALLBACK CMatchWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, L
 			
 			switch (iCornerNumber)
 			{
-			case 0:
+			case 0:	// NW
 				wRect.left=ptMousePoint.x;
 				wRect.top=ptMousePoint.y;
 				break;
-			case 1:
+			case 1:	// N
 				wRect.top=ptMousePoint.y;
 				break;
-			case 2:
+			case 2:	// NE
 				wRect.right=ptMousePoint.x;
 				wRect.top=ptMousePoint.y;
 				break;
-			case 3:
+			case 3:	// E
 				wRect.right=ptMousePoint.x;
 				break;
-			case 4:
+			case 4:	// SE
 				wRect.right=ptMousePoint.x;
 				wRect.bottom=ptMousePoint.y;
 				break;
-			case 5:
+			case 5:	// S
 				wRect.bottom=ptMousePoint.y;
 				break;
-			case 6:
+			case 6:	// SW
 				wRect.left=ptMousePoint.x;
 				wRect.bottom=ptMousePoint.y;
 				break;
-			case 7:
+			case 7:	// W
 				wRect.left=ptMousePoint.x;
 				break;
 			}
@@ -206,55 +205,57 @@ LRESULT CALLBACK CMatchWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, L
 				SetCapture(hWnd);
 				iCornerNumber=i;
 
+				RECT screenrect = GetScreenRect();
+
 				switch (iCornerNumber)
 				{
-				case 0:
-					wRect.left=0;
-					wRect.top=0;
-					wRect.bottom-=MW_WIDTH*3;
-					wRect.right-=MW_WIDTH*3;
+				case 0:	// NW
+					wRect.left = screenrect.left;
+					wRect.top = screenrect.top;
+					wRect.bottom -= MW_WIDTH*3;
+					wRect.right -= MW_WIDTH*3;
 					break;
-				case 1:
-					wRect.left=0;
-					wRect.top=0;
-					wRect.bottom-=MW_WIDTH*3;
-					wRect.right=GetSystemMetrics(SM_CXSCREEN);
+				case 1:	// N
+					wRect.left = screenrect.left;
+					wRect.top = screenrect.top;
+					wRect.bottom -= MW_WIDTH*3;
+					wRect.right = screenrect.right;
 					break;
-				case 2:
-					wRect.left+=MW_WIDTH*3;
-					wRect.top=0;
-					wRect.bottom-=MW_WIDTH*3;
-					wRect.right=GetSystemMetrics(SM_CXSCREEN);
+				case 2:	// NE
+					wRect.left += MW_WIDTH*3;
+					wRect.top = screenrect.top;
+					wRect.bottom -= MW_WIDTH*3;
+					wRect.right = screenrect.right;
 					break;
-				case 3:
-					wRect.left+=MW_WIDTH*3;
-					wRect.top=0;
-					wRect.bottom=GetSystemMetrics(SM_CYSCREEN);
-					wRect.right=GetSystemMetrics(SM_CXSCREEN);
+				case 3:	// E
+					wRect.left += MW_WIDTH*3;
+					wRect.top = screenrect.top;
+					wRect.bottom = screenrect.bottom;
+					wRect.right = screenrect.right;
 					break;
-				case 4:
-					wRect.left+=MW_WIDTH*3;
-					wRect.top+=MW_WIDTH*3;
-					wRect.bottom=GetSystemMetrics(SM_CYSCREEN);
-					wRect.right=GetSystemMetrics(SM_CXSCREEN);
+				case 4:	// SE
+					wRect.left += MW_WIDTH*3;
+					wRect.top += MW_WIDTH*3;
+					wRect.bottom = screenrect.bottom;
+					wRect.right = screenrect.right;
 					break;
-				case 5:
-					wRect.left=0;
-					wRect.top+=MW_WIDTH*3;
-					wRect.bottom=GetSystemMetrics(SM_CYSCREEN);
-					wRect.right=GetSystemMetrics(SM_CXSCREEN);
+				case 5:	// S
+					wRect.left = screenrect.left;
+					wRect.top += MW_WIDTH*3;
+					wRect.bottom = screenrect.bottom;
+					wRect.right = screenrect.right;
 					break;
-				case 6:
-					wRect.left=0;
-					wRect.top+=MW_WIDTH*3;
-					wRect.bottom=GetSystemMetrics(SM_CYSCREEN);
-					wRect.right-=MW_WIDTH*3;
+				case 6:	// SW
+					wRect.left = screenrect.left;
+					wRect.top += MW_WIDTH*3;
+					wRect.bottom = screenrect.bottom;
+					wRect.right -= MW_WIDTH*3;
 					break;
-				case 7:
-					wRect.left=0;
-					wRect.top=0;
-					wRect.bottom=GetSystemMetrics(SM_CYSCREEN);
-					wRect.right-=MW_WIDTH*3;
+				case 7:	// W
+					wRect.left = screenrect.left;
+					wRect.top = screenrect.top;
+					wRect.bottom = screenrect.bottom;
+					wRect.right -= MW_WIDTH*3;
 					break;
 				}
 				ClipCursor(&wRect);

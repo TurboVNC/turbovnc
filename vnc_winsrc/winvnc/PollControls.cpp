@@ -34,6 +34,7 @@ PollControls::PollControls(HWND hwnd, vncServer *server)
 	SetChecked(IDC_ONEVENT_ONLY, m_server->PollOnEventOnly());
 	SetChecked(IDC_DONT_SET_HOOKS, m_server->DontSetHooks());
 	SetChecked(IDC_DONT_USE_DRIVER, m_server->DontUseDriver());
+	SetChecked(IDC_DRIVER_DIRECT_ACCESS, m_server->DriverDirectAccess());
 	SetDlgItemInt(m_hwnd, IDC_POLLING_CYCLE, m_server->GetPollingCycle(), FALSE);
 
 	if (m_server->DesktopActive()) {
@@ -78,6 +79,7 @@ void PollControls::Apply()
 	// This should appear AFTER calling m_server->PollFullScreen(...)
 	m_server->DontSetHooks(IsChecked(IDC_DONT_SET_HOOKS));
 	m_server->DontUseDriver(IsChecked(IDC_DONT_USE_DRIVER));
+	m_server->DriverDirectAccess(IsChecked(IDC_DRIVER_DIRECT_ACCESS));
 
 	BOOL success;
 	UINT pollingCycle = GetDlgItemInt(m_hwnd, IDC_POLLING_CYCLE, &success, TRUE);
