@@ -593,6 +593,7 @@ int VNCOptions::DoDialog(bool running)
 	return DialogBoxParam(pApp->m_instance, DIALOG_MAKEINTRESOURCE(IDD_PARENT), 
 							NULL, (DLGPROC) DlgProc, (LONG) this); 	
 }
+
 BOOL CALLBACK VNCOptions::DlgProc(HWND hwndDlg, UINT uMsg,
 										WPARAM wParam, LPARAM lParam)
 {
@@ -1213,6 +1214,7 @@ BOOL CALLBACK VNCOptions::DlgProcGlobalOptions(HWND hwnd, UINT uMsg,
 	}
 	return 0;
 }
+
 void VNCOptions::EnableLog(HWND hwnd, bool enable)
 {
 	HWND hlevel = GetDlgItem(hwnd, IDC_STATIC_LOG_LEVEL);
@@ -1225,6 +1227,7 @@ void VNCOptions::EnableLog(HWND hwnd, bool enable)
 	EnableWindow(hlevel, enable);
 	EnableWindow(hLogBrowse, enable);
 }
+
 void VNCOptions::Lim(HWND hwnd, int control, DWORD min, DWORD max)
 {
 	int buf;
@@ -1242,6 +1245,7 @@ void VNCOptions::Lim(HWND hwnd, int control, DWORD min, DWORD max)
 					buf, FALSE);
 	}
 }
+
 void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 {
 	HKEY RegKey;
@@ -1285,6 +1289,7 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 	}
 	RegCloseKey(RegKey);
 }
+
 int VNCOptions::read(HKEY hkey, char *name, int retrn)
 {
 	DWORD buflen = 4;
@@ -1297,7 +1302,8 @@ int VNCOptions::read(HKEY hkey, char *name, int retrn)
 		return buf;
 	}
 }
- void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
+
+void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
 {
 	DWORD dispos;
 	HKEY RegKey;
@@ -1347,6 +1353,7 @@ void VNCOptions::delkey(char subkey[256], char keyname[256])
 	_tcscat(key, subkey);
 	RegDeleteKey (HKEY_CURRENT_USER, key);
 }
+
 void VNCOptions::save(HKEY hkey, char *name, int value) 
 {
 	RegSetValueEx( hkey, name, 
