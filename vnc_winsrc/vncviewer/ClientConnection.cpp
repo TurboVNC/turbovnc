@@ -57,6 +57,10 @@ extern "C" {
 #include "d3des.h"
 }
 
+#ifndef min
+ #define min(a,b) ((a)<(b)?(a):(b))
+#endif
+
 #define INITIALNETBUFSIZE 4096
 #define MAX_ENCODINGS 20
 #define VWR_WND_CLASS_NAME _T("VNCviewer")
