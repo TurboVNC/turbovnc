@@ -271,13 +271,17 @@ typedef struct _rfbAuthenticationCapsMsg {
  * authentication scheme.  The following codes are supported.
  */
 
+/* Standard authentication methods. */
 #define rfbAuthNone 1
 #define rfbAuthVNC 2
-#define rfbAuthUnixLogin 129
-#define rfbAuthExternal 130
 
 #define sig_rfbAuthNone "NOAUTH__"
 #define sig_rfbAuthVNC "VNCAUTH_"
+
+/* These two are not used in the mainstream version. */
+#define rfbAuthUnixLogin 129
+#define rfbAuthExternal 130
+
 #define sig_rfbAuthUnixLogin "ULGNAUTH"
 #define sig_rfbAuthExternal "XTRNAUTH"
 

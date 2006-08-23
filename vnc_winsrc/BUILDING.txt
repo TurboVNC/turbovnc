@@ -1,13 +1,25 @@
-BUILDING vncviewer and WinVNC (TightVNC 1.3dev7 development release)
-====================================================================
 
-IMPORTANT NOTE: This is a development version and may be unstable.
-It's not recommended for production use.
+  TightVNC version 1.3.8
+  BUILDING vncviewer and WinVNC
 
-This distibution requires third-party libraries for successfull
-compilation. They are NOT included in this archive. The required
-libraries include zlib and JPEG libraries freely available in the
-source form from the following locations:
+======================================================================
+
+  Building from the source distribution
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The source distribution is ready to compile, but the only compiler
+supported is MS Visual C++ 6.0. Workspace files (*.dsw) for this
+environment are included in the distribution.
+
+Building with Borland C++ 5.5 compiler is not supported any more,
+sorry.
+
+  Building from the CVS
+  ~~~~~~~~~~~~~~~~~~~~~
+
+The sources in the CVS do not include third-party libraries required
+for successful compilation. These are zlib and JPEG libraries freely
+available in the source form from the following locations:
 
   ftp://ftp.uu.net/graphics/jpeg/jpegsrc.v6b.tar.gz
   http://prdownloads.sourceforge.net/libpng/zlib-1.1.4.tar.gz
@@ -41,7 +53,5 @@ HtmlHelp.h and HtmlHelp.lib. Copy both files to the following folders:
     vnc_winsrc/vncviewer/
     vnc_winsrc/winvnc/
 
-Compilation has been checked under MS Visual C++ 6.0. Workspace files
-(*.dsw) for this environment are included in the distribution. Building
-with Borland C++ 5.5 compiler is not supported any more, sorry.
-
+After zlib, JPEG and HtmlHelp files are in place, the source is ready
+to compile with MS Visual C++ 6.0.

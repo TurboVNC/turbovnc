@@ -143,8 +143,6 @@ void ClientConnection::Init(VNCviewerApp *pApp)
 	m_hBitmap = NULL;
 	m_hPalette = NULL;
 	m_encPasswd[0] = '\0';
-	m_usernameExt[0] = '\0';
-	memset(m_encPasswdExt, 0, 2);	// set username and password lengths to zeroes
 
 	m_connDlg = NULL;
 
@@ -198,10 +196,6 @@ void ClientConnection::InitCapabilities()
 				   "No authentication");
 	m_authCaps.Add(rfbAuthVNC, rfbStandardVendor, sig_rfbAuthVNC,
 				   "Standard VNC password authentication");
-	m_authCaps.Add(rfbAuthUnixLogin, rfbTightVncVendor, sig_rfbAuthUnixLogin,
-				   "Unix login-style authentication");
-	m_authCaps.Add(rfbAuthExternal, rfbTightVncVendor, sig_rfbAuthExternal,
-				   "External authentication, preliminary version");
 
 	// Known server->client message types
 	m_serverMsgCaps.Add(rfbFileListData, rfbTightVncVendor,
@@ -1069,12 +1063,6 @@ void ClientConnection::Authenticate(CARD32 authScheme)
 	case rfbAuthVNC:
 		authFuncPtr = &ClientConnection::AuthenticateVNC;
 		break;
-	case rfbAuthUnixLogin:
-		authFuncPtr = &ClientConnection::AuthenticateUnixLogin;
-		break;
-	case rfbAuthExternal:
-		authFuncPtr = &ClientConnection::AuthenticateExternal;
-		break;
 	default:
 		vnclog.Print(0, _T("Unknown authentication scheme: %d\n"),
 					 (int)authScheme);
@@ -1172,191 +1160,6 @@ bool ClientConnection::AuthenticateVNC(char *errBuf, int errBufSize, bool *again
 		break;
 	default:
 		_snprintf(errBuf, errBufSize, "Unknown VNC authentication result: %u",
-				  (unsigned int)authResult);
-		*again = false;
-		break;
-	}
-	return false;
-}
-
-bool ClientConnection::AuthenticateUnixLogin(char *errBuf, int errBufSize, bool *again)
-{
-	char username[256];
-	char passwd[256];
-
-	LoginAuthDialog ad(m_opts.m_display);
-	ad.DoDialog();	
-#ifndef UNDER_CE
-	strcpy(username, ad.m_username);
-	strcpy(passwd, ad.m_passwd);
-#else
-	// FIXME: Move wide-character translations to a separate class
-	int origlen = _tcslen(ad.m_username);
-	int newlen = WideCharToMultiByte(
-		CP_ACP,			// code page
-		0,				// performance and mapping flags
-		ad.m_username,	// address of wide-character string
-		origlen,		// number of characters in string
-		username,		// address of buffer for new string
-		255,			// size of buffer
-		NULL, NULL);
-	username[newlen]= '\0';
-	origlen = _tcslen(ad.m_passwd);
-	newlen = WideCharToMultiByte(
-		CP_ACP,			// code page
-		0,				// performance and mapping flags
-		ad.m_passwd,	// address of wide-character string
-		origlen,		// number of characters in string
-		passwd,			// address of buffer for new string
-		255,			// size of buffer
-		NULL, NULL);
-	passwd[newlen]= '\0';
-#endif
-	if (strlen(username) == 0) {
-		_snprintf(errBuf, errBufSize, "Empty user name");
-		*again = true;
-		return false;
-	}
-	if (strlen(passwd) == 0) {
-		_snprintf(errBuf, errBufSize, "Empty password");
-		*again = true;
-		return false;
-	}
-
-	CARD32 usernameLen = Swap32IfLE((CARD32)strlen(username));
-	CARD32 passwdLen = Swap32IfLE((CARD32)strlen(passwd));
-
-	WriteExact((char *)&usernameLen, sizeof(usernameLen));
-	WriteExact((char *)&passwdLen, sizeof(passwdLen));
-	WriteExact(username, strlen(username));
-	WriteExact(passwd, strlen(passwd));
-
-	// Lose the password from memory
-	memset(passwd, '\0', strlen(passwd));
-
-	CARD32 authResult;
-	ReadExact((char *) &authResult, 4);
-	authResult = Swap32IfLE(authResult);
-
-	switch (authResult) {
-	case rfbVncAuthOK:
-		return true;
-	case rfbVncAuthFailed:
-		_snprintf(errBuf, errBufSize, "Authentication failed");
-		*again = true;
-		break;
-	case rfbVncAuthTooMany:
-		_snprintf(errBuf, errBufSize, "Authentication failed - too many tries");
-		*again = false;
-		break;
-	default:
-		_snprintf(errBuf, errBufSize, "Unknown authentication result: %u",
-				  (unsigned int)authResult);
-		*again = false;
-		break;
-	}
-	return false;
-}
-
-// FIXME: Code duplication, see UnixLogin authentication
-bool ClientConnection::AuthenticateExternal(char *errBuf, int errBufSize, bool *again)
-{
-	if (m_encPasswdExt[0] == '\0' && m_encPasswdExt[1] == '\0') {
-		char username[256];
-		char passwd[256];
-
-		LoginAuthDialog ad(m_opts.m_display, "External Authentication", m_usernameExt);
-		ad.DoDialog();	
-#ifndef UNDER_CE
-		strcpy(username, ad.m_username);
-		strcpy(passwd, ad.m_passwd);
-#else
-		// FIXME: Move wide-character translations to a separate class
-		int origlen = _tcslen(ad.m_username);
-		int newlen = WideCharToMultiByte(
-			CP_ACP,			// code page
-			0,				// performance and mapping flags
-			ad.m_username,	// address of wide-character string
-			origlen,		// number of characters in string
-			username,		// address of buffer for new string
-			255,			// size of buffer
-			NULL, NULL);
-		username[newlen]= '\0';
-		origlen = _tcslen(ad.m_passwd);
-		newlen = WideCharToMultiByte(
-			CP_ACP,			// code page
-			0,				// performance and mapping flags
-			ad.m_passwd,	// address of wide-character string
-			origlen,		// number of characters in string
-			passwd,			// address of buffer for new string
-			255,			// size of buffer
-			NULL, NULL);
-		passwd[newlen]= '\0';
-#endif
-		if (strlen(username) == 0) {
-			_snprintf(errBuf, errBufSize, "Empty user name");
-			*again = true;
-			return false;
-		}
-		if (strlen(passwd) == 0) {
-			_snprintf(errBuf, errBufSize, "Empty password");
-			*again = true;
-			return false;
-		}
-
-		CARD8 usernameLen = (CARD8)strlen(username);
-		CARD8 passwordLen = (CARD8)strlen(passwd);
-		WriteExact((char *)&usernameLen, sizeof(usernameLen));
-		WriteExact((char *)&passwordLen, sizeof(passwordLen));
-
-		int len = (usernameLen + passwordLen + 7) & 0xFFFFFFF8;
-		unsigned char *buf = new unsigned char[len];
-		memcpy(buf, username, usernameLen);
-		memcpy(buf + usernameLen, passwd, passwordLen);
-		memset(buf + usernameLen + passwordLen, '\0', len - (usernameLen + passwordLen));
-
-		// Encrypt and send the username/password pair
-		unsigned char key[8] = {11,110,60,254,61,210,245,92};
-		deskey(key, EN0);
-		for (int i = 0; i < len; i += 8)
-			des(buf + i, buf + i);
-		WriteExact((char *)buf, len);
-
-		// Remember encrypted username/password pair
-		m_encPasswdExt[0] = usernameLen;
-		m_encPasswdExt[1] = passwordLen;
-		strcpy(m_usernameExt, username);
-		memcpy(&m_encPasswdExt[2], buf, len);
-
-		// Lose the passwords from memory
-		memset(passwd, '\0', strlen(passwd));
-		memset(buf, '\0', len);
-		delete[] buf;
-	} else {
-		// Send encrypted username/password pair from the config file
-		CARD8 usernameLen = m_encPasswdExt[0];
-		CARD8 passwordLen = m_encPasswdExt[1];
-		int len = (usernameLen + passwordLen + 7) & 0xFFFFFFF8;
-		WriteExact((char *)m_encPasswdExt, 2 + len);
-	}
-
-	CARD32 authResult;
-	ReadExact((char *) &authResult, 4);
-	authResult = Swap32IfLE(authResult);
-
-	switch (authResult) {
-	case rfbVncAuthOK:
-		return true;
-	case rfbVncAuthFailed:
-		_snprintf(errBuf, errBufSize, "Authentication failed");
-		*again = true;
-		break;
-	case rfbVncAuthTooMany:
-		_snprintf(errBuf, errBufSize, "Authentication failed - too many tries");
-		*again = false;
-		break;
-	default:
-		_snprintf(errBuf, errBufSize, "Unknown authentication result: %u",
 				  (unsigned int)authResult);
 		*again = false;
 		break;
@@ -1510,6 +1313,7 @@ void ClientConnection::SizeWindow(bool centered)
 
 	int x,y;
 	WINDOWPLACEMENT winplace;
+	winplace.length = sizeof(WINDOWPLACEMENT);
 	GetWindowPlacement(m_hwnd1, &winplace);
 	if (centered) {
 		x = (workwidth - m_winwidth) / 2;		
@@ -1536,18 +1340,6 @@ void ClientConnection::SizeWindow(bool centered)
 	winplace.rcNormalPosition.right = x + m_winwidth;
 	winplace.rcNormalPosition.bottom = y + m_winheight;
 	SetWindowPlacement(m_hwnd1, &winplace);
-	switch (winplace.showCmd) {
-	case SW_SHOWNORMAL:
-		SetWindowPos(m_hwnd1, HWND_TOP, x, y, m_winwidth, m_winheight,
-					SWP_SHOWWINDOW);
-		break;	
-	case  SW_SHOWMAXIMIZED:
-		ShowWindow(m_hwnd1, SW_MAXIMIZE);
-		break;
-	case SW_SHOWMINIMIZED:
-		ShowWindow(m_hwnd1, SW_SHOWNORMAL);
-		break;
-	}
 	SetForegroundWindow(m_hwnd1);
 	PositionChildWindow();
 }

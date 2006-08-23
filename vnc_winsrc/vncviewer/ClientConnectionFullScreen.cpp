@@ -32,8 +32,8 @@
 
 // Parameters for scrolling in full screen mode
 #define BUMPSCROLLBORDER 4
-#define BUMPSCROLLAMOUNTX 16
-#define BUMPSCROLLAMOUNTY 4
+#define BUMPSCROLLAMOUNTX 8
+#define BUMPSCROLLAMOUNTY 6
 
 bool ClientConnection::InFullScreenMode() 
 {
