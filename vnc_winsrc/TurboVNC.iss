@@ -3,8 +3,8 @@
 
 [Setup]
 AppName=TurboVNC
-AppVerName=TurboVNC 0.3.1
-AppVersion=0.3.1
+AppVerName=TurboVNC 0.3.2
+AppVersion=0.3.2
 AppPublisher=The VirtualGL Project
 AppPublisherURL=http://VirtualGL.sourceforge.net
 AppSupportURL=http://VirtualGL.sourceforge.net
@@ -12,7 +12,6 @@ AppUpdatesURL=http://VirtualGL.sourceforge.net
 DefaultDirName={pf}\TurboVNC
 DefaultGroupName=TurboVNC
 AllowNoIcons=yes
-;AlwaysCreateUninstallIcon=no
 InfoBeforeFile=InstInfo.rtf
 Compression=zip/9
 WindowVisible=no
