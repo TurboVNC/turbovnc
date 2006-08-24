@@ -1,69 +1,74 @@
 include Makerules
 
-CFLAGS = $(OPTFLAG) -I. -I.. -I../../../vgl/include -Iomnithread -DXMD_H \
-	-DWIN32 -D_WINDOWS -D__NT__ -D_WINSTATIC -D__WIN32__ -D_WIN32_IE=0x400
-LDFLAGS = $(OPTFLAG)
-WINLIBS = -lwsock32 -lgdi32 -lcomdlg32 -lwinmm -lhtmlhelp -lcomctl32 \
-	-L../../../vgl/windows/vnc/lib -lturbojpeg -lfbx
+CFLAGS := $(CFLAGS) -Iomnithread -Izlib -I.. -I../turbojpeg
 
-OBJS = $(ODIR)/AboutBox.o \
-       $(ODIR)/AuthDialog.o \
-       $(ODIR)/CapsContainer.o \
-       $(ODIR)/ClientConnection.o \
-       $(ODIR)/ClientConnectionClipboard.o \
-       $(ODIR)/ClientConnectionCopyRect.o \
-       $(ODIR)/ClientConnectionCursor.o \
-       $(ODIR)/ClientConnectionFile.o \
-       $(ODIR)/ClientConnectionFullScreen.o \
-       $(ODIR)/ClientConnectionTight.o \
-       $(ODIR)/ConnectingDialog.o \
-       $(ODIR)/d3des.o \
-       $(ODIR)/Daemon.o \
-       $(ODIR)/Exception.o \
-       $(ODIR)/FileTransfer.o \
-       $(ODIR)/FileTransferItemInfo.o \
-       $(ODIR)/Flasher.o \
-       $(ODIR)/HotKeys.o \
-       $(ODIR)/KeyMap.o \
-       $(ODIR)/Log.o \
-       $(ODIR)/LoginAuthDialog.o \
-       $(ODIR)/SessionDialog.o \
-       $(ODIR)/stdhdrs.o \
-       $(ODIR)/vncauth.o \
-       $(ODIR)/VNCOptions.o \
-       $(ODIR)/vncviewer.o \
-       $(ODIR)/VNCHelp.o \
-       $(ODIR)/VNCviewerApp.o \
-       $(ODIR)/VNCviewerApp32.o \
-       $(ODIR)/omnithread.o
+WINLIBS = wsock32.lib gdi32.lib comdlg32.lib winmm.lib htmlhelp.lib \
+	comctl32.lib user32.lib advapi32.lib shell32.lib
 
-LIBS = $(ODIR)/libz.a
+OBJS = $(ODIR)/AboutBox.obj \
+       $(ODIR)/AuthDialog.obj \
+       $(ODIR)/CapsContainer.obj \
+       $(ODIR)/ClientConnection.obj \
+       $(ODIR)/ClientConnectionClipboard.obj \
+       $(ODIR)/ClientConnectionCopyRect.obj \
+       $(ODIR)/ClientConnectionCursor.obj \
+       $(ODIR)/ClientConnectionFile.obj \
+       $(ODIR)/ClientConnectionFullScreen.obj \
+       $(ODIR)/ClientConnectionTight.obj \
+       $(ODIR)/ConnectingDialog.obj \
+       $(ODIR)/d3des.obj \
+       $(ODIR)/Daemon.obj \
+       $(ODIR)/Exception.obj \
+       $(ODIR)/FileTransfer.obj \
+       $(ODIR)/FileTransferItemInfo.obj \
+       $(ODIR)/Flasher.obj \
+       $(ODIR)/HotKeys.obj \
+       $(ODIR)/KeyMap.obj \
+       $(ODIR)/Log.obj \
+       $(ODIR)/LoginAuthDialog.obj \
+       $(ODIR)/SessionDialog.obj \
+       $(ODIR)/stdhdrs.obj \
+       $(ODIR)/vncauth.obj \
+       $(ODIR)/VNCOptions.obj \
+       $(ODIR)/vncviewer.obj \
+       $(ODIR)/VNCHelp.obj \
+       $(ODIR)/VNCviewerApp.obj \
+       $(ODIR)/VNCviewerApp32.obj \
+       $(ODIR)/omnithread.obj \
+       $(ODIR)/fbx.obj
 
-RES = $(ODIR)/vncviewer.res.o
+LIBS = $(ODIR)/turbojpeg.lib $(ODIR)/zlib.lib
 
-TARGETS = $(ODIR)/vncviewer.exe
+RES = $(ODIR)/vncviewer.res
+
+TARGETS = $(ODIR)/vncviewer.exe $(ODIR)/turbojpeg.lib $(ODIR)/turbojpeg.exp \
+	$(ODIR)/zlib.lib
 
 default: zlib res $(TARGETS)
 
--include $(OBJS:.o=.d)
+HDRS := $(wildcard *.h omnithread/*.h zlib/*.h)
+$(OBJS): $(HDRS)
 
 $(ODIR)/vncviewer.exe: $(LIBS) $(OBJS) $(RES)
-	$(CXX) $(LDFLAGS) $(OBJS) $(RES) -o $@ $(LIBS) $(WINLIBS) -mwindows
+	$(LINK) $(OBJS) $(RES) -out:$@ $(LIBS) $(WINLIBS)
 
 .PHONY: zlib res
 zlib res:
-	make -C $@
+	$(MAKE) -C $@
 
-$(ODIR)/libz.a:
-	make -C zlib
+$(ODIR)/zlib.lib:
+	$(MAKE) -C zlib
 
-$(ODIR)/omnithread.o: omnithread/nt.cpp omnithread/nt.h omnithread/omnithread.h
-	$(CXX) -c $(CFLAGS) -o $@ $<
+$(ODIR)/turbojpeg.lib $(ODIR)/turbojpeg.exp: ../turbojpeg/turbojpeg.def
+	$(AR) -def:../turbojpeg/turbojpeg.def -out:$@
+
+$(ODIR)/omnithread.obj: omnithread/nt.cpp omnithread/nt.h omnithread/omnithread.h
+	$(CXX) -c $(CFLAGS) -Fo$@ $<
 
 $(RES):
-	make -C res
+	$(MAKE) -C res
 
 clean:
-	make -C zlib clean
-	make -C res clean
-	rm -f $(OBJS) $(OBJS:.o=.d) $(TARGETS)
+	$(MAKE) -C zlib clean
+	$(MAKE) -C res clean
+	rm -f $(OBJS) $(TARGETS)

@@ -304,6 +304,160 @@ BEGIN
 END
 
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_AUTH_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 40
+        HORZGUIDE, 21
+    END
+
+    IDD_LOGIN_AUTH_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 141
+        VERTGUIDE, 41
+        VERTGUIDE, 80
+        VERTGUIDE, 84
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 75
+        HORZGUIDE, 13
+        HORZGUIDE, 30
+        HORZGUIDE, 47
+    END
+
+    IDD_OPTIONDIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 296
+        VERTGUIDE, 12
+        VERTGUIDE, 25
+        VERTGUIDE, 121
+        VERTGUIDE, 127
+        VERTGUIDE, 136
+        VERTGUIDE, 145
+        VERTGUIDE, 290
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 175
+        HORZGUIDE, 20
+        HORZGUIDE, 34
+        HORZGUIDE, 46
+        HORZGUIDE, 60
+        HORZGUIDE, 73
+        HORZGUIDE, 99
+        HORZGUIDE, 112
+        HORZGUIDE, 165
+    END
+
+    IDD_FTBROWSE_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 176
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 189
+    END
+
+    IDD_FILETRANSFER_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 409
+        VERTGUIDE, 187
+        VERTGUIDE, 229
+        VERTGUIDE, 353
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 275
+        HORZGUIDE, 27
+        HORZGUIDE, 40
+        HORZGUIDE, 236
+        HORZGUIDE, 249
+    END
+
+    IDD_SESSION_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 246
+        VERTGUIDE, 51
+        VERTGUIDE, 58
+        VERTGUIDE, 160
+        VERTGUIDE, 174
+        VERTGUIDE, 180
+        VERTGUIDE, 189
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 78
+    END
+
+    IDD_SERVINFO_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 217
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 163
+    END
+
+    IDD_APP_ABOUT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 285
+        VERTGUIDE, 104
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 111
+    END
+
+    IDD_GENERAL_OPTION, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 296
+        VERTGUIDE, 12
+        VERTGUIDE, 24
+        VERTGUIDE, 88
+        VERTGUIDE, 92
+        VERTGUIDE, 164
+        VERTGUIDE, 171
+        VERTGUIDE, 189
+        VERTGUIDE, 288
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 175
+        HORZGUIDE, 21
+        HORZGUIDE, 35
+        HORZGUIDE, 51
+    END
+
+    IDD_HELP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 288
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 200
+    END
+
+    IDD_PARENT, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 311
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 220
+    END
+
+    IDD_CONNECTING_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 203
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 54
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -412,7 +566,6 @@ END
 // Dialog Info
 //
 
-#ifndef __GNUC__
 IDD_SESSION_DLG DLGINIT
 BEGIN
     IDC_HOSTNAME_EDIT, 0x403, 1, 0
@@ -430,7 +583,6 @@ BEGIN
 "\000" 
     0
 END
-#endif
 
 
 /////////////////////////////////////////////////////////////////////////////

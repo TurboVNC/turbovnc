@@ -57,10 +57,6 @@ extern "C" {
 #include "d3des.h"
 }
 
-#ifndef min
- #define min(a,b) ((a)<(b)?(a):(b))
-#endif
-
 #define INITIALNETBUFSIZE 4096
 #define MAX_ENCODINGS 20
 #define VWR_WND_CLASS_NAME _T("VNCviewer")
@@ -170,8 +166,8 @@ void ClientConnection::Init(VNCviewerApp *pApp)
 
 	m_decompStreamInited = false;
 
-	m_decompStreamRaw.total_in = (uLong)ZLIBHEX_DECOMP_UNINITED;
-	m_decompStreamEncoded.total_in = (uLong)ZLIBHEX_DECOMP_UNINITED;
+	m_decompStreamRaw.total_in = ZLIBHEX_DECOMP_UNINITED;
+	m_decompStreamEncoded.total_in = ZLIBHEX_DECOMP_UNINITED;
 
 	for (int i = 0; i < 4; i++)
 		m_tightZlibStreamActive[i] = false;
@@ -429,7 +425,7 @@ void ClientConnection::CreateDisplay()
 					plp->palPalEntry[pepos].peRed   = r * 255 / 5; 	
 					plp->palPalEntry[pepos].peGreen = g * 255 / 5;
 					plp->palPalEntry[pepos].peBlue  = b * 255 / 5;
-					plp->palPalEntry[pepos].peFlags  = 0;
+					plp->palPalEntry[pepos].peFlags  = NULL;
 					pepos++;
 				}
 			}
@@ -443,19 +439,19 @@ void ClientConnection::CreateDisplay()
 	HMENU hsysmenu = GetSystemMenu(m_hwnd1, FALSE);
 	if (!m_opts.m_restricted) {
 		bool save_item_flags = (m_serverInitiated) ? MF_GRAYED : 0;
-		AppendMenu(hsysmenu, MF_SEPARATOR, 0, 0);
+		AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
 		AppendMenu(hsysmenu, MF_STRING, IDC_OPTIONBUTTON,
 				   _T("Connection &options...\tCtrl-Alt-Shift-O"));
 		AppendMenu(hsysmenu, MF_STRING, ID_CONN_ABOUT,
 				   _T("Connection &info\tCtrl-Alt-Shift-I"));
 		AppendMenu(hsysmenu, MF_STRING, ID_REQUEST_REFRESH,
 				   _T("Request screen &refresh\tCtrl-Alt-Shift-R"));
-		AppendMenu(hsysmenu, MF_SEPARATOR, 0, 0);
+		AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
 		AppendMenu(hsysmenu, MF_STRING, ID_FULLSCREEN,
 				   _T("&Full screen\tCtrl-Alt-Shift-F"));
 		AppendMenu(hsysmenu, MF_STRING, ID_TOOLBAR,
 				   _T("Show &toolbar\tCtrl-Alt-Shift-T"));
-		AppendMenu(hsysmenu, MF_SEPARATOR, 0, 0);
+		AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
 		AppendMenu(hsysmenu, MF_STRING, ID_CONN_CTLALTDEL,
 				   _T("Send Ctrl-Alt-&Del"));
 		AppendMenu(hsysmenu, MF_STRING, ID_CONN_CTLESC,
@@ -464,21 +460,21 @@ void ClientConnection::CreateDisplay()
 				   _T("Ctrl key down"));
 		AppendMenu(hsysmenu, MF_STRING, ID_CONN_ALTDOWN,
 				   _T("Alt key down"));
-		AppendMenu(hsysmenu, MF_SEPARATOR, 0, 0);
+		AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
 		AppendMenu(hsysmenu, MF_STRING | MF_GRAYED, IDD_FILETRANSFER,
 				   _T("Transf&er files...\tCtrl-Alt-Shift-E"));
-		AppendMenu(hsysmenu, MF_SEPARATOR, 0, 0);
+		AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
 		AppendMenu(hsysmenu, MF_STRING, ID_NEWCONN,
 				   _T("&New connection...\tCtrl-Alt-Shift-N"));
 		AppendMenu(hsysmenu, save_item_flags, ID_CONN_SAVE_AS,
 				   _T("&Save connection info as...\tCtrl-Alt-Shift-S"));
 	}
 
-	AppendMenu(hsysmenu, MF_SEPARATOR, 0, 0);
+	AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
 	AppendMenu(hsysmenu, MF_STRING, IDD_APP_ABOUT,
 			   _T("&About TightVNC Viewer..."));
 	if (m_opts.m_listening) {
-		AppendMenu(hsysmenu, MF_SEPARATOR, 0, 0);
+		AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
 		AppendMenu(hsysmenu, MF_STRING, ID_CLOSEDAEMON,
 				   _T("Close &listening daemon"));
 	}
@@ -640,14 +636,14 @@ void ClientConnection::SaveListConnection()
 			if ((RegQueryValueEx( m_hRegKey, (LPTSTR)valname, 
 						NULL, NULL, 
 						(LPBYTE) buf, (LPDWORD) &dwbuflen) != ERROR_SUCCESS) ||
-						(_tcscmp(buf, m_opts.m_display) == 0)) {
+						(_tcscmp(buf, m_opts.m_display) == NULL)) {
 				RegSetValueEx( m_hRegKey, valname, 
-							0, REG_SZ, 
+							NULL, REG_SZ, 
 							(CONST BYTE *)buf1, (_tcslen(buf1)+1));
 				break;
 			}
 			RegSetValueEx(m_hRegKey, valname, 
-						0, REG_SZ, 
+						NULL, REG_SZ, 
 						(CONST BYTE *)buf1, (_tcslen(buf1)+1)); 
 				_tcscpy(buf1, buf);
 		}
@@ -2976,7 +2972,7 @@ void ClientConnection::ReadScreenUpdate() {
 	}
 
 	// Inform the other thread that an update is needed.
-	PostMessage(m_hwnd, WM_REGIONUPDATED, 0, 0);
+	PostMessage(m_hwnd, WM_REGIONUPDATED, NULL, NULL);
 }	
 
 void ClientConnection::SetDormant(bool newstate)

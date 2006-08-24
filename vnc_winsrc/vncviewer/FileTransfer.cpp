@@ -669,7 +669,7 @@ FileTransfer::ShowClientItems(char *path)
 					LARGE_INTEGER li;
 					li.LowPart = m_FindFileData.ftLastWriteTime.dwLowDateTime;
 					li.HighPart = m_FindFileData.ftLastWriteTime.dwHighDateTime;
-					li.QuadPart = (li.QuadPart - 116444736000000000LL) / 10000000LL;
+					li.QuadPart = (li.QuadPart - 116444736000000000) / 10000000;
 					m_FTClientItemInfo.Add(m_FindFileData.cFileName, buffer, li.LowPart);
 				} else {
 					strcpy(buffer, m_FTClientItemInfo.folderText);
@@ -1209,13 +1209,13 @@ unsigned int FileTransfer::FiletimeToTime70(FILETIME ftime)
 	LARGE_INTEGER uli;
 	uli.LowPart = ftime.dwLowDateTime;
 	uli.HighPart = ftime.dwHighDateTime;
-	uli.QuadPart = (uli.QuadPart - 116444736000000000LL) / 10000000LL;
+	uli.QuadPart = (uli.QuadPart - 116444736000000000) / 10000000;
 	return uli.LowPart;
 }
 
 void FileTransfer::Time70ToFiletime(unsigned int time70, FILETIME *pftime)
 {
-    LONGLONG ll = Int32x32To64(time70, 10000000LL) + 116444736000000000LL;
+    LONGLONG ll = Int32x32To64(time70, 10000000) + 116444736000000000;
     pftime->dwLowDateTime = (DWORD) ll;
     pftime->dwHighDateTime = ll >> 32;
 }

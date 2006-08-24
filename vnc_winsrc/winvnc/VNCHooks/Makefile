@@ -1,31 +1,25 @@
 TOPDIR = ..
 include ../Makerules
 
-CFLAGS = $(OPTFLAG) -DWIN32 -D_WINDOWS -D_WIN32_WINNT=0x0400
-WINLIBS = -lgdi32
+WINLIBS = user32.lib gdi32.lib advapi32.lib
 
-OBJS = $(ODIR)/VNCHooks.o
+OBJS = $(ODIR)/VNCHooks.obj
 
-TARGETS = $(ODIR)/VNCHooks.dll.a $(ODIR)/VNCHooks.dll
+TARGETS = $(ODIR)/VNCHooks.lib $(ODIR)/VNCHooks.dll $(ODIR)/VNCHooks.exp
 
-RES = $(ODIR)/VNCHooks.res.o
+RES = $(ODIR)/VNCHooks.res
 
 default: $(TARGETS)
 
--include $(OBJS:.o=.d)
+HDRS := $(wildcard *.h)
+$(OBJS): $(HDRS)
 
-$(ODIR)/VNCHooks.dll $(ODIR)/VNCHooks.dll.a: $(OBJS) $(RES)
-	$(CXX) $(LDFLAGS) -shared $^ -o $(ODIR)/VNCHooks.dll \
-		-Wl,-out-implib,$(ODIR)/VNCHooks.dll.a $(WINLIBS)
+$(TARGETS): $(OBJS) $(RES)
+	$(LINK) -dll $^ -out:$(ODIR)/VNCHooks.dll \
+		-implib:$(ODIR)/VNCHooks.lib $(WINLIBS)
 
-afxres.h:
-	echo "#include <windows.h>" > $@
-	echo "#ifndef IDC_STATIC" >> $@
-	echo "#define IDC_STATIC (-1)" >> $@
-	echo "#endif" >> $@
-
-$(RES): VNCHooks.rc afxres.h
-	$(RC) -l 0x809 -i $< -o $@
+$(RES): VNCHooks.rc
+	$(RC) -l 0x809 -fo $@ $<
 
 clean:
-	rm -f $(OBJS) $(OBJS:.o=.d) $(RES) $(TARGETS)
+	rm -f $(OBJS) $(RES) $(TARGETS)

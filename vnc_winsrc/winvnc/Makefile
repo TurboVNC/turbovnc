@@ -1,83 +1,86 @@
 include Makerules
 
-CFLAGS = $(OPTFLAG) -Iomnithread -Izlib -I.. -I../../../vgl/include \
-	-DWIN32 -D_WINDOWS -D__WIN32__ -D__NT__ -D__x86__ -D_WINSTATIC -DNCORBA
-LDFLAGS = $(OPTFLAG)
-WINLIBS = -lwsock32 -lgdi32 -lcomdlg32 -lwinmm -lhtmlhelp -lcomctl32 \
-	-L../../../vgl/windows/vnc/lib -lturbojpeg
+CFLAGS := $(CFLAGS) -Iomnithread -Izlib -I.. -I../turbojpeg
 
-OBJS = $(ODIR)/AdministrationControls.o \
-       $(ODIR)/d3des.o \
-       $(ODIR)/FileTransferItemInfo.o \
-       $(ODIR)/IncomingConnectionsControls.o \
-       $(ODIR)/InputHandlingControls.o \
-       $(ODIR)/Log.o \
-       $(ODIR)/MatchWindow.o \
-       $(ODIR)/MinMax.o \
-       $(ODIR)/PollControls.o \
-       $(ODIR)/QuerySettingsControls.o \
-       $(ODIR)/RectList.o \
-       $(ODIR)/SharedDesktopArea.o \
-       $(ODIR)/stdhdrs.o \
-       $(ODIR)/translate.o \
-       $(ODIR)/VideoDriver.o \
-       $(ODIR)/vncAbout.o \
-       $(ODIR)/vncAcceptDialog.o \
-       $(ODIR)/vncAcceptReverseDlg.o \
-       $(ODIR)/vncauth.o \
-       $(ODIR)/vncBuffer.o \
-       $(ODIR)/vncClient.o \
-       $(ODIR)/vncConnDialog.o \
-       $(ODIR)/vncDesktop.o \
-       $(ODIR)/vncEncoder.o \
-       $(ODIR)/vncEncodeTight.o \
-       $(ODIR)/VNCHelp.o \
-       $(ODIR)/vncHTTPConnect.o \
-       $(ODIR)/vncInstHandler.o \
-       $(ODIR)/vncKeymap.o \
-       $(ODIR)/vncMenu.o \
-       $(ODIR)/vncProperties.o \
-       $(ODIR)/vncRegion.o \
-       $(ODIR)/vncServer.o \
-       $(ODIR)/vncService.o \
-       $(ODIR)/vncSockConnect.o \
-       $(ODIR)/vncTimedMsgBox.o \
-       $(ODIR)/VSocket.o \
-       $(ODIR)/WinVNC.o \
-       $(ODIR)/omnithread.o
+WINLIBS = wsock32.lib gdi32.lib comdlg32.lib winmm.lib htmlhelp.lib \
+	comctl32.lib user32.lib advapi32.lib shell32.lib ole32.lib
 
-LIBS = $(ODIR)/VNCHooks.dll.a $(ODIR)/VNCHooks.dll $(ODIR)/libz.a
+OBJS = $(ODIR)/AdministrationControls.obj \
+       $(ODIR)/d3des.obj \
+       $(ODIR)/FileTransferItemInfo.obj \
+       $(ODIR)/IncomingConnectionsControls.obj \
+       $(ODIR)/InputHandlingControls.obj \
+       $(ODIR)/Log.obj \
+       $(ODIR)/MatchWindow.obj \
+       $(ODIR)/MinMax.obj \
+       $(ODIR)/PollControls.obj \
+       $(ODIR)/QuerySettingsControls.obj \
+       $(ODIR)/RectList.obj \
+       $(ODIR)/SharedDesktopArea.obj \
+       $(ODIR)/stdhdrs.obj \
+       $(ODIR)/translate.obj \
+       $(ODIR)/VideoDriver.obj \
+       $(ODIR)/vncAbout.obj \
+       $(ODIR)/vncAcceptDialog.obj \
+       $(ODIR)/vncAcceptReverseDlg.obj \
+       $(ODIR)/vncauth.obj \
+       $(ODIR)/vncBuffer.obj \
+       $(ODIR)/vncClient.obj \
+       $(ODIR)/vncConnDialog.obj \
+       $(ODIR)/vncDesktop.obj \
+       $(ODIR)/vncEncoder.obj \
+       $(ODIR)/vncEncodeTight.obj \
+       $(ODIR)/VNCHelp.obj \
+       $(ODIR)/vncHTTPConnect.obj \
+       $(ODIR)/vncInstHandler.obj \
+       $(ODIR)/vncKeymap.obj \
+       $(ODIR)/vncMenu.obj \
+       $(ODIR)/vncProperties.obj \
+       $(ODIR)/vncRegion.obj \
+       $(ODIR)/vncServer.obj \
+       $(ODIR)/vncService.obj \
+       $(ODIR)/vncSockConnect.obj \
+       $(ODIR)/vncTimedMsgBox.obj \
+       $(ODIR)/VSocket.obj \
+       $(ODIR)/WallpaperUtils.obj \
+       $(ODIR)/WinVNC.obj \
+       $(ODIR)/omnithread.obj
 
-RES = $(ODIR)/WinVNC.res.o
+LIBS = $(ODIR)/turbojpeg.lib $(ODIR)/VNCHooks.lib $(ODIR)/zlib.lib
 
-TARGETS = $(ODIR)/WinVNC.exe
+RES = $(ODIR)/WinVNC.res
 
-default: $(TARGETS)
+TARGETS = $(ODIR)/WinVNC.exe $(ODIR)/turbojpeg.lib $(ODIR)/turbojpeg.exp \
+	$(ODIR)/VNCHooks.lib $(ODIR)/VNCHooks.dll $(ODIR)/zlib.lib
 
--include $(OBJS:.o=.d)
+default: zlib VNCHooks $(TARGETS)
+
+HDRS := $(wildcard *.h omnithread/*.h VNCHooks/*.h zlib/*.h)
+$(OBJS): $(HDRS)
 
 $(ODIR)/WinVNC.exe: $(LIBS) $(OBJS) $(RES)
-	$(CXX) $(LDFLAGS) $(OBJS) $(RES) -o $@ $(LIBS) $(WINLIBS) -mwindows
+	$(LINK) $(OBJS) $(RES) -out:$@ $(LIBS) $(WINLIBS)
 
-$(ODIR)/libz.a:
-	make -C zlib
+.PHONY: zlib VNCHooks
+zlib VNCHooks:
+	$(MAKE) -C $@
 
-$(ODIR)/VNCHooks.dll.a $(ODIR)/VNCHooks.dll:
-	make -C VNCHooks
+$(ODIR)/zlib.lib:
+	$(MAKE) -C zlib
 
-$(ODIR)/omnithread.o: omnithread/nt.cpp omnithread/nt.h omnithread/omnithread.h
-	$(CXX) -c $(CFLAGS) -o $@ $<
+$(ODIR)/VNCHooks.lib $(ODIR)/VNCHooks.dll:
+	$(MAKE) -C VNCHooks
 
-afxres.h:
-	echo "#include <windows.h>" > $@
-	echo "#ifndef IDC_STATIC" >> $@
-	echo "#define IDC_STATIC (-1)" >> $@
-	echo "#endif" >> $@
+$(ODIR)/turbojpeg.lib $(ODIR)/turbojpeg.exp: ../turbojpeg/turbojpeg.def
+	$(AR) -def:../turbojpeg/turbojpeg.def -out:$@
 
-$(RES): WinVNC.rc afxres.h
-	$(RC) -DWITH_JAVA_VIEWER -l 0x809 -i $< -o $@
+$(ODIR)/omnithread.obj: omnithread/nt.cpp omnithread/nt.h omnithread/omnithread.h
+	$(CXX) -c $(CFLAGS) -Fo$@ $<
+
+$(RES): WinVNC.rc
+	$(RC) -DWITH_JAVA_VIEWER -l 0x409 -fo $@ $< 
 
 clean:
-	make -C zlib clean
-	make -C VNCHooks clean
-	rm -f $(OBJS) $(OBJS:.o=.d) $(RES) $(TARGETS)
+	$(MAKE) -C zlib clean
+	$(MAKE) -C VNCHooks clean
+	rm -f $(OBJS) $(RES) $(TARGETS)

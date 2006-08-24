@@ -1,37 +1,37 @@
-CXX = g++ -mno-cygwin -mthreads
-CC = gcc -mno-cygwin
-RC = windres -DNDEBUG
+CC =  "cl" -nologo -wd4996 -wd4482
+CXX = $(CC) -EHsc
+RC = "rc"
+LINK = "link" -nologo
+AR = "link" -lib -nologo
+
+CDEFINES = -D__WIN32__ -DWIN32 -D_WINSTATIC -D_WIN32_WINNT=0x0400 -D_CRT_SECURE_NO_DEPRECATE
+ifeq ($(DEBUG), yes)
+CDEFINES := $(CDEFINES) -D_DEBUG
+CFLAGS = -MTd -W3 -Od -Zi 
+LINK := $(LINK) -debug
+else
+CDEFINES := $(CDEFINES) -DNDEBUG
+CFLAGS = -MT -W3 -O2
+endif
+CFLAGS := $(CFLAGS) $(CDEFINES)
+
+RC := $(RC) $(CDEFINES)
 
 ifeq ($(TOPDIR),)
 TOPDIR = .
 endif
 
 ODIR = $(TOPDIR)/Release
-OPTFLAG = -O2 -DNDEBUG
 ifeq ($(DEBUG), yes)
 ODIR = $(TOPDIR)/Debug
-OPTFLAG = -O0 -ggdb -D_DEBUG
-RC = windres -D_DEBUG
 endif
 
 _DUMMY := $(shell mkdir -p $(ODIR))
 
 .SUFFIXES: .cpp
-$(ODIR)/%.o: %.cpp
-	$(CXX) $(CFLAGS) -c $*.cpp -o $(ODIR)/$*.o
-	$(CXX) $(CFLAGS) -MM $*.cpp > $(ODIR)/$*.d
-	@mv -f $(ODIR)/$*.d $(ODIR)/$*.d.tmp
-	@sed -e 's|.*:|$(ODIR)\/$*.o:|' < $(ODIR)/$*.d.tmp > $(ODIR)/$*.d
-	@sed -e 's/.*://' -e 's/\\$$//' < $(ODIR)/$*.d.tmp | \
-	  sed -e 's/^ *//' -e 's/$$/:/' >> $(ODIR)/$*.d
-	@rm -f $(ODIR)/$*.d.tmp
+$(ODIR)/%.obj: %.cpp
+	$(CXX) $(CFLAGS) -c $*.cpp -Fo$(ODIR)/$*.obj
 
 .SUFFIXES: .c
-$(ODIR)/%.o: %.c
-	$(CC) $(CFLAGS) -c $*.c -o $(ODIR)/$*.o
-	$(CC) $(CFLAGS) -MM $*.c > $(ODIR)/$*.d
-	@mv -f $(ODIR)/$*.d $(ODIR)/$*.d.tmp
-	@sed -e 's|.*:|$(ODIR)\/$*.o:|' < $(ODIR)/$*.d.tmp > $(ODIR)/$*.d
-	@sed -e 's/.*://' -e 's/\\$$//' < $(ODIR)/$*.d.tmp | \
-	  sed -e 's/^ *//' -e 's/$$/:/' >> $(ODIR)/$*.d
-	@rm -f $(ODIR)/$*.d.tmp
+$(ODIR)/%.obj: %.c
+	$(CC) $(CFLAGS) -c $*.c -Fo$(ODIR)/$*.obj

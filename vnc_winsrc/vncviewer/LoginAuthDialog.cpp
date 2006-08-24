@@ -54,7 +54,7 @@ LoginAuthDialog::LoginAuthDialog(char *vnchost, char *title, char *username)
 		m_username[255] = TEXT('\0');
 	}
 	m_passwd[0] = TEXT('\0');
-	m_vnchost = (vnchost != NULL) ? vnchost : (char *)"[unknown]";
+	m_vnchost = (vnchost != NULL) ? vnchost : "[unknown]";
 }
 
 LoginAuthDialog::~LoginAuthDialog()

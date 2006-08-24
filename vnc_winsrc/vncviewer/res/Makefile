@@ -1,18 +1,12 @@
 TOPDIR = ..
 include ../Makerules
 
-TARGETS = $(ODIR)/vncviewer.res.o
+TARGETS = $(ODIR)/vncviewer.res
 
 default: $(TARGETS)
 
-afxres.h:
-	echo "#include <windows.h>" > $@
-	echo "#ifndef IDC_STATIC" >> $@
-	echo "#define IDC_STATIC (-1)" >> $@
-	echo "#endif" >> $@
-
-$(ODIR)/vncviewer.res.o: vncviewer.rc afxres.h
-	$(RC) -DWINVER=0x0400 -l 0x409 -i $< -o $@
+$(ODIR)/vncviewer.res: vncviewer.rc
+	$(RC) -l 0x409 -fo $@ $<
 
 clean:
 	rm -f $(TARGETS)
