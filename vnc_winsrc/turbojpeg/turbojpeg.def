@@ -1,9 +1,0 @@
-EXPORTS
-    TJBUFSIZE @1
-    tjCompress @2
-    tjDecompress @3
-    tjDecompressHeader @4
-    tjDestroy @5
-    tjGetErrorStr @6
-    tjInitCompress @7
-    tjInitDecompress @8
