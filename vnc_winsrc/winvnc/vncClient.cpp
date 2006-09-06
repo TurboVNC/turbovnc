@@ -1,3 +1,4 @@
+//  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2001-2003 Constantin Kaplinsky. All Rights Reserved.
 //  Copyright (C) 2002 Vladimir Vologzhanin. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
