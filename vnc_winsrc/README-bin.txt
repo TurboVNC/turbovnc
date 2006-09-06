@@ -1,36 +1,35 @@
-TurboVNC 0.3.1 Binary Distribution for Windows platforms
+TurboVNC 0.3.2 Binary Distribution for Windows platforms
 ========================================================
 
-This software is a stripped-down version of TightVNC 1.3, supporting only
-tight encoding and true color displays.  The tight encoding features are
-accelerated greatly via. the use of the high-performance JPEG codec provided by
-the VirtualGL project.
+TurboVNC is a highly-optimized version of TightVNC 1.3 designed for real-time
+video applications (specifically VirtualGL, which performs real-time 3D
+rendering on a dedicated server and outputs the results as an interactive video
+stream.)  TurboVNC supports only tight encoding and true color displays, and
+the tight encoding features are accelerated greatly via. the use of TurboJPEG,
+the high-performance JPEG codec provided by The VirtualGL Project.
 
-TurboVNC is intended primarily as a high-performance X proxy for Linux
-visualization applications.  It is designed to be used in conjunction with
-VirtualGL's "compression-less" mode to provide excellent remote display
-performance for 3D applications.  The VirtualGL/TurboVNC combination will not
-perform as well in a 100 Mbit LAN environment as "standard" VirtualGL, but it
-should perform much better over high-latency networks such as broadband or
-satellite.  It also provides rudimentary collaboration capabilities, which are
-not available in "standard" VirtualGL.
+In addition to an optimized codec, TurboVNC also adds double buffering support
+to the client as well as minor protocol tweaks which allow interactive
+performance over broadband without breaking compatibility with TightVNC.
+TurboVNC is currently the best performing solution for enabling the use of
+VirtualGL on high-latency, low-bandwidth networks.  On high-speed local
+networks, VirtualGL's "direct" mode is a bit faster, but TurboVNC is easier to
+deploy, since it does not require an X server to be running on the client
+machine.  TurboVNC also provides rudimentary collaboration capabilities.
 
 TurboVNC can be used as a more general-purpose remote access solution for 2D
-applications, and in particular it is suitable for applications that require
-high performance and image quality.  But it should be understood that TurboVNC
-is designed to support only one fast path of operation, thus it is not as
-"general-purpose" as other VNC distributions.
+applications, and in particular it is a good choice for applications that
+require high performance with high image quality.  But it should be understood
+that TurboVNC is designed to support only one fast path of operation, thus it
+is not as "general-purpose" as other VNC distributions.
 
 For more information on VirtualGL and TurboVNC, visit:
 
 http://VirtualGL.sourceforge.net
 
 
-TightVNC 1.3dev7 Binary Distribution for Windows platforms
-==========================================================
-
-IMPORTANT NOTE: this is a development version and may be unstable.
-It's not recommended for production use.
+TightVNC 1.3.8 Binary Distribution for Windows platforms
+========================================================
 
 This distribution is based on the standard VNC source and includes new
 TightVNC-specific features and fixes, such as additional low-bandwidth
