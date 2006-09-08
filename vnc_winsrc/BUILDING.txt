@@ -1,57 +1,75 @@
+Building TurboVNC for Windows
+=============================
 
-  TightVNC version 1.3.8
-  BUILDING vncviewer and WinVNC
+Build Environment:
 
-======================================================================
+-- Gnu Make v3.7 or later
+   This can be found in the MSYS package (http://www.mingw.org/download.shtml)
+   or in Cygwin (http://www.cygwin.com/)
 
-  Building from the source distribution
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-- Microsoft Visual C++ 2003 or later
+   Tested with the free Visual C++ 2005 Express Edition --
+   http://msdn.microsoft.com/vstudio/express/visualc/
 
-The source distribution is ready to compile, but the only compiler
-supported is MS Visual C++ 6.0. Workspace files (*.dsw) for this
-environment are included in the distribution.
+-- Microsoft Platform SDK
+   Find the "SDK Downloads" link at http://msdn.microsoft.com/downloads/
 
-Building with Borland C++ 5.5 compiler is not supported any more,
-sorry.
+-- Inno Setup (needed to build the TurboVNC installer)
+   Inno Setup can be downloaded from http://www.jrsoftware.org/isinfo.php
 
-  Building from the CVS
-  ~~~~~~~~~~~~~~~~~~~~~
+   Recommended:
+-- Intel Integrated Performance Primitives v4.1 or later
+   TurboVNC can be built with a completely free version of libjpeg v6b which
+   will produce correct, albeit slow, behavior.  In order to get optimal
+   performance out of TurboVNC, however, it is necessary to build TurboVNC
+   against the Intel Performance Primitives, which are capable of compressing
+   JPEG images 3-4x faster than libjpeg.
 
-The sources in the CVS do not include third-party libraries required
-for successful compilation. These are zlib and JPEG libraries freely
-available in the source form from the following locations:
+   IPP can be downloaded for free for non-commercial purposes or for internal
+   evaluation:
+   http://www3.intel.com/cd/software/products/asmo-na/eng/perflib/ipp/219858.htm
+   Licenses which allow for commercial use and royalty-free distribution are
+   available at a reasonable cost:
+   http://www.intel.com/cd/software/products/asmo-na/eng/238658.htm
 
-  ftp://ftp.uu.net/graphics/jpeg/jpegsrc.v6b.tar.gz
-  http://prdownloads.sourceforge.net/libpng/zlib-1.1.4.tar.gz
+   The TurboVNC build defaults to using IPP and assumes that the IPP include
+   and library paths have been added to the system INCLUDE and LIB environment
+   variables.  If you wish to build TurboVNC with libjpeg instead, add an
+   argument of JPEGLIB=libjpeg to make:
 
-Please download these libraries prior to compilation. Note that these
-archives are in tar+gzip format not very popular in Windows
-environments. To unpack the files, either install appropriate
-extractors available for Windows platforms, or unpack them on
-Unix-like machines.
+     make JPEGLIB=libjpeg
 
-After you have downloaded and unpacked the libraries, place their
-source files to the locations listed below, NOT overriding existing
-files:
 
-  zlib library:
-    vnc_winsrc/vncviewer/zlib/
-    vnc_winsrc/winvnc/zlib/
+Library Dependencies in the VirtualGL Source Tree:
 
-  JPEG library:
-    vnc_winsrc/vncviewer/libjpeg/
-    vnc_winsrc/winvnc/libjpeg/
+TurboVNC depends on TurboJPEG and FBX, two libraries in the VirtualGL source
+tree.  The TurboVNC build environment expects the VirtualGL source tree to be
+located one level up from the top of the TurboVNC source tree, e.g.:
 
-Also, TightVNC compilation requires Microsoft Html Help SDK which can
-be freely downloaded from this page:
+   vgl/
+   vnc/
+     vnc_winsrc/
+       vncviewer/
+       winvnc/
 
-  http://msdn.microsoft.com/library/en-us/htmlhelp/html/hwMicrosoftHTMLHelpDownloads.asp
+TurboVNC's Makefile will attempt to build the necessary dependency libraries
+in the vgl directory prior to building TurboVNC.
 
-Only two files from the Html Help SDK are required for compilation,
-HtmlHelp.h and HtmlHelp.lib. Copy both files to the following folders:
 
-    vnc_winsrc/vncviewer/
-    vnc_winsrc/winvnc/
+Building TurboVNC:
 
-After zlib, JPEG and HtmlHelp files are in place, the source is ready
-to compile with MS Visual C++ 6.0.
+If everything is set up properly, you should be able to:
+
+  cd vnc/vnc_winsrc
+  make
+
+
+Packaging TurboVNC:
+
+Make sure that compil32.exe (the Inno Setup Compiler) is in your path, then
+
+  cd vnc/vnc_winsrc
+  make dist
+
+The installer package will be named "TurboVNC.exe", and it can be found in
+vnc/vnc_winsrc/.
