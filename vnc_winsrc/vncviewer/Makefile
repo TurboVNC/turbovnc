@@ -1,9 +1,10 @@
 include Makerules
 
-CFLAGS := $(CFLAGS) -Iomnithread -Izlib -I.. -I../turbojpeg
+CFLAGS := $(CFLAGS) -Iomnithread -Izlib -I.. -I../../../vgl/include
 
 WINLIBS = wsock32.lib gdi32.lib comdlg32.lib winmm.lib htmlhelp.lib \
-	comctl32.lib user32.lib advapi32.lib shell32.lib
+	comctl32.lib user32.lib advapi32.lib shell32.lib \
+	-libpath:../../../vgl/windows/vnc/lib fbx.lib turbojpeg.lib
 
 OBJS = $(ODIR)/AboutBox.obj \
        $(ODIR)/AuthDialog.obj \
@@ -34,15 +35,13 @@ OBJS = $(ODIR)/AboutBox.obj \
        $(ODIR)/VNCHelp.obj \
        $(ODIR)/VNCviewerApp.obj \
        $(ODIR)/VNCviewerApp32.obj \
-       $(ODIR)/omnithread.obj \
-       $(ODIR)/fbx.obj
+       $(ODIR)/omnithread.obj
 
-LIBS = $(ODIR)/turbojpeg.lib $(ODIR)/zlib.lib
+LIBS = $(ODIR)/zlib.lib
 
 RES = $(ODIR)/vncviewer.res
 
-TARGETS = $(ODIR)/vncviewer.exe $(ODIR)/turbojpeg.lib $(ODIR)/turbojpeg.exp \
-	$(ODIR)/zlib.lib
+TARGETS = $(ODIR)/vncviewer.exe $(ODIR)/zlib.lib
 
 default: zlib res $(TARGETS)
 
@@ -58,9 +57,6 @@ zlib res:
 
 $(ODIR)/zlib.lib:
 	$(MAKE) -C zlib
-
-$(ODIR)/turbojpeg.lib $(ODIR)/turbojpeg.exp: ../turbojpeg/turbojpeg.def
-	$(AR) -def:../turbojpeg/turbojpeg.def -out:$@
 
 $(ODIR)/omnithread.obj: omnithread/nt.cpp omnithread/nt.h omnithread/omnithread.h
 	$(CXX) -c $(CFLAGS) -Fo$@ $<

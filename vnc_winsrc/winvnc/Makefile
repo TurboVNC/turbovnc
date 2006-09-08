@@ -1,9 +1,10 @@
 include Makerules
 
-CFLAGS := $(CFLAGS) -Iomnithread -Izlib -I.. -I../turbojpeg
+CFLAGS := $(CFLAGS) -Iomnithread -Izlib -I.. -I../../../vgl/include
 
 WINLIBS = wsock32.lib gdi32.lib comdlg32.lib winmm.lib htmlhelp.lib \
-	comctl32.lib user32.lib advapi32.lib shell32.lib ole32.lib
+	comctl32.lib user32.lib advapi32.lib shell32.lib ole32.lib \
+	-libpath:../../../vgl/windows/vnc/lib turbojpeg.lib
 
 OBJS = $(ODIR)/AdministrationControls.obj \
        $(ODIR)/d3des.obj \
@@ -46,11 +47,11 @@ OBJS = $(ODIR)/AdministrationControls.obj \
        $(ODIR)/WinVNC.obj \
        $(ODIR)/omnithread.obj
 
-LIBS = $(ODIR)/turbojpeg.lib $(ODIR)/VNCHooks.lib $(ODIR)/zlib.lib
+LIBS = $(ODIR)/VNCHooks.lib $(ODIR)/zlib.lib
 
 RES = $(ODIR)/WinVNC.res
 
-TARGETS = $(ODIR)/WinVNC.exe $(ODIR)/turbojpeg.lib $(ODIR)/turbojpeg.exp \
+TARGETS = $(ODIR)/WinVNC.exe \
 	$(ODIR)/VNCHooks.lib $(ODIR)/VNCHooks.dll $(ODIR)/zlib.lib
 
 default: zlib VNCHooks $(TARGETS)
@@ -70,9 +71,6 @@ $(ODIR)/zlib.lib:
 
 $(ODIR)/VNCHooks.lib $(ODIR)/VNCHooks.dll:
 	$(MAKE) -C VNCHooks
-
-$(ODIR)/turbojpeg.lib $(ODIR)/turbojpeg.exp: ../turbojpeg/turbojpeg.def
-	$(AR) -def:../turbojpeg/turbojpeg.def -out:$@
 
 $(ODIR)/omnithread.obj: omnithread/nt.cpp omnithread/nt.h omnithread/omnithread.h
 	$(CXX) -c $(CFLAGS) -Fo$@ $<
