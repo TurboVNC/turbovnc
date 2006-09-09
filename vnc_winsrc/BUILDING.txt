@@ -8,34 +8,38 @@ Build Environment:
    or in Cygwin (http://www.cygwin.com/)
 
 -- Microsoft Visual C++ 2003 or later
-   Tested with the free Visual C++ 2005 Express Edition --
+   Tested with the free Visual C++ 2005 Express Edition:
    http://msdn.microsoft.com/vstudio/express/visualc/
 
 -- Microsoft Platform SDK
-   Find the "SDK Downloads" link at http://msdn.microsoft.com/downloads/
+   http://msdn.microsoft.com/vstudio/express/visualc/usingpsdk/
+
+   The Platform SDK include and library paths must be added to the system or
+   user INCLUDE and LIB environment variables (respectively.)
 
 -- Inno Setup (needed to build the TurboVNC installer)
    Inno Setup can be downloaded from http://www.jrsoftware.org/isinfo.php
 
    Recommended:
 -- Intel Integrated Performance Primitives v4.1 or later
-   TurboVNC can be built with a completely free version of libjpeg v6b which
-   will produce correct, albeit slow, behavior.  In order to get optimal
-   performance out of TurboVNC, however, it is necessary to build TurboVNC
-   against the Intel Performance Primitives, which are capable of compressing
-   JPEG images 3-4x faster than libjpeg.
+   TurboVNC can be built with 100% open source technology using a version of
+   libjpeg v6b.  This will produce correct, albeit slow, behavior.  In order to
+   get optimal performance out of TurboVNC, however, it is necessary to build
+   TurboVNC against the Intel Integrated Performance Primitives, which are
+   capable of compressing JPEG images 3-4x faster than libjpeg.
 
-   IPP can be downloaded for free for non-commercial purposes or for internal
-   evaluation:
-   http://www3.intel.com/cd/software/products/asmo-na/eng/perflib/ipp/219858.htm
-   Licenses which allow for commercial use and royalty-free distribution are
-   available at a reasonable cost:
-   http://www.intel.com/cd/software/products/asmo-na/eng/238658.htm
+   Single developer licenses for IPP can be obtained directly from Intel:
+   http://www.intel.com/software/products/ipp/index.htm
 
-   The TurboVNC build defaults to using IPP and assumes that the IPP include
-   and library paths have been added to the system INCLUDE and LIB environment
-   variables.  If you wish to build TurboVNC with libjpeg instead, add an
-   argument of JPEGLIB=libjpeg to make:
+   Licenses are free for non-commercial use and inexpensive for commercial use.
+   The IPP license entitles the license holder to distribute any binaries built
+   with the IPP freely and without royalties.
+
+   The IPP include and library paths must be added to the system or user
+   INCLUDE and LIB environment variables (respectively.)
+
+   The TurboVNC build defaults to using IPP.  If you wish to build TurboVNC
+   against libjpeg instead, add an argument of JPEGLIB=libjpeg to make:
 
      make JPEGLIB=libjpeg
 
