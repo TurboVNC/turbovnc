@@ -1,28 +1,35 @@
 #!/bin/bash
 
 VERSION=0.3.2
-BUILD=1
+BUILD=`date +%Y%m%d`
 TARGET=
+DISTRO=
+BLDDIR=.
 if [ `uname -m` = 'x86_64' ];then
 	TARGET='--target i386'
 fi
+if [ ! "$1" = "" ]; then
+	DISTRO=$1
+	BLDDIR=./$DISTRO
+	if [ ! -d $BLDDIR ]; then mkdir -p $BLDDIR; fi
+fi
 
-if [ -d ./rpms ]; then rm -rf ./rpms; fi
-mkdir -p ./rpms/RPMS
-mkdir -p ./rpms/SRPMS
-mkdir -p ./rpms/BUILD
-mkdir -p ./rpms/SOURCES
-mkdir -p ./rpms/SPECS
-cp turbovnc-$VERSION-unixsrc.tar.gz ./rpms/SOURCES || exit 1
+if [ -d $BLDDIR/rpms ]; then rm -rf $BLDDIR/rpms; fi
+mkdir -p $BLDDIR/rpms/RPMS
+mkdir -p $BLDDIR/rpms/SRPMS
+mkdir -p $BLDDIR/rpms/BUILD
+mkdir -p $BLDDIR/rpms/SOURCES
+mkdir -p $BLDDIR/rpms/SPECS
+cp vnc.tar.gz $BLDDIR/rpms/SOURCES/turbovnc-$VERSION.tar.gz || exit 1
 cat turbovnc.spec | sed s/%{_version}/$VERSION/g | sed s/%{_build}/$BUILD/g \
 	| sed s@%{_bindir}@/opt/TurboVNC/bin@g \
 	| sed s@%{_mandir}@/opt/TurboVNC/man@g \
 	| sed s@%{_datadir}@/opt/TurboVNC@g \
-	| sed s/#--\>//g > ./rpms/SPECS/turbovnc.spec || exit 1
-rpmbuild -ba --define "_topdir `pwd`/rpms" $TARGET ./rpms/SPECS/turbovnc.spec \
+	| sed s/#--\>//g > $BLDDIR/rpms/SPECS/turbovnc.spec || exit 1
+rpmbuild -ba --define "_topdir `pwd`/$BLDDIR/rpms" $TARGET $BLDDIR/rpms/SPECS/turbovnc.spec \
 	|| exit 1
 
-mv rpms/RPMS/i386/turbovnc-$VERSION-$BUILD.i386.rpm . || exit 1
-mv rpms/SRPMS/turbovnc-$VERSION-$BUILD.src.rpm . || exit 1
+mv $BLDDIR/rpms/RPMS/i386/turbovnc-$VERSION-$BUILD.i386.rpm $BLDDIR/turbovnc.i386.rpm || exit 1
+mv $BLDDIR/rpms/SRPMS/turbovnc-$VERSION-$BUILD.src.rpm $BLDDIR/turbovnc.src.rpm || exit 1
 
-rm -rf rpms/
+rm -rf $BLDDIR/rpms

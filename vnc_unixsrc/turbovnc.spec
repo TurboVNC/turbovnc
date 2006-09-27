@@ -3,7 +3,7 @@ Name:      turbovnc
 Version:   %{_version}
 Release:   %{_build}
 URL:       http://virtualgl.sourceforge.net
-#-->Source0: http://prdownloads.sourceforge.net/virtualgl/turbovnc-%{version}-unixsrc.tar.gz
+#-->Source0: http://prdownloads.sourceforge.net/virtualgl/turbovnc-%{version}.tar.gz
 License:   GPL
 Group:     User Interface/Desktops
 Requires:  bash >= 2.0
