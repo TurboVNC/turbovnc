@@ -30,8 +30,8 @@ if [ ! -f ../../vgl/Makefile ]; then
 else
 	__PWD=`pwd`
 	cd ../../vgl
-	gmake M32=yes DISTRO=vnc jpeg
-	gmake M32=yes DISTRO=vnc jpeg
+	gmake M32=yes vnc
+	gmake M32=yes vnc
 	cd $__PWD
 fi
 
@@ -136,8 +136,8 @@ cp -prf classes $pkgdir/vnc
 
 cd $pkgtmpdir
 pkgmk -o -r opt -d . -a `uname -p` -f proto
-pkgtrans -s . ../$pkgname-$_VERSION.pkg $pkgname
+pkgtrans -s . ../$pkgname.pkg $pkgname
 cd ..
-rm -f $pkgname-$_VERSION.pkg.bz2
-bzip2 $pkgname-$_VERSION.pkg
+rm -f $pkgname.pkg.bz2
+bzip2 $pkgname.pkg
 /bin/rm -rf $pkgtmpdir
