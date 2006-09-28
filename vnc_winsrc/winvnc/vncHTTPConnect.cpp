@@ -47,7 +47,7 @@ const char HTTP_FMT_INDEX[] =
 "      <PARAM NAME=\"PORT\" VALUE=\"%d\">\n"
 "%.1024s"
 "    </APPLET><BR>\n"
-"    <A HREF=\"http://virtualgl.sourceforge.net/\">virtualgl.sourceforge.net</A>\n"
+"    <A HREF=\"http://www.virtualgl.org/\">www.virtualgl.org</A>\n"
 "  </BODY>\n"
 "</HTML>\n";
 

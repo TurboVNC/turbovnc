@@ -25,7 +25,7 @@ is not as "general-purpose" as other VNC distributions.
 
 For more information on VirtualGL and TurboVNC, visit:
 
-http://VirtualGL.sourceforge.net
+http://www.virtualgl.org
 
 
 TightVNC 1.3.8 Binary Distribution for Windows platforms
