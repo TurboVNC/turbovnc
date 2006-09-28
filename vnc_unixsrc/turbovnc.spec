@@ -2,7 +2,7 @@ Summary:   A remote display system for hardware-accelerated 3D applications
 Name:      turbovnc
 Version:   %{_version}
 Release:   %{_build}
-URL:       http://virtualgl.sourceforge.net
+URL:       http://www.virtualgl.org
 #-->Source0: http://prdownloads.sourceforge.net/virtualgl/turbovnc-%{version}.tar.gz
 License:   GPL
 Group:     User Interface/Desktops
