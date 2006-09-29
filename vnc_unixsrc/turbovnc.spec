@@ -45,13 +45,13 @@ for i in classes/*.vnc; do install -m 644 $i %{buildroot}%{_datadir}/vnc/classes
 
 strip %{buildroot}%{_bindir}/* || :
 
-mkdir -p %{buildroot}/etc/rc.d/init.d
+mkdir -p %{buildroot}/etc/init.d
 
 cat vncserver.init   | \
 sed -e 's@vncserver :${display\%\%:@%{_bindir}/vncserver :${display\%\%:@g' | \
 sed -e 's@vncserver -kill :${display\%\%:@%{_bindir}/vncserver -kill :${display\%\%:@g' \
- > %{buildroot}/etc/rc.d/init.d/tvncserver
-chmod 755 %{buildroot}/etc/rc.d/init.d/tvncserver
+ > %{buildroot}/etc/init.d/tvncserver
+chmod 755 %{buildroot}/etc/init.d/tvncserver
 
 mkdir -p %{buildroot}/etc/sysconfig
 cat > %{buildroot}/etc/sysconfig/tvncservers << EOF
@@ -87,23 +87,23 @@ rm -rf %{buildroot}
 
 %post
 if [ "$1" = 1 ]; then
-  /sbin/chkconfig --add tvncserver
+  if [ -f /etc/redhat-release ]; then /sbin/chkconfig --add tvncserver; fi
 fi
 
 %preun
 if [ "$1" = 0 ]; then
-  /sbin/service tvncserver stop >/dev/null 2>&1
-  /sbin/chkconfig --del tvncserver
+  /etc/init.d/tvncserver stop >/dev/null 2>&1
+  if [ -f /etc/redhat-release ]; then /sbin/chkconfig --del tvncserver; fi
 fi
 
 %postun
 if [ "$1" -ge "1" ]; then
-  /sbin/service tvncserver condrestart >/dev/null 2>&1
+  /etc/init.d/tvncserver condrestart >/dev/null 2>&1
 fi
 
 %files
 %defattr(-,root,root)
-%attr(0755,root,root) %config /etc/rc.d/init.d/tvncserver
+%attr(0755,root,root) %config /etc/init.d/tvncserver
 %config(noreplace) /etc/sysconfig/tvncservers
 %doc LICENCE.TXT README WhatsNew ChangeLog
 %{_bindir}/vncviewer
