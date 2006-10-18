@@ -75,7 +75,6 @@ public class VncViewer extends java.applet.Applet
   boolean recordingActive;
   boolean recordingStatusChanged;
   String cursorUpdatesDef;
-  String eightBitColorsDef;
 
   // Variables read from parameter values.
   String socketFactory;
@@ -124,7 +123,6 @@ public class VncViewer extends java.applet.Applet
     recordingActive = false;
     recordingStatusChanged = false;
     cursorUpdatesDef = null;
-    eightBitColorsDef = null;
 
     if (inSeparateFrame)
       vncFrame.addWindowListener(this);
@@ -526,13 +524,13 @@ public class VncViewer extends java.applet.Applet
       encodings[nEncodings++] = RfbProto.EncodingRRE;
     }
 
-    if (options.compressLevel >= 0 && options.compressLevel <= 9) {
+    if (options.compressLevel >= 0 && options.compressLevel <= 2) {
       encodings[nEncodings++] =
-        RfbProto.EncodingCompressLevel0 + options.compressLevel;
+        RfbProto.EncodingJpegSubsamp444 + options.compressLevel;
     }
-    if (options.jpegQuality >= 0 && options.jpegQuality <= 9) {
+    if (options.jpegQuality >= 1 && options.jpegQuality <= 100) {
       encodings[nEncodings++] =
-        RfbProto.EncodingQualityLevel0 + options.jpegQuality;
+        RfbProto.EncodingJpegQualityLevel0 + options.jpegQuality;
     }
 
     if (options.requestCursorUpdates) {
@@ -629,15 +627,10 @@ public class VncViewer extends java.applet.Applet
 	// Save settings to restore them after recording the session.
 	cursorUpdatesDef =
 	  options.choices[options.cursorUpdatesIndex].getSelectedItem();
-	eightBitColorsDef =
-	  options.choices[options.eightBitColorsIndex].getSelectedItem();
 	// Set options to values suitable for recording.
 	options.choices[options.cursorUpdatesIndex].select("Disable");
 	options.choices[options.cursorUpdatesIndex].setEnabled(false);
 	options.setEncodings();
-	options.choices[options.eightBitColorsIndex].select("No");
-	options.choices[options.eightBitColorsIndex].setEnabled(false);
-	options.setColorFormat();
       } else {
 	rfb.closeSession();
       }
@@ -659,9 +652,6 @@ public class VncViewer extends java.applet.Applet
 	options.choices[options.cursorUpdatesIndex].select(cursorUpdatesDef);
 	options.choices[options.cursorUpdatesIndex].setEnabled(true);
 	options.setEncodings();
-	options.choices[options.eightBitColorsIndex].select(eightBitColorsDef);
-	options.choices[options.eightBitColorsIndex].setEnabled(true);
-	options.setColorFormat();
 
 	rfb.closeSession();
 	System.out.println("Session recording stopped.");
