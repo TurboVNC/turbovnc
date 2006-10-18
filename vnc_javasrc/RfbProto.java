@@ -97,6 +97,8 @@ class RfbProto {
     EncodingHextile        = 5,
     EncodingZlib           = 6,
     EncodingTight          = 7,
+    EncodingJpegSubsamp444 = 0xFFFFFD00,
+    EncodingJpegQualityLevel0 = 0xFFFFFE00,
     EncodingCompressLevel0 = 0xFFFFFF00,
     EncodingQualityLevel0  = 0xFFFFFFE0,
     EncodingXCursor        = 0xFFFFFF10,
