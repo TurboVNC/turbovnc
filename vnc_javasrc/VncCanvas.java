@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2006 Sun Microsystems, Inc.  All Rights Reserved.
 //  Copyright (C) 2004 Horizon Wimba.  All Rights Reserved.
 //  Copyright (C) 2001-2003 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 2001,2002 Constantin Kaplinsky.  All Rights Reserved.
@@ -28,6 +29,21 @@ import java.io.*;
 import java.lang.*;
 import java.util.zip.*;
 
+class RFBUpdateEvent extends AWTEvent {
+
+  public static final int RFBUPDATE_FIRST = AWTEvent.RESERVED_ID_MAX + 1;
+  public static final int RFBUPDATE_LAST = RFBUPDATE_FIRST;
+
+  public RFBUpdateEvent (Component source, int id) {
+    super(source, id);
+  }
+
+  public String paramString() {
+    String s = "SendRFBUpdate";
+    return s;
+  }
+
+}
 
 //
 // VncCanvas is a subclass of Canvas which draws a VNC desktop on it.
@@ -185,13 +201,8 @@ class VncCanvas extends Canvas
   }
 
   public void setPixelFormat() throws IOException {
-    if (viewer.options.eightBitColors) {
-      rfb.writeSetPixelFormat(8, 8, false, true, 7, 7, 3, 0, 3, 6);
-      bytesPixel = 1;
-    } else {
       rfb.writeSetPixelFormat(32, 24, false, true, 255, 255, 255, 16, 8, 0);
       bytesPixel = 4;
-    }
     updateFramebufferSize();
   }
 
@@ -307,12 +318,19 @@ class VncCanvas extends Canvas
 
     while (true) {
 
+      boolean wan = viewer.options.wan;
+
       // Read message type from the server.
       int msgType = rfb.readServerMessageType();
 
       // Process the message depending on its type.
       switch (msgType) {
       case RfbProto.FramebufferUpdate:
+
+	if (wan) {
+	  dispatchEvent(new RFBUpdateEvent(this, RFBUpdateEvent.RFBUPDATE_FIRST));
+	}
+
 	rfb.readFramebufferUpdate();
 
 	boolean cursorPosReceived = false;
@@ -396,19 +414,13 @@ class VncCanvas extends Canvas
 	  }
 	}
 
-	// Before requesting framebuffer update, check if the pixel
-	// format should be changed. If it should, request full update
-	// instead of an incremental one.
-	if (viewer.options.eightBitColors != (bytesPixel == 1)) {
-	  setPixelFormat();
-	  fullUpdateNeeded = true;
-	}
-
         viewer.autoSelectEncodings();
 
-	rfb.writeFramebufferUpdateRequest(0, 0, rfb.framebufferWidth,
-					  rfb.framebufferHeight,
-					  !fullUpdateNeeded);
+	if (!wan) {
+	  rfb.writeFramebufferUpdateRequest(0, 0, rfb.framebufferWidth,
+					    rfb.framebufferHeight,
+					    !fullUpdateNeeded);
+	}
 
 	break;
 
@@ -1251,6 +1263,18 @@ class VncCanvas extends Canvas
   public void mouseEntered(MouseEvent evt) {}
   public void mouseExited(MouseEvent evt) {}
 
+  public void processEvent( AWTEvent evt ) {
+    try {
+      if (evt.paramString().equals("SendRFBUpdate")) {
+	rfb.writeFramebufferUpdateRequest(0, 0, rfb.framebufferWidth,
+					  rfb.framebufferHeight,
+					  true);
+      }
+      super.processEvent(evt);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
 
   //////////////////////////////////////////////////////////////////
   //
