@@ -1,10 +1,10 @@
 include Makerules
 
-CFLAGS := $(CFLAGS) -Iomnithread -Izlib -I.. -I../../../vgl/include
+CFLAGS := $(CFLAGS) -Iomnithread -Izlib -I..
 
 WINLIBS = wsock32.lib gdi32.lib comdlg32.lib winmm.lib htmlhelp.lib \
 	comctl32.lib user32.lib advapi32.lib shell32.lib ole32.lib \
-	-libpath:../../../vgl/windows/vnc/lib turbojpeg.lib
+	-libpath:c:/turbojpeg/lib turbojpeg.lib
 
 OBJS = $(ODIR)/AdministrationControls.obj \
        $(ODIR)/d3des.obj \

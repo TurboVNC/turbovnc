@@ -1,18 +1,14 @@
 all: vncviewer winvnc
 
-.PHONY: vncviewer winvnc vnclibs
+.PHONY: vncviewer winvnc
 
-vncviewer winvnc: vnclibs
+vncviewer winvnc:
 	$(MAKE) -C $@
-
-vnclibs:
-	$(MAKE) -C ../../vgl vnc
 
 .PHONY: clean
 clean:
 	$(MAKE) -C vncviewer clean
 	$(MAKE) -C winvnc clean
-	$(MAKE) -C ../../vgl DISTRO=vnc clean
 
 .PHONY: dist
 dist: vncviewer winvnc

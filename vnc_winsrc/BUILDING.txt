@@ -20,45 +20,8 @@ Build Environment:
 -- Inno Setup (needed to build the TurboVNC installer)
    Inno Setup can be downloaded from http://www.jrsoftware.org/isinfo.php
 
-   Recommended:
--- Intel Integrated Performance Primitives v4.1 or later
-   TurboVNC can be built with 100% open source technology using a version of
-   libjpeg v6b.  This will produce correct, albeit slow, behavior.  In order to
-   get optimal performance out of TurboVNC, however, it is necessary to build
-   TurboVNC against the Intel Integrated Performance Primitives, which are
-   capable of compressing JPEG images 3-4x faster than libjpeg.
-
-   Single developer licenses for IPP can be obtained directly from Intel:
-   http://www.intel.com/software/products/ipp/index.htm
-
-   Licenses are free for non-commercial use and inexpensive for commercial use.
-   The IPP license entitles the license holder to distribute any binaries built
-   with the IPP freely and without royalties.
-
-   The IPP include and library paths must be added to the system or user
-   INCLUDE and LIB environment variables (respectively.)
-
-   The TurboVNC build defaults to using IPP.  If you wish to build TurboVNC
-   against libjpeg instead, add an argument of JPEGLIB=libjpeg to make:
-
-     make JPEGLIB=libjpeg
-
-
-Library Dependencies in the VirtualGL Source Tree:
-
-TurboVNC depends on TurboJPEG and FBX, two libraries in the VirtualGL source
-tree.  The TurboVNC build environment expects the VirtualGL source tree to be
-located one level up from the top of the TurboVNC source tree, e.g.:
-
-   vgl/
-   vnc/
-     vnc_winsrc/
-       vncviewer/
-       winvnc/
-
-TurboVNC's Makefile will attempt to build the necessary dependency libraries
-in the vgl directory prior to building TurboVNC.
-
+-- TurboJPEG SDK
+   Available from http://sourceforge.net/project/showfiles.php?group_id=117509
 
 Building TurboVNC:
 
