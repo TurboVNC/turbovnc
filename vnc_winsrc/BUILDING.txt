@@ -23,6 +23,7 @@ Build Environment:
 -- TurboJPEG SDK
    Available from http://sourceforge.net/project/showfiles.php?group_id=117509
 
+
 Building TurboVNC:
 
 If everything is set up properly, you should be able to:
