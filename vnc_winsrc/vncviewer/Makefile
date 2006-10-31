@@ -4,7 +4,7 @@ CFLAGS := $(CFLAGS) -Iomnithread -Izlib -I..
 
 WINLIBS = wsock32.lib gdi32.lib comdlg32.lib winmm.lib htmlhelp.lib \
 	comctl32.lib user32.lib advapi32.lib shell32.lib \
-	-libpath:c:/turbojpeg/lib turbojpeg.lib
+	turbojpeg.lib
 
 OBJS = $(ODIR)/AboutBox.obj \
        $(ODIR)/AuthDialog.obj \

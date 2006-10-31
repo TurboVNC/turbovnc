@@ -21,8 +21,11 @@ Build Environment:
    Inno Setup can be downloaded from http://www.jrsoftware.org/isinfo.php
 
 -- TurboJPEG SDK
-   Available from http://sourceforge.net/project/showfiles.php?group_id=117509
-
+   * Available from http://sourceforge.net/project/showfiles.php?group_id=117509
+   * Add the TurboJPEG include directory (e.g. c:\turbojpeg\include) to your
+     system INCLUDE environment variable
+   * Add the TurboJPEG lib directory (e.g. c:\turbojpeg\lib) to your
+     system LIB environment variable
 
 Building TurboVNC:
 
