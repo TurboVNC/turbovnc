@@ -1,0 +1,40 @@
+{\rtf1\mac\ansicpg10000\cocoartf824\cocoasubrtf420
+{\fonttbl\f0\fswiss\fcharset77 Helvetica;\f1\fmodern\fcharset77 Courier;}
+{\colortbl;\red255\green255\blue255;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc2\leveljcn2\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid0\'02\'05.;}{\levelnumbers\'01;}}{\listname ;}\listid1}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}}
+\margl1440\margr1440\vieww11480\viewh8940\viewkind0
+\deftab720
+\pard\pardeftab720\ql\qnatural
+
+\f0\fs24 \cf0 TurboVNC is a modified version of {\field{\*\fldinst{HYPERLINK "http://www.tightvnc.com"}}{\fldrslt TightVNC}} which differs from its parent project in the following ways:\
+\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\ql\qnatural
+\ls1\ilvl0\cf0 {\listtext	\'a5	}JPEG encoding and decoding is optimized using TurboJPEG, the same JPEG codec used by VirtualGL.  This allows TurboVNC to send full-screen updates at > 20 frames/sec (on a 100 Megabit network) with perceptually lossless image quality\
+{\listtext	\'a5	}TurboVNC executes some parts of the VNC image pipeline in parallel to improve performance on broadband connections and other high-latency networks\
+{\listtext	\'a5	}TurboVNC supports client-side double buffering\
+{\listtext	\'a5	}TurboVNC has optimized binaries for Solaris and Intel Macintosh platforms\
+\pard\pardeftab720\ql\qnatural
+\cf0 \
+TurboVNC, in combination with VirtualGL, provides a complete environment for remotely displaying 3D applications with interactive frame rates.  It can also be used for remotely displaying other types of real-time video applications.\
+\
+This package includes the TurboVNC Viewer (vncviewer), which is necessary to connect to TurboVNC servers.  The Macintosh X11 application (which is not installed by default but which can be installed from the OS X distribution discs) must be installed prior to using the TurboVNC Viewer.  The TurboJPEG package for Intel Macintosh computers must also be installed prior to using the TurboVNC Viewer.  TurboJPEG can be downloaded from {\field{\*\fldinst{HYPERLINK "http://sourceforge.net/project/showfiles.php?group_id=117509&package_id=166100"}}{\fldrslt here}}.\
+\
+You can start the TurboVNC Viewer either through the link provided in the Applications folder or by running \
+\
+\pard\pardeftab720\li720\ql\qnatural
+
+\f1 \cf0 /opt/TurboVNC/bin/vncviewer\
+\pard\pardeftab720\ql\qnatural
+
+\f0 \cf0 \
+in a terminal window.  Run\
+\
+\pard\pardeftab720\li720\ql\qnatural
+
+\f1 \cf0 man -M /opt/TurboVNC/man vncviewer\
+\pard\pardeftab720\ql\qnatural
+
+\f0 \cf0 \
+in a terminal window to view the man page.  Refer to {\field{\*\fldinst{HYPERLINK "http://www.VirtualGL.org"}}{\fldrslt http://www.VirtualGL.org}} for more information.\
+}
