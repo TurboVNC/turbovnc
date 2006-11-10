@@ -6,9 +6,12 @@ SHLIBFLAGS = -shared -lc -z defs
 EXTRA_DEFINES = -D_GNU_SOURCE
 #endif
 #if HasSunC
-CCOPTIONS = -mt -fast -KPIC
+#ifdef SparcArchitecture
+FAST = -fast
+#endif
+CCOPTIONS = -mt $(FAST) -KPIC
 SHLIBFLAGS = -G -lc -z defs
-LDOPT = -fast -mt
+LDOPT = $(FAST) -mt
 #endif
 
 #define MySharedLibraryTarget(libname,solist)                           @@\
