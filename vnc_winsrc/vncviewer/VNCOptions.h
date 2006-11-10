@@ -79,6 +79,7 @@ public:
 	bool	m_connectionSpecified;
 	bool	m_configSpecified;
 	TCHAR   m_configFilename[_MAX_PATH];
+	unsigned char m_encPasswd[8];
 	bool	m_restricted;
 	bool	m_optimizeForWAN;
 

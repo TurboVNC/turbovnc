@@ -35,6 +35,9 @@
 #include "Htmlhelp.h"
 #include "commctrl.h"
 #include "AboutBox.h"
+extern "C" {
+#include "vncauth.h"
+}
 
 VNCOptions::VNCOptions()
 {
@@ -89,6 +92,8 @@ VNCOptions::VNCOptions()
 	m_requestShapeUpdates = true;
 	m_ignoreShapeUpdates = false;
 	m_optimizeForWAN = false;
+
+	m_encPasswd[0] = '\0';
 
 	LoadGenOpt();
 
@@ -438,6 +443,17 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 				continue;
 			}
 			m_jpegQualityLevel = quality;
+		} else if ( SwitchMatch(args[j], _T("password") )) {
+			if (++j == i) {
+				ArgError(_T("No password specified"));
+				continue;
+			}
+			char passwd[MAXPWLEN + 1];
+			strncpy(passwd, args[j], MAXPWLEN);
+			passwd[MAXPWLEN]='\0';
+			if(strlen(passwd)>8) passwd[8]='\0';
+			vncEncryptPasswd(m_encPasswd, passwd);
+			memset(passwd, 0, MAXPWLEN);
 		} else if ( SwitchMatch(args[j], _T("register") )) {
 			Register();
 			exit(1);

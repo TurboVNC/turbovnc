@@ -609,7 +609,7 @@ BEGIN
     ID_CLOSEDAEMON          "Stop listening for incoming connections"
     ID_SHOWWINDOW           "Display a connection window"
     ID_NEWCONN              "Make a manual connection"
-    IDS_HELP                "vncviewer [/shared] [/noshared] [/swapmouse] \r\n      [/belldeiconify] [/listen [<port>]] [/fullscreen] [/restricted] [/viewonly] \r\n      [/emulate3] [/noemulate3] [/emulate3timeout <ms>] [/emulate3fuzz <pixels>] \r\n      [/notoolbar] [/scale <percentage>] [/config <filename>] [/disableclipboard] \r\n      [/subsamp 0=None, 1=4:1:1, 2=4:2:2] [/quality 1-100] [/wan] [/lan] \r\n      [/loglevel <n>] [/logfile <filename>] [/register] \r\n      [/nocursor] [/dotcursor] [/smalldotcursor] [/normalcursor] [/help] \r\n      [/nocursorshape] [/noremotecursor] [/singlebuffer] [/doublebuffer] \r\n      [<server>[:<display>]] \r\n\r\nFor full details, see the documentation."
+    IDS_HELP                "vncviewer [/shared] [/noshared] [/swapmouse] \r\n      [/belldeiconify] [/listen [<port>]] [/fullscreen] [/restricted] [/viewonly] \r\n      [/emulate3] [/noemulate3] [/emulate3timeout <ms>] [/emulate3fuzz <pixels>] \r\n      [/notoolbar] [/scale <percentage>] [/config <filename>] [/disableclipboard] \r\n      [/subsamp 0=None, 1=4:1:1, 2=4:2:2] [/quality 1-100] [/wan] [/lan] \r\n      [/loglevel <n>] [/logfile <filename>] [/register] [/password <clear text password>] \r\n      [/nocursor] [/dotcursor] [/smalldotcursor] [/normalcursor] [/help] \r\n      [/nocursorshape] [/noremotecursor] [/singlebuffer] [/doublebuffer] \r\n      [<server>[:<display>]] \r\n\r\nFor full details, see the documentation."
 END
 
 STRINGTABLE DISCARDABLE 

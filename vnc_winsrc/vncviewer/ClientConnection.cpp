@@ -265,6 +265,12 @@ void ClientConnection::Run()
 		}
 	}
 
+	if (strlen((const char *) m_pApp->m_options.m_encPasswd) > 0) {
+		memcpy(m_encPasswd, m_pApp->m_options.m_encPasswd, 8);
+		memset(m_pApp->m_options.m_encPasswd, 0, 8);
+	}
+
+
 	// Show the "Connecting..." dialog box
 	m_connDlg = new ConnectingDialog(m_pApp->m_instance, m_opts.m_display);
 
