@@ -1,38 +1,18 @@
 #!/bin/sh
-#
 
 if [ "$1" = "clean" ]; then
 xmkmf || exit -1
+make Makefiles || exit -1
 make clean || exit -1
-cd Xvnc
-if [ -f Makefile ]; then
-	make clean || exit -1
-	./configure || exit -1
-else
-	./configure || exit -1
-	make clean || exit -1
-fi
+cd Xvnc/config/imake
+xmkmf ../../
+make clean
+make
+cd ../..
+xmkmf -a ./
+make Makefiles
+make clean
 cd ..
-if [ ! -f ../../vgl/Makefile ]; then
-	echo Could not find VirtualGL build directory at ../../vgl !
-	exit -1
-else
-	__PWD=`pwd`
-	cd ../../vgl
-	gmake M32=yes DISTRO=vnc clean
-	cd $__PWD
-fi
-fi
-
-if [ ! -f ../../vgl/Makefile ]; then
-	echo Could not find VirtualGL build directory at ../../vgl !
-	exit -1
-else
-	__PWD=`pwd`
-	cd ../../vgl
-	gmake M32=yes vnc
-	gmake M32=yes vnc
-	cd $__PWD
 fi
 
 xmkmf || exit -1
@@ -127,11 +107,7 @@ mkdir -p $pkgdir/vnc
 mkdir -p $pkgdir/man/man1
 
 ./vncinstall $pkgdir/bin $pkgdir/man
-if [ `uname -m` = i86pc ]; then
-	cp ../../vgl/solx86/vnc/lib/libturbojpeg.so $pkgdir/lib
-else
-	cp ../../vgl/solaris/vnc/lib/libturbojpeg.so $pkgdir/lib
-fi
+cp turbojpeg/libturbojpeg.so $pkgdir/lib
 cp -prf classes $pkgdir/vnc
 
 cd $pkgtmpdir
