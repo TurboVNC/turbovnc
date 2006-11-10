@@ -1,4 +1,5 @@
 /* Copyright (C)2004 Landmark Graphics
+ * Copyright (C)2005, 2006 Sun Microsystems, Inc.
  *
  * This library is free software and may be redistributed and/or modified under
  * the terms of the wxWindows Library License, Version 3 or (at your option)
@@ -11,17 +12,13 @@
  * wxWindows Library License for more details.
  */
 
-#if defined(_MSC_VER) && defined(_WIN32) && defined(DLLDEFINE)
+#if (defined(_MSC_VER) || defined(__CYGWIN__) || defined(__MINGW32__)) && defined(_WIN32) && defined(DLLDEFINE)
 #define DLLEXPORT __declspec(dllexport)
 #else
 #define DLLEXPORT
 #endif
 
-#if defined(_MSC_VER) && defined(_WIN32)
-#define DLLCALL __stdcall
-#else
 #define DLLCALL
-#endif
 
 /* Subsampling */
 #define NUMSUBOPT 3
@@ -35,6 +32,7 @@ enum {TJ_444=0, TJ_422, TJ_411};
 #define TJ_FORCESSE  16  /* Force IPP to use SSE1 code even if SSE2 available */
 #define TJ_FORCESSE2 32  /* Force IPP to use SSE2 code (useful if auto-detect is not working properly) */
 #define TJ_ALPHAFIRST 64 /* BGR buffer is ABGR and RGB buffer is ARGB */
+#define TJ_FORCESSE3 128 /* Force IPP to use SSE3 code (useful if auto-detect is not working properly) */
 
 typedef void* tjhandle;
 
