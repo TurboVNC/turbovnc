@@ -4,14 +4,14 @@ if [ "$1" = "clean" ]; then
 xmkmf || exit -1
 make Makefiles || exit -1
 make clean || exit -1
-cd Xvnc/config/imake
-xmkmf ../../
-make clean
-make
-cd ../..
-xmkmf -a ./
-make Makefiles
-make clean
+cd Xvnc
+if [ -f Makefile ]; then
+	make clean || exit -1
+	./configure || exit -1
+else
+	./configure || exit -1
+	make clean || exit -1
+fi
 cd ..
 fi
 
