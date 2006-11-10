@@ -1,0 +1,36 @@
+#ifdef SunArchitecture
+
+#if HasGcc
+CCOPTIONS = -Wall -fPIC
+SHLIBFLAGS = -shared -lc -z defs
+EXTRA_DEFINES = -D_GNU_SOURCE
+#endif
+#if HasSunC
+CCOPTIONS = -mt -fast -KPIC
+SHLIBFLAGS = -G -lc -z defs
+LDOPT = -fast -mt
+#endif
+
+#define MySharedLibraryTarget(libname,solist)                           @@\
+AllTarget(Concat(lib,libname.so))                                       @@\
+                                                                        @@\
+Concat(lib,libname.so):  solist                                         @@\
+	$(CC) $(LDOPT) -o $@ $(SHLIBFLAGS) solist $(REQUIREDLIBS)             @@\
+	LinkBuildLibrary($@)                                                  @@\
+                                                                        @@\
+clean::                                                                 @@\
+	$(RM) Concat(lib,libname.so)
+
+REQUIREDLIBS = -lmlib
+
+SRCS = turbojpeg-mlib.c
+
+OBJS = turbojpeg-mlib.o
+
+INCLUDES = -I../include
+
+MySharedLibraryTarget(turbojpeg,$(OBJS))
+
+DependTarget()
+
+#endif
