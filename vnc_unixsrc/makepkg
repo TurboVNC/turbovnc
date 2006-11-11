@@ -91,6 +91,7 @@ f none SUNWtvnc/vnc/classes/OptionsFrame.class 0644 root bin
 f none SUNWtvnc/vnc/classes/RecordingFrame.class 0644 root bin
 f none SUNWtvnc/vnc/classes/ReloginPanel.class 0644 root bin
 f none SUNWtvnc/vnc/classes/RfbProto.class 0644 root bin
+f none SUNWtvnc/vnc/classes/RFBUpdateEvent.class 0644 root bin
 f none SUNWtvnc/vnc/classes/SessionRecorder.class 0644 root bin
 f none SUNWtvnc/vnc/classes/SocketFactory.class 0644 root bin
 f none SUNWtvnc/vnc/classes/VncCanvas.class 0644 root bin
