@@ -29,7 +29,7 @@ Name: "viewer"; Description: "TurboVNC Viewer"; Types: full compact custom;
 [Files]
 Source: "WinVNC\Release\WinVNC.exe"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: restartreplace; Components: server
 Source: "WinVNC\Release\VNCHooks.dll"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: restartreplace; Components: server
-Source: "{sys}\turbojpeg.dll"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: external
+Source: "c:\windows\system32\turbojpeg.dll"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: restartreplace; Components: "server viewer"
 Source: "VNCViewer\Release\vncviewer.exe"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Components: viewer
 Source: "README-bin.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "LICENCE.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
