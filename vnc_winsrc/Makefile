@@ -10,8 +10,11 @@ clean:
 	$(MAKE) -C vncviewer clean
 	$(MAKE) -C winvnc clean
 
+SYSROOT := $(subst \,\\,$(SYSTEMROOT))
+
 .PHONY: dist
 dist: vncviewer winvnc
-	$(RM) TurboVNC.exe
-	compil32 /cc TurboVNC.iss
+	cp $(SYSROOT)/system32/turbojpeg.dll .
+	iscc TurboVNC.iss 
+	$(RM) turbojpeg.dll
 	mv output/setup.exe TurboVNC.exe

@@ -37,7 +37,7 @@ If everything is set up properly, you should be able to:
 
 Packaging TurboVNC:
 
-Make sure that compil32.exe (the Inno Setup Compiler) is in your path, then
+Make sure that iscc.exe (the Inno Setup Compiler) is in your path, then
 
   cd vnc/vnc_winsrc
   make dist
