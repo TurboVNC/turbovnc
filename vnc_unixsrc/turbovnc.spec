@@ -7,7 +7,7 @@ URL:       http://www.virtualgl.org
 License:   GPL
 Group:     User Interface/Desktops
 Requires:  bash >= 2.0
-Prereq:    /sbin/chkconfig /etc/init.d turbojpeg >= 1.01
+Prereq:    /sbin/chkconfig /etc/init.d turbojpeg >= 1.04
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildPrereq: /usr/bin/perl turbojpeg
 BuildRequires: zlib-devel
