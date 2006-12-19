@@ -615,7 +615,7 @@ DLLEXPORT tjhandle DLLCALL tjInitCompress(void)
 DLLEXPORT unsigned long DLLCALL TJBUFSIZE(int width, int height)
 {
 	// This allows enough room in case the image doesn't compress
-	return ((width+15)&(~15)) * ((height+15)&(~15)) * 3 + 2048;
+	return ((width+15)&(~15)) * ((height+15)&(~15)) * 6 + 2048;
 }
 
 DLLEXPORT int DLLCALL tjCompress(tjhandle h,
