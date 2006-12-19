@@ -269,6 +269,10 @@ $ENV{VGL_COMPRESS}= "0";
 
 if ($opt{'-fg'}) {
 system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1");
+if (kill 0, `cat $pidFile`) {
+    $opt{'-kill'} = ':'.$displayNumber;
+    &Kill();
+}
 } else {
 system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1 &");
 }
