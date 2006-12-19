@@ -106,6 +106,13 @@ fi
 %attr(0755,root,root) %config /etc/init.d/tvncserver
 %config(noreplace) /etc/sysconfig/tvncservers
 %doc LICENCE.TXT README WhatsNew ChangeLog
+
+%dir %{_bindir}
+%dir %{_mandir}
+%dir %{_mandir}/man1
+%dir %{_datadir}
+%dir %{_datadir}/vnc
+
 %{_bindir}/vncviewer
 %config(noreplace) /etc/X11/applnk/Applications/tvncviewer.desktop
 %{_mandir}/man1/vncviewer.1*
