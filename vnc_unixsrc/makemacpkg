@@ -30,7 +30,7 @@ install -m 755 vncviewer/vncviewer $pkgtmpdir/pkg/Package_Root/opt/$pkgname/bin
 install -m 755 /usr/lib/libturbojpeg.dylib $pkgtmpdir/pkg/Package_Root/opt/$pkgname/lib
 install_name_tool -change libturbojpeg.dylib /opt/VirtualGL/lib/libturbojpeg.dylib $pkgtmpdir/pkg/Package_Root/opt/$pkgname/bin/vncviewer
 install -m 755 vncviewer/vncviewer.man $pkgtmpdir/pkg/Package_Root/opt/$pkgname/man/man1
-sudo ln -fs /opt/$pkgname/bin/vncviewer "$pkgtmpdir/pkg/Package_Root/Applications/$pkgname/$pkgname Viewer"
+install -m 644 ReadMe-MacApp.txt "$pkgtmpdir/pkg/Package_Root/Applications/$pkgname/Read Me.txt"
 sudo chown -R root:admin $pkgtmpdir/pkg/Package_Root
 cp License.rtf Welcome.rtf ReadMe.rtf $pkgtmpdir/pkg/Resources/
 $PACKAGEMAKER -build -v -p $pkgtmpdir/$pkgname-$_VERSION.pkg \
