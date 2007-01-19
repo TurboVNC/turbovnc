@@ -18,6 +18,9 @@ WindowVisible=no
 DisableStartupPrompt=yes
 BackColor=clBlack
 BackColor2=clBlue
+VersionInfoCompany=The VirtualGL Project
+VersionInfoDescription=A fast VNC implementation designed for video apps
+VersionInfoVersion=0.3.2
 
 ChangesAssociations=yes
 
