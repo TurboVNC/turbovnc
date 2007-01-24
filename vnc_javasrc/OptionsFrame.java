@@ -48,7 +48,7 @@ class OptionsFrame extends Frame
   };
 
   static String[][] values = {
-    { "Custom", "Broadband", "LAN" },
+    { "Broadband (favor performance)", "Broadband (favor image quality)", "LAN", "Custom" },
     { "4:1:1", "4:2:2", "None" },
     { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
       "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
@@ -285,11 +285,16 @@ class OptionsFrame extends Frame
 
     boolean updateOptions = false;
 
-    if (choices[presetIndex].getSelectedItem().equals("Broadband")) {
+    if (choices[presetIndex].getSelectedItem().equals("Broadband (favor performance)")) {
       compressLevel = 1;
       jpegQuality = 30;
       wan = true;
-      updateOptions = true;      
+      updateOptions = true;
+    } else if (choices[presetIndex].getSelectedItem().equals("Broadband (favor image quality)")) {
+      compressLevel = 0;
+      jpegQuality = 95;
+      wan = true;
+      updateOptions = true;
     } else if (choices[presetIndex].getSelectedItem().equals("LAN")) {
       compressLevel = 0;
       jpegQuality = 95;
@@ -316,7 +321,9 @@ class OptionsFrame extends Frame
     if (compressLevel == 0 && jpegQuality == 95 && wan == false) {
       choices[presetIndex].select("LAN");
     } else if (compressLevel == 1 && jpegQuality == 30 && wan == true) {
-      choices[presetIndex].select("Broadband");
+      choices[presetIndex].select("Broadband (favor performance)");
+    } else if (compressLevel == 0 && jpegQuality == 95 && wan == true) {
+      choices[presetIndex].select("Broadband (favor image quality)");
     } else {
       choices[presetIndex].select("Custom");
     }
