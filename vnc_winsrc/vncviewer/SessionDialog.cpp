@@ -293,7 +293,7 @@ int SessionDialog::cmp(HWND hwnd)
 	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
 	if (m_pOpt->m_compressLevel != 0) a = 0;
 	if (m_pOpt->m_jpegQualityLevel != 95) a = 0;
-	if (m_pOpt->m_optimizeForWAN != false) a = 0;
+	if (m_pOpt->m_optimizeForWAN != true) a = 0;
 	if (a == 3) {
 		SendMessage(hCustomRadio, BM_CLICK, 0, 0);
 		return a;
@@ -319,7 +319,7 @@ void SessionDialog::SetConnectionProfile(bool LowBandwidth, bool HighSpeed)
 		m_pOpt->m_PreferredEncoding = rfbEncodingTight;
 		m_pOpt->m_compressLevel = 0;
 		m_pOpt->m_jpegQualityLevel = 95;
-		m_pOpt->m_optimizeForWAN = false;
+		m_pOpt->m_optimizeForWAN = true;
 	}
 	if (LowBandwidth && !HighSpeed) {
 		m_pOpt->m_PreferredEncoding = rfbEncodingTight;
