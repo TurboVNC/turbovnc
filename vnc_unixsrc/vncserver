@@ -643,9 +643,9 @@ sub SanityCheck
     unless (defined($ENV{HOME})) {
 	die "$prog: The HOME environment variable is not set.\n";
     }
-    unless (defined($ENV{USER})) {
-	die "$prog: The USER environment variable is not set.\n";
-    }
+#    unless (defined($ENV{USER})) {
+#	die "$prog: The USER environment variable is not set.\n";
+#    }
 
     #
     # Find socket constants. 'use Socket' is a perl5-ism, so we wrap it in an
