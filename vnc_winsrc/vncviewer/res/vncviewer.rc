@@ -222,7 +222,7 @@ BEGIN
                     IDC_STATIC,135,48,190,36
     LTEXT           "Based on VNC software\nCopyright (C) 1999-2001 AT&&T Laboratories Cambridge\nCopyright (C) 2002-2003 RealVNC Ltd.\nhttp://www.realvnc.com/",
                     IDC_STATIC,135,89,190,36
-    LTEXT           "TurboVNC Viewer version 0.3.2\nCopyright (C) 2004 Landmark Graphics Corporation\nCopyright (C) 2004-2006 Sun Microsystems, Inc.\nhttp://www.virtualgl.org",
+    LTEXT           "TurboVNC Viewer version 0.3.3\nCopyright (C) 2004 Landmark Graphics Corporation\nCopyright (C) 2004-2006 Sun Microsystems, Inc.\nhttp://www.virtualgl.org",
                     IDC_STATIC,135,7,190,36
 END
 
@@ -465,8 +465,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,3,2,0
- PRODUCTVERSION 0,3,2,0
+ FILEVERSION 0,3,3,0
+ PRODUCTVERSION 0,3,3,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L

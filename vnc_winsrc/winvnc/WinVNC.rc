@@ -32,7 +32,7 @@ CAPTION "About TurboVNC Server"
 FONT 8, "MS Sans Serif"
 BEGIN
     CONTROL         132,IDC_VNCLOGO,"Static",SS_BITMAP | SS_SUNKEN,19,7,87,80
-    LTEXT           "TurboVNC Server version 0.3.2\nCopyright (C) 2004 Landmark Graphics Corporation\nCopyright (C) 2004-2006 Sun Microsystems, Inc.\nhttp://www.virtualgl.org",
+    LTEXT           "TurboVNC Server version 0.3.3\nCopyright (C) 2004 Landmark Graphics Corporation\nCopyright (C) 2004-2006 Sun Microsystems, Inc.\nhttp://www.virtualgl.org",
                     IDC_STATIC,135,7,190,36
     LTEXT           "Based on TightVNC Server version 1.3.8\nCopyright (C) 2000-2006 Constantin Kaplinsky\nCopyright (C) 2000-2006 TightVNC Group\nhttp://www.tightvnc.com/",
                     IDC_STATIC,135,48,190,36
@@ -559,8 +559,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,3,2,0
- PRODUCTVERSION 0,3,2,0
+ FILEVERSION 0,3,3,0
+ PRODUCTVERSION 0,3,3,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
