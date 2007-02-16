@@ -48,7 +48,7 @@ class OptionsFrame extends Frame
   };
 
   static String[][] values = {
-    { "Broadband (favor performance)", "Broadband (favor image quality)", "LAN", "Custom" },
+    { "Broadband (favor performance)", "Broadband (favor image quality)", "High-Speed Network", "Custom" },
     { "4:1:1", "4:2:2", "None" },
     { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
       "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
@@ -295,7 +295,7 @@ class OptionsFrame extends Frame
       jpegQuality = 95;
       wan = true;
       updateOptions = true;
-    } else if (choices[presetIndex].getSelectedItem().equals("LAN")) {
+    } else if (choices[presetIndex].getSelectedItem().equals("High-Speed Network")) {
       compressLevel = 0;
       jpegQuality = 95;
       wan = false;
@@ -319,7 +319,7 @@ class OptionsFrame extends Frame
   void setPreset() {
 
     if (compressLevel == 0 && jpegQuality == 95 && wan == false) {
-      choices[presetIndex].select("LAN");
+      choices[presetIndex].select("High-Speed Network");
     } else if (compressLevel == 1 && jpegQuality == 30 && wan == true) {
       choices[presetIndex].select("Broadband (favor performance)");
     } else if (compressLevel == 0 && jpegQuality == 95 && wan == true) {
