@@ -23,6 +23,8 @@ vncserver \- a wrapper to launch an X server for VNC.
 .TP
 \fBvncserver\fR \-kill :\fIdisplay\fR
 .TP
+\fBvncserver\fR \-list
+.TP
 \fBvncserver\fR \-help
 .SH DESCRIPTION
 \fBvncserver\fR is a wrapper script for \fBXvnc\fR, the free X server
@@ -57,6 +59,10 @@ This specifies the name of the desktop.
 .TP
 \fB\-kill\fR \fB:\fR\fIdisplay\fR
 Stops the VNC server which is currently running on the specified display.
+.TP
+\fB\-list\fR
+Lists the display numbers and process ID's of all VNC servers that are
+currently running under your account on this machine.
 .TP
 \fB\-help\fR
 Prints a brief list of command line options
