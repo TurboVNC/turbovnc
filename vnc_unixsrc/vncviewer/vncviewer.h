@@ -158,6 +158,7 @@ extern void CopyDataToScreen(char *buf, int x, int y, int width, int height);
 extern void SynchroniseScreen();
 extern void QualHigh(Widget, XEvent *, String *, Cardinal *);
 extern void QualLow(Widget, XEvent *, String *, Cardinal *);
+extern void QualWAN(Widget, XEvent *, String *, Cardinal *);
 
 /* dialogs.c */
 

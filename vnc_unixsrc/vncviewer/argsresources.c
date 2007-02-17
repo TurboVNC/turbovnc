@@ -94,7 +94,7 @@ char *fallback_resources[] = {
   "*popup.buttonForm.translations: #override\\n\
      <KeyPress>: SendRFBEvent() HidePopup()",
 
-  "*popupButtonCount: 10",
+  "*popupButtonCount: 11",
 
   "*popup*button1.label: Dismiss popup",
   "*popup*button1.translations: #override\\n\
@@ -135,13 +135,17 @@ char *fallback_resources[] = {
   "*popup*button8.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: SendRFBEvent(key,F8) HidePopup()",
 
-  "*popup*button9.label: Preset: Broadband/T1",
+  "*popup*button9.label: Preset: High-Speed Network (default)",
   "*popup*button9.translations: #override\\n\
+     <Btn1Down>,<Btn1Up>: QualHigh()",
+
+  "*popup*button10.label: Preset: Broadband (favor performance)",
+  "*popup*button10.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualLow()",
 
-  "*popup*button10.label: Preset: LAN (default)",
-  "*popup*button10.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: QualHigh()",
+  "*popup*button11.label: Preset: Broadband (favor image quality)",
+  "*popup*button11.translations: #override\\n\
+     <Btn1Down>,<Btn1Up>: QualWAN()",
 
   NULL
 };
@@ -275,6 +279,7 @@ static XtActionsRec actions[] = {
     {"SendRFBEvent", SendRFBEvent},
     {"QualHigh", QualHigh},
     {"QualLow", QualLow},
+    {"QualWAN", QualWAN},
     {"ShowPopup", ShowPopup},
     {"HidePopup", HidePopup},
     {"ToggleFullScreen", ToggleFullScreen},

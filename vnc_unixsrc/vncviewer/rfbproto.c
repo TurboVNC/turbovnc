@@ -907,6 +907,18 @@ QualLow(Widget w, XEvent *e, String *s, Cardinal *c)
   UpdateQual();
 }
 
+/*
+ * QualWAN
+ */
+void
+QualWAN(Widget w, XEvent *e, String *s, Cardinal *c)
+{
+  appData.compressLevel=0;
+  appData.qualityLevel=95;
+  appData.optimizeForWAN=1;
+  UpdateQual();
+}
+
 
 /*
  * SendClientCutText.
