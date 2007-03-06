@@ -46,7 +46,6 @@ $geometry = "1024x768";
 $depth = 24;
 $desktopName = "X";
 $vncUserDir = "$ENV{HOME}/.vnc";
-$fontPath = "unix/:7100";
 $authType = "-rfbauth $vncUserDir/passwd";
 
 # Here is another example of setting the font path:
@@ -113,6 +112,12 @@ unless ($xauthorityFile) {
 
 chop($host = `uname -n`);
 chop($os = `uname`);
+
+if ($os eq "SunOS") {
+    $fontPath = "inet/:7100";
+} else {
+    $fontPath = "unix/:7100";
+}
 
 
 # Check command line options
