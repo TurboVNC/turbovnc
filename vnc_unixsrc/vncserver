@@ -114,7 +114,7 @@ chop($host = `uname -n`);
 chop($os = `uname`);
 
 if ($os eq "SunOS") {
-    $fontPath = "inet/:7100";
+#   $fontPath = "inet/:7100";
 } else {
     $fontPath = "unix/:7100";
 }
@@ -242,7 +242,8 @@ system("$cmd & echo \$! >$pidFile");
 sleep(1);
 unless (kill 0, `cat $pidFile`) {
     warn "Couldn't start Xvnc; trying default font path.\n";
-    warn "Please set correct fontPath in the $prog script.\n";
+    warn "Please set correct fontPath in the $prog script\n";
+    warn "or make sure that the X Font Server (xfs) is running.\n";
     $cmd =~ s@-fp [^ ]+@@;
     system("$cmd & echo \$! >$pidFile");
     sleep(1);
