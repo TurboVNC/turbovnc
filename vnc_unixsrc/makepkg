@@ -72,6 +72,10 @@ f none SUNWtvnc/bin/vncviewer 0755 root bin
 f none SUNWtvnc/bin/vncserver 0755 root bin
 f none SUNWtvnc/bin/vncconnect 0755 root bin
 f none SUNWtvnc/bin/Xvnc 0755 root bin
+d none SUNWtvnc/doc 0755 root bin
+f none SUNWtvnc/doc/LICENCE.TXT 0644 root bin
+f none SUNWtvnc/doc/WhatsNew 0644 root bin
+f none SUNWtvnc/doc/TurboVNC-ChangeLog.txt 0644 root bin
 d none SUNWtvnc/lib 0755 root bin
 f none SUNWtvnc/lib/libturbojpeg.so 0755 root bin
 d none SUNWtvnc/man 0755 root bin
@@ -103,6 +107,7 @@ EOF
 pkgdir=$pkgtmpdir/opt/$pkgname
 
 mkdir -p $pkgdir/bin
+mkdir -p $pkgdir/doc
 mkdir -p $pkgdir/lib
 mkdir -p $pkgdir/vnc
 mkdir -p $pkgdir/man/man1
@@ -110,6 +115,7 @@ mkdir -p $pkgdir/man/man1
 ./vncinstall $pkgdir/bin $pkgdir/man
 cp turbojpeg/libturbojpeg.so $pkgdir/lib
 cp -prf classes $pkgdir/vnc
+cp LICENCE.TXT WhatsNew TurboVNC-ChangeLog.txt $pkgdir/doc
 
 cd $pkgtmpdir
 pkgmk -o -r opt -d . -a `uname -p` -f proto
