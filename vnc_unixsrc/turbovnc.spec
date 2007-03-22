@@ -105,7 +105,7 @@ fi
 %defattr(-,root,root)
 %attr(0755,root,root) %config /etc/init.d/tvncserver
 %config(noreplace) /etc/sysconfig/tvncservers
-%doc LICENCE.TXT README WhatsNew ChangeLog
+%doc LICENCE.TXT WhatsNew TurboVNC-ChangeLog.txt
 
 %dir %{_bindir}
 %dir %{_mandir}

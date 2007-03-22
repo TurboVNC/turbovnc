@@ -1,0 +1,138 @@
+===============================================================================
+Significant changes between 0.3.2 and 0.3.3
+===============================================================================
+[1]
+Added a new preset to all VNC viewers which allows the user to select both the
+WAN protocol optimizations and perceptually lossless image quality.
+-------------------------------------------------------------------------------
+[2]
+Added '-list' option to vncserver which lists all VNC sessions (not just
+TurboVNC sessions) running under the current user account on the current
+machine.  This new option is documented in the VGL/TVNC docs as well as the
+TurboVNC man pages.
+-------------------------------------------------------------------------------
+[3]
+vncserver will no longer fail if the USER environment variable is unset.  That
+environment variable is unused in the script, so checking for its presence was
+apparently a vestigial feature.
+-------------------------------------------------------------------------------
+[4]
+Modified Windows build to embed a proper version number in TurboVNC.exe.
+-------------------------------------------------------------------------------
+[5]
+Changed the fallback logic in the default ~/.vnc/xstartup file so that Gnome is
+used as the window manager on Solaris if it is available and if
+~/.dt/sessions/lastsession doesn't exist.  Otherwise, CDE is used.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
+Significant changes between 0.3.1 and 0.3.2
+===============================================================================
+[1]
+Incorporated TightVNC 1.3.8 patches (where applicable)
+-------------------------------------------------------------------------------
+[2]
+Now using a single RPM to support multiple Linux distributions.
+-------------------------------------------------------------------------------
+[3]
+Fixed a couple of issues in the fallback logic of the default ~/.vnc/xstartup
+script.  It should now properly run fvwm2 or twm if KDE, CDE, or Gnome are not
+available.
+-------------------------------------------------------------------------------
+[4]
+First pass at a Mac build of the TurboVNC viewer.  The Mac version is an X11
+Unix app and thus needs to be run inside an xterm.  It should otherwise behave
+and perform identically to the Linux version.
+-------------------------------------------------------------------------------
+[5]
+Increased the size of the TurboJPEG compression holding buffer to account for
+rare cases in which compressing very high-frequency image tiles (specifically
+parts of the 3D Studio MAX Viewperf test) with high quality levels
+(specifically Q99 or above) would produce JPEG images that are larger than the
+uncompressed input.
+
+Linux users will need to upgrade to the TurboJPEG 1.04 RPM to get this fix.
+For other platforms, the fix is included in the TurboVNC 0.3.2 packages.
+-------------------------------------------------------------------------------
+[6]
+Addad '-fg' switch to vncserver to make it (optionally) run in the foreground.
+This allows you to kill the VNC server by pressing CTRL-C in the shell you used
+to start it.  When in foreground mode, you can also kill the VNC server by
+logging out of the window manager inside the VNC session.
+-------------------------------------------------------------------------------
+[7]
+The /etc/init.d/tvncserver script, which can be used to launch multiple
+TurboVNC servers at boot time, should now work properly on SuSE systems.
+-------------------------------------------------------------------------------
+[8]
+Added TurboVNC protocol optimizations to the Java viewer and made its
+configuration options match the other TurboVNC viewers.  The Java viewer still
+uses a slower codec, so it is about 3X slower in a LAN environment than the
+native viewer.  The Java viewer also lacks double buffering support.  But with
+these new optimizations, the native and Java viewers should now perform
+similarly over a wide-area network.
+-------------------------------------------------------------------------------
+[9]
+Added a '-password' option to the Windows TurboVNC viewer to allow one to pass
+the VNC password as plain text.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
+Significant changes between 0.3 and 0.3.1
+===============================================================================
+[1]
+Automatically start Xvnc with '-nolisten local' on Solaris servers.  On
+Solaris, /tmp/.X11-unix is not world writable by default, so it is necessary to
+either start Xvnc with '-nolisten local' (which forces Xvnc to listen on a tcp
+port rather than a local pipe) or to make /tmp/.X11-unix world writable.  The
+former approach seemed like the lesser of two evils.
+-------------------------------------------------------------------------------
+[2]
+The vncserver startup script now sets VGL_COMPRESS to 0 automatically, so it is
+no longer necessary to supply a '-c 0' argument to vglrun when running inside a
+TurboVNC session.
+-------------------------------------------------------------------------------
+[3]
+The JPEG quality slider in the Unix client's F8 popup menu will now respond to
+any mouse button, not just the middle one.
+-------------------------------------------------------------------------------
+[4]
+The WAN protocol optimizations can now be switched on and off.  It has been
+discovered that these optimizations produce slower performance on a LAN, so it
+is preferable only to use them on high-latency networks.
+
+On the Windows client, the "Broadband/T1" preset now enables the WAN protocol
+optimizations in addition to setting quality=30 and subsampling=4:1:1.
+Similarly, the "High-speed Network" preset disables WAN optimizations in
+addition to setting quality=95 and subsampling=4:4:4.  WAN optimizations can
+also be configured via. an additional check box ("High-Latency Network") in the
+Options dialog or through two new command line switches: /lan and /wan.
+
+On the Linux/Unix client (vncviewer), the default is no WAN optimizations,
+quality=95, and subsampling=4:4:4.  You can specify an argument of '-wan' to
+enable WAN optimizations or '-broadband' to enable WAN optimizations,
+quality=30, and subsampling=4:1:1.  The F8 popup menu also contains a new
+button for enabling/disabling WAN optimizations, and the Broadband and LAN
+presets in this window will enable and disable WAN optimizations
+(respectively.)
+-------------------------------------------------------------------------------
+
+
+===============================================================================
+Significant changes between 0.2 and 0.3
+===============================================================================
+[1]
+Solaris/x86 support
+-------------------------------------------------------------------------------
+[2]
+Added a JPEG quality slider to the Unix/Linux F8 popup menu in vncviewer
+-------------------------------------------------------------------------------
+[3]
+Patches from TightVNC 1.3dev7, including a great many usability improvements on
+the Windows client
+-------------------------------------------------------------------------------
+[4]
+Improved performance on broadband connections
+-------------------------------------------------------------------------------
