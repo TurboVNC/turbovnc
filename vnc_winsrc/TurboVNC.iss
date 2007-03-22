@@ -36,6 +36,8 @@ Source: "turbojpeg.dll"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: res
 Source: "VNCViewer\Release\vncviewer.exe"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Components: viewer
 Source: "README-bin.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "LICENCE.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
+Source: "WhatsNew.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
+Source: "TurboVNC-ChangeLog.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "TurboVNC.url"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 ;Source: "Web\*"; DestDir: "{app}\Web"; CopyMode: alwaysoverwrite; Components: webdoc
 ;Source: "Web\images\*"; DestDir: "{app}\Web\images"; CopyMode: alwaysoverwrite; Components: webdoc
@@ -61,7 +63,8 @@ Name: "{group}\Documentation\Read Me";        FileName: "{app}\README-bin.txt"; 
 Name: "{group}\Documentation\Licensing Terms";        FileName: "{app}\LICENCE.txt";                                   WorkingDir: "{app}"
 Name: "{group}\Documentation\TurboVNC Web Site";      FileName: "{app}\TurboVNC.url"
 ;Name: "{group}\Documentation\What's New (Detailed Log)"; FileName: "{app}\Web\changelog-win32.html";                   WorkingDir: "{app}\Web"; Components: webdoc
-;Name: "{group}\Documentation\What's New (Summary)";   FileName: "{app}\Web\whatsnew.html";                             WorkingDir: "{app}\Web"; Components: webdoc
+Name: "{group}\Documentation\TightVNC Change Log";   FileName: "{app}\WhatsNew.txt";                             WorkingDir: "{app}"
+Name: "{group}\Documentation\TurboVNC Change Log";   FileName: "{app}\TurboVNC-ChangeLog.txt";                             WorkingDir: "{app}"
 
 [Tasks]
 Name: associate; Description: "&Associate .vnc files with TurboVNC Viewer"; GroupDescription: "File associations:"; Components: viewer
