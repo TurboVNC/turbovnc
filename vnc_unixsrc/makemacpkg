@@ -23,6 +23,7 @@ mkdir -p $pkgtmpdir/pkg/Package_Root/opt/$pkgname/bin
 mkdir -p $pkgtmpdir/pkg/Package_Root/opt/$pkgname/lib
 mkdir -p $pkgtmpdir/pkg/Package_Root/opt/$pkgname/man/man1
 mkdir -p $pkgtmpdir/pkg/Package_Root/Applications/$pkgname
+mkdir -p $pkgtmpdir/pkg/Package_Root/Library/Documentation/$pkgname-$_VERSION
 mkdir -p $pkgtmpdir/pkg/Resources
 cat macpkg.info.tmpl | sed s/{__VERSION}/$_VERSION/g > $pkgtmpdir/pkg/$pkgname.info
 cat Info.plist.tmpl | sed s/{__VERSION}/$_VERSION/g  | sed s/{__BUILD}/$_BUILD/g > $pkgtmpdir/pkg/Info.plist
@@ -31,6 +32,9 @@ install -m 755 /usr/lib/libturbojpeg.dylib $pkgtmpdir/pkg/Package_Root/opt/$pkgn
 install_name_tool -change libturbojpeg.dylib /opt/VirtualGL/lib/libturbojpeg.dylib $pkgtmpdir/pkg/Package_Root/opt/$pkgname/bin/vncviewer
 install -m 755 vncviewer/vncviewer.man $pkgtmpdir/pkg/Package_Root/opt/$pkgname/man/man1
 install -m 644 ReadMe-MacApp.txt "$pkgtmpdir/pkg/Package_Root/Applications/$pkgname/Read Me.txt"
+install -m 644 LICENCE.TXT $pkgtmpdir/pkg/Package_Root/Library/Documentation/$pkgname-$_VERSION
+install -m 644 WhatsNew $pkgtmpdir/pkg/Package_Root/Library/Documentation/$pkgname-$_VERSION
+install -m 644 TurboVNC-ChangeLog.txt $pkgtmpdir/pkg/Package_Root/Library/Documentation/$pkgname-$_VERSION
 sudo chown -R root:admin $pkgtmpdir/pkg/Package_Root
 cp License.rtf Welcome.rtf ReadMe.rtf $pkgtmpdir/pkg/Resources/
 $PACKAGEMAKER -build -v -p $pkgtmpdir/$pkgname-$_VERSION.pkg \
