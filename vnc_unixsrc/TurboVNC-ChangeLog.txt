@@ -24,6 +24,9 @@ Changed the fallback logic in the default ~/.vnc/xstartup file so that Gnome is
 used as the window manager on Solaris if it is available and if
 ~/.dt/sessions/lastsession doesn't exist.  Otherwise, CDE is used.
 -------------------------------------------------------------------------------
+[6]
+Fixed an issue whereby Gnome would fail to start in TurboVNC if TurboVNC was
+launched from within another X session.
 
 
 ===============================================================================
