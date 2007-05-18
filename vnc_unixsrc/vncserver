@@ -65,6 +65,7 @@ $authType = "-rfbauth $vncUserDir/passwd";
 
 $defaultXStartup
     = ("#!/bin/sh\n\n".
+       "unset SESSION_MANAGER\n".
        "OS=`uname -s`\n".
        "if [ -x /etc/X11/xinit/xinitrc ]; then\n".
        "  exec /etc/X11/xinit/xinitrc\n".
