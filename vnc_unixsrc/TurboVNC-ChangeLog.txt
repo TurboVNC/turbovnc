@@ -27,6 +27,7 @@ used as the window manager on Solaris if it is available and if
 [6]
 Fixed an issue whereby Gnome would fail to start in TurboVNC if TurboVNC was
 launched from within another X session.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
