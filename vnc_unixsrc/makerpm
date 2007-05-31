@@ -33,7 +33,7 @@ mkdir -p rpms/RPMS
 cd rpms; ln -fs .. BUILD; cd ..
 
 BUILD=`date +%Y%m%d`
-VERSION=0.3.3
+VERSION=0.3.4
 rpmbuild -bb --buildroot `pwd`/rpms/TurboVNC-buildroot --define "_topdir `pwd`/rpms" \
 	--define "_bindir /opt/TurboVNC/bin" --define "_mandir /opt/TurboVNC/man" \
 	--define "_datadir /opt/TurboVNC" --define "_version $VERSION" \
