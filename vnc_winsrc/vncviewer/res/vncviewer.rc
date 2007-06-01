@@ -57,8 +57,8 @@ IDD_OPTIONDIALOG DIALOG DISCARDABLE  0, 0, 300, 179
 STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
-    GROUPBOX        "Format and encodings",IDC_STATIC_FORMAT,4,4,123,142
-    LTEXT           "Use encoding:",IDC_STATIC_ENCODING,12,15,49,10,
+    GROUPBOX        "Image protocol",IDC_STATIC_FORMAT,4,4,123,142
+    LTEXT           "Compression:",IDC_STATIC_ENCODING,12,15,49,10,
                     SS_CENTERIMAGE
     COMBOBOX        IDC_ENCODING,65,14,56,79,CBS_DROPDOWNLIST | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
@@ -590,7 +590,7 @@ BEGIN
     ID_CLOSEDAEMON          "Stop listening for incoming connections"
     ID_SHOWWINDOW           "Display a connection window"
     ID_NEWCONN              "Make a manual connection"
-    IDS_HELP                "vncviewer [/shared] [/noshared] [/swapmouse] \r\n      [/belldeiconify] [/listen [<port>]] [/fullscreen] [/restricted] [/viewonly] \r\n      [/emulate3] [/noemulate3] [/emulate3timeout <ms>] [/emulate3fuzz <pixels>] \r\n      [/notoolbar] [/scale <percentage>] [/config <filename>] [/disableclipboard] \r\n      [/subsamp 0=None, 1=4:1:1, 2=4:2:2] [/quality 1-100] [/wan] [/lan] \r\n      [/loglevel <n>] [/logfile <filename>] [/register] [/password <clear text password>] \r\n      [/nocursor] [/dotcursor] [/smalldotcursor] [/normalcursor] [/help] \r\n      [/nocursorshape] [/noremotecursor] [/singlebuffer] [/doublebuffer] \r\n      [<server>[:<display>]] \r\n\r\nFor full details, see the documentation."
+    IDS_HELP                "vncviewer [/shared] [/noshared] [/swapmouse] \r\n      [/belldeiconify] [/listen [<port>]] [/fullscreen] [/restricted] [/viewonly] \r\n      [/emulate3] [/noemulate3] [/emulate3timeout <ms>] [/emulate3fuzz <pixels>] \r\n      [/notoolbar] [/scale <percentage>] [/config <filename>] [/disableclipboard] \r\n      [/compress <jpeg | rgb>] [/subsamp 0=None, 1=4:1:1, 2=4:2:2] [/quality 1-100] \r\n      [/wan] [/lan] [/loglevel <n>] [/logfile <filename>] [/register] \r\n      [/password <clear text password>] [/nocursor] [/dotcursor] [/smalldotcursor] \r\n      [/normalcursor] [/help] [/nocursorshape] [/noremotecursor] \r\n      [/singlebuffer] [/doublebuffer] \r\n      [<server>[:<display>]] \r\n\r\nFor full details, see the documentation."
 END
 
 STRINGTABLE DISCARDABLE 
