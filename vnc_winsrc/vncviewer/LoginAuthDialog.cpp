@@ -1,4 +1,4 @@
-//  Copyright (C) 2003 Constantin Kaplinsky. All Rights Reserved.
+//  Copyright (C) 2003-2006 Constantin Kaplinsky. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -47,6 +47,8 @@ LoginAuthDialog::LoginAuthDialog(char *vnchost, char *title, char *username)
 		m_title[0] = '\0';
 	}
 
+	m_username_disabled = (username == NULL);
+
 	if (username == NULL || username[0] == '\0') {
 		m_username[0] = TEXT('\0');
 	} else {
@@ -89,6 +91,9 @@ BOOL CALLBACK LoginAuthDialog::DlgProc(HWND hwnd, UINT uMsg,
 			SetDlgItemText(hwnd, IDC_LOGIN_EDIT, _this->m_username);
 			SetFocus(GetDlgItem(hwnd, IDC_PASSWD_EDIT));
 			return FALSE;
+		}
+		if (_this->m_username_disabled) {
+			EnableWindow(GetDlgItem(hwnd, IDC_LOGIN_EDIT), FALSE);
 		}
 		return TRUE;
 	case WM_COMMAND:

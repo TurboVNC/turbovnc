@@ -77,6 +77,9 @@ public:
 	void ReadUploadCancel();
 	void ReadDownloadFailed();
 
+	BOOL SendFileDownloadRequest();
+	BOOL SendMultipleFileDownloadRequests();
+
 	ClientConnection * m_clientconn;
 	VNCviewerApp * m_pApp; 
 	
@@ -84,6 +87,8 @@ private:
 	DWORD m_dwDownloadRead;
 	DWORD m_dwDownloadBlockSize;
 	int m_sizeDownloadFile;
+	int m_numOfFilesToDownload;
+	int m_currentDownloadIndex;
 	void Time70ToFiletime(unsigned int time70, FILETIME *pftime);
 	unsigned int FiletimeToTime70(FILETIME ftime);
 	void SendFileUploadDataMessage(unsigned short size, char *pFile);

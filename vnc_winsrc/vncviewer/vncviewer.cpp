@@ -144,10 +144,11 @@ bool ParseDisplay(LPTSTR display, LPTSTR phost, int hostlen, int *pport)
 			if (_stscanf(colonpos + 2, TEXT("%d"), &tmp_port) != 1) 
 				return false;
 		} else {
-			// One colon -- interpret as a display number
+			// One colon -- interpret as a display or port number
 			if (_stscanf(colonpos + 1, TEXT("%d"), &tmp_port) != 1) 
 				return false;
-			tmp_port += RFB_PORT_OFFSET;
+			if (tmp_port < 100)
+				tmp_port += RFB_PORT_OFFSET;
 		}
 	}
     *pport = tmp_port;

@@ -40,7 +40,6 @@ typedef short INT16;
 typedef unsigned char  CARD8;
 
 // Define the port number offsets
-#define FLASH_PORT_OFFSET 5400
 #define INCOMING_PORT_OFFSET 5500
 #define HTTP_PORT_OFFSET 5800	// we don't use this in Venice
 #define RFB_PORT_OFFSET 5900

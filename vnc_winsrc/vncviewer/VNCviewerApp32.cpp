@@ -34,7 +34,6 @@ VNCviewerApp32::VNCviewerApp32(HINSTANCE hInstance, PSTR szCmdLine) :
 {
 
 	m_pdaemon = NULL;
-	m_pflasher = NULL;
 
 	// Load a requested keyboard layout
 	if (m_options.m_kbdSpecified) {
@@ -148,7 +147,6 @@ void VNCviewerApp32::NewConnection(SOCKET sock) {
 void VNCviewerApp32::ListenMode() {
 
 	try {
-		m_pflasher = new Flasher(FLASH_PORT_OFFSET);
 		m_pdaemon = new Daemon(m_options.m_listenPort);
 	} catch (WarningException &e) {
 		char msg[1024];
@@ -219,6 +217,5 @@ bool VNCviewerApp32::ProcessDialogMessage(MSG *pmsg)
 VNCviewerApp32::~VNCviewerApp32() {
 	// We don't need to clean up pcc if the thread has been joined.
 	if (m_pdaemon != NULL) delete m_pdaemon;
-	if (m_pflasher != NULL) delete m_pflasher;
 }
 	

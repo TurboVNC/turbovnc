@@ -1,4 +1,4 @@
-//  Copyright (C) 2003 Constantin Kaplinsky. All Rights Reserved.
+//  Copyright (C) 2003-2006 Constantin Kaplinsky. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -45,6 +45,7 @@ public:
 private:
 	char m_title[256];
 	char *m_vnchost;
+	bool m_username_disabled;
 };
 
 #endif // LOGINAUTHDIALOG_H__
