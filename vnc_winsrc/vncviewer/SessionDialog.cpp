@@ -312,6 +312,7 @@ void SessionDialog::SetConnectionProfile(bool LowBandwidth, bool HighSpeed)
 	for (int i = rfbEncodingRaw; i <= LASTENCODING; i++)
 		m_pOpt->m_UseEnc[i] = false;
 
+	m_pOpt->m_UseEnc[rfbEncodingRaw] = true;
 	m_pOpt->m_UseEnc[rfbEncodingTight] = true;
 	m_pOpt->m_UseEnc[rfbEncodingCopyRect] = true;
 

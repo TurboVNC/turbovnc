@@ -43,7 +43,7 @@
 #define DOTCURSOR 1
 #define NORMALCURSOR 2
 #define SMALLCURSOR 3
-#define MAX_LEN_COMBO 1
+#define MAX_LEN_COMBO 2
 
 #define KEY_VNCVIEWER_HISTORI _T("Software\\ORL\\VNCviewer\\History")
 

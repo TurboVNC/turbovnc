@@ -44,6 +44,7 @@ VNCOptions::VNCOptions()
 	for (int i = rfbEncodingRaw; i<= LASTENCODING; i++)
 		m_UseEnc[i] = false;
 	
+	m_UseEnc[rfbEncodingRaw] = true;
 	m_UseEnc[rfbEncodingTight] = true;
 	m_UseEnc[rfbEncodingCopyRect] = true;
 
@@ -430,6 +431,24 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 				continue;
 			}
 			_tcscpy(m_via_host, args[j]);
+		} else if ( SwitchMatch(args[j], _T("compress") )) {
+			if (++j == i) {
+				ArgError(_T("No compression type specified"));
+				continue;
+			}
+			int enc = -1;
+			if (_tcsicmp(args[j], _T("rgb")) == 0) {
+				enc = rfbEncodingRaw;
+			} else if (_tcsicmp(args[j], _T("jpeg")) == 0) {
+				enc = rfbEncodingTight;
+			} else {
+				ArgError(_T("Invalid compression type specified"));
+				continue;
+			}
+			if (enc != -1) {
+				m_UseEnc[enc] = true;
+				m_PreferredEncoding = enc;
+			}
 		} else if ( SwitchMatch(args[j], _T("subsamp") )) {
 			if (++j == i) {
 				ArgError(_T("No subsampling specified"));
@@ -740,7 +759,8 @@ BOOL CALLBACK VNCOptions::DlgProc(HWND hwndDlg, UINT uMsg,
 }
 
 static COMBOSTRING rfbcombo[MAX_LEN_COMBO] = {
-	"Tight",rfbEncodingTight,
+	"None (RGB)",rfbEncodingRaw,
+	"JPEG",rfbEncodingTight,
 };
 
 static const char *subsampstr[3] = {
@@ -825,6 +845,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 			HWND hCompressLevel = GetDlgItem(hwnd, IDC_COMPRESSLEVEL);
 			SendMessage(hCompressLevel, TBM_SETRANGE, TRUE, (LPARAM) MAKELONG(0, 2)); 
 			SendMessage(hCompressLevel, TBM_SETPOS, TRUE, ((_this->m_compressLevel+2)%3));
+			EnableWindow(hCompressLevel, _this->m_PreferredEncoding == rfbEncodingTight);
 
 			if(_this->m_compressLevel>=0 && _this->m_compressLevel<=2)
 				SetDlgItemText(hwnd, IDC_STATIC_LEVEL, subsampstr[_this->m_compressLevel]);
@@ -834,6 +855,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 			SendMessage(hJpeg, TBM_SETPOS, TRUE, _this->m_jpegQualityLevel);
 			for (long i = 10; i < 100; i += 10)
 				SendMessage(hJpeg, TBM_SETTIC, 0, (LPARAM)i);
+			EnableWindow(hJpeg, _this->m_PreferredEncoding == rfbEncodingTight);
 
 			if(_this->m_jpegQualityLevel>=1 && _this->m_jpegQualityLevel<=100)
 				SetDlgItemInt(hwnd, IDC_STATIC_QUALITY, _this->m_jpegQualityLevel, FALSE);
@@ -979,7 +1001,28 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 				}
 				return 0;
 			}
-		}
+		case IDC_ENCODING:
+			switch (HIWORD(wParam)) {
+			case CBN_SELCHANGE:
+				{			
+					HWND hJpegSubsamp = GetDlgItem(hwnd, IDC_COMPRESSLEVEL);					
+					HWND hJpegQuality = GetDlgItem(hwnd, IDC_QUALITYLEVEL);					
+					HWND hListBox = GetDlgItem(hwnd, IDC_ENCODING);
+					int i = SendMessage(hListBox ,CB_GETCURSEL, 0, 0);
+					switch (rfbcombo[i].rfbEncoding) {
+					case rfbEncodingTight:
+						EnableWindow(hJpegSubsamp, TRUE);
+						EnableWindow(hJpegQuality, TRUE);
+						break;
+					case rfbEncodingRaw:
+						EnableWindow(hJpegSubsamp, FALSE);
+						EnableWindow(hJpegQuality, FALSE);
+					}
+					return 0;
+				}
+			}
+			return 0;
+		}		
 		return 0;	
 	case WM_HSCROLL: 
 		{			

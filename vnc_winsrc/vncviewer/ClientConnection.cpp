@@ -1620,6 +1620,11 @@ void ClientConnection::SetFormatAndEncodings()
 			}
 		}
 	}
+	if(m_opts.m_PreferredEncoding < 0) {
+		m_opts.m_PreferredEncoding = rfbEncodingTight;
+		encs[se->nEncodings++] = Swap32IfLE(m_opts.m_PreferredEncoding);
+		useCompressLevel = true;
+	}
 
 	// Now we go through and put in all the other encodings in order.
 	// We do rather assume that the most recent encoding is the most
@@ -2885,7 +2890,8 @@ void ClientConnection::ReadScreenUpdate() {
 				node = list;
 				r1 = &node->region;
 
-				if (r1->encoding == rfbEncodingTight) {
+				if (r1->encoding == rfbEncodingTight
+					|| r1->encoding == rfbEncodingRaw) {
 					SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h); 
 					if (node->isFill) {
 						omni_mutex_lock l(m_bitmapdcMutex);
@@ -2939,6 +2945,9 @@ void ClientConnection::ReadScreenUpdate() {
 		}
 
 		switch (surh.encoding) {
+		case rfbEncodingRaw:
+			ReadRawRect(&surh);
+			break;
 		case rfbEncodingCopyRect:
 			ReadCopyRect(&surh);
 			break;
@@ -2969,7 +2978,8 @@ void ClientConnection::ReadScreenUpdate() {
 			node = list;
 			r1 = &node->region;
 
-			if (r1->encoding == rfbEncodingTight) {
+			if (r1->encoding == rfbEncodingTight
+				|| r1->encoding == rfbEncodingRaw) {
 				SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
 				if (node->isFill) {
 					omni_mutex_lock l(m_bitmapdcMutex);
