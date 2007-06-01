@@ -7,7 +7,6 @@ WINLIBS = wsock32.lib gdi32.lib comdlg32.lib winmm.lib htmlhelp.lib \
 	turbojpeg.lib
 
 OBJS = $(ODIR)/AboutBox.obj \
-       $(ODIR)/AuthDialog.obj \
        $(ODIR)/BuildTime.obj \
        $(ODIR)/CapsContainer.obj \
        $(ODIR)/ClientConnection.obj \
@@ -25,7 +24,6 @@ OBJS = $(ODIR)/AboutBox.obj \
        $(ODIR)/fbx.obj \
        $(ODIR)/FileTransfer.obj \
        $(ODIR)/FileTransferItemInfo.obj \
-       $(ODIR)/Flasher.obj \
        $(ODIR)/HotKeys.obj \
        $(ODIR)/KeyMap.obj \
        $(ODIR)/Log.obj \
