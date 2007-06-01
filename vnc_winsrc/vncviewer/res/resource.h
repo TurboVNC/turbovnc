@@ -156,6 +156,7 @@
 #define IDC_BUTTON5                     1137
 #define IDC_CLIENTUP                    1138
 #define IDC_LOG_BROWSE                  1139
+#define IDC_BUILDTIME                   1140
 #define ID_SESSION_SET_CRECT            32777
 #define IDC_STATIC_SUBSAMP              32778
 #define IDC_STATIC_QUAL                 32779
@@ -173,7 +174,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        246
 #define _APS_NEXT_COMMAND_VALUE         40011
-#define _APS_NEXT_CONTROL_VALUE         1140
+#define _APS_NEXT_CONTROL_VALUE         1141
 #define _APS_NEXT_SYMED_VALUE           244
 #endif
 #endif
