@@ -8,6 +8,7 @@ WINLIBS = wsock32.lib gdi32.lib comdlg32.lib winmm.lib htmlhelp.lib \
 
 OBJS = $(ODIR)/AboutBox.obj \
        $(ODIR)/AuthDialog.obj \
+       $(ODIR)/BuildTime.obj \
        $(ODIR)/CapsContainer.obj \
        $(ODIR)/ClientConnection.obj \
        $(ODIR)/ClientConnectionClipboard.obj \
@@ -15,6 +16,7 @@ OBJS = $(ODIR)/AboutBox.obj \
        $(ODIR)/ClientConnectionCursor.obj \
        $(ODIR)/ClientConnectionFile.obj \
        $(ODIR)/ClientConnectionFullScreen.obj \
+       $(ODIR)/ClientConnectionRaw.obj \
        $(ODIR)/ClientConnectionTight.obj \
        $(ODIR)/ConnectingDialog.obj \
        $(ODIR)/d3des.obj \
