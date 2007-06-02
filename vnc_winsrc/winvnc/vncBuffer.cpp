@@ -34,7 +34,12 @@
 
 #include "vncDesktop.h"
 #include "vncEncoder.h"
+#include "vncEncodeRRE.h"
+#include "vncEncodeCoRRE.h"
+#include "vncEncodeHexT.h"
+#include "vncEncodeZlib.h"
 #include "vncEncodeTight.h"
+#include "vncEncodeZlibHex.h"
 #include "MinMax.h"
 
 #include "vncBuffer.h"
@@ -282,7 +287,6 @@ vncBuffer::SetEncoding(CARD32 encoding)
 	switch(encoding)
 	{
 
-#if 0
 	case rfbEncodingRaw:
 
 		vnclog.Print(LL_INTINFO, VNCLOG("raw encoder requested\n"));
@@ -342,7 +346,6 @@ vncBuffer::SetEncoding(CARD32 encoding)
 			return FALSE;
 		zlib_encoder_in_use = true;
 		break;
-#endif
 
 	case rfbEncodingTight:
 
@@ -364,7 +367,6 @@ vncBuffer::SetEncoding(CARD32 encoding)
 		tight_encoder_in_use = true;
 		break;
 
-#if 0
 	case rfbEncodingZlibHex:
 
 		vnclog.Print(LL_INTINFO, VNCLOG("ZlibHex encoder requested\n"));
@@ -384,7 +386,6 @@ vncBuffer::SetEncoding(CARD32 encoding)
 			return FALSE;
 		zlibhex_encoder_in_use = true;
 		break;
-#endif
 
 	default:
 		// An unknown encoding was specified
