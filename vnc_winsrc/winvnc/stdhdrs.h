@@ -33,6 +33,8 @@
 #include <process.h>
 #include <crtdbg.h>
 
+extern const char* g_buildTime;
+
 // LOGGING SUPPORT
 
 #include "Log.h"
