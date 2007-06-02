@@ -46,6 +46,8 @@
 // Constructor/destructor
 vncServer::vncServer()
 {
+	ResetPasswordsValidityInfo();
+
 	// Initialise some important stuffs...
 	m_socketConn = NULL;
 	m_corbaConn = NULL;
@@ -215,13 +217,13 @@ vncServer::ClientsDisabled()
 }
 
 vncClientId
-vncServer::AddClient(VSocket *socket, BOOL auth, BOOL shared)
+vncServer::AddClient(VSocket *socket, BOOL reverse, BOOL shared)
 {
-	return AddClient(socket, auth, shared, TRUE, TRUE);
+	return AddClient(socket, reverse, shared, TRUE, TRUE);
 }
 
 vncClientId
-vncServer::AddClient(VSocket *socket, BOOL auth, BOOL shared,
+vncServer::AddClient(VSocket *socket, BOOL reverse, BOOL shared,
 					 BOOL keysenabled, BOOL ptrenabled)
 {
 	vncClient *client;
@@ -255,7 +257,7 @@ vncServer::AddClient(VSocket *socket, BOOL auth, BOOL shared,
 	client->EnablePointer(ptrenabled && m_enable_remote_inputs);
 
 	// Start the client
-	if (!client->Init(this, socket, auth, shared, clientid))
+	if (!client->Init(this, socket, reverse, shared, clientid))
 	{
 		// The client will delete the socket for us...
 		vnclog.Print(LL_CONNERR, VNCLOG("failed to initialize client object\n"));
@@ -866,6 +868,7 @@ vncServer::SetPorts(const UINT port_rfb, const UINT port_http)
 void
 vncServer::SetPassword(BOOL activate, const char *passwd)
 {
+	ResetPasswordsValidityInfo();
 	m_password_set = activate;
 	memcpy(m_password, passwd, MAXPWLEN);
 }
@@ -880,6 +883,7 @@ vncServer::GetPassword(char *passwd)
 void
 vncServer::SetPasswordViewOnly(BOOL activate, const char *passwd)
 {
+	ResetPasswordsValidityInfo();
 	m_password_viewonly_set = activate;
 	memcpy(m_password_viewonly, passwd, MAXPWLEN);
 }
@@ -889,6 +893,72 @@ vncServer::GetPasswordViewOnly(char *passwd)
 {
 	memcpy(passwd, m_password_viewonly, MAXPWLEN);
 	return m_password_viewonly_set;
+}
+
+BOOL
+vncServer::ValidPasswordsSet()
+{
+	if (!m_valid_passwords_set_cached) {
+		m_valid_passwords_set = ValidPasswordsSet_nocache();
+		m_valid_passwords_set_cached = TRUE;
+	}
+	return m_valid_passwords_set;
+}
+
+BOOL
+vncServer::ValidPasswordsSet_nocache()
+{
+	char passwd1[MAXPWLEN];
+	char passwd2[MAXPWLEN];
+	BOOL set1 = GetPassword(passwd1);
+	BOOL set2 = GetPasswordViewOnly(passwd2);
+	if (!set1 && !set2)
+		return FALSE;	// no passwords set, connections impossible
+
+	if (!AuthRequired())
+		return TRUE;	// passwords may be empty, but we allow that
+
+	vncPasswd::ToText plain1(passwd1);
+	vncPasswd::ToText plain2(passwd2);
+	BOOL empty1 = !set1 || (strlen(plain1) == 0);
+	BOOL empty2 = !set2 || (strlen(plain2) == 0);
+	if (empty1 && empty2)
+		return FALSE;	// both passwords empty or unset, not allowed
+
+	return TRUE;		// at least one non-empty password
+}
+
+BOOL
+vncServer::ValidPasswordsEmpty()
+{
+	if (!m_valid_passwords_empty_cached) {
+		m_valid_passwords_empty = ValidPasswordsEmpty_nocache();
+		m_valid_passwords_empty_cached = TRUE;
+	}
+	return m_valid_passwords_empty;
+}
+
+BOOL
+vncServer::ValidPasswordsEmpty_nocache()
+{
+	if (AuthRequired())
+		return FALSE;	// empty passwords disallowed, always fail
+
+	char passwd1[MAXPWLEN];
+	char passwd2[MAXPWLEN];
+	BOOL set1 = GetPassword(passwd1);
+	BOOL set2 = GetPasswordViewOnly(passwd2);
+	if (!set1 && !set2)
+		return FALSE;	// no passwords set, connections impossible
+
+	vncPasswd::ToText plain1(passwd1);
+	vncPasswd::ToText plain2(passwd2);
+	BOOL empty1 = !set1 || (strlen(plain1) == 0);
+	BOOL empty2 = !set2 || (strlen(plain2) == 0);
+	if (empty1 && empty2)
+		return TRUE;	// there are no passwords that are non-empty
+
+	return FALSE;		// at least one non-empty password
 }
 
 // Remote input handling

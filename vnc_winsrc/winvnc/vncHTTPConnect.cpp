@@ -94,17 +94,20 @@ const FileMap filemapping [] = {
 	{"/OptionsFrame.class", "JavaClass", IDR_OPTIONSFRAME_CLASS},
 	{"/RfbProto.class", "JavaClass", IDR_RFBPROTO_CLASS},
 	{"/VncCanvas.class", "JavaClass", IDR_VNCCANVAS_CLASS},
+	{"/VncCanvas2.class", "JavaClass", IDR_VNCCANVAS2_CLASS},
 	{"/VncViewer.class", "JavaClass", IDR_VNCVIEWER_CLASS},
 	{"/ButtonPanel.class", "JavaClass", IDR_BUTTONPANEL_CLASS},
 	{"/RecordingFrame.class", "JavaClass", IDR_RECFRAME_CLASS},
 	{"/SessionRecorder.class", "JavaClass", IDR_SESSIONREC_CLASS},
 	{"/ReloginPanel.class", "JavaClass", IDR_RELOGINPANEL_CLASS},
 	{"/SocketFactory.class", "JavaClass", IDR_SOCKFACTORY_CLASS},
-	{"/AuthUnixLoginPanel.class", "JavaClass", IDR_AUTHUNIXLOGIN_CLASS},
 	{"/CapabilityInfo.class", "JavaClass", IDR_CAPINFO_CLASS},
-	{"/CapsContainer.class", "JavaClass", IDR_CAPSCONTAINER_CLASS}
+	{"/CapsContainer.class", "JavaClass", IDR_CAPSCONTAINER_CLASS},
+	{"/InStream.class", "JavaClass", IDR_INSTREAM_CLASS},
+	{"/MemInStream.class", "JavaClass", IDR_MEMINSTREAM_CLASS},
+	{"/ZlibInStream.class", "JavaClass", IDR_ZLIBINSTREAM_CLASS},
 };
-const int filemappingsize		= 16;
+const int filemappingsize		= 19;
 
 //
 // Connection thread -- one per each client connection.

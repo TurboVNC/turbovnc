@@ -1,5 +1,5 @@
 //  Copyright (C) 2004 HorizonWimba, Inc. All Rights Reserved.
-//  Copyright (C) 2003 Constantin Kaplinsky. All Rights Reserved.
+//  Copyright (C) 2003-2006 Constantin Kaplinsky. All Rights Reserved.
 //  Copyright (C) 2002 RealVNC Ltd. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -117,7 +117,6 @@ vncMenu::vncMenu(vncServer *server)
 	m_winvnc_normal_icon = LoadIcon(hAppInstance, MAKEINTRESOURCE(IDI_WINVNC));
 	m_winvnc_disabled_icon = LoadIcon(hAppInstance, MAKEINTRESOURCE(IDI_DISABLED));
 	m_flash_icon = LoadIcon(hAppInstance, MAKEINTRESOURCE(IDI_FLASH));
-	m_winvnc_icon = m_winvnc_normal_icon;
 
 	// Load the popup menu
 	m_hmenu = LoadMenu(hAppInstance, MAKEINTRESOURCE(IDR_TRAYMENU));
@@ -151,16 +150,13 @@ vncMenu::~vncMenu()
 void
 vncMenu::AddTrayIcon()
 {
-	// If the user name is non-null then we have a user!
-//!!!!	if (strcmp(m_username, "") != 0)
-	//{
+	// If the user name is empty, then we consider no user is logged in.
+	if (strcmp(m_username, "") != 0) {
 		// Make sure the server has not been configured to
 		// suppress the tray icon.
-		if ( ! m_server->GetDisableTrayIcon())
-		{
+		if (!m_server->GetDisableTrayIcon())
 			SendTrayMsg(NIM_ADD, FALSE);
-		}
-	//}
+	}
 }
 
 void
@@ -212,32 +208,38 @@ vncMenu::SendTrayMsg(DWORD msg, BOOL flash)
 	m_nid.hWnd = m_hwnd;
 	m_nid.cbSize = sizeof(m_nid);
 	m_nid.uID = IDI_WINVNC;			// never changes after construction
-	m_nid.hIcon = flash ? m_flash_icon : m_winvnc_icon;
-	m_nid.uFlags = NIF_ICON | NIF_MESSAGE;
+	m_nid.hIcon = m_winvnc_normal_icon;
+	m_nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
 	m_nid.uCallbackMessage = WM_TRAYNOTIFY;
 
-	// Use resource string as tip if there is one
-	if (LoadString(hAppInstance, IDI_WINVNC, m_nid.szTip, sizeof(m_nid.szTip)))
-	    m_nid.uFlags |= NIF_TIP;
-		
-	if (m_nid.uFlags & NIF_TIP)
-	{
-	    strncat(m_nid.szTip, " - ", (sizeof(m_nid.szTip)-1)-strlen(m_nid.szTip));
-	    if (m_server->SockConnected())
-	    {
-		unsigned long tiplen = strlen(m_nid.szTip);
+	// Construct the tip string
+	const char *title = (vncService::RunningAsService()) ?
+		"TurboVNC Service - " : "TurboVNC Server - ";
+	m_nid.szTip[0] = '\0';
+	strncat(m_nid.szTip, title, sizeof(m_nid.szTip) - 1);
+	if (m_server->SockConnected()) {
+		size_t tiplen = strlen(m_nid.szTip);
 		char *tipptr = ((char *)&m_nid.szTip) + tiplen;
 
 		// Try to add the server's IP addresses to the tip string, if possible
 		GetIPAddrString(tipptr, sizeof(m_nid.szTip) - tiplen);
-	 		if (m_server->ClientsDisabled())
-				strncat(m_nid.szTip, " (Not listening)", (sizeof(m_nid.szTip)-1)-strlen(m_nid.szTip));
-	    }
-	    else
-	    {
-		strncat(m_nid.szTip, "Not listening", (sizeof(m_nid.szTip)-1)-strlen(m_nid.szTip));
-	    }
+		if (m_server->ClientsDisabled()) {
+			m_nid.hIcon = m_winvnc_disabled_icon;
+			strncat(m_nid.szTip, " (new clients disabled)",
+					sizeof(m_nid.szTip) - 1 - strlen(m_nid.szTip));
+		} else if (!m_server->ValidPasswordsSet()) {
+			m_nid.hIcon = m_winvnc_disabled_icon;
+			strncat(m_nid.szTip, " (no valid passwords set)",
+					sizeof(m_nid.szTip) - 1 - strlen(m_nid.szTip));
+		}
+	} else {
+		m_nid.hIcon = m_winvnc_disabled_icon;
+		strncat(m_nid.szTip, "Not listening",
+				sizeof(m_nid.szTip) - 1 - strlen(m_nid.szTip));
 	}
+
+	if (flash)
+		m_nid.hIcon = m_flash_icon;
 
 	// Send the message
 	if (Shell_NotifyIcon(msg, &m_nid))
@@ -358,16 +360,12 @@ LRESULT CALLBACK vncMenu::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lP
 			// Disallow incoming connections (changed to leave existing ones)
 			if (GetMenuState(_this->m_hmenu, ID_DISABLE_CONN, MF_BYCOMMAND) & MF_CHECKED)
 			{
-				//_this->m_server->SockConnect(TRUE);
 				_this->m_server->DisableClients(FALSE);
 				CheckMenuItem(_this->m_hmenu, ID_DISABLE_CONN, MF_UNCHECKED);
-				_this->m_winvnc_icon = _this->m_winvnc_normal_icon;
 			} else
 			{
-				//_this->m_server->SockConnect(FALSE);
 				_this->m_server->DisableClients(TRUE);
 				CheckMenuItem(_this->m_hmenu, ID_DISABLE_CONN, MF_CHECKED);
-				_this->m_winvnc_icon = _this->m_winvnc_disabled_icon;
 			}
 			// Update the icon
 			_this->FlashTrayIcon(_this->m_server->AuthClientCount() != 0);
@@ -440,6 +438,8 @@ LRESULT CALLBACK vncMenu::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lP
 		// Only accept WM_CLOSE if the logged on user has AllowShutdown set
 		if (!_this->m_properties.AllowShutdown())
 			return 0;
+		_this->m_server->KillAuthClients();
+		_this->m_wputils.RestoreWallpaper();
 		break;
 
 	case WM_DESTROY:

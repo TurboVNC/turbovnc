@@ -26,19 +26,21 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // Dialog
 //
 
-IDD_ABOUT DIALOG DISCARDABLE  0, 0, 334, 155
+IDD_ABOUT DIALOG DISCARDABLE  0, 0, 334, 161
 STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About TurboVNC Server"
 FONT 8, "MS Sans Serif"
 BEGIN
     CONTROL         132,IDC_VNCLOGO,"Static",SS_BITMAP | SS_SUNKEN,19,7,87,80
-    LTEXT           "TurboVNC Server version 0.3.3\nCopyright (C) 2004 Landmark Graphics Corporation\nCopyright (C) 2004-2006 Sun Microsystems, Inc.\nhttp://www.virtualgl.org",
-                    IDC_STATIC,135,7,190,36
-    LTEXT           "Based on TightVNC Server version 1.3.8\nCopyright (C) 2000-2006 Constantin Kaplinsky\nCopyright (C) 2000-2006 TightVNC Group\nhttp://www.tightvnc.com/",
-                    IDC_STATIC,135,48,190,36
+    LTEXT           "TurboVNC Server version 0.3.4",IDC_STATIC,135,7,190,9
+		LTEXT           "Copyright (C) 2004 Landmark Graphics Corporation\nCopyright (C) 2004-2007 Sun Microsystems, Inc.\nhttp://www.virtualgl.org",
+                    IDC_STATIC,135,23,190,25
+    LTEXT           "Based on TightVNC Server version 1.3.9\nCopyright (C) 2000-2006 Constantin Kaplinsky\nCopyright (C) 2000-2007 TightVNC Group\nhttp://www.tightvnc.com/",
+                    IDC_STATIC,135,55,190,33
     LTEXT           "Based on VNC software\nCopyright (C) 1999-2001 AT&&T Laboratories Cambridge\nCopyright (C) 2002-2003 RealVNC Ltd.\nhttp://www.realvnc.com/",
-                    IDC_STATIC,135,89,190,36
-    DEFPUSHBUTTON   "&OK",IDOK,135,133,50,14
+                    IDC_STATIC,135,95,190,33
+    DEFPUSHBUTTON   "&OK",IDOK,135,139,50,14
+    LTEXT           "[build time unknown]",IDC_BUILDTIME,135,15,190,9
 END
 
 IDD_OUTGOING_CONN DIALOG DISCARDABLE  0, 0, 246, 65
@@ -372,7 +374,7 @@ BEGIN
         RIGHTMARGIN, 285
         VERTGUIDE, 104
         TOPMARGIN, 7
-        BOTTOMMARGIN, 120
+        BOTTOMMARGIN, 128
     END
 
     IDD_OUTGOING_CONN, DIALOG
@@ -559,8 +561,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,3,3,0
- PRODUCTVERSION 0,3,3,0
+ FILEVERSION 0,3,4,0
+ PRODUCTVERSION 0,3,4,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -578,14 +580,14 @@ BEGIN
             VALUE "Comments", "Based on TightVNC by Constantin Kaplinsky; Based on VNC by AT&T Research Labs Cambridge, RealVNC Ltd.\0"
             VALUE "CompanyName", "The VirtualGL Project\0"
             VALUE "FileDescription", "TurboVNC Win32 Server\0"
-            VALUE "FileVersion", "0, 3, 2, 0\0"
+            VALUE "FileVersion", "0, 3, 4, 0\0"
             VALUE "InternalName", "WinVNC\0"
-            VALUE "LegalCopyright", "Copyright © 1998-2006 [many holders]\0"
+            VALUE "LegalCopyright", "Copyright © 1998-2007 [many holders]\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "WinVNC.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "TurboVNC Win32 Server\0"
-            VALUE "ProductVersion", "0, 3, 2, 0\0"
+            VALUE "ProductVersion", "0, 3, 4, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END
@@ -750,9 +752,9 @@ IDR_SOCKFACTORY_CLASS   JAVACLASS DISCARDABLE   "res\\SocketFactory.class"
 #endif
 #if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
 #if defined(APSTUDIO_INVOKED)
-IDR_AUTHUNIXLOGIN_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\AuthUnixLoginPanel.class"
+IDR_VNCCANVAS2_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\VncCanvas2.class"
 #else
-IDR_AUTHUNIXLOGIN_CLASS JAVACLASS DISCARDABLE   "res\\AuthUnixLoginPanel.class"
+IDR_VNCCANVAS2_CLASS    JAVACLASS DISCARDABLE   "res\\VncCanvas2.class"
 #endif
 #endif
 #if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
@@ -767,6 +769,27 @@ IDR_CAPINFO_CLASS       JAVACLASS DISCARDABLE   "res\\CapabilityInfo.class"
 IDR_CAPSCONTAINER_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\CapsContainer.class"
 #else
 IDR_CAPSCONTAINER_CLASS JAVACLASS DISCARDABLE   "res\\CapsContainer.class"
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_INSTREAM_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\InStream.class"
+#else
+IDR_INSTREAM_CLASS      JAVACLASS DISCARDABLE   "res\\InStream.class"
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_MEMINSTREAM_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\MemInStream.class"
+#else
+IDR_MEMINSTREAM_CLASS   JAVACLASS DISCARDABLE   "res\\MemInStream.class"
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(WITH_JAVA_VIEWER)
+#if defined(APSTUDIO_INVOKED)
+IDR_ZLIBINSTREAM_CLASS$(WITH_JAVA_VIEWER) JAVACLASS DISCARDABLE   "res\\ZlibInStream.class"
+#else
+IDR_ZLIBINSTREAM_CLASS  JAVACLASS DISCARDABLE   "res\\ZlibInStream.class"
 #endif
 #endif
 
@@ -791,11 +814,6 @@ IDC_CURSOR1             CURSOR  DISCARDABLE     "res\\cursor1.cur"
 //
 // String Table
 //
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDI_WINVNC              "TurboVNC Server"
-END
 
 STRINGTABLE DISCARDABLE 
 BEGIN

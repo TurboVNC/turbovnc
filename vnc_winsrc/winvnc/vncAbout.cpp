@@ -64,6 +64,11 @@ vncAbout::Show(BOOL show)
 				(DLGPROC) DialogProc,
 				(LONG) this);
 		}
+		else
+		{
+			// The dialog is already displayed, just raise it to foreground.
+			SetForegroundWindow(m_hDialog);
+		}
 	}
 }
 
@@ -87,9 +92,13 @@ vncAbout::DialogProc(HWND hwnd,
 			SetWindowLong(hwnd, GWL_USERDATA, lParam);
 			_this = (vncAbout *) lParam;
 
+			// Set information about build time
+			SetDlgItemText(hwnd, IDC_BUILDTIME, g_buildTime);
+
 			// Show the dialog
 			SetForegroundWindow(hwnd);
 
+			_this->m_hDialog = hwnd;
 			_this->m_dlgvisible = TRUE;
 
 			return TRUE;

@@ -55,6 +55,7 @@ public:
 
 	// Implementation
 	BOOL m_dlgvisible;
+	HWND m_hDialog;
 };
 
 #endif // _WINVNC_VNCABOUT

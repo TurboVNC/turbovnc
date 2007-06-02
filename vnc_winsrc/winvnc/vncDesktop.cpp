@@ -40,6 +40,7 @@
 #include "vncDesktop.h"
 #include "vncService.h"
 #include "WallpaperUtils.h"
+#include "TsSessions.h"
 
 #if (_MSC_VER>= 1300)
 #include <fstream>
@@ -159,6 +160,10 @@ void *vncDesktopThread::run_undetached(void *arg)
 {
 	// Save the thread's "home" desktop, under NT (no effect under 9x)
 	HDESK home_desktop = GetThreadDesktop(GetCurrentThreadId());
+
+	// Try to make session zero the console session
+	if (!inConsoleSession())
+		setConsoleSession();
 
 	// Attempt to initialise and return success or failure
 	if (!m_desktop->Startup())
@@ -401,6 +406,12 @@ vncDesktop::~vncDesktop()
 BOOL
 vncDesktop::Startup()
 {
+	// Currently, we just check whether we're in the console session, and
+	//   fail if not
+	if (!inConsoleSession()) {
+		vnclog.Print(LL_INTERR, VNCLOG("Console is not session zero - reconnect to restore Console session"));
+		return FALSE;
+	}
 
 	// Configure the display for optimal VNC performance.
 	SetupDisplayForConnection();
@@ -483,12 +494,12 @@ BOOL vncDesktop::Shutdown()
 	// If we created timers then kill them
 	if (m_timer_polling)
 	{
-		KillTimer(Window(), TimerID::POLL);
+		KillTimer(Window(), TIMER_POLL);
 		m_timer_polling = 0;
 	}
 	if (m_timer_blank_screen)
 	{
-		KillTimer(Window(), TimerID::BLANK_SCREEN);
+		KillTimer(Window(), TIMER_BLANK_SCREEN);
 		m_timer_blank_screen = 0;
 	}
 
@@ -1359,7 +1370,7 @@ vncDesktop::Init(vncServer *server)
 void
 vncDesktop::RequestUpdate()
 {
-	PostMessage(m_hwnd, WM_TIMER, TimerID::POLL, 0);
+	PostMessage(m_hwnd, WM_TIMER, TIMER_POLL, 0);
 }
 
 int
@@ -1886,14 +1897,14 @@ DesktopWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_TIMER:
 		switch (wParam) {
-		case vncDesktop::TimerID::POLL:
+		case vncDesktop::TIMER_POLL:
 			_this->SetPollingFlag(true);
 			break;
-		case vncDesktop::TimerID::BLANK_SCREEN:
+		case vncDesktop::TIMER_BLANK_SCREEN:
 			if (_this->m_server->GetBlankScreen())
 				_this->BlankScreen(TRUE);
 			break;
-		case vncDesktop::TimerID::RESTORE_SCREEN:
+		case vncDesktop::TIMER_RESTORE_SCREEN:
 			_this->BlankScreen(FALSE);
 			break;
 		}
@@ -2004,7 +2015,7 @@ BOOL vncDesktop::CheckUpdates()
 		UpdateBlankScreenTimer();
 
 		// Has the display resolution or desktop changed?
-		if (m_displaychanged || !vncService::InputDesktopSelected())
+		if (m_displaychanged || !vncService::InputDesktopSelected() || !inConsoleSession())
 		{
 			vnclog.Print(LL_STATE, VNCLOG("display resolution or desktop changed.\n"));
 
@@ -2235,7 +2246,7 @@ vncDesktop::SetPollingTimer()
 			msec = minPollingCycle;
 		}
 	}
-	m_timer_polling = SetTimer(Window(), TimerID::POLL, msec, NULL);
+	m_timer_polling = SetTimer(Window(), TIMER_POLL, msec, NULL);
 }
 
 inline void vncDesktop::CheckRects(vncRegion &rgn, rectlist &rects)
@@ -2923,11 +2934,11 @@ vncDesktop::UpdateBlankScreenTimer()
 {
 	BOOL active = m_server->GetBlankScreen();
 	if (active && !m_timer_blank_screen) {
-		m_timer_blank_screen = SetTimer(Window(), TimerID::BLANK_SCREEN, 50, NULL);
+		m_timer_blank_screen = SetTimer(Window(), TIMER_BLANK_SCREEN, 50, NULL);
 	} else if (!active && m_timer_blank_screen) {
-		KillTimer(Window(), TimerID::BLANK_SCREEN);
+		KillTimer(Window(), TIMER_BLANK_SCREEN);
 		m_timer_blank_screen = 0;
-		PostMessage(m_hwnd, WM_TIMER, TimerID::RESTORE_SCREEN, 0);
+		PostMessage(m_hwnd, WM_TIMER, TIMER_RESTORE_SCREEN, 0);
 	}
 }
 

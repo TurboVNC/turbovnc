@@ -180,6 +180,7 @@ private:
 	int m_tab_id;
 	bool m_tab_id_restore;
 
+	HWND m_hDialog;
 	HWND m_hTab;
 	HWND m_hIncoming;
 	HWND m_hShared;

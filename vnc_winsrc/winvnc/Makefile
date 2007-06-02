@@ -7,19 +7,23 @@ WINLIBS = wsock32.lib gdi32.lib comdlg32.lib winmm.lib htmlhelp.lib \
 	turbojpeg.lib
 
 OBJS = $(ODIR)/AdministrationControls.obj \
+       $(ODIR)/BuildTime.obj \
        $(ODIR)/d3des.obj \
+       $(ODIR)/DynamicFn.obj \
        $(ODIR)/FileTransferItemInfo.obj \
        $(ODIR)/IncomingConnectionsControls.obj \
        $(ODIR)/InputHandlingControls.obj \
        $(ODIR)/Log.obj \
        $(ODIR)/MatchWindow.obj \
        $(ODIR)/MinMax.obj \
+       $(ODIR)/ParseHost.obj \
        $(ODIR)/PollControls.obj \
        $(ODIR)/QuerySettingsControls.obj \
        $(ODIR)/RectList.obj \
        $(ODIR)/SharedDesktopArea.obj \
        $(ODIR)/stdhdrs.obj \
        $(ODIR)/translate.obj \
+       $(ODIR)/TsSessions.obj \
        $(ODIR)/VideoDriver.obj \
        $(ODIR)/vncAbout.obj \
        $(ODIR)/vncAcceptDialog.obj \
@@ -30,7 +34,12 @@ OBJS = $(ODIR)/AdministrationControls.obj \
        $(ODIR)/vncConnDialog.obj \
        $(ODIR)/vncDesktop.obj \
        $(ODIR)/vncEncoder.obj \
+       $(ODIR)/vncEncodeCoRRE.obj \
+       $(ODIR)/vncEncodeHexT.obj \
+       $(ODIR)/vncEncodeRRE.obj \
        $(ODIR)/vncEncodeTight.obj \
+       $(ODIR)/vncEncodeZlib.obj \
+       $(ODIR)/vncEncodeZlibHex.obj \
        $(ODIR)/VNCHelp.obj \
        $(ODIR)/vncHTTPConnect.obj \
        $(ODIR)/vncInstHandler.obj \

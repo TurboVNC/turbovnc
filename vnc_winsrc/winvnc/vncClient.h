@@ -72,7 +72,7 @@ public:
 	// Init
 	virtual BOOL Init(vncServer *server,
 						VSocket *socket,
-						BOOL auth,
+						BOOL reverse,
 						BOOL shared,
 						vncClientId newid);
 

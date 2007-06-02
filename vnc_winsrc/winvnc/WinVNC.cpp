@@ -44,6 +44,10 @@
 #include "vncInstHandler.h"
 #include "vncService.h"
 
+extern "C" {
+#include "ParseHost.h"
+}
+
 // Application instance and name
 HINSTANCE	hAppInstance;
 const char	*szAppName = "WinVNC";
@@ -300,17 +304,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 				if (connectName != NULL) {
 					strncpy(connectName, &(szCmdLine[start]), end-start);
 					connectName[end-start] = 0;
-
-					connectPort = INCOMING_PORT_OFFSET;
-					char *portp = strchr(connectName, ':');
-					if (portp != NULL) {
-						*portp++ = '\0';
-						if (*portp == ':') {
-							connectPort = atoi(++portp);	// host::port
-						} else {
-							connectPort += atoi(portp);		// host:display
-						}
-					}
+					connectPort = ParseHostPort(connectName, INCOMING_PORT_OFFSET);
 				}
 			} else {
 				if (connectName != NULL)

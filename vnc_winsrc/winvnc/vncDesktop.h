@@ -189,9 +189,9 @@ protected:
 
 	// Timer identifiers (the third one is not used in any real timer)
 	enum TimerID {
-		POLL = 1,
-		BLANK_SCREEN = 2,
-		RESTORE_SCREEN = 3
+		TIMER_POLL = 1,
+		TIMER_BLANK_SCREEN = 2,
+		TIMER_RESTORE_SCREEN = 3
 	};
 
 	// Video driver stuff
