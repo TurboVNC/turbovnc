@@ -153,7 +153,7 @@ vncEncoder::EncodeRect(BYTE *source, BYTE *dest, const RECT &rect, int offsetx, 
 	surh->r.y = Swap16IfLE(surh->r.y);
 	surh->r.w = Swap16IfLE(surh->r.w);
 	surh->r.h = Swap16IfLE(surh->r.h);
-	surh->encoding = Swap32IfLE(rfbEncodingTight);
+	surh->encoding = Swap32IfLE(rfbEncodingRaw);
 
 	// Update raw encoding statistics
 	rectangleOverhead += sz_rfbFramebufferUpdateRectHeader;
