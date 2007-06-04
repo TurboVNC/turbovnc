@@ -28,8 +28,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,3,8,0
- PRODUCTVERSION 1,3,8,0
+ FILEVERSION 1,3,9,0
+ PRODUCTVERSION 1,3,9,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -47,14 +47,14 @@ BEGIN
             VALUE "Comments", "Based on VNC by AT&T Research Labs Cambridge, RealVNC Ltd.\0"
             VALUE "CompanyName", "TightVNC Group\0"
             VALUE "FileDescription", "VNC hooks DLL for Win32\0"
-            VALUE "FileVersion", "1, 3, 8, 0\0"
+            VALUE "FileVersion", "1, 3, 9, 0\0"
             VALUE "InternalName", "VNCHooks\0"
-            VALUE "LegalCopyright", "Copyright (C) 2000-2006 TightVNC Group\0"
+            VALUE "LegalCopyright", "Copyright (C) 2000-2007 TightVNC Group\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "VNCHooks.dll\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "TightVNC - VNCHooks\0"
-            VALUE "ProductVersion", "1, 3, 8, 0\0"
+            VALUE "ProductVersion", "1, 3, 9, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END
