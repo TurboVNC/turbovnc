@@ -477,7 +477,7 @@ void ClientConnection::CreateDisplay()
 
 	AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
 	AppendMenu(hsysmenu, MF_STRING, IDD_APP_ABOUT,
-			   _T("&About TightVNC Viewer..."));
+			   _T("&About TurboVNC Viewer..."));
 	if (m_opts.m_listening) {
 		AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
 		AppendMenu(hsysmenu, MF_STRING, ID_CLOSEDAEMON,
