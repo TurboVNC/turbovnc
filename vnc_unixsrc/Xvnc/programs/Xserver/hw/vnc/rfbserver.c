@@ -5,7 +5,7 @@
 /*
  *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
- *  Copyright (C) 2000-2004 Constantin Kaplinsky.  All Rights Reserved.
+ *  Copyright (C) 2000-2006 Constantin Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -213,8 +213,7 @@ rfbNewClient(sock)
 
     cl->zlibCompressLevel = 5;
 
-    sprintf(pv,rfbProtocolVersionFormat,rfbProtocolMajorVersion,
-	    rfbProtocolMinorVersion);
+    sprintf(pv, rfbProtocolVersionFormat, 3, 8);
 
     if (WriteExact(sock, pv, sz_rfbProtocolVersionMsg) < 0) {
 	rfbLogPerror("rfbNewClient: write");
@@ -323,13 +322,13 @@ rfbProcessClientMessage(sock)
     case RFB_PROTOCOL_VERSION:
 	rfbProcessClientProtocolVersion(cl);
 	break;
-    case RFB_SECURITY_TYPE:	/* protocol 3.7 */
+    case RFB_SECURITY_TYPE:	/* protocol versions 3.7 and above */
 	rfbProcessClientSecurityType(cl);
 	break;
-    case RFB_TUNNELING_TYPE:	/* protocol 3.7t */
+    case RFB_TUNNELING_TYPE:	/* protocol versions 3.7t, 3.8t */
 	rfbProcessClientTunnelingType(cl);
 	break;
-    case RFB_AUTH_TYPE:		/* protocol 3.7t */
+    case RFB_AUTH_TYPE:		/* protocol versions 3.7t, 3.8t */
 	rfbProcessClientAuthType(cl);
 	break;
     case RFB_AUTHENTICATION:
@@ -372,60 +371,32 @@ rfbProcessClientProtocolVersion(cl)
 	rfbCloseSock(cl->sock);
 	return;
     }
-    rfbLog("Using protocol version %d.%d\n", major, minor);
-
-    if (major != rfbProtocolMajorVersion) {
-	rfbLog("RFB protocol version mismatch - server %d.%d, client %d.%d\n",
-	       rfbProtocolMajorVersion, rfbProtocolMinorVersion, major, minor);
+    if (major != 3) {
+	rfbLog("Unsupported protocol version %d.%d\n", major, minor);
 	rfbCloseSock(cl->sock);
 	return;
     }
 
-    /* Always use one of the two standard versions of the RFB protocol. */
+    /* Always use one of the three standard versions of the RFB protocol. */
     cl->protocol_minor_ver = minor;
-    if (minor > rfbProtocolMinorVersion) {
-	cl->protocol_minor_ver = rfbProtocolMinorVersion;
-    } else if (minor < rfbProtocolMinorVersion) {
-	cl->protocol_minor_ver = rfbProtocolFallbackMinorVersion;
+    if (minor > 8) {		/* buggy client */
+	cl->protocol_minor_ver = 8;
+    } else if (minor > 3 && minor < 7) { /* non-standard client */
+	cl->protocol_minor_ver = 3;
+    } else if (minor < 3) {	/* ancient client */
+	cl->protocol_minor_ver = 3;
     }
-    if (minor != rfbProtocolMinorVersion &&
-	minor != rfbProtocolFallbackMinorVersion) {
-	rfbLog("Non-standard protocol version %d.%d, using %d.%d instead\n",
-	       major, minor, rfbProtocolMajorVersion, cl->protocol_minor_ver);
+    if (cl->protocol_minor_ver != minor) {
+	rfbLog("Non-standard protocol version 3.%d, using 3.%d instead\n",
+	       minor, cl->protocol_minor_ver);
+    } else {
+	rfbLog("Using protocol version 3.%d\n", cl->protocol_minor_ver);
     }
 
     /* TightVNC protocol extensions are not enabled yet. */
     cl->protocol_tightvnc = FALSE;
 
     rfbAuthNewClient(cl);
-}
-
-
-/*
- * rfbClientConnFailed is called when a client connection has failed
- * before the authentication stage.
- */
-
-void
-rfbClientConnFailed(cl, reason)
-    rfbClientPtr cl;
-    char *reason;
-{
-    int headerLen, reasonLen;
-    char buf[8];
-
-    headerLen = (cl->protocol_minor_ver >= 7) ? 1 : 4;
-    reasonLen = strlen(reason);
-    ((CARD32 *)buf)[0] = 0;
-    ((CARD32 *)buf)[1] = Swap32IfLE(reasonLen);
-
-    if ( WriteExact(cl->sock, buf, headerLen) < 0 ||
-	 WriteExact(cl->sock, buf + 4, 4) < 0 ||
-	 WriteExact(cl->sock, reason, reasonLen) < 0 ) {
-	rfbLogPerror("rfbClientConnFailed: write");
-    }
-
-    rfbCloseSock(cl->sock);
 }
 
 
@@ -517,8 +488,8 @@ rfbProcessClientInitMessage(cl)
 /*
  * rfbSendInteractionCaps is called after sending the server
  * initialisation message, only if TightVNC protocol extensions were
- * enabled (protocol 3.7t). In this function, we send the lists of
- * supported protocol messages and encodings.
+ * enabled (protocol versions 3.7t, 3.8t). In this function, we send
+ * the lists of supported protocol messages and encodings.
  */
 
 /* Update these constants on changing capability lists below! */
@@ -786,8 +757,8 @@ rfbProcessClientNormalMessage(cl)
 		    cl->zlibCompressLevel = enc & 0x0F;
 		    rfbLog("Using compression level %d for client %s\n",
 			   cl->zlibCompressLevel, cl->host);
-		} else if ( enc >= (CARD32)rfbJpegSubsamp444 &&
-			 enc <= (CARD32)rfbJpegSubsamp422 ) {
+		} else if ( enc >= (CARD32)rfbJpegSubsamp1X &&
+			 enc <= (CARD32)rfbJpegSubsampGray ) {
 		    cl->tightCompressLevel = enc & 0xFF;
 		    rfbLog("Using compression level %d for client %s\n",
 			   cl->tightCompressLevel, cl->host);
