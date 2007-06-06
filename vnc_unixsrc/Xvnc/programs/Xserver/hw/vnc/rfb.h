@@ -30,6 +30,7 @@
 #include <rfbproto.h>
 #include <vncauth.h>
 #include <zlib.h>
+#include <stdarg.h>
 
 /* It's a good idea to keep these values a bit greater than required. */
 #define MAX_ENCODINGS 10
@@ -469,7 +470,6 @@ extern void rfbNewClientConnection(int sock);
 extern rfbClientPtr rfbReverseConnection(char *host, int port);
 extern void rfbClientConnectionGone(int sock);
 extern void rfbProcessClientMessage(int sock);
-extern void rfbClientConnFailed(rfbClientPtr cl, char *reason);
 extern void rfbNewUDPConnection(int sock);
 extern void rfbProcessUDPInput(int sock);
 extern Bool rfbSendFramebufferUpdate(rfbClientPtr cl);
@@ -517,17 +517,15 @@ extern void rfbProcessClientTunnelingType(rfbClientPtr cl);
 extern void rfbProcessClientAuthType(rfbClientPtr cl);
 extern void rfbVncAuthProcessResponse(rfbClientPtr cl);
 
+extern void rfbClientConnFailed(rfbClientPtr cl, char *reason);
+extern void rfbClientAuthFailed(rfbClientPtr cl, char *reason);
+extern void rfbClientAuthSucceeded(rfbClientPtr cl, CARD32 authType);
+
 /* Functions to prevent too many successive authentication failures */
 extern Bool rfbAuthConsiderBlocking(void);
 extern void rfbAuthUnblock(void);
 extern Bool rfbAuthIsBlocked(void);
 
-
-/* loginauth.c */
-
-extern Bool loginAuthEnabled;
-
-extern void rfbLoginAuthProcessClientMessage(rfbClientPtr cl);
 
 /* rre.c */
 

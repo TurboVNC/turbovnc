@@ -81,6 +81,7 @@ from the X Consortium.
 #include <sys/param.h>
 #include "dix.h"
 #include "rfb.h"
+#include <time.h>
 
 #ifdef CORBA
 #include <vncserverctrl.h>
@@ -259,14 +260,6 @@ ddxProcessArgument (argc, argv, i)
 	return 2;
     }
 
-    if (strcmp(argv[i], "-loginauth") == 0) {
-	if (geteuid() == 0) {
-	    /* Only when run as root! */
-	    loginAuthEnabled = TRUE;
-	}
-	return 1;
-    }
-
     if (strcmp(argv[i], "-httpd") == 0) {
 	if (i + 1 >= argc) UseMsg();
 	httpDir = argv[i+1];
@@ -289,13 +282,6 @@ ddxProcessArgument (argc, argv, i)
 	rfbEconomicTranslate = TRUE;
 	return 1;
     }
-
-#if 0
-    if (strcmp(argv[i], "-lazytight") == 0) {
-	rfbTightDisableGradient = TRUE;
-	return 1;
-    }
-#endif
 
     if (strcmp(argv[i], "-desktop") == 0) {	/* -desktop desktop-name */
 	if (i + 1 >= argc) UseMsg();
@@ -393,8 +379,7 @@ ddxProcessArgument (argc, argv, i)
     }
 
     if (strcmp(argv[i], "-version") == 0) {
-	ErrorF("Xvnc version %s, protocol %d.%d\n", XVNCRELEASE,
-	       rfbProtocolMajorVersion, rfbProtocolMinorVersion);
+	ErrorF("Xvnc version %s\n", XVNCRELEASE);
 	exit(0);
     }
 
@@ -421,17 +406,14 @@ InitOutput(screenInfo, argc, argv)
     initOutputCalled = TRUE;
 
     rfbLog("Xvnc version %s\n", XVNCRELEASE);
-    rfbLog("Copyright (C) 2004-2006 Sun Microsystems, Inc.\n");
+    rfbLog("Copyright (C) 2004-2007 Sun Microsystems, Inc.\n");
     rfbLog("Copyright (C) 2004 Landmark Graphics Corporation\n");
-    rfbLog("Copyright (C) 2000-2006 Constantin Kaplinsky\n");
+    rfbLog("Copyright (C) 2000-2007 TightVNC Group\n");
     rfbLog("Copyright (C) 1999 AT&T Laboratories Cambridge\n");
     rfbLog("All Rights Reserved.\n");
-    rfbLog("See http://www.virtualgl.org for more info\n");
+    rfbLog("See http://www.virtualgl.org for more information\n");
     rfbLog("Desktop name '%s' (%s:%s)\n",desktopName,rfbThisHost,display);
-    rfbLog("Protocol versions supported: %d.%dt, %d.%d, %d.%d\n",
-	   rfbProtocolMajorVersion, rfbProtocolMinorVersion,
-	   rfbProtocolMajorVersion, rfbProtocolMinorVersion,
-	   rfbProtocolMajorVersion, rfbProtocolFallbackMinorVersion);
+    rfbLog("Protocol versions supported: 3.3, 3.7, 3.8, 3.7t, 3.8t\n");
 
     VNC_LAST_CLIENT_ID = MakeAtom("VNC_LAST_CLIENT_ID",
 				  strlen("VNC_LAST_CLIENT_ID"), TRUE);
@@ -933,10 +915,6 @@ ddxUseMsg()
     ErrorF("-deferupdate time      time in ms to defer updates "
 							     "(default 40)\n");
     ErrorF("-economictranslate     less memory-hungry translation\n");
-#if 0
-    ErrorF("-lazytight             disable \"gradient\" filter in tight "
-								"encoding\n");
-#endif
     ErrorF("-desktop name          VNC desktop name (default x11)\n");
     ErrorF("-alwaysshared          always treat new clients as shared\n");
     ErrorF("-nevershared           never treat new clients as shared\n");

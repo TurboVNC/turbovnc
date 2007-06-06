@@ -39,6 +39,7 @@
 #endif
 #if USE_LIBWRAP
 #include <tcpd.h>
+#include <arpa/inet.h>
 #endif
 
 #include "rfb.h"
