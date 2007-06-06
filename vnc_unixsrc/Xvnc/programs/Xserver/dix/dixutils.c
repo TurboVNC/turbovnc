@@ -404,6 +404,7 @@ DeleteWindowFromAnySaveSet(pWin)
  */
 void
 NoopDDA(
+#undef NeedVarargsPrototypes
 #if NeedVarargsPrototypes
     void* f, ...
 #endif

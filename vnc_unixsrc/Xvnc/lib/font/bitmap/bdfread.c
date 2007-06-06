@@ -79,7 +79,7 @@ bdfReadBitmap(pCI, file, bit, byte, glyph, scan, sizes)
                 byte,
                 glyph,
                 scan;
-    int         sizes[GLYPHPADOPTIONS];
+    CARD32      sizes[GLYPHPADOPTIONS];
 {
     int         widthBits,
                 widthBytes,

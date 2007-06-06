@@ -479,6 +479,7 @@ extern ClientPtr LookupClient(
 );
 
 extern void NoopDDA(
+#undef NeedVarargsPrototypes
 #if NeedVarargsPrototypes
     void *,
     ...
