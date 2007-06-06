@@ -21,9 +21,9 @@
 #define DLLCALL
 
 /* Subsampling */
-#define NUMSUBOPT 3
+#define NUMSUBOPT 4
 
-enum {TJ_444=0, TJ_422, TJ_411};
+enum {TJ_444=0, TJ_422, TJ_411, TJ_GRAYSCALE};
 
 /* Flags */
 #define TJ_BGR       1
@@ -98,6 +98,7 @@ DLLEXPORT tjhandle DLLCALL tjInitCompress(void);
      TJ_422: 4:2:2 subsampling.  Discards every other Cb, Cr pixel only in
         the horizontal direction.
      TJ_444: no subsampling.
+     TJ_GRAYSCALE: Generate grayscale JPEG image
 
   [INPUT] jpegqual = JPEG quality (an integer between 0 and 100 inclusive.)
   [INPUT] flags = the bitwise OR of one or more of the following
@@ -112,6 +113,8 @@ DLLEXPORT tjhandle DLLCALL tjInitCompress(void);
         of this codec-- force IPP to use SSE code (bypass CPU auto-detection)
      TJ_FORCESSE2: Valid only for the Intel Performance Primitives implementation
         of this codec-- force IPP to use SSE2 code (bypass CPU auto-detection)
+     TJ_FORCESSE3: Valid only for the Intel Performance Primitives implementation
+        of this codec-- force IPP to use SSE3 code (bypass CPU auto-detection)
 
   RETURNS: 0 on success, -1 on error
 */
