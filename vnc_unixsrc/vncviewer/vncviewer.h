@@ -54,7 +54,6 @@ extern int endianTest;
 
 #define MAX_ENCODINGS 20
 
-#define FLASH_PORT_OFFSET 5400
 #define LISTEN_PORT_OFFSET 5500
 #define TUNNEL_PORT_OFFSET 5500
 #define SERVER_PORT_OFFSET 5900
@@ -87,6 +86,7 @@ typedef struct {
   char *passwordFile;
   Bool passwordDialog;
 
+  int rawDelay;
   int copyRectDelay;
 
   Bool debug;
@@ -113,7 +113,7 @@ extern char *fallback_resources[];
 extern char vncServerHost[];
 extern int vncServerPort;
 extern Bool listenSpecified;
-extern int listenPort, flashPort;
+extern int listenPort;
 
 extern XrmOptionDescRec cmdLineOptions[];
 extern int numCmdLineOptions;
