@@ -3,8 +3,8 @@
 
 [Setup]
 AppName=TurboVNC
-AppVerName=TurboVNC 0.3.4
-AppVersion=0.3.4
+AppVerName=TurboVNC 0.4
+AppVersion=0.4
 AppPublisher=The VirtualGL Project
 AppPublisherURL=http://www.virtualgl.org
 AppSupportURL=http://www.virtualgl.org
@@ -20,7 +20,7 @@ BackColor=clBlack
 BackColor2=clBlue
 VersionInfoCompany=The VirtualGL Project
 VersionInfoDescription=A fast VNC implementation designed for video apps
-VersionInfoVersion=0.3.4
+VersionInfoVersion=0.4
 
 ChangesAssociations=yes
 
