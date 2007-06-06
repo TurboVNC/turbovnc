@@ -132,6 +132,7 @@ processViaArgs(char **gatewayHost, char **remoteHost,
 {
   char *colonPos;
   int len, portOffset;
+  int disp;
 
   if (tunnelArgIndex >= *pargc - 2)
     usage();
@@ -153,7 +154,10 @@ processViaArgs(char **gatewayHost, char **remoteHost,
     if (!len || strspn(colonPos, "-0123456789") != len) {
       usage();
     }
-    *remotePort = atoi(colonPos) + portOffset;
+    disp = atoi(colonPos);
+    if (portOffset != 0 && disp >= 100)
+      portOffset = 0;
+    *remotePort = disp + portOffset;
   }
 
   sprintf(lastArgv, "localhost::%d", localPort);

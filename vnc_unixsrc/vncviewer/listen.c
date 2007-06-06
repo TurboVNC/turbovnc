@@ -28,16 +28,9 @@
 #include <sys/utsname.h>
 #include <vncviewer.h>
 
-#define FLASHWIDTH 50	/* pixels */
-#define FLASHDELAY 1	/* seconds */
-
 Bool listenSpecified = False;
-int listenPort = 0, flashPort = 0;
+int listenPort = 0;
 
-static Font flashFont;
-
-static void getFlashFont(Display *d);
-static void flashDisplay(Display *d, char *user);
 static Bool AllXEventsPredicate(Display *d, XEvent *ev, char *arg);
 
 /*
@@ -52,9 +45,8 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
 {
   Display *d;
   XEvent ev;
-  int listenSocket, flashSocket, sock;
+  int listenSocket, sock;
   fd_set fds;
-  char flashUser[256];
   int n;
   int i;
   char *displayname = NULL;
@@ -71,7 +63,6 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
 					    argv[listenArgIndex+1][0] <= '9') {
 
     listenPort = (LISTEN_PORT_OFFSET + atoi(argv[listenArgIndex+1])) & 0xFFFF;
-    flashPort = (FLASH_PORT_OFFSET + atoi(argv[listenArgIndex+1])) & 0xFFFF;
     removeArgs(argc, argv, listenArgIndex, 2);
 
   } else {
@@ -92,7 +83,6 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
 			      strlen(hostinfo.nodename)) == 0))) {
 
       listenPort = LISTEN_PORT_OFFSET + atoi(colonPos+1);
-      flashPort = FLASH_PORT_OFFSET + atoi(colonPos+1);
 
     } else {
       fprintf(stderr,"%s: cannot work out which display number to "
@@ -108,15 +98,12 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
     exit(1);
   }
 
-  getFlashFont(d);
-
   listenSocket = ListenAtTcpPort(listenPort);
-  flashSocket = ListenAtTcpPort(flashPort);
 
-  if ((listenSocket < 0) || (flashSocket < 0)) exit(1);
+  if (listenSocket < 0) exit(1);
 
-  fprintf(stderr,"%s -listen: Listening on port %d (flash port %d)\n",
-	  programName,listenPort,flashPort);
+  fprintf(stderr,"%s -listen: Listening on port %d\n",
+	  programName, listenPort);
   fprintf(stderr,"%s -listen: Command line errors are not reported until "
 	  "a connection comes in.\n", programName);
 
@@ -132,25 +119,10 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
 
     FD_ZERO(&fds); 
 
-    FD_SET(flashSocket, &fds);
     FD_SET(listenSocket, &fds);
     FD_SET(ConnectionNumber(d), &fds);
 
     select(FD_SETSIZE, &fds, NULL, NULL, NULL);
-
-    if (FD_ISSET(flashSocket, &fds)) {
-
-      sock = AcceptTcpConnection(flashSocket);
-      if (sock < 0) exit(1);
-      n = read(sock, flashUser, 255);
-      if (n > 0) {
-	flashUser[n] = 0;
-	flashDisplay(d, flashUser);
-      } else {
-	flashDisplay(d, NULL);
-      }
-      close(sock);
-    }
 
     if (FD_ISSET(listenSocket, &fds)) {
       rfbsock = AcceptTcpConnection(listenSocket);
@@ -170,7 +142,6 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
       case 0:
 	/* child - return to caller */
 	close(listenSocket);
-	close(flashSocket);
 	return;
 
       default:
@@ -181,110 +152,12 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
 		  programName, XDisplayName(displayname));
 	  exit(1);
 	}
-	getFlashFont(d);
 	break;
       }
     }
   }
 }
 
-
-/*
- * getFlashFont
- */
-
-static void
-getFlashFont(Display *d)
-{
-  char fontName[256];
-  char **fontNames;
-  int nFontNames;
-
-  sprintf(fontName,"-*-courier-bold-r-*-*-%d-*-*-*-*-*-iso8859-1",
-	  FLASHWIDTH);
-  fontNames = XListFonts(d, fontName, 1, &nFontNames);
-  if (nFontNames == 1) {
-    XFreeFontNames(fontNames);
-  } else {
-    sprintf(fontName,"fixed");
-  }
-  flashFont = XLoadFont(d, fontName);
-}
-
-
-/*
- * flashDisplay
- */
-
-static void
-flashDisplay(Display *d, char *user)
-{
-  Window w1, w2, w3, w4;
-  XSetWindowAttributes attr;
-
-  XBell(d, 0);
-
-  XForceScreenSaver(d, ScreenSaverReset);
-
-  attr.background_pixel = BlackPixel(d, DefaultScreen(d));
-  attr.override_redirect = 1;
-  attr.save_under = True;
-
-  w1 = XCreateWindow(d, DefaultRootWindow(d), 0, 0,
-		     WidthOfScreen(DefaultScreenOfDisplay(d)), 
-		     FLASHWIDTH, 0, 
-		     CopyFromParent, CopyFromParent, CopyFromParent, 
-		     CWBackPixel|CWOverrideRedirect|CWSaveUnder,
-		     &attr);
-  
-  w2 = XCreateWindow(d, DefaultRootWindow(d), 0, 0, FLASHWIDTH,
-		     HeightOfScreen(DefaultScreenOfDisplay(d)), 0,
-		     CopyFromParent, CopyFromParent, CopyFromParent, 
-		     CWBackPixel|CWOverrideRedirect|CWSaveUnder,
-		     &attr);
-
-  w3 = XCreateWindow(d, DefaultRootWindow(d), 
-		     WidthOfScreen(DefaultScreenOfDisplay(d))-FLASHWIDTH, 
-		     0, FLASHWIDTH, 
-		     HeightOfScreen(DefaultScreenOfDisplay(d)), 0, 
-		     CopyFromParent, CopyFromParent, CopyFromParent, 
-		     CWBackPixel|CWOverrideRedirect|CWSaveUnder,
-		     &attr);
-
-  w4 = XCreateWindow(d, DefaultRootWindow(d), 0,
-		     HeightOfScreen(DefaultScreenOfDisplay(d))-FLASHWIDTH, 
-		     WidthOfScreen(DefaultScreenOfDisplay(d)), 
-		     FLASHWIDTH, 0, 
-		     CopyFromParent, CopyFromParent, CopyFromParent, 
-		     CWBackPixel|CWOverrideRedirect|CWSaveUnder,
-		     &attr);
-
-  XMapWindow(d, w1);
-  XMapWindow(d, w2);
-  XMapWindow(d, w3);
-  XMapWindow(d, w4);
-
-  if (user) {
-    GC gc;
-    XGCValues gcv;
-
-    gcv.foreground = WhitePixel(d, DefaultScreen(d));
-    gcv.font = flashFont;
-    gc = XCreateGC(d, w1, GCForeground|GCFont, &gcv);
-    XDrawString(d, w1, gc,
-		WidthOfScreen(DefaultScreenOfDisplay(d)) / 2 - FLASHWIDTH,
-		(FLASHWIDTH * 3 / 4), user, strlen(user));
-  }
-  XFlush(d);
-
-  sleep(FLASHDELAY);
-
-  XDestroyWindow(d, w1);
-  XDestroyWindow(d, w2);
-  XDestroyWindow(d, w3);
-  XDestroyWindow(d, w4);
-  XFlush(d);
-}
 
 /*
  * AllXEventsPredicate is needed to make XCheckIfEvent return all events.
