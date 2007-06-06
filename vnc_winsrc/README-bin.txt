@@ -1,4 +1,4 @@
-TurboVNC 0.3.3 Binary Distribution for Windows platforms
+TurboVNC 0.4 Binary Distribution for Windows platforms
 ========================================================
 
 TurboVNC is a highly-optimized version of TightVNC 1.3 designed for real-time
@@ -28,7 +28,7 @@ For more information on VirtualGL and TurboVNC, visit:
 http://www.virtualgl.org
 
 
-TightVNC 1.3.8 Binary Distribution for Windows platforms
+TightVNC 1.3.9 Binary Distribution for Windows platforms
 ========================================================
 
 This distribution is based on the standard VNC source and includes new
