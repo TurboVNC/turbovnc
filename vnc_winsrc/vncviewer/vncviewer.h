@@ -41,6 +41,11 @@
 #define WM_REGIONUPDATED WM_TRAYNOTIFY+1
 #define WM_FBUPDATERECVD WM_REGIONUPDATED+1
 
+// The enum is ordered in this way so as to maintain backward compatibility
+// with TVNC 0.3.x
+#define TVNC_SAMPOPT 4
+enum {TVNC_1X=0, TVNC_4X, TVNC_2X, TVNC_GRAY};
+
 // The Application
 extern VNCviewerApp *pApp;
 

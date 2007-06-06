@@ -1646,8 +1646,8 @@ void ClientConnection::SetFormatAndEncodings()
 	// Request desired compression level if applicable
 	if ( useCompressLevel &&
 		 m_opts.m_compressLevel >= 0 &&
-		 m_opts.m_compressLevel <= 2) {
-		encs[se->nEncodings++] = Swap32IfLE( rfbJpegSubsamp444 +
+		 m_opts.m_compressLevel <= TVNC_SAMPOPT-1) {
+		encs[se->nEncodings++] = Swap32IfLE( rfbJpegSubsamp1X +
 											 m_opts.m_compressLevel );
 	}
 

@@ -89,7 +89,7 @@ VNCOptions::VNCOptions()
 	m_listenPort = INCOMING_PORT_OFFSET;
 	m_restricted = false;
 
-	m_compressLevel = 0;
+	m_compressLevel = TVNC_1X;
 	m_jpegQualityLevel = 95;
 	m_requestShapeUpdates = true;
 	m_ignoreShapeUpdates = false;
@@ -431,6 +431,10 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 				continue;
 			}
 			_tcscpy(m_via_host, args[j]);
+		} else if ( SwitchMatch(args[j], _T("copyrect") )) {
+			m_UseEnc[rfbEncodingCopyRect] = true;
+		} else if ( SwitchMatch(args[j], _T("nocopyrect") )) {
+			m_UseEnc[rfbEncodingCopyRect] = false;
 		} else if ( SwitchMatch(args[j], _T("compress") )) {
 			if (++j == i) {
 				ArgError(_T("No compression type specified"));
@@ -449,14 +453,19 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 				m_UseEnc[enc] = true;
 				m_PreferredEncoding = enc;
 			}
-		} else if ( SwitchMatch(args[j], _T("subsamp") )) {
+		} else if ( SwitchMatch(args[j], _T("samp") )) {
 			if (++j == i) {
 				ArgError(_T("No subsampling specified"));
 				continue;
 			}
 			int subsamp=-1;
-			if (_stscanf(args[j], _T("%d"), &subsamp) != 1
-				|| subsamp<0 || subsamp>2) {
+			switch(_totupper(args[j][0])) {
+				case '0': case 'G':  subsamp = TVNC_GRAY;  break;
+				case '1':  subsamp = TVNC_1X;  break;
+				case '2':  subsamp = TVNC_2X;  break;
+				case '4':  subsamp = TVNC_4X;  break;
+			}
+			if(subsamp==-1) {
 				ArgError(_T("Invalid subsampling specified"));
 				continue;
 			}
@@ -760,11 +769,19 @@ BOOL CALLBACK VNCOptions::DlgProc(HWND hwndDlg, UINT uMsg,
 
 static COMBOSTRING rfbcombo[MAX_LEN_COMBO] = {
 	"None (RGB)",rfbEncodingRaw,
-	"JPEG",rfbEncodingTight,
+	"JPEG",rfbEncodingTight
 };
 
-static const char *subsampstr[3] = {
-	"None", "4:1:1", "4:2:2"
+static const char *sampopt2str[TVNC_SAMPOPT] = {
+	"None", "4x", "2x", "Gray"
+};
+
+static const int sliderpos2sampopt[TVNC_SAMPOPT] = {
+	TVNC_GRAY, TVNC_4X, TVNC_2X, TVNC_1X
+};
+
+static const int sampopt2sliderpos[TVNC_SAMPOPT] = {
+	3, 1, 2, 0
 };
 
 BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
@@ -843,12 +860,12 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 			EnableWindow(hEmulate,!_this->m_ViewOnly);
 
 			HWND hCompressLevel = GetDlgItem(hwnd, IDC_COMPRESSLEVEL);
-			SendMessage(hCompressLevel, TBM_SETRANGE, TRUE, (LPARAM) MAKELONG(0, 2)); 
-			SendMessage(hCompressLevel, TBM_SETPOS, TRUE, ((_this->m_compressLevel+2)%3));
+			SendMessage(hCompressLevel, TBM_SETRANGE, TRUE, (LPARAM) MAKELONG(0, 3)); 
+			SendMessage(hCompressLevel, TBM_SETPOS, TRUE, sampopt2sliderpos[_this->m_compressLevel]);
 			EnableWindow(hCompressLevel, _this->m_PreferredEncoding == rfbEncodingTight);
 
-			if(_this->m_compressLevel>=0 && _this->m_compressLevel<=2)
-				SetDlgItemText(hwnd, IDC_STATIC_LEVEL, subsampstr[_this->m_compressLevel]);
+			if(_this->m_compressLevel>=0 && _this->m_compressLevel<=TVNC_SAMPOPT-1)
+				SetDlgItemText(hwnd, IDC_STATIC_LEVEL, sampopt2str[_this->m_compressLevel]);
 
 			HWND hJpeg = GetDlgItem(hwnd, IDC_QUALITYLEVEL);
 			SendMessage(hJpeg, TBM_SETRANGE, TRUE, (LPARAM) MAKELONG(1, 100));
@@ -978,7 +995,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 #endif
 				
 				HWND hCompressLevel = GetDlgItem(hwnd, IDC_COMPRESSLEVEL);
-				_this->m_compressLevel = (SendMessage(hCompressLevel,TBM_GETPOS , 0, 0)+1)%3;
+				_this->m_compressLevel = sliderpos2sampopt[SendMessage(hCompressLevel,TBM_GETPOS , 0, 0)];
 
 				HWND hJpeg = GetDlgItem(hwnd, IDC_QUALITYLEVEL);
 				_this->m_jpegQualityLevel = SendMessage(hJpeg,TBM_GETPOS , 0, 0);
@@ -1032,7 +1049,8 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 			HWND hJpeg = GetDlgItem(hwnd, IDC_QUALITYLEVEL);
 			if (HWND(lParam) == hCompressLevel) {
 				dwPos = SendMessage(hCompressLevel, TBM_GETPOS, 0, 0);
-				SetDlgItemText(hwnd, IDC_STATIC_LEVEL, subsampstr[(dwPos+1)%3]);
+				SetDlgItemText(hwnd, IDC_STATIC_LEVEL,
+					sampopt2str[sliderpos2sampopt[dwPos]]);
 			}
 			if (HWND(lParam) == hJpeg) {
 				dwPos = SendMessage(hJpeg, TBM_GETPOS, 0, 0);

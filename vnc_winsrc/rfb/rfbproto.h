@@ -464,9 +464,10 @@ typedef struct _rfbInteractionCapsMsg {
 
 #define rfbJpegQualityLevel1       0xFFFFFE01
 #define rfbJpegQualityLevel100     0xFFFFFE64
-#define rfbJpegSubsamp444          0xFFFFFD00
-#define rfbJpegSubsamp411          0xFFFFFD01
-#define rfbJpegSubsamp422          0xFFFFFD02
+#define rfbJpegSubsamp1X           0xFFFFFD00
+#define rfbJpegSubsamp4X           0xFFFFFD01
+#define rfbJpegSubsamp2X           0xFFFFFD02
+#define rfbJpegSubsampGray         0xFFFFFD03
   	 
 #define rfbEncodingCompressLevel0  0xFFFFFF00
 #define rfbEncodingCompressLevel1  0xFFFFFF01
