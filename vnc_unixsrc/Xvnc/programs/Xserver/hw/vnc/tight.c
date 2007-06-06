@@ -71,6 +71,10 @@ static TIGHT_CONF tightConf[1] = {
 static int compressLevel;
 static int qualityLevel;
 
+static const int compressLevel2subsamp[4] = {
+    TJ_444, TJ_411, TJ_422, TJ_GRAYSCALE
+};
+
 /* Pointers to dynamically-allocated buffers. */
 
 static int tightBeforeBufSize = 0;
@@ -165,7 +169,8 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
         usePixelFormat24 = FALSE;
     }
 
-    if (!cl->enableLastRectEncoding || w * h < MIN_SPLIT_RECT_SIZE)
+    if (!cl->enableLastRectEncoding || w * h < MIN_SPLIT_RECT_SIZE
+        || compressLevel == 3)
         return SendRectSimple(cl, x, y, w, h);
 
     /* Make sure we can write at least one pixel into tightBeforeBuf. */
@@ -497,8 +502,9 @@ SendSubrect(cl, x, y, w, h)
                        &cl->format, fbptr, tightBeforeBuf,
                        rfbScreen.paddedWidthInBytes, w, h);
 
-    if((rfbScreen.bitsPerPixel / 8) * w * h > JPEGTHRESHOLD)
-	    success = SendJpegRect(cl, x, y, w, h, qualityLevel);
+    if((rfbScreen.bitsPerPixel / 8) * w * h > JPEGTHRESHOLD
+      || compressLevel == 3)
+        success = SendJpegRect(cl, x, y, w, h, qualityLevel);
     else
         success = SendFullColorRect(cl, w, h);
 
@@ -731,7 +737,7 @@ SendJpegRect(cl, x, y, w, h, quality)
     int dy;
     char *srcbuf;
     int ps=rfbServerFormat.bitsPerPixel/8;
-    int subsamp=compressLevel==1? TJ_411: (compressLevel==2? TJ_422:TJ_444);
+    int subsamp=compressLevel2subsamp[compressLevel];
     unsigned long size;
     int flags=0;
 
