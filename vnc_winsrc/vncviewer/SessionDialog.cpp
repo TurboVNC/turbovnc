@@ -259,11 +259,12 @@ int SessionDialog::cmp(HWND hwnd)
 	HWND hLocNetRadio = GetDlgItem(hwnd, IDC_LOC_NET_RADIO);
 	int i;
 	for (i = rfbEncodingRaw; i <= LASTENCODING; i++)
-		if ((m_pOpt->m_UseEnc[i] != false) && (i != rfbEncodingTight && i != rfbEncodingCopyRect)) a = 0;
+		if ((m_pOpt->m_UseEnc[i] != false) && (i != rfbEncodingTight
+			&& i != rfbEncodingRaw && i != rfbEncodingCopyRect)) a = 0;
 	if (m_pOpt->m_UseEnc[rfbEncodingTight] != true) a = 0;
 	if (m_pOpt->m_UseEnc[rfbEncodingCopyRect] != true) a = 0;
 	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
-	if (m_pOpt->m_compressLevel != 1) a = 0;
+	if (m_pOpt->m_compressLevel != TVNC_4X) a = 0;
 	if (m_pOpt->m_jpegQualityLevel != 30) a = 0;
 	if (m_pOpt->m_optimizeForWAN != true) a = 0;
 	if (a == 1) {
@@ -273,11 +274,12 @@ int SessionDialog::cmp(HWND hwnd)
 
 	a = 2;
 	for (i = rfbEncodingRaw; i <= LASTENCODING; i++)
-		if ((m_pOpt->m_UseEnc[i] != false) && (i != rfbEncodingTight && i != rfbEncodingCopyRect)) a = 0;
+		if ((m_pOpt->m_UseEnc[i] != false) && (i != rfbEncodingTight
+			&& i != rfbEncodingRaw && i != rfbEncodingCopyRect)) a = 0;
 	if (m_pOpt->m_UseEnc[rfbEncodingTight] != true) a = 0;
 	if (m_pOpt->m_UseEnc[rfbEncodingCopyRect] != true) a = 0;
 	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
-	if (m_pOpt->m_compressLevel != 0) a = 0;
+	if (m_pOpt->m_compressLevel != TVNC_1X) a = 0;
 	if (m_pOpt->m_jpegQualityLevel != 95) a = 0;
 	if (m_pOpt->m_optimizeForWAN != false) a = 0;
 	if (a == 2) {
@@ -287,11 +289,12 @@ int SessionDialog::cmp(HWND hwnd)
 
 	a = 3;
 	for (i = rfbEncodingRaw; i <= LASTENCODING; i++)
-		if ((m_pOpt->m_UseEnc[i] != false) && (i != rfbEncodingTight && i != rfbEncodingCopyRect)) a = 0;
+		if ((m_pOpt->m_UseEnc[i] != false) && (i != rfbEncodingTight
+			&& i != rfbEncodingRaw && i != rfbEncodingCopyRect)) a = 0;
 	if (m_pOpt->m_UseEnc[rfbEncodingTight] != true) a = 0;
 	if (m_pOpt->m_UseEnc[rfbEncodingCopyRect] != true) a = 0;
 	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
-	if (m_pOpt->m_compressLevel != 0) a = 0;
+	if (m_pOpt->m_compressLevel != TVNC_1X) a = 0;
 	if (m_pOpt->m_jpegQualityLevel != 95) a = 0;
 	if (m_pOpt->m_optimizeForWAN != true) a = 0;
 	if (a == 3) {
@@ -318,19 +321,19 @@ void SessionDialog::SetConnectionProfile(bool LowBandwidth, bool HighSpeed)
 
 	if (!LowBandwidth && !HighSpeed) {
 		m_pOpt->m_PreferredEncoding = rfbEncodingTight;
-		m_pOpt->m_compressLevel = 0;
+		m_pOpt->m_compressLevel = TVNC_1X;
 		m_pOpt->m_jpegQualityLevel = 95;
 		m_pOpt->m_optimizeForWAN = true;
 	}
 	if (LowBandwidth && !HighSpeed) {
 		m_pOpt->m_PreferredEncoding = rfbEncodingTight;
-		m_pOpt->m_compressLevel = 1;
+		m_pOpt->m_compressLevel = TVNC_4X;
 		m_pOpt->m_jpegQualityLevel = 30;
 		m_pOpt->m_optimizeForWAN = true;
 	}
 	if (!LowBandwidth && HighSpeed) {
 		m_pOpt->m_PreferredEncoding = rfbEncodingTight;
-		m_pOpt->m_compressLevel = 0;
+		m_pOpt->m_compressLevel = TVNC_1X;
 		m_pOpt->m_jpegQualityLevel = 95;
 		m_pOpt->m_optimizeForWAN = false;
 	}
