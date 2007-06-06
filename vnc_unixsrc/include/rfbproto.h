@@ -1,7 +1,7 @@
 /*
  *  Copyright (C) 2004-2006 Sun Microsystems, Inc. All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
- *  Copyright (C) 2000-2004 Constantin Kaplinsky. All Rights Reserved.
+ *  Copyright (C) 2000-2006 Constantin Kaplinsky. All Rights Reserved.
  *  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
  *
@@ -22,8 +22,8 @@
  */
 
 /*
- * rfbproto.h - header file for the RFB protocol, versions 3.3, 3.7 and 3.7t
- * (protocol 3.7t is effectively 3.7 with TightVNC extensions enabled)
+ * rfbproto.h - header file for the RFB protocol, versions 3.3, 3.7 and 3.7t,
+ * 3.8 and 3.8t ("t" suffix denotes TightVNC protocol extensions enabled)
  *
  * Uses types CARD<n> for an n-bit unsigned integer, INT<n> for an n-bit signed
  * integer (for n = 8, 16 and 32).
@@ -126,7 +126,7 @@ typedef struct _rfbPixelFormat {
 
 /*-----------------------------------------------------------------------------
  * Structure used to describe protocol options such as tunneling methods,
- * authentication schemes and message types (protocol version 3.7t).
+ * authentication schemes and message types (protocol versions 3.7t, 3.8t).
  */
 
 typedef struct _rfbCapabilityInfo {
@@ -162,8 +162,8 @@ typedef struct _rfbCapabilityInfo {
  * The server always sends 12 bytes to start which identifies the latest RFB
  * protocol version number which it supports.  These bytes are interpreted
  * as a string of 12 ASCII characters in the format "RFB xxx.yyy\n" where
- * xxx and yyy are the major and minor version numbers (for version 3.7
- * this is "RFB 003.007\n").
+ * xxx and yyy are the major and minor version numbers (e.g. for version 3.8
+ * this is "RFB 003.008\n").
  *
  * The client then replies with a similar 12-byte message giving the version
  * number of the protocol which should actually be used (which may be different
@@ -182,9 +182,6 @@ typedef struct _rfbCapabilityInfo {
  */
 
 #define rfbProtocolVersionFormat "RFB %03d.%03d\n"
-#define rfbProtocolMajorVersion 3
-#define rfbProtocolMinorVersion 7
-#define rfbProtocolFallbackMinorVersion 3
 
 typedef char rfbProtocolVersionMsg[13];	/* allow extra byte for null */
 
@@ -192,7 +189,7 @@ typedef char rfbProtocolVersionMsg[13];	/* allow extra byte for null */
 
 
 /*
- * Negotiation of the security type (protocol version 3.7)
+ * Negotiation of the security type (protocol versions 3.7, 3.8)
  *
  * Once the protocol version has been decided, the server either sends a list
  * of supported security types, or informs the client about an error (when the
@@ -211,7 +208,7 @@ typedef char rfbProtocolVersionMsg[13];	/* allow extra byte for null */
 
 
 /*-----------------------------------------------------------------------------
- * Negotiation of Tunneling Capabilities (protocol version 3.7t)
+ * Negotiation of Tunneling Capabilities (protocol versions 3.7t, 3.8t)
  *
  * If the chosen security type is rfbSecTypeTight, the server sends a list of
  * supported tunneling methods ("tunneling" refers to any additional layer of
@@ -233,7 +230,7 @@ typedef struct _rfbTunnelingCapsMsg {
 #define sz_rfbTunnelingCapsMsg 4
 
 /*-----------------------------------------------------------------------------
- * Tunneling Method Request (protocol version 3.7t)
+ * Tunneling Method Request (protocol versions 3.7t, 3.8t)
  *
  * If the list of tunneling capabilities sent by the server was not empty, the
  * client should reply with a 32-bit code specifying a particular tunneling
@@ -245,7 +242,7 @@ typedef struct _rfbTunnelingCapsMsg {
 
 
 /*-----------------------------------------------------------------------------
- * Negotiation of Authentication Capabilities (protocol version 3.7t)
+ * Negotiation of Authentication Capabilities (protocol versions 3.7t, 3.8t)
  *
  * After setting up tunneling, the server sends a list of supported
  * authentication schemes.
@@ -266,33 +263,40 @@ typedef struct _rfbAuthenticationCapsMsg {
 #define sz_rfbAuthenticationCapsMsg 4
 
 /*-----------------------------------------------------------------------------
- * Authentication Scheme Request (protocol version 3.7t)
+ * Authentication Scheme Request (protocol versions 3.7t, 3.8t)
  *
  * If the list of authentication capabilities sent by the server was not empty,
  * the client should reply with a 32-bit code specifying a particular
  * authentication scheme.  The following codes are supported.
  */
 
+/* Standard authentication methods. */
 #define rfbAuthNone 1
 #define rfbAuthVNC 2
-#define rfbAuthUnixLogin 129
-#define rfbAuthExternal 130
 
 #define sig_rfbAuthNone "NOAUTH__"
 #define sig_rfbAuthVNC "VNCAUTH_"
+
+/* These two are not used in the mainstream version. */
+#define rfbAuthUnixLogin 129
+#define rfbAuthExternal 130
+
 #define sig_rfbAuthUnixLogin "ULGNAUTH"
 #define sig_rfbAuthExternal "XTRNAUTH"
 
 
 /*-----------------------------------------------------------------------------
- * Standard VNC Authentication (all protocol versions)
+ * Authentication result codes (all protocol versions, but rfbAuthTooMany is
+ * not used in protocol versions above 3.3)
  *
- * Standard authentication result codes are defined below.
+ * In the protocol version 3.8 and above, rfbAuthFailed is followed by a text
+ * string describing the reason of failure. The text string is preceded with a
+ * 32-bit counter of bytes in the string.
  */
 
-#define rfbVncAuthOK 0
-#define rfbVncAuthFailed 1
-#define rfbVncAuthTooMany 2
+#define rfbAuthOK 0
+#define rfbAuthFailed 1
+#define rfbAuthTooMany 2
 
 
 /*-----------------------------------------------------------------------------
@@ -332,10 +336,11 @@ typedef struct _rfbServerInitMsg {
 
 
 /*-----------------------------------------------------------------------------
- * Server Interaction Capabilities Message (protocol version 3.7t)
+ * Server Interaction Capabilities Message (protocol versions 3.7t, 3.8t)
  *
- * In the protocol version 3.7t, the server informs the client what message
- * types it supports in addition to ones defined in the protocol version 3.7.
+ * If TightVNC protocol extensions are enabled, the server informs the client
+ * what message types it supports in addition to ones defined in the standard
+ * RFB protocol.
  * Also, the server sends the list of all supported encodings (note that it's
  * not necessary to advertise the "raw" encoding sinse it MUST be supported in
  * RFB 3.x protocols).
@@ -436,6 +441,7 @@ typedef struct _rfbInteractionCapsMsg {
 #define rfbEncodingZlib      6
 #define rfbEncodingTight     7
 #define rfbEncodingZlibHex   8
+#define rfbEncodingZRLE     16
 
 /* signatures for basic encoding types */
 #define sig_rfbEncodingRaw       "RAW_____"
@@ -446,6 +452,7 @@ typedef struct _rfbInteractionCapsMsg {
 #define sig_rfbEncodingZlib      "ZLIB____"
 #define sig_rfbEncodingTight     "TIGHT___"
 #define sig_rfbEncodingZlibHex   "ZLIBHEX_"
+#define sig_rfbEncodingZRLE      "ZRLE____"
 
 /*
  * Special encoding numbers:
@@ -459,10 +466,10 @@ typedef struct _rfbInteractionCapsMsg {
 
 #define rfbJpegQualityLevel1       0xFFFFFE01
 #define rfbJpegQualityLevel100     0xFFFFFE64
-#define rfbJpegSubsamp444          0xFFFFFD00
-#define rfbJpegSubsamp411          0xFFFFFD01
-#define rfbJpegSubsamp422          0xFFFFFD02
-
+#define rfbJpegSubsamp1X           0xFFFFFD00
+#define rfbJpegSubsamp4X           0xFFFFFD01
+#define rfbJpegSubsamp2X           0xFFFFFD02
+#define rfbJpegSubsampGray         0xFFFFFD03
 
 #define rfbEncodingCompressLevel0  0xFFFFFF00
 #define rfbEncodingCompressLevel1  0xFFFFFF01
