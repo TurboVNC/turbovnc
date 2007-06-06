@@ -7,7 +7,7 @@ URL:       http://www.virtualgl.org
 License:   GPL
 Group:     User Interface/Desktops
 Requires:  bash >= 2.0
-Prereq:    /sbin/chkconfig /etc/init.d turbojpeg >= 1.04
+Prereq:    /sbin/chkconfig /etc/init.d turbojpeg >= 1.10
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildPrereq: /usr/bin/perl turbojpeg
 BuildRequires: zlib-devel
@@ -127,8 +127,8 @@ fi
 %{_mandir}/man1/vncpasswd.1*
 
 %changelog
-* Thu May 31 2007 Darrell Commander <dcommander@users.sourceforge.net>
-- TurboVNC 0.3.4
+* Tue Jun 5 2007 Darrell Commander <dcommander@users.sourceforge.net>
+- TurboVNC 0.4 (Includes patches from TightVNC 1.3.9)
 
 * Fri Feb 16 2007 Darrell Commander <dcommander@users.sourceforge.net>
 - TurboVNC 0.3.3
