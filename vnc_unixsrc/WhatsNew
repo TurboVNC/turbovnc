@@ -4,6 +4,79 @@
 |   in TightVNC source and binary archives.                          |
 +--------------------------------------------------------------------+
 
+* TightVNC 1.3.9
+
+  - All platforms: Added support for the standard RFB protocol version
+    3.8 with TightVNC extensions.
+
+  - All platforms: Made "host:port" parsing maximally compatible with
+    VNC4. Interpreting a number in host names like somehost:5900 as an
+    actual port number if it's not in the range [0..99].
+
+  - Windows Server: Various user interface enhancements - changes in
+    GUI labels, tray icon with a red border when incoming connections
+    are not possible for any reason, more information in the tray icon
+    tip, smarter logic in displaying the Properties dialog, and more.
+ 
+  - Windows Server: Fixed a problem introduced in TightVNC 1.3.8 -
+    default passwords were not respected if user passwords were not
+    set.
+
+  - Windows Server: Slightly improved handling of passwords. One of
+    the notable changes is that now it's enough to enter a view-only
+    password without providing primary password.
+
+  - Windows Server: Fixed problems with running WinVNC service and
+    Terminal Services. When a Remote Desktop (RDP) client connected to
+    the console, WinVNC showed black screen and did not restore normal
+    operations even on disconnection of that RDP client. Now, we
+    always share the console correctly, and disable simultaneous RDP
+    and VNC sessions. The changes were ported from VNC 4.1.2.
+
+  - Windows Server: Better way of simulating Ctrl+Alt+Del. There are
+    reports that this solves the problem with greyed username and
+    password fields on Windows 2003 Server (bug #887617).
+
+  - Windows Server: Bugfix for the bug #1109102: attempt to restart
+    the machine remotely via TightVNC led to disconnect if there was
+    some non-saved data, and further connections were rejected.
+
+  - Windows Viewer: Multiple selection now works in file transfers,
+    thanks to developers at Novell and personally Rohit Kumar.
+
+  - Windows Viewer: The viewer terminated silently when the server
+    dropped connection right after accepting it. Now we report such
+    errors.
+
+  - Windows version source archive: Included project files for
+    compiling with Visual C++ 2005 Express Edition. Also, all required
+    libraries are now included within the source distribution.
+
+  - Unix Server: Applied patches from Debian Linux that port Xvnc to
+    x86_64 platform (tightvnc-1.2.9-amd64support.p and
+    tightvnc-1.3_alpha7-x86_64.patch), thanks to Quanah Gibson-Mount.
+
+  - Java viewer: Implemented scaling, either with a fixed scaling
+    factor or automatic. If Java 2D API is available (Java 1.2 and
+    higher), then high-quality scaling is used. From the other side,
+    the viewer remains compatible with Java 1.1 where it would simply
+    use scaling with much decreased image quality. Scaling can be
+    enabled with new "Scaling Factor" parameter but cannot be
+    controlled from the GUI yet.
+
+  - Java viewer: Added support for ZRLE encoding.
+
+  - Java viewer: Disabled focus traversal keys under JVMs 1.4 and
+    higher. This fixes the problem with not sending Tab key events to
+    the VNC server.
+
+  - Java viewer: Fixed wrong pixel format interpretation at decoding
+    RichCursor pseudo-encoding (local cursor could be rendered in
+    wrong colors).
+
+  - Other improvements and bugfixes, see ChangeLog files within the
+    distribution for more details.
+
 * TightVNC 1.3.8, release candidate version
 
   - Win32 server: Fixed major problem with disconnecting clients on
