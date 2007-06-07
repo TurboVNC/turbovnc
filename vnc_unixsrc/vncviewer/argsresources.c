@@ -1,6 +1,6 @@
 /*
- *  Copyright (C) 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
- *  Copyright (C) 2002-2003 Constantin Kaplinsky.  All Rights Reserved.
+ *  Copyright (C) 2005-2007 Sun Microsystems, Inc.  All Rights Reserved.
+ *  Copyright (C) 2002-2006 Constantin Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -77,10 +77,15 @@ char *fallback_resources[] = {
     
   "*qualText.label: 000",
 
-  "*subsampLabel.label: JPEG Subsampling\\n[4:1:1 = fastest]\\n[None = best quality]",
-  "*subsamp411.label: 4:1:1",
-  "*subsamp422.label: 4:2:2",
-  "*subsamp444.label: None",
+  "*subsampLabel.label: JPEG Chrominance Subsampling\\n[4X = fastest]\\n[None = best quality]",
+  "*subsampGray.label: Grayscale",
+  "*subsamp4X.label: 4X",
+  "*subsamp2X.label: 2X",
+  "*subsamp1X.label: None",
+
+  "*compressLabel.label: Image Compression Type",
+  "*compressRGB.label: None (RGB)",
+  "*compressJPEG.label: JPEG",
 
   "*wanopt.label: Optimize for High-Latency Network",
 
@@ -184,11 +189,11 @@ static XtResource appDataResourceList[] = {
   {"passwordFile", "PasswordFile", XtRString, sizeof(String),
    XtOffsetOf(AppData, passwordFile), XtRImmediate, (XtPointer) 0},
 
-  {"userLogin", "UserLogin", XtRString, sizeof(String),
-   XtOffsetOf(AppData, userLogin), XtRImmediate, (XtPointer) 0},
-
   {"passwordDialog", "PasswordDialog", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, passwordDialog), XtRImmediate, (XtPointer) False},
+
+  {"compressType", "CompressType", XtRString, sizeof(String),
+   XtOffsetOf(AppData, encodingsString), XtRImmediate, (XtPointer) "JPEG"},
 
   {"useCopyRect", "UseCopyRect", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, useCopyRect), XtRImmediate, (XtPointer) True},
@@ -208,6 +213,9 @@ static XtResource appDataResourceList[] = {
   {"debug", "Debug", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, debug), XtRImmediate, (XtPointer) False},
 
+  {"rawDelay", "RawDelay", XtRInt, sizeof(int),
+   XtOffsetOf(AppData, rawDelay), XtRImmediate, (XtPointer) 0},
+
   {"copyRectDelay", "CopyRectDelay", XtRInt, sizeof(int),
    XtOffsetOf(AppData, copyRectDelay), XtRImmediate, (XtPointer) 0},
 
@@ -217,10 +225,10 @@ static XtResource appDataResourceList[] = {
   {"bumpScrollPixels", "BumpScrollPixels", XtRInt, sizeof(int),
    XtOffsetOf(AppData, bumpScrollPixels), XtRImmediate, (XtPointer) 20},
 
-  {"compressLevel", "CompressionLevel", XtRInt, sizeof(int),
-   XtOffsetOf(AppData, compressLevel), XtRImmediate, (XtPointer) 0},
+  {"subsampling", "Subsampling", XtRString, sizeof(String),
+   XtOffsetOf(AppData, subsampString), XtRImmediate, (XtPointer) "1X"},
 
-  {"qualityLevel", "QualityLevel", XtRInt, sizeof(int),
+  {"quality", "Quality", XtRInt, sizeof(int),
    XtOffsetOf(AppData, qualityLevel), XtRImmediate, (XtPointer) 95},
 
   {"useRemoteCursor", "UseRemoteCursor", XtRBool, sizeof(Bool),
@@ -255,15 +263,15 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-fullscreen",    "*fullScreen",         XrmoptionNoArg,  "True"},
   {"-noraiseonbeep", "*raiseOnBeep",        XrmoptionNoArg,  "False"},
   {"-passwd",        "*passwordFile",       XrmoptionSepArg, 0},
-  {"-user",          "*userLogin",          XrmoptionSepArg, 0},
+  {"-compress",      "*compressType",       XrmoptionSepArg, 0},
   {"-nocopyrect",    "*useCopyRect",        XrmoptionNoArg,  "False"},
-  {"-subsamp",       "*compressLevel",      XrmoptionSepArg, 0},
-  {"-quality",       "*qualityLevel",       XrmoptionSepArg, 0},
+  {"-samp",          "*subsampling",        XrmoptionSepArg, 0},
+  {"-quality",       "*quality",            XrmoptionSepArg, 0},
   {"-nocursorshape", "*useRemoteCursor",    XrmoptionNoArg,  "False"},
   {"-x11cursor",     "*useX11Cursor",       XrmoptionNoArg,  "True"},
   {"-singlebuffer",  "*doubleBuffer",       XrmoptionNoArg,  "False"},
-  {"-autopass",      "*autoPass",           XrmoptionNoArg,  "True"},
   {"-broadband",     "*qualityLevel",       XrmoptionNoArg,  "-1"},
+  {"-autopass",      "*autoPass",           XrmoptionNoArg,  "True"},
   {"-wan",           "*optimizeForWAN",     XrmoptionNoArg,  "True"},
 
 };
@@ -317,7 +325,7 @@ void
 usage(void)
 {
   fprintf(stderr,
-	  "TurboVNC Viewer version 0.3.4\n"
+	  "TurboVNC Viewer version 0.4\n"
 	  "\n"
 	  "Usage: %s [<OPTIONS>] [<HOST>][:<DISPLAY#>]\n"
 	  "       %s [<OPTIONS>] [<HOST>][::<PORT#>]\n"
@@ -332,16 +340,16 @@ usage(void)
 	  "        -fullscreen\n"
 	  "        -noraiseonbeep\n"
 	  "        -passwd <PASSWD-FILENAME> (standard VNC authentication)\n"
-	  "        -user <USERNAME> (Unix login authentication)\n"
 	  "        -nocopyrect\n"
-	  "        -subsamp <SUBSAMPLING-VALUE> (0=None, 1=4:1:1, 2=4:2:2)\n"
-	  "        -quality <JPEG-QUALITY-VALUE> (1..100: 1-low, 100-high)\n"
+	  "        -compress <IMAGE COMPRESSION TYPE> (jpeg | rgb)\n"
+	  "        -samp <JPEG CHROMINANCE SUBSAMPLING> (1X | 2X | 4X | gray)\n"
+	  "        -quality <JPEG IMAGE QUALITY> (1..100: 1-low, 100-high)\n"
 	  "        -nocursorshape\n"
 	  "        -x11cursor\n"
 	  "        -autopass\n"
 	  "        -singlebuffer\n"
 	  "        -wan\n"
-	  "        -broadband (preset for -wan -subsamp 1 -quality 30)\n"
+	  "        -broadband (preset for -wan -samp 4 -quality 30)\n"
 	  "\n"
 	  "Option names may be abbreviated, e.g. -q instead of -quality.\n"
 	  "See the manual page for more information."
@@ -362,6 +370,7 @@ GetArgsAndResources(int argc, char **argv)
   int i;
   char *vncServerName, *colonPos;
   int len, portOffset;
+  int disp;
 
   /* Turn app resource specs into our appData structure for the rest of the
      program to use */
@@ -373,8 +382,24 @@ GetArgsAndResources(int argc, char **argv)
 
   if(appData.qualityLevel==-1) {
     appData.qualityLevel=30;
-    appData.compressLevel=1;
+    appData.compressLevel=TVNC_4X;
     appData.optimizeForWAN=1;
+  }
+
+  /* Translate compression parameters */
+  if (appData.encodingsString && (toupper(appData.encodingsString[0]) == 'R'
+    || appData.encodingsString[0] == '0'))
+    appData.compressType = TVNC_RGB;
+  else
+    appData.compressType = TVNC_JPEG;
+
+  if (appData.subsampString) {
+    switch(toupper(appData.subsampString[0])) {
+      case 'G': case '0':  appData.compressLevel=TVNC_GRAY;  break;
+      case '1':  appData.compressLevel=TVNC_1X;  break;
+      case '2':  appData.compressLevel=TVNC_2X;  break;
+      case '4':  appData.compressLevel=TVNC_4X;  break;
+    }
   }
 
   /* Add our actions to the actions table so they can be used in widget
@@ -437,6 +462,9 @@ GetArgsAndResources(int argc, char **argv)
     if (!len || strspn(colonPos + 1, "0123456789") != len) {
       usage();
     }
-    vncServerPort = atoi(colonPos + 1) + portOffset;
+    disp = atoi(colonPos + 1);
+    if (portOffset != 0 && disp >= 100)
+      portOffset = 0;
+    vncServerPort = disp + portOffset;
   }
 }
