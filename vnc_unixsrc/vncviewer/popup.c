@@ -31,8 +31,8 @@
 #include <X11/Xaw/Scrollbar.h>
 
 
-Widget popup, fullScreenToggle, button411, button422, button444, qualtext,
-  qualslider, wanbutton;
+Widget popup, fullScreenToggle, button4X, button2X, button1X, buttonGray,
+  qualtext, qualslider, wanbutton, buttonRGB, buttonJPEG;
 
 
 void
@@ -45,30 +45,55 @@ UpdateQual(void)
   strncpy(title, titleFormat, 1023);
   if((ptr=strrchr(title, '['))!=NULL)
   {
-    sprintf(ptr, "[%s Q%d]", appData.compressLevel==1?"4:1:1":
-      appData.compressLevel==2?"4:2:2":"4:4:4", appData.qualityLevel);
+    if(appData.compressType == TVNC_RGB)
+      sprintf(ptr, "[RGB]");
+    else
+      sprintf(ptr, "[JPEG %s Q%d]", compressLevel2str[appData.compressLevel],
+        appData.qualityLevel);
     XtVaSetValues(toplevel, XtNtitle, title, XtNiconName, title, NULL);
   }
   XawScrollbarSetThumb(qualslider, (float)appData.qualityLevel/100., 0.);
   sprintf(text, "%d", appData.qualityLevel);
   XtVaSetValues(qualtext, XtNlabel, text, NULL);
-  if(appData.compressLevel==0)
+
+  if(appData.compressType == TVNC_RGB)
   {
-    XtVaSetValues(button411, XtNstate, 0, NULL);
-    XtVaSetValues(button422, XtNstate, 0, NULL);
-    XtVaSetValues(button444, XtNstate, 1, NULL);
+    XtVaSetValues(buttonRGB, XtNstate, 1, NULL);
+    XtVaSetValues(buttonJPEG, XtNstate, 0, NULL);
   }
-  else if(appData.compressLevel==1)
+  else if(appData.compressType == TVNC_JPEG)
   {
-    XtVaSetValues(button411, XtNstate, 1, NULL);
-    XtVaSetValues(button422, XtNstate, 0, NULL);
-    XtVaSetValues(button444, XtNstate, 0, NULL);
+    XtVaSetValues(buttonRGB, XtNstate, 0, NULL);
+    XtVaSetValues(buttonJPEG, XtNstate, 1, NULL);
   }
-  else if(appData.compressLevel==2)
+
+  if(appData.compressLevel==TVNC_1X)
   {
-    XtVaSetValues(button411, XtNstate, 0, NULL);
-    XtVaSetValues(button422, XtNstate, 1, NULL);
-    XtVaSetValues(button444, XtNstate, 0, NULL);
+    XtVaSetValues(buttonGray, XtNstate, 0, NULL);
+    XtVaSetValues(button4X, XtNstate, 0, NULL);
+    XtVaSetValues(button2X, XtNstate, 0, NULL);
+    XtVaSetValues(button1X, XtNstate, 1, NULL);
+  }
+  else if(appData.compressLevel==TVNC_4X)
+  {
+    XtVaSetValues(buttonGray, XtNstate, 0, NULL);
+    XtVaSetValues(button4X, XtNstate, 1, NULL);
+    XtVaSetValues(button2X, XtNstate, 0, NULL);
+    XtVaSetValues(button1X, XtNstate, 0, NULL);
+  }
+  else if(appData.compressLevel==TVNC_2X)
+  {
+    XtVaSetValues(buttonGray, XtNstate, 0, NULL);
+    XtVaSetValues(button4X, XtNstate, 0, NULL);
+    XtVaSetValues(button2X, XtNstate, 1, NULL);
+    XtVaSetValues(button1X, XtNstate, 0, NULL);
+  }
+  else if(appData.compressLevel==TVNC_GRAY)
+  {
+    XtVaSetValues(buttonGray, XtNstate, 1, NULL);
+    XtVaSetValues(button4X, XtNstate, 0, NULL);
+    XtVaSetValues(button2X, XtNstate, 0, NULL);
+    XtVaSetValues(button1X, XtNstate, 0, NULL);
   }
   XtVaSetValues(wanbutton, XtNstate, appData.optimizeForWAN, NULL);
 }
@@ -122,25 +147,49 @@ qualJumpProc(Widget w, XtPointer client, XtPointer p)
 
 
 void
-button411Proc(Widget w, XtPointer client, XtPointer p)
+buttonRGBProc(Widget w, XtPointer client, XtPointer p)
 {
-  if((int)p==1) appData.compressLevel=1;
+  if((int)p==1) appData.compressType=TVNC_RGB;
   UpdateQual();
 }
 
 
 void
-button422Proc(Widget w, XtPointer client, XtPointer p)
+buttonJPEGProc(Widget w, XtPointer client, XtPointer p)
 {
-  if((int)p==1) appData.compressLevel=2;
+  if((int)p==1) appData.compressType=TVNC_JPEG;
   UpdateQual();
 }
 
 
 void
-button444Proc(Widget w, XtPointer client, XtPointer p)
+buttonGrayProc(Widget w, XtPointer client, XtPointer p)
 {
-  if((int)p==1) appData.compressLevel=0;
+  if((int)p==1) appData.compressLevel=TVNC_GRAY;
+  UpdateQual();
+}
+
+
+void
+button4XProc(Widget w, XtPointer client, XtPointer p)
+{
+  if((int)p==1) appData.compressLevel=TVNC_4X;
+  UpdateQual();
+}
+
+
+void
+button2XProc(Widget w, XtPointer client, XtPointer p)
+{
+  if((int)p==1) appData.compressLevel=TVNC_2X;
+  UpdateQual();
+}
+
+
+void
+button1XProc(Widget w, XtPointer client, XtPointer p)
+{
+  if((int)p==1) appData.compressLevel=TVNC_1X;
   UpdateQual();
 }
 
@@ -192,8 +241,23 @@ CreatePopup()
     prevButton = button;
   }
 
+  label = XtCreateManagedWidget("compressLabel", labelWidgetClass, buttonForm,
+    NULL, 0);
+  XtVaSetValues(label, XtNfromVert, prevButton, XtNleft, XawChainLeft,
+    XtNright, XawChainRight, NULL);
+
+  buttonRGB = XtCreateManagedWidget("compressRGB", toggleWidgetClass,
+    buttonForm, NULL, 0);
+  XtVaSetValues(buttonRGB, XtNfromVert, label, XtNleft, XawChainLeft, NULL);
+  XtAddCallback(buttonRGB, XtNcallback, buttonRGBProc, NULL);
+
+  buttonJPEG = XtCreateManagedWidget("compressJPEG", toggleWidgetClass,
+    buttonForm, NULL, 0);
+  XtVaSetValues(buttonJPEG, XtNfromVert, label, XtNfromHoriz, buttonRGB);
+  XtAddCallback(buttonJPEG, XtNcallback, buttonJPEGProc, NULL);
+
   label = XtCreateManagedWidget("qualLabel", labelWidgetClass, buttonForm, NULL, 0);
-  XtVaSetValues(label, XtNfromVert, prevButton, XtNleft, XawChainLeft, XtNright,
+  XtVaSetValues(label, XtNfromVert, buttonRGB, XtNleft, XawChainLeft, XtNright,
     XawChainRight, NULL);
 
   qualslider = XtCreateManagedWidget("qualBar", scrollbarWidgetClass, buttonForm,
@@ -212,26 +276,31 @@ CreatePopup()
   XtVaSetValues(label, XtNfromVert, qualslider, XtNleft, XawChainLeft,
     XtNright, XawChainRight, NULL);
 
-  button411 =  XtCreateManagedWidget("subsamp411", toggleWidgetClass, buttonForm,
+  buttonGray = XtCreateManagedWidget("subsampGray", toggleWidgetClass, buttonForm,
     NULL, 0);
-  XtVaSetValues(button411, XtNfromVert, label, XtNleft, XawChainLeft, NULL);
-  XtAddCallback(button411, XtNcallback, button411Proc, NULL);
+  XtVaSetValues(buttonGray, XtNfromVert, label, XtNleft, XawChainLeft, NULL);
+  XtAddCallback(buttonGray, XtNcallback, buttonGrayProc, NULL);
 
-  button422 =  XtCreateManagedWidget("subsamp422", toggleWidgetClass, buttonForm,
+  button4X = XtCreateManagedWidget("subsamp4X", toggleWidgetClass, buttonForm,
     NULL, 0);
-  XtVaSetValues(button422, XtNfromVert, label, XtNfromHoriz, button411, 
-    XtNradioGroup, button411, NULL);
-  XtAddCallback(button422, XtNcallback, button422Proc, NULL);
+  XtVaSetValues(button4X, XtNfromVert, label, XtNfromHoriz, buttonGray);
+  XtAddCallback(button4X, XtNcallback, button4XProc, NULL);
 
-  button444 =  XtCreateManagedWidget("subsamp444", toggleWidgetClass, buttonForm,
+  button2X = XtCreateManagedWidget("subsamp2X", toggleWidgetClass, buttonForm,
     NULL, 0);
-  XtVaSetValues(button444, XtNfromVert, label, XtNfromHoriz, button422,
-    XtNradioGroup, button411, NULL);
-  XtAddCallback(button444, XtNcallback, button444Proc, NULL);
+  XtVaSetValues(button2X, XtNfromVert, label, XtNfromHoriz, button4X, 
+    XtNradioGroup, buttonGray, NULL);
+  XtAddCallback(button2X, XtNcallback, button2XProc, NULL);
+
+  button1X = XtCreateManagedWidget("subsamp1X", toggleWidgetClass, buttonForm,
+    NULL, 0);
+  XtVaSetValues(button1X, XtNfromVert, label, XtNfromHoriz, button2X,
+    XtNradioGroup, buttonGray, NULL);
+  XtAddCallback(button1X, XtNcallback, button1XProc, NULL);
 
   wanbutton =  XtCreateManagedWidget("wanopt", toggleWidgetClass, buttonForm,
     NULL, 0);
-  XtVaSetValues(wanbutton, XtNfromVert, button411, XtNleft, XawChainLeft, NULL);
+  XtVaSetValues(wanbutton, XtNfromVert, buttonGray, XtNleft, XawChainLeft, NULL);
   XtAddCallback(wanbutton, XtNcallback, wanbuttonProc, NULL);
 
 }

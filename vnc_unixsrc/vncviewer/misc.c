@@ -55,8 +55,11 @@ ToplevelInitBeforeRealization()
   char temps[80];
 
   XtVaGetValues(toplevel, XtNtitle, &titleFormat, NULL);
-  sprintf(temps, " [%s Q%d] ", appData.compressLevel==1?"4:1:1":
-    appData.compressLevel==2?"4:2:2":"4:4:4", appData.qualityLevel);
+  if(appData.compressType == TVNC_RGB)
+    sprintf(temps, "[RGB]");
+  else
+    sprintf(temps, "[JPEG %s Q%d]", compressLevel2str[appData.compressLevel],
+      appData.qualityLevel);
   title = XtMalloc(strlen(titleFormat) + strlen(desktopName)
     + strlen(temps) + 1);
   sprintf(title, titleFormat, desktopName);
