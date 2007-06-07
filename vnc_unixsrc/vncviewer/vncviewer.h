@@ -64,6 +64,19 @@ extern int endianTest;
 #define DEFAULT_VIA_CMD     \
   (DEFAULT_SSH_CMD " -f -L %L:%H:%R %G sleep 20")
 
+/*
+ * The enum is ordered in this way so as to maintain backward compatibility
+ * with TVNC 0.3.x
+ */
+#define TVNC_SAMPOPT 4
+enum {TVNC_1X=0, TVNC_4X, TVNC_2X, TVNC_GRAY};
+
+static const char *compressLevel2str[TVNC_SAMPOPT] = {
+  "1X", "4X", "2X", "Gray"
+};
+
+/* Compression types */
+enum {TVNC_RGB=0, TVNC_JPEG};
 
 /* argsresources.c */
 
@@ -74,6 +87,8 @@ typedef struct {
   Bool grabKeyboard;
   Bool raiseOnBeep;
 
+  String encodingsString;
+  String subsampString;
   Bool useCopyRect;
 
   Bool useShm;
@@ -96,6 +111,7 @@ typedef struct {
   int bumpScrollTime;
   int bumpScrollPixels;
 
+  int compressType;
   int compressLevel;
   int qualityLevel;
   Bool useRemoteCursor;
