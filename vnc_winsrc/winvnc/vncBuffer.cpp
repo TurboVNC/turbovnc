@@ -57,8 +57,8 @@ vncBuffer::vncBuffer(vncDesktop *desktop)
 	zlibhex_encoder_in_use = false;
 	m_hold_zlibhex_encoder = NULL;
 
-	m_compresslevel = 6;
-	m_qualitylevel = -1;
+	m_compresslevel = TVNC_1X;
+	m_qualitylevel = 95;
 	m_use_xcursor = FALSE;
 	m_use_richcursor = FALSE;
 	m_use_lastrect = FALSE;
@@ -417,7 +417,7 @@ vncBuffer::SetEncoding(CARD32 encoding)
 void
 vncBuffer::SetCompressLevel(int level)
 {
-	m_compresslevel = (level >= 0 && level <= 2) ? level : 0;
+	m_compresslevel = (level >= 0 && level <= TVNC_SAMPOPT-1) ? level : TVNC_1X;
 	if (m_encoder != NULL)
 		m_encoder->SetCompressLevel(m_compresslevel);
 }

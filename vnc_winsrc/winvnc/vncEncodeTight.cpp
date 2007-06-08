@@ -63,6 +63,10 @@ const TIGHT_CONF vncEncodeTight::m_conf[1] = {
 	{ 65536, 2048,  32,  8192, 9, 9, 9, 6, 200, 500,  96, 80,   200,   500 }
 };
 
+static const int compressLevel2subsamp[4] = {
+    TJ_444, TJ_411, TJ_422, TJ_GRAYSCALE
+};
+
 vncEncodeTight::vncEncodeTight()
 {
 	m_buffer = NULL;
@@ -1441,7 +1445,6 @@ vncEncodeTight::SendJpegRect(BYTE *src, BYTE *dst, int x, int y, int w, int h, i
 {
 	BYTE *srcbuf;
 	int ps=m_localformat.bitsPerPixel/8;
-	int subsamp=m_compresslevel==1? TJ_411: (m_compresslevel==2? TJ_422:TJ_444);
 	unsigned long jpegDstDataLen;
 
 	if (ps < 3) return SendFullColorRect(dst, w, h);
@@ -1455,7 +1458,8 @@ vncEncodeTight::SendJpegRect(BYTE *src, BYTE *dst, int x, int y, int w, int h, i
 
 	srcbuf=&src[y*m_bytesPerRow + x*ps];
 	if(tjCompress(tjhnd, (unsigned char *)srcbuf, w, m_bytesPerRow,
-		h, ps, (unsigned char *)dst, &jpegDstDataLen, subsamp, quality,
+		h, ps, (unsigned char *)dst, &jpegDstDataLen,
+		compressLevel2subsamp[m_compresslevel], quality,
 		m_localformat.bigEndian?0:TJ_BGR)==-1) {
 		vnclog.Print(LL_INTERR, VNCLOG("JPEG Error: %s\n"), tjGetErrorStr());
 		return 0;

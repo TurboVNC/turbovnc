@@ -47,7 +47,7 @@ vncEncoder::vncEncoder()
 	m_transtable = NULL;
 	m_localpalette = NULL;
 	m_bytesPerRow = 0;
-	m_compresslevel = 0;
+	m_compresslevel = TVNC_1X;
 	m_qualitylevel = 95;
 	m_use_xcursor = FALSE;
 	m_use_richcursor = FALSE;
@@ -427,7 +427,7 @@ vncEncoder::SetRemoteFormat(rfbPixelFormat &pixformat)
 void
 vncEncoder::SetCompressLevel(int level)
 {
-	m_compresslevel = (level >= 0 && level <= 2) ? level : 0;
+	m_compresslevel = (level >= 0 && level <= TVNC_SAMPOPT-1) ? level : TVNC_1X;
 }
 
 void

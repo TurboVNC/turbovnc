@@ -875,7 +875,7 @@ vncClientThread::run(void *arg)
 			}
 
 			m_client->m_buffer->SetQualityLevel(95);
-			m_client->m_buffer->SetCompressLevel(0);
+			m_client->m_buffer->SetCompressLevel(TVNC_1X);
 			m_client->m_buffer->EnableXCursor(FALSE);
 			m_client->m_buffer->EnableRichCursor(FALSE);
 			m_client->m_buffer->EnableLastRect(FALSE);
@@ -937,11 +937,11 @@ vncClientThread::run(void *arg)
 					}
 
 					// Is this a CompressLevel encoding?
-					if ((Swap32IfLE(encoding) >= rfbJpegSubsamp444) &&
-						(Swap32IfLE(encoding) <= rfbJpegSubsamp422))
+					if ((Swap32IfLE(encoding) >= rfbJpegSubsamp1X) &&
+						(Swap32IfLE(encoding) <= rfbJpegSubsampGray))
 					{
 						// Client specified encoding-specific compression level
-						int level = (int)(Swap32IfLE(encoding) - rfbJpegSubsamp444);
+						int level = (int)(Swap32IfLE(encoding) - rfbJpegSubsamp1X);
 						m_client->m_buffer->SetCompressLevel(level);
 						vnclog.Print(LL_INTINFO, VNCLOG("subsampling level requested: %d\n"), level);
 						continue;
