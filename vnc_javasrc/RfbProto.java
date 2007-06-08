@@ -1,6 +1,6 @@
 //
 //  Copyright (C) 2001-2004 HorizonLive.com, Inc.  All Rights Reserved.
-//  Copyright (C) 2001,2002 Constantin Kaplinsky.  All Rights Reserved.
+//  Copyright (C) 2001-2006 Constantin Kaplinsky.  All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
 //
@@ -34,7 +34,8 @@ class RfbProto {
 
   final static String
     versionMsg_3_3 = "RFB 003.003\n",
-    versionMsg_3_7 = "RFB 003.007\n";
+    versionMsg_3_7 = "RFB 003.007\n",
+    versionMsg_3_8 = "RFB 003.008\n";
 
   // Vendor signatures: standard VNC/RealVNC, TridiaVNC, and TightVNC
   final static String
@@ -97,7 +98,8 @@ class RfbProto {
     EncodingHextile        = 5,
     EncodingZlib           = 6,
     EncodingTight          = 7,
-    EncodingJpegSubsamp444 = 0xFFFFFD00,
+    EncodingZRLE           = 16,
+    EncodingJpegSubsamp1X = 0xFFFFFD00,
     EncodingJpegQualityLevel0 = 0xFFFFFE00,
     EncodingCompressLevel0 = 0xFFFFFF00,
     EncodingQualityLevel0  = 0xFFFFFFE0,
@@ -114,6 +116,7 @@ class RfbProto {
     SigEncodingHextile        = "HEXTILE_",
     SigEncodingZlib           = "ZLIB____",
     SigEncodingTight          = "TIGHT___",
+    SigEncodingZRLE           = "ZRLE____",
     SigEncodingCompressLevel0 = "COMPRLVL",
     SigEncodingQualityLevel0  = "JPEGQLVL",
     SigEncodingXCursor        = "X11CURSR",
@@ -122,7 +125,7 @@ class RfbProto {
     SigEncodingLastRect       = "LASTRECT",
     SigEncodingNewFBSize      = "NEWFBSIZ";
 
-  final static int MaxNormalEncoding = 7;
+  final static int MaxNormalEncoding = 255;
 
   // Contstants used in the Hextile decoder
   final static int
@@ -160,12 +163,12 @@ class RfbProto {
   boolean brokenKeyPressed = false;
 
   // This will be set to true on the first framebuffer update
-  // containing Zlib- or Tight-encoded data.
+  // containing Zlib-, ZRLE- or Tight-encoded data.
   boolean wereZlibUpdates = false;
 
   // This will be set to false if the startSession() was called after
-  // we have received at least one Zlib- or Tight-encoded framebuffer
-  // update.
+  // we have received at least one Zlib-, ZRLE- or Tight-encoded
+  // framebuffer update.
   boolean recordFromBeginning = true;
 
   // This fields are needed to show warnings about inefficiently saved
@@ -284,7 +287,10 @@ class RfbProto {
 
   void writeVersionMsg() throws IOException {
     clientMajor = 3;
-    if (serverMajor > 3 || serverMinor >= 7) {
+    if (serverMajor > 3 || serverMinor >= 8) {
+      clientMinor = 8;
+      os.write(versionMsg_3_8.getBytes());
+    } else if (serverMinor >= 7) {
       clientMinor = 7;
       os.write(versionMsg_3_7.getBytes());
     } else {
@@ -324,7 +330,7 @@ class RfbProto {
   }
 
   //
-  // Select security type from the server's list (protocol version 3.7).
+  // Select security type from the server's list (protocol versions 3.7/3.8).
   //
 
   int selectSecurityType() throws Exception {
@@ -366,6 +372,67 @@ class RfbProto {
   }
 
   //
+  // Perform "no authentication".
+  //
+
+  void authenticateNone() throws Exception {
+    if (clientMinor >= 8)
+      readSecurityResult("No authentication");
+  }
+
+  //
+  // Perform standard VNC Authentication.
+  //
+
+  void authenticateVNC(String pw) throws Exception {
+    byte[] challenge = new byte[16];
+    readFully(challenge);
+
+    if (pw.length() > 8)
+      pw = pw.substring(0, 8);	// Truncate to 8 chars
+
+    // Truncate password on the first zero byte.
+    int firstZero = pw.indexOf(0);
+    if (firstZero != -1)
+      pw = pw.substring(0, firstZero);
+
+    byte[] key = {0, 0, 0, 0, 0, 0, 0, 0};
+    System.arraycopy(pw.getBytes(), 0, key, 0, pw.length());
+
+    DesCipher des = new DesCipher(key);
+
+    des.encrypt(challenge, 0, challenge, 0);
+    des.encrypt(challenge, 8, challenge, 8);
+
+    os.write(challenge);
+
+    readSecurityResult("VNC authentication");
+  }
+
+  //
+  // Read security result.
+  // Throws an exception on authentication failure.
+  //
+
+  void readSecurityResult(String authType) throws Exception {
+    int securityResult = is.readInt();
+
+    switch (securityResult) {
+    case VncAuthOK:
+      System.out.println(authType + ": success");
+      break;
+    case VncAuthFailed:
+      if (clientMinor >= 8)
+        readConnFailedReason();
+      throw new Exception(authType + ": failed");
+    case VncAuthTooMany:
+      throw new Exception(authType + ": failed, too many tries");
+    default:
+      throw new Exception(authType + ": unknown result " + securityResult);
+    }
+  }
+
+  //
   // Read the string describing the reason for a connection failure,
   // and throw an exception.
   //
@@ -378,7 +445,7 @@ class RfbProto {
   }
 
   //
-  // Initialize capability lists (protocol 3.7t).
+  // Initialize capability lists (TightVNC protocol extensions).
   //
 
   void initCapabilities() {
@@ -393,20 +460,10 @@ class RfbProto {
 		 "No authentication");
     authCaps.add(AuthVNC, StandardVendor, SigAuthVNC,
 		 "Standard VNC password authentication");
-    authCaps.add(AuthUnixLogin, TightVncVendor, SigAuthUnixLogin,
-		 "Login-style Unix authentication");
 
     // Supported encoding types
     encodingCaps.add(EncodingCopyRect, StandardVendor,
 		     SigEncodingCopyRect, "Standard CopyRect encoding");
-    encodingCaps.add(EncodingRRE, StandardVendor,
-		     SigEncodingRRE, "Standard RRE encoding");
-    encodingCaps.add(EncodingCoRRE, StandardVendor,
-		     SigEncodingCoRRE, "Standard CoRRE encoding");
-    encodingCaps.add(EncodingHextile, StandardVendor,
-		     SigEncodingHextile, "Standard Hextile encoding");
-    encodingCaps.add(EncodingZlib, TridiaVncVendor,
-		     SigEncodingZlib, "Zlib encoding");
     encodingCaps.add(EncodingTight, TightVncVendor,
 		     SigEncodingTight, "Tight encoding");
 
@@ -428,7 +485,7 @@ class RfbProto {
   }
 
   //
-  // Setup tunneling (protocol version 3.7t)
+  // Setup tunneling (TightVNC protocol extensions)
   //
 
   void setupTunneling() throws IOException {
@@ -442,7 +499,7 @@ class RfbProto {
   }
 
   //
-  // Negotiate authentication scheme (protocol version 3.7t)
+  // Negotiate authentication scheme (TightVNC protocol extensions)
   //
 
   int negotiateAuthenticationTight() throws Exception {
@@ -453,9 +510,7 @@ class RfbProto {
     readCapabilityList(authCaps, nAuthTypes);
     for (int i = 0; i < authCaps.numEnabled(); i++) {
       int authType = authCaps.getByOrder(i);
-      if (authType == AuthNone ||
-	  authType == AuthVNC  ||
-	  authType == AuthUnixLogin) {
+      if (authType == AuthNone || authType == AuthVNC) {
 	writeInt(authType);
 	return authType;
       }
@@ -464,7 +519,7 @@ class RfbProto {
   }
 
   //
-  // Read a capability list (protocol version 3.7t)
+  // Read a capability list (TightVNC protocol extensions)
   //
 
   void readCapabilityList(CapsContainer caps, int count) throws IOException {
@@ -536,7 +591,7 @@ class RfbProto {
     readFully(name);
     desktopName = new String(name);
 
-    // Read interaction capabilities (protocol 3.7t)
+    // Read interaction capabilities (TightVNC protocol extensions)
     if (protocolTightVNC) {
       int nServerMessageTypes = is.readUnsignedShort();
       int nClientMessageTypes = is.readUnsignedShort();
@@ -572,6 +627,11 @@ class RfbProto {
     rec.write(desktopName.getBytes());
     numUpdatesInSession = 0;
 
+    // FIXME: If there were e.g. ZRLE updates only, that should not
+    //        affect recording of Zlib and Tight updates. So, actually
+    //        we should maintain separate flags for Zlib, ZRLE and
+    //        Tight, instead of one ``wereZlibUpdates'' variable.
+    //
     if (wereZlibUpdates)
       recordFromBeginning = false;
 
@@ -653,6 +713,7 @@ class RfbProto {
     updateRectEncoding = is.readInt();
 
     if (updateRectEncoding == EncodingZlib ||
+        updateRectEncoding == EncodingZRLE ||
 	updateRectEncoding == EncodingTight)
       wereZlibUpdates = true;
 
