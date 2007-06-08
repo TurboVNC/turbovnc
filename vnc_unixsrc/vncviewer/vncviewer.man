@@ -111,14 +111,19 @@ to send only the coordinates of the new position rather than completely
 re-sending the rectangular area. CopyRect encoding is enabled by default,
 but this option disables it.
 .TP
-\fB\-subsamp \fI<0=None, 1=4:1:1, 2=4:2:2>\fR
+\fB\-compress\fR \fIrgb | jpeg\fR
+Selects either RGB (no image compression) or JPEG image compression (the
+default.)
+.TP
+\fB\-samp \fI1X | 2X | 4X | gray\fR
 Each pixel in a JPEG image is represented as a brightness (luminance)
 value and a color (chrominance) value. Chrominance subsampling discards
 every other chrominance value to reduce the image size, but it can
-create visible compression artifacts. 4:1:1 subsampling provides the best
+create visible compression artifacts. 4X subsampling provides the best
 compression but also the lowest quality, since it discards every other
-chrominance pixel along both X and Y. 4:2:2 subsampling discards every
-other pixel along only the X direction.
+chrominance pixel in both X and Y directions. 2X subsampling discards every
+other chrominance pixel in only the X direction.  Grayscale subsampling
+discards the chrominance pixels altogether, leaving only luminance.
 .TP
 \fB\-quality \fIlevel\fR
 Use the specified JPEG quality \fIlevel\fR (1..100) to compress the
@@ -204,10 +209,13 @@ is set. Default false.
 If set to false, this is the equivalent of the \fB\-nocopyrect\fR option. Default
 true. (TurboVNC\-specific)
 .TP
-.B compressLevel
-Equivalent of the \fB\-subsamp\fR option (TurboVNC\-specific).
+.B compressType
+Equivalent of the \fB\-compress\fR option (TurboVNC\-specific).
 .TP
-.B qualityLevel
+.B subsampling
+Equivalent of the \fB\-samp\fR option (TurboVNC\-specific).
+.TP
+.B quality
 Equivalent of the \fB\-quality\fR option (TurboVNC\-specific).
 .TP
 .B doubleBuffer
@@ -219,13 +227,13 @@ If set to false, this is the equivalent of the \fB\-nocursorshape\fR option.
 Default true. (TurboVNC\-specific)
 .TP
 .B useSharedMemory
-Use the MIT shared memory extension if the viewer is running on the same machine as the VNC
+Use the MIT shared memory extension if the viewer is running on the same machine as the X
 server. Default true.
 .TP
 .B wmDecorationWidth, wmDecorationHeight
 The total width and height taken up by window manager decorations.
 This is used to calculate the maximum size of the VNC viewer window. 
-Default width is 4, and default height is 24.
+The default width is 4, and the default height is 24.
 .TP
 .B bumpScrollTime, bumpScrollPixels
 When the viewer is in full\-screen mode and the VNC desktop is bigger
