@@ -36,6 +36,7 @@ class OptionsFrame extends Frame
 
   static String[] names = {
     "Connection profile",
+    "Image compression type",
     "JPEG chrominance subsampling",
     "JPEG image quality",
     "Cursor shape updates",
@@ -49,7 +50,8 @@ class OptionsFrame extends Frame
 
   static String[][] values = {
     { "Broadband (favor performance)", "Broadband (favor image quality)", "High-Speed Network", "Custom" },
-    { "4:1:1", "4:2:2", "None" },
+    { "None (RGB)", "JPEG" },
+    { "Grayscale", "4X", "2X", "None" },
     { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
       "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
       "21", "22", "23", "24", "25", "26", "27", "28", "29", "30",
@@ -71,15 +73,16 @@ class OptionsFrame extends Frame
 
   final int
     presetIndex          = 0,
-    compressLevelIndex   = 1,
-    jpegQualityIndex     = 2,
-    cursorUpdatesIndex   = 3,
-    useCopyRectIndex     = 4,
-    wanIndex             = 5,
-    mouseButtonIndex     = 6,
-    viewOnlyIndex        = 7,
-    scaleCursorIndex     = 8,
-    shareDesktopIndex    = 9;
+    compressTypeIndex    = 1,
+    compressLevelIndex   = 2,
+    jpegQualityIndex     = 3,
+    cursorUpdatesIndex   = 4,
+    useCopyRectIndex     = 5,
+    wanIndex             = 6,
+    mouseButtonIndex     = 7,
+    viewOnlyIndex        = 8,
+    scaleCursorIndex     = 9,
+    shareDesktopIndex    = 10;
 
   Label[] labels = new Label[names.length];
   Choice[] choices = new Choice[names.length];
@@ -91,7 +94,7 @@ class OptionsFrame extends Frame
   // The actual data which other classes look at:
   //
 
-  static int preferredEncoding = RfbProto.EncodingTight;
+  int preferredEncoding;
   int compressLevel;
   int jpegQuality;
   boolean useCopyRect;
@@ -104,6 +107,9 @@ class OptionsFrame extends Frame
   boolean shareDesktop;
   boolean viewOnly;
   int scaleCursor;
+
+  boolean autoScale;
+  int scalingFactor;
 
   //
   // Constructor.  Set up the labels and choices from the names and values
@@ -150,6 +156,7 @@ class OptionsFrame extends Frame
 
     // Set up defaults
 
+    choices[compressTypeIndex].select("JPEG");
     choices[compressLevelIndex].select("None");
     choices[jpegQualityIndex].select("95");
     choices[cursorUpdatesIndex].select("Enable");
@@ -169,6 +176,35 @@ class OptionsFrame extends Frame
 	  if (s.equalsIgnoreCase(values[i][j])) {
 	    choices[i].select(j);
 	  }
+	}
+      }
+    }
+
+    // FIXME: Provide some sort of GUI for "Scaling Factor".
+
+    autoScale = false;
+    scalingFactor = 100;
+    String s = viewer.readParameter("Scaling Factor", false);
+    if (s != null) {
+      if (s.equalsIgnoreCase("Auto")) {
+	autoScale = true;
+      } else {
+	// Remove the '%' char at the end of string if present.
+	if (s.charAt(s.length() - 1) == '%') {
+	  s = s.substring(0, s.length() - 1);
+	}
+	// Convert to an integer.
+	try {
+	  scalingFactor = Integer.parseInt(s);
+	}
+	catch (NumberFormatException e) {
+	  scalingFactor = 100;
+	}
+	// Make sure scalingFactor is in the range of [1..1000].
+	if (scalingFactor < 1) {
+	  scalingFactor = 1;
+	} else if (scalingFactor > 1000) {
+	  scalingFactor = 1000;
 	}
       }
     }
@@ -201,13 +237,20 @@ class OptionsFrame extends Frame
   void setEncodings() {
     useCopyRect = choices[useCopyRectIndex].getSelectedItem().equals("Yes");
 
+    preferredEncoding = RfbProto.EncodingTight;
+    if (choices[compressTypeIndex].getSelectedItem().equals("None (RGB)")) {
+      preferredEncoding = RfbProto.EncodingRaw;
+    }
+
     // Handle compression level setting.
 
     compressLevel = 0;
-    if (choices[compressLevelIndex].getSelectedItem().equals("4:1:1")) {
+    if (choices[compressLevelIndex].getSelectedItem().equals("4X")) {
       compressLevel = 1;
-    } else if (choices[compressLevelIndex].getSelectedItem().equals("4:2:2")) {
+    } else if (choices[compressLevelIndex].getSelectedItem().equals("2X")) {
       compressLevel = 2;
+    } else if (choices[compressLevelIndex].getSelectedItem().equals("Grayscale")) {
+      compressLevel = 3;
     }
 
     // Handle JPEG quality setting.
@@ -286,16 +329,19 @@ class OptionsFrame extends Frame
     boolean updateOptions = false;
 
     if (choices[presetIndex].getSelectedItem().equals("Broadband (favor performance)")) {
+      preferredEncoding = RfbProto.EncodingTight;
       compressLevel = 1;
       jpegQuality = 30;
       wan = true;
       updateOptions = true;
     } else if (choices[presetIndex].getSelectedItem().equals("Broadband (favor image quality)")) {
+      preferredEncoding = RfbProto.EncodingTight;
       compressLevel = 0;
       jpegQuality = 95;
       wan = true;
       updateOptions = true;
     } else if (choices[presetIndex].getSelectedItem().equals("High-Speed Network")) {
+      preferredEncoding = RfbProto.EncodingTight;
       compressLevel = 0;
       jpegQuality = 95;
       wan = false;
@@ -306,9 +352,11 @@ class OptionsFrame extends Frame
       choices[jpegQualityIndex].select(String.valueOf(jpegQuality));
       choices[wanIndex].select(wan? "Yes":"No");
       if (compressLevel==1) {
-        choices[compressLevelIndex].select("4:1:1");
+        choices[compressLevelIndex].select("4X");
       } else if (compressLevel==2) {
-        choices[compressLevelIndex].select("4:2;2");
+        choices[compressLevelIndex].select("2X");
+      } else if (compressLevel==3) {
+        choices[compressLevelIndex].select("Grayscale");
       } else {
         choices[compressLevelIndex].select("None");
       }
@@ -318,11 +366,14 @@ class OptionsFrame extends Frame
 
   void setPreset() {
 
-    if (compressLevel == 0 && jpegQuality == 95 && wan == false) {
+    if (preferredEncoding == RfbProto.EncodingTight
+      && compressLevel == 0 && jpegQuality == 95 && wan == false) {
       choices[presetIndex].select("High-Speed Network");
-    } else if (compressLevel == 1 && jpegQuality == 30 && wan == true) {
+    } else if (preferredEncoding == RfbProto.EncodingTight
+      && compressLevel == 1 && jpegQuality == 30 && wan == true) {
       choices[presetIndex].select("Broadband (favor performance)");
-    } else if (compressLevel == 0 && jpegQuality == 95 && wan == true) {
+    } else if (preferredEncoding == RfbProto.EncodingTight
+      && compressLevel == 0 && jpegQuality == 95 && wan == true) {
       choices[presetIndex].select("Broadband (favor image quality)");
     } else {
       choices[presetIndex].select("Custom");
@@ -337,6 +388,7 @@ class OptionsFrame extends Frame
     Object source = evt.getSource();
 
     if (source == choices[wanIndex] ||
+        source == choices[compressTypeIndex] ||
         source == choices[compressLevelIndex] ||
         source == choices[jpegQualityIndex] ||
         source == choices[cursorUpdatesIndex] ||
