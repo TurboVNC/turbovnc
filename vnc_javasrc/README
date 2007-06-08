@@ -1,5 +1,5 @@
 
-  TightVNC Java Viewer version 1.3.8
+  TightVNC Java Viewer version 1.3.9
 
 ======================================================================
 
@@ -11,8 +11,8 @@ optimizations, major GUI improvements, and more.
 	Copyright (C) 2000 Tridia Corp.
 	Copyright (C) 2002-2003 RealVNC Ltd.
 	Copyright (C) 2001-2004 HorizonLive.com, Inc.
-	Copyright (C) 2000-2006 Constantin Kaplinsky
-	Copyright (C) 2000-2006 TightVNC Group
+	Copyright (C) 2000-2007 Constantin Kaplinsky
+	Copyright (C) 2000-2007 TightVNC Group
 	All rights reserved.
 
 This software is distributed under the GNU General Public Licence as
@@ -97,20 +97,45 @@ Parameters
 ==========
 
 TightVNC Java viewer supports a number of parameters allowing you to
-customize its behaviour. Most parameter names copy settings available from
-the Options frame in the Java viewer. Both parameter names and their values
-are case-insensitive, with one exception for the "PASSWORD" parameter. Here
-is the full list of parameters supported in TightVNC Java viewer:
+customize its behavior. Most parameters directly correspond to the settings
+found in the Options window. However, there are parameters that do not
+correspond to those settings. For such parameters, you can see a note "no GUI
+equivalent", in the documentation below.
+
+Parameters can be specified in one of the two ways, depending on how the Java
+viewer is used:
+
+  1. When the Java viewer is run as an applet (embedded within an HTML
+     document), parameters should be specified in the <PARAM> HTML tags,
+     within the appropriate <APPLET> section. Here is an example:
+
+    <APPLET CODE=VncViewer.class ARCHIVE=VncViewer.jar WIDTH=400 HEIGHT=300>
+      <PARAM NAME="PORT" VALUE=5901>
+      <PARAM NAME="Scaling factor" VALUE=50>
+    </APPLET>
+
+  2. When run as a standalone application, the Java viewer reads parameters
+     from the command line. Command-line arguments should be specified in
+     pairs -- first goes parameter name, then parameter value. Here is a
+     command line example:
+
+     java VncViewer HOST vnchost PORT 5901 "Scaling factor" 50
+
+Both parameter names and their values are case-insensitive. The only
+exception is the "PASSWORD" parameter, as VNC passwords are case-sensitive.
+
+Here is the complete list of parameters supported in TightVNC Java viewer:
 
 --> "HOST" (no GUI equivalent)
 
     Value: host name or IP address of the VNC server.
     Default: in applet mode, the host from which the applet was loaded.
 
-    This parameter tells the viewer which server to connect to. Normally,
-    it's not needed, because default Java security policy allow connections
-    from applets to the only one host anyway, and that is the host from which
-    the applet was loaded.
+    This parameter tells the viewer which server to connect to. It's not
+    needed in the applet mode, because default Java security policy allow
+    connections from applets to the only one host anyway, and that is the
+    host from which the applet was loaded. However, this parameter is
+    required if the viewer is used as a standalone application.
 
 --> "PORT" (no GUI equivalent)
 
@@ -146,7 +171,7 @@ is the full list of parameters supported in TightVNC Java viewer:
 
 --> "Encoding"
 
-    Values: "Auto", "Raw", "RRE", "CoRRE", "Hextile", "Zlib", "Tight".
+    Values: "Auto", "Raw", "RRE", "CoRRE", "Hextile", "ZRLE", "Zlib", "Tight".
     Default: "Auto".
 
     The preferred encoding. If the value is "Auto", then the viewer will
@@ -155,8 +180,11 @@ is the full list of parameters supported in TightVNC Java viewer:
     encoding that was designed for fast networks, while "Tight" is better
     suited for low-bandwidth connections. From the other side, "Tight"
     decoder in the TightVNC Java viewer seems to be more efficient than
-    "Hextile" decoder so it may be ok for fast networks too. Other encodings
-    are not efficient and provided for compatibility reasons.
+    "Hextile" decoder so it may be ok for fast networks too. "ZRLE" encoding
+    is similar to "Tight", but it does not support JPEG compression and
+    compression levels. Unlike "Tight" encoding, "ZRLE" is supported in
+    recent versions of RealVNC products. Other encodings are not efficient
+    and provided for compatibility reasons.
 
 --> "Compression level"
 
@@ -260,6 +288,22 @@ is the full list of parameters supported in TightVNC Java viewer:
     desktop size, the window will resize automatically when remote desktop
     size changes.
 
+--> "Scaling factor" (no GUI equivalent)
+
+    Value: an integer in the range of [1..1000], or the string "auto".
+    Default: "100".
+
+    Scale local representation of the remote desktop. The value is
+    interpreted as scaling factor in percents. The default value of 100%
+    corresponds to the original framebuffer size. Values below 100 reduce
+    image size, values above 100 enlarge the image proportionally. If the
+    parameter is set to "auto", automatic scaling is performed. Auto-scaling
+    tries to choose scaling factor such way that the whole remote framebuffer
+    will fit on the local screen. Currently, auto-scaling is supported only
+    when the remote desktop is shown in a separate frame (always true in the
+    application mode, and also in the applet mode with "Open new window"
+    parameter set to "yes").
+
 --> "Show controls" (no GUI equivalent)
 
     Values: "Yes", "No".
@@ -328,7 +372,7 @@ is the full list of parameters supported in TightVNC Java viewer:
     This option provides the way to define an alternate I/O implementation.
     The dynamically referenced class must implement a SocketFactory
     interface, and create a Socket, as configured by this parameter. See the
-    source in the SocketFactory.class.
+    source in SocketFactory.java.
 
 
 RECORDING VNC SESSIONS
@@ -359,18 +403,19 @@ Other important facts about session recording:
     recording. It's not necessary to keep that window open during recording a
     session.
 
---> Avoid using Zlib encoding when recording sessions. It's ok if you started
-    recording BEFORE the connection to the VNC server has been established,
-    but if you started recording during an active session, all Zlib sessions
-    will be saved Raw-encoded (that is, without compression at all). Zlib
-    decoding depends on the pixel data received earlier, thus saving the data
-    received from the server at an arbitrary moment is not sufficient to
-    decompress it correctly. And there is no way to say Zlib decoder to reset
-    decompressor's state -- that's a limitation of the Zlib encoder. The
-    viewer could re-compress raw pixel data again before saving Zlib-encoded
-    sessions, but unfortunately Java API does not allow to flush zlib data
-    streams making it impossible to save Zlib-encoded RFB pixel data without
-    using native code.
+--> Avoid using Zlib and ZRLE encodings when recording sessions. If you have
+    started recording BEFORE opening a VNC session, then you are ok. But
+    otherwise, all Zlib-encoded updates will be saved Raw-encoded (that is,
+    without compression at all). The case with ZRLE is even worse -- ZRLE
+    updates will not be saved at all, so the resulting session file may be
+    corrupted. Zlib decoding depends on the pixel data received earlier, thus
+    saving the data received from the server at an arbitrary moment is not
+    sufficient to decompress it correctly. And there is no way to tell Zlib
+    or ZRLE decoder to reset decompressor's state -- that's a limitation of
+    these encoders. The viewer could re-compress raw pixel data again before
+    saving Zlib-encoded sessions, but unfortunately Java API does not allow
+    to flush zlib data streams making it impossible to save Zlib-encoded RFB
+    pixel data without using native code.
 
 --> Usually, Tight encoding is the most suitable one for session recording,
     but some of the issues described above for the Zlib encoding affect the

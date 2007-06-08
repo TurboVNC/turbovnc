@@ -62,8 +62,6 @@ public class VncViewer extends java.applet.Applet
   GridBagLayout gridbag;
   ButtonPanel buttonPanel;
   Label connStatusLabel;
-  AuthPanel authenticator;
-  AuthUnixLoginPanel authenticatorUnixLogin;
   VncCanvas vc;
   OptionsFrame options;
   ClipboardFrame clipboard;
@@ -80,6 +78,7 @@ public class VncViewer extends java.applet.Applet
   String socketFactory;
   String host;
   int port;
+  String passwordParam;
   boolean showControls;
   boolean offerRelogin;
   boolean showOfflineDesktop;
@@ -114,8 +113,6 @@ public class VncViewer extends java.applet.Applet
 
     options = new OptionsFrame(this);
     clipboard = new ClipboardFrame(this);
-    authenticator = new AuthPanel(this);
-    authenticatorUnixLogin = new AuthUnixLoginPanel();
     if (RecordingFrame.checkSecurity())
       rec = new RecordingFrame(this);
 
@@ -157,7 +154,19 @@ public class VncViewer extends java.applet.Applet
       connectAndAuthenticate();
       doProtocolInitialisation();
 
-      vc = new VncCanvas(this);
+      // FIXME: Use auto-scaling not only in a separate frame.
+      if (options.autoScale && inSeparateFrame) {
+	Dimension screenSize;
+	try {
+	  screenSize = vncContainer.getToolkit().getScreenSize();
+	} catch (Exception e) {
+	  screenSize = new Dimension(0, 0);
+	}
+	createCanvas(screenSize.width - 32, screenSize.height - 32);
+      } else {
+	createCanvas(0, 0);
+      }
+
       gbc.weightx = 1.0;
       gbc.weighty = 1.0;
 
@@ -245,6 +254,33 @@ public class VncViewer extends java.applet.Applet
     
   }
 
+  //
+  // Create a VncCanvas instance.
+  //
+
+  void createCanvas(int maxWidth, int maxHeight) throws IOException {
+    // Determine if Java 2D API is available and use a special
+    // version of VncCanvas if it is present.
+    vc = null;
+    try {
+      // This throws ClassNotFoundException if there is no Java 2D API.
+      Class cl = Class.forName("java.awt.Graphics2D");
+      // If we could load Graphics2D class, then we can use VncCanvas2D.
+      cl = Class.forName("VncCanvas2");
+      Class[] argClasses = { this.getClass(), Integer.TYPE, Integer.TYPE };
+      java.lang.reflect.Constructor cstr = cl.getConstructor(argClasses);
+      Object[] argObjects =
+        { this, new Integer(maxWidth), new Integer(maxHeight) };
+      vc = (VncCanvas)cstr.newInstance(argObjects);
+    } catch (Exception e) {
+      System.out.println("Warning: Java 2D API is not available");
+    }
+
+    // If we failed to create VncCanvas2D, use old VncCanvas.
+    if (vc == null)
+      vc = new VncCanvas(this, maxWidth, maxHeight);
+  }
+
 
   //
   // Process RFB socket messages.
@@ -280,19 +316,6 @@ public class VncViewer extends java.applet.Applet
       validate();
     }
 
-    while (!tryAuthenticate()) {
-      authenticator.retry();
-      authenticatorUnixLogin.retry();
-    }
-  }
-
-
-  //
-  // Try to connect and authenticate.
-  //
-
-  boolean tryAuthenticate() throws Exception
-  {
     showConnectionStatus("Connecting to " + host + ", port " + port + "...");
 
     rfb = new RfbProto(host, port, this);
@@ -307,63 +330,33 @@ public class VncViewer extends java.applet.Applet
 			 rfb.clientMajor + "." + rfb.clientMinor);
 
     int secType = rfb.negotiateSecurity();
-    int authType = 0;
-
-    // FIXME: Map security types to authentication schemes in RfbProto.
-    switch (secType) {
-    case RfbProto.SecTypeNone:
-      authType = RfbProto.AuthNone;
-      break;
-    case RfbProto.SecTypeVncAuth:
-      authType = RfbProto.AuthVNC;
-      break;
-    case RfbProto.SecTypeTight:
+    int authType;
+    if (secType == RfbProto.SecTypeTight) {
       showConnectionStatus("Enabling TightVNC protocol extensions");
       rfb.initCapabilities();
       rfb.setupTunneling();
       authType = rfb.negotiateAuthenticationTight();
-      break;
-    default:
-      throw new Exception("Unknown security type " + secType);
+    } else {
+      authType = secType;
     }
-
-    boolean success = false;
 
     switch (authType) {
     case RfbProto.AuthNone:
       showConnectionStatus("No authentication needed");
-      success = true;
+      rfb.authenticateNone();
       break;
     case RfbProto.AuthVNC:
       showConnectionStatus("Performing standard VNC authentication");
-      if (authenticator.isInteractionNecessary()) {
-	showAuthPanel(authenticator);
-	authenticator.moveFocusToDefaultField();
-      }
-      success = authenticator.tryAuthenticate(rfb);
-      if (authenticator.isInteractionNecessary()) {
-	vncContainer.remove(authenticator);
+      if (passwordParam != null) {
+        rfb.authenticateVNC(passwordParam);
       } else {
-	// Don't retry non-interactive authentication.
-	if (!success)
-	  throw new Exception("VNC authentication failed");
+        String pw = askPassword();
+        rfb.authenticateVNC(pw);
       }
-      break;
-    case RfbProto.AuthUnixLogin:
-      showConnectionStatus("Performing Unix login-style authentication");
-      showAuthPanel(authenticatorUnixLogin);
-      authenticatorUnixLogin.moveFocusToDefaultField();
-      success = authenticatorUnixLogin.tryAuthenticate(rfb);
-      vncContainer.remove(authenticatorUnixLogin);
       break;
     default:
       throw new Exception("Unknown authentication scheme " + authType);
     }
-
-    if (!success)
-      rfb.close();
-
-    return success;
   }
 
 
@@ -414,9 +407,11 @@ public class VncViewer extends java.applet.Applet
   // Show an authentication panel.
   //
 
-  void showAuthPanel(Panel authPanel)
+  String askPassword() throws Exception
   {
     showConnectionStatus(null);
+
+    AuthPanel authPanel = new AuthPanel(this);
 
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.gridwidth = GridBagConstraints.REMAINDER;
@@ -433,6 +428,12 @@ public class VncViewer extends java.applet.Applet
     } else {
       validate();
     }
+
+    authPanel.moveFocusToDefaultField();
+    String pw = authPanel.getPassword();
+    vncContainer.remove(authPanel);
+
+    return pw;
   }
 
 
@@ -473,8 +474,8 @@ public class VncViewer extends java.applet.Applet
     if (preferredEncoding == -1) {
       long kbitsPerSecond = rfb.kbitsPerSecond();
       if (nEncodingsSaved < 1) {
-        // Choose Tight encoding for the very first update.
-        System.out.println("Using Tight encoding");
+        // Choose Tight or ZRLE encoding for the very first update.
+        System.out.println("Using Tight/ZRLE encodings");
         preferredEncoding = RfbProto.EncodingTight;
       } else if (kbitsPerSecond > 2000 &&
                  encodingsSaved[0] != RfbProto.EncodingHextile) {
@@ -484,9 +485,9 @@ public class VncViewer extends java.applet.Applet
         preferredEncoding = RfbProto.EncodingHextile;
       } else if (kbitsPerSecond < 1000 &&
                  encodingsSaved[0] != RfbProto.EncodingTight) {
-        // Switch to Tight if the connection speed is below 1Mbps.
+        // Switch to Tight/ZRLE if the connection speed is below 1Mbps.
         System.out.println("Throughput " + kbitsPerSecond +
-                           " kbit/s - changing to Tight encoding");
+                           " kbit/s - changing to Tight/ZRLE encodings");
         preferredEncoding = RfbProto.EncodingTight;
       } else {
         // Don't change the encoder.
@@ -508,11 +509,14 @@ public class VncViewer extends java.applet.Applet
       encodings[nEncodings++] = RfbProto.EncodingCopyRect;
     }
 
-    if (preferredEncoding != RfbProto.EncodingHextile) {
-      encodings[nEncodings++] = RfbProto.EncodingHextile;
-    }
     if (preferredEncoding != RfbProto.EncodingTight) {
       encodings[nEncodings++] = RfbProto.EncodingTight;
+    }
+    if (preferredEncoding != RfbProto.EncodingZRLE) {
+      encodings[nEncodings++] = RfbProto.EncodingZRLE;
+    }
+    if (preferredEncoding != RfbProto.EncodingHextile) {
+      encodings[nEncodings++] = RfbProto.EncodingHextile;
     }
     if (preferredEncoding != RfbProto.EncodingZlib) {
       encodings[nEncodings++] = RfbProto.EncodingZlib;
@@ -524,9 +528,9 @@ public class VncViewer extends java.applet.Applet
       encodings[nEncodings++] = RfbProto.EncodingRRE;
     }
 
-    if (options.compressLevel >= 0 && options.compressLevel <= 2) {
+    if (options.compressLevel >= 0 && options.compressLevel <= 3) {
       encodings[nEncodings++] =
-        RfbProto.EncodingJpegSubsamp444 + options.compressLevel;
+        RfbProto.EncodingJpegSubsamp1X + options.compressLevel;
     }
     if (options.jpegQuality >= 1 && options.jpegQuality <= 100) {
       encodings[nEncodings++] =
@@ -669,7 +673,7 @@ public class VncViewer extends java.applet.Applet
   // those expected in the html applet tag source.
   //
 
-  public void readParameters() {
+  void readParameters() {
     host = readParameter("HOST", !inAnApplet);
     if (host == null) {
       host = getCodeBase().getHost();
@@ -680,6 +684,9 @@ public class VncViewer extends java.applet.Applet
 
     String str = readParameter("PORT", true);
     port = Integer.parseInt(str);
+
+    // Read "ENCPASSWORD" or "PASSWORD" parameter if specified.
+    readPasswordParameters();
 
     if (inAnApplet) {
       str = readParameter("Open New Window", false);
@@ -713,6 +720,35 @@ public class VncViewer extends java.applet.Applet
 
     // SocketFactory.
     socketFactory = readParameter("SocketFactory", false);
+  }
+
+  //
+  // Read password parameters. If an "ENCPASSWORD" parameter is set,
+  // then decrypt the password into the passwordParam string. Otherwise,
+  // try to read the "PASSWORD" parameter directly to passwordParam.
+  //
+
+  private void readPasswordParameters() {
+    String encPasswordParam = readParameter("ENCPASSWORD", false);
+    if (encPasswordParam == null) {
+      passwordParam = readParameter("PASSWORD", false);
+    } else {
+      // ENCPASSWORD is hexascii-encoded. Decode.
+      byte[] pw = {0, 0, 0, 0, 0, 0, 0, 0};
+      int len = encPasswordParam.length() / 2;
+      if (len > 8)
+        len = 8;
+      for (int i = 0; i < len; i++) {
+        String hex = encPasswordParam.substring(i*2, i*2+2);
+        Integer x = new Integer(Integer.parseInt(hex, 16));
+        pw[i] = x.byteValue();
+      }
+      // Decrypt the password.
+      byte[] key = {23, 82, 107, 6, 35, 78, 88, 7};
+      DesCipher des = new DesCipher(key);
+      des.decrypt(pw, 0, pw, 0);
+      passwordParam = new String(pw);
+    }
   }
 
   public String readParameter(String name, boolean required) {
@@ -754,19 +790,13 @@ public class VncViewer extends java.applet.Applet
   }
 
   //
-  // moveFocusToDesktop() - move keyboard focus either to the
-  // VncCanvas or to the AuthPanel.
+  // moveFocusToDesktop() - move keyboard focus either to VncCanvas.
   //
 
   void moveFocusToDesktop() {
     if (vncContainer != null) {
-      if (vc != null && vncContainer.isAncestorOf(vc)) {
+      if (vc != null && vncContainer.isAncestorOf(vc))
 	vc.requestFocus();
-      } else if (vncContainer.isAncestorOf(authenticator)) {
-	authenticator.moveFocusToDefaultField();
-      } else if (vncContainer.isAncestorOf(authenticatorUnixLogin)) {
-	authenticatorUnixLogin.moveFocusToDefaultField();
-      }
     }
   }
 
@@ -920,21 +950,10 @@ public class VncViewer extends java.applet.Applet
   }
 
   //
-  // Move the keyboard focus to the password field on window activation.
-  //
-
-  public void windowActivated(WindowEvent evt) {
-    if (vncFrame.isAncestorOf(authenticator)) {
-      authenticator.moveFocusToDefaultField();
-    } else if (vncContainer.isAncestorOf(authenticatorUnixLogin)) {
-      authenticatorUnixLogin.moveFocusToDefaultField();
-    }
-  }
-
-  //
   // Ignore window events we're not interested in.
   //
 
+  public void windowActivated(WindowEvent evt) {}
   public void windowDeactivated (WindowEvent evt) {}
   public void windowOpened(WindowEvent evt) {}
   public void windowClosed(WindowEvent evt) {}
