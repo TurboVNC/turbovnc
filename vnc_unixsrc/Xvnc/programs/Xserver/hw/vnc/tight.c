@@ -498,15 +498,15 @@ SendSubrect(cl, x, y, w, h)
     fbptr = (rfbScreen.pfbMemory + (rfbScreen.paddedWidthInBytes * y)
              + (x * (rfbScreen.bitsPerPixel / 8)));
 
-    (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
-                       &cl->format, fbptr, tightBeforeBuf,
-                       rfbScreen.paddedWidthInBytes, w, h);
-
     if((rfbScreen.bitsPerPixel / 8) * w * h > JPEGTHRESHOLD
       || compressLevel == 3)
         success = SendJpegRect(cl, x, y, w, h, qualityLevel);
-    else
+    else {
+       (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
+                       &cl->format, fbptr, tightBeforeBuf,
+                       rfbScreen.paddedWidthInBytes, w, h);
         success = SendFullColorRect(cl, w, h);
+    }
 
     return success;
 }
