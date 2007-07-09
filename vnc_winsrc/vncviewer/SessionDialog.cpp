@@ -266,7 +266,6 @@ int SessionDialog::cmp(HWND hwnd)
 	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
 	if (m_pOpt->m_compressLevel != TVNC_4X) a = 0;
 	if (m_pOpt->m_jpegQualityLevel != 30) a = 0;
-	if (m_pOpt->m_optimizeForWAN != true) a = 0;
 	if (a == 1) {
 		SendMessage(hModemRadio, BM_CLICK, 0, 0);
 		return a;
@@ -281,7 +280,6 @@ int SessionDialog::cmp(HWND hwnd)
 	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
 	if (m_pOpt->m_compressLevel != TVNC_1X) a = 0;
 	if (m_pOpt->m_jpegQualityLevel != 95) a = 0;
-	if (m_pOpt->m_optimizeForWAN != false) a = 0;
 	if (a == 2) {
 		SendMessage(hLocNetRadio, BM_CLICK, 0, 0);
 		return a;
@@ -296,7 +294,6 @@ int SessionDialog::cmp(HWND hwnd)
 	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
 	if (m_pOpt->m_compressLevel != TVNC_1X) a = 0;
 	if (m_pOpt->m_jpegQualityLevel != 95) a = 0;
-	if (m_pOpt->m_optimizeForWAN != true) a = 0;
 	if (a == 3) {
 		SendMessage(hCustomRadio, BM_CLICK, 0, 0);
 		return a;
@@ -323,19 +320,16 @@ void SessionDialog::SetConnectionProfile(bool LowBandwidth, bool HighSpeed)
 		m_pOpt->m_PreferredEncoding = rfbEncodingTight;
 		m_pOpt->m_compressLevel = TVNC_1X;
 		m_pOpt->m_jpegQualityLevel = 95;
-		m_pOpt->m_optimizeForWAN = true;
 	}
 	if (LowBandwidth && !HighSpeed) {
 		m_pOpt->m_PreferredEncoding = rfbEncodingTight;
 		m_pOpt->m_compressLevel = TVNC_4X;
 		m_pOpt->m_jpegQualityLevel = 30;
-		m_pOpt->m_optimizeForWAN = true;
 	}
 	if (!LowBandwidth && HighSpeed) {
 		m_pOpt->m_PreferredEncoding = rfbEncodingTight;
 		m_pOpt->m_compressLevel = TVNC_1X;
 		m_pOpt->m_jpegQualityLevel = 95;
-		m_pOpt->m_optimizeForWAN = false;
 	}
 }
 	

@@ -81,7 +81,6 @@ public:
 	TCHAR   m_configFilename[_MAX_PATH];
 	unsigned char m_encPasswd[8];
 	bool	m_restricted;
-	bool	m_optimizeForWAN;
 
 	// default connection options - can be set through Dialog
 	bool	m_ViewOnly;

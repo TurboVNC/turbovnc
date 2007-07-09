@@ -160,7 +160,6 @@
 #define ID_SESSION_SET_CRECT            32777
 #define IDC_STATIC_SUBSAMP              32778
 #define IDC_STATIC_QUAL                 32779
-#define ID_SESSION_SET_WAN              32780
 #define ID_SESSION_SWAPMOUSE            32785
 #define ID_CLOSEDAEMON                  40001
 #define ID_SHOWWINDOW                   40004
