@@ -171,12 +171,12 @@ BEGIN
     COMBOBOX        IDC_HOSTNAME_EDIT,51,7,109,66,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "...",IDC_LOAD,164,7,16,13
-    CONTROL         "&Broadband (favor performance)",IDC_MODEM_RADIO,"Button",
+    CONTROL         "&Broadband/T1/Satellite",IDC_MODEM_RADIO,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,58,36,116,10
-    CONTROL         "Broadband (favor image &quality)",IDC_CUSTOM_RADIO,"Button",
-                    BS_AUTORADIOBUTTON,58,49,116,10
     CONTROL         "&High-Speed Network",IDC_LOC_NET_RADIO,"Button",
-                    BS_AUTORADIOBUTTON,58,62,116,10
+                    BS_AUTORADIOBUTTON,58,49,116,10
+    CONTROL         "&Gigabit Network (no compression)",IDC_CUSTOM_RADIO,"Button",
+                    BS_AUTORADIOBUTTON,58,62,120,10
     DEFPUSHBUTTON   "&Connect",IDC_OK,189,7,57,14,WS_GROUP
     PUSHBUTTON      "&Options...",IDC_OPTIONBUTTON,189,25,57,14
     PUSHBUTTON      "Cancel",IDCANCEL,189,43,57,14

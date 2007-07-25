@@ -196,7 +196,7 @@ BOOL CALLBACK SessionDialog::SessDlgProc(  HWND hwnd,  UINT uMsg,  WPARAM wParam
 			case BN_CLICKED:
 				// FIXME: Eliminate code duplication, see below
 				// (handle connection profiles in one place, in VNCOptions?)
-				_this->SetConnectionProfile(false, true);
+				_this->SetConnectionProfile(rfbEncodingTight, TVNC_1X, 95);
 				return TRUE;
 			}
 			return TRUE;
@@ -204,7 +204,7 @@ BOOL CALLBACK SessionDialog::SessDlgProc(  HWND hwnd,  UINT uMsg,  WPARAM wParam
 			switch (HIWORD(wParam)) {
 			case BN_CLICKED:
 				// FIXME: Eliminate code duplication, see above and below.
-				_this->SetConnectionProfile(true, false);
+				_this->SetConnectionProfile(rfbEncodingTight, TVNC_4X, 30);
 				return TRUE;
 			}
 			return TRUE;
@@ -212,7 +212,7 @@ BOOL CALLBACK SessionDialog::SessDlgProc(  HWND hwnd,  UINT uMsg,  WPARAM wParam
 			switch (HIWORD(wParam)) {
 			case BN_CLICKED:
 				// FIXME: Eliminate code duplication, see above.
-				_this->SetConnectionProfile(false, false);
+				_this->SetConnectionProfile(rfbEncodingRaw, -1, -1);
 				return TRUE;
 			}
 			return TRUE;
@@ -289,11 +289,9 @@ int SessionDialog::cmp(HWND hwnd)
 	for (i = rfbEncodingRaw; i <= LASTENCODING; i++)
 		if ((m_pOpt->m_UseEnc[i] != false) && (i != rfbEncodingTight
 			&& i != rfbEncodingRaw && i != rfbEncodingCopyRect)) a = 0;
-	if (m_pOpt->m_UseEnc[rfbEncodingTight] != true) a = 0;
+	if (m_pOpt->m_UseEnc[rfbEncodingRaw] != true) a = 0;
 	if (m_pOpt->m_UseEnc[rfbEncodingCopyRect] != true) a = 0;
-	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
-	if (m_pOpt->m_compressLevel != TVNC_1X) a = 0;
-	if (m_pOpt->m_jpegQualityLevel != 95) a = 0;
+	if (m_pOpt->m_PreferredEncoding != rfbEncodingRaw) a = 0;
 	if (a == 3) {
 		SendMessage(hCustomRadio, BM_CLICK, 0, 0);
 		return a;
@@ -307,7 +305,7 @@ int SessionDialog::cmp(HWND hwnd)
 	return a;
 }
 
-void SessionDialog::SetConnectionProfile(bool LowBandwidth, bool HighSpeed) 
+void SessionDialog::SetConnectionProfile(int encoding, int subsamp, int qual)
 {
 	for (int i = rfbEncodingRaw; i <= LASTENCODING; i++)
 		m_pOpt->m_UseEnc[i] = false;
@@ -316,21 +314,9 @@ void SessionDialog::SetConnectionProfile(bool LowBandwidth, bool HighSpeed)
 	m_pOpt->m_UseEnc[rfbEncodingTight] = true;
 	m_pOpt->m_UseEnc[rfbEncodingCopyRect] = true;
 
-	if (!LowBandwidth && !HighSpeed) {
-		m_pOpt->m_PreferredEncoding = rfbEncodingTight;
-		m_pOpt->m_compressLevel = TVNC_1X;
-		m_pOpt->m_jpegQualityLevel = 95;
-	}
-	if (LowBandwidth && !HighSpeed) {
-		m_pOpt->m_PreferredEncoding = rfbEncodingTight;
-		m_pOpt->m_compressLevel = TVNC_4X;
-		m_pOpt->m_jpegQualityLevel = 30;
-	}
-	if (!LowBandwidth && HighSpeed) {
-		m_pOpt->m_PreferredEncoding = rfbEncodingTight;
-		m_pOpt->m_compressLevel = TVNC_1X;
-		m_pOpt->m_jpegQualityLevel = 95;
-	}
+	m_pOpt->m_PreferredEncoding = encoding;
+	if(subsamp>=0) m_pOpt->m_compressLevel = subsamp;
+	if(qual>=1) m_pOpt->m_jpegQualityLevel = qual;
 }
 	
 	

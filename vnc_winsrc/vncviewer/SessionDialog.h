@@ -46,7 +46,7 @@ public:
     HKEY m_hRegKey;
 	
 private:
-	void SetConnectionProfile(bool LowBandwidth, bool HighSpeed);
+	void SetConnectionProfile(int encoding, int subsamp, int qual);
 	int cmp(HWND hwnd);
 	ClientConnection *m_cc;
 	VNCOptions *m_pOpt;
