@@ -797,7 +797,6 @@ QualHigh(Widget w, XEvent *e, String *s, Cardinal *c)
   appData.compressType=TVNC_JPEG;
   appData.compressLevel=TVNC_1X;
   appData.qualityLevel=95;
-  appData.optimizeForWAN=0;
   UpdateQual();
 }
 
@@ -810,23 +809,8 @@ QualLow(Widget w, XEvent *e, String *s, Cardinal *c)
   appData.compressType=TVNC_JPEG;
   appData.compressLevel=TVNC_4X;
   appData.qualityLevel=30;
-  appData.optimizeForWAN=1;
   UpdateQual();
 }
-
-/*
- * QualWAN
- */
-void
-QualWAN(Widget w, XEvent *e, String *s, Cardinal *c)
-{
-  appData.compressType=TVNC_JPEG;
-  appData.compressLevel=TVNC_1X;
-  appData.qualityLevel=95;
-  appData.optimizeForWAN=1;
-  UpdateQual();
-}
-
 
 /*
  * SendClientCutText.
@@ -897,9 +881,7 @@ HandleRFBServerMessage()
     int i;
     int usecs;
     XEvent ev;
-    Bool optimizeForWAN = appData.optimizeForWAN;
 
-    if (optimizeForWAN) {
     memset(&ev, 0, sizeof(ev));
     ev.xclient.type=ClientMessage;
     ev.xclient.window=XtWindow(desktop);
@@ -907,7 +889,6 @@ HandleRFBServerMessage()
     ev.xclient.format=8;
     strcpy(ev.xclient.data.b, "SendRFBUpdate");
     XSendEvent(dpy, XtWindow(desktop), False, 0, &ev);
-    }
 
     if (!ReadFromRFBServer(((char *)&msg.fu) + 1,
 			   sz_rfbFramebufferUpdateMsg - 1))
@@ -1114,11 +1095,6 @@ HandleRFBServerMessage()
     if (appData.useShm)
       XSync(dpy, False);
 #endif
-
-    if (!optimizeForWAN) {
-      if (!SendIncrementalFramebufferUpdateRequest()) 	 
-        return False;
-    }
 
     break;
   }

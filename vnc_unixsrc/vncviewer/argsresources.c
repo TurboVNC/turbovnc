@@ -87,8 +87,6 @@ char *fallback_resources[] = {
   "*compressRGB.label: None (RGB)",
   "*compressJPEG.label: JPEG",
 
-  "*wanopt.label: Optimize for High-Latency Network",
-
   "*popup.title: TurboVNC popup",
   "*popup*background: grey",
   "*popup*font: -*-helvetica-bold-r-*-*-16-*-*-*-*-*-*-*",
@@ -99,7 +97,7 @@ char *fallback_resources[] = {
   "*popup.buttonForm.translations: #override\\n\
      <KeyPress>: SendRFBEvent() HidePopup()",
 
-  "*popupButtonCount: 11",
+  "*popupButtonCount: 10",
 
   "*popup*button1.label: Dismiss popup",
   "*popup*button1.translations: #override\\n\
@@ -140,17 +138,13 @@ char *fallback_resources[] = {
   "*popup*button8.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: SendRFBEvent(key,F8) HidePopup()",
 
-  "*popup*button9.label: Preset: High-Speed Network (default)",
+  "*popup*button9.label: Preset: Broadband/T1/Satellite",
   "*popup*button9.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: QualHigh()",
-
-  "*popup*button10.label: Preset: Broadband (favor performance)",
-  "*popup*button10.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualLow()",
 
-  "*popup*button11.label: Preset: Broadband (favor image quality)",
-  "*popup*button11.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: QualWAN()",
+  "*popup*button10.label: Preset: High-Speed Network (default)",
+  "*popup*button10.translations: #override\\n\
+     <Btn1Down>,<Btn1Up>: QualHigh()",
 
   NULL
 };
@@ -243,9 +237,6 @@ static XtResource appDataResourceList[] = {
   {"doubleBuffer", "DoubleBuffer", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, doubleBuffer), XtRImmediate, (XtPointer) True},
 
-  {"optimizeForWAN", "OptimizeForWAN", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, optimizeForWAN), XtRImmediate, (XtPointer) False},
-
   {"autoPass", "AutoPass", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, autoPass), XtRImmediate, (XtPointer) False}
 };
@@ -272,7 +263,6 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-singlebuffer",  "*doubleBuffer",       XrmoptionNoArg,  "False"},
   {"-broadband",     "*qualityLevel",       XrmoptionNoArg,  "-1"},
   {"-autopass",      "*autoPass",           XrmoptionNoArg,  "True"},
-  {"-wan",           "*optimizeForWAN",     XrmoptionNoArg,  "True"},
 
 };
 
@@ -287,7 +277,6 @@ static XtActionsRec actions[] = {
     {"SendRFBEvent", SendRFBEvent},
     {"QualHigh", QualHigh},
     {"QualLow", QualLow},
-    {"QualWAN", QualWAN},
     {"ShowPopup", ShowPopup},
     {"HidePopup", HidePopup},
     {"ToggleFullScreen", ToggleFullScreen},
@@ -348,8 +337,7 @@ usage(void)
 	  "        -x11cursor\n"
 	  "        -autopass\n"
 	  "        -singlebuffer\n"
-	  "        -wan\n"
-	  "        -broadband (preset for -wan -samp 4 -quality 30)\n"
+	  "        -broadband (preset for -samp 4 -quality 30)\n"
 	  "\n"
 	  "Option names may be abbreviated, e.g. -q instead of -quality.\n"
 	  "See the manual page for more information."
@@ -383,7 +371,6 @@ GetArgsAndResources(int argc, char **argv)
   if(appData.qualityLevel==-1) {
     appData.qualityLevel=30;
     appData.compressLevel=TVNC_4X;
-    appData.optimizeForWAN=1;
   }
 
   /* Translate compression parameters */

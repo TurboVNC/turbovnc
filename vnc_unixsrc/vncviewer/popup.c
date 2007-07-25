@@ -32,7 +32,7 @@
 
 
 Widget popup, fullScreenToggle, button4X, button2X, button1X, buttonGray,
-  qualtext, qualslider, wanbutton, buttonRGB, buttonJPEG;
+  qualtext, qualslider, buttonRGB, buttonJPEG;
 
 
 void
@@ -95,7 +95,6 @@ UpdateQual(void)
     XtVaSetValues(button2X, XtNstate, 0, NULL);
     XtVaSetValues(button1X, XtNstate, 0, NULL);
   }
-  XtVaSetValues(wanbutton, XtNstate, appData.optimizeForWAN, NULL);
 }
 
 
@@ -190,14 +189,6 @@ void
 button1XProc(Widget w, XtPointer client, XtPointer p)
 {
   if((int)p==1) appData.compressLevel=TVNC_1X;
-  UpdateQual();
-}
-
-void
-wanbuttonProc(Widget w, XtPointer client, XtPointer p)
-{
-  if((int)p==1) appData.optimizeForWAN=1;
-	else appData.optimizeForWAN=0;
   UpdateQual();
 }
 
@@ -297,10 +288,5 @@ CreatePopup()
   XtVaSetValues(button1X, XtNfromVert, label, XtNfromHoriz, button2X,
     XtNradioGroup, buttonGray, NULL);
   XtAddCallback(button1X, XtNcallback, button1XProc, NULL);
-
-  wanbutton =  XtCreateManagedWidget("wanopt", toggleWidgetClass, buttonForm,
-    NULL, 0);
-  XtVaSetValues(wanbutton, XtNfromVert, buttonGray, XtNleft, XawChainLeft, NULL);
-  XtAddCallback(wanbutton, XtNcallback, wanbuttonProc, NULL);
 
 }
