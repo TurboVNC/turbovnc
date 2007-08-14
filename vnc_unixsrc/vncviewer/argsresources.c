@@ -97,7 +97,7 @@ char *fallback_resources[] = {
   "*popup.buttonForm.translations: #override\\n\
      <KeyPress>: SendRFBEvent() HidePopup()",
 
-  "*popupButtonCount: 10",
+  "*popupButtonCount: 12",
 
   "*popup*button1.label: Dismiss popup",
   "*popup*button1.translations: #override\\n\
@@ -125,8 +125,12 @@ char *fallback_resources[] = {
   "*popup*button6.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: SendRFBEvent(fbupdate) HidePopup()",
 
-  "*popup*button7.label: Send ctrl-alt-del",
+  "*popup*button7.label: Request lossless refresh",
   "*popup*button7.translations: #override\\n\
+     <Btn1Down>,<Btn1Up>: LosslessRefresh() HidePopup()",
+
+  "*popup*button8.label: Send ctrl-alt-del",
+  "*popup*button8.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: SendRFBEvent(keydown,Control_L)\
                           SendRFBEvent(keydown,Alt_L)\
                           SendRFBEvent(key,Delete)\
@@ -134,16 +138,20 @@ char *fallback_resources[] = {
                           SendRFBEvent(keyup,Control_L)\
                           HidePopup()",
 
-  "*popup*button8.label: Send F8",
-  "*popup*button8.translations: #override\\n\
+  "*popup*button9.label: Send F8",
+  "*popup*button9.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: SendRFBEvent(key,F8) HidePopup()",
 
-  "*popup*button9.label: Preset: Broadband/T1/Satellite",
-  "*popup*button9.translations: #override\\n\
+  "*popup*button10.label: Preset: Low Quality (Wide-Area Network)",
+  "*popup*button10.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualLow()",
 
-  "*popup*button10.label: Preset: High-Speed Network (default)",
-  "*popup*button10.translations: #override\\n\
+  "*popup*button11.label: Preset: Medium Quality",
+  "*popup*button11.translations: #override\\n\
+     <Btn1Down>,<Btn1Up>: QualMed()",
+
+  "*popup*button12.label: Preset: High Quality (High-Speed Network) [default]",
+  "*popup*button12.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualHigh()",
 
   NULL
@@ -261,7 +269,9 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-nocursorshape", "*useRemoteCursor",    XrmoptionNoArg,  "False"},
   {"-x11cursor",     "*useX11Cursor",       XrmoptionNoArg,  "True"},
   {"-singlebuffer",  "*doubleBuffer",       XrmoptionNoArg,  "False"},
-  {"-broadband",     "*qualityLevel",       XrmoptionNoArg,  "-1"},
+  {"-broadband",     "*quality",            XrmoptionNoArg,  "-1"},
+  {"-lowqual",       "*quality",            XrmoptionNoArg,  "-1"},
+  {"-medqual",       "*quality",            XrmoptionNoArg,  "-2"},
   {"-autopass",      "*autoPass",           XrmoptionNoArg,  "True"},
 
 };
@@ -277,6 +287,8 @@ static XtActionsRec actions[] = {
     {"SendRFBEvent", SendRFBEvent},
     {"QualHigh", QualHigh},
     {"QualLow", QualLow},
+    {"QualMed", QualMed},
+    {"LosslessRefresh", LosslessRefresh},
     {"ShowPopup", ShowPopup},
     {"HidePopup", HidePopup},
     {"ToggleFullScreen", ToggleFullScreen},
@@ -337,7 +349,8 @@ usage(void)
 	  "        -x11cursor\n"
 	  "        -autopass\n"
 	  "        -singlebuffer\n"
-	  "        -broadband (preset for -samp 4 -quality 30)\n"
+	  "        -lowqual (preset for -samp 4X -quality 30)\n"
+	  "        -medqual (preset for -samp 2X -quality 80)\n"
 	  "\n"
 	  "Option names may be abbreviated, e.g. -q instead of -quality.\n"
 	  "See the manual page for more information."
@@ -366,13 +379,6 @@ GetArgsAndResources(int argc, char **argv)
   XtGetApplicationResources(toplevel, &appData, appDataResourceList,
 			    XtNumber(appDataResourceList), 0, 0);
 
-  /* -broadband switch was used */
-
-  if(appData.qualityLevel==-1) {
-    appData.qualityLevel=30;
-    appData.compressLevel=TVNC_4X;
-  }
-
   /* Translate compression parameters */
   if (appData.encodingsString && (toupper(appData.encodingsString[0]) == 'R'
     || appData.encodingsString[0] == '0'))
@@ -387,6 +393,17 @@ GetArgsAndResources(int argc, char **argv)
       case '2':  appData.compressLevel=TVNC_2X;  break;
       case '4':  appData.compressLevel=TVNC_4X;  break;
     }
+  }
+
+  /* -lowqual switch was used */
+  if(appData.qualityLevel==-1) {
+    appData.qualityLevel=30;
+    appData.compressLevel=TVNC_4X;
+  }
+  /* -medqual switch was used */
+  else if(appData.qualityLevel==-2) {
+    appData.qualityLevel=80;
+    appData.compressLevel=TVNC_2X;
   }
 
   /* Add our actions to the actions table so they can be used in widget

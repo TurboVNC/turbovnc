@@ -691,10 +691,12 @@ SetFormatAndEncodings()
 					  rfbJpegSubsamp1X);
     }
 
+    if (appData.qualityLevel != -1) {
       if (appData.qualityLevel < 1 || appData.qualityLevel > 100)
 	appData.qualityLevel = 95;
       encs[se->nEncodings++] = Swap32IfLE(appData.qualityLevel +
 					  rfbJpegQualityLevel1 - 1);
+    }
 
     if (appData.useRemoteCursor) {
       encs[se->nEncodings++] = Swap32IfLE(rfbEncodingXCursor);
@@ -797,6 +799,18 @@ QualHigh(Widget w, XEvent *e, String *s, Cardinal *c)
   appData.compressType=TVNC_JPEG;
   appData.compressLevel=TVNC_1X;
   appData.qualityLevel=95;
+  UpdateQual();
+}
+
+/*
+ * QualMed
+ */
+void
+QualMed(Widget w, XEvent *e, String *s, Cardinal *c)
+{
+  appData.compressType=TVNC_JPEG;
+  appData.compressLevel=TVNC_2X;
+  appData.qualityLevel=80;
   UpdateQual();
 }
 
