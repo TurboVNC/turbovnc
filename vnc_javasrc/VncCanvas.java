@@ -372,8 +372,6 @@ class VncCanvas extends Canvas
 
     while (true) {
 
-      boolean wan = viewer.options.wan;
-
       // Read message type from the server.
       int msgType = rfb.readServerMessageType();
 
@@ -381,9 +379,7 @@ class VncCanvas extends Canvas
       switch (msgType) {
       case RfbProto.FramebufferUpdate:
 
-	if (wan) {
 	  dispatchEvent(new RFBUpdateEvent(this, RFBUpdateEvent.RFBUPDATE_FIRST));
-	}
 
 	rfb.readFramebufferUpdate();
 
@@ -472,12 +468,6 @@ class VncCanvas extends Canvas
 	}
 
         viewer.autoSelectEncodings();
-
-	if (!wan) {
-	  rfb.writeFramebufferUpdateRequest(0, 0, rfb.framebufferWidth,
-					    rfb.framebufferHeight,
-					    !fullUpdateNeeded);
-	}
 
 	break;
 
