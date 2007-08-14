@@ -172,7 +172,9 @@ extern void SendRFBEvent(Widget w, XEvent *event, String *params,
 extern void CopyDataToScreen(char *buf, int x, int y, int width, int height);
 extern void SynchroniseScreen();
 extern void QualHigh(Widget, XEvent *, String *, Cardinal *);
+extern void QualMed(Widget, XEvent *, String *, Cardinal *);
 extern void QualLow(Widget, XEvent *, String *, Cardinal *);
+extern void LosslessRefresh(Widget, XEvent *, String *, Cardinal *);
 
 /* dialogs.c */
 
