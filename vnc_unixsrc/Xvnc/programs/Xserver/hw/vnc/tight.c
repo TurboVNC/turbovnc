@@ -498,8 +498,8 @@ SendSubrect(cl, x, y, w, h)
     fbptr = (rfbScreen.pfbMemory + (rfbScreen.paddedWidthInBytes * y)
              + (x * (rfbScreen.bitsPerPixel / 8)));
 
-    if((rfbScreen.bitsPerPixel / 8) * w * h > JPEGTHRESHOLD
-      || compressLevel == 3)
+    if(((rfbScreen.bitsPerPixel / 8) * w * h > JPEGTHRESHOLD
+      || compressLevel == 3) && qualityLevel != -1)
         success = SendJpegRect(cl, x, y, w, h, qualityLevel);
     else {
        (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,

@@ -191,7 +191,7 @@ rfbNewClient(sock)
     cl->translateLookupTable = NULL;
 
     cl->tightCompressLevel = TIGHT_DEFAULT_COMPRESSION;
-    cl->tightQualityLevel = TIGHT_DEFAULT_QUALITY;
+    cl->tightQualityLevel = -1;
     for (i = 0; i < 4; i++)
         cl->zsActive[i] = FALSE;
 
@@ -660,7 +660,7 @@ rfbProcessClientNormalMessage(cl)
 	cl->enableCursorPosUpdates = FALSE;
 	cl->enableLastRectEncoding = FALSE;
 	cl->tightCompressLevel = TIGHT_DEFAULT_COMPRESSION;
-	cl->tightQualityLevel = TIGHT_DEFAULT_QUALITY;
+	cl->tightQualityLevel = -1;
 
 	for (i = 0; i < msg.se.nEncodings; i++) {
 	    if ((n = ReadExact(cl->sock, (char *)&enc, 4)) <= 0) {
