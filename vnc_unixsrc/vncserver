@@ -227,7 +227,7 @@ $cmd .= " -rfbport $vncPort";
 $cmd .= " -fp $fontPath" if ($fontPath);
 $cmd .= " -co $colorPath" if ($colorPath);
 $cmd .= " -nolisten local" if ($os eq "SunOS");
-$cmd .= " -deferupdate 0";
+$cmd .= " -deferupdate 1";
 
 foreach $arg (@ARGV) {
     $cmd .= " " . &quotedString($arg);
