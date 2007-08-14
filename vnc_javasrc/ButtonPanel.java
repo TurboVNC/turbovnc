@@ -36,6 +36,7 @@ class ButtonPanel extends Panel implements ActionListener {
   Button clipboardButton;
   Button ctrlAltDelButton;
   Button refreshButton;
+  Button losslessRefreshButton;
 
   ButtonPanel(VncViewer v) {
     viewer = v;
@@ -65,6 +66,10 @@ class ButtonPanel extends Panel implements ActionListener {
     refreshButton.setEnabled(false);
     add(refreshButton);
     refreshButton.addActionListener(this);
+    losslessRefreshButton = new Button("Lossless Refresh");
+    losslessRefreshButton.setEnabled(false);
+    add(losslessRefreshButton);
+    losslessRefreshButton.addActionListener(this);
   }
 
   //
@@ -75,6 +80,7 @@ class ButtonPanel extends Panel implements ActionListener {
     disconnectButton.setEnabled(true);
     clipboardButton.setEnabled(true);
     refreshButton.setEnabled(true);
+    losslessRefreshButton.setEnabled(true);
   }
 
   //
@@ -92,6 +98,7 @@ class ButtonPanel extends Panel implements ActionListener {
     clipboardButton.setEnabled(false);
     ctrlAltDelButton.setEnabled(false);
     refreshButton.setEnabled(false);
+    losslessRefreshButton.setEnabled(false);
 
     validate();
   }
@@ -145,6 +152,19 @@ class ButtonPanel extends Panel implements ActionListener {
 	RfbProto rfb = viewer.rfb;
 	rfb.writeFramebufferUpdateRequest(0, 0, rfb.framebufferWidth,
 					  rfb.framebufferHeight, false);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    } else if (evt.getSource() == losslessRefreshButton) {
+      try {
+	int qual = viewer.options.jpegQuality;
+	viewer.options.jpegQuality = -1;
+	viewer.setEncodings();
+	RfbProto rfb = viewer.rfb;
+	rfb.writeFramebufferUpdateRequest(0, 0, rfb.framebufferWidth,
+					  rfb.framebufferHeight, false);
+	viewer.options.jpegQuality = qual;
+	viewer.setEncodings();
       } catch (IOException e) {
         e.printStackTrace();
       }
