@@ -212,7 +212,7 @@ BOOL CALLBACK SessionDialog::SessDlgProc(  HWND hwnd,  UINT uMsg,  WPARAM wParam
 			switch (HIWORD(wParam)) {
 			case BN_CLICKED:
 				// FIXME: Eliminate code duplication, see above.
-				_this->SetConnectionProfile(rfbEncodingRaw, -1, -1);
+				_this->SetConnectionProfile(rfbEncodingTight, TVNC_2X, 80);
 				return TRUE;
 			}
 			return TRUE;
@@ -289,13 +289,16 @@ int SessionDialog::cmp(HWND hwnd)
 	for (i = rfbEncodingRaw; i <= LASTENCODING; i++)
 		if ((m_pOpt->m_UseEnc[i] != false) && (i != rfbEncodingTight
 			&& i != rfbEncodingRaw && i != rfbEncodingCopyRect)) a = 0;
-	if (m_pOpt->m_UseEnc[rfbEncodingRaw] != true) a = 0;
+	if (m_pOpt->m_UseEnc[rfbEncodingTight] != true) a = 0;
 	if (m_pOpt->m_UseEnc[rfbEncodingCopyRect] != true) a = 0;
-	if (m_pOpt->m_PreferredEncoding != rfbEncodingRaw) a = 0;
+	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
+	if (m_pOpt->m_compressLevel != TVNC_2X) a = 0;
+	if (m_pOpt->m_jpegQualityLevel != 80) a = 0;
 	if (a == 3) {
 		SendMessage(hCustomRadio, BM_CLICK, 0, 0);
 		return a;
 	}
+
 	if (a == 0) {
 		SendMessage(hLocNetRadio, BM_SETCHECK, 0, 0L);
 		SendMessage(hModemRadio, BM_SETCHECK, 0, 0L);

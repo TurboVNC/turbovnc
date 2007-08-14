@@ -171,12 +171,12 @@ BEGIN
     COMBOBOX        IDC_HOSTNAME_EDIT,51,7,109,66,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "...",IDC_LOAD,164,7,16,13
-    CONTROL         "&Broadband/T1/Satellite",IDC_MODEM_RADIO,"Button",
+    CONTROL         "&Low Qual (Wide-Area Network)",IDC_MODEM_RADIO,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,58,36,116,10
-    CONTROL         "&High-Speed Network",IDC_LOC_NET_RADIO,"Button",
+    CONTROL         "&Medium Qual",IDC_CUSTOM_RADIO,"Button",
                     BS_AUTORADIOBUTTON,58,49,116,10
-    CONTROL         "&Gigabit Network (no compression)",IDC_CUSTOM_RADIO,"Button",
-                    BS_AUTORADIOBUTTON,58,62,120,10
+    CONTROL         "&High Qual (High-Speed Network)",IDC_LOC_NET_RADIO,"Button",
+                    BS_AUTORADIOBUTTON,58,62,116,10
     DEFPUSHBUTTON   "&Connect",IDC_OK,189,7,57,14,WS_GROUP
     PUSHBUTTON      "&Options...",IDC_OPTIONBUTTON,189,25,57,14
     PUSHBUTTON      "Cancel",IDCANCEL,189,43,57,14
@@ -600,9 +600,9 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDC_LOC_NET_RADIO       "Choose compression and protocol settings appropriate for high-bandwidth, low-latency networks. Choose this profile if connecting over a local area network."
-    IDC_MODEM_RADIO         "Choose compression and protocol settings appropriate for low-bandwidth, high-latency networks (broadband, T1, satellite, etc.) when performance is more critical than image quality"
-    IDC_CUSTOM_RADIO        "Choose compression and protocol settings appropriate for low-bandwidth, high-latency networks (broadband, T1, satellite, etc.) when image quality is more critical than performance"
+    IDC_LOC_NET_RADIO       "Preset for JPEG quality 95 with no chrominance subsampling. This preset should produce no perceptible image compression artifacts for most applications. Use this on high-speed networks (such as Ethernet) or when image quality is critical"
+    IDC_MODEM_RADIO         "Preset for JPEG quality 30 with 4x chrominance subsampling. This produces very noticeable artifacts but requires only half the bandwidth of the Medium Quality preset. Use this on wide-area networks when performance is more critical than image quality"
+    IDC_CUSTOM_RADIO        "Preset for JPEG quality 80 with 2x chrominance subsampling. This produces some noticeable, minor image compression artifacts but requires only half the network bandwidth of the High Quality preset"
     IDC_OK                  "Connect to the specified VNC server."
     IDC_LIST_MODE           "Switch to listen mode and close the dialog box. The listening viewer will wait for incoming connections from VNC servers. To connect to a listening viewer, choose ""Add New Client..."" from the TurboVNC Server's tray menu."
     IDC_CHECK_MESSAGE       "If this option is set, the viewer will show a warning before switching to full-screen mode. The warning reminds you how to exit that mode."
