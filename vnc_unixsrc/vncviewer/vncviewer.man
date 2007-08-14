@@ -118,9 +118,9 @@ default.)
 \fB\-samp \fI1X | 2X | 4X | gray\fR
 Each pixel in a JPEG image is represented as a brightness (luminance)
 value and a color (chrominance) value. Chrominance subsampling discards
-every other chrominance value to reduce the image size, but it can
+some of the chrominance values to reduce the image size, but it can
 create visible compression artifacts. 4X subsampling provides the best
-compression but also the lowest quality, since it discards every other
+color compression but also the lowest quality, since it discards every other
 chrominance pixel in both X and Y directions. 2X subsampling discards every
 other chrominance pixel in only the X direction.  Grayscale subsampling
 discards the chrominance pixels altogether, leaving only luminance.
@@ -157,16 +157,24 @@ buffering makes TurboVNC behave more like other VNC implementations.
 Normally, you shouldn't need to change this setting unless
 something isn't working right.
 .TP
-\fB\-broadband\fR
-Preset for \fB\-subsamp 1 -quality 30\fR.
+\fB\-lowqual\fR
+Preset for \fB\-samp 4X -quality 30\fR.
 
-This preset sets the JPEG quality to a relatively low level, which will
-provide optimum performance on low-bandwidth connections by sacrificing
-image quality. The "broadband" quality preset maintains a
-usable image quality, but it will produce visible compression artifacts.
-You may need to increase the quality if you are doing work that
-requires a high level of detail. You can fine-tune the image quality
-by using TurboVNC's F8 popup menu.
+"Low Quality" mode sets the JPEG quality to about the lowest usable level.
+This provides optimal performance on low-bandwidth connections, such as
+broadband, but it will produce very noticeable image compression artifacts.
+You may need to increase the quality if you are doing work that requires a
+high level of detail, or you may wish to take advantage of TurboVNC's
+"Lossless Refresh" feature.
+.TP
+\fB\-medqual\fR
+Preset for \fB\-samp 2X -quality 80\fR.
+
+"Medium Quality" mode sets the JPEG quality to a level which balances
+performance with image quality. There will be some image compression artifacts
+in this mode, but they are generally minor and not very noticeable. This mode
+uses about half the network bandwidth of the default mode (Quality 95, no
+subsampling) and about twice the network bandwidth of the Low Quality mode.
 .SH RESOURCES
 X resources that \fBvncviewer\fR knows about, aside from the
 normal Xt resources, are as follows:
