@@ -335,6 +335,22 @@ SendRFBEvent(Widget w, XEvent *ev, String *params, Cardinal *num_params)
 
 
 /*
+ * LosslessRefresh
+ */
+void
+LosslessRefresh(Widget w, XEvent *ev, String *params, Cardinal *num_params)
+{
+	int qual = appData.qualityLevel;
+	appData.qualityLevel = -1;
+	SetFormatAndEncodings();
+	SendFramebufferUpdateRequest(0, 0, si.framebufferWidth,
+				     si.framebufferHeight, False);
+	appData.qualityLevel = qual;
+	SetFormatAndEncodings();
+}
+
+
+/*
  * CreateDotCursor.
  */
 
