@@ -22,6 +22,7 @@
 #define IDT_TRAYTIMER                   109
 #define ID_FULLSCREEN                   110
 #define ID_REQUEST_REFRESH              111
+#define ID_REQUEST_LOSSLESS_REFRESH     112
 #define IDD_SESSION_DLG                 135
 #define IDD_SERVINFO_DLG                137
 #define IDD_AUTH_DIALOG                 138

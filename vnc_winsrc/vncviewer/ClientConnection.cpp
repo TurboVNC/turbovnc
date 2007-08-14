@@ -451,6 +451,8 @@ void ClientConnection::CreateDisplay()
 				   _T("Connection &info\tCtrl-Alt-Shift-I"));
 		AppendMenu(hsysmenu, MF_STRING, ID_REQUEST_REFRESH,
 				   _T("Request screen &refresh\tCtrl-Alt-Shift-R"));
+		AppendMenu(hsysmenu, MF_STRING, ID_REQUEST_LOSSLESS_REFRESH,
+				   _T("Request &lossless refresh\tCtrl-Alt-Shift-L"));
 		AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
 		AppendMenu(hsysmenu, MF_STRING, ID_FULLSCREEN,
 				   _T("&Full screen\tCtrl-Alt-Shift-F"));
@@ -553,48 +555,53 @@ HWND ClientConnection::CreateToolbar()
 	but[i].fsState		= TBSTATE_ENABLED;
 	but[i++].fsStyle	= TBSTYLE_BUTTON;
 
+	but[i].iBitmap		= 4;
+	but[i].idCommand	= ID_REQUEST_LOSSLESS_REFRESH;
+	but[i].fsState		= TBSTATE_ENABLED;
+	but[i++].fsStyle	= TBSTYLE_BUTTON;
+
 	but[i++].fsStyle	= TBSTYLE_SEP;
 
-	but[i].iBitmap		= 4;
+	but[i].iBitmap		= 5;
 	but[i].idCommand	= ID_CONN_CTLALTDEL;
 	but[i].fsState		= TBSTATE_ENABLED;
 	but[i++].fsStyle	= TBSTYLE_BUTTON;
 
-	but[i].iBitmap		= 5;
+	but[i].iBitmap		= 6;
 	but[i].idCommand	= ID_CONN_CTLESC;
 	but[i].fsState		= TBSTATE_ENABLED;
 	but[i++].fsStyle	= TBSTYLE_BUTTON;
 
-	but[i].iBitmap		= 6;
+	but[i].iBitmap		= 7;
 	but[i].idCommand	= ID_CONN_CTLDOWN;
 	but[i].fsState		= TBSTATE_ENABLED;
 	but[i++].fsStyle	= TBSTYLE_CHECK;
 
-	but[i].iBitmap		= 7;
+	but[i].iBitmap		= 8;
 	but[i].idCommand	= ID_CONN_ALTDOWN;
 	but[i].fsState		= TBSTATE_ENABLED;
 	but[i++].fsStyle	= TBSTYLE_CHECK;
 
 	but[i++].fsStyle	= TBSTYLE_SEP;
 
-	but[i].iBitmap		= 8;
+	but[i].iBitmap		= 9;
 	but[i].idCommand	= IDD_FILETRANSFER;
 	but[i].fsState		= TBSTATE_INDETERMINATE;
 	but[i++].fsStyle	= TBSTYLE_BUTTON;
 
 	but[i++].fsStyle	= TBSTYLE_SEP;
 
-	but[i].iBitmap		= 9;
+	but[i].iBitmap		= 10;
 	but[i].idCommand	= ID_NEWCONN;
 	but[i].fsState		= TBSTATE_ENABLED;
 	but[i++].fsStyle	= TBSTYLE_BUTTON;
 
-	but[i].iBitmap		= 10;
+	but[i].iBitmap		= 11;
 	but[i].idCommand	= ID_CONN_SAVE_AS;
 	but[i].fsState		= TBSTATE_ENABLED;
 	but[i++].fsStyle	= TBSTYLE_BUTTON;
 
-	but[i].iBitmap		= 11;
+	but[i].iBitmap		= 12;
 	but[i].idCommand	= ID_DISCONNECT;
 	but[i].fsState		= TBSTATE_ENABLED;
 	but[i++].fsStyle	= TBSTYLE_BUTTON;
@@ -1833,6 +1840,9 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 		case ID_REQUEST_REFRESH:
 			TTStr->lpszText = "Request screen refresh";
 			break;
+		case ID_REQUEST_LOSSLESS_REFRESH:
+			TTStr->lpszText = "Request lossless refresh";
+			break;
 		case ID_CONN_CTLALTDEL:
 			TTStr->lpszText = "Send Ctrl-Alt-Del";
 			break;
@@ -1946,6 +1956,16 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 			// Request a full-screen update
 			_this->SendFullFramebufferUpdateRequest();
 			return 0;
+		case ID_REQUEST_LOSSLESS_REFRESH: 
+		{
+			int qual = _this->m_opts.m_jpegQualityLevel;
+			_this->m_opts.m_jpegQualityLevel = -1;
+			_this->SetFormatAndEncodings();
+			_this->SendFullFramebufferUpdateRequest();
+			_this->m_opts.m_jpegQualityLevel = qual;
+			_this->SetFormatAndEncodings();
+			return 0;
+		}
 		case ID_CONN_CTLESC:
 			_this->SendKeyEvent(XK_Control_L, true);
 			_this->SendKeyEvent(XK_Escape,     true);

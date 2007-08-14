@@ -48,6 +48,10 @@ HotKeys::HotKeys()
 	accel[i++].cmd = ID_REQUEST_REFRESH;
 
 	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+	accel[i].key = 0x4C;	// "L"
+	accel[i++].cmd = ID_REQUEST_LOSSLESS_REFRESH;
+
+	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
 	accel[i].key = 0x4e;	// "N"
 	accel[i++].cmd = ID_NEWCONN;
 
