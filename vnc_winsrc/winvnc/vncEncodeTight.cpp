@@ -63,6 +63,8 @@ const TIGHT_CONF vncEncodeTight::m_conf[1] = {
 	{ 65536, 2048,  32,  8192, 9, 9, 9, 6, 200, 500,  96, 80,   200,   500 }
 };
 
+#define JPEGTHRESHOLD 1024
+
 static const int compressLevel2subsamp[4] = {
     TJ_444, TJ_411, TJ_422, TJ_GRAYSCALE
 };
@@ -459,8 +461,17 @@ vncEncodeTight::EncodeSubrect(BYTE *source, VSocket *outConn, BYTE *dest,
 	RECT r;
 	r.left = x; r.top = y;
 	r.right = x + w; r.bottom = y + h;
-	Translate(source, m_buffer, r);
 
+	int encDataSize;
+	if ( ((m_localformat.bitsPerPixel/8) * w * h > JPEGTHRESHOLD
+		|| m_compresslevel == TVNC_GRAY) && m_qualitylevel != -1)
+		encDataSize = SendJpegRect(source, dest, x, y, w, h, m_qualitylevel);
+	else {
+		Translate(source, m_buffer, r);
+		encDataSize = SendFullColorRect(dest, w, h);
+	}
+
+#if 0
 	m_paletteMaxColors = w * h / m_conf[0].idxMaxColorsDivisor;
 	if ( m_paletteMaxColors < 2 &&
 		 w * h >= m_conf[0].monoMinRectSize ) {
@@ -476,10 +487,7 @@ vncEncodeTight::EncodeSubrect(BYTE *source, VSocket *outConn, BYTE *dest,
 	default:
 		FillPalette32(w * h);
 	}
-	int encDataSize;
-	encDataSize = SendJpegRect(source, dest, x, y, w, h, m_qualitylevel);
 
-#if 0
 	switch (m_paletteNumColors) {
 	case 0:
 		// Truecolor image

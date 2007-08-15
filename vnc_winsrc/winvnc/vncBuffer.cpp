@@ -58,7 +58,7 @@ vncBuffer::vncBuffer(vncDesktop *desktop)
 	m_hold_zlibhex_encoder = NULL;
 
 	m_compresslevel = TVNC_1X;
-	m_qualitylevel = 95;
+	m_qualitylevel = -1;
 	m_use_xcursor = FALSE;
 	m_use_richcursor = FALSE;
 	m_use_lastrect = FALSE;
@@ -425,7 +425,7 @@ vncBuffer::SetCompressLevel(int level)
 void
 vncBuffer::SetQualityLevel(int level)
 {
-	m_qualitylevel = (level >= 1 && level <= 100) ? level : 95;
+	m_qualitylevel = (level >= 1 && level <= 100) ? level : -1;
 	if (m_encoder != NULL)
 		m_encoder->SetQualityLevel(m_qualitylevel);
 }

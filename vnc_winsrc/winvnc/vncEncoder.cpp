@@ -48,7 +48,7 @@ vncEncoder::vncEncoder()
 	m_localpalette = NULL;
 	m_bytesPerRow = 0;
 	m_compresslevel = TVNC_1X;
-	m_qualitylevel = 95;
+	m_qualitylevel = -1;
 	m_use_xcursor = FALSE;
 	m_use_richcursor = FALSE;
 	m_use_lastrect = FALSE;
@@ -433,7 +433,7 @@ vncEncoder::SetCompressLevel(int level)
 void
 vncEncoder::SetQualityLevel(int level)
 {
-	m_qualitylevel = (level >= 0 && level <= 100) ? level : 95;
+	m_qualitylevel = (level >= 0 && level <= 100) ? level : -1;
 }
 
 //

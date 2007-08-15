@@ -874,7 +874,7 @@ vncClientThread::run(void *arg)
 				break;
 			}
 
-			m_client->m_buffer->SetQualityLevel(95);
+			m_client->m_buffer->SetQualityLevel(-1);
 			m_client->m_buffer->SetCompressLevel(TVNC_1X);
 			m_client->m_buffer->EnableXCursor(FALSE);
 			m_client->m_buffer->EnableRichCursor(FALSE);
