@@ -222,6 +222,14 @@ vncEncodeTight::EncodeRect(BYTE *source, VSocket *outConn, BYTE *dest,
 
 			if (CheckSolidTile(source, dx, dy, dw, dh, &colorValue, FALSE)) {
 
+				if(m_compresslevel == TVNC_GRAY) {
+					CARD32 r=(colorValue>>16)&0xFF;
+					CARD32 g=(colorValue>>8)&0xFF;
+					CARD32 b=(colorValue)&0xFF;
+					double y=(0.257*(double)r)+(0.504*(double)g)+(0.098*(double)b)+16.;
+					colorValue=(int)y+(((int)y)<<8)+(((int)y)<<16);
+				}
+
 				// Get dimensions of solid-color area.
 
 				FindBestSolidArea(source, dx, dy, w - (dx - x), h - (dy - y),
