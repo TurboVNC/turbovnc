@@ -600,9 +600,9 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDC_LOC_NET_RADIO       "Preset for JPEG quality 95 with no chrominance subsampling. This preset should produce no perceptible image compression artifacts for most applications. Use this on high-speed networks (such as Ethernet) or when image quality is critical"
-    IDC_MODEM_RADIO         "Preset for JPEG quality 30 with 4x chrominance subsampling. This produces very noticeable artifacts but requires only half the bandwidth of the Medium Quality preset. Use this on wide-area networks when performance is more critical than image quality"
-    IDC_CUSTOM_RADIO        "Preset for JPEG quality 80 with 2x chrominance subsampling. This produces some noticeable, minor image compression artifacts but requires only half the network bandwidth of the High Quality preset"
+    IDC_LOC_NET_RADIO       "Preset for JPEG quality 95 with no chrominance subsampling. This profile should produce no perceptible image compression artifacts for most applications. Use this on high-speed networks (such as Ethernet) or when image quality is critical."
+    IDC_MODEM_RADIO         "Preset for JPEG quality 30 with 4x chrominance subsampling. This produces very noticeable artifacts but requires only half the bandwidth of the Medium Quality profile. Use this on wide-area networks when performance is more critical than image quality."
+    IDC_CUSTOM_RADIO        "Preset for JPEG quality 80 with 2x chrominance subsampling. This produces some minor image compression artifacts but requires only half the network bandwidth of the High Quality profile."
     IDC_OK                  "Connect to the specified VNC server."
     IDC_LIST_MODE           "Switch to listen mode and close the dialog box. The listening viewer will wait for incoming connections from VNC servers. To connect to a listening viewer, choose ""Add New Client..."" from the TurboVNC Server's tray menu."
     IDC_CHECK_MESSAGE       "If this option is set, the viewer will show a warning before switching to full-screen mode. The warning reminds you how to exit that mode."
