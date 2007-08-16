@@ -228,7 +228,7 @@ static XtResource appDataResourceList[] = {
    XtOffsetOf(AppData, bumpScrollPixels), XtRImmediate, (XtPointer) 20},
 
   {"subsampling", "Subsampling", XtRString, sizeof(String),
-   XtOffsetOf(AppData, subsampString), XtRImmediate, (XtPointer) "1X"},
+   XtOffsetOf(AppData, subsampString), XtRImmediate, (XtPointer) "1x"},
 
   {"quality", "Quality", XtRInt, sizeof(int),
    XtOffsetOf(AppData, qualityLevel), XtRImmediate, (XtPointer) 95},
@@ -343,14 +343,14 @@ usage(void)
 	  "        -passwd <PASSWD-FILENAME> (standard VNC authentication)\n"
 	  "        -nocopyrect\n"
 	  "        -compress <IMAGE COMPRESSION TYPE> (jpeg | rgb)\n"
-	  "        -samp <JPEG CHROMINANCE SUBSAMPLING> (1X | 2X | 4X | gray)\n"
+	  "        -samp <JPEG CHROMINANCE SUBSAMPLING> (1x | 2x | 4x | gray)\n"
 	  "        -quality <JPEG IMAGE QUALITY> (1..100: 1-low, 100-high)\n"
 	  "        -nocursorshape\n"
 	  "        -x11cursor\n"
 	  "        -autopass\n"
 	  "        -singlebuffer\n"
-	  "        -lowqual (preset for -samp 4X -quality 30)\n"
-	  "        -medqual (preset for -samp 2X -quality 80)\n"
+	  "        -lowqual (preset for -samp 4x -quality 30)\n"
+	  "        -medqual (preset for -samp 2x -quality 80)\n"
 	  "\n"
 	  "Option names may be abbreviated, e.g. -q instead of -quality.\n"
 	  "See the manual page for more information."
