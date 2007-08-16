@@ -169,8 +169,7 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
         usePixelFormat24 = FALSE;
     }
 
-    if (!cl->enableLastRectEncoding || w * h < MIN_SPLIT_RECT_SIZE
-        || compressLevel == 3)
+    if (!cl->enableLastRectEncoding || w * h < MIN_SPLIT_RECT_SIZE)
         return SendRectSimple(cl, x, y, w, h);
 
     /* Make sure we can write at least one pixel into tightBeforeBuf. */
@@ -217,6 +216,15 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
                 MAX_SPLIT_TILE_SIZE : (x + w - dx);
 
             if (CheckSolidTile(dx, dy, dw, dh, &colorValue, FALSE)) {
+
+                if (compressLevel == 3) {
+		    CARD32 r=(colorValue>>16)&0xFF;
+		    CARD32 g=(colorValue>>8)&0xFF;
+		    CARD32 b=(colorValue)&0xFF;
+		    double y=(0.257*(double)r)+(0.504*(double)g)
+		        +(0.098*(double)b)+16.;
+		    colorValue=(int)y+(((int)y)<<8)+(((int)y)<<16);
+		}
 
                 /* Get dimensions of solid-color area. */
 
