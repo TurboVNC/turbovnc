@@ -53,37 +53,37 @@ BEGIN
     PUSHBUTTON      "&Cancel",IDCANCEL,77,61,50,14
 END
 
-IDD_OPTIONDIALOG DIALOG DISCARDABLE  0, 0, 300, 179
+IDD_OPTIONDIALOG DIALOG DISCARDABLE  0, 0, 300, 192
 STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
-    GROUPBOX        "Image protocol",IDC_STATIC_FORMAT,4,4,123,130
-    LTEXT           "Compression:",IDC_STATIC_ENCODING,12,15,49,10,
+    GROUPBOX        "Image delivery",IDC_STATIC_FORMAT,4,4,123,143
+    LTEXT           "Image compression type:",IDC_STATIC_ENCODING,12,15,109,10,
                     SS_CENTERIMAGE
-    COMBOBOX        IDC_ENCODING,65,14,56,79,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_ENCODING,20,27,56,79,CBS_DROPDOWNLIST | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    CHECKBOX        "Double buffering",IDC_DBCHECK,12,29,109,10, WS_GROUP
-    LTEXT           "JPEG Chrominance Subsampling:",IDC_STATIC_SUBSAMP,12,
-                    41,109,10
-    RTEXT           "fast",IDC_STATIC_FAST,12,55,18,10
+    CHECKBOX        "Double buffering",IDC_DBCHECK,12,42,109,10, WS_GROUP
+    LTEXT           "JPEG chrominance subsampling:",IDC_STATIC_SUBSAMP,12,
+                    54,109,10
+    RTEXT           "fast",IDC_STATIC_FAST,12,68,18,10
     CONTROL         "Slider2",IDC_COMPRESSLEVEL,"msctls_trackbar32",
-                    TBS_AUTOTICKS | WS_TABSTOP,31,54,72,12
-    LTEXT           "best",IDC_STATIC_BEST,103,55,18,10
-    RTEXT           "Subsampling:",IDC_STATIC_TEXT_LEVEL,35,68,43,10
-    LTEXT           "None",IDC_STATIC_LEVEL,83,68,28,10
-    LTEXT           "JPEG Image Quality:",IDC_STATIC_QUAL,12,80,109,10
-    RTEXT           "poor",IDC_STATIC_POOR,12,94,18,10
+                    TBS_AUTOTICKS | WS_TABSTOP,31,67,72,12
+    LTEXT           "best",IDC_STATIC_BEST,103,68,18,10
+    RTEXT           "Subsampling:",IDC_STATIC_TEXT_LEVEL,35,81,43,10
+    LTEXT           "None",IDC_STATIC_LEVEL,83,81,28,10
+    LTEXT           "JPEG image quality:",IDC_STATIC_QUAL,12,93,109,10
+    RTEXT           "poor",IDC_STATIC_POOR,12,107,18,10
     CONTROL         "Slider1",IDC_QUALITYLEVEL,"msctls_trackbar32",
-                    TBS_AUTOTICKS | WS_TABSTOP,31,93,72,12
-    LTEXT           "best",IDC_STATIC_QBEST,103,94,18,10
-    RTEXT           "Quality:",IDC_STATIC_TEXT_QUALITY,31,107,42,10
-    LTEXT           "1",IDC_STATIC_QUALITY,78,107,25,10
+                    TBS_AUTOTICKS | WS_TABSTOP,31,106,72,12
+    LTEXT           "best",IDC_STATIC_QBEST,103,107,18,10
+    RTEXT           "Quality:",IDC_STATIC_TEXT_QUALITY,31,120,42,10
+    LTEXT           "1",IDC_STATIC_QUALITY,78,120,25,10
     CONTROL         "Allow CopyRect encoding",ID_SESSION_SET_CRECT,"Button",
-                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,12,119,109,10
-    GROUPBOX        "Restrictions",IDC_STATIC_RESTRICTIONS,4,137,123,38
-    CHECKBOX        "View only (inputs ignored)",IDC_VIEWONLY,12,148,109,10
+                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,12,132,109,10
+    GROUPBOX        "Restrictions",IDC_STATIC_RESTRICTIONS,4,150,123,38
+    CHECKBOX        "View only (inputs ignored)",IDC_VIEWONLY,12,161,109,10
     CONTROL         "Disable clipboard transfer",IDC_DISABLECLIPBOARD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,12,160,109,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,12,173,109,10
     GROUPBOX        "Display",IDC_STATIC_DISPLAY,136,4,160,52
     LTEXT           "Scale by:",IDC_STATIC_SCALE,145,15,36,10,SS_CENTERIMAGE
     COMBOBOX        IDC_SCALE_EDIT,181,14,36,85,CBS_DROPDOWN | 
@@ -269,15 +269,15 @@ BEGIN
                     WS_VSCROLL | WS_HSCROLL
 END
 
-IDD_PARENT DIALOGEX 0, 0, 316, 225
+IDD_PARENT DIALOGEX 0, 0, 316, 238
 STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTEXTHELP | WS_EX_CONTROLPARENT
 CAPTION "TurboVNC Viewer Options"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    PUSHBUTTON      "&OK",IDOK,206,206,50,14
-    PUSHBUTTON      "&Cancel",IDCANCEL,261,206,50,14
-    CONTROL         "Tab1",IDC_TAB,"SysTabControl32",WS_TABSTOP,5,5,306,197
+    PUSHBUTTON      "&OK",IDOK,206,219,50,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,261,219,50,14
+    CONTROL         "Tab1",IDC_TAB,"SysTabControl32",WS_TABSTOP,5,5,306,210
 END
 
 IDD_CONNECTING_DIALOG DIALOG DISCARDABLE  0, 0, 210, 61
