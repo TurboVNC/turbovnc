@@ -160,21 +160,22 @@ something isn't working right.
 \fB\-lowqual\fR
 Preset for \fB\-samp 4X -quality 30\fR.
 
-"Low Quality" mode sets the JPEG quality to about the lowest usable level.
-This provides optimal performance on low-bandwidth connections, such as
-broadband, but it will produce very noticeable image compression artifacts.
-You may need to increase the quality if you are doing work that requires a
-high level of detail, or you may wish to take advantage of TurboVNC's
-"Lossless Refresh" feature.
+The "Low Quality" connection profile sets the JPEG quality to about the lowest
+usable level. This provides optimal performance on low-bandwidth connections,
+such as broadband, but it will produce very noticeable image compression
+artifacts. You may need to increase the quality if you are doing work that
+requires a high level of detail, or you may wish to take advantage of
+TurboVNC's "Lossless Refresh" feature.
 .TP
 \fB\-medqual\fR
 Preset for \fB\-samp 2X -quality 80\fR.
 
-"Medium Quality" mode sets the JPEG quality to a level which balances
-performance with image quality. There will be some image compression artifacts
-in this mode, but they are generally minor and not very noticeable. This mode
-uses about half the network bandwidth of the default mode (Quality 95, no
-subsampling) and about twice the network bandwidth of the Low Quality mode.
+The "Medium Quality" connection profile sets the JPEG quality to a level which
+balances performance with image quality. This produces some image compression
+artifacts, but they are generally minor and not very noticeable. This profile
+uses about half the network bandwidth of the default profile (Quality 95, no
+subsampling) and about twice the network bandwidth of the "Low Quality"
+profile.
 .SH RESOURCES
 X resources that \fBvncviewer\fR knows about, aside from the
 normal Xt resources, are as follows:
