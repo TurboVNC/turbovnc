@@ -142,15 +142,15 @@ char *fallback_resources[] = {
   "*popup*button9.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: SendRFBEvent(key,F8) HidePopup()",
 
-  "*popup*button10.label: Preset: Low Quality (Wide-Area Network)",
+  "*popup*button10.label: Connection profile: Low Quality (Wide-Area Network)",
   "*popup*button10.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualLow()",
 
-  "*popup*button11.label: Preset: Medium Quality",
+  "*popup*button11.label: Connection profile: Medium Quality",
   "*popup*button11.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualMed()",
 
-  "*popup*button12.label: Preset: High Quality (High-Speed Network) [default]",
+  "*popup*button12.label: Connection profile: High Quality (High-Speed Network)",
   "*popup*button12.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualHigh()",
 
