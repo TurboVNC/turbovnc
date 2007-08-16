@@ -65,7 +65,7 @@ char *fallback_resources[] = {
   "*passwordDialog.dialog.value.translations: #override\\n\
      <Key>Return: PasswordDialogDone()",
 
-  "*qualLabel.label: JPEG Quality",
+  "*qualLabel.label: JPEG Image Quality",
   "*qualBar.length: 100",
   "*qualBar.width: 130",
   "*qualBar.orientation: horizontal",
