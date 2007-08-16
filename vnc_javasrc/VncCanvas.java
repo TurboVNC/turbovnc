@@ -29,22 +29,6 @@ import java.io.*;
 import java.lang.*;
 import java.util.zip.*;
 
-class RFBUpdateEvent extends AWTEvent {
-
-  public static final int RFBUPDATE_FIRST = AWTEvent.RESERVED_ID_MAX + 1;
-  public static final int RFBUPDATE_LAST = RFBUPDATE_FIRST;
-
-  public RFBUpdateEvent (Component source, int id) {
-    super(source, id);
-  }
-
-  public String paramString() {
-    String s = "SendRFBUpdate";
-    return s;
-  }
-
-}
-
 //
 // VncCanvas is a subclass of Canvas which draws a VNC desktop on it.
 //
