@@ -1,4 +1,77 @@
 ===============================================================================
+Significant changes between 0.3.3 and 0.4
+===============================================================================
+[1]
+Added relevant patches from TightVNC 1.3.9
+-------------------------------------------------------------------------------
+[2]
+Added lossless refresh feature, which instructs the server to send a
+mathematically lossless (Zlib-encoded RGB) copy of the current screen.  This
+feature does not currently work with the Windows TurboVNC server, because the
+Windows TurboVNC server processes framebuffer update requests asynchronously.
+-------------------------------------------------------------------------------
+[3]
+Modified /opt/TurboVNC/bin/vncserver so that it invokes Xvnc with the arguments
+'-deferupdate 1'.  This sets the deferred update timer to 1 ms rather than its
+default value of 40 ms, which has two effects:
+
+(a) It improves the performance of Solaris TurboVNC servers dramatically when
+connecting to them over a high-speed network.
+
+(b) It eliminates the need for the "High-Latency Network" switch in the
+TurboVNC Viewer.  In prior versions of TurboVNC, leaving this switch on when
+connecting over a high-speed network incurred a severe performance penalty.
+Since this is no longer the case, the switch is left on all the time and is no
+longer configurable.
+
+NOTE:  The performance penalty described in (b) will still be incurred when
+connecting a TurboVNC 0.4 viewer to an older (pre-0.4) TurboVNC server over a
+high-speed network.  Start the server with
+'/opt/TurboVNC/bin/vncserver -deferupdate 1' to avoid this, or simply upgrade
+the server to 0.4.
+-------------------------------------------------------------------------------
+[4]
+Added an option for lossless (uncompressed RGB) image encoding.  This is useful
+for reducing CPU usage on the server and client (at the expense of increased
+network usage) when connecting over a gigabit (or faster) network.
+-------------------------------------------------------------------------------
+[5]
+Added a "Medium Quality" connection profile to the Windows, Unix, and Java
+TurboVNC Viewers (and subsequently removed the "Broadband (favor image
+quality)" profile, which is no longer necessary due to [3].)  The "Medium
+Quality" profile sets the JPEG quality to 80 with 2X chrominance subsampling,
+which (on average) should use about half the bandwidth of the "High Quality"
+profile (quality=95, no subsampling) and twice the bandwidth of the "Low
+Quality" profile (quality=30, 4x subsampling.)
+-------------------------------------------------------------------------------
+[6]
+Added an additional subsampling option to enable grayscale JPEG encoding.
+This provides additional bandwidth savings over and above chrominance
+subsampling, since grayscale throws away all chrominance pixels.  It is
+potentially useful when working with applications that already render grayscale
+images (medical imaging, etc.)
+-------------------------------------------------------------------------------
+[7]
+Fixed embedded Java viewer on Windows TurboVNC servers (.jar file did not
+include all of the necessary classes)
+-------------------------------------------------------------------------------
+[8]
+Created symlink from /opt/TurboVNC to /opt/SUNWtvnc in the Solaris packages so
+that Solaris and Linux would have a consistent interface.
+-------------------------------------------------------------------------------
+[9]
+Removed unnecessary pixel format translation when sending JPEG from a big
+endian server to a little endian client (or vice versa.)  This improves
+performance a bit when connecting x86 clients to Sparc servers or vice versa.
+-------------------------------------------------------------------------------
+[10]
+Included mediaLib Huffman encoding optimizations contributed by Sun.  This
+boosts the performance of the Solaris TurboVNC server and client by as much as
+30%.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 Significant changes between 0.3.2 and 0.3.3
 ===============================================================================
 [1]
@@ -23,6 +96,10 @@ Modified Windows build to embed a proper version number in TurboVNC.exe.
 Changed the fallback logic in the default ~/.vnc/xstartup file so that Gnome is
 used as the window manager on Solaris if it is available and if
 ~/.dt/sessions/lastsession doesn't exist.  Otherwise, CDE is used.
+-------------------------------------------------------------------------------
+[6]
+Fixed an issue whereby Gnome would fail to start in TurboVNC if TurboVNC was
+launched from within another X session.
 -------------------------------------------------------------------------------
 
 
