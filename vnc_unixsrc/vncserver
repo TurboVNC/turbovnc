@@ -42,7 +42,7 @@ $vncClasses = "";
 # Global variables.  You may want to configure some of these for your site.
 #
 
-$geometry = "1024x768";
+$geometry = "1240x900";
 $depth = 24;
 $desktopName = "X";
 $vncUserDir = "$ENV{HOME}/.vnc";
