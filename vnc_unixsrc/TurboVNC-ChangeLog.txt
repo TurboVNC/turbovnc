@@ -69,6 +69,10 @@ Included mediaLib Huffman encoding optimizations contributed by Sun.  This
 boosts the performance of the Solaris TurboVNC server and client by as much as
 30%.
 -------------------------------------------------------------------------------
+[11]
+Changed default geometry to 1240x900, an appropriate size for most 1280x1024
+displays.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
