@@ -73,6 +73,11 @@ boosts the performance of the Solaris TurboVNC server and client by as much as
 Changed default geometry to 1240x900, an appropriate size for most 1280x1024
 displays.
 -------------------------------------------------------------------------------
+[12]
+vncserver now looks for xauth in /usr/X11R6/bin and /usr/openwin/bin before
+searching the PATH.  Those directories are sometimes not in the PATH on Linux
+and Solaris systems.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
