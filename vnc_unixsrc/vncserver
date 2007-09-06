@@ -47,6 +47,7 @@ $depth = 24;
 $desktopName = "X";
 $vncUserDir = "$ENV{HOME}/.vnc";
 $authType = "-rfbauth $vncUserDir/passwd";
+$xauth = "xauth";
 
 # Here is another example of setting the font path:
 # $fontPath = "/usr/lib/X11/fonts/misc/,/usr/lib/X11/fonts/75dpi/";
@@ -208,8 +209,8 @@ for (1..16) {
     $cookie .= sprintf("%02x", int(rand(256)));
 }
 
-system("xauth -f $xauthorityFile add $host:$displayNumber . $cookie");
-system("xauth -f $xauthorityFile add $host/unix:$displayNumber . $cookie"); 
+system("$xauth -f $xauthorityFile add $host:$displayNumber . $cookie");
+system("$xauth -f $xauthorityFile add $host/unix:$displayNumber . $cookie"); 
 
 # Now start the X VNC Server
 
@@ -638,7 +639,7 @@ sub SanityCheck
     #
 
  cmd:
-    foreach $cmd ("uname","xauth") {
+    foreach $cmd ("uname") {
 	for (split(/:/,$ENV{PATH})) {
 	    if (-x "$_/$cmd") {
 		next cmd;
@@ -646,6 +647,23 @@ sub SanityCheck
 	}
 	die "$prog: couldn't find \"$cmd\" on your PATH.\n";
     }
+    if (-x "/usr/X11R6/bin/xauth") {
+	$xauth = "/usr/X11R6/bin/xauth";
+    }
+    elsif (-x "/usr/openwin/bin/xauth") {
+	$xauth = "/usr/openwin/bin/xauth";
+    }
+    else {
+	foreach $cmd ("xauth") {
+	    for (split(/:/,$ENV{PATH})) {
+		if (-x "$_/$cmd") {
+		    next cmd;
+		}
+	    }
+	    die "$prog: couldn't find \"$cmd\" on your PATH.\n";
+	}
+    }
+
     if($exedir eq "") {
       cmd2:
 	foreach $cmd ("Xvnc","vncpasswd") {
