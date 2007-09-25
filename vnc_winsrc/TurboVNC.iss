@@ -34,6 +34,7 @@ Source: "WinVNC\Release\WinVNC.exe"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "WinVNC\Release\VNCHooks.dll"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: restartreplace; Components: server
 Source: "turbojpeg.dll"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: restartreplace; Components: "server viewer"
 Source: "VNCViewer\Release\vncviewer.exe"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Components: viewer
+Source: "putty\Release\putty.exe"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Components: viewer
 Source: "README-bin.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "LICENCE.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "WhatsNew.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
