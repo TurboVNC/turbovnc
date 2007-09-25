@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- This is present purely to make Visual Styles in XP work better.
+     See 20020104174954.A12067@imsa.edu.
+     Do not attempt to do anything clever with it, as some versions of
+     Windows are very sensitive to the exact format.
+     Hence, some facts below are fibs. -->
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+<assemblyIdentity
+   version="0.0.0.0"
+   processorArchitecture="x86"
+   name="PuTTY"
+   type="win32" />
+   <description>A network client and terminal emulator</description>
+   <dependency>
+   <dependentAssembly>
+        <!-- Load Common Controls 6 instead of 5 to get WinXP native-
+             looking controls in the client area. -->
+        <assemblyIdentity type="win32"
+             name="Microsoft.Windows.Common-Controls"
+             version="6.0.0.0" 
+             publicKeyToken="6595b64144ccf1df"
+             language="*" 
+             processorArchitecture="x86"/> 
+   </dependentAssembly>
+   </dependency>
+</assembly>

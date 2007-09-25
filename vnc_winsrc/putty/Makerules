@@ -1,0 +1,28 @@
+CC =  "cl" -nologo -wd4996 -wd4482
+CXX = $(CC) -EHsc
+RC = "rc"
+LINK = "link" -nologo
+AR = "link" -lib -nologo
+
+CDEFINES = -DWIN32 -D_CRT_SECURE_NO_DEPRECATE
+ifeq ($(DEBUG), yes)
+CFLAGS = -MTd -W3 -Od -Zi -I.
+LINK := $(LINK) -debug
+else
+CFLAGS = -MT -W3 -O2 -I.
+endif
+CFLAGS := $(CFLAGS) $(CDEFINES)
+
+RC := $(RC) $(CDEFINES)
+
+ifeq ($(TOPDIR),)
+TOPDIR = .
+endif
+
+ODIR = $(TOPDIR)/Release
+ifeq ($(DEBUG), yes)
+ODIR = $(TOPDIR)/Debug
+endif
+
+_DUMMY := $(shell mkdir -p $(ODIR))
+
