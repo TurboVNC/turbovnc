@@ -78,6 +78,12 @@ vncserver now looks for xauth in /usr/X11R6/bin and /usr/openwin/bin before
 searching the PATH.  Those directories are sometimes not in the PATH on Linux
 and Solaris systems.
 -------------------------------------------------------------------------------
+[13]
+Modified Mac package such that /opt/TurboVNC/bin/vncviewer links to
+/opt/TurboVNC/lib/libturbojpeg.dylib rather than to
+/opt/VirtualGL/lib/libturbojpeg.dylib (oops.)  This was causing the Mac
+TurboVNC viewer to fail unless VirtualGL was also installed.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
