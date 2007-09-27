@@ -84,6 +84,12 @@ Modified Mac package such that /opt/TurboVNC/bin/vncviewer links to
 /opt/VirtualGL/lib/libturbojpeg.dylib (oops.)  This was causing the Mac
 TurboVNC viewer to fail unless VirtualGL was also installed.
 -------------------------------------------------------------------------------
+[14]
+Included an optimized version of PuTTY 0.60 in the Windows build (and viewer
+package.)  It is recommended that this version be used when tunneling
+TurboVNC connections over SSh, as it will perform as much as 4X as fast as
+the stock version of PuTTY 0.60.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
