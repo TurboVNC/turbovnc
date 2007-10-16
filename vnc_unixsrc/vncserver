@@ -638,7 +638,7 @@ sub SanityCheck
     # Check we have all the commands we'll need on the path.
     #
 
- cmd:
+  cmd:
     foreach $cmd ("uname") {
 	for (split(/:/,$ENV{PATH})) {
 	    if (-x "$_/$cmd") {
@@ -654,10 +654,11 @@ sub SanityCheck
 	$xauth = "/usr/openwin/bin/xauth";
     }
     else {
+      cmd1:
 	foreach $cmd ("xauth") {
 	    for (split(/:/,$ENV{PATH})) {
 		if (-x "$_/$cmd") {
-		    next cmd;
+		    next cmd1;
 		}
 	    }
 	    die "$prog: couldn't find \"$cmd\" on your PATH.\n";
