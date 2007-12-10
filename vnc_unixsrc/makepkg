@@ -49,7 +49,7 @@ PKG=SUNWtvnc
 NAME=TurboVNC server and client
 VERSION=$_VERSION,REV=$_BUILD
 SUNW_PRODNAME=TurboVNC
-SUNW_PRODVERS=1.0
+SUNW_PRODVERS=1.1
 SUNW_PKGVERS=1.0
 DESC=TurboVNC is a sleek and fast VNC distribution, containing a high-performance implementation of tight JPEG encoding designed to work in conjunction with VirtualGL.
 VENDOR=The VirtualGL Project
