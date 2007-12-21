@@ -90,6 +90,10 @@ package.)  It is recommended that this version be used when tunneling
 TurboVNC connections over SSh, as it will perform as much as 4X as fast as
 the stock version of PuTTY 0.60.
 -------------------------------------------------------------------------------
+[15]
+Fixed bug in vncserver script which was uncovered by running it with recent
+versions of Perl.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
