@@ -244,7 +244,7 @@ CreatePopup()
 
   buttonJPEG = XtCreateManagedWidget("compressJPEG", toggleWidgetClass,
     buttonForm, NULL, 0);
-  XtVaSetValues(buttonJPEG, XtNfromVert, label, XtNfromHoriz, buttonRGB);
+  XtVaSetValues(buttonJPEG, XtNfromVert, label, XtNfromHoriz, buttonRGB, NULL);
   XtAddCallback(buttonJPEG, XtNcallback, buttonJPEGProc, NULL);
 
   label = XtCreateManagedWidget("qualLabel", labelWidgetClass, buttonForm, NULL, 0);
@@ -274,7 +274,7 @@ CreatePopup()
 
   button4X = XtCreateManagedWidget("subsamp4X", toggleWidgetClass, buttonForm,
     NULL, 0);
-  XtVaSetValues(button4X, XtNfromVert, label, XtNfromHoriz, buttonGray);
+  XtVaSetValues(button4X, XtNfromVert, label, XtNfromHoriz, buttonGray, NULL);
   XtAddCallback(button4X, XtNcallback, button4XProc, NULL);
 
   button2X = XtCreateManagedWidget("subsamp2X", toggleWidgetClass, buttonForm,
