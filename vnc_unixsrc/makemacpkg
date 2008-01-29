@@ -41,5 +41,5 @@ $PACKAGEMAKER -build -v -p $pkgtmpdir/$pkgname-$_VERSION.pkg \
   -i $pkgtmpdir/pkg/Info.plist -d $pkgtmpdir/pkg/Description.plist
 hdiutil create -fs HFS+ -volname $pkgname-$_VERSION \
 	-srcfolder $pkgtmpdir/$pkgname-$_VERSION.pkg \
-	$pkgname-$_VERSION.dmg
+	$pkgname.dmg
 sudo rm -rf $pkgtmpdir
