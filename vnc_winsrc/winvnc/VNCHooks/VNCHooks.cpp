@@ -1115,7 +1115,7 @@ char * NameFromPath(const char *path)
 // These functions handle the update settings for any apps used with WinVNC.
 
 static const TCHAR szSoftware[] = "Software";
-static const TCHAR szCompany[] = "ORL";
+static const TCHAR szCompany[] = "TurboVNC";
 static const TCHAR szProfile[] = "VNCHooks";
 
 HKEY GetRegistryKey()

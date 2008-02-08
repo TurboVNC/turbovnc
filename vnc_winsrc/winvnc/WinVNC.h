@@ -48,7 +48,7 @@
 #define WM_SRV_CLIENT_DISCONNECT	WM_USER+4
 #define WM_SRV_CLIENT_HIDEWALLPAPER	WM_USER+5
 
-#define WINVNC_REGISTRY_KEY "Software\\ORL\\WinVNC3"
+#define WINVNC_REGISTRY_KEY "Software\\TurboVNC\\WinVNC3"
 
 // Export the application details
 extern HINSTANCE	hAppInstance;

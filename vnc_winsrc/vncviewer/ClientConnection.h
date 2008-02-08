@@ -48,7 +48,7 @@
 #include "turbojpeg.h"
 #include "fbx.h"
 
-#define SETTINGS_KEY_NAME "Software\\ORL\\VNCviewer\\Settings"
+#define SETTINGS_KEY_NAME "Software\\TurboVNC\\VNCviewer\\Settings"
 #define MAX_HOST_NAME_LEN 250
 
 #define ZLIBHEX_DECOMP_UNINITED (-1)

@@ -45,7 +45,7 @@
 #define SMALLCURSOR 3
 #define MAX_LEN_COMBO 2
 
-#define KEY_VNCVIEWER_HISTORI _T("Software\\ORL\\VNCviewer\\History")
+#define KEY_VNCVIEWER_HISTORI _T("Software\\TurboVNC\\VNCviewer\\History")
 
 struct COMBOSTRING {
 		TCHAR NameString[20];
