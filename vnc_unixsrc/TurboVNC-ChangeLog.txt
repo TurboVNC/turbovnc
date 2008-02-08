@@ -94,6 +94,9 @@ the stock version of PuTTY 0.60.
 Fixed bug in vncserver script which was uncovered by running it with recent
 versions of Perl.
 -------------------------------------------------------------------------------
+[16]
+Changed name of options registry key to avoid conflict with TightVNC
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
