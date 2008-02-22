@@ -97,6 +97,10 @@ versions of Perl.
 [16]
 Changed name of options registry key to avoid conflict with TightVNC
 -------------------------------------------------------------------------------
+[17]
+Open Java viewer in a new window (edit /opt/TurboVNC/vnc/classes/index.vnc to
+change this back.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
