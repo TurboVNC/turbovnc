@@ -45,6 +45,7 @@ const char HTTP_FMT_INDEX[] =
 "  <BODY>\n"
 "    <APPLET CODE=VncViewer.class ARCHIVE=VncViewer.jar WIDTH=%d HEIGHT=%d>\n"
 "      <PARAM NAME=\"PORT\" VALUE=\"%d\">\n"
+"      <PARAM NAME=\"Open New Window\" VALUE=\"Yes\">\n"
 "%.1024s"
 "    </APPLET><BR>\n"
 "    <A HREF=\"http://www.virtualgl.org/\">www.virtualgl.org</A>\n"
