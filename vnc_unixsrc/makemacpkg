@@ -27,7 +27,10 @@ mkdir -p $pkgtmpdir/pkg/Resources
 cat Description.plist.tmpl | sed s/{__VERSION}/$_VERSION/g > $pkgtmpdir/pkg/Description.plist
 cat Info.plist.tmpl | sed s/{__VERSION}/$_VERSION/g  | sed s/{__BUILD}/$_BUILD/g > $pkgtmpdir/pkg/Info.plist
 install -m 755 vncviewer/vncviewer $pkgtmpdir/pkg/Package_Root/opt/$pkgname/bin
-install -m 755 /usr/lib/libturbojpeg.dylib $pkgtmpdir/pkg/Package_Root/opt/$pkgname/lib
+install -m 755 /usr/lib/libturbojpeg-ipp.dylib $pkgtmpdir/pkg/Package_Root/opt/$pkgname/lib/libturbojpeg.dylib
+install -m 755 /usr/lib/libturbojpeg-ipp.dylib $pkgtmpdir/pkg/Package_Root/opt/$pkgname/lib
+install -m 755 /usr/lib/libturbojpeg-libjpeg.dylib $pkgtmpdir/pkg/Package_Root/opt/$pkgname/lib
+install -m 755 /usr/bin/switchtjpeg $pkgtmpdir/pkg/Package_Root/opt/$pkgname/bin
 install_name_tool -change libturbojpeg.dylib /opt/$pkgname/lib/libturbojpeg.dylib $pkgtmpdir/pkg/Package_Root/opt/$pkgname/bin/vncviewer
 install -m 755 vncviewer/vncviewer.man $pkgtmpdir/pkg/Package_Root/opt/$pkgname/man/man1
 install -m 644 ReadMe-MacApp.txt "$pkgtmpdir/pkg/Package_Root/Applications/$pkgname/Read Me.txt"
