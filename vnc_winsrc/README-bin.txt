@@ -1,4 +1,4 @@
-TurboVNC 0.4 Binary Distribution for Windows platforms
+TurboVNC 0.4.1 Binary Distribution for Windows platforms
 ========================================================
 
 TurboVNC is a highly-optimized version of TightVNC 1.3 designed for real-time
