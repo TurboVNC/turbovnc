@@ -8,11 +8,16 @@ Build Environment:
    or in Cygwin (http://www.cygwin.com/)
 
 -- Microsoft Visual C++ 2003 or later
-   Tested with the free Visual C++ 2005 Express Edition:
+   Tested with Microsoft Visual C++ 2005 Express Edition and
+   Microsoft Visual C++ 2008 Express Edition (both free downloads):
    http://msdn.microsoft.com/vstudio/express/visualc/
 
--- Microsoft Platform SDK
+-- If using Microsoft Visual C++ 2005 Express Edition, you additionally need
+   to download the Microsoft Platform SDK:
+
    http://msdn.microsoft.com/vstudio/express/visualc/usingpsdk/
+
+   (This is included with Microsoft Visual C++ 2008 Express Edition.)
 
    The Platform SDK include and library paths must be added to the system or
    user INCLUDE and LIB environment variables (respectively.)
