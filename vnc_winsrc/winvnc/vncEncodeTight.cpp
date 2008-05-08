@@ -1462,8 +1462,9 @@ vncEncodeTight::SendJpegRect(BYTE *src, BYTE *dst, int x, int y, int w, int h, i
 	BYTE *srcbuf;
 	int ps=m_localformat.bitsPerPixel/8;
 	unsigned long jpegDstDataLen;
+	int i, flags=0, srcbufalloc=0, pitch=m_bytesPerRow;
 
-	if (ps < 3) return SendFullColorRect(dst, w, h);
+	if (ps < 2) return SendFullColorRect(dst, w, h);
 
 	if(!tjhnd) {
 		if((tjhnd=tjInitCompress())==NULL) {
@@ -1471,12 +1472,23 @@ vncEncodeTight::SendJpegRect(BYTE *src, BYTE *dst, int x, int y, int w, int h, i
 			return 0;
 		}
 	}
-
-	srcbuf=&src[y*m_bytesPerRow + x*ps];
-	if(tjCompress(tjhnd, (unsigned char *)srcbuf, w, m_bytesPerRow,
+	if(ps >= 3)
+	{
+		srcbuf=&src[y*m_bytesPerRow + x*ps];
+		flags=m_localformat.bigEndian?0:TJ_BGR;
+	}
+	else
+	{
+		srcbuf=new byte[w * h * 3];
+		srcbufalloc=1;
+		for(i = 0; i < h; i++)
+			PrepareRowForJpeg16(&srcbuf[i*w*3],
+				(CARD16 *)&src[(y+i)*m_bytesPerRow + x*ps], w);
+		ps=3;  pitch=w*ps;
+	}
+	if(tjCompress(tjhnd, (unsigned char *)srcbuf, w, pitch,
 		h, ps, (unsigned char *)dst, &jpegDstDataLen,
-		compressLevel2subsamp[m_compresslevel], quality,
-		m_localformat.bigEndian?0:TJ_BGR)==-1) {
+		compressLevel2subsamp[m_compresslevel], quality, flags)==-1) {
 		vnclog.Print(LL_INTERR, VNCLOG("JPEG Error: %s\n"), tjGetErrorStr());
 		return 0;
 	}
@@ -1484,6 +1496,32 @@ vncEncodeTight::SendJpegRect(BYTE *src, BYTE *dst, int x, int y, int w, int h, i
 
 	m_hdrBuffer[m_hdrBufferBytes++] = rfbTightJpeg << 4;
 
+	if(srcbufalloc) delete [] srcbuf;
+
 	return SendCompressedData(jpegDstDataLen);
 }
 
+void
+vncEncodeTight::PrepareRowForJpeg16(BYTE *dst, CARD16 *src, int count)
+{
+	bool endianMismatch =
+		(!m_localformat.bigEndian != !m_remoteformat.bigEndian);
+
+	int r_shift = m_localformat.redShift;
+	int g_shift = m_localformat.greenShift;
+	int b_shift = m_localformat.blueShift;
+	int r_max = m_localformat.redMax;
+	int g_max = m_localformat.greenMax;
+	int b_max = m_localformat.blueMax;
+
+	CARD16 pix;
+	while (count--) {
+		pix = *src++;
+		if (endianMismatch) {
+			pix = Swap16(pix);
+		}
+		*dst++ = (BYTE)((pix >> r_shift & r_max) * 255 / r_max);
+		*dst++ = (BYTE)((pix >> g_shift & g_max) * 255 / g_max);
+		*dst++ = (BYTE)((pix >> b_shift & b_max) * 255 / b_max);
+	}
+}
