@@ -1,7 +1,7 @@
 /* Copyright (C)2007 Sun Microsystems, Inc.
  *
  * This library is free software and may be redistributed and/or modified under
- * the terms of the wxWindows Library License, Version 3 or (at your option)
+ * the terms of the wxWindows Library License, Version 3.1 or (at your option)
  * any later version.  The full license is in the LICENSE.txt file included
  * with this distribution.
  *
@@ -32,37 +32,10 @@ typedef struct {
 
 /***************************************************************/
 
-const mlib_u8 jpeg_natural_order2[JPEG_DCTSIZE2+1] = {
-   2*0,  2*1,  2*8, 2*16,  2*9,  2*2,  2*3, 2*10,
-  2*17, 2*24, 2*32, 2*25, 2*18, 2*11,  2*4,  2*5,
-  2*12, 2*19, 2*26, 2*33, 2*40, 2*48, 2*41, 2*34,
-  2*27, 2*20, 2*13,  2*6,  2*7, 2*14, 2*21, 2*28,
-  2*35, 2*42, 2*49, 2*56, 2*57, 2*50, 2*43, 2*36,
-  2*29, 2*22, 2*15, 2*23, 2*30, 2*37, 2*44, 2*51,
-  2*58, 2*59, 2*52, 2*45, 2*38, 2*31, 2*39, 2*46,
-  2*53, 2*60, 2*61, 2*54, 2*47, 2*55, 2*62, 2*63, 2*63
-};
-
 /* JPEG luminance and chrominance quantization tables */
 
-const mlib_u8 jpeg_first_bit_table[256] = {
-  0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
-  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8
-};
+static mlib_u8 jpeg_first_bit_table[65536];
+int jpeg_first_bit_table_init=0;
 
 /***************************************************************/
 
@@ -94,6 +67,29 @@ mlib_status jpeg_EncoderHuffmanCreateTable(void    **hufftable,
 
   ht->length      = k;
   *hufftable      = ht;
+
+  if(!jpeg_first_bit_table_init) {
+    for(i = 0; i < 65536; i++) {
+      if(i & 0x8000) jpeg_first_bit_table[i] = 16;
+      else if(i & 0x4000) jpeg_first_bit_table[i] = 15;
+      else if(i & 0x2000) jpeg_first_bit_table[i] = 14;
+      else if(i & 0x1000) jpeg_first_bit_table[i] = 13;
+      else if(i & 0x800) jpeg_first_bit_table[i] = 12;
+      else if(i & 0x400) jpeg_first_bit_table[i] = 11;
+      else if(i & 0x200) jpeg_first_bit_table[i] = 10;
+      else if(i & 0x100) jpeg_first_bit_table[i] = 9;
+      else if(i & 0x80) jpeg_first_bit_table[i] = 8;
+      else if(i & 0x40) jpeg_first_bit_table[i] = 7;
+      else if(i & 0x20) jpeg_first_bit_table[i] = 6;
+      else if(i & 0x10) jpeg_first_bit_table[i] = 5;
+      else if(i & 0x8) jpeg_first_bit_table[i] = 4;
+      else if(i & 0x4) jpeg_first_bit_table[i] = 3;
+      else if(i & 0x2) jpeg_first_bit_table[i] = 2;
+      else if(i & 0x1) jpeg_first_bit_table[i] = 1;
+      else jpeg_first_bit_table[i] = 0;
+    }
+    jpeg_first_bit_table_init = 1;
+  }
 
   return MLIB_SUCCESS;
 }
@@ -146,8 +142,8 @@ mlib_status jpeg_EncoderHuffmanInit(jpeg_encoder *enc) {
 /***************************************************************/
 
 #define DUMP_SINGLE_VALUE(ht, codevalue) { \
-  mlib_s32 size = ht->huffsize[codevalue]; \
-  mlib_s32 code = ht->huffcode[codevalue]; \
+  size = ht->huffsize[codevalue];          \
+  code = ht->huffcode[codevalue];          \
                                            \
   DUMP_BITS(code, size)                    \
  }
@@ -155,8 +151,8 @@ mlib_status jpeg_EncoderHuffmanInit(jpeg_encoder *enc) {
 /***************************************************************/
 
 #define DUMP_VALUE(ht, codevalue, t, nbits) { \
-  mlib_s32 size = ht->huffsize[codevalue];    \
-  mlib_s32 code = ht->huffcode[codevalue];    \
+  size = ht->huffsize[codevalue];             \
+  code = ht->huffcode[codevalue];             \
   t &= ~(-1 << nbits);                        \
   DUMP_BITS(code, size)                       \
   DUMP_BITS(t, nbits)                         \
@@ -181,10 +177,8 @@ mlib_status jpeg_EncoderHuffmanDumpBlock(jpeg_encoder  *encoder,
   mlib_s32 bits     = encoder->bits;
   jpeg_huff_encoder *hdc = huffdctable;
   jpeg_huff_encoder *hac = huffactable;
-  mlib_s32 t, t1, sflag, nbits, r, lastr, k, count;
-  mlib_u8   rvals[JPEG_DCTSIZE2 + 2];
-  mlib_u16  tvals[JPEG_DCTSIZE2 + 2];
-  mlib_addr order;
+  mlib_s32 t, t1, sflag, nbits, r, size, code;
+  mlib_s32 code_0xf0 = hac->huffcode[0xf0], size_0xf0 = hac->huffsize[0xf0];
 
   t     = (t1 = coeffs[0]);
   sflag = t >> 31;
@@ -193,51 +187,40 @@ mlib_status jpeg_EncoderHuffmanDumpBlock(jpeg_encoder  *encoder,
   CALC_FIRST_BIT(nbits, t)
   DUMP_VALUE(hdc, nbits, t1, nbits)
   r     = 0;
-  order = 2;
-  t1    = 1;
-  count = -1;
 
-#ifdef __SUNPRO_C
-#pragma pipeloop(0)
-#endif /* __SUNPRO_C */
-  for(k = 2; k < JPEG_DCTSIZE2 + 1; k++) {
-    sflag          = (-t1) >> 31;
-    r              = (r + 1) &~ sflag;
-    count         -= sflag;
-    t1             = *(mlib_u16*)((mlib_u8*)coeffs + order);
-    order          = jpeg_natural_order2[k];
-    rvals[count]   = r;
-    *(mlib_s16*)((mlib_u8*)tvals + count + count) = t1;
-  }
+#define innerloop(order) {  \
+  t1  = *(mlib_u16*)((mlib_u8*)coeffs + order);  \
+  if(t1 == 0) r++;  \
+  else {  \
+    t     = (mlib_s16)t1;  \
+    sflag = t >> 31;  \
+    t     = (t ^ sflag) - sflag;  \
+    t1   += sflag;  \
+    nbits = jpeg_first_bit_table[t];  \
+    for(; r > 15; r -= 16) DUMP_BITS(code_0xf0, size_0xf0)  \
+    sflag = (r << 4) + nbits;  \
+    DUMP_VALUE(hac, sflag, t1, nbits)  \
+    r = 0;  \
+  }}
 
-  if (tvals[count]) {
-    count++;
-    lastr = 0;
-    rvals[count]   = 0;
-    *(mlib_s16*)((mlib_u8*)tvals + count + count) = 0;
-  }
-  else lastr = 1;
+  innerloop(2*1);   innerloop(2*8);   innerloop(2*16);  innerloop(2*9);
+  innerloop(2*2);   innerloop(2*3);   innerloop(2*10);  innerloop(2*17);
+  innerloop(2*24);  innerloop(2*32);  innerloop(2*25);  innerloop(2*18);
+  innerloop(2*11);  innerloop(2*4);   innerloop(2*5);   innerloop(2*12);
+  innerloop(2*19);  innerloop(2*26);  innerloop(2*33);  innerloop(2*40);
+  innerloop(2*48);  innerloop(2*41);  innerloop(2*34);  innerloop(2*27);
+  innerloop(2*20);  innerloop(2*13);  innerloop(2*6);   innerloop(2*7);
+  innerloop(2*14);  innerloop(2*21);  innerloop(2*28);  innerloop(2*35);
+  innerloop(2*42);  innerloop(2*49);  innerloop(2*56);  innerloop(2*57);
+  innerloop(2*50);  innerloop(2*43);  innerloop(2*36);  innerloop(2*29);
+  innerloop(2*22);  innerloop(2*15);  innerloop(2*23);  innerloop(2*30);
+  innerloop(2*37);  innerloop(2*44);  innerloop(2*51);  innerloop(2*58);
+  innerloop(2*59);  innerloop(2*52);  innerloop(2*45);  innerloop(2*38);
+  innerloop(2*31);  innerloop(2*39);  innerloop(2*46);  innerloop(2*53);
+  innerloop(2*60);  innerloop(2*61);  innerloop(2*54);  innerloop(2*47);
+  innerloop(2*55);  innerloop(2*62);  innerloop(2*63);
 
-  t1    = tvals[0];
-  r     = rvals[0];
-
-#ifdef __SUNPRO_C
-#pragma pipeloop(0)
-#endif /* __SUNPRO_C */
-  for(k = 1; k <= count; k++) {
-    t     = (mlib_s16)t1;
-    sflag = t >> 31;
-    t     = (t ^ sflag) - sflag;
-    t1   += sflag;
-    CALC_FIRST_BIT(nbits, t)
-    sflag = ((r & 15) << 4) + nbits;
-    for(; r > 15; r -= 16) DUMP_SINGLE_VALUE(hac, 0xF0)
-    DUMP_VALUE(hac, sflag, t1, nbits)
-    t1    = tvals[k];
-    r     = rvals[k];
-  }
-
-  if (lastr > 0) DUMP_SINGLE_VALUE(hac, 0x0)
+  if (r > 0) DUMP_SINGLE_VALUE(hac, 0x0)
 
   FIX_OF_PUTTING
   return MLIB_SUCCESS;
