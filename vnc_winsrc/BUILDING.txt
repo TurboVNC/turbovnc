@@ -3,34 +3,71 @@ Building TurboVNC for Windows
 
 Build Environment:
 
--- Gnu Make v3.7 or later
-   This can be found in the MSYS package (http://www.mingw.org/download.shtml)
-   or in Cygwin (http://www.cygwin.com/)
+-- GNU Make v3.7 or later
+
+   GNU Make for Win32 can be found in MSYS
+   (http://www.mingw.org/download.shtml) or Cygwin (http://www.cygwin.com/)
 
 -- Microsoft Visual C++ 2003 or later
-   Tested with Microsoft Visual C++ 2005 Express Edition and
-   Microsoft Visual C++ 2008 Express Edition (both free downloads):
-   http://msdn.microsoft.com/vstudio/express/visualc/
 
--- If using Microsoft Visual C++ 2005 Express Edition, you additionally need
-   to download the Microsoft Platform SDK:
+   * Tested with Microsoft Visual C++ 2005 Express Edition and
+     Microsoft Visual C++ 2008 Express Edition (both free downloads):
 
-   http://msdn.microsoft.com/vstudio/express/visualc/usingpsdk/
+     http://msdn.microsoft.com/vstudio/express/visualc/
 
-   (This is included with Microsoft Visual C++ 2008 Express Edition.)
+   * Add the compiler binary directories (for instance,
+     c:\Program Files\Microsoft Visual Studio 9.0\VC\BIN;
+     c:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE)
+     to the system or user PATH environment variable prior to building
+     TurboVNC.
+   * Add the compiler include directory (for instance,
+     c:\Program Files\Microsoft Visual Studio 9.0\VC\INCLUDE)
+     to the system or user INCLUDE environment variable prior to building
+     TurboVNC.
+   * Add the compiler library directory (for instance,
+     c:\Program Files\Microsoft Visual Studio 9.0\VC\LIB)
+     to the system or user LIB environment variable prior to building
+     TurboVNC.
 
-   The Platform SDK include and library paths must be added to the system or
-   user INCLUDE and LIB environment variables (respectively.)
+-- Microsoft Windows SDK
+
+   * This is included with Microsoft Visual C++ 2008 Express Edition, but users
+     of prior editions of Visual C++ can download the SDK from:
+
+     http://msdn2.microsoft.com/en-us/windowsserver/bb980924.aspx
+
+   * Add the SDK include directory (for instance,
+     c:\Program Files\Microsoft SDKs\Windows\v6.0A\include)
+     to the system or user INCLUDE environment variable prior to building
+     TurboVNC.
+   * Add the SDK library directory (for instance,
+     c:\Program Files\Microsoft SDKs\Windows\v6.0A\lib)
+     to the system or user LIB environment variable prior to building
+     TurboVNC.
 
 -- Inno Setup (needed to build the TurboVNC installer)
    Inno Setup can be downloaded from http://www.jrsoftware.org/isinfo.php
 
+   Add the directory containing iscc.exe (for instance, 
+   C:\Program Files\Inno Setup 5) to the system or user PATH environment
+   variable prior to building TurboVNC.
+
 -- TurboJPEG SDK
-   * Available from http://sourceforge.net/project/showfiles.php?group_id=117509
-   * Add the TurboJPEG include directory (e.g. c:\turbojpeg\include) to your
-     system INCLUDE environment variable
-   * Add the TurboJPEG lib directory (e.g. c:\turbojpeg\lib) to your
-     system LIB environment variable
+
+   * The TurboJPEG SDK Windows installer (EXE) can be obtained from the
+     "Download" area of:
+
+     http://sourceforge.net/projects/virtualgl
+
+     The direct link for TurboJPEG downloads is:
+
+     http://sourceforge.net/project/showfiles.php?group_id=117509&package_id=166100
+
+   * Add the TurboJPEG include path (c:\turbojpeg\include) to the system
+     or user INCLUDE environment variable prior to building TurboVNC.
+   * Add the TurboJPEG library path (c:\turbojpeg\lib) to the system
+     or user LIB environment variable prior to building TurboVNC.
+
 
 Building TurboVNC:
 
@@ -41,8 +78,6 @@ If everything is set up properly, you should be able to:
 
 
 Packaging TurboVNC:
-
-Make sure that iscc.exe (the Inno Setup Compiler) is in your path, then
 
   cd vnc/vnc_winsrc
   make dist
