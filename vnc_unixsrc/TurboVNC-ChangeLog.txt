@@ -5,6 +5,11 @@ Significant changes between 0.4 and 0.4.1
 The Windows TurboVNC server now works properly (albeit more slowly) when the
 server's graphics card is configured for a 16-bit pixel depth.
 -------------------------------------------------------------------------------
+[2]
+0.4 [12] was supposed to allow vncserver to work even if xauth was not in the
+PATH, but unfortunately there was a bug in that patch.  This bug has been
+fixed, so vncserver should now really work if xauth is not in the PATH.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
