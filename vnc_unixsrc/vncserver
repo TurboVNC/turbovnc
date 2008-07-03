@@ -506,7 +506,7 @@ sub removeSlashes
 
 sub Usage
 {
-    die("TurboVNC Server version 0.4.1\n".
+    die("TurboVNC Server version 0.5\n".
 	"\n".
 	"Usage: $prog [<OPTIONS>] [:<DISPLAY#>]\n".
 	"       $prog -kill :<DISPLAY#>\n".

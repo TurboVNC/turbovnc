@@ -127,6 +127,9 @@ fi
 %{_mandir}/man1/vncpasswd.1*
 
 %changelog
+* Thu Jul 3 2008 Darrell Commander <dcommander@users.sourceforge.net>
+- TurboVNC 0.5 (Includes patches from TightVNC 1.3.9)
+
 * Tue Jun 5 2007 Darrell Commander <dcommander@users.sourceforge.net>
 - TurboVNC 0.4 (Includes patches from TightVNC 1.3.9)
 

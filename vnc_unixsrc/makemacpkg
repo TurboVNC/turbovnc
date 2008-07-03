@@ -12,7 +12,7 @@ make World || exit -1
 
 pkgtmpdir=`mktemp -d /tmp/vncbuild.XXXXXX`
 pkgname=TurboVNC
-_VERSION=0.4.1
+_VERSION=0.5
 _BUILD=`date +%Y%m%d`
 PACKAGEMAKER=/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker
 
