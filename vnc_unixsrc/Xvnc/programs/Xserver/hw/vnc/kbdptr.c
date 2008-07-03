@@ -24,6 +24,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "X11/X.h"
 #define NEED_EVENTS
