@@ -191,6 +191,7 @@ rfbNewClient(sock)
     cl->translateLookupTable = NULL;
 
     cl->tightCompressLevel = TIGHT_DEFAULT_COMPRESSION;
+    cl->tightSubsampLevel = TIGHT_DEFAULT_SUBSAMP;
     cl->tightQualityLevel = -1;
     for (i = 0; i < 4; i++)
         cl->zsActive[i] = FALSE;
@@ -495,7 +496,7 @@ rfbProcessClientInitMessage(cl)
 /* Update these constants on changing capability lists below! */
 #define N_SMSG_CAPS  0
 #define N_CMSG_CAPS  0
-#define N_ENC_CAPS  12
+#define N_ENC_CAPS  14
 
 void
 rfbSendInteractionCaps(cl)
@@ -551,6 +552,8 @@ rfbSendInteractionCaps(cl)
     SetCapInfo(&enc_list[i++],  rfbEncodingTight,          rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingCompressLevel0, rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingQualityLevel0,  rfbTightVncVendor);
+    SetCapInfo(&enc_list[i++],  rfbJpegQualityLevel1,      rfbTightVncVendor);
+    SetCapInfo(&enc_list[i++],  rfbJpegSubsamp1X,          rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingXCursor,        rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingRichCursor,     rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingPointerPos,     rfbTightVncVendor);
@@ -660,6 +663,7 @@ rfbProcessClientNormalMessage(cl)
 	cl->enableCursorPosUpdates = FALSE;
 	cl->enableLastRectEncoding = FALSE;
 	cl->tightCompressLevel = TIGHT_DEFAULT_COMPRESSION;
+	cl->tightSubsampLevel = TIGHT_DEFAULT_SUBSAMP;
 	cl->tightQualityLevel = -1;
 
 	for (i = 0; i < msg.se.nEncodings; i++) {
@@ -755,19 +759,20 @@ rfbProcessClientNormalMessage(cl)
 		if ( enc >= (CARD32)rfbEncodingCompressLevel0 &&
 		     enc <= (CARD32)rfbEncodingCompressLevel9 ) {
 		    cl->zlibCompressLevel = enc & 0x0F;
-		    rfbLog("Using compression level %d for client %s\n",
-			   cl->zlibCompressLevel, cl->host);
-		} else if ( enc >= (CARD32)rfbJpegSubsamp1X &&
-			 enc <= (CARD32)rfbJpegSubsampGray ) {
-		    cl->tightCompressLevel = enc & 0xFF;
+		    cl->tightCompressLevel = enc & 0x0F;
 		    rfbLog("Using compression level %d for client %s\n",
 			   cl->tightCompressLevel, cl->host);
+		} else if ( enc >= (CARD32)rfbJpegSubsamp1X &&
+			 enc <= (CARD32)rfbJpegSubsampGray ) {
+		    cl->tightSubsampLevel = enc & 0xFF;
+		    rfbLog("Using JPEG subsampling %d for client %s\n",
+			   cl->tightSubsampLevel, cl->host);
 		} else if ( enc >= (CARD32)rfbEncodingQualityLevel0 &&
 			    enc <= (CARD32)rfbEncodingQualityLevel9 ) {
 		    cl->tightQualityLevel = JPEG_QUAL[enc & 0x0F];
-		    cl->tightCompressLevel = JPEG_SUBSAMP[enc & 0x0F];
+		    cl->tightSubsampLevel = JPEG_SUBSAMP[enc & 0x0F];
 		    rfbLog("Using JPEG subsampling %d, Q%d for client %s\n",
-			   cl->tightCompressLevel, cl->tightQualityLevel, cl->host);
+			   cl->tightSubsampLevel, cl->tightQualityLevel, cl->host);
 		} else if ( enc >= (CARD32)rfbJpegQualityLevel1 &&
 			    enc <= (CARD32)rfbJpegQualityLevel100 ) {
 		    cl->tightQualityLevel = enc & 0xFF;

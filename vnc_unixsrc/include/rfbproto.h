@@ -508,7 +508,8 @@ typedef struct _rfbInteractionCapsMsg {
 #define sig_rfbEncodingLastRect        "LASTRECT"
 #define sig_rfbEncodingNewFBSize       "NEWFBSIZ"
 #define sig_rfbEncodingQualityLevel0   "JPEGQLVL"
-
+#define sig_rfbJpegQualityLevel1       "TRBOQLVL"
+#define sig_rfbJpegSubsamp1X           "TRBOSAMP"
 
 /*****************************************************************************
  *

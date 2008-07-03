@@ -27,9 +27,10 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "rfb.h"
 #include "turbojpeg.h"
-
 
 /* Note: The following constant should not be changed. */
 #define TIGHT_MIN_TO_COMPRESS 12
@@ -49,31 +50,56 @@ static Bool usePixelFormat24;
 
 typedef struct TIGHT_CONF_s {
     int maxRectSize, maxRectWidth;
-    int rawZlibLevel;
+    int monoMinRectSize;
+    int idxZlibLevel, monoZlibLevel, rawZlibLevel;
+    int idxMaxColorsDivisor;
 } TIGHT_CONF;
 
-static TIGHT_CONF tightConf[1] = {
+static TIGHT_CONF tightConf[2] = {
+    {   512,   32,   6, 0, 0, 0,   4 },
 #if 0
-    {   512,   32, 0 },
-    {  2048,  128, 1 },
-    {  6144,  256, 2 },
-    { 10240, 1024, 3 },
-    { 16384, 2048, 4 },
-    { 32768, 2048, 5 },
-    { 65536, 2048, 6 },
-    { 65536, 2048, 7 },
-    { 65536, 2048, 8 },
+    {  2048,  128,   6, 1, 1, 1,   8 },
+    {  6144,  256,   8, 3, 3, 2,  24 },
+    { 10240, 1024,  12, 5, 5, 3,  32 },
+    { 16384, 2048,  12, 6, 6, 4,  32 },
+    { 32768, 2048,  12, 7, 7, 5,  32 },
+    { 65536, 2048,  16, 7, 7, 6,  48 },
+    { 65536, 2048,  16, 8, 8, 7,  64 },
+    { 65536, 2048,  32, 9, 9, 8,  64 },
 #endif
-    { 65536, 2048, 9 }
+    { 65536, 2048,  32, 1, 1, 1,  96 }
 };
 
-#define JPEGTHRESHOLD 1024
 static int compressLevel;
 static int qualityLevel;
+static int subsampLevel;
 
-static const int compressLevel2subsamp[4] = {
+static const int subsampLevel2tjsubsamp[4] = {
     TJ_444, TJ_411, TJ_422, TJ_GRAYSCALE
 };
+
+/* Stuff dealing with palettes. */
+
+typedef struct COLOR_LIST_s {
+    struct COLOR_LIST_s *next;
+    int idx;
+    CARD32 rgb;
+} COLOR_LIST;
+
+typedef struct PALETTE_ENTRY_s {
+    COLOR_LIST *listNode;
+    int numPixels;
+} PALETTE_ENTRY;
+
+typedef struct PALETTE_s {
+    PALETTE_ENTRY entry[256];
+    COLOR_LIST *hash[256];
+    COLOR_LIST list[256];
+} PALETTE;
+
+static int paletteNumColors, paletteMaxColors;
+static CARD32 monoBackground, monoForeground;
+static PALETTE palette;
 
 /* Pointers to dynamically-allocated buffers. */
 
@@ -107,13 +133,29 @@ static Bool SendSubrect       (rfbClientPtr cl, int x, int y, int w, int h);
 static Bool SendTightHeader   (rfbClientPtr cl, int x, int y, int w, int h);
 
 static Bool SendSolidRect     (rfbClientPtr cl);
+static Bool SendMonoRect      (rfbClientPtr cl, int w, int h);
+static Bool SendIndexedRect   (rfbClientPtr cl, int w, int h);
 static Bool SendFullColorRect (rfbClientPtr cl, int w, int h);
 
 static Bool CompressData(rfbClientPtr cl, int streamId, int dataLen,
                          int zlibLevel, int zlibStrategy);
 static Bool SendCompressedData(rfbClientPtr cl, int compressedLen);
 
+static void FillPalette8(CARD8 *data, int w, int pitch, int h);
+static void FillPalette16(CARD16 *data, int w, int pitch, int h);
+static void FillPalette32(CARD32 *data, int w, int pitch, int h);
+
+static void PaletteReset(void);
+static int PaletteInsert(CARD32 rgb, int numPixels, int bpp);
+
 static void Pack24(char *buf, rfbPixelFormat *fmt, int count);
+
+static void EncodeIndexedRect16(CARD8 *buf, int count);
+static void EncodeIndexedRect32(CARD8 *buf, int count);
+
+static void EncodeMonoRect8(CARD8 *buf, int w, int h);
+static void EncodeMonoRect16(CARD8 *buf, int w, int h);
+static void EncodeMonoRect32(CARD8 *buf, int w, int h);
 
 static Bool SendJpegRect(rfbClientPtr cl, int x, int y, int w, int h,
                          int quality);
@@ -135,8 +177,8 @@ rfbNumCodedRectsTight(cl, x, y, w, h)
     if (cl->enableLastRectEncoding && w * h >= MIN_SPLIT_RECT_SIZE)
       return 0;
 
-    maxRectSize = tightConf[0].maxRectSize;
-    maxRectWidth = tightConf[0].maxRectWidth;
+    maxRectSize = tightConf[compressLevel].maxRectSize;
+    maxRectWidth = tightConf[compressLevel].maxRectWidth;
 
     if (w > maxRectWidth || w * h > maxRectSize) {
         subrectMaxWidth = (w > maxRectWidth) ? maxRectWidth : w;
@@ -161,6 +203,8 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
 
     compressLevel = cl->tightCompressLevel;
     qualityLevel = cl->tightQualityLevel;
+    if (qualityLevel != -1) compressLevel = 1;
+    subsampLevel = cl->tightSubsampLevel;
 
     if ( cl->format.depth == 24 && cl->format.redMax == 0xFF &&
          cl->format.greenMax == 0xFF && cl->format.blueMax == 0xFF ) {
@@ -188,8 +232,8 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
     {
         int maxRectSize, maxRectWidth, nMaxWidth;
 
-        maxRectSize = tightConf[0].maxRectSize;
-        maxRectWidth = tightConf[0].maxRectWidth;
+        maxRectSize = tightConf[compressLevel].maxRectSize;
+        maxRectWidth = tightConf[compressLevel].maxRectWidth;
         nMaxWidth = (w > maxRectWidth) ? maxRectWidth : w;
         nMaxRows = maxRectSize / nMaxWidth;
     }
@@ -217,7 +261,7 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
 
             if (CheckSolidTile(dx, dy, dw, dh, &colorValue, FALSE)) {
 
-                if (compressLevel == 3) {
+                if (subsampLevel == TJ_GRAYSCALE) {
 		    CARD32 r=(colorValue>>16)&0xFF;
 		    CARD32 g=(colorValue>>8)&0xFF;
 		    CARD32 b=(colorValue)&0xFF;
@@ -442,8 +486,8 @@ SendRectSimple(cl, x, y, w, h)
     int dx, dy;
     int rw, rh;
 
-    maxRectSize = tightConf[0].maxRectSize;
-    maxRectWidth = tightConf[0].maxRectWidth;
+    maxRectSize = tightConf[compressLevel].maxRectSize;
+    maxRectWidth = tightConf[compressLevel].maxRectWidth;
 
     maxBeforeSize = maxRectSize * (cl->format.bitsPerPixel / 8);
     maxAfterSize = maxBeforeSize + (maxBeforeSize + 99) / 100 + 12;
@@ -506,16 +550,55 @@ SendSubrect(cl, x, y, w, h)
     fbptr = (rfbScreen.pfbMemory + (rfbScreen.paddedWidthInBytes * y)
              + (x * (rfbScreen.bitsPerPixel / 8)));
 
-    if(((rfbScreen.bitsPerPixel / 8) * w * h > JPEGTHRESHOLD
-      || compressLevel == 3) && qualityLevel != -1)
-        success = SendJpegRect(cl, x, y, w, h, qualityLevel);
-    else {
-       (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
-                       &cl->format, fbptr, tightBeforeBuf,
-                       rfbScreen.paddedWidthInBytes, w, h);
-        success = SendFullColorRect(cl, w, h);
+    if (subsampLevel == TJ_GRAYSCALE)
+        return SendJpegRect(cl, x, y, w, h, qualityLevel);
+
+    paletteMaxColors = w * h / tightConf[compressLevel].idxMaxColorsDivisor;
+    if(qualityLevel != -1)
+        paletteMaxColors = 24;
+    if ( paletteMaxColors < 2 &&
+         w * h >= tightConf[compressLevel].monoMinRectSize ) {
+        paletteMaxColors = 2;
+    }
+    switch (cl->format.bitsPerPixel) {
+    case 8:
+        FillPalette8(fbptr, w, rfbScreen.paddedWidthInBytes, h);
+        break;
+    case 16:
+        FillPalette16((CARD16 *)fbptr, w, rfbScreen.paddedWidthInBytes/2, h);
+        break;
+    default:
+        FillPalette32((CARD32 *)fbptr, w, rfbScreen.paddedWidthInBytes/4, h);
     }
 
+    if(paletteNumColors != 0 || qualityLevel == -1
+        || cl->format.bitsPerPixel < 16) {
+        (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
+                           &cl->format, fbptr, tightBeforeBuf,
+                           rfbScreen.paddedWidthInBytes, w, h);
+    }
+
+    switch (paletteNumColors) {
+    case 0:
+        /* Truecolor image */
+        if (qualityLevel != -1) {
+            success = SendJpegRect(cl, x, y, w, h, qualityLevel);
+        } else {
+            success = SendFullColorRect(cl, w, h);
+        }
+        break;
+    case 1:
+        /* Solid rectangle */
+        success = SendSolidRect(cl);
+        break;
+    case 2:
+        /* Two-color rectangle */
+        success = SendMonoRect(cl, w, h);
+        break;
+    default:
+        /* Up to 256 different colors */
+        success = SendIndexedRect(cl, w, h);
+    }
     return success;
 }
 
@@ -578,6 +661,133 @@ SendSolidRect(cl)
 }
 
 static Bool
+SendMonoRect(cl, w, h)
+    rfbClientPtr cl;
+    int w, h;
+{
+    int streamId = 1;
+    int paletteLen, dataLen;
+
+    if ( (ublen + TIGHT_MIN_TO_COMPRESS + 6 +
+          2 * cl->format.bitsPerPixel / 8) > UPDATE_BUF_SIZE ) {
+        if (!rfbSendUpdateBuf(cl))
+            return FALSE;
+    }
+
+    /* Prepare tight encoding header. */
+    dataLen = (w + 7) / 8;
+    dataLen *= h;
+
+    updateBuf[ublen++] = (streamId | rfbTightExplicitFilter) << 4;
+    updateBuf[ublen++] = rfbTightFilterPalette;
+    updateBuf[ublen++] = 1;
+
+    /* Prepare palette, convert image. */
+    switch (cl->format.bitsPerPixel) {
+
+    case 32:
+        EncodeMonoRect32((CARD8 *)tightBeforeBuf, w, h);
+
+        ((CARD32 *)tightAfterBuf)[0] = monoBackground;
+        ((CARD32 *)tightAfterBuf)[1] = monoForeground;
+        if (usePixelFormat24) {
+            Pack24(tightAfterBuf, &cl->format, 2);
+            paletteLen = 6;
+        } else
+            paletteLen = 8;
+
+        memcpy(&updateBuf[ublen], tightAfterBuf, paletteLen);
+        ublen += paletteLen;
+        cl->rfbBytesSent[rfbEncodingTight] += 3 + paletteLen;
+        break;
+
+    case 16:
+        EncodeMonoRect16((CARD8 *)tightBeforeBuf, w, h);
+
+        ((CARD16 *)tightAfterBuf)[0] = (CARD16)monoBackground;
+        ((CARD16 *)tightAfterBuf)[1] = (CARD16)monoForeground;
+
+        memcpy(&updateBuf[ublen], tightAfterBuf, 4);
+        ublen += 4;
+        cl->rfbBytesSent[rfbEncodingTight] += 7;
+        break;
+
+    default:
+        EncodeMonoRect8((CARD8 *)tightBeforeBuf, w, h);
+
+        updateBuf[ublen++] = (char)monoBackground;
+        updateBuf[ublen++] = (char)monoForeground;
+        cl->rfbBytesSent[rfbEncodingTight] += 5;
+    }
+
+    return CompressData(cl, streamId, dataLen,
+                        tightConf[compressLevel].monoZlibLevel,
+                        Z_DEFAULT_STRATEGY);
+}
+
+static Bool
+SendIndexedRect(cl, w, h)
+    rfbClientPtr cl;
+    int w, h;
+{
+    int streamId = 2;
+    int i, entryLen;
+
+    if ( (ublen + TIGHT_MIN_TO_COMPRESS + 6 +
+          paletteNumColors * cl->format.bitsPerPixel / 8) > UPDATE_BUF_SIZE ) {
+        if (!rfbSendUpdateBuf(cl))
+            return FALSE;
+    }
+
+    /* Prepare tight encoding header. */
+    updateBuf[ublen++] = (streamId | rfbTightExplicitFilter) << 4;
+    updateBuf[ublen++] = rfbTightFilterPalette;
+    updateBuf[ublen++] = (char)(paletteNumColors - 1);
+
+    /* Prepare palette, convert image. */
+    switch (cl->format.bitsPerPixel) {
+
+    case 32:
+        EncodeIndexedRect32((CARD8 *)tightBeforeBuf, w * h);
+
+        for (i = 0; i < paletteNumColors; i++) {
+            ((CARD32 *)tightAfterBuf)[i] =
+                palette.entry[i].listNode->rgb;
+        }
+        if (usePixelFormat24) {
+            Pack24(tightAfterBuf, &cl->format, paletteNumColors);
+            entryLen = 3;
+        } else
+            entryLen = 4;
+
+        memcpy(&updateBuf[ublen], tightAfterBuf, paletteNumColors * entryLen);
+        ublen += paletteNumColors * entryLen;
+        cl->rfbBytesSent[rfbEncodingTight] += 3 + paletteNumColors * entryLen;
+        break;
+
+    case 16:
+        EncodeIndexedRect16((CARD8 *)tightBeforeBuf, w * h);
+
+        for (i = 0; i < paletteNumColors; i++) {
+            ((CARD16 *)tightAfterBuf)[i] =
+                (CARD16)palette.entry[i].listNode->rgb;
+        }
+
+        memcpy(&updateBuf[ublen], tightAfterBuf, paletteNumColors * 2);
+        ublen += paletteNumColors * 2;
+        cl->rfbBytesSent[rfbEncodingTight] += 3 + paletteNumColors * 2;
+        break;
+
+    default:
+        return FALSE;           /* Should never happen. */
+    }
+
+    return CompressData(cl, streamId, w * h,
+                        tightConf[compressLevel].idxZlibLevel,
+                        Z_DEFAULT_STRATEGY);
+}
+
+static Bool
 SendFullColorRect(cl, w, h)
     rfbClientPtr cl;
     int w, h;
@@ -600,8 +810,50 @@ SendFullColorRect(cl, w, h)
         len = cl->format.bitsPerPixel / 8;
 
     return CompressData(cl, streamId, w * h * len,
-                        tightConf[0].rawZlibLevel,
+                        tightConf[compressLevel].rawZlibLevel,
                         Z_DEFAULT_STRATEGY);
+}
+
+/* Fake up Zlib headers so uncompressed data can be decoded by Zlib on the
+   remote end.  This is much faster than using Zlib with level=0. */
+
+#if (UPDATE_BUF_SIZE>65535)
+#error UPDATE_BUF_SIZE must be <= 65535
+#endif
+
+static Bool
+FakeCompressData(cl, dataLen)
+    rfbClientPtr cl;
+    int dataLen;
+{
+    int i, portionLen = UPDATE_BUF_SIZE - 5;
+
+    if (ublen + 2 > UPDATE_BUF_SIZE) {
+        if (!rfbSendUpdateBuf(cl))
+            return FALSE;
+    }
+    updateBuf[ublen++]=0x78;  updateBuf[ublen++]=0x01;
+    cl->rfbBytesSent[rfbEncodingTight] += 2;
+
+    for (i = 0; i < dataLen; i += portionLen) {
+        if (i + portionLen > dataLen) {
+            portionLen = dataLen - i;
+        }
+        if (ublen + portionLen + 5 > UPDATE_BUF_SIZE) {
+           if (!rfbSendUpdateBuf(cl))
+               return FALSE;
+        }
+        updateBuf[ublen++]=0;
+        updateBuf[ublen++]=(unsigned short)portionLen&0xFF;
+        updateBuf[ublen++]=((unsigned short)portionLen>>8)&0xFF;
+        updateBuf[ublen++]=(~((unsigned short)portionLen))&0xFF;
+        updateBuf[ublen++]=((~((unsigned short)portionLen))>>8)&0xFF;
+        memcpy(&updateBuf[ublen], &tightBeforeBuf[i], portionLen);
+        ublen += portionLen;
+        cl->rfbBytesSent[rfbEncodingTight] += portionLen + 5;
+    }
+
+    return TRUE;
 }
 
 static Bool
@@ -610,11 +862,24 @@ CompressData(cl, streamId, dataLen, zlibLevel, zlibStrategy)
     int streamId, dataLen, zlibLevel, zlibStrategy;
 {
     z_streamp pz;
-    int err;
+    int err, i;
+
+    if (zlibLevel == 0)
+        return FakeCompressData(cl, dataLen);
 
     if (dataLen < TIGHT_MIN_TO_COMPRESS) {
-        memcpy(&updateBuf[ublen], tightBeforeBuf, dataLen);
-        ublen += dataLen;
+        int portionLen = UPDATE_BUF_SIZE;
+        for (i = 0; i < dataLen; i += portionLen) {
+            if (i + portionLen > dataLen) {
+                portionLen = dataLen - i;
+            }
+            if (ublen + portionLen > UPDATE_BUF_SIZE) {
+                if (!rfbSendUpdateBuf(cl))
+                    return FALSE;
+            }
+            memcpy(&updateBuf[ublen], &tightBeforeBuf[i], portionLen);
+            ublen += portionLen;
+        }
         cl->rfbBytesSent[rfbEncodingTight] += dataLen;
         return TRUE;
     }
@@ -695,6 +960,226 @@ static Bool SendCompressedData(cl, compressedLen)
 }
 
 /*
+ * Code to determine how many different colors used in rectangle.
+ */
+
+static void
+FillPalette8(data, w, pitch, h)
+    CARD8 *data;
+    int w, pitch, h;
+{
+    CARD8 c0, c1;
+    int i, j, i2 = 0, j2 = 0, n0, n1;
+
+    paletteNumColors = 0;
+
+    c0 = data[0];
+    for (j = 0; j < h; j++) {
+        for (i = 0; i < w; i++) {
+            if (data[j * pitch + i] != c0) goto done;
+        }
+    }
+    done:
+    if (j >= h) {
+        paletteNumColors = 1;
+        return;                 /* Solid rectangle */
+    }
+
+    if (paletteMaxColors < 2)
+        return;
+    n0 = j * w + i;
+    c1 = data[j * pitch + i];
+    n1 = 0;
+    i++;  if (i >= w) {i = 0;  j++;}
+    for (j2 = j; j2 < h; j2++) {
+        for (i2 = i; i2 < w; i2++) {
+            if (data[j2 * pitch + i2] == c0) {
+                n0++;
+            } else if (data[j2 * pitch + i2] == c1) {
+                n1++;
+            } else
+                goto done2;
+        }
+        i = 0;
+    }
+    done2:
+    if (j2 >= h) {
+        if (n0 > n1) {
+            monoBackground = (CARD32)c0;
+            monoForeground = (CARD32)c1;
+        } else {
+            monoBackground = (CARD32)c1;
+            monoForeground = (CARD32)c0;
+        }
+        paletteNumColors = 2;   /* Two colors */
+    }
+}
+
+#define DEFINE_FILL_PALETTE_FUNCTION(bpp)                               \
+                                                                        \
+static void                                                             \
+FillPalette##bpp(data, w, pitch, h)                                     \
+    CARD##bpp *data;                                                    \
+    int w, pitch, h;                                                    \
+{                                                                       \
+    CARD##bpp c0, c1, ci;                                               \
+    int i, j, i2, j2, n0, n1, ni;                                       \
+                                                                        \
+    c0 = data[0];                                                       \
+    for (j = 0; j < h; j++) {                                           \
+        for (i = 0; i < w; i++) {                                       \
+            if (data[j * pitch + i] != c0) goto done;                   \
+        }                                                               \
+    }                                                                   \
+    done:                                                               \
+    if (j >= h) {                                                       \
+        paletteNumColors = 1;   /* Solid rectangle */                   \
+        return;                                                         \
+    }                                                                   \
+                                                                        \
+    if (paletteMaxColors < 2) {                                         \
+        paletteNumColors = 0;   /* Full-color encoding preferred */     \
+        return;                                                         \
+    }                                                                   \
+                                                                        \
+    n0 = j * w + i;                                                     \
+    c1 = data[j * pitch + i];                                           \
+    n1 = 0;                                                             \
+    i++;  if (i >= w) {i = 0;  j++;}                                    \
+    for (j2 = j; j2 < h; j2++) {                                        \
+        for (i2 = i; i2 < w; i2++) {                                    \
+            ci = data[j2 * pitch + i2];                                 \
+            if (ci == c0) {                                             \
+                n0++;                                                   \
+            } else if (ci == c1) {                                      \
+                n1++;                                                   \
+            } else                                                      \
+                goto done2;                                             \
+        }                                                               \
+        i = 0;                                                          \
+    }                                                                   \
+    done2:                                                              \
+    if (j2 >= h) {                                                      \
+        if (n0 > n1) {                                                  \
+            monoBackground = (CARD32)c0;                                \
+            monoForeground = (CARD32)c1;                                \
+        } else {                                                        \
+            monoBackground = (CARD32)c1;                                \
+            monoForeground = (CARD32)c0;                                \
+        }                                                               \
+        paletteNumColors = 2;   /* Two colors */                        \
+        return;                                                         \
+    }                                                                   \
+                                                                        \
+    PaletteReset();                                                     \
+    PaletteInsert (c0, (CARD32)n0, bpp);                                \
+    PaletteInsert (c1, (CARD32)n1, bpp);                                \
+                                                                        \
+    ni = 1;                                                             \
+    i2++;  if (i2 >= w) {i2 = 0;  j2++;}                                \
+    for (j = j2; j < h; j++) {                                          \
+        for (i = i2; i < w; i++) {                                      \
+            if (data[j * pitch + i] == ci) {                            \
+                ni++;                                                   \
+            } else {                                                    \
+                if (!PaletteInsert (ci, (CARD32)ni, bpp))               \
+                    return;                                             \
+                ci = data[j * pitch + i];                               \
+                ni = 1;                                                 \
+            }                                                           \
+        }                                                               \
+        i2 = 0;                                                         \
+    }                                                                   \
+                                                                        \
+    PaletteInsert (ci, (CARD32)ni, bpp);                                \
+}
+
+DEFINE_FILL_PALETTE_FUNCTION(16)
+DEFINE_FILL_PALETTE_FUNCTION(32)
+
+
+/*
+ * Functions to operate with palette structures.
+ */
+
+#define HASH_FUNC16(rgb) ((int)((((rgb) >> 8) + (rgb)) & 0xFF))
+#define HASH_FUNC32(rgb) ((int)((((rgb) >> 16) + ((rgb) >> 8)) & 0xFF))
+
+static void
+PaletteReset(void)
+{
+    paletteNumColors = 0;
+    memset(palette.hash, 0, 256 * sizeof(COLOR_LIST *));
+}
+
+static int
+PaletteInsert(rgb, numPixels, bpp)
+    CARD32 rgb;
+    int numPixels;
+    int bpp;
+{
+    COLOR_LIST *pnode;
+    COLOR_LIST *prev_pnode = NULL;
+    int hash_key, idx, new_idx, count;
+
+    hash_key = (bpp == 16) ? HASH_FUNC16(rgb) : HASH_FUNC32(rgb);
+
+    pnode = palette.hash[hash_key];
+
+    while (pnode != NULL) {
+        if (pnode->rgb == rgb) {
+            /* Such palette entry already exists. */
+            new_idx = idx = pnode->idx;
+            count = palette.entry[idx].numPixels + numPixels;
+            if (new_idx && palette.entry[new_idx-1].numPixels < count) {
+                do {
+                    palette.entry[new_idx] = palette.entry[new_idx-1];
+                    palette.entry[new_idx].listNode->idx = new_idx;
+                    new_idx--;
+                }
+                while (new_idx && palette.entry[new_idx-1].numPixels < count);
+                palette.entry[new_idx].listNode = pnode;
+                pnode->idx = new_idx;
+            }
+            palette.entry[new_idx].numPixels = count;
+            return paletteNumColors;
+        }
+        prev_pnode = pnode;
+        pnode = pnode->next;
+    }
+
+    /* Check if palette is full. */
+    if (paletteNumColors == 256 || paletteNumColors == paletteMaxColors) {
+        paletteNumColors = 0;
+        return 0;
+    }
+
+    /* Move palette entries with lesser pixel counts. */
+    for ( idx = paletteNumColors;
+          idx > 0 && palette.entry[idx-1].numPixels < numPixels;
+          idx-- ) {
+        palette.entry[idx] = palette.entry[idx-1];
+        palette.entry[idx].listNode->idx = idx;
+    }
+
+    /* Add new palette entry into the freed slot. */
+    pnode = &palette.list[paletteNumColors];
+    if (prev_pnode != NULL) {
+        prev_pnode->next = pnode;
+    } else {
+        palette.hash[hash_key] = pnode;
+    }
+    pnode->next = NULL;
+    pnode->idx = idx;
+    pnode->rgb = rgb;
+    palette.entry[idx].listNode = pnode;
+    palette.entry[idx].numPixels = numPixels;
+
+    return (++paletteNumColors);
+}
+
+
+/*
  * Converting 32-bit color samples into 24-bit colors.
  * Should be called only when redMax, greenMax and blueMax are 255.
  * Color components assumed to be byte-aligned.
@@ -729,6 +1214,105 @@ static void Pack24(buf, fmt, count)
     }
 }
 
+
+/*
+ * Converting truecolor samples into palette indices.
+ */
+
+#define DEFINE_IDX_ENCODE_FUNCTION(bpp)                                 \
+                                                                        \
+static void                                                             \
+EncodeIndexedRect##bpp(buf, count)                                      \
+    CARD8 *buf;                                                         \
+    int count;                                                          \
+{                                                                       \
+    COLOR_LIST *pnode;                                                  \
+    CARD##bpp *src;                                                     \
+    CARD##bpp rgb;                                                      \
+    int rep = 0;                                                        \
+                                                                        \
+    src = (CARD##bpp *) buf;                                            \
+                                                                        \
+    while (count--) {                                                   \
+        rgb = *src++;                                                   \
+        while (count && *src == rgb) {                                  \
+            rep++, src++, count--;                                      \
+        }                                                               \
+        pnode = palette.hash[HASH_FUNC##bpp(rgb)];                      \
+        while (pnode != NULL) {                                         \
+            if ((CARD##bpp)pnode->rgb == rgb) {                         \
+                *buf++ = (CARD8)pnode->idx;                             \
+                while (rep) {                                           \
+                    *buf++ = (CARD8)pnode->idx;                         \
+                    rep--;                                              \
+                }                                                       \
+                break;                                                  \
+            }                                                           \
+            pnode = pnode->next;                                        \
+        }                                                               \
+    }                                                                   \
+}
+
+DEFINE_IDX_ENCODE_FUNCTION(16)
+DEFINE_IDX_ENCODE_FUNCTION(32)
+
+#define DEFINE_MONO_ENCODE_FUNCTION(bpp)                                \
+                                                                        \
+static void                                                             \
+EncodeMonoRect##bpp(buf, w, h)                                          \
+    CARD8 *buf;                                                         \
+    int w, h;                                                           \
+{                                                                       \
+    CARD##bpp *ptr;                                                     \
+    CARD##bpp bg;                                                       \
+    unsigned int value, mask;                                           \
+    int aligned_width;                                                  \
+    int x, y, bg_bits;                                                  \
+                                                                        \
+    ptr = (CARD##bpp *) buf;                                            \
+    bg = (CARD##bpp) monoBackground;                                    \
+    aligned_width = w - w % 8;                                          \
+                                                                        \
+    for (y = 0; y < h; y++) {                                           \
+        for (x = 0; x < aligned_width; x += 8) {                        \
+            for (bg_bits = 0; bg_bits < 8; bg_bits++) {                 \
+                if (*ptr++ != bg)                                       \
+                    break;                                              \
+            }                                                           \
+            if (bg_bits == 8) {                                         \
+                *buf++ = 0;                                             \
+                continue;                                               \
+            }                                                           \
+            mask = 0x80 >> bg_bits;                                     \
+            value = mask;                                               \
+            for (bg_bits++; bg_bits < 8; bg_bits++) {                   \
+                mask >>= 1;                                             \
+                if (*ptr++ != bg) {                                     \
+                    value |= mask;                                      \
+                }                                                       \
+            }                                                           \
+            *buf++ = (CARD8)value;                                      \
+        }                                                               \
+                                                                        \
+        mask = 0x80;                                                    \
+        value = 0;                                                      \
+        if (x >= w)                                                     \
+            continue;                                                   \
+                                                                        \
+        for (; x < w; x++) {                                            \
+            if (*ptr++ != bg) {                                         \
+                value |= mask;                                          \
+            }                                                           \
+            mask >>= 1;                                                 \
+        }                                                               \
+        *buf++ = (CARD8)value;                                          \
+    }                                                                   \
+}
+
+DEFINE_MONO_ENCODE_FUNCTION(8)
+DEFINE_MONO_ENCODE_FUNCTION(16)
+DEFINE_MONO_ENCODE_FUNCTION(32)
+
 /*
  * JPEG compression stuff.
  */
@@ -745,14 +1329,19 @@ SendJpegRect(cl, x, y, w, h, quality)
     int dy;
     char *srcbuf;
     int ps=rfbServerFormat.bitsPerPixel/8;
-    int subsamp=compressLevel2subsamp[compressLevel];
-    unsigned long size;
-    int flags=0;
+    int subsamp=subsampLevel2tjsubsamp[subsampLevel];
+    unsigned long size=0;
+    int flags=0, pitch;
+    unsigned char *tmpbuf=NULL;
 
-    if (ps < 3) {
-      rfbLog("Error: Server must be run with 24-bit or 32-bit depth\n");  return 0;
+    if (rfbServerFormat.bitsPerPixel == 8)
+        return SendFullColorRect(cl, w, h);
+
+
+    if(ps<2) {
+      rfbLog("Error: JPEG requires 16-bit, 24-bit, or 32-bit pixel format.\n");
+      return 0;
     }
-
     if(!j) {
       if((j=tjInitCompress())==NULL) {
         rfbLog("JPEG Error: %s\n", tjGetErrorStr());  return 0;
@@ -772,18 +1361,60 @@ SendJpegRect(cl, x, y, w, h, quality)
         tightAfterBufSize = TJBUFSIZE(w,h);
     }
 
-    if(rfbServerFormat.bigEndian && ps==4) flags|=TJ_ALPHAFIRST;
-    if(rfbServerFormat.redShift==16 && rfbServerFormat.blueShift==0)
-        flags|=TJ_BGR;
-    if(rfbServerFormat.bigEndian) flags^=TJ_BGR;
+    if (ps == 2) {
+        CARD16 *srcptr, pix;
+        unsigned char *dst;
+        int inRed, inGreen, inBlue, i, j;
 
-    srcbuf=&rfbScreen.pfbMemory[y * rfbScreen.paddedWidthInBytes + x * ps];
-    if(tjCompress(j, (unsigned char *)srcbuf, w, rfbScreen.paddedWidthInBytes,
-      h, ps, (unsigned char *)tightAfterBuf, &jpegDstDataLen, subsamp, quality,
+        if((tmpbuf=(unsigned char *)malloc(w*h*3))==NULL)
+            rfbLog("Memory allocation failure!\n");
+        srcptr = (CARD16 *)
+            &rfbScreen.pfbMemory[y * rfbScreen.paddedWidthInBytes +
+                                 x * ps];
+        dst = tmpbuf;
+        for(j=0; j<h; j++) {
+            CARD16 *srcptr2=srcptr;
+            unsigned char *dst2=dst;
+            for(i=0; i<w; i++) {
+                pix = *srcptr2++;
+                inRed = (int)
+                    (pix >> rfbServerFormat.redShift   & rfbServerFormat.redMax);
+                inGreen = (int)
+                    (pix >> rfbServerFormat.greenShift & rfbServerFormat.greenMax);
+                inBlue  = (int)
+                    (pix >> rfbServerFormat.blueShift  & rfbServerFormat.blueMax);
+                *dst2++ = (CARD8)((inRed   * 255 + rfbServerFormat.redMax / 2) /
+                          rfbServerFormat.redMax);                          
+               	*dst2++ = (CARD8)((inGreen * 255 + rfbServerFormat.greenMax / 2) /
+                          rfbServerFormat.greenMax);
+                *dst2++ = (CARD8)((inBlue  * 255 + rfbServerFormat.blueMax / 2) /
+                          rfbServerFormat.blueMax);
+            }
+            srcptr+=rfbScreen.paddedWidthInBytes;
+            dst+=w*3;
+        }
+        srcbuf = tmpbuf;
+        pitch = w*3;
+        ps = 3;
+    } else {
+        if(rfbServerFormat.bigEndian && ps==4) flags|=TJ_ALPHAFIRST;
+        if(rfbServerFormat.redShift==16 && rfbServerFormat.blueShift==0)
+            flags|=TJ_BGR;
+        if(rfbServerFormat.bigEndian) flags^=TJ_BGR;
+        srcbuf=&rfbScreen.pfbMemory[y * rfbScreen.paddedWidthInBytes + x * ps];
+        pitch=rfbScreen.paddedWidthInBytes;
+    }
+
+    if(tjCompress(j, (unsigned char *)srcbuf, w, pitch,
+      h, ps, (unsigned char *)tightAfterBuf, &size, subsamp, quality,
       flags)==-1) {
       rfbLog("JPEG Error: %s\n", tjGetErrorStr());
+      if(tmpbuf) {free(tmpbuf);  tmpbuf=NULL;}
       return 0;
     }
+    jpegDstDataLen=(int)size;
+
+    if(tmpbuf) {free(tmpbuf);  tmpbuf=NULL;}
 
     if (ublen + TIGHT_MIN_TO_COMPRESS + 1 > UPDATE_BUF_SIZE) {
         if (!rfbSendUpdateBuf(cl))

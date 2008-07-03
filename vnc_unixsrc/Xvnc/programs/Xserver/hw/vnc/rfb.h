@@ -261,6 +261,7 @@ typedef struct rfbClientRec {
     Bool zsActive[4];
     int zsLevel[4];
     int tightCompressLevel;
+    int tightSubsampLevel;
     int tightQualityLevel;
 
     Bool enableLastRectEncoding;   /* client supports LastRect encoding */
@@ -564,6 +565,7 @@ extern Bool rfbSendRectEncodingZlib(rfbClientPtr cl, int x, int y, int w,
 /* tight.c */
 
 #define TIGHT_DEFAULT_COMPRESSION  0
+#define TIGHT_DEFAULT_SUBSAMP      0
 #define TIGHT_DEFAULT_QUALITY      95
 
 extern int rfbNumCodedRectsTight(rfbClientPtr cl, int x,int y,int w,int h);

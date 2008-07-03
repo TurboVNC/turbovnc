@@ -55,6 +55,7 @@ from the X Consortium.
 /* Use ``#define CORBA'' to enable CORBA control interface */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
 #include <sys/types.h>
@@ -111,11 +112,11 @@ static HWEventQueueType *mieqCheckForInput[2];
 #ifdef sun
 // Use ABGR instead of ARGB because it performs better.
 static char primaryOrder[4] = "bgr";
-static int redBits=8, greenBits=8, blueBits=8;
 #else
 static char primaryOrder[4] = "";
-static int redBits, greenBits, blueBits;
 #endif
+static int redBits, greenBits, blueBits;
+
 
 static Bool rfbScreenInit(int index, ScreenPtr pScreen, int argc,
 			  char **argv);
@@ -189,7 +190,6 @@ ddxProcessArgument (argc, argv, i)
     {
 	if (i + 1 >= argc) UseMsg();
 	rfbScreen.depth = atoi(argv[i+1]);
-	if (rfbScreen.depth < 24) rfbScreen.depth = 24;
 #ifdef CORBA
 	screenDepth= rfbScreen.depth;
 #endif
@@ -212,9 +212,6 @@ ddxProcessArgument (argc, argv, i)
 	    ErrorF("Invalid pixel format %s\n", argv[i+1]);
 	    UseMsg();
 	}
-	if (redBits < 8) redBits = 8;
-	if (greenBits < 8) greenBits = 8;
-	if (blueBits < 8) blueBits = 8;
 
 	return 2;
     }
@@ -904,6 +901,7 @@ void
 ddxUseMsg()
 {
     ErrorF("-geometry WxH          set framebuffer width & height\n");
+    ErrorF("-depth D               set framebuffer depth\n");
     ErrorF("-pixelformat format    set pixel format (BGRnnn or RGBnnn)\n");
     ErrorF("-udpinputport port     UDP port for keyboard/pointer data\n");
     ErrorF("-rfbport port          TCP port for RFB protocol\n");
