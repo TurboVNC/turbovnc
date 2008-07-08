@@ -22,6 +22,10 @@ and continues to use TurboJPEG for high-color-depth image tiles.  The
 resulting compression scheme should be both tighter and faster than pure JPEG
 in all cases.
 -------------------------------------------------------------------------------
+[4]
+The TurboVNC Unix server now executes ~/.vnc/xstartup.turbovnc instead of
+~/.vnc/xstartup.  This is to avoid conflicts with other VNC flavors.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
