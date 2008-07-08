@@ -26,6 +26,10 @@ in all cases.
 The TurboVNC Unix server now executes ~/.vnc/xstartup.turbovnc instead of
 ~/.vnc/xstartup.  This is to avoid conflicts with other VNC flavors.
 -------------------------------------------------------------------------------
+[5]
+Shift-Click and Control-Click now work properly when using the X11 TurboVNC
+viewer.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
