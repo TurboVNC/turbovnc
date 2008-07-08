@@ -572,6 +572,7 @@ DecompressJpegRectBPP(int x, int y, int w, int h)
   if(!tjhnd) {
     if((tjhnd=tjInitDecompress())==NULL) {
       fprintf(stderr, "TurboJPEG error: %s\n", tjGetErrorStr());
+      free(compressedData);
       return False;
     }
   }     
@@ -586,6 +587,7 @@ DecompressJpegRectBPP(int x, int y, int w, int h)
   if(tjDecompress(tjhnd, (unsigned char *)compressedData, (unsigned long)compressedLen,
     (unsigned char *)dstptr, w, image->bytes_per_line, h, ps, flags)==-1) {
     fprintf(stderr, "TurboJPEG error: %s\n", tjGetErrorStr());
+    free(compressedData);
     return False;
   }
 
