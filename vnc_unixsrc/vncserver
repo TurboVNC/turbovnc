@@ -60,8 +60,8 @@ $authType = "-rfbauth $vncUserDir/passwd";
 # passwords are always kept on the local filesystem. To do that, just
 # uncomment the line below. Note that in this case Xvnc's .Xauthority
 # file will be searched in the same $vncUserDir directory by default,
-# and $ENV{HOME}/.vncstartup will be executed instead of usual
-# $vncUserDir/xstartup.
+# and $ENV{HOME}/.turbovncstartup will be executed instead of usual
+# $vncUserDir/xstartup.turbovnc.
 #
 # $vncUserDir = "/tmp/$ENV{USER}-vnc";
 
@@ -104,7 +104,7 @@ $xauthorityFile = "$ENV{XAUTHORITY}";
 
 $vncUserDirUnderTmp = ($vncUserDir =~ m|^/tmp/.+|) ? 1 : 0;
 $xstartup = ($vncUserDirUnderTmp) ?
-  "$ENV{HOME}/.vncstartup" : "$vncUserDir/xstartup";
+  "$ENV{HOME}/.turbovncstartup" : "$vncUserDir/xstartup.turbovnc";
 unless ($xauthorityFile) {
     if ($vncUserDirUnderTmp) {
         $xauthorityFile = "$vncUserDir/.Xauthority";
