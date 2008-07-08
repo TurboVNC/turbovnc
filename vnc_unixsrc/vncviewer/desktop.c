@@ -178,10 +178,12 @@ HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev, Boolean *cont)
     break;
 
   case LeaveNotify:
-    for (i = 0; i < 256; i++) {
-      if (modifierPressed[i]) {
-	SendKeyEvent(XKeycodeToKeysym(dpy, i, 0), False);
-	modifierPressed[i] = False;
+    if (ev->xcrossing.mode == NotifyNormal) {
+      for (i = 0; i < 256; i++) {
+	if (modifierPressed[i]) {
+	  SendKeyEvent(XKeycodeToKeysym(dpy, i, 0), False);
+	  modifierPressed[i] = False;
+	}
       }
     }
     break;
