@@ -1,5 +1,5 @@
 ===============================================================================
-Significant changes between 0.4 and 0.4.1
+Significant changes between 0.4 and 0.5
 ===============================================================================
 [1]
 The Windows TurboVNC server now works properly (albeit more slowly) when the
@@ -9,6 +9,32 @@ server's graphics card is configured for a 16-bit pixel depth.
 0.4 [12] was supposed to allow vncserver to work even if xauth was not in the
 PATH, but unfortunately there was a bug in that patch.  This bug has been
 fixed, so vncserver should now really work if xauth is not in the PATH.
+-------------------------------------------------------------------------------
+[3]
+It was discovered that pure JPEG encoding was not the most efficient method of
+compression for all 3D image workloads.  Particularly, CAD applications and
+other types of applications that generate images with sharp edges and reduced
+color palettes compress much better with traditional Tight encoding.  However,
+traditional Tight encoding is too slow to stream real-time full-screen 3D
+images.  Thus, a hybrid scheme was developed which uses the fastest elements
+of Tight encoding with minimal Zlib compression for low-color-depth image tiles
+and continues to use TurboJPEG for high-color-depth image tiles.  The
+resulting compression scheme should be both tighter and faster than pure JPEG
+in all cases.
+-------------------------------------------------------------------------------
+[4]
+The TurboVNC Unix server now executes ~/.vnc/xstartup.turbovnc instead of
+~/.vnc/xstartup.  This is to avoid conflicts with other VNC flavors.
+-------------------------------------------------------------------------------
+[5]
+Shift-Click and Control-Click now work properly when using the X11 TurboVNC
+viewer.
+-------------------------------------------------------------------------------
+[6]
+When running in OpenSolaris 2008.05, the default xstartup.turbovnc file did
+not launch JDS, since the JDS launch script is in a different location on that
+platform.  This resulted in a TurboVNC session that had no window manager.
+This has been fixed.
 -------------------------------------------------------------------------------
 
 
