@@ -36,6 +36,10 @@ Build Environment:
 
      http://msdn2.microsoft.com/en-us/windowsserver/bb980924.aspx
 
+   * Add the SDK binary directory (for instance,
+     c:\Program Files\Microsoft SDKs\Windows\v6.0A\bin)
+     to the system or user PATH environment variable prior to building
+     TurboVNC.
    * Add the SDK include directory (for instance,
      c:\Program Files\Microsoft SDKs\Windows\v6.0A\include)
      to the system or user INCLUDE environment variable prior to building
