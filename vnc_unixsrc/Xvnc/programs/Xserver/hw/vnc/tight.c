@@ -141,9 +141,13 @@ static Bool CompressData(rfbClientPtr cl, int streamId, int dataLen,
                          int zlibLevel, int zlibStrategy);
 static Bool SendCompressedData(rfbClientPtr cl, int compressedLen);
 
-static void FillPalette8(CARD8 *data, int w, int pitch, int h);
-static void FillPalette16(CARD16 *data, int w, int pitch, int h);
-static void FillPalette32(CARD32 *data, int w, int pitch, int h);
+static void FillPalette8(int count);
+static void FillPalette16(int count);
+static void FillPalette32(int count);
+static void FastFillPalette16(rfbClientPtr cl, CARD16 *data, int w, int pitch,
+                              int h);
+static void FastFillPalette32(rfbClientPtr cl, CARD32 *data, int w, int pitch,
+                              int h);
 
 static void PaletteReset(void);
 static int PaletteInsert(CARD32 rgb, int numPixels, int bpp);
@@ -560,22 +564,46 @@ SendSubrect(cl, x, y, w, h)
          w * h >= tightConf[compressLevel].monoMinRectSize ) {
         paletteMaxColors = 2;
     }
-    switch (cl->format.bitsPerPixel) {
-    case 8:
-        FillPalette8(fbptr, w, rfbScreen.paddedWidthInBytes, h);
-        break;
-    case 16:
-        FillPalette16((CARD16 *)fbptr, w, rfbScreen.paddedWidthInBytes/2, h);
-        break;
-    default:
-        FillPalette32((CARD32 *)fbptr, w, rfbScreen.paddedWidthInBytes/4, h);
-    }
 
-    if(paletteNumColors != 0 || qualityLevel == -1
-        || cl->format.bitsPerPixel < 16) {
+    if (cl->format.bitsPerPixel == rfbServerFormat.bitsPerPixel &&
+        cl->format.redMax == rfbServerFormat.redMax &&
+        cl->format.greenMax == rfbServerFormat.greenMax && 
+        cl->format.blueMax == rfbServerFormat.blueMax &&
+        cl->format.bitsPerPixel >= 16) {
+
+        /* This is so we can avoid translating the pixels when compressing
+           with JPEG, since it is unnecessary */
+        switch (cl->format.bitsPerPixel) {
+        case 16:
+            FastFillPalette16(cl, (CARD16 *)fbptr, w,
+                              rfbScreen.paddedWidthInBytes/2, h);
+            break;
+        default:
+            FastFillPalette32(cl, (CARD32 *)fbptr, w,
+                              rfbScreen.paddedWidthInBytes/4, h);
+        }
+
+        if(paletteNumColors != 0 || qualityLevel == -1) {
+            (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
+                               &cl->format, fbptr, tightBeforeBuf,
+                               rfbScreen.paddedWidthInBytes, w, h);
+        }
+    }
+    else {
         (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
                            &cl->format, fbptr, tightBeforeBuf,
                            rfbScreen.paddedWidthInBytes, w, h);
+
+        switch (cl->format.bitsPerPixel) {
+        case 8:
+            FillPalette8(w * h);
+            break;
+        case 16:
+            FillPalette16(w * h);
+            break;
+        default:
+            FillPalette32(w * h);
+        }
     }
 
     switch (paletteNumColors) {
@@ -964,46 +992,37 @@ static Bool SendCompressedData(cl, compressedLen)
  */
 
 static void
-FillPalette8(data, w, pitch, h)
-    CARD8 *data;
-    int w, pitch, h;
+FillPalette8(count)
+    int count;
 {
+    CARD8 *data = (CARD8 *)tightBeforeBuf;
     CARD8 c0, c1;
-    int i, j, i2 = 0, j2 = 0, n0, n1;
+    int i, n0, n1;
 
     paletteNumColors = 0;
 
     c0 = data[0];
-    for (j = 0; j < h; j++) {
-        for (i = 0; i < w; i++) {
-            if (data[j * pitch + i] != c0) goto done;
-        }
-    }
-    done:
-    if (j >= h) {
+    for (i = 1; i < count && data[i] == c0; i++);
+    if (i == count) {
         paletteNumColors = 1;
         return;                 /* Solid rectangle */
     }
 
     if (paletteMaxColors < 2)
         return;
-    n0 = j * w + i;
-    c1 = data[j * pitch + i];
+
+    n0 = i;
+    c1 = data[i];
     n1 = 0;
-    i++;  if (i >= w) {i = 0;  j++;}
-    for (j2 = j; j2 < h; j2++) {
-        for (i2 = i; i2 < w; i2++) {
-            if (data[j2 * pitch + i2] == c0) {
-                n0++;
-            } else if (data[j2 * pitch + i2] == c1) {
-                n1++;
-            } else
-                goto done2;
-        }
-        i = 0;
+    for (i++; i < count; i++) {
+        if (data[i] == c0) {
+            n0++;
+        } else if (data[i] == c1) {
+            n1++;
+        } else
+            break;
     }
-    done2:
-    if (j2 >= h) {
+    if (i == count) {
         if (n0 > n1) {
             monoBackground = (CARD32)c0;
             monoForeground = (CARD32)c1;
@@ -1018,21 +1037,16 @@ FillPalette8(data, w, pitch, h)
 #define DEFINE_FILL_PALETTE_FUNCTION(bpp)                               \
                                                                         \
 static void                                                             \
-FillPalette##bpp(data, w, pitch, h)                                     \
-    CARD##bpp *data;                                                    \
-    int w, pitch, h;                                                    \
+FillPalette##bpp(count)                                                 \
+    int count;                                                          \
 {                                                                       \
+    CARD##bpp *data = (CARD##bpp *)tightBeforeBuf;                      \
     CARD##bpp c0, c1, ci;                                               \
-    int i, j, i2, j2, n0, n1, ni;                                       \
+    int i, n0, n1, ni;                                                  \
                                                                         \
     c0 = data[0];                                                       \
-    for (j = 0; j < h; j++) {                                           \
-        for (i = 0; i < w; i++) {                                       \
-            if (data[j * pitch + i] != c0) goto done;                   \
-        }                                                               \
-    }                                                                   \
-    done:                                                               \
-    if (j >= h) {                                                       \
+    for (i = 1; i < count && data[i] == c0; i++);                       \
+    if (i >= count) {                                                   \
         paletteNumColors = 1;   /* Solid rectangle */                   \
         return;                                                         \
     }                                                                   \
@@ -1042,24 +1056,19 @@ FillPalette##bpp(data, w, pitch, h)                                     \
         return;                                                         \
     }                                                                   \
                                                                         \
-    n0 = j * w + i;                                                     \
-    c1 = data[j * pitch + i];                                           \
+    n0 = i;                                                             \
+    c1 = data[i];                                                       \
     n1 = 0;                                                             \
-    i++;  if (i >= w) {i = 0;  j++;}                                    \
-    for (j2 = j; j2 < h; j2++) {                                        \
-        for (i2 = i; i2 < w; i2++) {                                    \
-            ci = data[j2 * pitch + i2];                                 \
-            if (ci == c0) {                                             \
-                n0++;                                                   \
-            } else if (ci == c1) {                                      \
-                n1++;                                                   \
-            } else                                                      \
-                goto done2;                                             \
-        }                                                               \
-        i = 0;                                                          \
+    for (i++; i < count; i++) {                                         \
+        ci = data[i];                                                   \
+        if (ci == c0) {                                                 \
+            n0++;                                                       \
+        } else if (ci == c1) {                                          \
+            n1++;                                                       \
+        } else                                                          \
+            break;                                                      \
     }                                                                   \
-    done2:                                                              \
-    if (j2 >= h) {                                                      \
+    if (i >= count) {                                                   \
         if (n0 > n1) {                                                  \
             monoBackground = (CARD32)c0;                                \
             monoForeground = (CARD32)c1;                                \
@@ -1076,26 +1085,121 @@ FillPalette##bpp(data, w, pitch, h)                                     \
     PaletteInsert (c1, (CARD32)n1, bpp);                                \
                                                                         \
     ni = 1;                                                             \
+    for (i++; i < count; i++) {                                         \
+        if (data[i] == ci) {                                            \
+            ni++;                                                       \
+        } else {                                                        \
+            if (!PaletteInsert (ci, (CARD32)ni, bpp))                   \
+                return;                                                 \
+            ci = data[i];                                               \
+            ni = 1;                                                     \
+        }                                                               \
+    }                                                                   \
+    PaletteInsert (ci, (CARD32)ni, bpp);                                \
+}
+
+DEFINE_FILL_PALETTE_FUNCTION(16)
+DEFINE_FILL_PALETTE_FUNCTION(32)
+
+#define DEFINE_FAST_FILL_PALETTE_FUNCTION(bpp)                          \
+                                                                        \
+static void                                                             \
+FastFillPalette##bpp(cl, data, w, pitch, h)                             \
+    rfbClientPtr cl;                                                    \
+    CARD##bpp *data;                                                    \
+    int w, pitch, h;                                                    \
+{                                                                       \
+    CARD##bpp c0, c1, ci, mask = 0, c0t, c1t, cit;                      \
+    int i, j, i2, j2, n0, n1, ni;                                       \
+                                                                        \
+    mask |= rfbServerFormat.redMax << rfbServerFormat.redShift;         \
+    mask |= rfbServerFormat.greenMax << rfbServerFormat.greenShift;     \
+    mask |= rfbServerFormat.blueMax << rfbServerFormat.blueShift;       \
+                                                                        \
+    c0 = data[0] & mask;                                                \
+    for (j = 0; j < h; j++) {                                           \
+        for (i = 0; i < w; i++) {                                       \
+            if ((data[j * pitch + i] & mask) != c0)                     \
+                goto done;                                              \
+        }                                                               \
+    }                                                                   \
+    done:                                                               \
+    if (j >= h) {                                                       \
+        paletteNumColors = 1;   /* Solid rectangle */                   \
+        return;                                                         \
+    }                                                                   \
+    if (paletteMaxColors < 2) {                                         \
+        paletteNumColors = 0;   /* Full-color encoding preferred */     \
+        return;                                                         \
+    }                                                                   \
+                                                                        \
+    n0 = j * w + i;                                                     \
+    c1 = data[j * pitch + i] & mask;                                    \
+    n1 = 0;                                                             \
+    i++;  if (i >= w) {i = 0;  j++;}                                    \
+    for (j2 = j; j2 < h; j2++) {                                        \
+        for (i2 = i; i2 < w; i2++) {                                    \
+            ci = data[j2 * pitch + i2] & mask;                          \
+            if (ci == c0) {                                             \
+                n0++;                                                   \
+            } else if (ci == c1) {                                      \
+                n1++;                                                   \
+            } else                                                      \
+                goto done2;                                             \
+        }                                                               \
+        i = 0;                                                          \
+    }                                                                   \
+    done2:                                                              \
+    (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,      \
+                       &cl->format, (char *)&c0, (char *)&c0t, bpp/8,   \
+                       1, 1);                                           \
+    (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,      \
+                       &cl->format, (char *)&c1, (char *)&c1t, bpp/8,   \
+                       1, 1);                                           \
+    if (j2 >= h) {                                                      \
+        if (n0 > n1) {                                                  \
+            monoBackground = (CARD32)c0t;                               \
+            monoForeground = (CARD32)c1t;                               \
+        } else {                                                        \
+            monoBackground = (CARD32)c1t;                               \
+            monoForeground = (CARD32)c0t;                               \
+        }                                                               \
+        paletteNumColors = 2;   /* Two colors */                        \
+        return;                                                         \
+    }                                                                   \
+                                                                        \
+    PaletteReset();                                                     \
+    PaletteInsert (c0t, (CARD32)n0, bpp);                               \
+    PaletteInsert (c1t, (CARD32)n1, bpp);                               \
+                                                                        \
+    ni = 1;                                                             \
     i2++;  if (i2 >= w) {i2 = 0;  j2++;}                                \
     for (j = j2; j < h; j++) {                                          \
         for (i = i2; i < w; i++) {                                      \
-            if (data[j * pitch + i] == ci) {                            \
+            if ((data[j * pitch + i] & mask) == ci) {                   \
                 ni++;                                                   \
             } else {                                                    \
-                if (!PaletteInsert (ci, (CARD32)ni, bpp))               \
+                (*cl->translateFn)(cl->translateLookupTable,            \
+                                   &rfbServerFormat, &cl->format,       \
+                                   (char *)&ci, (char *)&cit, bpp/8,    \
+                                   1, 1);                               \
+                if (!PaletteInsert (cit, (CARD32)ni, bpp))              \
                     return;                                             \
-                ci = data[j * pitch + i];                               \
+                ci = data[j * pitch + i] & mask;                        \
                 ni = 1;                                                 \
             }                                                           \
         }                                                               \
         i2 = 0;                                                         \
     }                                                                   \
                                                                         \
-    PaletteInsert (ci, (CARD32)ni, bpp);                                \
+    (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,      \
+                       &cl->format, (char *)&ci, (char *)&cit, bpp/8,   \
+                       1, 1);                                           \
+    PaletteInsert (cit, (CARD32)ni, bpp);                               \
 }
 
-DEFINE_FILL_PALETTE_FUNCTION(16)
-DEFINE_FILL_PALETTE_FUNCTION(32)
+DEFINE_FAST_FILL_PALETTE_FUNCTION(16)
+DEFINE_FAST_FILL_PALETTE_FUNCTION(32)
 
 
 /*
@@ -1390,7 +1494,7 @@ SendJpegRect(cl, x, y, w, h, quality)
                 *dst2++ = (CARD8)((inBlue  * 255 + rfbServerFormat.blueMax / 2) /
                           rfbServerFormat.blueMax);
             }
-            srcptr+=rfbScreen.paddedWidthInBytes;
+            srcptr+=rfbScreen.paddedWidthInBytes/ps;
             dst+=w*3;
         }
         srcbuf = tmpbuf;
