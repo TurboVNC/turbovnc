@@ -211,7 +211,7 @@ BEGIN
                     IDC_STATIC,135,55,190,33
     LTEXT           "Based on VNC software\nCopyright (C) 1999-2001 AT&&T Laboratories Cambridge\nCopyright (C) 2002-2003 RealVNC Ltd.\nhttp://www.realvnc.com/",
                     IDC_STATIC,135,95,190,33
-    LTEXT           "TurboVNC Viewer version 0.4.1",IDC_STATIC,135,7,190,9
+    LTEXT           "TurboVNC Viewer version 0.5",IDC_STATIC,135,7,190,9
     LTEXT           "Copyright (C) 2004 Landmark Graphics Corporation\nCopyright (C) 2004-2008 Sun Microsystems, Inc.\nhttp://www.virtualgl.org",
                     IDC_STATIC,135,23,190,25
     LTEXT           "[build time unknown]",IDC_BUILDTIME,135,15,190,9
