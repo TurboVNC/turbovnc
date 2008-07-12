@@ -193,8 +193,10 @@ rfbNewClient(sock)
     cl->tightCompressLevel = TIGHT_DEFAULT_COMPRESSION;
     cl->tightSubsampLevel = TIGHT_DEFAULT_SUBSAMP;
     cl->tightQualityLevel = -1;
-    for (i = 0; i < 4; i++)
+    for (i = 0; i < 4; i++) {
         cl->zsActive[i] = FALSE;
+        cl->fakezsActive[i] = FALSE;
+    }
 
     cl->enableCursorShapeUpdates = FALSE;
     cl->enableCursorPosUpdates = FALSE;
