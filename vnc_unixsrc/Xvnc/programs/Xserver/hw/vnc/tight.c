@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
+ *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  *  Copyright (C) 2000, 2001 Const Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
@@ -850,18 +850,38 @@ SendFullColorRect(cl, w, h)
 #endif
 
 static Bool
-FakeCompressData(cl, dataLen)
+FakeCompressData(cl, streamId, dataLen)
     rfbClientPtr cl;
-    int dataLen;
+    int streamId, dataLen;
 {
     int i, portionLen = UPDATE_BUF_SIZE - 5;
+    int headerLen = cl->fakezsActive[streamId] ? 0 : 2;
+    int compressedLen = dataLen +
+        ((dataLen + portionLen - 1) / portionLen) * 5 + 5 + headerLen;
 
-    if (ublen + 2 > UPDATE_BUF_SIZE) {
+    if (ublen + 2 + headerLen > UPDATE_BUF_SIZE) {
         if (!rfbSendUpdateBuf(cl))
             return FALSE;
     }
-    updateBuf[ublen++]=0x78;  updateBuf[ublen++]=0x01;
-    cl->rfbBytesSent[rfbEncodingTight] += 2;
+
+    updateBuf[ublen++] = compressedLen & 0x7F;
+    cl->rfbBytesSent[rfbEncodingTight]++;
+    if (compressedLen > 0x7F) {
+        updateBuf[ublen-1] |= 0x80;
+        updateBuf[ublen++] = compressedLen >> 7 & 0x7F;
+        cl->rfbBytesSent[rfbEncodingTight]++;
+        if (compressedLen > 0x3FFF) {
+            updateBuf[ublen-1] |= 0x80;
+            updateBuf[ublen++] = compressedLen >> 14 & 0xFF;
+            cl->rfbBytesSent[rfbEncodingTight]++;
+        }
+    }
+
+    if (!cl->fakezsActive[streamId]) {
+        cl->fakezsActive[streamId] = TRUE;
+        updateBuf[ublen++] = 0x78;  updateBuf[ublen++] = 0x01;
+        cl->rfbBytesSent[rfbEncodingTight] += 2;
+    }
 
     for (i = 0; i < dataLen; i += portionLen) {
         if (i + portionLen > dataLen) {
@@ -881,6 +901,16 @@ FakeCompressData(cl, dataLen)
         cl->rfbBytesSent[rfbEncodingTight] += portionLen + 5;
     }
 
+    if (ublen + 5 > UPDATE_BUF_SIZE) {
+       if (!rfbSendUpdateBuf(cl))
+           return FALSE;
+    }
+
+    updateBuf[ublen++] = 0;  updateBuf[ublen++] = 0;
+    updateBuf[ublen++] = 0;
+    updateBuf[ublen++] = (char)0xFF;  updateBuf[ublen++] = (char)0xFF;
+    cl->rfbBytesSent[rfbEncodingTight] += 5;
+
     return TRUE;
 }
 
@@ -892,25 +922,15 @@ CompressData(cl, streamId, dataLen, zlibLevel, zlibStrategy)
     z_streamp pz;
     int err, i;
 
-    if (zlibLevel == 0)
-        return FakeCompressData(cl, dataLen);
-
     if (dataLen < TIGHT_MIN_TO_COMPRESS) {
-        int portionLen = UPDATE_BUF_SIZE;
-        for (i = 0; i < dataLen; i += portionLen) {
-            if (i + portionLen > dataLen) {
-                portionLen = dataLen - i;
-            }
-            if (ublen + portionLen > UPDATE_BUF_SIZE) {
-                if (!rfbSendUpdateBuf(cl))
-                    return FALSE;
-            }
-            memcpy(&updateBuf[ublen], &tightBeforeBuf[i], portionLen);
-            ublen += portionLen;
-        }
+        memcpy(&updateBuf[ublen], tightBeforeBuf, dataLen);
+        ublen += dataLen;
         cl->rfbBytesSent[rfbEncodingTight] += dataLen;
         return TRUE;
     }
+
+    if (zlibLevel == 0)
+        return FakeCompressData(cl, streamId, dataLen);
 
     pz = &cl->zsStruct[streamId];
 
@@ -1109,12 +1129,14 @@ FastFillPalette##bpp(cl, data, w, pitch, h)                             \
     CARD##bpp *data;                                                    \
     int w, pitch, h;                                                    \
 {                                                                       \
-    CARD##bpp c0, c1, ci, mask = 0, c0t, c1t, cit;                      \
+    CARD##bpp c0, c1, ci, mask, c0t, c1t, cit;                          \
     int i, j, i2, j2, n0, n1, ni;                                       \
                                                                         \
-    mask |= rfbServerFormat.redMax << rfbServerFormat.redShift;         \
-    mask |= rfbServerFormat.greenMax << rfbServerFormat.greenShift;     \
-    mask |= rfbServerFormat.blueMax << rfbServerFormat.blueShift;       \
+    if (cl->translateFn != rfbTranslateNone) {                          \
+        mask = rfbServerFormat.redMax << rfbServerFormat.redShift;      \
+        mask |= rfbServerFormat.greenMax << rfbServerFormat.greenShift; \
+        mask |= rfbServerFormat.blueMax << rfbServerFormat.blueShift;   \
+    } else mask = ~0;                                                   \
                                                                         \
     c0 = data[0] & mask;                                                \
     for (j = 0; j < h; j++) {                                           \
@@ -1431,7 +1453,7 @@ SendJpegRect(cl, x, y, w, h, quality)
     int quality;
 {
     int dy;
-    char *srcbuf;
+    unsigned char *srcbuf;
     int ps=rfbServerFormat.bitsPerPixel/8;
     int subsamp=subsampLevel2tjsubsamp[subsampLevel];
     unsigned long size=0;
@@ -1505,13 +1527,13 @@ SendJpegRect(cl, x, y, w, h, quality)
         if(rfbServerFormat.redShift==16 && rfbServerFormat.blueShift==0)
             flags|=TJ_BGR;
         if(rfbServerFormat.bigEndian) flags^=TJ_BGR;
-        srcbuf=&rfbScreen.pfbMemory[y * rfbScreen.paddedWidthInBytes + x * ps];
+        srcbuf=(unsigned char *)&rfbScreen.pfbMemory[y * 
+            rfbScreen.paddedWidthInBytes + x * ps];
         pitch=rfbScreen.paddedWidthInBytes;
     }
 
-    if(tjCompress(j, (unsigned char *)srcbuf, w, pitch,
-      h, ps, (unsigned char *)tightAfterBuf, &size, subsamp, quality,
-      flags)==-1) {
+    if(tjCompress(j, srcbuf, w, pitch, h, ps, (unsigned char *)tightAfterBuf,
+      &size, subsamp, quality, flags)==-1) {
       rfbLog("JPEG Error: %s\n", tjGetErrorStr());
       if(tmpbuf) {free(tmpbuf);  tmpbuf=NULL;}
       return 0;
