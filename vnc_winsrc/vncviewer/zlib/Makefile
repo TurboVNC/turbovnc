@@ -5,12 +5,11 @@ OBJS = $(ODIR)/adler32.obj \
        $(ODIR)/compress.obj \
        $(ODIR)/crc32.obj \
        $(ODIR)/deflate.obj \
-       $(ODIR)/infblock.obj \
-       $(ODIR)/infcodes.obj \
+       $(ODIR)/gzio.obj \
+       $(ODIR)/infback.obj \
        $(ODIR)/inffast.obj \
        $(ODIR)/inflate.obj \
        $(ODIR)/inftrees.obj \
-       $(ODIR)/infutil.obj \
        $(ODIR)/trees.obj \
        $(ODIR)/uncompr.obj \
        $(ODIR)/zutil.obj
