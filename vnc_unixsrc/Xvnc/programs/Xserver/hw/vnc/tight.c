@@ -448,7 +448,7 @@ CheckSolidTile(x, y, w, h, colorPtr, needSameColor)
                                                                               \
 static Bool                                                                   \
 CheckSolidTile##bpp(x, y, w, h, colorPtr, needSameColor)                      \
-    int x, y;                                                                 \
+    int x, y, w, h;                                                           \
     CARD32 *colorPtr;                                                         \
     Bool needSameColor;                                                       \
 {                                                                             \
