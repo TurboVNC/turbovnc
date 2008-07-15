@@ -796,6 +796,7 @@ typedef struct _rfbZlibHeader {
 #define rfbTightExplicitFilter         0x04
 #define rfbTightFill                   0x08
 #define rfbTightJpeg                   0x09
+#define rfbTightNoZlib                 0x0A
 #define rfbTightMaxSubencoding         0x09
 
 /* Filters to improve compression efficiency */

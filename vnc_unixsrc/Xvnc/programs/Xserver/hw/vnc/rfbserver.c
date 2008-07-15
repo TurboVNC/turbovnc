@@ -195,7 +195,6 @@ rfbNewClient(sock)
     cl->tightQualityLevel = -1;
     for (i = 0; i < 4; i++) {
         cl->zsActive[i] = FALSE;
-        cl->fakezsActive[i] = FALSE;
     }
 
     cl->enableCursorShapeUpdates = FALSE;

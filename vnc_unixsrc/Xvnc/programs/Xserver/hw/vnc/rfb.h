@@ -259,7 +259,6 @@ typedef struct rfbClientRec {
 
     z_stream zsStruct[4];
     Bool zsActive[4];
-    Bool fakezsActive[4];
     int zsLevel[4];
     int tightCompressLevel;
     int tightSubsampLevel;
