@@ -56,7 +56,7 @@ typedef struct TIGHT_CONF_s {
 } TIGHT_CONF;
 
 static TIGHT_CONF tightConf[2] = {
-    {   512,   32,   6, 0, 0, 0,   4 },
+    { 65536, 2048,   6, 0, 0, 0,   4 },
 #if 0
     {  2048,  128,   6, 1, 1, 1,   8 },
     {  6144,  256,   8, 3, 3, 2,  24 },
@@ -139,7 +139,7 @@ static Bool SendFullColorRect (rfbClientPtr cl, int w, int h);
 
 static Bool CompressData(rfbClientPtr cl, int streamId, int dataLen,
                          int zlibLevel, int zlibStrategy);
-static Bool SendCompressedData(rfbClientPtr cl, int compressedLen);
+static Bool SendCompressedData(rfbClientPtr cl, char *buf, int compressedLen);
 
 static void FillPalette8(int count);
 static void FillPalette16(int count);
@@ -706,7 +706,10 @@ SendMonoRect(cl, w, h)
     dataLen = (w + 7) / 8;
     dataLen *= h;
 
-    updateBuf[ublen++] = (streamId | rfbTightExplicitFilter) << 4;
+    if (tightConf[compressLevel].monoZlibLevel == 0)
+        updateBuf[ublen++] = (char)((rfbTightNoZlib | rfbTightExplicitFilter) << 4);
+    else
+        updateBuf[ublen++] = (streamId | rfbTightExplicitFilter) << 4;
     updateBuf[ublen++] = rfbTightFilterPalette;
     updateBuf[ublen++] = 1;
 
@@ -768,7 +771,10 @@ SendIndexedRect(cl, w, h)
     }
 
     /* Prepare tight encoding header. */
-    updateBuf[ublen++] = (streamId | rfbTightExplicitFilter) << 4;
+    if (tightConf[compressLevel].idxZlibLevel == 0)
+        updateBuf[ublen++] = (char)((rfbTightNoZlib | rfbTightExplicitFilter) << 4);
+    else
+        updateBuf[ublen++] = (streamId | rfbTightExplicitFilter) << 4;
     updateBuf[ublen++] = rfbTightFilterPalette;
     updateBuf[ublen++] = (char)(paletteNumColors - 1);
 
@@ -828,7 +834,10 @@ SendFullColorRect(cl, w, h)
             return FALSE;
     }
 
-    updateBuf[ublen++] = 0x00;  /* stream id = 0, no flushing, no filter */
+    if (tightConf[compressLevel].rawZlibLevel == 0)
+        updateBuf[ublen++] = (char)(rfbTightNoZlib << 4);
+    else
+        updateBuf[ublen++] = 0x00;  /* stream id = 0, no flushing, no filter */
     cl->rfbBytesSent[rfbEncodingTight]++;
 
     if (usePixelFormat24) {
@@ -840,78 +849,6 @@ SendFullColorRect(cl, w, h)
     return CompressData(cl, streamId, w * h * len,
                         tightConf[compressLevel].rawZlibLevel,
                         Z_DEFAULT_STRATEGY);
-}
-
-/* Fake up Zlib headers so uncompressed data can be decoded by Zlib on the
-   remote end.  This is much faster than using Zlib with level=0. */
-
-#if (UPDATE_BUF_SIZE>65535)
-#error UPDATE_BUF_SIZE must be <= 65535
-#endif
-
-static Bool
-FakeCompressData(cl, streamId, dataLen)
-    rfbClientPtr cl;
-    int streamId, dataLen;
-{
-    int i, portionLen = UPDATE_BUF_SIZE - 5;
-    int headerLen = cl->fakezsActive[streamId] ? 0 : 2;
-    int compressedLen = dataLen +
-        ((dataLen + portionLen - 1) / portionLen) * 5 + 5 + headerLen;
-
-    if (ublen + 2 + headerLen > UPDATE_BUF_SIZE) {
-        if (!rfbSendUpdateBuf(cl))
-            return FALSE;
-    }
-
-    updateBuf[ublen++] = compressedLen & 0x7F;
-    cl->rfbBytesSent[rfbEncodingTight]++;
-    if (compressedLen > 0x7F) {
-        updateBuf[ublen-1] |= 0x80;
-        updateBuf[ublen++] = compressedLen >> 7 & 0x7F;
-        cl->rfbBytesSent[rfbEncodingTight]++;
-        if (compressedLen > 0x3FFF) {
-            updateBuf[ublen-1] |= 0x80;
-            updateBuf[ublen++] = compressedLen >> 14 & 0xFF;
-            cl->rfbBytesSent[rfbEncodingTight]++;
-        }
-    }
-
-    if (!cl->fakezsActive[streamId]) {
-        cl->fakezsActive[streamId] = TRUE;
-        updateBuf[ublen++] = 0x78;  updateBuf[ublen++] = 0x01;
-        cl->rfbBytesSent[rfbEncodingTight] += 2;
-    }
-
-    for (i = 0; i < dataLen; i += portionLen) {
-        if (i + portionLen > dataLen) {
-            portionLen = dataLen - i;
-        }
-        if (ublen + portionLen + 5 > UPDATE_BUF_SIZE) {
-           if (!rfbSendUpdateBuf(cl))
-               return FALSE;
-        }
-        updateBuf[ublen++]=0;
-        updateBuf[ublen++]=(unsigned short)portionLen&0xFF;
-        updateBuf[ublen++]=((unsigned short)portionLen>>8)&0xFF;
-        updateBuf[ublen++]=(~((unsigned short)portionLen))&0xFF;
-        updateBuf[ublen++]=((~((unsigned short)portionLen))>>8)&0xFF;
-        memcpy(&updateBuf[ublen], &tightBeforeBuf[i], portionLen);
-        ublen += portionLen;
-        cl->rfbBytesSent[rfbEncodingTight] += portionLen + 5;
-    }
-
-    if (ublen + 5 > UPDATE_BUF_SIZE) {
-       if (!rfbSendUpdateBuf(cl))
-           return FALSE;
-    }
-
-    updateBuf[ublen++] = 0;  updateBuf[ublen++] = 0;
-    updateBuf[ublen++] = 0;
-    updateBuf[ublen++] = (char)0xFF;  updateBuf[ublen++] = (char)0xFF;
-    cl->rfbBytesSent[rfbEncodingTight] += 5;
-
-    return TRUE;
 }
 
 static Bool
@@ -930,7 +867,7 @@ CompressData(cl, streamId, dataLen, zlibLevel, zlibStrategy)
     }
 
     if (zlibLevel == 0)
-        return FakeCompressData(cl, streamId, dataLen);
+        return SendCompressedData (cl, tightBeforeBuf, dataLen);
 
     pz = &cl->zsStruct[streamId];
 
@@ -969,11 +906,13 @@ CompressData(cl, streamId, dataLen, zlibLevel, zlibStrategy)
         return FALSE;
     }
 
-    return SendCompressedData(cl, tightAfterBufSize - pz->avail_out);
+    return SendCompressedData(cl, tightAfterBuf,
+        tightAfterBufSize - pz->avail_out);
 }
 
-static Bool SendCompressedData(cl, compressedLen)
+static Bool SendCompressedData(cl, buf, compressedLen)
     rfbClientPtr cl;
+    char *buf;
     int compressedLen;
 {
     int i, portionLen;
@@ -1000,7 +939,7 @@ static Bool SendCompressedData(cl, compressedLen)
             if (!rfbSendUpdateBuf(cl))
                 return FALSE;
         }
-        memcpy(&updateBuf[ublen], &tightAfterBuf[i], portionLen);
+        memcpy(&updateBuf[ublen], &buf[i], portionLen);
         ublen += portionLen;
     }
     cl->rfbBytesSent[rfbEncodingTight] += compressedLen;
@@ -1550,5 +1489,5 @@ SendJpegRect(cl, x, y, w, h, quality)
     updateBuf[ublen++] = (char)(rfbTightJpeg << 4);
     cl->rfbBytesSent[rfbEncodingTight]++;
 
-    return SendCompressedData(cl, jpegDstDataLen);
+    return SendCompressedData(cl, tightAfterBuf, jpegDstDataLen);
 }
