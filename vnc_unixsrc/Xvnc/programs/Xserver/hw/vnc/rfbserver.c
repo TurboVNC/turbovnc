@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
+ *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  *  Copyright (C) 2000-2006 Constantin Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
@@ -64,20 +64,13 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl);
 static Bool rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy);
 static Bool rfbSendLastRectMarker(rfbClientPtr cl);
 
+
 /*
- * Map of quality levels to JPEG quality levels (experimentally determined by
- * studying compression ratios of sample images)
- * 9 ~= 6:1,   8 ~= 8:1,   7 ~= 10:1,  6 ~= 12:1,  5 ~= 14:1,
- * 4 ~= 16:1,  3 ~= 18:1,  2 ~= 20:1,  1 ~= 22:1,  0 ~= 24:1
- * This is to provide compatibility with TightVNC clients
+ * Map of quality levels to provide compatibility with TightVNC clients
  */
 
 static int JPEG_QUAL[10] = {
-   41, 48, 57, 56, 66, 74, 72, 81, 88, 94
-};
-
-static int JPEG_SUBSAMP[10] = {
-   1, 1, 1, 2, 2, 2, 0, 0, 0, 0
+   5, 10, 15, 25, 37, 50, 60, 70, 75, 80
 };
 
 
@@ -193,9 +186,8 @@ rfbNewClient(sock)
     cl->tightCompressLevel = TIGHT_DEFAULT_COMPRESSION;
     cl->tightSubsampLevel = TIGHT_DEFAULT_SUBSAMP;
     cl->tightQualityLevel = -1;
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < 4; i++)
         cl->zsActive[i] = FALSE;
-    }
 
     cl->enableCursorShapeUpdates = FALSE;
     cl->enableCursorPosUpdates = FALSE;
@@ -553,8 +545,8 @@ rfbSendInteractionCaps(cl)
     SetCapInfo(&enc_list[i++],  rfbEncodingTight,          rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingCompressLevel0, rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingQualityLevel0,  rfbTightVncVendor);
-    SetCapInfo(&enc_list[i++],  rfbJpegQualityLevel1,      rfbTightVncVendor);
-    SetCapInfo(&enc_list[i++],  rfbJpegSubsamp1X,          rfbTightVncVendor);
+    SetCapInfo(&enc_list[i++],  rfbJpegQualityLevel1,      rfbTurboVncVendor);
+    SetCapInfo(&enc_list[i++],  rfbJpegSubsamp1X,          rfbTurboVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingXCursor,        rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingRichCursor,     rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingPointerPos,     rfbTightVncVendor);
@@ -771,7 +763,7 @@ rfbProcessClientNormalMessage(cl)
 		} else if ( enc >= (CARD32)rfbEncodingQualityLevel0 &&
 			    enc <= (CARD32)rfbEncodingQualityLevel9 ) {
 		    cl->tightQualityLevel = JPEG_QUAL[enc & 0x0F];
-		    cl->tightSubsampLevel = JPEG_SUBSAMP[enc & 0x0F];
+		    cl->tightSubsampLevel = 2;
 		    rfbLog("Using JPEG subsampling %d, Q%d for client %s\n",
 			   cl->tightSubsampLevel, cl->tightQualityLevel, cl->host);
 		} else if ( enc >= (CARD32)rfbJpegQualityLevel1 &&
