@@ -1,4 +1,6 @@
 /*
+ *  Copyright (C) 2004-2008 Sun Microsystems, Inc. All Rights Reserved.
+ *  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
  *  Copyright (C) 2000-2006 Constantin Kaplinsky. All Rights Reserved.
  *  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -146,6 +148,7 @@ typedef struct _rfbCapabilityInfo {
 #define rfbStandardVendor "STDV"
 #define rfbTridiaVncVendor "TRDV"
 #define rfbTightVncVendor "TGHT"
+#define rfbTurboVncVendor "TRBO"
 
 
 /*****************************************************************************
@@ -468,7 +471,7 @@ typedef struct _rfbInteractionCapsMsg {
 #define rfbJpegSubsamp4X           0xFFFFFD01
 #define rfbJpegSubsamp2X           0xFFFFFD02
 #define rfbJpegSubsampGray         0xFFFFFD03
-  	 
+
 #define rfbEncodingCompressLevel0  0xFFFFFF00
 #define rfbEncodingCompressLevel1  0xFFFFFF01
 #define rfbEncodingCompressLevel2  0xFFFFFF02
@@ -506,7 +509,8 @@ typedef struct _rfbInteractionCapsMsg {
 #define sig_rfbEncodingLastRect        "LASTRECT"
 #define sig_rfbEncodingNewFBSize       "NEWFBSIZ"
 #define sig_rfbEncodingQualityLevel0   "JPEGQLVL"
-
+#define sig_rfbJpegQualityLevel1       "JPEGQLV2"
+#define sig_rfbJpegSubsamp1X           "JPEGSAMP"
 
 /*****************************************************************************
  *
@@ -793,6 +797,7 @@ typedef struct _rfbZlibHeader {
 #define rfbTightExplicitFilter         0x04
 #define rfbTightFill                   0x08
 #define rfbTightJpeg                   0x09
+#define rfbTightNoZlib                 0x0A
 #define rfbTightMaxSubencoding         0x09
 
 /* Filters to improve compression efficiency */

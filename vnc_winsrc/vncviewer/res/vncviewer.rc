@@ -56,63 +56,68 @@ BEGIN
     PUSHBUTTON      "&Cancel",IDCANCEL,77,61,50,14
 END
 
-IDD_OPTIONDIALOG DIALOG DISCARDABLE  0, 0, 300, 192
+IDD_OPTIONDIALOG DIALOG DISCARDABLE  0, 0, 340, 193
 STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
-    GROUPBOX        "Image delivery",IDC_STATIC_FORMAT,4,4,123,143
-    LTEXT           "Image compression type:",IDC_STATIC_ENCODING,12,15,109,10,
+    GROUPBOX        "Image encoding",IDC_STATIC_FORMAT,4,4,163,144
+    LTEXT           "Protocol:",IDC_STATIC_ENCODING,12,15,109,10,
                     SS_CENTERIMAGE
-    COMBOBOX        IDC_ENCODING,20,27,56,79,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_ENCODING,20,27,140,79,CBS_DROPDOWNLIST | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    CHECKBOX        "Double buffering",IDC_DBCHECK,12,42,109,10, WS_GROUP
+    CHECKBOX        "Allow JPEG compression",IDC_ALLOW_JPEG,12,43,109,10
     LTEXT           "JPEG chrominance subsampling:",IDC_STATIC_SUBSAMP,12,
-                    54,109,10
-    RTEXT           "fast",IDC_STATIC_FAST,12,68,18,10
-    CONTROL         "Slider2",IDC_COMPRESSLEVEL,"msctls_trackbar32",
+                    57,109,10
+    LTEXT           "None",IDC_STATIC_SLEVEL,121,57,28,10
+    RTEXT           "fast",IDC_STATIC_SFAST,12,68,18,10
+    CONTROL         "Slider2",IDC_SUBSAMPLEVEL,"msctls_trackbar32",
                     TBS_AUTOTICKS | WS_TABSTOP,31,67,72,12
-    LTEXT           "best",IDC_STATIC_BEST,103,68,18,10
-    RTEXT           "Subsampling:",IDC_STATIC_TEXT_LEVEL,35,81,43,10
-    LTEXT           "None",IDC_STATIC_LEVEL,83,81,28,10
-    LTEXT           "JPEG image quality:",IDC_STATIC_QUAL,12,93,109,10
-    RTEXT           "poor",IDC_STATIC_POOR,12,107,18,10
+    LTEXT           "best",IDC_STATIC_SBEST,103,68,18,10
+    LTEXT           "JPEG image quality:",IDC_STATIC_QUAL,12,83,68,10
+    LTEXT           "1",IDC_STATIC_QUALITY,80,83,25,10
+    RTEXT           "poor",IDC_STATIC_POOR,12,94,18,10
     CONTROL         "Slider1",IDC_QUALITYLEVEL,"msctls_trackbar32",
-                    TBS_AUTOTICKS | WS_TABSTOP,31,106,72,12
-    LTEXT           "best",IDC_STATIC_QBEST,103,107,18,10
-    RTEXT           "Quality:",IDC_STATIC_TEXT_QUALITY,31,120,42,10
-    LTEXT           "1",IDC_STATIC_QUALITY,78,120,25,10
-    CONTROL         "Allow CopyRect encoding",ID_SESSION_SET_CRECT,"Button",
-                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,12,132,109,10
-    GROUPBOX        "Restrictions",IDC_STATIC_RESTRICTIONS,4,150,123,38
-    CHECKBOX        "View only (inputs ignored)",IDC_VIEWONLY,12,161,109,10
+                    TBS_AUTOTICKS | WS_TABSTOP,31,93,72,12
+    LTEXT           "best",IDC_STATIC_QBEST,103,94,18,10
+    LTEXT           "Zlib compression level:",IDC_STATIC_COMPRESS,12,109,77,10
+    LTEXT           "None",IDC_STATIC_LEVEL,89,109,28,10
+    RTEXT           "fast",IDC_STATIC_FAST,12,120,18,10
+    CONTROL         "Slider3",IDC_COMPRESSLEVEL,"msctls_trackbar32",
+                    TBS_AUTOTICKS | WS_TABSTOP,31,119,72,12
+    LTEXT           "best",IDC_STATIC_BEST,103,120,18,10
+    CHECKBOX        "Allow CopyRect encoding",ID_SESSION_SET_CRECT,
+                    12,133,109,10,WS_GROUP | WS_TABSTOP
+    GROUPBOX        "Restrictions",IDC_STATIC_RESTRICTIONS,4,151,163,38
+    CHECKBOX        "View only (inputs ignored)",IDC_VIEWONLY,12,162,109,10
     CONTROL         "Disable clipboard transfer",IDC_DISABLECLIPBOARD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,12,173,109,10
-    GROUPBOX        "Display",IDC_STATIC_DISPLAY,136,4,160,52
-    LTEXT           "Scale by:",IDC_STATIC_SCALE,145,15,36,10,SS_CENTERIMAGE
-    COMBOBOX        IDC_SCALE_EDIT,181,14,36,85,CBS_DROPDOWN | 
+                    BS_AUTOCHECKBOX | WS_TABSTOP,12,174,109,10
+    GROUPBOX        "Display",IDC_STATIC_DISPLAY,176,4,160,64
+    LTEXT           "Scale by:",IDC_STATIC_SCALE,185,15,36,10,SS_CENTERIMAGE
+    COMBOBOX        IDC_SCALE_EDIT,221,14,36,85,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "%",IDC_STATIC_P,222,15,10,10,SS_CENTERIMAGE
+    LTEXT           "%",IDC_STATIC_P,262,15,10,10,SS_CENTERIMAGE
+    CHECKBOX        "Double buffering",IDC_DBCHECK,185,29,145,10, WS_GROUP
     CONTROL         "Full-screen mode",IDC_FULLSCREEN,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,145,29,145,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,185,41,145,10
     CONTROL         "Deiconify on remote Bell event",IDC_BELLDEICONIFY,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,145,41,145,10
-    GROUPBOX        "Mouse",IDC_STATIC_MOUSE,136,61,160,39
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,185,53,145,10
+    GROUPBOX        "Mouse",IDC_STATIC_MOUSE,176,73,160,39
     CONTROL         "Emulate 3 buttons (with 2-button click)",
                     IDC_EMULATECHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | 
-                    WS_TABSTOP,145,72,145,10
+                    WS_TABSTOP,185,84,145,10
     CONTROL         "Swap mouse buttons 2 and 3",ID_SESSION_SWAPMOUSE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,145,84,145,10
-    GROUPBOX        "Mouse cursor",IDC_STATIC_MCURSOR,136,104,160,49
+                    BS_AUTOCHECKBOX | WS_TABSTOP,185,96,145,10
+    GROUPBOX        "Mouse cursor",IDC_STATIC_MCURSOR,176,116,160,49
     CONTROL         "Track remote cursor locally",IDC_CSHAPE_ENABLE_RADIO,
-                    "Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,145,
-                    115,145,10
-    CONTROL         "Let remote server deal with mouse cursor",
-                    IDC_CSHAPE_DISABLE_RADIO,"Button",BS_AUTORADIOBUTTON,145,
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,185,
                     127,145,10
+    CONTROL         "Let remote server deal with mouse cursor",
+                    IDC_CSHAPE_DISABLE_RADIO,"Button",BS_AUTORADIOBUTTON,185,
+                    139,145,10
     CONTROL         "Don't show remote cursor",IDC_CSHAPE_IGNORE_RADIO,
-                    "Button",BS_AUTORADIOBUTTON,145,139,145,10
+                    "Button",BS_AUTORADIOBUTTON,185,151,145,10
     CONTROL         "Request shared session",IDC_SHARED,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,145,160,145,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,185,172,145,10
 END
 
 IDD_FTBROWSE_DLG DIALOGEX 0, 0, 183, 196
@@ -272,15 +277,15 @@ BEGIN
                     WS_VSCROLL | WS_HSCROLL
 END
 
-IDD_PARENT DIALOGEX 0, 0, 316, 238
+IDD_PARENT DIALOGEX 0, 0, 356, 238
 STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTEXTHELP | WS_EX_CONTROLPARENT
 CAPTION "TurboVNC Viewer Options"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    PUSHBUTTON      "&OK",IDOK,206,219,50,14
-    PUSHBUTTON      "&Cancel",IDCANCEL,261,219,50,14
-    CONTROL         "Tab1",IDC_TAB,"SysTabControl32",WS_TABSTOP,5,5,306,210
+    PUSHBUTTON      "&OK",IDOK,246,220,50,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,301,220,50,14
+    CONTROL         "Tab1",IDC_TAB,"SysTabControl32",WS_TABSTOP,5,5,346,211
 END
 
 IDD_CONNECTING_DIALOG DIALOG DISCARDABLE  0, 0, 210, 61
@@ -466,14 +471,14 @@ BEGIN
             VALUE "Comments", "Based on TightVNC by Constantin Kaplinsky; Based on VNC by AT&T Research Labs Cambridge, RealVNC Ltd.\0"
             VALUE "CompanyName", "The VirtualGL Project\0"
             VALUE "FileDescription", "vncviewer\0"
-            VALUE "FileVersion", "0, 4, 0, 0\0"
+            VALUE "FileVersion", "0, 5, 0, 0\0"
             VALUE "InternalName", "vncviewer\0"
             VALUE "LegalCopyright", "Copyright © 1999-2008 [many holders]\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "vncviewer.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "TurboVNC Win32 Viewer\0"
-            VALUE "ProductVersion", "0, 4, 0, 0\0"
+            VALUE "ProductVersion", "0, 5, 0, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END
@@ -591,7 +596,7 @@ BEGIN
     ID_CLOSEDAEMON          "Stop listening for incoming connections"
     ID_SHOWWINDOW           "Display a connection window"
     ID_NEWCONN              "Make a manual connection"
-    IDS_HELP                "vncviewer [/shared] [/noshared] [/swapmouse] \r\n      [/belldeiconify] [/listen [<port>]] [/fullscreen] [/restricted] [/viewonly] \r\n      [/emulate3] [/noemulate3] [/emulate3timeout <ms>] [/emulate3fuzz <pixels>] \r\n      [/notoolbar] [/scale <percentage>] [/config <filename>] [/disableclipboard] \r\n      [/compress <jpeg | rgb>] [/samp <gray | 1X | 2X | 4X>] [/quality <1-100>] \r\n      [/copyrect] [/nocopyrect] [/loglevel <n>] [/logfile <filename>] \r\n      [/register] [/password <clear text password>] [/nocursor] [/dotcursor] \r\n      [/smalldotcursor] [/normalcursor] [/help] [/nocursorshape] [/noremotecursor] \r\n      [/singlebuffer] [/doublebuffer] \r\n      [<server>[:<display>]] \r\n\r\nFor full details, see the documentation."
+    IDS_HELP                "vncviewer [/8bit] [/no8bit] [/shared] [/noshared] [/swapmouse] \r\n      [/belldeiconify] [/listen [<port>]] [/fullscreen] [/restricted] [/viewonly] \r\n      [/emulate3] [/noemulate3] [/emulate3timeout <ms>] [/emulate3fuzz <pixels>] \r\n      [/notoolbar] [/scale <percentage>] [/config <filename>] [/disableclipboard] \r\n      [/encoding <encname>] [/compresslevel <n>] [/samp <gray | 1X | 2X | 4X>] \r\n      [/quality <1-100>] [/copyrect] [/nocopyrect] [/loglevel <n>] [/logfile <filename>] \r\n      [/register] [/nocursor] [/dotcursor] [/smalldotcursor] [/normalcursor] [/help] \r\n      [/nojpeg] [/nocursorshape] [/noremotecursor] [/singlebuffer] [/doublebuffer] \r\n      [/password <clear text password>] [<server>[:<display>]] \r\n\r\nFor full details, see the documentation."
 END
 
 STRINGTABLE DISCARDABLE 
@@ -618,7 +623,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDC_HOSTNAME_EDIT       "The IP address or host name of the VNC server to which you want to connect. Append :<display number> or ::<port number> to the host name (e.g. ""myhost:1"" or ""myhost::5901"") to connect to a specific display number or TCP port."
+    IDC_HOSTNAME_EDIT       "The IP address or host name of the VNC server to which you want to connect. Append :<display number> or ::<port number> to the host name (for example, ""myhost:1"" or ""myhost::5901"") to connect to a specific display number or TCP port."
     IDC_BELLDEICONIFY       "If this option is checked, a minimized viewer window will be restored upon receiving a remote ""Bell"" event."
     IDC_VIEWONLY            "If this option is checked, you will be able to see but not control the remote desktop."
 END
@@ -633,7 +638,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDC_EDIT_LOG_LEVEL      "Specifies the level of detail to include in the log file. Level 0 causes the viewer to log only the most important events, whereas Level 12 generates a lot of debugging output."
     IDC_SHARED              "Enable multiple simultaneous viewer connections to the same server desktop. If the session is not shared, then only one viewer can connect to the same session at the same time. Unlike the standard VNC, TurboVNC uses shared sessions by default."
-    IDC_ENCODING            "TurboVNC uses only Tight encoding, so this option has no effect."
+    IDC_ENCODING            "Choose one of these preset settings based on the type of network you are using and your desired image quality and performance."
     IDC_SCALE_EDIT          "Reduce or enlarge the image of the remote dektop."
     IDC_DOTCURSOR_RADIO     "Show local cursor position as a dot."
     IDC_NOCURSOR_RADIO      "Do not show local cursor position."
@@ -647,7 +652,8 @@ BEGIN
     IDC_CSHAPE_DISABLE_RADIO 
                             "In this mode, the server draws the mouse cursor and sends it to the client as an image. Mouse movements can be painfully slow in this mode, so use it only if the default setting does not work."
     IDC_QUALITYLEVEL        "Higher JPEG quality levels result in less compression but better image quality."
-    IDC_COMPRESSLEVEL       "Each pixel in a JPEG image is represented as a brightness (luminance) value and a color (chrominance) value. Chrominance subsampling discards every other chrominance value to reduce the image size, but it can create visible artifacts."
+    IDC_SUBSAMPLEVEL        "Each pixel in a JPEG image is represented as a brightness (luminance) value and a color (chrominance) value. Chrominance subsampling discards some or all chrominance values to reduce the image size, but it can create visible artifacts."
+    IDC_COMPRESSLEVEL       "Enabling Zlib compression will greatly reduce the bandwidth usage of Lossless encoding, but Zlib requires a lot of server CPU time (more than JPEG, even.)  Thus, Zlib is only really useful on slow networks."
     IDC_CSHAPE_ENABLE_RADIO "In this mode, the server sends only changes to the remote cursor's shape and position. This results in the best mouse responsiveness."
     IDC_CSHAPE_IGNORE_RADIO "In this mode, the remote mouse cursor will not be shown at all. Cursor shape updates and new coordinates received from the server will be ignored."
 END
@@ -655,6 +661,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_SESSION_SET_CRECT    "When a rectangular area on the server's display changes position (such as when a window is moved), CopyRect encoding allows the server to send only the coordinates of the new position rather than completely re-sending the rectangular area."
+    IDC_ALLOW_JPEG          "TurboVNC can use TurboJPEG to compress image tiles that have a large number of unique colors, thus saving a significant amount of bandwidth.  JPEG is mathematically lossy, but if High Quality JPEG is used, the loss should not be perceptible."
 END
 
 STRINGTABLE DISCARDABLE 

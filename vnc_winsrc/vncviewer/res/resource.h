@@ -158,9 +158,15 @@
 #define IDC_CLIENTUP                    1138
 #define IDC_LOG_BROWSE                  1139
 #define IDC_BUILDTIME                   1140
+#define IDC_STATIC_SUBSAMP              5000
+#define IDC_STATIC_QUAL                 5001
+#define IDC_STATIC_COMPRESS             5002
+#define IDC_STATIC_SFAST                5003
+#define IDC_STATIC_SBEST                5004
+#define IDC_STATIC_SLEVEL               5005
 #define ID_SESSION_SET_CRECT            32777
-#define IDC_STATIC_SUBSAMP              32778
-#define IDC_STATIC_QUAL                 32779
+#define IDC_SUBSAMPLEVEL                32778
+#define IDC_ALLOW_JPEG                  32779
 #define ID_SESSION_SWAPMOUSE            32785
 #define ID_CLOSEDAEMON                  40001
 #define ID_SHOWWINDOW                   40004
