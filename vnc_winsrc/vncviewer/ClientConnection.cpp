@@ -1,4 +1,4 @@
-//  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
+//  Copyright (C) 2005-2008 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2003-2006 Constantin Kaplinsky. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
@@ -223,6 +223,8 @@ void ClientConnection::InitCapabilities()
 	// Supported encoding types
 	m_encodingCaps.Add(rfbEncodingCopyRect, rfbStandardVendor,
 					   sig_rfbEncodingCopyRect, "Standard CopyRect encoding");
+	m_encodingCaps.Add(rfbEncodingHextile, rfbStandardVendor,
+					   sig_rfbEncodingHextile, "Standard Hextile encoding");
 	m_encodingCaps.Add(rfbEncodingTight, rfbTightVncVendor,
 					   sig_rfbEncodingTight, "Tight encoding by Constantin Kaplinsky");
 
@@ -241,6 +243,10 @@ void ClientConnection::InitCapabilities()
 					   sig_rfbEncodingLastRect, "LastRect protocol extension");
 	m_encodingCaps.Add(rfbEncodingNewFBSize, rfbTightVncVendor,
 					   sig_rfbEncodingNewFBSize, "Framebuffer size change");
+	m_encodingCaps.Add(rfbJpegQualityLevel1, rfbTurboVncVendor,
+					   sig_rfbJpegQualityLevel1, "TurboJPEG quality level");
+	m_encodingCaps.Add(rfbJpegSubsamp1X, rfbTurboVncVendor,
+					   sig_rfbJpegSubsamp1X, "TurboJPEG subsampling level");
 }
 
 // 
@@ -1532,7 +1538,14 @@ void ClientConnection::CreateLocalFramebuffer() {
 }
 
 void ClientConnection::SetupPixelFormat() {
-    if (!m_si.format.trueColour) {
+	// Have we requested a reduction to 8-bit?
+    if (m_opts.m_Use8Bit) {		
+      
+		vnclog.Print(2, _T("Requesting 8-bit truecolour\n"));  
+		m_myFormat = vnc8bitFormat;
+    
+		// We don't support colormaps so we'll ask the server to convert
+    } else if (!m_si.format.trueColour) {
         
         // We'll just request a standard 16-bit truecolor
         vnclog.Print(2, _T("Requesting 16-bit truecolour\n"));
@@ -1608,6 +1621,7 @@ void ClientConnection::SetFormatAndEncodings()
 	se->nEncodings = 0;
 
 	bool useCompressLevel = false;
+	bool useSubsampLevel = false;
 	int i;
 
 	// Put the preferred encoding first, and change it if the
@@ -1622,15 +1636,13 @@ void ClientConnection::SetFormatAndEncodings()
 					 i == rfbEncodingZlibHex ) {
 					useCompressLevel = true;
 				}
+				if ( i == rfbEncodingTight ) {
+					useSubsampLevel = true;
+				}
 			} else {
 				m_opts.m_PreferredEncoding--;
 			}
 		}
-	}
-	if(m_opts.m_PreferredEncoding < 0) {
-		m_opts.m_PreferredEncoding = rfbEncodingTight;
-		encs[se->nEncodings++] = Swap32IfLE(m_opts.m_PreferredEncoding);
-		useCompressLevel = true;
 	}
 
 	// Now we go through and put in all the other encodings in order.
@@ -1647,14 +1659,17 @@ void ClientConnection::SetFormatAndEncodings()
 				 i == rfbEncodingZlibHex ) {
 				useCompressLevel = true;
 			}
+			if ( i == rfbEncodingTight ) {
+				useSubsampLevel = true;
+			}
 		}
 	}
 
 	// Request desired compression level if applicable
 	if ( useCompressLevel &&
 		 m_opts.m_compressLevel >= 0 &&
-		 m_opts.m_compressLevel <= TVNC_SAMPOPT-1) {
-		encs[se->nEncodings++] = Swap32IfLE( rfbJpegSubsamp1X +
+		 m_opts.m_compressLevel <= 9) {
+		encs[se->nEncodings++] = Swap32IfLE( rfbEncodingCompressLevel0 +
 											 m_opts.m_compressLevel );
 	}
 
@@ -1667,10 +1682,21 @@ void ClientConnection::SetFormatAndEncodings()
 	}
 
 	// Request JPEG quality level if JPEG compression was enabled by user
-	if ( m_opts.m_jpegQualityLevel >= 1 &&
+	if ( m_opts.m_enableJpegCompression &&
+		 m_opts.m_jpegQualityLevel >= 1 &&
 		 m_opts.m_jpegQualityLevel <= 100) {
+		encs[se->nEncodings++] = Swap32IfLE( rfbEncodingQualityLevel0 +
+											 (m_opts.m_jpegQualityLevel - 1) / 10 );
 		encs[se->nEncodings++] = Swap32IfLE( rfbJpegQualityLevel1 - 1 +
 											 m_opts.m_jpegQualityLevel );
+	}
+
+	// Request desired subsampling level if applicable
+	if ( useSubsampLevel &&
+		 m_opts.m_subsampLevel >= 0 &&
+		 m_opts.m_subsampLevel <= TVNC_SAMPOPT-1) {
+		encs[se->nEncodings++] = Swap32IfLE( rfbJpegSubsamp1X +
+											 m_opts.m_subsampLevel );
 	}
 
 	// Notify the server that we support LastRect and NewFBSize encodings
@@ -1958,11 +1984,20 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 			return 0;
 		case ID_REQUEST_LOSSLESS_REFRESH: 
 		{
+			int encoding = _this->m_opts.m_PreferredEncoding;
+			int compressLevel = _this->m_opts.m_compressLevel;
 			int qual = _this->m_opts.m_jpegQualityLevel;
+			bool enablejpeg = _this->m_opts.m_enableJpegCompression;
 			_this->m_opts.m_jpegQualityLevel = -1;
+			_this->m_opts.m_enableJpegCompression = false;
+			_this->m_opts.m_PreferredEncoding = rfbEncodingTight;
+			_this->m_opts.m_compressLevel = 1;
 			_this->SetFormatAndEncodings();
 			_this->SendFullFramebufferUpdateRequest();
 			_this->m_opts.m_jpegQualityLevel = qual;
+			_this->m_opts.m_enableJpegCompression = enablejpeg;
+			_this->m_opts.m_PreferredEncoding = encoding;
+			_this->m_opts.m_compressLevel = compressLevel;
 			_this->SetFormatAndEncodings();
 			return 0;
 		}
@@ -2907,21 +2942,18 @@ void ClientConnection::ReadScreenUpdate() {
 				node = list;
 				r1 = &node->region;
 
-				if (r1->encoding == rfbEncodingTight
-					|| r1->encoding == rfbEncodingRaw) {
-					SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h); 
-					if (node->isFill) {
-						omni_mutex_lock l(m_bitmapdcMutex);
-						ObjectSelector b(m_hBitmapDC, m_hBitmap);
-						PaletteSelector p(m_hBitmapDC, m_hPalette);
-						FillSolidRect(r1->r.x, r1->r.y, r1->r.w, r1->r.h,
-							node->fillColour);
-					}
-					RECT rect;
-					SetRect(&rect, r1->r.x, r1->r.y,
-						r1->r.x + r1->r.w, r1->r.y + r1->r.h);
-					InvalidateScreenRect(&rect);
+				SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h); 
+				if (node->isFill) {
+					omni_mutex_lock l(m_bitmapdcMutex);
+					ObjectSelector b(m_hBitmapDC, m_hBitmap);
+					PaletteSelector p(m_hBitmapDC, m_hPalette);
+					FillSolidRect(r1->r.x, r1->r.y, r1->r.w, r1->r.h,
+						node->fillColour);
 				}
+				RECT rect;
+				SetRect(&rect, r1->r.x, r1->r.y,
+					r1->r.x + r1->r.w, r1->r.y + r1->r.h);
+				InvalidateScreenRect(&rect);
 				list = list->next;
 				free(node);
 			}
@@ -2968,6 +3000,9 @@ void ClientConnection::ReadScreenUpdate() {
 		case rfbEncodingCopyRect:
 			ReadCopyRect(&surh);
 			break;
+		case rfbEncodingHextile:
+			ReadHextileRect(&surh);
+			break;
 		case rfbEncodingTight:
 			ReadTightRect(&surh);
 			break;
@@ -2995,21 +3030,18 @@ void ClientConnection::ReadScreenUpdate() {
 			node = list;
 			r1 = &node->region;
 
-			if (r1->encoding == rfbEncodingTight
-				|| r1->encoding == rfbEncodingRaw) {
-				SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
-				if (node->isFill) {
-					omni_mutex_lock l(m_bitmapdcMutex);
-					ObjectSelector b(m_hBitmapDC, m_hBitmap);
-					PaletteSelector p(m_hBitmapDC, m_hPalette);
-					FillSolidRect(r1->r.x, r1->r.y, r1->r.w, r1->r.h,
-					node->fillColour);
-				}
-				RECT rect;
-				SetRect(&rect, r1->r.x, r1->r.y,
-					r1->r.x + r1->r.w, r1->r.y + r1->r.h);
-				InvalidateScreenRect(&rect);
+			SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
+			if (node->isFill) {
+				omni_mutex_lock l(m_bitmapdcMutex);
+				ObjectSelector b(m_hBitmapDC, m_hBitmap);
+				PaletteSelector p(m_hBitmapDC, m_hPalette);
+				FillSolidRect(r1->r.x, r1->r.y, r1->r.w, r1->r.h,
+				node->fillColour);
 			}
+			RECT rect;
+			SetRect(&rect, r1->r.x, r1->r.y,
+				r1->r.x + r1->r.w, r1->r.y + r1->r.h);
+			InvalidateScreenRect(&rect);
 			list = list->next;
 			free(node);
 		}
@@ -3260,3 +3292,176 @@ void ClientConnection::ReadNewFBSize(rfbFramebufferUpdateRectHeader *pfburh)
 	RealiseFullScreenMode(true);
 }
 
+void ClientConnection::InitSetPixels(void)
+{
+	SETUP_COLOR_SHORTCUTS;
+
+	m_srcpf=-1;
+	int srcps=m_myFormat.bitsPerPixel/8;
+	if(rs==0 && gs==8 && bs==16) {
+		if(srcps==3) m_srcpf=FBX_RGB;
+		else if(srcps==4) m_srcpf=FBX_RGBA;
+	}
+	else if(rs==16 && gs==8 && bs==0) {
+		if(srcps==3) m_srcpf=FBX_BGR;
+		else if(srcps==4) m_srcpf=FBX_BGRA;
+	}
+	else if(rs==8 && gs==16 && bs==24 && srcps==4) m_srcpf=FBX_ARGB;
+	else if(rs==24 && gs==16 && bs==8 && srcps==4) m_srcpf=FBX_ABGR;
+
+	if(m_srcpf < 0) {
+		// Source is not 24-bit or 32-bit
+		switch (m_myFormat.bitsPerPixel) {
+		case 8:
+			setPixels=&ClientConnection::setPixelsFullConv8;  break;
+		case 16:
+			setPixels=&ClientConnection::setPixelsFullConv16;  break;
+		case 24:
+		case 32:
+			setPixels=&ClientConnection::setPixelsFullConv32;  break;
+		default:
+			vnclog.Print(0, _T("Invalid number of bits per pixel: %d\n"),
+				m_myFormat.bitsPerPixel);
+			return;
+		}
+		return;
+	}
+
+	int srcbgr=fbx_bgr[m_srcpf], dstbgr=fbx_bgr[fb.format],
+		dstps=fbx_ps[fb.format];
+
+	if(srcbgr==dstbgr && srcps==dstps)
+		setPixels=&ClientConnection::setPixelsCopyLine;
+	else
+	{
+		if(srcbgr==dstbgr) setPixels=&ClientConnection::setPixelsCopyPixel;
+		else setPixels=&ClientConnection::setPixelsSlow;
+	}
+}
+
+#define DEFINE_SETPIXELSFULL_FUNC(bpp)                                        \
+void ClientConnection::setPixelsFullConv##bpp(char *buffer, int x, int y,     \
+	int srcw, int srch)                                                         \
+{                                                                             \
+	SETUP_COLOR_SHORTCUTS;                                                      \
+                                                                              \
+	int w=srcw, h=srch;                                                         \
+	if(x+w>fb.width) w=fb.width-x;                                              \
+	if(y+h>fb.height) h=fb.height-y;                                            \
+	if(w<1 || h<1) {                                                            \
+		vnclog.Print(0, _T("Rectangle out of bounds for screen: %d,%d %dx%d\n"),  \
+			x, y, srcw, srch);                                                      \
+		return;                                                                   \
+	}                                                                           \
+                                                                              \
+  CARD32 drs = fbx_roffset[fb.format]*8;                                      \
+  CARD32 dgs = fbx_goffset[fb.format]*8;                                      \
+  CARD32 dbs = fbx_boffset[fb.format]*8;                                      \
+                                                                              \
+	CARD##bpp *srcptr=(CARD##bpp *)buffer;                                      \
+	CARD##bpp *srcfinal=&srcptr[srcw*h];                                        \
+  CARD32 *dstptr = (CARD32 *)&fb.bits[y*fb.pitch + x*fbx_ps[fb.format]];      \
+  int dstw = fb.pitch / fbx_ps[fb.format];                                    \
+                                                                              \
+	for(; srcptr<srcfinal; srcptr+=srcw, dstptr+=dstw) {                        \
+		CARD##bpp *p=srcptr, *pfinal=&p[w];                                       \
+		CARD32 *dstptr2=dstptr;                                                   \
+		for(; p<pfinal; p++, dstptr2++)                                           \
+			*dstptr2 = (((((CARD32)(*p) >> rs) & rm) * 255 / rm) << drs)            \
+               | (((((CARD32)(*p) >> gs) & gm) * 255 / gm) << dgs)            \
+               | (((((CARD32)(*p) >> bs) & bm) * 255 / bm) << dbs);           \
+	}                                                                           \
+}
+
+DEFINE_SETPIXELSFULL_FUNC(8)
+DEFINE_SETPIXELSFULL_FUNC(16)
+DEFINE_SETPIXELSFULL_FUNC(32)
+
+void ClientConnection::setPixelsCopyLine(char *buffer, int x, int y, int srcw,
+	int srch)
+{
+	int w=srcw, h=srch;
+	if(x+w>fb.width) w=fb.width-x;
+	if(y+h>fb.height) h=fb.height-y;
+	if(w<1 || h<1) {
+		vnclog.Print(0, _T("Rectangle out of bounds for screen: %d,%d %dx%d\n"),
+			x, y, srcw, srch);
+		return;
+	}
+
+	int srcps=m_myFormat.bitsPerPixel/8;
+	int wps=w*srcps;
+	int srcstride=srcps*srcw;
+	char *srcptr=buffer, *dstptr=&fb.bits[y*fb.pitch + x*fbx_ps[fb.format]];
+	char *srcfinal=&srcptr[srcstride*h];
+
+	int srcaf=fbx_alphafirst[m_srcpf], dstaf=fbx_alphafirst[fb.format];
+	if(srcaf) srcptr++;
+	if(dstaf) dstptr++;
+	if(srcaf || dstaf)  wps--;
+
+	for(; srcptr<srcfinal; srcptr+=srcstride, dstptr+=fb.pitch)
+	{
+		memcpy(dstptr, srcptr, wps);
+	}
+}
+
+void ClientConnection::setPixelsCopyPixel(char *buffer, int x, int y, int srcw,
+	int srch)
+{
+	int w=srcw, h=srch;
+	if(x+w>fb.width) w=fb.width-x;
+	if(y+h>fb.height) h=fb.height-y;
+	if(w<1 || h<1) {
+		vnclog.Print(0, _T("Rectangle out of bounds for screen: %d,%d %dx%d\n"),
+			x, y, srcw, srch);
+		return;
+	}
+
+	int srcps=m_myFormat.bitsPerPixel/8;
+	int srcstride=srcps*srcw, dststride=fb.pitch;
+	char *srcptr=buffer, *dstptr=&fb.bits[y*fb.pitch + x*fbx_ps[fb.format]];
+	char *srcfinal=&srcptr[srcstride*h];
+
+	int srcaf=fbx_alphafirst[m_srcpf], dstaf=fbx_alphafirst[fb.format];
+	if(srcaf) srcptr++;
+	if(dstaf) dstptr++;
+
+	for(; srcptr<srcfinal; srcptr+=srcstride, dstptr+=dststride)
+	{
+		char *srcptr2=srcptr, *src2final=&srcptr2[srcps*w], *dstptr2=dstptr;
+		for(; srcptr2<src2final; srcptr2+=srcps, dstptr2+=fbx_ps[fb.format])
+		{
+			memcpy(dstptr2, srcptr2, 3);
+	 	}
+	}
+}
+
+void ClientConnection::setPixelsSlow(char *buffer, int x, int y, int srcw,
+	int srch)
+{
+	int w=srcw, h=srch;
+	if(x+w>fb.width) w=fb.width-x;
+	if(y+h>fb.height) h=fb.height-y;
+	if(w<1 || h<1) {
+		vnclog.Print(0, _T("Rectangle out of bounds for screen: %d,%d %dx%d\n"),
+			x, y, srcw, srch);
+		return;
+	}
+
+	int srcps=m_myFormat.bitsPerPixel/8;
+	int srcstride=srcps*srcw, dststride=fb.pitch;
+	char *srcptr=buffer, *dstptr=&fb.bits[y*fb.pitch + x*fbx_ps[fb.format]];
+	char *srcfinal=&srcptr[srcstride*h];
+
+	for(; srcptr<srcfinal; srcptr+=srcstride, dstptr+=dststride)
+	{
+		char *srcptr2=srcptr, *src2final=&srcptr2[srcps*w], *dstptr2=dstptr;
+		for(; srcptr2<src2final; srcptr2+=srcps, dstptr2+=fbx_ps[fb.format])
+		{
+			dstptr2[2]=srcptr2[0];
+			dstptr2[1]=srcptr2[1];
+			dstptr2[0]=srcptr2[2];
+	 	}
+	}
+}
