@@ -56,7 +56,8 @@
 #define TIGHT_ZLIB_BUFFER_SIZE 512
 
 class ClientConnection;
-typedef void (ClientConnection:: *tightFilterFunc)(int);
+typedef void (ClientConnection:: *tightFilterFunc)(int, int, int);
+typedef void (ClientConnection:: *setPixelsFunc)(char *, int, int, int, int);
 
 typedef struct _UpdateList
 {
@@ -165,21 +166,31 @@ private:
 
 	void ReadNewFBSize(rfbFramebufferUpdateRectHeader *pfburh);
 
+	void InitSetPixels(void);
+	setPixelsFunc setPixels;
+	void setPixelsFullConv8(char *, int, int, int, int);
+	void setPixelsFullConv16(char *, int, int, int, int);
+	void setPixelsFullConv32(char *, int, int, int, int);
+	void setPixelsCopyLine(char *, int, int, int, int);
+	void setPixelsCopyPixel(char *, int, int, int, int);
+	void setPixelsSlow(char *, int, int, int, int);
+	int m_srcpf;
+
 	// ClientConnectionTight.cpp
 	void ReadTightRect(rfbFramebufferUpdateRectHeader *pfburh);
 	int ReadCompactLen();
 	int InitFilterCopy (int rw, int rh);
 	int InitFilterGradient (int rw, int rh);
 	int InitFilterPalette (int rw, int rh);
-	void FilterCopy8 (int numRows);
-	void FilterCopy16 (int numRows);
-	void FilterCopy24 (int numRows);
-	void FilterCopy32 (int numRows);
-	void FilterGradient8 (int numRows);
-	void FilterGradient16 (int numRows);
-	void FilterGradient24 (int numRows);
-	void FilterGradient32 (int numRows);
-	void FilterPalette (int numRows);
+	void FilterCopy8 (int srcx, int srcy, int numRows);
+	void FilterCopy16 (int srcx, int srcy, int numRows);
+	void FilterCopy24 (int srcx, int srcy, int numRows);
+	void FilterCopy32 (int srcx, int srcy, int numRows);
+	void FilterGradient8 (int srcx, int srcy, int numRows);
+	void FilterGradient16 (int srcx, int srcy, int numRows);
+	void FilterGradient24 (int srcx, int srcy, int numRows);
+	void FilterGradient32 (int srcx, int srcy, int numRows);
+	void FilterPalette (int srcx, int srcy, int numRows);
 	void DecompressJpegRect(int x, int y, int w, int h);
 
 	// ClientConnectionZlibHex.cpp
@@ -309,7 +320,7 @@ private:
 	tightFilterFunc m_tightCurrentFilter;
 	bool m_tightCutZeros;
 	int m_tightRectWidth, m_tightRectColors;
-	COLORREF m_tightPalette[256];
+	CARD32 m_tightPalette[256];
 	CARD8 m_tightPrevRow[2048*3*sizeof(CARD16)];
 
 	// Bitmap for local copy of screen, and DC for writing to it.
@@ -477,28 +488,10 @@ public:
 #endif
 
 #define SETPIXELS(buffer, bpp, x, y, w, h)										\
-	{																			\
-		CARD##bpp *p = (CARD##bpp *) buffer;									\
-        register CARD##bpp pix;													\
-		for (int k = y; k < y+h; k++) {											\
-			for (int j = x; j < x+w; j++) {										\
-                    pix = *p;													\
-                    SETPIXEL(m_hBitmapDC, j,k, COLOR_FROM_PIXEL##bpp##(pix));	\
-					p++;														\
-			}																	\
-		}																		\
-	}
+	(this->*setPixels)((char *)buffer, x, y, w, h);
 
 #define SETPIXELS_NOCONV(buffer, x, y, w, h)									\
-	{																			\
-		CARD32 *p = (CARD32 *) buffer;											\
-		for (int k = y; k < y+h; k++) {											\
-			for (int j = x; j < x+w; j++) {										\
-                    SETPIXEL(m_hBitmapDC, j,k, *p);	                            \
-					p++;														\
-			}																	\
-		}																		\
-	}
+	(this->*setPixels)((char *)buffer, x, y, w, h);
 
 #endif // CLIENTCONNECTION_H__
 
