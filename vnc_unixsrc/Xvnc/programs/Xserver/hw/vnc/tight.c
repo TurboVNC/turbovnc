@@ -205,7 +205,10 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
     int x_best, y_best, w_best, h_best;
     char *fbptr;
 
-    compressLevel = cl->tightCompressLevel;
+    compressLevel = cl->tightCompressLevel > 0 ? 1 : 0;
+    tightConf[compressLevel].idxZlibLevel = cl->tightCompressLevel;
+    tightConf[compressLevel].monoZlibLevel = cl->tightCompressLevel;
+    tightConf[compressLevel].rawZlibLevel = cl->tightCompressLevel;
     qualityLevel = cl->tightQualityLevel;
     if (qualityLevel != -1) compressLevel = 1;
     subsampLevel = cl->tightSubsampLevel;
