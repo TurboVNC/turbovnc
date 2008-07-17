@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2004-2006 Sun Microsystems, Inc. All Rights Reserved.
+ *  Copyright (C) 2004-2008 Sun Microsystems, Inc. All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
  *  Copyright (C) 2000-2006 Constantin Kaplinsky. All Rights Reserved.
  *  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
@@ -148,6 +148,7 @@ typedef struct _rfbCapabilityInfo {
 #define rfbStandardVendor "STDV"
 #define rfbTridiaVncVendor "TRDV"
 #define rfbTightVncVendor "TGHT"
+#define rfbTurboVncVendor "TRBO"
 
 
 /*****************************************************************************
@@ -508,8 +509,8 @@ typedef struct _rfbInteractionCapsMsg {
 #define sig_rfbEncodingLastRect        "LASTRECT"
 #define sig_rfbEncodingNewFBSize       "NEWFBSIZ"
 #define sig_rfbEncodingQualityLevel0   "JPEGQLVL"
-#define sig_rfbJpegQualityLevel1       "TRBOQLVL"
-#define sig_rfbJpegSubsamp1X           "TRBOSAMP"
+#define sig_rfbJpegQualityLevel1       "JPEGQLV2"
+#define sig_rfbJpegSubsamp1X           "JPEGSAMP"
 
 /*****************************************************************************
  *
