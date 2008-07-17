@@ -403,7 +403,7 @@ InitOutput(screenInfo, argc, argv)
     initOutputCalled = TRUE;
 
     rfbLog("Xvnc version %s\n", XVNCRELEASE);
-    rfbLog("Copyright (C) 2004-2007 Sun Microsystems, Inc.\n");
+    rfbLog("Copyright (C) 2004-2008 Sun Microsystems, Inc.\n");
     rfbLog("Copyright (C) 2004 Landmark Graphics Corporation\n");
     rfbLog("Copyright (C) 2000-2007 TightVNC Group\n");
     rfbLog("Copyright (C) 1999 AT&T Laboratories Cambridge\n");
