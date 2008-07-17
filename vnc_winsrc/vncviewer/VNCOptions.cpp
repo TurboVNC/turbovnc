@@ -45,6 +45,7 @@ VNCOptions::VNCOptions()
 		m_UseEnc[i] = false;
 	
 	m_UseEnc[rfbEncodingRaw] = true;
+	m_UseEnc[rfbEncodingHextile] = true;
 	m_UseEnc[rfbEncodingTight] = true;
 	m_UseEnc[rfbEncodingCopyRect] = true;
 
@@ -53,6 +54,7 @@ VNCOptions::VNCOptions()
 	m_toolbar = true;
 	m_historyLimit = 32;
 	m_skipprompt = false;
+	m_Use8Bit = false;
 	m_DoubleBuffer = true;
 	m_PreferredEncoding = rfbEncodingTight;
 	m_SwapMouse = false;
@@ -89,7 +91,9 @@ VNCOptions::VNCOptions()
 	m_listenPort = INCOMING_PORT_OFFSET;
 	m_restricted = false;
 
-	m_compressLevel = TVNC_1X;
+	m_subsampLevel = TVNC_1X;
+	m_compressLevel = 1;
+	m_enableJpegCompression = true;
 	m_jpegQualityLevel = 95;
 	m_requestShapeUpdates = true;
 	m_ignoreShapeUpdates = false;
@@ -123,6 +127,7 @@ VNCOptions& VNCOptions::operator=(VNCOptions& s)
 	
 	m_ViewOnly			= s.m_ViewOnly;
 	m_FullScreen		= s.m_FullScreen;
+	m_Use8Bit			= s.m_Use8Bit;
 	m_DoubleBuffer      = s.m_DoubleBuffer;
 	m_PreferredEncoding = s.m_PreferredEncoding;
 	m_SwapMouse			= s.m_SwapMouse;
@@ -160,7 +165,9 @@ VNCOptions& VNCOptions::operator=(VNCOptions& s)
 	m_listenPort		= s.m_listenPort;
 	m_restricted		= s.m_restricted;
 
+	m_subsampLevel			= s.m_subsampLevel;
 	m_compressLevel			= s.m_compressLevel;
+	m_enableJpegCompression	= s.m_enableJpegCompression;
 	m_jpegQualityLevel		= s.m_jpegQualityLevel;
 	m_requestShapeUpdates	= s.m_requestShapeUpdates;
 	m_ignoreShapeUpdates	= s.m_ignoreShapeUpdates;
@@ -293,6 +300,10 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			m_FullScreen = true;
 		} else if ( SwitchMatch(args[j], _T("notoolbar"))) {
 			m_toolbar = false;
+		} else if ( SwitchMatch(args[j], _T("8bit"))) {
+			m_Use8Bit = true;
+		} else if ( SwitchMatch(args[j], _T("no8bit"))) {
+			m_Use8Bit = false;
 		} else if ( SwitchMatch(args[j], _T("singlebuffer"))) {
 			m_DoubleBuffer = false;
 		} else if ( SwitchMatch(args[j], _T("doublebuffer"))) {
@@ -317,6 +328,8 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			m_Emul3Buttons = true;
 		} else if ( SwitchMatch(args[j], _T("noemulate3") )) {
 			m_Emul3Buttons = false;
+		} else if ( SwitchMatch(args[j], _T("nojpeg") )) {
+			m_enableJpegCompression = false;
 		} else if ( SwitchMatch(args[j], _T("nocursorshape") )) {
 			m_requestShapeUpdates = false;
 		} else if ( SwitchMatch(args[j], _T("noremotecursor") )) {
@@ -429,24 +442,38 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			m_UseEnc[rfbEncodingCopyRect] = true;
 		} else if ( SwitchMatch(args[j], _T("nocopyrect") )) {
 			m_UseEnc[rfbEncodingCopyRect] = false;
-		} else if ( SwitchMatch(args[j], _T("compress") )) {
+		} else if ( SwitchMatch(args[j], _T("encoding") )) {
 			if (++j == i) {
-				ArgError(_T("No compression type specified"));
+				ArgError(_T("No encoding specified"));
 				continue;
 			}
 			int enc = -1;
-			if (_tcsicmp(args[j], _T("rgb")) == 0) {
+			if (_tcsicmp(args[j], _T("raw")) == 0) {
 				enc = rfbEncodingRaw;
-			} else if (_tcsicmp(args[j], _T("jpeg")) == 0) {
+			} else if (_tcsicmp(args[j], _T("hextile")) == 0) {
+				enc = rfbEncodingHextile;
+			} else if (_tcsicmp(args[j], _T("tight")) == 0) {
 				enc = rfbEncodingTight;
 			} else {
-				ArgError(_T("Invalid compression type specified"));
+				ArgError(_T("Invalid encoding specified"));
 				continue;
 			}
 			if (enc != -1) {
 				m_UseEnc[enc] = true;
 				m_PreferredEncoding = enc;
 			}
+		} else if ( SwitchMatch(args[j], _T("compresslevel") )) {
+			if (++j == i) {
+				ArgError(_T("No compression level specified"));
+				continue;
+			}
+			int level = -1;
+			if (_stscanf(args[j], _T("%d"), &level) != 1
+				|| level < 0 || level > 9) {
+				ArgError(_T("Invalid compression level specified"));
+				continue;
+			}
+			m_compressLevel = level;
 		} else if ( SwitchMatch(args[j], _T("samp") )) {
 			if (++j == i) {
 				ArgError(_T("No subsampling specified"));
@@ -463,7 +490,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 				ArgError(_T("Invalid subsampling specified"));
 				continue;
 			}
-			m_compressLevel = subsamp;
+			m_subsampLevel = subsamp;
 		} else if ( SwitchMatch(args[j], _T("quality") )) {
 			if (++j == i) {
 				ArgError(_T("No image quality level specified"));
@@ -535,6 +562,7 @@ void VNCOptions::Save(char *fname)
 	saveInt("restricted",			m_restricted,		fname);
 	saveInt("viewonly",				m_ViewOnly,			fname);
 	saveInt("fullscreen",			m_FullScreen,		fname);
+	saveInt("8bit",					m_Use8Bit,			fname);
 	saveInt("doublebuffer",			m_DoubleBuffer,		fname);
 	saveInt("shared",				m_Shared,			fname);
 	saveInt("swapmouse",			m_SwapMouse,		fname);
@@ -549,8 +577,9 @@ void VNCOptions::Save(char *fname)
 	saveInt("scale_num",			m_scale_num,		fname);
 	saveInt("cursorshape",			m_requestShapeUpdates, fname);
 	saveInt("noremotecursor",		m_ignoreShapeUpdates, fname);	
-	saveInt("subsampling", m_compressLevel,	fname);	
-	saveInt("quality", m_jpegQualityLevel,	fname);
+	saveInt("compresslevel", m_compressLevel,	fname);	
+	saveInt("subsampling", m_subsampLevel,	fname);	
+	saveInt("quality", m_enableJpegCompression?	m_jpegQualityLevel : -1,	fname);
 
 }
 
@@ -565,6 +594,7 @@ void VNCOptions::Load(char *fname)
 	m_restricted =			readInt("restricted",		m_restricted,	fname) != 0 ;
 	m_ViewOnly =			readInt("viewonly",			m_ViewOnly,		fname) != 0;
 	m_FullScreen =			readInt("fullscreen",		m_FullScreen,	fname) != 0;
+	m_Use8Bit =				readInt("8bit",				m_Use8Bit,		fname) != 0;
 	m_DoubleBuffer =		readInt("doublebuffer",		m_DoubleBuffer,	fname) != 0;
 	m_Shared =				readInt("shared",			m_Shared,		fname) != 0;
 	m_SwapMouse =			readInt("swapmouse",		m_SwapMouse,	fname) != 0;
@@ -579,13 +609,19 @@ void VNCOptions::Load(char *fname)
 	m_scale_num =			readInt("scale_num",		m_scale_num,	fname);
 	m_requestShapeUpdates =	readInt("cursorshape",		m_requestShapeUpdates, fname) != 0;
 	m_ignoreShapeUpdates =	readInt("noremotecursor",	m_ignoreShapeUpdates, fname) != 0;
-
-	int level =				readInt("subsampling",	-1,				fname);
+	int level =				readInt("compresslevel",	-1,				fname);
 	if (level != -1) {
 		m_compressLevel = level;
 	}
-	level =					readInt("quality",			-1,				fname);
+	level =				readInt("subsampling",	-1,				fname);
 	if (level != -1) {
+		m_subsampLevel = level;
+	}
+	level =					readInt("quality",			-1,				fname);
+	m_enableJpegCompression = true;
+	if (level == -1) {
+		m_enableJpegCompression = false;
+	} else {
 		m_jpegQualityLevel = level;
 	}
 }
@@ -760,8 +796,11 @@ BOOL CALLBACK VNCOptions::DlgProc(HWND hwndDlg, UINT uMsg,
 }
 
 static COMBOSTRING rfbcombo[MAX_LEN_COMBO] = {
-	"None (RGB)",rfbEncodingRaw,
-	"JPEG",rfbEncodingTight
+	"Tight + High Quality JPEG (LAN)", rfbEncodingTight, true, TVNC_1X, 95, -1,
+	"Tight + Medium Quality JPEG", rfbEncodingTight, true, TVNC_2X, 80, -1,
+	"Tight + Low Quality JPEG (WAN)", rfbEncodingTight, true, TVNC_4X, 30, -1,
+	"Lossless Tight (Gigabit)", rfbEncodingTight, false, -1, -1, 0,
+	"Lossless Tight + Zlib (WAN)", rfbEncodingTight, false, -1, -1, 1
 };
 
 static const char *sampopt2str[TVNC_SAMPOPT] = {
@@ -775,6 +814,13 @@ static const int sliderpos2sampopt[TVNC_SAMPOPT] = {
 static const int sampopt2sliderpos[TVNC_SAMPOPT] = {
 	3, 1, 2, 0
 };
+
+static const TCHAR *encodingString[17] = {
+	"Raw", "CopyRect", "RRE", "", "CoRRE", "Hextile", "Zlib", "Tight", "ZlibHex",
+	"", "", "", "", "", "", "", "ZRLE"
+};
+
+static int slidermax = 1;
 
 BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 											 WPARAM wParam, LPARAM lParam) {
@@ -799,10 +845,13 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 				SendMessage(hListBox, CB_INSERTSTRING, 
 							(WPARAM)i, 
 							(LPARAM)(int FAR*)rfbcombo[i].NameString);
-				if (rfbcombo[i].rfbEncoding == _this->m_PreferredEncoding) {
-					SendMessage(hListBox, CB_SETCURSEL, i, 0);
-				}
-			}			
+			}
+			if (_this->m_PreferredEncoding != rfbEncodingTight) {
+				SendMessage(hListBox, CB_INSERTSTRING, MAX_LEN_COMBO,
+					(LPARAM)encodingString[_this->m_PreferredEncoding]);
+				EnableWindow(hListBox, 0);
+			}
+
 			HWND hCopyRect = GetDlgItem(hwnd, ID_SESSION_SET_CRECT);
 			SendMessage(hCopyRect, BM_SETCHECK, _this->m_UseEnc[rfbEncodingCopyRect], 0);
 			
@@ -851,24 +900,36 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 			EnableWindow(hSwap,!_this->m_ViewOnly);
 			EnableWindow(hEmulate,!_this->m_ViewOnly);
 
+			HWND hAllowJpeg = GetDlgItem(hwnd, IDC_ALLOW_JPEG);
+			SendMessage(hAllowJpeg, BM_SETCHECK, _this->m_enableJpegCompression, 0);
+			
+			EnableWindow(hAllowJpeg, _this->m_PreferredEncoding == rfbEncodingTight);
+			
+			if (_this->m_compressLevel > 1) slidermax = 9;
 			HWND hCompressLevel = GetDlgItem(hwnd, IDC_COMPRESSLEVEL);
-			SendMessage(hCompressLevel, TBM_SETRANGE, TRUE, (LPARAM) MAKELONG(0, 3)); 
-			SendMessage(hCompressLevel, TBM_SETPOS, TRUE, sampopt2sliderpos[_this->m_compressLevel]);
-			EnableWindow(hCompressLevel, _this->m_PreferredEncoding == rfbEncodingTight);
+			SendMessage(hCompressLevel, TBM_SETRANGE, TRUE,
+				(LPARAM) MAKELONG(0, slidermax));
+			_this->SetCompressSlider(hwnd, _this->m_compressLevel);
 
-			if(_this->m_compressLevel>=0 && _this->m_compressLevel<=TVNC_SAMPOPT-1)
-				SetDlgItemText(hwnd, IDC_STATIC_LEVEL, sampopt2str[_this->m_compressLevel]);
+			_this->EnableCompress(hwnd,
+				(_this->m_PreferredEncoding == rfbEncodingTight &&
+					!_this->m_enableJpegCompression) );
+
+			HWND hSubsampLevel = GetDlgItem(hwnd, IDC_SUBSAMPLEVEL);
+			SendMessage(hSubsampLevel, TBM_SETRANGE, TRUE, (LPARAM) MAKELONG(0, 3)); 
+			_this->SetSubsampSlider(hwnd, _this->m_subsampLevel);
+
+			_this->EnableSubsamp(hwnd,
+				(_this->m_PreferredEncoding == rfbEncodingTight &&
+					_this->m_enableJpegCompression) );
 
 			HWND hJpeg = GetDlgItem(hwnd, IDC_QUALITYLEVEL);
 			SendMessage(hJpeg, TBM_SETRANGE, TRUE, (LPARAM) MAKELONG(1, 100));
-			SendMessage(hJpeg, TBM_SETPOS, TRUE, _this->m_jpegQualityLevel);
-			for (long i = 10; i < 100; i += 10)
-				SendMessage(hJpeg, TBM_SETTIC, 0, (LPARAM)i);
-			EnableWindow(hJpeg, _this->m_PreferredEncoding == rfbEncodingTight);
-
-			if(_this->m_jpegQualityLevel>=1 && _this->m_jpegQualityLevel<=100)
-				SetDlgItemInt(hwnd, IDC_STATIC_QUALITY, _this->m_jpegQualityLevel, FALSE);
-
+			_this->SetQualitySlider(hwnd, _this->m_jpegQualityLevel);
+			
+			_this->EnableJpeg(hwnd, _this->m_PreferredEncoding == rfbEncodingTight
+				&& _this->m_enableJpegCompression);
+			
 			HWND hRemoteCursor;
 			if (_this->m_requestShapeUpdates && !_this->m_ignoreShapeUpdates) {
 				hRemoteCursor = GetDlgItem(hwnd, IDC_CSHAPE_ENABLE_RADIO);
@@ -878,6 +939,12 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 				hRemoteCursor = GetDlgItem(hwnd, IDC_CSHAPE_DISABLE_RADIO);
 			}
 			SendMessage(hRemoteCursor, BM_SETCHECK,	true, 0);			
+
+			if (_this->m_PreferredEncoding != rfbEncodingTight)
+				SendMessage(hListBox, CB_SETCURSEL, MAX_LEN_COMBO, 0);
+			else
+				_this->SetComboBox(hwnd);
+
 			return TRUE;
 		}
 
@@ -900,6 +967,39 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 				} else {
 					SendMessage(hDB, BM_SETCHECK, TRUE, 0);
 				}
+				_this->SetComboBox(hwnd);
+				return 0;
+			}
+			return 0;
+		case ID_SESSION_SET_CRECT:
+			switch (HIWORD(wParam)) {
+			case BN_CLICKED:
+				HWND hCR = GetDlgItem(hwnd, ID_SESSION_SET_CRECT);
+				if (SendMessage(hCR, BM_GETCHECK, 0, 0) != 0) {
+					SendMessage(hCR, BM_SETCHECK, FALSE, 0);
+				} else {
+					SendMessage(hCR, BM_SETCHECK, TRUE, 0);
+				}
+				_this->SetComboBox(hwnd);
+				return 0;
+			}
+			return 0;
+		case IDC_ALLOW_JPEG:
+			switch (HIWORD(wParam)) {
+			case BN_CLICKED:
+				HWND hAllowJpeg = GetDlgItem(hwnd, IDC_ALLOW_JPEG);				
+				if (SendMessage(hAllowJpeg, BM_GETCHECK, 0, 0) == 0) {
+					_this->EnableJpeg(hwnd, TRUE);
+					_this->EnableSubsamp(hwnd, TRUE);
+					_this->EnableCompress(hwnd, FALSE);
+					SendMessage(hAllowJpeg, BM_SETCHECK, TRUE, 0);
+				} else {
+					_this->EnableJpeg(hwnd, FALSE);
+					_this->EnableSubsamp(hwnd, FALSE);
+					_this->EnableCompress(hwnd, TRUE);
+					SendMessage(hAllowJpeg, BM_SETCHECK, FALSE, 0);
+				}
+				_this->SetComboBox(hwnd);
 				return 0;
 			}
 			return 0;
@@ -925,7 +1025,8 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 			{		 
 				HWND hListBox = GetDlgItem(hwnd, IDC_ENCODING);
 				int i = SendMessage(hListBox, CB_GETCURSEL, 0, 0);
-				_this->m_PreferredEncoding = rfbcombo[i].rfbEncoding;					
+				if (i < MAX_LEN_COMBO)
+					_this->m_PreferredEncoding = rfbcombo[i].rfbEncoding;					
 				HWND hScalEdit = GetDlgItem(hwnd, IDC_SCALE_EDIT);
 				i = GetDlgItemInt(hwnd, IDC_SCALE_EDIT, NULL, FALSE);
 				if (i > 0) {
@@ -984,10 +1085,19 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 #endif
 				
 				HWND hCompressLevel = GetDlgItem(hwnd, IDC_COMPRESSLEVEL);
-				_this->m_compressLevel = sliderpos2sampopt[SendMessage(hCompressLevel,TBM_GETPOS , 0, 0)];
-
+				_this->m_compressLevel = SendMessage(hCompressLevel, TBM_GETPOS, 0, 0);
+				
+				
+				HWND hSubsampLevel = GetDlgItem(hwnd, IDC_SUBSAMPLEVEL);
+				_this->m_subsampLevel = sliderpos2sampopt[SendMessage(hSubsampLevel, TBM_GETPOS, 0, 0)];
+				
+				
+				HWND hAllowJpeg = GetDlgItem(hwnd, IDC_ALLOW_JPEG);
+				_this->m_enableJpegCompression = 
+					(SendMessage(hAllowJpeg, BM_GETCHECK, 0, 0) == BST_CHECKED);
 				HWND hJpeg = GetDlgItem(hwnd, IDC_QUALITYLEVEL);
 				_this->m_jpegQualityLevel = SendMessage(hJpeg,TBM_GETPOS , 0, 0);
+				
 				
 				_this->m_requestShapeUpdates = false;
 				_this->m_ignoreShapeUpdates = false;
@@ -1007,19 +1117,34 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 			switch (HIWORD(wParam)) {
 			case CBN_SELCHANGE:
 				{			
-					HWND hJpegSubsamp = GetDlgItem(hwnd, IDC_COMPRESSLEVEL);					
+					HWND hCompress = GetDlgItem(hwnd, IDC_COMPRESSLEVEL);					
+					HWND hJpegSubsamp = GetDlgItem(hwnd, IDC_SUBSAMPLEVEL);					
 					HWND hJpegQuality = GetDlgItem(hwnd, IDC_QUALITYLEVEL);					
+					HWND hAllowJpeg = GetDlgItem(hwnd, IDC_ALLOW_JPEG);					
+					HWND hCopyRect = GetDlgItem(hwnd, ID_SESSION_SET_CRECT);
 					HWND hListBox = GetDlgItem(hwnd, IDC_ENCODING);
 					int i = SendMessage(hListBox ,CB_GETCURSEL, 0, 0);
-					switch (rfbcombo[i].rfbEncoding) {
-					case rfbEncodingTight:
-						EnableWindow(hJpegSubsamp, TRUE);
-						EnableWindow(hJpegQuality, TRUE);
-						break;
-					case rfbEncodingRaw:
-						EnableWindow(hJpegSubsamp, FALSE);
-						EnableWindow(hJpegQuality, FALSE);
+					if (i != MAX_LEN_COMBO) {
+						int count = SendMessage(hListBox, CB_GETCOUNT, 0, 0);
+						while (count > MAX_LEN_COMBO)
+							count = SendMessage(hListBox, CB_DELETESTRING, MAX_LEN_COMBO, 0);
 					}
+					else break;
+					if (rfbcombo[i].enableJpeg) {
+						_this->EnableJpeg(hwnd, 1);
+						_this->EnableSubsamp(hwnd, 1);
+						_this->EnableCompress(hwnd, 0);
+						SendMessage(hAllowJpeg, BM_SETCHECK, 1, 0);
+						_this->SetSubsampSlider(hwnd, rfbcombo[i].subsampLevel);
+						_this->SetQualitySlider(hwnd, rfbcombo[i].qualityLevel);
+					} else {
+						_this->EnableJpeg(hwnd, 0);
+						_this->EnableSubsamp(hwnd, 0);
+						_this->EnableCompress(hwnd, 1);
+						SendMessage(hAllowJpeg, BM_SETCHECK, 0, 0);
+						_this->SetCompressSlider(hwnd, rfbcombo[i].compressLevel);
+					}
+					SendMessage(hCopyRect, BM_SETCHECK, 1, 0);
 					return 0;
 				}
 			}
@@ -1031,16 +1156,25 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 			DWORD dwPos ;    // current position of slider 
 			
 			HWND hCompressLevel = GetDlgItem(hwnd, IDC_COMPRESSLEVEL);
+			HWND hSubsampLevel = GetDlgItem(hwnd, IDC_SUBSAMPLEVEL);
 			HWND hJpeg = GetDlgItem(hwnd, IDC_QUALITYLEVEL);
 			if (HWND(lParam) == hCompressLevel) {
 				dwPos = SendMessage(hCompressLevel, TBM_GETPOS, 0, 0);
-				SetDlgItemText(hwnd, IDC_STATIC_LEVEL,
+				if (dwPos == 0)
+					SetDlgItemText(hwnd, IDC_STATIC_LEVEL, "None");
+				else
+					SetDlgItemInt(hwnd, IDC_STATIC_LEVEL, dwPos, FALSE);
+			}
+			if (HWND(lParam) == hSubsampLevel) {
+				dwPos = SendMessage(hSubsampLevel, TBM_GETPOS, 0, 0);
+				SetDlgItemText(hwnd, IDC_STATIC_SLEVEL,
 					sampopt2str[sliderpos2sampopt[dwPos]]);
 			}
 			if (HWND(lParam) == hJpeg) {
 				dwPos = SendMessage(hJpeg, TBM_GETPOS, 0, 0);
 				SetDlgItemInt(hwnd, IDC_STATIC_QUALITY, dwPos, FALSE);
 			}
+			_this->SetComboBox(hwnd);
 			return 0;
 		}
 	case WM_HELP:	
@@ -1048,6 +1182,120 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 		return 0;
 	}
 	return 0;
+}
+
+void VNCOptions::EnableCompress(HWND hwnd, bool enable)
+{
+	HWND hfast = GetDlgItem(hwnd, IDC_STATIC_FAST);
+	HWND hlevel = GetDlgItem(hwnd, IDC_STATIC_LEVEL);
+	HWND htextlevel = GetDlgItem(hwnd, IDC_STATIC_COMPRESS);
+	HWND hbest = GetDlgItem(hwnd, IDC_STATIC_BEST);
+	HWND hCompressLevel = GetDlgItem(hwnd, IDC_COMPRESSLEVEL);
+	EnableWindow(hCompressLevel,enable);
+	EnableWindow(hfast, enable);
+	EnableWindow(hlevel,enable);
+	EnableWindow(htextlevel, enable);
+	EnableWindow(hbest, enable);
+}
+
+void VNCOptions::EnableJpeg(HWND hwnd, bool enable)
+{
+	HWND hpoor = GetDlgItem(hwnd, IDC_STATIC_POOR);
+	HWND hqbest = GetDlgItem(hwnd, IDC_STATIC_QBEST);
+	HWND hqualitytext = GetDlgItem(hwnd, IDC_STATIC_QUAL);
+	HWND hquality = GetDlgItem(hwnd, IDC_STATIC_QUALITY);
+	HWND hJpeg = GetDlgItem(hwnd, IDC_QUALITYLEVEL);
+	EnableWindow( hJpeg, enable);
+	EnableWindow(hpoor, enable);
+	EnableWindow(hqbest, enable);
+	EnableWindow(hqualitytext, enable);
+	EnableWindow(hquality, enable);
+}
+
+void VNCOptions::EnableSubsamp(HWND hwnd, bool enable)
+{
+	HWND hfast = GetDlgItem(hwnd, IDC_STATIC_SFAST);
+	HWND hbest = GetDlgItem(hwnd, IDC_STATIC_SBEST);
+	HWND htextlevel = GetDlgItem(hwnd, IDC_STATIC_SLEVEL);
+	HWND hsubsamp = GetDlgItem(hwnd, IDC_STATIC_SUBSAMP);
+	HWND hSubsampLevel = GetDlgItem(hwnd, IDC_SUBSAMPLEVEL);
+	EnableWindow(hSubsampLevel, enable);
+	EnableWindow(hfast, enable);
+	EnableWindow(hbest, enable);
+	EnableWindow(htextlevel, enable);
+	EnableWindow(hsubsamp, enable);
+}
+
+void VNCOptions::SetSubsampSlider(HWND hwnd, int subsamp)
+{
+	HWND hJpegSubsamp = GetDlgItem(hwnd, IDC_SUBSAMPLEVEL);
+	SendMessage(hJpegSubsamp, TBM_SETPOS, TRUE, sampopt2sliderpos[subsamp]);
+	if(subsamp>=0 && subsamp<=TVNC_SAMPOPT-1)
+		SetDlgItemText(hwnd, IDC_STATIC_SLEVEL, sampopt2str[subsamp]);
+}
+
+void VNCOptions::SetQualitySlider(HWND hwnd, int quality)
+{
+	HWND hJpegQuality = GetDlgItem(hwnd, IDC_QUALITYLEVEL);
+	SendMessage(hJpegQuality, TBM_SETPOS, TRUE, quality);
+	for (long i = 10; i < 100; i += 10)
+		SendMessage(hJpegQuality, TBM_SETTIC, 0, (LPARAM)i);
+	if(quality>=1 && quality<=100)
+		SetDlgItemInt(hwnd, IDC_STATIC_QUALITY, quality, FALSE);
+}
+
+void VNCOptions::SetCompressSlider(HWND hwnd, int compress)
+{
+	HWND hCompress = GetDlgItem(hwnd, IDC_COMPRESSLEVEL);
+	SendMessage(hCompress, TBM_SETPOS, TRUE, compress);
+	if (compress == 0)
+		SetDlgItemText(hwnd, IDC_STATIC_LEVEL, "None");
+	else
+		SetDlgItemInt(hwnd, IDC_STATIC_LEVEL, compress, FALSE);
+}
+
+void VNCOptions::SetComboBox(HWND hwnd)
+{
+	HWND hCompressLevel = GetDlgItem(hwnd, IDC_COMPRESSLEVEL);
+	HWND hQualityLevel = GetDlgItem(hwnd, IDC_QUALITYLEVEL);
+	HWND hSubsampLevel = GetDlgItem(hwnd, IDC_SUBSAMPLEVEL);
+	HWND hAllowJpeg = GetDlgItem(hwnd, IDC_ALLOW_JPEG);
+	HWND hCopyRect = GetDlgItem(hwnd, ID_SESSION_SET_CRECT);
+	HWND hListBox = GetDlgItem(hwnd, IDC_ENCODING);
+	int compressLevel = SendMessage(hCompressLevel, TBM_GETPOS, 0, 0);
+	int qualityLevel = SendMessage(hQualityLevel, TBM_GETPOS, 0, 0);
+	int subsampLevel = sliderpos2sampopt[SendMessage(hSubsampLevel, TBM_GETPOS, 0, 0)];
+	int allowJpeg = SendMessage(hAllowJpeg, BM_GETCHECK, 0, 0);
+	int copyRect = SendMessage(hCopyRect, BM_GETCHECK, 0, 0);
+	int i;
+
+	for (i = 0; i <= (MAX_LEN_COMBO - 1); i++) {			
+		if (rfbcombo[i].rfbEncoding == m_PreferredEncoding && copyRect) {
+			if (rfbcombo[i].enableJpeg == true) {
+				if (allowJpeg && rfbcombo[i].subsampLevel == subsampLevel
+					&& rfbcombo[i].qualityLevel == qualityLevel) {
+					SendMessage(hListBox, CB_SETCURSEL, i, 0);
+					break;
+				}
+			} else {
+				if (!allowJpeg && rfbcombo[i].compressLevel == compressLevel) {
+					SendMessage(hListBox, CB_SETCURSEL, i, 0);
+					break;
+				}
+			}
+		}
+	}
+	if (i == MAX_LEN_COMBO) {
+		int count = SendMessage(hListBox, CB_GETCOUNT, 0, 0);
+		if (count <= MAX_LEN_COMBO)
+			SendMessage(hListBox, CB_INSERTSTRING, MAX_LEN_COMBO, (LPARAM)"Custom");
+		SendMessage(hListBox, CB_SETCURSEL, MAX_LEN_COMBO, 0);
+	}
+	else {
+		int count = SendMessage(hListBox, CB_GETCOUNT, 0, 0);
+		while (count > MAX_LEN_COMBO)
+			count = SendMessage(hListBox, CB_DELETESTRING, MAX_LEN_COMBO, 0);
+	}
 }
 
 BOOL CALLBACK VNCOptions::DlgProcGlobalOptions(HWND hwnd, UINT uMsg,
@@ -1339,6 +1587,7 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 	m_restricted =			read(RegKey, "restricted",        m_restricted           ) != 0;
 	m_ViewOnly =			read(RegKey, "viewonly",	      m_ViewOnly             ) != 0;
 	m_FullScreen =			read(RegKey, "fullscreen",        m_FullScreen           ) != 0;
+	m_Use8Bit =				read(RegKey, "8bit",	          m_Use8Bit              ) != 0;
 	m_DoubleBuffer =		read(RegKey, "doublebuffer",	  m_DoubleBuffer              ) != 0;
 	m_Shared =				read(RegKey, "shared",            m_Shared               ) != 0;
 	m_SwapMouse =			read(RegKey, "swapmouse",         m_SwapMouse	         ) != 0;
@@ -1352,13 +1601,21 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 	m_scale_num =			read(RegKey, "scale_num",         m_scale_num	         );
 	m_requestShapeUpdates =	read(RegKey, "cursorshape",       m_requestShapeUpdates	 ) != 0;
 	m_ignoreShapeUpdates =	read(RegKey, "noremotecursor",    m_ignoreShapeUpdates   ) != 0;
-	int level		 =		read(RegKey, "subsampling",     -1				     );
+	int level		 =		read(RegKey, "compresslevel",     -1				     );
 	if (level != -1) {
 		m_compressLevel = level;
 	}
-	m_scaling =				read(RegKey, "scaling",			  m_scaling  ) != 0;	
-	level =					read(RegKey, "quality", -1);
+	level		 =		read(RegKey, "subsampling",     -1				     );
 	if (level != -1) {
+		m_subsampLevel = level;
+	}
+	m_scaling =				read(RegKey, "scaling",			  m_scaling  ) != 0;	
+		
+	m_enableJpegCompression = true;
+	level =					read(RegKey, "quality",			  95);
+	if (level == -1) {
+		m_enableJpegCompression = false;
+	} else {
 		m_jpegQualityLevel = level;
 	}
 	RegCloseKey(RegKey);
@@ -1397,6 +1654,7 @@ void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
 	save(RegKey, "viewonly",			m_ViewOnly			);
 	save(RegKey, "fullscreen",			m_FullScreen		);
 	save(RegKey, "scaling",				m_scaling			);
+	save(RegKey, "8bit",				m_Use8Bit			);
 	save(RegKey, "doublebuffer",		m_DoubleBuffer		);
 	save(RegKey, "shared",				m_Shared			);
 	save(RegKey, "swapmouse",			m_SwapMouse			);
@@ -1410,8 +1668,9 @@ void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
 	save(RegKey, "scale_num",			m_scale_num			);
 	save(RegKey, "cursorshape",			m_requestShapeUpdates );
 	save(RegKey, "noremotecursor",		m_ignoreShapeUpdates );	
-	save(RegKey, "subsampling", m_compressLevel );	
-	save(RegKey, "quality",	m_jpegQualityLevel );
+	save(RegKey, "compresslevel", m_compressLevel );
+	save(RegKey, "subsampling", m_subsampLevel );
+	save(RegKey, "quality",	m_enableJpegCompression ? m_jpegQualityLevel : -1);
 	
 	
 	RegCloseKey(RegKey);

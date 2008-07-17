@@ -43,13 +43,17 @@
 #define DOTCURSOR 1
 #define NORMALCURSOR 2
 #define SMALLCURSOR 3
-#define MAX_LEN_COMBO 2
+#define MAX_LEN_COMBO 5
 
 #define KEY_VNCVIEWER_HISTORI _T("Software\\TurboVNC\\VNCviewer\\History")
 
 struct COMBOSTRING {
-		TCHAR NameString[20];
+		TCHAR NameString[36];
 		int rfbEncoding;
+		bool enableJpeg;
+		int subsampLevel;
+		int qualityLevel;
+		int compressLevel;
 };
 
 class VNCOptions  
@@ -85,6 +89,7 @@ public:
 	// default connection options - can be set through Dialog
 	bool	m_ViewOnly;
 	bool	m_FullScreen;
+	bool	m_Use8Bit;
 	bool	m_DoubleBuffer;
 	int		m_PreferredEncoding;
 	bool	m_SwapMouse;
@@ -98,7 +103,9 @@ public:
 	bool	m_scaling;
 	bool	m_FitWindow;
 	int		m_scale_num, m_scale_den; // Numerator & denominator
+	int		m_subsampLevel;
 	int		m_compressLevel;
+	bool	m_enableJpegCompression;
 	int		m_jpegQualityLevel;
 	bool	m_requestShapeUpdates;
 	bool	m_ignoreShapeUpdates;
@@ -150,8 +157,13 @@ private:
 	void BrowseLogFile();
 	void EnableCompress(HWND hwnd, bool enable);
 	void EnableJpeg(HWND hwnd, bool enable);
+	void EnableSubsamp(HWND hwnd, bool enable);
 	void EnableLog(HWND hwnd, bool enable);
-	
+	void SetSubsampSlider(HWND hwnd, int subsamp);
+	void SetQualitySlider(HWND hwnd, int subsamp);
+	void SetCompressSlider(HWND hwnd, int subsamp);
+	void SetComboBox(HWND hwnd);
+
 	// Just for temporary use
 	bool m_running;
 	

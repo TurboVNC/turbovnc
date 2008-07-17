@@ -52,7 +52,7 @@ void VNCHelp::Popup(LPARAM lParam)
 		case IDC_STATIC_TEXT_LEVEL:
 		case IDC_STATIC_FAST:
 		case IDC_STATIC_BEST:
-			popup.idString = IDC_COMPRESSLEVEL;
+			popup.idString = IDC_SUBSAMPLEVEL;
 			break;
 		case IDC_STATIC_QUALITY:
 		case IDC_STATIC_TEXT_QUALITY:
