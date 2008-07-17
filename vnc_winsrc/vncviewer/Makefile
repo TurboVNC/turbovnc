@@ -15,6 +15,7 @@ OBJS = $(ODIR)/AboutBox.obj \
        $(ODIR)/ClientConnectionCursor.obj \
        $(ODIR)/ClientConnectionFile.obj \
        $(ODIR)/ClientConnectionFullScreen.obj \
+       $(ODIR)/ClientConnectionHextile.obj \
        $(ODIR)/ClientConnectionRaw.obj \
        $(ODIR)/ClientConnectionTight.obj \
        $(ODIR)/ConnectingDialog.obj \
