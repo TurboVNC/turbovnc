@@ -264,8 +264,10 @@ int SessionDialog::cmp(HWND hwnd)
 	if (m_pOpt->m_UseEnc[rfbEncodingTight] != true) a = 0;
 	if (m_pOpt->m_UseEnc[rfbEncodingCopyRect] != true) a = 0;
 	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
-	if (m_pOpt->m_compressLevel != TVNC_4X) a = 0;
+	if (m_pOpt->m_subsampLevel != TVNC_4X) a = 0;
 	if (m_pOpt->m_jpegQualityLevel != 30) a = 0;
+	if (!m_pOpt->m_enableJpegCompression) a = 0;
+	if (!m_pOpt->m_DoubleBuffer) a = 0;
 	if (a == 1) {
 		SendMessage(hModemRadio, BM_CLICK, 0, 0);
 		return a;
@@ -278,8 +280,10 @@ int SessionDialog::cmp(HWND hwnd)
 	if (m_pOpt->m_UseEnc[rfbEncodingTight] != true) a = 0;
 	if (m_pOpt->m_UseEnc[rfbEncodingCopyRect] != true) a = 0;
 	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
-	if (m_pOpt->m_compressLevel != TVNC_1X) a = 0;
+	if (m_pOpt->m_subsampLevel != TVNC_1X) a = 0;
 	if (m_pOpt->m_jpegQualityLevel != 95) a = 0;
+	if (!m_pOpt->m_enableJpegCompression) a = 0;
+	if (!m_pOpt->m_DoubleBuffer) a = 0;
 	if (a == 2) {
 		SendMessage(hLocNetRadio, BM_CLICK, 0, 0);
 		return a;
@@ -292,8 +296,10 @@ int SessionDialog::cmp(HWND hwnd)
 	if (m_pOpt->m_UseEnc[rfbEncodingTight] != true) a = 0;
 	if (m_pOpt->m_UseEnc[rfbEncodingCopyRect] != true) a = 0;
 	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
-	if (m_pOpt->m_compressLevel != TVNC_2X) a = 0;
+	if (m_pOpt->m_subsampLevel != TVNC_2X) a = 0;
 	if (m_pOpt->m_jpegQualityLevel != 80) a = 0;
+	if (!m_pOpt->m_enableJpegCompression) a = 0;
+	if (!m_pOpt->m_DoubleBuffer) a = 0;
 	if (a == 3) {
 		SendMessage(hCustomRadio, BM_CLICK, 0, 0);
 		return a;
@@ -313,13 +319,14 @@ void SessionDialog::SetConnectionProfile(int encoding, int subsamp, int qual)
 	for (int i = rfbEncodingRaw; i <= LASTENCODING; i++)
 		m_pOpt->m_UseEnc[i] = false;
 
-	m_pOpt->m_UseEnc[rfbEncodingRaw] = true;
 	m_pOpt->m_UseEnc[rfbEncodingTight] = true;
 	m_pOpt->m_UseEnc[rfbEncodingCopyRect] = true;
 
 	m_pOpt->m_PreferredEncoding = encoding;
-	if(subsamp>=0) m_pOpt->m_compressLevel = subsamp;
-	if(qual>=1) m_pOpt->m_jpegQualityLevel = qual;
+	m_pOpt->m_subsampLevel = subsamp;
+	m_pOpt->m_jpegQualityLevel = qual;
+	m_pOpt->m_enableJpegCompression = true;
+	m_pOpt->m_DoubleBuffer = true;
 }
 	
 	
