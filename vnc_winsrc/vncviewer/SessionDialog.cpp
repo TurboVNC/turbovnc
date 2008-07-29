@@ -72,9 +72,6 @@ BOOL CALLBACK SessionDialog::SessDlgProc(  HWND hwnd,  UINT uMsg,  WPARAM wParam
 	int i;
 	TCHAR tmphost[256];
 	TCHAR buffer[256];
-	HWND hCustomRadio = GetDlgItem(hwnd, IDC_CUSTOM_RADIO);
-	HWND hModemRadio = GetDlgItem(hwnd, IDC_MODEM_RADIO);
-	HWND hLocNetRadio = GetDlgItem(hwnd, IDC_LOC_NET_RADIO);
 	HWND hListMode = GetDlgItem(hwnd, IDC_LIST_MODE);
 	HWND hcombo = GetDlgItem(hwnd, IDC_HOSTNAME_EDIT);
 
@@ -108,7 +105,6 @@ BOOL CALLBACK SessionDialog::SessDlgProc(  HWND hwnd,  UINT uMsg,  WPARAM wParam
 			} else {
 				SetDlgItemText(hwnd, IDC_HOSTNAME_EDIT, _this->m_pOpt->m_display);
 			}
-			_this->cmp(hwnd);
 			
 			SetFocus(hcombo);
             return TRUE;
@@ -137,8 +133,6 @@ BOOL CALLBACK SessionDialog::SessDlgProc(  HWND hwnd,  UINT uMsg,  WPARAM wParam
 					SendMessage(hcombo, CB_GETLBTEXT, a, (LPARAM)(int FAR*)buffer );
 					_this->m_pOpt->LoadOpt(buffer,KEY_VNCVIEWER_HISTORI);
 					
-					_this->cmp(hwnd);
-					
 					SetFocus(hcombo);
 					return TRUE;
 				}
@@ -154,7 +148,6 @@ BOOL CALLBACK SessionDialog::SessDlgProc(  HWND hwnd,  UINT uMsg,  WPARAM wParam
 							_this->m_cc->m_host);
 					SetDlgItemText(hwnd, IDC_HOSTNAME_EDIT,
 									_this->m_pOpt->m_display);
-					 _this->cmp(hwnd);
 				}
 				SetFocus(hcombo);
 				return TRUE;
@@ -191,31 +184,6 @@ BOOL CALLBACK SessionDialog::SessDlgProc(  HWND hwnd,  UINT uMsg,  WPARAM wParam
 			EndDialog(_this->m_pOpt->m_hParent, FALSE);
 			EndDialog(hwnd, FALSE);			
 			return TRUE;				
-		case IDC_LOC_NET_RADIO:
-			switch (HIWORD(wParam)) {
-			case BN_CLICKED:
-				// FIXME: Eliminate code duplication, see below
-				// (handle connection profiles in one place, in VNCOptions?)
-				_this->SetConnectionProfile(rfbEncodingTight, TVNC_1X, 95);
-				return TRUE;
-			}
-			return TRUE;
-		case IDC_MODEM_RADIO:
-			switch (HIWORD(wParam)) {
-			case BN_CLICKED:
-				// FIXME: Eliminate code duplication, see above and below.
-				_this->SetConnectionProfile(rfbEncodingTight, TVNC_4X, 30);
-				return TRUE;
-			}
-			return TRUE;
-		case IDC_CUSTOM_RADIO:
-			switch (HIWORD(wParam)) {
-			case BN_CLICKED:
-				// FIXME: Eliminate code duplication, see above.
-				_this->SetConnectionProfile(rfbEncodingTight, TVNC_2X, 80);
-				return TRUE;
-			}
-			return TRUE;
 		case IDC_OPTIONBUTTON:
 			{
 				if (SetForegroundWindow(_this->m_pOpt->m_hParent) != 0) return 0;
@@ -238,7 +206,6 @@ BOOL CALLBACK SessionDialog::SessDlgProc(  HWND hwnd,  UINT uMsg,  WPARAM wParam
 					SendMessage(hcombo, CB_INSERTSTRING, (WPARAM)i, (LPARAM)(int FAR*)buf);
 				}
 				SetDlgItemText(hwnd, IDC_HOSTNAME_EDIT, _this->m_pOpt->m_display); 				
-				_this->cmp(hwnd);									
 				SetFocus(hOptionButton);
 				return TRUE;
 			}
@@ -249,71 +216,3 @@ BOOL CALLBACK SessionDialog::SessDlgProc(  HWND hwnd,  UINT uMsg,  WPARAM wParam
 	}	
 	return 0;
 }
-
-
-int SessionDialog::cmp(HWND hwnd)
-{
-	int a=1;
-	HWND hCustomRadio = GetDlgItem(hwnd, IDC_CUSTOM_RADIO);
-	HWND hModemRadio = GetDlgItem(hwnd, IDC_MODEM_RADIO);
-	HWND hLocNetRadio = GetDlgItem(hwnd, IDC_LOC_NET_RADIO);
-
-	if (m_pOpt->m_UseEnc[rfbEncodingTight] != true) a = 0;
-	if (m_pOpt->m_UseEnc[rfbEncodingCopyRect] != true) a = 0;
-	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
-	if (m_pOpt->m_subsampLevel != TVNC_4X) a = 0;
-	if (m_pOpt->m_jpegQualityLevel != 30) a = 0;
-	if (!m_pOpt->m_enableJpegCompression) a = 0;
-	if (a == 1) {
-		SendMessage(hModemRadio, BM_CLICK, 0, 0);
-		return a;
-	}
-
-	a = 2;
-	if (m_pOpt->m_UseEnc[rfbEncodingTight] != true) a = 0;
-	if (m_pOpt->m_UseEnc[rfbEncodingCopyRect] != true) a = 0;
-	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
-	if (m_pOpt->m_subsampLevel != TVNC_1X) a = 0;
-	if (m_pOpt->m_jpegQualityLevel != 95) a = 0;
-	if (!m_pOpt->m_enableJpegCompression) a = 0;
-	if (a == 2) {
-		SendMessage(hLocNetRadio, BM_CLICK, 0, 0);
-		return a;
-	}
-
-	a = 3;
-	if (m_pOpt->m_UseEnc[rfbEncodingTight] != true) a = 0;
-	if (m_pOpt->m_UseEnc[rfbEncodingCopyRect] != true) a = 0;
-	if (m_pOpt->m_PreferredEncoding != rfbEncodingTight) a = 0;
-	if (m_pOpt->m_subsampLevel != TVNC_2X) a = 0;
-	if (m_pOpt->m_jpegQualityLevel != 80) a = 0;
-	if (!m_pOpt->m_enableJpegCompression) a = 0;
-	if (a == 3) {
-		SendMessage(hCustomRadio, BM_CLICK, 0, 0);
-		return a;
-	}
-
-	if (a == 0) {
-		SendMessage(hLocNetRadio, BM_SETCHECK, 0, 0L);
-		SendMessage(hModemRadio, BM_SETCHECK, 0, 0L);
-		SendMessage(hCustomRadio, BM_SETCHECK, 0, 0L);
-		return a;
-	}
-	return a;
-}
-
-void SessionDialog::SetConnectionProfile(int encoding, int subsamp, int qual)
-{
-	m_pOpt->m_UseEnc[rfbEncodingTight] = true;
-	m_pOpt->m_UseEnc[rfbEncodingCopyRect] = true;
-
-	m_pOpt->m_PreferredEncoding = encoding;
-	m_pOpt->m_subsampLevel = subsamp;
-	m_pOpt->m_jpegQualityLevel = qual;
-	m_pOpt->m_enableJpegCompression = true;
-}
-	
-	
-	
-
-
