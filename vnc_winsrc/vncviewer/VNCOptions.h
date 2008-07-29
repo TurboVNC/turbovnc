@@ -48,7 +48,7 @@
 #define KEY_VNCVIEWER_HISTORI _T("Software\\TurboVNC\\VNCviewer\\History")
 
 struct COMBOSTRING {
-		TCHAR NameString[36];
+		TCHAR NameString[41];
 		int rfbEncoding;
 		bool enableJpeg;
 		int subsampLevel;
