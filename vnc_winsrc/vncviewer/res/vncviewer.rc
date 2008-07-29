@@ -56,14 +56,14 @@ BEGIN
     PUSHBUTTON      "&Cancel",IDCANCEL,77,61,50,14
 END
 
-IDD_OPTIONDIALOG DIALOG DISCARDABLE  0, 0, 340, 193
+IDD_OPTIONDIALOG DIALOG DISCARDABLE  0, 0, 350, 193
 STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
-    GROUPBOX        "Image encoding",IDC_STATIC_FORMAT,4,4,163,144
+    GROUPBOX        "Image encoding",IDC_STATIC_FORMAT,4,4,173,144
     LTEXT           "Protocol:",IDC_STATIC_ENCODING,12,15,109,10,
                     SS_CENTERIMAGE
-    COMBOBOX        IDC_ENCODING,20,27,140,79,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_ENCODING,20,27,150,79,CBS_DROPDOWNLIST | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     CHECKBOX        "Allow JPEG compression",IDC_ALLOW_JPEG,12,43,109,10
     LTEXT           "JPEG chrominance subsampling:",IDC_STATIC_SUBSAMP,12,
@@ -87,37 +87,37 @@ BEGIN
     LTEXT           "best",IDC_STATIC_BEST,103,120,18,10
     CHECKBOX        "Allow CopyRect encoding",ID_SESSION_SET_CRECT,
                     12,133,109,10,WS_GROUP | WS_TABSTOP
-    GROUPBOX        "Restrictions",IDC_STATIC_RESTRICTIONS,4,151,163,38
+    GROUPBOX        "Restrictions",IDC_STATIC_RESTRICTIONS,4,151,173,38
     CHECKBOX        "View only (inputs ignored)",IDC_VIEWONLY,12,162,109,10
     CONTROL         "Disable clipboard transfer",IDC_DISABLECLIPBOARD,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,12,174,109,10
-    GROUPBOX        "Display",IDC_STATIC_DISPLAY,176,4,160,64
-    LTEXT           "Scale by:",IDC_STATIC_SCALE,185,15,36,10,SS_CENTERIMAGE
-    COMBOBOX        IDC_SCALE_EDIT,221,14,36,85,CBS_DROPDOWN | 
+    GROUPBOX        "Display",IDC_STATIC_DISPLAY,186,4,160,64
+    LTEXT           "Scale by:",IDC_STATIC_SCALE,195,15,36,10,SS_CENTERIMAGE
+    COMBOBOX        IDC_SCALE_EDIT,231,14,36,85,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "%",IDC_STATIC_P,262,15,10,10,SS_CENTERIMAGE
-    CHECKBOX        "Double buffering",IDC_DBCHECK,185,29,145,10, WS_GROUP
+    LTEXT           "%",IDC_STATIC_P,272,15,10,10,SS_CENTERIMAGE
+    CHECKBOX        "Double buffering",IDC_DBCHECK,195,29,145,10, WS_GROUP
     CONTROL         "Full-screen mode",IDC_FULLSCREEN,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,185,41,145,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,195,41,145,10
     CONTROL         "Deiconify on remote Bell event",IDC_BELLDEICONIFY,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,185,53,145,10
-    GROUPBOX        "Mouse",IDC_STATIC_MOUSE,176,73,160,39
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,195,53,145,10
+    GROUPBOX        "Mouse",IDC_STATIC_MOUSE,186,73,160,39
     CONTROL         "Emulate 3 buttons (with 2-button click)",
                     IDC_EMULATECHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | 
-                    WS_TABSTOP,185,84,145,10
+                    WS_TABSTOP,195,84,145,10
     CONTROL         "Swap mouse buttons 2 and 3",ID_SESSION_SWAPMOUSE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,185,96,145,10
-    GROUPBOX        "Mouse cursor",IDC_STATIC_MCURSOR,176,116,160,49
+                    BS_AUTOCHECKBOX | WS_TABSTOP,195,96,145,10
+    GROUPBOX        "Mouse cursor",IDC_STATIC_MCURSOR,186,116,160,49
     CONTROL         "Track remote cursor locally",IDC_CSHAPE_ENABLE_RADIO,
-                    "Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,185,
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,195,
                     127,145,10
     CONTROL         "Let remote server deal with mouse cursor",
-                    IDC_CSHAPE_DISABLE_RADIO,"Button",BS_AUTORADIOBUTTON,185,
+                    IDC_CSHAPE_DISABLE_RADIO,"Button",BS_AUTORADIOBUTTON,195,
                     139,145,10
     CONTROL         "Don't show remote cursor",IDC_CSHAPE_IGNORE_RADIO,
-                    "Button",BS_AUTORADIOBUTTON,185,151,145,10
+                    "Button",BS_AUTORADIOBUTTON,195,151,145,10
     CONTROL         "Request shared session",IDC_SHARED,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,185,172,145,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,195,172,145,10
 END
 
 IDD_FTBROWSE_DLG DIALOGEX 0, 0, 183, 196
@@ -179,18 +179,12 @@ BEGIN
     COMBOBOX        IDC_HOSTNAME_EDIT,51,7,109,66,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "...",IDC_LOAD,164,7,16,13
-    CONTROL         "&Low Qual (Wide-Area Network)",IDC_MODEM_RADIO,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,58,36,116,10
-    CONTROL         "&Medium Qual",IDC_CUSTOM_RADIO,"Button",
-                    BS_AUTORADIOBUTTON,58,49,116,10
-    CONTROL         "&High Qual (High-Speed Network)",IDC_LOC_NET_RADIO,"Button",
-                    BS_AUTORADIOBUTTON,58,62,116,10
     DEFPUSHBUTTON   "&Connect",IDC_OK,189,7,57,14,WS_GROUP
     PUSHBUTTON      "&Options...",IDC_OPTIONBUTTON,189,25,57,14
     PUSHBUTTON      "Cancel",IDCANCEL,189,43,57,14
     PUSHBUTTON      "&Listening mode",IDC_LIST_MODE,189,64,57,14
     LTEXT           "VNC server:",IDC_STATIC_SERVER,7,9,39,8
-    GROUPBOX        "Connection profile",IDC_CONN_PROF,51,24,129,54
+    LTEXT           "NOTE:  To set connection profile, click on 'Options' and select an image encoding protocol",IDC_CONN_PROF,51,28,129,54
     CONTROL         108,IDC_STATIC_PICTURE,"Static",SS_BITMAP,9,28,32,30
 END
 
@@ -277,15 +271,15 @@ BEGIN
                     WS_VSCROLL | WS_HSCROLL
 END
 
-IDD_PARENT DIALOGEX 0, 0, 356, 238
+IDD_PARENT DIALOGEX 0, 0, 366, 238
 STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTEXTHELP | WS_EX_CONTROLPARENT
 CAPTION "TurboVNC Viewer Options"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    PUSHBUTTON      "&OK",IDOK,246,220,50,14
-    PUSHBUTTON      "&Cancel",IDCANCEL,301,220,50,14
-    CONTROL         "Tab1",IDC_TAB,"SysTabControl32",WS_TABSTOP,5,5,346,211
+    PUSHBUTTON      "&OK",IDOK,256,220,50,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,311,220,50,14
+    CONTROL         "Tab1",IDC_TAB,"SysTabControl32",WS_TABSTOP,5,5,356,211
 END
 
 IDD_CONNECTING_DIALOG DIALOG DISCARDABLE  0, 0, 210, 61
@@ -608,9 +602,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDC_LOC_NET_RADIO       "Preset for JPEG quality 95 with no chrominance subsampling. This profile should produce no perceptible image compression artifacts for most applications. Use this on high-speed networks (such as Ethernet) or when image quality is critical."
-    IDC_MODEM_RADIO         "Preset for JPEG quality 30 with 4x chrominance subsampling. This produces very noticeable artifacts but requires only half the bandwidth of the Medium Quality profile. Use this on wide-area networks when performance is more critical than image quality."
-    IDC_CUSTOM_RADIO        "Preset for JPEG quality 80 with 2x chrominance subsampling. This produces some minor image compression artifacts but requires only half the network bandwidth of the High Quality profile."
     IDC_OK                  "Connect to the specified VNC server."
     IDC_LIST_MODE           "Switch to listen mode and close the dialog box. The listening viewer will wait for incoming connections from VNC servers. To connect to a listening viewer, choose ""Add New Client..."" from the TurboVNC Server's tray menu."
     IDC_CHECK_MESSAGE       "If this option is set, the viewer will show a warning before switching to full-screen mode. The warning reminds you how to exit that mode."
@@ -676,7 +667,6 @@ BEGIN
     IDC_FTPROGRESS          "Progress for current file transfer operation."
     IDC_LOAD                "Load saved connection info from a file. You can save connection info to a file by selecting ""Save connection info as..."" in the viewer's system menu."
     IDC_SERVERRELOAD        "Reload server-side file list."
-    IDC_CONN_PROF           "Choosing a connection profile allows you to select connection options suitable for a particular network environment."
 END
 
 STRINGTABLE DISCARDABLE 
