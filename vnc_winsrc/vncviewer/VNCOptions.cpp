@@ -796,7 +796,7 @@ BOOL CALLBACK VNCOptions::DlgProc(HWND hwndDlg, UINT uMsg,
 }
 
 static COMBOSTRING rfbcombo[MAX_LEN_COMBO] = {
-	"Tight + High Quality JPEG (LAN)", rfbEncodingTight, true, TVNC_1X, 95, -1,
+	"Tight + Perceptually Lossless JPEG (LAN)", rfbEncodingTight, true, TVNC_1X, 95, -1,
 	"Tight + Medium Quality JPEG", rfbEncodingTight, true, TVNC_2X, 80, -1,
 	"Tight + Low Quality JPEG (WAN)", rfbEncodingTight, true, TVNC_4X, 30, -1,
 	"Lossless Tight (Gigabit)", rfbEncodingTight, false, -1, -1, 0,
@@ -1584,6 +1584,8 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 		m_UseEnc[i] =   read(RegKey, buf, m_UseEnc[i] ) != 0;
 	}
 	m_PreferredEncoding =	read(RegKey, "preferred_encoding",m_PreferredEncoding    );
+	if (m_PreferredEncoding != rfbEncodingTight)
+		m_PreferredEncoding = rfbEncodingTight;
 	m_restricted =			read(RegKey, "restricted",        m_restricted           ) != 0;
 	m_ViewOnly =			read(RegKey, "viewonly",	      m_ViewOnly             ) != 0;
 	m_FullScreen =			read(RegKey, "fullscreen",        m_FullScreen           ) != 0;
@@ -1604,6 +1606,7 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 	int level		 =		read(RegKey, "compresslevel",     -1				     );
 	if (level != -1) {
 		m_compressLevel = level;
+		if (m_compressLevel > 1) m_compressLevel = 1;
 	}
 	level		 =		read(RegKey, "subsampling",     -1				     );
 	if (level != -1) {
