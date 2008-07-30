@@ -124,18 +124,6 @@ static int rectWidth, rectColors;
 static char tightPalette[256*4];
 static CARD8 tightPrevRow[2048*3*sizeof(CARD16)];
 
-#define SETUP_COLOR_SHORTCUTS \
-  CARD8 rs = m_myFormat.redShift;   CARD16 rm = m_myFormat.redMax;   \
-  CARD8 gs = m_myFormat.greenShift; CARD16 gm = m_myFormat.greenMax; \
-  CARD8 bs = m_myFormat.blueShift;  CARD16 bm = m_myFormat.blueMax;  \
-  CARD8 drs = 0, drm = image->red_mask;  \
-  CARD8 dgs = 0, dgm = image->green_mask;  \
-  CARD8 dbs = 0, dbm = image->blue_mask;  \
-  int ps = image->bits_per_pixel / 8;  \
-  int pitch = image->bytes_per_line;  \
-  do {if (drm & 1) break;  drm>>=1;  drs++;}  \
-  do {if (dgm & 1) break;  dgm>>=1;  dgs++;}  \
-  do {if (dbm & 1) break;  dbm>>=1;  dbs++;}
 
 /*
  * InitCapabilities.
