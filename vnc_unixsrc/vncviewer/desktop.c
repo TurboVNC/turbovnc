@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
+ *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -40,7 +40,7 @@ static Bool modifierPressed[256];
 XImage *image = NULL;
 
 static Cursor CreateDotCursor();
-//static void CopyBGR233ToScreen(CARD8 *buf, int x, int y, int width,int height);
+static void CopyBGR233ToScreen(CARD8 *buf, int x, int y, int width,int height);
 static void HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev,
 				    Boolean *cont);
 
@@ -342,12 +342,22 @@ SendRFBEvent(Widget w, XEvent *ev, String *params, Cardinal *num_params)
 void
 LosslessRefresh(Widget w, XEvent *ev, String *params, Cardinal *num_params)
 {
+	fprintf(stderr, "LosslessRefresh()");
+	String encodings = appData.encodingsString;
+	int compressLevel = appData.compressLevel;
 	int qual = appData.qualityLevel;
+	Bool enableJPEG = appData.enableJPEG;
 	appData.qualityLevel = -1;
+	appData.enableJPEG = False;
+	appData.encodingsString = "tight copyrect";
+	appData.compressLevel = 1;
 	SetFormatAndEncodings();
 	SendFramebufferUpdateRequest(0, 0, si.framebufferWidth,
 				     si.framebufferHeight, False);
 	appData.qualityLevel = qual;
+	appData.enableJPEG = enableJPEG;
+	appData.encodingsString = encodings;
+	appData.compressLevel = compressLevel;
 	SetFormatAndEncodings();
 }
 
@@ -395,21 +405,23 @@ CopyDataToScreen(char *buf, int x, int y, int width, int height)
   }
 
   if (buf) {
-    int h;
-    int widthInBytes = width * myFormat.bitsPerPixel / 8;
-    int scrWidthInBytes = si.framebufferWidth * myFormat.bitsPerPixel / 8;
+    if (!appData.useBGR233) {
+      int h;
+      int widthInBytes = width * myFormat.bitsPerPixel / 8;
+      int scrWidthInBytes = si.framebufferWidth * myFormat.bitsPerPixel / 8;
 
-    char *scr = (image->data + y * scrWidthInBytes
-		 + x * myFormat.bitsPerPixel / 8);
+      char *scr = (image->data + y * scrWidthInBytes
+		   + x * myFormat.bitsPerPixel / 8);
 
-    for (h = 0; h < height; h++) {
-      memcpy(scr, buf, widthInBytes);
-      buf += widthInBytes;
-      scr += scrWidthInBytes;
+      for (h = 0; h < height; h++) {
+        memcpy(scr, buf, widthInBytes);
+        buf += widthInBytes;
+        scr += scrWidthInBytes;
+      }
+    } else {
+      CopyBGR233ToScreen((CARD8 *)buf, x, y, width, height);
     }
-  }// else {
-//    CopyBGR233ToScreen((CARD8 *)buf, x, y, width, height);
-//  }
+  }
 
 #ifdef MITSHM
   if (appData.useShm) {
@@ -424,7 +436,7 @@ CopyDataToScreen(char *buf, int x, int y, int width, int height)
 /*
  * CopyBGR233ToScreen.
  */
-#if 0
+
 static void
 CopyBGR233ToScreen(CARD8 *buf, int x, int y, int width, int height)
 {
@@ -487,4 +499,3 @@ CopyBGR233ToScreen(CARD8 *buf, int x, int y, int width, int height)
     break;
   }
 }
-#endif
