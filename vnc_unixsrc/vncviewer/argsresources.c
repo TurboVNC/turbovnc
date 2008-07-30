@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2005-2007 Sun Microsystems, Inc.  All Rights Reserved.
+ *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2002-2006 Constantin Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -83,9 +83,9 @@ char *fallback_resources[] = {
   "*subsamp2X.label: 2X",
   "*subsamp1X.label: None",
 
-  "*compressLabel.label: Image Compression Type",
-  "*compressRGB.label: None (RGB)",
-  "*compressJPEG.label: JPEG",
+  "*enableJPEG.label: Enable JPEG Compression",
+
+  "*enableZlib.label: Enable Zlib Compression",
 
   "*popup.title: TurboVNC popup",
   "*popup*background: grey",
@@ -97,7 +97,7 @@ char *fallback_resources[] = {
   "*popup.buttonForm.translations: #override\\n\
      <KeyPress>: SendRFBEvent() HidePopup()",
 
-  "*popupButtonCount: 12",
+  "*popupButtonCount: 14",
 
   "*popup*button1.label: Dismiss popup",
   "*popup*button1.translations: #override\\n\
@@ -142,17 +142,25 @@ char *fallback_resources[] = {
   "*popup*button9.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: SendRFBEvent(key,F8) HidePopup()",
 
-  "*popup*button10.label: Connection profile: Low Quality (Wide-Area Network)",
+  "*popup*button10.label: Protocol: Tight + Perceptually Lossless JPEG (LAN)",
   "*popup*button10.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: QualLow()",
+     <Btn1Down>,<Btn1Up>: QualHigh()",
 
-  "*popup*button11.label: Connection profile: Medium Quality",
+  "*popup*button11.label: Protocol: Tight + Medium Quality JPEG",
   "*popup*button11.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualMed()",
 
-  "*popup*button12.label: Connection profile: High Quality (High-Speed Network)",
+  "*popup*button12.label: Protocol: Tight + Low Quality JPEG (WAN)",
   "*popup*button12.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: QualHigh()",
+     <Btn1Down>,<Btn1Up>: QualLow()",
+
+  "*popup*button13.label: Protocol: Lossless Tight (Gigabit)",
+  "*popup*button13.translations: #override\\n\
+     <Btn1Down>,<Btn1Up>: QualLossless()",
+
+  "*popup*button14.label: Protocol: Lossless Tight + Zlib (WAN)",
+  "*popup*button14.translations: #override\\n\
+     <Btn1Down>,<Btn1Up>: QualLosslessWAN()",
 
   NULL
 };
@@ -194,11 +202,26 @@ static XtResource appDataResourceList[] = {
   {"passwordDialog", "PasswordDialog", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, passwordDialog), XtRImmediate, (XtPointer) False},
 
-  {"compressType", "CompressType", XtRString, sizeof(String),
-   XtOffsetOf(AppData, encodingsString), XtRImmediate, (XtPointer) "JPEG"},
+  {"encodings", "Encodings", XtRString, sizeof(String),
+   XtOffsetOf(AppData, encodingsString), XtRImmediate, (XtPointer) 0},
 
-  {"useCopyRect", "UseCopyRect", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, useCopyRect), XtRImmediate, (XtPointer) True},
+  {"useBGR233", "UseBGR233", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, useBGR233), XtRImmediate, (XtPointer) False},
+
+  {"nColours", "NColours", XtRInt, sizeof(int),
+   XtOffsetOf(AppData, nColours), XtRImmediate, (XtPointer) 256},
+
+  {"useSharedColours", "UseSharedColours", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, useSharedColours), XtRImmediate, (XtPointer) True},
+
+  {"forceOwnCmap", "ForceOwnCmap", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, forceOwnCmap), XtRImmediate, (XtPointer) False},
+
+  {"forceTrueColour", "ForceTrueColour", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, forceTrueColour), XtRImmediate, (XtPointer) False},
+
+  {"requestedDepth", "RequestedDepth", XtRInt, sizeof(int),
+   XtOffsetOf(AppData, requestedDepth), XtRImmediate, (XtPointer) 0},
 
   {"useSharedMemory", "UseSharedMemory", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, useShm), XtRImmediate, (XtPointer) True},
@@ -227,11 +250,17 @@ static XtResource appDataResourceList[] = {
   {"bumpScrollPixels", "BumpScrollPixels", XtRInt, sizeof(int),
    XtOffsetOf(AppData, bumpScrollPixels), XtRImmediate, (XtPointer) 20},
 
+  {"compressLevel", "CompressionLevel", XtRInt, sizeof(int),
+   XtOffsetOf(AppData, compressLevel), XtRImmediate, (XtPointer) -1},
+
   {"subsampling", "Subsampling", XtRString, sizeof(String),
    XtOffsetOf(AppData, subsampString), XtRImmediate, (XtPointer) "1x"},
 
-  {"quality", "Quality", XtRInt, sizeof(int),
+  {"qualityLevel", "QualityLevel", XtRInt, sizeof(int),
    XtOffsetOf(AppData, qualityLevel), XtRImmediate, (XtPointer) 95},
+
+  {"enableJPEG", "EnableJPEG", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, enableJPEG), XtRImmediate, (XtPointer) True},
 
   {"useRemoteCursor", "UseRemoteCursor", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, useRemoteCursor), XtRImmediate, (XtPointer) True},
@@ -262,16 +291,23 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-fullscreen",    "*fullScreen",         XrmoptionNoArg,  "True"},
   {"-noraiseonbeep", "*raiseOnBeep",        XrmoptionNoArg,  "False"},
   {"-passwd",        "*passwordFile",       XrmoptionSepArg, 0},
-  {"-compress",      "*compressType",       XrmoptionSepArg, 0},
-  {"-nocopyrect",    "*useCopyRect",        XrmoptionNoArg,  "False"},
+  {"-encodings",     "*encodings",          XrmoptionSepArg, 0},
+  {"-bgr233",        "*useBGR233",          XrmoptionNoArg,  "True"},
+  {"-owncmap",       "*forceOwnCmap",       XrmoptionNoArg,  "True"},
+  {"-truecolor",     "*forceTrueColour",    XrmoptionNoArg,  "True"},
+  {"-truecolour",    "*forceTrueColour",    XrmoptionNoArg,  "True"},
+  {"-depth",         "*requestedDepth",     XrmoptionSepArg, 0},
   {"-samp",          "*subsampling",        XrmoptionSepArg, 0},
-  {"-quality",       "*quality",            XrmoptionSepArg, 0},
+  {"-compresslevel", "*compressLevel",      XrmoptionSepArg, 0},
+  {"-quality",       "*qualityLevel",       XrmoptionSepArg, 0},
+  {"-nojpeg",        "*enableJPEG",         XrmoptionNoArg,  "False"},
   {"-nocursorshape", "*useRemoteCursor",    XrmoptionNoArg,  "False"},
   {"-x11cursor",     "*useX11Cursor",       XrmoptionNoArg,  "True"},
   {"-singlebuffer",  "*doubleBuffer",       XrmoptionNoArg,  "False"},
-  {"-broadband",     "*quality",            XrmoptionNoArg,  "-1"},
-  {"-lowqual",       "*quality",            XrmoptionNoArg,  "-1"},
-  {"-medqual",       "*quality",            XrmoptionNoArg,  "-2"},
+  {"-lowqual",       "*qualityLevel",       XrmoptionNoArg,  "-1"},
+  {"-medqual",       "*qualityLevel",       XrmoptionNoArg,  "-2"},
+  {"-lossless",      "*qualityLevel",       XrmoptionNoArg,  "-3"},
+  {"-losslesswan",   "*qualityLevel",       XrmoptionNoArg,  "-4"},
   {"-autopass",      "*autoPass",           XrmoptionNoArg,  "True"},
 
 };
@@ -288,6 +324,8 @@ static XtActionsRec actions[] = {
     {"QualHigh", QualHigh},
     {"QualLow", QualLow},
     {"QualMed", QualMed},
+    {"QualLossless", QualLossless},
+    {"QualLosslessWAN", QualLosslessWAN},
     {"LosslessRefresh", LosslessRefresh},
     {"ShowPopup", ShowPopup},
     {"HidePopup", HidePopup},
@@ -341,18 +379,25 @@ usage(void)
 	  "        -fullscreen\n"
 	  "        -noraiseonbeep\n"
 	  "        -passwd <PASSWD-FILENAME> (standard VNC authentication)\n"
-	  "        -nocopyrect\n"
-	  "        -compress <IMAGE COMPRESSION TYPE> (jpeg | rgb)\n"
+	  "        -encodings <ENCODING-LIST> (example: \"tight copyrect\")\n"
+	  "        -bgr233\n"
+	  "        -owncmap\n"
+	  "        -truecolour\n"
+	  "        -depth <DEPTH>\n"
+	  "        -compresslevel <ZLIB COMPRESSION LEVEL> (0..1: 0-fast, 1-best)\n"
 	  "        -samp <JPEG CHROMINANCE SUBSAMPLING> (1x | 2x | 4x | gray)\n"
 	  "        -quality <JPEG IMAGE QUALITY> (1..100: 1-low, 100-high)\n"
+	  "        -nojpeg\n"
 	  "        -nocursorshape\n"
 	  "        -x11cursor\n"
 	  "        -autopass\n"
 	  "        -singlebuffer\n"
 	  "        -lowqual (preset for -samp 4x -quality 30)\n"
 	  "        -medqual (preset for -samp 2x -quality 80)\n"
+	  "        -lossless (preset for -nojpeg -compresslevel 0)\n"
+	  "        -losslesswan (preset for -nojpeg -compresslevel 1)\n"
 	  "\n"
-	  "Option names may be abbreviated, e.g. -q instead of -quality.\n"
+	  "Option names may be abbreviated, for example, -q instead of -quality.\n"
 	  "See the manual page for more information."
 	  "\n", programName, programName, programName, programName);
   exit(1);
@@ -379,31 +424,42 @@ GetArgsAndResources(int argc, char **argv)
   XtGetApplicationResources(toplevel, &appData, appDataResourceList,
 			    XtNumber(appDataResourceList), 0, 0);
 
-  /* Translate compression parameters */
-  if (appData.encodingsString && (toupper(appData.encodingsString[0]) == 'R'
-    || appData.encodingsString[0] == '0'))
-    appData.compressType = TVNC_RGB;
-  else
-    appData.compressType = TVNC_JPEG;
-
   if (appData.subsampString) {
     switch(toupper(appData.subsampString[0])) {
-      case 'G': case '0':  appData.compressLevel=TVNC_GRAY;  break;
-      case '1':  appData.compressLevel=TVNC_1X;  break;
-      case '2':  appData.compressLevel=TVNC_2X;  break;
-      case '4':  appData.compressLevel=TVNC_4X;  break;
+      case 'G': case '0':  appData.subsampLevel=TVNC_GRAY;  break;
+      case '1':  appData.subsampLevel=TVNC_1X;  break;
+      case '2':  appData.subsampLevel=TVNC_2X;  break;
+      case '4':  appData.subsampLevel=TVNC_4X;  break;
     }
   }
 
   /* -lowqual switch was used */
   if(appData.qualityLevel==-1) {
+    appData.encodingsString="tight copyrect";
+    appData.enableJPEG=True;
     appData.qualityLevel=30;
-    appData.compressLevel=TVNC_4X;
+    appData.subsampLevel=TVNC_4X;
   }
   /* -medqual switch was used */
   else if(appData.qualityLevel==-2) {
+    appData.encodingsString="tight copyrect";
+    appData.enableJPEG=True;
     appData.qualityLevel=80;
-    appData.compressLevel=TVNC_2X;
+    appData.subsampLevel=TVNC_2X;
+  }
+  /* -lossless switch was used */
+  if(appData.qualityLevel==-3) {
+    appData.encodingsString="tight copyrect";
+    appData.enableJPEG=False;
+    appData.qualityLevel=95;
+    appData.compressLevel=0;
+  }
+  /* -losslesswan switch was used */
+  if(appData.qualityLevel==-4) {
+    appData.encodingsString="tight copyrect";
+    appData.enableJPEG=False;
+    appData.qualityLevel=95;
+    appData.compressLevel=1;
   }
 
   /* Add our actions to the actions table so they can be used in widget
