@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
+ *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -55,11 +55,20 @@ ToplevelInitBeforeRealization()
   char temps[80];
 
   XtVaGetValues(toplevel, XtNtitle, &titleFormat, NULL);
-  if(appData.compressType == TVNC_RGB)
-    sprintf(temps, "[RGB]");
-  else
-    sprintf(temps, "[JPEG %s Q%d]", compressLevel2str[appData.compressLevel],
-      appData.qualityLevel);
+  if (!appData.encodingsString || strcasestr(appData.encodingsString, "tight")) {
+    if(!appData.enableJPEG) {
+      char zlibstr[80];
+      zlibstr[0]=0;
+      if (appData.compressLevel > 0)
+        snprintf(zlibstr, 79, " + Zlib %d", appData.compressLevel);
+      snprintf(temps, 79, " [Lossless Tight%s]", zlibstr);
+    }
+    else
+      snprintf(temps, 79, " [Tight + JPEG %s Q%d]", subsampLevel2str[appData.subsampLevel],
+        appData.qualityLevel);
+  }
+  else snprintf(temps, 79, " [%s]", appData.encodingsString);
+
   title = XtMalloc(strlen(titleFormat) + strlen(desktopName)
     + strlen(temps) + 1);
   sprintf(title, titleFormat, desktopName);
