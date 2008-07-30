@@ -126,6 +126,48 @@ static CARD8 tightPrevRow[2048*3*sizeof(CARD16)];
 
 
 /*
+ * NewNode.
+ */
+
+static void
+NewNode(int x, int y, int w, int h, int encoding)
+{
+  if (appData.doubleBuffer) {
+    node = (UpdateList *)malloc(sizeof(UpdateList));
+    node->next = NULL;
+    node->isFill = 0;
+    node->region.r.x = x;
+    node->region.r.y = y;
+    node->region.r.w = w;
+    node->region.r.h = h;
+    node->region.encoding = encoding;
+    if (list == NULL)
+      tail = list = node;
+    else {
+      tail->next = node;
+      tail = node;
+    }
+  }
+}
+
+
+/*
+ * FillRectangle.
+ */
+static void
+FillRectangle(XGCValues *gcv, int x, int y, int w, int h)
+{
+  if (appData.doubleBuffer) {
+    node->isFill = 1;
+    memcpy(&node->gcv, gcv, sizeof(XGCValues));
+  } else {
+    XChangeGC(dpy, gc, GCForeground, gcv);
+    XFillRectangle(dpy, desktopWin, gc, x, y, w, h);
+  }
+}
+
+
+/*
  * InitCapabilities.
  */
 
@@ -1057,7 +1099,8 @@ HandleRFBServerMessage()
 	  r1 = &node->region;
 
 	  if (r1->encoding == rfbEncodingTight
-	     || r1->encoding == rfbEncodingRaw) {
+	     || r1->encoding == rfbEncodingRaw
+	     || r1->encoding == rfbEncodingHextile) {
 	     SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h); 
 	     if (node->isFill) {
 	       XChangeGC(dpy, gc, GCForeground, &node->gcv);
@@ -1065,7 +1108,7 @@ HandleRFBServerMessage()
 			      r1->r.x, r1->r.y, r1->r.w, r1->r.h);
 
 	     } else
-	        CopyDataToScreen(NULL, r1->r.x, r1->r.y, r1->r.w, r1->r.h);
+	        CopyImageToScreen(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
 	   }
 
 	   list = list->next;
@@ -1113,22 +1156,11 @@ HandleRFBServerMessage()
 	 between framebuffer updates and cursor drawing operations. */
       SoftCursorLockArea(rect.r.x, rect.r.y, rect.r.w, rect.r.h);
 
-      if (appData.doubleBuffer) {
-        node = (UpdateList *)malloc(sizeof(UpdateList));
-	node->next = NULL;
-	node->isFill = 0;
-	memcpy(&(node->region), &rect, sz_rfbFramebufferUpdateRectHeader);
-	if (list == NULL)
-	  tail = list = node;
-	else {
-	  tail->next = node;
-	  tail = node;
-	}
-      }
-
       switch (rect.encoding) {
 
       case rfbEncodingRaw:
+
+        NewNode(rect.r.x, rect.r.y, rect.r.w, rect.r.h, rect.encoding);
 
 	bytesPerLine = rect.r.w * myFormat.bitsPerPixel / 8;
 	linesToRead = BUFFER_SIZE / bytesPerLine;
@@ -1140,8 +1172,8 @@ HandleRFBServerMessage()
 	  if (!ReadFromRFBServer(buffer,bytesPerLine * linesToRead))
 	    return False;
 
-	  CopyDataToScreen(buffer, rect.r.x, rect.r.y, rect.r.w,
-			   linesToRead);
+	  CopyDataToImage(buffer, rect.r.x, rect.r.y, rect.r.w,
+			  linesToRead);
 
 	  rect.r.h -= linesToRead;
 	  rect.r.y += linesToRead;
@@ -1152,6 +1184,8 @@ HandleRFBServerMessage()
       case rfbEncodingCopyRect:
       {
 	rfbCopyRect cr;
+
+        NewNode(rect.r.x, rect.r.y, rect.r.w, rect.r.h, rect.encoding);
 
 	if (!ReadFromRFBServer((char *)&cr, sz_rfbCopyRect))
 	  return False;
@@ -1204,6 +1238,8 @@ HandleRFBServerMessage()
 
       case rfbEncodingTight:
       {
+        NewNode(rect.r.x, rect.r.y, rect.r.w, rect.r.h, rect.encoding);
+
 	switch (myFormat.bitsPerPixel) {
 	case 8:
 	  if (!HandleTight8(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
@@ -1238,7 +1274,8 @@ HandleRFBServerMessage()
 	  r1 = &node->region;
 
 	  if (r1->encoding == rfbEncodingTight
-	    || r1->encoding == rfbEncodingRaw) {
+	    || r1->encoding == rfbEncodingRaw
+	    || r1->encoding == rfbEncodingHextile) {
 	    SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
 	    if (node->isFill) {
 		XChangeGC(dpy, gc, GCForeground, &node->gcv);
@@ -1246,7 +1283,7 @@ HandleRFBServerMessage()
 				r1->r.x, r1->r.y, r1->r.w, r1->r.h);
 
 	    } else
-		CopyDataToScreen(NULL, r1->r.x, r1->r.y, r1->r.w, r1->r.h);
+		CopyImageToScreen(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
            }
 
 	   list = list->next;

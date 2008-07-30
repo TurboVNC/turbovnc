@@ -390,11 +390,11 @@ CreateDotCursor()
 
 
 /*
- * CopyDataToScreen.
+ * CopyDataToImage.
  */
 
 void
-CopyDataToScreen(char *buf, int x, int y, int width, int height)
+CopyDataToImage(char *buf, int x, int y, int width, int height)
 {
   if (appData.rawDelay != 0) {
     XFillRectangle(dpy, desktopWin, gc, x, y, width, height);
@@ -404,25 +404,35 @@ CopyDataToScreen(char *buf, int x, int y, int width, int height)
     usleep(appData.rawDelay * 1000);
   }
 
-  if (buf) {
-    if (!appData.useBGR233) {
-      int h;
-      int widthInBytes = width * myFormat.bitsPerPixel / 8;
-      int scrWidthInBytes = si.framebufferWidth * myFormat.bitsPerPixel / 8;
+  if (!appData.useBGR233) {
+    int h;
+    int widthInBytes = width * myFormat.bitsPerPixel / 8;
+    int scrWidthInBytes = si.framebufferWidth * myFormat.bitsPerPixel / 8;
 
-      char *scr = (image->data + y * scrWidthInBytes
-		   + x * myFormat.bitsPerPixel / 8);
+    char *scr = (image->data + y * scrWidthInBytes
+		 + x * myFormat.bitsPerPixel / 8);
 
-      for (h = 0; h < height; h++) {
-        memcpy(scr, buf, widthInBytes);
-        buf += widthInBytes;
-        scr += scrWidthInBytes;
-      }
-    } else {
-      CopyBGR233ToScreen((CARD8 *)buf, x, y, width, height);
+    for (h = 0; h < height; h++) {
+      memcpy(scr, buf, widthInBytes);
+      buf += widthInBytes;
+      scr += scrWidthInBytes;
     }
+  } else {
+    CopyBGR233ToScreen((CARD8 *)buf, x, y, width, height);
   }
 
+  if (!appData.doubleBuffer)
+    CopyImageToScreen(x, y, width, height);
+}
+
+
+/*
+ * CopyImageToScreen.
+ */
+
+void
+CopyImageToScreen(int x, int y, int width, int height)
+{
 #ifdef MITSHM
   if (appData.useShm) {
     XShmPutImage(dpy, desktopWin, gc, image, x, y, x, y, width, height, False);

@@ -484,7 +484,7 @@ static void SoftCursorDraw(void)
 	  offset = y * rcWidth + x;
 	  if (rcMask[offset]) {
 	    pos = (char *)&rcSource[offset * bytesPerPixel];
-	    CopyDataToScreen(pos, x0, y0, 1, 1);
+	    CopyDataToImage(pos, x0, y0, 1, 1);
 	  }
 	}
       }

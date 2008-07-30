@@ -173,7 +173,8 @@ extern void DesktopInitBeforeRealization();
 extern void DesktopInitAfterRealization();
 extern void SendRFBEvent(Widget w, XEvent *event, String *params,
 			 Cardinal *num_params);
-extern void CopyDataToScreen(char *buf, int x, int y, int width, int height);
+extern void CopyDataToImage(char *buf, int x, int y, int width, int height);
+extern void CopyImageToScreen(int x, int y, int width, int height);
 extern void SynchroniseScreen();
 extern void QualHigh(Widget, XEvent *, String *, Cardinal *);
 extern void QualMed(Widget, XEvent *, String *, Cardinal *);

@@ -144,13 +144,7 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
     gcv.foreground = fill_colour;
 #endif
 
-    if (appData.doubleBuffer) {
-      node->isFill = 1;
-      memcpy(&node->gcv , &gcv, sizeof(XGCValues));
-    } else {
-      XChangeGC(dpy, gc, GCForeground, &gcv);
-      XFillRectangle(dpy, desktopWin, gc, rx, ry, rw, rh);
-    }
+    FillRectangle(&gcv, rx, ry, rw, rh);
     return True;
   }
 
@@ -224,7 +218,7 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
     if (!ReadFromRFBServer(uncompressedData, bufferSize))
       return False;
     filterFn(rx, ry, rh);
-    if (!appData.doubleBuffer) CopyDataToScreen(NULL, rx, ry, rw, rh);
+    if (!appData.doubleBuffer) CopyImageToScreen(rx, ry, rw, rh);
 
     return True;
   }
@@ -283,7 +277,7 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
   }
 
   filterFn(rx, ry, rh);
-  if (!appData.doubleBuffer) CopyDataToScreen(NULL, rx, ry, rw, rh);
+  if (!appData.doubleBuffer) CopyImageToScreen(rx, ry, rw, rh);
 
   return True;
 }
@@ -587,7 +581,7 @@ DecompressJpegRectBPP(int x, int y, int w, int h)
   }
 
   if (!appData.doubleBuffer)
-    CopyDataToScreen(NULL, x, y, w, h);
+    CopyImageToScreen(x, y, w, h);
 
   return True;
 }

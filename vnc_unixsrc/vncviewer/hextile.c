@@ -57,7 +57,8 @@ HandleHextileBPP (int rx, int ry, int rw, int rh)
 	if (!ReadFromRFBServer(buffer, w * h * (BPP / 8)))
 	  return False;
 
-	CopyDataToScreen(buffer, x, y, w, h);
+	NewNode(x, y, w, h, rfbEncodingHextile);
+	CopyDataToImage(buffer, x, y, w, h);
 	continue;
       }
 
@@ -72,8 +73,8 @@ HandleHextileBPP (int rx, int ry, int rw, int rh)
 #endif
 	gcv.foreground = bg;
 
-      XChangeGC(dpy, gc, GCForeground, &gcv);
-      XFillRectangle(dpy, desktopWin, gc, x, y, w, h);
+      NewNode(x, y, w, h, rfbEncodingHextile);
+      FillRectangle(&gcv, x, y, w, h);
 
       if (subencoding & rfbHextileForegroundSpecified)
 	if (!ReadFromRFBServer((char *)&fg, sizeof(fg)))
@@ -107,8 +108,8 @@ HandleHextileBPP (int rx, int ry, int rw, int rh)
 #endif
 	    gcv.foreground = fg;
 
-	  XChangeGC(dpy, gc, GCForeground, &gcv);
-	  XFillRectangle(dpy, desktopWin, gc, x+sx, y+sy, sw, sh);
+          NewNode(x+sx, y+sy, sw, sh, rfbEncodingHextile);
+          FillRectangle(&gcv, x+sx, y+sy, sw, sh);
 	}
 
       } else {
@@ -122,8 +123,6 @@ HandleHextileBPP (int rx, int ry, int rw, int rh)
 #endif
 	  gcv.foreground = fg;
 
-	XChangeGC(dpy, gc, GCForeground, &gcv);
-
 	for (i = 0; i < nSubrects; i++) {
 	  sx = rfbHextileExtractX(*ptr);
 	  sy = rfbHextileExtractY(*ptr);
@@ -131,7 +130,8 @@ HandleHextileBPP (int rx, int ry, int rw, int rh)
 	  sw = rfbHextileExtractW(*ptr);
 	  sh = rfbHextileExtractH(*ptr);
 	  ptr++;
-	  XFillRectangle(dpy, desktopWin, gc, x+sx, y+sy, sw, sh);
+	  NewNode(x+sx, y+sy, sw, sh, rfbEncodingHextile);
+	  FillRectangle(&gcv, x+sx, y+sy, sw, sh);
 	}
       }
     }
