@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
+ *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2000, 2001 Const Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
@@ -71,12 +71,9 @@ extern int endianTest;
 #define TVNC_SAMPOPT 4
 enum {TVNC_1X=0, TVNC_4X, TVNC_2X, TVNC_GRAY};
 
-static const char *compressLevel2str[TVNC_SAMPOPT] = {
+static const char *subsampLevel2str[TVNC_SAMPOPT] = {
   "1X", "4X", "2X", "Gray"
 };
-
-/* Compression types */
-enum {TVNC_RGB=0, TVNC_JPEG};
 
 /* argsresources.c */
 
@@ -89,7 +86,13 @@ typedef struct {
 
   String encodingsString;
   String subsampString;
-  Bool useCopyRect;
+
+  Bool useBGR233;
+  int nColours;
+  Bool useSharedColours;
+  Bool forceOwnCmap;
+  Bool forceTrueColour;
+  int requestedDepth;
 
   Bool useShm;
 
@@ -111,9 +114,10 @@ typedef struct {
   int bumpScrollTime;
   int bumpScrollPixels;
 
-  int compressType;
   int compressLevel;
   int qualityLevel;
+  int subsampLevel;
+  Bool enableJPEG;
   Bool useRemoteCursor;
   Bool useX11Cursor;
   Bool autoPass;
@@ -174,6 +178,8 @@ extern void SynchroniseScreen();
 extern void QualHigh(Widget, XEvent *, String *, Cardinal *);
 extern void QualMed(Widget, XEvent *, String *, Cardinal *);
 extern void QualLow(Widget, XEvent *, String *, Cardinal *);
+extern void QualLossless(Widget, XEvent *, String *, Cardinal *);
+extern void QualLosslessWAN(Widget, XEvent *, String *, Cardinal *);
 extern void LosslessRefresh(Widget, XEvent *, String *, Cardinal *);
 
 /* dialogs.c */
