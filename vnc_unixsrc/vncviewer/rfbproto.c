@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
+ *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  *  Copyright (C) 2000-2006 Constantin Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
@@ -44,6 +44,10 @@ static Bool ReadAuthenticationResult(void);
 static Bool ReadInteractionCaps(void);
 static Bool ReadCapabilityList(CapsContainer *caps, int count);
 
+static Bool HandleHextile8(int rx, int ry, int rw, int rh);
+static Bool HandleHextile16(int rx, int ry, int rw, int rh);
+static Bool HandleHextile32(int rx, int ry, int rw, int rh);
+static Bool HandleTight8(int rx, int ry, int rw, int rh);
 static Bool HandleTight16(int rx, int ry, int rw, int rh);
 static Bool HandleTight32(int rx, int ry, int rw, int rh);
 
@@ -83,6 +87,9 @@ static CapsContainer *encodingCaps;  /* known encodings besides Raw        */
 #define BUFFER_SIZE (640*480)
 static char buffer[BUFFER_SIZE];
 
+static char *compressedData = NULL;
+static char *uncompressedData = NULL;
+
 
 /* The zlib encoding requires expansion/decompression/deflation of the
    compressed data in the "buffer" above into another, result buffer.
@@ -117,6 +124,18 @@ static int rectWidth, rectColors;
 static char tightPalette[256*4];
 static CARD8 tightPrevRow[2048*3*sizeof(CARD16)];
 
+#define SETUP_COLOR_SHORTCUTS \
+  CARD8 rs = m_myFormat.redShift;   CARD16 rm = m_myFormat.redMax;   \
+  CARD8 gs = m_myFormat.greenShift; CARD16 gm = m_myFormat.greenMax; \
+  CARD8 bs = m_myFormat.blueShift;  CARD16 bm = m_myFormat.blueMax;  \
+  CARD8 drs = 0, drm = image->red_mask;  \
+  CARD8 dgs = 0, dgm = image->green_mask;  \
+  CARD8 dbs = 0, dbm = image->blue_mask;  \
+  int ps = image->bits_per_pixel / 8;  \
+  int pitch = image->bytes_per_line;  \
+  do {if (drm & 1) break;  drm>>=1;  drs++;}  \
+  do {if (dgm & 1) break;  dgm>>=1;  dgs++;}  \
+  do {if (dbm & 1) break;  dbm>>=1;  dbs++;}
 
 /*
  * InitCapabilities.
@@ -140,6 +159,8 @@ InitCapabilities(void)
   /* Supported encoding types */
   CapsAdd(encodingCaps, rfbEncodingCopyRect, rfbStandardVendor,
 	  sig_rfbEncodingCopyRect, "Standard CopyRect encoding");
+  CapsAdd(encodingCaps, rfbEncodingHextile, rfbStandardVendor,
+	  sig_rfbEncodingHextile, "Standard Hextile encoding");
   CapsAdd(encodingCaps, rfbEncodingTight, rfbTightVncVendor,
 	  sig_rfbEncodingTight, "Tight encoding by Constantin Kaplinsky");
 
@@ -156,6 +177,10 @@ InitCapabilities(void)
 	  sig_rfbEncodingPointerPos, "Pointer position update");
   CapsAdd(encodingCaps, rfbEncodingLastRect, rfbTightVncVendor,
 	  sig_rfbEncodingLastRect, "LastRect protocol extension");
+  CapsAdd(encodingCaps, rfbJpegQualityLevel1, rfbTurboVncVendor,
+	  sig_rfbJpegQualityLevel1, "TurboJPEG quality level");
+  CapsAdd(encodingCaps, rfbJpegSubsamp1X, rfbTurboVncVendor,
+	  sig_rfbJpegSubsamp1X, "TurboJPEG subsampling level");
 }
 
 
@@ -661,6 +686,9 @@ SetFormatAndEncodings()
   rfbSetEncodingsMsg *se = (rfbSetEncodingsMsg *)buf;
   CARD32 *encs = (CARD32 *)(&buf[sz_rfbSetEncodingsMsg]);
   int len = 0;
+  Bool requestCompressLevel = False;
+  Bool requestQualityLevel = False;
+  Bool requestSubsampLevel = False;
   Bool requestLastRectEncoding = False;
 
   spf.type = rfbSetPixelFormat;
@@ -675,27 +703,115 @@ SetFormatAndEncodings()
   se->type = rfbSetEncodings;
   se->nEncodings = 0;
 
-    if (appData.useCopyRect)
-      encs[se->nEncodings++] = Swap32IfLE(rfbEncodingCopyRect);
-    switch(appData.compressType) {
-      case TVNC_RGB:
-        encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRaw);
-        break;
-      case TVNC_JPEG:
-        encs[se->nEncodings++] = Swap32IfLE(rfbEncodingTight);
-        break;
+  if (appData.encodingsString) {
+    char *encStr = appData.encodingsString;
+    int encStrLen;
+    do {
+      char *nextEncStr = strchr(encStr, ' ');
+      if (nextEncStr) {
+	encStrLen = nextEncStr - encStr;
+	nextEncStr++;
+      } else {
+	encStrLen = strlen(encStr);
+      }
+
+      if (strncasecmp(encStr,"raw",encStrLen) == 0) {
+	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRaw);
+      } else if (strncasecmp(encStr,"copyrect",encStrLen) == 0) {
+	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingCopyRect);
+      } else if (strncasecmp(encStr,"tight",encStrLen) == 0) {
+	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingTight);
+	requestLastRectEncoding = True;
+	if (appData.compressLevel >= 0 && appData.compressLevel <= 9)
+	  requestCompressLevel = True;
+	if (appData.enableJPEG)
+	  requestQualityLevel = True;
+	  requestSubsampLevel = True;
+      } else if (strncasecmp(encStr,"hextile",encStrLen) == 0) {
+	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingHextile);
+      } else {
+	fprintf(stderr,"Unknown encoding '%.*s'\n",encStrLen,encStr);
+      }
+
+      encStr = nextEncStr;
+    } while (encStr && se->nEncodings < MAX_ENCODINGS);
+
+    if (se->nEncodings < MAX_ENCODINGS && requestCompressLevel) {
+      encs[se->nEncodings++] = Swap32IfLE(appData.compressLevel +
+					  rfbEncodingCompressLevel0);
     }
 
-    if (appData.compressLevel >= 0 && appData.compressLevel <= TVNC_SAMPOPT-1) {
-      encs[se->nEncodings++] = Swap32IfLE(appData.compressLevel +
+    if (se->nEncodings < MAX_ENCODINGS && requestQualityLevel) {
+      int tightQualityLevel;
+      if (appData.qualityLevel < 1 || appData.qualityLevel > 100)
+        appData.qualityLevel = 95;
+      tightQualityLevel = appData.qualityLevel / 10;
+      if (tightQualityLevel > 9) tightQualityLevel = 9;
+      encs[se->nEncodings++] = Swap32IfLE(appData.qualityLevel +
+					  rfbJpegQualityLevel1 - 1);
+      encs[se->nEncodings++] = Swap32IfLE(tightQualityLevel +
+					  rfbEncodingQualityLevel0);
+    }
+
+    if (se->nEncodings < MAX_ENCODINGS && requestSubsampLevel) {
+      if (appData.subsampLevel < 0 || appData.subsampLevel > TVNC_SAMPOPT - 1)
+        appData.subsampLevel = TVNC_1X;
+      encs[se->nEncodings++] = Swap32IfLE(appData.subsampLevel +
 					  rfbJpegSubsamp1X);
     }
 
-    if (appData.qualityLevel != -1) {
+    if (appData.useRemoteCursor) {
+      if (se->nEncodings < MAX_ENCODINGS)
+	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingXCursor);
+      if (se->nEncodings < MAX_ENCODINGS)
+	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRichCursor);
+      if (se->nEncodings < MAX_ENCODINGS)
+	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingPointerPos);
+    }
+
+    if (se->nEncodings < MAX_ENCODINGS && requestLastRectEncoding) {
+      encs[se->nEncodings++] = Swap32IfLE(rfbEncodingLastRect);
+    }
+  }
+  else {
+    if (SameMachine(rfbsock)) {
+      if (!tunnelSpecified) {
+	fprintf(stderr,"Same machine: preferring raw encoding\n");
+	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRaw);
+      } else {
+	fprintf(stderr,"Tunneling active: preferring tight encoding\n");
+      }
+    }
+
+    encs[se->nEncodings++] = Swap32IfLE(rfbEncodingCopyRect);
+    encs[se->nEncodings++] = Swap32IfLE(rfbEncodingTight);
+    encs[se->nEncodings++] = Swap32IfLE(rfbEncodingHextile);
+
+    if (appData.compressLevel >= 0 && appData.compressLevel <= 9) {
+      encs[se->nEncodings++] = Swap32IfLE(appData.compressLevel +
+					  rfbEncodingCompressLevel0);
+    } else if (!tunnelSpecified) {
+      /* If -tunnel option was provided, we assume that server machine is
+	 not in the local network so we use default compression level for
+	 tight encoding instead of fast compression. Thus we are
+	 requesting level 1 compression only if tunneling is not used. */
+      encs[se->nEncodings++] = Swap32IfLE(rfbEncodingCompressLevel1);
+    }
+
+    if (appData.enableJPEG) {
+      int tightQualityLevel;
       if (appData.qualityLevel < 1 || appData.qualityLevel > 100)
-	appData.qualityLevel = 95;
+        appData.qualityLevel = 95;
+      tightQualityLevel = appData.qualityLevel / 10;
+      if (tightQualityLevel > 9) tightQualityLevel = 9;
       encs[se->nEncodings++] = Swap32IfLE(appData.qualityLevel +
 					  rfbJpegQualityLevel1 - 1);
+      encs[se->nEncodings++] = Swap32IfLE(tightQualityLevel +
+					  rfbEncodingQualityLevel0);
+
+      if (appData.subsampLevel >= 0 && appData.subsampLevel <= TVNC_SAMPOPT-1)
+        encs[se->nEncodings++] = Swap32IfLE(appData.subsampLevel +  
+					    rfbJpegSubsamp1X);
     }
 
     if (appData.useRemoteCursor) {
@@ -705,6 +821,7 @@ SetFormatAndEncodings()
     }
 
     encs[se->nEncodings++] = Swap32IfLE(rfbEncodingLastRect);
+  }
 
   len = sz_rfbSetEncodingsMsg + se->nEncodings * 4;
 
@@ -796,8 +913,9 @@ SendKeyEvent(CARD32 key, Bool down)
 void
 QualHigh(Widget w, XEvent *e, String *s, Cardinal *c)
 {
-  appData.compressType=TVNC_JPEG;
-  appData.compressLevel=TVNC_1X;
+  appData.encodingsString="tight copyrect";
+  appData.enableJPEG=True;
+  appData.subsampLevel=TVNC_1X;
   appData.qualityLevel=95;
   UpdateQual();
 }
@@ -808,8 +926,9 @@ QualHigh(Widget w, XEvent *e, String *s, Cardinal *c)
 void
 QualMed(Widget w, XEvent *e, String *s, Cardinal *c)
 {
-  appData.compressType=TVNC_JPEG;
-  appData.compressLevel=TVNC_2X;
+  appData.encodingsString="tight copyrect";
+  appData.enableJPEG=True;
+  appData.subsampLevel=TVNC_2X;
   appData.qualityLevel=80;
   UpdateQual();
 }
@@ -820,9 +939,34 @@ QualMed(Widget w, XEvent *e, String *s, Cardinal *c)
 void
 QualLow(Widget w, XEvent *e, String *s, Cardinal *c)
 {
-  appData.compressType=TVNC_JPEG;
-  appData.compressLevel=TVNC_4X;
+  appData.encodingsString="tight copyrect";
+  appData.enableJPEG=True;
+  appData.subsampLevel=TVNC_4X;
   appData.qualityLevel=30;
+  UpdateQual();
+}
+
+/*
+ * QualLossless
+ */
+void
+QualLossless(Widget w, XEvent *e, String *s, Cardinal *c)
+{
+  appData.encodingsString="tight copyrect";
+  appData.enableJPEG=False;
+  appData.compressLevel=0;
+  UpdateQual();
+}
+
+/*
+ * QualLosslessWAN
+ */
+void
+QualLosslessWAN(Widget w, XEvent *e, String *s, Cardinal *c)
+{
+  appData.encodingsString="tight copyrect";
+  appData.enableJPEG=False;
+  appData.compressLevel=1;
   UpdateQual();
 }
 
@@ -1051,9 +1195,32 @@ HandleRFBServerMessage()
 	break;
       }
 
+      case rfbEncodingHextile:
+      {
+	switch (myFormat.bitsPerPixel) {
+	case 8:
+	  if (!HandleHextile8(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
+	    return False;
+	  break;
+	case 16:
+	  if (!HandleHextile16(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
+	    return False;
+	  break;
+	case 32:
+	  if (!HandleHextile32(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
+	    return False;
+	  break;
+	}
+	break;
+      }
+
       case rfbEncodingTight:
       {
 	switch (myFormat.bitsPerPixel) {
+	case 8:
+	  if (!HandleTight8(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
+	    return False;
+	  break;
 	case 16:
 	  if (!HandleTight16(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
 	    return False;
@@ -1175,10 +1342,16 @@ HandleRFBServerMessage()
 #define CONCAT2(a,b) a##b
 #define CONCAT2E(a,b) CONCAT2(a,b)
 
+#define BPP 8
+#include "hextile.c"
+#include "tight.c"
+#undef BPP
 #define BPP 16
+#include "hextile.c"
 #include "tight.c"
 #undef BPP
 #define BPP 32
+#include "hextile.c"
 #include "tight.c"
 #undef BPP
 
