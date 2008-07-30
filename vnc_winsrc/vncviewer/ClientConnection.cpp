@@ -2942,18 +2942,22 @@ void ClientConnection::ReadScreenUpdate() {
 				node = list;
 				r1 = &node->region;
 
-				SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h); 
-				if (node->isFill) {
-					omni_mutex_lock l(m_bitmapdcMutex);
-					ObjectSelector b(m_hBitmapDC, m_hBitmap);
-					PaletteSelector p(m_hBitmapDC, m_hPalette);
-					FillSolidRect(r1->r.x, r1->r.y, r1->r.w, r1->r.h,
-						node->fillColour);
+				if (r1->encoding == rfbEncodingTight
+					|| r1->encoding == rfbEncodingRaw
+					|| r1->encoding == rfbEncodingHextile) {
+					SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h); 
+					if (node->isFill) {
+						omni_mutex_lock l(m_bitmapdcMutex);
+						ObjectSelector b(m_hBitmapDC, m_hBitmap);
+						PaletteSelector p(m_hBitmapDC, m_hPalette);
+						FillSolidRect(r1->r.x, r1->r.y, r1->r.w, r1->r.h,
+							node->fillColour);
+					}
+					RECT rect;
+					SetRect(&rect, r1->r.x, r1->r.y,
+						r1->r.x + r1->r.w, r1->r.y + r1->r.h);
+					InvalidateScreenRect(&rect);
 				}
-				RECT rect;
-				SetRect(&rect, r1->r.x, r1->r.y,
-					r1->r.x + r1->r.w, r1->r.y + r1->r.h);
-				InvalidateScreenRect(&rect);
 				list = list->next;
 				free(node);
 			}
@@ -3030,18 +3034,22 @@ void ClientConnection::ReadScreenUpdate() {
 			node = list;
 			r1 = &node->region;
 
-			SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
-			if (node->isFill) {
-				omni_mutex_lock l(m_bitmapdcMutex);
-				ObjectSelector b(m_hBitmapDC, m_hBitmap);
-				PaletteSelector p(m_hBitmapDC, m_hPalette);
-				FillSolidRect(r1->r.x, r1->r.y, r1->r.w, r1->r.h,
-				node->fillColour);
+			if (r1->encoding == rfbEncodingTight
+				|| r1->encoding == rfbEncodingRaw
+				|| r1->encoding == rfbEncodingHextile) {
+				SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
+				if (node->isFill) {
+					omni_mutex_lock l(m_bitmapdcMutex);
+					ObjectSelector b(m_hBitmapDC, m_hBitmap);
+					PaletteSelector p(m_hBitmapDC, m_hPalette);
+					FillSolidRect(r1->r.x, r1->r.y, r1->r.w, r1->r.h,
+					node->fillColour);
+				}
+				RECT rect;
+				SetRect(&rect, r1->r.x, r1->r.y,
+					r1->r.x + r1->r.w, r1->r.y + r1->r.h);
+				InvalidateScreenRect(&rect);
 			}
-			RECT rect;
-			SetRect(&rect, r1->r.x, r1->r.y,
-				r1->r.x + r1->r.w, r1->r.y + r1->r.h);
-			InvalidateScreenRect(&rect);
 			list = list->next;
 			free(node);
 		}
