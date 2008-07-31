@@ -31,6 +31,9 @@
 #include <X11/Xaw/Scrollbar.h>
 
 
+extern Bool HasEncoding(const char *);
+
+
 Widget popup, fullScreenToggle, button4X, button2X, button1X, buttonGray,
   qualtext, qualslider, buttonZlib, buttonJPEG;
 
@@ -45,7 +48,7 @@ UpdateQual(void)
   strncpy(title, titleFormat, 1023);
   if((ptr=strrchr(title, '['))!=NULL)
   {
-    if (!appData.encodingsString || strcasestr(appData.encodingsString, "tight")) {
+    if (!appData.encodingsString || HasEncoding("tight")) {
       if (!appData.enableJPEG) {
         char zlibstr[80];
         zlibstr[0]=0;

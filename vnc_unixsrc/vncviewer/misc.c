@@ -42,6 +42,33 @@ static XtErrorHandler defaultXtErrorHandler;
 
 
 /*
+ * HasEncoding returns True if the encodings string contains the given
+ * substring.
+ */
+
+Bool
+HasEncoding(const char *str)
+{
+  if (appData.encodingsString) {
+    char *encStr = appData.encodingsString;
+    int encStrLen;
+    do {
+      char *nextEncStr = strchr(encStr, ' ');
+      if (nextEncStr) {
+	encStrLen = nextEncStr - encStr;
+	nextEncStr++;
+      } else {
+	encStrLen = strlen(encStr);
+      }
+      if (strncasecmp(encStr, str, encStrLen) == 0) return True;
+      encStr = nextEncStr;
+    } while (encStr);
+  }
+  return False;
+}
+
+
+/*
  * ToplevelInitBeforeRealization sets the title, geometry and other resources
  * on the toplevel window.
  */
@@ -55,7 +82,7 @@ ToplevelInitBeforeRealization()
   char temps[80];
 
   XtVaGetValues(toplevel, XtNtitle, &titleFormat, NULL);
-  if (!appData.encodingsString || strcasestr(appData.encodingsString, "tight")) {
+  if (!appData.encodingsString || HasEncoding("tight")) {
     if(!appData.enableJPEG) {
       char zlibstr[80];
       zlibstr[0]=0;
