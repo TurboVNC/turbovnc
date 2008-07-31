@@ -342,7 +342,6 @@ SendRFBEvent(Widget w, XEvent *ev, String *params, Cardinal *num_params)
 void
 LosslessRefresh(Widget w, XEvent *ev, String *params, Cardinal *num_params)
 {
-	fprintf(stderr, "LosslessRefresh()");
 	String encodings = appData.encodingsString;
 	int compressLevel = appData.compressLevel;
 	int qual = appData.qualityLevel;
