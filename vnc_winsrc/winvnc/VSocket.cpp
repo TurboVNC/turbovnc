@@ -361,6 +361,8 @@ VSocket::Accept()
 
   // Attempt to set the new socket's options
   setsockopt(new_socket->sock, IPPROTO_TCP, TCP_NODELAY, (char *)&one, sizeof(one));
+  int sendbufsize = 65536;
+  setsockopt(new_socket->sock, SOL_SOCKET, SO_SNDBUF, (char *)&sendbufsize, sizeof(sendbufsize));
 
   // Put the socket into non-blocking mode
 #ifdef __WIN32__
