@@ -1685,8 +1685,10 @@ void ClientConnection::SetFormatAndEncodings()
 	if ( m_opts.m_enableJpegCompression &&
 		 m_opts.m_jpegQualityLevel >= 1 &&
 		 m_opts.m_jpegQualityLevel <= 100) {
+		int tightQualityLevel = m_opts.m_jpegQualityLevel / 10;
+		if (tightQualityLevel > 9) tightQualityLevel = 9;
 		encs[se->nEncodings++] = Swap32IfLE( rfbEncodingQualityLevel0 +
-											 (m_opts.m_jpegQualityLevel - 1) / 10 );
+											 tightQualityLevel );
 		encs[se->nEncodings++] = Swap32IfLE( rfbJpegQualityLevel1 - 1 +
 											 m_opts.m_jpegQualityLevel );
 	}
