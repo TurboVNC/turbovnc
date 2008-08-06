@@ -777,10 +777,10 @@ SetFormatAndEncodings()
         appData.qualityLevel = 95;
       tightQualityLevel = appData.qualityLevel / 10;
       if (tightQualityLevel > 9) tightQualityLevel = 9;
-      encs[se->nEncodings++] = Swap32IfLE(appData.qualityLevel +
-					  rfbJpegQualityLevel1 - 1);
       encs[se->nEncodings++] = Swap32IfLE(tightQualityLevel +
 					  rfbEncodingQualityLevel0);
+      encs[se->nEncodings++] = Swap32IfLE(appData.qualityLevel +
+					  rfbJpegQualityLevel1 - 1);
     }
 
     if (se->nEncodings < MAX_ENCODINGS && requestSubsampLevel) {
@@ -834,10 +834,10 @@ SetFormatAndEncodings()
         appData.qualityLevel = 95;
       tightQualityLevel = appData.qualityLevel / 10;
       if (tightQualityLevel > 9) tightQualityLevel = 9;
-      encs[se->nEncodings++] = Swap32IfLE(appData.qualityLevel +
-					  rfbJpegQualityLevel1 - 1);
       encs[se->nEncodings++] = Swap32IfLE(tightQualityLevel +
 					  rfbEncodingQualityLevel0);
+      encs[se->nEncodings++] = Swap32IfLE(appData.qualityLevel +
+					  rfbJpegQualityLevel1 - 1);
 
       if (appData.subsampLevel >= 0 && appData.subsampLevel <= TVNC_SAMPOPT-1)
         encs[se->nEncodings++] = Swap32IfLE(appData.subsampLevel +  
