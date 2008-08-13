@@ -328,6 +328,8 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			m_Emul3Buttons = true;
 		} else if ( SwitchMatch(args[j], _T("noemulate3") )) {
 			m_Emul3Buttons = false;
+		} else if ( SwitchMatch(args[j], _T("jpeg") )) {
+			m_enableJpegCompression = true;
 		} else if ( SwitchMatch(args[j], _T("nojpeg") )) {
 			m_enableJpegCompression = false;
 		} else if ( SwitchMatch(args[j], _T("nocursorshape") )) {
