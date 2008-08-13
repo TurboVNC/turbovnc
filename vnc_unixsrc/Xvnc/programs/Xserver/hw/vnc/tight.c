@@ -274,7 +274,7 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
 
             if (CheckSolidTile(dx, dy, dw, dh, &colorValue, FALSE)) {
 
-                if (subsampLevel == TJ_GRAYSCALE) {
+                if (subsampLevel == TJ_GRAYSCALE && qualityLevel != -1) {
 		    CARD32 r=(colorValue>>16)&0xFF;
 		    CARD32 g=(colorValue>>8)&0xFF;
 		    CARD32 b=(colorValue)&0xFF;
@@ -563,7 +563,7 @@ SendSubrect(cl, x, y, w, h)
     fbptr = (rfbScreen.pfbMemory + (rfbScreen.paddedWidthInBytes * y)
              + (x * (rfbScreen.bitsPerPixel / 8)));
 
-    if (subsampLevel == TJ_GRAYSCALE)
+    if (subsampLevel == TJ_GRAYSCALE && qualityLevel != -1)
         return SendJpegRect(cl, x, y, w, h, qualityLevel);
 
     paletteMaxColors = w * h / tightConf[compressLevel].idxMaxColorsDivisor;
