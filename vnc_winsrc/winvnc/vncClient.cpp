@@ -62,19 +62,11 @@ extern "C" {
 }
 
 /*
- * Map of quality levels to JPEG quality levels (experimentally determined by
- * studying compression ratios of sample images)
- * 9 ~= 6:1,   8 ~= 8:1,   7 ~= 10:1,  6 ~= 12:1,  5 ~= 14:1,
- * 4 ~= 16:1,  3 ~= 18:1,  2 ~= 20:1,  1 ~= 22:1,  0 ~= 24:1
- * This is to provide compatibility with TightVNC clients
+ * Map of quality levels to provide compatibility with TightVNC clients
  */
 
 static int JPEG_QUAL[10] = {
-   41, 48, 57, 56, 66, 74, 72, 81, 88, 94
-};
-
-static int JPEG_SUBSAMP[10] = {
-   1, 1, 1, 2, 2, 2, 0, 0, 0, 0
+   5, 10, 15, 25, 37, 50, 60, 70, 75, 80
 };
 
 #include "FileTransferItemInfo.h"
@@ -875,7 +867,8 @@ vncClientThread::run(void *arg)
 			}
 
 			m_client->m_buffer->SetQualityLevel(-1);
-			m_client->m_buffer->SetCompressLevel(TVNC_1X);
+			m_client->m_buffer->SetCompressLevel(1);
+			m_client->m_buffer->SetSubsampLevel(TVNC_1X);
 			m_client->m_buffer->EnableXCursor(FALSE);
 			m_client->m_buffer->EnableRichCursor(FALSE);
 			m_client->m_buffer->EnableLastRect(FALSE);
@@ -937,13 +930,13 @@ vncClientThread::run(void *arg)
 					}
 
 					// Is this a CompressLevel encoding?
-					if ((Swap32IfLE(encoding) >= rfbJpegSubsamp1X) &&
-						(Swap32IfLE(encoding) <= rfbJpegSubsampGray))
+					if ((Swap32IfLE(encoding) >= rfbEncodingCompressLevel0) &&
+						(Swap32IfLE(encoding) <= rfbEncodingCompressLevel9))
 					{
 						// Client specified encoding-specific compression level
-						int level = (int)(Swap32IfLE(encoding) - rfbJpegSubsamp1X);
+						int level = (int)(Swap32IfLE(encoding) - rfbEncodingCompressLevel0);
 						m_client->m_buffer->SetCompressLevel(level);
-						vnclog.Print(LL_INTINFO, VNCLOG("subsampling level requested: %d\n"), level);
+						vnclog.Print(LL_INTINFO, VNCLOG("compression level requested: %d\n"), level);
 						continue;
 					}
 
@@ -953,9 +946,9 @@ vncClientThread::run(void *arg)
 					{
 						// Client specified image quality level used for JPEG compression
 						int qual = JPEG_QUAL[Swap32IfLE(encoding) - rfbEncodingQualityLevel0];
-						int level = JPEG_SUBSAMP[Swap32IfLE(encoding) - rfbEncodingQualityLevel0];
+						int level = TVNC_2X;
 						m_client->m_buffer->SetQualityLevel(qual);
-						m_client->m_buffer->SetCompressLevel(level);
+						m_client->m_buffer->SetSubsampLevel(level);
 						vnclog.Print(LL_INTINFO, VNCLOG("image compression level requested: %d, Q%d\n"), level, qual);
 						continue;
 					}
@@ -966,6 +959,17 @@ vncClientThread::run(void *arg)
 						int level = (int)(Swap32IfLE(encoding) - rfbJpegQualityLevel1 + 1);
 						m_client->m_buffer->SetQualityLevel(level);
 						vnclog.Print(LL_INTINFO, VNCLOG("image quality level requested: %d\n"), level);
+						continue;
+					}
+
+					// Is this a SubsampLevel encoding?
+					if ((Swap32IfLE(encoding) >= rfbJpegSubsamp1X) &&
+						(Swap32IfLE(encoding) <= rfbJpegSubsampGray))
+					{
+						// Client specified encoding-specific compression level
+						int level = (int)(Swap32IfLE(encoding) - rfbJpegSubsamp1X);
+						m_client->m_buffer->SetSubsampLevel(level);
+						vnclog.Print(LL_INTINFO, VNCLOG("subsampling level requested: %d\n"), level);
 						continue;
 					}
 

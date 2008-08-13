@@ -89,6 +89,7 @@ public:
 
 	// Configuring encoder
 	void SetCompressLevel(int level);
+	void SetSubsampLevel(int level);
 	void SetQualityLevel(int level);
 	void EnableXCursor(BOOL enable) { m_use_xcursor = enable; }
 	void EnableRichCursor(BOOL enable) { m_use_richcursor = enable; }
@@ -124,6 +125,7 @@ protected:
 	int					transmittedSize;		// Total amount of data sent
 
 	int					m_compresslevel;		// Encoding-specific compression level (if needed).
+	int					m_subsamplevel;			// YUV subsampling level for lossy JPEG compression.
 	int					m_qualitylevel;			// Image quality level for lossy JPEG compression.
 	BOOL				m_use_xcursor;			// XCursor cursor shape updates allowed.
 	BOOL				m_use_richcursor;		// RichCursor cursor shape updates allowed.

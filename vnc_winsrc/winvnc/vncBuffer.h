@@ -72,6 +72,7 @@ public:
 
 	// CONFIGURING ENCODER
 	void SetCompressLevel(int level);
+	void SetSubsampLevel(int level);
 	void SetQualityLevel(int level);
 	void EnableXCursor(BOOL enable);
 	void EnableRichCursor(BOOL enable);
@@ -124,6 +125,7 @@ protected:
 	// They are necessary because vncEncoder instance may be created after
 	// their values were set.
 	int				m_compresslevel;
+	int				m_subsamplevel;
 	int				m_qualitylevel;
 	BOOL			m_use_xcursor;
 	BOOL			m_use_richcursor;
