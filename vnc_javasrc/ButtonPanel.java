@@ -157,13 +157,22 @@ class ButtonPanel extends Panel implements ActionListener {
       }
     } else if (evt.getSource() == losslessRefreshButton) {
       try {
+	int encoding = viewer.options.preferredEncoding;
+	int compressLevel = viewer.options.compressLevel;
 	int qual = viewer.options.jpegQuality;
+        boolean enableJpeg = viewer.options.enableJpeg;
 	viewer.options.jpegQuality = -1;
+        viewer.options.enableJpeg = false;
+        viewer.options.preferredEncoding = RfbProto.EncodingTight;
+        viewer.options.compressLevel = 1;
 	viewer.setEncodings();
 	RfbProto rfb = viewer.rfb;
 	rfb.writeFramebufferUpdateRequest(0, 0, rfb.framebufferWidth,
 					  rfb.framebufferHeight, false);
 	viewer.options.jpegQuality = qual;
+        viewer.options.enableJpeg = enableJpeg;
+        viewer.options.preferredEncoding = encoding;
+        viewer.options.compressLevel = compressLevel;
 	viewer.setEncodings();
       } catch (IOException e) {
         e.printStackTrace();

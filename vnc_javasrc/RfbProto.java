@@ -41,7 +41,8 @@ class RfbProto {
   final static String
     StandardVendor  = "STDV",
     TridiaVncVendor = "TRDV",
-    TightVncVendor  = "TGHT";
+    TightVncVendor  = "TGHT",
+    TurboVncVendor  = "TRBO";
 
   // Security types
   final static int
@@ -100,7 +101,7 @@ class RfbProto {
     EncodingTight          = 7,
     EncodingZRLE           = 16,
     EncodingJpegSubsamp1X = 0xFFFFFD00,
-    EncodingJpegQualityLevel0 = 0xFFFFFE00,
+    EncodingJpegQualityLevel1 = 0xFFFFFE01,
     EncodingCompressLevel0 = 0xFFFFFF00,
     EncodingQualityLevel0  = 0xFFFFFFE0,
     EncodingXCursor        = 0xFFFFFF10,
@@ -123,7 +124,9 @@ class RfbProto {
     SigEncodingRichCursor     = "RCHCURSR",
     SigEncodingPointerPos     = "POINTPOS",
     SigEncodingLastRect       = "LASTRECT",
-    SigEncodingNewFBSize      = "NEWFBSIZ";
+    SigEncodingNewFBSize      = "NEWFBSIZ",
+    SigEncodingJpegQualityLevel1 = "JPEGQLV2",
+    SigEncodingJpegSubsamp1X  = "JPEGSAMP";
 
   final static int MaxNormalEncoding = 255;
 
@@ -141,6 +144,7 @@ class RfbProto {
     TightExplicitFilter = 0x04,
     TightFill           = 0x08,
     TightJpeg           = 0x09,
+    TightNoZlib         = 0x0A,
     TightMaxSubencoding = 0x09,
     TightFilterCopy     = 0x00,
     TightFilterPalette  = 0x01,
@@ -464,6 +468,8 @@ class RfbProto {
     // Supported encoding types
     encodingCaps.add(EncodingCopyRect, StandardVendor,
 		     SigEncodingCopyRect, "Standard CopyRect encoding");
+    encodingCaps.add(EncodingHextile, StandardVendor,
+		     SigEncodingHextile, "Standard Hextile encoding");
     encodingCaps.add(EncodingTight, TightVncVendor,
 		     SigEncodingTight, "Tight encoding");
 
@@ -482,6 +488,10 @@ class RfbProto {
 		     SigEncodingLastRect, "LastRect protocol extension");
     encodingCaps.add(EncodingNewFBSize, TightVncVendor,
 		     SigEncodingNewFBSize, "Framebuffer size change");
+    encodingCaps.add(EncodingJpegQualityLevel1, TurboVncVendor,
+                     SigEncodingJpegQualityLevel1, "TurboJPEG quality level");
+    encodingCaps.add(EncodingJpegSubsamp1X, TurboVncVendor,
+                     SigEncodingJpegSubsamp1X, "TurboJPEG subsampling level");
   }
 
   //

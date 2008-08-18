@@ -1,5 +1,5 @@
 //
-//  Copyright (C) 2006 Sun Microsystems, Inc.  All Rights Reserved.
+//  Copyright (C) 2006-2008 Sun Microsystems, Inc.  All Rights Reserved.
 //  Copyright (C) 2001 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 2001 Constantin Kaplinsky.  All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
@@ -35,10 +35,11 @@ class OptionsFrame extends Frame
   implements WindowListener, ActionListener, ItemListener {
 
   static String[] names = {
-    "Connection profile",
-    "Image compression type",
+    "Image encoding protocol",
+    "Allow JPEG compression",
     "JPEG chrominance subsampling",
     "JPEG image quality",
+    "Zlib compression level",
     "Cursor shape updates",
     "Use CopyRect",
     "Mouse buttons 2 and 3",
@@ -48,8 +49,10 @@ class OptionsFrame extends Frame
   };
 
   static String[][] values = {
-    { "Low Quality (Wide-Area Network)", "Medium Quality", "High Quality (High-Speed Network)", "Custom" },
-    { "None (RGB)", "JPEG" },
+    { "Tight + Perceptually Lossless JPEG (LAN)",
+      "Tight + Medium Quality JPEG", "Tight + Low Quality JPEG (WAN)",
+      "Lossless Tight (Gigabit)", "Lossless Tight + Zlib (WAN)", "Custom" },
+    { "Yes", "No" },
     { "Grayscale", "4X", "2X", "None" },
     { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
       "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
@@ -61,6 +64,7 @@ class OptionsFrame extends Frame
       "71", "72", "73", "74", "75", "76", "77", "78", "79", "80",
       "81", "82", "83", "84", "85", "86", "87", "88", "89", "90",
       "91", "92", "93", "94", "95", "96", "97", "98", "99", "100" },
+    { "None", "1" },
     { "Enable", "Ignore", "Disable" },
     { "Yes", "No" },
     { "Normal", "Reversed" },
@@ -70,16 +74,17 @@ class OptionsFrame extends Frame
   };
 
   final int
-    presetIndex          = 0,
-    compressTypeIndex    = 1,
-    compressLevelIndex   = 2,
+    encodingIndex        = 0,
+    enableJpegIndex      = 1,
+    subsampLevelIndex    = 2,
     jpegQualityIndex     = 3,
-    cursorUpdatesIndex   = 4,
-    useCopyRectIndex     = 5,
-    mouseButtonIndex     = 6,
-    viewOnlyIndex        = 7,
-    scaleCursorIndex     = 8,
-    shareDesktopIndex    = 9;
+    compressLevelIndex   = 4,
+    cursorUpdatesIndex   = 5,
+    useCopyRectIndex     = 6,
+    mouseButtonIndex     = 7,
+    viewOnlyIndex        = 8,
+    scaleCursorIndex     = 9,
+    shareDesktopIndex    = 10;
 
   Label[] labels = new Label[names.length];
   Choice[] choices = new Choice[names.length];
@@ -93,7 +98,9 @@ class OptionsFrame extends Frame
 
   int preferredEncoding;
   int compressLevel;
+  int subsampLevel;
   int jpegQuality;
+  boolean enableJpeg;
   boolean useCopyRect;
   boolean requestCursorUpdates;
   boolean ignoreCursorUpdates;
@@ -151,9 +158,11 @@ class OptionsFrame extends Frame
 
     // Set up defaults
 
-    choices[compressTypeIndex].select("JPEG");
-    choices[compressLevelIndex].select("None");
+    choices[encodingIndex].select("Tight + Perceptually Lossless JPEG (LAN)");
+    choices[enableJpegIndex].select("Yes");
+    choices[subsampLevelIndex].select("None");
     choices[jpegQualityIndex].select("95");
+    choices[compressLevelIndex].select("None");
     choices[cursorUpdatesIndex].select("Enable");
     choices[useCopyRectIndex].select("Yes");
     choices[mouseButtonIndex].select("Normal");
@@ -230,22 +239,41 @@ class OptionsFrame extends Frame
 
   void setEncodings() {
     useCopyRect = choices[useCopyRectIndex].getSelectedItem().equals("Yes");
+    enableJpeg = choices[enableJpegIndex].getSelectedItem().equals("Yes");
 
     preferredEncoding = RfbProto.EncodingTight;
-    if (choices[compressTypeIndex].getSelectedItem().equals("None (RGB)")) {
-      preferredEncoding = RfbProto.EncodingRaw;
+    boolean enableCompressLevel = false;
+    boolean enableSubsampLevel = false;
+    boolean enableQualityLevel = false;
+
+    if (enableJpeg) {
+      enableSubsampLevel = true;
+      enableQualityLevel = true;
+    } else {
+      enableCompressLevel = true;
     }
 
     // Handle compression level setting.
 
     compressLevel = 0;
-    if (choices[compressLevelIndex].getSelectedItem().equals("4X")) {
+    if (choices[compressLevelIndex].getSelectedItem().equals("1")) {
       compressLevel = 1;
-    } else if (choices[compressLevelIndex].getSelectedItem().equals("2X")) {
-      compressLevel = 2;
-    } else if (choices[compressLevelIndex].getSelectedItem().equals("Grayscale")) {
-      compressLevel = 3;
     }
+    labels[compressLevelIndex].setEnabled(enableCompressLevel);
+    choices[compressLevelIndex].setEnabled(enableCompressLevel);
+
+    // Handle subsampling level setting.
+
+    subsampLevel = 0;
+    if (choices[subsampLevelIndex].getSelectedItem().equals("4X")) {
+      subsampLevel = 1;
+    } else if (choices[subsampLevelIndex].getSelectedItem().equals("2X")) {
+      subsampLevel = 2;
+    } else if (choices[subsampLevelIndex].getSelectedItem().equals("Grayscale")) {
+      subsampLevel = 3;
+    }
+    labels[subsampLevelIndex].setEnabled(enableSubsampLevel);
+    choices[subsampLevelIndex].setEnabled(enableSubsampLevel);
 
     // Handle JPEG quality setting.
 
@@ -259,6 +287,8 @@ class OptionsFrame extends Frame
     if (jpegQuality < 1 || jpegQuality > 100) {
       jpegQuality = -1;
     }
+    labels[jpegQualityIndex].setEnabled(enableQualityLevel);
+    choices[jpegQualityIndex].setEnabled(enableQualityLevel);
 
     // Request cursor shape updates if necessary.
 
@@ -319,31 +349,76 @@ class OptionsFrame extends Frame
 
     boolean updateOptions = false;
 
-    if (choices[presetIndex].getSelectedItem().equals("Low Quality (Wide-Area Network)")) {
+    if (choices[encodingIndex].getSelectedItem().equals("Tight + Perceptually Lossless JPEG (LAN)")) {
       preferredEncoding = RfbProto.EncodingTight;
-      compressLevel = 1;
-      jpegQuality = 30;
-      updateOptions = true;
-    } else if (choices[presetIndex].getSelectedItem().equals("Medium Quality")) {
-      preferredEncoding = RfbProto.EncodingTight;
-      compressLevel = 2;
-      jpegQuality = 80;
-      updateOptions = true;
-    } else if (choices[presetIndex].getSelectedItem().equals("High Quality (High-Speed Network)")) {
-      preferredEncoding = RfbProto.EncodingTight;
-      compressLevel = 0;
+      enableJpeg = true;
+      subsampLevel = 0;
       jpegQuality = 95;
+      useCopyRect = true;
+      updateOptions = true;
+    } else if (choices[encodingIndex].getSelectedItem().equals("Tight + Medium Quality JPEG")) {
+      preferredEncoding = RfbProto.EncodingTight;
+      enableJpeg = true;
+      subsampLevel = 2;
+      jpegQuality = 80;
+      useCopyRect = true;
+      updateOptions = true;
+    } else if (choices[encodingIndex].getSelectedItem().equals("Tight + Low Quality JPEG (WAN)")) {
+      preferredEncoding = RfbProto.EncodingTight;
+      enableJpeg = true;
+      subsampLevel = 1;
+      jpegQuality = 30;
+      useCopyRect = true;
+      updateOptions = true;
+    } else if (choices[encodingIndex].getSelectedItem().equals("Lossless Tight (Gigabit)")) {
+      preferredEncoding = RfbProto.EncodingTight;
+      enableJpeg = false;
+      compressLevel = 0;
+      useCopyRect = true;
+      updateOptions = true;
+    } else if (choices[encodingIndex].getSelectedItem().equals("Lossless Tight + Zlib (WAN)")) {
+      preferredEncoding = RfbProto.EncodingTight;
+      enableJpeg = false;
+      compressLevel = 1;
+      useCopyRect = true;
       updateOptions = true;
     }
 
     if (updateOptions) {
+      if (enableJpeg) {
+        choices[enableJpegIndex].select("Yes");
+        labels[subsampLevelIndex].setEnabled(true);
+        choices[subsampLevelIndex].setEnabled(true);
+        labels[jpegQualityIndex].setEnabled(true);
+        choices[jpegQualityIndex].setEnabled(true);
+        labels[compressLevelIndex].setEnabled(false);
+        choices[compressLevelIndex].setEnabled(false);
+      } else {
+        choices[enableJpegIndex].select("No");
+        labels[subsampLevelIndex].setEnabled(false);
+        choices[subsampLevelIndex].setEnabled(false);
+        labels[jpegQualityIndex].setEnabled(false);
+        choices[jpegQualityIndex].setEnabled(false);
+        labels[compressLevelIndex].setEnabled(true);
+        choices[compressLevelIndex].setEnabled(true);
+      }
+      if (useCopyRect) {
+        choices[useCopyRectIndex].select("Yes");
+      } else {
+        choices[useCopyRectIndex].select("No");
+      }
       choices[jpegQualityIndex].select(String.valueOf(jpegQuality));
+      if (subsampLevel==1) {
+        choices[subsampLevelIndex].select("4X");
+      } else if (subsampLevel==2) {
+        choices[subsampLevelIndex].select("2X");
+      } else if (subsampLevel==3) {
+        choices[subsampLevelIndex].select("Grayscale");
+      } else {
+        choices[subsampLevelIndex].select("None");
+      }
       if (compressLevel==1) {
-        choices[compressLevelIndex].select("4X");
-      } else if (compressLevel==2) {
-        choices[compressLevelIndex].select("2X");
-      } else if (compressLevel==3) {
-        choices[compressLevelIndex].select("Grayscale");
+        choices[compressLevelIndex].select("1");
       } else {
         choices[compressLevelIndex].select("None");
       }
@@ -353,17 +428,28 @@ class OptionsFrame extends Frame
 
   void setPreset() {
 
-    if (preferredEncoding == RfbProto.EncodingTight
-      && compressLevel == 0 && jpegQuality == 95) {
-      choices[presetIndex].select("High Quality (High-Speed Network)");
-    } else if (preferredEncoding == RfbProto.EncodingTight
-      && compressLevel == 1 && jpegQuality == 30) {
-      choices[presetIndex].select("Low Quality (Wide-Area Network)");
-    } else if (preferredEncoding == RfbProto.EncodingTight
-      && compressLevel == 2 && jpegQuality == 80) {
-      choices[presetIndex].select("Medium Quality");
+    if (enableJpeg && useCopyRect
+      && preferredEncoding == RfbProto.EncodingTight
+      && subsampLevel == 0 && jpegQuality == 95) {
+      choices[encodingIndex].select("Tight + Perceptually Lossless JPEG (LAN)");
+    } else if (enableJpeg && useCopyRect
+      && preferredEncoding == RfbProto.EncodingTight
+      && subsampLevel == 2 && jpegQuality == 80) {
+      choices[encodingIndex].select("Tight + Medium Quality JPEG");
+    } else if (enableJpeg && useCopyRect
+      && preferredEncoding == RfbProto.EncodingTight
+      && subsampLevel == 1 && jpegQuality == 30) {
+      choices[encodingIndex].select("Tight + Low Quality JPEG (WAN)");
+    } else if (!enableJpeg && useCopyRect
+      && preferredEncoding == RfbProto.EncodingTight
+      && compressLevel == 0) {
+      choices[encodingIndex].select("Lossless Tight (Gigabit)");
+    } else if (!enableJpeg && useCopyRect
+      && preferredEncoding == RfbProto.EncodingTight
+      && compressLevel == 1) {
+      choices[encodingIndex].select("Lossless Tight + Zlib (WAN)");
     } else {
-      choices[presetIndex].select("Custom");
+      choices[encodingIndex].select("Custom");
     }
   }
 
@@ -374,7 +460,8 @@ class OptionsFrame extends Frame
   public void itemStateChanged(ItemEvent evt) {
     Object source = evt.getSource();
 
-    if (source == choices[compressTypeIndex] ||
+    if (source == choices[enableJpegIndex] ||
+        source == choices[subsampLevelIndex] ||
         source == choices[compressLevelIndex] ||
         source == choices[jpegQualityIndex] ||
         source == choices[cursorUpdatesIndex] ||
@@ -393,7 +480,7 @@ class OptionsFrame extends Frame
 
       setOtherOptions();
 
-    } else if (source == choices[presetIndex]) {
+    } else if (source == choices[encodingIndex]) {
 
       getPreset();
       viewer.setEncodings();
