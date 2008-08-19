@@ -18,8 +18,8 @@ Xvnc \- an X server providing VNC connectivity
 .TP
 \fBXvnc\fR
 [:\fIdisplay\fR]
-[\-geometry \fIwidth\fRx\fIheight\fR]
-[\-pixelformat rgb888|bgr888] [\-udpinputport \fIport\fR]
+[\-geometry \fIwidth\fRx\fIheight\fR] [\-depth \fIdepth\fR]
+[\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-udpinputport \fIport\fR]
 [\-rfbport \fIport\fR] [\-rfbwait \fItime\fR] [\-nocursor]
 [\-rfbauth \fIpasswd-file\fR] [\-httpd \fIdir\fR]
 [\-httpport \fIport\fR] [\-deferupdate \fItime\fR]
@@ -50,17 +50,16 @@ the \fBXserver\fR(1) manual page for details on those options.
 The VNC-specific options are as follows:
 .TP
 \fB\-geometry\fR \fIwidth\fR\fBx\fR\fIheight\fR
-Set width and height of the virtual desktop.
+Set width and height of the virtual X display.
 .TP
-\fB\-pixelformat\fR \fBrgb888\fR
-On Big Endian systems (e.g. Sparc), this causes the TurboVNC server to
-use ARGB pixel ordering for the virtual desktop instead of the default
-of ABGR.
-.TP
-\fB\-pixelformat\fR \fBbgr888\fR
-On Little Endian systems (e.g. x86), this causes the TurboVNC server
-to use RGBA pixel ordering for the virtual desktop instead of the
-default of BGRA.
+\fB\-pixelformat\fR \fBrgb\fR\fINNN\fR|\fBbgr\fR\fINNN\fR
+Specify the pixel format of the virtual X display. Xvnc can use any pixel
+format you choose, but if this pixel format does not match the pixel format
+of the display on which vncviewer is running, then Xvnc will perform pixel
+format conversion prior to sending images to vncviewer. This can slow
+performance. The default pixel format, rgb888, is equivalent to BGRA on little
+endian systems or ARGB on big endian systems.  A pixel format of bgr888 is
+equivalent to RGBA on little endian systems or ABGR on big endian systems.
 .TP
 \fB\-udpinputport\fR \fIport\fR
 UDP port for keyboard/pointer data.

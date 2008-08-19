@@ -54,8 +54,8 @@ format you choose, but if this pixel format does not match the pixel format
 of the display on which vncviewer is running, then Xvnc will perform pixel
 format conversion prior to sending images to vncviewer. This can slow
 performance. The default pixel format, rgb888, is equivalent to BGRA on little
-endian servers or ARGB on big endian servers.  A pixel format of bgr888 is
-equivalent to RGBA on little endian servers or ABGR on big endian servers.
+endian systems or ARGB on big endian systems.  A pixel format of bgr888 is
+equivalent to RGBA on little endian systems or ABGR on big endian systems.
 .TP
 \fB\-name\fR \fIstring\fR
 This specifies the name of the desktop.
