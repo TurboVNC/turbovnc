@@ -528,13 +528,23 @@ public class VncViewer extends java.applet.Applet
       encodings[nEncodings++] = RfbProto.EncodingRRE;
     }
 
-    if (options.compressLevel >= 0 && options.compressLevel <= 3) {
+    if (options.compressLevel >= 0 && options.compressLevel <= 1) {
       encodings[nEncodings++] =
-        RfbProto.EncodingJpegSubsamp1X + options.compressLevel;
+        RfbProto.EncodingCompressLevel0 + options.compressLevel;
     }
-    if (options.jpegQuality >= 1 && options.jpegQuality <= 100) {
+    if (options.enableJpeg && options.jpegQuality >= 1
+      && options.jpegQuality <= 100) {
+      int tightQualityLevel = options.jpegQuality / 10;
+      if (tightQualityLevel > 9) tightQualityLevel = 9;
       encodings[nEncodings++] =
-        RfbProto.EncodingJpegQualityLevel0 + options.jpegQuality;
+        RfbProto.EncodingQualityLevel0 + tightQualityLevel;
+      encodings[nEncodings++] =
+        RfbProto.EncodingJpegQualityLevel1 + options.jpegQuality - 1;
+    }
+    if (options.enableJpeg
+      && options.subsampLevel >= 0 && options.subsampLevel <= 3) {
+      encodings[nEncodings++] =
+        RfbProto.EncodingJpegSubsamp1X + options.subsampLevel;
     }
 
     if (options.requestCursorUpdates) {

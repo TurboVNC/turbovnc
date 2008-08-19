@@ -29,6 +29,7 @@ import java.io.*;
 import java.lang.*;
 import java.util.zip.*;
 
+
 //
 // VncCanvas is a subclass of Canvas which draws a VNC desktop on it.
 //
@@ -1065,6 +1066,7 @@ class VncCanvas extends Canvas
   void handleTightRect(int x, int y, int w, int h) throws Exception {
 
     int comp_ctl = rfb.is.readUnsignedByte();
+    boolean readUncompressed = false;
     if (rfb.rec != null) {
       if (rfb.recordFromBeginning ||
 	  comp_ctl == (rfb.TightFill << 4) ||
@@ -1083,6 +1085,11 @@ class VncCanvas extends Canvas
 	tightInflaters[stream_id] = null;
       }
       comp_ctl >>= 1;
+    }
+
+    if ((comp_ctl & rfb.TightNoZlib) == rfb.TightNoZlib) {
+      comp_ctl &= ~(rfb.TightNoZlib);
+      readUncompressed = true;
     }
 
     // Check correctness of subencoding value.
@@ -1199,10 +1206,14 @@ class VncCanvas extends Canvas
 
     // Read, optionally uncompress and decode data.
     int dataSize = h * rowSize;
-    if (dataSize < rfb.TightMinToCompress) {
+    if (dataSize < rfb.TightMinToCompress || readUncompressed) {
+
+      if (dataSize < rfb.TightMinToCompress) readUncompressed = false;
+
       // Data size is small - not compressed with zlib.
       if (numColors != 0) {
 	// Indexed colors.
+        if (readUncompressed) dataSize = rfb.readCompactLen();
 	byte[] indexedData = new byte[dataSize];
 	rfb.readFully(indexedData);
 	if (rfb.rec != null) {
@@ -1227,7 +1238,9 @@ class VncCanvas extends Canvas
 	}
       } else if (useGradient) {
 	// "Gradient"-processed data
-	byte[] buf = new byte[w * h * 3];
+        if (readUncompressed) dataSize = rfb.readCompactLen();
+        else dataSize = w * h * 3;
+	byte[] buf = new byte[dataSize];
 	rfb.readFully(buf);
 	if (rfb.rec != null) {
 	  rfb.rec.write(buf);
@@ -1236,26 +1249,36 @@ class VncCanvas extends Canvas
       } else {
 	// Raw truecolor data.
 	if (bytesPixel == 1) {
-	  for (int dy = y; dy < y + h; dy++) {
-	    rfb.readFully(pixels8, dy * rfb.framebufferWidth + x, w);
-	    if (rfb.rec != null) {
-	      rfb.rec.write(pixels8, dy * rfb.framebufferWidth + x, w);
-	    }
+	  if (readUncompressed) dataSize = rfb.readCompactLen();
+	  else dataSize = w * h;
+	  byte[] buf = new byte[dataSize];
+          rfb.readFully(buf);
+	  if (rfb.rec != null) {
+	    rfb.rec.write(buf);
+	  }
+	  int destOffset = y * rfb.framebufferWidth + x;
+	  for (int dy = 0; dy < h; dy++) {
+	    System.arraycopy(buf, dy * w, pixels8, destOffset, w);
+	    destOffset += rfb.framebufferWidth;
 	  }
 	} else {
-	  byte[] buf = new byte[w * 3];
-	  int i, offset;
-	  for (int dy = y; dy < y + h; dy++) {
-	    rfb.readFully(buf);
-	    if (rfb.rec != null) {
-	      rfb.rec.write(buf);
-	    }
-	    offset = dy * rfb.framebufferWidth + x;
+	  if (readUncompressed) dataSize = rfb.readCompactLen();
+	  else dataSize = w * h * 3;
+	  byte[] buf = new byte[dataSize];
+	  int srcOffset = 0;
+	  int destOffset, i;
+          rfb.readFully(buf);
+	  if (rfb.rec != null) {
+	    rfb.rec.write(buf);
+	  }
+	  for (int dy = 0; dy < h; dy++) {
+	    destOffset = (y + dy) * rfb.framebufferWidth + x;
 	    for (i = 0; i < w; i++) {
-	      pixels24[offset + i] =
-		(buf[i * 3] & 0xFF) << 16 |
-		(buf[i * 3 + 1] & 0xFF) << 8 |
-		(buf[i * 3 + 2] & 0xFF);
+	      pixels24[destOffset + i] =
+		(buf[srcOffset] & 0xFF) << 16 |
+		(buf[srcOffset + 1] & 0xFF) << 8 |
+		(buf[srcOffset + 2] & 0xFF);
+	      srcOffset += 3;
 	    }
 	  }
 	}
