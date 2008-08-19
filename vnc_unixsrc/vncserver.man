@@ -17,8 +17,8 @@
 vncserver \- a wrapper to launch an X server for VNC.
 .SH SYNOPSIS
 \fBvncserver\fR
-[:\fIdisplay\fR] [\-geometry \fIwidth\fRx\fIheight\fR]
-[\-pixelformat rgb888|bgr888] [\-name \fIdesktop\-name\fR]
+[:\fIdisplay\fR] [\-geometry \fIwidth\fRx\fIheight\fR] [\-depth \fIdepth\fR]
+[\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-name \fIdesktop\-name\fR]
 [\fIXvnc\-options\fR...]
 .TP
 \fBvncserver\fR \-kill :\fIdisplay\fR
@@ -30,7 +30,7 @@ vncserver \- a wrapper to launch an X server for VNC.
 \fBvncserver\fR is a wrapper script for \fBXvnc\fR, the free X server
 for VNC (Virtual Network Computing). Xvnc provides all of the capabilities of a
 standard X server, but it does not connect to a physical display.
-Instead, \fBXvnc\fR creates a virtual desktop which you can view or control
+Instead, \fBXvnc\fR creates a virtual X display which you can view or control
 remotely using a VNC viewer.
 .SH OPTIONS
 You can add \fBXvnc\fR options to the \fBvncserver\fR command line. They will be
@@ -42,17 +42,20 @@ The X display number which Xvnc should occupy. If omitted, the next free display
 is used.
 .TP
 \fB\-geometry\fR \fIwidth\fR\fBx\fR\fIheight\fR
-Set width and height of the virtual desktop.
+Set width and height of the virtual X display.
 .TP
-\fB\-pixelformat\fR \fBrgb888\fR
-On Big Endian systems (e.g. Sparc), this causes the TurboVNC server to
-use ARGB pixel ordering for the virtual desktop instead of the default
-of ABGR.
+\fB\-depth\fR \fIdepth\fR
+Set the color depth of the virtual X display, in bits per pixel. Must
+be a value between 8 and 32.
 .TP
-\fB\-pixelformat\fR \fBbgr888\fR
-On Little Endian systems (e.g. x86), this causes the TurboVNC server
-to use RGBA pixel ordering for the virtual desktop instead of the
-default of BGRA.
+\fB\-pixelformat\fR \fBrgb\fR\fINNN\fR|\fBbgr\fR\fINNN\fR
+Specify the pixel format of the virtual X display. Xvnc can use any pixel
+format you choose, but if this pixel format does not match the pixel format
+of the display on which vncviewer is running, then Xvnc will perform pixel
+format conversion prior to sending images to vncviewer. This can slow
+performance. The default pixel format, rgb888, is equivalent to BGRA on little
+endian servers or ARGB on big endian servers.  A pixel format of bgr888 is
+equivalent to RGBA on little endian servers or ABGR on big endian servers.
 .TP
 \fB\-name\fR \fIstring\fR
 This specifies the name of the desktop.
