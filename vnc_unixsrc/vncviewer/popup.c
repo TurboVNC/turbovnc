@@ -54,13 +54,13 @@ UpdateQual(void)
         zlibstr[0]=0;
         if (appData.compressLevel > 0)
           snprintf(zlibstr, 79, " + Zlib %d", appData.compressLevel);
-        snprintf(ptr, strlen(ptr), "[Lossless Tight%s]", zlibstr);
+        snprintf(ptr, 1023-(ptr-title), "[Lossless Tight%s]", zlibstr);
       }
       else
-        snprintf(ptr, strlen(ptr), "[Tight + JPEG %s Q%d]", subsampLevel2str[appData.subsampLevel],
+        snprintf(ptr, 1023-(ptr-title), "[Tight + JPEG %s Q%d]", subsampLevel2str[appData.subsampLevel],
           appData.qualityLevel);
     }
-    else snprintf(ptr, strlen(ptr), "[%s]", appData.encodingsString);
+    else snprintf(ptr, 1023-(ptr-title), "[%s]", appData.encodingsString);
     XtVaSetValues(toplevel, XtNtitle, title, XtNiconName, title, NULL);
   }
   XawScrollbarSetThumb(qualslider, (float)appData.qualityLevel/100., 0.);
