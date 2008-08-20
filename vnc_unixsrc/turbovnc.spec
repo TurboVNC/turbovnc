@@ -37,6 +37,7 @@ rm -rf %{buildroot}
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_mandir}/man1
 ./vncinstall %{buildroot}%{_bindir} %{buildroot}%{_mandir}
+install -m 644 Xvnc/programs/Xserver/Xserver.man %{buildroot}%{_mandir}/man1/Xserver.1
 
 mkdir -p %{buildroot}%{_datadir}/vnc/classes
 for i in classes/*.class; do install -m 644 $i %{buildroot}%{_datadir}/vnc/classes; done
@@ -122,13 +123,14 @@ fi
 %{_bindir}/vncconnect
 %{_datadir}/vnc
 %{_mandir}/man1/Xvnc.1*
+%{_mandir}/man1/Xserver.1*
 %{_mandir}/man1/vncserver.1*
 %{_mandir}/man1/vncconnect.1*
 %{_mandir}/man1/vncpasswd.1*
 
 %changelog
-* Thu Jul 3 2008 Darrell Commander <dcommander@users.sourceforge.net>
-- TurboVNC 0.5 (Includes patches from TightVNC 1.3.9)
+* Thu Aug 20 2008 Darrell Commander <dcommander@users.sourceforge.net>
+- TurboVNC 0.5
 
 * Tue Jun 5 2007 Darrell Commander <dcommander@users.sourceforge.net>
 - TurboVNC 0.4 (Includes patches from TightVNC 1.3.9)
