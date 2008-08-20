@@ -323,6 +323,9 @@ FilterCopyBPP (int srcx, int srcy, int numRows)
                                          + srcx * image->bits_per_pixel/8];
   int dstw = image->bytes_per_line / (image->bits_per_pixel / 8);
   int y;
+#if BPP == 32
+  int x;
+#endif
 
   if (appData.useBGR233) {
     dst = (CARDBPP *)buffer;
@@ -330,8 +333,6 @@ FilterCopyBPP (int srcx, int srcy, int numRows)
   }
 
 #if BPP == 32
-  int x;
-
   if (cutZeros) {
     for (y = 0; y < numRows; y++) {
       for (x = 0; x < rectWidth; x++) {
