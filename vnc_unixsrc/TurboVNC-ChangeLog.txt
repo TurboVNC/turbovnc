@@ -53,7 +53,7 @@ See the TurboVNC Compatibility Guide for more information.
 -------------------------------------------------------------------------------
 [10]
 Changed default pixel format for Solaris TurboVNC servers to ARGB/BGRA.  This
-should improve performance by a bit.
+should improve performance by a bit on SPARC servers.
 -------------------------------------------------------------------------------
 
 
