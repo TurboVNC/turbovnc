@@ -12,7 +12,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncserver 1 "August 2006" "" "TurboVNC"
+.TH vncserver 1 "August 2008" "" "TurboVNC"
 .SH NAME
 vncserver \- a wrapper to launch an X server for VNC.
 .SH SYNOPSIS
@@ -27,11 +27,11 @@ vncserver \- a wrapper to launch an X server for VNC.
 .TP
 \fBvncserver\fR \-help
 .SH DESCRIPTION
-\fBvncserver\fR is a wrapper script for \fBXvnc\fR, the free X server
-for VNC (Virtual Network Computing). Xvnc provides all of the capabilities of a
-standard X server, but it does not connect to a physical display.
-Instead, \fBXvnc\fR creates a virtual X display which you can view or control
-remotely using a VNC viewer.
+\fBvncserver\fR is a wrapper script for \fBXvnc\fR, the VNC (Virtual Network
+Computing) X server. Xvnc provides all of the capabilities of a standard X
+server, but it does not connect to a physical display. Instead, \fBXvnc\fR
+creates a virtual X display which you can view or control remotely using a VNC
+viewer.
 .SH OPTIONS
 You can add \fBXvnc\fR options to the \fBvncserver\fR command line. They will be
 passed through to Xvnc without modification. The options provided by
