@@ -5,12 +5,13 @@
 .\" Copyright (C) 1998 Marcus.Brinkmann@ruhr-uni-bochum.de
 .\" Copyright (C) 2000 Red Hat, Inc.
 .\" Copyright (C) 2001-2003 Constantin Kaplinsky
+.\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncpasswd 1 "August 2006" "" "TurboVNC"
+.TH vncpasswd 1 "August 2008" "" "TurboVNC"
 .SH NAME
 vncpasswd \- set passwords for VNC server
 .SH SYNOPSIS
@@ -24,9 +25,9 @@ vncpasswd \- set passwords for VNC server
 .IR \-f
 .br
 .SH DESCRIPTION
-The \fBvncpasswd\fR utility should be used to create and change
-passwords for the TurboVNC server. \fBXvnc\fR uses such
-passwords when started with the \fB\-rfbauth\fR command-line option
+The \fBvncpasswd\fR utility can be used to create and change
+passwords for Xvnc (the TurboVNC virtual X server.) \fBXvnc\fR uses these
+passwords when started with the \fB\-rfbauth\fR command line option
 (or when started from the \fBvncserver\fR script.)
 
 \fBvncpasswd\fR allows one to enter a primary VNC password and an
@@ -34,12 +35,12 @@ optional view-only password. \fBXvnc\fR will ignore mouse and keyboard
 input from clients who authenticated with the view-only password.
 
 The password file name defaults to \fB$HOME/.vnc/passwd\fR, unless the
-\fB\-t\fR command-line option was used (see the OPTIONS section
+\fB\-t\fR command line option was used (see the OPTIONS section
 below.) The \fB$HOME/.vnc/\fR directory will be created if it does not
 exist.
 
 Each password has to be longer than five characters (unless the
-\fB\-f\fR command-line option was used-- see its description below.) 
+\fB\-f\fR command line option was used-- see its description below.) 
 Only the first eight characters are significant. If the primary
 password is too short, the vncpasswd program will abort. If the view-only
 password is too short, then only the primary password will be saved.
