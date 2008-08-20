@@ -4,12 +4,13 @@
 .\"
 .\" Copyright (C) 2000,2001 Red Hat, Inc.
 .\" Copyright (C) 2001-2003 Constantin Kaplinsky
+.\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncconnect 1 "August 2006" "" "TightVNC"
+.TH vncconnect 1 "August 2008" "" "TurboVNC"
 .SH NAME
 vncconnect \- connect a VNC server to a VNC viewer
 .SH SYNOPSIS
@@ -22,8 +23,9 @@ host and port.
 .SH SEE ALSO
 \fBvncviewer\fR(1), \fBvncserver\fR(1), \fBXvnc\fR(1), \fBvncpasswd\fR(1)
 .SH AUTHORS
-Original VNC was developed in AT&T Laboratories Cambridge. TightVNC
-additions were implemented by Constantin Kaplinsky. Many other people
+VNC was originally developed at AT&T Laboratories Cambridge. TightVNC
+additions were implemented by Constantin Kaplinsky. TurboVNC, based
+on TightVNC, is provided by The VirtualGL Project. Many other people
 participated in development, testing and support.
 
 \fBMan page authors:\fR
@@ -31,3 +33,5 @@ participated in development, testing and support.
 Tim Waugh <twaugh@redhat.com>,
 .br
 Constantin Kaplinsky <const@tightvnc.com>
+.br
+Darrell Commander <dcommander@users.sourceforge.net>
