@@ -462,6 +462,12 @@ GetArgsAndResources(int argc, char **argv)
     appData.compressLevel=1;
   }
 
+  if(appData.useBGR233) {
+    if(appData.enableJPEG)
+      fprintf(stderr, "WARNING: Disabling JPEG encoding because BGR233 is enabled.\n");
+    appData.enableJPEG=False;
+  }
+
   /* Add our actions to the actions table so they can be used in widget
      resource specs */
 

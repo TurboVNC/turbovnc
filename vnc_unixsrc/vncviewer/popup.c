@@ -33,7 +33,6 @@
 
 extern Bool HasEncoding(const char *);
 
-
 Widget popup, fullScreenToggle, button4X, button2X, button1X, buttonGray,
   qualtext, qualslider, buttonZlib, buttonJPEG;
 
@@ -167,7 +166,11 @@ buttonZlibProc(Widget w, XtPointer client, XtPointer p)
 void
 buttonJPEGProc(Widget w, XtPointer client, XtPointer p)
 {
-  if((int)p==1) appData.enableJPEG=True;
+  if((int)p==1) {
+    if(appData.useBGR233)
+      fprintf(stderr, "WARNING: Cannot enable JPEG because BGR233 is enabled.\n");
+    else appData.enableJPEG=True;
+  }
   else appData.enableJPEG=False;
   UpdateQual();
 }
