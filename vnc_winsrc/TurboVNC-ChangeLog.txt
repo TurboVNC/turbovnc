@@ -19,8 +19,8 @@ traditional Tight encoding is too slow to stream real-time full-screen 3D
 images.  Thus, a hybrid scheme was developed which uses the fastest elements
 of Tight encoding with minimal Zlib compression for low-color-depth image tiles
 and continues to use TurboJPEG for high-color-depth image tiles.  The
-resulting compression scheme should be both tighter and faster than pure JPEG
-in all cases.
+resulting compression scheme should be both tighter and faster than the pure
+TurboJPEG protocol used by previous versions of TurboVNC.
 -------------------------------------------------------------------------------
 [4]
 The TurboVNC Unix server now executes ~/.vnc/xstartup.turbovnc instead of
@@ -46,8 +46,14 @@ Increased TCP send buffer size to 64k in the TurboVNC Windows server.  This
 should improve performance significantly.
 -------------------------------------------------------------------------------
 [9]
-Generally improved compatibility with TightVNC and RealVNC.  See TurboVNC
-Compatibility Guide for more information.
+Generally improved compatibility with TightVNC and RealVNC.  This included
+adding back in the Hextile decoder to the VNC viewer and adding back in
+support for 8-bit and 16-bit color depths (in both the viewer and the server.)
+See the TurboVNC Compatibility Guide for more information.
+-------------------------------------------------------------------------------
+[10]
+Changed default pixel format for Solaris TurboVNC servers to ARGB/BGRA.  This
+should improve performance by a bit.
 -------------------------------------------------------------------------------
 
 
@@ -218,7 +224,7 @@ Linux users will need to upgrade to the TurboJPEG 1.04 RPM to get this fix.
 For other platforms, the fix is included in the TurboVNC 0.3.2 packages.
 -------------------------------------------------------------------------------
 [6]
-Addad '-fg' switch to vncserver to make it (optionally) run in the foreground.
+Added '-fg' switch to vncserver to make it (optionally) run in the foreground.
 This allows you to kill the VNC server by pressing CTRL-C in the shell you used
 to start it.  When in foreground mode, you can also kill the VNC server by
 logging out of the window manager inside the VNC session.
