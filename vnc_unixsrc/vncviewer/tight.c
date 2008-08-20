@@ -218,6 +218,7 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
     if (!ReadFromRFBServer(uncompressedData, bufferSize))
       return False;
     filterFn(rx, ry, rh);
+    if (appData.useBGR233) CopyDataToImage(buffer, rx, ry, rw, rh);
     if (!appData.doubleBuffer) CopyImageToScreen(rx, ry, rw, rh);
 
     return True;
@@ -277,6 +278,7 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
   }
 
   filterFn(rx, ry, rh);
+  if (appData.useBGR233) CopyDataToImage(buffer, rx, ry, rw, rh);
   if (!appData.doubleBuffer) CopyImageToScreen(rx, ry, rw, rh);
 
   return True;
@@ -321,6 +323,11 @@ FilterCopyBPP (int srcx, int srcy, int numRows)
                                          + srcx * image->bits_per_pixel/8];
   int dstw = image->bytes_per_line / (image->bits_per_pixel / 8);
   int y;
+
+  if (appData.useBGR233) {
+    dst = (CARDBPP *)buffer;
+    dstw = rectWidth;
+  }
 
 #if BPP == 32
   int x;
@@ -369,6 +376,11 @@ FilterGradient24 (int srcx, int srcy, int numRows)
   CARD8 pix[3];
   int est[3];
 
+  if (appData.useBGR233) {
+    dst = (CARDBPP *)buffer;
+    dstw = rectWidth;
+  }
+
   for (y = 0; y < numRows; y++) {
 
     /* First pixel in a row */
@@ -414,6 +426,11 @@ FilterGradientBPP (int srcx, int srcy, int numRows)
   CARD16 max[3];
   int shift[3];
   int est[3];
+
+  if (appData.useBGR233) {
+    dst = (CARDBPP *)buffer;
+    dstw = rectWidth;
+  }
 
 #if BPP == 32
   if (cutZeros) {
@@ -502,6 +519,11 @@ FilterPaletteBPP (int srcx, int srcy, int numRows)
   int dstw = image->bytes_per_line / (image->bits_per_pixel / 8);
   CARD8 *src = (CARD8 *)uncompressedData;
   CARDBPP *palette = (CARDBPP *)tightPalette;
+
+  if (appData.useBGR233) {
+    dst = (CARDBPP *)buffer;
+    dstw = rectWidth;
+  }
 
   if (rectColors == 2) {
     w = (rectWidth + 7) / 8;
