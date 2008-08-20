@@ -85,6 +85,7 @@ f none SUNWtvnc/man/man1/vncviewer.1 0644 root bin
 f none SUNWtvnc/man/man1/vncserver.1 0644 root bin
 f none SUNWtvnc/man/man1/vncconnect.1 0644 root bin
 f none SUNWtvnc/man/man1/Xvnc.1 0644 root bin
+f none SUNWtvnc/man/man1/Xserver.1 0644 root bin
 d none SUNWtvnc/vnc 0755 root bin
 d none SUNWtvnc/vnc/classes 0755 root bin
 f none SUNWtvnc/vnc/classes/AuthPanel.class 0644 root bin
@@ -114,6 +115,7 @@ mkdir -p $pkgdir/vnc
 mkdir -p $pkgdir/man/man1
 
 ./vncinstall $pkgdir/bin $pkgdir/man
+cp Xvnc/programs/Xserver/Xserver.man $pkgdir/man/man1/Xserver.1
 cp turbojpeg/libturbojpeg.so $pkgdir/lib
 cp -prf classes $pkgdir/vnc
 cp LICENCE.TXT WhatsNew TurboVNC-ChangeLog.txt $pkgdir/doc
