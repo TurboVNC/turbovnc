@@ -1591,7 +1591,7 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 	m_restricted =			read(RegKey, "restricted",        m_restricted           ) != 0;
 	m_ViewOnly =			read(RegKey, "viewonly",	      m_ViewOnly             ) != 0;
 	m_FullScreen =			read(RegKey, "fullscreen",        m_FullScreen           ) != 0;
-	m_Use8Bit =				read(RegKey, "8bit",	          m_Use8Bit              ) != 0;
+//	m_Use8Bit =				read(RegKey, "8bit",	          m_Use8Bit              ) != 0;
 	m_DoubleBuffer =		read(RegKey, "doublebuffer",	  m_DoubleBuffer              ) != 0;
 	m_Shared =				read(RegKey, "shared",            m_Shared               ) != 0;
 	m_SwapMouse =			read(RegKey, "swapmouse",         m_SwapMouse	         ) != 0;
