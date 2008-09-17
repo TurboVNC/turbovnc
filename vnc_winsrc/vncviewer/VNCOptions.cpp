@@ -877,11 +877,11 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 			
 			HWND hViewOnly = GetDlgItem(hwnd, IDC_VIEWONLY);
 			SendMessage(hViewOnly, BM_SETCHECK, _this->m_ViewOnly, 0);
-			char scalecombo[8][20] = {
-				"25","50","75","90","100","125","150","Auto"
+			char scalecombo[9][20] = {
+				"25","50","75","90","100","125","150","200","Auto"
 			};
 			HWND hScalEdit = GetDlgItem(hwnd, IDC_SCALE_EDIT);
-			for (i = 0; i <= 7; i++) {
+			for (i = 0; i <= 8; i++) {
 				SendMessage(hScalEdit, CB_INSERTSTRING, (WPARAM)i,
 							(LPARAM)(int FAR*)scalecombo[i]);
 			}
@@ -955,7 +955,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 		case IDC_SCALE_EDIT:
 			switch (HIWORD(wParam)) {
 			case CBN_KILLFOCUS:
-				Lim(hwnd, IDC_SCALE_EDIT, 1, 150);
+				Lim(hwnd, IDC_SCALE_EDIT, 1, 200);
 				return 0;
 			}
 			return 0;
