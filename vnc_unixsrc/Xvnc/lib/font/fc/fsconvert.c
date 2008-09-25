@@ -33,6 +33,33 @@
 #include	"fontstruct.h"
 #include	"fservestr.h"
 
+extern void Xfree(pointer ptr);
+
+extern Atom MakeAtom(
+    char *string,
+    unsigned len,
+    int makeit
+);
+
+extern int FontCouldBeTerminal(
+    FontInfoPtr pFontInfo
+);
+
+extern void FontComputeInfoAccelerators(
+    FontInfoPtr pFontInfo
+);
+
+extern int add_range(
+    fsRange *newrange,
+    int *nranges,
+    fsRange **range,
+    Bool charset_subset
+);
+
+int fs_load_all_glyphs(
+    FontPtr pfont
+);
+
 extern char _fs_glyph_undefined;
 extern char _fs_glyph_requested;
 extern char _fs_glyph_zero_length;
@@ -347,6 +374,7 @@ fs_build_range(pfont, range_flag, count, item_size, data, nranges, ranges)
    performed by fs_build_range(); for use if the associated LoadGlyphs
    requests needs to be cancelled. */
 
+void
 _fs_clean_aborted_loadglyphs(pfont, num_expected_ranges, expected_ranges)
     FontPtr pfont;
     int num_expected_ranges;
@@ -579,9 +607,7 @@ _fs_get_metrics(pFont, count, chars, charEncoding, glyphCount, glyphs)
     unsigned int r;
     CharInfoPtr encoding;
     CharInfoPtr pDefault;
-    FSFontDataPtr fsd = (FSFontDataPtr) pFont->fpePrivate;
     int         itemSize;
-    int         err = Successful;
 
     fsdata = (FSFontPtr) pFont->fontPrivate;
     encoding = fsdata->inkMetrics;
