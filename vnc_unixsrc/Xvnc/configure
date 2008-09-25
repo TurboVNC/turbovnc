@@ -10,6 +10,7 @@
 #    Irix 6.2 (IRIX, 6.2)
 
 SYSNAME=`uname -s`
+ARCH=`uname -m`
 
 if [ "$SYSNAME" = AIX ]
 then
@@ -39,6 +40,24 @@ echo "#define OSMajorVersion $MAJOR" >> config/cf/platform.def
 echo "#define OSMinorVersion $MINOR" >> config/cf/platform.def
 echo "#define OSTeenyVersion $TEENY" >> config/cf/platform.def
 echo "#define LinuxCLibMajorVersion 6" >> config/cf/platform.def
+
+if [ "$SYSNAME" = Linux ]
+then
+    if [ "$ARCH" = x86_64 ]
+    then
+	if [ "$1" = "M32=yes" ]
+	then
+	    echo "#define LinuxMachineDefines -D__i386__ -m32" >> config/cf/platform.def
+	    echo "#define OptimizedCDebugFlags -O2 -m32" >> config/cf/platform.def
+	    echo "#define ServerCDebugFlags -O2 -m32" >> config/cf/platform.def
+	    echo "#define ExtraLoadOptions -m32" >> config/cf/platform.def
+	else
+	    echo "#define LinuxMachineDefines -D__x86_64__" >> config/cf/platform.def
+	    echo "#define OptimizedCDebugFlags -O2" >> config/cf/platform.def
+	    echo "#define ServerCDebugFlags -O2" >> config/cf/platform.def
+	fi
+    fi
+fi
 
 if [ "$SYSNAME" = AIX ]
 then
