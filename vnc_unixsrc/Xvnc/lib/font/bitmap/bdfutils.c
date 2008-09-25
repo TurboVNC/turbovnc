@@ -61,6 +61,8 @@ from the X Consortium.
 #include "bitmap.h"
 #include "bdfint.h"
 
+extern void Xfree(pointer ptr);
+
 int bdfFileLineNum;
 
 /***====================================================================***/

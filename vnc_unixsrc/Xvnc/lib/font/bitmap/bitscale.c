@@ -44,6 +44,42 @@ from the X Consortium.
 #include <math.h>
 #undef _XOPEN_SOURCE
 #endif
+#include <stdlib.h>
+
+extern void Xfree(pointer ptr);
+
+extern int FontFileCountDashes (
+    char    *name,
+    int     namelen
+);
+
+extern Bool FontFileCompleteXLFD (
+    register FontScalablePtr  vals,
+    FontScalablePtr def
+);
+
+extern void FontComputeInfoAccelerators(
+     FontInfoPtr pFontInfo
+);
+
+extern int BitmapGetRenderIndex(
+    FontRendererPtr renderer
+);
+
+extern int FontFileOpenBitmap (
+    FontPathElementPtr  fpe,
+    FontPtr   *pFont,
+    int     flags,
+    FontEntryPtr  entry,
+    int  format,
+    int  fmask
+);
+
+extern void FontFileCloseFont (
+    FontPathElementPtr  fpe,
+    FontPtr   pFont
+);
+   
 
 #ifndef MAX
 #define   MAX(a,b)    (((a)>(b)) ? a : b)
@@ -423,7 +459,6 @@ FindBestToScale(fpe, entry, vals, best, dxp, dyp, sdxp, sdyp, fpep)
 	extra = zero->u.scalable.extra;
 	for (i = 0; i < extra->numScaled; i++)
 	{
-	    FontScalableRec tmpvals;
 	    scaled = &extra->scaled[i];
 	    if (!scaled->bitmap)
 		continue;
@@ -777,7 +812,7 @@ compute_xform_matrix(vals, dx, dy, xform, inv_xform, xmult, ymult)
     double		dx, dy, *inv_xform, *xmult, *ymult;
     register double	*xform;
 {
-    double det, sintheta, costheta, tanphi;
+    double det;
     double pixel = get_matrix_vertical_component(vals->pixel_matrix);
     double pixelset = get_matrix_horizontal_component(vals->pixel_matrix);
 
@@ -855,7 +890,6 @@ ScaleFont(opf, widthMult, heightMult, sWidthMult, sHeightMult, vals,
     CharInfoPtr pci,
                 opci;
     int         nchars;		/* how many characters in the font */
-    int        *scratch;
     int         i;
     int         glyph;
     int		firstCol, lastCol, firstRow, lastRow;
@@ -1111,7 +1145,6 @@ ScaleFont(opf, widthMult, heightMult, sWidthMult, sHeightMult, vals,
     pci = bitmapFont->metrics;
     for (i = 0; i < nchars; i++)
     {
-	CharInfoRec temppci;
 	if ((pci = bitmapFont->encoding[i]) &&
 	    (opci = obitmapFont->encoding[OLDINDEX(i)]))
 	{
@@ -1724,6 +1757,7 @@ bail:
  *	exported interfaces
  */
 
+int
 FontFileLoadName(dirs, ndirs, name, pfont, format, fmask)
     FontFileDirPtr *dirs;
     int         ndirs;
@@ -1764,6 +1798,7 @@ FontFileLoadName(dirs, ndirs, name, pfont, format, fmask)
 #endif
 
 /* ARGSUSED */
+int
 BitmapOpenScalable (fpe, pFont, flags, entry, fileName, vals, format, fmask,
 		    non_cachable_font)
     FontPathElementPtr	fpe;
@@ -1866,6 +1901,7 @@ BitmapOpenScalable (fpe, pFont, flags, entry, fileName, vals, format, fmask,
     return Successful;
 }
 
+int
 BitmapGetInfoScalable (fpe, pFontInfo, entry, fontName, fileName, vals)
     FontPathElementPtr	fpe;
     FontInfoPtr		pFontInfo;

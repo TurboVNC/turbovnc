@@ -39,6 +39,14 @@ from the X Consortium.
 #include "bitmap.h"
 #include "pcf.h"
 
+int
+BufFileWrite (
+    BufFilePtr  f,
+    char  *b,
+    int   n
+);
+
+
 /* Write PCF font files */
 
 static int  current_position;
@@ -108,7 +116,7 @@ pcfPutINT8(file, format, c)
     return FontFilePutc(c, file);
 }
 
-static
+static void
 pcfWriteTOC(file, table, count)
     FontFilePtr file;
     PCFTablePtr table;
@@ -129,7 +137,7 @@ pcfWriteTOC(file, table, count)
     }
 }
 
-static
+static void
 pcfPutCompressedMetric(file, format, metric)
     FontFilePtr file;
     CARD32      format;
@@ -142,7 +150,7 @@ pcfPutCompressedMetric(file, format, metric)
     pcfPutINT8(file, format, metric->descent + 0x80);
 }
 
-static
+static void
 pcfPutMetric(file, format, metric)
     FontFilePtr file;
     CARD32      format;
@@ -156,7 +164,7 @@ pcfPutMetric(file, format, metric)
     pcfPutINT16(file, format, metric->attributes);
 }
 
-static
+static void
 pcfPutBitmap(file, format, pCI)
     FontFilePtr file;
     CARD32      format;
@@ -172,7 +180,7 @@ pcfPutBitmap(file, format, pCI)
 	FontFilePutc(*bits++, file);
 }
 
-static
+static void
 pcfPutAccel(file, format, pFontInfo)
     FontFilePtr file;
     CARD32      format;
@@ -222,6 +230,7 @@ pcfNameForAtom(a)
     return NameForAtom(a);
 }
 
+int
 pcfWriteFont(pFont, file)
     FontPtr     pFont;
     FontFilePtr file;

@@ -35,6 +35,22 @@ in this Software without prior written authorization from the X Consortium.
 #include "fntfilst.h"
 #include "bitmap.h"
 
+extern void Xfree(pointer ptr);
+
+extern void FontDefaultFormat (
+ int *bit, int *byte, int *glyph, int *scan
+);
+
+extern int CheckFSFormat(
+ int format, int fmask, int *bit, int *byte, int *scan, int *glyph, int *image
+);
+
+Bool
+FontFileRegisterRenderer (
+    FontRendererPtr renderer
+);
+
+
 typedef struct _BitmapFileFunctions {
     int         (*ReadFont) ( /* pFont, file, bit, byte, glyph, scan */ );
     int         (*ReadInfo) ( /* pFontInfo, file */ );
@@ -133,6 +149,7 @@ static FontRendererRec	renderers[] = {
 	CAPABILITIES 
 };
 
+int
 BitmapOpenBitmap (fpe, ppFont, flags, entry, fileName, format, fmask,
 		  non_cachable_font)
     FontPathElementPtr	fpe;
@@ -183,6 +200,7 @@ BitmapOpenBitmap (fpe, ppFont, flags, entry, fileName, format, fmask,
     return ret;
 }
 
+int
 BitmapGetInfoBitmap (fpe, pFontInfo, entry, fileName)
     FontPathElementPtr	fpe;
     FontInfoPtr		pFontInfo;
@@ -208,6 +226,7 @@ BitmapGetInfoBitmap (fpe, pFontInfo, entry, fileName)
 
 #define numRenderers	(sizeof renderers / sizeof renderers[0])
 
+void
 BitmapRegisterFontFileFunctions ()
 {
     int	    i;
@@ -221,6 +240,7 @@ BitmapRegisterFontFileFunctions ()
  * the font info reader, and the bitmap scaling routine.  All users
  * of this routine must be kept in step with the renderer array.
  */
+int
 BitmapGetRenderIndex(renderer)
     FontRendererPtr renderer;
 {

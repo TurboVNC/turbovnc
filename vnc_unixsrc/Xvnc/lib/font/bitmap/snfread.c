@@ -57,6 +57,52 @@ from the X Consortium.
 #include "bitmap.h"
 #include "snfstr.h"
 
+extern void Xfree(pointer ptr);
+
+extern int BufFileRead (
+    BufFilePtr  f,
+    char  *b,
+    int   n
+);
+
+extern Atom MakeAtom(
+    char *string,
+    unsigned len,
+    int makeit
+);
+
+extern void BitOrderInvert(
+     register unsigned char *buf,
+     register int nbytes
+);
+
+extern void TwoByteSwap(
+     register unsigned char *buf,
+     register int nbytes
+);
+
+extern void FourByteSwap(
+     register unsigned char *buf,
+     register int nbytes
+);
+
+extern int RepadBitmap (
+    char  *pSrc,
+    char  *pDst,
+    unsigned  srcPad,
+    unsigned  dstPad,
+    int   width,
+    int   height
+);
+
+void SnfGetFormat (
+    int *bit, int *byte, int *glyph, int *scan
+);
+
+extern void FontDefaultFormat (
+    int *bit, int *byte, int *glyph, int *scan
+);
+
 static void snfUnloadFont();
 
 static int
@@ -97,7 +143,7 @@ snfReadxCharInfo(file, charInfo)
     return Successful;
 }
 
-static
+static void
 snfCopyInfo(snfInfo, pFontInfo)
     snfFontInfoPtr snfInfo;
     FontInfoPtr pFontInfo;
@@ -469,6 +515,7 @@ snfUnloadFont(pFont)
 static int  snf_set;
 static int  snf_bit, snf_byte, snf_glyph, snf_scan;
 
+void
 SnfSetFormat (bit, byte, glyph, scan)
     int	bit, byte, glyph, scan;
 {
@@ -479,6 +526,7 @@ SnfSetFormat (bit, byte, glyph, scan)
     snf_set = 1;
 }
 
+void
 SnfGetFormat (bit, byte, glyph, scan)
     int	*bit, *byte, *glyph, *scan;
 {

@@ -44,6 +44,7 @@ static unsigned char ink_mask_lsb[8] = {
     0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
 };
 
+void
 FontCharInkMetrics(pFont, pCI, pInk)
     FontPtr     pFont;
     CharInfoPtr pCI;
@@ -157,6 +158,7 @@ found_right:
 #define Min(a,b)    ((a)<(b)?(a):(b))
 #define Max(a,b)    ((a)>(b)?(a):(b))
 
+void
 FontCharReshape(pFont, pSrc, pDst)
     FontPtr     pFont;
     CharInfoPtr pSrc,

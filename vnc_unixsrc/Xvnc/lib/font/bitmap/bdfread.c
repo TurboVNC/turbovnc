@@ -58,6 +58,61 @@ from the X Consortium.
 /* use bitmap structure */
 #include "bitmap.h"
 #include "bdfint.h"
+#include <ctype.h>
+#include <stdlib.h>
+
+extern void Xfree(pointer ptr);
+
+extern void BitOrderInvert(
+		 register unsigned char *buf,
+		 register int nbytes
+);
+
+extern void TwoByteSwap(
+		 register unsigned char *buf,
+		 register int nbytes
+);
+
+extern void FourByteSwap(
+		 register unsigned char *buf,
+		 register int nbytes
+);
+
+extern int bdfIsInteger(char *str);
+
+extern Bool bdfSpecialProperty(
+		 FontPtr     pFont,
+		 FontPropPtr prop,
+		 char        isString,
+		 bdfFileState *bdfState
+);
+
+extern int FontCouldBeTerminal(
+		 FontInfoPtr pFontInfo
+);
+
+extern void FontComputeInfoAccelerators(
+		 FontInfoPtr pFontInfo
+);
+
+extern Bool bitmapAddInkMetrics(
+		 FontPtr     pFont
+);
+
+extern int bitmapComputeWeight(
+		 FontPtr     pFont
+);
+
+extern void bdfFreeFontBits(
+		 FontPtr pFont
+);
+
+extern void FontCharReshape(
+		 FontPtr     pFont,
+		 CharInfoPtr pSrc,
+		 CharInfoPtr pDst
+);
+
 
 #define INDICES 256
 #define MAXENCODING 0xFFFF
@@ -851,6 +906,7 @@ BAILOUT:
     return AllocError;
 }
 
+void
 bdfFreeFontBits(pFont)
     FontPtr pFont;
 {

@@ -33,6 +33,12 @@ from the X Consortium.
 #include "fntfilst.h"
 #include "bitmap.h"
 
+extern void FontCharInkMetrics(
+    FontPtr     pFont,
+    CharInfoPtr pCI,
+    xCharInfo  *pInk
+);
+
 #ifndef MAXSHORT
 #define MAXSHORT    32767
 #endif
