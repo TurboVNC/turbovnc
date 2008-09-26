@@ -72,8 +72,19 @@ a macro for "strcpy" that diverts it to "my_strcpy".
 #include  "pictures.h"
 #include  "strokes.h"
 #include  "cluts.h"
+#include  <stdio.h>
+#include  <string.h>
 static char *TypeFmt();
-static ObjectPostMortem();
+static int ObjectPostMortem();
+
+extern void FatalError(
+#if NeedVarargsPrototypes
+    char* /*f*/,
+    ...
+#endif
+);
+
+extern void xiFree(register long *addr);
 
 /*
 :h3.The "pointer" Macro - Define a Generic Pointer
@@ -1012,7 +1023,7 @@ This is a subroutine of TypeErr() and ArgErr().
 */
  
 /*ARGSUSED*/
-static ObjectPostMortem(obj) /* non-ANSI avoids overly strict type checking  */
+static int ObjectPostMortem(obj) /* non-ANSI avoids overly strict type checking  */
        register struct xobject *obj;
 {
        extern struct XYspace *USER;

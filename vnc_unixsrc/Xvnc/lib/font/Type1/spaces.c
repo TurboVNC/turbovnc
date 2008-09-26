@@ -44,6 +44,15 @@ This module is responsible for handling the TYPE1IMAGER "XYspace" object.
 #include "fonts.h"
 #include "arith.h"
 #include "trig.h"
+#include <stdio.h>
+#include <string.h>
+
+extern void FatalError(
+#if NeedVarargsPrototypes
+    char* /*f*/,
+    ...
+#endif
+);
 
 static void FindFfcn();
 static void FindIfcn();
@@ -906,8 +915,6 @@ struct XYspace *USER = &identity;
  
 void InitSpaces()
 {
-       extern char *DEFAULTDEVICE;
- 
        IDENTITY->type = SPACETYPE;
        FillOutFcns(IDENTITY);
  

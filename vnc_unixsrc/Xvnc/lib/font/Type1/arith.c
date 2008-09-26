@@ -51,6 +51,13 @@ The included files are:
 #include "objects.h"
 #include "spaces.h"
 #include "arith.h"
+
+extern void FatalError(
+#if NeedVarargsPrototypes
+    char* /*f*/,
+    ...
+#endif
+);
  
 /*
 :h3.

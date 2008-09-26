@@ -38,11 +38,19 @@ routines (malloc/free).
 */
 
 #include "objects.h"	/* get #define for abort() */
+#include <stdio.h>
 
-static combine();
-static freeuncombinable();
-static unhook();
-static dumpchain();
+extern void FatalError(
+#if NeedVarargsPrototypes
+    char* /*f*/,
+    ...
+#endif
+);
+
+static void combine();
+static void freeuncombinable();
+static void unhook();
+static void dumpchain();
 /*
 :h3.Define NULL
  
@@ -262,7 +270,7 @@ In any event, that block will be moved to the end of the list (after
 'firstcombined').
 */
  
-static combine()
+static void combine()
 {
         register struct freeblock *p;   /* block we will try to combine */
         register long *addr;            /* identical to 'p' for 'long' access */
@@ -334,7 +342,7 @@ it with its eligible neighbors, or perhaps because we know it has
 no neighbors.
 */
  
-static freeuncombinable(addr, size)
+static void freeuncombinable(addr, size)
         register long *addr;  /* address of the block to be freed            */
         register long size;   /* size of block in words                      */
 {
@@ -368,7 +376,7 @@ would never be unhooking 'firstfree' or 'lastfree', so we do not
 have to worry about the end cases.)
 */
  
-static unhook(p)
+static void unhook(p)
         register struct freeblock *p;  /* block to unhook                    */
 {
         p->back->fore = p->fore;
@@ -610,7 +618,7 @@ void delmemory()
 :h3.dumpchain() - Print the Chain of Free Blocks
 */
  
-static dumpchain()
+static void dumpchain()
 {
         register struct freeblock *p;  /* current free block                 */
         register long size;  /* size of block                                */
@@ -649,7 +657,7 @@ static dumpchain()
 :h3.reportarea() - Display a Contiguous Set of Memory Blocks
 */
  
-static reportarea(area)
+static void reportarea(area)
        register long *area;   /* start of blocks (from addmemory)            */
 {
        register long size;    /* size of current block                       */
@@ -708,7 +716,7 @@ static reportarea(area)
 :h3.MemReport() - Display All of Memory
 */
  
-MemReport()
+void MemReport()
 {
        register int i;
  
@@ -722,7 +730,7 @@ MemReport()
 :h3.MemBytesAvail - Display Number of Bytes Now Available
 */
  
-MemBytesAvail()
+void MemBytesAvail()
 {
        printf("There are now %d bytes available\n", AvailableWords *
                                                     sizeof(long) );

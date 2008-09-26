@@ -34,6 +34,10 @@
 #include "token.h"
 #include "tokst.h"
 #include "hdigit.h"
+
+extern int T1Getc(F_FILE *f);
+
+extern int T1Ungetc(int c, F_FILE *f);
  
 /*
  * -------------------------------------------------------------------

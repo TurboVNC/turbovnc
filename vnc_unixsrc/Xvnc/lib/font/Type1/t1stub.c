@@ -29,6 +29,14 @@
  */
 
 #include "objects.h"	/* get #define for abort() */
+#include <stdio.h>
+
+extern void FatalError(
+#if NeedVarargsPrototypes
+    char* /*f*/,
+    ...
+#endif
+);
  
 xiStub()
 {

@@ -49,7 +49,13 @@ Include files needed:
 #include "curves.h"
 #include "lines.h"
 #include "arith.h"
- 
+
+extern void FatalError(
+#if NeedVarargsPrototypes
+    char* /*f*/,
+    ...
+#endif
+);
  
 /*
 :h3.Functions Provided to Other Modules
