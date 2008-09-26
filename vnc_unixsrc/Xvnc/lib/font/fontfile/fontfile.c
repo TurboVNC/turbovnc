@@ -348,6 +348,7 @@ FontFileOpenFont (client, fpe, flags, name, namelen, format, fmask,
     FontScalableEntryPtr   scalable;
     FontScaledPtr	scaled;
     FontBitmapEntryPtr	bitmap;
+    FontBCEntryPtr	bc;
     int			ret;
     Bool		noSpecificSize;
     int			nranges;
