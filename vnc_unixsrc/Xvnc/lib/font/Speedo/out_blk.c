@@ -599,6 +599,8 @@ register fix15 from, to;          /* Start and end of run in pixel units
 register fix15 y;
 register fix15 scan_line;
          fix15 first_y, last_y;
+         fix15 xmin, xmax;
+         boolean clipleft, clipright;
 
 #if DEBUG
 printf("\nIntercept lists:\n");

@@ -623,6 +623,8 @@ register fix15 scan_line;
          fix15 local_bmap_xmax;
          fix15 first_y, last_y;
          fix15 j,k;
+         fix15 xmin, xmax;
+         boolean clipleft, clipright;
 
 #if INCL_CLIPPING
 if ((sp_globals.specs.flags & CLIP_LEFT) != 0)

@@ -767,6 +767,8 @@ register fix15 y;
 register fix15 scan_line;
          fix15 first_y, last_y;
          fix15 xsave;
+         fix15 xmin, xmax;
+         boolean clipleft, clipright;
 
 
 fix15 diff;
