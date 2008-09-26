@@ -33,6 +33,14 @@ in this Software without prior written authorization from the X Consortium.
  * end up dragging in code from all the renderers, which is not small.
  */
 
+extern void BitmapRegisterFontFileFunctions (void);
+#ifndef CRAY
+extern void SpeedoRegisterFontFileFunctions (void);
+extern void Type1RegisterFontFileFunctions (void);
+#endif
+extern void FontFileRegisterLocalFpeFunctions (void);
+
+void
 FontFileRegisterFpeFunctions()
 {
     BitmapRegisterFontFileFunctions ();

@@ -44,6 +44,8 @@ from the X Consortium.
 extern int errno;
 #endif
 
+extern void Xfree(pointer ptr);
+
 BufFilePtr
 BufFileCreate (private, io, skip, close)
     char    *private;
@@ -137,7 +139,7 @@ BufFileOpenRead (fd)
     return BufFileCreate ((char *) fd, BufFileRawFill, BufFileRawSkip, BufFileRawClose);
 }
 
-static
+static int
 BufFileRawFlush (c, f)
     int		c;
     BufFilePtr	f;
@@ -170,6 +172,7 @@ BufFileOpenWrite (fd)
     return f;
 }
 
+int
 BufFileRead (f, b, n)
     BufFilePtr	f;
     char	*b;
@@ -186,6 +189,7 @@ BufFileRead (f, b, n)
     return n - cnt - 1;
 }
 
+int
 BufFileWrite (f, b, n)
     BufFilePtr	f;
     char	*b;

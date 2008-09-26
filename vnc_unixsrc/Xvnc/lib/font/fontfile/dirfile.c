@@ -50,6 +50,33 @@ in this Software without prior written authorization from the X Consortium.
 extern int errno;
 #endif
 
+extern void FontFileFreeDir (FontDirectoryPtr dir);
+
+extern Bool FontFileAddFontFile (
+    FontDirectoryPtr  dir,
+    char    *fontName,
+    char    *fileName
+);
+
+extern void FontFileSortDir (FontDirectoryPtr dir);
+
+extern void CopyISOLatin1Lowered (
+    char    *dst,
+    char    *src,
+    int     len
+);
+
+extern int FontFileCountDashes (
+    char    *name,
+    int     namelen
+);
+
+extern Bool FontFileAddFontAlias (
+    FontDirectoryPtr  dir,
+    char    *aliasName,
+    char    *fontName
+);
+
 static int ReadFontAlias();
 
 int

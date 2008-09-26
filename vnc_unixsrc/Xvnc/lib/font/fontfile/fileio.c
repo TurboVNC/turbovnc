@@ -81,9 +81,9 @@ FontFileOpen (name)
     return (FontFilePtr) raw;
 }
 
+int
 FontFileClose (f)
     FontFilePtr	f;
 {
-    BufFileClose ((BufFilePtr) f, TRUE);
+    return BufFileClose ((BufFilePtr) f, TRUE);
 }
-

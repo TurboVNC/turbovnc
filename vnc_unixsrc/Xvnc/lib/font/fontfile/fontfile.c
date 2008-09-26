@@ -35,6 +35,99 @@ in this Software without prior written authorization from the X Consortium.
 
 #include    "fntfilst.h"
 
+extern void Xfree(pointer ptr);
+
+extern int FontFileReadDirectory (
+    char    *directory,
+    FontDirectoryPtr  *pdir
+);
+
+extern Bool FontFileRegisterBitmapSource (
+    FontPathElementPtr  fpe
+);
+
+extern int FontFileFreeFPE (FontPathElementPtr fpe);
+
+extern Bool FontFileDirectoryChanged (FontDirectoryPtr dir);
+
+extern void FontFileUnregisterBitmapSource (FontPathElementPtr fpe);
+
+extern void FontFileFreeDir (FontDirectoryPtr dir);
+
+extern int FontFileCountDashes (
+    char    *name,
+    int     namelen
+);
+
+extern void CopyISOLatin1Lowered (
+    char    *dst,
+    char    *src,
+    int     len
+);
+
+extern Bool FontFileCompleteXLFD (
+    register FontScalablePtr  vals,
+    FontScalablePtr def
+);
+
+int FontFileOpenBitmapNCF (
+    FontPathElementPtr  fpe,
+    FontPtr   *pFont,
+    int     flags,
+    FontEntryPtr  entry,
+    int     format,
+    int     fmask,
+    FontPtr   non_cachable_font
+);
+
+extern int FontFileMatchBitmapSource (
+    FontPathElementPtr  fpe,
+    FontPtr   *pFont,
+    int     flags,
+    FontEntryPtr  entry,
+    FontNamePtr   zeroPat,
+    FontScalablePtr vals,
+    fsBitmapFormat  format,
+    fsBitmapFormatMask  fmask,
+    Bool    noSpecificSize
+);
+
+extern Bool FontFileAddScaledInstance (
+    FontEntryPtr    entry,
+    FontScalablePtr   vals,
+    FontPtr     pFont,
+    char      *bitmapName
+);
+
+extern void FontFileRemoveScaledInstance (
+    FontEntryPtr  entry,
+    FontPtr   pFont
+);
+
+extern Bool FontFileMatchName(
+    char  *name,
+    int   length,
+    FontNamePtr pat
+);
+
+extern int RegisterFPEFunctions();
+
+extern FontEntryPtr FontFileFindNameInScalableDir(
+    FontTablePtr    table,
+    FontNamePtr     pat,
+    FontScalablePtr     vals
+);
+
+extern int FontFileFindNamesInScalableDir(
+    FontTablePtr    table,
+    FontNamePtr     pat,
+    int       max,
+    FontNamesPtr    names,
+    FontScalablePtr vals,
+    int       alias_behavior,
+    int      *newmax
+);
+
 /*
  * Map FPE functions to renderer functions
  */
@@ -255,7 +348,6 @@ FontFileOpenFont (client, fpe, flags, name, namelen, format, fmask,
     FontScalableEntryPtr   scalable;
     FontScaledPtr	scaled;
     FontBitmapEntryPtr	bitmap;
-    FontBCEntryPtr	bc;
     int			ret;
     Bool		noSpecificSize;
     int			nranges;
@@ -284,7 +376,6 @@ FontFileOpenFont (client, fpe, flags, name, namelen, format, fmask,
 
     if (entry)
     {
-	int len;
 	switch (entry->type) {
 	case FONT_ENTRY_BITMAP:
 	    bitmap = &entry->u.bitmap;
@@ -475,6 +566,7 @@ FontFileOpenFont (client, fpe, flags, name, namelen, format, fmask,
 }
 
 /* ARGSUSED */
+void
 FontFileCloseFont (fpe, pFont)
     FontPathElementPtr	fpe;
     FontPtr		pFont;
@@ -538,6 +630,7 @@ FontFileOpenBitmap (fpe, pFont, flags, entry, format, fmask)
 				  (FontPtr)0);
 }
 
+int
 FontFileGetInfoBitmap (fpe, pFontInfo, entry)
     FontPathElementPtr	fpe;
     FontInfoPtr		pFontInfo;
@@ -695,7 +788,6 @@ _FontFileListFonts (client, fpe, pat, len, max, names, mark_aliases)
     FontNameRec		zeroName;
     FontNamesPtr	scaleNames;
     FontScalableRec	vals;
-    int			i;
     fsRange		*ranges;
     int			nranges;
     int			result = BadFontName;
@@ -792,6 +884,7 @@ typedef struct _LFWIData {
     int                   current;
 } LFWIDataRec, *LFWIDataPtr;
 
+int
 FontFileListFonts (client, fpe, pat, len, max, names)
     pointer     client;
     FontPathElementPtr fpe;
@@ -803,6 +896,7 @@ FontFileListFonts (client, fpe, pat, len, max, names)
     return _FontFileListFonts (client, fpe, pat, len, max, names, 0);
 }
 
+int
 FontFileStartListFontsWithInfo(client, fpe, pat, len, max, privatep)
     pointer     client;
     FontPathElementPtr fpe;
@@ -990,6 +1084,7 @@ FontFileListOneFontWithInfo (client, fpe, namep, namelenp, pFontInfo)
     return ret;
 }
 
+int
 FontFileListNextFontWithInfo(client, fpe, namep, namelenp, pFontInfo,
 			     numFonts, private)
     pointer		client;
@@ -1109,6 +1204,7 @@ extern void FontFileEmptyBitmapSource();
 typedef int (*IntFunc) ();
 static int  font_file_type;
 
+void
 FontFileRegisterLocalFpeFunctions ()
 {
     font_file_type = RegisterFPEFunctions(FontFileNameCheck,

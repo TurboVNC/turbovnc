@@ -53,6 +53,8 @@ in this Software without prior written authorization from the X Consortium.
 #include "fontmisc.h"
 #include <bufio.h>
 
+extern void Xfree(pointer ptr);
+
 #define BITS	16
 
 /*
