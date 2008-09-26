@@ -50,6 +50,12 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 
 /***** EXTERNAL FUNCTIONS *****/
 
+#if REENTRANT_ALLOC
+extern void sp_report_error(SPEEDO_GLOBALS *sp_global_ptr, int n);
+#else
+extern void sp_report_error(int n);
+#endif
+
 /***** STATIC VARIABLES *****/
 
 /***** STATIC FUNCTIONS *****/

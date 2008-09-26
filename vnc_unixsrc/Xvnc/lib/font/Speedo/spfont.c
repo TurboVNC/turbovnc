@@ -81,12 +81,16 @@ from the X Consortium.
 
 #endif
 
+extern void Xfree(pointer);
+
+extern void FontComputeInfoAccelerators(
+    FontInfoPtr pFontInfo
+);
+
 extern void SpeedoCloseFont();
 static int sp_get_glyphs();
 static int sp_get_metrics();
 static int sp_load_font();
-
-static CharInfoRec junkDefault;
 
 static int
 sp_get_glyphs(pFont, count, chars, charEncoding, glyphCount, glyphs)
@@ -239,7 +243,6 @@ sp_open_font(fontname, filename, entry, vals, format, fmask, flags, spfont)
     int         ret;
     specs_t     specs;
     int		xx8, xy8, yx8, yy8;
-    double	sxmult;
 
     /* find a master (create it if necessary) */
     spmf = (SpeedoMasterFontPtr) entry->u.scalable.extra->private;

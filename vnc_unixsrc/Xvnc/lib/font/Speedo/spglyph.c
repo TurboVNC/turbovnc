@@ -63,6 +63,21 @@ static int  bit_order,
             byte_order,
             scan;
 
+extern void TwoByteSwap(
+     register unsigned char *buf,
+     register int nbytes
+);
+
+extern void FourByteSwap(
+     register unsigned char *buf,
+     register int nbytes
+);
+
+extern int CheckFSFormat(
+    int format, int fmask, int *bit, int *byte,
+    int *scan, int *glyph, int *image
+);
+
 unsigned long
 sp_compute_data_size(pfont, mappad, scanlinepad, start, end)
     FontPtr     pfont;
