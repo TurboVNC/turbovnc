@@ -242,6 +242,8 @@ extern Bool XpClientIsBitmapClient(pointer client);
 
 extern int _FontTransClose(struct _XtransConnInfo *ciptr);
 
+extern int RegisterFPEFunctions();
+
 extern FontPtr find_old_font();
 
 extern int  _fs_build_range();
