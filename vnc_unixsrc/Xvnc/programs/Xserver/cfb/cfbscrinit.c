@@ -137,6 +137,7 @@ cfbCreateScreenResources(pScreen)
 }
 #endif
 
+int
 cfbFinishScreenInit(pScreen, pbits, xsize, ysize, dpix, dpiy, width)
     register ScreenPtr pScreen;
     pointer pbits;		/* pointer to screen bitmap */
