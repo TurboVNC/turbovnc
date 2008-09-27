@@ -61,6 +61,7 @@ Xrealloc (n,m)
 	return (unsigned long *) realloc ((char *) n, m);
 }
 
+void
 Xfree (n)
     unsigned long   *n;
 {
@@ -68,6 +69,7 @@ Xfree (n)
 	free ((char *) n);
 }
 
+void
 CopyISOLatin1Lowered (dst, src, len)
     char    *dst, *src;
     int	    len;
@@ -90,6 +92,7 @@ CopyISOLatin1Lowered (dst, src, len)
     *dest = '\0';
 }
 
+void
 register_fpe_functions ()
 {
 }

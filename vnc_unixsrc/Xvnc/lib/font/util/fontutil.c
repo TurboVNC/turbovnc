@@ -39,6 +39,8 @@ from the X Consortium.
 #include    "fontstruct.h"
 #include    "FSproto.h"
 
+extern void Xfree(pointer);
+
 /* Define global here...  doesn't hurt the servers, and avoids
    unresolved references in font clients.  */
 

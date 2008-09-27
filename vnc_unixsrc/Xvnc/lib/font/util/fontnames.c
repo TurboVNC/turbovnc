@@ -39,6 +39,8 @@ from the X Consortium.
 #include	"fontmisc.h"
 #include	"fontstruct.h"
 
+extern void Xfree(pointer);
+
 void
 FreeFontNames(pFN)
     FontNamesPtr pFN;
