@@ -81,6 +81,8 @@ SOFTWARE.
 #define BITCLEAR(buf, i) MASKWORD(buf, i) &= ~BITMASK(i)
 #define GETBIT(buf, i) (MASKWORD(buf, i) & BITMASK(i))
 
+extern void ProcessWorkQueueZombies(void);
+
 extern WindowPtr *WindowTable;
 extern xConnSetupPrefix connSetupPrefix;
 extern char *ConnectionInfo;
