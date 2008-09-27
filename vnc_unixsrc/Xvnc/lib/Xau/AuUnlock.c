@@ -31,9 +31,11 @@ in this Software without prior written authorization from the X Consortium.
 #include <X11/Xos.h>
 
 #if NeedFunctionPrototypes
+int
 XauUnlockAuth (
 _Xconst char *file_name)
 #else
+int
 XauUnlockAuth (file_name)
 char	*file_name;
 #endif
@@ -44,7 +46,7 @@ char	*file_name;
     char	link_name[1025];
 
     if (strlen (file_name) > 1022)
-	return;
+	return 0;
 #ifndef WIN32
     (void) strcpy (creat_name, file_name);
     (void) strcat (creat_name, "-c");
@@ -58,4 +60,5 @@ char	*file_name;
     (void) unlink (creat_name);
 #endif
     (void) unlink (link_name);
+    return 0;
 }

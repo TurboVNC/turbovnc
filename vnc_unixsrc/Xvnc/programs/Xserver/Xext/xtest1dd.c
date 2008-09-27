@@ -74,6 +74,24 @@ University of California.
 
 #include "xtest1dd.h"
 
+extern void XTestGetPointerPos(
+  short *fmousex, short *fmousey
+);
+
+extern void XTestJumpPointer(
+  int jx,
+  int jy,
+  int dev_type
+);
+
+extern void XTestGenerateEvent(
+  int dev_type,
+  int keycode,
+  int keystate,
+  int mousex,
+  int mousey
+);
+
 /***************************************************************
  * defines
  ***************************************************************/

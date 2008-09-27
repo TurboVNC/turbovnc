@@ -38,7 +38,7 @@ in this Software without prior written authorization from the X Consortium.
 #include <X11/Xos_r.h>
 #endif
 
-static
+static int
 binaryEqual (a, b, len)
 register char	*a, *b;
 register int	len;

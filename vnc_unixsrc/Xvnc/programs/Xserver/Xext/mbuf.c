@@ -50,6 +50,13 @@ in this Software without prior written authorization from the X Consortium.
 #include <sys/time.h>
 #endif
 
+extern int ClientSleepUntil (
+    ClientPtr client,
+    TimeStamp *revive,
+    void  (*notifyFunc)(),
+    pointer closure
+);
+
 /* given an OtherClientPtr obj, get the ClientPtr */
 #define rClient(obj) (clients[CLIENT_ID((obj)->resource)])
 

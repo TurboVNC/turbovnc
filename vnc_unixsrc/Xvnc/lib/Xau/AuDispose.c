@@ -28,6 +28,7 @@ in this Software without prior written authorization from the X Consortium.
 */
 
 #include <X11/Xauth.h>
+#include <stdlib.h>
 
 void
 XauDisposeAuth (auth)

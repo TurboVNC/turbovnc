@@ -77,6 +77,8 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #endif
 #if !defined(SYSV) && !defined(AMOEBA) && !defined(_MINIX) && !defined(WIN32) && !defined(Lynx)
 #include <sys/resource.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #endif
 #if defined(AIXV3) || defined(HPUX_10)
 # include <sys/resource.h>
@@ -106,6 +108,16 @@ static mutex print_lock;
 #include <stdlib.h>	/* for malloc() */
 #endif
 #endif
+
+extern void XdmcpUseMsg (void);
+
+extern int XdmcpOptions(
+    int     argc,
+    char    **argv,
+    int     i
+);
+
+extern Bool ParseGlyphCachingMode(char *);
 
 extern char *display;
 
@@ -487,6 +499,7 @@ GetTimeInMillis()
 }
 #endif
 
+int
 AdjustWaitForDelay (waitTime, newdelay)
     pointer	    waitTime;
     unsigned long   newdelay;
@@ -510,6 +523,7 @@ AdjustWaitForDelay (waitTime, newdelay)
 	    (*wt)->tv_usec = 1000 * (newdelay % 1000);
 	}
     }
+    return 0;
 }
 
 void UseMsg()

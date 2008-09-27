@@ -110,7 +110,7 @@ static char    e[] = {
  * Set up the key schedule from the key.
  */
 
-static
+static void
 setkey(key)
 char *key;
 {
@@ -249,12 +249,12 @@ static char    preS[48];
  * The payoff: encrypt a block.
  */
 
-static
+static void
 encrypt (block, edflag)
 char *block;
 {
        int i, ii;
-       register t, j, k;
+       register int t, j, k;
 
        /*
         * First, permute the bits in the input
@@ -339,7 +339,7 @@ char *block;
                block[j] = L[FP[j]-1];
 }
 
-static
+static void
 bytes_to_bits (bytes, bits)
     unsigned char   *bytes;
     char           *bits;
@@ -354,7 +354,7 @@ bytes_to_bits (bytes, bits)
     }
 }
 
-static
+static void
 bits_to_bytes (bits, bytes)
     char           *bits;
     unsigned char   *bytes;
@@ -377,6 +377,7 @@ bits_to_bytes (bits, bytes)
 # include   "Wrap.h"
 
 /*ARGSUSED*/
+void
 _XdmcpAuthSetup (key, schedule)
     auth_cblock                key;
     auth_wrapper_schedule      schedule;
@@ -388,6 +389,7 @@ _XdmcpAuthSetup (key, schedule)
 }
 
 /*ARGSUSED*/
+void
 _XdmcpAuthDoIt (input, output, schedule, edflag)
     auth_cblock                input, output;
     auth_wrapper_schedule      schedule;

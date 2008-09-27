@@ -66,6 +66,7 @@ copyright holders.
 ********************************************************************/
 /* $XFree86: xc/programs/Xserver/Xext/xprint.c,v 1.4 1997/01/02 04:05:05 dawes Exp $ */
 
+#include <stdlib.h>
 #include "X.h"
 #define NEED_EVENTS
 #include "Xproto.h"
@@ -82,6 +83,8 @@ copyright holders.
 #include "Printstr.h"
 #undef _XP_PRINT_SERVER_
 #include "../Xprint/DiPrint.h"
+
+extern void XpUnsetFontResFunc(ClientPtr);
 
 extern WindowPtr *WindowTable; /* declared in dix:globals.c */
 

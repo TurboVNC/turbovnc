@@ -77,6 +77,7 @@ extern int errno;
 
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifndef WIN32
 #ifndef MINIX
@@ -1042,19 +1043,23 @@ CloseDownConnection(client)
 }
 
 
+int
 AddEnabledDevice(fd)
     int fd;
 {
     FD_SET(fd, &EnabledDevices);
     FD_SET(fd, &AllSockets);
+    return 0;
 }
 
 
+int
 RemoveEnabledDevice(fd)
     int fd;
 {
     FD_CLR(fd, &EnabledDevices);
     FD_CLR(fd, &AllSockets);
+    return 0;
 }
 
 /*****************
@@ -1067,6 +1072,7 @@ RemoveEnabledDevice(fd)
  *    This routine is "undone" by ListenToAllClients()
  *****************/
 
+int
 OnlyListenToOneClient(client)
     ClientPtr client;
 {
@@ -1092,6 +1098,7 @@ OnlyListenToOneClient(client)
 	XFD_ORSET(&AllSockets, &AllSockets, &AllClients);
 	GrabInProgress = client->index;
     }
+    return 0;
 }
 
 /****************
@@ -1099,6 +1106,7 @@ OnlyListenToOneClient(client)
  *    Undoes OnlyListentToOneClient()
  ****************/
 
+int
 ListenToAllClients()
 {
     if (GrabInProgress)
@@ -1108,6 +1116,7 @@ ListenToAllClients()
 	XFD_ORSET(&ClientsWithInput, &ClientsWithInput, &SavedClientsWithInput);
 	GrabInProgress = 0;
     }	
+    return 0;
 }
 
 /****************
@@ -1116,6 +1125,7 @@ ListenToAllClients()
  *    Must have cooresponding call to AttendClient.
  ****************/
 
+int
 IgnoreClient (client)
     ClientPtr	client;
 {
@@ -1153,6 +1163,7 @@ IgnoreClient (client)
 	FD_CLR(connection, &SavedAllSockets);
 	FD_CLR(connection, &SavedAllClients);
     }
+    return 0;
 }
 
 /****************
@@ -1160,6 +1171,7 @@ IgnoreClient (client)
  *    Adds one client back into the input masks.
  ****************/
 
+int
 AttendClient (client)
     ClientPtr	client;
 {
@@ -1189,10 +1201,12 @@ AttendClient (client)
 	if (FD_ISSET(connection, &IgnoredClientsWithInput))
 	    FD_SET(connection, &SavedClientsWithInput);
     }
+    return 0;
 }
 
 /* make client impervious to grabs; assume only executing client calls this */
 
+int
 MakeClientGrabImpervious(client)
     ClientPtr client;
 {
@@ -1208,10 +1222,12 @@ MakeClientGrabImpervious(client)
 	grabinfo.grabstate  = CLIENT_IMPERVIOUS;
 	CallCallbacks(&ServerGrabCallback, &grabinfo);
     }
+    return 0;
 }
 
 /* make client pervious to grabs; assume only executing client calls this */
 
+int
 MakeClientGrabPervious(client)
     ClientPtr client;
 {
@@ -1238,6 +1254,7 @@ MakeClientGrabPervious(client)
 	grabinfo.grabstate  = CLIENT_PERVIOUS;
 	CallCallbacks(&ServerGrabCallback, &grabinfo);
     }
+    return 0;
 }
 
 #ifdef AIXV3

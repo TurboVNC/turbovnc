@@ -31,7 +31,7 @@ in this Software without prior written authorization from the X Consortium.
 
 /* stubs for use when Xalloc, Xrealloc and Xfree are not defined */
 
-extern char	*malloc (), *realloc ();
+#include <stdlib.h>
 
 unsigned long *
 Xalloc (amount)
