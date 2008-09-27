@@ -40,6 +40,10 @@ from the X Consortium.
 #include "dix.h"
 #include "miline.h"
 
+extern void ShmRegisterFbFuncs(
+    ScreenPtr pScreen
+);
+
 /* We use this structure to propogate some information from miScreenInit to
  * miCreateScreenResources.  miScreenInit allocates the structure, fills it
  * in, and puts it into pScreen->devPrivate.  miCreateScreenResources 

@@ -811,6 +811,7 @@ int what;
 /* MICLEARDRAWABLE -- sets the entire drawable to the background color of
  * the GC.  Useful when we have a scratch drawable and need to initialize 
  * it. */
+int
 miClearDrawable(pDraw, pGC)
     DrawablePtr	pDraw;
     GCPtr	pGC;
@@ -828,4 +829,5 @@ miClearDrawable(pDraw, pGC)
     (*pGC->ops->PolyFillRect)(pDraw, pGC, 1, &rect);
     DoChangeGC(pGC, GCForeground, &fg, 0);
     ValidateGC(pDraw, pGC);
+    return 0;
 }
