@@ -42,6 +42,7 @@
 #ifdef WIN32
 #include <X11/Xw32defs.h>
 #endif
+#include <unistd.h>
  
 /* Constants and variables used in the decryption */
 #define c1 ((unsigned short)52845)

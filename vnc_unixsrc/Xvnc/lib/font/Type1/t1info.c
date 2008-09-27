@@ -90,6 +90,34 @@ from the X Consortium.
 #include "FSproto.h"
 #include "t1intf.h"
 #include <math.h>
+
+extern void Xfree(pointer ptr);
+
+extern Atom MakeAtom(
+    char *string,
+    unsigned len,
+    int makeit
+);
+
+extern int Type1OpenScalable (
+    FontPathElementPtr  fpe,
+    FontPtr             *ppFont,
+    int                 flags,
+    FontEntryPtr        entry,
+    char                *fileName,
+    FontScalablePtr     vals,
+    fsBitmapFormat      format,
+    fsBitmapFormatMask  fmask,
+    FontPtr   non_cachable_font
+);
+
+extern void Type1CloseFont(
+    FontPtr pFont
+);
+
+extern void FontComputeInfoAccelerators(
+     FontInfoPtr pFontInfo
+);
  
 #define DECIPOINTSPERINCH 722.7
 #define DEFAULTRES 75
@@ -441,7 +469,7 @@ Type1GetInfoScalable(fpe, pInfo, entry, fontName, fileName, Vals)
     long fmask = 0;
     int ret;
  
-    ret = Type1OpenScalable(fpe, &pfont, flags, entry, fileName, Vals, format, fmask);
+    ret = Type1OpenScalable(fpe, &pfont, flags, entry, fileName, Vals, format, fmask, NULL);
     if (ret != Successful)
 	return ret;
     *pInfo = pfont->info;
