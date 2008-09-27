@@ -34,6 +34,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <pwd.h>
+#include <ctype.h>
 
 #ifndef USE_LIBWRAP
 #define USE_LIBWRAP 0

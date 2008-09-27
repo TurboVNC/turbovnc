@@ -70,6 +70,7 @@ SOFTWARE.
  * boxes, we may not want to start grabbing bits at psrc but at some offset
  * further on.) 
  */
+int
 mfbSetScanline(y, xOrigin, xStart, xEnd, psrc, alu, pdstBase, widthDst)
     int			y;
     int			xOrigin;	/* where this scanline starts */
@@ -138,6 +139,7 @@ mfbSetScanline(y, xOrigin, xStart, xEnd, psrc, alu, pdstBase, widthDst)
 	} 
 	 
     } 
+    return 0;
 }
 
 

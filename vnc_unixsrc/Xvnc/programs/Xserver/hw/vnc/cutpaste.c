@@ -29,6 +29,7 @@
 #include "selection.h"
 #include "input.h"
 #include <Xatom.h>
+#include "property.h"
 
 extern WindowPtr *WindowTable; /* Why isn't this in a header file? */
 extern Selection *CurrentSelections;

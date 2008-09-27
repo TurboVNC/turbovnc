@@ -33,7 +33,10 @@
 #define XK_CYRILLIC
 #include <X11/keysym.h>
 #include <Xatom.h>
+#include <unistd.h>
 #include "rfb.h"
+#include "mi.h"
+#include "mipointer.h"
 
 extern WindowPtr *WindowTable; /* Why isn't this in a header file? */
 

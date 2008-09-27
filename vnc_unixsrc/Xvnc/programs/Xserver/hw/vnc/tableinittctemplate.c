@@ -32,6 +32,8 @@
  *  USA.
  */
 
+#include <stdlib.h>
+
 #if !defined(OUT)
 #error "This file shouldn't be compiled."
 #error "It is included as part of translate.c"

@@ -60,6 +60,7 @@ SOFTWARE.
 /* horizontal solid line
    abs(len) > 1
 */
+int
 mfbHorzS(rop, addrl, nlwidth, x1, y1, len)
 int rop;		/* a reduced rasterop */
 register PixelType *addrl;	/* pointer to base of bitmap */
@@ -130,6 +131,7 @@ int len;		/* length of line */
 		*addrl ^= endmask;
         }
     }
+    return 0;
 }
 
 /* vertical solid line
@@ -138,6 +140,7 @@ int len;		/* length of line */
    it's OK to use it.
 */
 
+int
 mfbVertS(rop, addrl, nlwidth, x1, y1, len)
 int rop;		/* a reduced rasterop */
 register PixelType *addrl;	/* pointer to base of bitmap */
@@ -170,4 +173,5 @@ register int len;	/* length of line */
 	bitmask = mask[x1 & PIM];
         Duff(len, *addrl ^= bitmask; mfbScanlineInc(addrl, nlwidth) );
     }
+    return 0;
 }
