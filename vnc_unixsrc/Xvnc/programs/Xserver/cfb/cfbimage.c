@@ -55,6 +55,7 @@ SOFTWARE.
 #include "cfb.h"
 #include "cfbmskbits.h"
 #include "servermd.h"
+#include "mi.h"
 
 void
 cfbPutImage(pDraw, pGC, depth, x, y, w, h, leftPad, format, pImage)
