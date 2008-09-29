@@ -2,7 +2,6 @@
 
 if [ "$1" = "clean" ]; then
 xmkmf || exit -1
-make Makefiles || exit -1
 make clean || exit -1
 exit 0
 fi
