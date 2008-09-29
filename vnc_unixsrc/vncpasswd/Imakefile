@@ -3,10 +3,8 @@
 EXTRA_DEFINES = -D__EXTENSIONS__
 #endif
 #if defined(x86_64Architecture)||defined(AMD64Architecture)
-ifeq ($(M32), yes)
 EXTRA_DEFINES = -m32 -D__i386__
 EXTRA_LDOPTIONS = -m32
-endif
 #endif
 
 SRCS = vncpasswd.c
