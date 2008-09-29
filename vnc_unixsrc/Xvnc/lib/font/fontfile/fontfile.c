@@ -724,7 +724,7 @@ _FontFileAddScalableNames(names, scaleNames, nameptr, zeroChars, vals, ranges,
 		if (strcmp(nameChars, scaleNames->names[i]) &&
 		    FontFileMatchName(scaleNames->names[i],
 				      scaleNames->length[i],
-				      nameptr) &&
+				      *nameptr) &&
 		    *max)
 		{
 		    --*max;
