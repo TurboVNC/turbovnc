@@ -1,0 +1,86 @@
+#!/bin/bash
+
+ARCH=`uname -m`
+APPNAME=turbovnc
+VERSION=0.5
+BUILD=`date +%Y%m%d`
+DEBARCH=all
+BINDIR=/opt/TurboVNC/bin
+MANDIR=/opt/TurboVNC/man
+DATADIR=/opt/TurboVNC
+
+if [ "$1" = "clean" ]; then
+xmkmf || exit -1
+make clean || exit -1
+cd Xvnc
+if [ ! -f Makefile ]; then
+	./configure || exit -1
+fi
+make clean || exit -1
+cd ..
+fi
+
+xmkmf || exit -1
+make World || exit -1
+cd Xvnc
+./configure || exit -1
+make || exit -1
+cd ..
+
+umask 022
+TMPDIR=`mktemp -d /tmp/vncbuild.XXXXXX`
+mkdir -p $TMPDIR/DEBIAN
+cat deb-control.tmpl | sed s/{__PKGNAME}/$APPNAME/g | sed s/{__VERSION}/$VERSION/g | sed s/{__BUILD}/$BUILD/g | sed s/{__ARCH}/$DEBARCH/g > $TMPDIR/DEBIAN/control
+
+mkdir -p $TMPDIR$BINDIR
+mkdir -p $TMPDIR$MANDIR/man1
+./vncinstall $TMPDIR$BINDIR $TMPDIR$MANDIR
+install -m 644 Xvnc/programs/Xserver/Xserver.man $TMPDIR$MANDIR/man1/Xserver.1
+
+mkdir -p $TMPDIR$DATADIR/vnc/classes
+for i in classes/*.class; do install -m 644 $i $TMPDIR$DATADIR/vnc/classes; done
+for i in classes/*.jar; do install -m 644 $i $TMPDIR$DATADIR/vnc/classes; done
+for i in classes/*.vnc; do install -m 644 $i $TMPDIR$DATADIR/vnc/classes; done
+
+strip $TMPDIR$BINDIR/* || :
+
+mkdir -p $TMPDIR/etc/init.d
+cat vncserver.init   | sed -e 's@vncserver :${display\%\%:@/opt/TurboVNC/bin/vncserver :${display\%\%:@g' | sed -e 's@vncserver -kill :${display\%\%:@/opt/TurboVNC/bin/vncserver -kill :${display\%\%:@g' > $TMPDIR/etc/init.d/tvncserver
+chmod 755 $TMPDIR/etc/init.d/tvncserver
+
+mkdir -p $TMPDIR/etc/sysconfig
+cat > $TMPDIR/etc/sysconfig/tvncservers <<EOF
+# The VNCSERVERS variable is a list of display:user pairs.
+#
+# Uncomment the line below to start a VNC server on display :1
+# as my 'myusername' (adjust this to your own).  You will also
+# need to set a VNC password; run 'man vncpasswd' to see how
+# to do that.
+#
+# DO NOT RUN THIS SERVICE if your local area network is
+# untrusted!  For a secure way of using VNC, see
+# <URL:http://www.uk.research.att.com/vnc/sshvnc.html>.
+
+# VNCSERVERS="1:myusername"
+EOF
+chmod 644 $TMPDIR/etc/sysconfig/tvncservers
+
+mkdir -p $TMPDIR/usr/share/applications
+cat > $TMPDIR/usr/share/applications/tvncviewer.desktop <<EOF
+[Desktop Entry]
+Name=TurboVNC Viewer
+Comment=TurboVNC client application
+Exec=/opt/TurboVNC/bin/vncviewer
+Terminal=0
+Type=Application
+Categories=Application;Utility;X-Red-Hat-Extra;
+EOF
+
+mkdir -p $TMPDIR/usr/share/doc/$APPNAME-$VERSION
+install -m 644 LICENCE.TXT $TMPDIR/usr/share/doc/$APPNAME-$VERSION
+install -m 644 WhatsNew $TMPDIR/usr/share/doc/$APPNAME-$VERSION
+install -m 644 TurboVNC-ChangeLog.txt $TMPDIR/usr/share/doc/$APPNAME-$VERSION
+
+sudo chown -R root:root $TMPDIR/*
+dpkg -b $TMPDIR turbovnc_$DEBARCH.deb
+sudo rm -rf $TMPDIR
