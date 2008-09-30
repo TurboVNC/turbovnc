@@ -1,4 +1,4 @@
-Summary:   A remote display system for hardware-accelerated 3D applications
+Summary:   An accelerated version of TightVNC designed for video and 3D applications
 Name:      turbovnc
 Version:   %{_version}
 Release:   %{_build}
@@ -18,7 +18,7 @@ allows you to view a computing 'desktop' environment not only on the
 machine where it is running, but from anywhere on the Internet and
 from a wide variety of machine architectures.  TurboVNC is a sleek and
 fast VNC distribution, containing a high-performance implementation of
-tight JPEG encoding designed to work in conjunction with VirtualGL.
+Tight encoding designed to work in conjunction with VirtualGL.
 #-->%prep
 #-->%setup -q -n vnc/vnc_unixsrc
 
