@@ -126,7 +126,7 @@ chop($os = `uname`);
 if ($os eq "SunOS") {
     $fontPath = "inet/:7100";
 } else {
-    $fontPath = "unix:/7100";
+    $fontPath = "unix/:7100";
 }
 if (-d "/usr/lib/X11/fonts/misc") {
     $fontdir = "/usr/lib/X11/fonts";
