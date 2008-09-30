@@ -47,7 +47,7 @@ for f in Xvnc/programs/Xserver/Xvnc vncviewer/vncviewer \
   else
     echo "Copying $f -> $bin_dst/`basename $f`"
     cp -pf $f $bin_dst
-    chmod 0555 $bin_dst/`basename $f`
+    chmod 0755 $bin_dst/`basename $f`
   fi
 
   # Installing man pages
