@@ -71,14 +71,15 @@ cat > %{buildroot}/etc/sysconfig/tvncservers << EOF
 EOF
 chmod 644 %{buildroot}/etc/sysconfig/tvncservers
 
-mkdir -p %{buildroot}/etc/X11/applnk/Applications
-cat > %{buildroot}/etc/X11/applnk/Applications/tvncviewer.desktop << EOF
+mkdir -p %{buildroot}/usr/share/applications
+cat > %{buildroot}/usr/share/applications/tvncviewer.desktop << EOF
 [Desktop Entry]
 Name=TurboVNC Viewer
 Comment=TurboVNC client application
 Exec=%{_bindir}/vncviewer
 Terminal=0
 Type=Application
+Categories=Application;Utility;X-Red-Hat-Extra;
 EOF
 
 chmod 644 LICENCE.TXT README WhatsNew ChangeLog
@@ -115,7 +116,7 @@ fi
 %dir %{_datadir}/vnc
 
 %{_bindir}/vncviewer
-%config(noreplace) /etc/X11/applnk/Applications/tvncviewer.desktop
+%config(noreplace) /usr/share/applications/tvncviewer.desktop
 %{_mandir}/man1/vncviewer.1*
 %{_bindir}/Xvnc
 %{_bindir}/vncserver
