@@ -72,6 +72,9 @@ $defaultXStartup
        "if [ -x /etc/X11/xinit/xinitrc ]; then\n".
        "  exec /etc/X11/xinit/xinitrc\n".
        "fi\n".
+       "if [ -f /etc/X11/xinit/xinitrc ]; then\n".
+       "  exec sh /etc/X11/xinit/xinitrc\n".
+       "fi\n".
        "if [ \$OS = 'SunOS' -a -f \$HOME/.dt/sessions/lastsession ]; then\n".
        "  exec `cat \$HOME/.dt/sessions/lastsession`\n".
        "fi\n".
@@ -120,12 +123,34 @@ unless ($xauthorityFile) {
 chop($host = `uname -n`);
 chop($os = `uname`);
 
-if ($os eq "SunOS") {
-#   $fontPath = "inet/:7100";
+if (-d "/usr/lib/X11/fonts/misc") {
+    $fontdir = "/usr/lib/X11/fonts";
+} elsif (-d "/usr/X11/lib/X11/fonts/misc") {
+    $fontdir = "/usr/X11/lib/X11/fonts";
+} elsif (-d "/usr/share/X11/fonts/misc") {
+    $fontdir = "/usr/share/X11/fonts";
+} elsif (-d "/usr/openwin/lib/X11/fonts/misc") {
+    $fontdir = "/usr/openwin/lib/X11/fonts";
+} elsif (-d "/usr/X11R6/lib/X11/fonts/misc") {
+    $fontdir = "/usr/X11R6/lib/X11/fonts";
+}
+if ($fontdir) {
+    $fontPath = $fontdir."/misc,".$fontdir."/75dpi,".$fontdir."/100dpi,".$fontdir."/Speedo,".$fontdir."/Type1";
 } else {
     $fontPath = "unix/:7100";
 }
 
+if (-f "/usr/lib/X11/rgb.txt") {
+    $colorPath = "/usr/lib/X11/rgb";
+} elsif (-f "/usr/X11/lib/X11/rgb.txt") {
+    $colorPath = "/usr/X11/lib/X11/rgb";
+} elsif (-f "/usr/share/X11/rgb.txt") {
+    $colorPath = "/usr/share/X11/rgb";
+} elsif (-f "/usr/openwin/lib/X11/rgb.txt") {
+    $colorPath = "/usr/openwin/lib/X11/rgb";
+} elsif (-f "/usr/X11R6/lib/X11/rgb.txt") {
+    $colorPath = "/usr/X11R6/lib/X11/rgb";
+}
 
 # Check command line options
 
