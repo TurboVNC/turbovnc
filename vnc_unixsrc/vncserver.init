@@ -29,6 +29,11 @@ fi
 VNCSERVERS=""
 [ -f /etc/sysconfig/tvncservers ] && . /etc/sysconfig/tvncservers
 
+LOCKDIR=/var/lock
+if [ -d /var/lock/subsys ]; then
+    LOCKDIR=/var/lock/subsys
+fi
+
 prog=$"TurboVNC server"
 
 start() {
@@ -58,7 +63,7 @@ start() {
             log_failure_msg
     fi
     echo
-    [ "$RETVAL" -eq 0 ] && touch /var/lock/subsys/tvncserver
+    [ "$RETVAL" -eq 0 ] && touch $LOCKDIR/tvncserver
 }
 
 stop() {
@@ -85,7 +90,7 @@ stop() {
             log_failure_msg $"vncserver shutdown"
     fi
     echo
-    [ "$RETVAL" -eq 0 ] && rm -f /var/lock/subsys/tvncserver
+    [ "$RETVAL" -eq 0 ] && rm -f $LOCKDIR/tvncserver
 }
 
 # See how we were called.
@@ -101,7 +106,7 @@ case "$1" in
 	start
 	;;
   condrestart)
-	if [ -f /var/lock/subsys/tvncserver ]; then
+	if [ -f $LOCKDIR/tvncserver ]; then
 	    stop
 	    start
 	fi
