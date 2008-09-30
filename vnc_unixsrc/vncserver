@@ -123,6 +123,11 @@ unless ($xauthorityFile) {
 chop($host = `uname -n`);
 chop($os = `uname`);
 
+if ($os eq "SunOS") {
+    $fontPath = "inet/:7100";
+} else {
+    $fontPath = "unix:/7100";
+}
 if (-d "/usr/lib/X11/fonts/misc") {
     $fontdir = "/usr/lib/X11/fonts";
 } elsif (-d "/usr/X11/lib/X11/fonts/misc") {
@@ -135,9 +140,7 @@ if (-d "/usr/lib/X11/fonts/misc") {
     $fontdir = "/usr/X11R6/lib/X11/fonts";
 }
 if ($fontdir) {
-    $fontPath = $fontdir."/misc,".$fontdir."/75dpi,".$fontdir."/100dpi,".$fontdir."/Speedo,".$fontdir."/Type1";
-} else {
-    $fontPath = "unix/:7100";
+    $defFontPath = $fontdir."/misc,".$fontdir."/75dpi,".$fontdir."/100dpi,".$fontdir."/Speedo,".$fontdir."/Type1";
 }
 
 if (-f "/usr/lib/X11/rgb.txt") {
@@ -278,6 +281,7 @@ unless (kill 0, `cat $pidFile`) {
     warn "Please set correct fontPath in the $prog script\n";
     warn "or make sure that the X Font Server (xfs) is running.\n";
     $cmd =~ s@-fp [^ ]+@@;
+    $cmd .= " -fp $defFontPath" if ($defFontPath);
     system("$cmd & echo \$! >$pidFile");
     sleep(1);
 }
