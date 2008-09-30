@@ -45,6 +45,11 @@ char *fallback_resources[] = {
   "*viewport.useBottom: True",
   "*viewport.useRight: True",
   "*viewport*Scrollbar*thumb: None",
+  "*viewport*Scrollbar.translations: #override\\n\
+     <Btn1Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\\n\
+     <Btn1Motion>: MoveThumb() NotifyThumb()\\n\
+     <Btn3Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\\n\
+     <Btn3Motion>: MoveThumb() NotifyThumb()",
 
   "*desktop.baseTranslations:\
      <Key>F8: ShowPopup()\\n\
