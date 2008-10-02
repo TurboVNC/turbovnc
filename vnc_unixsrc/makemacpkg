@@ -35,7 +35,9 @@ install -m 755 vncviewer/vncviewer.man $pkgtmpdir/pkg/Package_Root/opt/$pkgname/
 install -m 644 ReadMe-MacApp.txt "$pkgtmpdir/pkg/Package_Root/Applications/$pkgname/Read Me.txt"
 install -m 644 LICENCE.TXT $pkgtmpdir/pkg/Package_Root/Library/Documentation/$pkgname-$_VERSION
 install -m 644 WhatsNew $pkgtmpdir/pkg/Package_Root/Library/Documentation/$pkgname-$_VERSION
+install -m 644 ChangeLog $pkgtmpdir/pkg/Package_Root/Library/Documentation/$pkgname-$_VERSION
 install -m 644 TurboVNC-ChangeLog.txt $pkgtmpdir/pkg/Package_Root/Library/Documentation/$pkgname-$_VERSION
+install -m 644 TurboVNC-CompatibilityGuide.txt $pkgtmpdir/pkg/Package_Root/Library/Documentation/$pkgname-$_VERSION
 sudo chown -R root:admin $pkgtmpdir/pkg/Package_Root
 cp License.rtf Welcome.rtf ReadMe.rtf $pkgtmpdir/pkg/Resources/
 $PACKAGEMAKER -build -v -p $pkgtmpdir/$pkgname-$_VERSION.pkg \

@@ -45,7 +45,7 @@ for i in classes/*.vnc; do install -m 644 $i $TMPDIR$DATADIR/vnc/classes; done
 strip $TMPDIR$BINDIR/* || :
 
 mkdir -p $TMPDIR/etc/init.d
-cat vncserver.init   | sed -e 's@vncserver :${display\%\%:@/opt/TurboVNC/bin/vncserver :${display\%\%:@g' | sed -e 's@vncserver -kill :${display\%\%:@/opt/TurboVNC/bin/vncserver -kill :${display\%\%:@g' > $TMPDIR/etc/init.d/tvncserver
+cat vncserver.init | sed -e 's@vncserver :${display\%\%:@/opt/TurboVNC/bin/vncserver :${display\%\%:@g' | sed -e 's@vncserver -kill :${display\%\%:@/opt/TurboVNC/bin/vncserver -kill :${display\%\%:@g' > $TMPDIR/etc/init.d/tvncserver
 chmod 755 $TMPDIR/etc/init.d/tvncserver
 
 mkdir -p $TMPDIR/etc/sysconfig
@@ -79,7 +79,9 @@ EOF
 mkdir -p $TMPDIR/usr/share/doc/$APPNAME-$VERSION
 install -m 644 LICENCE.TXT $TMPDIR/usr/share/doc/$APPNAME-$VERSION
 install -m 644 WhatsNew $TMPDIR/usr/share/doc/$APPNAME-$VERSION
+install -m 644 ChangeLog $TMPDIR/usr/share/doc/$APPNAME-$VERSION
 install -m 644 TurboVNC-ChangeLog.txt $TMPDIR/usr/share/doc/$APPNAME-$VERSION
+install -m 644 TurboVNC-CompatibilityGuide.txt $TMPDIR/usr/share/doc/$APPNAME-$VERSION
 
 sudo chown -R root:root $TMPDIR/*
 dpkg -b $TMPDIR turbovnc_$DEBARCH.deb

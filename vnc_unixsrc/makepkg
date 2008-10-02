@@ -71,7 +71,9 @@ f none SUNWtvnc/bin/Xvnc 0755 root bin
 d none SUNWtvnc/doc 0755 root bin
 f none SUNWtvnc/doc/LICENCE.TXT 0644 root bin
 f none SUNWtvnc/doc/WhatsNew 0644 root bin
+f none SUNWtvnc/doc/ChangeLog 0644 root bin
 f none SUNWtvnc/doc/TurboVNC-ChangeLog.txt 0644 root bin
+f none SUNWtvnc/doc/TurboVNC-CompatibilityGuide.txt 0644 root bin
 d none SUNWtvnc/lib 0755 root bin
 f none SUNWtvnc/lib/libturbojpeg.so 0755 root bin
 d none SUNWtvnc/man 0755 root bin
@@ -114,7 +116,7 @@ mkdir -p $pkgdir/man/man1
 cp Xvnc/programs/Xserver/Xserver.man $pkgdir/man/man1/Xserver.1
 cp turbojpeg/libturbojpeg.so $pkgdir/lib
 cp -prf classes $pkgdir/vnc
-cp LICENCE.TXT WhatsNew TurboVNC-ChangeLog.txt $pkgdir/doc
+cp LICENCE.TXT WhatsNew ChangeLog TurboVNC-ChangeLog.txt TurboVNC-CompatibilityGuide.txt $pkgdir/doc
 
 cd $pkgtmpdir
 pkgmk -o -r opt -d . -a `uname -p` -f proto

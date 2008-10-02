@@ -42,6 +42,7 @@ Source: "README-bin.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "LICENCE.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "WhatsNew.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "TurboVNC-ChangeLog.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
+Source: "TurboVNC-CompatibilityGuide.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "TurboVNC.url"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 ;Source: "Web\*"; DestDir: "{app}\Web"; CopyMode: alwaysoverwrite; Components: webdoc
 ;Source: "Web\images\*"; DestDir: "{app}\Web\images"; CopyMode: alwaysoverwrite; Components: webdoc
@@ -57,18 +58,20 @@ Name: "{group}\Show About Box";                       FileName: "{app}\WinVNC.ex
 Name: "{group}\Show User Settings";                   FileName: "{app}\WinVNC.exe";    Parameters: "-settings";        WorkingDir: "{app}";     Components: server
 Name: "{group}\TurboVNC Viewer";   FileName: "{app}\vncviewer.exe"; Parameters: ""; WorkingDir: "{app}"; Components: viewer
 Name: "{group}\TurboVNC Viewer (Listen Mode)";        FileName: "{app}\vncviewer.exe"; Parameters: "-listen";          WorkingDir: "{app}";     Components: viewer
+Name: "{group}\Uninstall TurboVNC";   FileName: "{uninstallexe}"; Parameters: ""; WorkingDir: "{app}";
 Name: "{group}\Administration\Install VNC Service";   FileName: "{app}\WinVNC.exe";    Parameters: "-install";         WorkingDir: "{app}";     Components: server
 Name: "{group}\Administration\Remove VNC Service";    FileName: "{app}\WinVNC.exe";    Parameters: "-remove";          WorkingDir: "{app}";     Components: server
 Name: "{group}\Administration\Run Service Helper";    FileName: "{app}\WinVNC.exe";    Parameters: "-servicehelper";   WorkingDir: "{app}";     Components: server
 Name: "{group}\Administration\Show Default Settings"; FileName: "{app}\WinVNC.exe";    Parameters: "-defaultsettings"; WorkingDir: "{app}";     Components: server
 ;Name: "{group}\Documentation\About VNC and TurboVNC"; FileName: "{app}\Web\index.html";                                WorkingDir: "{app}\Web"; Components: webdoc
 ;Name: "{group}\Documentation\Installation and Getting Started"; FileName: "{app}\Web\winst.html";                      WorkingDir: "{app}\Web"; Components: webdoc
-Name: "{group}\Documentation\Read Me";        FileName: "{app}\README-bin.txt";                                   WorkingDir: "{app}"
-Name: "{group}\Documentation\Licensing Terms";        FileName: "{app}\LICENCE.txt";                                   WorkingDir: "{app}"
+Name: "{group}\Documentation\Read Me";        FileName: "write.exe"; Parameters: "README-bin.txt";                                   WorkingDir: "{app}"; Flags: "useapppaths"
+Name: "{group}\Documentation\Licensing Terms";        FileName: "write.exe"; Parameters: "LICENCE.txt";                                   WorkingDir: "{app}"; Flags: "useapppaths"
 Name: "{group}\Documentation\TurboVNC Web Site";      FileName: "{app}\TurboVNC.url"
-;Name: "{group}\Documentation\What's New (Detailed Log)"; FileName: "{app}\Web\changelog-win32.html";                   WorkingDir: "{app}\Web"; Components: webdoc
-Name: "{group}\Documentation\TightVNC Change Log";   FileName: "{app}\WhatsNew.txt";                             WorkingDir: "{app}"
-Name: "{group}\Documentation\TurboVNC Change Log";   FileName: "{app}\TurboVNC-ChangeLog.txt";                             WorkingDir: "{app}"
+;Name: "{group}\Documentation\What's New (Detailed Log)"; FileName: "write.exe"; Parameters: "{app}\Web\changelog-win32.html";                   WorkingDir: "{app}\Web"; Components: webdoc
+Name: "{group}\Documentation\TightVNC Change Log";   FileName: "write.exe"; Parameters: "WhatsNew.txt";                             WorkingDir: "{app}"; Flags: "useapppaths"
+Name: "{group}\Documentation\TurboVNC Change Log";   FileName: "write.exe"; Parameters: "TurboVNC-ChangeLog.txt";                             WorkingDir: "{app}"; Flags: "useapppaths"
+Name: "{group}\Documentation\TurboVNC Compatibility Guide";   FileName: "write.exe"; Parameters: "TurboVNC-CompatibilityGuide.txt";                             WorkingDir: "{app}"; Flags: "useapppaths"
 
 [Tasks]
 Name: associate; Description: "&Associate .vnc files with TurboVNC Viewer"; GroupDescription: "File associations:"; Components: viewer
