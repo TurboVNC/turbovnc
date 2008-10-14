@@ -69,6 +69,16 @@ $defaultXStartup
     = ("#!/bin/sh\n\n".
        "unset SESSION_MANAGER\n".
        "OS=`uname -s`\n".
+       "if [ \$OS = 'Linux' ]; then\n".
+       "  case \"\$WINDOWMANAGER\" in\n".
+       "    \*gnome\*)\n".
+       "      if [ -e /etc/SuSE-release ]; then\n".
+       "        PATH=\$PATH:/opt/gnome/bin\n".
+       "        export PATH\n".
+       "      fi\n".
+       "      ;;\n".
+       "  esac\n".
+       "fi\n".
        "if [ -x /etc/X11/xinit/xinitrc ]; then\n".
        "  exec /etc/X11/xinit/xinitrc\n".
        "fi\n".
@@ -76,7 +86,9 @@ $defaultXStartup
        "  exec sh /etc/X11/xinit/xinitrc\n".
        "fi\n".
        "if [ \$OS = 'SunOS' -a -f \$HOME/.dt/sessions/lastsession ]; then\n".
-       "  exec `cat \$HOME/.dt/sessions/lastsession`\n".
+       "  if [ -x `cat \$HOME/.dt/sessions/lastsession` ]; then\n".
+       "    exec `cat \$HOME/.dt/sessions/lastsession`\n".
+       "  fi\n".
        "fi\n".
        "if [ -f /usr/dt/config/Xsession.jds ]; then\n".
        "  exec /usr/dt/config/Xsession.jds\n".
