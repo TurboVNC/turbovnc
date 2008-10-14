@@ -67,6 +67,22 @@ Changed the scrollbar behavior in the Unix TurboVNC viewer to more closely
 match that of "modern" windowing systems, in which the left mouse button is
 used to scroll in both directions.
 -------------------------------------------------------------------------------
+[14]
+Fixed an issue whereby Gnome would fail to start on SuSE 10 machines if CSh
+was the default shell.  The issue was that /opt/gnome/bin was not being added
+to the PATH by /etc/csh.cshrc.  This was worked around by adding it to the
+PATH in ~/.vnc/xstartup.turbovnc.
+-------------------------------------------------------------------------------
+[15]
+On Solaris machines, TurboVNC will attempt to load the window manager startup
+script specified in ~/.dt/sessions/lastsession.  This caused problems if the
+home directory was shared among multiple machines and the startup script did
+not exist on some of the machines (for instance, if the user's default
+windowing environment was JDS but they attempted to start TurboVNC on an older
+Solaris machine that had only CDE.)  This has been fixed by adding a line to
+xstartup.turbovnc which checks to make sure that the script specified in
+~/.dt/sessions/lastsession exists and is executable before executing it.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
