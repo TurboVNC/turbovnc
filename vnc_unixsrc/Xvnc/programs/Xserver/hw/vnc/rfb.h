@@ -564,7 +564,7 @@ extern Bool rfbSendRectEncodingZlib(rfbClientPtr cl, int x, int y, int w,
 
 /* tight.c */
 
-#define TIGHT_DEFAULT_COMPRESSION  0
+#define TIGHT_DEFAULT_COMPRESSION  1
 #define TIGHT_DEFAULT_SUBSAMP      0
 #define TIGHT_DEFAULT_QUALITY      95
 
