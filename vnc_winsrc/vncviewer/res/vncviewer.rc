@@ -77,7 +77,7 @@ BEGIN
     LTEXT           "1",IDC_STATIC_QUALITY,80,83,25,10
     RTEXT           "poor",IDC_STATIC_POOR,12,94,18,10
     CONTROL         "Slider1",IDC_QUALITYLEVEL,"msctls_trackbar32",
-                    TBS_AUTOTICKS | WS_TABSTOP,31,93,72,12
+                    WS_TABSTOP,31,93,72,12
     LTEXT           "best",IDC_STATIC_QBEST,103,94,18,10
     LTEXT           "Zlib compression level:",IDC_STATIC_COMPRESS,12,109,77,10
     LTEXT           "None",IDC_STATIC_LEVEL,89,109,28,10
