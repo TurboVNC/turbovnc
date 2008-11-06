@@ -57,6 +57,7 @@ static Atom	    lastAtom;
 static int
 Hash(string, len)
     char    *string;
+    int     len;
 {
     int	h;
 
@@ -130,6 +131,7 @@ ResizeReverseMap ()
 static int
 NameEqual (a, b, l)
     char    *a, *b;
+    int     l;
 {
     while (l--)
 	if (*a++ != *b++)

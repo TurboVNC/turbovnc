@@ -38,7 +38,7 @@ extern void FatalError(
 #endif
 );
  
-xiStub()
+void xiStub()
 {
        printf("xiStub called\n");
        abort("xiStub called");

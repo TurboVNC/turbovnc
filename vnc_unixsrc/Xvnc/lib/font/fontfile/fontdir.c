@@ -367,7 +367,9 @@ SetupWildMatch(table, pat, leftp, rightp, privatep)
 static int
 PatternMatch(pat, patdashes, string, stringdashes)
     char       *pat;
+    int        patdashes;
     char       *string;
+    int        stringdashes;
 {
     char        c,
                 t;

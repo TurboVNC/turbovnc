@@ -118,6 +118,13 @@ extern void Type1CloseFont(
 extern void FontComputeInfoAccelerators(
      FontInfoPtr pFontInfo
 );
+
+extern void QueryFontLib(
+     char *env,
+     char *infoName,
+     pointer infoValue,
+     int  *rcodeP
+);
  
 #define DECIPOINTSPERINCH 722.7
 #define DEFAULTRES 75

@@ -46,7 +46,7 @@ char *malloc(), *realloc();
 long serverGeneration = 1;
 
 unsigned long *
-Xalloc (m)
+Xalloc (int m)
 {
     return (unsigned long *) malloc (m);
 }
@@ -54,6 +54,7 @@ Xalloc (m)
 unsigned long *
 Xrealloc (n,m)
     unsigned long   *n;
+    int             m;
 {
     if (!n)
 	return (unsigned long *) malloc (m);

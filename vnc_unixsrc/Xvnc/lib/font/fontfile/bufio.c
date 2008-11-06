@@ -122,6 +122,7 @@ BufFileRawSkip (f, count)
 static int
 BufFileRawClose (f, doClose)
     BufFilePtr	f;
+    int		doClose;
 {
     if (doClose)
 	close (FileDes (f));
@@ -217,6 +218,7 @@ BufFileFlush (f)
 int
 BufFileClose (f, doClose)
     BufFilePtr	f;
+    int		doClose;
 {
     (void) (*f->close) (f, doClose);
     xfree (f);

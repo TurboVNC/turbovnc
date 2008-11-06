@@ -64,6 +64,7 @@ pcfWrite(file, b, c)
 static int
 pcfPutLSB32(file, c)
     FontFilePtr file;
+    int         c;
 {
     current_position += 4;
     (void) FontFilePutc(c, file);
@@ -76,6 +77,7 @@ static int
 pcfPutINT32(file, format, c)
     FontFilePtr file;
     CARD32      format;
+    int         c;
 {
     current_position += 4;
     if (PCF_BYTE_ORDER(format) == MSBFirst) {
@@ -95,6 +97,7 @@ static int
 pcfPutINT16(file, format, c)
     FontFilePtr file;
     CARD32      format;
+    int         c;
 {
     current_position += 2;
     if (PCF_BYTE_ORDER(format) == MSBFirst) {
@@ -111,6 +114,7 @@ static int
 pcfPutINT8(file, format, c)
     FontFilePtr file;
     CARD32      format;
+    int         c;
 {
     current_position += 1;
     return FontFilePutc(c, file);

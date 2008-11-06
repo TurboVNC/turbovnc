@@ -597,6 +597,8 @@ FontFileOpenBitmapNCF (fpe, pFont, flags, entry, format, fmask,
     FontPathElementPtr	fpe;
     int			flags;
     FontEntryPtr	entry;
+    int			format;
+    int			fmask;
     FontPtr		*pFont;
     FontPtr		non_cachable_font;
 {
@@ -625,6 +627,8 @@ FontFileOpenBitmap (fpe, pFont, flags, entry, format, fmask)
     FontPathElementPtr	fpe;
     int			flags;
     FontEntryPtr	entry;
+    int			format;
+    int			fmask;
     FontPtr		*pFont;
 {
     return FontFileOpenBitmapNCF (fpe, pFont, flags, entry, format, fmask,
