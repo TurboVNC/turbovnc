@@ -52,7 +52,6 @@ in this Software without prior written authorization from the X Consortium.
 #include <sys/param.h>
 #endif
 #include <errno.h>
-#include <stdlib.h>
 
 #ifndef X_NOT_POSIX
 #include <dirent.h>
@@ -173,7 +172,6 @@ int equivalent(lname, rname)
 /* Recursively create symbolic links from the current directory to the "from"
    directory.  Assumes that files described by fs and ts are directories. */
 
-int
 dodir (fn, fs, ts, rel)
 char *fn;			/* name of "from" directory, either absolute or
 				   relative to cwd */
@@ -302,7 +300,6 @@ int rel;			/* if true, prepend "../" to fn before using */
 }
 
 
-int
 main (ac, av)
 int ac;
 char **av;
