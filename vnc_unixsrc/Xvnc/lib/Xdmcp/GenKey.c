@@ -33,9 +33,8 @@ in this Software without prior written authorization from the X Consortium.
 #include <X11/X.h>
 #include <X11/Xmd.h>
 #include <X11/Xdmcp.h>
-#include <time.h>
 
-static void getbits (data, dst)
+static getbits (data, dst)
     long	    data;
     unsigned char   *dst;
 {

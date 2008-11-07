@@ -61,8 +61,6 @@ from the X Consortium.
 
 #if defined(TCPCONN) || defined(UNIXCONN)
 #include <netinet/in.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
 #else
 #ifdef ESIX
 #include <lan/in.h>
@@ -260,9 +258,6 @@ static Sockettrans2dev Sockettrans2devtab[] = {
 
 #endif /* UNIXCONN */
 
-int TRANS(GetHostname) (char *buf, int maxlen);
-
-int atoi(const char *nptr);
 
 /*
  * These are some utility function used by the real interface function below.
@@ -925,7 +920,7 @@ char 		*port;
 
 #ifdef UNIXCONN
 
-static int
+static
 TRANS(SocketUNIXCreateListener) (ciptr, port)
 
 XtransConnInfo ciptr;
@@ -1006,7 +1001,7 @@ char *port;
 }
 
 
-static int
+static
 TRANS(SocketUNIXResetListener) (ciptr)
 
 XtransConnInfo ciptr;
