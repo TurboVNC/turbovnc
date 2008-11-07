@@ -38,7 +38,6 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/socket.h>
@@ -48,7 +47,6 @@
 #include <netdb.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <unistd.h>
 
 #ifndef USE_LIBWRAP
 #define USE_LIBWRAP 0

@@ -24,7 +24,6 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "X11/X.h"
 #define NEED_EVENTS
@@ -33,10 +32,7 @@
 #define XK_CYRILLIC
 #include <X11/keysym.h>
 #include <Xatom.h>
-#include <unistd.h>
 #include "rfb.h"
-#include "mi.h"
-#include "mipointer.h"
 
 extern WindowPtr *WindowTable; /* Why isn't this in a header file? */
 

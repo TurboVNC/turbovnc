@@ -55,7 +55,6 @@ from the X Consortium.
 /* Use ``#define CORBA'' to enable CORBA control interface */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
 #include <sys/types.h>
@@ -83,32 +82,10 @@ from the X Consortium.
 #include "dix.h"
 #include "rfb.h"
 #include <time.h>
-#include "mi.h"
 
 #ifdef CORBA
 #include <vncserverctrl.h>
 #endif
-
-extern Bool cfb16ScreenInit(
-    register ScreenPtr pScreen,
-    pointer pbits,
-    int xsize, int ysize,
-    int dpix, int dpiy,
-    int width
-);
-
-extern Bool cfb32ScreenInit(
-    register ScreenPtr pScreen,
-    pointer pbits,
-    int xsize, int ysize,
-    int dpix, int dpiy,
-    int width
-);
-
-extern Bool rfbDCInitialize (
-    ScreenPtr       pScreen,
-    miPointerScreenFuncPtr  screenFuncs
-);
 
 #define RFB_DEFAULT_WIDTH  1024
 #define RFB_DEFAULT_HEIGHT 768
