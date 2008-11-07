@@ -35,16 +35,6 @@
 #include "util.h"
 #include "fontfcn.h"
 #include "fontmisc.h"
-
-extern void Xfree(pointer);
-
-extern boolean Init_BuiltInEncoding(void);
-
-extern void objFormatName(
-  psobj *objP,
-  int length,
-  char *valueP
-);
  
 extern xobject Type1Char();
 /***================================================================***/

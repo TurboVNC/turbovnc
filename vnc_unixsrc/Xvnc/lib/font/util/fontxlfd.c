@@ -52,13 +52,6 @@ from the X Consortium.
 #include	<ctype.h>
 #include	<stdio.h>	/* for sprintf() */
 
-extern int add_range(
-    fsRange *newrange,
-    int *nranges,
-    fsRange **range,
-    Bool charset_subset
-);
-
 static char *
 GetInt(ptr, val)
     char       *ptr;

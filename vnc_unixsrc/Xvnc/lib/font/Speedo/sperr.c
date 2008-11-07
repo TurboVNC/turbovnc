@@ -59,11 +59,6 @@ from the X Consortium.
 #if NeedVarargsPrototypes
 #include <stdarg.h>
 
-extern void ErrorF(
-    char* /*f*/,
-    ...
-);
-
 void
 SpeedoErr(char *str, ...)
 {
@@ -78,8 +73,6 @@ SpeedoErr(char *str, ...)
 }
 
 #else
-
-extern void ErrorF();
 
 /* VARARGS1 */
 void

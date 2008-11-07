@@ -34,9 +34,6 @@ in this Software without prior written authorization from the X Consortium.
 
 #include    <fontmisc.h>
 #include    <fontstruct.h>
-#include    <stdlib.h>
-
-extern void Xfree(pointer);
 
 /*
  * Static sized hash table for looking up font name patterns
@@ -96,7 +93,7 @@ FreeFontPatternCache (cache)
 }
 
 /* compute id for string */
-static int
+static
 Hash (string, len)
     char    *string;
     int	    len;

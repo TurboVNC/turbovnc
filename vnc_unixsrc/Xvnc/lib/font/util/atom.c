@@ -35,8 +35,6 @@ in this Software without prior written authorization from the X Consortium.
 
 #include "fontmisc.h"
 
-extern void Xfree(pointer);
-
 typedef struct _AtomList {
     char		*name;
     int			len;
@@ -54,10 +52,9 @@ static AtomListPtr  *reverseMap;
 static int	    reverseMapSize;
 static Atom	    lastAtom;
 
-static int
+static
 Hash(string, len)
     char    *string;
-    int     len;
 {
     int	h;
 
@@ -69,7 +66,7 @@ Hash(string, len)
     return h;
 }
 
-static int
+static
 ResizeHashTable ()
 {
     int		newHashSize;
@@ -115,7 +112,7 @@ ResizeHashTable ()
     return TRUE;
 }
 
-static int
+static
 ResizeReverseMap ()
 {
     if (reverseMapSize == 0)
@@ -125,13 +122,11 @@ ResizeReverseMap ()
     reverseMap = (AtomListPtr *) xrealloc (reverseMap, reverseMapSize * sizeof (AtomListPtr));
     if (!reverseMap)
 	return FALSE;
-    return TRUE;
 }
 
-static int
+static
 NameEqual (a, b, l)
     char    *a, *b;
-    int     l;
 {
     while (l--)
 	if (*a++ != *b++)
@@ -208,7 +203,6 @@ MakeAtom(string, len, makeit)
     return a->atom;
 }
 
-int
 ValidAtom(atom)
     Atom atom;
 {

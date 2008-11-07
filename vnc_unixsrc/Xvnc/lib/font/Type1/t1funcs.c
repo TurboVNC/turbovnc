@@ -86,7 +86,6 @@ from the X Consortium.
 
 */
  
-#include <stdlib.h>
 #include <string.h>
 #ifdef _XOPEN_SOURCE
 #include <math.h>
@@ -106,52 +105,6 @@ from the X Consortium.
 #include "t1stdio.h"
 #include "util.h"
 #include "fontfcn.h"
-
-extern void FontDefaultFormat (
-    int *bit, int *byte, int *glyph, int *scan
-);
-
-extern int CheckFSFormat(
-    int format, int fmask, int *bit, int *byte,
-    int *scan, int *glyph, int *image
-);
-
-extern void Xfree(pointer);
-
-extern void addmemory(
-    register long *addr,
-    register long size
-);
-
-extern void delmemory(void);
-
-extern void T1FillFontInfo(
-    FontPtr             pFont,
-    FontScalablePtr     Vals,
-    char                *Filename,
-    char                *Fontname,
-    long    sWidth
-);
-
-extern void T1InitStdProps(void);
-
-extern Bool FontFileRegisterRenderer (
-    FontRendererPtr renderer
-);
-
-extern void FatalError(
-#if NeedVarargsPrototypes
-    char* /*f*/,
-    ...
-#endif
-);
-
-extern void ErrorF(
-    char* /*f*/,
-    ...
-);
-
-int Type1ReturnCodeToXReturnCode(int rc);
  
 int         Type1OpenScalable ();
 static int  Type1GetGlyphs();
@@ -159,7 +112,7 @@ void        Type1CloseFont();
 extern int  Type1GetInfoScalable ();
  
 static int  Type1GetMetrics ();
-
+ 
 #define minchar(p) ((p).min_char_low + ((p).min_char_high << 8))
 #define maxchar(p) ((p).max_char_low + ((p).max_char_high << 8))
 
@@ -709,7 +662,6 @@ static FontRendererRec renderers[] = {
 };
  
 
-void
 Type1RegisterFontFileFunctions()
 {
     int i;

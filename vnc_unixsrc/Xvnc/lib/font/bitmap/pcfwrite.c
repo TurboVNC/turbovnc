@@ -39,14 +39,6 @@ from the X Consortium.
 #include "bitmap.h"
 #include "pcf.h"
 
-int
-BufFileWrite (
-    BufFilePtr  f,
-    char  *b,
-    int   n
-);
-
-
 /* Write PCF font files */
 
 static int  current_position;
@@ -64,7 +56,6 @@ pcfWrite(file, b, c)
 static int
 pcfPutLSB32(file, c)
     FontFilePtr file;
-    int         c;
 {
     current_position += 4;
     (void) FontFilePutc(c, file);
@@ -77,7 +68,6 @@ static int
 pcfPutINT32(file, format, c)
     FontFilePtr file;
     CARD32      format;
-    int         c;
 {
     current_position += 4;
     if (PCF_BYTE_ORDER(format) == MSBFirst) {
@@ -97,7 +87,6 @@ static int
 pcfPutINT16(file, format, c)
     FontFilePtr file;
     CARD32      format;
-    int         c;
 {
     current_position += 2;
     if (PCF_BYTE_ORDER(format) == MSBFirst) {
@@ -114,13 +103,12 @@ static int
 pcfPutINT8(file, format, c)
     FontFilePtr file;
     CARD32      format;
-    int         c;
 {
     current_position += 1;
     return FontFilePutc(c, file);
 }
 
-static void
+static
 pcfWriteTOC(file, table, count)
     FontFilePtr file;
     PCFTablePtr table;
@@ -141,7 +129,7 @@ pcfWriteTOC(file, table, count)
     }
 }
 
-static void
+static
 pcfPutCompressedMetric(file, format, metric)
     FontFilePtr file;
     CARD32      format;
@@ -154,7 +142,7 @@ pcfPutCompressedMetric(file, format, metric)
     pcfPutINT8(file, format, metric->descent + 0x80);
 }
 
-static void
+static
 pcfPutMetric(file, format, metric)
     FontFilePtr file;
     CARD32      format;
@@ -168,7 +156,7 @@ pcfPutMetric(file, format, metric)
     pcfPutINT16(file, format, metric->attributes);
 }
 
-static void
+static
 pcfPutBitmap(file, format, pCI)
     FontFilePtr file;
     CARD32      format;
@@ -184,7 +172,7 @@ pcfPutBitmap(file, format, pCI)
 	FontFilePutc(*bits++, file);
 }
 
-static void
+static
 pcfPutAccel(file, format, pFontInfo)
     FontFilePtr file;
     CARD32      format;
@@ -234,7 +222,6 @@ pcfNameForAtom(a)
     return NameForAtom(a);
 }
 
-int
 pcfWriteFont(pFont, file)
     FontPtr     pFont;
     FontFilePtr file;

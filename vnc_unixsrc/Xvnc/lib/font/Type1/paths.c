@@ -50,14 +50,7 @@ The included files are:
 #include  "pictures.h"     /* understands about handles                    */
 #include  "strokes.h"      /* understands how to coerce stroke paths       */
 #include  "trig.h"
-static void UnClose();
-
-extern void FatalError(
-#if NeedVarargsPrototypes
-    char* /*f*/,
-    ...
-#endif
-);
+static UnClose();
 
 /*
 :h3.Routines Available to the TYPE1IMAGER User
@@ -924,7 +917,7 @@ struct segment *ReverseSubPaths(p)
        return(r);
 }
  
-static void UnClose(p0)
+static UnClose(p0)
        register struct segment *p0;
 {
        register struct segment *p;

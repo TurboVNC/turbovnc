@@ -34,39 +34,6 @@ in this Software without prior written authorization from the X Consortium.
 
 #include    "fntfilst.h"
 #include    <X11/keysym.h>
-#include    <stdlib.h>
-
-extern void Xfree(pointer ptr);
-
-extern FontEntryPtr FontFileFindNameInScalableDir(
-    FontTablePtr    table,
-    FontNamePtr     pat,
-    FontScalablePtr     vals
-);
-
-extern int GetDefaultPointSize (void);
-
-extern Bool FontFileCompleteXLFD (
-    register FontScalablePtr  vals,
-    FontScalablePtr def
-);
-
-extern Bool FontFileAddScaledInstance (
-    FontEntryPtr    entry,
-    FontScalablePtr   vals,
-    FontPtr     pFont,
-    char      *bitmapName
-);
-
-extern void FontFileSwitchStringsToBitmapPointers (
-    FontDirectoryPtr  dir
-);
-
-extern void CopyISOLatin1Lowered(
-    register unsigned char *dest,
-    register unsigned char *source,
-    int length
-);
 
 Bool
 FontFileInitTable (table, size)
@@ -87,7 +54,6 @@ FontFileInitTable (table, size)
     return TRUE;
 }
 
-void
 FontFileFreeEntry (entry)
     FontEntryPtr    entry;
 {
@@ -121,7 +87,6 @@ FontFileFreeEntry (entry)
     }
 }
 
-void
 FontFileFreeTable (table)
     FontTablePtr    table;
 {
@@ -206,7 +171,6 @@ FontFileMakeDir(dirName, size)
     return dir;
 }
 
-void
 FontFileFreeDir (dir)
     FontDirectoryPtr	dir;
 {
@@ -257,7 +221,6 @@ FontFileNameCompare(a, b)
     return strcmp(a_name->name.name, b_name->name.name);
 }
 
-void
 FontFileSortTable (table)
     FontTablePtr    table;
 {
@@ -268,7 +231,6 @@ FontFileSortTable (table)
     }
 }
 
-void
 FontFileSortDir(dir)
     FontDirectoryPtr	dir;
 {
@@ -364,12 +326,10 @@ SetupWildMatch(table, pat, leftp, rightp, privatep)
     }
 }
 
-static int
+static
 PatternMatch(pat, patdashes, string, stringdashes)
     char       *pat;
-    int        patdashes;
     char       *string;
-    int        stringdashes;
 {
     char        c,
                 t;
@@ -509,7 +469,6 @@ FontFileFindNameInDir(table, pat)
     return FontFileFindNameInScalableDir(table, pat, (FontScalablePtr)0);
 }
 
-int
 FontFileFindNamesInScalableDir(table, pat, max, names, vals,
 			       alias_behavior, newmax)
     FontTablePtr    table;

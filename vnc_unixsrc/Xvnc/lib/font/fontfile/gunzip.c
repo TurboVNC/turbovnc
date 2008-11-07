@@ -7,8 +7,6 @@
 #include <bufio.h>
 #include <zlib.h>
 
-extern void Xfree(pointer ptr);
-
 typedef struct _xzip_buf {
   z_stream z;
   int zstat;

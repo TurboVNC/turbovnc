@@ -35,59 +35,6 @@
 #include "token.h"
 #include "fontfcn.h"
 #include "blues.h"
-
-extern void objFormatInteger(
-  psobj *objP,
-  int value
-);
-
-extern void objFormatName(
-  psobj *objP,
-  int length,
-  char *valueP
-);
-
-extern void objFormatReal(
-  psobj *objP,
-  float value
-);
-
-extern void objFormatArray(
-  psobj *objP,
-  int length,
-  psobj *valueP
-);
-
-extern void objFormatEncoding(
-  psobj *objP,
-  int length,
-  psobj *valueP
-);
-
-extern void objFormatString(
-  psobj *objP,
-  int length,
-  char *valueP
-);
-
-extern void objFormatBoolean(
-  psobj *objP,
-  boolean value
-);
-
-extern int SearchDictName(
- psdict *dictP,
- psobj  *keyP
-);
-
-extern int T1Getc(F_FILE *f);
-
-extern int T1Ungetc(int c, F_FILE *f);
-
-extern void objFormatFile(
-  psobj *objP,
-  FILE *valueP
-);
  
  
  

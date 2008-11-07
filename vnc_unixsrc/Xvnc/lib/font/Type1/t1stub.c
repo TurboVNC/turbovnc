@@ -29,16 +29,8 @@
  */
 
 #include "objects.h"	/* get #define for abort() */
-#include <stdio.h>
-
-extern void FatalError(
-#if NeedVarargsPrototypes
-    char* /*f*/,
-    ...
-#endif
-);
  
-void xiStub()
+xiStub()
 {
        printf("xiStub called\n");
        abort("xiStub called");

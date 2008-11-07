@@ -41,44 +41,6 @@ from the X Consortium.
 #define   MAX(a,b)    (((a)>(b)) ? a : b)
 #endif
 
-extern int BufFileRead (
-    BufFilePtr  f,
-    char  *b,
-    int   n
-);
-
-extern Atom MakeAtom(
-    char *string,
-    unsigned len,
-    int makeit
-);
-
-extern void BitOrderInvert(
-     register unsigned char *buf,
-     register int nbytes
-);
-
-extern void TwoByteSwap(
-     register unsigned char *buf,
-     register int nbytes
-);
-
-extern void FourByteSwap(
-     register unsigned char *buf,
-     register int nbytes
-);
-
-extern int RepadBitmap (
-    char  *pSrc,
-    char  *pDst,
-    unsigned  srcPad,
-    unsigned  dstPad,
-    int   width,
-    int   height
-);
-
-extern void Xfree(pointer ptr);
-
 /* Read PCF font files */
 
 void        pcfUnloadFont();
@@ -175,7 +137,7 @@ pcfReadTOC(file, countp)
  * metrics
  */
 
-static void
+static
 pcfGetMetric(file, format, metric)
     FontFilePtr file;
     CARD32      format;
@@ -189,7 +151,7 @@ pcfGetMetric(file, format, metric)
     metric->attributes = pcfGetINT16(file, format);
 }
 
-static void
+static
 pcfGetCompressedMetric(file, format, metric)
     FontFilePtr file;
     CARD32      format;
@@ -746,6 +708,7 @@ pmfReadFont(pFont, file, bit, byte, glyph, scan)
     CharInfoPtr *encoding = 0;
     int         nencoding;
     int         encodingOffset;
+    CARD32      bitmapSizes[GLYPHPADOPTIONS];
     Bool	hasBDFAccelerators;
     CharInfoPtr pci;
 

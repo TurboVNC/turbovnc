@@ -33,17 +33,6 @@ in this Software without prior written authorization from the X Consortium.
 
 #include "fntfilst.h"
 
-extern void Xfree(pointer ptr);
-
-extern int FontFileOpenBitmap (
-    FontPathElementPtr  fpe,
-    FontPtr   *pFont,
-    int     flags,
-    FontEntryPtr  entry,
-    int  format,
-    int  fmask
-);
-
 BitmapSourcesRec	FontFileBitmapSources;
 
 Bool
@@ -113,7 +102,6 @@ FontFileEmptyBitmapSource()
     FontFileBitmapSources.fpe = 0;
 }
 
-int
 FontFileMatchBitmapSource (fpe, pFont, flags, entry, zeroPat, vals, format, fmask, noSpecificSize)
     FontPathElementPtr	fpe;
     FontPtr		*pFont;

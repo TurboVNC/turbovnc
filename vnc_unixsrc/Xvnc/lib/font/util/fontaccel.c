@@ -37,7 +37,6 @@ from the X Consortium.
 #include    "fontmisc.h"
 #include    "fontstruct.h"
 
-void
 FontComputeInfoAccelerators(pFontInfo)
     FontInfoPtr pFontInfo;
 {
@@ -83,7 +82,6 @@ FontComputeInfoAccelerators(pFontInfo)
 	pFontInfo->inkInside = FALSE;
 }
 
-int
 FontCouldBeTerminal(pFontInfo)
     FontInfoPtr pFontInfo;
 {

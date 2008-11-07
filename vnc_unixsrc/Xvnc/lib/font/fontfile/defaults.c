@@ -63,7 +63,6 @@ in this Software without prior written authorization from the X Consortium.
 #define DEFAULT_SCAN_UNIT 1
 #endif
 
-void
 FontDefaultFormat (bit, byte, glyph, scan)
     int	    *bit, *byte, *glyph, *scan;
 {

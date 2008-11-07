@@ -46,7 +46,7 @@ char *malloc(), *realloc();
 long serverGeneration = 1;
 
 unsigned long *
-Xalloc (int m)
+Xalloc (m)
 {
     return (unsigned long *) malloc (m);
 }
@@ -54,7 +54,6 @@ Xalloc (int m)
 unsigned long *
 Xrealloc (n,m)
     unsigned long   *n;
-    int             m;
 {
     if (!n)
 	return (unsigned long *) malloc (m);
@@ -62,7 +61,6 @@ Xrealloc (n,m)
 	return (unsigned long *) realloc ((char *) n, m);
 }
 
-void
 Xfree (n)
     unsigned long   *n;
 {
@@ -70,7 +68,6 @@ Xfree (n)
 	free ((char *) n);
 }
 
-void
 CopyISOLatin1Lowered (dst, src, len)
     char    *dst, *src;
     int	    len;
@@ -93,7 +90,6 @@ CopyISOLatin1Lowered (dst, src, len)
     *dest = '\0';
 }
 
-void
 register_fpe_functions ()
 {
 }

@@ -51,7 +51,7 @@ The included files are:
 #include  "fonts.h"
 #include  "hints.h"
 #include  "strokes.h"      /* to pick up 'DoStroke'                        */
-static void Unwind();
+static Unwind();
 static void newfilledge();
 static struct edgelist *splitedge();
 static void vertjoin();
@@ -59,19 +59,10 @@ static int touches();
 static int crosses();
 static void edgemin();
 static void edgemax();
-static void discard();
-static void edgecheck();
+static discard();
+static edgecheck();
 static struct edgelist *NewEdge();
 static struct edgelist *swathxsort();  /* 'SortSwath' function               */
-
-extern void FatalError(
-#if NeedVarargsPrototypes
-    char* /*f*/,
-    ...
-#endif
-);
-
-void xiFree(register long *addr);
  
 /*
 :h3.Functions Provided to the TYPE1IMAGER User
@@ -596,7 +587,7 @@ or two downward edges are nominally left/right pairs, Unwind() should
 discard the second one.  Everything should balance; we should discard
 an even number of edges; of course, we abort if we don't.
 */
-static void Unwind(area)
+static Unwind(area)
        register struct edgelist *area;  /* input area modified in place      */
 {
        register struct edgelist *last,*next;  /* struct before and after current one */
@@ -1354,7 +1345,7 @@ So, to mark a 'edgelist' structure as discarded, we move it to the end
 of the list and set ymin=ymax.
 */
  
-static void discard(left, right)
+static discard(left, right)
        register struct edgelist *left,*right;  /* all edges between here exclusive */
                                        /* should be discarded */
 {
@@ -1472,7 +1463,7 @@ void UnJumble(region)
 /*
 */
  
-static void OptimizeRegion(R)
+static OptimizeRegion(R)
        struct region *R;     /* region to optimize                           */
 {
        register pel *xP;     /* pel pointer for inner loop                   */
@@ -1740,7 +1731,7 @@ void DumpEdges(edges)
 */
  
 /*ARGSUSED*/
-static void edgecheck(edge, oldmin, oldmax)
+static edgecheck(edge, oldmin, oldmax)
        struct edgelist *edge;
        int oldmin,oldmax;
 {

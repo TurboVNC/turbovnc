@@ -160,22 +160,22 @@ static int *ModeP;
 /************************/
 static double Div();
 static double PSFakePop();
-static void DoCommand();
-static void Escape();
-static void HStem();
-static void VStem();
-static void RLineTo();
-static void RRCurveTo();
-static void DoClosePath();
-static void CallSubr();
-static void Return();
-static void EndChar();
-static void RMoveTo();
-static void DotSection();
-static void Seac();
-static void Sbw();
-static void CallOtherSubr();
-static void SetCurrentPoint();
+static DoCommand();
+static Escape();
+static HStem();
+static VStem();
+static RLineTo();
+static RRCurveTo();
+static DoClosePath();
+static CallSubr();
+static Return();
+static EndChar();
+static RMoveTo();
+static DotSection();
+static Seac();
+static Sbw();
+static CallOtherSubr();
+static SetCurrentPoint();
 
 /*****************************************/
 /* statics for Flex procedures (FlxProc) */
@@ -196,7 +196,7 @@ static int numalignmentzones;	   /* total number of alignment zones */
 /******************************************/
 /* Fill in the alignment zone structures. */
 /******************************************/
-static void ComputeAlignmentZones()
+static ComputeAlignmentZones()
 {
   int i;
   double dummy, bluezonepixels, familyzonepixels;
@@ -274,14 +274,14 @@ static int oldhorhalf, oldverthalf;  /* Remember which half of the stem */
 static double wsoffsetX, wsoffsetY;  /* White space offset - for VSTEM3,HSTEM3 */
 static int wsset;                    /* Flag for whether we've set wsoffsetX,Y */
  
-static void InitStems()  /* Initialize the STEM hint data structures */
+static InitStems()  /* Initialize the STEM hint data structures */
 {
   InDotSection = FALSE;
   currstartstem = numstems = 0;
   oldvert = oldhor = -1;
 }
  
-static void FinitStems()  /* Terminate the STEM hint data structures */
+static FinitStems()  /* Terminate the STEM hint data structures */
 {
   int i;
  
@@ -297,7 +297,7 @@ static void FinitStems()  /* Terminate the STEM hint data structures */
 /* Compute the dislocation that a stemhint should cause for points */
 /* inside the stem.                                                */
 /*******************************************************************/
-static void ComputeStem(stemno)
+static ComputeStem(stemno)
 int stemno;
 {
   int verticalondevice, idealwidth;
@@ -692,24 +692,24 @@ static int CallTop;
 static double PSFakeStack[MAXPSFAKESTACK];
 static int PSFakeTop;
  
-static void ClearStack()
+static ClearStack()
 {
   Top = -1;
 }
  
-static void Push(Num)
+static Push(Num)
         double Num;
 {
   if (++Top < MAXSTACK) Stack[Top] = Num;
   else Error0("Push: Stack full\n");
 }
  
-static void ClearCallStack()
+static ClearCallStack()
 {
   CallTop = -1;
 }
  
-static void PushCall(CurrStrP, CurrIndex, CurrKey)
+static PushCall(CurrStrP, CurrIndex, CurrKey)
   psobj *CurrStrP;
   int CurrIndex;
   unsigned short CurrKey;
@@ -722,7 +722,7 @@ static void PushCall(CurrStrP, CurrIndex, CurrKey)
   else Error0("PushCall: Stack full\n");
 }
  
-static void PopCall(CurrStrPP, CurrIndexP, CurrKeyP)
+static PopCall(CurrStrPP, CurrIndexP, CurrKeyP)
   psobj **CurrStrPP;
   int *CurrIndexP;
   unsigned short *CurrKeyP;
@@ -735,13 +735,13 @@ static void PopCall(CurrStrPP, CurrIndexP, CurrKeyP)
   else Error0("PopCall: Stack empty\n");
 }
  
-static void ClearPSFakeStack()
+static ClearPSFakeStack()
 {
   PSFakeTop = -1;
 }
  
 /* PSFakePush: Pushes a number onto the fake PostScript stack */
-static void PSFakePush(Num)
+static PSFakePush(Num)
   double Num;
 {
   if (++PSFakeTop < MAXPSFAKESTACK) PSFakeStack[PSFakeTop] = Num;
@@ -862,7 +862,7 @@ static void StartDecrypt()
       Error0("StartDecrypt: Premature end of CharString\n");
 }
  
-static void Decode(Code)
+static Decode(Code)
   int Code;
 {
   int Code1, Code2, Code3, Code4;
@@ -892,7 +892,7 @@ ended: Error0("Decode: Premature end of Type 1 CharString");
 }
  
 /* Interpret a command code */
-static void DoCommand(Code)
+static DoCommand(Code)
   int Code;
 {
   switch(Code) {
@@ -1010,7 +1010,7 @@ static void DoCommand(Code)
   }
 }
  
-static void Escape(Code)
+static Escape(Code)
   int Code;
 {
   int i, Num;
@@ -1105,7 +1105,7 @@ static void Escape(Code)
 /* Declares the vertical range of a horizontal stem zone */
 /* between coordinates y and y + dy */
 /* y is relative to the left sidebearing point */
-static void HStem(y, dy)
+static HStem(y, dy)
   double y, dy;
 {
   IfTrace2((FontDebug), "Hstem %f %f\n", &y, &dy);
@@ -1126,7 +1126,7 @@ static void HStem(y, dy)
 /* Declares the horizontal range of a vertical stem zone */
 /* between coordinates x and x + dx */
 /* x is relative to the left sidebearing point */
-static void VStem(x, dx)
+static VStem(x, dx)
   double x, dx;
 {
   IfTrace2((FontDebug), "Vstem %f %f\n", &x, &dx);
@@ -1145,7 +1145,7 @@ static void VStem(x, dx)
  
 /* |- dx dy RLINETO |- */
 /* Behaves like RLINETO in PostScript */
-static void RLineTo(dx, dy)
+static RLineTo(dx, dy)
   double dx, dy;
 {
   struct segment *B;
@@ -1168,7 +1168,7 @@ static void RLineTo(dx, dy)
 /* Relative RCURVETO, equivalent to dx1 dy1 */
 /* (dx1+dx2) (dy1+dy2) (dx1+dx2+dx3) */
 /* (dy1+dy2+dy3) RCURVETO in PostScript */
-static void RRCurveTo(dx1, dy1, dx2, dy2, dx3, dy3)
+static RRCurveTo(dx1, dy1, dx2, dy2, dx3, dy3)
   double dx1, dy1, dx2, dy2, dx3, dy3;
 {
   struct segment *B, *C, *D;
@@ -1201,7 +1201,7 @@ static void RRCurveTo(dx1, dy1, dx2, dy2, dx3, dy3)
 /* - CLOSEPATH |- */
 /* Closes a subpath WITHOUT repositioning the */
 /* current point */
-static void DoClosePath()
+static DoClosePath()
 {
   struct segment *CurrentPoint;
  
@@ -1214,7 +1214,7 @@ static void DoClosePath()
 /* subr# CALLSUBR - */
 /* Calls a CharString subroutine with index */
 /* subr# from the Subrs array */
-static void CallSubr(subrno)
+static CallSubr(subrno)
   int subrno;
 {
   IfTrace1((FontDebug), "CallSubr %d\n", subrno);
@@ -1228,7 +1228,7 @@ static void CallSubr(subrno)
 /* - RETURN - */
 /* Returns from a Subrs array CharString */
 /* subroutine called with CALLSUBR */
-static void Return()
+static Return()
 {
   IfTrace0((FontDebug), "Return\n");
   PopCall(&CharStringP, &strindex, &r);
@@ -1242,7 +1242,7 @@ static void Return()
 /* HSBW or SBW.  It then calls a special version of FILL */
 /* or STROKE depending on the value of PaintType in the */
 /* font dictionary */
-static void EndChar()
+static EndChar()
 {
   IfTrace0((FontDebug), "EndChar\n");
  
@@ -1259,7 +1259,7 @@ static void EndChar()
  
 /* |- dx dy RMOVETO |- */
 /* Behaves like RMOVETO in PostScript */
-static void RMoveTo(dx,dy)
+static RMoveTo(dx,dy)
   double dx,dy;
 {
   struct segment *B;
@@ -1281,7 +1281,7 @@ static void RMoveTo(dx,dy)
 /* - DOTSECTION |- */
 /* Brackets an outline section for the dots in */
 /* letters such as "i", "j", and "!". */
-static void DotSection()
+static DotSection()
 {
   IfTrace0((FontDebug), "DotSection\n");
   InDotSection = !InDotSection;
@@ -1289,7 +1289,7 @@ static void DotSection()
  
 /* |- asb adx ady bchar achar SEAC |- */
 /* Standard Encoding Accented Character. */
-static void Seac(asb, adx, ady, bchar, achar)
+static Seac(asb, adx, ady, bchar, achar)
   double asb, adx, ady;
   unsigned char bchar, achar;
 {
@@ -1353,7 +1353,7 @@ static void Seac(asb, adx, ady, bchar, achar)
 /* |- sbx sby wx wy SBW |- */
 /* Set the left sidebearing point to (sbx,sby), */
 /* set the character width vector to (wx,wy). */
-static void Sbw(sbx, sby, wx, wy)
+static Sbw(sbx, sby, wx, wy)
   double sbx, sby, wx, wy;
 {
   IfTrace4((FontDebug), "SBW %f %f %f %f\n", &sbx, &sby, &wx, &wy);
@@ -1666,7 +1666,7 @@ static void HintReplace()
 /* arg1 ... argn n othersubr# CALLOTHERSUBR - */
 /* Make calls on the PostScript interpreter (or call equivalent C code) */
 /* NOTE: The n arguments have been pushed on the fake PostScript stack */
-static void CallOtherSubr(othersubrno)
+static CallOtherSubr(othersubrno)
   int othersubrno;
 {
   IfTrace1((FontDebug), "CallOtherSubr %d\n", othersubrno);
@@ -1701,7 +1701,7 @@ static void CallOtherSubr(othersubrno)
 /* Sets the current point to (x,y) in absolute */
 /* character space coordinates without per- */
 /* forming a CharString MOVETO command */
-static void SetCurrentPoint(x, y)
+static SetCurrentPoint(x, y)
   double x, y;
 {
   IfTrace2((FontDebug), "SetCurrentPoint %f %f\n", &x, &y);

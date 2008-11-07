@@ -65,8 +65,6 @@ SpeedoFontPtr sp_fp_cur = (SpeedoFontPtr) 0;
 
 #include "keys.h"
 
-extern void Xfree(pointer ptr);
-
 #ifdef EXTRAFONTS
 static ufix8 skey[] =
 {

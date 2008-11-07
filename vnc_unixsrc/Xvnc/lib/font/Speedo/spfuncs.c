@@ -56,28 +56,7 @@ from the X Consortium.
 #include "fntfilst.h"
 #include "spint.h"
 
-int
-SpeedoFontLoad(
-    FontPtr    *ppfont,
-    char       *fontname,
-    char       *filename,
-    FontEntryPtr    entry,
-    FontScalablePtr vals,
-    fsBitmapFormat format,
-    fsBitmapFormatMask fmask,
-    Mask        flags
-);
-
-extern void FontComputeInfoAccelerators(
-    FontInfoPtr pFontInfo
-);
-
-extern Bool FontFileRegisterRenderer (
-    FontRendererPtr renderer
-);
-
 /* ARGSUSED */
-int
 SpeedoOpenScalable (fpe, pFont, flags, entry, fileName, vals, format, fmask,
 		    non_cachable_font)
     FontPathElementPtr	fpe;
@@ -144,7 +123,6 @@ get_font_info(pinfo, fontname, filename, entry, vals, spfont)
 }
 
 /* ARGSUSED */
-int
 SpeedoGetInfoScaleable(fpe, pFontInfo, entry, fontName, fileName, vals)
     FontPathElementPtr	fpe;
     FontInfoPtr		pFontInfo;
@@ -174,7 +152,6 @@ static FontRendererRec renderer = {
     , CAP_MATRIX | CAP_CHARSUBSETTING
 };
     
-void
 SpeedoRegisterFontFileFunctions()
 {
     sp_make_standard_props();

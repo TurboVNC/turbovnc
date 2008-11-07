@@ -34,83 +34,6 @@ in this Software without prior written authorization from the X Consortium.
 
 #include    "fntfilst.h"
 
-extern int FontFileReadDirectory (
-    char    *directory,
-    FontDirectoryPtr  *pdir
-);
-
-extern Bool FontFileRegisterBitmapSource (
-    FontPathElementPtr  fpe
-);
-
-int XpClientIsPrintClient(
-    pointer   client,
-    FontPathElementPtr  fpe
-);
-
-extern int FontFileOpenFont (
-    pointer   client,
-    FontPathElementPtr  fpe,
-    int     flags,
-    char    *name,
-    int     namelen,
-    fsBitmapFormat  format,
-    fsBitmapFormatMask  fmask,
-    XID     id,
-    FontPtr   *pFont,
-    char    **aliasName,
-    FontPtr   non_cachable_font
-);
-
-extern int FontFileListFonts (
-    pointer     client,
-    FontPathElementPtr fpe,
-    char       *pat,
-    int         len,
-    int         max,
-    FontNamesPtr names
-);
-
-extern int FontFileStartListFontsWithInfo(
-    pointer     client,
-    FontPathElementPtr fpe,
-    char       *pat,
-    int         len,
-    int         max,
-    pointer    *privatep
-);
-
-extern int FontFileStartListFontsAndAliases(
-    pointer     client,
-    FontPathElementPtr fpe,
-    char       *pat,
-    int         len,
-    int         max,
-    pointer    *privatep
-);
-
-extern int FontFileListNextFontOrAlias(
-    pointer   client,
-    FontPathElementPtr  fpe,
-    char    **namep,
-    int     *namelenp,
-    char    **resolvedp,
-    int     *resolvedlenp,
-    pointer   private
-);
-
-extern int RegisterFPEFunctions();
-
-extern int FontFileListNextFontWithInfo(
-    pointer   client,
-    FontPathElementPtr  fpe,
-    char    **namep,
-    int     *namelenp,
-    FontInfoPtr   *pFontInfo,
-    int     *numFonts,
-    pointer   private
-);
-
 /*
  * Map FPE functions to renderer functions
  */
@@ -190,7 +113,6 @@ PrinterFontOpenFont (client, fpe, flags, name, namelen, format, fmask,
     return BadFontName;
 }
 
-int
 PrinterFontListFonts (client, fpe, pat, len, max, names)
     pointer     client;
     FontPathElementPtr fpe;
@@ -204,7 +126,6 @@ PrinterFontListFonts (client, fpe, pat, len, max, names)
     return BadFontName;
 }
 
-int
 PrinterFontStartListFontsWithInfo(client, fpe, pat, len, max, privatep)
     pointer     client;
     FontPathElementPtr fpe;
@@ -219,7 +140,6 @@ PrinterFontStartListFontsWithInfo(client, fpe, pat, len, max, privatep)
     return BadFontName;
 }
 
-int
 PrinterFontListNextFontWithInfo(client, fpe, namep, namelenp, pFontInfo,
 			     numFonts, private)
     pointer		client;
@@ -236,7 +156,6 @@ PrinterFontListNextFontWithInfo(client, fpe, namep, namelenp, pFontInfo,
     return BadFontName;
 }
 
-int
 PrinterFontStartListFontsAndAliases(client, fpe, pat, len, max, privatep)
     pointer     client;
     FontPathElementPtr fpe;
@@ -272,7 +191,6 @@ extern void FontFileEmptyBitmapSource();
 typedef int (*IntFunc) ();
 static int  printer_font_type;
 
-void
 PrinterFontRegisterFpeFunctions ()
 {
     /* what is the use of printer font type? */

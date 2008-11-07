@@ -44,13 +44,6 @@ The included files are:
 #include "paths.h"
 #include "regions.h"
 #include "hints.h"
-
-extern void FatalError(
-#if NeedVarargsPrototypes
-    char* /*f*/,
-    ...
-#endif
-);
  
 /*
 :h3.Functions Provided to the TYPE1IMAGER User

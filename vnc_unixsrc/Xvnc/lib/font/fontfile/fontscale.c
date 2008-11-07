@@ -41,8 +41,6 @@ in this Software without prior written authorization from the X Consortium.
 #undef _XOPEN_SOURCE
 #endif
 
-extern void Xfree(pointer ptr);
-
 Bool
 FontFileAddScaledInstance (entry, vals, pFont, bitmapName)
     FontEntryPtr		entry;
@@ -78,7 +76,6 @@ FontFileAddScaledInstance (entry, vals, pFont, bitmapName)
 
 /* Must call this after the directory is sorted */
 
-void
 FontFileSwitchStringsToBitmapPointers (dir)
     FontDirectoryPtr	dir;
 {
@@ -132,6 +129,7 @@ FontFileCompleteXLFD (vals, def)
     register FontScalablePtr	vals;
     FontScalablePtr	def;
 {
+    int		best;
     FontResolutionPtr res;
     int		num_res;
     double	sx, sy, temp_matrix[4];

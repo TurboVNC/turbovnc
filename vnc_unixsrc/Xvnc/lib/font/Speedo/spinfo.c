@@ -55,15 +55,6 @@ from the X Consortium.
 #include "fntfilst.h"
 #include "spint.h"
 #include <math.h>
-#include <stdlib.h>
-
-extern void Xfree(pointer ptr);
-
-extern Atom MakeAtom(
-    char *string,
-    unsigned len,
-    int makeit
-);
 
 /* percentage of pointsize used to specify ascent & descent */
 #define	STRETCH_FACTOR	120

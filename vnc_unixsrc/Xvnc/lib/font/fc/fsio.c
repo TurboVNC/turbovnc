@@ -108,28 +108,6 @@ int  _fs_wait_for_readable();
 #define SIGNAL_T void
 #endif
 
-extern void Xfree(pointer ptr);
-
-int _fs_write(
-    FSFpePtr    conn,
-    char       *data,
-    unsigned long size
-);
-
-int _fs_read(
-    FSFpePtr    conn,
-    char       *data,
-    unsigned long size
-);
-
-int _fs_read_pad(
-    FSFpePtr    conn,
-    char       *data,
-    int         len
-);
-
-extern void _fs_connection_died(FSFpePtr conn);
-
 /* ARGSUSED */
 static      SIGNAL_T
 _fs_alarm(foo)
@@ -379,7 +357,6 @@ _fs_reopen_server(conn)
  * expects everything to be here.  *not* to be called when reading huge
  * numbers of replies, but rather to get each chunk
  */
-int
 _fs_read(conn, data, size)
     FSFpePtr    conn;
     char       *data;
@@ -444,7 +421,6 @@ _fs_read(conn, data, size)
     return 0;
 }
 
-int
 _fs_write(conn, data, size)
     FSFpePtr    conn;
     char       *data;
@@ -489,7 +465,6 @@ _fs_write(conn, data, size)
     return 0;
 }
 
-int
 _fs_read_pad(conn, data, len)
     FSFpePtr    conn;
     char       *data;
@@ -507,7 +482,6 @@ _fs_read_pad(conn, data, len)
     return 0;
 }
 
-int
 _fs_write_pad(conn, data, len)
     FSFpePtr    conn;
     char       *data;
@@ -636,7 +610,6 @@ _fs_or_bits(dst, m1, m2)
     return 0;
 }
 
-int
 _fs_drain_bytes(conn, len)
     FSFpePtr    conn;
     int         len;
@@ -655,7 +628,6 @@ _fs_drain_bytes(conn, len)
     return 0;
 }
 
-void
 _fs_drain_bytes_pad(conn, len)
     FSFpePtr    conn;
     int         len;
@@ -668,7 +640,6 @@ _fs_drain_bytes_pad(conn, len)
     }
 }
 
-void
 _fs_eat_rest_of_error(conn, err)
     FSFpePtr    conn;
     fsError    *err;
