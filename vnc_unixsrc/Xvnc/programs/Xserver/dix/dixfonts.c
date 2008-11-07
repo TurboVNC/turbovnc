@@ -41,16 +41,6 @@ SOFTWARE.
 #include	<stdio.h>
 #endif
 
-extern void PrinterFontRegisterFpeFunctions (void);
-
-extern void FontFileCheckRegisterFpeFunctions (void);
-
-extern void FontFileRegisterFpeFunctions (void);
-
-extern void check_fs_register_fpe_functions (void);
-
-extern void fs_register_fpe_functions (void);
-
 #define QUERYCHARINFO(pci, pr)  *(pr) = (pci)->metrics
 
 static Mask FontFormat = 

@@ -65,11 +65,6 @@ struct protocol {
 #endif
 };
 
-extern void XdmcpRegisterAuthorization (
-    char    *name,
-    int     namelen
-);
-
 extern int  MitAddCookie ();
 extern XID  MitCheckCookie ();
 extern int  MitResetCookie ();

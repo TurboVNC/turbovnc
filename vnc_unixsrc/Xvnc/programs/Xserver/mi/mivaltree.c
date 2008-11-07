@@ -74,7 +74,6 @@ in this Software without prior written authorization from the X Consortium.
 /*
  * Compute the visibility of a shaped window
  */
-int
 miShapedWindowIn (pScreen, universe, bounding, rect, x, y)
     ScreenPtr	pScreen;
     RegionPtr	universe, bounding;

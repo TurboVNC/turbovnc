@@ -140,7 +140,6 @@ mieqSwitchScreen (pScreen, fromDIX)
  * Call this from ProcessInputEvents()
  */
 
-int
 mieqProcessInputEvents ()
 {
     EventRec	*e;
@@ -190,5 +189,4 @@ mieqProcessInputEvents ()
 	    }
 	}
     }
-    return 0;
 }

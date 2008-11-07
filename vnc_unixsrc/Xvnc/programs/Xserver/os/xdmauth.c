@@ -36,7 +36,6 @@ from the X Consortium.
  * Author:  Keith Packard, MIT X Consortium
  */
 
-#include <time.h>
 #include "X.h"
 #include "Xtrans.h"
 #include "os.h"
@@ -51,23 +50,6 @@ static Bool authFromXDMCP;
 #include "Xmd.h"
 #undef REQUEST
 #include "Xdmcp.h"
-
-extern int XdmcpCompareKeys (XdmAuthKeyPtr a, XdmAuthKeyPtr b);
-
-extern int XdmcpAllocARRAY8 (
-    ARRAY8Ptr array,
-    int   length
-);
-
-extern void XdmcpRegisterAuthentication (
-    char    *name,
-    int     namelen,
-    char    *data,
-    int     datalen,
-    Bool    (*Validator)(),
-    Bool    (*Generator)(),
-    Bool    (*AddAuth)()
-);
 
 /* XDM-AUTHENTICATION-1 */
 

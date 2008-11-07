@@ -570,7 +570,6 @@ InsertFakeRequest(client, data, count)
  *
  **********************/
 
-int
 ResetCurrentRequest(client)
     ClientPtr client;
 {
@@ -632,7 +631,6 @@ ResetCurrentRequest(client)
 	else
 	    YieldControlNoInput();
     }
-    return 0;
 }
 
 

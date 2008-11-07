@@ -50,7 +50,6 @@
 #endif
 #endif
 #include <stdio.h>
-#include <stdlib.h>
 #include "X.h"
 #include "Xmd.h"
 #include "misc.h"
@@ -69,26 +68,6 @@
 #ifdef XDMCP
 #undef REQUEST
 #include "Xdmcp.h"
-
-extern int XdmcpAllocARRAY8 (
-    ARRAY8Ptr array,
-    int   length
-);
-
-extern int XdmcpReallocARRAYofARRAY8 (
-    ARRAYofARRAY8Ptr  array,
-    int     length
-);
-
-extern int XdmcpReallocARRAY16 (
-    ARRAY16Ptr  array,
-    int   length
-);
-
-extern void XdmAuthenticationInit (
-    char    *cookie,
-    int     cookie_len
-);
 
 extern char *display;
 extern fd_set EnabledDevices;
@@ -182,20 +161,20 @@ static void recv_alive_msg(
 #endif
 );
 
-static void XdmcpFatal(
+static XdmcpFatal(
 #if NeedFunctionPrototypes
     char */*type*/,
     ARRAY8Ptr /*status*/
 #endif
 );
 
-static void XdmcpWarning(
+static XdmcpWarning(
 #if NeedFunctionPrototypes
     char */*str*/
 #endif
 );
 
-static void get_manager_by_name(
+static get_manager_by_name(
 #if NeedFunctionPrototypes
     int /*argc*/,
     char **/*argv*/,
@@ -209,7 +188,7 @@ static void receive_packet(
 #endif
 );
 
-static void send_packet(
+static send_packet(
 #if NeedFunctionPrototypes
     void
 #endif
@@ -227,7 +206,7 @@ static void timeout(
 #endif
 );
 
-static void restart(
+static restart(
 #if NeedFunctionPrototypes
     void
 #endif
@@ -269,7 +248,6 @@ static void read_cb(
 static short	xdm_udp_port = XDM_UDP_PORT;
 static Bool	OneSession = FALSE;
 
-void
 XdmcpUseMsg ()
 {
     ErrorF("-query host-name       contact named host for XDMCP\n");
@@ -747,7 +725,6 @@ XdmcpWakeupHandler(data, i, pReadmask)
  * user's host menu when the user selects a host
  */
 
-void
 XdmcpSelectHost(host_sockaddr, host_len, AuthenticationName)
     struct sockaddr_in	*host_sockaddr;
     int			host_len;
@@ -767,7 +744,6 @@ XdmcpSelectHost(host_sockaddr, host_len, AuthenticationName)
  */
 
 /*ARGSUSED*/
-void
 XdmcpAddHost(from, fromlen, AuthenticationName, hostname, status)
     struct sockaddr_in  *from;
     ARRAY8Ptr		AuthenticationName, hostname, status;
@@ -831,7 +807,7 @@ receive_packet()
  * send the appropriate message given the current state
  */
 
-static void
+static
 send_packet()
 {
     int rtx;
@@ -862,7 +838,6 @@ send_packet()
  * timeouts, or Keepalive failure.
  */
 
-int
 XdmcpDeadSession (reason)
     char *reason;
 {
@@ -873,7 +848,6 @@ XdmcpDeadSession (reason)
     timeOutTime = 0;
     timeOutRtx = 0;
     send_packet();
-    return 0;
 }
 
 /*
@@ -921,7 +895,7 @@ timeout()
     send_packet();
 }
 
-static void
+static
 restart()
 {
     state = XDM_INIT_STATE;
@@ -929,7 +903,6 @@ restart()
     send_packet();
 }
 
-int
 XdmcpCheckAuthentication (Name, Data, packet_type)
     ARRAY8Ptr	Name, Data;
     int	packet_type;
@@ -939,7 +912,6 @@ XdmcpCheckAuthentication (Name, Data, packet_type)
 	     (*AuthenticationFuncs->Validator) (AuthenticationData, Data, packet_type)));
 }
 
-int
 XdmcpAddAuthorization (name, data)
     ARRAY8Ptr	name, data;
 {
@@ -1375,7 +1347,7 @@ recv_alive_msg (length)
     }
 }
 
-static void
+static 
 XdmcpFatal (type, status)
     char	*type;
     ARRAY8Ptr	status;
@@ -1384,14 +1356,14 @@ XdmcpFatal (type, status)
 	   status->length, status->length, status->data);
 }
 
-static void
+static 
 XdmcpWarning(str)
     char *str;
 {
     ErrorF("XDMCP warning: %s\n", str);
 }
 
-static void
+static
 get_manager_by_name(argc, argv, i)
     int	    argc, i;
     char    **argv;

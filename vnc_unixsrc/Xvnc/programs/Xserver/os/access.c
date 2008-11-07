@@ -189,16 +189,6 @@ SOFTWARE.
 #include "extensions/security.h"
 #endif
 
-extern void XdmcpRegisterConnection (
-    int     type,
-    char    *address,
-    int     addrlen
-);
-
-extern void XdmcpRegisterBroadcastAddress (
-    struct sockaddr_in  *addr
-);
-
 Bool defeatAccessControl = FALSE;
 
 #define acmp(a1, a2, len) memcmp((char *)(a1), (char *)(a2), len)
@@ -1289,7 +1279,6 @@ CheckAddr (family, pAddr, length)
 /* Check if a host is not in the access control list. 
  * Returns 1 if host is invalid, 0 if we've found it. */
 
-int
 InvalidHost (saddr, len)
 #ifndef AMOEBA_ORIG
     register struct sockaddr	*saddr;
