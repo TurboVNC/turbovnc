@@ -135,25 +135,36 @@ unless ($xauthorityFile) {
 chop($host = `uname -n`);
 chop($os = `uname`);
 
-if (-d "/usr/lib/X11/fonts/misc") {
-    $fontdir = "/usr/lib/X11/fonts";
-} elsif (-d "/usr/X11/lib/X11/fonts/misc") {
-    $fontdir = "/usr/X11/lib/X11/fonts";
-} elsif (-d "/usr/share/X11/fonts/misc") {
-    $fontdir = "/usr/share/X11/fonts";
-} elsif (-d "/usr/openwin/lib/X11/fonts/misc") {
-    $fontdir = "/usr/openwin/lib/X11/fonts";
-} elsif (-d "/usr/X11R6/lib/X11/fonts/misc") {
-    $fontdir = "/usr/X11R6/lib/X11/fonts";
-}
-if ($fontdir) {
-    $fontPath = $fontdir."/misc,".$fontdir."/75dpi,".$fontdir."/100dpi,".$fontdir."/Speedo,".$fontdir."/Type1";
-} else {
-    if ($os eq "SunOS") {
-				$fontPath = "inet/:7100";
-    } else {
-				$fontPath = "unix/:7100";
+@fontpaths = ('/usr/lib/X11/fonts',
+             '/usr/X11/lib/X11/fonts',
+             '/usr/share/X11/fonts',
+             '/usr/openwin/lib/X11/fonts',
+             '/usr/X11R6/lib/X11/fonts',
+             '/usr/share/fonts/default');
+
+@fonttypes = ('misc',
+             '75dpi',
+             '100dpi',
+             'Speedo',
+             'Type1');
+
+foreach $_fpath (@fontpaths) {
+    foreach $_ftype (@fonttypes) {
+        if (-f "$_fpath/$_ftype/fonts.dir") {
+            $defFontPath .= "$_fpath/$_ftype,";
+        }
     }
+}
+if ($defFontPath) {
+    if (substr($defFontPath, -1, 1) == ',') {
+        chop $defFontPath;
+    }
+}
+
+if ($os eq "SunOS") {
+    $fontPath = "inet/:7100";
+} else {
+    $fontPath = "unix/:7100";
 }
 
 if (-f "/usr/lib/X11/rgb.txt") {
@@ -171,7 +182,7 @@ if (-f "/usr/lib/X11/rgb.txt") {
 # Check command line options
 
 &ParseOptions("-geometry",1,"-depth",1,"-pixelformat",1,"-name",1,"-kill",1,
-	      "-help",0,"-h",0,"--help",0,"-fg",0,"-list",0);
+	      "-help",0,"-h",0,"--help",0,"-fg",0,"-list",0,"-fp",0);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -192,6 +203,9 @@ if ($opt{'-depth'}) {
 }
 if ($opt{'-pixelformat'}) {
     $pixelformat = $opt{'-pixelformat'};
+}
+if ($opt{'-fp'}) {
+    $fontPath = $opt{'-fp'};
 }
 
 &CheckGeometryAndDepth();
@@ -290,10 +304,11 @@ system("$cmd & echo \$! >$pidFile");
 
 sleep(1);
 unless (kill 0, `cat $pidFile`) {
-    warn "Couldn't start Xvnc; trying default font path.\n";
-    warn "Please set correct fontPath in the $prog script\n";
-    warn "or make sure that the X Font Server (xfs) is running.\n";
+    warn "\nCould not start Xvnc, probably because the X Font Server (xfs) is not\n";
+    warn "running.  Trying to restart Xvnc using the default font path for this\n";
+    warn "system ...\n";
     $cmd =~ s@-fp [^ ]+@@;
+    $cmd .= " -fp $defFontPath" if ($defFontPath);
     system("$cmd & echo \$! >$pidFile");
     sleep(1);
 }
