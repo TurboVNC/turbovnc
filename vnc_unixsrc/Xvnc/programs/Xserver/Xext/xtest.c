@@ -57,13 +57,6 @@ static unsigned char XTestReqCode;
 extern int DeviceValuator;
 #endif /* XINPUT */
 
-extern int ClientSleepUntil (
-    ClientPtr client,
-    TimeStamp *revive,
-    void  (*notifyFunc)(),
-    pointer closure
-);
-
 static void XTestResetProc(
 #if NeedFunctionPrototypes
     ExtensionEntry * /* extEntry */

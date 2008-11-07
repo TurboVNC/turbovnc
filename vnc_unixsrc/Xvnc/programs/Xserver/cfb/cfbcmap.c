@@ -247,7 +247,6 @@ cfbInitializeColormap(pmap)
     outdefs[i].blue = pmap->blue[blue >> pVisual->offsetBlue].co.local.blue; \
 }
 
-int
 cfbExpandDirectColors (pmap, ndef, indefs, outdefs)
     ColormapPtr	pmap;
     int		ndef;

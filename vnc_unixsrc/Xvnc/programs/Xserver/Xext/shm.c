@@ -31,8 +31,6 @@ in this Software without prior written authorization from the X Consortium.
 /* $XFree86: xc/programs/Xserver/Xext/shm.c,v 3.8 1997/01/18 06:52:59 dawes Exp $ */
 
 #include <sys/types.h>
-#include <unistd.h>
-#include <sys/types.h>
 #ifndef Lynx
 #include <sys/ipc.h>
 #include <sys/shm.h>

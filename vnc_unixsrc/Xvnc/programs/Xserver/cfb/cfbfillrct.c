@@ -39,7 +39,6 @@ in this Software without prior written authorization from the X Consortium.
 #include "pixmapstr.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
-#include "mi.h"
 
 #include "cfb.h"
 #include "cfbmskbits.h"

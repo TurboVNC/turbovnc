@@ -60,7 +60,6 @@ SOFTWARE.
 /* horizontal solid line
    abs(len) > 1
 */
-int
 cfbHorzS(rop, and, xor, addrl, nlwidth, x1, y1, len)
 register int rop;
 register unsigned long and;
@@ -328,7 +327,6 @@ int len;		/* length of line */
 	}
     }
 #endif
-    return 0;
 }
 
 /* vertical solid line */

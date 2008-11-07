@@ -69,7 +69,6 @@ SOFTWARE.
  * boxes, we may not want to start grabbing bits at psrc but at some offset
  * further on.) 
  */
-int
 cfbSetScanline(y, xOrigin, xStart, xEnd, psrc, alu, pdstBase, widthDst, planemask)
     int			y;
     int			xOrigin;	/* where this scanline starts */
@@ -168,7 +167,6 @@ cfbSetScanline(y, xOrigin, xStart, xEnd, psrc, alu, pdstBase, widthDst, planemas
 	putbitsmropshort(tmpSrc, 0, nend, pdst);
     } 
 #endif /* PSZ == 24 */
-    return 0;
 }
 
 
