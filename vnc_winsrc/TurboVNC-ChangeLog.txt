@@ -59,8 +59,10 @@ should improve performance by a bit on SPARC servers.
 Added 200% scaling option to Windows TurboVNC Viewer GUI.
 -------------------------------------------------------------------------------
 [12]
-The TurboVNC server should now do a better job of setting the correct font path
-for various systems.
+The TurboVNC server script now tries to figure out an appropriate font path for
+the system rather than using the X Font Server, since xfs is not universally
+available.  If the script fails to figure out an appropriate font path, then
+it will fall back to using xfs.
 -------------------------------------------------------------------------------
 [13]
 Changed the scrollbar behavior in the Unix TurboVNC viewer to more closely
