@@ -74,6 +74,26 @@ Prints a brief list of command line options
 Run Xvnc as a foreground process.  This has two effects: (1) The VNC server
 can be aborted with CTRL-C, and (2) the VNC server will exit as soon as the
 user logs out of the window manager in the VNC session.
+.TP
+\fB\-fp\fR \fIstring\fR
+The vncserver script will normally examine your system to figure out where it
+stores its X11 fonts and then generate an appropriate font path for Xvnc based
+on this.  If your system stores its X11 fonts in a location that vncserver does
+not know about, however, then this may fail.  In that case, vncserver will then
+try to contact the local X Font Server (xfs) on port 7100.  Not all systems
+have xfs installed and running, so this may fail as well.  In that case, you
+can manually specify a font path by using the -fp argument to vncserver.
+
+If you prefer to use the X Font Server by default rather than a static font
+path, then you can run
+
+/opt/TurboVNC/bin/vncserver -fp unix/:7100
+
+on Linux systems or
+
+/opt/TurboVNC/bin/vncserver -fp inet/:7100
+
+on Solaris systems.
 .SH EXAMPLES
 .TP
 \fBvncserver\fR
