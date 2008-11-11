@@ -135,14 +135,15 @@ unless ($xauthorityFile) {
 chop($host = `uname -n`);
 chop($os = `uname`);
 
-@fontpaths = ('/usr/lib/X11/fonts',
-             '/usr/X11/lib/X11/fonts',
-             '/usr/share/X11/fonts',
-             '/usr/openwin/lib/X11/fonts',
-             '/usr/X11R6/lib/X11/fonts',
-             '/usr/share/fonts/default');
+@fontpaths = ('/usr/share/X11/fonts');
+if (! -l "/usr/lib/X11") {push(@fontpaths, '/usr/lib/X11/fonts');}
+if (! -l "/usr/X11") {push(@fontpaths, '/usr/X11/lib/X11/fonts');}
+if (! -l "/usr/openwin") {push(@fontpaths, '/usr/openwin/lib/X11/fonts');}
+if (! -l "/usr/X11R6") {push(@fontpaths, '/usr/X11R6/lib/X11/fonts');}
+push(@fontpaths, '/usr/share/fonts/default');
 
-@fonttypes = ('misc',
+@fonttypes = ('F3bitmaps',
+             'misc',
              '75dpi',
              '100dpi',
              'Speedo',
@@ -151,20 +152,22 @@ chop($os = `uname`);
 foreach $_fpath (@fontpaths) {
     foreach $_ftype (@fonttypes) {
         if (-f "$_fpath/$_ftype/fonts.dir") {
-            $defFontPath .= "$_fpath/$_ftype,";
+            if (! -l "$_fpath/$_ftype") {
+                $fontPath .= "$_fpath/$_ftype,";
+            }
         }
     }
 }
-if ($defFontPath) {
-    if (substr($defFontPath, -1, 1) == ',') {
-        chop $defFontPath;
+if ($fontPath) {
+    if (substr($fontPath, -1, 1) == ',') {
+        chop $fontPath;
     }
 }
 
 if ($os eq "SunOS") {
-    $fontPath = "inet/:7100";
+    $defFontPath = "inet/:7100";
 } else {
-    $fontPath = "unix/:7100";
+    $defFontPath = "unix/:7100";
 }
 
 if (-f "/usr/lib/X11/rgb.txt") {
@@ -182,7 +185,7 @@ if (-f "/usr/lib/X11/rgb.txt") {
 # Check command line options
 
 &ParseOptions("-geometry",1,"-depth",1,"-pixelformat",1,"-name",1,"-kill",1,
-	      "-help",0,"-h",0,"--help",0,"-fg",0,"-list",0,"-fp",0);
+	      "-help",0,"-h",0,"--help",0,"-fg",0,"-list",0,"-fp",1);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -304,16 +307,17 @@ system("$cmd & echo \$! >$pidFile");
 
 sleep(1);
 unless (kill 0, `cat $pidFile`) {
-    warn "\nCould not start Xvnc, probably because the X Font Server (xfs) is not\n";
-    warn "running.  Trying to restart Xvnc using the default font path for this\n";
-    warn "system ...\n";
+    warn "\nWARNING: The first attempt to start Xvnc failed, possibly because the vncserver\n";
+    warn "script was not able to figure out an appropriate X11 font path for this system\n";
+    warn "or because the font path you specified with the -fp argument was not valid.\n";
+    warn "Attempting to restart Xvnc using the X Font Server (xfs) ...\n";
     $cmd =~ s@-fp [^ ]+@@;
     $cmd .= " -fp $defFontPath" if ($defFontPath);
     system("$cmd & echo \$! >$pidFile");
     sleep(1);
 }
 unless (kill 0, `cat $pidFile`) {
-    warn "Couldn't start Xvnc process.\n\n";
+    warn "Could not start Xvnc.\n\n";
     open(LOG, "<$desktopLog");
     while (<LOG>) { print; }
     close(LOG);
@@ -579,6 +583,7 @@ sub Usage
 	"        -geometry <WIDTH>x<HEIGHT>\n".
 	"        -pixelformat rgb<NNN>\n".
 	"        -pixelformat bgr<NNN>\n".
+	"        -fp <FONT-PATH>\n".
 	"        -fg\n".
 	"\n".
 	"See vncserver and Xvnc manual pages for more information.\n");
