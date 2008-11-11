@@ -26,6 +26,28 @@ Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
 in this Software without prior written authorization from the X Consortium.
 
+Copyright 1991, 1998  The Open Group
+
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of The Open Group shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from The Open Group.
+
 */
 
 /*
@@ -210,6 +232,43 @@ FontFileAddEntry(table, prototype)
     return entry;
 }
 
+/*
+ * Compare two strings just like strcmp, but preserve decimal integer
+ * sorting order, i.e. "2" < "10" or "iso8859-2" < "iso8859-10" <
+ * "iso10646-1". Strings are sorted as if sequences of digits were
+ * prefixed by a length indicator (i.e., does not ignore leading zeroes).
+ *
+ * Markus Kuhn <Markus.Kuhn@cl.cam.ac.uk>
+ */
+#define Xisdigit(c) ('\060' <= (c) && (c) <= '\071')
+
+static int strcmpn(const char *s1, const char *s2)
+{
+    int digits, predigits = 0;
+    const char *ss1, *ss2;
+
+    while (1) {
+	if (*s1 == 0 && *s2 == 0)
+	    return 0;
+	digits = Xisdigit(*s1) && Xisdigit(*s2);
+	if (digits && !predigits) {
+	    ss1 = s1;
+	    ss2 = s2;
+	    while (Xisdigit(*ss1) && Xisdigit(*ss2))
+		ss1++, ss2++;
+	    if (!Xisdigit(*ss1) && Xisdigit(*ss2))
+		return -1;
+	    if (Xisdigit(*ss1) && !Xisdigit(*ss2))
+		return 1;
+	}
+	if ((unsigned char)*s1 < (unsigned char)*s2)
+	    return -1;
+	if ((unsigned char)*s1 > (unsigned char)*s2)
+	    return 1;
+	predigits = digits;
+	s1++, s2++;
+    }
+}
 static int
 FontFileNameCompare(a, b)
     char       *a,
@@ -218,7 +277,7 @@ FontFileNameCompare(a, b)
     FontEntryPtr    a_name = (FontEntryPtr) a,
 		    b_name = (FontEntryPtr) b;
 
-    return strcmp(a_name->name.name, b_name->name.name);
+    return strcmpn(a_name->name.name, b_name->name.name);
 }
 
 FontFileSortTable (table)
@@ -254,6 +313,7 @@ FontFileSortDir(dir)
 */
 
 #define isWild(c)   ((c) == XK_asterisk || (c) == XK_question)
+#define isDigit(c)  (XK_0 <= (c) && (c) <= XK_9)
 
 static int
 SetupWildMatch(table, pat, leftp, rightp, privatep)
@@ -267,6 +327,7 @@ SetupWildMatch(table, pat, leftp, rightp, privatep)
     char        c;
     char       *t;
     char       *firstWild;
+    char       *firstDigit;
     int         first;
     int         center,
                 left,
@@ -277,11 +338,16 @@ SetupWildMatch(table, pat, leftp, rightp, privatep)
     name = pat->name;
     nDashes = pat->ndashes;
     firstWild = 0;
+    firstDigit = 0;
     t = name;
-    while (c = *t++) {
+    while ((c = *t++)) {
 	if (isWild(c)) {
 	    if (!firstWild)
 		firstWild = t - 1;
+	}
+	if (isDigit(c)) {
+	    if (!firstDigit)
+		firstDigit = t - 1;
 	}
     }
     left = 0;
@@ -295,7 +361,10 @@ SetupWildMatch(table, pat, leftp, rightp, privatep)
 	*rightp = right;
 	return -1;
     } else if (firstWild) {
-	first = firstWild - name;
+	if (firstDigit && firstDigit < firstWild)
+	    first = firstDigit - name;
+	else
+	    first = firstWild - name;
 	while (left < right) {
 	    center = (left + right) / 2;
 	    result = strncmp(name, table->entries[center].name.name, first);
@@ -312,7 +381,7 @@ SetupWildMatch(table, pat, leftp, rightp, privatep)
     } else {
 	while (left < right) {
 	    center = (left + right) / 2;
-	    result = strcmp(name, table->entries[center].name.name);
+	    result = strcmpn(name, table->entries[center].name.name);
 	    if (result == 0)
 		return center;
 	    if (result < 0)
