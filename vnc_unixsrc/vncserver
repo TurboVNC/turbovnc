@@ -135,7 +135,7 @@ unless ($xauthorityFile) {
 chop($host = `uname -n`);
 chop($os = `uname`);
 
-@fontpaths = ('/usr/share/X11/fonts');
+@fontpaths = ('/usr/share/X11/fonts', '/usr/share/fonts');
 if (! -l "/usr/lib/X11") {push(@fontpaths, '/usr/lib/X11/fonts');}
 if (! -l "/usr/X11") {push(@fontpaths, '/usr/X11/lib/X11/fonts');}
 if (! -l "/usr/openwin") {push(@fontpaths, '/usr/openwin/lib/X11/fonts');}
