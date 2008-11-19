@@ -837,6 +837,7 @@ static int d_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 	mlib_status (DLLCALL *ccfct420)(mlib_u8 *, mlib_u8 *, const mlib_u8 *,
 		const mlib_u8 *, const mlib_u8 *, const mlib_u8 *, mlib_s32)=NULL;
 	int mcuh=_mcuh[jpg->subsamp], h, j, convreq=0, i;
+	int w=(jpg->width+1)&(~1);
 
 	h=mcuh;
 	if(startline+mcuh>jpg->height) h=jpg->height-startline;
@@ -875,9 +876,10 @@ static int d_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 		for(j=0; j<h; j+=2, jpg->bmpptr+=rgbstride*2, y+=yw*2, cb+=cw, cr+=cw)
 		{
 			tmpptr=jpg->bmpptr;  tmpptr2=jpg->bmpptr+rgbstride;
-			if(convreq || ((long)tmpptr&7L)!=0L) tmpptr=linebuf;
-			if(convreq || ((long)tmpptr2&7L)!=0L || j>=h-1) tmpptr2=linebuf2;
-			_mlib(ccfct420(tmpptr, tmpptr2, y, y+yw, cb, cr, jpg->width));
+			if(convreq || jpg->width!=w || ((long)tmpptr&7L)!=0L) tmpptr=linebuf;
+			if(convreq || jpg->width!=w || ((long)tmpptr2&7L)!=0L || j>=h-1)
+				tmpptr2=linebuf2;
+			_mlib(ccfct420(tmpptr, tmpptr2, y, y+yw, cb, cr, w));
 			if(tmpptr!=jpg->bmpptr)
 			{
 				if(convreq) {_catch(d_postconvertline(tmpptr, jpg->bmpptr, jpg));}
@@ -916,8 +918,8 @@ static int d_mcu_color_convert(jpgstruct *jpg, mlib_u8 *ybuf, int yw, mlib_u8 *c
 			for(j=0; j<h; j++, jpg->bmpptr+=rgbstride, y+=yw, cb+=cw, cr+=cw)
 			{
 				tmpptr=jpg->bmpptr;
-				if(convreq || ((long)tmpptr&7L)!=0L) tmpptr=linebuf;
-				_mlib(ccfct(tmpptr, y, cb, cr, jpg->width));
+				if(convreq || jpg->width!=w || ((long)tmpptr&7L)!=0L) tmpptr=linebuf;
+				_mlib(ccfct(tmpptr, y, cb, cr, w));
 				if(tmpptr!=jpg->bmpptr)
 				{
 					if(convreq) {_catch(d_postconvertline(tmpptr, jpg->bmpptr, jpg));}
