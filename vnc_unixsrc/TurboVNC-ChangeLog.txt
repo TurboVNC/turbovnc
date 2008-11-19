@@ -85,6 +85,11 @@ Solaris machine that had only CDE.)  This has been fixed by adding a line to
 xstartup.turbovnc which checks to make sure that the script specified in
 ~/.dt/sessions/lastsession exists and is executable before executing it.
 -------------------------------------------------------------------------------
+[16]
+Fixed a bug in the color conversion routines of TurboJPEG/mediaLib which
+caused the Solaris TurboVNC Viewer to display spurious multi-colored vertical
+lines when 2X or 4X subsampling was used.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
