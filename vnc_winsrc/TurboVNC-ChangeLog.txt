@@ -90,6 +90,15 @@ Fixed a bug in the color conversion routines of TurboJPEG/mediaLib which
 caused the Solaris TurboVNC Viewer to display spurious multi-colored vertical
 lines when 2X or 4X subsampling was used.
 -------------------------------------------------------------------------------
+[17]
+When requesting a Lossless Refresh using the TurboVNC viewer on a Linux or
+Solaris/x86 client, the pixels obscured by the F8 dialog will be regenerated
+using lossy compression after the lossless refresh has occurred.  This makes
+the lossless refresh somewhat ineffective.  We were not able to find a fix
+for this in 0.5, but as a workaround, you can now use the hotkey sequence
+CTRL-ALT-SHIFT-L to request a Lossless Refresh without popping up the F8
+dialog.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
