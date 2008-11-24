@@ -53,6 +53,7 @@ char *fallback_resources[] = {
 
   "*desktop.baseTranslations:\
      <Key>F8: ShowPopup()\\n\
+     Ctrl Alt Shift <Key>L: LosslessRefresh()\\n\
      <ButtonPress>: SendRFBEvent()\\n\
      <ButtonRelease>: SendRFBEvent()\\n\
      <Motion>: SendRFBEvent()\\n\
@@ -130,7 +131,7 @@ char *fallback_resources[] = {
   "*popup*button6.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: SendRFBEvent(fbupdate) HidePopup()",
 
-  "*popup*button7.label: Request lossless refresh",
+  "*popup*button7.label: Request lossless refresh (CTRL-ALT-SHIFT-L)",
   "*popup*button7.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: LosslessRefresh() HidePopup()",
 
