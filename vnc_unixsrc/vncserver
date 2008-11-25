@@ -135,7 +135,7 @@ unless ($xauthorityFile) {
 chop($host = `uname -n`);
 chop($os = `uname`);
 
-@fontpaths = ('/usr/share/X11/fonts', '/usr/share/fonts');
+@fontpaths = ('/usr/share/X11/fonts', '/usr/share/fonts', '/usr/share/fonts/X11/');
 if (! -l "/usr/lib/X11") {push(@fontpaths, '/usr/lib/X11/fonts');}
 if (! -l "/usr/X11") {push(@fontpaths, '/usr/X11/lib/X11/fonts');}
 if (! -l "/usr/openwin") {push(@fontpaths, '/usr/openwin/lib/X11/fonts');}
@@ -180,6 +180,8 @@ if (-f "/usr/lib/X11/rgb.txt") {
     $colorPath = "/usr/openwin/lib/X11/rgb";
 } elsif (-f "/usr/X11R6/lib/X11/rgb.txt") {
     $colorPath = "/usr/X11R6/lib/X11/rgb";
+} elsif (-f "/usr/share/X11/rgb.txt") {
+    $colorPath = "/usr/share/X11/rgb";
 }
 
 # Check command line options
