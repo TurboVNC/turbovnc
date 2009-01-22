@@ -8,6 +8,10 @@ problems on Solaris/x86 TurboVNC servers.
 [2]
 Developed a proper uninstaller app for the Mac OS X TurboVNC package.
 -------------------------------------------------------------------------------
+[3]
+Modified MAXINST variable in SUNWtvnc Solaris package to prevent multiple
+instances of this package from being installed simultaneously.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
