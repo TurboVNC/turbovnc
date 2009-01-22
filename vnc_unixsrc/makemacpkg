@@ -21,7 +21,7 @@ make World || doexit -1
 
 pkgtmpdir=`mktemp -d /tmp/vncbuild.XXXXXX`
 pkgname=TurboVNC
-_VERSION=0.5
+_VERSION=`cat TurboVNC-version`
 _BUILD=`date +%Y%m%d`
 PACKAGEMAKER=/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker
 

@@ -2,7 +2,7 @@
 
 ARCH=`uname -m`
 APPNAME=turbovnc
-VERSION=0.5
+VERSION=`cat TurboVNC-version`
 BUILD=`date +%Y%m%d`
 DEBARCH=all
 BINDIR=/opt/TurboVNC/bin

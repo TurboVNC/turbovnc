@@ -29,7 +29,7 @@ mkdir -p $TMPDIR/rpms/RPMS
 ln -fs `pwd` $TMPDIR/rpms/BUILD
 
 BUILD=`date +%Y%m%d`
-VERSION=0.5
+VERSION=`cat TurboVNC-version`
 rpmbuild -bb --buildroot $TMPDIR/rpms/TurboVNC-buildroot --define "_topdir $TMPDIR/rpms" \
 	--define "_bindir /opt/TurboVNC/bin" --define "_mandir /opt/TurboVNC/man" \
 	--define "_datadir /opt/TurboVNC" --define "_version $VERSION" \

@@ -210,7 +210,7 @@ BEGIN
                     IDC_STATIC,135,55,190,33
     LTEXT           "Based on VNC software\nCopyright (C) 1999-2001 AT&&T Laboratories Cambridge\nCopyright (C) 2002-2003 RealVNC Ltd.\nhttp://www.realvnc.com/",
                     IDC_STATIC,135,95,190,33
-    LTEXT           "TurboVNC Viewer version 0.5",IDC_STATIC,135,7,190,9
+    LTEXT           "TurboVNC Viewer version 0.5.1",IDC_STATIC,135,7,190,9
     LTEXT           "Copyright (C) 2004 Landmark Graphics Corporation\nCopyright (C) 2004-2008 Sun Microsystems, Inc.\nhttp://www.virtualgl.org",
                     IDC_STATIC,135,23,190,25
     LTEXT           "[build time unknown]",IDC_BUILDTIME,135,15,190,9
@@ -465,14 +465,14 @@ BEGIN
             VALUE "Comments", "Based on TightVNC by Constantin Kaplinsky; Based on VNC by AT&T Research Labs Cambridge, RealVNC Ltd.\0"
             VALUE "CompanyName", "The VirtualGL Project\0"
             VALUE "FileDescription", "vncviewer\0"
-            VALUE "FileVersion", "0, 5, 0, 0\0"
+            VALUE "FileVersion", "0, 5, 1, 0\0"
             VALUE "InternalName", "vncviewer\0"
             VALUE "LegalCopyright", "Copyright © 1999-2008 [many holders]\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "vncviewer.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "TurboVNC Win32 Viewer\0"
-            VALUE "ProductVersion", "0, 5, 0, 0\0"
+            VALUE "ProductVersion", "0, 5, 1, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END

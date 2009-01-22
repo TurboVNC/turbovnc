@@ -583,14 +583,14 @@ BEGIN
             VALUE "Comments", "Based on TightVNC by Constantin Kaplinsky; Based on VNC by AT&T Research Labs Cambridge, RealVNC Ltd.\0"
             VALUE "CompanyName", "The VirtualGL Project\0"
             VALUE "FileDescription", "TurboVNC Win32 Server\0"
-            VALUE "FileVersion", "0, 4, 0, 0\0"
+            VALUE "FileVersion", "0, 5, 1, 0\0"
             VALUE "InternalName", "WinVNC\0"
             VALUE "LegalCopyright", "Copyright © 1998-2008 [many holders]\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "WinVNC.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "TurboVNC Win32 Server\0"
-            VALUE "ProductVersion", "0, 4, 0, 0\0"
+            VALUE "ProductVersion", "0, 5, 1, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END

@@ -1,5 +1,5 @@
-TurboVNC 0.5 Binary Distribution for Windows platforms
-======================================================
+TurboVNC 0.5.1 Binary Distribution for Windows platforms
+========================================================
 
 TurboVNC is a highly-optimized version of TightVNC 1.3 designed for real-time
 video applications (specifically VirtualGL, which performs real-time 3D
