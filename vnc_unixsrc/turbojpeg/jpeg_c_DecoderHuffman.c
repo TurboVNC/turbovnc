@@ -148,7 +148,6 @@ void jpeg_DecoderHuffmanSetBuffer(jpeg_decoder  *decoder,
 /***************************************************************/
 
 mlib_status jpeg_DecoderHuffmanInit(jpeg_decoder *dec) {
-  mlib_s32 i;
 
   if (!dec) return MLIB_FAILURE;
 
