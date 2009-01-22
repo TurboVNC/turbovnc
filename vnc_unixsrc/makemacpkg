@@ -55,7 +55,9 @@ mkdir $pkgtmpdir/dmg
 $PACKAGEMAKER -build -v -p $pkgtmpdir/dmg/$pkgname.pkg \
 	-f $pkgtmpdir/pkg/Package_Root -r $pkgtmpdir/pkg/Resources \
   -i $pkgtmpdir/pkg/Info.plist -d $pkgtmpdir/pkg/Description.plist || doexit -1
-osacompile -t APPL -o "$pkgtmpdir/dmg/Uninstall $pkgname.app" vncuninstall.applescript || doexit -1
+install -m 644 vncuninstall.applescript $pkgtmpdir || doexit -1
+sudo osacompile -t APPL -o "$pkgtmpdir/dmg/Uninstall $pkgname.app" $pkgtmpdir/vncuninstall.applescript || doexit -1
+sudo chown -R $USER "$pkgtmpdir/dmg/Uninstall $pkgname.app" || doexit -1
 hdiutil create -fs HFS+ -volname $pkgname-$_VERSION \
 	-srcfolder $pkgtmpdir/dmg \
 	$pkgtmpdir/$pkgname.dmg || doexit -1
