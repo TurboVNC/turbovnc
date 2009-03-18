@@ -1,21 +1,165 @@
 ------------------------------------------------------------------------
-r2273 | const_k | 2007-04-27 09:36:00 +0700 (Fri, 27 Apr 2007) | 5 lines
+r3614 | const_k | 2009-03-05 11:46:34 +0600 (Thu, 05 Mar 2009) | 1 line
 Changed paths:
-   M /orig/tags/VERSION_1_3_9/vnc_javasrc/RfbProto.java
-   M /orig/tags/VERSION_1_3_9/vnc_javasrc/VncCanvas.java
-   M /orig/tags/VERSION_1_3_9/vnc_javasrc/VncViewer.java
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_javasrc/VncCanvas.java
 
-Reverted changes from orig/trunk/vnc_javasrc, revisions 2252:2244, as they really should not go the the 1.3.9 release. These changes were as follows:
-- rev.2245: Printing update statistics on disconnect: number of FramebufferUpdate messages, counters of real and pseudo rectangles in framebuffer updates.
-- rev.2246: Printing more statistics on disconnect: average update rate, and rectangle counters per each encoder (Tight, ZRLE, Hextile, Raw, CopyRect, others).
-- rev.2252: Initial support for continuous updates.
+[Merge] Merged in a change from trunk, revision 3612: [Bugfix] Fixed incorrect computation of the RichCursor-encoded data length.
+------------------------------------------------------------------------
+r3589 | const_k | 2009-02-05 15:47:09 +0600 (Thu, 05 Feb 2009) | 2 lines
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_javasrc/README
+
+[Packaging] Version-specific information updated, version 1.3.10.
 
 ------------------------------------------------------------------------
-r2271 | const_k | 2007-04-26 18:28:24 +0700 (Thu, 26 Apr 2007) | 2 lines
+r3569 | const_k | 2009-01-23 18:39:23 +0600 (Fri, 23 Jan 2009) | 1 line
 Changed paths:
-   A /orig/tags/VERSION_1_3_9/vnc_javasrc (from /orig/trunk/vnc_javasrc:2270)
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_javasrc/Makefile
 
-Tagging Java Viewer version 1.3.9. NOTE: Actually this is not version 1.3.9 yet -- some of the recent commits should be reverted to achieve version 1.3.9, see more commits in this directory.
+[Build fix] Added -source command-line option to 'javac'.
+------------------------------------------------------------------------
+r3555 | const_k | 2009-01-16 16:51:58 +0600 (Fri, 16 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_javasrc/OptionsFrame.java
+
+[Bugfix] Allow configuring JPEG quality level regardless of the preferred encoding set. This makes sense because TightVNC Servers can transmit video data as JPEG even if Tight is not the preferred encoding.
+------------------------------------------------------------------------
+r3554 | const_k | 2009-01-16 16:40:20 +0600 (Fri, 16 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_javasrc/OptionsFrame.java
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_javasrc/RfbProto.java
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_javasrc/VncCanvas.java
+
+[Development] Removed support for "continuous updates" from the Java viewer 1.3.x code.
+------------------------------------------------------------------------
+r3547 | const_k | 2009-01-15 16:42:48 +0600 (Thu, 15 Jan 2009) | 1 line
+Changed paths:
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_javasrc (from /orig/trunk/vnc_javasrc:2457)
+
+[Layout] Restored Java viewer source for the stable 1.3 branch.
+------------------------------------------------------------------------
+r2423 | const_k | 2008-03-17 11:05:54 +0600 (Mon, 17 Mar 2008) | 1 line
+Changed paths:
+   M /orig/trunk/vnc_javasrc
+   M /orig/trunk/vnc_unixsrc
+   M /orig/trunk/vnc_winsrc
+
+Set SVN project language to English.
+------------------------------------------------------------------------
+r2318 | const_k | 2007-05-25 19:29:28 +0700 (Fri, 25 May 2007) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_javasrc/VncViewer.java
+
+Slightly changed the format of reporting update statistics.
+
+------------------------------------------------------------------------
+r2317 | const_k | 2007-05-25 19:21:59 +0700 (Fri, 25 May 2007) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_javasrc/VncCanvas.java
+   M /orig/trunk/vnc_javasrc/VncViewer.java
+
+Reporting the number of JPEG-compressed Tight-encoded rectangles.
+
+------------------------------------------------------------------------
+r2316 | const_k | 2007-05-25 19:04:02 +0700 (Fri, 25 May 2007) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_javasrc/VncCanvas.java
+   M /orig/trunk/vnc_javasrc/VncViewer.java
+
+Reporting statistics on pixel data sizes received (e.g. Pixel data: 52428800 bytes, 269460 compressed, ratio 194.57).
+
+------------------------------------------------------------------------
+r2315 | const_k | 2007-05-25 18:46:43 +0700 (Fri, 25 May 2007) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_javasrc/RfbProto.java
+
+Tracking the number of bytes received from the input stream.
+
+------------------------------------------------------------------------
+r2314 | const_k | 2007-05-25 18:11:39 +0700 (Fri, 25 May 2007) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_javasrc/RfbProto.java
+   M /orig/trunk/vnc_javasrc/VncCanvas.java
+
+Made the member variable RfbProto::is private. Now other classes may access input stream only via RfbProto methods. This refactoring has to be done because we want to count how many bytes were read from the input stream.
+
+------------------------------------------------------------------------
+r2313 | const_k | 2007-05-25 16:11:50 +0700 (Fri, 25 May 2007) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_javasrc/RfbProto.java
+   M /orig/trunk/vnc_javasrc/VncViewer.java
+
+Fixed a bug that caused NullPointerException when connecting to any VNC server not supporting TightVNC protocol extensions.
+
+------------------------------------------------------------------------
+r2312 | const_k | 2007-05-25 11:11:45 +0700 (Fri, 25 May 2007) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_javasrc/VncCanvas.java
+
+Minor code cleanup - removed unnecessary duplication.
+
+------------------------------------------------------------------------
+r2311 | const_k | 2007-05-25 10:52:16 +0700 (Fri, 25 May 2007) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_javasrc/README
+   M /orig/trunk/vnc_javasrc/VncCanvas.java
+   M /orig/trunk/vnc_javasrc/VncViewer.java
+
+Added debugging parameters to use the viewer as a tool for measuring VNC server performance.
+
+------------------------------------------------------------------------
+r2310 | const_k | 2007-05-24 16:52:40 +0700 (Thu, 24 May 2007) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_javasrc/VncCanvas.java
+
+Minor code cleanup - a special method to reset update stats.
+
+------------------------------------------------------------------------
+r2309 | const_k | 2007-05-23 14:58:09 +0700 (Wed, 23 May 2007) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_javasrc/README
+   M /orig/trunk/vnc_javasrc/VncViewer.java
+
+Made "Defer update requests" parameter set to 0 by default.
+
+------------------------------------------------------------------------
+r2308 | const_k | 2007-05-18 12:31:47 +0700 (Fri, 18 May 2007) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_javasrc/VncCanvas.java
+
+Fixed minor problems with gathering statistics on updates. The number of "other" rectangles could be reported as -1.
+
+------------------------------------------------------------------------
+r2307 | const_k | 2007-05-15 10:13:40 +0700 (Tue, 15 May 2007) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_javasrc/README
+   M /orig/trunk/vnc_javasrc/VncViewer.java
+
+PORT parameter is not required any more, now it defaults to 5900.
+
+------------------------------------------------------------------------
+r2306 | const_k | 2007-05-15 09:43:14 +0700 (Tue, 15 May 2007) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_javasrc/OptionsFrame.java
+
+Clear the continuesUpdates flag in options if this mode is not supported by the server. Actually, this does not change functionality but eliminates repetitive messages on the console.
+
+------------------------------------------------------------------------
+r2305 | const_k | 2007-05-14 16:42:36 +0700 (Mon, 14 May 2007) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_javasrc/OptionsFrame.java
+
+Fixed GUI option for continuous updates - it did not work.
+
+------------------------------------------------------------------------
+r2304 | const_k | 2007-05-14 16:13:40 +0700 (Mon, 14 May 2007) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_javasrc/OptionsFrame.java
+   M /orig/trunk/vnc_javasrc/RfbProto.java
+   M /orig/trunk/vnc_javasrc/VncCanvas.java
+   M /orig/trunk/vnc_javasrc/VncViewer.java
+
+Completed support for continuous updates. Added a GUI setting for the parameter "Continuous updates" ("yes"/"no"). Fixed a protocol synchronization problem with SetPixelFormat in the continuous updates mode.
 
 ------------------------------------------------------------------------
 r2262 | const_k | 2007-04-25 16:12:53 +0700 (Wed, 25 Apr 2007) | 2 lines

@@ -1,5 +1,5 @@
 
-  TightVNC Java Viewer version 1.3.9
+  TightVNC Java Viewer version 1.3.10
 
 ======================================================================
 
@@ -12,7 +12,7 @@ optimizations, major GUI improvements, and more.
 	Copyright (C) 2002-2003 RealVNC Ltd.
 	Copyright (C) 2001-2004 HorizonLive.com, Inc.
 	Copyright (C) 2000-2007 Constantin Kaplinsky
-	Copyright (C) 2000-2007 TightVNC Group
+	Copyright (C) 2000-2009 TightVNC Group
 	All rights reserved.
 
 This software is distributed under the GNU General Public Licence as
@@ -90,8 +90,10 @@ There are three basic ways to use TightVNC Java viewer:
 
          java VncViewer HOST vnchost PORT 5900
 
-     The parameters HOST and PORT are required, but there is a number of
-     optional parameters as well (see the Parameters section below).
+     The HOST parameter is required, PORT defaults to 5900 if omitted, and
+     there is a number of other optional parameters, see the Parameters
+     section below.
+
 
 Parameters
 ==========
@@ -140,13 +142,14 @@ Here is the complete list of parameters supported in TightVNC Java viewer:
 --> "PORT" (no GUI equivalent)
 
     Value: TCP port number on the VNC server.
-    Default: none.
+    Default: 5900.
 
-    This parameter is required in all cases. Note that this port is not the
-    one used for HTTP connection from the browser, it is the port used for
-    RFB connection. Usually, VNC servers use ports 58xx for HTTP connections,
-    and ports 59xx for RFB connections. Thus, most likely, this parameter
-    should be set to something like 5900, 5901 etc.
+    This parameter specifies TCP port number for outgoing VNC connection.
+    Note that this port is not the one used for HTTP connection from the
+    browser, it is the port used for VNC/RFB connection. Usually, VNC servers
+    use ports 58xx for HTTP connections, and ports 59xx for RFB connections.
+    Thus, most likely, this parameter should be set to something like 5900,
+    5901 etc.
 
 --> "PASSWORD"
 
@@ -353,7 +356,7 @@ Here is the complete list of parameters supported in TightVNC Java viewer:
 --> "Defer update requests" (no GUI equivalent)
 
     Value: time in milliseconds.
-    Default: "50".
+    Default: "0".
 
     After processing an update received from server, wait for the specified
     number of milliseconds before requesting next screen update. Such delay
@@ -373,6 +376,32 @@ Here is the complete list of parameters supported in TightVNC Java viewer:
     The dynamically referenced class must implement a SocketFactory
     interface, and create a Socket, as configured by this parameter. See the
     source in SocketFactory.java.
+
+--> "DEBUG_XU" (no GUI equivalent)
+
+    Value: non-negative integer.
+    Default: 0.
+
+    Debugging option that causes update statistics reset after the specified
+    number of first framebuffer updates. This option was added to measure the
+    performance of a VNC server. First few updates (especially the very first
+    one) may be notably slower than others, and the viewer can exclude such
+    updates from statistics.
+
+--> "DEBUG_CU" (no GUI equivalent)
+
+    Value: non-negative integer.
+    Default: 0.
+
+    Debugging option that causes the viewer disconnect after the specified
+    number of framebuffer updates. When used with the "DEBUG_XU" parameter,
+    the number of updates specified in "DEBUG_XU" is not counted as part of
+    this parameter's value. E.g. if "DEBUG_XU"=2 and "DEBUG_CU"=10, then the
+    viewer will disconnect after 12 framebuffer updates: update statistics
+    will be reset after first two updates, then collected for next 10
+    updates, then the viewer will disconnect automatically. If the value is
+    0, the viewer will not disconnect automatically. This option was added to
+    measure the performance of a VNC server.
 
 
 RECORDING VNC SESSIONS
