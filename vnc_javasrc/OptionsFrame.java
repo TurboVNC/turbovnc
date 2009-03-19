@@ -305,8 +305,9 @@ class OptionsFrame extends Frame
   }
 
   //
-  // setOtherOptions looks at the "other" choices (ones which don't set the
-  // encoding or the color format) and sets the boolean flags appropriately.
+  // setOtherOptions looks at the "other" choices (ones that do not
+  // cause sending any protocol messages) and sets the boolean flags
+  // appropriately.
   //
 
   void setOtherOptions() {
