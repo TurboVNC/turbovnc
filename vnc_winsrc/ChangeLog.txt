@@ -1,54 +1,675 @@
 ------------------------------------------------------------------------
-r2292 | const_k | 2007-05-01 00:13:55 +0700 (Tue, 01 May 2007) | 11 lines
+r3615 | const_k | 2009-03-05 11:50:22 +0600 (Thu, 05 Mar 2009) | 1 line
 Changed paths:
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/BUILDING.txt
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/TightVNC.iss
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/vncviewer/AboutBox.cpp
-   A /orig/tags/VERSION_1_3_9/vnc_winsrc/vncviewer/BuildTime.cpp (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/BuildTime.cpp:2288)
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/vncviewer/res/resource.h
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/vncviewer/res/vncviewer.rc
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/vncviewer/stdhdrs.h
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/vncviewer/vncviewer.dsp
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/vncviewer/vncviewer.vcproj
-   A /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/BuildTime.cpp (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/BuildTime.cpp:2288)
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/WinVNC.dsp
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/WinVNC.rc
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/WinVNC.vcproj
-   A /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/res/InStream.class (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/InStream.class:2288)
-   A /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/res/MemInStream.class (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/MemInStream.class:2288)
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/res/OptionsFrame.class
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/res/RfbProto.class
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/res/VncCanvas.class
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/res/VncCanvas2.class
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/res/VncViewer.class
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/res/VncViewer.jar
-   A /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/res/ZlibInStream.class (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/ZlibInStream.class:2288)
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/resource.h
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/stdhdrs.h
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/vncAbout.cpp
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/vncHTTPConnect.cpp
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/vncProperties.cpp
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/vncServer.cpp
-   M /orig/tags/VERSION_1_3_9/vnc_winsrc/winvnc/vncServer.h
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/VncCanvas.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/VncViewer.jar
 
-Merged changes from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc, revisions 2271:2288. Now I really hope that there will be no more changes in the Windows version of TightVNC 1.3.9. The changes merged here were as follows:
-- rev.2288: Updated project files of Visual C++ 2005 for adding build time information to the About dialog of WinVNC and vncviewer.
-- rev.2287: Document updated to reflect the fact that TightVNC now can be compiled with Visual C++ 2005.
-- rev.2286: Added build time information to the About dialog of WinVNC.
-- rev.2285: Added build time information to the About dialog of the viewer.
-- rev.2283: Made the installation script work for all platforms again. On Windows 95, it will install one set of executables, on later versions - another set of executable files.
-- rev.2282: Installer script will require Windows 98 or Windows NT 4.0SP3 or later.
-- rev.2279: Java viewer files were not included by resource compiler when building with Visual C++ 2005.
-- rev.2278: Built-in Java viewer updated to its current version.
-- rev.2276: Fixed a serious bug introduced in rev.2150. After that "fix", user passwords were not read if default password was set. This should be included to version 1.3.9 as well.
-- rev.2272: Solution for the situation when passwords were decoded and checked each time on updating the tray icon, once per second. Now we use cached values in ValidPasswordsSet() and ValidPasswordsEmpty() methods. Hopefully, this is the last change to be included in version 1.3.9.
+[Build fix] Updated built-in Java viewer to the latest version.
 ------------------------------------------------------------------------
-r2269 | const_k | 2007-04-26 18:15:51 +0700 (Thu, 26 Apr 2007) | 2 lines
+r3603 | syuri | 2009-02-12 17:54:52 +0600 (Thu, 12 Feb 2009) | 1 line
 Changed paths:
-   A /orig/tags/VERSION_1_3_9/vnc_winsrc (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc:2268)
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/TightVNC.iss
 
-Tagging Win32 version 1.3.9.
+[Bugfix] Kill WinVNC under Windows 9x/ME before uninstall.
+------------------------------------------------------------------------
+r3602 | syuri | 2009-02-12 17:26:47 +0600 (Thu, 12 Feb 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/TightVNC.iss
 
+[Development] Removing separate installing for all and one user. Leaving only one checked box for start service.
+------------------------------------------------------------------------
+r3601 | syuri | 2009-02-12 15:37:19 +0600 (Thu, 12 Feb 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/TightVNC.iss
+
+[Bugfix] Removing "net start winvnc" command from setup if setup has run under windows 95 - 98.
+------------------------------------------------------------------------
+r3597 | const_k | 2009-02-12 11:48:52 +0600 (Thu, 12 Feb 2009) | 1 line
+Changed paths:
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer.exe.manifest
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.exe.manifest
+
+[Cleanups] Removed *.exe.manifest files since we don't use them any more.
+------------------------------------------------------------------------
+r3594 | const_k | 2009-02-10 20:40:08 +0600 (Tue, 10 Feb 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer-vc8.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC-vc8.vcproj
+
+[Build fix] Synchronized VC8 projects with the latest VC9 files. In particular, this makes both server and viewer to use Common Controls Library version 6 if it's available.
+------------------------------------------------------------------------
+r3593 | const_k | 2009-02-07 23:29:41 +0600 (Sat, 07 Feb 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/ClientConnection.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/ClientConnection.h
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/ClientConnectionFile.cpp
+
+[Bugfix] The viewer could not handle passwords from saved .vnc files correctly if the first byte of their encrypted representation was zero.
+------------------------------------------------------------------------
+r3592 | const_k | 2009-02-07 21:37:31 +0600 (Sat, 07 Feb 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/ClientConnection.cpp
+
+[Build fix] Fixed VC6 compilation.
+------------------------------------------------------------------------
+r3591 | const_k | 2009-02-05 17:23:41 +0600 (Thu, 05 Feb 2009) | 2 lines
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/TightVNC.iss
+
+[Packaging] Removed detailed change log from shortcuts.
+
+------------------------------------------------------------------------
+r3588 | const_k | 2009-02-05 15:46:27 +0600 (Thu, 05 Feb 2009) | 2 lines
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/BUILDING.txt
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/README-bin.txt
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/README.txt
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/TightVNC.iss
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/res/vncviewer.rc
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/VNCHooks/VNCHooks.rc
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.rc
+
+[Packaging] Version-specific information updated, version 1.3.10.
+
+------------------------------------------------------------------------
+r3587 | const_k | 2009-02-05 15:38:08 +0600 (Thu, 05 Feb 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/InstInfo.rtf
+
+[Packaging] Updated year in a copyright notice.
+------------------------------------------------------------------------
+r3571 | const_k | 2009-01-26 09:44:34 +0600 (Mon, 26 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/res/vncviewer.rc
+
+[Packaging] Version info changed in the resources of the vncviewer, version 1.3.9.9.
+------------------------------------------------------------------------
+r3568 | const_k | 2009-01-23 18:34:02 +0600 (Fri, 23 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/AuthPanel.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/ButtonPanel.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/CapabilityInfo.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/CapsContainer.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/ClipboardFrame.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/DesCipher.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/InStream.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/MemInStream.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/OptionsFrame.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/RecordingFrame.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/ReloginPanel.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/RfbProto.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/SessionRecorder.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/SocketFactory.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/VncCanvas.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/VncCanvas2.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/VncViewer.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/VncViewer.jar
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/ZlibInStream.class
+
+[Build fix] Updated built-in Java viewer to the latest version.
+------------------------------------------------------------------------
+r3566 | const_k | 2009-01-22 10:29:23 +0600 (Thu, 22 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.vcproj
+
+[Build fix] Including the dependency on Common Controls Library 6.0 in a more reliable way. Not sure why but using standalone manifest file required full rebuilding, otherwise the manifest might not be included at all.
+------------------------------------------------------------------------
+r3565 | const_k | 2009-01-22 10:19:08 +0600 (Thu, 22 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/res/vncviewer.rc
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.rc
+
+[User interface] Changed font in dialogs from "MS Sans Serif" to "MS Shell Dlg". This fixes password fields with rectangles in Windows XP.
+------------------------------------------------------------------------
+r3564 | const_k | 2009-01-21 10:13:49 +0600 (Wed, 21 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/ClientConnection.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/ClientConnection.h
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/ClientConnectionClipboard.cpp
+
+[Security fix] Fixed integer overflow vulnerabilities discovered by Ariel Futoransky, Fernando Russ and Alfredo Ortega from Core Security Technologies.
+------------------------------------------------------------------------
+r3563 | const_k | 2009-01-20 18:18:19 +0600 (Tue, 20 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/FileTransfer.cpp
+
+[Bugfix] Fixed a bug in file transfers. When the viewer could not create a file while downloading, it requested the same file again repeatedly after showing an error message.
+------------------------------------------------------------------------
+r3562 | const_k | 2009-01-20 16:37:17 +0600 (Tue, 20 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/ClientConnectionFullScreen.cpp
+
+[Bugfix] Fixed problems with full-screen viewer in Windows Vista where Windows taskbar could be shown above the "full-screen" window.
+------------------------------------------------------------------------
+r3558 | const_k | 2009-01-16 18:35:44 +0600 (Fri, 16 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.rc
+
+[User interface] Fixed control layout problems shown up when using Common Controls Library version 6.
+------------------------------------------------------------------------
+r3557 | const_k | 2009-01-16 18:23:16 +0600 (Fri, 16 Jan 2009) | 1 line
+Changed paths:
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer.exe.manifest
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer.vcproj
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.exe.manifest
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.vcproj
+
+[Build fix] Made both server and viewer to use Common Controls Library version 6 if its available.
+------------------------------------------------------------------------
+r3556 | syuri | 2009-01-16 17:17:05 +0600 (Fri, 16 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncService.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncService.h
+
+[Refactoring] Using silent as parameter of the InstallService(), RemoveService() and ReinstallService() functions instead of its usage as a member of vncService class.
+------------------------------------------------------------------------
+r3546 | const_k | 2009-01-15 15:38:29 +0600 (Thu, 15 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/VNCOptions.cpp
+
+[Bugfix] Allow configuring JPEG quality level regardless of the preferred encoding set. This makes sense because TightVNC Servers can transmit video data as JPEG even if Tight is not the preferred encoding.
+------------------------------------------------------------------------
+r3545 | const_k | 2009-01-15 11:54:05 +0600 (Thu, 15 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/VNCOptions.cpp
+
+[Bugfix] Fixed a bug with not saving log file name correctly on using the Browse button.
+------------------------------------------------------------------------
+r3544 | const_k | 2009-01-15 11:35:08 +0600 (Thu, 15 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/SessionDialog.cpp
+
+[Bugfix] Not trying to load connection settings for empty host name if the connection history is empty.
+------------------------------------------------------------------------
+r3543 | const_k | 2009-01-15 11:14:37 +0600 (Thu, 15 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/SessionDialog.cpp
+
+[Bugfix] On loading connection history from the registry, don't load empty host names.
+------------------------------------------------------------------------
+r3542 | const_k | 2009-01-15 11:08:00 +0600 (Thu, 15 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/VNCOptions.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/VNCOptions.h
+
+[Bugfix] Removing extra saved connections on decreasing the history limit.
+------------------------------------------------------------------------
+r3541 | const_k | 2009-01-15 10:11:32 +0600 (Thu, 15 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/ClientConnection.cpp
+
+[Enhancement] SaveConnectionHistory() function in ClientConnection has been rewritten. New version reorders connections if there were empty or missing records. Also, it removes options for the connection that was not saved due to exceeding maximum saved connections limit. Finally, new code is much cleaner.
+------------------------------------------------------------------------
+r3540 | const_k | 2009-01-14 19:08:12 +0600 (Wed, 14 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/SessionDialog.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/VNCOptions.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/VNCOptions.h
+
+[Refactoring, bugfixes] Moved the code which closes the Options dialog from SessionDialog to the VNCOptions itself. Checking window handle of the dialog before using it.
+------------------------------------------------------------------------
+r3539 | const_k | 2009-01-13 17:29:09 +0600 (Tue, 13 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/SessionDialog.cpp
+
+[Enhancement] While reading connection history from the registry, don't stop on the first missing record, try to skip to the next record instead. This would allow graceful handling of the cases when some records were be removed from the registry manually.
+------------------------------------------------------------------------
+r3538 | const_k | 2009-01-13 15:22:32 +0600 (Tue, 13 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/SessionDialog.cpp
+
+[Bugfix] Fixed keyboard navigation in the VNC Server combo box of the New TightVNC Connection combo box.
+------------------------------------------------------------------------
+r3537 | const_k | 2009-01-13 14:40:46 +0600 (Tue, 13 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/ClientConnection.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/ClientConnection.h
+
+[Bugfix] The viewer did not remember VNC host name typed by the user if that connection was not successful. That behavior should be considered a bug because programs should not make users enter the same information repeatedly.
+------------------------------------------------------------------------
+r3536 | const_k | 2009-01-13 13:49:38 +0600 (Tue, 13 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/ClientConnection.cpp
+
+[Cleanup] A better name for a local variable.
+------------------------------------------------------------------------
+r3535 | syuri | 2009-01-11 18:02:50 +0600 (Sun, 11 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/TightVNC.iss
+
+[Development] Removing service installation if run under Windows Vista. Removing service before uninstalling. Adding shortcut to start menu folder for uninstall. Selecting shortcut install target (all users or only current user).
+------------------------------------------------------------------------
+r3534 | syuri | 2009-01-11 14:40:21 +0600 (Sun, 11 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.h
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncService.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncService.h
+
+[Enhancement] Adding new "-silent" command line parameter.
+------------------------------------------------------------------------
+r3533 | const_k | 2009-01-11 02:23:32 +0600 (Sun, 11 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncBuffer.cpp
+
+[Bugfix] LastRect, XCursor and RichCursor pseudo-encodings were not properly enabled if they preceded true encodings in the SetEncodings protocol message.
+------------------------------------------------------------------------
+r3532 | const_k | 2009-01-10 22:06:38 +0600 (Sat, 10 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncClient.cpp
+
+[Bugfixes] Restoring error modes correctly, a bugfix from Dennis Syrovatsky.
+------------------------------------------------------------------------
+r3531 | const_k | 2009-01-10 20:38:03 +0600 (Sat, 10 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncClient.cpp
+
+[Bugfix] If the server could not impersonate current user on processing file transfers, it did not always read complete client messages, and that resulted in protocol error and disconnect on next read operation. Now it should read complete messages on impersonation failures.
+------------------------------------------------------------------------
+r3530 | const_k | 2009-01-10 20:03:37 +0600 (Sat, 10 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncClient.cpp
+
+[Debug] Log received RFB messages.
+------------------------------------------------------------------------
+r3529 | const_k | 2009-01-10 18:21:27 +0600 (Sat, 10 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncClient.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncService.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncService.h
+
+[Bugfix] Impersonating currently logged on user while processing file transfer requests. Disabling file transfers if current user is unknown or nobody is logged in.
+------------------------------------------------------------------------
+r3528 | const_k | 2009-01-09 00:40:47 +0600 (Fri, 09 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncMenu.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncService.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncService.h
+
+[Refactoring] Made arguments to vncService::ProcessUserHelperMessage() self-descriptive, removed unused argument.
+------------------------------------------------------------------------
+r3527 | const_k | 2009-01-08 19:18:54 +0600 (Thu, 08 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer.dsp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.dsp
+
+[Build fix] Fixed problems with updating build time on each link.
+------------------------------------------------------------------------
+r3526 | const_k | 2009-01-08 19:03:47 +0600 (Thu, 08 Jan 2009) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/FileTransfer.cpp
+
+[Bugfixes] Restoring error modes correctly, a bugfix from Dennis Syrovatsky.
+------------------------------------------------------------------------
+r2978 | const_k | 2008-10-11 01:20:57 +0700 (Sat, 11 Oct 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/libjpeg/libjpeg.dsp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/omnithread/omnithread.dsp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer.dsp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/zlib/zlib.dsp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/VNCHooks/VNCHooks.dsp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.dsp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/libjpeg/libjpeg.dsp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/omnithread/omnithread.dsp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/zlib/zlib.dsp
+
+[Build fixes] Configuring build environment (it's Visual C++ 6.0 this time) to create intermediate files in separate per-project subdirectories under the output directories.
+------------------------------------------------------------------------
+r2977 | const_k | 2008-10-10 23:45:06 +0700 (Fri, 10 Oct 2008) | 2 lines
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/libjpeg/libjpeg-vc8.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/omnithread/omnithread-vc8.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer-vc8.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/zlib/zlib-vc8.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/VNCHooks/VNCHooks-vc8.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC-vc8.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/libjpeg/libjpeg-vc8.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/omnithread/omnithread-vc8.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/zlib/zlib-vc8.vcproj
+
+[Build fixes] Configuring build environment (Visual Studio 2005 Express Edition) to create intermediate files in separate per-project subdirectories under the output directories.
+NOTE: Changes in rev.2973 were applicable to Visual Studio 2008 (not 2005).
+------------------------------------------------------------------------
+r2973 | const_k | 2008-10-10 17:32:23 +0700 (Fri, 10 Oct 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/libjpeg/libjpeg.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/omnithread/omnithread.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/zlib/zlib.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/VNCHooks/VNCHooks.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/libjpeg/libjpeg.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/omnithread/omnithread.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/zlib/zlib.vcproj
+
+[Build fixes] Configuring build environment (Visual Studio 2005 Express Edition) to create intermediate files in separate per-project subdirectories under the output directories.
+------------------------------------------------------------------------
+r2971 | const_k | 2008-10-10 16:14:02 +0700 (Fri, 10 Oct 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.vcproj
+
+[Build fix] Eliminated linker warnings about conflicting default libraries in Visual C++ 2008 Express Edition.
+------------------------------------------------------------------------
+r2970 | const_k | 2008-10-10 15:21:36 +0700 (Fri, 10 Oct 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/libjpeg
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/omnithread
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/zlib
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc
+
+[Layout] Ignoring temporary files created by Visual C++ 2005 (in addition to rev.2943).
+------------------------------------------------------------------------
+r2969 | const_k | 2008-10-10 15:15:43 +0700 (Fri, 10 Oct 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer-vc8.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC-vc8.vcproj
+
+[Build fix] Eliminated linker warnings about conflicting default libraries in Visual C++ 2005 Express Edition.
+------------------------------------------------------------------------
+r2968 | const_k | 2008-10-10 14:52:43 +0700 (Fri, 10 Oct 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer.dsp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.dsp
+
+[Build fix] Eliminated linker warnings about conflicting default libraries in Visual C++ 6.0.
+------------------------------------------------------------------------
+r2958 | const_k | 2008-10-10 11:01:44 +0700 (Fri, 10 Oct 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/ClientConnectionTight.cpp
+
+[Bugfix] Increased the limitation on the JPEG rectangle width from 2048 to 8192. Normally, TightVNC Server should not ever send Tight-encoded rectangles wider than 2048 pixels but we should not rely on that in the viewer.
+------------------------------------------------------------------------
+r2957 | const_k | 2008-10-10 10:30:06 +0700 (Fri, 10 Oct 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncDesktop.cpp
+
+[Debug] Added another debugging version of GetChangedRegion(), commented out.
+------------------------------------------------------------------------
+r2943 | const_k | 2008-10-09 14:24:16 +0700 (Thu, 09 Oct 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/VNCHooks
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/libjpeg
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/omnithread
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/zlib
+
+Ignoring temporary files created by Visual C++ 2005.
+------------------------------------------------------------------------
+r2833 | const_k | 2008-09-30 00:52:13 +0700 (Tue, 30 Sep 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncClient.cpp
+
+[Cleanup] Removed conditional blocks that will never be executed after applying the fix from rev.2832.
+------------------------------------------------------------------------
+r2832 | const_k | 2008-09-30 00:04:18 +0700 (Tue, 30 Sep 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncClient.cpp
+
+[Bugfix] This change should fix rendering problems when multiple CopyRects were combined with normal updates. That caused distortions that never updated even with full-screen polling active.
+------------------------------------------------------------------------
+r2667 | const_k | 2008-08-14 17:48:59 +0700 (Thu, 14 Aug 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncDesktop.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncDesktop.h
+
+Commented out the debugging version of vncDesktop::GetChangedRegion().
+------------------------------------------------------------------------
+r2654 | const_k | 2008-08-08 18:56:49 +0700 (Fri, 08 Aug 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncDesktop.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncDesktop.h
+
+Made the code of vncDesktop::CopyRect() closer to its version of 1.2.9. This does not fix known CopyRect bugs yet, but hopefully will help to locate them easier.
+------------------------------------------------------------------------
+r2653 | const_k | 2008-08-08 17:54:21 +0700 (Fri, 08 Aug 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.vcproj
+
+Removed missing files from the project, arranged other files into proper folders.
+------------------------------------------------------------------------
+r2652 | const_k | 2008-08-08 17:48:32 +0700 (Fri, 08 Aug 2008) | 1 line
+Changed paths:
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/History.txt
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncDesktop.cpp
+
+CopyRectToBuffer() should copy data within the back buffer, not from the main buffer.
+------------------------------------------------------------------------
+r2651 | const_k | 2008-08-08 17:33:32 +0700 (Fri, 08 Aug 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncDesktop.cpp
+
+Minor code cleanups and changes in comments.
+------------------------------------------------------------------------
+r2648 | const_k | 2008-08-08 15:41:12 +0700 (Fri, 08 Aug 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncDesktop.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncDesktop.h
+
+Cleanups in the vncDesktop::CopyRectToBuffer function to make the code easier to understand.
+------------------------------------------------------------------------
+r2647 | const_k | 2008-08-07 17:32:54 +0700 (Thu, 07 Aug 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.vcproj
+
+Fixed link problems in the Win32|Debug configuration.
+------------------------------------------------------------------------
+r2642 | const_k | 2008-08-05 01:03:32 +0700 (Tue, 05 Aug 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/SessionDialog.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/SessionDialog.h
+
+In the "New Connection" dialog, disable the "Connect" button if no VNC Server is specified. This would also fix the bug with attempting to connect even if the edit box is empty.
+------------------------------------------------------------------------
+r2429 | const_k | 2008-03-17 12:52:10 +0600 (Mon, 17 Mar 2008) | 1 line
+Changed paths:
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/BUILDING-bcc32.txt
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/build-bcc32.bat
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/Makefile.bcc32
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/Makefile.mingw
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/libjpeg/Makefile.bcc32
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/omnithread/Makefile.mingw
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/omnithread/build-bcc32.bat
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/res/Makefile.mingw
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/res/build-bcc32.bat
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/zlib/Makefile.bcc32
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/Makefile.bcc32
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/VNCHooks/Makefile.bcc32
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/VNCHooks/SharedData.cpp
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/VNCHooks/SharedData.h
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/VNCHooks/VNCHooks-bcc32.def
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/libjpeg/Makefile.bcc32
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/omnithread/build-bcc32.bat
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/zlib/Makefile.bcc32
+
+Removed files for build environments not supported any more.
+------------------------------------------------------------------------
+r2428 | const_k | 2008-03-17 12:35:36 +0600 (Mon, 17 Mar 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/BUILDING.txt
+
+Updated instructions on building the sources to reflect the fact that Visual Studio 2008 is now used instead of Visual Studio 2005.
+------------------------------------------------------------------------
+r2427 | const_k | 2008-03-17 12:32:11 +0600 (Mon, 17 Mar 2008) | 1 line
+Changed paths:
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/libjpeg/libjpeg-vc8.vcproj (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/libjpeg/libjpeg.vcproj:2425)
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/libjpeg/libjpeg.vcproj
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/omnithread/omnithread-vc8.vcproj (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/omnithread/omnithread.vcproj:2425)
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/omnithread/omnithread.vcproj
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer-vc8.sln (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer.sln:2425)
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer-vc8.vcproj (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer.vcproj:2425)
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer.sln
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer.vcproj
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/zlib/zlib-vc8.vcproj (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/zlib/zlib.vcproj:2425)
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/zlib/zlib.vcproj
+
+Project files for vncviewer have been converted to Visual Studio 2008 format. Old files (Visual Studio 2005 format) have been backed up with "-vc8" added to their base filename.
+------------------------------------------------------------------------
+r2426 | const_k | 2008-03-17 12:11:21 +0600 (Mon, 17 Mar 2008) | 1 line
+Changed paths:
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/VNCHooks/VNCHooks-vc8.vcproj (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/VNCHooks/VNCHooks.vcproj:2421)
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/VNCHooks/VNCHooks.vcproj
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC-vc8.sln (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.sln:2421)
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC-vc8.vcproj (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.vcproj:2421)
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.sln
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.vcproj
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/libjpeg/libjpeg-vc8.vcproj (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/libjpeg/libjpeg.vcproj:2421)
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/libjpeg/libjpeg.vcproj
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/omnithread/omnithread-vc8.vcproj (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/omnithread/omnithread.vcproj:2421)
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/omnithread/omnithread.vcproj
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/zlib/zlib-vc8.vcproj (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/zlib/zlib.vcproj:2421)
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/zlib/zlib.vcproj
+
+Project files for WinVNC have been converted to Visual Studio 2008 format. Old files (Visual Studio 2005 format) have been backed up with "-vc8" added to their base filename.
+------------------------------------------------------------------------
+r2425 | const_k | 2008-03-17 11:50:34 +0600 (Mon, 17 Mar 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/VNCHooks/VNCHooks.rc
+
+Fixes for resource compilation in Visual C++ 2008 Express Edition.
+------------------------------------------------------------------------
+r2422 | const_k | 2008-03-17 10:52:53 +0600 (Mon, 17 Mar 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc
+
+Set SVN project language to English.
+------------------------------------------------------------------------
+r2421 | const_k | 2008-03-16 23:00:31 +0600 (Sun, 16 Mar 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/res/resource.h
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/res/vncviewer.rc
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.rc
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/resource.h
+
+Fixes for resource compilation in Visual C++ 2008 Express Edition.
+------------------------------------------------------------------------
+r2419 | const_k | 2008-02-24 19:45:46 +0600 (Sun, 24 Feb 2008) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/ClientConnection.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/ClientConnection.h
+
+Reading and ignoring SetColourMapEntries messages instead of throwing exceptions in such cases.
+------------------------------------------------------------------------
+r2370 | const_k | 2007-11-22 20:24:18 +0600 (Thu, 22 Nov 2007) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/VNCOptions.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/VNCOptions.h
+
+Removed support for the -via command-line option. This reverts the change introduced in rev.2100. Automatic SSH tunneling support will be implemented by extending VNC host syntax, there is no need for the -via parameter.
+------------------------------------------------------------------------
+r2369 | const_k | 2007-11-13 11:15:23 +0600 (Tue, 13 Nov 2007) | 1 line
+Changed paths:
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/.cvsignore
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/.cvsignore
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/libjpeg/.cvsignore
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/omnithread/.cvsignore
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/res/.cvsignore
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/zlib/.cvsignore
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/.cvsignore
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/VNCHooks/.cvsignore
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/libjpeg/.cvsignore
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/zlib/.cvsignore
+
+Removed CVS control files.
+------------------------------------------------------------------------
+r2288 | const_k | 2007-04-30 18:22:09 +0700 (Mon, 30 Apr 2007) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer.vcproj
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.vcproj
+
+Updated project files of Visual C++ 2005 for adding build time information to the About dialog of WinVNC and vncviewer.
+------------------------------------------------------------------------
+r2287 | const_k | 2007-04-30 17:43:24 +0700 (Mon, 30 Apr 2007) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/BUILDING.txt
+
+Document updated to reflect the fact that TightVNC now can be compiled with Visual C++ 2005.
+------------------------------------------------------------------------
+r2286 | const_k | 2007-04-30 17:29:33 +0700 (Mon, 30 Apr 2007) | 1 line
+Changed paths:
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/BuildTime.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.dsp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.rc
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/resource.h
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/stdhdrs.h
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncAbout.cpp
+
+Added build time information to the About dialog of WinVNC.
+------------------------------------------------------------------------
+r2285 | const_k | 2007-04-30 17:28:57 +0700 (Mon, 30 Apr 2007) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/AboutBox.cpp
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/BuildTime.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/res/resource.h
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/res/vncviewer.rc
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/stdhdrs.h
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/vncviewer/vncviewer.dsp
+
+Added build time information to the About dialog of the viewer.
+------------------------------------------------------------------------
+r2284 | const_k | 2007-04-30 17:24:53 +0700 (Mon, 30 Apr 2007) | 1 line
+Changed paths:
+   D /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/TightVNC-Win95.iss
+
+Due to recent changes in TightVNC.iss, we do not need a special version of the script for Win95 any more.
+------------------------------------------------------------------------
+r2283 | const_k | 2007-04-30 17:18:16 +0700 (Mon, 30 Apr 2007) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/TightVNC.iss
+
+Made the installation script work for all platforms again. On Windows 95, it will install one set of executables, on later versions - another set of executable files.
+------------------------------------------------------------------------
+r2282 | const_k | 2007-04-30 15:07:07 +0700 (Mon, 30 Apr 2007) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/TightVNC.iss
+
+Installer script will require Windows 98 or Windows NT 4.0SP3 or later.
+------------------------------------------------------------------------
+r2281 | const_k | 2007-04-30 14:40:17 +0700 (Mon, 30 Apr 2007) | 1 line
+Changed paths:
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/TightVNC-Win95.iss (from /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/TightVNC.iss:2280)
+
+Created another copy of the installer script for Windows 95.
+------------------------------------------------------------------------
+r2279 | const_k | 2007-04-28 00:00:54 +0700 (Sat, 28 Apr 2007) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.vcproj
+
+Java viewer files were not included by resource compiler when building with Visual C++ 2005.
+------------------------------------------------------------------------
+r2278 | const_k | 2007-04-27 22:55:02 +0700 (Fri, 27 Apr 2007) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.dsp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/WinVNC.rc
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/InStream.class
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/MemInStream.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/OptionsFrame.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/RfbProto.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/VncCanvas.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/VncCanvas2.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/VncViewer.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/VncViewer.jar
+   A /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/res/ZlibInStream.class
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/resource.h
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncHTTPConnect.cpp
+
+Built-in Java viewer updated to its current version.
+------------------------------------------------------------------------
+r2276 | const_k | 2007-04-27 13:37:38 +0700 (Fri, 27 Apr 2007) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncProperties.cpp
+
+Fixed a serious bug introduced in rev.2150. After that "fix", user passwords were not read if default password was set. This should be included to version 1.3.9 as well.
+------------------------------------------------------------------------
+r2272 | const_k | 2007-04-26 22:24:05 +0700 (Thu, 26 Apr 2007) | 1 line
+Changed paths:
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncServer.cpp
+   M /orig/branches/BRANCH_1_3_STABLE/vnc_winsrc/winvnc/vncServer.h
+
+Solution for the situation when passwords were decoded and checked each time on updating the tray icon, once per second. Now we use cached values in ValidPasswordsSet() and ValidPasswordsEmpty() methods. Hopefully, this is the last change to be included in version 1.3.9.
 ------------------------------------------------------------------------
 r2266 | const_k | 2007-04-26 17:55:21 +0700 (Thu, 26 Apr 2007) | 2 lines
 Changed paths:
