@@ -418,8 +418,8 @@ WaitForSomething(pClientsReady)
 	    {
 	        int client_priority, client_index;
 
-		curclient = ffs (clientsReadable.fds_bits[i]) - 1;
-		client_index = ConnectionTranslation[curclient + (i << 5)];
+		curclient = ffsl(clientsReadable.fds_bits[i]) - 1;
+		client_index = ConnectionTranslation[curclient + (i * sizeof(fd_mask) * 8)];
 #else
 	int highest_priority;
 	fd_set savedClientsReadable;
@@ -531,8 +531,8 @@ WaitForSomething(pClientsReady)
 		while (clientsReadable[i]) {
 		    int client_priority, curclient, client_index;
 
-		    curclient = ffs (clientsReadable[i]) - 1;
-		    client_index = ConnectionTranslation[curclient + (i << 5)];
+		    curclient = ffsl(clientsReadable[i]) - 1;
+		    client_index = ConnectionTranslation[curclient + (i * sizeof(fd_mask) * 8)];
 		    dbprintf(("%d has input\n", curclient));
 #ifdef XSYNC
 		    client_priority = clients[client_index]->priority;

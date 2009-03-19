@@ -820,8 +820,8 @@ EstablishNewConnections(clientUnused, closure)
 	int status;
 
 #ifndef WIN32
-	curconn = ffs (readyconnections) - 1;
-	readyconnections &= ~(1 << curconn);
+	curconn = ffsl(readyconnections) - 1;
+	readyconnections &= ~(((fd_mask)1) << curconn);
 #else
 	curconn = XFD_FD(&readyconnections, i);
 #endif
@@ -987,14 +987,15 @@ CheckConnections()
 	mask = AllClients.fds_bits[i];
         while (mask)
     	{
-	    curoff = ffs (mask) - 1;
- 	    curclient = curoff + (i << 5);
+	    curoff = ffsl(mask) - 1;
+ 	    curclient = curoff + (8 * sizeof(fd_mask) * i);
             FD_ZERO(&tmask);
             FD_SET(curclient, &tmask);
             r = Select (curclient + 1, &tmask, NULL, NULL, &notime);
+            
             if (r < 0)
 		CloseDownClient(clients[ConnectionTranslation[curclient]]);
-	    mask &= ~(1 << curoff);
+	    mask &= ~(((fd_mask)1) << curoff);
 	}
     }	
 #else

@@ -588,7 +588,7 @@ miCopyPlane(pSrcDrawable, pDstDrawable,
 	box.x2 -= pSrcDrawable->x;
 	box.y1 -= pSrcDrawable->y;
 	box.y2 -= pSrcDrawable->y;
-	ptile = miGetPlane(pSrcDrawable, ffs(bitPlane) - 1,
+	ptile = miGetPlane(pSrcDrawable, ffsl(bitPlane) - 1,
 			   box.x1, box.y1,
 			   box.x2 - box.x1, box.y2 - box.y1,
 			   (unsigned long *) NULL);
@@ -697,7 +697,7 @@ miGetImage(pDraw, sx, sy, w, h, format, planeMask, pDst)
     }
     else
     {
-	(void) miGetPlane(pDraw, ffs(planeMask) - 1, sx, sy, w, h,
+	(void) miGetPlane(pDraw, ffsl(planeMask) - 1, sx, sy, w, h,
 			  (unsigned long *)pDst);
     }
 }

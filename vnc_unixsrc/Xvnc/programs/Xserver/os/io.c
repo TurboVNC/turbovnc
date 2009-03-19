@@ -967,7 +967,8 @@ FlushClient(who, oc, extraBuf, extraCount)
 void
 FlushAllOutput()
 {
-    register int index, base, mask;
+    register int index, base;
+    fd_mask mask;
     OsCommPtr oc;
     register ClientPtr client;
     Bool newoutput = NewOutputPending;
@@ -996,9 +997,9 @@ FlushAllOutput()
 	OutputPending.fds_bits[ base ] = 0;
 	while (mask)
 	{
-	    index = ffs(mask) - 1;
+	    index = ffsl(mask) - 1;
 	    mask &= ~lowbit(mask);
-	    if ((index = ConnectionTranslation[(base << 5) + index]) == 0)
+	    if ((index = ConnectionTranslation[(base * sizeof(fd_mask) * 8) + index]) == 0)
 		continue;
 	    client = clients[index];
 	    if (client->clientGone)
