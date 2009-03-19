@@ -110,7 +110,7 @@ cfbCopyPlane8to1 (pSrcDrawable, pDstDrawable, rop, prgnDst, pptSrc, planemask, b
 
     mfbGetPixelWidthAndPointer (pDstDrawable, widthDst, pdstBase)
 
-    bitPos = ffs (bitPlane) - 1;
+    bitPos = ffsl(bitPlane) - 1;
 
     nbox = REGION_NUM_RECTS(prgnDst);
     pbox = REGION_RECTS(prgnDst);

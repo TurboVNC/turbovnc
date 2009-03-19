@@ -12,7 +12,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncserver 1 "August 2008" "" "TurboVNC"
+.TH vncserver 1 "March 2009" "" "TurboVNC"
 .SH NAME
 vncserver \- a wrapper to launch an X server for VNC.
 .SH SYNOPSIS
@@ -108,6 +108,14 @@ Starts \fBXvnc\fR on display :1 with desktop size of 1024x768 pixels.
 .TP
 \fBvncserver\fR \fI\-kill :1\fR
 Shuts down the \fBXvnc\fR server running on display :1.
+.SH FILES
+.TP
+/etc/turbovncserver.conf
+System-wide configuration file for the TurboVNC Server.
+.TP
+$HOME/.vnc/turbovncserver.conf
+User configuration file for the TurboVNC Server. Settings in this file
+override the system-wide configuration.
 .SH SEE ALSO
 \fBXvnc\fR(1), \fBvncviewer\fR(1), \fBvncpasswd\fR(1), \fBvncconnect\fR(1)
 .SH AUTHORS

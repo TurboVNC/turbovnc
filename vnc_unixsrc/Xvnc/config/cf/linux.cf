@@ -392,5 +392,9 @@ XCOMM binutils:	(LinuxBinUtilsMajorVersion)
 # define HasZlib	YES
 #endif
 
+#ifndef HasFfsl
+#define HasFfsl         YES
+#endif
+
 #include <lnxLib.rules>
 #include <xfree86.cf>
