@@ -584,7 +584,8 @@ LRESULT CALLBACK vncMenu::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lP
 			// This message holds a process id which we can use to
 			// impersonate a specific user.  In doing so, we can load their
 			// preferences correctly
-			vncService::ProcessUserHelperMessage(wParam, lParam);
+			DWORD processId = (DWORD)lParam;
+			vncService::ProcessUserHelperMessage(processId);
 
 			// - Trigger a check of the current user
 			PostMessage(hwnd, WM_USERCHANGED, 0, 0);

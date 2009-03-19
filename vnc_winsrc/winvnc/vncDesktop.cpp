@@ -2119,8 +2119,6 @@ BOOL vncDesktop::CheckUpdates()
 			}
 		}
 
-// DEBUG: Continue auditing the code from this point.
-
 		// If we have incremental update requests
 		if (m_server->IncrRgnRequested())
 		{
@@ -2168,6 +2166,8 @@ BOOL vncDesktop::CheckUpdates()
 				m_server->CopyRect(m_copyrect_rect, m_copyrect_src);
 				m_copyrect_set = false;
 
+// DEBUG: Continue auditing the code from this point.
+
 // IMPORTANT: this order: CopyRectToBuffer, CaptureScreen, GetChangedRegion
 				// Copy old window rect to back buffer
 				CopyRectToBuffer(m_copyrect_rect, m_copyrect_src);
@@ -2175,7 +2175,7 @@ BOOL vncDesktop::CheckUpdates()
 				// Copy new window rect to main buffer
 				CaptureScreen(m_copyrect_rect, m_mainbuff);
 
-				// Get changed pixels to rg
+				// Get changed pixels to rgn
 				GetChangedRegion(rgn, m_copyrect_rect);
 
 				RECT rect;
@@ -2282,10 +2282,11 @@ inline void vncDesktop::CheckRects(vncRegion &rgn, rectlist &rects)
 
 static const int BLOCK_SIZE = 32;
 
-// created for troubleshoot purposes;
-// when GetChangedRegion_Normal et al are suspected for bugs/need changes.
-// the code below is as simple and clear as possible
-void vncDesktop::GetChangedRegion_Dummy(vncRegion &rgn, const RECT &rect)
+/*
+// A dummy version of GetChangedRegion() created for troubleshoot purposes
+// when GetChangedRegion() et al are suspected for bugs/need changes.
+// The code below is as simple and clear as possible.
+void vncDesktop::GetChangedRegion(vncRegion &rgn, const RECT &rect)
 {
 	rgn.AddRect(rect);
 
@@ -2308,8 +2309,57 @@ void vncDesktop::GetChangedRegion_Dummy(vncRegion &rgn, const RECT &rect)
 		o_ptr += m_bytesPerRow;
 	}
 }
+*/
 
-void vncDesktop::GetChangedRegion_Normal(vncRegion &rgn, const RECT &rect)
+/*
+// DEBUG: Another dumb and slow version of GetChangedRegion().
+void vncDesktop::GetChangedRegion(vncRegion &rgn, const RECT &rect)
+{
+	RECT newRect;
+
+	vnclog.Print(LL_INTERR, VNCLOG("DEBUG: GetChangedRegion for %dx%d at (%d,%d)\n"),
+		(int)(rect.right - rect.left), (int)(rect.bottom - rect.top),
+		(int)rect.left, (int)rect.top);
+
+	// Copy the changes to the back buffer
+	const int top = rect.top - m_bmrect.top;
+	const int left = rect.left - m_bmrect.left;
+	_ASSERTE(top >= 0);
+	_ASSERTE(left >= 0);
+
+	const UINT bytesPerPixel = m_scrinfo.format.bitsPerPixel / 8;
+	const int offset = top * m_bytesPerRow + left * bytesPerPixel;
+
+	unsigned char *o_ptr = m_backbuff + offset;
+	unsigned char *n_ptr = m_mainbuff + offset;
+	const int bytes_in_row = (rect.right - rect.left) * bytesPerPixel;
+	for (int y = rect.top; y < rect.bottom; y++) {
+		int x0 = rect.left;
+		while (x0 < rect.right) {
+			unsigned char *pNew = m_mainbuff + y * m_bytesPerRow + x0 * bytesPerPixel;
+			unsigned char *pOld = m_backbuff + y * m_bytesPerRow + x0 * bytesPerPixel;
+			if (memcmp(pOld, pNew, bytesPerPixel) != 0) {
+				break;	// x0 points to the first difference at the left
+			}
+			x0++;
+		}
+		SetRect(&newRect, x0, y, rect.right, y + 1);
+		if (newRect.right - newRect.left > 0 && newRect.bottom - newRect.top > 0) {
+			rgn.AddRect(newRect);
+			vnclog.Print(LL_INTERR, VNCLOG("DEBUG:   added %dx%d at (%d,%d)\n"),
+				(int)(newRect.right - newRect.left), (int)(newRect.bottom - newRect.top),
+				(int)newRect.left, (int)newRect.top);
+		}
+
+		memcpy(o_ptr, n_ptr, bytes_in_row);
+		n_ptr += m_bytesPerRow;
+		o_ptr += m_bytesPerRow;
+	}
+	vnclog.Print(LL_INTERR, VNCLOG("DEBUG: numRects = %d\n"), rgn.numRects());
+}
+*/
+
+void vncDesktop::GetChangedRegion(vncRegion &rgn, const RECT &rect)
 {
 	const UINT bytesPerPixel = m_scrinfo.format.bitsPerPixel / 8;
 	const int bytes_per_scanline = (rect.right - rect.left) * bytesPerPixel;
@@ -2683,150 +2733,88 @@ void vncDesktop::PollArea(const RECT &rect)
 	}
 }
 
-inline RECT MoveRect(RECT const& sr, POINT const& mv)
+void vncDesktop::CopyRect(const RECT &rcDest, const POINT &ptSrc)
 {
-	RECT R;
-	R.left = sr.left + mv.x;
-	R.top = sr.top + mv.y;
-	R.right = sr.right + mv.x;
-	R.bottom = sr.bottom + mv.y;
-	return R;
-}
-
-void vncDesktop::CopyRect(RECT const &rcDest, POINT ptSrc)
-{
-// motion vector
-	POINT mv2;
-	mv2.x = rcDest.left - ptSrc.x;
-	mv2.y = rcDest.top - ptSrc.y;
+	const int offset_x = rcDest.left - ptSrc.x;
+	const int offset_y = rcDest.top - ptSrc.y;
 
 	// Clip the destination to the screen
-	RECT rcDr2;
-	if (!IntersectRect(&rcDr2, &rcDest, &m_server->GetSharedRect()))
+	RECT destrect;
+	if (!IntersectRect(&destrect, &rcDest, &m_server->GetSharedRect()))
 		return;
 
-// NOTE: this is important.
-// each pixel in rcDr2 is either salvaged by copyrect
-// or became dirty
-	m_changed_rgn.AddRect(rcDr2);
-
-	// Adjust the source correspondingly
-	ptSrc.x = rcDr2.left - mv2.x;
-	ptSrc.y = rcDr2.top - mv2.y;
+	// NOTE: This is important. Each pixel in destrect is either salvaged
+	//       by copyrect or became dirty.
+	m_changed_rgn.AddRect(destrect);
 
 	// Work out the source rectangle
-	RECT rcSource;
-	rcSource.left = ptSrc.x;
-	rcSource.top = ptSrc.y;
-	rcSource.right = rcSource.left + rcDr2.right - rcDr2.left;
-	rcSource.bottom = rcSource.top + rcDr2.bottom - rcDr2.top;
+	RECT srcrect;
+	srcrect.left = destrect.left - offset_x;
+	srcrect.top = destrect.top - offset_y;
+	srcrect.right = srcrect.left + destrect.right - destrect.left;
+	srcrect.bottom = srcrect.top + destrect.bottom - destrect.top;
 
 	// Clip the source to the screen
-	RECT rcSr2;
-	if (!IntersectRect(&rcSr2, &rcSource, &m_server->GetSharedRect()))
+	RECT srcrect2;
+	if (!IntersectRect(&srcrect2, &srcrect, &m_server->GetSharedRect()))
 		return;
 
-	rcDr2 = MoveRect(rcSr2, mv2);
+	destrect.left += (srcrect2.left - srcrect.left);
+	destrect.top += (srcrect2.top - srcrect.top);
+	destrect.right = srcrect2.right - srcrect2.left + destrect.left;
+	destrect.bottom = srcrect2.bottom - srcrect2.top + destrect.top;
 
-// we'd try to continue the chain
-	if (m_copyrect_set)
-	{
-// prev motion vector
-		POINT mv1;
-		mv1.x = m_copyrect_rect.left - m_copyrect_src.x;
-		mv1.y = m_copyrect_rect.top - m_copyrect_src.y;
+	if ( destrect.right - destrect.left >= 16 &&
+		 destrect.bottom - destrect.top >= 16 ) {
+		m_changed_rgn.SubtractRect(destrect);
 
-		m_changed_rgn.AddRect(m_copyrect_rect);
+		m_copyrect_rect = destrect;
+		m_copyrect_src.x = srcrect2.left;
+		m_copyrect_src.y = srcrect2.top;
+		m_copyrect_set = TRUE;
 
-		RECT CR1i2Dst;
-		if (!IntersectRect(&CR1i2Dst, &m_copyrect_rect, &rcSr2))
-		{
-			m_copyrect_set = FALSE;
-			return;
-		}
-
-		RECT rcDr3 = MoveRect(CR1i2Dst, mv2);
-		if (rcDr3.right - rcDr3.left >= 16 &&
-			rcDr3.bottom - rcDr3.top >= 16)
-		{
-			m_changed_rgn.SubtractRect(rcDr3);
-
-			POINT ptCR1i2Src;
-			ptCR1i2Src.x = CR1i2Dst.left - mv1.x;
-			ptCR1i2Src.y = CR1i2Dst.top - mv1.y;
-
-			m_copyrect_rect = rcDr3;
-			m_copyrect_src = ptCR1i2Src;
-
-			//DPF(("CopyRect-cont: (%d, %d) (%d, %d, %d, %d)\n",
-			//	m_copyrect_src.x,
-			//	m_copyrect_src.y,
-			//	m_copyrect_rect.left,
-			//	m_copyrect_rect.top,
-			//	m_copyrect_rect.right,
-			//	m_copyrect_rect.bottom));
-		}
-		else
-		{
-			m_copyrect_set = FALSE;
-		}
-	}
-	else
-	{
-		if (rcDr2.right - rcDr2.left >= 16 &&
-			rcDr2.bottom - rcDr2.top >= 16)
-		{
-			m_changed_rgn.SubtractRect(rcDr2);
-
-			m_copyrect_rect = rcDr2;
-			m_copyrect_src.x = rcSr2.left;
-			m_copyrect_src.y = rcSr2.top;
-			m_copyrect_set = TRUE;
-
-			//DPF(("CopyRect: (%d, %d) (%d, %d, %d, %d)\n",
-			//	m_copyrect_src.x,
-			//	m_copyrect_src.y,
-			//	m_copyrect_rect.left,
-			//	m_copyrect_rect.top,
-			//	m_copyrect_rect.right,
-			//	m_copyrect_rect.bottom));
-		}
+		//DPF(("CopyRect: (%d, %d) (%d, %d, %d, %d)\n",
+		//	m_copyrect_src.x,
+		//	m_copyrect_src.y,
+		//	m_copyrect_rect.left,
+		//	m_copyrect_rect.top,
+		//	m_copyrect_rect.right,
+		//	m_copyrect_rect.bottom));
 	}
 }
 
-void vncDesktop::CopyRectToBuffer(RECT dest, POINT source)
+//
+// Copy the data from one rectangle of the back buffer to another.
+//
+
+void vncDesktop::CopyRectToBuffer(const RECT &dest, const POINT &source)
 {
-	const int ptsrc_re_vd_x = source.x - m_bmrect.left;
-	const int ptsrc_re_vd_y = source.y - m_bmrect.top;
-	_ASSERTE(ptsrc_re_vd_x >= 0);
-	_ASSERTE(ptsrc_re_vd_y >= 0);
+	const int src_x = source.x - m_bmrect.left;
+	const int src_y = source.y - m_bmrect.top;
+	_ASSERTE(src_x >= 0);
+	_ASSERTE(src_y >= 0);
 
-	// Copy the data from one region of the back-buffer to another!
-	BYTE *srcptr = m_mainbuff + (ptsrc_re_vd_y * m_bytesPerRow) + (ptsrc_re_vd_x * m_scrinfo.format.bitsPerPixel/8);
+	const int dst_x = dest.left - m_bmrect.left;
+	const int dst_y = dest.top - m_bmrect.top;
+	_ASSERTE(dst_x >= 0);
+	_ASSERTE(dst_y >= 0);
 
-	const int rcdest_re_vd_left = dest.left - m_bmrect.left;
-	const int rcdest_re_vd_top = dest.top - m_bmrect.top;
-	_ASSERTE(rcdest_re_vd_left >= 0);
-	_ASSERTE(rcdest_re_vd_top >= 0);
+	const unsigned int bytesPerPixel = m_scrinfo.format.bitsPerPixel / 8;
+	const unsigned int bytesPerLine = (dest.right - dest.left) * bytesPerPixel;
 
-	BYTE *destptr = m_backbuff + (rcdest_re_vd_top * m_bytesPerRow) + (rcdest_re_vd_left * m_scrinfo.format.bitsPerPixel/8);
-	const UINT bytesPerLine = (dest.right - dest.left) * (m_scrinfo.format.bitsPerPixel/8);
+	BYTE *srcptr = m_backbuff + src_y * m_bytesPerRow + src_x * bytesPerPixel;
+	BYTE *destptr = m_backbuff + dst_y * m_bytesPerRow + dst_x * bytesPerPixel;
 
-	if (dest.top < source.y)
-	{
-		for (int y = dest.top; y < dest.bottom; y++)
-		{
+	if (dst_y < src_y) {
+		for (int y = dest.top; y < dest.bottom; y++) {
 			memmove(destptr, srcptr, bytesPerLine);
 			srcptr += m_bytesPerRow;
 			destptr += m_bytesPerRow;
 		}
-	}
-	else
-	{
-		srcptr += (m_bytesPerRow * ((dest.bottom - dest.top) - 1));
-		destptr += (m_bytesPerRow * ((dest.bottom - dest.top) - 1));
-		for (int y = dest.bottom; y > dest.top; y--)
-		{
+	} else {
+		srcptr += m_bytesPerRow * (dest.bottom - dest.top - 1);
+		destptr += m_bytesPerRow * (dest.bottom - dest.top - 1);
+		for (int y = dest.bottom; y > dest.top; y--) {
 			memmove(destptr, srcptr, bytesPerLine);
 			srcptr -= m_bytesPerRow;
 			destptr -= m_bytesPerRow;

@@ -144,6 +144,13 @@
 #define IDC_STATIC_QUERY                1101
 #define IDC_STATIC_LOGGING              1102
 #define IDC_BUILDTIME                   1103
+#define IDC_STATIC_HELP                 1104
+#define IDC_STATIC_FORMATS              1105
+#define IDC_STATIC_NOTE                 1106
+#define IDC_STATIC_URL                  1107
+#define IDC_STATIC_VERSION              1108
+#define IDC_STATIC_COPYRIGHTS           1109
+#define IDC_STATIC_BASEDON              1110
 #define ID_PROPERTIES                   40001
 #define ID_CLOSE                        40002
 #define ID_KILLCLIENTS                  40003
@@ -158,7 +165,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        156
 #define _APS_NEXT_COMMAND_VALUE         40008
-#define _APS_NEXT_CONTROL_VALUE         1104
+#define _APS_NEXT_CONTROL_VALUE         1111
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -112,7 +112,7 @@ public:
 	// If they're disabled, it'll return NULL
 	inline BYTE *MainBuffer() {	return m_mainbuff; }
 	inline RECT MainBufferRect() {	return m_bmrect; }
-	void CopyRect(RECT const& dest, POINT source);
+	void CopyRect(const RECT &dest, const POINT &source);
 
 	BOOL			m_initialClipBoardSeen;
 
@@ -147,7 +147,7 @@ protected:
 
 	void CopyToBuffer(RECT rect, BYTE *scrBuff);
 	void CopyToBuffer(RECT rect, BYTE *scrBuff, const BYTE *SourceBuff);
-	void CopyRectToBuffer(RECT dest, POINT source);
+	void CopyRectToBuffer(const RECT &dest, const POINT &source);
 	void CalcCopyRects();
 	
 	// Routine to attempt enabling optimised DIBsection blits
@@ -168,17 +168,7 @@ protected:
 	void PollWindow(HWND hwnd);
 	void PollArea(const RECT &rect);
 	void CheckRects(vncRegion &rgn, rectlist &rects);
-	void GetChangedRegion_Normal(vncRegion &rgn, const RECT &rect);
-	void GetChangedRegion_Dummy(vncRegion &rgn, const RECT &rect);
-
-	void GetChangedRegion(vncRegion &rgn, const RECT &rect)
-	{
-#if 1
-		GetChangedRegion_Normal(rgn, rect);
-#else
-		GetChangedRegion_Dummy(rgn, rect);
-#endif
-	}
+	void GetChangedRegion(vncRegion &rgn, const RECT &rect);
 
 	void UpdateChangedRect(vncRegion &rgn, const RECT &rect);
 	void UpdateChangedSubRect(vncRegion &rgn, const RECT &rect);
