@@ -1,35 +1,118 @@
 ------------------------------------------------------------------------
-r2296 | const_k | 2007-05-02 14:15:35 +0700 (Wed, 02 May 2007) | 3 lines
+r3617 | const_k | 2009-03-05 12:38:33 +0600 (Thu, 05 Mar 2009) | 2 lines
 Changed paths:
-   M /orig/tags/VERSION_1_3_9/vnc_unixsrc/vnc-xclients.patch
+   M /orig/trunk/vnc_unixsrc/Xvnc/config/cf/Imake.tmpl
+   M /orig/trunk/vnc_unixsrc/Xvnc/config/cf/linux.cf
+   M /orig/trunk/vnc_unixsrc/Xvnc/programs/Xserver/cfb/cfb8cppl.c
+   M /orig/trunk/vnc_unixsrc/Xvnc/programs/Xserver/dix/Imakefile
+   A /orig/trunk/vnc_unixsrc/Xvnc/programs/Xserver/dix/ffsl.c
+   M /orig/trunk/vnc_unixsrc/Xvnc/programs/Xserver/hw/vnc/httpd.c
+   M /orig/trunk/vnc_unixsrc/Xvnc/programs/Xserver/mi/mibitblt.c
+   M /orig/trunk/vnc_unixsrc/Xvnc/programs/Xserver/os/WaitFor.c
+   M /orig/trunk/vnc_unixsrc/Xvnc/programs/Xserver/os/connection.c
+   M /orig/trunk/vnc_unixsrc/Xvnc/programs/Xserver/os/io.c
 
-Merged another change from /orig/trunk/vnc_unixsrc (-r 2294:2295), to be included in 1.3.9:
-- rev.2295: Updated the patch. Now it should create much better initial .vnc/xstartup file on first execution of the vncserver script. New xstartup script solves the problem with empty screen under Fedora Core 6, and provides an example of setting up desktop environment manually.
+[Bugfixes] Fixes for 64-bit Linux issues, a patch from Russel Miranda.
 
 ------------------------------------------------------------------------
-r2294 | const_k | 2007-05-01 00:47:01 +0700 (Tue, 01 May 2007) | 4 lines
+r3616 | const_k | 2009-03-05 11:52:25 +0600 (Thu, 05 Mar 2009) | 2 lines
 Changed paths:
-   M /orig/tags/VERSION_1_3_9/vnc_unixsrc/Xvnc/programs/Xserver/hw/vnc/init.c
-   A /orig/tags/VERSION_1_3_9/vnc_unixsrc/classes/InStream.class (from /orig/trunk/vnc_unixsrc/classes/InStream.class:2293)
-   A /orig/tags/VERSION_1_3_9/vnc_unixsrc/classes/MemInStream.class (from /orig/trunk/vnc_unixsrc/classes/MemInStream.class:2293)
-   M /orig/tags/VERSION_1_3_9/vnc_unixsrc/classes/OptionsFrame.class
-   M /orig/tags/VERSION_1_3_9/vnc_unixsrc/classes/RfbProto.class
-   M /orig/tags/VERSION_1_3_9/vnc_unixsrc/classes/VncCanvas.class
-   M /orig/tags/VERSION_1_3_9/vnc_unixsrc/classes/VncCanvas2.class
-   M /orig/tags/VERSION_1_3_9/vnc_unixsrc/classes/VncViewer.class
-   M /orig/tags/VERSION_1_3_9/vnc_unixsrc/classes/VncViewer.jar
-   A /orig/tags/VERSION_1_3_9/vnc_unixsrc/classes/ZlibInStream.class (from /orig/trunk/vnc_unixsrc/classes/ZlibInStream.class:2293)
+   M /orig/trunk/vnc_unixsrc/classes/VncCanvas.class
+   M /orig/trunk/vnc_unixsrc/classes/VncViewer.jar
 
-Merged two forgotten changes from /orig/trunk/vnc_unixsrc, revisions 2274:2293, to be included in 1.3.9. The changes were as follows:
-- rev.2293: Xvnc's built-in Java viewer updated to its current version.
-- rev.2275: Version-specific information updated, version 1.3.9.
+[Build fix] Updated built-in Java viewer to the latest version.
 
 ------------------------------------------------------------------------
-r2270 | const_k | 2007-04-26 18:22:08 +0700 (Thu, 26 Apr 2007) | 2 lines
+r3595 | const_k | 2009-02-12 10:27:18 +0600 (Thu, 12 Feb 2009) | 2 lines
 Changed paths:
-   A /orig/tags/VERSION_1_3_9/vnc_unixsrc (from /orig/trunk/vnc_unixsrc:2269)
+   M /orig/trunk/vnc_unixsrc/tightvncserver.conf
+   M /orig/trunk/vnc_unixsrc/vncserver
 
-Tagging Unix version 1.3.9.
+Made colorPath configurable via tightvncserver.conf, provided a better example of setting fontPath.
+
+------------------------------------------------------------------------
+r3590 | const_k | 2009-02-05 15:48:09 +0600 (Thu, 05 Feb 2009) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_unixsrc/README
+   M /orig/trunk/vnc_unixsrc/Xvnc/config/cf/vnc.def
+   M /orig/trunk/vnc_unixsrc/Xvnc/programs/Xserver/hw/vnc/init.c
+   M /orig/trunk/vnc_unixsrc/tightvnc.spec
+   M /orig/trunk/vnc_unixsrc/vncserver
+   M /orig/trunk/vnc_unixsrc/vncviewer/README
+   M /orig/trunk/vnc_unixsrc/vncviewer/argsresources.c
+
+[Packaging] Version-specific information updated, version 1.3.10.
+
+------------------------------------------------------------------------
+r3570 | const_k | 2009-01-23 19:07:59 +0600 (Fri, 23 Jan 2009) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_unixsrc/classes/AuthPanel.class
+   M /orig/trunk/vnc_unixsrc/classes/ButtonPanel.class
+   M /orig/trunk/vnc_unixsrc/classes/CapabilityInfo.class
+   M /orig/trunk/vnc_unixsrc/classes/CapsContainer.class
+   M /orig/trunk/vnc_unixsrc/classes/ClipboardFrame.class
+   M /orig/trunk/vnc_unixsrc/classes/DesCipher.class
+   M /orig/trunk/vnc_unixsrc/classes/InStream.class
+   M /orig/trunk/vnc_unixsrc/classes/MemInStream.class
+   M /orig/trunk/vnc_unixsrc/classes/OptionsFrame.class
+   M /orig/trunk/vnc_unixsrc/classes/RecordingFrame.class
+   M /orig/trunk/vnc_unixsrc/classes/ReloginPanel.class
+   M /orig/trunk/vnc_unixsrc/classes/RfbProto.class
+   M /orig/trunk/vnc_unixsrc/classes/SessionRecorder.class
+   M /orig/trunk/vnc_unixsrc/classes/SocketFactory.class
+   M /orig/trunk/vnc_unixsrc/classes/VncCanvas.class
+   M /orig/trunk/vnc_unixsrc/classes/VncCanvas2.class
+   M /orig/trunk/vnc_unixsrc/classes/VncViewer.class
+   M /orig/trunk/vnc_unixsrc/classes/VncViewer.jar
+   M /orig/trunk/vnc_unixsrc/classes/ZlibInStream.class
+
+[Build fix] Updated built-in Java viewer to the latest version.
+
+------------------------------------------------------------------------
+r3567 | const_k | 2009-01-22 16:35:08 +0600 (Thu, 22 Jan 2009) | 2 lines
+Changed paths:
+   A /orig/trunk/vnc_unixsrc/tightvncserver.conf
+   M /orig/trunk/vnc_unixsrc/vncserver
+   M /orig/trunk/vnc_unixsrc/vncserver.man
+
+[Development] Reading configuration from files in the vncserver script.
+
+------------------------------------------------------------------------
+r2423 | const_k | 2008-03-17 11:05:54 +0600 (Mon, 17 Mar 2008) | 1 line
+Changed paths:
+   M /orig/trunk/vnc_javasrc
+   M /orig/trunk/vnc_unixsrc
+   M /orig/trunk/vnc_winsrc
+
+Set SVN project language to English.
+------------------------------------------------------------------------
+r2295 | const_k | 2007-05-02 14:03:59 +0700 (Wed, 02 May 2007) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_unixsrc/vnc-xclients.patch
+
+Updated the patch. Now it should create much better initial .vnc/xstartup file on first execution of the vncserver script. New xstartup script solves the problem with empty screen under Fedora Core 6, and provides an example of setting up desktop environment manually.
+
+------------------------------------------------------------------------
+r2293 | const_k | 2007-05-01 00:27:40 +0700 (Tue, 01 May 2007) | 2 lines
+Changed paths:
+   A /orig/trunk/vnc_unixsrc/classes/InStream.class
+   A /orig/trunk/vnc_unixsrc/classes/MemInStream.class
+   M /orig/trunk/vnc_unixsrc/classes/OptionsFrame.class
+   M /orig/trunk/vnc_unixsrc/classes/RfbProto.class
+   M /orig/trunk/vnc_unixsrc/classes/VncCanvas.class
+   M /orig/trunk/vnc_unixsrc/classes/VncCanvas2.class
+   M /orig/trunk/vnc_unixsrc/classes/VncViewer.class
+   M /orig/trunk/vnc_unixsrc/classes/VncViewer.jar
+   A /orig/trunk/vnc_unixsrc/classes/ZlibInStream.class
+
+Xvnc's built-in Java viewer updated to its current version.
+
+------------------------------------------------------------------------
+r2275 | const_k | 2007-04-27 12:12:54 +0700 (Fri, 27 Apr 2007) | 2 lines
+Changed paths:
+   M /orig/trunk/vnc_unixsrc/Xvnc/programs/Xserver/hw/vnc/init.c
+
+Version-specific information updated, version 1.3.9.
 
 ------------------------------------------------------------------------
 r2267 | const_k | 2007-04-26 17:57:06 +0700 (Thu, 26 Apr 2007) | 2 lines
