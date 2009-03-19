@@ -155,6 +155,14 @@
 #define IDC_CLIENTUP                    1138
 #define IDC_LOG_BROWSE                  1139
 #define IDC_BUILDTIME                   1140
+#define IDC_STATIC_URL                  1141
+#define IDC_STATIC_VERSION              1143
+#define IDC_STATIC_COPYRIGHTS           1144
+#define IDC_STATIC_BASEDON              1145
+#define IDC_STATIC_LOGO                 1146
+#define IDC_STATIC_HOST                 1147
+#define IDC_STATIC_LOGIN                1148
+#define IDC_STATIC_PASSWD               1149
 #define IDC_STATIC_SUBSAMP              5000
 #define IDC_STATIC_QUAL                 5001
 #define IDC_STATIC_COMPRESS             5002
@@ -177,7 +185,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        246
 #define _APS_NEXT_COMMAND_VALUE         40011
-#define _APS_NEXT_CONTROL_VALUE         1141
+#define _APS_NEXT_CONTROL_VALUE         1150
 #define _APS_NEXT_SYMED_VALUE           244
 #endif
 #endif
