@@ -4,6 +4,93 @@
 |   in TightVNC source and binary archives.                          |
 +--------------------------------------------------------------------+
 
+* TightVNC 1.3.10
+
+  - Windows Server: Impersonating currently logged on user while
+    processing file transfer requests. Disabling file transfers if
+    current user is unknown or nobody is logged in.
+
+  - Windows Server: Fixed rendering problems when multiple CopyRects
+    were combined with normal updates. That could caused distortions
+    that never updated even with full-screen polling active.
+
+  - Windows Server: Added new "-silent" command-line option which
+    modifies the behavior of -install, -reinstall and -remove options
+    and makes them not show informational windows on successful
+    execution. Note that -silent should precede other respective
+    options in the command line.
+
+  - Windows Server: LastRect, XCursor and RichCursor pseudo-encodings
+    were not properly enabled if they preceded true encodings in the
+    SetEncodings protocol message.
+
+  - Windows Viewer: Fixed integer overflow vulnerabilities reported
+    by Core Security Technologies. A specially modified VNC server
+    could currupt the heap of the connected viewer causing its crash
+    or malfunction.
+
+  - Windows Viewer: TightVNC Viewer version 1.3.9 saved only
+    successful connections in the list of recently visited VNC
+    servers. Now we save unsuccessful connections too so that users
+    would not ever have to re-type server names after connection
+    failures. Also, several other enhancements were made to the code
+    which handles the list of recent connections.
+
+  - Windows Viewer: Fixed a bug with not loading passwords from saved
+    .vnc files correctly if the first byte of their encrypted
+    representation was zero.
+
+  - Windows Viewer: Fixed problems under Windows Vista where Windows
+    taskbar could remain visible above the full-screen window.
+
+  - Windows Viewer: Fixed a problem with decoding JPEG rectangles
+    wider than 2048 pixels.
+
+  - Windows Viewer: Fixed a bug with not saving log file name
+    correctly on using the Browse button.
+
+  - Windows Viewer: Usability improvements in the "New Connection"
+    dialog. 
+
+  - Windows Packaging: Improved installer and uninstall utility.
+    In this version, self-installing executable will not try to
+    install service in Windows Vista. Improved uninstall program
+    always removes the WinVNC service if it was previously installed.
+
+  - Unix Server: Applied fixes for 64-bit Linux issues, a patch from
+    Russel Miranda.
+
+  - Unix Server: Made the vncserver script read configuration from
+    files (system-wide /etc/tightvncserver.conf and user-specific
+    $HOME/.vnc/tightvncserver.conf).
+
+  - All viewers: Allow configuring JPEG quality level regardless of
+    the preferred encoding set. This makes sense because TightVNC
+    Servers can transmit video data as JPEG even if Tight is not the
+    preferred encoding.
+ 
+  - Java viewer: Fixed a bug that caused NullPointerException when
+    connecting to any VNC server not supporting TightVNC protocol
+    extensions.
+
+  - Java viewer: Fixed a bug with ignoreCursorUpdates option in 24-bit
+    color mode caused the viewer to disconnect. Thanks to Damien
+    Mascre for pointing out the issue.
+
+  - Java viewer: PORT parameter is not required any more, now it
+    defaults to 5900.
+
+  - Java viewer: Do not defer update requests by default, to minimize
+    delays in screen updates.
+
+  - Java viewer: Improvements in reporting statistics on disconnect.
+
+  - Java viewer: Added debugging parameters (DEBUG_XU, DEBUG_CU) that
+    allow using the viewer as a tool for measuring VNC server
+    performance.
+
+  - Other minor improvements and bugfixes.
+
 * TightVNC 1.3.9
 
   - All platforms: Added support for the standard RFB protocol version

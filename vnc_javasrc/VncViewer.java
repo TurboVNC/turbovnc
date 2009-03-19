@@ -85,6 +85,8 @@ public class VncViewer extends java.applet.Applet
   int deferScreenUpdates;
   int deferCursorUpdates;
   int deferUpdateRequests;
+  int debugStatsExcludeUpdates;
+  int debugStatsMeasureUpdates;
 
   // Reference to this applet for inter-applet communication.
   public static java.applet.Applet refApplet;
@@ -333,7 +335,6 @@ public class VncViewer extends java.applet.Applet
     int authType;
     if (secType == RfbProto.SecTypeTight) {
       showConnectionStatus("Enabling TightVNC protocol extensions");
-      rfb.initCapabilities();
       rfb.setupTunneling();
       authType = rfb.negotiateAuthenticationTight();
     } else {
@@ -692,12 +693,12 @@ public class VncViewer extends java.applet.Applet
       }
     }
 
-    String str = readParameter("PORT", true);
-    port = Integer.parseInt(str);
+    port = readIntParameter("PORT", 5900);
 
     // Read "ENCPASSWORD" or "PASSWORD" parameter if specified.
     readPasswordParameters();
 
+    String str;
     if (inAnApplet) {
       str = readParameter("Open New Window", false);
       if (str != null && str.equalsIgnoreCase("Yes"))
@@ -726,7 +727,11 @@ public class VncViewer extends java.applet.Applet
     // Fine tuning options.
     deferScreenUpdates = readIntParameter("Defer screen updates", 20);
     deferCursorUpdates = readIntParameter("Defer cursor updates", 10);
-    deferUpdateRequests = readIntParameter("Defer update requests", 50);
+    deferUpdateRequests = readIntParameter("Defer update requests", 0);
+
+    // Debugging options.
+    debugStatsExcludeUpdates = readIntParameter("DEBUG_XU", 0);
+    debugStatsMeasureUpdates = readIntParameter("DEBUG_CU", 0);
 
     // SocketFactory.
     socketFactory = readParameter("SocketFactory", false);
@@ -815,7 +820,37 @@ public class VncViewer extends java.applet.Applet
   //
 
   synchronized public void disconnect() {
-    System.out.println("Disconnect");
+    System.out.println("Disconnecting");
+
+    if (vc != null) {
+      double sec = (System.currentTimeMillis() - vc.statStartTime) / 1000.0;
+      double rate = Math.round(vc.statNumUpdates / sec * 100) / 100.0;
+      int nRealRects = vc.statNumPixelRects;
+      int nPseudoRects = vc.statNumTotalRects - vc.statNumPixelRects;
+      System.out.println("Updates received: " + vc.statNumUpdates + " (" +
+                         nRealRects + " rectangles + " + nPseudoRects +
+                         " pseudo), " + rate + " updates/sec");
+      int numRectsOther = nRealRects - vc.statNumRectsTight
+        - vc.statNumRectsZRLE - vc.statNumRectsHextile
+        - vc.statNumRectsRaw - vc.statNumRectsCopy;
+      System.out.println("Rectangles:" +
+                         " Tight=" + vc.statNumRectsTight +
+                         "(JPEG=" + vc.statNumRectsTightJPEG +
+                         ") ZRLE=" + vc.statNumRectsZRLE +
+                         " Hextile=" + vc.statNumRectsHextile +
+                         " Raw=" + vc.statNumRectsRaw +
+                         " CopyRect=" + vc.statNumRectsCopy +
+                         " other=" + numRectsOther);
+
+      int raw = vc.statNumBytesDecoded;
+      int compressed = vc.statNumBytesEncoded;
+      if (compressed > 0) {
+          double ratio = Math.round((double)raw / compressed * 1000) / 1000.0;
+          System.out.println("Pixel data: " + vc.statNumBytesDecoded +
+                             " bytes, " + vc.statNumBytesEncoded +
+                             " compressed, ratio " + ratio);
+      }
+    }
 
     if (rfb != null && !rfb.closed())
       rfb.close();
