@@ -23,6 +23,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/socket.h>
@@ -33,6 +34,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <pwd.h>
+#include <arpa/inet.h>
 
 #ifndef USE_LIBWRAP
 #define USE_LIBWRAP 0
@@ -113,7 +115,7 @@ httpCheckFds()
     fd_set fds;
     struct timeval tv;
     struct sockaddr_in addr;
-    int addrlen = sizeof(addr);
+    socklen_t addrlen = sizeof(addr);
 
     if (!httpDir)
 	return;
@@ -193,7 +195,7 @@ static void
 httpProcessInput()
 {
     struct sockaddr_in addr;
-    int addrlen = sizeof(addr);
+    socklen_t addrlen = sizeof(addr);
     char fullFname[512];
     char params[1024];
     char *ptr;
