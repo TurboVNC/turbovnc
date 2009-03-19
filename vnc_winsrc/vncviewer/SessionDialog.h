@@ -52,6 +52,9 @@ private:
 	
 	static BOOL CALLBACK SessDlgProc(  HWND hwndDlg,  UINT uMsg, 
 		WPARAM wParam, LPARAM lParam );
+
+	static void EnableConnectButton(HWND hDialog, BOOL bEnable);
+	static void UpdateConnectButton(HWND hDialog);
 };
 
 #endif // SESSIONDIALOG_H__
