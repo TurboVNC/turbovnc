@@ -95,6 +95,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	char *connectName = NULL;
 	int connectPort;
 	bool cancelConnect = false;
+	bool silent = false;
 
 	for (i = 0; i < strlen(szCmdLine); i++)
 	{
@@ -133,7 +134,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 			arglen == strlen(winvncInstallService))
 		{
 			// Install WinVNC as a service
-			vncService::InstallService();
+			vncService::InstallService(silent);
 			i += arglen;
 			continue;
 		}
@@ -141,7 +142,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 			arglen == strlen(winvncReinstallService))
 		{
 			// Silently remove WinVNC, then re-install it
-			vncService::ReinstallService();
+			vncService::ReinstallService(silent);
+			i += arglen;
+			continue;
+		}
+		if (strncmp(&szCmdLine[i], winvncSilentMode, arglen) == 0 &&
+			arglen == strlen(winvncSilentMode))
+		{
+			silent = true;
 			i += arglen;
 			continue;
 		}
@@ -149,7 +157,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 			arglen == strlen(winvncRemoveService))
 		{
 			// Remove the WinVNC service
-			vncService::RemoveService();
+			vncService::RemoveService(silent);
 			i += arglen;
 			continue;
 		}

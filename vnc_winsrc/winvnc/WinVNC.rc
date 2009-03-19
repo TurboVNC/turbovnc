@@ -32,16 +32,16 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 IDD_ABOUT DIALOG DISCARDABLE  0, 0, 334, 161
 STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About TurboVNC Server"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
     CONTROL         132,IDC_VNCLOGO,"Static",SS_BITMAP | SS_SUNKEN,19,7,87,80
-    LTEXT           "TurboVNC Server version 0.5",IDC_STATIC,135,7,190,9
+    LTEXT           "TurboVNC Server version 0.5",IDC_STATIC_URL,135,7,190,9
 		LTEXT           "Copyright (C) 2004 Landmark Graphics Corporation\nCopyright (C) 2004-2008 Sun Microsystems, Inc.\nhttp://www.virtualgl.org",
-                    IDC_STATIC,135,23,190,25
-    LTEXT           "Based on TightVNC Server version 1.3.9\nCopyright (C) 2000-2006 Constantin Kaplinsky\nCopyright (C) 2000-2007 TightVNC Group\nhttp://www.tightvnc.com/",
-                    IDC_STATIC,135,55,190,33
+                    IDC_STATIC_VERSION,135,23,190,25
+    LTEXT           "Based on TightVNC Server version 1.3.10\nCopyright (C) 2000-2006 Constantin Kaplinsky\nCopyright (C) 2000-2009 TightVNC Group\nhttp://www.tightvnc.com/",
+                    IDC_STATIC_BASEDON,135,55,190,33
     LTEXT           "Based on VNC software\nCopyright (C) 1999-2001 AT&&T Laboratories Cambridge\nCopyright (C) 2002-2003 RealVNC Ltd.\nhttp://www.realvnc.com/",
-                    IDC_STATIC,135,95,190,33
+                    IDC_STATIC_COPYRIGHTS,135,95,190,33
     DEFPUSHBUTTON   "&OK",IDOK,135,139,50,14
     LTEXT           "[build time unknown]",IDC_BUILDTIME,135,15,190,9
 END
@@ -50,7 +50,7 @@ IDD_OUTGOING_CONN DIALOG DISCARDABLE  0, 0, 246, 65
 STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Initiate Outgoing Connection (Add New Client)"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
     EDITTEXT        IDC_HOSTNAME_EDIT,55,6,130,14,ES_AUTOHSCROLL
     DEFPUSHBUTTON   "OK",IDOK,192,6,47,14
@@ -58,16 +58,17 @@ BEGIN
     LTEXT           "Host name:",IDC_HOSTNAME_STATIC,7,6,43,14,
                     SS_CENTERIMAGE | NOT WS_GROUP
     LTEXT           "Formats host:display and host::port are supported.\nThe default is to use display 0 or port 5500.",
-                    IDC_STATIC,7,27,178,18,NOT WS_GROUP
+                    IDC_STATIC_FORMATS,7,27,178,18,NOT WS_GROUP
     LTEXT           "Note: Host must be running VNC viewer in 'listen' mode.",
-                    IDC_STATIC,7,48,232,10,SS_CENTERIMAGE | NOT WS_GROUP
+                    IDC_STATIC_NOTE,7,48,232,10,SS_CENTERIMAGE | NOT 
+                    WS_GROUP
 END
 
 IDD_ACCEPT_CONN DIALOG DISCARDABLE  0, 0, 235, 102
 STYLE DS_SYSMODAL | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | 
     WS_CAPTION
 CAPTION "Accept WinVNC Connection?"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
     DEFPUSHBUTTON   "&Accept",IDACCEPT,7,78,53,17
     PUSHBUTTON      "&Reject",IDREJECT,175,78,53,17
@@ -92,7 +93,7 @@ STYLE DS_MODALFRAME | DS_3DLOOK | DS_CENTER | DS_CONTEXTHELP | WS_POPUP |
     WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTEXTHELP
 CAPTION "AppShare Settings"
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Shell Dlg"
 BEGIN
     GROUPBOX        "Select Sharing Area",IDC_SHARINGAREA_BORDER,5,5,188,55
     CONTROL         "Window",IDC_WINDOW,"Button",BS_AUTORADIOBUTTON | 
@@ -108,7 +109,7 @@ BEGIN
     LTEXT           "AppShare Key:",IDC_LIVESHARE_LABEL,10,77,54,8
     EDITTEXT        IDC_LIVESHARE,67,75,121,14,ES_AUTOHSCROLL
     LTEXT           "Enter the AppShare Key in the box above and click 'OK' to begin sharing your computer ",
-                    IDC_STATIC,10,90,176,16
+                    IDC_STATIC_HELP,10,90,176,16
     DEFPUSHBUTTON   "&OK",IDOK,199,9,58,15
     PUSHBUTTON      "&Cancel",IDCANCEL,199,29,58,15
     PUSHBUTTON      "&Apply",IDC_APPLY,199,49,58,15
@@ -126,7 +127,7 @@ STYLE DS_MODALFRAME | DS_3DLOOK | DS_CENTER | DS_CONTEXTHELP | WS_POPUP |
     WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTEXTHELP
 CAPTION "Advanced Properties"
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Shell Dlg"
 BEGIN
     GROUPBOX        "Update Handling",IDC_UPDATE_BORDER,5,5,196,92
     CONTROL         "Poll Full Screen",IDC_POLL_FULLSCREEN,"Button",
@@ -167,7 +168,7 @@ IDD_ACCEPT_REVERSE DIALOGEX 0, 0, 179, 55
 STYLE DS_SYSMODAL | DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_POPUP | 
     WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Begin AppShare Session?"
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Shell Dlg"
 BEGIN
     DEFPUSHBUTTON   "&OK",IDACCEPT,17,31,47,17
     PUSHBUTTON      "&Cancel",IDREJECT,113,31,48,17,0,WS_EX_TRANSPARENT
@@ -180,7 +181,7 @@ IDD_PROPERTIES_PARENT DIALOGEX 0, 0, 304, 212
 STYLE DS_MODALFRAME | DS_CENTER | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 EXSTYLE WS_EX_CONTEXTHELP | WS_EX_CONTROLPARENT
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Shell Dlg"
 BEGIN
     DEFPUSHBUTTON   "&OK",IDOK,139,193,50,14,WS_GROUP
     PUSHBUTTON      "&Cancel",IDCANCEL,194,193,50,14
@@ -191,7 +192,7 @@ END
 
 IDD_SHARED_DESKTOP_AREA DIALOG DISCARDABLE  0, 0, 288, 104
 STYLE DS_CONTROL | WS_CHILD | WS_VISIBLE
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
     GROUPBOX        "Sharing area",IDC_SHARINGAREA_BORDER,5,5,278,94
     CONTROL         "Full desktop",IDC_FULLSCREEN,"Button",
@@ -209,17 +210,17 @@ END
 
 IDD_INCOMING DIALOG DISCARDABLE  0, 0, 288, 166
 STYLE DS_CONTROL | WS_CHILD | WS_VISIBLE
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
     GROUPBOX        "Incoming connections",IDC_STATIC_INCOMING,5,5,139,63
     CONTROL         "Accept socket connections",IDC_CONNECT_SOCK,"Button",
                     BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,13,16,128,12
-    LTEXT           "Primary password:",IDC_PASSWORD_LABEL,19,30,69,12,
+    LTEXT           "Primary password:",IDC_PASSWORD_LABEL,13,30,67,12,
                     SS_CENTERIMAGE | NOT WS_GROUP
-    EDITTEXT        IDC_PASSWORD,91,30,44,12,ES_PASSWORD | ES_AUTOHSCROLL
-    LTEXT           "View-only password:",IDC_PASSWORD_VIEWONLY_LABEL,19,47,
-                    69,12,SS_CENTERIMAGE | NOT WS_GROUP
-    EDITTEXT        IDC_PASSWORD_VIEWONLY,91,47,44,12,ES_PASSWORD | 
+    EDITTEXT        IDC_PASSWORD,84,30,51,12,ES_PASSWORD | ES_AUTOHSCROLL
+    LTEXT           "View-only password:",IDC_PASSWORD_VIEWONLY_LABEL,13,47,
+                    67,12,SS_CENTERIMAGE | NOT WS_GROUP
+    EDITTEXT        IDC_PASSWORD_VIEWONLY,84,47,51,12,ES_PASSWORD | 
                     ES_AUTOHSCROLL
     GROUPBOX        "Display or port numbers to use",IDC_STATIC_DISPLAY_PORT,
                     152,5,131,63
@@ -270,7 +271,7 @@ END
 
 IDD_UPDATE_HANDLING DIALOG DISCARDABLE  0, 0, 288, 166
 STYLE DS_CONTROL | WS_CHILD | WS_VISIBLE
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
     GROUPBOX        "Polling modes",IDC_STATIC_POLLING,5,5,133,74
     CONTROL         "Poll foreground window",IDC_POLL_FOREGROUND,"Button",
@@ -310,7 +311,7 @@ END
 
 IDD_QUERY_SETTINGS DIALOG DISCARDABLE  0, 0, 288, 85
 STYLE DS_CONTROL | WS_CHILD | WS_VISIBLE
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
     GROUPBOX        "Query settings",IDC_STATIC_QUERY,5,5,278,75,WS_GROUP
     CONTROL         "Query console on incoming connections",IDQUERY,"Button",
@@ -323,9 +324,9 @@ BEGIN
     LTEXT           "Default action:",IDC_STATIC_ACTION,25,46,67,12,
                     SS_CENTERIMAGE | NOT WS_GROUP
     CONTROL         "Refuse",IDC_ACTION_REFUSE,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP | WS_TABSTOP,95,46,57,12
+                    WS_GROUP | WS_TABSTOP,95,46,52,12
     CONTROL         "Accept",IDC_ACTION_ACCEPT,"Button",BS_AUTORADIOBUTTON,
-                    152,46,72,12
+                    152,46,52,12
     CONTROL         "Allow option to accept without authentication",
                     IDQUERYALLOWNOPASS,"Button",BS_AUTOCHECKBOX | WS_GROUP | 
                     WS_TABSTOP,13,62,211,12
@@ -333,7 +334,7 @@ END
 
 IDD_ADMINISTRATION DIALOG DISCARDABLE  0, 0, 288, 119
 STYLE DS_CONTROL | WS_CHILD | WS_VISIBLE
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
     GROUPBOX        "Administration",IDC_STATIC_ADMINISTR,5,5,137,57
     CONTROL         "Disable empty passwords",IDREQUIREAUTH,"Button",
@@ -494,7 +495,7 @@ BEGIN
         VERTGUIDE, 13
         VERTGUIDE, 19
         VERTGUIDE, 58
-        VERTGUIDE, 91
+        VERTGUIDE, 84
         VERTGUIDE, 108
         VERTGUIDE, 135
         VERTGUIDE, 141
@@ -585,7 +586,7 @@ BEGIN
             VALUE "FileDescription", "TurboVNC Win32 Server\0"
             VALUE "FileVersion", "0, 5, 1, 0\0"
             VALUE "InternalName", "WinVNC\0"
-            VALUE "LegalCopyright", "Copyright © 1998-2008 [many holders]\0"
+            VALUE "LegalCopyright", "Copyright © 1998-2009 [many holders]\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "WinVNC.exe\0"
             VALUE "PrivateBuild", "\0"

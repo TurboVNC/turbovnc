@@ -66,6 +66,7 @@ const char winvncRunAsUserApp[]		= "-run";
 const char winvncInstallService[]	= "-install";
 const char winvncRemoveService[]	= "-remove";
 const char winvncReinstallService[]	= "-reinstall";
+const char winvncSilentMode[]		= "-silent";
 
 const char winvncReload[]			= "-reload";
 const char winvncShowProperties[]	= "-settings";
