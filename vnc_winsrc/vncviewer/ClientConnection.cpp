@@ -143,7 +143,7 @@ void ClientConnection::Init(VNCviewerApp *pApp)
 	m_hBitmapDC = NULL;
 	m_hBitmap = NULL;
 	m_hPalette = NULL;
-	m_encPasswd[0] = '\0';
+	m_passwdSet = false;
 
 	m_connDlg = NULL;
 
@@ -517,8 +517,7 @@ void ClientConnection::CreateDisplay()
 		CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE),
 					ID_TOOLBAR, MF_BYCOMMAND|MF_CHECKED);
 	}
-	SaveListConnection();
-	
+	SaveConnectionHistory();
 	// record which client created this window
 	
 #ifndef _WIN32_WCE
@@ -627,57 +626,89 @@ HWND ClientConnection::CreateToolbar()
 	return hwndToolbar;
 }
 
-void ClientConnection::SaveListConnection()
+void ClientConnection::SaveConnectionHistory()
 {
-	if (!m_serverInitiated) {
-		TCHAR  valname[3];
-		int dwbuflen = 255;
-		int i, j;
-		int maxEntries = pApp->m_options.m_historyLimit;
-		TCHAR list[80];
-		HKEY m_hRegKey;
-		TCHAR  buf[256];
-		DWORD dispos;
-		TCHAR  buf1[256];
-				
-		itoa(maxEntries, list, 10);
-		RegCreateKeyEx(HKEY_CURRENT_USER,
-					KEY_VNCVIEWER_HISTORI, 0, NULL, 
-					REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, 
-					NULL, &m_hRegKey, &dispos);
-		_tcscpy(buf1, m_opts.m_display);
-							
-		for ( i = 0; i < maxEntries; i++) {
-			j = i;
-			itoa(i, valname, 10);
-			dwbuflen = 255;
-			if ((RegQueryValueEx( m_hRegKey, (LPTSTR)valname, 
-						NULL, NULL, 
-						(LPBYTE) buf, (LPDWORD) &dwbuflen) != ERROR_SUCCESS) ||
-						(_tcscmp(buf, m_opts.m_display) == NULL)) {
-				RegSetValueEx( m_hRegKey, valname, 
-							NULL, REG_SZ, 
-							(CONST BYTE *)buf1, (_tcslen(buf1)+1));
-				break;
+	if (m_serverInitiated) {
+		return;
+	}
+
+	// Create or open the registry key for connection history.
+	HKEY hKey;
+	LONG result = RegCreateKeyEx(HKEY_CURRENT_USER, KEY_VNCVIEWER_HISTORI,
+								 0, NULL, REG_OPTION_NON_VOLATILE,
+								 KEY_ALL_ACCESS, NULL, &hKey, NULL);
+	if (result != ERROR_SUCCESS) {
+		return;
+	}
+
+	// Determine maximum number of connections to remember.
+	const int maxEntries = pApp->m_options.m_historyLimit;
+	if (maxEntries > 1024) {
+		return;
+	}
+
+	// Allocate memory for the list of connections, 256 TCHARs an entry.
+	const int entryBufferSize = 256;
+	const int connListBufferSize = maxEntries * entryBufferSize;
+	TCHAR *connListBuffer = new TCHAR[connListBufferSize];
+	memset(connListBuffer, 0, connListBufferSize * sizeof(TCHAR));
+
+	// Index first characters of each entry for convenient access.
+	TCHAR **connList = new TCHAR*[maxEntries];
+	int i;
+	for (i = 0; i < maxEntries; i++) {
+		connList[i] = &connListBuffer[i * entryBufferSize];
+	}
+
+	// Read the list of connections and remove it from the registry.
+	int numRead = 0;
+	for (i = 0; i < maxEntries; i++) {
+		TCHAR valueName[16];
+		_sntprintf(valueName, 16, "%d", i);
+		LPBYTE bufPtr = (LPBYTE)connList[numRead];
+		DWORD bufSize = (entryBufferSize - 1) * sizeof(TCHAR);
+		LONG err = RegQueryValueEx(hKey, valueName, 0, 0, bufPtr, &bufSize);
+		if (err == ERROR_SUCCESS) {
+			if (connList[numRead][0] != '\0') {
+				numRead++;
 			}
-			RegSetValueEx(m_hRegKey, valname, 
-						NULL, REG_SZ, 
-						(CONST BYTE *)buf1, (_tcslen(buf1)+1)); 
-				_tcscpy(buf1, buf);
+			RegDeleteValue(hKey, valueName);
 		}
-		if (j == maxEntries) {
-			dwbuflen = 255;
-			_tcscpy(valname, list);
-			_tcscpy(buf, "");
-			RegQueryValueEx( m_hRegKey, (LPTSTR)valname, 
-						NULL, NULL, 
-						(LPBYTE)buf, (LPDWORD)&dwbuflen);
-			m_opts.delkey(buf, KEY_VNCVIEWER_HISTORI);
+	}
+
+	// Save current connection first.
+	const BYTE *newConnPtr = (const BYTE *)m_opts.m_display;
+	DWORD newConnSize = (_tcslen(m_opts.m_display) + 1) * sizeof(TCHAR);
+	RegSetValueEx(hKey, _T("0"), 0, REG_SZ, newConnPtr, newConnSize);
+
+	// Save the list of other connections.
+	// Don't forget to exclude duplicates of current connection and make
+	// sure the number of entries written will not exceed maxEntries.
+	int numWritten = 1;
+	for (i = 0; i < numRead && numWritten < maxEntries; i++) {
+		if (_tcscmp(connList[i], m_opts.m_display) != 0) {
+			TCHAR keyName[16];
+			_sntprintf(keyName, 16, "%d", numWritten);
+			LPBYTE bufPtr = (LPBYTE)connList[i];
+			DWORD bufSize = (_tcslen(connList[i]) + 1) * sizeof(TCHAR);
+			RegSetValueEx(hKey, keyName, 0, REG_SZ, bufPtr, bufSize);
+			numWritten++;
 		}
-		RegCloseKey(m_hRegKey);
-		m_opts.SaveOpt(m_opts.m_display,
-						KEY_VNCVIEWER_HISTORI);
-	}		
+	}
+
+	// If not everything is written due to the maxEntries limitation, then
+	// delete settings for the connection that was not saved. But make sure
+	// we do not delete settings for the current connection.
+	if (i < numRead) {
+		if (_tcscmp(connList[i], m_opts.m_display) != 0) {
+			RegDeleteKey(hKey, connList[i]);
+		}
+	}
+
+	RegCloseKey(hKey);
+
+	// Save connection options for current connection.
+	m_opts.SaveOpt(m_opts.m_display, KEY_VNCVIEWER_HISTORI);
 }
 
 void ClientConnection::EnableFullControlOptions()
@@ -740,7 +771,13 @@ void ClientConnection::GetConnectDetails()
 		SessionDialog sessdlg(&m_opts, this);
 		if (!sessdlg.DoDialog()) {
 			throw QuietException("User Cancelled");
-		}		
+		}
+		// Add new connection to the connection history only if the VNC host name
+		// was entered interactively, as we should remember user input even if it
+		// does not seem to be correct. If the connection info was specified in
+		// the command line or in a configuration file, it will be added after the
+		// VNC connection is established successfully.
+		SaveConnectionHistory();
 	}
 	// This is a bit of a hack: 
 	// The config file may set various things in the app-level defaults which 
@@ -1154,7 +1191,7 @@ bool ClientConnection::AuthenticateVNC(char *errBuf, int errBufSize)
 
 	char passwd[MAXPWLEN + 1];
 	// Was the password already specified in a config file?
-	if (strlen((const char *) m_encPasswd) > 0) {
+	if (m_passwdSet) {
 		char *pw = vncDecryptPasswd(m_encPasswd);
 		strcpy(passwd, pw);
 		free(pw);
@@ -1186,6 +1223,7 @@ bool ClientConnection::AuthenticateVNC(char *errBuf, int errBufSize)
 			passwd[8] = '\0';
 		}
 		vncEncryptPasswd(m_encPasswd, passwd);
+		m_passwdSet = true;
 	}				
 
 	vncEncryptBytes(challenge, passwd);
@@ -2626,7 +2664,7 @@ ClientConnection::SendKeyEvent(CARD32 key, bool down)
 // SendClientCutText
 //
 
-void ClientConnection::SendClientCutText(char *str, int len)
+void ClientConnection::SendClientCutText(char *str, size_t len)
 {
     rfbClientCutTextMsg cct;
 
@@ -2809,8 +2847,7 @@ void* ClientConnection::run_undetached(void* arg) {
 				ReadScreenUpdate();
 				break;
 			case rfbSetColourMapEntries:
-		        vnclog.Print(3, _T("rfbSetColourMapEntries read but not supported\n") );
-				throw WarningException("Unhandled SetColormap message type received!\n");
+				ReadSetColourMapEntries();
 				break;
 			case rfbBell:
 				ReadBell();
@@ -3073,12 +3110,13 @@ void ClientConnection::SetDormant(bool newstate)
 // The server has copied some text to the clipboard - put it 
 // in the local clipboard too.
 
-void ClientConnection::ReadServerCutText() {
+void ClientConnection::ReadServerCutText()
+{
 	rfbServerCutTextMsg sctm;
 	vnclog.Print(6, _T("Read remote clipboard change\n"));
 	ReadExact((char *) &sctm, sz_rfbServerCutTextMsg);
-	int len = Swap32IfLE(sctm.length);
-	
+	size_t len = Swap32IfLE(sctm.length);
+
 	CheckBufferSize(len);
 	if (len == 0) {
 		m_netbuf[0] = '\0';
@@ -3088,6 +3126,21 @@ void ClientConnection::ReadServerCutText() {
 	UpdateLocalClipboard(m_netbuf, len);
 }
 
+void ClientConnection::ReadSetColourMapEntries()
+{
+	// Currently, we read and silently ignore SetColourMapEntries.
+
+	rfbSetColourMapEntriesMsg msg;
+	vnclog.Print(3, _T("Read server colour map entries (ignored)\n"));
+	ReadExact((char *)&msg, sz_rfbSetColourMapEntriesMsg);
+	int numEntries = Swap16IfLE(msg.nColours);
+
+	if (numEntries > 0) {
+		size_t nBytes = 6 * numEntries;
+		CheckBufferSize(nBytes);
+		ReadExact(m_netbuf, nBytes);
+	}
+}
 
 void ClientConnection::ReadBell() {
 	rfbBellMsg bm;
@@ -3204,51 +3257,61 @@ char *ClientConnection::ReadFailureReason()
 // Makes sure netbuf is at least as big as the specified size.
 // Note that netbuf itself may change as a result of this call.
 // Throws an exception on failure.
-void ClientConnection::CheckBufferSize(int bufsize)
+void ClientConnection::CheckBufferSize(size_t bufsize)
 {
 	if (m_netbufsize > bufsize) return;
 
+	// Don't try to allocate more than 2 gigabytes.
+	if (bufsize >= 0x80000000) {
+		vnclog.Print(1, _T("Requested buffer size is too big (%u bytes)\n"),
+					 (unsigned int)bufsize);
+		throw WarningException("Requested buffer size is too big.");
+	}
+
 	omni_mutex_lock l(m_bufferMutex);
 
-	char *newbuf = new char[bufsize+256];;
+	char *newbuf = new char[bufsize + 256];
 	if (newbuf == NULL) {
 		throw ErrorException("Insufficient memory to allocate network buffer.");
 	}
 
-	// Only if we're successful...
-
-	if (m_netbuf != NULL)
-		delete [] m_netbuf;
+	if (m_netbuf != NULL) {
+		delete[] m_netbuf;
+	}
 	m_netbuf = newbuf;
-	m_netbufsize=bufsize + 256;
-	vnclog.Print(4, _T("bufsize expanded to %d\n"), m_netbufsize);
+	m_netbufsize = bufsize + 256;
+	vnclog.Print(4, _T("Buffer size expanded to %u\n"),
+				 (unsigned int)m_netbufsize);
 }
 
 // Makes sure zlibbuf is at least as big as the specified size.
 // Note that zlibbuf itself may change as a result of this call.
 // Throws an exception on failure.
-void ClientConnection::CheckZlibBufferSize(int bufsize)
+void ClientConnection::CheckZlibBufferSize(size_t bufsize)
 {
-	unsigned char *newbuf;
-
 	if (m_zlibbufsize > bufsize) return;
+
+	// Don't try to allocate more than 2 gigabytes.
+	if (bufsize >= 0x80000000) {
+		vnclog.Print(1, _T("Requested zlib buffer size is too big (%u bytes)\n"),
+					 (unsigned int)bufsize);
+		throw WarningException("Requested zlib buffer size is too big.");
+	}
 
 	// omni_mutex_lock l(m_bufferMutex);
 
-	newbuf = (unsigned char *)new char[bufsize+256];
+	unsigned char *newbuf = new unsigned char[bufsize + 256];
 	if (newbuf == NULL) {
 		throw ErrorException("Insufficient memory to allocate zlib buffer.");
 	}
 
-	// Only if we're successful...
-
-	if (m_zlibbuf != NULL)
-		delete [] m_zlibbuf;
+	if (m_zlibbuf != NULL) {
+		delete[] m_zlibbuf;
+	}
 	m_zlibbuf = newbuf;
-	m_zlibbufsize=bufsize + 256;
-	vnclog.Print(4, _T("zlibbufsize expanded to %d\n"), m_zlibbufsize);
-
-
+	m_zlibbufsize = bufsize + 256;
+	vnclog.Print(4, _T("Zlib buffer size expanded to %u\n"),
+				 (unsigned int)m_zlibbufsize);
 }
 
 //
