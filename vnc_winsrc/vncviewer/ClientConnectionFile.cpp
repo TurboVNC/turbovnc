@@ -153,13 +153,14 @@ int ClientConnection::LoadConnection(char *fname, bool sess)
 	FormatDisplay(m_port, m_opts.m_display, m_host);
 
 	char buf[1026];
-	m_encPasswd[0] = '\0';
+	m_passwdSet = false;
 	if (GetPrivateProfileString("connection", "password", "", buf, 32, fname) > 0) {
 		for (int i = 0; i < MAXPWLEN; i++)	{
 			int x = 0;
 			sscanf(buf+i*2, "%2x", &x);
 			m_encPasswd[i] = (unsigned char) x;
 		}
+		m_passwdSet = true;
 	}
 	if (sess) {
 		m_opts.Load(fname);

@@ -125,7 +125,7 @@ private:
 	void SendClientInit();
 	void CreateLocalFramebuffer();
 	void SaveConnection();
-	void SaveListConnection();
+	void SaveConnectionHistory();
 	
 	void SetupPixelFormat();
 	void SetFormatAndEncodings();
@@ -243,10 +243,11 @@ private:
 
 	// ClientConnectionClipboard.cpp
 	void ProcessLocalClipboardChange();
-	void UpdateLocalClipboard(char *buf, int len);
-	void SendClientCutText(char *str, int len);
+	void UpdateLocalClipboard(char *buf, size_t len);
+	void SendClientCutText(char *str, size_t len);
 	void ReadServerCutText();
 
+	void ReadSetColourMapEntries();
 	void ReadBell();
 
 	void SendRFBMsg(CARD8 msgType, void* data, int length);
@@ -288,18 +289,18 @@ private:
     unsigned int CountProcessOtherWindows();
 
     // Buffer for network operations
-	void CheckBufferSize(int bufsize);
+	void CheckBufferSize(size_t bufsize);
 	char *m_netbuf;
-	int m_netbufsize;
+	size_t m_netbufsize;
 	omni_mutex m_bufferMutex, 
 		m_bitmapdcMutex,  m_clipMutex,
 		m_readMutex, m_writeMutex, m_sockMutex,
 		m_cursorMutex;
 
 	// Buffer for zlib decompression.
-	void CheckZlibBufferSize(int bufsize);
+	void CheckZlibBufferSize(size_t bufsize);
 	unsigned char *m_zlibbuf;
-	int m_zlibbufsize;
+	size_t m_zlibbufsize;
 
 	// zlib decompression state
 	bool m_decompStreamInited;
@@ -348,6 +349,7 @@ private:
 
 	TCHAR *m_desktopName;
 	unsigned char m_encPasswd[8];
+	bool m_passwdSet;
 	int m_authScheme;
 	rfbServerInitMsg m_si;
 	rfbPixelFormat m_myFormat, m_pendingFormat;

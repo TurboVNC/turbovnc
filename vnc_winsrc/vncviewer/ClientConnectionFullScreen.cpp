@@ -65,18 +65,18 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 		EnableMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOOLBAR, MF_BYCOMMAND|MF_GRAYED);
 		ShowWindow(m_hwnd1, SW_MAXIMIZE);
 		style = GetWindowLong(m_hwnd1, GWL_STYLE);
-		style &= ~(WS_DLGFRAME | WS_THICKFRAME);
+		style &= ~(WS_DLGFRAME | WS_THICKFRAME | WS_BORDER);
 		
 		SetWindowLong(m_hwnd1, GWL_STYLE, style);
 		int cx = GetSystemMetrics(SM_CXSCREEN);
 		int cy = GetSystemMetrics(SM_CYSCREEN);
-		SetWindowPos(m_hwnd1, HWND_TOPMOST, -1, -1, cx + 3, cy + 3, SWP_FRAMECHANGED);
+		SetWindowPos(m_hwnd1, HWND_TOPMOST, 0, 0, cx, cy, SWP_FRAMECHANGED);
 		CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_FULLSCREEN, MF_BYCOMMAND|MF_CHECKED);
 		
 	} else {
 		ShowWindow(m_hToolbar, SW_SHOW);
 		EnableMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOOLBAR, MF_BYCOMMAND|MF_ENABLED);
-		style |= (WS_DLGFRAME | WS_THICKFRAME);
+		style |= (WS_DLGFRAME | WS_THICKFRAME | WS_BORDER);
 		
 		SetWindowLong(m_hwnd1, GWL_STYLE, style);
 		SetWindowPos(m_hwnd1, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);

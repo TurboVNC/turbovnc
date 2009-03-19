@@ -94,7 +94,7 @@ void ClientConnection::ProcessLocalClipboardChange()
 // we need to copy it into the local clipboard.
 // Called by ClientConnection::ReadServerCutText()
 
-void ClientConnection::UpdateLocalClipboard(char *buf, int len) {
+void ClientConnection::UpdateLocalClipboard(char *buf, size_t len) {
 	
 	if (m_opts.m_DisableClipboard)
 		return;

@@ -510,9 +510,9 @@ FileTransfer::FileTransferUpload()
 		sprintf(path, "%s\\%s", m_ClientPath, m_ClientFilename);
 		strcpy(m_UploadFilename, path);
 		WIN32_FIND_DATA FindFileData;
-		SetErrorMode(SEM_FAILCRITICALERRORS);
+		UINT savedErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
 		HANDLE hFile = FindFirstFile(path, &FindFileData);
-		SetErrorMode(0);
+		SetErrorMode(savedErrorMode);
 		if (hFile == INVALID_HANDLE_VALUE) {
 			SetWindowText(m_hwndFTStatus, "Could not find selected file, can't upload");
 			// Continue with upload of other files.
@@ -655,8 +655,6 @@ FileTransfer::FileTransferDownload()
 			MessageBox(m_hwndFileTransfer, "Download failed: could not create local file",
 					   "Download Failed", MB_ICONEXCLAMATION | MB_OK);
 			SendMessage(m_hwndFTProgress, PBM_SETPOS, 0, 0);
-			// Send message to start download for next selected file.
-			PostMessage(m_hwndFileTransfer, WM_COMMAND, IDC_FTCOPY, 0);
 			return;
 		}
 		FILETIME Filetime;
@@ -744,10 +742,10 @@ FileTransfer::ShowClientItems(char *path)
 		int n = 0;
 		WIN32_FIND_DATA m_FindFileData;
 		strcat(path, "\\*");
-		SetErrorMode(SEM_FAILCRITICALERRORS);
+		UINT savedErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
 		m_handle = FindFirstFile(path, &m_FindFileData);
 		DWORD LastError = GetLastError();
-		SetErrorMode(0);
+		SetErrorMode(savedErrorMode);
 		if (m_handle == INVALID_HANDLE_VALUE) {
 			if (LastError != ERROR_SUCCESS && LastError != ERROR_FILE_NOT_FOUND) {
 				strcpy(m_ClientPathTmp, m_ClientPath);
@@ -974,9 +972,9 @@ FileTransfer::ShowTreeViewItems(HWND hwnd, LPNMTREEVIEW m_lParam)
 	while (TreeView_GetChild(GetDlgItem(hwnd, IDC_FTBROWSETREE), m_lParam->itemNew.hItem) != NULL) {
 		TreeView_DeleteItem(GetDlgItem(hwnd, IDC_FTBROWSETREE), TreeView_GetChild(GetDlgItem(hwnd, IDC_FTBROWSETREE), m_lParam->itemNew.hItem));
 	}
-	SetErrorMode(SEM_FAILCRITICALERRORS);
+	UINT savedErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
 	m_handle = FindFirstFile(path, &m_FindFileData);
-	SetErrorMode(0);
+	SetErrorMode(savedErrorMode);
 	if (m_handle == INVALID_HANDLE_VALUE) return;
 	while(1) {
 		if ((strcmp(m_FindFileData.cFileName, ".") != 0) && 
