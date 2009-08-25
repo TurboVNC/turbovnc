@@ -955,6 +955,11 @@ XCOMM  for compatibility with 3.3.x
 # endif
 #endif
 
+#if defined(x86_64Architecture) && defined(i386Architecture)
+# undef x86_64Architecture
+# define i386m32Architecture
+#endif
+
 #ifndef MacroIncludeFile
 XCOMM WARNING:  Imake.cf not configured; guessing at definitions!!!
 XCOMM This might mean that BOOTSTRAPCFLAGS was not set when building imake.

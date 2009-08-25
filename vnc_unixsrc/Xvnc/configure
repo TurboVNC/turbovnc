@@ -9,6 +9,11 @@
 #    Linux 2.4 (Linux, 2.4.0-4GB)
 #    Irix 6.2 (IRIX, 6.2)
 
+M32=0
+if [ "$1" = "-m32" ]; then
+    M32=1
+fi
+
 SYSNAME=`uname -s`
 
 if [ "$SYSNAME" = AIX ]
@@ -57,7 +62,11 @@ then
 else
     cd config/imake
     xmkmf ../../
-    make
+    if [ $M32 = 1 ]; then
+        make EXTRA_DEFINES="-m32 -D__i386__ -U__x86_64__" EXTRA_LDOPTIONS="-m32 -L/usr/X11R6/lib -L/usr/lib"
+    else
+        make
+    fi
     cd ../..
     xmkmf -a ./
 fi
