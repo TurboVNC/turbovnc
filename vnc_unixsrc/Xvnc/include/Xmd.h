@@ -59,7 +59,7 @@ SOFTWARE.
 #ifdef CRAY
 #define WORD64				/* 64-bit architecture */
 #endif
-#if defined(__alpha) || defined(__alpha__)
+#if defined(__alpha) || defined(__alpha__) || defined(__x86_64__)
 #define LONG64				/* 32/64-bit architecture */
 #endif
 #ifdef __sgi

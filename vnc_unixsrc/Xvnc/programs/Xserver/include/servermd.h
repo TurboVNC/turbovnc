@@ -374,6 +374,25 @@ SOFTWARE.
 #define NO_ONE_RECT
 #endif
 
+/* Values for AMD Opteron and Intel 64 bit extensions. Copied from Alpha.
+ */
+#ifdef __x86_64__
+#  define BITMAP_SCANLINE_UNIT			64
+# define BITMAP_SCANLINE_PAD 			64
+# define LOG2_BITMAP_PAD			6
+# define LOG2_BYTES_PER_SCANLINE_PAD		3
+
+/* Add for handling protocol XPutImage and XGetImage; see comment in
+ * Alpha section.
+ */
+#define INTERNAL_VS_EXTERNAL_PADDING
+#define BITMAP_SCANLINE_UNIT_PROTO		32
+
+#define BITMAP_SCANLINE_PAD_PROTO 	 	32
+#define LOG2_BITMAP_PAD_PROTO			5
+#define LOG2_BYTES_PER_SCANLINE_PAD_PROTO	2
+#endif
+
 #endif /* SVR4 / BSD / i386 */
 
 #if defined (linux) && defined (__mc68000__)
