@@ -3,8 +3,8 @@
 
 [Setup]
 AppName=TurboVNC
-AppVerName=TurboVNC 0.5.1
-AppVersion=0.5.1
+AppVerName=TurboVNC 0.6
+AppVersion=0.6
 AppPublisher=The VirtualGL Project
 AppPublisherURL=http://www.virtualgl.org
 AppSupportURL=http://www.virtualgl.org
@@ -18,9 +18,10 @@ WindowVisible=no
 DisableStartupPrompt=yes
 BackColor=clBlack
 BackColor2=clBlue
+DirExistsWarning=no
 VersionInfoCompany=The VirtualGL Project
 VersionInfoDescription=A fast VNC implementation designed for video apps
-VersionInfoVersion=0.5.1
+VersionInfoVersion=0.6
 
 ChangesAssociations=yes
 
@@ -30,53 +31,51 @@ Name: "viewer"; Description: "TurboVNC Viewer"; Types: full compact custom;
 ;Name: "webdoc"; Description: "Web pages and documentation"; Types: full custom;
 
 [Files]
-Source: "WinVNC\Release\WinVNC.exe"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: restartreplace; Components: server
-Source: "WinVNC\Release\VNCHooks.dll"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: restartreplace; Components: server
-Source: "turbojpeg.dll"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: restartreplace; Components: "server viewer"
-Source: "turbojpeg-ipp.dll"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: restartreplace; Components: "server viewer"
-Source: "turbojpeg-libjpeg.dll"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: restartreplace; Components: "server viewer"
-Source: "switchtjpeg.bat"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Flags: restartreplace; Components: "server viewer"
-Source: "VNCViewer\Release\vncviewer.exe"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Components: viewer
-Source: "putty\Release\putty.exe"; DestDir: "{app}"; CopyMode: alwaysoverwrite; Components: viewer
-Source: "README-bin.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
-Source: "LICENCE.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
-Source: "WhatsNew.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
-Source: "TurboVNC-ChangeLog.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
-Source: "TurboVNC-CompatibilityGuide.txt"; DestDir: "{app}"; CopyMode: alwaysoverwrite
-Source: "TurboVNC.url"; DestDir: "{app}"; CopyMode: alwaysoverwrite
-;Source: "Web\*"; DestDir: "{app}\Web"; CopyMode: alwaysoverwrite; Components: webdoc
-;Source: "Web\images\*"; DestDir: "{app}\Web\images"; CopyMode: alwaysoverwrite; Components: webdoc
-;Source: "Web\logo\*"; DestDir: "{app}\Web\logo"; CopyMode: alwaysoverwrite; Components: webdoc
-;Source: "Web\doc\win32\*"; DestDir: "{app}\Web\doc\win32"; CopyMode: alwaysoverwrite; Components: webdoc
-;Source: "Web\doc\java\*"; DestDir: "{app}\Web\doc\java"; CopyMode: alwaysoverwrite; Components: webdoc
-;Source: "Web\doc\man\*"; DestDir: "{app}\Web\doc\man"; CopyMode: alwaysoverwrite; Components: webdoc
-;Source: "Web\doc\unix\*"; DestDir: "{app}\Web\doc\unix"; CopyMode: alwaysoverwrite; Components: webdoc
+Source: "WinVNC\Release\WinVNC.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: server
+Source: "WinVNC\Release\VNCHooks.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: server
+Source: "turbojpeg.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: "server viewer"
+Source: "turbojpeg-ipp.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: "server viewer"
+Source: "turbojpeg-libjpeg.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: "server viewer"
+Source: "switchtjpeg.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: "server viewer"
+Source: "VNCViewer\Release\vncviewer.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
+Source: "putty\Release\putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
+Source: "README-bin.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "LICENCE.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "WhatsNew.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "TurboVNC-ChangeLog.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "TurboVNC-CompatibilityGuide.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "TurboVNC.url"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "Web\*"; DestDir: "{app}\Web"; Flags: ignoreversion; Components: webdoc
+;Source: "Web\images\*"; DestDir: "{app}\Web\images"; Flags: ignoreversion; Components: webdoc
+;Source: "Web\logo\*"; DestDir: "{app}\Web\logo"; Flags: ignoreversion; Components: webdoc
+;Source: "Web\doc\win32\*"; DestDir: "{app}\Web\doc\win32"; Flags: ignoreversion; Components: webdoc
+;Source: "Web\doc\java\*"; DestDir: "{app}\Web\doc\java"; Flags: ignoreversion; Components: webdoc
+;Source: "Web\doc\man\*"; DestDir: "{app}\Web\doc\man"; Flags: ignoreversion; Components: webdoc
+;Source: "Web\doc\unix\*"; DestDir: "{app}\Web\doc\unix"; Flags: ignoreversion; Components: webdoc
 
 [Icons]
-Name: "{group}\Launch TurboVNC Server";               FileName: "{app}\WinVNC.exe";                                    WorkingDir: "{app}";     Components: server
-Name: "{group}\Show About Box";                       FileName: "{app}\WinVNC.exe";    Parameters: "-about";           WorkingDir: "{app}";     Components: server
-Name: "{group}\Show User Settings";                   FileName: "{app}\WinVNC.exe";    Parameters: "-settings";        WorkingDir: "{app}";     Components: server
-Name: "{group}\TurboVNC Viewer";   FileName: "{app}\vncviewer.exe"; Parameters: ""; WorkingDir: "{app}"; Components: viewer
-Name: "{group}\TurboVNC Viewer (Listen Mode)";        FileName: "{app}\vncviewer.exe"; Parameters: "-listen";          WorkingDir: "{app}";     Components: viewer
-Name: "{group}\Uninstall TurboVNC";   FileName: "{uninstallexe}"; Parameters: ""; WorkingDir: "{app}";
-Name: "{group}\Administration\Install VNC Service";   FileName: "{app}\WinVNC.exe";    Parameters: "-install";         WorkingDir: "{app}";     Components: server
-Name: "{group}\Administration\Remove VNC Service";    FileName: "{app}\WinVNC.exe";    Parameters: "-remove";          WorkingDir: "{app}";     Components: server
-Name: "{group}\Administration\Run Service Helper";    FileName: "{app}\WinVNC.exe";    Parameters: "-servicehelper";   WorkingDir: "{app}";     Components: server
-Name: "{group}\Administration\Show Default Settings"; FileName: "{app}\WinVNC.exe";    Parameters: "-defaultsettings"; WorkingDir: "{app}";     Components: server
-;Name: "{group}\Documentation\About VNC and TurboVNC"; FileName: "{app}\Web\index.html";                                WorkingDir: "{app}\Web"; Components: webdoc
-;Name: "{group}\Documentation\Installation and Getting Started"; FileName: "{app}\Web\winst.html";                      WorkingDir: "{app}\Web"; Components: webdoc
-Name: "{group}\Documentation\Read Me";        FileName: "write.exe"; Parameters: "README-bin.txt";                                   WorkingDir: "{app}"; Flags: "useapppaths"
-Name: "{group}\Documentation\Licensing Terms";        FileName: "write.exe"; Parameters: "LICENCE.txt";                                   WorkingDir: "{app}"; Flags: "useapppaths"
+Name: "{group}\Launch TurboVNC Server";               FileName: "{app}\WinVNC.exe";                                    WorkingDir: "{app}";     Components: server;
+Name: "{group}\Show About Box";                       FileName: "{app}\WinVNC.exe";    Parameters: "-about";           WorkingDir: "{app}";     Components: server;
+Name: "{group}\Show User Settings";                   FileName: "{app}\WinVNC.exe";    Parameters: "-settings";        WorkingDir: "{app}";     Components: server;
+Name: "{group}\TurboVNC Viewer";                      FileName: "{app}\vncviewer.exe";                                 WorkingDir: "{app}";     Components: viewer;
+Name: "{group}\TurboVNC Viewer (Listen Mode)";        FileName: "{app}\vncviewer.exe"; Parameters: "-listen";          WorkingDir: "{app}";     Components: viewer;
+Name: "{group}\Uninstall TurboVNC";                   FileName: "{uninstallexe}";                                      WorkingDir: "{app}";                        
+Name: "{group}\Administration\Install VNC Service";   FileName: "{app}\WinVNC.exe";    Parameters: "-install";         WorkingDir: "{app}";     Components: server;
+Name: "{group}\Administration\Remove VNC Service";    FileName: "{app}\WinVNC.exe";    Parameters: "-remove";          WorkingDir: "{app}";     Components: server;
+Name: "{group}\Administration\Run Service Helper";    FileName: "{app}\WinVNC.exe";    Parameters: "-servicehelper";   WorkingDir: "{app}";     Components: server;
+Name: "{group}\Administration\Show Default Settings"; FileName: "{app}\WinVNC.exe";    Parameters: "-defaultsettings"; WorkingDir: "{app}";     Components: server;
+;Name: "{group}\Documentation\About VNC and TurboVNC"; FileName: "{app}\Web\index.html";                                WorkingDir: "{app}\Web"; Components: webdoc;
+;Name: "{group}\Documentation\Installation and Getting Started"; FileName: "{app}\Web\winst.html";                      WorkingDir: "{app}\Web"; Components: webdoc;
+Name: "{group}\Documentation\Read Me";                FileName: "write.exe";           Parameters: "README-bin.txt";   WorkingDir: "{app}";     Flags: "useapppaths"
+Name: "{group}\Documentation\Licensing Terms";        FileName: "write.exe";           Parameters: "LICENCE.txt";      WorkingDir: "{app}";     Flags: "useapppaths"
 Name: "{group}\Documentation\TurboVNC Web Site";      FileName: "{app}\TurboVNC.url"
-;Name: "{group}\Documentation\What's New (Detailed Log)"; FileName: "write.exe"; Parameters: "{app}\Web\changelog-win32.html";                   WorkingDir: "{app}\Web"; Components: webdoc
-Name: "{group}\Documentation\TightVNC Change Log";   FileName: "write.exe"; Parameters: "WhatsNew.txt";                             WorkingDir: "{app}"; Flags: "useapppaths"
-Name: "{group}\Documentation\TurboVNC Change Log";   FileName: "write.exe"; Parameters: "TurboVNC-ChangeLog.txt";                             WorkingDir: "{app}"; Flags: "useapppaths"
-Name: "{group}\Documentation\TurboVNC Compatibility Guide";   FileName: "write.exe"; Parameters: "TurboVNC-CompatibilityGuide.txt";                             WorkingDir: "{app}"; Flags: "useapppaths"
+Name: "{group}\Documentation\TightVNC Change Log";    FileName: "write.exe";           Parameters: "WhatsNew.txt";     WorkingDir: "{app}";     Flags: "useapppaths"
+Name: "{group}\Documentation\TurboVNC Change Log";    FileName: "write.exe";           Parameters: "TurboVNC-ChangeLog.txt"; WorkingDir: "{app}"; Flags: "useapppaths"
+Name: "{group}\Documentation\TurboVNC Compatibility Guide"; FileName: "write.exe";     Parameters: "TurboVNC-CompatibilityGuide.txt"; WorkingDir: "{app}"; Flags: "useapppaths"
 
 [Tasks]
 Name: associate; Description: "&Associate .vnc files with TurboVNC Viewer"; GroupDescription: "File associations:"; Components: viewer
-Name: installservice; Description: "&Register TurboVNC Server as a system service"; GroupDescription: "Server configuration:"; Components: server; Flags: unchecked
-Name: startservice; Description: "&Start or restart TurboVNC service"; GroupDescription: "Server configuration:"; Components: server; Flags: unchecked; MinVersion: 0,1
+Name: installservice; Description: "&Register TurboVNC Server as a system service"; GroupDescription: "Server configuration:"; Components: server; Flags: unchecked; OnlyBelowVersion: 0,6.0
 
 [Registry]
 Root: HKCR; Subkey: ".vnc"; ValueType: string; ValueName: ""; ValueData: "VncViewer.Config"; Flags: uninsdeletevalue; Tasks: associate
@@ -85,7 +84,11 @@ Root: HKCR; Subkey: "VncViewer.Config\DefaultIcon"; ValueType: string; ValueName
 Root: HKCR; Subkey: "VncViewer.Config\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\vncviewer.exe"" -config ""%1"""; Tasks: associate
 
 [Run]
-Filename: "{app}\WinVNC.exe"; Parameters: "-reinstall"; Tasks: installservice
-Filename: "net"; Parameters: "start WinVNC"; Tasks: startservice
-Filename: "{app}\WinVNC.exe"; Parameters: "-servicehelper"; Tasks: startservice
+Filename: "{app}\WinVNC.exe"; Parameters: "-silent -reinstall"; Tasks: installservice
+Filename: "net"; Parameters: "start WinVNC"; Tasks: installservice; MinVersion: 0,4.0
+Filename: "{app}\WinVNC.exe"; Parameters: "-servicehelper"; Tasks: installservice
+
+[UninstallRun]
+Filename: "{app}\WinVNC.exe"; Parameters: "-kill"; OnlyBelowVersion: 0,4.0
+Filename: "{app}\WinVNC.exe"; Parameters: "-silent -remove";
 
