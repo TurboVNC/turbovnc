@@ -36,7 +36,7 @@ rm -rf %{buildroot}
 
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_mandir}/man1
-./vncinstall %{buildroot}%{_bindir} %{buildroot}%{_mandir}
+sh ./vncinstall %{buildroot}%{_bindir} %{buildroot}%{_mandir}
 install -m 644 Xvnc/programs/Xserver/Xserver.man %{buildroot}%{_mandir}/man1/Xserver.1
 
 mkdir -p %{buildroot}%{_datadir}/vnc/classes
