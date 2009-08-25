@@ -1,25 +1,53 @@
 #!/bin/bash
 
-TARGET=
-if [ `uname -m` = 'x86_64' ];then
-	TARGET='--target i386'
+RPMARCH=i386
+M32=0
+CLEAN=0
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+	-m32) M32=1;;
+	clean) CLEAN=1;;
+	esac
+	shift
+done
+
+if [ `uname -m` = 'x86_64' -a $M32 = 0 ]; then
+	RPMARCH=`uname -m`
+else
+	if [ $M32 = 1 ]; then
+		M32=0
+	fi
 fi
 
-if [ "$1" = "clean" ]; then
+if [ $CLEAN = 1 ]; then
 xmkmf || exit -1
 make clean || exit -1
+exit
 cd Xvnc
 if [ ! -f Makefile ]; then
-	./configure || exit -1
+	if [ $M32 = 1 ]; then
+		sh ./configure -m32 || exit -1
+	else
+		sh ./configure || exit -1
+	fi
 fi
 make clean || exit -1
 cd ..
 fi
 
-xmkmf || exit -1
-make World || exit -1
+if [ $M32 = 1 ]; then
+	sh make32 || exit -1
+else
+	xmkmf || exit -1
+	make World || exit -1
+fi
 cd Xvnc
-./configure || exit -1
+if [ $M32 = 1 ]; then
+	sh ./configure -m32 || exit -1
+else
+	sh ./configure || exit -1
+fi
 make || exit -1
 cd ..
 
@@ -34,8 +62,8 @@ rpmbuild -bb --buildroot $TMPDIR/rpms/TurboVNC-buildroot --define "_topdir $TMPD
 	--define "_bindir /opt/TurboVNC/bin" --define "_mandir /opt/TurboVNC/man" \
 	--define "_datadir /opt/TurboVNC" --define "_version $VERSION" \
 	--define "_build $BUILD" \
-	$TARGET turbovnc.spec
+	--target $RPMARCH turbovnc.spec
 
-mv $TMPDIR/rpms/RPMS/i386/turbovnc-$VERSION-$BUILD.i386.rpm turbovnc.i386.rpm
+mv $TMPDIR/rpms/RPMS/$RPMARCH/turbovnc-$VERSION-$BUILD.$RPMARCH.rpm turbovnc.$RPMARCH.rpm
 
 rm -rf $TMPDIR
