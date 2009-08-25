@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2009 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -134,7 +135,7 @@ static XtResource resources[] = {
 void
 qualScrollProc(Widget w, XtPointer client, XtPointer p)
 {
-  float	size, val;  int qual, pos=(int)p;
+  float	size, val;  int qual;  long pos=(long)p;
   XtVaGetValues(w, XtNshown, &size, XtNtopOfThumb, &val, 0);
   if(pos<0) val-=.1;  else val+=.1;
   qual=(int)(val*100.);  if(qual<1) qual=1;  if(qual>100) qual=100;
@@ -157,7 +158,7 @@ qualJumpProc(Widget w, XtPointer client, XtPointer p)
 void
 buttonZlibProc(Widget w, XtPointer client, XtPointer p)
 {
-  if((int)p==1) appData.compressLevel=1;
+  if((long)p==1) appData.compressLevel=1;
   else appData.compressLevel=0;
   UpdateQual();
 }
@@ -166,7 +167,7 @@ buttonZlibProc(Widget w, XtPointer client, XtPointer p)
 void
 buttonJPEGProc(Widget w, XtPointer client, XtPointer p)
 {
-  if((int)p==1) {
+  if((long)p==1) {
     if(appData.useBGR233)
       fprintf(stderr, "WARNING: Cannot enable JPEG because BGR233 is enabled.\n");
     else appData.enableJPEG=True;
@@ -179,7 +180,7 @@ buttonJPEGProc(Widget w, XtPointer client, XtPointer p)
 void
 buttonGrayProc(Widget w, XtPointer client, XtPointer p)
 {
-  if((int)p==1) appData.subsampLevel=TVNC_GRAY;
+  if((long)p==1) appData.subsampLevel=TVNC_GRAY;
   UpdateQual();
 }
 
@@ -187,7 +188,7 @@ buttonGrayProc(Widget w, XtPointer client, XtPointer p)
 void
 button4XProc(Widget w, XtPointer client, XtPointer p)
 {
-  if((int)p==1) appData.subsampLevel=TVNC_4X;
+  if((long)p==1) appData.subsampLevel=TVNC_4X;
   UpdateQual();
 }
 
@@ -195,7 +196,7 @@ button4XProc(Widget w, XtPointer client, XtPointer p)
 void
 button2XProc(Widget w, XtPointer client, XtPointer p)
 {
-  if((int)p==1) appData.subsampLevel=TVNC_2X;
+  if((long)p==1) appData.subsampLevel=TVNC_2X;
   UpdateQual();
 }
 
@@ -203,7 +204,7 @@ button2XProc(Widget w, XtPointer client, XtPointer p)
 void
 button1XProc(Widget w, XtPointer client, XtPointer p)
 {
-  if((int)p==1) appData.subsampLevel=TVNC_1X;
+  if((long)p==1) appData.subsampLevel=TVNC_1X;
   UpdateQual();
 }
 
