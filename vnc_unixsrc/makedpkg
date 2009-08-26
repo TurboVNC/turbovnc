@@ -1,30 +1,66 @@
 #!/bin/bash
 
-ARCH=`uname -m`
 APPNAME=turbovnc
 VERSION=`cat TurboVNC-version`
 BUILD=`date +%Y%m%d`
-DEBARCH=all
+DEBARCH=i386
 BINDIR=/opt/TurboVNC/bin
 MANDIR=/opt/TurboVNC/man
 DATADIR=/opt/TurboVNC
+M32=0
+CLEAN=0
 
-if [ "$1" = "clean" ]; then
+while [ $# -gt 0 ]; do
+	case "$1" in
+	-m32) M32=1;;
+	clean) CLEAN=1;;
+	*) break;;
+	esac
+	shift
+done
+
+MAKEARGS=${1+"$@"}
+
+if [ `uname -m` = 'x86_64' ]; then
+	if [ $M32 = 0 ]; then
+		DEBARCH=amd64
+	fi
+else
+	if [ $M32 = 1 ]; then
+		M32=0
+	fi
+fi
+
+if [ $CLEAN = 1 ]; then
 xmkmf || exit -1
+make Makefiles || exit -1
 make clean || exit -1
 cd Xvnc
 if [ ! -f Makefile ]; then
-	./configure || exit -1
+	if [ $M32 = 1 ]; then
+		sh ./configure -m32 || exit -1
+	else
+		sh ./configure || exit -1
+	fi
 fi
 make clean || exit -1
 cd ..
+exit
 fi
 
-xmkmf || exit -1
-make World || exit -1
+if [ $M32 = 1 ]; then
+	sh make32 "$MAKEARGS" || exit -1
+else
+	xmkmf || exit -1
+	make "$MAKEARGS" World || exit -1
+fi
 cd Xvnc
-./configure || exit -1
-make || exit -1
+if [ $M32 = 1 ]; then
+	sh ./configure -m32 || exit -1
+else
+	sh ./configure || exit -1
+fi
+make "$MAKEARGS" || exit -1
 cd ..
 
 umask 022
@@ -34,7 +70,7 @@ cat deb-control.tmpl | sed s/{__PKGNAME}/$APPNAME/g | sed s/{__VERSION}/$VERSION
 
 mkdir -p $TMPDIR$BINDIR
 mkdir -p $TMPDIR$MANDIR/man1
-./vncinstall $TMPDIR$BINDIR $TMPDIR$MANDIR
+sh ./vncinstall $TMPDIR$BINDIR $TMPDIR$MANDIR
 install -m 644 Xvnc/programs/Xserver/Xserver.man $TMPDIR$MANDIR/man1/Xserver.1
 
 mkdir -p $TMPDIR$DATADIR/vnc/classes
