@@ -2,12 +2,8 @@
 
 VERSION=`cat TurboVNC-version`
 BUILD=`date +%Y%m%d`
-TARGET=
 DISTRO=
 BLDDIR=.
-if [ `uname -m` = 'x86_64' ];then
-	TARGET='--target i386'
-fi
 if [ ! "$1" = "" ]; then
 	DISTRO=$1
 	BLDDIR=./$DISTRO
@@ -26,10 +22,9 @@ cat turbovnc.spec | sed s/%{_version}/$VERSION/g | sed s/%{_build}/$BUILD/g \
 	| sed s@%{_mandir}@/opt/TurboVNC/man@g \
 	| sed s@%{_datadir}@/opt/TurboVNC@g \
 	| sed s/#--\>//g > $BLDDIR/rpms/SPECS/turbovnc.spec || exit 1
-rpmbuild -ba --define "_topdir `pwd`/$BLDDIR/rpms" $TARGET $BLDDIR/rpms/SPECS/turbovnc.spec \
+rpmbuild -bs --define "_topdir `pwd`/$BLDDIR/rpms" $BLDDIR/rpms/SPECS/turbovnc.spec \
 	|| exit 1
 
-mv $BLDDIR/rpms/RPMS/i386/turbovnc-$VERSION-$BUILD.i386.rpm $BLDDIR/turbovnc.i386.rpm || exit 1
 mv $BLDDIR/rpms/SRPMS/turbovnc-$VERSION-$BUILD.src.rpm $BLDDIR/turbovnc.src.rpm || exit 1
 
 rm -rf $BLDDIR/rpms
