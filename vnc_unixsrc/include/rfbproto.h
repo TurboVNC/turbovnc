@@ -457,6 +457,8 @@ typedef struct _rfbInteractionCapsMsg {
 
 /*
  * Special encoding numbers:
+ *   0xFFFFFD00 .. 0xFFFFFD05 -- subsampling level
+ *   0xFFFFFE00 .. 0xFFFFFE64 -- fine-grained quality level (0-100 scale)
  *   0xFFFFFF00 .. 0xFFFFFF0F -- encoding-specific compression levels;
  *   0xFFFFFF10 .. 0xFFFFFF1F -- mouse cursor shape data;
  *   0xFFFFFF20 .. 0xFFFFFF2F -- various protocol extensions;
@@ -465,12 +467,14 @@ typedef struct _rfbInteractionCapsMsg {
  *   0xFFFFFFF0 .. 0xFFFFFFFF -- not allocated yet.
  */
 
-#define rfbJpegQualityLevel1       0xFFFFFE01
-#define rfbJpegQualityLevel100     0xFFFFFE64
-#define rfbJpegSubsamp1X           0xFFFFFD00
-#define rfbJpegSubsamp4X           0xFFFFFD01
-#define rfbJpegSubsamp2X           0xFFFFFD02
-#define rfbJpegSubsampGray         0xFFFFFD03
+#define rfbEncodingFineQualityLevel0   0xFFFFFE00
+#define rfbEncodingFineQualityLevel100 0xFFFFFE64
+#define rfbEncodingSubsamp1X           0xFFFFFD00
+#define rfbEncodingSubsamp4X           0xFFFFFD01
+#define rfbEncodingSubsamp2X           0xFFFFFD02
+#define rfbEncodingSubsampGray         0xFFFFFD03
+#define rfbEncodingSubsamp8X           0xFFFFFD04
+#define rfbEncodingSubsamp16X          0xFFFFFD05
 
 #define rfbEncodingCompressLevel0  0xFFFFFF00
 #define rfbEncodingCompressLevel1  0xFFFFFF01
@@ -508,9 +512,9 @@ typedef struct _rfbInteractionCapsMsg {
 #define sig_rfbEncodingPointerPos      "POINTPOS"
 #define sig_rfbEncodingLastRect        "LASTRECT"
 #define sig_rfbEncodingNewFBSize       "NEWFBSIZ"
+#define sig_rfbEncodingFineQualityLevel0 "FINEQLVL"
+#define sig_rfbEncodingSubsamp1X       "SSAMPLVL"
 #define sig_rfbEncodingQualityLevel0   "JPEGQLVL"
-#define sig_rfbJpegQualityLevel1       "JPEGQLV2"
-#define sig_rfbJpegSubsamp1X           "JPEGSAMP"
 
 /*****************************************************************************
  *

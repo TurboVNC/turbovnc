@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2009 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  *  Copyright (C) 2000-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -207,10 +208,10 @@ InitCapabilities(void)
 	  sig_rfbEncodingPointerPos, "Pointer position update");
   CapsAdd(encodingCaps, rfbEncodingLastRect, rfbTightVncVendor,
 	  sig_rfbEncodingLastRect, "LastRect protocol extension");
-  CapsAdd(encodingCaps, rfbJpegQualityLevel1, rfbTurboVncVendor,
-	  sig_rfbJpegQualityLevel1, "TurboJPEG quality level");
-  CapsAdd(encodingCaps, rfbJpegSubsamp1X, rfbTurboVncVendor,
-	  sig_rfbJpegSubsamp1X, "TurboJPEG subsampling level");
+  CapsAdd(encodingCaps, rfbEncodingFineQualityLevel0, rfbTurboVncVendor,
+	  sig_rfbEncodingFineQualityLevel0, "TurboJPEG fine-grained quality level");
+  CapsAdd(encodingCaps, rfbEncodingSubsamp1X, rfbTurboVncVendor,
+	  sig_rfbEncodingSubsamp1X, "TurboJPEG subsampling level");
 }
 
 
@@ -780,14 +781,14 @@ SetFormatAndEncodings()
       encs[se->nEncodings++] = Swap32IfLE(tightQualityLevel +
 					  rfbEncodingQualityLevel0);
       encs[se->nEncodings++] = Swap32IfLE(appData.qualityLevel +
-					  rfbJpegQualityLevel1 - 1);
+					  rfbEncodingFineQualityLevel0);
     }
 
     if (se->nEncodings < MAX_ENCODINGS && requestSubsampLevel) {
       if (appData.subsampLevel < 0 || appData.subsampLevel > TVNC_SAMPOPT - 1)
         appData.subsampLevel = TVNC_1X;
       encs[se->nEncodings++] = Swap32IfLE(appData.subsampLevel +
-					  rfbJpegSubsamp1X);
+					  rfbEncodingSubsamp1X);
     }
 
     if (appData.useRemoteCursor) {
@@ -837,11 +838,11 @@ SetFormatAndEncodings()
       encs[se->nEncodings++] = Swap32IfLE(tightQualityLevel +
 					  rfbEncodingQualityLevel0);
       encs[se->nEncodings++] = Swap32IfLE(appData.qualityLevel +
-					  rfbJpegQualityLevel1 - 1);
+					  rfbEncodingFineQualityLevel0);
 
       if (appData.subsampLevel >= 0 && appData.subsampLevel <= TVNC_SAMPOPT-1)
         encs[se->nEncodings++] = Swap32IfLE(appData.subsampLevel +  
-					    rfbJpegSubsamp1X);
+					    rfbEncodingSubsamp1X);
     }
 
     if (appData.useRemoteCursor) {

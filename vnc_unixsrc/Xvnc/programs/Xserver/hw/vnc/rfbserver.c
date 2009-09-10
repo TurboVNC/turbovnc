@@ -3,6 +3,7 @@
  */
 
 /*
+ *  Copyright (C) 2009 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  *  Copyright (C) 2000-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -545,8 +546,8 @@ rfbSendInteractionCaps(cl)
     SetCapInfo(&enc_list[i++],  rfbEncodingTight,          rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingCompressLevel0, rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingQualityLevel0,  rfbTightVncVendor);
-    SetCapInfo(&enc_list[i++],  rfbJpegQualityLevel1,      rfbTurboVncVendor);
-    SetCapInfo(&enc_list[i++],  rfbJpegSubsamp1X,          rfbTurboVncVendor);
+    SetCapInfo(&enc_list[i++],  rfbEncodingFineQualityLevel0, rfbTurboVncVendor);
+    SetCapInfo(&enc_list[i++],  rfbEncodingSubsamp1X,         rfbTurboVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingXCursor,        rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingRichCursor,     rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingPointerPos,     rfbTightVncVendor);
@@ -755,8 +756,8 @@ rfbProcessClientNormalMessage(cl)
 		    cl->tightCompressLevel = enc & 0x0F;
 		    rfbLog("Using compression level %d for client %s\n",
 			   cl->tightCompressLevel, cl->host);
-		} else if ( enc >= (CARD32)rfbJpegSubsamp1X &&
-			 enc <= (CARD32)rfbJpegSubsampGray ) {
+		} else if ( enc >= (CARD32)rfbEncodingSubsamp1X &&
+			 enc <= (CARD32)rfbEncodingSubsampGray ) {
 		    cl->tightSubsampLevel = enc & 0xFF;
 		    rfbLog("Using JPEG subsampling %d for client %s\n",
 			   cl->tightSubsampLevel, cl->host);
@@ -766,8 +767,8 @@ rfbProcessClientNormalMessage(cl)
 		    cl->tightSubsampLevel = 2;
 		    rfbLog("Using JPEG subsampling %d, Q%d for client %s\n",
 			   cl->tightSubsampLevel, cl->tightQualityLevel, cl->host);
-		} else if ( enc >= (CARD32)rfbJpegQualityLevel1 &&
-			    enc <= (CARD32)rfbJpegQualityLevel100 ) {
+		} else if ( enc >= (CARD32)rfbEncodingFineQualityLevel0 + 1 &&
+			    enc <= (CARD32)rfbEncodingFineQualityLevel100 ) {
 		    cl->tightQualityLevel = enc & 0xFF;
 		    rfbLog("Using image quality level %d for client %s\n",
 			   cl->tightQualityLevel, cl->host);
