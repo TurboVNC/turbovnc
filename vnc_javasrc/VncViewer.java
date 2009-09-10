@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2009 D. R. Commander.  All Rights Reserved.
 //  Copyright (C) 2001-2004 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
@@ -540,12 +541,12 @@ public class VncViewer extends java.applet.Applet
       encodings[nEncodings++] =
         RfbProto.EncodingQualityLevel0 + tightQualityLevel;
       encodings[nEncodings++] =
-        RfbProto.EncodingJpegQualityLevel1 + options.jpegQuality - 1;
+        RfbProto.EncodingFineQualityLevel0 + options.jpegQuality;
     }
     if (options.enableJpeg
       && options.subsampLevel >= 0 && options.subsampLevel <= 3) {
       encodings[nEncodings++] =
-        RfbProto.EncodingJpegSubsamp1X + options.subsampLevel;
+        RfbProto.EncodingSubsamp1X + options.subsampLevel;
     }
 
     if (options.requestCursorUpdates) {

@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2009 D. R. Commander.  All Rights Reserved.
 //  Copyright (C) 2001-2004 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 2001-2006 Constantin Kaplinsky.  All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
@@ -112,8 +113,8 @@ class RfbProto {
     EncodingZlib           = 6,
     EncodingTight          = 7,
     EncodingZRLE           = 16,
-    EncodingJpegSubsamp1X = 0xFFFFFD00,
-    EncodingJpegQualityLevel1 = 0xFFFFFE01,
+    EncodingSubsamp1X = 0xFFFFFD00,
+    EncodingFineQualityLevel0 = 0xFFFFFE00,
     EncodingCompressLevel0 = 0xFFFFFF00,
     EncodingQualityLevel0  = 0xFFFFFFE0,
     EncodingXCursor        = 0xFFFFFF10,
@@ -137,8 +138,8 @@ class RfbProto {
     SigEncodingPointerPos     = "POINTPOS",
     SigEncodingLastRect       = "LASTRECT",
     SigEncodingNewFBSize      = "NEWFBSIZ",
-    SigEncodingJpegQualityLevel1 = "JPEGQLV2",
-    SigEncodingJpegSubsamp1X  = "JPEGSAMP";
+    SigEncodingFineQualityLevel0 = "FINEQLVL",
+    SigEncodingSubsamp1X      = "SSAMPLVL";
 
   final static int MaxNormalEncoding = 255;
 
@@ -513,10 +514,10 @@ class RfbProto {
 		     SigEncodingLastRect, "LastRect protocol extension");
     encodingCaps.add(EncodingNewFBSize, TightVncVendor,
 		     SigEncodingNewFBSize, "Framebuffer size change");
-    encodingCaps.add(EncodingJpegQualityLevel1, TurboVncVendor,
-                     SigEncodingJpegQualityLevel1, "TurboJPEG quality level");
-    encodingCaps.add(EncodingJpegSubsamp1X, TurboVncVendor,
-                     SigEncodingJpegSubsamp1X, "TurboJPEG subsampling level");
+    encodingCaps.add(EncodingFineQualityLevel0, TurboVncVendor,
+                     SigEncodingFineQualityLevel0, "TurboJPEG fine-grained quality level");
+    encodingCaps.add(EncodingSubsamp1X, TurboVncVendor,
+                     SigEncodingSubsamp1X, "TurboJPEG subsampling level");
   }
 
   //
