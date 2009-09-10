@@ -1,3 +1,4 @@
+//  Copyright (C) 2009 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2008 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2003-2006 Constantin Kaplinsky. All Rights Reserved.
@@ -243,10 +244,10 @@ void ClientConnection::InitCapabilities()
 					   sig_rfbEncodingLastRect, "LastRect protocol extension");
 	m_encodingCaps.Add(rfbEncodingNewFBSize, rfbTightVncVendor,
 					   sig_rfbEncodingNewFBSize, "Framebuffer size change");
-	m_encodingCaps.Add(rfbJpegQualityLevel1, rfbTurboVncVendor,
-					   sig_rfbJpegQualityLevel1, "TurboJPEG quality level");
-	m_encodingCaps.Add(rfbJpegSubsamp1X, rfbTurboVncVendor,
-					   sig_rfbJpegSubsamp1X, "TurboJPEG subsampling level");
+	m_encodingCaps.Add(rfbEncodingFineQualityLevel0, rfbTurboVncVendor,
+					   sig_rfbEncodingFineQualityLevel0, "TurboJPEG fine-grained quality level");
+	m_encodingCaps.Add(rfbEncodingSubsamp1X, rfbTurboVncVendor,
+					   sig_rfbEncodingSubsamp1X, "TurboJPEG subsampling level");
 }
 
 // 
@@ -1727,7 +1728,7 @@ void ClientConnection::SetFormatAndEncodings()
 		if (tightQualityLevel > 9) tightQualityLevel = 9;
 		encs[se->nEncodings++] = Swap32IfLE( rfbEncodingQualityLevel0 +
 											 tightQualityLevel );
-		encs[se->nEncodings++] = Swap32IfLE( rfbJpegQualityLevel1 - 1 +
+		encs[se->nEncodings++] = Swap32IfLE( rfbEncodingFineQualityLevel0 +
 											 m_opts.m_jpegQualityLevel );
 	}
 
@@ -1735,7 +1736,7 @@ void ClientConnection::SetFormatAndEncodings()
 	if ( useSubsampLevel &&
 		 m_opts.m_subsampLevel >= 0 &&
 		 m_opts.m_subsampLevel <= TVNC_SAMPOPT-1) {
-		encs[se->nEncodings++] = Swap32IfLE( rfbJpegSubsamp1X +
+		encs[se->nEncodings++] = Swap32IfLE( rfbEncodingSubsamp1X +
 											 m_opts.m_subsampLevel );
 	}
 

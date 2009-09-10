@@ -1,3 +1,4 @@
+//  Copyright (C) 2009 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2001-2006 Constantin Kaplinsky. All Rights Reserved.
 //  Copyright (C) 2002 Vladimir Vologzhanin. All Rights Reserved.
@@ -956,22 +957,22 @@ vncClientThread::run(void *arg)
 						vnclog.Print(LL_INTINFO, VNCLOG("image compression level requested: %d, Q%d\n"), level, qual);
 						continue;
 					}
-					if ((Swap32IfLE(encoding) >= rfbJpegQualityLevel1) &&
-						(Swap32IfLE(encoding) <= rfbJpegQualityLevel100))
+					if ((Swap32IfLE(encoding) >= rfbEncodingFineQualityLevel0 + 1) &&
+						(Swap32IfLE(encoding) <= rfbEncodingFineQualityLevel100))
 					{
 						// Client specified image quality level used for JPEG compression
-						int level = (int)(Swap32IfLE(encoding) - rfbJpegQualityLevel1 + 1);
+						int level = (int)(Swap32IfLE(encoding) - rfbEncodingFineQualityLevel0);
 						m_client->m_buffer->SetQualityLevel(level);
 						vnclog.Print(LL_INTINFO, VNCLOG("image quality level requested: %d\n"), level);
 						continue;
 					}
 
 					// Is this a SubsampLevel encoding?
-					if ((Swap32IfLE(encoding) >= rfbJpegSubsamp1X) &&
-						(Swap32IfLE(encoding) <= rfbJpegSubsampGray))
+					if ((Swap32IfLE(encoding) >= rfbEncodingSubsamp1X) &&
+						(Swap32IfLE(encoding) <= rfbEncodingSubsampGray))
 					{
 						// Client specified encoding-specific compression level
-						int level = (int)(Swap32IfLE(encoding) - rfbJpegSubsamp1X);
+						int level = (int)(Swap32IfLE(encoding) - rfbEncodingSubsamp1X);
 						m_client->m_buffer->SetSubsampLevel(level);
 						vnclog.Print(LL_INTINFO, VNCLOG("subsampling level requested: %d\n"), level);
 						continue;
