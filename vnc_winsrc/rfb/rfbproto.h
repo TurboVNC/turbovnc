@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2009 D. R. Commander. All Rights Reserved.
  *  Copyright (C) 2004-2008 Sun Microsystems, Inc. All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
  *  Copyright (C) 2000-2006 Constantin Kaplinsky. All Rights Reserved.
