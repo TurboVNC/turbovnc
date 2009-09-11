@@ -67,11 +67,16 @@ static Bool rfbSendLastRectMarker(rfbClientPtr cl);
 
 
 /*
- * Map of quality levels to provide compatibility with TightVNC clients
+ * Map of quality levels to provide compatibility with TightVNC/TigerVNC
+ * clients
  */
 
 static int JPEG_QUAL[10] = {
-   5, 10, 15, 25, 37, 50, 60, 70, 75, 80
+   15, 29, 41, 42, 62, 77, 79, 86, 92, 100
+};
+
+static int JPEG_SUBSAMP[10] = {
+   1, 1, 1, 2, 2, 2, 0, 0, 0, 0
 };
 
 
@@ -764,7 +769,7 @@ rfbProcessClientNormalMessage(cl)
 		} else if ( enc >= (CARD32)rfbEncodingQualityLevel0 &&
 			    enc <= (CARD32)rfbEncodingQualityLevel9 ) {
 		    cl->tightQualityLevel = JPEG_QUAL[enc & 0x0F];
-		    cl->tightSubsampLevel = 2;
+		    cl->tightSubsampLevel = JPEG_SUBSAMP[enc & 0x0F];
 		    rfbLog("Using JPEG subsampling %d, Q%d for client %s\n",
 			   cl->tightSubsampLevel, cl->tightQualityLevel, cl->host);
 		} else if ( enc >= (CARD32)rfbEncodingFineQualityLevel0 + 1 &&
