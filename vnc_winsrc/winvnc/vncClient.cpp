@@ -70,6 +70,10 @@ static int JPEG_QUAL[10] = {
    5, 10, 15, 25, 37, 50, 60, 70, 75, 80
 };
 
+static int JPEG_SUBSAMP[10] = {
+   TVNC_4X, TVNC_4X, TVNC_4X, TVNC_2X, TVNC_2X, TVNC_2X, TVNC_1X, TVNC_1X, TVNC_1X, TVNC_1X
+};
+
 #include "FileTransferItemInfo.h"
 #include "vncMenu.h"
 
@@ -951,7 +955,7 @@ vncClientThread::run(void *arg)
 					{
 						// Client specified image quality level used for JPEG compression
 						int qual = JPEG_QUAL[Swap32IfLE(encoding) - rfbEncodingQualityLevel0];
-						int level = TVNC_2X;
+						int level = JPEG_SUBSAMP[Swap32IfLE(encoding) - rfbEncodingQualityLevel0];
 						m_client->m_buffer->SetQualityLevel(qual);
 						m_client->m_buffer->SetSubsampLevel(level);
 						vnclog.Print(LL_INTINFO, VNCLOG("image compression level requested: %d, Q%d\n"), level, qual);
