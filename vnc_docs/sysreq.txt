@@ -1,0 +1,134 @@
+* System Requirements
+
+** Linux/x86
+
+|| || Server (x86) || Server (x86-64) || Client ||
+| Recommended CPU \
+	| Pentium 4, 1.7 GHz or faster (or equivalent) \
+		{list type=ul: \
+			{item:For optimal performance, the processor should support SSE2 \
+				extensions.} \
+			{item:Dual processors or dual cores recommended}} \
+	| Pentium 4/Xeon with EM64T, or...{nl} \
+		AMD Opteron or Athlon64, 1.8 GHz or faster \
+		{list type=ul: \
+			{item:For optimal performance with 64-bit TurboVNC, the processor \
+				should support SSE3 extensions.  AMD 64-bit processors manufactured \
+				prior to 2005 do not support SSE3.} \
+			{item:Dual processors or dual cores recommended}} \
+	| Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent) \
+	|
+| Recommended O/S \
+	| {list type=ul: \
+			{item:Any distribution in the \
+				[[http://www.redhat.com/][RedHat]] or [[http://www.novell.com/linux/][SuSE]] \
+				families which contains GLIBC 2.3.2 or later (including \
+				[[http://fedora.redhat.com/][Fedora]], \
+				[[http://www.centos.org/][CentOS]] 3 and later, and \
+				[[http://www.whiteboxlinux.org/][White Box]])} \
+			{item:Ubuntu Linux v6.0 or later}} \
+	| < \
+	| < \
+	|
+| Other Software \
+	| {:} | {:} \
+	| X server configured to export True Color (24-bit or 32-bit) visuals \
+	|
+#OPT: hiCol=first
+
+** Solaris/x86
+
+|| || Server || Client ||
+| Recommended CPU \
+	| Pentium 4/Xeon with EM64T, or...{nl} \
+		AMD Opteron or Athlon64, 1.8 GHz or faster \
+		{list type=ul: \
+	    {item:Dual processors or dual cores recommended}} \
+	| Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent) \
+	|
+| O/S \
+	| {list type=ul: \
+			{item: Solaris 10 (or newer)} \
+			{item: OpenSolaris 2008.11 (or newer)}} \
+	| < \
+	| < \
+	|
+| Other Software \
+	| {list type=ul: \
+			{item:[[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]] \
+				(v2.5 or higher recommended *)} \
+			{item:[[http://sunsolve.sun.com/pub-cgi/show.pl?target=patchpage][Solaris Patch]] \
+				118345-04 (or later)}} \
+	| {list type=ul: \
+			{item:[[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]] \
+				(v2.5 or higher recommended *)} \
+			{item:X server configured to export True Color (24-bit or 32-bit) \
+				visuals}} \
+	|
+#OPT: hiCol=first
+
+	!!! * mediaLib 2.5 is included in Solaris 10 update 4 and newer.  If you
+	are running an older version of Solaris, it is recommended that you download
+	and install the mediaLib 2.5 upgrade from the link above.  mediaLib 2.5
+	improves the performance of TurboVNC significantly on Solaris/x86 systems,
+	when compared to mediaLib 2.4.
+
+** Solaris/SPARC
+
+|| || Server || Client ||
+| Recommended CPU \
+	| UltraSPARC III 900 MHz or faster \
+		{list type=ul: \
+			{item:Dual processors or dual cores recommended}} \
+	| UltraSPARC III 900 MHz or faster \
+	|
+| O/S \
+	| {list type=ul: \
+			{item: Solaris 8 (or newer)} \
+			{item: OpenSolaris 2008.11 (or newer)}} \
+	| < \
+	|
+| Other Software \
+	| [[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]] \
+		(pre-installed on Solaris 10 and higher) \
+	| {list type=ul: \
+			{item:[[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]] \
+				(pre-installed on Solaris 10 and higher)} \
+			{item:If your system does not ship with SSh pre-installed (older Solaris \
+				8 and 9 systems don't), then download and install an OpenSSH package \
+				from [[http://www.blastwave.org/][Blastwave]] or \
+				http://www.sunfreeware.com/.} \
+			{item:X server configured to export True Color (24-bit or 32-bit) \
+				visuals}} \
+	|
+#OPT: hiCol=first
+
+** Mac/x86
+
+|| || Client ||
+| Recommended CPU \
+	| Any Intel-based Mac \
+	|
+| O/S \
+	| OS X 10.4 ("Tiger") or later \
+	|
+| Other Software \
+	| Mac X11 application (in the "Optional Installs" package on the OS X \
+		install discs) \
+	|
+#OPT: hiCol=first
+
+** Windows
+
+|| || Client ||
+| Recommended CPU \
+	| Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent) \
+	|
+| O/S \
+	| Windows 2000 or later \
+	|
+| Other \
+	| For best performance, client display should have a 24-bit or 32-bit (True \
+		Color) color depth. \
+	|
+#OPT: hiCol=first

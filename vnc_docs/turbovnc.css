@@ -1,0 +1,190 @@
+p.title
+{
+	font-size: 2em;
+	font-weight: bold;
+}
+
+body
+{
+	background-color: rgb(255, 255, 255);
+	font-family: Arial,Helvetica,sans-serif;
+}
+
+a
+{
+	text-decoration: none;
+}
+
+dt
+{
+	font-weight: bold;
+	margin-left: 25px;
+	margin-top: 20px;
+}
+
+.valid
+{
+	border-width: 0px;
+}
+
+pre
+{
+	border: 1px solid rgb(0, 0, 255);
+	padding: 4px;
+	font-family: courier,monospace;
+	font-size: 14px;
+	background-color: rgb(238, 238, 255);
+	margin-left: 25px;
+	margin-right: 25px;
+}
+
+tr
+{
+	background-color: rgb(238, 238, 255);
+	color: rgb(32, 32, 32);
+	text-align: left;
+}
+
+table
+{
+	border-spacing: 0px;
+	border-width: 1;
+	border-style: solid;
+}
+
+th
+{
+	padding: 5px;
+	background-color: rgb(0, 0, 0);
+	color: rgb(255, 255, 255);
+	text-align: left;
+	border-style: solid;
+	border-width: 2;
+	empty-cells: show;
+	border-color: rgb(0, 0, 0);
+}
+
+td
+{
+	padding: 5px;
+	vertical-align: top;
+	text-align: left;
+	border-style: solid;
+	border-width: 2;
+	empty-cells: show;
+	border-color: rgb(0, 0, 0);
+}
+
+td.high
+{
+	padding: 5px;
+	background-color: rgb(0, 0, 0);
+	color: rgb(255, 255, 255);
+	text-align: left;
+	font-weight: bold;
+	border-style: solid;
+	border-width: 2;
+	border-color: rgb(0, 0, 0);
+	empty-cells: show;
+}
+
+.colorheader
+{
+	padding: 2px;
+	background-color: rgb(0, 0, 0);
+	color: rgb(255, 255, 255);
+	margin-left: 3px;
+	margin-right: 3px;
+	font-weight: bold;
+}
+
+.newwin
+{
+	border-width: 0px;
+}
+
+.tip
+{
+	border: 1px solid rgb(0, 0, 0);
+	padding: 1px 5px;
+	font-weight: bold;
+	background-color: rgb(255, 255, 0);
+	margin-right: 10px;
+}
+
+.note
+{
+	border: 1px solid rgb(0, 0, 0);
+	padding: 1px 5px;
+	font-weight: bold;
+	background-color: blue;
+	color: rgb(255, 255, 255);
+	margin-right: 10px;
+}
+
+hr
+{
+	margin-bottom: 7px;
+}
+
+h1
+{
+	font-size: 1.5em;
+	padding: 5px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(25, 25, 112);
+}
+
+h2
+{
+	font-size: 1.17em;
+	padding: 2px;
+	background-color: rgb(0, 0, 0);
+	color: rgb(255, 255, 255);
+	margin-left: 3px;
+	margin-right: 3px;
+}
+
+h3
+{
+	font-size: 1.0em;
+}
+
+.top
+{
+	text-align: right;
+}
+
+div.figure
+{
+	text-align: center; 
+	padding: 20pt; 
+}
+
+caption
+{
+	font-weight: bold;
+}
+
+p.caption
+{
+	font-weight: bold;
+}
+
+p.important
+{
+	color: rgb(240, 110, 0);
+	font-style: italic;
+}
+
+li.Ordered
+{
+	margin-bottom: 1em;
+}
+
+div.tableNote
+{
+	text-align: center;
+	font-weight: bold;
+}
+

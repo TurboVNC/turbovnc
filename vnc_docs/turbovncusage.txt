@@ -1,0 +1,317 @@
+* Using TurboVNC
+{anchor: TurboVNC_Usage}
+
+** Starting and Connecting to a TurboVNC Session
+
+*** Procedure
+#OPT: noList! plain!
+
+	#. __Mac clients:__ Start the Mac X11 application.
+
+	#. Open a new Command Prompt/terminal window on your client machine.
+		(__Mac clients:__ in the X11 application, start a new xterm [Command-N] if
+		one isn't already started.)
+
+	#. In the new Command Prompt/terminal/xterm window, open a Secure Shell (SSh)
+		session into the TurboVNC server:
+
+		Linux/Mac/Solaris clients :: {:}
+		#Verb: <<---
+		ssh {user}@{server}
+		---
+
+		Windows clients :: {:}
+		#Verb: <<---
+		"c:\program files\turbovnc\putty" {user}@{server}
+		---
+
+		Replace __''{user}''__ with your user account name on the TurboVNC server and
+		__''{server}''__ with the hostname or IP address of that server.
+
+	#. In the SSh session, start a TurboVNC session:
+
+		#Verb: <<---
+		/opt/TurboVNC/bin/vncserver
+		---
+
+	#. Make a note of the X display number that the TurboVNC session is
+		occupying, for instance:
+		{nl}{nl}
+		''New 'X' desktop is my_server:1''
+		{nl}{nl}
+		If this is the first time that a TurboVNC session has ever been run
+		under this user account, TurboVNC will prompt for a VNC session password.
+
+	#. The SSh session can now be exited, if desired.
+
+	#. On the client machine, start the TurboVNC viewer.
+
+		Linux/Mac/Solaris clients :: {:}
+		Open a new terminal/xterm and type
+		#Verb: <<---
+		/opt/TurboVNC/bin/vncviewer
+		---
+
+		Windows clients :: {:}
+		Select __TurboVNC Viewer__ in the __TurboVNC__ Start Menu group.
+
+	#. A small dialog box will appear.
+		{nl}{nl}
+		|| Windows TurboVNC viewer || Linux/Mac/Solaris TurboVNC viewer ||
+		| {img:turbovnc1.png} | {img:turbovnc2.png} |
+		{nl}
+		Enter the X display name (hostname/IP address and display number) of the
+		TurboVNC session in the "VNC Server" field, then click "Connect" (Windows)
+		or press Enter (Linux/Mac/Solaris.)
+
+	#. Another dialog box appears, prompting for the VNC session password.
+		{nl}{nl}
+		|| Windows TurboVNC viewer || Linux/Mac/Solaris TurboVNC viewer ||
+		| {img:turbovnc3.png} | {img:turbovnc4.png} |
+		{nl}
+		Enter the VNC session password and click "OK" (Windows) or press
+		Enter (Linux/Mac/Solaris.)
+		{nl}{nl}
+		A TurboVNC desktop window should appear on your client machine.  This
+		window contains a virtual X server with which you can interact to launch
+		X-Windows applications on the TurboVNC server.
+
+** Disconnecting and Killing a TurboVNC Session
+
+Closing the TurboVNC viewer disconnects from the TurboVNC session, but the
+TurboVNC session will remain running on the TurboVNC server (as will any
+applications that you may have started in the session), and you can reconnect
+to the session at any time.
+
+To kill a TurboVNC session:
+
+	#. Using SSh (''c:\\Program Files\\TurboVNC\\putty.exe'' on Windows clients),
+		log into the server that is running the TurboVNC session that you wish to
+		kill.{nl} \
+		... or ...{nl} \
+		Using the TurboVNC viewer, connect to the TurboVNC session that you wish to
+		kill, and open a new terminal in that TurboVNC session.
+
+	#. Type the following command:
+
+		#Verb: <<---
+		/opt/TurboVNC/bin/vncserver -kill :{n}
+		---
+
+	Replace __''{n}''__ with the X display number of the TurboVNC session you
+	wish to kill.
+
+To list the X display numbers and process ID's of all TurboVNC sessions that
+are currently running under your user account on a particular machine, type the
+following command:
+
+	#Verb: <<---
+	/opt/TurboVNC/bin/vncserver -list
+	---
+
+** Using TurboVNC in a Web Browser
+
+When a TurboVNC session is created, it automatically launches a miniature web
+server that serves up a Java TurboVNC viewer applet.  This Java TurboVNC viewer
+can be used to connect to the TurboVNC session from a machine that does not
+have a native TurboVNC viewer installed (or a machine for which no native
+TurboVNC viewer is available.)  The Java viewer is significantly slower than
+the native viewer on high-speed networks, but on low-speed networks the Java
+viewer and native viewers have comparable performance.  The Java viewer does
+not currently support double buffering.
+
+To use the Java TurboVNC viewer, point your web browser to:
+
+''http://''__''{turbovnc_server}''__'':{5800+''__''n''__''}''
+
+where __''{turbovnc_server}''__ is the hostname or IP address of the TurboVNC
+server, and __''n''__ is the X display number of the TurboVNC session to which
+you want to connect.
+
+__Example:__
+If the TurboVNC session is occupying X display ''my_server:1'', then point your
+web browser to:
+
+''http://my_server:5801''
+
+** Optimizing TurboVNC's Performance for Different Network Types
+
+The level of image compression in TurboVNC can be adjusted to balance the
+(sometimes conflicting) goals of high image quality and high performance.
+There are four options which control the manner in which TurboVNC compresses
+images:
+
+	Allow JPEG compression :: {:}
+		If this option is enabled, then TurboVNC will use JPEG compression for all
+		image tiles with more than 24 unique colors and paletted encoding for all
+		other image tiles.  If this option is disabled, then TurboVNC will select
+		between paletted or raw encoding depending on the size of the image tile
+		and its color count.
+
+	JPEG image quality :: {:}
+		Lower quality levels produce grainier JPEG images with more noticeable
+		compression artifacts, but lower quality levels also use less network
+		bandwidth and CPU time.
+
+	JPEG chrominance subsampling :: {:}
+		After converting the image from RGB to YUV, chrominance subsampling
+		discards some of the U and V (chrominance) components to save space.  1x
+		subsampling retains the chrominance components for all pixels, 2x
+		subsampling retains the chrominance components for every other pixel, 4x
+		subsampling retains the chrominance components for every fourth pixel, and
+		grayscale throws out all of the chrominance components.  1x subsampling
+		uses the most network bandwidth and CPU time, whereas grayscale uses the
+		least.
+
+	Zlib compression level :: {:}
+		If Zlib compression is enabled, then paletted and raw-encoded image tiles
+		will be compressed with Zlib prior to transmission.  This decreases network
+		bandwidth usage at the expense of increased server CPU usage.  If JPEG
+		compression is enabled, then Zlib compression is always used with non-JPEG
+		image tiles.
+
+In the Windows TurboVNC viewer, these parameters can be adjusted by accessing
+the Options dialog box (click on the "Options" button in the "TurboVNC
+Connection" dialog box or, after connecting to the server, click on the
+Connection Options button in the toolbar.)  In the Unix TurboVNC viewer, press
+F8 after connecting to bring up the options menu.  In the Java viewer, click on
+the Options button at the top of the browser window.
+
+The TurboVNC viewer provides five image encoding protocols, corresponding
+to the most useful combinations of the image compression options described
+above:
+
+|| Image encoding protocol || Allow JPEG || JPEG image quality || \
+	JPEG chrominance subsampling || Zlib compression level || Notes ||
+| "Tight + Perceptually Lossless JPEG" | Yes | 95 | 1x | N/A | \
+	This protocol should be perceptually lossless (that is, any image \
+	compression artifacts it produces should be imperceptible to the human \
+	eye under most viewing conditions.)  This protocol requires a great deal \
+	of network bandwidth, however, and is generally not recommended except on \
+	50 Megabit/second and faster networks. |
+| "Tight + Medium Quality JPEG" | Yes | 80 | 2x | N/A | \
+	For image tiles with a high number of unique colors, this protocol produces \
+	some minor, but generally not very noticeable, image compression artifacts. \
+	All else being equal, this protocol typically uses about twice the network \
+	bandwidth of the "Low Quality JPEG" protocol and about half the bandwidth of the \
+	"Perceptually Lossless JPEG" protocol, making it appropriate for medium-speed \
+	networks such as 10 Megabit ethernet. |
+| "Tight + Low Quality JPEG" | Yes | 30 | 4x | N/A | \
+	For image tiles with a high number of unique colors, this protocol produces \
+	very noticeable image compression artifacts.  However, it performs \
+	optimally on low-bandwidth connections.  If image quality is more critical \
+	than performance, then use one of the other connection protocols or take \
+	advantage of the "Lossless Refresh" feature. |
+| "Lossless Tight" | No | N/A | N/A | 0 | \
+	This protocol uses paletted encoding for image tiles with a low number of \
+	unique colors but otherwise does not perform any image compression at all. \
+	It is thus suitable only for gigabit and faster networks.  This protocol \
+	uses significantly less CPU time than any of the JPEG-based protocols. |
+| "Lossless Tight + Zlib" | No | N/A | N/A | 1 | \
+	This protocol uses paletted encoding for image tiles with a low number of \
+	unique colors and raw encoding for image tiles with a high number of unique \
+	colors.  It compresses all image tiles using Zlib with compression level \
+	1.  For certain types of applications (CAD applications, in particular), \
+	this protocol uses less network bandwidth than the "Perceptually Lossless JPEG" \
+	protocol, but it also uses significantly more CPU time on the server than \
+	any of the JPEG-based protocols. |
+
+In the Windows TurboVNC viewer, the image encoding protocol can be set using
+the Options dialog box (click on the "Options" button in the "TurboVNC
+Connection" dialog box or, after connecting to the server, click on the
+Connection Options button in the toolbar.)  In the Java viewer, the same thing
+is accomplished by clicking on the "Options" button at the top of the browser
+window.  With the Linux/Mac/Solaris TurboVNC viewer, the "Perceptually
+Lossless" protocol is the default, and you can use the following command line
+switches to select another protocol:
+
+''-medqual'' = select the "Tight + Medium Quality JPEG" protocol {nl}
+''-lowqual'' = select the "Tight + Low Quality JPEG" protocol {nl}
+''-lossless'' = select the "Lossless Tight" protocol {nl}
+''-losslesswan'' = select the "Lossless Tight + Zlib" protocol {nl}
+
+You can also press the F8 key after connecting to pop up a menu from which you
+can select a different protocol.
+
+*** Lossless Refresh
+
+Since both of TurboVNC's mathematically lossless protocols have performance
+drawbacks, another option for image-quality-critical applications is the
+"Lossless Refresh" feature.  When a lossless refresh is requested by a TurboVNC
+viewer, the server will send a mathematically lossless image of the current
+TurboVNC desktop to the requesting viewer.  So, for instance, a user can
+rotate/pan/zoom an object in their 3D application using a very low-quality JPEG
+setting, then when that user is ready to interpret or analyze the object, they
+can request a lossless refresh of TurboVNC's virtual screen.
+
+To perform a lossless refresh in the Windows or Unix TurboVNC viewers, press
+CTRL-ALT-SHIFT-L (in the Windows TurboVNC viewer, you can also click on the
+Lossless Refresh toolbar icon.)  In the Java TurboVNC viewer, click on the
+"Lossless Refresh" button at the top of the browser window.
+
+** Securing a TurboVNC Connection
+
+Normally, the connection between the TurboVNC server and the TurboVNC viewer is
+completely unencrypted, but securing that connection can be easily
+accomplished by using the port forwarding feature of Secure Shell (SSh.)  After
+you have started a TurboVNC session on the TurboVNC server, open a new SSh
+connection into the TurboVNC server using the following command line:
+
+	Linux/Mac/Solaris clients :: {:}
+	#Verb: <<---
+	ssh -L {5900+n}:localhost:{5900+n} {user}@{server}
+	---
+
+	Windows clients :: {:}
+	#Verb: <<---
+	"c:\program files\turbovnc\putty" -L {5900+n}:localhost:{5900+n} {user}@{server}
+	---
+
+Replace __''{user}''__ with your user account name on the TurboVNC server and
+__''{server}''__ with the hostname or IP address of that server.  Replace
+__''n''__ with the X display number of the TurboVNC session to which you want
+to connect.
+
+For instance, if you wish to connect to display '':1'' on server ''my_server''
+using user account ''my_user'', you would type:
+
+	Linux/Mac/Solaris clients :: {:}
+	#Verb: <<---
+	ssh -L 5901:localhost:5901 my_user@my_server
+	---
+
+	Windows clients :: {:}
+	#Verb: <<---
+	"c:\program files\turbovnc\putty" -L 5901:localhost:5901 my_user@my_server
+	---
+
+After the SSh connection has been established, you can then launch the
+TurboVNC viewer and point it to ''localhost:''__''{n}''__ (''localhost:1'' in the
+above example.)
+
+*** Performance Notes
+#OPT: noList! plain!
+
+For LAN connections and other high-speed networks, tunneling the TurboVNC
+connection over SSh will reduce performance by as much as 20-40%.  For
+wide-area networks, however, there is no performance penalty for using SSh
+tunneling with TurboVNC.
+
+** Further Reading
+
+For more detailed instructions on the usage of TurboVNC:
+
+	Linux/Mac/Solaris :: Refer to the TurboVNC man pages:
+	#Verb: <<---
+	man -M /opt/TurboVNC/man {vncserver | Xvnc | vncviewer | vncconnect | vncpasswd}
+	---
+
+	Windows :: Use the embedded help feature (the question mark button in the
+	upper right of the TurboVNC viewer window.)
+
+The TightVNC documentation:
+
+http://www.tightvnc.com/docs.html
+
+might also be helpful, since TurboVNC is based on TightVNC and shares many of
+its features.

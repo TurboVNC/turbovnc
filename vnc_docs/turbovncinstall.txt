@@ -5,9 +5,9 @@
 *** Installing TurboJPEG
 #OPT: noList! plain!
 
-	1. Download the appropriate TurboJPEG binary package (v1.10 or later) for
+	1. Download the appropriate TurboJPEG binary package (v1.11 or later) for
 		your system from the
-		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+		[[http://sourceforge.net/projects/virtualgl/files/TurboJPEG/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 		{nl}
 		!!! The "i386" RPM and DEB packages are for 32-bit-only systems.  The
@@ -31,7 +31,7 @@
 #OPT: noList! plain!
 
 	1. Download the appropriate TurboVNC binary package for your system from the
-		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+		[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 		{nl}
 
@@ -52,7 +52,7 @@
 
 	1. Download the TurboVNC Solaris package (''SUNWtvnc-''__''{version}''__''.pkg.bz2''
 		for SPARC or ''SUNWtvnc-''__''{version}''__''-x86.pkg.bz2'' for x86) from the
-		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+		[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 		{nl}
 
@@ -78,7 +78,7 @@
 
 	#. Download the TurboVNC Mac disk image
 		(''TurboVNC-''__''{version}''__''.dmg'') from the
-		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+		[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 
 	#. Open the disk image, then open ''TurboVNC-''__''{version}''__''.pkg'' inside the
@@ -89,7 +89,7 @@
 
 	#. Download the TurboVNC Windows installer package
 		(''TurboVNC-''__''{version}''__''.exe'') from the
-		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+		[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 
 	#. Run the TurboVNC installer.  The installation of TurboVNC should be
