@@ -1,0 +1,151 @@
+* Obtaining and Installing TurboVNC
+
+** Installing TurboVNC on Linux
+
+*** Installing TurboJPEG
+#OPT: noList! plain!
+
+	1. Download the appropriate TurboJPEG binary package (v1.10 or later) for
+		your system from the
+		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
+		{nl}
+		!!! The "i386" RPM and DEB packages are for 32-bit-only systems.  The
+		"x86_64" RPM and "amd64" DEB packages are for 64-bit systems.  The 64-bit
+		packages contain both 32-bit and 64-bit libraries.
+
+	2. Log in as root, cd to the directory where you downloaded the binary
+		package, and issue one of the following commands:
+
+		RPM-based systems :: {:}
+		#Verb <<---
+		rpm -U turbojpeg*.rpm
+		---
+
+		Debian-based systems :: {:}
+		#Verb <<---
+		dpkg -i turbojpeg*.deb
+		---
+
+*** Installing TurboVNC
+#OPT: noList! plain!
+
+	1. Download the appropriate TurboVNC binary package for your system from the
+		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
+		{nl}
+
+	2. Log in as root, cd to the directory where you downloaded the binary
+		package, and issue one of the following commands:
+
+		RPM-based systems :: {:}
+		#Verb <<---
+		rpm -U turbovnc*.rpm
+		---
+
+		Debian-based systems :: {:}
+		#Verb <<---
+		dpkg -i turbovnc*.deb
+		---
+
+** Installing TurboVNC on Solaris
+
+	1. Download the TurboVNC Solaris package (''SUNWtvnc-''__''{version}''__''.pkg.bz2''
+		for SPARC or ''SUNWtvnc-''__''{version}''__''-x86.pkg.bz2'' for x86) from the
+		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
+		{nl}
+
+	2. Log in as root, cd to the directory where you downloaded the package, and
+		issue the following commands:
+
+		#Verb: <<---
+		pkgrm SUNWvgl
+		---
+
+		(answer "Y" when prompted.)
+
+		#Verb: <<---
+		bzip2 -d SUNWtvnc-{version}.pkg.bz2
+		pkgadd -d SUNWtvnc-{version}.pkg
+		---
+
+		Select the ''SUNWtvnc'' package (usually option 1) from the menu.
+
+ !!! TurboVNC for Solaris installs into ''/opt/SUNWtvnc''.
+
+** Installing TurboVNC on Mac (Client Only)
+
+	#. Download the TurboVNC Mac disk image
+		(''TurboVNC-''__''{version}''__''.dmg'') from the
+		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
+
+	#. Open the disk image, then open ''TurboVNC-''__''{version}''__''.pkg'' inside the
+		disk image.  Follow the instructions to install the Mac client.  The Mac
+		package installs files in the same locations as the Linux packages.
+
+** Installing TurboVNC on Windows (Client Only)
+
+	#. Download the TurboVNC Windows installer package
+		(''TurboVNC-''__''{version}''__''.exe'') from the
+		[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
+
+	#. Run the TurboVNC installer.  The installation of TurboVNC should be
+		self-explanatory.  The only configuration option is the directory into
+		which you want the files to be installed.
+
+** Installing TurboVNC from Source
+
+If you are using a Unix platform for which there is not a pre-built TurboVNC
+binary package available, then log in as root, download the TurboVNC source
+tarball (''turbovnc-''__''{version}''__''.tar.gz'') from the 
+[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]],
+uncompress it, ''cd vnc/vnc_unixsrc'', and read the ''README'' file for further
+instructions on how to build TurboVNC from source.
+
+** Uninstalling TurboVNC
+
+*** Linux
+#OPT: noList! plain!
+
+As root, issue one of the following commands:
+
+	RPM-based systems :: {:}
+	#Verb: <<---
+	rpm -e turbovnc
+	---
+
+	Debian-based systems :: {:}
+	#Verb: <<---
+	dpkg -r turbovnc
+	---
+
+*** Solaris
+#OPT: noList! plain!
+
+As root, issue the following command:
+
+#Verb: <<---
+pkgrm SUNWtvnc
+---
+
+Answer "yes" when prompted.
+
+*** Mac
+#OPT: noList! plain!
+
+Use the "Uninstall TurboVNC" application provided in the TurboVNC disk image,
+or issue the following command from the Terminal:
+
+#Verb: <<---
+sudo /opt/TurboVNC/bin/uninstall
+---
+
+*** Windows
+#OPT: noList! plain!
+
+Use the "Add or Remove Programs" applet in the Control Panel (or the
+"Programs and Features" applet if you're running Vista.)
