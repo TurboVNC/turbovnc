@@ -101,7 +101,7 @@
 If you are using a Unix platform for which there is not a pre-built TurboVNC
 binary package available, then log in as root, download the TurboVNC source
 tarball (''turbovnc-''__''{version}''__''.tar.gz'') from the 
-[[http://sourceforge.net/project/showfiles.php?group_id=117509][Download area]]
+[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
 of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]],
 uncompress it, ''cd vnc/vnc_unixsrc'', and read the ''README'' file for further
 instructions on how to build TurboVNC from source.
