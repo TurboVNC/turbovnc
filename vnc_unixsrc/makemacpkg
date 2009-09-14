@@ -48,7 +48,8 @@ install -m 644 LICENCE.TXT $pkgtmpdir/pkg/Package_Root/Library/Documentation/$pk
 install -m 644 WhatsNew $pkgtmpdir/pkg/Package_Root/Library/Documentation/$pkgname || doexit -1
 install -m 644 ChangeLog $pkgtmpdir/pkg/Package_Root/Library/Documentation/$pkgname || doexit -1
 install -m 644 TurboVNC-ChangeLog.txt $pkgtmpdir/pkg/Package_Root/Library/Documentation/$pkgname || doexit -1
-install -m 644 TurboVNC-CompatibilityGuide.txt $pkgtmpdir/pkg/Package_Root/Library/Documentation/$pkgname || doexit -1
+install -m 644 ../vnc_docs/LICEN*.txt ../vnc_docs/*.html ../vnc_docs/*.png ../vnc_docs/*.css $pkgtmpdir/pkg/Package_Root/Library/Documentation/$pkgname || doexit -1
+sudo ln -fs /Library/Documentation/$pkgname/index.html "$pkgtmpdir/pkg/Package_Root/Applications/$pkgname/User's Guide.html"
 sudo chown -R root:admin $pkgtmpdir/pkg/Package_Root || doexit -1
 cp License.rtf Welcome.rtf ReadMe.rtf $pkgtmpdir/pkg/Resources/ || doexit -1
 mkdir $pkgtmpdir/dmg
