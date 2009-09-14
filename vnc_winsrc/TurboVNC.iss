@@ -39,7 +39,6 @@ Source: "turbojpeg-libjpeg.dll"; DestDir: "{app}"; Flags: ignoreversion restartr
 Source: "switchtjpeg.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: "server viewer"
 Source: "VNCViewer\Release\vncviewer.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 Source: "putty\Release\putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
-Source: "README-bin.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "LICENCE.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "WhatsNew.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "TurboVNC-ChangeLog.txt"; DestDir: "{app}"; Flags: ignoreversion
@@ -62,7 +61,6 @@ Name: "{group}\Administration\Remove VNC Service";    FileName: "{app}\WinVNC.ex
 Name: "{group}\Administration\Run Service Helper";    FileName: "{app}\WinVNC.exe";    Parameters: "-servicehelper";   WorkingDir: "{app}";     Components: server;
 Name: "{group}\Administration\Show Default Settings"; FileName: "{app}\WinVNC.exe";    Parameters: "-defaultsettings"; WorkingDir: "{app}";     Components: server;
 Name: "{group}\Documentation\TurboVNC User's Guide";  FileName: "{app}\doc\index.html";                                WorkingDir: "{app}\doc"; Components: doc;
-Name: "{group}\Documentation\Read Me";                FileName: "write.exe";           Parameters: "README-bin.txt";   WorkingDir: "{app}";     Flags: "useapppaths"
 Name: "{group}\Documentation\Licensing Terms";        FileName: "write.exe";           Parameters: "LICENCE.txt";      WorkingDir: "{app}";     Flags: "useapppaths"
 Name: "{group}\Documentation\TurboVNC Web Site";      FileName: "{app}\TurboVNC.url"
 Name: "{group}\Documentation\TightVNC Change Log";    FileName: "write.exe";           Parameters: "WhatsNew.txt";     WorkingDir: "{app}";     Flags: "useapppaths"
