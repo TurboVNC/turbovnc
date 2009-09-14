@@ -129,7 +129,7 @@ install -m 644 LICENCE.TXT $TMPDIR/usr/share/doc/$APPNAME-$VERSION
 install -m 644 WhatsNew $TMPDIR/usr/share/doc/$APPNAME-$VERSION
 install -m 644 ChangeLog $TMPDIR/usr/share/doc/$APPNAME-$VERSION
 install -m 644 TurboVNC-ChangeLog.txt $TMPDIR/usr/share/doc/$APPNAME-$VERSION
-install -m 644 TurboVNC-CompatibilityGuide.txt $TMPDIR/usr/share/doc/$APPNAME-$VERSION
+install -m 644 ../vnc_docs/LICEN*.txt ../vnc_docs/*.html ../vnc_docs/*.png ../vnc_docs/*.css $TMPDIR/usr/share/doc/$APPNAME-$VERSION
 
 sudo chown -R root:root $TMPDIR/*
 dpkg -b $TMPDIR turbovnc_$DEBARCH.deb
