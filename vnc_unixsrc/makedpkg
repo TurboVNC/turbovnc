@@ -49,10 +49,18 @@ exit
 fi
 
 if [ $M32 = 1 ]; then
-	sh make32 "$MAKEARGS" || exit -1
+	if [ "$MAKEARGS" = "" ]; then
+		sh make32 || exit -1
+	else
+		sh make32 "$MAKEARGS" || exit -1
+	fi
 else
 	xmkmf || exit -1
-	make "$MAKEARGS" World || exit -1
+	if [ "$MAKEARGS" = "" ]; then
+		make World || exit -1
+	else
+		make "$MAKEARGS" World || exit -1
+	fi
 fi
 cd Xvnc
 if [ $M32 = 1 ]; then
@@ -60,7 +68,11 @@ if [ $M32 = 1 ]; then
 else
 	sh ./configure || exit -1
 fi
-make "$MAKEARGS" || exit -1
+if [ "$MAKEARGS" = "" ]; then
+	make || exit -1
+else
+	make "$MAKEARGS" || exit -1
+fi
 cd ..
 
 umask 022
