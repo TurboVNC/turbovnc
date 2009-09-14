@@ -82,7 +82,7 @@ Type=Application
 Categories=Application;Utility;X-Red-Hat-Extra;
 EOF
 
-chmod 644 LICENCE.TXT WhatsNew ChangeLog TurboVNC-ChangeLog.txt TurboVNC-CompatibilityGuide.txt
+chmod 644 LICENCE.TXT WhatsNew ChangeLog TurboVNC-ChangeLog.txt ../vnc_docs/LICEN*.txt ../vnc_docs/*.html ../vnc_docs/*.png ../vnc_docs/*.css
 
 %clean
 rm -rf %{buildroot}
@@ -107,7 +107,7 @@ fi
 %defattr(-,root,root)
 %attr(0755,root,root) %config /etc/init.d/tvncserver
 %config(noreplace) /etc/sysconfig/tvncservers
-%doc LICENCE.TXT WhatsNew ChangeLog TurboVNC-ChangeLog.txt TurboVNC-CompatibilityGuide.txt
+%doc LICENCE.TXT WhatsNew ChangeLog TurboVNC-ChangeLog.txt ../vnc_docs/LICEN*.txt ../vnc_docs/*.html ../vnc_docs/*.png ../vnc_docs/*.css
 
 %dir %{_bindir}
 %dir %{_mandir}
