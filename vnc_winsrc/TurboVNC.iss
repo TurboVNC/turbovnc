@@ -20,7 +20,7 @@ BackColor=clBlack
 BackColor2=clBlue
 DirExistsWarning=no
 VersionInfoCompany=The VirtualGL Project
-VersionInfoDescription=A fast VNC implementation designed for video apps
+VersionInfoDescription=A fast VNC implementation designed for video and 3D apps
 VersionInfoVersion=0.6
 
 ChangesAssociations=yes
@@ -28,7 +28,7 @@ ChangesAssociations=yes
 [Components]
 Name: "server"; Description: "TurboVNC Server"; Types: custom;
 Name: "viewer"; Description: "TurboVNC Viewer"; Types: full compact custom;
-;Name: "webdoc"; Description: "Web pages and documentation"; Types: full custom;
+Name: "doc";    Description: "Documentation";   Types: full custom;
 
 [Files]
 Source: "WinVNC\Release\WinVNC.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: server
@@ -43,15 +43,12 @@ Source: "README-bin.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "LICENCE.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "WhatsNew.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "TurboVNC-ChangeLog.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "TurboVNC-CompatibilityGuide.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "TurboVNC.url"; DestDir: "{app}"; Flags: ignoreversion
-;Source: "Web\*"; DestDir: "{app}\Web"; Flags: ignoreversion; Components: webdoc
-;Source: "Web\images\*"; DestDir: "{app}\Web\images"; Flags: ignoreversion; Components: webdoc
-;Source: "Web\logo\*"; DestDir: "{app}\Web\logo"; Flags: ignoreversion; Components: webdoc
-;Source: "Web\doc\win32\*"; DestDir: "{app}\Web\doc\win32"; Flags: ignoreversion; Components: webdoc
-;Source: "Web\doc\java\*"; DestDir: "{app}\Web\doc\java"; Flags: ignoreversion; Components: webdoc
-;Source: "Web\doc\man\*"; DestDir: "{app}\Web\doc\man"; Flags: ignoreversion; Components: webdoc
-;Source: "Web\doc\unix\*"; DestDir: "{app}\Web\doc\unix"; Flags: ignoreversion; Components: webdoc
+Source: "..\vnc_docs\*.png"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
+Source: "..\vnc_docs\*.html"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
+Source: "..\vnc_docs\LIC*.TXT"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
+Source: "..\vnc_docs\LIC*.txt"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
+Source: "..\vnc_docs\*.css"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
 
 [Icons]
 Name: "{group}\Launch TurboVNC Server";               FileName: "{app}\WinVNC.exe";                                    WorkingDir: "{app}";     Components: server;
@@ -64,14 +61,12 @@ Name: "{group}\Administration\Install VNC Service";   FileName: "{app}\WinVNC.ex
 Name: "{group}\Administration\Remove VNC Service";    FileName: "{app}\WinVNC.exe";    Parameters: "-remove";          WorkingDir: "{app}";     Components: server;
 Name: "{group}\Administration\Run Service Helper";    FileName: "{app}\WinVNC.exe";    Parameters: "-servicehelper";   WorkingDir: "{app}";     Components: server;
 Name: "{group}\Administration\Show Default Settings"; FileName: "{app}\WinVNC.exe";    Parameters: "-defaultsettings"; WorkingDir: "{app}";     Components: server;
-;Name: "{group}\Documentation\About VNC and TurboVNC"; FileName: "{app}\Web\index.html";                                WorkingDir: "{app}\Web"; Components: webdoc;
-;Name: "{group}\Documentation\Installation and Getting Started"; FileName: "{app}\Web\winst.html";                      WorkingDir: "{app}\Web"; Components: webdoc;
+Name: "{group}\Documentation\TurboVNC User's Guide";  FileName: "{app}\doc\index.html";                                WorkingDir: "{app}\doc"; Components: doc;
 Name: "{group}\Documentation\Read Me";                FileName: "write.exe";           Parameters: "README-bin.txt";   WorkingDir: "{app}";     Flags: "useapppaths"
 Name: "{group}\Documentation\Licensing Terms";        FileName: "write.exe";           Parameters: "LICENCE.txt";      WorkingDir: "{app}";     Flags: "useapppaths"
 Name: "{group}\Documentation\TurboVNC Web Site";      FileName: "{app}\TurboVNC.url"
 Name: "{group}\Documentation\TightVNC Change Log";    FileName: "write.exe";           Parameters: "WhatsNew.txt";     WorkingDir: "{app}";     Flags: "useapppaths"
 Name: "{group}\Documentation\TurboVNC Change Log";    FileName: "write.exe";           Parameters: "TurboVNC-ChangeLog.txt"; WorkingDir: "{app}"; Flags: "useapppaths"
-Name: "{group}\Documentation\TurboVNC Compatibility Guide"; FileName: "write.exe";     Parameters: "TurboVNC-CompatibilityGuide.txt"; WorkingDir: "{app}"; Flags: "useapppaths"
 
 [Tasks]
 Name: associate; Description: "&Associate .vnc files with TurboVNC Viewer"; GroupDescription: "File associations:"; Components: viewer
@@ -91,4 +86,3 @@ Filename: "{app}\WinVNC.exe"; Parameters: "-servicehelper"; Tasks: installservic
 [UninstallRun]
 Filename: "{app}\WinVNC.exe"; Parameters: "-kill"; OnlyBelowVersion: 0,4.0
 Filename: "{app}\WinVNC.exe"; Parameters: "-silent -remove";
-
