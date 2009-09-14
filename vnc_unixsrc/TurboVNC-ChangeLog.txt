@@ -12,6 +12,10 @@ TurboVNC server will now translate JPEG quality levels into actual JPEG
 quality and subsampling using the same translation table used by the TigerVNC
 server.  See the TurboVNC Compatibility Guide for more details.
 -------------------------------------------------------------------------------
+[3]
+Created the TurboVNC User's Guide, which mostly consists of the TurboVNC
+chapters that were formerly in the VirtualGL User's Guide.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
