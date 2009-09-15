@@ -2,19 +2,21 @@
 
 if [ "$1" = "clean" ]; then
 xmkmf || exit -1
+make Makefiles || exit -1
 make clean || exit -1
 cd Xvnc
 if [ ! -f Makefile ]; then
-	./configure || exit -1
+	sh ./configure || exit -1
 fi
 make clean || exit -1
 cd ..
+exit
 fi
 
 xmkmf || exit -1
 make World || exit -1
 cd Xvnc
-./configure || exit -1
+sh ./configure || exit -1
 make || exit -1
 cd ..
 
@@ -71,7 +73,11 @@ f none SUNWtvnc/doc/LICENCE.TXT 0644 root bin
 f none SUNWtvnc/doc/WhatsNew 0644 root bin
 f none SUNWtvnc/doc/ChangeLog 0644 root bin
 f none SUNWtvnc/doc/TurboVNC-ChangeLog.txt 0644 root bin
-f none SUNWtvnc/doc/TurboVNC-CompatibilityGuide.txt 0644 root bin
+EOF
+for i in ../vnc_docs/*.png; do echo f none SUNWtvnc/doc/`basename $i` 0644 root bin >> $pkgtmpdir/proto; done
+echo f none SUNWtvnc/doc/index.html 0644 root bin >> $pkgtmpdir/proto
+for i in ../vnc_docs/*.css; do echo f none SUNWtvnc/doc/`basename $i` 0644 root bin >> $pkgtmpdir/proto; done
+cat >> $pkgtmpdir/proto <<EOF
 d none SUNWtvnc/lib 0755 root bin
 f none SUNWtvnc/lib/libturbojpeg.so 0755 root bin
 d none SUNWtvnc/man 0755 root bin
@@ -110,11 +116,11 @@ mkdir -p $pkgdir/lib
 mkdir -p $pkgdir/vnc
 mkdir -p $pkgdir/man/man1
 
-./vncinstall $pkgdir/bin $pkgdir/man
+sh ./vncinstall $pkgdir/bin $pkgdir/man
 cp Xvnc/programs/Xserver/Xserver.man $pkgdir/man/man1/Xserver.1
 cp turbojpeg/libturbojpeg.so $pkgdir/lib
 cp -prf classes $pkgdir/vnc
-cp LICENCE.TXT WhatsNew ChangeLog TurboVNC-ChangeLog.txt TurboVNC-CompatibilityGuide.txt $pkgdir/doc
+cp ../vnc_docs/*.png ../vnc_docs/*.css ../vnc_docs/index.html LICENCE.TXT WhatsNew ChangeLog TurboVNC-ChangeLog.txt $pkgdir/doc
 
 cd $pkgtmpdir
 pkgmk -o -r opt -d . -a `uname -p` -f proto
