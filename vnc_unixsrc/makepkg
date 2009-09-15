@@ -77,6 +77,7 @@ EOF
 for i in ../vnc_docs/*.png; do echo f none SUNWtvnc/doc/`basename $i` 0644 root bin >> $pkgtmpdir/proto; done
 echo f none SUNWtvnc/doc/index.html 0644 root bin >> $pkgtmpdir/proto
 for i in ../vnc_docs/*.css; do echo f none SUNWtvnc/doc/`basename $i` 0644 root bin >> $pkgtmpdir/proto; done
+for i in ../vnc_docs/LICEN*.txt; do echo f none SUNWtvnc/doc/`basename $i` 0644 root bin >> $pkgtmpdir/proto; done
 cat >> $pkgtmpdir/proto <<EOF
 d none SUNWtvnc/lib 0755 root bin
 f none SUNWtvnc/lib/libturbojpeg.so 0755 root bin
@@ -120,7 +121,7 @@ sh ./vncinstall $pkgdir/bin $pkgdir/man
 cp Xvnc/programs/Xserver/Xserver.man $pkgdir/man/man1/Xserver.1
 cp turbojpeg/libturbojpeg.so $pkgdir/lib
 cp -prf classes $pkgdir/vnc
-cp ../vnc_docs/*.png ../vnc_docs/*.css ../vnc_docs/index.html LICENCE.TXT WhatsNew ChangeLog TurboVNC-ChangeLog.txt $pkgdir/doc
+cp ../vnc_docs/*.png ../vnc_docs/*.css ../vnc_docs/index.html ../vnc_docs/LICEN*.txt LICENCE.TXT WhatsNew ChangeLog TurboVNC-ChangeLog.txt $pkgdir/doc
 
 cd $pkgtmpdir
 pkgmk -o -r opt -d . -a `uname -p` -f proto
