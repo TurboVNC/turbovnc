@@ -11,7 +11,7 @@ XCOMM $XFree86: xc/programs/Xserver/Imakefile,v 3.85.2.8 1998/02/07 00:44:33 daw
 INSTPGMFLAGS = 
 #endif
 
-#define PreFbLibs $(DIX) $(OS) $(FONT) $(XPDDX)
+#define PreFbLibs $(DIX) $(OS) $(DIX) $(FONT) $(XPDDX)
 #define BarePostFbLibs $(MFB) $(XPFBLIBS) $(MI)
 #define PostFbLibs BarePostFbLibs $(EXTENSIONS)
 #define NoMfbBarePostFbLibs $(XPFBLIBS) $(MI)
