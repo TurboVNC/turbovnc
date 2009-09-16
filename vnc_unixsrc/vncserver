@@ -282,7 +282,7 @@ $cmd .= " $authType";
 $cmd .= " -rfbport $vncPort";
 $cmd .= " -fp $fontPath" if ($fontPath);
 $cmd .= " -co $colorPath" if ($colorPath);
-$cmd .= " -nolisten local" if ($os eq "SunOS");
+#$cmd .= " -nolisten local" if ($os eq "SunOS");
 $cmd .= " -deferupdate 1";
 
 foreach $arg (@ARGV) {
