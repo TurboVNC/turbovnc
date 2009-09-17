@@ -10,7 +10,7 @@ for more details.
 When connecting a TigerVNC or TightVNC Viewer to a TurboVNC server, the
 TurboVNC server will now translate JPEG quality levels into actual JPEG
 quality and subsampling using the same translation table used by the TigerVNC
-server.  See the TurboVNC Compatibility Guide for more details.
+server.  See the TurboVNC User's Guide for more details.
 -------------------------------------------------------------------------------
 [3]
 Created the TurboVNC User's Guide, which mostly consists of the TurboVNC
