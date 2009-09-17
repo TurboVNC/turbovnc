@@ -16,6 +16,17 @@ server.  See the TurboVNC User's Guide for more details.
 Created the TurboVNC User's Guide, which mostly consists of the TurboVNC
 chapters that were formerly in the VirtualGL User's Guide.
 -------------------------------------------------------------------------------
+[4]
+Fixed an issue on OpenSolaris whereby a TurboVNC session would start but would
+display a blank X Windows screen with no window manager.  This was due to the
+vncserver script passing an argument of "-nolisten local" to Xvnc on all Sun
+platforms, and this doesn't work on OpenSolaris.  The "-nolisten local" option
+was necessary to get Xvnc to work on earlier versions of Solaris, but it is no
+longer necessary with Solaris 10.  If you are running TurboVNC on an older
+Solaris release, then you can pass "-nolisten local" to
+/opt/TurboVNC/bin/vncserver to get back the behavior of TurboVNC 0.5.x (or
+uncomment that line in the vncserver script.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
