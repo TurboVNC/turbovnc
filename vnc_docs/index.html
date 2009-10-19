@@ -3,8 +3,8 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2009-09-16T16:51:22">
-<meta name="generator" content="deplate.rb 0.8.4">
+<meta name="date" content="2009-10-19T10:05:54">
+<meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 0.6</title>
 <link rel="start" href="index.html" title="Frontpage">
 <link rel="chapter" href="index.html#hd001" title="1 Legal Information">
@@ -170,6 +170,7 @@ License, v2</a><a name="idx004"></a>.</p>
 <hr class="break" />
 
 
+
 <h1 id="hd002"><a name="file002"></a>2&nbsp;Overview</h1>
 
 <p><a name="Overview"></a></p>
@@ -254,6 +255,7 @@ distributions without interference.</p>
 <hr class="break" />
 
 
+
 <h1 id="hd003"><a name="file003"></a>3&nbsp;System Requirements</h1>
 
 
@@ -316,6 +318,7 @@ distributions without interference.</p>
 
 
 
+
 <h2 id="hd003002">3.2&nbsp;Solaris/x86</h2>
 
 <div class="table">
@@ -364,6 +367,7 @@ distributions without interference.</p>
 <div class="important"><p class="important">
 * mediaLib 2.5 is included in Solaris 10 update 4 and newer.  If you are running an older version of Solaris, it is recommended that you download and install the mediaLib 2.5 upgrade from the link above.  mediaLib 2.5 improves the performance of TurboVNC significantly on Solaris/x86 systems, when compared to mediaLib 2.4.
 </p></div>
+
 
 
 <h2 id="hd003003">3.3&nbsp;Solaris/SPARC</h2>
@@ -418,6 +422,7 @@ distributions without interference.</p>
 
 
 
+
 <h2 id="hd003004">3.4&nbsp;Mac/x86</h2>
 
 <div class="table">
@@ -442,6 +447,7 @@ distributions without interference.</p>
   </tr>
 </table>
 </div>
+
 
 
 
@@ -476,13 +482,29 @@ distributions without interference.</p>
 <hr class="break" />
 
 
+
 <h1 id="hd004"><a name="file004"></a>4&nbsp;Obtaining and Installing TurboVNC</h1>
 
 
 <h2 id="hd004001">4.1&nbsp;Installing TurboVNC on Linux</h2>
 
 
-<h3 id="hd004001001">Installing TurboJPEG</h3>
+<h3 id="hd004001001">Font Dependencies</h3>
+
+<p>On some Linux distributions, most notably Fedora 10 and later, the basic 
+X11 bitmap fonts are not installed by default.  Thus, it is necessary to 
+install the <code>xorg-x11-fonts-misc</code> package on these 
+distributions prior to starting a TurboVNC session for the first time.  
+Otherwise, TurboVNC will fail with the following error:</p>
+
+<pre class="verbatim">
+Fatal&nbsp;server&nbsp;error:
+could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
+</pre>
+
+
+
+<h3 id="hd004001002">Installing TurboJPEG</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered" value="1">
@@ -519,7 +541,8 @@ dpkg&nbsp;-i&nbsp;turbojpeg*.deb
 </ol>
 
 
-<h3 id="hd004001002">Installing TurboVNC</h3>
+
+<h3 id="hd004001003">Installing TurboVNC</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered" value="1">
@@ -551,6 +574,7 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
         </dl>
     </li>
 </ol>
+
 
 
 <h2 id="hd004002">4.2&nbsp;Installing TurboVNC on Solaris</h2>
@@ -589,6 +613,7 @@ TurboVNC for Solaris installs into <code>/opt/SUNWtvnc</code>.
 </p></div>
 
 
+
 <h2 id="hd004003">4.3&nbsp;Installing TurboVNC on Mac (Client Only)</h2>
 
 <ol class="Ordered numeric">
@@ -611,6 +636,7 @@ TurboVNC for Solaris installs into <code>/opt/SUNWtvnc</code>.
 </ol>
 
 
+
 <h2 id="hd004004">4.4&nbsp;Installing TurboVNC on Windows (Client Only)</h2>
 
 <ol class="Ordered numeric">
@@ -631,6 +657,7 @@ TurboVNC for Solaris installs into <code>/opt/SUNWtvnc</code>.
 </ol>
 
 
+
 <h2 id="hd004005">4.5&nbsp;Installing TurboVNC from Source</h2>
 
 <p>If you are using a Unix platform for which there is not a pre-built 
@@ -644,6 +671,7 @@ area</a></span><a name="idx0027"></a> of the
 SourceForge web-site</a></span><a name="idx0028"></a>, uncompress it, 
 <code>cd&nbsp;vnc/vnc_unixsrc</code>, and read the <code>README</code> 
 file for further instructions on how to build TurboVNC from source.</p>
+
 
 
 <h2 id="hd004006">4.6&nbsp;Uninstalling TurboVNC</h2>
@@ -671,6 +699,7 @@ dpkg&nbsp;-r&nbsp;turbovnc
 </dl>
 
 
+
 <h3 id="hd004006002">Solaris</h3>
 
 <p>As root, issue the following command:</p>
@@ -680,6 +709,7 @@ pkgrm&nbsp;SUNWtvnc
 </pre>
 
 <p>Answer &ldquo;yes&rdquo; when prompted.</p>
+
 
 
 <h3 id="hd004006003">Mac</h3>
@@ -692,6 +722,7 @@ sudo&nbsp;/opt/TurboVNC/bin/uninstall
 </pre>
 
 
+
 <h3 id="hd004006004">Windows</h3>
 
 <p>Use the &ldquo;Add or Remove Programs&rdquo; applet in the Control Panel 
@@ -701,6 +732,7 @@ running Vista.)</p>
 <p><br /></p>
 
 <hr class="break" />
+
 
 
 <h1 id="hd005"><a name="file005"></a>5&nbsp;Using TurboVNC</h1>
@@ -829,6 +861,7 @@ ssh&nbsp;{user}@{server}
 </ol>
 
 
+
 <h2 id="hd005002">5.2&nbsp;Disconnecting and Killing a TurboVNC Session</h2>
 
 <p>Closing the TurboVNC viewer disconnects from the TurboVNC session, but 
@@ -866,6 +899,7 @@ particular machine, type the following command:</p>
 </pre>
 
 
+
 <h2 id="hd005003">5.3&nbsp;Using TurboVNC in a Web Browser</h2>
 
 <p>When a TurboVNC session is created, it automatically launches a 
@@ -890,6 +924,7 @@ display number of the TurboVNC session to which you want to connect.</p>
 <code>my_server:1</code>, then point your web browser to:</p>
 
 <p><code>http://my_server:5801</code></p>
+
 
 
 <h2 id="hd005004">5.4&nbsp;Optimizing TurboVNC&rsquo;s Performance for Different Network Types</h2>
@@ -1043,6 +1078,7 @@ viewer, click on the &ldquo;Lossless Refresh&rdquo; button at the top of
 the browser window.</p>
 
 
+
 <h2 id="hd005005">5.5&nbsp;Securing a TurboVNC Connection</h2>
 
 <p>Normally, the connection between the TurboVNC server and the TurboVNC 
@@ -1109,6 +1145,7 @@ TurboVNC connection over SSh will reduce performance by as much as
 penalty for using SSh tunneling with TurboVNC.</p>
 
 
+
 <h2 id="hd005006">5.6&nbsp;Further Reading</h2>
 
 <p>For more detailed instructions on the usage of TurboVNC:</p>
@@ -1139,6 +1176,7 @@ many of its features.</p>
 <p><br /></p>
 
 <hr class="break" />
+
 
 
 <h1 id="hd006"><a name="file006"></a>6&nbsp;Using TurboVNC with VirtualGL</h1>
@@ -1218,6 +1256,7 @@ embedded VGL Transport.</p>
 </ul>
 
 
+
 <h3 id="hd006000002">Disadvantages of TurboVNC (when compared to the VGL transport)</h3>
 
 <ul class="Itemize">
@@ -1237,6 +1276,7 @@ embedded VGL Transport.</p>
         TurboVNC does not support quad-buffered stereo or transparent overlays.
     </li>
 </ul>
+
 
 
 <h2 id="hd006001">6.1&nbsp;Using TurboVNC and VirtualGL on the Same Server</h2>
@@ -1278,6 +1318,7 @@ this configuration.</p>
         the X11 Transport within VirtualGL.
     </li>
 </ol>
+
 
 
 <h2 id="hd006002">6.2&nbsp;Using TurboVNC When VirtualGL Is Running on a Different Machine</h2>
@@ -1342,6 +1383,7 @@ TurboVNC server for this procedure to perform well.</p>
 <p><br /></p>
 
 <hr class="break" />
+
 
 
 <h1 id="hd007"><a name="file007"></a>7&nbsp;Compatibility Guide</h1>
@@ -1528,6 +1570,7 @@ mixing TurboVNC with other VNC flavors.</p>
 </ul>
 
 
+
 <h2 id="hd007002">7.2&nbsp;TightVNC or TigerVNC Viewers</h2>
 
 <ul class="Itemize">
@@ -1546,6 +1589,7 @@ mixing TurboVNC with other VNC flavors.</p>
         TightVNC and TigerVNC viewers don&rsquo;t support this.
     </li>
 </ul>
+
 
 
 <h2 id="hd007003">7.3&nbsp;RealVNC</h2>
@@ -1569,6 +1613,7 @@ in some cases, the TurboVNC viewer may actually perform better than the
 RealVNC viewer when connecting to RealVNC servers.</p>
 
 <p><br /></p>
+
 
 </body>
 </html>

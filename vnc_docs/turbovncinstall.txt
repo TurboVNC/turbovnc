@@ -2,6 +2,20 @@
 
 ** Installing TurboVNC on Linux
 
+*** Font Dependencies
+#OPT: noList! plain!
+
+On some Linux distributions, most notably Fedora 10 and later, the basic X11
+bitmap fonts are not installed by default.  Thus, it is necessary to install
+the ''xorg-x11-fonts-misc'' package on these distributions prior to starting a
+TurboVNC session for the first time.  Otherwise, TurboVNC will fail with the
+following error:
+
+	#Verb <<---
+	Fatal server error:
+	could not open default font 'fixed'
+	---
+
 *** Installing TurboJPEG
 #OPT: noList! plain!
 
