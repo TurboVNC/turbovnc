@@ -1,4 +1,14 @@
 ===============================================================================
+Significant changes between 0.6 and 0.7
+===============================================================================
+[1]
+Multi-threaded the Tight encoder and decoder on Unix and the Tight decoder on
+Windows to improve performance on multi-core systems.  See documentation for
+further details.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 Significant changes between 0.5.1 and 0.6
 ===============================================================================
 [1]
