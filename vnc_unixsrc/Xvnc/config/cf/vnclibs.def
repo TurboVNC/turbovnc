@@ -9,12 +9,12 @@ VNCLIBS = $(TOP)/../libvncauth/libvncauth.a
 
 #ifdef OSF1Architecture
 /* Avoid linking with different libjpeg in /usr/shlib under Tru64. */
-VNCSYSLIBS = /usr/local/lib/libjpeg.a /usr/local/lib/libz.a -lcrypt
+VNCSYSLIBS = /usr/local/lib/libjpeg.a /usr/local/lib/libz.a -lcrypt -lpthread
 #else
 #ifdef SunArchitecture
-VNCSYSLIBS = -L/usr/local/lib -R/opt/SUNWtvnc/lib -L$(TOP)/../turbojpeg -lturbojpeg -lz -lcrypt
+VNCSYSLIBS = -L/usr/local/lib -R/opt/SUNWtvnc/lib -L$(TOP)/../turbojpeg -lturbojpeg -lz -lcrypt -lpthread
 #else
-VNCSYSLIBS = -L/usr/local/lib -lturbojpeg -lz -lcrypt
+VNCSYSLIBS = -L/usr/local/lib -lturbojpeg -lz -lcrypt -lpthread
 #endif
 #endif
 
