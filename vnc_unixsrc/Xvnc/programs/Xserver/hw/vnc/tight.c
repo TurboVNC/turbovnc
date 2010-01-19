@@ -264,13 +264,13 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
 {
     pthread_mutexattr_t ma;
     Bool status = TRUE;
-    static int nt = 1;  int i, j;
+    static int _nt;  int i, j, nt;
     pthread_t thnd[TVNC_MAXTHREADS] = {0, 0, 0, 0, 0, 0, 0, 0};
     static int firsttime = 1;
     static threadparam tparam[TVNC_MAXTHREADS];
 
     if (firsttime) {
-        nt = nthreads();
+        _nt = nthreads();
         memset(tparam, 0, sizeof(threadparam)*TVNC_MAXTHREADS);
         tparam[0].ublen = &ublen;
         tparam[0].updateBuf = updateBuf;
@@ -304,7 +304,7 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
         usePixelFormat24 = FALSE;
     }
 
-    nt = min(nt, w * h / tightConf[compressLevel].maxRectSize);
+    nt = min(_nt, w * h / tightConf[compressLevel].maxRectSize);
     if (nt < 1) nt = 1;
 
     for (i = 0; i < nt; i++) {
