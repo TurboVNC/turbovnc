@@ -117,9 +117,9 @@ typedef struct _threadparam {
     CARD32 monoBackground, monoForeground;
     PALETTE palette;
     tjhandle j;
+    int bytessent, rectsent;
 } threadparam;
 
-static pthread_mutex_t globalmutex;
 
 
 /* Prototypes for static functions. */
@@ -264,12 +264,13 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
 {
     pthread_mutexattr_t ma;
     Bool status = TRUE;
-    int nt = nthreads(), i, j;
+    static int nt = 1;  int i, j;
     pthread_t thnd[TVNC_MAXTHREADS] = {0, 0, 0, 0, 0, 0, 0, 0};
     static int firsttime = 1;
     static threadparam tparam[TVNC_MAXTHREADS];
 
     if (firsttime) {
+        nt = nthreads();
         memset(tparam, 0, sizeof(threadparam)*TVNC_MAXTHREADS);
         tparam[0].ublen = &ublen;
         tparam[0].updateBuf = updateBuf;
@@ -279,10 +280,6 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
         }
         rfbLog("Using %d thread%s for Tight encoding\n", nt,
             nt == 1 ? "" : "s");
-        pthread_mutexattr_init(&ma);
-        pthread_mutexattr_settype(&ma, PTHREAD_MUTEX_RECURSIVE);
-        pthread_mutex_init(&globalmutex, &ma);
-        pthread_mutexattr_destroy(&ma);
         firsttime = 0;
     }
 
@@ -316,6 +313,7 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
         tparam[i].y = h / nt * i + y;
         tparam[i].w = w;
         tparam[i].h = (i == nt - 1) ? (h - (h / nt * i)) : h / nt;
+        tparam[i].bytessent = tparam[i].rectsent = 0;
     }
     if (nt > 1) {
         for (i = 1; i < nt; i++) {
@@ -335,6 +333,8 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
 
     status &= SendRectEncodingTight(&tparam[0], tparam[0].x, tparam[0].y,
         tparam[0].w, tparam[0].h);
+    cl->rfbBytesSent[rfbEncodingTight] += tparam[0].bytessent;
+    cl->rfbRectanglesSent[rfbEncodingTight] += tparam[0].rectsent;
 
     if (nt > 1) {
         for (i = 1; i < nt; i++) {
@@ -357,6 +357,8 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
                 status = FALSE;
             }
             (*tparam[i].ublen) = 0;
+            cl->rfbBytesSent[rfbEncodingTight] += tparam[i].bytessent;
+            cl->rfbRectanglesSent[rfbEncodingTight] += tparam[i].rectsent;
         }
     }
 
@@ -813,10 +815,8 @@ SendTightHeader(t, x, y, w, h)
            sz_rfbFramebufferUpdateRectHeader);
     (*t->ublen) += sz_rfbFramebufferUpdateRectHeader;
 
-    pthread_mutex_lock(&globalmutex);
-    cl->rfbRectanglesSent[rfbEncodingTight]++;
-    cl->rfbBytesSent[rfbEncodingTight] += sz_rfbFramebufferUpdateRectHeader;
-    pthread_mutex_unlock(&globalmutex);
+    t->rectsent++;
+    t->bytessent += sz_rfbFramebufferUpdateRectHeader;
 
     return TRUE;
 }
@@ -845,9 +845,7 @@ SendSolidRect(t)
     memcpy (&t->updateBuf[*t->ublen], t->tightBeforeBuf, len);
     (*t->ublen) += len;
 
-    pthread_mutex_lock(&globalmutex);
-    cl->rfbBytesSent[rfbEncodingTight] += len + 1;
-    pthread_mutex_unlock(&globalmutex);
+    t->bytessent += len + 1;
 
     return TRUE;
 }
@@ -892,9 +890,7 @@ SendMonoRect(t, w, h)
 
         memcpy(&t->updateBuf[*t->ublen], t->tightAfterBuf, paletteLen);
         (*t->ublen) += paletteLen;
-        pthread_mutex_lock(&globalmutex);
-        cl->rfbBytesSent[rfbEncodingTight] += 3 + paletteLen;
-        pthread_mutex_unlock(&globalmutex);
+        t->bytessent += 3 + paletteLen;
         break;
 
     case 16:
@@ -905,9 +901,7 @@ SendMonoRect(t, w, h)
 
         memcpy(&t->updateBuf[*t->ublen], t->tightAfterBuf, 4);
         (*t->ublen) += 4;
-        pthread_mutex_lock(&globalmutex);
-        cl->rfbBytesSent[rfbEncodingTight] += 7;
-        pthread_mutex_unlock(&globalmutex);
+        t->bytessent += 7;
         break;
 
     default:
@@ -915,9 +909,7 @@ SendMonoRect(t, w, h)
 
         t->updateBuf[(*t->ublen)++] = (char)t->monoBackground;
         t->updateBuf[(*t->ublen)++] = (char)t->monoForeground;
-        pthread_mutex_lock(&globalmutex);
-        cl->rfbBytesSent[rfbEncodingTight] += 5;
-        pthread_mutex_unlock(&globalmutex);
+        t->bytessent += 5;
     }
 
     return CompressData(t, streamId, dataLen,
@@ -964,9 +956,7 @@ SendIndexedRect(t, w, h)
 
         memcpy(&t->updateBuf[*t->ublen], t->tightAfterBuf, t->paletteNumColors * entryLen);
         (*t->ublen) += t->paletteNumColors * entryLen;
-        pthread_mutex_lock(&globalmutex);
-        cl->rfbBytesSent[rfbEncodingTight] += 3 + t->paletteNumColors * entryLen;
-        pthread_mutex_unlock(&globalmutex);
+        t->bytessent += 3 + t->paletteNumColors * entryLen;
         break;
 
     case 16:
@@ -979,9 +969,7 @@ SendIndexedRect(t, w, h)
 
         memcpy(&t->updateBuf[*t->ublen], t->tightAfterBuf, t->paletteNumColors * 2);
         (*t->ublen) += t->paletteNumColors * 2;
-        pthread_mutex_lock(&globalmutex);
-        cl->rfbBytesSent[rfbEncodingTight] += 3 + t->paletteNumColors * 2;
-        pthread_mutex_unlock(&globalmutex);
+        t->bytessent += 3 + t->paletteNumColors * 2;
         break;
 
     default:
@@ -1009,9 +997,7 @@ SendFullColorRect(t, w, h)
         t->updateBuf[(*t->ublen)++] = (char)(rfbTightNoZlib << 4);
     else
         t->updateBuf[(*t->ublen)++] = 0x00;  /* stream id = 0, flushing, no filter */
-    pthread_mutex_lock(&globalmutex);
-    cl->rfbBytesSent[rfbEncodingTight]++;
-    pthread_mutex_unlock(&globalmutex);
+    t->bytessent++;
 
     if (usePixelFormat24) {
         Pack24(t->tightBeforeBuf, &cl->format, w * h);
@@ -1037,9 +1023,7 @@ CompressData(t, streamId, dataLen, zlibLevel, zlibStrategy)
     if (dataLen < TIGHT_MIN_TO_COMPRESS) {
         memcpy(&t->updateBuf[*t->ublen], t->tightBeforeBuf, dataLen);
         (*t->ublen) += dataLen;
-        pthread_mutex_lock(&globalmutex);
-        cl->rfbBytesSent[rfbEncodingTight] += dataLen;
-        pthread_mutex_unlock(&globalmutex);
+        t->bytessent += dataLen;
         return TRUE;
     }
 
@@ -1101,19 +1085,17 @@ static Bool SendCompressedData(t, buf, compressedLen)
     rfbClientPtr cl = t->cl;
 
     t->updateBuf[(*t->ublen)++] = compressedLen & 0x7F;
-    pthread_mutex_lock(&globalmutex);
-    cl->rfbBytesSent[rfbEncodingTight]++;
+    t->bytessent++;
     if (compressedLen > 0x7F) {
         t->updateBuf[(*t->ublen)-1] |= 0x80;
         t->updateBuf[(*t->ublen)++] = compressedLen >> 7 & 0x7F;
-        cl->rfbBytesSent[rfbEncodingTight]++;
+        t->bytessent++;
         if (compressedLen > 0x3FFF) {
             t->updateBuf[(*t->ublen)-1] |= 0x80;
             t->updateBuf[(*t->ublen)++] = compressedLen >> 14 & 0xFF;
-            cl->rfbBytesSent[rfbEncodingTight]++;
+            t->bytessent++;
         }
     }
-    pthread_mutex_unlock(&globalmutex);
 
     portionLen = UPDATE_BUF_SIZE;
     for (i = 0; i < compressedLen; i += portionLen) {
@@ -1125,9 +1107,7 @@ static Bool SendCompressedData(t, buf, compressedLen)
         memcpy(&t->updateBuf[*t->ublen], &buf[i], portionLen);
         (*t->ublen) += portionLen;
     }
-    pthread_mutex_lock(&globalmutex);
-    cl->rfbBytesSent[rfbEncodingTight] += compressedLen;
-    pthread_mutex_unlock(&globalmutex);
+    t->bytessent += compressedLen;
     return TRUE;
 }
 
@@ -1676,9 +1656,7 @@ SendJpegRect(t, x, y, w, h, quality)
         return FALSE;
 
     t->updateBuf[(*t->ublen)++] = (char)(rfbTightJpeg << 4);
-    pthread_mutex_lock(&globalmutex);
-    cl->rfbBytesSent[rfbEncodingTight]++;
-    pthread_mutex_unlock(&globalmutex);
+    t->bytessent++;
 
     return SendCompressedData(t, t->tightAfterBuf, jpegDstDataLen);
 }
