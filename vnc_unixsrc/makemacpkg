@@ -12,6 +12,7 @@ doexit()
 
 if [ "$1" = "clean" ]; then
 xmkmf || doexit -1
+make Makefiles
 make clean || doexit -1
 exit 0
 fi
