@@ -17,7 +17,7 @@ exit 0
 fi
 
 xmkmf || doexit -1
-make World || doexit -1
+sh make32 World || doexit -1
 
 pkgtmpdir=`mktemp -d /tmp/vncbuild.XXXXXX`
 pkgname=TurboVNC
