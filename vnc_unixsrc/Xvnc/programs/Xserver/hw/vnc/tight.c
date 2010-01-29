@@ -118,6 +118,7 @@ typedef struct _threadparam {
     PALETTE palette;
     tjhandle j;
     int bytessent, rectsent;
+    int streamId, baseStreamId, nStreams;
 } threadparam;
 
 
@@ -313,6 +314,13 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
         tparam[i].w = w;
         tparam[i].h = (i == nt - 1) ? (h - (h / nt * i)) : h / nt;
         tparam[i].bytessent = tparam[i].rectsent = 0;
+        if(i < 4) {
+            int n = min(nt, 4);
+            tparam[i].baseStreamId = 4 / n * i;
+            if (i == n - 1) tparam[i].nStreams = 4 - tparam[i].baseStreamId;
+            else tparam[i].nStreams = 4 / n;
+            tparam[i].streamId = tparam[i].baseStreamId;
+        }
     }
     if (nt > 1) {
         for (i = 1; i < nt; i++) {
@@ -854,13 +862,19 @@ SendMonoRect(t, w, h)
     threadparam *t;
     int w, h;
 {
-    int streamId = t->id;
+    int streamId = t->streamId;
     int paletteLen, dataLen;
     rfbClientPtr cl = t->cl;
 
     if (!CheckUpdateBuf(t, TIGHT_MIN_TO_COMPRESS + 6 +
           2 * cl->format.bitsPerPixel / 8))
         return FALSE;
+
+    if(t->nStreams > 0) {
+        t->streamId++;
+        if (t->streamId >= t->baseStreamId + t->nStreams)
+            t->streamId = t->baseStreamId;
+    }
    
     /* Prepare tight encoding header. */
     dataLen = (w + 7) / 8;
@@ -921,13 +935,19 @@ SendIndexedRect(t, w, h)
     threadparam *t;
     int w, h;
 {
-    int streamId = t->id;
+    int streamId = t->streamId;
     int i, entryLen;
     rfbClientPtr cl = t->cl;
 
     if (!CheckUpdateBuf(t, TIGHT_MIN_TO_COMPRESS + 6 +
           t->paletteNumColors * cl->format.bitsPerPixel / 8))
             return FALSE;
+
+    if(t->nStreams > 0) {
+        t->streamId++;
+        if (t->streamId >= t->baseStreamId + t->nStreams)
+            t->streamId = t->baseStreamId;
+    }
 
     /* Prepare tight encoding header. */
     if (tightConf[compressLevel].idxZlibLevel == 0 || t->id > 3)
@@ -985,12 +1005,18 @@ SendFullColorRect(t, w, h)
     threadparam *t;
     int w, h;
 {
-    int streamId = t->id;
+    int streamId = t->streamId;
     int len;
     rfbClientPtr cl = t->cl;
 
     if (!CheckUpdateBuf(t, TIGHT_MIN_TO_COMPRESS + 1))
         return FALSE;
+
+    if(t->nStreams > 0) {
+        t->streamId++;
+        if (t->streamId >= t->baseStreamId + t->nStreams)
+            t->streamId = t->baseStreamId;
+    }
 
     if (tightConf[compressLevel].rawZlibLevel == 0 || t->id > 3)
         t->updateBuf[(*t->ublen)++] = (char)(rfbTightNoZlib << 4);
