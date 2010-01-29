@@ -262,7 +262,6 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
     rfbClientPtr cl;
     int x, y, w, h;
 {
-    pthread_mutexattr_t ma;
     Bool status = TRUE;
     static int _nt;  int i, j, nt;
     pthread_t thnd[TVNC_MAXTHREADS] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -279,7 +278,7 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
             tparam[i].id = i;
         }
         rfbLog("Using %d thread%s for Tight encoding\n", _nt,
-            nt == 1 ? "" : "s");
+            _nt == 1 ? "" : "s");
         firsttime = 0;
     }
 
