@@ -396,9 +396,11 @@ void
 CopyDataToImage(char *buf, int x, int y, int width, int height)
 {
   if (appData.rawDelay != 0) {
+    XLockDisplay(dpy);
     XFillRectangle(dpy, desktopWin, gc, x, y, width, height);
 
     XSync(dpy,False);
+    XUnlockDisplay(dpy);
 
     usleep(appData.rawDelay * 1000);
   }
@@ -432,6 +434,7 @@ CopyDataToImage(char *buf, int x, int y, int width, int height)
 void
 CopyImageToScreen(int x, int y, int width, int height)
 {
+  XLockDisplay(dpy);
 #ifdef MITSHM
   if (appData.useShm) {
     XShmPutImage(dpy, desktopWin, gc, image, x, y, x, y, width, height, False);
@@ -439,6 +442,7 @@ CopyImageToScreen(int x, int y, int width, int height)
   }
 #endif
   XPutImage(dpy, desktopWin, gc, image, x, y, x, y, width, height);
+  XUnlockDisplay(dpy);
 }
 
 

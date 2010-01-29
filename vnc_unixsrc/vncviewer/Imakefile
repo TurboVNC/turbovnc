@@ -27,7 +27,8 @@ JPEG_LIB = -L/usr/local/lib -lturbojpeg
 #endif
 
 DEPLIBS = XawClientDepLibs $(VNCAUTH_LIB)
-LOCAL_LIBRARIES = XawClientLibs $(VNCAUTH_LIB) $(ZLIB_LIB) $(JPEG_LIB)
+LOCAL_LIBRARIES = XawClientLibs $(VNCAUTH_LIB) $(ZLIB_LIB) $(JPEG_LIB) \
+  -lpthread
 
 SRCS = \
   argsresources.c \

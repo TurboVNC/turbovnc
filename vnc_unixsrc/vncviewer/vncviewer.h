@@ -64,6 +64,9 @@ extern int endianTest;
 #define DEFAULT_VIA_CMD     \
   (DEFAULT_SSH_CMD " -f -L %L:%H:%R %G sleep 20")
 
+/* Multi-threading stuff */
+#define TVNC_MAXTHREADS 8
+
 /*
  * The enum is ordered in this way so as to maintain backward compatibility
  * with TVNC 0.3.x

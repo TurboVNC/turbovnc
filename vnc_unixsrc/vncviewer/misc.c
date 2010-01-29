@@ -40,6 +40,7 @@ static XErrorHandler defaultXErrorHandler;
 static XIOErrorHandler defaultXIOErrorHandler;
 static XtErrorHandler defaultXtErrorHandler;
 
+extern void ShutdownThreads(void);
 
 /*
  * HasEncoding returns True if the encodings string contains the given
@@ -333,6 +334,7 @@ Cleanup()
   if (appData.useShm)
     ShmCleanup();
 #endif
+  ShutdownThreads();
 }
 
 static int

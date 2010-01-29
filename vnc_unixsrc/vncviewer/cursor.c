@@ -121,7 +121,9 @@ Bool HandleXCursor(int xhot, int yhot, int width, int height)
       return False;
     }
 
+    XLockDisplay(dpy);
     XQueryBestCursor(dpy, dr, width, height, &wret, &hret);
+    XUnlockDisplay(dpy);
   }
 
   if (width * height == 0 || wret < width || hret < height) {
@@ -142,6 +144,7 @@ Bool HandleXCursor(int xhot, int yhot, int width, int height)
   for (i = 0; i < bytesData * 2; i++)
     buf[i] = (char)_reverse_byte[(int)buf[i] & 0xFF];
 
+  XLockDisplay(dpy);
   source = XCreateBitmapFromData(dpy, dr, buf, width, height);
   mask = XCreateBitmapFromData(dpy, dr, &buf[bytesData], width, height);
   cursor = XCreatePixmapCursor(dpy, source, mask, &fg, &bg, xhot, yhot);
@@ -150,6 +153,7 @@ Bool HandleXCursor(int xhot, int yhot, int width, int height)
   free(buf);
 
   XDefineCursor(dpy, desktopWin, cursor);
+  XUnlockDisplay(dpy);
   FreeX11Cursor();
   prevXCursor = cursor;
   prevXCursorSet = True;
@@ -294,8 +298,10 @@ Bool HandleCursorShape(int xhot, int yhot, int width, int height, CARD32 enc)
 
   /* Set remaining data associated with cursor. */
 
+  XLockDisplay(dpy);
   dr = DefaultRootWindow(dpy);
   rcSavedArea = XCreatePixmap(dpy, dr, width, height, visdepth);
+  XUnlockDisplay(dpy);
   rcHotX = xhot;
   rcHotY = yhot;
   rcWidth = width;
@@ -320,8 +326,11 @@ Bool HandleCursorShape(int xhot, int yhot, int width, int height, CARD32 enc)
 Bool HandleCursorPos(int x, int y)
 {
   if (appData.useX11Cursor) {
-    if (appData.fullScreen)
+    if (appData.fullScreen) {
+      XLockDisplay(dpy);
       XWarpPointer(dpy, None, desktopWin, 0, 0, 0, 0, x, y);
+      XUnlockDisplay(dpy);
+    }
     
     return True; 
   }
@@ -453,6 +462,7 @@ static void SoftCursorCopyArea(int oper)
     h = si.framebufferHeight - y;
   }
 
+  XLockDisplay(dpy);
   if (oper == OPER_SAVE) {
     /* Save screen area in memory. */
 #ifdef MITSHM
@@ -464,6 +474,7 @@ static void SoftCursorCopyArea(int oper)
     /* Restore screen area. */
     XCopyArea(dpy, rcSavedArea, desktopWin, gc, 0, 0, w, h, x, y);
   }
+  XUnlockDisplay(dpy);
 }
 
 static void SoftCursorDraw(void)
@@ -496,7 +507,9 @@ static void FreeSoftCursor(void)
 {
   if (prevSoftCursorSet) {
     SoftCursorCopyArea(OPER_RESTORE);
+    XLockDisplay(dpy);
     XFreePixmap(dpy, rcSavedArea);
+    XUnlockDisplay(dpy);
     free(rcSource);
     free(rcMask);
     prevSoftCursorSet = False;
@@ -507,7 +520,9 @@ static void FreeSoftCursor(void)
 static void FreeX11Cursor()
 {
   if (prevXCursorSet) {
+    XLockDisplay(dpy);
     XFreeCursor(dpy, prevXCursor);
+    XUnlockDisplay(dpy);
     prevXCursorSet = False;
   }
 }

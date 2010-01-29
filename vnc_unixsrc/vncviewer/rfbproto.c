@@ -32,7 +32,12 @@
 #include <vncviewer.h>
 #include <vncauth.h>
 #include <zlib.h>
+#include <pthread.h>
 #include "turbojpeg.h"
+
+#ifndef min
+ #define min(a,b) ((a)<(b)?(a):(b))
+#endif
 
 static void InitCapabilities(void);
 static Bool SetupTunneling(void);
@@ -64,7 +69,6 @@ rfbPixelFormat myFormat;
 rfbServerInitMsg si;
 char *serverCutText = NULL;
 Bool newServerCutText = False;
-tjhandle tjhnd=NULL;
 
 /* For double buffering */
 UpdateList *list, *node, *tail;
@@ -87,9 +91,6 @@ static CapsContainer *encodingCaps;  /* known encodings besides Raw        */
 
 #define BUFFER_SIZE (640*480)
 static char buffer[BUFFER_SIZE];
-
-static char *compressedData = NULL;
-static char *uncompressedData = NULL;
 
 
 /* The zlib encoding requires expansion/decompression/deflation of the
@@ -121,9 +122,101 @@ static Bool zlibStreamActive[4] = {
 
 /* Filter stuff. Should be initialized by filter initialization code. */
 static Bool cutZeros;
-static int rectWidth, rectColors;
-static char tightPalette[256*4];
 static CARD8 tightPrevRow[2048*3*sizeof(CARD16)];
+
+
+/* Multi-threading stuff */
+
+static Bool threadInit = False;
+static int nt;
+
+typedef struct _threadparam
+{
+  int x, y, w, h, compressedLen;
+  char *compressedData, *uncompressedData, *buffer;
+  pthread_mutex_t ready, done;
+  tjhandle tjhnd;
+  Bool (*filterFn)(struct _threadparam *, int, int, int, int);
+  Bool (*decompFn)(struct _threadparam *, int, int, int, int);
+  Bool status, deadyet;
+  z_streamp zs;
+  int rectColors;
+  char tightPalette[256*4];
+} threadparam;
+
+static threadparam tparam[TVNC_MAXTHREADS];
+static pthread_t thnd[TVNC_MAXTHREADS] = {0, 0, 0, 0, 0, 0, 0, 0};
+static int curthread = 0;
+
+static int
+nthreads(void)
+{
+  char *ntenv = getenv("TVNC_NTHREADS");
+  int np = sysconf(_SC_NPROCESSORS_CONF), nt = 0;
+  if (np == -1) np = 1;
+  np = min(np, TVNC_MAXTHREADS);
+  if (ntenv && strlen(ntenv) > 0) nt = atoi(ntenv);
+  if (nt >= 1 && nt <= np) return nt;
+  else return np;
+}
+
+static void *
+TightThreadFunc(void *param)
+{
+  threadparam *t=(threadparam *)param;
+  while (!t->deadyet) {
+    pthread_mutex_lock(&t->ready);
+    if (t->deadyet) break;
+    t->status = t->decompFn(t, t->x, t->y, t->w, t->h);
+    pthread_mutex_unlock(&t->done);
+  }
+  return NULL;
+}
+
+static void
+InitThreads(void)
+{
+  int err = 0, i;
+  if (threadInit) return;
+
+  nt = nthreads();
+  fprintf(stderr, "Using %d thread%s for Tight decoding\n", nt,
+    nt == 1 ? "" : "s");
+  memset(tparam, 0, sizeof(threadparam)*TVNC_MAXTHREADS);
+
+  for (i = 0; i < nt; i++) {
+    tparam[i].status = True;
+    pthread_mutex_init(&tparam[i].ready, NULL);
+    pthread_mutex_lock(&tparam[i].ready);
+    pthread_mutex_init(&tparam[i].done, NULL);
+    if ((err = pthread_create(&thnd[i], NULL, TightThreadFunc,
+      &tparam[i])) != 0) {
+      fprintf(stderr, "Could not start thread %d: %s\n", i + 1,
+        strerror(err == -1 ? errno : err));
+      return;
+    }
+  }
+  threadInit = True;
+}
+
+
+void
+ShutdownThreads(void)
+{
+  int i;
+  for (i = 0; i < nt; i++) {
+    if(thnd[i]) {
+      tparam[i].deadyet = True;
+      pthread_mutex_unlock(&tparam[i].ready);
+      pthread_join(thnd[i], NULL);
+    }
+    if (tparam[i].compressedData) free(tparam[i].compressedData);
+    if (tparam[i].uncompressedData) free(tparam[i].uncompressedData);
+    if (tparam[i].buffer) free(tparam[i].buffer);
+    memset(&tparam[i], 0, sizeof(threadparam));
+  }
+  threadInit = False;
+}
 
 
 /*
@@ -162,8 +255,10 @@ FillRectangle(XGCValues *gcv, int x, int y, int w, int h)
     node->isFill = 1;
     memcpy(&node->gcv, gcv, sizeof(XGCValues));
   } else {
+    XLockDisplay(dpy);
     XChangeGC(dpy, gc, GCForeground, gcv);
     XFillRectangle(dpy, desktopWin, gc, x, y, w, h);
+    XUnlockDisplay(dpy);
   }
 }
 
@@ -1094,12 +1189,21 @@ HandleRFBServerMessage()
     if (appData.doubleBuffer)
 	list = NULL;
 
+    if (!threadInit) {
+        InitThreads();
+        if (!threadInit) return False;
+    }
+
     for (i = 0; i < msg.fu.nRects; i++) {
       if (!ReadFromRFBServer((char *)&rect, sz_rfbFramebufferUpdateRectHeader))
 	return False;
 
       rect.encoding = Swap32IfLE(rect.encoding);
       if (rect.encoding == rfbEncodingLastRect) {
+        for (i = 0; i < nt; i++) {
+          pthread_mutex_lock(&tparam[i].done);
+          pthread_mutex_unlock(&tparam[i].done);
+        }
         while (appData.doubleBuffer && list != NULL) {
 	  rfbFramebufferUpdateRectHeader* r1;
           node = list;
@@ -1110,9 +1214,11 @@ HandleRFBServerMessage()
 	     || r1->encoding == rfbEncodingHextile) {
 	     SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h); 
 	     if (node->isFill) {
+	       XLockDisplay(dpy);
 	       XChangeGC(dpy, gc, GCForeground, &node->gcv);
 	       XFillRectangle(dpy, desktopWin, gc,
 			      r1->r.x, r1->r.y, r1->r.w, r1->r.h);
+	       XUnlockDisplay(dpy);
 
 	     } else
 	        CopyImageToScreen(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
@@ -1205,6 +1311,7 @@ HandleRFBServerMessage()
 	   rectangle) to the source rectangle as well. */
 	SoftCursorLockArea(cr.srcX, cr.srcY, rect.r.w, rect.r.h);
 
+	XLockDisplay(dpy);
 	if (appData.copyRectDelay != 0) {
 	  XFillRectangle(dpy, desktopWin, srcGC, cr.srcX, cr.srcY,
 			 rect.r.w, rect.r.h);
@@ -1220,6 +1327,7 @@ HandleRFBServerMessage()
 
 	XCopyArea(dpy, desktopWin, desktopWin, gc, cr.srcX, cr.srcY,
 		  rect.r.w, rect.r.h, rect.r.x, rect.r.y);
+	XUnlockDisplay(dpy);
 
 	break;
       }
@@ -1272,6 +1380,14 @@ HandleRFBServerMessage()
 
       /* Now we may discard "soft cursor locks". */
       SoftCursorUnlockScreen();
+    }
+
+    for (i = 0; i < nt; i++) {
+      pthread_mutex_lock(&tparam[i].done);
+      pthread_mutex_unlock(&tparam[i].done);
+    }
+    for (i = 0; i < nt; i++) {
+      if (tparam[i].status == False) return False;
     }
 
     if (appData.doubleBuffer) {
