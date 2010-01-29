@@ -1,3 +1,2 @@
 #!/bin/sh
-xmkmf
-make EXTRA_DEFINES="-m32 -D__i386__ -U__amd64__" EXTRA_LDOPTIONS="-m32 -L/usr/X11R6/lib -L/usr/lib" ${1+"$@"} World
+make EXTRA_DEFINES="-m32 -D__i386__ -U__amd64__" EXTRA_LDOPTIONS="-m32 -L/usr/X11R6/lib -L/usr/lib" ${1+"$@"}

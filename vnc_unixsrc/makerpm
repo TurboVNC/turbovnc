@@ -42,14 +42,14 @@ cd ..
 exit
 fi
 
+xmkmf || exit -1
 if [ $M32 = 1 ]; then
 	if [ "$MAKEARGS" = "" ]; then
-		sh make32 || exit -1
+		sh make32 World || exit -1
 	else
-		sh make32 "$MAKEARGS" || exit -1
+		sh make32 "$MAKEARGS" World || exit -1
 	fi
 else
-	xmkmf || exit -1
 	if [ "$MAKEARGS" = "" ]; then
 		make World || exit -1
 	else
