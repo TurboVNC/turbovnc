@@ -132,7 +132,7 @@ static int nt;
 
 typedef struct _threadparam
 {
-  int x, y, w, h, compressedLen;
+  int id, x, y, w, h, compressedLen;
   char *compressedData, *uncompressedData, *buffer;
   pthread_mutex_t ready, done;
   tjhandle tjhnd;
@@ -185,15 +185,20 @@ InitThreads(void)
   memset(tparam, 0, sizeof(threadparam)*TVNC_MAXTHREADS);
 
   for (i = 0; i < nt; i++) {
+    tparam[i].id = i;
     tparam[i].status = True;
-    pthread_mutex_init(&tparam[i].ready, NULL);
-    pthread_mutex_lock(&tparam[i].ready);
-    pthread_mutex_init(&tparam[i].done, NULL);
-    if ((err = pthread_create(&thnd[i], NULL, TightThreadFunc,
-      &tparam[i])) != 0) {
-      fprintf(stderr, "Could not start thread %d: %s\n", i + 1,
-        strerror(err == -1 ? errno : err));
-      return;
+  }
+  if (nt > 1) {
+    for (i = 1; i < nt; i++) {
+      pthread_mutex_init(&tparam[i].ready, NULL);
+      pthread_mutex_lock(&tparam[i].ready);
+      pthread_mutex_init(&tparam[i].done, NULL);
+      if ((err = pthread_create(&thnd[i], NULL, TightThreadFunc,
+        &tparam[i])) != 0) {
+        fprintf(stderr, "Could not start thread %d: %s\n", i + 1,
+          strerror(err == -1 ? errno : err));
+        return;
+      }
     }
   }
   threadInit = True;
@@ -204,12 +209,16 @@ void
 ShutdownThreads(void)
 {
   int i;
-  for (i = 0; i < nt; i++) {
-    if(thnd[i]) {
-      tparam[i].deadyet = True;
-      pthread_mutex_unlock(&tparam[i].ready);
-      pthread_join(thnd[i], NULL);
+  if (nt > 1) {
+    for (i = 1; i < nt; i++) {
+      if(thnd[i]) {
+        tparam[i].deadyet = True;
+        pthread_mutex_unlock(&tparam[i].ready);
+        pthread_join(thnd[i], NULL);
+      }
     }
+  }
+  for (i = 0; i < nt; i++) {
     if (tparam[i].compressedData) free(tparam[i].compressedData);
     if (tparam[i].uncompressedData) free(tparam[i].uncompressedData);
     if (tparam[i].buffer) free(tparam[i].buffer);

@@ -165,8 +165,10 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
   if (comp_ctl == rfbTightJpeg) {
     t = &tparam[curthread];
     curthread = (curthread + 1) % nt;
-    pthread_mutex_lock(&t->done);
-    if (t->status == False) return False;
+    if (t->id != 0) {
+      pthread_mutex_lock(&t->done);
+      if (t->status == False) return False;
+    }
 
     t->compressedLen = (int)ReadCompactLen();
     if (t->compressedLen <= 0) {
@@ -187,8 +189,12 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
     t->filterFn = NULL;  t->zs = NULL;
     t->decompFn = DecompressJpegRectBPP;
     t->x = rx;  t->y = ry;  t->w = rw;  t->h = rh;
-    pthread_mutex_unlock(&t->ready);
-    return True;
+
+    if (t->id != 0) {
+      pthread_mutex_unlock(&t->ready);
+      return True;
+    }
+    else return DecompressJpegRectBPP(t, rx, ry, rw, rh);
   }
 #endif
 
@@ -245,8 +251,10 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
   if (bufferSize != -1) {
     t = &tparam[curthread];
     curthread = (curthread + 1) % nt;
-    pthread_mutex_lock(&t->done);
-    if (t->status == False) return False;
+    if (t->id != 0 && filterFn != FilterGradientBPP) {
+      pthread_mutex_lock(&t->done);
+      if (t->status == False) return False;
+    }
 
     if (rectColors > 0) {
       memcpy(t->tightPalette, tightPalette, rectColors*4);
@@ -265,12 +273,11 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
     t->decompFn = DecompressZlibRectBPP;
     t->x = rx;  t->y = ry;  t->w = rw;  t->h = rh;
 
-    pthread_mutex_unlock(&t->ready);
-    if (filterFn == FilterGradientBPP) {
-      pthread_mutex_lock(&t->done);
-      pthread_mutex_unlock(&t->done);
+    if (t->id != 0 && filterFn != FilterGradientBPP) {
+      pthread_mutex_unlock(&t->ready);
+      return True;
     }
-    return True;
+    else return DecompressZlibRectBPP(t, rx, ry, rw, rh);
   }
 
   /* Now let's initialize compression stream if needed. */
@@ -291,8 +298,10 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
 
   /* Read, decode and draw actual pixel data in a loop. */
   t = &tparam[stream_id % nt];
-  pthread_mutex_lock(&t->done);
-  if (t->status == False) return False;
+  if (t->id != 0 && filterFn != FilterGradientBPP) {
+    pthread_mutex_lock(&t->done);
+    if (t->status == False) return False;
+  }
 
   if (rectColors > 0) {
     memcpy(t->tightPalette, tightPalette, rectColors*4);
@@ -328,12 +337,11 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
   t->decompFn = DecompressZlibRectBPP;
   t->x = rx;  t->y = ry;  t->w = rw;  t->h = rh;
 
-  pthread_mutex_unlock(&t->ready);
-  if (filterFn == FilterGradientBPP) {
-    pthread_mutex_lock(&t->done);
-    pthread_mutex_unlock(&t->done);
+  if (t->id != 0 && filterFn != FilterGradientBPP) {
+    pthread_mutex_unlock(&t->ready);
+    return True;
   }
-  return True;
+  else return DecompressZlibRectBPP(t, rx, ry, rw, rh);
 }
 
 /*----------------------------------------------------------------------------
