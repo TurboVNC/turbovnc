@@ -711,7 +711,7 @@ DecompressJpegRectBPP(threadparam *t, int x, int y, int w, int h)
 
   if(ps==2) {
     CARD16 *dst=(CARD16 *)dstptr, *dst2;
-    unsigned char *src=t->uncompressedData;
+    char *src=t->uncompressedData;
     int i, j;
 
     for(j=0; j<h; j++) {
