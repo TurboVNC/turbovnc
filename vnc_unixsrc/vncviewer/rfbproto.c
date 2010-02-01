@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2009 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  *  Copyright (C) 2000-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -1209,7 +1209,7 @@ HandleRFBServerMessage()
 
       rect.encoding = Swap32IfLE(rect.encoding);
       if (rect.encoding == rfbEncodingLastRect) {
-        for (i = 0; i < nt; i++) {
+        for (i = 1; i < nt; i++) {
           pthread_mutex_lock(&tparam[i].done);
           pthread_mutex_unlock(&tparam[i].done);
         }
@@ -1391,11 +1391,11 @@ HandleRFBServerMessage()
       SoftCursorUnlockScreen();
     }
 
-    for (i = 0; i < nt; i++) {
+    for (i = 1; i < nt; i++) {
       pthread_mutex_lock(&tparam[i].done);
       pthread_mutex_unlock(&tparam[i].done);
     }
-    for (i = 0; i < nt; i++) {
+    for (i = 1; i < nt; i++) {
       if (tparam[i].status == False) return False;
     }
 
