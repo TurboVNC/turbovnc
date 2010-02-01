@@ -1021,7 +1021,7 @@ SendFullColorRect(t, w, h)
     if (tightConf[compressLevel].rawZlibLevel == 0 || t->id > 3)
         t->updateBuf[(*t->ublen)++] = (char)(rfbTightNoZlib << 4);
     else
-        t->updateBuf[(*t->ublen)++] = 0x00;  /* stream id = 0, flushing, no filter */
+        t->updateBuf[(*t->ublen)++] = streamId << 4;
     t->bytessent++;
 
     if (usePixelFormat24) {
