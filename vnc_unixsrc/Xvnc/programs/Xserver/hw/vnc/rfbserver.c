@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2009 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  *  Copyright (C) 2000-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -56,6 +56,8 @@ Bool rfbAlwaysShared = FALSE;
 Bool rfbNeverShared = FALSE;
 Bool rfbDontDisconnect = FALSE;
 Bool rfbViewOnly = FALSE; /* run server in view only mode - Ehud Karni SW */
+
+extern void ShutdownTightThreads(void);
 
 static rfbClientPtr rfbNewClient(int sock);
 static void rfbProcessClientProtocolVersion(rfbClientPtr cl);
@@ -286,6 +288,8 @@ rfbClientConnectionGone(sock)
     if (cl->translateLookupTable) free(cl->translateLookupTable);
 
     xfree(cl);
+
+    ShutdownTightThreads();
 }
 
 
