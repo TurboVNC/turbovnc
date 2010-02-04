@@ -104,6 +104,10 @@ typedef struct PALETTE_s {
 
 #define TVNC_MAXTHREADS 8
 
+static Bool threadInit = FALSE;
+static int _nt;
+static pthread_t thnd[TVNC_MAXTHREADS] = {0, 0, 0, 0, 0, 0, 0, 0};
+
 typedef struct _threadparam {
     rfbClientPtr cl;
     int x, y, w, h, id, _ublen, *ublen;
@@ -119,8 +123,11 @@ typedef struct _threadparam {
     tjhandle j;
     int bytessent, rectsent;
     int streamId, baseStreamId, nStreams;
+    pthread_mutex_t ready, done;
+    Bool status, deadyet;
 } threadparam;
 
+static threadparam tparam[TVNC_MAXTHREADS];
 
 
 /* Prototypes for static functions. */
@@ -226,14 +233,78 @@ nthreads(void)
     else return np;
 }
 
+static void
+InitThreads(void)
+{
+    int err = 0, i;
+    if (threadInit) return;
+
+    _nt = nthreads();
+    memset(tparam, 0, sizeof(threadparam)*TVNC_MAXTHREADS);
+    tparam[0].ublen = &ublen;
+    tparam[0].updateBuf = updateBuf;
+    for (i = 1; i < TVNC_MAXTHREADS; i++) {
+        tparam[i].ublen = &tparam[i]._ublen;
+        tparam[i].id = i;
+    }
+    rfbLog("Using %d thread%s for Tight encoding\n", _nt,
+        _nt == 1 ? "" : "s");
+    if (_nt > 1) {
+        for (i = 1; i < _nt; i++) {
+            if (!tparam[i].updateBuf) {
+                tparam[i].updateBufSize = UPDATE_BUF_SIZE;
+                tparam[i].updateBuf = (char *)xalloc(tparam[i].updateBufSize);
+            }
+            pthread_mutex_init(&tparam[i].ready, NULL);
+            pthread_mutex_lock(&tparam[i].ready);
+            pthread_mutex_init(&tparam[i].done, NULL);
+            pthread_mutex_lock(&tparam[i].done);
+            if ((err = pthread_create(&thnd[i], NULL, TightThreadFunc,
+                &tparam[i])) != 0) {
+                rfbLog ("Could not start thread %d: %s\n", i + 1,
+                    strerror(err == -1 ? errno : err));
+                return;
+            }
+        }
+    }
+    threadInit = TRUE;
+}
+
+void
+ShutdownTightThreads(void)
+{
+  int i;
+  if (_nt > 1) {
+    for (i = 1; i < _nt; i++) {
+      if(thnd[i]) {
+        tparam[i].deadyet = TRUE;
+        pthread_mutex_unlock(&tparam[i].ready);
+        pthread_join(thnd[i], NULL);
+      }
+    }
+  }
+  for (i = 0; i < _nt; i++) {
+    if (tparam[i].tightAfterBuf) free(tparam[i].tightAfterBuf);
+    if (tparam[i].tightBeforeBuf) free(tparam[i].tightBeforeBuf);
+    if (i != 0 && tparam[i].updateBuf) free(tparam[i].updateBuf);
+    memset(&tparam[i], 0, sizeof(threadparam));
+  }
+  threadInit = FALSE;
+}
+
 static void *
 TightThreadFunc(param)
     void *param;
 {
     long status;
     threadparam *t=(threadparam *)param;
-    status = SendRectEncodingTight(t, t->x, t->y, t->w, t->h);
-    return ((void *)status);
+    while (!t->deadyet) {
+        pthread_mutex_lock(&t->ready);
+        if (t->deadyet) break;
+        t->status = SendRectEncodingTight(t, t->x, t->y, t->w, t->h);
+        pthread_mutex_unlock(&t->done);
+    }
+    return NULL;
 }
 
 static Bool
@@ -264,23 +335,11 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
     int x, y, w, h;
 {
     Bool status = TRUE;
-    static int _nt;  int i, j, nt;
-    pthread_t thnd[TVNC_MAXTHREADS] = {0, 0, 0, 0, 0, 0, 0, 0};
-    static int firsttime = 1;
-    static threadparam tparam[TVNC_MAXTHREADS];
+    int i, j, nt;
 
-    if (firsttime) {
-        _nt = nthreads();
-        memset(tparam, 0, sizeof(threadparam)*TVNC_MAXTHREADS);
-        tparam[0].ublen = &ublen;
-        tparam[0].updateBuf = updateBuf;
-        for (i = 1; i < TVNC_MAXTHREADS; i++) {
-            tparam[i].ublen = &tparam[i]._ublen;
-            tparam[i].id = i;
-        }
-        rfbLog("Using %d thread%s for Tight encoding\n", _nt,
-            _nt == 1 ? "" : "s");
-        firsttime = 0;
+    if (!threadInit) {
+      InitThreads();
+      if (!threadInit) return FALSE;
     }
 
     compressLevel = cl->tightCompressLevel > 0 ? 1 : 0;
@@ -308,6 +367,7 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
     if (nt < 1) nt = 1;
 
     for (i = 0; i < nt; i++) {
+        tparam[i].status = TRUE;
         tparam[i].cl = cl;
         tparam[i].x = x;
         tparam[i].y = h / nt * i + y;
@@ -323,19 +383,7 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
         }
     }
     if (nt > 1) {
-        for (i = 1; i < nt; i++) {
-            int err = 0;
-            if (!tparam[i].updateBuf) {
-                tparam[i].updateBufSize = UPDATE_BUF_SIZE;
-                tparam[i].updateBuf = (char *)xalloc(tparam[i].updateBufSize);
-            }
-            if ((err = pthread_create(&thnd[i], NULL, TightThreadFunc,
-                &tparam[i])) != 0) {
-                rfbLog ("Could not start thread %d: %s\n", i + 1,
-                    strerror(err == -1 ? errno : err));
-                return FALSE;
-            }
-        }
+        for (i = 1; i < nt; i++) pthread_mutex_unlock(&tparam[i].ready);
     }
 
     status &= SendRectEncodingTight(&tparam[0], tparam[0].x, tparam[0].y,
@@ -345,11 +393,8 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
 
     if (nt > 1) {
         for (i = 1; i < nt; i++) {
-            if (thnd[i]) {
-                void *ret;
-                pthread_join(thnd[i], &ret);
-                if (ret != (void *)TRUE) status = FALSE;
-            }
+            pthread_mutex_lock (&tparam[i].done);
+            status &= tparam[i].status;
         }
         if (ublen > 0) {
             if (!rfbSendUpdateBuf(cl))
