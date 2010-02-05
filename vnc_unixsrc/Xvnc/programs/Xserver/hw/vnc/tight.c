@@ -396,6 +396,7 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
             pthread_mutex_lock (&tparam[i].done);
             status &= tparam[i].status;
         }
+        if (status == FALSE) return FALSE;
         if (ublen > 0) {
             if (!rfbSendUpdateBuf(cl))
                 return FALSE;
