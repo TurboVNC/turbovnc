@@ -70,6 +70,25 @@ rfbServerInitMsg si;
 char *serverCutText = NULL;
 Bool newServerCutText = False;
 
+
+/*
+ * Profiling stuff
+ */
+
+BOOL rfbProfile = FALSE;
+static double tUpdateTime = 0., tDecodeTime = 0., tBlitTime = 0., tStart = -1.,
+  tElapsed;
+double tRecvTime = 0.;
+static unsigned long iter = 0; 
+
+double gettime(void)
+{
+  struct timeval __tv;
+  gettimeofday(&__tv, (struct timezone *)NULL);
+  return((double)__tv.tv_sec + (double)__tv.tv_usec * 0.000001);
+}
+
+
 /* For double buffering */
 UpdateList *list, *node, *tail;
 
@@ -142,6 +161,7 @@ typedef struct _threadparam
   z_streamp zs;
   int rectColors;
   char tightPalette[256*4];
+  int rects;
 } threadparam;
 
 static threadparam tparam[TVNC_MAXTHREADS];
@@ -168,6 +188,7 @@ TightThreadFunc(void *param)
     pthread_mutex_lock(&t->ready);
     if (t->deadyet) break;
     t->status = t->decompFn(t, t->x, t->y, t->w, t->h);
+    if(t->status == True) t->rects++;
     pthread_mutex_unlock(&t->done);
   }
   return NULL;
@@ -355,6 +376,7 @@ InitialiseRFBConnection(void)
   int server_major, server_minor;
   rfbClientInitMsg ci;
   int secType;
+  char *env = NULL;
 
   /* if the connection is immediately closed, don't report anything, so
        that pmw's monitor can make test connections */
@@ -462,6 +484,9 @@ InitialiseRFBConnection(void)
     if (!ReadInteractionCaps())
       return False;
   }
+
+  if((env = getenv("TVNC_PROFILE"))!=NULL && !strcmp(env, "1"))
+    rfbProfile = TRUE;
 
   return True;
 }
@@ -1180,6 +1205,12 @@ HandleRFBServerMessage()
     int i;
     int usecs;
     XEvent ev;
+    double tDecodeStart, tBlitStart, tUpdateStart;
+
+    if(rfbProfile) {
+      tUpdateStart = gettime();
+      if(tStart < 0.) tStart = tUpdateStart;
+    }
 
     memset(&ev, 0, sizeof(ev));
     ev.xclient.type=ClientMessage;
@@ -1213,6 +1244,7 @@ HandleRFBServerMessage()
           pthread_mutex_lock(&tparam[i].done);
           pthread_mutex_unlock(&tparam[i].done);
         }
+        if (rfbProfile) tBlitStart = gettime();
         while (appData.doubleBuffer && list != NULL) {
 	  rfbFramebufferUpdateRectHeader* r1;
           node = list;
@@ -1237,6 +1269,7 @@ HandleRFBServerMessage()
 	   free(node);
 	}
 	SoftCursorUnlockScreen(); 
+	if (rfbProfile) tBlitTime += gettime() - tBlitStart;
 	break;
       }
 
@@ -1278,6 +1311,8 @@ HandleRFBServerMessage()
 	 between framebuffer updates and cursor drawing operations. */
       SoftCursorLockArea(rect.r.x, rect.r.y, rect.r.w, rect.r.h);
 
+      if (rfbProfile) tDecodeStart = gettime();
+
       switch (rect.encoding) {
 
       case rfbEncodingRaw:
@@ -1318,6 +1353,8 @@ HandleRFBServerMessage()
 	/* If RichCursor encoding is used, we should extend our
 	   "cursor lock area" (previously set to destination
 	   rectangle) to the source rectangle as well. */
+        
+	if (rfbProfile) tBlitStart = gettime();
 	SoftCursorLockArea(cr.srcX, cr.srcY, rect.r.w, rect.r.h);
 
 	XLockDisplay(dpy);
@@ -1336,7 +1373,7 @@ HandleRFBServerMessage()
 
 	XCopyArea(dpy, desktopWin, desktopWin, gc, cr.srcX, cr.srcY,
 		  rect.r.w, rect.r.h, rect.r.x, rect.r.y);
-	XUnlockDisplay(dpy);
+	if (rfbProfile) tBlitTime += gettime() - tBlitStart;
 
 	break;
       }
@@ -1399,7 +1436,10 @@ HandleRFBServerMessage()
       if (tparam[i].status == False) return False;
     }
 
+    if (rfbProfile) tDecodeTime += gettime() - tDecodeStart;
+
     if (appData.doubleBuffer) {
+  	if (rfbProfile) tBlitStart = gettime();
   	while (list != NULL) {
 	  rfbFramebufferUpdateRectHeader* r1;
   	  node = list;
@@ -1422,6 +1462,7 @@ HandleRFBServerMessage()
 	   free(node);
         }
 	SoftCursorUnlockScreen();
+	if (rfbProfile) tBlitTime += gettime() - tBlitStart;
     }
 
 #ifdef MITSHM
@@ -1433,6 +1474,29 @@ HandleRFBServerMessage()
     if (appData.useShm)
       XSync(dpy, False);
 #endif
+
+    if (rfbProfile) {
+      tUpdateTime += gettime() - tUpdateStart;
+      iter++;
+      tElapsed = gettime() - tStart;
+
+      if (tElapsed > 5.) {
+        printf("Updates/sec: %.2f  Time/update:  Total = %.3f ms  Recv = %.3f ms  Decode = %.3f ms  Blit = %.3f ms  Other = %.3f ms\n",
+          (double)iter/tElapsed, tUpdateTime/(double)iter*1000.,
+          tRecvTime/(double)iter*1000., tDecodeTime/(double)iter*1000.,
+          tBlitTime/(double)iter*1000.,
+          (tElapsed-tUpdateTime)/(double)iter*1000.);
+        printf("Rectangles/update:  ");
+        for(i = 0; i < nt; i++) {
+          printf("T%d: %.2f  ", i, (double)tparam[i].rects/(double)iter);
+          tparam[i].rects=0;
+        }
+        printf("\n");
+        tUpdateTime=tRecvTime=tDecodeTime=tBlitTime=0.;
+        iter=0;
+        tStart=gettime();
+      }
+    }
 
     break;
   }

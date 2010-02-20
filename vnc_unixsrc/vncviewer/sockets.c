@@ -42,6 +42,14 @@ static char *bufoutptr = buf;
 static int buffered = 0;
 
 /*
+ * Profiling stuff
+ */
+
+extern BOOL rfbProfile;
+extern double tRecvTime;
+extern double gettime(void);
+
+/*
  * ReadFromRFBServer is called whenever we want to read some data from the RFB
  * server.  It is non-trivial for two reasons:
  *
@@ -77,6 +85,10 @@ ProcessXtEvents()
 Bool
 ReadFromRFBServer(char *out, unsigned int n)
 {
+  double tRecvStart;
+
+  if (rfbProfile) tRecvStart = gettime();
+
   if (n <= buffered) {
     memcpy(out, bufoutptr, n);
     bufoutptr += n;
@@ -119,7 +131,6 @@ ReadFromRFBServer(char *out, unsigned int n)
     memcpy(out, bufoutptr, n);
     bufoutptr += n;
     buffered -= n;
-    return True;
 
   } else {
 
@@ -145,9 +156,11 @@ ReadFromRFBServer(char *out, unsigned int n)
       out += i;
       n -= i;
     }
-
-    return True;
   }
+
+  if (rfbProfile) tRecvTime += gettime() - tRecvStart;
+
+  return True;
 }
 
 
