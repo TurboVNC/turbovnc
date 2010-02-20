@@ -69,6 +69,22 @@ static Bool rfbSendLastRectMarker(rfbClientPtr cl);
 
 
 /*
+ * Profiling stuff
+ */
+
+static BOOL rfbProfile = FALSE;
+static double tUpdateTime = 0., tStart = -1., tElapsed;
+static unsigned long iter = 0; 
+
+static double gettime(void)
+{
+    struct timeval __tv;
+    gettimeofday(&__tv, (struct timezone *)NULL);
+    return((double)__tv.tv_sec + (double)__tv.tv_usec * 0.000001);
+}
+
+
+/*
  * Map of quality levels to provide compatibility with TightVNC/TigerVNC
  * clients
  */
@@ -143,6 +159,7 @@ rfbNewClient(sock)
     struct sockaddr_in addr;
     int addrlen = sizeof(struct sockaddr_in);
     int i;
+    char *env = NULL;
 
     if (rfbClientHead == NULL) {
 	/* no other clients - make sure we don't think any keys are pressed */
@@ -222,6 +239,9 @@ rfbNewClient(sock)
 	rfbCloseSock(sock);
 	return NULL;
     }
+
+    if((env = getenv("TVNC_PROFILE"))!=NULL && !strcmp(env, "1"))
+        rfbProfile = TRUE;
 
     return cl;
 }
@@ -972,6 +992,12 @@ rfbSendFramebufferUpdate(cl)
     int dx, dy;
     Bool sendCursorShape = FALSE;
     Bool sendCursorPos = FALSE;
+    double tUpdateStart;
+
+    if (rfbProfile) {
+	tUpdateStart = gettime();
+	if (tStart < 0.) tStart = tUpdateStart;
+    }
 
     /*
      * If this client understands cursor shape updates, cursor should be
@@ -1202,6 +1228,21 @@ rfbSendFramebufferUpdate(cl)
 
     if (!rfbSendUpdateBuf(cl))
 	return FALSE;
+
+    if (rfbProfile) {
+	tUpdateTime += gettime() - tUpdateStart;
+	tElapsed = gettime() - tStart;
+	iter++;
+
+	if (tElapsed > 5.) {
+	    rfbLog("Updates/sec: %.2f  Encode time/update: %.3f ms  Other time/update: %.3f ms\n",
+		(double)iter/tElapsed, tUpdateTime/(double)iter*1000.,
+		(tElapsed-tUpdateTime)/(double)iter*1000.);
+	    tUpdateTime=0.;
+	    iter=0;
+	    tStart=gettime();
+	}
+    }
 
     return TRUE;
 }
