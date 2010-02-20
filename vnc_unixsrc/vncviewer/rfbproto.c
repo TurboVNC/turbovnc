@@ -1205,7 +1205,7 @@ HandleRFBServerMessage()
     int i;
     int usecs;
     XEvent ev;
-    double tDecodeStart, tBlitStart, tUpdateStart;
+    double tDecodeStart = 0., tBlitStart = 0., tUpdateStart = 0.;
 
     if(rfbProfile) {
       tUpdateStart = gettime();
@@ -1373,6 +1373,8 @@ HandleRFBServerMessage()
 
 	XCopyArea(dpy, desktopWin, desktopWin, gc, cr.srcX, cr.srcY,
 		  rect.r.w, rect.r.h, rect.r.x, rect.r.y);
+	XUnlockDisplay(dpy);
+
 	if (rfbProfile) tBlitTime += gettime() - tBlitStart;
 
 	break;
