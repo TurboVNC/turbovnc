@@ -201,6 +201,14 @@ InitThreads(void)
   if (threadInit) return;
 
   nt = nthreads();
+
+  if(!appData.doubleBuffer || appData.rawDelay != 0) {
+    if (nt != 1) {
+      fprintf(stderr, "Multi-threading does not work with single buffering or raw delay options\n");
+      nt = 1;
+    }
+  }
+
   fprintf(stderr, "Using %d thread%s for Tight decoding\n", nt,
     nt == 1 ? "" : "s");
   memset(tparam, 0, sizeof(threadparam)*TVNC_MAXTHREADS);
@@ -285,10 +293,8 @@ FillRectangle(XGCValues *gcv, int x, int y, int w, int h)
     node->isFill = 1;
     memcpy(&node->gcv, gcv, sizeof(XGCValues));
   } else {
-    XLockDisplay(dpy);
     XChangeGC(dpy, gc, GCForeground, gcv);
     XFillRectangle(dpy, desktopWin, gc, x, y, w, h);
-    XUnlockDisplay(dpy);
   }
 }
 
@@ -1255,11 +1261,9 @@ HandleRFBServerMessage()
 	     || r1->encoding == rfbEncodingHextile) {
 	     SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h); 
 	     if (node->isFill) {
-	       XLockDisplay(dpy);
 	       XChangeGC(dpy, gc, GCForeground, &node->gcv);
 	       XFillRectangle(dpy, desktopWin, gc,
 			      r1->r.x, r1->r.y, r1->r.w, r1->r.h);
-	       XUnlockDisplay(dpy);
 
 	     } else
 	        CopyImageToScreen(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
@@ -1357,7 +1361,6 @@ HandleRFBServerMessage()
 	if (rfbProfile) tBlitStart = gettime();
 	SoftCursorLockArea(cr.srcX, cr.srcY, rect.r.w, rect.r.h);
 
-	XLockDisplay(dpy);
 	if (appData.copyRectDelay != 0) {
 	  XFillRectangle(dpy, desktopWin, srcGC, cr.srcX, cr.srcY,
 			 rect.r.w, rect.r.h);
@@ -1373,7 +1376,6 @@ HandleRFBServerMessage()
 
 	XCopyArea(dpy, desktopWin, desktopWin, gc, cr.srcX, cr.srcY,
 		  rect.r.w, rect.r.h, rect.r.x, rect.r.y);
-	XUnlockDisplay(dpy);
 
 	if (rfbProfile) tBlitTime += gettime() - tBlitStart;
 
@@ -1426,6 +1428,8 @@ HandleRFBServerMessage()
 	return False;
       }
 
+      if (rfbProfile) tDecodeTime += gettime() - tDecodeStart;
+
       /* Now we may discard "soft cursor locks". */
       SoftCursorUnlockScreen();
     }
@@ -1437,8 +1441,6 @@ HandleRFBServerMessage()
     for (i = 1; i < nt; i++) {
       if (tparam[i].status == False) return False;
     }
-
-    if (rfbProfile) tDecodeTime += gettime() - tDecodeStart;
 
     if (appData.doubleBuffer) {
   	if (rfbProfile) tBlitStart = gettime();
