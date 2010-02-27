@@ -57,11 +57,6 @@ main(int argc, char **argv)
     }
   }
 
-  if (!XInitThreads() || !XtToolkitThreadInitialize()) {
-    fprintf(stderr, "Could not initialize X thread safety\n");
-    exit(1);
-  }
-
   /* Call the main Xt initialisation function.  It parses command-line options,
      generating appropriate resource specs, and makes a connection to the X
      display. */
