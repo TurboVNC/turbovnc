@@ -194,7 +194,10 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
       pthread_mutex_unlock(&t->ready);
       return True;
     }
-    else return DecompressJpegRectBPP(t, rx, ry, rw, rh);
+    else {
+      t->rects++;
+      return DecompressJpegRectBPP(t, rx, ry, rw, rh);
+    }
   }
 #endif
 
@@ -277,7 +280,10 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
       pthread_mutex_unlock(&t->ready);
       return True;
     }
-    else return DecompressZlibRectBPP(t, rx, ry, rw, rh);
+    else {
+      t->rects++;
+      return DecompressZlibRectBPP(t, rx, ry, rw, rh);
+    }
   }
 
   /* Now let's initialize compression stream if needed. */
@@ -341,7 +347,10 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
     pthread_mutex_unlock(&t->ready);
     return True;
   }
-  else return DecompressZlibRectBPP(t, rx, ry, rw, rh);
+  else {
+    t->rects++;
+    return DecompressZlibRectBPP(t, rx, ry, rw, rh);
+  }
 }
 
 /*----------------------------------------------------------------------------
