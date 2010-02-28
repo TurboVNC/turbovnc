@@ -44,7 +44,7 @@ static void rfbSendAuthCaps(rfbClientPtr cl);
 
 static void rfbVncAuthSendChallenge(rfbClientPtr cl);
 
-#define AUTH_DEFAULT_CONF_FILE        "/etc/turbovncserver.auth"
+#define AUTH_DEFAULT_CONF_FILE        "/etc/turbovncserver-auth.conf"
 #define AUTH_DEFAULT_AUTH_METHODS     "vncauth"
 #ifdef XVNC_AuthPAM
 #define AUTH_DEFAULT_PAM_SERVICE_NAME "turbovnc"
@@ -91,6 +91,10 @@ void
 rfbAuthAddUser(const char* name, Bool viewOnly)
 {
     UserList* p = (UserList*) xalloc(sizeof(UserList));
+
+    if (p == NULL) {
+        FatalError("rfbAuthAddUser: out of memory");
+    }
 
     rfbLog("rfbAuthAddUser: '%s'%s\n", name, viewOnly ? " view-only" : "");
     p->next = userACL;
@@ -396,6 +400,9 @@ rfbAuthInit()
         }
 
         n = (char*) xalloc(strlen(pbuf.pw_name));
+        if (n == NULL) {
+	    FatalError("AuthPAMUserPwdRspFunc: out of memory");
+        }
         strcpy(n, pbuf.pw_name);
         rfbAuthAddUser(n, FALSE);
     }
@@ -688,11 +695,18 @@ rfbSendAuthCaps(cl)
                 break;
             }
 
+#ifdef notdef
+	    /*
+	     * This bit of code is disabled so that we can get an error message about
+	     * the lack of a OTP back to the VNC client.
+	     */
             if ((a->requiredData & AD_OTP) && (rfbAuthOTPValue == NULL))
                 continue;
+#endif
 
             if ((a->requiredData & AD_PWD) && (rfbAuthPasswdFile == NULL))
                 continue;
+
 
             pcap = &caplist[count];
             pcap->code = Swap32IfLE(a->authType);
