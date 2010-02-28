@@ -3,11 +3,15 @@
 EXTRA_DEFINES = -D__EXTENSIONS__
 #endif
 
+#ifdef LinuxArchitecture
+EXTRA_DEFINES = -DUseDevUrandom
+#endif
+
 SRCS = vncpasswd.c
 INCLUDES = -I../include
 VNCAUTH_LIB = ../libvncauth/libvncauth.a
 
 all:: vncpasswd
 
-NormalProgramTarget(vncpasswd,vncpasswd.o,$(VNCAUTH_LIB),$(VNCAUTH_LIB),)
+NormalProgramTarget(vncpasswd,vncpasswd.o,$(VNCAUTH_LIB) $(DEPXLIB),$(VNCAUTH_LIB) $(XLIB),)
 DependTarget()
