@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 #
+#  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
+#  Copyright (C) 2010 University Corporation for Atmospheric Research.
+#                     All Rights Reserved.
 #  Copyright (C) 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
 #  Copyright (C) 2002-2009 Constantin Kaplinsky.  All Rights Reserved.
 #  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
@@ -52,6 +55,7 @@ $configFile = "/etc/turbovncserver.conf";
 ReadConfiguration();
 $configFile = "$ENV{HOME}/.vnc/turbovncserver.conf";
 ReadConfiguration();
+ReadAuthConfiguration("/etc/turbovncserver-auth.conf");
 
 # Done reading configuration.
 
@@ -177,7 +181,7 @@ if (-f "/usr/lib/X11/rgb.txt") {
 # Check command line options
 
 &ParseOptions("-geometry",1,"-depth",1,"-pixelformat",1,"-name",1,"-kill",1,
-	      "-help",0,"-h",0,"--help",0,"-fg",0,"-list",0,"-fp",1);
+	      "-help",0,"-h",0,"--help",0,"-fg",0,"-list",0,"-fp",1,"-otp",0);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -202,6 +206,9 @@ if ($opt{'-pixelformat'}) {
 if ($opt{'-fp'}) {
     $fontPath = $opt{'-fp'};
 }
+if ($opt{'-otp'}) {
+    $authType='-otp';
+}
 
 &CheckGeometryAndDepth();
 
@@ -222,16 +229,18 @@ if (!-d _ || !-o _ || ($vncUserDirUnderTmp && ($mode & 0777) != 0700)) {
 }
 
 # Make sure the user has a password.
+if (substr($authType, 0, 7) eq "-rfbauth") {
+    ($z,$z,$mode) = lstat("$vncUserDir/passwd");
+    if (-e _ && (!-f _ || !-o _)) {
+	die "$prog: Wrong type or ownership on $vncUserDir/passwd.\n";
+    }
 
-($z,$z,$mode) = lstat("$vncUserDir/passwd");
-if (-e _ && (!-f _ || !-o _)) {
-    die "$prog: Wrong type or ownership on $vncUserDir/passwd.\n";
-}
-if (!-e _ || ($mode & 077) != 0) {
-    warn "\nYou will require a password to access your desktops.\n\n";
-    system($exedir."vncpasswd $vncUserDir/passwd");
-    if (($? & 0xFF00) != 0) {
-        exit 1;
+    if (!-e _ || ($mode & 077) != 0) {
+	warn "\nYou will require a password to access your desktops.\n\n";
+	system($exedir."vncpasswd $vncUserDir/passwd");
+	if (($? & 0xFF00) != 0) {
+	    exit 1;
+	}
     }
 }
 
@@ -270,6 +279,7 @@ system("$xauth -f $xauthorityFile add $host/unix:$displayNumber . $cookie");
 # Now start the X VNC Server
 
 $cmd = $exedir."Xvnc :$displayNumber";
+$cmd .= " -dpi $dpi" if ($dpi);
 $cmd .= " -desktop " . &quotedString($desktopName);
 $cmd .= " -httpd $vncClasses";
 $cmd .= " -auth $xauthorityFile";
@@ -317,6 +327,17 @@ unless (kill 0, `cat $pidFile`) {
 }
 
 warn "\nNew '$desktopName' desktop is $host:$displayNumber\n\n";
+
+if ($authType eq '-otp') {
+    warn "One-time password authentication enabled.  Generating initial OTP ...\n";
+
+    system($exedir."vncpasswd -o -display $host:$displayNumber");
+    if (($? & 0xFF00) != 0) {
+	exit 1;
+    }
+
+    warn "Run 'vncpasswd -o' from within the TurboVNC session or\n    'vncpasswd -o -display $host:$displayNumber' from within this shell\n    to generate additional OTPs\n";
+}
 
 # Create the user's xstartup script if necessary.
 
@@ -798,6 +819,7 @@ sub ReadConfiguration
     qw(geometry
        depth
        desktopName
+       dpi
        vncClasses
        vncUserDir
        fontPath
@@ -818,4 +840,23 @@ sub ReadConfiguration
     }
     close CONF;
   }
+}
+
+sub ReadAuthConfiguration ($)
+{
+  my $acf = shift;
+
+  return if ($authType eq '-otp');
+  return unless (open(ACF, $acf));
+
+  while (<ACF>) {
+    if (/^permitted-auth-methods=(.*)/) {
+      if ($1 eq 'otp') {
+        $authType = '-otp';
+        return;
+      }
+    }
+  }
+
+  close(ACF);
 }
