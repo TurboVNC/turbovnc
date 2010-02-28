@@ -43,7 +43,7 @@
 #include <X11/Xatom.h>
 
 #ifdef UseDevUrandom
-#define URANDOM_PATH	"/dev/urandom"
+#define URANDOM_PATH "/dev/urandom"
 
 #include <stdint.h>
 #include <fcntl.h>
@@ -58,138 +58,138 @@ static void mkdir_and_check(char *dirname, int be_strict);
 static int read_password(char *result);
 static int ask_password(char *result);
 
-int	alsoView;
+int alsoView;
 
-int	otp;
-int	otpClear;
-char*	displayname;
+int otp;
+int otpClear;
+char* displayname;
 
 int
 DoOTP()
 {
-	unsigned int	full;
-	unsigned int	view;
-	Display*	dpy;
-	Atom		prop;
-	int		len;
-	char		buf[MAXPWLEN + 1];
-	char		bytes[MAXPWLEN * 2];
+  unsigned int full;
+  unsigned int view;
+  Display* dpy;
+  Atom prop;
+  int len;
+  char buf[MAXPWLEN + 1];
+  char bytes[MAXPWLEN * 2];
 #ifdef UseDevUrandom
-	int		fd;
+  int fd;
 #endif
 
-	if ((dpy = XOpenDisplay(displayname)) == NULL) {
-		fprintf(stderr, "unable to open display \"%s\"\n", XDisplayName(displayname));
-		return(1);
-	}
+  if ((dpy = XOpenDisplay(displayname)) == NULL) {
+    fprintf(stderr, "unable to open display \"%s\"\n", XDisplayName(displayname));
+    return(1);
+  }
 
-	prop = XInternAtom(dpy, "VNC_OTP", True);
-	if (prop == None) {
-		fprintf(stderr, "The X display \"%s\" does not support VNC one-time passwords\n",
-			      XDisplayName(displayname));
-		return(1);
-	}
+  prop = XInternAtom(dpy, "VNC_OTP", True);
+  if (prop == None) {
+    fprintf(stderr, "The X display \"%s\" does not support VNC one-time passwords\n",
+            XDisplayName(displayname));
+    return(1);
+  }
 
-	if (otpClear) {
-		len = 0;
+  if (otpClear) {
+    len = 0;
 
-	} else {
+  } else {
 #ifdef UseDevUrandom
-		if ((fd = open(URANDOM_PATH, O_RDONLY, 0)) < 0) {
-			perror(URANDOM_PATH);
-			return(1);
-		}
+    if ((fd = open(URANDOM_PATH, O_RDONLY, 0)) < 0) {
+      perror(URANDOM_PATH);
+      return(1);
+    }
 
-		if (
-			(read(fd, &full, sizeof(full)) != sizeof(full)) ||
-			(alsoView && (read(fd, &view, sizeof(view)) != sizeof(view)))
-		) {
-			fprintf(stderr, "Could not read random number from %s\n", URANDOM_PATH);
-			return(1);
-		}
+    if (
+      (read(fd, &full, sizeof(full)) != sizeof(full)) ||
+      (alsoView && (read(fd, &view, sizeof(view)) != sizeof(view)))
+    ) {
+      fprintf(stderr, "Could not read random number from %s\n", URANDOM_PATH);
+      return(1);
+    }
 
-		close(fd);
+    close(fd);
 
 #else
-		struct timeval now;
+    struct timeval now;
 
-		gettimeofday(&now, NULL);
-		srandom((unsigned int) now.tv_sec + (unsigned int) now.tv_usec);
-		full = random();
-		if (alsoView)
-			view = random();
+    gettimeofday(&now, NULL);
+    srandom((unsigned int) now.tv_sec + (unsigned int) now.tv_usec);
+    full = random();
+    if (alsoView)
+      view = random();
 #endif
 
-		snprintf(buf, sizeof(buf), "%08u", full);
-		memcpy(&bytes[0], buf, MAXPWLEN);
-		fprintf(stderr, "Full control one-time password: %.*s\n", MAXPWLEN, &bytes[0]);
-		len = MAXPWLEN;
-		if (alsoView) {
-			snprintf(buf, sizeof(buf), "%08u", view);
-			memcpy(&bytes[MAXPWLEN], buf, MAXPWLEN);
-			fprintf(stderr, "View-only one-time password: %.*s\n", MAXPWLEN,
-					&bytes[MAXPWLEN]);
-			len = MAXPWLEN * 2;
-		}
-	}
+    snprintf(buf, sizeof(buf), "%08u", full);
+    memcpy(&bytes[0], buf, MAXPWLEN);
+    fprintf(stderr, "Full control one-time password: %.*s\n", MAXPWLEN, &bytes[0]);
+    len = MAXPWLEN;
+    if (alsoView) {
+      snprintf(buf, sizeof(buf), "%08u", view);
+      memcpy(&bytes[MAXPWLEN], buf, MAXPWLEN);
+      fprintf(stderr, "View-only one-time password: %.*s\n", MAXPWLEN,
+              &bytes[MAXPWLEN]);
+      len = MAXPWLEN * 2;
+    }
+  }
 
 #ifdef notdef
-	if (len >= MAXPWLEN)
-		vncEncryptPasswd(&bytes[0], &bytes[0]);
+  if (len >= MAXPWLEN)
+    vncEncryptPasswd(&bytes[0], &bytes[0]);
 
-	if (len == MAXPWLEN * 2)
-		vncEncryptPasswd(&bytes[MAXPWLEN], &bytes[MAXPWLEN]);
+  if (len == MAXPWLEN * 2)
+    vncEncryptPasswd(&bytes[MAXPWLEN], &bytes[MAXPWLEN]);
 #endif
 
-	XChangeProperty(dpy, DefaultRootWindow(dpy), prop, XA_STRING, 8,
-			    PropModeReplace, (unsigned char *)bytes, len);
-	memset(bytes, 0, sizeof(bytes));
-	XCloseDisplay(dpy);
-	return(0);
+  XChangeProperty(dpy, DefaultRootWindow(dpy), prop, XA_STRING, 8,
+                  PropModeReplace, (unsigned char *)bytes, len);
+  memset(bytes, 0, sizeof(bytes));
+  XCloseDisplay(dpy);
+  return(0);
 }
 
-int	addUser;
-int	userList;
-char*	user;
+int addUser;
+int userList;
+char* user;
 
-#define MAXUSERLEN	63
+#define MAXUSERLEN  63
 
 int
 DoUserList()
 {
-	Display*	dpy;
-	Atom		prop;
-	int		len;
-	char		bytes[MAXUSERLEN + 1];
+  Display* dpy;
+  Atom prop;
+  int len;
+  char bytes[MAXUSERLEN + 1];
 
-	if ((user == NULL) || ((len = strlen(user)) == 0)) {
-		fprintf(stderr, "missing the user name!");
-		return(1);
-	}
+  if ((user == NULL) || ((len = strlen(user)) == 0)) {
+    fprintf(stderr, "missing the user name!");
+    return(1);
+  }
 
-	if (len > MAXUSERLEN) {
-		fprintf(stderr, "user name is too large");
-		return(1);
-	}
+  if (len > MAXUSERLEN) {
+    fprintf(stderr, "user name is too large");
+    return(1);
+  }
 
-	if ((dpy = XOpenDisplay(displayname)) == NULL) {
-		fprintf(stderr, "unable to open display \"%s\"\n", XDisplayName(displayname));
-		return(1);
-	}
+  if ((dpy = XOpenDisplay(displayname)) == NULL) {
+    fprintf(stderr, "unable to open display \"%s\"\n", XDisplayName(displayname));
+    return(1);
+  }
 
-	prop = XInternAtom(dpy, "VNC_ACL", True);
-	if (prop == None) {
-		fprintf(stderr, "The X server \"%s\" does not support user access control lists\n",
-			      XDisplayName(displayname));
-		return(1);
-	}
+  prop = XInternAtom(dpy, "VNC_ACL", True);
+  if (prop == None) {
+    fprintf(stderr, "The X server \"%s\" does not support user access control lists\n",
+            XDisplayName(displayname));
+    return(1);
+  }
 
-	bytes[0] = addUser | (alsoView ? 0x10 : 0x00);
-	memcpy(&bytes[1], user, len);
-	XChangeProperty(dpy, DefaultRootWindow(dpy), prop, XA_STRING, 8,
-			    PropModeReplace, (unsigned char *)bytes, len + 1);
-	XCloseDisplay(dpy);
-	return(0);
+  bytes[0] = addUser | (alsoView ? 0x10 : 0x00);
+  memcpy(&bytes[1], user, len);
+  XChangeProperty(dpy, DefaultRootWindow(dpy), prop, XA_STRING, 8,
+                  PropModeReplace, (unsigned char *)bytes, len + 1);
+  XCloseDisplay(dpy);
+  return(0);
 }
 
 int main(int argc, char *argv[])
@@ -215,10 +215,10 @@ int main(int argc, char *argv[])
     switch (argv[i][1]) {
     case 'd':
       if (strcmp("-display", argv[i]))
-      	usage(argv);
+        usage(argv);
 
       if (++i >= argc)
-	usage(argv);
+        usage(argv);
 
       displayname = argv[i];
       break;
@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
 
     case 'a':
       if (++i >= argc)
-	usage(argv);
+        usage(argv);
 
       user = argv[i];
       userList = 1;
@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
 
     case 'r':
       if (++i >= argc)
-	usage(argv);
+        usage(argv);
 
       user = argv[i];
       userList = 1;
@@ -313,14 +313,14 @@ int main(int argc, char *argv[])
   }
 
   if (i != argc) {
-      if (strlen(argv[i]) > sizeof(passwdFile) - 1) {
-        fprintf(stderr, "Error: file name too long\n");
-        exit(1);
-      }
-      strcpy(passwdFile, argv[i]);
-      read_from_stdin = 0;
-      make_directory = 0;
-      check_strictly = 0;
+    if (strlen(argv[i]) > sizeof(passwdFile) - 1) {
+      fprintf(stderr, "Error: file name too long\n");
+      exit(1);
+    }
+    strcpy(passwdFile, argv[i]);
+    read_from_stdin = 0;
+    make_directory = 0;
+    check_strictly = 0;
   }
 
   if (make_directory) {
@@ -356,7 +356,7 @@ int main(int argc, char *argv[])
       /* FIXME: Is it correct to read from stdin here? */
       fprintf(stderr, "Would you like to enter a view-only password (y/n)? ");
       if (fgets(yesno, 2, stdin) != NULL && strchr("Yy", yesno[0]) != NULL)
-	  alsoView = 1;
+        alsoView = 1;
     }
 
     if (alsoView && ask_password(passwd2)) {
