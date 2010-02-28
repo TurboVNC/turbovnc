@@ -4,7 +4,7 @@
 
 /*
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
- *     All Rights Reserved.
+ *                     All Rights Reserved.
  *  Copyright (C) 2000-2004 Const Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
@@ -513,18 +513,18 @@ extern void httpCheckFds();
 
 /* auth.c */
 
-void	rfbAuthInit();
-void	rfbAuthProcessResponse(rfbClientPtr cl);
-extern char*	rfbAuthConfigFile;
+void rfbAuthInit();
+void rfbAuthProcessResponse(rfbClientPtr cl);
+extern char* rfbAuthConfigFile;
 
-extern Bool	rfbAuthOTP;
-extern char*	rfbAuthOTPValue;
-extern int	rfbAuthOTPValueLen;
-extern Bool	rfbAuthDisableRevCon;
+extern Bool  rfbAuthOTP;
+extern char* rfbAuthOTPValue;
+extern int   rfbAuthOTPValueLen;
+extern Bool  rfbAuthDisableRevCon;
 
 #ifdef XVNC_AuthPAM
-extern void	rfbAuthAddUser(const char* name, Bool viewOnly);
-extern void	rfbAuthRevokeUser(const char* name);
+extern void rfbAuthAddUser(const char* name, Bool viewOnly);
+extern void rfbAuthRevokeUser(const char* name);
 #endif
 
 extern char *rfbAuthPasswdFile;
