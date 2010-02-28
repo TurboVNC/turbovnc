@@ -179,7 +179,7 @@ DoUserList()
 
   prop = XInternAtom(dpy, "VNC_ACL", True);
   if (prop == None) {
-    fprintf(stderr, "The X server \"%s\" does not support user access control lists\n",
+    fprintf(stderr, "The X server \"%s\" does not support VNC user access control lists\n",
             XDisplayName(displayname));
     return(1);
   }
