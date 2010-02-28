@@ -805,10 +805,13 @@ AuthenticateUnixLogin(void)
 {
     char* user;
     char* passwd;
-    char  buf[64];
+    char  buf[64], buf2[256];
     CARD32 userLen;
     CARD32 pwdLen;
     CARD32 t;
+    struct passwd pwbuf;
+    struct passwd* pw;
+    BOOL curUser = FALSE;
 
     fprintf(stderr, "Performing Unix Login VNC authentication\n");
     user = passwd = NULL;
@@ -820,17 +823,32 @@ AuthenticateUnixLogin(void)
 
     } else {
 	if (user == NULL) {
-	    fprintf(stdout, "User: ");
+	    buf2[0] = 0;
+	    if (getpwuid_r(getuid(), &pwbuf, buf2, sizeof(buf2), &pw) == 0
+		&& pwbuf.pw_name && strlen(pwbuf.pw_name) > 0)
+		curUser = TRUE;
+	    if (curUser)
+		fprintf(stdout, "User (%s): ", pwbuf.pw_name);
+	    else
+		fprintf(stdout, "User: ");
 	    fflush(stdout);
 	    if (fgets(buf, sizeof(buf), stdin) == NULL) {
-		fprintf(stderr, "Reading user name failed\n");
-		return False;
+		if (curUser)
+		    strncpy(buf, pwbuf.pw_name, 63);
+		else {
+		    fprintf(stderr, "Reading user name failed\n");
+		    return False;
+		}
 	    }
 
 	    userLen = strlen(buf);
 	    if (userLen > 0) {
 		if (buf[userLen - 1] == '\n')
 		    buf[--userLen] = '\0';
+	    }
+	    if (userLen == 0 && curUser) {
+		strncpy(buf, pwbuf.pw_name, 63);
+		userLen = strlen(buf);
 	    }
 
 	    user = buf;
