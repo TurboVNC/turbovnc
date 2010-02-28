@@ -67,8 +67,8 @@ char*	displayname;
 int
 DoOTP()
 {
-	uint32_t	full;
-	uint32_t	view;
+	unsigned int	full;
+	unsigned int	view;
 	Display*	dpy;
 	Atom		prop;
 	int		len;
@@ -85,7 +85,7 @@ DoOTP()
 
 	prop = XInternAtom(dpy, "VNC_OTP", True);
 	if (prop == None) {
-		fprintf(stderr, "The server \"%s\" is not enabled for one time passwords\n",
+		fprintf(stderr, "The X display \"%s\" does not support VNC one-time passwords\n",
 			      XDisplayName(displayname));
 		return(1);
 	}
@@ -122,22 +122,24 @@ DoOTP()
 
 		snprintf(buf, sizeof(buf), "%08u", full);
 		memcpy(&bytes[0], buf, MAXPWLEN);
-		fprintf(stderr, "Full control one time password: %.*s\n", MAXPWLEN, &bytes[0]);
+		fprintf(stderr, "Full control one-time password: %.*s\n", MAXPWLEN, &bytes[0]);
 		len = MAXPWLEN;
 		if (alsoView) {
 			snprintf(buf, sizeof(buf), "%08u", view);
 			memcpy(&bytes[MAXPWLEN], buf, MAXPWLEN);
-			fprintf(stderr, "View Only one time password: %.*s\n", MAXPWLEN,
+			fprintf(stderr, "View-only one-time password: %.*s\n", MAXPWLEN,
 					&bytes[MAXPWLEN]);
 			len = MAXPWLEN * 2;
 		}
 	}
 
+#ifdef notdef
 	if (len >= MAXPWLEN)
 		vncEncryptPasswd(&bytes[0], &bytes[0]);
 
 	if (len == MAXPWLEN * 2)
 		vncEncryptPasswd(&bytes[MAXPWLEN], &bytes[MAXPWLEN]);
+#endif
 
 	XChangeProperty(dpy, DefaultRootWindow(dpy), prop, XA_STRING, 8,
 			    PropModeReplace, (unsigned char *)bytes, len);
@@ -177,7 +179,7 @@ DoUserList()
 
 	prop = XInternAtom(dpy, "VNC_ACL", True);
 	if (prop == None) {
-		fprintf(stderr, "The server \"%s\" is not enabled for user access lists\n",
+		fprintf(stderr, "The X server \"%s\" does not support user access control lists\n",
 			      XDisplayName(displayname));
 		return(1);
 	}
@@ -222,7 +224,7 @@ int main(int argc, char *argv[])
       break;
 
     case 'c':
-      otpClear = 1;
+      otp = 1;  otpClear = 1;
       break;
 
     case 'o':
@@ -310,12 +312,7 @@ int main(int argc, char *argv[])
     exit(DoUserList());
   }
 
-  if (i == argc) {
-    read_from_stdin = 0;
-    make_directory = 1;
-    check_strictly = 0;
-
-  } else {
+  if (i != argc) {
       if (strlen(argv[i]) > sizeof(passwdFile) - 1) {
         fprintf(stderr, "Error: file name too long\n");
         exit(1);
@@ -384,10 +381,10 @@ int main(int argc, char *argv[])
 static void usage(char *argv[])
 {
   fprintf(stderr, "usage: %s [-v] [FILE]\n", argv[0]);
-  fprintf(stderr, "       %s -f [-v]\n", argv[0]);
+  fprintf(stderr, "       %s -f\n", argv[0]);
   fprintf(stderr, "       %s -t [-v]\n", argv[0]);
   fprintf(stderr, "       %s -o [-v] [-display VNC-DISPLAY]\n", argv[0]);
-  fprintf(stderr, "       %s -o -c [-display VNC-DISPLAY]\n", argv[0]);
+  fprintf(stderr, "       %s -c [-display VNC-DISPLAY]\n", argv[0]);
   fprintf(stderr, "       %s -a USER [-display VNC-DISPLAY]\n", argv[0]);
   fprintf(stderr, "       %s -r USER [-display VNC-DISPLAY]\n", argv[0]);
   exit(1);
