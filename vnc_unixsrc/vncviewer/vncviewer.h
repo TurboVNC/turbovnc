@@ -1,4 +1,6 @@
 /*
+ *  Copyright (C) 2010 University Corporation for Atmospheric Research.
+ *                     All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2000, 2001 Const Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
@@ -103,9 +105,11 @@ typedef struct {
   int wmDecorationHeight;
 
   char *userLogin;
+  Bool noUnixLogin;
 
   char *passwordFile;
   Bool passwordDialog;
+  Bool userPwdDialog;
 
   int rawDelay;
   int copyRectDelay;
@@ -194,6 +198,14 @@ extern char *DoServerDialog();
 extern void PasswordDialogDone(Widget w, XEvent *event, String *params,
 			     Cardinal *num_params);
 extern char *DoPasswordDialog();
+
+extern void UserPwdSetFocus(Widget w, XEvent *event, String *params,
+			     Cardinal *num_params);
+extern void UserPwdNextField(Widget w, XEvent *event, String *params,
+			     Cardinal *num_params);
+extern void UserPwdDialogDone(Widget w, XEvent *event, String *params,
+			     Cardinal *num_params);
+extern void DoUserPwdDialog(char** user, char** password);
 
 /* fullscreen.c */
 

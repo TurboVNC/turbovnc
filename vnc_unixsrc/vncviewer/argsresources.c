@@ -1,4 +1,6 @@
 /*
+ *  Copyright (C) 2010 University Corporation for Atmospheric Research.
+                       All Rights Reserved.
  *  Copyright (C) 2009 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2002-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -71,6 +73,59 @@ char *fallback_resources[] = {
   "*passwordDialog.dialog.value.AsciiSink.echo: False",
   "*passwordDialog.dialog.value.translations: #override\\n\
      <Key>Return: PasswordDialogDone()",
+
+  "*userPwdDialog.title: VNC Server Authentication",
+  "*userPwdDialog.form.background: grey",
+  "*userPwdDialog.form.resizable: true",
+
+  "*userPwdDialog*userLabel.label: User:",
+
+  "*userPwdDialog*userField.editType: edit",
+  "*userPwdDialog*userField.fromHoriz: userLabel",
+  "*userPwdDialog*userField.resize: width",
+  "*userPwdDialog*userField.textSource.editType: edit",
+  "*userPwdDialog*userField.textSource.string: ",
+  "*userPwdDialog*userField.translations: #override\\n\
+     <Btn1Down>,<Btn1Up>: UserPwdSetFocus()\\n\
+     Ctrl<Key>O:    Nothing()\\n\
+     Meta<Key>I:    Nothing()\\n\
+     Ctrl<Key>N:    Nothing()\\n\
+     Ctrl<Key>P:    Nothing()\\n\
+     Ctrl<Key>Z:    Nothing()\\n\
+     Meta<Key>Z:    Nothing()\\n\
+     Ctrl<Key>V:    Nothing()\\n\
+     Meta<Key>V:    Nothing()\\n\
+     <Key>Tab: UserPwdNextField()\\n\
+     Ctrl<Key>J: UserPwdNextField()\\n\
+     Ctrl<Key>M: UserPwdNextField()\\n\
+     <Key>Linefeed: UserPwdNextField()\\n\
+     <Key>Return: UserPwdNextField()",
+
+  "*userPwdDialog*pwdLabel.label: Password:",
+  "*userPwdDialog*pwdLabel.fromVert: userLabel",
+
+  "*userPwdDialog*pwdField.editType: edit",
+  "*userPwdDialog*pwdField.fromHoriz: pwdLabel",
+  "*userPwdDialog*pwdField.fromVert: userField",
+  "*userPwdDialog*pwdField.resize: width",
+  "*userPwdDialog*pwdField.textSink.echo: False",
+  "*userPwdDialog*pwdField.textSource.editType: edit",
+  "*userPwdDialog*pwdField.textSource.string: ",
+  "*userPwdDialog*pwdField.translations: #override\\n\
+     <Btn1Down>,<Btn1Up>: UserPwdSetFocus()\\n\
+     Ctrl<Key>O:    Nothing()\\n\
+     Meta<Key>I:    Nothing()\\n\
+     Ctrl<Key>N:    Nothing()\\n\
+     Ctrl<Key>P:    Nothing()\\n\
+     Ctrl<Key>Z:    Nothing()\\n\
+     Meta<Key>Z:    Nothing()\\n\
+     Ctrl<Key>V:    Nothing()\\n\
+     Meta<Key>V:    Nothing()\\n\
+     <Key>Tab: UserPwdNextField()\\n\
+     Ctrl<Key>J: UserPwdDialogDone()\\n\
+     Ctrl<Key>M: UserPwdDialogDone()\\n\
+     <Key>Linefeed: UserPwdDialogDone()\\n\
+     <Key>Return: UserPwdDialogDone()",
 
   "*qualLabel.label: JPEG Image Quality",
   "*qualBar.length: 100",
@@ -191,6 +246,12 @@ int vncServerPort = 0;
 AppData appData;
 
 static XtResource appDataResourceList[] = {
+  {"userLogin", "UserLogin", XtRString, sizeof(String),
+   XtOffsetOf(AppData, userLogin), XtRImmediate, (XtPointer) 0},
+
+  {"noUnixLogin", "NoUnixLogin", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, noUnixLogin), XtRImmediate, (XtPointer) False},
+
   {"shareDesktop", "ShareDesktop", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, shareDesktop), XtRImmediate, (XtPointer) True},
 
@@ -316,7 +377,8 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-lossless",      "*qualityLevel",       XrmoptionNoArg,  "-3"},
   {"-losslesswan",   "*qualityLevel",       XrmoptionNoArg,  "-4"},
   {"-autopass",      "*autoPass",           XrmoptionNoArg,  "True"},
-
+  {"-user",          "*userLogin",          XrmoptionSepArg,  0},
+  {"-nounixlogin",   "*noUnixLogin",        XrmoptionNoArg,  "True"}
 };
 
 int numCmdLineOptions = XtNumber(cmdLineOptions);
@@ -342,6 +404,10 @@ static XtActionsRec actions[] = {
     {"SelectionToVNC", SelectionToVNC},
     {"ServerDialogDone", ServerDialogDone},
     {"PasswordDialogDone", PasswordDialogDone},
+    {"Nothing", NULL},
+    {"UserPwdDialogDone", UserPwdDialogDone},
+    {"UserPwdNextField", UserPwdNextField},
+    {"UserPwdSetFocus", UserPwdSetFocus},
     {"Pause", Pause},
     {"RunCommand", RunCommand},
     {"Quit", Quit},
@@ -403,6 +469,8 @@ usage(void)
 	  "        -medqual (preset for -samp 2x -quality 80)\n"
 	  "        -lossless (preset for -nojpeg -compresslevel 0)\n"
 	  "        -losslesswan (preset for -nojpeg -compresslevel 1)\n"
+	  "        -user <USER NAME>\n"
+	  "        -nounixlogin\n"
 	  "\n"
 	  "Option names may be abbreviated, for example, -q instead of -quality.\n"
 	  "See the manual page for more information."

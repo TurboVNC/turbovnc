@@ -1,4 +1,6 @@
 /*
+ *  Copyright (C) 2010 University Corporation for Atmospheric Research.
+                       All Rights Reserved.
  *  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
@@ -45,6 +47,7 @@ static int ReadSecurityType(void);
 static int SelectSecurityType(void);
 static Bool PerformAuthenticationTight(void);
 static Bool AuthenticateVNC(void);
+static Bool AuthenticateUnixLogin(void);
 static Bool AuthenticateNone(void);
 static Bool ReadAuthenticationResult(void);
 static Bool ReadInteractionCaps(void);
@@ -317,6 +320,8 @@ InitCapabilities(void)
 	  "No authentication");
   CapsAdd(authCaps, rfbAuthVNC, rfbStandardVendor, sig_rfbAuthVNC,
 	  "Standard VNC password authentication");
+  CapsAdd(authCaps, rfbAuthUnixLogin, rfbTightVncVendor, sig_rfbAuthUnixLogin,
+	  "Unix login authentication");
 
   /* Supported encoding types */
   CapsAdd(encodingCaps, rfbEncodingCopyRect, rfbStandardVendor,
@@ -633,6 +638,7 @@ PerformAuthenticationTight(void)
 {
   rfbAuthenticationCapsMsg caps;
   CARD32 authScheme;
+  CARD32 a;
   int i;
 
   /* In protocols 3.7t/3.8t, the server informs us about supported
@@ -650,29 +656,64 @@ PerformAuthenticationTight(void)
   if (!ReadCapabilityList(authCaps, caps.nAuthTypes))
     return False;
 
-  /* Try server's preferred authentication scheme. */
-  for (i = 0; i < CapsNumEnabled(authCaps); i++) {
-    authScheme = CapsGetByOrder(authCaps, i);
-    if (authScheme != rfbAuthVNC && authScheme != rfbAuthNone)
-      continue;                 /* unknown scheme - cannot use it */
-    authScheme = Swap32IfLE(authScheme);
-    if (!WriteExact(rfbsock, (char *)&authScheme, sizeof(authScheme)))
-      return False;
-    authScheme = Swap32IfLE(authScheme); /* convert it back */
-
-    switch (authScheme) {
-    case rfbAuthNone:
-      return AuthenticateNone();
-    case rfbAuthVNC:
-      return AuthenticateVNC();
-    default:                      /* should never happen */
-      fprintf(stderr, "Internal error: Invalid authentication type\n");
-      return False;
+  authScheme = 0;
+  if (!appData.noUnixLogin && (appData.userLogin != NULL)) {
+    /* Prefer Unix Login over other types */
+    for (i = 0; i < CapsNumEnabled(authCaps); i++) {
+      if (CapsGetByOrder(authCaps, i) == rfbAuthUnixLogin) {
+	authScheme = rfbAuthUnixLogin;
+	break;
+      }
     }
   }
 
-  fprintf(stderr, "No suitable authentication schemes offered by server\n");
-  return False;
+  if (authScheme == 0) {
+    /* Try server's preferred authentication scheme. */
+    for (i = 0; (authScheme == 0) && (i < CapsNumEnabled(authCaps)); i++) {
+      a = CapsGetByOrder(authCaps, i);
+      switch (a) {
+      case rfbAuthVNC:
+      case rfbAuthNone:
+	authScheme = a;
+	break;
+
+      case rfbAuthUnixLogin:
+      	if (!appData.noUnixLogin)
+	  authScheme = a;
+
+        break;
+
+      default:
+	  /* unknown scheme - cannot use it */
+	  continue;
+      }
+    }
+  }
+
+  if (authScheme == 0) {
+    fprintf(stderr, "No suitable authentication schemes offered by server\n");
+    return False;
+  }
+
+  authScheme = Swap32IfLE(authScheme);
+  if (!WriteExact(rfbsock, (char *)&authScheme, sizeof(authScheme)))
+    return False;
+
+  authScheme = Swap32IfLE(authScheme); /* convert it back */
+  switch (authScheme) {
+  case rfbAuthNone:
+    return AuthenticateNone();
+
+  case rfbAuthVNC:
+    return AuthenticateVNC();
+
+  case rfbAuthUnixLogin:
+    return AuthenticateUnixLogin();
+
+  default:                      /* should never happen */
+    fprintf(stderr, "Internal error: Invalid authentication type\n");
+    return False;
+  }
 }
 
 
@@ -701,7 +742,6 @@ AuthenticateNone(void)
 static Bool
 AuthenticateVNC(void)
 {
-  CARD32 authScheme;
   CARD8 challenge[CHALLENGESIZE];
   char *passwd;
   char  buffer[64];
@@ -754,6 +794,80 @@ AuthenticateVNC(void)
     return False;
 
   return ReadAuthenticationResult();
+}
+
+/*
+ * Unix Logon authentication.
+ */
+
+static Bool
+AuthenticateUnixLogin(void)
+{
+    char* user;
+    char* passwd;
+    char  buf[64];
+    CARD32 userLen;
+    CARD32 pwdLen;
+    CARD32 t;
+
+    fprintf(stderr, "Performing Unix Login VNC authentication\n");
+    user = passwd = NULL;
+    if ((appData.userLogin != NULL) && (strlen(appData.userLogin) > 0))
+	user = appData.userLogin;
+
+    if (appData.passwordDialog) {
+	DoUserPwdDialog(&user, &passwd);
+
+    } else {
+	if (user == NULL) {
+	    fprintf(stdout, "User: ");
+	    fflush(stdout);
+	    if (fgets(buf, sizeof(buf), stdin) == NULL) {
+		fprintf(stderr, "Reading user name failed\n");
+		return False;
+	    }
+
+	    userLen = strlen(buf);
+	    if (userLen > 0) {
+		if (buf[userLen - 1] == '\n')
+		    buf[--userLen] = '\0';
+	    }
+
+	    user = buf;
+	}
+
+	if (strlen(user) > 0)
+	    passwd = getpass("Password: ");
+    }
+
+    if (!user || ((userLen = strlen(user)) == 0)) {
+	fprintf(stderr, "Reading user name failed\n");
+	return False;
+    }
+
+    if (!passwd || (pwdLen = strlen(passwd)) == 0) {
+	fprintf(stderr, "Reading password failed\n");
+	return False;
+    }
+
+    t = Swap32IfLE(userLen);
+    if (!WriteExact(rfbsock, (char *)&t, sizeof(t)))
+	return False;
+
+    t = Swap32IfLE(pwdLen);
+    if (!WriteExact(rfbsock, (char *)&t, sizeof(t)))
+	return False;
+
+    if (!WriteExact(rfbsock, (char *)user, userLen))
+	return False;
+
+    if (!WriteExact(rfbsock, (char *)passwd, pwdLen))
+	return False;
+
+    while (*passwd == '\0')
+    	*passwd++ = '\0';
+
+    return ReadAuthenticationResult();
 }
 
 /*
