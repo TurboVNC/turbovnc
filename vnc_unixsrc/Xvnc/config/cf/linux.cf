@@ -401,5 +401,9 @@ XCOMM binutils:	(LinuxBinUtilsMajorVersion)
 #define HasFfsl         YES
 #endif
 
+#ifndef XvncAuthPAM
+#define XvncAuthPAM     YES
+#endif
+
 #include <lnxLib.rules>
 #include <xfree86.cf>

@@ -18,4 +18,9 @@ VNCSYSLIBS = -L/usr/local/lib -lturbojpeg -lz -lcrypt -lpthread
 #endif
 #endif
 
-VNCCPPFLAGS = -I$(TOP)/../include -I/usr/local/include
+#if XvncAuthPAM == YES
+VNCPAMDEFS = -DXVNC_AuthPAM
+VNCSYSLIBS := $(VNCSYSLIBS) -lpam
+#endif
+
+VNCCPPFLAGS = -I$(TOP)/../include -I/usr/local/include $(VNCPAMDEFS)
