@@ -3,7 +3,9 @@
  */
 
 /*
- *  Copyright (C) 2009 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010 University Corporation for Atmospheric Research.
+ *     All Rights Reserved.
+ *  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -56,6 +58,7 @@ from the X Consortium.
 /* Use ``#define CORBA'' to enable CORBA control interface */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
 #include <sys/types.h>
@@ -105,6 +108,14 @@ char rfbThisHost[256];
 
 Atom VNC_LAST_CLIENT_ID;
 Atom VNC_CONNECT;
+
+Atom VNC_OTP;
+
+#ifdef XVNC_AuthPAM
+#define MAXUSERLEN 63
+
+Atom VNC_ACL;
+#endif
 
 static HWEventQueueType alwaysCheckForInput[2] = { 0, 1 };
 static HWEventQueueType *mieqCheckForInput[2];
@@ -247,8 +258,33 @@ ddxProcessArgument (argc, argv, i)
 
     if (strcmp(argv[i], "-rfbauth") == 0) {	/* -rfbauth passwd-file */
 	if (i + 1 >= argc) UseMsg();
+	if (rfbAuthOTP) {
+	    rfbLog("Cannot specify both -otp and -rfbauth\n");
+	    exit(1);
+	}
 	rfbAuthPasswdFile = argv[i+1];
 	return 2;
+    }
+
+    if (strcmp(argv[i], "-authcfg") == 0) {	/* -authcfg config-file */
+	if (i + 1 >= argc) UseMsg();
+	rfbAuthConfigFile = argv[i+1];
+	return 2;
+    }
+
+    if (strcmp(argv[i], "-noreverse") == 0) {
+	rfbAuthDisableRevCon = TRUE;
+	return 1;
+    }
+
+    if (strcmp(argv[i], "-otp") == 0) {
+	if (!rfbAuthOTP && (rfbAuthPasswdFile != NULL)) {
+	    rfbLog("Cannot specify both -otp and -rfbauth\n");
+	    exit(1);
+	}
+
+	rfbAuthOTP = TRUE;
+	return 1;
     }
 
     if (strcmp(argv[i], "-httpd") == 0) {
@@ -398,6 +434,7 @@ InitOutput(screenInfo, argc, argv)
 
     rfbLog("Xvnc version %s\n", XVNCRELEASE);
     rfbLog("Copyright (C) 2009-2010 D. R. Commander\n");
+    rfbLog("Copyright (C) 2010 University Corporation for Atmospheric Research\n");
     rfbLog("Copyright (C) 2004-2008 Sun Microsystems, Inc.\n");
     rfbLog("Copyright (C) 2004 Landmark Graphics Corporation\n");
     rfbLog("Copyright (C) 2000-2009 TightVNC Group\n");
@@ -410,6 +447,14 @@ InitOutput(screenInfo, argc, argv)
     VNC_LAST_CLIENT_ID = MakeAtom("VNC_LAST_CLIENT_ID",
 				  strlen("VNC_LAST_CLIENT_ID"), TRUE);
     VNC_CONNECT = MakeAtom("VNC_CONNECT", strlen("VNC_CONNECT"), TRUE);
+
+    if (rfbAuthOTP)
+	VNC_OTP = MakeAtom("VNC_OTP", strlen("VNC_OTP"), TRUE);
+
+#ifdef XVNC_AuthPAM
+    VNC_ACL = MakeAtom("VNC_ACL", strlen("VNC_ACL"), TRUE);
+#endif
+
     rfbInitSockets();
     if (inetdSock == -1)
 	httpInitSockets();
@@ -768,9 +813,12 @@ rfbRootPropertyChange(PropertyPtr pProp)
 	rfbGotXCutText(pProp->data, pProp->size);
 	return;
     }
-    if ((pProp->propertyName == VNC_CONNECT) && (pProp->type == XA_STRING)
-	&& (pProp->format == 8))
-    {
+
+    if (
+	!rfbAuthDisableRevCon &&
+	(pProp->propertyName == VNC_CONNECT) && (pProp->type == XA_STRING)
+	    && (pProp->format == 8)
+    ) {
 	int i;
 	rfbClientPtr cl;
 	int port = 5500;
@@ -792,6 +840,57 @@ rfbRootPropertyChange(PropertyPtr pProp)
 #endif
 	free(host);
     }
+
+    if (
+	rfbAuthOTP &&
+	(pProp->propertyName == VNC_OTP) && (pProp->type == XA_STRING) &&
+	(pProp->format == 8)
+    ) {
+	if (pProp->size == 0) {
+	    if (rfbAuthOTPValue != NULL) {
+		xfree(rfbAuthOTPValue);
+		rfbAuthOTPValue = NULL;
+		rfbLog("One time password(s) disabled\n");
+	    }
+
+	} else if ((pProp->size == MAXPWLEN) || (pProp->size == (MAXPWLEN * 2))) {
+	    if (rfbAuthOTPValue != NULL)
+		xfree(rfbAuthOTPValue);
+
+	    rfbAuthOTPValueLen = pProp->size;
+	    rfbAuthOTPValue = (char *) xalloc(pProp->size);
+	    memcpy(rfbAuthOTPValue, pProp->data, pProp->size);
+	}
+
+	memset(pProp->data, 0, pProp->size);
+	/* delete the property? how? */
+    }
+
+#ifdef XVNC_AuthPAM
+    if ((pProp->propertyName == VNC_ACL) && (pProp->type == XA_STRING) &&
+	(pProp->format == 8) && (pProp->size > 1) && (pProp->size <= (MAXUSERLEN + 1))
+    ) {
+	/*
+	 * The first byte is a flag that selects revoke/add.
+	 * The remaining bytes are the name.
+	 */
+	char*		p = (char *) xalloc(pProp->size);
+	const char*	n = (const char*) pProp->data;
+
+	memcpy(p, &n[1], pProp->size - 1);
+	p[pProp->size - 1] = '\0';
+	if ((n[0] & 1) == 0) {
+	    rfbAuthRevokeUser(p);
+	    xfree(p);
+
+	} else {
+	    rfbAuthAddUser(p, (n[0] & 0x10) ? TRUE : FALSE);
+	}
+
+	memset(pProp->data, 0, pProp->size);
+	/* delete the property? how? */
+    }
+#endif
 }
 
 
@@ -874,6 +973,7 @@ AbortDDX()
 void
 OsVendorInit()
 {
+	rfbAuthInit();
 }
 
 void
@@ -923,6 +1023,9 @@ ddxUseMsg()
     ErrorF("-compatiblekbd         set META key = ALT key as in the original "
 								"VNC\n");
     ErrorF("-version               report Xvnc version on stderr\n");
+    ErrorF("-authcfg config-file   specify pathname of authentication configuration file\n");
+    ErrorF("-noreverse             disable reverse connections\n");
+    ErrorF("-otp                   use one-time password authentication\n");
     exit(1);
 }
 

@@ -5,6 +5,9 @@
  */
 
 /*
+ *  Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010 University Corporation for Atmospheric Research.
+ *     All Rights Reserved.
  *  Copyright (C) 2003-2006 Constantin Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -26,6 +29,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <errno.h>
 #include "windowstr.h"
 #include "rfb.h"
 
@@ -33,11 +38,385 @@
 char *rfbAuthPasswdFile = NULL;
 
 static void rfbSendSecurityType(rfbClientPtr cl, int securityType);
-static void rfbSendSecurityTypeList(rfbClientPtr cl, int primaryType);
+static void rfbSendSecurityTypeList(rfbClientPtr cl);
 static void rfbSendTunnelingCaps(rfbClientPtr cl);
 static void rfbSendAuthCaps(rfbClientPtr cl);
 
 static void rfbVncAuthSendChallenge(rfbClientPtr cl);
+
+#define AUTH_DEFAULT_CONF_FILE		"/etc/turbovncserver.auth"
+#define AUTH_DEFAULT_AUTH_METHODS	"vncauth"
+#ifdef XVNC_AuthPAM
+#define AUTH_DEFAULT_PAM_SERVICE_NAME   "turbovnc"
+#endif
+
+#define MAX_USER_LEN	64
+#define MAX_PWD_LEN	64
+
+char*	rfbAuthConfigFile = AUTH_DEFAULT_CONF_FILE;
+Bool    rfbAuthDisableRevCon;
+Bool	rfbAuthOTP;
+char*	rfbAuthOTPValue;
+int	rfbAuthOTPValueLen;
+
+static void
+AuthNoneStartFunc(rfbClientPtr cl)
+{
+    cl->state = RFB_INITIALISATION;
+}
+
+static void
+AuthNoneRspFunc(rfbClientPtr cl)
+{
+}
+
+#ifdef XVNC_AuthPAM
+
+#include <pwd.h>
+
+Bool	rfbPAMAuthenticate(const char* svc, const char* host, const char* user, const char* pwd,
+				const char** emsg);
+
+static char*	pamServiceName = AUTH_DEFAULT_PAM_SERVICE_NAME;
+typedef struct UserList {
+	struct UserList*	next;
+	const char*		name;
+	Bool			viewOnly;
+} UserList;
+
+static UserList*	userACL;
+Bool	rfbAuthUserACL;
+
+void
+rfbAuthAddUser(const char* name, Bool viewOnly)
+{
+    UserList*	p = (UserList*) xalloc(sizeof(UserList));
+
+    rfbLog("rfbAuthAddUser: '%s'%s\n", name, viewOnly ? " view-only" : "");
+    p->next = userACL;
+    p->name = name;
+    p->viewOnly = viewOnly;
+    userACL = p;
+}
+
+void
+rfbAuthRevokeUser(const char* name)
+{
+    UserList**	prev = &userACL;
+    UserList*	p;
+
+    rfbLog("rfbAuthRevokeUser: '%s'\n", name);
+    while (*prev != NULL) {
+	p = *prev;
+	if (!strcmp(p->name, name)) {
+	    *prev = p->next;
+	    xfree(p->name);
+	    xfree(p);
+	    return;
+	}
+
+	prev = &p->next;
+    }
+}
+
+static void
+AuthPAMUserPwdStartFunc(rfbClientPtr cl)
+{       
+    cl->state = RFB_AUTHENTICATION;
+}
+
+static void
+AuthPAMUserPwdRspFunc(rfbClientPtr cl)
+{       
+    CARD32	userLen;
+    CARD32	pwdLen;
+    char	userBuf[MAX_USER_LEN + 1];
+    char	pwdBuf[MAX_PWD_LEN + 1];
+    int		n;
+    const char*	emsg;
+
+    n = ReadExact(cl->sock, (char*) &userLen, sizeof(userLen));
+    if (n <= 0) {
+	if (n != 0)
+	    rfbLogPerror("AuthPAMUserPwdRspFunc: read");
+
+	rfbCloseSock(cl->sock);
+	return;
+    }
+
+    userLen = Swap32IfLE(userLen);
+    n = ReadExact(cl->sock, (char*) &pwdLen, sizeof(pwdLen));
+    if (n <= 0) {
+	if (n != 0)
+	    rfbLogPerror("AuthPAMUserPwdRspFunc: read");
+
+	rfbCloseSock(cl->sock);
+	return;
+    }
+
+    pwdLen = Swap32IfLE(pwdLen);
+    if ((userLen > MAX_USER_LEN) || (pwdLen > MAX_PWD_LEN)) {
+	rfbLogPerror("AuthPAMUserPwdRspFunc: excessively large user or password in response");
+	rfbCloseSock(cl->sock);
+	return;
+    }
+
+    n = ReadExact(cl->sock, userBuf, userLen);
+    if (n <= 0) {
+	if (n != 0)
+	    rfbLogPerror("AuthPAMUserPwdRspFunc: user read");
+
+	rfbCloseSock(cl->sock);
+	return;
+    }
+
+    userBuf[userLen] = '\0';
+    n = ReadExact(cl->sock, pwdBuf, pwdLen);
+    if (n <= 0) {
+	if (n != 0)
+	    rfbLogPerror("AuthPAMUserPwdRspFunc: pwd read");
+
+	rfbCloseSock(cl->sock);
+	return;
+    }
+
+    pwdBuf[pwdLen] = '\0';
+    if (rfbAuthUserACL) {
+    	UserList*	p = userACL;
+
+	if (p == NULL)
+	    rfbLog("AuthPAMUserPwdRspFunc: WARNING: user ACL empty\n");
+
+	while (p != NULL) {
+	    if (!strcmp(p->name, userBuf))
+		    break;
+
+	    p = p->next;
+	}
+
+	if (p == NULL) {
+	    rfbLog("AuthPAMUserPwdRspFunc: user '%s' denied access", userBuf);
+	    rfbClientAuthFailed(cl, "User denied access");
+	    return;
+	}
+
+	cl->viewOnly = p->viewOnly;
+    }
+
+    if (rfbPAMAuthenticate(pamServiceName, cl->host, userBuf, pwdBuf, &emsg)) {
+	rfbClientAuthSucceeded(cl, rfbAuthUnixLogin);
+    
+    } else {
+	rfbClientAuthFailed(cl, (char*)emsg);
+    }
+}
+#endif
+
+#define AD_NONE		0x01
+#define AD_PWD		0x02
+#define AD_USER_PWD	0x04
+#define AD_OTP		0x08
+
+typedef void (*AuthFunc)(rfbClientPtr cl);
+
+typedef struct {
+	const char*	name;
+	int		protocolMinorVer;
+	Bool		enabled;
+	int		requiredData;
+	CARD8		securityType;
+	int		authType;
+	CARD8		vendorSignature[4];
+	CARD8		nameSignature[8];
+	AuthFunc	startFunc;
+	AuthFunc	rspFunc;
+} AuthMethodData;
+
+/*
+ * NOTE: Keep this list ordered by decreasing security.
+ */
+static AuthMethodData authMethods[] = {
+#ifdef XVNC_AuthPAM
+	{ "pam-userpwd", 7, FALSE, AD_USER_PWD,
+		rfbSecTypeTight, rfbAuthUnixLogin, rfbTightVncVendor, sig_rfbAuthUnixLogin,
+		AuthPAMUserPwdStartFunc, AuthPAMUserPwdRspFunc},
+#endif
+
+	{ "otp", 3, FALSE, AD_OTP,
+		rfbSecTypeVncAuth, rfbAuthVNC, rfbStandardVendor, sig_rfbAuthVNC,
+		rfbVncAuthSendChallenge, rfbVncAuthProcessResponse},
+
+	{ "vncauth", 3, FALSE, AD_PWD,
+		rfbSecTypeVncAuth, rfbAuthVNC, rfbStandardVendor, sig_rfbAuthVNC,
+		rfbVncAuthSendChallenge, rfbVncAuthProcessResponse},
+
+	{ "none", 3, FALSE, AD_NONE,
+		rfbSecTypeNone,	rfbAuthNone, rfbStandardVendor, sig_rfbAuthNone,
+		AuthNoneStartFunc, AuthNoneRspFunc},
+
+	{ NULL }
+};
+
+static void
+setMethods(char* buf)
+{
+	char*		saveptr;
+	char*		p;
+	AuthMethodData*	a;
+
+	for (a = authMethods; a->name != NULL; a++)
+		a->enabled = FALSE;
+
+	while (TRUE) {
+		p = strtok_r(buf, ",", &saveptr);
+		buf = NULL;
+		if (p == NULL)
+			break;
+
+		for (a = authMethods; a->name != NULL; a++) {
+			if (!strcmp(a->name, p))
+				break;
+		}
+
+		if (a->name == NULL) {
+			FatalError("rfbAuthInit unknown auth method name '%s'\n", p);
+		}
+
+		a->enabled = TRUE;
+		if (a->requiredData & AD_OTP)
+			rfbAuthOTP = TRUE;
+	}
+}
+
+void
+rfbAuthInit()
+{
+	FILE*  		fp;
+	char		buf[256];
+	int		line;
+	int		len;
+	int		n;
+	struct stat	sb;
+	AuthMethodData*	a;
+	Bool		enabled = FALSE;
+
+	setMethods(AUTH_DEFAULT_AUTH_METHODS);
+	if ((fp = fopen(rfbAuthConfigFile, "r")) == NULL)
+		return;
+
+	if (fstat(fileno(fp), &sb) == -1) {
+		FatalError("rfbAuthInit: ERROR: fstat %s: %s", rfbAuthConfigFile, strerror(errno));
+	}
+
+	if ((sb.st_uid != 0) && (sb.st_uid != getuid())) {
+		FatalError("rfbAuthInit: ERROR: %s is not owned either by you or root\n", rfbAuthConfigFile);
+	}
+
+	if (sb.st_mode & (S_IWGRP | S_IWOTH)) {
+		FatalError("rfbAuthInit: ERROR: %s is insecure\n", rfbAuthConfigFile);
+	}
+
+	rfbLog("rfbAuthInit: using configuration file %s\n", rfbAuthConfigFile);
+	for (line = 0; fgets(buf, sizeof(buf), fp) != NULL; line++) {
+		len = strlen(buf) - 1;
+		if (buf[len] != '\n') {
+			FatalError("rfbAuthInit: ERROR: Configuration file %s line %d too long!\n", rfbAuthConfigFile, line);
+		}
+		
+		buf[len] = '\0';
+
+		n = 21;
+		if (!strncmp(buf, "no-reverse-connection", n)) {
+			rfbAuthDisableRevCon = TRUE;
+			continue;
+		}
+
+#ifdef XVNC_AuthPAM
+		n = 15;
+		if (!strncmp(buf, "enable-user-acl", n)) {
+			rfbAuthUserACL = TRUE;
+			continue;
+		}
+
+		n = 17;
+		if (!strncmp(buf, "pam-service-name=", n)) {
+			if (buf[n] == '\0') {
+				FatalError("rfbAuthInit: ERROR: pam-service-name empty!");
+			}
+
+			if ((pamServiceName = strdup(&buf[n])) == NULL) {
+				FatalError("rfbAuthInit strdup: %s", strerror(errno));
+			}
+
+			continue;
+		}
+#endif
+
+		n = 23;
+		if (!strncmp(buf, "permitted-auth-methods=", n)) {
+			if (buf[n] == '\0') {
+				FatalError("rfbAuthInit: ERROR: permitted-auth-methods empty!");
+			}
+
+			setMethods(&buf[n]);
+			continue;
+		}
+
+		rfbLog("rfbAuthInit: WARNING: unrecognized auth config line '%s'\n", buf);
+	}
+
+	fclose(fp);
+	for (a = authMethods; a->name != NULL; a++) {
+		if (!a->enabled)
+			continue;
+
+		enabled = TRUE;
+		rfbLog("rfbAuthInit: enabled method %s\n", a->name);
+	}
+
+	if (!enabled) {
+		FatalError("rfbAuthInit: ERROR: no auth methods enabled!\n");
+	}
+
+	if (rfbAuthOTP && (rfbAuthPasswdFile != NULL)) {
+	    rfbLog("rfbAuthInit: WARNING: -rfbauth overridden to -otp by auth config file\n");
+	    rfbAuthPasswdFile = NULL;
+	}
+
+#ifdef XVNC_AuthPAM
+	if (rfbAuthUserACL) {
+		struct passwd	pbuf;
+		struct passwd*	pw;
+		char		buf[256];
+		char*		n;
+
+		if (getpwuid_r(getuid(), &pbuf, buf, sizeof(buf), &pw) != 0) {
+			FatalError("AuthPAMUserPwdRspFunc: limit-user enabled and getpwuid_r failed: %s",
+				strerror(errno));
+		}
+
+		n = (char*) xalloc(strlen(pbuf.pw_name));
+		strcpy(n, pbuf.pw_name);
+		rfbAuthAddUser(n, FALSE);
+	}
+#endif
+}
+
+void
+rfbAuthProcessResponse(rfbClientPtr cl)
+{
+    AuthMethodData*	a;
+
+    for (a = authMethods; a->name != NULL; a++) {
+	if (cl->selectedAuthType == a->authType) {
+	    a->rspFunc(cl);
+	    return;
+	}
+    }
+
+    rfbLog("rfbAuthProcessResponse: authType assertion failed");
+    rfbCloseSock(cl->sock);
+}
 
 
 /*
@@ -51,33 +430,34 @@ void
 rfbAuthNewClient(cl)
     rfbClientPtr cl;
 {
-    int securityType = rfbSecTypeInvalid;
+    AuthMethodData*	a;
 
-    if (!rfbAuthPasswdFile || cl->reverseConnection) {
-	securityType = rfbSecTypeNone;
-    } else {
-	if (rfbAuthIsBlocked()) {
-	    rfbLog("Too many authentication failures - client rejected\n");
-	    rfbClientConnFailed(cl, "Too many authentication failures");
-	    return;
-	}
-	if (rfbAuthPasswdFile)
-	    securityType = rfbSecTypeVncAuth;
+    if (rfbAuthIsBlocked()) {
+	rfbLog("Too many authentication failures - client rejected\n");
+	rfbClientConnFailed(cl, "Too many authentication failures");
+	return;
     }
 
-    if (cl->protocol_minor_ver < 7) {
-	/* Make sure we use only RFB 3.3 compatible security types. */
-	if (securityType == rfbSecTypeInvalid) {
-	    rfbLog("VNC authentication disabled - RFB 3.3 client rejected\n");
-	    rfbClientConnFailed(cl, "Your viewer cannot handle required "
-				"authentication methods");
-	    return;
-	}
-	rfbSendSecurityType(cl, securityType);
-    } else {
-	/* Here it's ok when securityType is set to rfbSecTypeInvalid. */
-	rfbSendSecurityTypeList(cl, securityType);
+    if (cl->protocol_minor_ver >= 7) {
+	rfbSendSecurityTypeList(cl);
+	return;
     }
+
+    /* Make sure we use only RFB 3.3 compatible security types,
+       but we'll pick the first (most secure) one. */
+    for (a = authMethods; a->name != NULL; a++) {
+	if (a->enabled && (a->protocolMinorVer < 7))
+	    break;
+    }
+
+    if (a->name == NULL) {
+	rfbLog("VNC authentication disabled - RFB 3.3 client rejected\n");
+	rfbClientConnFailed(cl, "Your viewer cannot handle required authentication methods");
+	return;
+    }
+
+    cl->selectedAuthType = a->securityType;
+    rfbSendSecurityType(cl, a->securityType);
 }
 
 
@@ -117,31 +497,46 @@ rfbSendSecurityType(cl, securityType)
     }
 }
 
-
 /*
  * Advertise our supported security types (protocol 3.7 and above).
- * The list includes one standard security type (if primaryType is not
- * set to rfbSecTypeInvalid), and then one more value telling the
- * client that we support TightVNC protocol extensions. Thus,
- * currently, there will be either 1 or 2 items in the list.
  */
 
 static void
-rfbSendSecurityTypeList(cl, primaryType)
-    rfbClientPtr cl;
-    int primaryType;
+rfbSendSecurityTypeList(rfbClientPtr cl)
 {
-    int count = 1;
+    int			n;
+    AuthMethodData*	a;
+    Bool		tightAdvertised = FALSE;
 
-    /* Fill in the list of security types in the client structure. */
-    if (primaryType != rfbSecTypeInvalid) {
-	cl->securityTypes[count++] = (CARD8)primaryType;
+    n = 0;
+    for (a = authMethods; a->name != NULL; a++) {
+	if (n > MAX_SECURITY_TYPES) {
+	    FatalError("rfbSendSecurityTypeList: # enabled security types > MAX_SECURITY_TYPES\n");
+	}
+
+	if (a->enabled && (cl->protocol_minor_ver >= a->protocolMinorVer)) {
+	    cl->securityTypes[++n] = a->securityType;
+	    if (a->securityType == rfbSecTypeTight)
+	    	tightAdvertised = TRUE;
+	}
     }
-    cl->securityTypes[count] = (CARD8)rfbSecTypeTight;
-    cl->securityTypes[0] = (CARD8)count++;
+
+    if (!tightAdvertised) {
+	/*
+	 * Make sure to advertise the Tight security type to allow the compatible
+	 * client to enable other the other non-auth Tight extensions.
+	 */
+	if (n > MAX_SECURITY_TYPES) {
+	    FatalError("rfbSendSecurityTypeList: # enabled security types > MAX_SECURITY_TYPES\n");
+	}
+
+	cl->securityTypes[++n] = rfbSecTypeTight;
+    }
+
+    cl->securityTypes[0] = (CARD8)n;
 
     /* Send the list. */
-    if (WriteExact(cl->sock, (char *)cl->securityTypes, count) < 0) {
+    if (WriteExact(cl->sock, (char *)cl->securityTypes, n + 1) < 0) {
 	rfbLogPerror("rfbSendSecurityTypeList: write");
 	rfbCloseSock(cl->sock);
 	return;
@@ -188,6 +583,7 @@ rfbProcessClientSecurityType(cl)
 	return;
     }
 
+    cl->selectedAuthType = chosenType;
     /* Now go to the proper authentication procedure. */
     switch (chosenType) {
     case rfbSecTypeNone:
@@ -273,16 +669,47 @@ rfbSendAuthCaps(cl)
     rfbCapabilityInfo caplist[MAX_AUTH_CAPS];
     int count = 0;
 
-    authRequired = (rfbAuthPasswdFile != NULL && !cl->reverseConnection);
+    AuthMethodData*	a;
+    rfbCapabilityInfo*	pcap;
 
-    if (authRequired) {
-	if (rfbAuthPasswdFile != NULL) {
-	    SetCapInfo(&caplist[count], rfbAuthVNC, rfbStandardVendor);
-	    cl->authCaps[count++] = rfbAuthVNC;
+    if (!cl->reverseConnection) {
+	authRequired = TRUE;
+	for (a = authMethods; a->name != NULL; a++) {
+	    if (count >= MAX_AUTH_CAPS) {
+		FatalError("rfbSendAuthCaps: # enabled security types > MAX_AUTH_CAPS\n");
+	    }
+
+	    if (!a->enabled)
+		continue;
+		
+	    if (a->requiredData == AD_NONE) {
+		authRequired = FALSE;
+		break;
+	    }
+
+	    if ((a->requiredData & AD_OTP) && (rfbAuthOTPValue == NULL))
+		continue;
+
+	    if ((a->requiredData & AD_PWD) && (rfbAuthPasswdFile == NULL))
+		continue;
+
+	    pcap = &caplist[count];
+	    pcap->code = Swap32IfLE(a->authType);
+	    memcpy(pcap->vendorSignature, a->vendorSignature, sz_rfbCapabilityInfoVendor);
+	    memcpy(pcap->nameSignature, a->nameSignature, sz_rfbCapabilityInfoName);
+	    cl->authCaps[count] = a->authType;
+	    count++;
 	}
-	if (count == 0) {
-	    /* Should never happen. */
-	    rfbLog("rfbSendAuthCaps: assertion failed\n");
+
+	if (authRequired && (count == 0)) {
+	    if (rfbAuthOTP) {
+		rfbLog("rfbSendAuthCaps: OTP authentication required but no OTP set.\n");
+
+	    } else {
+		rfbLog("rfbSendAuthCaps: authentication required but no auth methods enabled.\n");
+		rfbLog("    you may need to provide one of the -rfbauth or -otp command line options.\n");
+	    }
+
 	    rfbCloseSock(cl->sock);
 	    return;
 	}
@@ -322,6 +749,7 @@ rfbProcessClientAuthType(cl)
 {
     CARD32 auth_type;
     int n, i;
+    AuthMethodData*	a;
 
     /* Read authentication type selected by the client. */
     n = ReadExact(cl->sock, (char *)&auth_type, sizeof(auth_type));
@@ -347,18 +775,16 @@ rfbProcessClientAuthType(cl)
 	return;
     }
 
-    switch (auth_type) {
-    case rfbAuthNone:
-	/* Dispatch client input to rfbProcessClientInitMessage. */
-	cl->state = RFB_INITIALISATION;
-	break;
-    case rfbAuthVNC:
-	rfbVncAuthSendChallenge(cl);
-	break;
-    default:
-	rfbLog("rfbProcessClientAuthType: unknown authentication scheme\n");
-	rfbCloseSock(cl->sock);
+    for (a = authMethods; a->name != NULL; a++) {
+	if (auth_type == a->authType) {
+	    cl->selectedAuthType = auth_type;
+	    a->startFunc(cl);
+	    return;
+	}
     }
+
+    rfbLog("rfbProcessClientAuthType: unknown authentication scheme\n");
+    rfbCloseSock(cl->sock);
 }
 
 
@@ -391,8 +817,8 @@ void
 rfbVncAuthProcessResponse(cl)
     rfbClientPtr cl;
 {
-    char passwdFullControl[9];
-    char passwdViewOnly[9];
+    char passwdFullControl[MAXPWLEN + 1];
+    char passwdViewOnly[MAXPWLEN + 1];
     int numPasswords;
     Bool ok;
     int n;
@@ -408,15 +834,34 @@ rfbVncAuthProcessResponse(cl)
 	return;
     }
 
-    numPasswords = vncDecryptPasswdFromFile2(rfbAuthPasswdFile,
-					     passwdFullControl,
-					     passwdViewOnly);
-    if (numPasswords == 0) {
-	rfbLog("rfbVncAuthProcessResponse: could not get password from %s\n",
-	       rfbAuthPasswdFile);
+    if (rfbAuthOTP) {
+	if (rfbAuthOTPValue == NULL) {
+	    rfbClientAuthFailed(cl, "The one time password has not been set on the server");
+	    return;
+	}
 
-	rfbClientAuthFailed(cl, "The server is not configured properly");
-	return;
+	memcpy(passwdFullControl, rfbAuthOTPValue, MAXPWLEN);
+	passwdFullControl[MAXPWLEN] = '\0';
+	numPasswords = rfbAuthOTPValueLen / MAXPWLEN;
+	if (numPasswords > 1) {
+	    memcpy(passwdViewOnly, rfbAuthOTPValue + MAXPWLEN, MAXPWLEN);
+	    passwdViewOnly[MAXPWLEN] = '\0';
+	}
+
+	xfree(rfbAuthOTPValue);
+	rfbAuthOTPValue = NULL;
+
+    } else {
+	numPasswords = vncDecryptPasswdFromFile2(rfbAuthPasswdFile,
+						 passwdFullControl,
+						 passwdViewOnly);
+	if (numPasswords == 0) {
+	    rfbLog("rfbVncAuthProcessResponse: could not get password from %s\n",
+		   rfbAuthPasswdFile);
+
+	    rfbClientAuthFailed(cl, "The server is not configured properly");
+	    return;
+	}
     }
 
     memcpy(encryptedChallenge1, cl->authChallenge, CHALLENGESIZE);

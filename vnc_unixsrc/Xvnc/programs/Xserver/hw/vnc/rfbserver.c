@@ -3,6 +3,8 @@
  */
 
 /*
+ *  Copyright (C) 2010 University Corporation for Atmospheric Research.
+ *     All Rights Reserved.
  *  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
@@ -130,6 +132,11 @@ rfbReverseConnection(host, port)
 {
     int sock;
     rfbClientPtr cl;
+
+    if (rfbAuthDisableRevCon) {
+    	rfbLog("Reverse connections disabled\n");
+	return (rfbClientPtr)NULL;
+    }
 
     if ((sock = rfbConnect(host, port)) < 0)
 	return (rfbClientPtr)NULL;
@@ -356,7 +363,7 @@ rfbProcessClientMessage(sock)
 	rfbProcessClientAuthType(cl);
 	break;
     case RFB_AUTHENTICATION:
-	rfbVncAuthProcessResponse(cl);
+	rfbAuthProcessResponse(cl);
 	break;
     case RFB_INITIALISATION:
 	rfbProcessClientInitMessage(cl);

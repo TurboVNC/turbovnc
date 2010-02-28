@@ -3,6 +3,8 @@
  */
 
 /*
+ *  Copyright (C) 2010 University Corporation for Atmospheric Research.
+ *     All Rights Reserved.
  *  Copyright (C) 2000-2004 Const Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
@@ -170,6 +172,7 @@ typedef struct rfbClientRec {
 
     int nAuthCaps;
     CARD32 authCaps[MAX_AUTH_CAPS];
+    CARD8 selectedAuthType;
 
     /* This is not useful while we don't support tunneling:
     int nTunnelingCaps;
@@ -509,6 +512,20 @@ extern void httpCheckFds();
 
 
 /* auth.c */
+
+void	rfbAuthInit();
+void	rfbAuthProcessResponse(rfbClientPtr cl);
+extern char*	rfbAuthConfigFile;
+
+extern Bool	rfbAuthOTP;
+extern char*	rfbAuthOTPValue;
+extern int	rfbAuthOTPValueLen;
+extern Bool	rfbAuthDisableRevCon;
+
+#ifdef XVNC_AuthPAM
+extern void	rfbAuthAddUser(const char* name, Bool viewOnly);
+extern void	rfbAuthRevokeUser(const char* name);
+#endif
 
 extern char *rfbAuthPasswdFile;
 

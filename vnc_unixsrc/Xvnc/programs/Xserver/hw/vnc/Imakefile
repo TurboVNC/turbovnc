@@ -6,8 +6,12 @@ SRCS = init.c sockets.c kbdptr.c cmap.c draw.c cutpaste.c \
        rre.c corre.c stats.c hextile.c zlib.c tight.c cursor.c
 
 OBJS = init.o sockets.o kbdptr.o cmap.o draw.o cutpaste.o \
-       dispcur.o sprite.o rfbserver.o translate.o httpd.o auth.o \
+       dispcur.o sprite.o rfbserver.o translate.o httpd.o auth.o $(PAMOBJS) \
        rre.o corre.o stats.o hextile.o zlib.o tight.o cursor.o
+
+#if XvncAuthPAM == YES
+PAMOBJS = authpam.o
+#endif
 
 #include <vnclibs.def>
 INCLUDES = -I. -I$(XBUILDINCDIR) -I$(FONTINCSRC) -I$(XINCLUDESRC) \
