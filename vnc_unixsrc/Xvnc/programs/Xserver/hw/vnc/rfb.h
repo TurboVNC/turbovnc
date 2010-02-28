@@ -40,6 +40,9 @@
 #define MAX_TUNNELING_CAPS 16
 #define MAX_AUTH_CAPS 16
 
+/* Protect ourself against a denial of service */
+#define MAX_CUTTEXT_LEN (1 * 1024 * 1024)
+
 extern char *display;
 
 

@@ -180,6 +180,11 @@ rfbNewClient(sock)
     }
 
     cl = (rfbClientPtr)xalloc(sizeof(rfbClientRec));
+    if (cl == NULL) {
+	rfbLog("rfbNewClient: out of memory");
+	rfbCloseSock(cl->sock);
+	return NULL;
+    }
 
     cl->sock = sock;
     getpeername(sock, (struct sockaddr *)&addr, &addrlen);
@@ -951,8 +956,18 @@ rfbProcessClientNormalMessage(cl)
 	}
 
 	msg.cct.length = Swap32IfLE(msg.cct.length);
+	if (msg.cct.length > MAX_CUTTEXT_LEN) {
+	    rfbLogPerror("rfbProcessClientNormalMessage: rfbClientCutText length excessive");
+	    rfbCloseSock(cl->sock);
+	    return;
+	}
 
 	str = (char *)xalloc(msg.cct.length);
+	if (str == NULL) {
+	    rfbLogPerror("rfbProcessClientNormalMessage: rfbClientCutText out of memory");
+	    rfbCloseSock(cl->sock);
+	    return;
+	}
 
 	if ((n = ReadExact(cl->sock, str, msg.cct.length)) <= 0) {
 	    if (n != 0)
