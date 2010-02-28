@@ -296,10 +296,10 @@ void
 rfbAuthInit()
 {
     FILE*           fp;
-    char            buf[256];
+    char            buf[256], buf2[256];
     int             line;
     int             len;
-    int             n;
+    int             n, i, j;
     struct stat     sb;
     AuthMethodData* a;
     Bool            enabled = FALSE;
@@ -329,26 +329,34 @@ rfbAuthInit()
         
         buf[len] = '\0';
 
+        for (i = 0, j = 0; i < len; i++) {
+            if (buf[i] != ' ' && buf[i] != '\t')
+                 buf2[j++] = buf[i];
+        }
+        len = j;
+        buf2[len] = '\0';
+        if (len < 1) continue;
+
         n = 21;
-        if (!strncmp(buf, "no-reverse-connection", n)) {
+        if (!strncmp(buf2, "no-reverse-connection", n)) {
             rfbAuthDisableRevCon = TRUE;
             continue;
         }
 
 #ifdef XVNC_AuthPAM
         n = 15;
-        if (!strncmp(buf, "enable-user-acl", n)) {
+        if (!strncmp(buf2, "enable-user-acl", n)) {
             rfbAuthUserACL = TRUE;
             continue;
         }
 
         n = 17;
-        if (!strncmp(buf, "pam-service-name=", n)) {
-            if (buf[n] == '\0') {
+        if (!strncmp(buf2, "pam-service-name=", n)) {
+            if (buf2[n] == '\0') {
                 FatalError("rfbAuthInit: ERROR: pam-service-name empty!");
             }
 
-            if ((pamServiceName = strdup(&buf[n])) == NULL) {
+            if ((pamServiceName = strdup(&buf2[n])) == NULL) {
                 FatalError("rfbAuthInit strdup: %s", strerror(errno));
             }
 
@@ -357,16 +365,17 @@ rfbAuthInit()
 #endif
 
         n = 23;
-        if (!strncmp(buf, "permitted-auth-methods=", n)) {
-            if (buf[n] == '\0') {
+        if (!strncmp(buf2, "permitted-auth-methods=", n)) {
+            if (buf2[n] == '\0') {
                 FatalError("rfbAuthInit: ERROR: permitted-auth-methods empty!");
             }
 
-            setMethods(&buf[n]);
+            setMethods(&buf2[n]);
             continue;
         }
 
-        rfbLog("rfbAuthInit: WARNING: unrecognized auth config line '%s'\n", buf);
+        if (buf2[0] != '#')
+            rfbLog("rfbAuthInit: WARNING: unrecognized auth config line '%s'\n", buf);
     }
 
     fclose(fp);
