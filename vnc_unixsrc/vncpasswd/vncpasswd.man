@@ -11,18 +11,37 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncpasswd 1 "August 2008" "" "TurboVNC"
+.TH vncpasswd 1 "February 2010" "" "TurboVNC"
 .SH NAME
 vncpasswd \- set passwords for VNC server
 .SH SYNOPSIS
 .B vncpasswd
+.RI [\| \-v \|]
 .RI [\| file \|]
 .br
 .B vncpasswd
 .IR \-t
+.RI [\| \-v \|]
 .br
 .B vncpasswd
 .IR \-f
+.br
+.B vncpasswd
+.IR \-o
+.RI [\| \-v \|]
+.RI [\| \-display\ VNC-display \|]
+.br
+.B vncpasswd
+.IR \-c
+.RI [\| \-display\ VNC-display \|]
+.br
+.B vncpasswd
+.I \-a user
+.RI [\| \-display\ VNC-display \|]
+.br
+.B vncpasswd
+.I \-r user
+.RI [\| \-display\ VNC-display \|]
 .br
 .SH DESCRIPTION
 The \fBvncpasswd\fR utility can be used to create and change
@@ -48,9 +67,22 @@ password is too short, then only the primary password will be saved.
 Unless a file name was provided in the command line explicitly, then this
 utility may perform certain sanity checks to prevent writing a
 password file into some hazardous place.
-
-If at least one password was saved successfully, \fBvncpasswd\fR will
-exit with status code 0. Otherwise it will exit with status code 1.
+.br
+.SH ONE-TIME PASSWORD (OTP) SUPPORT
+If the VNC server is configured to support one-time passwords, then
+\fBvncpasswd\fR can be used to generate new one-time passwords for both full
+control and, optionally, view-only access.  A one-time password is valid for
+one successful connection from a VNC viewer to the VNC server session.  For
+each subsequent connection, a new one-time password must be generated.
+\fBvncpasswd\fR can also be used to clear any one-time passwords that are
+currently enabled for a VNC server session.
+.br
+.SH USER ACCESS CONTROL LIST SUPPORT
+If the VNC server is configured to support a user access control list (ACL) for
+the Unix Login VNC authentication method, then \fBvncpasswd\fR can be used to
+add users to or remove users from the ACL.  Be careful not to remove yourself
+from the list, or you will not be able to connect again until you re-add
+yourself.
 .br
 .SH OPTIONS
 .TP
@@ -67,6 +99,31 @@ versions to stdout. One or two passwords (full-control and view-only)
 can be supplied in the input stream, with a new line terminating each password. 
 Note that in filter mode, short or even empty passwords will be
 silently accepted.
+.TP
+\fB\-v\fR
+Also prompt for a view-only password, or generate a one-time view-only password.
+.TP
+\fB\-display\fR \fIVNC-display\fR
+This option specifies the name of the VNC server session to use when
+setting/clearing one-time passwords or adding users to/removing users from the
+ACL.  If \fIVNC-display\fR is not specified, then it defaults to the value of
+the \fBDISPLAY\fR environment variable.
+.TP
+\fB\-o\fR
+Generate a one-time full control password for \fIVNC-display\fR.
+.TP
+\fB\-c\fR
+Clear any one-time passwords on \fIVNC-display\fR.
+.TP
+\fB\-a\fR \fIuser\fR
+Add \fIuser\fR to \fIVNC-display\fR's user ACL.
+.TP
+\fB\-r\fR \fIuser\fR
+Remove \fIuser\fR from \fIVNC-display\fR's user ACL.
+.SH EXIT CODES
+If at least one password was saved successfully, or if the one-time password
+or user ACL operation succeeded, then \fBvncpasswd\fR will
+exit with status 0.  Otherwise, it will exit with status 1.
 .SH SEE ALSO
 \fBvncserver\fR(1), \fBXvnc\fR(1), \fBvncviewer\fR(1),
 \fBvncconnect\fR(1)
@@ -84,4 +141,6 @@ Tim Waugh <twaugh@redhat.com>,
 .br
 Constantin Kaplinsky <const@tightvnc.com>
 .br
-Darrell Commander <dcommander@users.sourceforge.net>
+D. R. Commander <dcommander@users.sourceforge.net>
+.br
+Craig Ruff <cruff@ucar.edu>
