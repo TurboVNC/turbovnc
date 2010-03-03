@@ -38,8 +38,6 @@ mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_mandir}/man1
 sh ./vncinstall %{buildroot}%{_bindir} %{buildroot}%{_mandir}
 install -m 644 Xvnc/programs/Xserver/Xserver.man %{buildroot}%{_mandir}/man1/Xserver.1
-mkdir -p %{buildroot}/etc
-install -m 644 turbovncserver-auth.conf %{buildroot}/etc/
 
 mkdir -p %{buildroot}%{_datadir}/vnc/classes
 for i in classes/*.class; do install -m 644 $i %{buildroot}%{_datadir}/vnc/classes; done
@@ -55,6 +53,8 @@ sed -e 's@vncserver :${display\%\%:@%{_bindir}/vncserver :${display\%\%:@g' | \
 sed -e 's@vncserver -kill :${display\%\%:@%{_bindir}/vncserver -kill :${display\%\%:@g' \
  > %{buildroot}/etc/init.d/tvncserver
 chmod 755 %{buildroot}/etc/init.d/tvncserver
+
+install -m 644 turbovncserver-auth.conf %{buildroot}/etc/
 
 mkdir -p %{buildroot}/etc/sysconfig
 cat > %{buildroot}/etc/sysconfig/tvncservers << EOF
