@@ -38,6 +38,8 @@ mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_mandir}/man1
 sh ./vncinstall %{buildroot}%{_bindir} %{buildroot}%{_mandir}
 install -m 644 Xvnc/programs/Xserver/Xserver.man %{buildroot}%{_mandir}/man1/Xserver.1
+mkdir -p %{buildroot}/etc
+install -m 644 turbovncserver-auth.conf %{buildroot}/etc/
 
 mkdir -p %{buildroot}%{_datadir}/vnc/classes
 for i in classes/*.class; do install -m 644 $i %{buildroot}%{_datadir}/vnc/classes; done
@@ -107,6 +109,7 @@ fi
 %defattr(-,root,root)
 %attr(0755,root,root) %config /etc/init.d/tvncserver
 %config(noreplace) /etc/sysconfig/tvncservers
+%config(noreplace) /etc/turbovncserver-auth.conf
 %doc LICENCE.TXT WhatsNew ChangeLog TurboVNC-ChangeLog.txt ../vnc_docs/LICEN*.txt ../vnc_docs/*.html ../vnc_docs/*.png ../vnc_docs/*.css
 
 %dir %{_bindir}
@@ -122,7 +125,7 @@ fi
 %{_bindir}/vncserver
 %{_bindir}/vncpasswd
 %{_bindir}/vncconnect
-%{_datadir}/vnc
+%{_datadir}/vnc/*
 %{_mandir}/man1/Xvnc.1*
 %{_mandir}/man1/Xserver.1*
 %{_mandir}/man1/vncserver.1*
@@ -130,193 +133,3 @@ fi
 %{_mandir}/man1/vncpasswd.1*
 
 %changelog
-* Thu Mar 19 2009 Darrell Commander <dcommander@users.sourceforge.net>
-- TurboVNC 0.6
-
-* Thu Jan 22 2009 Darrell Commander <dcommander@users.sourceforge.net>
-- TurboVNC 0.5.1
-
-* Thu Aug 20 2008 Darrell Commander <dcommander@users.sourceforge.net>
-- TurboVNC 0.5
-
-* Tue Jun 5 2007 Darrell Commander <dcommander@users.sourceforge.net>
-- TurboVNC 0.4 (Includes patches from TightVNC 1.3.9)
-
-* Fri Feb 16 2007 Darrell Commander <dcommander@users.sourceforge.net>
-- TurboVNC 0.3.3
-
-* Tue Aug 22 2006 Darrell Commander <dcommander@users.sourceforge.net>
-- TurboVNC 0.3.2 (Includes patches from TightVNC 1.3.8)
-
-* Fri May 19 2006 Darrell Commander <dcommander@users.sourceforge.net>
-- TurboVNC 0.3.1
-
-* Mon Dec 19 2005 Darrell Commander <dcommander@users.sourceforge.net>
-- TurboVNC 0.3
-
-* Fri Mar 11 2005 Darrell Commander <dcommander@users.sourceforge.net>
-- TurboVNC 0.2
-
-* Mon Oct 25 2004 Darrell Commander <dcommander@users.sourceforge.net>
-- TurboVNC 0.1.1
-
-* Mon Oct 4 2004 Darrell Commander <dcommander@users.sourceforge.net>
-- TurboVNC 0.1
-
-* Thu Jul 31 2003 Constantin Kaplinsky <const@ce.cctpu.edu.ru>
-- TightVNC 1.2.9 update.
-
-* Wed Jan 29 2003 Constantin Kaplinsky <const@ce.cctpu.edu.ru>
-- TightVNC 1.2.8 update.
-- Dependencies on /sbin/chkconfig and /sbin/service has been removed
-  for the viewer part.
-
-* Thu Nov 14 2002 Constantin Kaplinsky <const@ce.cctpu.edu.ru>
-- TightVNC 1.2.7 update.
-
-* Sat Aug 10 2002 Constantin Kaplinsky <const@ce.cctpu.edu.ru>
-- TightVNC 1.2.5 update.
-
-* Tue May 21 2002 Constantin Kaplinsky <const@ce.cctpu.edu.ru>
-- TightVNC 1.2.4 update.
-
-* Fri Mar 22 2002 Constantin Kaplinsky <const@ce.cctpu.edu.ru>
-- TightVNC 1.2.3 update.
-
-* Tue Mar 12 2002 Tim Waugh <twaugh@redhat.com> 3.3.3r2-27
-- Don't block on partial HTTP requests (bug #58066).
-- Use the system-provided zlib instead of the bundled one in Xvnc.
-- Link to libz and libjpeg dynamically instead of statically in
-  vncviewer.
-- Fix docs permissions (bug #60783).
-
-* Tue Jan 29 2002 Tim Waugh <twaugh@redhat.com> 3.3.3r2-26
-- Updated vncserver fp patch (see bug #58990):
-  - Check that Xvnc actually started.
-  - Try omitting font path specification if not.
-
-* Wed Jan 09 2002 Tim Powers <timp@redhat.com> 3.3.3r2-25
-- automated rebuild
-
-* Wed Dec 05 2001 David Sainty <dsainty@redhat.com> 3.3.3r2-24
-- Added support for s390 and s390x architectures.
-
-* Thu Nov 29 2001 Tim Waugh <twaugh@redhat.com> 3.3.3r2-23
-- TightVNC 1.2.2.
-
-* Mon Nov  5 2001 Tim Waugh <twaugh@redhat.com> 3.3.3r2-22
-- Don't use bash redirections except in bash (bug #55686).
-
-* Fri Oct 26 2001 Tim Waugh <twaugh@redhat.com> 3.3.3r2-21
-- Run /etc/X11/xinit/xinitrc in xstartup, not Xclients (bug #52711).
-- Don't segfault when disconnecting from font server (bug #55135).
-
-* Wed Sep 26 2001 Tim Waugh <twaugh@redhat.com> 3.3.3r2-20
-- TightVNC 1.2.1, which incorporates several patches we had.
-
-* Mon Sep  3 2001 Tim Waugh <twaugh@redhat.com> 3.3.3r2-19
-- Use xinit's Xclients script to start the session (bug #52711).
-- Make vncpasswd create ~/.vnc if it doesn't exist (bug #52547).
-- Mention the eight character password limit in vncpasswd.1.
-
-* Tue Jul 24 2001 Tim Waugh <twaugh@redhat.com> 3.3.3r2-18
-- Build requires zlib-devel, libjpeg-devel (bug #49731).
-
-* Fri Jul 13 2001 Tim Waugh <twaugh@redhat.com> 3.3.3r2-17
-- Rebuild to fix file ownership problems.
-
-* Tue Jun  5 2001 Tim Waugh <twaugh@redhat.com> 3.3.3r2-16
-- Really fix bug #28318.
-- Use tcp_wrappers (bug #41052).
-- Fix build error when using XFree86 4.1.0's imakefile config.
-
-* Fri May  4 2001 Tim Waugh <twaugh@redhat.com> 3.3.3r2-15
-- Add tight encoding patch (includes corre and typo patches).
-- Const's Java viewer with tight encoding.
-- Update man pages.
-- Use the font server (bug #35913).
-
-* Mon Feb 19 2001 Tim Waugh <twaugh@redhat.com> 3.3.3r2-14
-- Make initscript change to user's home directory before starting
-  vncserver (bug #28318).
-- Make initscript stop properly.
-
-* Thu Feb  8 2001 Tim Waugh <twaugh@redhat.com>
-- Change initscript usage string.
-- Resync descriptions and summaries to match those from specspo.
-
-* Tue Jan 23 2001 Tim Waugh <twaugh@redhat.com>
-- Redo initscript internationalisation.
-- Initscript uses bash not sh.
-
-* Fri Jan 19 2001 Tim Waugh <twaugh@redhat.com>
-- Xvnc man page: put a pointer to tunnelling through ssh.
-
-* Thu Jan 18 2001 Tim Waugh <twaugh@redhat.com>
-- Warn about VNC being insecure in /etc/sysconfig/vncservers.
-- CoRRE fix from Const Kaplinsky (bug #24285).
-
-* Mon Jan 15 2001 Tim Waugh <twaugh@redhat.com>
-- Initscript internationalisation.
-
-* Tue Dec 12 2000 Tim Waugh <twaugh@redhat.com>
-- Service is off by default (bug #22076).
-- Don't start VNC server in initscript if user has not set passwd yet
-  (bug #22076).
-
-* Thu Dec 07 2000 Tim Waugh <twaugh@redhat.com>
-- Mark vncviewer.desktop noreplace.
-- Mark vncservers and /etc/rc.d/init.d/vncserver config.
-- Add reload to vncserver initscript.
-- chkconfig in post.
-
-* Fri Dec 01 2000 Tim Waugh <twaugh@redhat.com>
-- Rebuilt because of fileutils bug.
-
-* Mon Nov 06 2000 Tim Waugh <twaugh@redhat.com>
-- Include vncpasswd man page in manifest.
-
-* Mon Nov 06 2000 Tim Waugh <twaugh@redhat.com>
-- Add vncviewer.desktop.
-- Correct typo in vncconnect.c.
-- Add man pages.
-
-* Mon Oct 30 2000 Tim Waugh <twaugh@redhat.com>
-- set XAUTHORITY before running xstartup.  Fixes vncserver in ssh
-  sessions.
-- revamp initscript so that it allows for non-root users.
-
-* Thu Oct 26 2000 Tim Waugh <twaugh@redhat.com>
-- update to 3.3.3r2.  Patch from bug #19146 no longer needed.
-- include new vncconnect program in file list
-
-* Thu Oct 26 2000 Tim Waugh <twaugh@redhat.com>
-- fix initscript (bug #19698)
-
-* Tue Oct 17 2000 Than Ngo <than@redhat.com>
-- fixed VNC crashes, patch from Shinji Hattori (Bug #10528)
-
-* Mon Oct 16 2000 Bernhard Rosenkraenzer <bero@redhat.com>
-- Fix authentication, Bug #19146, Patch from Tim Waugh <twaugh@redhat.com>
-
-* Fri Aug  4 2000 Bernhard Rosenkraenzer <bero@redhat.com>
-- Remove ,v file from vnc-doc, Bug #12443
-
-* Thu Jul 20 2000 Bill Nottingham <notting@redhat.com>
-- move initscript back
-
-* Thu Jul 13 2000 Prospector <bugzilla@redhat.com>
-- automatic rebuild
-
-* Mon Jul 10 2000 Preston Brown <pbrown@redhat.com>
-- move initscript
-
-* Thu Jun 15 2000 Preston Brown <pbrown@redhat.com>
-- move post/postun scripts from main package to server subpackage
-
-* Mon Jun 12 2000 Preston Brown <pbrown@redhat.com>
-- preun and postun sections
-
-* Fri Jun 09 2000 Preston Brown <pbrown@redhat.com>
-- initial package, from Sean P. Kane package and Mandrake package
-- rewrote init script, added condrestart mode
