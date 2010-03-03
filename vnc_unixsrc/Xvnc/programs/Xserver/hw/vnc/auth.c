@@ -338,7 +338,7 @@ rfbAuthInit()
         if (len < 1) continue;
 
         n = 21;
-        if (!strncmp(buf2, "no-reverse-connection", n)) {
+        if (!strncmp(buf2, "no-reverse-connections", n)) {
             rfbAuthDisableRevCon = TRUE;
             continue;
         }
