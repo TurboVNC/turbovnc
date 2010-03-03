@@ -353,7 +353,7 @@ rfbAuthInit()
         n = 17;
         if (!strncmp(buf2, "pam-service-name=", n)) {
             if (buf2[n] == '\0') {
-                FatalError("rfbAuthInit: ERROR: pam-service-name empty!");
+                FatalError("rfbAuthInit: ERROR: pam-service-name is empty!");
             }
 
             if ((pamServiceName = strdup(&buf2[n])) == NULL) {
@@ -367,7 +367,7 @@ rfbAuthInit()
         n = 23;
         if (!strncmp(buf2, "permitted-auth-methods=", n)) {
             if (buf2[n] == '\0') {
-                FatalError("rfbAuthInit: ERROR: permitted-auth-methods empty!");
+                FatalError("rfbAuthInit: ERROR: permitted-auth-methods is empty!");
             }
 
             setMethods(&buf2[n]);
@@ -384,7 +384,7 @@ rfbAuthInit()
             continue;
 
         enabled = TRUE;
-        rfbLog("rfbAuthInit: enabled method %s\n", a->name);
+        rfbLog("rfbAuthInit: enabled authentication method %s\n", a->name);
     }
 
     if (!enabled) {
