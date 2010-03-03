@@ -96,6 +96,8 @@ mkdir -p $TMPDIR/etc/init.d
 cat vncserver.init | sed -e 's@vncserver :${display\%\%:@/opt/TurboVNC/bin/vncserver :${display\%\%:@g' | sed -e 's@vncserver -kill :${display\%\%:@/opt/TurboVNC/bin/vncserver -kill :${display\%\%:@g' > $TMPDIR/etc/init.d/tvncserver
 chmod 755 $TMPDIR/etc/init.d/tvncserver
 
+install -m 644 turbovncserver-auth.conf $TMPDIR/etc
+
 mkdir -p $TMPDIR/etc/sysconfig
 cat > $TMPDIR/etc/sysconfig/tvncservers <<EOF
 # The VNCSERVERS variable is a list of display:user pairs.
