@@ -7,19 +7,20 @@
 .\" Copyright (C) 2000, 2001 Red Hat, Inc.
 .\" Copyright (C) 2001, 2002 Constantin Kaplinsky
 .\" Copyright (C) 2005-2006 Sun Microsystems, Inc.
+.\" Copyright (C) 2010 D. R. Commander
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncserver 1 "March 2009" "" "TurboVNC"
+.TH vncserver 1 "March 2010" "" "TurboVNC"
 .SH NAME
 vncserver \- a wrapper to launch an X server for VNC.
 .SH SYNOPSIS
 \fBvncserver\fR
 [:\fIdisplay\fR] [\-geometry \fIwidth\fRx\fIheight\fR] [\-depth \fIdepth\fR]
 [\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-name \fIdesktop\-name\fR]
-[\fIXvnc\-options\fR...]
+[\-novncauth] [\-nootp] [\-nopam] [\-noauth] [\-otp] [\fIXvnc\-options\fR...]
 .TP
 \fBvncserver\fR \-kill :\fIdisplay\fR
 .TP
@@ -59,6 +60,45 @@ equivalent to RGBA on little endian systems or ABGR on big endian systems.
 .TP
 \fB\-name\fR \fIstring\fR
 This specifies the name of the desktop.
+.TP
+\fB\-novncauth\fR
+The default behavior of the \fBvncserver\fR script is to enable all of the
+supported authentication methods (VNC password, one-time password, and Unix
+login) in Xvnc.  Passing an argument of \-novncauth to \fBvncserver\fR tells it
+not to enable the VNC authentication method in Xvnc.  This argument has no
+effect if \fIpermitted-auth-methods\fR is specified in the authentication
+configuration file and "vnc" is not listed as a permitted method.
+.TP
+\fB\-nootp\fR
+The default behavior of the \fBvncserver\fR script is to enable all of the
+supported authentication methods (VNC password, one-time password, and Unix
+login) in Xvnc.  Passing an argument of \-nootp to \fBvncserver\fR tells it
+not to enable the one-time password authentication method in Xvnc.  This
+argument has no effect if \fIpermitted-auth-methods\fR is specified in the
+authentication configuration file and "otp" is not listed as a permitted
+method.
+.TP
+\fB\-nopam\fR
+The default behavior of the \fBvncserver\fR script is to enable all of the
+supported authentication methods (VNC password, one-time password, and Unix
+login) in Xvnc.  Passing an argument of \-nopam to \fBvncserver\fR tells it
+not to enable the PAM user/password (Unix login) authentication method in Xvnc.
+This argument has no effect if \fIpermitted-auth-methods\fR is specified in the
+authentication configuration file and "pam-userpwd" is not listed as a
+permitted method.
+.TP
+\fB\-noauth\fR
+The default behavior of the \fBvncserver\fR script is to enable all of the
+supported authentication methods (VNC password, one-time password, and Unix
+login) in Xvnc.  Passing an argument of \-noauth to \fBvncserver\fR tells it to
+disable all forms of authentication in Xvnc.  If \fIpermitted-auth-methods\fR
+is specified in the authentication configuration file and "none" is not listed
+as a permitted method, then Xvnc exits with an error.
+.TP
+\fB\-otp\fR
+If the one-time password authentication method is enabled and permitted in
+Xvnc, then generate an initial one-time password and print it to the console
+prior to starting Xvnc.
 .TP
 \fB\-kill\fR \fB:\fR\fIdisplay\fR
 Stops the VNC server which is currently running on the specified display.
@@ -132,4 +172,4 @@ Tim Waugh <twaugh@redhat.com>,
 .br
 Constantin Kaplinsky <const@tightvnc.com>
 .br
-Darrell Commander <dcommander@users.sourceforge.net>
+D. R. Commander <dcommander@users.sourceforge.net>
