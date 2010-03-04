@@ -34,4 +34,4 @@ Tim Waugh <twaugh@redhat.com>,
 .br
 Constantin Kaplinsky <const@tightvnc.com>
 .br
-Darrell Commander <dcommander@users.sourceforge.net>
+D. R. Commander <dcommander@users.sourceforge.net>
