@@ -174,8 +174,11 @@ static int curthread = 0;
 static int
 nthreads(void)
 {
+  char *mtenv = getenv("TVNC_MT");
   char *ntenv = getenv("TVNC_NTHREADS");
   int np = sysconf(_SC_NPROCESSORS_CONF), nt = 0;
+  if (!mtenv || strlen(mtenv) < 1 || strcmp(mtenv, "1"))
+    return 1;
   if (np == -1) np = 1;
   np = min(np, TVNC_MAXTHREADS);
   if (ntenv && strlen(ntenv) > 0) nt = atoi(ntenv);
@@ -212,8 +215,9 @@ InitThreads(void)
     }
   }
 
-  fprintf(stderr, "Using %d thread%s for Tight decoding\n", nt,
-    nt == 1 ? "" : "s");
+  if(nt > 1)
+    fprintf(stderr, "Using %d thread%s for Tight decoding\n", nt,
+      nt == 1 ? "" : "s");
   memset(tparam, 0, sizeof(threadparam)*TVNC_MAXTHREADS);
 
   for (i = 0; i < nt; i++) {
