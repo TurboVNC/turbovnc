@@ -520,7 +520,10 @@ void rfbAuthInit();
 void rfbAuthProcessResponse(rfbClientPtr cl);
 extern char* rfbAuthConfigFile;
 
-extern Bool  rfbAuthOTP;
+extern Bool  rfbOptOtpauth;
+extern Bool  rfbOptPamauth;
+extern Bool  rfbOptRfbauth;
+
 extern char* rfbAuthOTPValue;
 extern int   rfbAuthOTPValueLen;
 extern Bool  rfbAuthDisableRevCon;

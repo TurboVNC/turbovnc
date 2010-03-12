@@ -258,17 +258,8 @@ ddxProcessArgument (argc, argv, i)
 
     if (strcmp(argv[i], "-rfbauth") == 0) {	/* -rfbauth passwd-file */
 	if (i + 1 >= argc) UseMsg();
-	if (rfbAuthOTP) {
-	    rfbLog("Cannot specify both -otp and -rfbauth\n");
-	    exit(1);
-	}
+	rfbOptRfbauth = TRUE;
 	rfbAuthPasswdFile = argv[i+1];
-	return 2;
-    }
-
-    if (strcmp(argv[i], "-authcfg") == 0) {	/* -authcfg config-file */
-	if (i + 1 >= argc) UseMsg();
-	rfbAuthConfigFile = argv[i+1];
 	return 2;
     }
 
@@ -277,13 +268,13 @@ ddxProcessArgument (argc, argv, i)
 	return 1;
     }
 
-    if (strcmp(argv[i], "-otp") == 0) {
-	if (!rfbAuthOTP && (rfbAuthPasswdFile != NULL)) {
-	    rfbLog("Cannot specify both -otp and -rfbauth\n");
-	    exit(1);
-	}
+    if (strcmp(argv[i], "-otpauth") == 0) {
+	rfbOptOtpauth = TRUE;
+	return 1;
+    }
 
-	rfbAuthOTP = TRUE;
+    if (strcmp(argv[i], "-pamauth") == 0) {
+	rfbOptPamauth = TRUE;
 	return 1;
     }
 
@@ -448,8 +439,8 @@ InitOutput(screenInfo, argc, argv)
 				  strlen("VNC_LAST_CLIENT_ID"), TRUE);
     VNC_CONNECT = MakeAtom("VNC_CONNECT", strlen("VNC_CONNECT"), TRUE);
 
-    if (rfbAuthOTP)
-	VNC_OTP = MakeAtom("VNC_OTP", strlen("VNC_OTP"), TRUE);
+    if (rfbOptOtpauth)
+	    VNC_OTP = MakeAtom("VNC_OTP", strlen("VNC_OTP"), TRUE);
 
 #ifdef XVNC_AuthPAM
     VNC_ACL = MakeAtom("VNC_ACL", strlen("VNC_ACL"), TRUE);
@@ -842,7 +833,7 @@ rfbRootPropertyChange(PropertyPtr pProp)
     }
 
     if (
-	rfbAuthOTP &&
+	rfbOptOtpauth &&
 	(pProp->propertyName == VNC_OTP) && (pProp->type == XA_STRING) &&
 	(pProp->format == 8)
     ) {
@@ -1002,7 +993,9 @@ ddxUseMsg()
     ErrorF("-rfbport port          TCP port for RFB protocol\n");
     ErrorF("-rfbwait time          max time in ms to wait for RFB client\n");
     ErrorF("-nocursor              don't put up a cursor\n");
-    ErrorF("-rfbauth passwd-file   use authentication on RFB protocol\n");
+    ErrorF("-otpauth               enable one-time password authentication\n");
+    ErrorF("-pamauth               enable PAM-based user/password authentication\n");
+    ErrorF("-rfbauth passwd-file   enable VNC password authentication\n");
     ErrorF("-httpd dir             serve files via HTTP from here\n");
     ErrorF("-httpport port         port for HTTP\n");
     ErrorF("-deferupdate time      time in ms to defer updates "
@@ -1023,9 +1016,7 @@ ddxUseMsg()
     ErrorF("-compatiblekbd         set META key = ALT key as in the original "
 								"VNC\n");
     ErrorF("-version               report Xvnc version on stderr\n");
-    ErrorF("-authcfg config-file   specify pathname of authentication configuration file\n");
     ErrorF("-noreverse             disable reverse connections\n");
-    ErrorF("-otp                   use one-time password authentication\n");
     exit(1);
 }
 
