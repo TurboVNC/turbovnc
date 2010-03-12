@@ -210,25 +210,22 @@ if ($opt{'-pixelformat'}) {
 if ($opt{'-fp'}) {
     $fontPath = $opt{'-fp'};
 }
-if ($opt{'-otp'}) {
-    $generateOTP = 1;
-}
 if ($opt{'-novncauth'}) {
-    if (! $authTypeVNC eq "") {
+    if (! ($authTypeVNC eq "")) {
         $authTypeVNC = "";
     } else {
         print ("VNC password auth is not permitted on this system.  Ignoring -novncauth.\n");
     }
 }
 if ($opt{'-nootp'}) {
-    if (! $authTypeOTP eq "") {
+    if (! ($authTypeOTP eq "")) {
         $authTypeOTP = "";
     } else {
         print ("One-time password auth is not permitted on this system.  Ignoring -nootp.\n");
     }
 }
 if ($opt{'-nopam'}) {
-    if (! $authTypePAM eq "") {
+    if (! ($authTypePAM eq "")) {
         $authTypePAM = "";
     } else {
         print ("Unix login auth is not permitted on this system.  Ignoring -nopam.\n");
@@ -238,6 +235,13 @@ if ($opt{'-noauth'}) {
     $authType = "";
 } else {
     $authType = $authTypeVNC." ".$authTypeOTP." ".$authTypePAM;
+}
+if ($opt{'-otp'}) {
+    if (! ($authTypeOTP eq "-otpauth")) {
+        print ("One-time password authentication is not enabled.  Ignoring -otp.\n");
+    } else {
+        $generateOTP = 1;
+    }
 }
 
 &CheckGeometryAndDepth();
@@ -358,7 +362,7 @@ unless (kill 0, `cat $pidFile`) {
 
 warn "\nNew '$desktopName' desktop is $host:$displayNumber\n\n";
 
-if ($authTypeOTP eq '-otpauth') {
+if ($generateOTP == 1) {
     warn "One-time password authentication enabled.  Generating initial OTP ...\n";
 
     system($exedir."vncpasswd -o -display $host:$displayNumber");
