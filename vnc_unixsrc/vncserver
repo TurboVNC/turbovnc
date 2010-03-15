@@ -886,6 +886,7 @@ sub ReadAuthConfiguration ($)
   my $enableVNC = 0;
   my $enableOTP = 0;
   my $enablePAM = 0;
+  my $permissionsSet = 0;
 
   return unless (open(ACF, $acf));
 
@@ -893,6 +894,7 @@ sub ReadAuthConfiguration ($)
     $_ =~ s/[\t\ \r\n]//g;
     @tokens = split(/=/, $_);
     if (@tokens[0] eq 'permitted-auth-methods') {
+      $permissionsSet = 1;
       foreach $tok (split/[,=]/, $_) {
         if ($tok eq 'otp') {
           $enableOTP = 1;
@@ -906,6 +908,8 @@ sub ReadAuthConfiguration ($)
       }
     }
   }
+
+  return unless ($permissionsSet == 1);
 
   if ($enableVNC == 0) {
     $authTypeVNC = "";
