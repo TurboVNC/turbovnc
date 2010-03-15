@@ -53,18 +53,18 @@ static void rfbVncAuthSendChallenge(rfbClientPtr cl);
 #define MAX_PWD_LEN  64
 
 char* rfbAuthConfigFile = AUTH_DEFAULT_CONF_FILE;
-Bool  rfbAuthDisableRevCon;
+Bool  rfbAuthDisableRevCon = FALSE;
 
-static int nAuthMethodsEnabled;
+static int nAuthMethodsEnabled = 0;
 static int preferenceLimit = 1;	/* Force once through the loop in rfbSendAuthCaps */
 
-Bool  rfbOptNoauth;     /* Must never be set to TRUE to get the proper defaulting behavior! */
-Bool  rfbOptOtpauth;
-Bool  rfbOptPamauth;
-Bool  rfbOptRfbauth;
+Bool  rfbOptNoauth = FALSE;
+Bool  rfbOptOtpauth = FALSE;
+Bool  rfbOptPamauth = FALSE;
+Bool  rfbOptRfbauth = FALSE;
 
-char* rfbAuthOTPValue;
-int   rfbAuthOTPValueLen;
+char* rfbAuthOTPValue = NULL;
+int   rfbAuthOTPValueLen = 0;
 
 static void
 AuthNoneStartFunc(rfbClientPtr cl)
@@ -93,7 +93,7 @@ typedef struct UserList {
 } UserList;
 
 static UserList* userACL = NULL;
-Bool rfbAuthUserACL;
+Bool rfbAuthUserACL = FALSE;
 
 void
 rfbAuthAddUser(const char* name, Bool viewOnly)
@@ -287,7 +287,7 @@ typedef struct {
 static AuthMethodData authMethods[] = {
     { "none", FALSE, TRUE, -1, &rfbOptNoauth, "", FALSE, &secTypeNone, &authCapNone},
 
-    { "vncauth", FALSE, TRUE, -1, &rfbOptRfbauth, "-rfbauth", TRUE, &secTypeVncauth, &authCapVncauth},
+    { "vnc", FALSE, TRUE, -1, &rfbOptRfbauth, "-rfbauth", TRUE, &secTypeVncauth, &authCapVncauth},
 
     { "otp", FALSE, TRUE, -1, &rfbOptOtpauth, "-otpauth", TRUE, &secTypeVncauth, &authCapVncauth},
 
@@ -436,6 +436,7 @@ rfbAuthInit()
                             a->optionName);
                 }
 
+                *(a->optionSet) = FALSE;
                 continue;
             }
 
@@ -444,10 +445,10 @@ rfbAuthInit()
 
         if (a->enabled) {
             nAuthMethodsEnabled++;
-            rfbLog("rfbAuthInit: enabled method %s\n", a->name);
+            rfbLog("Enabled authentication method '%s'\n", a->name);
             if (!a->secType->advertise) {
                 a->secType->advertise = TRUE;
-                rfbLog("rfbAuthInit: advertise sectype %s\n", a->secType->name);
+                rfbLog("Advertising security type '%s' to viewers\n", a->secType->name);
             }
         }
     }
@@ -460,8 +461,8 @@ rfbAuthInit()
                     nAuthMethodsEnabled++;
                     a->enabled = TRUE;
                     a->secType->advertise = TRUE;
-                    rfbLog("rfbAuthInit: enabled method %s\n", a->name);
-                    rfbLog("rfbAuthInit: advertise sectype %s\n", a->secType->name);
+                    rfbLog("Enabled authentication method '%s'\n", a->name);
+                    rfbLog("Advertising security type '%s' to viewers\n", a->secType->name);
                 }
             } else {
                 a->secType->advertise = FALSE;
@@ -481,6 +482,8 @@ rfbAuthInit()
         }
 
         FatalError("rfbAuthInit: ERROR: no auth methods enabled!\n");
+    } else {
+        secTypeNone.advertise = FALSE;
     }
 
 #ifdef XVNC_AuthPAM
@@ -984,7 +987,7 @@ rfbVncAuthProcessResponse(cl)
     if (rfbOptOtpauth) {
         if (rfbAuthOTPValue == NULL) {
             if (nAuthMethodsEnabled == 1) {
-                rfbClientAuthFailed(cl, "The one time password has not been set on the server");
+                rfbClientAuthFailed(cl, "The one-time password has not been set on the server");
                 return;
             }
 
