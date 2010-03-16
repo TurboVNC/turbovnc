@@ -946,12 +946,12 @@ CheckResponse(rfbClientPtr cl, int numPasswords, char* passwdFullControl,
     memset(passwdViewOnly, 0, MAXPWLEN + 1);
 
     if (memcmp(encryptedChallenge1, response, CHALLENGESIZE) == 0) {
-        rfbLog("Full-control authentication passed by %s\n", cl->host);
+        rfbLog("Full-control authentication enabled for %s\n", cl->host);
         ok = TRUE;
         cl->viewOnly = FALSE;
 
     } else if (memcmp(encryptedChallenge2, response, CHALLENGESIZE) == 0) {
-        rfbLog("View-only authentication passed by %s\n", cl->host);
+        rfbLog("View-only authentication enabled for %s\n", cl->host);
         ok = TRUE;
         cl->viewOnly = TRUE;
     }
