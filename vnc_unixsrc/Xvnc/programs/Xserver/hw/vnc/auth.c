@@ -104,7 +104,7 @@ rfbAuthAddUser(const char* name, Bool viewOnly)
         FatalError("rfbAuthAddUser: out of memory");
     }
 
-    rfbLog("rfbAuthAddUser: '%s'%s\n", name, viewOnly ? " view-only" : "");
+    rfbLog("Adding user '%s' to ACL with %s privileges\n", name, viewOnly ? " view-only" : "full control");
     p->next = userACL;
     p->name = name;
     p->viewOnly = viewOnly;
@@ -117,7 +117,7 @@ rfbAuthRevokeUser(const char* name)
     UserList** prev = &userACL;
     UserList*  p;
 
-    rfbLog("rfbAuthRevokeUser: '%s'\n", name);
+    rfbLog("Removing user '%s' from ACL\n", name);
     while (*prev != NULL) {
         p = *prev;
         if (!strcmp(p->name, name)) {
@@ -197,7 +197,7 @@ AuthPAMUserPwdRspFunc(rfbClientPtr cl)
         UserList* p = userACL;
 
         if (p == NULL)
-            rfbLog("AuthPAMUserPwdRspFunc: WARNING: user ACL empty\n");
+            rfbLog("WARNING: User ACL is empty.  No users will be allowed to log in with Unix Login authentication.\n");
 
         while (p != NULL) {
             if (!strcmp(p->name, userBuf))
@@ -207,7 +207,7 @@ AuthPAMUserPwdRspFunc(rfbClientPtr cl)
         }
 
         if (p == NULL) {
-            rfbLog("AuthPAMUserPwdRspFunc: user '%s' denied access", userBuf);
+            rfbLog("User '%s' is not in the ACL and has been denied access\n", userBuf);
             rfbClientAuthFailed(cl, "User denied access");
             return;
         }
@@ -325,7 +325,7 @@ setMethods(char* buf)
         }
 
         if (a->name == NULL) {
-            FatalError("rfbAuthInit unknown auth method name '%s'\n", p);
+            FatalError("ERROR: Unknown auth method name '%s'\n", p);
         }
 
         a->permitted = TRUE;
@@ -351,18 +351,18 @@ ReadConfigFile()
     }
 
     if ((sb.st_uid != 0) && (sb.st_uid != getuid())) {
-        FatalError("rfbAuthInit: ERROR: %s is not owned either by you or root\n", rfbAuthConfigFile);
+        FatalError("ERROR: %s must be owned by you or by root\n", rfbAuthConfigFile);
     }
 
     if (sb.st_mode & (S_IWGRP | S_IWOTH)) {
-        FatalError("rfbAuthInit: ERROR: %s is insecure\n", rfbAuthConfigFile);
+        FatalError("ERROR: %s cannot have group or global write permissions\n", rfbAuthConfigFile);
     }
 
-    rfbLog("rfbAuthInit: using configuration file %s\n", rfbAuthConfigFile);
+    rfbLog("Using auth configuration file %s\n", rfbAuthConfigFile);
     for (line = 0; fgets(buf, sizeof(buf), fp) != NULL; line++) {
         len = strlen(buf) - 1;
         if (buf[len] != '\n') {
-            FatalError("rfbAuthInit: ERROR: Configuration file %s line %d too long!\n", rfbAuthConfigFile, line);
+            FatalError("ERROR in %s: line %d is too long!\n", rfbAuthConfigFile, line+1);
         }
         
         buf[len] = '\0';
@@ -389,7 +389,7 @@ ReadConfigFile()
         n = 17;
         if (!strncmp(buf2, "pam-service-name=", n)) {
             if (buf2[n] == '\0') {
-                FatalError("rfbAuthInit: ERROR: pam-service-name is empty!");
+                FatalError("ERROR in %s: pam-service-name is empty!", rfbAuthConfigFile);
             }
 
             if ((pamServiceName = strdup(&buf2[n])) == NULL) {
@@ -403,7 +403,7 @@ ReadConfigFile()
         n = 23;
         if (!strncmp(buf2, "permitted-auth-methods=", n)) {
             if (buf2[n] == '\0') {
-                FatalError("rfbAuthInit: ERROR: permitted-auth-methods is empty!");
+                FatalError("ERROR in %s: permitted-auth-methods is empty!", rfbAuthConfigFile);
             }
 
             setMethods(&buf2[n]);
@@ -411,7 +411,7 @@ ReadConfigFile()
         }
 
         if (buf2[0] != '#')
-            rfbLog("rfbAuthInit: WARNING: unrecognized auth config line '%s'\n", buf);
+            rfbLog("WARNING: unrecognized auth config line '%s'\n", buf);
     }
 
     fclose(fp);
@@ -432,7 +432,7 @@ rfbAuthInit()
             nSelected++;
             if (!a->permitted) {
                 if (a->optionName != NULL) {
-                    rfbLog("rfbAuthInit: WARNING: authentication option '%s' is not in the permitted set\n",
+                    rfbLog("WARNING: authentication option '%s' is not permitted\n",
                             a->optionName);
                 }
 
@@ -472,16 +472,16 @@ rfbAuthInit()
 
 #ifndef XVNC_AuthPAM
     if (rfbOptPamauth)
-        rfbLog("rfbAuthInit: WARNING: PAM support is not compiled in.\n");
+        rfbLog("WARNING: PAM support is not compiled in.\n");
 #endif
 
     if (nAuthMethodsEnabled == 0) {
         for (a = authMethods; a->name != NULL; a++) {
             if (a->permitted)
-                rfbLog("rfbAuthInit: NOTICE: %s is a permitted auth method\n", a->name);
+                rfbLog("NOTICE: %s is a permitted auth method\n", a->name);
         }
 
-        FatalError("rfbAuthInit: ERROR: no auth methods enabled!\n");
+        FatalError("ERROR: no authentication methods enabled!\n");
     } else {
         secTypeNone.advertise = FALSE;
     }
