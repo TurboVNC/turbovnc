@@ -1009,12 +1009,16 @@ class RfbProto {
   void writePointerEvent(MouseEvent evt) throws IOException {
     int modifiers = evt.getModifiers();
 
+    int wheelClicks = 0;
+
     int mask2 = 2;
     int mask3 = 4;
     if (viewer.options.reverseMouseButtons2And3) {
       mask2 = 4;
       mask3 = 2;
     }
+    int mask4 = 1<<3;
+    int mask5 = 1<<4;
 
     // Note: For some reason, AWT does not set BUTTON1_MASK on left
     // button presses. Here we think that it was the left button if
@@ -1036,6 +1040,16 @@ class RfbProto {
         modifiers &= ~ALT_MASK;
       } else if ((modifiers & InputEvent.BUTTON3_MASK) != 0) {
         modifiers &= ~META_MASK;
+      }
+    } else if (evt.getID() == MouseEvent.MOUSE_WHEEL) {
+      wheelClicks = ((MouseWheelEvent) evt).getWheelRotation();
+      if (wheelClicks == 0) {
+        return;
+      } else if (wheelClicks < 0) {
+        pointerMask = mask4;
+        wheelClicks = -wheelClicks;
+      } else {
+        pointerMask = mask5;
       }
     }
 
@@ -1063,7 +1077,22 @@ class RfbProto {
       writeModifierKeyEvents(0);
     }
 
-    os.write(eventBuf, 0, eventBufLen);
+    if (wheelClicks == 0) {
+      os.write(eventBuf, 0, eventBufLen);
+    } else {
+
+      //
+      // For wheel events, simulate a button 4/5 click for each unit of rotation.
+      //
+
+      for (int i = 0; i < wheelClicks; i++) {
+        eventBuf[1] = (byte) pointerMask;
+        os.write(eventBuf, 0, eventBufLen);
+        eventBuf[1] = (byte) 0;
+        os.write(eventBuf, 0, eventBufLen);
+      }
+
+    }
   }
 
 

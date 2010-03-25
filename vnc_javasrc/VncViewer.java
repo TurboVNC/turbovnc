@@ -188,6 +188,15 @@ public class VncViewer extends java.applet.Applet
 	gridbag.setConstraints(desktopScrollPane, gbc);
 	desktopScrollPane.add(canvasPanel);
 
+	// Prevent ScrollPane from capturing mouse wheel events.
+	try {
+	  Class[] argClasses = { Boolean.TYPE };
+	  java.lang.reflect.Method method =
+	    desktopScrollPane.getClass().getMethod("setWheelScrollingEnabled", argClasses);
+	  Object[] argObjects = { new Boolean(false) };
+	  method.invoke(desktopScrollPane, argObjects);
+	} catch (Exception e) {}
+
 	// Finally, add our ScrollPane to the Frame window.
 	vncFrame.add(desktopScrollPane);
 	vncFrame.setTitle(rfb.desktopName);

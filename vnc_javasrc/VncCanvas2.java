@@ -18,17 +18,19 @@
 //
 
 import java.awt.*;
+import java.awt.event.*;
 import java.io.*;
 
 //
 // VncCanvas2 is a special version of VncCanvas which may use Java 2 API.
 //
 
-class VncCanvas2 extends VncCanvas {
+class VncCanvas2 extends VncCanvas implements MouseWheelListener {
 
   public VncCanvas2(VncViewer v) throws IOException {
     super(v);
     disableFocusTraversalKeys();
+    enableMouseWheelListener();
   }
 
   public VncCanvas2(VncViewer v, int maxWidth_, int maxHeight_)
@@ -36,6 +38,7 @@ class VncCanvas2 extends VncCanvas {
 
     super(v, maxWidth_, maxHeight_);
     disableFocusTraversalKeys();
+    enableMouseWheelListener();
   }
 
   public void paintScaledFrameBuffer(Graphics g) {
@@ -57,6 +60,24 @@ class VncCanvas2 extends VncCanvas {
       Object[] argObjects = { new Boolean(false) };
       method.invoke(this, argObjects);
     } catch (Exception e) {}
+  }
+
+  //
+  // Try to enable the mouse wheel listener (JVMs 1.4 and higher).
+  //
+
+  public synchronized void enableMouseWheelListener() {
+    try {
+      Class[] argClasses = { Class.forName("java.awt.event.MouseWheelListener") };
+      java.lang.reflect.Method method =
+        getClass().getMethod("addMouseWheelListener", argClasses);
+      Object[] argObjects = { this };
+      method.invoke(this, argObjects);
+    } catch (Exception e) {}
+  }
+
+  public void mouseWheelMoved(MouseWheelEvent evt) {
+    processLocalMouseEvent(evt, false);
   }
 
 }
