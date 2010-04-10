@@ -1091,6 +1091,7 @@ class RfbProto {
         eventBuf[1] = (byte) 0;
         os.write(eventBuf, 0, eventBufLen);
       }
+      pointerMask = 0;
 
     }
   }
