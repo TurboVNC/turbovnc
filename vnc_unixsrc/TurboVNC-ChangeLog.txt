@@ -10,6 +10,9 @@ further details.
 Added authentication extensions contributed by UCAR.  See documentation for
 details
 -------------------------------------------------------------------------------
+[3]
+Added scroll wheel support to the Java VNC viewer (requires JRE 1.4 or later.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
