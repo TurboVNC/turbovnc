@@ -37,10 +37,7 @@ mkdir -p $pkgtmpdir/pkg/Resources || doexit -1
 (cat Description.plist.tmpl | sed s/{__VERSION}/$_VERSION/g > $pkgtmpdir/pkg/Description.plist) || doexit -1
 (cat Info.plist.tmpl | sed s/{__VERSION}/$_VERSION/g  | sed s/{__BUILD}/$_BUILD/g > $pkgtmpdir/pkg/Info.plist) || doexit -1
 install -m 755 vncviewer/vncviewer $pkgtmpdir/pkg/Package_Root/opt/$pkgname/bin || doexit -1
-install -m 755 /usr/lib/libturbojpeg-ipp.dylib $pkgtmpdir/pkg/Package_Root/opt/$pkgname/lib/libturbojpeg.dylib || doexit -1
-install -m 755 /usr/lib/libturbojpeg-ipp.dylib $pkgtmpdir/pkg/Package_Root/opt/$pkgname/lib || doexit -1
-install -m 755 /usr/lib/libturbojpeg-libjpeg.dylib $pkgtmpdir/pkg/Package_Root/opt/$pkgname/lib || doexit -1
-install -m 755 /usr/bin/switchtjpeg $pkgtmpdir/pkg/Package_Root/opt/$pkgname/bin || doexit -1
+install -m 755 /usr/lib/libturbojpeg.dylib $pkgtmpdir/pkg/Package_Root/opt/$pkgname/lib/libturbojpeg.dylib || doexit -1
 install -m 755 uninstall.sh $pkgtmpdir/pkg/Package_Root/opt/$pkgname/bin/uninstall || doexit -1
 install_name_tool -change libturbojpeg.dylib /opt/$pkgname/lib/libturbojpeg.dylib $pkgtmpdir/pkg/Package_Root/opt/$pkgname/bin/vncviewer || doexit -1
 install -m 755 vncviewer/vncviewer.man $pkgtmpdir/pkg/Package_Root/opt/$pkgname/man/man1 || doexit -1
