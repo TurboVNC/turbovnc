@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2009-10-19T10:05:54">
+<meta name="date" content="2010-04-14T02:08:09">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 0.6</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -188,7 +188,7 @@ to compress each frame, and it produces generally better compression
 ratios.  As with TightVNC, TurboVNC uses JPEG compression for image 
 tiles with a high number of unique colors and paletted encoding for 
 image tiles with a low number of unique colors.  Part of 
-TurboVNC&rsquo;s speedup comes from the use of TurboJPEG, the same 
+TurboVNC&rsquo;s speedup comes from the use of libjpeg-turbo, the same 
 high-speed vector-optimized JPEG codec used by VirtualGL.  However, 
 TurboVNC also bypasses the CPU-hungry smoothness detection routines that 
 TightVNC uses to determine whether a tile is a good candidate for JPEG 
@@ -197,8 +197,7 @@ maximizes network efficiency by using the largest tile sizes supported
 by the TightVNC protocol, and it never uses a Zlib compression level 
 higher than 1.  In the aggregate, TurboVNC compresses 2D application 
 workloads less efficiently than TightVNC, but it generally does a better 
-job than TightVNC of compressing 3D application workloads.  Also, 
-TurboVNC is much faster across the board than TightVNC 1.3.x.</p>
+job than TightVNC of compressing 3D application workloads.</p>
 
 <p>TurboVNC is the product of extensive research, in which the TightVNC 
 encoder was benchmarked under a variety of different real-world 
@@ -224,10 +223,15 @@ TightVNC, and these were removed or accelerated to form TurboVNC.</p>
         connections.
     </li>
     <li class="Itemize-1 Itemize asterisk">
+        TurboVNC supports authentication with one-time passwords or Unix login 
+        credentials.
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
         A &ldquo;lossless refresh&rdquo; feature, which sends a Zlib-encoded RGB 
         copy of the current screen image when a certain hotkey is pressed.  This 
-        is useful in situations where image quality is critical but the network 
-        is too slow to support sending a high-quality image for every frame.
+        is useful in situations in which image quality is critical but the 
+        network is too slow to support sending a high-quality image for every 
+        frame.
     </li>
     <li class="Itemize-1 Itemize asterisk">
         TurboVNC builds and runs on Solaris platforms (client and server) and on 
@@ -280,11 +284,6 @@ distributions without interference.</p>
     Dual processors or dual cores recommended
 </li></ul></td>
     <td class="standard">Pentium 4/Xeon with EM64T, or&hellip;<br /> AMD Opteron or Athlon64, 1.8 GHz or faster <ul class="Itemize"><li class="Itemize-0">
-    For optimal performance with 64-bit TurboVNC, the processor should 
-    support SSE3 extensions.  AMD 64-bit processors manufactured prior to 
-    2005 do not support SSE3.
-</li>
-<li class="Itemize-0">
     Dual processors or dual cores recommended
 </li></ul></td>
     <td class="standard">Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent)</td>
@@ -348,25 +347,12 @@ distributions without interference.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Other Software</td>
-    <td class="standard"><ul class="Itemize"><li class="Itemize-0">
-    <span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun 
-    mediaLib</a></span><a name="idx0012"></a> (v2.5 or higher recommended *)
-</li></ul></td>
-    <td class="standard"><ul class="Itemize"><li class="Itemize-0">
-    <span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun 
-    mediaLib</a></span><a name="idx0013"></a> (v2.5 or higher recommended *)
-</li>
-<li class="Itemize-0">
-    X server configured to export True Color (24-bit or 32-bit) visuals
-</li></ul></td>
+    <td class="standard"></td>
+    <td class="standard">X server configured to export True Color (24-bit or 32-bit) visuals</td>
   </tr>
 </table>
 </div>
 
-
-<div class="important"><p class="important">
-* mediaLib 2.5 is included in Solaris 10 update 4 and newer.  If you are running an older version of Solaris, it is recommended that you download and install the mediaLib 2.5 upgrade from the link above.  mediaLib 2.5 improves the performance of TurboVNC significantly on Solaris/x86 systems, when compared to mediaLib 2.4.
-</p></div>
 
 
 
@@ -399,17 +385,17 @@ distributions without interference.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Other Software</td>
-    <td class="standard"><span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun mediaLib</a></span><a name="idx0014"></a> (pre-installed on Solaris 10 and higher)</td>
+    <td class="standard"><span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun mediaLib</a></span><a name="idx0012"></a> (pre-installed on Solaris 10 and higher)</td>
     <td class="standard"><ul class="Itemize"><li class="Itemize-0">
     <span class="remote"><a href="http://www.sun.com/processors/vis/mlib.html" class="remote">Sun 
-    mediaLib</a></span><a name="idx0015"></a> (pre-installed on Solaris 10 
+    mediaLib</a></span><a name="idx0013"></a> (pre-installed on Solaris 10 
     and higher)
 </li>
 <li class="Itemize-0">
     If your system does not ship with SSh pre-installed (older Solaris 8 and 
     9 systems don&rsquo;t), then download and install an OpenSSH package 
     from 
-    <span class="remote"><a href="http://www.blastwave.org/" class="remote">Blastwave</a></span><a name="idx0016"></a> 
+    <span class="remote"><a href="http://www.blastwave.org/" class="remote">Blastwave</a></span><a name="idx0014"></a> 
     or 
     <span class="remote"><a href="http://www.sunfreeware.com/." class="remote">http://www.sunfreeware.com/.</a></span>
 </li>
@@ -504,54 +490,16 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
 
 
 
-<h3 id="hd004001002">Installing TurboJPEG</h3>
-
-<ol class="Ordered numeric">
-    <li class="Ordered-1 Ordered" value="1">
-        Download the appropriate TurboJPEG binary package (v1.11 or later) for 
-        your system from the 
-        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboJPEG/" class="remote">Files 
-        area</a></span><a name="idx0017"></a> of the 
-        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0018"></a>. <br />
-        <div class="important"><p class="important">
-        The &ldquo;i386&rdquo; RPM and DEB packages are for 32-bit-only systems.  The &ldquo;x86_64&rdquo; RPM and &ldquo;amd64&rdquo; DEB packages are for 64-bit systems.  The 64-bit packages contain both 32-bit and 64-bit libraries.
-        </p></div>
-    </li>
-    <li class="Ordered-1 Ordered" value="2">
-        Log in as root, cd to the directory where you downloaded the binary 
-        package, and issue one of the following commands:
-        <dl class="Description">
-            <dt class="Description-3 Description">RPM-based systems</dt>
-            <dd class="Description-3 Description">
-<pre class="verbatim">
-rpm&nbsp;-U&nbsp;turbojpeg*.rpm
-</pre>
-
-            </dd>
-            <dt class="Description-3 Description">Debian-based systems</dt>
-            <dd class="Description-3 Description">
-<pre class="verbatim">
-dpkg&nbsp;-i&nbsp;turbojpeg*.deb
-</pre>
-
-            </dd>
-        </dl>
-    </li>
-</ol>
-
-
-
-<h3 id="hd004001003">Installing TurboVNC</h3>
+<h3 id="hd004001002">Installing TurboVNC</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered" value="1">
         Download the appropriate TurboVNC binary package for your system from 
         the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-        area</a></span><a name="idx0019"></a> of the 
+        area</a></span><a name="idx0015"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0020"></a>. <br />
+        SourceForge web-site</a></span><a name="idx0016"></a>. <br />
     </li>
     <li class="Ordered-1 Ordered" value="2">
         Log in as root, cd to the directory where you downloaded the binary 
@@ -587,9 +535,9 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
         <code>SUNWtvnc-</code><em><code>{version}</code></em><code>-x86.pkg.bz2</code> 
         for x86) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-        area</a></span><a name="idx0021"></a> of the 
+        area</a></span><a name="idx0017"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0022"></a>. <br />
+        SourceForge web-site</a></span><a name="idx0018"></a>. <br />
     </li>
     <li class="Ordered-1 Ordered" value="2">
         Log in as root, cd to the directory where you downloaded the package, 
@@ -622,9 +570,9 @@ TurboVNC for Solaris installs into <code>/opt/SUNWtvnc</code>.
         (<code>TurboVNC-</code><em><code>{version}</code></em><code>.dmg</code>) 
         from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-        area</a></span><a name="idx0023"></a> of the 
+        area</a></span><a name="idx0019"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0024"></a>.
+        SourceForge web-site</a></span><a name="idx0020"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Open the disk image, then open 
@@ -645,9 +593,9 @@ TurboVNC for Solaris installs into <code>/opt/SUNWtvnc</code>.
         (<code>TurboVNC-</code><em><code>{version}</code></em><code>.exe</code>) 
         from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-        area</a></span><a name="idx0025"></a> of the 
+        area</a></span><a name="idx0021"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0026"></a>.
+        SourceForge web-site</a></span><a name="idx0022"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Run the TurboVNC installer.  The installation of TurboVNC should be 
@@ -666,9 +614,9 @@ TurboVNC source tarball
 (<code>turbovnc-</code><em><code>{version}</code></em><code>.tar.gz</code>) 
 from the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-area</a></span><a name="idx0027"></a> of the 
+area</a></span><a name="idx0023"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-SourceForge web-site</a></span><a name="idx0028"></a>, uncompress it, 
+SourceForge web-site</a></span><a name="idx0024"></a>, uncompress it, 
 <code>cd&nbsp;vnc/vnc_unixsrc</code>, and read the <code>README</code> 
 file for further instructions on how to build TurboVNC from source.</p>
 
@@ -1394,7 +1342,7 @@ TurboVNC server for this procedure to perform well.</p>
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully backward compatible with TightVNC, RealVNC, 
 and other VNC flavors, as well as fully forward compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0029"></a>. 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0025"></a>. 
 You can use the TurboVNC viewer to connect to a non-TurboVNC server (or 
 vice versa), although this will result in some decrease in performance.</p>
 

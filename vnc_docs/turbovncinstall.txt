@@ -16,31 +16,6 @@ following error:
 	could not open default font 'fixed'
 	---
 
-*** Installing TurboJPEG
-#OPT: noList! plain!
-
-	1. Download the appropriate TurboJPEG binary package (v1.11 or later) for
-		your system from the
-		[[http://sourceforge.net/projects/virtualgl/files/TurboJPEG/][Files area]]
-		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
-		{nl}
-		!!! The "i386" RPM and DEB packages are for 32-bit-only systems.  The
-		"x86_64" RPM and "amd64" DEB packages are for 64-bit systems.  The 64-bit
-		packages contain both 32-bit and 64-bit libraries.
-
-	2. Log in as root, cd to the directory where you downloaded the binary
-		package, and issue one of the following commands:
-
-		RPM-based systems :: {:}
-		#Verb <<---
-		rpm -U turbojpeg*.rpm
-		---
-
-		Debian-based systems :: {:}
-		#Verb <<---
-		dpkg -i turbojpeg*.deb
-		---
-
 *** Installing TurboVNC
 #OPT: noList! plain!
 
