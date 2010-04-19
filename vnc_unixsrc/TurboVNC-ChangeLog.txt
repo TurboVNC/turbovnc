@@ -1,5 +1,5 @@
 ===============================================================================
-Significant changes between 0.6 and 0.7
+Significant changes since 0.6
 ===============================================================================
 [1]
 Multi-threaded the Tight encoder and decoder on Unix and the Tight decoder on
@@ -8,10 +8,13 @@ further details.
 -------------------------------------------------------------------------------
 [2]
 Added authentication extensions contributed by UCAR.  See documentation for
-details
+details.
 -------------------------------------------------------------------------------
 [3]
 Added scroll wheel support to the Java VNC viewer (requires JRE 1.4 or later.)
+-------------------------------------------------------------------------------
+[4]
+Added automatic lossless refresh feature.  See documentation for details.
 -------------------------------------------------------------------------------
 
 
