@@ -1822,7 +1822,9 @@ rfbDeferredUpdateCallback(OsTimerPtr timer, CARD32 now, pointer arg)
 {
   rfbClientPtr cl = (rfbClientPtr)arg;
 
+  if(rfbAutoLosslessRefresh > 0.0) pthread_mutex_lock(&cl->sendMutex);
   rfbSendFramebufferUpdate(cl);
+  if(rfbAutoLosslessRefresh > 0.0) pthread_mutex_unlock(&cl->sendMutex);
 
   cl->deferredUpdateScheduled = FALSE;
   return 0;
@@ -1843,7 +1845,9 @@ rfbScheduleDeferredUpdate(rfbClientPtr cl)
 					   rfbDeferredUpdateCallback, cl);
 	cl->deferredUpdateScheduled = TRUE;
     } else {
+	if(rfbAutoLosslessRefresh > 0.0) pthread_mutex_lock(&cl->sendMutex);
 	rfbSendFramebufferUpdate(cl);
+	if(rfbAutoLosslessRefresh > 0.0) pthread_mutex_unlock(&cl->sendMutex);
     }
 }
 

@@ -58,6 +58,7 @@ Bool rfbAlwaysShared = FALSE;
 Bool rfbNeverShared = FALSE;
 Bool rfbDontDisconnect = FALSE;
 Bool rfbViewOnly = FALSE; /* run server in view only mode - Ehud Karni SW */
+double rfbAutoLosslessRefresh = 0.0;
 
 extern void ShutdownTightThreads(void);
 
@@ -83,6 +84,50 @@ static double gettime(void)
     struct timeval __tv;
     gettimeofday(&__tv, (struct timezone *)NULL);
     return((double)__tv.tv_sec + (double)__tv.tv_usec * 0.000001);
+}
+
+
+/*
+ * Auto Lossless Refresh
+ */
+
+static void *
+ALRThreadFunc(param)
+    void *param;
+{
+    rfbClientPtr cl=(rfbClientPtr)param;
+    while (!cl->deadyet) {
+        if(rfbAutoLosslessRefresh > 0.0
+            && gettime()-cl->lastFramebufferUpdate > rfbAutoLosslessRefresh
+            && cl->firstUpdate && cl->dirty) {
+            rfbClientRec mycl;
+            BoxRec box;
+
+            pthread_mutex_lock(&cl->sendMutex);
+            if (cl->deadyet) break;
+
+            memcpy(&mycl, cl, sizeof(rfbClientRec));
+            mycl.tightCompressLevel = 1;
+            mycl.tightQualityLevel = -1;
+            mycl.copyDX = cl->copyDY = 0;
+            REGION_INIT(pScreen, &mycl.copyRegion, NullBox, 0);
+            box.x1 = mycl.modifiedRegionSave.extents.x1;
+            box.x2 = mycl.modifiedRegionSave.extents.x2;
+            box.y1 = mycl.modifiedRegionSave.extents.y1;
+            box.y2 = mycl.modifiedRegionSave.extents.y2;
+            REGION_INIT(pScreen, &mycl.modifiedRegion, &box, 0);
+            REGION_INIT(pScreen, &mycl.requestedRegion, &box, 0);
+
+            rfbSendUpdateBuf(cl);
+            rfbSendFramebufferUpdate(&mycl);
+            cl->lastFramebufferUpdate = mycl.lastFramebufferUpdate;
+            cl->dirty = FALSE;
+
+            pthread_mutex_unlock(&cl->sendMutex);
+        }
+        usleep(100000);
+    }
+    return NULL;
 }
 
 
@@ -165,7 +210,7 @@ rfbNewClient(sock)
     BoxRec box;
     struct sockaddr_in addr;
     int addrlen = sizeof(struct sockaddr_in);
-    int i;
+    int i, err;
     char *env = NULL;
 
     if (rfbClientHead == NULL) {
@@ -255,6 +300,16 @@ rfbNewClient(sock)
     if((env = getenv("TVNC_PROFILE"))!=NULL && !strcmp(env, "1"))
         rfbProfile = TRUE;
 
+    if(rfbAutoLosslessRefresh > 0.0) {
+        pthread_mutex_init(&cl->sendMutex, NULL);
+        cl->deadyet = cl->firstUpdate = cl->dirty = FALSE;
+        if ((err = pthread_create(&cl->threadHandle, NULL, ALRThreadFunc, cl))
+            != 0) {
+            rfbLogPerror ("Could not start Auto Lossless Refresh thread");
+            return;
+        }
+    }
+
     return cl;
 }
 
@@ -319,6 +374,12 @@ rfbClientConnectionGone(sock)
 
     if (cl->translateLookupTable) free(cl->translateLookupTable);
 
+    if(rfbAutoLosslessRefresh > 0.0) {
+        cl->deadyet = TRUE;
+        pthread_mutex_unlock(&cl->sendMutex);
+        pthread_join(cl->threadHandle, NULL);
+    }
+
     xfree(cl);
 
     ShutdownTightThreads();
@@ -354,6 +415,7 @@ rfbProcessClientMessage(sock)
     }
 #endif
 
+    if(rfbAutoLosslessRefresh > 0.0) pthread_mutex_lock(&cl->sendMutex);
     switch (cl->state) {
     case RFB_PROTOCOL_VERSION:
 	rfbProcessClientProtocolVersion(cl);
@@ -376,6 +438,7 @@ rfbProcessClientMessage(sock)
     default:
 	rfbProcessClientNormalMessage(cl);
     }
+    if(rfbAutoLosslessRefresh > 0.0) pthread_mutex_unlock(&cl->sendMutex);
 }
 
 
@@ -1016,6 +1079,10 @@ rfbSendFramebufferUpdate(cl)
     Bool sendCursorPos = FALSE;
     double tUpdateStart;
 
+    cl->firstUpdate = TRUE;
+    memcpy(&cl->modifiedRegionSave, &cl->modifiedRegion,
+        sizeof(RegionRec));
+
     if (rfbProfile) {
 	tUpdateStart = gettime();
 	if (tStart < 0.) tStart = tUpdateStart;
@@ -1265,6 +1332,8 @@ rfbSendFramebufferUpdate(cl)
 	    tStart=gettime();
 	}
     }
+
+    cl->lastFramebufferUpdate = gettime();
 
     return TRUE;
 }

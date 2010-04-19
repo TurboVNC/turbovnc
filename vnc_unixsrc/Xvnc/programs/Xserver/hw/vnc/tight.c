@@ -1731,5 +1731,7 @@ SendJpegRect(t, x, y, w, h, quality)
     t->updateBuf[(*t->ublen)++] = (char)(rfbTightJpeg << 4);
     t->bytessent++;
 
+    cl->dirty = TRUE;
+
     return SendCompressedData(t, t->tightAfterBuf, jpegDstDataLen);
 }

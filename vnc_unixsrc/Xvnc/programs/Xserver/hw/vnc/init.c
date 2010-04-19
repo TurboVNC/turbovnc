@@ -278,6 +278,13 @@ ddxProcessArgument (argc, argv, i)
 	return 1;
     }
 
+    if (strcmp(argv[i], "-alr") == 0) {
+	if (i + 1 >= argc) UseMsg();
+	rfbAutoLosslessRefresh = atof(argv[i+1]);
+	if (rfbAutoLosslessRefresh <= 0.0) UseMsg();
+	return 2;
+    }
+
     if (strcmp(argv[i], "-httpd") == 0) {
 	if (i + 1 >= argc) UseMsg();
 	httpDir = argv[i+1];
@@ -1017,6 +1024,8 @@ ddxUseMsg()
 								"VNC\n");
     ErrorF("-version               report Xvnc version on stderr\n");
     ErrorF("-noreverse             disable reverse connections\n");
+    ErrorF("-alr S                 enable automatic lossless refresh and set timer to S\n");
+    ErrorF("                       seconds (S is floating point)\n");
     exit(1);
 }
 

@@ -33,6 +33,7 @@
 #include <vncauth.h>
 #include <zlib.h>
 #include <stdarg.h>
+#include <pthread.h>
 
 /* It's a good idea to keep these values a bit greater than required. */
 #define MAX_ENCODINGS 10
@@ -279,6 +280,12 @@ typedef struct rfbClientRec {
 
     int cursorX, cursorY;          /* client's cursor position */
 
+    pthread_mutex_t sendMutex;
+    pthread_t threadHandle;
+    Bool deadyet, firstUpdate, dirty;
+    double lastFramebufferUpdate;
+    RegionRec modifiedRegionSave;
+
     struct rfbClientRec *next;
 
 } rfbClientRec, *rfbClientPtr;
@@ -472,6 +479,7 @@ extern Bool rfbAlwaysShared;
 extern Bool rfbNeverShared;
 extern Bool rfbDontDisconnect;
 extern Bool rfbViewOnly; /* run server in view-only mode - Ehud Karni SW */
+extern double rfbAutoLosslessRefresh;
 
 extern void rfbNewClientConnection(int sock);
 extern rfbClientPtr rfbReverseConnection(char *host, int port);
