@@ -14,7 +14,7 @@ VNCSYSLIBS = /usr/local/lib/libjpeg.a /usr/local/lib/libz.a -lcrypt -lpthread
 #ifdef SunArchitecture
 VNCSYSLIBS = -L/usr/local/lib -R/opt/SUNWtvnc/lib -L$(TOP)/../turbojpeg -lturbojpeg -lz -lcrypt -lpthread
 #else
-VNCSYSLIBS = -L/usr/local/lib -lturbojpeg -lz -lcrypt -lpthread
+VNCSYSLIBS = -L/usr/local/lib -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic -lz -lcrypt -lpthread
 #endif
 #endif
 
