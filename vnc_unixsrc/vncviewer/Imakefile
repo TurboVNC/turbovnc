@@ -22,7 +22,11 @@ JPEG_LIB = /usr/local/lib/libjpeg.a
 #ifdef SunArchitecture
 JPEG_LIB = -L/usr/local/lib -R/opt/SUNWtvnc/lib -L../turbojpeg -lturbojpeg
 #else
+#ifdef DarwinArchitecture
+JPEG_LIB = -L/usr/local/lib /usr/lib/libturbojpeg.a
+#else
 JPEG_LIB = -L/usr/local/lib -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic
+#endif
 #endif
 #endif
 
