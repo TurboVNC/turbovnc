@@ -361,7 +361,7 @@ ReadConfigFile()
     rfbLog("Using auth configuration file %s\n", rfbAuthConfigFile);
     for (line = 0; fgets(buf, sizeof(buf), fp) != NULL; line++) {
         len = strlen(buf) - 1;
-        if (buf[len] != '\n') {
+        if (buf[len] != '\n' && strlen(buf) == 256) {
             FatalError("ERROR in %s: line %d is too long!\n", rfbAuthConfigFile, line+1);
         }
         
