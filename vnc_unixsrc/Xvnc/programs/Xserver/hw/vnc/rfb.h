@@ -282,9 +282,9 @@ typedef struct rfbClientRec {
 
     pthread_mutex_t sendMutex;
     pthread_t threadHandle;
-    Bool deadyet, firstUpdate, dirty;
+    Bool deadyet, firstUpdate;
     double lastFramebufferUpdate;
-    RegionRec modifiedRegionSave;
+    RegionRec lossyRegion;
 
     struct rfbClientRec *next;
 

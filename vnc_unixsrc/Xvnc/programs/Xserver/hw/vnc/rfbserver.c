@@ -97,9 +97,9 @@ ALRThreadFunc(param)
 {
     rfbClientPtr cl=(rfbClientPtr)param;
     while (!cl->deadyet) {
-        if(rfbAutoLosslessRefresh > 0.0
+        if(rfbAutoLosslessRefresh > 0.0 && cl->firstUpdate
             && gettime()-cl->lastFramebufferUpdate > rfbAutoLosslessRefresh
-            && cl->firstUpdate && cl->dirty) {
+            && REGION_NOTEMPTY(pScreen, &cl->lossyRegion)) {
             rfbClientRec mycl;
             BoxRec box;
 
@@ -111,17 +111,17 @@ ALRThreadFunc(param)
             mycl.tightQualityLevel = -1;
             mycl.copyDX = cl->copyDY = 0;
             REGION_INIT(pScreen, &mycl.copyRegion, NullBox, 0);
-            box.x1 = mycl.modifiedRegionSave.extents.x1;
-            box.x2 = mycl.modifiedRegionSave.extents.x2;
-            box.y1 = mycl.modifiedRegionSave.extents.y1;
-            box.y2 = mycl.modifiedRegionSave.extents.y2;
+            box.x1 = mycl.lossyRegion.extents.x1;
+            box.x2 = mycl.lossyRegion.extents.x2;
+            box.y1 = mycl.lossyRegion.extents.y1;
+            box.y2 = mycl.lossyRegion.extents.y2;
             REGION_INIT(pScreen, &mycl.modifiedRegion, &box, 0);
             REGION_INIT(pScreen, &mycl.requestedRegion, &box, 0);
 
             rfbSendUpdateBuf(cl);
             rfbSendFramebufferUpdate(&mycl);
             cl->lastFramebufferUpdate = mycl.lastFramebufferUpdate;
-            cl->dirty = FALSE;
+            REGION_INIT(pScreen, &cl->lossyRegion, NullBox, 0);
 
             pthread_mutex_unlock(&cl->sendMutex);
         }
@@ -301,8 +301,9 @@ rfbNewClient(sock)
         rfbProfile = TRUE;
 
     if(rfbAutoLosslessRefresh > 0.0) {
+        REGION_INIT(pScreen, &cl->lossyRegion, NullBox, 0);
         pthread_mutex_init(&cl->sendMutex, NULL);
-        cl->deadyet = cl->firstUpdate = cl->dirty = FALSE;
+        cl->deadyet = cl->firstUpdate = FALSE;
         if ((err = pthread_create(&cl->threadHandle, NULL, ALRThreadFunc, cl))
             != 0) {
             rfbLogPerror ("Could not start Auto Lossless Refresh thread");
@@ -1080,8 +1081,6 @@ rfbSendFramebufferUpdate(cl)
     double tUpdateStart;
 
     cl->firstUpdate = TRUE;
-    memcpy(&cl->modifiedRegionSave, &cl->modifiedRegion,
-        sizeof(RegionRec));
 
     if (rfbProfile) {
 	tUpdateStart = gettime();
