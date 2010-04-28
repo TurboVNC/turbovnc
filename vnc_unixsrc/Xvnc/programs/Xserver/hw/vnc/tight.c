@@ -1732,10 +1732,12 @@ SendJpegRect(t, x, y, w, h, quality)
     t->updateBuf[(*t->ublen)++] = (char)(rfbTightJpeg << 4);
     t->bytessent++;
 
-    box.x1 = x;  box.y1 = y;
-    box.x2 = x + w;  box.y2 = y + h;
-    REGION_INIT(pScreen, &tmpRegion, &box, 0);
-    REGION_UNION(pScreen, &cl->lossyRegion, &cl->lossyRegion, &tmpRegion);
+    if (rfbAutoLosslessRefresh > 0.0) {
+        box.x1 = x;  box.y1 = y;
+        box.x2 = x + w;  box.y2 = y + h;
+        REGION_INIT(pScreen, &tmpRegion, &box, 0);
+        REGION_UNION(pScreen, &cl->lossyRegion, &cl->lossyRegion, &tmpRegion);
+    }
 
     return SendCompressedData(t, t->tightAfterBuf, jpegDstDataLen);
 }
