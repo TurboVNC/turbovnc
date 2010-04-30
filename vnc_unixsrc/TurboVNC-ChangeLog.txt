@@ -19,7 +19,7 @@ Added automatic lossless refresh feature.  See documentation for details.
 [5]
 For Linux, Mac/Intel, Solaris/x86, and Windows systems, the default build of
 TurboVNC no longer uses TurboJPEG/IPP (which was based on the proprietary
-Intel Performance Primitives) or Sun mediaLib.  Instead, VGL v2.2 uses
+Intel Performance Primitives) or Sun mediaLib.  Instead, TurboVNC now uses
 libjpeg-turbo, a fully open source vector-accelerated JPEG codec developed in
 conjunction with the TigerVNC Project (and based on libjpeg/SIMD.)
 -------------------------------------------------------------------------------
