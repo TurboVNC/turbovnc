@@ -1,4 +1,5 @@
 # Copyright (C)2009 Sun Microsystems, Inc.
+# Copyright (C)2010 D. R. Commander
 #
 # This library is free software and may be redistributed and/or modified under
 # the terms of the wxWindows Library License, Version 3.1 or (at your option)
@@ -22,17 +23,23 @@ if [ ! "`id -u`" = "0" ]; then
 	error "This command must be run as root"
 fi
 
+MACPKGNAME=com.virtualgl.turbovnc
 RCPT=/Library/Receipts/TurboVNC.pkg
 
-if [ ! -d $RCPT ]; then error "Could not find package receipt"; fi
+LSBOM=
+if [ -d $RCPT ]; then
+	LSBOM='lsbom -s -f -l '$RCPT'/Contents/Archive.bom'
+else
+	LSBOM='pkgutil --files '$MACPKGNAME
+fi
 
 echo Removing files ...
-lsbom -s -f -l $RCPT/Contents/Archive.bom >/dev/null || error "Could not list package contents"
+$LSBOM >/dev/null || error "Could not list package contents"
 RETCODE=0
 PWD=`pwd`
 cd /
-lsbom -s -f -l $RCPT/Contents/Archive.bom | while read line; do
-	rm "$line" 2>&1 || RETCODE=-1
+$LSBOM | while read line; do
+	if [ ! -d "$line" ]; then rm "$line" 2>&1 || RETCODE=-1; fi
 done
 cd $PWD
 
@@ -45,8 +52,13 @@ rmdir /opt/TurboVNC 2>&1 || RETCODE=-1
 rmdir /Library/Documentation/TurboVNC 2>&1 || RETCODE=-1
 rmdir /Applications/TurboVNC 2>&1 || RETCODE=-1
 
-echo Removing package receipt $RCPT ...
-rm -r $RCPT 2>&1 || error "Could not remove package receipt"
+if [ -d $RCPT ]; then
+	echo Removing package receipt $RCPT ...
+	rm -r $RCPT 2>&1 || RETCODE=-1
+else
+	echo Forgetting package $MACPKGNAME
+	pkgutil --forget $MACPKGNAME
+fi
 
 for RCPT in /Library/Receipts/TurboVNC-*.pkg; do
 	if [ -d $RCPT ]; then
