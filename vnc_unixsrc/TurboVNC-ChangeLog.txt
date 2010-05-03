@@ -23,6 +23,10 @@ Intel Performance Primitives) or Sun mediaLib.  Instead, TurboVNC now uses
 libjpeg-turbo, a fully open source vector-accelerated JPEG codec developed in
 conjunction with the TigerVNC Project (and based on libjpeg/SIMD.)
 -------------------------------------------------------------------------------
+[6]
+The uninstall script in the Mac distribution package should now work on OS X
+10.6.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
