@@ -96,32 +96,51 @@ ALRThreadFunc(param)
     void *param;
 {
     rfbClientPtr cl=(rfbClientPtr)param;
+    RegionRec copyRegionSave, modifiedRegionSave, requestedRegionSave;
+    int tightCompressLevelSave, tightQualityLevelSave, copyDXSave, copyDYSave;
     while (!cl->deadyet) {
         if(rfbAutoLosslessRefresh > 0.0 && cl->firstUpdate
             && gettime()-cl->lastFramebufferUpdate > rfbAutoLosslessRefresh
             && REGION_NOTEMPTY(pScreen, &cl->lossyRegion)) {
-            rfbClientRec mycl;
-            BoxRec box;
 
             pthread_mutex_lock(&cl->sendMutex);
             if (cl->deadyet) break;
 
-            memcpy(&mycl, cl, sizeof(rfbClientRec));
-            mycl.tightCompressLevel = 1;
-            mycl.tightQualityLevel = -1;
-            mycl.copyDX = cl->copyDY = 0;
-            REGION_INIT(pScreen, &mycl.copyRegion, NullBox, 0);
-            box.x1 = mycl.lossyRegion.extents.x1;
-            box.x2 = mycl.lossyRegion.extents.x2;
-            box.y1 = mycl.lossyRegion.extents.y1;
-            box.y2 = mycl.lossyRegion.extents.y2;
-            REGION_INIT(pScreen, &mycl.modifiedRegion, &box, 0);
-            REGION_INIT(pScreen, &mycl.requestedRegion, &box, 0);
+            tightCompressLevelSave = cl->tightCompressLevel;
+            tightQualityLevelSave = cl->tightQualityLevel;
+            copyDXSave = cl->copyDX;
+            copyDYSave = cl->copyDY;
+            REGION_INIT(pScreen, &copyRegionSave, NullBox, 0);
+            REGION_COPY(pScreen, &copyRegionSave, &cl->copyRegion);
+            REGION_INIT(pScreen, &modifiedRegionSave, NullBox, 0);
+            REGION_COPY(pScreen, &modifiedRegionSave, &cl->modifiedRegion);
+            REGION_INIT(pScreen, &requestedRegionSave, NullBox, 0);
+            REGION_COPY(pScreen, &requestedRegionSave, &cl->requestedRegion);
 
-            rfbSendUpdateBuf(cl);
-            rfbSendFramebufferUpdate(&mycl);
-            cl->lastFramebufferUpdate = mycl.lastFramebufferUpdate;
-            REGION_INIT(pScreen, &cl->lossyRegion, NullBox, 0);
+            cl->tightCompressLevel = 1;
+            cl->tightQualityLevel = -1;
+            cl->copyDX = cl->copyDY = 0;
+            REGION_EMPTY(pScreen, &cl->copyRegion);
+            REGION_EMPTY(pScreen, &cl->modifiedRegion);
+            REGION_UNION(pScreen, &cl->modifiedRegion, &cl->modifiedRegion,
+                &cl->lossyRegion);
+            REGION_EMPTY(pScreen, &cl->requestedRegion);
+            REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
+                &cl->lossyRegion);
+
+            rfbSendFramebufferUpdate(cl);
+
+            REGION_EMPTY(pScreen, &cl->lossyRegion);
+            cl->tightCompressLevel = tightCompressLevelSave;
+            cl->tightQualityLevel = tightQualityLevelSave;
+            cl->copyDX = copyDXSave;
+            cl->copyDY = copyDYSave;
+            REGION_COPY(pScreen, &cl->copyRegion, &copyRegionSave);
+            REGION_COPY(pScreen, &cl->modifiedRegion, &modifiedRegionSave);
+            REGION_COPY(pScreen, &cl->requestedRegion, &requestedRegionSave);
+            REGION_UNINIT(pScreen, &copyRegionSave);
+            REGION_UNINIT(pScreen, &modifiedRegionSave);
+            REGION_UNINIT(pScreen, &requestedRegionSave);
 
             pthread_mutex_unlock(&cl->sendMutex);
         }

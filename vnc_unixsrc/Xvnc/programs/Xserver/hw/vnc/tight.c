@@ -125,6 +125,7 @@ typedef struct _threadparam {
     int streamId, baseStreamId, nStreams;
     pthread_mutex_t ready, done;
     Bool status, deadyet;
+    RegionRec lossyRegion;
 } threadparam;
 
 static threadparam tparam[TVNC_MAXTHREADS];
@@ -376,6 +377,7 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
         tparam[i].w = w;
         tparam[i].h = (i == nt - 1) ? (h - (h / nt * i)) : h / nt;
         tparam[i].bytessent = tparam[i].rectsent = 0;
+        REGION_INIT(pScreen, &tparam[i].lossyRegion, NullBox, 0);
         if(i < 4) {
             int n = min(nt, 4);
             tparam[i].baseStreamId = 4 / n * i;
@@ -415,6 +417,12 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
             cl->rfbBytesSent[rfbEncodingTight] += tparam[i].bytessent;
             cl->rfbRectanglesSent[rfbEncodingTight] += tparam[i].rectsent;
         }
+    }
+
+    for(i = 0; i < nt; i++) {
+        REGION_UNION(pScreen, &cl->lossyRegion, &cl->lossyRegion,
+            &tparam[i].lossyRegion);
+        REGION_UNINIT(pScreen, &tparam[i].lossyRegion);
     }
 
     return status;
@@ -1736,7 +1744,8 @@ SendJpegRect(t, x, y, w, h, quality)
         box.x1 = x;  box.y1 = y;
         box.x2 = x + w;  box.y2 = y + h;
         REGION_INIT(pScreen, &tmpRegion, &box, 0);
-        REGION_UNION(pScreen, &cl->lossyRegion, &cl->lossyRegion, &tmpRegion);
+        REGION_UNION(pScreen, &t->lossyRegion, &t->lossyRegion, &tmpRegion);
+        REGION_UNINIT(pScreen, &tmpRegion);
     }
 
     return SendCompressedData(t, t->tightAfterBuf, jpegDstDataLen);
