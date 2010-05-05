@@ -6,6 +6,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2010 D. R. Commander
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -1899,6 +1900,7 @@ rfbSpriteSetCursor (pScreen, pCursor, x, y)
     pScreenPriv->y = y;
     pScreenPriv->pCursor = pCursor;
 
+    alrlock();
     for (cl = rfbClientHead; cl; cl = nextCl) {
 	nextCl = cl->next;
 	if (cl->enableCursorPosUpdates) {
@@ -1913,13 +1915,10 @@ rfbSpriteSetCursor (pScreen, pCursor, x, y)
 	    /* cursorIsDrawn is guaranteed to be FALSE here, so we definitely
 	       want to send a screen update to the client, even if that's only
 	       putting up the cursor */
-	    if(rfbAutoLosslessRefresh > 0.0)
-		pthread_mutex_lock(&cl->sendMutex);
 	    rfbSendFramebufferUpdate(cl);
-	    if(rfbAutoLosslessRefresh > 0.0)
-		pthread_mutex_unlock(&cl->sendMutex);
 	}
     }
+    alrunlock();
 }
 
 static void
@@ -2043,19 +2042,17 @@ rfbDisplayCursor(pScreen, pCursor)
     pPriv = (rfbSpriteScreenPtr)pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
     result = (*pPriv->DisplayCursor)(pScreen, pCursor);
 
+    alrlock();
     for (cl = rfbClientHead; cl; cl = cl->next) {
 	if (cl->enableCursorShapeUpdates) {
 	    cl->cursorWasChanged = TRUE;
 	    if ( !cl->deferredUpdateScheduled &&
 		 REGION_NOTEMPTY(pScreen,&cl->requestedRegion) ) {
-		if(rfbAutoLosslessRefresh > 0.0)
-		    pthread_mutex_lock(&cl->sendMutex);
 		rfbSendFramebufferUpdate(cl);
-		if(rfbAutoLosslessRefresh > 0.0)
-		    pthread_mutex_unlock(&cl->sendMutex);
 	    }
 	}
     }
+    alrunlock();
 
     return result;
 }

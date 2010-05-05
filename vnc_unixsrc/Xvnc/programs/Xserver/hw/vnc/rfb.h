@@ -281,9 +281,7 @@ typedef struct rfbClientRec {
 
     int cursorX, cursorY;          /* client's cursor position */
 
-    pthread_mutex_t sendMutex;
-    pthread_t threadHandle;
-    Bool deadyet, firstUpdate;
+    Bool firstUpdate;
     double lastFramebufferUpdate;
     RegionRec lossyRegion;
 
@@ -481,6 +479,16 @@ extern Bool rfbNeverShared;
 extern Bool rfbDontDisconnect;
 extern Bool rfbViewOnly; /* run server in view-only mode - Ehud Karni SW */
 extern double rfbAutoLosslessRefresh;
+extern pthread_mutex_t alrMutex;
+extern Bool alrInit;
+#define alrlock() { \
+    if (rfbAutoLosslessRefresh > 0.0 && alrInit) \
+        pthread_mutex_lock(&alrMutex); \
+}
+#define alrunlock() { \
+    if (rfbAutoLosslessRefresh > 0.0 && alrInit) \
+        pthread_mutex_unlock(&alrMutex); \
+}
 
 extern void rfbNewClientConnection(int sock);
 extern rfbClientPtr rfbReverseConnection(char *host, int port);

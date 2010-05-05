@@ -9,6 +9,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2010 D. R. Commander
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -85,9 +86,11 @@ int rfbDeferUpdateTime = 40; /* ms */
 #define ADD_TO_MODIFIED_REGION(pScreen,reg)				      \
   {									      \
       rfbClientPtr cl;							      \
+      alrlock();							      \
       for (cl = rfbClientHead; cl; cl = cl->next) {			      \
 	  REGION_UNION((pScreen),&cl->modifiedRegion,&cl->modifiedRegion,reg);\
       }									      \
+      alrunlock();							      \
   }
 
 /* SCHEDULE_FB_UPDATE is used at the end of each drawing routine to schedule an
@@ -97,6 +100,7 @@ int rfbDeferUpdateTime = 40; /* ms */
 #define SCHEDULE_FB_UPDATE(pScreen,prfb)				\
   if (!prfb->dontSendFramebufferUpdate) {				\
       rfbClientPtr cl, nextCl;						\
+      alrlock();							\
       for (cl = rfbClientHead; cl; cl = nextCl) {			\
 	  nextCl = cl->next;						\
 	  if (!cl->deferredUpdateScheduled && FB_UPDATE_PENDING(cl) &&	\
@@ -105,6 +109,7 @@ int rfbDeferUpdateTime = 40; /* ms */
 	      rfbScheduleDeferredUpdate(cl);				\
 	  }								\
       }									\
+      alrunlock();							\
   }
 
 /* function prototypes */
@@ -317,6 +322,7 @@ rfbCopyWindow (pWin, ptOldOrg, pOldRegion)
     REGION_INTERSECT(pWin->drawable.pScreen, &dstRegion, &dstRegion,
 		     &pWin->borderClip);
 
+    alrlock();
     for (cl = rfbClientHead; cl; cl = cl->next) {
 	if (cl->useCopyRect) {
 	    REGION_INIT(pScreen,&srcRegion,NullBox,0);
@@ -334,6 +340,7 @@ rfbCopyWindow (pWin, ptOldOrg, pOldRegion)
 			 &dstRegion);
 	}
     }
+    alrunlock();
 
     REGION_UNINIT(pSrc->pScreen, &dstRegion);
 
@@ -705,6 +712,7 @@ rfbCopyArea (pSrc, pDst, pGC, srcx, srcy, w, h, dstx, dsty)
 	box.x2 = box.x1 + w;
 	box.y2 = box.y1 + h;
 
+	alrlock();
 	for (cl = rfbClientHead; cl; cl = cl->next) {
 	    if (cl->useCopyRect) {
 		SAFE_REGION_INIT(pSrc->pScreen, &srcRegion, &box, 0);
@@ -723,6 +731,7 @@ rfbCopyArea (pSrc, pDst, pGC, srcx, srcy, w, h, dstx, dsty)
 			     &dstRegion);
 	    }
 	}
+	alrunlock();
 
     } else {
 
@@ -1726,6 +1735,8 @@ rfbCopyRegion(pScreen, cl, src, dst, dx, dy)
 
     /* src = src - modifiedRegion */
 
+    alrlock();
+
     REGION_SUBTRACT(pScreen, src, src, &cl->modifiedRegion);
 
     if (REGION_NOTEMPTY(pScreen, &cl->copyRegion)) {
@@ -1769,6 +1780,7 @@ rfbCopyRegion(pScreen, cl, src, dst, dx, dy)
 		    cl->copyDX = 0;
 		    cl->copyDY = 0;
 		}
+		alrunlock();
 		return;
 	    }
 
@@ -1809,6 +1821,8 @@ rfbCopyRegion(pScreen, cl, src, dst, dx, dy)
 	cl->copyDX = 0;
 	cl->copyDY = 0;
     }
+
+    alrunlock();
 }
 
 
@@ -1822,9 +1836,9 @@ rfbDeferredUpdateCallback(OsTimerPtr timer, CARD32 now, pointer arg)
 {
   rfbClientPtr cl = (rfbClientPtr)arg;
 
-  if(rfbAutoLosslessRefresh > 0.0) pthread_mutex_lock(&cl->sendMutex);
+  alrlock();
   rfbSendFramebufferUpdate(cl);
-  if(rfbAutoLosslessRefresh > 0.0) pthread_mutex_unlock(&cl->sendMutex);
+  alrunlock();
 
   cl->deferredUpdateScheduled = FALSE;
   return 0;
@@ -1845,9 +1859,9 @@ rfbScheduleDeferredUpdate(rfbClientPtr cl)
 					   rfbDeferredUpdateCallback, cl);
 	cl->deferredUpdateScheduled = TRUE;
     } else {
-	if(rfbAutoLosslessRefresh > 0.0) pthread_mutex_lock(&cl->sendMutex);
+	alrlock();
 	rfbSendFramebufferUpdate(cl);
-	if(rfbAutoLosslessRefresh > 0.0) pthread_mutex_unlock(&cl->sendMutex);
+	alrunlock();
     }
 }
 
