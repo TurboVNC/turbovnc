@@ -968,8 +968,8 @@ void
 rfbVncAuthProcessResponse(cl)
     rfbClientPtr cl;
 {
-    char passwdFullControl[MAXPWLEN + 1];
-    char passwdViewOnly[MAXPWLEN + 1];
+    char passwdFullControl[MAXPWLEN + 1] = "\0";
+    char passwdViewOnly[MAXPWLEN + 1] = "\0";
     int numPasswords;
     Bool ok;
     int n;
