@@ -377,7 +377,8 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
         tparam[i].w = w;
         tparam[i].h = (i == nt - 1) ? (h - (h / nt * i)) : h / nt;
         tparam[i].bytessent = tparam[i].rectsent = 0;
-        REGION_INIT(pScreen, &tparam[i].lossyRegion, NullBox, 0);
+        if (rfbAutoLosslessRefresh > 0.0)
+            REGION_INIT(pScreen, &tparam[i].lossyRegion, NullBox, 0);
         if(i < 4) {
             int n = min(nt, 4);
             tparam[i].baseStreamId = 4 / n * i;
@@ -419,10 +420,12 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
         }
     }
 
-    for(i = 0; i < nt; i++) {
-        REGION_UNION(pScreen, &cl->lossyRegion, &cl->lossyRegion,
-            &tparam[i].lossyRegion);
-        REGION_UNINIT(pScreen, &tparam[i].lossyRegion);
+    if (rfbAutoLosslessRefresh > 0.0) {
+        for(i = 0; i < nt; i++) {
+            REGION_UNION(pScreen, &cl->lossyRegion, &cl->lossyRegion,
+                &tparam[i].lossyRegion);
+            REGION_UNINIT(pScreen, &tparam[i].lossyRegion);
+        }
     }
 
     return status;
