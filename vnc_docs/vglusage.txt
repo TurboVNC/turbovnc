@@ -133,7 +133,7 @@ perform well.
 
 	#. Open a new terminal inside the TurboVNC desktop.
 
-	#. In the same terminal window, open a Secure Shell (SSh) session into the
+	#. In the same terminal window, open a Secure Shell (SSH) session into the
 		VirtualGL server:
 
 		#Verb: <<---
@@ -144,13 +144,13 @@ perform well.
 		__''{server}''__ with the hostname or IP address of that server.  Refer to
 		the VirtualGL User's Guide for additional ''vglconnect'' options.
 
-	#. In the SSh session, set the ''VGL_COMPRESS'' environment variable to
+	#. In the SSH session, set the ''VGL_COMPRESS'' environment variable to
 		''rgb''
 
 		!!! Passing an argument of ''-c rgb'' to ''vglrun'' achieves the same
 		effect.
 
-	#. In the SSh session, start a 3D application using VirtualGL:
+	#. In the SSH session, start a 3D application using VirtualGL:
 
 		#Verb: <<---
 		/opt/VirtualGL/bin/vglrun [vglrun options] {application_executable_or_script} {arguments}

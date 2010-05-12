@@ -12,7 +12,7 @@
 		(__Mac clients:__ in the X11 application, start a new xterm [Command-N] if
 		one isn't already started.)
 
-	#. In the new Command Prompt/terminal/xterm window, open a Secure Shell (SSh)
+	#. In the new Command Prompt/terminal/xterm window, open a Secure Shell (SSH)
 		session into the TurboVNC server:
 
 		Linux/Mac/Solaris clients :: {:}
@@ -28,7 +28,7 @@
 		Replace __''{user}''__ with your user account name on the TurboVNC server and
 		__''{server}''__ with the hostname or IP address of that server.
 
-	#. In the SSh session, start a TurboVNC session:
+	#. In the SSH session, start a TurboVNC session:
 
 		#Verb: <<---
 		/opt/TurboVNC/bin/vncserver
@@ -42,7 +42,7 @@
 		If this is the first time that a TurboVNC session has ever been run
 		under this user account, TurboVNC will prompt for a VNC session password.
 
-	#. The SSh session can now be exited, if desired.
+	#. The SSH session can now be exited, if desired.
 
 	#. On the client machine, start the TurboVNC viewer.
 
@@ -85,7 +85,7 @@ to the session at any time.
 
 To kill a TurboVNC session:
 
-	#. Using SSh (''c:\\Program Files\\TurboVNC\\putty.exe'' on Windows clients),
+	#. Using SSH (''c:\\Program Files\\TurboVNC\\putty.exe'' on Windows clients),
 		log into the server that is running the TurboVNC session that you wish to
 		kill.{nl} \
 		... or ...{nl} \
@@ -222,7 +222,7 @@ Connection" dialog box or, after connecting to the server, click on the
 Connection Options button in the toolbar.)  In the Java viewer, the same thing
 is accomplished by clicking on the "Options" button at the top of the browser
 window.  With the Linux/Mac/Solaris TurboVNC viewer, the "Perceptually
-Lossless" protocol is the default, and you can use the following command line
+Lossless" protocol is the default, and you can use the following command-line
 switches to select another protocol:
 
 ''-medqual'' = select the "Tight + Medium Quality JPEG" protocol {nl}
@@ -249,12 +249,28 @@ CTRL-ALT-SHIFT-L (in the Windows TurboVNC viewer, you can also click on the
 Lossless Refresh toolbar icon.)  In the Java TurboVNC viewer, click on the
 "Lossless Refresh" button at the top of the browser window.
 
+*** Automatic Lossless Refresh
+
+Passing an argument of ''-alr ''__''{timeout}''__ to ''vncserver'' will
+enable the automatic lossless refresh (ALR) feature for the TurboVNC server
+session.  ALR will monitor all of the client connections, and if more than
+__''{timeout}''__ seconds have elapsed since the last framebuffer update was
+sent to a given client, then the TurboVNC server will send a mathematically
+lossless copy of any screen regions that have been "corrupted" by lossy
+compression.
+
+The ALR feature is designed mainly for use by interactive visualization
+applications.  The idea is that, on a low-bandwidth connection, low-quality
+JPEG can be used while the user is rotating/panning/zooming a 3D scene, but
+when the user stops manipulating the scene, then a fully lossless copy is sent
+for them to study in detail.
+
 ** Securing a TurboVNC Connection
 
 Normally, the connection between the TurboVNC server and the TurboVNC viewer is
 completely unencrypted, but securing that connection can be easily
-accomplished by using the port forwarding feature of Secure Shell (SSh.)  After
-you have started a TurboVNC session on the TurboVNC server, open a new SSh
+accomplished by using the port forwarding feature of Secure Shell (SSH.)  After
+you have started a TurboVNC session on the TurboVNC server, open a new SSH
 connection into the TurboVNC server using the following command line:
 
 	Linux/Mac/Solaris clients :: {:}
@@ -285,16 +301,54 @@ using user account ''my_user'', you would type:
 	"c:\program files\turbovnc\putty" -L 5901:localhost:5901 my_user@my_server
 	---
 
-After the SSh connection has been established, you can then launch the
+After the SSH connection has been established, you can then launch the
 TurboVNC viewer and point it to ''localhost:''__''{n}''__ (''localhost:1'' in the
 above example.)
+
+*** The ''-via'' Command-Line Option
+#OPT: noList! plain!
+
+If you are using the Unix/Linux TurboVNC Viewer, then you can simplify the
+above by using the ''-via'' command-line option to ''vncviewer''.  For
+instance, running
+
+	#Verb: <<---
+	/opt/TurboVNC/bin/vncviewer -via {user}@{server} localhost:{n}
+	---
+
+is the equivalent of running
+
+	#Verb: <<---
+	/usr/bin/ssh -L {5900+n}:localhost:{5900+n} {user}@{server}
+	/opt/TurboVNC/bin/vncviewer localhost:{n}
+	---
+
+The command used to establish the SSH tunnel is configurable by way of
+environment variables.  See the ''vncviewer'' man page for more details.
+
+*** Forcing Secure Connections
+#OPT: noList! plain!
+
+Passing an argument of ''-localhost'' to ''vncserver'' will force the TurboVNC
+server session to accept inbound connections only from the server machine.
+This effectively forces SSH tunneling to be used for remote connections.  If
+the ''no-remote-connections'' directive is set in the TurboVNC authentication
+configuration file, then that has the effect of enabling the ''-localhost''
+option for all new TurboVNC server sessions that are started on the machine.
+
+Passing an argument of ''-noreverse'' to ''vncserver'' will disable the ability
+to make outbound (reverse) connections from the TurboVNC server session.
+If the ''no-reverse-connections'' directive is set in the TurboVNC
+authentication configuration file, then that has the effect of enabling the
+''-noreverse'' option for all new TurboVNC server sessions that are started on
+the machine.
 
 *** Performance Notes
 #OPT: noList! plain!
 
 For LAN connections and other high-speed networks, tunneling the TurboVNC
-connection over SSh will reduce performance by as much as 20-40%.  For
-wide-area networks, however, there is no performance penalty for using SSh
+connection over SSH will reduce performance by as much as 20-40%.  For
+wide-area networks, however, there is no performance penalty for using SSH
 tunneling with TurboVNC.
 
 ** Further Reading

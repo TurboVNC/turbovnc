@@ -77,7 +77,7 @@
 	| {list type=ul: \
 			{item:[[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]] \
 				(pre-installed on Solaris 10 and higher)} \
-			{item:If your system does not ship with SSh pre-installed (older Solaris \
+			{item:If your system does not ship with SSH pre-installed (older Solaris \
 				8 and 9 systems don't), then download and install an OpenSSH package \
 				from [[http://www.blastwave.org/][Blastwave]] or \
 				http://www.sunfreeware.com/.} \

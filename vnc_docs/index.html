@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-04-14T02:08:09">
+<meta name="date" content="2010-05-12T16:36:47">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 0.6</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -101,6 +101,9 @@ windows.</p>
                 <ul class="toc">
                     <li class="Itemize-5 toc">
                         <a href="#hd005004001" class="toc">5.4.1 Lossless Refresh</a>
+                    </li>
+                    <li class="Itemize-5 toc">
+                        <a href="#hd005004002" class="toc">5.4.2 Automatic Lossless Refresh</a>
                     </li>
                 </ul>
             </li>
@@ -392,7 +395,7 @@ distributions without interference.</p>
     and higher)
 </li>
 <li class="Itemize-0">
-    If your system does not ship with SSh pre-installed (older Solaris 8 and 
+    If your system does not ship with SSH pre-installed (older Solaris 8 and 
     9 systems don&rsquo;t), then download and install an OpenSSH package 
     from 
     <span class="remote"><a href="http://www.blastwave.org/" class="remote">Blastwave</a></span><a name="idx0014"></a> 
@@ -704,7 +707,7 @@ running Vista.)</p>
     </li>
     <li class="Ordered-1 Ordered">
         In the new Command Prompt/terminal/xterm window, open a Secure Shell 
-        (SSh) session into the TurboVNC server:
+        (SSH) session into the TurboVNC server:
         <dl class="Description">
             <dt class="Description-3 Description">Linux/Mac/Solaris clients</dt>
             <dd class="Description-3 Description">
@@ -726,7 +729,7 @@ ssh&nbsp;{user}@{server}
         </dl>
     </li>
     <li class="Ordered-1 Ordered">
-        In the SSh session, start a TurboVNC session:
+        In the SSH session, start a TurboVNC session:
 <pre class="verbatim">
 /opt/TurboVNC/bin/vncserver
 </pre>
@@ -741,7 +744,7 @@ ssh&nbsp;{user}@{server}
         password.
     </li>
     <li class="Ordered-1 Ordered">
-        The SSh session can now be exited, if desired.
+        The SSH session can now be exited, if desired.
     </li>
     <li class="Ordered-1 Ordered">
         On the client machine, start the TurboVNC viewer.
@@ -821,7 +824,7 @@ reconnect to the session at any time.</p>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
-        Using SSh (<code>c:\Program&nbsp;Files\TurboVNC\putty.exe</code> on 
+        Using SSH (<code>c:\Program&nbsp;Files\TurboVNC\putty.exe</code> on 
         Windows clients), log into the server that is running the TurboVNC 
         session that you wish to kill.<br /> &hellip; or &hellip;<br /> Using 
         the TurboVNC viewer, connect to the TurboVNC session that you wish to 
@@ -994,7 +997,7 @@ In the Java viewer, the same thing is accomplished by clicking on the
 &ldquo;Options&rdquo; button at the top of the browser window.  With the 
 Linux/Mac/Solaris TurboVNC viewer, the &ldquo;Perceptually 
 Lossless&rdquo; protocol is the default, and you can use the following 
-command line switches to select another protocol:</p>
+command-line switches to select another protocol:</p>
 
 <p><code>-medqual</code> = select the &ldquo;Tight + Medium Quality 
 JPEG&rdquo; protocol <br /> <code>-lowqual</code> = select the 
@@ -1027,13 +1030,33 @@ the browser window.</p>
 
 
 
+<h3 id="hd005004002">5.4.2&nbsp;Automatic Lossless Refresh</h3>
+
+<p>Passing an argument of 
+<code>-alr&nbsp;</code><em><code>{timeout}</code></em> to 
+<code>vncserver</code> will enable the automatic lossless refresh (ALR) 
+feature for the TurboVNC server session.  ALR will monitor all of the 
+client connections, and if more than <em><code>{timeout}</code></em> 
+seconds have elapsed since the last framebuffer update was sent to a 
+given client, then the TurboVNC server will send a mathematically 
+lossless copy of any screen regions that have been 
+&ldquo;corrupted&rdquo; by lossy compression.</p>
+
+<p>The ALR feature is designed mainly for use by interactive visualization 
+applications.  The idea is that, on a low-bandwidth connection, 
+low-quality JPEG can be used while the user is rotating/panning/zooming 
+a 3D scene, but when the user stops manipulating the scene, then a fully 
+lossless copy is sent for them to study in detail.</p>
+
+
+
 <h2 id="hd005005">5.5&nbsp;Securing a TurboVNC Connection</h2>
 
 <p>Normally, the connection between the TurboVNC server and the TurboVNC 
 viewer is completely unencrypted, but securing that connection can be 
 easily accomplished by using the port forwarding feature of Secure Shell 
-(SSh.)  After you have started a TurboVNC session on the TurboVNC 
-server, open a new SSh connection into the TurboVNC server using the 
+(SSH.)  After you have started a TurboVNC session on the TurboVNC 
+server, open a new SSH connection into the TurboVNC server using the 
 following command line:</p>
 
 <dl class="Description">
@@ -1079,18 +1102,61 @@ ssh&nbsp;-L&nbsp;5901:localhost:5901&nbsp;my_user@my_server
     </dd>
 </dl>
 
-<p>After the SSh connection has been established, you can then launch the 
+<p>After the SSH connection has been established, you can then launch the 
 TurboVNC viewer and point it to 
 <code>localhost:</code><em><code>{n}</code></em> 
 (<code>localhost:1</code> in the above example.)</p>
 
 
-<h3 id="hd005005001">Performance Notes</h3>
+<h3 id="hd005005001">The <code>-via</code> Command-Line Option</h3>
+
+<p>If you are using the Unix/Linux TurboVNC Viewer, then you can simplify 
+the above by using the <code>-via</code> command-line option to 
+<code>vncviewer</code>.  For instance, running</p>
+
+<pre class="verbatim">
+/opt/TurboVNC/bin/vncviewer&nbsp;-via&nbsp;{user}@{server}&nbsp;localhost:{n}
+</pre>
+
+<p>is the equivalent of running</p>
+
+<pre class="verbatim">
+/usr/bin/ssh&nbsp;-L&nbsp;{5900+n}:localhost:{5900+n}&nbsp;{user}@{server}
+/opt/TurboVNC/bin/vncviewer&nbsp;localhost:{n}
+</pre>
+
+<p>The command used to establish the SSH tunnel is configurable by way of 
+environment variables.  See the <code>vncviewer</code> man page for more 
+details.</p>
+
+
+
+<h3 id="hd005005002">Forcing Secure Connections</h3>
+
+<p>Passing an argument of <code>-localhost</code> to <code>vncserver</code> 
+will force the TurboVNC server session to accept inbound connections 
+only from the server machine. This effectively forces SSH tunneling to 
+be used for remote connections.  If the 
+<code>no-remote-connections</code> directive is set in the TurboVNC 
+authentication configuration file, then that has the effect of enabling 
+the <code>-localhost</code> option for all new TurboVNC server sessions 
+that are started on the machine.</p>
+
+<p>Passing an argument of <code>-noreverse</code> to <code>vncserver</code> 
+will disable the ability to make outbound (reverse) connections from the 
+TurboVNC server session. If the <code>no-reverse-connections</code> 
+directive is set in the TurboVNC authentication configuration file, then 
+that has the effect of enabling the <code>-noreverse</code> option for 
+all new TurboVNC server sessions that are started on the machine.</p>
+
+
+
+<h3 id="hd005005003">Performance Notes</h3>
 
 <p>For LAN connections and other high-speed networks, tunneling the 
-TurboVNC connection over SSh will reduce performance by as much as 
+TurboVNC connection over SSH will reduce performance by as much as 
 20-40%.  For wide-area networks, however, there is no performance 
-penalty for using SSh tunneling with TurboVNC.</p>
+penalty for using SSH tunneling with TurboVNC.</p>
 
 
 
@@ -1301,7 +1367,7 @@ TurboVNC server for this procedure to perform well.</p>
         Open a new terminal inside the TurboVNC desktop.
     </li>
     <li class="Ordered-1 Ordered">
-        In the same terminal window, open a Secure Shell (SSh) session into the 
+        In the same terminal window, open a Secure Shell (SSH) session into the 
         VirtualGL server:
 <pre class="verbatim">
 /opt/VirtualGL/bin/vglconnect&nbsp;{user}@{server}
@@ -1313,14 +1379,14 @@ TurboVNC server for this procedure to perform well.</p>
         for additional <code>vglconnect</code> options.
     </li>
     <li class="Ordered-1 Ordered">
-        In the SSh session, set the <code>VGL_COMPRESS</code> environment 
+        In the SSH session, set the <code>VGL_COMPRESS</code> environment 
         variable to <code>rgb</code>
         <div class="important"><p class="important">
         Passing an argument of <code>-c&nbsp;rgb</code> to <code>vglrun</code> achieves the same effect.
         </p></div>
     </li>
     <li class="Ordered-1 Ordered">
-        In the SSh session, start a 3D application using VirtualGL:
+        In the SSH session, start a 3D application using VirtualGL:
 <pre class="verbatim">
 /opt/VirtualGL/bin/vglrun&nbsp;[vglrun&nbsp;options]&nbsp;{application_executable_or_script}&nbsp;{arguments}
 </pre>
