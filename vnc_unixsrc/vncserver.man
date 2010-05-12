@@ -97,8 +97,8 @@ as a permitted method, then Xvnc exits with an error.
 .TP
 \fB\-otp\fR
 If the one-time password authentication method is enabled and permitted in
-Xvnc, then generate an initial one-time password and print it to the console
-prior to starting Xvnc.
+Xvnc, then this generates an initial one-time password and prints it to the
+console prior to starting Xvnc.
 .TP
 \fB\-kill\fR \fB:\fR\fIdisplay\fR
 Stops the VNC server which is currently running on the specified display.
@@ -111,7 +111,7 @@ currently running under your account on this machine.
 Prints a brief list of command line options
 .TP
 \fB\-fg\fR
-Run Xvnc as a foreground process.  This has two effects: (1) The VNC server
+Runs Xvnc as a foreground process.  This has two effects: (1) The VNC server
 can be aborted with CTRL-C, and (2) the VNC server will exit as soon as the
 user logs out of the window manager in the VNC session.
 .TP
