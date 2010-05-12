@@ -1,0 +1,14 @@
+# The VNCSERVERS variable is a list of display:user pairs, separated by
+# spaces.
+#
+# Uncomment the line below to start a VNC server on display :1 as 'myusername'
+# (adjust this to your own user name).  You will also need to configure a VNC
+# password (run 'man -M /opt/TurboVNC/man vncpasswd' for instructions on how
+# to set this) or another form of authentication.  See the TurboVNC User's
+# Guide for more information about the authentication methods available in 
+# TurboVNC.
+#
+# DO NOT RUN THIS SERVICE if your local area network is untrusted!  See the
+# TurboVNC User's Guide for information about tunneling TurboVNC over SSh.
+
+# VNCSERVERS="1:myusername"

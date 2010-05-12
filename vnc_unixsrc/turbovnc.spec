@@ -57,21 +57,7 @@ chmod 755 %{buildroot}/etc/init.d/tvncserver
 install -m 644 turbovncserver-auth.conf %{buildroot}/etc/
 
 mkdir -p %{buildroot}/etc/sysconfig
-cat > %{buildroot}/etc/sysconfig/tvncservers << EOF
-# The VNCSERVERS variable is a list of display:user pairs.
-#
-# Uncomment the line below to start a VNC server on display :1
-# as my 'myusername' (adjust this to your own).  You will also
-# need to set a VNC password; run 'man vncpasswd' to see how
-# to do that.  
-#
-# DO NOT RUN THIS SERVICE if your local area network is
-# untrusted!  For a secure way of using VNC, see
-# <URL:http://www.uk.research.att.com/vnc/sshvnc.html>.
-
-# VNCSERVERS="1:myusername"
-EOF
-chmod 644 %{buildroot}/etc/sysconfig/tvncservers
+install -m 644 tvncservers %{buildroot}/etc/sysconfig/tvncservers
 
 mkdir -p %{buildroot}/usr/share/applications
 cat > %{buildroot}/usr/share/applications/tvncviewer.desktop << EOF
