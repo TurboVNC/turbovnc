@@ -13,37 +13,23 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncpasswd 1 "February 2010" "" "TurboVNC"
+.TH vncpasswd 1 "May 2010" "" "TurboVNC"
 .SH NAME
 vncpasswd \- set passwords for VNC server
 .SH SYNOPSIS
-.B vncpasswd
-.RI [\| \-v \|]
-.RI [\| file \|]
+\fBvncpasswd\fR [\-v] [\fIfile\fR]
 .br
-.B vncpasswd
-.IR \-t
-.RI [\| \-v \|]
+\fBvncpasswd\fR \-t [\-v]
 .br
-.B vncpasswd
-.IR \-f
+\fBvncpasswd\fR \-f
 .br
-.B vncpasswd
-.IR \-o
-.RI [\| \-v \|]
-.RI [\| \-display\ VNC-display \|]
+\fBvncpasswd\fR \-o [\-v] [\-display \fIVNC-display\fR]
 .br
-.B vncpasswd
-.IR \-c
-.RI [\| \-display\ VNC-display \|]
+\fBvncpasswd\fR \-c [\-display \fIVNC-display\fR]
 .br
-.B vncpasswd
-.I \-a user
-.RI [\| \-display\ VNC-display \|]
+\fBvncpasswd\fR \-a \fIuser\fR [\-display \fIVNC-display\fR]
 .br
-.B vncpasswd
-.I \-r user
-.RI [\| \-display\ VNC-display \|]
+\fBvncpasswd\fR \-r \fIuser\fR [\-display \fIVNC-display\fR]
 .br
 .SH DESCRIPTION
 The \fBvncpasswd\fR utility can be used to create and change
@@ -53,9 +39,9 @@ passwords when started with the \fB\-rfbauth\fR command line option
 
 \fBvncpasswd\fR allows one to enter a primary VNC password and an
 optional view-only password. \fBXvnc\fR will ignore mouse and keyboard
-input from clients who authenticated with the view-only password.
+input from clients who authenticate with the view-only password.
 
-The password file name defaults to \fB$HOME/.vnc/passwd\fR, unless the
+The password filename defaults to \fB$HOME/.vnc/passwd\fR, unless the
 \fB\-t\fR command line option was used (see the OPTIONS section
 below.) The \fB$HOME/.vnc/\fR directory will be created if it does not
 exist.
@@ -63,10 +49,10 @@ exist.
 Each password has to be longer than five characters (unless the
 \fB\-f\fR command line option was used-- see its description below.) 
 Only the first eight characters are significant. If the primary
-password is too short, the vncpasswd program will abort. If the view-only
+password is too short, then vncpasswd will abort. If the view-only
 password is too short, then only the primary password will be saved.
 
-Unless a file name was provided in the command line explicitly, then this
+Unless a filename was explicitly provided in the command line, then this
 utility may perform certain sanity checks to prevent writing a
 password file into some hazardous place.
 .br
@@ -81,10 +67,10 @@ currently enabled for a VNC server session.
 .br
 .SH USER ACCESS CONTROL LIST SUPPORT
 If the VNC server is configured to support a user access control list (ACL) for
-the Unix Login VNC authentication method, then \fBvncpasswd\fR can be used to
-add users to or remove users from the ACL.  Be careful not to remove yourself
-from the list, or you will not be able to connect again until you re-add
-yourself.
+the PAM user/password (Unix Login) authentication method, then \fBvncpasswd\fR
+can be used to add users to or remove users from the ACL.  Be careful not to
+remove yourself from the list, or you will not be able to connect again until
+you re-add yourself.
 .br
 .SH OPTIONS
 .TP
@@ -143,6 +129,6 @@ Tim Waugh <twaugh@redhat.com>,
 .br
 Constantin Kaplinsky <const@tightvnc.com>
 .br
-D. R. Commander <dcommander@users.sourceforge.net>
+D. R. Commander <information@virtualgl.org>
 .br
 Craig Ruff <cruff@ucar.edu>
