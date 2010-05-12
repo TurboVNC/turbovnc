@@ -9,6 +9,6 @@
 # TurboVNC.
 #
 # DO NOT RUN THIS SERVICE if your local area network is untrusted!  See the
-# TurboVNC User's Guide for information about tunneling TurboVNC over SSh.
+# TurboVNC User's Guide for information about tunneling TurboVNC over SSH.
 
 # VNCSERVERS="1:myusername"
