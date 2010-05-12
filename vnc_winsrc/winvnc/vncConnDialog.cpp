@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -55,7 +56,7 @@ vncConnDialog::~vncConnDialog()
 void vncConnDialog::DoDialog()
 {
 	DialogBoxParam(hAppInstance, MAKEINTRESOURCE(IDD_OUTGOING_CONN), 
-		NULL, (DLGPROC) vncConnDlgProc, (LONG) this);
+		NULL, (DLGPROC) vncConnDlgProc, (LONG_PTR) this);
 	delete this;
 }
 
@@ -69,7 +70,7 @@ BOOL CALLBACK vncConnDialog::vncConnDlgProc(HWND hwnd,
 	// dealing with. But we can get a pseudo-this from the parameter to 
 	// WM_INITDIALOG, which we therafter store with the window and retrieve
 	// as follows:
-	vncConnDialog *_this = (vncConnDialog *) GetWindowLong(hwnd, GWL_USERDATA);
+	vncConnDialog *_this = (vncConnDialog *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
 
 	switch (uMsg) {
 
@@ -79,7 +80,7 @@ BOOL CALLBACK vncConnDialog::vncConnDlgProc(HWND hwnd,
 			// Save the lParam into our user data so that subsequent calls have
 			// access to the parent C++ object
 
-            SetWindowLong(hwnd, GWL_USERDATA, lParam);
+            SetWindowLongPtr(hwnd, GWLP_USERDATA, lParam);
             vncConnDialog *_this = (vncConnDialog *) lParam;
             
             // Return success!

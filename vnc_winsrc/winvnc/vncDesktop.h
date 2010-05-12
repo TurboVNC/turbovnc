@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -195,8 +196,8 @@ protected:
 	omni_thread 	*m_thread;
 	HWND			m_hwnd;
 	BOOL			m_polling_flag;
-	UINT			m_timer_polling;
-	UINT			m_timer_blank_screen;
+	UINT_PTR		m_timer_polling;
+	UINT_PTR		m_timer_blank_screen;
 	HWND			m_hnextviewer;
 	BOOL			m_clipboard_active;
 	BOOL			m_hooks_active;

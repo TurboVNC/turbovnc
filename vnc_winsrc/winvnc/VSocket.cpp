@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //  Copyright (C) 2001 HorizonLive.com, Inc. All Rights Reserved.
 //
@@ -335,7 +336,7 @@ VSocket::Accept()
 {
   const int one = 1;
 
-  int new_socket_id;
+  SOCKET new_socket_id;
   VSocket * new_socket;
 
   // Check this socket
@@ -396,7 +397,7 @@ VSocket::TryAccept(VSocket **new_socket, long ms)
 	FD_SET((unsigned int)sock, &fds);
 	tm.tv_sec = ms / 1000;
 	tm.tv_usec = (ms % 1000) * 1000;
-	int ready = select(sock + 1, &fds, NULL, NULL, &tm);
+	SOCKET ready = select((int)(sock + 1), &fds, NULL, NULL, &tm);
 	if (ready == 0) {
 		// Timeout
 		*new_socket = NULL;
@@ -538,7 +539,7 @@ VSocket::SendExact(const char *buff, const VCard bufflen)
 {
 	struct fd_set write_fds;
 	struct timeval tm;
-	int count;
+	SOCKET count;
 
 	// Put the data into the queue
 	SendQueued(buff, bufflen);
@@ -550,7 +551,7 @@ VSocket::SendExact(const char *buff, const VCard bufflen)
 			FD_SET((unsigned int)sock, &write_fds);
 			tm.tv_sec = 1;
 			tm.tv_usec = 0;
-			count = select(sock + 1, NULL, &write_fds, NULL, &tm);
+			count = select((int)(sock + 1), NULL, &write_fds, NULL, &tm);
 		} while (count == 0);
 		if (count < 0 || count > 1) {
 			vnclog.Print(LL_SOCKERR, VNCLOG("socket error in select()\n"));
@@ -604,7 +605,7 @@ VSocket::SendFromQueue()
 		portion_size = 32768;
 
 	// Try to send some data
-	int bytes = Send(out_queue->data_ptr + bytes_sent, portion_size);
+	int bytes = Send(out_queue->data_ptr + bytes_sent, (int)portion_size);
 	if (bytes > 0) {
 		bytes_sent += bytes;
 	} else if (bytes < 0 && errno != EWOULDBLOCK) {
@@ -649,7 +650,7 @@ VSocket::ReadExact(char *buff, const VCard bufflen)
 	VCard currlen = bufflen;
 	struct fd_set read_fds, write_fds;
 	struct timeval tm;
-	int count;
+	SOCKET count;
 
 	while (currlen > 0) {
 		// Wait until some data can be read or sent
@@ -661,7 +662,7 @@ VSocket::ReadExact(char *buff, const VCard bufflen)
 				FD_SET((unsigned int)sock, &write_fds);
 			tm.tv_sec = 0;
 			tm.tv_usec = 50;
-			count = select(sock + 1, &read_fds, &write_fds, NULL, &tm);
+			count = select((int)(sock + 1), &read_fds, &write_fds, NULL, &tm);
 		} while (count == 0);
 		if (count < 0 || count > 2) {
 			vnclog.Print(LL_SOCKERR, VNCLOG("socket error in select()\n"));

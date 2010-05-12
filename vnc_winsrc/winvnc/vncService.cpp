@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2002 RealVNC Ltd. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //  Copyright (C) 2009 GlavSoft LLC. All Rights Reserved.
@@ -1001,7 +1002,7 @@ vncService::InstallService(BOOL silent)
 	char servicecmd[pathlength];
 
 	// Get the filename of this executable
-    if (GetModuleFileName(NULL, path, pathlength-(strlen(winvncRunService)+2)) == 0) {
+    if (GetModuleFileName(NULL, path, pathlength-((int)strlen(winvncRunService)+2)) == 0) {
 		if (!silent) {
 			MessageBox(NULL, "Unable to install WinVNC service", szAppName, MB_ICONEXCLAMATION | MB_OK);
 		}
@@ -1034,7 +1035,7 @@ vncService::InstallService(BOOL silent)
 			}
 
 			// Attempt to add a WinVNC key
-			if (RegSetValueEx(runservices, szAppName, 0, REG_SZ, (unsigned char *)servicecmd, strlen(servicecmd)+1) != ERROR_SUCCESS)
+			if (RegSetValueEx(runservices, szAppName, 0, REG_SZ, (unsigned char *)servicecmd, (int)strlen(servicecmd)+1) != ERROR_SUCCESS)
 			{
 				RegCloseKey(runservices);
 				if (!silent) {
@@ -1162,7 +1163,7 @@ vncService::InstallService(BOOL silent)
 
 				// Add the VNCserviceHelper entry
 				if (RegSetValueEx(runapps, szAppName, 0, REG_SZ,
-					(unsigned char *)servicehelpercmd, strlen(servicehelpercmd)+1) != ERROR_SUCCESS)
+					(unsigned char *)servicehelpercmd, (int)strlen(servicehelpercmd)+1) != ERROR_SUCCESS)
 				{
 					if (!silent) {
 						MessageBox(NULL, "WARNING:Unable to install the ServiceHelper hook\nGlobal user-specific registry settings will not be loaded", szAppName, MB_ICONEXCLAMATION | MB_OK);

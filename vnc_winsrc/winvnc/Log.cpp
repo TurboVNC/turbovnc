@@ -168,11 +168,11 @@ inline void Log::ReallyPrintLine(char *line)
     if (m_todebug) OutputDebugString(line);
     if (m_toconsole) {
         DWORD byteswritten;
-        WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), line, strlen(line), &byteswritten, NULL);
+        WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), line, (DWORD)strlen(line), &byteswritten, NULL);
     }
     if (m_tofile && (hlogfile != NULL)) {
         DWORD byteswritten;
-        WriteFile(hlogfile, line, strlen(line), &byteswritten, NULL); 
+        WriteFile(hlogfile, line, (DWORD)strlen(line), &byteswritten, NULL); 
     }
 }
 
@@ -209,7 +209,7 @@ void Log::ReallyPrint(char *format, va_list ap)
 	char line[LINE_BUFFER_SIZE];
 	_vsnprintf(line, LINE_BUFFER_SIZE - 2, format_ptr, ap);
 	line[LINE_BUFFER_SIZE - 2] = '\0';
-	int len = strlen(line);
+	int len = (int)strlen(line);
 	if (len > 0 && len <= LINE_BUFFER_SIZE - 2 && line[len - 1] == '\n') {
 		// Replace trailing '\n' with MS-DOS style end-of-line.
 		line[len-1] = '\r';

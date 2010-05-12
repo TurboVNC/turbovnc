@@ -1,3 +1,4 @@
+// Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 // Copyright (C) 2004-2006 TightVNC Group. All Rights Reserved.
 //
 //  TightVNC is free software; you can redistribute it and/or modify
@@ -66,7 +67,7 @@ private:
 	}
 
 	HWND m_hwnd;
-	LONG m_OldBmpWndProc;
+	LONG_PTR m_OldBmpWndProc;
 	BOOL m_bCaptured;
 	HWND m_KeepHandle;
 	HWND m_hwndShared;

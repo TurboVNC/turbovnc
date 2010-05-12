@@ -1,3 +1,4 @@
+// Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 // Copyright (C) 2003 TightVNC Development Team. All Rights Reserved.
 //
 //  TightVNC is free software; you can redistribute it and/or modify
@@ -80,7 +81,7 @@ void VNCHelp::Popup(LPARAM lParam)
 		HtmlHelp((HWND)hlp->hItemHandle,
 				 NULL,
 				 HH_DISPLAY_TEXT_POPUP,
-				 (DWORD)&popup);
+				 (DWORD_PTR)&popup);
 	}
 }
 

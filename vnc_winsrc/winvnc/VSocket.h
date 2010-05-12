@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //  Copyright (C) 2001 HorizonLive.com, Inc. All Rights Reserved.
 //
@@ -39,6 +40,10 @@ class VSocket;
 
 #include <omnithread.h>
 #include "VTypes.h"
+
+#ifndef _WIN32
+typedef int SOCKET;
+#endif
 
 // This class is used as a part of output queue
 class AIOBlock
@@ -169,7 +174,7 @@ public:
   // Internal structures
 protected:
   // The internal socket id
-  int sock;
+  SOCKET sock;
 
   // Output queue
   size_t bytes_sent;

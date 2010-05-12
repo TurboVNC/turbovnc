@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -60,7 +61,7 @@ vncAcceptDialog::~vncAcceptDialog()
 
 int vncAcceptDialog::DoDialog()
 {
-	int retVal = DialogBoxParam(hAppInstance,
+	INT_PTR retVal = DialogBoxParam(hAppInstance,
 								MAKEINTRESOURCE(IDD_ACCEPT_CONN),
 								NULL,
 								(DLGPROC)vncAcceptDlgProc,
@@ -88,7 +89,7 @@ BOOL CALLBACK vncAcceptDialog::vncAcceptDlgProc(HWND hwnd,
 	// dealing with. But we can get a pseudo-this from the parameter to 
 	// WM_INITDIALOG, which we therafter store with the window and retrieve
 	// as follows:
-	vncAcceptDialog *_this = (vncAcceptDialog *) GetWindowLong(hwnd, GWL_USERDATA);
+	vncAcceptDialog *_this = (vncAcceptDialog *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
 
 	switch (uMsg) {
 
@@ -98,7 +99,7 @@ BOOL CALLBACK vncAcceptDialog::vncAcceptDlgProc(HWND hwnd,
 			// Save the lParam into our user data so that subsequent calls have
 			// access to the parent C++ object
 
-            SetWindowLong(hwnd, GWL_USERDATA, lParam);
+            SetWindowLongPtr(hwnd, GWLP_USERDATA, lParam);
             vncAcceptDialog *_this = (vncAcceptDialog *) lParam;
 
 			// Disable the "Accept without password" button if needed

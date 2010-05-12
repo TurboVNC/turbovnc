@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2004 HorizonWimba, Inc. All Rights Reserved.
 //  Copyright (C) 2003-2006 Constantin Kaplinsky. All Rights Reserved.
 //  Copyright (C) 2002 RealVNC Ltd. All Rights Reserved.
@@ -108,7 +109,7 @@ vncMenu::vncMenu(vncServer *server)
 	SetTimer(m_hwnd, 1, 5000, NULL);
 
 	// record which client created this window
-	SetWindowLong(m_hwnd, GWL_USERDATA, (LONG) this);
+	SetWindowLongPtr(m_hwnd, GWLP_USERDATA, (LONG_PTR) this);
 
 	// Ask the server object to notify us of stuff
 	server->AddNotify(m_hwnd);
@@ -222,7 +223,7 @@ vncMenu::SendTrayMsg(DWORD msg, BOOL flash)
 		char *tipptr = ((char *)&m_nid.szTip) + tiplen;
 
 		// Try to add the server's IP addresses to the tip string, if possible
-		GetIPAddrString(tipptr, sizeof(m_nid.szTip) - tiplen);
+		GetIPAddrString(tipptr, (int)(sizeof(m_nid.szTip) - tiplen));
 		if (m_server->ClientsDisabled()) {
 			m_nid.hIcon = m_winvnc_disabled_icon;
 			strncat(m_nid.szTip, " (new clients disabled)",
@@ -279,7 +280,7 @@ LRESULT CALLBACK vncMenu::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lP
 	// This is a static method, so we don't know which instantiation we're 
 	// dealing with. We use Allen Hadden's (ahadden@taratec.com) suggestion 
 	// from a newsgroup to get the pseudo-this.
-	vncMenu *_this = (vncMenu *) GetWindowLong(hwnd, GWL_USERDATA);
+	vncMenu *_this = (vncMenu *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
 
 	switch (iMsg)
 	{
@@ -620,7 +621,7 @@ LRESULT CALLBACK vncMenu::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lP
 
 			// Get the IP address stringified
 			struct in_addr address;
-			address.S_un.S_addr = lParam;
+			address.S_un.S_addr = (ULONG)lParam;
 			char *name = inet_ntoa(address);
 			if (name == 0)
 				return 0;

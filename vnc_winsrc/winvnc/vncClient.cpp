@@ -1,4 +1,4 @@
-//  Copyright (C) 2009 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2009-2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2001-2006 Constantin Kaplinsky. All Rights Reserved.
 //  Copyright (C) 2002 Vladimir Vologzhanin. All Rights Reserved.
@@ -374,7 +374,7 @@ vncClientThread::SendTextStringMessage(const char *str)
 	CARD32 len = Swap32IfLE(strlen(str));
 	if (!m_socket->SendExact((char *)&len, sizeof(len)))
 		return FALSE;
-	if (!m_socket->SendExact(str, strlen(str)))
+	if (!m_socket->SendExact(str, (int)strlen(str)))
 		return FALSE;
 
 	return TRUE;
@@ -779,7 +779,7 @@ vncClientThread::run(void *arg)
 		m_server->RemoveClient(m_client->GetClientId());
 		return;
 	}
-	if (!m_socket->SendExact(desktopname, strlen(desktopname)))
+	if (!m_socket->SendExact(desktopname, (int)strlen(desktopname)))
 	{
 		m_server->RemoveClient(m_client->GetClientId());
 		return;
@@ -1314,7 +1314,7 @@ vncClientThread::run(void *arg)
 							*backslash = '\0';
 						ftii.Add(drive, -1, 0);
 						free(drive);
-						i += strcspn(&szDrivesList[i], "\0") + 1;
+						i += (int)strcspn(&szDrivesList[i], "\0") + 1;
 					}
 				} else {
 					strcat(path, "\\*");
@@ -1396,14 +1396,14 @@ vncClientThread::run(void *arg)
 				if (!vncService::tryImpersonate()) {
 					m_socket->ReadExact(NULL, msg.fdr.fNameSize);
 					char reason[] = "Cannot impersonate logged on user";
-					int reasonLen = strlen(reason);
+					int reasonLen = (int)strlen(reason);
 					m_client->SendFileDownloadFailed(reasonLen, reason);
 					break;
 				}
 				if (msg.fdr.fNameSize > 255) {
 					m_socket->ReadExact(NULL, msg.fdr.fNameSize);
 					char reason[] = "Path length exceeds 255 bytes";
-					int reasonLen = strlen(reason);
+					int reasonLen = (int)strlen(reason);
 					m_client->SendFileDownloadFailed(reasonLen, reason);
 					vncService::undoImpersonate();
 					break;
@@ -1432,7 +1432,7 @@ vncClientThread::run(void *arg)
 					(hFile == INVALID_HANDLE_VALUE) || (path_file[0] == '\0')) {
 					FindClose(hFile);
 					char reason[] = "Cannot open file, perhaps it is absent or is a directory";
-					int reasonLen = strlen(reason);
+					int reasonLen = (int)strlen(reason);
 					m_client->SendFileDownloadFailed(reasonLen, reason);
 					vncService::undoImpersonate();
 					break;
@@ -1471,14 +1471,14 @@ vncClientThread::run(void *arg)
 				if (!vncService::tryImpersonate()) {
 					m_socket->ReadExact(NULL, msg.fupr.fNameSize);
 					char reason[] = "Cannot impersonate logged on user";
-					int reasonLen = strlen(reason);
+					int reasonLen = (int)strlen(reason);
 					m_client->SendFileUploadCancel(reasonLen, reason);
 					break;
 				}
 				if (msg.fupr.fNameSize > MAX_PATH) {
 					m_socket->ReadExact(NULL, msg.fupr.fNameSize);
 					char reason[] = "Path length exceeds MAX_PATH value";
-					int reasonLen = strlen(reason);
+					int reasonLen = (int)strlen(reason);
 					m_client->SendFileUploadCancel(reasonLen, reason);
 					vncService::undoImpersonate();
 					break;
@@ -1492,7 +1492,7 @@ vncClientThread::run(void *arg)
 				m_client->m_bUploadStarted = TRUE;
 				if (m_client->m_hFileToWrite == INVALID_HANDLE_VALUE) {
 					char reason[] = "Could not create file";
-					int reasonLen = strlen(reason);
+					int reasonLen = (int)strlen(reason);
 					m_client->SendFileUploadCancel(reasonLen, reason);
 					vncService::undoImpersonate();
 					break;
@@ -1541,7 +1541,7 @@ vncClientThread::run(void *arg)
 						m_socket->ReadExact(NULL, msg.fud.compressedSize);
 					}
 					char reason[] = "Cannot impersonate logged on user";
-					int reasonLen = strlen(reason);
+					int reasonLen = (int)strlen(reason);
 					m_client->SendFileUploadCancel(reasonLen, reason);
 					m_client->CloseUndoneFileTransfer();
 					break;
@@ -1578,7 +1578,7 @@ vncClientThread::run(void *arg)
 				if (msg.fud.compressedLevel != 0) {
 					delete[] pBuff;
 					char reason[] = "Server does not support data compression on upload";
-					int reasonLen = strlen(reason);
+					int reasonLen = (int)strlen(reason);
 					m_client->SendFileUploadCancel(reasonLen, reason);
 					m_client->CloseUndoneFileTransfer();
 					vncService::undoImpersonate();
@@ -1588,7 +1588,7 @@ vncClientThread::run(void *arg)
 				delete[] pBuff;
 				if ((dwNumberOfBytesWritten != msg.fud.compressedSize) || !bResult) {
 					char reason[] = "Error writing file data";
-					int reasonLen = strlen(reason);
+					int reasonLen = (int)strlen(reason);
 					m_client->SendFileUploadCancel(reasonLen, reason);
 					m_client->CloseUndoneFileTransfer();
 					vncService::undoImpersonate();
@@ -1977,7 +1977,7 @@ vncClient::UpdateClipText(LPSTR text)
 		Kill();
 		return;
 	}
-	if (!m_socket->SendQueued(text, strlen(text)))
+	if (!m_socket->SendQueued(text, (int)strlen(text)))
 	{
 		Kill();
 		return;
@@ -2424,7 +2424,7 @@ vncClient::UpdateLocalFormat()
 char * 
 vncClientThread::ConvertPath(char *path)
 {
-	int len = strlen(path);
+	int len = (int)strlen(path);
 	if(len >= 255) return path;
 	if((path[0] == '/') && (len == 1)) {path[0] = '\0'; return path;}
 	for(int i = 0; i < (len - 1); i++) {

@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -335,7 +336,7 @@ vncEncodeCoRRE::EncodeSmallRect(BYTE *source, BYTE *dest, const RECT &rect)
 			dest+sz_rfbFramebufferUpdateRectHeader+sz_rfbRREHeader,
 			rectW,
 			rectH,
-			m_bufflen-sz_rfbFramebufferUpdateRectHeader-sz_rfbRREHeader
+			(int)(m_bufflen-sz_rfbFramebufferUpdateRectHeader-sz_rfbRREHeader)
 			);
 		break;
 	case 16:
@@ -344,7 +345,7 @@ vncEncodeCoRRE::EncodeSmallRect(BYTE *source, BYTE *dest, const RECT &rect)
 			(CARD8 *)(dest+sz_rfbFramebufferUpdateRectHeader+sz_rfbRREHeader),
 			rectW,
 			rectH,
-			m_bufflen-sz_rfbFramebufferUpdateRectHeader-sz_rfbRREHeader
+			(int)(m_bufflen-sz_rfbFramebufferUpdateRectHeader-sz_rfbRREHeader)
 			);
 		break;
 	case 32:
@@ -353,7 +354,7 @@ vncEncodeCoRRE::EncodeSmallRect(BYTE *source, BYTE *dest, const RECT &rect)
 			(CARD8 *)(dest+sz_rfbFramebufferUpdateRectHeader+sz_rfbRREHeader),
 			rectW,
 			rectH,
-			m_bufflen-sz_rfbFramebufferUpdateRectHeader-sz_rfbRREHeader
+			(int)(m_bufflen-sz_rfbFramebufferUpdateRectHeader-sz_rfbRREHeader)
 			);
 		break;
 	}

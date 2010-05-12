@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -54,8 +55,8 @@ vncAcceptReverseDlg::~vncAcceptReverseDlg()
 
 int vncAcceptReverseDlg::DoDialog()
 {
-	int retVal = DialogBoxParam(hAppInstance, MAKEINTRESOURCE(IDD_ACCEPT_REVERSE), 
-		NULL, (DLGPROC) vncAcceptReverseDlgProc, (LONG) this);
+	INT_PTR retVal = DialogBoxParam(hAppInstance, MAKEINTRESOURCE(IDD_ACCEPT_REVERSE), 
+		NULL, (DLGPROC) vncAcceptReverseDlgProc, (LONG_PTR) this);
 	delete this;
 	switch (retVal)
 	{
@@ -77,7 +78,7 @@ BOOL CALLBACK vncAcceptReverseDlg::vncAcceptReverseDlgProc(HWND hwnd,
 	// dealing with. But we can get a pseudo-this from the parameter to 
 	// WM_INITDIALOG, which we therafter store with the window and retrieve
 	// as follows:
-	vncAcceptReverseDlg *_this = (vncAcceptReverseDlg *) GetWindowLong(hwnd, GWL_USERDATA);
+	vncAcceptReverseDlg *_this = (vncAcceptReverseDlg *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
 
 	switch (uMsg) {
 
@@ -87,7 +88,7 @@ BOOL CALLBACK vncAcceptReverseDlg::vncAcceptReverseDlgProc(HWND hwnd,
 			// Save the lParam into our user data so that subsequent calls have
 			// access to the parent C++ object
 
-            SetWindowLong(hwnd, GWL_USERDATA, lParam);
+            SetWindowLongPtr(hwnd, GWLP_USERDATA, lParam);
 
 			SetForegroundWindow(hwnd);
 

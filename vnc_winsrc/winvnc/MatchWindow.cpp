@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2001 HorizonLive.com, Inc. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -77,7 +78,7 @@ CMatchWindow::CMatchWindow(vncServer* pServer,int left,int top,int right,int bot
 		NULL				// pointer to window-creation data
 	);
   	
-	SetWindowLong(m_hWnd,GWL_USERDATA,(LONG)this);
+	SetWindowLongPtr(m_hWnd,GWLP_USERDATA,(LONG_PTR)this);
 	ModifyPosition(left,top,right,bottom);
 
 	CanModify(FALSE);
@@ -95,7 +96,7 @@ LRESULT CALLBACK CMatchWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, L
 	PAINTSTRUCT ps;
 	HDC hdc;
 	HBRUSH hBrush;
-	CMatchWindow* pMatchWnd=(CMatchWindow*)GetWindowLong(hWnd,GWL_USERDATA);
+	CMatchWindow* pMatchWnd=(CMatchWindow*)GetWindowLongPtr(hWnd,GWLP_USERDATA);
 
 	switch (message)
 	{

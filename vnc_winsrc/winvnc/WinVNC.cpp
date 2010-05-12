@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -236,7 +237,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 
 			// First, we have to parse the command line to get an argument
 			int start, end;
-			start = i;
+			start = (int)i;
 			while (szCmdLine[start] && szCmdLine[start] <= ' ') start++;
 			end = start;
 			while (szCmdLine[end] > ' ') end++;
@@ -261,16 +262,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 			cancelConnect = true;	// Ignore the -connect option unless
 									// there will be valid window to share
 
-			int start = i, end;
+			int start = (int)i, end;
 			while (szCmdLine[start] && szCmdLine[start] <= ' ') start++;
 			if (szCmdLine[start] == '"') {
 				start++;
 				char *ptr = strchr(&szCmdLine[start], '"');
 				if (ptr == NULL) {
-					end = strlen(szCmdLine);
+					end = (int)strlen(szCmdLine);
 					i = end;
 				} else {
-					end = ptr - szCmdLine;
+					end = (int)(ptr - szCmdLine);
 					i = end + 1;
 				}
 			} else {
@@ -300,7 +301,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 
 			// First, we have to parse the command line to get the hostname to use
 			int start, end;
-			start=i;
+			start=(int)i;
 			while (szCmdLine[start] && szCmdLine[start] <= ' ') start++;
 			end = start;
 			while (szCmdLine[end] > ' ') end++;
@@ -399,5 +400,5 @@ int WinVNCAppMain()
 	if (menu != NULL)
 		delete menu;
 
-	return msg.wParam;
+	return (int)msg.wParam;
 }

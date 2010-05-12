@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2002 Constantin Kaplinsky. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -202,7 +203,7 @@ void vncHTTPConnectThread::DoHTTP(VSocket *socket)
 
     if (filename[0] != '/') {
 		vnclog.Print(LL_CONNERR, VNCLOG("filename didn't begin with '/'\n"));
-		socket->SendExact(HTTP_MSG_NOSUCHFILE, strlen(HTTP_MSG_NOSUCHFILE));
+		socket->SendExact(HTTP_MSG_NOSUCHFILE, (int)strlen(HTTP_MSG_NOSUCHFILE));
 		return;
 	}
 
@@ -216,7 +217,7 @@ void vncHTTPConnectThread::DoHTTP(VSocket *socket)
 			vnclog.Print(LL_INTWARN, VNCLOG("applet parameters specified\n"));
 
 		// Send the OK notification message to the client
-		if (!socket->SendExact(HTTP_MSG_OK, strlen(HTTP_MSG_OK)))
+		if (!socket->SendExact(HTTP_MSG_OK, (int)strlen(HTTP_MSG_OK)))
 			return;
 
 		// Compose the index page
@@ -248,7 +249,7 @@ void vncHTTPConnectThread::DoHTTP(VSocket *socket)
 			if (filename[1] == '?') {
 				if (!ParseParams(&filename[2], params, 1024)) {
 					socket->SendExact(HTTP_MSG_BADPARAMS,
-									  strlen(HTTP_MSG_BADPARAMS));
+									  (int)strlen(HTTP_MSG_BADPARAMS));
 					return;
 				}
 			}
@@ -264,7 +265,7 @@ void vncHTTPConnectThread::DoHTTP(VSocket *socket)
 		}
 
 		// Send the page
-		if (socket->SendExact(indexpage, strlen(indexpage)))
+		if (socket->SendExact(indexpage, (int)strlen(indexpage)))
 			vnclog.Print(LL_INTINFO, VNCLOG("sent page\n"));
 
 		return;
@@ -309,7 +310,7 @@ void vncHTTPConnectThread::DoHTTP(VSocket *socket)
 			vnclog.Print(LL_INTINFO, VNCLOG("sending file...\n"));
 
 			// Send the OK message
-			if (!socket->SendExact(HTTP_MSG_OK, strlen(HTTP_MSG_OK)))
+			if (!socket->SendExact(HTTP_MSG_OK, (int)strlen(HTTP_MSG_OK)))
 				return;
 
 			// Now send the entirety of the data to the client
@@ -323,7 +324,7 @@ void vncHTTPConnectThread::DoHTTP(VSocket *socket)
 	}
 
 	// Send the NoSuchFile notification message to the client
-	if (!socket->SendExact(HTTP_MSG_NOSUCHFILE, strlen(HTTP_MSG_NOSUCHFILE)))
+	if (!socket->SendExact(HTTP_MSG_NOSUCHFILE, (int)strlen(HTTP_MSG_NOSUCHFILE)))
 		return;
 }
 
@@ -351,7 +352,7 @@ BOOL vncHTTPConnectThread::ParseParams(const char *request,
 			}
 			strcpy(param_request, tail);
 		} else {
-			int len = delim_ptr - tail;
+			int len = (int)(delim_ptr - tail);
 			if (len >= sizeof(param_request)) {
 				return FALSE;
 			}

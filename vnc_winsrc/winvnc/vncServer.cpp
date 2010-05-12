@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -449,7 +450,7 @@ vncServer::AuthClientCount()
 {
 	omni_mutex_lock l(m_clientsLock);
 
-	return m_authClients.size();
+	return (UINT)m_authClients.size();
 }
 
 UINT
@@ -457,7 +458,7 @@ vncServer::UnauthClientCount()
 {
 	omni_mutex_lock l(m_clientsLock);
 
-	return m_unauthClients.size();
+	return (UINT)m_unauthClients.size();
 }
 
 void
@@ -1368,7 +1369,7 @@ vncServer::VerifyHost(const char *hostname) {
 	vncServer::AcceptQueryReject patternType = vncServer::aqrReject;
 	UINT authHostsPos = 0;
 	UINT patternStart = 0;
-	UINT hostNameLen = strlen(hostname);
+	UINT hostNameLen = (UINT)strlen(hostname);
 
 	// Run through the auth hosts string until we hit the end
 	if (m_auth_hosts) {

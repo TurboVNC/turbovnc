@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2003 Dennis Syrovatsky. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -99,6 +100,6 @@ int FileTransferItemInfo::GetSummaryNamesLength()
 {
 	int sumLen = 0;
 	for (int i = 0; i < m_NumEntries; i++)
-		sumLen += strlen(m_pEntries[i].Name);
+		sumLen += (int)strlen(m_pEntries[i].Name);
 	return sumLen;
 }

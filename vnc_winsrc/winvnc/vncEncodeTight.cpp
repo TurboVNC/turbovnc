@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2005-2008 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2000 Constantin Kaplinsky. All Rights Reserved.
@@ -65,7 +66,7 @@ TIGHT_CONF vncEncodeTight::m_conf[2] = {
 };
 
 static const int subsampLevel2subsamp[4] = {
-    TJ_444, TJ_411, TJ_422, TJ_GRAYSCALE
+    TJ_444, TJ_420, TJ_422, TJ_GRAYSCALE
 };
 
 vncEncodeTight::vncEncodeTight()

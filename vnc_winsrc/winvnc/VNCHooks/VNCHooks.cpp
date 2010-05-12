@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -1090,7 +1091,7 @@ LRESULT CALLBACK MousePriorityProc(int nCode, WPARAM wParam, LPARAM lParam)
 char * NameFromPath(const char *path)
 {
 	int x;
-	int l = strlen(path);
+	int l = (int)strlen(path);
 	char *temp = NULL;
 	
 	// Find the file part of a filename

@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2001-2004 HorizonLive.com, Inc. All Rights Reserved.
 //  Copyright (C) 2001-2004 TightVNC Team. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -1275,7 +1276,7 @@ vncDesktop::InitWindow()
 	}
 
 	// Set the "this" pointer for the window
-	SetWindowLong(m_hwnd, GWL_USERDATA, (long)this);
+	SetWindowLongPtr(m_hwnd, GWLP_USERDATA, (LONG_PTR)this);
 
 	// Enable clipboard hooking
 	m_hnextviewer = SetClipboardViewer(m_hwnd);
@@ -1618,7 +1619,7 @@ vncDesktop::ConvertClipText(char *dst, const char *src)
 		// Copy the string before the LF
 		if (ptr1 != ptr0) {
 			memcpy(&dst[dst_pos], ptr0, ptr1 - ptr0);
-			dst_pos += ptr1 - ptr0;
+			dst_pos += (int)(ptr1 - ptr0);
 		}
 		// Don't insert CR if there is one already
 		if (ptr1 == ptr0 || *(ptr1 - 1) != '\r') {
@@ -1870,7 +1871,7 @@ vncDesktop::CalcCopyRects()
 LRESULT CALLBACK
 DesktopWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
-	vncDesktop *_this = (vncDesktop*)GetWindowLong(hwnd, GWL_USERDATA);
+	vncDesktop *_this = (vncDesktop*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
 
 	switch (iMsg)
 	{
@@ -1956,7 +1957,7 @@ DesktopWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 
 			if (cliptext != NULL)
 			{
-				int cliplen = strlen(cliptext);
+				int cliplen = (int)strlen(cliptext);
 				LPSTR unixtext = (char *)malloc(cliplen+1);
 
 				// Replace CR-LF with LF - never send CR-LF on the wire,
