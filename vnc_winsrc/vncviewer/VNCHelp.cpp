@@ -1,3 +1,4 @@
+// Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 // Copyright (C) 2003 TightVNC Development Team. All Rights Reserved.
 //
 //  TightVNC is free software; you can redistribute it and/or modify
@@ -27,7 +28,7 @@
 VNCHelp::VNCHelp()
 {
 	m_dwCookie = NULL;
-	HtmlHelp(NULL, NULL, HH_INITIALIZE, (DWORD)&m_dwCookie);
+	HtmlHelp(NULL, NULL, HH_INITIALIZE, (DWORD_PTR)&m_dwCookie);
 }
 
 void VNCHelp::Popup(LPARAM lParam) 
@@ -87,7 +88,7 @@ void VNCHelp::Popup(LPARAM lParam)
 		HtmlHelp((HWND)hlp->hItemHandle,
 				 NULL,
 				 HH_DISPLAY_TEXT_POPUP,
-				 (DWORD)&popup);
+				 (DWORD_PTR)&popup);
 	}
 }
 
@@ -98,6 +99,6 @@ BOOL VNCHelp::TranslateMsg(MSG *pmsg)
 
 VNCHelp::~VNCHelp()
 {
-	HtmlHelp(NULL, NULL, HH_UNINITIALIZE, (DWORD)m_dwCookie);
+	HtmlHelp(NULL, NULL, HH_UNINITIALIZE, (DWORD_PTR)m_dwCookie);
 }
 

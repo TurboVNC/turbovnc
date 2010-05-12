@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -56,7 +57,7 @@ SessionDialog::~SessionDialog()
 // It's exceedingly unlikely, but possible, that if two modal dialogs were
 // closed at the same time, the static variables used for transfer between 
 // window procedure and this method could overwrite each other.
-int SessionDialog::DoDialog()
+INT_PTR SessionDialog::DoDialog()
 {
  	return DialogBoxParam(pApp->m_instance, DIALOG_MAKEINTRESOURCE(IDD_SESSION_DLG), 
 							NULL, (DLGPROC) SessDlgProc, (LONG) this);
@@ -68,7 +69,7 @@ BOOL CALLBACK SessionDialog::SessDlgProc(  HWND hwnd,  UINT uMsg,  WPARAM wParam
 	// dealing with. But we can get a pseudo-this from the parameter to 
 	// WM_INITDIALOG, which we therafter store with the window and retrieve
 	// as follows:
-	SessionDialog *_this = (SessionDialog *) GetWindowLong(hwnd, GWL_USERDATA);
+	SessionDialog *_this = (SessionDialog *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
 	int i;
 	TCHAR tmphost[256];
 	TCHAR buffer[256];
@@ -78,7 +79,7 @@ BOOL CALLBACK SessionDialog::SessDlgProc(  HWND hwnd,  UINT uMsg,  WPARAM wParam
 	switch (uMsg) {
 	case WM_INITDIALOG: 
 		{			
-            SetWindowLong(hwnd, GWL_USERDATA, lParam);
+            SetWindowLongPtr(hwnd, GWLP_USERDATA, lParam);
             SessionDialog *_this = (SessionDialog *) lParam;
             CentreWindow(hwnd);
 			_this->m_cc->m_hSess = hwnd;

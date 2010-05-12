@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2003 Dennis Syrovatsky. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -135,7 +136,7 @@ bool FileTransferItemInfo::IsFile(int Number)
 
 int FileTransferItemInfo::ConvertCharToInt(char *pStr)
 {
-	int strLen = strlen(pStr);
+	int strLen = (int)strlen(pStr);
 	int res = 0, tenX = 1;
 	for (int i = (strLen - 1); i >= 0; i--) {
 		switch (pStr[i])

@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -39,7 +40,7 @@ public:
 	// Create a connection dialog, with the options to be
 	// displayed if the options.. button is clicked.
 	SessionDialog(VNCOptions *pOpt,ClientConnection *cc);
-	int DoDialog();
+	INT_PTR DoDialog();
 	int m_port;
 	TCHAR m_host[256];
    	virtual ~SessionDialog();

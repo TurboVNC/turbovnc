@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -45,7 +46,7 @@ protected:
 	SOCKET m_sock;
 	HWND m_hwnd;
 	HMENU m_hmenu;
-	UINT m_timer;
+	UINT_PTR m_timer;
 	NOTIFYICONDATA m_nid;
 	char netbuf[1024];
 };

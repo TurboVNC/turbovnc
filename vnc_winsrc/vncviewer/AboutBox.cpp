@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -52,7 +53,7 @@ static LRESULT CALLBACK AboutDlgProc(HWND hwnd, UINT iMsg,
 
 void ShowAboutBox()
 {
-	int res = DialogBox(pApp->m_instance, 
+	INT_PTR res = DialogBox(pApp->m_instance, 
  						DIALOG_MAKEINTRESOURCE(IDD_APP_ABOUT),
 						NULL, (DLGPROC) AboutDlgProc);
 }
@@ -83,7 +84,7 @@ static LRESULT CALLBACK HelpDlgProc(HWND hwnd, UINT iMsg,
 
 void ShowHelpBox(LPTSTR title)
 {
-	int res = DialogBoxParam(pApp->m_instance, 
+	INT_PTR res = DialogBoxParam(pApp->m_instance, 
  							 DIALOG_MAKEINTRESOURCE(IDD_HELP),
 							 NULL, (DLGPROC)HelpDlgProc,
 							 (LPARAM)title);

@@ -1,4 +1,4 @@
-//  Copyright (C) 2009 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2009-2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2008 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2003-2006 Constantin Kaplinsky. All Rights Reserved.
@@ -402,8 +402,8 @@ void ClientConnection::CreateDisplay()
 			      NULL,                // Menu handle
 			      m_pApp->m_instance,
 			      NULL);
-	SetWindowLong(m_hwnd1, GWL_USERDATA, (LONG) this);
-	SetWindowLong(m_hwnd1, GWL_WNDPROC, (LONG)ClientConnection::WndProc1);
+	SetWindowLongPtr(m_hwnd1, GWLP_USERDATA, (LONG_PTR) this);
+	SetWindowLongPtr(m_hwnd1, GWLP_WNDPROC, (LONG_PTR)ClientConnection::WndProc1);
 	ShowWindow(m_hwnd1, SW_HIDE);
 
 	m_hwndscroll = CreateWindow("ScrollClass",
@@ -417,7 +417,7 @@ void ClientConnection::CreateDisplay()
 			      NULL,                // Menu handle
 			      m_pApp->m_instance,
 			      NULL);
-	SetWindowLong(m_hwndscroll, GWL_USERDATA, (LONG) this);
+	SetWindowLongPtr(m_hwndscroll, GWLP_USERDATA, (LONG_PTR) this);
 	ShowWindow(m_hwndscroll, SW_HIDE);
 	
 	// Create a memory DC which we'll use for drawing to
@@ -511,8 +511,8 @@ void ClientConnection::CreateDisplay()
 	hotkeys.SetWindow(m_hwnd1);
     ShowWindow(m_hwnd, SW_HIDE);
 		
-	SetWindowLong(m_hwnd, GWL_USERDATA, (LONG) this);
-	SetWindowLong(m_hwnd, GWL_WNDPROC, (LONG)ClientConnection::WndProc);
+	SetWindowLongPtr(m_hwnd, GWLP_USERDATA, (LONG_PTR) this);
+	SetWindowLongPtr(m_hwnd, GWLP_WNDPROC, (LONG_PTR)ClientConnection::WndProc);
 	
 	if(pApp->m_options.m_toolbar) {
 		CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE),
@@ -679,7 +679,7 @@ void ClientConnection::SaveConnectionHistory()
 
 	// Save current connection first.
 	const BYTE *newConnPtr = (const BYTE *)m_opts.m_display;
-	DWORD newConnSize = (_tcslen(m_opts.m_display) + 1) * sizeof(TCHAR);
+	DWORD newConnSize = (DWORD)((_tcslen(m_opts.m_display) + 1) * sizeof(TCHAR));
 	RegSetValueEx(hKey, _T("0"), 0, REG_SZ, newConnPtr, newConnSize);
 
 	// Save the list of other connections.
@@ -691,7 +691,7 @@ void ClientConnection::SaveConnectionHistory()
 			TCHAR keyName[16];
 			_sntprintf(keyName, 16, "%d", numWritten);
 			LPBYTE bufPtr = (LPBYTE)connList[i];
-			DWORD bufSize = (_tcslen(connList[i]) + 1) * sizeof(TCHAR);
+			DWORD bufSize = (DWORD)((_tcslen(connList[i]) + 1) * sizeof(TCHAR));
 			RegSetValueEx(hKey, keyName, 0, REG_SZ, bufPtr, bufSize);
 			numWritten++;
 		}
@@ -1828,7 +1828,7 @@ bool ClientConnection::ScrollScreen(int dx, int dy)
 LRESULT CALLBACK ClientConnection::ScrollProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {	// This is a static method, so we don't know which instantiation we're 
 	// dealing with.  But we've stored a 'pseudo-this' in the window data.
-	ClientConnection *_this = (ClientConnection *) GetWindowLong(hwnd, GWL_USERDATA);
+	ClientConnection *_this = (ClientConnection *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
 		
 	switch (iMsg) {
 	case WM_HSCROLL:
@@ -1884,7 +1884,7 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 	
 	// This is a static method, so we don't know which instantiation we're 
 	// dealing with.  But we've stored a 'pseudo-this' in the window data.
-	ClientConnection *_this = (ClientConnection *) GetWindowLong(hwnd, GWL_USERDATA);
+	ClientConnection *_this = (ClientConnection *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
 		
 	switch (iMsg) {
 	
@@ -2155,7 +2155,7 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
 {	
 	// This is a static method, so we don't know which instantiation we're 
 	// dealing with.  But we've stored a 'pseudo-this' in the window data.
-	ClientConnection *_this = (ClientConnection *) GetWindowLong(hwnd, GWL_USERDATA);
+	ClientConnection *_this = (ClientConnection *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
 
 	switch (iMsg) {
 	case WM_FBUPDATERECVD:
@@ -2218,7 +2218,7 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
 			if ( _this->m_opts.m_ViewOnly)
 				return 0;
 
-			_this->ProcessPointerEvent(coords.x, coords.y, wParam, iMsg);
+			_this->ProcessPointerEvent(coords.x, coords.y, (DWORD)wParam, iMsg);
 			return 0;
 		}
 
@@ -2672,7 +2672,7 @@ void ClientConnection::SendClientCutText(char *str, size_t len)
     cct.type = rfbClientCutText;
     cct.length = Swap32IfLE(len);
     WriteExact((char *)&cct, sz_rfbClientCutTextMsg);
-	WriteExact(str, len);
+	WriteExact(str, (int)len);
 	vnclog.Print(6, _T("Sent %d bytes of clipboard\n"), len);
 }
 #endif
@@ -3122,7 +3122,7 @@ void ClientConnection::ReadServerCutText()
 	if (len == 0) {
 		m_netbuf[0] = '\0';
 	} else {
-		ReadString(m_netbuf, len);
+		ReadString(m_netbuf, (int)len);
 	}
 	UpdateLocalClipboard(m_netbuf, len);
 }
@@ -3139,7 +3139,7 @@ void ClientConnection::ReadSetColourMapEntries()
 	if (numEntries > 0) {
 		size_t nBytes = 6 * numEntries;
 		CheckBufferSize(nBytes);
-		ReadExact(m_netbuf, nBytes);
+		ReadExact(m_netbuf, (int)nBytes);
 	}
 }
 

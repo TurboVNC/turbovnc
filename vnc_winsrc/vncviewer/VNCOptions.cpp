@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -216,7 +217,7 @@ void VNCOptions::FixScaling() {
 void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 	// We assume no quoting here.
 	// Copy the command line - we don't know what might happen to the original
-	int cmdlinelen = _tcslen(szCmdLine);
+	int cmdlinelen = (int)_tcslen(szCmdLine);
 	
 	if (cmdlinelen == 0) return;
 		
@@ -664,7 +665,7 @@ void VNCOptions::Register()
 }
 
 // The dialog box allows you to change the session-specific parameters
-int VNCOptions::DoDialog(bool running)
+INT_PTR VNCOptions::DoDialog(bool running)
 {
 	m_running = running;
 	return DialogBoxParam(pApp->m_instance, DIALOG_MAKEINTRESOURCE(IDD_PARENT), 
@@ -692,14 +693,14 @@ BOOL CALLBACK VNCOptions::DlgProc(HWND hwndDlg, UINT uMsg,
 {
 	// We use the dialog-box's USERDATA to store a _this pointer
 	// This is set only once WM_INITDIALOG has been recieved, though!
-	VNCOptions *_this = (VNCOptions *) GetWindowLong(hwndDlg, GWL_USERDATA);
+	VNCOptions *_this = (VNCOptions *) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 	switch (uMsg) {
 	case WM_INITDIALOG: 
 		{
 			// Retrieve the Dialog box parameter and use it as a pointer
 			// to the calling VNCOptions object
-			SetWindowLong(hwndDlg, GWL_USERDATA, lParam);
+			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lParam);
 			VNCOptions *_this = (VNCOptions *) lParam;
 			InitCommonControls();
 			CentreWindow(hwndDlg);
@@ -836,13 +837,13 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 	// dealing with. But we can get a pseudo-this from the parameter to 
 	// WM_INITDIALOG, which we therafter store with the window and retrieve
 	// as follows:
-	VNCOptions *_this = (VNCOptions *) GetWindowLong(hwnd, GWL_USERDATA);
+	VNCOptions *_this = (VNCOptions *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
 	
 	switch (uMsg) {
 		
 	case WM_INITDIALOG: 
 		{
-			SetWindowLong(hwnd, GWL_USERDATA, lParam);
+			SetWindowLongPtr(hwnd, GWLP_USERDATA, lParam);
 			VNCOptions *_this = (VNCOptions *) lParam;
 
 			// Initialise the controls
@@ -1032,7 +1033,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 		case IDC_OK: 
 			{		 
 				HWND hListBox = GetDlgItem(hwnd, IDC_ENCODING);
-				int i = SendMessage(hListBox, CB_GETCURSEL, 0, 0);
+				int i = (int)SendMessage(hListBox, CB_GETCURSEL, 0, 0);
 				if (i < MAX_LEN_COMBO)
 					_this->m_PreferredEncoding = rfbcombo[i].rfbEncoding;					
 				HWND hScalEdit = GetDlgItem(hwnd, IDC_SCALE_EDIT);
@@ -1093,7 +1094,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 #endif
 				
 				HWND hCompressLevel = GetDlgItem(hwnd, IDC_COMPRESSLEVEL);
-				_this->m_compressLevel = SendMessage(hCompressLevel, TBM_GETPOS, 0, 0);
+				_this->m_compressLevel = (int)SendMessage(hCompressLevel, TBM_GETPOS, 0, 0);
 				
 				
 				HWND hSubsampLevel = GetDlgItem(hwnd, IDC_SUBSAMPLEVEL);
@@ -1104,7 +1105,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 				_this->m_enableJpegCompression = 
 					(SendMessage(hAllowJpeg, BM_GETCHECK, 0, 0) == BST_CHECKED);
 				HWND hJpeg = GetDlgItem(hwnd, IDC_QUALITYLEVEL);
-				_this->m_jpegQualityLevel = SendMessage(hJpeg,TBM_GETPOS , 0, 0);
+				_this->m_jpegQualityLevel = (int)SendMessage(hJpeg,TBM_GETPOS , 0, 0);
 				
 				
 				_this->m_requestShapeUpdates = false;
@@ -1131,11 +1132,11 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 					HWND hAllowJpeg = GetDlgItem(hwnd, IDC_ALLOW_JPEG);					
 					HWND hCopyRect = GetDlgItem(hwnd, ID_SESSION_SET_CRECT);
 					HWND hListBox = GetDlgItem(hwnd, IDC_ENCODING);
-					int i = SendMessage(hListBox ,CB_GETCURSEL, 0, 0);
+					int i = (int)SendMessage(hListBox ,CB_GETCURSEL, 0, 0);
 					if (i != MAX_LEN_COMBO) {
-						int count = SendMessage(hListBox, CB_GETCOUNT, 0, 0);
+						int count = (int)SendMessage(hListBox, CB_GETCOUNT, 0, 0);
 						while (count > MAX_LEN_COMBO)
-							count = SendMessage(hListBox, CB_DELETESTRING, MAX_LEN_COMBO, 0);
+							count = (int)SendMessage(hListBox, CB_DELETESTRING, MAX_LEN_COMBO, 0);
 					}
 					else break;
 					if (rfbcombo[i].enableJpeg) {
@@ -1167,19 +1168,19 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 			HWND hSubsampLevel = GetDlgItem(hwnd, IDC_SUBSAMPLEVEL);
 			HWND hJpeg = GetDlgItem(hwnd, IDC_QUALITYLEVEL);
 			if (HWND(lParam) == hCompressLevel) {
-				dwPos = SendMessage(hCompressLevel, TBM_GETPOS, 0, 0);
+				dwPos = (DWORD)SendMessage(hCompressLevel, TBM_GETPOS, 0, 0);
 				if (dwPos == 0)
 					SetDlgItemText(hwnd, IDC_STATIC_LEVEL, "None");
 				else
 					SetDlgItemInt(hwnd, IDC_STATIC_LEVEL, dwPos, FALSE);
 			}
 			if (HWND(lParam) == hSubsampLevel) {
-				dwPos = SendMessage(hSubsampLevel, TBM_GETPOS, 0, 0);
+				dwPos = (DWORD)SendMessage(hSubsampLevel, TBM_GETPOS, 0, 0);
 				SetDlgItemText(hwnd, IDC_STATIC_SLEVEL,
 					sampopt2str[sliderpos2sampopt[dwPos]]);
 			}
 			if (HWND(lParam) == hJpeg) {
-				dwPos = SendMessage(hJpeg, TBM_GETPOS, 0, 0);
+				dwPos = (DWORD)SendMessage(hJpeg, TBM_GETPOS, 0, 0);
 				SetDlgItemInt(hwnd, IDC_STATIC_QUALITY, dwPos, FALSE);
 			}
 			_this->SetComboBox(hwnd);
@@ -1270,11 +1271,11 @@ void VNCOptions::SetComboBox(HWND hwnd)
 	HWND hAllowJpeg = GetDlgItem(hwnd, IDC_ALLOW_JPEG);
 	HWND hCopyRect = GetDlgItem(hwnd, ID_SESSION_SET_CRECT);
 	HWND hListBox = GetDlgItem(hwnd, IDC_ENCODING);
-	int compressLevel = SendMessage(hCompressLevel, TBM_GETPOS, 0, 0);
-	int qualityLevel = SendMessage(hQualityLevel, TBM_GETPOS, 0, 0);
+	int compressLevel = (int)SendMessage(hCompressLevel, TBM_GETPOS, 0, 0);
+	int qualityLevel = (int)SendMessage(hQualityLevel, TBM_GETPOS, 0, 0);
 	int subsampLevel = sliderpos2sampopt[SendMessage(hSubsampLevel, TBM_GETPOS, 0, 0)];
-	int allowJpeg = SendMessage(hAllowJpeg, BM_GETCHECK, 0, 0);
-	int copyRect = SendMessage(hCopyRect, BM_GETCHECK, 0, 0);
+	int allowJpeg = (int)SendMessage(hAllowJpeg, BM_GETCHECK, 0, 0);
+	int copyRect = (int)SendMessage(hCopyRect, BM_GETCHECK, 0, 0);
 	int i;
 
 	for (i = 0; i <= (MAX_LEN_COMBO - 1); i++) {			
@@ -1294,28 +1295,28 @@ void VNCOptions::SetComboBox(HWND hwnd)
 		}
 	}
 	if (i == MAX_LEN_COMBO) {
-		int count = SendMessage(hListBox, CB_GETCOUNT, 0, 0);
+		int count = (int)SendMessage(hListBox, CB_GETCOUNT, 0, 0);
 		if (count <= MAX_LEN_COMBO)
 			SendMessage(hListBox, CB_INSERTSTRING, MAX_LEN_COMBO, (LPARAM)"Custom");
 		SendMessage(hListBox, CB_SETCURSEL, MAX_LEN_COMBO, 0);
 	}
 	else {
-		int count = SendMessage(hListBox, CB_GETCOUNT, 0, 0);
+		int count = (int)SendMessage(hListBox, CB_GETCOUNT, 0, 0);
 		while (count > MAX_LEN_COMBO)
-			count = SendMessage(hListBox, CB_DELETESTRING, MAX_LEN_COMBO, 0);
+			count = (int)SendMessage(hListBox, CB_DELETESTRING, MAX_LEN_COMBO, 0);
 	}
 }
 
 BOOL CALLBACK VNCOptions::DlgProcGlobalOptions(HWND hwnd, UINT uMsg,
 											   WPARAM wParam, LPARAM lParam)
 {
-	VNCOptions *_this = (VNCOptions *) GetWindowLong(hwnd, GWL_USERDATA);
+	VNCOptions *_this = (VNCOptions *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
 	
 	switch (uMsg) {
 		
 	case WM_INITDIALOG: 
 		{					
-			SetWindowLong(hwnd, GWL_USERDATA, lParam);
+			SetWindowLongPtr(hwnd, GWLP_USERDATA, lParam);
 			VNCOptions *_this = (VNCOptions *) lParam;
 			// Initialise the controls
 	
@@ -1433,26 +1434,26 @@ BOOL CALLBACK VNCOptions::DlgProcGlobalOptions(HWND hwnd, UINT uMsg,
 
 				if (SendMessage(hDotCursor, BM_GETCHECK, 0, 0) == BST_CHECKED) {
 					pApp->m_options.m_localCursor = DOTCURSOR;
-					SetClassLong(_this->m_hWindow, GCL_HCURSOR,
-									(long)LoadCursor(pApp->m_instance, 
+					SetClassLongPtr(_this->m_hWindow, GCLP_HCURSOR,
+									(LONG_PTR)LoadCursor(pApp->m_instance, 
 									MAKEINTRESOURCE(IDC_DOTCURSOR)));
 				}
 				if (SendMessage(hSmallCursor, BM_GETCHECK, 0, 0) == BST_CHECKED) {
 					pApp->m_options.m_localCursor = SMALLCURSOR;
-					SetClassLong(_this->m_hWindow, GCL_HCURSOR,
-									(long)LoadCursor(pApp->m_instance, 
+					SetClassLongPtr(_this->m_hWindow, GCLP_HCURSOR,
+									(LONG_PTR)LoadCursor(pApp->m_instance, 
 									MAKEINTRESOURCE(IDC_SMALLDOT)));
 				}
 				if (SendMessage(hNoCursor, BM_GETCHECK, 0, 0) == BST_CHECKED) {
 					pApp->m_options.m_localCursor = NOCURSOR;
-					SetClassLong(_this->m_hWindow, GCL_HCURSOR,
-									(long)LoadCursor(pApp->m_instance, 
+					SetClassLongPtr(_this->m_hWindow, GCLP_HCURSOR,
+									(LONG_PTR)LoadCursor(pApp->m_instance, 
 									MAKEINTRESOURCE(IDC_NOCURSOR)));
 				}
 				if (SendMessage(hNormalCursor, BM_GETCHECK, 0, 0) == BST_CHECKED) {
 					pApp->m_options.m_localCursor = NORMALCURSOR;
-					SetClassLong(_this->m_hWindow, GCL_HCURSOR,
-									(long)LoadCursor(NULL,IDC_ARROW));
+					SetClassLongPtr(_this->m_hWindow, GCLP_HCURSOR,
+									(LONG_PTR)LoadCursor(NULL,IDC_ARROW));
 				}
 				
 				if (SendMessage(hChec, BM_GETCHECK, 0, 0) == 0) {
@@ -1780,7 +1781,7 @@ void VNCOptions::SaveGenOpt()
 	strcpy(buf, m_logFilename);
 	RegSetValueEx( hRegKey, "LogFileName", 
 					NULL, REG_SZ , 
-					(CONST BYTE *)buf, (_tcslen(buf)+1));				
+					(CONST BYTE *)buf, (DWORD)(_tcslen(buf)+1));				
 				
 	RegSetValueEx( hRegKey, "ListenPort", 
 					NULL, REG_DWORD, 

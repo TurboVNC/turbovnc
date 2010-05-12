@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2003-2006 Constantin Kaplinsky. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -38,7 +39,7 @@ public:
 
 	LoginAuthDialog(char *vnchost, char *title = NULL, char *username = NULL);
 	virtual ~LoginAuthDialog();
-	int DoDialog();
+	INT_PTR DoDialog();
 
 	static BOOL CALLBACK DlgProc(HWND hwndDlg, UINT uMsg,
 								 WPARAM wParam, LPARAM lParam);

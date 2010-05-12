@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2003 Dennis Syrovatsky. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -70,7 +71,7 @@ FileTransfer::CreateFileTransferDialog()
 #endif
 	ShowWindow(m_hwndFileTransfer, SW_SHOW);
 	UpdateWindow(m_hwndFileTransfer);
-	SetWindowLong(m_hwndFileTransfer, GWL_USERDATA, (LONG) this);
+	SetWindowLongPtr(m_hwndFileTransfer, GWLP_USERDATA, (LONG_PTR) this);
 
 	m_hwndFTProgress = GetDlgItem(m_hwndFileTransfer, IDC_FTPROGRESS);
 	m_hwndFTClientList = GetDlgItem(m_hwndFileTransfer, IDC_FTCLIENTLIST);
@@ -111,7 +112,7 @@ FileTransfer::FileTransferDlgProc(HWND hwnd,
 								  WPARAM wParam, 
 								  LPARAM lParam)
 {
-	FileTransfer *_this = (FileTransfer *) GetWindowLong(hwnd, GWL_USERDATA);
+	FileTransfer *_this = (FileTransfer *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
 	int i;
 	switch (uMsg)
 	{
@@ -158,7 +159,7 @@ FileTransfer::FileTransferDlgProc(HWND hwnd,
 				SendMessage(_this->m_hwndFTProgress, PBM_SETPOS, 0, 0);
 				SetWindowText(_this->m_hwndFTStatus, "");
 				if (strcmp(_this->m_ClientPathTmp, "") == 0) return TRUE;
-				for (i=(strlen(_this->m_ClientPathTmp)-2); i>=0; i--) {
+				for (i=(int)(strlen(_this->m_ClientPathTmp)-2); i>=0; i--) {
 					if (_this->m_ClientPathTmp[i] == '\\') {
 						_this->m_ClientPathTmp[i] = '\0';
 						break;
@@ -173,7 +174,7 @@ FileTransfer::FileTransferDlgProc(HWND hwnd,
 				SendMessage(_this->m_hwndFTProgress, PBM_SETPOS, 0, 0);
 				SetWindowText(_this->m_hwndFTStatus, "");
 				if (strcmp(_this->m_ServerPathTmp, "") == 0) return TRUE;
-				for (i=(strlen(_this->m_ServerPathTmp)-2); i>=0; i--) {
+				for (i=(int)(strlen(_this->m_ServerPathTmp)-2); i>=0; i--) {
 					if (_this->m_ServerPathTmp[i] == '\\') {
 						_this->m_ServerPathTmp[i] = '\0';
 						break;
@@ -440,7 +441,7 @@ FileTransfer:: SendFileDownloadRequest()
 	fdr.position = Swap32IfLE(0);
 	sprintf(path, "%s\\%s", m_ServerPath, m_ServerFilename);
 	ConvertPath(path);
-	int len = strlen(path);
+	int len = (int)strlen(path);
 	fdr.fNameSize = Swap16IfLE(len);
 	m_clientconn->WriteExact((char *)&fdr, sz_rfbFileDownloadRequestMsg);
 	m_clientconn->WriteExact(path, len);
@@ -541,7 +542,7 @@ FileTransfer::FileTransferUpload()
 		SetWindowText(m_hwndFTStatus, buffer);
 		sprintf(path, "%s\\%s", m_ServerPath, m_ClientFilename);
 		ConvertPath(path);
-		int pathLen = strlen(path);
+		int pathLen = (int)strlen(path);
 
 		char *pAllFURMessage = new char[sz_rfbFileUploadRequestMsg + pathLen];
 		rfbFileUploadRequestMsg *pFUR = (rfbFileUploadRequestMsg *) pAllFURMessage;
@@ -571,7 +572,7 @@ FileTransfer::FileTransferUpload()
 					EnableWindow(GetDlgItem(m_hwndFileTransfer, IDC_FTCANCEL), FALSE);
 					BlockingFileTransferDialog(TRUE);
 					char reason[] = "File transfer canceled by user";
-					int reasonLen = strlen(reason);
+					int reasonLen = (int)strlen(reason);
 					char *pFUFMessage = new char[sz_rfbFileUploadFailedMsg + reasonLen];
 					rfbFileUploadFailedMsg *pFUF = (rfbFileUploadFailedMsg *) pFUFMessage;
 					char *pReason = &pFUFMessage[sz_rfbFileUploadFailedMsg];
@@ -698,7 +699,7 @@ FileTransfer::FileTransferDownload()
 void
 FileTransfer::CancelDownload(char *reason)
 {
-	SendFileDownloadCancelMessage(strlen(reason), reason);
+	SendFileDownloadCancelMessage((int)strlen(reason), reason);
 	SetWindowText(m_hwndFTStatus, reason);
 	CloseUndoneFileTransfers();
 	EnableWindow(GetDlgItem(m_hwndFileTransfer, IDC_FTCANCEL), FALSE);
@@ -794,12 +795,12 @@ FileTransfer::ShowClientItems(char *path)
 BOOL CALLBACK 
 FileTransfer::FTBrowseDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	FileTransfer *_this = (FileTransfer *) GetWindowLong(hwnd, GWL_USERDATA);
+	FileTransfer *_this = (FileTransfer *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
 	switch (uMsg)
 	{
 	case WM_INITDIALOG:
 		{
-			SetWindowLong(hwnd, GWL_USERDATA, lParam);
+			SetWindowLongPtr(hwnd, GWLP_USERDATA, lParam);
 			_this = (FileTransfer *) lParam;
 			CentreWindow(hwnd);
 			_this->m_hwndFTBrowse = hwnd;
@@ -929,7 +930,7 @@ FileTransfer::GetTVPath(HWND hwnd, HTREEITEM hTItem, char *path)
 	char path_tmp[rfbMAX_PATH], path_out[rfbMAX_PATH];
 	path_tmp[0] = '\0';
 	path_out[0] = '\0';
-	int len = strlen(path);
+	int len = (int)strlen(path);
 	int ii = 0;
 	for (int i = (len-1); i>=0; i--) {
 		if (path[i] == '\\') {
@@ -951,7 +952,7 @@ FileTransfer::GetTVPath(HWND hwnd, HTREEITEM hTItem, char *path)
 void
 FileTransfer::StrInvert(char str[rfbMAX_PATH])
 {
-	int len = strlen(str), i;
+	int len = (int)strlen(str), i;
 	char str_out[rfbMAX_PATH];
 	str_out[0] = '\0';
 	for (i = (len-1); i>=0; i--) str_out[len-i-1] = str[i];
@@ -1075,7 +1076,7 @@ FileTransfer::ShowServerItems()
 				TreeView_InsertItem(GetDlgItem(m_hwndFTBrowse, IDC_FTBROWSETREE), &tvins);
 				tvins.hParent = m_hTreeItem;;
 			}
-			pos += strlen(pFilenames + pos) + 1;
+			pos += (int)strlen(pFilenames + pos) + 1;
 		}
 	}
 	delete [] pftSD;
@@ -1088,10 +1089,10 @@ FileTransfer::SendFileListRequestMessage(char *filename, unsigned char flags)
 {
 	char _filename[rfbMAX_PATH];
 	strcpy(_filename, filename);
-	int len = strlen(_filename);
+	int len = (int)strlen(_filename);
 	if (_filename[len-1] == '\\') _filename[len-1] = '\0';
 	ConvertPath(_filename);
-	len = strlen(_filename);
+	len = (int)strlen(_filename);
 	rfbFileListRequestMsg flr;
 	flr.type = rfbFileListRequest;
 	flr.dirNameSize = Swap16IfLE(len);
@@ -1122,7 +1123,7 @@ FileTransfer::ProcessListViewDBLCLK(HWND hwnd, char *Path, char *PathTmp, int iI
 void
 FileTransfer::ConvertPath(char *path)
 {
-	int len = strlen(path);
+	int len = (int)strlen(path);
 	if (len >= rfbMAX_PATH) return;
 	if (strcmp(path, "") == 0) {strcpy(path, "/"); return;}
 	for (int i = (len - 1); i >= 0; i--) {
@@ -1187,7 +1188,7 @@ FileTransfer::CreateServerItemInfoList(FileTransferItemInfo *pftii,
       sprintf(buf, "%d", ftsd[i].size);
     }
     pftii->Add(pfnames + pos, buf, ftsd[i].data);
-    pos += strlen(pfnames + pos) + 1;
+    pos += (int)strlen(pfnames + pos) + 1;
   }
 }
 

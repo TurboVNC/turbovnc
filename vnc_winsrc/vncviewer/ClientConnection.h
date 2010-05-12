@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
@@ -389,7 +390,7 @@ private:
 	// Or are we emulating the middle button now?
 	bool m_emulatingMiddleButton;
 	// Emulate 3 buttons mouse timer:
-	UINT m_emulate3ButtonsTimer;
+	UINT_PTR m_emulate3ButtonsTimer;
 	// Buttons pressed, waiting for timer in emulating 3 buttons:
 	DWORD m_emulateKeyFlags;
 	int m_emulateButtonPressedX;

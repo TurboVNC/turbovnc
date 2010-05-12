@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -128,7 +129,7 @@ void Log::ReallyPrint(LPTSTR format, va_list ap)
 	TCHAR line[LINE_BUFFER_SIZE];
 	_vsntprintf(line, sizeof(line) - 2 * sizeof(TCHAR), format, ap);
 	line[LINE_BUFFER_SIZE-2] = (TCHAR)'\0';
-	int len = _tcslen(line);
+	int len = (int)_tcslen(line);
 	if (len > 0 && len <= sizeof(line) - 2 * sizeof(TCHAR) && line[len-1] == (TCHAR)'\n') {
 		// Replace trailing '\n' with MS-DOS style end-of-line.
 		line[len-1] = (TCHAR)'\r';
@@ -140,12 +141,12 @@ void Log::ReallyPrint(LPTSTR format, va_list ap)
 
     if (m_toconsole) {
         DWORD byteswritten;
-        WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), line, _tcslen(line)*sizeof(TCHAR), &byteswritten, NULL); 
+        WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), line, (DWORD)(_tcslen(line)*sizeof(TCHAR)), &byteswritten, NULL); 
     }
 
     if (m_tofile && (hlogfile != NULL)) {
         DWORD byteswritten;
-        WriteFile(hlogfile, line, _tcslen(line)*sizeof(TCHAR), &byteswritten, NULL); 
+        WriteFile(hlogfile, line, (DWORD)(_tcslen(line)*sizeof(TCHAR)), &byteswritten, NULL); 
     }
 }
 
