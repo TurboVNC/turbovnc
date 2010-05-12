@@ -30,6 +30,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <errno.h>
 #include "windowstr.h"
 #include "rfb.h"
@@ -377,6 +380,11 @@ ReadConfigFile()
 
         if (!strcmp(buf2, "no-reverse-connections")) {
             rfbAuthDisableRevCon = TRUE;
+            continue;
+        }
+
+        if (!strcmp(buf2, "no-remote-connections")) {
+            interface.s_addr = htonl (INADDR_LOOPBACK);
             continue;
         }
 
