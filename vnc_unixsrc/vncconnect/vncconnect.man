@@ -5,12 +5,13 @@
 .\" Copyright (C) 2000,2001 Red Hat, Inc.
 .\" Copyright (C) 2001-2003 Constantin Kaplinsky
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
+.\" Copyright (C) 2010 D. R. Commander.
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncconnect 1 "August 2008" "" "TurboVNC"
+.TH vncconnect 1 "May 2010" "" "TurboVNC"
 .SH NAME
 vncconnect \- connect a VNC server to a VNC viewer
 .SH SYNOPSIS
@@ -34,4 +35,4 @@ Tim Waugh <twaugh@redhat.com>,
 .br
 Constantin Kaplinsky <const@tightvnc.com>
 .br
-D. R. Commander <dcommander@users.sourceforge.net>
+D. R. Commander <information@virtualgl.org>
