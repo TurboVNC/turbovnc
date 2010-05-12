@@ -101,8 +101,9 @@ file and "pam-userpwd" is not listed as a permitted method.
 .TP
 \fB\-noreverse\fR
 Do not allow reverse VNC connections to be made from this Xvnc session.
-If \fIno-reverse-connections\fR is specified in the authentication
-configuration file, then this argument has no effect.
+This option can be set for all TurboVNC sessions on this system by using the
+\fIno-reverse-connections\fR directive in the authentication configuration
+file.  See the AUTHENTICATION CONFIGURATION FILE section for more details.
 .TP
 \fB\-httpd\fR \fIdir\fR
 Specify directory where the Java viewer classes are located.
@@ -143,8 +144,10 @@ be able to see the desktop but won't be able to control it.
 .TP
 \fB\-localhost\fR
 Only allow loopback connections from localhost. This option is useful
-in conjunction with SSH tunneling.
-
+in conjunction with SSH tunneling.  This option can be set for all TurboVNC
+sessions on this system by using the \fIno-remote-connections\fR directive in
+the authentication configuration file.  See the AUTHENTICATION CONFIGURATION
+FILE section for more details.
 .TP
 \fB\-interface\fR \fIipaddr\fR
 Listen only on the network interface with the given \fIipaddr\fR.
@@ -275,9 +278,13 @@ added to or removed from this list using the \fBvncpasswd\fR(1) utility.  The
 user who started the Xvnc server will automatically be added to the access
 control list.
 .IP \fIno-reverse-connections\fR
-Do not allow reverse connections to be made from any Xvnc server running on
+Do not allow reverse connections to be made from any TurboVNC server running on
 this machine.  This causes Xvnc to ignore requests from the
 \fBvncconnect\fR(1) utility.
+.IP \fIno-remote-connections\fR
+Do not allow inbound remote connections to be made to any TurboVNC server
+running on this machine.  Only connections from localhost can be made, which
+effectively forces the use of SSH tunneling to make inbound remote connections.
 .IP \fIpam-service-name\fR=\fIsvcname\fR
 Sets the service name to be used when Xvnc performs PAM authentication.  The
 default service name is \fIturbovnc\fR.  This typically corresponds to a file
