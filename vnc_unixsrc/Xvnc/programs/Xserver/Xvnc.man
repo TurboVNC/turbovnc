@@ -41,7 +41,7 @@ Normally, you don't need to start Xvnc manually-- use the
 \fBvncserver\fR(1) wrapper script instead. This script sets reasonable
 defaults for the Xvnc session, checks many error conditions, etc.
 
-Please read the \fBSECURITY CONCERNS\fR section if you plan to use VNC on an
+Please read the SECURITY CONCERNS section if you plan to use VNC on an
 untrusted network.
 .SH OPTIONS
 Xvnc supports many standard X server options and a number of
@@ -94,7 +94,7 @@ as a permitted method.
 .TP
 \fB\-pamauth\fR
 Enable PAM user/password (Unix login) authentication.  Additional configuration
-is necessary to make this work (see the \fBAUTHENTICATION CONFIGURATION FILE\fR
+is necessary to make this work (see the AUTHENTICATION CONFIGURATION FILE
 section for details.)  This argument has no effect if
 \fIpermitted-auth-methods\fR is specified in the authentication configuration
 file and "pam-userpwd" is not listed as a permitted method.
@@ -197,7 +197,7 @@ Modules (PAM).  This method is enabled by passing a command-line argument of
 specified in the authentication configuration file, then "pam-userpwd" must be
 listed as a permitted method.  Also, a valid PAM service configuration must
 have been created by the system administrator (see the
-\fBAUTHENTICATION CONFIGURATION FILE\fR section for details.)
+AUTHENTICATION CONFIGURATION FILE section for details.)
 
 This authentication method can be used only with VNC clients that understand
 the RFB protocol "Tight" security type with the "Unix login" authentication
