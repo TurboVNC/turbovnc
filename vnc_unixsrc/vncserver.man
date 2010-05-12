@@ -143,10 +143,10 @@ defaults.
 \fBvncserver\fR \fI:1\fR
 Starts \fBXvnc\fR on display :1.
 .TP
-\fBvncserver\fR \fI\-geometry 1024x768 :1\fR
+\fBvncserver\fR -geometry \fI1024x768 :1\fR
 Starts \fBXvnc\fR on display :1 with desktop size of 1024x768 pixels.
 .TP
-\fBvncserver\fR \fI\-kill :1\fR
+\fBvncserver\fR -kill \fI:1\fR
 Shuts down the \fBXvnc\fR server running on display :1.
 .SH FILES
 .TP
@@ -172,4 +172,4 @@ Tim Waugh <twaugh@redhat.com>,
 .br
 Constantin Kaplinsky <const@tightvnc.com>
 .br
-D. R. Commander <dcommander@users.sourceforge.net>
+D. R. Commander <information@virtualgl.org>
