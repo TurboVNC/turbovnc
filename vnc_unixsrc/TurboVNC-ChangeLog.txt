@@ -27,6 +27,9 @@ conjunction with the TigerVNC Project (and based on libjpeg/SIMD.)
 The uninstall script in the Mac distribution package should now work on OS X
 10.6.
 -------------------------------------------------------------------------------
+[7]
+Support for 64-bit Windows platforms.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
@@ -268,7 +271,7 @@ TurboVNC viewer to fail unless VirtualGL was also installed.
 [14]
 Included an optimized version of PuTTY 0.60 in the Windows build (and viewer
 package.)  It is recommended that this version be used when tunneling
-TurboVNC connections over SSh, as it will perform as much as 4X as fast as
+TurboVNC connections over SSH, as it will perform as much as 4X as fast as
 the stock version of PuTTY 0.60.
 -------------------------------------------------------------------------------
 [15]

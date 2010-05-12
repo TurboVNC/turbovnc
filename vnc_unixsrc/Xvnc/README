@@ -40,10 +40,11 @@ NO in the platform-specific config file under config/cf.
 
 The pam-userpwd authentication method requires the TurboVNC viewer or another
 VNC viewer that can handle the Tight security type and the Unix Login
-authentication type.  You will also need to configure PAM as appropriate for
-your system.  The default PAM service name is "turbovnc".  NOTE: interaction
-with PAM is limited to supplying a user name and password.  The exchange of
-any additional information is not supported.
+authentication capability.  You will also need to configure PAM as appropriate
+for your system.  The default PAM service name is "turbovnc".
+
+NOTE: interaction with PAM is limited to supplying a user name and password.
+The exchange of any additional information is not supported.
 
 See the Xvnc man page for details on the command line options which control
 configurable authentication.
