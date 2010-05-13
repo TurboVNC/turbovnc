@@ -1,0 +1,66 @@
+ifeq ($(PROCESSOR_ARCHITECTURE), AMD64)
+ WIN64 = yes
+else
+ ifeq ($(PROCESSOR_ARCHITEW6432), AMD64)
+  WIN64 = yes
+ endif
+endif
+
+ifeq ($(WIN64), yes)
+subplatform := 64
+endif
+
+VERSION := 0.6.82
+RCVERSION := 0,6,82,0
+BUILD := $(shell date +%Y%m%d)
+ifeq ($(DEBUG), yes)
+ BUILD := $(BUILD)d
+endif
+
+CC =  "cl" -nologo -wd4996 -wd4482
+CXX = $(CC) -EHs
+RC = "rc"
+LINK = "link" -nologo
+AR = "link" -lib -nologo
+
+CDEFINES = -D__WIN32__ -DWIN32 -D_CRT_SECURE_NO_DEPRECATE \
+	-D__VERSION=\"$(VERSION)\" -D__BUILD=\"$(BUILD)\"
+ifeq ($(DEBUG), yes)
+CDEFINES := $(CDEFINES) -D_DEBUG
+CFLAGS = -MTd -W3 -Od -Zi -I.
+LINK := $(LINK) -debug
+else
+CDEFINES := $(CDEFINES) -DNDEBUG
+CFLAGS = -MT -W3 -O2 -I.
+endif
+CFLAGS := $(CFLAGS) $(CDEFINES)
+
+RC := $(RC) $(CDEFINES)
+
+ifeq ($(TOPDIR),)
+TOPDIR = ..
+endif
+
+ifeq ($(ONAME),)
+ONAME = obj
+endif
+
+BLDDIR = $(TOPDIR)/windows$(subplatform)
+
+ODIR = $(BLDDIR)/$(ONAME)
+EDIR = $(BLDDIR)/bin
+ifeq ($(DEBUG), yes)
+ODIR = $(BLDDIR)/dbg/$(ONAME)
+EDIR = $(BLDDIR)/dbg/bin
+endif
+
+_DUMMY := $(shell mkdir -p $(ODIR))
+_DUMMY2 := $(shell mkdir -p $(EDIR))
+
+.SUFFIXES: .cpp
+$(ODIR)/%.obj: %.cpp
+	$(CXX) $(CFLAGS) -c $*.cpp -Fo$(ODIR)/$*.obj
+
+.SUFFIXES: .c
+$(ODIR)/%.obj: %.c
+	$(CC) $(CFLAGS) -c $*.c -Fo$(ODIR)/$*.obj
