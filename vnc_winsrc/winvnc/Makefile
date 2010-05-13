@@ -1,6 +1,8 @@
-include Makerules
+ONAME := obj/winvnc
 
-CFLAGS := $(CFLAGS) -Iomnithread -Izlib -I..
+include ../Makerules
+
+CFLAGS := $(CFLAGS) -D_WINSTATIC -D_WIN32_WINNT=0x0500 -Iomnithread -Izlib -I..
 
 WINLIBS = wsock32.lib gdi32.lib comdlg32.lib winmm.lib htmlhelp.lib \
 	comctl32.lib user32.lib advapi32.lib shell32.lib ole32.lib \
@@ -60,15 +62,15 @@ LIBS = $(ODIR)/VNCHooks.lib $(ODIR)/zlib.lib
 
 RES = $(ODIR)/WinVNC.res
 
-TARGETS = $(ODIR)/WinVNC.exe \
-	$(ODIR)/VNCHooks.lib $(ODIR)/VNCHooks.dll $(ODIR)/zlib.lib
+TARGETS = $(EDIR)/WinVNC.exe \
+	$(ODIR)/VNCHooks.lib $(EDIR)/VNCHooks.dll $(ODIR)/zlib.lib
 
 default: zlib VNCHooks $(TARGETS)
 
 HDRS := $(wildcard *.h omnithread/*.h VNCHooks/*.h zlib/*.h)
 $(OBJS): $(HDRS)
 
-$(ODIR)/WinVNC.exe: $(LIBS) $(OBJS) $(RES)
+$(EDIR)/WinVNC.exe: $(LIBS) $(OBJS) $(RES)
 	$(LINK) $(OBJS) $(RES) -out:$@ $(LIBS) $(WINLIBS)
 
 .PHONY: zlib VNCHooks
@@ -78,7 +80,7 @@ zlib VNCHooks:
 $(ODIR)/zlib.lib:
 	$(MAKE) -C zlib
 
-$(ODIR)/VNCHooks.lib $(ODIR)/VNCHooks.dll:
+$(ODIR)/VNCHooks.lib $(EDIR)/VNCHooks.dll:
 	$(MAKE) -C VNCHooks
 
 $(ODIR)/omnithread.obj: omnithread/nt.cpp omnithread/nt.h omnithread/omnithread.h

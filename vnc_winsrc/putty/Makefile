@@ -1,4 +1,6 @@
-include Makerules
+ONAME := obj/putty
+
+include ../Makerules
 
 COMMONOBJS = $(ODIR)/BE_ALL_S.obj \
              $(ODIR)/CMDLINE.obj  \
@@ -76,7 +78,7 @@ $(ODIR)/%.res: WINDOWS/%.RC
 
 CFLAGS := $(CFLAGS) -D_WINDOWS -DRELEASE=0.60-VGL -I./WINDOWS
 
-TARGETS = $(ODIR)/putty.exe
+TARGETS = $(EDIR)/putty.exe
 
 all: $(TARGETS)
 
@@ -86,6 +88,6 @@ clean:
 HDRS := $(wildcard *.H WINDOWS/*.H)
 $(OBJS): $(HDRS)
 
-$(ODIR)/putty.exe: $(PUTTYOBJS) $(COMMONOBJS)
+$(EDIR)/putty.exe: $(PUTTYOBJS) $(COMMONOBJS)
 	$(LINK) $(LDFLAGS) $^ -out:$@ user32.lib gdi32.lib imm32.lib advapi32.lib \
 		comctl32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib

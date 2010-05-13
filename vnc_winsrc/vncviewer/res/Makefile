@@ -1,5 +1,7 @@
-TOPDIR = ..
-include ../Makerules
+ONAME := obj/vncviewer
+TOPDIR = ../..
+
+include ../../Makerules
 
 TARGETS = $(ODIR)/vncviewer.res
 

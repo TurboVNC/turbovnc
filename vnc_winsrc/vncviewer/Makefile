@@ -1,6 +1,8 @@
-include Makerules
+ONAME := obj/vncviewer
 
-CFLAGS := $(CFLAGS) -Iomnithread -Izlib -I..
+include ../Makerules
+
+CFLAGS := $(CFLAGS) -D_WINSTATIC -D_WIN32_WINNT=0x0400 -Iomnithread -Izlib -I..
 
 WINLIBS = wsock32.lib gdi32.lib comdlg32.lib winmm.lib htmlhelp.lib \
 	comctl32.lib user32.lib advapi32.lib shell32.lib \
@@ -43,14 +45,14 @@ LIBS = $(ODIR)/zlib.lib
 
 RES = $(ODIR)/vncviewer.res
 
-TARGETS = $(ODIR)/vncviewer.exe $(ODIR)/zlib.lib
+TARGETS = $(EDIR)/vncviewer.exe $(ODIR)/zlib.lib
 
 default: zlib res $(TARGETS)
 
 HDRS := $(wildcard *.h omnithread/*.h zlib/*.h)
 $(OBJS): $(HDRS)
 
-$(ODIR)/vncviewer.exe: $(LIBS) $(OBJS) $(RES)
+$(EDIR)/vncviewer.exe: $(LIBS) $(OBJS) $(RES)
 	$(LINK) $(OBJS) $(RES) -out:$@ $(LIBS) $(WINLIBS)
 
 .PHONY: zlib res

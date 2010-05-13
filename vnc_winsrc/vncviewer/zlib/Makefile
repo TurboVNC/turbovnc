@@ -1,5 +1,7 @@
-TOPDIR = ..
-include ../Makerules
+ONAME := obj/vncviewer
+TOPDIR = ../..
+
+include ../../Makerules
 
 OBJS = $(ODIR)/adler32.obj \
        $(ODIR)/compress.obj \

@@ -1,11 +1,13 @@
-TOPDIR = ..
-include ../Makerules
+ONAME := obj/winvnc
+TOPDIR = ../..
+
+include ../../Makerules
 
 WINLIBS = user32.lib gdi32.lib advapi32.lib
 
 OBJS = $(ODIR)/VNCHooks.obj
 
-TARGETS = $(ODIR)/VNCHooks.lib $(ODIR)/VNCHooks.dll $(ODIR)/VNCHooks.exp
+TARGETS = $(ODIR)/VNCHooks.lib $(EDIR)/VNCHooks.dll $(ODIR)/VNCHooks.exp
 
 RES = $(ODIR)/VNCHooks.res
 
@@ -15,7 +17,7 @@ HDRS := $(wildcard *.h)
 $(OBJS): $(HDRS)
 
 $(TARGETS): $(OBJS) $(RES)
-	$(LINK) -dll $^ -out:$(ODIR)/VNCHooks.dll \
+	$(LINK) -dll $^ -out:$(EDIR)/VNCHooks.dll \
 		-implib:$(ODIR)/VNCHooks.lib $(WINLIBS)
 
 $(RES): VNCHooks.rc
