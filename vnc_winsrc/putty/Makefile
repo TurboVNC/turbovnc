@@ -72,7 +72,7 @@ $(ODIR)/%.obj: WINDOWS/%.C
 	$(CC) $(CFLAGS) -c $< -Fo$@
 
 $(ODIR)/%.res: WINDOWS/%.RC
-	"rc" -l 0x809 -fo $@ $<
+	"rc" -DNO_MANIFESTS -l 0x809 -fo $@ $<
 
 CFLAGS := $(CFLAGS) -D_WINDOWS -DRELEASE=0.60-VGL -I./WINDOWS
 

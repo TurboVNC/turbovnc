@@ -23,7 +23,7 @@ static void hmacmd5_chap(const unsigned char *challenge, int challen,
 
     hmacmd5_ctx = hmacmd5_make_context();
 
-    pwlen = strlen(passwd);
+    pwlen = (int)strlen(passwd);
     if (pwlen>64) {
 	unsigned char md5buf[16];
 	MD5Simple(passwd, pwlen, md5buf);
@@ -169,7 +169,7 @@ int proxy_socks5_selectchap(Proxy_Socket p)
 	chapbuf[4] = '\x85'; /* ...and it's HMAC-MD5, the core one */
 	chapbuf[5] = '\x02'; /* Second attribute - username */
 
-	ulen = strlen(p->cfg.proxy_username);
+	ulen = (int)strlen(p->cfg.proxy_username);
 	if (ulen > 255) ulen = 255; if (ulen < 1) ulen = 1;
 
 	chapbuf[6] = ulen;

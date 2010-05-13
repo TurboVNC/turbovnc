@@ -420,7 +420,7 @@ static void process_subneg(Telnet telnet)
 	    b[2] = TELOPT_TSPEED;
 	    b[3] = TELQUAL_IS;
 	    strcpy((char *)(b + 4), telnet->cfg.termspeed);
-	    n = 4 + strlen(telnet->cfg.termspeed);
+	    n = 4 + (int)strlen(telnet->cfg.termspeed);
 	    b[n] = IAC;
 	    b[n + 1] = SE;
 	    telnet->bufsize = sk_write(telnet->s, (char *)b, n + 2);
@@ -854,7 +854,7 @@ static int telnet_send(void *handle, char *buf, int len)
 
 	while (p < end && iswritable(*p))
 	    p++;
-	telnet->bufsize = sk_write(telnet->s, (char *)q, p - q);
+	telnet->bufsize = sk_write(telnet->s, (char *)q, (int)(p - q));
 
 	while (p < end && !iswritable(*p)) {
 	    telnet->bufsize = 

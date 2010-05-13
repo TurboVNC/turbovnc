@@ -60,7 +60,7 @@ static void logprintf(struct LogContext *ctx, const char *fmt, ...)
     data = dupvprintf(fmt, ap);
     va_end(ap);
 
-    logwrite(ctx, data, strlen(data));
+    logwrite(ctx, data, (int)strlen(data));
     sfree(data);
 }
 
@@ -297,7 +297,7 @@ void log_packet(void *handle, int direction, int type,
 	if (((p % 16) == 0) || (p == len) || omitted) {
 	    if (output_pos) {
 		strcpy(dumpdata + 10+1+3*16+2+output_pos, "\r\n");
-		logwrite(ctx, dumpdata, strlen(dumpdata));
+		logwrite(ctx, dumpdata, (int)strlen(dumpdata));
 		output_pos = 0;
 	    }
 	}
@@ -378,20 +378,20 @@ static void xlatlognam(Filename *dest, Filename src,
 	    size = 0;
 	    if (*s) switch (c = *s++, tolower(c)) {
 	      case 'y':
-		size = strftime(buf, sizeof(buf), "%Y", tm);
+		size = (int)strftime(buf, sizeof(buf), "%Y", tm);
 		break;
 	      case 'm':
-		size = strftime(buf, sizeof(buf), "%m", tm);
+		size = (int)strftime(buf, sizeof(buf), "%m", tm);
 		break;
 	      case 'd':
-		size = strftime(buf, sizeof(buf), "%d", tm);
+		size = (int)strftime(buf, sizeof(buf), "%d", tm);
 		break;
 	      case 't':
-		size = strftime(buf, sizeof(buf), "%H%M%S", tm);
+		size = (int)strftime(buf, sizeof(buf), "%H%M%S", tm);
 		break;
 	      case 'h':
 		bufp = hostname;
-		size = strlen(bufp);
+		size = (int)strlen(bufp);
 		break;
 	      default:
 		buf[0] = '&';

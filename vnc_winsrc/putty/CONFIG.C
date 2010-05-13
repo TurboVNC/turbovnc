@@ -739,7 +739,7 @@ static void ttymodes_handler(union control *ctrl, void *dlg,
 	    dlg_update_start(ctrl, dlg);
 	    dlg_listbox_clear(ctrl, dlg);
 	    while (*p) {
-		int tabpos = strchr(p, '\t') - p;
+		int tabpos = (int)(strchr(p, '\t') - p);
 		char *disp = dupprintf("%.*s\t%s", tabpos, p,
 				       (p[tabpos+1] == 'A') ? "(auto)" :
 				       p+tabpos+2);
@@ -769,7 +769,7 @@ static void ttymodes_handler(union control *ctrl, void *dlg,
 		/* Construct new entry */
 		memset(str, 0, lenof(str));
 		strncpy(str, ttymodes[ind], lenof(str)-3);
-		slen = strlen(str);
+		slen = (int)strlen(str);
 		str[slen] = '\t';
 		str[slen+1] = type;
 		slen += 2;
@@ -780,13 +780,13 @@ static void ttymodes_handler(union control *ctrl, void *dlg,
 		p = cfg->ttymodes;
 		left = lenof(cfg->ttymodes);
 		while (*p) {
-		    int t = strchr(p, '\t') - p;
+		    int t = (int)(strchr(p, '\t') - p);
 		    if (t == strlen(ttymodes[ind]) &&
 			strncmp(p, ttymodes[ind], t) == 0) {
 			memmove(p, p+strlen(p)+1, left - (strlen(p)+1));
 			continue;
 		    }
-		    left -= strlen(p) + 1;
+		    left -= (int)strlen(p) + 1;
 		    p    += strlen(p) + 1;
 		}
 		/* Append new entry */
@@ -826,7 +826,7 @@ static void ttymodes_handler(union control *ctrl, void *dlg,
 		    i++;
 		    continue;
 		}
-		len -= strlen(p) + 1;
+		len -= (int)strlen(p) + 1;
 		p   += strlen(p) + 1;
 		i++;
 	    }
@@ -869,7 +869,7 @@ static void environ_handler(union control *ctrl, void *dlg,
 	    }
 	    p = str + strlen(str);
 	    *p++ = '\t';
-	    dlg_editbox_get(ed->valbox, dlg, p, sizeof(str)-1 - (p - str));
+	    dlg_editbox_get(ed->valbox, dlg, p, (int)(sizeof(str)-1 - (p - str)));
 	    if (!*p) {
 		dlg_beep(dlg);
 		return;
@@ -1006,7 +1006,7 @@ static void portfwd_handler(union control *ctrl, void *dlg,
 	    if (type != 'D') {
 		*p++ = '\t';
 		dlg_editbox_get(pfd->destbox, dlg, p,
-				sizeof(str) - (p - str));
+				(int)(sizeof(str) - (p - str)));
 		if (!*p || !strchr(p, ':')) {
 		    dlg_error_msg(dlg,
 				  "You need to specify a destination address\n"
@@ -1057,7 +1057,7 @@ static void portfwd_handler(union control *ctrl, void *dlg,
 		{
 		    static const char *const afs = "A46";
 		    char *afp = strchr(afs, *p);
-		    int idx = afp ? afp-afs : 0;
+		    int idx = afp ? (int)(afp-afs) : 0;
 		    if (afp)
 			p++;
 #ifndef NO_IPV6
@@ -1068,7 +1068,7 @@ static void portfwd_handler(union control *ctrl, void *dlg,
 		    static const char *const dirs = "LRD";
 		    dir = *p;
 		    dlg_radiobutton_set(pfd->direction, dlg,
-					strchr(dirs, dir) - dirs);
+					(int)(strchr(dirs, dir) - dirs));
 		}
 		p++;
 		if (dir != 'D') {

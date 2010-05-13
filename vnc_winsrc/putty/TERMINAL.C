@@ -328,12 +328,12 @@ static void copy_termchar(termline *destline, int x, termchar *src)
 static void move_termchar(termline *line, termchar *dest, termchar *src)
 {
     /* First clear the cc list from the original char, just in case. */
-    clear_cc(line, dest - line->chars);
+    clear_cc(line, (int)(dest - line->chars));
 
     /* Move the character cell and adjust its cc_next. */
     *dest = *src;		       /* copy everything except cc-list */
     if (src->cc_next)
-	dest->cc_next = src->cc_next - (dest-src);
+	dest->cc_next = (int)(src->cc_next - (dest-src));
 
     /* Ensure the original cell doesn't have a cc list. */
     src->cc_next = 0;
@@ -829,7 +829,7 @@ static void readliteral_cc(struct buf *b, termchar *c, termline *ldata,
 {
     termchar n;
     unsigned long zstate;
-    int x = c - ldata->chars;
+    int x = (int)(c - ldata->chars);
 
     c->cc_next = 0;
 
@@ -2748,7 +2748,7 @@ static void term_out(Terminal *term)
 			}
 		    }
 		    lpage_send(term->ldisc, DEFAULT_CODEPAGE,
-			       abuf, d - abuf, 0);
+			       abuf, (int)(d - abuf), 0);
 		}
 		break;
 	      case '\007':	      /* BEL: Bell */
@@ -3126,7 +3126,7 @@ static void term_out(Terminal *term)
 		    compatibility(VT100);
 		    if (term->ldisc)
 			ldisc_send(term->ldisc, term->id_string,
-				   strlen(term->id_string), 0);
+				   (int)strlen(term->id_string), 0);
 		    break;
 		  case 'c':	       /* RIS: restore power-on settings */
 		    compatibility(VT100);
@@ -3403,7 +3403,7 @@ static void term_out(Terminal *term)
 			/* This is the response for a VT102 */
 			if (term->ldisc)
 			    ldisc_send(term->ldisc, term->id_string,
- 				       strlen(term->id_string), 0);
+ 				       (int)strlen(term->id_string), 0);
 			break;
 		      case 'n':       /* DSR: cursor position query */
 			if (term->ldisc) {
@@ -3411,7 +3411,7 @@ static void term_out(Terminal *term)
 				char buf[32];
 				sprintf(buf, "\033[%d;%dR", term->curs.y + 1,
 					term->curs.x + 1);
-				ldisc_send(term->ldisc, buf, strlen(buf), 0);
+				ldisc_send(term->ldisc, buf, (int)strlen(buf), 0);
 			    } else if (term->esc_args[0] == 5) {
 				ldisc_send(term->ldisc, "\033[0n", 4, 0);
 			    }
@@ -3798,7 +3798,7 @@ static void term_out(Terminal *term)
 					p = get_window_title(term->frontend, TRUE);
 				    else
 					p = EMPTY_WINDOW_TITLE;
-				    len = strlen(p);
+				    len = (int)strlen(p);
 				    ldisc_send(term->ldisc, "\033]L", 3, 0);
 				    ldisc_send(term->ldisc, p, len, 0);
 				    ldisc_send(term->ldisc, "\033\\", 2, 0);
@@ -3811,7 +3811,7 @@ static void term_out(Terminal *term)
 					p = get_window_title(term->frontend, FALSE);
 				    else
 					p = EMPTY_WINDOW_TITLE;
-				    len = strlen(p);
+				    len = (int)strlen(p);
 				    ldisc_send(term->ldisc, "\033]l", 3, 0);
 				    ldisc_send(term->ldisc, p, len, 0);
 				    ldisc_send(term->ldisc, "\033\\", 2, 0);
@@ -5440,7 +5440,7 @@ static pos sel_spread_half(Terminal *term, pos p, int dir)
 	    if (q == ldata->chars + term->cols)
 		q--;
 	    if (p.x >= q - ldata->chars)
-		p.x = (dir == -1 ? q - ldata->chars : term->cols - 1);
+		p.x = (dir == -1 ? (int)(q - ldata->chars)	 : term->cols - 1);
 	}
 	break;
       case SM_WORD:
@@ -6235,7 +6235,7 @@ void term_key(Terminal *term, Key_Sym keysym, wchar_t *text, size_t tlen,
 		fprintf(stderr, " %02x", output[i]);
 	    fprintf(stderr, "\n");
 #endif
-	    ldisc_send(term->ldisc, output, p - output, 1);
+	    ldisc_send(term->ldisc, output, (int)(p - output), 1);
 	} else if (tlen > 0) {
 #if 0
 	    fprintf(stderr, "sending %d unichars:", tlen);
@@ -6243,7 +6243,7 @@ void term_key(Terminal *term, Key_Sym keysym, wchar_t *text, size_t tlen,
 		fprintf(stderr, " %04x", (unsigned) text[i]);
 	    fprintf(stderr, "\n");
 #endif
-	    luni_send(term->ldisc, text, tlen, 1);
+	    luni_send(term->ldisc, text, (int)tlen, 1);
 	}
     }
 }
@@ -6425,14 +6425,14 @@ int term_get_userpass_input(Terminal *term, prompts_t *p,
 	/* We only print the `name' caption if we have to... */
 	if (p->name_reqd && p->name) {
 	    size_t l = strlen(p->name);
-	    term_data_untrusted(term, p->name, l);
+	    term_data_untrusted(term, p->name, (int)l);
 	    if (p->name[l-1] != '\n')
 		term_data_untrusted(term, "\n", 1);
 	}
 	/* ...but we always print any `instruction'. */
 	if (p->instruction) {
 	    size_t l = strlen(p->instruction);
-	    term_data_untrusted(term, p->instruction, l);
+	    term_data_untrusted(term, p->instruction, (int)l);
 	    if (p->instruction[l-1] != '\n')
 		term_data_untrusted(term, "\n", 1);
 	}
@@ -6452,7 +6452,7 @@ int term_get_userpass_input(Terminal *term, prompts_t *p,
 	int finished_prompt = 0;
 
 	if (!s->done_prompt) {
-	    term_data_untrusted(term, pr->prompt, strlen(pr->prompt));
+	    term_data_untrusted(term, pr->prompt, (int)strlen(pr->prompt));
 	    s->done_prompt = 1;
 	    s->pos = 0;
 	}

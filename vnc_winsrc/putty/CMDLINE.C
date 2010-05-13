@@ -218,7 +218,7 @@ int cmdline_process_param(char *p, char *value, int need_save, Config *cfg)
 		ptr++;
 	    ptr++;
 	}
-	i = ptr - cfg->portfwd;
+	i = (int)(ptr - cfg->portfwd);
 	ptr[0] = p[1];  /* insert a 'L', 'R' or 'D' at the start */
 	ptr++;
 	if (1 + strlen(fwd) + 2 > sizeof(cfg->portfwd) - i) {
@@ -260,7 +260,7 @@ int cmdline_process_param(char *p, char *value, int need_save, Config *cfg)
 	while (*portp && *portp != ':')
 	    portp++;
 	if (*portp) {
-	    unsigned len = portp - host;
+	    unsigned len = (int)(portp - host);
 	    if (len >= sizeof(cfg->ssh_nc_host))
 		len = sizeof(cfg->ssh_nc_host) - 1;
 	    strncpy(cfg->ssh_nc_host, value, len);

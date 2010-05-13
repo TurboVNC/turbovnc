@@ -93,7 +93,7 @@ int has_help(void)
 void launch_help(HWND hwnd, const char *topic)
 {
     if (topic) {
-	int colonpos = strcspn(topic, ":");
+	int colonpos = (int)strcspn(topic, ":");
 
 #ifndef NO_HTMLHELP
 	if (chm_path) {

@@ -1075,7 +1075,7 @@ static void c_write_untrusted(Ssh ssh, const char *buf, int len)
 
 static void c_write_str(Ssh ssh, const char *buf)
 {
-    c_write(ssh, buf, strlen(buf));
+    c_write(ssh, buf, (int)strlen(buf));
 }
 
 static void ssh_free_packet(struct Packet *pkt)
@@ -1406,7 +1406,7 @@ static int s_wrpkt_prepare(Ssh ssh, struct Packet *pkt, int *offset_p)
     if (ssh->logctx)
 	log_packet(ssh->logctx, PKT_OUTGOING, pkt->data[12],
 		   ssh1_pkt_type(pkt->data[12]),
-		   pkt->body, pkt->length - (pkt->body - pkt->data),
+		   pkt->body, pkt->length - (int)(pkt->body - pkt->data),
 		   pkt->nblanks, pkt->blanks);
     sfree(pkt->blanks); pkt->blanks = NULL;
     pkt->nblanks = 0;
@@ -1598,7 +1598,7 @@ static void ssh_pkt_ensure(struct Packet *pkt, int length)
 {
     if (pkt->maxlen < length) {
 	unsigned char *body = pkt->body;
-	int offset = body ? body - pkt->data : 0;
+	int offset = body ? (int)(body - pkt->data) : 0;
 	pkt->maxlen = length + 256;
 	pkt->data = sresize(pkt->data, pkt->maxlen + APIEXTRA, unsigned char);
 	if (body) pkt->body = pkt->data + offset;
@@ -1611,7 +1611,7 @@ static void ssh_pkt_adddata(struct Packet *pkt, void *data, int len)
 	pkt->blanks = sresize(pkt->blanks, pkt->nblanks, struct logblank_t);
 	assert(pkt->body);
 	pkt->blanks[pkt->nblanks-1].offset = pkt->length -
-					     (pkt->body - pkt->data);
+					     (int)(pkt->body - pkt->data);
 	pkt->blanks[pkt->nblanks-1].len = len;
 	pkt->blanks[pkt->nblanks-1].type = pkt->logmode;
     }
@@ -1640,7 +1640,7 @@ static void ssh_pkt_addstring_start(struct Packet *pkt)
 }
 static void ssh_pkt_addstring_str(struct Packet *pkt, char *data)
 {
-    ssh_pkt_adddata(pkt, data, strlen(data));
+    ssh_pkt_adddata(pkt, data, (int)strlen(data));
     PUT_32BIT(pkt->data + pkt->savedpos - 4, pkt->length - pkt->savedpos);
 }
 static void ssh_pkt_addstring_data(struct Packet *pkt, char *data, int len)
@@ -1727,7 +1727,7 @@ static int ssh2_pkt_construct(Ssh ssh, struct Packet *pkt)
     if (ssh->logctx)
 	log_packet(ssh->logctx, PKT_OUTGOING, pkt->data[5],
 		   ssh2_pkt_type(ssh->pkt_ctx, pkt->data[5]),
-		   pkt->body, pkt->length - (pkt->body - pkt->data),
+		   pkt->body, pkt->length - (int)(pkt->body - pkt->data),
 		   pkt->nblanks, pkt->blanks);
     sfree(pkt->blanks); pkt->blanks = NULL;
     pkt->nblanks = 0;
@@ -2499,7 +2499,7 @@ static int do_ssh_init(Ssh ssh, unsigned char c)
         }
         logeventf(ssh, "We claim version: %.*s",
                   strcspn(verstring, "\015\012"), verstring);
-	s_write(ssh, verstring, strlen(verstring));
+	s_write(ssh, verstring, (int)strlen(verstring));
         sfree(verstring);
 	if (ssh->version == 2)
 	    do_ssh2_transport(ssh, NULL, -1, NULL);
@@ -3006,7 +3006,7 @@ static int do_ssh1_login(Ssh ssh, unsigned char *in, int inlen,
 	strcpy(logmsg, "      ");
 	hostkey.comment = NULL;
 	rsa_fingerprint(logmsg + strlen(logmsg),
-			sizeof(logmsg) - strlen(logmsg), &hostkey);
+			(int)(sizeof(logmsg) - strlen(logmsg)), &hostkey);
 	logevent(logmsg);
     }
 
@@ -3357,13 +3357,13 @@ static int do_ssh1_login(Ssh ssh, unsigned char *in, int inlen,
 			int n, ok = FALSE;
 			do {	       /* do while (0) to make breaking easy */
 			    n = ssh1_read_bignum
-				(s->p, s->responselen-(s->p-s->response),
+				(s->p, (int)(s->responselen-(s->p-s->response)),
 				 &s->key.exponent);
 			    if (n < 0)
 				break;
 			    s->p += n;
 			    n = ssh1_read_bignum
-				(s->p, s->responselen-(s->p-s->response),
+				(s->p, (int)(s->responselen-(s->p-s->response)),
 				 &s->key.modulus);
 			    if (n < 0)
 			    break;
@@ -3803,7 +3803,7 @@ static int do_ssh1_login(Ssh ssh, unsigned char *in, int inlen,
 		int bottom, top, pwlen, i;
 		char *randomstr;
 
-		pwlen = strlen(s->cur_prompt->prompts[0]->result);
+		pwlen = (int)strlen(s->cur_prompt->prompts[0]->result);
 		if (pwlen < 16) {
 		    bottom = 0;    /* zero length passwords are OK! :-) */
 		    top = 15;
@@ -3847,7 +3847,7 @@ static int do_ssh1_login(Ssh ssh, unsigned char *in, int inlen,
 		char *ss;
 		int len;
 
-		len = strlen(s->cur_prompt->prompts[0]->result);
+		len = (int)strlen(s->cur_prompt->prompts[0]->result);
 		if (len < sizeof(string)) {
 		    ss = string;
 		    strcpy(string, s->cur_prompt->prompts[0]->result);
@@ -3868,7 +3868,7 @@ static int do_ssh1_login(Ssh ssh, unsigned char *in, int inlen,
 		 * any of our password camouflage methods.
 		 */
 		int len;
-		len = strlen(s->cur_prompt->prompts[0]->result);
+		len = (int)strlen(s->cur_prompt->prompts[0]->result);
 		logevent("Sending unpadded password");
 		send_packet(ssh, s->pwpkt_type,
 			    PKTT_PASSWORD, PKT_INT, len,
@@ -5011,7 +5011,7 @@ static int in_commasep_string(char *needle, char *haystack, int haylen)
     int needlen;
     if (!needle || !haystack)	       /* protect against null pointers */
 	return 0;
-    needlen = strlen(needle);
+    needlen = (int)strlen(needle);
     while (1) {
 	/*
 	 * Is it at the start of the string?
@@ -5042,7 +5042,7 @@ static int first_in_commasep_string(char *needle, char *haystack, int haylen)
     int needlen;
     if (!needle || !haystack)	       /* protect against null pointers */
 	return 0;
-    needlen = strlen(needle);
+    needlen = (int)strlen(needle);
     /*
      * Is it at the start of the string?
      */
@@ -5547,8 +5547,8 @@ static int do_ssh2_transport(Ssh ssh, void *vin, int inlen,
 	}
 
 	ssh->exhash = ssh->kex->hash->init();
-	hash_string(ssh->kex->hash, ssh->exhash, ssh->v_c, strlen(ssh->v_c));
-	hash_string(ssh->kex->hash, ssh->exhash, ssh->v_s, strlen(ssh->v_s));
+	hash_string(ssh->kex->hash, ssh->exhash, ssh->v_c, (int)strlen(ssh->v_c));
+	hash_string(ssh->kex->hash, ssh->exhash, ssh->v_s, (int)strlen(ssh->v_s));
 	hash_string(ssh->kex->hash, ssh->exhash,
 	    s->our_kexinit, s->our_kexinitlen);
 	sfree(s->our_kexinit);
@@ -8045,7 +8045,7 @@ static void do_ssh2_authconn(Ssh ssh, unsigned char *in, int inlen,
 	    ssh2_pkt_addstring(s->pktout, "env");
 	    ssh2_pkt_addbool(s->pktout, 1);	       /* want reply */
 	    ssh2_pkt_addstring_start(s->pktout);
-	    ssh2_pkt_addstring_data(s->pktout, var, varend-var);
+	    ssh2_pkt_addstring_data(s->pktout, var, (int)(varend-var));
 	    ssh2_pkt_addstring(s->pktout, val);
 	    ssh2_pkt_send(ssh, s->pktout);
 

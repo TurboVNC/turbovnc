@@ -546,7 +546,7 @@ void sk_getaddr(SockAddr addr, char *buf, int buflen)
 #ifndef NO_IPV6
     if (addr->ai) {
 	if (p_WSAAddressToStringA) {
-	    p_WSAAddressToStringA(addr->ai->ai_addr, addr->ai->ai_addrlen,
+	    p_WSAAddressToStringA(addr->ai->ai_addr, (int)addr->ai->ai_addrlen,
 				  NULL, buf, &buflen);
 	} else
 	    strncpy(buf, "IPv6", buflen);
@@ -1343,7 +1343,7 @@ int select_result(WPARAM wParam, LPARAM lParam)
 	    return 1;
     }
 
-    noise_ultralight(lParam);
+    noise_ultralight((int)lParam);
 
     switch (WSAGETSELECTEVENT(lParam)) {
       case FD_CONNECT:

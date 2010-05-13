@@ -74,7 +74,7 @@ void luni_send(void *handle, wchar_t * widebuf, int len, int interactive)
 	    p = linebuffer;
     }
     if (p > linebuffer)
-	ldisc_send(ldisc, linebuffer, p - linebuffer, interactive);
+	ldisc_send(ldisc, linebuffer, (int)(p - linebuffer), interactive);
 
     sfree(linebuffer);
 }

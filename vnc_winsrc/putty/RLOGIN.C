@@ -184,16 +184,16 @@ static const char *rlogin_init(void *frontend_handle, void **backend_handle,
 	char *p;
 	sk_write(rlogin->s, &z, 1);
 	sk_write(rlogin->s, cfg->localusername,
-		 strlen(cfg->localusername));
+		 (int)strlen(cfg->localusername));
 	sk_write(rlogin->s, &z, 1);
 	sk_write(rlogin->s, cfg->username,
-		 strlen(cfg->username));
+		 (int)strlen(cfg->username));
 	sk_write(rlogin->s, &z, 1);
 	sk_write(rlogin->s, cfg->termtype,
-		 strlen(cfg->termtype));
+		 (int)strlen(cfg->termtype));
 	sk_write(rlogin->s, "/", 1);
 	for (p = cfg->termspeed; isdigit((unsigned char)*p); p++) continue;
-	sk_write(rlogin->s, cfg->termspeed, p - cfg->termspeed);
+	sk_write(rlogin->s, cfg->termspeed, (int)(p - cfg->termspeed));
 	rlogin->bufsize = sk_write(rlogin->s, &z, 1);
     }
 

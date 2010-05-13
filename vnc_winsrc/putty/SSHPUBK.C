@@ -36,7 +36,7 @@ static int loadrsakey_main(FILE * fp, struct RSAKey *key, int pub_only,
     *error = NULL;
 
     /* Slurp the whole file (minus the header) into a buffer. */
-    len = fread(buf, 1, sizeof(buf), fp);
+    len = (int)fread(buf, 1, sizeof(buf), fp);
     fclose(fp);
     if (len < 0 || len == sizeof(buf)) {
 	*error = "error reading file";
@@ -105,7 +105,7 @@ static int loadrsakey_main(FILE * fp, struct RSAKey *key, int pub_only,
      */
     if (ciphertype) {
 	MD5Init(&md5c);
-	MD5Update(&md5c, (unsigned char *)passphrase, strlen(passphrase));
+	MD5Update(&md5c, (unsigned char *)passphrase, (int)strlen(passphrase));
 	MD5Final(keybuf, &md5c);
 	des3_decrypt_pubkey(keybuf, buf + i, (len - i + 7) & ~7);
 	memset(keybuf, 0, sizeof(keybuf));	/* burn the evidence */
@@ -355,9 +355,9 @@ int saversakey(const Filename *filename, struct RSAKey *key, char *passphrase)
      */
     if (passphrase) {
 	MD5Init(&md5c);
-	MD5Update(&md5c, (unsigned char *)passphrase, strlen(passphrase));
+	MD5Update(&md5c, (unsigned char *)passphrase, (int)strlen(passphrase));
 	MD5Final(keybuf, &md5c);
-	des3_encrypt_pubkey(keybuf, estart, p - estart);
+	des3_encrypt_pubkey(keybuf, estart, (int)(p - estart));
 	memset(keybuf, 0, sizeof(keybuf));	/* burn the evidence */
     }
 
@@ -578,7 +578,7 @@ static unsigned char *read_blob(FILE * fp, int nlines, int *bloblen)
 	    sfree(blob);
 	    return NULL;
 	}
-	linelen = strlen(line);
+	linelen = (int)strlen(line);
 	if (linelen % 4 != 0 || linelen > 64) {
 	    sfree(blob);
 	    sfree(line);
@@ -627,7 +627,7 @@ struct ssh2_userkey *ssh2_load_userkey(const Filename *filename,
     unsigned char *public_blob, *private_blob;
     int public_blob_len, private_blob_len;
     int i, is_mac, old_fmt;
-    int passlen = passphrase ? strlen(passphrase) : 0;
+    int passlen = passphrase ? (int)strlen(passphrase) : 0;
     const char *error = NULL;
 
     ret = NULL;			       /* return NULL for most errors */
@@ -763,9 +763,9 @@ struct ssh2_userkey *ssh2_load_userkey(const Filename *filename,
 	    free_macdata = 0;
 	} else {
 	    unsigned char *p;
-	    int namelen = strlen(alg->name);
-	    int enclen = strlen(encryption);
-	    int commlen = strlen(comment);
+	    int namelen = (int)strlen(alg->name);
+	    int enclen = (int)strlen(encryption);
+	    int commlen = (int)strlen(comment);
 	    maclen = (4 + namelen +
 		      4 + enclen +
 		      4 + commlen +
@@ -1091,9 +1091,9 @@ int ssh2_save_userkey(const Filename *filename, struct ssh2_userkey *key,
 	unsigned char *macdata;
 	int maclen;
 	unsigned char *p;
-	int namelen = strlen(key->alg->name);
-	int enclen = strlen(cipherstr);
-	int commlen = strlen(key->comment);
+	int namelen = (int)strlen(key->alg->name);
+	int enclen = (int)strlen(cipherstr);
+	int commlen = (int)strlen(key->comment);
 	SHA_State s;
 	unsigned char mackey[20];
 	char header[] = "putty-private-key-file-mac-key";
@@ -1115,7 +1115,7 @@ int ssh2_save_userkey(const Filename *filename, struct ssh2_userkey *key,
 	SHA_Init(&s);
 	SHA_Bytes(&s, header, sizeof(header)-1);
 	if (passphrase)
-	    SHA_Bytes(&s, passphrase, strlen(passphrase));
+	    SHA_Bytes(&s, passphrase, (int)strlen(passphrase));
 	SHA_Final(&s, mackey);
 	hmac_sha1_simple(mackey, 20, macdata, maclen, priv_mac);
 	memset(macdata, 0, maclen);
@@ -1128,7 +1128,7 @@ int ssh2_save_userkey(const Filename *filename, struct ssh2_userkey *key,
 	unsigned char key[40];
 	SHA_State s;
 
-	passlen = strlen(passphrase);
+	passlen = (int)strlen(passphrase);
 
 	SHA_Init(&s);
 	SHA_Bytes(&s, "\0\0\0\0", 4);
@@ -1184,7 +1184,7 @@ int key_type(const Filename *filename)
     fp = f_open(*filename, "r", FALSE);
     if (!fp)
 	return SSH_KEYTYPE_UNOPENABLE;
-    i = fread(buf, 1, sizeof(buf), fp);
+    i = (int)fread(buf, 1, sizeof(buf), fp);
     fclose(fp);
     if (i < 0)
 	return SSH_KEYTYPE_UNOPENABLE;

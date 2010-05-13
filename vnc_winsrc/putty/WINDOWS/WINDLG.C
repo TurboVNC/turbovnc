@@ -66,7 +66,7 @@ void force_normal(HWND hwnd)
     recurse = 0;
 }
 
-static int CALLBACK LogProc(HWND hwnd, UINT msg,
+static INT_PTR CALLBACK LogProc(HWND hwnd, UINT msg,
 			    WPARAM wParam, LPARAM lParam)
 {
     int i;
@@ -100,7 +100,7 @@ static int CALLBACK LogProc(HWND hwnd, UINT msg,
 		HIWORD(wParam) == BN_DOUBLECLICKED) {
 		int selcount;
 		int *selitems;
-		selcount = SendDlgItemMessage(hwnd, IDN_LIST,
+		selcount = (int)SendDlgItemMessage(hwnd, IDN_LIST,
 					      LB_GETSELCOUNT, 0, 0);
 		if (selcount == 0) {   /* don't even try to copy zero items */
 		    MessageBeep(0);
@@ -109,7 +109,7 @@ static int CALLBACK LogProc(HWND hwnd, UINT msg,
 
 		selitems = snewn(selcount, int);
 		if (selitems) {
-		    int count = SendDlgItemMessage(hwnd, IDN_LIST,
+		    int count = (int)SendDlgItemMessage(hwnd, IDN_LIST,
 						   LB_GETSELITEMS,
 						   selcount,
 						   (LPARAM) selitems);
@@ -126,14 +126,14 @@ static int CALLBACK LogProc(HWND hwnd, UINT msg,
 		    size = 0;
 		    for (i = 0; i < count; i++)
 			size +=
-			    strlen(events[selitems[i]]) + sizeof(sel_nl);
+			    (int)strlen(events[selitems[i]]) + sizeof(sel_nl);
 
 		    clipdata = snewn(size, char);
 		    if (clipdata) {
 			char *p = clipdata;
 			for (i = 0; i < count; i++) {
 			    char *q = events[selitems[i]];
-			    int qlen = strlen(q);
+			    int qlen = (int)strlen(q);
 			    memcpy(p, q, qlen);
 			    p += qlen;
 			    memcpy(p, sel_nl, sizeof(sel_nl));
@@ -161,7 +161,7 @@ static int CALLBACK LogProc(HWND hwnd, UINT msg,
     return 0;
 }
 
-static int CALLBACK LicenceProc(HWND hwnd, UINT msg,
+static INT_PTR CALLBACK LicenceProc(HWND hwnd, UINT msg,
 				WPARAM wParam, LPARAM lParam)
 {
     switch (msg) {
@@ -187,7 +187,7 @@ static int CALLBACK LicenceProc(HWND hwnd, UINT msg,
     return 0;
 }
 
-static int CALLBACK AboutProc(HWND hwnd, UINT msg,
+static INT_PTR CALLBACK AboutProc(HWND hwnd, UINT msg,
 			      WPARAM wParam, LPARAM lParam)
 {
     char *str;
@@ -259,7 +259,7 @@ static int SaneDialogBox(HINSTANCE hinst,
     SetWindowLongPtr(hwnd, BOXRESULT, 0); /* result from SaneEndDialog */
 
     while ((gm=GetMessage(&msg, NULL, 0, 0)) > 0) {
-	flags=GetWindowLongPtr(hwnd, BOXFLAGS);
+	flags=(int)GetWindowLongPtr(hwnd, BOXFLAGS);
 	if (!(flags & DF_END) && !IsDialogMessage(hwnd, &msg))
 	    DispatchMessage(&msg);
 	if (flags & DF_END)
@@ -267,9 +267,9 @@ static int SaneDialogBox(HINSTANCE hinst,
     }
 
     if (gm == 0)
-        PostQuitMessage(msg.wParam); /* We got a WM_QUIT, pass it on */
+        PostQuitMessage((int)msg.wParam); /* We got a WM_QUIT, pass it on */
 
-    ret=GetWindowLongPtr(hwnd, BOXRESULT);
+    ret=(int)GetWindowLongPtr(hwnd, BOXRESULT);
     DestroyWindow(hwnd);
     return ret;
 }
@@ -283,7 +283,7 @@ static void SaneEndDialog(HWND hwnd, int ret)
 /*
  * Null dialog procedure.
  */
-static int CALLBACK NullDlgProc(HWND hwnd, UINT msg,
+static INT_PTR CALLBACK NullDlgProc(HWND hwnd, UINT msg,
 				WPARAM wParam, LPARAM lParam)
 {
     return 0;
@@ -317,7 +317,7 @@ static HTREEITEM treeview_insert(struct treeview_faff *faff,
 #endif
     ins.INSITEM.mask = TVIF_TEXT | TVIF_PARAM;
     ins.INSITEM.pszText = text;
-    ins.INSITEM.cchTextMax = strlen(text)+1;
+    ins.INSITEM.cchTextMax = (int)strlen(text)+1;
     ins.INSITEM.lParam = (LPARAM)path;
     newitem = TreeView_InsertItem(faff->treeview, &ins);
     if (level > 0)
@@ -367,7 +367,7 @@ static void create_controls(HWND hwnd, char *path)
  * (Being a dialog procedure, in general it returns 0 if the default
  * dialog processing should be performed, and 1 if it should not.)
  */
-static int CALLBACK GenericMainDlgProc(HWND hwnd, UINT msg,
+static INT_PTR CALLBACK GenericMainDlgProc(HWND hwnd, UINT msg,
 				       WPARAM wParam, LPARAM lParam)
 {
     HWND hw, treeview;
@@ -720,7 +720,7 @@ void logevent(void *frontend, const char *string)
 	int count;
 	SendDlgItemMessage(logbox, IDN_LIST, LB_ADDSTRING,
 			   0, (LPARAM) events[nevents]);
-	count = SendDlgItemMessage(logbox, IDN_LIST, LB_GETCOUNT, 0, 0);
+	count = (int)SendDlgItemMessage(logbox, IDN_LIST, LB_GETCOUNT, 0, 0);
 	SendDlgItemMessage(logbox, IDN_LIST, LB_SETTOPINDEX, count - 1, 0);
     }
     nevents++;
@@ -821,6 +821,7 @@ int verify_ssh_host_key(void *frontend, char *host, int port, char *keytype,
 	    return 1;
         return 0;
     }
+    return 0;
 }
 
 /*

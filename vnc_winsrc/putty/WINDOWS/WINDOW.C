@@ -393,7 +393,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	while (*p && isspace(*p))
 	    p++;
 	if (*p == '@') {
-	    int i = strlen(p);
+	    int i = (int)strlen(p);
 	    while (i > 1 && isspace(p[i - 1]))
 		i--;
 	    p[i] = '\0';
@@ -556,7 +556,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	 * Trim leading whitespace off the hostname if it's there.
 	 */
 	{
-	    int space = strspn(cfg.host, " \t");
+	    int space = (int)strspn(cfg.host, " \t");
 	    memmove(cfg.host, cfg.host+space, 1+strlen(cfg.host)-space);
 	}
 
@@ -854,8 +854,8 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
     }
 
     finished:
-    cleanup_exit(msg.wParam);	       /* this doesn't return... */
-    return msg.wParam;		       /* ... but optimiser doesn't know */
+    cleanup_exit((int)msg.wParam);	       /* this doesn't return... */
+    return (int)msg.wParam;		       /* ... but optimiser doesn't know */
 }
 
 /*
@@ -2062,7 +2062,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
 		    sprintf(c, "putty &%p", filemap);
 		    cl = c;
 		} else if (wParam == IDM_SAVEDSESS) {
-		    unsigned int sessno = ((lParam - IDM_SAVED_MIN)
+		    unsigned int sessno = (((unsigned int)lParam - IDM_SAVED_MIN)
 					   / MENU_SAVED_STEP) + 1;
 		    if (sessno < (unsigned)sesslist.nsessions) {
 			char *session = sesslist.sessions[sessno];
@@ -2170,9 +2170,9 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
 
 		/* Enable or disable the scroll bar, etc */
 		{
-		    LONG nflg, flag = GetWindowLongPtr(hwnd, GWL_STYLE);
+		    LONG nflg, flag = (LONG)GetWindowLongPtr(hwnd, GWL_STYLE);
 		    LONG nexflag, exflag =
-			GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+			(LONG)GetWindowLongPtr(hwnd, GWL_EXSTYLE);
 
 		    nexflag = exflag;
 		    if (cfg.alwaysontop != prev_cfg.alwaysontop) {
@@ -2303,7 +2303,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
 		SendMessage(hwnd, WM_SYSCOMMAND, IDM_SAVEDSESS, wParam);
 	    }
 	    if (wParam >= IDM_SPECIAL_MIN && wParam <= IDM_SPECIAL_MAX) {
-		int i = (wParam - IDM_SPECIAL_MIN) / 0x10;
+		int i = ((int)wParam - IDM_SPECIAL_MIN) / 0x10;
 		/*
 		 * Ensure we haven't been sent a bogus SYSCOMMAND
 		 * which would cause us to reference invalid memory
@@ -2449,7 +2449,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
 	 * Add the mouse position and message time to the random
 	 * number noise.
 	 */
-	noise_ultralight(lParam);
+	noise_ultralight((int)lParam);
 
 	if (wParam & (MK_LBUTTON | MK_MBUTTON | MK_RBUTTON) &&
 	    GetCapture() == hwnd) {
@@ -2477,10 +2477,10 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
 		last_mousemove = WM_NCMOUSEMOVE;
 	    }
 	}
-	noise_ultralight(lParam);
+	noise_ultralight((int)lParam);
 	break;
       case WM_IGNORE_CLIP:
-	ignore_clip = wParam;	       /* don't panic on DESTROYCLIPBOARD */
+	ignore_clip = (int)wParam;	       /* don't panic on DESTROYCLIPBOARD */
 	break;
       case WM_DESTROYCLIPBOARD:
 	if (!ignore_clip)
@@ -2871,7 +2871,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
 	 * Add the scan code and keypress timing to the random
 	 * number noise.
 	 */
-	noise_ultralight(lParam);
+	noise_ultralight((int)lParam);
 
 	/*
 	 * We don't do TranslateMessage since it disassociates the
@@ -2977,8 +2977,8 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
 	if (wParam & 0xFF00) {
 	    unsigned char buf[2];
 
-	    buf[1] = wParam;
-	    buf[0] = wParam >> 8;
+	    buf[1] = (int)wParam;
+	    buf[0] = (int)wParam >> 8;
 	    term_seen_key_event(term);
 	    if (ldisc)
 		lpage_send(ldisc, kbd_codepage, buf, 2, 1);
@@ -3842,31 +3842,31 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 	    switch (wParam) {
 	      case VK_NUMPAD1:
 		*p++ = "bB\002\002"[shift_state & 3];
-		return p - output;
+		return (int)(p - output);
 	      case VK_NUMPAD2:
 		*p++ = "jJ\012\012"[shift_state & 3];
-		return p - output;
+		return (int)(p - output);
 	      case VK_NUMPAD3:
 		*p++ = "nN\016\016"[shift_state & 3];
-		return p - output;
+		return (int)(p - output);
 	      case VK_NUMPAD4:
 		*p++ = "hH\010\010"[shift_state & 3];
-		return p - output;
+		return (int)(p - output);
 	      case VK_NUMPAD5:
 		*p++ = shift_state ? '.' : '.';
-		return p - output;
+		return (int)(p - output);
 	      case VK_NUMPAD6:
 		*p++ = "lL\014\014"[shift_state & 3];
-		return p - output;
+		return (int)(p - output);
 	      case VK_NUMPAD7:
 		*p++ = "yY\031\031"[shift_state & 3];
-		return p - output;
+		return (int)(p - output);
 	      case VK_NUMPAD8:
 		*p++ = "kK\013\013"[shift_state & 3];
-		return p - output;
+		return (int)(p - output);
 	      case VK_NUMPAD9:
 		*p++ = "uU\025\025"[shift_state & 3];
-		return p - output;
+		return (int)(p - output);
 	    }
 	}
 
@@ -3964,7 +3964,7 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 			p += sprintf((char *) p, "\x1B?%c", xkey);
 		} else
 		    p += sprintf((char *) p, "\x1BO%c", xkey);
-		return p - output;
+		return (int)(p - output);
 	    }
 	}
 
@@ -3983,15 +3983,15 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 	    *p++ = 0x1B;
 	    *p++ = '[';
 	    *p++ = 'Z';
-	    return p - output;
+	    return (int)(p - output);
 	}
 	if (wParam == VK_SPACE && shift_state == 2) {	/* Ctrl-Space */
 	    *p++ = 0;
-	    return p - output;
+	    return (int)(p - output);
 	}
 	if (wParam == VK_SPACE && shift_state == 3) {	/* Ctrl-Shift-Space */
 	    *p++ = 160;
-	    return p - output;
+	    return (int)(p - output);
 	}
 	if (wParam == VK_CANCEL && shift_state == 2) {	/* Ctrl-Break */
 	    if (back)
@@ -4006,24 +4006,24 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 	/* Control-2 to Control-8 are special */
 	if (shift_state == 2 && wParam >= '2' && wParam <= '8') {
 	    *p++ = "\000\033\034\035\036\037\177"[wParam - '2'];
-	    return p - output;
+	    return (int)(p - output);
 	}
 	if (shift_state == 2 && (wParam == 0xBD || wParam == 0xBF)) {
 	    *p++ = 0x1F;
-	    return p - output;
+	    return (int)(p - output);
 	}
 	if (shift_state == 2 && wParam == 0xDF) {
 	    *p++ = 0x1C;
-	    return p - output;
+	    return (int)(p - output);
 	}
 	if (shift_state == 3 && wParam == 0xDE) {
 	    *p++ = 0x1E;	       /* Ctrl-~ == Ctrl-^ in xterm at least */
-	    return p - output;
+	    return (int)(p - output);
 	}
 	if (shift_state == 0 && wParam == VK_RETURN && term->cr_lf_return) {
 	    *p++ = '\r';
 	    *p++ = '\n';
-	    return p - output;
+	    return (int)(p - output);
 	}
 
 	/*
@@ -4124,7 +4124,7 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 
 	if (term->vt52_mode && code > 0 && code <= 6) {
 	    p += sprintf((char *) p, "\x1B%c", " HLMEIG"[code]);
-	    return p - output;
+	    return (int)(p - output);
 	}
 
 	if (cfg.funky_type == FUNKY_SCO &&     /* SCO function keys */
@@ -4148,7 +4148,7 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 	    if (keystate[VK_SHIFT] & 0x80) index += 12;
 	    if (keystate[VK_CONTROL] & 0x80) index += 24;
 	    p += sprintf((char *) p, "\x1B[%c", codes[index]);
-	    return p - output;
+	    return (int)(p - output);
 	}
 	if (cfg.funky_type == FUNKY_SCO &&     /* SCO small keypad */
 	    code >= 1 && code <= 6) {
@@ -4158,7 +4158,7 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 	    } else {
 		p += sprintf((char *) p, "\x1B[%c", codes[code-1]);
 	    }
-	    return p - output;
+	    return (int)(p - output);
 	}
 	if ((term->vt52_mode || cfg.funky_type == FUNKY_VT100P) && code >= 11 && code <= 24) {
 	    int offt = 0;
@@ -4171,26 +4171,26 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 	    else
 		p +=
 		    sprintf((char *) p, "\x1BO%c", code + 'P' - 11 - offt);
-	    return p - output;
+	    return (int)(p - output);
 	}
 	if (cfg.funky_type == FUNKY_LINUX && code >= 11 && code <= 15) {
 	    p += sprintf((char *) p, "\x1B[[%c", code + 'A' - 11);
-	    return p - output;
+	    return (int)(p - output);
 	}
 	if (cfg.funky_type == FUNKY_XTERM && code >= 11 && code <= 14) {
 	    if (term->vt52_mode)
 		p += sprintf((char *) p, "\x1B%c", code + 'P' - 11);
 	    else
 		p += sprintf((char *) p, "\x1BO%c", code + 'P' - 11);
-	    return p - output;
+	    return (int)(p - output);
 	}
 	if (cfg.rxvt_homeend && (code == 1 || code == 4)) {
 	    p += sprintf((char *) p, code == 1 ? "\x1B[H" : "\x1BOw");
-	    return p - output;
+	    return (int)(p - output);
 	}
 	if (code) {
 	    p += sprintf((char *) p, "\x1B[%d~", code);
-	    return p - output;
+	    return (int)(p - output);
 	}
 
 	/*
@@ -4248,7 +4248,7 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 		    else
 			p += sprintf((char *) p, "\x1B[%c", xkey);
 		}
-		return p - output;
+		return (int)(p - output);
 	    }
 	}
 
@@ -4263,7 +4263,7 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 	}
 
 	if (left_alt && wParam >= VK_NUMPAD0 && wParam <= VK_NUMPAD9)
-	    alt_sum = alt_sum * 10 + wParam - VK_NUMPAD0;
+	    alt_sum = alt_sum * 10 + (int)wParam - VK_NUMPAD0;
 	else
 	    alt_sum = 0;
     }
@@ -4295,10 +4295,10 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 	     * and speculations. */
 	    BYTE keybs[3];
 	    int i;
-	    r = ToAsciiEx(wParam, scan, keystate, (LPWORD)keybs, 0, kbd_layout);
+	    r = ToAsciiEx((UINT)wParam, scan, keystate, (LPWORD)keybs, 0, kbd_layout);
 	    for (i=0; i<3; i++) keys[i] = keybs[i];
 	} else {
-	    r = ToAsciiEx(wParam, scan, keystate, keys, 0, kbd_layout);
+	    r = ToAsciiEx((UINT)wParam, scan, keystate, keys, 0, kbd_layout);
 	}
 #ifdef SHOW_TOASCII_RESULT
 	if (r == 1 && !key_down) {
@@ -4407,7 +4407,7 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 	    /* This is so the ALT-Numpad and dead keys work correctly. */
 	    keys[0] = 0;
 
-	    return p - output;
+	    return (int)(p - output);
 	}
 	/* If we're definitly not building up an ALT-54321 then clear it */
 	if (!left_alt)
@@ -4636,7 +4636,7 @@ void write_clip(void *frontend, wchar_t * data, int *attr, int len, int must_des
 
 	get_unitab(CP_ACP, unitab, 0);
 
-	rtfsize = 100 + strlen(cfg.font.name);
+	rtfsize = 100 + (int)strlen(cfg.font.name);
 	rtf = snewn(rtfsize, char);
 	rtflen = sprintf(rtf, "{\\rtf1\\ansi\\deff0{\\fonttbl\\f0\\fmodern %s;}\\f0\\fs%d",
 			 cfg.font.name, cfg.font.height*2);
@@ -4694,7 +4694,7 @@ void write_clip(void *frontend, wchar_t * data, int *attr, int len, int must_des
 	     */
 	    rtf = sresize(rtf, rtfsize + (numcolours * 25), char);
 	    strcat(rtf, "{\\colortbl ;");
-	    rtflen = strlen(rtf);
+	    rtflen = (int)strlen(rtf);
 
 	    for (i = 0; i < NALLCOLOURS; i++) {
 		if (palette[i] != 0) {
@@ -4934,7 +4934,7 @@ void get_clip(void *frontend, wchar_t ** p, int *len)
 	    *p = GlobalLock(clipdata);
 	    if (*p) {
 		for (p2 = *p; *p2; p2++);
-		*len = p2 - *p;
+		*len = (int)(p2 - *p);
 		return;
 	    }
 	} else if ( (clipdata = GetClipboardData(CF_TEXT)) ) {
@@ -4942,9 +4942,9 @@ void get_clip(void *frontend, wchar_t ** p, int *len)
 	    int i;
 	    CloseClipboard();
 	    s = GlobalLock(clipdata);
-	    i = MultiByteToWideChar(CP_ACP, 0, s, strlen(s) + 1, 0, 0);
+	    i = MultiByteToWideChar(CP_ACP, 0, s, (int)strlen(s) + 1, 0, 0);
 	    *p = converted = snewn(i, wchar_t);
-	    MultiByteToWideChar(CP_ACP, 0, s, strlen(s) + 1, converted, i);
+	    MultiByteToWideChar(CP_ACP, 0, s, (int)strlen(s) + 1, converted, i);
 	    *len = i - 1;
 	    return;
 	} else
@@ -5313,7 +5313,7 @@ static void make_full_screen()
 		return;
 	
     /* Remove the window furniture. */
-    style = GetWindowLongPtr(hwnd, GWL_STYLE);
+    style = (LONG)GetWindowLongPtr(hwnd, GWL_STYLE);
     style &= ~(WS_CAPTION | WS_BORDER | WS_THICKFRAME);
     if (cfg.scrollbar_in_fullscreen)
 	style |= WS_VSCROLL;
@@ -5345,7 +5345,7 @@ static void clear_full_screen()
     DWORD oldstyle, style;
 
     /* Reinstate the window furniture. */
-    style = oldstyle = GetWindowLongPtr(hwnd, GWL_STYLE);
+    style = oldstyle = (DWORD)GetWindowLongPtr(hwnd, GWL_STYLE);
     style |= WS_CAPTION | WS_BORDER;
     if (cfg.resize_action == RESIZE_DISABLED)
         style &= ~WS_THICKFRAME;

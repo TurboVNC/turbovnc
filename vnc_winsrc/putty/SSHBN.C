@@ -617,7 +617,7 @@ int ssh1_read_bignum(const unsigned char *data, int len, Bignum * result)
 
     *result = bignum_from_bytes(p, b);
 
-    return p + b - data;
+    return (int)(p + b - data);
 }
 
 /*

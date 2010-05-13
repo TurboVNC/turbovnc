@@ -109,7 +109,7 @@ void write_setting_s(void *handle, const char *key, const char *value)
 {
     if (handle)
 	RegSetValueEx((HKEY) handle, key, 0, REG_SZ, value,
-		      1 + strlen(value));
+		      1 + (int)strlen(value));
 }
 
 void write_setting_i(void *handle, const char *key, int value)
@@ -296,7 +296,7 @@ static void hostkey_regname(char *buffer, const char *hostname,
     int len;
     strcpy(buffer, keytype);
     strcat(buffer, "@");
-    len = strlen(buffer);
+    len = (int)strlen(buffer);
     len += sprintf(buffer + len, "%d:", port);
     mungestr(hostname, buffer + strlen(buffer));
 }
@@ -311,7 +311,7 @@ int verify_host_key(const char *hostname, int port,
     DWORD type;
     int ret, compare;
 
-    len = 1 + strlen(key);
+    len = 1 + (int)strlen(key);
 
     /*
      * Now read a saved key in from the registry and see what it
@@ -363,7 +363,7 @@ int verify_host_key(const char *hostname, int port,
 		int ndigits, nwords;
 		*p++ = '0';
 		*p++ = 'x';
-		ndigits = strcspn(q, "/");	/* find / or end of string */
+		ndigits = (int)strcspn(q, "/");	/* find / or end of string */
 		nwords = ndigits / 4;
 		/* now trim ndigits to remove leading zeros */
 		while (q[(ndigits - 1) ^ 3] == '0' && ndigits > 1)
@@ -387,7 +387,7 @@ int verify_host_key(const char *hostname, int port,
 	     */
 	    if (!strcmp(otherstr, key))
 		RegSetValueEx(rkey, regname, 0, REG_SZ, otherstr,
-			      strlen(otherstr) + 1);
+			      (int)strlen(otherstr) + 1);
 	}
     }
 
@@ -419,7 +419,7 @@ void store_host_key(const char *hostname, int port,
 
     if (RegCreateKey(HKEY_CURRENT_USER, PUTTY_REG_POS "\\SshHostKeys",
 		     &rkey) == ERROR_SUCCESS) {
-	RegSetValueEx(rkey, regname, 0, REG_SZ, key, strlen(key) + 1);
+	RegSetValueEx(rkey, regname, 0, REG_SZ, key, (int)strlen(key) + 1);
 	RegCloseKey(rkey);
     } /* else key does not exist in registry */
 

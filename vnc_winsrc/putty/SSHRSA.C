@@ -56,7 +56,7 @@ int makekey(unsigned char *data, int len, struct RSAKey *result,
 	p += n;
 	len -= n;
     }
-    return p - data;
+    return (int)(p - data);
 }
 
 int makeprivate(unsigned char *data, int len, struct RSAKey *result)
@@ -308,7 +308,7 @@ void rsa_fingerprint(char *str, int len, struct RSAKey *key)
 		digest[i]);
     strncpy(str, buffer, len);
     str[len - 1] = '\0';
-    slen = strlen(str);
+    slen = (int)strlen(str);
     if (key->comment && slen < len - 1) {
 	str[slen] = ' ';
 	strncpy(str + slen + 1, key->comment, len - slen - 1);
@@ -408,7 +408,7 @@ int rsa_public_blob_len(void *data, int maxlen)
 	return -1;
     p += n;
 
-    return p - (unsigned char *)data;
+    return (int)(p - (unsigned char *)data);
 }
 
 void freersakey(struct RSAKey *key)

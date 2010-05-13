@@ -135,7 +135,7 @@ char *dupstr(const char *s)
 {
     char *p = NULL;
     if (s) {
-        int len = strlen(s);
+        int len = (int)strlen(s);
         p = snewn(len + 1, char);
         strcpy(p, s);
     }
@@ -149,13 +149,13 @@ char *dupcat(const char *s1, ...)
     char *p, *q, *sn;
     va_list ap;
 
-    len = strlen(s1);
+    len = (int)strlen(s1);
     va_start(ap, s1);
     while (1) {
 	sn = va_arg(ap, char *);
 	if (!sn)
 	    break;
-	len += strlen(sn);
+	len += (int)strlen(sn);
     }
     va_end(ap);
 
@@ -276,7 +276,7 @@ char *fgetline(FILE *fp)
     char *ret = snewn(512, char);
     int size = 512, len = 0;
     while (fgets(ret + len, size - len, fp)) {
-	len += strlen(ret + len);
+	len += (int)strlen(ret + len);
 	if (ret[len-1] == '\n')
 	    break;		       /* got a newline, we're done */
 	size = len + 512;

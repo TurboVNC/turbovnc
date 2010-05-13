@@ -219,7 +219,7 @@ static void wprefs(void *sesskey, char *name,
     for (i = 0; l > 0 && i < nvals; i++) {
 	const char *s = val2key(mapping, nvals, array[i]);
 	if (s) {
-	    int sl = strlen(s);
+	    int sl = (int)strlen(s);
 	    if (i > 0) {
 		strncat(buf, ",", l);
 		l--;
@@ -817,13 +817,13 @@ void get_sesslist(struct sesslist *list, int allocate)
 	    do {
 		ret = enum_settings_next(handle, otherbuf, sizeof(otherbuf));
 		if (ret) {
-		    int len = strlen(otherbuf) + 1;
+		    int len = (int)strlen(otherbuf) + 1;
 		    if (bufsize < buflen + len) {
 			bufsize = buflen + len + 2048;
 			list->buffer = sresize(list->buffer, bufsize, char);
 		    }
 		    strcpy(list->buffer + buflen, otherbuf);
-		    buflen += strlen(list->buffer + buflen) + 1;
+		    buflen += (int)strlen(list->buffer + buflen) + 1;
 		}
 	    } while (ret);
 	    enum_settings_finish(handle);

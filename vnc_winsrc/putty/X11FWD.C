@@ -158,7 +158,7 @@ static char *x11_verify(unsigned long peer_ip, int peer_port,
 	    if (data[i] != 0)	       /* zero padding wrong */
 		return "XDM-AUTHORIZATION-1 data failed check";
 	tim = time(NULL);
-	if (abs(t - tim) > XDM_MAXSKEW)
+	if (abs((int)(t - tim)) > XDM_MAXSKEW)
 	    return "XDM-AUTHORIZATION-1 time stamp was too far out";
 	seen = snew(struct XDMSeen);
 	seen->time = t;
@@ -231,10 +231,10 @@ int x11_get_screen_number(char *display)
 {
     int n;
 
-    n = strcspn(display, ":");
+    n = (int)strcspn(display, ":");
     if (!display[n])
 	return 0;
-    n = strcspn(display, ".");
+    n = (int)strcspn(display, ".");
     if (!display[n])
 	return 0;
     return atoi(display + n + 1);
@@ -289,7 +289,7 @@ const char *x11_init(Socket * s, char *display, void *c, void *auth,
     /*
      * Split up display name into host and display-number parts.
      */
-    n = strcspn(display, ":");
+    n = (int)strcspn(display, ":");
     assert(n != 0);		/* x11_display() promises this */
     if (display[n])
 	displaynum = atoi(display + n + 1);
@@ -459,7 +459,7 @@ int x11_send(Socket s, char *data, int len)
 	    unsigned char *reply;
 
 	    message = dupprintf("PuTTY X11 proxy: %s", err);
-	    msglen = strlen(message);
+	    msglen = (int)strlen(message);
 	    reply = snewn(8 + msglen+1 + 4, unsigned char); /* include zero */
 	    msgsize = (msglen + 3) & ~3;
 	    reply[0] = 0;	       /* failure */
@@ -484,7 +484,7 @@ int x11_send(Socket s, char *data, int len)
         {
             char realauthdata[64];
             int realauthlen = 0;
-            int authstrlen = strlen(x11_authnames[pr->auth->realproto]);
+            int authstrlen = (int)strlen(x11_authnames[pr->auth->realproto]);
 	    int buflen = 0;	       /* initialise to placate optimiser */
             static const char zeroes[4] = { 0,0,0,0 };
 	    void *buf;
