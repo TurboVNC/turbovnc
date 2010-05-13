@@ -35,8 +35,8 @@ CAPTION "About TurboVNC Server"
 FONT 8, "MS Shell Dlg"
 BEGIN
     CONTROL         132,IDC_VNCLOGO,"Static",SS_BITMAP | SS_SUNKEN,19,7,87,80
-    LTEXT           "TurboVNC Server version 0.6",IDC_STATIC_URL,135,7,190,9
-    LTEXT           "Copyright (C) 2004 Landmark Graphics Corporation\nCopyright (C) 2004-2008 Sun Microsystems, Inc.\nCopyright (C) 2009 D. R. Commander\nhttp://www.virtualgl.org",
+    LTEXT           __APPNAME,IDC_STATIC_URL,135,7,190,9
+    LTEXT           "Copyright (C) 2004 Landmark Graphics Corporation\nCopyright (C) 2004-2008 Sun Microsystems, Inc.\nCopyright (C) 2009-2010 D. R. Commander\nhttp://www.virtualgl.org",
                     IDC_STATIC_VERSION,135,23,190,33
     LTEXT           "Based on TightVNC Server version 1.3.10\nCopyright (C) 2000-2006 Constantin Kaplinsky\nCopyright (C) 2000-2009 TightVNC Group\nhttp://www.tightvnc.com/",
                     IDC_STATIC_BASEDON,135,63,190,33
@@ -565,8 +565,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,6,0,0
- PRODUCTVERSION 0,6,0,0
+ FILEVERSION __RCVERSION
+ PRODUCTVERSION __RCVERSION
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -583,15 +583,23 @@ BEGIN
         BEGIN
             VALUE "Comments", "Based on TightVNC by Constantin Kaplinsky; Based on VNC by AT&T Research Labs Cambridge, RealVNC Ltd.\0"
             VALUE "CompanyName", "The VirtualGL Project\0"
+            #ifdef WIN64
+            VALUE "FileDescription", "TurboVNC Win64 Server\0"
+            #else
             VALUE "FileDescription", "TurboVNC Win32 Server\0"
-            VALUE "FileVersion", "0, 6, 0, 0\0"
+            #endif
+            VALUE "FileVersion", __RCVERSIONSTR
             VALUE "InternalName", "WinVNC\0"
-            VALUE "LegalCopyright", "Copyright © 1998-2009 [many holders]\0"
+            VALUE "LegalCopyright", "Copyright © 1998-2010 [many holders]\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "WinVNC.exe\0"
             VALUE "PrivateBuild", "\0"
+            #ifdef WIN64
+            VALUE "ProductName", "TurboVNC Win64 Server\0"
+            #else
             VALUE "ProductName", "TurboVNC Win32 Server\0"
-            VALUE "ProductVersion", "0, 6, 0, 0\0"
+            #endif
+            VALUE "ProductVersion", __RCVERSIONSTR
             VALUE "SpecialBuild", "\0"
         END
     END
