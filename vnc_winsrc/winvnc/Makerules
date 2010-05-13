@@ -1,5 +1,17 @@
+ifeq ($(PROCESSOR_ARCHITECTURE), AMD64)
+ WIN64 = yes
+else
+ ifeq ($(PROCESSOR_ARCHITEW6432), AMD64)
+  WIN64 = yes
+ endif
+endif
+
+ifeq ($(WIN64), yes)
+subplatform := 64
+endif
+
 CC =  "cl" -nologo -wd4996 -wd4482
-CXX = $(CC) -EHsc
+CXX = $(CC) -EHs
 RC = "rc"
 LINK = "link" -nologo
 AR = "link" -lib -nologo
@@ -21,9 +33,9 @@ ifeq ($(TOPDIR),)
 TOPDIR = .
 endif
 
-ODIR = $(TOPDIR)/Release
+ODIR = $(TOPDIR)/Release$(subplatform)
 ifeq ($(DEBUG), yes)
-ODIR = $(TOPDIR)/Debug
+ODIR = $(TOPDIR)/Debug$(subplatform)
 endif
 
 _DUMMY := $(shell mkdir -p $(ODIR))
