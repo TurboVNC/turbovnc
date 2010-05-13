@@ -1,3 +1,6 @@
+TOPDIR = .
+include Makerules
+
 all: vncviewer winvnc putty
 
 .PHONY: vncviewer winvnc putty
@@ -11,9 +14,13 @@ clean:
 	$(MAKE) -C winvnc clean
 	$(MAKE) -C putty clean
 
-SYSROOT := $(subst \,\\,$(SYSTEMROOT))
-
 .PHONY: dist
+ifeq ($(subplatform), 64)
 dist: vncviewer winvnc putty
-	iscc TurboVNC.iss 
-	mv output/setup.exe TurboVNC.exe
+	iscc /O$(BLDDIR) /FTurboVNC /dVERSION=$(VERSION) /dBUILD=$(BUILD) \
+		/dBLDDIR=$(BLDDIR) /dWIN64 TurboVNC.iss 
+else
+dist: vncviewer winvnc putty
+	iscc /O$(BLDDIR) /FTurboVNC /dVERSION=$(VERSION) /dBUILD=$(BUILD) \
+		/dBLDDIR=$(BLDDIR) TurboVNC.iss 
+endif

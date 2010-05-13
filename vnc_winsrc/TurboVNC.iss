@@ -2,15 +2,25 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 [Setup]
+#ifdef WIN64
+ArchitecturesInstallIn64BitMode=x64
+AppName=TurboVNC 64-bit
+AppVerName=TurboVNC 64-bit v{#VERSION} ({#BUILD})
+#else
 AppName=TurboVNC
-AppVerName=TurboVNC 0.6
-AppVersion=0.6
+AppVerName=TurboVNC v{#VERSION} ({#BUILD})
+#endif
+AppVersion={#VERSION}
 AppPublisher=The VirtualGL Project
 AppPublisherURL=http://www.virtualgl.org
 AppSupportURL=http://www.virtualgl.org
 AppUpdatesURL=http://www.virtualgl.org
 DefaultDirName={pf}\TurboVNC
+#ifdef WIN64
+DefaultGroupName=TurboVNC 64-bit
+#else
 DefaultGroupName=TurboVNC
+#endif
 AllowNoIcons=yes
 InfoBeforeFile=InstInfo.rtf
 Compression=zip/9
@@ -21,7 +31,7 @@ BackColor2=clBlue
 DirExistsWarning=no
 VersionInfoCompany=The VirtualGL Project
 VersionInfoDescription=A fast VNC implementation designed for video and 3D apps
-VersionInfoVersion=0.6
+VersionInfoVersion={#VERSION}
 
 ChangesAssociations=yes
 
@@ -31,10 +41,10 @@ Name: "viewer"; Description: "TurboVNC Viewer"; Types: full compact custom;
 Name: "doc";    Description: "Documentation";   Types: full custom;
 
 [Files]
-Source: "WinVNC\Release\WinVNC.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: server
-Source: "WinVNC\Release\VNCHooks.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: server
-Source: "VNCViewer\Release\vncviewer.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
-Source: "putty\Release\putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
+Source: "{#BLDDIR}\bin\WinVNC.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: server
+Source: "{#BLDDIR}\bin\VNCHooks.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: server
+Source: "{#BLDDIR}\bin\vncviewer.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
+Source: "{#BLDDIR}\bin\putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 Source: "LICENCE.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "WhatsNew.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "TurboVNC-ChangeLog.txt"; DestDir: "{app}"; Flags: ignoreversion
