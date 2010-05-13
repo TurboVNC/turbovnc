@@ -86,8 +86,17 @@ $(ODIR)/VNCHooks.lib $(EDIR)/VNCHooks.dll:
 $(ODIR)/omnithread.obj: omnithread/nt.cpp omnithread/nt.h omnithread/omnithread.h
 	$(CXX) -c $(CFLAGS) -Fo$@ $<
 
+ifeq ($(WIN64), yes)
+APPNAME=\""TurboVNC Server 64-bit v$(VERSION) ($(BUILD))"\"
+WIN64DEF=-DWIN64
+else
+APPNAME=\""TurboVNC Server v$(VERSION) ($(BUILD))"\"
+endif
+
 $(RES): WinVNC.rc
-	$(RC) -DWITH_JAVA_VIEWER -l 0x409 -fo $@ $< 
+	$(RC) -DWITH_JAVA_VIEWER -D__APPNAME=$(APPNAME) $(WIN64DEF) \
+		-D__RCVERSION=$(RCVERSION) -D__RCVERSIONSTR=\"$(RCVERSION)\\0\" \
+		-l 0x409 -fo $@ $< 
 
 clean:
 	$(MAKE) -C zlib clean
