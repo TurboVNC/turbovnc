@@ -24,7 +24,7 @@ Xvnc \- an X server providing VNC connectivity
 [\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-udpinputport \fIport\fR]
 [\-rfbport \fIport\fR] [\-rfbwait \fItime\fR] [\-nocursor]
 [\-rfbauth \fIpasswd-file\fR] [\-otpauth] [\-pamauth] [\-httpd \fIdir\fR]
-[\-httpport \fIport\fR] [\-deferupdate \fItime\fR]
+[\-httpport \fIport\fR] [\-deferupdate \fItime\fR] [\-alr \fItime\fR]
 [\-economictranslate] [\-desktop \fIname\fR] [\-alwaysshared]
 [\-nevershared] [\-dontdisconnect] [\-viewonly] [\-localhost]
 [\-interface ipaddr] [\-inetd] [\-compatiblekbd]
@@ -116,6 +116,15 @@ web browsers.
 Time, in milliseconds, for which to defer screen updates (default: 40). Deferring
 updates helps to coalesce many small desktop changes into a few larger
 updates, thus saving network bandwidth.
+.TP
+\fB\-alr\fR \fItime\fR
+Enable the automatic lossless refresh (ALR) feature for this Xvnc session and
+set the timeout to \fItime\fR seconds.  If ALR is enabled and no framebuffer
+updates have been sent to a given client in the past \fItime\fR seconds, and if
+some areas of the screen have been transmitted to that client using JPEG since
+the last lossless refresh, then those areas of the screen are re-transmitted
+using mathematically lossless image compression (specifically, the Lossless
+Tight + Zlib protocol.)
 .TP
 \fB\-economictranslate\fR
 Use less memory-hungry pixel format translation.
