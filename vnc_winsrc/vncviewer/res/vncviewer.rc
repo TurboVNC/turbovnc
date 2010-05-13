@@ -210,7 +210,7 @@ BEGIN
                     IDC_STATIC_VERSION,135,63,190,33
     LTEXT           "Based on VNC software\nCopyright (C) 1999-2001 AT&&T Laboratories Cambridge\nCopyright (C) 2002-2003 RealVNC Ltd.\nhttp://www.realvnc.com/",
                     IDC_STATIC_BASEDON,135,103,190,33
-    LTEXT           "TurboVNC Viewer version 0.6",IDC_STATIC_URL,135,7,190,9
+    LTEXT           __APPNAME,IDC_STATIC_URL,135,7,190,9
     LTEXT           "Copyright (C) 2004 Landmark Graphics Corporation\nCopyright (C) 2004-2008 Sun Microsystems, Inc.\nCopyright (C) 2009 D. R. Commander\nhttp://www.virtualgl.org",
                     IDC_STATIC_COPYRIGHTS,135,23,190,33
     LTEXT           "[build time unknown]",IDC_BUILDTIME,135,15,190,9
@@ -446,8 +446,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,6,0,0
- PRODUCTVERSION 0,6,0,0
+ FILEVERSION __RCVERSION
+ PRODUCTVERSION __RCVERSION
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -465,14 +465,18 @@ BEGIN
             VALUE "Comments", "Based on TightVNC by Constantin Kaplinsky; Based on VNC by AT&T Research Labs Cambridge, RealVNC Ltd.\0"
             VALUE "CompanyName", "The VirtualGL Project\0"
             VALUE "FileDescription", "vncviewer\0"
-            VALUE "FileVersion", "0, 6, 0, 0\0"
+            VALUE "FileVersion", __RCVERSIONSTR
             VALUE "InternalName", "vncviewer\0"
-            VALUE "LegalCopyright", "Copyright © 1999-2009 [many holders]\0"
+            VALUE "LegalCopyright", "Copyright © 1999-2010 [many holders]\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "vncviewer.exe\0"
             VALUE "PrivateBuild", "\0"
+            #ifdef WIN64
+            VALUE "ProductName", "TurboVNC Win64 Viewer\0"
+            #else
             VALUE "ProductName", "TurboVNC Win32 Viewer\0"
-            VALUE "ProductVersion", "0, 6, 0, 0\0"
+            #endif
+            VALUE "ProductVersion", __RCVERSIONSTR
             VALUE "SpecialBuild", "\0"
         END
     END
