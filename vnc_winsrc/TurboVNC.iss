@@ -33,10 +33,6 @@ Name: "doc";    Description: "Documentation";   Types: full custom;
 [Files]
 Source: "WinVNC\Release\WinVNC.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: server
 Source: "WinVNC\Release\VNCHooks.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: server
-Source: "turbojpeg.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: "server viewer"
-Source: "turbojpeg-ipp.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: "server viewer"
-Source: "turbojpeg-libjpeg.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: "server viewer"
-Source: "switchtjpeg.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: "server viewer"
 Source: "VNCViewer\Release\vncviewer.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 Source: "putty\Release\putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 Source: "LICENCE.txt"; DestDir: "{app}"; Flags: ignoreversion
