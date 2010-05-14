@@ -47,9 +47,9 @@ $geometry = "1240x900";
 $depth = 24;
 $desktopName = "X";
 $vncUserDir = "$ENV{HOME}/.vnc";
-$authTypeVNC = "-rfbauth $vncUserDir/passwd";
-$authTypeOTP = "-otpauth";
-$authTypePAM = "-pamauth";
+$authTypeVNC = 1;
+$authTypeOTP = 1;
+$authTypePAM = 1;
 $generateOTP = 0;
 $autoLosslessRefresh = 0.0;
 
@@ -217,22 +217,22 @@ if ($opt{'-fp'}) {
     $fontPath = $opt{'-fp'};
 }
 if ($opt{'-novncauth'}) {
-    if (! ($authTypeVNC eq "")) {
-        $authTypeVNC = "";
+    if ($authTypeVNC) {
+        $authTypeVNC = 0;
     } else {
         print ("VNC password auth is not permitted on this system.  Ignoring -novncauth.\n");
     }
 }
 if ($opt{'-nootp'}) {
-    if (! ($authTypeOTP eq "")) {
-        $authTypeOTP = "";
+    if ($authTypeOTP) {
+        $authTypeOTP = 0;
     } else {
         print ("One-time password auth is not permitted on this system.  Ignoring -nootp.\n");
     }
 }
 if ($opt{'-nopam'}) {
-    if (! ($authTypePAM eq "")) {
-        $authTypePAM = "";
+    if ($authTypePAM) {
+        $authTypePAM = 0;
     } else {
         print ("Unix login auth is not permitted on this system.  Ignoring -nopam.\n");
     }
@@ -241,7 +241,10 @@ if ($opt{'-noauth'}) {
     $authType = "";
 } else {
     if (($authType eq "")) {
-        $authType = $authTypeVNC." ".$authTypeOTP." ".$authTypePAM;
+        $authType = "";
+        if ($authTypeVNC) {$authType .= "-rfbauth $vncUserDir/passwd ";}
+        if ($authTypeOTP) {$authType .= "-otpauth ";}
+        if ($authTypePAM) {$authType .= "-pamauth ";}
     }
 }
 if ($opt{'-otp'}) {
@@ -273,7 +276,7 @@ if (!-d _ || !-o _ || ($vncUserDirUnderTmp && ($mode & 0777) != 0700)) {
 }
 
 # Make sure the user has a password.
-if (substr($authType, 0, 7) eq "-rfbauth") {
+if (index($authType, "-rfbauth") >= 0) {
     ($z,$z,$mode) = lstat("$vncUserDir/passwd");
     if (-e _ && (!-f _ || !-o _)) {
 	die "$prog: Wrong type or ownership on $vncUserDir/passwd.\n";
@@ -319,6 +322,9 @@ for (1..16) {
 
 system("$xauth -f $xauthorityFile add $host:$displayNumber . $cookie");
 system("$xauth -f $xauthorityFile add $host/unix:$displayNumber . $cookie"); 
+if ($vncUserDirUnderTmp) {
+    system("$xauth merge $xauthorityFile");
+}
 
 # Now start the X VNC Server
 
@@ -925,13 +931,13 @@ sub ReadAuthConfiguration ($)
   return unless ($permissionsSet == 1);
 
   if ($enableVNC == 0) {
-    $authTypeVNC = "";
+    $authTypeVNC = 0;
   }
   if ($enableOTP == 0) {
-    $authTypeOTP = "";
+    $authTypeOTP = 0;
   }
   if ($enablePAM == 0) {
-    $authTypePAM = "";
+    $authTypePAM = 0;
   }
 
   close(ACF);
