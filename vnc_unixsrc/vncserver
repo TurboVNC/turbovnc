@@ -51,6 +51,7 @@ $authTypeVNC = "-rfbauth $vncUserDir/passwd";
 $authTypeOTP = "-otpauth";
 $authTypePAM = "-pamauth";
 $generateOTP = 0;
+$autoLosslessRefresh = 0.0;
 
 # Read configuration from the system-wide and user files if present.
 
@@ -149,17 +150,19 @@ push(@fontpaths, '/usr/share/fonts/default');
              'Speedo',
              'Type1');
 
-foreach $_fpath (@fontpaths) {
-    foreach $_ftype (@fonttypes) {
-        if (-f "$_fpath/$_ftype/fonts.dir") {
-            if (! -l "$_fpath/$_ftype") {
-                $fontPath .= "$_fpath/$_ftype,";
+if (($fontPath eq "")) {
+    foreach $_fpath (@fontpaths) {
+        foreach $_ftype (@fonttypes) {
+            if (-f "$_fpath/$_ftype/fonts.dir") {
+                if (! -l "$_fpath/$_ftype") {
+                    $fontPath .= "$_fpath/$_ftype,";
+                }
             }
         }
     }
 }
 if ($fontPath) {
-    if (substr($fontPath, -1, 1) == ',') {
+    if (substr($fontPath, -1, 1) eq ',') {
         chop $fontPath;
     }
 }
@@ -237,14 +240,18 @@ if ($opt{'-nopam'}) {
 if ($opt{'-noauth'}) {
     $authType = "";
 } else {
-    $authType = $authTypeVNC." ".$authTypeOTP." ".$authTypePAM;
+    if (($authType eq "")) {
+        $authType = $authTypeVNC." ".$authTypeOTP." ".$authTypePAM;
+    }
 }
 if ($opt{'-otp'}) {
-    if (! ($authTypeOTP eq "-otpauth")) {
-        print ("One-time password authentication is not enabled.  Ignoring -otp.\n");
-    } else {
-        $generateOTP = 1;
-    }
+    $generateOTP = 1;
+}
+
+if ($generateOTP && index($authType, "-otpauth") < 0) {
+    print ("One-time password authentication is not enabled.  Ignoring request to generate\n");
+    print ("    initial OTP.\n");
+    $generateOTP = 0;
 }
 
 &CheckGeometryAndDepth();
@@ -329,6 +336,7 @@ $cmd .= " $authType";
 $cmd .= " -rfbport $vncPort";
 $cmd .= " -fp $fontPath" if ($fontPath);
 $cmd .= " -co $colorPath" if ($colorPath);
+$cmd .= " -alr ".$autoLosslessRefresh if ($autoLosslessRefresh > 0.0);
 #$cmd .= " -nolisten local" if ($os eq "SunOS");
 $cmd .= " -deferupdate 1";
 
@@ -866,6 +874,8 @@ sub ReadConfiguration
        fontPath
        authType
        colorPath
+       generateOTP
+       autoLosslessRefresh
       );
 
   if (open CONF, "<$configFile") {
