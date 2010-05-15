@@ -59,7 +59,6 @@ make World CDEBUGFLAGS='-O3'
 install -m 755 vncviewer/vncviewer $PKGROOT/opt/$pkgname/bin 
 install -m 755 uninstall.sh $PKGROOT/opt/$pkgname/bin/uninstall 
 install -m 755 vncviewer/vncviewer.man $PKGROOT/opt/$pkgname/man/man1 
-install -m 644 ReadMe-MacApp.txt "$PKGROOT/Applications/$pkgname/Read Me.txt" 
 install -m 644 LICENCE.TXT $PKGROOT/Library/Documentation/$pkgname 
 install -m 644 WhatsNew $PKGROOT/Library/Documentation/$pkgname 
 install -m 644 ChangeLog $PKGROOT/Library/Documentation/$pkgname 
