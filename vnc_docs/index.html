@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-05-12T16:36:47">
+<meta name="date" content="2010-05-15T16:36:55">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 0.6</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -182,25 +182,25 @@ License, v2</a><a name="idx004"></a>.</p>
 <span class="remote"><a href="http://www.realvnc.com/" class="remote">VNC</a></span><a name="idx005"></a> 
 (more specifically, of 
 <span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx006"></a> 
-1.3.x.)  On the surface, TurboVNC behaves very similarly to its parent 
-project, but TurboVNC has been tuned to provide interactive performance 
-for full-screen video and 3D workloads.  On these types of image 
-workloads, TurboVNC performs as much as an order of magnitude faster 
-than TightVNC 1.3.x, uses more than an order of magnitude less CPU time 
-to compress each frame, and it produces generally better compression 
-ratios.  As with TightVNC, TurboVNC uses JPEG compression for image 
-tiles with a high number of unique colors and paletted encoding for 
-image tiles with a low number of unique colors.  Part of 
-TurboVNC&rsquo;s speedup comes from the use of libjpeg-turbo, the same 
-high-speed vector-optimized JPEG codec used by VirtualGL.  However, 
-TurboVNC also bypasses the CPU-hungry smoothness detection routines that 
-TightVNC uses to determine whether a tile is a good candidate for JPEG 
-compression.  Furthermore, TurboVNC eliminates buffer copies, it 
-maximizes network efficiency by using the largest tile sizes supported 
-by the TightVNC protocol, and it never uses a Zlib compression level 
-higher than 1.  In the aggregate, TurboVNC compresses 2D application 
-workloads less efficiently than TightVNC, but it generally does a better 
-job than TightVNC of compressing 3D application workloads.</p>
+1.3.x.)  On the surface, TurboVNC behaves very similarly to its parent, 
+but TurboVNC has been tuned to provide interactive performance for 
+full-screen video and 3D workloads.  On these types of image workloads, 
+TurboVNC performs as much as an order of magnitude faster than TightVNC 
+1.3.x, uses more than an order of magnitude less CPU time to compress 
+each frame, and it produces generally better compression ratios.  As 
+with TightVNC, TurboVNC uses JPEG compression for image tiles with a 
+high number of unique colors and paletted encoding for image tiles with 
+a low number of unique colors.  Part of TurboVNC&rsquo;s speedup comes 
+from the use of libjpeg-turbo, the same high-speed vector-optimized JPEG 
+codec used by VirtualGL.  However, TurboVNC also bypasses the CPU-hungry 
+smoothness detection routines that TightVNC uses to determine whether a 
+tile is a good candidate for JPEG compression.  Furthermore, TurboVNC 
+eliminates buffer copies, it maximizes network efficiency by using the 
+largest tile sizes supported by the TightVNC protocol, and it never uses 
+a Zlib compression level higher than 1.  In the aggregate, TurboVNC 
+compresses 2D application workloads less efficiently than TightVNC, but 
+it generally does a better job than TightVNC of compressing 3D 
+application workloads.</p>
 
 <p>TurboVNC is the product of extensive research, in which the TightVNC 
 encoder was benchmarked under a variety of different real-world 
@@ -230,11 +230,13 @@ TightVNC, and these were removed or accelerated to form TurboVNC.</p>
         credentials.
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        A &ldquo;lossless refresh&rdquo; feature, which sends a Zlib-encoded RGB 
-        copy of the current screen image when a certain hotkey is pressed.  This 
-        is useful in situations in which image quality is critical but the 
-        network is too slow to support sending a high-quality image for every 
-        frame.
+        A &ldquo;lossless refresh&rdquo; feature, which sends a mathematically 
+        lossless copy of the current screen image.  This is useful in situations 
+        in which image quality is critical but the network is too slow to 
+        support sending a high-quality image for every frame.  Lossless 
+        refreshes can be performed manually when a certain hotkey is pressed or 
+        automatically if the user stops interacting with the application for a 
+        certain period of time.
     </li>
     <li class="Itemize-1 Itemize asterisk">
         TurboVNC builds and runs on Solaris platforms (client and server) and on 
@@ -246,11 +248,11 @@ TightVNC, and these were removed or accelerated to form TurboVNC.</p>
 robust solution for remotely displaying 3D applications over all types 
 of networks.</p>
 
-<p>TurboVNC is capable of sending over 30 Megapixels/second of image data 
-over a 100 Megabit/second local area network with perceptually lossless 
-image quality. TurboVNC can deliver between 10 and 12 Megapixels/second 
-of image data over a 3 Megabit/second broadband connection at reduced 
-(but usable) image quality.</p>
+<p>TurboVNC is capable of sending 30+ Megapixels/second of image data over 
+a 100 Megabit/second local area network with perceptually lossless image 
+quality. TurboVNC can deliver between 10 and 12 Megapixels/second of 
+image data over a 3 Megabit/second broadband connection at reduced (but 
+usable) image quality.</p>
 
 <p>TurboVNC is compatible with other VNC distributions.  See Chapter 
 <a href="#Compatibility" class="ref">7</a> for more information.  
