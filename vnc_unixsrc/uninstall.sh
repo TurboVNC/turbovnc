@@ -50,6 +50,7 @@ rmdir /opt/TurboVNC/man/man1 2>&1 || RETCODE=-1
 rmdir /opt/TurboVNC/man 2>&1 || RETCODE=-1
 rmdir /opt/TurboVNC 2>&1 || RETCODE=-1
 rmdir /Library/Documentation/TurboVNC 2>&1 || RETCODE=-1
+rm /Applications/TurboVNC/Documentation 2>&1 || RETCODE=-1
 rmdir /Applications/TurboVNC 2>&1 || RETCODE=-1
 
 if [ -d $RCPT ]; then

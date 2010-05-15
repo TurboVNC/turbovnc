@@ -64,7 +64,7 @@ install -m 644 WhatsNew $PKGROOT/Library/Documentation/$pkgname
 install -m 644 ChangeLog $PKGROOT/Library/Documentation/$pkgname 
 install -m 644 TurboVNC-ChangeLog.txt $PKGROOT/Library/Documentation/$pkgname 
 install -m 644 ../vnc_docs/LICEN*.txt ../vnc_docs/*.html ../vnc_docs/*.png ../vnc_docs/*.css $PKGROOT/Library/Documentation/$pkgname 
-sudo ln -fs /Library/Documentation/$pkgname/index.html "$PKGROOT/Applications/$pkgname/User's Guide.html"
+sudo ln -fs /Library/Documentation/$pkgname "$PKGROOT/Applications/$pkgname/Documentation"
 
 if [ $UNIVERSAL ]; then
 	lipo -create -arch i386 $pkgtmpdir/vncviewer.32 \
