@@ -39,6 +39,7 @@ mkdir -p $pkgtmpdir/pkg/Resources
 
 xmkmf
 if [ $UNIVERSAL ]; then
+	make Makefiles
 	make clean
 	make World CDEBUGFLAGS='-O3' \
 		EXTRA_DEFINES="-m32 -D__i386__ -U__amd64__ \
@@ -49,6 +50,7 @@ if [ $UNIVERSAL ]; then
     	-mmacosx-version-min=10.4"
 	install -m 755 vncviewer/vncviewer $pkgtmpdir/vncviewer.32
 fi
+make Makefiles
 make clean
 make World CDEBUGFLAGS='-O3'
 
