@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -42,6 +43,7 @@
 #include <X11/Xmu/StdSel.h>
 #include "rfbproto.h"
 #include "caps.h"
+#include "tvnc_version.h"
 
 extern int endianTest;
 
