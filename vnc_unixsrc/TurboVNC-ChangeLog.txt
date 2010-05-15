@@ -35,6 +35,10 @@ Fixed a number of interaction issues between the server configuration files and
 the vncserver script, and added the ability to configure the new TurboVNC
 features using these config files.
 -------------------------------------------------------------------------------
+[9]
+Added the ability to create universal 32/64-bit binaries for OS X 10.6 "Snow
+Leopard"
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
