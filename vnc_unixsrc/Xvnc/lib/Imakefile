@@ -1,7 +1,7 @@
 XCOMM $TOG: Imakefile /main/39 1997/02/26 18:09:44 kaleb $
 XCOMM $XFree86: xc/lib/Imakefile,v 3.17.2.2 1997/07/05 15:55:33 dawes Exp $
 #define IHaveSubdirs
-#define PassCDebugFlags
+#define PassCDebugFlags CDEBUGFLAGS='$(CDEBUGFLAGS)' CC='$(CC)' EXTRA_LDOPTIONS='$(EXTRA_LDOPTIONS)'
 
 #ifndef NeedBerklib
 #define NeedBerklib NO

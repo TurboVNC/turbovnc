@@ -5,7 +5,7 @@ XCOMM $TOG: Imakefile /main/93 1997/06/13 15:34:58 kaleb $
 
 XCOMM $XFree86: xc/include/Imakefile,v 3.9.2.1 1997/06/15 07:25:25 dawes Exp $
 #define IHaveSubdirs
-#define PassCDebugFlags /**/
+#define PassCDebugFlags CDEBUGFLAGS='$(CDEBUGFLAGS)' CC='$(CC)' EXTRA_LDOPTIONS='$(EXTRA_LDOPTIONS)'
 
 SUBDIRS = bitmaps extensions fonts
 

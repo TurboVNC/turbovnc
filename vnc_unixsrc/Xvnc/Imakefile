@@ -1,7 +1,7 @@
 XCOMM $XConsortium: Imakefile /main/137 1996/10/08 07:38:14 swick $
 XCOMM $XFree86: xc/Imakefile,v 3.11.2.2 1998/02/28 04:47:00 dawes Exp $
 #define IHaveSubdirs
-#define PassCDebugFlags CDEBUGFLAGS="$(CDEBUGFLAGS)"
+#define PassCDebugFlags CDEBUGFLAGS='$(CDEBUGFLAGS)' CC='$(CC)' EXTRA_LDOPTIONS='$(EXTRA_LDOPTIONS)'
 
 RELEASE = "Release 6.3"
 #ifndef OSName
@@ -62,7 +62,7 @@ clean::
 	$(RM) -r $(BUILDBINDIR)
 
 World::
-	$(MAKE) $(MFLAGS) $(MAKE_OPTS) $(PARALLELOPTS) all
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) $(PARALLELOPTS) PassCDebugFlags all
 
 Everything::
 	@echo ""
@@ -75,10 +75,10 @@ Everything::
 	else \
 	    $(MAKE) $(MFLAGS) -f Makefile.ini BOOTSTRAPCFLAGS="$(BOOTSTRAPCFLAGS)"; \
 	fi
-	$(MAKE) $(MFLAGS) $(MAKE_OPTS) Makefiles
-	$(MAKE) $(MFLAGS) $(MAKE_OPTS) includes
-	$(MAKE) $(MFLAGS) $(MAKE_OPTS) depend
-	$(MAKE) $(MFLAGS) $(MAKE_OPTS) $(WORLDOPTS)
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) PassCDebugFlags Makefiles
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) PassCDebugFlags includes
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) PassCDebugFlags depend
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) $(WORLDOPTS) PassCDebugFlags
 	@echo ""
 	@date
 	@echo ""

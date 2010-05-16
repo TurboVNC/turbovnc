@@ -1,7 +1,7 @@
 XCOMM $XConsortium: Imakefile /main/83 1996/12/18 16:29:30 lehors $
 XCOMM $XFree86: xc/programs/Imakefile,v 3.15.2.2 1998/02/15 16:08:40 hohndel Exp $
 #define IHaveSubdirs
-#define PassCDebugFlags CDEBUGFLAGS="$(CDEBUGFLAGS)"
+#define PassCDebugFlags CDEBUGFLAGS='$(CDEBUGFLAGS)' CC='$(CC)' EXTRA_LDOPTIONS='$(EXTRA_LDOPTIONS)'
 
 #if BuildServer
        RGBSRCDIR = rgb
