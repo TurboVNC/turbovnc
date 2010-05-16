@@ -55,6 +55,8 @@ you do do not need to include these header files.
  
 #include  <string.h>
 #include  <ctype.h>
+#include  <stdlib.h>
+#include  <stdio.h>
  
 /*
 override incorrect system functions; for example you might define

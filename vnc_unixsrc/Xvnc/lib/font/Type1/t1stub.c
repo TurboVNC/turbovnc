@@ -28,6 +28,7 @@
  * SOFTWARE.
  */
 
+#include <stdio.h>
 #include "objects.h"	/* get #define for abort() */
  
 xiStub()

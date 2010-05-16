@@ -59,7 +59,7 @@ XdmcpFill (fd, buffer, from, fromlen)
     int		    fd;
     XdmcpBufferPtr  buffer;
     XdmcpNetaddr    from;	/* return */
-    int		    *fromlen;	/* return */
+    socklen_t		    *fromlen;	/* return */
 {
     BYTE    *newBuf;
 #ifdef STREAMSCONN

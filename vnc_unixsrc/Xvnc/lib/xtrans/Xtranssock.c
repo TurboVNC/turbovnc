@@ -298,7 +298,7 @@ XtransConnInfo ciptr;
 #if defined(SVR4) || defined(SCO325)
     size_t namelen = sizeof sockname;
 #else
-    int namelen = sizeof sockname;
+    socklen_t namelen = sizeof sockname;
 #endif
 
     PRMSG (3,"SocketINETGetAddr(%x)\n", ciptr, 0, 0);
@@ -345,7 +345,7 @@ XtransConnInfo ciptr;
 #if defined(SVR4) || defined(SCO325)
     size_t namelen = sizeof sockname;
 #else
-    int namelen = sizeof sockname;
+    socklen_t namelen = sizeof sockname;
 #endif
 
     PRMSG (3,"SocketINETGetPeerAddr(%x)\n", ciptr, 0, 0);
@@ -1078,7 +1078,7 @@ int	       *status;
 {
     XtransConnInfo	newciptr;
     struct sockaddr_in	sockname;
-    int			namelen = sizeof(sockname);
+    socklen_t			namelen = sizeof(sockname);
 
     PRMSG (2, "SocketINETAccept(%x,%d)\n", ciptr, ciptr->fd, 0);
 
@@ -1160,7 +1160,7 @@ int	       *status;
 #if defined(SVR4) || defined(SCO325)
     size_t namelen = sizeof sockname;
 #else
-    int namelen = sizeof sockname;
+    socklen_t namelen = sizeof sockname;
 #endif
 
     PRMSG (2, "SocketUNIXAccept(%x,%d)\n", ciptr, ciptr->fd, 0);

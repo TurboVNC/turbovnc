@@ -50,6 +50,7 @@
 #endif
 #endif
 #include <stdio.h>
+#include <stdlib.h>
 #include "X.h"
 #include "Xmd.h"
 #include "misc.h"

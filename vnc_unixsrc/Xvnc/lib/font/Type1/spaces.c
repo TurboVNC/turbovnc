@@ -37,6 +37,9 @@ This module is responsible for handling the TYPE1IMAGER "XYspace" object.
  
 :h3.Include Files
 */
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include "objects.h"
 #include "spaces.h"
 #include "paths.h"
