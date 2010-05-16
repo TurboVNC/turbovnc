@@ -762,7 +762,7 @@ InitStringFeedbackClassDeviceStruct (dev, controlProc, max_symbols,
     for (i=0; i<num_symbols_supported; i++)
 	*(feedc->ctrl.symbols_supported+i) = *symbols++;
     for (i=0; i<max_symbols; i++)
-	*(feedc->ctrl.symbols_displayed+i) = (KeySym) NULL;
+	*(feedc->ctrl.symbols_displayed+i) = (KeySym) 0;
     feedc->ctrl.id = 0;
     if ( (feedc->next = dev->stringfeed) )
 	feedc->ctrl.id = dev->stringfeed->ctrl.id + 1;

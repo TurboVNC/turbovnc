@@ -78,6 +78,7 @@ SOFTWARE.
 /* $XConsortium: cfbfillsp.c,v 5.24 94/04/17 20:28:48 dpw Exp $ */
 /* $XFree86: xc/programs/Xserver/cfb/cfbfillsp.c,v 3.1 1996/12/09 11:50:54 dawes Exp $ */
 
+#include <stdlib.h>
 #include "X.h"
 #include "Xmd.h"
 #include "servermd.h"

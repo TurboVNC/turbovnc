@@ -195,7 +195,7 @@ static GCOps rfbSpriteGCOps = {
     (rfbScreen.cursorIsDrawn &&					    \
         (pScreenPriv->pCacheWin == pWin ?			    \
 	    pScreenPriv->isInCacheWin : (			    \
-	    ((int) (pScreenPriv->pCacheWin = (pWin))) ,		    \
+	    ((long) (pScreenPriv->pCacheWin = (pWin))) ,		    \
 	    (pScreenPriv->isInCacheWin =			    \
 		(pWin)->drawable.x < pScreenPriv->saved.x2 &&	    \
 		pScreenPriv->saved.x1 < (pWin)->drawable.x +	    \

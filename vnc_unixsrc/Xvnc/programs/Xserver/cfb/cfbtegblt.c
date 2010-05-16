@@ -47,6 +47,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
+#include	<stdlib.h>
 #include	"X.h"
 #include	"Xmd.h"
 #include	"Xproto.h"

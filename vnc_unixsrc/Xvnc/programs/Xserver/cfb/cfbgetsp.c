@@ -48,6 +48,7 @@ SOFTWARE.
 
 ******************************************************************/
 
+#include <stdlib.h>
 #include "X.h"
 #include "Xmd.h"
 #include "servermd.h"
