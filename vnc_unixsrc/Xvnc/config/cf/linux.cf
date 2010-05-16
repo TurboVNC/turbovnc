@@ -249,15 +249,8 @@ XCOMM binutils:	(LinuxBinUtilsMajorVersion)
 #define StandardCppDefines	-traditional StandardDefines
 
 #ifdef i386Architecture
-#ifdef i386m32Architecture
-#define OptimizedCDebugFlags	-O2 -m32
-#define ServerCDebugFlags -O2 -m32
-#define LinuxMachineDefines	-D__i386__ -m32
-#define ExtraLoadOptions -m32
-#else
 #define OptimizedCDebugFlags	DefaultGcc2i386Opt
 #define LinuxMachineDefines	-D__i386__
-#endif
 #define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
 #define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
 #endif /* i386Architecture */
@@ -403,6 +396,14 @@ XCOMM binutils:	(LinuxBinUtilsMajorVersion)
 
 #ifndef XvncAuthPAM
 #define XvncAuthPAM     YES
+#endif
+
+#ifndef JPEGIncludeFlags
+#define JPEGIncludeFlags
+#endif
+
+#ifndef JPEGLibraryFlags
+#define JPEGLibraryFlags -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic
 #endif
 
 #include <lnxLib.rules>

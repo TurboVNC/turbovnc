@@ -4,15 +4,23 @@
 # This script sets up for a build.  It has been tested on the following
 # Operating System versions (uname outputs):
 #
-#    Solaris 7 & 8 (SunOS, 5.7 or 5.8)
-#    Tru64 4.0F & 5.1 (OSF1, V4.0 or V5.1)
-#    Linux 2.4 (Linux, 2.4.0-4GB)
-#    Irix 6.2 (IRIX, 6.2)
+#    Solaris 10 (SunOS 5.10)
+#    Linux 2.4 and 2.6
 
 M32=0
-if [ "$1" = "-m32" ]; then
-    M32=1
-fi
+FORCEGCC=0
+FORCEX86=0
+FORCEX86_64=0
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -gcc)  FORCEGCC=1  ;;
+        -x86)  FORCEX86=1  ;;
+        -x86_64)  FORCEX86_64=1  ;;
+        *)  break  ;;
+    esac
+    shift
+done
 
 SYSNAME=`uname -s`
 
@@ -44,6 +52,15 @@ echo "#define OSMajorVersion $MAJOR" >> config/cf/platform.def
 echo "#define OSMinorVersion $MINOR" >> config/cf/platform.def
 echo "#define OSTeenyVersion $TEENY" >> config/cf/platform.def
 echo "#define LinuxCLibMajorVersion 6" >> config/cf/platform.def
+if [ $FORCEGCC = 1 ]; then
+    echo "#define HasGcc2 YES" >> config/cf/platform.def
+fi
+if [ $FORCEX86 = 1 ]; then
+    echo "#define i386Architecture" >> config/cf/platform.def
+fi
+if [ $FORCEX86_64 = 1 ]; then
+    echo "#define x86_64Architecture" >> config/cf/platform.def
+fi
 
 if [ "$SYSNAME" = AIX ]
 then
@@ -62,13 +79,12 @@ then
 else
     cd config/imake
     xmkmf ../../
-    if [ $M32 = 1 ]; then
-        make EXTRA_DEFINES="-m32 -D__i386__ -U__x86_64__" EXTRA_LDOPTIONS="-m32 -L/usr/X11R6/lib -L/usr/lib"
-    else
-        make
-    fi
+    make ${1+"$@"}
     cd ../..
-    xmkmf -a ./
+    config/imake/imake -I./config/cf -DTOPDIR=./ -DCURDIR=.
+    make Makefiles ${1+"$@"}
+    make includes ${1+"$@"}
+    make depend ${1+"$@"}
 fi
 
 exit 0
