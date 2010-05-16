@@ -24,21 +24,21 @@ vncviewer.h
 
 EXTRA_DIST = README
 
-vncviewer_CFLAGS = -I${top_srcdir}/include @X_CFLAGS@
-
-vncviewer_LDADD = @X_LIBS@ -lX11 -lXt -lXaw -lXmu @X_EXTRA_LIBS@ \
-	$(top_builddir)/libvncauth/libvncauth.a -lz -lpthread
-
 if WITH_MEDIALIB
 
-vncviewer_CFLAGS += -I${top_srcdir}/turbojpeg
+JPEGCFLAGS = -I${top_srcdir}/turbojpeg
 
-vncviewer_LDADD += -lmlib ${top_builddir}/turbojpeg/libturbojpeg.a
+JPEGLDADD = -lmlib ${top_builddir}/turbojpeg/libturbojpeg.a
 
 else
 
-vncviewer_CFLAGS += ${LJTINC}
+JPEGCFLAGS = ${LJTINC}
 
-vncviewer_LDADD += ${LJTLIB}
+JPEGLDADD = ${LJTLIB}
 
 endif
+
+vncviewer_CFLAGS = -I${top_srcdir}/include @X_CFLAGS@ $(JPEGCFLAGS)
+
+vncviewer_LDADD = @X_LIBS@ -lX11 -lXt -lXaw -lXmu @X_EXTRA_LIBS@ \
+	$(top_builddir)/libvncauth/libvncauth.a -lz -lpthread $(JPEGLDADD)
