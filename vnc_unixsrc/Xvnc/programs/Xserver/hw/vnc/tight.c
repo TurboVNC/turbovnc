@@ -78,7 +78,7 @@ static int qualityLevel;
 static int subsampLevel;
 
 static const int subsampLevel2tjsubsamp[4] = {
-    TJ_444, TJ_411, TJ_422, TJ_GRAYSCALE
+    TJ_444, TJ_420, TJ_422, TJ_GRAYSCALE
 };
 
 /* Stuff dealing with palettes. */
