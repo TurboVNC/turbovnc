@@ -27,6 +27,10 @@
  * vncviewer.h
  */
 
+#ifndef _POSIX_PTHREAD_SEMANTICS
+#define _POSIX_PTHREAD_SEMANTICS
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

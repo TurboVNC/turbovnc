@@ -28,6 +28,10 @@
  * rfbproto.c - functions to deal with client side of RFB protocol.
  */
 
+#ifndef _POSIX_PTHREAD_SEMANTICS
+#define _POSIX_PTHREAD_SEMANTICS
+#endif
+
 #include <unistd.h>
 #include <errno.h>
 #include <pwd.h>
