@@ -81,7 +81,7 @@ else
   AC_ARG_WITH([libjpeg-turbo],
     AC_HELP_STRING([--with-libjpeg-turbo=DIR],
       [Specify directory in which libjpeg-turbo is located]),
-    [LJTLIB='-L$withval -lturbojpeg'; LJTINC='-I$withval'], [])
+    [LJTLIB="-L${withval}/lib -lturbojpeg"; LJTINC="-I${withval}/include"], [])
 
   SAVE_CPPFLAGS=${CPPFLAGS}
   CPPFLAGS="${CPPFLAGS} ${LJTINC}"
