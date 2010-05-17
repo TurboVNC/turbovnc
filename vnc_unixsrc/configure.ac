@@ -5,7 +5,7 @@ AC_PREREQ([2.56])
 AC_INIT([turbovnc], [0.6.82])
 BUILD=`date +%Y%m%d`
 
-AM_INIT_AUTOMAKE([-Wall foreign dist-bzip2])
+AM_INIT_AUTOMAKE([foreign dist-bzip2])
 AC_PREFIX_DEFAULT(/opt/TurboVNC)
 
 # Checks for programs.
@@ -97,6 +97,9 @@ fi
 AM_CONDITIONAL([WITH_MEDIALIB], [test "x$USE_MEDIALIB" != "xno"])
 AC_SUBST(LJTINC)
 AC_SUBST(LJTLIB)
+AC_SUBST(abs_top_srcdir)
+AC_SUBST(CFLAGS)
+AC_SUBST(LDFLAGS)
 
 AC_PATH_XTRA
 
@@ -129,6 +132,9 @@ case "$host_cpu" in
     DEBARCH=i386
     ;;
 esac
+
+AM_CONDITIONAL([X86], [test "x$RPMARCH" = "xi386"])
+AM_CONDITIONAL([GCC], [test "x$GCC" = "xyes"])
 
 AC_SUBST(RPMARCH)
 AC_SUBST(DEBARCH)
