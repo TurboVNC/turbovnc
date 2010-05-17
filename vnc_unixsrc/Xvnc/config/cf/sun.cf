@@ -260,12 +260,12 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 # if OSMajorVersion > 4 && defined(i386Architecture)
 #  ifndef DefaultCCOptions
 #   if UseInstalled
-#    define DefaultCCOptions -DNO_ASM
+#    define DefaultCCOptions -DNO_ASM -D_POSIX_SOURCE -D__EXTENSIONS__
 #   else
 #    if OSMinorVersion > 3
-#     define DefaultCCOptions -ansi -pedantic -DNO_ASM
+#     define DefaultCCOptions -ansi -pedantic -DNO_ASM -D_POSIX_SOURCE -D__EXTENSIONS__
 #    else
-#     define DefaultCCOptions -DNO_ASM
+#     define DefaultCCOptions -DNO_ASM -D_POSIX_SOURCE -D__EXTENSIONS__
 #    endif
 #   endif
 #  endif
@@ -383,6 +383,30 @@ man_keywords::								@@\
 	-DMULTIBYTE -DNLS16 -DMESSAGE_CAT -D_XOPEN_VERSION=4 \
 	-D_XOPEN_SOURCE -D__EXTENSIONS__ \
 	-DOSMAJORVERSION=OSMajorVersion -DOSMINORVERSION=OSMinorVersion
+
+#ifndef XvncAuthPAM
+#define XvncAuthPAM     YES
+#endif
+
+#ifndef JPEGIncludeFlags
+#ifdef SparcArchitecture
+#define JPEGIncludeFlags -I$(TOP)/../turbojpeg
+#else
+#define JPEGIncludeFlags -I/opt/libjpeg-turbo/include
+#endif
+#endif
+
+#ifndef JPEGLibraryFlags
+#ifdef SparcArchitecture
+#define JPEGLibraryFlags $(TOP)/../turbojpeg/libturbojpeg.a
+#else
+#ifdef x86_64Architecture
+#define JPEGLibraryFlags /opt/libjpeg-turbo/lib/amd64/libturbojpeg.a
+#else
+#define JPEGLibraryFlags /opt/libjpeg-turbo/lib/libturbojpeg.a
+#endif
+#endif
+#endif
 
 #ifdef SparcArchitecture
 # define AsmDefines	/**/
