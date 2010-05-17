@@ -16,8 +16,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_RANLIB
 
-host_cpu=`echo $host_alias | cut -d- -f1`
-host_os=`echo $host_alias | cut -d- -f3`
+AC_CANONICAL_HOST
 
 if test "x${GCC}" = "xyes"; then
   if test "x${SAVED_CFLAGS}" = "x"; then
