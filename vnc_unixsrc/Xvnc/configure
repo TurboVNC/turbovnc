@@ -11,16 +11,21 @@ M32=0
 FORCEGCC=0
 FORCEX86=0
 FORCEX86_64=0
+JPEGINC=
+JPEGLINK=
 
 while [ $# -gt 0 ]; do
     case "$1" in
         -gcc)  FORCEGCC=1  ;;
         -x86)  FORCEX86=1  ;;
         -x86_64)  FORCEX86_64=1  ;;
+        -jpeginc)  JPEGINC=$2;  shift  ;;
+        -jpeglink)  JPEGLINK=$2;  shift  ;;
         *)  break  ;;
     esac
     shift
 done
+
 
 SYSNAME=`uname -s`
 
@@ -61,6 +66,12 @@ fi
 if [ $FORCEX86_64 = 1 ]; then
     echo "#define x86_64Architecture" >> config/cf/platform.def
 fi
+if [ ! "$JPEGINC" = "" ]; then
+    echo "#define JPEGIncludeFlags $JPEGINC" >>config/cf/platform.def
+fi
+if [ ! "$JPEGLINK" = "" ]; then
+    echo "#define JPEGLibraryFlags $JPEGLINK" >>config/cf/platform.def
+fi
 
 if [ "$SYSNAME" = AIX ]
 then
@@ -78,6 +89,14 @@ then
     make depend
 else
     cd config/imake
+    xmkmf ../../
+    make ${1+"$@"}
+    cd ../..
+    cd config/makedepend
+    xmkmf ../../
+    make ${1+"$@"}
+    cd ../..
+    cd config/util
     xmkmf ../../
     make ${1+"$@"}
     cd ../..
