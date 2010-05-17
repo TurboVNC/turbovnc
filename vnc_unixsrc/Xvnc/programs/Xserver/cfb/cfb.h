@@ -1488,7 +1488,7 @@ extern int cfbScreenPrivateIndex;
  * forcing as to use div instead of shift.  Let's be explicit.
  */
 
-#if defined(mips) || defined(sparc) || defined(__alpha) || defined(__alpha__) || defined(__i386__) || defined(i386)
+#if defined(mips) || defined(sparc) || defined(__alpha) || defined(__alpha__) || defined(__i386__) || defined(i386) || defined(__x86_64__)
 #define GetHighWord(x) (((int) (x)) >> 16)
 #else
 #define GetHighWord(x) (((int) (x)) / 65536)
