@@ -103,8 +103,6 @@ DoPasswordDialog()
   return password;
 }
 
-#include <pwd.h>
-
 static Bool userPwdDialogDone = False;
 
 void
