@@ -87,9 +87,11 @@ else
   AC_CHECK_HEADERS([turbojpeg.h], [DUMMY=1],
     [AC_MSG_ERROR([Could not find libjpeg-turbo header files])])
   CPPFLAGS=${SAVE_CPPFLAGS}
+  SAVE_LDFLAGS=${LDFLAGS}
+  LDFLAGS="${LJTLIB} ${LDFLAGS}"
   AC_CHECK_LIB(turbojpeg, tjInitCompress, [DUMMY=1],
-    [AC_MSG_ERROR([Could not link with libjpeg-turbo libraries])],
-    [$LJTLIB])
+    [AC_MSG_ERROR([Could not link with libjpeg-turbo libraries])])
+  LDFLAGS=${SAVE_LDFLAGS}
 
 fi
 
