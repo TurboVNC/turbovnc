@@ -5,7 +5,7 @@ AC_PREREQ([2.56])
 AC_INIT([turbovnc], [0.6.82])
 BUILD=`date +%Y%m%d`
 
-AM_INIT_AUTOMAKE([foreign dist-bzip2])
+AM_INIT_AUTOMAKE([-Wall foreign dist-bzip2])
 AC_PREFIX_DEFAULT(/opt/TurboVNC)
 
 # Checks for programs.
@@ -60,20 +60,17 @@ if test "x$USE_MEDIALIB" = "xyes"; then
 
 else
 
+  LJTINC=-I/opt/libjpeg-turbo/include
+  LJTLIB='-L/opt/libjpeg-turbo/lib -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic'
+
   case $host_os in
     darwin*)
       LJTLIB=/usr/lib/libturbojpeg.a
       ;;
     solaris*)
-      LJTINC=-I/opt/libjpeg-turbo/include
       if test "$host_cpu" = "x86_64"; then
         LJTLIB='-L/opt/libjpeg-turbo/lib/amd64 -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic'
-      else
-        LJTLIB='-L/opt/libjpeg-turbo/lib -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic'
       fi
-      ;;
-    *)
-      LJTLIB='-Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic'
       ;;
   esac
 
@@ -99,8 +96,6 @@ AM_CONDITIONAL([WITH_MEDIALIB], [test "x$USE_MEDIALIB" != "xno"])
 AC_SUBST(LJTINC)
 AC_SUBST(LJTLIB)
 AC_SUBST(abs_top_srcdir)
-AC_SUBST(CFLAGS)
-AC_SUBST(LDFLAGS)
 
 AC_PATH_XTRA
 
@@ -109,9 +104,12 @@ AC_ARG_WITH([shm],
   AC_HELP_STRING([--without-shm],
     [Don't use MIT-SHM extension, even if it is available]))
 if test "x$with_shm" != "xno"; then
+  SAVE_CPPFLAGS=${CPPFLAGS}
+  CPPFLAGS="${CPPFLAGS} ${X_CFLAGS}"
   AC_CHECK_HEADERS([X11/extensions/XShm.h], [DUMMY=1],
     [AC_MSG_ERROR([Could not find MIT-SHM header files])],
     [#include <X11/Xlib.h>])
+  CPPFLAGS=${SAVE_CPPFLAGS}
   AC_CHECK_LIB(Xext, XShmQueryExtension, [DUMMY=1],
     [AC_MSG_ERROR([MIT-SHM not available in Xext library])],
     [$X_LIBS -lX11])
