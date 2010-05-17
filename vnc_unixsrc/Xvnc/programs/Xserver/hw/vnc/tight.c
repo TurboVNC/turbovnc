@@ -32,6 +32,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <errno.h>
+#include <unistd.h>
 #include "rfb.h"
 #include "turbojpeg.h"
 
