@@ -23,7 +23,8 @@
 /* Subsampling */
 #define NUMSUBOPT 4
 
-enum {TJ_444=0, TJ_422, TJ_411, TJ_GRAYSCALE};
+enum {TJ_444=0, TJ_422, TJ_420, TJ_GRAYSCALE};
+#define TJ_411 TJ_420
 
 /* Flags */
 #define TJ_BGR       1
