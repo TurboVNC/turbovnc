@@ -62,6 +62,7 @@ if [ $FORCEGCC = 1 ]; then
 fi
 if [ $FORCEX86 = 1 ]; then
     echo "#define i386Architecture" >> config/cf/platform.def
+    echo "#undef x86_64Architecture" >> config/cf/platform.def
 fi
 if [ $FORCEX86_64 = 1 ]; then
     echo "#define x86_64Architecture" >> config/cf/platform.def
