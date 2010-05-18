@@ -43,44 +43,6 @@ There are five programs here:
 	       server.  You normally use the vncserver script to start Xvnc.
 
 
-First you must have a reasonably recent version of X installed (this includes
-/usr/openwin on Solaris machines).  Also, TightVNC requires JPEG and zlib
-libraries installed in the system (e.g. under /usr/local).  To build
-everything but Xvnc, do:
-
-	% xmkmf
-	% make World
-
-This should build first the vncauth library which is used by each of the
-programs, then vncviewer, vncpasswd and vncconnect.
-
-Xvnc differs from the other programs in that it is built inside a cut-down
-version of the X build tree.  This is based around the XFree86 3.3.2 "server
-only" distribution, which in turn is based on the X11R6.3 distribution from
-the X consortium.  To build Xvnc, do:
-
-	% cd Xvnc
-	% ./configure
-	% make
-
-If you have trouble building Xvnc, see the Xvnc/README file for more details.
-
-If it all builds OK you should copy the programs to some directory which
-is in your PATH environment variable, such as /usr/local/bin.  Also, it's
-handy to install manual pages in a directory where the man utility can find
-them.  You can use the vncinstall script to do this for you (man path is
-optional):
-
-	% cd ..
-	% ./vncinstall /usr/local/bin /usr/local/man
-
-If you want to use the Java VNC viewer, you should copy the class files from
-the classes directory to some suitable installation directory such as
-/usr/local/vnc/classes:
-
-	% mkdir -p /usr/local/vnc/classes
-	% cp classes/* /usr/local/vnc/classes
-
 We recommend that you use the vncserver script to run Xvnc for you.  You can
 edit the script as appropriate for your site.  Things you may need to change
 include:
