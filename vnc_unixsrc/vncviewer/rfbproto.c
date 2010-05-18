@@ -41,6 +41,13 @@
 #include <pthread.h>
 #include "turbojpeg.h"
 
+/* OS X 10.4 doesn't define this */
+#ifdef __APPLE__
+#ifndef _SC_NPROCESSORS_CONF
+#define _SC_NPROCESSORS_CONF 1
+#endif
+#endif
+
 #ifndef min
  #define min(a,b) ((a)<(b)?(a):(b))
 #endif
