@@ -1,0 +1,240 @@
+Building TurboVNC for Unix
+==========================
+
+
+*******************************************************************************
+**     Prerequisites
+*******************************************************************************
+
+-- autoconf 2.56 or later
+-- automake 1.7 or later
+   * On Solaris, these are available from BlastWave (http://www.blastwave.org)
+     or OpenCSW (http://www.opencsw.org)
+   * Needed only when building TurboVNC from CVS, or if you wish to modify the
+     build scripts and Makefiles
+
+-- make
+
+-- xmkmf and imake (if building the TurboVNC Server)
+
+-- GCC
+   * On OS X, this is available in the X Code Tools, which are located on the
+     install discs or at:
+     http://developer.apple.com/tools/xcode
+
+... OR ...
+
+-- SOLARIS ONLY:  Sun Studio/Workshop Pro Compiler v12 or later
+   * See http://www.sun.com/software/products/studio/ for a free download.
+
+-- X11 development kit
+   * On most Linux variants, this can be found in the "XFree86-devel" or 
+     "xorg-x11-devel" package.  On Ubuntu, it is in the "libx11-dev" package.
+   * On OS X, this is available in the "X11 SDK" package, which is part of the
+     X Code Tools.
+
+-- x86 ONLY:  libjpeg-turbo SDK v1.0.0 or later
+   * The libjpeg-turbo SDK packages for various platforms can be obtained from
+     the "Files" area of:
+     http://sourceforge.net/projects/libjpeg-turbo/
+
+-- SPARC ONLY:  Sun mediaLib
+   * mediaLib is pre-installed on Solaris 10 and later, and it can also be
+     downloaded for free from http://www.sun.com/processors/vis/mlib.html.
+
+
+*******************************************************************************
+**     Building TurboVNC
+*******************************************************************************
+
+The following procedure will build the TurboVNC Viewer on Linux, FreeBSD,
+32-bit OS X, and Solaris/x86 systems (on Solaris, this generates a 32-bit
+binary.  See below for 64-bit build instructions.)
+
+  cd vnc/vnc_unixsrc
+  autoreconf -fiv
+  sh ./configure [additional configure flags]
+  make
+
+NOTE: Running autoreconf is only necessary if building TurboVNC from the CVS
+repository or if configure.ac has been modified.
+
+On supported platforms (Linux and Solaris, at the moment), the TurboVNC Server
+(Xvnc) can then be built by executing:
+
+  make xserver
+
+You can also run:
+
+  make xserver-clean
+
+to clean the Xvnc build, or
+
+  make xserver-rebuild
+
+to do a minimal rebuild of Xvnc without re-configuring it.
+
+
+*******************************************************************************
+**     Build Recipes for Specific Systems
+*******************************************************************************
+
+
+VPATH and Out-of-Tree Builds
+----------------------------
+Since it uses autotools, the TurboVNC Viewer can be built in a different
+directory from the source directory.  However, the TurboVNC Server uses an
+antiquated build system (stone knives and bearskins) that doen't support
+out-of-tree builds.  If building the TurboVNC Server, then the TurboVNC Viewer
+components must be built in-tree so the server build knows where to find them.
+
+
+32-bit Build on 64-bit Linux
+----------------------------
+
+Add
+
+  --host i686-pc-linux-gnu CFLAGS='-O3 -m32'
+
+to the configure command line.  You may need to also add
+
+  --x-libraries=/usr/X11R6/lib
+
+to the configure command line if you are running an older distribution that
+uses XFree86 (this is known to be necessary on RedHat Enterprise Linux 3, for
+instance.)
+
+
+64-bit Build on 64-bit OS/X
+---------------------------
+
+Add
+
+  --host x86_64-apple-darwin10.0.0
+
+to the configure command line.
+
+
+32-bit Build on 64-bit OS/X
+---------------------------
+
+Add
+
+  CFLAGS='-O3 -m32' LDFLAGS=-m32
+
+to the configure command line.
+
+
+32-bit Backward-Compatible Build on 64-bit OS/X
+-----------------------------------------------
+
+Add
+
+  CFLAGS='-isysroot /Developer/SDKs/MacOSX10.4u.sdk \
+    -mmacosx-version-min=10.4 -O3 -m32' \
+    LDFLAGS='-isysroot /Developer/SDKs/MacOSX10.4u.sdk \
+    -mmacosx-version-min=10.4 -m32'
+
+to the configure command line.  The OS X 10.4 SDK must be installed.
+
+
+64-bit Build on 64-bit Solaris
+------------------------------
+
+Add
+
+  --host x86_64-pc-solaris CFLAGS='-O3 -m64' LDFLAGS=-m64
+
+to the configure command line.
+
+
+32-bit TurboVNC Viewer Build on 64-bit FreeBSD
+----------------------------------------------
+
+Add
+
+  --host i386-unknown-freebsd CC='gcc -B /usr/lib32' CFLAGS='-O3 -m32' \
+    LDFLAGS='-B/usr/lib32'
+
+to the configure command line.
+
+
+Sun Studio
+----------
+
+Add
+
+  CC=cc
+
+to the configure command line.  TurboVNC will automatically be built with
+the maximum optimization level (-xO5) unless you override CFLAGS.
+
+To build a 64-bit version of TurboVNC using Sun Studio, add
+
+  --host x86_64-pc-solaris CC=cc CFLAGS='-xO5 -m64' LDFLAGS=-m64
+
+to the configure command line.
+
+
+*******************************************************************************
+**     Creating Release Packages
+*******************************************************************************
+
+The following commands can be used to create various types of release packages:
+
+make rpm
+
+  Create RedHat-style binary RPM package.  Requires RPM v4 or later.
+
+make srpm
+
+  This creates a pristine source tarball, then creates a RedHat-style source
+  RPM package from the tarball.  Requires RPM v4 or later.
+
+make deb
+
+  Create Debian-style binary package.  Requires dpkg.
+
+make dmg
+
+  Create Macintosh package/disk image.  This requires the PackageMaker
+  application, which must be installed in /Developer/Applications/Utilities.
+
+make udmg
+
+  On 64-bit OS X (10.6 "Snow Leopard" or later), this creates a version of the
+  Macintosh package/disk image which contains universal i386/x86-64 binaries.
+  The 32-bit fork of these binaries is backward compatible with OS X 10.4 and
+  later, whereas the 64-bit fork is compatible with OS X 10.6 and later.  OS X
+  10.4 compatibility SDK required.
+
+
+*******************************************************************************
+**     Other Options
+*******************************************************************************
+
+mediaLib Build
+--------------
+
+Adding --with-medialib to the configure command line will build a version of
+TurboVNC that uses mediaLib for JPEG compression/decompression rather than
+libjpeg-turbo.  On x86 platforms, this is meant primarily for testing purposes,
+since libjpeg-turbo is generally faster than mediaLib.  Building against
+mediaLib is the default on SPARC platforms.
+
+
+Custom builds of libjpeg-turbo
+------------------------------
+
+The TurboVNC build will look for libjpeg-turbo in its usual place
+(/opt/libjpeg-turbo).  If you have built a custom version of libjpeg-turbo and
+installed it into a different directory, then set the JPEG_CFLAGS and
+JPEG_LDFLAGS variables on the configure command line to specify how to build
+and link against your custom version.  For instance,
+
+  configure JPEG_CFLAGS='-I/usr/local/include' \
+    JPEG_LDFLAGS='-L/usr/local/lib -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic'
+
+The default build of TurboVNC tries to use the TurboJPEG/OSS static library
+(libturbojpeg.a), so you can override JPEG_LDFLAGS to build TurboVNC against
+the TurboJPEG/OSS dynamic library if you wish.
