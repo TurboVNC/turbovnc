@@ -181,7 +181,7 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #  ifdef x86_64Architecture
 #   define StandardDefines	  -Dsun -Di386 -DSVR4 -D__x86_64__
 #  else
-#   define StandardDefines	  -Dsun -Di386 -DSVR4 -D__i386
+#   define StandardDefines	  -Dsun -Di386 -DSVR4 -D__i386__
 #  endif
 #  define ToolkitStringsABIOptions	-intelabi
 # else
