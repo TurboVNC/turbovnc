@@ -3,6 +3,7 @@
 /*
 
 Copyright (c) 1993, 1994  X Consortium
+Copyright (c) 2010  D. R. Commander
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +28,7 @@ in this Software without prior written authorization from the X Consortium.
 
 */
 
+#include <errno.h>
 #include "def.h"
 #ifdef hpux
 #define sigvec sigvector
@@ -170,8 +172,12 @@ main(argc, argv)
 	    nargc = 1;
 	    if ((afd = open(argv[1]+1, O_RDONLY)) < 0)
 		fatalerr("cannot open \"%s\"\n", argv[1]+1);
-	    fstat(afd, &ast);
+	    memset(&ast, 0, sizeof(struct stat));
+	    if(fstat(afd, &ast) < 0)
+		fatalerr("cannot fstat \"%s\": %s\n", argv[1]+1, strerror(errno));
 	    args = (char *)malloc(ast.st_size + 1);
+	    if (args == NULL)
+		fatalerr("cannot alloc mem\n");
 	    if ((ast.st_size = read(afd, args, ast.st_size)) < 0)
 		fatalerr("failed to read %s\n", argv[1]+1);
 	    args[ast.st_size] = '\0';
@@ -498,7 +504,13 @@ struct filepointer *getfile(file)
 		*content->f_p = '\0';
 		return(content);
 	}
-	fstat(fd, &st);
+	memset(&st, 0, sizeof(struct stat));
+	if(fstat(fd, &st) < 0) {
+		warning("cannot fstat \"%s\": %s\n", file, strerror(errno));
+		content->f_p = content->f_base = content->f_end = (char *)malloc(1);
+		*content->f_p = '\0';
+		return(content);
+	}
 	content->f_base = (char *)malloc(st.st_size+1);
 	if (content->f_base == NULL)
 		fatalerr("cannot allocate mem\n");
