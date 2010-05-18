@@ -437,7 +437,7 @@ void
 usage(void)
 {
   fprintf(stderr,
-	  "TurboVNC Viewer version "__VERSION"\n"
+	  "TurboVNC Viewer v"PACKAGE_VERSION" (build "__BUILD")\n"
 	  "\n"
 	  "Usage: %s [<OPTIONS>] [<HOST>][:<DISPLAY#>]\n"
 	  "       %s [<OPTIONS>] [<HOST>][::<PORT#>]\n"
