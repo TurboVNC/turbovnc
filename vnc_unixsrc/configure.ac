@@ -51,51 +51,53 @@ AC_ARG_WITH([medialib],
     [Use Sun mediaLib to perform JPEG compression/decompression]),
   [USE_MEDIALIB=$with_medialib], [])
 
+AC_ARG_VAR(JPEG_CFLAGS, [Custom C compiler flags for libjpeg-turbo, e.g. -I{libjpeg-turbo_directory}/include])
+AC_ARG_VAR(JPEG_LDFLAGS, [Custom Linker flags for libjpeg-turbo, e.g. -L{libjpeg-turbo_directory}/lib -lturbojpeg])
+
 if test "x$USE_MEDIALIB" = "xyes"; then
 
   AC_CHECK_HEADERS([mlib.h], [],
     [AC_MSG_ERROR([Could not find mediaLib header files])])
   AC_CHECK_LIB(mlib, mlib_version, [],
     [AC_MSG_ERROR([Could not link with mediaLib library])])
+  JPEG_CFLAGS=-I${abs_top_srcdir}/turbojpeg
+  JPEG_LDFLAGS=-lmlib ${abs_top_srcdir}/turbojpeg/libturbojpeg.a
 
 else
 
-  LJTINC=-I/opt/libjpeg-turbo/include
-  LJTLIB='-L/opt/libjpeg-turbo/lib -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic'
-
-  case $host_os in
-    darwin*)
-      LJTLIB=/usr/lib/libturbojpeg.a
-      ;;
-    solaris*)
-      if test "$host_cpu" = "x86_64"; then
-        LJTLIB='-L/opt/libjpeg-turbo/lib/amd64 -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic'
-      fi
-      ;;
-  esac
-
-  AC_ARG_WITH([libjpeg-turbo],
-    AC_HELP_STRING([--with-libjpeg-turbo=DIR],
-      [Specify directory in which libjpeg-turbo is located]),
-    [LJTLIB="-L${withval}/lib -lturbojpeg"; LJTINC="-I${withval}/include"], [])
+  if test "x$JPEG_CFLAGS" = "x"; then
+    JPEG_CFLAGS=-I/opt/libjpeg-turbo/include
+  fi
+  if test "x$JPEG_LDFLAGS" = "x"; then
+    if test "$host_cpu" = "x86_64"; then
+      JPEG_LDFLAGS='-L/opt/libjpeg-turbo/lib64 -L/opt/libjpeg-turbo/lib -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic'
+    else
+      JPEG_LDFLAGS='-L/opt/libjpeg-turbo/lib32 -L/opt/libjpeg-turbo/lib -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic'
+    fi
+    case $host_os in
+      darwin*)
+        JPEG_LDFLAGS=/opt/libjpeg-turbo/lib/libturbojpeg.a
+        ;;
+    esac
+  fi
 
   SAVE_CPPFLAGS=${CPPFLAGS}
-  CPPFLAGS="${CPPFLAGS} ${LJTINC}"
+  CPPFLAGS="${CPPFLAGS} ${JPEG_CFLAGS}"
   AC_CHECK_HEADERS([turbojpeg.h], [DUMMY=1],
     [AC_MSG_ERROR([Could not find libjpeg-turbo header files])])
+  AC_MSG_CHECKING([for libjpeg-turbo library])
+  LJT_CHECK=no
   CPPFLAGS=${SAVE_CPPFLAGS}
-  SAVE_LDFLAGS=${LDFLAGS}
-  LDFLAGS="${LJTLIB} ${LDFLAGS}"
-  AC_CHECK_LIB(turbojpeg, tjInitCompress, [DUMMY=1],
+  SAVE_LIBS=${LIBS}
+  LIBS="${LIBS} ${JPEG_LDFLAGS}"
+  AC_LINK_IFELSE([AC_LANG_CALL([], [tjInitCompress])], [LJT_CHECK=yes],
     [AC_MSG_ERROR([Could not link with libjpeg-turbo libraries])])
-  LDFLAGS=${SAVE_LDFLAGS}
+  LIBS=${SAVE_LIBS}
+	AC_MSG_RESULT([$LJT_CHECK])
 
 fi
 
 AM_CONDITIONAL([WITH_MEDIALIB], [test "x$USE_MEDIALIB" != "xno"])
-AC_SUBST(LJTINC)
-AC_SUBST(LJTLIB)
-AC_SUBST(abs_top_srcdir)
 
 AC_PATH_XTRA
 
@@ -122,13 +124,16 @@ fi
 AM_CONDITIONAL([X86_64], [test "x$host_cpu" = "xx86_64"])
 
 case "$host_cpu" in
+  sparc*)
+    PKGARCH=sparc
+    ;;
   x86_64)
     RPMARCH=x86_64
-    DEBARCH=amd64
+    PKGARCH=amd64
     ;;
   i*86 | x86 | ia32)
     RPMARCH=i386
-    DEBARCH=i386
+    PKGARCH=i386
     ;;
 esac
 
@@ -136,8 +141,11 @@ AM_CONDITIONAL([X86], [test "x$RPMARCH" = "xi386"])
 AM_CONDITIONAL([GCC], [test "x$GCC" = "xyes"])
 
 AC_SUBST(RPMARCH)
-AC_SUBST(DEBARCH)
+AC_SUBST(PKGARCH)
 AC_SUBST(BUILD)
+AC_DEFINE_UNQUOTED(__BUILD, "${BUILD}")
+
+AC_CONFIG_FILES([vncserver], [chmod +x vncserver])
 
 AC_OUTPUT([
 Makefile
