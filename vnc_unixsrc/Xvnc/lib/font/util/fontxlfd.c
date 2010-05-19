@@ -215,7 +215,7 @@ double x;
       significant digits.  How do you round to n significant digits on
       a binary machine?  */
 
-#if defined(i386) || defined(__i386__) || defined(__alpha__)
+#if defined(__i386__) || defined(__alpha__)
 #if !defined(__EMX__)
 #include <float.h>
 
@@ -278,7 +278,7 @@ double x;
    else 
 #endif
 #endif /* !__EMX__ */
-#endif /* i386 || __i386__ */
+#endif /* defined(__i386__) || defined(__alpha__) */
     {
 	/*
 	 * If not IEEE 754:  Let printf() do it for you.  
