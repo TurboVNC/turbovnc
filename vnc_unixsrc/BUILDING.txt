@@ -102,7 +102,13 @@ to the configure command line.  You may need to also add
 
 to the configure command line if you are running an older distribution that
 uses XFree86 (this is known to be necessary on RedHat Enterprise Linux 3, for
-instance.)
+instance.)  On newer systems that store the X11 libraries in /usr/lib, the
+build should work, but it will probably generate a bunch of warnings when
+linking vncviewer.  You can add
+
+  --x-libraries=/usr/lib
+
+to the configure command line to get rid of these warnings.
 
 
 64-bit Build on 64-bit OS/X
