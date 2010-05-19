@@ -60,8 +60,6 @@ if test "x$USE_MEDIALIB" = "xyes"; then
     [AC_MSG_ERROR([Could not find mediaLib header files])])
   AC_CHECK_LIB(mlib, mlib_version, [],
     [AC_MSG_ERROR([Could not link with mediaLib library])])
-  JPEG_CFLAGS=-I${abs_top_srcdir}/turbojpeg
-  JPEG_LDFLAGS=-lmlib ${abs_top_srcdir}/turbojpeg/libturbojpeg.a
 
 else
 
@@ -153,6 +151,7 @@ AM_CONDITIONAL([GCC], [test "x$GCC" = "xyes"])
 AC_SUBST(RPMARCH)
 AC_SUBST(PKGARCH)
 AC_SUBST(BUILD)
+AC_SUBST(abs_top_srcdir)
 AC_DEFINE_UNQUOTED(__BUILD, "${BUILD}")
 
 AC_CONFIG_FILES([vncserver], [chmod +x vncserver])
