@@ -115,6 +115,8 @@ if test "x$with_shm" != "xno"; then
   AC_CHECK_LIB(Xext, XShmQueryExtension, [DUMMY=1],
     [AC_MSG_ERROR([MIT-SHM not available in Xext library])],
     [$X_LIBS -lX11])
+else
+  USE_MITSHM=no
 fi
 if test "x$USE_MITSHM" = "xyes"; then
   AC_DEFINE(MITSHM)

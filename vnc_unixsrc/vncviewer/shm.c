@@ -21,6 +21,8 @@
  * shm.c - code to set up shared memory extension.
  */
 
+#ifdef MITSHM
+
 #include <vncviewer.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -98,3 +100,5 @@ CreateShmImage()
 
   return image;
 }
+
+#endif
