@@ -145,7 +145,10 @@ Add
 
   --host x86_64-pc-solaris CFLAGS='-O3 -m64' LDFLAGS=-m64
 
-to the configure command line.
+to the configure command line.  Both the TurboVNC Viewer and TurboVNC Server
+can be built as 64-bit binaries, but for unknown reasons, the TurboVNC Server
+will not work on Solaris if built using 64-bit code.  Any insight into this
+problem is appreciated.
 
 
 32-bit TurboVNC Viewer Build on 64-bit FreeBSD
