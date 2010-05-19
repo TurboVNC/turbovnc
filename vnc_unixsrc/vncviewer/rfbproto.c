@@ -126,26 +126,9 @@ static CapsContainer *encodingCaps;  /* known encodings besides Raw        */
 static char buffer[BUFFER_SIZE];
 
 
-/* The zlib encoding requires expansion/decompression/deflation of the
-   compressed data in the "buffer" above into another, result buffer.
-   However, the size of the result buffer can be determined precisely
-   based on the bitsPerPixel, height and width of the rectangle.  We
-   allocate this buffer one time to be the full size of the buffer. */
-
-static int raw_buffer_size = -1;
-static char *raw_buffer;
-
-static z_stream decompStream;
-static Bool decompStreamInited = False;
-
-
 /*
  * Variables for the ``tight'' encoding implementation.
  */
-
-/* Separate buffer for compressed data. */
-#define ZLIB_BUFFER_SIZE 512
-static char zlib_buffer[ZLIB_BUFFER_SIZE];
 
 /* Four independent compression streams for zlib library. */
 static z_stream zlibStream[4];
@@ -556,7 +539,6 @@ static int
 SelectSecurityType(void)
 {
   CARD8 nSecTypes;
-  char *secTypeNames[] = {"None", "VncAuth"};
   CARD8 knownSecTypes[] = {rfbSecTypeNone, rfbSecTypeVncAuth};
   int nKnownSecTypes = sizeof(knownSecTypes);
   CARD8 *secTypes;
@@ -1356,7 +1338,6 @@ HandleRFBServerMessage()
     int linesToRead;
     int bytesPerLine;
     int i;
-    int usecs;
     XEvent ev;
     double tDecodeStart = 0., tBlitStart = 0., tUpdateStart = 0.;
 

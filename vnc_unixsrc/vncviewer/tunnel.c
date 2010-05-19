@@ -100,7 +100,6 @@ processTunnelArgs(char **remoteHost, int *remotePort, int localPort,
 		  int *pargc, char **argv, int tunnelArgIndex)
 {
   char *pdisplay;
-  int port;
 
   if (tunnelArgIndex >= *pargc - 1)
     usage();

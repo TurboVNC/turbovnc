@@ -211,7 +211,7 @@ button1XProc(Widget w, XtPointer client, XtPointer p)
 void
 CreatePopup()
 {
-  Widget buttonForm, button, prevButton = NULL, label;
+  Widget buttonForm, button = NULL, prevButton = NULL, label;
   int i;
   char buttonName[12];
   String buttonType;

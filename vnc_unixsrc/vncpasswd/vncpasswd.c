@@ -68,7 +68,7 @@ int
 DoOTP()
 {
   unsigned int full;
-  unsigned int view;
+  unsigned int view = 0;
   Display* dpy;
   Atom prop;
   int len;

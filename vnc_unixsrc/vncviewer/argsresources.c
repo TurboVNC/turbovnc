@@ -26,6 +26,7 @@
  * argsresources.c - deal with command-line args and resources.
  */
 
+#include <ctype.h>
 #include "vncviewer.h"
 
 /*
@@ -488,7 +489,6 @@ usage(void)
 void
 GetArgsAndResources(int argc, char **argv)
 {
-  int i;
   char *vncServerName, *colonPos;
   int len, portOffset;
   int disp;

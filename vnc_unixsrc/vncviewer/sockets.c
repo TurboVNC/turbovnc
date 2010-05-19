@@ -85,7 +85,7 @@ ProcessXtEvents()
 Bool
 ReadFromRFBServer(char *out, unsigned int n)
 {
-  double tRecvStart;
+  double tRecvStart = 0.0;
 
   if (rfbProfile) tRecvStart = gettime();
 
@@ -114,7 +114,7 @@ ReadFromRFBServer(char *out, unsigned int n)
 	    ProcessXtEvents();
 	    i = 0;
 	  } else {
-	    fprintf(stderr,programName);
+	    fprintf(stderr,"%s",programName);
 	    perror(": read");
 	    return False;
 	  }
@@ -142,7 +142,7 @@ ReadFromRFBServer(char *out, unsigned int n)
 	    ProcessXtEvents();
 	    i = 0;
 	  } else {
-	    fprintf(stderr,programName);
+	    fprintf(stderr,"%s",programName);
 	    perror(": read");
 	    return False;
 	  }
@@ -184,13 +184,13 @@ WriteExact(int sock, char *buf, int n)
 	  FD_SET(rfbsock,&fds);
 
 	  if (select(rfbsock+1, NULL, &fds, NULL, NULL) <= 0) {
-	    fprintf(stderr,programName);
+	    fprintf(stderr,"%s",programName);
 	    perror(": select");
 	    return False;
 	  }
 	  j = 0;
 	} else {
-	  fprintf(stderr,programName);
+	  fprintf(stderr,"%s",programName);
 	  perror(": write");
 	  return False;
 	}
@@ -222,13 +222,13 @@ ConnectToTcpAddr(unsigned int host, int port)
 
   sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0) {
-    fprintf(stderr,programName);
+    fprintf(stderr,"%s",programName);
     perror(": ConnectToTcpAddr: socket");
     return -1;
   }
 
   if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    fprintf(stderr,programName);
+    fprintf(stderr,"%s",programName);
     perror(": ConnectToTcpAddr: connect");
     close(sock);
     return -1;
@@ -236,7 +236,7 @@ ConnectToTcpAddr(unsigned int host, int port)
 
   if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
 		 (char *)&one, sizeof(one)) < 0) {
-    fprintf(stderr,programName);
+    fprintf(stderr,"%s",programName);
     perror(": ConnectToTcpAddr: setsockopt");
     close(sock);
     return -1;
@@ -263,7 +263,7 @@ FindFreeTcpPort(void)
 
   sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0) {
-    fprintf(stderr,programName);
+    fprintf(stderr,"%s",programName);
     perror(": FindFreeTcpPort: socket");
     return 0;
   }
@@ -298,28 +298,28 @@ ListenAtTcpPort(int port)
 
   sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0) {
-    fprintf(stderr,programName);
+    fprintf(stderr,"%s",programName);
     perror(": ListenAtTcpPort: socket");
     return -1;
   }
 
   if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
 		 (const char *)&one, sizeof(one)) < 0) {
-    fprintf(stderr,programName);
+    fprintf(stderr,"%s",programName);
     perror(": ListenAtTcpPort: setsockopt");
     close(sock);
     return -1;
   }
 
   if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    fprintf(stderr,programName);
+    fprintf(stderr,"%s",programName);
     perror(": ListenAtTcpPort: bind");
     close(sock);
     return -1;
   }
 
   if (listen(sock, 5) < 0) {
-    fprintf(stderr,programName);
+    fprintf(stderr,"%s",programName);
     perror(": ListenAtTcpPort: listen");
     close(sock);
     return -1;
@@ -338,19 +338,19 @@ AcceptTcpConnection(int listenSock)
 {
   int sock;
   struct sockaddr_in addr;
-  int addrlen = sizeof(addr);
+  socklen_t addrlen = sizeof(addr);
   int one = 1;
 
   sock = accept(listenSock, (struct sockaddr *) &addr, &addrlen);
   if (sock < 0) {
-    fprintf(stderr,programName);
+    fprintf(stderr,"%s",programName);
     perror(": AcceptTcpConnection: accept");
     return -1;
   }
 
   if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
 		 (char *)&one, sizeof(one)) < 0) {
-    fprintf(stderr,programName);
+    fprintf(stderr,"%s",programName);
     perror(": AcceptTcpConnection: setsockopt");
     close(sock);
     return -1;
@@ -368,7 +368,7 @@ Bool
 SetNonBlocking(int sock)
 {
   if (fcntl(sock, F_SETFL, O_NONBLOCK) < 0) {
-    fprintf(stderr,programName);
+    fprintf(stderr,"%s",programName);
     perror(": AcceptTcpConnection: fcntl");
     return False;
   }
@@ -414,7 +414,7 @@ Bool
 SameMachine(int sock)
 {
   struct sockaddr_in peeraddr, myaddr;
-  int addrlen = sizeof(struct sockaddr_in);
+  socklen_t addrlen = sizeof(struct sockaddr_in);
 
   getpeername(sock, (struct sockaddr *)&peeraddr, &addrlen);
   getsockname(sock, (struct sockaddr *)&myaddr, &addrlen);

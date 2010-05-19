@@ -45,9 +45,8 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
 {
   Display *d;
   XEvent ev;
-  int listenSocket, sock;
+  int listenSocket;
   fd_set fds;
-  int n;
   int i;
   char *displayname = NULL;
 

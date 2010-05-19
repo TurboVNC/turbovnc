@@ -26,6 +26,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
 #include <vncauth.h>
 #include <d3des.h>
@@ -73,7 +74,7 @@ int
 vncEncryptAndStorePasswd2(char *passwd, char *passwdViewOnly, char *fname)
 {
     FILE *fp;
-    int i, bytesToWrite, bytesWrote;
+    int bytesToWrite, bytesWrote;
     unsigned char encryptedPasswd[16] = {
 	0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0
