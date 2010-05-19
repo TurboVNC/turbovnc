@@ -99,6 +99,14 @@ fi
 
 AM_CONDITIONAL([WITH_MEDIALIB], [test "x$USE_MEDIALIB" != "xno"])
 
+USE_DEV_URANDOM=no;
+AC_MSG_CHECKING([for /dev/urandom])
+if test -r /dev/urandom; then
+  USE_DEV_URANDOM=yes
+  AC_DEFINE(UseDevUrandom)
+fi
+AC_MSG_RESULT([$USE_DEV_URANDOM])
+
 AC_PATH_XTRA
 
 USE_MITSHM=yes
