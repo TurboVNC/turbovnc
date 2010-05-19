@@ -85,7 +85,8 @@ will install the TurboVNC Viewer into /opt/TurboVNC.
 
   make xserver-install
 
-will do likewise for the TurboVNC Server.
+will do likewise for the TurboVNC Server.  'make uninstall' and
+'make xserver-uninstall' will correspondingly uninstall the viewer and server.
 
 You can change the directory into which TurboVNC will install by passing an
 argument of
