@@ -1,30 +1,45 @@
 #!/bin/sh
 
-if [ "$1" = "clean" ]; then
-xmkmf || exit -1
-make Makefiles || exit -1
-make clean || exit -1
-cd Xvnc
-if [ ! -f Makefile ]; then
-	sh ./configure || exit -1
+set -u
+set -e
+trap onexit INT
+trap onexit TERM
+trap onexit EXIT
+
+pkgtmpdir=
+
+onexit()
+{
+	if [ ! "$pkgtmpdir" = "" ]; then
+		rm -rf $pkgtmpdir
+	fi
+}
+
+usage()
+{
+	echo "$0 <version> <build> <package architecture> <source dir.> [medialib]"
+	exit 1
+}
+
+MEDIALIB=0
+
+if [ $# -lt 4 ]; then usage $0; fi
+pkgname=TurboVNC
+VERSION=$1
+BUILD=$2
+PKGARCH=$3
+SRCDIR=$4
+if [ $# -gt 4 ]; then
+	if [ "$5" = "medialib" ]; then 
+		MEDIALIB=1
+	fi
 fi
-make clean || exit -1
-cd ..
-exit
-fi
 
-xmkmf || exit -1
-make World || exit -1
-cd Xvnc
-sh ./configure || exit -1
-make || exit -1
-cd ..
-
-pkgtmpdir=pkgbuild
-pkgname=SUNWtvnc
-
-/bin/rm -rf $pkgtmpdir
-mkdir -p $pkgtmpdir
+umask 022
+pkgtmpdir=`mktemp -d /tmp/$pkgname-build.XXXXXX`
+PKGROOT=$pkgtmpdir/pkgbuild/$pkgname
+mkdir -p $PKGROOT
+touch $pkgtmpdir/depend
 
 cat > $pkgtmpdir/copyright <<EOF 
 Use is subject to the terms of the GNU General Public License, Version 2
@@ -36,18 +51,25 @@ P SUNWkvm       Core Architecture, (Kvm)
 P SUNWcsr       Core Solaris, (Root)
 P SUNWcsu       Core Solaris, (Usr)
 P SUNWxwplt     X Windows platform software
-P SUNWmlib      mediaLib - Shared Libraries
 EOF
 
-_VERSION=`cat TurboVNC-version`
-_BUILD=`date +%Y%m%d`
+if [ $MEDIALIB ]; then
+cat >> $pkgtmpdir/depend <<EOF 
+P SUNWmlib      mediaLib - Shared Libraries
+EOF
+fi
+
+if [ ! "$PKGARCH" = "sparc" ]; then
+	PKGARCH=i386
+fi
+
 cat > $pkgtmpdir/pkginfo <<EOF 
-ARCH=sparc
-PKG=SUNWtvnc
+ARCH=$PKGARCH
+PKG=TurboVNC
 NAME=TurboVNC server and client
-VERSION=$_VERSION,REV=$_BUILD
+VERSION=$VERSION,REV=$BUILD
 SUNW_PKGVERS=1.0
-DESC=TurboVNC is a sleek and fast VNC distribution, containing a high-performance implementation of tight JPEG encoding designed to work in conjunction with VirtualGL.
+DESC=TurboVNC is a sleek and fast VNC distribution, containing a high-performance implementation of tight encoding designed to work in conjunction with VirtualGL.
 VENDOR=The VirtualGL Project
 HOTLINE=http://www.VirtualGL.org
 EMAIL=information@virtualgl.org
@@ -61,72 +83,50 @@ cat > $pkgtmpdir/proto <<EOF
 i copyright
 i depend
 i pkginfo
-d none SUNWtvnc 0755 root bin
-d none SUNWtvnc/bin 0755 root bin
-f none SUNWtvnc/bin/vncpasswd 0755 root bin
-f none SUNWtvnc/bin/vncviewer 0755 root bin
-f none SUNWtvnc/bin/vncserver 0755 root bin
-f none SUNWtvnc/bin/vncconnect 0755 root bin
-f none SUNWtvnc/bin/Xvnc 0755 root bin
-d none SUNWtvnc/doc 0755 root bin
-f none SUNWtvnc/doc/LICENCE.TXT 0644 root bin
-f none SUNWtvnc/doc/WhatsNew 0644 root bin
-f none SUNWtvnc/doc/ChangeLog 0644 root bin
-f none SUNWtvnc/doc/TurboVNC-ChangeLog.txt 0644 root bin
+d none TurboVNC 0755 root bin
+d none $pkgname/bin 0755 root bin
+f none $pkgname/bin/vncpasswd 0755 root bin
+f none $pkgname/bin/vncviewer 0755 root bin
+f none $pkgname/bin/vncserver 0755 root bin
+f none $pkgname/bin/vncconnect 0755 root bin
+f none $pkgname/bin/Xvnc 0755 root bin
+d none $pkgname/doc 0755 root bin
+f none $pkgname/doc/LICENCE.TXT 0644 root bin
+f none $pkgname/doc/TurboVNC-ChangeLog.txt 0644 root bin
 EOF
-for i in ../vnc_docs/*.png; do echo f none SUNWtvnc/doc/`basename $i` 0644 root bin >> $pkgtmpdir/proto; done
-echo f none SUNWtvnc/doc/index.html 0644 root bin >> $pkgtmpdir/proto
-for i in ../vnc_docs/*.css; do echo f none SUNWtvnc/doc/`basename $i` 0644 root bin >> $pkgtmpdir/proto; done
-for i in ../vnc_docs/LICEN*.txt; do echo f none SUNWtvnc/doc/`basename $i` 0644 root bin >> $pkgtmpdir/proto; done
+for i in $SRCDIR/../vnc_docs/*.png; do echo f none $pkgname/doc/`basename $i` 0644 root bin >> $pkgtmpdir/proto; done
+echo f none $pkgname/doc/index.html 0644 root bin >> $pkgtmpdir/proto
+for i in $SRCDIR/../vnc_docs/*.css; do echo f none $pkgname/doc/`basename $i` 0644 root bin >> $pkgtmpdir/proto; done
+for i in $SRCDIR/../vnc_docs/LICEN*.txt; do echo f none $pkgname/doc/`basename $i` 0644 root bin >> $pkgtmpdir/proto; done
 cat >> $pkgtmpdir/proto <<EOF
-d none SUNWtvnc/lib 0755 root bin
-f none SUNWtvnc/lib/libturbojpeg.so 0755 root bin
-d none SUNWtvnc/man 0755 root bin
-d none SUNWtvnc/man/man1 0755 root bin
-f none SUNWtvnc/man/man1/vncpasswd.1 0644 root bin
-f none SUNWtvnc/man/man1/vncviewer.1 0644 root bin
-f none SUNWtvnc/man/man1/vncserver.1 0644 root bin
-f none SUNWtvnc/man/man1/vncconnect.1 0644 root bin
-f none SUNWtvnc/man/man1/Xvnc.1 0644 root bin
-f none SUNWtvnc/man/man1/Xserver.1 0644 root bin
-d none SUNWtvnc/vnc 0755 root bin
-d none SUNWtvnc/vnc/classes 0755 root bin
-f none SUNWtvnc/vnc/classes/AuthPanel.class 0644 root bin
-f none SUNWtvnc/vnc/classes/ButtonPanel.class 0644 root bin
-f none SUNWtvnc/vnc/classes/ClipboardFrame.class 0644 root bin
-f none SUNWtvnc/vnc/classes/DesCipher.class 0644 root bin
-f none SUNWtvnc/vnc/classes/OptionsFrame.class 0644 root bin
-f none SUNWtvnc/vnc/classes/RecordingFrame.class 0644 root bin
-f none SUNWtvnc/vnc/classes/ReloginPanel.class 0644 root bin
-f none SUNWtvnc/vnc/classes/RfbProto.class 0644 root bin
-f none SUNWtvnc/vnc/classes/RFBUpdateEvent.class 0644 root bin
-f none SUNWtvnc/vnc/classes/SessionRecorder.class 0644 root bin
-f none SUNWtvnc/vnc/classes/SocketFactory.class 0644 root bin
-f none SUNWtvnc/vnc/classes/VncCanvas.class 0644 root bin
-f none SUNWtvnc/vnc/classes/VncViewer.class 0644 root bin
-f none SUNWtvnc/vnc/classes/VncViewer.jar 0644 root bin
-f none SUNWtvnc/vnc/classes/index.vnc 0644 root bin
-s none TurboVNC=SUNWtvnc
+d none $pkgname/man 0755 root bin
+d none $pkgname/man/man1 0755 root bin
+f none $pkgname/man/man1/vncpasswd.1 0644 root bin
+f none $pkgname/man/man1/vncviewer.1 0644 root bin
+f none $pkgname/man/man1/vncserver.1 0644 root bin
+f none $pkgname/man/man1/vncconnect.1 0644 root bin
+f none $pkgname/man/man1/Xvnc.1 0644 root bin
+f none $pkgname/man/man1/Xserver.1 0644 root bin
+d none $pkgname/vnc 0755 root bin
+d none $pkgname/vnc/classes 0755 root bin
+f none $pkgname/vnc/classes/VncViewer.jar 0644 root bin
+f none $pkgname/vnc/classes/index.vnc 0644 root bin
+d none $pkgname/etc 0755 root bin
+f none $pkgname/etc/turbovncserver.conf 0644 root bin
+f none $pkgname/etc/turbovncserver-auth.conf 0644 root bin
 EOF
 
-pkgdir=$pkgtmpdir/opt/$pkgname
+make install DESTDIR=$pkgtmpdir
+make xserver-install DESTDIR=$pkgtmpdir
+mv $pkgtmpdir/opt/$pkgname/share/man $pkgtmpdir/opt/$pkgname/man
+rmdir $pkgtmpdir/opt/$pkgname/share
 
-mkdir -p $pkgdir/bin
-mkdir -p $pkgdir/doc
-mkdir -p $pkgdir/lib
-mkdir -p $pkgdir/vnc
-mkdir -p $pkgdir/man/man1
+mkdir -p $pkgtmpdir/opt/$pkgname/doc
+cp $SRCDIR/../vnc_docs/*.png $SRCDIR/../vnc_docs/*.css $SRCDIR/../vnc_docs/index.html $SRCDIR/../vnc_docs/LICEN*.txt LICENCE.TXT WhatsNew ChangeLog TurboVNC-ChangeLog.txt $pkgtmpdir/opt/$pkgname/doc
 
-sh ./vncinstall $pkgdir/bin $pkgdir/man
-cp Xvnc/programs/Xserver/Xserver.man $pkgdir/man/man1/Xserver.1
-cp turbojpeg/libturbojpeg.so $pkgdir/lib
-cp -prf classes $pkgdir/vnc
-cp ../vnc_docs/*.png ../vnc_docs/*.css ../vnc_docs/index.html ../vnc_docs/LICEN*.txt LICENCE.TXT WhatsNew ChangeLog TurboVNC-ChangeLog.txt $pkgdir/doc
+pkgmk -o -r $pkgtmpdir/opt -d $pkgtmpdir -f $pkgtmpdir/proto
+pkgtrans -s $pkgtmpdir $pkgtmpdir/$pkgname.pkg $pkgname
+bzip2 $pkgtmpdir/$pkgname.pkg
+cp $pkgtmpdir/$pkgname.pkg.bz2 . 
 
-cd $pkgtmpdir
-pkgmk -o -r opt -d . -a `uname -p` -f proto
-pkgtrans -s . ../$pkgname.pkg $pkgname
-cd ..
-rm -f $pkgname.pkg.bz2
-bzip2 $pkgname.pkg
-/bin/rm -rf $pkgtmpdir
+exit 0
