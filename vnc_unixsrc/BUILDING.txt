@@ -76,6 +76,26 @@ to do a minimal rebuild of Xvnc without re-configuring it.
 
 
 *******************************************************************************
+**     Installing
+*******************************************************************************
+
+  make install
+
+will install the TurboVNC Viewer into /opt/TurboVNC.
+
+  make xserver-install
+
+will do likewise for the TurboVNC Server.
+
+You can change the directory into which TurboVNC will install by passing an
+argument of
+
+  --prefix={directory}
+
+on the configure command line.  Run configure --help for more details.
+
+
+*******************************************************************************
 **     Build Recipes for Specific Systems
 *******************************************************************************
 
