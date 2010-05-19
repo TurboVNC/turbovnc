@@ -38,8 +38,8 @@ features using these config files.
 -------------------------------------------------------------------------------
 [9]
 Performance of the OS X viewer should generally be better (prior versions were
-not being built with compiler optimizations, due to the use of an antiquated
-build system.)
+not being built with compiler optimizations, due to the use of the antiquated
+XFree86 build system.)
 -------------------------------------------------------------------------------
 
 
