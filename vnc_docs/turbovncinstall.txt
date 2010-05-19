@@ -39,8 +39,8 @@ following error:
 
 ** Installing TurboVNC on Solaris
 
-	1. Download the TurboVNC Solaris package (''SUNWtvnc-''__''{version}''__''.pkg.bz2''
-		for SPARC or ''SUNWtvnc-''__''{version}''__''-x86.pkg.bz2'' for x86) from the
+	1. Download the TurboVNC Solaris package
+		(''TurboVNC-''__''{version}''__''-x86.pkg.bz2'') from the
 		[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
 		{nl}
@@ -49,19 +49,17 @@ following error:
 		issue the following commands:
 
 		#Verb: <<---
-		pkgrm SUNWvgl
+		pkgrm TurboVNC
 		---
 
 		(answer "Y" when prompted.)
 
 		#Verb: <<---
-		bzip2 -d SUNWtvnc-{version}.pkg.bz2
-		pkgadd -d SUNWtvnc-{version}.pkg
+		bzip2 -d TurboVNC-{version}.pkg.bz2
+		pkgadd -d TurboVNC-{version}.pkg
 		---
 
-		Select the ''SUNWtvnc'' package (usually option 1) from the menu.
-
- !!! TurboVNC for Solaris installs into ''/opt/SUNWtvnc''.
+		Select the ''TurboVNC'' package (usually option 1) from the menu.
 
 ** Installing TurboVNC on Mac (Client Only)
 
@@ -118,7 +116,7 @@ As root, issue one of the following commands:
 As root, issue the following command:
 
 #Verb: <<---
-pkgrm SUNWtvnc
+pkgrm TurboVNC
 ---
 
 Answer "yes" when prompted.

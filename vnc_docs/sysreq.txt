@@ -58,33 +58,9 @@
 
 ** Solaris/SPARC
 
-|| || Server || Client ||
-| Recommended CPU \
-	| UltraSPARC III 900 MHz or faster \
-		{list type=ul: \
-			{item:Dual processors or dual cores recommended}} \
-	| UltraSPARC III 900 MHz or faster \
-	|
-| O/S \
-	| {list type=ul: \
-			{item: Solaris 8 (or newer)} \
-			{item: OpenSolaris 2008.11 (or newer)}} \
-	| < \
-	|
-| Other Software \
-	| [[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]] \
-		(pre-installed on Solaris 10 and higher) \
-	| {list type=ul: \
-			{item:[[http://www.sun.com/processors/vis/mlib.html][Sun mediaLib]] \
-				(pre-installed on Solaris 10 and higher)} \
-			{item:If your system does not ship with SSH pre-installed (older Solaris \
-				8 and 9 systems don't), then download and install an OpenSSH package \
-				from [[http://www.blastwave.org/][Blastwave]] or \
-				http://www.sunfreeware.com/.} \
-			{item:X server configured to export True Color (24-bit or 32-bit) \
-				visuals}} \
-	|
-#OPT: hiCol=first
+TurboVNC should (theoretically) build and run on SPARC with Solaris 10 or
+newer, but this configuration has not been tested.  If you encounter any
+problems, then please contact us.
 
 ** Mac/x86
 
