@@ -47,7 +47,6 @@
 #include <X11/Xmu/StdSel.h>
 #include "rfbproto.h"
 #include "caps.h"
-#include "tvnc_version.h"
 
 extern int endianTest;
 
