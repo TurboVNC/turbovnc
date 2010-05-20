@@ -704,7 +704,25 @@ sub Kill
     $SIG{'HUP'} = 'IGNORE';
     chop($pid = `cat $pidFile`);
     warn "Killing Xvnc process ID $pid\n";
-    system("kill $pid");
+
+    if (kill 0, $pid) {
+	system("kill $pid");
+    } else {
+	warn "Xvnc process ID $pid already killed\n";
+	$opt{'-kill'} =~ s/://;
+    
+	if (-e "/tmp/.X11-unix/X$opt{'-kill'}") {
+	    print "Xvnc did not appear to shut down cleanly.";
+	    print " Removing /tmp/.X11-unix/X$opt{'-kill'}\n";
+	    unlink "/tmp/.X11-unix/X$opt{'-kill'}";
+	}
+	if (-e "/tmp/.X$opt{'-kill'}-lock") {
+	    print "Xvnc did not appear to shut down cleanly.";
+	    print " Removing /tmp/.X$opt{'-kill'}-lock\n";
+	    unlink "/tmp/.X$opt{'-kill'}-lock";
+	}
+    }
+
     unlink $pidFile;
     exit;
 }
