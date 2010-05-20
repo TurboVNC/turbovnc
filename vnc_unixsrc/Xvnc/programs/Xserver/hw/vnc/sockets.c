@@ -453,7 +453,7 @@ WriteExact(sock, buf, len)
 	    exit(1);
 
 	} else {
-	    if (errno != EWOULDBLOCK && errno != EAGAIN) {
+	    if (errno != EWOULDBLOCK && errno != EAGAIN && errno != 0) {
 		return n;
 	    }
 
