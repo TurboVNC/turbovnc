@@ -94,7 +94,7 @@ static double gettime(void)
 pthread_mutex_t alrMutex;
 Bool alrInit = FALSE;
 static pthread_t threadHandle = 0;
-static Bool deadyet = TRUE, clientListModified = FALSE;
+static Bool deadyet = TRUE, clientListModified = FALSE, putImageOnly = TRUE;
 
 static void *
 ALRThreadFunc(param)
@@ -112,7 +112,8 @@ ALRThreadFunc(param)
 
             if(rfbAutoLosslessRefresh > 0.0 && cl->firstUpdate
                 && gettime()-cl->lastFramebufferUpdate > rfbAutoLosslessRefresh
-                && REGION_NOTEMPTY(pScreen, &cl->lossyRegion)) {
+                && REGION_NOTEMPTY(pScreen, &cl->lossyRegion)
+                && (!putImageOnly || cl->alrTrigger)) {
 
                 tightCompressLevelSave = cl->tightCompressLevel;
                 tightQualityLevelSave = cl->tightQualityLevel;
@@ -137,6 +138,7 @@ ALRThreadFunc(param)
                     &cl->lossyRegion);
 
                 rfbSendFramebufferUpdate(cl);
+                cl->alrTrigger = FALSE;
 
                 REGION_EMPTY(pScreen, &cl->lossyRegion);
                 cl->tightCompressLevel = tightCompressLevelSave;
@@ -343,6 +345,9 @@ rfbNewClient(sock)
             pthread_mutexattr_settype(&ma, PTHREAD_MUTEX_RECURSIVE);
             pthread_mutex_init(&alrMutex, &ma);
             pthread_mutexattr_destroy(&ma);
+            if((env = getenv("TVNC_ALRALL"))!=NULL && !strcmp(env, "1"))
+                putImageOnly = FALSE;
+            cl->putImageTrigger = cl->alrTrigger = FALSE;
             deadyet = FALSE;
             if ((err = pthread_create(&threadHandle, NULL, ALRThreadFunc,
                 NULL)) != 0) {
@@ -1388,7 +1393,11 @@ rfbSendFramebufferUpdate(cl)
 	}
     }
 
-    cl->lastFramebufferUpdate = gettime();
+    if (!putImageOnly || cl->putImageTrigger) {
+        cl->lastFramebufferUpdate = gettime();
+        cl->alrTrigger = TRUE;
+        cl->putImageTrigger = FALSE;
+    }
 
     return TRUE;
 }

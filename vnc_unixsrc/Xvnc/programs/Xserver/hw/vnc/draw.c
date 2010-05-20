@@ -97,7 +97,7 @@ int rfbDeferUpdateTime = 40; /* ms */
    update to be sent to each client if there is one pending and the client is
    ready for it.  */
 
-#define SCHEDULE_FB_UPDATE(pScreen,prfb)				\
+#define _SCHEDULE_FB_UPDATE(pScreen,prfb,trigger)			\
   if (!prfb->dontSendFramebufferUpdate) {				\
       rfbClientPtr cl, nextCl;						\
       alrlock();							\
@@ -106,11 +106,15 @@ int rfbDeferUpdateTime = 40; /* ms */
 	  if (!cl->deferredUpdateScheduled && FB_UPDATE_PENDING(cl) &&	\
 	      REGION_NOTEMPTY(pScreen,&cl->requestedRegion))		\
 	  {								\
+	      cl->putImageTrigger=trigger;				\
 	      rfbScheduleDeferredUpdate(cl);				\
 	  }								\
       }									\
       alrunlock();							\
   }
+
+#define SCHEDULE_FB_UPDATE(pScreen,prfb)				\
+  _SCHEDULE_FB_UPDATE(pScreen,prfb,FALSE)
 
 /* function prototypes */
 
@@ -664,7 +668,7 @@ rfbPutImage(pDrawable, pGC, depth, x, y, w, h, leftPad, format, pBits)
     (*pGC->ops->PutImage) (pDrawable, pGC, depth, x, y, w, h,
 			   leftPad, format, pBits);
 
-    SCHEDULE_FB_UPDATE(pDrawable->pScreen, prfb);
+    _SCHEDULE_FB_UPDATE(pDrawable->pScreen, prfb, TRUE);
 
     GC_OP_EPILOGUE(pGC);
 }
