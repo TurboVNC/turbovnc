@@ -155,6 +155,7 @@ AC_SUBST(abs_top_srcdir)
 AC_DEFINE_UNQUOTED(__BUILD, "${BUILD}")
 
 AC_CONFIG_FILES([vncserver], [chmod +x vncserver])
+AC_CONFIG_FILES([Xvnc/config/cf/tvnc_version.h])
 
 AC_OUTPUT([
 Makefile

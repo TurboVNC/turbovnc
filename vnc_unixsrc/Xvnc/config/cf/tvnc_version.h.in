@@ -1,0 +1,3 @@
+#define __VERSION   "@VERSION@"
+#define __BUILD     "@BUILD@"
+#define XvncRelease \"turbo@VERSION@\"

@@ -5,8 +5,10 @@ SUBDIRS = libvncauth vncconnect vncpasswd vncviewer
 endif
 
 noinst_SCRIPTS = vncserver
-CLEANFILES = $(noinst_SCRIPTS)
 noinst_MANS = vncserver.man
+noinst_HEADERS = Xvnc/config/cf/tvnc_version.h
+
+CLEANFILES = $(noinst_SCRIPTS) $(noinst_HEADERS)
 
 if X86_64
 CFGFLAGS = -x86_64
@@ -53,7 +55,7 @@ xserver-rebuild: all
 		$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)"; \
 	fi
 
-xserver-clean:
+xserver-clean: Xvnc/config/cf/tvnc_version.h
 	if [ ! "${top_srcdir}" = "${top_builddir}" ]; then \
 		echo Out-of-tree builds cannot be used when building Xvnc; \
 	else \
