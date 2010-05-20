@@ -32,7 +32,7 @@ JPEGLDFLAGS = ${JPEG_LDFLAGS}
 
 endif
 
-xserver:
+xserver: all
 	if [ ! "${top_srcdir}" = "${top_builddir}" ]; then \
 		echo Out-of-tree builds cannot be used when building Xvnc; \
 	else \
@@ -45,7 +45,7 @@ xserver:
 		$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)"; \
 	fi
 
-xserver-rebuild:
+xserver-rebuild: all
 	if [ ! "${top_srcdir}" = "${top_builddir}" ]; then \
 		echo Out-of-tree builds cannot be used when building Xvnc; \
 	else \
@@ -66,7 +66,7 @@ xserver-clean:
 		$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)" clean; \
 	fi
 
-xserver-install:
+xserver-install: vncserver
 	$(INSTALL) -m 755 $(builddir)/vncserver $(DESTDIR)/$(bindir)/
 	$(INSTALL) -m 755 $(builddir)/Xvnc/programs/Xserver/Xvnc $(DESTDIR)/$(bindir)/
 	$(INSTALL) -m 755 $(srcdir)/vncserver.man $(DESTDIR)/$(mandir)/man1/vncserver.1
