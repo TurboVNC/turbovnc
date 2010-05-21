@@ -1,9 +1,9 @@
-Summary:   An accelerated version of TightVNC designed for video and 3D applications
-Name:      turbovnc
+Summary:   A highly-optimized version of VNC that can be used with real-time video applications
+Name:      %{_name}
 Version:   %{_version}
 Release:   %{_build}
 URL:       http://www.virtualgl.org
-#-->Source0: http://prdownloads.sourceforge.net/virtualgl/turbovnc-%{version}.tar.gz
+#-->Source0: http://prdownloads.sourceforge.net/virtualgl/%{_name}-%{version}.tar.gz
 License:   GPL
 Group:     User Interface/Desktops
 Requires:  bash >= 2.0
@@ -19,42 +19,29 @@ machine where it is running, but from anywhere on the Internet and
 from a wide variety of machine architectures.  TurboVNC is a sleek and
 fast VNC distribution, containing a high-performance implementation of
 Tight encoding designed to work in conjunction with VirtualGL.
+
 #-->%prep
 #-->%setup -q -n vnc/vnc_unixsrc
 
 #-->%build
-#-->xmkmf
-#-->make World
-#-->cd Xvnc
-#-->./configure
-#-->make
-#-->cd ..
-
+#-->configure --prefix=%{_prefix} --sysconfdir=/etc --mandir=%{_mandir}
+#-->make DESTDIR=%{buildroot}
+#-->make xserver DESTDIR=%{buildroot}
 
 %install
 rm -rf %{buildroot}
+make install DESTDIR=%{buildroot} sysconfdir=/etc
+make xserver-install DESTDIR=%{buildroot} sysconfdir=/etc
 
-mkdir -p %{buildroot}%{_bindir}
-mkdir -p %{buildroot}%{_mandir}/man1
-sh ./vncinstall %{buildroot}%{_bindir} %{buildroot}%{_mandir}
-install -m 644 Xvnc/programs/Xserver/Xserver.man %{buildroot}%{_mandir}/man1/Xserver.1
-
-mkdir -p %{buildroot}%{_datadir}/vnc/classes
-for i in classes/*.class; do install -m 644 $i %{buildroot}%{_datadir}/vnc/classes; done
-for i in classes/*.jar; do install -m 644 $i %{buildroot}%{_datadir}/vnc/classes; done
-for i in classes/*.vnc; do install -m 644 $i %{buildroot}%{_datadir}/vnc/classes; done
-
-strip %{buildroot}%{_bindir}/* || :
+strip %{buildroot}%{_prefix}/bin/* || :
 
 mkdir -p %{buildroot}/etc/init.d
 
 cat vncserver.init   | \
-sed -e 's@vncserver :${display\%\%:@%{_bindir}/vncserver :${display\%\%:@g' | \
-sed -e 's@vncserver -kill :${display\%\%:@%{_bindir}/vncserver -kill :${display\%\%:@g' \
+sed -e 's@vncserver :${display\%\%:@%{_prefix}/bin/vncserver :${display\%\%:@g' | \
+sed -e 's@vncserver -kill :${display\%\%:@%{_prefix}/bin/vncserver -kill :${display\%\%:@g' \
  > %{buildroot}/etc/init.d/tvncserver
 chmod 755 %{buildroot}/etc/init.d/tvncserver
-
-install -m 644 turbovncserver-auth.conf %{buildroot}/etc/
 
 mkdir -p %{buildroot}/etc/sysconfig
 install -m 644 tvncservers %{buildroot}/etc/sysconfig/tvncservers
@@ -64,13 +51,13 @@ cat > %{buildroot}/usr/share/applications/tvncviewer.desktop << EOF
 [Desktop Entry]
 Name=TurboVNC Viewer
 Comment=TurboVNC client application
-Exec=%{_bindir}/vncviewer
+Exec=%{_prefix}/bin/vncviewer
 Terminal=0
 Type=Application
 Categories=Application;Utility;X-Red-Hat-Extra;
 EOF
 
-chmod 644 LICENCE.TXT WhatsNew ChangeLog TurboVNC-ChangeLog.txt ../vnc_docs/LICEN*.txt ../vnc_docs/*.html ../vnc_docs/*.png ../vnc_docs/*.css
+chmod 644 %{_srcdir}/LICENCE.TXT %{_srcdir}/TurboVNC-ChangeLog.txt %{_srcdir}/../vnc_docs/LICEN*.txt %{_srcdir}/../vnc_docs/*.html %{_srcdir}/../vnc_docs/*.png %{_srcdir}/../vnc_docs/*.css
 
 %clean
 rm -rf %{buildroot}
@@ -95,23 +82,25 @@ fi
 %defattr(-,root,root)
 %attr(0755,root,root) %config /etc/init.d/tvncserver
 %config(noreplace) /etc/sysconfig/tvncservers
+%config(noreplace) /etc/turbovncserver.conf
 %config(noreplace) /etc/turbovncserver-auth.conf
-%doc LICENCE.TXT WhatsNew ChangeLog TurboVNC-ChangeLog.txt ../vnc_docs/LICEN*.txt ../vnc_docs/*.html ../vnc_docs/*.png ../vnc_docs/*.css
+%doc %{_srcdir}/LICENCE.TXT  %{_srcdir}/TurboVNC-ChangeLog.txt %{_srcdir}/../vnc_docs/LICEN*.txt %{_srcdir}/../vnc_docs/*.html %{_srcdir}/../vnc_docs/*.png %{_srcdir}/../vnc_docs/*.css
 
-%dir %{_bindir}
+%dir %{_prefix}/bin
 %dir %{_mandir}
 %dir %{_mandir}/man1
-%dir %{_datadir}
-%dir %{_datadir}/vnc
+%dir %{_prefix}/vnc
+%dir %{_prefix}/vnc/classes
 
-%{_bindir}/vncviewer
+%{_prefix}/bin/vncviewer
 %config(noreplace) /usr/share/applications/tvncviewer.desktop
 %{_mandir}/man1/vncviewer.1*
-%{_bindir}/Xvnc
-%{_bindir}/vncserver
-%{_bindir}/vncpasswd
-%{_bindir}/vncconnect
-%{_datadir}/vnc/*
+%{_prefix}/bin/Xvnc
+%{_prefix}/bin/vncserver
+%{_prefix}/bin/vncpasswd
+%{_prefix}/bin/vncconnect
+%{_prefix}/vnc/classes/index.vnc
+%{_prefix}/vnc/classes/VncViewer.jar
 %{_mandir}/man1/Xvnc.1*
 %{_mandir}/man1/Xserver.1*
 %{_mandir}/man1/vncserver.1*
