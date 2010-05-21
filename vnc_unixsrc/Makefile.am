@@ -113,8 +113,8 @@ rpm: all
 	rm -rf $$TMPDIR
 
 deb: all
-	sh $(srcdir)/release/makedpkg ${PACKAGE_NAME} ${VERSION} ${BUILD} \
-		${PKGARCH} ${srcdir}
+	sh $(srcdir)/makedpkg ${PACKAGE_NAME} ${VERSION} ${BUILD} ${PKGARCH} \
+		${srcdir} ${prefix}
 
 
 if X86_64
