@@ -69,8 +69,8 @@ xserver-clean: Xvnc/config/cf/tvnc_version.h
 	fi
 
 xserver-install: vncserver
-	$(INSTALL) -m 755 $(builddir)/vncserver $(DESTDIR)/$(bindir)/
-	$(INSTALL) -m 755 $(builddir)/Xvnc/programs/Xserver/Xvnc $(DESTDIR)/$(bindir)/
+	$(INSTALL) -m 755 ./vncserver $(DESTDIR)/$(bindir)/
+	$(INSTALL) -m 755 ./Xvnc/programs/Xserver/Xvnc $(DESTDIR)/$(bindir)/
 	$(INSTALL) -m 755 $(srcdir)/vncserver.man $(DESTDIR)/$(mandir)/man1/vncserver.1
 	$(INSTALL) -m 755 $(srcdir)/Xvnc/programs/Xserver/Xvnc.man $(DESTDIR)/$(mandir)/man1/Xvnc.1
 	$(INSTALL) -m 755 $(srcdir)/Xvnc/programs/Xserver/Xserver.man $(DESTDIR)/$(mandir)/man1/Xserver.1
