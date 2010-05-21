@@ -128,16 +128,22 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 # endif
 #endif
 
+#ifdef x86_64Architecture
+# define XServer64Defines -D_XSERVER64
+#else
+# define XServer64Defines
+#endif
+
 #ifdef i386Architecture
 # if OSMajorVersion > 4
-#  define ServerExtraDefines AllocateLocalDefines XFree86ServerDefines -D__EXTENSIONS__
+#  define ServerExtraDefines AllocateLocalDefines XFree86ServerDefines -D__EXTENSIONS__ XServer64Defines
 #  define ServerOSDefines    XFree86ServerOSDefines
 # else
-#  define ServerExtraDefines AllocateLocalDefines
+#  define ServerExtraDefines AllocateLocalDefines XServer64Defines
 #  define ServerOSDefines   -DDDXOSINIT
 # endif
 #else
-# define ServerExtraDefines AllocateLocalDefines
+# define ServerExtraDefines AllocateLocalDefines XServer64Defines
 # define ServerOSDefines   -DDDXOSINIT
 #endif
 
