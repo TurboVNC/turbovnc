@@ -6,7 +6,6 @@ AM_CONFIG_HEADER(config.h)
 
 dnl Checks for programs.
 AC_PROG_CC
-AC_PROG_LIBTOOL
 AC_PATH_XTRA
 if test "$no_x" = "yes"
 then
