@@ -112,6 +112,24 @@ rpm: all
 	cp $$TMPDIR/RPMS/${RPMARCH}/${PACKAGE_NAME}-${VERSION}-${BUILD}.${RPMARCH}.rpm ${PACKAGE_NAME}.${RPMARCH}.rpm; \
 	rm -rf $$TMPDIR
 
+srpm:
+	TMPDIR=`mktemp -d /tmp/${PACKAGE_NAME}-build.XXXXXX`; \
+	mkdir -p $$TMPDIR/RPMS; \
+	mkdir -p $$TMPDIR/SRPMS; \
+	mkdir -p $$TMPDIR/BUILD; \
+	mkdir -p $$TMPDIR/SOURCES; \
+	mkdir -p $$TMPDIR/SPECS; \
+	rm -f ${PACKAGE_NAME}.src.rpm; \
+	cp vnc.tar.gz $$TMPDIR/SOURCES/${PACKAGE_NAME}-${VERSION}.tar.gz; \
+	cat ${srcdir}/${PACKAGE_NAME}.spec | sed s@%{_name}@${PACKAGE_NAME}@g \
+		| sed s@%{_version}@${VERSION}@g | sed s@%{_build}@${BUILD}@g \
+		| sed s@%{_bindir}@${bindir}@g | sed s@%{_mandir}@${mandir}@g \
+		| sed s@%{_prefix}@${prefix}@g | sed s@%{_srcdir}@${srcdir}@g \
+		|sed s/#--\>//g > $$TMPDIR/SPECS/${PACKAGE_NAME}.spec; \
+	rpmbuild -bs --define "_topdir $$TMPDIR" $$TMPDIR/SPECS/${PACKAGE_NAME}.spec; \
+	cp $$TMPDIR/SRPMS/${PACKAGE_NAME}-${VERSION}-${BUILD}.src.rpm ${PACKAGE_NAME}.src.rpm; \
+	rm -rf $$TMPDIR
+
 deb: all
 	sh $(srcdir)/makedpkg ${PACKAGE_NAME} ${VERSION} ${BUILD} ${PKGARCH} \
 		${srcdir} ${prefix}
