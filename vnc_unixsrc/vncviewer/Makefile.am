@@ -1,3 +1,6 @@
+mandir = @MANDIR@
+datadir = @DATADIR@
+
 bin_PROGRAMS = vncviewer
 
 man1_MANS = vncviewer.man

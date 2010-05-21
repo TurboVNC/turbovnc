@@ -1,3 +1,6 @@
+mandir = @MANDIR@
+datadir = @DATADIR@
+
 bin_PROGRAMS = vncpasswd
 
 man1_MANS = vncpasswd.man

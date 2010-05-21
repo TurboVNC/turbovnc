@@ -4,6 +4,9 @@ else
 SUBDIRS = libvncauth vncconnect vncpasswd vncviewer
 endif
 
+mandir = @MANDIR@
+datadir = @DATADIR@
+
 noinst_SCRIPTS = vncserver
 noinst_MANS = vncserver.man
 noinst_HEADERS = Xvnc/config/cf/tvnc_version.h
@@ -77,9 +80,9 @@ xserver-install: vncserver
 	mkdir -p $(DESTDIR)/$(prefix)/vnc/classes/
 	$(INSTALL) -m 755 $(srcdir)/classes/index.vnc $(DESTDIR)/$(prefix)/vnc/classes/
 	$(INSTALL) -m 755 $(srcdir)/classes/VncViewer.jar $(DESTDIR)/$(prefix)/vnc/classes/
-	mkdir -p $(DESTDIR)/$(prefix)/etc/
-	$(INSTALL) -m 755 $(srcdir)/turbovncserver.conf $(DESTDIR)/$(prefix)/etc/
-	$(INSTALL) -m 755 $(srcdir)/turbovncserver-auth.conf $(DESTDIR)/$(prefix)/etc/
+	mkdir -p $(DESTDIR)/$(sysconfdir)/
+	$(INSTALL) -m 755 $(srcdir)/turbovncserver.conf $(DESTDIR)/$(sysconfdir)/
+	$(INSTALL) -m 755 $(srcdir)/turbovncserver-auth.conf $(DESTDIR)/$(sysconfdir)/
 
 xserver-uninstall:
 	rm -f $(DESTDIR)/$(bindir)/vncserver
@@ -91,13 +94,23 @@ xserver-uninstall:
 	rm -f $(DESTDIR)/$(prefix)/vnc/classes/VncViewer.jar
 	rmdir $(DESTDIR)/$(prefix)/vnc/classes/
 	rmdir $(DESTDIR)/$(prefix)/vnc/
-	rm -f $(DESTDIR)/$(prefix)/etc/turbovncserver.conf
-	rm -f $(DESTDIR)/$(prefix)/etc/turbovncserver-auth.conf
+	rm -f $(DESTDIR)/$(sysconfdir)/turbovncserver.conf
+	rm -f $(DESTDIR)/$(sysconfdir)/turbovncserver-auth.conf
 
 
 rpm: all
-	sh $(srcdir)/makerpm ${PACKAGE_NAME} ${VERSION} ${BUILD} \
-		${RPMARCH} ${srcdir}
+	TMPDIR=`mktemp -d /tmp/${PACKAGE_NAME}-build.XXXXXX`; \
+	mkdir -p $$TMPDIR/RPMS; \
+	ln -fs `pwd` $$TMPDIR/BUILD; \
+	rm -f ${PACKAGE_NAME}.${RPMARCH}.rpm; \
+	rpmbuild -bb --define "_name ${PACKAGE_NAME}" \
+		--define "_blddir $TMPDIR/buildroot" --define "_topdir $$TMPDIR" \
+		--define "_bindir ${bindir}" --define "_mandir ${mandir}" \
+		--define "_prefix ${prefix}" --define "_version ${VERSION}" \
+		--define "_build ${BUILD}" --define "_srcdir ${srcdir}" \
+		--target ${RPMARCH} ${srcdir}/${PACKAGE_NAME}.spec; \
+	cp $$TMPDIR/RPMS/${RPMARCH}/${PACKAGE_NAME}-${VERSION}-${BUILD}.${RPMARCH}.rpm ${PACKAGE_NAME}.${RPMARCH}.rpm; \
+	rm -rf $$TMPDIR
 
 deb: all
 	sh $(srcdir)/release/makedpkg ${PACKAGE_NAME} ${VERSION} ${BUILD} \

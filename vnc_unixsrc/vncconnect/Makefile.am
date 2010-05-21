@@ -1,3 +1,6 @@
+mandir = @MANDIR@
+datadir = @DATADIR@
+
 bin_PROGRAMS = vncconnect
 
 man1_MANS = vncconnect.man

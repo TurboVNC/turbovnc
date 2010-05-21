@@ -8,6 +8,13 @@ BUILD=`date +%Y%m%d`
 AM_INIT_AUTOMAKE([-Wall foreign dist-bzip2])
 AC_PREFIX_DEFAULT(/opt/TurboVNC)
 
+if test "x${mandir}" = "x/opt/TurboVNC/share/man"; then
+  MANDIR=/opt/TurboVNC/man
+else
+  MANDIR=$mandir
+fi
+AC_SUBST(MANDIR)
+
 # Checks for programs.
 SAVED_CFLAGS=${CFLAGS}
 SAVED_CXXFLAGS=${CXXFLAGS}
