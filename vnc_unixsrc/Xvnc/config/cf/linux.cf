@@ -118,8 +118,12 @@ XCOMM binutils:	(LinuxBinUtilsMajorVersion)
 /* For compatibility */
 #define SourceDefines		LinuxSourceDefines
 
+#ifndef HasGcc
 #define HasGcc			YES
+#endif
+#ifndef HasGcc2
 #define HasGcc2			YES
+#endif
 #ifndef HasGcc2ForCplusplus
 # define HasGcc2ForCplusplus	YES
 #endif
@@ -248,18 +252,18 @@ XCOMM binutils:	(LinuxBinUtilsMajorVersion)
 #define HasWChar32		YES
 #define StandardCppDefines	-traditional StandardDefines
 
+#ifdef x86_64Architecture
+#define OptimizedCDebugFlags	-O2
+#define LinuxMachineDefines	-D__x86_64__
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
+#else
 #ifdef i386Architecture
 #define OptimizedCDebugFlags	DefaultGcc2i386Opt
 #define LinuxMachineDefines	-D__i386__
 #define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
 #define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
 #endif /* i386Architecture */
-
-#ifdef x86_64Architecture
-#define OptimizedCDebugFlags	-O2
-#define LinuxMachineDefines	-D__x86_64__
-#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
-#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
 #endif /* x86_64Architecture */
 
 #ifdef ia64Architecture
