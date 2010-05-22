@@ -46,6 +46,10 @@ If Xvnc aborts unexpectedly for any reason, then attempting to run
 'vncserver -kill :N' for the session will now print a warning message about
 the process aborting and will then try to clean up the orphaned X socket files.
 -------------------------------------------------------------------------------
+[11]
+Integrated autocutsel into the TurboVNC Server distribution for Unix/Linux in
+order to work around clipboard transfer issues.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
