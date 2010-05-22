@@ -710,6 +710,14 @@ sub Kill
 
     if (kill 0, $pid) {
 	system("kill $pid");
+	sleep(1);
+	if (kill 0, $pid) {
+	    print "Xvnc seems to be deadlocked.  Kill the process manually and then re-run\n";
+	    print "    ".$0." -kill ".$opt{'-kill'}."\n";
+	    print "to clean up the socket files.\n";
+	    exit
+	}
+
     } else {
 	warn "Xvnc process ID $pid already killed\n";
 	$opt{'-kill'} =~ s/://;
