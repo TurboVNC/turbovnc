@@ -2,19 +2,22 @@
 Significant changes since 0.6
 ===============================================================================
 [1]
-Multi-threaded the Tight encoder and decoder on Unix and the Tight decoder on
-Windows to improve performance on multi-core systems.  See documentation for
-further details.
+Multi-threaded the Tight encoder in the Unix/Linux TurboVNC Server so that it
+can take advantage of multi-core systems.  See documentation for further
+details.
 -------------------------------------------------------------------------------
 [2]
-Added authentication extensions contributed by UCAR.  See documentation and
-man pages for details.
+Added authentication extensions contributed by UCAR, which allow clients to
+authenticate using one-time passwords and Unix login credentials.  See
+documentation and man pages for details.
 -------------------------------------------------------------------------------
 [3]
 Added scroll wheel support to the Java VNC viewer (requires JRE 1.4 or later.)
 -------------------------------------------------------------------------------
 [4]
-Added automatic lossless refresh feature.  See documentation for details.
+Added automatic lossless refresh (ALR) feature, which sends a mathematically
+lossless copy of the screen during periods of inactivity.  See documentation
+for details.
 -------------------------------------------------------------------------------
 [5]
 For Linux, Mac/Intel, Solaris/x86, and Windows systems, the default build of
@@ -22,33 +25,39 @@ TurboVNC no longer uses TurboJPEG/IPP (which was based on the proprietary
 Intel Performance Primitives) or Sun mediaLib.  Instead, TurboVNC now uses
 libjpeg-turbo, a fully open source vector-accelerated JPEG codec developed in
 conjunction with the TigerVNC Project (and based on libjpeg/SIMD.)
+
+As a result of this, the TurboVNC RPMs and DEBs are now self-contained.
 -------------------------------------------------------------------------------
 [6]
 The uninstall script in the Mac distribution package should now work on OS X
 10.6.
 -------------------------------------------------------------------------------
 [7]
-Support for building 64-bit Solaris and Windows binaries, as well as 
-a universal 32/64-bit binary package for OS X 10.6 "Snow Leopard".
+Added 64-bit Solaris and Windows binary packages, as well as a universal
+32/64-bit binary package for OS X 10.6 "Snow Leopard".
 -------------------------------------------------------------------------------
 [8]
-Fixed a number of interaction issues between the server configuration files and
-the vncserver script, and added the ability to configure the new TurboVNC
-features using these config files.
+Fixed a number of interaction issues between turbovncserver.conf and the
+vncserver script, and added configuration file options for the new TurboVNC
+features, such as ALR.
 -------------------------------------------------------------------------------
 [9]
 Performance of the OS X viewer should generally be better (prior versions were
 not being built with compiler optimizations, due to the use of the antiquated
-XFree86 build system.)
+imake build system.)
 -------------------------------------------------------------------------------
 [10]
-If Xvnc aborts unexpectedly for any reason, then attempting to run
-'vncserver -kill :N' for the session will now print a warning message about
-the process aborting and will then try to clean up the orphaned X socket files.
+Generally robustified 'vncserver -kill'.  In this release, if Xvnc aborts
+unexpectedly for any reason, then attempting to run 'vncserver -kill :N' for
+the session will print a warning message about the process aborting and will
+then try to clean up the orphaned X socket files.  If Xvnc deadlocks, then
+attempting to run 'vncserver -kill :N' will warn about the deadlock and forego
+deleting the PID file (so you can kill -9 the process yourself and then re-run
+vncserver -kill to clean up the orphaned files.)
 -------------------------------------------------------------------------------
 [11]
 Integrated autocutsel into the TurboVNC Server distribution for Unix/Linux in
-order to work around clipboard transfer issues.
+order to work around issues with the clipboard transfer feature.
 -------------------------------------------------------------------------------
 
 
