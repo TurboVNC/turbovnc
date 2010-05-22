@@ -80,6 +80,7 @@ public class VncViewer extends java.applet.Applet
   String host;
   int port;
   String passwordParam;
+  boolean syncClipboards;
   boolean showControls;
   boolean offerRelogin;
   boolean showOfflineDesktop;
@@ -596,21 +597,6 @@ public class VncViewer extends java.applet.Applet
 
 
   //
-  // setCutText() - send the given cut text to the RFB server.
-  //
-
-  void setCutText(String text) {
-    try {
-      if (rfb != null && rfb.inNormalProtocol) {
-	rfb.writeClientCutText(text);
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-
-  //
   // Order change in session recording status. To stop recording, pass
   // null in place of the fname argument.
   //
@@ -714,6 +700,11 @@ public class VncViewer extends java.applet.Applet
       if (str != null && str.equalsIgnoreCase("Yes"))
 	inSeparateFrame = true;
     }
+
+    syncClipboards = true;
+    str = readParameter("Sync clipboards", false);
+    if (str != null && str.equalsIgnoreCase("No"))
+      syncClipboards = false;
 
     // "Show Controls" set to "No" disables button panel.
     showControls = true;

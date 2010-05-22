@@ -307,6 +307,14 @@ Here is the complete list of parameters supported in TightVNC Java viewer:
     application mode, and also in the applet mode with "Open new window"
     parameter set to "yes").
 
+--> "Sync clipboards"
+
+    Values: "Yes", "No".
+    Default: "Yes".
+
+    Automatically synchronize the local and remote clipboards. If set to "No",
+    the remote clipboard will still be accessible via the "Clipboard" button.
+
 --> "Show controls" (no GUI equivalent)
 
     Values: "Yes", "No".

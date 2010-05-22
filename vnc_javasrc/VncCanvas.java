@@ -35,7 +35,7 @@ import java.util.zip.*;
 //
 
 class VncCanvas extends Canvas
-  implements KeyListener, MouseListener, MouseMotionListener {
+  implements KeyListener, MouseListener, MouseMotionListener, FocusListener {
 
   VncViewer viewer;
   RfbProto rfb;
@@ -127,6 +127,10 @@ class VncCanvas extends Canvas
     // Keyboard listener is enabled even in view-only mode, to catch
     // 'r' or 'R' key presses used to request screen update.
     addKeyListener(this);
+
+    // Enable focus event listener for sending client
+    // clipboard updates.
+    addFocusListener(this);
   }
 
   public VncCanvas(VncViewer v) throws IOException {
@@ -506,7 +510,7 @@ class VncCanvas extends Canvas
 
       case RfbProto.ServerCutText:
 	String s = rfb.readServerCutText();
-	viewer.clipboard.setCutText(s);
+	viewer.clipboard.recvCutText(s);
 	break;
 
       default:
@@ -1596,6 +1600,10 @@ class VncCanvas extends Canvas
     }
   }
 
+  public void focusGained(FocusEvent e) {
+    viewer.clipboard.checkLocalClipboard();
+  }
+
   //
   // Ignored events.
   //
@@ -1603,6 +1611,8 @@ class VncCanvas extends Canvas
   public void mouseClicked(MouseEvent evt) {}
   public void mouseEntered(MouseEvent evt) {}
   public void mouseExited(MouseEvent evt) {}
+
+  public void focusLost(FocusEvent e) {}
 
   //
   // Reset update statistics.

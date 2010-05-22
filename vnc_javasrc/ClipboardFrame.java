@@ -24,6 +24,7 @@
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.datatransfer.*;
 
 class ClipboardFrame extends Frame
   implements WindowListener, ActionListener {
@@ -32,6 +33,13 @@ class ClipboardFrame extends Frame
   Button clearButton, closeButton;
   String selection;
   VncViewer viewer;
+
+  static Clipboard systemClipboard;
+  static {
+    try {
+      systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+    } catch (Exception e) {}
+  }
 
   //
   // Constructor.
@@ -50,7 +58,7 @@ class ClipboardFrame extends Frame
     gbc.fill = GridBagConstraints.BOTH;
     gbc.weighty = 1.0;
 
-    textArea = new TextArea(5, 40);
+    textArea = new TextArea("", 5, 40, TextArea.SCROLLBARS_NONE);
     gridbag.setConstraints(textArea, gbc);
     add(textArea);
 
@@ -75,11 +83,26 @@ class ClipboardFrame extends Frame
   }
 
 
-  //
-  // Set the cut text from the RFB server.
-  //
+  // Send the given cut text to the RFB server.
+  void sendCutText(String text) {
+    try {
+      if (viewer.rfb != null && viewer.rfb.inNormalProtocol) {
+	viewer.rfb.writeClientCutText(text);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
 
-  void setCutText(String text) {
+  // Called when cut text is received from the RFB server.
+  void recvCutText(String text) {
+    setContents(text);
+    setLocalClipboard(text);
+  }
+
+
+  // Set the window contents.
+  void setContents(String text) {
     selection = text;
     textArea.setText(text);
     if (isVisible()) {
@@ -87,6 +110,39 @@ class ClipboardFrame extends Frame
     }
   }
 
+  // Set the local clipboard's contents.
+  void setLocalClipboard(String text) {
+    if (viewer.syncClipboards && systemClipboard != null) {
+      StringSelection ss = new StringSelection(text);
+      systemClipboard.setContents(ss, ss);
+    }
+  }
+
+
+  // Check for updates to the local clipboard.
+  void checkLocalClipboard() {
+    if (viewer.syncClipboards && systemClipboard != null) {
+      Transferable contents = systemClipboard.getContents(this);
+      if (contents != null && contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+        try {
+          String text = (String)(contents.getTransferData(DataFlavor.stringFlavor));
+          if (text != null && !text.equals(selection)) {
+            sendCutText(text);
+            setContents(text);
+          }
+        } catch (Exception e) {}
+      }
+    }
+  }
+
+
+  //
+  // When the focus enters the window, check for updates to the local clipboard.
+  //
+
+  public void windowActivated(WindowEvent evt) {
+    checkLocalClipboard();
+  }
 
   //
   // When the focus leaves the window, see if we have new cut text and
@@ -96,7 +152,8 @@ class ClipboardFrame extends Frame
   public void windowDeactivated (WindowEvent evt) {
     if (selection != null && !selection.equals(textArea.getText())) {
       selection = textArea.getText();
-      viewer.setCutText(selection);
+      sendCutText(selection);
+      setLocalClipboard(selection);
     }
   }
 
@@ -112,7 +169,6 @@ class ClipboardFrame extends Frame
   // Ignore window events we're not interested in.
   //
 
-  public void windowActivated(WindowEvent evt) {}
   public void windowOpened(WindowEvent evt) {}
   public void windowClosed(WindowEvent evt) {}
   public void windowIconified(WindowEvent evt) {}
@@ -125,7 +181,9 @@ class ClipboardFrame extends Frame
 
   public void actionPerformed(ActionEvent evt) {
     if (evt.getSource() == clearButton) {
-      textArea.setText("");
+      sendCutText("");
+      setContents("");
+      setLocalClipboard("");
     } else if (evt.getSource() == closeButton) {
       setVisible(false);
     }
