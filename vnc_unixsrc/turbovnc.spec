@@ -99,6 +99,7 @@ fi
 %{_prefix}/bin/vncserver
 %{_prefix}/bin/vncpasswd
 %{_prefix}/bin/vncconnect
+%{_prefix}/bin/autocutsel
 %{_prefix}/vnc/classes/index.vnc
 %{_prefix}/vnc/classes/VncViewer.jar
 %{_mandir}/man1/Xvnc.1*

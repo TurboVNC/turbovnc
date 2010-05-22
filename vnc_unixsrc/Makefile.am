@@ -1,7 +1,7 @@
 if WITH_MEDIALIB
-SUBDIRS = turbojpeg libvncauth vncconnect vncpasswd vncviewer
+SUBDIRS = turbojpeg libvncauth autocutsel vncconnect vncpasswd vncviewer
 else
-SUBDIRS = libvncauth vncconnect vncpasswd vncviewer
+SUBDIRS = libvncauth autocutsel vncconnect vncpasswd vncviewer
 endif
 
 mandir = @MANDIR@
