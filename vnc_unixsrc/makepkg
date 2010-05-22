@@ -65,7 +65,7 @@ fi
 
 cat > $pkgtmpdir/pkginfo <<EOF 
 ARCH=$PKGARCH
-PKG=TurboVNC
+PKG=$pkgname
 NAME=TurboVNC server and client
 VERSION=$VERSION,REV=$BUILD
 SUNW_PKGVERS=1.0
@@ -83,13 +83,14 @@ cat > $pkgtmpdir/proto <<EOF
 i copyright
 i depend
 i pkginfo
-d none TurboVNC 0755 root bin
+d none $pkgname 0755 root bin
 d none $pkgname/bin 0755 root bin
 f none $pkgname/bin/vncpasswd 0755 root bin
 f none $pkgname/bin/vncviewer 0755 root bin
 f none $pkgname/bin/vncserver 0755 root bin
 f none $pkgname/bin/vncconnect 0755 root bin
 f none $pkgname/bin/Xvnc 0755 root bin
+f none $pkgname/bin/autocutsel 0755 root bin
 d none $pkgname/doc 0755 root bin
 f none $pkgname/doc/LICENCE.TXT 0644 root bin
 f none $pkgname/doc/TurboVNC-ChangeLog.txt 0644 root bin
@@ -118,11 +119,8 @@ EOF
 
 make install DESTDIR=$pkgtmpdir
 make xserver-install DESTDIR=$pkgtmpdir
-mv $pkgtmpdir/opt/$pkgname/share/man $pkgtmpdir/opt/$pkgname/man
-rmdir $pkgtmpdir/opt/$pkgname/share
-
 mkdir -p $pkgtmpdir/opt/$pkgname/doc
-cp $SRCDIR/../vnc_docs/*.png $SRCDIR/../vnc_docs/*.css $SRCDIR/../vnc_docs/index.html $SRCDIR/../vnc_docs/LICEN*.txt LICENCE.TXT WhatsNew ChangeLog TurboVNC-ChangeLog.txt $pkgtmpdir/opt/$pkgname/doc
+cp $SRCDIR/../vnc_docs/*.png $SRCDIR/../vnc_docs/*.css $SRCDIR/../vnc_docs/index.html $SRCDIR/../vnc_docs/LICEN*.txt LICENCE.TXT TurboVNC-ChangeLog.txt $pkgtmpdir/opt/$pkgname/doc
 
 pkgmk -o -r $pkgtmpdir/opt -d $pkgtmpdir -f $pkgtmpdir/proto
 pkgtrans -s $pkgtmpdir $pkgtmpdir/$pkgname.pkg $pkgname
