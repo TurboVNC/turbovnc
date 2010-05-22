@@ -1087,6 +1087,7 @@ rfbProcessClientNormalMessage(cl)
 	    return;
 	}
 
+	if (msg.cct.length <= 0) return;
 	str = (char *)xalloc(msg.cct.length);
 	if (str == NULL) {
 	    rfbLogPerror("rfbProcessClientNormalMessage: rfbClientCutText out of memory");
