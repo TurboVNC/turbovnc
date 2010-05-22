@@ -1,5 +1,6 @@
 
-bin_PROGRAMS = autocutsel cutsel
+bin_PROGRAMS = autocutsel
+noinst_PROGRAMS = cutsel
 
 autocutsel_SOURCES = autocutsel.c common.c
 cutsel_SOURCES = cutsel.c common.c
