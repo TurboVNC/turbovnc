@@ -183,15 +183,20 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 # if OSMinorVersion > 3
 #  define InstallCmd	    /usr/ucb/install
 # endif
+# if HasSunC
+#  define MtFlag -mt
+# else
+#  define MtFlag
+# endif
 # ifdef i386Architecture
 #  ifdef x86_64Architecture
-#   define StandardDefines	  -Dsun -Di386 -DSVR4 -D__x86_64__
+#   define StandardDefines	  -Dsun -Di386 -DSVR4 -D__x86_64__ MtFlag
 #  else
-#   define StandardDefines	  -Dsun -Di386 -DSVR4 -D__i386__
+#   define StandardDefines	  -Dsun -Di386 -DSVR4 -D__i386__ MtFlag
 #  endif
 #  define ToolkitStringsABIOptions	-intelabi
 # else
-#  define StandardDefines	  -Dsun -DSVR4
+#  define StandardDefines	  -Dsun -DSVR4 MtFlag
 #  define ToolkitStringsABIOptions	-sparcabi
 #  define HasPlugin         YES
 # endif

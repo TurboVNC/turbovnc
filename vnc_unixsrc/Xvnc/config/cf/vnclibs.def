@@ -12,16 +12,16 @@ VNCPAMDEFS = -DXVNC_AuthPAM
 VNCPAMLIBS = -lpam
 #endif
 
-#ifdef OSF1Architecture
-/* Avoid linking with different libjpeg in /usr/shlib under Tru64. */
-VNCSYSLIBS = /usr/local/lib/libjpeg.a /usr/local/lib/libz.a -lcrypt -lpthread
+#if HasSunC
+PTHREADLIBS = -mt -lpthread
 #else
-#ifdef SunArchitecture
-VNCSYSLIBS = JPEGLibraryFlags -lz -lpthread $(VNCPAMLIBS)
-#else
-VNCSYSLIBS = JPEGLibraryFlags -lz -lcrypt -lpthread $(VNCPAMLIBS)
-#endif
+PTHREADLIBS = -lpthread
 #endif
 
-VNCCPPFLAGS = -I$(TOP)/../include -I/usr/local/include $(VNCPAMDEFS) \
-    JPEGIncludeFlags
+#ifdef SunArchitecture
+VNCSYSLIBS = JPEGLibraryFlags -lz $(PTHREADLIBS) $(VNCPAMLIBS)
+#else
+VNCSYSLIBS = JPEGLibraryFlags -lz -lcrypt $(PTHREADLIBS) $(VNCPAMLIBS)
+#endif
+
+VNCCPPFLAGS = -I$(TOP)/../include $(VNCPAMDEFS) JPEGIncludeFlags
