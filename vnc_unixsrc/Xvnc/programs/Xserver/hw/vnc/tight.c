@@ -288,9 +288,9 @@ ShutdownTightThreads(void)
     }
   }
   for (i = 0; i < _nt; i++) {
-    if (tparam[i].tightAfterBuf) free(tparam[i].tightAfterBuf);
-    if (tparam[i].tightBeforeBuf) free(tparam[i].tightBeforeBuf);
-    if (i != 0 && tparam[i].updateBuf) free(tparam[i].updateBuf);
+    if (tparam[i].tightAfterBuf) xfree(tparam[i].tightAfterBuf);
+    if (tparam[i].tightBeforeBuf) xfree(tparam[i].tightBeforeBuf);
+    if (i != 0 && tparam[i].updateBuf) xfree(tparam[i].updateBuf);
     memset(&tparam[i], 0, sizeof(threadparam));
   }
   threadInit = FALSE;
@@ -402,10 +402,10 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
             pthread_mutex_lock (&tparam[i].done);
             status &= tparam[i].status;
         }
-        if (status == FALSE) goto abort;
+        if (status == FALSE) return FALSE;
         if (ublen > 0) {
             if (!rfbSendUpdateBuf(cl)) {
-                status = FALSE;  goto abort;
+                return FALSE;
             }
         }
         for (i = 1; i < nt; i++) {
@@ -414,8 +414,9 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
                     *tparam[i].ublen) < 0) {
                 rfbLogPerror("rfbSendRectEncodingTight: write");
                 rfbCloseSock(cl->sock);
-                status = FALSE;  goto abort;
+                return FALSE;
             }
+            (*tparam[i].ublen) = 0;
             cl->rfbBytesSent[rfbEncodingTight] += tparam[i].bytessent;
             cl->rfbRectanglesSent[rfbEncodingTight] += tparam[i].rectsent;
         }
@@ -429,12 +430,6 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
         }
     }
 
-    abort:
-    if (nt > 1) {
-        for (i = 1; i < nt; i++) {
-            (*tparam[i].ublen) = 0;
-        }
-    }
     return status;
 }
 
