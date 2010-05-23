@@ -272,6 +272,7 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #endif
 
 #if HasGcc
+# define UseInternalMalloc NO
 # if OSMajorVersion > 4 && defined(i386Architecture)
 #  ifndef DefaultCCOptions
 #   if UseInstalled
@@ -286,6 +287,7 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #  endif
 # endif
 # if HasGcc2
+#  define UseInternalMalloc NO
 #  ifndef OptimizedCDebugFlags
 #   ifdef i386Architecture
 #    define OptimizedCDebugFlags DefaultGcc2i386Opt
