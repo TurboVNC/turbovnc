@@ -137,7 +137,7 @@ ALRThreadFunc(param)
                 REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
                     &cl->lossyRegion);
 
-                rfbSendFramebufferUpdate(cl);
+                if (!rfbSendFramebufferUpdate(cl)) continue;
                 cl->alrTrigger = FALSE;
 
                 REGION_EMPTY(pScreen, &cl->lossyRegion);
@@ -156,7 +156,9 @@ ALRThreadFunc(param)
         pthread_mutex_unlock(&alrMutex);
         usleep(100000);
     }
+    alrInit = FALSE;
     pthread_mutex_unlock(&alrMutex);
+    pthread_mutex_destroy(&alrMutex);
     return NULL;
 }
 
@@ -352,7 +354,7 @@ rfbNewClient(sock)
             if ((err = pthread_create(&threadHandle, NULL, ALRThreadFunc,
                 NULL)) != 0) {
                 rfbLogPerror ("Could not start Auto Lossless Refresh thread");
-                return;
+                return NULL;
             }
             alrInit = TRUE;
         }
@@ -430,15 +432,16 @@ rfbClientConnectionGone(sock)
     if(rfbAutoLosslessRefresh > 0.0 && rfbClientHead == NULL
         && alrInit) {
         deadyet = TRUE;
-        pthread_mutex_unlock(&alrMutex);
-        pthread_join(threadHandle, NULL);
-        pthread_mutex_destroy(&alrMutex);
-        alrInit = FALSE;
+        if (pthread_self() != threadHandle) {
+            while(pthread_mutex_unlock(&alrMutex) == 0) {}
+            pthread_join(threadHandle, NULL);
+            threadHandle = 0;
+        }
     }
 
     xfree(cl);
 
-    ShutdownTightThreads();
+    if(rfbClientHead == NULL) ShutdownTightThreads();
 
     alrunlock();
 }
