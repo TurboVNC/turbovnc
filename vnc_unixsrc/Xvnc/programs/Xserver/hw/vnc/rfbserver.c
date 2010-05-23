@@ -439,9 +439,9 @@ rfbClientConnectionGone(sock)
         }
     }
 
-    xfree(cl);
+    ShutdownTightThreads();
 
-    if(rfbClientHead == NULL) ShutdownTightThreads();
+    xfree(cl);
 
     alrunlock();
 }
