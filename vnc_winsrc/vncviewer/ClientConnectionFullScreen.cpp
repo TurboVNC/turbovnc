@@ -1,4 +1,5 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -68,9 +69,11 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 		style &= ~(WS_DLGFRAME | WS_THICKFRAME | WS_BORDER);
 		
 		SetWindowLong(m_hwnd1, GWL_STYLE, style);
-		int cx = GetSystemMetrics(SM_CXSCREEN);
-		int cy = GetSystemMetrics(SM_CYSCREEN);
-		SetWindowPos(m_hwnd1, HWND_TOPMOST, 0, 0, cx, cy, SWP_FRAMECHANGED);
+		int cx = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+		int cy = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+		int x = GetSystemMetrics(SM_XVIRTUALSCREEN);
+		int y = GetSystemMetrics(SM_YVIRTUALSCREEN);
+		SetWindowPos(m_hwnd1, HWND_TOPMOST, x, y, cx, cy, SWP_FRAMECHANGED);
 		CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_FULLSCREEN, MF_BYCOMMAND|MF_CHECKED);
 		
 	} else {
@@ -90,8 +93,8 @@ bool ClientConnection::BumpScroll(int x, int y)
 {
 	int dx = 0;
 	int dy = 0;
-	int rightborder = GetSystemMetrics(SM_CXSCREEN)-BUMPSCROLLBORDER;
-	int bottomborder = GetSystemMetrics(SM_CYSCREEN)-BUMPSCROLLBORDER;
+	int rightborder = GetSystemMetrics(SM_CXVIRTUALSCREEN)-BUMPSCROLLBORDER;
+	int bottomborder = GetSystemMetrics(SM_CYVIRTUALSCREEN)-BUMPSCROLLBORDER;
 	if (x < BUMPSCROLLBORDER)
 		dx = -BUMPSCROLLAMOUNTX * m_opts.m_scale_num / m_opts.m_scale_den;
 	if (x >= rightborder)

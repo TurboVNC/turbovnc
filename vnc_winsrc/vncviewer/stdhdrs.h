@@ -1,4 +1,5 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -27,7 +28,7 @@
 #define VC_EXTRALEAN
 
 // These two lines are needed to get the mouse wheel macros.
-#define WINVER 0x0400
+#define WINVER 0x0500
 #define _WIN32_WINDOWS 0x0410
 
 #include <winsock2.h>
