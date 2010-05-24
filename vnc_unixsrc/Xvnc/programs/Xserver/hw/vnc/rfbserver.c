@@ -110,7 +110,7 @@ ALRThreadFunc(param)
 
         for (cl = rfbClientHead; cl && !clientListModified; cl = cl->next) {
 
-            if(rfbAutoLosslessRefresh > 0.0 && cl->firstUpdate
+            if(rfbAutoLosslessRefresh > 0.0 && !cl->firstUpdate
                 && gettime()-cl->lastFramebufferUpdate > rfbAutoLosslessRefresh
                 && REGION_NOTEMPTY(pScreen, &cl->lossyRegion)
                 && (!putImageOnly || cl->alrTrigger)) {
@@ -339,7 +339,7 @@ rfbNewClient(sock)
 
     if(rfbAutoLosslessRefresh > 0.0) {
         REGION_INIT(pScreen, &cl->lossyRegion, NullBox, 0);
-        cl->firstUpdate = FALSE;
+        cl->firstUpdate = TRUE;
         cl->lastFramebufferUpdate = gettime();
         if(!alrInit) {
             pthread_mutexattr_t ma;
@@ -1145,8 +1145,6 @@ rfbSendFramebufferUpdate(cl)
     Bool sendCursorPos = FALSE;
     double tUpdateStart;
 
-    cl->firstUpdate = TRUE;
-
     if (rfbProfile) {
 	tUpdateStart = gettime();
 	if (tStart < 0.) tStart = tUpdateStart;
@@ -1397,11 +1395,12 @@ rfbSendFramebufferUpdate(cl)
 	}
     }
 
-    if (!putImageOnly || cl->putImageTrigger) {
+    if (!putImageOnly || cl->putImageTrigger || cl->firstUpdate) {
         cl->lastFramebufferUpdate = gettime();
         cl->alrTrigger = TRUE;
         cl->putImageTrigger = FALSE;
     }
+    if (cl->firstUpdate) cl->firstUpdate = FALSE;
 
     return TRUE;
 }
