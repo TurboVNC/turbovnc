@@ -59,6 +59,10 @@ vncserver -kill to clean up the orphaned files.)
 Integrated autocutsel into the TurboVNC Server distribution for Unix/Linux in
 order to work around issues with the clipboard transfer feature.
 -------------------------------------------------------------------------------
+[12]
+In the Windows TurboVNC Viewer, full-screen mode will now span all monitors in
+a multi-monitor configuration, not just the primary monitor.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
