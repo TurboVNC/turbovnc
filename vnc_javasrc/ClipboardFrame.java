@@ -34,10 +34,30 @@ class ClipboardFrame extends Frame
   String selection;
   VncViewer viewer;
 
-  static Clipboard systemClipboard;
+  static Clipboard systemClipboard = null;
+  static String systemClipboardText = null;
+  static Clipboard systemSelection = null;
+  static String systemSelectionText = null;
   static {
     try {
+      // Used for Windows and explicit Copy/Paste in Linux ("CLIPBOARD Selection")
       systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+      if (systemClipboard != null) {
+        Transferable contents = systemClipboard.getContents(null);
+        if (contents != null && contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+          systemClipboardText = (String)(contents.getTransferData(DataFlavor.stringFlavor));
+        }
+      }
+    } catch (Exception e) {}
+    try {
+      // Used for Select/Middle-Click in Linux ("PRIMARY Selection")
+      systemSelection = Toolkit.getDefaultToolkit().getSystemSelection();
+      if (systemSelection != null) {
+        Transferable contents = systemSelection.getContents(null);
+        if (contents != null && contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+          systemSelectionText = (String)(contents.getTransferData(DataFlavor.stringFlavor));
+        }
+      }
     } catch (Exception e) {}
   }
 
@@ -111,26 +131,56 @@ class ClipboardFrame extends Frame
   }
 
   // Set the local clipboard's contents.
+  // (In Linux, set both clipboards)
   void setLocalClipboard(String text) {
-    if (viewer.syncClipboards && systemClipboard != null) {
+    if (viewer.syncClipboards) {
       StringSelection ss = new StringSelection(text);
-      systemClipboard.setContents(ss, ss);
+      if (systemClipboard != null) {
+        systemClipboard.setContents(ss, ss);
+      }
+      if (systemSelection != null) {
+        systemSelection.setContents(ss, ss);
+      }
     }
   }
 
 
   // Check for updates to the local clipboard.
+  // (In Linux, if both clipboards changed, prefer the explicit Copy/Paste clipboard)
   void checkLocalClipboard() {
-    if (viewer.syncClipboards && systemClipboard != null) {
-      Transferable contents = systemClipboard.getContents(this);
-      if (contents != null && contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+    if (viewer.syncClipboards) {
+      boolean clipboardChanged = false;
+      boolean selectionChanged = false;
+      if (systemClipboard != null) {
         try {
-          String text = (String)(contents.getTransferData(DataFlavor.stringFlavor));
-          if (text != null && !text.equals(selection)) {
-            sendCutText(text);
-            setContents(text);
+          Transferable contents = systemClipboard.getContents(this);
+          if (contents != null && contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+            String text = (String)(contents.getTransferData(DataFlavor.stringFlavor));
+            if (text != null && (systemClipboardText == null || !text.equals(systemClipboardText))) {
+              systemClipboardText = text;
+              clipboardChanged = true;
+            }
           }
         } catch (Exception e) {}
+      }
+      if (systemSelection != null) {
+        try {
+          Transferable contents = systemSelection.getContents(this);
+          if (contents != null && contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+            String text = (String)(contents.getTransferData(DataFlavor.stringFlavor));
+            if (text != null && (systemSelectionText == null || !text.equals(systemSelectionText))) {
+              systemSelectionText = text;
+              selectionChanged = true;
+            }
+          }
+        } catch (Exception e) {}
+      }
+      if (clipboardChanged) {
+        sendCutText(systemClipboardText);
+        setContents(systemClipboardText);
+      } else if (selectionChanged) {
+        sendCutText(systemSelectionText);
+        setContents(systemSelectionText);
       }
     }
   }
