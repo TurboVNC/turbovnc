@@ -63,17 +63,13 @@ class VncCanvas2 extends VncCanvas implements MouseWheelListener {
   }
 
   //
-  // Try to enable the mouse wheel listener (JVMs 1.4 and higher).
+  // Try to enable the mouse wheel listener (JVM 1.4+).
   //
 
   public synchronized void enableMouseWheelListener() {
     try {
-      Class[] argClasses = { Class.forName("java.awt.event.MouseWheelListener") };
-      java.lang.reflect.Method method =
-        getClass().getMethod("addMouseWheelListener", argClasses);
-      Object[] argObjects = { this };
-      method.invoke(this, argObjects);
-    } catch (Exception e) {}
+      this.addMouseWheelListener(this);
+    } catch (NoSuchMethodError e) {}
   }
 
   public void mouseWheelMoved(MouseWheelEvent evt) {

@@ -1026,30 +1026,33 @@ class RfbProto {
 
     if (evt.getID() == MouseEvent.MOUSE_PRESSED) {
       if ((modifiers & InputEvent.BUTTON2_MASK) != 0) {
-        pointerMask = mask2;
+        pointerMask |= mask2;
         modifiers &= ~ALT_MASK;
       } else if ((modifiers & InputEvent.BUTTON3_MASK) != 0) {
-        pointerMask = mask3;
+        pointerMask |= mask3;
         modifiers &= ~META_MASK;
       } else {
-        pointerMask = 1;
+        pointerMask |= 1;
       }
     } else if (evt.getID() == MouseEvent.MOUSE_RELEASED) {
-      pointerMask = 0;
       if ((modifiers & InputEvent.BUTTON2_MASK) != 0) {
+        pointerMask &= ~mask2;
         modifiers &= ~ALT_MASK;
       } else if ((modifiers & InputEvent.BUTTON3_MASK) != 0) {
+        pointerMask &= ~mask3;
         modifiers &= ~META_MASK;
+      } else {
+        pointerMask &= ~1;
       }
     } else if (evt.getID() == MouseEvent.MOUSE_WHEEL) {
       wheelClicks = ((MouseWheelEvent) evt).getWheelRotation();
       if (wheelClicks == 0) {
         return;
       } else if (wheelClicks < 0) {
-        pointerMask = mask4;
+        pointerMask |= mask4;
         wheelClicks = -wheelClicks;
       } else {
-        pointerMask = mask5;
+        pointerMask |= mask5;
       }
     }
 
@@ -1091,7 +1094,7 @@ class RfbProto {
         eventBuf[1] = (byte) 0;
         os.write(eventBuf, 0, eventBufLen);
       }
-      pointerMask = 0;
+      pointerMask &= ~mask4 & ~mask5;
 
     }
   }
