@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
 //  Copyright (C) 2001 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
 //
@@ -48,7 +49,10 @@ class ClipboardFrame extends Frame
           systemClipboardText = (String)(contents.getTransferData(DataFlavor.stringFlavor));
         }
       }
-    } catch (Exception e) {}
+    } catch (Exception e) {
+        System.out.println("WARNING: Could not get system clipboard, and thus automatic clipboard transfer");
+        System.out.println("   will not work.  This may be due to the applet being unsigned.");
+    }
     try {
       // Used for Select/Middle-Click in Linux ("PRIMARY Selection")
       systemSelection = Toolkit.getDefaultToolkit().getSystemSelection();
@@ -58,7 +62,10 @@ class ClipboardFrame extends Frame
           systemSelectionText = (String)(contents.getTransferData(DataFlavor.stringFlavor));
         }
       }
-    } catch (Exception e) {}
+    } catch (Exception e) {
+        System.out.println("WARNING: Could not get system clipboard, and thus automatic clipboard transfer");
+        System.out.println("   will not work.  This may be due to the applet being unsigned.");
+    }
   }
 
   //
