@@ -36,6 +36,13 @@ $(CLASSES): $(SOURCES)
 
 $(ARCHIVE): $(CLASSES) $(MANIFEST)
 	$(JAR) cfm $(ARCHIVE) $(MANIFEST) $(CLASSES)
+	rm -f turbovnc.keystore
+	keytool -genkey -alias TurboVNC -keystore turbovnc.keystore -keyalg RSA \
+		-storepass turbovnc -keypass turbovnc -validity 7300 \
+		-dname "CN=TurboVNC, OU=Software Development, O=The VirtualGL Project, L=Austin, S=Texas, C=US"
+	jarsigner -keystore turbovnc.keystore -storepass turbovnc -keypass turbovnc \
+		$(ARCHIVE) TurboVNC
+	rm -f turbovnc.keystore
 
 install: $(CLASSES) $(ARCHIVE)
 	$(CP) $(CLASSES) $(ARCHIVE) $(PAGES) $(INSTALL_DIR)
