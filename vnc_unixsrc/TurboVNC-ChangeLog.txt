@@ -63,6 +63,9 @@ order to work around issues with the clipboard transfer feature.
 In the Windows TurboVNC Viewer, full-screen mode will now span all monitors in
 a multi-monitor configuration, not just the primary monitor.
 -------------------------------------------------------------------------------
+[13]
+Added automatic clipboard transfer to the Java VNC viewer.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
