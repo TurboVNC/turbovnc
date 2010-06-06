@@ -21,7 +21,7 @@ following error:
 
 	1. Download the appropriate TurboVNC binary package for your system from the
 		[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
-		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
+		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
 		{nl}
 
 	2. Log in as root, cd to the directory where you downloaded the binary
@@ -40,9 +40,11 @@ following error:
 ** Installing TurboVNC on Solaris
 
 	1. Download the TurboVNC Solaris package
-		(''TurboVNC-''__''{version}''__''-x86.pkg.bz2'') from the
+		(''TurboVNC-''__''{version}''__''-x86.pkg.bz2'' for 32-bit systems or
+		''TurboVNC-''__''{version}''__''-x64.pkg.bz2'' for 64-bit systems)
+		from the
 		[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
-		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
+		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
 		{nl}
 
 	2. Log in as root, cd to the directory where you downloaded the package, and
@@ -61,8 +63,8 @@ following error:
 	(answer "Y" when prompted.)
 
 	#Verb: <<---
-	bzip2 -d TurboVNC-{version}.pkg.bz2
-	pkgadd -d TurboVNC-{version}.pkg
+	bzip2 -d TurboVNC*.pkg.bz2
+	pkgadd -d TurboVNC*.pkg
 	---
 
 	Select the ''TurboVNC'' package (usually option 1) from the menu.
@@ -72,18 +74,18 @@ following error:
 	#. Download the TurboVNC Mac disk image
 		(''TurboVNC-''__''{version}''__''.dmg'') from the
 		[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
-		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
+		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
 
 	#. Open the disk image, then open ''TurboVNC-''__''{version}''__''.pkg'' inside the
-		disk image.  Follow the instructions to install the Mac client.  The Mac
-		package installs files in the same locations as the Linux packages.
+		disk image.  Follow the instructions to install the Mac client.
 
 ** Installing TurboVNC on Windows (Client Only)
 
 	#. Download the TurboVNC Windows installer package
-		(''TurboVNC-''__''{version}''__''.exe'') from the
+		(''TurboVNC-''__''{version}''__''.exe'' for 32-bit systems or
+		''TurboVNC64-''__''{version}''__''.exe'' for 64-bit systems) from the
 		[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
-		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]].
+		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
 
 	#. Run the TurboVNC installer.  The installation of TurboVNC should be
 		self-explanatory.  The only configuration option is the directory into
@@ -95,8 +97,8 @@ If you are using a Unix platform for which there is not a pre-built TurboVNC
 binary package available, then log in as root, download the TurboVNC source
 tarball (''turbovnc-''__''{version}''__''.tar.gz'') from the 
 [[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
-of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge web-site]],
-uncompress it, ''cd vnc/vnc_unixsrc'', and read the ''README'' file for further
+of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]],
+uncompress it, ''cd vnc/vnc_unixsrc'', and read ''BUILDING.txt'' for further
 instructions on how to build TurboVNC from source.
 
 ** Uninstalling TurboVNC
@@ -141,4 +143,5 @@ sudo /opt/TurboVNC/bin/uninstall
 #OPT: noList! plain!
 
 Use the "Add or Remove Programs" applet in the Control Panel (or the
-"Programs and Features" applet if you're running Vista.)
+"Programs and Features" applet if you are running Windows Vista), or select
+"Uninstall TurboVNC" in the "TurboVNC" Start Menu group.

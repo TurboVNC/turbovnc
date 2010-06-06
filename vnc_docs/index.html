@@ -3,9 +3,9 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-05-19T03:16:58">
+<meta name="date" content="2010-06-06T02:18:35">
 <meta name="generator" content="deplate.rb 0.8.5">
-<title>User&rsquo;s Guide for TurboVNC 0.6</title>
+<title>User&rsquo;s Guide for TurboVNC 1.0</title>
 <link rel="start" href="index.html" title="Frontpage">
 <link rel="chapter" href="index.html#hd001" title="1 Legal Information">
 <link rel="chapter" href="index.html#hd002" title="2 Overview">
@@ -19,7 +19,7 @@
 <body >
 <a name="#pagetop"></a>
 <div class="title">
-<p class="title">User&rsquo;s Guide for TurboVNC 0.6</p>
+<p class="title">User&rsquo;s Guide for TurboVNC 1.0</p>
 </div>
 <a name="file000"></a>
 <p><em>Intended audience:</em> System Administrators, Researchers, and 
@@ -160,7 +160,7 @@ works which contain material derived from this document must cite The
 VirtualGL Project as the source of the material and list the current URL 
 for the VirtualGL web site.</p>
 
-<p>The TurboVNC Windows package includes 
+<p>The TurboVNC Windows packages include 
 <span class="remote"><a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/" class="remote">PuTTY</a></span><a name="idx002"></a>, 
 which is released under <a href="LICENSE-PuTTY.txt">this 
 license</a><a name="idx003"></a>.</p>
@@ -234,7 +234,8 @@ TightVNC, and these were removed or accelerated to form TurboVNC.</p>
         lossless copy of the current screen image.  This is useful in situations 
         in which image quality is critical but the network is too slow to 
         support sending a high-quality image for every frame.  Lossless 
-        refreshes can be performed manually when a certain hotkey is pressed or 
+        refreshes can be performed manually when a certain hotkey is pressed, or 
+        the TurboVNC server can be configured to send a lossless refresh 
         automatically if the user stops interacting with the application for a 
         certain period of time.
     </li>
@@ -330,12 +331,19 @@ distributions without interference.</p>
   <thead class="standard">
   <tr class="head ">
     <th class="head standard"></th>
-    <th class="head standard">Server</th>
+    <th class="head standard">Server (x86)</th>
+    <th class="head standard">Server (x86-64)</th>
     <th class="head standard">Client</th>
   </tr>
   </thead>
   <tr class="standard">
     <td class="high standard">Recommended CPU</td>
+    <td class="standard">Pentium 4, 1.7 GHz or faster (or equivalent) <ul class="Itemize"><li class="Itemize-0">
+    For optimal performance, the processor should support SSE2 extensions.
+</li>
+<li class="Itemize-0">
+    Dual processors or dual cores recommended
+</li></ul></td>
     <td class="standard">Pentium 4/Xeon with EM64T, or&hellip;<br /> AMD Opteron or Athlon64, 1.8 GHz or faster <ul class="Itemize"><li class="Itemize-0">
     Dual processors or dual cores recommended
 </li></ul></td>
@@ -352,6 +360,7 @@ distributions without interference.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Other Software</td>
+    <td class="standard"></td>
     <td class="standard"></td>
     <td class="standard">X server configured to export True Color (24-bit or 32-bit) visuals</td>
   </tr>
@@ -459,7 +468,7 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
         area</a></span><a name="idx0012"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0013"></a>. <br />
+        SourceForge project page</a></span><a name="idx0013"></a>. <br />
     </li>
     <li class="Ordered-1 Ordered" value="2">
         Log in as root, cd to the directory where you downloaded the binary 
@@ -490,24 +499,38 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered" value="1">
         Download the TurboVNC Solaris package 
-        (<code>TurboVNC-</code><em><code>{version}</code></em><code>-x86.pkg.bz2</code>) 
-        from the 
+        (<code>TurboVNC-</code><em><code>{version}</code></em><code>-x86.pkg.bz2</code> 
+        for 32-bit systems or 
+        <code>TurboVNC-</code><em><code>{version}</code></em><code>-x64.pkg.bz2</code> 
+        for 64-bit systems) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
         area</a></span><a name="idx0014"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0015"></a>. <br />
+        SourceForge project page</a></span><a name="idx0015"></a>. <br />
     </li>
     <li class="Ordered-1 Ordered" value="2">
         Log in as root, cd to the directory where you downloaded the package, 
         and issue the following commands:
+        <dl class="Description">
+            <dt class="Description-3 Description">If TurboVNC 0.6 or older is installed</dt>
+            <dd class="Description-3 Description">
+<pre class="verbatim">
+pkgrm&nbsp;SUNWtvnc
+</pre>
+
+            </dd>
+            <dt class="Description-3 Description">If TurboVNC 1.0 or newer is installed</dt>
+            <dd class="Description-3 Description">
 <pre class="verbatim">
 pkgrm&nbsp;TurboVNC
 </pre>
 
+            </dd>
+        </dl>
         (answer &ldquo;Y&rdquo; when prompted.)
 <pre class="verbatim">
-bzip2&nbsp;-d&nbsp;TurboVNC-{version}.pkg.bz2
-pkgadd&nbsp;-d&nbsp;TurboVNC-{version}.pkg
+bzip2&nbsp;-d&nbsp;TurboVNC*.pkg.bz2
+pkgadd&nbsp;-d&nbsp;TurboVNC*.pkg
 </pre>
 
         Select the <code>TurboVNC</code> package (usually option 1) from the 
@@ -527,14 +550,13 @@ pkgadd&nbsp;-d&nbsp;TurboVNC-{version}.pkg
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
         area</a></span><a name="idx0016"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0017"></a>.
+        SourceForge project page</a></span><a name="idx0017"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Open the disk image, then open 
         <code>TurboVNC-</code><em><code>{version}</code></em><code>.pkg</code> 
         inside the disk image.  Follow the instructions to install the Mac 
-        client.  The Mac package installs files in the same locations as the 
-        Linux packages.
+        client.
     </li>
 </ol>
 
@@ -545,12 +567,14 @@ pkgadd&nbsp;-d&nbsp;TurboVNC-{version}.pkg
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
         Download the TurboVNC Windows installer package 
-        (<code>TurboVNC-</code><em><code>{version}</code></em><code>.exe</code>) 
-        from the 
+        (<code>TurboVNC-</code><em><code>{version}</code></em><code>.exe</code> 
+        for 32-bit systems or 
+        <code>TurboVNC64-</code><em><code>{version}</code></em><code>.exe</code> 
+        for 64-bit systems) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
         area</a></span><a name="idx0018"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge web-site</a></span><a name="idx0019"></a>.
+        SourceForge project page</a></span><a name="idx0019"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Run the TurboVNC installer.  The installation of TurboVNC should be 
@@ -571,9 +595,10 @@ from the
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
 area</a></span><a name="idx0020"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-SourceForge web-site</a></span><a name="idx0021"></a>, uncompress it, 
-<code>cd&nbsp;vnc/vnc_unixsrc</code>, and read the <code>README</code> 
-file for further instructions on how to build TurboVNC from source.</p>
+SourceForge project page</a></span><a name="idx0021"></a>, uncompress 
+it, <code>cd&nbsp;vnc/vnc_unixsrc</code>, and read 
+<code>BUILDING.txt</code> for further instructions on how to build 
+TurboVNC from source.</p>
 
 
 
@@ -629,8 +654,9 @@ sudo&nbsp;/opt/TurboVNC/bin/uninstall
 <h3 id="hd004006004">Windows</h3>
 
 <p>Use the &ldquo;Add or Remove Programs&rdquo; applet in the Control Panel 
-(or the &ldquo;Programs and Features&rdquo; applet if you&rsquo;re 
-running Vista.)</p>
+(or the &ldquo;Programs and Features&rdquo; applet if you are running 
+Windows Vista), or select &ldquo;Uninstall TurboVNC&rdquo; in the 
+&ldquo;TurboVNC&rdquo; Start Menu group.</p>
 
 <p><br /></p>
 
