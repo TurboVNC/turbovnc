@@ -8,7 +8,7 @@ This document and all associated illustrations are licensed under the
 material derived from this document must cite The VirtualGL Project as the
 source of the material and list the current URL for the VirtualGL web site.
 
-The TurboVNC Windows package includes [[http://www.chiark.greenend.org.uk/~sgtatham/putty/][PuTTY]],
+The TurboVNC Windows packages include [[http://www.chiark.greenend.org.uk/~sgtatham/putty/][PuTTY]],
 which is released under [[LICENSE-PuTTY.txt][this license]!].
 
 TurboVNC is licensed under the [[LICENCE.TXT][GNU General Public License, v2]!].
