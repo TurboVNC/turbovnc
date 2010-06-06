@@ -48,18 +48,24 @@ following error:
 	2. Log in as root, cd to the directory where you downloaded the package, and
 		issue the following commands:
 
+		If TurboVNC 0.6 or older is installed :: {:}
+		#Verb: <<---
+		pkgrm SUNWtvnc
+		---
+
+		If TurboVNC 1.0 or newer is installed :: {:}
 		#Verb: <<---
 		pkgrm TurboVNC
 		---
 
-		(answer "Y" when prompted.)
+	(answer "Y" when prompted.)
 
-		#Verb: <<---
-		bzip2 -d TurboVNC-{version}.pkg.bz2
-		pkgadd -d TurboVNC-{version}.pkg
-		---
+	#Verb: <<---
+	bzip2 -d TurboVNC-{version}.pkg.bz2
+	pkgadd -d TurboVNC-{version}.pkg
+	---
 
-		Select the ''TurboVNC'' package (usually option 1) from the menu.
+	Select the ''TurboVNC'' package (usually option 1) from the menu.
 
 ** Installing TurboVNC on Mac (Client Only)
 
