@@ -69,7 +69,7 @@ following error:
 
 	Select the ''TurboVNC'' package (usually option 1) from the menu.
 
-** Installing TurboVNC on Mac (Client Only)
+** Installing the TurboVNC Viewer on OS X
 
 	#. Download the TurboVNC Mac disk image
 		(''TurboVNC-''__''{version}''__''.dmg'') from the
@@ -79,7 +79,7 @@ following error:
 	#. Open the disk image, then open ''TurboVNC-''__''{version}''__''.pkg'' inside the
 		disk image.  Follow the instructions to install the Mac client.
 
-** Installing TurboVNC on Windows (Client Only)
+** Installing the TurboVNC Viewer on Windows
 
 	#. Download the TurboVNC Windows installer package
 		(''TurboVNC-''__''{version}''__''.exe'' for 32-bit systems or
@@ -129,7 +129,7 @@ pkgrm TurboVNC
 
 Answer "yes" when prompted.
 
-*** Mac
+*** OS X
 #OPT: noList! plain!
 
 Use the "Uninstall TurboVNC" application provided in the TurboVNC disk image,
