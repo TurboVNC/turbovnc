@@ -115,7 +115,7 @@ components must be built in-tree so the server build knows where to find them.
 
 Add
 
-  --host i686-pc-linux-gnu CFLAGS='-O3 -m32'
+  --host i686-pc-linux-gnu CFLAGS='-O3 -m32' LDFLAGS=-m32
 
 to the configure command line.  You may need to also add
 
