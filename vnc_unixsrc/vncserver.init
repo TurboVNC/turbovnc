@@ -44,15 +44,9 @@ start() {
     do
         echo -n "${display} "
         unset BASH_ENV ENV
-        if [ $REDHAT -eq 1 ]; then
-            initlog $INITLOG_ARGS -c \
-                "su ${display##*:} -c \"cd ~${display##*:} && [ -f .vnc/passwd ] && vncserver :${display%%:*}\""
-            RETVAL=$?
-        else
-            _OUT=`echo ${display}; su ${display##*:} -c "cd ~${display##*:} && [ -f .vnc/passwd ] && vncserver :${display%%:*}" 2>&1`
-            RETVAL=$?
-            logger -p local7.notice $_OUT
-        fi
+        _OUT=`echo ${display}; su ${display##*:} -c "cd ~${display##*:} && [ -f .vnc/passwd ] && vncserver :${display%%:*}" 2>&1`
+        RETVAL=$?
+        logger -p local7.notice $_OUT
         [ "$RETVAL" -ne 0 ] && break
     done
     if [ $REDHAT -eq 1 ]; then
@@ -72,15 +66,9 @@ stop() {
     do
         echo -n "${display} "
         unset BASH_ENV ENV
-        if [ $REDHAT -eq 1 ]; then
-            initlog $INITLOG_ARGS -c \
-                "su ${display##*:} -c \"vncserver -kill :${display%%:*}\" >/dev/null 2>&1"
-            RETVAL=$?
-        else
-            _OUT=`echo ${display}; su ${display##*:} -c "vncserver -kill :${display%%:*}" 2>&1`
-            RETVAL=$?
-            logger -p local7.notice $_OUT
-        fi
+        _OUT=`echo ${display}; su ${display##*:} -c "vncserver -kill :${display%%:*}" 2>&1`
+        RETVAL=$?
+        logger -p local7.notice $_OUT
     done
     if [ $REDHAT -eq 1 ]; then
         [ "$RETVAL" -eq 0 ] && success $"vncserver shutdown" || \
