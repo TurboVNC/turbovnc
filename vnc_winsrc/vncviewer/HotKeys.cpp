@@ -30,7 +30,7 @@ HotKeys::HotKeys()
 	Init(false);
 }
 
-void HotKeys::Init(bool fastFSToggle)
+void HotKeys::Init(bool FSAltEnter)
 {
 	const int MAX_ACCELS = 16;
 	ACCEL accel[MAX_ACCELS];
@@ -72,7 +72,7 @@ void HotKeys::Init(bool fastFSToggle)
 	accel[i].key = 0x45;	// "E"
 	accel[i++].cmd = IDD_FILETRANSFER;
 
-	if(fastFSToggle) {
+	if(FSAltEnter) {
 		accel[i].fVirt = FVIRTKEY | FALT | FNOINVERT;
 		accel[i].key = VK_RETURN;	// Enter
 		accel[i++].cmd = ID_FULLSCREEN_NODIALOG;

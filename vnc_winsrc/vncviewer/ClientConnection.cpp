@@ -320,7 +320,7 @@ void ClientConnection::Run()
 	
 	SetFormatAndEncodings();
 
-	if (m_opts.m_fastFSToggle) hotkeys.Init(true);
+	if (m_opts.m_FSAltEnter) hotkeys.Init(true);
 	else hotkeys.Init(false);
 
 	// This starts the worker thread.

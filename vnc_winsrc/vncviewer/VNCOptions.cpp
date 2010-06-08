@@ -52,7 +52,7 @@ VNCOptions::VNCOptions()
 
 	m_ViewOnly = false;
 	m_FullScreen = false;
-	m_fastFSToggle = false;
+	m_FSAltEnter = false;
 	m_toolbar = true;
 	m_historyLimit = 32;
 	m_skipprompt = false;
@@ -129,7 +129,7 @@ VNCOptions& VNCOptions::operator=(VNCOptions& s)
 	
 	m_ViewOnly			= s.m_ViewOnly;
 	m_FullScreen		= s.m_FullScreen;
-	m_fastFSToggle		= s.m_fastFSToggle;
+	m_FSAltEnter		= s.m_FSAltEnter;
 	m_Use8Bit			= s.m_Use8Bit;
 	m_DoubleBuffer      = s.m_DoubleBuffer;
 	m_PreferredEncoding = s.m_PreferredEncoding;
@@ -335,10 +335,10 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			m_enableJpegCompression = true;
 		} else if ( SwitchMatch(args[j], _T("nojpeg") )) {
 			m_enableJpegCompression = false;
-		} else if ( SwitchMatch(args[j], _T("fastfstoggle") )) {
-			m_fastFSToggle = true;
-		} else if ( SwitchMatch(args[j], _T("nofastfstoggle") )) {
-			m_fastFSToggle = false;
+		} else if ( SwitchMatch(args[j], _T("fsaltenter") )) {
+			m_FSAltEnter = true;
+		} else if ( SwitchMatch(args[j], _T("nofsaltenter") )) {
+			m_FSAltEnter = false;
 		} else if ( SwitchMatch(args[j], _T("nocursorshape") )) {
 			m_requestShapeUpdates = false;
 		} else if ( SwitchMatch(args[j], _T("noremotecursor") )) {
@@ -561,7 +561,7 @@ void VNCOptions::Save(char *fname)
 	saveInt("restricted",			m_restricted,		fname);
 	saveInt("viewonly",				m_ViewOnly,			fname);
 	saveInt("fullscreen",			m_FullScreen,		fname);
-	saveInt("fastfstoggle",			m_fastFSToggle,		fname);
+	saveInt("fsaltenter",			m_FSAltEnter,		fname);
 	saveInt("8bit",					m_Use8Bit,			fname);
 	saveInt("doublebuffer",			m_DoubleBuffer,		fname);
 	saveInt("shared",				m_Shared,			fname);
@@ -594,7 +594,7 @@ void VNCOptions::Load(char *fname)
 	m_restricted =			readInt("restricted",		m_restricted,	fname) != 0 ;
 	m_ViewOnly =			readInt("viewonly",			m_ViewOnly,		fname) != 0;
 	m_FullScreen =			readInt("fullscreen",		m_FullScreen,	fname) != 0;
-	m_fastFSToggle =		readInt("fastfstoggle",		m_fastFSToggle,	fname) != 0;
+	m_FSAltEnter =			readInt("fsaltenter",		m_FSAltEnter,	fname) != 0;
 	m_Use8Bit =				readInt("8bit",				m_Use8Bit,		fname) != 0;
 	m_DoubleBuffer =		readInt("doublebuffer",		m_DoubleBuffer,	fname) != 0;
 	m_Shared =				readInt("shared",			m_Shared,		fname) != 0;
@@ -1607,7 +1607,7 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 	m_restricted =			read(RegKey, "restricted",        m_restricted           ) != 0;
 	m_ViewOnly =			read(RegKey, "viewonly",	      m_ViewOnly             ) != 0;
 	m_FullScreen =			read(RegKey, "fullscreen",        m_FullScreen           ) != 0;
-	m_fastFSToggle =		read(RegKey, "fastfstoggle",      m_fastFSToggle         ) != 0;
+	m_FSAltEnter =			read(RegKey, "fsaltenter",      m_FSAltEnter         ) != 0;
 //	m_Use8Bit =				read(RegKey, "8bit",	          m_Use8Bit              ) != 0;
 	m_DoubleBuffer =		read(RegKey, "doublebuffer",	  m_DoubleBuffer              ) != 0;
 	m_Shared =				read(RegKey, "shared",            m_Shared               ) != 0;
@@ -1675,7 +1675,7 @@ void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
 	save(RegKey, "restricted",			m_restricted		);
 	save(RegKey, "viewonly",			m_ViewOnly			);
 	save(RegKey, "fullscreen",			m_FullScreen		);
-	save(RegKey, "fastfstoggle",		m_fastFSToggle		);
+	save(RegKey, "fsaltenter",			m_FSAltEnter		);
 	save(RegKey, "scaling",				m_scaling			);
 	save(RegKey, "8bit",				m_Use8Bit			);
 	save(RegKey, "doublebuffer",		m_DoubleBuffer		);

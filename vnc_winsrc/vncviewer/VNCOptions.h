@@ -90,7 +90,7 @@ public:
 	// default connection options - can be set through Dialog
 	bool	m_ViewOnly;
 	bool	m_FullScreen;
-	bool	m_fastFSToggle;
+	bool	m_FSAltEnter;
 	bool	m_Use8Bit;
 	bool	m_DoubleBuffer;
 	int		m_PreferredEncoding;
