@@ -473,6 +473,9 @@ void ClientConnection::CreateDisplay()
 				   _T("Send Ctrl-Alt-&Del"));
 		AppendMenu(hsysmenu, MF_STRING, ID_CONN_CTLESC,
 				   _T("Send Ctrl-Esc"));
+		if (m_opts.m_FSAltEnter)
+			AppendMenu(hsysmenu, MF_STRING, ID_CONN_ALTENTER,
+					   _T("Send Alt-Enter"));
 		AppendMenu(hsysmenu, MF_STRING, ID_CONN_CTLDOWN,
 				   _T("Ctrl key down"));
 		AppendMenu(hsysmenu, MF_STRING, ID_CONN_ALTDOWN,
@@ -724,12 +727,14 @@ void ClientConnection::EnableFullControlOptions()
 		EnableAction(ID_CONN_CTLDOWN, false);
 		EnableAction(ID_CONN_ALTDOWN, false);
 		EnableAction(ID_CONN_CTLESC, false);
+		EnableAction(ID_CONN_ALTENTER, false);
 	} else {
 		EnableAction(IDD_FILETRANSFER, m_enableFileTransfers);
 		EnableAction(ID_CONN_CTLALTDEL, true);
 		EnableAction(ID_CONN_CTLDOWN, true);
 		EnableAction(ID_CONN_ALTDOWN, true);
 		EnableAction(ID_CONN_CTLESC, true);
+		EnableAction(ID_CONN_ALTENTER, true);
 	}
 }
 
@@ -1919,6 +1924,9 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 		case ID_CONN_CTLESC:
 			TTStr->lpszText = "Send Ctrl-Esc";
 			break;
+		case ID_CONN_ALTENTER:
+			TTStr->lpszText = "Send Alt-Enter";
+			break;
 		case ID_CONN_CTLDOWN:
 			TTStr->lpszText = "Send Ctrl key press/release";
 			break;
@@ -2054,6 +2062,12 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 			_this->SendKeyEvent(XK_Escape,     true);
 			_this->SendKeyEvent(XK_Escape,     false);
 			_this->SendKeyEvent(XK_Control_L, false);
+			return 0;
+		case ID_CONN_ALTENTER:
+			_this->SendKeyEvent(XK_Alt_L,  true);
+			_this->SendKeyEvent(XK_Return, true);
+			_this->SendKeyEvent(XK_Return, false);
+			_this->SendKeyEvent(XK_Alt_L,  false);
 			return 0;
 		case ID_CONN_CTLALTDEL:
 			_this->SendKeyEvent(XK_Control_L, true);
