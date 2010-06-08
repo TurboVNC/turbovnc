@@ -237,7 +237,7 @@ private:
 	void SoftCursorToScreen(RECT *screenArea, POINT *cursorOffset);
 
 	// ClientConnectionFullScreen.cpp
-	void SetFullScreenMode(bool enable);
+	void SetFullScreenMode(bool enable, bool suppressPrompt=false);
 	bool InFullScreenMode();
 	void RealiseFullScreenMode(bool suppressPrompt);
 	bool BumpScroll(int x, int y);

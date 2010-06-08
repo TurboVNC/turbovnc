@@ -46,7 +46,7 @@ void HotKeys::Init(bool fastFSToggle)
 
 	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
 	accel[i].key = 0x46;	// "F"
-	accel[i++].cmd = ID_FULLSCREEN;
+	accel[i++].cmd = ID_FULLSCREEN_NODIALOG;
 
 	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
 	accel[i].key = 0x52;	// "R"
@@ -75,7 +75,7 @@ void HotKeys::Init(bool fastFSToggle)
 	if(fastFSToggle) {
 		accel[i].fVirt = FVIRTKEY | FALT | FNOINVERT;
 		accel[i].key = VK_RETURN;	// Enter
-		accel[i++].cmd = ID_FULLSCREEN;
+		accel[i++].cmd = ID_FULLSCREEN_NODIALOG;
 	}
 
 	int numKeys = i;

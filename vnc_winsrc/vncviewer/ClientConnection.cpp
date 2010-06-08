@@ -2022,6 +2022,10 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 			// Toggle full screen mode
 			_this->SetFullScreenMode(!_this->InFullScreenMode());
 			return 0;
+		case ID_FULLSCREEN_NODIALOG:
+			// Toggle full screen mode
+			_this->SetFullScreenMode(!_this->InFullScreenMode(), true);
+			return 0;
 		case ID_REQUEST_REFRESH: 
 			// Request a full-screen update
 			_this->SendFullFramebufferUpdateRequest();

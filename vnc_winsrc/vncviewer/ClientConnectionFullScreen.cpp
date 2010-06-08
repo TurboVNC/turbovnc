@@ -42,10 +42,10 @@ bool ClientConnection::InFullScreenMode()
 };
 
 // You can explicitly change mode by calling this
-void ClientConnection::SetFullScreenMode(bool enable)
+void ClientConnection::SetFullScreenMode(bool enable, bool suppressPrompt)
 {	
 	m_opts.m_FullScreen = enable;
-	RealiseFullScreenMode(false);
+	RealiseFullScreenMode(suppressPrompt);
 }
 
 // If the options have been changed other than by calling 
