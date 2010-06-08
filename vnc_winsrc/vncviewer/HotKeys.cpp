@@ -26,7 +26,11 @@
 HotKeys::HotKeys()
 {
 	m_hwnd = 0;
+	Init(false);
+}
 
+void HotKeys::Init(bool fastFSToggle)
+{
 	const int MAX_ACCELS = 16;
 	ACCEL accel[MAX_ACCELS];
 	int i = 0;
@@ -67,9 +71,16 @@ HotKeys::HotKeys()
 	accel[i].key = 0x45;	// "E"
 	accel[i++].cmd = IDD_FILETRANSFER;
 
+	if(fastFSToggle) {
+		accel[i].fVirt = FVIRTKEY | FALT | FNOINVERT;
+		accel[i].key = VK_RETURN;	// Enter
+		accel[i++].cmd = ID_FULLSCREEN;
+	}
+
 	int numKeys = i;
 	assert(numKeys <= MAX_ACCELS);
 
+	Destroy();
 	m_hAccel = CreateAcceleratorTable((LPACCEL)accel, numKeys);
 }
 
@@ -78,7 +89,15 @@ bool HotKeys::TranslateAccel(MSG *pmsg)
 	return (TranslateAccelerator(m_hwnd, m_hAccel, pmsg) != 0);
 }
 
+void HotKeys::Destroy(void)
+{
+	if(m_hAccel) {
+		DestroyAcceleratorTable(m_hAccel);
+		m_hAccel = 0;
+	}
+}
+
 HotKeys::~HotKeys()
 {
-	DestroyAcceleratorTable(m_hAccel);
+	Destroy();
 }

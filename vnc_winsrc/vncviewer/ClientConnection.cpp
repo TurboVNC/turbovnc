@@ -320,6 +320,9 @@ void ClientConnection::Run()
 	
 	SetFormatAndEncodings();
 
+	if (m_opts.m_fastFSToggle) hotkeys.Init(true);
+	else hotkeys.Init(false);
+
 	// This starts the worker thread.
 	// The rest of the processing continues in run_undetached.
 	start_undetached();

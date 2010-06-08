@@ -32,6 +32,8 @@ public:
 	HotKeys();
 	void SetWindow(HWND hwnd) { m_hwnd = hwnd; }
 	bool TranslateAccel(MSG *pmsg);
+	void Init(bool);
+	void Destroy(void);
 	virtual ~HotKeys();	
 };
 
