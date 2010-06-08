@@ -49,7 +49,7 @@ TARGETS = $(EDIR)/vncviewer.exe $(ODIR)/zlib.lib
 
 default: zlib res $(TARGETS)
 
-HDRS := $(wildcard *.h omnithread/*.h zlib/*.h)
+HDRS := $(wildcard *.h omnithread/*.h zlib/*.h res/*.h)
 $(OBJS): $(HDRS)
 
 $(EDIR)/vncviewer.exe: $(LIBS) $(OBJS) $(RES)
