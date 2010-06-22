@@ -86,6 +86,7 @@ fi
 %config(noreplace) /etc/turbovncserver-auth.conf
 %doc %{_srcdir}/LICENCE.TXT  %{_srcdir}/TurboVNC-ChangeLog.txt %{_srcdir}/../vnc_docs/LICEN*.txt %{_srcdir}/../vnc_docs/*.html %{_srcdir}/../vnc_docs/*.png %{_srcdir}/../vnc_docs/*.css
 
+%dir %{_prefix}
 %dir %{_prefix}/bin
 %dir %{_mandir}
 %dir %{_mandir}/man1
