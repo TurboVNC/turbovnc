@@ -90,7 +90,6 @@ public:
 	// default connection options - can be set through Dialog
 	bool	m_ViewOnly;
 	bool	m_FullScreen;
-	bool	m_FSAltEnter;
 	bool	m_Use8Bit;
 	bool	m_DoubleBuffer;
 	int		m_PreferredEncoding;
@@ -122,6 +121,10 @@ public:
 
 	TCHAR   m_host[256];
 	int     m_port;
+
+	bool	m_FSAltEnter;
+	bool	m_noUnixLogin;
+	char	m_userLogin[256];
 
     // Logging
     int     m_logLevel;

@@ -120,6 +120,7 @@ private:
 	void Authenticate(CARD32 authScheme);
 	bool AuthenticateNone(char *errBuf, int errBufSize);
 	bool AuthenticateVNC(char *errBuf, int errBufSize);
+	bool AuthenticateUnixLogin(char *errBuf, int errBufSize);
 	void ReadServerInit();
 	void ReadInteractionCaps();
 	void ReadCapabilityList(CapsContainer *caps, int count);

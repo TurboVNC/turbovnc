@@ -196,6 +196,8 @@ void ClientConnection::InitCapabilities()
 				   "No authentication");
 	m_authCaps.Add(rfbAuthVNC, rfbStandardVendor, sig_rfbAuthVNC,
 				   "Standard VNC password authentication");
+	m_authCaps.Add(rfbAuthUnixLogin, rfbTightVncVendor, sig_rfbAuthUnixLogin,
+				   "Unix login authentication");
 
 	// Known server->client message types
 	m_serverMsgCaps.Add(rfbFileListData, rfbTightVncVendor,
@@ -1070,13 +1072,43 @@ void ClientConnection::PerformAuthenticationTight()
 		ReadCapabilityList(&m_authCaps, caps.nAuthTypes);
 		if (m_connDlg != NULL)
 			m_connDlg->SetStatus("Authentication capability list received");
-		if (!m_authCaps.NumEnabled()) {
+
+		CARD32 authScheme = 0, a;
+		if (!m_opts.m_noUnixLogin && strlen(m_opts.m_userLogin) > 0) {
+			// Prefer Unix Login over other types
+			for (int i = 0; i < m_authCaps.NumEnabled(); i++) {
+				if (m_authCaps.GetByOrder(i) == rfbAuthUnixLogin) {
+					authScheme = rfbAuthUnixLogin;
+					break;
+				}
+			}
+		}
+
+		if (authScheme == 0) {
+			// Try server's preferred authentication scheme.
+			for (int i = 0; (authScheme == 0) && (i < m_authCaps.NumEnabled());
+				i++) {
+				a = m_authCaps.GetByOrder(i);
+				switch (a) {
+					case rfbAuthVNC:
+					case rfbAuthNone:
+						authScheme = a;
+						break;
+					case rfbAuthUnixLogin:
+						if (!m_opts.m_noUnixLogin) authScheme = a;
+						break;
+					default:
+						// unknown scheme - cannot use it
+						continue;
+				}
+			}
+		}
+
+		if (authScheme == 0) {
 			vnclog.Print(0, _T("No suitable authentication schemes offered by the server\n"));
 			throw ErrorException("No suitable authentication schemes offered by the server");
 		}
 
-		// Use server's preferred authentication scheme.
-		CARD32 authScheme = m_authCaps.GetByOrder(0);
 		authScheme = Swap32IfLE(authScheme);
 		WriteExact((char *)&authScheme, sizeof(authScheme));
 		authScheme = Swap32IfLE(authScheme);	// convert it back
@@ -1113,6 +1145,9 @@ void ClientConnection::Authenticate(CARD32 authScheme)
 		break;
 	case rfbAuthVNC:
 		authFuncPtr = &ClientConnection::AuthenticateVNC;
+		break;
+	case rfbAuthUnixLogin:
+		authFuncPtr = &ClientConnection::AuthenticateUnixLogin;
 		break;
 	default:
 		vnclog.Print(0, _T("Unknown authentication scheme: %d\n"),
@@ -1241,6 +1276,51 @@ bool ClientConnection::AuthenticateVNC(char *errBuf, int errBufSize)
 	memset(passwd, 0, strlen(passwd));
 
 	WriteExact((char *) challenge, CHALLENGESIZE);
+
+	return true;
+}
+
+// Unix Login authentication.
+
+bool ClientConnection::AuthenticateUnixLogin(char *errBuf, int errBufSize)
+{
+    CARD32 t;
+
+	char passwd[256] = "\0", user[256] = "\0";
+	if (strlen(m_opts.m_userLogin) > 0) {
+		strncpy(user, m_opts.m_userLogin, 255);
+		user[255] = '\0';
+	}
+
+	LoginAuthDialog ad(m_opts.m_display, "Unix Login Authentication", user);
+	ad.DoDialog();
+	strncpy(user, ad.m_username, 255);
+	user[255] = '\0';
+	if (strlen(user) == 0) {
+		_snprintf(errBuf, errBufSize, "Empty user name");
+		return false;
+	}
+	strncpy(m_opts.m_userLogin, user, 255);
+	m_opts.m_userLogin[255] = '\0';
+
+	strncpy(passwd, ad.m_passwd, 255);
+	passwd[255] = '\0';
+	if (strlen(passwd) == 0) {
+		_snprintf(errBuf, errBufSize, "Empty password");
+		return false;
+	}
+
+	t = Swap32IfLE(strlen(user));
+	WriteExact((char *)&t, sizeof(t));
+
+	t = Swap32IfLE(strlen(passwd));
+	WriteExact((char *)&t, sizeof(t));
+
+	WriteExact(user, (int)strlen(user));
+	WriteExact(passwd, (int)strlen(passwd));
+
+	/* Lose the plain-text password from memory */
+	memset(passwd, 0, strlen(passwd));
 
 	return true;
 }
