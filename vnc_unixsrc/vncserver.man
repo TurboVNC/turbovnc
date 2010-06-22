@@ -61,6 +61,12 @@ equivalent to RGBA on little endian systems or ABGR on big endian systems.
 \fB\-name\fR \fIstring\fR
 This specifies the name of the desktop.
 .TP
+\fB\-nohttp
+The default behavior of the \fBvncserver\fR script is to enable the embedded
+web server in Xvnc, which serves up the Java TurboVNC Viewer on a dedicated
+port.  Passing an argument of -nohttp to \fBvncserver\fR tells it not to enable
+the embedded web server in Xvnc.
+.TP
 \fB\-novncauth\fR
 The default behavior of the \fBvncserver\fR script is to enable all of the
 supported authentication methods (VNC password, one-time password, and Unix

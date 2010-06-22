@@ -51,6 +51,7 @@ $authTypeVNC = 1;
 $authTypeOTP = 1;
 $authTypePAM = 1;
 $generateOTP = 0;
+$enableHTTP = 1;
 $autoLosslessRefresh = 0.0;
 
 # Read configuration from the system-wide and user files if present.
@@ -191,7 +192,7 @@ if (-f "/usr/lib/X11/rgb.txt") {
 
 &ParseOptions("-geometry",1,"-depth",1,"-pixelformat",1,"-name",1,"-kill",1,
 	      "-help",0,"-h",0,"--help",0,"-fg",0,"-list",0,"-fp",1,"-otp",0,
-	      "-novncauth",0,"-nootp",0,"-nopam",0,"-noauth",0);
+	      "-novncauth",0,"-nootp",0,"-nopam",0,"-noauth",0,"-nohttp",0);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -212,6 +213,9 @@ if ($opt{'-depth'}) {
 }
 if ($opt{'-pixelformat'}) {
     $pixelformat = $opt{'-pixelformat'};
+}
+if ($opt{'-nohttp'}) {
+    $enableHTTP = 0;
 }
 if ($opt{'-fp'}) {
     $fontPath = $opt{'-fp'};
@@ -331,7 +335,7 @@ if ($vncUserDirUnderTmp) {
 $cmd = $exedir."Xvnc :$displayNumber";
 $cmd .= " -dpi $dpi" if ($dpi);
 $cmd .= " -desktop " . &quotedString($desktopName);
-$cmd .= " -httpd $vncClasses";
+$cmd .= " -httpd $vncClasses" if ($enableHTTP);
 $cmd .= " -auth $xauthorityFile";
 $cmd .= " -dontdisconnect";
 $cmd .= " -geometry $geometry" if ($geometry);
@@ -911,6 +915,7 @@ sub ReadConfiguration
        colorPath
        generateOTP
        autoLosslessRefresh
+       enableHTTP
       );
 
   if (open CONF, "<$configFile") {
