@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "May 2010" "" "TurboVNC"
+.TH Xvnc 1 "June 2010" "" "TurboVNC"
 .SH NAME
 Xvnc \- an X server providing VNC connectivity
 .SH SYNOPSIS
@@ -77,25 +77,26 @@ Maximum time, in milliseconds, to wait for an RFB client (VNC viewer.)
 Don't display a mouse pointer on the remote desktop.
 .TP
 \fB\-rfbauth\fR \fIpasswd-file\fR
-Enable standard VNC authentication and read the VNC password from the specified
-file. The \fIpasswd-file\fR can be created using the \fBvncpasswd\fR(1)
-utility.  This argument has no effect if \fIpermitted-auth-methods\fR is
-specified in the authentication configuration file and "vnc" is not listed as
-a permitted method.
+Enable the VNC password authentication method and read the VNC password from
+the specified file.  The \fIpasswd-file\fR can be created using the
+\fBvncpasswd\fR(1) utility.  This argument has no effect if
+\fIpermitted-auth-methods\fR is specified in the authentication configuration
+file and "vnc" is not listed as a permitted method.
 .TP
 \fB\-otpauth\fR
-Enable one-time password (OTP) authentication.  One-time passwords for full
-control or view-only access can be created using the \fBvncpasswd\fR(1)
-utility.  OTPs are discarded by Xvnc immediately after they are used, so an
-additional OTP must be generated before another user is allowed to connect
-using this method.  This argument has no effect if \fIpermitted-auth-methods\fR
-is specified in the authentication configuration file and "otp" is not listed
-as a permitted method.
+Enable the one-time password (OTP) authentication method.  One-time passwords
+for full control or view-only access can be created using the
+\fBvncpasswd\fR(1) utility.  OTPs are discarded by Xvnc immediately after they
+are used, so an additional OTP must be generated before another user is allowed
+to connect using this method.  This argument has no effect if
+\fIpermitted-auth-methods\fR is specified in the authentication configuration
+file and "otp" is not listed as a permitted method.
 .TP
 \fB\-pamauth\fR
-Enable PAM user/password (Unix login) authentication.  Additional configuration
-is necessary to make this work (see the AUTHENTICATION CONFIGURATION FILE
-section for details.)  This argument has no effect if
+Enable the PAM user/password authentication method, which is used to implement
+the "Unix login authentication" extension to the VNC protocol.  Additional
+configuration is necessary to make this work (see the AUTHENTICATION
+CONFIGURATION FILE section for details.)  This argument has no effect if
 \fIpermitted-auth-methods\fR is specified in the authentication configuration
 file and "pam-userpwd" is not listed as a permitted method.
 .TP
@@ -182,7 +183,7 @@ This authentication method can be used with VNC clients that understand the
 RFB "None" security type or the "Tight" security type with the "None"
 authentication capability.
 .IP \fBvnc\fR
-Standard VNC authentication using a password set by the \fBvncpasswd\fR(1)
+VNC password authentication using a password set by the \fBvncpasswd\fR(1)
 utility.  This method is enabled with the \fB-rfbauth\fR command-line argument
 to Xvnc.  Additionally, if \fIpermitted-auth-methods\fR is specified in the
 authentication configuration file, then "vnc" must be listed as a permitted
@@ -199,17 +200,20 @@ argument of \fB-otpauth\fR to Xvnc.  Additionally, if
 file, then "otp" must be listed as a permitted method.
 
 This authentication method can be used with any VNC client that supports
-standard VNC authentication.  OTP authentication is handy for sharing
+VNC password authentication.  OTP authentication is handy for sharing
 a VNC session with another person with whom you do not wish to share your
 VNC password.
 .IP \fBpam-userpwd\fR
-Unix login (user/password) authentication using Pluggable Authentication
-Modules (PAM).  This method is enabled by passing a command-line argument of
+User/password authentication using Pluggable Authentication Modules (PAM).
+This is typically used to authenticate against Unix login credentials, but it
+can also be used to authenticate against any other user/password authentication
+credentials that can be accessed through PAM.  The PAM user/password
+authentication method is enabled by passing a command-line argument of
 \fB-pamauth\fR to Xvnc.  Additionally, if \fIpermitted-auth-methods\fR is
 specified in the authentication configuration file, then "pam-userpwd" must be
 listed as a permitted method.  Also, a valid PAM service configuration must
-have been created by the system administrator (see the
-AUTHENTICATION CONFIGURATION FILE section for details.)
+have been created by the system administrator (see the AUTHENTICATION
+CONFIGURATION FILE section for details.)
 
 This authentication method can be used only with VNC clients that understand
 the RFB protocol "Tight" security type with the "Unix login" authentication
@@ -220,10 +224,10 @@ depends on the following:
 .TP
 \fBCommand-line authentication options\fR
 The authentication options (\fB-rfbauth\fR, \fB-otpauth\fR and \fB-pamauth\fR)
-allow you to request that VNC, OTP, and PAM user/password (Unix login)
-authentication be enabled in Xvnc, respectively.  If none of these options is
-specified, then this is the equivalent of requesting that no authentication be
-used.
+allow you to request that the VNC password, OTP, and PAM user/password
+authentication methods be enabled in Xvnc, respectively.  If none of these
+options is specified, then this is the equivalent of requesting that no
+authentication be used.
 .TP
 \fBThe \fIpermitted-auth-methods\fB directive\fR
 If the authentication configuration file exists, then the system administrator
@@ -297,7 +301,10 @@ effectively forces the use of SSH tunneling to make inbound remote connections.
 .IP \fIpam-service-name\fR=\fIsvcname\fR
 Sets the service name to be used when Xvnc performs PAM authentication.  The
 default service name is \fIturbovnc\fR.  This typically corresponds to a file
-in \fB/etc/pam.d\fR.
+in \fB/etc/pam.d\fR or to a token in \fB/etc/pam.conf\fR.  For instance, if
+your system has a file named \fB/etc/pam.d/passwd\fR, then copying this file to
+\fB/etc/pam.d/{svcname}\fR would cause the username and password sent by the
+VNC viewer to be validated against \fB/etc/passwd\fR.
 .IP \fIpermitted-auth-methods\fR=\fImethod\fR[,\fImethod\fR[...]]
 Defines the initial set of permitted authentication methods.  Multiple
 comma-separated methods may be specified.  Accepted values for \fImethod\fR
@@ -319,9 +326,9 @@ TurboVNC User's Guide.
 It is incumbent upon the system administrator to ensure that an authentication
 method meets the security requirements for a particular site before it is
 permitted to be used.  In particular, caution should be exercised when using
-the "pam-userpwd" method.  Unless SSH tunneling or another suitable encryption
-mechanism is enforced, then the use of "pam-userpwd" will result in Unix
-passwords being sent unencrypted over the network.
+Unix login authentication.  Unless SSH tunneling or another suitable encryption
+mechanism is enforced, then the use of Unix login authentication will result in
+Unix passwords being sent unencrypted over the network.
 .SH SEE ALSO
 \fBvncserver\fR(1), \fBvncviewer\fR(1), \fBvncpasswd\fR(1),
 \fBvncconnect\fR(1), \fBsshd\fR(1)
