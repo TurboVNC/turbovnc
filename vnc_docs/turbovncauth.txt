@@ -24,11 +24,11 @@ The TurboVNC server supports four methods for authenticating VNC viewers:
 	PAM User/Password Authentication :: {:}
 		The TurboVNC server uses Pluggable Authentication Modules (PAM) to validate
 		a user and password sent from the VNC viewer.  This authentication method
-		is used to implement the "Unix login authentication"
-		extension to the TightVNC protocol, but the username and password
-		received from the VNC viewer need not necessarily be validated against
-		Unix login credentials.  Generally, any user/password authentication
-		credentials that can be accessed through PAM can be used.  It is
+		is used to implement the "Unix login authentication" extension to the VNC
+		protocol, but the username and password received from the VNC viewer need
+		not necessarily be validated against Unix login credentials.  Generally,
+		the server can be configured to use any user/password authentication
+		credentials that can be accessed through PAM.  It is
 		__strongly__ recommended that the PAM user/password authentication method
 		be used only with an SSH-encrypted TurboVNC connection (see
 		{ref prefix="Section ": Secure_TurboVNC_Usage}), since Unix login
@@ -60,9 +60,10 @@ all of them for a single TurboVNC session by passing command-line arguments to
 ** Configuring PAM User/Password Authentication
 
 The ''Xvnc'' man page contains information about configuring PAM user/password
-authentication.  In some cases, it may be necessary to make the ''Xvnc''
-binary setuid root in order for PAM user/password authentication to work.  This
-is known to be necessary on Solaris 10, for instance.
+authentication.  One additional note is that, in some cases, it may be
+necessary to make the ''Xvnc'' binary setuid root in order for PAM
+user/password authentication to work.  This is known to be necessary on Solaris
+10, for instance.
 
 ** Further Reading
 
