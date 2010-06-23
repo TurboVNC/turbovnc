@@ -22,6 +22,9 @@ knowledge of the Linux or Solaris operating systems and X windows.
 #INCLUDE: turbovncusage.txt
 {nl}
 ----8<--------------
+#INCLUDE: turbovncauth.txt
+{nl}
+----8<--------------
 #INCLUDE: vglusage.txt
 {nl}
 ----8<--------------

@@ -1,0 +1,74 @@
+* TurboVNC Authentication Extensions
+
+The TurboVNC server supports four methods for authenticating VNC viewers:
+
+	No Authentication :: {:}
+		Any viewer may connect without entering a password.
+
+	VNC Password Authentication :: {:}
+		A VNC password must be entered in order to connect.  The VNC password is
+		typically stored in a file under the user's home directory on the server
+		machine.  It is separate from any other login credentials and thus
+		represents less of a security threat if compromised (that is, assuming the
+		VNC password and the Unix login password are not set to the same value.)
+
+	One-Time Password (OTP) Authentication :: {:}
+		A unique password is generated "on the fly" for the TurboVNC session and is
+		passed to the user via SSH.  Once the password has been used once to
+		authenticate with the TurboVNC session, the password is forgotten and
+		cannot be reused.  OTP authentication can be used, for instance, to launch
+		or connect to TurboVNC sessions from an automated web portal or from a job
+		scheduler.  OTP authentication is also useful for allowing temporary access
+		to a TurboVNC session for collaboration purposes.
+
+	PAM User/Password Authentication :: {:}
+		The TurboVNC server uses Pluggable Authentication Modules (PAM) to validate
+		a user and password sent from the VNC viewer.  This authentication method
+		is used to implement the "Unix login authentication"
+		extension to the TightVNC protocol, but the username and password
+		received from the VNC viewer need not necessarily be validated against
+		Unix login credentials.  Generally, any user/password authentication
+		credentials that can be accessed through PAM can be used.  It is
+		__strongly__ recommended that the PAM user/password authentication method
+		be used only with an SSH-encrypted TurboVNC connection (see
+		{ref prefix="Section ": Secure_TurboVNC_Usage}), since Unix login
+		authentication sends the Unix password in plain text over the network.
+
+** Enabling Authentication Methods
+
+The default behavior of the TurboVNC server is for all authentication methods
+to be enabled and for VNC password authentication to be preferred over Unix
+login authentication.  However, the system administrator can disable one or
+more of the authentication methods or set Unix login authentication to be
+preferred over VNC password authentication by editing the server's
+authentication configuration file.  See the ''Xvnc'' man page for more details.
+
+If both Unix login authentication and VNC password authentication are enabled
+on the server, then the user can force the use of Unix login authentication by
+passing an argument of ''-user ''__''{user_name}''__ to ''vncviewer'' when
+connecting to the TurboVNC session.  Similarly, the user can force the use of
+VNC password (or OTP) authentication by passing an argument of ''-nounixlogin''
+to ''vncviewer'' when connecting to the TurboVNC session.  Both of these
+command-line options work with both the Unix and Windows versions of
+''vncviewer''.
+
+If the system administrator has not restricted any of the authentication
+methods on a system-wide basis, then the user can choose to disable some or
+all of them for a single TurboVNC session by passing command-line arguments to
+''vncserver''.  See the ''vncserver'' man page for more details.
+
+** Configuring PAM User/Password Authentication
+
+The ''Xvnc'' man page contains information about configuring PAM user/password
+authentication.  In some cases, it may be necessary to make the ''Xvnc''
+binary setuid root in order for PAM user/password authentication to work.  This
+is known to be necessary on Solaris 10, for instance.
+
+** Further Reading
+
+For more detailed information about the TurboVNC authentication extensions,
+refer to the TurboVNC man pages:
+
+	#Verb: <<---
+	man -M /opt/TurboVNC/man {vncserver | Xvnc | vncviewer | vncpasswd}
+	---
