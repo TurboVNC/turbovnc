@@ -195,7 +195,7 @@ void ClientConnection::InitCapabilities()
 	m_authCaps.Add(rfbAuthNone, rfbStandardVendor, sig_rfbAuthNone,
 				   "No authentication");
 	m_authCaps.Add(rfbAuthVNC, rfbStandardVendor, sig_rfbAuthVNC,
-				   "Standard VNC password authentication");
+				   "VNC password authentication");
 	m_authCaps.Add(rfbAuthUnixLogin, rfbTightVncVendor, sig_rfbAuthUnixLogin,
 				   "Unix login authentication");
 
@@ -1240,7 +1240,7 @@ bool ClientConnection::AuthenticateVNC(char *errBuf, int errBufSize)
 		strcpy(passwd, pw);
 		free(pw);
 	} else {
-		LoginAuthDialog ad(m_opts.m_display, "Standard VNC Authentication");
+		LoginAuthDialog ad(m_opts.m_display, "VNC Password Authentication");
 		ad.DoDialog();
 #ifndef UNDER_CE
 		strncpy(passwd, ad.m_passwd, MAXPWLEN);
