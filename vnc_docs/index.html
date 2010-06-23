@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-06-23T02:57:47">
+<meta name="date" content="2010-06-23T03:39:33">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1248,13 +1248,13 @@ man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;{vncserver&nbsp;|&nbsp;Xvnc&nbsp;|&nbsp;
          The TurboVNC server uses Pluggable Authentication Modules (PAM) to 
          validate a user and password sent from the VNC viewer.  This 
          authentication method is used to implement the &ldquo;Unix login 
-         authentication&rdquo; extension to the TightVNC protocol, but the 
-         username and password received from the VNC viewer need not necessarily 
-         be validated against Unix login credentials.  Generally, any 
-         user/password authentication credentials that can be accessed through 
-         PAM can be used.  It is <em>strongly</em> recommended that the PAM 
-         user/password authentication method be used only with an SSH-encrypted 
-         TurboVNC connection (see Section 
+         authentication&rdquo; extension to the VNC protocol, but the username 
+         and password received from the VNC viewer need not necessarily be 
+         validated against Unix login credentials.  Generally, the server can be 
+         configured to use any user/password authentication credentials that can 
+         be accessed through PAM.  It is <em>strongly</em> recommended that the 
+         PAM user/password authentication method be used only with an 
+         SSH-encrypted TurboVNC connection (see Section 
          <a href="#Secure_TurboVNC_Usage" class="ref">5.5</a>), since Unix login 
          authentication sends the Unix password in plain text over the network.
     </dd>
@@ -1293,10 +1293,10 @@ page for more details.</p>
 <h2 id="hd006002">6.2&nbsp;Configuring PAM User/Password Authentication</h2>
 
 <p>The <code>Xvnc</code> man page contains information about configuring 
-PAM user/password authentication.  In some cases, it may be necessary to 
-make the <code>Xvnc</code> binary setuid root in order for PAM 
-user/password authentication to work.  This is known to be necessary on 
-Solaris 10, for instance.</p>
+PAM user/password authentication.  One additional note is that, in some 
+cases, it may be necessary to make the <code>Xvnc</code> binary setuid 
+root in order for PAM user/password authentication to work.  This is 
+known to be necessary on Solaris 10, for instance.</p>
 
 
 
