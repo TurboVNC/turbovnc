@@ -318,7 +318,11 @@ unlink($desktopLog);
 # PID and part of the encrypted form of the password.  Ideally we'd use
 # /dev/urandom, but that's only available on Linux.
 
-srand(time+$$+unpack("L",`cat $vncUserDir/passwd`));
+if (-e "$vncUserDir/passwd") {
+    srand(time+$$+unpack("L",`cat $vncUserDir/passwd`));
+} else {
+    srand(time+$$);
+}
 $cookie = "";
 for (1..16) {
     $cookie .= sprintf("%02x", int(rand(256)));
