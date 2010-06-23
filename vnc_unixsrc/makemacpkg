@@ -68,7 +68,7 @@ fi
 (cat $SRCDIR/Description.plist.tmpl | sed s/{__VERSION}/$VERSION/g > $pkgtmpdir/pkg/Description.plist)
 (cat $SRCDIR/Info.plist.tmpl | sed s/{__VERSION}/$VERSION/g  | sed s/{__BUILD}/$BUILD/g > $pkgtmpdir/pkg/Info.plist)
 install -m 755 $SRCDIR/uninstall.sh $PKGROOT/opt/$pkgname/bin/uninstall
-install -m 755 $SRCDIR/vncviewer/vncviewer.man $PKGROOT/opt/$pkgname/man/man1
+install -m 755 $SRCDIR/vncviewer/vncviewer.man $PKGROOT/opt/$pkgname/man/man1/vncviewer.1
 install -m 644 $SRCDIR/LICENCE.TXT $PKGROOT/Library/Documentation/$pkgname
 install -m 644 $SRCDIR/TurboVNC-ChangeLog.txt $PKGROOT/Library/Documentation/$pkgname
 install -m 644 $SRCDIR/../vnc_docs/LICEN*.txt $SRCDIR/../vnc_docs/*.html $SRCDIR/../vnc_docs/*.png $SRCDIR/../vnc_docs/*.css $PKGROOT/Library/Documentation/$pkgname
