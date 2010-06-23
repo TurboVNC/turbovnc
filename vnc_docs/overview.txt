@@ -43,15 +43,16 @@ In addition, TurboVNC provides the following features:
 	* TurboVNC supports authentication with one-time passwords or Unix login
 		credentials.
 
-	* A "lossless refresh" feature, which sends a mathematically lossless copy of
-		the current screen image.  This is useful in situations in which image
-		quality is critical but the network is too slow to support sending a
-		high-quality image for every frame.  Lossless refreshes can be performed
-		manually when a certain hotkey is pressed, or the TurboVNC server can be
-		configured to send a lossless refresh automatically if the user stops
-		interacting with the application for a certain period of time.
+	* TurboVNC provides a "lossless refresh" feature, which sends a
+		mathematically lossless copy of the current screen image.  This is useful
+		in situations in which image quality is critical but the network is too
+		slow to support sending a high-quality image for every frame.  Lossless
+		refreshes can be performed manually when a certain hotkey is pressed, or
+		the TurboVNC server can be configured to send a lossless refresh
+		automatically if the user stops interacting with the application for a
+		certain period of time.
 
-	* TurboVNC builds and runs on Solaris platforms (client and server) and on
+	* TurboVNC is fully supported on Solaris platforms (client and server) and on
 		Intel-based Macs (client only.)
 
 TurboVNC, when used with VirtualGL, provides a highly performant and robust
@@ -59,7 +60,7 @@ solution for remotely displaying 3D applications over all types of networks.
 
 TurboVNC is capable of sending 30+ Megapixels/second of image data over a
 100 Megabit/second local area network with perceptually lossless image quality.
-TurboVNC can deliver between 10 and 12 Megapixels/second of image data over a 3
+TurboVNC can deliver between 10 and 12 Megapixels/second of image data over a 5
 Megabit/second broadband connection at reduced (but usable) image quality.
 
 TurboVNC is compatible with other VNC distributions.  See

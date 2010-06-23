@@ -40,7 +40,8 @@
 		''New 'X' desktop is my_server:1''
 		{nl}{nl}
 		If this is the first time that a TurboVNC session has ever been run
-		under this user account, TurboVNC will prompt for a VNC session password.
+		under this user account, and if VNC password authentication is enabled for
+		the session, then TurboVNC will prompt for a VNC session password.
 
 	#. The SSH session can now be exited, if desired.
 
@@ -64,13 +65,16 @@
 		TurboVNC session in the "VNC Server" field, then click "Connect" (Windows)
 		or press Enter (Linux/Mac/Solaris.)
 
-	#. Another dialog box appears, prompting for the VNC session password.
+	#. Another dialog box appears, prompting for the VNC session password (if VNC
+		password authentication is enabled) or for the username and password (if
+		Unix login authentication is enabled.)
 		{nl}{nl}
-		|| Windows TurboVNC viewer || Linux/Mac/Solaris TurboVNC viewer ||
-		| {img:turbovnc3.png} | {img:turbovnc4.png} |
+		|| || Windows TurboVNC viewer || Linux/Mac/Solaris TurboVNC viewer ||
+		| VNC Password Authentication Dialog | {img:turbovnc3.png} | {img:turbovnc4.png} |
+		| Unix Login Authentication Dialog   | {img:turbovnc5.png} | {img:turbovnc6.png} |
 		{nl}
-		Enter the VNC session password and click "OK" (Windows) or press
-		Enter (Linux/Mac/Solaris.)
+		Enter the VNC session password or the Unix username/password and click
+		"OK" (Windows) or press Enter (Linux/Mac/Solaris.)
 		{nl}{nl}
 		A TurboVNC desktop window should appear on your client machine.  This
 		window contains a virtual X server with which you can interact to launch
@@ -255,17 +259,38 @@ Passing an argument of ''-alr ''__''{timeout}''__ to ''vncserver'' will
 enable the automatic lossless refresh (ALR) feature for the TurboVNC server
 session.  ALR will monitor all of the client connections, and if more than
 __''{timeout}''__ seconds have elapsed since the last framebuffer update was
-sent to a given client, then the TurboVNC server will send a mathematically
-lossless copy of any screen regions that have been "corrupted" by lossy
-compression.
+sent to a given client, then the TurboVNC server will send to that client a
+mathematically lossless copy of screen regions that have been affected by
+lossy compression.
 
 The ALR feature is designed mainly for use by interactive visualization
 applications.  The idea is that, on a low-bandwidth connection, low-quality
 JPEG can be used while the user is rotating/panning/zooming a 3D scene, but
-when the user stops manipulating the scene, then a fully lossless copy is sent
-for them to study in detail.
+when the user stops manipulating the scene, then a fully lossless copy of the
+3D image is sent for them to study in detail.
+
+The default ALR behavior is to monitor and send lossless copies of only the
+screen regions which were drawn using ''X[Shm]PutImage()''.  When used with
+VirtualGL, this means that ALRs will mainly be sent for just the 3D screen
+regions.  This should be fine for most applications, since the 3D regions are
+the ones which are quality-critical.  The default ALR behavior also prevents
+what might best be termed the "blinking cursor dilemma."  Certain ill-behaved
+Window managers update a small region of the taskbar continuously, even though
+none of the pixels in that region have changed.  Also, certain programs have a
+blinking cursor which may update more frequently than the ALR timeout.  Since
+an ALR is triggered based on a period of inactivity relative to the last
+framebuffer update, these continuous updates prevent an ALR from ever being
+sent.  Fortunately, these ill-behaved window managers and blinking cursors 
+do not typically use ''X[Shm]PutImage()'', so it is effective to limit the
+regions which are "eligible" for ALR to just the subset of regions which were
+drawn with the ''X[Shm]PutImage()'' functions.
+
+You can override the default ALR behavior, thus making all screen regions
+eligible for ALR, by setting the ''TVNC_ALRALL'' environment variable to ''1''
+on the TurboVNC server machine prior to starting a TurboVNC session.
 
 ** Securing a TurboVNC Connection
+{anchor: Secure_TurboVNC_Usage}
 
 Normally, the connection between the TurboVNC server and the TurboVNC viewer is
 completely unencrypted, but securing that connection can be easily
@@ -362,10 +387,3 @@ For more detailed instructions on the usage of TurboVNC:
 
 	Windows :: Use the embedded help feature (the question mark button in the
 	upper right of the TurboVNC viewer window.)
-
-The TightVNC documentation:
-
-http://www.tightvnc.com/docs.html
-
-might also be helpful, since TurboVNC is based on TightVNC and shares many of
-its features.
