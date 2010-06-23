@@ -64,18 +64,20 @@ char *fallback_resources[] = {
      <KeyPress>: SendRFBEvent()\\n\
      <KeyRelease>: SendRFBEvent()",
 
+  "*serverDialog.title: New TurboVNC Connection",
   "*serverDialog.dialog.label: VNC server:",
   "*serverDialog.dialog.value:",
   "*serverDialog.dialog.value.translations: #override\\n\
      <Key>Return: ServerDialogDone()",
 
+  "*passwordDialog.title: Standard VNC Authentication",
   "*passwordDialog.dialog.label: Password:",
   "*passwordDialog.dialog.value:",
   "*passwordDialog.dialog.value.AsciiSink.echo: False",
   "*passwordDialog.dialog.value.translations: #override\\n\
      <Key>Return: PasswordDialogDone()",
 
-  "*userPwdDialog.title: VNC Server Authentication",
+  "*userPwdDialog.title: Unix Login Authentication",
   "*userPwdDialog.form.background: grey",
   "*userPwdDialog.form.resizable: true",
 
