@@ -124,7 +124,7 @@ public:
 
 	bool	m_FSAltEnter;
 	bool	m_noUnixLogin;
-	char	m_userLogin[256];
+	char	m_user[256];
 
     // Logging
     int     m_logLevel;

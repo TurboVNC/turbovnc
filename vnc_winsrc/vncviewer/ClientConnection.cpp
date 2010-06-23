@@ -1074,7 +1074,7 @@ void ClientConnection::PerformAuthenticationTight()
 			m_connDlg->SetStatus("Authentication capability list received");
 
 		CARD32 authScheme = 0, a;
-		if (!m_opts.m_noUnixLogin && strlen(m_opts.m_userLogin) > 0) {
+		if (!m_opts.m_noUnixLogin && strlen(m_opts.m_user) > 0) {
 			// Prefer Unix Login over other types
 			for (int i = 0; i < m_authCaps.NumEnabled(); i++) {
 				if (m_authCaps.GetByOrder(i) == rfbAuthUnixLogin) {
@@ -1287,8 +1287,8 @@ bool ClientConnection::AuthenticateUnixLogin(char *errBuf, int errBufSize)
     CARD32 t;
 
 	char passwd[256] = "\0", user[256] = "\0";
-	if (strlen(m_opts.m_userLogin) > 0) {
-		strncpy(user, m_opts.m_userLogin, 255);
+	if (strlen(m_opts.m_user) > 0) {
+		strncpy(user, m_opts.m_user, 255);
 		user[255] = '\0';
 	}
 
@@ -1300,8 +1300,8 @@ bool ClientConnection::AuthenticateUnixLogin(char *errBuf, int errBufSize)
 		_snprintf(errBuf, errBufSize, "Empty user name");
 		return false;
 	}
-	strncpy(m_opts.m_userLogin, user, 255);
-	m_opts.m_userLogin[255] = '\0';
+	strncpy(m_opts.m_user, user, 255);
+	m_opts.m_user[255] = '\0';
 
 	strncpy(passwd, ad.m_passwd, 255);
 	passwd[255] = '\0';

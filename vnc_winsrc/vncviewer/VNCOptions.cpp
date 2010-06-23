@@ -100,7 +100,7 @@ VNCOptions::VNCOptions()
 	m_ignoreShapeUpdates = false;
 
 	m_encPasswd[0] = '\0';
-	m_userLogin[0] = '\0';
+	m_user[0] = '\0';
 	m_noUnixLogin = false;
 
 	LoadGenOpt();
@@ -177,7 +177,7 @@ VNCOptions& VNCOptions::operator=(VNCOptions& s)
 	m_requestShapeUpdates	= s.m_requestShapeUpdates;
 	m_ignoreShapeUpdates	= s.m_ignoreShapeUpdates;
 	m_noUnixLogin			= s.m_noUnixLogin;
-	strcpy(m_userLogin, s.m_userLogin);
+	strcpy(m_user, s.m_user);
 
 #ifdef UNDER_CE
 	m_palmpc			= s.m_palmpc;
@@ -519,13 +519,14 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			if(strlen(passwd)>8) passwd[8]='\0';
 			vncEncryptPasswd(m_encPasswd, passwd);
 			memset(passwd, 0, MAXPWLEN);
-		} else if ( SwitchMatch(args[j], _T("userlogin") )) {
+		} else if ( SwitchMatch(args[j], _T("user") )) {
 			if (++j == i) {
 				ArgError(_T("No username specified"));
 				continue;
 			}
-			strncpy(m_userLogin, args[j], 255);
-			m_userLogin[255]='\0';
+			strncpy(m_user, args[j], 255);
+			m_user[255]='\0';
+			m_noUnixLogin=false;
 		} else if ( SwitchMatch(args[j], _T("register") )) {
 			Register();
 			exit(1);
@@ -594,8 +595,8 @@ void VNCOptions::Save(char *fname)
 	saveInt("subsampling",			m_subsampLevel,		fname);	
 	saveInt("quality",				m_enableJpegCompression? m_jpegQualityLevel : -1, fname);
 	saveInt("nounixlogin",			m_noUnixLogin,		fname);
-	if (strlen(m_userLogin) > 0)
-		WritePrivateProfileString("connection", "userlogin", m_userLogin, fname);
+	if (strlen(m_user) > 0)
+		WritePrivateProfileString("connection", "user", m_user, fname);
 
 }
 
@@ -643,9 +644,9 @@ void VNCOptions::Load(char *fname)
 	}
 	m_noUnixLogin =			readInt("nounixlogin",		m_noUnixLogin,	fname) != 0;
 	char temps[256];
-	if (GetPrivateProfileString("connection", "userlogin", "", temps, 255, fname) != 0) {
-		strncpy(m_userLogin, temps, 255);
-		m_userLogin[255] = '\0';
+	if (GetPrivateProfileString("connection", "user", "", temps, 255, fname) != 0) {
+		strncpy(m_user, temps, 255);
+		m_user[255] = '\0';
 	}
 	
 }
@@ -1647,10 +1648,10 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 	m_ignoreShapeUpdates =	read(RegKey, "noremotecursor",    m_ignoreShapeUpdates   ) != 0;
 	m_noUnixLogin =			read(RegKey, "nounixlogin",       m_noUnixLogin          ) != 0;
 	char buf[256];  DWORD buflen = 255;
-	if (RegQueryValueEx(RegKey, (LPTSTR) "userlogin", NULL, NULL, (LPBYTE) buf,
+	if (RegQueryValueEx(RegKey, (LPTSTR) "user", NULL, NULL, (LPBYTE) buf,
 		&buflen) == ERROR_SUCCESS && buflen > 0) {
-		strncpy(m_userLogin, buf, 255);
-		m_userLogin[255] = '\0';
+		strncpy(m_user, buf, 255);
+		m_user[255] = '\0';
 	}
 	int level		 =		read(RegKey, "compresslevel",     -1				     );
 	if (level != -1) {
@@ -1725,8 +1726,8 @@ void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
 	save(RegKey, "subsampling",			m_subsampLevel		);
 	save(RegKey, "quality",				m_enableJpegCompression ? m_jpegQualityLevel : -1);
 	save(RegKey, "nounixlogin",			m_noUnixLogin		);
-	RegSetValueEx( RegKey, "userlogin", NULL, REG_SZ,
-		(CONST BYTE *)m_userLogin, (DWORD)strlen(m_userLogin) );
+	RegSetValueEx( RegKey, "user", NULL, REG_SZ,
+		(CONST BYTE *)m_user, (DWORD)strlen(m_user) );
 
 	RegCloseKey(RegKey);
 }
