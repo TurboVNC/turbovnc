@@ -204,7 +204,7 @@ AuthPAMUserPwdRspFunc(rfbClientPtr cl)
         UserList* p = userACL;
 
         if (p == NULL)
-            rfbLog("WARNING: User ACL is empty.  No users will be allowed to log in with Unix Login authentication.\n");
+            rfbLog("WARNING: User ACL is empty.  No users will be allowed to log in with Unix login authentication.\n");
 
         while (p != NULL) {
             if (!strcmp(p->name, userBuf))

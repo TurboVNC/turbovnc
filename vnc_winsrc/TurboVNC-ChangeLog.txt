@@ -178,7 +178,7 @@ Changed default pixel format for Solaris TurboVNC servers to ARGB/BGRA.  This
 should improve performance by a bit on SPARC servers.
 -------------------------------------------------------------------------------
 [11]
-Added 200% scaling option to Windows TurboVNC Viewer GUI.
+Added 200% scaling option to the Windows TurboVNC Viewer GUI.
 -------------------------------------------------------------------------------
 [12]
 The TurboVNC server script now tries to figure out an appropriate font path for
@@ -187,7 +187,7 @@ available.  If the script fails to figure out an appropriate font path, then
 it will fall back to using xfs.
 -------------------------------------------------------------------------------
 [13]
-Changed the scrollbar behavior in the Unix TurboVNC viewer to more closely
+Changed the scrollbar behavior in the Unix TurboVNC Viewer to more closely
 match that of "modern" windowing systems, in which the left mouse button is
 used to scroll in both directions.
 -------------------------------------------------------------------------------
@@ -213,7 +213,7 @@ caused the Solaris TurboVNC Viewer to display spurious multi-colored vertical
 lines when 2X or 4X subsampling was used.
 -------------------------------------------------------------------------------
 [17]
-When requesting a Lossless Refresh using the TurboVNC viewer on a Linux or
+When requesting a Lossless Refresh using the TurboVNC Viewer on a Linux or
 Solaris/x86 client, the pixels obscured by the F8 dialog will be regenerated
 using lossy compression after the lossless refresh has occurred.  This makes
 the lossless refresh somewhat ineffective.  We were not able to find a fix
@@ -307,7 +307,7 @@ and Solaris systems.
 Modified Mac package such that /opt/TurboVNC/bin/vncviewer links to
 /opt/TurboVNC/lib/libturbojpeg.dylib rather than to
 /opt/VirtualGL/lib/libturbojpeg.dylib (oops.)  This was causing the Mac
-TurboVNC viewer to fail unless VirtualGL was also installed.
+TurboVNC Viewer to fail unless VirtualGL was also installed.
 -------------------------------------------------------------------------------
 [14]
 Included an optimized version of PuTTY 0.60 in the Windows build (and viewer
@@ -375,7 +375,7 @@ script.  It should now properly run fvwm2 or twm if KDE, CDE, or Gnome are not
 available.
 -------------------------------------------------------------------------------
 [4]
-First pass at a Mac build of the TurboVNC viewer.  The Mac version is an X11
+First pass at a Mac build of the TurboVNC Viewer.  The Mac version is an X11
 Unix app and thus needs to be run inside an xterm.  It should otherwise behave
 and perform identically to the Linux version.
 -------------------------------------------------------------------------------
@@ -408,7 +408,7 @@ these new optimizations, the native and Java viewers should now perform
 similarly over a wide-area network.
 -------------------------------------------------------------------------------
 [9]
-Added a '-password' option to the Windows TurboVNC viewer to allow one to pass
+Added a '-password' option to the Windows TurboVNC Viewer to allow one to pass
 the VNC password as plain text.
 -------------------------------------------------------------------------------
 
