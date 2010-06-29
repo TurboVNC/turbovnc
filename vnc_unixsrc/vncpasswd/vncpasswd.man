@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncpasswd 1 "May 2010" "" "TurboVNC"
+.TH vncpasswd 1 "June 2010" "" "TurboVNC"
 .SH NAME
 vncpasswd \- set passwords for VNC server
 .SH SYNOPSIS
@@ -33,23 +33,23 @@ vncpasswd \- set passwords for VNC server
 .br
 .SH DESCRIPTION
 The \fBvncpasswd\fR utility can be used to create and change
-passwords for Xvnc (the TurboVNC virtual X server.) \fBXvnc\fR uses these
+passwords for Xvnc (the TurboVNC virtual X server.)  \fBXvnc\fR uses these
 passwords when started with the \fB\-rfbauth\fR command line option
 (or when started from the \fBvncserver\fR script.)
 
 \fBvncpasswd\fR allows one to enter a primary VNC password and an
-optional view-only password. \fBXvnc\fR will ignore mouse and keyboard
+optional view-only password.  \fBXvnc\fR will ignore mouse and keyboard
 input from clients who authenticate with the view-only password.
 
 The password filename defaults to \fB$HOME/.vnc/passwd\fR, unless the
 \fB\-t\fR command line option was used (see the OPTIONS section
-below.) The \fB$HOME/.vnc/\fR directory will be created if it does not
+below.)  The \fB$HOME/.vnc/\fR directory will be created if it does not
 exist.
 
 Each password has to be longer than five characters (unless the
 \fB\-f\fR command line option was used-- see its description below.) 
-Only the first eight characters are significant. If the primary
-password is too short, then vncpasswd will abort. If the view-only
+Only the first eight characters are significant.  If the primary
+password is too short, then vncpasswd will abort.  If the view-only
 password is too short, then only the primary password will be saved.
 
 Unless a filename was explicitly provided in the command line, then this
@@ -67,7 +67,7 @@ currently enabled for a VNC server session.
 .br
 .SH USER ACCESS CONTROL LIST SUPPORT
 If the VNC server is configured to support a user access control list (ACL) for
-the PAM user/password (Unix Login) authentication method, then \fBvncpasswd\fR
+the PAM user/password authentication method, then \fBvncpasswd\fR
 can be used to add users to or remove users from the ACL.  Be careful not to
 remove yourself from the list, or you will not be able to connect again until
 you re-add yourself.
@@ -77,14 +77,14 @@ you re-add yourself.
 \fB\-t\fR
 Write passwords into \fB/tmp/$USER-vnc/passwd\fR, creating the
 \fB/tmp/$USER-vnc/\fR directory if it does not exist and checking the
-permissions on that directory (the mode must be 700.) This option can
+permissions on that directory (the mode must be 700.)  This option can
 help to improve security if your home directory is shared on the
 network (e.g. when using NFS.)
 .TP
 \fB\-f\fR
-Filter mode. Read plain-text passwords from stdin, and write encrypted
-versions to stdout. One or two passwords (full-control and view-only)
-can be supplied in the input stream, with a new line terminating each password. 
+Filter mode.  Read plain-text passwords from stdin, and write encrypted
+versions to stdout.  One or two passwords (full-control and view-only)
+can be supplied in the input stream, with a new line terminating each password.  
 Note that in filter mode, short or even empty passwords will be
 silently accepted.
 .TP
@@ -116,16 +116,16 @@ exit with status 0.  Otherwise, it will exit with status 1.
 \fBvncserver\fR(1), \fBXvnc\fR(1), \fBvncviewer\fR(1),
 \fBvncconnect\fR(1)
 .SH AUTHORS
-VNC was originally developed at AT&T Laboratories Cambridge. TightVNC
-additions were implemented by Constantin Kaplinsky. TurboVNC, based
-on TightVNC, is provided by The VirtualGL Project. Many other people
+VNC was originally developed at AT&T Laboratories Cambridge.  TightVNC
+additions were implemented by Constantin Kaplinsky.  TurboVNC, based
+on TightVNC, is provided by The VirtualGL Project.  Many other people
 participated in development, testing and support.
 
 \fBMan page authors:\fR
 .br
-Marcus Brinkmann <Marcus.Brinkmann@ruhr-uni-bochum.de>,
+Marcus Brinkmann <Marcus.Brinkmann@ruhr-uni-bochum.de>
 .br
-Tim Waugh <twaugh@redhat.com>,
+Tim Waugh <twaugh@redhat.com>
 .br
 Constantin Kaplinsky <const@tightvnc.com>
 .br
