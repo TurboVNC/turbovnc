@@ -48,7 +48,7 @@ In addition, TurboVNC provides the following features:
 		in situations in which image quality is critical but the network is too
 		slow to support sending a high-quality image for every frame.  Lossless
 		refreshes can be performed manually when a certain hotkey is pressed, or
-		the TurboVNC server can be configured to send a lossless refresh
+		the TurboVNC Server can be configured to send a lossless refresh
 		automatically if the user stops interacting with the application for a
 		certain period of time.
 

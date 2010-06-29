@@ -249,7 +249,7 @@ rotate/pan/zoom an object in their 3D application using a very low-quality JPEG
 setting, then when that user is ready to interpret or analyze the object, they
 can request a lossless refresh of TurboVNC's virtual screen.
 
-To perform a lossless refresh in the Windows or Unix TurboVNC viewers, press
+To perform a lossless refresh in the Windows or Unix TurboVNC Viewers, press
 CTRL-ALT-SHIFT-L (in the Windows TurboVNC Viewer, you can also click on the
 Lossless Refresh toolbar icon.)  In the Java TurboVNC Viewer, click on the
 "Lossless Refresh" button at the top of the browser window.
