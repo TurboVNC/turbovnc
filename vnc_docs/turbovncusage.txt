@@ -13,7 +13,7 @@
 		one isn't already started.)
 
 	#. In the new Command Prompt/terminal/xterm window, open a Secure Shell (SSH)
-		session into the TurboVNC server:
+		session into the TurboVNC server machine:
 
 		Linux/Mac/Solaris clients :: {:}
 		#Verb: <<---
@@ -25,8 +25,9 @@
 		"c:\program files\turbovnc\putty" {user}@{server}
 		---
 
-		Replace __''{user}''__ with your user account name on the TurboVNC server and
-		__''{server}''__ with the hostname or IP address of that server.
+		Replace __''{user}''__ with your user account name on the TurboVNC server
+		machine and __''{server}''__ with the hostname or IP address of that
+		machine.
 
 	#. In the SSH session, start a TurboVNC session:
 
@@ -41,11 +42,11 @@
 		{nl}{nl}
 		If this is the first time that a TurboVNC session has ever been run
 		under this user account, and if VNC password authentication is enabled for
-		the session, then TurboVNC will prompt for a VNC session password.
+		the session, then TurboVNC will prompt for a VNC password.
 
 	#. The SSH session can now be exited, if desired.
 
-	#. On the client machine, start the TurboVNC viewer.
+	#. On the client machine, start the TurboVNC Viewer.
 
 		Linux/Mac/Solaris clients :: {:}
 		Open a new terminal/xterm and type
@@ -58,18 +59,18 @@
 
 	#. A small dialog box will appear.
 		{nl}{nl}
-		|| Windows TurboVNC viewer || Linux/Mac/Solaris TurboVNC viewer ||
+		|| Windows TurboVNC Viewer || Linux/Mac/Solaris TurboVNC Viewer ||
 		| {img:turbovnc1.png} | {img:turbovnc2.png} |
 		{nl}
 		Enter the X display name (hostname/IP address and display number) of the
-		TurboVNC session in the "VNC Server" field, then click "Connect" (Windows)
+		TurboVNC session in the "VNC server" field, then click "Connect" (Windows)
 		or press Enter (Linux/Mac/Solaris.)
 
-	#. Another dialog box appears, prompting for the VNC session password (if VNC
+	#. Another dialog box appears, prompting for the VNC password (if VNC
 		password authentication is enabled) or for the username and password (if
 		Unix login authentication is enabled.)
 		{nl}{nl}
-		|| || Windows TurboVNC viewer || Linux/Mac/Solaris TurboVNC viewer ||
+		|| || Windows TurboVNC Viewer || Linux/Mac/Solaris TurboVNC Viewer ||
 		| VNC Password Authentication Dialog | {img:turbovnc3.png} | {img:turbovnc4.png} |
 		| Unix Login Authentication Dialog   | {img:turbovnc5.png} | {img:turbovnc6.png} |
 		{nl}
@@ -78,14 +79,14 @@
 		{nl}{nl}
 		A TurboVNC desktop window should appear on your client machine.  This
 		window contains a virtual X server with which you can interact to launch
-		X-Windows applications on the TurboVNC server.
+		X-Windows applications on the TurboVNC server machine.
 
 ** Disconnecting and Killing a TurboVNC Session
 
-Closing the TurboVNC viewer disconnects from the TurboVNC session, but the
-TurboVNC session will remain running on the TurboVNC server (as will any
-applications that you may have started in the session), and you can reconnect
-to the session at any time.
+Closing the TurboVNC Viewer disconnects from the TurboVNC session, but the
+TurboVNC session will remain running on the TurboVNC server machine (as will
+any applications that you may have started in the session), and you can
+reconnect to the session at any time.
 
 To kill a TurboVNC session:
 
@@ -93,7 +94,7 @@ To kill a TurboVNC session:
 		log into the server that is running the TurboVNC session that you wish to
 		kill.{nl} \
 		... or ...{nl} \
-		Using the TurboVNC viewer, connect to the TurboVNC session that you wish to
+		Using the TurboVNC Viewer, connect to the TurboVNC session that you wish to
 		kill, and open a new terminal in that TurboVNC session.
 
 	#. Type the following command:
@@ -116,21 +117,21 @@ following command:
 ** Using TurboVNC in a Web Browser
 
 When a TurboVNC session is created, it automatically launches a miniature web
-server that serves up a Java TurboVNC viewer applet.  This Java TurboVNC viewer
+server that serves up a Java TurboVNC Viewer applet.  This Java TurboVNC Viewer
 can be used to connect to the TurboVNC session from a machine that does not
-have a native TurboVNC viewer installed (or a machine for which no native
-TurboVNC viewer is available.)  The Java viewer is significantly slower than
+have a native TurboVNC Viewer installed (or a machine for which no native
+TurboVNC Viewer is available.)  The Java viewer is significantly slower than
 the native viewer on high-speed networks, but on low-speed networks the Java
 viewer and native viewers have comparable performance.  The Java viewer does
 not currently support double buffering.
 
-To use the Java TurboVNC viewer, point your web browser to:
+To use the Java TurboVNC Viewer, point your web browser to:
 
 ''http://''__''{turbovnc_server}''__'':{5800+''__''n''__''}''
 
 where __''{turbovnc_server}''__ is the hostname or IP address of the TurboVNC
-server, and __''n''__ is the X display number of the TurboVNC session to which
-you want to connect.
+server machine, and __''n''__ is the X display number of the TurboVNC session
+to which you want to connect.
 
 __Example:__
 If the TurboVNC session is occupying X display ''my_server:1'', then point your
@@ -174,14 +175,14 @@ images:
 		compression is enabled, then Zlib compression is always used with non-JPEG
 		image tiles.
 
-In the Windows TurboVNC viewer, these parameters can be adjusted by accessing
+In the Windows TurboVNC Viewer, these parameters can be adjusted by accessing
 the Options dialog box (click on the "Options" button in the "TurboVNC
 Connection" dialog box or, after connecting to the server, click on the
-Connection Options button in the toolbar.)  In the Unix TurboVNC viewer, press
+Connection Options button in the toolbar.)  In the Unix TurboVNC Viewer, press
 F8 after connecting to bring up the options menu.  In the Java viewer, click on
 the Options button at the top of the browser window.
 
-The TurboVNC viewer provides five image encoding protocols, corresponding
+The TurboVNC Viewer provides five image encoding protocols, corresponding
 to the most useful combinations of the image compression options described
 above:
 
@@ -199,7 +200,7 @@ above:
 	All else being equal, this protocol typically uses about twice the network \
 	bandwidth of the "Low Quality JPEG" protocol and about half the bandwidth of the \
 	"Perceptually Lossless JPEG" protocol, making it appropriate for medium-speed \
-	networks such as 10 Megabit ethernet. |
+	networks such as 10 Megabit Ethernet. |
 | "Tight + Low Quality JPEG" | Yes | 30 | 4x | N/A | \
 	For image tiles with a high number of unique colors, this protocol produces \
 	very noticeable image compression artifacts.  However, it performs \
@@ -220,12 +221,12 @@ above:
 	protocol, but it also uses significantly more CPU time on the server than \
 	any of the JPEG-based protocols. |
 
-In the Windows TurboVNC viewer, the image encoding protocol can be set using
+In the Windows TurboVNC Viewer, the image encoding protocol can be set using
 the Options dialog box (click on the "Options" button in the "TurboVNC
 Connection" dialog box or, after connecting to the server, click on the
 Connection Options button in the toolbar.)  In the Java viewer, the same thing
 is accomplished by clicking on the "Options" button at the top of the browser
-window.  With the Linux/Mac/Solaris TurboVNC viewer, the "Perceptually
+window.  With the Linux/Mac/Solaris TurboVNC Viewer, the "Perceptually
 Lossless" protocol is the default, and you can use the following command-line
 switches to select another protocol:
 
@@ -249,17 +250,17 @@ setting, then when that user is ready to interpret or analyze the object, they
 can request a lossless refresh of TurboVNC's virtual screen.
 
 To perform a lossless refresh in the Windows or Unix TurboVNC viewers, press
-CTRL-ALT-SHIFT-L (in the Windows TurboVNC viewer, you can also click on the
-Lossless Refresh toolbar icon.)  In the Java TurboVNC viewer, click on the
+CTRL-ALT-SHIFT-L (in the Windows TurboVNC Viewer, you can also click on the
+Lossless Refresh toolbar icon.)  In the Java TurboVNC Viewer, click on the
 "Lossless Refresh" button at the top of the browser window.
 
 *** Automatic Lossless Refresh
 
 Passing an argument of ''-alr ''__''{timeout}''__ to ''vncserver'' will
-enable the automatic lossless refresh (ALR) feature for the TurboVNC server
-session.  ALR will monitor all of the client connections, and if more than
+enable the automatic lossless refresh (ALR) feature for the TurboVNC
+session.  ALR will monitor all of the VNC viewer connections, and if more than
 __''{timeout}''__ seconds have elapsed since the last framebuffer update was
-sent to a given client, then the TurboVNC server will send to that client a
+sent to a given viewer, then the TurboVNC Server will send to that viewer a
 mathematically lossless copy of screen regions that have been affected by
 lossy compression.
 
@@ -272,18 +273,19 @@ when the user stops manipulating the scene, then a fully lossless copy of the
 The default ALR behavior is to monitor and send lossless copies of only the
 screen regions which were drawn using ''X[Shm]PutImage()''.  When used with
 VirtualGL, this means that ALRs will mainly be sent for just the 3D screen
-regions.  This should be fine for most applications, since the 3D regions are
+regions.  This should be fine for most 3D applications, since the 3D regions are
 the ones which are quality-critical.  The default ALR behavior also prevents
 what might best be termed the "blinking cursor dilemma."  Certain ill-behaved
-Window managers update a small region of the taskbar continuously, even though
+window managers update a small region of the taskbar continuously, even though
 none of the pixels in that region have changed.  Also, certain programs have a
 blinking cursor which may update more frequently than the ALR timeout.  Since
 an ALR is triggered based on a period of inactivity relative to the last
 framebuffer update, these continuous updates prevent an ALR from ever being
 sent.  Fortunately, these ill-behaved window managers and blinking cursors 
-do not typically use ''X[Shm]PutImage()'', so it is effective to limit the
-regions which are "eligible" for ALR to just the subset of regions which were
-drawn with the ''X[Shm]PutImage()'' functions.
+do not typically use ''X[Shm]PutImage()'' to perform their continuous updates,
+so the problem can be worked around by limiting the regions which are
+"eligible" for ALR to just the subset of regions which were drawn with the
+''X[Shm]PutImage()'' functions.
 
 You can override the default ALR behavior, thus making all screen regions
 eligible for ALR, by setting the ''TVNC_ALRALL'' environment variable to ''1''
@@ -292,11 +294,12 @@ on the TurboVNC server machine prior to starting a TurboVNC session.
 ** Securing a TurboVNC Connection
 {anchor: Secure_TurboVNC_Usage}
 
-Normally, the connection between the TurboVNC server and the TurboVNC viewer is
+Normally, the connection between the TurboVNC Server and the TurboVNC Viewer is
 completely unencrypted, but securing that connection can be easily
 accomplished by using the port forwarding feature of Secure Shell (SSH.)  After
-you have started a TurboVNC session on the TurboVNC server, open a new SSH
-connection into the TurboVNC server using the following command line:
+you have started a TurboVNC session on the TurboVNC server machine, open a new
+SSH connection into the TurboVNC server machine using the following command
+line:
 
 	Linux/Mac/Solaris clients :: {:}
 	#Verb: <<---
@@ -308,10 +311,10 @@ connection into the TurboVNC server using the following command line:
 	"c:\program files\turbovnc\putty" -L {5900+n}:localhost:{5900+n} {user}@{server}
 	---
 
-Replace __''{user}''__ with your user account name on the TurboVNC server and
-__''{server}''__ with the hostname or IP address of that server.  Replace
-__''n''__ with the X display number of the TurboVNC session to which you want
-to connect.
+Replace __''{user}''__ with your user account name on the TurboVNC server
+machine and __''{server}''__ with the hostname or IP address of that machine.
+Replace __''n''__ with the X display number of the TurboVNC session to which
+you want to connect.
 
 For instance, if you wish to connect to display '':1'' on server ''my_server''
 using user account ''my_user'', you would type:
@@ -327,7 +330,7 @@ using user account ''my_user'', you would type:
 	---
 
 After the SSH connection has been established, you can then launch the
-TurboVNC viewer and point it to ''localhost:''__''{n}''__ (''localhost:1'' in the
+TurboVNC Viewer and point it to ''localhost:''__''{n}''__ (''localhost:1'' in the
 above example.)
 
 *** The ''-via'' Command-Line Option
@@ -355,17 +358,17 @@ environment variables.  See the ''vncviewer'' man page for more details.
 #OPT: noList! plain!
 
 Passing an argument of ''-localhost'' to ''vncserver'' will force the TurboVNC
-server session to accept inbound connections only from the server machine.
+Server session to accept inbound connections only from the server machine.
 This effectively forces SSH tunneling to be used for remote connections.  If
 the ''no-remote-connections'' directive is set in the TurboVNC authentication
 configuration file, then that has the effect of enabling the ''-localhost''
-option for all new TurboVNC server sessions that are started on the machine.
+option for all new TurboVNC sessions that are started on the machine.
 
 Passing an argument of ''-noreverse'' to ''vncserver'' will disable the ability
-to make outbound (reverse) connections from the TurboVNC server session.
+to make outbound (reverse) connections from the TurboVNC Server session.
 If the ''no-reverse-connections'' directive is set in the TurboVNC
 authentication configuration file, then that has the effect of enabling the
-''-noreverse'' option for all new TurboVNC server sessions that are started on
+''-noreverse'' option for all new TurboVNC sessions that are started on
 the machine.
 
 *** Performance Notes
@@ -386,4 +389,4 @@ For more detailed instructions on the usage of TurboVNC:
 	---
 
 	Windows :: Use the embedded help feature (the question mark button in the
-	upper right of the TurboVNC viewer window.)
+	upper right of the TurboVNC Viewer window.)
