@@ -1,6 +1,6 @@
 * TurboVNC Authentication Extensions
 
-The TurboVNC server supports four methods for authenticating VNC viewers:
+The TurboVNC Server supports four methods for authenticating VNC viewers:
 
 	No Authentication :: {:}
 		Any viewer may connect without entering a password.
@@ -22,7 +22,7 @@ The TurboVNC server supports four methods for authenticating VNC viewers:
 		to a TurboVNC session for collaboration purposes.
 
 	PAM User/Password Authentication :: {:}
-		The TurboVNC server uses Pluggable Authentication Modules (PAM) to validate
+		The TurboVNC Server uses Pluggable Authentication Modules (PAM) to validate
 		a user and password sent from the VNC viewer.  This authentication method
 		is used to implement the "Unix login authentication" extension to the VNC
 		protocol, but the username and password received from the VNC viewer need
@@ -31,39 +31,33 @@ The TurboVNC server supports four methods for authenticating VNC viewers:
 		credentials that can be accessed through PAM.  It is
 		__strongly__ recommended that the PAM user/password authentication method
 		be used only with an SSH-encrypted TurboVNC connection (see
-		{ref prefix="Section ": Secure_TurboVNC_Usage}), since Unix login
-		authentication sends the Unix password in plain text over the network.
+		{ref prefix="Section ": Secure_TurboVNC_Usage}), since the Unix login
+		authentication extension to VNC sends the Unix password in plain text over
+		the network.
 
 ** Enabling Authentication Methods
 
-The default behavior of the TurboVNC server is for all authentication methods
-to be enabled and for VNC password authentication to be preferred over Unix
-login authentication.  However, the system administrator can disable one or
-more of the authentication methods or set Unix login authentication to be
-preferred over VNC password authentication by editing the server's
-authentication configuration file.  See the ''Xvnc'' man page for more details.
+The default behavior of the TurboVNC Server is for all authentication methods
+to be enabled and for VNC password authentication to be preferred over PAM
+user/password authentication.  However, the system administrator can disable
+one or more of the authentication methods or set PAM user/password
+authentication to be preferred over VNC password authentication by editing the
+server's authentication configuration file.  See the ''Xvnc'' man page for more
+details.
 
-If both Unix login authentication and VNC password authentication are enabled
-on the server, then the user can force the use of Unix login authentication by
-passing an argument of ''-user ''__''{user_name}''__ to ''vncviewer'' when
-connecting to the TurboVNC session.  Similarly, the user can force the use of
-VNC password (or OTP) authentication by passing an argument of ''-nounixlogin''
-to ''vncviewer'' when connecting to the TurboVNC session.  Both of these
-command-line options work with both the Unix and Windows versions of
-''vncviewer''.
+If both PAM user/password authentication and VNC password authentication are
+enabled on the server, then the user can force the use of Unix login
+authentication in the TurboVNC Viewer by passing an argument of
+''-user ''__''{user_name}''__ to ''vncviewer'' when connecting to the TurboVNC
+session.  Similarly, the user can force the use of VNC password (or OTP)
+authentication by passing an argument of ''-nounixlogin'' to ''vncviewer'' when
+connecting to the TurboVNC session.  Both of these command-line options work
+with both the Unix and Windows versions of ''vncviewer''.
 
 If the system administrator has not restricted any of the authentication
 methods on a system-wide basis, then the user can choose to disable some or
 all of them for a single TurboVNC session by passing command-line arguments to
 ''vncserver''.  See the ''vncserver'' man page for more details.
-
-** Configuring PAM User/Password Authentication
-
-The ''Xvnc'' man page contains information about configuring PAM user/password
-authentication.  One additional note is that, in some cases, it may be
-necessary to make the ''Xvnc'' binary setuid root in order for PAM
-user/password authentication to work.  This is known to be necessary on Solaris
-10, for instance.
 
 ** Further Reading
 
