@@ -11,7 +11,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncconnect 1 "May 2010" "" "TurboVNC"
+.TH vncconnect 1 "June 2010" "" "TurboVNC"
 .SH NAME
 vncconnect \- connect a VNC server to a VNC viewer
 .SH SYNOPSIS
@@ -31,7 +31,7 @@ participated in development, testing and support.
 
 \fBMan page authors:\fR
 .br
-Tim Waugh <twaugh@redhat.com>,
+Tim Waugh <twaugh@redhat.com>
 .br
 Constantin Kaplinsky <const@tightvnc.com>
 .br

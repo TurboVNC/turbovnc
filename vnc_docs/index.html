@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-06-23T03:39:33">
+<meta name="date" content="2010-06-28T20:39:53">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -123,11 +123,7 @@ windows.</p>
                 <a href="#hd006001" class="toc">6.1 Enabling Authentication Methods</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd006002" class="toc">6.2 Configuring PAM User/Password 
-                Authentication</a>
-            </li>
-            <li class="Itemize-3 toc">
-                <a href="#hd006003" class="toc">6.3 Further Reading</a>
+                <a href="#hd006002" class="toc">6.2 Further Reading</a>
             </li>
         </ul>
     </li>
@@ -251,7 +247,7 @@ TightVNC, and these were removed or accelerated to form TurboVNC.</p>
         useful in situations in which image quality is critical but the network 
         is too slow to support sending a high-quality image for every frame.  
         Lossless refreshes can be performed manually when a certain hotkey is 
-        pressed, or the TurboVNC server can be configured to send a lossless 
+        pressed, or the TurboVNC Server can be configured to send a lossless 
         refresh automatically if the user stops interacting with the application 
         for a certain period of time.
     </li>
@@ -701,7 +697,7 @@ Windows Vista), or select &ldquo;Uninstall TurboVNC&rdquo; in the
     </li>
     <li class="Ordered-1 Ordered">
         In the new Command Prompt/terminal/xterm window, open a Secure Shell 
-        (SSH) session into the TurboVNC server:
+        (SSH) session into the TurboVNC server machine:
         <dl class="Description">
             <dt class="Description-3 Description">Linux/Mac/Solaris clients</dt>
             <dd class="Description-3 Description">
@@ -717,8 +713,8 @@ ssh&nbsp;{user}@{server}
 </pre>
 
         Replace <em><code>{user}</code></em> with your user account name on the 
-        TurboVNC server and <em><code>{server}</code></em> with the hostname or 
-        IP address of that server.
+        TurboVNC server machine and <em><code>{server}</code></em> with the 
+        hostname or IP address of that machine.
             </dd>
         </dl>
     </li>
@@ -735,14 +731,13 @@ ssh&nbsp;{user}@{server}
         <code>New&nbsp;'X'&nbsp;desktop&nbsp;is&nbsp;my_server:1</code> 
         <br /><br /> If this is the first time that a TurboVNC session has ever 
         been run under this user account, and if VNC password authentication is 
-        enabled for the session, then TurboVNC will prompt for a VNC session 
-        password.
+        enabled for the session, then TurboVNC will prompt for a VNC password.
     </li>
     <li class="Ordered-1 Ordered">
         The SSH session can now be exited, if desired.
     </li>
     <li class="Ordered-1 Ordered">
-        On the client machine, start the TurboVNC viewer.
+        On the client machine, start the TurboVNC Viewer.
         <dl class="Description">
             <dt class="Description-3 Description">Linux/Mac/Solaris clients</dt>
             <dd class="Description-3 Description">
@@ -765,8 +760,8 @@ ssh&nbsp;{user}@{server}
         <table class="standard">
           <thead class="standard">
           <tr class="head ">
-            <th class="head standard">Windows TurboVNC viewer</th>
-            <th class="head standard">Linux/Mac/Solaris TurboVNC viewer</th>
+            <th class="head standard">Windows TurboVNC Viewer</th>
+            <th class="head standard">Linux/Mac/Solaris TurboVNC Viewer</th>
           </tr>
           </thead>
           <tr class="standard">
@@ -777,20 +772,20 @@ ssh&nbsp;{user}@{server}
         </div>
         
         <br /> Enter the X display name (hostname/IP address and display number) 
-        of the TurboVNC session in the &ldquo;VNC Server&rdquo; field, then 
+        of the TurboVNC session in the &ldquo;VNC server&rdquo; field, then 
         click &ldquo;Connect&rdquo; (Windows) or press Enter (Linux/Mac/Solaris.)
     </li>
     <li class="Ordered-1 Ordered">
-        Another dialog box appears, prompting for the VNC session password (if 
-        VNC password authentication is enabled) or for the username and password 
-        (if Unix login authentication is enabled.) <br /><br />
+        Another dialog box appears, prompting for the VNC password (if VNC 
+        password authentication is enabled) or for the username and password (if 
+        Unix login authentication is enabled.) <br /><br />
         <div class="table">
         <table class="standard">
           <thead class="standard">
           <tr class="head ">
             <th class="head standard"></th>
-            <th class="head standard">Windows TurboVNC viewer</th>
-            <th class="head standard">Linux/Mac/Solaris TurboVNC viewer</th>
+            <th class="head standard">Windows TurboVNC Viewer</th>
+            <th class="head standard">Linux/Mac/Solaris TurboVNC Viewer</th>
           </tr>
           </thead>
           <tr class="standard">
@@ -810,7 +805,7 @@ ssh&nbsp;{user}@{server}
         click &ldquo;OK&rdquo; (Windows) or press Enter (Linux/Mac/Solaris.) 
         <br /><br /> A TurboVNC desktop window should appear on your client 
         machine.  This window contains a virtual X server with which you can 
-        interact to launch X-Windows applications on the TurboVNC server.
+        interact to launch X-Windows applications on the TurboVNC server machine.
     </li>
 </ol>
 
@@ -818,10 +813,10 @@ ssh&nbsp;{user}@{server}
 
 <h2 id="hd005002">5.2&nbsp;Disconnecting and Killing a TurboVNC Session</h2>
 
-<p>Closing the TurboVNC viewer disconnects from the TurboVNC session, but 
-the TurboVNC session will remain running on the TurboVNC server (as will 
-any applications that you may have started in the session), and you can 
-reconnect to the session at any time.</p>
+<p>Closing the TurboVNC Viewer disconnects from the TurboVNC session, but 
+the TurboVNC session will remain running on the TurboVNC server machine 
+(as will any applications that you may have started in the session), and 
+you can reconnect to the session at any time.</p>
 
 <p>To kill a TurboVNC session:</p>
 
@@ -830,7 +825,7 @@ reconnect to the session at any time.</p>
         Using SSH (<code>c:\Program&nbsp;Files\TurboVNC\putty.exe</code> on 
         Windows clients), log into the server that is running the TurboVNC 
         session that you wish to kill.<br /> &hellip; or &hellip;<br /> Using 
-        the TurboVNC viewer, connect to the TurboVNC session that you wish to 
+        the TurboVNC Viewer, connect to the TurboVNC session that you wish to 
         kill, and open a new terminal in that TurboVNC session.
     </li>
     <li class="Ordered-1 Ordered">
@@ -857,22 +852,23 @@ particular machine, type the following command:</p>
 <h2 id="hd005003">5.3&nbsp;Using TurboVNC in a Web Browser</h2>
 
 <p>When a TurboVNC session is created, it automatically launches a 
-miniature web server that serves up a Java TurboVNC viewer applet.  This 
-Java TurboVNC viewer can be used to connect to the TurboVNC session from 
-a machine that does not have a native TurboVNC viewer installed (or a 
-machine for which no native TurboVNC viewer is available.)  The Java 
+miniature web server that serves up a Java TurboVNC Viewer applet.  This 
+Java TurboVNC Viewer can be used to connect to the TurboVNC session from 
+a machine that does not have a native TurboVNC Viewer installed (or a 
+machine for which no native TurboVNC Viewer is available.)  The Java 
 viewer is significantly slower than the native viewer on high-speed 
 networks, but on low-speed networks the Java viewer and native viewers 
 have comparable performance.  The Java viewer does not currently support 
 double buffering.</p>
 
-<p>To use the Java TurboVNC viewer, point your web browser to:</p>
+<p>To use the Java TurboVNC Viewer, point your web browser to:</p>
 
 <p><code>http://</code><em><code>{turbovnc_server}</code></em><code>:{5800+</code><em><code>n</code></em><code>}</code></p>
 
 <p>where <em><code>{turbovnc_server}</code></em> is the hostname or IP 
-address of the TurboVNC server, and <em><code>n</code></em> is the X 
-display number of the TurboVNC session to which you want to connect.</p>
+address of the TurboVNC server machine, and <em><code>n</code></em> is 
+the X display number of the TurboVNC session to which you want to 
+connect.</p>
 
 <p><em>Example:</em> If the TurboVNC session is occupying X display 
 <code>my_server:1</code>, then point your web browser to:</p>
@@ -924,15 +920,15 @@ TurboVNC compresses images:</p>
     </dd>
 </dl>
 
-<p>In the Windows TurboVNC viewer, these parameters can be adjusted by 
+<p>In the Windows TurboVNC Viewer, these parameters can be adjusted by 
 accessing the Options dialog box (click on the &ldquo;Options&rdquo; 
 button in the &ldquo;TurboVNC Connection&rdquo; dialog box or, after 
 connecting to the server, click on the Connection Options button in the 
-toolbar.)  In the Unix TurboVNC viewer, press F8 after connecting to 
+toolbar.)  In the Unix TurboVNC Viewer, press F8 after connecting to 
 bring up the options menu.  In the Java viewer, click on the Options 
 button at the top of the browser window.</p>
 
-<p>The TurboVNC viewer provides five image encoding protocols, 
+<p>The TurboVNC Viewer provides five image encoding protocols, 
 corresponding to the most useful combinations of the image compression 
 options described above:</p>
 
@@ -962,7 +958,7 @@ options described above:</p>
     <td class="standard">80</td>
     <td class="standard">2x</td>
     <td class="standard">N/A</td>
-    <td class="standard">For image tiles with a high number of unique colors, this protocol produces some minor, but generally not very noticeable, image compression artifacts. All else being equal, this protocol typically uses about twice the network bandwidth of the &ldquo;Low Quality JPEG&rdquo; protocol and about half the bandwidth of the &ldquo;Perceptually Lossless JPEG&rdquo; protocol, making it appropriate for medium-speed networks such as 10 Megabit ethernet.</td>
+    <td class="standard">For image tiles with a high number of unique colors, this protocol produces some minor, but generally not very noticeable, image compression artifacts. All else being equal, this protocol typically uses about twice the network bandwidth of the &ldquo;Low Quality JPEG&rdquo; protocol and about half the bandwidth of the &ldquo;Perceptually Lossless JPEG&rdquo; protocol, making it appropriate for medium-speed networks such as 10 Megabit Ethernet.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Tight + Low Quality JPEG&rdquo;</td>
@@ -992,13 +988,13 @@ options described above:</p>
 </div>
 
 
-<p>In the Windows TurboVNC viewer, the image encoding protocol can be set 
+<p>In the Windows TurboVNC Viewer, the image encoding protocol can be set 
 using the Options dialog box (click on the &ldquo;Options&rdquo; button 
 in the &ldquo;TurboVNC Connection&rdquo; dialog box or, after connecting 
 to the server, click on the Connection Options button in the toolbar.)  
 In the Java viewer, the same thing is accomplished by clicking on the 
 &ldquo;Options&rdquo; button at the top of the browser window.  With the 
-Linux/Mac/Solaris TurboVNC viewer, the &ldquo;Perceptually 
+Linux/Mac/Solaris TurboVNC Viewer, the &ldquo;Perceptually 
 Lossless&rdquo; protocol is the default, and you can use the following 
 command-line switches to select another protocol:</p>
 
@@ -1025,10 +1021,10 @@ object in their 3D application using a very low-quality JPEG setting,
 then when that user is ready to interpret or analyze the object, they 
 can request a lossless refresh of TurboVNC&rsquo;s virtual screen.</p>
 
-<p>To perform a lossless refresh in the Windows or Unix TurboVNC viewers, 
-press CTRL-ALT-SHIFT-L (in the Windows TurboVNC viewer, you can also 
+<p>To perform a lossless refresh in the Windows or Unix TurboVNC Viewers, 
+press CTRL-ALT-SHIFT-L (in the Windows TurboVNC Viewer, you can also 
 click on the Lossless Refresh toolbar icon.)  In the Java TurboVNC 
-viewer, click on the &ldquo;Lossless Refresh&rdquo; button at the top of 
+Viewer, click on the &ldquo;Lossless Refresh&rdquo; button at the top of 
 the browser window.</p>
 
 
@@ -1038,10 +1034,10 @@ the browser window.</p>
 <p>Passing an argument of 
 <code>-alr&nbsp;</code><em><code>{timeout}</code></em> to 
 <code>vncserver</code> will enable the automatic lossless refresh (ALR) 
-feature for the TurboVNC server session.  ALR will monitor all of the 
-client connections, and if more than <em><code>{timeout}</code></em> 
+feature for the TurboVNC session.  ALR will monitor all of the VNC 
+viewer connections, and if more than <em><code>{timeout}</code></em> 
 seconds have elapsed since the last framebuffer update was sent to a 
-given client, then the TurboVNC server will send to that client a 
+given viewer, then the TurboVNC Server will send to that viewer a 
 mathematically lossless copy of screen regions that have been affected 
 by lossy compression.</p>
 
@@ -1054,20 +1050,21 @@ lossless copy of the 3D image is sent for them to study in detail.</p>
 <p>The default ALR behavior is to monitor and send lossless copies of only 
 the screen regions which were drawn using <code>X[Shm]PutImage()</code>.  
 When used with VirtualGL, this means that ALRs will mainly be sent for 
-just the 3D screen regions.  This should be fine for most applications, 
-since the 3D regions are the ones which are quality-critical.  The 
-default ALR behavior also prevents what might best be termed the 
-&ldquo;blinking cursor dilemma.&rdquo;  Certain ill-behaved Window 
-managers update a small region of the taskbar continuously, even though 
-none of the pixels in that region have changed.  Also, certain programs 
-have a blinking cursor which may update more frequently than the ALR 
-timeout.  Since an ALR is triggered based on a period of inactivity 
-relative to the last framebuffer update, these continuous updates 
-prevent an ALR from ever being sent.  Fortunately, these ill-behaved 
-window managers and blinking cursors do not typically use 
-<code>X[Shm]PutImage()</code>, so it is effective to limit the regions 
-which are &ldquo;eligible&rdquo; for ALR to just the subset of regions 
-which were drawn with the <code>X[Shm]PutImage()</code> functions.</p>
+just the 3D screen regions.  This should be fine for most 3D 
+applications, since the 3D regions are the ones which are 
+quality-critical.  The default ALR behavior also prevents what might 
+best be termed the &ldquo;blinking cursor dilemma.&rdquo;  Certain 
+ill-behaved window managers update a small region of the taskbar 
+continuously, even though none of the pixels in that region have 
+changed.  Also, certain programs have a blinking cursor which may update 
+more frequently than the ALR timeout.  Since an ALR is triggered based 
+on a period of inactivity relative to the last framebuffer update, these 
+continuous updates prevent an ALR from ever being sent.  Fortunately, 
+these ill-behaved window managers and blinking cursors do not typically 
+use <code>X[Shm]PutImage()</code> to perform their continuous updates, 
+so the problem can be worked around by limiting the regions which are 
+&ldquo;eligible&rdquo; for ALR to just the subset of regions which were 
+drawn with the <code>X[Shm]PutImage()</code> functions.</p>
 
 <p>You can override the default ALR behavior, thus making all screen 
 regions eligible for ALR, by setting the <code>TVNC_ALRALL</code> 
@@ -1080,12 +1077,12 @@ prior to starting a TurboVNC session.</p>
 
 <p><a name="Secure_TurboVNC_Usage"></a></p>
 
-<p>Normally, the connection between the TurboVNC server and the TurboVNC 
-viewer is completely unencrypted, but securing that connection can be 
+<p>Normally, the connection between the TurboVNC Server and the TurboVNC 
+Viewer is completely unencrypted, but securing that connection can be 
 easily accomplished by using the port forwarding feature of Secure Shell 
-(SSH.)  After you have started a TurboVNC session on the TurboVNC 
-server, open a new SSH connection into the TurboVNC server using the 
-following command line:</p>
+(SSH.)  After you have started a TurboVNC session on the TurboVNC server 
+machine, open a new SSH connection into the TurboVNC server machine 
+using the following command line:</p>
 
 <dl class="Description">
     <dt class="Description-1 Description">Linux/Mac/Solaris clients</dt>
@@ -1105,9 +1102,10 @@ ssh&nbsp;-L&nbsp;{5900+n}:localhost:{5900+n}&nbsp;{user}@{server}
 </dl>
 
 <p>Replace <em><code>{user}</code></em> with your user account name on the 
-TurboVNC server and <em><code>{server}</code></em> with the hostname or 
-IP address of that server.  Replace <em><code>n</code></em> with the X 
-display number of the TurboVNC session to which you want to connect.</p>
+TurboVNC server machine and <em><code>{server}</code></em> with the 
+hostname or IP address of that machine. Replace <em><code>n</code></em> 
+with the X display number of the TurboVNC session to which you want to 
+connect.</p>
 
 <p>For instance, if you wish to connect to display <code>:1</code> on 
 server <code>my_server</code> using user account <code>my_user</code>, 
@@ -1131,7 +1129,7 @@ ssh&nbsp;-L&nbsp;5901:localhost:5901&nbsp;my_user@my_server
 </dl>
 
 <p>After the SSH connection has been established, you can then launch the 
-TurboVNC viewer and point it to 
+TurboVNC Viewer and point it to 
 <code>localhost:</code><em><code>{n}</code></em> 
 (<code>localhost:1</code> in the above example.)</p>
 
@@ -1162,20 +1160,20 @@ details.</p>
 <h3 id="hd005005002">Forcing Secure Connections</h3>
 
 <p>Passing an argument of <code>-localhost</code> to <code>vncserver</code> 
-will force the TurboVNC server session to accept inbound connections 
+will force the TurboVNC Server session to accept inbound connections 
 only from the server machine. This effectively forces SSH tunneling to 
 be used for remote connections.  If the 
 <code>no-remote-connections</code> directive is set in the TurboVNC 
 authentication configuration file, then that has the effect of enabling 
-the <code>-localhost</code> option for all new TurboVNC server sessions 
-that are started on the machine.</p>
+the <code>-localhost</code> option for all new TurboVNC sessions that 
+are started on the machine.</p>
 
 <p>Passing an argument of <code>-noreverse</code> to <code>vncserver</code> 
 will disable the ability to make outbound (reverse) connections from the 
-TurboVNC server session. If the <code>no-reverse-connections</code> 
+TurboVNC Server session. If the <code>no-reverse-connections</code> 
 directive is set in the TurboVNC authentication configuration file, then 
 that has the effect of enabling the <code>-noreverse</code> option for 
-all new TurboVNC server sessions that are started on the machine.</p>
+all new TurboVNC sessions that are started on the machine.</p>
 
 
 
@@ -1204,7 +1202,7 @@ man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;{vncserver&nbsp;|&nbsp;Xvnc&nbsp;|&nbsp;
     <dt class="Description-1 Description">Windows</dt>
     <dd class="Description-1 Description">
         Use the embedded help feature (the question mark button in the upper 
-        right of the TurboVNC viewer window.)
+        right of the TurboVNC Viewer window.)
     </dd>
 </dl>
 
@@ -1216,7 +1214,7 @@ man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;{vncserver&nbsp;|&nbsp;Xvnc&nbsp;|&nbsp;
 
 <h1 id="hd006"><a name="file006"></a>6&nbsp;TurboVNC Authentication Extensions</h1>
 
-<p>The TurboVNC server supports four methods for authenticating VNC viewers:</p>
+<p>The TurboVNC Server supports four methods for authenticating VNC viewers:</p>
 
 <dl class="Description">
     <dt class="Description-1 Description">No Authentication</dt>
@@ -1245,7 +1243,7 @@ man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;{vncserver&nbsp;|&nbsp;Xvnc&nbsp;|&nbsp;
     </dd>
     <dt class="Description-1 Description">PAM User/Password Authentication</dt>
     <dd class="Description-1 Description">
-         The TurboVNC server uses Pluggable Authentication Modules (PAM) to 
+         The TurboVNC Server uses Pluggable Authentication Modules (PAM) to 
          validate a user and password sent from the VNC viewer.  This 
          authentication method is used to implement the &ldquo;Unix login 
          authentication&rdquo; extension to the VNC protocol, but the username 
@@ -1255,25 +1253,26 @@ man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;{vncserver&nbsp;|&nbsp;Xvnc&nbsp;|&nbsp;
          be accessed through PAM.  It is <em>strongly</em> recommended that the 
          PAM user/password authentication method be used only with an 
          SSH-encrypted TurboVNC connection (see Section 
-         <a href="#Secure_TurboVNC_Usage" class="ref">5.5</a>), since Unix login 
-         authentication sends the Unix password in plain text over the network.
+         <a href="#Secure_TurboVNC_Usage" class="ref">5.5</a>), since the Unix 
+         login authentication extension to VNC sends the Unix password in plain 
+         text over the network.
     </dd>
 </dl>
 
 
 <h2 id="hd006001">6.1&nbsp;Enabling Authentication Methods</h2>
 
-<p>The default behavior of the TurboVNC server is for all authentication 
+<p>The default behavior of the TurboVNC Server is for all authentication 
 methods to be enabled and for VNC password authentication to be 
-preferred over Unix login authentication.  However, the system 
+preferred over PAM user/password authentication.  However, the system 
 administrator can disable one or more of the authentication methods or 
-set Unix login authentication to be preferred over VNC password 
+set PAM user/password authentication to be preferred over VNC password 
 authentication by editing the server&rsquo;s authentication 
 configuration file.  See the <code>Xvnc</code> man page for more details.</p>
 
-<p>If both Unix login authentication and VNC password authentication are 
-enabled on the server, then the user can force the use of Unix login 
-authentication by passing an argument of 
+<p>If both PAM user/password authentication and VNC password authentication 
+are enabled on the server, then the user can force the use of Unix login 
+authentication in the TurboVNC Viewer by passing an argument of 
 <code>-user&nbsp;</code><em><code>{user_name}</code></em> to 
 <code>vncviewer</code> when connecting to the TurboVNC session.  
 Similarly, the user can force the use of VNC password (or OTP) 
@@ -1290,17 +1289,7 @@ page for more details.</p>
 
 
 
-<h2 id="hd006002">6.2&nbsp;Configuring PAM User/Password Authentication</h2>
-
-<p>The <code>Xvnc</code> man page contains information about configuring 
-PAM user/password authentication.  One additional note is that, in some 
-cases, it may be necessary to make the <code>Xvnc</code> binary setuid 
-root in order for PAM user/password authentication to work.  This is 
-known to be necessary on Solaris 10, for instance.</p>
-
-
-
-<h2 id="hd006003">6.3&nbsp;Further Reading</h2>
+<h2 id="hd006002">6.2&nbsp;Further Reading</h2>
 
 <p>For more detailed information about the TurboVNC authentication 
 extensions, refer to the TurboVNC man pages:</p>
@@ -1346,9 +1335,9 @@ embedded VGL Transport.</p>
         When using the VGL Transport, non-3D portions of the application&rsquo;s 
         GUI are sent over the network using remote X11, which will create 
         performance problems on high-latency networks (such as broadband or 
-        long-haul T1 lines.)  Non-3D portions of the application&rsquo;s GUI 
-        will load and render much faster (perhaps even orders of magnitude 
-        faster) with TurboVNC than with the VGL Transport on such connections.
+        long-haul fibre.) Non-3D portions of the application&rsquo;s GUI will 
+        load and render much faster (perhaps even orders of magnitude faster) 
+        with TurboVNC than with the VGL Transport on such connections.
     </li>
     <li class="Itemize-1 Itemize asterisk">
         For 3D applications whose rendered images do not contain very many 
@@ -1372,18 +1361,23 @@ embedded VGL Transport.</p>
         to study the model in detail.
     </li>
     <li class="Itemize-1 Itemize asterisk">
+        The TurboVNC Server can be configured to send a mathematically lossless 
+        copy of certain regions of the screen during periods of inactivity 
+        (Automatic Lossless Refresh.)
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
         TurboVNC provides rudimentary collaboration capabilities.  Multiple 
         clients can simultaneously view the same TurboVNC session and pass 
         around control of the keyboard and mouse.
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        The TurboVNC viewer is stateless.  If the network hiccups or the viewer 
+        The TurboVNC Viewer is stateless.  If the network hiccups or the viewer 
         is otherwise disconnected, the session continues to run on the server 
         and can be rejoined from any machine on the network.
     </li>
     <li class="Itemize-1 Itemize asterisk">
         No X server is required on the client machine.  This reduces the 
-        deployment cost and complexity for Windows clients.
+        deployment complexity for Windows clients.
     </li>
     <li class="Itemize-1 Itemize asterisk">
         Any web browser or PDA can be used as a TurboVNC client (with reduced 
@@ -1470,7 +1464,7 @@ desirable to use the VGL Transport to send images from the VirtualGL
 server to the TurboVNC server.  It is also desirable to disable image 
 compression in the VGL Transport.  Otherwise, the images would have to 
 be compressed by the VirtualGL server, decompressed by the VirtualGL 
-Client, then recompressed by the TurboVNC server, which is a waste of 
+Client, then recompressed by the TurboVNC Server, which is a waste of 
 CPU resources. However, sending images uncompressed over a network 
 requires a fast network (generally, Gigabit Ethernet or faster), so 
 there needs to be a fast link between the VirtualGL server and the 
@@ -1531,7 +1525,7 @@ necessary to use a TurboVNC server and a TurboVNC viewer in concert.
 However, TurboVNC is fully backward compatible with TightVNC, RealVNC, 
 and other VNC flavors, as well as fully forward compatible with 
 <span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0022"></a>. 
-You can use the TurboVNC viewer to connect to a non-TurboVNC server (or 
+You can use the TurboVNC Viewer to connect to a non-TurboVNC server (or 
 vice versa), although this will result in some decrease in performance.</p>
 
 <p>The following sections list additional things to bear in mind when 
@@ -1665,25 +1659,26 @@ mixing TurboVNC with other VNC flavors.</p>
         that allow the JPEG quality to be specified on the standard 1-100 scale 
         and allow the JPEG chrominance subsampling to be specified seperately. 
         <br /><br /> When a TurboVNC viewer is connected to a TightVNC or 
-        TigerVNC server, setting the JPEG quality to N in the TurboVNC viewer 
+        TigerVNC server, setting the JPEG quality to N in the TurboVNC Viewer 
         sets the JPEG quality level to N/10 on the TightVNC or TigerVNC server.  
-        For instance, if you set the JPEG quality to 95 in the TurboVNC viewer, 
+        For instance, if you set the JPEG quality to 95 in the TurboVNC Viewer, 
         this would translate to a JPEG quality level of 9, which would set the 
         actual JPEG quality/subsampling to 80/2X on a TightVNC server or 100/1X 
         on a TigerVNC server. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        Changing the JPEG chrominance subsampling option in the TurboVNC viewer 
+        Changing the JPEG chrominance subsampling option in the TurboVNC Viewer 
         has no effect when connecting to a TightVNC or TigerVNC server. 
         <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        TurboVNC only supports Zlib compression level 1, because higher 
-        compression levels use too much CPU time to be useful for the types of 
-        image workloads that TurboVNC is designed to support.  However, although 
-        Zlib compression levels 2-9 cannot be set using the TurboVNC Viewer GUI, 
-        you can still specify these higher Zlib compression levels from the 
-        TurboVNC Viewer command line. <br /><br />
+        The TurboVNC Server only supports Zlib compression level 1, because 
+        higher compression levels use too much CPU time to be useful for the 
+        types of image workloads that TurboVNC is designed to support.  However, 
+        although Zlib compression levels 2-9 cannot be set using the TurboVNC 
+        Viewer GUI, you can still specify these higher Zlib compression levels 
+        from the TurboVNC Viewer command line.  This may be useful when 
+        connecting to a TightVNC or TigerVNC server. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
         TurboVNC supports an extension to the TightVNC protocol which allows the 
@@ -1691,15 +1686,15 @@ mixing TurboVNC with other VNC flavors.</p>
         rectangle.  Zlib introduces a tremendous amount of performance overhead, 
         even when compression level 0 (no compression) is used.  Thus, when a 
         TurboVNC viewer requests Zlib compression level 0 from the TurboVNC 
-        server, the TurboVNC server bypasses Zlib altogether.  TightVNC and 
+        Server, the TurboVNC Server bypasses Zlib altogether.  TightVNC and 
         TigerVNC servers do not support this extension, and thus they will still 
         use Zlib to &ldquo;compress&rdquo; data even if you request no Zlib 
-        compression using the TurboVNC viewer. <br /><br />
+        compression using the TurboVNC Viewer. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        The TightVNC server will use much more CPU time across the board than 
-        the TurboVNC server, all else being equal.  TigerVNC uses a 
-        SIMD-accelerated JPEG codec, and thus, it will come much closer to the 
+        The TightVNC Server will use much more CPU time across the board than 
+        the TurboVNC Server, all else being equal.  Since TigerVNC uses the same 
+        SIMD-accelerated JPEG codec as TurboVNC, it will come much closer to the 
         performance of TurboVNC.  However, TigerVNC still lags behind the 
         performance of TurboVNC a bit as of this writing.
     </li>
@@ -1711,7 +1706,7 @@ mixing TurboVNC with other VNC flavors.</p>
 
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
-        The TurboVNC server will attempt to emulate the behavior of a TigerVNC 
+        The TurboVNC Server will attempt to emulate the behavior of a TigerVNC 
         server and will translate JPEG quality levels into actual JPEG quality 
         and subsampling as specified in Section 
         <a href="#TigerVNC_JPEG_Qual" class="ref">8.1</a>. <br /><br />
@@ -1720,7 +1715,7 @@ mixing TurboVNC with other VNC flavors.</p>
         When either a TightVNC or TigerVNC viewer is connected to a TurboVNC 
         server, setting the compression level to 0 in the viewer will, in 
         certain cases, cause the connection to abort with a &ldquo;bad 
-        subencoding value&rdquo; error. This is because the TurboVNC server is 
+        subencoding value&rdquo; error. This is because the TurboVNC Server is 
         attempting to send the image tiles with no Zlib compression, and the 
         TightVNC and TigerVNC viewers don&rsquo;t support this.
     </li>
@@ -1730,13 +1725,13 @@ mixing TurboVNC with other VNC flavors.</p>
 
 <h2 id="hd008003">8.3&nbsp;RealVNC</h2>
 
-<p>The TurboVNC server and viewer both support the Hextile and Raw 
+<p>The TurboVNC Server and Viewer both support the Hextile and Raw 
 protocols, which are compatible with RealVNC.  Neither of these 
 protocols can be selected from the TurboVNC Viewer GUI, but Hextile will 
 be selected automatically when connecting to a RealVNC server.  Raw will 
 be automatically selected when connecting to a VNC server running on the 
 same machine as the viewer.  Both Raw and Hextile can also be manually 
-selected from the vncviewer command line.</p>
+selected from the <code>vncviewer</code> command line.</p>
 
 <p>The Raw protocol can perform well on gigabit links.  The Hextile 
 protocol, however, uses very small tiles, and thus it incurs a large 
@@ -1745,8 +1740,8 @@ protocol should be used unless absolutely necessary.  One interesting
 note, however, is that many of the TurboVNC viewer enhancements 
 (including optimized blitting, hiding network latency, and double 
 buffering) are available even when using these legacy protocols.  Thus, 
-in some cases, the TurboVNC viewer may actually perform better than the 
-RealVNC viewer when connecting to RealVNC servers.</p>
+in some cases, the TurboVNC Viewer may actually perform better than the 
+RealVNC Viewer when connecting to RealVNC servers.</p>
 
 <p><br /></p>
 
