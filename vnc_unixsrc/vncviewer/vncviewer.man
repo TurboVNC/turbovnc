@@ -380,14 +380,14 @@ Equivalent of \fB\-bgr233\fR option.  Default false.
 When using BGR233, try to allocate this many "exact" colors from the
 BGR233 color cube.  When using a shared colormap, setting this resource
 lower leaves more colors for other X clients.  Irrelevant when using
-truecolor.  Default is 256 (i.e.  all of them).
+truecolor.  Default is 256 (i.e. all of them).
 .TP
 .B useSharedColours
 If the number of "exact" BGR233 colors successfully allocated is less
 than 256, then the rest are filled in using the "nearest" colors
 available.  This resource says whether to only use the "exact" BGR233
 colors for this purpose, or whether to use other clients' "shared"
-colors as well.  Default true (i.e.  use other clients' colors.)
+colors as well.  Default true (i.e. use other clients' colors.)
 .TP
 .B forceOwnCmap
 Equivalent of \fB\-owncmap\fR option.  Default false.
