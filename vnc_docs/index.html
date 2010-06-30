@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-06-29T14:31:10">
+<meta name="date" content="2010-06-30T01:58:23">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1274,7 +1274,7 @@ credentials with a VNC server:</p>
     <dd class="Description-1 Description">
          No authentication credentials are sent to the server.
     </dd>
-    <dt class="Description-1 Description">VNC Authentication</dt>
+    <dt class="Description-1 Description">Standard VNC Authentication</dt>
     <dd class="Description-1 Description">
          The VNC password is sent to the server using a DES-encrypted 
          challenge-response scheme.  The password can be up to 8 characters 
@@ -1308,14 +1308,14 @@ authentication capability will be determined by the preferred
 authentication method on the server.  In this case, the user can 
 override the default by passing command-line arguments to 
 <code>vncviewer</code>.  If the server prefers an authentication method 
-that supports VNC authentication, then the user can force the use of 
-Unix login authentication by passing an argument of 
+that supports standard VNC authentication, then the user can force the 
+use of Unix login authentication by passing an argument of 
 <code>-user&nbsp;</code><em><code>{user_name}</code></em> to 
 <code>vncviewer</code> when connecting to the TurboVNC session.  
 Similarly, if the server prefers an authentication method that supports 
-Unix login authentication, then the user can force the use of VNC 
-authentication by passing an argument of <code>-nounixlogin</code> to 
-<code>vncviewer</code>. Both of these command-line options work with 
+Unix login authentication, then the user can force the use of standard 
+VNC authentication by passing an argument of <code>-nounixlogin</code> 
+to <code>vncviewer</code>. Both of these command-line options work with 
 both the Unix and Windows versions of <code>vncviewer</code>.</p>
 
 <p>If the system administrator has not restricted any of the authentication 

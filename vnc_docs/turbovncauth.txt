@@ -46,7 +46,7 @@ protocols used to validate authentication credentials with a VNC server:
 	None :: {:}
 		No authentication credentials are sent to the server.
 
-	VNC Authentication :: {:}
+	Standard VNC Authentication :: {:}
 		The VNC password is sent to the server using a DES-encrypted
 		challenge-response scheme.  The password can be up to 8 characters long,
 		so the DES key length is 56 bits.  This is not a particularly strong form
@@ -73,12 +73,12 @@ authentication capabilities, then the client's default authentication
 capability will be determined by the preferred authentication method on the
 server.  In this case, the user can override the default by passing
 command-line arguments to ''vncviewer''.  If the server prefers an
-authentication method that supports VNC authentication, then the user can force
-the use of Unix login authentication by passing an argument of
+authentication method that supports standard VNC authentication, then the user
+can force the use of Unix login authentication by passing an argument of
 ''-user ''__''{user_name}''__ to ''vncviewer'' when connecting to the TurboVNC
 session.  Similarly, if the server prefers an authentication method that
-supports Unix login authentication, then the user can force the use of VNC
-authentication by passing an argument of ''-nounixlogin'' to ''vncviewer''.
+supports Unix login authentication, then the user can force the use of standard
+VNC authentication by passing an argument of ''-nounixlogin'' to ''vncviewer''.
 Both of these command-line options work with both the Unix and Windows versions
 of ''vncviewer''.
 
