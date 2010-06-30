@@ -317,7 +317,7 @@ InitCapabilities(void)
   CapsAdd(authCaps, rfbAuthNone, rfbStandardVendor, sig_rfbAuthNone,
 	  "No authentication");
   CapsAdd(authCaps, rfbAuthVNC, rfbStandardVendor, sig_rfbAuthVNC,
-	  "Standard VNC password authentication");
+	  "Standard VNC authentication");
   CapsAdd(authCaps, rfbAuthUnixLogin, rfbTightVncVendor, sig_rfbAuthUnixLogin,
 	  "Unix login authentication");
 
