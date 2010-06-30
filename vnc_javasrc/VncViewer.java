@@ -1,5 +1,5 @@
 //
-//  Copyright (C) 2009 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
 //  Copyright (C) 2001-2004 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
@@ -79,7 +79,9 @@ public class VncViewer extends java.applet.Applet
   String socketFactory;
   String host;
   int port;
+  String userParam;
   String passwordParam;
+  boolean noUnixLogin;
   boolean syncClipboards;
   boolean showControls;
   boolean offerRelogin;
@@ -358,9 +360,19 @@ public class VncViewer extends java.applet.Applet
       if (passwordParam != null) {
         rfb.authenticateVNC(passwordParam);
       } else {
-        String pw = askPassword();
+        AuthPanel authPanel = createAuthPanel(false);
+        String pw = authPanel.getPassword();
+        vncContainer.remove(authPanel);
         rfb.authenticateVNC(pw);
       }
+      break;
+    case RfbProto.AuthUnixLogin:
+      showConnectionStatus("Performing Unix login authentication");
+      AuthPanel authPanel = createAuthPanel(true);
+      String pw = authPanel.getPassword();
+      String user = authPanel.getUsername();
+      vncContainer.remove(authPanel);
+      rfb.authenticateUnixLogin(user, pw);
       break;
     default:
       throw new Exception("Unknown authentication scheme " + authType);
@@ -415,11 +427,11 @@ public class VncViewer extends java.applet.Applet
   // Show an authentication panel.
   //
 
-  String askPassword() throws Exception
+  AuthPanel createAuthPanel(boolean unixLogin) throws Exception
   {
     showConnectionStatus(null);
 
-    AuthPanel authPanel = new AuthPanel(this);
+    AuthPanel authPanel = new AuthPanel(this, unixLogin, userParam);
 
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.gridwidth = GridBagConstraints.REMAINDER;
@@ -438,10 +450,7 @@ public class VncViewer extends java.applet.Applet
     }
 
     authPanel.moveFocusToDefaultField();
-    String pw = authPanel.getPassword();
-    vncContainer.remove(authPanel);
-
-    return pw;
+    return authPanel;
   }
 
 
@@ -687,10 +696,16 @@ public class VncViewer extends java.applet.Applet
 
     port = readIntParameter("PORT", 5900);
 
+    String str;
+
+    userParam = readParameter("USER", false);
+    str = readParameter("No Unix Login", false);
+    if (str != null && str.equalsIgnoreCase("Yes"))
+	  noUnixLogin = true;
+
     // Read "ENCPASSWORD" or "PASSWORD" parameter if specified.
     readPasswordParameters();
 
-    String str;
     if (inAnApplet) {
       str = readParameter("Open New Window", false);
       if (str != null && str.equalsIgnoreCase("Yes"))

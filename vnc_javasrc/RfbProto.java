@@ -1,5 +1,5 @@
 //
-//  Copyright (C) 2009 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
 //  Copyright (C) 2001-2004 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 2001-2006 Constantin Kaplinsky.  All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
@@ -434,6 +434,24 @@ class RfbProto {
   }
 
   //
+  // Perform Unix Login Authentication.
+  //
+
+  void authenticateUnixLogin(String user, String pw) throws Exception {
+
+    if (user.length() < 1)
+      throw new Exception("Empty user name");
+    writeInt(user.length());
+    if (pw.length() < 1)
+      throw new Exception("Empty password");
+    writeInt(pw.length());
+    os.write(user.getBytes());
+    os.write(pw.getBytes());
+
+    readSecurityResult("Unix login authentication");
+  }
+
+  //
   // Read security result.
   // Throws an exception on authentication failure.
   //
@@ -483,7 +501,9 @@ class RfbProto {
     authCaps.add(AuthNone, StandardVendor, SigAuthNone,
 		 "No authentication");
     authCaps.add(AuthVNC, StandardVendor, SigAuthVNC,
-		 "Standard VNC password authentication");
+		 "Standard VNC authentication");
+    authCaps.add(AuthUnixLogin, TightVncVendor, SigAuthUnixLogin,
+		 "Unix login authentication");
 
     // Supported non-standard server-to-client messages
     // [NONE]
@@ -539,19 +559,47 @@ class RfbProto {
   //
 
   int negotiateAuthenticationTight() throws Exception {
-    int nAuthTypes = readU32();
+    int a, i, nAuthTypes = readU32();
     if (nAuthTypes == 0)
       return AuthNone;
 
     readCapabilityList(authCaps, nAuthTypes);
-    for (int i = 0; i < authCaps.numEnabled(); i++) {
-      int authType = authCaps.getByOrder(i);
-      if (authType == AuthNone || authType == AuthVNC) {
-	writeInt(authType);
-	return authType;
+
+    int authScheme = 0;
+    if (!viewer.noUnixLogin && (viewer.userParam != null)) {
+      /* Prefer Unix Login over other types */
+      for (i = 0; i < authCaps.numEnabled(); i++) {
+        if (authCaps.getByOrder(i) == AuthUnixLogin) {
+          authScheme = AuthUnixLogin;
+          break;
+        }
       }
     }
-    throw new Exception("No suitable authentication scheme found");
+
+    if (authScheme == 0) {
+      /* Try server's preferred authentication scheme. */
+      for (i = 0; (authScheme == 0) && (i < authCaps.numEnabled()); i++) {
+        a = authCaps.getByOrder(i);
+        switch (a) {
+          case AuthVNC:
+          case AuthNone:
+            authScheme = a;
+            break;
+          case AuthUnixLogin:
+            if (!viewer.noUnixLogin) authScheme = a;
+            break;
+          default:
+            /* unknown scheme - cannot use it */
+            continue;
+        }
+      }
+    }
+
+    if (authScheme == 0)
+      throw new Exception("No suitable authentication scheme found");
+
+	writeInt(authScheme);
+    return authScheme;
   }
 
   //

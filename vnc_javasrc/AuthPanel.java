@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
 //  Copyright (C) 2002-2006 Constantin Kaplinsky.  All Rights Reserved.
 //
@@ -28,20 +29,36 @@ import java.awt.event.*;
 class AuthPanel extends Panel implements ActionListener {
 
   TextField passwordField;
+  TextField userField;
   Button okButton;
 
   //
   // Constructor.
   //
 
-  public AuthPanel(VncViewer viewer)
+  public AuthPanel(VncViewer viewer, boolean unixLogin, String user)
   {
-    Label titleLabel = new Label("VNC Authentication", Label.CENTER);
+    Label titleLabel, userLabel = null;
+    if (unixLogin)
+      titleLabel  = new Label("Unix Login Authentication", Label.CENTER);
+    else
+      titleLabel  = new Label("Standard VNC Authentication", Label.CENTER);
     titleLabel.setFont(new Font("Helvetica", Font.BOLD, 18));
 
-    Label promptLabel = new Label("Password:", Label.CENTER);
+    if (unixLogin) {
+      userLabel = new Label("User name:", Label.CENTER);
 
-    passwordField = new TextField(10);
+      if (user != null)
+        userField = new TextField(user, 20);
+      else
+        userField = new TextField(20);
+      userField.setForeground(Color.black);
+      userField.setBackground(Color.white);
+    }
+
+    Label passwordLabel = new Label("Password:", Label.CENTER);
+
+    passwordField = new TextField(20);
     passwordField.setForeground(Color.black);
     passwordField.setBackground(Color.white);
     passwordField.setEchoChar('*');
@@ -58,11 +75,22 @@ class AuthPanel extends Panel implements ActionListener {
     gridbag.setConstraints(titleLabel,gbc);
     add(titleLabel);
 
+    if (unixLogin) {
+      gbc.fill = GridBagConstraints.NONE;
+      gbc.gridwidth = 1;
+      gbc.insets = new Insets(0,0,0,0);
+      gridbag.setConstraints(userLabel,gbc);
+      add(userLabel);
+
+      gridbag.setConstraints(userField,gbc);
+      add(userField);
+    }
+
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 1;
     gbc.insets = new Insets(0,0,0,0);
-    gridbag.setConstraints(promptLabel,gbc);
-    add(promptLabel);
+    gridbag.setConstraints(passwordLabel,gbc);
+    add(passwordLabel);
 
     gridbag.setConstraints(passwordField,gbc);
     add(passwordField);
@@ -85,7 +113,11 @@ class AuthPanel extends Panel implements ActionListener {
 
   public void moveFocusToDefaultField()
   {
-    passwordField.requestFocus();
+    if (userField != null && (userField.getText() == null
+      || userField.getText().length() < 1))
+      userField.requestFocus();
+    else
+      passwordField.requestFocus();
   }
 
   //
@@ -111,6 +143,11 @@ class AuthPanel extends Panel implements ActionListener {
       wait();
     } catch (InterruptedException e) { }
     return passwordField.getText();
+  }
+
+  public synchronized String getUsername() throws Exception
+  {
+    return userField.getText();
   }
 
 }
