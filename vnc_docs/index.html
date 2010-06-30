@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-06-30T02:26:00">
+<meta name="date" content="2010-06-30T14:23:36">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1226,12 +1226,12 @@ viewer:</p>
     <dt class="Description-1 Description">VNC Password Authentication</dt>
     <dd class="Description-1 Description">
          A valid VNC password must be sent from the VNC viewer using the 
-         &ldquo;VNC&rdquo; authentication capability (see below) before it is 
-         allowed to connect.  The VNC password is typically stored in a file 
-         under the user&rsquo;s home directory on the server machine.  It is 
-         separate from any other login credentials and thus represents less of a 
-         security threat if compromised (that is, assuming the VNC password and 
-         the Unix login password are not set to the same value.)
+         &ldquo;Standard VNC&rdquo; authentication capability (see below) before 
+         it is allowed to connect. The VNC password is typically stored in a 
+         file under the user&rsquo;s home directory on the server machine.  It 
+         is separate from any other login credentials and thus represents less 
+         of a security threat if compromised (that is, assuming the VNC password 
+         and the Unix login password are not set to the same value.)
     </dd>
     <dt class="Description-1 Description">One-Time Password (OTP) Authentication</dt>
     <dd class="Description-1 Description">
@@ -1240,13 +1240,13 @@ viewer:</p>
          server&rsquo;s command line (see the man page for 
          <code>vncpasswd</code> for more details.)  The user enters this 
          password in the VNC viewer as if it were a VNC password, and the viewer 
-         sends the OTP using the &ldquo;VNC&rdquo; authentication capability 
-         (see below.)  However, once the OTP has been used once to authenticate 
-         a viewer, it is forgotten and cannot be reused.  OTP authentication can 
-         be used, for instance, to launch or connect to TurboVNC sessions from 
-         an automated web portal or from a job scheduler.  OTP authentication is 
-         also useful for allowing temporary access to a TurboVNC session for 
-         collaboration purposes.
+         sends the OTP using the &ldquo;Standard VNC&rdquo; authentication 
+         capability (see below.) However, once the OTP has been used once to 
+         authenticate a viewer, it is forgotten and cannot be reused.  OTP 
+         authentication can be used, for instance, to launch or connect to 
+         TurboVNC sessions from an automated web portal or from a job scheduler.  
+         OTP authentication is also useful for allowing temporary access to a 
+         TurboVNC session for collaboration purposes.
     </dd>
     <dt class="Description-1 Description">PAM User/Password Authentication</dt>
     <dd class="Description-1 Description">
@@ -1276,7 +1276,7 @@ credentials with a VNC server:</p>
     </dd>
     <dt class="Description-1 Description">Standard VNC Authentication</dt>
     <dd class="Description-1 Description">
-         The VNC password is sent to the server using a DES-encrypted 
+         A password is sent to the server using a DES-encrypted 
          challenge-response scheme.  The password can be up to 8 characters 
          long, so the DES key length is 56 bits.  This is not a particularly 
          strong form of encryption by today&rsquo;s standards (56-bit DES was 
@@ -1316,7 +1316,11 @@ Similarly, if the server prefers an authentication method that supports
 Unix login authentication, then the user can force the use of standard 
 VNC authentication by passing an argument of <code>-nounixlogin</code> 
 to <code>vncviewer</code>. Both of these command-line options work with 
-both the Unix and Windows versions of <code>vncviewer</code>.</p>
+both the Unix and Windows versions of <code>vncviewer</code>.  Note that 
+if using the Java TurboVNC Viewer, the same thing can be accomplished by 
+setting the <code>USER</code> parameter or setting the 
+<code>No&nbsp;Unix&nbsp;Login</code> parameter to <code>Yes</code> in 
+<code>/opt/TurboVNC/vnc/classes/index.vnc</code>.</p>
 
 <p>If the system administrator has not restricted any of the authentication 
 methods on a system-wide basis, then the user can choose to disable some 
