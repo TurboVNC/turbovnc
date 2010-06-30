@@ -97,11 +97,11 @@ This will force Unix login authentication to be used, if an authentication
 method that supports it is enabled in the VNC server.
 .TP
 \fB\-nounixlogin\fR
-This will force VNC authentication to be used, if an authentication method that
-supports it is enabled in the VNC server.  This is useful if the server is
-configured to prefer an authentication method that supports Unix login
-authentication and you want to override this preference for a particular
-session (for instance, to use a one-time password.)
+This will force standard VNC authentication to be used, if an authentication
+method that supports it is enabled in the VNC server.  This is useful if the
+server is configured to prefer an authentication method that supports Unix
+login authentication and you want to override this preference for a particular
+connection (for instance, to use a one-time password.)
 .TP
 \fB\-encodings\fR \fIencoding\-list\fR
 This option specifies a list of image encoding methods that vncviewer is

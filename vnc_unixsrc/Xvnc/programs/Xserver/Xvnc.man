@@ -206,7 +206,7 @@ argument of \fB-otpauth\fR to Xvnc.  Additionally, if
 file, then "otp" must be listed as a permitted method.
 
 This authentication method can be used with any VNC client that supports
-VNC authentication.  OTP authentication is handy for sharing
+standard VNC authentication.  OTP authentication is handy for sharing
 a VNC session with another person with whom you do not wish to share your
 VNC password.
 .IP \fBpam-userpwd\fR
@@ -251,7 +251,7 @@ in which authentication capabilities are advertised to VNC clients.  For
 instance, if "pam-userpwd" is listed first, then the TurboVNC Viewer will
 default to using Unix login authentication when connecting to any TurboVNC
 sessions on this server.  Similarly, if "vnc" or "otp" is listed first, then
-the TurboVNC Viewer will default to using VNC authentication.
+the TurboVNC Viewer will default to using standard VNC authentication.
 
 If the authentication configuration file does not exist or
 \fIpermitted-auth-methods\fR is not specified, then Xvnc behaves as if
