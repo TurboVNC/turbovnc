@@ -29,7 +29,7 @@ validate authentication credentials sent from a VNC viewer:
 
 	PAM User/Password Authentication :: {:}
 		The TurboVNC Server uses Pluggable Authentication Modules (PAM) to validate
-		a user and password received from a VNC viewer via the "Unix login"
+		a username and password received from a VNC viewer via the "Unix login"
 		authentication capability (see below.)  The username and password received
 		from the VNC viewer need not necessarily be validated against Unix login
 		credentials.  Generally, the server can be configured to use any
@@ -54,7 +54,7 @@ protocols used to validate authentication credentials with a VNC server:
 		attack in the late 90's.)
 
 	Unix Login Authentication :: {:}
-		Both the user name and password are sent to the server as plain text.
+		Both the username and password are sent to the server as plain text.
 		Thus, it is __strongly__ recommended that this authentication capability
 		be used only with an SSH-encrypted TurboVNC connection (see
 		{ref prefix="Section ": Secure_TurboVNC_Usage}.)

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-06-30T14:23:36">
+<meta name="date" content="2010-06-30T14:33:46">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1251,7 +1251,7 @@ viewer:</p>
     <dt class="Description-1 Description">PAM User/Password Authentication</dt>
     <dd class="Description-1 Description">
          The TurboVNC Server uses Pluggable Authentication Modules (PAM) to 
-         validate a user and password received from a VNC viewer via the 
+         validate a username and password received from a VNC viewer via the 
          &ldquo;Unix login&rdquo; authentication capability (see below.)  The 
          username and password received from the VNC viewer need not necessarily 
          be validated against Unix login credentials.  Generally, the server can 
@@ -1284,7 +1284,7 @@ credentials with a VNC server:</p>
     </dd>
     <dt class="Description-1 Description">Unix Login Authentication</dt>
     <dd class="Description-1 Description">
-         Both the user name and password are sent to the server as plain text. 
+         Both the username and password are sent to the server as plain text. 
          Thus, it is <em>strongly</em> recommended that this authentication 
          capability be used only with an SSH-encrypted TurboVNC connection (see 
          Section <a href="#Secure_TurboVNC_Usage" class="ref">5.5</a>.)
