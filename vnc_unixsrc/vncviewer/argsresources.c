@@ -472,7 +472,7 @@ usage(void)
 	  "        -medqual (preset for -samp 2x -quality 80)\n"
 	  "        -lossless (preset for -nojpeg -compresslevel 0)\n"
 	  "        -losslesswan (preset for -nojpeg -compresslevel 1)\n"
-	  "        -user <USER NAME>\n"
+	  "        -user <USER NAME> (Unix login authentication)\n"
 	  "        -nounixlogin\n"
 	  "\n"
 	  "Option names may be abbreviated, for example, -q instead of -quality.\n"
