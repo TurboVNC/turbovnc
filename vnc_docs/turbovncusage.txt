@@ -66,12 +66,12 @@
 		TurboVNC session in the "VNC server" field, then click "Connect" (Windows)
 		or press Enter (Linux/Mac/Solaris.)
 
-	#. Another dialog box appears, prompting for the VNC password (if VNC
-		password authentication is enabled) or for the username and password (if
-		Unix login authentication is enabled.)
+	#. Another dialog box appears, prompting for the password (if standard
+		VNC authentication is being used) or for the username and password (if
+		Unix login authentication is being used.)
 		{nl}{nl}
 		|| || Windows TurboVNC Viewer || Linux/Mac/Solaris TurboVNC Viewer ||
-		| VNC Password Authentication Dialog | {img:turbovnc3.png} | {img:turbovnc4.png} |
+		| Standard VNC Authentication Dialog | {img:turbovnc3.png} | {img:turbovnc4.png} |
 		| Unix Login Authentication Dialog   | {img:turbovnc5.png} | {img:turbovnc6.png} |
 		{nl}
 		Enter the VNC session password or the Unix username/password and click
