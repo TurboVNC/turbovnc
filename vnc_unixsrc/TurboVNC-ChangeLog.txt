@@ -7,9 +7,9 @@ can take advantage of multi-core systems.  See documentation for further
 details.
 -------------------------------------------------------------------------------
 [2]
-Added authentication extensions contributed by UCAR, which allow clients to
-authenticate using one-time passwords and Unix login credentials.  See
-documentation and man pages for details.
+Added authentication extensions which allow clients to authenticate using
+one-time passwords and Unix login credentials.  See documentation and man pages
+for details.
 -------------------------------------------------------------------------------
 [3]
 Added scroll wheel support to the Java VNC viewer (requires JRE 1.4 or later.)
