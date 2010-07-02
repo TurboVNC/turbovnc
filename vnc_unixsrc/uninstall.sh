@@ -45,7 +45,7 @@ cd $PWD
 
 echo Removing directories ...
 rmdir /opt/TurboVNC/bin 2>&1 || RETCODE=-1
-rmdir /opt/TurboVNC/lib 2>&1 || RETCODE=-1
+if [ -d /opt/TurboVNC/lib ]; then rmdir /opt/TurboVNC/lib 2>&1 || RETCODE=-1; fi
 rmdir /opt/TurboVNC/man/man1 2>&1 || RETCODE=-1
 rmdir /opt/TurboVNC/man 2>&1 || RETCODE=-1
 rmdir /opt/TurboVNC 2>&1 || RETCODE=-1
