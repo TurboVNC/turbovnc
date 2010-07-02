@@ -34,7 +34,7 @@ The uninstall script in the Mac distribution package should now work on OS X
 -------------------------------------------------------------------------------
 [7]
 Added 64-bit Solaris and Windows binary packages, as well as a universal
-32/64-bit binary package for OS X 10.6 "Snow Leopard".
+32/64-bit binary package for OS X.
 -------------------------------------------------------------------------------
 [8]
 Fixed a number of interaction issues between turbovncserver.conf and the

@@ -137,7 +137,7 @@ to the configure command line to get rid of these warnings.
 
 Add
 
-  --host x86_64-apple-darwin10.0.0
+  --host x86_64-apple-darwin
 
 to the configure command line.
 
@@ -152,8 +152,22 @@ Add
 to the configure command line.
 
 
-32-bit Backward-Compatible Build on 64-bit OS/X
+64-bit Backward-Compatible Build on 64-bit OS/X
 -----------------------------------------------
+
+Add
+
+  --host x86_64-apple-darwin \
+  CFLAGS='-isysroot /Developer/SDKs/MacOSX10.4u.sdk \
+    -mmacosx-version-min=10.4 -O3' \
+    LDFLAGS='-isysroot /Developer/SDKs/MacOSX10.4u.sdk \
+    -mmacosx-version-min=10.4'
+
+to the configure command line.  The OS X 10.4 SDK must be installed.
+
+
+32-bit Backward-Compatible Build on OS/X
+----------------------------------------
 
 Add
 
@@ -229,11 +243,11 @@ make dmg
 
 make udmg
 
-  On 64-bit OS X (10.6 "Snow Leopard" or later), this creates a version of the
-  Macintosh package/disk image which contains universal i386/x86-64 binaries.
-  The 32-bit fork of these binaries is backward compatible with OS X 10.4 and
-  later, whereas the 64-bit fork is compatible with OS X 10.6 and later.  OS X
-  10.4 compatibility SDK required.
+  On 64-bit OS X systems, this creates a version of the Macintosh package and
+  disk image which contains universal i386/x86-64 binaries.  The 32-bit fork of
+  these binaries is backward compatible with OS X 10.4 and later.  The 64-bit
+  fork can be made backward compatible as well by using the instructions in
+  the "Build Recipes" section.  OS X 10.4 compatibility SDK required.
 
 
 *******************************************************************************
