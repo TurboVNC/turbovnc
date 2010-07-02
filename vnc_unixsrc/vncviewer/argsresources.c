@@ -440,7 +440,7 @@ void
 usage(void)
 {
   fprintf(stderr,
-	  "TurboVNC Viewer v"PACKAGE_VERSION" (build "__BUILD")\n"
+	  "TurboVNC Viewer %d-bit v"PACKAGE_VERSION" (build "__BUILD")\n"
 	  "\n"
 	  "Usage: %s [<OPTIONS>] [<HOST>][:<DISPLAY#>]\n"
 	  "       %s [<OPTIONS>] [<HOST>][::<PORT#>]\n"
@@ -477,7 +477,7 @@ usage(void)
 	  "\n"
 	  "Option names may be abbreviated, for example, -q instead of -quality.\n"
 	  "See the manual page for more information."
-	  "\n", programName, programName, programName, programName);
+	  "\n", (int)sizeof(size_t)*8, programName, programName, programName, programName);
   exit(1);
 }
 
