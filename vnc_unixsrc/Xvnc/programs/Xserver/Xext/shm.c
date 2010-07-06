@@ -533,7 +533,7 @@ ProcShmPutImage(client)
 	char 		* stuffptr, /* pointer into protocol data */
 			* tmpptr;   /* new location to copy to */
 
-        if(!(tmpImage = (char *) ALLOCATE_LOCAL(length*stuff->totalHeight)))
+        if(!(tmpImage = (char *) xalloc(length*stuff->totalHeight)))
             return (BadAlloc);
 	tmpAlloced = 1;
     
@@ -566,7 +566,7 @@ ProcShmPutImage(client)
     else if ((unsigned long)(shmdesc->addr+stuff->offset) & 
 	     (sizeof(long)-1)) 
     {
-        if(!(tmpImage = (char *) ALLOCATE_LOCAL(length*stuff->totalHeight)))
+        if(!(tmpImage = (char *) xalloc(length*stuff->totalHeight)))
             return (BadAlloc);
 	tmpAlloced = 1;
 	bcopy((char *)(shmdesc->addr+stuff->offset),
@@ -624,7 +624,7 @@ ProcShmPutImage(client)
 
 #ifdef INTERNAL_VS_EXTERNAL_PADDING
     if (tmpAlloced)
-        DEALLOCATE_LOCAL(tmpImage);
+        xfree(tmpImage);
 #endif
 
      return (client->noClientException);
