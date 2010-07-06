@@ -34,7 +34,7 @@ The uninstall script in the Mac distribution package should now work on OS X
 -------------------------------------------------------------------------------
 [7]
 Added 64-bit Solaris and Windows binary packages, as well as a universal
-32/64-bit binary package for OS X 10.6 "Snow Leopard".
+32/64-bit binary package for OS X.
 -------------------------------------------------------------------------------
 [8]
 Fixed a number of interaction issues between turbovncserver.conf and the
@@ -70,6 +70,10 @@ Added automatic clipboard transfer to the Java VNC viewer.
 Removed the warning dialog in the Windows viewer if full screen mode is
 activated via a hotkey (the reasoning being that if the user knows the hotkey
 to activate full screen mode, then they know how to deactivate it as well.)
+-------------------------------------------------------------------------------
+[15]
+Fixed an issue whereby the TurboVNC Server would crash when a VirtualGL window
+was resized to larger than 2.75 megapixels.
 -------------------------------------------------------------------------------
 
 
