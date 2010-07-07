@@ -1,5 +1,6 @@
 //
 //  Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
 //  Copyright (C) 2001 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
 //

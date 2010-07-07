@@ -1,5 +1,6 @@
 //
 //  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
 //  Copyright (C) 2001-2004 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 2001-2006 Constantin Kaplinsky.  All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
