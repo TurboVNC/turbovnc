@@ -1,4 +1,6 @@
 //
+//  Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
 //  Copyright (C) 2006-2008 Sun Microsystems, Inc.  All Rights Reserved.
 //  Copyright (C) 2001 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 2001 Constantin Kaplinsky.  All Rights Reserved.
@@ -44,8 +46,9 @@ class OptionsFrame extends Frame
     "Use CopyRect",
     "Mouse buttons 2 and 3",
     "View only",
+    "Scaling factor",
     "Scale remote cursor",
-    "Share desktop",
+    "Share desktop"
   };
 
   static String[][] values = {
@@ -69,8 +72,9 @@ class OptionsFrame extends Frame
     { "Yes", "No" },
     { "Normal", "Reversed" },
     { "Yes", "No" },
+    { "Auto", "Fixed Ratio", "50%", "75%", "95%", "100%", "105%", "125%", "150%", "200%"},
     { "No", "50%", "75%", "125%", "150%" },
-    { "Yes", "No" },
+    { "Yes", "No" }
   };
 
   final int
@@ -83,8 +87,9 @@ class OptionsFrame extends Frame
     useCopyRectIndex     = 6,
     mouseButtonIndex     = 7,
     viewOnlyIndex        = 8,
-    scaleCursorIndex     = 9,
-    shareDesktopIndex    = 10;
+    scalingFactorIndex   = 9,
+    scaleCursorIndex     = 10,
+    shareDesktopIndex    = 11;
 
   Label[] labels = new Label[names.length];
   Choice[] choices = new Choice[names.length];
@@ -111,6 +116,7 @@ class OptionsFrame extends Frame
   int scaleCursor;
 
   boolean autoScale;
+  boolean fixedRatioScale;
   int scalingFactor;
 
   //
@@ -183,14 +189,43 @@ class OptionsFrame extends Frame
       }
     }
 
-    // FIXME: Provide some sort of GUI for "Scaling Factor".
-
-    autoScale = false;
-    scalingFactor = 100;
+    // Get scaling factor from parameters and set it
+    // to gui and class member scalingFactor
+    
     String s = viewer.readParameter("Scaling Factor", false);
+    if (s == null) s = "100%";
+    setScalingFactor(s);
+    if (autoScale) {
+      choices[scalingFactorIndex].select("Auto");
+    } else if (fixedRatioScale) {
+      choices[scalingFactorIndex].select("Fixed Ratio");
+    } else {
+      choices[scalingFactorIndex].select(s);
+    }
+
+    // Make the booleans and encodings array correspond to the state of the GUI
+
+    setEncodings();
+    setOtherOptions();
+  }
+  
+  //
+  // Set scaling factor class member value
+  //
+  
+  void setScalingFactor(int sf) {
+      setScalingFactor(new Integer(sf).toString());
+  }
+  
+  void setScalingFactor(String s) {
+    autoScale = false;
+    fixedRatioScale = false;
+    scalingFactor = 100;
     if (s != null) {
       if (s.equalsIgnoreCase("Auto")) {
 	autoScale = true;
+      } else if (s.equalsIgnoreCase("Fixed Ratio")) {
+	fixedRatioScale = true;
       } else {
 	// Remove the '%' char at the end of string if present.
 	if (s.charAt(s.length() - 1) == '%') {
@@ -211,11 +246,6 @@ class OptionsFrame extends Frame
 	}
       }
     }
-
-    // Make the booleans and encodings array correspond to the state of the GUI
-
-    setEncodings();
-    setOtherOptions();
   }
 
 
@@ -485,6 +515,12 @@ class OptionsFrame extends Frame
 
       getPreset();
       viewer.setEncodings();
+
+    } else if (source == choices[scalingFactorIndex]){
+        // Tell VNC canvas that scaling factor has changed
+        setScalingFactor(choices[scalingFactorIndex].getSelectedItem());
+        if (viewer.vc != null)
+          viewer.vc.setScaledSize();
     }
   }
 

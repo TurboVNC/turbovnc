@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
 //  Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
 //  Copyright (C) 2006 Sun Microsystems, Inc.  All Rights Reserved.
 //  Copyright (C) 2004 Horizon Wimba.  All Rights Reserved.
@@ -44,9 +45,8 @@ class VncCanvas extends Canvas
   Color[] colors;
   int bytesPixel;
 
-  int maxWidth = 0, maxHeight = 0;
-  int scalingFactor;
-  int scaledWidth, scaledHeight;
+  int scaledWidth = 0, scaledHeight = 0;
+  float scaleWidthRatio, scaleHeightRatio;
 
   Image memImage;
   Graphics memGraphics;
@@ -100,15 +100,10 @@ class VncCanvas extends Canvas
   // The constructors.
   //
 
-  public VncCanvas(VncViewer v, int maxWidth_, int maxHeight_)
-    throws IOException {
+  public VncCanvas(VncViewer v) throws IOException {
 
     viewer = v;
-    maxWidth = maxWidth_;
-    maxHeight = maxHeight_;
-
     rfb = viewer.rfb;
-    scalingFactor = viewer.options.scalingFactor;
 
     tightInflaters = new Inflater[4];
 
@@ -120,6 +115,7 @@ class VncCanvas extends Canvas
       colors[i] = new Color(cm8.getRGB(i));
 
     setPixelFormat();
+    setFramebufferSize();
 
     inputEnabled = false;
     if (!viewer.options.viewOnly)
@@ -132,10 +128,6 @@ class VncCanvas extends Canvas
     // Enable focus event listener for sending client
     // clipboard updates.
     addFocusListener(this);
-  }
-
-  public VncCanvas(VncViewer v) throws IOException {
-    this(v, 0, 0);
   }
 
   //
@@ -164,7 +156,7 @@ class VncCanvas extends Canvas
 
   public void paint(Graphics g) {
     synchronized(memImage) {
-      if (rfb.framebufferWidth == scaledWidth) {
+      if (rfb.framebufferWidth == scaledWidth && rfb.framebufferHeight == scaledHeight) {
         g.drawImage(memImage, 0, 0, null);
       } else {
         paintScaledFrameBuffer(g);
@@ -237,28 +229,13 @@ class VncCanvas extends Canvas
   public void setPixelFormat() throws IOException {
       rfb.writeSetPixelFormat(32, 24, false, true, 255, 255, 255, 16, 8, 0);
       bytesPixel = 4;
-    updateFramebufferSize();
   }
 
-  void updateFramebufferSize() {
+  public void setFramebufferSize() {
 
     // Useful shortcuts.
     int fbWidth = rfb.framebufferWidth;
     int fbHeight = rfb.framebufferHeight;
-
-    // Calculate scaling factor for auto scaling.
-    if (maxWidth > 0 && maxHeight > 0) {
-      int f1 = maxWidth * 100 / fbWidth;
-      int f2 = maxHeight * 100 / fbHeight;
-      scalingFactor = Math.min(f1, f2);
-      if (scalingFactor > 100)
-	scalingFactor = 100;
-      System.out.println("Scaling desktop at " + scalingFactor + "%");
-    }
-
-    // Update scaled framebuffer geometry.
-    scaledWidth = (fbWidth * scalingFactor + 50) / 100;
-    scaledHeight = (fbHeight * scalingFactor + 50) / 100;
 
     // Create new off-screen image either if it does not exist, or if
     // its geometry should be changed. It's not necessary to replace
@@ -302,44 +279,126 @@ class VncCanvas extends Canvas
     pixelsSource.setAnimated(true);
     rawPixelsImage = Toolkit.getDefaultToolkit().createImage(pixelsSource);
 
-    // Update the size of desktop containers.
-    if (viewer.inSeparateFrame) {
-      if (viewer.desktopScrollPane != null)
-	resizeDesktopFrame();
-    } else {
-      setSize(scaledWidth, scaledHeight);
-    }
-    viewer.moveFocusToDesktop();
+    // Update the scaled size.
+    setScaledSize();
   }
 
-  void resizeDesktopFrame() {
-    setSize(scaledWidth, scaledHeight);
+  public void setScaledSize() {
 
-    // FIXME: Find a better way to determine correct size of a
-    // ScrollPane.  -- const
+    // Useful shortcuts.
+    int fbWidth = rfb.framebufferWidth;
+    int fbHeight = rfb.framebufferHeight;
+
+    int oldScaledWidth = scaledWidth;
+    int oldScaledHeight = scaledHeight;
+
+    // Update the scaled size.
+    if (!viewer.options.autoScale && !viewer.options.fixedRatioScale) {
+      scaledWidth = (fbWidth * viewer.options.scalingFactor + 50) / 100;
+      scaledHeight = (fbHeight * viewer.options.scalingFactor + 50) / 100;
+    } else {
+      if (viewer.desktopScrollPane == null) {
+        // Don't do any auto-scaling at start-up, since we can't determine the
+        // size to scale to yet.
+        // For separate window, resizeWindowFrame() will trigger viewer.componentResized()
+        // which will call setScaledSize() again.
+        // For applet, setScaledSize() is called explicitly from VncViewer
+        // after the window is assembled.
+        scaledWidth = fbWidth;
+        scaledHeight = fbHeight;
+      } else {
+        // Calculate the available size, ignoring scroll bars.
+        Dimension availableSize = viewer.desktopScrollPane.getViewportSize();
+        Adjustable vertScroll = viewer.desktopScrollPane.getVAdjustable();
+        if (vertScroll.getValue() != vertScroll.getMinimum() ||
+            vertScroll.getVisibleAmount() != vertScroll.getMaximum()) {
+          availableSize.width += viewer.desktopScrollPane.getVScrollbarWidth();
+        }
+        Adjustable horizScroll = viewer.desktopScrollPane.getHAdjustable();
+        if (horizScroll.getValue() != horizScroll.getMinimum() ||
+            horizScroll.getVisibleAmount() != horizScroll.getMaximum()) {
+          availableSize.height += viewer.desktopScrollPane.getHScrollbarHeight();
+        }
+        if (viewer.options.fixedRatioScale) {
+          float widthRatio = (float)(availableSize.width) / (float)fbWidth;
+          float heightRatio = (float)(availableSize.height) / (float)fbHeight;
+          float ratio = Math.min(widthRatio, heightRatio);
+          scaledWidth = (int)((float)fbWidth * ratio + .5);
+          scaledHeight = (int)((float)fbHeight * ratio + .5);
+        } else {
+          scaledWidth = availableSize.width;
+          scaledHeight = availableSize.height;
+        }
+      }
+    }
+
+    // Update the scale ratios.
+    scaleWidthRatio = (scaledWidth == fbWidth)?-1:((float)scaledWidth / (float)fbWidth);
+    scaleHeightRatio = (scaledHeight == fbHeight)?-1:((float)scaledHeight / (float)fbHeight);
+
+    // Resize/Refresh the window components.
+    if (scaledWidth != oldScaledWidth || scaledHeight != oldScaledHeight) {
+      setSize(scaledWidth, scaledHeight);
+      if (viewer.desktopScrollPane != null) {
+        if (viewer.inSeparateFrame) {
+          if (!viewer.options.autoScale && !viewer.options.fixedRatioScale) {
+            // Resize the ScrollPane and Frame, unless still starting up.
+            // At start-up, resizeWindowFrame() will be called explicitly
+            // from VncViewer after the window is assembled.
+            resizeWindowFrame();
+          } else {
+            // Notify the ScrollPane that we updated its contents.
+            viewer.desktopScrollPane.validate();
+          }
+        } else {
+          // If in an Applet, ScrollPane does not need to be
+          // explicitly resized, just validate the window.
+          viewer.validate();
+        }
+      }
+    } else if (viewer.options.autoScale || viewer.options.fixedRatioScale) {
+      // The frame buffer size may have changed without changing the scaled
+      // dimensions, so refresh the ScrollPane.
+      viewer.desktopScrollPane.validate();
+    }
+  }
+
+  void resizeWindowFrame() {
+
+    // Resize the ScrollPane to fit the frame buffer without scrolling.
     Insets insets = viewer.desktopScrollPane.getInsets();
-    viewer.desktopScrollPane.setSize(scaledWidth +
-				     2 * Math.min(insets.left, insets.right),
-				     scaledHeight +
-				     2 * Math.min(insets.top, insets.bottom));
+    Adjustable vertScroll = viewer.desktopScrollPane.getVAdjustable();
+    if (vertScroll.getValue() != vertScroll.getMinimum() ||
+        vertScroll.getVisibleAmount() != vertScroll.getMaximum()) {
+      insets.right -= viewer.desktopScrollPane.getVScrollbarWidth();
+    }
+    Adjustable horizScroll = viewer.desktopScrollPane.getHAdjustable();
+    if (horizScroll.getValue() != horizScroll.getMinimum() ||
+        horizScroll.getVisibleAmount() != horizScroll.getMaximum()) {
+      insets.bottom -= viewer.desktopScrollPane.getHScrollbarHeight();
+    }
+    viewer.desktopScrollPane.setSize(scaledWidth + insets.left + insets.right,
+				     scaledHeight + insets.top + insets.bottom);
+    viewer.desktopScrollPane.validate();
 
+    // Pack the Frame around the ScrollPane.
     viewer.vncFrame.pack();
 
+    //
     // Try to limit the frame size to the screen size.
+    //
 
     Dimension screenSize = viewer.vncFrame.getToolkit().getScreenSize();
     Dimension frameSize = viewer.vncFrame.getSize();
     Dimension newSize = frameSize;
 
-    // Reduce Screen Size by 30 pixels in each direction;
+    // Reduce Screen Height by 30;
     // This is a (poor) attempt to account for
     //     1) Menu bar on Macintosh (should really also account for
     //        Dock on OSX).  Usually 22px on top of screen.
     //     2) Taxkbar on Windows (usually about 28 px on bottom)
     //     3) Other obstructions.
-
     screenSize.height -= 30;
-    screenSize.width  -= 30;
 
     boolean needToResizeFrame = false;
     if (frameSize.height > screenSize.height) {
@@ -353,8 +412,6 @@ class VncCanvas extends Canvas
     if (needToResizeFrame) {
       viewer.vncFrame.setSize(newSize);
     }
-
-    viewer.desktopScrollPane.doLayout();
   }
 
   //
@@ -414,7 +471,7 @@ class VncCanvas extends Canvas
 
 	  if (rfb.updateRectEncoding == rfb.EncodingNewFBSize) {
 	    rfb.setFramebufferSize(rw, rh);
-	    updateFramebufferSize();
+	    setFramebufferSize();
 	    break;
 	  }
 
@@ -425,7 +482,13 @@ class VncCanvas extends Canvas
 	  }
 
 	  if (rfb.updateRectEncoding == rfb.EncodingPointerPos) {
-	    softCursorMove(rx, ry);
+	    if (rfb.framebufferWidth == scaledWidth && rfb.framebufferHeight == scaledHeight) {
+	      softCursorMove(rx, ry);
+	    } else {
+	      int sx = (scaleWidthRatio == -1) ? rx : ((int)((float)rx * scaleWidthRatio));
+	      int sy = (scaleHeightRatio == -1) ? ry : ((int)((float)ry * scaleHeightRatio));
+	      softCursorMove(sx, sy);
+	    }
 	    cursorPosReceived = true;
 	    continue;
 	  }
@@ -1510,18 +1573,14 @@ class VncCanvas extends Canvas
   // Tell JVM to repaint specified desktop area.
   //
 
-  void scheduleRepaint(int x, int y, int w, int h) {
+  public void scheduleRepaint(int x, int y, int w, int h) {
     // Request repaint, deferred if necessary.
-    if (rfb.framebufferWidth == scaledWidth) {
-      repaint(viewer.deferScreenUpdates, x, y, w, h);
-    } else {
-      int sx = x * scalingFactor / 100;
-      int sy = y * scalingFactor / 100;
-      int sw = ((x + w) * scalingFactor + 49) / 100 - sx + 1;
-      int sh = ((y + h) * scalingFactor + 49) / 100 - sy + 1;
+    int sx = (scaleWidthRatio == -1) ? x : ((int)((float)x * scaleWidthRatio));
+    int sy = (scaleHeightRatio == -1) ? y : ((int)((float)y * scaleHeightRatio));
+    int sw = (scaleWidthRatio == -1) ? w : ((int)((float)(x+w) * scaleWidthRatio) - sx + 1);
+    int sh = (scaleHeightRatio == -1) ? h : ((int)((float)(y+h) * scaleHeightRatio) - sy + 1);
       repaint(viewer.deferScreenUpdates, sx, sy, sw, sh);
     }
-  }
 
   //
   // Handle events.
@@ -1585,9 +1644,9 @@ class VncCanvas extends Canvas
       if (moved) {
 	softCursorMove(evt.getX(), evt.getY());
       }
-      if (rfb.framebufferWidth != scaledWidth) {
-        int sx = (evt.getX() * 100 + scalingFactor/2) / scalingFactor;
-        int sy = (evt.getY() * 100 + scalingFactor/2) / scalingFactor;
+      if (rfb.framebufferWidth != scaledWidth || rfb.framebufferHeight != scaledHeight) {
+        int sx = (scaleWidthRatio == -1) ? evt.getX() : ((int)((float)evt.getX() / scaleWidthRatio + .5));
+        int sy = (scaleHeightRatio == -1) ? evt.getY() : ((int)((float)evt.getY() / scaleHeightRatio + .5));
         evt.translatePoint(sx - evt.getX(), sy - evt.getY());
       }
       synchronized(rfb) {
