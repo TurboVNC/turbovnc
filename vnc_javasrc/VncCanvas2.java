@@ -1,6 +1,6 @@
 //
-//  Copyright (C) 2006 Constantin Kaplinsky.  All Rights Reserved.
 //  Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
+//  Copyright (C) 2006 Constantin Kaplinsky.  All Rights Reserved.
 //
 //  This is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -30,14 +30,6 @@ class VncCanvas2 extends VncCanvas implements MouseWheelListener {
 
   public VncCanvas2(VncViewer v) throws IOException {
     super(v);
-    disableFocusTraversalKeys();
-    enableMouseWheelListener();
-  }
-
-  public VncCanvas2(VncViewer v, int maxWidth_, int maxHeight_)
-    throws IOException {
-
-    super(v, maxWidth_, maxHeight_);
     disableFocusTraversalKeys();
     enableMouseWheelListener();
   }
