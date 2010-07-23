@@ -320,7 +320,7 @@ Here is the complete list of parameters supported in the Java TurboVNC Viewer:
     Set to "No" if you want to get rid of the button panel at the top of the
     viewer window.
 
---> "Offer relogin" (no GUI equivalent, not applicable in the applet mode)
+--> "Offer relogin" (no GUI equivalent)
 
     Values: "Yes", "No"
     Default: "Yes"
