@@ -385,7 +385,7 @@ static void usage(char *argv[])
   fprintf(stderr, "       %s -t [-v]\n", argv[0]);
   fprintf(stderr, "       %s -o [-v] [-display VNC-DISPLAY]\n", argv[0]);
   fprintf(stderr, "       %s -c [-display VNC-DISPLAY]\n", argv[0]);
-  fprintf(stderr, "       %s -a USER [-display VNC-DISPLAY]\n", argv[0]);
+  fprintf(stderr, "       %s -a USER [-v] [-display VNC-DISPLAY]\n", argv[0]);
   fprintf(stderr, "       %s -r USER [-display VNC-DISPLAY]\n", argv[0]);
   exit(1);
 }
