@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncpasswd 1 "June 2010" "" "TurboVNC"
+.TH vncpasswd 1 "July 2010" "" "TurboVNC"
 .SH NAME
 vncpasswd \- set passwords for VNC server
 .SH SYNOPSIS
@@ -27,7 +27,7 @@ vncpasswd \- set passwords for VNC server
 .br
 \fBvncpasswd\fR \-c [\-display \fIVNC-display\fR]
 .br
-\fBvncpasswd\fR \-a \fIuser\fR [\-display \fIVNC-display\fR]
+\fBvncpasswd\fR \-a \fIuser\fR [\-v] [\-display \fIVNC-display\fR]
 .br
 \fBvncpasswd\fR \-r \fIuser\fR [\-display \fIVNC-display\fR]
 .br
@@ -90,6 +90,9 @@ silently accepted.
 .TP
 \fB\-v\fR
 Also prompt for a view-only password, or generate a one-time view-only password.
+
+If adding a user to the user ACL, then the \fB\-v\fR option specifies that the
+user should be granted view-only access instead of full control.
 .TP
 \fB\-display\fR \fIVNC-display\fR
 This option specifies the name of the VNC server session to use when
@@ -104,7 +107,8 @@ Generate a one-time full control password for \fIVNC-display\fR.
 Clear any one-time passwords on \fIVNC-display\fR.
 .TP
 \fB\-a\fR \fIuser\fR
-Add \fIuser\fR to \fIVNC-display\fR's user ACL.
+Add \fIuser\fR to \fIVNC-display\fR's user ACL.  The \fB\-v\fR option can also
+be specified in order to restrict this user's access to view-only.
 .TP
 \fB\-r\fR \fIuser\fR
 Remove \fIuser\fR from \fIVNC-display\fR's user ACL.
