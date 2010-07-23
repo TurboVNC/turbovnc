@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
 //  Copyright (C) 2002 Cendio Systems.  All Rights Reserved.
 //  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
 //
@@ -57,9 +58,17 @@ class ReloginPanel extends Panel implements ActionListener {
   // This method is called when a button is pressed.
   //
   public synchronized void actionPerformed(ActionEvent evt) {
-    if (viewer.inSeparateFrame)
-      viewer.vncFrame.dispose();
-    if (evt.getSource() == reloginButton)
-      viewer.getAppletContext().showDocument(viewer.getDocumentBase());
+    if (viewer.inAnApplet) {
+      if (viewer.inSeparateFrame)
+        viewer.vncFrame.dispose();
+      if (evt.getSource() == reloginButton)
+        viewer.getAppletContext().showDocument(viewer.getDocumentBase());
+    } else {
+      if (evt.getSource() == reloginButton) {
+        VncViewer.main(viewer.mainArgs);
+      } else {
+        System.exit(1);
+      }
+    }
   }
 }
