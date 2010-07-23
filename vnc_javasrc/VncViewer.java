@@ -174,7 +174,7 @@ public class VncViewer extends java.applet.Applet
         // This throws ClassNotFoundException if there is no Java 2D API.
         Class cl = Class.forName("java.awt.Graphics2D");
         // If we could load Graphics2D class, then we can use VncCanvas2.
-        cl = Class.forName("com.tightvnc.vncviewer.VncCanvas2");
+        cl = Class.forName("VncCanvas2");
         Class[] argClasses = { this.getClass() };
         java.lang.reflect.Constructor cstr = cl.getConstructor(argClasses);
         Object[] argObjects = { this };
