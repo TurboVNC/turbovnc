@@ -300,9 +300,10 @@ Here is the complete list of parameters supported in the Java TurboVNC Viewer:
     variable desktop size, then the window will resize automatically when
     the remote desktop size changes.
 
---> "Scaling factor" (no GUI equivalent)
+--> "Scaling factor"
 
-    Value: an integer in the range of [1..1000], or the string "auto"
+    Value: an integer in the range of [1..1000], or the string "auto",
+           or the string "fixed ratio"
     Default: "100"
 
     Reduce or enlarge the remote desktop image.  The value is interpreted as a
@@ -313,8 +314,10 @@ Here is the complete list of parameters supported in the Java TurboVNC Viewer:
     Auto-scaling tries to choose a scaling factor in such a way that the whole
     remote desktop will fit on the local screen.  Currently, auto-scaling is
     supported only when the remote desktop is shown in a separate frame (always
-    true in the application mode, and also in the applet mode when the
-    "Open new window" parameter is set to "yes".)
+    true in standalone application mode, and also in applet mode when the
+    "Open new window" parameter is set to "yes".)  If the parameter is set to
+    "fixed ratio", then automatic scaling is performed, but the original aspect
+    ratio is preserved.
 
 --> "Sync clipboards"
 
