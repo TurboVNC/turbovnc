@@ -194,13 +194,13 @@ Read a plain-text password from stdin.  Irrelevant if Unix login
 authentication is used.
 .TP
 \fB\-singlebuffer\fR
-Normally, TurboVNC will wait until a window has finished redrawing
-on the server before it redraws the window on the client.  This is
-called "double buffering", and it prevents tearing artifacts when
-a 3D or video application switches frames.  Disabling double
-buffering makes TurboVNC behave more like other VNC implementations.
-Normally, you shouldn't need to change this setting unless
-something isn't working right.
+The TurboVNC Viewer's default behavior is to wait until all tiles in a
+framebuffer update have been received and decoded before it draws the
+framebuffer update to the screen.  This is a form of double buffering,
+and it reduces tearing artifacts when 3D or video applications switch
+frames.  Passing an argument of \fB\-singlebuffer\fR to vncviewer will
+cause it to draw each tile in the framebuffer update as it is received.
+This may be desirable on very slow connections.
 .TP
 \fB\-lowqual\fR
 Select the "Tight + Low Quality JPEG" image encoding protocol.  This is the
