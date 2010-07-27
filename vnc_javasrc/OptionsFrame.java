@@ -47,7 +47,7 @@ class OptionsFrame extends Frame
     "Mouse buttons 2 and 3",
     "View only",
     "Scale remote cursor",
-    "Share desktop",
+    "Share desktop"
   };
 
   static String[][] values = {

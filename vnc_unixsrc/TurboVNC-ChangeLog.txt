@@ -78,6 +78,10 @@ was resized to larger than 2.75 megapixels.
 [16]
 Added double buffering option to Java TurboVNC Viewer.
 -------------------------------------------------------------------------------
+[17]
+"Login again" button now works when running the Java TurboVNC Viewer as a
+standalone application.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
