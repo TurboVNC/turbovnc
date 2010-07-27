@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
 //  Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
 //  Copyright (C) 2006 Sun Microsystems, Inc.  All Rights Reserved.
 //  Copyright (C) 2004 Horizon Wimba.  All Rights Reserved.
@@ -198,8 +199,9 @@ class VncCanvas extends Canvas
 	if (jpegRect != null) {
 	  synchronized(jpegRect) {
 	    memGraphics.drawImage(img, jpegRect.x, jpegRect.y, null);
-	    scheduleRepaint(jpegRect.x, jpegRect.y,
-			    jpegRect.width, jpegRect.height);
+	    if (!viewer.options.doubleBuffer)
+	      scheduleRepaint(jpegRect.x, jpegRect.y,
+			      jpegRect.width, jpegRect.height);
 	    jpegRect.notify();
 	  }
 	}
@@ -400,6 +402,8 @@ class VncCanvas extends Canvas
 	rfb.readFramebufferUpdate();
 	statNumUpdates++;
 
+	int dbx = -1, dby = -1, dbw = -1, dbh = -1;
+
 	boolean cursorPosReceived = false;
 
 	for (int i = 0; i < rfb.updateNRects; i++) {
@@ -409,8 +413,14 @@ class VncCanvas extends Canvas
 	  int rx = rfb.updateRectX, ry = rfb.updateRectY;
 	  int rw = rfb.updateRectW, rh = rfb.updateRectH;
 
-	  if (rfb.updateRectEncoding == rfb.EncodingLastRect)
+	  if (rfb.updateRectEncoding == rfb.EncodingLastRect) {
+	    if (viewer.options.doubleBuffer && dbx >= 0 && dby >= 0
+		&& dbw >= 1 && dbh >= 1) {
+	      scheduleRepaint(dbx, dby, dbw, dbh);
+	      dbx = dby = dbw = dbh = -1;
+	    }
 	    break;
+	  }
 
 	  if (rfb.updateRectEncoding == rfb.EncodingNewFBSize) {
 	    rfb.setFramebufferSize(rw, rh);
@@ -433,6 +443,11 @@ class VncCanvas extends Canvas
           long numBytesReadBefore = rfb.getNumBytesRead();
 
           rfb.startTiming();
+
+	  if (rx < dbx || dbx < 0) dbx = rx;
+	  if (ry < dby || dby < 0) dby = ry;
+	  if (rx + rw > dbx + dbw || dbw < 0) dbw = rx + rw - dbx;
+	  if (ry + rh > dby + dbh || dbh < 0) dbh = ry + rh - dby;
 
 	  switch (rfb.updateRectEncoding) {
 	  case RfbProto.EncodingRaw:
@@ -475,6 +490,12 @@ class VncCanvas extends Canvas
           statNumBytesDecoded += rw * rh * bytesPixel;
           statNumBytesEncoded +=
             (int)(rfb.getNumBytesRead() - numBytesReadBefore);
+	}
+
+	if (viewer.options.doubleBuffer && dbx >= 0 && dby >= 0
+	    && dbw >= 1 && dbh >= 1) {
+	    scheduleRepaint(dbx, dby, dbw, dbh);
+	    dbx = dby = dbw = dbh = -1;
 	}
 
 	boolean fullUpdateNeeded = false;
@@ -559,7 +580,7 @@ class VncCanvas extends Canvas
     }
 
     handleUpdatedPixels(x, y, w, h);
-    if (paint)
+    if (paint && !viewer.options.doubleBuffer)
       scheduleRepaint(x, y, w, h);
   }
 
@@ -573,7 +594,7 @@ class VncCanvas extends Canvas
     memGraphics.copyArea(rfb.copyRectSrcX, rfb.copyRectSrcY, w, h,
 			 x - rfb.copyRectSrcX, y - rfb.copyRectSrcY);
 
-    scheduleRepaint(x, y, w, h);
+    if (!viewer.options.doubleBuffer) scheduleRepaint(x, y, w, h);
   }
 
   //
@@ -625,7 +646,7 @@ class VncCanvas extends Canvas
       memGraphics.fillRect(sx, sy, sw, sh);
     }
 
-    scheduleRepaint(x, y, w, h);
+    if (!viewer.options.doubleBuffer) scheduleRepaint(x, y, w, h);
   }
 
   //
@@ -674,7 +695,7 @@ class VncCanvas extends Canvas
       memGraphics.fillRect(sx, sy, sw, sh);
     }
 
-    scheduleRepaint(x, y, w, h);
+    if (!viewer.options.doubleBuffer) scheduleRepaint(x, y, w, h);
   }
 
   //
@@ -703,7 +724,7 @@ class VncCanvas extends Canvas
       }
 
       // Finished with a row of tiles, now let's show it.
-      scheduleRepaint(x, y, w, h);
+      if (!viewer.options.doubleBuffer) scheduleRepaint(x, y, w, h);
     }
   }
 
@@ -902,7 +923,7 @@ class VncCanvas extends Canvas
 
     zrleInStream.reset();
 
-    scheduleRepaint(x, y, w, h);
+    if (!viewer.options.doubleBuffer) scheduleRepaint(x, y, w, h);
   }
 
   int readPixel(InStream is) throws Exception {
@@ -1102,7 +1123,7 @@ class VncCanvas extends Canvas
     }
 
     handleUpdatedPixels(x, y, w, h);
-    scheduleRepaint(x, y, w, h);
+    if (!viewer.options.doubleBuffer) scheduleRepaint(x, y, w, h);
   }
 
   //
@@ -1163,7 +1184,7 @@ class VncCanvas extends Canvas
 	memGraphics.setColor(bg);
       }
       memGraphics.fillRect(x, y, w, h);
-      scheduleRepaint(x, y, w, h);
+      if (!viewer.options.doubleBuffer) scheduleRepaint(x, y, w, h);
       return;
 
     }
@@ -1400,7 +1421,7 @@ class VncCanvas extends Canvas
     }
 
     handleUpdatedPixels(x, y, w, h);
-    scheduleRepaint(x, y, w, h);
+    if (!viewer.options.doubleBuffer) scheduleRepaint(x, y, w, h);
   }
 
   //
