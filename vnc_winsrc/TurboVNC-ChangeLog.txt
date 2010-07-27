@@ -75,6 +75,9 @@ to activate full screen mode, then they know how to deactivate it as well.)
 Fixed an issue whereby the TurboVNC Server would crash when a VirtualGL window
 was resized to larger than 2.75 megapixels.
 -------------------------------------------------------------------------------
+[16]
+Implement double buffering feature in Java TurboVNC Viewer.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
