@@ -506,20 +506,17 @@ class VncCanvas extends Canvas
 
           rfb.startTiming();
 
+	  if (rx < dbx || dbx < 0) dbx = rx;
+	  if (ry < dby || dby < 0) dby = ry;
+	  if (rx + rw > dbx + dbw || dbw < 0) dbw = rx + rw - dbx;
+	  if (ry + rh > dby + dbh || dbh < 0) dbh = ry + rh - dby;
+
 	  switch (rfb.updateRectEncoding) {
 	  case RfbProto.EncodingRaw:
-	    if (rx < dbx || dbx < 0) dbx = rx;
-	    if (ry < dby || dby < 0) dby = ry;
-	    if (rx + rw > dbx + dbw || dbw < 0) dbw = rx + rw - dbx;
-	    if (ry + rh > dby + dbh || dbh < 0) dbh = ry + rh - dby;
 	    statNumRectsRaw++;
 	    handleRawRect(rx, ry, rw, rh);
 	    break;
 	  case RfbProto.EncodingCopyRect:
-	    if (rx < dbx || dbx < 0) dbx = rx;
-	    if (ry < dby || dby < 0) dby = ry;
-	    if (rx + rw > dbx + dbw || dbw < 0) dbw = rx + rw - dbx;
-	    if (ry + rh > dby + dbh || dbh < 0) dbh = ry + rh - dby;
 	    statNumRectsCopy++;
 	    handleCopyRect(rx, ry, rw, rh);
 	    break;
@@ -541,10 +538,6 @@ class VncCanvas extends Canvas
             handleZlibRect(rx, ry, rw, rh);
 	    break;
 	  case RfbProto.EncodingTight:
-	    if (rx < dbx || dbx < 0) dbx = rx;
-	    if (ry < dby || dby < 0) dby = ry;
-	    if (rx + rw > dbx + dbw || dbw < 0) dbw = rx + rw - dbx;
-	    if (ry + rh > dby + dbh || dbh < 0) dbh = ry + rh - dby;
 	    statNumRectsTight++;
 	    handleTightRect(rx, ry, rw, rh);
 	    break;
