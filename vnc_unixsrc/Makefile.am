@@ -80,6 +80,7 @@ xserver-install: vncserver
 	mkdir -p $(DESTDIR)/$(prefix)/vnc/classes/
 	$(INSTALL) -m 644 $(srcdir)/classes/index.vnc $(DESTDIR)/$(prefix)/vnc/classes/
 	$(INSTALL) -m 644 $(srcdir)/classes/VncViewer.jar $(DESTDIR)/$(prefix)/vnc/classes/
+	$(INSTALL) -m 644 $(srcdir)/classes/README $(DESTDIR)/$(prefix)/vnc/classes/
 	mkdir -p $(DESTDIR)/$(sysconfdir)/
 	$(INSTALL) -m 644 $(srcdir)/turbovncserver.conf $(DESTDIR)/$(sysconfdir)/
 	$(INSTALL) -m 644 $(srcdir)/turbovncserver-auth.conf $(DESTDIR)/$(sysconfdir)/

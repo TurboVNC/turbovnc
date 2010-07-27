@@ -112,6 +112,7 @@ d none $pkgname/vnc 0755 root bin
 d none $pkgname/vnc/classes 0755 root bin
 f none $pkgname/vnc/classes/VncViewer.jar 0644 root bin
 f none $pkgname/vnc/classes/index.vnc 0644 root bin
+f none $pkgname/vnc/classes/README 0644 root bin
 d none $pkgname/etc 0755 root bin
 f none $pkgname/etc/turbovncserver.conf 0644 root bin
 f none $pkgname/etc/turbovncserver-auth.conf 0644 root bin
