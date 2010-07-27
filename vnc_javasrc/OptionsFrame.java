@@ -42,6 +42,7 @@ class OptionsFrame extends Frame
     "JPEG chrominance subsampling",
     "JPEG image quality",
     "Zlib compression level",
+    "Double buffering",
     "Cursor shape updates",
     "Use CopyRect",
     "Mouse buttons 2 and 3",
@@ -68,6 +69,7 @@ class OptionsFrame extends Frame
       "81", "82", "83", "84", "85", "86", "87", "88", "89", "90",
       "91", "92", "93", "94", "95", "96", "97", "98", "99", "100" },
     { "None", "1" },
+    { "Yes", "No" },
     { "Enable", "Ignore", "Disable" },
     { "Yes", "No" },
     { "Normal", "Reversed" },
@@ -84,13 +86,14 @@ class OptionsFrame extends Frame
     subsampLevelIndex    = 2,
     jpegQualityIndex     = 3,
     compressLevelIndex   = 4,
-    cursorUpdatesIndex   = 5,
-    useCopyRectIndex     = 6,
-    mouseButtonIndex     = 7,
-    viewOnlyIndex        = 8,
-    scalingFactorIndex   = 9,
-    scaleCursorIndex     = 10,
-    shareDesktopIndex    = 11;
+    doubleBufferIndex    = 5,
+    cursorUpdatesIndex   = 6,
+    useCopyRectIndex     = 7,
+    mouseButtonIndex     = 8,
+    viewOnlyIndex        = 9,
+    scalingFactorIndex   = 10,
+    scaleCursorIndex     = 11,
+    shareDesktopIndex    = 12;
 
   Label[] labels = new Label[names.length];
   Choice[] choices = new Choice[names.length];
@@ -107,6 +110,7 @@ class OptionsFrame extends Frame
   int subsampLevel;
   int jpegQuality;
   boolean enableJpeg;
+  boolean doubleBuffer;
   boolean useCopyRect;
   boolean requestCursorUpdates;
   boolean ignoreCursorUpdates;
@@ -170,6 +174,7 @@ class OptionsFrame extends Frame
     choices[subsampLevelIndex].select("None");
     choices[jpegQualityIndex].select("95");
     choices[compressLevelIndex].select("None");
+    choices[doubleBufferIndex].select("Yes");
     choices[cursorUpdatesIndex].select("Enable");
     choices[useCopyRectIndex].select("Yes");
     choices[mouseButtonIndex].select("Normal");
@@ -343,6 +348,8 @@ class OptionsFrame extends Frame
 
   void setOtherOptions() {
 
+    doubleBuffer = choices[doubleBufferIndex].getSelectedItem().equals("Yes");
+
     reverseMouseButtons2And3
       = choices[mouseButtonIndex].getSelectedItem().equals("Reversed");
 
@@ -508,7 +515,8 @@ class OptionsFrame extends Frame
     } else if (source == choices[mouseButtonIndex] ||
 	       source == choices[shareDesktopIndex] ||
 	       source == choices[viewOnlyIndex] ||
-	       source == choices[scaleCursorIndex]) {
+	       source == choices[scaleCursorIndex] ||
+	       source == choices[doubleBufferIndex]) {
 
       setOtherOptions();
 
