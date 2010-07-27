@@ -74,15 +74,15 @@ xserver-clean: Xvnc/config/cf/tvnc_version.h
 xserver-install: vncserver
 	$(INSTALL) -m 755 ./vncserver $(DESTDIR)/$(bindir)/
 	$(INSTALL) -m 755 ./Xvnc/programs/Xserver/Xvnc $(DESTDIR)/$(bindir)/
-	$(INSTALL) -m 755 $(srcdir)/vncserver.man $(DESTDIR)/$(mandir)/man1/vncserver.1
-	$(INSTALL) -m 755 $(srcdir)/Xvnc/programs/Xserver/Xvnc.man $(DESTDIR)/$(mandir)/man1/Xvnc.1
-	$(INSTALL) -m 755 $(srcdir)/Xvnc/programs/Xserver/Xserver.man $(DESTDIR)/$(mandir)/man1/Xserver.1
+	$(INSTALL) -m 644 $(srcdir)/vncserver.man $(DESTDIR)/$(mandir)/man1/vncserver.1
+	$(INSTALL) -m 644 $(srcdir)/Xvnc/programs/Xserver/Xvnc.man $(DESTDIR)/$(mandir)/man1/Xvnc.1
+	$(INSTALL) -m 644 $(srcdir)/Xvnc/programs/Xserver/Xserver.man $(DESTDIR)/$(mandir)/man1/Xserver.1
 	mkdir -p $(DESTDIR)/$(prefix)/vnc/classes/
-	$(INSTALL) -m 755 $(srcdir)/classes/index.vnc $(DESTDIR)/$(prefix)/vnc/classes/
-	$(INSTALL) -m 755 $(srcdir)/classes/VncViewer.jar $(DESTDIR)/$(prefix)/vnc/classes/
+	$(INSTALL) -m 644 $(srcdir)/classes/index.vnc $(DESTDIR)/$(prefix)/vnc/classes/
+	$(INSTALL) -m 644 $(srcdir)/classes/VncViewer.jar $(DESTDIR)/$(prefix)/vnc/classes/
 	mkdir -p $(DESTDIR)/$(sysconfdir)/
-	$(INSTALL) -m 755 $(srcdir)/turbovncserver.conf $(DESTDIR)/$(sysconfdir)/
-	$(INSTALL) -m 755 $(srcdir)/turbovncserver-auth.conf $(DESTDIR)/$(sysconfdir)/
+	$(INSTALL) -m 644 $(srcdir)/turbovncserver.conf $(DESTDIR)/$(sysconfdir)/
+	$(INSTALL) -m 644 $(srcdir)/turbovncserver-auth.conf $(DESTDIR)/$(sysconfdir)/
 
 xserver-uninstall:
 	rm -f $(DESTDIR)/$(bindir)/vncserver
