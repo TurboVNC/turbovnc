@@ -103,6 +103,7 @@ fi
 %{_prefix}/bin/autocutsel
 %{_prefix}/vnc/classes/index.vnc
 %{_prefix}/vnc/classes/VncViewer.jar
+%{_prefix}/vnc/classes/README
 %{_mandir}/man1/Xvnc.1*
 %{_mandir}/man1/Xserver.1*
 %{_mandir}/man1/vncserver.1*

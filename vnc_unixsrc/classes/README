@@ -1,0 +1,533 @@
+
+  Java TurboVNC Viewer
+
+======================================================================
+
+This distribution is based on the standard VNC source and includes new
+features and fixes, such as additional low-bandwidth optimizations, major GUI
+improvements, and more.
+
+	Copyright (C) 1999 AT&T Laboratories Cambridge.
+	Copyright (C) 2000 Tridia Corp.
+	Copyright (C) 2002-2003 RealVNC Ltd.
+	Copyright (C) 2001-2004 HorizonLive.com, Inc.
+	Copyright (C) 2000-2007 Constantin Kaplinsky
+	Copyright (C) 2000-2009 TightVNC Group
+	Copyright (C) 2009 Paul Donohue
+	Copyright (C) 2009-2010 D. R. Commander
+	All rights reserved.
+
+This software is distributed under the GNU General Public Licence as
+published by the Free Software Foundation.  See the file LICENCE.TXT for the
+conditions under which this software is made available.  TurboVNC also
+contains code from other sources.  See the Acknowledgements section below and
+the individual files for details of the conditions under which they are made
+available.
+
+
+Compiling
+=========
+
+To compile all of the .java files into .class files, simply do:
+
+	% make
+
+This will also generate a JAR (Java ARchive) file containing all of the
+classes.  Most JVM (Java Virtual Machine) implementations are able to use
+either the set of .class files or the JAR.
+
+
+Installation
+============
+
+There are three basic ways to use the Java TurboVNC Viewer:
+
+  1. Running the applet as part of the TurboVNC Server installation.
+
+     Both the Unix and Windows versions of the TurboVNC Server include a small
+     built-in HTTP server which can serve the Java TurboVNC Viewer to web
+     clients.  This enables easy access to the shared desktop without the need
+     to install any software on the client machine.
+
+     The Unix TurboVNC Server (Xvnc) is able to serve up any set of files which
+     are present in a particular directory, which is determined by the -httpd
+     argument to Xvnc.  In the default version of the vncserver script, this
+     argument is set to ../vnc/classes, relative to the directory containing
+     the vncserver script.  Thus, one can easily deploy a modified version of
+     the Java TurboVNC Viewer by simply copying a new JAR file to this
+     directory.
+
+     The Windows TurboVNC Server (WinVNC) embeds the JAR file inside of its
+     executable, so deploying a modified version of the Java TurboVNC Viewer
+     on a Windows server requires rebuilding WinVNC.
+
+  2. Running the applet from a standalone web server.
+
+     Another possibility for using the Java TurboVNC Viewer is to install it
+     under a fully-functional HTTP server such as Apache or IIS.  Due to Java
+     security restrictions, the applet must be signed in order for it to
+     connect to a TurboVNC Server running on a different machine from the
+     HTTP server.
+
+     One can install the Java TurboVNC Viewer by simply copying the .class and
+     .jar files into a directory that is under the control of the HTTP server.
+     Also, an HTML page should be created which will act as a the base document
+     for the Java TurboVNC Viewer applet (an example named index.html is
+     provided in this directory.  Modify this file to suit your specific
+     needs.)
+
+  3. Running the viewer as a standalone application.
+
+     Finally, the Java TurboVNC Viewer can be executed locally on the client
+     machine, but this method requires installation of either the JRE (Java
+     Runtime Environment) or the JDK (Java Development Kit).  If the
+     VncViewer.jar file is in the current directory, then the Java TurboVNC
+     Viewer can be launched with the following command line:
+
+         java -jar VncViewer.jar VncViewer HOST {host} PORT {port}
+
+     where {host} is the hostname or IP address of the TurboVNC server machine
+     and {port} is typically 5900 + the X display number of the TurboVNC
+     session to which you want to connect (example: 5901 if connecting to
+     display :1.)  {port} defaults to 5900 if omitted.  There are a number of
+     other optional parameters which can be specified (see the Parameters
+     section below.)
+
+
+Parameters
+==========
+
+The Java TurboVNC Viewer supports a number of parameters, allowing you to
+customize its behavior.  Most parameters directly correspond to the settings
+found in the Options window.  However, there are some parameters that have no
+equivalent in the GUI.
+
+Parameters can be specified in one of the two ways, depending on how the Java
+TurboVNC Viewer is used:
+
+  1. When the Java TurboVNC Viewer is run as an applet (embedded within an HTML
+     document), parameters should be specified using the <PARAM> HTML tags
+     within the appropriate <APPLET> section.  Example:
+
+    <APPLET CODE=VncViewer.class ARCHIVE=VncViewer.jar WIDTH=400 HEIGHT=300>
+      <PARAM NAME="PORT" VALUE=5901>
+      <PARAM NAME="Scaling factor" VALUE=50>
+    </APPLET>
+
+  2. When run as a standalone application, the Java TurboVNC Viewer reads
+     parameters from the command line.  Example:
+
+     java -jar VncViewer.jar VncViewer HOST my_server PORT 5901 "Scaling factor" 50
+
+Both parameter names and their values are case-insensitive.  The only
+exception is the "PASSWORD" parameter, as VNC passwords are case-sensitive.
+
+Here is the complete list of parameters supported in the Java TurboVNC Viewer:
+
+--> "HOST" (no GUI equivalent)
+
+    Value: hostname or IP address of the TurboVNC server machine
+    Default: in applet mode, the host from which the applet was loaded
+
+    This parameter tells the viewer which server to connect to.  Unless the
+    applet is signed, then the default Java security policy will allow it to
+    connect only to the host from which it was loaded.  This parameter is
+    required if the viewer is to be used as a standalone application.
+
+--> "PORT" (no GUI equivalent)
+
+    Value: TCP port number of the TurboVNC session
+    Default: 5900
+
+    This parameter specifies the TCP port number on which the TurboVNC Server
+    session is listening.  This is typically 5900 + the X display number of
+    of the TurboVNC session (example: 5901 if connecting to display :1.)
+
+--> "PASSWORD"
+
+    Value: VNC password in plain text
+    Default: none
+
+    If this parameter is set, then the viewer will use this value as the VNC
+    password when performing standard VNC authentication.  It is strongly
+    recommended that this parameter be used only with a one-time password.
+    Exposing a permanent VNC password in this manner represents a large
+    security risk.
+
+--> "ENCPASSWORD"
+
+    Value: encrypted session password in hex-ascii
+    Default: none
+
+    The same as the "PASSWORD" parameter but DES-encrypted using a fixed key.
+    Its value should be represented in hex-ascii, e.g. "494015f9a35e8b22".
+    This parameter has a higher priority than the "PASSWORD" parameter.  Do not
+    use this unless you understand the security ramifications of it.  In
+    particular, this parameter is only slightly more secure than storing the
+    password in plain text, since the DES decryption key is always known.
+
+--> "Allow JPEG compression"
+
+    Values: "Yes", "No"
+    Default: "Yes"
+
+    If this option is enabled, then TurboVNC will use JPEG compression for all
+    image tiles with more than 24 unique colors and paletted encoding for all
+    other image tiles.  If this option is disabled, then TurboVNC will select
+    between paletted or raw encoding depending on the size of the image tile
+    and its color count.
+
+--> "JPEG image quality"
+
+    Values: "1" through "100"
+    Default: "95"
+
+    Lower quality levels produce grainier JPEG images with more noticeable
+    compression artifacts, but lower quality levels also use less network
+    bandwidth and CPU time.  The default value of 95 should be "perceptually
+    lossless" under most viewing conditions.
+
+--> "JPEG chrominance subsampling"
+
+    Values: "Grayscale", "None", "2X", "4X"
+    Default: "None"
+
+    When compressing an image using JPEG, the RGB pixels are first converted
+    to the YUV colorspace.  After this colorspace conversion, chrominance
+    subsampling can be used to discard some of the U and V (chrominance)
+    components in order to save bandwidth.  1x subsampling retains the
+    chrominance components for all pixels, 2x subsampling retains the
+    chrominance components for every other pixel, 4x subsampling retains the
+    chrominance components for every fourth pixel, and grayscale throws out all
+    of the chrominance components.  1x subsampling uses the most network
+    bandwidth and CPU time, whereas grayscale uses the least.
+
+--> "Zlib compression level"
+
+    Values: "None", "1"
+    Default: "1" if JPEG compression is enabled, "None" otherwise
+
+    If Zlib compression is enabled, then paletted and raw-encoded image tiles
+    will be compressed with Zlib prior to transmission.  This decreases network
+    bandwidth usage at the expense of increased server CPU usage.  If JPEG
+    compression is enabled, then Zlib compression is always used with non-JPEG
+    image tiles.
+
+--> "Cursor shape updates"
+
+    Values: "Enable", "Ignore", "Disable"
+    Default: "Enable"
+
+    Cursor shape updates is a protocol extension used to handle remote cursor
+    movements locally on the client, thus saving bandwidth and eliminating
+    delays in mouse pointer movement.  Note that the current implementation of
+    cursor shape updates does not allow a client to track the actual mouse
+    cursor position on the server.  This means that clients would not see mouse
+    cursor movements if the mouse was moved either locally on the server or by
+    another remote VNC client.  Set this parameter to "Disable" if you always
+    want to see the server's real cursor position.  Setting this option to
+    "Ignore" is similar to "Enable", but the remote cursor will not be visible
+    at all.  This can be a reasonable setting if you don't care about cursor
+    shape and don't want to see two mouse cursors, one above the other.
+
+--> "Use CopyRect"
+
+    Values: "Yes", "No"
+    Default: "Yes"
+
+    When an image rectangle has been moved from one location to another on the
+    VNC server's desktop but has not otherwise changed, the CopyRect protocol
+    sends only the new location of the rectangle and relies on the VNC viewer
+    to copy the actual pixels.  This saves network bandwidth when a window is
+    moved around on the VNC server or when an application sends the same image
+    over and over again.
+
+--> "Mouse buttons 2 and 3"
+
+    Values: "Normal", "Reversed".
+    Default: "Normal".
+
+    If set to "Reversed", then the right mouse button (button 2) will act as if
+    it was the middle mouse button (button 3), and vice versa.
+
+--> "View only"
+
+    Values: "Yes", "No"
+    Default: "No"
+
+    If set to "Yes", then all keyboard and mouse events in the desktop window
+    will be silently ignored and will not be passed to the TurboVNC server.
+
+--> "Scale remote cursor"
+
+    Values: "No", "50%", "75%", "125%", "150%"
+    Default: "No"
+
+    If a percentage value is specified, then the remote cursor is reduced
+    or enlarged accordingly.  Scaling takes place only when "View only"
+    is set to "No" and "Cursor shape updates" is set to "Enable".
+
+--> "Share desktop"
+
+    Values: "Yes", "No"
+    Default: "Yes"
+
+    When connecting, request a shared session.  In TurboVNC, this is the
+    default.  When the session is shared, other users can connect to the
+    session (assuming they have the correct authentication credentials) and
+    collaborate with the user who started the session.
+
+--> "Open new window" (no GUI equivalent, applicable only in the applet mode)
+
+    Values: "Yes", "No"
+    Default: "No"
+
+    Operate in a separate window.  This makes it possible to resize the
+    desktop and adds scroll bars when necessary.  If the server supports a
+    variable desktop size, then the window will resize automatically when
+    the remote desktop size changes.
+
+--> "Scaling factor" (no GUI equivalent)
+
+    Value: an integer in the range of [1..1000], or the string "auto"
+    Default: "100"
+
+    Reduce or enlarge the remote desktop image.  The value is interpreted as a
+    scaling factor in percent.  The default value of 100% corresponds to the
+    original remote desktop size.  Values below 100 reduce the image size,
+    whereas values above 100 enlarge the image proportionally.  If the
+    parameter is set to "auto", then automatic scaling is performed.
+    Auto-scaling tries to choose a scaling factor in such a way that the whole
+    remote desktop will fit on the local screen.  Currently, auto-scaling is
+    supported only when the remote desktop is shown in a separate frame (always
+    true in the application mode, and also in the applet mode when the
+    "Open new window" parameter is set to "yes".)
+
+--> "Sync clipboards"
+
+    Values: "Yes", "No"
+    Default: "Yes"
+
+    Automatically synchronize the local and remote clipboards.  If set to "No",
+    then the remote clipboard will still be accessible via the "Clipboard"
+    button.
+
+--> "Show controls" (no GUI equivalent)
+
+    Values: "Yes", "No"
+    Default: "Yes"
+
+    Set to "No" if you want to get rid of the button panel at the top of the
+    viewer window.
+
+--> "Offer relogin" (no GUI equivalent)
+
+    Values: "Yes", "No"
+    Default: "Yes"
+
+    If set to "No", then the "Login again" and "Close window" buttons won't be
+    shown on disconnects or after an error has occured.
+
+--> "Show offline desktop" (no GUI equivalent)
+
+    Values: "Yes", "No"
+    Default: "No"
+
+    If set to "Yes", then the viewer will continue to display the remote
+    desktop even if the server has closed the connection.  In this case, if the
+    button panel is enabled, then the "Disconnect" button would be
+    changed to "Hide desktop" after the connection is lost.
+
+--> "Defer screen updates" (no GUI equivalent)
+
+    Value: time in milliseconds
+    Default: "20"
+
+    When updating the desktop contents after receiving an update from the
+    server, schedule a repaint within the specified number of milliseconds.
+    This delay helps to coalesce several small updates into one drawing
+    operation, which improves CPU usage.  Set this parameter to 0 to disable
+    deferred updates.
+
+--> "Defer cursor updates" (no GUI equivalent)
+
+    Value: time in milliseconds
+    Default: "10"
+
+    When updating the desktop after moving the mouse, schedule a repaint within
+    the specified number of milliseconds.  This setting makes sense only when
+    the "Cursor shape updates" parameter is set to "Enable".  This delay helps
+    to coalesce several small updates into one drawing operation, which
+    improves CPU usage.  Set this parameter to 0 to disable deferred cursor
+    updates.
+
+--> "Defer update requests" (no GUI equivalent)
+
+    Value: time in milliseconds
+    Default: "0"
+
+    After processing an update received from server, wait for the specified
+    number of milliseconds before requesting the next screen update.  This
+    delay will end immediately if a mouse or keyboard event is sent and the
+    viewer is not in "view-only" mode.  Deferring update requests helps the
+    server to coalesce several small updates into one framebuffer update,
+    improving both bandwidth and CPU usage.  Increasing this parameter value
+    does not affect the responsiveness for mouse and keyboard events, but it
+    will cause delays in updating the screen when there is no mouse and
+    keyboard activity on the client side.
+
+--> "SocketFactory" (no GUI equivalent)
+
+    Value: name of the class
+    Default: none
+
+    This option provides a way to define an alternate I/O implementation.
+    The dynamically-referenced class must implement a SocketFactory
+    interface and create a Socket.  See SocketFactory.java for an example.
+
+--> "USER"
+
+    Value: user name for Unix login authentication
+    Default: none
+
+    Specify the user name for Unix login authentication.  This will also force
+    Unix login authentication to be used, if an authentication method that
+    supports it is enabled in the VNC server.
+
+--> "No Unix login" (no GUI equivalent)
+
+    Values: "Yes", "No"
+    Default: "No"
+
+    This will force standard VNC authentication to be used, if an
+    authentication method that supports it is enabled in the VNC server.  This
+    is useful if the server is configured to prefer an authentication method
+    that supports Unix login authentication and you want to override this
+    preference for a particular connection (for instance, to use a one-time
+    password.)
+
+
+
+--> "DEBUG_XU" (no GUI equivalent)
+
+    Value: non-negative integer
+    Default: 0
+
+    Debugging option that causes the update statistics to be reset after the
+    specified number of framebuffer updates.  This option was added to
+    measure the performance of VNC servers.  The first few updates (especially
+    the very first one) may be notably slower than others, so this allows the
+    viewer to exclude such updates from the statistics.
+
+--> "DEBUG_CU" (no GUI equivalent)
+
+    Value: non-negative integer
+    Default: 0
+
+    Debugging option that causes the viewer to disconnect after the specified
+    number of framebuffer updates.  When used with the "DEBUG_XU" parameter,
+    the number of updates specified in "DEBUG_XU" is not counted toward this
+    number.  For example, if "DEBUG_XU"=2 and "DEBUG_CU"=10, then the
+    viewer will reset update statistics after the first two updates, then
+    collect statistics for the next 10 updates, then disconnect automatically.
+    If the value of "DEBUG_CU" is 0, then the viewer will not disconnect
+    automatically.  This option was added to measure the performance of VNC
+    servers.
+
+
+RECORDING VNC SESSIONS
+======================
+
+The current version of the Java TurboVNC Viewer is able to record VNC (RFB)
+sessions in files for later playback.  The data format in the saved session
+files is compatible with the rfbproxy program written by Tim Waugh.  The most
+important note about session recording is that it is supported only if the Java
+security manager allows access to the local filesystem.  Typically, this is not
+the case unless the applet is signed.  To use this feature, either use the
+Java TurboVNC Viewer as a standalone application (Java Runtime Environment or
+Java Development Kit should be installed) or as a signed applet.  The code
+checks if it is possible to support session recording, and if so, then a
+"Record" button should appear in the button panel.  Pressing this button opens
+a new window which controls session recording.  The GUI is self-explanatory.
+
+Other important notes about session recording:
+
+--> All sessions are recorded with cursor shape updates turned off.  This is
+    necessary to represent remote cursor movements in the recorded sessions.
+
+--> Closing and re-opening the recording control window does not affect the
+    recording.  It is not necessary to keep that window open while recording a
+    session.
+
+--> Due to limitations in the Java zlib API (specifically, the lack of a flush
+    feature), the viewer has to recompress some of the RFB protocol stream
+    to synchronize the encoder's and the decoder's zlib streams.  Also, the
+    zlib streams' states have to be reset for each compressed rectangle,
+    causing compression ratios to be lower than in the original VNC session.
+    If you want to achieve the best possible performance, turn recording on
+    BEFORE connecting to the VNC server, otherwise CPU usage and compression
+    ratios may be noticeably less efficient.
+
+
+HINTS
+=====
+
+--> To refresh the remote desktop in the view-only mode, press "r" or "R"
+    on the keyboard.
+
+
+ACKNOWLEDGEMENTS
+================
+
+This distribution contains Java DES software by Dave Zimmerman
+<dzimm@widget.com> and Jef Poskanzer <jef@acme.com>.  This is:
+
+    Copyright (c) 1996 Widget Workshop, Inc. All Rights Reserved.
+
+    Permission to use, copy, modify, and distribute this software and its
+    documentation for NON-COMMERCIAL or COMMERCIAL purposes and without fee
+    is hereby granted, provided that this copyright notice is kept intact.
+    
+    WIDGET WORKSHOP MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE
+    SUITABILITY OF THE SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING BUT
+    NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+    PARTICULAR PURPOSE, OR NON-INFRINGEMENT. WIDGET WORKSHOP SHALL NOT BE
+    LIABLE FOR ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING,
+    MODIFYING OR DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
+    
+    THIS SOFTWARE IS NOT DESIGNED OR INTENDED FOR USE OR RESALE AS ON-LINE
+    CONTROL EQUIPMENT IN HAZARDOUS ENVIRONMENTS REQUIRING FAIL-SAFE
+    PERFORMANCE, SUCH AS IN THE OPERATION OF NUCLEAR FACILITIES, AIRCRAFT
+    NAVIGATION OR COMMUNICATION SYSTEMS, AIR TRAFFIC CONTROL, DIRECT LIFE
+    SUPPORT MACHINES, OR WEAPONS SYSTEMS, IN WHICH THE FAILURE OF THE
+    SOFTWARE COULD LEAD DIRECTLY TO DEATH, PERSONAL INJURY, OR SEVERE
+    PHYSICAL OR ENVIRONMENTAL DAMAGE ("HIGH RISK ACTIVITIES").  WIDGET
+    WORKSHOP SPECIFICALLY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTY OF
+    FITNESS FOR HIGH RISK ACTIVITIES.
+
+    Copyright (C) 1996 by Jef Poskanzer <jef@acme.com>.  All rights
+    reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions
+    are met:
+    1. Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
+
+    THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+    PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS
+    BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+    BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+    WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+    OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+    ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+    Visit the ACME Labs Java page for up-to-date versions of this and other
+    fine Java utilities: http://www.acme.com/java/
