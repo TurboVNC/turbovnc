@@ -213,6 +213,19 @@ Here is the complete list of parameters supported in the Java TurboVNC Viewer:
     compression is enabled, then Zlib compression is always used with non-JPEG
     image tiles.
 
+--> "Double buffering"
+
+    Values: "Yes", "No"
+    Default: "Yes"
+
+    The TurboVNC Viewer's default behavior is to wait until all tiles in a
+    framebuffer update have been received and decoded before it draws the
+    framebuffer update to the screen.  This is a form of double buffering, and
+    it reduces tearing artifacts when 3D or video applications switch frames.
+    Setting this option to "No" will cause the TurboVNC Viewer to draw each
+    tile in the framebuffer update as it is received.  This may be desirable on
+    very slow connections.
+
 --> "Cursor shape updates"
 
     Values: "Enable", "Ignore", "Disable"
