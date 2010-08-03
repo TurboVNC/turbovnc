@@ -3,6 +3,8 @@
  */
 
 /*
+ *  Copyright (C) 2010 University Corporation for Atmospheric Research.
+ *                     All Rights Reserved.
  *  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -290,7 +292,7 @@ httpProcessInput()
     ptr = strchr(fname, '?');
     if (ptr != NULL) {
 	*ptr = '\0';
-	if (!parseParams(&ptr[1], params, 1024)) {
+	if (!parseParams(&ptr[1], params, sizeof(params))) {
 	    params[0] = '\0';
 	    rfbLog("httpd: bad parameters in the URL\n");
 	}
@@ -471,30 +473,34 @@ parseParams(const char *request, char *result, int max_bytes)
 	    param_request[len] = '\0';
 	}
 
-	/* Split the request into parameter name and value */
-	value_str = strchr(&param_request[1], '=');
-	if (value_str == NULL) {
-	    return FALSE;
-	}
-	*value_str++ = '\0';
-	if (strlen(value_str) == 0) {
-	    return FALSE;
-	}
+	/* len could be zero here! */
+	if (len > 0) {
+	    /* Split the request into parameter name and value */
+	    value_str = strchr(&param_request[1], '=');
+	    if (value_str == NULL) {
+		return FALSE;
+	    }
+	    *value_str++ = '\0';
+	    if (strlen(value_str) == 0) {
+		return FALSE;
+	    }
 
-	/* Validate both parameter name and value */
-	if (!validateString(param_request) || !validateString(value_str)) {
-	    return FALSE;
-	}
+	    /* Validate both parameter name and value */
+	    if (!validateString(param_request) || !validateString(value_str)) {
+		return FALSE;
+	    }
 
-	/* Prepare HTML-formatted representation of the name=value pair */
-	len = sprintf(param_formatted,
-		      "<PARAM NAME=\"%s\" VALUE=\"%s\">\n",
-		      param_request, value_str);
-	if (cur_bytes + len + 1 > max_bytes) {
-	    return FALSE;
+	    /* Prepare HTML-formatted representation of the name=value pair */
+	    len = snprintf(param_formatted, sizeof(param_formatted),
+			  "<PARAM NAME=\"%s\" VALUE=\"%s\">\n",
+			  param_request, value_str);
+	    if ((len >= sizeof(param_formatted)) ||
+                (cur_bytes + len + 1 > max_bytes)) {
+		return FALSE;
+	    }
+	    strcat(result, param_formatted);
+	    cur_bytes += len;
 	}
-	strcat(result, param_formatted);
-	cur_bytes += len;
 
 	/* Go to the next parameter */
 	if (delim_ptr == NULL) {
