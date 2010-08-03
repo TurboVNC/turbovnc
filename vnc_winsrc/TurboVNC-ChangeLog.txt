@@ -82,6 +82,9 @@ Added double buffering option to Java TurboVNC Viewer.
 "Login again" button now works when running the Java TurboVNC Viewer as a
 standalone application.
 -------------------------------------------------------------------------------
+[18]
+Fix a couple of potential buffer overruns in Xvnc's embedded HTTP server.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
