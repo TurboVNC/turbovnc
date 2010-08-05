@@ -1,0 +1,18 @@
+* Multithreading in TurboVNC
+
+The TurboVNC Server can use multiple threads to perform image encoding and
+compression, thus allowing it to take advantage of multi-core or
+multi-processor systems.  The server splits the screen vertically into N tiles,
+where N is the number of threads, and assigns each tile to a separate thread.
+The scalability of this algorithm is nearly linear when used with demanding 3D
+or video applications that fill most of the screen.  However, whether or not
+multithreading improves the overall performance of TurboVNC depends largely on
+the performance of the client and the network.  If either the client or the
+network are the primary performance bottlenecks, then multithreading the server
+will not help.  It will almost certainly have no effect on networks slower than
+100 Megabit Ethernet or when using the Java TurboVNC Viewer.
+
+To enable server-side multithreading, set the ''TVNC_MT'' environment variable
+to ''1'' on the server prior to starting ''vncserver''.  The default behavior
+is to use as many threads as there are cores on the server machine, but you can
+set the ''TVNC_NTHREADS'' environment variable to override this.
