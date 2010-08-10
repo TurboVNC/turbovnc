@@ -1,4 +1,4 @@
-/* Copyright (C)2004 Landmark Graphics
+/* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
  *
  * The VNC system is free software; you can redistribute it and/or modify
