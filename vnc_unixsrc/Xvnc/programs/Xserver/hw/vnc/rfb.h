@@ -289,6 +289,8 @@ typedef struct rfbClientRec {
 
     struct rfbClientRec *next;
 
+    Bool continuousUpdates;
+
 } rfbClientRec, *rfbClientPtr;
 
 
