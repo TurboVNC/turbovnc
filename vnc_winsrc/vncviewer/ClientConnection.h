@@ -193,6 +193,7 @@ private:
 	void FilterGradient24 (int srcx, int srcy, int numRows);
 	void FilterGradient32 (int srcx, int srcy, int numRows);
 	void FilterPalette (int srcx, int srcy, int numRows);
+	void FilterPalette24 (int srcx, int srcy, int numRows);
 	void DecompressJpegRect(int x, int y, int w, int h);
 
 	// ClientConnectionZlibHex.cpp

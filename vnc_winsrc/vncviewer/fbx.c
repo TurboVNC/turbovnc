@@ -1,5 +1,6 @@
-/* Copyright (C)2004 Landmark Graphics
+/* Copyright (C)2004 Landmark Graphics Corporation
  * Copyright (C)2005, 2006 Sun Microsystems, Inc.
+ * Copyright (C)2010 D. R. Commander
  *
  * The VNC system is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -177,9 +178,9 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	}
 	else
 	{
-		rmask=0xFF;
+		rmask=0xFF0000;
 		gmask=0xFF00;
-		bmask=0xFF0000;
+		bmask=0xFF;
 	}
 
 	s->format=-1;
