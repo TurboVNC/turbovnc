@@ -510,13 +510,12 @@ void ClientConnection::FilterGradient24 (int srcx, int srcy, int numRows)
   CARD8 pix[3];
   int est[3];
 
-  CARD32 *dst = (CARD32 *)&fb.bits[srcy*fb.pitch + srcx*fbx_ps[fb.format]];
-  int dstw = fb.pitch / fbx_ps[fb.format];
+  int ps = fbx_ps[fb.format];
+  CARD8 *dst = (CARD8 *)&fb.bits[srcy*fb.pitch + srcx*ps];
 
-  CARD32 drs = fbx_roffset[fb.format]*8;
-  CARD32 dgs = fbx_goffset[fb.format]*8;
-  CARD32 dbs = fbx_boffset[fb.format]*8;
-
+  int rindex = fbx_roffset[fb.format];
+  int gindex = fbx_goffset[fb.format];
+  int bindex = fbx_boffset[fb.format];
 
   for (int y = 0; y < numRows; y++) {
 
@@ -525,9 +524,9 @@ void ClientConnection::FilterGradient24 (int srcx, int srcy, int numRows)
       pix[c] = m_tightPrevRow[c] + m_netbuf[y*m_tightRectWidth*3+c];
       thisRow[c] = pix[c];
     }
-    dst[y*dstw] = ((CARD32)pix[0] << drs)
-                | ((CARD32)pix[1] << dgs)
-                | ((CARD32)pix[2] << dbs);
+    dst[y*fb.pitch + rindex] = pix[0];
+    dst[y*fb.pitch + gindex] = pix[1];
+    dst[y*fb.pitch + bindex] = pix[2];
 
     // Remaining pixels of a row
     for (int x = 1; x < m_tightRectWidth; x++) {
@@ -542,9 +541,9 @@ void ClientConnection::FilterGradient24 (int srcx, int srcy, int numRows)
         pix[c] = (CARD8)est[c] + m_netbuf[(y*m_tightRectWidth+x)*3+c];
         thisRow[x*3+c] = pix[c];
       }
-      dst[y*dstw+x] = ((CARD32)pix[0] << drs)
-                    | ((CARD32)pix[1] << dgs)
-                    | ((CARD32)pix[2] << dbs);
+      dst[y*fb.pitch + x*ps + rindex] = pix[0];
+      dst[y*fb.pitch + x*ps + gindex] = pix[1];
+      dst[y*fb.pitch + x*ps + bindex] = pix[2];
     }
 
     memcpy(m_tightPrevRow, thisRow, m_tightRectWidth * 3);
