@@ -1,3 +1,4 @@
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2000, 2001 Constantin Kaplinsky. All Rights Reserved.
@@ -326,6 +327,8 @@ int ClientConnection::InitFilterPalette (int rw, int rh)
       m_tightPalette[i] = ((CARD32)p[0] << drs)
                         | ((CARD32)p[1] << dgs)
                         | ((CARD32)p[2] << dbs);
+
+    m_tightCurrentFilter = &ClientConnection::FilterPalette24;
   } else {
     CheckBufferSize(m_tightRectColors * (m_myFormat.bitsPerPixel / 8));
     ReadExact(m_netbuf, m_tightRectColors * (m_myFormat.bitsPerPixel / 8));
@@ -415,21 +418,24 @@ DEFINE_TIGHT_FILTER_COPY(32)
 
 void ClientConnection::FilterCopy24 (int srcx, int srcy, int numRows)
 {
-  CARD32 *dst = (CARD32 *)&fb.bits[srcy*fb.pitch + srcx*fbx_ps[fb.format]];
-  int dstw = fb.pitch / fbx_ps[fb.format];
-  CARD8 *p = (CARD8 *)m_netbuf;
+  int dstps = fbx_ps[fb.format];
+  CARD8 *dst = (CARD8 *)&fb.bits[srcy*fb.pitch + srcx*dstps];
+  CARD8 *src = (CARD8 *)m_netbuf;
+  CARD8 *srcptr, *dstptr, *srcptr2, *dstptr2;
+  int srcpitch = m_tightRectWidth*3;
 
-  SETUP_COLOR_SHORTCUTS;
-  CARD32 drs = fbx_roffset[fb.format]*8;
-  CARD32 dgs = fbx_goffset[fb.format]*8;
-  CARD32 dbs = fbx_boffset[fb.format]*8;
+  int rindex = fbx_roffset[fb.format];
+  int gindex = fbx_goffset[fb.format];
+  int bindex = fbx_boffset[fb.format];
 
-  int x;
-  for (int y = 0; y < numRows; y++) {
-    for (x = 0; x < m_tightRectWidth; x++, p+=3) {
-      dst[y*dstw+x] = ((CARD32)p[0] << drs)
-                    | ((CARD32)p[1] << dgs)
-                    | ((CARD32)p[2] << dbs);
+  for (srcptr = src, dstptr = dst; srcptr < &src[numRows*srcpitch] &&
+    dstptr < &dst[numRows*fb.pitch]; srcptr += srcpitch, dstptr += fb.pitch) {
+    for (srcptr2 = srcptr, dstptr2 = dstptr; srcptr2 < &srcptr[srcpitch] &&
+      dstptr2 < &dstptr[m_tightRectWidth*dstps]; srcptr2 += 3,
+      dstptr2 += dstps) {
+      dstptr2[rindex] = srcptr2[0];
+      dstptr2[gindex] = srcptr2[1];
+      dstptr2[bindex] = srcptr2[2];
     }
   }
 }
@@ -567,6 +573,34 @@ void ClientConnection::FilterPalette (int srcx, int srcy, int numRows)
     for (y = 0; y < numRows; y++)
       for (x = 0; x < m_tightRectWidth; x++)
         dst[y*dstw+x] = m_tightPalette[(int)src[y*m_tightRectWidth+x]];
+  }
+}
+
+void ClientConnection::FilterPalette24 (int srcx, int srcy, int numRows)
+{
+	int x, y, b, w, dstps = fbx_ps[fb.format];
+	CARD8 *src = (CARD8 *)m_netbuf;
+	CARD8 *dst = (CARD8 *)&fb.bits[srcy*fb.pitch + srcx*fbx_ps[fb.format]];
+
+  if (m_tightRectColors == 2) {
+    w = (m_tightRectWidth + 7) / 8;
+    for (y = 0; y < numRows; y++) {
+      for (x = 0; x < m_tightRectWidth / 8; x++) {
+        for (b = 7; b >= 0; b--) {
+          memcpy(&dst[y*fb.pitch + (x*8+7-b)*dstps],
+            &m_tightPalette[src[y*w+x] >> b & 1], 3);
+        }
+      }
+      for (b = 7; b >= 8 - m_tightRectWidth % 8; b--) {
+        memcpy(&dst[y*fb.pitch + (x*8+7-b)*dstps],
+          &m_tightPalette[src[y*w+x] >> b & 1], 3);
+      }
+    }
+  } else {
+    for (y = 0; y < numRows; y++)
+      for (x = 0; x < m_tightRectWidth; x++)
+        memcpy(&dst[y*fb.pitch + x*dstps],
+          &m_tightPalette[(int)src[y*m_tightRectWidth+x]], 3);
   }
 }
 
