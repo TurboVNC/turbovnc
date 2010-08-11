@@ -391,7 +391,7 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-autopass",      "*autoPass",           XrmoptionNoArg,  "True"},
   {"-user",          "*userLogin",          XrmoptionSepArg,  0},
   {"-nounixlogin",   "*noUnixLogin",        XrmoptionNoArg,  "True"},
-  {"-cu",            "*continuousUpdates",  XrmoptionNoArg,  "False"}
+  {"-cu",            "*continuousUpdates",  XrmoptionNoArg,  "True"}
 };
 
 int numCmdLineOptions = XtNumber(cmdLineOptions);

@@ -74,6 +74,8 @@ static Bool HandleTight32(int rx, int ry, int rw, int rh);
 static void ReadConnFailedReason(void);
 static long ReadCompactLen (void);
 
+static void SendContinuousUpdatesMessage(Bool enable);
+
 extern void UpdateQual(void);
 extern Bool HandleCursorPos(int, int);
 
@@ -500,6 +502,8 @@ InitialiseRFBConnection(void)
 
   if((env = getenv("TVNC_PROFILE"))!=NULL && !strcmp(env, "1"))
     rfbProfile = TRUE;
+
+  if(appData.continuousUpdates) SendContinuousUpdatesMessage(True);
 
   return True;
 }
@@ -1210,7 +1214,7 @@ SendKeyEvent(CARD32 key, Bool down)
  * SendContinuousUpdatesMessage.
  */
 
-void
+static void
 SendContinuousUpdatesMessage(Bool enable)
 {
   rfbEnableContinuousUpdatesMsg fencu;
@@ -1229,8 +1233,7 @@ SendContinuousUpdatesMessage(Bool enable)
 
   fprintf(stderr, "%s continuous updates\n", enable? "Enabling":"Disabling");
 
-  if (!WriteExact(rfbsock, (char *)&fencu, sz_rfbEnableContinuousUpdatesMsg))
-    return False;
+  WriteExact(rfbsock, (char *)&fencu, sz_rfbEnableContinuousUpdatesMsg);
 
   return;
 }
