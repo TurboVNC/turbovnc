@@ -321,6 +321,10 @@ InitCapabilities(void)
   CapsAdd(authCaps, rfbAuthUnixLogin, rfbTightVncVendor, sig_rfbAuthUnixLogin,
 	  "Unix login authentication");
 
+  /* Supported non-standard client-to-server messages */
+  CapsAdd(clientMsgCaps, rfbEnableContinuousUpdates, rfbTightVncVendor,
+	  sig_rfbEnableContinuousUpdates, "Enable/disable continuous updates");
+
   /* Supported encoding types */
   CapsAdd(encodingCaps, rfbEncodingCopyRect, rfbStandardVendor,
 	  sig_rfbEncodingCopyRect, "Standard CopyRect encoding");
@@ -1199,6 +1203,48 @@ SendKeyEvent(CARD32 key, Bool down)
   ke.down = down ? 1 : 0;
   ke.key = Swap32IfLE(key);
   return WriteExact(rfbsock, (char *)&ke, sz_rfbKeyEventMsg);
+}
+
+
+/*
+ * SendContinuousUpdatesMessage.
+ */
+
+void
+SendContinuousUpdatesMessage(Bool enable)
+{
+  rfbEnableContinuousUpdatesMsg fencu;
+
+  if (!CapsIsEnabled(clientMsgCaps, rfbEnableContinuousUpdates)) {
+    fprintf(stderr, "WARNING: Continuous updates not supported by the server.\n");
+    return;
+  }
+
+  fencu.type = rfbEnableContinuousUpdates;
+  fencu.enable = enable ? 1 : 0;
+  fencu.x = 0;
+  fencu.y = 0;
+  fencu.w = Swap16IfLE(si.framebufferWidth);
+  fencu.h = Swap16IfLE(si.framebufferHeight);
+
+  fprintf(stderr, "%s continuous updates\n", enable? "Enabling":"Disabling");
+
+  if (!WriteExact(rfbsock, (char *)&fencu, sz_rfbEnableContinuousUpdatesMsg))
+    return False;
+
+  return;
+}
+
+
+/*
+ * ToggleCU is an action which toggles in and out of continuous updates mode.
+ */
+
+void
+ToggleCU(Widget w, XEvent *ev, String *params, Cardinal *num_params)
+{
+  appData.continuousUpdates = !appData.continuousUpdates;
+  SendContinuousUpdatesMessage(appData.continuousUpdates);
 }
 
 

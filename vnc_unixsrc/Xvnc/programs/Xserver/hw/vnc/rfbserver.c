@@ -325,6 +325,8 @@ rfbNewClient(sock)
 
     cl->zlibCompressLevel = 5;
 
+    cl->continuousUpdates = FALSE;
+
     sprintf(pv, rfbProtocolVersionFormat, 3, 8);
 
     if (WriteExact(sock, pv, sz_rfbProtocolVersionMsg) < 0) {
@@ -337,9 +339,10 @@ rfbNewClient(sock)
     if((env = getenv("TVNC_PROFILE"))!=NULL && !strcmp(env, "1"))
         rfbProfile = TRUE;
 
+    cl->firstUpdate = TRUE;
+
     if(rfbAutoLosslessRefresh > 0.0) {
         REGION_INIT(pScreen, &cl->lossyRegion, NullBox, 0);
-        cl->firstUpdate = TRUE;
         cl->lastFramebufferUpdate = gettime();
         if(!alrInit) {
             pthread_mutexattr_t ma;
@@ -658,7 +661,7 @@ rfbProcessClientInitMessage(cl)
 
 /* Update these constants on changing capability lists below! */
 #define N_SMSG_CAPS  0
-#define N_CMSG_CAPS  0
+#define N_CMSG_CAPS  1
 #define N_ENC_CAPS  14
 
 void
@@ -667,6 +670,7 @@ rfbSendInteractionCaps(cl)
 {
     rfbInteractionCapsMsg intr_caps;
     rfbCapabilityInfo enc_list[N_ENC_CAPS];
+    rfbCapabilityInfo cmsg_list[N_CMSG_CAPS];
     int i;
 
     /* Fill in the header structure sent prior to capability lists. */
@@ -690,20 +694,21 @@ rfbSendInteractionCaps(cl)
     */
 
     /* Supported client->server message types. */
-    /* For future file transfer support:
     i = 0;
+    /* For future file transfer support:
     SetCapInfo(&cmsg_list[i++], rfbFileListRequest,        rfbTightVncVendor);
     SetCapInfo(&cmsg_list[i++], rfbFileDownloadRequest,    rfbTightVncVendor);
     SetCapInfo(&cmsg_list[i++], rfbFileUploadRequest,      rfbTightVncVendor);
     SetCapInfo(&cmsg_list[i++], rfbFileUploadData,         rfbTightVncVendor);
     SetCapInfo(&cmsg_list[i++], rfbFileDownloadCancel,     rfbTightVncVendor);
     SetCapInfo(&cmsg_list[i++], rfbFileUploadFailed,       rfbTightVncVendor);
+    */
+    SetCapInfo(&cmsg_list[i++], rfbEnableContinuousUpdates, rfbTightVncVendor);
     if (i != N_CMSG_CAPS) {
 	rfbLog("rfbSendInteractionCaps: assertion failed, i != N_CMSG_CAPS\n");
 	rfbCloseSock(cl->sock);
 	return;
     }
-    */
 
     /* Encoding types. */
     i = 0;
@@ -730,6 +735,8 @@ rfbSendInteractionCaps(cl)
     /* Send header and capability lists */
     if (WriteExact(cl->sock, (char *)&intr_caps,
 		   sz_rfbInteractionCapsMsg) < 0 ||
+	WriteExact(cl->sock, (char *)&cmsg_list[0],
+		   sz_rfbCapabilityInfo * N_CMSG_CAPS) < 0 ||
 	WriteExact(cl->sock, (char *)&enc_list[0],
 		   sz_rfbCapabilityInfo * N_ENC_CAPS) < 0) {
 	rfbLogPerror("rfbSendInteractionCaps: write");
@@ -1113,6 +1120,20 @@ rfbProcessClientNormalMessage(cl)
 	xfree(str);
 	return;
 
+    case rfbEnableContinuousUpdates:
+
+	if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
+			   sz_rfbEnableContinuousUpdatesMsg-1)) <= 0) {
+	    if (n != 0)
+		rfbLogPerror("rfbProcessClientNormalMessage: read");
+	    rfbCloseSock(cl->sock);
+	    return;
+	}
+
+	cl->continuousUpdates = msg.fencu.enable;
+	rfbLog("Continuous updates %s\n", cl->continuousUpdates? "enabled":
+		"disabled");
+	return;
 
     default:
 

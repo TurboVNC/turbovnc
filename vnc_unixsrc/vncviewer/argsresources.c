@@ -207,24 +207,30 @@ char *fallback_resources[] = {
   "*popup*button9.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: SendRFBEvent(key,F8) HidePopup()",
 
-  "*popup*button10.label: Protocol: Tight + Perceptually Lossless JPEG (LAN)",
+  "*popup*button10.label: Continuous updates",
+  "*popup*button10.type: toggle",
   "*popup*button10.translations: #override\\n\
+     <Visible>: SetCUState()\\n\
+     <Btn1Down>,<Btn1Up>: toggle() ToggleCU()",
+
+  "*popup*button11.label: Protocol: Tight + Perceptually Lossless JPEG (LAN)",
+  "*popup*button11.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualHigh()",
 
-  "*popup*button11.label: Protocol: Tight + Medium Quality JPEG",
-  "*popup*button11.translations: #override\\n\
+  "*popup*button12.label: Protocol: Tight + Medium Quality JPEG",
+  "*popup*button12.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualMed()",
 
-  "*popup*button12.label: Protocol: Tight + Low Quality JPEG (WAN)",
-  "*popup*button12.translations: #override\\n\
+  "*popup*button13.label: Protocol: Tight + Low Quality JPEG (WAN)",
+  "*popup*button13.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualLow()",
 
-  "*popup*button13.label: Protocol: Lossless Tight (Gigabit)",
-  "*popup*button13.translations: #override\\n\
+  "*popup*button14.label: Protocol: Lossless Tight (Gigabit)",
+  "*popup*button14.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualLossless()",
 
-  "*popup*button14.label: Protocol: Lossless Tight + Zlib (WAN)",
-  "*popup*button14.translations: #override\\n\
+  "*popup*button15.label: Protocol: Lossless Tight + Zlib (WAN)",
+  "*popup*button15.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualLosslessWAN()",
 
   NULL
@@ -346,7 +352,10 @@ static XtResource appDataResourceList[] = {
    XtOffsetOf(AppData, doubleBuffer), XtRImmediate, (XtPointer) True},
 
   {"autoPass", "AutoPass", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, autoPass), XtRImmediate, (XtPointer) False}
+   XtOffsetOf(AppData, autoPass), XtRImmediate, (XtPointer) False},
+
+  {"continuousUpdates", "ContinuousUpdates", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, continuousUpdates), XtRImmediate, (XtPointer) False}
 };
 
 
@@ -381,7 +390,8 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-losslesswan",   "*qualityLevel",       XrmoptionNoArg,  "-4"},
   {"-autopass",      "*autoPass",           XrmoptionNoArg,  "True"},
   {"-user",          "*userLogin",          XrmoptionSepArg,  0},
-  {"-nounixlogin",   "*noUnixLogin",        XrmoptionNoArg,  "True"}
+  {"-nounixlogin",   "*noUnixLogin",        XrmoptionNoArg,  "True"},
+  {"-cu",            "*continuousUpdates",  XrmoptionNoArg,  "False"}
 };
 
 int numCmdLineOptions = XtNumber(cmdLineOptions);
@@ -414,6 +424,8 @@ static XtActionsRec actions[] = {
     {"Pause", Pause},
     {"RunCommand", RunCommand},
     {"Quit", Quit},
+    {"SetCUState", SetCUState},
+    {"ToggleCU", ToggleCU}
 };
 
 
@@ -474,6 +486,7 @@ usage(void)
 	  "        -losslesswan (preset for -nojpeg -compresslevel 1)\n"
 	  "        -user <USER NAME> (Unix login authentication)\n"
 	  "        -nounixlogin\n"
+	  "        -cu\n"
 	  "\n"
 	  "Option names may be abbreviated, for example, -q instead of -quality.\n"
 	  "See the manual page for more information."

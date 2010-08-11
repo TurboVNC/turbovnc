@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2009 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -207,6 +207,17 @@ button1XProc(Widget w, XtPointer client, XtPointer p)
   if((long)p==1) appData.subsampLevel=TVNC_1X;
   UpdateQual();
 }
+
+
+void
+SetCUState(Widget w, XEvent *ev, String *params, Cardinal *num_params)
+{
+  if (appData.continuousUpdates)
+    XtVaSetValues(w, XtNstate, True, NULL);
+  else
+    XtVaSetValues(w, XtNstate, False, NULL);
+}
+
 
 void
 CreatePopup()
