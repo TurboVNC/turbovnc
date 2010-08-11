@@ -672,10 +672,10 @@ rfbPutImage(pDrawable, pGC, depth, x, y, w, h, leftPad, format, pBits)
         rfbClientPtr cl, nextCl;
         alrlock();
         for (cl = rfbClientHead; cl; cl = nextCl) {
+            nextCl = cl->next;
             cl->putImageTrigger = TRUE;
-            if (w * h >= 65536 && cl->continuousUpdates) {
+            if (w * h >= 65536 && cl->continuousUpdates && !cl->firstUpdate) {
                 BoxRec box;  RegionRec tmpRegion;
-                nextCl = cl->next;
                 box.x1 = x;  box.y1 = y;
                 box.x2 = x + w;  box.y2 = y + h;
                 REGION_INIT(pScreen, &tmpRegion, &box, 0);
