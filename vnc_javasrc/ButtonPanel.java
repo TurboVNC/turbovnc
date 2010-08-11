@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2007 Sun Microsystems, Inc.  All Rights Reserved.
 //  Copyright (C) 2001,2002 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
 //
