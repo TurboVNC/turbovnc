@@ -255,6 +255,29 @@ Here is the complete list of parameters supported in the Java TurboVNC Viewer:
     moved around on the VNC server or when an application sends the same image
     over and over again.
 
+--> "Continuous Updates"
+
+    Values: "Yes", "No"
+    Default: "No"
+
+    Normally, RFB (the protocol used by VNC) is a "client pull" protocol.  The
+    VNC server waits for a framebuffer update request from a viewer before
+    sending a framebuffer update to that viewer (a framebuffer update consists
+    of a set of image tiles representing regions of the virtual framebuffer
+    that have changed since the last update.)  This client pull behavior is
+    necessary in order to allow multiple connected VNC viewers to receive
+    updates at different rates, and it also allows a viewer to refresh regions
+    of its window that may have become obscured.
+
+    The downside of the client pull approach is that it requires a full round
+    trip between client and server for each framebuffer update.  This severely
+    limits the frame rate that streaming applications, such as video players
+    and VirtualGL, can achieve on high-latency networks.  Enabling the
+    continuous updates feature will cause any framebuffer update that results
+    from a large X[Shm]PutImage() operation ("large" = 65536 pixels or greater)
+    to be sent to the viewer immediately without waiting for a framebuffer
+    update request.
+
 --> "Mouse buttons 2 and 3"
 
     Values: "Normal", "Reversed".
