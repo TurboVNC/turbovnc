@@ -5,6 +5,23 @@ Significant changes since 1.0
 Enhanced the screen scaling feature in the Java TurboVNC Viewer and added a GUI
 option to control it.
 -------------------------------------------------------------------------------
+[2]
+Added a "continuous updates" feature which will, optionally, send framebuffer
+updates that result from large X[Shm]PutImage() operations immediately rather
+than waiting for a framebuffer update request from a viewer.  This greatly
+improves the performance of video players and VirtualGL on high-latency
+networks.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
+Significant changes since 1.0beta1
+===============================================================================
+[1]
+The Windows TurboVNC Viewer should now work properly with displays that use a
+24-bit (as opposed to a 32-bit) pixel format (this includes Remote Desktop and
+Citrix sessions.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
