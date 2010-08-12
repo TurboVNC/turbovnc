@@ -255,7 +255,25 @@ usefulness of this protocol is debatable, but it is included for those who
 absolutely must use mathematically lossless compression in environments where
 performance is constrained more by the network than the server CPU.  The
 Lossless Refresh feature in TurboVNC uses this protocol.
+.TP
+\fB\-cu\fR
+Enable continuous updates.  Normally, RFB (the protocol used by VNC) is a
+"client pull" protocol.  The VNC server waits for a framebuffer update request
+from a viewer before sending a framebuffer update to that viewer (a framebuffer
+update consists of a set of image tiles representing regions of the virtual
+framebuffer that have changed since the last update.)  This client pull
+behavior is necessary in order to allow multiple connected VNC viewers to
+receive updates at different rates, and it also allows a viewer to refresh
+regions of its window that may have become obscured.
 
+The downside of the client pull approach is that it requires a full round
+trip between client and server for each framebuffer update.  This severely
+limits the frame rate that streaming applications, such as video players
+and VirtualGL, can achieve on high-latency networks.  Enabling the
+continuous updates feature will cause any framebuffer update that results
+from a large X[Shm]PutImage() operation ("large" = 65536 pixels or greater)
+to be sent to the viewer immediately without waiting for a framebuffer
+update request.
 .SH ENCODINGS
 In order to simplify the implementation of the VNC viewer, the VNC protocol is
 designed such that the VNC server sends information in whatever format the
@@ -368,6 +386,10 @@ Default true.
 .B doubleBuffer
 If set to false, this is the equivalent of the \fB\-singlebuffer\fR option.
 Default true.
+.TP
+.B continuousUpdates
+If set to true, this is the equivalent of the \fB\-cu\fR option.  Default
+false.
 .TP
 .B useRemoteCursor
 If set to false, this is the equivalent of the \fB\-nocursorshape\fR option.
