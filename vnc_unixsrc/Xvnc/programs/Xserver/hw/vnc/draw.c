@@ -113,6 +113,38 @@ int rfbDeferUpdateTime = 40; /* ms */
       alrunlock();							\
   }
 
+#define _SCHEDULE_FB_UPDATE_CU(pScreen,prfb,trigger)                    \
+  if (!prfb->dontSendFramebufferUpdate) {                               \
+      rfbClientPtr cl, nextCl;                                          \
+      alrlock();                                                        \
+      for (cl = rfbClientHead; cl; cl = nextCl) {                       \
+          nextCl = cl->next;                                            \
+          if (w * h >= 65536 && cl->continuousUpdates &&                \
+              !cl->firstUpdate) {                                       \
+              BoxRec box;  RegionRec tmpRegion;                         \
+              box.x1 = x;  box.y1 = y;                                  \
+              box.x2 = x + w;  box.y2 = y + h;                          \
+              REGION_INIT(pScreen, &tmpRegion, &box, 0);                \
+              REGION_UNION(pScreen, &cl->requestedRegion,               \
+                  &cl->requestedRegion, &tmpRegion);                    \
+              REGION_UNION(pScreen, &cl->modifiedRegion,                \
+                  &cl->modifiedRegion, &tmpRegion);                     \
+              REGION_SUBTRACT(pScreen, &cl->copyRegion,                 \
+                  &cl->copyRegion, &tmpRegion);                         \
+              REGION_UNINIT(pScreen, &tmpRegion);                       \
+              cl->putImageTrigger = trigger;                            \
+              rfbSendFramebufferUpdate(cl);                             \
+          }                                                             \
+          else if (!cl->deferredUpdateScheduled &&                      \
+              FB_UPDATE_PENDING(cl) &&                                  \
+              REGION_NOTEMPTY(pScreen, &cl->requestedRegion)) {         \
+              cl->putImageTrigger = trigger;                            \
+              rfbScheduleDeferredUpdate(cl);                            \
+          }                                                             \
+      }                                                                 \
+      alrunlock();                                                      \
+  }
+
 #define SCHEDULE_FB_UPDATE(pScreen,prfb)				\
   _SCHEDULE_FB_UPDATE(pScreen,prfb,FALSE)
 
@@ -668,32 +700,7 @@ rfbPutImage(pDrawable, pGC, depth, x, y, w, h, leftPad, format, pBits)
     (*pGC->ops->PutImage) (pDrawable, pGC, depth, x, y, w, h,
 			   leftPad, format, pBits);
 
-    if (!prfb->dontSendFramebufferUpdate) {
-        rfbClientPtr cl, nextCl;
-        alrlock();
-        for (cl = rfbClientHead; cl; cl = nextCl) {
-            nextCl = cl->next;
-            cl->putImageTrigger = TRUE;
-            if (w * h >= 65536 && cl->continuousUpdates && !cl->firstUpdate) {
-                BoxRec box;  RegionRec tmpRegion;
-                box.x1 = x;  box.y1 = y;
-                box.x2 = x + w;  box.y2 = y + h;
-                REGION_INIT(pScreen, &tmpRegion, &box, 0);
-                REGION_UNION(pScreen, &cl->requestedRegion,
-                    &cl->requestedRegion, &tmpRegion);
-                REGION_UNION(pScreen, &cl->modifiedRegion, &cl->modifiedRegion,
-                    &tmpRegion);
-                REGION_SUBTRACT(pScreen, &cl->copyRegion, &cl->copyRegion,
-                    &tmpRegion);
-                REGION_UNINIT(pScreen, &tmpRegion);
-                rfbSendFramebufferUpdate(cl);
-            }
-            else if (!cl->deferredUpdateScheduled && FB_UPDATE_PENDING(cl) &&
-                REGION_NOTEMPTY(pScreen, &cl->requestedRegion))
-                rfbScheduleDeferredUpdate(cl);
-        }
-        alrunlock();
-    }
+    _SCHEDULE_FB_UPDATE_CU(pDst->pScreen, prfb, TRUE);
 
     GC_OP_EPILOGUE(pGC);
 }
