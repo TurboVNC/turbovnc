@@ -60,6 +60,8 @@ Bool rfbDontDisconnect = FALSE;
 Bool rfbViewOnly = FALSE; /* run server in view only mode - Ehud Karni SW */
 double rfbAutoLosslessRefresh = 0.0;
 
+extern Bool cuCopyArea;
+
 extern void ShutdownTightThreads(void);
 
 static rfbClientPtr rfbNewClient(int sock);
@@ -338,6 +340,8 @@ rfbNewClient(sock)
 
     if((env = getenv("TVNC_PROFILE"))!=NULL && !strcmp(env, "1"))
         rfbProfile = TRUE;
+    if((env = getenv("TVNC_CUCOPYAREA"))!=NULL && !strcmp(env, "1"))
+        cuCopyArea = TRUE;
 
     cl->firstUpdate = TRUE;
 

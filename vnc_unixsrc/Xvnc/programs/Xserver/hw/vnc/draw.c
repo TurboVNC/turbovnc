@@ -65,6 +65,7 @@ in this Software without prior written authorization from the X Consortium.
 extern WindowPtr *WindowTable; /* Why isn't this in a header file? */
 
 int rfbDeferUpdateTime = 40; /* ms */
+Bool cuCopyArea = FALSE;
 
 
 /****************************************************************************/
@@ -729,6 +730,7 @@ rfbCopyArea (pSrc, pDst, pGC, srcx, srcy, w, h, dstx, dsty)
     RegionPtr rgn;
     RegionRec srcRegion, dstRegion;
     BoxRec box;
+    int x, y;
     GC_OP_PROLOGUE(pDst, pGC);
 
     TRC((stderr,"rfbCopyArea called\n"));
@@ -779,7 +781,12 @@ rfbCopyArea (pSrc, pDst, pGC, srcx, srcy, w, h, dstx, dsty)
     rgn = (*pGC->ops->CopyArea) (pSrc, pDst, pGC, srcx, srcy, w, h,
 				 dstx, dsty);
 
-    SCHEDULE_FB_UPDATE(pDst->pScreen, prfb);
+    if (cuCopyArea) {
+        x = dstx;  y = dsty;
+        _SCHEDULE_FB_UPDATE_CU(pDst->pScreen, prfb, FALSE);
+    }
+    else
+        SCHEDULE_FB_UPDATE(pDst->pScreen, prfb);
 
     GC_OP_EPILOGUE(pGC);
 
