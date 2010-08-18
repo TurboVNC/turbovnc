@@ -282,6 +282,7 @@ ShutdownTightThreads(void)
         tparam[i].deadyet = TRUE;
         pthread_mutex_unlock(&tparam[i].ready);
         pthread_join(thnd[i], NULL);
+        thnd[i] = 0;
         pthread_mutex_destroy(&tparam[i].ready);
         pthread_mutex_destroy(&tparam[i].done);
       }
