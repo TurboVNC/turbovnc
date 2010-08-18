@@ -6,6 +6,14 @@ The Windows TurboVNC Viewer should now work properly with displays that use a
 24-bit (as opposed to a 32-bit) pixel format (this includes Remote Desktop and
 Citrix sessions.)
 -------------------------------------------------------------------------------
+[2]
+Eliminated the use of the dangerous alloca() (stack-based allocation) function
+in Xvnc and replaced it with heap-based allocation (malloc() and free().)  
+-------------------------------------------------------------------------------
+[3]
+Eliminated a segfault in pthread_join() which would occur under certain
+circumstances when using multithreading in the TurboVNC Server.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
