@@ -14,6 +14,10 @@ in Xvnc and replaced it with heap-based allocation (malloc() and free().)
 Eliminated a segfault in pthread_join() which would occur under certain
 circumstances when using multithreading in the TurboVNC Server.
 -------------------------------------------------------------------------------
+[4]
+To maintain consistency with other versions of VNC, added -nohttpd option to
+vncserver as an alias for -nohttp.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
