@@ -1251,6 +1251,16 @@ rfbSendFramebufferUpdate(cl)
 
     cl->rfbFramebufferUpdateMessagesSent++;
 
+    if (REGION_NUM_RECTS(&updateRegion) > 100) {
+	RegionRec combinedUpdateRegion;
+	REGION_INIT(pScreen, &combinedUpdateRegion,
+		    REGION_EXTENTS(pScreen, &updateRegion), 1);
+	REGION_UNINIT(pScreen, &updateRegion);
+	REGION_INIT(pScreen, &updateRegion,
+		    REGION_EXTENTS(pScreen, &combinedUpdateRegion), 1);
+	REGION_UNINIT(pScreen, &combinedUpdateRegion);
+    }
+
     if (cl->preferredEncoding == rfbEncodingCoRRE) {
 	nUpdateRegionRects = 0;
 
