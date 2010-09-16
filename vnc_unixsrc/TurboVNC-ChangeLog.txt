@@ -18,6 +18,12 @@ circumstances when using multithreading in the TurboVNC Server.
 To maintain consistency with other versions of VNC, added -nohttpd option to
 vncserver as an alias for -nohttp.
 -------------------------------------------------------------------------------
+[5]
+Fixed an issue whereby certain applications which draw hundreds of
+thousands of tiny lines or points on the screen would cause the TurboVNC Viewer
+to abort with an "unhandled message type" error or would cause the viewer to
+freeze for several minutes.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
