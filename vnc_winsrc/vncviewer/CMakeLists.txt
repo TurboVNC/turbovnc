@@ -3,8 +3,6 @@ project(vncviewer)
 add_definitions(-D_WINSTATIC -D_WIN32_WINNT=0x0400)
 include_directories(omnithread zlib ${CMAKE_SOURCE_DIR})
 
-add_subdirectory(zlib)
-
 if(CMAKE_CL_64)
 	set(APPNAME "TurboVNC Viewer 64-bit v${VERSION} (${BUILD})")
 	set(WIN64DEF -DWIN64)
