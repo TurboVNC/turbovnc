@@ -39,5 +39,6 @@ endforeach()
 add_definitions(-wd4996 -wd4482 -D__WIN32__ -D_CRT_SECURE_NO_DEPRECATE
 	-D__VERSION="${VERSION}" -D__BUILD="${BUILD}")
 
+add_subdirectory(zlib)
 add_subdirectory(vncviewer)
-#add_subdirectory(winvnc)
+add_subdirectory(winvnc)
