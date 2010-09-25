@@ -56,7 +56,7 @@ BEGIN
     PUSHBUTTON      "&Cancel",IDCANCEL,77,61,50,14
 END
 
-IDD_OPTIONDIALOG DIALOG DISCARDABLE  0, 0, 350, 193
+IDD_OPTIONDIALOG DIALOG DISCARDABLE  0, 0, 350, 200
 STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
@@ -118,6 +118,8 @@ BEGIN
                     "Button",BS_AUTORADIOBUTTON,195,151,145,10
     CONTROL         "Request shared session",IDC_SHARED,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,195,172,145,10
+    CONTROL         "Continuous Updates",IDC_CU,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,195,186,145,10
 END
 
 IDD_FTBROWSE_DLG DIALOGEX 0, 0, 183, 196
@@ -271,15 +273,15 @@ BEGIN
                     WS_VSCROLL | WS_HSCROLL
 END
 
-IDD_PARENT DIALOGEX 0, 0, 366, 238
+IDD_PARENT DIALOGEX 0, 0, 366, 245
 STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTEXTHELP | WS_EX_CONTROLPARENT
 CAPTION "TurboVNC Viewer Options"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    PUSHBUTTON      "&OK",IDOK,256,220,50,14
-    PUSHBUTTON      "&Cancel",IDCANCEL,311,220,50,14
-    CONTROL         "Tab1",IDC_TAB,"SysTabControl32",WS_TABSTOP,5,5,356,211
+    PUSHBUTTON      "&OK",IDOK,256,227,50,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,311,227,50,14
+    CONTROL         "Tab1",IDC_TAB,"SysTabControl32",WS_TABSTOP,5,5,356,218
 END
 
 IDD_CONNECTING_DIALOG DIALOG DISCARDABLE  0, 0, 210, 61
@@ -594,7 +596,7 @@ BEGIN
     ID_CLOSEDAEMON          "Stop listening for incoming connections"
     ID_SHOWWINDOW           "Display a connection window"
     ID_NEWCONN              "Make a manual connection"
-    IDS_HELP                "vncviewer [/8bit] [/no8bit] [/shared] [/noshared] [/swapmouse] \r\n      [/belldeiconify] [/listen [<port>]] [/fullscreen] [/restricted] [/viewonly] \r\n      [/emulate3] [/noemulate3] [/emulate3timeout <ms>] [/emulate3fuzz <pixels>] \r\n      [/notoolbar] [/scale <percentage>] [/config <filename>] [/disableclipboard] \r\n      [/encoding <encname>] [/compresslevel <n>] [/samp <gray | 1X | 2X | 4X>] \r\n      [/quality <1-100>] [/copyrect] [/nocopyrect] [/loglevel <n>] [/logfile <filename>] \r\n      [/register] [/nocursor] [/dotcursor] [/smalldotcursor] [/normalcursor] [/help] \r\n      [/jpeg] [/nojpeg] [/nocursorshape] [/noremotecursor] [/singlebuffer] \r\n      [/doublebuffer] [/fsaltenter] [/nofsaltenter] [/user <user name>]\r\n      [/nounixlogin] [/password <clear text password>] [<server>[:<display>]] \r\n\r\nFor full details, see the documentation."
+    IDS_HELP                "vncviewer [/8bit] [/no8bit] [/shared] [/noshared] [/swapmouse] \r\n      [/belldeiconify] [/listen [<port>]] [/fullscreen] [/restricted] [/viewonly] \r\n      [/emulate3] [/noemulate3] [/emulate3timeout <ms>] [/emulate3fuzz <pixels>] \r\n      [/notoolbar] [/scale <percentage>] [/config <filename>] [/disableclipboard] \r\n      [/encoding <encname>] [/compresslevel <n>] [/samp <gray | 1X | 2X | 4X>] \r\n      [/quality <1-100>] [/copyrect] [/nocopyrect] [/loglevel <n>] [/logfile <filename>] \r\n      [/register] [/nocursor] [/dotcursor] [/smalldotcursor] [/normalcursor] [/help] \r\n      [/jpeg] [/nojpeg] [/nocursorshape] [/noremotecursor] [/singlebuffer] \r\n      [/doublebuffer] [/fsaltenter] [/nofsaltenter] [/cu] [/nocu] [/user <user name>]\r\n      [/nounixlogin] [/password <clear text password>] [<server>[:<display>]] \r\n\r\nFor full details, see the documentation."
 END
 
 STRINGTABLE DISCARDABLE 
@@ -633,6 +635,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDC_EDIT_LOG_LEVEL      "Specifies the level of detail to include in the log file. Level 0 causes the viewer to log only the most important events, whereas Level 12 generates a lot of debugging output."
     IDC_SHARED              "Enable multiple simultaneous viewer connections to the same server desktop. If the session is not shared, then only one viewer can connect to the same session at the same time. Unlike the standard VNC, TurboVNC uses shared sessions by default."
+    IDC_CU                  "If enabled, the TurboVNC Server will immediately send framebuffer updates resulting from large PutImage or CopyArea operations without waiting for a framebuffer update request from a VNC viewer. This can improve performance on some high-latency networks."
     IDC_ENCODING            "Choose one of these preset settings based on the type of network you are using and your desired image quality and performance."
     IDC_SCALE_EDIT          "Reduce or enlarge the image of the remote dektop."
     IDC_DOTCURSOR_RADIO     "Show local cursor position as a dot."

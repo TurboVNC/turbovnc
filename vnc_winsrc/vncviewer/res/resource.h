@@ -165,6 +165,7 @@
 #define IDC_STATIC_HOST                 1147
 #define IDC_STATIC_LOGIN                1148
 #define IDC_STATIC_PASSWD               1149
+#define IDC_CU                          1150
 #define IDC_STATIC_SUBSAMP              5000
 #define IDC_STATIC_QUAL                 5001
 #define IDC_STATIC_COMPRESS             5002

@@ -144,6 +144,7 @@ private:
     void ProcessKeyEvent(int virtkey, DWORD keyData);
 	void SendKeyEvent(CARD32 key, bool down);
 	void SwitchOffKey();
+	void SendCUMessage(bool enable);
 
 	void ReadScreenUpdate();
 	void Update(RECT *pRect);
@@ -362,6 +363,8 @@ private:
 	bool m_threadStarted, m_running;
 	// mid-connection format change requested
 	bool m_pendingFormatChange;
+	// CU enable/disable requested
+	bool m_pendingCUChange;
 	// Display connection info;
 	void ShowConnInfo();
 
