@@ -1,17 +1,18 @@
 project(vncviewer)
 
 add_definitions(-D_WINSTATIC -D_WIN32_WINNT=0x0400)
-include_directories(omnithread zlib ${CMAKE_SOURCE_DIR})
+include_directories(omnithread zlib ${CMAKE_SOURCE_DIR}
+	${CMAKE_CURRENT_BINARY_DIR}/res)
 
 if(CMAKE_CL_64)
 	set(APPNAME "TurboVNC Viewer 64-bit v${VERSION} (${BUILD})")
-	set(WIN64DEF -DWIN64)
+	set(WIN64 1)
 else(CMAKE_CL_64)
 	set(APPNAME "TurboVNC Viewer v${VERSION} (${BUILD})")
+	set(WIN64 0)
 endif(CMAKE_CL_64)
 
-set(CMAKE_RC_COMPILE_OBJECT
-	"<CMAKE_RC_COMPILER> -D__APPNAME=\\\"\"${APPNAME}\"\\\" ${WIN64DEF} -D__RCVERSION=${RCVERSION} -D__RCVERSIONSTR=\\\"${RCVERSION}\\0\\\" -l 0x409 -fo <OBJECT> <SOURCE>")
+configure_file(res/resdefs.h.in res/resdefs.h)
 
 add_executable(vncviewer WIN32
 	AboutBox.cpp
