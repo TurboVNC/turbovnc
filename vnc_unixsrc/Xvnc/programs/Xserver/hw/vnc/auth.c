@@ -1011,13 +1011,13 @@ rfbVncAuthProcessResponse(cl)
                 memcpy(passwdViewOnly, rfbAuthOTPValue + MAXPWLEN, MAXPWLEN);
                 passwdViewOnly[MAXPWLEN] = '\0';
             }
-        }
 
-        ok = CheckResponse(cl, numPasswords, passwdFullControl, passwdViewOnly, response);
-        if (ok) {
-            memset(rfbAuthOTPValue, 0, rfbAuthOTPValueLen);
-            xfree(rfbAuthOTPValue);
-            rfbAuthOTPValue = NULL;
+            ok = CheckResponse(cl, numPasswords, passwdFullControl, passwdViewOnly, response);
+            if (ok) {
+                memset(rfbAuthOTPValue, 0, rfbAuthOTPValueLen);
+                xfree(rfbAuthOTPValue);
+                rfbAuthOTPValue = NULL;
+            }
         }
     }
 
