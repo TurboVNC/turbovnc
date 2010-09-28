@@ -1,0 +1,4 @@
+#define __APPNAME "@APPNAME@"
+#define __RCVERSION @RCVERSION@
+#define __RCVERSIONSTR "@RCVERSION@\0"
+#define __WIN64 @WIN64@

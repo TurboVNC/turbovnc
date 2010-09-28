@@ -1,19 +1,28 @@
 project(winvnc)
 
 add_definitions(-D_WINSTATIC -D_WIN32_WINNT=0x0500)
-include_directories(omnithread zlib ${CMAKE_SOURCE_DIR})
+include_directories(omnithread zlib ${CMAKE_SOURCE_DIR}
+	${CMAKE_CURRENT_BINARY_DIR})
 
 if(CMAKE_CL_64)
 	set(APPNAME "TurboVNC Server 64-bit v${VERSION} (${BUILD})")
-	set(WIN64DEF -DWIN64)
+	set(WIN64 1)
 else(CMAKE_CL_64)
 	set(APPNAME "TurboVNC Server v${VERSION} (${BUILD})")
+	set(WIN64 0)
 endif(CMAKE_CL_64)
 
-set(CMAKE_RC_COMPILE_OBJECT
-	"<CMAKE_RC_COMPILER> -DWITH_JAVA_VIEWER -D__APPNAME=\\\"\"${APPNAME}\"\\\" ${WIN64DEF} -D__RCVERSION=${RCVERSION} -D__RCVERSIONSTR=\\\"${RCVERSION}\\0\\\" -l 0x409 -fo <OBJECT> <SOURCE>")
+add_definitions(-DWITH_JAVA_VIEWER)
 
-add_subdirectory(VNCHooks)
+configure_file(resdefs.h.in resdefs.h)
+
+add_library(VNCHooks SHARED
+	VNCHooks/VNCHooks.cpp
+	VNCHooks/VNCHooks.def
+	VNCHooks/VNCHooks.rc)
+
+target_link_libraries(VNCHooks
+	user32.lib gdi32.lib advapi32.lib)
 
 add_executable(winvnc WIN32
 	AdministrationControls.cpp
