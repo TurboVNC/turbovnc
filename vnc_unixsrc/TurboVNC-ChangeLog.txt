@@ -24,6 +24,11 @@ thousands of tiny lines or points on the screen would cause the TurboVNC Viewer
 to abort with an "unhandled message type" error or would cause the viewer to
 freeze for several minutes.
 -------------------------------------------------------------------------------
+[6]
+Fixed a security loophole whereby RealVNC clients were able to connect with a
+blank password if PAM and OTP authentication were enabled on the TurboVNC
+server and the OTP was not set.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
