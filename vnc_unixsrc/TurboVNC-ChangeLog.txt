@@ -12,6 +12,11 @@ than waiting for a framebuffer update request from a viewer.  This greatly
 improves the performance of video players and VirtualGL on high-latency
 networks.
 -------------------------------------------------------------------------------
+[3]
+Added an idle timeout feature to the Unix TurboVNC Server which, when enabled,
+will cause it to exit automatically whenever a certain number of seconds have
+elapsed since the last active VNC viewer connection.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
