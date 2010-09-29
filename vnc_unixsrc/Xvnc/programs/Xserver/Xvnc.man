@@ -28,6 +28,7 @@ Xvnc \- an X server providing VNC connectivity
 [\-economictranslate] [\-desktop \fIname\fR] [\-alwaysshared]
 [\-nevershared] [\-dontdisconnect] [\-viewonly] [\-localhost]
 [\-interface ipaddr] [\-inetd] [\-compatiblekbd]
+[\-idletimeout \fIseconds\fR]
 [\fIX-options\fR...]
 .SH DESCRIPTION
 \fBXvnc\fR is a VNC (Virtual Network Computing) server for Unix and Linux
@@ -132,6 +133,13 @@ X[Shm]PutImage() are eligible for ALR.  This is designed to work in conjunction
 with VirtualGL and to prevent blinking cursors from confusing the ALR
 algorithm.  You can, however, set the \fBTVNC_ALRALL\fR environment variable to
 \fB1\fR to make all screen regions eligible for ALR.
+.TP
+\fB\-idletimeout\fR \fItime\fR
+Time, in seconds, which the TurboVNC Server can sit idle (with no VNC viewer
+connections) before it automatically exits (default: no timeout.)  This
+argument has no effect if the \fImax-idle-timeout\fR directive is specified in
+the authentication configuration file and if that value is lower than
+\fItime\fR.
 .TP
 \fB\-economictranslate\fR
 Use less memory-hungry pixel format translation.
@@ -297,6 +305,13 @@ which users will be permitted to attempt PAM authentication.  Users can be
 added to or removed from this list using the \fBvncpasswd\fR(1) utility.  The
 user who started the Xvnc server will automatically be added to the access
 control list.
+.IP \fImax-idle-timeout\fR=\fItime\fR
+This specifies the maximum idle timeout (in seconds) for all TurboVNC sessions
+running on this machine.  The idle timeout is the amount of time that a
+TurboVNC session can remain idle (with no VNC viewer connections) before
+Xvnc automatically exits.  If this value is set to a number greater than 0,
+then all TurboVNC sessions on this machine will use this idle timeout value by
+default, and the user will only be allowed to override it with a lower value.
 .IP \fIno-reverse-connections\fR
 Do not allow reverse connections to be made from any TurboVNC server running on
 this machine.  This causes Xvnc to ignore requests from the
