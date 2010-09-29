@@ -74,6 +74,22 @@ static Bool rfbSendLastRectMarker(rfbClientPtr cl);
 
 
 /*
+ * Idle timeout
+ */
+
+CARD32 rfbMaxIdleTimeout = 0;
+CARD32 rfbIdleTimeout = 0;
+OsTimerPtr idleTimer;
+
+CARD32
+idleTimeoutCallback(OsTimerPtr timer, CARD32 time, pointer arg)
+{
+    FatalError("TurboVNC server has been idle for %d seconds.  Exiting.\n",
+        rfbIdleTimeout);
+}
+
+
+/*
  * Profiling stuff
  */
 
@@ -368,6 +384,10 @@ rfbNewClient(sock)
         else pthread_mutex_unlock(&alrMutex);
     }
 
+    if (rfbIdleTimeout > 0) {
+        TimerCancel(idleTimer);
+    }
+
     return cl;
 }
 
@@ -449,6 +469,11 @@ rfbClientConnectionGone(sock)
     ShutdownTightThreads();
 
     xfree(cl);
+
+    if (rfbClientHead == NULL && rfbIdleTimeout > 0) {
+        idleTimer = TimerSet(idleTimer, 0, rfbIdleTimeout * 1000,
+            idleTimeoutCallback, NULL);
+    }
 
     alrunlock();
 }
