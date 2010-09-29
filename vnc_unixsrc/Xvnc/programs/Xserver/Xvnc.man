@@ -28,7 +28,7 @@ Xvnc \- an X server providing VNC connectivity
 [\-economictranslate] [\-desktop \fIname\fR] [\-alwaysshared]
 [\-nevershared] [\-dontdisconnect] [\-viewonly] [\-localhost]
 [\-interface ipaddr] [\-inetd] [\-compatiblekbd]
-[\-idletimeout \fIseconds\fR]
+[\-idletimeout \fItime\fR]
 [\fIX-options\fR...]
 .SH DESCRIPTION
 \fBXvnc\fR is a VNC (Virtual Network Computing) server for Unix and Linux
