@@ -132,7 +132,7 @@ linking vncviewer.  You can add
 to the configure command line to get rid of these warnings.
 
 
-64-bit Build on 64-bit OS/X
+64-bit Build on 64-bit OS X
 ---------------------------
 
 Add
@@ -142,7 +142,7 @@ Add
 to the configure command line.
 
 
-32-bit Build on 64-bit OS/X
+32-bit Build on 64-bit OS X
 ---------------------------
 
 Add
@@ -152,7 +152,7 @@ Add
 to the configure command line.
 
 
-64-bit Backward-Compatible Build on 64-bit OS/X
+64-bit Backward-Compatible Build on 64-bit OS X
 -----------------------------------------------
 
 Add
@@ -166,7 +166,7 @@ Add
 to the configure command line.  The OS X 10.5 SDK must be installed.
 
 
-32-bit Backward-Compatible Build on OS/X
+32-bit Backward-Compatible Build on OS X
 ----------------------------------------
 
 Add
