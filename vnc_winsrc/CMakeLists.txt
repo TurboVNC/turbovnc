@@ -48,3 +48,4 @@ add_definitions(-U_MBCS -wd4996 -wd4482 -D__WIN32__ -D_CRT_SECURE_NO_DEPRECATE
 add_subdirectory(zlib)
 add_subdirectory(vncviewer)
 add_subdirectory(winvnc)
+add_subdirectory(putty)
