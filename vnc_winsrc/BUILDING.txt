@@ -58,9 +58,9 @@ Build Environment:
      http://sourceforge.net/projects/libjpeg-turbo
 
    * Add the libjpeg-turbo include path (c:\libjpeg-turbo[64]\include) to the
-     system or user INCLUDE environment variable prior to building VirtualGL.
+     system or user INCLUDE environment variable prior to building TurboVNC.
    * Add the libjpeg-turbo library path (c:\libjpeg-turbo[64]\lib) to the
-     system or user LIB environment variable prior to building VirtualGL.
+     system or user LIB environment variable prior to building TurboVNC.
 
 
 Building TurboVNC:
