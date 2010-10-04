@@ -6,10 +6,8 @@ include_directories(omnithread zlib ${CMAKE_SOURCE_DIR}
 
 if(CMAKE_CL_64)
 	set(APPNAME "TurboVNC Viewer 64-bit v${VERSION} (${BUILD})")
-	set(WIN64 1)
 else(CMAKE_CL_64)
 	set(APPNAME "TurboVNC Viewer v${VERSION} (${BUILD})")
-	set(WIN64 0)
 endif(CMAKE_CL_64)
 
 configure_file(res/resdefs.h.in res/resdefs.h)

@@ -47,7 +47,7 @@ BEGIN
         BEGIN
             VALUE "Comments", "Based on TightVNC by Constantin Kaplinsky; Based on VNC by AT&T Research Labs Cambridge, RealVNC Ltd.\0"
             VALUE "CompanyName", "The VirtualGL Project\0"
-            #if __WIN64==1
+            #ifdef WIN64
             VALUE "FileDescription", "VNC hooks DLL for Win64\0"
             #else
             VALUE "FileDescription", "VNC hooks DLL for Win32\0"

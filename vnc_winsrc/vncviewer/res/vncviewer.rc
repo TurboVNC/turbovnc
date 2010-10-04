@@ -474,7 +474,7 @@ BEGIN
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "vncviewer.exe\0"
             VALUE "PrivateBuild", "\0"
-            #if __WIN64==1
+            #ifdef WIN64
             VALUE "ProductName", "TurboVNC Win64 Viewer\0"
             #else
             VALUE "ProductName", "TurboVNC Win32 Viewer\0"
