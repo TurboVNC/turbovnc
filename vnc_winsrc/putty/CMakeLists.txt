@@ -7,6 +7,10 @@ if(CMAKE_CL_64)
 	add_definitions(-D_WIN64)
 endif()
 
+if(MSVC)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
+endif()
+
 set(SOURCE_FILES BE_ALL_S.C
 	CMDLINE.C
 	CONFIG.C
