@@ -1,3 +1,4 @@
+project(TurboVNC)
 cmake_minimum_required(VERSION 2.6)
 
 set(VERSION 1.0.80)
@@ -42,10 +43,34 @@ foreach(var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE)
 	endif()
 endforeach()
 
-add_definitions(-U_MBCS -wd4996 -wd4482 -D__WIN32__ -D_CRT_SECURE_NO_DEPRECATE
+add_definitions(-D__WIN32__ -D_CRT_SECURE_NO_DEPRECATE
 	-D__VERSION="${VERSION}" -D__BUILD="${BUILD}")
+
+if(MSVC)
+	add_definitions(-U_MBCS -wd4996 -wd4482 -D_CRT_SECURE_NO_DEPRECATE)
+endif()
+
+if(CMAKE_CL_64)
+	set(WIN64 1)
+	set(WIN64DEF -DWIN64)
+endif()
+
+if(MSVC_IDE)
+	set(INSTALLERDIR "$(OutDir)")
+	set(BUILDDIRDEF "-DBUILD_DIR=${INSTALLERDIR}\\")
+else()
+	set(INSTALLERDIR .)
+	set(BUILDDIRDEF "-DBUILD_DIR=")
+endif()
 
 add_subdirectory(zlib)
 add_subdirectory(vncviewer)
 add_subdirectory(winvnc)
 add_subdirectory(putty)
+
+configure_file(TurboVNC.iss.in TurboVNC.iss)
+
+add_custom_target(installer
+	iscc -o${INSTALLERDIR} ${WIN64DEF} ${BUILDDIRDEF} -FTurboVNC TurboVNC.iss
+	DEPENDS vncviewer winvnc putty
+	SOURCES TurboVNC.iss)

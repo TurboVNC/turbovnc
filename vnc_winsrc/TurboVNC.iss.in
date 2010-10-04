@@ -5,12 +5,12 @@
 #ifdef WIN64
 ArchitecturesInstallIn64BitMode=x64
 AppName=TurboVNC 64-bit
-AppVerName=TurboVNC 64-bit v{#VERSION} ({#BUILD})
+AppVerName=TurboVNC 64-bit v@VERSION@ (@BUILD@)
 #else
 AppName=TurboVNC
-AppVerName=TurboVNC v{#VERSION} ({#BUILD})
+AppVerName=TurboVNC v@VERSION@ (@BUILD@)
 #endif
-AppVersion={#VERSION}
+AppVersion=@VERSION@
 AppPublisher=The VirtualGL Project
 AppPublisherURL=http://www.virtualgl.org
 AppSupportURL=http://www.virtualgl.org
@@ -22,7 +22,7 @@ DefaultGroupName=TurboVNC 64-bit
 DefaultGroupName=TurboVNC
 #endif
 AllowNoIcons=yes
-InfoBeforeFile=InstInfo.rtf
+InfoBeforeFile=@CMAKE_SOURCE_DIR@\InstInfo.rtf
 Compression=zip/9
 WindowVisible=no
 DisableStartupPrompt=yes
@@ -31,7 +31,7 @@ BackColor2=clBlue
 DirExistsWarning=no
 VersionInfoCompany=The VirtualGL Project
 VersionInfoDescription=A fast VNC implementation designed for video and 3D apps
-VersionInfoVersion={#VERSION}
+VersionInfoVersion=@VERSION@
 
 ChangesAssociations=yes
 
@@ -41,19 +41,19 @@ Name: "viewer"; Description: "TurboVNC Viewer"; Types: full compact custom;
 Name: "doc";    Description: "Documentation";   Types: full custom;
 
 [Files]
-Source: "{#BLDDIR}\bin\WinVNC.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: server
-Source: "{#BLDDIR}\bin\VNCHooks.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: server
-Source: "{#BLDDIR}\bin\vncviewer.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
-Source: "{#BLDDIR}\bin\putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
-Source: "LICENCE.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "WhatsNew.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "TurboVNC-ChangeLog.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "TurboVNC.url"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\vnc_docs\*.png"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
-Source: "..\vnc_docs\*.html"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
-Source: "..\vnc_docs\LIC*.TXT"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
-Source: "..\vnc_docs\LIC*.txt"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
-Source: "..\vnc_docs\*.css"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
+Source: "@CMAKE_CURRENT_BINARY_DIR@\winvnc\{#BUILD_DIR}WinVNC.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: server
+Source: "@CMAKE_CURRENT_BINARY_DIR@\winvnc\{#BUILD_DIR}VNCHooks.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: server
+Source: "@CMAKE_CURRENT_BINARY_DIR@\vncviewer\{#BUILD_DIR}vncviewer.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
+Source: "@CMAKE_CURRENT_BINARY_DIR@\putty\{#BUILD_DIR}putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
+Source: "@CMAKE_SOURCE_DIR@\LICENCE.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "@CMAKE_SOURCE_DIR@\WhatsNew.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "@CMAKE_SOURCE_DIR@\TurboVNC-ChangeLog.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "@CMAKE_SOURCE_DIR@\TurboVNC.url"; DestDir: "{app}"; Flags: ignoreversion
+Source: "@CMAKE_SOURCE_DIR@\..\vnc_docs\*.png"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
+Source: "@CMAKE_SOURCE_DIR@\..\vnc_docs\*.html"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
+Source: "@CMAKE_SOURCE_DIR@\..\vnc_docs\LIC*.TXT"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
+Source: "@CMAKE_SOURCE_DIR@\..\vnc_docs\LIC*.txt"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
+Source: "@CMAKE_SOURCE_DIR@\..\vnc_docs\*.css"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
 
 [Icons]
 Name: "{group}\Launch TurboVNC Server";               FileName: "{app}\WinVNC.exe";                                    WorkingDir: "{app}";     Components: server;
