@@ -2,44 +2,33 @@ Building TurboVNC for Windows
 =============================
 
 
-Build Environment:
-------------------
+Build Environment
+-----------------
 
--- GNU Make v3.7 or later
+-- CMake v2.6 or later
 
-   GNU Make for Win32 can be found in MSYS
-   (http://www.mingw.org/download.shtml) or Cygwin (http://www.cygwin.com/)
+   Available from http://www.cmake.org/cmake/resources/software.html
 
--- Microsoft Visual C++ 2003 or later
+-- Microsoft Visual C++ 2005 or later
 
    If you don't already have Visual C++, then the easiest way to get it is by
-   installing the Windows SDK for Windows Server 2008 and .NET Framework 3.5
-   (or a later version):
+   installing the Windows SDK:
 
-   http://msdn.microsoft.com/en-us/windows/dd146047.aspx
+   http://msdn.microsoft.com/en-us/windows/bb980924.aspx
 
    The Windows SDK includes both 32-bit and 64-bit Visual C++ compilers and
    everything necessary to build TurboVNC.
 
-   * For 32-bit builds, you can also use Microsoft Visual C++ 2008 Express
-     Edition (or a later version.)  Visual C++ Express Edition is a free
-     download.
-   * Add the compiler and SDK binary directories (for instance,
-     c:\Program Files\Microsoft Visual Studio 9.0\VC\BIN[\amd64];
-     c:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE;
-     c:\Program Files\Microsoft SDKs\Windows\v6.1\bin[\x64])
-     to the system or user PATH environment variable prior to building
-     TurboVNC.
-   * Add the compiler and SDK include directories (for instance,
-     c:\Program Files\Microsoft Visual Studio 9.0\VC\INCLUDE;
-     c:\Program Files\Microsoft SDKs\Windows\v6.1\include)
-     to the system or user INCLUDE environment variable prior to building
-     TurboVNC.
-   * Add the compiler and SDK library directories (for instance,
-     c:\Program Files\Microsoft Visual Studio 9.0\VC\LIB[\amd64];
-     c:\Program Files\Microsoft SDKs\Windows\v6.1\lib[\x64])
-     to the system or user LIB environment variable prior to building
-     TurboVNC.
+   * For 32-bit builds, you can also use Microsoft Visual C++ Express
+     Edition.  Visual C++ Express Edition is a free download.
+   * If you intend to build TurboVNC from the command line, then add the
+     appropriate compiler and SDK directories to the INCLUDE, LIB, and PATH
+     environment variables.  This is generally accomplished by executing
+     vcvars32.bat or vcvars64.bat and SetEnv.cmd.  vcvars32.bat and
+     vcvars64.bat are part of Visual C++ and are located in the same directory
+     as the compiler.  SetEnv.cmd is part of the Windows SDK.  You can pass
+     optional arguments to SetEnv.cmd to specify a 32-bit or 64-bit build
+     environment.
 
 -- Inno Setup (needed to build the TurboVNC installer)
    Inno Setup can be downloaded from http://www.jrsoftware.org/isinfo.php.
@@ -57,34 +46,69 @@ Build Environment:
 
      http://sourceforge.net/projects/libjpeg-turbo
 
-   * Add the libjpeg-turbo include path (c:\libjpeg-turbo[64]\include) to the
-     system or user INCLUDE environment variable prior to building VirtualGL.
-   * Add the libjpeg-turbo library path (c:\libjpeg-turbo[64]\lib) to the
-     system or user LIB environment variable prior to building VirtualGL.
+   * If you intend to build TurboVNC from the command line, then add the
+     libjpeg-turbo include path (c:\libjpeg-turbo[64]\include) to the system or
+     user INCLUDE environment variable, and add the libjpeg-turbo library path
+     (c:\libjpeg-turbo[64]\lib) to the system or user LIB environment variable
+     prior to building TurboVNC.
+   * If you intend to build TurboVNC from the Visual Studio IDE, then add the
+     same paths to the "Include Files" and "Library Files" directories in
+     Visual Studio (under Tools-->Options.)
 
 
-Building TurboVNC:
+Out-of-Tree Builds
 ------------------
 
-If everything is set up properly, then you should be able to:
+Binary objects, libraries, and executables are generated in the same directory
+from which CMake was executed (the "binary directory"), and this directory need
+not necessarily be the same as the TurboVNC source directory.  You can create
+multiple independent binary directories, in which different versions of
+TurboVNC can be built from the same source tree using different compilers or
+settings.  In the sections below, {build_directory} refers to the binary
+directory, whereas {source_directory} refers to the TurboVNC source directory
+(vnc\vnc_winsrc.)  For in-tree builds, these directories are the same.
 
-  cd vnc/vnc_winsrc
-  make
 
-The default on 64-bit Windows platforms is to build a 64-bit version of
-TurboVNC.  To build a 32-bit version of TurboVNC on a 64-bit Windows system,
-pass an argument of
+Building TurboVNC from the Command Line
+---------------------------------------
 
-  WIN64=no
+  cd {build_directory}
+  cmake -G "NMake Makefiles" {source_directory}
+  nmake
 
-to make.
+This will build either a 32-bit or a 64-bit version of TurboVNC, depending on
+which version of cl.exe is in the PATH.
+
+To build a debug version:
+
+  cd {build_directory}
+  cmake -G "NMake Makefiles" -DDEBUG=1 {source_directory}
+  nmake
+
+
+Building TurboVNC Using the Visual Studio IDE
+---------------------------------------------
+
+Choose the appropriate CMake generator option for your version of Visual Studio
+(run "cmake" with no arguments for a list of available generators.)  For
+instance:
+
+  cd {build_directory}
+  cmake -G "Visual Studio 9 2008" {source_directory}
+
+You can then open ALL_BUILD.vcproj in Visual Studio and build the "Debug" or
+"Release" configurations of that project to generate a full build of TurboVNC.
 
 
 Packaging TurboVNC:
 -------------------
 
-  cd vnc/vnc_winsrc
-  make dist
+  cd {build_directory}
+  nmake installer
 
-The installer package will be named "TurboVNC.exe", and it can be found in
-windows/ (32-bit) or windows64/ (64-bit).
+or build the "installer" project in the Visual Studio IDE.
+
+The installer package (TurboVNC.exe) will be located under {build_directory}.
+If building using the Visual Studio IDE, then the installer package will be
+located in a subdirectory with the same name as the configuration you built
+(such as {build_directory}\Debug\ or {build_directory}\Release\).

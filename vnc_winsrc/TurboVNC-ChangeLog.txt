@@ -17,6 +17,10 @@ Added an idle timeout feature to the Unix TurboVNC Server which, when enabled,
 will cause it to exit automatically whenever a certain number of seconds have
 elapsed since the last active VNC viewer connection.
 -------------------------------------------------------------------------------
+[4]
+Created a new CMake-based build system for the Windows TurboVNC Server and
+Viewer.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
