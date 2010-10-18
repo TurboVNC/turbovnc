@@ -4,29 +4,31 @@ cmake_minimum_required(VERSION 2.6)
 set(VERSION 1.0.80)
 set(RCVERSION 1,0,80,0)
 
-if(WIN32)
-	execute_process(COMMAND "${CMAKE_SOURCE_DIR}/getdate.bat" OUTPUT_VARIABLE
-		BUILD)
-	string(REGEX REPLACE "\n" "" BUILD ${BUILD})
-elseif(UNIX)
-	execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)
-	string(REGEX REPLACE "\n" "" BUILD ${BUILD})
-else(WIN32)
-	message(FATAL_ERROR "date not implemented")
-endif(WIN32)
+if(NOT WIN32)
+	message(FATAL_ERROR "TurboVNC cannot be cross-compiled")
+endif()
 
-# This ugly hack is necessary because the NMake generator always defaults to
-# Debug.  Grrr...
-if("${DEBUG}" EQUAL "1")
-	set(CMAKE_BUILD_TYPE Debug)
-else()
+if(NOT MSVC)
+	message(FATAL_ERROR "TurboVNC requires Visual C++")
+endif()
+
+execute_process(COMMAND "${CMAKE_SOURCE_DIR}/getdate.bat" OUTPUT_VARIABLE
+	BUILD)
+string(REGEX REPLACE "\n" "" BUILD ${BUILD})
+
+if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
 endif()
-message(STATUS "Build type = ${CMAKE_BUILD_TYPE}")
 
+message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
+
+# This only works if building from the command line.  There is currently no way
+# to set a variable's value based on the build type when using the MSVC IDE.
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set(BUILD "${BUILD}d")
 endif()
+
+message(STATUS "VERSION = ${VERSION}, BUILD = ${BUILD}")
 
 foreach(var CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
 	CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
@@ -44,16 +46,12 @@ foreach(var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
 	endif()
 endforeach()
 
-if(MSVC)
-	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:LIBCMT")
-endif()
+set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:LIBCMT")
 
 add_definitions(-D__WIN32__ -D_CRT_SECURE_NO_DEPRECATE
 	-D__VERSION="${VERSION}" -D__BUILD="${BUILD}")
 
-if(MSVC)
-	add_definitions(-U_MBCS -wd4996 -wd4482 -D_CRT_SECURE_NO_DEPRECATE)
-endif()
+add_definitions(-U_MBCS -wd4996 -wd4482 -D_CRT_SECURE_NO_DEPRECATE)
 
 if(CMAKE_CL_64)
 	set(WIN64 1)
