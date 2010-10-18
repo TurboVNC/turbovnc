@@ -5,9 +5,7 @@ Building TurboVNC for Windows
 Build Environment
 -----------------
 
--- CMake v2.6 or later
-
-   Available from http://www.cmake.org/cmake/resources/software.html
+-- CMake (http://www.cmake.org) v2.6 or later
 
 -- Microsoft Visual C++ 2005 or later
 
@@ -73,17 +71,11 @@ Building TurboVNC from the Command Line
 ---------------------------------------
 
   cd {build_directory}
-  cmake -G "NMake Makefiles" {source_directory}
+  cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release {source_directory}
   nmake
 
 This will build either a 32-bit or a 64-bit version of TurboVNC, depending on
 which version of cl.exe is in the PATH.
-
-To build a debug version:
-
-  cd {build_directory}
-  cmake -G "NMake Makefiles" -DDEBUG=1 {source_directory}
-  nmake
 
 
 Building TurboVNC Using the Visual Studio IDE
@@ -96,8 +88,17 @@ instance:
   cd {build_directory}
   cmake -G "Visual Studio 9 2008" {source_directory}
 
-You can then open ALL_BUILD.vcproj in Visual Studio and build the "Debug" or
-"Release" configurations of that project to generate a full build of TurboVNC.
+You can then open ALL_BUILD.vcproj in Visual Studio and build one of the
+configurations in that project ("Debug", "Release", etc.) to generate a full
+build of TurboVNC.
+
+
+Debug Build
+-----------
+
+Add "-DCMAKE_BUILD_TYPE=Debug" to the cmake command line.  Or, if building with
+NMake, remove "-DCMAKE_BUILD_TYPE=Release" (Debug builds are the default with
+NMake.)
 
 
 Packaging TurboVNC:
