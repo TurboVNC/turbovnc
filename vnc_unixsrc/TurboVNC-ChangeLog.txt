@@ -29,6 +29,10 @@ Fixed a security loophole whereby RealVNC clients were able to connect with a
 blank password if PAM and OTP authentication were enabled on the TurboVNC
 server and the OTP was not set.
 -------------------------------------------------------------------------------
+[7]
+Fixed seg fault in the TurboVNC Unix server which occurred in the
+miRegionDestroy() function under certain rare circumstances.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
