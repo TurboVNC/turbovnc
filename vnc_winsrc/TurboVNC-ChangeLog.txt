@@ -1,4 +1,17 @@
 ===============================================================================
+Significant changes since 1.0
+===============================================================================
+[1]
+Fixed seg fault in the TurboVNC Unix server which occurred in the
+miRegionDestroy() function under certain rare circumstances.
+-------------------------------------------------------------------------------
+[1]
+Fixed seg fault in the TurboVNC Unix server which occurred in the
+cfb32ClippedLineCopy() function under certain rare circumstances.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 Significant changes since 1.0beta1
 ===============================================================================
 [1]
@@ -28,10 +41,6 @@ freeze for several minutes.
 Fixed a security loophole whereby RealVNC clients were able to connect with a
 blank password if PAM and OTP authentication were enabled on the TurboVNC
 server and the OTP was not set.
--------------------------------------------------------------------------------
-[7]
-Fixed seg fault in the TurboVNC Unix server which occurred in the
-miRegionDestroy() function under certain rare circumstances.
 -------------------------------------------------------------------------------
 
 
