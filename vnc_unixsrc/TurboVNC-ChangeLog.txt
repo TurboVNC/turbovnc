@@ -21,6 +21,10 @@ elapsed since the last active VNC viewer connection.
 Created a new CMake-based build system for the Windows TurboVNC Server and
 Viewer.
 -------------------------------------------------------------------------------
+[5]
+Added a '-config' option to the Unix TurboVNC Viewer which allows it to read
+.vnc connection info files saved by the Windows TurboVNC Viewer.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
