@@ -1439,7 +1439,7 @@ RROP_NAME (cfb8ClippedLine) (pDrawable, pGC, x1, y1, x2, y2, boxp, shorten)
 	{
 	    body body;
 	}
-	if (len & 1)
+	if (len > 0 && len & 1)
 	    body;
 
 	IMPORTANT_END;
