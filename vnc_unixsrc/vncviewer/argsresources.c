@@ -551,7 +551,7 @@ LoadConfigFile(char *filename)
 
   for (line = 0; fgets(buf, sizeof(buf), fp) != NULL; line++) {
     len = strlen(buf) - 1;
-    if (buf[len] != '\n' && strlen(buf) == 256) {
+    if (buf[len] != '\n' && strlen(buf) == 255) {
       fprintf(stderr, "ERROR in %s: line %d is too long!\n", filename, line+1);
       exit(1);
     }
@@ -597,6 +597,7 @@ LoadConfigFile(char *filename)
         for (i = 0; i < strlen(passwordString); i += 2) {
           char temps[3];  int temp;
           strncpy(temps, &passwordString[i], 2);
+          temps[2] = 0;
           if (sscanf(temps, "%x", &temp) == 1)
             encryptedPassword[i/2] = (char)temp;
           else break;
