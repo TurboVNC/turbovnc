@@ -28,6 +28,7 @@
 
 #include <ctype.h>
 #include "vncviewer.h"
+#include "vncauth.h"
 
 /*
  * fallback_resources - these are used if there is no app-defaults file
@@ -527,6 +528,12 @@ usage(void)
 }
 
 static char encodings[256] = "";
+static const char *encodingString[17] = {
+  "raw", "copyrect", "rre", "", "corre", "hextile", "zlib", "tight",
+  "zlibhex", "", "", "", "", "", "", "", "zrle"
+};
+
+char encryptedPassword[9] = "";
 
 void
 LoadConfigFile(char *filename)
@@ -535,10 +542,7 @@ LoadConfigFile(char *filename)
   char buf[256], buf2[256];
   int  line, len, n, i, j, preferred_encoding = -1;
   Bool use_encoding[17] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  static const char *encodingString[17] = {
-    "raw", "copyrect", "rre", "", "corre", "hextile", "zlib", "tight",
-    "zlibhex", "", "", "", "", "", "", "", "zrle"
-  };
+  char passwordString[256] = "";
 
   if ((fp = fopen(filename, "r")) == NULL) {
     fprintf(stderr, "ERROR: Cannot read connection info from %s\n", filename);
@@ -581,6 +585,23 @@ LoadConfigFile(char *filename)
         fprintf(stderr, "ERROR in %s: port number must be between 1 and 65535\n",
           filename);
         exit(1);
+      }
+      continue;
+    }
+
+    n = 9;
+    if (!strncmp(buf2, "password=", n)) {
+      if (buf2[n] != '\0') {
+        strncpy(passwordString, &buf2[n], 255-n);
+        passwordString[16] = 0;
+        for (i = 0; i < strlen(passwordString); i += 2) {
+          char temps[3];  int temp;
+          strncpy(temps, &passwordString[i], 2);
+          if (sscanf(temps, "%x", &temp) == 1)
+            encryptedPassword[i/2] = (char)temp;
+          else break;
+        }
+        encryptedPassword[i/2] = 0;
       }
       continue;
     }

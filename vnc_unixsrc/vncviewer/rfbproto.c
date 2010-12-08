@@ -744,6 +744,8 @@ AuthenticateNone(void)
  * Standard VNC authentication.
  */
 
+extern char encryptedPassword[9];
+
 static Bool
 AuthenticateVNC(void)
 {
@@ -758,7 +760,13 @@ AuthenticateVNC(void)
   if (!ReadFromRFBServer((char *)challenge, CHALLENGESIZE))
     return False;
 
-  if (appData.passwordFile) {
+  if (strlen(encryptedPassword)) {
+    passwd = buffer;
+    if (!vncDecryptPasswd(encryptedPassword, passwd)) {
+      fprintf(stderr, "Password stored in connection info file is invalid.\n");
+      return False;
+    }
+  } else if (appData.passwordFile) {
     passwd = vncDecryptPasswdFromFile(appData.passwordFile);
     if (!passwd) {
       fprintf(stderr, "Cannot read valid password from file \"%s\"\n",
