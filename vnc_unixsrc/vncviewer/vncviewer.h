@@ -137,6 +137,8 @@ typedef struct {
   Bool doubleBuffer;
   Bool continuousUpdates;
 
+  char *configFile;
+
 } AppData;
 
 extern AppData appData;

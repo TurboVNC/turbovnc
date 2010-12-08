@@ -242,7 +242,7 @@ char *fallback_resources[] = {
  * from a dialog box.
  */
 
-char vncServerHost[256];
+char vncServerHost[256] = "";
 int vncServerPort = 0;
 
 
@@ -355,7 +355,10 @@ static XtResource appDataResourceList[] = {
    XtOffsetOf(AppData, autoPass), XtRImmediate, (XtPointer) False},
 
   {"continuousUpdates", "ContinuousUpdates", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, continuousUpdates), XtRImmediate, (XtPointer) False}
+   XtOffsetOf(AppData, continuousUpdates), XtRImmediate, (XtPointer) False},
+
+  {"configFile", "ConfigFile", XtRString, sizeof(String),
+   XtOffsetOf(AppData, configFile), XtRImmediate, (XtPointer) 0},
 };
 
 
@@ -391,7 +394,8 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-autopass",      "*autoPass",           XrmoptionNoArg,  "True"},
   {"-user",          "*userLogin",          XrmoptionSepArg,  0},
   {"-nounixlogin",   "*noUnixLogin",        XrmoptionNoArg,  "True"},
-  {"-cu",            "*continuousUpdates",  XrmoptionNoArg,  "True"}
+  {"-cu",            "*continuousUpdates",  XrmoptionNoArg,  "True"},
+  {"-config",        "*configFile",         XrmoptionSepArg, 0}
 };
 
 int numCmdLineOptions = XtNumber(cmdLineOptions);
@@ -487,11 +491,144 @@ usage(void)
 	  "        -user <USER NAME> (Unix login authentication)\n"
 	  "        -nounixlogin\n"
 	  "        -cu\n"
+	  "        -config <CONFIG-FILENAME>\n"
 	  "\n"
 	  "Option names may be abbreviated, for example, -q instead of -quality.\n"
 	  "See the manual page for more information."
 	  "\n", (int)sizeof(size_t)*8, programName, programName, programName, programName);
   exit(1);
+}
+
+
+/*
+ * Load connection info from file
+ */
+
+#define ReadConfigBool(str, var) {  \
+  n = strlen(str);  \
+  if (!strncmp(buf2, str, n)) {  \
+    int temp = 0;  \
+    if (sscanf(&buf2[n], "%d", &temp) == 1) {  \
+      if (temp) var = True;  \
+      else var = False;  \
+    }  \
+    continue;  \
+  }  \
+}
+
+#define ReadConfigInt(str, var, min, max) {  \
+  n = strlen(str);  \
+  if (!strncmp(buf2, str, n)) {  \
+    int temp = -1;  \
+    if (sscanf(&buf2[n], "%d", &temp) == 1 && temp >= min && temp <= max)  \
+      var = temp;  \
+    continue;  \
+  }  \
+}
+
+static char encodings[256] = "";
+
+void
+LoadConfigFile(char *filename)
+{
+  FILE *fp;
+  char buf[256], buf2[256];
+  int  line, len, n, i, j, preferred_encoding = -1;
+  Bool use_encoding[17] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  static const char *encodingString[17] = {
+    "raw", "copyrect", "rre", "", "corre", "hextile", "zlib", "tight",
+    "zlibhex", "", "", "", "", "", "", "", "zrle"
+  };
+
+  if ((fp = fopen(filename, "r")) == NULL) {
+    fprintf(stderr, "ERROR: Cannot read connection info from %s\n", filename);
+    exit(1);
+  }
+
+  for (line = 0; fgets(buf, sizeof(buf), fp) != NULL; line++) {
+    len = strlen(buf) - 1;
+    if (buf[len] != '\n' && strlen(buf) == 256) {
+      fprintf(stderr, "ERROR in %s: line %d is too long!\n", filename, line+1);
+      exit(1);
+    }
+    buf[len] = '\0';
+
+    for (i = 0, j = 0; i < len; i++) {
+      if (buf[i] != ' ' && buf[i] != '\t' && buf[i] != '\r' && buf[i] != '\n')
+        buf2[j++] = buf[i];
+    }
+    len = j;
+    buf2[len] = '\0';
+    if (len < 1) continue;
+
+    n = 5;
+    if (!strncmp(buf2, "host=", n)) {
+      if (buf2[n] == '\0') {
+        fprintf(stderr, "ERROR reading host name from %s\n", filename);
+        exit(1);
+      }
+      strncpy(vncServerHost, &buf2[n], 255-n);
+      continue;
+    }
+
+    n = 5;
+    if (!strncmp(buf2, "port=", n)) {
+      if (buf2[n] == '\0' || sscanf(&buf2[n], "%d", &vncServerPort) < 1) {
+        fprintf(stderr, "ERROR reading port number from %s\n", filename);
+        exit(1);
+      }
+      if (vncServerPort < 1 || vncServerPort > 65535) {
+        fprintf(stderr, "ERROR in %s: port number must be between 1 and 65535\n",
+          filename);
+        exit(1);
+      }
+      continue;
+    }
+
+    for (i = 0; i < 17; i++) {
+      char token[17];
+      snprintf(token, 16, "use_encoding_%d=", i);
+      token[16] = 0;
+      ReadConfigBool(token, use_encoding[i]);
+    }
+
+    ReadConfigInt("preferred_encoding=", preferred_encoding, 0, 16);
+    ReadConfigBool("viewonly=", appData.viewOnly);
+    ReadConfigBool("fullscreen=", appData.fullScreen);
+    ReadConfigBool("8bit=", appData.useBGR233);
+    ReadConfigBool("doublebuffer=", appData.doubleBuffer);
+    ReadConfigBool("shared=", appData.shareDesktop);
+    ReadConfigBool("continuousupdates=", appData.continuousUpdates);
+    ReadConfigBool("belldeiconify=", appData.raiseOnBeep);
+    ReadConfigInt("compresslevel=", appData.compressLevel, 0, 9);
+    ReadConfigInt("subsampling=", appData.subsampLevel, 0, 3);
+    ReadConfigInt("quality=", appData.qualityLevel, 1, 100);
+    ReadConfigBool("nounixlogin=", appData.noUnixLogin);
+  }
+
+  if (preferred_encoding >= 0 && preferred_encoding <= 16
+    && use_encoding[preferred_encoding]) {
+    strncat(encodings, encodingString[preferred_encoding],
+      255 - strlen(encodings));
+  }
+  for (i = 0; i < 17; i++) {
+    if (use_encoding[i] && i != preferred_encoding) {
+      strncat(encodings, " ", 255 - strlen(encodings));
+      strncat(encodings, encodingString[i], 255 - strlen(encodings));
+    }
+  }
+  if (strlen(encodings) > 0) appData.encodingsString = encodings;
+
+  if (strlen(vncServerHost) == 0) {
+    fprintf(stderr, "ERROR reading host name from %s\n", filename);
+    exit(1);
+  }
+  if (vncServerPort == 0) {
+    fprintf(stderr, "ERROR reading port number from %s\n", filename);
+    exit(1);
+  }
+
+  fclose(fp);
 }
 
 
@@ -514,7 +651,11 @@ GetArgsAndResources(int argc, char **argv)
   XtGetApplicationResources(toplevel, &appData, appDataResourceList,
 			    XtNumber(appDataResourceList), 0, 0);
 
-  if (appData.subsampString) {
+  appData.subsampLevel = -1;
+
+  if(appData.configFile) LoadConfigFile(appData.configFile);
+
+  if (appData.subsampString && appData.subsampLevel < 0) {
     switch(toupper(appData.subsampString[0])) {
       case 'G': case '0':  appData.subsampLevel=TVNC_GRAY;  break;
       case '1':  appData.subsampLevel=TVNC_1X;  break;
@@ -577,50 +718,53 @@ GetArgsAndResources(int argc, char **argv)
     return;
   }
 
-  if (argc == 1) {
-    vncServerName = DoServerDialog();
-    appData.passwordDialog = True;
-  } else if (argc != 2) {
-    usage();
-  } else {
-    vncServerName = argv[1];
-
-    if (!isatty(0))
-      appData.passwordDialog = True;
-    if (vncServerName[0] == '-')
-      usage();
-  }
-
   if (appData.doubleBuffer)
     appData.useX11Cursor = True;
 
-  if (strlen(vncServerName) > 255) {
-    fprintf(stderr,"VNC server name too long\n");
-    exit(1);
-  }
+  if (strlen(vncServerHost) == 0 && vncServerPort < 1) {
 
-  colonPos = strchr(vncServerName, ':');
-  if (colonPos == NULL) {
-    /* No colon -- use default port number */
-    strcpy(vncServerHost, vncServerName);
-    vncServerPort = SERVER_PORT_OFFSET;
-  } else {
-    memcpy(vncServerHost, vncServerName, colonPos - vncServerName);
-    vncServerHost[colonPos - vncServerName] = '\0';
-    len = strlen(colonPos + 1);
-    portOffset = SERVER_PORT_OFFSET;
-    if (colonPos[1] == ':') {
-      /* Two colons -- interpret as a port number */
-      colonPos++;
-      len--;
-      portOffset = 0;
-    }
-    if (!len || strspn(colonPos + 1, "0123456789") != len) {
+    if (argc == 1) {
+      vncServerName = DoServerDialog();
+      appData.passwordDialog = True;
+    } else if (argc != 2) {
       usage();
+    } else {
+      vncServerName = argv[1];
+
+      if (!isatty(0))
+        appData.passwordDialog = True;
+      if (vncServerName[0] == '-')
+        usage();
     }
-    disp = atoi(colonPos + 1);
-    if (portOffset != 0 && disp >= 100)
-      portOffset = 0;
-    vncServerPort = disp + portOffset;
+
+    if (strlen(vncServerName) > 255) {
+      fprintf(stderr,"VNC server name too long\n");
+      exit(1);
+    }
+
+    colonPos = strchr(vncServerName, ':');
+    if (colonPos == NULL) {
+      /* No colon -- use default port number */
+      strcpy(vncServerHost, vncServerName);
+      vncServerPort = SERVER_PORT_OFFSET;
+    } else {
+      memcpy(vncServerHost, vncServerName, colonPos - vncServerName);
+      vncServerHost[colonPos - vncServerName] = '\0';
+      len = strlen(colonPos + 1);
+      portOffset = SERVER_PORT_OFFSET;
+      if (colonPos[1] == ':') {
+        /* Two colons -- interpret as a port number */
+        colonPos++;
+        len--;
+        portOffset = 0;
+      }
+      if (!len || strspn(colonPos + 1, "0123456789") != len) {
+        usage();
+      }
+      disp = atoi(colonPos + 1);
+      if (portOffset != 0 && disp >= 100)
+        portOffset = 0;
+      vncServerPort = disp + portOffset;
+    }
   }
 }
