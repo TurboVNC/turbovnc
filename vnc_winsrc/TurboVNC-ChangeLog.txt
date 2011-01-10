@@ -1,5 +1,5 @@
 ===============================================================================
-Significant changes since 1.0
+Significant changes since 1.0.1
 ===============================================================================
 [1]
 Enhanced the screen scaling feature in the Java TurboVNC Viewer and added a GUI
@@ -24,6 +24,19 @@ Viewer.
 [5]
 Added a '-config' option to the Unix TurboVNC Viewer which allows it to read
 .vnc connection info files saved by the Windows TurboVNC Viewer.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
+Significant changes since 1.0
+===============================================================================
+[1]
+Fixed seg fault in the TurboVNC Unix server which occurred in the
+miRegionDestroy() function under certain rare circumstances.
+-------------------------------------------------------------------------------
+[1]
+Fixed seg fault in the TurboVNC Unix server which occurred in the
+cfb32ClippedLineCopy() function under certain rare circumstances.
 -------------------------------------------------------------------------------
 
 
