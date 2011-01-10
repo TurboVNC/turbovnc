@@ -145,7 +145,7 @@ extern Bool Must_have_memory;
         ((r1)->y2 >= (r2)->y2) )
 
 #define xallocData(n) (RegDataPtr)xalloc(REGION_SZOF(n))
-#define xfreeData(reg) if ((reg)->data && (reg)->data->size) xfree((reg)->data)
+#define xfreeData(reg) if ((reg)->data && (reg)->data->size) {xfree((reg)->data);  (reg)->data=NULL;}
 
 #define RECTALLOC(pReg,n) \
 if (!(pReg)->data || (((pReg)->data->numRects + (n)) > (pReg)->data->size)) \
