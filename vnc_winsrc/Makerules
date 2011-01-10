@@ -10,8 +10,8 @@ ifeq ($(WIN64), yes)
 subplatform := 64
 endif
 
-VERSION := 1.0
-RCVERSION := 1,0,0,0
+VERSION := 1.0.1
+RCVERSION := 1,0,1,0
 BUILD := $(shell date +%Y%m%d)
 ifeq ($(DEBUG), yes)
  BUILD := $(BUILD)d
