@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2011 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
                        All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -676,6 +676,11 @@ GetArgsAndResources(int argc, char **argv)
   appData.subsampLevel = -1;
 
   if(appData.configFile) LoadConfigFile(appData.configFile);
+  else if(argc > 1 && strlen(argv[1]) >= 4
+    && !strncmp(&argv[1][strlen(argv[1])-4], ".vnc", 4)) {
+    appData.configFile = argv[1];
+    LoadConfigFile(appData.configFile);
+  }
 
   if (appData.subsampString && appData.subsampLevel < 0) {
     switch(toupper(appData.subsampString[0])) {
