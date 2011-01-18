@@ -10,5 +10,12 @@
 #
 # DO NOT RUN THIS SERVICE if your local area network is untrusted!  See the
 # TurboVNC User's Guide for information about tunneling TurboVNC over SSH.
+#
+# Use "-nohttpd" to prevent web-based VNC clients from connecting.
+#
+# Use "-localhost" to prevent remote VNC clients from connecting except when
+# doing so through a secure tunnel.  See the TurboVNC User's Guide and the
+# vncviewer and Xvnc man pages for more information.
 
 # VNCSERVERS="1:myusername"
+# VNCSERVERARGS[1]="-geometry 800x600 -nohttpd -localhost"
