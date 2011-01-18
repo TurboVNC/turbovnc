@@ -255,6 +255,7 @@ Lossless Refresh toolbar icon.)  In the Java TurboVNC Viewer, click on the
 "Lossless Refresh" button at the top of the browser window.
 
 *** Automatic Lossless Refresh
+{anchor: ALR}
 
 Passing an argument of ''-alr ''__''{timeout}''__ to ''vncserver'' will
 enable the automatic lossless refresh (ALR) feature for the TurboVNC

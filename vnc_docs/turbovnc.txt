@@ -1,5 +1,5 @@
 #VAR: css=turbovnc.css
-#TITLE: User's Guide for TurboVNC 1.0
+#TITLE: User's Guide for TurboVNC 1.0.1
 #MAKETITLE
 __Intended audience:__ System Administrators, Researchers, and others with
 knowledge of the Linux or Solaris operating systems and X windows.
