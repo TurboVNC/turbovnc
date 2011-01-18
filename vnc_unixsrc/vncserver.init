@@ -26,6 +26,7 @@ if [ $REDHAT -eq 1 ]; then
     [ ${NETWORKING} = "no" ] && exit 0
 fi
 
+unset VNCSERVERARGS
 VNCSERVERS=""
 [ -f /etc/sysconfig/tvncservers ] && . /etc/sysconfig/tvncservers
 
@@ -44,7 +45,9 @@ start() {
     do
         echo -n "${display} "
         unset BASH_ENV ENV
-        _OUT=`echo ${display}; su ${display##*:} -c "cd ~${display##*:} && [ -f .vnc/passwd ] && vncserver :${display%%:*}" 2>&1`
+        DISP="${display%%:*}"
+        export VNCUSERARGS="${VNCSERVERARGS[${DISP}]}"
+        _OUT=`echo ${display}; su ${display##*:} -c "cd ~${display##*:} && [ -f .vnc/passwd ] && vncserver :${display%%:*} ${VNCUSERARGS}" 2>&1`
         RETVAL=$?
         logger -p local7.notice $_OUT
         [ "$RETVAL" -ne 0 ] && break
