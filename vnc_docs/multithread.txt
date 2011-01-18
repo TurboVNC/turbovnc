@@ -1,4 +1,5 @@
 * Multithreading in TurboVNC
+{anchor: Multithreading}
 
 The TurboVNC Server can use multiple threads to perform image encoding and
 compression, thus allowing it to take advantage of multi-core or

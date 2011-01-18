@@ -33,3 +33,6 @@ knowledge of the Linux or Solaris operating systems and X windows.
 ----8<--------------
 #INCLUDE: compatibility.txt
 {nl}
+----8<--------------
+#INCLUDE: config.txt
+{nl}

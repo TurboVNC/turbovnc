@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2010-08-04T23:40:18">
+<meta name="date" content="2011-01-18T04:56:14">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.0</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -16,6 +16,7 @@
 <link rel="chapter" href="index.html#hd007" title="7 Multithreading in TurboVNC">
 <link rel="chapter" href="index.html#hd008" title="8 Using TurboVNC with VirtualGL">
 <link rel="chapter" href="index.html#hd009" title="9 Compatibility Guide">
+<link rel="chapter" href="index.html#hd0010" title="10 Advanced Configuration">
 <link rel="stylesheet" type="text/css" href="turbovnc.css" title="turbovnc">
 </head>
 <body >
@@ -155,6 +156,17 @@ windows.</p>
             </li>
             <li class="Itemize-3 toc">
                 <a href="#hd009003" class="toc">9.3 RealVNC</a>
+            </li>
+        </ul>
+    </li>
+    <li class="Itemize-1 toc">
+        <a href="#hd0010" class="toc">10 Advanced Configuration</a>
+        <ul class="toc">
+            <li class="Itemize-3 toc">
+                <a href="#hd0010001" class="toc">10.1 Server Settings</a>
+            </li>
+            <li class="Itemize-3 toc">
+                <a href="#hd0010002" class="toc">10.2 Client Settings</a>
             </li>
         </ul>
     </li>
@@ -1035,6 +1047,8 @@ the browser window.</p>
 
 <h3 id="hd005004002">5.4.2&nbsp;Automatic Lossless Refresh</h3>
 
+<p><a name="ALR"></a></p>
+
 <p>Passing an argument of 
 <code>-alr&nbsp;</code><em><code>{timeout}</code></em> to 
 <code>vncserver</code> will enable the automatic lossless refresh (ALR) 
@@ -1354,6 +1368,8 @@ man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;{vncserver&nbsp;|&nbsp;Xvnc&nbsp;|&nbsp;
 
 
 <h1 id="hd007"><a name="file007"></a>7&nbsp;Multithreading in TurboVNC</h1>
+
+<p><a name="Multithreading"></a></p>
 
 <p>The TurboVNC Server can use multiple threads to perform image encoding 
 and compression, thus allowing it to take advantage of multi-core or 
@@ -1818,6 +1834,170 @@ note, however, is that many of the TurboVNC viewer enhancements
 buffering) are available even when using these legacy protocols.  Thus, 
 in some cases, the TurboVNC Viewer may actually perform better than the 
 RealVNC Viewer when connecting to RealVNC servers.</p>
+
+<p><br /></p>
+
+<hr class="break" />
+
+
+
+<h1 id="hd0010"><a name="file010"></a>10&nbsp;Advanced Configuration</h1>
+
+
+<h2 id="hd0010001">10.1&nbsp;Server Settings</h2>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>TVNC_ALRALL&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Disable/Enable automatic lossless refresh for regions which were drawn using methods other than <code>X[Shm]PutImage()</code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Platforms</td>
+    <td class="standard">Unix</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Disabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        See Section <a href="#ALR" class="ref">5.4.2</a>
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>TVNC_MT&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Disable/Enable multithreaded image encoding</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Platforms</td>
+    <td class="standard">Unix</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Disabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        See Chapter <a href="#Multithreading" class="ref">7</a>
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>VGL_NTHREADS&nbsp;=&nbsp;</code><em><code>{n}</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Use <em><code>{n}</code></em> threads to perform image encoding</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Platforms</td>
+    <td class="standard">Unix</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard"><em><code>{n}</code></em> = the number of CPU cores in the system</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        See Chapter <a href="#Multithreading" class="ref">7</a>
+    </dd>
+</dl>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>TVNC_PROFILE&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Disable/enable profiling output</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Platforms</td>
+    <td class="standard">Unix</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Disabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        If profiling output is enabled, then the TurboVNC Server will 
+        continuously benchmark itself and periodically print the throughput of 
+        various stages in its image pipeline to the Xvnc log file.
+    </dd>
+</dl>
+
+
+
+<h2 id="hd0010002">10.2&nbsp;Client Settings</h2>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Environment Variable</td>
+    <td class="standard"><code>TVNC_PROFILE&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Disable/enable profiling output</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Platforms</td>
+    <td class="standard">Unix</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Disabled</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        If profiling output is enabled, then the TurboVNC Viewer will 
+        continuously benchmark itself and periodically print the throughput of 
+        various stages in its image pipeline to the console.
+    </dd>
+</dl>
 
 <p><br /></p>
 
