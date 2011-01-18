@@ -1,0 +1,50 @@
+* Advanced Configuration
+
+** Server Settings
+
+| Environment Variable | ''TVNC_ALRALL = ''__''0 \| 1''__ |
+| Summary | Disable/Enable automatic lossless refresh for regions which were \
+drawn using methods other than ''X[Shm]PutImage()'' |
+| Platforms | Unix |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: See {ref prefix="Section ": ALR}
+
+| Environment Variable | ''TVNC_MT = ''__''0 \| 1''__ |
+| Summary | Disable/Enable multithreaded image encoding |
+| Platforms | Unix |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: See {ref prefix="Chapter ": Multithreading}
+
+| Environment Variable | ''VGL_NTHREADS = ''__''{n}''__ |
+| Summary | Use __''{n}''__ threads to perform image encoding |
+| Platforms | Unix |
+| Default Value | __''{n}''__ = the number of CPU cores in the system |
+#OPT: hiCol=first
+
+	Description :: See {ref prefix="Chapter ": Multithreading}
+
+| Environment Variable | ''TVNC_PROFILE = ''__''0 \| 1''__ |
+| Summary | Disable/enable profiling output |
+| Platforms | Unix |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: If profiling output is enabled, then the TurboVNC Server will
+	continuously benchmark itself and periodically print the throughput of
+	various stages in its image pipeline to the Xvnc log file.
+
+** Client Settings
+
+| Environment Variable | ''TVNC_PROFILE = ''__''0 \| 1''__ |
+| Summary | Disable/enable profiling output |
+| Platforms | Unix |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: If profiling output is enabled, then the TurboVNC Viewer will
+	continuously benchmark itself and periodically print the throughput of
+	various stages in its image pipeline to the console.
