@@ -34,9 +34,13 @@ Significant changes since 1.0
 Fixed seg fault in the TurboVNC Unix server which occurred in the
 miRegionDestroy() function under certain rare circumstances.
 -------------------------------------------------------------------------------
-[1]
+[2]
 Fixed seg fault in the TurboVNC Unix server which occurred in the
 cfb32ClippedLineCopy() function under certain rare circumstances.
+-------------------------------------------------------------------------------
+[3]
+vncserver arguments can now be specified in the /etc/sysconfig/tvncservers file
+using an array called VNCSERVERARGS.  This works the same as in RealVNC 4.
 -------------------------------------------------------------------------------
 
 
