@@ -7,13 +7,13 @@
 .\" Copyright (C) 2001-2003 Constantin Kaplinsky
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
 .\" Copyright (C) 2010 University Corporation for Atmospheric Research
-.\" Copyright (C) 2010 D. R. Commander
+.\" Copyright (C) 2010-2011 D. R. Commander
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TurboVNC distribution.
 .\"
-.TH vncviewer 1 "December 2010" "" "TurboVNC"
+.TH vncviewer 1 "January 2011" "" "TurboVNC"
 .SH NAME
 vncviewer \- an X11 viewer/client for TurboVNC
 .SH SYNOPSIS
@@ -335,6 +335,18 @@ Zlib can optionally be used to compress the paletted and raw-encoded
 rectangles.  In TurboVNC, the Tight protocol has been optimized for maximum
 performance with 3D and video workloads.
 .SH RESOURCES
+X resources for \fBvncviewer\fR can be set in a file called \fBVncviewer\fR
+(case-sensitive), which can reside either in the user's home directory or in
+the system-wide resources directory (for instance,
+\fB/usr/lib/X11/app-defaults\fR).  To set a resource in this file, use the
+following syntax:
+
+*resourceName: resourceValue
+
+For instance,
+
+*fullScreen: true
+
 X resources that \fBvncviewer\fR knows about, aside from the
 normal Xt resources, are as follows:
 .TP
