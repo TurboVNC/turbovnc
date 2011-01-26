@@ -14,7 +14,7 @@ improvements, and more.
 	Copyright (C) 2000-2007 Constantin Kaplinsky
 	Copyright (C) 2000-2009 TightVNC Group
 	Copyright (C) 2009 Paul Donohue
-	Copyright (C) 2009-2010 D. R. Commander
+	Copyright (C) 2009-2011 D. R. Commander
 	All rights reserved.
 
 This software is distributed under the GNU General Public Licence as
@@ -84,7 +84,7 @@ There are three basic ways to use the Java TurboVNC Viewer:
      VncViewer.jar file is in the current directory, then the Java TurboVNC
      Viewer can be launched with the following command line:
 
-         java -jar VncViewer.jar VncViewer HOST {host} PORT {port}
+         java -jar VncViewer.jar HOST {host} PORT {port}
 
      where {host} is the hostname or IP address of the TurboVNC server machine
      and {port} is typically 5900 + the X display number of the TurboVNC
@@ -117,7 +117,7 @@ TurboVNC Viewer is used:
   2. When run as a standalone application, the Java TurboVNC Viewer reads
      parameters from the command line.  Example:
 
-     java -jar VncViewer.jar VncViewer HOST my_server PORT 5901 "Scaling factor" 50
+     java -jar VncViewer.jar HOST my_server PORT 5901 "Scaling factor" 50
 
 Both parameter names and their values are case-insensitive.  The only
 exception is the "PASSWORD" parameter, as VNC passwords are case-sensitive.
