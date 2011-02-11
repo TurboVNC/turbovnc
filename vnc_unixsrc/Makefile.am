@@ -93,6 +93,7 @@ xserver-uninstall:
 	rm -f $(DESTDIR)/$(mandir)/man1/Xserver.1
 	rm -f $(DESTDIR)/$(prefix)/vnc/classes/index.vnc
 	rm -f $(DESTDIR)/$(prefix)/vnc/classes/VncViewer.jar
+	rm -f $(DESTDIR)/$(prefix)/vnc/classes/README
 	rmdir $(DESTDIR)/$(prefix)/vnc/classes/
 	rmdir $(DESTDIR)/$(prefix)/vnc/
 	rm -f $(DESTDIR)/$(sysconfdir)/turbovncserver.conf
