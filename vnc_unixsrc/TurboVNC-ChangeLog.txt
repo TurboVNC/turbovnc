@@ -13,6 +13,12 @@ cfb32ClippedLineCopy() function under certain rare circumstances.
 vncserver arguments can now be specified in the /etc/sysconfig/tvncservers file
 using an array called VNCSERVERARGS.  This works the same as in RealVNC 4.
 -------------------------------------------------------------------------------
+[4]
+The -via option in the Unix TurboVNC Viewer now uses ephemeral ports to bind
+the client side of the SSH tunnel.  This should prevent port conflicts that
+could occur when multiple vncviewer instances tried to use the -via option
+simultaneously.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
