@@ -1,5 +1,6 @@
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2011 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -255,29 +256,37 @@ ConnectToTcpAddr(unsigned int host, int port)
 int
 FindFreeTcpPort(void)
 {
-  int sock, port;
+  int sock;
   struct sockaddr_in addr;
+  socklen_t n;
 
+  memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = INADDR_ANY;
 
   sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0) {
     fprintf(stderr,"%s",programName);
-    perror(": FindFreeTcpPort: socket");
+    perror(": FindFreeTcpPort: unable to create socket");
     return 0;
   }
 
-  for (port = TUNNEL_PORT_OFFSET + 99; port > TUNNEL_PORT_OFFSET; port--) {
-    addr.sin_port = htons((unsigned short)port);
-    if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) == 0) {
-      close(sock);
-      return port;
-    }
+  addr.sin_port = 0;
+  if (bind (sock, (struct sockaddr *)&addr, sizeof (addr)) < 0) {
+    close(sock);
+    fprintf(stderr,"%s",programName);
+    perror(": FindFreeTcpPort: unable to find free port");
+  }
+
+  n = sizeof(addr);
+  if (getsockname (sock, (struct sockaddr *)&addr, &n) < 0) {
+    close(sock);
+    fprintf(stderr,"%s",programName);
+    perror(": FindFreeTcpPort: unable to get port number");
   }
 
   close(sock);
-  return 0;
+  return ntohs(addr.sin_port);
 }
 
 
