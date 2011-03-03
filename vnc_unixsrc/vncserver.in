@@ -439,7 +439,7 @@ if (kill 0, `cat $pidFile`) {
     &Kill();
 }
 } else {
-system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1 &");
+system("($xstartup; $0 -kill :$displayNumber) >> " . &quotedString($desktopLog) . " 2>&1 &");
 }
 
 exit;
