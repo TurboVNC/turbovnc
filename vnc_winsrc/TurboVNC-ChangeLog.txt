@@ -25,6 +25,10 @@ Viewer.
 Added a '-config' option to the Unix TurboVNC Viewer which allows it to read
 .vnc connection info files saved by the Windows TurboVNC Viewer.
 -------------------------------------------------------------------------------
+[6]
+Xvnc will now always exit whenever the window manager running in the VNC
+session exits.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
