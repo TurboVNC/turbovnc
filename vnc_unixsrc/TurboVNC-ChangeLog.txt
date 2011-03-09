@@ -19,6 +19,10 @@ the client side of the SSH tunnel.  This should prevent port conflicts that
 could occur when multiple vncviewer instances tried to use the -via option
 simultaneously.
 -------------------------------------------------------------------------------
+[5]
+Xvnc will now always exit whenever the window manager running in the VNC
+session exits.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
