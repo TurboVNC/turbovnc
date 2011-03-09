@@ -664,6 +664,8 @@ sub Usage
 	"        -pixelformat rgb<NNN>\n".
 	"        -pixelformat bgr<NNN>\n".
 	"        -fp <FONT-PATH>\n".
+	"        -fg\n".
+	"        -list\n".
 	"        -novncauth\n".
 	"        -nootp\n".
 	"        -nopam\n".
