@@ -18,7 +18,6 @@ AC_SUBST(MANDIR)
 
 # Checks for programs.
 SAVED_CFLAGS=${CFLAGS}
-SAVED_CXXFLAGS=${CXXFLAGS}
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_LN_S
@@ -30,18 +29,12 @@ if test "x${GCC}" = "xyes"; then
   if test "x${SAVED_CFLAGS}" = "x"; then
     CFLAGS=-O3
   fi
-  if test "x${SAVED_CXXFLAGS}" = "x"; then
-    CXXFLAGS=-O3
-  fi
 fi
 
 AC_CHECK_DECL([__SUNPRO_C], [SUNCC="yes"], [SUNCC="no"])
 if test "x${SUNCC}" = "xyes"; then
   if test "x${SAVED_CFLAGS}" = "x"; then
     CFLAGS=-xO5
-  fi
-  if test "x${SAVED_CXXFLAGS}" = "x"; then
-    CXXFLAGS=-xO5
   fi
 fi
 
