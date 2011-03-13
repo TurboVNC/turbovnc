@@ -121,17 +121,10 @@ currently running under your account on this machine.
 Prints a brief list of command line options
 .TP
 \fB\-fg\fR
-Unless -noxstartup is specified, this version of vncserver will launch Xvnc in
-such a way that, when the window manager running inside the VNC session is
-exited, Xvnc will terminate.  Specifying this option will additionally make
-Xvnc run as a foreground process, which means that it can be aborted with
-CTRL-C.  This may be necessary when launching TurboVNC from within certain grid
-computing environments.
-.TP
-\fB\-noxstartup\fR
-Do not run the ~/.vnc/xstartup.turbovnc script after launching Xvnc.  This
-option allows you to manually start a window manager in your TurboVNC session
-or to run a full-screen application without a window manager.
+Runs Xvnc as a foreground process.  This has two effects: (1) The VNC server
+can be aborted with CTRL-C, and (2) the VNC server will exit as soon as the
+user logs out of the window manager in the VNC session.  This may be necessary
+when launching TurboVNC from within certain grid computing environments.
 .TP
 \fB\-fp\fR \fIfont-path\fR
 The vncserver script will normally examine your system to figure out where it
