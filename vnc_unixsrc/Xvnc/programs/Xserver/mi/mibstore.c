@@ -41,6 +41,45 @@ The University of California makes no representations about the suitability
 of this software for any purpose.  It is provided "as is" without express or
 implied warranty.
 
+Copyright 1987, 1998  The Open Group
+
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of The Open Group shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from The Open Group.
+
+
+Copyright 1987 by the Regents of the University of California
+
+                        All Rights Reserved
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted, provided
+that the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation, and that the name The Open Group not be used in advertising or publicity
+pertaining to distribution of the software without specific, written prior
+permission.  
+
+The University of California makes no representations about the suitability
+of this software for any purpose.  It is provided "as is" without express or
+implied warranty.
+
 ******************************************************************/
 
 #define NEED_EVENTS
@@ -2809,6 +2848,15 @@ miBSSaveDoomedAreas(pWin, pObscured, dx, dy)
 	    }
 	}
 	REGION_TRANSLATE(pScreen, pObscured, x, y);
+    }
+    else
+    {
+	if (REGION_BROKEN (pScreen, pObscured))
+	{
+	    REGION_EMPTY( pScreen, &pBackingStore->SavedRegion);
+	    miDestroyBSPixmap (pWin);
+	    return;
+	}
     }
 }
 

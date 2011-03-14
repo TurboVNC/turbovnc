@@ -506,6 +506,8 @@ extern Bool miValidRegion(
 );
 #endif
 
+extern Bool miRegionBroken(RegionPtr pReg);
+
 /* miscrinit.c */
 
 extern Bool miModifyPixmapHeader(

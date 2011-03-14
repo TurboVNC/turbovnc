@@ -568,6 +568,18 @@ typedef    void (* RegionEmptyProcPtr)(
 #endif
 );
 
+typedef    Bool (* RegionBrokenProcPtr)(
+#if NeedNestedPrototypes
+	RegionPtr /*pReg*/
+#endif
+);
+
+typedef    Bool (* RegionBreakProcPtr)(
+#if NeedNestedPrototypes
+	RegionPtr /*pReg*/
+#endif
+);
+
 typedef    BoxPtr (* RegionExtentsProcPtr)(
 #if NeedNestedPrototypes
 	RegionPtr /*pReg*/
@@ -858,6 +870,8 @@ typedef struct _Screen {
     RectInProcPtr		RectIn;
     PointInRegionProcPtr	PointInRegion;
     RegionNotEmptyProcPtr	RegionNotEmpty;
+    RegionBrokenProcPtr		RegionBroken;
+    RegionBreakProcPtr		RegionBreak;
     RegionEmptyProcPtr		RegionEmpty;
     RegionExtentsProcPtr	RegionExtents;
     RegionAppendProcPtr		RegionAppend;

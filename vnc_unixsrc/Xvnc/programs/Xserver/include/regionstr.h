@@ -1,6 +1,28 @@
 /* $XConsortium: regionstr.h,v 1.8 94/04/17 20:26:01 dpw Exp $ */
 /***********************************************************
 
+Copyright 1987, 1998  The Open Group
+
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of The Open Group shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from The Open Group.
+
 Copyright (c) 1987  X Consortium
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -76,8 +98,11 @@ typedef struct _Region {
 
 extern BoxRec miEmptyBox;
 extern RegDataRec miEmptyData;
+extern RegDataRec miBrokenData;
 
 #define REGION_NIL(reg) ((reg)->data && !(reg)->data->numRects)
+/* not a region */
+#define REGION_NAR(reg)	((reg)->data == &miBrokenData)
 #define REGION_NUM_RECTS(reg) ((reg)->data ? (reg)->data->numRects : 1)
 #define REGION_SIZE(reg) ((reg)->data ? (reg)->data->size : 0)
 #define REGION_RECTS(reg) ((reg)->data ? (BoxPtr)((reg)->data + 1) \
@@ -131,6 +156,12 @@ extern RegDataRec miEmptyData;
 
 #define REGION_NOTEMPTY(_pScreen, _pReg) \
     (*(_pScreen)->RegionNotEmpty)(_pReg)
+
+#define REGION_BROKEN(_pScreen, _pReg) \
+    (*(_pScreen)->RegionBroken)(_pReg)
+
+#define REGION_BREAK(_pScreen, _pReg) \
+    (*(_pScreen)->RegionBreak)(_pReg)
 
 #define REGION_EMPTY(_pScreen, _pReg) \
     (*(_pScreen)->RegionEmpty)(_pReg)
@@ -194,6 +225,9 @@ extern RegDataRec miEmptyData;
 #define RECTS_TO_REGION(_pScreen, nrects, prect, ctype) \
     miRectsToRegion(nrects, prect, ctype)
 
+#define REGION_BREAK(_pScreen, _pReg) \
+    miRegionBreak(_pReg)
+
 #ifdef DONT_INLINE_REGION_OPS
 
 #define REGION_INIT(_pScreen, _pReg, _rect, _size) \
@@ -207,6 +241,9 @@ extern RegDataRec miEmptyData;
 
 #define REGION_NOTEMPTY(_pScreen, _pReg) \
     miRegionNotEmpty(_pReg)
+
+#define REGION_BROKEN(_pScreen, _pReg) \
+    miRegionBroken(_pReg)
 
 #define REGION_EMPTY(_pScreen, _pReg) \
     miRegionEmpty(_pReg)
@@ -251,6 +288,9 @@ extern RegDataRec miEmptyData;
 
 #define REGION_NOTEMPTY(_pScreen, _pReg) \
     !REGION_NIL(_pReg)
+
+#define REGION_BROKEN(_pScreen, _pReg) \
+    REGION_NAR(_pReg)
 
 #define REGION_EMPTY(_pScreen, _pReg) \
 { \
@@ -376,6 +416,12 @@ extern void miRegionReset(
 #if NeedFunctionPrototypes
     RegionPtr /*pReg*/,
     BoxPtr /*pBox*/
+#endif
+);
+
+extern Bool miRegionBreak(
+#if NeedFunctionPrototypes
+    RegionPtr /*pReg*/
 #endif
 );
 
