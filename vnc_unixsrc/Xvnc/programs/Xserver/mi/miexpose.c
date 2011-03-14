@@ -105,7 +105,6 @@ miHandleExposures(pSrcDrawable, pDstDrawable,
     int 			dstx, dsty;
     unsigned long		plane;
 {
-    register ScreenPtr pscr = pGC->pScreen;
     RegionPtr prgnSrcClip;	/* drawable-relative source clip */
     RegionRec rgnSrcRec;
     RegionPtr prgnDstClip;	/* drawable-relative dest clip */
@@ -119,7 +118,7 @@ miHandleExposures(pSrcDrawable, pDstDrawable,
 				   the window background
 				*/
     WindowPtr pSrcWin;
-    BoxRec expBox;
+    BoxRec expBox = {0, };
     Bool extents;
 
     /* avoid work if we can */
@@ -581,9 +580,9 @@ int what;
     ChangeGCVal gcval[7];
     ChangeGCVal newValues [COUNT_BITS];
 
-    BITS32 gcmask, index, mask;
+    BITS32 gcmask = 0, index, mask;
     RegionRec prgnWin;
-    DDXPointRec oldCorner;
+    DDXPointRec oldCorner = {0, 0};
     BoxRec box;
     WindowPtr	pBgWin;
     GCPtr pGC;
@@ -593,6 +592,7 @@ int what;
     register xRectangle *prect;
     int numRects;
 
+    REGION_INIT(pWin->drawable.pScreen, &prgnWin, NullBox, 0);
     gcmask = 0;
 
     if (what == PW_BACKGROUND)
@@ -811,6 +811,7 @@ int what;
 /* MICLEARDRAWABLE -- sets the entire drawable to the background color of
  * the GC.  Useful when we have a scratch drawable and need to initialize 
  * it. */
+void
 miClearDrawable(pDraw, pGC)
     DrawablePtr	pDraw;
     GCPtr	pGC;

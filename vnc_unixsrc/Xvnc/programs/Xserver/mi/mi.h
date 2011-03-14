@@ -278,7 +278,7 @@ extern void miPaintWindow(
 #endif
 );
 
-extern int miClearDrawable(
+extern void miClearDrawable(
 #if NeedFunctionPrototypes
     DrawablePtr /*pDraw*/,
     GCPtr /*pGC*/
