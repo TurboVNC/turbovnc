@@ -1,13 +1,12 @@
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +14,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -380,6 +379,10 @@ miMarkOverlappedWindows(pWin, pFirst, ppLayerWin)
 	{
 	    if (pChild->viewable)
 	    {
+		if (REGION_BROKEN (pScreen, &pChild->winSize))
+		    SetWinSize (pChild);
+		if (REGION_BROKEN (pScreen, &pChild->borderSize))
+		    SetBorderSize (pChild);
 		(* MarkWindow)(pChild);
 		if (pChild->firstChild)
 		{
@@ -402,15 +405,21 @@ miMarkOverlappedWindows(pWin, pFirst, ppLayerWin)
 	pLast = pChild->parent->lastChild;
 	while (1)
 	{
-	    if (pChild->viewable && RECT_IN_REGION(pScreen, &pChild->borderSize,
-						       box))
+	    if (pChild->viewable)
 	    {
-		(* MarkWindow)(pChild);
-		anyMarked = TRUE;
-		if (pChild->firstChild)
+		if (REGION_BROKEN (pScreen, &pChild->winSize))
+		    SetWinSize (pChild);
+		if (REGION_BROKEN (pScreen, &pChild->borderSize))
+		    SetBorderSize (pChild);
+		if (RECT_IN_REGION(pScreen, &pChild->borderSize, box))
 		{
-		    pChild = pChild->firstChild;
-		    continue;
+		    (* MarkWindow)(pChild);
+		    anyMarked = TRUE;
+		    if (pChild->firstChild)
+		    {
+			pChild = pChild->firstChild;
+			continue;
+		    }
 		}
 	    }
 	    while (!pChild->nextSib && (pChild != pLast))
@@ -479,9 +488,9 @@ miMoveWindow(pWin, x, y, pNextSib, kind)
     WindowPtr pParent;
     Bool WasViewable = (Bool)(pWin->viewable);
     short bw;
-    RegionPtr oldRegion;
+    RegionPtr oldRegion = NULL;
     DDXPointRec oldpt;
-    Bool anyMarked;
+    Bool anyMarked = FALSE;
     register ScreenPtr pScreen;
     WindowPtr windowToValidate;
 #ifdef DO_SAVE_UNDERS
@@ -602,8 +611,8 @@ miSlideAndSizeWindow(pWin, x, y, w, h, pSib)
     int bw = wBorderWidth (pWin);
     short dw, dh;
     DDXPointRec oldpt;
-    RegionPtr oldRegion;
-    Bool anyMarked;
+    RegionPtr oldRegion = NULL;
+    Bool anyMarked = FALSE;
     register ScreenPtr pScreen;
     WindowPtr pFirstChange;
     register WindowPtr pChild;
@@ -611,9 +620,9 @@ miSlideAndSizeWindow(pWin, x, y, w, h, pSib)
     register unsigned g;
     int		nx, ny;		/* destination x,y */
     int		newx, newy;	/* new inner window position */
-    RegionPtr	pRegion;
+    RegionPtr	pRegion = NULL;
     RegionPtr	destClip;	/* portions of destination already written */
-    RegionPtr	oldWinClip;	/* old clip list for window */
+    RegionPtr	oldWinClip = NULL;	/* old clip list for window */
     RegionPtr	borderVisible = NullRegion; /* visible area of the border */
     RegionPtr	bsExposed = NullRegion;	    /* backing store exposures */
     Bool	shrunk = FALSE; /* shrunk in an inner dimension */
@@ -963,9 +972,8 @@ miSetShape(pWin)
 {
     Bool	WasViewable = (Bool)(pWin->viewable);
     register ScreenPtr pScreen = pWin->drawable.pScreen;
-    Bool	anyMarked;
-    WindowPtr	pParent = pWin->parent;
-    RegionPtr	pOldClip, bsExposed;
+    Bool	anyMarked = FALSE;
+    RegionPtr	pOldClip = NULL, bsExposed;
 #ifdef DO_SAVE_UNDERS
     Bool	dosave = FALSE;
 #endif
@@ -1065,7 +1073,7 @@ miChangeBorderWidth(pWin, width)
 {
     WindowPtr pParent;
     int oldwidth;
-    Bool anyMarked;
+    Bool anyMarked = FALSE;
     register ScreenPtr pScreen;
     Bool WasViewable = (Bool)(pWin->viewable);
     Bool HadBorder;
