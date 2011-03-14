@@ -19,6 +19,11 @@ the client side of the SSH tunnel.  This should prevent port conflicts that
 could occur when multiple vncviewer instances tried to use the -via option
 simultaneously.
 -------------------------------------------------------------------------------
+[5]
+'vncserver -fg &' now works properly.  This allows Xvnc to run in the
+background, as it would normally do, but it will automatically terminate when
+the window manager exits.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
