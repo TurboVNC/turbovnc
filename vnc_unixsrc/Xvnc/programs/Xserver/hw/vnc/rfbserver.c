@@ -36,6 +36,7 @@
 #include <pwd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "windowstr.h"
@@ -518,7 +519,6 @@ rfbProcessClientProtocolVersion(cl)
 {
     rfbProtocolVersionMsg pv;
     int n, major, minor;
-    Bool mismatch;
 
     if ((n = ReadExact(cl->sock, pv, sz_rfbProtocolVersionMsg)) <= 0) {
 	if (n == 0)
@@ -1143,7 +1143,7 @@ rfbSendFramebufferUpdate(cl)
     int dx, dy;
     Bool sendCursorShape = FALSE;
     Bool sendCursorPos = FALSE;
-    double tUpdateStart;
+    double tUpdateStart = 0.0;
 
     if (rfbProfile) {
 	tUpdateStart = gettime();
@@ -1405,7 +1405,8 @@ rfbSendFramebufferUpdate(cl)
 	}
     }
 
-    if (!putImageOnly || cl->putImageTrigger || cl->firstUpdate) {
+    if (rfbAutoLosslessRefresh > 0.0 &&
+        (!putImageOnly || cl->putImageTrigger || cl->firstUpdate)) {
         cl->lastFramebufferUpdate = gettime();
         cl->alrTrigger = TRUE;
         cl->putImageTrigger = FALSE;
