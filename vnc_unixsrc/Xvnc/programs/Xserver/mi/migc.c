@@ -205,7 +205,6 @@ miComputeCompositeClip(pGC, pDrawable)
     GCPtr           pGC;
     DrawablePtr     pDrawable;
 {
-    ScreenPtr       pScreen = pGC->pScreen;
     miPrivGC *devPriv = (miPrivGC *) (pGC->devPrivates[miGCPrivateIndex].ptr);
 
     if (pDrawable->type == DRAWABLE_WINDOW)
