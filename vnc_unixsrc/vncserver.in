@@ -440,14 +440,11 @@ system($exedir."autocutsel -s PRIMARY >> " . &quotedString($desktopLog) . " 2>&1
 
 if (! $skipxstartup) {
     if ($opt{'-fg'}) {
-        system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1");
-        if (kill 0, `cat $pidFile`) {
-            $opt{'-kill'} = ':'.$displayNumber;
-            &Kill();
-        }
-    } else {
+        close(STDIN);
         system("($xstartup; $0 -kill :$displayNumber) >> "
-           . &quotedString($desktopLog) . " 2>&1 &");
+            . &quotedString($desktopLog) . " 2>&1");
+    } else {
+        system("$xstartup >> " . &quotedString($desktopLog) . " 2>&1 &");
     }
 }
 
