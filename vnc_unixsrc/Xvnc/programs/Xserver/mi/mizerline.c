@@ -425,13 +425,13 @@ miZeroClipLine(xmin, ymin, xmax, ymax,
 {
     int swapped = 0;
     int clipDone = 0;
-    CARD32 utmp;
+    CARD32 utmp = 0;
     int clip1, clip2;
     int x1, y1, x2, y2;
     int x1_orig, y1_orig, x2_orig, y2_orig;
     int xmajor;
-    int negslope, anchorval;
-    unsigned int eqn;
+    int negslope = 0, anchorval = 0;
+    unsigned int eqn = 0;
 
     x1 = x1_orig = *new_x1;
     y1 = y1_orig = *new_y1;
@@ -688,13 +688,13 @@ miZeroLine(pDraw, pGC, mode, npt, pptInit)
     int		npt;		/* number of points */
     DDXPointPtr pptInit;
 {
-    int Nspans, current_y;
+    int Nspans, current_y = 0;
     DDXPointPtr ppt; 
     DDXPointPtr pspanInit, spans;
     int *pwidthInit, *widths, list_len;
     int xleft, ytop, xright, ybottom;
     int new_x1, new_y1, new_x2, new_y2;
-    int x, y, x1, y1, x2, y2, xstart, ystart;
+    int x = 0, y = 0, x1, y1, x2, y2, xstart, ystart;
     int oc1, oc2;
     int result;
     int pt1_clipped, pt2_clipped = 0;
