@@ -33,8 +33,6 @@ rm -rf %{buildroot}
 make install DESTDIR=%{buildroot} sysconfdir=/etc
 make xserver-install DESTDIR=%{buildroot} sysconfdir=/etc
 
-strip %{buildroot}%{_prefix}/bin/* || :
-
 mkdir -p %{buildroot}/etc/init.d
 
 cat vncserver.init   | \
