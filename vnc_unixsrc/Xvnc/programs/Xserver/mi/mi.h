@@ -220,7 +220,7 @@ extern void mieqSwitchScreen(
 #endif
 );
 
-extern int mieqProcessInputEvents(
+extern void mieqProcessInputEvents(
 #if NeedFunctionPrototypes
     void
 #endif
