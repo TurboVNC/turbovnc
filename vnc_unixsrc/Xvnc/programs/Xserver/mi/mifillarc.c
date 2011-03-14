@@ -274,7 +274,7 @@ miGetPieEdge(arc, angle, edge, top, left)
     register miSliceEdgePtr edge;
     Bool top, left;
 {
-    register int k, signdx, signdy;
+    register int k;
     int	dx, dy;
 
     miEllipseAngleToSlope (angle, arc->width, arc->height, &dx, &dy, 0, 0);
