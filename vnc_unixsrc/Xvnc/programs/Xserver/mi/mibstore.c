@@ -390,7 +390,7 @@ miBSGetImage (pDrawable, sx, sy, w, h, format, planemask, pdstLine)
     {
 	PixmapPtr	pPixmap;
 	miBSWindowPtr	pWindowPriv;
-	GCPtr		pGC;
+	GCPtr		pGC = NULL;
 	WindowPtr	pWin, pSrcWin;
 	int		xoff, yoff;
 	RegionRec	Remaining;
@@ -2306,8 +2306,8 @@ miBSClearBackingStore(pWin, x, y, w, h, generateExposures)
 		    gcvalues[1] = (pointer) background.pixmap;
 		    gcmask = GCFillStyle|GCTile;
 		}
-		gcvalues[2] = (pointer)(ts_x_origin - pBackingStore->x);
-		gcvalues[3] = (pointer)(ts_y_origin - pBackingStore->y);
+		gcvalues[2] = (pointer)(long)(ts_x_origin - pBackingStore->x);
+		gcvalues[3] = (pointer)(long)(ts_y_origin - pBackingStore->y);
 		gcmask |= GCTileStipXOrigin|GCTileStipYOrigin;
 		DoChangeGC(pGC, gcmask, (XID *)gcvalues, TRUE);
 		ValidateGC((DrawablePtr)pBackingStore->pBackingPixmap, pGC);
@@ -2450,12 +2450,12 @@ miBSFillVirtualBits (pDrawable, pGC, pRgn, x, y, state, pixunion, planeMask)
 	}
 	if (pGC->patOrg.x != x)
 	{
-	    gcval[i++] = (pointer)x;
+	    gcval[i++] = (pointer)(long)x;
 	    gcmask |= GCTileStipXOrigin;
 	}
 	if (pGC->patOrg.y != y)
 	{
-	    gcval[i++] = (pointer)y;
+	    gcval[i++] = (pointer)(long)y;
 	    gcmask |= GCTileStipYOrigin;
 	}
     }
@@ -3281,7 +3281,7 @@ miBSValidateGC (pGC, stateChanges, pDrawable)
     DrawablePtr   pDrawable;
 {
     GCPtr   	  	pBackingGC;
-    miBSWindowPtr	pWindowPriv;
+    miBSWindowPtr	pWindowPriv = NULL;
     miBSGCPtr		pPriv;
     WindowPtr		pWin;
     int			lift_functions;
@@ -3642,7 +3642,7 @@ miCreateBSPixmap (pWin, pExtents)
     miBSWindowPtr	pBackingStore;
     ScreenPtr		pScreen;
     PixUnion		background;
-    char		backgroundState;
+    char		backgroundState = 0;
     BoxPtr		extents;
     Bool		backSet;
 
