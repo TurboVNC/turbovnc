@@ -39,7 +39,6 @@ cat $SRCDIR/deb-control.tmpl | sed s/{__PKGNAME}/$PACKAGE_NAME/g \
 
 make install DESTDIR=$TMPDIR sysconfdir=/etc
 make xserver-install DESTDIR=$TMPDIR sysconfdir=/etc
-strip $TMPDIR$PREFIX/bin/* || :
 
 mkdir -p $TMPDIR/etc/init.d
 cat vncserver.init | sed -e 's@vncserver :${display\%\%:@$PREFIX/bin/vncserver :${display\%\%:@g' | sed -e 's@vncserver -kill :${display\%\%:@$PREFIX/bin/vncserver -kill :${display\%\%:@g' > $TMPDIR/etc/init.d/tvncserver
