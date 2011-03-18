@@ -25,6 +25,11 @@ Viewer.
 Added a '-config' option to the Unix TurboVNC Viewer which allows it to read
 .vnc connection info files saved by the Windows TurboVNC Viewer.
 -------------------------------------------------------------------------------
+[6]
+Added a '-noxstartup' option to vncserver, which prevents it from executing
+the xstartup.turbovnc script.  This is useful for those that may want to
+occasionally run TurboVNC without a window manager.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
