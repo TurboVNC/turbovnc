@@ -47,7 +47,7 @@ Source: "{#BLDDIR}\bin\vncviewer.exe"; DestDir: "{app}"; Flags: ignoreversion re
 Source: "{#BLDDIR}\bin\putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 Source: "LICENCE.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "WhatsNew.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "TurboVNC-ChangeLog.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\TurboVNC-ChangeLog.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "TurboVNC.url"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\vnc_docs\*.png"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
 Source: "..\vnc_docs\*.html"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
