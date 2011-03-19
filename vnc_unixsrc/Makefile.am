@@ -106,11 +106,11 @@ rpm: all
 	ln -fs `pwd` $$TMPDIR/BUILD; \
 	rm -f ${PACKAGE_NAME}.${RPMARCH}.rpm; \
 	rpmbuild -bb --define "_name ${PACKAGE_NAME}" \
-		--define "_blddir $TMPDIR/buildroot" --define "_topdir $$TMPDIR" \
-		--define "_bindir ${bindir}" --define "_mandir ${mandir}" \
-		--define "_prefix ${prefix}" --define "_version ${VERSION}" \
-		--define "_build ${BUILD}" --define "_srcdir ${srcdir}" \
-		--target ${RPMARCH} ${srcdir}/${PACKAGE_NAME}.spec; \
+		--define "_blddir $$TMPDIR/buildroot" --define "_topdir $$TMPDIR" \
+		--define "_mandir ${mandir}" --define "_prefix ${prefix}" \
+		--define "_version ${VERSION}" --define "_build ${BUILD}" \
+		--define "_srcdir ${srcdir}" --target ${RPMARCH} \
+		${srcdir}/${PACKAGE_NAME}.spec; \
 	cp $$TMPDIR/RPMS/${RPMARCH}/${PACKAGE_NAME}-${VERSION}-${BUILD}.${RPMARCH}.rpm ${PACKAGE_NAME}.${RPMARCH}.rpm; \
 	rm -rf $$TMPDIR
 
@@ -125,9 +125,9 @@ srpm:
 	cp vnc.tar.gz $$TMPDIR/SOURCES/${PACKAGE_NAME}-${VERSION}.tar.gz; \
 	cat ${srcdir}/${PACKAGE_NAME}.spec | sed s@%{_name}@${PACKAGE_NAME}@g \
 		| sed s@%{_version}@${VERSION}@g | sed s@%{_build}@${BUILD}@g \
-		| sed s@%{_bindir}@${bindir}@g | sed s@%{_mandir}@${mandir}@g \
-		| sed s@%{_prefix}@${prefix}@g | sed s@%{_srcdir}@${srcdir}@g \
-		|sed s/#--\>//g > $$TMPDIR/SPECS/${PACKAGE_NAME}.spec; \
+		| sed s@%{_mandir}@${mandir}@g | sed s@%{_prefix}@${prefix}@g \
+		| sed s@%{_srcdir}@${srcdir}@g | sed s@%{_blddir}@${_tmppath}@g \
+		| sed s/#--\>//g > $$TMPDIR/SPECS/${PACKAGE_NAME}.spec; \
 	rpmbuild -bs --define "_topdir $$TMPDIR" $$TMPDIR/SPECS/${PACKAGE_NAME}.spec; \
 	cp $$TMPDIR/SRPMS/${PACKAGE_NAME}-${VERSION}-${BUILD}.src.rpm ${PACKAGE_NAME}.src.rpm; \
 	rm -rf $$TMPDIR
