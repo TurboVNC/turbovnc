@@ -47,7 +47,7 @@ Source: "@CMAKE_CURRENT_BINARY_DIR@\vncviewer\{#BUILD_DIR}vncviewer.exe"; DestDi
 Source: "@CMAKE_CURRENT_BINARY_DIR@\putty\{#BUILD_DIR}putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 Source: "@CMAKE_SOURCE_DIR@\LICENCE.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "@CMAKE_SOURCE_DIR@\WhatsNew.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "@CMAKE_SOURCE_DIR@\TurboVNC-ChangeLog.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "@CMAKE_SOURCE_DIR@\..\TurboVNC-ChangeLog.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "@CMAKE_SOURCE_DIR@\TurboVNC.url"; DestDir: "{app}"; Flags: ignoreversion
 Source: "@CMAKE_SOURCE_DIR@\..\vnc_docs\*.png"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
 Source: "@CMAKE_SOURCE_DIR@\..\vnc_docs\*.html"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc

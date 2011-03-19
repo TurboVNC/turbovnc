@@ -55,7 +55,7 @@ Type=Application
 Categories=Application;Utility;X-Red-Hat-Extra;
 EOF
 
-chmod 644 %{_srcdir}/LICENCE.TXT %{_srcdir}/TurboVNC-ChangeLog.txt %{_srcdir}/../vnc_docs/LICEN*.txt %{_srcdir}/../vnc_docs/*.html %{_srcdir}/../vnc_docs/*.png %{_srcdir}/../vnc_docs/*.css
+chmod 644 %{_srcdir}/LICENCE.TXT %{_srcdir}/../TurboVNC-ChangeLog.txt %{_srcdir}/../vnc_docs/LICEN*.txt %{_srcdir}/../vnc_docs/*.html %{_srcdir}/../vnc_docs/*.png %{_srcdir}/../vnc_docs/*.css
 
 %clean
 rm -rf %{buildroot}
@@ -82,7 +82,7 @@ fi
 %config(noreplace) /etc/sysconfig/tvncservers
 %config(noreplace) /etc/turbovncserver.conf
 %config(noreplace) /etc/turbovncserver-auth.conf
-%doc %{_srcdir}/LICENCE.TXT  %{_srcdir}/TurboVNC-ChangeLog.txt %{_srcdir}/../vnc_docs/LICEN*.txt %{_srcdir}/../vnc_docs/*.html %{_srcdir}/../vnc_docs/*.png %{_srcdir}/../vnc_docs/*.css
+%doc %{_srcdir}/LICENCE.TXT  %{_srcdir}/../TurboVNC-ChangeLog.txt %{_srcdir}/../vnc_docs/LICEN*.txt %{_srcdir}/../vnc_docs/*.html %{_srcdir}/../vnc_docs/*.png %{_srcdir}/../vnc_docs/*.css
 
 %dir %{_prefix}
 %dir %{_prefix}/bin
