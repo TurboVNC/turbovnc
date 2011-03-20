@@ -17,10 +17,10 @@ clean:
 .PHONY: dist
 ifeq ($(subplatform), 64)
 dist: vncviewer winvnc putty
-	iscc -O$(BLDDIR) -FTurboVNC -dVERSION=$(VERSION) -dBUILD=$(BUILD) \
+	iscc -O$(BLDDIR) -FTurboVNC64-$(VERSION) -dVERSION=$(VERSION) -dBUILD=$(BUILD) \
 		-dBLDDIR=$(BLDDIR) -dWIN64 TurboVNC.iss
 else
 dist: vncviewer winvnc putty
-	iscc -O$(BLDDIR) -FTurboVNC -dVERSION=$(VERSION) -dBUILD=$(BUILD) \
+	iscc -O$(BLDDIR) -FTurboVNC-$(VERSION) -dVERSION=$(VERSION) -dBUILD=$(BUILD) \
 		-dBLDDIR=$(BLDDIR) TurboVNC.iss
 endif
