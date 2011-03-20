@@ -227,11 +227,6 @@ make rpm
 
   Create RedHat-style binary RPM package.  Requires RPM v4 or later.
 
-make srpm
-
-  This creates a pristine source tarball, then creates a RedHat-style source
-  RPM package from the tarball.  Requires RPM v4 or later.
-
 make deb
 
   Create Debian-style binary package.  Requires dpkg.
@@ -241,14 +236,19 @@ make dmg
   Create Macintosh package/disk image.  This requires the PackageMaker
   application, which must be installed in /Developer/Applications/Utilities.
 
-make udmg
+make udmg [BUILDDIR32={32-bit build directory}]
 
-  On 64-bit OS X (10.5 "Leopard") and later, this creates a version of the
-  Macintosh package/disk image which contains universal i386/x86-64 binaries.
-  The 32-bit fork of these binaries is backward compatible with OS X 10.4 and
-  later (OS X 10.4 compatibility SDK required.)  If building on OS X 10.6
-  ("Snow Leopard") or later, the 64-bit fork can be made backward compatible
-  with 10.5 by using the instructions in the "Build Recipes" section.
+  On 64-bit OS X systems, this creates a version of the Macintosh package and
+  disk image which contains universal i386/x86-64 binaries.  You should first
+  configure a 32-bit out-of-tree build of TurboVNC, then configure a 64-bit
+  out-of-tree build, then run 'make udmg' from the 64-bit build directory.  The
+  build system will look for the 32-bit build under {source_directory}/osxx86
+  by default, but you can override this by setting the BUILDDIR32 variable on
+  the make command line as shown above.
+
+make sunpkg
+
+  Build a Solaris package.  This requires pkgmk, pkgtrans, and bzip2.
 
 
 *******************************************************************************

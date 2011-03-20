@@ -86,5 +86,6 @@ Packaging TurboVNC:
   cd vnc/vnc_winsrc
   make dist
 
-The installer package will be named "TurboVNC.exe", and it can be found in
-windows/ (32-bit) or windows64/ (64-bit).
+The installer package will be named "TurboVNC-{version}.exe" (32-bit) or
+"TurboVNC64-{version}.exe", and it can be found in windows/ (32-bit) or
+windows64/ (64-bit).
