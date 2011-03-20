@@ -21,6 +21,7 @@ BUILD=@BUILD@
 PKGARCH=@PKGARCH@
 SRCDIR=@srcdir@
 MEDIALIB=@USE_MEDIALIB@
+PKGEXT=
 
 umask 022
 pkgtmpdir=`mktemp -d /tmp/$pkgname-build.XXXXXX`
@@ -46,8 +47,11 @@ P SUNWmlib      mediaLib - Shared Libraries
 EOF
 fi
 
-if [ ! "$PKGARCH" = "sparc" ]; then
-	PKGARCH=i386
+if [ "$PKGARCH" = "amd64" ]; then
+	PKGARCH=i386;
+	PKGEXT=-x64;
+elif [ "$PKGARCH" = "i386" ]; then
+	PKGEXT=-x86;
 fi
 
 cat > $pkgtmpdir/pkginfo <<EOF 
@@ -111,8 +115,8 @@ mkdir -p $pkgtmpdir/opt/$pkgname/doc
 cp $SRCDIR/../vnc_docs/*.png $SRCDIR/../vnc_docs/*.css $SRCDIR/../vnc_docs/index.html $SRCDIR/../vnc_docs/LICEN*.txt LICENCE.TXT $SRCDIR/../TurboVNC-ChangeLog.txt $pkgtmpdir/opt/$pkgname/doc
 
 pkgmk -o -r $pkgtmpdir/opt -d $pkgtmpdir -f $pkgtmpdir/proto
-pkgtrans -s $pkgtmpdir $pkgtmpdir/$pkgname-$VERSION.pkg $pkgname
-bzip2 $pkgtmpdir/$pkgname-$VERSION.pkg
-cp $pkgtmpdir/$pkgname-$VERSION.pkg.bz2 . 
+pkgtrans -s $pkgtmpdir $pkgtmpdir/$pkgname-$VERSION$PKGEXT.pkg $pkgname
+bzip2 $pkgtmpdir/$pkgname-$VERSION$PKGEXT.pkg
+cp $pkgtmpdir/$pkgname-$VERSION$PKGEXT.pkg.bz2 . 
 
 exit 0
