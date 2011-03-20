@@ -54,8 +54,11 @@ add_definitions(-D__WIN32__ -D_CRT_SECURE_NO_DEPRECATE
 add_definitions(-U_MBCS -wd4996 -wd4482 -D_CRT_SECURE_NO_DEPRECATE)
 
 if(CMAKE_CL_64)
+  set(INST_NAME ${CMAKE_PROJECT_NAME}64-${VERSION})
 	set(WIN64 1)
 	set(WIN64DEF -DWIN64)
+else()
+  set(INST_NAME ${CMAKE_PROJECT_NAME}-${VERSION})
 endif()
 
 if(MSVC_IDE)
@@ -74,6 +77,7 @@ add_subdirectory(putty)
 configure_file(TurboVNC.iss.in TurboVNC.iss)
 
 add_custom_target(installer
-	iscc -o${INSTALLERDIR} ${WIN64DEF} ${BUILDDIRDEF} -FTurboVNC TurboVNC.iss
+	iscc -o${INSTALLERDIR} ${WIN64DEF} ${BUILDDIRDEF} -F${INST_NAME}
+		TurboVNC.iss
 	DEPENDS vncviewer winvnc putty
 	SOURCES TurboVNC.iss)

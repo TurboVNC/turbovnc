@@ -1,14 +1,14 @@
 Summary:   A highly-optimized version of VNC that can be used with real-time video applications
-Name:      %{_name}
-Version:   %{_version}
-Release:   %{_build}
+Name:      @PACKAGE_NAME@
+Version:   @VERSION@
+Release:   @BUILD@
 URL:       http://www.virtualgl.org
-#-->Source0: http://prdownloads.sourceforge.net/virtualgl/%{_name}-%{version}.tar.gz
+#-->Source0: http://prdownloads.sourceforge.net/virtualgl/%{name}-%{version}.tar.gz
 License:   GPL
 Group:     User Interface/Desktops
 Requires:  bash >= 2.0
 Prereq:    /sbin/chkconfig /etc/init.d
-BuildRoot: %{_tmppath}/%{name}-%{version}-root
+BuildRoot: %{_blddir}/%{name}-%{version}-root
 BuildPrereq: /usr/bin/perl libjpeg-turbo
 BuildRequires: zlib-devel
 
@@ -24,7 +24,7 @@ Tight encoding designed to work in conjunction with VirtualGL.
 #-->%setup -q -n vnc/vnc_unixsrc
 
 #-->%build
-#-->configure --prefix=%{_prefix} --sysconfdir=/etc --mandir=%{_mandir}
+#-->configure --prefix=@prefix@ --sysconfdir=/etc --mandir=@MANDIR@
 #-->make DESTDIR=%{buildroot}
 #-->make xserver DESTDIR=%{buildroot}
 
@@ -36,8 +36,8 @@ make xserver-install DESTDIR=%{buildroot} sysconfdir=/etc
 mkdir -p %{buildroot}/etc/init.d
 
 cat vncserver.init   | \
-sed -e 's@vncserver :${display\%\%:@%{_prefix}/bin/vncserver :${display\%\%:@g' | \
-sed -e 's@vncserver -kill :${display\%\%:@%{_prefix}/bin/vncserver -kill :${display\%\%:@g' \
+sed -e 's@vncserver :${display\%\%:@@prefix@/bin/vncserver :${display\%\%:@g' | \
+sed -e 's@vncserver -kill :${display\%\%:@@prefix@/bin/vncserver -kill :${display\%\%:@g' \
  > %{buildroot}/etc/init.d/tvncserver
 chmod 755 %{buildroot}/etc/init.d/tvncserver
 
@@ -49,7 +49,7 @@ cat > %{buildroot}/usr/share/applications/tvncviewer.desktop << EOF
 [Desktop Entry]
 Name=TurboVNC Viewer
 Comment=TurboVNC client application
-Exec=%{_prefix}/bin/vncviewer
+Exec=@prefix@/bin/vncviewer
 Terminal=0
 Type=Application
 Categories=Application;Utility;X-Red-Hat-Extra;
@@ -84,28 +84,28 @@ fi
 %config(noreplace) /etc/turbovncserver-auth.conf
 %doc %{_srcdir}/LICENCE.TXT  %{_srcdir}/../TurboVNC-ChangeLog.txt %{_srcdir}/../vnc_docs/LICEN*.txt %{_srcdir}/../vnc_docs/*.html %{_srcdir}/../vnc_docs/*.png %{_srcdir}/../vnc_docs/*.css
 
-%dir %{_prefix}
-%dir %{_prefix}/bin
-%dir %{_mandir}
-%dir %{_mandir}/man1
-%dir %{_prefix}/vnc
-%dir %{_prefix}/vnc/classes
+%dir @prefix@
+%dir @prefix@/bin
+%dir @MANDIR@
+%dir @MANDIR@/man1
+%dir @prefix@/vnc
+%dir @prefix@/vnc/classes
 
-%{_prefix}/bin/vncviewer
+@prefix@/bin/vncviewer
 %config(noreplace) /usr/share/applications/tvncviewer.desktop
-%{_mandir}/man1/vncviewer.1*
-%{_prefix}/bin/Xvnc
-%{_prefix}/bin/vncserver
-%{_prefix}/bin/vncpasswd
-%{_prefix}/bin/vncconnect
-%{_prefix}/bin/autocutsel
-%{_prefix}/vnc/classes/index.vnc
-%{_prefix}/vnc/classes/VncViewer.jar
-%{_prefix}/vnc/classes/README
-%{_mandir}/man1/Xvnc.1*
-%{_mandir}/man1/Xserver.1*
-%{_mandir}/man1/vncserver.1*
-%{_mandir}/man1/vncconnect.1*
-%{_mandir}/man1/vncpasswd.1*
+@MANDIR@/man1/vncviewer.1*
+@prefix@/bin/Xvnc
+@prefix@/bin/vncserver
+@prefix@/bin/vncpasswd
+@prefix@/bin/vncconnect
+@prefix@/bin/autocutsel
+@prefix@/vnc/classes/index.vnc
+@prefix@/vnc/classes/VncViewer.jar
+@prefix@/vnc/classes/README
+@MANDIR@/man1/Xvnc.1*
+@MANDIR@/man1/Xserver.1*
+@MANDIR@/man1/vncserver.1*
+@MANDIR@/man1/vncconnect.1*
+@MANDIR@/man1/vncpasswd.1*
 
 %changelog
