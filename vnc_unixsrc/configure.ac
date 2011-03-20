@@ -100,6 +100,7 @@ else
 fi
 
 AM_CONDITIONAL([WITH_MEDIALIB], [test "x$USE_MEDIALIB" != "xno"])
+AC_SUBST(USE_MEDIALIB)
 
 USE_DEV_URANDOM=no;
 AC_MSG_CHECKING([for /dev/urandom])
