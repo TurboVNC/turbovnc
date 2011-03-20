@@ -9,10 +9,13 @@ AM_INIT_AUTOMAKE([-Wall foreign dist-bzip2])
 AC_PREFIX_DEFAULT(/opt/TurboVNC)
 AC_CONFIG_SUBDIRS([autocutsel])
 
-if test "x${mandir}" = "x/opt/TurboVNC/share/man"; then
+if test "x$prefix" = "xNONE" -a "x$ac_default_prefix" != "x"; then
+  prefix=$ac_default_prefix
+fi
+MANDIR=`eval echo ${mandir}`
+MANDIR=`eval echo $MANDIR`
+if test "$MANDIR" = "/opt/TurboVNC/share/man"; then
   MANDIR=/opt/TurboVNC/man
-else
-  MANDIR=$mandir
 fi
 AC_SUBST(MANDIR)
 
@@ -157,6 +160,10 @@ AC_DEFINE_UNQUOTED(__BUILD, "${BUILD}")
 
 AC_CONFIG_FILES([vncserver], [chmod +x vncserver])
 AC_CONFIG_FILES([Xvnc/config/cf/tvnc_version.h])
+AC_CONFIG_FILES([turbovnc.spec:turbovnc.spec.in])
+AC_CONFIG_FILES([makemacpkg:makemacpkg.in])
+AC_CONFIG_FILES([makesunpkg:makesunpkg.in])
+AC_CONFIG_FILES([makedpkg:makedpkg.in])
 
 AC_OUTPUT([
 Makefile

@@ -15,25 +15,12 @@ onexit()
 	fi
 }
 
-usage()
-{
-	echo "$0 <version> <build> <package architecture> <source dir.> [medialib]"
-	exit 1
-}
-
-MEDIALIB=0
-
-if [ $# -lt 4 ]; then usage $0; fi
 pkgname=TurboVNC
-VERSION=$1
-BUILD=$2
-PKGARCH=$3
-SRCDIR=$4
-if [ $# -gt 4 ]; then
-	if [ "$5" = "medialib" ]; then 
-		MEDIALIB=1
-	fi
-fi
+VERSION=@VERSION@
+BUILD=@BUILD@
+PKGARCH=@PKGARCH@
+SRCDIR=@srcdir@
+MEDIALIB=@USE_MEDIALIB@
 
 umask 022
 pkgtmpdir=`mktemp -d /tmp/$pkgname-build.XXXXXX`
@@ -53,7 +40,7 @@ P SUNWcsu       Core Solaris, (Usr)
 P SUNWxwplt     X Windows platform software
 EOF
 
-if [ $MEDIALIB ]; then
+if [ "$MEDIALIB" = "yes" ]; then
 cat >> $pkgtmpdir/depend <<EOF 
 P SUNWmlib      mediaLib - Shared Libraries
 EOF
@@ -124,8 +111,8 @@ mkdir -p $pkgtmpdir/opt/$pkgname/doc
 cp $SRCDIR/../vnc_docs/*.png $SRCDIR/../vnc_docs/*.css $SRCDIR/../vnc_docs/index.html $SRCDIR/../vnc_docs/LICEN*.txt LICENCE.TXT $SRCDIR/../TurboVNC-ChangeLog.txt $pkgtmpdir/opt/$pkgname/doc
 
 pkgmk -o -r $pkgtmpdir/opt -d $pkgtmpdir -f $pkgtmpdir/proto
-pkgtrans -s $pkgtmpdir $pkgtmpdir/$pkgname.pkg $pkgname
-bzip2 $pkgtmpdir/$pkgname.pkg
-cp $pkgtmpdir/$pkgname.pkg.bz2 . 
+pkgtrans -s $pkgtmpdir $pkgtmpdir/$pkgname-$VERSION.pkg $pkgname
+bzip2 $pkgtmpdir/$pkgname-$VERSION.pkg
+cp $pkgtmpdir/$pkgname-$VERSION.pkg.bz2 . 
 
 exit 0
