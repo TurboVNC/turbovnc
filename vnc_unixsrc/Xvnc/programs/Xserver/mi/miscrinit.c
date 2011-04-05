@@ -240,6 +240,8 @@ miScreenInit(pScreen, pbits, xsize, ysize, dpix, dpiy, width,
     pScreen->RectIn = miRectIn;
     pScreen->PointInRegion = miPointInRegion;
     pScreen->RegionNotEmpty = miRegionNotEmpty;
+    pScreen->RegionBroken = miRegionBroken;
+    pScreen->RegionBreak = miRegionBreak;
     pScreen->RegionEmpty = miRegionEmpty;
     pScreen->RegionExtents = miRegionExtents;
     pScreen->RegionAppend = miRegionAppend;

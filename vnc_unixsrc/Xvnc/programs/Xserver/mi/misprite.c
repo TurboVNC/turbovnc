@@ -9,14 +9,13 @@
 
 /*
 
-Copyright (c) 1989  X Consortium
+Copyright 1989, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -24,13 +23,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 */
 
 # include   "X.h"
@@ -545,7 +544,7 @@ miSpriteStoreColors (pMap, ndef, pdef)
 	{
 	    /* Direct color - match on any of the subfields */
 
-#define MaskMatch(a,b,mask) ((a) & (pVisual->mask) == (b) & (pVisual->mask))
+#define MaskMatch(a,b,mask) (((a) & (pVisual->mask)) == ((b) & (pVisual->mask)))
 
 #define UpdateDAC(plane,dac,mask) {\
     if (MaskMatch (pPriv->colors[plane].pixel,pdef[i].pixel,mask)) {\
@@ -1617,7 +1616,6 @@ miSpriteText (pDraw, pGC, x, y, count, chars, fontEncoding, textType, cursorBox)
     unsigned long i;
     unsigned int  n;
     int		  w;
-    void   	  (*drawFunc)();
 
     Bool imageblt;
 
@@ -1648,27 +1646,33 @@ miSpriteText (pDraw, pGC, x, y, count, chars, fontEncoding, textType, cursorBox)
 	switch (textType)
 	{
 	case TT_POLY8:
-	    drawFunc = (void (*)())pGC->ops->PolyText8;
+	    (*pGC->ops->PolyText8)(pDraw, pGC, x, y, (int)count, chars);
 	    break;
 	case TT_IMAGE8:
-	    drawFunc = pGC->ops->ImageText8;
+	    (*pGC->ops->ImageText8)(pDraw, pGC, x, y, (int)count, chars);
 	    break;
 	case TT_POLY16:
-	    drawFunc = (void (*)())pGC->ops->PolyText16;
+	    (*pGC->ops->PolyText16)(pDraw, pGC, x, y, (int)count,
+				    (unsigned short *)chars);
 	    break;
 	case TT_IMAGE16:
-	    drawFunc = pGC->ops->ImageText16;
+	    (*pGC->ops->ImageText16)(pDraw, pGC, x, y, (int)count,
+				     (unsigned short *)chars);
 	    break;
 	}
-	(*drawFunc) (pDraw, pGC, x, y, (int) count, chars);
 #else /* don't AVOID_GLYPHBLT */
 	/*
 	 * On the other hand, if the device does use GlyphBlt ultimately to do text, we
 	 * don't want to slow it down by invoking the text functions and having them call
 	 * GetGlyphs all over again, so we go directly to the GlyphBlt functions here.
 	 */
-	drawFunc = imageblt ? pGC->ops->ImageGlyphBlt : pGC->ops->PolyGlyphBlt;
-	(*drawFunc) (pDraw, pGC, x, y, n, charinfo, FONTGLYPHS(pGC->font));
+	if (imageblt) {
+	    (*pGC->ops->ImageGlyphBlt)(pDraw, pGC, x, y, n, charinfo,
+				       FONTGLYPHS(pGC->font));
+	} else {
+	    (*pGC->ops->PolyGlyphBlt)(pDraw, pGC, x, y, n, charinfo,
+				      FONTGLYPHS(pGC->font));
+	}
 #endif /* AVOID_GLYPHBLT */
     }
     DEALLOCATE_LOCAL(charinfo);

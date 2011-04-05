@@ -5,14 +5,13 @@
  *	is miValidateTree.
  *
 
-Copyright (c) 1987, 1988, 1989  X Consortium
+Copyright 1987, 1988, 1989, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -20,13 +19,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
  *
  * Copyright 1987, 1988, 1989 by 
@@ -312,6 +311,10 @@ miComputeClips (pParent, pScreen, universe, kind, exposed)
 	    REGION_TRANSLATE( pScreen, &pParent->clipList, dx, dy);
     	} 
 	break;
+    case VTBroken:
+	REGION_EMPTY (pScreen, &pParent->borderClip);
+	REGION_EMPTY (pScreen, &pParent->clipList);
+	break;
     }
 
     borderVisible = pParent->valdata->before.borderVisible;
@@ -573,39 +576,65 @@ miValidateTree (pParent, pChild, kind)
      */
     REGION_INIT(pScreen, &totalClip, NullBox, 0);
     viewvals = 0;
-    if ((pChild->drawable.y < pParent->lastChild->drawable.y) ||
-	((pChild->drawable.y == pParent->lastChild->drawable.y) &&
-	 (pChild->drawable.x < pParent->lastChild->drawable.x)))
+    if (REGION_BROKEN (pScreen, &pParent->clipList) &&
+	!REGION_BROKEN (pScreen, &pParent->borderClip))
     {
+	kind = VTBroken;
+	/*
+	 * When rebuilding clip lists after out of memory,
+	 * assume everything is busted.
+	 */
 	forward = TRUE;
+	REGION_COPY (pScreen, &totalClip, &pParent->borderClip);
+	REGION_INTERSECT (pScreen, &totalClip, &totalClip, &pParent->winSize);
+	
+	for (pWin = pParent->firstChild; pWin != pChild; pWin = pWin->nextSib)
+	{
+	    if (pWin->viewable)
+		REGION_SUBTRACT (pScreen, &totalClip, &totalClip, &pWin->borderSize);
+	}
 	for (pWin = pChild; pWin; pWin = pWin->nextSib)
-	{
-	    if (pWin->valdata)
-	    {
-		REGION_APPEND( pScreen, &totalClip, &pWin->borderClip);
-		if (pWin->viewable)
-		    viewvals++;
-	    }
-	}
+	    if (pWin->valdata && pWin->viewable)
+		viewvals++;
+	
+	REGION_EMPTY (pScreen, &pParent->clipList);
     }
-    else
+    else 
     {
-	forward = FALSE;
-	pWin = pParent->lastChild;
-	while (1)
+	if ((pChild->drawable.y < pParent->lastChild->drawable.y) ||
+	    ((pChild->drawable.y == pParent->lastChild->drawable.y) &&
+	     (pChild->drawable.x < pParent->lastChild->drawable.x)))
 	{
-	    if (pWin->valdata)
+	    forward = TRUE;
+	    for (pWin = pChild; pWin; pWin = pWin->nextSib)
 	    {
-		REGION_APPEND( pScreen, &totalClip, &pWin->borderClip);
-		if (pWin->viewable)
-		    viewvals++;
+		if (pWin->valdata)
+		{
+		    REGION_APPEND( pScreen, &totalClip, &pWin->borderClip);
+		    if (pWin->viewable)
+			viewvals++;
+		}
 	    }
-	    if (pWin == pChild)
-		break;
-	    pWin = pWin->prevSib;
 	}
+	else
+	{
+	    forward = FALSE;
+	    pWin = pParent->lastChild;
+	    while (1)
+	    {
+		if (pWin->valdata)
+		{
+		    REGION_APPEND( pScreen, &totalClip, &pWin->borderClip);
+		    if (pWin->viewable)
+			viewvals++;
+		}
+		if (pWin == pChild)
+		    break;
+		pWin = pWin->prevSib;
+	    }
+	}
+	REGION_VALIDATE( pScreen, &totalClip, &overlap);
     }
-    REGION_VALIDATE( pScreen, &totalClip, &overlap);
 
     /*
      * Now go through the children of the root and figure their new

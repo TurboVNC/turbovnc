@@ -279,10 +279,10 @@ miGetPlane(pDraw, planeNum, sx, sy, w, h, result)
     unsigned long	*result;
 {
     int			i, j, k, width, bitsPerPixel, widthInBytes;
-    DDXPointRec 	pt;
+    DDXPointRec 	pt = {0, 0};
     unsigned long	pixel;
     unsigned long	bit;
-    unsigned char	*pCharsOut;
+    unsigned char	*pCharsOut = NULL;
 
 #if BITMAP_SCANLINE_UNIT == 8
 #define OUT_TYPE unsigned char
@@ -298,7 +298,7 @@ miGetPlane(pDraw, planeNum, sx, sy, w, h, result)
 #endif
 
     OUT_TYPE		*pOut;
-    int			delta;
+    int			delta = 0;
 
     sx += pDraw->x;
     sy += pDraw->y;
@@ -632,10 +632,10 @@ miGetImage(pDraw, sx, sy, w, h, format, planeMask, pDst)
 {
     unsigned char	depth;
     int			i, linelength, width, srcx, srcy;
-    DDXPointRec		pt;
+    DDXPointRec		pt = {0, 0};
     XID			gcv[2];
     PixmapPtr		pPixmap = (PixmapPtr)NULL;
-    GCPtr		pGC;
+    GCPtr		pGC = NULL;
 
     depth = pDraw->depth;
     if(format == ZPixmap)

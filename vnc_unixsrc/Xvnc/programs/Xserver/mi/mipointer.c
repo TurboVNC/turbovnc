@@ -172,8 +172,6 @@ miPointerDisplayCursor (pScreen, pCursor)
     ScreenPtr	pScreen;
     CursorPtr	pCursor;
 {
-    SetupScreen(pScreen);
-
     miPointer.pCursor = pCursor;
     miPointer.pScreen = pScreen;
     miPointerUpdate ();

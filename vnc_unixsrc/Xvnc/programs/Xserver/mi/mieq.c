@@ -90,7 +90,7 @@ void
 mieqEnqueue (e)
     xEvent	*e;
 {
-    HWEventQueueType	oldtail, newtail, prevtail;
+    HWEventQueueType	oldtail, newtail;
     Bool    isMotion;
 
     oldtail = miEventQueue.tail;
@@ -140,6 +140,7 @@ mieqSwitchScreen (pScreen, fromDIX)
  * Call this from ProcessInputEvents()
  */
 
+void
 mieqProcessInputEvents ()
 {
     EventRec	*e;

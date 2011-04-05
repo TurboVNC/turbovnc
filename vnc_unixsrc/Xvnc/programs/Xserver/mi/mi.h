@@ -220,7 +220,7 @@ extern void mieqSwitchScreen(
 #endif
 );
 
-extern int mieqProcessInputEvents(
+extern void mieqProcessInputEvents(
 #if NeedFunctionPrototypes
     void
 #endif
@@ -278,7 +278,7 @@ extern void miPaintWindow(
 #endif
 );
 
-extern int miClearDrawable(
+extern void miClearDrawable(
 #if NeedFunctionPrototypes
     DrawablePtr /*pDraw*/,
     GCPtr /*pGC*/
@@ -505,6 +505,8 @@ extern Bool miValidRegion(
 #endif
 );
 #endif
+
+extern Bool miRegionBroken(RegionPtr pReg);
 
 /* miscrinit.c */
 

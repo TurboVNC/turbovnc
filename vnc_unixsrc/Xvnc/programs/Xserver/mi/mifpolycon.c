@@ -85,9 +85,9 @@ miFillSppPoly(dst, pgc, count, ptsIn, xTrans, yTrans, xFtrans, yFtrans)
 						   meet the polygon exactly.
 						 */
 {
-    double		xl, xr,		/* x vals of left and right edges */
-          		ml,       	/* left edge slope */
-          		mr,             /* right edge slope */
+    double		xl = 0.0, xr = 0.0,	/* x vals of left and right edges */
+          		ml = 0.0,      	/* left edge slope */
+          		mr = 0.0,       /* right edge slope */
           		dy,             /* delta y */
     			i;              /* loop counter */
     int			y,              /* current scanline */
@@ -162,8 +162,8 @@ miFillSppPoly(dst, pgc, count, ptsIn, xTrans, yTrans, xFtrans, yFtrans)
 
         /* add a right edge if we need to */
         if ((y > ptsIn[nextright].y + yFtrans) ||
- 	     ISEQUAL(y, ptsIn[nextright].y + yFtrans)
-	     && Marked[nextright] != 1)
+ 	     (ISEQUAL(y, ptsIn[nextright].y + yFtrans)
+	     && Marked[nextright] != 1))
 	{
 	    Marked[nextright]++;
             right = nextright--;
