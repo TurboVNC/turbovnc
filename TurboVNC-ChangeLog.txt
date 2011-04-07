@@ -1,4 +1,14 @@
 ===============================================================================
+Significant changes since 1.0.1
+===============================================================================
+[1]
+Fixed seg fault in the TurboVNC Unix server which occured under certain rare
+circumstances when disconnecting a viewer from a server that was using multi-
+threaded compression.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 Significant changes since 1.0
 ===============================================================================
 [1]
