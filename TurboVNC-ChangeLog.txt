@@ -1,5 +1,5 @@
 ===============================================================================
-Significant changes since 1.0.1
+Significant changes since 1.0.2
 ===============================================================================
 [1]
 Enhanced the screen scaling feature in the Java TurboVNC Viewer and added a GUI
@@ -29,6 +29,21 @@ Added a '-config' option to the Unix TurboVNC Viewer which allows it to read
 Added a '-noxstartup' option to vncserver, which prevents it from executing
 the xstartup.turbovnc script.  This is useful for those that may want to
 occasionally run TurboVNC without a window manager.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
+Significant changes since 1.0.1
+===============================================================================
+[1]
+Fixed seg fault in the TurboVNC Unix server which occured under certain rare
+circumstances when disconnecting a viewer from a server that was using multi-
+threaded compression.
+-------------------------------------------------------------------------------
+[2]
+If the user overrides the location of the password file (by passing
+-rfbauth {file} to vncserver), then vncserver will no longer prompt the user to
+create a new VNC password if ~/.vnc/passwd does not exist.
 -------------------------------------------------------------------------------
 
 
