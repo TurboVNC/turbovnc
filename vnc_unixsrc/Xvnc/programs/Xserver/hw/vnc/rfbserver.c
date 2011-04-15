@@ -427,6 +427,8 @@ rfbClientConnectionGone(sock)
     }
     free(cl->host);
 
+    ShutdownTightThreads();
+
     /* Release the compression state structures if any. */
     if ( cl->compStreamInited == TRUE ) {
 	deflateEnd( &(cl->compStream) );
@@ -467,8 +469,6 @@ rfbClientConnectionGone(sock)
             threadHandle = 0;
         }
     }
-
-    ShutdownTightThreads();
 
     xfree(cl);
 
