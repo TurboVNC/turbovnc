@@ -318,6 +318,10 @@ int main(int argc, char *argv[])
       exit(1);
     }
     strcpy(passwdFile, argv[i]);
+    if (read_from_stdin) {
+      fprintf(stderr, "Error: cannot specify filename with -f\n");
+      exit(1);
+    }
     read_from_stdin = 0;
     make_directory = 0;
     check_strictly = 0;
