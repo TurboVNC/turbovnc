@@ -951,6 +951,10 @@ rfbClientStateChange(cbl, myData, clt)
 void
 ddxGiveUp()
 {
+    alrlock();
+    ShutdownTightThreads();
+    ShutdownALRThread();
+    alrunlock();
     Xfree(rfbScreen.pfbMemory);
     if (initOutputCalled) {
 	char unixSocketName[32];

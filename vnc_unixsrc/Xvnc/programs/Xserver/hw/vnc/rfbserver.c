@@ -61,8 +61,6 @@ Bool rfbDontDisconnect = FALSE;
 Bool rfbViewOnly = FALSE; /* run server in view only mode - Ehud Karni SW */
 double rfbAutoLosslessRefresh = 0.0;
 
-extern void ShutdownTightThreads(void);
-
 static rfbClientPtr rfbNewClient(int sock);
 static void rfbProcessClientProtocolVersion(rfbClientPtr cl);
 static void rfbProcessClientInitMessage(rfbClientPtr cl);
@@ -161,6 +159,17 @@ ALRThreadFunc(param)
     pthread_mutex_unlock(&alrMutex);
     pthread_mutex_destroy(&alrMutex);
     return NULL;
+}
+
+void ShutdownALRThread(void) {
+    if(rfbAutoLosslessRefresh > 0.0 && alrInit) {
+        deadyet = TRUE;
+        if (pthread_self() != threadHandle) {
+            while(pthread_mutex_unlock(&alrMutex) == 0) {}
+            pthread_join(threadHandle, NULL);
+            threadHandle = 0;
+        }
+    }
 }
 
 
@@ -432,15 +441,7 @@ rfbClientConnectionGone(sock)
 
     if (cl->translateLookupTable) free(cl->translateLookupTable);
 
-    if(rfbAutoLosslessRefresh > 0.0 && rfbClientHead == NULL
-        && alrInit) {
-        deadyet = TRUE;
-        if (pthread_self() != threadHandle) {
-            while(pthread_mutex_unlock(&alrMutex) == 0) {}
-            pthread_join(threadHandle, NULL);
-            threadHandle = 0;
-        }
-    }
+    if(rfbClientHead == NULL) ShutdownALRThread();
 
     xfree(cl);
 

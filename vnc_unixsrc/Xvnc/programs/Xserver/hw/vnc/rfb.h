@@ -508,6 +508,7 @@ extern Bool rfbSendSetColourMapEntries(rfbClientPtr cl, int firstColour,
 				       int nColours);
 extern void rfbSendBell();
 extern void rfbSendServerCutText(char *str, int len);
+extern void ShutdownALRThread(void);
 
 
 /* translate.c */
@@ -615,6 +616,7 @@ extern Bool rfbSendRectEncodingZlib(rfbClientPtr cl, int x, int y, int w,
 
 extern int rfbNumCodedRectsTight(rfbClientPtr cl, int x,int y,int w,int h);
 extern Bool rfbSendRectEncodingTight(rfbClientPtr cl, int x,int y,int w,int h);
+extern void ShutdownTightThreads(void);
 
 
 /* cursor.c */
