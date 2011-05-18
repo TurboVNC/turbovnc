@@ -50,6 +50,10 @@ Fixed seg fault in the TurboVNC Unix server which occurred under certain rare
 circumstances when shutting down a server that was using multi-threaded
 compression.
 -------------------------------------------------------------------------------
+[4]
+Fixed an issue in the TurboVNC Java viewer whereby it was sending spurious
+KeyPress/KeyRelease events in conjunction with certain mouse events.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
