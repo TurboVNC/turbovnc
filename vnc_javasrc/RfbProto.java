@@ -1059,6 +1059,11 @@ class RfbProto {
   final static int SHIFT_MASK = InputEvent.SHIFT_MASK;
   final static int META_MASK  = InputEvent.META_MASK;
   final static int ALT_MASK   = InputEvent.ALT_MASK;
+  final static int MASK1      = 1 << 0;
+  final static int MASK2      = 1 << 1;
+  final static int MASK3      = 1 << 2;
+  final static int MASK4      = 1 << 3;
+  final static int MASK5      = 1 << 4;
 
 
   //
@@ -1069,53 +1074,72 @@ class RfbProto {
   int pointerMask = 0;
 
   void writePointerEvent(MouseEvent evt) throws IOException {
+
+    int mask2 = (viewer.options.reverseMouseButtons2And3 ? MASK3 : MASK2);
+    int mask3 = (viewer.options.reverseMouseButtons2And3 ? MASK2 : MASK3);
+
+    int wheelMask = 0, wheelClicks = 0;
+
+    int eventId = evt.getID();
+    // Be careful to account for the fact that
+    // InputEvent.BUTTON2_MASK == InputEvent.ALT_MASK and
+    // InputEvent.BUTTON3_MASK == InputEvent.META_MASK
     int modifiers = evt.getModifiers();
 
-    int wheelClicks = 0;
-
-    int mask2 = 2;
-    int mask3 = 4;
-    if (viewer.options.reverseMouseButtons2And3) {
-      mask2 = 4;
-      mask3 = 2;
-    }
-    int mask4 = 1<<3;
-    int mask5 = 1<<4;
-
-    // Note: For some reason, AWT does not set BUTTON1_MASK on left
-    // button presses. Here we think that it was the left button if
-    // modifiers do not include BUTTON2_MASK or BUTTON3_MASK.
-
-    if (evt.getID() == MouseEvent.MOUSE_PRESSED) {
-      if ((modifiers & InputEvent.BUTTON2_MASK) != 0) {
+    if (eventId == MouseEvent.MOUSE_PRESSED) {
+      // One button mask will be set, indicating the button that changed state.
+      if ((modifiers & InputEvent.BUTTON1_MASK) != 0) {
+        pointerMask |= MASK1;
+      } else if ((modifiers & InputEvent.BUTTON2_MASK) != 0) {
         pointerMask |= mask2;
         modifiers &= ~ALT_MASK;
       } else if ((modifiers & InputEvent.BUTTON3_MASK) != 0) {
         pointerMask |= mask3;
         modifiers &= ~META_MASK;
       } else {
-        pointerMask |= 1;
+        // In Java 1.1, AWT does not set BUTTON1_MASK on left button presses,
+        // so we must assume a left button press if no button modifiers are set
+        // (see Java Bug ID 4029201).
+        pointerMask |= MASK1;
       }
-    } else if (evt.getID() == MouseEvent.MOUSE_RELEASED) {
-      if ((modifiers & InputEvent.BUTTON2_MASK) != 0) {
+    } else if (eventId == MouseEvent.MOUSE_RELEASED) {
+      // One button mask will be set, indicating the button that changed state.
+      if ((modifiers & InputEvent.BUTTON1_MASK) != 0) {
+        pointerMask &= ~MASK1;
+      } else if ((modifiers & InputEvent.BUTTON2_MASK) != 0) {
         pointerMask &= ~mask2;
         modifiers &= ~ALT_MASK;
       } else if ((modifiers & InputEvent.BUTTON3_MASK) != 0) {
         pointerMask &= ~mask3;
         modifiers &= ~META_MASK;
       } else {
-        pointerMask &= ~1;
-      }
-    } else if (evt.getID() == MouseEvent.MOUSE_WHEEL) {
-      wheelClicks = ((MouseWheelEvent) evt).getWheelRotation();
-      if (wheelClicks == 0) {
+        // MOUSE_RELEASED event for unhandled button.
         return;
-      } else if (wheelClicks < 0) {
-        pointerMask |= mask4;
-        wheelClicks = -wheelClicks;
-      } else {
-        pointerMask |= mask5;
       }
+    } else {
+      // 'modifiers' will represent the current state of all buttons.
+      if (eventId == MouseEvent.MOUSE_WHEEL) {
+        wheelClicks = ((MouseWheelEvent) evt).getWheelRotation();
+        if (wheelClicks == 0) {
+          return;
+        } else if (wheelClicks < 0) {
+          wheelMask = pointerMask | MASK4;
+          wheelClicks = -wheelClicks;
+        } else {
+          wheelMask = pointerMask | MASK5;
+        }
+      } else if (eventId != MouseEvent.MOUSE_ENTERED &&
+                 eventId != MouseEvent.MOUSE_MOVED &&
+                 eventId != MouseEvent.MOUSE_DRAGGED) {
+        // Unhandled eventId.
+        return;
+      }
+      // Clear the ALT and META modifiers if we have received MOUSE_PRESSED
+      // events for BUTTON2 or BUTTON3.
+      if ((pointerMask & mask2) != 0)
+        modifiers &= ~ALT_MASK;
+      if ((pointerMask & mask3) != 0)
+        modifiers &= ~META_MASK;
     }
 
     eventBufLen = 0;
@@ -1123,42 +1147,40 @@ class RfbProto {
 
     int x = evt.getX();
     int y = evt.getY();
-
     if (x < 0) x = 0;
     if (y < 0) y = 0;
 
-    eventBuf[eventBufLen++] = (byte) PointerEvent;
-    eventBuf[eventBufLen++] = (byte) pointerMask;
-    eventBuf[eventBufLen++] = (byte) ((x >> 8) & 0xff);
-    eventBuf[eventBufLen++] = (byte) (x & 0xff);
-    eventBuf[eventBufLen++] = (byte) ((y >> 8) & 0xff);
-    eventBuf[eventBufLen++] = (byte) (y & 0xff);
+    if (wheelClicks == 0) {
+      eventBuf[eventBufLen++] = (byte) PointerEvent;
+      eventBuf[eventBufLen++] = (byte) pointerMask;
+      eventBuf[eventBufLen++] = (byte) ((x >> 8) & 0xff);
+      eventBuf[eventBufLen++] = (byte) (x & 0xff);
+      eventBuf[eventBufLen++] = (byte) ((y >> 8) & 0xff);
+      eventBuf[eventBufLen++] = (byte) (y & 0xff);
+    } else {
+      // Send press/release events for each unit of wheel rotation.
+      for (int i = 0; i < wheelClicks; i++) {
+        eventBuf[eventBufLen++] = (byte) PointerEvent;
+        eventBuf[eventBufLen++] = (byte) wheelMask;
+        eventBuf[eventBufLen++] = (byte) ((x >> 8) & 0xff);
+        eventBuf[eventBufLen++] = (byte) (x & 0xff);
+        eventBuf[eventBufLen++] = (byte) ((y >> 8) & 0xff);
+        eventBuf[eventBufLen++] = (byte) (y & 0xff);
+        eventBuf[eventBufLen++] = (byte) PointerEvent;
+        eventBuf[eventBufLen++] = (byte) pointerMask;
+        eventBuf[eventBufLen++] = (byte) ((x >> 8) & 0xff);
+        eventBuf[eventBufLen++] = (byte) (x & 0xff);
+        eventBuf[eventBufLen++] = (byte) ((y >> 8) & 0xff);
+        eventBuf[eventBufLen++] = (byte) (y & 0xff);
+      }
+    }
 
-    //
-    // Always release all modifiers after an "up" event
-    //
-
+    // Always release all modifiers after all buttons have been released.
     if (pointerMask == 0) {
       writeModifierKeyEvents(0);
     }
 
-    if (wheelClicks == 0) {
-      os.write(eventBuf, 0, eventBufLen);
-    } else {
-
-      //
-      // For wheel events, simulate a button 4/5 click for each unit of rotation.
-      //
-
-      for (int i = 0; i < wheelClicks; i++) {
-        eventBuf[1] = (byte) pointerMask;
-        os.write(eventBuf, 0, eventBufLen);
-        eventBuf[1] = (byte) 0;
-        os.write(eventBuf, 0, eventBufLen);
-      }
-      pointerMask &= ~mask4 & ~mask5;
-
-    }
+    os.write(eventBuf, 0, eventBufLen);
   }
 
 
