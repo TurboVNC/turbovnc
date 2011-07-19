@@ -1,5 +1,3 @@
-project(vncviewer)
-
 add_definitions(-D_WINDOWS -DRELEASE=0.60-VGL)
 include_directories(WINDOWS ${CMAKE_CURRENT_SOURCE_DIR})
 

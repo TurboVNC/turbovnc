@@ -1,5 +1,3 @@
-project(winvnc)
-
 add_definitions(-D_WINSTATIC -D_WIN32_WINNT=0x0500)
 include_directories(omnithread zlib ${CMAKE_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR})
