@@ -60,7 +60,6 @@
   #endif
   #include <X11/extensions/XShm.h>
  #endif
- #include <X11/extensions/Xdbe.h>
  #include <X11/Xutil.h>
  typedef GC fbx_gc;
  typedef struct {Display *dpy; Window win;} fbx_wh;
@@ -103,7 +102,7 @@ typedef struct _fbx_struct
 	#endif
 	GC xgc;
 	XImage *xi;
-	XdbeBackBuffer bb;
+	Pixmap pm;
 	#endif
 } fbx_struct;
 

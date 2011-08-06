@@ -27,7 +27,7 @@
 #define MINHEIGHT 24
 
 static int __line=-1;
-FILE *__warningfile=NULL;
+static FILE *__warningfile=NULL;
 
 const int fbx_rmask[FBX_FORMATS]=
 	{0x0000FF, 0x0000FF, 0xFF0000, 0xFF0000, 0x0000FF, 0xFF0000, 0};
@@ -52,6 +52,9 @@ const char *_fbx_formatname[FBX_FORMATS]=
  static char *__lasterror="No error";
  #define _throw(m) {__lasterror=m;  __line=__LINE__;  goto finally;}
  #define x11(f) if(!(f)) {__lasterror="X11 Error (window may have disappeared)";  __line=__LINE__;  goto finally;}
+ #ifndef X_ShmAttach
+ #define X_ShmAttach 1
+ #endif
 
 #endif
 
@@ -70,17 +73,12 @@ const char *_fbx_formatname[FBX_FORMATS]=
  static int fbx_checkdll(char *, int *, int *, int *, int *);
  #endif
 
- unsigned long serial=0;  int __extok=1;
- XErrorHandler prevhandler=NULL;
-
- #ifndef X_DbeAllocateBackBufferName
- #define X_DbeAllocateBackBufferName 1
- #endif
+ static unsigned long serial=0;  static int __extok=1;
+ static XErrorHandler prevhandler=NULL;
 
  int _fbx_xhandler(Display *dpy, XErrorEvent *e)
  {
-	if(e->serial==serial && ((e->minor_code==X_ShmAttach && e->error_code==BadAccess)
-		|| (e->minor_code==X_DbeAllocateBackBufferName && e->error_code==BadMatch)))
+	if(e->serial==serial && (e->minor_code==X_ShmAttach && e->error_code==BadAccess))
 	{
 		__extok=0;  return 0;
 	}
@@ -119,7 +117,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	#ifdef FBXWIN32
 	BMINFO bminfo;  HBITMAP hmembmp=0;  RECT rect;  HDC hdc=NULL;
 	#else
-	XWindowAttributes xwinattrib;  int dummy1, dummy2, shmok=1, alphafirst;
+	XWindowAttributes xwinattrib;  int shmok=1, alphafirst;
 	#ifdef XWIN32
 	static int seqnum=1;  char temps[80];
 	#endif
@@ -260,11 +258,14 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		shmok=__extok;
 		if(!alreadywarned && !shmok && __warningfile)
 		{
-			fprintf(__warningfile, "[FBX] MIT-SHM extension failed to initialize (this is normal on a remote\n");
-			fprintf(__warningfile, "[FBX]   connection.)  Will try to use DOUBLE-BUFFER extension instead.\n");
+			fprintf(__warningfile, "[FBX] WARNING: MIT-SHM extension failed to initialize (this is normal on a\n");
+			fprintf(__warningfile, "[FBX]    remote connection.)  Will use X Pixmap drawing instead.\n");
 			alreadywarned=1;
 		}
 		XUnlockDisplay(s->wh.dpy);
+		#ifndef XDK
+		shmctl(s->shminfo.shmid, IPC_RMID, 0);
+		#endif
 		#ifdef XWIN32
 		if(!shmok)
 		{
@@ -273,7 +274,8 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		#else
 		if(!shmok)
 		{
-			useshm=0;  XDestroyImage(s->xi);  shmctl(s->shminfo.shmid, IPC_RMID, 0);  goto noshm;
+			useshm=0;  XDestroyImage(s->xi);  shmdt(s->shminfo.shmaddr);
+			shmctl(s->shminfo.shmid, IPC_RMID, 0);  goto noshm;
 		}
 		#endif
 		s->xattach=1;  s->shm=1;
@@ -283,8 +285,8 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 		static int alreadywarned=0;
 		if(!alreadywarned && __warningfile)
 		{
-			fprintf(__warningfile, "[FBX] MIT-SHM extension not available.  Will try to use DOUBLE-BUFFER\n");
-			fprintf(__warningfile, "[FBX]   extension instead.\n");
+			fprintf(__warningfile, "[FBX] WARNING: MIT-SHM extension not available.  Will use X pixmap\n");
+			fprintf(__warningfile, "[FBX]    drawing instead.\n");
 			alreadywarned=1;
 		}
 		useshm=0;
@@ -293,39 +295,8 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	if(!useshm)
 	#endif
 	{
-		if(XdbeQueryExtension(s->wh.dpy, &dummy1, &dummy2))
-		{
-			XLockDisplay(s->wh.dpy);
-			XSync(s->wh.dpy, False);
-			prevhandler=XSetErrorHandler(_fbx_xhandler);
-			__extok=1;
-			serial=NextRequest(s->wh.dpy);
-			s->bb=XdbeAllocateBackBufferName(s->wh.dpy, s->wh.win, XdbeUndefined);
-			XSync(s->wh.dpy, False);
-			XSetErrorHandler(prevhandler);
-			if(!__extok)
-			{
-				static int alreadywarned=0;
-				s->bb=0;
-				if(!alreadywarned && __warningfile)
-				{
-					fprintf(__warningfile, "[FBX] DOUBLE-BUFFER extension failed to initialize.  Falling back to\n");
-					fprintf(__warningfile, "[FBX]   single-buffered drawing.\n");
-					alreadywarned=1;
-				}
-			}
-			XUnlockDisplay(s->wh.dpy);
-		}
-		else
-		{
-			static int alreadywarned=0;
-			if(!alreadywarned && __warningfile)
-			{
-				fprintf(__warningfile, "[FBX] DOUBLE-BUFFER extension not available.  Falling back to\n");
-				fprintf(__warningfile, "[FBX]   single-buffered drawing.\n");
-				alreadywarned=1;
-			}
-		}
+		x11(s->pm=XCreatePixmap(s->wh.dpy, s->wh.win, xwinattrib.width, xwinattrib.height,
+			xwinattrib.depth));
 		x11(s->xi=XCreateImage(s->wh.dpy, xwinattrib.visual, xwinattrib.depth, ZPixmap, 0, NULL,
 			w, h, 8, 0));
 		if((s->xi->data=(char *)malloc(s->xi->bytes_per_line*s->xi->height+1))==NULL)
@@ -351,7 +322,7 @@ int fbx_init(fbx_struct *s, fbx_wh wh, int width, int height, int useshm)
 	if(s->format==-1) _throw("Display has unsupported pixel format");
 
 	s->bits=s->xi->data;
-	x11(s->xgc=XCreateGC(s->wh.dpy, s->bb? s->bb:s->wh.win, 0, NULL));
+	x11(s->xgc=XCreateGC(s->wh.dpy, s->pm? s->pm:s->wh.win, 0, NULL));
 	return 0;
 
 	finally:
@@ -367,7 +338,7 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 	int wx, wy;
 	#ifdef FBXWIN32
 	fbx_gc gc;
-	#else
+	#elif !defined(__APPLE__)
 	int x=0, y=0;  XWindowAttributes xwinattrib, rwinattrib;  Window dummy;
 	#endif
 	if(!s) _throw("Invalid argument");
@@ -385,6 +356,7 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 	if(!s->xattach && s->shm) {x11(XShmAttach(s->wh.dpy, &s->shminfo));  s->xattach=1;}
 	#endif
 
+	#ifndef __APPLE__
 	x11(XGetWindowAttributes(s->wh.dpy, s->wh.win, &xwinattrib));
 	if(s->wh.win!=xwinattrib.root && s->format!=FBX_INDEX)
 	{
@@ -406,6 +378,7 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 		}
 	}
 	else
+	#endif
 	{
 		#ifdef USESHM
 		if(s->shm)
@@ -427,18 +400,18 @@ int fbx_read(fbx_struct *s, int winx, int winy)
 
 int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int h)
 {
-	#ifdef FBXWIN32
 	int bx, by, wx, wy, bw, bh;
+	#ifdef FBXWIN32
 	BITMAPINFO bmi;  fbx_gc gc;
 	#endif
 	if(!s) _throw("Invalid argument");
 
-	#ifdef FBXWIN32
 	bx=bmpx>=0?bmpx:0;  by=bmpy>=0?bmpy:0;  bw=w>0?w:s->width;  bh=h>0?h:s->height;
 	wx=winx>=0?winx:0;  wy=winy>=0?winy:0;
 	if(bw>s->width) bw=s->width;  if(bh>s->height) bh=s->height;
 	if(bx+bw>s->width) bw=s->width-bx;  if(by+bh>s->height) bh=s->height-by;
 
+	#ifdef FBXWIN32
 	if(!s->wh || s->width<=0 || s->height<=0 || !s->bits) _throw("Not initialized");
 	memset(&bmi, 0, sizeof(bmi));
 	bmi.bmiHeader.biSize=sizeof(bmi);
@@ -454,7 +427,12 @@ int fbx_write(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int 
 	return 0;
 	#else
 	if(fbx_awrite(s, bmpx, bmpy, winx, winy, w, h)==-1) return -1;
-	if(fbx_sync(s)==-1) return -1;
+	if(s->pm)
+	{
+		XCopyArea(s->wh.dpy, s->pm, s->wh.win, s->xgc, wx, wy, bw, bh, wx, wy);
+	}
+	XFlush(s->wh.dpy);
+	XSync(s->wh.dpy, False);
 	return 0;
 	#endif
 
@@ -505,11 +483,11 @@ int fbx_awrite(fbx_struct *s, int bmpx, int bmpy, int winx, int winy, int w, int
 	if(s->shm)
 	{
 		if(!s->xattach) {x11(XShmAttach(s->wh.dpy, &s->shminfo));  s->xattach=1;}
-		x11(XShmPutImage(s->wh.dpy, s->bb? s->bb:s->wh.win, s->xgc, s->xi, bx, by, wx, wy, bw, bh, False));
+		x11(XShmPutImage(s->wh.dpy, s->wh.win, s->xgc, s->xi, bx, by, wx, wy, bw, bh, False));
 	}
 	else
 	#endif
-	XPutImage(s->wh.dpy, s->bb? s->bb:s->wh.win, s->xgc, s->xi, bx, by, wx, wy, bw, bh);
+	XPutImage(s->wh.dpy, s->pm, s->xgc, s->xi, bx, by, wx, wy, bw, bh);
 	return 0;
 
 	finally:
@@ -522,15 +500,10 @@ int fbx_sync(fbx_struct *s)
 	#ifdef FBXWIN32
 	return 0;
 	#else
-	XdbeSwapInfo si;
 	if(!s) _throw("Invalid argument");
-	si.swap_window=s->wh.win;
-	si.swap_action=XdbeUndefined;
-	if(s->bb)
+	if(s->pm)
 	{
-		XdbeBeginIdiom(s->wh.dpy);
-		XdbeSwapBuffers(s->wh.dpy, &si, 1);
-		XdbeEndIdiom(s->wh.dpy);
+		XCopyArea(s->wh.dpy, s->pm, s->wh.win, s->xgc, 0, 0, s->width, s->height, 0, 0);
 	}
 	XFlush(s->wh.dpy);
 	XSync(s->wh.dpy, False);
@@ -548,7 +521,7 @@ int fbx_term(fbx_struct *s)
 	if(s->hdib) DeleteObject(s->hdib);
 	if(s->hmdc) DeleteDC(s->hmdc);
 	#else
-	if(s->bb) {XdbeDeallocateBackBufferName(s->wh.dpy, s->bb);  s->bb=0;}
+	if(s->pm) {XFreePixmap(s->wh.dpy, s->pm);  s->pm=0;}
 	if(s->xi) 
 	{
 		if(s->xi->data && !s->shm) {free(s->xi->data);  s->xi->data=NULL;}
@@ -587,9 +560,9 @@ static int fbx_checkdlls(void)
 		{
 			if(!alreadywarned && __warningfile)
 			{
-				fprintf(__warningfile, "[FBX] Installed version of hclshm.dll is %d.%d.%d.%d.\n",
+				fprintf(__warningfile, "[FBX] WARNING: Installed version of hclshm.dll is %d.%d.%d.%d.\n",
 					v1, v2, v3, v4);
-				fprintf(__warningfile, "[FBX]   Need version >= 9.0.0.1 for shared memory drawing\n");
+				fprintf(__warningfile, "[FBX]    Need version >= 9.0.0.1 for shared memory drawing\n");
 			}
 			retval=0;
 		}
@@ -600,9 +573,9 @@ static int fbx_checkdlls(void)
 		{
 			if(!alreadywarned && __warningfile)
 			{
-				fprintf(__warningfile, "[FBX] Installed version of xlib.dll is %d.%d.%d.%d.\n",
+				fprintf(__warningfile, "[FBX] WARNING: Installed version of xlib.dll is %d.%d.%d.%d.\n",
 					v1, v2, v3, v4);
-				fprintf(__warningfile, "[FBX]   Need version >= 9.0.0.3 for shared memory drawing\n");
+				fprintf(__warningfile, "[FBX]    Need version >= 9.0.0.3 for shared memory drawing\n");
 			}
 			retval=0;
 		}
@@ -613,9 +586,9 @@ static int fbx_checkdlls(void)
 		{
 			if(!alreadywarned && __warningfile)
 			{
-				fprintf(__warningfile, "[FBX] Installed version of exceed.exe is %d.%d.%d.%d.\n",
+				fprintf(__warningfile, "[FBX] WARNING: Installed version of exceed.exe is %d.%d.%d.%d.\n",
 					v1, v2, v3, v4);
-				fprintf(__warningfile, "[FBX]   Need version >= 8.0.0.28 for shared memory drawing\n");
+				fprintf(__warningfile, "[FBX]    Need version >= 8.0.0.28 for shared memory drawing\n");
 			}
 			retval=0;
 		}
@@ -623,15 +596,15 @@ static int fbx_checkdlls(void)
 		{
 			if(!alreadywarned && __warningfile)
 			{
-				fprintf(__warningfile, "[FBX] Installed version of exceed.exe is %d.%d.%d.%d.\n",
+				fprintf(__warningfile, "[FBX] WARNING: Installed version of exceed.exe is %d.%d.%d.%d.\n",
 					v1, v2, v3, v4);
-				fprintf(__warningfile, "[FBX]   Need version >= 9.0.0.9 for shared memory drawing\n");
+				fprintf(__warningfile, "[FBX]    Need version >= 9.0.0.9 for shared memory drawing\n");
 			}
 			retval=0;
 		}
 	}
 	if(!retval && !alreadywarned && __warningfile)
-		fprintf(__warningfile, "[FBX] Exceed patches not installed.  Disabling shared memory drawing\n");
+		fprintf(__warningfile, "[FBX] WARNING: Exceed patches not installed.  Disabling shared memory drawing\n");
 	if(!alreadywarned) alreadywarned=1;
 	return retval;
 }
