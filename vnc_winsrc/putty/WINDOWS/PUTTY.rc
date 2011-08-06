@@ -7,7 +7,7 @@
 #include "win_res.rc2"
 
 #ifndef NO_MANIFESTS
-#ifdef _WIN64
+#ifdef WIN64
 1 RT_MANIFEST "putty64.mft"
 #else
 1 RT_MANIFEST "putty.mft"
