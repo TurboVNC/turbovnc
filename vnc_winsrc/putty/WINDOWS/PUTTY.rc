@@ -1,4 +1,5 @@
 #include "rcstuff.h"
+#include "resdefs.h"
 
 #define APPNAME "PuTTY"
 #define APPDESC "SSH, Telnet and Rlogin client"
