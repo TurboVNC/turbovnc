@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: MINIBIDI.C,v 1.1 2007-09-25 22:55:11 dcommander Exp $
+ * $Id: MINIBIDI.C,v 1.1.4.1 2011-08-06 20:17:03 dcommander Exp $
  *
  * ------------
  * Description:
@@ -14,9 +14,9 @@
  * -----------------
  * Revision Details:    (Updated by Revision Control System)
  * -----------------
- *  $Date: 2007-09-25 22:55:11 $
+ *  $Date: 2011-08-06 20:17:03 $
  *  $Author: dcommander $
- *  $Revision: 1.1 $
+ *  $Revision: 1.1.4.1 $
  *
  * (www.arabeyes.org - under MIT license)
  *
