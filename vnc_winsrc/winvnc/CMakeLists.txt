@@ -70,6 +70,6 @@ add_executable(winvnc WIN32
 	WinVNC.rc)
 
 target_link_libraries(winvnc zlib VNCHooks
-	wsock32.lib comctl32.lib htmlhelp.lib turbojpeg-static.lib)
+	wsock32.lib comctl32.lib htmlhelp.lib ${TJPEG_LIBRARY})
 
 install(TARGETS winvnc VNCHooks RUNTIME DESTINATION .)
