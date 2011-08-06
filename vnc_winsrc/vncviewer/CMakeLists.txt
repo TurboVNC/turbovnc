@@ -46,6 +46,6 @@ add_executable(vncviewer WIN32
 	res/vncviewer.rc)
 
 target_link_libraries(vncviewer zlib
-	wsock32.lib gdi32.lib comdlg32.lib winmm.lib htmlhelp.lib comctl32.lib
-	user32.lib advapi32.lib shell32.lib
-	turbojpeg-static.lib)
+	wsock32.lib winmm.lib htmlhelp.lib comctl32.lib ${TJPEG_LIBRARY})
+
+install(TARGETS vncviewer DESTINATION .)

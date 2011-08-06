@@ -17,9 +17,6 @@ add_library(VNCHooks SHARED
 	VNCHooks/VNCHooks.def
 	VNCHooks/VNCHooks.rc)
 
-target_link_libraries(VNCHooks
-	user32.lib gdi32.lib advapi32.lib)
-
 add_executable(winvnc WIN32
 	AdministrationControls.cpp
 	BuildTime.cpp
@@ -73,6 +70,6 @@ add_executable(winvnc WIN32
 	WinVNC.rc)
 
 target_link_libraries(winvnc zlib VNCHooks
-	wsock32.lib gdi32.lib comdlg32.lib winmm.lib htmlhelp.lib comctl32.lib
-	user32.lib advapi32.lib shell32.lib ole32.lib
-	turbojpeg-static.lib)
+	wsock32.lib comctl32.lib htmlhelp.lib ${TJPEG_LIBRARY})
+
+install(TARGETS winvnc VNCHooks RUNTIME DESTINATION .)

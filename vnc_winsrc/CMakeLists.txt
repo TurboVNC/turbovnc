@@ -1,6 +1,6 @@
-project(TurboVNC)
 cmake_minimum_required(VERSION 2.6)
 
+project(TurboVNC)
 set(VERSION 1.0.80)
 set(RCVERSION 1,0,80,0)
 
@@ -12,7 +12,7 @@ if(NOT MSVC)
 	message(FATAL_ERROR "TurboVNC requires Visual C++")
 endif()
 
-execute_process(COMMAND "${CMAKE_SOURCE_DIR}/getdate.bat" OUTPUT_VARIABLE
+execute_process(COMMAND "${CMAKE_SOURCE_DIR}/cmakescripts/getdate.bat" OUTPUT_VARIABLE
 	BUILD)
 string(REGEX REPLACE "\n" "" BUILD ${BUILD})
 
@@ -30,6 +30,9 @@ endif()
 
 message(STATUS "VERSION = ${VERSION}, BUILD = ${BUILD}")
 
+message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
+
+# Use the static C library for all build types
 foreach(var CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
 	CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
 	CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
@@ -46,20 +49,27 @@ foreach(var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
 	endif()
 endforeach()
 
+# Don't auto-generate manifests
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
+
+# Avoid linker warning when doing Debug build if dependent libraries are
+# linked with the Release version of the static C library.
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:LIBCMT")
 
-add_definitions(-D__WIN32__ -D_CRT_SECURE_NO_DEPRECATE
-	-D__VERSION="${VERSION}" -D__BUILD="${BUILD}")
+add_definitions(-D__WIN32__ -U_MBCS -wd4996 -wd4482 -D_CRT_SECURE_NO_DEPRECATE)
 
-add_definitions(-U_MBCS -wd4996 -wd4482 -D_CRT_SECURE_NO_DEPRECATE)
-
-if(CMAKE_CL_64)
+if(CMAKE_SIZEOF_VOID_P MATCHES 8)
   set(INST_NAME ${CMAKE_PROJECT_NAME}64-${VERSION})
+	set(64BIT 1)
 	set(WIN64 1)
 	set(WIN64DEF -DWIN64)
+	message(STATUS "64-bit build")
 else()
   set(INST_NAME ${CMAKE_PROJECT_NAME}-${VERSION})
+	message(STATUS "32-bit build")
 endif()
+
+include(cmakescripts/FindTurboJPEG.cmake)
 
 if(MSVC_IDE)
 	set(INSTALLERDIR "$(OutDir)")
@@ -73,11 +83,15 @@ add_subdirectory(zlib)
 add_subdirectory(vncviewer)
 add_subdirectory(winvnc)
 add_subdirectory(putty)
+add_subdirectory(../vnc_docs doc)
 
-configure_file(TurboVNC.iss.in TurboVNC.iss)
+configure_file(release/TurboVNC.iss.in pkgscripts/TurboVNC.iss)
 
 add_custom_target(installer
 	iscc -o${INSTALLERDIR} ${WIN64DEF} ${BUILDDIRDEF} -F${INST_NAME}
-		TurboVNC.iss
+		pkgscripts/TurboVNC.iss
 	DEPENDS vncviewer winvnc putty
-	SOURCES TurboVNC.iss)
+	SOURCES pkgscripts/TurboVNC.iss)
+
+install(FILES LICENCE.txt TurboVNC.url ../TurboVNC-ChangeLog.txt WhatsNew.txt
+	DESTINATION .)
