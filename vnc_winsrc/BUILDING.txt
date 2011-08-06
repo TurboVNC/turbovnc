@@ -44,14 +44,12 @@ Build Environment
 
      http://sourceforge.net/projects/libjpeg-turbo
 
-   * If you intend to build TurboVNC from the command line, then add the
-     libjpeg-turbo include path (c:\libjpeg-turbo[64]\include) to the system or
-     user INCLUDE environment variable, and add the libjpeg-turbo library path
-     (c:\libjpeg-turbo[64]\lib) to the system or user LIB environment variable
-     prior to building TurboVNC.
-   * If you intend to build TurboVNC from the Visual Studio IDE, then add the
-     same paths to the "Include Files" and "Library Files" directories in
-     Visual Studio (under Tools-->Options.)
+   * The VirtualGL build system will search for the TurboJPEG/OSS header and
+     library under c:\libjpeg-turbo64 (64-bit) or c:\libjpeg-turbo (32-bit),
+     but you can override this by setting the TJPEG_INCLUDE_DIR CMake variable
+     to the directory containing turbojpeg.h and the TJPEG_LIBRARY CMake
+     variable to the full path of the TurboJPEG/OSS library against which you
+     want to link.
 
 
 Out-of-Tree Builds
@@ -71,7 +69,7 @@ Building TurboVNC from the Command Line
 ---------------------------------------
 
   cd {build_directory}
-  cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release {source_directory}
+  cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release [additional CMake flags] {source_directory}
   nmake
 
 This will build either a 32-bit or a 64-bit version of TurboVNC, depending on
@@ -86,7 +84,7 @@ Choose the appropriate CMake generator option for your version of Visual Studio
 instance:
 
   cd {build_directory}
-  cmake -G "Visual Studio 9 2008" {source_directory}
+  cmake -G "Visual Studio 9 2008" [additional CMake flags] {source_directory}
 
 You can then open ALL_BUILD.vcproj in Visual Studio and build one of the
 configurations in that project ("Debug", "Release", etc.) to generate a full
@@ -96,20 +94,23 @@ build of TurboVNC.
 Debug Build
 -----------
 
-Add "-DCMAKE_BUILD_TYPE=Debug" to the cmake command line.  Or, if building with
+Add "-DCMAKE_BUILD_TYPE=Debug" to the CMake command line.  Or, if building with
 NMake, remove "-DCMAKE_BUILD_TYPE=Release" (Debug builds are the default with
 NMake.)
 
 
-Packaging TurboVNC:
--------------------
+Packaging TurboVNC
+------------------
+
+If using NMake:
 
   cd {build_directory}
   nmake installer
 
-or build the "installer" project in the Visual Studio IDE.
+If using the Visual Studio IDE, build the "installer" project.
 
-The installer package (TurboVNC.exe) will be located under {build_directory}.
-If building using the Visual Studio IDE, then the installer package will be
-located in a subdirectory with the same name as the configuration you built
-(such as {build_directory}\Debug\ or {build_directory}\Release\).
+The installer package (TurboVNC[64]-{version}.exe) will be located under
+{build_directory}.  If building using the Visual Studio IDE, then the installer
+package will be located in a subdirectory with the same name as the
+configuration you built (such as {build_directory}\Debug\ or
+{build_directory}\Release\).
