@@ -24,4 +24,4 @@ VNCSYSLIBS = JPEGLibraryFlags -lz $(PTHREADLIBS) $(VNCPAMLIBS)
 VNCSYSLIBS = JPEGLibraryFlags -lz -lcrypt $(PTHREADLIBS) $(VNCPAMLIBS)
 #endif
 
-VNCCPPFLAGS = -I$(TOP)/../include $(VNCPAMDEFS) JPEGIncludeFlags
+VNCCPPFLAGS = VncIncludeDir $(VNCPAMDEFS) JPEGIncludeFlags
