@@ -13,63 +13,32 @@ noinst_HEADERS = Xvnc/config/cf/tvnc_version.h
 
 CLEANFILES = $(noinst_SCRIPTS) $(noinst_HEADERS)
 
-if X86_64
-CFGFLAGS = -x86_64
-endif
-
-if X86
-CFGFLAGS = -x86
-endif
-
-if GCC
-GCCFLAG = -gcc
-endif
-
-if WITH_MEDIALIB
-
-JPEGCFLAGS = -I${abs_top_srcdir}/turbojpeg 	 
-JPEGLDFLAGS = -lmlib ${abs_top_srcdir}/turbojpeg/libturbojpeg.a
-
-else
-
-JPEGCFLAGS = ${JPEG_CFLAGS}
-JPEGLDFLAGS = ${JPEG_LDFLAGS}
-
-endif
-
 xserver: all
 	if [ ! "${top_srcdir}" = "${top_builddir}" ]; then \
-		echo Out-of-tree builds cannot be used when building Xvnc; \
-	else \
-		cd Xvnc; \
-		rm -f config/imake/imake config/imake/*.o config/makedepend/makedepend \
-			config/makedepend/*.o config/util/lndir config/util/*.o; \
-		sh ./configure -jpeginc "$(JPEGCFLAGS)" -jpeglink "$(JPEGLDFLAGS)" \
-			$(GCCFLAG) $(CFGFLAGS) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" \
-			EXTRA_LDOPTIONS="$(LDFLAGS)"; \
-		$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)"; \
-	fi
+		rsync -av ${top_srcdir}/Xvnc ${top_builddir}; \
+	fi; \
+	cd Xvnc; \
+	rm -f config/imake/imake config/imake/*.o config/makedepend/makedepend \
+		config/makedepend/*.o config/util/lndir config/util/*.o; \
+	sh ../Xvnc-configure; \
+	$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)"
 
 xserver-rebuild: all
 	if [ ! "${top_srcdir}" = "${top_builddir}" ]; then \
-		echo Out-of-tree builds cannot be used when building Xvnc; \
-	else \
-		cd Xvnc; \
-		$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)"; \
-	fi
+		rsync -av ${top_srcdir}/Xvnc ${top_builddir}; \
+	fi; \
+	cd Xvnc; \
+	$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)"
 
 xserver-clean: Xvnc/config/cf/tvnc_version.h
 	if [ ! "${top_srcdir}" = "${top_builddir}" ]; then \
-		echo Out-of-tree builds cannot be used when building Xvnc; \
-	else \
-		cd Xvnc; \
-		rm -f config/imake/imake config/imake/*.o config/makedepend/makedepend \
-			config/makedepend/*.o; \
-		sh ./configure -jpeginc "$(JPEGCFLAGS)" -jpeglink "$(JPEGLDFLAGS)" \
-			$(GCCFLAG) $(CFGFLAGS) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" \
-			EXTRA_LDOPTIONS="$(LDFLAGS)"; \
-		$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)" clean; \
-	fi
+		rsync -av ${top_srcdir}/Xvnc ${top_builddir}; \
+	fi; \
+	cd Xvnc; \
+	rm -f config/imake/imake config/imake/*.o config/makedepend/makedepend \
+		config/makedepend/*.o; \
+	sh ../Xvnc-configure; \
+	$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)" clean
 
 xserver-install: vncserver
 	$(INSTALL) -m 755 ./vncserver $(DESTDIR)/$(bindir)/
@@ -107,7 +76,7 @@ rpm: all
 	rm -f ${PACKAGE_NAME}-${VERSION}.${RPMARCH}.rpm; \
 	rpmbuild -bb --define "_blddir $$TMPDIR/buildroot"  \
 		--define "_srcdir ${srcdir}" --define "_topdir $$TMPDIR" \
-		--target ${RPMARCH} ${PACKAGE_NAME}.spec; \
+		--target ${RPMARCH} pkgscripts/${PACKAGE_NAME}.spec; \
 	cp $$TMPDIR/RPMS/${RPMARCH}/${PACKAGE_NAME}-${VERSION}-${BUILD}.${RPMARCH}.rpm ${PACKAGE_NAME}-${VERSION}.${RPMARCH}.rpm; \
 	rm -rf $$TMPDIR
 
@@ -120,7 +89,7 @@ srpm:
 	mkdir -p $$TMPDIR/SPECS; \
 	rm -f ${PACKAGE_NAME}-${VERSION}.src.rpm; \
 	cp vnc.tar.gz $$TMPDIR/SOURCES/${PACKAGE_NAME}-${VERSION}.tar.gz; \
-	cat ${PACKAGE_NAME}.spec | sed s/%{_blddir}/%{_tmppath}/g \
+	cat pkgscripts/${PACKAGE_NAME}.spec | sed s/%{_blddir}/%{_tmppath}/g \
 		| sed s@%{_srcdir}/@@g | sed s/#--\>//g \
 		> $$TMPDIR/SPECS/${PACKAGE_NAME}.spec; \
 	rpmbuild -bs --define "_topdir $$TMPDIR" $$TMPDIR/SPECS/${PACKAGE_NAME}.spec; \
@@ -128,17 +97,13 @@ srpm:
 	rm -rf $$TMPDIR
 
 deb: all
-	sh makedpkg
-
-if X86_64
+	sh pkgscripts/makedpkg
 
 udmg: all
-	sh makemacpkg universal ${BUILDDIR32}
-
-endif
+	sh pkgscripts/makemacpkg universal ${BUILDDIR32}
 
 dmg: all
-	sh makemacpkg
+	sh pkgscripts/makemacpkg
 
-sunpkg: all
-	sh makesunpkg
+solarispkg: all
+	sh pkgscripts/makesolarispkg

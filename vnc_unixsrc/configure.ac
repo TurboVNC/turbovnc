@@ -55,8 +55,8 @@ AC_ARG_WITH([medialib],
     [Use Sun mediaLib to perform JPEG compression/decompression]),
   [USE_MEDIALIB=$with_medialib], [])
 
-AC_ARG_VAR(JPEG_CFLAGS, [Custom C compiler flags for libjpeg-turbo, e.g. -I{libjpeg-turbo_directory}/include])
-AC_ARG_VAR(JPEG_LDFLAGS, [Custom Linker flags for libjpeg-turbo, e.g. -L{libjpeg-turbo_directory}/lib -lturbojpeg])
+AC_ARG_VAR(JPEG_CFLAGS, [Custom C compiler flags for TurboJPEG, e.g. -I{libjpeg-turbo_directory}/include])
+AC_ARG_VAR(JPEG_LDFLAGS, [Custom Linker flags for TurboJPEG, e.g. -L{libjpeg-turbo_directory}/lib -lturbojpeg])
 
 if test "x$USE_MEDIALIB" = "xyes"; then
 
@@ -86,14 +86,14 @@ else
   SAVE_CPPFLAGS=${CPPFLAGS}
   CPPFLAGS="${CPPFLAGS} ${JPEG_CFLAGS}"
   AC_CHECK_HEADERS([turbojpeg.h], [DUMMY=1],
-    [AC_MSG_ERROR([Could not find libjpeg-turbo header files])])
-  AC_MSG_CHECKING([for libjpeg-turbo library])
+    [AC_MSG_ERROR([Could not find TurboJPEG header files])])
+  AC_MSG_CHECKING([for TurboJPEG library])
   LJT_CHECK=no
   CPPFLAGS=${SAVE_CPPFLAGS}
   SAVE_LIBS=${LIBS}
   LIBS="${LIBS} ${JPEG_LDFLAGS}"
   AC_LINK_IFELSE([AC_LANG_CALL([], [tjInitCompress])], [LJT_CHECK=yes],
-    [AC_MSG_ERROR([Could not link with libjpeg-turbo libraries])])
+    [AC_MSG_ERROR([Could not link with TurboJPEG libraries])])
   LIBS=${SAVE_LIBS}
 	AC_MSG_RESULT([$LJT_CHECK])
 
@@ -134,8 +134,6 @@ if test "x$USE_MITSHM" = "xyes"; then
   X_EXTRA_LIBS="$X_EXTRA_LIBS -lXext"
 fi
 
-AM_CONDITIONAL([X86_64], [test "x$host_cpu" = "xx86_64"])
-
 case "$host_cpu" in
   sparc*)
     PKGARCH=sparc
@@ -150,21 +148,23 @@ case "$host_cpu" in
     ;;
 esac
 
-AM_CONDITIONAL([X86], [test "x$RPMARCH" = "xi386"])
-AM_CONDITIONAL([GCC], [test "x$GCC" = "xyes"])
-
 AC_SUBST(RPMARCH)
 AC_SUBST(PKGARCH)
 AC_SUBST(BUILD)
 AC_SUBST(abs_top_srcdir)
+AC_SUBST(GCC)
 AC_DEFINE_UNQUOTED(__BUILD, "${BUILD}")
 
 AC_CONFIG_FILES([vncserver], [chmod +x vncserver])
 AC_CONFIG_FILES([Xvnc/config/cf/tvnc_version.h])
-AC_CONFIG_FILES([turbovnc.spec:turbovnc.spec.in])
-AC_CONFIG_FILES([makemacpkg:makemacpkg.in])
-AC_CONFIG_FILES([makesunpkg:makesunpkg.in])
-AC_CONFIG_FILES([makedpkg:makedpkg.in])
+AC_CONFIG_FILES([pkgscripts/turbovnc.spec:release/turbovnc.spec.in])
+AC_CONFIG_FILES([pkgscripts/deb-control:release/deb-control.in])
+AC_CONFIG_FILES([pkgscripts/makemacpkg:release/makemacpkg.in])
+AC_CONFIG_FILES([pkgscripts/Description.plist:release/Description.plist.in])
+AC_CONFIG_FILES([pkgscripts/Info.plist:release/Info.plist.in])
+AC_CONFIG_FILES([pkgscripts/makesolarispkg:release/makesolarispkg.in])
+AC_CONFIG_FILES([pkgscripts/makedpkg:release/makedpkg.in])
+AC_CONFIG_FILES([Xvnc-configure])
 
 AC_OUTPUT([
 Makefile
