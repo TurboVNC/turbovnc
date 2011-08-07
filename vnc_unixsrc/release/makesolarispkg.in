@@ -49,9 +49,9 @@ fi
 
 if [ "$PKGARCH" = "amd64" ]; then
 	PKGARCH=i386;
-	PKGEXT=-x64;
+	PKGEXT=-solarisx64;
 elif [ "$PKGARCH" = "i386" ]; then
-	PKGEXT=-x86;
+	PKGEXT=-solarisx86;
 fi
 
 cat > $pkgtmpdir/pkginfo <<EOF 
