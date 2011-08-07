@@ -24,7 +24,7 @@ Tight encoding designed to work in conjunction with VirtualGL.
 #-->%setup -q -n vnc/vnc_unixsrc
 
 #-->%build
-#-->configure --prefix=@prefix@ --sysconfdir=/etc --mandir=@MANDIR@
+#-->./configure --prefix=@prefix@ --sysconfdir=/etc --mandir=@MANDIR@
 #-->make DESTDIR=%{buildroot}
 #-->make xserver DESTDIR=%{buildroot}
 
