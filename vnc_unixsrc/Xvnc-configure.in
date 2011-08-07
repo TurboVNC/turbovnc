@@ -12,8 +12,14 @@ CC="@CC@"
 GCC=@GCC@
 CFLAGS="@CFLAGS@"
 LDFLAGS="@LDFLAGS@"
-JPEGINC="@JPEG_CFLAGS@"
-JPEGLINK="@JPEG_LDFLAGS@"
+MEDIALIB=@USE_MEDIALIB@
+if [ "$MEDIALIB" = "yes" ]; then
+  JPEGINC=-I@abs_top_srcdir@/turbojpeg
+  JPEGLINK="-lmlib `pwd`/../turbojpeg/libturbojpeg.a"
+else
+  JPEGINC="@JPEG_CFLAGS@"
+  JPEGLINK="@JPEG_LDFLAGS@"
+fi
 
 SYSNAME=`uname -s`
 
