@@ -35,14 +35,14 @@ make xserver-install DESTDIR=%{buildroot} sysconfdir=/etc
 
 mkdir -p %{buildroot}/etc/init.d
 
-cat vncserver.init   | \
+cat %{_srcdir}/vncserver.init   | \
 sed -e 's@vncserver :${display\%\%:@@prefix@/bin/vncserver :${display\%\%:@g' | \
 sed -e 's@vncserver -kill :${display\%\%:@@prefix@/bin/vncserver -kill :${display\%\%:@g' \
  > %{buildroot}/etc/init.d/tvncserver
 chmod 755 %{buildroot}/etc/init.d/tvncserver
 
 mkdir -p %{buildroot}/etc/sysconfig
-install -m 644 tvncservers %{buildroot}/etc/sysconfig/tvncservers
+install -m 644 %{_srcdir}/tvncservers %{buildroot}/etc/sysconfig/tvncservers
 
 mkdir -p %{buildroot}/usr/share/applications
 cat > %{buildroot}/usr/share/applications/tvncviewer.desktop << EOF

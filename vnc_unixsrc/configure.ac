@@ -157,10 +157,13 @@ AC_DEFINE_UNQUOTED(__BUILD, "${BUILD}")
 
 AC_CONFIG_FILES([vncserver], [chmod +x vncserver])
 AC_CONFIG_FILES([Xvnc/config/cf/tvnc_version.h])
-AC_CONFIG_FILES([turbovnc.spec:turbovnc.spec.in])
-AC_CONFIG_FILES([makemacpkg:makemacpkg.in])
-AC_CONFIG_FILES([makesunpkg:makesunpkg.in])
-AC_CONFIG_FILES([makedpkg:makedpkg.in])
+AC_CONFIG_FILES([pkgscripts/turbovnc.spec:release/turbovnc.spec.in])
+AC_CONFIG_FILES([pkgscripts/deb-control:release/deb-control.in])
+AC_CONFIG_FILES([pkgscripts/makemacpkg:release/makemacpkg.in])
+AC_CONFIG_FILES([pkgscripts/Description.plist:release/Description.plist.in])
+AC_CONFIG_FILES([pkgscripts/Info.plist:release/Info.plist.in])
+AC_CONFIG_FILES([pkgscripts/makesolarispkg:release/makesolarispkg.in])
+AC_CONFIG_FILES([pkgscripts/makedpkg:release/makedpkg.in])
 AC_CONFIG_FILES([Xvnc-configure])
 
 AC_OUTPUT([

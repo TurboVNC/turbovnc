@@ -19,26 +19,24 @@ PACKAGE_NAME=@PACKAGE_NAME@
 VERSION=@VERSION@
 BUILD=@BUILD@
 DEBARCH=@PKGARCH@
-SRCDIR=@srcdir@
+SRCDIR=@abs_top_srcdir@
 PREFIX=@prefix@
 
 umask 022
 rm -f $PACKAGE_NAME\_$DEBARCH.deb
 TMPDIR=`mktemp -d /tmp/$PACKAGE_NAME-build.XXXXXX`
 mkdir $TMPDIR/DEBIAN
-cat $SRCDIR/deb-control.tmpl | sed s/{__PKGNAME}/$PACKAGE_NAME/g \
-	| sed s/{__VERSION}/$VERSION/g | sed s/{__BUILD}/$BUILD/g \
-	| sed s/{__ARCH}/$DEBARCH/g > $TMPDIR/DEBIAN/control
+cp pkgscripts/deb-control $TMPDIR/DEBIAN/control
 
 make install DESTDIR=$TMPDIR sysconfdir=/etc
 make xserver-install DESTDIR=$TMPDIR sysconfdir=/etc
 
 mkdir -p $TMPDIR/etc/init.d
-cat vncserver.init | sed -e 's@vncserver :${display\%\%:@$PREFIX/bin/vncserver :${display\%\%:@g' | sed -e 's@vncserver -kill :${display\%\%:@$PREFIX/bin/vncserver -kill :${display\%\%:@g' > $TMPDIR/etc/init.d/tvncserver
+cat $SRCDIR/vncserver.init | sed -e 's@vncserver :${display\%\%:@$PREFIX/bin/vncserver :${display\%\%:@g' | sed -e 's@vncserver -kill :${display\%\%:@$PREFIX/bin/vncserver -kill :${display\%\%:@g' > $TMPDIR/etc/init.d/tvncserver
 chmod 755 $TMPDIR/etc/init.d/tvncserver
 
 mkdir -p $TMPDIR/etc/sysconfig
-install -m 644 tvncservers $TMPDIR/etc/sysconfig/tvncservers
+install -m 644 $SRCDIR/tvncservers $TMPDIR/etc/sysconfig/tvncservers
 
 mkdir -p $TMPDIR/usr/share/applications
 cat > $TMPDIR/usr/share/applications/tvncviewer.desktop <<EOF

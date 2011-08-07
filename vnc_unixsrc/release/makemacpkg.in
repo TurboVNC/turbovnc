@@ -25,8 +25,8 @@ UNIVERSAL=0
 
 VERSION=@VERSION@
 BUILD=@BUILD@
-SRCDIR=@srcdir@
-BUILDDIR32=@srcdir@/osxx86
+SRCDIR=@abs_top_srcdir@
+BUILDDIR32=@abs_top_srcdir@/osxx86
 if [ $# -gt 0 ]; then
 	if [ "$1" = "universal" ]; then
 		UNIVERSAL=1
@@ -69,9 +69,9 @@ if [ $UNIVERSAL = 1 ]; then
 		-output $PKGROOT/opt/$pkgname/bin/vncviewer
 fi
 
-(cat $SRCDIR/Description.plist.tmpl | sed s/{__VERSION}/$VERSION/g > $pkgtmpdir/pkg/Description.plist)
-(cat $SRCDIR/Info.plist.tmpl | sed s/{__VERSION}/$VERSION/g  | sed s/{__BUILD}/$BUILD/g > $pkgtmpdir/pkg/Info.plist)
-install -m 755 $SRCDIR/uninstall.sh $PKGROOT/opt/$pkgname/bin/uninstall
+cp pkgscripts/Description.plist $pkgtmpdir/pkg/
+cp pkgscripts/Info.plist $pkgtmpdir/pkg/
+install -m 755 $SRCDIR/release/uninstall $PKGROOT/opt/$pkgname/bin/uninstall
 install -m 644 $SRCDIR/vncviewer/vncviewer.man $PKGROOT/opt/$pkgname/man/man1/vncviewer.1
 install -m 644 $SRCDIR/LICENCE.TXT $PKGROOT/Library/Documentation/$pkgname
 install -m 644 $SRCDIR/../TurboVNC-ChangeLog.txt $PKGROOT/Library/Documentation/$pkgname
@@ -84,7 +84,7 @@ mkdir $pkgtmpdir/dmg
 $PACKAGEMAKER -build -v -p $pkgtmpdir/dmg/$pkgname.pkg \
 	-f $PKGROOT -r $pkgtmpdir/pkg/Resources \
 	-i $pkgtmpdir/pkg/Info.plist -d $pkgtmpdir/pkg/Description.plist 
-install -m 644 $SRCDIR/vncuninstall.applescript $pkgtmpdir 
+install -m 644 $SRCDIR/release/vncuninstall.applescript $pkgtmpdir 
 sudo osacompile -t APPL -o "$pkgtmpdir/dmg/Uninstall $pkgname.app" $pkgtmpdir/vncuninstall.applescript 
 sudo chown -R $USER "$pkgtmpdir/dmg/Uninstall $pkgname.app" 
 hdiutil create -fs HFS+ -volname $pkgname-$VERSION \

@@ -19,7 +19,7 @@ pkgname=TurboVNC
 VERSION=@VERSION@
 BUILD=@BUILD@
 PKGARCH=@PKGARCH@
-SRCDIR=@srcdir@
+SRCDIR=@abs_top_srcdir@
 MEDIALIB=@USE_MEDIALIB@
 PKGEXT=
 
@@ -112,7 +112,7 @@ EOF
 make install DESTDIR=$pkgtmpdir
 make xserver-install DESTDIR=$pkgtmpdir
 mkdir -p $pkgtmpdir/opt/$pkgname/doc
-cp $SRCDIR/../vnc_docs/*.png $SRCDIR/../vnc_docs/*.css $SRCDIR/../vnc_docs/index.html $SRCDIR/../vnc_docs/LICEN*.txt LICENCE.TXT $SRCDIR/../TurboVNC-ChangeLog.txt $pkgtmpdir/opt/$pkgname/doc
+cp $SRCDIR/../vnc_docs/*.png $SRCDIR/../vnc_docs/*.css $SRCDIR/../vnc_docs/index.html $SRCDIR/../vnc_docs/LICEN*.txt $SRCDIR/LICENCE.TXT $SRCDIR/../TurboVNC-ChangeLog.txt $pkgtmpdir/opt/$pkgname/doc
 
 pkgmk -o -r $pkgtmpdir/opt -d $pkgtmpdir -f $pkgtmpdir/proto
 pkgtrans -s $pkgtmpdir $pkgtmpdir/$pkgname-$VERSION$PKGEXT.pkg $pkgname

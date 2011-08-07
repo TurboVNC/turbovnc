@@ -1,8 +1,8 @@
-Package: {__PKGNAME}
-Version: {__VERSION}-{__BUILD}
+Package: @PACKAGE_NAME@
+Version: @VERSION@-@BUILD@
 Section: misc
 Priority: optional
-Architecture: {__ARCH}
+Architecture: @PKGARCH@
 Essential: no
 Maintainer: The VirtualGL Project [http://www.VirtualGL.org]
 Description: A highly-optimized version of VNC that can be used with real-time video applications
