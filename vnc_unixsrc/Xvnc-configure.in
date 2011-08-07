@@ -7,25 +7,13 @@
 #    Solaris 10 (SunOS 5.10)
 #    Linux 2.4 and 2.6
 
-M32=0
-FORCEGCC=0
-FORCEX86=0
-FORCEX86_64=0
-JPEGINC=
-JPEGLINK=
-
-while [ $# -gt 0 ]; do
-    case "$1" in
-        -gcc)  FORCEGCC=1  ;;
-        -x86)  FORCEX86=1  ;;
-        -x86_64)  FORCEX86_64=1  ;;
-        -jpeginc)  JPEGINC=$2;  shift  ;;
-        -jpeglink)  JPEGLINK=$2;  shift  ;;
-        *)  break  ;;
-    esac
-    shift
-done
-
+CPU=@host_cpu@
+CC="@CC@"
+GCC=@GCC@
+CFLAGS="@CFLAGS@"
+LDFLAGS="@LDFLAGS@"
+JPEGINC="@JPEG_CFLAGS@"
+JPEGLINK="@JPEG_LDFLAGS@"
 
 SYSNAME=`uname -s`
 
@@ -57,22 +45,25 @@ echo "#define OSMajorVersion $MAJOR" >> config/cf/platform.def
 echo "#define OSMinorVersion $MINOR" >> config/cf/platform.def
 echo "#define OSTeenyVersion $TEENY" >> config/cf/platform.def
 echo "#define LinuxCLibMajorVersion 6" >> config/cf/platform.def
-if [ $FORCEGCC = 1 ]; then
+if [ "$GCC" = "yes" ]; then
     echo "#define HasGcc2 YES" >> config/cf/platform.def
 fi
-if [ $FORCEX86 = 1 ]; then
-    echo "#define i386Architecture" >> config/cf/platform.def
-    echo "#undef x86_64Architecture" >> config/cf/platform.def
-fi
-if [ $FORCEX86_64 = 1 ]; then
-    echo "#define x86_64Architecture" >> config/cf/platform.def
-fi
+case "$CPU" in
+    i*86)
+        echo "#define i386Architecture" >> config/cf/platform.def
+        echo "#undef x86_64Architecture" >> config/cf/platform.def
+        ;;
+    x86_64 | amd64)
+        echo "#define x86_64Architecture" >> config/cf/platform.def
+        ;;
+esac
 if [ ! "$JPEGINC" = "" ]; then
     echo "#define JPEGIncludeFlags $JPEGINC" >>config/cf/platform.def
 fi
 if [ ! "$JPEGLINK" = "" ]; then
     echo "#define JPEGLibraryFlags $JPEGLINK" >>config/cf/platform.def
 fi
+echo '#define VncIncludeDir "-I@abs_top_srcdir@/include"' >>config/cf/platform.def
 
 if [ "$SYSNAME" = AIX ]
 then
@@ -91,20 +82,20 @@ then
 else
     cd config/imake
     xmkmf ../../
-    make ${1+"$@"}
+    make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
     cd ../..
     cd config/makedepend
     xmkmf ../../
-    make ${1+"$@"}
+    make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
     cd ../..
     cd config/util
     xmkmf ../../
-    make ${1+"$@"}
+    make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
     cd ../..
     config/imake/imake -I./config/cf -DTOPDIR=./ -DCURDIR=.
-    make Makefiles ${1+"$@"}
-    make includes ${1+"$@"}
-    make depend ${1+"$@"}
+    make Makefiles CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
+    make includes CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
+    make depend CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
 fi
 
 exit 0

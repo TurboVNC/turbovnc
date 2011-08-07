@@ -13,18 +13,6 @@ noinst_HEADERS = Xvnc/config/cf/tvnc_version.h
 
 CLEANFILES = $(noinst_SCRIPTS) $(noinst_HEADERS)
 
-if X86_64
-CFGFLAGS = -x86_64
-endif
-
-if X86
-CFGFLAGS = -x86
-endif
-
-if GCC
-GCCFLAG = -gcc
-endif
-
 if WITH_MEDIALIB
 
 JPEGCFLAGS = -I${abs_top_srcdir}/turbojpeg 	 
@@ -39,24 +27,20 @@ endif
 
 xserver: all
 	if [ ! "${top_srcdir}" = "${top_builddir}" ]; then \
-		echo Out-of-tree builds cannot be used when building Xvnc; \
-	else \
-		cd Xvnc; \
-		rm -f config/imake/imake config/imake/*.o config/makedepend/makedepend \
-			config/makedepend/*.o config/util/lndir config/util/*.o; \
-		sh ./configure -jpeginc "$(JPEGCFLAGS)" -jpeglink "$(JPEGLDFLAGS)" \
-			$(GCCFLAG) $(CFGFLAGS) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" \
-			EXTRA_LDOPTIONS="$(LDFLAGS)"; \
-		$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)"; \
-	fi
+		rsync -av ${top_srcdir}/Xvnc ${top_builddir}; \
+	fi; \
+	cd Xvnc; \
+	rm -f config/imake/imake config/imake/*.o config/makedepend/makedepend \
+		config/makedepend/*.o config/util/lndir config/util/*.o; \
+	sh ../Xvnc-configure; \
+	$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)"
 
 xserver-rebuild: all
 	if [ ! "${top_srcdir}" = "${top_builddir}" ]; then \
-		echo Out-of-tree builds cannot be used when building Xvnc; \
-	else \
-		cd Xvnc; \
-		$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)"; \
-	fi
+		rsync -av ${top_srcdir}/Xvnc ${top_builddir}; \
+	fi; \
+	cd Xvnc; \
+	$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)"
 
 xserver-clean: Xvnc/config/cf/tvnc_version.h
 	if [ ! "${top_srcdir}" = "${top_builddir}" ]; then \
@@ -130,12 +114,8 @@ srpm:
 deb: all
 	sh makedpkg
 
-if X86_64
-
 udmg: all
 	sh makemacpkg universal ${BUILDDIR32}
-
-endif
 
 dmg: all
 	sh makemacpkg
