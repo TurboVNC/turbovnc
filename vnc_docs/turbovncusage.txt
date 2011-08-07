@@ -148,10 +148,10 @@ images:
 
 	Allow JPEG compression :: {:}
 		If this option is enabled, then TurboVNC will use JPEG compression for all
-		image tiles with more than 24 unique colors and paletted encoding for all
-		other image tiles.  If this option is disabled, then TurboVNC will select
-		between paletted or raw encoding depending on the size of the image tile
-		and its color count.
+		image tiles with more than 24 unique colors and indexed color encoding for
+		all other image tiles.  If this option is disabled, then TurboVNC will
+		select between indexed color or raw encoding depending on the size of the
+		image tile and its color count.
 
 	JPEG image quality :: {:}
 		Lower quality levels produce grainier JPEG images with more noticeable
@@ -169,11 +169,11 @@ images:
 		least.
 
 	Zlib compression level :: {:}
-		If Zlib compression is enabled, then paletted and raw-encoded image tiles
-		will be compressed with Zlib prior to transmission.  This decreases network
-		bandwidth usage at the expense of increased server CPU usage.  If JPEG
-		compression is enabled, then Zlib compression is always used with non-JPEG
-		image tiles.
+		If Zlib compression is enabled, then indexed color and raw-encoded image
+		tiles will be compressed with Zlib prior to transmission.  This decreases
+		network bandwidth usage at the expense of increased server CPU usage.  If
+		JPEG compression is enabled, then Zlib compression is always used with
+		non-JPEG image tiles.
 
 In the Windows TurboVNC Viewer, these parameters can be adjusted by accessing
 the Options dialog box (click on the "Options" button in the "TurboVNC
@@ -208,18 +208,19 @@ above:
 	than performance, then use one of the other connection protocols or take \
 	advantage of the "Lossless Refresh" feature. |
 | "Lossless Tight" | No | N/A | N/A | 0 | \
-	This protocol uses paletted encoding for image tiles with a low number of \
-	unique colors but otherwise does not perform any image compression at all. \
-	It is thus suitable only for gigabit and faster networks.  This protocol \
-	uses significantly less CPU time than any of the JPEG-based protocols. |
+	This protocol uses indexed color encoding for image tiles with a low number \
+	of unique colors but otherwise does not perform any image compression at \
+	all.  It is thus suitable only for gigabit and faster networks.  This \
+	protocol uses significantly less CPU time than any of the JPEG-based \
+	protocols. |
 | "Lossless Tight + Zlib" | No | N/A | N/A | 1 | \
-	This protocol uses paletted encoding for image tiles with a low number of \
-	unique colors and raw encoding for image tiles with a high number of unique \
-	colors.  It compresses all image tiles using Zlib with compression level \
-	1.  For certain types of applications (CAD applications, in particular), \
-	this protocol uses less network bandwidth than the "Perceptually Lossless JPEG" \
-	protocol, but it also uses significantly more CPU time on the server than \
-	any of the JPEG-based protocols. |
+	This protocol uses indexed color encoding for image tiles with a low number \
+	of unique colors and raw encoding for image tiles with a high number of \
+	unique colors.  It compresses all image tiles using Zlib with compression \
+	level 1.  For certain types of applications (CAD applications, in \
+	particular), this protocol uses less network bandwidth than the \
+	"Perceptually Lossless JPEG" protocol, but it also uses significantly more \
+	CPU time on the server than any of the JPEG-based protocols. |
 
 In the Windows TurboVNC Viewer, the image encoding protocol can be set using
 the Options dialog box (click on the "Options" button in the "TurboVNC
