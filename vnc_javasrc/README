@@ -313,7 +313,7 @@ Here is the complete list of parameters supported in the Java TurboVNC Viewer:
     Auto-scaling tries to choose a scaling factor in such a way that the whole
     remote desktop will fit on the local screen.  Currently, auto-scaling is
     supported only when the remote desktop is shown in a separate frame (always
-    true in the application mode, and also in the applet mode when the
+    true in standalone application mode, and also in applet mode when the
     "Open new window" parameter is set to "yes".)
 
 --> "Sync clipboards"
