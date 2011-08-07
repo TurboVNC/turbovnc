@@ -18,8 +18,8 @@ will cause it to exit automatically whenever a certain number of seconds have
 elapsed since the last active VNC viewer connection.
 -------------------------------------------------------------------------------
 [4]
-Created a new CMake-based build system for the Windows TurboVNC Server and
-Viewer.
+Numerous build system changes, including the use of CMake for Windows builds
+and support for out-of-tree Xvnc builds.
 -------------------------------------------------------------------------------
 [5]
 Added a '-config' option to the Unix TurboVNC Viewer which allows it to read
