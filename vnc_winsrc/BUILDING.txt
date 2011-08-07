@@ -44,11 +44,11 @@ Build Environment
 
      http://sourceforge.net/projects/libjpeg-turbo
 
-   * The VirtualGL build system will search for the TurboJPEG/OSS header and
+   * The VirtualGL build system will search for the TurboJPEG header and
      library under c:\libjpeg-turbo64 (64-bit) or c:\libjpeg-turbo (32-bit),
      but you can override this by setting the TJPEG_INCLUDE_DIR CMake variable
      to the directory containing turbojpeg.h and the TJPEG_LIBRARY CMake
-     variable to the full path of the TurboJPEG/OSS library against which you
+     variable to the full path of the TurboJPEG library against which you
      want to link.
 
 
