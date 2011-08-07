@@ -20,6 +20,10 @@ compression.
 Fixed an issue in the TurboVNC Java viewer whereby it was sending spurious
 KeyPress/KeyRelease events in conjunction with certain mouse events.
 -------------------------------------------------------------------------------
+[5]
+Numerous build system changes, including the use of CMake for Windows builds
+and support for out-of-tree Xvnc builds.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

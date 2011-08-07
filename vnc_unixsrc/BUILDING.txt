@@ -1,10 +1,11 @@
-Building TurboVNC for Unix
-==========================
+*******************************************************************************
+**     Building TurboVNC for Unix
+*******************************************************************************
 
 
-*******************************************************************************
-**     Prerequisites
-*******************************************************************************
+==================
+Build Requirements
+==================
 
 -- autoconf 2.56 or later
 -- automake 1.7 or later
@@ -17,6 +18,8 @@ Building TurboVNC for Unix
 
 -- xmkmf and imake (if building the TurboVNC Server)
 
+-- rsync (if building the TurboVNC Server using an out-of-tree build)
+
 -- GCC
    * On OS X, this is available in the X Code Tools, which are located on the
      install discs or at:
@@ -27,9 +30,8 @@ Building TurboVNC for Unix
 -- SOLARIS ONLY:  Sun Studio/Workshop Pro Compiler v12 or later
    * See http://www.sun.com/software/products/studio/ for a free download.
 
--- X11 development kit
-   * On most Linux variants, this can be found in the "XFree86-devel" or 
-     "xorg-x11-devel" package.  On Ubuntu, it is in the "libx11-dev" package.
+-- X Intrinsics/Athena Widgets development kit
+   * libXaw, libXt, and all dependencies thereof
    * On OS X, this is available in the "X11 SDK" package, which is part of the
      X Code Tools.
 
@@ -43,17 +45,32 @@ Building TurboVNC for Unix
      downloaded for free from http://www.sun.com/processors/vis/mlib.html.
 
 
-*******************************************************************************
-**     Building TurboVNC
-*******************************************************************************
+==================
+Out-of-Tree Builds
+==================
+
+Binary objects, libraries, and executables are generated in the same directory
+from which configure was executed (the "binary directory"), and this directory
+need not necessarily be the same as the TurboVNC source directory.  You can
+create multiple independent binary directories, in which different versions of
+TurboVNC can be built from the same source tree using different compilers or
+settings.  In the sections below, {build_directory} refers to the binary
+directory, whereas {source_directory} refers to the TurboVNC source directory.
+For in-tree builds, these directories are the same.
+
+
+=================
+Building TurboVNC
+=================
 
 The following procedure will build the TurboVNC Viewer on Linux, FreeBSD,
 32-bit OS X, and Solaris/x86 systems (on Solaris, this generates a 32-bit
 binary.  See below for 64-bit build instructions.)
 
-  cd vnc/vnc_unixsrc
+  cd {source_directory}
   autoreconf -fiv
-  sh ./configure [additional configure flags]
+  cd {build_directory}
+  sh {source_directory}/configure [additional configure flags]
   make
 
 NOTE: Running autoreconf is only necessary if building TurboVNC from the CVS
@@ -75,9 +92,9 @@ to clean the Xvnc build, or
 to do a minimal rebuild of Xvnc without re-configuring it.
 
 
-*******************************************************************************
-**     Installing
-*******************************************************************************
+==========
+Installing
+==========
 
   make install
 
@@ -96,19 +113,9 @@ argument of
 on the configure command line.  Run configure --help for more details.
 
 
-*******************************************************************************
-**     Build Recipes for Specific Systems
-*******************************************************************************
-
-
-VPATH and Out-of-Tree Builds
-----------------------------
-Since it uses autotools, the TurboVNC Viewer can be built in a different
-directory from the source directory.  However, the TurboVNC Server uses an
-antiquated build system (stone knives and bearskins) that doen't support
-out-of-tree builds.  If building the TurboVNC Server, then the TurboVNC Viewer
-components must be built in-tree so the server build knows where to find them.
-
+==================================
+Build Recipes for Specific Systems
+==================================
 
 32-bit Build on 64-bit Linux
 ----------------------------
@@ -217,9 +224,9 @@ To build a 64-bit version of TurboVNC using Sun Studio, add
 to the configure command line.
 
 
-*******************************************************************************
-**     Creating Release Packages
-*******************************************************************************
+=========================
+Creating Release Packages
+=========================
 
 The following commands can be used to create various types of release packages:
 
@@ -251,9 +258,9 @@ make sunpkg
   Build a Solaris package.  This requires pkgmk, pkgtrans, and bzip2.
 
 
-*******************************************************************************
-**     Other Options
-*******************************************************************************
+=============
+Other Options
+=============
 
 mediaLib Build
 --------------
