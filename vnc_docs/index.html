@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2011-05-04T02:26:52">
+<meta name="date" content="2011-08-07T03:28:38">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -203,35 +203,35 @@ License, v2</a><a name="idx004"></a>.</p>
 
 <p><a name="Overview"></a></p>
 
-<p>TurboVNC is an optimized version of 
-<span class="remote"><a href="http://www.realvnc.com/" class="remote">VNC</a></span><a name="idx005"></a> 
-(more specifically, of 
-<span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx006"></a> 
-1.3.x.)  On the surface, TurboVNC behaves very similarly to its parent, 
-but TurboVNC has been tuned to provide interactive performance for 
-full-screen video and 3D workloads.  On these types of image workloads, 
+<p>TurboVNC is an optimized version of VNC (more specifically, of 
+<span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx005"></a> 
+1.3.x.)  On the surface, TurboVNC behaves similarly to its parent, but 
+TurboVNC has been tuned to provide interactive performance for 
+full-screen video and 3D workloads.  On these types of workloads, 
 TurboVNC performs as much as an order of magnitude faster than TightVNC 
 1.3.x, uses more than an order of magnitude less CPU time to compress 
 each frame, and it produces generally better compression ratios.  As 
 with TightVNC, TurboVNC uses JPEG compression for image tiles with a 
-high number of unique colors and paletted encoding for image tiles with 
-a low number of unique colors.  Part of TurboVNC&rsquo;s speedup comes 
-from the use of libjpeg-turbo, the same high-speed vector-optimized JPEG 
-codec used by VirtualGL.  However, TurboVNC also bypasses the CPU-hungry 
-smoothness detection routines that TightVNC uses to determine whether a 
-tile is a good candidate for JPEG compression.  Furthermore, TurboVNC 
-eliminates buffer copies, it maximizes network efficiency by using the 
-largest tile sizes supported by the TightVNC protocol, and it never uses 
-a Zlib compression level higher than 1.  In the aggregate, TurboVNC 
-compresses 2D application workloads less efficiently than TightVNC, but 
-it generally does a better job than TightVNC of compressing 3D 
-application workloads.</p>
+high number of unique colors and indexed color encoding for image tiles 
+with a low number of unique colors.  Part of TurboVNC&rsquo;s speedup 
+comes from the use of libjpeg-turbo, the same high-speed SIMD-optimized 
+JPEG codec used by VirtualGL.  However, TurboVNC also bypasses the 
+CPU-hungry smoothness detection routines that TightVNC uses to determine 
+whether a tile is a good candidate for JPEG compression.  Furthermore, 
+TurboVNC eliminates buffer copies, it maximizes network efficiency by 
+using the largest tile sizes supported by the TightVNC protocol, and it 
+never uses a Zlib compression level higher than 1.  In the aggregate, 
+TurboVNC compresses 2D application workloads a bit less efficiently than 
+TightVNC, but it generally does a better job than TightVNC of 
+compressing 3D application workloads.</p>
 
-<p>TurboVNC is the product of extensive research, in which the TightVNC 
-encoder was benchmarked under a variety of different real-world 
-application workloads and a variety of different configurations.  This 
-research revealed several fundamental performance bottlenecks in 
-TightVNC, and these were removed or accelerated to form TurboVNC.</p>
+<p>TurboVNC is the product of extensive research, in which many different 
+permutations of the TightVNC encoder were benchmarked at the low level 
+against a variety of captured RFB sessions that simulated real-world 
+application workloads, both 2D and 3D.  For more information on the 
+research leading to TurboVNC&rsquo;s image encoding optimizations, see 
+<span class="remote"><a href="http://www.virtualgl.org/pmwiki/uploads/About/tighttoturbo.pdf" class="remote">this 
+report</a></span><a name="idx006"></a>.</p>
 
 <p>In addition, TurboVNC provides the following features:</p>
 
@@ -515,9 +515,9 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered" value="1">
         Download the TurboVNC Solaris package 
-        (<code>TurboVNC-</code><em><code>{version}</code></em><code>-x86.pkg.bz2</code> 
+        (<code>TurboVNC-</code><em><code>{version}</code></em><code>-solarisx86.pkg.bz2</code> 
         for 32-bit systems or 
-        <code>TurboVNC-</code><em><code>{version}</code></em><code>-x64.pkg.bz2</code> 
+        <code>TurboVNC-</code><em><code>{version}</code></em><code>-solarisx64.pkg.bz2</code> 
         for 64-bit systems) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
         area</a></span><a name="idx0013"></a> of the 
@@ -892,10 +892,10 @@ TurboVNC compresses images:</p>
     <dt class="Description-1 Description">Allow JPEG compression</dt>
     <dd class="Description-1 Description">
          If this option is enabled, then TurboVNC will use JPEG compression for 
-         all image tiles with more than 24 unique colors and paletted encoding 
-         for all other image tiles.  If this option is disabled, then TurboVNC 
-         will select between paletted or raw encoding depending on the size of 
-         the image tile and its color count.
+         all image tiles with more than 24 unique colors and indexed color 
+         encoding for all other image tiles.  If this option is disabled, then 
+         TurboVNC will select between indexed color or raw encoding depending on 
+         the size of the image tile and its color count.
     </dd>
     <dt class="Description-1 Description">JPEG image quality</dt>
     <dd class="Description-1 Description">
@@ -916,8 +916,8 @@ TurboVNC compresses images:</p>
     </dd>
     <dt class="Description-1 Description">Zlib compression level</dt>
     <dd class="Description-1 Description">
-         If Zlib compression is enabled, then paletted and raw-encoded image 
-         tiles will be compressed with Zlib prior to transmission.  This 
+         If Zlib compression is enabled, then indexed color and raw-encoded 
+         image tiles will be compressed with Zlib prior to transmission.  This 
          decreases network bandwidth usage at the expense of increased server 
          CPU usage.  If JPEG compression is enabled, then Zlib compression is 
          always used with non-JPEG image tiles.
@@ -978,7 +978,7 @@ options described above:</p>
     <td class="standard">N/A</td>
     <td class="standard">N/A</td>
     <td class="standard">0</td>
-    <td class="standard">This protocol uses paletted encoding for image tiles with a low number of unique colors but otherwise does not perform any image compression at all. It is thus suitable only for gigabit and faster networks.  This protocol uses significantly less CPU time than any of the JPEG-based protocols.</td>
+    <td class="standard">This protocol uses indexed color encoding for image tiles with a low number of unique colors but otherwise does not perform any image compression at all.  It is thus suitable only for gigabit and faster networks.  This protocol uses significantly less CPU time than any of the JPEG-based protocols.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Lossless Tight + Zlib&rdquo;</td>
@@ -986,7 +986,7 @@ options described above:</p>
     <td class="standard">N/A</td>
     <td class="standard">N/A</td>
     <td class="standard">1</td>
-    <td class="standard">This protocol uses paletted encoding for image tiles with a low number of unique colors and raw encoding for image tiles with a high number of unique colors.  It compresses all image tiles using Zlib with compression level 1.  For certain types of applications (CAD applications, in particular), this protocol uses less network bandwidth than the &ldquo;Perceptually Lossless JPEG&rdquo; protocol, but it also uses significantly more CPU time on the server than any of the JPEG-based protocols.</td>
+    <td class="standard">This protocol uses indexed color encoding for image tiles with a low number of unique colors and raw encoding for image tiles with a high number of unique colors.  It compresses all image tiles using Zlib with compression level 1.  For certain types of applications (CAD applications, in particular), this protocol uses less network bandwidth than the &ldquo;Perceptually Lossless JPEG&rdquo; protocol, but it also uses significantly more CPU time on the server than any of the JPEG-based protocols.</td>
   </tr>
 </table>
 </div>

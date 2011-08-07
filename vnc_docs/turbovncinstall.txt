@@ -40,8 +40,8 @@ following error:
 ** Installing TurboVNC on Solaris
 
 	1. Download the TurboVNC Solaris package
-		(''TurboVNC-''__''{version}''__''-x86.pkg.bz2'' for 32-bit systems or
-		''TurboVNC-''__''{version}''__''-x64.pkg.bz2'' for 64-bit systems)
+		(''TurboVNC-''__''{version}''__''-solarisx86.pkg.bz2'' for 32-bit systems or
+		''TurboVNC-''__''{version}''__''-solarisx64.pkg.bz2'' for 64-bit systems)
 		from the
 		[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
