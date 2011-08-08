@@ -348,6 +348,7 @@ WaitForSomething(pClientsReady)
 		return 0;
 	    FD_ZERO(&clientsWritable);
 	    if (i < 0) 
+	    {
 		if (selecterr == EBADF)    /* Some client disconnected */
 		{
 		    CheckConnections ();
@@ -364,6 +365,7 @@ WaitForSomething(pClientsReady)
 		    ErrorF("WaitForSomething(): select: errno=%d\n",
 			selecterr);
 		}
+	    }
 	    if (timers)
 	    {
 		now = GetTimeInMillis();
@@ -412,7 +414,7 @@ WaitForSomething(pClientsReady)
 #ifndef WIN32
 	for (i=0; i<howmany(XFD_SETSIZE, NFDBITS); i++)
 	{
-	    int highest_priority;
+	    int highest_priority = 0;
 
 	    while (clientsReadable.fds_bits[i])
 	    {
@@ -724,7 +726,6 @@ TimerForce(timer)
     register OsTimerPtr timer;
 {
     register OsTimerPtr *prev;
-    register CARD32 newTime;
 
     for (prev = &timers; *prev; prev = &(*prev)->next)
     {
@@ -780,7 +781,7 @@ TimerInit()
 {
     OsTimerPtr timer;
 
-    while (timer = timers)
+    while ((timer = timers))
     {
 	timers = timer->next;
 	xfree(timer);
