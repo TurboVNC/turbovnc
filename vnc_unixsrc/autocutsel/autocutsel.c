@@ -191,6 +191,7 @@ static void CheckBuffer()
   int length;
   
   value = XFetchBuffer(dpy, &length, buffer);
+  if (!value) return;
   
   if (length > 0 && ValueDiffers(value, length)) {
     if (options.debug) {
