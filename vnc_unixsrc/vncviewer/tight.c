@@ -563,7 +563,7 @@ FilterGradientBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRow
 
     /* First pixel in a row */
     for (c = 0; c < 3; c++) {
-      pix[c] = (CARD16)((src[y*rectWidth] >> shift[c]) + thatRow[c] & max[c]);
+      pix[c] = (CARD16)(((src[y*rectWidth] >> shift[c]) + thatRow[c]) & max[c]);
       thisRow[c] = pix[c];
     }
     dst[y*dstw] = RGB_TO_PIXEL(BPP, pix[0], pix[1], pix[2]);
@@ -577,7 +577,7 @@ FilterGradientBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRow
 	} else if (est[c] < 0) {
 	  est[c] = 0;
 	}
-	pix[c] = (CARD16)((src[y*rectWidth+x] >> shift[c]) + est[c] & max[c]);
+	pix[c] = (CARD16)(((src[y*rectWidth+x] >> shift[c]) + est[c]) & max[c]);
 	thisRow[x*3+c] = pix[c];
       }
       dst[y*dstw+x] = RGB_TO_PIXEL(BPP, pix[0], pix[1], pix[2]);
