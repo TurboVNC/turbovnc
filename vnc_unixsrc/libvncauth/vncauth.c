@@ -1,5 +1,6 @@
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -194,6 +195,27 @@ vncDecryptPasswdFromFile2(char *fname,
     memset(passwd, 0, 16);
 
     return (i < 16) ? 1 : 2;
+}
+
+
+/*
+ * Decrypt a password from memory.  Returns 1 if successful or 0 on error.
+ * On success, the password is written into decryptedPasswd, which should be
+ * at least 9 bytes in length.
+ */
+
+int
+vncDecryptPasswd(char *encryptedPasswd, char *decryptedPasswd)
+{
+    int i;
+
+    if (!encryptedPasswd || !decryptedPasswd || strlen(encryptedPasswd) < 8)
+        return 0;
+
+    deskey(s_fixedkey, DE1);
+    des((unsigned char *)encryptedPasswd, (unsigned char *)decryptedPasswd);
+    decryptedPasswd[8] = '\0';
+    return 1;
 }
 
 

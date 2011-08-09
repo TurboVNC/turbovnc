@@ -136,6 +136,8 @@ typedef struct {
 
   Bool doubleBuffer;
 
+  char *configFile;
+
 } AppData;
 
 extern AppData appData;
