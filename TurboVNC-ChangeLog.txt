@@ -1,5 +1,5 @@
 ===============================================================================
-Significant changes since 1.0.1
+1.0.2
 ===============================================================================
 [1]
 Fixed seg fault in the TurboVNC Unix server which occurred under certain rare
@@ -24,10 +24,14 @@ KeyPress/KeyRelease events in conjunction with certain mouse events.
 Numerous build system changes, including the use of CMake for Windows builds
 and support for out-of-tree Xvnc builds.
 -------------------------------------------------------------------------------
+[6]
+Added a '-config' option to the Unix TurboVNC Viewer which allows it to read
+.vnc connection info files saved by the Windows TurboVNC Viewer.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
-Significant changes since 1.0
+1.0.1
 ===============================================================================
 [1]
 Fixed seg fault in the TurboVNC Unix server which occurred in the
@@ -50,7 +54,7 @@ simultaneously.
 
 
 ===============================================================================
-Significant changes since 1.0beta1
+1.0
 ===============================================================================
 [1]
 The Windows TurboVNC Viewer should now work properly with displays that use a
@@ -83,7 +87,7 @@ server and the OTP was not set.
 
 
 ===============================================================================
-Significant changes since 0.6
+1.0 beta1
 ===============================================================================
 [1]
 Multi-threaded the Tight encoder in the Unix/Linux TurboVNC Server so that it
@@ -172,7 +176,7 @@ Fix a couple of potential buffer overruns in Xvnc's embedded HTTP server.
 
 
 ===============================================================================
-Significant changes between 0.5.1 and 0.6
+0.6
 ===============================================================================
 [1]
 Integrated TightVNC 1.3.10 enhancements and fixes, including 64-bit support
@@ -203,7 +207,7 @@ uncomment that line in the vncserver script.)
 
 
 ===============================================================================
-Significant changes between 0.5 and 0.5.1
+0.5.1
 ===============================================================================
 [1]
 Fixed a buffer overrun issue in TurboJPEG/mediaLib that may have caused
@@ -219,7 +223,7 @@ instances of this package from being installed simultaneously.
 
 
 ===============================================================================
-Significant changes between 0.4 and 0.5
+0.5
 ===============================================================================
 [1]
 The Windows TurboVNC server now works properly (albeit more slowly) when the
@@ -322,7 +326,7 @@ dialog.
 
 
 ===============================================================================
-Significant changes between 0.3.3 and 0.4
+0.4
 ===============================================================================
 [1]
 Added relevant patches from TightVNC 1.3.9
@@ -427,7 +431,7 @@ change this back.)
 
 
 ===============================================================================
-Significant changes between 0.3.2 and 0.3.3
+0.3.3
 ===============================================================================
 [1]
 Added a new preset to all VNC viewers which allows the user to select both the
@@ -459,7 +463,7 @@ launched from within another X session.
 
 
 ===============================================================================
-Significant changes between 0.3.1 and 0.3.2
+0.3.2
 ===============================================================================
 [1]
 Incorporated TightVNC 1.3.8 patches (where applicable)
@@ -512,7 +516,7 @@ the VNC password as plain text.
 
 
 ===============================================================================
-Significant changes between 0.3 and 0.3.1
+0.3.1
 ===============================================================================
 [1]
 Automatically start Xvnc with '-nolisten local' on Solaris servers.  On
@@ -553,7 +557,7 @@ presets in this window will enable and disable WAN optimizations
 
 
 ===============================================================================
-Significant changes between 0.2 and 0.3
+0.3
 ===============================================================================
 [1]
 Solaris/x86 support
