@@ -24,8 +24,8 @@ occasionally run TurboVNC without a window manager.
 -------------------------------------------------------------------------------
 [5]
 Fixed image corruption that occurred when using the Lossless Tight or Lossless
-Tight + Zlib protocols with the TurboVNC Viewer running on a 16-bit-per-pixel
-X server.
+Tight + Zlib protocols with the TurboVNC Unix Viewer running on a
+16-bit-per-pixel X server.
 -------------------------------------------------------------------------------
 
 
