@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010-2011 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  *  Copyright (C) 2000, 2001 Const Kaplinsky.  All Rights Reserved.
@@ -443,7 +443,7 @@ FilterCopyBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRows)
 #endif
 
   for (y = 0; y < numRows; y++)
-    memcpy (&dst[y*dstw], &t->uncompressedData[y*rectWidth],
+    memcpy (&dst[y * dstw], &t->uncompressedData[y * rectWidth * (BPP / 8)],
       rectWidth * (BPP / 8));
 
   return True;
