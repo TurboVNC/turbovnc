@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 
 project(TurboVNC)
-set(VERSION 1.0.2)
-set(RCVERSION 1,0,2,0)
+set(VERSION 1.0.3)
+set(RCVERSION 1,0,3,0)
 
 if(NOT WIN32)
 	message(FATAL_ERROR "TurboVNC cannot be cross-compiled")
