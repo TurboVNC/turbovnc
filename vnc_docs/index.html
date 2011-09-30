@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2011-08-07T03:28:38">
+<meta name="date" content="2011-09-30T18:33:55">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1889,12 +1889,11 @@ RealVNC Viewer when connecting to RealVNC servers.</p>
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
         Normally, when the continuous updates feature is enabled, continuous 
-        updates are only sent for &ldquo;large&rdquo; image regions (65536 
-        pixels or greater) drawn using <code>X[Shm]PutImage()</code>.  When 
-        <code>TVNC_CUCOPYAREA</code> is set to <code>1</code>, continuous 
-        updates are also sent for regions drawn using <code>XCopyArea()</code>.  
-        This may be necessary in order to make the continuous updates feature 
-        work properly with some applications. 
+        updates are only sent for image regions drawn using 
+        <code>X[Shm]PutImage()</code>.  When <code>TVNC_CUCOPYAREA</code> is set 
+        to <code>1</code>, continuous updates are also sent for regions drawn 
+        using <code>XCopyArea()</code>.  This may be necessary in order to make 
+        the continuous updates feature work properly with some applications.  
         <code>man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;vncviewer</code> for more 
         information about the continuous updates feature.
     </dd>
