@@ -6,7 +6,6 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2010 D. R. Commander
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -1900,7 +1899,6 @@ rfbSpriteSetCursor (pScreen, pCursor, x, y)
     pScreenPriv->y = y;
     pScreenPriv->pCursor = pCursor;
 
-    alrlock();
     for (cl = rfbClientHead; cl; cl = nextCl) {
 	nextCl = cl->next;
 	if (cl->enableCursorPosUpdates) {
@@ -1918,7 +1916,6 @@ rfbSpriteSetCursor (pScreen, pCursor, x, y)
 	    rfbSendFramebufferUpdate(cl);
 	}
     }
-    alrunlock();
 }
 
 static void
@@ -2042,7 +2039,6 @@ rfbDisplayCursor(pScreen, pCursor)
     pPriv = (rfbSpriteScreenPtr)pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
     result = (*pPriv->DisplayCursor)(pScreen, pCursor);
 
-    alrlock();
     for (cl = rfbClientHead; cl; cl = cl->next) {
 	if (cl->enableCursorShapeUpdates) {
 	    cl->cursorWasChanged = TRUE;
@@ -2052,7 +2048,6 @@ rfbDisplayCursor(pScreen, pCursor)
 	    }
 	}
     }
-    alrunlock();
 
     return result;
 }

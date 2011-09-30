@@ -3,9 +3,9 @@
  */
 
 /*
+ *  Copyright (C) 2009-2011 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
- *  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  *  Copyright (C) 2000-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -109,86 +109,56 @@ static double gettime(void)
  * Auto Lossless Refresh
  */
 
-pthread_mutex_t alrMutex;
-Bool alrInit = FALSE;
-static pthread_t threadHandle = 0;
-static Bool deadyet = TRUE, clientListModified = FALSE, putImageOnly = TRUE;
+static Bool putImageOnly = TRUE;
 
-static void *
-ALRThreadFunc(param)
-    void *param;
+CARD32
+alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
 {
-    rfbClientPtr cl;
     RegionRec copyRegionSave, modifiedRegionSave, requestedRegionSave;
+    rfbClientPtr cl = (rfbClientPtr)arg;
     int tightCompressLevelSave, tightQualityLevelSave, copyDXSave, copyDYSave;
-    while (!deadyet) {
-        pthread_mutex_lock(&alrMutex);
-        if (deadyet) break;
-        clientListModified = FALSE;
 
-        for (cl = rfbClientHead; cl && !clientListModified; cl = cl->next) {
+    if(!cl->firstUpdate && REGION_NOTEMPTY(pScreen, &cl->lossyRegion)
+        && (!putImageOnly || cl->alrTrigger)) {
 
-            if(rfbAutoLosslessRefresh > 0.0 && !cl->firstUpdate
-                && gettime()-cl->lastFramebufferUpdate > rfbAutoLosslessRefresh
-                && REGION_NOTEMPTY(pScreen, &cl->lossyRegion)
-                && (!putImageOnly || cl->alrTrigger)) {
+        tightCompressLevelSave = cl->tightCompressLevel;
+        tightQualityLevelSave = cl->tightQualityLevel;
+        copyDXSave = cl->copyDX;
+        copyDYSave = cl->copyDY;
+        REGION_INIT(pScreen, &copyRegionSave, NullBox, 0);
+        REGION_COPY(pScreen, &copyRegionSave, &cl->copyRegion);
+        REGION_INIT(pScreen, &modifiedRegionSave, NullBox, 0);
+        REGION_COPY(pScreen, &modifiedRegionSave, &cl->modifiedRegion);
+        REGION_INIT(pScreen, &requestedRegionSave, NullBox, 0);
+        REGION_COPY(pScreen, &requestedRegionSave, &cl->requestedRegion);
 
-                tightCompressLevelSave = cl->tightCompressLevel;
-                tightQualityLevelSave = cl->tightQualityLevel;
-                copyDXSave = cl->copyDX;
-                copyDYSave = cl->copyDY;
-                REGION_INIT(pScreen, &copyRegionSave, NullBox, 0);
-                REGION_COPY(pScreen, &copyRegionSave, &cl->copyRegion);
-                REGION_INIT(pScreen, &modifiedRegionSave, NullBox, 0);
-                REGION_COPY(pScreen, &modifiedRegionSave, &cl->modifiedRegion);
-                REGION_INIT(pScreen, &requestedRegionSave, NullBox, 0);
-                REGION_COPY(pScreen, &requestedRegionSave, &cl->requestedRegion);
+        cl->tightCompressLevel = 1;
+        cl->tightQualityLevel = -1;
+        cl->copyDX = cl->copyDY = 0;
+        REGION_EMPTY(pScreen, &cl->copyRegion);
+        REGION_EMPTY(pScreen, &cl->modifiedRegion);
+        REGION_UNION(pScreen, &cl->modifiedRegion, &cl->modifiedRegion,
+            &cl->lossyRegion);
+        REGION_EMPTY(pScreen, &cl->requestedRegion);
+        REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
+            &cl->lossyRegion);
 
-                cl->tightCompressLevel = 1;
-                cl->tightQualityLevel = -1;
-                cl->copyDX = cl->copyDY = 0;
-                REGION_EMPTY(pScreen, &cl->copyRegion);
-                REGION_EMPTY(pScreen, &cl->modifiedRegion);
-                REGION_UNION(pScreen, &cl->modifiedRegion, &cl->modifiedRegion,
-                    &cl->lossyRegion);
-                REGION_EMPTY(pScreen, &cl->requestedRegion);
-                REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
-                    &cl->lossyRegion);
+        rfbSendFramebufferUpdate(cl);
+        cl->alrTrigger = FALSE;
 
-                if (!rfbSendFramebufferUpdate(cl)) continue;
-                cl->alrTrigger = FALSE;
-
-                REGION_EMPTY(pScreen, &cl->lossyRegion);
-                cl->tightCompressLevel = tightCompressLevelSave;
-                cl->tightQualityLevel = tightQualityLevelSave;
-                cl->copyDX = copyDXSave;
-                cl->copyDY = copyDYSave;
-                REGION_COPY(pScreen, &cl->copyRegion, &copyRegionSave);
-                REGION_COPY(pScreen, &cl->modifiedRegion, &modifiedRegionSave);
-                REGION_COPY(pScreen, &cl->requestedRegion, &requestedRegionSave);
-                REGION_UNINIT(pScreen, &copyRegionSave);
-                REGION_UNINIT(pScreen, &modifiedRegionSave);
-                REGION_UNINIT(pScreen, &requestedRegionSave);
-            }
-        }
-        pthread_mutex_unlock(&alrMutex);
-        usleep(100000);
+        REGION_EMPTY(pScreen, &cl->lossyRegion);
+        cl->tightCompressLevel = tightCompressLevelSave;
+        cl->tightQualityLevel = tightQualityLevelSave;
+        cl->copyDX = copyDXSave;
+        cl->copyDY = copyDYSave;
+        REGION_COPY(pScreen, &cl->copyRegion, &copyRegionSave);
+        REGION_COPY(pScreen, &cl->modifiedRegion, &modifiedRegionSave);
+        REGION_COPY(pScreen, &cl->requestedRegion, &requestedRegionSave);
+        REGION_UNINIT(pScreen, &copyRegionSave);
+        REGION_UNINIT(pScreen, &modifiedRegionSave);
+        REGION_UNINIT(pScreen, &requestedRegionSave);
     }
-    alrInit = FALSE;
-    pthread_mutex_unlock(&alrMutex);
-    pthread_mutex_destroy(&alrMutex);
-    return NULL;
-}
-
-void ShutdownALRThread(void) {
-    if(rfbAutoLosslessRefresh > 0.0 && alrInit) {
-        deadyet = TRUE;
-        if (pthread_self() != threadHandle) {
-            while(pthread_mutex_unlock(&alrMutex) == 0) {}
-            pthread_join(threadHandle, NULL);
-            threadHandle = 0;
-        }
-    }
+    return 0;
 }
 
 
@@ -271,10 +241,8 @@ rfbNewClient(sock)
     BoxRec box;
     struct sockaddr_in addr;
     socklen_t addrlen = sizeof(struct sockaddr_in);
-    int i, err;
+    int i;
     char *env = NULL;
-
-    alrlock();
 
     if (rfbClientHead == NULL) {
 	/* no other clients - make sure we don't think any keys are pressed */
@@ -291,7 +259,6 @@ rfbNewClient(sock)
     if (cl == NULL) {
 	rfbLog("rfbNewClient: out of memory");
 	rfbCloseSock(cl->sock);
-	alrunlock();
 	return NULL;
     }
 
@@ -341,7 +308,6 @@ rfbNewClient(sock)
 
     cl->next = rfbClientHead;
     rfbClientHead = cl;
-    clientListModified = TRUE;
 
     rfbResetStats(cl);
 
@@ -361,7 +327,6 @@ rfbNewClient(sock)
     if (WriteExact(sock, pv, sz_rfbProtocolVersionMsg) < 0) {
 	rfbLogPerror("rfbNewClient: write");
 	rfbCloseSock(sock);
-	alrunlock();
 	return NULL;
     }
 
@@ -371,28 +336,13 @@ rfbNewClient(sock)
         cuCopyArea = TRUE;
 
     cl->firstUpdate = TRUE;
+    cl->alrTimer = NULL;
 
     if(rfbAutoLosslessRefresh > 0.0) {
         REGION_INIT(pScreen, &cl->lossyRegion, NullBox, 0);
-        cl->lastFramebufferUpdate = gettime();
-        if(!alrInit) {
-            pthread_mutexattr_t ma;
-            pthread_mutexattr_init(&ma);
-            pthread_mutexattr_settype(&ma, PTHREAD_MUTEX_RECURSIVE);
-            pthread_mutex_init(&alrMutex, &ma);
-            pthread_mutexattr_destroy(&ma);
-            if((env = getenv("TVNC_ALRALL"))!=NULL && !strcmp(env, "1"))
-                putImageOnly = FALSE;
-            cl->putImageTrigger = cl->alrTrigger = FALSE;
-            deadyet = FALSE;
-            if ((err = pthread_create(&threadHandle, NULL, ALRThreadFunc,
-                NULL)) != 0) {
-                rfbLogPerror ("Could not start Auto Lossless Refresh thread");
-                return NULL;
-            }
-            alrInit = TRUE;
-        }
-        else pthread_mutex_unlock(&alrMutex);
+        if((env = getenv("TVNC_ALRALL"))!=NULL && !strcmp(env, "1"))
+            putImageOnly = FALSE;
+        cl->putImageTrigger = cl->alrTrigger = FALSE;
     }
 
     if (rfbIdleTimeout > 0) {
@@ -415,8 +365,6 @@ rfbClientConnectionGone(sock)
     rfbClientPtr cl, prev;
     int i;
 
-    alrlock();
-
     for (prev = NULL, cl = rfbClientHead; cl; prev = cl, cl = cl->next) {
 	if (sock == cl->sock)
 	    break;
@@ -424,7 +372,6 @@ rfbClientConnectionGone(sock)
 
     if (!cl) {
 	rfbLog("rfbClientConnectionGone: unknown socket %d\n",sock);
-	alrunlock();
 	return;
     }
 
@@ -459,7 +406,6 @@ rfbClientConnectionGone(sock)
 	prev->next = cl->next;
     else
 	rfbClientHead = cl->next;
-    clientListModified = TRUE;
 
     REGION_UNINIT(pScreen,&cl->copyRegion);
     REGION_UNINIT(pScreen,&cl->modifiedRegion);
@@ -469,7 +415,7 @@ rfbClientConnectionGone(sock)
 
     if (cl->translateLookupTable) free(cl->translateLookupTable);
 
-    if(rfbClientHead == NULL) ShutdownALRThread();
+    if(cl->alrTimer) TimerFree(cl->alrTimer);
 
     xfree(cl);
 
@@ -477,8 +423,6 @@ rfbClientConnectionGone(sock)
         idleTimer = TimerSet(idleTimer, 0, rfbIdleTimeout * 1000,
             idleTimeoutCallback, NULL);
     }
-
-    alrunlock();
 }
 
 
@@ -492,8 +436,6 @@ rfbProcessClientMessage(sock)
 {
     rfbClientPtr cl;
 
-    alrlock();
-
     for (cl = rfbClientHead; cl; cl = cl->next) {
 	if (sock == cl->sock)
 	    break;
@@ -502,7 +444,6 @@ rfbProcessClientMessage(sock)
     if (!cl) {
 	rfbLog("rfbProcessClientMessage: unknown socket %d\n",sock);
 	rfbCloseSock(sock);
-	alrunlock();
 	return;
     }
 
@@ -510,7 +451,6 @@ rfbProcessClientMessage(sock)
     if (isClosePending(cl)) {
 	rfbLog("Closing connection to client %s\n", cl->host);
 	rfbCloseSock(sock);
-	alrunlock();
 	return;
     }
 #endif
@@ -537,8 +477,6 @@ rfbProcessClientMessage(sock)
     default:
 	rfbProcessClientNormalMessage(cl);
     }
-
-    alrunlock();
 }
 
 
@@ -1459,7 +1397,8 @@ rfbSendFramebufferUpdate(cl)
 
     if (rfbAutoLosslessRefresh > 0.0 &&
         (!putImageOnly || cl->putImageTrigger || cl->firstUpdate)) {
-        cl->lastFramebufferUpdate = gettime();
+        cl->alrTimer = TimerSet(cl->alrTimer, 0,
+            (CARD32)(rfbAutoLosslessRefresh * 1000.0), alrCallback, cl);
         cl->alrTrigger = TRUE;
         cl->putImageTrigger = FALSE;
     }

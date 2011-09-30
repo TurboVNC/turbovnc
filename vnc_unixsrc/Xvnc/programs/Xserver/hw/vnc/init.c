@@ -3,9 +3,9 @@
  */
 
 /*
+ *  Copyright (C) 2009-2011 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
- *  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -957,10 +957,7 @@ rfbClientStateChange(cbl, myData, clt)
 void
 ddxGiveUp()
 {
-    alrlock();
     ShutdownTightThreads();
-    ShutdownALRThread();
-    alrunlock();
     Xfree(rfbScreen.pfbMemory);
     if (initOutputCalled) {
 	char unixSocketName[32];

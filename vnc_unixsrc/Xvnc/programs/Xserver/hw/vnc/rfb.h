@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2010 D. R. Commander
+ *  Copyright (C) 2010-2011 D. R. Commander
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2000-2004 Const Kaplinsky.  All Rights Reserved.
@@ -282,7 +282,7 @@ typedef struct rfbClientRec {
     int cursorX, cursorY;          /* client's cursor position */
 
     Bool firstUpdate;
-    double lastFramebufferUpdate;
+    OsTimerPtr alrTimer;
     RegionRec lossyRegion;
     Bool alrTrigger;
     Bool putImageTrigger;
@@ -488,16 +488,6 @@ extern Bool rfbNeverShared;
 extern Bool rfbDontDisconnect;
 extern Bool rfbViewOnly; /* run server in view-only mode - Ehud Karni SW */
 extern double rfbAutoLosslessRefresh;
-extern pthread_mutex_t alrMutex;
-extern Bool alrInit;
-#define alrlock() { \
-    if (rfbAutoLosslessRefresh > 0.0 && alrInit) \
-        pthread_mutex_lock(&alrMutex); \
-}
-#define alrunlock() { \
-    if (rfbAutoLosslessRefresh > 0.0 && alrInit) \
-        pthread_mutex_unlock(&alrMutex); \
-}
 #define debugregion(r, m) \
     rfbLog(m" %d, %d %d x %d\n", r.extents.x1, r.extents.y1, \
         r.extents.x2 - r.extents.x1, r.extents.y2 - r.extents.y1)
@@ -515,7 +505,6 @@ extern Bool rfbSendSetColourMapEntries(rfbClientPtr cl, int firstColour,
 				       int nColours);
 extern void rfbSendBell();
 extern void rfbSendServerCutText(char *str, int len);
-extern void ShutdownALRThread(void);
 
 
 /* translate.c */
