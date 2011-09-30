@@ -24,7 +24,7 @@ occasionally run TurboVNC without a window manager.
 -------------------------------------------------------------------------------
 [5]
 Fixed image corruption that occurred when using the Lossless Tight or Lossless
-Tight + Zlib protocols with the TurboVNC Unix Viewer running on a
+Tight + Zlib protocols with the Unix TurboVNC Viewer running on a
 16-bit-per-pixel X server.
 -------------------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ Tight + Zlib protocols with the TurboVNC Unix Viewer running on a
 1.0.2
 ===============================================================================
 [1]
-Fixed seg fault in the TurboVNC Unix server which occurred under certain rare
+Fixed seg fault in the Unix TurboVNC Server which occurred under certain rare
 circumstances when disconnecting a viewer from a server that was using multi-
 threaded compression.
 -------------------------------------------------------------------------------
@@ -43,12 +43,12 @@ If the user overrides the location of the password file (by passing
 create a new VNC password if ~/.vnc/passwd does not exist.
 -------------------------------------------------------------------------------
 [3]
-Fixed seg fault in the TurboVNC Unix server which occurred under certain rare
+Fixed seg fault in the Unix TurboVNC Server which occurred under certain rare
 circumstances when shutting down a server that was using multi-threaded
 compression.
 -------------------------------------------------------------------------------
 [4]
-Fixed an issue in the TurboVNC Java viewer whereby it was sending spurious
+Fixed an issue in the Java TurboVNC Viewer whereby it was sending spurious
 KeyPress/KeyRelease events in conjunction with certain mouse events.
 -------------------------------------------------------------------------------
 [5]
@@ -65,11 +65,11 @@ Added a '-config' option to the Unix TurboVNC Viewer which allows it to read
 1.0.1
 ===============================================================================
 [1]
-Fixed seg fault in the TurboVNC Unix server which occurred in the
+Fixed seg fault in the Unix TurboVNC Server which occurred in the
 miRegionDestroy() function under certain rare circumstances.
 -------------------------------------------------------------------------------
 [2]
-Fixed seg fault in the TurboVNC Unix server which occurred in the
+Fixed seg fault in the Unix TurboVNC Server which occurred in the
 cfb32ClippedLineCopy() function under certain rare circumstances.
 -------------------------------------------------------------------------------
 [3]
@@ -113,7 +113,7 @@ freeze for several minutes.
 [6]
 Fixed a security loophole whereby RealVNC clients were able to connect with a
 blank password if PAM and OTP authentication were enabled on the TurboVNC
-server and the OTP was not set.
+Server and the OTP was not set.
 -------------------------------------------------------------------------------
 
 
@@ -131,7 +131,8 @@ one-time passwords and Unix login credentials.  See documentation and man pages
 for details.
 -------------------------------------------------------------------------------
 [3]
-Added scroll wheel support to the Java VNC viewer (requires JRE 1.4 or later.)
+Added scroll wheel support to the Java TurboVNC viewer (requires JRE 1.4 or
+later.)
 -------------------------------------------------------------------------------
 [4]
 Added automatic lossless refresh (ALR) feature, which sends a mathematically
@@ -183,7 +184,7 @@ In the Windows TurboVNC Viewer, full-screen mode will now span all monitors in
 a multi-monitor configuration, not just the primary monitor.
 -------------------------------------------------------------------------------
 [13]
-Added automatic clipboard transfer to the Java VNC viewer.
+Added automatic clipboard transfer to the Java TurboVNC Viewer.
 -------------------------------------------------------------------------------
 [14]
 Removed the warning dialog in the Windows viewer if full screen mode is
@@ -218,7 +219,7 @@ for more details.
 When connecting a TigerVNC or TightVNC Viewer to a TurboVNC server, the
 TurboVNC server will now translate JPEG quality levels into actual JPEG
 quality and subsampling using the same translation table used by the TigerVNC
-server.  See the TurboVNC User's Guide for more details.
+Server.  See the TurboVNC User's Guide for more details.
 -------------------------------------------------------------------------------
 [3]
 Created the TurboVNC User's Guide, which mostly consists of the TurboVNC
@@ -257,7 +258,7 @@ instances of this package from being installed simultaneously.
 0.5
 ===============================================================================
 [1]
-The Windows TurboVNC server now works properly (albeit more slowly) when the
+The Windows TurboVNC Server now works properly (albeit more slowly) when the
 server's graphics card is configured for a 16-bit pixel depth.
 -------------------------------------------------------------------------------
 [2]
@@ -278,12 +279,12 @@ resulting compression scheme should be both tighter and faster than the pure
 TurboJPEG protocol used by previous versions of TurboVNC.
 -------------------------------------------------------------------------------
 [4]
-The TurboVNC Unix server now executes ~/.vnc/xstartup.turbovnc instead of
+The Unix TurboVNC Server now executes ~/.vnc/xstartup.turbovnc instead of
 ~/.vnc/xstartup.  This is to avoid conflicts with other VNC flavors.
 -------------------------------------------------------------------------------
 [5]
 Shift-Click and Control-Click now work properly when using the X11 TurboVNC
-viewer.
+Viewer.
 -------------------------------------------------------------------------------
 [6]
 Further optimized the Huffman encoder in the mediaLib implementation of
@@ -297,12 +298,12 @@ This resulted in a TurboVNC session that had no window manager.  This has been
 fixed.
 -------------------------------------------------------------------------------
 [8]
-Increased TCP send buffer size to 64k in the TurboVNC Windows server.  This
+Increased TCP send buffer size to 64k in the Windows TurboVNC Server.  This
 should improve performance significantly.
 -------------------------------------------------------------------------------
 [9]
 Generally improved compatibility with TightVNC and RealVNC.  This included
-adding back in the Hextile decoder to the VNC viewer and adding back in
+adding back in the Hextile decoder to the TurboVNC Viewer and adding back in
 support for 8-bit and 16-bit color depths (in both the viewer and the server.)
 See the TurboVNC Compatibility Guide for more information.
 -------------------------------------------------------------------------------
@@ -365,8 +366,8 @@ Added relevant patches from TightVNC 1.3.9
 [2]
 Added lossless refresh feature, which instructs the server to send a
 mathematically lossless (Zlib-encoded RGB) copy of the current screen.  This
-feature does not currently work with the Windows TurboVNC server, because the
-Windows TurboVNC server processes framebuffer update requests asynchronously.
+feature does not currently work with the Windows TurboVNC Server, because the
+Windows TurboVNC Server processes framebuffer update requests asynchronously.
 -------------------------------------------------------------------------------
 [3]
 Modified /opt/TurboVNC/bin/vncserver so that it invokes Xvnc with the arguments
