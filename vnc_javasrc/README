@@ -66,8 +66,8 @@ There are three basic ways to use the Java TurboVNC Viewer:
      Another possibility for using the Java TurboVNC Viewer is to install it
      under a fully-functional HTTP server, such as Apache or IIS.  Due to Java
      security restrictions, the applet must be signed in order for it to
-     connect to a TurboVNC Server running on a different machine from the
-     HTTP server.
+     connect to a VNC server running on a different machine from the HTTP
+     server.
 
      One can install the Java TurboVNC Viewer by simply copying the .class and
      .jar files into a directory that is under the control of the HTTP server.
