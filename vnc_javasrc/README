@@ -42,19 +42,19 @@ Installation
 
 There are three basic ways to use the Java TurboVNC Viewer:
 
-  1. Running the applet as part of the TurboVNC Server installation.
+  1. Running the applet as part of a TurboVNC Server installation.
 
      Both the Unix and Windows versions of the TurboVNC Server include a small
-     built-in HTTP server which can serve the Java TurboVNC Viewer to web
+     built-in HTTP server that can serve the Java TurboVNC Viewer to web
      clients.  This enables easy access to the shared desktop without the need
      to install any software on the client machine.
 
-     The Unix TurboVNC Server (Xvnc) is able to serve up any set of files which
-     are present in a particular directory, which is determined by the -httpd
+     The Unix TurboVNC Server (Xvnc) is able to serve up any set of files that
+     are present in a particular directory, which is specified in the -httpd
      argument to Xvnc.  In the default version of the vncserver script, this
      argument is set to ../vnc/classes, relative to the directory containing
      the vncserver script.  Thus, one can easily deploy a modified version of
-     the Java TurboVNC Viewer by simply copying a new JAR file to this
+     the Java TurboVNC Viewer by simply copying a new JAR file into this
      directory.
 
      The Windows TurboVNC Server (WinVNC) embeds the JAR file inside of its
@@ -64,25 +64,24 @@ There are three basic ways to use the Java TurboVNC Viewer:
   2. Running the applet from a standalone web server.
 
      Another possibility for using the Java TurboVNC Viewer is to install it
-     under a fully-functional HTTP server such as Apache or IIS.  Due to Java
+     under a fully-functional HTTP server, such as Apache or IIS.  Due to Java
      security restrictions, the applet must be signed in order for it to
      connect to a TurboVNC Server running on a different machine from the
      HTTP server.
 
      One can install the Java TurboVNC Viewer by simply copying the .class and
      .jar files into a directory that is under the control of the HTTP server.
-     Also, an HTML page should be created which will act as a the base document
-     for the Java TurboVNC Viewer applet (an example named index.html is
-     provided in this directory.  Modify this file to suit your specific
-     needs.)
+     Also, an HTML page should be created to act as a the base document for the
+     Java TurboVNC Viewer applet (an example named index.html is provided in
+     this directory.  Modify this file to suit your specific needs.)
 
   3. Running the viewer as a standalone application.
 
      Finally, the Java TurboVNC Viewer can be executed locally on the client
-     machine, but this method requires installation of either the JRE (Java
-     Runtime Environment) or the JDK (Java Development Kit).  If the
-     VncViewer.jar file is in the current directory, then the Java TurboVNC
-     Viewer can be launched with the following command line:
+     machine, but this method requires installation of either a JRE (Java
+     Runtime Environment) or a JDK (Java Development Kit).  If VncViewer.jar is
+     in the current directory, then the Java TurboVNC Viewer can be launched
+     with the following command line:
 
          java -jar VncViewer.jar HOST {host} PORT {port}
 
@@ -90,14 +89,14 @@ There are three basic ways to use the Java TurboVNC Viewer:
      and {port} is typically 5900 + the X display number of the TurboVNC
      session to which you want to connect (example: 5901 if connecting to
      display :1.)  {port} defaults to 5900 if omitted.  There are a number of
-     other optional parameters which can be specified (see the Parameters
+     other optional parameters that can be specified (see the Parameters
      section below.)
 
 
 Parameters
 ==========
 
-The Java TurboVNC Viewer supports a number of parameters, allowing you to
+The Java TurboVNC Viewer accepts a number of parameters, allowing you to
 customize its behavior.  Most parameters directly correspond to the settings
 found in the Options window.  However, there are some parameters that have no
 equivalent in the GUI.
@@ -126,7 +125,7 @@ Here is the complete list of parameters supported in the Java TurboVNC Viewer:
 
 --> "HOST" (no GUI equivalent)
 
-    Value: hostname or IP address of the TurboVNC server machine
+    Value: hostname or IP address of the VNC server machine
     Default: in applet mode, the host from which the applet was loaded
 
     This parameter tells the viewer which server to connect to.  Unless the
@@ -136,12 +135,13 @@ Here is the complete list of parameters supported in the Java TurboVNC Viewer:
 
 --> "PORT" (no GUI equivalent)
 
-    Value: TCP port number of the TurboVNC session
+    Value: TCP port number of the VNC server session
     Default: 5900
 
-    This parameter specifies the TCP port number on which the TurboVNC Server
-    session is listening.  This is typically 5900 + the X display number of
-    of the TurboVNC session (example: 5901 if connecting to display :1.)
+    This parameter specifies the TCP port number on which the VNC server
+    session is listening.  For Unix VNC servers, this is typically 5900 + the
+    X display number of of the VNC session (example: 5901 if connecting to
+    display :1.)  For Windows VNC servers, this is typically 5900.
 
 --> "PASSWORD"
 
@@ -162,8 +162,8 @@ Here is the complete list of parameters supported in the Java TurboVNC Viewer:
     The same as the "PASSWORD" parameter but DES-encrypted using a fixed key.
     Its value should be represented in hex-ascii, e.g. "494015f9a35e8b22".
     This parameter has a higher priority than the "PASSWORD" parameter.  Do not
-    use this unless you understand the security ramifications of it.  In
-    particular, this parameter is only slightly more secure than storing the
+    use this parameter unless you understand the security ramifications of it.
+    In particular, this parameter is only slightly more secure than storing the
     password in plain text, since the DES decryption key is always known.
 
 --> "Allow JPEG compression"
