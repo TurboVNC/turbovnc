@@ -153,7 +153,8 @@ DesktopInitAfterRealization()
 static void
 HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev, Boolean *cont)
 {
-  int i;
+  int i;  char *env=NULL;
+  static int x = 100, y = 100;
 
   switch (ev->type) {
 
@@ -189,11 +190,16 @@ HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev, Boolean *cont)
     break;
 
   case ClientMessage:
-      if(ev->xclient.window==XtWindow(desktop)
-        && ev->xclient.message_type==XA_INTEGER
-        && ev->xclient.format==8
-        && !strcmp(ev->xclient.data.b, "SendRFBUpdate"))
-        SendIncrementalFramebufferUpdateRequest();
+    if(ev->xclient.window == XtWindow(desktop)
+      && ev->xclient.message_type == XA_INTEGER
+      && ev->xclient.format == 8
+      && !strcmp(ev->xclient.data.b, "SendRFBUpdate"))
+      SendIncrementalFramebufferUpdateRequest();
+    if((env = getenv("TVNC_FAKEMOUSE")) != NULL && !strcmp(env, "1")) {
+      SendPointerEvent(x, y, rfbButton1Mask | rfbButton3Mask);
+      if(x == 100) x = 101;  else x = 100;
+      if(y == 100) y = 101;  else y = 100;
+    }
     break;
   }
 }
