@@ -1,14 +1,13 @@
-/* $XConsortium: syncstr.h,v 1.4 94/04/17 20:11:27 rws Exp $ */
+/* $Xorg: syncstr.h,v 1.4 2001/02/09 02:03:24 xorgcvs Exp $ */
 /*
 
-Copyright (c) 1991, 1993, 1994  X Consortium
+Copyright 1991, 1993, 1994, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 */
 
@@ -49,6 +48,10 @@ OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 
 ******************************************************************/
+/* $XFree86: xc/include/extensions/syncstr.h,v 1.3 2003/07/16 01:38:24 dawes Exp $ */
+
+#ifndef _SYNCSTR_H_
+#define _SYNCSTR_H_
 
 #include "sync.h"
 
@@ -393,17 +396,13 @@ typedef struct _SysCounterInfo {
     CARD64	bracket_less;
     SyncCounterType counterType;  /* how can this counter change */
     void        (*QueryValue)(
-#if NeedNestedPrototypes
 			      pointer /*pCounter*/,
 			      CARD64 * /*freshvalue*/
-#endif
 );
     void	(*BracketValues)(
-#if NeedNestedPrototypes
 				 pointer /*pCounter*/,
 				 CARD64 * /*lessthan*/,
 				 CARD64 * /*greaterthan*/
-#endif
 );
 } SysCounterInfo;
 
@@ -416,20 +415,14 @@ typedef struct _SyncTrigger {
     unsigned int test_type;	/* transition or Comparision type */
     CARD64	test_value;	/* trigger event threshold value */
     Bool	(*CheckTrigger)(
-#if NeedNestedPrototypes
 				struct _SyncTrigger * /*pTrigger*/,
 				CARD64 /*newval*/
-#endif
 				);
     void	(*TriggerFired)(
-#if NeedNestedPrototypes
 				struct _SyncTrigger * /*pTrigger*/
-#endif
 				);
     void	(*CounterDestroyed)(
-#if NeedNestedPrototypes
 				struct _SyncTrigger * /*pTrigger*/
-#endif
 				    );
 } SyncTrigger;
 
@@ -473,28 +466,29 @@ typedef union {
 
 
 extern pointer SyncCreateSystemCounter(
-#if NeedFunctionPrototypes
     char *	/* name */,
     CARD64  	/* inital_value */,
     CARD64  	/* resolution */,
     SyncCounterType /* change characterization */,
-    void        (* /*QueryValue*/ ) (), /* XXX prototype */
-    void        (* /*BracketValues*/) ()
-#endif
+    void        (* /*QueryValue*/ ) (
+        pointer /* pCounter */,
+        CARD64 * /* pValue_return */), /* XXX prototype */
+    void        (* /*BracketValues*/) (
+        pointer /* pCounter */, 
+        CARD64 * /* pbracket_less */,
+        CARD64 * /* pbracket_greater */)
 );
 
 extern void SyncChangeCounter(
-#if NeedFunctionPrototypes
     SyncCounter *	/* pCounter*/,
     CARD64  		/* new_value */
-#endif
 );
 
 extern void SyncDestroySystemCounter(
-#if NeedFunctionPrototypes
     pointer pCounter
-#endif
 );
-extern void InitServertime();
+extern void InitServertime(void);
 
 #endif /* _SYNC_SERVER */
+
+#endif /* _SYNCSTR_H_ */

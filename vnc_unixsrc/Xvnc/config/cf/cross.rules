@@ -1,0 +1,147 @@
+XCOMM $XFree86: xc/config/cf/cross.rules,v 1.7 2002/04/04 14:05:33 eich Exp $
+
+#ifndef HostCcCmd
+#define HostCcCmd cc
+#endif
+
+#define HostLinkRule(target,flags,objs,libs)  HostCcCmd -I$(BUILDINCDIR) -o target flags objs libs
+
+/* ComplexHostProgramTarget - Compile a program such that we can run
+ * it on this host, i.e., don't use the default cross compiler.
+ */
+#ifndef ComplexHostProgramTarget
+#define	ComplexHostProgramTarget(program)				@@\
+              CC=HostCcCmd							@@\
+    STD_INCLUDES=							@@\
+          CFLAGS=$(TOP_INCLUDES) $(INCLUDES) $(BOOTSTRAPCFLAGS)\	@@\
+		$(CROSSCOMPILEDEFINES) $(CROSSCOMPILEBOOTSTRAPDEFINES)	@@\
+EXTRA_LOAD_FLAGS=							@@\
+        PROGRAM = program						@@\
+									@@\
+AllTarget(HostProgramTargetName(program))				@@\
+									@@\
+HostProgramTargetName(program): $(OBJS) $(DEPLIBS)			@@\
+	RemoveTargetProgram($@)						@@\
+	HostLinkRule($@,$(_NOOP_),$(OBJS),$(DEPLIBS) $(LOCAL_LIBRARIES)) @@\
+									@@\
+DependTarget()								@@\
+									@@\
+LintTarget()								@@\
+									@@\
+clean::									@@\
+	RemoveFile(HostProgramTargetName(program))
+#endif /* ComplexHostProgramTarget */
+
+
+#ifndef SimpleHostProgramTarget
+#define SimpleHostProgramTarget(program)				@@\
+           SRCS = program.c						@@\
+									@@\
+              CC=HostCcCmd					@@\
+    STD_INCLUDES=							@@\
+          CFLAGS=$(TOP_INCLUDES) $(INCLUDES) $(BOOTSTRAPCFLAGS)\	@@\
+		$(CROSSCOMPILEDEFINES) $(CROSSCOMPILEBOOTSTRAPDEFINES)	@@\
+EXTRA_LOAD_FLAGS=							@@\
+        PROGRAM = program						@@\
+									@@\
+AllTarget(HostProgramTargetName(program))				@@\
+									@@\
+HostProgramTargetName(program): program.o $(DEPLIBS)			@@\
+	RemoveTargetProgram($@)						@@\
+	HostLinkRule($@,$(_NOOP_),program.o,$(DEPLIBS) $(LOCAL_LIBRARIES)) @@\
+									@@\
+DependTarget()								@@\
+									@@\
+LintTarget()								@@\
+									@@\
+clean::									@@\
+	RemoveFile(HostProgramTargetName(program))
+#endif /* SimpleHostProgramTarget */
+
+#ifndef SimpleHostProgramTarget_1
+#define SimpleHostProgramTarget_1(program)				@@\
+           SRCS = program.c						@@\
+									@@\
+              CC=HostCcCmd						@@\
+    STD_INCLUDES=							@@\
+          CFLAGS=$(TOP_INCLUDES) $(INCLUDES) $(BOOTSTRAPCFLAGS)\	@@\
+		$(CROSSCOMPILEDEFINES) $(CROSSCOMPILEBOOTSTRAPDEFINES)	@@\
+EXTRA_LOAD_FLAGS=							@@\
+        PROGRAM = program						@@\
+									@@\
+AllTarget(HostProgramTargetName(program))				@@\
+									@@\
+HostProgramTargetName(program): program.o $(DEPLIBS)			@@\
+	RemoveTargetProgram($@)						@@\
+	HostLinkRule($@,$(_NOOP_),program.o,$(DEPLIBS) $(LOCAL_LIBRARIES)) @@\
+									@@\
+DependTarget()								@@\
+LintTarget()								@@\
+									@@\
+clean::									@@\
+	RemoveFile(HostProgramTargetName(program))
+#endif /* SimpleHostProgramTarget_1 */
+
+
+#ifndef SimpleHostProgramTarget_2
+#define SimpleHostProgramTarget_2(program)				@@\
+           SRCS = program.c						@@\
+									@@\
+              CC=HostCcCmd						@@\
+    STD_INCLUDES=							@@\
+          CFLAGS=$(TOP_INCLUDES) $(INCLUDES) $(BOOTSTRAPCFLAGS)\	@@\
+		$(CROSSCOMPILEDEFINES) $(CROSSCOMPILEBOOTSTRAPDEFINES)	@@\
+EXTRA_LOAD_FLAGS=							@@\
+        PROGRAM = program						@@\
+									@@\
+AllTarget(HostProgramTargetName(program))				@@\
+									@@\
+HostProgramTargetName(program): program.o $(DEPLIBS)			@@\
+	RemoveTargetProgram($@)						@@\
+	HostLinkRule($@,$(_NOOP_),program.o,$(DEPLIBS) $(LOCAL_LIBRARIES)) @@\
+									@@\
+clean::									@@\
+	RemoveFile(HostProgramTargetName(program))
+#endif /* SimpleHostProgramTarget_2 */
+
+#ifndef SimpleHostProgramTarget_3
+#define SimpleHostProgramTarget_3(program)				@@\
+           SRCS = program.c						@@\
+									@@\
+              CC=HostCcCmd						@@\
+    STD_INCLUDES=							@@\
+          CFLAGS=$(TOP_INCLUDES) $(INCLUDES) $(BOOTSTRAPCFLAGS)\	@@\
+		$(CROSSCOMPILEDEFINES) $(CROSSCOMPILEBOOTSTRAPDEFINES)	@@\
+EXTRA_LOAD_FLAGS=							@@\
+        PROGRAM = program						@@\
+									@@\
+AllTarget(HostProgramTargetName(program))				@@\
+									@@\
+HostProgramTargetName(program): program.o $(DEPLIBS)			@@\
+	RemoveTargetProgram($@)						@@\
+	HostLinkRule($@,$(_NOOP_),program.o,$(DEPLIBS) $(LOCAL_LIBRARIES)) @@\
+									@@\
+clean::									@@\
+	RemoveFile(HostProgramTargetName(program))
+#endif /* SimpleHostProgramTarget_3 */
+
+#ifndef SimpleHostProgramTarget_4
+#define SimpleHostProgramTarget_4(program)				@@\
+           SRCS = program.c						@@\
+									@@\
+              CC=HostCcCmd						@@\
+    STD_INCLUDES=							@@\
+          CFLAGS=$(TOP_INCLUDES) $(INCLUDES) $(BOOTSTRAPCFLAGS)\	@@\
+		$(CROSSCOMPILEDEFINES) $(CROSSCOMPILEBOOTSTRAPDEFINES)	@@\
+EXTRA_LOAD_FLAGS=							@@\
+        PROGRAM = program						@@\
+									@@\
+AllTarget(HostProgramTargetName(program))				@@\
+									@@\
+HostProgramTargetName(program): program.o $(DEPLIBS)			@@\
+	RemoveTargetProgram($@)						@@\
+	HostLinkRule($@,$(_NOOP_),program.o,$(DEPLIBS) $(LOCAL_LIBRARIES)) @@\
+									@@\
+clean::									@@\
+	RemoveFile(HostProgramTargetName(program))
+#endif /* SimpleHostProgramTarget_4 */

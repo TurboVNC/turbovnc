@@ -1,5 +1,5 @@
 /* 
-$XConsortium: record.h /main/4 1996/01/31 20:28:22 dpw $
+$Xorg: record.h,v 1.3 2000/08/18 04:05:46 coskrey Exp $
 */
 
 /***************************************************************************
@@ -21,6 +21,8 @@ $XConsortium: record.h /main/4 1996/01/31 20:28:22 dpw $
  * AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING 
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  **************************************************************************/
+/* $XFree86$ */
+
 #ifndef _RECORD_H_
 #define _RECORD_H_
 
@@ -116,38 +118,29 @@ _XFUNCPROTOBEGIN
  */
 
 XID XRecordIdBaseMask(
-#if NeedFunctionPrototypes
     Display *dpy
-#endif
 );
 
 extern Status XRecordQueryVersion(
-#if NeedFunctionPrototypes
     Display* 			/* dpy */,
     int* 			/* cmajor_return */, 
     int*			/* cminor_return */  
-#endif
 );
 
 extern XRecordContext XRecordCreateContext(
-#if NeedFunctionPrototypes
     Display*			/* dpy */, 
     int				/* datum_flags */, 
     XRecordClientSpec*		/* clients */,
     int				/* nclients */,     
     XRecordRange**              /* ranges */,
     int				/* nranges */
-#endif
 );
 
 extern XRecordRange *XRecordAllocRange(
-#if NeedFunctionPrototypes
     void
-#endif
 );
 
 extern Status XRecordRegisterClients(
-#if NeedFunctionPrototypes
     Display* 			/* dpy */, 
     XRecordContext 		/* context */, 
     int				/* datum_flags */,
@@ -155,81 +148,60 @@ extern Status XRecordRegisterClients(
     int				/* nclients */, 
     XRecordRange** 		/* ranges */,  
     int				/* nranges */
-#endif
 );
 
 extern Status XRecordUnregisterClients(
-#if NeedFunctionPrototypes
     Display* 			/* dpy */, 
     XRecordContext 		/* context */, 
     XRecordClientSpec*		/* clients */,
     int				/* nclients */ 
-#endif
 );
 
 extern Status XRecordGetContext(
-#if NeedFunctionPrototypes
     Display*			/* dpy */,
     XRecordContext 		/* context */, 
     XRecordState** 		/* state_return */ 
-#endif
 );
 
 extern void XRecordFreeState(
-#if NeedFunctionPrototypes
 XRecordState*			/* state */
-#endif
 ); 
 
 typedef void (*XRecordInterceptProc) (
-#if NeedFunctionPrototypes
     XPointer			/* closure */, 
     XRecordInterceptData*	/* recorded_data */
-#endif
 );
 
 extern Status XRecordEnableContext(
-#if NeedFunctionPrototypes
     Display*			/* dpy */,
     XRecordContext 		/* context */, 
     XRecordInterceptProc	/* callback */,
     XPointer			/* closure */
-#endif
 ); 
 
 extern Status XRecordEnableContextAsync(
-#if NeedFunctionPrototypes
     Display*			/* dpy */,
     XRecordContext 		/* context */, 
     XRecordInterceptProc	/* callback */,
     XPointer			/* closure */
-#endif
 ); 
 
 extern void XRecordProcessReplies(
-#if NeedFunctionPrototypes
     Display*			/* dpy */
-#endif
 ); 
 
 extern void XRecordFreeData(
-#if NeedFunctionPrototypes
 XRecordInterceptData*	/* data */
-#endif
 ); 
 
 extern Status XRecordDisableContext(
-#if NeedFunctionPrototypes
     Display*			/* dpy */,
     XRecordContext 		/* context */
-#endif
 ); 
 
 extern Status XRecordFreeContext(
-#if NeedFunctionPrototypes
     Display* 			/* dpy */, 
     XRecordContext 		/* context */
-#endif
 );
 
 _XFUNCPROTOEND

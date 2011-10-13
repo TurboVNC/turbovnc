@@ -1,7 +1,7 @@
 /* 
  *  @OSF_COPYRIGHT@
  *  COPYRIGHT NOTICE
- *  Copyright (c) 1990, 1991, 1992, 1993 Open Software Foundation, Inc.
+ *  Copyright (c) 1990, 1991, 1992, 1993, 1998 The Open Group, Inc.
  *  ALL RIGHTS RESERVED (MOTIF). See the file named COPYRIGHT.MOTIF for
  *  the full copyright text.
  *
@@ -13,7 +13,7 @@
  * (c) Copyright 1996 FUJITSU LIMITED.
  * (c) Copyright 1996 Hitachi.
  */ 
-XCOMM $TOG: Motif.rules /main/3 1997/03/24 09:10:35 mgreess $
+XCOMM $Xorg: Motif.rules,v 1.3 2000/08/17 19:41:46 cpqbld Exp $
 
 /* Note whether we are the top level project. */
 #ifndef SeenTopLevelProject

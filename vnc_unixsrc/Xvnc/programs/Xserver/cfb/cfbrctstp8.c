@@ -1,16 +1,16 @@
 /*
  * Fill 32 bit stippled rectangles for 8 bit frame buffers
  */
+/* $XFree86: xc/programs/Xserver/cfb/cfbrctstp8.c,v 3.5 2001/10/28 03:33:01 tsi Exp $ */
 /*
 
-Copyright (c) 1989  X Consortium
+Copyright 1989, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -18,25 +18,28 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 Author: Keith Packard, MIT X Consortium
 
 */
 
-/* $XConsortium: cfbrctstp8.c,v 1.17 94/04/17 20:28:59 dpw Exp $ */
-/* $XFree86: xc/programs/Xserver/cfb/cfbrctstp8.c,v 3.0 1996/12/09 11:50:55 dawes Exp $ */
+/* $Xorg: cfbrctstp8.c,v 1.4 2001/02/09 02:04:38 xorgcvs Exp $ */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
 #if PSZ == 8
 
-#include "X.h"
-#include "Xmd.h"
+#include <X11/X.h>
+#include <X11/Xmd.h>
 #include "servermd.h"
 #include "gcstruct.h"
 #include "window.h"
@@ -58,36 +61,34 @@ cfb8FillRectOpaqueStippled32 (pDrawable, pGC, nBox, pBox)
     int		    nBox;	/* number of boxes to fill */
     register BoxPtr pBox;	/* pointer to list of boxes to fill */
 {
-    unsigned long   *src;
+    CfbBits   *src;
     int stippleHeight;
 
     int nlwDst;		/* width in longwords of the dest pixmap */
     int w;		/* width of current box */
     register int h;	/* height of current box */
-    unsigned long startmask;
-    unsigned long endmask;	/* masks for reggedy bits at either end of line */
+    CfbBits startmask;
+    CfbBits endmask;	/* masks for reggedy bits at either end of line */
     int nlwMiddle;	/* number of longwords between sides of boxes */
     register int nlw;			/* loop version of nlwMiddle */
-    unsigned long *dstLine;
-    register unsigned long *dst;	/* pointer to bits we're writing */
-    unsigned long *dstTmp;
+    CfbBits *dstLine;
+    register CfbBits *dst;	/* pointer to bits we're writing */
+    CfbBits *dstTmp;
     int y;				/* current scan line */
 
-    unsigned long *pbits;/* pointer to start of pixmap */
-    register unsigned long bits;	/* bits from stipple */
-    int	rot, lastStop, i;
-    register unsigned long  xor, and;
-    cfbPrivGCPtr	    devPriv;
+    CfbBits *pbits;/* pointer to start of pixmap */
+    register CfbBits bits;	/* bits from stipple */
+    int	rot;
+    register CfbBits xor;
     PixmapPtr		    stipple;
     int	    wEnd;
 
-    devPriv = cfbGetGCPrivate(pGC);
-    stipple = devPriv->pRotatedPixmap;
+    stipple = pGC->pRotatedPixmap;
 
     cfb8CheckOpaqueStipple(pGC->alu, pGC->fgPixel, pGC->bgPixel, pGC->planemask);
 
     stippleHeight = stipple->drawable.height;
-    src = (unsigned long *)stipple->devPrivate.ptr;
+    src = (CfbBits *)stipple->devPrivate.ptr;
 
     cfbGetLongWidthAndPointer (pDrawable, nlwDst, pbits)
 
@@ -127,8 +128,8 @@ cfb8FillRectOpaqueStippled32 (pDrawable, pGC, nBox, pBox)
 	    	    dstLine += nlwDst;
 	    	    if (startmask)
 	    	    {
-		    	*dst = *dst & ~startmask |
-				GetPixelGroup (bits) & startmask;
+		    	*dst = (*dst & ~startmask) |
+			       (GetPixelGroup (bits) & startmask);
 		    	dst++;
 		    	RotBitsLeft (bits, PGSZB);
 	    	    }
@@ -140,8 +141,8 @@ cfb8FillRectOpaqueStippled32 (pDrawable, pGC, nBox, pBox)
 	    	    }
 	    	    if (endmask)
 	    	    {
-			*dst = *dst & ~endmask |
-			      GetPixelGroup (bits) & endmask;
+			*dst = (*dst & ~endmask) |
+			       (GetPixelGroup (bits) & endmask);
 	    	    }
 	    	}
 	    }
@@ -161,8 +162,8 @@ cfb8FillRectOpaqueStippled32 (pDrawable, pGC, nBox, pBox)
 	    	    dstLine += nlwDst;
 		    if (startmask)
 		    {
-			*dstTmp = *dstTmp & ~startmask |
-			       GetPixelGroup (bits) & startmask;
+			*dstTmp = (*dstTmp & ~startmask) |
+				  (GetPixelGroup (bits) & startmask);
 			dstTmp++;
 			RotBitsLeft (bits, PGSZB);
 		    }
@@ -186,7 +187,7 @@ cfb8FillRectOpaqueStippled32 (pDrawable, pGC, nBox, pBox)
 		    {
 			dst = dstTmp + (nlwMiddle << 3);
 			*dst = (*dst & ~endmask) |
-			       GetPixelGroup (bits) & endmask;
+			       (GetPixelGroup(bits) & endmask);
 		    }
 		    while (w--)
 		    {
@@ -250,13 +251,13 @@ cfb8FillRectTransparentStippled32 (pDrawable, pGC, nBox, pBox)
     BoxPtr 	    pBox;	/* pointer to list of boxes to fill */
 {
     int		    x, y, w, h;
-    int		    nlwMiddle, nlwDst, nlwTmp;
-    unsigned long   startmask, endmask;
-    register unsigned long   *dst;
-    unsigned long   *dstLine, *pbits, *dstTmp;
-    unsigned long   *src;
-    register unsigned long   xor;
-    register unsigned long   bits, mask;
+    int		    nlwMiddle, nlwDst;
+    CfbBits   startmask, endmask;
+    register CfbBits   *dst;
+    CfbBits   *dstLine, *pbits, *dstTmp;
+    CfbBits   *src;
+    register CfbBits   xor;
+    register CfbBits   bits, mask;
     int		    rot;
     int		    wEnd;
     cfbPrivGCPtr    devPriv;
@@ -265,8 +266,8 @@ cfb8FillRectTransparentStippled32 (pDrawable, pGC, nBox, pBox)
     register int    nlw;
     
     devPriv = cfbGetGCPrivate(pGC);
-    stipple = devPriv->pRotatedPixmap;
-    src = (unsigned long *)stipple->devPrivate.ptr;
+    stipple = pGC->pRotatedPixmap;
+    src = (CfbBits *)stipple->devPrivate.ptr;
     stippleHeight = stipple->drawable.height;
 
     cfb8CheckStipple (pGC->alu, pGC->fgPixel, pGC->planemask);
@@ -467,8 +468,8 @@ cfb8FillRectStippledUnnatural (pDrawable, pGC, nBox, pBox)
     int		    nBox;
     register BoxPtr pBox;
 {
-    unsigned long   *pdstBase;	/* pointer to start of bitmap */
-    unsigned long   *pdstLine;	/* current destination line */
+    CfbBits   *pdstBase;	/* pointer to start of bitmap */
+    CfbBits   *pdstLine;	/* current destination line */
     int		    nlwDst;	/* width in longwords of bitmap */
     PixmapPtr	    pStipple;	/* pointer to stipple we want to fill with */
     int		    nlwMiddle;
@@ -476,14 +477,14 @@ cfb8FillRectStippledUnnatural (pDrawable, pGC, nBox, pBox)
     int		    x, y, w, h, xrem, xSrc, ySrc;
     int		    stwidth, stippleWidth;
     int		    stippleHeight;
-    register unsigned long  bits, inputBits;
+    register CfbBits  bits, inputBits;
     register int    partBitsLeft;
     int		    nextPartBits;
     int		    bitsLeft, bitsWhole;
-    register unsigned long    *pdst;	/* pointer to current word in bitmap */
-    unsigned long   *srcTemp, *srcStart;
-    unsigned long   *psrcBase;
-    unsigned long   startmask, endmask;
+    register CfbBits    *pdst;	/* pointer to current word in bitmap */
+    CfbBits   *srcTemp, *srcStart;
+    CfbBits   *psrcBase;
+    CfbBits   startmask, endmask;
 
     if (pGC->fillStyle == FillStippled)
 	cfb8CheckStipple (pGC->alu, pGC->fgPixel, pGC->planemask);
@@ -508,7 +509,7 @@ cfb8FillRectStippledUnnatural (pDrawable, pGC, nBox, pBox)
     stwidth = pStipple->devKind >> PWSH;
     stippleWidth = pStipple->drawable.width;
     stippleHeight = pStipple->drawable.height;
-    psrcBase = (unsigned long *) pStipple->devPrivate.ptr;
+    psrcBase = (CfbBits *) pStipple->devPrivate.ptr;
 
     /*
      *	The Target:

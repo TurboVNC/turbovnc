@@ -1,14 +1,12 @@
-.\" $XConsortium: lndir.man /main/10 1996/09/28 16:16:45 rws $
+.\" $Xorg: lndir.man,v 1.4 2001/02/09 02:03:17 xorgcvs Exp $
 .\"
-.\" Copyright (c) 1993, 1994  X Consortium
+.\" Copyright (c) 1993, 1994, 1998 The Open Group
 .\" 
-.\" Permission is hereby granted, free of charge, to any person obtaining
-.\" a copy of this software and associated documentation files (the
-.\" "Software"), to deal in the Software without restriction, including
-.\" without limitation the rights to use, copy, modify, merge, publish,
-.\" distribute, sublicense, and/or sell copies of the Software, and to
-.\" permit persons to whom the Software is furnished to do so, subject to
-.\" the following conditions:
+.\" Permission to use, copy, modify, distribute, and sell this software and its
+.\" documentation for any purpose is hereby granted without fee, provided that
+.\" the above copyright notice appear in all copies and that both that
+.\" copyright notice and this permission notice appear in supporting
+.\" documentation.
 .\" 
 .\" The above copyright notice and this permission notice shall be
 .\" included in all copies or substantial portions of the Software.
@@ -16,17 +14,20 @@
 .\" THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 .\" EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 .\" MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-.\" IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+.\" IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 .\" OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 .\" ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 .\" OTHER DEALINGS IN THE SOFTWARE.
 .\" 
-.\" Except as contained in this notice, the name of the X Consortium shall
+.\" Except as contained in this notice, the name of The Open Group shall
 .\" not be used in advertising or otherwise to promote the sale, use or
 .\" other dealings in this Software without prior written authorization
-.\" from the X Consortium.
+.\" from The Open Group.
 .\" 
-.TH LNDIR 1 "Release 6.1" "X Version 11"
+.\"
+.\" $XFree86: xc/config/util/lndir.man,v 1.3tsi Exp $
+.\"
+.TH LNDIR 1 __xorgversion__
 .SH NAME
 lndir \- create a shadow directory of symbolic links to another directory tree
 .SH SYNOPSIS
@@ -35,6 +36,8 @@ lndir \- create a shadow directory of symbolic links to another directory tree
 .B \-silent
 ] [
 .B \-ignorelinks
+] [
+.B \-withrevinfo
 ]
 .I \|fromdir\|
 [
@@ -73,7 +76,8 @@ argument may be relative (e.g., ../src) and is relative to
 (not the current directory).
 .PP 
 .\" CVS.adm is used by the Concurrent Versions System.
-Note that RCS, SCCS, CVS and CVS.adm directories are not shadowed.
+Note that BitKeeper, RCS, SCCS, .svn, CVS and CVS.adm directories are
+shadowed only if the \fB\-withrevinfo\fP flag is specified.
 .PP
 If you add files, simply run
 .I lndir
@@ -100,6 +104,9 @@ If the link is to a directory, this is almost certainly the wrong thing.
 .IP
 This option exists mostly to emulate the behavior the C version of
 \fIlndir\fP had in X11R6.  Its use is not recommended.
+.IP \-withrevinfo
+Causes any BitKeeper, RCS, SCCS, .svn, CVS and CVS.adm subdirectories to be
+treated as any other directory, rather than ignored.
 .SH DIAGNOSTICS
 The program displays the name of each subdirectory it enters, followed
 by a colon.  The \fB\-silent\fP option suppresses these messages.
@@ -110,20 +117,3 @@ exists.
 .PP
 If the link already exists but doesn't point to the correct file, the
 program prints the link name and the location where it does point.
-.SH BUGS
-The
-.I patch
-program gets upset if it cannot change the files.  You should never run
-.I patch
-from a shadow directory anyway.
-.PP
-You need to use something like
-.nf
-	find todir \|\-type l \|\-print \||\| xargs rm
-.fi
-to clear out all files before you can relink (if fromdir moved, for instance).
-Something like
-.nf
-	 find . \|\\! \|\-type d \|\-print
-.fi
-will find all files that are not directories.

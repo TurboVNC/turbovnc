@@ -1,14 +1,14 @@
 /*
- * $XConsortium: stipsparc.s,v 1.9 94/04/17 20:29:09 rws Exp $
+ * $Xorg: stipsparc.s,v 1.4 2001/02/09 02:04:39 xorgcvs Exp $
+ * $XdotOrg: xc/programs/Xserver/cfb/stipsparc.s,v 1.3 2004/04/26 02:39:58 alanc Exp $
  *
-Copyright (c) 1990  X Consortium
+Copyright 1990, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,16 +16,17 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
  *
  * Author:  Keith Packard, MIT X Consortium
  */
+/* $XFree86: xc/programs/Xserver/cfb/stipsparc.s,v 1.4 2001/01/17 22:36:38 dawes Exp $ */
 
 /*
  * SPARC assembly code for optimized text rendering.
@@ -85,7 +86,7 @@ in this Software without prior written authorization from the X Consortium.
 #define ForEachBits	LY4
 #define NextBits	LY5
 
-#if defined(SVR4) || ( defined(linux) && defined(__ELF__) )
+#if defined(SVR4) || defined(__ELF__)
 #ifdef TETEXT
 #define	_cfbStippleStack	cfbStippleStackTE
 #else
@@ -101,9 +102,17 @@ in this Software without prior written authorization from the X Consortium.
 	.globl	_cfbStippleStack
 _cfbStippleStack:
 	save	%sp,-64,%sp
+#ifdef SHAREDCODE
+1:
+        call    2f
+        nop
+2:
+        mov     %o7,sbase                       /* sbase = 1b(1:) */
+        add     sbase, CaseBegin-1b, sbase
+#else /* !SHAREDCODE */
 	sethi	%hi(CaseBegin),sbase		/* load up switch table */
 	or	sbase,%lo(CaseBegin),sbase
-
+#endif /* SHAREDCODE */
 	mov	4,lshift			/* compute offset within */
 	sub	lshift, shift, lshift		/*  stipple of remaining bits */
 #ifdef LITTLE_ENDIAN

@@ -1,13 +1,13 @@
+/* $XFree86: xc/programs/Xserver/mfb/mfbpushpxl.c,v 1.6tsi Exp $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -45,9 +45,13 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $XConsortium: mfbpushpxl.c,v 5.6 94/04/17 20:28:31 dpw Exp $ */
+/* $Xorg: mfbpushpxl.c,v 1.4 2001/02/09 02:05:19 xorgcvs Exp $ */
 
-#include "X.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
 #include "gcstruct.h"
 #include "scrnintstr.h"
 #include "pixmapstr.h"
@@ -108,7 +112,7 @@ mfbSolidPP(pGC, pBitMap, pDrawable, dx, dy, xOrg, yOrg)
     register BoxPtr pbox;
     int i;
 
-    if (!pGC->planemask & 1) return;
+    if (!(pGC->planemask & 1)) return;
 
     /* compute the reduced rop function */
     alu = pGC->alu;
@@ -123,8 +127,7 @@ mfbSolidPP(pGC, pBitMap, pDrawable, dx, dy, xOrg, yOrg)
     REGION_INIT(pGC->pScreen, &rgnDst, &srcBox, 1);
 
     /* clip the shape of the dst to the destination composite clip */
-    REGION_INTERSECT(pGC->pScreen, &rgnDst, &rgnDst,
-	((mfbPrivGC *)(pGC->devPrivates[mfbGCPrivateIndex].ptr))->pCompositeClip);
+    REGION_INTERSECT(pGC->pScreen, &rgnDst, &rgnDst, pGC->pCompositeClip);
 
     if (!REGION_NIL(&rgnDst))
     {
@@ -180,7 +183,7 @@ mfbPushPixels(pGC, pBitMap, pDrawable, dx, dy, xOrg, yOrg)
     for(h = 0; h < dy; h++)
     {
 
-	pw = (PixelType *)
+	pw = (PixelType *)(pointer)
 	     (((char *)(pBitMap->devPrivate.ptr))+(h * pBitMap->devKind));
 	pwLineStart = pw;
 	/* Process all words which are fully in the pixmap */
@@ -276,4 +279,9 @@ mfbPushPixels(pGC, pBitMap, pDrawable, dx, dy, xOrg, yOrg)
     {
 	(*pGC->ops->FillSpans)(pDrawable, pGC, ipt, pt, width, TRUE);
     }
+}
+
+mfbPushPixelsProc *mfbPushPixelsWeak(void)
+{
+   return mfbPushPixels;
 }

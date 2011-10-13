@@ -1,3 +1,4 @@
+/* $XFree86: xc/programs/Xserver/include/dixstruct.h,v 3.19tsi Exp $ */
 /***********************************************************
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -20,8 +21,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $XConsortium: dixstruct.h /main/43 1996/12/15 21:25:06 rws $ */
-/* $XFree86: xc/programs/Xserver/include/dixstruct.h,v 3.8 1996/12/24 02:27:28 dawes Exp $ */
+/* $Xorg: dixstruct.h,v 1.3 2000/08/17 19:53:29 cpqbld Exp $ */
 
 #ifndef DIXSTRUCT_H
 #define DIXSTRUCT_H
@@ -51,20 +51,14 @@ typedef struct {
 } NewClientInfoRec;
 
 typedef void (*ReplySwapPtr) (
-#if NeedNestedPrototypes
 		ClientPtr	/* pClient */,
 		int		/* size */,
-		void *		/* pbuf */
-#endif
-);
+		void *		/* pbuf */);
 
 extern void ReplyNotSwappd (
-#if NeedNestedPrototypes
 		ClientPtr	/* pClient */,
 		int		/* size */,
-		void *		/* pbuf */
-#endif
-);
+		void *		/* pbuf */);
 
 typedef enum {ClientStateInitial,
 	      ClientStateAuthenticating,
@@ -73,6 +67,28 @@ typedef enum {ClientStateInitial,
 	      ClientStateGone,
 	      ClientStateCheckingSecurity,
 	      ClientStateCheckedSecurity} ClientState;
+
+#ifdef XFIXES
+typedef struct _saveSet {
+    struct _Window  *windowPtr;
+    Bool	    toRoot;
+    Bool	    remap;
+} SaveSetElt;
+#define SaveSetWindow(ss)   ((ss).windowPtr)
+#define SaveSetToRoot(ss)   ((ss).toRoot)
+#define SaveSetRemap(ss)    ((ss).remap)
+#define SaveSetAssignWindow(ss,w)   ((ss).windowPtr = (w))
+#define SaveSetAssignToRoot(ss,tr)  ((ss).toRoot = (tr))
+#define SaveSetAssignRemap(ss,rm)  ((ss).remap = (rm))
+#else
+typedef struct _Window *SaveSetElt;
+#define SaveSetWindow(ss)   (ss)
+#define SaveSetToRoot(ss)   FALSE
+#define SaveSetRemap(ss)    TRUE
+#define SaveSetAssignWindow(ss,w)   ((ss) = (w))
+#define SaveSetAssignToRoot(ss,tr)
+#define SaveSetAssignRemap(ss,rm)
+#endif
 
 typedef struct _Client {
     int         index;
@@ -91,14 +107,11 @@ typedef struct _Client {
     Drawable    lastDrawableID;
     GCPtr       lastGC;
     GContext    lastGCID;
-    pointer    *saveSet;
+    SaveSetElt	*saveSet;
     int         numSaved;
     pointer     screenPrivate[MAXSCREENS];
     int         (**requestVector) (
-#if NeedNestedPrototypes
-		ClientPtr /* pClient */
-#endif
-);
+		ClientPtr /* pClient */);
     CARD32	req_len;		/* length of current request */
     Bool	big_requests;		/* supports large requests */
     int		priority;
@@ -117,51 +130,61 @@ typedef struct _Client {
     int         requestLogIndex;
 #endif
 #ifdef LBX
-    int		(*readRequest)(
-#if NeedNestedPrototypes
-	ClientPtr /*client*/
-#endif
-);
+    int		(*readRequest)(ClientPtr /*client*/);
 #endif
     unsigned long replyBytesRemaining;
 #ifdef XCSECURITY
     XID		authId;
     unsigned int trustLevel;
     pointer (* CheckAccess)(
-#if NeedNestedPrototypes
 	    ClientPtr /*pClient*/,
 	    XID /*id*/,
 	    RESTYPE /*classes*/,
 	    Mask /*access_mode*/,
-	    pointer /*resourceval*/
-#endif
-);
+	    pointer /*resourceval*/);
 #endif
 #ifdef XAPPGROUP
     struct _AppGroupRec*	appgroup;
 #endif
     struct _FontResolution * (*fontResFunc) (    /* no need for font.h */
-#if NeedNestedPrototypes
 		ClientPtr	/* pClient */,
-		int *		/* num */
+		int *		/* num */);
+#ifdef SMART_SCHEDULE
+    int	    smart_priority;
+    long    smart_start_tick;
+    long    smart_stop_tick;
+    long    smart_check_tick;
 #endif
-);
 }           ClientRec;
 
-/* This prototype is used pervasively in Xext, dix */
-#if NeedFunctionPrototypes
-#define DISPATCH_PROC(func) int func(ClientPtr /* client */)
-#else
-#define DISPATCH_PROC(func) int func(/* ClientPtr client */)
+#ifdef SMART_SCHEDULE
+/*
+ * Scheduling interface
+ */
+extern long SmartScheduleTime;
+extern long SmartScheduleInterval;
+extern long SmartScheduleSlice;
+extern long SmartScheduleMaxSlice;
+extern unsigned long SmartScheduleIdleCount;
+extern Bool SmartScheduleDisable;
+extern Bool SmartScheduleIdle;
+extern Bool SmartScheduleTimerStopped;
+extern Bool SmartScheduleStartTimer(void);
+#define SMART_MAX_PRIORITY  (20)
+#define SMART_MIN_PRIORITY  (-20)
+
+extern Bool SmartScheduleInit(void);
+
 #endif
+
+/* This prototype is used pervasively in Xext, dix */
+#define DISPATCH_PROC(func) int func(ClientPtr /* client */)
 
 typedef struct _WorkQueue {
     struct _WorkQueue *next;
     Bool        (*function) (
-#if NeedNestedPrototypes
 		ClientPtr	/* pClient */,
 		pointer		/* closure */
-#endif
 );
     ClientPtr   client;
     pointer     closure;
@@ -171,17 +194,10 @@ extern TimeStamp currentTime;
 extern TimeStamp lastDeviceEventTime;
 
 extern int CompareTimeStamps(
-#if NeedFunctionPrototypes
     TimeStamp /*a*/,
-    TimeStamp /*b*/
-#endif
-);
+    TimeStamp /*b*/);
 
-extern TimeStamp ClientTimeToServerTime(
-#if NeedFunctionPrototypes
-    CARD32 /*c*/
-#endif
-);
+extern TimeStamp ClientTimeToServerTime(CARD32 /*c*/);
 
 typedef struct _CallbackRec {
   CallbackProcPtr proc;
@@ -200,38 +216,18 @@ typedef struct _CallbackList {
 
 /* proc vectors */
 
-extern int (* InitialVector[3]) (
-#if NeedNestedPrototypes
-    ClientPtr /*client*/
-#endif
-);
+extern int (* InitialVector[3]) (ClientPtr /*client*/);
 
-extern int (* ProcVector[256]) (
-#if NeedNestedPrototypes
-    ClientPtr /*client*/
-#endif
-);
+extern int (* ProcVector[256]) (ClientPtr /*client*/);
 
-extern int (* SwappedProcVector[256]) (
-#if NeedNestedPrototypes
-    ClientPtr /*client*/
-#endif
-);
+extern int (* SwappedProcVector[256]) (ClientPtr /*client*/);
 
 #ifdef K5AUTH
-extern int (*k5_Vector[256])() =
-#if NeedNestedPrototypes
-    ClientPtr /*client*/
-#endif
-);
+extern int (*k5_Vector[256])(ClientPtr /*client*/);
 #endif
 
-extern void (* ReplySwapVector[256]) ();
+extern ReplySwapPtr ReplySwapVector[256];
 
-extern int ProcBadRequest(
-#if NeedFunctionPrototypes
-    ClientPtr /*client*/
-#endif
-);
+extern int ProcBadRequest(ClientPtr /*client*/);
 
 #endif				/* DIXSTRUCT_H */

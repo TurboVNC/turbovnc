@@ -77,7 +77,7 @@ Bool cuCopyArea = FALSE;
 /* SLIGHTLY DIRTY HACK - use Composite Clip region calculated by mfb */
 
 #define WINDOW_CLIP_REGION(_w, _gc) \
-  (((mfbPrivGCPtr)((_gc)->devPrivates[mfbGCPrivateIndex].ptr))->pCompositeClip)
+  ((_gc)->pCompositeClip)
 
 #define TRC(x) /* (fprintf x) */
 

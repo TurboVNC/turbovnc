@@ -1,4 +1,4 @@
-/* $XConsortium: fserve.h,v 1.7 93/08/24 18:49:12 gildea Exp $ */
+/* $Xorg: fserve.h,v 1.3 2000/08/17 19:46:36 cpqbld Exp $ */
 /*
  * Copyright 1990 Network Computing Devices
  *
@@ -24,6 +24,7 @@
  * Author:  	Dave Lemke, Network Computing Devices, Inc
  *
  */
+/* $XFree86: xc/lib/font/fc/fserve.h,v 1.4 2001/01/17 19:43:29 dawes Exp $ */
 
 #ifndef _FSERVE_H_
 #define _FSERVE_H_
@@ -50,6 +51,12 @@
 #define	FS_LFWI_REPLY		1
 #define	FS_LFWI_FINISHED	2
 
+/* states of connection */
+#define FS_CONN_CLOSED		0
+#define FS_CONN_CONNECTING	1
+#define FS_CONN_READ_HEADER	2
+#define FS_CONN_READ_DATA	3
+
 #define	AccessDone	0x400
 
 typedef struct _fs_font_data *FSFontDataPtr;
@@ -59,10 +66,31 @@ typedef struct _fs_blocked_list *FSBlockedListPtr;
 typedef struct _fs_blocked_list_info *FSBlockedListInfoPtr;
 typedef struct _fs_block_data *FSBlockDataPtr;
 typedef struct _fs_font_table *FSFontTablePtr;
+typedef struct _fs_fpe_data *FSFpePtr;
 
 typedef struct _fs_blocked_bitmaps *FSBlockedBitmapPtr;
 typedef struct _fs_blocked_extents *FSBlockedExtentPtr;
 
-extern void fs_convert_char_info();
+extern void _fs_convert_char_info ( fsXCharInfo *src, xCharInfo *dst );
+extern void _fs_free_props (FontInfoPtr pfi);
+extern FontPtr fs_create_font (FontPathElementPtr   fpe,
+			       char		    *name,
+			       int		    namelen,
+			       fsBitmapFormat	    format,
+			       fsBitmapFormatMask   fmask);
+
+extern int fs_load_all_glyphs ( FontPtr pfont );
+extern int _fs_load_glyphs ( pointer client, FontPtr pfont, Bool range_flag, 
+			     unsigned int nchars, int item_size, 
+			     unsigned char *data );
+
+/*
+ * These should be declared elsewhere, but I'm concerned that moving them
+ * would cause problems building other pieces
+ */
+extern FontPtr find_old_font (Font id);
+extern int  set_font_authorizations (char **a, int *len, pointer client);
+extern long   GetTimeInMillis (void);
+
 
 #endif				/* _FSERVE_H_ */

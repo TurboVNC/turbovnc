@@ -1,4 +1,5 @@
-XCOMM platform:  $TOG: sgi.cf /main/45 1997/06/18 18:01:03 kaleb $
+XCOMM platform:  $Xorg: sgi.cf,v 1.4 2000/08/17 19:41:48 cpqbld Exp $
+XCOMM $XFree86: xc/config/cf/sgi.cf,v 1.12tsi Exp $
 
 #ifndef OSName
 # define OSName		DefaultOSName
@@ -10,9 +11,9 @@ XCOMM platform:  $TOG: sgi.cf /main/45 1997/06/18 18:01:03 kaleb $
 # define OSMinorVersion	DefaultOSMinorVersion
 #endif
 #ifndef OSTeenyVersion
-# define OSTeenyVersion	DefaultOSTeenyVersion 
+# define OSTeenyVersion	DefaultOSTeenyVersion
 #endif
-XCOMM operating system: OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
+XCOMM operating system: OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVersion)
 
 #if OSMajorVersion < 4
 /* We do not guarantee this will work */
@@ -38,6 +39,8 @@ XCOMM operating system: OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 #define XawI18nDefines		-DHAS_WCTYPE_H -DHAS_ISW_FUNCS
 #else
 #define XawI18nDefines		-DHAS_WCHAR_H -DHAS_ISW_FUNCS
+#define HasSetenv		NO
+#define HasSnprintf		YES
 #endif
 #define AllocateLocalDefines	-DINCLUDE_ALLOCA_H
 #ifndef ExtraLoadFlags
@@ -63,13 +66,17 @@ XCOMM operating system: OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 # define BuildLibPathVar	_RLD_ROOT=/dev/null LD_LIBRARY64_PATH
 # define SystemBuildLibPath	/usr/lib64:/lib64
 # define LdCmd			ld -64
+# define AsCmd			as -64
 #elif defined(MipsN32Architecture)
 # define BuildLibPathVar	_RLD_ROOT=/dev/null LD_LIBRARYN32_PATH
 # define SystemBuildLibPath	/usr/lib32:/lib32
 # define LdCmd			ld -n32
+# define AsCmd			as -n32
 #else
 # define BuildLibPathVar	_RLD_ROOT=/dev/null LD_LIBRARY_PATH
 # define SystemBuildLibPath	/usr/lib:/lib
+# define LdCmd			ld -32
+# define AsCmd			as -32
 #endif
 #define HasCplusplus		YES
 #define Malloc0ReturnsNull	YES	/* IRIX [56].x -lmalloc needs this */
@@ -78,6 +85,7 @@ XCOMM operating system: OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 #define HasNdbm			YES
 #define HasPoll                 YES
 #define ExpandManNames          YES
+#define LexLib			/* Not needed */
 #ifndef BuildXInputExt
 #define BuildXInputExt		YES
 #endif
@@ -92,11 +100,9 @@ XCOMM operating system: OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 
 #if OSMajorVersion < 5
 #define SymbolTables -Wf,-XNp16000,-XNd16000,-XNh2000
-#define PexSymbolTables -Wf,-XNp15000,-XNd15000,-XNh2000
 #define ServerSymbolTables -Wf,-XNp8000,-XNh2000,-XNd8000
 #else
 #define SymbolTables
-#define PexSymbolTables 
 #define ServerSymbolTables
 #endif
 
@@ -109,7 +115,7 @@ XCOMM operating system: OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 # if OSMajorVersion < 6
 #  define sgiCCOptions -xansi
 # else
-#  define CppCmd cc -E
+#  define CppCmd cc -E -cckr
 #  ifdef Mips64Architecture
 /* set Mips64Architecture in host.def. Usually don't need it but we
  * (the X Consortium) want a  64-bit big-endian machine to test on. */
@@ -119,9 +125,9 @@ XCOMM operating system: OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 /* Set MipsN32Architecture to build "new" 32-bit objs with a 32-bit kernel. */
 #   define sgiCCOptions -xansi -mips3 -n32
 #  else
-#   define sgiCCOptions -xansi
+#   define sgiCCOptions -xansi -32
 #  endif
-#  if OSMinorVersion > 1
+#  if OSMinorVersion == 2
 /* if you haven't installed patch 1361, 1403, or 1645 on IRIX 6.2 then you
  * must add "#define HasPosixThreads NO" in your site.def or host.def file
  */
@@ -130,14 +136,14 @@ XCOMM operating system: OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 #   endif
 #   define ThreadedX HasPosixThreads
 #   define ThreadsLibraries -lpthread
-/* 
- * Add "#define HasSgiThreadsPatch1403 NO" to your site.def or host.def if 
+/*
+ * Add "#define HasSgiThreadsPatch1403 YES" to your site.def or host.def if
  * that's which patch you have.
  */
 #   ifndef HasSgiThreadsPatch1403
-#    define HasSgiThreadsPatch1403 YES
+#    define HasSgiThreadsPatch1403 NO
 #   endif
-#   if (HasSgiThreadsPatch1403) 
+#   if (HasSgiThreadsPatch1403)
 #    define SystemMTDefines -D_POSIX_THREAD_SAFE_FUNCTIONS
 #   endif
 #  endif
@@ -146,9 +152,36 @@ XCOMM operating system: OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 # define ExtraLibraries /**/
 #endif
 
+/* IRIX 6.5 doesn't support IPv6, but #define's AF_INET6.  Go figure... */
+#ifndef BuildIPv6
+#define BuildIPv6	NO
+#endif
+
+#undef  BuildXF86DRI
+#define BuildXF86DRI	NO
+
+#if !HasGcc
+#if !defined(OptimizedCDebugFlags)
+#if defined(MipsN32Architecture) || defined(Mips64Architecture)
+#define OptimizedCDebugFlags -O -OPT:Olimit=0
+#else
+#define OptimizedCDebugFlags -O -Olimit 2048
+#endif
+#endif
+#if !defined(RawCppCmd)
+#define RawCppCmd CppCmd
+#endif
+#endif
+
+#ifndef DefaultCCOptions
 #define DefaultCCOptions sgiCCOptions SymbolTables
-#define PexCCOptions sgiCCOptions PexSymbolTables
+#endif
+#ifndef ServerCCOptions
 #define ServerCCOptions sgiCCOptions ServerSymbolTables
+#endif
+#ifndef DefaultCplusplusOptions
+#define DefaultCplusplusOptions DefaultCCOptions
+#endif
 
 /* For SGI C++ compiler, need to search extra dirs in make depend */
 #ifndef CplusplusDependIncludes
@@ -159,7 +192,7 @@ XCOMM operating system: OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 #define ConstructMFLAGS		NO	/* build MFLAGS from MAKEFLAGS */
 
 /* Used only for compressed fonts */
-#define UNCOMPRESSPATH /usr/bsd/uncompress
+#define UNCOMPRESSPATH /usr/bsd/uncompress /* obsolete */
 
 /* Normally used only to conditionally chose the default font path order */
 #define PrimaryScreenResolution 96
@@ -176,24 +209,25 @@ XCOMM operating system: OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 #define DefaultUserPath :/usr/sbin:/usr/bsd:/usr/bin:/bin:$(BINDIR):/etc:/usr/etc
 #define DefaultSystemPath /usr/sbin:/usr/bsd:/bin:/etc:/usr/bin:/usr/etc:$(BINDIR)
 
-#ifndef BuildServer
-#define BuildServer             NO
-#endif
-#define ServerOSDefines		-DDDXTIME 
-/* only need this for binary compatibility with their ddx */
+#define ServerOSDefines		-DDDXTIME XFree86ServerOSDefines
+
+#ifndef ServerExtraDefines
 #ifndef Mips64Architecture
-#define ServerExtraDefines	-DNEED_LINEHELPER AllocateLocalDefines
+#define ServerExtraDefines	-DNEED_LINEHELPER AllocateLocalDefines \
+				XFree86ServerDefines
 #else
-#define ServerExtraDefines	-D_XSERVER64 -DNEED_LINEHELPER AllocateLocalDefines
+#define ServerExtraDefines	-DNEED_LINEHELPER AllocateLocalDefines \
+				XFree86ServerDefines -D_XSERVER64
+#endif
 #endif
 
 /* Changed to a single shell command for pmake/smake */
 #if OSMajorVersion < 5
 /*
  * NormalLibObjCompile - compile fragment for a library object file
- * 	do ld -x to remove line number symbols for libraries
+ *	do ld -x to remove line number symbols for libraries
  */
-#define NormalLibObjCompile(options) 	ClearmakeOSName			  \
+#define NormalLibObjCompile(options)	ClearmakeOSName			  \
 	$(RM) $@ $*.os \						@@\
 	&& $(CC) -c options $(CFLAGS) $*.c \				@@\
 	&& $(LD) $(LDSTRIPFLAGS) -r $@ -o $*.os \			@@\
@@ -221,13 +255,64 @@ man_keywords::								@@\
 
 #define MotifDefines		-DSYS_DIR -DPORT_NOVFORK -DNO_REGCOMP
 
+#if !defined(HasGcc) || !HasGcc
+
 #ifndef CppFileTarget
 #define CppFileTarget(dst,src,defs,deplist)				@@\
 dst::  src deplist							@@\
 	RemoveFile($@)							@@\
 	ClearmakeOSName \
-	$(CPP) CppNoLineInfoOption defs src | CppSedMagic >$@; 		@@\
+	$(CPP) CppNoLineInfoOption defs src 2>/dev/null | CppSedMagic >$@; @@\
 									@@\
 clean::									@@\
 	RemoveFiles(dst)
 #endif /* CppFileTarget */
+
+#ifndef CppScriptTarget
+#if ExecableScripts		/* can use #! instead of colon */
+#define CppScriptTarget(dst,src,defs,deplist)				@@\
+dst::	src deplist							@@\
+	RemoveFile($@)							@@\
+	ClearmakeOSName \
+	$(CPP) CppNoLineInfoOption defs src | CppSedMagic >$@		@@\
+	chmod a+x $@							@@\
+									@@\
+clean::									@@\
+	RemoveFiles(dst)
+#else
+#define CppScriptTarget(dst,src,defs,deplist)				@@\
+dst::  src deplist							@@\
+	RemoveFile($@)							@@\
+	ClearmakeOSName \
+	echo \: >$@							@@\
+	sed '1d' src | $(CPP) CppNoLineInfoOption defs | CppSedMagic >>$@	@@\
+	chmod a+x $@							@@\
+									@@\
+clean::									@@\
+	RemoveFile(dst)
+#endif /* ExecableScripts */
+#endif /* CppScriptTarget */
+
+/* Like CppFileTarget, but don't add any default defines */
+#ifndef CppRawFileTarget
+#define CppRawFileTarget(dst,src,defs,deplist)				@@\
+dst::  src deplist							@@\
+	RemoveFile($@)							@@\
+	ClearmakeOSName \
+	$(RAWCPP) CppNoLineInfoOption defs src | CppSedMagic >$@	@@\
+									@@\
+clean::									@@\
+	RemoveFiles(dst)
+#endif /* CppFileTarget */
+
+#endif /* !HasGcc */
+
+#ifndef DoLoadableServer
+#define DoLoadableServer YES
+#endif
+
+#ifndef UseDeprecatedKeyboardDriver
+#define UseDeprecatedKeyboardDriver YES
+#endif
+
+#include <xorg.cf>

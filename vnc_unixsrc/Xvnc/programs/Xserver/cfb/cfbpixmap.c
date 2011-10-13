@@ -1,14 +1,13 @@
-/* $XConsortium: cfbpixmap.c,v 5.14 94/04/17 20:28:56 dpw Exp $ */
+/* $Xorg: cfbpixmap.c,v 1.4 2001/02/09 02:04:38 xorgcvs Exp $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -46,21 +45,24 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
+/* $XFree86: xc/programs/Xserver/cfb/cfbpixmap.c,v 1.4 2001/01/17 22:36:36 dawes Exp $ */
 /* pixmap management
    written by drewry, september 1986
 
    on a monchrome device, a pixmap is a bitmap.
 */
 
-#include "Xmd.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/Xmd.h>
 #include "servermd.h"
 #include "scrnintstr.h"
 #include "pixmapstr.h"
 #include "mi.h"
 #include "cfb.h"
 #include "cfbmskbits.h"
-
-extern unsigned long endtab[];
 
 PixmapPtr
 cfbCreatePixmap (pScreen, width, height, depth)
@@ -70,10 +72,13 @@ cfbCreatePixmap (pScreen, width, height, depth)
     int		depth;
 {
     PixmapPtr pPixmap;
-    int datasize;
-    int paddedWidth;
+    size_t datasize;
+    size_t paddedWidth;
 
     paddedWidth = PixmapBytePad(width, depth);
+
+    if (paddedWidth / 4 > 32767 || height > 32767)
+	return NullPixmap;
     datasize = height * paddedWidth;
     pPixmap = AllocatePixmap(pScreen, datasize);
     if (!pPixmap)
@@ -147,9 +152,9 @@ cfbPadPixmap(pPixmap)
 {
     register int width = (pPixmap->drawable.width) * (pPixmap->drawable.bitsPerPixel);
     register int h;
-    register unsigned long mask;
-    register unsigned long *p;
-    register unsigned long bits; /* real pattern bits */
+    register CfbBits mask;
+    register CfbBits *p;
+    register CfbBits bits; /* real pattern bits */
     register int i;
     int rep;                    /* repeat count for pattern */
  
@@ -160,9 +165,9 @@ cfbPadPixmap(pPixmap)
     if (rep*width != PGSZ)
         return;
  
-    mask = endtab[width];
+    mask = mfbGetendtab(width);
  
-    p = (unsigned long *)(pPixmap->devPrivate.ptr);
+    p = (CfbBits *)(pPixmap->devPrivate.ptr);
     for (h=0; h < pPixmap->drawable.height; h++)
     {
         *p &= mask;
@@ -231,8 +236,8 @@ cfbXRotatePixmap(pPix, rw)
     PixmapPtr	pPix;
     register int rw;
 {
-    register unsigned long	*pw, *pwFinal;
-    register unsigned long	t;
+    register CfbBits	*pw, *pwFinal;
+    register CfbBits	t;
     int				rot;
 
     if (pPix == NullPixmap)
@@ -248,7 +253,7 @@ cfbXRotatePixmap(pPix, rw)
 	    ErrorF("cfbXRotatePixmap: unsupported bitsPerPixel %d\n", ((DrawablePtr) pPix)->bitsPerPixel);
 	    return;
     }
-    pw = (unsigned long *)pPix->devPrivate.ptr;
+    pw = (CfbBits *)pPix->devPrivate.ptr;
     modulus (rw, (int) pPix->drawable.width, rot);
     if(pPix->drawable.width == PPW)
     {
@@ -264,25 +269,25 @@ cfbXRotatePixmap(pPix, rw)
     {
         ErrorF("cfb internal error: trying to rotate odd-sized pixmap.\n");
 #ifdef notdef
-	register unsigned long *pwTmp;
+	register CfbBits *pwTmp;
 	int size, tsize;
 
 	tsize = PixmapBytePad(pPix->drawable.width - rot, pPix->drawable.depth);
-	pwTmp = (unsigned long *) ALLOCATE_LOCAL(pPix->drawable.height * tsize);
+	pwTmp = (CfbBits *) ALLOCATE_LOCAL(pPix->drawable.height * tsize);
 	if (!pwTmp)
 	    return;
 	/* divide pw (the pixmap) in two vertically at (w - rot) and swap */
 	tsize >>= 2;
 	size = pPix->devKind >> SIZE0F(PixelGroup);
-	cfbQuickBlt((long *)pw, (long *)pwTmp,
+	cfbQuickBlt((CfbBits *)pw, (CfbBits *)pwTmp,
 		    0, 0, 0, 0,
 		    (int)pPix->drawable.width - rot, (int)pPix->drawable.height,
 		    size, tsize);
-	cfbQuickBlt((long *)pw, (long *)pw,
+	cfbQuickBlt((CfbBits *)pw, (CfbBits *)pw,
 		    (int)pPix->drawable.width - rot, 0, 0, 0,
 		    rot, (int)pPix->drawable.height,
 		    size, size);
-	cfbQuickBlt((long *)pwTmp, (long *)pw,
+	cfbQuickBlt((CfbBits *)pwTmp, (CfbBits *)pw,
 		    0, 0, rot, 0,
 		    (int)pPix->drawable.width - rot, (int)pPix->drawable.height,
 		    tsize, size);

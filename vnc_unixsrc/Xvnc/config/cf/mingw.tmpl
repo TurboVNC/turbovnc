@@ -1,0 +1,77 @@
+XCOMM $XFree86: xc/config/cf/cygwin.tmpl,v 3.18 2003/10/19 08:27:05 herrb Exp $
+
+#define SharedX11Reqs		-lwsock32 
+#define SharedXlibi18nReqs	$(LDPRELIB) $(XONLYLIB)
+#define SharedOldXReqs		$(LDPRELIB) $(XONLYLIB)
+#define SharedXReqs		$(XTOOLLIB) $(XPLIB) $(XLIB) $(LDPOSTLIBS)
+#define SharedXtReqs		$(LDPRELIB) $(SMLIB) $(ICELIB) $(XONLYLIB)
+#define SharedXawReqs		$(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XPMLIB) $(EXTRAXAWREQS) $(XLIB)
+#define SharedXaw7Reqs		$(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XPMLIB) $(XLIB)
+#define SharedXaw6Reqs		$(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XPMLIB) $(XLIB)
+#define SharedXmuReqs 		$(LDPRELIB) $(XTOOLLIB) $(XLIB)
+#define SharedXextReqs		$(LDPRELIB) $(XONLYLIB)
+#define SharedXiReqs		$(LDPRELIB) $(XLIB)
+#define SharedXtstReqs		$(LDPRELIB) $(XLIB)
+#define SharedSMReqs		$(LDPRELIB) $(ICELIB)
+#define SharedXpReqs		$(LDPRELIB) $(XAUTHLIB) $(XLIB)
+#define SharedXvReqs		$(LDPRELIB) $(XLIB)
+#define SharedGLReqs		$(LDPRELIB) $(XLIB)
+#define SharedGLUReqs		$(LDPRELIB) $(XLIB) $(GLXLIB)
+#define SharedXfontReqs		$(LDPRELIB) $(FONTSTUBLIB) GzipLibrary $(FREETYPE2LIB)
+#define SharedFontencReqs	$(LDPRELIB) GzipLibrary
+#define SharedXxf86vmReqs	$(LDPRELIB) $(XLIB) 
+#define SharedXxf86miscReqs	$(LDPRELIB) $(XLIB)
+#define SharedXpmReqs		$(LDPRELIB) $(XLIB)
+#define SharedXxf86dgaReqs	$(LDPRELIB) $(XLIB)
+#define SharedDPSReqs		$(LDPRELIB) $(SMLIB) $(ICELIB) $(XTOOLLIB) $(XLIB)
+#define SharedDPSTKReqs		$(LDPRELIB) $(SMLIB) $(ICELIB) $(XTOOLLIB) $(DPSLIB) $(XLIB)
+#define SharedXrenderReqs	$(LDPRELIB) $(XLIB)
+#define SharedpsresReqs		$(LDPRELIB) $(SMLIB) $(ICELIB) $(XTOOLLIB) $(XLIB
+#define SharedXResReqs 		$(LDPRELIB) $(XLIB)
+#define SharedXfontcacheReqs	$(LDPRELIB) $(XLIB)
+#define SharedXineramaReqs	$(LDPRELIB) $(XLIB)
+/*
+ * We don't build Xss
+ * #define SharedXssReqs	$(LDPRELIB) $(XLIB)
+ */
+#define SharedXvMCReqs		$(LDPRELIB) $(XLIB)
+#define SharedXxf86dgaReqs	$(LDPRELIB) $(XLIB)
+#define SharedXxf86miscReqs	$(LDPRELIB) $(XLIB)
+#define SharedXxf86vmReqs	$(LDPRELIB) $(XLIB)
+#define SharedxkbfileReqs	$(LDPRELIB) $(XONLYLIB)
+#define SharedxkbuiReqs		$(LDPRELIB) $(XKBFILELIB) $(XONLYLIB)
+#define SharedXmuuReqs		$(LDPRELIB) $(XTOOLLIB) $(XLIB)
+#define SharedXrandrReqs	$(LDPRELIB) $(XRENDERLIB) $(XLIB)
+#define SharedXcursorReqs	$(LDPRELIB) $(XRENDERLIB) $(XLIB) 
+#define SharedXfixesReqs	$(LDPRELIB) $(XLIB)
+#define SharedXdamageReqs	$(LDPRELIB) $(XFIXESLIB) $(XLIB)
+#define SharedXcompositeReqs	$(LDPRELIB) $(XDAMAGELIB) $(XFIXESLIB) $(XLIB)
+#define SharedXevieReqs		$(LDPRELIB) $(XLIB)
+
+#ifndef FixupLibReferences
+# define FixupLibReferences()						@@\
+XMULIBONLY = -lXmu							@@\
+XMULIB = $(XMULIBONLY) $(XTOOLLIB) $(XLIB)
+#endif
+
+#ifndef XawClientLibs
+# define XawClientLibs $(XAWLIB) $(XMULIBONLY) $(XTOOLLIB) $(XPMLIB) $(EXTRAXAWCLIENTLIBS) $(XLIB)
+#endif
+
+
+/*
+ * Suffix for Windows resource source files
+ */
+
+#ifndef RCsuf
+# define RCsuf rc
+#endif
+
+
+/*
+ * Suffix for Windows resource compiled files
+ */
+
+#ifndef RESsuf
+# define RESsuf res
+#endif

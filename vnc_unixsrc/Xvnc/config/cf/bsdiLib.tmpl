@@ -1,0 +1,43 @@
+XCOMM $XFree86: xc/config/cf/bsdiLib.tmpl,v 3.3 2003/05/29 21:56:57 herrb Exp $
+
+/*
+ * BSDI shared library template (converted from Linux template)
+ */
+
+/*
+ * Linux ELF shared libraries (which BSDI uses)
+ * are deficient in link semantics...
+ */
+
+#ifndef FixupLibReferences
+#define FixupLibReferences()						@@\
+XMULIBONLY = -lXmu							@@\
+XMULIB = $(XMULIBONLY) $(XTOOLLIB) $(XLIB)
+#endif
+
+#ifndef XawClientLibs
+#define XawClientLibs $(XAWLIB) $(XMULIBONLY) $(XTOOLLIB) $(XPMLIB) $(EXTRAXAWCLIENTLIBS) $(XLIB)
+#endif
+
+#define FrescoSysLibs	CplusplusLibC MathLibrary
+
+#define SharedX11Reqs
+#define SharedXlibi18nReqs $(LDPRELIB) $(XONLYLIB)
+#define SharedOldXReqs	$(LDPRELIB) $(XONLYLIB)
+#define SharedXtReqs	$(LDPRELIB) $(XONLYLIB) $(SMLIB) $(ICELIB)
+#define SharedXawReqs	$(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XPMLIB) $(EXTRAXAWREQS) $(XLIB)
+#define SharedXaw7Reqs	$(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XPMLIB) $(XLIB)
+#define SharedXaw6Reqs	$(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XLIB)
+#define SharedXmuReqs	$(LDPRELIB) $(XTOOLLIB) $(XLIB)
+#define SharedXextReqs	$(LDPRELIB) $(XONLYLIB)
+#define SharedXiReqs	$(LDPRELIB) $(XLIB)
+#define SharedXtstReqs	$(LDPRELIB) $(XLIB)
+#define SharedSMReqs	$(LDPRELIB) $(ICELIB)
+#define SharedFrescoReqs	$(LDPRELIB) $(XONLYLIB) FrescoSysLibs
+#define SharedXtfReqs	$(LDPRELIB) $(FRESCOLIB) $(XTOOLLIB) $(XLIB) FrescoSysLibs
+
+/* Motif lib requirements */
+#define SharedXReqs $(XTOOLLIB) $(XPLIB) $(XLIB)
+#define SharedXmReqs $(LDPRELIB) SharedXReqs
+#define SharedMrmReqs $(LDPRELIB) $(XMLIB) SharedXReqs
+#define SharedUilReqs $(LDPRELIB) $(XMLIB) SharedXReqs

@@ -1,4 +1,4 @@
-/* $XConsortium: iface.c,v 1.3 94/04/17 20:17:44 rws Exp $ */
+/* $Xorg: iface.c,v 1.3 2000/08/17 19:46:25 cpqbld Exp $ */
 
 /*
 
@@ -21,6 +21,7 @@ INCIDENTAL OR CONSEQUENTIAL DAMAGES, ARISING OUT OF OR IN ANY WAY CONNECTED
 WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 
 */
+/* $XFree86: xc/lib/font/Speedo/iface.c,v 1.2 1998/07/25 06:56:53 dawes Exp $ */
 
 /***************************** I F A C E . C *********************************
  *                                                                           *
@@ -30,7 +31,11 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
  ****************************************************************************/
 
 #include "speedo.h"               /* General definitions for Speedo */
+#ifndef FONTMODULE
 #include <math.h>
+#else
+#include "xf86_ansic.h"
+#endif
 
 #define   DEBUG      0
 

@@ -1,0 +1,111 @@
+XCOMM $XFree86: xc/lib/font/FreeType/module/Imakefile,v 1.16 2003/11/05 16:58:35 tsi Exp $
+
+FT2INCDIR = $(TOP)/extras/freetype2/include
+FT2SOURCEDIR = $(TOP)/extras/freetype2/src
+
+/*#define BuildFreetypeDlModule NO*/
+
+#if !defined(BuildFreetypeDlModule)
+# define BuildFreetypeDlModule (HasFreetype2 && HasDlopen)
+#endif
+
+#if !BuildFreetypeDlModule
+EXTRADEFINES = Freetype2BuildDefines -DFONTMODULE 
+# else
+# undef MakeDllModules
+# define MakeDllModules YES
+#endif
+
+
+
+DEFINES = $(EXTRADEFINES) -DXFREE86_FT2 $(INTERNALDEFINES)
+#define IHaveModules
+#include <Server.tmpl>
+
+
+#if BuildFreetypeDlModule
+
+FT2INCLUDES =  $(FREETYPE2INCLUDES)
+EXTLIB = $(FREETYPE2LIB)
+
+# if !HasFreetype2
+LINKFT2LIB = -L$(BUILDLIBDIR)
+# endif
+#else
+
+FT2INCLUDES = -I$(FT2INCDIR) \
+           -I$(FT2SOURCEDIR)/base \
+           -I$(FT2SOURCEDIR)/gzip \
+           -I$(FT2SOURCEDIR)/raster \
+           -I$(FT2SOURCEDIR)/sfnt \
+           -I$(FT2SOURCEDIR)/truetype \
+           -I$(FT2SOURCEDIR)/cff \
+           -I$(FT2SOURCEDIR)/type1 \
+           -I$(FT2SOURCEDIR)/psaux \
+           -I$(FT2SOURCEDIR)/psnames \
+           -I$(FT2SOURCEDIR)/pshinter \
+           -I$(FT2SOURCEDIR)/autohint \
+           -I$(FT2SOURCEDIR)/bdf \
+           -I$(FT2SOURCEDIR)/pcf \
+           -I$(FT2SOURCEDIR)/lzw
+
+FT2SRCS = ftbase.c ftinit.c ftglyph.c ftbbox.c ftsystem.c fttype1.c ftxf86.c \
+          ftgzip.c raster.c sfnt.c truetype.c cff.c type1.c \
+          psaux.c psnames.c pshinter.c  autohint.c ftlzw.c \
+          ftbdf.c bdf.c pcf.c
+FT2OBJS = ftbase.o ftinit.o ftglyph.o ftbbox.o ftsystem.o fttype1.o ftxf86.o \
+          ftgzip.o raster.o sfnt.o truetype.o cff.o type1.o \
+          psaux.o psnames.o pshinter.o autohint.o ftlzw.o \
+          ftbdf.o bdf.o pcf.o
+#endif
+
+INCLUDES =  -I. -I.. -I$(FONTINCSRC) -I../../include -I$(XINCLUDESRC) \
+            -I$(SERVERSRC)/include $(FT2INCLUDES) -I$(INCLUDESRC)
+
+SRCS = xttcap.c ftfuncs.c ftenc.c fttools.c $(FT2SRCS) ftmodule.c
+OBJS = xttcap.o ftfuncs.o ftenc.o fttools.o $(FT2OBJS) ftmodule.o
+
+LinkSourceFile(ftenc.c,..)
+LinkSourceFile(ftfuncs.c,..)
+LinkSourceFile(fttools.c,..)
+LinkSourceFile(xttcap.c,..)
+
+#if !BuildFreetypeDlModule
+LinkSourceFile(ftbase.c,$(FT2SOURCEDIR)/base)
+LinkSourceFile(ftinit.c,$(FT2SOURCEDIR)/base)
+LinkSourceFile(ftglyph.c,$(FT2SOURCEDIR)/base)
+LinkSourceFile(ftbbox.c,$(FT2SOURCEDIR)/base)
+LinkSourceFile(ftsystem.c,..)
+LinkSourceFile(ftutil.c,$(FT2SOURCEDIR)/base)
+LinkSourceFile(fttype1.c,$(FT2SOURCEDIR)/base)
+LinkSourceFile(ftxf86.c,$(FT2SOURCEDIR)/base)
+LinkSourceFile(ftgzip.c,$(FT2SOURCEDIR)/gzip)
+LinkSourceFile(raster.c,$(FT2SOURCEDIR)/raster)
+LinkSourceFile(sfnt.c,$(FT2SOURCEDIR)/sfnt)
+LinkSourceFile(truetype.c,$(FT2SOURCEDIR)/truetype)
+LinkSourceFile(cff.c,$(FT2SOURCEDIR)/cff)
+LinkSourceFile(type1.c,$(FT2SOURCEDIR)/type1)
+LinkSourceFile(psaux.c,$(FT2SOURCEDIR)/psaux)
+LinkSourceFile(psnames.c,$(FT2SOURCEDIR)/psnames)
+LinkSourceFile(pshinter.c,$(FT2SOURCEDIR)/pshinter)
+LinkSourceFile(autohint.c,$(FT2SOURCEDIR)/autohint)
+LinkSourceFile(ftbdf.c,$(FT2SOURCEDIR)/base)
+LinkSourceFile(bdf.c,$(FT2SOURCEDIR)/bdf)
+LinkSourceFile(pcf.c,$(FT2SOURCEDIR)/pcf)
+LinkSourceFile(ftlzw.c,$(FT2SOURCEDIR)/lzw)
+#endif
+
+ModuleObjectRule()
+
+#if !BuildFreetypeDlModule
+LibraryModuleTarget(freetype,$(OBJS))
+InstallLibraryModule(freetype,$(MODULEDIR),fonts)
+InstallDriverSDKLibraryModule(freetype,$(DRIVERSDKMODULEDIR),fonts)
+#else
+DepDynamicModuleTarget(Concat3(lib,freetype,.so), $(OBJS), $(LINKFT2LIB) $(OBJS) $(EXTLIB))
+InstallDynamicModule(Concat3(lib,freetype,.so),$(MODULEDIR),fonts)
+InstallDriverSDKDynamicModule(Concat3(lib,freetype,.so),$(DRIVERSDKMODULEDIR),fonts)
+#endif
+
+DependTarget()
+

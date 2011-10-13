@@ -1,42 +1,127 @@
-XCOMM $XConsortium: Imakefile /main/46 1996/09/28 16:17:59 rws $
-XCOMM $XFree86: xc/include/extensions/Imakefile,v 3.13 1997/01/12 10:39:14 dawes Exp $
+XCOMM $XdotOrg: xc/include/extensions/Imakefile,v 1.12 2004/11/24 02:45:33 krh Exp $
+XCOMM $Xorg: Imakefile,v 1.3 2000/08/18 04:05:44 coskrey Exp $
 
-#if BuildScreenSaverLibrary
+
+
+
+XCOMM $XFree86: xc/include/extensions/Imakefile,v 3.55 2003/04/21 12:32:06 sven Exp $
+
+#if BuildScreenSaverExt || BuildScreenSaverLibrary
 SCREENSAVERHEADERS = saver.h saverproto.h scrnsaver.h
 #endif
 
-#if BuildXF86MiscLibrary
+#if BuildXF86MiscExt || BuildXF86MiscLibrary
 XF86MISCHEADERS = xf86misc.h xf86mscstr.h
 #endif
-#if BuildXF86VidModeLibrary
+#if BuildXF86BigfontExt
+XF86BIGFONTHEADERS = xf86bigfont.h xf86bigfstr.h
+#endif
+#if BuildXF86VidModeExt || BuildXF86VidModeLibrary
 XF86VIDMODEHEADERS = xf86vmode.h xf86vmstr.h
 #endif
-#if BuildXF86DGALibrary
-XF86DGAHEADERS = xf86dga.h xf86dgastr.h
+#if BuildXF86DGA || BuildXF86DGALibrary
+XF86DGAHEADERS = xf86dga.h xf86dgastr.h xf86dga1.h xf86dga1str.h
 #endif
-#if BuildLBX
-LBXHEADERS = lbxbuf.h lbxbufstr.h lbxdeltastr.h lbximage.h lbxopts.h lbxstr.h lbxzlib.h
+#if BuildLBX || BuildXextLib
+LBXHEADERS = XLbx.h lbxbuf.h lbxbufstr.h lbxdeltastr.h lbximage.h lbxopts.h \
+	     lbxstr.h lbxzlib.h
 #endif
-#if BuildDPMSLibrary
-DPMSHEADERS = dpms.h dpmsstr.h
+#if BuildXvExt || BuildXvLibrary
+XVHEADERS = Xv.h Xvlib.h Xvproto.h
+XVMCHEADERS = XvMC.h XvMClib.h XvMCproto.h vldXvMC.h
+#endif
+#if BuildXF86RushExt || BuildXF86RushLibrary
+XF86RUSHHEADERS = xf86rush.h xf86rushstr.h
+#endif
+#if BuildFontCache
+FONTCACHEHEADERS = fontcache.h fontcacheP.h fontcachstr.h
+#endif
+#if BuildXinerama || BuildXineramaLibrary
+XINERAMAHEADERS = Xinerama.h panoramiXext.h panoramiXproto.h
+#endif
+#if BuildRender || BuildXftLibrary
+RENDERHEADERS = render.h renderproto.h
+#endif
+#if BuildXfixes || BuildXfixesLibrary
+XFIXESHEADERS = xfixeswire.h xfixesproto.h
+#endif
+#if BuildDamage || BuildDamageLibrary
+DAMAGEHEADERS = damagewire.h damageproto.h
+#endif
+#if BuildComposite || BuildCompositeLibrary
+COMPOSITEHEADERS = composite.h compositeproto.h
+#endif
+#if BuildRandR || BuildRandRLibrary
+RANDRHEADERS = randr.h randrproto.h
+#endif
+#if BuildXTrap || BuildXTrapLibrary
+XTRAPHEADERS = xtrapbits.h xtrapddmi.h xtrapdi.h xtrapemacros.h xtraplib.h \
+	xtraplibp.h xtrapproto.h
+#endif
+#if BuildXResExt || BuildXResLibrary
+XRESHEADERS = XRes.h XResproto.h
+#endif
+#if BuildXevie || BuildXevieLibrary
+XEVIEHEADERS = Xevie.h Xeviestr.h
+#endif
+#if BuildDmx || BuildDmxLibrary
+XDMXHEADERS = dmxext.h dmxproto.h
 #endif
 
-EXTRAHEADERS = $(SCREENSAVERHEADERS) $(XF86VIDMODEHEADERS) $(XF86DGAHEADERS) $(XF86MISCHEADERS) $(LBXHEADERS) $(DPMSHEADERS)
+EXTRAHEADERS = $(SCREENSAVERHEADERS) $(XF86MISCHEADERS) $(XF86BIGFONTHEADERS) \
+	       $(XF86VIDMODEHEADERS) $(XF86DGAHEADERS) $(XINERAMAHEADERS) \
+	       $(LBXHEADERS) $(XVHEADERS) $(XVMCHEADERS) $(XF86RUSHHEADERS) \
+	       $(FONTCACHEHEADERS) $(RENDERHEADERS) $(RANDRHEADERS) \
+	       $(XFIXESHEADERS) $(DAMAGEHEADERS) $(COMPOSITEHEADERS) \
+	       $(XEVIEHEADERS) \
+	       $(XTRAPHEADERS) $(XRESHEADERS) $(XDMXHEADERS)
 
 
 
-HEADERS = Xext.h multibuf.h shape.h XShm.h MITMisc.h XI.h XInput.h XIproto.h \
-	XTest.h xtestext1.h XIE.h XIEproto.h XIEprotost.h sync.h \
-	XKB.h XKBgeom.h XKBproto.h XKBstr.h XKBsrv.h Xdbe.h Xdbeproto.h \
+HEADERS = Xext.h \
+	xcmiscstr.h \
+	MITMisc.h mitmiscstr.h \
+	bigreqstr.h \
+	extutil.h \
+	XI.h XInput.h XIproto.h \
+	XTest.h xtestext1.h xteststr.h \
+	XKB.h XKBgeom.h XKBproto.h XKBstr.h XKBsrv.h \
+	Xdbe.h Xdbeproto.h \
 	Xag.h Xagstr.h Xagsrv.h \
+	XShm.h shmstr.h \
+	$(EXTRAHEADERS) \
+	multibuf.h multibufst.h \
 	record.h recordstr.h \
-        lbxbuf.h lbxbufstr.h lbxdeltastr.h lbximage.h \
-        lbxopts.h lbxstr.h lbxzlib.h \
 	security.h securstr.h \
-	Print.h Printstr.h $(EXTRAHEADERS)
+	shape.h shapestr.h \
+	sync.h syncstr.h \
+	Print.h Printstr.h \
+	Xcup.h Xcupstr.h \
+	dpms.h dpmsstr.h \
+	XEVI.h XEVIstr.h
 
 all::
 
 BuildIncludes($(HEADERS),X11/extensions,../..)
+
+#if BuildLibraries
 InstallMultipleFlags($(HEADERS),$(INCDIR)/X11/extensions,$(INSTINCFLAGS))
-InstallLinkKitMultipleDestFlags($(EXTRAHEADERS),$(LINKKITDIR)/include/X11/extensions,$(INSTDATFLAGS))
+#endif
+
+InstallDriverSDKNonExecFile(XI.h,$(DRIVERSDKINCLUDEDIR)/extensions)
+InstallDriverSDKNonExecFile(XIproto.h,$(DRIVERSDKINCLUDEDIR)/extensions)
+InstallDriverSDKNonExecFile(Xv.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(Xvproto.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(dpms.h,$(DRIVERSDKINCLUDEDIR)/extensions)
+InstallDriverSDKNonExecFile(xf86dga1str.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(xf86dgastr.h,$(DRIVERSDKINCLUDEDIR)/extensions)
+InstallDriverSDKNonExecFile(xf86misc.h,$(DRIVERSDKINCLUDEDIR)/extensions)
+InstallDriverSDKNonExecFile(xf86rush.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(xf86rushstr.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(renderproto.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(Xv.h,$(DRIVERSDKINCLUDEDIR)/extensions)
+InstallDriverSDKNonExecFile(XvMC.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(vldXvMC.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(Xvlib.h,$(DRIVERSDKINCLUDEDIR)/extensions)
+InstallDriverSDKNonExecFile(Xv.h,$(DRIVERSDKINCLUDEDIR)/X11/extensions)
+InstallDriverSDKNonExecFile(Xvlib.h,$(DRIVERSDKINCLUDEDIR)/X11/extensions)

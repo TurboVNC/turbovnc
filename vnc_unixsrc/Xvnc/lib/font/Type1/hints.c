@@ -1,4 +1,4 @@
-/* $XConsortium: hints.c,v 1.4 91/10/10 11:18:13 rws Exp $ */
+/* $Xorg: hints.c,v 1.3 2000/08/17 19:46:30 cpqbld Exp $ */
 /* Copyright International Business Machines, Corp. 1991
  * All Rights Reserved
  * Copyright Lexmark International, Inc. 1991
@@ -26,6 +26,8 @@
  * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
  * THIS SOFTWARE.
  */
+/* $XFree86: xc/lib/font/Type1/hints.c,v 1.7tsi Exp $ */
+
  /* HINTS    CWEB         V0006 ********                             */
 /*
 :h1.HINTS Module - Processing Rasterization Hints
@@ -38,13 +40,18 @@ W. Pryor, Jr.
  
 The included files are:
 */
- 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#ifdef FONTMODULE
+# include "os.h"
+#endif
 #include "objects.h"
 #include "spaces.h"
 #include "paths.h"
 #include "regions.h"
 #include "hints.h"
- 
+
 /*
 :h3.Functions Provided to the TYPE1IMAGER User
  
@@ -81,7 +88,8 @@ static struct {
 #define FPFLOOR(fp) TOFRACTPEL((fp) >> FRACTBITS)
 #define FPROUND(fp) FPFLOOR((fp) + FPHALF)
  
-void InitHints()
+void 
+InitHints(void)
 {
   int i;
  
@@ -96,8 +104,8 @@ void InitHints()
 :h3.CloseHints(hintP) - Reverse hints that are still open
 */
  
-void CloseHints(hintP)
-  struct fractpoint *hintP;
+void 
+CloseHints(struct fractpoint *hintP)
 {
   int i;
  
@@ -109,9 +117,6 @@ void CloseHints(hintP)
       hintP->y -= oldHint[i].hint.y;
  
       oldHint[i].inuse = FALSE;
- 
-      IfTrace3((HintDebug > 1),"  Hint %d was open, hint=(%p,%p)\n",
-                i, hintP->x, hintP->y);
       }
     }
 }
@@ -120,10 +125,10 @@ void CloseHints(hintP)
 :h3.ComputeHint(hP, currX, currY, hintP) - Compute the value of a hint
 */
  
-static void ComputeHint(hP, currX, currY, hintP)
-  struct hintsegment *hP;
-  fractpel currX, currY;
-  struct fractpoint *hintP;
+static void 
+ComputeHint(struct hintsegment *hP, 
+	    fractpel currX, fractpel currY, 
+	    struct fractpoint *hintP)
 {
   fractpel currRef, currWidth;
   int idealWidth;
@@ -139,16 +144,13 @@ multiple of 90 degrees.
   if (hP->width.y == 0)
     {
     orientation = 'v';  /* vertical */
-    IfTrace0((HintDebug > 0),"  vertical hint\n");
     }
   else if (hP->width.x == 0)
     {
     orientation = 'h';  /* horizontal */
-    IfTrace0((HintDebug > 0),"  horizontal hint\n");
     }
   else
     {
-    IfTrace0((HintDebug > 0),"  hint not vertical or horizontal\n");
     hintP->x = hintP->y = 0;
     return;
     }
@@ -166,13 +168,8 @@ multiple of 90 degrees.
     }
   else                             /* error */
     {
-    abort("ComputeHint: invalid orientation");
+    Abort("ComputeHint: invalid orientation");
     }
- 
-  IfTrace4((HintDebug > 1),
-    "  currX=%p, currY=%p, currRef=%p, currWidth=%p\n",
-    currX, currY,
-    currRef, currWidth);
  
   if ((hP->hinttype == 'b')      /* Bar or stem */
     || (hP->hinttype == 's'))    /* Serif */
@@ -189,9 +186,6 @@ multiple of 90 degrees.
       /* align "ref" on pel boundary */
       hintValue = FPROUND(currRef) - currRef;
       }
-    if (HintDebug > 2) {
-          IfTrace1(TRUE,"  idealWidth=%d, ", idealWidth);
-      }
     }
   else if (hP->hinttype == 'c')  /* Curve extrema */
     {
@@ -200,10 +194,8 @@ multiple of 90 degrees.
     }
   else                           /* error */
     {
-    abort("ComputeHint: invalid hinttype");
+    Abort("ComputeHint: invalid hinttype");
     }
- 
-  IfTrace1((HintDebug > 1),"  hintValue=%p", hintValue);
  
   if (orientation == 'v')      /* vertical */
     {
@@ -217,7 +209,7 @@ multiple of 90 degrees.
     }
   else                             /* error */
     {
-    abort("ComputeHint: invalid orientation");
+    Abort("ComputeHint: invalid orientation");
     }
 }
  
@@ -225,20 +217,12 @@ multiple of 90 degrees.
 :h3.ProcessHint(hP, currX, currY, hintP) - Process a rasterization hint
 */
  
-void ProcessHint(hP, currX, currY, hintP)
-  struct hintsegment *hP;
-  fractpel currX, currY;
-  struct fractpoint *hintP;
+void 
+ProcessHint(struct hintsegment *hP, 
+	    fractpel currX, fractpel currY, 
+	    struct fractpoint *hintP)
 {
   struct fractpoint thisHint;
- 
-  IfTrace4((HintDebug > 1),"  ref=(%p,%p), width=(%p,%p)",
-      hP->ref.x, hP->ref.y,
-      hP->width.x, hP->width.y);
-  IfTrace4((HintDebug > 1),", %c %c %c %c",
-      hP->orientation, hP->hinttype,
-      hP->adjusttype, hP->direction);
-  IfTrace1((HintDebug > 1),", label=%d\n", hP->label);
  
   if ((hP->adjusttype == 'm')      /* Move */
     || (hP->adjusttype == 'a'))    /* Adjust */
@@ -266,7 +250,7 @@ void ProcessHint(hP, currX, currY, hintP)
       }
     else                             /* error */
       {
-      abort("ProcessHint: invalid label");
+      Abort("ProcessHint: invalid label");
       }
     }
   else if (hP->adjusttype == 'r')  /* Reverse */
@@ -282,27 +266,22 @@ void ProcessHint(hP, currX, currY, hintP)
         }
       else                           /* error */
         {
-        abort("ProcessHint: label is not in use");
+        Abort("ProcessHint: label is not in use");
         }
       }
     else                           /* error */
       {
-      abort("ProcessHint: invalid label");
+      Abort("ProcessHint: invalid label");
       }
  
     }
   else                           /* error */
     {
-    abort("ProcessHint: invalid adjusttype");
+    Abort("ProcessHint: invalid adjusttype");
     }
-  IfTrace3((HintDebug > 1),"  label=%d, thisHint=(%p,%p)\n",
-    hP->label, thisHint.x, thisHint.y);
  
   hintP->x += thisHint.x;
   hintP->y += thisHint.y;
- 
-  IfTrace2((HintDebug > 1),"  hint=(%p,%p)\n",
-    hintP->x, hintP->y);
 }
  
 /*
@@ -362,9 +341,9 @@ off of the edge's range; XofY() could be replace by FindXofY() to
 call ourselves recursively if this were not true.
 */
  
-static pel SearchXofY(edge, y)
-       register struct edgelist *edge;  /* represents edge                   */
-       register pel y;       /* 'y' value to find edge for                   */
+static pel 
+SearchXofY(register struct edgelist *edge,   /* represents edge              */
+	   register pel y)                   /* 'y' value to find edge for   */
 {
        register struct edgelist *e;  /* loop variable                        */
  
@@ -385,7 +364,7 @@ static pel SearchXofY(edge, y)
        else
                return(XofY(edge, y));
  
-       abort("bad subpath chain");
+       Abort("bad subpath chain");
        /*NOTREACHED*/
 }
 /*
@@ -413,9 +392,10 @@ are at the top and the first edge is going up.
 #define  BLACKBELOW  +1
 #define  NONE         0
  
-static int ImpliedHorizontalLine(e1, e2, y)
-       register struct edgelist *e1,*e2;  /* two edges to check              */
-       register int y;       /* y where they might be connected              */
+static int 
+ImpliedHorizontalLine(struct edgelist *e1, /* two edges to check            */
+		      struct edgelist *e2, 
+		      int y) /* y where they might be connected             */
 {
        register struct edgelist *e3,*e4;
  
@@ -466,7 +446,7 @@ Now we have everything to return the answer:
        else if (ISBOTTOM(e1->flag) && y == e1->ymax)
                return(!ISDOWN(e2->flag));
        else
-               abort("ImpliedHorizontalLine:  why ask?");
+               Abort("ImpliedHorizontalLine:  why ask?");
        /*NOTREACHED*/
 }
  
@@ -483,14 +463,14 @@ routine finds and fixes false breaks.
 Also, this routine sets the ISTOP and ISBOTTOM flags in the edge lists.
 */
  
-static void FixSubPaths(R)
-       register struct region *R;       /* anchor of region                */
+static void 
+FixSubPaths(struct region *R)           /* anchor of region                  */
 {
        register struct edgelist *e;     /* fast loop variable                */
        register struct edgelist *edge;  /* current edge in region            */
        register struct edgelist *next;  /* next in subpath after 'edge'      */
        register struct edgelist *break1;  /* first break after 'next'        */
-       register struct edgelist *break2;  /* last break before 'edge'        */
+       register struct edgelist *break2 = NULL;  /* last break before 'edge' */
        register struct edgelist *prev;    /* previous edge for fixing links  */
        int left = TRUE;
  
@@ -505,7 +485,7 @@ static void FixSubPaths(R)
                if (!ISBREAK(edge, next))
                        continue;
                if (edge->ymax < next->ymin)
-                       abort("disjoint subpath?");
+                       Abort("disjoint subpath?");
 /*
 'edge' now contains an edgelist at the bottom of an edge, and 'next'
 contains the next subsequent edgelist in the subpath, which must be at
@@ -566,7 +546,7 @@ as 'next':
  
                break1->subpath = break2->subpath;
                if (ISBREAK(break1, break1->subpath))
-                       abort("unable to fix subpath break?");
+                       Abort("unable to fix subpath break?");
  
                break2->subpath = next;
  
@@ -626,10 +606,10 @@ get all the way to the outside without resolving ambiguity.
 A debug tool.
 */
  
-static struct edgelist *before();  /* subroutine of DumpSubPaths             */
+static struct edgelist *before(struct edgelist *e);  /* subroutine of DumpSubPaths             */
  
-static void DumpSubPaths(anchor)
-       struct edgelist *anchor;
+static void
+DumpSubPaths(struct edgelist *anchor)
 {
  
        register struct edgelist *edge,*e,*e2;
@@ -638,28 +618,19 @@ static void DumpSubPaths(anchor)
        for (edge = anchor; VALIDEDGE(edge); edge = edge->link) {
                if (ISPERMANENT(edge->flag))
                        continue;
-               IfTrace0(TRUE, "BEGIN Subpath\n");
                for (e2 = edge; !ISPERMANENT(e2->flag);) {
                        if (ISDOWN(e2->flag)) {
-                               IfTrace1(TRUE, ". Downgoing edge's top at %x\n", e2);
                                for (e = e2;; e = e->subpath) {
-                                       IfTrace4(TRUE, ". . [%5d] %5d    @ %x[%x]\n",
-                                                e->ymin, *e->xvalues, e, e->flag);
                                        for (y=e->ymin+1; y < e->ymax; y++)
-                                               IfTrace2(TRUE, ". . [%5d] %5d     \"\n", y, e->xvalues[y-e->ymin]);
                                        e->flag |= ISPERMANENT(ON);
                                        if (ISBREAK(e, e->subpath))
                                                break;
                                }
                        }
                        else {
-                               IfTrace1(TRUE, ". Upgoing edge's top at %x\n", e2);
                                for (e = e2; !ISBREAK(e, e->subpath); e = e->subpath) { ; }
                                for (;; e=before(e)) {
-                                       IfTrace4(TRUE, ". . [%5d] %5d    @ %x[%x]\n",
-                                                e->ymax-1, e->xvalues[e->ymax-1-e->ymin], e, e->flag);
                                        for (y=e->ymax-2; y >= e->ymin; y--)
-                                               IfTrace2(TRUE, ". . [%5d] %5d      \"\n", y, e->xvalues[y-e->ymin]);
                                        e->flag |= ISPERMANENT(ON);
                                        if (e == e2)
                                                break;
@@ -672,8 +643,8 @@ static void DumpSubPaths(anchor)
        }
 }
  
-static struct edgelist *before(e)
-       struct edgelist *e;
+static struct edgelist *
+before(struct edgelist *e)
 {
        struct edgelist *r;
        for (r = e->subpath; r->subpath != e; r = r->subpath) { ; }
@@ -705,10 +676,10 @@ new x might exceed the region's bounds, updating those are the
 responsibility of the caller.
 */
  
-static void writeXofY(e, y, x)
-       struct edgelist *e;   /* relevant edgelist                            */
-       int y;                /* y value                                      */
-       int x;                /* new x value                                  */
+static void 
+writeXofY(struct edgelist *e,/* relevant edgelist                            */
+	  int y,             /* y value                                      */
+	  int x)             /* new x value                                  */
 {
        if (e->xmin > x)  e->xmin = x;
        if (e->xmax < x)  e->xmax = x;
@@ -739,12 +710,12 @@ points (collapses) the white run as necessary if it is not.  The
 goal is to collapse the white run as little as possible.
 */
  
-static void CollapseWhiteRun(anchor, yblack, left, right, ywhite)
-        struct edgelist *anchor;  /* anchor of edge list                     */
-        pel yblack;          /* y of (hopefully) black run above or below    */
-        struct edgelist *left;  /* edgelist at left of WHITE run             */
-        struct edgelist *right;  /* edgelist at right of WHITE run           */
-        pel ywhite;          /* y location of white run                      */
+static void 
+CollapseWhiteRun(struct edgelist *anchor, /* anchor of edge list             */
+		 pel yblack, /* y of (hopefully) black run above or below    */
+		 struct edgelist *left, /* edgelist at left of WHITE run     */
+		 struct edgelist *right, /* edgelist at right of WHITE run   */
+		 pel ywhite) /* y location of white run                      */
 {
        struct edgelist *edge;
        struct edgelist *swathstart = anchor;
@@ -810,8 +781,8 @@ This is the externally visible routine called from the REGIONS module
 when the +CONTINUITY flag is on the Interior() fill rule.
 */
  
-void ApplyContinuity(R)
-struct region *R;
+void 
+ApplyContinuity(struct region *R)
 {
  struct edgelist *left;
  struct edgelist *right;

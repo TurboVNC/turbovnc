@@ -1,15 +1,14 @@
-/* $XConsortium: AuUnlock.c,v 1.10 94/04/17 20:15:44 rws Exp $ */
+/* $Xorg: AuUnlock.c,v 1.4 2001/02/09 02:03:42 xorgcvs Exp $ */
 
 /*
 
-Copyright (c) 1988  X Consortium
+Copyright 1988, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -17,26 +16,26 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 */
+/* $XFree86: xc/lib/Xau/AuUnlock.c,v 1.4 2001/12/14 19:54:36 dawes Exp $ */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <X11/Xauth.h>
 #include <X11/Xos.h>
 
-#if NeedFunctionPrototypes
+int
 XauUnlockAuth (
 _Xconst char *file_name)
-#else
-XauUnlockAuth (file_name)
-char	*file_name;
-#endif
 {
 #ifndef WIN32
     char	creat_name[1025];
@@ -44,7 +43,7 @@ char	*file_name;
     char	link_name[1025];
 
     if (strlen (file_name) > 1022)
-	return;
+	return 0;
 #ifndef WIN32
     (void) strcpy (creat_name, file_name);
     (void) strcat (creat_name, "-c");
@@ -58,4 +57,6 @@ char	*file_name;
     (void) unlink (creat_name);
 #endif
     (void) unlink (link_name);
+
+    return 1;
 }

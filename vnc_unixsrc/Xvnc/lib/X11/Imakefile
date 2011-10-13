@@ -1,17 +1,41 @@
-XCOMM $TOG: Imakefile /main/196 1997/05/20 10:06:09 kaleb $
+XCOMM $Xorg: Imakefile,v 1.3 2000/08/17 19:44:38 cpqbld Exp $
 
 
 
 
-XCOMM $XFree86: xc/lib/X11/Imakefile,v 3.19.2.2 1997/05/21 15:02:16 dawes Exp $
+XCOMM $XFree86: xc/lib/X11/Imakefile,v 3.52 2003/05/27 16:53:15 tsi Exp $
+
+
+
+        HEADERS = Xlib.h Xresource.h Xutil.h cursorfont.h Xlibint.h \
+		Xcms.h Xlocale.h XKBlib.h XlibConf.h Xregion.h ImUtil.h
+
+#if BuildServersOnly && !XWinServer && !XnestServer && !BuildGLXLibrary && !BuildClients && !XdmxServer
+all::
+
+BuildIncludes($(HEADERS),IncSubdir,..)
+
+#else
+
+#if BuildLoadableXlibI18n
+#define IHaveSubdirs
+#define PassCDebugFlags CDEBUGFLAGS="$(CDEBUGFLAGS)"
+#define NoLibSubdirs
+#endif
+
 #define DoNormalLib NormalLibX11
 #define DoSharedLib SharedLibX11
+#define DoExtraLib SharedLibX11
 #define DoDebugLib DebugLibX11
 #define DoProfileLib ProfileLibX11
 #define LibName X11
 #define SoRev SOXLIBREV
 #define HugeLibrary YES
 #define IncSubdir X11
+
+#if BuildLoadableXlibI18n
+SUBDIRS = xlibi18n
+#endif
 
 #include <Threads.tmpl>
 
@@ -20,8 +44,17 @@ XCOMM $XFree86: xc/lib/X11/Imakefile,v 3.19.2.2 1997/05/21 15:02:16 dawes Exp $
 #endif
 
 #ifdef SharedX11Reqs
-REQUIREDLIBS = SharedX11Reqs
+REQUIREDX11LIBS = SharedX11Reqs
 #endif
+#if BuildLoadableXlibI18n
+REQUIREDI18NLIBS = DlLibrary
+#endif
+#ifdef cygwinArchitecture
+EXCLUDE_SYMBOL = -Wl,--exclude-symbol,XdmcpWrap:_XdmcpWrapperToOddParity
+#endif
+
+REQUIREDLIBS=$(REQUIREDX11LIBS) $(REQUIREDI18NLIBS) $(EXCLUDE_SYMBOL)
+
 #if defined(MacIIArchitecture) || defined(SequentArchitecture) || defined(i386ScoArchitecture)
 XBSDLIB = /**/
 #endif
@@ -55,12 +88,18 @@ EXTRA_LIBRARIES = /**/
 #if HasPoll
    POLL_DEFINES = -DUSE_POLL
 #endif
-   CONN_DEFINES = ConnectionFlags
-   XTRANS_X_DEFINES = -DX11_t -DTRANS_CLIENT
-   XTRANS_XIM_DEFINES = -DXIM_t -DTRANS_CLIENT
+   CONN_DEFINES = $(CONNECTION_FLAGS)
+   XTRANS_X_DEFINES = -DX11_t -DTRANS_CLIENT $(XTRANS_FAILDEFINES)
+   XTRANS_XIM_DEFINES = -DXIM_t -DTRANS_CLIENT $(XTRANS_FAILDEFINES)
 #if HasBSD44Sockets
    SOCK_DEFINES = -DBSD44SOCKETS
 #endif
+#if HasShm
+    SHM_DEFINES = -DHAS_SHM
+#endif
+
+    XF86BIGFONT_DEFINES = XF86BigfontExtensionDefines
+
      EDB_DEFINES = -DERRORDB=\"$(LIBDIR)/XErrorDB\"
      KDB_DEFINES = -DKEYSYMDB=\"$(LIBDIR)/XKeysymDB\"
      CMS_DEFINES = -DXCMSDB=\"$(LIBDIR)/Xcms.txt\"
@@ -73,6 +112,13 @@ EXTRA_LIBRARIES = /**/
 #if NoRConst
  RCONST_DEFINES = -DNORCONST
 #endif
+#if DisableXLocaleDirEnv
+  SETID_DEFINES = -DNO_XLOCALEDIR
+#elif HasIssetugid
+  SETID_DEFINES = -DHASSETUGID
+#elif HasGetresuid
+  SETID_DEFINES = -DHASGETRESUID
+#endif
     XLC_DEFINES = -DXLOCALEDIR=\"$(XLOCALEDIR)\"
 #if HasKrb5
          K5OBJS = k5encode.o
@@ -80,22 +126,38 @@ EXTRA_LIBRARIES = /**/
          K5INCL = Krb5Includes
          K5DEFS = Krb5Defines
 #endif
-#if !HasSnprintf
-       MISCSRCS = snprintf.c
-       MISCOBJS = snprintf.o
+#if (defined(FreeBSDArchitecture) && OSRelVersion < 500016) || \
+	defined(OpenBSDArchitecture)
+THRSTUBSRCS = UIThrStubs.c
+THRSTUBOBJS = UIThrStubs.o
+#endif
+#if BuildLoadableXlibXcursor
+XCURSOR_DEFINES = -DUSE_DYNAMIC_XCURSOR -DLIBXCURSOR=\"libXcursor.so.$(SOXCURSORREV)\"
 #endif
 #if NeedLibInsideFlag
     LIB_DEFINES = -D_XLIBINT_
 #endif
-        DEFINES = $(MALLOC_DEFINES) $(LIB_DEFINES)
+#if defined(LibDirName)
+        POSTLOCALELIBDIR = LibDirName
+        POSTLOCALELIBDEFINES = -DPOSTLOCALELIBDIR=\"$(POSTLOCALELIBDIR)\"
+#endif
+        DEFINES = $(MALLOC_DEFINES) $(LIB_DEFINES) $(MISC_DEFINES)\
+			$(POSTLOCALELIBDEFINES)
    OPEN_DEFINES = -I$(EXTINCSRC) $(K5INCL) $(K5DEFS)
- DEPEND_DEFINES = $(OPEN_DEFINES) $(TRANS_INCLUDES) $(CONN_DEFINES) $(THREADS_DEFINES)
+ DEPEND_DEFINES = $(OPEN_DEFINES) $(TRANS_INCLUDES) $(CONN_DEFINES) $(THREADS_DEFINES) DependDefines
        AUTHOBJS = AuDispose.o AuGetBest.o AuFileName.o AuRead.o
        AUTHSRCS = AuDispose.c AuGetBest.c AuFileName.c AuRead.c
-           SRCS = $(SRCS1) $(SRCS2) $(SRCS3) /* try *.c if you have trouble */
-        HEADERS = Xlib.h Xresource.h Xutil.h cursorfont.h Xlibint.h \
-			Xcms.h Xlocale.h XKBlib.h
+           SRCS = $(SRCS1) $(SRCS2) $(SRCS3) $(EXTRASRCS) /* try *.c if you have trouble */
        LINTLIBS =
+
+#if BuildLoadableXlibI18n && DoSharedLib
+EXTRASHAREDSRC = $(SHAREDLCSRCS)
+#endif
+#if !BuildLoadableXlibI18n || DoNormalLib
+EXTRASTATICSRC = $(STATICLCSRCS)
+#endif
+
+EXTRASRCS = $(EXTRASHAREDSRC) $(EXTRASTATICSRC)
 
 SRCS1 = \
 	Context.c \
@@ -477,7 +539,7 @@ SRCS2 = \
 	Withdraw.c \
 	WMGeom.c \
 	WMProps.c \
-	$(AUTHSRCS) $(XDMAUTHSRCS) $(K5SRCS)
+	$(AUTHSRCS) $(XDMAUTHSRCS) $(K5SRCS) $(THRSTUBSRCS)
 
 OBJS2 = \
 	Macros.o \
@@ -601,7 +663,8 @@ OBJS2 = \
 	WMProps.o \
 	$(AUTHOBJS) \
 	$(XDMAUTHOBJS) \
-	$(K5OBJS)
+	$(K5OBJS) \
+	$(THRSTUBOBJS)
 
 SRCS3 = \
 	Lab.c \
@@ -674,8 +737,10 @@ SRCS3 = \
 	OMWrap.c \
 	lcWrap.c \
 	mbWMProps.c \
+	utf8WMProps.c \
 	mbWrap.c \
 	wcWrap.c \
+	utf8Wrap.c \
 	FilterEv.c \
 	RegstFlt.c \
 	locking.c \
@@ -755,8 +820,10 @@ OBJS3 = \
 	OMWrap.o \
 	lcWrap.o \
 	mbWMProps.o \
+	utf8WMProps.o \
 	mbWrap.o \
 	wcWrap.o \
+	utf8Wrap.o \
 	FilterEv.o \
 	RegstFlt.o \
 	locking.o \
@@ -765,18 +832,19 @@ OBJS3 = \
 	ximtrans.o \
 	$(XKBOBJS) $(LCOBJS) $(MISCOBJS)
 
-#ifdef RsArchitecture
-LCDEPSYMSRCS = aixlcLoad.c
-#endif
-#ifdef OS2Architecture
-LCDEPSYMSRCS = os2Stubs.c
+#if BuildLoadableXlibI18n
+LC_DYNDEFINES = -DUSE_DYNAMIC_LC
 #endif
 
-LCSRCS = \
-	SetLocale.c \
-	$(LCDEPSYMSRCS) \
+SHAREDLCDEPSYMSRCS = XlcDL.c XlcSL.c
+
+SHAREDI18NSTATICSRCS = \
+        XDefaultIMIF.c XDefaultOMIF.c
+
+STATICLCDEPSYMSRCS =
+
+STATICI18NSTATICSRCS = \
 	imCallbk.c \
-	imConv.c \
 	imDefFlt.c \
 	imDefIc.c \
 	imDefIm.c \
@@ -802,26 +870,11 @@ LCSRCS = \
 	imTrX.c \
 	imTransR.c \
 	imTrans.c \
-	lcCT.c \
-	lcCharSet.c \
-	lcConv.c \
-	lcDB.c \
-	lcDefConv.c \
 	lcEuc.c \
-	lcFile.c \
 	lcGenConv.c \
-	lcGeneric.c \
-	lcInit.c \
 	lcJis.c \
-	lcPrTxt.c \
-	lcPubWrap.c \
-	lcPublic.c \
-	lcRM.c \
 	lcSjis.c \
-	lcStd.c \
-	lcTxtPr.c \
-	lcUTF.c \
-	lcUtil.c \
+	lcUTF8Load.c \
 	omDefault.c \
 	omGeneric.c \
 	omImText.c \
@@ -831,23 +884,41 @@ LCSRCS = \
 	omTextPer.c \
 	omXChar.c
 
-/*
-#if defined(SunArchitecture) && defined(HasSharedLibraries)
-LCDEPOBJS = XsunDL.o
-#endif
-*/
-#ifdef RsArchitecture
-LCDEPOBJS = aixlcLoad.o
-#endif
-#ifdef OS2Architecture
-LCDEPOBJS = os2Stubs.o
-#endif
+LCSRCS = \
+	SetLocale.c \
+	imConv.c \
+	imKStoUCS.c \
+	lcCT.c \
+	lcCharSet.c \
+	lcConv.c \
+	lcDB.c \
+	lcDefConv.c \
+	lcFile.c \
+	lcGeneric.c \
+	lcInit.c \
+	lcPrTxt.c \
+	lcPubWrap.c \
+	lcPublic.c \
+	lcRM.c \
+	lcStd.c \
+	lcTxtPr.c \
+	lcUtil.c \
+	lcUTF8.c
 
-LCOBJS = \
-	SetLocale.o \
-	$(LCDEPOBJS) \
+STATICLCSRCS = \
+	$(STATICLCDEPSYMSRCS) \
+	$(STATICI18NSTATICSRCS)
+
+SHAREDLCSRCS = \
+	$(SHAREDLCDEPSYMSRCS) \
+	$(SHAREDI18NSTATICSRCS)
+
+SHAREDLCDEPOBJS = XlcDL.o XlcSL.o
+SHAREDI18NSTATICOBJS = \
+	XDefaultIMIF.o XDefaultOMIF.o
+STATICLCDEPOBJS = 
+STATICI18NSTATICOBJS = \
 	imCallbk.o \
-	imConv.o \
 	imDefFlt.o \
 	imDefIc.o \
 	imDefIm.o \
@@ -873,26 +944,11 @@ LCOBJS = \
 	imTrX.o \
 	imTransR.o \
 	imTrans.o \
-	lcCT.o \
-	lcCharSet.o \
-	lcConv.o \
-	lcDB.o \
-	lcDefConv.o \
 	lcEuc.o \
-	lcFile.o \
 	lcGenConv.o \
-	lcGeneric.o \
-	lcInit.o \
 	lcJis.o \
-	lcPrTxt.o \
-	lcPubWrap.o \
-	lcPublic.o \
-	lcRM.o \
 	lcSjis.o \
-	lcStd.o \
-	lcTxtPr.o \
-	lcUTF.o \
-	lcUtil.o \
+	lcUTF8Load.o \
 	omDefault.o \
 	omGeneric.o \
 	omImText.o \
@@ -902,9 +958,53 @@ LCOBJS = \
 	omTextPer.o \
 	omXChar.o
 
+LCOBJS = \
+	SetLocale.o \
+	imConv.o \
+	imKStoUCS.o \
+	lcCT.o \
+	lcCharSet.o \
+	lcConv.o \
+	lcDB.o \
+	lcDefConv.o \
+	lcFile.o \
+	lcGeneric.o \
+	lcInit.o \
+	lcPrTxt.o \
+	lcPubWrap.o \
+	lcPublic.o \
+	lcRM.o \
+	lcStd.o \
+	lcTxtPr.o \
+	lcUtil.o \
+	lcUTF8.o
+
+STATICLCOBJS = \
+	$(STATICLCDEPOBJS) \
+	$(STATICI18NSTATICOBJS) 
+
+SHAREDLCOBJS = \
+	$(SHAREDLCDEPOBJS) \
+	$(SHAREDI18NSTATICOBJS) 
+
+#ifdef OS2Architecture
+MISCSRCS = os2Stubs.c
+#endif
+
+#ifdef OS2Architecture
+MISCOBJS = os2Stubs.o
+#endif
+
 OBJS = $(OBJS1) $(OBJS2) $(OBJS3)
 
-#if !BuildServersOnly || XnestServer
+EXTRAUNSHAREDOBJS = $(STATICLCOBJS)
+
+#if BuildLoadableXlibI18n
+EXTRASHAREDOBJS = $(SHAREDLCOBJS)
+# else
+EXTRASHAREDOBJS = $(STATICLCOBJS)
+#endif
+
 #include <Library.tmpl>
 
 SpecialCLibObjectRule(ErrDes,$(ICONFIGFILES),$(EDB_DEFINES))
@@ -916,14 +1016,16 @@ SpecialCLibObjectRule(ximtrans,$(ICONFIGFILES),$(TRANS_INCLUDES) $(CONN_DEFINES)
 LinkFile(ximtrans.c,$(TRANSCOMMSRC)/transport.c)
 SpecialCLibObjectRule(OpenDis,$(ICONFIGFILES),$(BC_DEFINES) $(OPEN_DEFINES) $(XTRANS_X_DEFINES) $(XKB_DEFINES))
 SpecialCLibObjectRule(Wrap,$(ICONFIGFILES),$(XDMAUTHDEFS))
-SpecialCLibObjectRule(XlibInt,$(ICONFIGFILES),-I$(EXTINCSRC) $(CONN_DEFINES) $(POLL_DEFINES) $(XTRANS_X_DEFINES))
+SpecialCLibObjectRule(XlibInt,$(ICONFIGFILES),$(CONN_DEFINES) $(POLL_DEFINES) $(XTRANS_X_DEFINES))
+SpecialCLibObjectRule(Font,$(ICONFIGFILES),$(SHM_DEFINES) $(XF86BIGFONT_DEFINES))
+SpecialCLibObjectRule(FontInfo,$(ICONFIGFILES),$(SHM_DEFINES) $(XF86BIGFONT_DEFINES))
 SpecialCLibObjectRule(cmsColNm,$(ICONFIGFILES),$(CMS_DEFINES))
 SpecialCLibObjectRule(globals,$(ICONFIGFILES),$(CONN_DEFINES))
 SpecialCLibObjectRule(Context,$(ICONFIGFILES),$(BC_DEFINES))
 SpecialCLibObjectRule(Xrm,$(_NOOP_),$(RCONST_DEFINES))
 SpecialCLibObjectRule(imTransR,$(ICONFIGFILES),$(CONN_DEFINES) $(XTRANS_XIM_DEFINES))
 SpecialCLibObjectRule(imTrans,$(ICONFIGFILES),$(CONN_DEFINES) $(XTRANS_XIM_DEFINES))
-SpecialCLibObjectRule(lcFile,$(ICONFIGFILES),$(XLC_DEFINES))
+SpecialCLibObjectRule(lcFile,$(ICONFIGFILES),$(XLC_DEFINES) $(SETID_DEFINES))
 #if BuildXKBlib
 SpecialCLibObjectRule(XKBCvt,$(_NOOP_),$(RCONST_DEFINES))
 SpecialCLibObjectRule(KeyBind,$(ICONFIGFILES),$(XKB_DEFINES))
@@ -933,9 +1035,16 @@ SpecialCLibObjectRule(imConv,$(ICONFIGFILES),$(XKB_DEFINES))
 #if HasKrb5
 SpecialCLibObjectRule(k5encode,$(_NOOP_),$(K5INCL))
 #endif
-#ifdef MinixArchitecture
-SpecialCLibObjectRule(IMWrap,$(ICONFIGFILES),-DX11_TINY_IM)
-SpecialCLibObjectRule(lcInit,$(ICONFIGFILES),-DX11_TINY_LC)
+#if BuildLoadableXlibI18n
+SpecialCLibObjectRuleSeparateOpts(lcInit,$(ICONFIGFILES),$(_NOOP_),$(LC_DYNDEFINES))
+SpecialCLibObjectRuleSeparateOpts(lcGeneric,$(ICONFIGFILES),$(_NOOP_),$(LC_DYNDEFINES))
+SpecialCLibObjectRuleSeparateOpts(lcPublic,$(ICONFIGFILES),$(_NOOP_),$(LC_DYNDEFINES))
+#endif
+#if BuildLoadableXlibXcursor
+SpecialCLibObjectRuleSeparateOpts(CrCursor,$(ICONFIGFILES),$(_NOOP_),$(XCURSOR_DEFINES))
+SpecialCLibObjectRuleSeparateOpts(CrGlCur,$(ICONFIGFILES),$(_NOOP_),$(XCURSOR_DEFINES))
+SpecialCLibObjectRuleSeparateOpts(CrPixmap,$(ICONFIGFILES),$(_NOOP_),$(XCURSOR_DEFINES))
+SpecialCLibObjectRuleSeparateOpts(PutImage,$(ICONFIGFILES),$(_NOOP_),$(XCURSOR_DEFINES))
 #endif
 
 #if InstallXcmsTxt
@@ -959,31 +1068,67 @@ LinkSourceFile(Wrap.c,$(XDMCPLIBSRC))
 LinkSourceFile(Wraphelp.c,$(XDMCPLIBSRC))
 #endif
 
-#if !HasSnprintf
-LinkSourceFile(snprintf.c,../misc)
-SpecialCLibObjectRule(snprintf,$(ICONFIGFILES),-DLIBX11)
+#ifdef QNX4Architecture
+LOCAL_LDFLAGS=-F
 #endif
-LinkSourceFile(snprintf.h,../misc)
 
 MAKEKEYS = ./makekeys
 
+#if CrossCompiling
+HOST_LDLIBS=
+HOST_CFLAGS=$(TOP_INCLUDES) $(INCLUDES) $(BOOTSTRAPCFLAGS) \
+	$(CROSSCOMPILEDEFINES) $(CROSSCOMPILEBOOTSTRAPDEFINES)
+#else
+HOST_LDLIBS=$(LDLIBS)
+HOST_CFLAGS=$(CFLAGS)
+#endif
+
 ks_tables.h: $(XINCLUDESRC)/keysymdef.h util/makekeys.c
-	RemoveFiles($@ ProgramTargetName(makekeys) makekeys.Osuf)
-	-HostLinkRule(ProgramTargetName(makekeys),$(CFLAGS) $(LOCAL_LDFLAGS),util/makekeys.c,$(LDLIBS))
+	RemoveFiles($@ HostProgramTargetName(makekeys) makekeys.Osuf)
+	-HostLinkRule(HostProgramTargetName(makekeys),$(HOST_CFLAGS) $(LOCAL_LDFLAGS),util/makekeys.c,$(HOST_LDLIBS))
 	RunProgram(MAKEKEYS,< $(XINCLUDESRC)/keysymdef.h > ks_tables_h)
 	$(MV) ks_tables_h $@
-	RemoveFiles(ProgramTargetName(makekeys) makekeys.Osuf ks_tables_h)
+	RemoveFiles(HostProgramTargetName(makekeys) makekeys.Osuf ks_tables_h)
 
 includes:: ks_tables.h
 
 depend:: ks_tables.h
 
 clean::
-	RemoveFiles(ks_tables_h ks_tables.h ProgramTargetName(makekeys))
+	RemoveFiles(ks_tables_h ks_tables.h HostProgramTargetName(makekeys))
 
-DependTarget3($(SRCS1),$(SRCS2),$(SRCS3))
-#else
-all::
 
-BuildIncludes($(HEADERS),IncSubdir,..)
+DependTarget3($(SRCS1),$(SRCS2),$(SRCS3) $(EXTRASRCS))
+
+#if BuildLoadableXlibI18n
+MakeSubdirs($(SUBDIRS))
+DependSubdirs($(SUBDIRS))
+MakeLintLibSubdirs($(LINTSUBDIRS))
+MakeLintSubdirs($(LINTSUBDIRS),install.ln,install.ln)
 #endif
+#endif
+
+includes:: XlibConf.h
+
+#include <Threads.tmpl>
+
+#if ThreadedProject
+#define XThreadsDefine echo '#ifndef XTHREADS' >> $@		@@\
+	echo '#define XTHREADS' >> $@				@@\
+	echo '#endif' >> $@
+#else
+#define XThreadsDefine echo '#undef XTHREADS' >> $@
+#endif
+
+#if HasThreadSafeAPI
+#define MTSafeAPIDefine	echo '#ifndef XUSE_MTSAFE_API' >> $@	@@\
+	echo '#define XUSE_MTSAFE_API' >> $@			@@\
+	echo '#endif' >> $@
+#else
+#define MTSafeAPIDefine echo '#undef XUSE_MTSAFE_API' >> $@
+#endif
+
+XlibConf.h:
+	echo '/* Defines needed to use Xlib from non-imake projects */' > $@
+	XThreadsDefine
+	MTSafeAPIDefine

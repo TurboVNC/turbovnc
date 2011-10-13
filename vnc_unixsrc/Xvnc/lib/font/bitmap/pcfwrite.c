@@ -1,16 +1,13 @@
-/* $XConsortium: pcfwrite.c,v 1.6 94/04/17 20:17:16 gildea Exp $ */
-
+/* $Xorg: pcfwrite.c,v 1.5 2001/02/09 02:04:02 xorgcvs Exp $ */
 /*
 
-Copyright (c) 1990, 1994  X Consortium
+Copyright 1990, 1994, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -18,44 +15,44 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/lib/font/bitmap/pcfwrite.c,v 1.11 2003/11/17 22:20:22 dawes Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
-#include "fntfilst.h"
-#include "bitmap.h"
-#include "pcf.h"
+#include <X11/fonts/fntfilst.h>
+#include <X11/fonts/bitmap.h>
+#include <X11/fonts/pcf.h>
 
 /* Write PCF font files */
 
-static int  current_position;
+static CARD32  current_position;
 
 static int
-pcfWrite(file, b, c)
-    FontFilePtr file;
-    char       *b;
-    int         c;
+pcfWrite(FontFilePtr file, char *b, int c)
 {
     current_position += c;
     return FontFileWrite(file, b, c);
 }
 
 static int
-pcfPutLSB32(file, c)
-    FontFilePtr file;
+pcfPutLSB32(FontFilePtr file, int c)
 {
     current_position += 4;
     (void) FontFilePutc(c, file);
@@ -65,9 +62,7 @@ pcfPutLSB32(file, c)
 }
 
 static int
-pcfPutINT32(file, format, c)
-    FontFilePtr file;
-    CARD32      format;
+pcfPutINT32(FontFilePtr file, CARD32 format, int c)
 {
     current_position += 4;
     if (PCF_BYTE_ORDER(format) == MSBFirst) {
@@ -84,9 +79,7 @@ pcfPutINT32(file, format, c)
 }
 
 static int
-pcfPutINT16(file, format, c)
-    FontFilePtr file;
-    CARD32      format;
+pcfPutINT16(FontFilePtr file, CARD32 format, int c)
 {
     current_position += 2;
     if (PCF_BYTE_ORDER(format) == MSBFirst) {
@@ -100,19 +93,14 @@ pcfPutINT16(file, format, c)
 
 /*ARGSUSED*/
 static int
-pcfPutINT8(file, format, c)
-    FontFilePtr file;
-    CARD32      format;
+pcfPutINT8(FontFilePtr file, CARD32 format, int c)
 {
     current_position += 1;
     return FontFilePutc(c, file);
 }
 
-static
-pcfWriteTOC(file, table, count)
-    FontFilePtr file;
-    PCFTablePtr table;
-    int         count;
+static void
+pcfWriteTOC(FontFilePtr file, PCFTablePtr table, int count)
 {
     CARD32      version;
     int         i;
@@ -129,11 +117,8 @@ pcfWriteTOC(file, table, count)
     }
 }
 
-static
-pcfPutCompressedMetric(file, format, metric)
-    FontFilePtr file;
-    CARD32      format;
-    xCharInfo  *metric;
+static void
+pcfPutCompressedMetric(FontFilePtr file, CARD32 format, xCharInfo *metric)
 {
     pcfPutINT8(file, format, metric->leftSideBearing + 0x80);
     pcfPutINT8(file, format, metric->rightSideBearing + 0x80);
@@ -142,11 +127,8 @@ pcfPutCompressedMetric(file, format, metric)
     pcfPutINT8(file, format, metric->descent + 0x80);
 }
 
-static
-pcfPutMetric(file, format, metric)
-    FontFilePtr file;
-    CARD32      format;
-    xCharInfo  *metric;
+static void
+pcfPutMetric(FontFilePtr file, CARD32 format, xCharInfo *metric)
 {
     pcfPutINT16(file, format, metric->leftSideBearing);
     pcfPutINT16(file, format, metric->rightSideBearing);
@@ -156,11 +138,8 @@ pcfPutMetric(file, format, metric)
     pcfPutINT16(file, format, metric->attributes);
 }
 
-static
-pcfPutBitmap(file, format, pCI)
-    FontFilePtr file;
-    CARD32      format;
-    CharInfoPtr pCI;
+static void
+pcfPutBitmap(FontFilePtr file, CARD32 format, CharInfoPtr pCI)
 {
     int         count;
     unsigned char *bits;
@@ -172,11 +151,8 @@ pcfPutBitmap(file, format, pCI)
 	FontFilePutc(*bits++, file);
 }
 
-static
-pcfPutAccel(file, format, pFontInfo)
-    FontFilePtr file;
-    CARD32      format;
-    FontInfoPtr pFontInfo;
+static void
+pcfPutAccel(FontFilePtr file, CARD32 format, FontInfoPtr pFontInfo)
 {
     pcfPutINT8(file, format, pFontInfo->noOverlap);
     pcfPutINT8(file, format, pFontInfo->constantMetrics);
@@ -216,15 +192,13 @@ pcfPutAccel(file, format, pFontInfo)
 #define CanCompressMetrics(min,max) (CanCompressMetric(min) && CanCompressMetric(max))
 
 static char *
-pcfNameForAtom(a)
-    Atom        a;
+pcfNameForAtom(Atom a)
 {
     return NameForAtom(a);
 }
 
-pcfWriteFont(pFont, file)
-    FontPtr     pFont;
-    FontFilePtr file;
+int
+pcfWriteFont(FontPtr pFont, FontFilePtr file)
 {
     PCFTableRec tables[32],
                *table;
@@ -242,13 +216,13 @@ pcfWriteFont(pFont, file)
     xCharInfo  *ink_minbounds,
                *ink_maxbounds;
     BitmapFontPtr  bitmapFont;
-    int         nencodings;
+    int         nencodings = 0;
     int         header_size;
     FontPropPtr offsetProps;
-    int         prop_pad;
+    int         prop_pad = 0;
     char       *atom_name;
     int         glyph;
-    int         offset;
+    CARD32      offset;
 
     bitmapFont = (BitmapFontPtr) pFont->fontPrivate;
     if (bitmapFont->bitmapExtra) {
@@ -263,8 +237,10 @@ pcfWriteFont(pFont, file)
 	ink_maxbounds = &pFont->info.ink_maxbounds;
     }
     offsetProps = (FontPropPtr) xalloc(pFont->info.nprops * sizeof(FontPropRec));
-    if (!offsetProps)
+    if (!offsetProps) {
+      pcfError("pcfWriteFont(): Couldn't allocate offsetProps (%d*%d)", pFont->info.nprops, sizeof(FontPropRec));
 	return AllocError;
+    }
     prop_string_size = 0;
     for (i = 0; i < pFont->info.nprops; i++) {
 	offsetProps[i].name = prop_string_size;
@@ -381,7 +357,8 @@ pcfWriteFont(pFont, file)
 	    cur_table++, table++) {
 	if (current_position > table->offset) {
 	    printf("can't go backwards... %d > %d\n",
-		   current_position, table->offset);
+		   (int)current_position, (int)table->offset);
+	    xfree(offsetProps);
 	    return BadFontName;
 	}
 	while (current_position < table->offset)
@@ -454,8 +431,10 @@ pcfWriteFont(pFont, file)
 	    pcfPutINT16(file, format, pFont->info.lastRow);
 	    pcfPutINT16(file, format, pFont->info.defaultCh);
 	    for (i = 0; i < nencodings; i++) {
-		if (bitmapFont->encoding[i])
-		    pcfPutINT16(file, format, bitmapFont->encoding[i] - bitmapFont->metrics);
+		if (ACCESSENCODING(bitmapFont->encoding,i))
+		    pcfPutINT16(file, format, 
+                                ACCESSENCODING(bitmapFont->encoding, i) - 
+                                  bitmapFont->metrics);
 		else
 		    pcfPutINT16(file, format, 0xFFFF);
 	    }
@@ -483,5 +462,7 @@ pcfWriteFont(pFont, file)
 	    break;
 	}
     }
+
+    xfree(offsetProps);
     return Successful;
 }

@@ -1,0 +1,52 @@
+XCOMM $XdotOrg: xc/lib/freetype2/freetype/config/Imakefile,v 1.4 2005/10/10 01:25:40 alanc Exp $
+XCOMM $XFree86: xc/lib/freetype2/freetype/config/Imakefile,v 1.12 2003/10/24 16:21:17 tsi Exp $
+
+FREETYPETOP = $(TOP)/extras/freetype2
+FREETYPESRC = $(FREETYPETOP)/src
+FREETYPEINC = $(FREETYPETOP)/include/freetype
+
+HEADERS= \
+        ftconfig.h \
+	ftheader.h \
+        ftmodule.h \
+        ftoption.h \
+        ftstdlib.h
+
+BuildIncludes($(HEADERS),freetype2/freetype/config,../../..)
+InstallMultipleFlags($(HEADERS),$(INCDIR)/freetype2/freetype/config,$(INSTINCFLAGS))
+
+LinkSourceFile(ftconfig.h,$(FREETYPEINC)/config)
+LinkSourceFile(ftheader.h,$(FREETYPEINC)/config)
+LinkSourceFile(ftmodule.h,$(FREETYPEINC)/config)
+LinkSourceFile(ftoption.h,$(FREETYPEINC)/config)
+LinkSourceFile(ftstdlib.h,$(FREETYPEINC)/config)
+
+XCOMM Build and install a configure-compatible freetype-config
+
+LinkSourceFile(freetype-config.in,$(FREETYPETOP)/builds/unix)
+LinkSourceFile(freetype2.in,$(FREETYPETOP)/builds/unix)
+
+FREETYPE_VERSION=Freetype2Version
+
+RPATH_CFLAG = HardCodeLibdirFlag
+
+CONFIG_SUBST = 	\
+    sed -e s%@prefix@%$(PROJECTROOT)% -e s%@exec_prefix@%$(PROJECTROOT)% \
+	-e s%@libdir@%$(USRLIBDIR)%g -e s%@includedir@%$(INCDIR)%	\
+	-e s%@ft_version@%$(FREETYPE_VERSION)% -e s%@LIBZ@%% \
+	-e s%@hardcode_libdir_flag_spec@%$(RPATH_CFLAG)% -e s%@wl@%%
+
+freetype-config: freetype-config.in
+	$(CONFIG_SUBST) < freetype-config.in > $@
+
+freetype2.pc: freetype2.in
+	$(CONFIG_SUBST) < freetype2.in > $@
+
+includes:: freetype-config freetype2.pc
+
+InstallNamedProg(freetype-config,freetype-config,$(BINDIR))
+InstallNonExecFile(freetype2.pc,$(USRLIBDIR)/pkgconfig)
+
+clean::
+	RemoveFile(freetype-config)
+	RemoveFile(freetype2.pc)

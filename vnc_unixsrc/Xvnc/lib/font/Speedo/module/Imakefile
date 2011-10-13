@@ -1,0 +1,47 @@
+XCOMM $XFree86: xc/lib/font/Speedo/module/Imakefile,v 1.5 1999/08/14 10:49:18 dawes Exp $
+
+#define IHaveModules
+#include <Server.tmpl>
+
+        INCLUDES = -I$(FONTINCSRC) -I../../include -I$(SERVERSRC)/include \
+		   -I$(XINCLUDESRC) -I../
+         HEADERS = 
+         DEFINES = -DFONTMODULE
+
+      SPEEDOSRCS = do_char.c do_trns.c out_bl2d.c out_blk.c speedomod.c \
+		   out_scrn.c out_util.c reset.c set_spcs.c set_trns.c 
+      SPEEDOOBJS = do_char.o do_trns.o out_bl2d.o out_blk.o speedomod.o \
+		   out_scrn.o out_util.o reset.o set_spcs.o set_trns.o
+
+            SRCS = spfuncs.c spfile.c spinfo.c sperr.c spfont.c spglyph.c \
+		spencode.c bics-unicode.c \
+	    	$(SPEEDOSRCS)
+            OBJS = spfuncs.o spfile.o spinfo.o sperr.o spfont.o spglyph.o \
+		spencode.o bics-unicode.o \
+		$(SPEEDOOBJS)
+
+LinkSourceFile(bics-unicode.c,..)
+LinkSourceFile(do_char.c,..)
+LinkSourceFile(do_trns.c,..)
+LinkSourceFile(out_bl2d.c,..)
+LinkSourceFile(out_blk.c,..)
+LinkSourceFile(out_scrn.c,..)
+LinkSourceFile(out_util.c,..)
+LinkSourceFile(reset.c,..)
+LinkSourceFile(set_spcs.c,..)
+LinkSourceFile(set_trns.c,..)
+LinkSourceFile(spfuncs.c,..)
+LinkSourceFile(spfile.c,..)
+LinkSourceFile(spinfo.c,..)
+LinkSourceFile(sperr.c,..)
+LinkSourceFile(spfont.c,..)
+LinkSourceFile(spglyph.c,..)
+LinkSourceFile(spencode.c,..)
+
+ModuleObjectRule()
+LibraryModuleTarget(speedo,$(OBJS))
+InstallLibraryModule(speedo,$(MODULEDIR),fonts)
+
+DependTarget()
+
+InstallDriverSDKLibraryModule(speedo,$(DRIVERSDKMODULEDIR),fonts)

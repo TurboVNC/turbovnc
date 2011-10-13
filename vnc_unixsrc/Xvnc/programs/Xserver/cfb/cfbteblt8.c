@@ -3,16 +3,16 @@
  * 8 bit displays, in Copy mode with no clipping.
  */
 
+/* $XFree86: xc/programs/Xserver/cfb/cfbteblt8.c,v 1.5 2001/10/28 03:33:02 tsi Exp $ */
 /*
 
-Copyright (c) 1989  X Consortium
+Copyright 1989, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -20,24 +20,28 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 */
 
-/* $XConsortium: cfbteblt8.c,v 5.24 94/09/29 15:26:00 dpw Exp $ */
+/* $Xorg: cfbteblt8.c,v 1.4 2001/02/09 02:04:38 xorgcvs Exp $ */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
 #if PSZ == 8
 
-#include	"X.h"
-#include	"Xmd.h"
-#include	"Xproto.h"
+#include	<X11/X.h>
+#include	<X11/Xmd.h>
+#include	<X11/Xproto.h>
 #include	"cfb.h"
-#include	"fontstruct.h"
+#include	<X11/fonts/fontstruct.h>
 #include	"dixfontstr.h"
 #include	"gcstruct.h"
 #include	"windowstr.h"
@@ -160,7 +164,6 @@ typedef unsigned int	*glyphPointer;
 #endif
 
 #ifdef USE_LEFTBITS
-extern unsigned long endtab[];
 
 #define IncChar(c)  (c = (glyphPointer) (((char *) c) + glyphBytes))
 
@@ -314,7 +317,7 @@ extern unsigned long endtab[];
 #define StoreBits(o)	StorePixels(o,cfb8Pixels[(c) & PGSZBMSK]);
 #define FirstStep	Step
 #else /* PGSZ == 32 */
-#define StoreBits(o)	StorePixels(o,*((unsigned long *) (((char *) cfb8Pixels) + (c & 0x3c))));
+#define StoreBits(o)	StorePixels(o,*((CfbBits *) (((char *) cfb8Pixels) + (c & 0x3c))));
 #define FirstStep	c = BitLeft (c, 2);
 #endif /* PGSZ */
 #endif /* BITMAP_BIT_ORDER */
@@ -329,9 +332,9 @@ CFBTEGBLT8 (pDrawable, pGC, xInit, yInit, nglyph, ppci, pglyphBase)
     CharInfoPtr *ppci;		/* array of character info */
     pointer	pglyphBase;	/* start of array of glyphs */
 {
-    register unsigned long  c;
-    register unsigned long  *dst;
-    register unsigned long  leftMask, rightMask;
+    register CfbBits  c;
+    register CfbBits  *dst;
+    register CfbBits  leftMask, rightMask;
     register int	    hTmp;
     register int	    xoff1;
     register glyphPointer   char1;
@@ -350,11 +353,14 @@ CFBTEGBLT8 (pDrawable, pGC, xInit, yInit, nglyph, ppci, pglyphBase)
 #endif
 
     FontPtr		pfont = pGC->font;
-    unsigned long	*dstLine;
+    CfbBits	*dstLine;
     glyphPointer	oldRightChar;
-    unsigned long	*pdstBase;
+    CfbBits	*pdstBase;
     glyphPointer	leftChar;
-    int			widthDst, widthLeft;
+    int			widthDst;
+#ifndef FAST_CONSTANT_OFFSET_MODE
+    int			widthLeft;
+#endif
     int			widthGlyph;
     int			h;
     int			ew;
@@ -363,8 +369,8 @@ CFBTEGBLT8 (pDrawable, pGC, xInit, yInit, nglyph, ppci, pglyphBase)
     int			lshift;
     int			widthGlyphs;
 #ifdef USE_LEFTBITS
-    register unsigned long  glyphMask;
-    register unsigned long  tmpSrc;
+    register CfbBits  glyphMask;
+    register CfbBits  tmpSrc;
     register int	    glyphBytes;
 #endif
 
@@ -405,7 +411,7 @@ CFBTEGBLT8 (pDrawable, pGC, xInit, yInit, nglyph, ppci, pglyphBase)
 #endif
 
 #ifdef USE_LEFTBITS
-    glyphMask = endtab[widthGlyph];
+    glyphMask = mfbGetendtab(widthGlyph);
     glyphBytes = GLYPHWIDTHBYTESPADDED(*ppci);
 #endif
 
@@ -455,8 +461,8 @@ CFBTEGBLT8 (pDrawable, pGC, xInit, yInit, nglyph, ppci, pglyphBase)
 		    leftMask = cfbendtab[xoff1];
 		    rightMask = cfbstarttab[xoff1];
 
-#define StoreBits0	StorePixels (0,dst[0] & leftMask | \
-				       GetPixelGroup(c) & rightMask);
+#define StoreBits0	StorePixels (0, (dst[0] & leftMask) | \
+					(GetPixelGroup(c) & rightMask));
 #define GetBits GetBitsNS
 
 		    SwitchEm
@@ -521,7 +527,8 @@ CFBTEGBLT8 (pDrawable, pGC, xInit, yInit, nglyph, ppci, pglyphBase)
 		leftMask = cfbendtab[xoff1];
 		rightMask = cfbstarttab[xoff1];
 
-#define StoreBits0	StorePixels (0,dst[0] & leftMask | GetPixelGroup(c) & rightMask);
+#define StoreBits0	StorePixels (0, (dst[0] & leftMask) | \
+					(GetPixelGroup(c) & rightMask));
 #define GetBits	WGetBits1S
 
 		SwitchEm

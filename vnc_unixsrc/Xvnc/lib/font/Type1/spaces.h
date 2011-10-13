@@ -1,4 +1,4 @@
-/* $XConsortium: spaces.h,v 1.4 94/02/06 16:27:06 gildea Exp $ */
+/* $Xorg: spaces.h,v 1.3 2000/08/17 19:46:32 cpqbld Exp $ */
 /* Copyright International Business Machines, Corp. 1991
  * All Rights Reserved
  * Copyright Lexmark International, Inc. 1991
@@ -26,6 +26,8 @@
  * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
  * THIS SOFTWARE.
  */
+/* $XFree86: xc/lib/font/Type1/spaces.h,v 3.3 1999/08/22 08:58:53 dawes Exp $ */
+
 /*SHARED*/
  
 #define   USER                       t1_User
@@ -37,35 +39,26 @@
 #define   Scale(o,sx,sy)             t1_Scale(o,sx,sy)
 #define   QuerySpace(S,f1,f2,f3,f4)  t1_QuerySpace(S,f1,f2,f3,f4)
 #define   Warp(s1,o,s2)              t1_Warp(s1,o,s2)
- 
-struct XYspace *t1_Context(); /* creates a coordinate space for a device      */
-struct xobject *t1_Transform();  /* transform an object                       */
+
+/* IDENTITY space */
+extern struct XYspace *IDENTITY;
+
+/* creates a coordinate space for a device      */
+extern struct XYspace *Context(pointer device, double units);
+/* transform an object                       */
+extern struct xobject *t1_Transform ( struct xobject *obj, double cxx, 
+				      double cyx, double cxy, double cyy );
+#if 0
 struct xobject *t1_Rotate();  /* rotate an object                             */
-struct xobject *t1_Scale();   /* scale an object                              */
+#endif
+/* scale an object                              */
+extern struct xobject *t1_Scale ( struct xobject *obj, double sx, double sy );
+#if 0
 struct xobject *t1_Warp();    /* transform like delta of two spaces           */
-void t1_QuerySpace();         /* returns coordinate space matrix              */
- 
-/*END SHARED*/
-/*SHARED*/
- 
-#define   DeviceResolution   t1_DeviceResolution
-#define   InitSpaces()       t1_InitSpaces()
-#define   CopySpace(s)       t1_CopySpace(s)
-#define   Xform(o,M)         t1_Xform(o,M)
-#define   UnConvert(S,pt,xp,yp)    t1_UnConvert(S,pt,xp,yp)
-#define   MatrixMultiply(A,B,C)    t1_MMultiply(A,B,C)
-#define   MatrixInvert(A,B)        t1_MInvert(A,B)
-#define   PseudoSpace(S,M)   t1_PseudoSpace(S,M)
-#define   FindContext(M)     t1_FindContext(M)
- 
-void t1_InitSpaces();         /* initialize pre-defined coordinate spaces     */
-struct XYspace *t1_CopySpace(); /* duplicate a coordinate space               */
-struct xobject *t1_Xform();   /* transform object by matrix                   */
-void t1_UnConvert();          /* return user coordinates from device coordinates */
-void t1_MMultiply();          /* multiply two matrices                        */
-void t1_MInvert();            /* invert a matrix                              */
-void t1_PseudoSpace();        /* force a coordinate space from a matrix       */
-int t1_FindContext();         /* return the "context" represented by a matrix */
+#endif
+/* returns coordinate space matrix              */
+extern void t1_QuerySpace ( struct XYspace *S, double *cxxP, double *cyxP, 
+			    double *cxyP, double *cyyP );
  
 /*END SHARED*/
 /*SHARED*/
@@ -108,15 +101,24 @@ struct doublematrix {
 /*END SHARED*/
 /*SHARED*/
  
+struct fractpoint {
+       fractpel x,y;
+} ;
+ 
+/*SHARED*/
+
+typedef fractpel (*convertFunc)(double, double, double, double);
+typedef fractpel (*iconvertFunc)(fractpel, fractpel, long, long);
+
 struct XYspace {
        XOBJ_COMMON           /* xobject common data define 3-26-91 PNM       */
 			     /* type = SPACETYPE			     */
-       void (*convert)();     /* calculate "fractpoint" X,Y from float X,Y   */
-       void (*iconvert)();    /* calculate "fractpoint" X,Y from int X,Y     */
-       fractpel (*xconvert)();  /* subroutine of convert                     */
-       fractpel (*yconvert)();  /* subroutine of convert                     */
-       fractpel (*ixconvert)();  /* subroutine of iconvert                   */
-       fractpel (*iyconvert)();  /* subroutine of iconvert                   */
+       void (*convert)(struct fractpoint *, struct XYspace *, double, double);     /* calculate "fractpoint" X,Y from float X,Y   */
+       void (*iconvert)(struct fractpoint *, struct XYspace *, long, long);    /* calculate "fractpoint" X,Y from int X,Y     */
+       convertFunc xconvert;  /* subroutine of convert                       */
+       convertFunc yconvert;  /* subroutine of convert                       */
+       iconvertFunc ixconvert;  /* subroutine of iconvert                    */
+       iconvertFunc iyconvert;  /* subroutine of iconvert                    */
        int ID;               /* unique identifier (used in font caching)     */
        unsigned char context;  /* device context of coordinate space         */
        struct doublematrix tofract;  /* xform to get to fractional pels      */
@@ -126,15 +128,45 @@ struct XYspace {
 #define    INVALIDID  0      /* no valid space will have this ID             */
  
 /*END SHARED*/
+/*END SHARED*/
 /*SHARED*/
  
-struct fractpoint {
-       fractpel x,y;
-} ;
+#define   DeviceResolution   t1_DeviceResolution
+#define   InitSpaces         t1_InitSpaces
+#define   CopySpace(s)       t1_CopySpace(s)
+#define   Xform(o,M)         t1_Xform(o,M)
+#define   UnConvert(S,pt,xp,yp)    t1_UnConvert(S,pt,xp,yp)
+#define   MatrixMultiply(A,B,C)    t1_MMultiply(A,B,C)
+#define   MatrixInvert(A,B)        t1_MInvert(A,B)
+#define   PseudoSpace(S,M)   t1_PseudoSpace(S,M)
+#define   FindContext(M)     t1_FindContext(M)
  
+/* initialize pre-defined coordinate spaces     */
+extern void t1_InitSpaces ( void );
+/* duplicate a coordinate space               */
+extern struct XYspace *t1_CopySpace ( struct XYspace *S );
+/* transform object by matrix                   */
+extern struct xobject *t1_Xform ( struct xobject *obj, double M[2][2] );
+/* return user coordinates from device coordinates */
+extern void t1_UnConvert ( struct XYspace *S, struct fractpoint *pt, 
+			   double *xp, double *yp );
+/* multiply two matrices                        */
+extern void t1_MMultiply ( double A[2][2], double B[2][2], double C[2][2] );
+/* invert a matrix                              */
+extern void t1_MInvert ( double M[2][2], double Mprime[2][2] );
+/* force a coordinate space from a matrix       */
+extern void t1_PseudoSpace ( struct XYspace *S, double M[2][2] );
+/* return the "context" represented by a matrix */
+int t1_FindContext(double M[2][2]);          
+
 /*END SHARED*/
 /*SHARED*/
  
 #define  NULLCONTEXT   0
  
 /*END SHARED*/
+ 
+/* dump a coordinate space structure           */
+extern void t1_DumpSpace ( struct XYspace *S );
+/* dump a format a "fractpel" coordinate       */
+extern void t1_FormatFP ( char *string, fractpel fpel );

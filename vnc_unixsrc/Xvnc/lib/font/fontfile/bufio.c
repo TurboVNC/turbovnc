@@ -1,17 +1,14 @@
-/* $XConsortium: bufio.c,v 1.8 94/04/17 20:17:00 gildea Exp $ */
-/* $XFree86: xc/lib/font/fontfile/bufio.c,v 3.0 1994/12/17 09:41:39 dawes Exp $ */
+/* $Xorg: bufio.c,v 1.4 2001/02/09 02:04:03 xorgcvs Exp $ */
 
 /*
 
-Copyright (c) 1991  X Consortium
+Copyright 1991, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -19,37 +16,38 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/lib/font/fontfile/bufio.c,v 3.9 2001/12/14 19:56:50 dawes Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
  */
 
 
-#include <X11/Xos.h>
-#include <fontmisc.h>
-#include <bufio.h>
-#include <errno.h>
-#ifdef X_NOT_STDC_ENV
-extern int errno;
+#ifdef HAVE_CONFIG_H
+#include <config.h>
 #endif
+#include <X11/Xos.h>
+#include <X11/fonts/fontmisc.h>
+#include <X11/fonts/bufio.h>
+#include <errno.h>
 
 BufFilePtr
-BufFileCreate (private, io, skip, close)
-    char    *private;
-    int	    (*io)();
-    int	    (*skip)();
-    int	    (*close)();
+BufFileCreate (char *private,
+	       int (*input)(BufFilePtr),
+	       int (*output)(int, BufFilePtr),
+	       int (*skip)(BufFilePtr, int),
+	       int (*close)(BufFilePtr, int))
 {
     BufFilePtr	f;
 
@@ -59,17 +57,18 @@ BufFileCreate (private, io, skip, close)
     f->private = private;
     f->bufp = f->buffer;
     f->left = 0;
-    f->io = io;
+    f->input = input;
+    f->output = output;
     f->skip = skip;
+    f->eof  = 0;
     f->close = close;
     return f;
 }
 
-#define FileDes(f)  ((int) (f)->private)
+#define FileDes(f)  ((int)(long) (f)->private)
 
 static int
-BufFileRawFill (f)
-    BufFilePtr	f;
+BufFileRawFill (BufFilePtr f)
 {
     int	left;
 
@@ -84,9 +83,7 @@ BufFileRawFill (f)
 }
 
 static int
-BufFileRawSkip (f, count)
-    BufFilePtr	f;
-    int		count;
+BufFileRawSkip (BufFilePtr f, int count)
 {
     int	    curoff;
     int	    fileoff;
@@ -118,8 +115,7 @@ BufFileRawSkip (f, count)
 }
 
 static int
-BufFileRawClose (f, doClose)
-    BufFilePtr	f;
+BufFileRawClose (BufFilePtr f, int doClose)
 {
     if (doClose)
 	close (FileDes (f));
@@ -127,20 +123,17 @@ BufFileRawClose (f, doClose)
 }
 
 BufFilePtr
-BufFileOpenRead (fd)
-    int	fd;
+BufFileOpenRead (int fd)
 {
-#ifdef __EMX__
+#if defined(__UNIXOS2__) || defined (WIN32)
     /* hv: I'd bet WIN32 has the same effect here */
     setmode(fd,O_BINARY);
 #endif
-    return BufFileCreate ((char *) fd, BufFileRawFill, BufFileRawSkip, BufFileRawClose);
+    return BufFileCreate ((char *)(long) fd, BufFileRawFill, 0, BufFileRawSkip, BufFileRawClose);
 }
 
-static
-BufFileRawFlush (c, f)
-    int		c;
-    BufFilePtr	f;
+static int
+BufFileRawFlush (int c, BufFilePtr f)
 {
     int	cnt;
 
@@ -155,25 +148,22 @@ BufFileRawFlush (c, f)
 }
 
 BufFilePtr
-BufFileOpenWrite (fd)
-    int	fd;
+BufFileOpenWrite (int fd)
 {
     BufFilePtr	f;
 
-#ifdef __EMX__
+#if defined(__UNIXOS2__) || defined(WIN32)
     /* hv: I'd bet WIN32 has the same effect here */
     setmode(fd,O_BINARY);
 #endif
-    f = BufFileCreate ((char *) fd, BufFileRawFlush, 0, BufFileFlush);
+    f = BufFileCreate ((char *)(long) fd, 0, BufFileRawFlush, 0, BufFileFlush);
     f->bufp = f->buffer;
     f->left = BUFFILESIZE;
     return f;
 }
 
-BufFileRead (f, b, n)
-    BufFilePtr	f;
-    char	*b;
-    int		n;
+int
+BufFileRead (BufFilePtr f, char *b, int n)
 {
     int	    c, cnt;
     cnt = n;
@@ -186,10 +176,8 @@ BufFileRead (f, b, n)
     return n - cnt - 1;
 }
 
-BufFileWrite (f, b, n)
-    BufFilePtr	f;
-    char	*b;
-    int		n;
+int
+BufFileWrite (BufFilePtr f, char *b, int n)
 {
     int	    cnt;
     cnt = n;
@@ -201,30 +189,24 @@ BufFileWrite (f, b, n)
 }
 
 int
-BufFileFlush (f)
-    BufFilePtr	f;
+BufFileFlush (BufFilePtr f, int doClose)
 {
     if (f->bufp != f->buffer)
-	(*f->io) (BUFFILEEOF, f);
-
+	return (*f->output) (BUFFILEEOF, f);
     return 0;
 }
 
 int
-BufFileClose (f, doClose)
-    BufFilePtr	f;
+BufFileClose (BufFilePtr f, int doClose)
 {
-    (void) (*f->close) (f, doClose);
+    int ret;
+    ret = (*f->close) (f, doClose);
     xfree (f);
-
-    return 0;
+    return ret;
 }
 
-int
-BufFileFree (f)
-    BufFilePtr	f;
+void
+BufFileFree (BufFilePtr f)
 {
     xfree (f);
-
-    return 0;
 }

@@ -1,9 +1,11 @@
-XCOMM $TOG: sunLib.tmpl /main/45 1997/02/13 13:52:59 kaleb $
+XCOMM $Xorg: sunLib.tmpl,v 1.3 2000/08/17 19:41:48 cpqbld Exp $
+XCOMM $XdotOrg: xc/config/cf/sunLib.tmpl,v 1.14 2005/12/03 17:20:48 alanc Exp $
 
 
 
 
-XCOMM $XFree86: xc/config/cf/sunLib.tmpl,v 3.7.2.1 1997/05/03 09:43:09 dawes Exp $
+
+XCOMM $XFree86: xc/config/cf/sunLib.tmpl,v 3.12tsi Exp $
 
 /*
  * SunOS shared library template
@@ -13,6 +15,7 @@ XCOMM $XFree86: xc/config/cf/sunLib.tmpl,v 3.7.2.1 1997/05/03 09:43:09 dawes Exp
 
 # if SunPost411FCSLd
 #  define SharedXmuReqs $(LDPRELIBS) $(XTOOLLIB) $(XLIB)
+#  define SharedXrenderReqs $(LDPRELIB) $(XLIB)
 # endif
 
 #ifndef SharedX11Rev
@@ -31,7 +34,7 @@ XCOMM $XFree86: xc/config/cf/sunLib.tmpl,v 3.7.2.1 1997/05/03 09:43:09 dawes Exp
 #define SharedXmuRev 4.20
 #endif
 #ifndef SharedXextRev
-#define SharedXextRev 4.40
+#define SharedXextRev 4.50
 #endif
 #ifndef SharedXiRev
 #define SharedXiRev 4.20
@@ -39,37 +42,193 @@ XCOMM $XFree86: xc/config/cf/sunLib.tmpl,v 3.7.2.1 1997/05/03 09:43:09 dawes Exp
 #ifndef SharedXtstRev
 #define SharedXtstRev 1.20
 #endif
-#ifndef SharedPexRev
-#define SharedPexRev 1.10
-#endif
 
 #else				/* else it's Solaris */
+
+/* Solaris uses single digit library versions, and versions of libraries
+ * defined in SVID specs should match the versions specified there.
+ */
+
+#ifndef SharedX11Rev
+# define SharedX11Rev 4
+#endif
+#ifndef SharedOldXRev
+# define SharedOldXRev 6
+#endif
+#ifndef SharedXextRev
+# define SharedXextRev 0
+#endif
+#ifndef SharedXauRev
+# define SharedXauRev 6
+#endif
+#ifndef SharedXdmcpRev
+# define SharedXdmcpRev 6
+#endif
+#ifndef SharedXmuRev
+# define SharedXmuRev 4
+#endif
+#ifndef SharedXmuuRev
+# define SharedXmuuRev 1
+#endif
+#ifndef SharedXpRev
+# define SharedXpRev 1
+#endif
+#ifndef SharedXpmRev
+# define SharedXpmRev 4
+#endif
+#ifndef SharedXtRev
+# define SharedXtRev 4
+#endif
+#ifndef SharedXaw6Rev
+# define SharedXaw6Rev 5
+#endif
+#ifndef SharedXiRev
+# define SharedXiRev 5
+#endif
+#ifndef SharedXtstRev
+# define SharedXtstRev 1
+#endif
+#ifndef SharedFSRev
+# define SharedFSRev 5
+#endif
+#ifndef SharedICERev
+# define SharedICERev 6
+#endif
+#ifndef SharedSMRev
+# define SharedSMRev 6
+#endif
+#ifndef SharedXcursor
+# define SharedXcursorRev 1
+#endif
+#ifndef SharedXdamageRev
+# define SharedXdamageRev 1
+#endif
+#ifndef SharedXevieRev
+# define SharedXevieRev 1
+#endif
+#ifndef SharedXfixesRev
+# define SharedXfixesRev 1
+#endif
+#ifndef SharedXftRev
+# define SharedXftRev 2
+#endif
+#ifndef SharedXineramaRev
+# define SharedXineramaRev 1
+#endif
+#ifndef SharedXrenderRev
+# define SharedXrenderRev 1
+#endif
+#ifndef SharedXResRev
+# define SharedXResRev 1
+#endif
+#ifndef SharedXvRev
+# define SharedXvRev 1
+#endif
+#ifndef SharedXvMCRev
+# define SharedXvMCRev 1
+#endif
+#ifndef SharedXrandrRev
+# define SharedXrandrRev 2
+#endif
+#ifndef SharedXssRev
+# define SharedXssRev 1
+#endif
+#ifndef SharedFontconfigRev
+# define SharedFontconfigRev 1
+#endif
+#ifndef SharedGlxRev
+# define SharedGlxRev 1
+#endif
+#ifndef SharedGluRev
+# define SharedGluRev 1
+#endif
+#ifndef SharedGLwRev
+# define SharedGLwRev 1
+#endif
+#ifndef SharedOSMesaRev
+# define SharedOSMesaRev 4
+#endif
+#ifndef SharedxkbfileRev
+# define SharedxkbfileRev 5
+#endif
+#ifndef SharedXxf86miscRev
+# define SharedXxf86miscRev 1
+#endif
+#ifndef SharedXxf86vmRev
+# define SharedXxf86vmRev 1
+#endif
 
 # if ThreadedX
 #  if OSMinorVersion > 3
 #   define SharedThreadReqs /**/
-#   define SharedX11Reqs /**/
 #  endif
 # endif
-# define SharedXmuReqs $(LDPRELIBS) $(XTOOLLIB) $(XLIB)
+
+# define SharedX11Reqs $(LDPRELIB) SharedThreadReqs $(EXTRA_LIBRARIES) -lc DlLibrary
+# define SharedXlibi18nReqs $(LDPRELIB) $(XLIBONLY) -lc
+# define SharedOldXReqs $(LDPRELIB) $(XLIBONLY) -lc
+# define SharedXtReqs $(LDPRELIB) $(XLIBONLY) $(SMLIB) $(ICELIB) -lc
+# define SharedXawReqs $(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XPMLIB) $(EXTRAXAWREQS) $(XLIB) -lc
+# define SharedXaw7Reqs $(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XPMLIB) $(XLIB) -lc
+# define SharedXaw6Reqs $(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XLIB) -lc
+# define SharedXmuReqs $(LDPRELIB) $(XTOOLLIB) $(XLIB) -lnsl -lc
+# define SharedXmuuReqs $(LDPRELIB) $(XLIBONLY) -lc
+# define SharedXextReqs $(LDPRELIB) $(XLIBONLY) -lc
+# define SharedXiReqs $(LDPRELIB) $(XLIB) -lc
+# define SharedXtstReqs $(LDPRELIB) $(XLIB) -lc
+# define SharedFSReqs $(EXTRA_LIBRARIES) -lc
+# define SharedICEReqs $(EXTRA_LIBRARIES) -lc
+# define SharedSMReqs $(LDPRELIB) $(ICELIB) $(EXTRA_LIBRARIES) -lc
+# define SharedXineramaReqs $(LDPRELIB) $(XLIB) -lc
+# define SharedXpReqs $(LDPRELIB) $(XLIB) -lc
+# define SharedXpmReqs $(LDPRELIB) $(XLIBONLY) -lc
+# define SharedXResReqs $(LDPRELIB) $(XLIB) -lc
+# define SharedXrenderReqs $(LDPRELIB) $(XLIBONLY) -lc
+# define SharedXrandrReqs  $(LDPRELIB) $(XRENDERLIB) $(XLIB) -lc
+# define SharedXssReqs $(LDPRELIB) $(XLIB) -lc
+# define SharedXvReqs $(LDPRELIB) $(XLIB) -lc
+# define SharedXvMCReqs $(LDPRELIB) $(XLIB) -lc
+# define SharedXfontReqs $(LDPRELIB) $(FREETYPE2LIB) GzipLibrary -lsocket MathLibrary -lc
+# define SharedXfontcacheReqs $(LDPRELIB) $(XLIB)
+# define SharedFontencReqs $(LDPRELIB) GzipLibrary -lc
+# define SharedXxf86dgaReqs $(LDPRELIB) $(XLIB) -lc
+# define SharedXxf86miscReqs $(LDPRELIB) $(XLIB) -lc
+# define SharedXxf86vmReqs $(LDPRELIB) $(XLIB) -lc
+# define SharedDPSReqs $(LDPRELIB) $(SMLIB) $(ICELIB) $(XTOOLLIB) $(XLIBONLY) $(EXTRA_LIBRARIES) -lc
+# define SharedDPSTKReqs $(LDPRELIB) $(SMLIB) $(ICELIB) $(XTOOLLIB) $(DPSLIB) $(XLIBONLY) -lc
+# define SharedPSResReqs -lc
+# define SharedGLReqs $(LDPRELIB) $(XLIB) -lc
+# define SharedGLUReqs $(LDPRELIBS) $(XLIB) $(GLXLIB) $(CXXLIB) MathLibrary -lc
+# define SharedGLwReqs $(LDPRELIBS) $(MOTIFLIB) $(GLXLIB) $(XTOOLLIB) $(XLIB)
+# define SharedOSMesaReqs $(LDPRELIB) $(XLIB) $(GLXLIB) MathLibrary -lc
+# define SharedxkbfileReqs $(LDPRELIB) $(XONLYLIB) -lc
+# define SharedxkbuiReqs $(LDPRELIB) $(XKBFILELIB) $(XONLYLIB) MathLibrary -lc
+# define SharedXfixesReqs $(LDPRELIB) $(XLIB) -lc
+# define SharedXdamageReqs $(LDPRELIB) $(XLIB) -lc
+# define SharedXauReqs -lc
+# define SharedXdmcpReqs -lsocket -lc
+# define SharedXcompositeReqs $(LDPRELIB) $(XDAMAGELIB) $(XFIXESLIB) $(XLIB) -lc
+# define SharedXcursorReqs $(LDPRELIB) $(XRENDERLIB) $(XONLYLIB) -lc
+# define SharedXevieReqs $(LDPRELIB) $(XLIB)
+
 # define FixupLibReferences() /**/
 
-# define SharedPamReqs -ldl
+# define SharedPamReqs DlLibrary
 # define SharedPamUnixReqs $(LDPRELIBS) -lpam $(LDPOSTLIBS) -lnsl -lmp -lcmd SharedThreadReqs
 # define SharedPamSampleReqs $(LDPRELIBS) -lpam $(LDPOSTLIBS) SharedThreadReqs
 # define SharedPamDialAuthReqs $(LDPRELIBS) -lpam $(LDPOSTLIBS) SharedThreadReqs
 # define SharedPamRhostsAuthReqs $(LDPRELIBS) -lpam $(LDPOSTLIBS) -lsocket SharedThreadReqs
 # define SharedPamDceAuthReqs $(LDPRELIBS) -lpam $(LDPOSTLIBS) -ldce -lnsl -lsocket SharedThreadReqs
-# define SharedTtReqs -lnsl -lsocket -lintl -ldl -lc -lw
-# define SharedDtSvcReqs $(LDPRELIBS) $(TTLIB) $(XMLIB) $(XTOOLLIB) $(XPLIB) $(XLIB) $(LDPOSTLIBS) SharedThreadReqs -lgen -lc -lsocket -lnsl -ldl
-# define SharedDtMmdbReqs $(LDPRELIBS) $(DTSVCLIB) $(TTLIB) $(XMLIB) $(XTOOLLIB) $(XPLIB) $(XLIB) $(LDPOSTLIBS) SharedThreadReqs -lgen -lc -lsocket -lnsl -ldl
+# define SharedTtReqs -lnsl -lsocket -lintl DlLibrary -lc -lw
+# define SharedDtSvcReqs $(LDPRELIBS) $(TTLIB) $(XMLIB) $(XTOOLLIB) $(XPLIB) $(XLIB) $(LDPOSTLIBS) SharedThreadReqs -lgen -lc -lsocket -lnsl DlLibrary
+# define SharedDtMmdbReqs $(LDPRELIBS) $(DTSVCLIB) $(TTLIB) $(XMLIB) $(XTOOLLIB) $(XPLIB) $(XLIB) $(LDPOSTLIBS) SharedThreadReqs -lgen -lc -lsocket -lnsl DlLibrary
 # define SharedDtSearchReqs -lm -lc
 # define SharedDtWidgetReqs $(LDPRELIBS) $(DTSVCLIB) $(XMLIB) -lintl $(LDPOSTLIBS) -lw -lm -lc
 # define SharedDtHelpReqs $(LDPRELIBS) $(DTSVCLIB) $(XMLIB) $(XTOOLLIB) $(XPLIB) $(XLIB) $(LDPOSTLIBS) -lw -lgen -lm -lc
 # define SharedDtPrintReqs $(LDPRELIBS) $(DTSVCLIB) $(DTHELPLIB) $(XMLIB) -lintl $(LDPOSTLIBS) -lw -lm -lc
-# define SharedDtTermReqs SharedDtHelpReqs -ldl -lgen
+# define SharedDtTermReqs SharedDtHelpReqs DlLibrary -lgen
 # define SharedDtMrmReqs $(LDPRELIBS) $(DTTERMLIB) $(DTPRINTLIB) $(DTHELPLIB) $(DTWIDGETLIB) $(MRESOURCELIB) $(XMLIB) $(XTOOLLIB) $(XPLIB) $(XLIB) $(LDPOSTLIBS) -lw -lsocket -lnsl -lc
-# define SharedDtMailReqs $(LDPRELIBS) -lw $(CXXLIB) -lm -ldl
+# define SharedDtMailReqs $(LDPRELIBS) -lw $(CXXLIB) -lm DlLibrary
 # define SharedCsaReqs $(LDPRELIBS) $(DTSVCLIB) $(XMLIB) SharedXmReqs
 
 # define DtClientExtraLibs -lintl
@@ -80,8 +239,16 @@ ICONV_INBUF_DEFINE = -DICONV_INBUF_CONST=const
 # if HasCplusplus
 #  if HasGcc2ForCplusplus
 UNSHARED_CXXLIB = -static -lC
-#  else
+#  elif HasSunCplusplus
+#   if CplusplusCompilerMajorVersion > 3
+#    ifdef CplusplusWhatdir
+UNSHARED_CXXLIB = -Bstatic -L`CplusplusWhatdir CC`/../lib -lC -Bdynamic
+#    else
+UNSHARED_CXXLIB = -Bstatic -L/opt/SUNWspro/SC4.0/lib -lC -Bdynamic
+#    endif
+#   else
 UNSHARED_CXXLIB = -Bstatic -lC -Bdynamic -lm -lc -Bstatic
+#   endif
 #  endif
 # endif
 

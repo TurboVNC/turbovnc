@@ -1,0 +1,29 @@
+.TH cleanlinks 1 __vendorversion__
+.SH NAME
+cleanlinks \- remove dangling symbolic links and empty directories
+.SH SYNOPSIS
+.B cleanlinks
+.SH DESCRIPTION
+The
+.I cleanlinks
+program searches the directory tree descended from the current directory for
+symbolic links whose targets do not exist, and removes them.
+It then removes all empty directories in that directory tree.
+.PP
+.I cleanlinks
+is useful for cleaning up a shadow link tree created with
+.BR lndir (1)
+after files have been removed from the real directory.
+.SH DIAGNOSTICS
+A message will be printed upon encountering each dangling symlink and empty
+directory.
+.SH SEE ALSO
+.BR lndir (1).
+.SH AUTHOR
+.PP
+The version of the 
+.I cleanlinks
+included in this X.Org Foundation release was originally written 
+by David Dawes wrote as a part of XFree86.
+.PP
+Colin Watson wrote this manual page, originally for the Debian Project.

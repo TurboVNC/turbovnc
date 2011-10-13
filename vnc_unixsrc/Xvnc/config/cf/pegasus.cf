@@ -1,4 +1,4 @@
-XCOMM platform:  $XConsortium: pegasus.cf /main/38 1996/09/28 16:12:05 rws $
+XCOMM platform:  $Xorg: pegasus.cf,v 1.3 2000/08/17 19:41:48 cpqbld Exp $
 
 #ifndef OSName
 #define OSName             UTek 4.0

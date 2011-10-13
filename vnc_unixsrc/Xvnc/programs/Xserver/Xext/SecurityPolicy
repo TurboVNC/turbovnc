@@ -1,6 +1,6 @@
 version-1 
 
-# $XConsortium: SecurityPolicy /main/3 1996/12/20 20:27:48 swick $
+# $Xorg: SecurityPolicy,v 1.3 2000/08/17 19:47:56 cpqbld Exp $
 
 # The site policy fields are interpreted by the XC-QUERY-SECURITY-1
 # authorization protocol.  The values are arbitrary and site-specific.

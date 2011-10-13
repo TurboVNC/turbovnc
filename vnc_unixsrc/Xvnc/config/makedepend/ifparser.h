@@ -1,5 +1,5 @@
 /*
- * $XConsortium: ifparser.h /main/4 1996/09/28 16:15:24 rws $
+ * $Xorg: ifparser.h,v 1.3 2000/08/17 19:41:51 cpqbld Exp $
  *
  * Copyright 1992 Network Computing Devices, Inc.
  * 
@@ -57,30 +57,27 @@
  *     ParseIfExpression		parse a string for #if
  */
 
-/* $XFree86: xc/config/makedepend/ifparser.h,v 3.2 1996/12/30 13:57:56 dawes Exp $ */
+/* $XFree86: xc/config/makedepend/ifparser.h,v 3.4 2001/01/17 16:38:58 dawes Exp $ */
 
 #include <stdio.h>
 
-#define const /**/
 typedef int Bool;
 #define False 0
 #define True 1
 
 typedef struct _if_parser {
     struct {				/* functions */
-	char *(*handle_error) (/* struct _if_parser *, const char *,
-				 const char * */);
-	long (*eval_variable) (/* struct _if_parser *, const char *, int */);
-	int (*eval_defined) (/* struct _if_parser *, const char *, int */);
+	const char *(*handle_error) (struct _if_parser *, const char *,
+				     const char *);
+	long (*eval_variable) (struct _if_parser *, const char *, int);
+	int (*eval_defined) (struct _if_parser *, const char *, int);
     } funcs;
     char *data;
 } IfParser;
 
-char *ParseIfExpression (
-#ifdef __STDC__
+const char *ParseIfExpression (
     IfParser *, 
     const char *, 
     long *
-#endif
 );
 

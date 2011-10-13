@@ -1,0 +1,263 @@
+XCOMM $XdotOrg: xc/lib/freetype2/Imakefile,v 1.4 2004/05/05 17:24:41 eich Exp $
+XCOMM $XFree86: xc/lib/freetype2/Imakefile,v 1.19 2003/11/21 02:33:22 dawes Exp $
+
+#define IHaveSubdirs
+#define PassCDebugFlags
+#define NoLibSubdirs
+
+#define DoNormalLib NormalLibFreetype2
+#define DoSharedLib SharedLibFreetype2
+#define DoExtraLib SharedLibFreetype2
+#define DoDebugLib DebugLibFreetype2
+#define DoProfileLib ProfileLibFreetype2
+#define HasSharedData YES
+#define LibName freetype
+#define SoRev SOFREETYPE2REV
+#ifdef SharedLibtoolFreetype2Rev
+#define SharedLibtoolRev SharedLibtoolFreetype2Rev
+#endif
+#define LibHeaders NO
+
+#include <Threads.tmpl>
+
+FREETYPETOP = $(TOP)/extras/freetype2
+FREETYPESRC = $(FREETYPETOP)/src
+
+
+#ifdef DarwinArchitecture
+# if DarwinQuartzSupport
+DARWINDEFINES = -DTARGET_API_MAC_CARBON=TRUE
+REQUIREDLIBS = -framework CoreServices -framework ApplicationServices
+# else
+DARWINDEFINES = -DDARWIN_NO_CARBON
+# endif
+#endif
+
+DEFINES = $(DARWINDEFINES) Freetype2BuildDefines -DXFREE86_FT2
+
+INCLUDES = -I -I.\
+	-I$(FREETYPESRC)\
+	-I$(FREETYPESRC)/base\
+        -I$(FREETYPESRC)/autofit \
+	-I$(FREETYPESRC)/autohint\
+	-I$(FREETYPESRC)/bdf\
+	-I$(FREETYPESRC)/cff\
+	-I$(FREETYPESRC)/cid\
+	-I$(FREETYPESRC)/gzip\
+        -I$(FREETYPESRC)/lzw \
+	-I$(FREETYPESRC)/pcf\
+	-I$(FREETYPESRC)/pfr\
+	-I$(FREETYPESRC)/psaux\
+	-I$(FREETYPESRC)/pshinter\
+	-I$(FREETYPESRC)/psnames\
+	-I$(FREETYPESRC)/raster\
+	-I$(FREETYPESRC)/sfnt\
+	-I$(FREETYPESRC)/smooth\
+	-I$(FREETYPESRC)/truetype\
+	-I$(FREETYPESRC)/type1\
+	-I$(FREETYPESRC)/type42\
+	-I$(FREETYPESRC)/winfonts\
+	$(FREETYPE2INCLUDES)\
+	-I$(XBUILDINCDIR)
+
+SUBDIRS=freetype
+
+HEADERS=ft2build.h
+
+SRCS_BASE = ftapi.c \
+            ftbase.c \
+            ftbbox.c \
+            ftbdf.c \
+            ftdebug.c \
+            ftglyph.c \
+            ftinit.c \
+            ftmm.c \
+            ftpfr.c \
+            ftstroke.c \
+            ftsynth.c \
+            ftsystem.c \
+            fttype1.c \
+            ftwinfnt.c \
+            ftxf86.c
+
+OBJS_BASE = ftapi.o \
+            ftbase.o \
+            ftbbox.o \
+            ftbdf.o \
+            ftdebug.o \
+            ftglyph.o \
+            ftinit.o \
+            ftmm.o \
+            ftpfr.o \
+            ftstroke.o \
+            ftsynth.o \
+            ftsystem.o \
+            fttype1.o \
+            ftwinfnt.o \
+            ftxf86.o
+
+SRCS_AUTOFIT  = autofit.c
+OBJS_AUTOFIT  = autofit.o
+
+SRCS_AUTOHINT = autohint.c
+OBJS_AUTOHINT = autohint.o
+
+SRCS_BDF      = bdf.c
+OBJS_BDF      = bdf.o
+
+SRCS_CFF      = cff.c
+OBJS_CFF      = cff.o
+
+SRCS_CID      = type1cid.c
+OBJS_CID      = type1cid.o
+
+SRCS_GZIP     = ftgzip.c
+OBJS_GZIP     = ftgzip.o
+
+SRCS_LZW      = ftlzw.c
+OBJS_LZW      = ftlzw.o
+
+SRCS_PCF      = pcf.c
+OBJS_PCF      = pcf.o
+
+SRCS_PFR      = pfr.c
+OBJS_PFR      = pfr.o
+
+SRCS_PSAUX    = psaux.c
+OBJS_PSAUX    = psaux.o
+
+SRCS_PSHINTER = pshinter.c
+OBJS_PSHINTER = pshinter.o
+
+SRCS_PSNAMES  = psnames.c
+OBJS_PSNAMES  = psnames.o
+
+SRCS_RASTER   = raster.c
+OBJS_RASTER   = raster.o
+
+SRCS_SFNT     = sfnt.c
+OBJS_SFNT     = sfnt.o
+
+SRCS_SMOOTH   = smooth.c
+OBJS_SMOOTH   = smooth.o
+
+SRCS_TRUETYPE = truetype.c
+OBJS_TRUETYPE = truetype.o
+
+SRCS_TYPE1    = type1.c
+OBJS_TYPE1    = type1.o
+
+SRCS_TYPE42   = type42.c
+OBJS_TYPE42   = type42.o
+
+SRCS_WINFONTS = winfnt.c
+OBJS_WINFONTS = winfnt.o
+
+SRCS = $(SRCS_BASE)\
+       $(SRCS_AUTOFIT) \
+       $(SRCS_AUTOHINT)\
+       $(SRCS_BDF)\
+       $(SRCS_CFF)\
+       $(SRCS_CID)\
+       $(SRCS_GZIP)\
+       $(SRCS_LZW)\
+       $(SRCS_PCF)\
+       $(SRCS_PFR)\
+       $(SRCS_PSAUX)\
+       $(SRCS_PSHINTER)\
+       $(SRCS_PSNAMES)\
+       $(SRCS_RASTER)\
+       $(SRCS_SFNT)\
+       $(SRCS_SMOOTH)\
+       $(SRCS_TRUETYPE)\
+       $(SRCS_TYPE1)\
+       $(SRCS_TYPE42)\
+       $(SRCS_WINFONTS)
+
+OBJS = $(OBJS_BASE)\
+       $(OBJS_AUTOFIT) \
+       $(OBJS_AUTOHINT)\
+       $(OBJS_BDF)\
+       $(OBJS_CFF)\
+       $(OBJS_CID)\
+       $(OBJS_GZIP)\
+       $(OBJS_LZW)\
+       $(OBJS_PCF)\
+       $(OBJS_PFR)\
+       $(OBJS_PSAUX)\
+       $(OBJS_PSHINTER)\
+       $(OBJS_PSNAMES)\
+       $(OBJS_RASTER)\
+       $(OBJS_SFNT)\
+       $(OBJS_SMOOTH)\
+       $(OBJS_TRUETYPE)\
+       $(OBJS_TYPE1)\
+       $(OBJS_TYPE42)\
+       $(OBJS_WINFONTS)
+
+
+#include <Library.tmpl>
+
+#if DoSharedLib && SharedDataSeparation
+SpecialCObjectRule(sharedlib,NullParameter,$(SHLIBDEF))
+#endif
+
+#if 0
+MANSUFFIX = $(LIBMANSUFFIX)
+InstallManPage(Freetype,$(LIBMANDIR))
+#endif
+
+BuildIncludes($(HEADERS),.,.)
+InstallMultipleFlags($(HEADERS),$(INCDIR),$(INSTINCFLAGS))
+
+/* There might be an ft2build.h file in the wrong place.  If so, remove it. */
+install::
+	@if [ -f $(DESTDIR)$(INCDIR)/freetype2/ft2build.h ]; then \
+		(set -x; $(RM) -f $(DESTDIR)$(INCDIR)/freetype2/ft2build.h) \
+	fi
+
+LinkFile(ft2build.h,$(FREETYPETOP)/builds/unix/ft2unix.h)
+
+LinkSourceFile(ftapi.c,$(FREETYPESRC)/base)
+LinkSourceFile(ftbase.c,$(FREETYPESRC)/base)
+LinkSourceFile(ftbdf.c,$(FREETYPESRC)/base)
+LinkSourceFile(ftbbox.c,$(FREETYPESRC)/base)
+LinkSourceFile(ftdebug.c,$(FREETYPESRC)/base)
+LinkSourceFile(ftglyph.c,$(FREETYPESRC)/base)
+LinkSourceFile(ftinit.c,$(FREETYPESRC)/base)
+LinkSourceFile(ftmm.c,$(FREETYPESRC)/base)
+LinkSourceFile(ftpfr.c,$(FREETYPESRC)/base)
+LinkSourceFile(ftstroke.c,$(FREETYPESRC)/base)
+LinkSourceFile(ftsynth.c,$(FREETYPESRC)/base)
+LinkSourceFile(ftsystem.c,$(FREETYPESRC)/base)
+LinkSourceFile(fttype1.c,$(FREETYPESRC)/base)
+LinkSourceFile(ftwinfnt.c,$(FREETYPESRC)/base)
+LinkSourceFile(ftxf86.c,$(FREETYPESRC)/base)
+
+#if defined(DarwinArchitecture) && DarwinQuartzSupport
+LinkSourceFile(ftmac.c,$(FREETYPESRC)/base)
+#endif
+
+LinkSourceFile(autofit.c,$(FREETYPESRC)/autofit)
+LinkSourceFile(autohint.c,$(FREETYPESRC)/autohint)
+LinkSourceFile(bdf.c,$(FREETYPESRC)/bdf)
+LinkSourceFile(cff.c,$(FREETYPESRC)/cff)
+LinkSourceFile(ftgzip.c,$(FREETYPESRC)/gzip)
+LinkSourceFile(ftlzw.c,$(FREETYPESRC)/lzw)
+LinkSourceFile(type1cid.c,$(FREETYPESRC)/cid)
+LinkSourceFile(pcf.c,$(FREETYPESRC)/pcf)
+LinkSourceFile(pfr.c,$(FREETYPESRC)/pfr)
+LinkSourceFile(psaux.c,$(FREETYPESRC)/psaux)
+LinkSourceFile(pshinter.c,$(FREETYPESRC)/pshinter)
+LinkSourceFile(psnames.c,$(FREETYPESRC)/psnames)
+LinkSourceFile(raster.c,$(FREETYPESRC)/raster)
+LinkSourceFile(sfnt.c,$(FREETYPESRC)/sfnt)
+LinkSourceFile(smooth.c,$(FREETYPESRC)/smooth)
+LinkSourceFile(truetype.c,$(FREETYPESRC)/truetype)
+LinkSourceFile(type1.c,$(FREETYPESRC)/type1)
+LinkSourceFile(type42.c,$(FREETYPESRC)/type42)
+LinkSourceFile(winfnt.c,$(FREETYPESRC)/winfonts)
+
+DependTarget()
+
+DependSubdirs($(SUBDIRS))

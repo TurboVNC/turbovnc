@@ -1,15 +1,14 @@
-/* $XConsortium: defaults.c,v 1.3 94/04/17 20:17:01 rws Exp $ */
+/* $Xorg: defaults.c,v 1.4 2001/02/09 02:04:03 xorgcvs Exp $ */
 
 /*
 
-Copyright (c) 1990  X Consortium
+Copyright 1990, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -17,23 +16,26 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 */
+/* $XFree86: xc/lib/font/fontfile/defaults.c,v 1.7 2001/01/17 19:43:29 dawes Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include    <X11/X.h>
 #include    <X11/Xproto.h>
-#include    <servermd.h>
 
 #ifndef DEFAULT_BIT_ORDER
 #ifdef BITMAP_BIT_ORDER
@@ -63,8 +65,10 @@ in this Software without prior written authorization from the X Consortium.
 #define DEFAULT_SCAN_UNIT 1
 #endif
 
-FontDefaultFormat (bit, byte, glyph, scan)
-    int	    *bit, *byte, *glyph, *scan;
+#include <X11/fonts/fntfilst.h>
+
+void
+FontDefaultFormat (int *bit, int *byte, int *glyph, int *scan)
 {
     *bit = DEFAULT_BIT_ORDER;
     *byte = DEFAULT_BYTE_ORDER;

@@ -1,16 +1,15 @@
 /*
- * $XConsortium: Xfuncs.h,v 1.16 94/12/01 16:25:53 kaleb Exp $
- * $XFree86: xc/include/Xfuncs.h,v 3.2 1995/01/28 15:42:03 dawes Exp $
+ * $XdotOrg: xc/include/Xfuncs.h,v 1.4 2005/11/08 06:33:25 jkj Exp $
+ * $Xorg: Xfuncs.h,v 1.4 2001/02/09 02:03:22 xorgcvs Exp $
  * 
  * 
-Copyright (c) 1990  X Consortium
+Copyright 1990, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -18,15 +17,16 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
  *
  */
+/* $XFree86: xc/include/Xfuncs.h,v 3.10 2002/05/31 18:45:38 dawes Exp $ */
 
 #ifndef _XFUNCS_H_
 #define _XFUNCS_H_
@@ -34,40 +34,30 @@ in this Software without prior written authorization from the X Consortium.
 #include <X11/Xosdefs.h>
 
 /* the old Xfuncs.h, for pre-R6 */
+#if !(defined(XFree86LOADER) && defined(IN_MODULE))
 
 #ifdef X_USEBFUNCS
 void bcopy();
 void bzero();
 int bcmp();
 #else
-#if (__STDC__ && !defined(X_NOT_STDC_ENV) && !defined(sun) && !defined(macII) && !defined(apollo)) || defined(SVR4) || defined(hpux) || defined(_IBMR2) || defined(_SEQUENT_)
-#include <string.h>
-#define _XFUNCS_H_INCLUDED_STRING_H
-#define bcopy(b1,b2,len) memmove(b2, b1, (size_t)(len))
-#define bzero(b,len) memset(b, 0, (size_t)(len))
-#define bcmp(b1,b2,len) memcmp(b1, b2, (size_t)(len))
-#else
-#ifdef sgi
-#include <bstring.h>
-#else
-#ifdef SYSV
+#if defined(SYSV) && !defined(__SCO__) && !defined(sun) && !defined(__UNIXWARE__)
 #include <memory.h>
 void bcopy();
 #define bzero(b,len) memset(b, 0, len)
 #define bcmp(b1,b2,len) memcmp(b1, b2, len)
 #else
-#ifdef __EMX__
+#include <string.h>
+#if defined(__SCO__) || defined(sun) || defined(__UNIXWARE__)
 #include <strings.h>
-#define _XFUNCS_H_INCLUDED_STRING_H
-/* bcopy, bcmp, bzero declared */
-#else /* bsd */
-void bcopy();
-void bzero();
-int bcmp();
 #endif
-#endif /* SYSV */
-#endif /* sgi */
-#endif /* __STDC__ and relatives */
+#define _XFUNCS_H_INCLUDED_STRING_H
+#if defined(sun)
+#define bcopy(b1,b2,len) memmove(b2, b1, (size_t)(len))
+#define bzero(b,len) memset(b, 0, (size_t)(len))
+#define bcmp(b1,b2,len) memcmp(b1, b2, (size_t)(len))
+#endif
+#endif
 #endif /* X_USEBFUNCS */
 
 /* the new Xfuncs.h */
@@ -94,5 +84,11 @@ int bcmp();
 #define memcmp(b1,b2,len) bcmp((char *)(b1),(char *)(b2),(int)(len))
 #endif /* SYSV else */
 #endif /* ! X_NOT_STDC_ENV else */
+
+#if defined(X_NOT_STDC_ENV) || (defined(sun) && !defined(SVR4))
+#define atexit(f) on_exit(f, 0)
+#endif
+
+#endif /* !(defined(XFree86LOADER) && defined(IN_MODULE)) */
 
 #endif /* _XFUNCS_H_ */

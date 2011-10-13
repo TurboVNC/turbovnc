@@ -1,5 +1,5 @@
 XCOMM!/bin/sh
-XCOMM $XConsortium: elistgen.usl /main/2 1996/12/04 10:13:26 swick $
+XCOMM $Xorg: elistgen.usl,v 1.3 2000/08/17 19:41:52 cpqbld Exp $
 XCOMM
 XCOMM #########################################################################
 XCOMM Construct shared-library export lists for Novell based on standardized
@@ -22,12 +22,14 @@ XCOMM (c) Copyright 1996 FUJITSU LIMITED.
 XCOMM (c) Copyright 1996 Hitachi.
 XCOMM
 XCOMM #########################################################################
+XCOMM
+XCOMM $XFree86$
 
 XCOMM Utility programs
 FILTER=CXXFILT			# C++ symbol demangler
 AWK=awk				# awk
 
-XCOMM For nm, cat, pr, expand, awk, c++filt
+XCOMM For nm, cat, pr, sed, awk, c++filt
 PATH=/usr/bin:/bin:/usr/ucb:/usr/ccs/bin
 
 XCOMM Temporary files
@@ -126,7 +128,7 @@ XCOMM Read in the above files and write result to stdout.  The contents
 XCOMM of NMLIST and FILTLIST are used to construct a symbol lookup table.
 XCOMM The contents of EXPORTLIST are converted with the help of this table.
 XCOMM Use ";" as a delimiter in the symbol lookup table.
-(pr -m -s";" -t -w1024 $NMLIST $FILTLIST | expand -1; cat $EXPORTLIST) | $AWK '
+(pr -m -s";" -t -w1024 $NMLIST $FILTLIST | sed 's/      / /g'; cat $EXPORTLIST) | $AWK '
     BEGIN {
 	FS = ";";
 	implicit = 0;

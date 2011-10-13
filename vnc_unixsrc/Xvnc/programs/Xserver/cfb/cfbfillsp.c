@@ -1,3 +1,4 @@
+/* $XFree86: xc/programs/Xserver/cfb/cfbfillsp.c,v 3.7tsi Exp $ */
 /************************************************************
 Copyright 1987 by Sun Microsystems, Inc. Mountain View, CA.
 
@@ -8,10 +9,10 @@ software  and  its documentation for any purpose and without
 fee is hereby granted, provided that the above copyright no-
 tice  appear  in all copies and that both that copyright no-
 tice and this permission notice appear in  supporting  docu-
-mentation,  and  that the names of Sun or X Consortium
+mentation,  and  that the names of Sun or The Open Group
 not be used in advertising or publicity pertaining to 
 distribution  of  the software  without specific prior 
-written permission. Sun and X Consortium make no 
+written permission. Sun and The Open Group make no 
 representations about the suitability of this software for 
 any purpose. It is provided "as is" without any express or 
 implied warranty.
@@ -29,14 +30,13 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -44,13 +44,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -75,12 +75,14 @@ SOFTWARE.
 
 ******************************************************************/
 
-/* $XConsortium: cfbfillsp.c,v 5.24 94/04/17 20:28:48 dpw Exp $ */
-/* $XFree86: xc/programs/Xserver/cfb/cfbfillsp.c,v 3.1 1996/12/09 11:50:54 dawes Exp $ */
+/* $Xorg: cfbfillsp.c,v 1.4 2001/02/09 02:04:37 xorgcvs Exp $ */
 
-#include <stdlib.h>
-#include "X.h"
-#include "Xmd.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
+#include <X11/Xmd.h>
 #include "servermd.h"
 #include "gcstruct.h"
 #include "window.h"
@@ -155,7 +157,7 @@ int fSorted;
     int n;			/* number of spans to fill */
     register DDXPointPtr ppt;	/* pointer to list of start points */
     register int *pwidth;	/* pointer to list of n widths */
-    void    (*fill)();
+    void    (*fill)(DrawablePtr, int, DDXPointPtr, int *, PixmapPtr, int, int, int, unsigned long);
     int	xrot, yrot;
 
     if (!(pGC->planemask))
@@ -224,21 +226,21 @@ int fSorted;
     int		    *pwidth;	/* pointer to list of n widths */
     int		    *pwidthFree;/* copies of the pointers to free */
     DDXPointPtr	    pptFree;
-    unsigned long   *pdstBase;	/* pointer to start of bitmap */
+    CfbBits   *pdstBase;	/* pointer to start of bitmap */
     int		    nlwDst;	/* width in longwords of bitmap */
-    register unsigned long    *pdst;	/* pointer to current word in bitmap */
+    register CfbBits    *pdst;	/* pointer to current word in bitmap */
     PixmapPtr	    pStipple;	/* pointer to stipple we want to fill with */
     int		    nlw;
     int		    x, y, w, xrem, xSrc, ySrc;
     int		    stwidth, stippleWidth;
     int		    stippleHeight;
-    register unsigned long  bits, inputBits;
+    register CfbBits  bits, inputBits;
     register int    partBitsLeft;
     int		    nextPartBits;
     int		    bitsLeft, bitsWhole;
-    unsigned long   *srcTemp, *srcStart;
-    unsigned long   *psrcBase;
-    unsigned long   startmask, endmask;
+    CfbBits   *srcTemp, *srcStart;
+    CfbBits   *psrcBase;
+    CfbBits   startmask, endmask;
 
     if (pGC->fillStyle == FillStippled)
 	cfb8CheckStipple (pGC->alu, pGC->fgPixel, pGC->planemask);
@@ -281,7 +283,7 @@ int fSorted;
     stwidth = pStipple->devKind >> PWSH;
     stippleWidth = pStipple->drawable.width;
     stippleHeight = pStipple->drawable.height;
-    psrcBase = (unsigned long *) pStipple->devPrivate.ptr;
+    psrcBase = (CfbBits *) pStipple->devPrivate.ptr;
 
     /*
      *	The Target:
@@ -413,20 +415,20 @@ int fSorted;
     register DDXPointPtr    ppt;	/* pointer to list of start points */
     register int	    *pwidth;	/* pointer to list of n widths */
     int			    iline;	/* first line of tile to use */
-    unsigned long	    *addrlBase;	/* pointer to start of bitmap */
+    CfbBits	    *addrlBase;	/* pointer to start of bitmap */
     int			    nlwidth;	/* width in longwords of bitmap */
-    register unsigned long  *pdst;	/* pointer to current word in bitmap */
+    register CfbBits  *pdst;	/* pointer to current word in bitmap */
     PixmapPtr		    pStipple;	/* pointer to stipple we want to fill with */
     register int	    w;
     int			    width,  x, xrem, xSrc, ySrc;
-    unsigned long	    tmpSrc, tmpDst1, tmpDst2;
+    CfbBits	    tmpSrc, tmpDst1, tmpDst2;
     int			    stwidth, stippleWidth;
-    unsigned long	    *psrcS;
-    int			    rop, stiprop;
+    CfbBits	    *psrcS;
+    int			    rop, stiprop = 0;
     int			    stippleHeight;
     int			    *pwidthFree;    /* copies of the pointers to free */
     DDXPointPtr		    pptFree;
-    unsigned long	    fgfill, bgfill;
+    CfbBits	    fgfill, bgfill;
 
     if (!(pGC->planemask))
 	return;
@@ -504,16 +506,19 @@ int fSorted;
 	iline = (ppt->y - ySrc) % stippleHeight;
 	x = ppt->x;
 	pdst = addrlBase + (ppt->y * nlwidth);
-        psrcS = (unsigned long *) pStipple->devPrivate.ptr + (iline * stwidth);
+        psrcS = (CfbBits *) pStipple->devPrivate.ptr + (iline * stwidth);
 
 	if (*pwidth)
 	{
 	    width = *pwidth;
 	    while(width > 0)
 	    {
-	        int xtemp, tmpx;
-		register unsigned long *ptemp;
-		register unsigned long *pdsttmp;
+		int xtemp;
+#if PSZ != 32 || PPW != 1
+		int tmpx;
+#endif
+		register CfbBits *ptemp;
+		register CfbBits *pdsttmp;
 		/*
 		 *  Do a stripe through the stipple & destination w pixels
 		 *  wide.  w is not more than:
@@ -538,12 +543,14 @@ int fSorted;
 #endif
 
 	        xtemp = (xrem & MFB_PIM);
-	        ptemp = (unsigned long *)(psrcS + (xrem >> MFB_PWSH));
+	        ptemp = (CfbBits *)(psrcS + (xrem >> MFB_PWSH));
 #if PSZ == 24
 		tmpx = x & 3;
 		pdsttmp = pdst + ((x * 3)>>2);
 #else
+#if PSZ != 32 || PPW != 1
 		tmpx = x & PIM;
+#endif
 		pdsttmp = pdst + (x>>PWSH);
 #endif
 		switch ( pGC->fillStyle ) {
@@ -615,23 +622,23 @@ cfb8Stipple32FS (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
     int		    n;			/* number of spans to fill */
     DDXPointPtr	    ppt;		/* pointer to list of start points */
     int		    *pwidth;		/* pointer to list of n widths */
-    unsigned long   *src;		/* pointer to bits in stipple, if needed */
+    CfbBits   *src;		/* pointer to bits in stipple, if needed */
     int		    stippleHeight;	/* height of the stipple */
     PixmapPtr	    stipple;
 
     int		    nlwDst;		/* width in longwords of the dest pixmap */
     int		    x,y,w;		/* current span */
-    unsigned long   startmask;
-    unsigned long   endmask;
-    register unsigned long *dst;	/* pointer to bits we're writing */
+    CfbBits   startmask;
+    CfbBits   endmask;
+    register CfbBits *dst;	/* pointer to bits we're writing */
     register int    nlw;
-    unsigned long   *dstTmp;
+    CfbBits   *dstTmp;
     int		    nlwTmp;
 
-    unsigned long   *pbits;		/* pointer to start of pixmap */
-    register unsigned long  xor;
-    register unsigned long  mask;
-    register unsigned long  bits;	/* bits from stipple */
+    CfbBits   *pbits;		/* pointer to start of pixmap */
+    register CfbBits  xor;
+    register CfbBits  mask;
+    register CfbBits  bits;	/* bits from stipple */
     int		    wEnd;
 
     int		    *pwidthFree;	/* copies of the pointers to free */
@@ -640,7 +647,7 @@ cfb8Stipple32FS (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 
     devPriv = cfbGetGCPrivate(pGC);
     cfb8CheckStipple (pGC->alu, pGC->fgPixel, pGC->planemask);
-    n = nInit * miFindMaxBand(devPriv->pCompositeClip);
+    n = nInit * miFindMaxBand(pGC->pCompositeClip);
     if ( n == 0 )
 	return;
     pwidthFree = (int *)ALLOCATE_LOCAL(n * sizeof(int));
@@ -653,12 +660,11 @@ cfb8Stipple32FS (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
     }
     pwidth = pwidthFree;
     ppt = pptFree;
-    n = miClipSpans(devPriv->pCompositeClip,
-		     pptInit, pwidthInit, nInit,
+    n = miClipSpans(pGC->pCompositeClip, pptInit, pwidthInit, nInit,
 		     ppt, pwidth, fSorted);
 
-    stipple = devPriv->pRotatedPixmap;
-    src = (unsigned long *)stipple->devPrivate.ptr;
+    stipple = pGC->pRotatedPixmap;
+    src = (CfbBits *)stipple->devPrivate.ptr;
     stippleHeight = stipple->drawable.height;
 
     cfbGetLongWidthAndPointer (pDrawable, nlwDst, pbits)
@@ -829,23 +835,22 @@ cfb8OpaqueStipple32FS (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
     int		    n;			/* number of spans to fill */
     DDXPointPtr	    ppt;		/* pointer to list of start points */
     int		    *pwidth;		/* pointer to list of n widths */
-    unsigned long   *src;		/* pointer to bits in stipple, if needed */
+    CfbBits   *src;		/* pointer to bits in stipple, if needed */
     int		    stippleHeight;	/* height of the stipple */
     PixmapPtr	    stipple;
 
     int		    nlwDst;		/* width in longwords of the dest pixmap */
     int		    x,y,w;		/* current span */
-    unsigned long   startmask;
-    unsigned long   endmask;
-    register unsigned long *dst;	/* pointer to bits we're writing */
+    CfbBits   startmask;
+    CfbBits   endmask;
+    register CfbBits *dst;	/* pointer to bits we're writing */
     register int    nlw;
-    unsigned long   *dstTmp;
+    CfbBits   *dstTmp;
     int		    nlwTmp;
 
-    unsigned long   *pbits;		/* pointer to start of pixmap */
-    register unsigned long  xor;
-    register unsigned long  mask;
-    register unsigned long  bits;	/* bits from stipple */
+    CfbBits   *pbits;		/* pointer to start of pixmap */
+    register CfbBits  xor;
+    register CfbBits  bits;	/* bits from stipple */
     int		    wEnd;
 
     int		    *pwidthFree;	/* copies of the pointers to free */
@@ -856,7 +861,7 @@ cfb8OpaqueStipple32FS (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 
     cfb8CheckOpaqueStipple(pGC->alu, pGC->fgPixel, pGC->bgPixel, pGC->planemask);
 
-    n = nInit * miFindMaxBand(devPriv->pCompositeClip);
+    n = nInit * miFindMaxBand(pGC->pCompositeClip);
     if ( n == 0 )
 	return;
     pwidthFree = (int *)ALLOCATE_LOCAL(n * sizeof(int));
@@ -869,12 +874,11 @@ cfb8OpaqueStipple32FS (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
     }
     pwidth = pwidthFree;
     ppt = pptFree;
-    n = miClipSpans(devPriv->pCompositeClip,
-		     pptInit, pwidthInit, nInit,
+    n = miClipSpans(pGC->pCompositeClip, pptInit, pwidthInit, nInit,
 		     ppt, pwidth, fSorted);
 
-    stipple = devPriv->pRotatedPixmap;
-    src = (unsigned long *)stipple->devPrivate.ptr;
+    stipple = pGC->pRotatedPixmap;
+    src = (CfbBits *)stipple->devPrivate.ptr;
     stippleHeight = stipple->drawable.height;
 
     cfbGetLongWidthAndPointer (pDrawable, nlwDst, pbits)
@@ -906,8 +910,8 @@ cfb8OpaqueStipple32FS (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 	    {
 		if (startmask)
 		{
-		    *dst = *dst & ~startmask |
-			   GetPixelGroup (bits) & startmask;
+		    *dst = (*dst & ~startmask) |
+			   (GetPixelGroup (bits) & startmask);
 		    dst++;
 		    RotBitsLeft (bits, PGSZB);
 		}
@@ -918,8 +922,8 @@ cfb8OpaqueStipple32FS (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 		}
 		if (endmask)
 		{
-		    *dst = *dst & ~endmask |
-			   GetPixelGroup (bits) & endmask;
+		    *dst = (*dst & ~endmask) |
+			   (GetPixelGroup (bits) & endmask);
 		}
 	    }
 	    else
@@ -930,8 +934,8 @@ cfb8OpaqueStipple32FS (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 		nlwTmp = nlw;
 		if (startmask)
 		{
-		    *dstTmp = *dstTmp & ~startmask |
-			   GetPixelGroup (bits) & startmask;
+		    *dstTmp = (*dstTmp & ~startmask) |
+			      (GetPixelGroup (bits) & startmask);
 		    dstTmp++;
 		    RotBitsLeft (bits, PGSZB);
 		}
@@ -955,7 +959,7 @@ cfb8OpaqueStipple32FS (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 		{
 		    dst = dstTmp + (nlwTmp << 3);
 		    *dst = (*dst & ~endmask) |
-			   GetPixelGroup (bits) & endmask;
+			   (GetPixelGroup (bits) & endmask);
 		}
 		while (w--)
 		{

@@ -1,16 +1,14 @@
-/* $XConsortium: Xtransint.h /main/25 1995/12/05 16:51:28 mor $ */
-/* $XFree86: xc/lib/xtrans/Xtransint.h,v 3.18.2.2 1997/07/19 04:59:16 dawes Exp $ */
+/* $XdotOrg: xc/lib/xtrans/Xtransint.h,v 1.4 2005/11/08 06:33:26 jkj Exp $ */
+/* $Xorg: Xtransint.h,v 1.4 2001/02/09 02:04:06 xorgcvs Exp $ */
 /*
 
-Copyright (c) 1993, 1994  X Consortium
+Copyright 1993, 1994, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -18,19 +16,20 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/lib/xtrans/Xtransint.h,v 3.41 2003/08/28 00:35:23 tsi Exp $ */
 
-/* Copyright (c) 1993, 1994 NCR Corporation - Dayton, Ohio, USA
+/* Copyright 1993, 1994 NCR Corporation - Dayton, Ohio, USA
  *
  * All Rights Reserved
  *
@@ -74,113 +73,120 @@ from the X Consortium.
  * message.
  */
 
-#ifndef __EMX__
+#ifndef XTRANSDEBUG
+# ifndef __UNIXOS2__
 #  define XTRANSDEBUG 1
-#else
-#define XTRANSDEBUG 1
+# else
+#  define XTRANSDEBUG 1
+# endif
 #endif
 
 #ifdef WIN32
-#define _WILLWINSOCK_
+# define _WILLWINSOCK_
 #endif
 
 #include "Xtrans.h"
 
 #ifdef XTRANSDEBUG
-#include <stdio.h>
+# include <stdio.h>
 #endif /* XTRANSDEBUG */
 
 #include <errno.h>
-#ifdef X_NOT_STDC_ENV
-extern int  errno;		/* Internal system error number. */
-#endif
 
 #ifndef WIN32
-#ifndef MINIX
-#ifndef Lynx
-#include <sys/socket.h>
-#else
-#include <socket.h>
-#endif
-#endif
-#ifdef __EMX__
-#include <sys/ioctl.h>
-#endif
+# ifndef Lynx
+#  include <sys/socket.h>
+# else
+#  include <socket.h>
+# endif
+# include <netinet/in.h>
+# include <arpa/inet.h>
+# ifdef __UNIXOS2__
+#  include <sys/ioctl.h>
+# endif
 
 /*
  * Moved the setting of NEED_UTSNAME to this header file from Xtrans.c,
  * to avoid a race condition. JKJ (6/5/97)
  */
-#if (defined(_POSIX_SOURCE) && !defined(AIXV3)) || defined(hpux) || defined(USG) || defined(SVR4) || defined(SCO)
-#ifndef NEED_UTSNAME
-#define NEED_UTSNAME
-#endif
-#include <sys/utsname.h>
-#endif
+
+# if (defined(_POSIX_SOURCE) && !defined(AIXV3) && !defined(__QNX__)) || defined(hpux) || defined(USG) || defined(SVR4) || defined(__SCO__)
+#  ifndef NEED_UTSNAME
+#   define NEED_UTSNAME
+#  endif
+#  include <sys/utsname.h>
+# endif
 
 /*
  * makedepend screws up on #undef OPEN_MAX, so we define a new symbol
  */
 
-#ifndef TRANS_OPEN_MAX
+# ifndef TRANS_OPEN_MAX
 
-#ifndef X_NOT_POSIX
-#ifdef _POSIX_SOURCE
-#include <limits.h>
-#else
-#define _POSIX_SOURCE
-#include <limits.h>
-#undef _POSIX_SOURCE
-#endif
-#endif
-#ifndef OPEN_MAX
-#ifdef SVR4
-#define OPEN_MAX 256
-#else
-#include <sys/param.h>
-#ifndef OPEN_MAX
-#ifdef __OSF1__
-#define OPEN_MAX 256
-#else
-#ifdef NOFILE
-#define OPEN_MAX NOFILE
-#else
-#ifndef __EMX__
-#define OPEN_MAX NOFILES_MAX
-#else
-#define OPEN_MAX 256
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
+#  ifndef X_NOT_POSIX
+#   ifdef _POSIX_SOURCE
+#    include <limits.h>
+#   else
+#    define _POSIX_SOURCE
+#    include <limits.h>
+#    undef _POSIX_SOURCE
+#   endif
+#  endif
+#  ifndef OPEN_MAX
+#   if defined(_SC_OPEN_MAX) && !defined(__UNIXOS2__)
+#    define OPEN_MAX (sysconf(_SC_OPEN_MAX))
+#   else
+#    ifdef SVR4
+#     define OPEN_MAX 256
+#    else
+#     include <sys/param.h>
+#     ifndef OPEN_MAX
+#      ifdef __OSF1__
+#       define OPEN_MAX 256
+#      else
+#       ifdef NOFILE
+#        define OPEN_MAX NOFILE
+#       else
+#        if !defined(__UNIXOS2__) && !defined(__QNX__)
+#         define OPEN_MAX NOFILES_MAX
+#        else
+#         define OPEN_MAX 256
+#        endif
+#       endif
+#      endif
+#     endif
+#    endif
+#   endif
+#  endif
+#  if defined(_SC_OPEN_MAX)
+#   define TRANS_OPEN_MAX OPEN_MAX
+#  else /* !__GNU__ */
+#   if OPEN_MAX > 256
+#    define TRANS_OPEN_MAX 256
+#   else
+#    define TRANS_OPEN_MAX OPEN_MAX
+#   endif
+#  endif /*__GNU__*/
 
-#if OPEN_MAX > 256
-#define TRANS_OPEN_MAX 256
-#else
-#define TRANS_OPEN_MAX OPEN_MAX
-#endif
+# endif /* TRANS_OPEN_MAX */
 
-#endif /* TRANS_OPEN_MAX */
-
-#ifdef __EMX__
-#define ESET(val)
-#else
-#define ESET(val) errno = val
-#endif
-#define EGET() errno
+# ifdef __UNIXOS2__
+#  define ESET(val)
+# else
+#  define ESET(val) errno = val
+# endif
+# define EGET() errno
 
 #else /* WIN32 */
 
-#define ESET(val) WSASetLastError(val)
-#define EGET() WSAGetLastError()
+# include <limits.h>	/* for USHRT_MAX */
+
+# define ESET(val) WSASetLastError(val)
+# define EGET() WSAGetLastError()
 
 #endif /* WIN32 */
 
-#ifndef NULL
-#define NULL 0
-#endif
+#include <stddef.h>
 
 #ifdef X11_t
 #define X_TCP_PORT	6000
@@ -213,25 +219,21 @@ typedef struct _Xtransport {
 #ifdef TRANS_CLIENT
 
     XtransConnInfo (*OpenCOTSClient)(
-#if NeedNestedPrototypes
 	struct _Xtransport *,	/* transport */
 	char *,			/* protocol */
 	char *,			/* host */
 	char *			/* port */
-#endif
     );
 
 #endif /* TRANS_CLIENT */
 
 #ifdef TRANS_SERVER
-
+    char **	nolisten;
     XtransConnInfo (*OpenCOTSServer)(
-#if NeedNestedPrototypes
 	struct _Xtransport *,	/* transport */
 	char *,			/* protocol */
 	char *,			/* host */
 	char *			/* port */
-#endif
     );
 
 #endif /* TRANS_SERVER */
@@ -239,12 +241,10 @@ typedef struct _Xtransport {
 #ifdef TRANS_CLIENT
 
     XtransConnInfo (*OpenCLTSClient)(
-#if NeedNestedPrototypes
 	struct _Xtransport *,	/* transport */
 	char *,			/* protocol */
 	char *,			/* host */
 	char *			/* port */
-#endif
     );
 
 #endif /* TRANS_CLIENT */
@@ -252,12 +252,10 @@ typedef struct _Xtransport {
 #ifdef TRANS_SERVER
 
     XtransConnInfo (*OpenCLTSServer)(
-#if NeedNestedPrototypes
 	struct _Xtransport *,	/* transport */
 	char *,			/* protocol */
 	char *,			/* host */
 	char *			/* port */
-#endif
     );
 
 #endif /* TRANS_SERVER */
@@ -266,52 +264,43 @@ typedef struct _Xtransport {
 #ifdef TRANS_REOPEN
 
     XtransConnInfo (*ReopenCOTSServer)(
-#if NeedNestedPrototypes
 	struct _Xtransport *,	/* transport */
         int,			/* fd */
         char *			/* port */
-#endif
     );
 
     XtransConnInfo (*ReopenCLTSServer)(
-#if NeedNestedPrototypes
 	struct _Xtransport *,	/* transport */
         int,			/* fd */
         char *			/* port */
-#endif
     );
 
 #endif /* TRANS_REOPEN */
 
 
     int	(*SetOption)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
 	int,			/* option */
 	int			/* arg */
-#endif
     );
 
 #ifdef TRANS_SERVER
+/* Flags */
+# define ADDR_IN_USE_ALLOWED	1
 
     int	(*CreateListener)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
-	char *			/* port */
-#endif
+	char *,			/* port */
+	unsigned int		/* flags */
     );
 
     int	(*ResetListener)(
-#if NeedNestedPrototypes
 	XtransConnInfo		/* connection */
-#endif
     );
 
     XtransConnInfo (*Accept)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
         int *			/* status */
-#endif
     );
 
 #endif /* TRANS_SERVER */
@@ -319,70 +308,52 @@ typedef struct _Xtransport {
 #ifdef TRANS_CLIENT
 
     int	(*Connect)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
 	char *,			/* host */
 	char *			/* port */
-#endif
     );
 
 #endif /* TRANS_CLIENT */
 
     int	(*BytesReadable)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
 	BytesReadable_t *	/* pend */
-#endif
     );
 
     int	(*Read)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
 	char *,			/* buf */
 	int			/* size */
-#endif
     );
 
     int	(*Write)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
 	char *,			/* buf */
 	int			/* size */
-#endif
     );
 
     int	(*Readv)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
 	struct iovec *,		/* buf */
 	int			/* size */
-#endif
     );
 
     int	(*Writev)(
-#if NeedNestedPrototypes
 	XtransConnInfo,		/* connection */
 	struct iovec *,		/* buf */
 	int			/* size */
-#endif
     );
 
     int	(*Disconnect)(
-#if NeedNestedPrototypes
 	XtransConnInfo		/* connection */
-#endif
     );
 
     int	(*Close)(
-#if NeedNestedPrototypes
 	XtransConnInfo		/* connection */
-#endif
     );
 
     int	(*CloseForCloning)(
-#if NeedNestedPrototypes
 	XtransConnInfo		/* connection */
-#endif
     );
 
 } Xtransport;
@@ -402,23 +373,24 @@ typedef struct _Xtransport_table {
 #define TRANS_LOCAL	(1<<1)	/* local transport */
 #define TRANS_DISABLED	(1<<2)	/* Don't open this one */
 #define TRANS_NOLISTEN  (1<<3)  /* Don't listen on this one */
+#define TRANS_NOUNLINK	(1<<4)	/* Dont unlink transport endpoints */
 
+/* Flags to preserve when setting others */
+#define TRANS_KEEPFLAGS	(TRANS_NOUNLINK)
 
 /*
  * readv() and writev() don't exist or don't work correctly on some
  * systems, so they may be emulated.
  */
 
-#if defined(CRAY) || (defined(SYSV) && defined(i386) && !defined(SCO325)) || defined(WIN32) || defined(__sxg__) || defined(__EMX__)
+#if defined(CRAY) || (defined(SYSV) && defined(i386) && !defined(__SCO__)) || defined(WIN32) || defined(__sxg__) || defined(__UNIXOS2__)
 
 #define READV(ciptr, iov, iovcnt)	TRANS(ReadV)(ciptr, iov, iovcnt)
 
 static	int TRANS(ReadV)(
-#if NeedFunctionPrototypes
     XtransConnInfo,	/* ciptr */
     struct iovec *,	/* iov */
     int			/* iovcnt */
-#endif
 );
 
 #else
@@ -428,16 +400,14 @@ static	int TRANS(ReadV)(
 #endif /* CRAY || (SYSV && i386) || WIN32 || __sxg__ || */
 
 
-#if defined(CRAY) || (defined(SYSV) && defined(i386) && !defined(SCO325)) || defined(WIN32) || defined(__sxg__) || defined(__EMX__)
+#if defined(CRAY) || (defined(SYSV) && defined(i386) && !defined(__SCO__)) || defined(WIN32) || defined(__sxg__) || defined(__UNIXOS2__)
 
 #define WRITEV(ciptr, iov, iovcnt)	TRANS(WriteV)(ciptr, iov, iovcnt)
 
 static int TRANS(WriteV)(
-#if NeedFunctionPrototypes
     XtransConnInfo,	/* ciptr */
     struct iovec *,	/* iov */
     int 		/* iovcnt */
-#endif
 );
 
 #else
@@ -448,11 +418,15 @@ static int TRANS(WriteV)(
 
 
 static int is_numeric (
-#if NeedFunctionPrototypes
     char *		/* str */
-#endif
 );
 
+#ifdef TRANS_SERVER
+static int trans_mkdir (
+    char *,		/* path */
+    int			/* mode */
+);
+#endif
 
 /*
  * Some XTRANSDEBUG stuff

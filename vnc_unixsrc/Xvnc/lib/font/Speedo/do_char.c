@@ -1,4 +1,4 @@
-/* $XConsortium: do_char.c /main/5 1995/10/24 11:22:28 gildea $ */
+/* $Xorg: do_char.c,v 1.3 2000/08/17 19:46:24 cpqbld Exp $ */
 
 /*
 
@@ -21,6 +21,7 @@ INCIDENTAL OR CONSEQUENTIAL DAMAGES, ARISING OUT OF OR IN ANY WAY CONNECTED
 WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 
 */
+/* $XFree86: xc/lib/font/Speedo/do_char.c,v 1.3 2001/01/17 19:43:17 dawes Exp $ */
 
 /***************************** D O - C H A R . C *****************************
  *                                                                           *
@@ -29,6 +30,9 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
  *                                                                           *
  ****************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "spdo_prv.h"               /* General definitions for Speedo    */
 
 #define   DEBUG   0
@@ -52,24 +56,16 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 
 /***** STATIC FUNCTIONS *****/
 
-#if PROTOS_AVAIL
 static boolean sp_make_simp_char(PROTO_DECL2 ufix8 FONTFAR *pointer,ufix8 format);
 static boolean sp_make_comp_char(PROTO_DECL2 ufix8 FONTFAR *pointer);
 static ufix8 FONTFAR *sp_get_char_org(PROTO_DECL2 ufix16 char_index,boolean top_level);
 static fix15 sp_get_posn_arg(PROTO_DECL2 ufix8 FONTFAR *STACKFAR *ppointer,ufix8 format);
 static fix15 sp_get_scale_arg(PROTO_DECL2 ufix8 FONTFAR *STACKFAR *ppointer,ufix8 format);
-#else
-static boolean sp_make_simp_char(); /* Process simple character data */
-static boolean sp_make_comp_char(); /* Process compound character data */
-static ufix8 FONTFAR *sp_get_char_org();   /* Look up char in character directory */
-static fix15   sp_get_posn_arg();   /* Read Xpos Ypos args in DOCH instruction */
-static fix15   sp_get_scale_arg();  /* read Xscale Yscale args in DOCH instruction */
-#endif
 
 
-FUNCTION ufix16 get_char_id(char_index)
+FUNCTION ufix16 get_char_id(
 GDECL
-ufix16 char_index;     /* Index to character in char directory */
+ufix16 char_index)     /* Index to character in char directory */
 /*
  * Returns character id for specified character index in currently
  * selected font.
@@ -97,9 +93,9 @@ return 0xffff & NEXT_WORD(pointer); /* Return character id */
 
 
 #if INCL_METRICS
-FUNCTION fix31 get_char_width(char_index)
+FUNCTION fix31 get_char_width(
 GDECL
-ufix16 char_index;     /* Index to character in char directory */
+ufix16 char_index)     /* Index to character in char directory */
 /*
  * Returns character set width for specified character index in currently
  * selected font in units of 1/65536 em.
@@ -131,10 +127,10 @@ return set_width;                /* Return in 1/65536 em units */
 #endif
 
 #if INCL_METRICS
-FUNCTION fix15 get_track_kern(track, point_size)
+FUNCTION fix15 get_track_kern(
 GDECL
-fix15  track;          /* Track required (0 - 3) */
-fix15  point_size;     /* Point size (units of whole points) */
+fix15  track,          /* Track required (0 - 3) */
+fix15  point_size)     /* Point size (units of whole points) */
 /*
  * Returns inter-character spacing adjustment in units of 1/256
  * points for the specified kerning track and point size.
@@ -153,16 +149,16 @@ fix15  point_size;     /* Point size (units of whole points) */
  */
 {
 ufix8 FONTFAR   *pointer;      /* Pointer to character data */
-fix15    no_tracks;    /* Number of kerning tracks in font */
-ufix8    format;       /* Track kerning format byte */
-fix15    i;            /* Track counter */
-fix15    min_pt_size;  /* Minimum point size for track */
-fix15    max_pt_size;  /* Maximum point size for track */
-fix15    min_adj;      /* Adjustment for min point size */
-fix15    max_adj;      /* Adjustment for max point size */
-fix31    delta_pt_size;/* Max point size - min point size */
-fix31    delta_adj;    /* Min adjustment - max adjustment */
-fix15    adj = 0;      /* Interpolated adjustment */
+fix15    no_tracks;            /* Number of kerning tracks in font */
+ufix8    format;               /* Track kerning format byte */
+fix15    i;                    /* Track counter */
+fix15    min_pt_size = 0;      /* Minimum point size for track */
+fix15    max_pt_size = 0;      /* Maximum point size for track */
+fix15    min_adj = 0;          /* Adjustment for min point size */
+fix15    max_adj = 0;          /* Adjustment for max point size */
+fix31    delta_pt_size;        /* Max point size - min point size */
+fix31    delta_adj;            /* Min adjustment - max adjustment */
+fix15    adj = 0;              /* Interpolated adjustment */
 
 if (track == 0)                  /* Track zero selected? */
     {
@@ -220,10 +216,10 @@ return adj;                      /* Return interpolated adjustment (1/256 points
 #endif
 
 #if INCL_METRICS
-FUNCTION fix31 get_pair_kern(char_index1, char_index2)
+FUNCTION fix31 get_pair_kern(
 GDECL
-ufix16 char_index1;    /* Index to first character in char directory */
-ufix16 char_index2;    /* Index to second character in char directory */
+ufix16 char_index1,    /* Index to first character in char directory */
+ufix16 char_index2)    /* Index to second character in char directory */
 /*
  * Returns inter-character spacing adjustment in units of 1/65536 em
  * for the specified pair of characters.
@@ -243,7 +239,7 @@ fix15    nn;           /* Number of kern pairs in first partition */
 fix15    base;         /* Index to first record in rem kern pairs */
 fix15    i;            /* Index to kern pair being tested */
 fix31    adj = 0;      /* Returned value of adjustment */
-fix15    adj_base;     /* Adjustment base for relative adjustments */
+fix15    adj_base = 0; /* Adjustment base for relative adjustments */
 
 if (!sp_globals.specs_valid)                /* Font specs not defined? */
     {
@@ -310,10 +306,10 @@ return adj;                      /* Return pair kerning adjustment */
 
 #if INCL_METRICS
 #ifdef old
-FUNCTION boolean get_char_bbox(char_index, bbox)
+FUNCTION boolean get_char_bbox(
 GDECL
-ufix16 char_index;
-bbox_t *bbox;
+ufix16 char_index,
+bbox_t *bbox)
 {
 /*
  *	returns true if character exists, false if it doesn't
@@ -368,10 +364,10 @@ return TRUE;
 
 #else /* new code, 4/25/91 */
 
-FUNCTION boolean get_char_bbox(char_index, bbox)
+FUNCTION boolean get_char_bbox(
 GDECL
-ufix16 char_index;
-bbox_t *bbox;
+ufix16 char_index,
+bbox_t *bbox)
 {
 /*
  *	returns true if character exists, false if it doesn't
@@ -447,10 +443,10 @@ return TRUE;
 
 
 #if INCL_ISW
-FUNCTION boolean make_char_isw(char_index,imported_setwidth)
+FUNCTION boolean make_char_isw(
 GDECL
-ufix16 char_index;
-ufix32 imported_setwidth;
+ufix16 char_index,
+ufix32 imported_setwidth)
 {
 fix15   xmin;          /* Minimum X ORU value in font */
 fix15   xmax;          /* Maximum X ORU value in font */
@@ -481,17 +477,17 @@ if (sp_globals.isw_modified_constants)
 return (return_value);
 }
 
-FUNCTION boolean make_char(char_index)
+FUNCTION boolean make_char(
 GDECL
-ufix16 char_index;     /* Index to character in char directory */
+ufix16 char_index)     /* Index to character in char directory */
 {
 sp_globals.import_setwidth_act = FALSE;
 return (do_make_char(char_index));
 }
 
-FUNCTION static boolean do_make_char(char_index)
+FUNCTION static boolean do_make_char(GDECL ufix16 char_index)
 #else
-FUNCTION boolean make_char(char_index)
+FUNCTION boolean make_char(GDECL ufix16 char_index)
 #endif
 /*
  * Outputs specified character using the currently selected font and
@@ -500,8 +496,6 @@ FUNCTION boolean make_char(char_index)
  * previously set.
  * Reports Error 12 and returns FALSE if character data not available.
  */
-GDECL
-ufix16 char_index;
 {
 ufix8 FONTFAR  *pointer;      /* Pointer to character data */
 fix15    x_orus;
@@ -594,10 +588,10 @@ else
     }
 }
 
-FUNCTION static boolean sp_make_simp_char(pointer, format)
+FUNCTION static boolean sp_make_simp_char(
 GDECL
-ufix8 FONTFAR  *pointer;      /* Pointer to first byte of position argument */
-ufix8    format;       /* Character format byte */
+ufix8 FONTFAR  *pointer,      /* Pointer to first byte of position argument */
+ufix8    format)       /* Character format byte */
 /*
  * Called by sp_make_char() to output a simple (non-compound) character.
  * Returns TRUE on completion.
@@ -655,9 +649,9 @@ if (fn_begin_char(sp_globals.Psw, Pmin, Pmax))     /* Signal start of character 
 return TRUE;
 }
 
-FUNCTION static boolean sp_make_comp_char(pointer)
+FUNCTION static boolean sp_make_comp_char(
 GDECL
-ufix8 FONTFAR  *pointer;      /* Pointer to first byte of position argument */
+ufix8 FONTFAR  *pointer)      /* Pointer to first byte of position argument */
 /*
  * Called by sp_make_char() to output a compound character.
  * Returns FALSE if data for any sub-character is not available.
@@ -747,7 +741,7 @@ if (fn_begin_char(sp_globals.Psw, Pmin, Pmax)) /* Signal start of character data
 	do
 	    {
 	    pointer = pointer_sav;                 /* Point to next DOCH or END instruction */
-	    while (format = NEXT_BYTE(pointer))    /* DOCH instruction? */
+	    while ((format = NEXT_BYTE(pointer)))  /* DOCH instruction? */
 	        {
 	        init_tcb();                        /* Initialize transformation control block */
 	        x_posn = sp_get_posn_arg(&pointer, format);
@@ -796,10 +790,10 @@ return TRUE;
 }
 
 #if INCL_LCD           /* Dynamic load character data supported? */
-FUNCTION static ufix8 FONTFAR *sp_get_char_org(char_index, top_level)
+FUNCTION static ufix8 FONTFAR *sp_get_char_org(
 GDECL
-ufix16   char_index;   /* Index of character to be accessed */
-boolean  top_level;    /* Not a compound character element */
+ufix16   char_index,   /* Index of character to be accessed */
+boolean  top_level)    /* Not a compound character element */
 /*
  * Called by sp_get_char_id(), sp_get_char_width(), sp_make_char() and
  * sp_make_comp_char() to get a pointer to the start of the character data
@@ -864,10 +858,10 @@ return pchar_data->org;               /* Return pointer into character data buff
 
 #if INCL_LCD
 #else                  /* Dynamic load character data not supported? */
-FUNCTION static ufix8 FONTFAR *sp_get_char_org(char_index, top_level)
+FUNCTION static ufix8 FONTFAR *sp_get_char_org(
 GDECL
-ufix16   char_index;   /* Index of character to be accessed */
-boolean  top_level;    /* Not a compound character element */
+ufix16   char_index,   /* Index of character to be accessed */
+boolean  top_level)    /* Not a compound character element */
 /*
  * Called by sp_get_char_id(), sp_get_char_width(), sp_make_char() and
  * sp_make_comp_char() to get a pointer to the start of the character data
@@ -915,10 +909,10 @@ return sp_globals.pfont->org + char_offset;      /* Return pointer into font buf
 #endif
 
 
-FUNCTION static fix15 sp_get_posn_arg(ppointer, format)
+FUNCTION static fix15 sp_get_posn_arg(
 GDECL
-ufix8 FONTFAR * STACKFAR *ppointer;     /* Pointer to first byte of position argument */
-ufix8    format;       /* Format of DOCH arguments */
+ufix8 FONTFAR * STACKFAR *ppointer,     /* Pointer to first byte of position argument */
+ufix8    format)       /* Format of DOCH arguments */
 /*
  * Called by sp_make_comp_char() to read a position argument from the
  * specified point in the font/char buffer.
@@ -939,10 +933,10 @@ default:
     }
 }
 
-FUNCTION static fix15 sp_get_scale_arg(ppointer, format)
+FUNCTION static fix15 sp_get_scale_arg(
 GDECL
-ufix8 FONTFAR *STACKFAR *ppointer;     /* Pointer to first byte of position argument */
-ufix8    format;       /* Format of DOCH arguments */
+ufix8 FONTFAR *STACKFAR *ppointer,     /* Pointer to first byte of position argument */
+ufix8    format)       /* Format of DOCH arguments */
 /*
  * Called by sp_make_comp_char() to read a scale argument from the
  * specified point in the font/char buffer.
@@ -956,10 +950,10 @@ else
     return (fix15)ONE_SCALE;
 }
 #if INCL_ISW || INCL_SQUEEZING
-FUNCTION static void preview_bounding_box(pointer,format)
+FUNCTION static void preview_bounding_box(
 GDECL
-ufix8 FONTFAR  *pointer;      /* Pointer to first byte of position argument */
-ufix8    format;       /* Character format byte */
+ufix8 FONTFAR  *pointer,      /* Pointer to first byte of position argument */
+ufix8    format)       /* Character format byte */
 {
 point_t  Pmin, Pmax;   /* Transformed corners of bounding box */
 
@@ -984,9 +978,9 @@ x */
 }
 #endif
 #if INCL_ISW
-FUNCTION static boolean reset_xmax(xmax)
+FUNCTION static boolean reset_xmax(
 GDECL
-fix31   xmax;
+fix31   xmax)
 
 {
 fix15   xmin;          /* Minimum X ORU value in font */

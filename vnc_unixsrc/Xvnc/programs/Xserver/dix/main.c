@@ -1,13 +1,14 @@
+/* $XdotOrg: xc/programs/Xserver/dix/main.c,v 1.14 2005/07/03 08:53:38 daniels Exp $ */
+/* $XFree86: xc/programs/Xserver/dix/main.c,v 3.43 2003/10/30 21:21:02 herrb Exp $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +16,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -45,12 +46,47 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $XConsortium: main.c /main/82 1996/09/28 17:12:09 rws $ */
-/* $XFree86: xc/programs/Xserver/dix/main.c,v 3.10.2.2 1998/01/22 10:47:08 dawes Exp $ */
+/* $Xorg: main.c,v 1.4 2001/02/09 02:04:40 xorgcvs Exp $ */
+
+/* The panoramix components contained the following notice */
+/*****************************************************************
+
+Copyright (c) 1991, 1997 Digital Equipment Corporation, Maynard, Massachusetts.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software.
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+DIGITAL EQUIPMENT CORPORATION BE LIABLE FOR ANY CLAIM, DAMAGES, INCLUDING,
+BUT NOT LIMITED TO CONSEQUENTIAL OR INCIDENTAL DAMAGES, OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of Digital Equipment Corporation
+shall not be used in advertising or otherwise to promote the sale, use or other
+dealings in this Software without prior written authorization from Digital
+Equipment Corporation.
+
+******************************************************************/
+
+/* $TOG: main.c /main/86 1998/02/09 14:20:03 kaleb $ */
 
 #define NEED_EVENTS
-#include "X.h"
-#include "Xproto.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
+#include <X11/Xos.h>   /* for unistd.h  */
+#include <X11/Xproto.h>
 #include "scrnintstr.h"
 #include "misc.h"
 #include "os.h"
@@ -59,86 +95,59 @@ SOFTWARE.
 #include "dixstruct.h"
 #include "gcstruct.h"
 #include "extension.h"
-#include "extnsionst.h"
 #include "colormap.h"
 #include "colormapst.h"
 #include "cursorstr.h"
-#include "font.h"
+#include <X11/fonts/font.h>
 #include "opaque.h"
 #include "servermd.h"
 #include "site.h"
 #include "dixfont.h"
+#include "extnsionst.h"
+#ifdef XPRINT
+#include "DiPrint.h"
+#endif
+#ifdef PANORAMIX
+#include "panoramiXsrv.h"
+#else
 #include "dixevents.h"		/* InitEvents() */
 #include "dispatch.h"		/* InitProcVectors() */
-
-extern CARD32 defaultScreenSaverTime;
-extern CARD32 defaultScreenSaverInterval;
-extern int defaultScreenSaverBlanking;
-extern int defaultScreenSaverAllowExposures;
+#endif
 
 #ifdef DPMSExtension
-#include "dpms.h"
+#define DPMS_SERVER
+#include <X11/extensions/dpms.h>
+#include "dpmsproc.h"
 #endif
 
-void ddxGiveUp();
+extern int InitClientPrivates(ClientPtr client);
 
-extern int InitClientPrivates(
-#if NeedFunctionPrototypes
-    ClientPtr /*client*/
-#endif
-);
+extern void Dispatch(void);
 
-extern void Dispatch(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
-
-extern char *display;
 char *ConnectionInfo;
 xConnSetupPrefix connSetupPrefix;
 
-extern WindowPtr *WindowTable;
 extern FontPtr defaultFont;
 extern int screenPrivateCount;
 
-static Bool CreateConnectionBlock(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
+extern void InitProcVectors(void);
+extern Bool CreateGCperDepthArray(void);
 
-static void FreeScreen(
-#if NeedFunctionPrototypes
-    ScreenPtr /*pScreen*/
+#ifndef PANORAMIX
+static
 #endif
-);
+Bool CreateConnectionBlock(void);
+
+static void FreeScreen(ScreenPtr);
 
 PaddingInfo PixmapWidthPaddingInfo[33];
-
-#ifdef INTERNAL_VS_EXTERNAL_PADDING
-/* add padding info for 32-bit interface. PutImage and GetImage will
- * work on 32-bit padding while the rest of the server will work
- * on 64-bit padding (Alpha).
- */
-PaddingInfo PixmapWidthPaddingInfoProto[33];
-#endif
 
 int connBlockScreenStart;
 
 static int restart = 0;
 
-/*
- * Dummy entry for EventSwapVector[]
- */
-/*ARGSUSED*/
 void
-NotImplemented(
-#if NeedFunctionPrototypes && defined(EVENT_SWAP_PTR)
-	xEvent * from,
-	xEvent * to
-#endif
-	)
+NotImplemented(xEvent *from, xEvent *to)
 {
     FatalError("Not implemented");
 }
@@ -146,14 +155,12 @@ NotImplemented(
 /*
  * Dummy entry for ReplySwapVector[]
  */
-/*ARGSUSED*/
+
 void
 ReplyNotSwappd(
-#if NeedNestedPrototypes
 	ClientPtr pClient ,
 	int size ,
 	void * pbuf
-#endif
 	)
 {
     FatalError("Not implemented");
@@ -234,32 +241,57 @@ static int indexForScanlinePad[ 65 ] = {
 	 3		/* 64 bits per scanline pad unit */
 };
 
+#ifndef MIN
+#define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#endif
 
 int
-main(argc, argv)
-    int		argc;
-    char	*argv[];
+main(int argc, char *argv[], char *envp[])
 {
-    int		i, j, k;
+    int		i, j, k, error;
+    char	*xauthfile;
     HWEventQueueType	alwaysCheckForInput[2];
 
-    /* Notice if we're restart.  Probably this is because we jumped through
-     * uninitialized pointer */
+    display = "0";
+
+    InitGlobals();
+#ifdef XPRINT
+    PrinterInitGlobals();
+#endif
+
+    /* Quartz support on Mac OS X requires that the Cocoa event loop be in
+     * the main thread. This allows the X server main to be called again
+     * from another thread. */
+#if defined(__DARWIN__) && defined(DARWIN_WITH_QUARTZ)
+    DarwinHandleGUI(argc, argv, envp);
+#endif
+
+    /* Notice if we're restarted.  Probably this is because we jumped through
+     * an uninitialized pointer */
     if (restart)
 	FatalError("server restarted. Jumped through uninitialized pointer?\n");
     else
 	restart = 1;
 
-#if 0
+    CheckUserParameters(argc, argv, envp);
+
+    CheckUserAuthorization();
+
+#ifdef COMMANDLINE_CHALLENGED_OPERATING_SYSTEMS
     ExpandCommandLine(&argc, &argv);
 #endif
+
+    InitConnectionLimits();
 
     /* These are needed by some routines which are called from interrupt
      * handlers, thus have no direct calling path back to main and thus
      * can't be passed argc, argv as parameters */
     argcGlobal = argc;
     argvGlobal = argv;
-    display = "0";
+    /* prep X authority file from environment; this can be overriden by a
+     * command line option */
+    xauthfile = getenv("XAUTHORITY");
+    if (xauthfile) InitAuthorization (xauthfile);
     ProcessCommandLine(argc, argv);
 
     alwaysCheckForInput[0] = 0;
@@ -267,7 +299,7 @@ main(argc, argv)
     while(1)
     {
 	serverGeneration++;
-        ScreenSaverTime = defaultScreenSaverTime;
+	ScreenSaverTime = defaultScreenSaverTime;
 	ScreenSaverInterval = defaultScreenSaverInterval;
 	ScreenSaverBlanking = defaultScreenSaverBlanking;
 	ScreenSaverAllowExposures = defaultScreenSaverAllowExposures;
@@ -297,8 +329,8 @@ main(argc, argv)
 	}
 	else
 	    ResetWellKnownSockets ();
-        clients[0] = serverClient;
-        currentMaxClients = 1;
+	clients[0] = serverClient;
+	currentMaxClients = 1;
 
 	if (!InitClientResources(serverClient))      /* for root resources */
 	    FatalError("couldn't init server resources");
@@ -320,18 +352,7 @@ main(argc, argv)
 	PixmapWidthPaddingInfo[1].padPixelsLog2 = answer[j][k];
  	j = indexForBitsPerPixel[8]; /* bits per byte */
  	PixmapWidthPaddingInfo[1].padBytesLog2 = answer[j][k];
-
-#ifdef INTERNAL_VS_EXTERNAL_PADDING
-	/* Fake out protocol interface to make them believe we support
-	 * a different padding than the actual internal padding.
-	 */
-	j = indexForBitsPerPixel[ 1 ];
-	k = indexForScanlinePad[ BITMAP_SCANLINE_PAD_PROTO ];
-	PixmapWidthPaddingInfoProto[1].padRoundUp = BITMAP_SCANLINE_PAD_PROTO-1;
-	PixmapWidthPaddingInfoProto[1].padPixelsLog2 = answer[j][k];
- 	j = indexForBitsPerPixel[8]; /* bits per byte */
- 	PixmapWidthPaddingInfoProto[1].padBytesLog2 = answer[j][k];
-#endif /* INTERNAL_VS_EXTERNAL_PADDING */
+	PixmapWidthPaddingInfo[1].bitsPerPixel = 1;
 
 	InitAtoms();
 	InitEvents();
@@ -345,15 +366,18 @@ main(argc, argv)
 #endif
 	ResetColormapPrivates();
 	ResetFontPrivateIndex();
+	ResetDevicePrivateIndex();
 	InitCallbackManager();
+	InitVisualWrap();
 	InitOutput(&screenInfo, argc, argv);
+#ifdef XPRINT
+	PrinterInitOutput(&screenInfo, argc, argv);
+#endif
+
 	if (screenInfo.numScreens < 1)
 	    FatalError("no screens found");
 	if (screenInfo.numVideoScreens < 0)
 	    screenInfo.numVideoScreens = screenInfo.numScreens;
-#ifdef XPRINT
-	PrinterInitOutput(&screenInfo, argc, argv);
-#endif
 	InitExtensions(argc, argv);
 	if (!InitClientPrivates(serverClient))
 	    FatalError("failed to allocate serverClient devprivates");
@@ -377,8 +401,13 @@ main(argc, argv)
 	    FatalError("failed to initialize core devices");
 
 	InitFonts();
-	if (SetDefaultFontPath(defaultFontPath) != Success)
-	    ErrorF("failed to set default font path '%s'", defaultFontPath);
+	if (loadableFonts) {
+	    SetFontPath(0, 0, (unsigned char *)defaultFontPath, &error);
+	} else {
+	    if (SetDefaultFontPath(defaultFontPath) != Success)
+		ErrorF("failed to set default font path '%s'",
+			defaultFontPath);
+	}
 	if (!SetDefaultFont(defaultTextFont))
 	    FatalError("could not open default font '%s'", defaultTextFont);
 	if (!(rootCursor = CreateRootCursor(defaultCursorFont, 0)))
@@ -390,20 +419,53 @@ main(argc, argv)
 	if (!DPMSCapableFlag)
      	    DPMSEnabled = FALSE;
 #endif
+
+#ifdef PANORAMIX
+	/*
+	 * Consolidate window and colourmap information for each screen
+	 */
+	if (!noPanoramiXExtension)
+	    PanoramiXConsolidate();
+#endif
+
 	for (i = 0; i < screenInfo.numScreens; i++)
 	    InitRootWindow(WindowTable[i]);
-        DefineInitialRootWindow(WindowTable[0]);
+	DefineInitialRootWindow(WindowTable[0]);
+	SaveScreens(SCREEN_SAVER_FORCER, ScreenSaverReset);
+#ifdef DPMSExtension
+	SetDPMSTimers();
+#endif
 
-	if (!CreateConnectionBlock())
-	    FatalError("could not create connection block info");
+#ifdef PANORAMIX
+	if (!noPanoramiXExtension) {
+	    if (!PanoramiXCreateConnectionBlock())
+		FatalError("could not create connection block info");
+	} else
+#endif
+	{
+	    if (!CreateConnectionBlock())
+	    	FatalError("could not create connection block info");
+	}
 
 	Dispatch();
 
 	/* Now free up whatever must be freed */
 	if (screenIsSaved == SCREEN_SAVER_ON)
 	    SaveScreens(SCREEN_SAVER_OFF, ScreenSaverReset);
+	FreeScreenSaverTimer();
 	CloseDownExtensions();
+
+#ifdef PANORAMIX
+	{
+	    Bool remember_it = noPanoramiXExtension;
+	    noPanoramiXExtension = TRUE;
+	    FreeAllResources();
+	    noPanoramiXExtension = remember_it;
+	}
+#else
 	FreeAllResources();
+#endif
+
 	CloseDownDevices();
 	for (i = screenInfo.numScreens - 1; i >= 0; i--)
 	{
@@ -414,25 +476,59 @@ main(argc, argv)
 	    FreeScreen(screenInfo.screens[i]);
 	    screenInfo.numScreens = i;
 	}
+  	CloseDownEvents();
 	xfree(WindowTable);
-	FreeFonts ();
+	WindowTable = NULL;
+	FreeFonts();
+
+#ifdef DPMSExtension
+	FreeDPMSTimers();
+#endif
+	FreeAuditTimer();
+
 	xfree(serverClient->devPrivates);
+	serverClient->devPrivates = NULL;
 
 	if (dispatchException & DE_TERMINATE)
 	{
-	    OsCleanup();
+	    CloseWellKnownConnections();
+	}
+
+	OsCleanup((dispatchException & DE_TERMINATE) != 0);
+
+	if (dispatchException & DE_TERMINATE)
+	{
 	    ddxGiveUp();
 	    break;
 	}
 
 	xfree(ConnectionInfo);
+	ConnectionInfo = NULL;
     }
     return(0);
 }
 
+static int  VendorRelease = VENDOR_RELEASE;
+static char *VendorString = VENDOR_STRING;
+
+void
+SetVendorRelease(int release)
+{
+    VendorRelease = release;
+}
+
+void
+SetVendorString(char *string)
+{
+    VendorString = string;
+}
+
 static int padlength[4] = {0, 3, 2, 1};
 
-static Bool
+#ifndef PANORAMIX
+static
+#endif
+Bool
 CreateConnectionBlock()
 {
     xConnSetup setup;
@@ -450,29 +546,19 @@ CreateConnectionBlock()
     /* Leave off the ridBase and ridMask, these must be sent with 
        connection */
 
-    setup.release = VENDOR_RELEASE;
+    setup.release = VendorRelease;
     /*
      * per-server image and bitmap parameters are defined in Xmd.h
      */
     setup.imageByteOrder = screenInfo.imageByteOrder;
 
-#ifdef INTERNAL_VS_EXTERNAL_PADDING
-    if ( screenInfo.bitmapScanlineUnit > 32 )
-    	setup.bitmapScanlineUnit  = 32;
-    else
-#endif 
-    	setup.bitmapScanlineUnit  = screenInfo.bitmapScanlineUnit;
-#ifdef INTERNAL_VS_EXTERNAL_PADDING
-    if ( screenInfo.bitmapScanlinePad > 32 )
-    	setup.bitmapScanlinePad = 32;
-    else
-#endif 
-	setup.bitmapScanlinePad = screenInfo.bitmapScanlinePad;
+    setup.bitmapScanlineUnit = screenInfo.bitmapScanlineUnit;
+    setup.bitmapScanlinePad = screenInfo.bitmapScanlinePad;
 
     setup.bitmapBitOrder = screenInfo.bitmapBitOrder;
     setup.motionBufferSize = NumMotionEvents();
     setup.numRoots = screenInfo.numScreens;
-    setup.nbytesVendor = strlen(VENDOR_STRING); 
+    setup.nbytesVendor = strlen(VendorString); 
     setup.numFormats = screenInfo.numPixmapFormats;
     setup.maxRequestSize = MAX_REQUEST_SIZE;
     QueryMinMaxKeyCodes(&setup.minKeyCode, &setup.maxKeyCode);
@@ -489,24 +575,19 @@ CreateConnectionBlock()
     sizesofar = sizeof(xConnSetup);
     pBuf = ConnectionInfo + sizeof(xConnSetup);
 
-    memmove(pBuf, VENDOR_STRING, (int)setup.nbytesVendor);
+    memmove(pBuf, VendorString, (int)setup.nbytesVendor);
     sizesofar += setup.nbytesVendor;
     pBuf += setup.nbytesVendor;
     i = padlength[setup.nbytesVendor & 3];
     sizesofar += i;
     while (--i >= 0)
-        *pBuf++ = 0;
+	*pBuf++ = 0;
     
     for (i=0; i<screenInfo.numPixmapFormats; i++)
     {
 	format.depth = screenInfo.formats[i].depth;
 	format.bitsPerPixel = screenInfo.formats[i].bitsPerPixel;
-#ifdef INTERNAL_VS_EXTERNAL_PADDING
-	if ( screenInfo.formats[i].scanlinePad > 32 )
-	    format.scanLinePad = 32;
-	else
-#endif
-	    format.scanLinePad = screenInfo.formats[i].scanlinePad;
+	format.scanLinePad = screenInfo.formats[i].scanlinePad;
 	memmove(pBuf, (char *)&format, sizeof(xPixmapFormat));
 	pBuf += sizeof(xPixmapFormat);
 	sizesofar += sizeof(xPixmapFormat);
@@ -594,24 +675,15 @@ with its screen number, a pointer to its ScreenRec, argc, and argv.
 */
 
 int
-#if NeedFunctionPrototypes
 AddScreen(
     Bool	(* pfnInit)(
-#if NeedNestedPrototypes
 	int /*index*/,
 	ScreenPtr /*pScreen*/,
 	int /*argc*/,
 	char ** /*argv*/
-#endif
 		),
     int argc,
     char **argv)
-#else
-AddScreen(pfnInit, argc, argv)
-    Bool	(* pfnInit)();
-    int argc;
-    char **argv;
-#endif
 {
 
     int i;
@@ -625,12 +697,12 @@ AddScreen(pfnInit, argc, argv)
     if (i == MAXSCREENS)
 	return -1;
 
-    pScreen = (ScreenPtr) xalloc(sizeof(ScreenRec));
+    pScreen = (ScreenPtr) xcalloc(1, sizeof(ScreenRec));
     if (!pScreen)
 	return -1;
 
-    pScreen->devPrivates = (DevUnion *)xalloc(screenPrivateCount *
-					      sizeof(DevUnion));
+    pScreen->devPrivates = (DevUnion *)xcalloc(sizeof(DevUnion),
+						screenPrivateCount);
     if (!pScreen->devPrivates && screenPrivateCount)
     {
 	xfree(pScreen);
@@ -639,10 +711,12 @@ AddScreen(pfnInit, argc, argv)
     pScreen->myNum = i;
     pScreen->WindowPrivateLen = 0;
     pScreen->WindowPrivateSizes = (unsigned *)NULL;
-    pScreen->totalWindowSize = sizeof(WindowRec);
+    pScreen->totalWindowSize =
+        ((sizeof(WindowRec) + sizeof(long) - 1) / sizeof(long)) * sizeof(long);
     pScreen->GCPrivateLen = 0;
     pScreen->GCPrivateSizes = (unsigned *)NULL;
-    pScreen->totalGCSize = sizeof(GC);
+    pScreen->totalGCSize =
+        ((sizeof(GC) + sizeof(long) - 1) / sizeof(long)) * sizeof(long);
 #ifdef PIXPRIV
     pScreen->PixmapPrivateLen = 0;
     pScreen->PixmapPrivateSizes = (unsigned *)NULL;
@@ -679,6 +753,7 @@ AddScreen(pfnInit, argc, argv)
  	    (scanlinepad/bitsPerPixel) - 1;
  	j = indexForBitsPerPixel[ 8 ]; /* bits per byte */
  	PixmapWidthPaddingInfo[ depth ].padBytesLog2 = answer[j][k];
+	PixmapWidthPaddingInfo[ depth ].bitsPerPixel = bitsPerPixel;
 	if (answerBytesPerPixel[bitsPerPixel])
 	{
 	    PixmapWidthPaddingInfo[ depth ].notPower2 = 1;
@@ -689,29 +764,6 @@ AddScreen(pfnInit, argc, argv)
 	{
 	    PixmapWidthPaddingInfo[ depth ].notPower2 = 0;
 	}
-
-#ifdef INTERNAL_VS_EXTERNAL_PADDING
-	/* Fake out protocol interface to make them believe we support
-	 * a different padding than the actual internal padding.
-	 */
- 	j = indexForBitsPerPixel[ bitsPerPixel ];
-  	k = indexForScanlinePad[ BITMAP_SCANLINE_PAD_PROTO ];
- 	PixmapWidthPaddingInfoProto[ depth ].padPixelsLog2 = answer[j][k];
- 	PixmapWidthPaddingInfoProto[ depth ].padRoundUp =
- 	    (BITMAP_SCANLINE_PAD_PROTO/bitsPerPixel) - 1;
- 	j = indexForBitsPerPixel[ 8 ]; /* bits per byte */
- 	PixmapWidthPaddingInfoProto[ depth ].padBytesLog2 = answer[j][k];
-	if (answerBytesPerPixel[bitsPerPixel])
-	{
-	    PixmapWidthPaddingInfoProto[ depth ].notPower2 = 1;
-	    PixmapWidthPaddingInfoProto[ depth ].bytesPerPixel =
-		answerBytesPerPixel[bitsPerPixel];
-	}
-	else
-	{
-	    PixmapWidthPaddingInfoProto[ depth ].notPower2 = 0;
-	}
-#endif /* INTERNAL_VS_EXTERNAL_PADDING */
     }
   
     /* This is where screen specific stuff gets initialized.  Load the
@@ -736,8 +788,7 @@ AddScreen(pfnInit, argc, argv)
 }
 
 static void
-FreeScreen(pScreen)
-    ScreenPtr pScreen;
+FreeScreen(ScreenPtr pScreen)
 {
     xfree(pScreen->WindowPrivateSizes);
     xfree(pScreen->GCPrivateSizes);

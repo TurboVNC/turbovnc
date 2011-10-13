@@ -1,16 +1,14 @@
-/* $XConsortium: window.c /main/210 1996/10/28 07:24:59 kaleb $ */
-/* $XFree86: xc/programs/Xserver/dix/window.c,v 3.6 1997/01/18 06:53:16 dawes Exp $ */
+/* $XdotOrg: xc/programs/Xserver/dix/window.c,v 1.12 2005/07/03 08:53:38 daniels Exp $ */
+/* $Xorg: window.c,v 1.4 2001/02/09 02:04:41 xorgcvs Exp $ */
 /*
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -18,15 +16,15 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts,
@@ -51,6 +49,41 @@ SOFTWARE.
 
 */
 
+/* The panoramix components contained the following notice */
+/*****************************************************************
+
+Copyright (c) 1991, 1997 Digital Equipment Corporation, Maynard, Massachusetts.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software.
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+DIGITAL EQUIPMENT CORPORATION BE LIABLE FOR ANY CLAIM, DAMAGES, INCLUDING,
+BUT NOT LIMITED TO CONSEQUENTIAL OR INCIDENTAL DAMAGES, OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of Digital Equipment Corporation
+shall not be used in advertising or otherwise to promote the sale, use or other
+dealings in this Software without prior written authorization from Digital
+Equipment Corporation.
+
+******************************************************************/
+
+/* $XFree86: xc/programs/Xserver/dix/window.c,v 3.36 2003/11/14 23:52:50 torrey Exp $ */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #include "misc.h"
 #include "scrnintstr.h"
 #include "os.h"
@@ -64,22 +97,19 @@ SOFTWARE.
 #include "dixstruct.h"
 #include "gcstruct.h"
 #include "servermd.h"
+#ifdef PANORAMIX
+#include "panoramiX.h"
+#include "panoramiXsrv.h"
+#endif
 #include "dixevents.h"
+#include "globals.h"
+
 #ifdef XAPPGROUP
-#include "extensions/Xagsrv.h"
+#include <X11/extensions/Xagsrv.h>
 #endif
 #ifdef XCSECURITY
 #define _SECURITY_SERVER
-#include "extensions/security.h"
-#endif
-
-extern Bool permitOldBugs;
-
-#if defined(NEED_SCREEN_REGIONS)
-#define REGION_PTR(pScreen,pWin) \
-    register ScreenPtr pScreen = pWin->drawable.pScreen;
-#else
-#define REGION_PTR(pScreen,pWin) /* nothing */
+#include <X11/extensions/security.h>
 #endif
 
 /******
@@ -99,16 +129,14 @@ int screenIsSaved = SCREEN_SAVER_OFF;
 
 ScreenSaverStuffRec savedScreenInfo[MAXSCREENS];
 
-extern WindowPtr *WindowTable;
-
-extern int rand();
-
-static Bool TileScreenSaver(
-#if NeedFunctionPrototypes
-    int /*i*/,
-    int /*kind*/
+#if 0
+extern void DeleteWindowFromAnyEvents();
+extern Mask EventMaskForClient();
+extern void WindowHasNewCursor();
+extern void RecalculateDeliverableEvents();
 #endif
-);
+
+static Bool TileScreenSaver(int i, int kind);
 
 
 #define INPUTONLY_LEGAL_MASK (CWWinGravity | CWEventMask | \
@@ -142,9 +170,7 @@ int deltaSaveUndersViewable = 0;
  ******/
 
 int
-PrintChildren(p1, indent)
-    WindowPtr p1;
-    int indent;
+PrintChildren(WindowPtr p1, int indent)
 {
     WindowPtr p2;
     int i;
@@ -177,10 +203,7 @@ PrintWindowTree()
 #endif
 
 int
-TraverseTree(pWin, func, data)
-    register WindowPtr pWin;
-    VisitWindowProcPtr func;
-    pointer data;
+TraverseTree(register WindowPtr pWin, VisitWindowProcPtr func, pointer data)
 {
     register int result;
     register WindowPtr pChild;
@@ -215,10 +238,7 @@ TraverseTree(pWin, func, data)
  *****/
 
 int
-WalkTree(pScreen, func, data)
-    ScreenPtr pScreen;
-    VisitWindowProcPtr func;
-    pointer data;
+WalkTree(ScreenPtr pScreen, VisitWindowProcPtr func, pointer data)
 {
     return(TraverseTree(WindowTable[pScreen->myNum], func, data));
 }
@@ -227,16 +247,12 @@ WalkTree(pScreen, func, data)
 int	defaultBackingStore = NotUseful;
 /* hack to force no backing store */
 Bool	disableBackingStore = FALSE;
+Bool	enableBackingStore = FALSE;
 /* hack to force no save unders */
 Bool	disableSaveUnders = FALSE;
 
 static void
-#if NeedFunctionPrototypes
 SetWindowToDefaults(register WindowPtr pWin)
-#else
-SetWindowToDefaults(pWin)
-    register WindowPtr pWin;
-#endif
 {
     pWin->prevSib = NullWindow;
     pWin->firstChild = NullWindow;
@@ -268,20 +284,18 @@ SetWindowToDefaults(pWin)
     pWin->srcBuffer = DBE_FRONT_BUFFER;
     pWin->dstBuffer = DBE_FRONT_BUFFER;
 #endif
+#ifdef COMPOSITE
+    pWin->redirectDraw = 0;
+#endif
 }
 
 static void
-#if NeedFunctionPrototypes
 MakeRootTile(WindowPtr pWin)
-#else
-MakeRootTile(pWin)
-    WindowPtr pWin;
-#endif
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     GCPtr pGC;
     unsigned char back[128];
-    int len = BitmapBytePad(4);
+    int len = BitmapBytePad(sizeof(long));
     register unsigned char *from, *to;
     register int i, j;
 
@@ -291,7 +305,7 @@ MakeRootTile(pWin)
     pWin->backgroundState = BackgroundPixmap;
     pGC = GetScratchGC(pScreen->rootDepth, pScreen);
     if (!pWin->background.pixmap || !pGC)
-	FatalError("cound not create root tile");
+	FatalError("could not create root tile");
 
     {
 	CARD32 attributes[2];
@@ -311,16 +325,18 @@ MakeRootTile(pWin)
 	for (j = len; j > 0; j--)
 	    *to++ = *from;
 
+   if (blackRoot)
+       bzero(back, sizeof(back));
+
    (*pGC->ops->PutImage)((DrawablePtr)pWin->background.pixmap, pGC, 1,
-		    0, 0, 4, 4, 0, XYBitmap, (char *)back);
+		    0, 0, len, 4, 0, XYBitmap, (char *)back);
 
    FreeScratchGC(pGC);
 
 }
 
 WindowPtr
-AllocateWindow(pScreen)
-    ScreenPtr pScreen;
+AllocateWindow(ScreenPtr pScreen)
 {
     WindowPtr pWin;
     register char *ptr;
@@ -356,8 +372,7 @@ AllocateWindow(pScreen)
  *****/
 
 Bool
-CreateRootWindow(pScreen)
-    ScreenPtr	pScreen;
+CreateRootWindow(ScreenPtr pScreen)
 {
     WindowPtr	pWin;
     BoxRec	box;
@@ -390,6 +405,8 @@ CreateRootWindow(pScreen)
     SetWindowToDefaults(pWin);
 
     pWin->optional = (WindowOptRec *) xalloc (sizeof (WindowOptRec));
+    if (!pWin->optional)
+        return FALSE;
 
     pWin->optional->dontPropagateMask = 0;
     pWin->optional->otherEventMasks = 0;
@@ -401,6 +418,7 @@ CreateRootWindow(pScreen)
 #ifdef SHAPE
     pWin->optional->boundingShape = NULL;
     pWin->optional->clipShape = NULL;
+    pWin->optional->inputShape = NULL;
 #endif
 #ifdef XINPUT
     pWin->optional->inputMasks = NULL;
@@ -441,6 +459,8 @@ CreateRootWindow(pScreen)
 
     if (disableBackingStore)
 	pScreen->backingStoreSupport = NotUseful;
+    if (enableBackingStore)
+	pScreen->backingStoreSupport = Always;
 
 #ifdef DO_SAVE_UNDERS
     if ((pScreen->backingStoreSupport != NotUseful) &&
@@ -461,12 +481,10 @@ CreateRootWindow(pScreen)
 }
 
 void
-InitRootWindow(pWin)
-    WindowPtr pWin;
+InitRootWindow(WindowPtr pWin)
 {
-    ScreenPtr pScreen;
+    ScreenPtr pScreen = pWin->drawable.pScreen;
 
-    pScreen = pWin->drawable.pScreen;
     if (!(*pScreen->CreateWindow)(pWin))
 	return; /* XXX */
     (*pScreen->PositionWindow)(pWin, 0, 0);
@@ -490,13 +508,11 @@ InitRootWindow(pWin)
  */
 
 void
-ClippedRegionFromBox(pWin, Rgn, x, y, w, h)
-    register WindowPtr pWin;
-    RegionPtr Rgn;
-    register int x, y;
-    int w, h;
+ClippedRegionFromBox(register WindowPtr pWin, RegionPtr Rgn,
+                     register int x, register int y,
+                     register int w, register int h)
 {
-    REGION_PTR(pScreen, pWin)
+    ScreenPtr pScreen = pWin->drawable.pScreen;
     BoxRec box;
 
     box = *(REGION_EXTENTS(pScreen, &pWin->winSize));
@@ -520,8 +536,7 @@ ClippedRegionFromBox(pWin, Rgn, x, y, w, h)
 }
 
 WindowPtr
-RealChildHead(pWin)
-    register WindowPtr pWin;
+RealChildHead(register WindowPtr pWin)
 {
     if (!pWin->parent &&
 	(screenIsSaved == SCREEN_SAVER_ON) &&
@@ -537,19 +552,9 @@ RealChildHead(pWin)
  *****/
 
 WindowPtr
-CreateWindow(wid, pParent, x, y, w, h, bw, class, vmask, vlist,
-	     depth, client, visual, error)
-    Window wid;
-    register WindowPtr pParent;
-    int x,y;
-    unsigned int w, h, bw;
-    unsigned int class;
-    register Mask vmask;
-    XID *vlist;
-    int depth;
-    ClientPtr client;
-    VisualID visual;
-    int *error;
+CreateWindow(Window wid, register WindowPtr pParent, int x, int y, unsigned w,
+             unsigned h, unsigned bw, unsigned class, register Mask vmask, XID *vlist,
+             int depth, ClientPtr client, VisualID visual, int *error)
 {
     register WindowPtr pWin;
     WindowPtr pHead;
@@ -584,9 +589,8 @@ CreateWindow(wid, pParent, x, y, w, h, bw, class, vmask, vlist,
     }
 
     pScreen = pParent->drawable.pScreen;
-
     if ((class == InputOutput) && (depth == 0))
-	depth = pParent->drawable.depth;
+	 depth = pParent->drawable.depth;
     ancwopt = pParent->optional;
     if (!ancwopt)
 	ancwopt = FindWindowWithOptional(pParent)->optional;
@@ -709,10 +713,10 @@ CreateWindow(wid, pParent, x, y, w, h, bw, class, vmask, vlist,
     pWin->drawable.y = pParent->drawable.y + y + (int)bw;
 
 	/* set up clip list correctly for unobscured WindowPtr */
-    REGION_INIT(pScreen, &pWin->clipList, NullBox, 1);
-    REGION_INIT(pScreen, &pWin->borderClip, NullBox, 1);
-    REGION_INIT(pScreen, &pWin->winSize, NullBox, 1);
-    REGION_INIT(pScreen, &pWin->borderSize, NullBox, 1);
+    REGION_NULL(pScreen, &pWin->clipList);
+    REGION_NULL(pScreen, &pWin->borderClip);
+    REGION_NULL(pScreen, &pWin->winSize);
+    REGION_NULL(pScreen, &pWin->borderSize);
 
     pHead = RealChildHead(pParent);
     if (pHead)
@@ -781,17 +785,11 @@ CreateWindow(wid, pParent, x, y, w, h, bw, class, vmask, vlist,
 	event.u.createNotify.override = pWin->overrideRedirect;
 	DeliverEvents(pParent, &event, 1, NullWindow);		
     }
-
     return pWin;
 }
 
 static void
-#if NeedFunctionPrototypes
 FreeWindowResources(register WindowPtr pWin)
-#else
-FreeWindowResources(pWin)
-    register WindowPtr pWin;
-#endif
 {
     register ScreenPtr pScreen = pWin->drawable.pScreen;
 
@@ -807,6 +805,8 @@ FreeWindowResources(pWin)
 	REGION_DESTROY(pScreen, wBoundingShape (pWin));
     if (wClipShape (pWin))
 	REGION_DESTROY(pScreen, wClipShape (pWin));
+    if (wInputShape (pWin))
+	REGION_DESTROY(pScreen, wInputShape (pWin));
 #endif
     if (pWin->borderIsPixel == FALSE)
 	(*pScreen->DestroyPixmap)(pWin->border.pixmap);
@@ -820,12 +820,7 @@ FreeWindowResources(pWin)
 }
 
 static void
-#if NeedFunctionPrototypes
 CrushTree(WindowPtr pWin)
-#else
-CrushTree(pWin)
-    WindowPtr pWin;
-#endif
 {
     register WindowPtr pChild, pSib, pParent;
     UnrealizeWindowProcPtr UnrealizeWindow;
@@ -881,11 +876,8 @@ CrushTree(pWin)
  *	 If wid is None, don't send any events
  *****/
 
-/*ARGSUSED*/
 int
-DeleteWindow(value, wid)
-    pointer value;
-    XID wid;
+DeleteWindow(pointer value, XID wid)
  {
     register WindowPtr pParent;
     register WindowPtr pWin = (WindowPtr)value;
@@ -919,11 +911,8 @@ DeleteWindow(value, wid)
     return Success;
 }
 
-/*ARGSUSED*/
 void
-DestroySubwindows(pWin, client)
-    register WindowPtr pWin;
-    ClientPtr client;
+DestroySubwindows(register WindowPtr pWin, ClientPtr client)
 {
     /* XXX
      * The protocol is quite clear that each window should be
@@ -950,11 +939,7 @@ DestroySubwindows(pWin, client)
  *****/
  
 int
-ChangeWindowAttributes(pWin, vmask, vlist, client)
-    register WindowPtr pWin;
-    Mask vmask;
-    XID *vlist;
-    ClientPtr client;
+ChangeWindowAttributes(register WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
 {
     register Mask index2;
     register XID *pVlist;
@@ -1284,7 +1269,7 @@ ChangeWindowAttributes(pWin, vmask, vlist, client)
 		 * win_owner == client for CreateWindow, other clients
 		 * can ChangeWindowAttributes
 		 */
-		win_owner = LookupClient (pWin->drawable.id, client);
+		win_owner = clients[CLIENT_ID(pWin->drawable.id)];
 
 		if ( win_owner && win_owner->appgroup &&
 		    !pWin->parent->parent &&
@@ -1358,7 +1343,7 @@ ChangeWindowAttributes(pWin, vmask, vlist, client)
 		    if (pChild->optional->colormap == cmap)
 			CheckWindowOptionalNeed (pChild);
 		}
-
+	
 		xE.u.u.type = ColormapNotify;
 		xE.u.colormap.window = pWin->drawable.id;
 		xE.u.colormap.colormap = cmap;
@@ -1479,7 +1464,7 @@ PatchUp:
     {
 	RegionRec exposed;
 
-	REGION_INIT(pScreen, &exposed, NullBox, 0);
+	REGION_NULL(pScreen, &exposed);
 	REGION_SUBTRACT(pScreen, &exposed, &pWin->borderClip, &pWin->winSize);
 	(*pWin->drawable.pScreen->PaintWindowBorder)(pWin, &exposed, PW_BORDER);
 	REGION_UNINIT(pScreen, &exposed);
@@ -1494,10 +1479,7 @@ PatchUp:
  *****/
 
 void
-GetWindowAttributes(pWin, client, wa)
-    register WindowPtr pWin;
-    ClientPtr client;
-    xGetWindowAttributesReply *wa;
+GetWindowAttributes(register WindowPtr pWin, ClientPtr client, xGetWindowAttributesReply *wa)
 {
     wa->type = X_Reply;
     wa->bitGravity = pWin->bitGravity;
@@ -1533,14 +1515,15 @@ GetWindowAttributes(pWin, client, wa)
 
 
 WindowPtr
-MoveWindowInStack(pWin, pNextSib)
-    register WindowPtr pWin, pNextSib;
+MoveWindowInStack(register WindowPtr pWin, register WindowPtr pNextSib)
 {
     register WindowPtr pParent = pWin->parent;
     WindowPtr pFirstChange = pWin; /* highest window where list changes */
 
     if (pWin->nextSib != pNextSib)
     {
+	WindowPtr pOldNextSib = pWin->nextSib;
+
 	if (!pNextSib)	      /* move to bottom */
 	{
 	    if (pParent->firstChild == pWin)
@@ -1597,14 +1580,26 @@ MoveWindowInStack(pWin, pNextSib)
 		     pFirstChange = pFirstChange->nextSib;
 	    }
 	}
+	if(pWin->drawable.pScreen->RestackWindow)
+	    (*pWin->drawable.pScreen->RestackWindow)(pWin, pOldNextSib);
     }
+
+#ifdef ROOTLESS
+    /*
+     * In rootless mode we can't optimize away window restacks.
+     * There may be non-X windows around, so even if the window
+     * is in the correct position from X's point of view,
+     * the underlying window system may want to reorder it.
+     */
+    else if (pWin->drawable.pScreen->RestackWindow)
+        (*pWin->drawable.pScreen->RestackWindow)(pWin, pWin->nextSib);
+#endif
 
     return( pFirstChange );
 }
 
 RegionPtr
-CreateUnclippedWinSize (pWin)
-    register WindowPtr	 pWin;
+CreateUnclippedWinSize (register WindowPtr pWin)
 {
     RegionPtr	pRgn;
     BoxRec	box;
@@ -1616,7 +1611,7 @@ CreateUnclippedWinSize (pWin)
     pRgn = REGION_CREATE(pWin->drawable.pScreen, &box, 1);
 #ifdef SHAPE
     if (wBoundingShape (pWin) || wClipShape (pWin)) {
-	REGION_PTR(pScreen, pWin)
+	ScreenPtr pScreen = pWin->drawable.pScreen;
 
 	REGION_TRANSLATE(pScreen, pRgn, - pWin->drawable.x,
 			 - pWin->drawable.y);
@@ -1631,16 +1626,28 @@ CreateUnclippedWinSize (pWin)
 }
 
 void
-SetWinSize (pWin)
-    register WindowPtr pWin;
+SetWinSize (register WindowPtr pWin)
 {
+#ifdef COMPOSITE
+    if (pWin->redirectDraw)
+    {
+	BoxRec	box;
+
+	box.x1 = pWin->drawable.x;
+	box.y1 = pWin->drawable.y;
+	box.x2 = pWin->drawable.x + pWin->drawable.width;
+	box.y2 = pWin->drawable.y + pWin->drawable.height;
+	REGION_RESET (pScreen, &pWin->winSize, &box);
+    }
+    else
+#endif
     ClippedRegionFromBox(pWin->parent, &pWin->winSize,
 			 pWin->drawable.x, pWin->drawable.y,
 			 (int)pWin->drawable.width,
 			 (int)pWin->drawable.height);
 #ifdef SHAPE
     if (wBoundingShape (pWin) || wClipShape (pWin)) {
-	REGION_PTR(pScreen, pWin)
+	ScreenPtr pScreen = pWin->drawable.pScreen;
 
 	REGION_TRANSLATE(pScreen, &pWin->winSize, - pWin->drawable.x,
 			 - pWin->drawable.y);
@@ -1657,20 +1664,32 @@ SetWinSize (pWin)
 }
 
 void
-SetBorderSize (pWin)
-    register WindowPtr pWin;
+SetBorderSize (register WindowPtr pWin)
 {
     int	bw;
 
     if (HasBorder (pWin)) {
 	bw = wBorderWidth (pWin);
+#ifdef COMPOSITE
+	if (pWin->redirectDraw)
+	{
+	    BoxRec	box;
+
+	    box.x1 = pWin->drawable.x - bw;
+	    box.y1 = pWin->drawable.y - bw;
+	    box.x2 = pWin->drawable.x + pWin->drawable.width + bw;
+	    box.y2 = pWin->drawable.y + pWin->drawable.height + bw;
+	    REGION_RESET (pScreen, &pWin->borderSize, &box);
+	}
+	else
+#endif
 	ClippedRegionFromBox(pWin->parent, &pWin->borderSize,
 		pWin->drawable.x - bw, pWin->drawable.y - bw,
 		(int)(pWin->drawable.width + (bw<<1)),
 		(int)(pWin->drawable.height + (bw<<1)));
 #ifdef SHAPE
 	if (wBoundingShape (pWin)) {
-	    REGION_PTR(pScreen, pWin)
+	    ScreenPtr pScreen = pWin->drawable.pScreen;
 
 	    REGION_TRANSLATE(pScreen, &pWin->borderSize, - pWin->drawable.x,
 			     - pWin->drawable.y);
@@ -1688,13 +1707,17 @@ SetBorderSize (pWin)
     }
 }
 
+/**
+ *
+ *  \param x,y          new window position
+ *  \param oldx,oldy    old window position
+ *  \param destx,desty  position relative to gravity
+ */
+
 void
-GravityTranslate (x, y, oldx, oldy, dw, dh, gravity, destx, desty)
-    register int x, y;		/* new window position */
-    int		oldx, oldy;	/* old window position */
-    int		dw, dh;
-    unsigned	gravity;
-    register int *destx, *desty;	/* position relative to gravity */
+GravityTranslate (register int x, register int y, int oldx, int oldy,
+                  int dw, int dh, unsigned gravity,
+                  register int *destx, register int *desty)
 {
     switch (gravity) {
     case NorthGravity:
@@ -1742,9 +1765,7 @@ GravityTranslate (x, y, oldx, oldy, dw, dh, gravity, destx, desty)
 
 /* XXX need to retile border on each window with ParentRelative origin */
 void
-ResizeChildrenWinSize(pWin, dx, dy, dw, dh)
-    register WindowPtr pWin;
-    int dx, dy, dw, dh;
+ResizeChildrenWinSize(register WindowPtr pWin, int dx, int dy, int dw, int dh)
 {
     register ScreenPtr pScreen;
     register WindowPtr pSib, pChild;
@@ -1780,6 +1801,7 @@ ResizeChildrenWinSize(pWin, dx, dy, dw, dh)
 	SetWinSize (pSib);
 	SetBorderSize (pSib);
 	(*pScreen->PositionWindow)(pSib, pSib->drawable.x, pSib->drawable.y);
+
 	if ( (pChild = pSib->firstChild) )
 	{
 	    while (1)
@@ -1837,14 +1859,9 @@ ResizeChildrenWinSize(pWin, dx, dy, dw, dh)
  */
 
 static int
-#if NeedFunctionPrototypes
 IsSiblingAboveMe(
     register WindowPtr pMe,
     register WindowPtr pSib)
-#else
-IsSiblingAboveMe(pMe, pSib)
-    register WindowPtr pMe, pSib;
-#endif
 {
     register WindowPtr pWin;
 
@@ -1861,15 +1878,9 @@ IsSiblingAboveMe(pMe, pSib)
 }
 
 static BoxPtr
-#if NeedFunctionPrototypes
 WindowExtents(
     register WindowPtr pWin,
     register BoxPtr pBox)
-#else
-WindowExtents(pWin, pBox)
-    register WindowPtr pWin;
-    register BoxPtr pBox;
-#endif
 {
     pBox->x1 = pWin->drawable.x - wBorderWidth (pWin);
     pBox->y1 = pWin->drawable.y - wBorderWidth (pWin);
@@ -1884,18 +1895,12 @@ WindowExtents(pWin, pBox)
 #define IS_SHAPED(pWin)	(wBoundingShape (pWin) != (RegionPtr) NULL)
 
 static RegionPtr
-#if NeedFunctionPrototypes
 MakeBoundingRegion (
     register WindowPtr	pWin,
     BoxPtr	pBox)
-#else
-MakeBoundingRegion (pWin, pBox)
-    register WindowPtr	pWin;
-    BoxPtr	pBox;
-#endif
 {
     RegionPtr	pRgn;
-    REGION_PTR(pScreen, pWin)
+    ScreenPtr   pScreen = pWin->drawable.pScreen;
 
     pRgn = REGION_CREATE(pScreen, pBox, 1);
     if (wBoundingShape (pWin)) {
@@ -1909,17 +1914,11 @@ MakeBoundingRegion (pWin, pBox)
 }
 
 static Bool
-#if NeedFunctionPrototypes
 ShapeOverlap (
     WindowPtr	pWin,
     BoxPtr	pWinBox,
     WindowPtr	pSib,
     BoxPtr	pSibBox)
-#else
-ShapeOverlap (pWin, pWinBox, pSib, pSibBox)
-    WindowPtr	pWin, pSib;
-    BoxPtr	pWinBox, pSibBox;
-#endif
 {
     RegionPtr	pWinRgn, pSibRgn;
     register ScreenPtr	pScreen;
@@ -1939,16 +1938,10 @@ ShapeOverlap (pWin, pWinBox, pSib, pSibBox)
 #endif
 
 static Bool
-#if NeedFunctionPrototypes
 AnyWindowOverlapsMe(
     WindowPtr pWin,
     WindowPtr pHead,
     register BoxPtr box)
-#else
-AnyWindowOverlapsMe(pWin, pHead, box)
-    WindowPtr pWin, pHead;
-    register BoxPtr box;
-#endif
 {
     register WindowPtr pSib;
     BoxRec sboxrec;
@@ -1971,15 +1964,9 @@ AnyWindowOverlapsMe(pWin, pHead, box)
 }
 
 static Bool
-#if NeedFunctionPrototypes
 IOverlapAnyWindow(
     WindowPtr pWin,
     register BoxPtr box)
-#else
-IOverlapAnyWindow(pWin, box)
-    WindowPtr pWin;
-    register BoxPtr box;
-#endif
 {
     register WindowPtr pSib;
     BoxRec sboxrec;
@@ -2030,7 +2017,6 @@ IOverlapAnyWindow(pWin, box)
  */
 
 static WindowPtr
-#if NeedFunctionPrototypes
 WhereDoIGoInTheStack(
     register WindowPtr pWin,
     register WindowPtr pSib,
@@ -2039,13 +2025,6 @@ WhereDoIGoInTheStack(
     unsigned short w,
     unsigned short h,
     int smode)
-#else
-WhereDoIGoInTheStack(pWin, pSib, x, y, w, h, smode)
-    register WindowPtr pWin, pSib;
-    short x, y;
-    unsigned short w, h;
-    int smode;
-#endif
 {
     BoxRec box;
     register ScreenPtr pScreen;
@@ -2144,21 +2123,14 @@ WhereDoIGoInTheStack(pWin, pSib, x, y, w, h, smode)
 }
 
 static void
-#if NeedFunctionPrototypes
 ReflectStackChange(
     register WindowPtr pWin,
     register WindowPtr pSib,
     VTKind  kind)
-#else
-ReflectStackChange(pWin, pSib, kind)
-    register WindowPtr pWin, pSib;
-    VTKind  kind;
-#endif
 {
 /* Note that pSib might be NULL */
 
     Bool WasViewable = (Bool)pWin->viewable;
-    WindowPtr pParent;
     Bool anyMarked;
     WindowPtr pFirstChange;
 #ifdef DO_SAVE_UNDERS
@@ -2168,8 +2140,8 @@ ReflectStackChange(pWin, pSib, kind)
     ScreenPtr pScreen = pWin->drawable.pScreen;
 
     /* if this is a root window, can't be restacked */
-    if (!(pParent = pWin->parent))
-	return ;
+    if (!pWin->parent)
+	return;
 
     pFirstChange = MoveWindowInStack(pWin, pSib);
 
@@ -2205,11 +2177,7 @@ ReflectStackChange(pWin, pSib, kind)
  *****/
 
 int
-ConfigureWindow(pWin, mask, vlist, client)
-    register WindowPtr pWin;
-    register Mask mask;
-    XID *vlist;
-    ClientPtr client;
+ConfigureWindow(register WindowPtr pWin, register Mask mask, XID *vlist, ClientPtr client)
 {
 #define RESTACK_WIN    0
 #define MOVE_WIN       1
@@ -2217,7 +2185,7 @@ ConfigureWindow(pWin, mask, vlist, client)
 #define REBORDER_WIN   3
     register WindowPtr pSib = NullWindow;
     register WindowPtr pParent = pWin->parent;
-    Window sibwid;
+    Window sibwid = 0;
     Mask index2, tmask;
     register XID *pVlist;
     short x,   y, beforeX, beforeY;
@@ -2350,6 +2318,12 @@ ConfigureWindow(pWin, mask, vlist, client)
 	    event.u.u.detail = Above;
 	event.u.configureRequest.x = x;
 	event.u.configureRequest.y = y;
+#ifdef PANORAMIX
+	if(!noPanoramiXExtension && (!pParent || !pParent->parent)) {
+            event.u.configureRequest.x += panoramiXdataPtr[0].x;
+            event.u.configureRequest.y += panoramiXdataPtr[0].y;
+	}
+#endif
 	event.u.configureRequest.width = w;
 	event.u.configureRequest.height = h;
 	event.u.configureRequest.borderWidth = bw;
@@ -2411,7 +2385,10 @@ ConfigureWindow(pWin, mask, vlist, client)
 	    goto ActuallyDoSomething;
     if (mask & CWStackMode)
     {
+#ifndef ROOTLESS
+        /* See above for why we always reorder in rootless mode. */
 	if (pWin->nextSib != pSib)
+#endif
 	    goto ActuallyDoSomething;
     }
     return(Success);
@@ -2427,6 +2404,12 @@ ActuallyDoSomething:
 	    event.u.configureNotify.aboveSibling = None;
 	event.u.configureNotify.x = x;
 	event.u.configureNotify.y = y;
+#ifdef PANORAMIX
+	if(!noPanoramiXExtension && (!pParent || !pParent->parent)) {
+	    event.u.configureNotify.x += panoramiXdataPtr[0].x;
+            event.u.configureNotify.y += panoramiXdataPtr[0].y;
+	}
+#endif
 	event.u.configureNotify.width = w;
 	event.u.configureNotify.height = h;
 	event.u.configureNotify.borderWidth = bw;
@@ -2460,7 +2443,6 @@ ActuallyDoSomething:
 
     if (action != RESTACK_WIN)
 	CheckCursorConfinement(pWin);
-
     return(Success);
 #undef RESTACK_WIN
 #undef MOVE_WIN
@@ -2480,10 +2462,7 @@ ActuallyDoSomething:
  ******/
 
 int
-CirculateWindow(pParent, direction, client)
-    WindowPtr pParent;
-    int direction;
-    ClientPtr client;
+CirculateWindow(WindowPtr pParent, int direction, ClientPtr client)
 {
     register WindowPtr pWin, pHead, pFirst;
     xEvent event;
@@ -2538,15 +2517,9 @@ CirculateWindow(pParent, direction, client)
 }
 
 static int
-#if NeedFunctionPrototypes
 CompareWIDs(
     WindowPtr pWin,
     pointer   value) /* must conform to VisitWindowProcPtr */
-#else
-CompareWIDs(pWin, value)
-    WindowPtr pWin;
-    pointer   value; /* must conform to VisitWindowProcPtr */
-#endif
 {
     Window *wid = (Window *)value;
 
@@ -2561,10 +2534,8 @@ CompareWIDs(pWin, value)
  *****/
 
 int
-ReparentWindow(pWin, pParent, x, y, client)
-    register WindowPtr pWin, pParent;
-    int x,y;
-    ClientPtr client;
+ReparentWindow(register WindowPtr pWin, register WindowPtr pParent,
+               int x, int y, ClientPtr client)
 {
     WindowPtr pPrev, pPriorParent;
     Bool WasMapped = (Bool)(pWin->mapped);
@@ -2586,6 +2557,12 @@ ReparentWindow(pWin, pParent, x, y, client)
     event.u.reparent.parent = pParent->drawable.id;
     event.u.reparent.x = x;
     event.u.reparent.y = y;
+#ifdef PANORAMIX
+    if(!noPanoramiXExtension && !pParent->parent) {
+	event.u.reparent.x += panoramiXdataPtr[0].x;
+	event.u.reparent.y += panoramiXdataPtr[0].y;
+    }
+#endif
     event.u.reparent.override = pWin->overrideRedirect;
     DeliverEvents(pWin, &event, 1, pParent);
 
@@ -2649,12 +2626,7 @@ ReparentWindow(pWin, pParent, x, y, client)
 }
 
 static void
-#if NeedFunctionPrototypes
 RealizeTree(WindowPtr pWin)
-#else
-RealizeTree(pWin)
-    WindowPtr pWin;
-#endif
 {
     register WindowPtr pChild;
     RealizeWindowProcPtr Realize;
@@ -2695,9 +2667,7 @@ RealizeTree(pWin)
  *****/
 
 int
-MapWindow(pWin, client)
-    register WindowPtr pWin;
-    ClientPtr client;
+MapWindow(register WindowPtr pWin, ClientPtr client)
 {
     register ScreenPtr pScreen;
 
@@ -2806,7 +2776,7 @@ MapWindow(pWin, client)
 	    (*pScreen->ClipNotify) (pWin, 0, 0);
 	if (pScreen->PostValidateTree)
 	    (*pScreen->PostValidateTree)(NullWindow, pWin, VTMap);
-	REGION_INIT(pScreen, &temp, NullBox, 0);
+	REGION_NULL(pScreen, &temp);
 	REGION_COPY(pScreen, &temp, &pWin->clipList);
 	(*pScreen->WindowExposures) (pWin, &temp, NullRegion);
 	REGION_UNINIT(pScreen, &temp);
@@ -2823,9 +2793,7 @@ MapWindow(pWin, client)
  *****/
 
 void
-MapSubwindows(pParent, client)
-    register WindowPtr pParent;
-    ClientPtr client;
+MapSubwindows(register WindowPtr pParent, ClientPtr client)
 {
     register WindowPtr	pWin;
     WindowPtr		pFirstMapped = NullWindow;
@@ -2941,15 +2909,9 @@ MapSubwindows(pParent, client)
 }
 
 static void
-#if NeedFunctionPrototypes
 UnrealizeTree(
     WindowPtr pWin,
     Bool fromConfigure)
-#else
-UnrealizeTree(pWin, fromConfigure)
-    WindowPtr pWin;
-    Bool fromConfigure;
-#endif
 {
     register WindowPtr pChild;
     UnrealizeWindowProcPtr Unrealize;
@@ -2964,6 +2926,15 @@ UnrealizeTree(pWin, fromConfigure)
 	{
 	    pChild->realized = FALSE;
 	    pChild->visibility = VisibilityNotViewable;
+#ifdef PANORAMIX
+	    if(!noPanoramiXExtension && !pChild->drawable.pScreen->myNum) {
+		PanoramiXRes *win;
+		win = (PanoramiXRes*)LookupIDByType(pChild->drawable.id,
+							XRT_WINDOW);
+		if(win)
+		   win->u.win.visibility = VisibilityNotViewable;
+	    } 
+#endif
 	    (* Unrealize)(pChild);
 	    DeleteWindowFromAnyEvents(pChild, FALSE);
 	    if (pChild->viewable)
@@ -3001,9 +2972,7 @@ UnrealizeTree(pWin, fromConfigure)
  *****/
 
 int
-UnmapWindow(pWin, fromConfigure)
-    register WindowPtr pWin;
-    Bool fromConfigure;
+UnmapWindow(register WindowPtr pWin, Bool fromConfigure)
 {
     register WindowPtr pParent;
     xEvent event;
@@ -3062,8 +3031,7 @@ UnmapWindow(pWin, fromConfigure)
  *****/
 
 void
-UnmapSubwindows(pWin)
-    register WindowPtr pWin;
+UnmapSubwindows(register WindowPtr pWin)
 {
     register WindowPtr pChild, pHead;
     xEvent event;
@@ -3071,7 +3039,7 @@ UnmapSubwindows(pWin)
     Bool wasViewable = (Bool)pWin->viewable;
     Bool anyMarked = FALSE;
     Mask parentNotify;
-    WindowPtr pLayerWin;
+    WindowPtr pLayerWin = NULL;
     ScreenPtr pScreen = pWin->drawable.pScreen;
 
     if (!pWin->firstChild)
@@ -3154,18 +3122,24 @@ UnmapSubwindows(pWin)
 
 
 void
-HandleSaveSet(client)
-    register ClientPtr client;
+HandleSaveSet(register ClientPtr client)
 {
     register WindowPtr pParent, pWin;
     register int j;
 
     for (j=0; j<client->numSaved; j++)
     {
-	pWin = (WindowPtr)client->saveSet[j];
-	pParent = pWin->parent;
-	while (pParent && (wClient (pParent) == client))
-	    pParent = pParent->parent;
+	pWin = SaveSetWindow(client->saveSet[j]);
+#ifdef XFIXES
+	if (SaveSetToRoot(client->saveSet[j]))
+	    pParent = WindowTable[pWin->drawable.pScreen->myNum];
+	else
+#endif
+	{
+	    pParent = pWin->parent;
+	    while (pParent && (wClient (pParent) == client))
+		pParent = pParent->parent;
+	}
 	if (pParent)
 	{
 	    if (pParent != pWin->parent)
@@ -3177,19 +3151,24 @@ HandleSaveSet(client)
 		if(!pWin->realized && pWin->mapped)
 		    pWin->mapped = FALSE;
 	    }
-	    MapWindow(pWin, client);
+#ifdef XFIXES
+	    if (SaveSetRemap (client->saveSet[j]))
+#endif
+		MapWindow(pWin, client);
 	}
     }
     xfree(client->saveSet);
     client->numSaved = 0;
-    client->saveSet = (pointer *)NULL;
+    client->saveSet = (SaveSetElt *)NULL;
 }
 
+/**
+ *
+ *  \param x,y  in root
+ *  \param box  "return" value
+ */
 Bool
-VisibleBoundingBoxFromPoint(pWin, x, y, box)
-    register WindowPtr pWin;
-    int x, y;	/* in root */
-    BoxPtr box;	  /* "return" value */
+VisibleBoundingBoxFromPoint(register WindowPtr pWin, int x, int y, BoxPtr box)
 {
     if (!pWin->realized)
 	return (FALSE);
@@ -3198,25 +3177,31 @@ VisibleBoundingBoxFromPoint(pWin, x, y, box)
     return(FALSE);
 }
 
+/**
+ *
+ * \param x,y  in root
+ */
 Bool
-PointInWindowIsVisible(pWin, x, y)
-    register WindowPtr pWin;
-    int x, y;	/* in root */
+PointInWindowIsVisible(register WindowPtr pWin, int x, int y)
 {
     BoxRec box;
 
     if (!pWin->realized)
 	return (FALSE);
     if (POINT_IN_REGION(pWin->drawable.pScreen, &pWin->borderClip,
-						  x, y, &box))
+						  x, y, &box)
+	&& (!wInputShape(pWin) ||
+	    POINT_IN_REGION(pWin->drawable.pScreen,
+			    wInputShape(pWin),
+			    x - pWin->drawable.x, 
+			    y - pWin->drawable.y, &box)))
 	return(TRUE);
     return(FALSE);
 }
 
 
 RegionPtr
-NotClippedByChildren(pWin)
-    register WindowPtr pWin;
+NotClippedByChildren(register WindowPtr pWin)
 {
     register ScreenPtr pScreen;
     RegionPtr pReg;
@@ -3232,15 +3217,71 @@ NotClippedByChildren(pWin)
     return(pReg);
 }
 
-
 void
-SendVisibilityNotify(pWin)
-    WindowPtr pWin;
+SendVisibilityNotify(WindowPtr pWin)
 {
     xEvent event;
+#ifndef NO_XINERAMA_PORT
+    unsigned int visibility = pWin->visibility;
+#endif
+#ifdef PANORAMIX
+    /* This is not quite correct yet, but it's close */
+    if(!noPanoramiXExtension) {
+	PanoramiXRes *win;
+	WindowPtr pWin2;
+	int i, Scrnum;
+
+	Scrnum = pWin->drawable.pScreen->myNum;
+	
+	win = PanoramiXFindIDByScrnum(XRT_WINDOW, pWin->drawable.id, Scrnum);
+
+	if(!win || (win->u.win.visibility == visibility))
+	    return;
+
+	switch(visibility) {
+	case VisibilityUnobscured:
+	    for(i = 0; i < PanoramiXNumScreens; i++) {
+		if(i == Scrnum) continue;
+
+		pWin2 = (WindowPtr)LookupIDByType(win->info[i].id, RT_WINDOW);
+
+		if (pWin2) {
+		    if(pWin2->visibility == VisibilityPartiallyObscured)
+		   	return;
+
+		    if(!i) pWin = pWin2;
+		}
+	    }
+	    break;
+	case VisibilityPartiallyObscured:
+	    if(Scrnum) {
+	        pWin2 = (WindowPtr)LookupIDByType(win->info[0].id, RT_WINDOW);
+		if (pWin2) pWin = pWin2;
+	    }
+	    break;
+	case VisibilityFullyObscured:
+	    for(i = 0; i < PanoramiXNumScreens; i++) {
+		if(i == Scrnum) continue;
+
+		pWin2 = (WindowPtr)LookupIDByType(win->info[i].id, RT_WINDOW);
+		
+		if (pWin2) {
+		    if(pWin2->visibility != VisibilityFullyObscured)
+		    	return;
+
+		    if(!i) pWin = pWin2;
+		}
+	    }
+	    break;
+	}
+	
+	win->u.win.visibility = visibility;
+    }
+#endif
+
     event.u.u.type = VisibilityNotify;
     event.u.visibility.window = pWin->drawable.id;
-    event.u.visibility.state = pWin->visibility;
+    event.u.visibility.state = visibility;
     DeliverEvents(pWin, &event, 1, NullWindow);
 }
 
@@ -3248,18 +3289,13 @@ SendVisibilityNotify(pWin)
 #define RANDOM_WIDTH 32
 
 #ifndef NOLOGOHACK
-extern int logoScreenSaver;
 static void DrawLogo(
-#if NeedFunctionPrototypes
-    WindowPtr /*pWin*/
-#endif
+    WindowPtr pWin
 );
 #endif
 
 void
-SaveScreens(on, mode)
-    int on;
-    int mode;
+SaveScreens(int on, int mode)
 {
     int i;
     int what;
@@ -3330,6 +3366,15 @@ SaveScreens(on, mode)
 #endif
 		screenIsSaved = SCREEN_SAVER_ON;
 	    }
+	    /*
+	     * Call the DDX saver in case it wants to do something
+	     * at cycle time
+	     */
+	    else if (savedScreenInfo[i].blanked == SCREEN_IS_BLANKED)
+	    {
+		(* screenInfo.screens[i]->SaveScreen) (screenInfo.screens[i],
+						       type);
+	    }
 	    break;
 	case SCREEN_SAVER_ON:
 	    if (ScreenSaverBlanking != DontPreferBlanking)
@@ -3358,16 +3403,12 @@ SaveScreens(on, mode)
 	}
     }
     screenIsSaved = what;
+    if (mode == ScreenSaverReset)
+       SetScreenSaverTimer();
 }
 
 static Bool
-#if NeedFunctionPrototypes
 TileScreenSaver(int i, int kind)
-#else
-TileScreenSaver(i, kind)
-    int i;
-    int	kind;
-#endif
 {
     int j;
     int result;
@@ -3377,7 +3418,7 @@ TileScreenSaver(i, kind)
     CursorMetricRec cm;
     unsigned char *srcbits, *mskbits;
     CursorPtr cursor;
-    XID	    cursorID;
+    XID	cursorID = 0;
     int	attri;
 
     mask = 0;
@@ -3485,8 +3526,7 @@ TileScreenSaver(i, kind)
  */
 
 WindowPtr
-FindWindowWithOptional (w)
-    register WindowPtr w;
+FindWindowWithOptional (register WindowPtr w)
 {
     do
 	w = w->parent;
@@ -3503,8 +3543,7 @@ FindWindowWithOptional (w)
  */
 
 void
-CheckWindowOptionalNeed (w)
-    register WindowPtr w;
+CheckWindowOptionalNeed (register WindowPtr w)
 {
     register WindowOptPtr optional;
     register WindowOptPtr parentOptional;
@@ -3531,6 +3570,8 @@ CheckWindowOptionalNeed (w)
 	return;
     if (optional->clipShape != NULL)
 	return;
+    if (optional->inputShape != NULL)
+	return;
 #endif
 #ifdef XINPUT
     if (optional->inputMasks != NULL)
@@ -3556,8 +3597,7 @@ CheckWindowOptionalNeed (w)
  */
 
 Bool
-MakeWindowOptional (pWin)
-    register WindowPtr pWin;
+MakeWindowOptional (register WindowPtr pWin)
 {
     register WindowOptPtr optional;
     register WindowOptPtr parentOptional;
@@ -3577,6 +3617,7 @@ MakeWindowOptional (pWin)
 #ifdef SHAPE
     optional->boundingShape = NULL;
     optional->clipShape = NULL;
+    optional->inputShape = NULL;
 #endif
 #ifdef XINPUT
     optional->inputMasks = NULL;
@@ -3598,14 +3639,28 @@ MakeWindowOptional (pWin)
 }
 
 void
-DisposeWindowOptional (pWin)
-    register WindowPtr pWin;
+DisposeWindowOptional (register WindowPtr pWin)
 {
     if (!pWin->optional)
 	return;
     /*
      * everything is peachy.  Delete the optional record
      * and clean up
+     */
+    /*
+     * TOG changed this code to:
+     *
+     *	    if (pWin->cursorIsNone == FALSE)
+     *		FreeCursor (pWin->optional->cursor, (Cursor)0);
+     *	    pWin->cursorIsNone = TRUE;
+     *
+     * This is blatently wrong; windows without optionals can have
+     * two different cursor values, either None or sharing their
+     * parents cursor.  This difference is controlled by the
+     * cursorIsNone value; when TRUE, the window has no cursor,
+     * when false, it shares its cursor with its parent; TOG
+     * made it impossible for a window to have a cursor without
+     * an optional record.
      */
     if (pWin->optional->cursor)
     {
@@ -3620,12 +3675,7 @@ DisposeWindowOptional (pWin)
 
 #ifndef NOLOGOHACK
 static void
-#if NeedFunctionPrototypes
 DrawLogo(WindowPtr pWin)
-#else
-DrawLogo(pWin)
-    WindowPtr pWin;
-#endif
 {
     DrawablePtr pDraw;
     ScreenPtr pScreen;

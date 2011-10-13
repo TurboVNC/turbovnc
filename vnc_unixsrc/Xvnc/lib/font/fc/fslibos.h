@@ -1,5 +1,4 @@
-/* $XConsortium: fslibos.h /main/16 1996/11/13 14:45:15 lehors $ */
-/* $XFree86: xc/lib/font/fc/fslibos.h,v 3.3 1996/12/23 06:02:08 dawes Exp $ */
+/* $Xorg: fslibos.h,v 1.4 2001/02/09 02:04:03 xorgcvs Exp $ */
 /*
  * Copyright 1990 Network Computing Devices;
  * Portions Copyright 1987 by Digital Equipment Corporation
@@ -7,15 +6,13 @@
 
 /*
 
-Copyright (c) 1987, 1994  X Consortium
+Copyright 1987, 1994, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -23,23 +20,24 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/lib/font/fc/fslibos.h,v 3.8 2003/08/29 18:01:14 herrb Exp $ */
 
 /*
  * FSlib networking & os include file
  */
 
-#include <X11/Xtrans.h>
+#include <X11/Xtrans/Xtrans.h>
 
 #ifndef WIN32
 
@@ -50,21 +48,24 @@ from the X Consortium.
 #ifndef FONT_OPEN_MAX
 
 #ifndef X_NOT_POSIX
-#ifdef _POSIX_SOURCE
-#include <limits.h>
-#else
-#define _POSIX_SOURCE
-#include <limits.h>
-#undef _POSIX_SOURCE
+# ifdef _POSIX_SOURCE
+#  include <limits.h>
+# else
+#  define _POSIX_SOURCE
+#  include <limits.h>
+#  undef _POSIX_SOURCE
+# endif
 #endif
+#ifndef SIZE_MAX
+# ifdef ULONG_MAX
+#  define SIZE_MAX ULONG_MAX
+# else
+#  define SIZE_MAX UINT_MAX
+# endif
 #endif
 #ifndef OPEN_MAX
-#if defined(SVR4) || defined(__EMX__)
-#ifdef SCO325
-#define OPEN_MAX sysconf(_SC_OPEN_MAX)
-#else
+#if defined(SVR4) || defined(__UNIXOS2__)
 #define OPEN_MAX 256
-#endif
 #else
 #include <sys/param.h>
 #ifndef OPEN_MAX

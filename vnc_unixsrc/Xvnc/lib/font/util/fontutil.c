@@ -1,17 +1,14 @@
-/* $XConsortium: fontutil.c /main/11 1996/09/12 10:08:59 kaleb $ */
-/* $XFree86: xc/lib/font/util/fontutil.c,v 3.1 1996/12/23 06:02:33 dawes Exp $ */
+/* $Xorg: fontutil.c,v 1.4 2001/02/09 02:04:04 xorgcvs Exp $ */
 
 /*
 
-Copyright (c) 1991  X Consortium
+Copyright 1991, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -19,25 +16,30 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/lib/font/util/fontutil.c,v 3.6 2001/10/28 03:32:46 tsi Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
  */
 
-#include    "fontmisc.h"
-#include    "fontstruct.h"
-#include    "FSproto.h"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include    <X11/fonts/fontmisc.h>
+#include    <X11/fonts/fontstruct.h>
+#include    <X11/fonts/FSproto.h>
+#include    <X11/fonts/fontutil.h>
 
 /* Define global here...  doesn't hurt the servers, and avoids
    unresolved references in font clients.  */
@@ -46,13 +48,12 @@ static int defaultGlyphCachingMode = DEFAULT_GLYPH_CACHING_MODE;
 int glyphCachingMode = DEFAULT_GLYPH_CACHING_MODE;
 
 void
-GetGlyphs(font, count, chars, fontEncoding, glyphcount, glyphs)
-    FontPtr     font;
-    unsigned long count;
-    unsigned char *chars;
-    FontEncoding fontEncoding;
-    unsigned long *glyphcount;	/* RETURN */
-    CharInfoPtr *glyphs;	/* RETURN */
+GetGlyphs(FontPtr font, 
+	  unsigned long count, 
+	  unsigned char *chars, 
+	  FontEncoding fontEncoding, 
+	  unsigned long *glyphcount,	/* RETURN */
+	  CharInfoPtr *glyphs)		/* RETURN */
 {
     (*font->get_glyphs) (font, count, chars, fontEncoding, glyphcount, glyphs);
 }
@@ -61,11 +62,10 @@ GetGlyphs(font, count, chars, fontEncoding, glyphcount, glyphs)
 #define MAX(a,b)    ((a)>(b)?(a):(b))
 
 void
-QueryGlyphExtents(pFont, charinfo, count, info)
-    FontPtr     pFont;
-    CharInfoPtr *charinfo;
-    unsigned long count;
-    ExtentInfoRec *info;
+QueryGlyphExtents(FontPtr pFont, 
+		  CharInfoPtr *charinfo, 
+		  unsigned long count, 
+		  ExtentInfoRec *info)
 {
     register unsigned long i;
     xCharInfo  *pCI;
@@ -134,11 +134,10 @@ QueryGlyphExtents(pFont, charinfo, count, info)
 }
 
 Bool
-QueryTextExtents(pFont, count, chars, info)
-    FontPtr     pFont;
-    unsigned long count;
-    unsigned char *chars;
-    ExtentInfoRec *info;
+QueryTextExtents(FontPtr pFont, 
+		 unsigned long count, 
+		 unsigned char *chars, 
+		 ExtentInfoRec *info)
 {
     xCharInfo     **charinfo;
     unsigned long   n;
@@ -161,21 +160,21 @@ QueryTextExtents(pFont, count, chars, info)
     /* Do default character substitution as get_metrics doesn't */
 
 #define IsNonExistentChar(ci) (!(ci) || \
-			       (ci)->ascent == 0 && \
+			       ((ci)->ascent == 0 && \
 			       (ci)->descent == 0 && \
 			       (ci)->leftSideBearing == 0 && \
 			       (ci)->rightSideBearing == 0 && \
-			       (ci)->characterWidth == 0)
+			       (ci)->characterWidth == 0))
 
     firstReal = n;
     defc[0] = pFont->info.defaultCh >> 8;
     defc[1] = pFont->info.defaultCh;
     (*pFont->get_metrics) (pFont, 1, defc, encoding, &t, &defaultChar);
-    if (IsNonExistentChar (defaultChar))
+    if ((IsNonExistentChar (defaultChar)))
 	defaultChar = 0;
     for (i = 0; i < n; i++)
     {
-	if (IsNonExistentChar (charinfo[i]))
+	if ((IsNonExistentChar (charinfo[i])))
 	{
 	    if (!defaultChar)
 		continue;
@@ -186,15 +185,15 @@ QueryTextExtents(pFont, count, chars, info)
     }
     cm = pFont->info.constantMetrics;
     pFont->info.constantMetrics = FALSE;
-    QueryGlyphExtents(pFont, charinfo + firstReal, n - firstReal, info);
+    QueryGlyphExtents(pFont, (CharInfoPtr*) charinfo + firstReal, 
+		      n - firstReal, info);
     pFont->info.constantMetrics = cm;
     xfree(charinfo);
     return TRUE;
 }
 
 Bool
-ParseGlyphCachingMode(str)
-    char       *str;
+ParseGlyphCachingMode(char *str)
 {
     if (!strcmp(str, "none")) defaultGlyphCachingMode = CACHING_OFF;
     else if (!strcmp(str, "all")) defaultGlyphCachingMode = CACHE_ALL_GLYPHS;
@@ -204,7 +203,7 @@ ParseGlyphCachingMode(str)
 }
 
 void
-InitGlyphCaching()
+InitGlyphCaching(void)
 {
     /* Set glyphCachingMode to the mode the server hopes to
        support.  DDX drivers that do not support the requested level
@@ -219,8 +218,7 @@ InitGlyphCaching()
  * caching they can support.
  */
 void
-SetGlyphCachingMode(newmode)
-    int newmode;
+SetGlyphCachingMode(int newmode)
 {
     if ( (glyphCachingMode > newmode) && (newmode >= 0) )
 	glyphCachingMode = newmode;
@@ -232,16 +230,15 @@ SetGlyphCachingMode(newmode)
 
 /* add_range(): Add range to a list of ranges, with coalescence */
 int
-add_range(newrange, nranges, range, charset_subset)
-fsRange *newrange;
-int *nranges;
-fsRange **range;
-Bool charset_subset;
+add_range(fsRange *newrange, 
+	  int *nranges, 
+	  fsRange **range, 
+	  Bool charset_subset)
 {
     int first, last, middle;
     unsigned long keymin, keymax;
-    unsigned long ptrmin, ptrmax;
-    fsRange *ptr, *ptr1, *ptr2, *endptr;
+    unsigned long ptrmin = 0, ptrmax = 0;
+    fsRange *ptr = NULL, *ptr1, *ptr2, *endptr;
 
     /* There are two different ways to treat ranges:
 
@@ -259,7 +256,7 @@ Bool charset_subset;
     /* If newrange covers multiple rows; break up the rows */
     if (!charset_subset && newrange->min_char_high != newrange->max_char_high)
     {
-	int i, err;
+	int i, err = 0;
 	fsRange temprange;
 	for (i = newrange->min_char_high;
 	     i <= newrange->max_char_high;
@@ -388,8 +385,7 @@ Bool charset_subset;
     }
     for (ptr2 = ptr; ptr2 < endptr; ptr2++)
     {
-	if (ptr2->min_char_low == 0 &&
-	    ptr2->min_char_high == 0 ||
+	if ((ptr2->min_char_low == 0 && ptr2->min_char_high == 0) ||
 	    ptrmax >= mincharp(ptr2) - 1)
 	{
 	    if (!charset_subset && ptr->min_char_high != ptr2->min_char_high)
@@ -417,3 +413,31 @@ Bool charset_subset;
 
     return Successful;
 }
+
+/* It is difficult to find a good place for this. */
+#ifdef NEED_STRCASECMP
+int
+f_strcasecmp(const char *s1, const char *s2)
+{
+  char c1, c2;
+
+  if (*s1 == 0)
+    if (*s2 == 0)
+      return 0;
+    else
+      return 1;
+
+  c1 = (isupper (*s1) ? tolower (*s1) : *s1);
+  c2 = (isupper (*s2) ? tolower (*s2) : *s2);
+  while (c1 == c2) {
+    if (c1 == '\0')
+      return 0;
+    s1++;
+    s2++;
+    c1 = (isupper (*s1) ? tolower (*s1) : *s1);
+    c2 = (isupper (*s2) ? tolower (*s2) : *s2);
+  }
+  return c1 - c2;
+}
+#endif
+

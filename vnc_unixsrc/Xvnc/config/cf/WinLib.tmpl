@@ -1,13 +1,16 @@
-XCOMM $XConsortium: WinLib.tmpl /main/3 1996/11/13 14:43:09 lehors $
+XCOMM $Xorg: WinLib.tmpl,v 1.3 2000/08/17 19:41:46 cpqbld Exp $
 
-#define SharedOldXReqs $(LDPRELIBS) $(XLIBONLY)
-#define SharedXtReqs $(LDPRELIBS) $(XLIBONLY)
-#define SharedXawReqs $(LDPRELIBS) $(XMULIB) $(XTOOLLIB) $(XLIB)
+
+
+XCOMM $XFree86: xc/config/cf/WinLib.tmpl,v 1.4tsi Exp $
+
+#define SharedOldXReqs $(LDPRELIBS) $(XONLYLIB)
+#define SharedXtReqs $(LDPRELIBS) $(XONLYLIB)
+#define SharedXawReqs $(LDPRELIBS) $(XMULIB) $(XTOOLLIB) $(EXTRAXAWREQS) $(XLIB)
 #define SharedXmuReqs $(LDPRELIBS) $(XTOOLLIB) $(XLIB)
-#define SharedXextReqs $(LDPRELIBS) $(XLIBONLY)
+#define SharedXextReqs $(LDPRELIBS) $(XONLYLIB)
 #define SharedXiReqs $(LDPRELIBS) $(XLIB)
-#define SharedPexReqs $(LDPRELIBS) $(XLIBONLY) MathLibrary
 #define SharedXtstReqs $(LDPRELIBS) $(XLIB)
-#define SharedXieReqs $(LDPRELIBS) $(XLIBONLY)
 #define SharedSMReqs $(LDPRELIBS) $(ICELIB)
-#define SharedXpReqs $(LDPRELIBS) $(XAUTHLIB) $(EXTENSIONLIB) $(XLIBONLY)
+#define SharedXpReqs $(LDPRELIBS) $(XAUTHLIB) $(XLIB)
+#define SharedXpmReqs $(LDPRELIBS) $(XLIB)

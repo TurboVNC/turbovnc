@@ -1,15 +1,13 @@
-/* $XConsortium: cfbgetsp.c,v 5.14 94/04/17 20:28:50 dpw Exp $ */
-/* $XFree86: xc/programs/Xserver/cfb/cfbgetsp.c,v 3.0.4.1 1997/07/13 14:44:57 dawes Exp $ */
+/* $Xorg: cfbgetsp.c,v 1.4 2001/02/09 02:04:38 xorgcvs Exp $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -17,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -47,10 +45,14 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
+/* $XFree86: xc/programs/Xserver/cfb/cfbgetsp.c,v 3.9tsi Exp $ */
 
-#include <stdlib.h>
-#include "X.h"
-#include "Xmd.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
+#include <X11/Xmd.h>
 #include "servermd.h"
 
 #include "misc.h"
@@ -85,15 +87,19 @@ cfbGetSpans(pDrawable, wMax, ppt, pwidth, nspans, pchardstStart)
     int			widthSrc;	/* width of pixmap in bytes */
     register DDXPointPtr pptLast;	/* one past last point to get */
     int         	xEnd;		/* last pixel to copy from */
-    register int	nstart; 
-    int	 		nend; 
-    PixelGroup		startmask, endmask;
-    int			nlMiddle, nl, srcBit;
+    int			nl, srcBit;
     int			w;
     PixelGroup		*pdstNext;
 #if PSZ == 24
     register char *psrcb, *pdstb;
     register int xIndex = 0;
+#else
+    register int	nstart; 
+#if PSZ != 32 || PPW != 1
+    int	 		nend; 
+#endif
+    PixelGroup		startmask, endmask;
+    int			nlMiddle;
 #endif
 
     switch (pDrawable->bitsPerPixel) {
@@ -106,6 +112,12 @@ cfbGetSpans(pDrawable, wMax, ppt, pwidth, nspans, pchardstStart)
 	    FatalError("cfbGetSpans: invalid depth\n");
     }
 
+    /*
+     * XFree86 DDX empties the root borderClip when the VT is
+     * switched away; this checks for that case
+     */
+    if (!cfbDrawableEnabled(pDrawable))
+	return;
     
     cfbGetLongWidthAndPointer (pDrawable, widthSrc, psrcBase)
 
@@ -116,7 +128,7 @@ cfbGetSpans(pDrawable, wMax, ppt, pwidth, nspans, pchardstStart)
 	tmpSrc = *((PixelType *)(psrcBase + (ppt->y * widthSrc))
 		   + ppt->x);
 #if BITMAP_BIT_ORDER == MSBFirst
-	tmpSrc <<= (sizeof (unsigned long) - sizeof (PixelType)) * 8;
+	tmpSrc <<= (sizeof (CfbBits) - sizeof (PixelType)) * 8;
 #endif
 	*pdstStart = tmpSrc;
 	return;
@@ -128,7 +140,7 @@ cfbGetSpans(pDrawable, wMax, ppt, pwidth, nspans, pchardstStart)
     while(ppt < pptLast)
     {
 #if PSZ == 24
-	xEnd = min(ppt->x + *pwidth, widthSrc * sizeof(long) / 3);
+	xEnd = min(ppt->x + *pwidth, widthSrc * sizeof(CfbBits) / 3);
 	w = xEnd - ppt->x;
 	psrc = psrcBase + ppt->y * widthSrc;
 	srcBit = ppt->x;
@@ -152,7 +164,7 @@ cfbGetSpans(pDrawable, wMax, ppt, pwidth, nspans, pchardstStart)
 	  psrc = (PixelGroup *)((unsigned long)psrcb & ~0x03);
 	  getbits24(psrc, tmpSrc, srcBit);
 	  pdst = (PixelGroup *)((unsigned long)pdstb & ~0x03);
-	  putbits24(tmpSrc, nstart, PPW, pdst, ~((unsigned long)0), xIndex);
+	  putbits24(tmpSrc, PPW, pdst, ~((CfbBits)0), xIndex);
 	  srcBit++;
 	  psrcb += 3;
 	  xIndex++;
@@ -163,7 +175,7 @@ cfbGetSpans(pDrawable, wMax, ppt, pwidth, nspans, pchardstStart)
 	if (srcBit + w <= PPW) 
 	{ 
 	    getbits(psrc, srcBit, w, tmpSrc);
-	    putbits(tmpSrc, 0, w, pdst, ~((unsigned long)0)); 
+	    putbits(tmpSrc, 0, w, pdst, ~((CfbBits)0)); 
 	    pdst++;
 	} 
 	else 
@@ -174,7 +186,7 @@ cfbGetSpans(pDrawable, wMax, ppt, pwidth, nspans, pchardstStart)
 	    { 
 		nstart = PPW - srcBit; 
 		getbits(psrc, srcBit, nstart, tmpSrc);
-		putbits(tmpSrc, 0, nstart, pdst, ~((unsigned long)0));
+		putbits(tmpSrc, 0, nstart, pdst, ~((CfbBits)0));
 		if(srcBit + nstart >= PPW)
 		    psrc++;
 	    } 
@@ -182,15 +194,17 @@ cfbGetSpans(pDrawable, wMax, ppt, pwidth, nspans, pchardstStart)
 	    while (nl--) 
 	    { 
 		tmpSrc = *psrc;
-		putbits(tmpSrc, nstart, PPW, pdst, ~((unsigned long)0));
+		putbits(tmpSrc, nstart, PPW, pdst, ~((CfbBits)0));
 		psrc++;
 		pdst++;
 	    } 
 	    if (endmask) 
 	    { 
+#if PSZ != 32 || PPW != 1
 		nend = xEnd & PIM; 
+#endif
 		getbits(psrc, 0, nend, tmpSrc);
-		putbits(tmpSrc, nstart, nend, pdst, ~((unsigned long)0));
+		putbits(tmpSrc, nstart, nend, pdst, ~((CfbBits)0));
 	    } 
 	    pdst = pdstNext;
 	} 

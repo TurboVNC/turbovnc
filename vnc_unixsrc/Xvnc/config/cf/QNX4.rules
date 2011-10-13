@@ -1,0 +1,65 @@
+XCOMM platform:  $XFree86: xc/config/cf/QNX4.rules,v 1.1 1999/12/27 00:45:43 robin Exp $
+
+XCOMM Rules to work around wlib for QNX...
+
+#define LinkFile(tofile, fromfile)				@@\
+tofile:: fromfile						@@\
+	$(CP) fromfile tofile					@@\
+								@@\
+includes:: tofile						@@\
+								@@\
+depend:: tofile							@@\
+								@@\
+clean::								@@\
+	RemoveFile(tofile)
+
+#define ObjectFromSpecialSource(dst, src, flags)		@@\
+NoConfigRec(dst.c)						@@\
+								@@\
+dst.c: src.c							@@\
+	RemoveFile($@)						@@\
+	$(CP) $? $@						@@\
+								@@\
+SpecialCObjectRule(dst,NullParameter,flags)			@@\
+								@@\
+includes:: dst.c						@@\
+								@@\
+depend:: dst.c							@@\
+								@@\
+clean::								@@\
+	RemoveFile(dst.c)
+
+
+#define ObjectFromSpecialAsmSource(dst, src, flags)		@@\
+dst.S: src.S							@@\
+	RemoveFile($@)						@@\
+	$(CP) $? $@						@@\
+								@@\
+dst.o: dst.S							@@\
+	AssembleObject(dst,flags)				@@\
+								@@\
+dst.i: dst.S							@@\
+	CPPOnlyAsm(dst,flags)					@@\
+								@@\
+depend:: dst.S							@@\
+								@@\
+clean::								@@\
+	RemoveFile(dst.S)
+
+/* This is the rule to make reloc. OMF objects. We use a little
+ * trick which works only for OMF....
+ * "catomf" can be downloaded from 
+ * http://prdownloads.sourceforge.net/openqnx/catomf.tar.gz
+ * or contact Rick Lake <rick@anp.nl>
+ */
+#define NormalRelocatableTarget(objname,objlist)		@@\
+AllTarget(objname.Osuf)						@@\
+								@@\
+objname.Osuf: objlist $(EXTRALIBRARYDEPS)			@@\
+	RemoveFile($@)						@@\
+	/usr/local/bin/catomf -O $@ objlist
+
+
+	
+
+

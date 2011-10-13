@@ -1,8 +1,8 @@
-XCOMM platform:  $XConsortium: NetBSD.cf /main/16 1996/10/31 14:47:14 kaleb $
+XCOMM platform:  $Xorg: NetBSD.cf,v 1.3 2000/08/17 19:41:46 cpqbld Exp $
 
 
 
-XCOMM platform:  $XFree86: xc/config/cf/NetBSD.cf,v 3.49.2.9 1997/07/26 06:30:39 dawes Exp $
+XCOMM platform:  $XFree86: xc/config/cf/NetBSD.cf,v 3.122 2003/11/18 18:09:45 dawes Exp $
 
 
 #ifndef OSName
@@ -20,7 +20,7 @@ XCOMM platform:  $XFree86: xc/config/cf/NetBSD.cf,v 3.49.2.9 1997/07/26 06:30:39
 
 
 #ifndef OSVendor
-#define	OSVendor	/**/
+#define	OSVendor		The NetBSD Foundation, Inc.
 #endif
 XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVersion)
 
@@ -30,17 +30,25 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #if ((OSMajorVersion > 1) || \
      (OSMajorVersion == 1 && OSMinorVersion > 2) || \
      (OSMajorVersion == 1 && OSMinorVersion == 2 && OSTeenyVersion > 1))
-#  define HasPoll			YES
+# define HasPoll			YES
 #endif
 #define HasNdbm         	YES
 #define HasPutenv       	YES
+#if OSMajorVersion == 1 && OSMinorVersion > 4 || OSMajorVersion > 1
+# define HasStrlcat		YES
+#endif
 #define HasSnprintf		YES
 #define HasBSD44Sockets 	YES
 #define Malloc0ReturnsNull	NO
 #define SetTtyGroup     	YES
 #define DBMLibrary		/**/
+#define HasDlopen		YES
+#define HasSetProcTitle		YES
 #ifndef HasLibCrypt
 # define HasLibCrypt		YES
+#endif
+#ifndef BuildPDFdocs
+# define BuildPDFdocs NO
 #endif
 #ifndef HasShm
 # if OSMajorVersion == 0 && OSMinorVersion == 9 && OSTeenyVersion == 2
@@ -66,15 +74,69 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
        (OSMajorVersion == 1 && OSMinorVersion < 2))) 
 #define HasMkstemp		YES
 #endif
+/* But the standalone mktemp doesn't exist before NetBSD 1.5*/
+#if (OSMajorVersion ==0 || (OSMajorVersion == 1 && OSMinorVersion <= 4))
+# define HasMktemp		NO
+#else
+# define HasMktemp		YES
+#endif
+
+#ifndef HasIssetugid
+# if (OSMajorVersion > 1 || (OSMajorVersion == 1 && OSMinorVersion >= 5))
+#  define HasIssetugid          YES
+# endif
+#endif
+
+#if (OSMajorVersion == 1 && OSMinorVersion >= 5 || OSMajorVersion > 1) 
+#define HasGetIfAddrs		YES
+#endif
+
+#define HasUsableFileMmap	YES
+
+#define HasVarRun		YES
+#define HasVarDb		YES
+
+#define HasShadowPasswd		NO
+
+#define InstallXloadSetGID	NO
+
+#if OSMajorVersion < 1 || (OSMajorVersion == 1 && OSMinorVersion < 5)
+#define BuildIPv6		NO
+#endif
+
+#define IPv6SocketsAlsoIPv4	NO
+
+/*
+ * NetBSD 1.6M and newer supports POSIX Threads.
+ */
+
+#ifndef NetBSDThreads
+# define NetBSDThreads		YES
+#endif
+
+#if NetBSDThreads && \
+    ((OSMajorVersion > 1) || \
+     (OSMajorVersion == 1 && OSMinorVersion > 6) || \
+     (OSMajorVersion == 1 && OSMinorVersion == 6 && OSTeenyVersion >= 13))
+
+# define HasPosixThreads	YES
+# define ThreadedX		YES
+# define HasThreadSafeAPI	YES
+# define ThreadsLibraries	-lpthread
+# if ((OSMajorVersion == 2 && OSMinorVersion == 99 && OSTeenyVersion < 11) || \
+      (OSMajorVersion == 2 && OSMinorVersion < 99) || \
+      (OSMajorVersion < 2))
+#  define LibraryMTDefines	-DUSE_NBSD_THREADLIB
+# endif
+# define SystemMTDefines	-D_REENTRANT
+# define MTSafeAPIDefines	-DXUSE_MTSAFE_API -DXNO_MTSAFE_PWDAPI
+#else 
+# define ThreadedX		NO
+#endif
+
 /*
  * Compiler Features
  */
-#undef HasGcc
-#define HasGcc			YES
-#define HasGcc2			YES
-#ifndef HasGcc2ForCplusplus
-#define HasGcc2ForCplusplus	YES
-#endif
 #define GccUsesGas		YES
 #define UseGas			YES
 #define GnuCpp			YES
@@ -87,18 +149,28 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 
 #define MkdirHierCmd		mkdir -p
 
-#define CppCmd          	/usr/libexec/cpp
-#define StandardCppDefines	-traditional
-#define PreProcessCmd   	CppCmd
-#define PreIncDir		/usr/include
-
 #undef CcCmd
 #define CcCmd 			gcc
-#if defined(UseInstalled) && (!defined(XF86LinkKit) || !XF86LinkKit)
+#ifndef DefaultCCOptions
+#if defined(UseInstalled)
 #define DefaultCCOptions 	/**/
 #else
-#define DefaultCCOptions 	-ansi -Dasm=__asm
+#ifdef Arm32Architecture
+#define DefaultCCOptions 	-ansi -Dasm=__asm -fsigned-char \
+				-fomit-frame-pointer
+#elif defined(PpcArchitecture)
+# define DefaultCCOptions	-ansi -Dasm=__asm -fsigned-char
+#else
+#define DefaultCCOptions 	-ansi -Dasm=__asm GccWarningOptions
 #endif
+#endif
+#endif
+
+#define CppCmd			cpp
+#define StandardCppOptions	-traditional
+#define StandardCppDefines	/**/
+#define PreProcessCmd   	CcCmd -E
+#define PostIncDir		/usr/include
 
 #define GccGasOption 		-DGCCUSESGAS
 #define AsmDefines 		-DUSE_GAS
@@ -119,13 +191,18 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
  *
  * XXX May not be correct on NetBSD/pmax (ELF, but might not have
  * working shared libs).
+ *
+ * Disabled for NetBSD/vax until I figure out the scheme. --CS 
  */
-#if ((OSMajorVersion > 0) && \
-     !defined(AlphaArchitecture) && !defined(MipsArchitecture)) || \
-    UseElfFormat
-# ifndef BuildDynamicLoading
-# define BuildDynamicLoading	YES
-# endif
+#if ((OSMajorVersion > 0) && defined(i386Architecture)) || \
+    defined(PpcArchitecture)
+#  ifndef DoLoadableServer
+#  define DoLoadableServer	YES
+#  endif
+#else
+#  ifndef DoLoadableServer
+#  define DoLoadableServer	NO
+#  endif
 #endif
 
 #if UseElfFormat
@@ -134,25 +211,40 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #define DlLibrary		/**/
 #endif
 
+/* All ELF NetBSD systems support Weak symbols */
+#define HasWeakSymbols		UseElfFormat 
+
 #ifdef i386Architecture
+# ifndef DefaultGcc2i386Opt
+#  if OSMajorVersion > 1 || (OSMajorVersion == 1 && OSMinorVersion > 2)
+    /* The GCC strength-reduce bug is fixed for NetBSD 1.3 and later */
+#   define DefaultGcc2i386Opt -O2 GccAliasingArgs
+#  endif
+# endif
 # define OptimizedCDebugFlags 	DefaultGcc2i386Opt
 # if OSMajorVersion < 1
-#  define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME -DXNO_SYSCONF
+#  define ServerOSDefines	XFree86ServerOSDefines -DXNO_SYSCONF
 # else
-#  define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
+#  define ServerOSDefines	XFree86ServerOSDefines
 # endif
 # if OSMajorVersion == 1 && OSMinorVersion >= 1 || OSMajorVersion >= 2
-#  define ServerExtraSysLibs	-li386 DlLibrary
+#  define ServerExtraSysLibs	-li386
 # endif
 #else
 # define OptimizedCDebugFlags 	-O2
-# if defined(SparcArchitecture) || defined(AlphaArchitecture)
+# if defined(SparcArchitecture)
 #  define ServerOSDefines 	-DDDXOSINIT
+# elif defined(AlphaArchitecture)
+#  define ServerOSDefines 	XFree86ServerOSDefines
+# elif defined(Arm32Architecture)
+#   define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
+# elif defined(PpcArchitecture)
+#  define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME -DDDXOSINIT
 # else
 #  define ServerOSDefines 	/**/
 # endif
-# if BuildDynamicLoading
-#  define ServerExtraSysLibs	DlLibrary
+# if defined(AlphaArchitecture)
+#  define ServerExtraSysLibs	-lalpha
 # else
 #  define ServerExtraSysLibs	/**/
 # endif
@@ -160,24 +252,68 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #ifdef i386Architecture
 # define ServerExtraDefines GccGasOption XFree86ServerDefines
 # ifndef XFree86ConsoleDefines
-#  define XFree86ConsoleDefines -DPCCONS_SUPPORT -DPCVT_SUPPORT
+#  if (OSMajorVersion == 1 && ((OSMinorVersion == 3 && OSTeenyVersion >= 6) \
+	                       || OSMinorVersion >= 4) \
+       || OSMajorVersion >= 2)  
+#   define XFree86ConsoleDefines -DPCCONS_SUPPORT -DPCVT_SUPPORT -DWSCONS_SUPPORT
+#  else
+#   define XFree86ConsoleDefines -DPCCONS_SUPPORT -DPCVT_SUPPORT
+#  endif
 # endif
+#elif defined(SparcArchitecture)
+#  if defined(Sparc64Architecture)
+#   define ServerExtraDefines XFree86ServerDefines -D_XSERVER64
+#  else
+#   define ServerExtraDefines XFree86ServerDefines
+#  endif
+# elif defined(AlphaArchitecture)
+	/* XXX for the following */
+#  define ServerExtraDefines GccGasOption XFree86ServerDefines -D_XSERVER64
+#  ifndef XFree86ConsoleDefines
+#   define XFree86ConsoleDefines -DWSCONS_SUPPORT -DPCCONS_SUPPORT -DPCVT_SUPPORT
+#  endif
+#elif defined(AlphaArchitecture)
+#   define ServerExtraDefines GccGasOption -D_XSERVER64
+#elif defined(Arm32Architecture)
+#  define ServerExtraDefines GccGasOption XFree86ServerDefines
+#  ifndef XFree86ConsoleDefines
+#    define XFree86ConsoleDefines -DPCCONS_SUPPORT
+#  endif
+#elif defined(PpcArchitecture)
+#  define ServerExtraDefines	GccGasOption XFree86ServerDefines
+#  ifndef XFree86ConsoleDefines
+#    define XFree86ConsoleDefines	-DWSCONS_SUPPORT
+#  endif
 #else
-# if defined(AlphaArchitecture)
-#  define ServerExtraDefines GccGasOption -D_XSERVER64
-# else
 #  define ServerExtraDefines GccGasOption
-# endif
 #endif
 
 #define StandardDefines	-DCSRG_BASED
+/* Citrus mb locale were added in 1.5P */
+#if ((OSMajorVersion > 1) || \
+     (OSMajorVersion == 1 && OSMinorVersion > 5) || \
+     (OSMajorVersion == 1 && OSMinorVersion == 5 && OSTeenyVersion >= 15))
+#define XawI18nDefines	-DHAS_WCHAR_H -DHAS_WCTYPE_H -DNO_WIDEC_H
+#else
 #define XawI18nDefines	-DUSE_XWCHAR_STRING -DUSE_XMBTOWC
+#endif
 
 #ifndef ExtraLibraries
 #define ExtraLibraries		/**/
 #endif
 #ifndef UseGnuMalloc
+/*
+ * There is no way to map 1.4J correctly to OS*Version, so 'J' is mapped
+ * to OSTeenyVersion == 9. That should be safe, since there will never
+ * be a release for 1.4.9.
+ */
+# if ((OSMajorVersion > 1) || \
+     (OSMajorVersion == 1 && OSMinorVersion > 4) || \
+     (OSMajorVersion == 1 && OSMinorVersion == 4 && OSTeenyVersion > 9))
+#  define UseGnuMalloc		NO
+# else
 #  define UseGnuMalloc		YES
+#endif
 #endif
 #ifndef GnuMallocLibrary
 #define GnuMallocLibrary	-lgnumalloc
@@ -193,14 +329,34 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 
 #define	AdmDir			/var/log
 
+#define HasFlex			YES
+
+/* NetBSD doesn't have gperf in the base install */
+#define DontRebuildGperfOutput	YES
+
+/* 
+ * NetBSD doesn't have perl in default system
+ * you may override this in host.def if you installed perl from the packages
+ */
+#ifndef HasPerl
+#define HasPerl			NO
+#endif
+
+/*
+ * NetBSD doesn't have gperf in default system
+ * you may override this in host.def if you installed perl from the packages
+ */
+#ifndef HasGperf
+#define HasGperf		NO
+#endif
+
 /*
  * Make & install Features
  */
 #define HasBsdMake		YES
-#define StripInstalledPrograms	YES
 #define CompressAllFonts	YES
 #define GzipFontCompression	YES
-#define DefaultUserPath		/bin:/usr/bin:/usr/local/bin:$(BINDIR)
+#define DefaultUserPath		/bin:/usr/bin:/usr/pkg/bin:/usr/local/bin:$(BINDIR)
 #define DefaultSystemPath	/sbin:/usr/sbin:/bin:/usr/bin:$(BINDIR)
 
 #ifdef  InstallCmd
@@ -218,16 +374,76 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #define NeqnCmd			neqn -Tlatin1
 #define NroffCmd		nroff -Tlatin1
 #define	EqnCmd 			eqn -Tps
-#define TroffCmd        	groff -Tps
+#define HasGroff		YES
 
 /*
  * To use the NetBSD Aperture driver
  */
 #if defined(i386Architecture)
-#ifndef HasNetBSDApertureDriver
-#define HasNetBSDApertureDriver	YES
+# ifndef HasNetBSDApertureDriver
+#  define HasNetBSDApertureDriver	YES
+# endif
+
+/*
+ * Builtin MTRR support (NetBSD 1.5Y and up)
+ */
+# if ((OSMajorVersion > 1) || \
+      (OSMajorVersion == 1 && OSMinorVersion >= 6) || \
+      (OSMajorVersion == 1 && OSMinorVersion == 5 && \
+       OSTeenyVersion >= 25))
+#  define HasMTRRBuiltin        YES
+# else
+ /*
+  * MTRR support  provided by the Aperture driver
+  */
+#  if HasNetBSDApertureDriver
+#   ifndef HasMTRRSupport
+#    define HasMTRRSupport	YES
+#   endif
+#  endif
+# endif /* MTRRBuiltin */
+#endif /* i386Architecture */
+
+/*
+ * agpgart support (NetBSD 1.5Y and up)
+ */
+#if ((OSMajorVersion > 1) || \
+     (OSMajorVersion == 1 && OSMinorVersion >= 6) || \
+     (OSMajorVersion == 1 && OSMinorVersion == 5 && \
+      OSTeenyVersion >= 25))
+# ifndef HasAgpGart
+#  define HasAgpGart   YES
+# endif
 #endif
+
+/*
+ * MMX, SSE and 3DNow will be autodetected. NetBSD 1.6 and up have the
+ * necessary kernel and toolchain support.
+ */
+#if defined(i386Architecture) &&  \
+	((OSMajorVersion > 1) || (OSMajorVersion == 1 && OSMinorVersion > 5))
+# define HasX86Support          YES
+# define HasMMXSupport          YES
+# define Has3DNowSupport        YES
+# define HasSSESupport          YES
+#else
+# define HasX86Support          NO
+# define HasMMXSupport          NO
+# define Has3DNowSupport        NO
+# define HasSSESupport          NO
 #endif
+
+#ifndef HasCookieMaker
+# if OSMajorVersion == 1 && OSMinorVersion >= 5 || OSMajorVersion >= 2
+   /* NetBSD 1.5 and later have /dev/urandom */
+#  define HasCookieMaker	YES
+#  define MkCookieCmd \
+	'dd if=/dev/urandom bs=16 count=1 2>/dev/null | hexdump -e \\"%08x\\"'
+# else
+#  define HasCookieMaker	NO
+# endif
+#endif
+
 
 /*
  * ForceSubdirs - force make to build subdirectories
@@ -241,22 +457,22 @@ dirs:	.EXEC								@@\
 									@@\
 .EXEC:
 
-XCOMM Man pages need to be formatted when installed, so override the default
-XCOMM imake rules.
-
+/*
+ * Man pages need to be formatted when installed, so override the default
+ * imake rules.
+ */
 #define ManSuffix	1
 #define FileManSuffix	5
 #define ManSourcePath	$(MANPATH)/cat
 
-#define InstallManPageLong(file,destdir,dest)                           @@\
+#define InstallManPageLongBase(file,destdir,dest)			@@\
+									@@\
 all:: file.0								@@\
 									@@\
-file.0:: file.man							@@\
-	@if [ -f file.man ]; \						@@\
+file.0:: file.$(MANNEWSUFFIX)						@@\
+	@if [ -f file.$(MANNEWSUFFIX) ]; \				@@\
 	then \								@@\
-	cat file.man | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) | $(COL) >/tmp/$$$$.man; \	@@\
-	cp /tmp/$$$$.man file.0; \					@@\
-	$(RM) /tmp/$$$$.man; \						@@\
+	cat file.$(MANNEWSUFFIX) | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) | $(COL) > file.0; \	@@\
 	fi 								@@\
 									@@\
 install.man::                                                           @@\
@@ -264,10 +480,38 @@ install.man::                                                           @@\
 	-@if [ -f file.0 ]; \						@@\
 	then \								@@\
 	$(INSTALL) -c $(INSTMANFLAGS) file.0 $(DESTDIR)destdir/dest.0; \@@\
-	fi
+	fi								@@\
+									@@\
+clean::									@@\
+	RemoveFile(file.0)
+
+#define InstallManPageLong(file,destdir,dest)				@@\
+BuildInstallHtmlManPage(file,dest,$(MANSUFFIX))				@@\
+									@@\
+CppManTarget(file, $(EXTRAMANDEFS))					@@\
+									@@\
+InstallManPageLongBase(file,destdir,dest)
 
 #define InstallGenManPageLong(file,destdir,dest,suffix)			@@\
-	InstallManPageLong(file,destdir,dest)
+BuildInstallHtmlManPage(file,dest,suffix)				@@\
+									@@\
+CppManTarget(file, $(EXTRAMANDEFS))					@@\
+									@@\
+InstallManPageLongBase(file,destdir,dest)
+
+#define InstallMultipleMan(list,dest)                                   @@\
+install.man:: 								@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	case '${MFLAGS}' in *[i]*) set +e;; esac; \			@@\
+	for i in list; do \                                             @@\
+	  (MNAME=`echo $$i | cut -f1 -d.`; \				@@\
+	  set -x; \							@@\
+	  cat $$i | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) \		@@\
+		| $(COL) > $${MNAME}.0; \				@@\
+	  $(INSTALL) -c $(INSTMANFLAGS) $${MNAME}.0 \			@@\
+			$(DESTDIR)dest/$${MNAME}.0; \			@@\
+	  $(RM) $${MNAME}.0); \						@@\
+	done
 
 #define InstallMultipleManSuffix(list,dest,suff)                        @@\
 install.man:: 								@@\
@@ -275,15 +519,14 @@ install.man:: 								@@\
 	case '${MFLAGS}' in *[i]*) set +e;; esac; \			@@\
 	for i in list; do \                                             @@\
 	  (set -x; \							@@\
-	  cat $$i.suff | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) | $(COL) >/tmp/$$$$.suff; \	@@\
-	  $(INSTALL) -c $(INSTMANFLAGS) /tmp/$$$$.suff $(DESTDIR)dest/$$i.0; \	@@\
-	  $(RM) /tmp/$$$$.suff); \						@@\
+	  cat $$i.suff | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) \	@@\
+		| $(COL) > $$i.0; \					@@\
+	  $(INSTALL) -c $(INSTMANFLAGS) $$i.0	 \			@@\
+		$(DESTDIR)dest/$$i.0; \					@@\
+	  $(RM) $$i.0 ); \						@@\
 	done
 
-#define InstallMultipleMan(list,dest)                                   @@\
-	InstallMultipleManSuffix(list,dest,man)
-
-#define InstallManPageAliases(file,destdir,aliases)                     @@\
+#define InstallManPageAliasesBase(file,destdir,aliases)			@@\
 install.man:: 								@@\
 	@case '${MFLAGS}' in *[i]*) set +e;; esac; \                    @@\
 	for i in aliases; do \                                          @@\
@@ -293,8 +536,15 @@ install.man:: 								@@\
 		); \							@@\
 	done
 
+#define InstallManPageAliases(file,destdir,aliases)			@@\
+InstallHtmlManPageAliases(file,aliases,$(MANSUFFIX))			@@\
+									@@\
+InstallManPageAliasesBase(file,destdir,aliases)
+
 #define InstallGenManPageAliases(file,destdir,suffix,aliases)		@@\
-	InstallManPageAliases(file,destdir,aliases)
+InstallHtmlManPageAliases(file,aliases,suffix)				@@\
+									@@\
+InstallManPageAliasesBase(file,destdir,aliases)
 
 /*
  * Shared libraries supported starting in 1.0 on a.out platforms,
@@ -323,12 +573,25 @@ install.man:: 								@@\
 #define HasSharedLibraries	NO
 #endif 
 
+/*
+ * Unresolved references are fatal on NetBSD 1.5 for libGL, which is
+ * built with -Bsymbolic.
+ */
+#if UseElfFormat && OSMajorVersion == 1 && OSMinorVersion == 5
+#define SharedGLReqs		$(LDPRELIBS) $(XLIB) -lc
+#endif
+
 #if HasSharedLibraries
 #include <bsdLib.rules>
 #endif /* HasSharedLibraries */
 
-#ifdef i386Architecture
-# include <xfree86.cf>
+/* Always build the XInput library, regardless of server support on this plattform */
+#if !defined(BuildXInputLib) && !defined(BuildServersOnly)
+# define BuildXInputLib          YES
+#endif
+
+#if defined(i386Architecture) || defined(Arm32Architecture) || defined(AlphaArchitecture) || defined(PpcArchitecture)
+# include <xorg.cf>
 #endif
 
 /*
@@ -336,17 +599,18 @@ install.man:: 								@@\
  */
 #ifdef SparcArchitecture
 #ifndef Xsun24Server
-#define Xsun24Server	NO
+#define Xsun24Server	YES
 #endif
 #ifndef XsunServer
 #define XsunServer	YES
 #endif
 #ifndef XsunMonoServer
-#define XsunMonoServer	YES
+#define XsunMonoServer	NO	/* XXX: does not link */
 #endif
 #ifndef BuildScreenSaverLibrary
 #define BuildScreenSaverLibrary	YES
 #endif
+
 /*
  * XFree86 uses its own (more portable) database routines to speed up 
  * the RGB database lookups
@@ -356,6 +620,10 @@ install.man:: 								@@\
 #ifndef UseRgbTxt
 #define UseRgbTxt	YES
 #endif
+#define BuildXF86VidModeExt	NO
+#define BuildXF86DGA		NO
+#define BuildXInputExt		NO
+#include <xorg.cf>
 #endif
 
 /*
@@ -365,13 +633,60 @@ install.man:: 								@@\
 #define PositionIndependentCFlags
 #define SharedLibraryLoadFlags -x -shared --whole-archive -soname `echo $@ |
 sed 's/\.[0-9]*$$//'`
-#define SharedXtReqs $(XLIBONLY) $(SMLIB) $(ICELIB)
-#define SharedXmuReqs $(LDPRELIB) $(XTOOLONLYLIB) $(XONLYLIB) $(EXTENSIONLIB)
+#define SharedXtReqs $(XONLYLIB) $(SMLIB) $(ICELIB)
+#define SharedXmuReqs $(LDPRELIB) $(XTOOLONLYLIB) $(XLIB)
 #endif
 
 /*
  * Definition for compiling on Alpha machines
  */
 #ifdef AlphaArchitecture
-#define	BuildServer	NO
+
+/* Build the shared XDM greeter on Alpha if it supports shared libs */
+#define SharedLibXdmGreet HasSharedLibraries
+#endif
+
+/*
+ * Definition for compile on macppc machines
+ */
+#ifdef PpcArchitecture
+
+# define OptimizedCDebugFlags 	-O2
+# define XkbServerDefines	-DXKB_ALWAYS_USES_SOFT_REPEAT
+
+# ifndef DoLoadableServer
+#   define DoLoadableServer	YES
+# endif
+
+# define UseElfFormat		YES
+
+#endif
+
+/*
+ * Definition for compiling on VAX machines
+ */
+#ifdef VaxArchitecture
+#define BuildServer	NO
+#endif
+
+/* 
+ * General settings for all platforms 
+ */ 
+#ifndef SharedLibXdmGreet
+#define SharedLibXdmGreet NO
+#endif
+
+#ifndef BuildHtmlManPages
+#define BuildHtmlManPages NO	/* We don't want HTML manpages */
+#endif
+
+#ifndef UseSeparateConfDir
+#define UseSeparateConfDir NO	/* We don't want appdefs in "/etc/X11". */
+#endif
+
+#if defined(NetBSDArchitecture) && \
+     ((OSMajorVersion > 1) || \
+      (OSMajorVersion == 1 && OSMinorVersion > 3))
+#define HasDevRandom		YES
+#define RandomDeviceFile	/dev/urandom
 #endif

@@ -1,13 +1,14 @@
+/* $XdotOrg: xc/programs/Xserver/dix/colormap.c,v 1.11 2005/09/05 07:40:50 daniels Exp $ */
+/* $XFree86: xc/programs/Xserver/dix/colormap.c,v 3.11 2003/11/03 05:10:59 tsi Exp $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +16,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -46,12 +47,15 @@ SOFTWARE.
 
 ******************************************************************/
 
-/* $XConsortium: colormap.c /main/71 1996/06/17 11:01:33 mor $ */
-/* $XFree86: xc/programs/Xserver/dix/colormap.c,v 3.1 1996/12/23 06:29:34 dawes Exp $ */
+/* $Xorg: colormap.c,v 1.4 2001/02/09 02:04:39 xorgcvs Exp $ */
 
-#include "X.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
 #define NEED_EVENTS
-#include "Xproto.h"
+#include <X11/Xproto.h>
 #include "misc.h"
 #include "dix.h"
 #include "colormapst.h"
@@ -59,78 +63,63 @@ SOFTWARE.
 #include "scrnintstr.h"
 #include "resource.h"
 #include "windowstr.h"
+#ifdef LBX
+#include "lbxserve.h"
+#endif
 
 extern XID clientErrorValue;
+extern int colormapPrivateCount;
 
 static Pixel FindBestPixel(
-#if NeedFunctionPrototypes
     EntryPtr /*pentFirst*/,
     int /*size*/,
     xrgb * /*prgb*/,
     int /*channel*/
-#endif
 );
 
 static int AllComp(
-#if NeedFunctionPrototypes
     EntryPtr /*pent*/,
     xrgb * /*prgb*/
-#endif
 );
 
 static int RedComp(
-#if NeedFunctionPrototypes
     EntryPtr /*pent*/,
     xrgb * /*prgb*/
-#endif
 );
 
 static int GreenComp(
-#if NeedFunctionPrototypes
     EntryPtr /*pent*/,
     xrgb * /*prgb*/
-#endif
 );
 
 static int BlueComp(
-#if NeedFunctionPrototypes
     EntryPtr /*pent*/,
     xrgb * /*prgb*/
-#endif
 );
 
 static void FreePixels(
-#if NeedFunctionPrototypes
     register ColormapPtr /*pmap*/,
     register int /*client*/
-#endif
 );
 
 static void CopyFree(
-#if NeedFunctionPrototypes
     int /*channel*/,
     int /*client*/,
     ColormapPtr /*pmapSrc*/,
     ColormapPtr /*pmapDst*/
-#endif
 );
 
 static void FreeCell(
-#if NeedFunctionPrototypes
     ColormapPtr /*pmap*/,
     Pixel /*i*/,
     int /*channel*/
-#endif
 );
 
 static void UpdateColors(
-#if NeedFunctionPrototypes
     ColormapPtr /*pmap*/
-#endif
 );
 
 static int AllocDirect(
-#if NeedFunctionPrototypes
     int /*client*/,
     ColormapPtr /*pmap*/,
     int /*c*/,
@@ -142,11 +131,9 @@ static int AllocDirect(
     Pixel * /*prmask*/,
     Pixel * /*pgmask*/,
     Pixel * /*pbmask*/
-#endif
 );
 
 static int AllocPseudo(
-#if NeedFunctionPrototypes
     int /*client*/,
     ColormapPtr /*pmap*/,
     int /*c*/,
@@ -155,11 +142,9 @@ static int AllocPseudo(
     Pixel * /*pixels*/,
     Pixel * /*pmask*/,
     Pixel ** /*pppixFirst*/
-#endif
 );
 
 static Bool AllocCP(
-#if NeedFunctionPrototypes
     ColormapPtr /*pmap*/,
     EntryPtr /*pentFirst*/,
     int /*count*/,
@@ -167,11 +152,9 @@ static Bool AllocCP(
     Bool /*contig*/,
     Pixel * /*pixels*/,
     Pixel * /*pMask*/
-#endif
 );
 
 static Bool AllocShared(
-#if NeedFunctionPrototypes
     ColormapPtr /*pmap*/,
     Pixel * /*ppix*/,
     int /*c*/,
@@ -182,31 +165,43 @@ static Bool AllocShared(
     Pixel /*gmask*/,
     Pixel /*bmask*/,
     Pixel * /*ppixFirst*/
-#endif
 );
 
 static int FreeCo(
-#if NeedFunctionPrototypes
     ColormapPtr /*pmap*/,
     int /*client*/,
     int /*color*/,
     int /*npixIn*/,
     Pixel * /*ppixIn*/,
     Pixel /*mask*/
-#endif
 );
 
 static int   TellNoMap(
-#if NeedFunctionPrototypes
     WindowPtr	/*pwin*/,
     Colormap 	* /*pmid*/
-#endif
+);
+
+static void FindColorInRootCmap (
+    ColormapPtr	/* pmap */,
+    EntryPtr	/* pentFirst */,
+    int		/* size */,
+    xrgb*	/* prgb */,
+    Pixel*	/* pPixel */,
+    int		/* channel */,
+    ColorCompareProcPtr /* comp */
 );
 
 #define NUMRED(vis) ((vis->redMask >> vis->offsetRed) + 1)
 #define NUMGREEN(vis) ((vis->greenMask >> vis->offsetGreen) + 1)
 #define NUMBLUE(vis) ((vis->blueMask >> vis->offsetBlue) + 1)
-#define RGBMASK(vis) (vis->redMask | vis->greenMask | vis->blueMask)
+#if COMPOSITE
+#define ALPHAMASK(vis)	((vis)->nplanes < 32 ? 0 : \
+			 (CARD32) ~((vis)->redMask|(vis)->greenMask|(vis)->blueMask))
+#else
+#define ALPHAMASK(vis)	0
+#endif
+
+#define RGBMASK(vis) (vis->redMask | vis->greenMask | vis->blueMask | ALPHAMASK(vis))
 
 /* GetNextBitsOrBreak(bits, mask, base)  -- 
  * (Suggestion: First read the macro, then read this explanation.
@@ -254,15 +249,15 @@ typedef struct _colorResource
  */
 
 
-/* Create and initialize the color map */
+/** 
+ * Create and initialize the color map 
+ * 
+ * \param mid    resource to use for this colormap
+ * \param alloc  1 iff all entries are allocated writable
+ */
 int 
-CreateColormap (mid, pScreen, pVisual, ppcmap, alloc, client)
-    Colormap	mid;		/* resource to use for this colormap */
-    ScreenPtr	pScreen;
-    VisualPtr	pVisual;
-    ColormapPtr	*ppcmap;	
-    int		alloc;		/* 1 iff all entries are allocated writeable */
-    int		client;
+CreateColormap (Colormap mid, ScreenPtr pScreen, VisualPtr pVisual, 
+                ColormapPtr *ppcmap, int alloc, int client)
 {
     int		class, size;
     unsigned long sizebytes;
@@ -270,7 +265,6 @@ CreateColormap (mid, pScreen, pVisual, ppcmap, alloc, client)
     register	EntryPtr	pent;
     int		i;
     register	Pixel	*ppix, **pptr;
-    extern int colormapPrivateCount;
 
     class = pVisual->class;
     if(!(class & DynamicClass) && (alloc != AllocNone) && (client != SERVER_ID))
@@ -404,9 +398,8 @@ CreateColormap (mid, pScreen, pVisual, ppcmap, alloc, client)
 	pmap->devPrivates = NULL;
     else
     {
-	pmap->devPrivates = (DevUnion *) xalloc (
-	    colormapPrivateCount * sizeof(DevUnion));
-
+	pmap->devPrivates = (DevUnion *) xcalloc (
+	    sizeof(DevUnion), colormapPrivateCount);
 	if (!pmap->devPrivates)
 	{
 	    FreeResource (mid, RT_NONE);
@@ -424,10 +417,12 @@ CreateColormap (mid, pScreen, pVisual, ppcmap, alloc, client)
     return (Success);
 }
 
+/**
+ *
+ * \param value  must conform to DeleteType
+ */
 int
-FreeColormap (value, mid)
-    pointer	value; /* must conform to DeleteType */
-    XID		mid;
+FreeColormap (pointer value, XID mid)
 {
     int		i;
     register EntryPtr pent;
@@ -484,11 +479,10 @@ FreeColormap (value, mid)
 
 /* Tell window that pmid has disappeared */
 static int
-TellNoMap (pwin, pmid)
-    WindowPtr	pwin;
-    Colormap 	*pmid;
+TellNoMap (WindowPtr pwin, Colormap *pmid)
 {
     xEvent 	xE;
+
     if (wColormap(pwin) == *pmid)
     {
 	/* This should be call to DeliverEvent */
@@ -497,7 +491,10 @@ TellNoMap (pwin, pmid)
 	xE.u.colormap.colormap = None;
 	xE.u.colormap.new = TRUE;
 	xE.u.colormap.state = ColormapUninstalled;
-	DeliverEvents(pwin, &xE, 1, (WindowPtr)NULL);
+#ifdef PANORAMIX
+        if(noPanoramiXExtension || !pwin->drawable.pScreen->myNum)
+#endif
+	   DeliverEvents(pwin, &xE, 1, (WindowPtr)NULL);
 	if (pwin->optional) {
 	    pwin->optional->colormap = None;
 	    CheckWindowOptionalNeed (pwin);
@@ -509,12 +506,15 @@ TellNoMap (pwin, pmid)
 
 /* Tell window that pmid got uninstalled */
 int
-TellLostMap (pwin, value)
-    WindowPtr	pwin;
-    pointer	value;
+TellLostMap (WindowPtr pwin, pointer value)
 {
     Colormap 	*pmid = (Colormap *)value;
     xEvent 	xE;
+
+#ifdef PANORAMIX
+    if(!noPanoramiXExtension && pwin->drawable.pScreen->myNum)
+	return WT_STOPWALKING;
+#endif
     if (wColormap(pwin) == *pmid)
     {
 	/* This should be call to DeliverEvent */
@@ -531,12 +531,15 @@ TellLostMap (pwin, value)
 
 /* Tell window that pmid got installed */
 int
-TellGainedMap (pwin, value)
-    WindowPtr	pwin;
-    pointer	value;
+TellGainedMap (WindowPtr pwin, pointer value)
 {
     Colormap 	*pmid = (Colormap *)value;
     xEvent 	xE;
+
+#ifdef PANORAMIX
+    if(!noPanoramiXExtension && pwin->drawable.pScreen->myNum)
+	return WT_STOPWALKING;
+#endif
     if (wColormap (pwin) == *pmid)
     {
 	/* This should be call to DeliverEvent */
@@ -553,10 +556,7 @@ TellGainedMap (pwin, value)
 
   
 int
-CopyColormapAndFree (mid, pSrc, client)
-    Colormap	mid;
-    ColormapPtr	pSrc;
-    int		client;
+CopyColormapAndFree (Colormap mid, ColormapPtr pSrc, int client)
 {
     ColormapPtr	pmap = (ColormapPtr) NULL;
     int		result, alloc, size;
@@ -603,11 +603,9 @@ CopyColormapAndFree (mid, pSrc, client)
 
 /* Helper routine for freeing large numbers of cells from a map */
 static void
-CopyFree (channel, client, pmapSrc, pmapDst)
-    int		channel, client;
-    ColormapPtr	pmapSrc, pmapDst;
+CopyFree (int channel, int client, ColormapPtr pmapSrc, ColormapPtr pmapDst)
 {
-    int		z, npix, oldFree;
+    int		z, npix;
     EntryPtr	pentSrcFirst, pentDstFirst;
     EntryPtr	pentSrc, pentDst;
     Pixel	*ppix;
@@ -621,21 +619,18 @@ CopyFree (channel, client, pmapSrc, pmapDst)
 	npix = (pmapSrc->numPixelsRed)[client];
 	pentSrcFirst = pmapSrc->red;
 	pentDstFirst = pmapDst->red;
-	oldFree = pmapSrc->freeRed;
 	break;
       case GREENMAP:
 	ppix = (pmapSrc->clientPixelsGreen)[client];
 	npix = (pmapSrc->numPixelsGreen)[client];
 	pentSrcFirst = pmapSrc->green;
 	pentDstFirst = pmapDst->green;
-	oldFree = pmapSrc->freeGreen;
 	break;
       case BLUEMAP:
 	ppix = (pmapSrc->clientPixelsBlue)[client];
 	npix = (pmapSrc->numPixelsBlue)[client];
 	pentSrcFirst = pmapSrc->blue;
 	pentDstFirst = pmapDst->blue;
-	oldFree = pmapSrc->freeBlue;
 	break;
     }
     nalloc = 0;
@@ -695,10 +690,7 @@ CopyFree (channel, client, pmapSrc, pmapDst)
 /* Free the ith entry in a color map.  Must handle freeing of
  * colors allocated through AllocColorPlanes */
 static void
-FreeCell (pmap, i, channel)
-    ColormapPtr pmap;
-    Pixel i;
-    int	channel;
+FreeCell (ColormapPtr pmap, Pixel i, int channel)
 {
     EntryPtr pent;
     int	*pCount;
@@ -745,8 +737,7 @@ FreeCell (pmap, i, channel)
 }
 
 static void
-UpdateColors (pmap)
-    ColormapPtr	pmap;
+UpdateColors (ColormapPtr pmap)
 {
     xColorItem		*defs;
     register xColorItem *pdef;
@@ -813,11 +804,9 @@ UpdateColors (pmap)
  * Returns by changing the value in pred, pgreen, pblue and pPix
  */
 int
-AllocColor (pmap, pred, pgreen, pblue, pPix, client)
-    ColormapPtr		pmap;
-    unsigned short 	*pred, *pgreen, *pblue;
-    Pixel		*pPix;
-    int			client;
+AllocColor (ColormapPtr pmap, 
+            unsigned short *pred, unsigned short *pgreen, unsigned short *pblue, 
+            Pixel *pPix, int client)
 {
     Pixel	pixR, pixG, pixB;
     int		entries;
@@ -871,7 +860,9 @@ AllocColor (pmap, pred, pgreen, pblue, pPix, client)
 	pixB = FindBestPixel(pmap->blue, NUMBLUE(pVisual), &rgb, BLUEMAP);
 	*pPix = (pixR << pVisual->offsetRed) |
 		(pixG << pVisual->offsetGreen) |
-		(pixB << pVisual->offsetBlue);
+		(pixB << pVisual->offsetBlue) |
+		ALPHAMASK(pVisual);
+	
 	*pred = pmap->red[pixR].co.local.red;
 	*pgreen = pmap->green[pixG].co.local.green;
 	*pblue = pmap->blue[pixB].co.local.blue;
@@ -903,12 +894,45 @@ AllocColor (pmap, pred, pgreen, pblue, pPix, client)
 
     case GrayScale:
     case PseudoColor:
+	if (pmap->mid != pmap->pScreen->defColormap &&
+	    pmap->pVisual->vid == pmap->pScreen->rootVisual)
+	{
+	    ColormapPtr prootmap = (ColormapPtr)
+		SecurityLookupIDByType (clients[client], pmap->pScreen->defColormap,
+					 RT_COLORMAP, SecurityReadAccess);
+
+	    if (pmap->class == prootmap->class)
+		FindColorInRootCmap (prootmap, prootmap->red, entries, &rgb, 
+			pPix, PSEUDOMAP, AllComp);
+	}
 	if (FindColor(pmap, pmap->red, entries, &rgb, pPix, PSEUDOMAP,
 		      client, AllComp) != Success)
 	    return (BadAlloc);
         break;
 
     case DirectColor:
+	if (pmap->mid != pmap->pScreen->defColormap &&
+	    pmap->pVisual->vid == pmap->pScreen->rootVisual)
+	{
+	    ColormapPtr prootmap = (ColormapPtr)
+		SecurityLookupIDByType (clients[client], pmap->pScreen->defColormap,
+					 RT_COLORMAP, SecurityReadAccess);
+
+	    if (pmap->class == prootmap->class)
+	    {
+		pixR = (*pPix & pVisual->redMask) >> pVisual->offsetRed; 
+		FindColorInRootCmap (prootmap, prootmap->red, entries, &rgb, 
+			&pixR, REDMAP, RedComp);
+		pixG = (*pPix & pVisual->greenMask) >> pVisual->offsetGreen; 
+		FindColorInRootCmap (prootmap, prootmap->green, entries, &rgb, 
+			&pixG, GREENMAP, GreenComp);
+		pixB = (*pPix & pVisual->blueMask) >> pVisual->offsetBlue; 
+		FindColorInRootCmap (prootmap, prootmap->blue, entries, &rgb, 
+			&pixB, BLUEMAP, BlueComp);
+		*pPix = pixR | pixG | pixB;
+	    }
+	}
+
 	pixR = (*pPix & pVisual->redMask) >> pVisual->offsetRed; 
 	if (FindColor(pmap, pmap->red, NUMRED(pVisual), &rgb, &pixR, REDMAP,
 		      client, RedComp) != Success)
@@ -928,7 +952,8 @@ AllocColor (pmap, pred, pgreen, pblue, pPix, client)
 	    (void)FreeCo(pmap, client, REDMAP, 1, &pixR, (Pixel)0);
 	    return (BadAlloc);
 	}
-	*pPix = pixR | pixG | pixB;
+	*pPix = pixR | pixG | pixB | ALPHAMASK(pVisual);
+
 	break;
     }
 
@@ -964,9 +989,7 @@ AllocColor (pmap, pred, pgreen, pblue, pPix, client)
  */
 
 void
-FakeAllocColor (pmap, item)
-    register ColormapPtr pmap;
-    register xColorItem  *item;
+FakeAllocColor (register ColormapPtr pmap, register xColorItem *item)
 {
     Pixel	pixR, pixG, pixB;
     Pixel	temp;
@@ -1032,9 +1055,7 @@ FakeAllocColor (pmap, item)
 
 /* free a pixel value obtained from FakeAllocColor */
 void
-FakeFreeColor(pmap, pixel)
-    register ColormapPtr pmap;
-    Pixel pixel;
+FakeFreeColor(register ColormapPtr pmap, Pixel pixel)
 {
     register VisualPtr pVisual;
     Pixel pixR, pixG, pixB;
@@ -1085,12 +1106,7 @@ typedef struct _bignum {
 				 ((r)->lower = BIGNUMLOWER-1))
 
 static void
-#if NeedFunctionPrototypes
 BigNumAdd (BigNumPtr x, BigNumPtr y, BigNumPtr r)
-#else
-BigNumAdd (x, y, r)
-    BigNumPtr	x, y, r;
-#endif
 {
     BigNumLower	lower, carry = 0;
 
@@ -1104,11 +1120,7 @@ BigNumAdd (x, y, r)
 }
 
 static Pixel
-FindBestPixel(pentFirst, size, prgb, channel)
-    EntryPtr	pentFirst;
-    int		size;
-    xrgb	*prgb;
-    int		channel;
+FindBestPixel(EntryPtr pentFirst, int size, xrgb *prgb, int channel)
 {
     EntryPtr	pent;
     Pixel	pixel, final;
@@ -1125,16 +1137,16 @@ FindBestPixel(pentFirst, size, prgb, channel)
 	switch(channel)
 	{
 	  case PSEUDOMAP:
-	      dg = pent->co.local.green - prgb->green;
-	      db = pent->co.local.blue - prgb->blue;
+	      dg = (long) pent->co.local.green - prgb->green;
+	      db = (long) pent->co.local.blue - prgb->blue;
 	  case REDMAP:
-	      dr = pent->co.local.red - prgb->red;
+	      dr = (long) pent->co.local.red - prgb->red;
 	      break;
 	  case GREENMAP:
-	      dg = pent->co.local.green - prgb->green;
+	      dg = (long) pent->co.local.green - prgb->green;
 	      break;
 	  case BLUEMAP:
-	      db = pent->co.local.blue - prgb->blue;
+	      db = (long) pent->co.local.blue - prgb->blue;
 	      break;
 	}
 	sq = dr * dr;
@@ -1154,27 +1166,55 @@ FindBestPixel(pentFirst, size, prgb, channel)
     return(final);
 }
 
+static void
+FindColorInRootCmap (ColormapPtr pmap, EntryPtr pentFirst, int size, 
+                     xrgb *prgb, Pixel *pPixel, int channel, 
+                     ColorCompareProcPtr comp)
+{
+    EntryPtr    pent;
+    Pixel	pixel;
+    int         count;
+
+    if ((pixel = *pPixel) >= size)
+	pixel = 0;
+    for (pent = pentFirst + pixel, count = size; --count >= 0; pent++, pixel++)
+    {
+	if (pent->refcnt > 0 && (*comp) (pent, prgb))
+	{
+	    switch (channel)
+	    {
+	    case REDMAP:
+		pixel <<= pmap->pVisual->offsetRed;
+		break;
+	    case GREENMAP:
+		pixel <<= pmap->pVisual->offsetGreen;
+		break;
+	    case BLUEMAP:
+		pixel <<= pmap->pVisual->offsetBlue;
+		break;
+	    default: /* PSEUDOMAP */
+		break;
+	    }
+	    *pPixel = pixel;
+	}
+    }
+}
+
 /* Tries to find a color in pmap that exactly matches the one requested in prgb
  * if it can't it allocates one.
  * Starts looking at pentFirst + *pPixel, so if you want a specific pixel,
  * load *pPixel with that value, otherwise set it to 0
  */
 int
-FindColor (pmap, pentFirst, size, prgb, pPixel, channel, client, comp)
-    ColormapPtr	pmap;
-    EntryPtr	pentFirst;
-    int		size;
-    xrgb	*prgb;
-    Pixel	*pPixel;
-    int		channel;
-    int		client;
-    ColorCompareProcPtr comp;
+FindColor (ColormapPtr pmap, EntryPtr pentFirst, int size, xrgb *prgb, 
+           Pixel *pPixel, int channel, int client, 
+           ColorCompareProcPtr comp)
 {
     EntryPtr	pent;
     Bool	foundFree;
-    Pixel	pixel, Free;
-    int		npix, count, *nump;
-    Pixel	**pixp, *ppix;
+    Pixel	pixel, Free = 0;
+    int		npix, count, *nump = NULL;
+    Pixel	**pixp = NULL, *ppix;
     xColorItem	def;
 
     foundFree = FALSE;
@@ -1341,9 +1381,7 @@ gotit:
 /* Comparison functions -- passed to FindColor to determine if an
  * entry is already the color we're looking for or not */
 static int
-AllComp (pent, prgb)
-    EntryPtr	pent;
-    xrgb	*prgb;
+AllComp (EntryPtr pent, xrgb *prgb)
 {
     if((pent->co.local.red == prgb->red) &&
        (pent->co.local.green == prgb->green) &&
@@ -1353,9 +1391,7 @@ AllComp (pent, prgb)
 }
 
 static int
-RedComp (pent, prgb)
-    EntryPtr	pent;
-    xrgb	*prgb;
+RedComp (EntryPtr pent, xrgb *prgb)
 {
     if (pent->co.local.red == prgb->red) 
 	return (1);
@@ -1363,9 +1399,7 @@ RedComp (pent, prgb)
 }
 
 static int
-GreenComp (pent, prgb)
-    EntryPtr	pent;
-    xrgb	*prgb;
+GreenComp (EntryPtr pent, xrgb *prgb)
 {
     if (pent->co.local.green == prgb->green) 
 	return (1);
@@ -1373,9 +1407,7 @@ GreenComp (pent, prgb)
 }
 
 static int
-BlueComp (pent, prgb)
-    EntryPtr	pent;
-    xrgb	*prgb;
+BlueComp (EntryPtr pent, xrgb *prgb)
 {
     if (pent->co.local.blue == prgb->blue) 
 	return (1);
@@ -1386,11 +1418,7 @@ BlueComp (pent, prgb)
 /* Read the color value of a cell */
 
 int
-QueryColors (pmap, count, ppixIn, prgbList)
-    ColormapPtr	pmap;
-    int		count;
-    Pixel	*ppixIn;
-    xrgb	*prgbList;
+QueryColors (ColormapPtr pmap, int count, Pixel *ppixIn, xrgb *prgbList)
 {
     Pixel	*ppix, pixel;
     xrgb	*prgb;
@@ -1475,9 +1503,7 @@ QueryColors (pmap, count, ppixIn, prgbList)
 }
 
 static void
-FreePixels(pmap, client)
-    register ColormapPtr	pmap;
-    register int 		client;
+FreePixels(register ColormapPtr pmap, register int client)
 {
     register Pixel		*ppix, *ppixStart;
     register int 		n;
@@ -1566,12 +1592,14 @@ FreePixels(pmap, client)
     }
 }
 
-/* Free all of a client's colors and cells */
-/*ARGSUSED*/
+/** 
+ * Frees all of a client's colors and cells.
+ *
+ *  \param value  must conform to DeleteType
+ *  \unused fakeid
+ */
 int
-FreeClientPixels (value, fakeid)
-    pointer value;  /* must conform to DeleteType */
-    XID	fakeid;
+FreeClientPixels (pointer value, XID fakeid)
 {
     ColormapPtr pmap;
     colorResource *pcr = (colorResource *)value;
@@ -1584,13 +1612,8 @@ FreeClientPixels (value, fakeid)
 }
 
 int
-AllocColorCells (client, pmap, colors, planes, contig, ppix, masks)
-    int		client;
-    ColormapPtr	pmap;
-    int		colors, planes;
-    Bool	contig;
-    Pixel	*ppix;
-    Pixel	*masks;
+AllocColorCells (int client, ColormapPtr pmap, int colors, int planes, 
+                 Bool contig, Pixel *ppix, Pixel *masks)
 {
     Pixel	rmask, gmask, bmask, *ppixFirst, r, g, b;
     int		n, class;
@@ -1661,14 +1684,9 @@ AllocColorCells (client, pmap, colors, planes, contig, ppix, masks)
 
 
 int
-AllocColorPlanes (client, pmap, colors, r, g, b, contig, pixels,
-		  prmask, pgmask, pbmask)
-    int		client;
-    ColormapPtr	pmap;
-    int		colors, r, g, b;
-    Bool	contig;
-    Pixel	*pixels;
-    Pixel	*prmask, *pgmask, *pbmask;
+AllocColorPlanes (int client, ColormapPtr pmap, int colors, 
+                  int r, int g, int b, Bool contig, Pixel *pixels, 
+                  Pixel *prmask, Pixel *pgmask, Pixel *pbmask)
 {
     int		ok;
     Pixel	mask, *ppixFirst;
@@ -1756,13 +1774,8 @@ AllocColorPlanes (client, pmap, colors, r, g, b, contig, pixels,
 }
 
 static int
-AllocDirect (client, pmap, c, r, g, b, contig, pixels, prmask, pgmask, pbmask)
-    int		client;
-    ColormapPtr	pmap;
-    int		c, r, g, b;
-    Bool	contig;
-    Pixel	*pixels;
-    Pixel	*prmask, *pgmask, *pbmask;
+AllocDirect (int client, ColormapPtr pmap, int c, int r, int g, int b, Bool contig, 
+             Pixel *pixels, Pixel *prmask, Pixel *pgmask, Pixel *pbmask)
 {
     Pixel	*ppixRed, *ppixGreen, *ppixBlue;
     Pixel	*ppix, *pDst, *p;
@@ -1868,6 +1881,10 @@ AllocDirect (client, pmap, c, r, g, b, contig, pixels, prmask, pgmask, pbmask)
     pmap->numPixelsBlue[client] += npixB;
     pmap->freeBlue -= npixB;
 
+
+    for (pDst = pixels; pDst < pixels + c; pDst++)
+	*pDst |= ALPHAMASK(pmap->pVisual);
+
     DEALLOCATE_LOCAL(ppixBlue);
     DEALLOCATE_LOCAL(ppixGreen);
     DEALLOCATE_LOCAL(ppixRed);
@@ -1876,14 +1893,8 @@ AllocDirect (client, pmap, c, r, g, b, contig, pixels, prmask, pgmask, pbmask)
 }
 
 static int
-AllocPseudo (client, pmap, c, r, contig, pixels, pmask, pppixFirst)
-    int		client;
-    ColormapPtr	pmap;
-    int		c, r;
-    Bool	contig;
-    Pixel	*pixels;
-    Pixel	*pmask;
-    Pixel	**pppixFirst;
+AllocPseudo (int client, ColormapPtr pmap, int c, int r, Bool contig, 
+             Pixel *pixels, Pixel *pmask, Pixel **pppixFirst)
 {
     Pixel	*ppix, *p, *pDst, *ppixTemp;
     int		npix;
@@ -1937,13 +1948,8 @@ AllocPseudo (client, pmap, c, r, contig, pixels, pmask, pppixFirst)
  * (see AllocShared for why we care)
  */
 static Bool
-AllocCP (pmap, pentFirst, count, planes, contig, pixels, pMask)
-    ColormapPtr	pmap;
-    EntryPtr	pentFirst;
-    int		count, planes;
-    Bool	contig;
-    Pixel	*pixels, *pMask;
-    
+AllocCP (ColormapPtr pmap, EntryPtr pentFirst, int count, int planes, 
+         Bool contig, Pixel *pixels, Pixel *pMask)
 {
     EntryPtr	ent;
     Pixel	pixel, base, entries, maxp, save;
@@ -2112,13 +2118,13 @@ AllocCP (pmap, pentFirst, count, planes, contig, pixels, pMask)
     return (FALSE);
 }
 
+/**
+ *
+ *  \param ppixFirst  First of the client's new pixels
+ */
 static Bool
-AllocShared (pmap, ppix, c, r, g, b, rmask, gmask, bmask, ppixFirst)
-    ColormapPtr	pmap;
-    Pixel	*ppix;
-    int		c, r, g, b;
-    Pixel	rmask, gmask, bmask;
-    Pixel	*ppixFirst;	/* First of the client's new pixels */
+AllocShared (ColormapPtr pmap, Pixel *ppix, int c, int r, int g, int b, 
+             Pixel rmask, Pixel gmask, Pixel bmask, Pixel *ppixFirst)
 {
     Pixel	*pptr, *cptr;
     int		npix, z, npixClientNew, npixShared;
@@ -2247,14 +2253,11 @@ AllocShared (pmap, ppix, c, r, g, b, rmask, gmask, bmask, ppixFirst)
 }
 
 
-/* Free colors and/or cells (probably slow for large numbers) */
-
+/** FreeColors
+ * Free colors and/or cells (probably slow for large numbers) 
+ */
 int
-FreeColors (pmap, client, count, pixels, mask)
-    ColormapPtr	pmap;
-    int		client, count;
-    Pixel	*pixels;
-    Pixel	mask;
+FreeColors (ColormapPtr pmap, int client, int count, Pixel *pixels, Pixel mask)
 {
     int		rval, result, class;
     Pixel	rmask;
@@ -2292,19 +2295,20 @@ FreeColors (pmap, client, count, pixels, mask)
     return (result);
 }
 
-/* Helper for FreeColors -- frees all combinations of *newpixels and mask bits
+/**
+ * Helper for FreeColors -- frees all combinations of *newpixels and mask bits
  * which the client has allocated in channel colormap cells of pmap.
- * doesn't change newpixels if it doesn't need to */
+ * doesn't change newpixels if it doesn't need to 
+ *
+ *  \param pmap   which colormap head
+ *  \param color  which sub-map, eg, RED, BLUE, PSEUDO
+ *  \param npixIn number of pixels passed in
+ *  \param ppixIn number of base pixels
+ *  \param mask   mask client gave us
+ */
 static int
-FreeCo (pmap, client, color, npixIn, ppixIn, mask)
-    ColormapPtr	pmap;		/* which colormap head */
-    int		client;		
-    int		color;		/* which sub-map, eg RED, BLUE, PSEUDO */
-    int		npixIn;		/* number of pixels passed in */
-    Pixel	*ppixIn;	/* list of base pixels */
-    Pixel	mask;		/* mask client gave us */ 
+FreeCo (ColormapPtr pmap, int client, int color, int npixIn, Pixel *ppixIn, Pixel mask)
 {
-
     Pixel	*ppixClient, pixTest;
     int		npixClient, npixNew, npix;
     Pixel	bits, base, cmask, rgbbad;
@@ -2497,10 +2501,7 @@ FreeCo (pmap, client, color, npixIn, ppixIn, mask)
 
 /* Redefine color values */
 int
-StoreColors (pmap, count, defs)
-    ColormapPtr	pmap;
-    int		count;
-    xColorItem	*defs;
+StoreColors (ColormapPtr pmap, int count, xColorItem *defs)
 {
     register Pixel 	pix;
     register xColorItem *pdef;
@@ -2767,9 +2768,7 @@ StoreColors (pmap, count, defs)
 }
 
 int
-IsMapInstalled(map, pWin)
-    Colormap	map;
-    WindowPtr	pWin;
+IsMapInstalled(Colormap map, WindowPtr pWin)
 {
     Colormap	*pmaps;
     int		imap, nummaps, found;

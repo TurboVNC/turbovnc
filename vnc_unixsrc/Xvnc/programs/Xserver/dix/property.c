@@ -1,13 +1,13 @@
+/* $XFree86: xc/programs/Xserver/dix/property.c,v 3.12 2002/02/19 11:09:22 alanh Exp $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -45,13 +45,16 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $XConsortium: property.c /main/41 1996/12/22 12:33:58 rws $ */
-/* $XFree86: xc/programs/Xserver/dix/property.c,v 3.5 1996/12/24 11:52:04 dawes Exp $ */
+/* $Xorg: property.c,v 1.4 2001/02/09 02:04:40 xorgcvs Exp $ */
 
-#include "X.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
 #define NEED_REPLIES
 #define NEED_EVENTS
-#include "Xproto.h"
+#include <X11/Xproto.h>
 #include "windowstr.h"
 #include "propertyst.h"
 #include "dixstruct.h"
@@ -59,17 +62,20 @@ SOFTWARE.
 #include "swaprep.h"
 #ifdef XCSECURITY
 #define _SECURITY_SERVER
-#include "extensions/security.h"
+#include <X11/extensions/security.h>
+#endif
+#ifdef LBX
+#include "lbxserve.h"
+#include "lbxtags.h"
 #endif
 
 #if defined(LBX) || defined(LBX_COMPAT)
-int fWriteToClient(client, len, buf)
-    ClientPtr   client;
-    int         len;
-    char        *buf;
+#if 0 /* no header in X11 environment, not used in X11 environment */
+int fWriteToClient(ClientPtr client, int len, char *buf)
 {
     return WriteToClient(client, len, buf);
 }
+#endif
 #endif
 
 /*****************************************************************
@@ -85,8 +91,7 @@ int fWriteToClient(client, len, buf)
 
 #ifdef notdef
 static void
-PrintPropertys(pWin)
-    WindowPtr pWin;
+PrintPropertys(WindowPtr pWin)
 {
     PropertyPtr pProp;
     register int j;
@@ -105,8 +110,7 @@ PrintPropertys(pWin)
 #endif
 
 int
-ProcRotateProperties(client)
-    ClientPtr client;
+ProcRotateProperties(ClientPtr client)
 {
     int     i, j, delta;
     REQUEST(xRotatePropertiesReq);
@@ -198,8 +202,7 @@ found:
 }
 
 int 
-ProcChangeProperty(client)
-    ClientPtr client;
+ProcChangeProperty(ClientPtr client)
 {	      
     WindowPtr pWin;
     char format, mode;
@@ -272,13 +275,9 @@ ProcChangeProperty(client)
 }
 
 int
-ChangeWindowProperty(pWin, property, type, format, mode, len, value, sendevent)
-    WindowPtr	pWin;
-    Atom	property, type;
-    int		format, mode;
-    unsigned long len;
-    pointer	value;
-    Bool	sendevent;
+ChangeWindowProperty(WindowPtr pWin, Atom property, Atom type, int format, 
+                     int mode, unsigned long len, pointer value, 
+                     Bool sendevent)
 {
 #ifdef LBX
     return LbxChangeWindowProperty(NULL, pWin, property, type,
@@ -402,9 +401,7 @@ ChangeWindowProperty(pWin, property, type, format, mode, len, value, sendevent)
 }
 
 int
-DeleteProperty(pWin, propName)
-    WindowPtr pWin;
-    Atom propName;
+DeleteProperty(WindowPtr pWin, Atom propName)
 {
     PropertyPtr pProp, prevProp;
     xEvent event;
@@ -447,8 +444,7 @@ DeleteProperty(pWin, propName)
 }
 
 void
-DeleteAllWindowProperties(pWin)
-    WindowPtr pWin;
+DeleteAllWindowProperties(WindowPtr pWin)
 {
     PropertyPtr pProp, pNextProp;
     xEvent event;
@@ -474,11 +470,11 @@ DeleteAllWindowProperties(pWin)
 }
 
 static int
-NullPropertyReply(client, propertyType, format, reply)
-    ClientPtr client;
-    ATOM propertyType;
-    int format;
-    xGetPropertyReply *reply;
+NullPropertyReply(
+    ClientPtr client,
+    ATOM propertyType,
+    int format,
+    xGetPropertyReply *reply)
 {
     reply->nItems = 0;
     reply->length = 0;
@@ -500,8 +496,7 @@ NullPropertyReply(client, propertyType, format, reply)
  *****************/
 
 int
-ProcGetProperty(client)
-    ClientPtr client;
+ProcGetProperty(ClientPtr client)
 {
     PropertyPtr pProp, prevProp;
     unsigned long n, len, ind;
@@ -656,10 +651,9 @@ ProcGetProperty(client)
 }
 
 int
-ProcListProperties(client)
-    ClientPtr client;
+ProcListProperties(ClientPtr client)
 {
-    Atom *pAtoms, *temppAtoms;
+    Atom *pAtoms = NULL, *temppAtoms;
     xListPropertiesReply xlpr;
     int	numProps = 0;
     WindowPtr pWin;
@@ -704,8 +698,7 @@ ProcListProperties(client)
 }
 
 int 
-ProcDeleteProperty(client)
-    register ClientPtr client;
+ProcDeleteProperty(register ClientPtr client)
 {
     WindowPtr pWin;
     REQUEST(xDeletePropertyReq);

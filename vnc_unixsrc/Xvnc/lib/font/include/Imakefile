@@ -1,0 +1,11 @@
+XCOMM $Xorg$
+    HEADERS = bitmap.h bufio.h fntfil.h fntfilio.h fntfilst.h fontenc.h \
+	      fontencc.h fontmisc.h fontmod.h fontshow.h fontutil.h \
+	      fontxlfd.h
+all::
+
+BuildIncludes($(HEADERS),X11/fonts,../..)
+
+#if BuildLibraries
+InstallMultipleFlags($(HEADERS),$(INCDIR)/X11/fonts,$(INSTINCFLAGS))
+#endif

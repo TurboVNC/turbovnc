@@ -1,16 +1,15 @@
-/* $XConsortium: Xtranssock.c /main/58 1996/12/04 10:22:50 lehors $ */
-/* $XFree86: xc/lib/xtrans/Xtranssock.c,v 3.25.2.4 1998/02/01 16:04:34 robin Exp $ */
+/* $XdotOrg: xc/lib/xtrans/Xtranssock.c,v 1.11 2005/11/08 06:33:26 jkj Exp $ */
+/* $Xorg: Xtranssock.c,v 1.11 2001/02/09 02:04:06 xorgcvs Exp $ */
 /*
 
-Copyright (c) 1993, 1994  X Consortium
+Copyright 1993, 1994, 1998  The Open Group
+Copyright 2002 Sun Microsystems, Inc.  All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -18,19 +17,20 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of the copyright holders shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from the copyright holders.
 
 */
+/* $XFree86: xc/lib/xtrans/Xtranssock.c,v 3.68 2004/01/07 04:28:02 dawes Exp $ */
 
-/* Copyright (c) 1993, 1994 NCR Corporation - Dayton, Ohio, USA
+/* Copyright 1993, 1994 NCR Corporation - Dayton, Ohio, USA
  *
  * All Rights Reserved
  *
@@ -57,15 +57,15 @@ from the X Consortium.
 #ifdef XTHREADS
 #include <X11/Xthreads.h>
 #endif
+
 #ifndef WIN32
 
 #if defined(TCPCONN) || defined(UNIXCONN)
+#include <sys/socket.h>
 #include <netinet/in.h>
-#else
-#ifdef ESIX
-#include <lan/in.h>
+#include <arpa/inet.h>
 #endif
-#endif
+
 #if defined(TCPCONN) || defined(UNIXCONN)
 #define X_INCLUDE_NETDB_H
 #define XOS_USE_NO_LOCKING
@@ -83,39 +83,38 @@ from the X Consortium.
 #include <sys/stat.h>
 #endif
 
-#if defined(hpux) || defined(__EMX__)
+#if defined(hpux) || (defined(MOTOROLA) && defined(SYSV))
 #define NO_TCP_H
-#endif /* hpux */
-#ifdef MOTOROLA
-#ifdef SYSV
-#define NO_TCP_H
-#endif /* SYSV */
-#endif /* MOTOROLA */
+#endif 
+
 #ifndef NO_TCP_H
-#ifdef __osf__
+#if defined(__osf__) || defined(linux) || defined(__GLIBC__) || defined(AIXV5)
 #include <sys/param.h>
 #endif /* osf */
-#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__FreeBSD__) 
+#if defined(__NetBSD__) || defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__DragonFly__)
+#include <sys/param.h>
 #include <machine/endian.h>
-#endif /* __NetBSD__ || __OpenBSD__ || __FreeBSD__ */
+#endif /* __NetBSD__ || __OpenBSD__ || __FreeBSD__ || __DragonFly__ */
 #include <netinet/tcp.h>
 #endif /* !NO_TCP_H */
+
 #include <sys/ioctl.h>
-#if defined(SVR4) && !defined(SCO325)
+#if defined(SVR4) && !defined(DGUX) && !defined(_SEQUENT_)
 #include <sys/filio.h>
 #endif
-#if (defined(i386) && defined(SYSV)) || defined(_SEQUENT_)
-#if !defined(_SEQUENT_) && !defined(ESIX) && !defined(sco)
+
+#if (defined(i386) && defined(SYSV)) && !defined(SCO325) && !defined(sun)
 #include <net/errno.h>
-#endif /* _SEQUENT_  || ESIX  || SCO */
-#if !defined(ISC) || !defined(I_NREAD) || defined(SCO325)
+#endif 
+
+#if (defined(i386) && defined(SYSV)) && (!defined(ISC) || !defined(I_NREAD) || defined(SCO325)) || defined(_SEQUENT_)
 #include <sys/stropts.h>
-#endif
-#endif /* i386 && SYSV || _SEQUENT_ */
+#endif 
 
 #else /* !WIN32 */
 
 #include <X11/Xwinsock.h>
+#include <X11/Xwindows.h>
 #include <X11/Xw32defs.h>
 #undef close
 #define close closesocket
@@ -124,6 +123,7 @@ from the X Consortium.
 #define EPROTOTYPE WSAEPROTOTYPE
 #undef EWOULDBLOCK
 #define EWOULDBLOCK WSAEWOULDBLOCK
+#define EINPROGRESS WSAEINPROGRESS
 #undef EINTR
 #define EINTR WSAEINTR
 #define X_INCLUDE_NETDB_H
@@ -135,7 +135,7 @@ from the X Consortium.
 #undef SO_DONTLINGER
 #endif
 
-#if defined(__EMX__)
+#if defined(__UNIXOS2__)
 #if defined(NOT_EMX09A)
 static int IBMsockInit = 0;
 #define SocketInitOnce()\
@@ -191,7 +191,13 @@ typedef struct _Sockettrans2dev {
 static Sockettrans2dev Sockettrans2devtab[] = {
 #ifdef TCPCONN
     {"inet",AF_INET,SOCK_STREAM,SOCK_DGRAM,0},
+#if !defined(IPv6) || !defined(AF_INET6)
     {"tcp",AF_INET,SOCK_STREAM,SOCK_DGRAM,0},
+#else /* IPv6 */
+    {"tcp",AF_INET6,SOCK_STREAM,SOCK_DGRAM,0},
+    {"tcp",AF_INET,SOCK_STREAM,SOCK_DGRAM,0}, /* fallback */
+    {"inet6",AF_INET6,SOCK_STREAM,SOCK_DGRAM,0},
+#endif
 #endif /* TCPCONN */
 #ifdef UNIXCONN
     {"unix",AF_UNIX,SOCK_STREAM,SOCK_DGRAM,0},
@@ -203,6 +209,9 @@ static Sockettrans2dev Sockettrans2devtab[] = {
 
 #define NUMSOCKETFAMILIES (sizeof(Sockettrans2devtab)/sizeof(Sockettrans2dev))
 
+#ifdef TCPCONN
+static int TRANS(SocketINETClose) (XtransConnInfo ciptr);
+#endif
 
 #ifdef UNIXCONN
 
@@ -230,6 +239,10 @@ static Sockettrans2dev Sockettrans2devtab[] = {
 #define UNIX_PATH "/usr/spool/sockets/xtrans_test/"
 #define UNIX_DIR "/usr/spool/sockets/xtrans_test"
 #endif
+#if defined(LBXPROXY_t)
+#define UNIX_PATH "/usr/spool/sockets/X11/"
+#define UNIX_DIR  "/usr/spool/sockets/X11"
+#endif
 
 #else /* !hpux */
 
@@ -253,33 +266,53 @@ static Sockettrans2dev Sockettrans2devtab[] = {
 #define UNIX_PATH "/tmp/.Test-unix/test"
 #define UNIX_DIR "/tmp/.Test-unix"
 #endif
+#if defined(LBXPROXY_t)
+#define UNIX_PATH "/tmp/.X11-unix/X"
+#define UNIX_DIR  "/tmp/.X11-unix"
+#endif
 
 #endif /* hpux */
 
 #endif /* UNIXCONN */
 
+#define PORTBUFSIZE	32
+
+#ifndef MAXHOSTNAMELEN
+#define MAXHOSTNAMELEN 255
+#endif
+
+/*
+ * This provides compatibility for apps linked against system libraries
+ * that don't have IPv6 support.
+ */
+#if defined(IPv6) && defined(AF_INET6)
+static const struct in6_addr local_in6addr_any = IN6ADDR_ANY_INIT;
+#pragma weak in6addr_any = local_in6addr_any
+#ifndef __USLC__
+#pragma weak getaddrinfo
+#endif
+static int haveIPv6 = 1;
+#endif
 
 /*
  * These are some utility function used by the real interface function below.
  */
 
 static int
-TRANS(SocketSelectFamily) (family)
-
-char *family;
+TRANS(SocketSelectFamily) (int first, char *family)
 
 {
     int     i;
 
     PRMSG (3,"SocketSelectFamily(%s)\n", family, 0, 0);
 
-    for (i = 0; i < NUMSOCKETFAMILIES;i++)
+    for (i = first + 1; i < NUMSOCKETFAMILIES;i++)
     {
         if (!strcmp (family, Sockettrans2devtab[i].transname))
 	    return i;
     }
 
-    return -1;
+    return (first == -1 ? -2 : -1);
 }
 
 
@@ -289,22 +322,41 @@ char *family;
  */
 
 static int
-TRANS(SocketINETGetAddr) (ciptr)
-
-XtransConnInfo ciptr;
+TRANS(SocketINETGetAddr) (XtransConnInfo ciptr)
 
 {
-    struct sockaddr_in 	sockname;
-#if defined(SVR4) || defined(SCO325)
-    size_t namelen = sizeof sockname;
+#if defined(IPv6) && defined(AF_INET6)
+    struct sockaddr_storage socknamev6;
+#endif
+    struct sockaddr_in socknamev4;
+    void *socknamePtr;
+#if defined(SVR4) || defined(__SCO__)
+    size_t namelen;
 #else
-    socklen_t namelen = sizeof sockname;
+    int namelen;
 #endif
 
-    PRMSG (3,"SocketINETGetAddr(%x)\n", ciptr, 0, 0);
+    PRMSG (3,"SocketINETGetAddr(%p)\n", ciptr, 0, 0);
 
-    if (getsockname (ciptr->fd,(struct sockaddr *) &sockname, &namelen) < 0)
+#if defined(IPv6) && defined(AF_INET6)
+    if (haveIPv6)
     {
+	namelen = sizeof(socknamev6);
+	socknamePtr = &socknamev6;
+    }
+    else
+#endif
+    {
+	namelen = sizeof(socknamev4);
+	socknamePtr = &socknamev4;
+    }
+
+    if (getsockname (ciptr->fd,(struct sockaddr *) socknamePtr,
+		     (void *)&namelen) < 0)
+    {
+#ifdef WIN32
+	errno = WSAGetLastError();
+#endif
 	PRMSG (1,"SocketINETGetAddr: getsockname() failed: %d\n",
 	    EGET(),0, 0);
 	return -1;
@@ -322,9 +374,18 @@ XtransConnInfo ciptr;
         return -1;
     }
 
-    ciptr->family = sockname.sin_family;
+#if defined(IPv6) && defined(AF_INET6)
+    if (haveIPv6)
+    {
+	ciptr->family = ((struct sockaddr *)socknamePtr)->sa_family;
+    }
+    else
+#endif
+    {
+	ciptr->family = socknamev4.sin_family;
+    }
     ciptr->addrlen = namelen;
-    memcpy (ciptr->addr, &sockname, ciptr->addrlen);
+    memcpy (ciptr->addr, socknamePtr, ciptr->addrlen);
 
     return 0;
 }
@@ -336,22 +397,41 @@ XtransConnInfo ciptr;
  */
 
 static int
-TRANS(SocketINETGetPeerAddr) (ciptr)
-
-XtransConnInfo ciptr;
+TRANS(SocketINETGetPeerAddr) (XtransConnInfo ciptr)
 
 {
-    struct sockaddr_in 	sockname;
-#if defined(SVR4) || defined(SCO325)
-    size_t namelen = sizeof sockname;
+#if defined(IPv6) && defined(AF_INET6)
+    struct sockaddr_storage socknamev6;
+#endif
+    struct sockaddr_in 	socknamev4;
+    void *socknamePtr;
+#if defined(SVR4) || defined(__SCO__)
+    size_t namelen;
 #else
-    socklen_t namelen = sizeof sockname;
+    int namelen;
 #endif
 
-    PRMSG (3,"SocketINETGetPeerAddr(%x)\n", ciptr, 0, 0);
-
-    if (getpeername (ciptr->fd, (struct sockaddr *) &sockname, &namelen) < 0)
+#if defined(IPv6) && defined(AF_INET6)
+    if (haveIPv6 && ciptr->family == AF_INET6)
     {
+	namelen = sizeof(socknamev6);
+	socknamePtr = &socknamev6;
+    }
+    else
+#endif
+    {
+	namelen = sizeof(socknamev4);
+	socknamePtr = &socknamev4;
+    }
+
+    PRMSG (3,"SocketINETGetPeerAddr(%p)\n", ciptr, 0, 0);
+
+    if (getpeername (ciptr->fd, (struct sockaddr *) socknamePtr,
+		     (void *)&namelen) < 0)
+    {
+#ifdef WIN32
+	errno = WSAGetLastError();
+#endif
 	PRMSG (1,"SocketINETGetPeerAddr: getpeername() failed: %d\n",
 	    EGET(), 0, 0);
 	return -1;
@@ -370,22 +450,27 @@ XtransConnInfo ciptr;
     }
 
     ciptr->peeraddrlen = namelen;
-    memcpy (ciptr->peeraddr, &sockname, ciptr->peeraddrlen);
+    memcpy (ciptr->peeraddr, socknamePtr, ciptr->peeraddrlen);
 
     return 0;
 }
 
 
 static XtransConnInfo
-TRANS(SocketOpen) (i, type)
-
-int i;
-int type;
+TRANS(SocketOpen) (int i, int type)
 
 {
     XtransConnInfo	ciptr;
 
     PRMSG (3,"SocketOpen(%d,%d)\n", i, type, 0);
+
+#if defined(IPv6) && defined(AF_INET6)
+    if (getaddrinfo == NULL)
+	haveIPv6 = 0;
+
+    if (!haveIPv6 && Sockettrans2devtab[i].family == AF_INET6)
+	return NULL;
+#endif
 
     if ((ciptr = (XtransConnInfo) xcalloc (
 	1, sizeof(struct _XtransConnInfo))) == NULL)
@@ -402,7 +487,10 @@ int type;
 #endif
 #endif
       ) {
-	PRMSG (1, "SocketOpen: socket() failed for %s\n",
+#ifdef WIN32
+	errno = WSAGetLastError();
+#endif
+	PRMSG (2, "SocketOpen: socket() failed for %s\n",
 	    Sockettrans2devtab[i].transname, 0, 0);
 
 	xfree ((char *) ciptr);
@@ -410,7 +498,11 @@ int type;
     }
 
 #ifdef TCP_NODELAY
-    if (Sockettrans2devtab[i].family == AF_INET)
+    if (Sockettrans2devtab[i].family == AF_INET
+#if defined(IPv6) && defined(AF_INET6)
+      || Sockettrans2devtab[i].family == AF_INET6
+#endif
+    )
     {
 	/*
 	 * turn off TCP coalescence for INET sockets
@@ -429,12 +521,7 @@ int type;
 #ifdef TRANS_REOPEN
 
 static XtransConnInfo
-TRANS(SocketReopen) (i, type, fd, port)
-
-int  i;
-int  type;
-int  fd;
-char *port;
+TRANS(SocketReopen) (int i, int type, int fd, char *port)
 
 {
     XtransConnInfo	ciptr;
@@ -463,35 +550,29 @@ char *port;
 #ifdef TRANS_CLIENT
 
 static XtransConnInfo
-TRANS(SocketOpenCOTSClient) (thistrans, protocol, host, port)
-
-Xtransport *thistrans;
-char 	   *protocol;
-char 	   *host;
-char       *port;
-
+TRANS(SocketOpenCOTSClientBase) (char *transname, char *protocol,
+				char *host, char *port, int previndex)
 {
     XtransConnInfo	ciptr;
-    int			i;
+    int			i = previndex;
 
     PRMSG (2, "SocketOpenCOTSClient(%s,%s,%s)\n",
 	protocol, host, port);
 
     SocketInitOnce();
 
-    if ((i = TRANS(SocketSelectFamily) (thistrans->TransName)) < 0)
-    {
-	PRMSG (1,
-       "SocketOpenCOTSClient: Unable to determine socket type for %s\n",
-	    thistrans->TransName, 0, 0);
-	return NULL;
+    while ((i = TRANS(SocketSelectFamily) (i, transname)) >= 0) {
+	if ((ciptr = TRANS(SocketOpen) (
+		 i, Sockettrans2devtab[i].devcotsname)) != NULL)
+	    break;
     }
-
-    if ((ciptr = TRANS(SocketOpen) (
-	i, Sockettrans2devtab[i].devcotsname)) == NULL)
-    {
-	PRMSG (1,"SocketOpenCOTSClient: Unable to open socket for %s\n",
-	    thistrans->TransName, 0, 0);
+    if (i < 0) {
+	if (i == -1)
+	    PRMSG (1,"SocketOpenCOTSClient: Unable to open socket for %s\n",
+		   transname, 0, 0);
+	else
+	    PRMSG (1,"SocketOpenCOTSClient: Unable to determine socket type for %s\n",
+		   transname, 0, 0);
 	return NULL;
     }
 
@@ -502,40 +583,44 @@ char       *port;
     return ciptr;
 }
 
+static XtransConnInfo
+TRANS(SocketOpenCOTSClient) (Xtransport *thistrans, char *protocol, 
+			     char *host, char *port)
+{
+    return TRANS(SocketOpenCOTSClientBase)(
+			thistrans->TransName, protocol, host, port, -1);
+}
+
+
 #endif /* TRANS_CLIENT */
 
 
 #ifdef TRANS_SERVER
 
 static XtransConnInfo
-TRANS(SocketOpenCOTSServer) (thistrans, protocol, host, port)
-
-Xtransport *thistrans;
-char 	   *protocol;
-char 	   *host;
-char 	   *port;
+TRANS(SocketOpenCOTSServer) (Xtransport *thistrans, char *protocol, 
+			     char *host, char *port)
 
 {
     XtransConnInfo	ciptr;
-    int	i;
+    int	i = -1;
 
     PRMSG (2,"SocketOpenCOTSServer(%s,%s,%s)\n", protocol, host, port);
 
     SocketInitOnce();
 
-    if ((i = TRANS(SocketSelectFamily) (thistrans->TransName)) < 0)
-    {
-	PRMSG (1,
-       "SocketOpenCOTSServer: Unable to determine socket type for %s\n",
-	    thistrans->TransName, 0, 0);
-	return NULL;
+    while ((i = TRANS(SocketSelectFamily) (i, thistrans->TransName)) >= 0) {
+	if ((ciptr = TRANS(SocketOpen) (
+		 i, Sockettrans2devtab[i].devcotsname)) != NULL)
+	    break;
     }
-
-    if ((ciptr = TRANS(SocketOpen) (
-	i, Sockettrans2devtab[i].devcotsname)) == NULL)
-    {
-	PRMSG (1,"SocketOpenCOTSServer: Unable to open socket for %s\n",
-	    thistrans->TransName, 0, 0);
+    if (i < 0) {
+	if (i == -1)
+	    PRMSG (1,"SocketOpenCOTSServer: Unable to open socket for %s\n",
+		   thistrans->TransName, 0, 0);
+	else
+	    PRMSG (1,"SocketOpenCOTSServer: Unable to determine socket type for %s\n",
+		   thistrans->TransName, 0, 0);
 	return NULL;
     }
 
@@ -546,17 +631,27 @@ char 	   *port;
 #ifdef SO_REUSEADDR
 
     /*
-     * SO_REUSEADDR only applied to AF_INET
+     * SO_REUSEADDR only applied to AF_INET && AF_INET6
      */
 
-    if (Sockettrans2devtab[i].family == AF_INET)
+    if (Sockettrans2devtab[i].family == AF_INET
+#if defined(IPv6) && defined(AF_INET6)
+      || Sockettrans2devtab[i].family == AF_INET6
+#endif
+    )
     {
 	int one = 1;
 	setsockopt (ciptr->fd, SOL_SOCKET, SO_REUSEADDR,
 		    (char *) &one, sizeof (int));
     }
 #endif
-
+#ifdef IPV6_V6ONLY
+    if (Sockettrans2devtab[i].family == AF_INET6)
+    {
+	int one = 1;
+	setsockopt(ciptr->fd, IPPROTO_IPV6, IPV6_V6ONLY, &one, sizeof(int));
+    }
+#endif
     /* Save the index for later use */
 
     ciptr->index = i;
@@ -570,34 +665,29 @@ char 	   *port;
 #ifdef TRANS_CLIENT
 
 static XtransConnInfo
-TRANS(SocketOpenCLTSClient) (thistrans, protocol, host, port)
-
-Xtransport *thistrans;
-char 	   *protocol;
-char 	   *host;
-char 	   *port;
+TRANS(SocketOpenCLTSClient) (Xtransport *thistrans, char *protocol, 
+			     char *host, char *port)
 
 {
     XtransConnInfo	ciptr;
-    int			i;
+    int			i = -1;
 
     PRMSG (2,"SocketOpenCLTSClient(%s,%s,%s)\n", protocol, host, port);
 
     SocketInitOnce();
 
-    if ((i = TRANS(SocketSelectFamily) (thistrans->TransName)) < 0)
-    {
-	PRMSG (1,
-       "SocketOpenCLTSClient: Unable to determine socket type for %s\n",
-	    thistrans->TransName, 0, 0);
-	return NULL;
+    while ((i = TRANS(SocketSelectFamily) (i, thistrans->TransName)) >= 0) {
+	if ((ciptr = TRANS(SocketOpen) (
+		 i, Sockettrans2devtab[i].devcotsname)) != NULL)
+	    break;
     }
-
-    if ((ciptr = TRANS(SocketOpen) (
-	i, Sockettrans2devtab[i].devcotsname)) == NULL)
-    {
-	PRMSG (1,"SocketOpenCLTSClient: Unable to open socket for %s\n",
-	      thistrans->TransName, 0, 0);
+    if (i < 0) {
+	if (i == -1)
+	    PRMSG (1,"SocketOpenCLTSClient: Unable to open socket for %s\n",
+		   thistrans->TransName, 0, 0);
+	else
+	    PRMSG (1,"SocketOpenCLTSClient: Unable to determine socket type for %s\n",
+		   thistrans->TransName, 0, 0);
 	return NULL;
     }
 
@@ -614,37 +704,39 @@ char 	   *port;
 #ifdef TRANS_SERVER
 
 static XtransConnInfo
-TRANS(SocketOpenCLTSServer) (thistrans, protocol, host, port)
-
-Xtransport *thistrans;
-char 	   *protocol;
-char 	   *host;
-char 	   *port;
+TRANS(SocketOpenCLTSServer) (Xtransport *thistrans, char *protocol, 
+			     char *host, char *port)
 
 {
     XtransConnInfo	ciptr;
-    int	i;
+    int	i = -1;
 
     PRMSG (2,"SocketOpenCLTSServer(%s,%s,%s)\n", protocol, host, port);
 
     SocketInitOnce();
 
-    if ((i = TRANS(SocketSelectFamily) (thistrans->TransName)) < 0)
-    {
-	PRMSG (1,
-       "SocketOpenCLTSServer: Unable to determine socket type for %s\n",
-	      thistrans->TransName, 0, 0);
+    while ((i = TRANS(SocketSelectFamily) (i, thistrans->TransName)) >= 0) {
+	if ((ciptr = TRANS(SocketOpen) (
+		 i, Sockettrans2devtab[i].devcotsname)) != NULL)
+	    break;
+    }
+    if (i < 0) {
+	if (i == -1)
+	    PRMSG (1,"SocketOpenCLTSServer: Unable to open socket for %s\n",
+		   thistrans->TransName, 0, 0);
+	else
+	    PRMSG (1,"SocketOpenCLTSServer: Unable to determine socket type for %s\n",
+		   thistrans->TransName, 0, 0);
 	return NULL;
     }
 
-    if ((ciptr = TRANS(SocketOpen) (
-	i, Sockettrans2devtab[i].devcotsname)) == NULL)
+#ifdef IPV6_V6ONLY
+    if (Sockettrans2devtab[i].family == AF_INET6)
     {
-	PRMSG (1,"SocketOpenCLTSServer: Unable to open socket for %s\n",
-	      thistrans->TransName, 0, 0);
-	return NULL;
+	int one = 1;
+	setsockopt(ciptr->fd, IPPROTO_IPV6, IPV6_V6ONLY, &one, sizeof(int));
     }
-
+#endif
     /* Save the index for later use */
 
     ciptr->index = i;
@@ -658,35 +750,29 @@ char 	   *port;
 #ifdef TRANS_REOPEN
 
 static XtransConnInfo
-TRANS(SocketReopenCOTSServer) (thistrans, fd, port)
-
-Xtransport *thistrans;
-int	   fd;
-char	   *port;
+TRANS(SocketReopenCOTSServer) (Xtransport *thistrans, int fd, char *port)
 
 {
     XtransConnInfo	ciptr;
-    int			i;
+    int			i = -1;
 
     PRMSG (2,
 	"SocketReopenCOTSServer(%d, %s)\n", fd, port, 0);
 
     SocketInitOnce();
 
-    if ((i = TRANS(SocketSelectFamily) (thistrans->TransName)) < 0)
-    {
-	PRMSG (1,
-       "SocketReopenCOTSServer: Unable to determine socket type for %s\n",
-	    thistrans->TransName, 0, 0);
-	return NULL;
+    while ((i = TRANS(SocketSelectFamily) (i, thistrans->TransName)) >= 0) {
+	if ((ciptr = TRANS(SocketReopen) (
+		 i, Sockettrans2devtab[i].devcotsname, fd, port)) != NULL)
+	    break;
     }
-
-    if ((ciptr = TRANS(SocketReopen) (
-	i, Sockettrans2devtab[i].devcotsname, fd, port)) == NULL)
-    {
-	PRMSG (1,
-	    "SocketReopenCOTSServer: Unable to reopen socket for %s\n",
-	    thistrans->TransName, 0, 0);
+    if (i < 0) {
+	if (i == -1)
+	    PRMSG (1,"SocketReopenCOTSServer: Unable to open socket for %s\n",
+		   thistrans->TransName, 0, 0);
+	else
+	    PRMSG (1,"SocketReopenCOTSServer: Unable to determine socket type for %s\n",
+		   thistrans->TransName, 0, 0);
 	return NULL;
     }
 
@@ -698,35 +784,29 @@ char	   *port;
 }
 
 static XtransConnInfo
-TRANS(SocketReopenCLTSServer) (thistrans, fd, port)
-
-Xtransport *thistrans;
-int	   fd;
-char	   *port;
+TRANS(SocketReopenCLTSServer) (Xtransport *thistrans, int fd, char *port)
 
 {
     XtransConnInfo	ciptr;
-    int			i;
+    int			i = -1;
 
     PRMSG (2,
 	"SocketReopenCLTSServer(%d, %s)\n", fd, port, 0);
 
     SocketInitOnce();
 
-    if ((i = TRANS(SocketSelectFamily) (thistrans->TransName)) < 0)
-    {
-	PRMSG (1,
-       "SocketReopenCLTSServer: Unable to determine socket type for %s\n",
-	      thistrans->TransName, 0, 0);
-	return NULL;
+    while ((i = TRANS(SocketSelectFamily) (i, thistrans->TransName)) >= 0) {
+	if ((ciptr = TRANS(SocketReopen) (
+		 i, Sockettrans2devtab[i].devcotsname, fd, port)) != NULL)
+	    break;
     }
-
-    if ((ciptr = TRANS(SocketReopen) (
-	i, Sockettrans2devtab[i].devcotsname, fd, port)) == NULL)
-    {
-	PRMSG (1,
-	     "SocketReopenCLTSServer: Unable to reopen socket for %s\n",
-	     thistrans->TransName, 0, 0);
+    if (i < 0) {
+	if (i == -1)
+	    PRMSG (1,"SocketReopenCLTSServer: Unable to open socket for %s\n",
+		   thistrans->TransName, 0, 0);
+	else
+	    PRMSG (1,"SocketReopenCLTSServer: Unable to determine socket type for %s\n",
+		   thistrans->TransName, 0, 0);
 	return NULL;
     }
 
@@ -741,11 +821,7 @@ char	   *port;
 
 
 static int
-TRANS(SocketSetOption) (ciptr, option, arg)
-
-XtransConnInfo 	ciptr;
-int 		option;
-int 		arg;
+TRANS(SocketSetOption) (XtransConnInfo ciptr, int option, int arg)
 
 {
     PRMSG (2,"SocketSetOption(%d,%d,%d)\n", ciptr->fd, option, arg);
@@ -753,33 +829,61 @@ int 		arg;
     return -1;
 }
 
+#ifdef UNIXCONN
+static int
+set_sun_path(const char *port, const char *upath, char *path)
+{
+    struct sockaddr_un s;
+    int maxlen = sizeof(s.sun_path) - 1;
+
+    if (!port || !*port || !path)
+	return -1;
+
+    if (*port == '/') { /* a full pathname */
+	if (strlen(port) > maxlen)
+	    return -1;
+	sprintf(path, "%s", port);
+    } else {
+	if (strlen(port) + strlen(upath) > maxlen)
+	    return -1;
+	sprintf(path, "%s%s", upath, port);
+    }
+    return 0;
+}
+#endif
 
 #ifdef TRANS_SERVER
 
 static int
-TRANS(SocketCreateListener) (ciptr, sockname, socknamelen)
-
-XtransConnInfo	ciptr;
-struct sockaddr	*sockname;
-int		socknamelen;
+TRANS(SocketCreateListener) (XtransConnInfo ciptr, 
+			     struct sockaddr *sockname,
+			     int socknamelen, unsigned int flags)
 
 {
     int	namelen = socknamelen;
     int	fd = ciptr->fd;
     int	retry;
 
-    PRMSG (3, "SocketCreateListener(%x,%d)\n", ciptr, fd, 0);
+    PRMSG (3, "SocketCreateListener(%x,%p)\n", ciptr, fd, 0);
 
-    if (Sockettrans2devtab[ciptr->index].family == AF_INET)
+    if (Sockettrans2devtab[ciptr->index].family == AF_INET
+#if defined(IPv6) && defined(AF_INET6)
+      || Sockettrans2devtab[ciptr->index].family == AF_INET6
+#endif
+	)
 	retry = 20;
     else
 	retry = 0;
 
     while (bind (fd, (struct sockaddr *) sockname, namelen) < 0)
     {
-	if (errno == EADDRINUSE)
-	    return TRANS_ADDR_IN_USE;
-
+	if (errno == EADDRINUSE) {
+	    if (flags & ADDR_IN_USE_ALLOWED)
+		break;
+	    else
+		return TRANS_ADDR_IN_USE;
+	}
+	
 	if (retry-- == 0) {
 	    PRMSG (1, "SocketCreateListener: failed to bind listener\n",
 		0, 0, 0);
@@ -793,7 +897,11 @@ int		socknamelen;
 #endif /* SO_REUSEDADDR */
     }
 
-    if (Sockettrans2devtab[ciptr->index].family == AF_INET) {
+    if (Sockettrans2devtab[ciptr->index].family == AF_INET
+#if defined(IPv6) && defined(AF_INET6)
+      || Sockettrans2devtab[ciptr->index].family == AF_INET6
+#endif
+	) {
 #ifdef SO_DONTLINGER
 	setsockopt (fd, SOL_SOCKET, SO_DONTLINGER, (char *) NULL, 0);
 #else
@@ -816,30 +924,33 @@ int		socknamelen;
 	
     /* Set a flag to indicate that this connection is a listener */
 
-    ciptr->flags = 1;
+    ciptr->flags = 1 | (ciptr->flags & TRANS_KEEPFLAGS);
 
     return 0;
 }
 
-
 #ifdef TCPCONN
 static int
-TRANS(SocketINETCreateListener) (ciptr, port)
-
-XtransConnInfo 	ciptr;
-char 		*port;
+TRANS(SocketINETCreateListener) (XtransConnInfo ciptr, char *port, unsigned int flags)
 
 {
-    struct sockaddr_in	sockname;
+#if defined(IPv6) && defined(AF_INET6)
+    struct sockaddr_storage sockname;
+#else
+    struct sockaddr_in	    sockname;
+#endif
+    unsigned short	    sport;
     int		namelen = sizeof(sockname);
     int		status;
-    short	tmpport;
+    long	tmpport;
+#ifdef XTHREADS_NEEDS_BYNAMEPARAMS
     _Xgetservbynameparams sparams;
+#endif
     struct servent *servp;
 
-#define PORTBUFSIZE	64	/* what is a real size for this? */
-
+#ifdef X11_t
     char	portbuf[PORTBUFSIZE];
+#endif
     
     PRMSG (2, "SocketINETCreateListener(%s)\n", port, 0, 0);
 
@@ -855,14 +966,11 @@ char 		*port;
 
     if (is_numeric (port))
     {
-	tmpport = (short) atoi (port);
-
-	sprintf (portbuf,"%d", X_TCP_PORT+tmpport);
+	/* fixup the server port address */
+	tmpport = X_TCP_PORT + strtol (port, (char**)NULL, 10);
+	sprintf (portbuf,"%lu", tmpport);
+	port = portbuf;
     }
-    else
-	strncpy (portbuf, port, PORTBUFSIZE);
-
-    port = portbuf;
 #endif
 
     if (port && *port)
@@ -878,25 +986,57 @@ char 		*port;
 		      port, 0, 0);
 		return TRANS_CREATE_LISTENER_FAILED;
 	    }
-	    sockname.sin_port = servp->s_port;
+	    /* we trust getservbyname to return a valid number */
+	    sport = servp->s_port;
 	}
 	else
 	{
-	    tmpport = (short) atoi (port);
-	    sockname.sin_port = htons (tmpport);
+	    tmpport = strtol (port, (char**)NULL, 10);
+	    /* 
+	     * check that somehow the port address isn't negative or in
+	     * the range of reserved port addresses. This can happen and
+	     * be very bad if the server is suid-root and the user does 
+	     * something (dumb) like `X :60049`. 
+	     */
+	    if (tmpport < 1024 || tmpport > USHRT_MAX)
+		return TRANS_CREATE_LISTENER_FAILED;
+
+	    sport = (unsigned short) tmpport;
 	}
     }
     else
-	sockname.sin_port = htons (0);
+	sport = 0;
 
+    bzero(&sockname, sizeof(sockname));
+#if defined(IPv6) && defined(AF_INET6)
+    if (Sockettrans2devtab[ciptr->index].family == AF_INET) {
+	namelen = sizeof (struct sockaddr_in);
+#ifdef BSD44SOCKETS
+	((struct sockaddr_in *)&sockname)->sin_len = namelen;
+#endif
+	((struct sockaddr_in *)&sockname)->sin_family = AF_INET;
+	((struct sockaddr_in *)&sockname)->sin_port = htons(sport);
+	((struct sockaddr_in *)&sockname)->sin_addr.s_addr = htonl(INADDR_ANY);
+    } else {
+	namelen = sizeof (struct sockaddr_in6);
+#ifdef SIN6_LEN
+	((struct sockaddr_in6 *)&sockname)->sin6_len = sizeof(sockname);
+#endif
+	((struct sockaddr_in6 *)&sockname)->sin6_family = AF_INET6;
+	((struct sockaddr_in6 *)&sockname)->sin6_port = htons(sport);
+	((struct sockaddr_in6 *)&sockname)->sin6_addr = in6addr_any;
+    }
+#else
 #ifdef BSD44SOCKETS
     sockname.sin_len = sizeof (sockname);
 #endif
     sockname.sin_family = AF_INET;
+    sockname.sin_port = htons (sport);
     sockname.sin_addr.s_addr = htonl (INADDR_ANY);
+#endif
 
     if ((status = TRANS(SocketCreateListener) (ciptr,
-	(struct sockaddr *) &sockname, namelen)) < 0)
+	(struct sockaddr *) &sockname, namelen, flags)) < 0)
     {
 	PRMSG (1,
     "SocketINETCreateListener: ...SocketCreateListener() failed\n",
@@ -920,17 +1060,16 @@ char 		*port;
 
 #ifdef UNIXCONN
 
-static
-TRANS(SocketUNIXCreateListener) (ciptr, port)
-
-XtransConnInfo ciptr;
-char *port;
+static int
+TRANS(SocketUNIXCreateListener) (XtransConnInfo ciptr, char *port,
+				 unsigned int flags)
 
 {
     struct sockaddr_un	sockname;
     int			namelen;
     int			oldUmask;
     int			status;
+    unsigned int	mode;
 
     PRMSG (2, "SocketUNIXCreateListener(%s)\n",
 	port ? port : "NULL", 0, 0);
@@ -940,23 +1079,31 @@ char *port;
     oldUmask = umask (0);
 
 #ifdef UNIX_DIR
-    if (!mkdir (UNIX_DIR, 01777))
-        chmod (UNIX_DIR, 01777);
+#ifdef HAS_STICKY_DIR_BIT
+    mode = 01777;
+#else
+    mode = 0777;
+#endif
+    if (trans_mkdir(UNIX_DIR, mode) == -1) {
+	PRMSG (1, "SocketUNIXCreateListener: mkdir(%s) failed, errno = %d\n",
+	       UNIX_DIR, errno, 0);
+	(void) umask (oldUmask);
+	return TRANS_CREATE_LISTENER_FAILED;
+    }
 #endif
 
     sockname.sun_family = AF_UNIX;
 
     if (port && *port) {
-	if (*port == '/') { /* a full pathname */
-	    sprintf (sockname.sun_path, "%s", port);
-	} else {
-	    sprintf (sockname.sun_path, "%s%s", UNIX_PATH, port);
+	if (set_sun_path(port, UNIX_PATH, sockname.sun_path) != 0) {
+	    PRMSG (1, "SocketUNIXCreateListener: path too long\n", 0, 0, 0);
+	    return TRANS_CREATE_LISTENER_FAILED;
 	}
     } else {
-	sprintf (sockname.sun_path, "%s%d", UNIX_PATH, getpid());
+	sprintf (sockname.sun_path, "%s%ld", UNIX_PATH, (long)getpid());
     }
 
-#if defined(BSD44SOCKETS) && !defined(Lynx)
+#if (defined(BSD44SOCKETS) || defined(__UNIXWARE__)) && !defined(Lynx)
     sockname.sun_len = strlen(sockname.sun_path);
     namelen = SUN_LEN(&sockname);
 #else
@@ -966,11 +1113,12 @@ char *port;
     unlink (sockname.sun_path);
 
     if ((status = TRANS(SocketCreateListener) (ciptr,
-	(struct sockaddr *) &sockname, namelen)) < 0)
+	(struct sockaddr *) &sockname, namelen, flags)) < 0)
     {
 	PRMSG (1,
     "SocketUNIXCreateListener: ...SocketCreateListener() failed\n",
 	    0, 0, 0);
+	(void) umask (oldUmask);
 	return status;
     }
 
@@ -988,6 +1136,7 @@ char *port;
         PRMSG (1,
         "SocketUNIXCreateListener: Can't allocate space for the addr\n",
 	    0, 0, 0);
+	(void) umask (oldUmask);
         return TRANS_CREATE_LISTENER_FAILED;
     }
 
@@ -1001,10 +1150,8 @@ char *port;
 }
 
 
-static
-TRANS(SocketUNIXResetListener) (ciptr)
-
-XtransConnInfo ciptr;
+static int
+TRANS(SocketUNIXResetListener) (XtransConnInfo ciptr)
 
 {
     /*
@@ -1014,13 +1161,13 @@ XtransConnInfo ciptr;
     struct sockaddr_un 	*unsock = (struct sockaddr_un *) ciptr->addr;
     struct stat		statb;
     int 		status = TRANS_RESET_NOOP;
-    void 		TRANS(FreeConnInfo) ();
+    unsigned int	mode;
 
-    PRMSG (3, "SocketUNIXResetListener(%x,%d)\n", ciptr, ciptr->fd, 0);
+    PRMSG (3, "SocketUNIXResetListener(%p,%d)\n", ciptr, ciptr->fd, 0);
 
     if (stat (unsock->sun_path, &statb) == -1 ||
         ((statb.st_mode & S_IFMT) !=
-#if (defined (sun) && defined(SVR4)) || defined(NCR) || defined(SCO) || defined(sco) || !defined(S_IFSOCK)
+#if (defined (sun) && defined(SVR4)) || defined(NCR) || defined(SCO325) || !defined(S_IFSOCK)
 	  		S_IFIFO))
 #else
 			S_IFSOCK))
@@ -1029,8 +1176,17 @@ XtransConnInfo ciptr;
 	int oldUmask = umask (0);
 
 #ifdef UNIX_DIR
-	if (!mkdir (UNIX_DIR, 01777))
-	    chmod (UNIX_DIR, 01777);
+#ifdef HAS_STICKY_DIR_BIT
+	mode = 01777;
+#else
+	mode = 0777;
+#endif
+        if (trans_mkdir(UNIX_DIR, mode) == -1) {
+            PRMSG (1, "SocketUNIXResetListener: mkdir(%s) failed, errno = %d\n",
+	    UNIX_DIR, errno, 0);
+	    (void) umask (oldUmask);
+	    return TRANS_RESET_FAILURE;
+        }
 #endif
 
 	close (ciptr->fd);
@@ -1039,6 +1195,7 @@ XtransConnInfo ciptr;
 	if ((ciptr->fd = socket (AF_UNIX, SOCK_STREAM, 0)) < 0)
 	{
 	    TRANS(FreeConnInfo) (ciptr);
+	    (void) umask (oldUmask);
 	    return TRANS_RESET_FAILURE;
 	}
 
@@ -1053,6 +1210,7 @@ XtransConnInfo ciptr;
 	{
 	    close (ciptr->fd);
 	    TRANS(FreeConnInfo) (ciptr);
+	    (void) umask (oldUmask);
 	    return TRANS_RESET_FAILURE;
 	}
 
@@ -1070,17 +1228,14 @@ XtransConnInfo ciptr;
 #ifdef TCPCONN
 
 static XtransConnInfo
-TRANS(SocketINETAccept) (ciptr, status)
-
-XtransConnInfo ciptr;
-int	       *status;
+TRANS(SocketINETAccept) (XtransConnInfo ciptr, int *status)
 
 {
     XtransConnInfo	newciptr;
     struct sockaddr_in	sockname;
-    socklen_t			namelen = sizeof(sockname);
+    int			namelen = sizeof(sockname);
 
-    PRMSG (2, "SocketINETAccept(%x,%d)\n", ciptr, ciptr->fd, 0);
+    PRMSG (2, "SocketINETAccept(%p,%d)\n", ciptr, ciptr->fd, 0);
 
     if ((newciptr = (XtransConnInfo) xcalloc (
 	1, sizeof(struct _XtransConnInfo))) == NULL)
@@ -1091,8 +1246,11 @@ int	       *status;
     }
 
     if ((newciptr->fd = accept (ciptr->fd,
-	(struct sockaddr *) &sockname, &namelen)) < 0)
+	(struct sockaddr *) &sockname, (void *)&namelen)) < 0)
     {
+#ifdef WIN32
+	errno = WSAGetLastError();
+#endif
 	PRMSG (1, "SocketINETAccept: accept() failed\n", 0, 0, 0);
 	xfree (newciptr);
 	*status = TRANS_ACCEPT_FAILED;
@@ -1149,21 +1307,18 @@ int	       *status;
 
 #ifdef UNIXCONN
 static XtransConnInfo
-TRANS(SocketUNIXAccept) (ciptr, status)
-
-XtransConnInfo ciptr;
-int	       *status;
+TRANS(SocketUNIXAccept) (XtransConnInfo ciptr, int *status)
 
 {
     XtransConnInfo	newciptr;
     struct sockaddr_un	sockname;
-#if defined(SVR4) || defined(SCO325)
+#if defined(SVR4) || defined(__SCO__)
     size_t namelen = sizeof sockname;
 #else
-    socklen_t namelen = sizeof sockname;
+    int namelen = sizeof sockname;
 #endif
 
-    PRMSG (2, "SocketUNIXAccept(%x,%d)\n", ciptr, ciptr->fd, 0);
+    PRMSG (2, "SocketUNIXAccept(%p,%d)\n", ciptr, ciptr->fd, 0);
 
     if ((newciptr = (XtransConnInfo) xcalloc (
 	1, sizeof(struct _XtransConnInfo))) == NULL)
@@ -1174,7 +1329,7 @@ int	       *status;
     }
 
     if ((newciptr->fd = accept (ciptr->fd,
-	(struct sockaddr *) &sockname, &namelen)) < 0)
+	(struct sockaddr *) &sockname, (void *)&namelen)) < 0)
     {
 	PRMSG (1, "SocketUNIXAccept: accept() failed\n", 0, 0, 0);
 	xfree (newciptr);
@@ -1232,31 +1387,43 @@ int	       *status;
 #ifdef TRANS_CLIENT
 
 #ifdef TCPCONN
-static int
-TRANS(SocketINETConnect) (ciptr, host, port)
 
-XtransConnInfo 	ciptr;
-char 		*host;
-char 		*port;
+#if defined(IPv6) && defined(AF_INET6)
+struct addrlist {
+    struct addrinfo *	addr;
+    struct addrinfo *	firstaddr; 
+    char 		port[PORTBUFSIZE];
+    char 		host[MAXHOSTNAMELEN];
+};
+static struct addrlist  *addrlist = NULL;
+#endif
+
+
+static int
+TRANS(SocketINETConnect) (XtransConnInfo ciptr, char *host, char *port)
 
 {
-    struct sockaddr_in	sockname;
-#if defined(SVR4) || defined(SCO325)
-    size_t namelen = sizeof sockname;
-#else
-    int namelen = sizeof sockname;
+    struct sockaddr *	socketaddr = NULL;
+    int			socketaddrlen = 0;
+    int			res;
+#if defined(IPv6) && defined(AF_INET6)
+    struct addrinfo 	hints;
+    char		ntopbuf[INET6_ADDRSTRLEN];
+    int			resetonce = 0;
 #endif
+    struct sockaddr_in	sockname;
+#ifdef XTHREADS_NEEDS_BYNAMEPARAMS
     _Xgethostbynameparams hparams;
     _Xgetservbynameparams sparams;
+#endif
     struct hostent	*hostp;
     struct servent	*servp;
-
-#define PORTBUFSIZE	64	/* what is a real size for this? */
-    char	portbuf[PORTBUFSIZE];
-
-    int			ret;
-    short		tmpport;
     unsigned long 	tmpaddr;
+#ifdef X11_t
+    char	portbuf[PORTBUFSIZE];
+#endif
+
+    long		tmpport;
     char 		hostnamebuf[256];		/* tmp space */
 
     PRMSG (2,"SocketINETConnect(%d,%s,%s)\n", ciptr->fd, host, port);
@@ -1280,108 +1447,267 @@ char 		*port;
 
     if (is_numeric (port))
     {
-	tmpport = (short) atoi (port);
-
-	sprintf (portbuf, "%d", X_TCP_PORT + tmpport);
+	tmpport = X_TCP_PORT + strtol (port, (char**)NULL, 10);
+	sprintf (portbuf, "%lu", tmpport);
+	port = portbuf;
     }
-    else
 #endif
-	strncpy (portbuf, port, PORTBUFSIZE);
 
-    /*
-     * Build the socket name.
-     */
+#if defined(IPv6) && defined(AF_INET6)
+    if (haveIPv6) {
+	if (addrlist != NULL) {
+	    if (strcmp(host,addrlist->host) || strcmp(port,addrlist->port)) {
+		if (addrlist->firstaddr)
+		    freeaddrinfo(addrlist->firstaddr);
+		addrlist->firstaddr = NULL;
+	    }
+	} else {
+	    addrlist = malloc(sizeof(struct addrlist));
+	    addrlist->firstaddr = NULL;
+	}
+
+	if (addrlist->firstaddr == NULL) {
+	    strncpy(addrlist->port, port, sizeof(addrlist->port));
+	    addrlist->port[sizeof(addrlist->port) - 1] = '\0';
+	    strncpy(addrlist->host, host, sizeof(addrlist->host));
+	    addrlist->host[sizeof(addrlist->host) - 1] = '\0';
+
+	    bzero(&hints,sizeof(hints));
+	    hints.ai_socktype = Sockettrans2devtab[ciptr->index].devcotsname;
+
+	    res = getaddrinfo(host,port,&hints,&addrlist->firstaddr);
+	    if (res != 0) {
+		PRMSG (1, "SocketINETConnect() can't get address "
+			"for %s:%s: %s\n", host, port, gai_strerror(res));
+		ESET(EINVAL);
+		return TRANS_CONNECT_FAILED;
+	    }
+	    for (res = 0, addrlist->addr = addrlist->firstaddr;
+		 addrlist->addr ; res++) {
+		addrlist->addr = addrlist->addr->ai_next;
+	    }
+	    PRMSG(4,"Got New Address list with %d addresses\n", res, 0, 0);
+	    res = 0;
+	    addrlist->addr = NULL;
+	}
+
+	while (socketaddr == NULL) {
+	    if (addrlist->addr == NULL) {
+		if (resetonce) { 
+		    /* Already checked entire list - no usable addresses */
+		    PRMSG (1, "SocketINETConnect() no usable address "
+			   "for %s:%s\n", host, port, 0);
+		    return TRANS_CONNECT_FAILED;
+		} else {
+		    /* Go back to beginning of list */
+		    resetonce = 1;
+		    addrlist->addr = addrlist->firstaddr;
+		}
+	    } 
+
+	    socketaddr = addrlist->addr->ai_addr;
+	    socketaddrlen = addrlist->addr->ai_addrlen;
+
+	    if (addrlist->addr->ai_family == AF_INET) {
+		struct sockaddr_in *sin = (struct sockaddr_in *) socketaddr;
+
+		PRMSG (4,"SocketINETConnect() sockname.sin_addr = %s\n",
+			inet_ntop(addrlist->addr->ai_family,&sin->sin_addr,
+			ntopbuf,sizeof(ntopbuf)), 0, 0); 
+
+		PRMSG (4,"SocketINETConnect() sockname.sin_port = %d\n",
+			ntohs(sin->sin_port), 0, 0); 
+
+		if (Sockettrans2devtab[ciptr->index].family == AF_INET6) {
+		    if (strcmp(Sockettrans2devtab[ciptr->index].transname,
+				"tcp") == 0) {
+			XtransConnInfo newciptr;
+
+			/*
+			 * Our socket is an IPv6 socket, but the address is
+			 * IPv4.  Close it and get an IPv4 socket.  This is
+			 * needed for IPv4 connections to work on platforms
+			 * that don't allow IPv4 over IPv6 sockets.
+			 */
+			TRANS(SocketINETClose)(ciptr);
+			newciptr = TRANS(SocketOpenCOTSClientBase)(
+					"tcp", "tcp", host, port, ciptr->index);
+			if (newciptr)
+			    ciptr->fd = newciptr->fd;
+			if (!newciptr ||
+			    Sockettrans2devtab[newciptr->index].family !=
+				AF_INET) {
+			    socketaddr = NULL;
+			    PRMSG (4,"SocketINETConnect() Cannot get IPv4 "
+					" socketfor IPv4 address\n", 0,0,0);
+			}
+			if (newciptr)
+			    xfree(newciptr);
+		    } else {
+			socketaddr = NULL;
+			PRMSG (4,"SocketINETConnect Skipping IPv4 address\n",
+				0,0,0);
+		    }
+		}
+	    } else if (addrlist->addr->ai_family == AF_INET6) {
+		struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) socketaddr;
+	
+		PRMSG (4,"SocketINETConnect() sockname.sin6_addr = %s\n",
+			inet_ntop(addrlist->addr->ai_family,
+				  &sin6->sin6_addr,ntopbuf,sizeof(ntopbuf)),
+			0, 0); 
+		PRMSG (4,"SocketINETConnect() sockname.sin6_port = %d\n",
+			ntohs(sin6->sin6_port), 0, 0); 
+
+		if (Sockettrans2devtab[ciptr->index].family == AF_INET) {
+		    if (strcmp(Sockettrans2devtab[ciptr->index].transname,
+				"tcp") == 0) {
+			XtransConnInfo newciptr;
+
+			/*
+			 * Close the IPv4 socket and try to open an IPv6 socket.
+			 */
+			TRANS(SocketINETClose)(ciptr);
+			newciptr = TRANS(SocketOpenCOTSClientBase)(
+					"tcp", "tcp", host, port, -1);
+			if (newciptr)
+			    ciptr->fd = newciptr->fd;
+			if (!newciptr ||
+			    Sockettrans2devtab[newciptr->index].family !=
+					AF_INET6) {
+			    socketaddr = NULL;
+			    PRMSG (4,"SocketINETConnect() Cannot get IPv6 "
+				   "socket for IPv6 address\n", 0,0,0);
+			}
+			if (newciptr)
+			    xfree(newciptr);
+		    }
+		    else
+		    {
+			socketaddr = NULL;
+			PRMSG (4,"SocketINETConnect() Skipping IPv6 address\n",
+				0,0,0);
+		    }
+		}
+	    } else {
+		socketaddr = NULL; /* Unsupported address type */
+	    }
+	    if (socketaddr == NULL) {
+		addrlist->addr = addrlist->addr->ai_next;
+	    }
+	} 
+    } else
+#endif
+    {
+	/*
+	 * Build the socket name.
+	 */
 
 #ifdef BSD44SOCKETS
-    sockname.sin_len = sizeof (struct sockaddr_in);
+	sockname.sin_len = sizeof (struct sockaddr_in);
 #endif
-    sockname.sin_family = AF_INET;
+	sockname.sin_family = AF_INET;
 
-    /*
-     * fill in sin_addr
-     */
+	/*
+	 * fill in sin_addr
+	 */
 
-    /* check for ww.xx.yy.zz host string */
+#ifndef INADDR_NONE
+#define INADDR_NONE ((in_addr_t) 0xffffffff)
+#endif
 
-    if (isascii (host[0]) && isdigit (host[0])) {
-	tmpaddr = inet_addr (host); /* returns network byte order */
-    } else {
-	tmpaddr = -1;
-    }
+	/* check for ww.xx.yy.zz host string */
 
-    PRMSG (4,"SocketINETConnect: inet_addr(%s) = %x\n",
-	host, tmpaddr, 0);
-
-    if (tmpaddr == -1)
-    {
-	if ((hostp = _XGethostbyname(host,hparams)) == NULL)
-	{
-	    PRMSG (1,"SocketINETConnect: Can't get address for %s\n",
-		  host, 0, 0);
-	    ESET(EINVAL);
-	    return TRANS_CONNECT_FAILED;
+	if (isascii (host[0]) && isdigit (host[0])) {
+	    tmpaddr = inet_addr (host); /* returns network byte order */
+	} else {
+	    tmpaddr = INADDR_NONE;
 	}
-	if (hostp->h_addrtype != AF_INET)  /* is IP host? */
-	{
-	    PRMSG (1,"SocketINETConnect: not INET host%s\n",
-		  host, 0, 0);
-	    ESET(EPROTOTYPE);
-	    return TRANS_CONNECT_FAILED;
-	}
+
+	PRMSG (4,"SocketINETConnect() inet_addr(%s) = %x\n", host, tmpaddr, 0);
+
+	if (tmpaddr == INADDR_NONE) {
+	    if ((hostp = _XGethostbyname(host,hparams)) == NULL) {
+		PRMSG (1,"SocketINETConnect: Can't get address for %s\n",
+			host, 0, 0);
+		ESET(EINVAL);
+		return TRANS_CONNECT_FAILED;
+	    }
+	    if (hostp->h_addrtype != AF_INET) {  /* is IP host? */
+		PRMSG (1,"SocketINETConnect: not INET host%s\n", host, 0, 0);
+		ESET(EPROTOTYPE);
+		return TRANS_CONNECT_FAILED;
+	    }
 	
 #if defined(CRAY) && defined(OLDTCP)
-        /* Only Cray UNICOS3 and UNICOS4 will define this */
-        {
-	long t;
-	memcpy ((char *)&t, (char *) hostp->h_addr, sizeof (t));
-	sockname.sin_addr = t;
+	    /* Only Cray UNICOS3 and UNICOS4 will define this */
+	    {
+		long t;
+		memcpy ((char *)&t, (char *) hostp->h_addr, sizeof (t));
+		sockname.sin_addr = t;
+	    }
+#else
+	    memcpy ((char *) &sockname.sin_addr, (char *) hostp->h_addr,
+		    sizeof (sockname.sin_addr));
+#endif /* CRAY and OLDTCP */
+
+	} else {
+#if defined(CRAY) && defined(OLDTCP)
+	    /* Only Cray UNICOS3 and UNICOS4 will define this */
+	    sockname.sin_addr = tmpaddr;
+#else
+	    sockname.sin_addr.s_addr = tmpaddr;
+#endif /* CRAY and OLDTCP */
         }
-#else
-        memcpy ((char *) &sockname.sin_addr, (char *) hostp->h_addr,
-		sizeof (sockname.sin_addr));
-#endif /* CRAY and OLDTCP */
-	
-    }
-else
-    {
-#if defined(CRAY) && defined(OLDTCP)
-	/* Only Cray UNICOS3 and UNICOS4 will define this */
-	sockname.sin_addr = tmpaddr;
-#else
-	sockname.sin_addr.s_addr = tmpaddr;
-#endif /* CRAY and OLDTCP */
+
+	/*
+	 * fill in sin_port
+	 */
+
+	/* Check for number in the port string */
+
+	if (!is_numeric (port)) {
+	    if ((servp = _XGetservbyname (port,"tcp",sparams)) == NULL) {
+		PRMSG (1,"SocketINETConnect: can't get service for %s\n",
+			port, 0, 0);
+		return TRANS_CONNECT_FAILED;
+	    }
+	    sockname.sin_port = htons (servp->s_port);
+	} else {
+	    tmpport = strtol (port, (char**)NULL, 10);
+	    if (tmpport < 1024 || tmpport > USHRT_MAX)
+		return TRANS_CONNECT_FAILED;
+	    sockname.sin_port = htons (((unsigned short) tmpport));
+	}
+
+	PRMSG (4,"SocketINETConnect: sockname.sin_port = %d\n",
+		ntohs(sockname.sin_port), 0, 0);
+	socketaddr = (struct sockaddr *) &sockname;
+	socketaddrlen = sizeof(sockname);
     }
 
     /*
-     * fill in sin_port
+     * Turn on socket keepalive so the client process will eventually
+     * be notified with a SIGPIPE signal if the display server fails
+     * to respond to a periodic transmission of messages
+     * on the connected socket.
+     * This is useful to avoid hung application processes when the
+     * processes are not spawned from the xdm session and
+     * the display server terminates abnormally.
+     * (Someone turned off the power switch.)
      */
-    
-    /* Check for number in the port string */
 
-    if (!is_numeric (portbuf))
     {
-	if ((servp = _XGetservbyname (portbuf,"tcp",sparams)) == NULL)
-	{
-	    PRMSG (1,"SocketINETConnect: Can't get service for %s\n",
-		  portbuf, 0, 0);
-	    return TRANS_CONNECT_FAILED;
-	}
-	sockname.sin_port = servp->s_port;
+	int tmp = 1;
+	setsockopt (ciptr->fd, SOL_SOCKET, SO_KEEPALIVE,
+		(char *) &tmp, sizeof (int));
     }
-    else
-    {
-	tmpport = (short) atoi (portbuf);
-	sockname.sin_port = htons (tmpport);
-    }
-    
-    PRMSG (4,"SocketINETConnect: sockname.sin_port = %d\n",
-	  ntohs(sockname.sin_port), 0, 0);
 
     /*
      * Do the connect()
      */
 
-    if (connect (ciptr->fd, (struct sockaddr *) &sockname, namelen) < 0)
+    if (connect (ciptr->fd, socketaddr, socketaddrlen ) < 0)
     {
 #ifdef WIN32
 	int olderrno = WSAGetLastError();
@@ -1389,45 +1715,78 @@ else
 	int olderrno = errno;
 #endif
 
-	PRMSG (1,"SocketINETConnect: Can't connect: errno = %d\n",
-	  EGET(),0, 0);
-
 	/*
 	 * If the error was ECONNREFUSED, the server may be overloaded
 	 * and we should try again.
 	 *
+	 * If the error was EWOULDBLOCK or EINPROGRESS then the socket
+	 * was non-blocking and we should poll using select
+	 *
 	 * If the error was EINTR, the connect was interrupted and we
 	 * should try again.
+	 *
+	 * If multiple addresses are found for a host then we should
+	 * try to connect again with a different address for a larger
+	 * number of errors that made us quit before, since those
+	 * could be caused by trying to use an IPv6 address to contact
+	 * a machine with an IPv4-only server or other reasons that
+	 * only affect one of a set of addresses.  
 	 */
 
-	if (olderrno == ECONNREFUSED || olderrno == EINTR)
-	    return TRANS_TRY_CONNECT_AGAIN;
+	if (olderrno == ECONNREFUSED || olderrno == EINTR
+#if defined(IPv6) && defined(AF_INET6)
+	  || (haveIPv6 && ((addrlist->addr->ai_next != NULL) || 
+	        (addrlist->addr != addrlist->firstaddr)) &&
+               (olderrno == ENETUNREACH || olderrno == EAFNOSUPPORT ||
+		 olderrno == EADDRNOTAVAIL || olderrno == ETIMEDOUT
+#if defined(EHOSTDOWN)
+		   || olderrno == EHOSTDOWN
+#endif
+	       ))
+#endif
+	    )
+	    res = TRANS_TRY_CONNECT_AGAIN;
+	else if (olderrno == EWOULDBLOCK || olderrno == EINPROGRESS)
+	    res = TRANS_IN_PROGRESS;
 	else
-	    return TRANS_CONNECT_FAILED;	
-    }
+	{
+	    PRMSG (2,"SocketINETConnect: Can't connect: errno = %d\n",
+		   olderrno,0, 0);
+
+	    res = TRANS_CONNECT_FAILED;	
+	}
+    } else {
+	res = 0;
     
 
-    /*
-     * Sync up the address fields of ciptr.
-     */
+	/*
+	 * Sync up the address fields of ciptr.
+	 */
     
-    if (TRANS(SocketINETGetAddr) (ciptr) < 0)
-    {
-	PRMSG (1,
-	   "SocketINETConnect: ...SocketINETGetAddr() failed:\n",
-	   0, 0, 0);
-	return TRANS_CONNECT_FAILED;
-    }
-
-    if (TRANS(SocketINETGetPeerAddr) (ciptr) < 0)
-    {
-	PRMSG (1,
-	 "SocketINETConnect: ...SocketINETGetPeerAddr() failed:\n",
+	if (TRANS(SocketINETGetAddr) (ciptr) < 0)
+	{
+	    PRMSG (1,
+	     "SocketINETConnect: ...SocketINETGetAddr() failed:\n",
 	      0, 0, 0);
-	return TRANS_CONNECT_FAILED;
+	    res = TRANS_CONNECT_FAILED;
+	}
+
+	else if (TRANS(SocketINETGetPeerAddr) (ciptr) < 0)
+	{
+	    PRMSG (1,
+	      "SocketINETConnect: ...SocketINETGetPeerAddr() failed:\n",
+	      0, 0, 0);
+	    res = TRANS_CONNECT_FAILED;
+	}
     }
 
-    return 0;
+#if defined(IPv6) && defined(AF_INET6)
+   if (haveIPv6 && res != 0) { 
+	addrlist->addr = addrlist->addr->ai_next;
+   }
+#endif
+
+    return res;
 }
 
 #endif /* TCPCONN */
@@ -1441,12 +1800,15 @@ else
  */
 
 static int
-UnixHostReallyLocal (host)
-
-char *host;
+UnixHostReallyLocal (char *host)
 
 {
     char hostnamebuf[256];
+
+#if defined(IPv6) && defined(AF_INET6)
+    if (getaddrinfo == NULL)
+	haveIPv6 = 0;
+#endif
 
     TRANS(GetHostname) (hostnamebuf, sizeof (hostnamebuf));
 
@@ -1454,6 +1816,56 @@ char *host;
     {
 	return (1);
     }
+#if defined(IPv6) && defined(AF_INET6)
+    else if (haveIPv6)
+    {
+	struct addrinfo *localhostaddr;
+	struct addrinfo *otherhostaddr;
+	struct addrinfo *i, *j;
+	int equiv = 0;
+
+	if (getaddrinfo(hostnamebuf, NULL, NULL, &localhostaddr) != 0)
+	    return 0;
+	if (getaddrinfo(host, NULL, NULL, &otherhostaddr) != 0) {
+	    freeaddrinfo(localhostaddr);
+	    return 0;
+	}
+
+	for (i = localhostaddr; i != NULL && equiv == 0; i = i->ai_next) {
+	    for (j = otherhostaddr; j != NULL && equiv == 0; j = j->ai_next) {
+		if (i->ai_family == j->ai_family) {
+		    if (i->ai_family == AF_INET) {
+			struct sockaddr_in *sinA 
+			  = (struct sockaddr_in *) i->ai_addr;
+			struct sockaddr_in *sinB
+			  = (struct sockaddr_in *) j->ai_addr;
+			struct in_addr *A = &sinA->sin_addr;
+			struct in_addr *B = &sinB->sin_addr;
+
+			if (memcmp(A,B,sizeof(struct in_addr)) == 0) {
+			    equiv = 1;
+			}
+		    } else if (i->ai_family == AF_INET6) {
+			struct sockaddr_in6 *sinA 
+			  = (struct sockaddr_in6 *) i->ai_addr;
+			struct sockaddr_in6 *sinB 
+			  = (struct sockaddr_in6 *) j->ai_addr;
+			struct in6_addr *A = &sinA->sin6_addr;
+			struct in6_addr *B = &sinB->sin6_addr;
+
+			if (memcmp(A,B,sizeof(struct in6_addr)) == 0) {
+			    equiv = 1;
+			}
+		    }
+		}
+	    }
+	}
+	
+	freeaddrinfo(localhostaddr);
+	freeaddrinfo(otherhostaddr);
+	return equiv;
+    }
+#endif
     else
     {
 	/*
@@ -1465,7 +1877,9 @@ char *host;
 	 */
 	char specified_local_addr_list[10][4];
 	int scount, equiv, i, j;
+#ifdef XTHREADS_NEEDS_BYNAMEPARAMS
 	_Xgethostbynameparams hparams;
+#endif
 	struct hostent *hostp;
 
 	if ((hostp = _XGethostbyname (host,hparams)) == NULL)
@@ -1521,17 +1935,12 @@ char *host;
 
 	    i++;
 	}
-	
-    return (equiv);
+	return (equiv);
     }
 }
 
 static int
-TRANS(SocketUNIXConnect) (ciptr, host, port)
-
-XtransConnInfo ciptr;
-char *host;
-char *port;
+TRANS(SocketUNIXConnect) (XtransConnInfo ciptr, char *host, char *port)
 
 {
     struct sockaddr_un	sockname;
@@ -1579,13 +1988,12 @@ char *port;
     
     sockname.sun_family = AF_UNIX;
 
-    if (*port == '/') { /* a full pathname */
-	sprintf (sockname.sun_path, "%s", port);
-    } else {
-	sprintf (sockname.sun_path, "%s%s", UNIX_PATH, port);
+    if (set_sun_path(port, UNIX_PATH, sockname.sun_path) != 0) {
+	PRMSG (1, "SocketUNIXConnect: path too long\n", 0, 0, 0);
+	return TRANS_CONNECT_FAILED;
     }
 
-#if defined(BSD44SOCKETS) && !defined(Lynx)
+#if (defined(BSD44SOCKETS) || defined(__UNIXWARE__)) && !defined(Lynx)
     sockname.sun_len = strlen (sockname.sun_path);
     namelen = SUN_LEN (&sockname);
 #else
@@ -1598,10 +2006,9 @@ char *port;
      * This is gross, but it was in Xlib
      */
     old_sockname.sun_family = AF_UNIX;
-    if (*port == '/') { /* a full pathname */
-	sprintf (old_sockname.sun_path, "%s", port);
-    } else {
-	sprintf (old_sockname.sun_path, "%s%s", OLD_UNIX_PATH, port);
+    if (set_sun_path(port, OLD_UNIX_PATH, old_sockname.sun_path) != 0) {
+	PRMSG (1, "SocketUNIXConnect: path too long\n", 0, 0, 0);
+	return TRANS_CONNECT_FAILED;
     }
     old_namelen = strlen (old_sockname.sun_path) +
 	sizeof (old_sockname.sun_family);
@@ -1633,13 +2040,28 @@ char *port;
 	{
 	    errno = olderrno;
 	    
-	    PRMSG (1,"SocketUNIXConnect: Can't connect: errno = %d\n",
-		  EGET(),0, 0);
+	    /*
+	     * If the error was ENOENT, the server may be starting up
+	     * and we should try again.
+	     *
+	     * If the error was EWOULDBLOCK or EINPROGRESS then the socket
+	     * was non-blocking and we should poll using select
+	     *
+	     * If the error was EINTR, the connect was interrupted and we
+	     * should try again.
+	     */
 
 	    if (olderrno == ENOENT || olderrno == EINTR)
 		return TRANS_TRY_CONNECT_AGAIN;
+	    else if (olderrno == EWOULDBLOCK || olderrno == EINPROGRESS)
+		return TRANS_IN_PROGRESS;
 	    else
+	    {
+		PRMSG (2,"SocketUNIXConnect: Can't connect: errno = %d\n",
+		       EGET(),0, 0);
+
 		return TRANS_CONNECT_FAILED;
+	    }
 	}
     }
 
@@ -1672,42 +2094,48 @@ char *port;
 
 
 static int
-TRANS(SocketBytesReadable) (ciptr, pend)
+TRANS(SocketBytesReadable) (XtransConnInfo ciptr, BytesReadable_t *pend)
 
-XtransConnInfo ciptr;
-BytesReadable_t *pend;
 {
-    PRMSG (2,"SocketBytesReadable(%x,%d,%x)\n",
+    PRMSG (2,"SocketBytesReadable(%p,%d,%p)\n",
 	ciptr, ciptr->fd, pend);
-
+#if defined(QNX4)
+    *pend = 0L; /* FIONREAD only returns a short. Zero out upper bits */
+#endif
 #ifdef WIN32
-    return ioctlsocket ((SOCKET) ciptr->fd, FIONREAD, (u_long *) pend);
+    {
+	int ret = ioctlsocket ((SOCKET) ciptr->fd, FIONREAD, (u_long *) pend);
+	errno = WSAGetLastError();
+	return ret;
+    }
 #else
-#if (defined(i386) && defined(SYSV)) || defined(_SEQUENT_)
+#if (defined(i386) && defined(SYSV) && !defined(SCO325)) || (defined(_SEQUENT_) && _SOCKET_VERSION == 1)
     return ioctl (ciptr->fd, I_NREAD, (char *) pend);
 #else
-#if defined(__EMX__)
+#if defined(__UNIXOS2__)
     return ioctl (ciptr->fd, FIONREAD, (char*) pend, sizeof(int));
 #else
     return ioctl (ciptr->fd, FIONREAD, (char *) pend);
-#endif /* __EMX__ */
-#endif /* i386 && SYSV && !SCO || _SEQUENT_ */
+#endif /* __UNIXOS2__ */
+#endif /* i386 && SYSV || _SEQUENT_ && _SOCKET_VERSION == 1 */
 #endif /* WIN32 */
 }
 
 
 static int
-TRANS(SocketRead) (ciptr, buf, size)
-
-XtransConnInfo	ciptr;
-char		*buf;
-int		size;
+TRANS(SocketRead) (XtransConnInfo ciptr, char *buf, int size)
 
 {
-    PRMSG (2,"SocketRead(%d,%x,%d)\n", ciptr->fd, buf, size);
+    PRMSG (2,"SocketRead(%d,%p,%d)\n", ciptr->fd, buf, size);
 
-#if defined(WIN32) || defined(__EMX__)
-    return recv ((SOCKET)ciptr->fd, buf, size, 0);
+#if defined(WIN32) || defined(__UNIXOS2__)
+    {
+	int ret = recv ((SOCKET)ciptr->fd, buf, size, 0);
+#ifdef WIN32
+	errno = WSAGetLastError();
+#endif
+	return ret;
+    }
 #else
     return read (ciptr->fd, buf, size);
 #endif /* WIN32 */
@@ -1715,17 +2143,19 @@ int		size;
 
 
 static int
-TRANS(SocketWrite) (ciptr, buf, size)
-
-XtransConnInfo ciptr;
-char 	       *buf;
-int 	       size;
+TRANS(SocketWrite) (XtransConnInfo ciptr, char *buf, int size)
 
 {
-    PRMSG (2,"SocketWrite(%d,%x,%d)\n", ciptr->fd, buf, size);
+    PRMSG (2,"SocketWrite(%d,%p,%d)\n", ciptr->fd, buf, size);
 
-#if defined(WIN32) || defined(__EMX__)
-    return send ((SOCKET)ciptr->fd, buf, size, 0);
+#if defined(WIN32) || defined(__UNIXOS2__)
+    {
+	int ret = send ((SOCKET)ciptr->fd, buf, size, 0);
+#ifdef WIN32
+	errno = WSAGetLastError();
+#endif
+	return ret;
+    }
 #else
     return write (ciptr->fd, buf, size);
 #endif /* WIN32 */
@@ -1733,55 +2163,59 @@ int 	       size;
 
 
 static int
-TRANS(SocketReadv) (ciptr, buf, size)
-
-XtransConnInfo	ciptr;
-struct iovec 	*buf;
-int 		size;
+TRANS(SocketReadv) (XtransConnInfo ciptr, struct iovec *buf, int size)
 
 {
-    PRMSG (2,"SocketReadv(%d,%x,%d)\n", ciptr->fd, buf, size);
+    PRMSG (2,"SocketReadv(%d,%p,%d)\n", ciptr->fd, buf, size);
 
     return READV (ciptr, buf, size);
 }
 
 
 static int
-TRANS(SocketWritev) (ciptr, buf, size)
-
-XtransConnInfo 	ciptr;
-struct iovec 	*buf;
-int 		size;
+TRANS(SocketWritev) (XtransConnInfo ciptr, struct iovec *buf, int size)
 
 {
-    PRMSG (2,"SocketWritev(%d,%x,%d)\n", ciptr->fd, buf, size);
+    PRMSG (2,"SocketWritev(%d,%p,%d)\n", ciptr->fd, buf, size);
 
     return WRITEV (ciptr, buf, size);
 }
 
 
 static int
-TRANS(SocketDisconnect) (ciptr)
-
-XtransConnInfo ciptr;
+TRANS(SocketDisconnect) (XtransConnInfo ciptr)
 
 {
-    PRMSG (2,"SocketDisconnect(%x,%d)\n", ciptr, ciptr->fd, 0);
+    PRMSG (2,"SocketDisconnect(%p,%d)\n", ciptr, ciptr->fd, 0);
 
+#ifdef WIN32
+    { 
+	int ret = shutdown (ciptr->fd, 2);
+	errno = WSAGetLastError();
+	return ret;
+    }
+#else
     return shutdown (ciptr->fd, 2); /* disallow further sends and receives */
+#endif
 }
 
 
 #ifdef TCPCONN
 static int
-TRANS(SocketINETClose) (ciptr)
-
-XtransConnInfo ciptr;
+TRANS(SocketINETClose) (XtransConnInfo ciptr)
 
 {
-    PRMSG (2,"SocketINETClose(%x,%d)\n", ciptr, ciptr->fd, 0);
+    PRMSG (2,"SocketINETClose(%p,%d)\n", ciptr, ciptr->fd, 0);
 
+#ifdef WIN32
+    {
+	int ret = close (ciptr->fd);
+	errno = WSAGetLastError();
+	return ret;
+    }
+#else
     return close (ciptr->fd);
+#endif
 }
 
 #endif /* TCPCONN */
@@ -1789,9 +2223,7 @@ XtransConnInfo ciptr;
 
 #ifdef UNIXCONN
 static int
-TRANS(SocketUNIXClose) (ciptr)
-
-XtransConnInfo ciptr;
+TRANS(SocketUNIXClose) (XtransConnInfo ciptr)
 
 {
     /*
@@ -1800,10 +2232,9 @@ XtransConnInfo ciptr;
      */
 
     struct sockaddr_un	*sockname = (struct sockaddr_un *) ciptr->addr;
-    char	path[200]; /* > sizeof sun_path +1 */
     int ret;
 
-    PRMSG (2,"SocketUNIXClose(%x,%d)\n", ciptr, ciptr->fd, 0);
+    PRMSG (2,"SocketUNIXClose(%p,%d)\n", ciptr, ciptr->fd, 0);
 
     ret = close(ciptr->fd);
 
@@ -1812,18 +2243,15 @@ XtransConnInfo ciptr;
        && sockname->sun_family == AF_UNIX
        && sockname->sun_path[0])
     {
-	strncpy (path, sockname->sun_path,
-		ciptr->addrlen - sizeof (sockname->sun_family));
-	unlink (path);
+	if (!(ciptr->flags & TRANS_NOUNLINK))
+		unlink (sockname->sun_path);
     }
 
     return ret;
 }
 
 static int
-TRANS(SocketUNIXCloseForCloning) (ciptr)
-
-XtransConnInfo ciptr;
+TRANS(SocketUNIXCloseForCloning) (XtransConnInfo ciptr)
 
 {
     /*
@@ -1832,7 +2260,7 @@ XtransConnInfo ciptr;
 
     int ret;
 
-    PRMSG (2,"SocketUNIXCloseForCloning(%x,%d)\n",
+    PRMSG (2,"SocketUNIXCloseForCloning(%p,%d)\n",
 	ciptr, ciptr->fd, 0);
 
     ret = close(ciptr->fd);
@@ -1844,14 +2272,25 @@ XtransConnInfo ciptr;
 
 
 #ifdef TCPCONN
+# ifdef TRANS_SERVER
+static char* tcp_nolisten[] = {
+	"inet",
+#if defined(IPv6) && defined(AF_INET6)
+	"inet6",
+#endif
+	NULL
+};
+# endif
+
 Xtransport	TRANS(SocketTCPFuncs) = {
 	/* Socket Interface */
 	"tcp",
-        0,
+        TRANS_ALIAS,
 #ifdef TRANS_CLIENT
 	TRANS(SocketOpenCOTSClient),
 #endif /* TRANS_CLIENT */
 #ifdef TRANS_SERVER
+	tcp_nolisten,
 	TRANS(SocketOpenCOTSServer),
 #endif /* TRANS_SERVER */
 #ifdef TRANS_CLIENT
@@ -1886,11 +2325,12 @@ Xtransport	TRANS(SocketTCPFuncs) = {
 Xtransport	TRANS(SocketINETFuncs) = {
 	/* Socket Interface */
 	"inet",
-	TRANS_ALIAS,
+	0,
 #ifdef TRANS_CLIENT
 	TRANS(SocketOpenCOTSClient),
 #endif /* TRANS_CLIENT */
 #ifdef TRANS_SERVER
+	NULL,
 	TRANS(SocketOpenCOTSServer),
 #endif /* TRANS_SERVER */
 #ifdef TRANS_CLIENT
@@ -1922,6 +2362,47 @@ Xtransport	TRANS(SocketINETFuncs) = {
 	TRANS(SocketINETClose),
 	};
 
+#if defined(IPv6) && defined(AF_INET6)
+Xtransport     TRANS(SocketINET6Funcs) = {
+	/* Socket Interface */
+	"inet6",
+	0,
+#ifdef TRANS_CLIENT
+	TRANS(SocketOpenCOTSClient),
+#endif /* TRANS_CLIENT */
+#ifdef TRANS_SERVER
+	NULL,
+	TRANS(SocketOpenCOTSServer),
+#endif /* TRANS_SERVER */
+#ifdef TRANS_CLIENT
+	TRANS(SocketOpenCLTSClient),
+#endif /* TRANS_CLIENT */
+#ifdef TRANS_SERVER
+	TRANS(SocketOpenCLTSServer),
+#endif /* TRANS_SERVER */
+#ifdef TRANS_REOPEN
+	TRANS(SocketReopenCOTSServer),
+	TRANS(SocketReopenCLTSServer),
+#endif
+	TRANS(SocketSetOption),
+#ifdef TRANS_SERVER
+	TRANS(SocketINETCreateListener),
+	NULL,					/* ResetListener */
+	TRANS(SocketINETAccept),
+#endif /* TRANS_SERVER */
+#ifdef TRANS_CLIENT
+	TRANS(SocketINETConnect),
+#endif /* TRANS_CLIENT */
+	TRANS(SocketBytesReadable),
+	TRANS(SocketRead),
+	TRANS(SocketWrite),
+	TRANS(SocketReadv),
+	TRANS(SocketWritev),
+	TRANS(SocketDisconnect),
+	TRANS(SocketINETClose),
+	TRANS(SocketINETClose),
+	};
+#endif /* IPv6 */
 #endif /* TCPCONN */
 
 #ifdef UNIXCONN
@@ -1934,6 +2415,7 @@ Xtransport	TRANS(SocketLocalFuncs) = {
 	TRANS(SocketOpenCOTSClient),
 #endif /* TRANS_CLIENT */
 #ifdef TRANS_SERVER
+	NULL,
 	TRANS(SocketOpenCOTSServer),
 #endif /* TRANS_SERVER */
 #ifdef TRANS_CLIENT
@@ -1965,7 +2447,12 @@ Xtransport	TRANS(SocketLocalFuncs) = {
 	TRANS(SocketUNIXCloseForCloning),
 	};
 #endif /* !LOCALCONN */
-
+# ifdef TRANS_SERVER
+#  if !defined(LOCALCONN)
+static char* unix_nolisten[] = { "local" , NULL };
+#  endif
+# endif
+	    
 Xtransport	TRANS(SocketUNIXFuncs) = {
 	/* Socket Interface */
 	"unix",
@@ -1978,6 +2465,11 @@ Xtransport	TRANS(SocketUNIXFuncs) = {
 	TRANS(SocketOpenCOTSClient),
 #endif /* TRANS_CLIENT */
 #ifdef TRANS_SERVER
+#if !defined(LOCALCONN)
+	unix_nolisten,
+#else
+	NULL,
+#endif
 	TRANS(SocketOpenCOTSServer),
 #endif /* TRANS_SERVER */
 #ifdef TRANS_CLIENT

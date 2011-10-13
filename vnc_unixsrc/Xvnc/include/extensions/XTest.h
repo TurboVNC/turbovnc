@@ -1,15 +1,13 @@
-/* $XConsortium: XTest.h,v 1.9 94/04/17 20:11:18 rws Exp $ */
-/* $XFree86: xc/include/extensions/XTest.h,v 3.0 1996/12/12 09:12:53 dawes Exp $ */
+/* $Xorg: XTest.h,v 1.5 2001/02/09 02:03:24 xorgcvs Exp $ */
 /*
 
-Copyright (c) 1992  X Consortium
+Copyright 1992, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -17,15 +15,16 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 */
+/* $XFree86: xc/include/extensions/XTest.h,v 3.3 2001/12/14 19:53:28 dawes Exp $ */
 
 #ifndef _XTEST_H_
 #define _XTEST_H_
@@ -53,69 +52,54 @@ in this Software without prior written authorization from the X Consortium.
 _XFUNCPROTOBEGIN
 
 Bool XTestQueryExtension(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     int*		/* event_basep */,
     int*		/* error_basep */,
     int*		/* majorp */,
     int*		/* minorp */
-#endif
 );
 
 Bool XTestCompareCursorWithWindow(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     Window		/* window */,
     Cursor		/* cursor */
-#endif
 );
 
 Bool XTestCompareCurrentCursorWithWindow(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     Window		/* window */
-#endif
 );
 
 extern int XTestFakeKeyEvent(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     unsigned int	/* keycode */,
     Bool		/* is_press */,
     unsigned long	/* delay */
-#endif
 );
 
 extern int XTestFakeButtonEvent(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     unsigned int	/* button */,
     Bool		/* is_press */,
     unsigned long	/* delay */
-#endif
 );
 
 extern int XTestFakeMotionEvent(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     int			/* screen */,
     int			/* x */,
     int			/* y */,
     unsigned long	/* delay */
-#endif
 );
 
 extern int XTestFakeRelativeMotionEvent(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     int			/* x */,
     int			/* y */,
     unsigned long	/* delay */
-#endif
 );
 
 extern int XTestFakeDeviceKeyEvent(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     XDevice*		/* dev */,
     unsigned int	/* keycode */,
@@ -123,11 +107,9 @@ extern int XTestFakeDeviceKeyEvent(
     int*		/* axes */,
     int			/* n_axes */,
     unsigned long	/* delay */
-#endif
 );
 
 extern int XTestFakeDeviceButtonEvent(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     XDevice*		/* dev */,
     unsigned int	/* button */,
@@ -135,22 +117,18 @@ extern int XTestFakeDeviceButtonEvent(
     int*		/* axes */,
     int			/* n_axes */,
     unsigned long	/* delay */
-#endif
 );
 
 extern int XTestFakeProximityEvent(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     XDevice*		/* dev */,
     Bool		/* in_prox */,
     int*		/* axes */,
     int			/* n_axes */,
     unsigned long	/* delay */
-#endif
 );
 
 extern int XTestFakeDeviceMotionEvent(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     XDevice*		/* dev */,
     Bool		/* is_relative */,
@@ -158,34 +136,25 @@ extern int XTestFakeDeviceMotionEvent(
     int*		/* axes */,
     int			/* n_axes */,
     unsigned long	/* delay */
-#endif
 );
 
 extern int XTestGrabControl(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     Bool		/* impervious */
-#endif
 );
 
 void XTestSetGContextOfGC(
-#if NeedFunctionPrototypes
     GC			/* gc */,
     GContext		/* gid */
-#endif
 );
 
 void XTestSetVisualIDOfVisual(
-#if NeedFunctionPrototypes
     Visual*		/* visual */,
     VisualID		/* visualid */
-#endif
 );
 
 Status XTestDiscard(
-#if NeedFunctionPrototypes
     Display*		/* dpy */
-#endif
 );
 
 _XFUNCPROTOEND

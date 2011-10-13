@@ -1,0 +1,125 @@
+XCOMM site:  $Xorg: site.sample,v 1.3 2000/08/17 19:41:48 cpqbld Exp $
+
+/***************************************************************************
+ *                                                                         *
+ *			   SITE-SPECIFIC DEFINITIONS                       *
+ *                                                                         *
+ * This file contains two halves, one included before the vendor-specific  *
+ * configuration file (.cf file), and one included after the .cf file.     *
+ * The before-half should be protected by #ifdef BeforeVendorCF, and the   *
+ * after-half should be protected by #ifdef AfterVendorCF.                 *
+ *                                                                         *
+ * The before-half should only set things that the .cf file depends on.    *
+ * For the .cf files shipped in this release, the main variables in this   *
+ * category are HasGcc, HasGcc2, HasCplusplus, OSMajorVersion,             *
+ * OSMinorVersion, and OSTeenyVersion.                                     *
+ *                                                                         *
+ * The after-half should contain all other definitions.  For example,      *
+ * place your ProjectRoot definition here.                                 *
+ *                                                                         *
+ * OS Major and Minor version numbers should be changed directly in the    *
+ * .cf file, not overridden in site.def.                                   *
+ *                                                                         *
+ ***************************************************************************/
+
+/* if you want host-specific customization, this is one way to do it */
+/*
+#ifndef SiteIConfigFiles
+#define SiteIConfigFiles $(IRULESRC)/host.def
+#define LocalConfigFiles host.def
+#endif
+*/
+
+
+#ifdef BeforeVendorCF
+
+/* #include <host.def> */
+
+/* On systems where cpp doesn't expand correctly macros in include directives
+ * the two following macros need to be defined directly (where "X11" is
+ * really whatever the TopLevelProject macro is defined to be).
+ */
+# if defined(AIXArchitecture) || defined(SVR4Architecture) || \
+     defined(SCOArchitecture) || defined(Win32Architecture) || \
+     defined(UXPArchitecture) || defined(SunArchitecture)
+#  ifndef ProjectRulesFile
+#   define ProjectRulesFile	<X11.rules>
+#  endif
+#  ifndef ProjectTmplFile
+#   define ProjectTmplFile	<X11.tmpl>
+#  endif
+# endif
+
+/*
+#ifndef HasGcc2
+#define HasGcc2 YES
+#endif
+*/
+
+#endif /* BeforeVendorCF */
+
+#ifdef AfterVendorCF
+
+#define ProjectRoot Concat(/usr/X11R,XORG_VERSION_MAJOR.XORG_VERSION_MINOR)
+
+/* Only set HasXdmAuth to YES if you have a Wraphelp.c file. */
+/* #define HasXdmAuth YES */
+
+/*
+#if defined(SunArchitecture) && defined(SparcArchitecture)
+#define HasCodeCenter	YES
+#ifndef SVR4Architecture
+#define HasTestCenter	YES
+#endif
+#endif
+*/
+
+/*
+#ifdef __hp9000s800
+#define HasCodeCenter	YES
+#endif
+*/
+
+/*
+#if defined(SunArchitecture) && defined(SparcArchitecture) && !defined(SVR4Architecture)
+#define HasPurify	YES
+#endif
+*/
+
+/*
+#define HasSentinel	YES
+*/
+
+/*
+#undef DefaultUserPath
+#define DefaultUserPath /bin:/usr/bin:$(BINDIR):/usr/ucb:/usr/local/bin
+*/
+
+
+/* You do NOT need SetUID if you only run the server under xdm */
+/* You MAY need SetUID if users run the server by hand or under xinit */
+/* Consult your system administrator before making the X server setuid */
+/*
+#if defined(SunArchitecture) && OSMajorVersion > 4
+#define InstallXserverSetUID YES
+#endif
+*/
+
+/* You do NOT need SetUID if you only run the server under xdm */
+/* You MAY need SetUID if users run the server by hand or under xinit */
+/* Consult your system administrator before making the X server setuid */
+/*
+#if defined(XFree86Version) || defined(XorgVersion)
+#define InstallXserverSetUID YES
+#endif
+*/
+
+#ifndef XnestServer
+#undef BuildServer
+#define BuildServer YES
+#define XnestServer YES
+#endif
+
+/* #include <host.def> */
+
+#endif /* AfterVendorCF */

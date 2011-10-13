@@ -1,4 +1,4 @@
-/* $XConsortium: util.c,v 1.7 94/01/27 15:21:15 gildea Exp $ */
+/* $Xorg: util.c,v 1.3 2000/08/17 19:46:34 cpqbld Exp $ */
 /* Copyright International Business Machines,Corp. 1991
  * All Rights Reserved
  *
@@ -27,11 +27,42 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
  * SOFTWARE.
  */
+/* Copyright (c) 1994-1999 Silicon Graphics, Inc. All Rights Reserved.
+ *
+ * The contents of this file are subject to the CID Font Code Public Licence
+ * Version 1.0 (the "License"). You may not use this file except in compliance
+ * with the Licence. You may obtain a copy of the License at Silicon Graphics,
+ * Inc., attn: Legal Services, 2011 N. Shoreline Blvd., Mountain View, CA
+ * 94043 or at http://www.sgi.com/software/opensource/cid/license.html.
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis.
+ * ALL WARRANTIES ARE DISCLAIMED, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED
+ * WARRANTIES OF MERCHANTABILITY, OF FITNESS FOR A PARTICULAR PURPOSE OR OF
+ * NON-INFRINGEMENT. See the License for the specific language governing
+ * rights and limitations under the License.
+ *
+ * The Original Software is CID font code that was developed by Silicon
+ * Graphics, Inc.
+ */
+/* $XFree86: xc/lib/font/Type1/util.c,v 1.5 1999/08/21 13:47:53 dawes Exp $ */
 /* Author: Katherine A. Hitchcock    IBM Almaden Research Laboratory */
  
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#ifdef BUILDCID
+#define XFONT_CID 1
+#endif
+
+#ifndef FONTMODULE
 #include <stdio.h>
+#else
+#include "Xdefs.h"
+#include "Xmd.h"
+#include "xf86_ansic.h"
+#endif
 #include "util.h"
-#include "fontmisc.h"
+#include <X11/fonts/fontmisc.h>			/* for xalloc/xfree */
  
 static char *vm_base = NULL;  /* Start of virtual memory area */
        char *vm_next = NULL;  /* Pointer to first free byte */
@@ -41,10 +72,18 @@ static char *vm_base = NULL;  /* Start of virtual memory area */
 /*
  * Initialize memory.
  */
-boolean vm_init(cnt)
-int cnt;
+boolean 
+vm_init(int cnt)
 {
+#if XFONT_CID
+  if (vm_base == NULL || (vm_base != NULL && vm_size != cnt)) {
+      if (vm_base != NULL) xfree(vm_base);
+      vm_next = vm_base = (char *)xalloc (cnt);
+  } else
+      vm_next = vm_base;
+#else
   vm_next = vm_base = (char *)xalloc (cnt);
+#endif
  
   if (vm_base != NULL) {
     vm_free = cnt;
@@ -56,8 +95,8 @@ int cnt;
  
 }
  
-char *vm_alloc(bytes)
-  int bytes;
+char *
+vm_alloc(int bytes)
 {
   char *answer;
  
@@ -79,9 +118,8 @@ char *vm_alloc(bytes)
 /*
  * Format an Integer object
  */
-void objFormatInteger(objP,value)
-  psobj *objP;
-  int value;
+void 
+objFormatInteger(psobj *objP, int value)
 {
   if (objP != NULL) {
     objP->type         = OBJ_INTEGER;
@@ -93,9 +131,8 @@ void objFormatInteger(objP,value)
 /*
  * Format a Real object
  */
-void objFormatReal(objP,value)
-  psobj *objP;
-  float value;
+void 
+objFormatReal(psobj *objP, float value)
 {
   if (objP != NULL) {
     objP->type       = OBJ_REAL;
@@ -107,9 +144,8 @@ void objFormatReal(objP,value)
 /*
  * Format a Boolean object
  */
-void objFormatBoolean(objP,value)
-  psobj *objP;
-  boolean value;
+void 
+objFormatBoolean(psobj *objP, boolean value)
 {
   if (objP != NULL) {
     objP->type         = OBJ_BOOLEAN;
@@ -121,10 +157,8 @@ void objFormatBoolean(objP,value)
 /*
  * Format an Encoding object
  */
-void objFormatEncoding(objP,length,valueP)
-  psobj *objP;
-  int length;
-  psobj *valueP;
+void 
+objFormatEncoding(psobj *objP, int length, psobj *valueP)
 {
   if (objP != NULL) {
     objP->type        = OBJ_ENCODING;
@@ -136,10 +170,8 @@ void objFormatEncoding(objP,length,valueP)
 /*
  * Format an Array object
  */
-void objFormatArray(objP,length,valueP)
-  psobj *objP;
-  int length;
-  psobj *valueP;
+void 
+objFormatArray(psobj *objP, int length, psobj *valueP)
 {
   if (objP != NULL) {
     objP->type        = OBJ_ARRAY;
@@ -152,10 +184,8 @@ void objFormatArray(objP,length,valueP)
 /*
  * Format a String object
  */
-void objFormatString(objP,length,valueP)
-  psobj *objP;
-  int length;
-  char *valueP;
+void 
+objFormatString(psobj *objP, int length, char *valueP)
 {
   if (objP != NULL) {
     objP->type         = OBJ_STRING;
@@ -167,10 +197,8 @@ void objFormatString(objP,length,valueP)
 /*
  * Format a Name object
  */
-void objFormatName(objP,length,valueP)
-  psobj *objP;
-  int length;
-  char *valueP;
+void 
+objFormatName(psobj *objP, int length, char *valueP)
 {
   if (objP != NULL) {
     objP->type         = OBJ_NAME;
@@ -182,9 +210,8 @@ void objFormatName(objP,length,valueP)
 /*
  * Format a File object
  */
-void objFormatFile(objP,valueP)
-  psobj *objP;
-  FILE *valueP;
+void 
+objFormatFile(psobj *objP, FILE *valueP)
 {
   if (objP != NULL) {
     objP->type         = OBJ_FILE;

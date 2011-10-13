@@ -4,20 +4,25 @@
  * $XFree86: xc/config/util/indir.cmd,v 3.1 1996/01/24 21:56:12 dawes Exp $
  */
 curdir = directory()
-line = fixbadprefix(arg(1))
-new = directory(word(line,1))
-subword(line,2)
-old = directory(curdir)
-exit
+line = fixbadprefix(ARG(1))
+w1 = TRANSLATE(WORD(line,1),'\','/')
+new = directory(w1)
+/*IF (SUBSTR(w1,1,2) = '..') | (POS(w1,new) > 0) THEN DO*/
+  subword(line,2)
+  old = directory(curdir)
+/*END
+ELSE DO
+  say 'Directory 'new' does not exist, ignoring command (nonfatal)'
+END*/
+EXIT
 
 /* somehow make or cmd manages to convert a relative path ..\..\. to ..... */
 fixbadprefix:
 count = 1
 str = ARG(1)
-DO WHILE SUBSTR(str,count,2) = '..'
+DO WHILE SUBSTR(str,count,3) = '...'
    count = count+1
    str = INSERT('\',str,count)
    count = count+2
 END
 RETURN str
-

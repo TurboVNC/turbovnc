@@ -1,4 +1,4 @@
-/* $XConsortium: t1stub.c,v 1.3 92/03/20 15:58:40 eswu Exp $ */
+/* $Xorg: t1stub.c,v 1.3 2000/08/17 19:46:34 cpqbld Exp $ */
 /* Copyright International Business Machines,Corp. 1991
  * All Rights Reserved
  *
@@ -27,17 +27,30 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
  * SOFTWARE.
  */
+/* $XFree86: xc/lib/font/Type1/t1stub.c,v 1.8 2001/01/17 19:43:24 dawes Exp $ */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#ifdef FONTMODULE
+#include "Xdefs.h"	/* Bool declaration */
+#include "Xmd.h"	/* INT32 declaration */
+#include "os.h"
+#include "xf86_ansic.h"
+#else 
 #include <stdio.h>
-#include "objects.h"	/* get #define for abort() */
- 
-xiStub()
+#endif
+#include "objects.h"	/* get #define for Abort() */
+
+static void 
+xiStub(void)
 {
        printf("xiStub called\n");
-       abort("xiStub called");
+       Abort("xiStub called");
 }
  
-void t1_DumpText()
+void 
+t1_DumpText(void)
 {
        xiStub();
 }

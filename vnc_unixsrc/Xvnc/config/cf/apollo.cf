@@ -1,4 +1,4 @@
-XCOMM platform:  $XConsortium: apollo.cf /main/34 1996/09/28 16:09:07 rws $
+XCOMM platform:  $Xorg: apollo.cf,v 1.3 2000/08/17 19:41:46 cpqbld Exp $
 
 /*
  * Minimally tested, and only in the bsd4.3 environment.  X_NOT_POSIX is not

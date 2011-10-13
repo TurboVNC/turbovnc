@@ -1,11 +1,15 @@
-XCOMM $XConsortium: sgiLib.tmpl /main/2 1996/09/28 16:12:44 rws $
+XCOMM $Xorg: sgiLib.tmpl,v 1.3 2000/08/17 19:41:48 cpqbld Exp $
+
+
+
+
+XCOMM $XFree86: xc/config/cf/sgiLib.tmpl,v 3.3tsi Exp $
 
 /*
  * SGI shared library template
  */
-#define SharedXtReqs $(LDPRELIBS) $(XLIBONLY) -delay_load $(SMLIB) -delay_load $(ICELIB)
+#define SharedXtReqs $(LDPRELIBS) $(XONLYLIB) -delay_load $(SMLIB) -delay_load $(ICELIB)
 #define SharedXmuReqs $(LDPRELIBS) $(XTOOLONLYLIB)
-#define SharedXawReqs -lw
 #define SharedXpReqs $(LDPRELIBS) $(XLIB)
 
 #define SharedXReqs $(XTOOLLIB) $(XPLIB) $(XLIB) -lgen

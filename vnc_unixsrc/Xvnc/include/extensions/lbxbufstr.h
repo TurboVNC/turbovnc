@@ -1,4 +1,4 @@
-/* $XConsortium: lbxbufstr.h /main/8 1996/11/15 21:33:20 rws $ */
+/* $Xorg: lbxbufstr.h,v 1.3 2000/08/18 04:05:45 coskrey Exp $ */
 /*
  * Copyright 1988, 1989, 1990, 1994 Network Computing Devices, Inc.
  *
@@ -22,10 +22,12 @@
  * SOFTWARE.
  * 
  */
+/* $XFree86$ */
+
 #ifndef _BUFFERSTR_H_
 #define _BUFFERSTR_H_
 
-#include	"lbxbuf.h"
+#include <X11/extensions/lbxbuf.h>
 
 /*
  * ZLIB Input/Output buffer

@@ -1,17 +1,14 @@
-/* $XFree86: xc/lib/X11/Xlibint.h,v 3.7 1996/12/23 05:59:50 dawes Exp $ */
-/* $XConsortium: Xlibint.h /main/114 1996/10/22 14:24:29 kaleb $ */
+/* $Xorg: Xlibint.h,v 1.5 2001/02/09 02:03:38 xorgcvs Exp $ */
 
 /*
 
-Copyright (c) 1984, 1985, 1987, 1989  X Consortium
+Copyright 1984, 1985, 1987, 1989, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -19,17 +16,21 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/lib/X11/Xlibint.h,v 3.27 2003/05/27 22:26:26 tsi Exp $ */
+
+#ifndef _XLIBINT_H_
+#define _XLIBINT_H_ 1
 
 /*
  *	Xlibint.h - Header definition and support file for the internal
@@ -40,6 +41,8 @@ from the X Consortium.
  */
 
 #include <X11/Xlib.h>
+#include <X11/Xproto.h>		/* to declare xEvent */
+#include <X11/XlibConf.h>	/* for configured options like XTHREADS */
 
 #ifdef WIN32
 #define _XFlush _XFlushIt
@@ -77,9 +80,7 @@ struct _XDisplay
 	XID resource_id;	/* allocator current ID */
 	int resource_shift;	/* allocator shift to correct bits */
 	XID (*resource_alloc)(	/* allocator function */
-#if NeedFunctionPrototypes
 		struct _XDisplay*
-#endif
 		);
 	int byte_order;		/* screen byte order, LSBFirst, MSBFirst */
 	int bitmap_unit;	/* padding and data requirements */
@@ -100,9 +101,7 @@ struct _XDisplay
 	unsigned max_request_size; /* maximum number 32 bit words in request*/
 	struct _XrmHashBucketRec *db;
 	int (*synchandler)(	/* Synchronization handler */
-#if NeedFunctionPrototypes
 		struct _XDisplay*
-#endif
 		);
 	char *display_name;	/* "host:display" string used on this connect*/
 	int default_screen;	/* default screen for operations */
@@ -128,14 +127,26 @@ struct _XDisplay
 	 * list to find the right procedure for each event might be
 	 * expensive if many extensions are being used.
 	 */
-	Bool (*event_vec[128])();  /* vector for wire to event */
-	Status (*wire_vec[128])(); /* vector for event to wire */
+	Bool (*event_vec[128])(	/* vector for wire to event */
+		Display *	/* dpy */,
+		XEvent *	/* re */,
+		xEvent *	/* event */
+		);
+	Status (*wire_vec[128])( /* vector for event to wire */
+		Display *	/* dpy */,
+		XEvent *	/* re */,
+		xEvent *	/* event */
+		);
 	KeySym lock_meaning;	   /* for XLookupString */
 	struct _XLockInfo *lock;   /* multi-thread state, display lock */
 	struct _XInternalAsync *async_handlers; /* for internal async */
 	unsigned long bigreq_size; /* max size of big requests */
 	struct _XLockPtrs *lock_fns; /* pointers to threads functions */
-	void (*idlist_alloc)();	   /* XID list allocator function */
+	void (*idlist_alloc)(	   /* XID list allocator function */
+		Display *	/* dpy */,
+		XID *		/* ids */,
+		int		/* count */
+		);
 	/* things above this line should not move, for binary compatibility */
 	struct _XKeytrans *key_bindings; /* for XLookupString */
 	Font cursor_font;	   /* for XCreateFontCursor */
@@ -143,7 +154,11 @@ struct _XDisplay
 	unsigned int mode_switch;  /* keyboard group modifiers */
 	unsigned int num_lock;  /* keyboard numlock modifiers */
 	struct _XContextDB *context_db; /* context database */
-	Bool (**error_vec)();      /* vector for wire to error */
+	Bool (**error_vec)(	/* vector for wire to error */
+		Display     *	/* display */,
+		XErrorEvent *	/* he */,
+		xError      *	/* we */
+		);
 	/*
 	 * Xcms information
 	 */
@@ -162,7 +177,9 @@ struct _XDisplay
 	struct _XConnWatchInfo *conn_watchers; /* XAddConnectionWatch */
 	int watcher_count;	/* number of conn_watchers */
 	XPointer filedes;	/* struct pollfd cache for _XWaitForReadable */
-	int (*savedsynchandler)(); /* user synchandler when Xlib usurps */
+	int (*savedsynchandler)( /* user synchandler when Xlib usurps */
+		Display *	/* dpy */
+		);
 	XID resource_max;	/* allocator max ID */
 	int xcmisc_opcode;	/* major opcode for XC-MISC */
 	struct _XkbInfoRec *xkb_info; /* XKB info */
@@ -194,10 +211,8 @@ typedef struct _XSQEvent
 #define NEED_REPLIES
 #endif
 
-#if NeedFunctionPrototypes	/* prototypes require event type definitions */
 #define NEED_EVENTS
 #define NEED_REPLIES
-#endif
 #include <X11/Xproto.h>
 #ifdef __sgi
 #define _SGI_MP_SOURCE  /* turn this on to get MP safe errno */
@@ -212,18 +227,12 @@ typedef struct _XSQEvent
 #undef dirty
 #endif
 
-#ifndef X_NOT_STDC_ENV
 #include <stdlib.h>
 #include <string.h>
-#else
-char *malloc(), *realloc(), *calloc();
-void exit();
-#ifdef SYSV
-#include <string.h>
-#else
-#include <strings.h>
-#endif
-#endif
+
+#include <X11/Xfuncproto.h>
+
+_XFUNCPROTOBEGIN
 
 /*
  * The following definitions can be used for locking requests in multi-threaded
@@ -235,15 +244,26 @@ void exit();
  * declarations for C Threads locking
  */
 
-#include <X11/Xfuncproto.h>
+typedef struct _LockInfoRec *LockInfoPtr;
 
+/* interfaces for locking.c */
 struct _XLockPtrs {
     /* used by all, including extensions; do not move */
-    void (*lock_display)();
-    void (*unlock_display)();
+    void (*lock_display)(
+		Display *dpy
+#if defined(XTHREADS_WARN) || defined(XTHREADS_FILE_LINE)
+		, char *file
+		, int line
+#endif
+	);
+    void (*unlock_display)(
+		Display *dpy
+#if defined(XTHREADS_WARN) || defined(XTHREADS_FILE_LINE)
+		, char *file
+		, int line
+#endif
+	);
 };
-
-typedef struct _LockInfoRec *LockInfoPtr;
 
 #if defined(WIN32) && !defined(_XLIBINT_)
 #define _XCreateMutex_fn (*_XCreateMutex_fn_p)
@@ -255,31 +275,23 @@ typedef struct _LockInfoRec *LockInfoPtr;
 
 /* in XlibInt.c */
 extern void (*_XCreateMutex_fn)(
-#if NeedFunctionPrototypes
     LockInfoPtr /* lock */
-#endif
 );
 extern void (*_XFreeMutex_fn)(
-#if NeedFunctionPrototypes
     LockInfoPtr /* lock */
-#endif
 );
 extern void (*_XLockMutex_fn)(
-#if NeedFunctionPrototypes
     LockInfoPtr	/* lock */
 #if defined(XTHREADS_WARN) || defined(XTHREADS_FILE_LINE)
     , char * /* file */
     , int /* line */
-#endif
 #endif
 );
 extern void (*_XUnlockMutex_fn)(
-#if NeedFunctionPrototypes
     LockInfoPtr	/* lock */
 #if defined(XTHREADS_WARN) || defined(XTHREADS_FILE_LINE)
     , char * /* file */
     , int /* line */
-#endif
 #endif
 );
 
@@ -331,15 +343,10 @@ extern LockInfoPtr _Xglobal_lock;
 
 #endif
 
-#ifndef NULL
-#define NULL 0
-#endif
+#include <stddef.h>
+
 #define LOCKED 1
 #define UNLOCKED 0
-
-#ifdef X_NOT_STDC_ENV
-extern int errno;			/* Internal system error number. */
-#endif
 
 #ifndef BUFSIZE
 #define BUFSIZE 2048			/* X output buffer size. */
@@ -380,6 +387,7 @@ extern int errno;			/* Internal system error number. */
 #define XlibDisplayReadEvents	(1L << 5) /* in _XReadEvents */
 #define XlibDisplayReply	(1L << 5) /* in _XReply */
 #define XlibDisplayWriting	(1L << 6) /* in _XFlushInt, _XSend */
+#define XlibDisplayDfltRMDB     (1L << 7) /* mark if RM db from XGetDefault */
 
 /*
  * X Protocol packetizing macros.
@@ -415,7 +423,7 @@ extern int errno;			/* Internal system error number. */
  *
  */
 
-#if (defined(__STDC__) && !defined(UNIXCPP)) || defined(ANSICPP)
+#if !defined(UNIXCPP) || defined(ANSICPP)
 #define GetReq(name, req) \
         WORD64ALIGN\
 	if ((dpy->bufptr + SIZEOF(x##name##Req)) > dpy->bufmax)\
@@ -441,7 +449,7 @@ extern int errno;			/* Internal system error number. */
 /* GetReqExtra is the same as GetReq, but allocates "n" additional
    bytes after the request. "n" must be a multiple of 4!  */
 
-#if (defined(__STDC__) && !defined(UNIXCPP)) || defined(ANSICPP)
+#if !defined(UNIXCPP) || defined(ANSICPP)
 #define GetReqExtra(name, n, req) \
         WORD64ALIGN\
 	if ((dpy->bufptr + SIZEOF(x##name##Req) + n) > dpy->bufmax)\
@@ -470,7 +478,7 @@ extern int errno;			/* Internal system error number. */
  * "rid" is the name of the resource. 
  */
 
-#if (defined(__STDC__) && !defined(UNIXCPP)) || defined(ANSICPP)
+#if !defined(UNIXCPP) || defined(ANSICPP)
 #define GetResReq(name, rid, req) \
         WORD64ALIGN\
 	if ((dpy->bufptr + SIZEOF(xResourceReq)) > dpy->bufmax)\
@@ -498,7 +506,7 @@ extern int errno;			/* Internal system error number. */
  * GetEmptyReq is for those requests that have no arguments
  * at all. 
  */
-#if (defined(__STDC__) && !defined(UNIXCPP)) || defined(ANSICPP)
+#if !defined(UNIXCPP) || defined(ANSICPP)
 #define GetEmptyReq(name, req) \
         WORD64ALIGN\
 	if ((dpy->bufptr + SIZEOF(xReq)) > dpy->bufmax)\
@@ -532,6 +540,18 @@ extern int errno;			/* Internal system error number. */
     Data32(dpy, (long *)&_BRdat, 4); \
     }
 #else
+#ifdef LONG64
+#define MakeBigReq(req,n) \
+    { \
+    CARD64 _BRdat; \
+    CARD32 _BRlen = req->length - 1; \
+    req->length = 0; \
+    _BRdat = ((CARD32 *)req)[_BRlen]; \
+    memmove(((char *)req) + 8, ((char *)req) + 4, _BRlen << 2); \
+    ((CARD32 *)req)[1] = _BRlen + n + 2; \
+    Data32(dpy, &_BRdat, 4); \
+    }
+#else
 #define MakeBigReq(req,n) \
     { \
     CARD32 _BRdat; \
@@ -542,6 +562,7 @@ extern int errno;			/* Internal system error number. */
     ((CARD32 *)req)[1] = _BRlen + n + 2; \
     Data32(dpy, &_BRdat, 4); \
     }
+#endif
 #endif
 
 #define SetReqLen(req,n,badlen) \
@@ -558,7 +579,7 @@ extern int errno;			/* Internal system error number. */
 #define SyncHandle() \
 	if (dpy->synchandler) (*dpy->synchandler)(dpy)
 
-extern void _XFlushGCCache();
+extern void _XFlushGCCache(Display *dpy, GC gc);
 #define FlushGC(dpy, gc) \
 	if ((gc)->dirty) _XFlushGCCache((dpy), (gc))
 /*
@@ -570,12 +591,13 @@ extern void _XFlushGCCache();
  * "len" is the length of the data buffer.
  */
 #ifndef DataRoutineIsProcedure
-#define Data(dpy, data, len) \
+#define Data(dpy, data, len) {\
 	if (dpy->bufptr + (len) <= dpy->bufmax) {\
 		memcpy(dpy->bufptr, data, (int)len);\
 		dpy->bufptr += ((len) + 3) & ~3;\
 	} else\
-		_XSend(dpy, data, len)
+		_XSend(dpy, data, len);\
+	}
 #endif /* DataRoutineIsProcedure */
 
 
@@ -597,6 +619,7 @@ extern void _XFlushGCCache();
     if (dpy->bufptr + (n) > dpy->bufmax) \
         _XFlush (dpy); \
     ptr = (type) dpy->bufptr; \
+    (void)ptr; \
     dpy->bufptr += (n);
 
 #ifdef WORD64
@@ -608,6 +631,16 @@ extern void _XFlushGCCache();
 #define _XRead16(dpy, data, len) _XRead((dpy), (char *)(data), (len))
 #ifdef LONG64
 #define Data32(dpy, data, len) _XData32(dpy, (long *)data, len)
+extern int _XData32(
+	     Display *dpy,
+	     register long *data,
+	     unsigned len
+);
+extern void _XRead32(
+	     Display *dpy,
+	     register long *data,
+	     long len
+);
 #else
 #define Data32(dpy, data, len) Data((dpy), (char *)(data), (len))
 #define _XRead32(dpy, data, len) _XRead((dpy), (char *)(data), (len))
@@ -707,13 +740,11 @@ typedef struct _XInternalAsync {
      * The handler returns True iff it handled this reply.
      */
     Bool (*handler)(
-#if NeedNestedPrototypes
 		    Display*	/* dpy */,
 		    xReply*	/* rep */,
 		    char*	/* buf */,
 		    int		/* len */,
 		    XPointer	/* data */
-#endif
 		    );
     XPointer data;
 } _XAsyncHandler;
@@ -728,7 +759,7 @@ typedef struct _XAsyncEState {
     int error_count;
 } _XAsyncErrorState;
 
-extern void _XDeqAsyncHandler();
+extern void _XDeqAsyncHandler(Display *dpy, _XAsyncHandler *handler);
 #define DeqAsyncHandler(dpy,handler) { \
     if (dpy->async_handlers == (handler)) \
 	dpy->async_handlers = (handler)->next; \
@@ -736,131 +767,180 @@ extern void _XDeqAsyncHandler();
 	_XDeqAsyncHandler(dpy, handler); \
     }
 
+typedef void (*FreeFuncType) (
+    Display*	/* display */
+);
+
+typedef int (*FreeModmapType) (
+    XModifierKeymap*	/* modmap */
+);
+
 /*
  * This structure is private to the library.
  */
 typedef struct _XFreeFuncs {
-    void (*atoms)();		/* _XFreeAtomTable */
-    int (*modifiermap)();	/* XFreeModifierMap */
-    void (*key_bindings)();	/* _XFreeKeyBindings */
-    void (*context_db)();	/* _XFreeContextDB */
-    void (*defaultCCCs)();	/* _XcmsFreeDefaultCCCs */
-    void (*clientCmaps)();	/* _XcmsFreeClientCmaps */
-    void (*intensityMaps)();	/* _XcmsFreeIntensityMaps */
-    void (*im_filters)();	/* _XFreeIMFilters */
-    void (*xkb)();		/* _XkbFreeInfo */
+    FreeFuncType atoms;		/* _XFreeAtomTable */
+    FreeModmapType modifiermap;	/* XFreeModifierMap */
+    FreeFuncType key_bindings;	/* _XFreeKeyBindings */
+    FreeFuncType context_db;	/* _XFreeContextDB */
+    FreeFuncType defaultCCCs;	/* _XcmsFreeDefaultCCCs */
+    FreeFuncType clientCmaps;	/* _XcmsFreeClientCmaps */
+    FreeFuncType intensityMaps;	/* _XcmsFreeIntensityMaps */
+    FreeFuncType im_filters;	/* _XFreeIMFilters */
+    FreeFuncType xkb;		/* _XkbFreeInfo */
 } _XFreeFuncRec;
+
+/* types for InitExt.c */
+typedef int (*CreateGCType) (
+    Display*	/* display */,
+    GC		/* gc */,
+    XExtCodes*	/* codes */
+);
+
+typedef int (*CopyGCType)(
+    Display*	/* display */,
+    GC		/* gc */,
+    XExtCodes*	/* codes */
+);
+
+typedef int (*FlushGCType) (
+    Display*	/* display */,
+    GC		/* gc */,
+    XExtCodes*	/* codes */
+);
+
+typedef int (*FreeGCType) (
+    Display*	/* display */,
+    GC		/* gc */,
+    XExtCodes*	/* codes */
+);
+
+typedef int (*CreateFontType) (
+    Display*	/* display */,
+    XFontStruct* /* fs */,
+    XExtCodes*	/* codes */
+);
+
+typedef int (*FreeFontType) (
+    Display*	/* display */,
+    XFontStruct* /* fs */,
+    XExtCodes*	/* codes */
+);
+
+typedef int (*CloseDisplayType) (
+    Display*	/* display */,
+    XExtCodes*	/* codes */
+);
+
+typedef int (*ErrorType) (
+    Display*	/* display */,
+    xError*	/* err */,
+    XExtCodes*	/* codes */,
+    int*	/* ret_code */
+);
+
+typedef char* (*ErrorStringType) (
+    Display*	/* display */,
+    int		/* code */,
+    XExtCodes*	/* codes */,
+    char*	/* buffer */,
+    int		/* nbytes */
+);
+
+typedef void (*PrintErrorType)(
+    Display*	/* display */,
+    XErrorEvent* /* ev */,
+    void*	/* fp */
+);
+
+typedef void (*BeforeFlushType)(
+    Display*	/* display */,
+    XExtCodes*	/* codes */,
+    _Xconst char* /* data */,
+    long	/* len */
+);
 
 /*
  * This structure is private to the library.
  */
-typedef struct _XExten {	/* private to extension mechanism */
-	struct _XExten *next;	/* next in list */
-	XExtCodes codes;	/* public information, all extension told */
-	int (*create_GC)();	/* routine to call when GC created */
-	int (*copy_GC)();	/* routine to call when GC copied */
-	int (*flush_GC)();	/* routine to call when GC flushed */
-	int (*free_GC)();	/* routine to call when GC freed */
-	int (*create_Font)();	/* routine to call when Font created */
-	int (*free_Font)();	/* routine to call when Font freed */
-	int (*close_display)();	/* routine to call when connection closed */
-	int (*error)();		/* who to call when an error occurs */
-        char *(*error_string)();  /* routine to supply error string */
-	char *name;		/* name of this extension */
-	void (*error_values)(); /* routine to supply error values */
-	void (*before_flush)();	/* routine to call when sending data */
-	struct _XExten *next_flush; /* next in list of those with flushes */
+typedef struct _XExten {		/* private to extension mechanism */
+	struct _XExten *next;		/* next in list */
+	XExtCodes codes;		/* public information, all extension told */
+	CreateGCType create_GC;		/* routine to call when GC created */
+	CopyGCType copy_GC;		/* routine to call when GC copied */
+	FlushGCType flush_GC;		/* routine to call when GC flushed */
+	FreeGCType free_GC;		/* routine to call when GC freed */
+	CreateFontType create_Font;	/* routine to call when Font created */
+	FreeFontType free_Font;		/* routine to call when Font freed */
+	CloseDisplayType close_display;	/* routine to call when connection closed */
+	ErrorType error;		/* who to call when an error occurs */
+	ErrorStringType error_string;	/* routine to supply error string */
+	char *name;			/* name of this extension */
+	PrintErrorType error_values;	/* routine to supply error values */
+	BeforeFlushType before_flush;	/* routine to call when sending data */
+	struct _XExten *next_flush;	/* next in list of those with flushes */
 } _XExtension;
 
 /* extension hooks */
 
-_XFUNCPROTOBEGIN
-
 #ifdef DataRoutineIsProcedure
-extern void Data();
+extern void Data(Display *dpy, char *data, long len);
 #endif
 extern int _XError(
-#if NeedFunctionPrototypes
     Display*	/* dpy */,
     xError*	/* rep */
-#endif
 );
 extern int _XIOError(
-#if NeedFunctionPrototypes
     Display*	/* dpy */
-#endif
 );
 extern int (*_XIOErrorFunction)(
-#if NeedNestedPrototypes
     Display*	/* dpy */
-#endif
 );
 extern int (*_XErrorFunction)(
-#if NeedNestedPrototypes
     Display*		/* dpy */,
     XErrorEvent*	/* error_event */
-#endif
 );
 extern void _XEatData(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     unsigned long	/* n */
-#endif
 );
 extern char *_XAllocScratch(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     unsigned long	/* nbytes */
-#endif
 );
 extern char *_XAllocTemp(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     unsigned long	/* nbytes */
-#endif
 );
 extern void _XFreeTemp(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     char*		/* buf */,
     unsigned long	/* nbytes */
-#endif
 );
 extern Visual *_XVIDtoVisual(
-#if NeedFunctionPrototypes
     Display*	/* dpy */,
     VisualID	/* id */
-#endif
 );
 extern unsigned long _XSetLastRequestRead(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     xGenericReply*	/* rep */
-#endif
 );
 extern int _XGetHostname(
-#if NeedFunctionPrototypes
     char*	/* buf */,
     int		/* maxlen */
-#endif
 );
 extern Screen *_XScreenOfWindow(
-#if NeedFunctionPrototypes
     Display*	/* dpy */,
     Window	/* w */
-#endif
 );
 extern Bool _XAsyncErrorHandler(
-#if NeedFunctionPrototypes
     Display*	/* dpy */,
     xReply*	/* rep */,
     char*	/* buf */,
     int		/* len */,
     XPointer	/* data */
-#endif
 );
 extern char *_XGetAsyncReply(
-#if NeedFunctionPrototypes
     Display*	/* dpy */,
     char*	/* replbuf */,
     xReply*	/* rep */,
@@ -868,347 +948,270 @@ extern char *_XGetAsyncReply(
     int		/* len */,
     int		/* extra */,
     Bool	/* discard */
-#endif
+);
+extern void _XGetAsyncData(
+    Display*	/* dpy */,
+    char *	/* data */,
+    char *	/* buf */,
+    int		/* len */,
+    int		/* skip */,
+    int		/* datalen */,
+    int		/* discardtotal */
 );
 extern void _XFlush(
-#if NeedFunctionPrototypes
     Display*	/* dpy */
-#endif
 );
 extern int _XEventsQueued(
-#if NeedFunctionPrototypes
     Display*	/* dpy */,
     int 	/* mode */
-#endif
 );
 extern void _XReadEvents(
-#if NeedFunctionPrototypes
     Display*	/* dpy */
-#endif
 );
 extern int _XRead(
-#if NeedFunctionPrototypes
     Display*	/* dpy */,
     char*	/* data */,
     long	/* size */
-#endif
 );
 extern void _XReadPad(
-#if NeedFunctionPrototypes
     Display*	/* dpy */,
     char*	/* data */,
     long	/* size */
-#endif
 );
 extern void _XSend(
-#if NeedFunctionPrototypes
     Display*		/* dpy */,
     _Xconst char*	/* data */,
     long		/* size */
-#endif
 );
 extern Status _XReply(
-#if NeedFunctionPrototypes
     Display*	/* dpy */,
     xReply*	/* rep */,
     int		/* extra */,
     Bool	/* discard */
-#endif
 );
 extern void _XEnq(
-#if NeedFunctionPrototypes
     Display*	/* dpy */,
     xEvent*	/* event */
-#endif
 );
 extern void _XDeq(
-#if NeedFunctionPrototypes
     Display*	/* dpy */,
     _XQEvent*	/* prev */,
     _XQEvent*	/* qelt */
-#endif
+);
+
+extern Bool _XUnknownWireEvent(
+    Display*	/* dpy */,
+    XEvent*	/* re */,
+    xEvent*	/* event */
+);
+extern Status _XUnknownNativeEvent(
+    Display*	/* dpy */,
+    XEvent*	/* re */,
+    xEvent*	/* event */
+);
+
+extern Bool _XWireToEvent(Display *dpy, XEvent *re, xEvent *event);
+extern Bool _XDefaultWireError(Display *display, XErrorEvent *he, xError *we);
+extern Bool _XPollfdCacheInit(Display *dpy);
+extern void _XPollfdCacheAdd(Display *dpy, int fd);
+extern void _XPollfdCacheDel(Display *dpy, int fd);
+extern XID _XAllocID(Display *dpy);
+extern void _XAllocIDs(Display *dpy, XID *ids, int count);
+
+extern int _XFreeExtData(
+    XExtData*	/* extension */
 );
 
 extern int (*XESetCreateGC(
-#if NeedFunctionPrototypes
     Display*		/* display */,
     int			/* extension */,
     int (*) (
-#if NeedNestedPrototypes
 	      Display*			/* display */,
 	      GC			/* gc */,
 	      XExtCodes*		/* codes */
-#endif
 	    )		/* proc */
-#endif
 ))(
-#if NeedNestedPrototypes
     Display*, GC, XExtCodes*
-#endif
 );
 
 extern int (*XESetCopyGC(
-#if NeedFunctionPrototypes
     Display*		/* display */,
     int			/* extension */,
     int (*) (
-#if NeedNestedPrototypes
 	      Display*			/* display */,
               GC			/* gc */,
               XExtCodes*		/* codes */
-#endif
             )		/* proc */	      
-#endif
 ))(
-#if NeedNestedPrototypes
     Display*, GC, XExtCodes*
-#endif
 );
 
 extern int (*XESetFlushGC(
-#if NeedFunctionPrototypes
     Display*		/* display */,
     int			/* extension */,
     int (*) (
-#if NeedNestedPrototypes
 	      Display*			/* display */,
               GC			/* gc */,
               XExtCodes*		/* codes */
-#endif
             )		/* proc */	     
-#endif
 ))(
-#if NeedNestedPrototypes
     Display*, GC, XExtCodes*
-#endif
 );
 
 extern int (*XESetFreeGC(
-#if NeedFunctionPrototypes
     Display*		/* display */,
     int			/* extension */,
     int (*) (
-#if NeedNestedPrototypes
 	      Display*			/* display */,
               GC			/* gc */,
               XExtCodes*		/* codes */
-#endif
             )		/* proc */	     
-#endif
 ))(
-#if NeedNestedPrototypes
     Display*, GC, XExtCodes*
-#endif
 );
 
 extern int (*XESetCreateFont(
-#if NeedFunctionPrototypes
     Display*		/* display */,
     int			/* extension */,
     int (*) (
-#if NeedNestedPrototypes
 	      Display*			/* display */,
               XFontStruct*		/* fs */,
               XExtCodes*		/* codes */
-#endif
             )		/* proc */    
-#endif
 ))(
-#if NeedNestedPrototypes
     Display*, XFontStruct*, XExtCodes*
-#endif
 );
 
 extern int (*XESetFreeFont(
-#if NeedFunctionPrototypes
     Display*		/* display */,
     int			/* extension */,
     int (*) (
-#if NeedNestedPrototypes
 	      Display*			/* display */,
               XFontStruct*		/* fs */,
               XExtCodes*		/* codes */
-#endif
             )		/* proc */    
-#endif
 ))(
-#if NeedNestedPrototypes
     Display*, XFontStruct*, XExtCodes*
-#endif
 ); 
 
 extern int (*XESetCloseDisplay(
-#if NeedFunctionPrototypes
     Display*		/* display */,
     int			/* extension */,
     int (*) (
-#if NeedNestedPrototypes
 	      Display*			/* display */,
               XExtCodes*		/* codes */
-#endif
             )		/* proc */    
-#endif
 ))(
-#if NeedNestedPrototypes
     Display*, XExtCodes*
-#endif
 );
 
 extern int (*XESetError(
-#if NeedFunctionPrototypes
     Display*		/* display */,
     int			/* extension */,
     int (*) (
-#if NeedNestedPrototypes
 	      Display*			/* display */,
               xError*			/* err */,
               XExtCodes*		/* codes */,
               int*			/* ret_code */
-#endif
             )		/* proc */    
-#endif
 ))(
-#if NeedNestedPrototypes
     Display*, xError*, XExtCodes*, int*
-#endif
 );
 
 extern char* (*XESetErrorString(
-#if NeedFunctionPrototypes
     Display*		/* display */,
     int			/* extension */,
     char* (*) (
-#if NeedNestedPrototypes
 	        Display*		/* display */,
                 int			/* code */,
                 XExtCodes*		/* codes */,
                 char*			/* buffer */,
                 int			/* nbytes */
-#endif
               )		/* proc */	       
-#endif
 ))(
-#if NeedNestedPrototypes
     Display*, int, XExtCodes*, char*, int
-#endif
 );
 
 extern void (*XESetPrintErrorValues (
-#if NeedFunctionPrototypes
     Display*		/* display */,
     int			/* extension */,
     void (*)(
-#if NeedNestedPrototypes
 	      Display*			/* display */,
 	      XErrorEvent*		/* ev */,
 	      void*			/* fp */
-#endif
 	     )		/* proc */
-#endif
 ))(
-#if NeedNestedPrototypes
     Display*, XErrorEvent*, void*
-#endif
 );
 
 extern Bool (*XESetWireToEvent(
-#if NeedFunctionPrototypes
     Display*		/* display */,
     int			/* event_number */,
     Bool (*) (
-#if NeedNestedPrototypes
 	       Display*			/* display */,
                XEvent*			/* re */,
                xEvent*			/* event */
-#endif
              )		/* proc */    
-#endif
 ))(
-#if NeedNestedPrototypes
     Display*, XEvent*, xEvent*
-#endif
 );
 
 extern Status (*XESetEventToWire(
-#if NeedFunctionPrototypes
     Display*		/* display */,
     int			/* event_number */,
     Status (*) (
-#if NeedNestedPrototypes
 	      Display*			/* display */,
               XEvent*			/* re */,
               xEvent*			/* event */
-#endif
             )		/* proc */   
-#endif
 ))(
-#if NeedNestedPrototypes
     Display*, XEvent*, xEvent*
-#endif
 );
 
 extern Bool (*XESetWireToError(
-#if NeedFunctionPrototypes
     Display*		/* display */,
     int			/* error_number */,
     Bool (*) (
-#if NeedNestedPrototypes
 	       Display*			/* display */,
 	       XErrorEvent*		/* he */,
 	       xError*			/* we */
-#endif
             )		/* proc */   
-#endif
 ))(
-#if NeedNestedPrototypes
     Display*, XErrorEvent*, xError*
-#endif
 );
 
 extern void (*XESetBeforeFlush(
-#if NeedFunctionPrototypes
     Display*		/* display */,
     int			/* error_number */,
     void (*) (
-#if NeedNestedPrototypes
 	       Display*			/* display */,
 	       XExtCodes*		/* codes */,
-	       char*			/* data */,
+	       _Xconst char*		/* data */,
 	       long			/* len */
-#endif
             )		/* proc */   
-#endif
 ))(
-#if NeedNestedPrototypes
-    Display*, XExtCodes*, char*, long
-#endif
+    Display*, XExtCodes*, _Xconst char*, long
 );
 
 /* internal connections for IMs */
 
 typedef void (*_XInternalConnectionProc)(
-#if NeedFunctionPrototypes
     Display*			/* dpy */,
     int				/* fd */,
     XPointer			/* call_data */
-#endif
 );
 
 
 extern Status _XRegisterInternalConnection(
-#if NeedFunctionPrototypes
     Display*			/* dpy */,
     int				/* fd */,
     _XInternalConnectionProc	/* callback */,
     XPointer			/* call_data */
-#endif
 );
 
 extern void _XUnregisterInternalConnection(
-#if NeedFunctionPrototypes
     Display*			/* dpy */,
     int				/* fd */
-#endif
 );
 
 /* Display structure has pointers to these */
@@ -1227,28 +1230,84 @@ struct _XConnWatchInfo {	/* info from XAddConnectionWatch */
     struct _XConnWatchInfo *next;
 };
 
-#ifdef __EMX__
+#ifdef __UNIXOS2__
 extern char* __XOS2RedirRoot(
-#if NeedFunctionPrototypes
     char*
-#endif
 );
 #endif
 
 extern int _XTextHeight(
-#if NeedFunctionPrototypes
     XFontStruct*	/* font_struct */,
     _Xconst char*	/* string */,
     int			/* count */
-#endif
 );
 
 extern int _XTextHeight16(
-#if NeedFunctionPrototypes
     XFontStruct*	/* font_struct */,
     _Xconst XChar2b*	/* string */,
     int			/* count */
-#endif
 );
 
+#if defined(WIN32)
+
+extern int _XOpenFile(
+    _Xconst char*	/* path */,
+    int			/* flags */
+);
+
+extern void* _XFopenFile(
+    _Xconst char*	/* path */,
+    _Xconst char*	/* mode */
+);
+
+extern int _XAccessFile(
+    _Xconst char*	/* path */
+);
+#else
+#define _XOpenFile(path,flags) open(path,flags)
+#define _XFopenFile(path,mode) fopen(path,mode)
+#endif
+
+/* EvToWire.c */
+extern Status _XEventToWire(Display *dpy, XEvent *re, xEvent *event);
+
+extern int _XF86LoadQueryLocaleFont(
+    Display*		/* dpy */,
+    _Xconst char*	/* name*/,
+    XFontStruct**	/* xfp*/,
+    Font*		/* fidp */
+);
+
+extern void _XProcessWindowAttributes (
+    register Display *dpy,
+    xChangeWindowAttributesReq *req,
+    register unsigned long valuemask,
+    register XSetWindowAttributes *attributes);
+
+extern int _XDefaultError(
+        Display *dpy,
+        XErrorEvent *event);
+
+extern int _XDefaultIOError(
+        Display *dpy);
+
+extern void _XSetClipRectangles (
+    register Display *dpy,
+    GC gc,
+    int clip_x_origin, int clip_y_origin,
+    XRectangle *rectangles,
+    int n,
+    int ordering);
+
+Status _XGetWindowAttributes(
+    register Display *dpy,
+    Window w,
+    XWindowAttributes *attr);
+
+int _XPutBackEvent (
+    register Display *dpy, 
+    register XEvent *event);
+
 _XFUNCPROTOEND
+
+#endif /* _XLIBINT_H_ */

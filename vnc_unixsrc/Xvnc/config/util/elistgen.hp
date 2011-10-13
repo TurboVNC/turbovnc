@@ -1,5 +1,5 @@
 XCOMM!/bin/sh
-XCOMM $XConsortium: elistgen.hp /main/2 1996/12/04 10:13:14 swick $
+XCOMM $Xorg: elistgen.hp,v 1.3 2000/08/17 19:41:52 cpqbld Exp $
 XCOMM
 XCOMM #########################################################################
 XCOMM Construct shared-library export lists for HP-UX based on standardized

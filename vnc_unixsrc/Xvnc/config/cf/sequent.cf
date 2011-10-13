@@ -1,84 +1,444 @@
-XCOMM platform:  $XConsortium: sequent.cf /main/4 1996/12/04 10:10:49 swick $
+XCOMM platform:  $XConsortium: sequent.cf$
+
 /*
  * SET VERSION NUMBERS BEFORE MAKING MAKEFILES; also, you'll need to install
  * util/scripts/bsdinstall.sh before doing a "make install"
  */
 
-#if defined(DynixPtxArchitecture) || defined(_SEQUENT_)
+/*
+ * Version numbers are set one of two ways:
+ *
+ * If the target version is different than the machine you are building on,
+ * set the target versions using the environmental variable IMAKEINCLUDES.
+ * Example: IMAKEINCLUDES="-I. -DOSMajorVersion=4 -DOSMinorVersion=4"
+ * This is usually only done at Sequent when building a product using
+ * cross compiling tools and target headers and libraries.
+ *
+ * Otherwise, the imake will use uname(2) to calculate the default to be
+ * the same as the machine you are building on.  The X11R6 imake will set
+ * DefaultOS*Version macros to be these default values.
+ * Those default values will be used in the assignments below.
+ * This is the recommended method to be used by customers.
+ */
 
-# ifndef OSName
-#  define OSName		Dynix/ptx
-# endif
-# ifndef OSMajorVersion
-#  define OSMajorVersion	2
-# endif
-# ifndef OSMinorVersion
-#  define OSMinorVersion	0
-# endif
-
-# define SystemV		YES
-# define SymbolTableFlags
-# define DefaultCCOptions	SymbolTableFlags
-# define SharedLibraryCCOptions	DefaultCCOptions
-# define StandardDefines		-DSYSV
-# define MotifDefines		-DSTRINGS_ALIGNED -DNO_REGCOMP
-# define ExtraLibraries		$(XBSDLIB) -lsocket -linet -lnsl -lseq
-# define XmExtraLibraries	/* -lgen (not official i386 ABI?) */
-
-# define NeedBerklib		YES
-# define HasShadowPasswd	YES
-# define InstallXdmConfig	YES
-# define HasSockets		YES
+				/* defaults from imake via uname(2) */
+#ifndef OSName
+#define OSName			DefaultOSName
+#endif
+#ifndef OSMajorVersion
+#define OSMajorVersion		DefaultOSMajorVersion
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion		DefaultOSMinorVersion
+#endif
+#ifndef OSTeenyVersion
+#define OSTeenyVersion		DefaultOSTeenyVersion
+#endif
+XCOMM operating system:  OSName V/**/OSMajorVersion./**/OSMinorVersion./**/OSTeenyVersion
 
 /*
- * Plan to remove Prototypes defines and use -Xc with
- * Dynix/ptx:
- *   OSMajorVersion=4
- *   OSMinorVersion=0
- * Using -Xc with Version 4.0 will elliminate most warnings
+ * Sequent Dynix/PTX 4.x.x (SVR4) and later operating systems.
+ *
+ * Sequent Dynix/PTX 4.2.3 and later operating systems are supported with
+ * the X11R6 sequent.cf and other X11R6 configuration files.
+ * Specifically 4.4.2 and later have been tested.
+ *
+ * Attempting to use these X11R6 configuration files and X11R6 source files
+ * with early versions of Dynix/PTX 4.x.x may work, however that will not be
+ * tested or supported at Sequent.
+ * Sequent Dynix/PTX 2.1.x has been retired so support for it and earlier
+ * releases has been removed.
  */
-# define NeedFunctionPrototypes	YES
-# define NeedNestedPrototypes	YES
-# define NeedConstPrototypes	YES
-# define NeedVarargsPrototypes	YES
 
+#if OSMajorVersion >= 4
+
+#define SystemV4		YES
+#define SequentVersionDefines	-DSVR4
+#define ExtraLibraries		
+#define ForceNormalLib		YES
+#define HasRequiredLibs		YES
+#define NeedBerklib		NO	/* gettimeofday in libc */
+
+#define XmExtraLibraries	/* for ABI-compliance do not use -lgen here */
+#define MotifDefines		-DXM_STRINGS_1_2_2_STATE  /* code review */
+
+/* initial port does not use multiple socket libs, default libsocket.so.1.1 */
+#define HasMultipleSockets	NO	/* obsolete */ /* only libsocket.so.1.1 */
+
+#endif /* OSMajorVersion >= 4 */
 
 /*
- * unfortunately pbmplus uses this...
+ * Below this line are generic defines that apply to all Sequent systems.
+ * However they are currently tested with only OSMajorVersion >= 4
  */
-RANLIB = :
 
-#endif /* defined(DynixPtxArchitecture) || defined(_SEQUENT_) */
+/*
+ * The following cpp macro defines are order independent,
+ * since the right-hand-side is constant.
+ * Therefore these are simply listed in alphabetical order.
+ * Macros defined later may use these definitions.
+ */
 
-#if defined(Dynix3Architecture) || defined(sequent)
+/* 
+ * Threads.tmpl cpp macros.
+ * Sequent overrides the Threads.tmpl defaults with the values below.
+ * Sequent has native threads for ptx 4.5.0 and higher.
+ */
 
-# ifndef OSName
-#  define OSName		Dynix 3
-# endif
-# ifndef OSMajorVersion
-#  define OSMajorVersion	3
-# endif
-# ifndef OSMinorVersion
-#  define OSMinorVersion	2
-# endif
+#if ( OSMajorVersion >= 5 || (OSMajorVersion == 4 && OSMinorVersion >= 5) )
 
-# define SymbolTableFlags	-W0,-Nn7500 -W0,-Nd10000
-# define DefaultCCOptions	SymbolTableFlags
-# define StandardDefines	-DX_NOT_STDC_ENV -DX_NOT_POSIX
-# define ExtraLibraries		-lseq
+#define HasPosixThreads			YES
+#define HasThreadSafeAPI		YES
+#define ThreadedX			YES
+#define ThreadsLibraries		/**/
+#define ThreadsCplusplusLibraries	/**/
+#define ThreadPreStdAPIDefines		/**/
+#define ThreadsCompileFlags		-Kthread
+#define ThreadsCplusplusCompileFlags	-Kthread
+#define SharedThreadReqs		/**/
 
-# define HasVoidSignalReturn	NO
-# define HasBsearch		NO
+/*
+ * THREADS macro and environment variable used with Sequent commands only.
+ * We use THREADS rather than the generic X11 THREADS_CFLAGS because we 
+ * want to ensure that the macro is defined for all compiles and not just
+ * those Makefiles built from a Imakefile that includes Threads.tmpl.
+ *
+ * Sequent compiler option -Kthread will also define -D_SEQUENT_THREADS.
+ * Currently using -Kthread is the recommended interface to this define.
+ * Currently there are no extra includes files using -D_SEQUENT_THREADS.
+ * Currently no reason for makedepend or cpp to use -D_SEQUENT_THREADS.
+ * If needed in the future, we would add to ProjectThreadsDefines
+ *
+ * #define ProjectThreadsDefines -DXTHREADS -D_SEQUENT_THREADS
+ */
 
-# define SetTtyGroup		YES
+  THREADS = -Kthread
 
-#endif /* defined(Dynix3Architecture) || defined(sequent) */
+#endif /* ptx 4.5.0 or greater has threads */
 
-#define BuildServer		NO
-#define BuildXInputLib		NO
-#define BuildPexClients		NO
+/* 
+ * Imake.tmpl cpp macros.
+ * Sequent overrides the Imake.tmpl defaults with the values below.
+ */
 
-#define LnCmd			ln -s
+#define BuildLibPathVar		LD_LIBRARY_PATH
+#define DefaultCCOptions	-Xa
+#define ExpandManNames		YES
+#define ExtraFilesToClean	*.z
+#define HasNdbm			YES
+#define HasShadowPasswd		YES
+#define HasSockets		YES	/* default */
+#define HasVarDirectory		NO
+#ifdef UseInstalled
+#define InstallCmd $(BINDIR)/ptxinst -t "$(TOOLS)"
+#else
+#define InstallCmd $(SHELL) $(SCRIPTSRC)/ptxinst.sh
+#endif /* UseInstalled */
+#define InstPgmFlags		-s -m 0555 -o bin -g bin
+#define InstBinFlags		-s -m 0555 -o bin -g bin
+#define InstLibFlags		-m 0444 -o bin -g bin
+#define InstShLibFlags		-m 0555 -o bin -g bin
+#define Malloc0ReturnsNull	YES
+#define ManSuffix	1		/* use just one tab or cpp will die */
+#define LibManSuffix	3x		/* use just one tab or cpp will die */
+#define LibmanDir	$(MANSOURCEPATH)3
+#define MiscManSuffix	5x		/* use just one tab or cpp will die */
+#define MiscManDir	$(MANSOURCEPATH)5
+#define MkdirHierCmd		mkdir -p
+#define NeedConstPrototypes     YES
+#define NeedFunctionPrototypes  YES
+#define NeedNestedPrototypes    YES
+#define NeedVarargsPrototypes   YES
+#define StripInstalledPrograms	YES
+#define SystemManDirectory	/usr/catman
+#define TermcapLibrary		-lcurses	/* code review for SVR4 ? */
+#define TerminfoDir		/usr/lib/terminfo	/* Sequent addition */
+#define ToolkitStringsABIOptions -intelabi
 
-/* libgen is not part of the i386 ABI.  (Are both architectures i386??) */
-#define UseLocalRegex		YES
+
+/* 
+ * X11.tmpl cpp macros.
+ * Sequent overrides the X11.tmpl defaults with the values below.
+ */
+
+#define BuildDps		YES
+#define BuildServer		YES
+#define BuildXF86DGA		NO	/* DGA has no meaning on Sequent HW */
+#define BuildXF86MiscExt	NO	/* turn off the server portion */
+#define BuildXF86VidModeExt	NO	/* turn off the server portion */
+#define BuildXInputExt		YES
+#define BuildXKBuilib		YES	/* override NO set in xorg.cf */
+#define ConnectionFlags		-DTCPCONN
+#define DefaultSystemPath	/bin:/etc:/usr/bin:$(BINDIR)
+#define DefaultUserPath		:/bin:/usr/bin:$(BINDIR)
+#define HasPlugin		YES
+#define HasXServer		NO
+#define InstallFSConfig		YES	/* safe since we install to DESTDIR */
+#define InstallXdmConfig	YES	/* safe since we install to DESTDIR */
+#define MotifBC			NO	/* default, code review from X11R5  */
+#define XdmServersType	fs	/* One tab here.  Needed if BuildServer YES */
+#define XtMalloc0ReturnsNullDefines Malloc0ReturnsNullDefines -DXTMALLOC_BC
+#define XprtServer		YES
+#define XVirtualFramebufferServer	YES
+#define XF86SVGAServer		NO	/* Don't build the XFree86 servers */
+#define XF86S3Server		NO
+#define XF86S3VServer		NO
+#define XF86I8514Server		NO
+#define XF86Mach8Server		NO
+#define XF86Mach32Server	NO
+#define XF86Mach64Server	NO
+#define XF86P9000Server		NO
+#define XF86AGXServer		NO
+#define XF86I128Server		NO
+#define XF86GLINTServer		NO
+#define XF86REALimageServer	NO
+
+/* 
+ * Motif.tmpl cpp macros.
+ * Sequent overrides the Motif.tmpl default with the values below.
+ */
+
+#define GencatCmd             /usr/lbin/gencat
+
+/* Port Sequent macro DontBuildMotifConfig to Motif 2.1 */
+/*
+ * #ifndef MetroLink
+ * #define DontBuildMotifConfig
+ * #endif
+ */
+
+/* 
+ * Sequent added cpp macros.
+ * 
+ * The following cpp macro defines have been introduced by Sequent.
+ * They will be referenced in Sequent patches sent to TOG.
+ * They may be moved above if accepted by TOG or X.org.
+ */
+
+#define AdminBaseDir		  /usr/admin.ptx/etc/base.dir
+#define MessageCatDir		  /usr/lib/message/C
+#define NeedXinputAlias		  YES
+#define UseHidesymsLists	  YES
+#define XlbiffMailPath		  /usr/mail/%s	/* used by contrib xlbiff */
+
+/* 
+ * Imake.tmpl, X11.tmpl, or other order dependent cpp defines.
+ *
+ * The following cpp macro defines are order dependent.
+ * They depend on previously defined cpp macros.
+ * Do not change the order.
+ */
+#define SharedLibraryCCOptions	DefaultCCOptions
+#define StandardDefines		SequentVersionDefines -DOSMAJORVERSION=OSMajorVersion -DOSMINORVERSION=OSMinorVersion -DANSICPP -DDYNIX_C2 -DMetroLink
+#define StandardCppDefines	StandardDefines -D_SOCKET_VERSION=11 -DUnixCpp
+
+#ifdef ProjectRoot
+#define ManDirectoryRoot	ProjectRoot/**//catman
+#else
+#define ManDirectoryRoot	SystemManDirectory
+#endif
+#define XmanSearchPath		ManDirectoryRoot /* for X11R5 xman */
+
+/* 
+ * Sequent configuration environment specific to building X11 and Motif.
+ * This environment is only available when UseInstalled is not defined.
+ * Therefore this environment is not used by customers using xmkmf.
+ */
+
+#ifndef UseInstalled
+
+/* Product builds using local X11 and Motif trees */
+
+/*
+ * Provide libraries needed by nonX programs in the X11 build tree.
+ * These are not standard so the customer will be forced to add them to their
+ * Imakefile SYS_LIBRARIES if needed.  An ABI program may not want or need them,
+ * so we do not include them in the ExtraLibraries provided to customers
+ * when UseInstalled is defined.  We add them here as a convenience when
+ * building the entire X11 tree (at Sequent or the contractor).
+ */
+#undef ExtraLibraries
+#define ExtraLibraries	-lsocket -lnsl
+
+/*
+ * Sequent builds X11 and Motif in the same tree.
+ * The Motif project files include the X11 project files.
+ *
+ * Later we may use the Local project files similer the the lynx.cf
+ *
+ * #define LocalTmplFile		<Motif.tmpl>
+ * #define LocalRulesFile		<Motif.rules>
+ */
+
+/* Try the Metro Link method. */
+
+#ifndef MetroLink
+#undef ProjectTmplFile
+#define ProjectTmplFile		<Motif.tmpl>
+#undef ProjectRulesFile
+#define ProjectRulesFile	<Motif.rules>
+#endif
+
+/*
+ * Later change to Metro Link directory layout,
+ * or allow $(TOP)/../motif21
+ */
+
+/* Try the Metro Link method. */
+
+#ifndef MetroLink
+#define MTop $(TOP)/motif21
+#endif
+
+/*
+ * Set the Program macros to be correct for the target machine.
+ * This will avoid using any crosstools as hardwired strings
+ * built into binaries that will run on the target machine.
+ *
+ * These macro names need to be ported from X11R5 to X11R6.
+ */
+#define ArProgramBase	ar
+#define CppProgram	/lib/cpp
+#define CcProgram	cc
+#define RanlibProgram	ranlib
+
+/*
+ * Build all the X11 debug libaries *_d.a for use by Sequent Service
+ */
+
+/*
+ * Set DebugLibDefault YES for Sequent to build all debug libs.
+ * If we move this to generic code to *.tmpl files,
+ * use the default code below that sets the default NO
+ */
+
+#define DebugLibDefault		NO
+
+#ifndef DebugLibDefault
+#define DebugLibDefault		NO
+#endif
+
+#define DebugLibX11		DebugLibDefault	/* debugged X library */
+#define DebugLibXext		DebugLibDefault	/* debugged Xext library */
+#define DebugLibXau		DebugLibDefault	/* debugged auth library */
+#define DebugLibXdmcp		DebugLibDefault	/* debugged XDMCP library */
+#define DebugLibXmu		DebugLibDefault	/* debugged Xmu library */
+#define DebugLibXp              DebugLibDefault	/* debugged Xp library */
+#define DebugLibXt		DebugLibDefault	/* debugged toolkit library */
+#define DebugLibXa		DebugLibDefault	/* debugged audio library */
+#define DebugLibXaw		DebugLibDefault	/* debugged widget library */
+#define DebugLibXi		DebugLibDefault	/* debugged Xi library */
+#define DebugLibXtst		DebugLibDefault	/* debugged Xtst library */
+#define DebugLibICE		DebugLibDefault	/* debugged ICE library */
+#define DebugLibSM		DebugLibDefault	/* debugged SM library */
+#define DebugLibXkey		DebugLibDefault	/* debugged Xkey library */
+#define DebugLibFS		DebugLibDefault	/* debugged FS library */
+
+/*
+ * Build all the Motif debug libaries *_d.a for use by Service
+ */
+#define DebugLibXm		DebugLibDefault
+#define DebugLibMrm		DebugLibDefault
+#define DebugLibUil		DebugLibDefault
+
+/*
+ * Build all the Adobe DPS debug libaries *_d.a for use by Service
+ */
+#define DebugLibDps		DebugLibDefault
+
+#endif /* ! UseInstalled */
+
+/*
+ * Sequent general make macros.
+ * X11R6.5 should migrate these to Imake.tmpl.
+ */
+
+XCOMM Sequent general make macros.
+
+#ifndef PackCmd
+#define PackCmd pack
+#endif
+            PACK = PackCmd
+
+/*
+ * Sequent unique make macros.  These will always be unique to Sequent.
+ * We introduce them here in sequent.cf since cpp macros are set in sequent.cf.
+ * We may later move them to sequentLib.tmpl.
+ */
+
+XCOMM Sequent unique make macros.
+
+     ADMINBASEDIR = AdminBaseDir
+    MESSAGECATDIR = MessageCatDir
+
+/*
+ * DPS default values (unique to sequent)
+ */
+#ifndef PswrapCmd
+#define PswrapCmd     pswrap
+#endif
+
+#ifdef UseHidesymsLists
+
+#ifndef HidesymsCmd
+#define HidesymsCmd /usr/lib/hidesyms/hidesyms
+#endif
+#ifndef HsAcppCmd
+#define HsAcppCmd /lib/acpp
+#endif
+/*
+ * When building in the X11 tree.
+ * For shared libs,   hidesyms executes in a subdir.
+ * For unshared libs, hidesyms executes in a subsubdir.
+ * Therefore we add both of these to the acpp path:
+ * ../../$(BUILDINCROOT)/lib/hidesyms:../$(BUILDINCROOT)/lib/hidesyms
+ */
+#ifndef HsAcppLocalPath
+# define HsAcppLocalPath ../../$(BUILDINCROOT)/lib/hidesyms:../$(BUILDINCROOT)/lib/hidesyms
+#endif
+#ifndef HsAcppSystemPath
+# define HsAcppSystemPath /usr/lib/hidesyms
+#endif
+#ifndef HsAcppPath
+# ifdef UseInstalled
+# define HsAcppPath HsAcppSystemPath
+# else
+# define HsAcppPath HsAcppLocalPath:HsAcppSystemPath
+# endif /* UseInstalled */
+#endif
+/* 
+ * note: -DABI_SHARED_OBJECT requires a temporary fix added to 
+ * Xt/Error.c to provide missing _abi_* routines not in libc.so.1.
+ * When the base adds those missing _abi_* to libc.so.1,
+ * then the code in Xt/Error.c can be removed and the corresponding
+ * symbols added to Xt/libXt.hs can be removed.
+ */
+#ifndef HsAcppDefines
+#define HsAcppDefines -DABI_SHARED_OBJECT -D_SOCKET_VERSION=11 $(THREADS_DEFINES)
+#endif
+
+/*
+ * For shared libs, hidesyms executes in a subdir,
+ * therefore we add a -L../$(BUILDLIBDIR)
+ */
+#ifndef LdPreLib
+#ifndef UseInstalled
+#define LdPreLib -L$(BUILDLIBDIR) -L../$(BUILDLIBDIR)
+#endif
+#endif
+
+XCOMM HIDESYMS is for filtering system library symbols.
+
+         HIDESYMS = HidesymsCmd
+       HSACPPPATH = HsAcppPath
+        HSACPPCMD = HsAcppCmd
+    HSACPPDEFINES = HsAcppDefines
+           HSACPP = $(HSACPPCMD) -Y $(HSACPPPATH) $(HSACPPDEFINES)
+            HSCMD = $(HIDESYMS) -z -p "$(HSACPP)"
+
+#endif /* UseHidesymsLists */
+
+#if OSMajorVersion >= 4
+#include <xorg.cf>
+#include <sequentLib.rules>	/* include after macros, before Motif.rules */
+#endif /* OSMajorVersion >= 4 */

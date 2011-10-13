@@ -1,16 +1,14 @@
-/* $XConsortium: AuLock.c,v 1.15 94/04/17 20:15:43 rws Exp $ */
-/* $XFree86: xc/lib/Xau/AuLock.c,v 3.0 1994/10/20 06:04:31 dawes Exp $ */
+/* $Xorg: AuLock.c,v 1.4 2001/02/09 02:03:42 xorgcvs Exp $ */
 
 /*
 
-Copyright (c) 1988  X Consortium
+Copyright 1988, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -18,56 +16,46 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 */
+/* $XFree86: xc/lib/Xau/AuLock.c,v 3.6 2002/05/31 18:45:43 dawes Exp $ */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <X11/Xauth.h>
 #include <X11/Xos.h>
 #include <sys/stat.h>
 #include <errno.h>
-#if defined(X_NOT_STDC_ENV)
-extern int errno;
-#define Time_t long
-extern Time_t time ();
-#else
 #include <time.h>
 #define Time_t time_t
-#endif
 #ifndef X_NOT_POSIX
 #include <unistd.h>
 #else
 #ifndef WIN32
 extern unsigned	sleep ();
 #else
+#include <X11/Xwindows.h>
 #define link rename
 #endif
 #endif
-#ifdef __EMX__
+#ifdef __UNIXOS2__
 #define link rename
 #endif
 
-#if NeedFunctionPrototypes
 int
 XauLockAuth (
 _Xconst char *file_name,
 int	retries,
 int	timeout,
 long	dead)
-#else
-int
-XauLockAuth (file_name, retries, timeout, dead)
-char	*file_name;
-int	retries;
-int	timeout;
-long	dead;
-#endif
 {
     char	creat_name[1025], link_name[1025];
     struct stat	statb;
@@ -94,7 +82,7 @@ long	dead;
     
     while (retries > 0) {
 	if (creat_fd == -1) {
-	    creat_fd = creat (creat_name, 0666);
+	    creat_fd = open (creat_name, O_WRONLY | O_CREAT | O_EXCL, 0600);
 	    if (creat_fd == -1) {
 		if (errno != EACCES)
 		    return LOCK_ERROR;

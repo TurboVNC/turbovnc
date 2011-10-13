@@ -1,18 +1,18 @@
-XCOMM platform:  $XConsortium: Win32.cf /main/51 1996/12/19 14:20:08 lehors $
+XCOMM platform:  $Xorg: Win32.cf,v 1.3 2000/08/17 19:41:46 cpqbld Exp $
 
 #ifndef OSName
-#define OSName			Microsoft Windows NT 4.0
+#define OSName DefaultOSName
 #endif
-XCOMM operating system:  OSName
 #ifndef OSMajorVersion
-#define OSMajorVersion		4
+#define OSMajorVersion	DefaultOSMajorVersion	
 #endif
 #ifndef OSMinorVersion
-#define OSMinorVersion		0
+#define OSMinorVersion	DefaultOSMinorVersion
 #endif
 #ifndef OSTeenyVersion
-#define OSTeenyVersion		0
+#define OSTeenyVersion	DefaultOSTeenyVersion
 #endif
+XCOMM operating system:  OSName OSMajorVersion./**/OSMinorVersion
 
 #ifndef CompilerMajorVersion
 /* 0 == NT 3.1 Win32 SDK, 2 == MSVC++ 2, 4 == MSVC 4 */
@@ -42,8 +42,13 @@ XCOMM operating system:  OSName
 #define MvCmd ren
 #define RmCmd del
 #ifndef RmTreeCmd
-/*#define RmTreeCmd del /q /s */
-#define RmTreeCmd rm -rfx
+XCOMM choices here include:
+XCOMM   o `del /q /s` and live with pressing the "any" key
+XCOMM   o `deltree, copied from MS-DOS 5
+XCOMM   o `rm -rfx` from the SDK Subscription (MSTOOLS in your Path)
+XCOMM   o `rm -rf` from the GNU file utilities
+XCOMM We're using the GNU file utilities
+#define RmTreeCmd rm -rf
 #endif
 #define CcCmd cl
 #define HasCplusplus		YES
@@ -64,7 +69,7 @@ XCOMM operating system:  OSName
 #endif
 #define ArCmd ArCmdBase
 #define CplusplusCmd cl
-#define MkdirHierCmd mkdir
+#define MkdirHierCmd $(CONFIGSRC:/=\)\util\mkdirhier
 #define InstallCmd copy
 #define InstPgmFlags /**/
 #define InstBinFlags /**/

@@ -1,0 +1,323 @@
+XCOMM $Xorg: sequentLib.rules,v 1.3 2000/08/17 19:41:48 cpqbld Exp $
+
+/*
+ * SVR4 shared library rules
+ */
+
+#ifndef HasSharedLibraries
+# define HasSharedLibraries YES
+#endif
+#ifndef SharedDataSeparation
+# define SharedDataSeparation NO
+#endif
+#ifndef SharedCodeDef
+# define SharedCodeDef /**/
+#endif
+#ifndef SharedLibraryDef
+# define SharedLibraryDef /**/
+#endif
+#ifndef ShLibIncludeFile
+# define ShLibIncludeFile <sequentLib.tmpl>
+#endif
+#ifndef SharedLibraryLoadFlags
+/* Sequent may need to implement the X11R5 HasMultipleSockets ? */
+# if HasMultipleSockets
+#  define SharedLibraryLoadFlags -G -z text $(DEFAULTSOCKETLDOPTIONS)
+#  define ExtraLoadOptions $(DEFAULTSOCKETLDOPTIONS)
+# else
+/* #  define SharedLibraryLoadFlags -G -z text */
+#  define SharedLibraryLoadFlags -G
+#  define ExtraLoadOptions
+# endif
+#endif
+#ifndef PositionIndependentCFlags
+# if HasGcc2
+#  define PositionIndependentCFlags -fpic
+# else
+#  define PositionIndependentCFlags -K PIC
+# endif
+#endif
+#ifndef PositionIndependentCplusplusFlags
+# if HasGcc2ForCplusplus
+#  define PositionIndependentCplusplusFlags -fpic
+# else
+#  define PositionIndependentCplusplusFlags -K PIC
+# endif
+#endif
+#ifndef UseExportLists
+# define UseExportLists NO
+#endif
+#ifndef UseHidesymsLists
+# define UseHidesymsLists NO
+#endif
+
+#if UseHidesymsLists
+
+#ifndef BuildHidesyms
+#define BuildHidesyms(libname)						@@\
+includes::								@@\
+	MakeDir($(BUILDLIBDIR)/hidesyms) 				@@\
+	@( if [ -f Concat(lib,libname.hs) ]; \				@@\
+	then \								@@\
+	(set -x; cd $(BUILDLIBDIR)/hidesyms && \			@@\
+	RemoveFile(Concat(lib,libname.hs)) && \				@@\
+	$(LN) $(BUILDLIBTOP)/../$(CURRENT_DIR)/Concat(lib,libname.hs) .); \	@@\
+	fi; )
+#endif /* BuildHidesyms */
+
+/*
+ * InstallHidesyms - install library hidesyms directive file. (Sequent only)
+ * Logic cloned from InstallNonExecFile.
+ * We do not list the hidesyms directive file as a dependency since it
+ * may not exist.
+ */
+#ifndef InstallHidesyms
+#define InstallHidesyms(libname)					@@\
+install::								@@\
+	MakeDir($(DESTDIR)/usr/lib/hidesyms) 				@@\
+	@( if [ -f Concat(lib,libname.hs) ]; then \			@@\
+	$(INSTALL) $(INSTALLFLAGS) $(INSTDATFLAGS) Concat(lib,libname.hs) $(DESTDIR)/usr/lib/hidesyms; fi; )
+#endif /* InstallHidesyms */
+
+/*
+ * InstallLibrary - generate rules to install the indicated library.
+ *
+ * Sequent includes an extra "install::" target to install hidesyms files
+ * and an extra "includes::" target to export library hidesyms files.
+ * Therefore whenever InstallLibrary is expanded the hidesyms targets
+ * will also be expanded.  This avoids changes to generic cf *.tmpl files.
+ */
+#ifndef InstallLibrary
+#define	InstallLibrary(libname,dest)					@@\
+install:: LibraryTargetName(libname)					@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS) LibraryTargetName(libname) $(DESTDIR)dest @@\
+	RanLibrary($(RANLIBINSTFLAGS) $(DESTDIR)dest/LibraryTargetName(libname))	@@\
+									@@\
+InstallHidesyms(libname)						@@\
+									@@\
+BuildHidesyms(libname)
+#endif /* InstallLibrary */
+
+/*
+ * Sequent additions to MakeLibrary for filtering objects
+ * with hidesyms before making a normal archive library.
+ */
+
+#ifndef MakeLibrary
+#define MakeLibrary(libname,objlist) ( $(RM) -r tmp_hs ; \		@@\
+	LIBNAME_HS=`dirname libname`/`basename libname .a`.hs ; \	@@\
+	(if [ -f $$LIBNAME_HS ]; \					@@\
+	then \								@@\
+	    LIBNAME_AR=../libname; \					@@\
+	    $(MKDIRHIER) tmp_hs && \					@@\
+	    $(CP) *.o tmp_hs && \					@@\
+	    cd tmp_hs && \						@@\
+	    $(HSCMD) -i ../$$LIBNAME_HS *.o ; \				@@\
+	else \								@@\
+	     LIBNAME_AR=libname; \					@@\
+	fi; \								@@\
+	$(AR) $$LIBNAME_AR objlist ) ;\					@@\
+	$(RM) -r tmp_hs )
+#endif
+
+#endif /* UseHidesymsLists */
+
+/*
+ * InstallSharedLibrary - generate rules to install the shared library.
+ */
+#ifndef InstallSharedLibrary
+# define InstallSharedLibrary(libname,rev,dest)				@@\
+install:: Concat(lib,libname.so.rev) 					@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) $(INSTALLFLAGS) $(INSTSHLIBFLAGS) Concat(lib,libname.so.rev) $(DESTDIR)dest @@\
+	$(RM) Concat($(DESTDIR)dest/lib,libname.so)			@@\
+	$(LN) Concat(lib,libname.so.rev) Concat($(DESTDIR)dest/lib,libname.so)
+#endif /* InstallSharedLibrary */
+
+/*
+ * InstallSharedLibraryData - generate rules to install the shared library data
+ */
+#ifndef InstallSharedLibraryData
+# define InstallSharedLibraryData(libname,rev,dest)
+#endif /* InstallSharedLibraryData */
+
+#ifndef LinkWithExports
+# if UseHidesymsLists
+#  define LinkWithExports(libname,rev,solist,down,up) \
+	$(RM) -r tmp_hs							@@\
+	( if [ -f Concat(lib,libname.hs) ]; \				@@\
+	then \								@@\
+	    LIBNAME_SO=../$@~; \					@@\
+	    mkdir tmp_hs; \						@@\
+	    cd down; \							@@\
+	    $(CP) *.o up/tmp_hs && \					@@\
+	    cd up/tmp_hs && \						@@\
+	    $(HSCMD) -i ../Concat(lib,libname.hs) *.o; \		@@\
+	else \								@@\
+	    LIBNAME_SO=up/$@~; \					@@\
+	    cd down; \							@@\
+	fi; \								@@\
+	$(CCENVSETUP) $(LD) -o $$LIBNAME_SO $(SHLIBLDFLAGS) -h $@ solist $(REQUIREDLIBS) )	@@\
+	$(RM) -r tmp_hs
+# else
+# if UseExportLists
+#  define LinkWithExports(libname,rev,solist,down,up) \
+	(cd down; $(CCENVSETUP) $(LD) -o up/$@~ $(SHLIBLDFLAGS) -h $@ solist $(REQUIREDLIBS))	@@\
+	if [ -f Concat(lib,libname.elist) ]; then \			@@\
+	    $(RM) down/$@.exports $@.list; \				@@\
+	    $(CPP) $(ALLINCLUDES) $(EXTRA_DEFINES) $(PROTO_DEFINES) $(THREADS_DEFINES) $(DEFINES) Concat(lib,libname.elist) | CppSedMagic >$@.list; \	@@\
+	    $(EXPORTLISTGEN) $@~ $@.list > down/$@.exports; \		@@\
+	    (cd down; $(CCENVSETUP) $(LD) -o up/$@~ $(SHLIBLDFLAGS) -h $@ ShlibExportListOpt($@.exports) solist $(REQUIREDLIBS)); \	@@\
+	    $(RM) down/$@.exports $@.list; \				@@\
+	fi;
+# else
+#  define LinkWithExports(libname,rev,solist,down,up) \
+	(cd down; $(CCENVSETUP) $(LD) -o up/$@~ $(SHLIBLDFLAGS) -h $@ solist $(REQUIREDLIBS))
+# endif /* UseExportLists */
+# endif /* UseHidesymsLists */
+#endif
+
+/*
+ * SharedLibraryTarget - generate rules to create a shared library;
+ * build it into a different name so that we do not hose people by having
+ * the library gone for long periods.
+ */
+#ifndef SharedLibraryTarget
+# define SharedLibraryTarget(libname,rev,solist,down,up)		@@\
+AllTarget(Concat(lib,libname.so.rev))					@@\
+									@@\
+Concat(lib,libname.so.rev):  solist $(EXTRALIBRARYDEPS)			@@\
+	$(RM) $@~							@@\
+	LinkWithExports(libname,rev,solist,down,up)			@@\
+	$(RM) $@ 							@@\
+	$(MV) $@~ $@							@@\
+	$(RM) Concat(lib,libname.so)					@@\
+	$(LN) $@ Concat(lib,libname.so)					@@\
+	LinkBuildLibrary($@)						@@\
+	LinkBuildLibrary(Concat(lib,libname.so))			@@\
+									@@\
+clean::									@@\
+	$(RM) Concat(lib,libname.so.rev) Concat(lib,libname.so)
+
+#endif /* SharedLibraryTarget */
+
+/*
+ * SharedLibraryDataTarget - generate rules to create shlib data file;
+ */
+#ifndef SharedLibraryDataTarget
+# define SharedLibraryDataTarget(libname,rev,salist)
+#endif /* SharedLibraryTarget */
+
+/*
+ * Sequent does not use the InstallManPageAliases rule.
+ * Sequent customer installation procedure uses makealiases(1M)
+ * after the initial product manpages are installed in system directories.
+ */
+#define InstallManPageAliases(file,destdir,aliases) /* use makealiases(1M) */
+
+/*
+ * Man pages need to be formatted when installed, so override the default
+ * imake rules.
+ */
+#if defined(UseInstalled)
+MANCAT = cat
+#else
+MANCAT = sed -f $(CONFIGSRC)/util/installman.sed
+#endif
+
+#define InstallManPageLong(file,destdir,dest)				@@\
+all:: file.$(MANSUFFIX).z						@@\
+									@@\
+file.$(MANSUFFIX).z:: file.man						@@\
+	@if [ -f file.man ]; \						@@\
+	then \								@@\
+	$(MANCAT) file.man | $(NEQN) | \				@@\
+	$(TBL) | $(NROFF) $(MANMACROS) | $(COL) > file.$(MANSUFFIX); \	@@\
+	$(RM) file.$(MANSUFFIX).z; \					@@\
+	$(PACK) -f file.$(MANSUFFIX); \					@@\
+	fi 								@@\
+									@@\
+file.man::								@@\
+									@@\
+install.man::								@@\
+	MakeDir($(DESTDIR)destdir)					@@\
+	@if [ -f file.$(MANSUFFIX).z ]; \				@@\
+	then \								@@\
+	$(INSTALL) -c $(INSTMANFLAGS) file.$(MANSUFFIX).z $(DESTDIR)destdir/dest.$(MANSUFFIX).z; \@@\
+	fi
+
+#define InstallMultipleManSuffix(list,dest,suff)			@@\
+install.man::								@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	MakeFlagsToShellFlags(i,set +e); \				@@\
+	@for i in list; do \						@@\
+	  (set -x; \							@@\
+	$(MANCAT) $$i.suff | $(NEQN) | \				@@\
+	$(TBL) | $(NROFF) $(MANMACROS) | $(COL) >/tmp/$$i.suff; \	@@\
+	  $(PACK) -f /tmp/$$i.suff; \					@@\
+	  $(INSTALL) -c $(INSTMANFLAGS) /tmp/$$i.suff.z $(DESTDIR)dest/$$i.$(MANSUFFIX).z; \	@@\
+	  $(RM) /tmp/$$i.suff.z); \					@@\
+	done
+
+#define InstallMultipleMan(list,dest)					@@\
+	InstallMultipleManSuffix(list,dest,man)
+
+/* 
+ * InstallMotifManPage relies on the fact that all the
+ * Imakefiles where it is used (or Makefile default value)
+ * will correctly define MANSUFFIX which may be
+ * either "section" or "section"x.
+ * Since we rely on MANSUFFIX being defined correctly in each Makefile
+ * we can also rely on MANDIR = $(MANSOURCEPATH)section
+ *
+ * CAUTION:
+ * The source file "file.section" may have the same name as
+ * the target file "file.$(MANSUFFIX)" so we must use temporary files
+ * so that we do not overwrite "file.section".
+ */
+#define InstallMotifManPage(file,section)				@@\
+all:: file.$(MANSUFFIX).z						@@\
+									@@\
+file.$(MANSUFFIX).z: file.section					@@\
+	@$(MANCAT) file.section | $(NEQN) | \				@@\
+	$(TBL) | $(NROFF) $(MANMACROS) | $(COL) > /tmp/file.man; \	@@\
+	$(RM) /tmp/file.man.z; \					@@\
+	$(PACK) -f /tmp/file.man; \					@@\
+	$(CP) /tmp/file.man.z file.$(MANSUFFIX).z; \			@@\
+	$(RM) /tmp/file.man.z						@@\
+									@@\
+install.man:: file.$(MANSUFFIX).z					@@\
+	MakeDir($(DESTDIR)$(MANDIR))					@@\
+	$(INSTALL) -c $(INSTMANFLAGS) file.$(MANSUFFIX).z $(DESTDIR)$(MANDIR)/file.$(MANSUFFIX).z
+
+/* 
+ * The Real_MessageCatalogRule defined in Motif.rules does not
+ * install the generated catalog file.  This rule adds an install
+ * clause to do that.
+ */
+#define Real_MessageCatalogRule(prefix)					@@\
+prefix.cat Concat(prefix,MsgCatI.h):					@@\
+	$(RM) Concat(prefix,MsgCatI.h) prefix.cat $(MLOCSRC)/C/msg/prefix.msg	@@\
+	$(MKCATTOOL) Concat(prefix,MsgCatI.h) prefix.msg > $(MLOCSRC)/C/msg/prefix.msg	@@\
+	$(GENCAT) prefix.cat $(MLOCSRC)/C/msg/prefix.msg		@@\
+									@@\
+includes:: prefix.cat Concat(prefix,MsgCatI.h)				@@\
+									@@\
+depend:: prefix.cat Concat(prefix,MsgCatI.h)				@@\
+									@@\
+all:: prefix.cat							@@\
+									@@\
+install:: prefix.cat							@@\
+	MakeDir($(DESTDIR)$(MESSAGECATDIR))				@@\
+	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS) prefix.cat $(DESTDIR)$(MESSAGECATDIR)/prefix.cat	@@\
+	$(RM) $(DESTDIR)$(MESSAGECATDIR)/prefix				@@\
+	$(LN) prefix.cat $(DESTDIR)$(MESSAGECATDIR)/prefix		@@\
+	MakeDir($(DESTDIR)$(NLSDIR))					@@\
+	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS) prefix.cat $(DESTDIR)$(NLSDIR)/prefix.cat	@@\
+	$(RM) $(DESTDIR)$(NLSDIR)/prefix				@@\
+	$(LN) prefix.cat $(DESTDIR)$(NLSDIR)/prefix			@@\
+									@@\
+clean::									@@\
+	$(RM) prefix.cat Concat(prefix,MsgCatI.h)
+

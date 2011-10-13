@@ -1,16 +1,14 @@
-/* $XConsortium: fntfilst.h,v 1.8 94/04/17 20:17:29 gildea Exp $ */
-/* $XFree86: xc/lib/font/include/fntfilst.h,v 3.0 1995/11/16 11:03:45 dawes Exp $ */
+/* $Xorg: fntfilst.h,v 1.5 2001/02/09 02:04:04 xorgcvs Exp $ */
 
 /*
 
-Copyright (c) 1991  X Consortium
+Copyright 1991, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -18,15 +16,16 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 */
+/* $XFree86: xc/lib/font/include/fntfilst.h,v 3.8 2002/12/09 17:30:00 dawes Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
@@ -35,11 +34,15 @@ in this Software without prior written authorization from the X Consortium.
 #ifndef _FONTFILEST_H_
 #define _FONTFILEST_H_
 
+#ifndef FONTMODULE
 #include <X11/Xos.h>
-#include "fontmisc.h"
-#include "fontstruct.h"
-#include "fntfil.h"
-#include "fontxlfd.h"
+#endif
+#ifndef XP_PSTEXT
+#include <X11/fonts/fontmisc.h>
+#endif
+#include <X11/fonts/fontstruct.h>
+#include <X11/fonts/fontxlfd.h>
+#include <X11/fonts/fntfil.h>
 
 typedef struct _FontName {
     char	*name;
@@ -128,17 +131,45 @@ typedef struct _FontDirectory {
 typedef struct _FontRenderer {
     char    *fileSuffix;
     int	    fileSuffixLen;
-    int	    (*OpenBitmap)(/* fpe, pFont, flags, entry, fileName, format, fmask */);
-    int	    (*OpenScalable)(/* fpe, pFont, flags, entry, fileName, vals, format, fmask */);
-    int	    (*GetInfoBitmap)(/* fpe, pFontInfo, entry, fileName */);
-    int	    (*GetInfoScalable)(/* fpe, pFontInfo, entry, fileName, vals */);
+    int	    (*OpenBitmap)(FontPathElementPtr /* fpe */, 
+			  FontPtr * /* pFont */,
+			  int /* flags */, 
+			  FontEntryPtr /* entry */, 
+			  char * /* fileName */, 
+			  fsBitmapFormat /* format */, 
+			  fsBitmapFormatMask /* mask */,
+			  FontPtr /* non_cachable_font */);
+    int	    (*OpenScalable)(FontPathElementPtr /* fpe */, 
+			    FontPtr * /* pFont */, 
+			    int /* flags */, 
+			    FontEntryPtr /* entry */, 
+			    char * /* fileName */, 
+			    FontScalablePtr /* vals */, 
+			    fsBitmapFormat /* format */, 
+			    fsBitmapFormatMask /* fmask */,
+			    FontPtr /* non_cachable_font */);
+    int	    (*GetInfoBitmap)(FontPathElementPtr /* fpe */, 
+			     FontInfoPtr /* pFontInfo */, 
+			     FontEntryPtr /* entry */, 
+			     char * /*fileName */);
+    int	    (*GetInfoScalable)(FontPathElementPtr /* fpe */, 
+			       FontInfoPtr /* pFontInfo */, 
+			       FontEntryPtr /* entry */, 
+			       FontNamePtr /* fontName */,
+			       char * /* fileName */, 
+			       FontScalablePtr /* vals */);
     int	    number;
     int     capabilities;	/* Bitmap components defined above */
 } FontRendererRec;
 
 typedef struct _FontRenders {
     int		    number;
-    FontRendererPtr *renderers;
+    struct _FontRenderersElement {
+        /* In order to preserve backward compatibility, the
+           priority field is made invisible to renderers */
+        FontRendererPtr renderer;
+        int priority;
+    } *renderers;
 } FontRenderersRec, *FontRenderersPtr;
 
 typedef struct _BitmapInstance {

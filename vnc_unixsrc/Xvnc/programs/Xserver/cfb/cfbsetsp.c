@@ -1,15 +1,13 @@
-/* $XConsortium: cfbsetsp.c,v 5.10 94/04/17 20:29:01 dpw Exp $ */
-/* $XFree86: xc/programs/Xserver/cfb/cfbsetsp.c,v 3.0 1996/06/29 09:05:49 dawes Exp $ */
+/* $Xorg: cfbsetsp.c,v 1.4 2001/02/09 02:04:38 xorgcvs Exp $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -17,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -47,10 +45,14 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
+/* $XFree86: xc/programs/Xserver/cfb/cfbsetsp.c,v 3.5tsi Exp $ */
 
-#include <stdlib.h>
-#include "X.h"
-#include "Xmd.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
+#include <X11/Xmd.h>
 #include "servermd.h"
 
 #include "misc.h"
@@ -70,6 +72,7 @@ SOFTWARE.
  * boxes, we may not want to start grabbing bits at psrc but at some offset
  * further on.) 
  */
+void
 cfbSetScanline(y, xOrigin, xStart, xEnd, psrc, alu, pdstBase, widthDst, planemask)
     int			y;
     int			xOrigin;	/* where this scanline starts */
@@ -84,15 +87,19 @@ cfbSetScanline(y, xOrigin, xStart, xEnd, psrc, alu, pdstBase, widthDst, planemas
     int			w;		/* width of scanline in bits */
     register int	*pdst;		/* where to put the bits */
     register int	tmpSrc;		/* scratch buffer to collect bits in */
-    int			dstBit;		/* offset in bits from beginning of 
-					 * word */
-    register int	nstart; 	/* number of bits from first partial */
-    register int	nend; 		/* " " last partial word */
     int			offSrc;
-    int		startmask, endmask, nlMiddle, nl;
+    int			nl;
 #if PSZ == 24
     register char *psrcb, *pdstb;
     register int	xIndex;
+#else
+    int			dstBit;		/* offset in bits from beginning of
+					 * word */
+    register int	nstart; 	/* number of bits from first partial */
+#if PSZ != 32 || PPW != 1
+    register int	nend; 		/* " " last partial word */
+#endif
+    int			startmask, endmask, nlMiddle;
 #endif
     DeclareMergeRop()
 
@@ -109,7 +116,6 @@ cfbSetScanline(y, xOrigin, xStart, xEnd, psrc, alu, pdstBase, widthDst, planemas
     offSrc = (xStart - xOrigin) & PIM;
 #endif
     w = xEnd - xStart;
-    dstBit = xStart & PIM;
 
 #if PSZ == 24
     nl = w;
@@ -124,6 +130,7 @@ cfbSetScanline(y, xOrigin, xStart, xEnd, psrc, alu, pdstBase, widthDst, planemas
       pdstb += 3;
     } 
 #else /* PSZ == 24 */
+    dstBit = xStart & PIM;
     if (dstBit + w <= PPW) 
     { 
 	maskpartialbits(dstBit, w, startmask);
@@ -138,10 +145,12 @@ cfbSetScanline(y, xOrigin, xStart, xEnd, psrc, alu, pdstBase, widthDst, planemas
 	nstart = PPW - dstBit; 
     else 
 	nstart = 0; 
+#if PSZ != 32 || PPW != 1
     if (endmask) 
 	nend = xEnd & PIM; 
     else 
 	nend = 0; 
+#endif
     if (startmask) 
     { 
 	getbits(psrc, offSrc, nstart, tmpSrc);
@@ -189,7 +198,7 @@ cfbSetSpans(pDrawable, pGC, pcharsrc, ppt, pwidth, nspans, fSorted)
     int			fSorted;
 {
     unsigned int	*psrc = (unsigned int *)pcharsrc;
-    unsigned long	*pdstBase;	/* start of dst bitmap */
+    CfbBits	*pdstBase;	/* start of dst bitmap */
     int 		widthDst;	/* width of bitmap in words */
     register BoxPtr 	pbox, pboxLast, pboxTest;
     register DDXPointPtr pptLast;

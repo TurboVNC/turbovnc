@@ -1,13 +1,13 @@
+/* $XFree86: xc/programs/Xserver/dix/swapreq.c,v 3.4 2001/12/14 19:59:33 dawes Exp $ */
 /************************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -46,28 +46,27 @@ SOFTWARE.
 
 ********************************************************/
 
-/* $XConsortium: swapreq.c,v 1.39 94/04/17 20:26:45 dpw Exp $ */
-/* $XFree86: xc/programs/Xserver/dix/swapreq.c,v 3.1 1996/05/06 05:56:24 dawes Exp $ */
+/* $Xorg: swapreq.c,v 1.4 2001/02/09 02:04:41 xorgcvs Exp $ */
 
-#include "X.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
 #define NEED_EVENTS
-#include "Xproto.h"
-#include "Xprotostr.h"
+#include <X11/Xproto.h>
+#include <X11/Xprotostr.h>
 #include "misc.h"
 #include "dixstruct.h"
 #include "extnsionst.h"	/* for SendEvent */
 #include "swapreq.h"
-
-extern int (* ProcVector[256]) ();
 
 /* Thanks to Jack Palevich for testing and subsequently rewriting all this */
 
 /* Byte swap a list of longs */
 
 void
-SwapLongs (list, count)
-	register CARD32 *list;
-	register unsigned long count;
+SwapLongs (register CARD32 *list, register unsigned long count)
 {
 	register char n;
 
@@ -94,9 +93,7 @@ SwapLongs (list, count)
 /* Byte swap a list of shorts */
 
 void
-SwapShorts (list, count)
-	register short *list;
-	register unsigned long count;
+SwapShorts (register short *list, register unsigned long count)
 {
 	register char n;
 
@@ -131,8 +128,7 @@ SwapShorts (list, count)
 /* The following is used for all requests that have
    no fields to be swapped (except "length") */
 int
-SProcSimpleReq(client)
-	register ClientPtr client;
+SProcSimpleReq(register ClientPtr client)
 {
     register char n;
 
@@ -145,8 +141,7 @@ SProcSimpleReq(client)
    only a single 32-bit field to be swapped, coming
    right after the "length" field */
 int
-SProcResourceReq(client)
-	register ClientPtr client;
+SProcResourceReq(register ClientPtr client)
 {
     register char n;
 
@@ -158,8 +153,7 @@ SProcResourceReq(client)
 }
 
 int
-SProcCreateWindow(client)
-    register ClientPtr client;
+SProcCreateWindow(register ClientPtr client)
 {
     register char n;
 
@@ -181,8 +175,7 @@ SProcCreateWindow(client)
 }
 
 int
-SProcChangeWindowAttributes(client)
-    register ClientPtr client;
+SProcChangeWindowAttributes(register ClientPtr client)
 {
     register char n;
 
@@ -196,8 +189,7 @@ SProcChangeWindowAttributes(client)
 }
 
 int
-SProcReparentWindow(client)
-    register ClientPtr client;
+SProcReparentWindow(register ClientPtr client)
 {
     register char n;
     REQUEST(xReparentWindowReq);
@@ -211,8 +203,7 @@ SProcReparentWindow(client)
 }
 
 int
-SProcConfigureWindow(client)
-    register ClientPtr client;
+SProcConfigureWindow(register ClientPtr client)
 {
     register char n;
     REQUEST(xConfigureWindowReq);
@@ -227,8 +218,7 @@ SProcConfigureWindow(client)
 
 
 int
-SProcInternAtom(client)
-    register ClientPtr client;
+SProcInternAtom(register ClientPtr client)
 {
     register char n;
     REQUEST(xInternAtomReq);
@@ -239,8 +229,7 @@ SProcInternAtom(client)
 }
 
 int
-SProcChangeProperty(client)
-    register ClientPtr client;
+SProcChangeProperty(register ClientPtr client)
 {
     register char n;
     REQUEST(xChangePropertyReq);
@@ -264,8 +253,7 @@ SProcChangeProperty(client)
 }
 
 int 
-SProcDeleteProperty(client)
-    register ClientPtr client;
+SProcDeleteProperty(register ClientPtr client)
 {
     register char n;
     REQUEST(xDeletePropertyReq);
@@ -278,8 +266,7 @@ SProcDeleteProperty(client)
 }
 
 int 
-SProcGetProperty(client)
-    register ClientPtr client;
+SProcGetProperty(register ClientPtr client)
 {
     register char n;
     REQUEST(xGetPropertyReq);
@@ -294,8 +281,7 @@ SProcGetProperty(client)
 }
 
 int
-SProcSetSelectionOwner(client)
-    register ClientPtr client;
+SProcSetSelectionOwner(register ClientPtr client)
 {
     register char n;
     REQUEST(xSetSelectionOwnerReq);
@@ -308,8 +294,7 @@ SProcSetSelectionOwner(client)
 }
 
 int
-SProcConvertSelection(client)
-    register ClientPtr client;
+SProcConvertSelection(register ClientPtr client)
 {
     register char n;
     REQUEST(xConvertSelectionReq);
@@ -324,8 +309,7 @@ SProcConvertSelection(client)
 }
 
 int
-SProcSendEvent(client)
-    register ClientPtr client;
+SProcSendEvent(register ClientPtr client)
 {
     register char n;
     xEvent eventT;
@@ -347,8 +331,7 @@ SProcSendEvent(client)
 }
 
 int
-SProcGrabPointer(client)
-    register ClientPtr client;
+SProcGrabPointer(register ClientPtr client)
 {
     register char n;
     REQUEST(xGrabPointerReq);
@@ -363,8 +346,7 @@ SProcGrabPointer(client)
 }
 
 int
-SProcGrabButton(client)
-    register ClientPtr client;
+SProcGrabButton(register ClientPtr client)
 {
     register char n;
     REQUEST(xGrabButtonReq);
@@ -379,8 +361,7 @@ SProcGrabButton(client)
 }
 
 int
-SProcUngrabButton(client)
-    register ClientPtr client;
+SProcUngrabButton(register ClientPtr client)
 {
     register char n;
     REQUEST(xUngrabButtonReq);
@@ -392,8 +373,7 @@ SProcUngrabButton(client)
 }
 
 int
-SProcChangeActivePointerGrab(client)
-    register ClientPtr client;
+SProcChangeActivePointerGrab(register ClientPtr client)
 {
     register char n;
     REQUEST(xChangeActivePointerGrabReq);
@@ -406,8 +386,7 @@ SProcChangeActivePointerGrab(client)
 }
 
 int
-SProcGrabKeyboard(client)
-    register ClientPtr client;
+SProcGrabKeyboard(register ClientPtr client)
 {
     register char n;
     REQUEST(xGrabKeyboardReq);
@@ -419,8 +398,7 @@ SProcGrabKeyboard(client)
 }
 
 int
-SProcGrabKey(client)
-    register ClientPtr client;
+SProcGrabKey(register ClientPtr client)
 {
     register char n;
     REQUEST(xGrabKeyReq);
@@ -432,8 +410,7 @@ SProcGrabKey(client)
 }
 
 int
-SProcUngrabKey(client)
-    register ClientPtr client;
+SProcUngrabKey(register ClientPtr client)
 {
     register char n;
     REQUEST(xUngrabKeyReq);
@@ -445,8 +422,7 @@ SProcUngrabKey(client)
 }
 
 int
-SProcGetMotionEvents(client)
-    register ClientPtr client;
+SProcGetMotionEvents(register ClientPtr client)
 {
     register char n;
     REQUEST(xGetMotionEventsReq);
@@ -459,8 +435,7 @@ SProcGetMotionEvents(client)
 }
 
 int
-SProcTranslateCoords(client)
-    register ClientPtr client;
+SProcTranslateCoords(register ClientPtr client)
 {
     register char n;
     REQUEST(xTranslateCoordsReq);
@@ -474,8 +449,7 @@ SProcTranslateCoords(client)
 }
 
 int
-SProcWarpPointer(client)
-    register ClientPtr client;
+SProcWarpPointer(register ClientPtr client)
 {
     register char n;
     REQUEST(xWarpPointerReq);
@@ -493,8 +467,7 @@ SProcWarpPointer(client)
 }
 
 int
-SProcSetInputFocus(client)
-    register ClientPtr client;
+SProcSetInputFocus(register ClientPtr client)
 {
     register char n;
     REQUEST(xSetInputFocusReq);
@@ -506,8 +479,7 @@ SProcSetInputFocus(client)
 }
 
 int
-SProcOpenFont(client)
-    register ClientPtr client;
+SProcOpenFont(register ClientPtr client)
 {
     register char n;
     REQUEST(xOpenFontReq);
@@ -519,8 +491,7 @@ SProcOpenFont(client)
 }
 
 int
-SProcListFonts(client)
-    register ClientPtr client;
+SProcListFonts(register ClientPtr client)
 {
     register char n;
     REQUEST(xListFontsReq);
@@ -532,8 +503,7 @@ SProcListFonts(client)
 }
 
 int
-SProcListFontsWithInfo(client)
-    register ClientPtr client;
+SProcListFontsWithInfo(register ClientPtr client)
 {
     register char n;
     REQUEST(xListFontsWithInfoReq);
@@ -545,8 +515,7 @@ SProcListFontsWithInfo(client)
 }
 
 int
-SProcSetFontPath(client)
-    register ClientPtr client;
+SProcSetFontPath(register ClientPtr client)
 {
     register char n;
     REQUEST(xSetFontPathReq);
@@ -557,8 +526,7 @@ SProcSetFontPath(client)
 }
 
 int
-SProcCreatePixmap(client)
-    register ClientPtr client;
+SProcCreatePixmap(register ClientPtr client)
 {
     register char n;
     REQUEST(xCreatePixmapReq);
@@ -573,8 +541,7 @@ SProcCreatePixmap(client)
 }
 
 int
-SProcCreateGC(client)
-    register ClientPtr client;
+SProcCreateGC(register ClientPtr client)
 {
     register char n;
     REQUEST(xCreateGCReq);
@@ -588,8 +555,7 @@ SProcCreateGC(client)
 }
 
 int
-SProcChangeGC(client)
-    register ClientPtr client;
+SProcChangeGC(register ClientPtr client)
 {
     register char n;
     REQUEST(xChangeGCReq);
@@ -602,8 +568,7 @@ SProcChangeGC(client)
 }
 
 int
-SProcCopyGC(client)
-    register ClientPtr client;
+SProcCopyGC(register ClientPtr client)
 {
     register char n;
     REQUEST(xCopyGCReq);
@@ -616,8 +581,7 @@ SProcCopyGC(client)
 }
 
 int
-SProcSetDashes(client)
-    register ClientPtr client;
+SProcSetDashes(register ClientPtr client)
 {
     register char n;
     REQUEST(xSetDashesReq);
@@ -631,8 +595,7 @@ SProcSetDashes(client)
 }
 
 int
-SProcSetClipRectangles(client)
-    register ClientPtr client;
+SProcSetClipRectangles(register ClientPtr client)
 {
     register char n;
     REQUEST(xSetClipRectanglesReq);
@@ -646,8 +609,7 @@ SProcSetClipRectangles(client)
 }
 
 int
-SProcClearToBackground(client)
-    register ClientPtr client;
+SProcClearToBackground(register ClientPtr client)
 {
     register char n;
     REQUEST(xClearAreaReq);
@@ -662,8 +624,7 @@ SProcClearToBackground(client)
 }
 
 int
-SProcCopyArea(client)
-    register ClientPtr client;
+SProcCopyArea(register ClientPtr client)
 {
     register char n;
     REQUEST(xCopyAreaReq);
@@ -682,8 +643,7 @@ SProcCopyArea(client)
 }
 
 int
-SProcCopyPlane(client)
-    register ClientPtr client;
+SProcCopyPlane(register ClientPtr client)
 {
     register char n;
     REQUEST(xCopyPlaneReq);
@@ -705,8 +665,7 @@ SProcCopyPlane(client)
 /* The following routine is used for all Poly drawing requests
    (except FillPoly, which uses a different request format) */
 int
-SProcPoly(client)
-    register ClientPtr client;
+SProcPoly(register ClientPtr client)
 {
     register char n;
 
@@ -723,8 +682,7 @@ SProcPoly(client)
    is longer than xPolyPointReq, and we don't want to swap
    the difference as shorts! */
 int
-SProcFillPoly(client)
-    register ClientPtr client;
+SProcFillPoly(register ClientPtr client)
 {
     register char n;
 
@@ -738,8 +696,7 @@ SProcFillPoly(client)
 }
 
 int
-SProcPutImage(client)
-    register ClientPtr client;
+SProcPutImage(register ClientPtr client)
 {
     register char n;
     REQUEST(xPutImageReq);
@@ -757,8 +714,7 @@ SProcPutImage(client)
 }
 
 int
-SProcGetImage(client)
-    register ClientPtr	client;
+SProcGetImage(register ClientPtr client)
 {
     register char n;
     REQUEST(xGetImageReq);
@@ -776,8 +732,7 @@ SProcGetImage(client)
 /* ProcPolyText used for both PolyText8 and PolyText16 */
 
 int
-SProcPolyText(client)
-    register ClientPtr client;
+SProcPolyText(register ClientPtr client)
 {
     register char n;
     REQUEST(xPolyTextReq);
@@ -793,8 +748,7 @@ SProcPolyText(client)
 /* ProcImageText used for both ImageText8 and ImageText16 */
 
 int
-SProcImageText(client)
-    register ClientPtr client;
+SProcImageText(register ClientPtr client)
 {
     register char n;
     REQUEST(xImageTextReq);
@@ -808,8 +762,7 @@ SProcImageText(client)
 }
 
 int
-SProcCreateColormap(client)
-    register ClientPtr client;
+SProcCreateColormap(register ClientPtr client)
 {
     register char n;
     REQUEST(xCreateColormapReq);
@@ -823,8 +776,7 @@ SProcCreateColormap(client)
 
 
 int
-SProcCopyColormapAndFree(client)
-    register ClientPtr client;
+SProcCopyColormapAndFree(register ClientPtr client)
 {
     register char n;
     REQUEST(xCopyColormapAndFreeReq);
@@ -837,8 +789,7 @@ SProcCopyColormapAndFree(client)
 }
 
 int
-SProcAllocColor                (client)
-    register ClientPtr client;
+SProcAllocColor(register ClientPtr client)
 {
     register char n;
     REQUEST(xAllocColorReq);
@@ -852,8 +803,7 @@ SProcAllocColor                (client)
 }
 
 int
-SProcAllocNamedColor           (client)
-    register ClientPtr client;
+SProcAllocNamedColor(register ClientPtr client)
 {
     register char n;
 
@@ -866,8 +816,7 @@ SProcAllocNamedColor           (client)
 }
 
 int
-SProcAllocColorCells           (client)
-    register ClientPtr client;
+SProcAllocColorCells(register ClientPtr client)
 {
     register char n;
     REQUEST(xAllocColorCellsReq);
@@ -880,8 +829,7 @@ SProcAllocColorCells           (client)
 }
 
 int
-SProcAllocColorPlanes(client)
-    register ClientPtr client;
+SProcAllocColorPlanes(register ClientPtr client)
 {
     register char n;
     REQUEST(xAllocColorPlanesReq);
@@ -896,8 +844,7 @@ SProcAllocColorPlanes(client)
 }
 
 int
-SProcFreeColors          (client)
-    register ClientPtr client;
+SProcFreeColors(register ClientPtr client)
 {
     register char n;
     REQUEST(xFreeColorsReq);
@@ -911,8 +858,7 @@ SProcFreeColors          (client)
 }
 
 void
-SwapColorItem(pItem)
-    xColorItem	*pItem;
+SwapColorItem(xColorItem *pItem)
 {
     register char n;
 
@@ -923,8 +869,7 @@ SwapColorItem(pItem)
 }
 
 int
-SProcStoreColors               (client)
-    register ClientPtr client;
+SProcStoreColors(register ClientPtr client)
 {
     register char n;
     long count;
@@ -941,8 +886,7 @@ SProcStoreColors               (client)
 }
 
 int
-SProcStoreNamedColor           (client)
-    register ClientPtr client;
+SProcStoreNamedColor (register ClientPtr client)
 {
     register char n;
     REQUEST(xStoreNamedColorReq);
@@ -955,8 +899,7 @@ SProcStoreNamedColor           (client)
 }
 
 int
-SProcQueryColors(client)
-    register ClientPtr client;
+SProcQueryColors (register ClientPtr client)
 {
     register char n;
     REQUEST(xQueryColorsReq);
@@ -968,8 +911,7 @@ SProcQueryColors(client)
 } 
 
 int
-SProcLookupColor(client)
-    register ClientPtr client;
+SProcLookupColor (register ClientPtr client)
 {
     register char n;
     REQUEST(xLookupColorReq);
@@ -981,8 +923,7 @@ SProcLookupColor(client)
 }
 
 int
-SProcCreateCursor( client)
-    register ClientPtr client;
+SProcCreateCursor (register ClientPtr client)
 {
     register char n;
     REQUEST(xCreateCursorReq);
@@ -1003,8 +944,7 @@ SProcCreateCursor( client)
 }
 
 int
-SProcCreateGlyphCursor( client)
-    register ClientPtr client;
+SProcCreateGlyphCursor (register ClientPtr client)
 {
     register char n;
     REQUEST(xCreateGlyphCursorReq);
@@ -1026,8 +966,7 @@ SProcCreateGlyphCursor( client)
 
 
 int
-SProcRecolorCursor(client)
-    register ClientPtr client;
+SProcRecolorCursor (register ClientPtr client)
 {
     register char n;
     REQUEST(xRecolorCursorReq);
@@ -1044,8 +983,7 @@ SProcRecolorCursor(client)
 }
 
 int
-SProcQueryBestSize   (client)
-    register ClientPtr client;
+SProcQueryBestSize (register ClientPtr client)
 {
     register char n;
     REQUEST(xQueryBestSizeReq);
@@ -1059,8 +997,7 @@ SProcQueryBestSize   (client)
 }
 
 int
-SProcQueryExtension   (client)
-    register ClientPtr client;
+SProcQueryExtension (register ClientPtr client)
 {
     register char n;
     REQUEST(xQueryExtensionReq);
@@ -1071,8 +1008,7 @@ SProcQueryExtension   (client)
 }
 
 int
-SProcChangeKeyboardMapping   (client)
-    register ClientPtr client;
+SProcChangeKeyboardMapping (register ClientPtr client)
 {
     register char n;
     REQUEST(xChangeKeyboardMappingReq);
@@ -1084,8 +1020,7 @@ SProcChangeKeyboardMapping   (client)
 
 
 int
-SProcChangeKeyboardControl   (client)
-    register ClientPtr client;
+SProcChangeKeyboardControl (register ClientPtr client)
 {
     register char n;
     REQUEST(xChangeKeyboardControlReq);
@@ -1097,8 +1032,7 @@ SProcChangeKeyboardControl   (client)
 }
 
 int
-SProcChangePointerControl   (client)
-    register ClientPtr client;
+SProcChangePointerControl (register ClientPtr client)
 {
     register char n;
     REQUEST(xChangePointerControlReq);
@@ -1112,8 +1046,7 @@ SProcChangePointerControl   (client)
 
 
 int
-SProcSetScreenSaver            (client)
-    register ClientPtr client;
+SProcSetScreenSaver (register ClientPtr client)
 {
     register char n;
     REQUEST(xSetScreenSaverReq);
@@ -1125,8 +1058,7 @@ SProcSetScreenSaver            (client)
 }
 
 int
-SProcChangeHosts(client)
-    register ClientPtr client;
+SProcChangeHosts (register ClientPtr client)
 {
     register char n;
 
@@ -1138,8 +1070,7 @@ SProcChangeHosts(client)
 
 }
 
-int SProcRotateProperties(client)
-    register ClientPtr client;
+int SProcRotateProperties (register ClientPtr client)
 {
     register char n;
     REQUEST(xRotatePropertiesReq);
@@ -1152,10 +1083,8 @@ int SProcRotateProperties(client)
     return ((* ProcVector[X_RotateProperties])(client));
 }
 
-/*ARGSUSED*/
 int
-SProcNoOperation(client)
-    ClientPtr client;
+SProcNoOperation(register ClientPtr client)
 {
     register char n;
     REQUEST(xReq);
@@ -1164,8 +1093,7 @@ SProcNoOperation(client)
 }
 
 void
-SwapConnClientPrefix(pCCP)
-    xConnClientPrefix	*pCCP;
+SwapConnClientPrefix(xConnClientPrefix *pCCP)
 {
     register char n;
 

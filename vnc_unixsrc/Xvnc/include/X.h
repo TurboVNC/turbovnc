@@ -1,5 +1,5 @@
 /*
- *	$XConsortium: X.h,v 1.69 94/04/17 20:10:48 dpw Exp $
+ *	$Xorg: X.h,v 1.4 2001/02/09 02:03:22 xorgcvs Exp $
  */
 
 /* Definitions for the X window system likely to be used by applications */
@@ -9,14 +9,13 @@
 
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -24,13 +23,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -54,6 +53,8 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
+/* $XFree86: xc/include/X.h,v 1.6 2003/07/09 15:27:28 tsi Exp $ */
+
 #define X_PROTOCOL	11		/* current protocol version */
 #define X_PROTOCOL_REVISION 0		/* current minor version */
 
@@ -65,23 +66,44 @@ SOFTWARE.
  * client or library code.
  */
 #ifndef _XSERVER64
+#  ifndef _XTYPEDEF_XID
+#    define _XTYPEDEF_XID
 typedef unsigned long XID;
+#  endif
+#  ifndef _XTYPEDEF_MASK
+#    define _XTYPEDEF_MASK
 typedef unsigned long Mask;
-typedef unsigned long Atom;
+#  endif
+#  ifndef _XTYPEDEF_ATOM
+#    define _XTYPEDEF_ATOM
+typedef unsigned long Atom;		/* Also in Xdefs.h */
+#  endif
 typedef unsigned long VisualID;
 typedef unsigned long Time;
 #else
-#include <X11/Xmd.h>
+#  include <X11/Xmd.h>
+#  ifndef _XTYPEDEF_XID
+#    define _XTYPEDEF_XID
 typedef CARD32 XID;
+#  endif
+#  ifndef _XTYPEDEF_MASK
+#    define _XTYPEDEF_MASK
 typedef CARD32 Mask;
+#  endif
+#  ifndef _XTYPEDEF_ATOM
+#    define _XTYPEDEF_ATOM
 typedef CARD32 Atom;
+#  endif
 typedef CARD32 VisualID;
 typedef CARD32 Time;
 #endif
 
 typedef XID Window;
 typedef XID Drawable;
+#ifndef _XTYPEDEF_FONT
+#  define _XTYPEDEF_FONT
 typedef XID Font;
+#endif
 typedef XID Pixmap;
 typedef XID Cursor;
 typedef XID Colormap;
@@ -94,7 +116,9 @@ typedef unsigned char KeyCode;
  * RESERVED RESOURCE AND CONSTANT DEFINITIONS
  *****************************************************************/
 
+#ifndef None
 #define None                 0L	/* universal null resource or null atom */
+#endif
 
 #define ParentRelative       1L	/* background pixmap in CreateWindow
 				    and ChangeWindowAttributes */
@@ -275,9 +299,13 @@ are reserved in the protocol for errors and replies. */
 
 /* protocol families */
 
-#define FamilyInternet		0
+#define FamilyInternet		0	/* IPv4 */
 #define FamilyDECnet		1
 #define FamilyChaos		2
+#define FamilyInternet6		6	/* IPv6 */
+
+/* authentication families not tied to a specific protocol */
+#define FamilyServerInterpreted 5
 
 /* Property notification */
 

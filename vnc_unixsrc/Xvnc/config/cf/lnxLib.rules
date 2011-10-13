@@ -1,27 +1,38 @@
-XCOMM $XConsortium: lnxLib.rules /main/13 1996/09/28 16:11:01 rws $
-XCOMM $XFree86: xc/config/cf/lnxLib.rules,v 3.28.2.3 1997/06/22 10:32:20 dawes Exp $
+XCOMM $Xorg: lnxLib.rules,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
+XCOMM $XFree86: xc/config/cf/lnxLib.rules,v 3.52 2003/10/31 20:49:03 herrb Exp $
 
 /*
  * Linux shared library rules (DLL & ELF versions)
  */
 #ifndef HasSharedLibraries
-#define HasSharedLibraries YES
+# define HasSharedLibraries YES
 #endif
 #ifndef ForceNormalLib
-#define ForceNormalLib NO
+# define ForceNormalLib NO
 #endif
 
-#define SharedOldX NO
+#ifndef UseRpath
+#define UseRpath NO
+#endif
+
+#ifndef SharedOldX
+# define SharedOldX NO
+#endif
 
 #if UseElfFormat
 
-#if (LinuxCLibMajorVersion >= 5 && LinuxCLibMinorVersion >= 4) || LinuxCLibMajorVersion >= 6
-#undef SpecialMalloc
-#define SpecialMalloc NO
-#undef UseInternalMalloc
-#define UseInternalMalloc NO
+# if (LinuxCLibMajorVersion >= 5 && LinuxCLibMinorVersion >= 4) || LinuxCLibMajorVersion >= 6
+#  ifndef SpecialMalloc
+#   define SpecialMalloc NO
+#  endif
+#if 0
+#  ifndef UseInternalMalloc
+#   define UseInternalMalloc NO
+#  endif
 #endif
+# endif
 
+# if LinuxCLibMajorVersion <= 5
 /*
  *	#define BaseShLibReqs	-lc
  *
@@ -38,64 +49,105 @@ XCOMM $XFree86: xc/config/cf/lnxLib.rules,v 3.28.2.3 1997/06/22 10:32:20 dawes E
  * ELF EXECUTABLES LINKED WITH libg.a OR libc_p.a. H.J.
  *
  */
-#define BaseShLibReqs
+#  define BaseShLibReqs
+# else
+/* With GNU libc 2 this works fine. */
+#  define BaseShLibReqs	-lc
+# endif
 
-#ifndef SharedDataSeparation
-#define SharedDataSeparation NO
-#endif
-#ifndef SharedCodeDef
-#define SharedCodeDef /**/
-#endif
-#ifndef SharedLibraryDef
-#define SharedLibraryDef /**/
-#endif
-#ifndef ShLibIncludeFile
-#define ShLibIncludeFile <lnxLib.tmpl>
-#endif
-#ifndef SharedLibraryLoadFlags
-#define SharedLibraryLoadFlags -shared
-#endif
-#ifndef PositionIndependentCFlags
-#define PositionIndependentCFlags -fPIC
-#endif
-#ifndef PositionIndependentCplusplusFlags
-#define PositionIndependentCplusplusFlags -fPIC
-#endif
-#ifndef ExtraLoadFlags
-#if LinuxBinUtilsMajorVersion >= 26
-#ifdef UseInstalled
-#if LinuxBinUtilsMajorVersion < 27
-#define ExtraLoadFlags -Wl,-rpath-link,$(USRLIBDIRPATH)
-#endif
+# ifndef SharedDataSeparation
+#  define SharedDataSeparation NO
+# endif
+# ifndef SharedCodeDef
+#  define SharedCodeDef /**/
+# endif
+# ifndef SharedLibraryDef
+#  define SharedLibraryDef /**/
+# endif
+# ifndef ShLibIncludeFile
+#  define ShLibIncludeFile <lnxLib.tmpl>
+# endif
+#ifndef RpathLoadFlags
+#if UseRpath
+#define RpathLoadFlags -Wl,-rpath,$(USRLIBDIRPATH)
 #else
-#define ExtraLoadFlags -Wl,-rpath-link,$(BUILDLIBDIR)
-#endif
-#else
-#define ExtraLoadFlags -Wl,-rpath,$(USRLIBDIRPATH)
+#define RpathLoadFlags /**/
 #endif
 #endif
+#ifndef LibraryRpathLoadFlags
+#define LibraryRpathLoadFlags RpathLoadFlags
+#endif
+# ifndef SharedLibraryLoadFlags
+#  define SharedLibraryLoadFlags -shared
+# endif
+# ifndef PositionIndependentCFlags
+#  define PositionIndependentCFlags -fPIC
+# endif
+# ifndef PositionIndependentCplusplusFlags
+#  define PositionIndependentCplusplusFlags -fPIC
+# endif
+# ifndef ExtraLoadFlags
+#  if LinuxBinUtilsMajorVersion >= 26
+#   ifdef UseInstalled
+#    if LinuxBinUtilsMajorVersion < 27
+#     define ExtraLoadFlags RpathLoadFlags -Wl,-rpath-link,$(USRLIBDIRPATH)
+#    endif
+#   else
+#    define ExtraLoadFlags RpathLoadFlags -Wl,-rpath-link,$(BUILDLIBDIR)
+#   endif
+#  else
+#   define ExtraLoadFlags RpathLoadFlags
+#  endif
+# endif
+# ifndef HardCodeLibdirFlag
+#  define HardCodeLibdirFlag RpathLoadFlags
+# endif
+# if !defined(ShlibGlobalsFlags)
+#  define ShlibGlobalsFlags -Wl,-Bsymbolic
+# endif
 
 /*
  * InstallSharedLibrary - generate rules to install the shared library.
  * NOTE: file must be executable, hence "INSTBINFLAGS"
  */
-#ifndef InstallSharedLibrary
-#define	InstallSharedLibrary(libname,rev,dest)				@@\
+# ifndef InstallSharedLibrary
+#  define	InstallSharedLibrary(libname,rev,dest)			@@\
 install:: Concat(lib,libname.so.rev) 					@@\
 	MakeDir($(DESTDIR)dest)						@@\
 	$(INSTALL) $(INSTALLFLAGS) $(INSTBINFLAGS) Concat(lib,libname.so.rev) $(DESTDIR)dest @@\
-	@T=`echo Concat($(DESTDIR)dest/lib,libname.so.rev) | sed 's/\.[^\.]*$$//'`;\
+	@T=`echo Concat($(DESTDIR)dest/lib,libname.so.rev) | sed 's/\(lib[^\.]*\.so\.[0-9]*\)\(\.[0-9]*\)\{1,2\}/\1/'`;\
 	  set -x; $(RM) $$T && $(LN) Concat(lib,libname.so.rev) $$T	@@\
-	$(RM) Concat($(DESTDIR)dest/lib,libname.so)			@@\
-	$(LN) Concat(lib,libname.so.rev) Concat($(DESTDIR)dest/lib,libname.so)
-#endif /* InstallSharedLibrary */
+	@if $(SOSYMLINK); then (set -x; \
+	  $(RM) Concat($(DESTDIR)dest/lib,libname.so); \		@@\
+	  $(LN) Concat(lib,libname.so.rev) Concat($(DESTDIR)dest/lib,libname.so)); fi
+# endif /* InstallSharedLibrary */
+
+# ifndef InstallSharedLibtoolLibrary
+
+#  define SetRevisions(rev) V=`expr rev : '\([^:]*\)'`; \		@@\
+		R=`expr rev : '.*:\([^:]*\):'`; \			@@\
+		A=`expr rev : '.*:\([^:]*\)'`; \			@@\
+		MAJ=`expr $$V - $$A`; \					@@\
+		MIN=$$A.$$R
+
+#  define	InstallSharedLibtoolLibrary(libname,rev,dest)		@@\
+install:: Concat(lib,libname.so) 					@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	@set +e; SetRevisions(rev); \					@@\
+		set -xe; \						@@\
+		$(INSTALL) $(INSTALLFLAGS) $(INSTBINFLAGS) Concat(lib,libname.so.$$MAJ.$$MIN) $(DESTDIR)dest; \ @@\
+		$(RM) Concat($(DESTDIR)dest/lib,libname.so.$$MAJ); \	@@\
+		$(LN) Concat(lib,libname.so.$$MAJ.$$MIN) Concat($(DESTDIR)dest/lib,libname.so.$$MAJ); \ @@\
+		$(RM) Concat($(DESTDIR)dest/lib,libname.so); \		@@\
+		$(LN) Concat(lib,libname.so.$$MAJ.$$MIN) Concat($(DESTDIR)dest/lib,libname.so)
+# endif /* InstallSharedLibrary */
 
 /*
  * InstallSharedLibraryData - generate rules to install the shared library data
  */
-#ifndef InstallSharedLibraryData
-#define	InstallSharedLibraryData(libname,rev,dest)
-#endif /* InstallSharedLibraryData */
+# ifndef InstallSharedLibraryData
+#  define	InstallSharedLibraryData(libname,rev,dest)
+# endif /* InstallSharedLibraryData */
 
 
 /*
@@ -103,39 +155,121 @@ install:: Concat(lib,libname.so.rev) 					@@\
  * build it into a different name so that we do not hose people by having
  * the library gone for long periods.
  */
-#ifndef SharedLibraryTarget
-#ifdef UseInstalled
-#define LinkBuildSonameLibrary(lib) true
-#else
-#define LinkBuildSonameLibrary(lib) (RemoveFile($(BUILDLIBDIR)/lib); \
-	cd $(BUILDLIBDIR); $(LN) $(BUILDINCTOP)/$(CURRENT_DIR)/lib .)
-#endif
-
-#define SharedLibraryTarget(libname,rev,solist,down,up)			@@\
+# ifndef SharedLibraryTarget
+#  define SharedLibraryTarget(libname,rev,solist,down,up)		@@\
 AllTarget(Concat(lib,libname.so.rev))					@@\
 									@@\
 Concat(lib,libname.so.rev):  solist $(EXTRALIBRARYDEPS)			@@\
 	$(RM) $@~							@@\
-	@SONAME=`echo $@ | sed 's/\.[^\.]*$$//'`; set -x; \		@@\
+	@SONAME=`echo $@ | sed 's/\(lib[^\.]*\.so\.[0-9]*\)\(\.[0-9]*\)\{1,2\}/\1/'`; (set -x; \	@@\
+		cd down; $(CC) -o up/$@~ $(SHLIBLDFLAGS) -Wl,-soname,$$SONAME solist $(REQUIREDLIBS) BaseShLibReqs) || exit 1; \ @@\
+		(set -x; $(RM) $$SONAME; $(LN) $@ $$SONAME); \		@@\
+		LinkBuildSonameLibrary($$SONAME)			@@\
+	$(RM) $@ 							@@\
+	$(MV) $@~ $@							@@\
+	@if $(SOSYMLINK); then (set -x; \				@@\
+	  $(RM) Concat(lib,libname.so); \				@@\
+	  $(LN) $@ Concat(lib,libname.so)); fi				@@\
+	LinkBuildLibrary($@)						@@\
+	LinkBuildLibraryMaybe(Concat(lib,libname.so),$(SOSYMLINK))	@@\
+									@@\
+clean::									@@\
+	@MAJREV=`echo rev | sed 's/\([0-9]*\)\(\.[0-9]*\)\{1,2\}/\1/'`; \	@@\
+	set -x; $(RM) Concat(lib,libname.so.$$MAJREV)			@@\
+	$(RM) Concat(lib,libname.so.rev) Concat(lib,libname.so)
+
+# endif /* SharedLibraryTarget */
+
+
+# ifndef SharedLibtoolLibraryTarget
+#  define SharedLibtoolLibraryTarget(libname,rev,solist,down,up)	@@\
+AllTarget(Concat(lib,libname.so))					@@\
+									@@\
+Concat(lib,libname.so):  solist $(EXTRALIBRARYDEPS)			@@\
+	$(RM) $@~							@@\
+	@set +e; SetRevisions(rev); set -e; \				@@\
+		SONAME=$@.$$MAJ; \					@@\
+		(set -x; \						@@\
+		$(RM) $@.$$MAJ.$$MIN~; \				@@\
+		cd down; $(CC) -o up/$@.$$MAJ.$$MIN~ $(SHLIBLDFLAGS) -Wl,-soname,$$SONAME solist $(REQUIREDLIBS) BaseShLibReqs) || exit 1; \ @@\
+		(set -x; \						@@\
+		$(RM) $$SONAME; $(LN) $@.$$MAJ.$$MIN $$SONAME); \	@@\
+		LinkBuildSonameLibrary($$SONAME); \			@@\
+		(set -x; \						@@\
+		$(RM) $@.$$MAJ.$$MIN; \					@@\
+		$(MV) $@.$$MAJ.$$MIN~ $@.$$MAJ.$$MIN; \			@@\
+	  	$(RM) $@; \						@@\
+	  	$(LN) $@.$$MAJ.$$MIN $@); \				@@\
+		LinkBuildLibraryInline($@.$$MAJ.$$MIN); \		@@\
+		LinkBuildLibraryInline($@)				@@\
+									@@\
+clean::									@@\
+	@set +e; SetRevisions(rev); \					@@\
+		set -xe; \						@@\
+		$(RM) Concat(lib,libname.so.$$MAJ); \			@@\
+		$(RM) Concat(lib,libname.so.$$MAJ.$$MIN)		@@\
+	$(RM) Concat(lib,libname.so)
+
+# endif /* SharedLibtoolLibraryTarget */
+
+/*
+ * SharedDepLibraryTarget - generate rules to create a shared library.
+ */
+# ifndef SharedDepLibraryTarget
+#   define SharedDepLibraryTarget(libname,rev,deplist,solist,down,up)	@@\
+AllTarget(Concat(lib,libname.so.rev))					@@\
+									@@\
+Concat(lib,libname.so.rev):  deplist $(EXTRALIBRARYDEPS)		@@\
+	$(RM) $@~							@@\
+	@SONAME=`echo $@ | sed 's/\(lib[^\.]*\.so\.[0-9]*\)\(\.[0-9]*\)\{1,2\}/\1/'`; set -x; \		@@\
 		(cd down; $(CC) -o up/$@~ $(SHLIBLDFLAGS) -Wl,-soname,$$SONAME solist $(REQUIREDLIBS) BaseShLibReqs); \ @@\
 		$(RM) $$SONAME; $(LN) $@ $$SONAME; \			@@\
 		LinkBuildSonameLibrary($$SONAME)			@@\
 	$(RM) $@ 							@@\
 	$(MV) $@~ $@							@@\
-	$(RM) Concat(lib,libname.so)					@@\
-	$(LN) $@ Concat(lib,libname.so)					@@\
+	@if $(SOSYMLINK); then (set -x; \				@@\
+	  $(RM) Concat(lib,libname.so); \				@@\
+	  $(LN) $@ Concat(lib,libname.so)); fi				@@\
 	LinkBuildLibrary($@)						@@\
-	LinkBuildLibrary(Concat(lib,libname.so))			@@\
+	LinkBuildLibraryMaybe(Concat(lib,libname.so),$(SOSYMLINK))	@@\
 									@@\
 clean::									@@\
-	@MAJREV=`expr rev : '\(.*\)\.'`; \				@@\
+	@MAJREV=`echo rev | sed 's/\([0-9]*\)\(\.[0-9]*\)\{1,2\}/\1/'`; \	@@\
 	set -x; $(RM) Concat(lib,libname.so.$$MAJREV)			@@\
 	$(RM) Concat(lib,libname.so.rev) Concat(lib,libname.so)
 
-#endif /* SharedLibraryTarget */
+#endif /* SharedDepLibraryTarget */
 
-#ifndef SharedDepModuleTarget
-#define SharedDepModuleTarget(name,deps,solist)				@@\
+/*
+ * SharedDepCplusplusLibraryTarget - generate rules to create a shared library.
+ */
+#ifndef SharedDepCplusplusLibraryTarget
+#define SharedDepCplusplusLibraryTarget(libname,rev,deplist,solist,down,up) @@\
+AllTarget(Concat(lib,libname.so.rev))					@@\
+									@@\
+Concat(lib,libname.so.rev):  deplist $(EXTRALIBRARYDEPS)		@@\
+	$(RM) $@~							@@\
+	@SONAME=`echo $@ | sed 's/\(lib[^\.]*\.so\.[0-9]*\)\(\.[0-9]*\)\{1,2\}/\1/'`; set -x; \		@@\
+		(cd down; $(CXX) -o up/$@~ $(SHLIBLDFLAGS) -Wl,-soname,$$SONAME solist $(REQUIREDLIBS) BaseShLibReqs); \ @@\
+		$(RM) $$SONAME; $(LN) $@ $$SONAME; \			@@\
+		LinkBuildSonameLibrary($$SONAME)			@@\
+	$(RM) $@ 							@@\
+	$(MV) $@~ $@							@@\
+	@if $(SOSYMLINK); then (set -x; \				@@\
+	  $(RM) Concat(lib,libname.so); \				@@\
+	  $(LN) $@ Concat(lib,libname.so)); fi				@@\
+	LinkBuildLibrary($@)						@@\
+	LinkBuildLibraryMaybe(Concat(lib,libname.so),$(SOSYMLINK))	@@\
+									@@\
+clean::									@@\
+	@MAJREV=`echo rev | sed 's/\([0-9]*\)\(\.[0-9]*\)\{1,2\}/\1/'`; \	@@\
+	set -x; $(RM) Concat(lib,libname.so.$$MAJREV)			@@\
+	$(RM) Concat(lib,libname.so.rev) Concat(lib,libname.so)
+
+#endif /* SharedDepCplusplusLibraryTarget */
+
+# ifndef SharedDepModuleTarget
+#  define SharedDepModuleTarget(name,deps,solist)			@@\
 AllTarget(name)								@@\
 									@@\
 name: deps								@@\
@@ -147,35 +281,52 @@ name: deps								@@\
 clean::									@@\
 	$(RM) name
 
-#endif /* SharedDepModuleTarget */
+# endif /* SharedDepModuleTarget */
+
+# ifndef SharedDriModuleTarget
+#  define SharedDriModuleTarget(name,deps,solist)			@@\
+AllTarget(name)								@@\
+									@@\
+name: deps								@@\
+	$(RM) $@~ $@.map						@@\
+	@(echo 'DRI_MODULE { global: __dri*; local: *; };' > $@.map)	@@\
+	$(CC) -o $@~ -Wl,--version-script=$@.map $(SHLIBLDFLAGS) solist $(REQUIREDLIBS) BaseShLibReqs @@\
+	$(RM) $@ $@.map							@@\
+	$(MV) $@~ $@							@@\
+									@@\
+clean::									@@\
+	$(RM) name							@@\
+	$(RM) name.map
+
+# endif /* SharedDriModuleTarget */
 
 /*
  * SharedLibraryDataTarget - generate rules to create shlib data file;
  */
-#ifndef SharedLibraryDataTarget
-#define SharedLibraryDataTarget(libname,rev,salist)
-#endif /* SharedLibraryTarget */
+# ifndef SharedLibraryDataTarget
+#  define SharedLibraryDataTarget(libname,rev,salist)
+# endif /* SharedLibraryTarget */
 
 #else /* UseElfFormat */
 
-#ifndef SharedDataSeparation
-#define SharedDataSeparation NO
-#endif
-#ifndef SharedCodeDef
-#define SharedCodeDef /**/
-#endif
-#ifndef SharedLibraryDef
-#define SharedLibraryDef /**/
-#endif
-#ifndef ShLibIncludeFile
-#define ShLibIncludeFile <lnxLib.tmpl>
-#endif
-#ifndef SharedLibraryLoadFlags
-#define SharedLibraryLoadFlags /**/
-#endif
-#ifndef PositionIndependentCFlags
-#define PositionIndependentCFlags -B/usr/bin/jump
-#endif
+# ifndef SharedDataSeparation
+#  define SharedDataSeparation NO
+# endif
+# ifndef SharedCodeDef
+#  define SharedCodeDef /**/
+# endif
+# ifndef SharedLibraryDef
+#  define SharedLibraryDef /**/
+# endif
+# ifndef ShLibIncludeFile
+#  define ShLibIncludeFile <lnxLib.tmpl>
+# endif
+# ifndef SharedLibraryLoadFlags
+#  define SharedLibraryLoadFlags /**/
+# endif
+# ifndef PositionIndependentCFlags
+#  define PositionIndependentCFlags -B/usr/bin/jump
+# endif
 
 /*
  * These definitions are now extended to work with the X sources and
@@ -222,16 +373,16 @@ clean::									@@\
  * files in the shared subdirectory into jump_xxx files.
  */
 
-#ifndef UseInstalled
+# ifndef UseInstalled
 XCOMM These are only needed to build the server
 
-#if LinuxElfDefault
+#  if LinuxElfDefault
 LIBC_SA = /usr/i486-linuxaout/lib/libc.sa
 LIBM_SA = /usr/i486-linuxaout/lib/libm.sa
-#else
+#  else
 LIBC_SA = /usr/lib/libc.sa
 LIBM_SA = /usr/lib/libm.sa
-#endif
+#  endif
 
 JUMP_LDLIBS_libc = `$(CC) --print-libgcc-file-name` -lc
 
@@ -338,50 +489,14 @@ JUMP_LDLIBS_Xaw = $(JUMP_ROOT_Xt)/libXt.sa $(JUMP_ROOT_Xt)/libXmu.sa \
 	$(JUMP_ROOT_Xt)/libXext.sa $(JUMP_ROOT_X11)/libX11.sa \
 	$(JUMP_LDLIBS_libc)
 
-# libPEX.so (PEX5)
-JUMP_ROOT_PEX5 = $(PEXLIBSRC)
-JUMP_IS_HOST_PEX5 = YES
-JUMP_STUBLIBS_PEX5 = libPEX5.sa
-JUMP_SUBDIRS_PEX5 = $(JUMP_ROOT_X11)
-JUMP_DIR_PEX5 = $(JUMP_ROOT_PEX5)/shared
-JUMP_VARS_PEX5 = $(JUMP_ROOT_PEX5)/jump_vars
-JUMP_FUNCS_PEX5 = $(JUMP_ROOT_PEX5)/jump_funcs
-JUMP_IGNORE_PEX5 = $(JUMP_ROOT_PEX5)/jump_ignore
-JUMP_EXPORT_PEX5 = $(JUMP_DIR_PEX5)/jump.vars
-JUMP_IMPORT_PEX5 = $(JUMP_EXPORT_X11)
-JUMP_ADDRESS_PEX5 = 0x60b00000
-JUMP_JUMPTABLESIZE_PEX5 = 0x4000
-JUMP_GOTSIZE_PEX5 = 4096
-JUMP_STUBNAMES_PEX5 = libPEX5
-JUMP_STUBS_IMPORT_PEX5 = $(JUMP_STUBS_IMPORT_X11) $(LIBM_SA)
-JUMP_LDLIBS_PEX5 = $(JUMP_ROOT_X11)/libX11.sa $(JUMP_LDLIBS_libc) -lm
-
-# libXIE.so (XIE)
-JUMP_ROOT_XIE = $(XIELIBSRC)
-JUMP_IS_HOST_XIE = YES
-JUMP_STUBLIBS_XIE = libXIE.sa
-JUMP_SUBDIRS_XIE = $(JUMP_ROOT_X11)
-JUMP_DIR_XIE = $(JUMP_ROOT_XIE)/shared
-JUMP_VARS_XIE = $(JUMP_ROOT_XIE)/jump_vars
-JUMP_FUNCS_XIE = $(JUMP_ROOT_XIE)/jump_funcs
-JUMP_IGNORE_XIE = $(JUMP_ROOT_XIE)/jump_ignore
-JUMP_EXPORT_XIE = $(JUMP_DIR_XIE)/jump.vars
-JUMP_IMPORT_XIE = $(JUMP_EXPORT_X11)
-JUMP_ADDRESS_XIE = 0x60be0000
-JUMP_JUMPTABLESIZE_XIE = 0x4000
-JUMP_GOTSIZE_XIE = 4096
-JUMP_STUBNAMES_XIE = libXIE
-JUMP_STUBS_IMPORT_XIE = $(JUMP_STUBS_IMPORT_X11) $(LIBM_SA)
-JUMP_LDLIBS_XIE = $(JUMP_ROOT_X11)/libX11.sa $(JUMP_LDLIBS_libc) -lm
-
-#endif /* !UseInstalled */
+# endif /* !UseInstalled */
 
 /*
  * SharedLibraryDataTarget - generate rules to create shared data file
  */
-#ifndef SharedLibraryDataTarget
-#define SharedLibraryDataTarget(libname,rev,salist)
-#endif
+# ifndef SharedLibraryDataTarget
+#  define SharedLibraryDataTarget(libname,rev,salist)
+# endif
 
 /*
  * SharedLibraryTarget - generate rules to create a shared library;
@@ -389,8 +504,8 @@ JUMP_LDLIBS_XIE = $(JUMP_ROOT_X11)/libX11.sa $(JUMP_LDLIBS_libc) -lm
  * their own (and possibly other) libs, and hosted, which rely on another
  * lib for all the work.
  */
-#ifndef SharedLibraryTarget
-#define SharedLibraryTarget(libname,rev,solist,down,up)			@@\
+# ifndef SharedLibraryTarget
+#  define SharedLibraryTarget(libname,rev,solist,down,up)		@@\
 XCOMM This logic is such to compile the libs in their proper order,	@@\
 XCOMM remain dependent on subsidiary libs, and yet minimize local work	@@\
 									@@\
@@ -538,28 +653,28 @@ jumpclean_0:								@@\
 jumpclean_1:								@@\
 	$(RM) -r $(JUMP_SO) $(Concat(JUMP_DIR_,libname)) \		@@\
 		down/mk_JUMP_SA_1 down/mk_JUMP_SO_1 down/mk_JUMP_SO_2
-#endif /* SharedLibraryTarget */
+# endif /* SharedLibraryTarget */
 
 /*
  * InstallSharedLibrary - generate rules to install the shared library.
  */
-#ifndef InstallSharedLibrary
-#define	InstallSharedLibrary(libname,rev,dest)				@@\
+# ifndef InstallSharedLibrary
+#  define	InstallSharedLibrary(libname,rev,dest)			@@\
 install:: $(JUMP_SA) $(JUMP_SO)						@@\
 	MakeDir($(DESTDIR)dest)						@@\
 	@if [ "$(JUMP_IS_HOST)" = YES ]; then \
-		(T=$(DESTDIR)dest/`echo $(JUMP_SO)|sed 's/\.[^\.]*$$//'`;\
+		(T=$(DESTDIR)dest/`echo $(JUMP_SO)|sed '/\(lib[^\.]*\.so\.[0-9]*\)\(\.[0-9]*\)\{1,2\}/\1/`;\
 		set -x; \
 		$(INSTALL) -s -c $(INSTSOLIBFLAGS) $(JUMP_SO) $(DESTDIR)dest; \
 		$(RM) $$T && $(LN) $(JUMP_SO) $$T); fi			@@\
 	$(INSTALL) -c $(INSTLIBFLAGS) $(JUMP_SA) $(DESTDIR)dest
-#endif /* InstallSharedLibrary */
+# endif /* InstallSharedLibrary */
 
 /*
  * InstallSharedLibraryData - generate rules to install the shared library data
  */
-#ifndef InstallSharedLibraryData
-#define	InstallSharedLibraryData(libname,rev,dest)
-#endif /* InstallSharedLibraryData */
+# ifndef InstallSharedLibraryData
+#  define	InstallSharedLibraryData(libname,rev,dest)
+# endif /* InstallSharedLibraryData */
 
 #endif /* UseElfFormat */

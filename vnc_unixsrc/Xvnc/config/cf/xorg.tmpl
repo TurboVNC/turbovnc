@@ -1,0 +1,145 @@
+XCOMM $Xorg: xf86.tmpl,v 1.3 2000/08/17 19:41:48 cpqbld Exp $
+XCOMM $XdotOrg: xc/config/cf/xorg.tmpl,v 1.5 2005/11/08 06:33:24 jkj Exp $
+
+#ifndef ConfigDefines
+# define ConfigDefines -D__XCONFIGFILE__='"$(XCONFIGFILE)"' \
+	-D__XCONFIGDIR__='"$(XCONFIGDIR)"' -D__XLOGFILE__='"$(XLOGFILE)"' \
+	-D__XSERVERNAME__='"$(XSERVERNAME)"'
+#endif
+
+CONFIG_DEFINES = ConfigDefines
+
+#ifndef ServerDefines
+#define ServerDefines StandardDefines VersionDefines
+#endif
+
+#ifdef BuilderEMailAddr
+BUILDERADDR = BuilderEMailAddr
+#else 
+BUILDERADDR = "xorg@lists.freedesktop.org"
+#endif
+#ifdef VendorSupportAddress
+ VENDORSUPPORT = VendorSupportAddress
+ BUGMSG = -DBUILDERADDR='$(BUILDERADDR)' -DVENDORSUPPORT='$(VENDORSUPPORT)'
+#else
+ BUGMSG = -DBUILDERADDR='$(BUILDERADDR)'
+#endif
+
+#if defined(XF86DriverSDK)
+    BUILDMODULEDIR = $(DRIVERSDKMODULEDIR)
+    BUILDMODULETOP = ..
+    TOP_INCLUDES = TopIncludes
+   IMAKE_DEFINES = -DXF86DriverSDK=1
+#ifdef UseInstalled
+       IMAKE_CMD = $(IMAKE) -DUseInstalled -I$(TOP) -I$(IRULESRC) \
+		   $(IMAKE_DEFINES) $(IMAKE_WARNINGS)
+#else
+       IMAKE_CMD = $(IMAKE) -I$(TOP) -I$(IRULESRC) \
+		   $(IMAKE_DEFINES) $(IMAKE_WARNINGS)
+#endif
+
+#undef ImakeSubCmdHelper
+#ifdef UseInstalled
+#define ImakeSubCmdHelper $(IMAKE) -DUseInstalled -I$(IMAKETOP) \
+			  -I$(IRULESRC) $(IMAKE_DEFINES) $(IMAKE_WARNINGS)
+#else
+#define ImakeSubCmdHelper $(IMAKEPREFIX)$(IMAKE) -I$(IMAKETOP) \
+			  $(IMAKE_DEFINES) $(IMAKE_WARNINGS) \
+			  -I$(IMAKEPREFIX)$(IRULESRC)
+#endif
+#endif
+
+#ifndef JoystickSupport
+#define JoystickSupport		NO
+#endif
+
+/*
+ * Module support: These overrides must be here, not in xf86.rules,
+ * because they will replace rules after having seen the first lines
+ * of Imakefile (include <Server.tmpl>)
+ */
+
+#ifndef ProPoliceSupport
+#define ProPoliceSupport	O
+#endif
+
+#ifndef HasGccMergeConstants
+#define HasGccMergeConstants	NO
+#endif
+
+#if HasGccMergeConstants && DoLoadableServer && !MakeDllModules
+MODULE_GCC_FLAGS = -fno-merge-constants
+#endif
+
+#if defined(IHaveModules) && MakeDllModules
+MODULE_PIC_FLAGS = $(PICFLAGS)
+#endif
+
+MODULE_CFLAGS = $(MODULE_PIC_FLAGS) $(MODULE_GCC_FLAGS)
+
+#if defined(IHaveModules)
+# if DoLoadableServer
+MODULE_DEFINES = -DIN_MODULE -DXFree86Module
+# else
+MODULE_DEFINES = -DXFree86Module
+# endif
+#endif
+
+#if defined(IHaveModules) && DoLoadableServer
+
+/* This overrides the ObjCompile in Imake.rules! */
+#undef ObjectCompile
+#define ObjectCompile(options) RemoveFile($@)                           @@\
+	ClearmakeOSName\
+	$(MODCC) $(MODCFLAGS) options -c $*.c
+
+/* This overrides an AssembleObject in xf86.rules or in an os-dependent
+ * rules file (currently only minix.cf and os2.rules (uncritical))
+ */
+#define ModCPPOnlyAsm(basename,options) RemoveFile(basename.i)		@@\
+	$(MODCPP) AsmDefines $(DEFINES) $(INCLUDES) options basename.S | \	@@\
+		grep -v '^\#' > basename.i
+
+#undef AssembleObject
+#define AssembleObject(basename,flags) ModCPPOnlyAsm(basename,flags)	@@\
+	RemoveFile(basename.o)						@@\
+	$(MODAS) $(MODASFLAGS) -o basename.o basename.i			@@\
+	RemoveFile(basename.i)
+
+/* This overrides the NormalRelocatableTarget in Imake.rules */
+#undef NormalRelocatableTarget
+#define	NormalRelocatableTarget(objname,objlist)			@@\
+AllTarget(objname.Osuf)							@@\
+									@@\
+objname.Osuf: objlist $(EXTRALIBRARYDEPS)				@@\
+	RemoveFile($@)							@@\
+	$(MODLD) $(MODLDCOMBINEFLAGS) objlist -o $@
+
+/* This overrides the NormalDepRelocatableTarget in Imake.rules */
+#undef NormalDepRelocatableTarget
+#define	NormalDepRelocatableTarget(objname,deplist,objlist)		@@\
+AllTarget(objname.Osuf)							@@\
+									@@\
+objname.Osuf: deplist $(EXTRALIBRARYDEPS)				@@\
+	RemoveFile($@)							@@\
+	$(MODLD) $(MODLDCOMBINEFLAGS) objlist -o $@
+
+/* This overrides the RanLibrary in Imake.rules */
+#if DoRanlibCmd || NeedModuleRanlib
+#undef RanLibrary
+#define RanLibrary(args) $(MODRANLIB) args
+#endif
+
+/* This overrides the MakeLibrary rule in Imake.rules */
+#undef MakeLibrary
+#define MakeLibrary(libname,objlist) $(MODAR) libname objlist
+
+/* This overrides the LibraryTargetName rule in Imake.rules */
+#undef LibraryTargetName
+#define LibraryTargetName(libname)Concat(lib,libname.a)
+
+/* This disables an OS/2 rule */
+#undef BuildLibSupportLibs
+#define BuildLibSupportLibs(dummy)
+
+#endif /* IHaveModules */

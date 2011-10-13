@@ -1,0 +1,305 @@
+/* host.def config for the Xprint server standalone packages */
+
+/*
+ * Enable this if you want to build the GISWxprintglue package...
+ * #define BuildGISWxprintglue YES
+ * Then do a % make World ; cd packager/solaris/GISWxprintglue/ ; make make_GISWxprintglue
+ */
+ 
+/*
+ * Enable this if you want to build the GISWxprint package...
+ * #define BuildGISWxprint YES
+ * Then do a % make World ; cd packager/solaris/GISWxprint/ ; make make_GISWxprint
+ */
+
+/*
+ * Enable this if you want to build the Debian Xprint server package
+ * #define BuildDebianXprintPackage YES
+ */
+
+/*
+ * If you build a RPM package from this tree the xprint.spec file
+ * will set BuildXprintRPMPackage to YES
+ */
+ 
+/*
+ * Enable this if you want to build the Mozilla Xprint XPI server package
+ * #define BuildMozillaXprintXPIPackage YES
+ */
+ 
+/* HasDocBookTools - set to YES if "xsltproc", "xmllint", "docbook2man",
+ * "lynx" and the docbook-xsl-stylesheets are installed.
+ * #define HasDocBookTools YES
+ */
+
+/* #########################################################################
+ * ############ xprint.mozdev.org defaults start (do not edit!) ############
+ * #########################################################################
+ */
+
+#ifndef BuildGISWxprintglue
+# define BuildGISWxprintglue           NO
+#endif /* BuildGISWxprintglue */
+
+#ifndef BuildGISWxprint
+# define BuildGISWxprint               NO
+#endif /* BuildGISWxprint */
+
+#ifndef BuildDebianXprintPackage
+# define BuildDebianXprintPackage      NO
+#endif /* BuildDebianXprintPackage */
+
+#ifndef BuildXprintRPMPackage
+# define BuildXprintRPMPackage         NO
+#endif /* BuildXprintRPMPackage */
+
+#ifndef BuildMozillaXprintXPIPackage
+# define BuildMozillaXprintXPIPackage  NO
+#endif /* BuildMozillaXprintXPIPackage */
+
+/* If we do not build any of the special packages then build and
+ * install everything */
+#ifndef BuildFullXprintDistrib
+# if BuildGISWxprintglue || BuildGISWxprint || BuildDebianXprintPackage || BuildXprintRPMPackage || BuildMozillaXprintXPIPackage
+#  define BuildFullXprintDistrib       NO
+# else
+#  define BuildFullXprintDistrib       YES
+# endif /* BuildGISWxprintglue || BuildGISWxprint || BuildDebianXprintPackage || BuildXprintRPMPackage || BuildMozillaXprintXPIPackage */
+#endif /* BuildFullXprintDistrib */
+
+/* Verify that only one package is enabled at the same time */
+#if (BuildGISWxprintglue + BuildGISWxprint + BuildDebianXprintPackage + BuildXprintRPMPackage + BuildFullXprintDistrib + BuildMozillaXprintXPIPackage) > 1
+# error Building more than one special package is not allowed.
+#endif /* Verify */
+
+/* Some flags to build the Xprint server (Xprt), the tools and the fonts */
+#define BuildServer	               YES
+#define XprtServer	               YES
+
+/* Needed to build encoding files */
+#define BuildFonts	               YES
+#define BuildSpeedoFonts               NO
+#define BuildType1Fonts                NO
+#define BuildCIDFonts                  NO
+#define BuildTrueTypeFonts             NO
+#define BuildEthiopicFonts             NO
+#define BuildBethMarduthoFonts         NO
+
+/* X extensions not needed (or not supported yet by Xprt) */
+#define BuildXKB	               NO
+#define BuildRECORD	               NO
+#define BuildDPMS	               NO
+#define BuildXF86VidModeExt            NO
+#define BuildXInputExt                 NO
+#define BuildScreenSaverExt            NO
+#define BuildXvExt                     NO
+#define BuildXvMCExt                   NO
+#define BuildDmx                       NO
+#define BuildXF86DRI                   NO
+#define BuildRender                    NO
+#define BuildXfixes                    NO
+#define BuildDamage                    NO
+#define BuildComposite                 NO
+#define BuildXevie                     NO
+#define BuildXF86DGA                   NO
+#define BuildRandR                     NO
+#define BuildXinerama                  NO
+
+/* X extensions needed */
+#define BuildGlxExt                    YES
+/* LBX is needed for compatibility to the XWeb stuff */
+#define BuildLBX	               YES
+
+/* Xprt's non-bitmap based DDX (PS, PCL, PDF, SVGprint etc.) cannot support MIT-SHM */
+#undef HasShm
+#define HasShm NO
+/* Disable stipple code due portability issues
+ * (see http://xprint.mozdev.org/bugs/show_bug.cgi?id=2220) */
+#define BuildStippleCode NO
+
+/* Temporary for Xorg tree */
+#define BuildFontconfigLibrary         NO
+#define XorgServer                     NO
+#define XF86Server                     NO
+#define XnestServer                    NO
+#define XVirtualFramebufferServer      NO
+#define XdmxServer                     NO
+
+#define GzipFontCompression            YES
+#define BuildFreeType	               YES
+#define BuildFreetype2Library          YES
+#define SharedLibFreetype2             NO
+#define NormalLibFreetype2             YES
+#define HasFreetype2                   NO
+#define Freetype2BuildDefines -DTT_CONFIG_OPTION_BYTECODE_INTERPRETER
+
+#define BuildType1                     NO
+#define BuildCID                       NO
+#define BuildSpeedo                    NO
+#define BuildFontCache                 NO
+#define BuildRender                    NO
+#define BuildRenderLibrary             NO
+#define BuildRandRLibrary              NO
+#define BuildXcursorLibrary            NO
+#define BuildXcursorgen                NO
+#define SharedLibFontEnc               NO
+#define SharedLibFont                  NO
+#define XserverStaticFontLib           YES
+
+/* Build only Xprint applications */
+#ifndef BuildXprintAppsOnly
+#define BuildXprintAppsOnly YES
+#endif /* BuildXprintAppsOnly */
+
+/* Set our own XVendorString/XVendorRelease
+ * (and to avoid that xorg.cf sets it's own stuff here) */
+#define XVendorString "xprint.mozdev.org"
+#define XVendorRelease 100000
+
+#define UseHackLinkAgainstInstalledX11Libs NO
+#if UseHackLinkAgainstInstalledX11Libs
+/* "Hack" to reuse an already installed X11 distribution when linking our
+ * programs (this assumes that the installed X version is at least X11R6.4) */
+# ifndef IBMArchitecture
+#  define LdPreLib -L$(USRLIBDIR) -R$(USRLIBDIR) -L$(BUILDLIBDIR)
+# endif /* !IBMArchitecture */
+#endif /* UseHackLinkAgainstInstalledX11Libs */
+
+XCOMM #### Sun/Solaris-specifc stuff ... ####
+#if defined(SunArchitecture) && (OSMajorVersion > 4)
+#undef XsunServer
+#define XsunServer    NO
+
+XCOMM X11R6.7's sun.cf does not set ProjectRoot to /usr/openwin anymore - why ?
+#define ProjectRoot      /usr/openwin
+#define ServerConfigDir  /usr/openwin/server/etc
+
+XCOMM Some build hacks for the GISWxprintglue package
+#if BuildGISWxprintglue
+#  define ProjectRoot      /usr/openwin
+#  define ServerConfigDir  /usr/openwin/server/etc
+#  define BinDir           /opt/GISWxprintglue/bin
+#  define ManDirectoryRoot /opt/GISWxprintglue/man
+#  undef XPrintDir
+#  define XPrintDir        /opt/GISWxprintglue/server/etc/XpConfig
+   /* PCL DDXs are currently defunct in Solaris Xprt, so do not ship the
+    * config files for now */
+#  undef XpColorPclDDX
+#  define XpColorPclDDX NO
+#  undef XpMonoPclDDX
+#  define XpMonoPclDDX NO
+   /* GISWxprintglue uses the Solaris Xprt server which uses the Solaris
+    * encoding/ttmap files for font encodings
+    */
+#  define InstallXF86EncodingFiles NO
+#endif /* BuildGISWxprintglue */
+
+XCOMM Some build hacks for the GISWxprint package
+#if BuildGISWxprint
+#  define ProjectRoot      /usr/openwin
+#  define ServerConfigDir  /usr/openwin/server/etc
+#  define BinDir           /opt/GISWxprint/bin
+#  define ManDirectoryRoot /opt/GISWxprint/man
+#  undef XPrintDir
+#  define XPrintDir        /opt/GISWxprint/server/etc/XpConfig
+   /* PCL DDXs are currently defunct in Solaris Xprt, so do not ship the
+    * config files for now */
+#  undef XpColorPclDDX
+#  define XpColorPclDDX NO
+#  undef XpMonoPclDDX
+#  define XpMonoPclDDX NO
+   /* Make sure we install our own encoding files since Solaris uses a format we
+    * (currently) do not support (yet).
+    */
+#  define InstallXF86EncodingFiles YES
+#  undef XF86EncodingsPath
+#  define XF86EncodingsPath /opt/GISWxprint/lib/X11/fonts/encodings
+#endif /* GISWxprint */
+
+/* Install XF86 encoding files since that's the only format we currently support */
+#ifndef InstallXF86EncodingFiles
+#define InstallXF86EncodingFiles YES
+#endif /* InstallXF86EncodingFiles */
+
+#define HasVarDirectory NO
+#undef HasMotif2
+#define HasMotif2 YES
+
+#if 1 /* Switch for 32bit binaries or 64bit binaries */
+   /* 32bit SPARC */
+#  define CcCmd                       /opt/SUNWspro/bin/cc
+#  define CplusplusCmd                /opt/SUNWspro/bin/CC
+#else
+   /* 64bit sparc (Doesn't really work yet because the Xservers cannot link properly... ;-( */
+#  define ServerExtraDefines   -D_XSERVER64
+#  define CcCmd                       /opt/SUNWspro/bin/cc -xarch=v9a
+#  define CplusplusCmd                /opt/SUNWspro/bin/CC -xarch=v9a
+#  define UsrLibDir /usr/openwin/lib/sparcv9
+#endif
+
+#if 0 /* Development only */
+   XCOMM Explicitly use "-xs" to make Rational Purify "happy"
+#  undef OptimizedCDebugFlags
+#  define OptimizedCDebugFlags -xs -g -DDEBUG_$(LOGNAME)
+#endif
+
+XCOMM #### FreeBSD-specifc stuff ... ####
+#elif defined(FreeBSDArchitecture)
+#define ProjectRoot /usr/X11R6
+#define XPrintDir   /etc/X11/xserver
+#define DlLibrary -lc
+#undef XF86SVGAServer
+#define XF86SVGAServer NO
+#define HasVarDirectory NO
+#define HasMotif2 YES
+#define HasGhostScript YES
+#define InstallXF86EncodingFiles NO
+
+XCOMM #### NetBSD-specifc stuff ... ####
+#elif defined(NetBSDArchitecture)
+#define ProjectRoot /usr/X11R6
+#define XPrintDir   /etc/X11/xserver
+#undef XF86SVGAServer   
+#define XF86SVGAServer NO 
+#define HasVarDirectory NO
+#define HasMotif2 YES   
+#define HasGhostScript YES
+#define InstallXF86EncodingFiles NO
+
+XCOMM #### Linux-specifc stuff ... ####
+#elif defined(LinuxArchitecture)
+#define ProjectRoot /usr/X11R6
+#define XPrintDir   /etc/X11/xserver
+#undef XF86SVGAServer
+#define XF86SVGAServer NO
+#define HasVarDirectory NO
+#define HasMotif2 YES
+#define HasGhostScript YES
+#define InstallXF86EncodingFiles NO
+/* Debian Xprint package puts the Xprt config files elsewhere */
+#if (LinuxDistribution == LinuxDebian)
+# define XPrintDir /usr/share/Xprint/xserver 
+#endif
+
+#endif
+
+/* Do not strip binaries to ensure usefull stacktraces in bug reports
+ * (http://xprint.mozdev.org/bugs/show_bug.cgi?id=2264)
+ */
+#define StripInstalledPrograms	NO
+
+/* Does the X11 installation have the Xfree86 encoding files ? */
+#ifndef InstallXF86EncodingFiles
+#define InstallXF86EncodingFiles YES
+#endif /* InstallXF86EncodingFiles */
+
+INSTALLXF86ENCODINGFILES = InstallXF86EncodingFiles
+
+#ifndef XF86EncodingsPath
+#define XF86EncodingsPath $(FONTDIR)/encodings
+#endif /* XF86EncodingsPath *
+
+/* #########################################################################
+ * ################      xprint.mozdev.org defaults end     ################
+ * #########################################################################
+ */

@@ -1,4 +1,4 @@
-/* $XConsortium: lbxzlib.h /main/2 1996/10/27 15:39:45 rws $ */
+/* $Xorg: lbxzlib.h,v 1.3 2000/08/18 04:05:45 coskrey Exp $ */
 /*
  * Copyright 1993 Network Computing Devices
  *
@@ -46,5 +46,19 @@
 	((((unsigned)((p)[0] & ZLIB_DATALEN_MASK)) << 8) | (unsigned)(p)[1])
 
 #define ZLIB_COMPRESSED(p) ((p)[0] & ZLIB_COMPRESS_FLAG)
+
+struct ZlibInfo;
+
+extern void * ZlibInit ( int fd, int level );
+extern void ZlibFree ( struct ZlibInfo *comp );
+extern int ZlibFlush ( int fd );
+extern int ZlibStuffInput ( int fd, unsigned char *buffer, int buflen );
+extern void ZlibCompressOn ( int fd );
+extern void ZlibCompressOff ( int fd );
+extern int ZlibWrite ( int fd, unsigned char *buffer, int buflen );
+extern int ZlibWriteV ( int fd, struct iovec *iov, int iovcnt );
+extern int ZlibRead ( int fd, unsigned char *buffer, int buflen );
+extern int ZlibInputAvail ( int fd );
+
 
 #endif /* _ZLIB_H_ */

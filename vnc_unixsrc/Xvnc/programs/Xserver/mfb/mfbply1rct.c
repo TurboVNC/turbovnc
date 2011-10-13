@@ -1,14 +1,13 @@
 /*
- * $XConsortium: mfbply1rct.c /main/10 1996/08/23 10:35:13 dpw $
+ * $Xorg: mfbply1rct.c,v 1.4 2001/02/09 02:05:19 xorgcvs Exp $
  *
-Copyright (c) 1990  X Consortium
+Copyright 1990, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,18 +15,24 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
  *
  * Author:  Keith Packard, MIT X Consortium
  */
 
-#include "X.h"
+/* $XFree86: xc/programs/Xserver/mfb/mfbply1rct.c,v 1.7tsi Exp $ */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
 
 #include "gcstruct.h"
 #include "windowstr.h"
@@ -47,12 +52,12 @@ in this Software without prior written authorization from the X Consortium.
 
 #if IMAGE_BYTE_ORDER == MSBFirst
 #define intToCoord(i,x,y)   (((x) = GetHighWord(i)), ((y) = (int) ((short) (i))))
-#define coordToInt(x,y)	(((x) << 16) | (y))
+#define coordToInt(x,y)	(((x) << 16) | ((y) & 0xffff))
 #define intToX(i)	(GetHighWord(i))
 #define intToY(i)	((int) ((short) i))
 #else
 #define intToCoord(i,x,y)   (((x) = (int) ((short) (i))), ((y) = GetHighWord(i)))
-#define coordToInt(x,y)	(((y) << 16) | (x))
+#define coordToInt(x,y)	(((y) << 16) | ((x) & 0xffff))
 #define intToX(i)	((int) ((short) (i)))
 #define intToY(i)	(GetHighWord(i))
 #endif
@@ -61,10 +66,11 @@ void
 MFBFILLPOLY1RECT (pDrawable, pGC, shape, mode, count, ptsIn)
     DrawablePtr	pDrawable;
     GCPtr	pGC;
+    int		shape;
+    int		mode;
     int		count;
     DDXPointPtr	ptsIn;
 {
-    mfbPrivGCPtr    devPriv;
     int		    nlwidth;
     PixelType	    *addrl, *addr;
     int		    maxy;
@@ -74,29 +80,28 @@ MFBFILLPOLY1RECT (pDrawable, pGC, shape, mode, count, ptsIn)
     BoxPtr	    extents;
     int		    clip;
     int		    y;
-    int		    *vertex1p, *vertex2p;
+    int		    *vertex1p = NULL, *vertex2p;
     int		    *endp;
-    int		    x1, x2;
-    int		    dx1, dx2;
-    int		    dy1, dy2;
-    int		    e1, e2;
-    int		    step1, step2;
-    int		    sign1, sign2;
+    int		    x1 = 0, x2 = 0;
+    int		    dx1 = 0, dx2 = 0;
+    int		    dy1 = 0, dy2 = 0;
+    int		    e1 = 0, e2 = 0;
+    int		    step1 = 0, step2 = 0;
+    int		    sign1 = 0, sign2 = 0;
     int		    h;
     int		    l, r;
     PixelType	    mask, bits = ~((PixelType)0);
     int		    nmiddle;
 
-    devPriv = (mfbPrivGC *)(pGC->devPrivates[mfbGCPrivateIndex].ptr);
     if (mode == CoordModePrevious || shape != Convex ||
-	REGION_NUM_RECTS(devPriv->pCompositeClip) != 1)
+	REGION_NUM_RECTS(pGC->pCompositeClip) != 1)
     {
 	miFillPolygon (pDrawable, pGC, shape, mode, count, ptsIn);
 	return;
     }
     origin = *((int *) &pDrawable->x);
     vertex2 = origin - ((origin & 0x8000) << 1);
-    extents = &devPriv->pCompositeClip->extents;
+    extents = &pGC->pCompositeClip->extents;
     vertex1 = *((int *) &extents->x1) - vertex2;
     vertex2 = *((int *) &extents->x2) - vertex2 - 0x00010001;
     clip = 0;
@@ -136,7 +141,7 @@ MFBFILLPOLY1RECT (pDrawable, pGC, shape, mode, count, ptsIn)
 	vertex2p = (int *) ptsIn;
 #define Setup(c,x,vertex,dx,dy,e,sign,step) {\
     x = intToX(vertex); \
-    if (dy = intToY(c) - y) { \
+    if ((dy = intToY(c) - y)) { \
     	dx = intToX(c) - x; \
 	step = 0; \
     	if (dx >= 0) \
@@ -240,7 +245,7 @@ MFBFILLPOLY1RECT (pDrawable, pGC, shape, mode, count, ptsIn)
 	    	}
 	    	nmiddle >>= PWSH;
 		Duff (nmiddle, *addr++ EQWHOLEWORD)
-	    	if (mask = ~SCRRIGHT(bits, r & PIM))
+	    	if ((mask = ~SCRRIGHT(bits, r & PIM)))
 	    	    *addr OPEQ mask;
 	    }
 	    if (!--h)

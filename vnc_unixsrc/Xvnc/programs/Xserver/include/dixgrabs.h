@@ -27,9 +27,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef DIXGRABS_H
 #define DIXGRABS_H 1
 
-GrabPtr
-CreateGrab(
-#if NeedFunctionPrototypes
+extern GrabPtr CreateGrab(
 	int /* client */,
 	DeviceIntPtr /* device */,
 	WindowPtr /* window */,
@@ -42,38 +40,20 @@ CreateGrab(
 	int /* type */,
 	KeyCode /* keybut */,
 	WindowPtr /* confineTo */,
-	CursorPtr /* cursor */
-#endif
-	);
+	CursorPtr /* cursor */);
 
-int
-DeletePassiveGrab(
-#if NeedFunctionPrototypes
+extern int DeletePassiveGrab(
 	pointer /* value */,
-	XID /* id */
-#endif
-	);
+	XID /* id */);
 
-Bool
-GrabMatchesSecond(
-#if NeedFunctionPrototypes
+extern Bool GrabMatchesSecond(
 	GrabPtr /* pFirstGrab */,
-	GrabPtr /* pSecondGrab */
-#endif
-	);
+	GrabPtr /* pSecondGrab */);
 
-int
-AddPassiveGrabToList(
-#if NeedFunctionPrototypes
-	GrabPtr /* pGrab */
-#endif
-	);
+extern int AddPassiveGrabToList(
+	GrabPtr /* pGrab */);
 
-Bool
-DeletePassiveGrabFromList(
-#if NeedFunctionPrototypes
-	GrabPtr /* pMinuendGrab */
-#endif
-	);
+extern Bool DeletePassiveGrabFromList(
+	GrabPtr /* pMinuendGrab */);
 
 #endif /* DIXGRABS_H */

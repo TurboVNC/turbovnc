@@ -1,4 +1,4 @@
-/* $XConsortium: spglyph.c,v 1.17 94/04/17 20:17:49 gildea Exp $ */
+/* $Xorg: spglyph.c,v 1.4 2001/02/09 02:04:00 xorgcvs Exp $ */
 /*
  * Copyright 1990, 1991 Network Computing Devices;
  * Portions Copyright 1987 by Digital Equipment Corporation
@@ -24,15 +24,13 @@
 
 /*
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -40,20 +38,25 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/lib/font/Speedo/spglyph.c,v 1.6 2001/01/17 19:43:20 dawes Exp $ */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include	<X11/X.h>	/* for bit order #defines */
 #include	"spint.h"
+#include	<X11/fonts/fontutil.h>
 
 #undef	CLIP_BBOX_NOISE
 
@@ -64,12 +67,12 @@ static int  bit_order,
             scan;
 
 unsigned long
-sp_compute_data_size(pfont, mappad, scanlinepad, start, end)
-    FontPtr     pfont;
+sp_compute_data_size(
+    FontPtr     pfont,
     int         mappad,
-                scanlinepad;
+    int         scanlinepad,
     unsigned long start,
-                end;
+    unsigned long end)
 {
     unsigned long ch;
     unsigned long size = 0;
@@ -123,8 +126,7 @@ sp_compute_data_size(pfont, mappad, scanlinepad, start, end)
 }
 
 static void
-finish_line(spf)
-    SpeedoFontPtr spf;
+finish_line(SpeedoFontPtr spf)
 {
     int         bpr = cfv->bpr;
     CharInfoPtr ci = &spf->encoding[cfv->char_id - spf->master->first_char_id];
@@ -133,17 +135,14 @@ finish_line(spf)
 	bpr = GLYPH_SIZE(ci, cfv->scanpad);
     }
     if (bpr) {			/* char may not have any metrics... */
-	cfv->bp += bpr;
+	cfv->bp = (char *)cfv->bp + bpr;
     }
     assert(cfv->bp - sp_fp_cur->bitmaps <= sp_fp_cur->bitmap_size);
 }
 
 
 void
-sp_set_bitmap_bits(y, xbit1, xbit2)
-    fix15       y;
-    fix15       xbit1,
-                xbit2;
+sp_set_bitmap_bits(fix15 y, fix15 xbit1, fix15 xbit2)
 {
     int         nmiddle;
     CARD8	startmask,
@@ -190,7 +189,7 @@ sp_set_bitmap_bits(y, xbit1, xbit2)
 	xbit1 = 0;
 
     nmiddle = (xbit1 >> 3);
-    dst = (CARD8 *) (cfv->bp + nmiddle);
+    dst = (CARD8 *)cfv->bp + nmiddle;
     xbit2 -= (xbit1 & ~7);
     nmiddle = (xbit2 >> 3);
     xbit1 &= 7;
@@ -214,13 +213,8 @@ sp_set_bitmap_bits(y, xbit1, xbit2)
 
 /* ARGSUSED */
 void
-sp_open_bitmap(x_set_width, y_set_width, xorg, yorg, xsize, ysize)
-    fix31       x_set_width;
-    fix31       y_set_width;
-    fix31       xorg;
-    fix31       yorg;
-    fix15       xsize;
-    fix15       ysize;
+sp_open_bitmap(fix31 x_set_width, fix31 y_set_width, fix31 xorg, fix31 yorg,
+		fix15 xsize, fix15 ysize)
 {
     CharInfoPtr ci = &sp_fp_cur->encoding[cfv->char_id - sp_fp_cur->master->first_char_id];
 
@@ -316,10 +310,10 @@ sp_close_bitmap()
 }
 
 int
-sp_build_all_bitmaps(pfont, format, fmask)
-    FontPtr     pfont;
-    fsBitmapFormat format;
-    fsBitmapFormatMask fmask;
+sp_build_all_bitmaps(
+    FontPtr     pfont,
+    fsBitmapFormat format,
+    fsBitmapFormatMask fmask)
 {
     int         ret,
                 glyph = 1,
@@ -374,7 +368,7 @@ sp_build_all_bitmaps(pfont, format, fmask)
 	int j;
 	cfv->char_index = spmf->enc[i * 2 + 1];
 	cfv->char_id = spmf->enc[i * 2];
-#if DEBUG
+#ifdef DEBUG
 fprintf(stderr, "build_all_sp_bitmaps:i = %d, Char ID = %d\n", i, cfv->char_id);
 #endif
 	if (!cfv->char_id)

@@ -1,8 +1,8 @@
-XCOMM $XConsortium: sv3Lib.rules /main/1 1996/10/31 14:47:33 kaleb $
+XCOMM $Xorg: sv3Lib.rules,v 1.3 2000/08/17 19:41:48 cpqbld Exp $
 
 
 
-XCOMM $XFree86: xc/config/cf/sv3Lib.rules,v 3.1 1996/12/27 06:50:27 dawes Exp $
+XCOMM $XFree86: xc/config/cf/sv3Lib.rules,v 3.5 2002/11/22 22:55:56 tsi Exp $
 /*
  * SVR3 shared library rules
  * Copyright (c) 1992, 1993 by Thomas Wolfram, Berlin, Germany
@@ -29,14 +29,8 @@ XCOMM $XFree86: xc/config/cf/sv3Lib.rules,v 3.1 1996/12/27 06:50:27 dawes Exp $
 #ifndef SharedLibXi
 #define SharedLibXi HasSharedLibraries
 #endif
-#ifndef SharedLibXie
-#define SharedLibXie HasSharedLibraries
-#endif
 #ifndef SharedLibXtst
 #define SharedLibXtst HasSharedLibraries
-#endif
-#ifndef SharedLibPhigs
-#define SharedLibPhigs HasSharedLibraries
 #endif
 #ifndef SharedLibICE
 #define SharedLibICE HasSharedLibraries
@@ -61,9 +55,6 @@ XCOMM $XFree86: xc/config/cf/sv3Lib.rules,v 3.1 1996/12/27 06:50:27 dawes Exp $
 #endif
 #ifndef SharedLibXext
 #define SharedLibXext HasSharedLibraries
-#endif
-#ifndef SharedLibPex
-#define SharedLibPex NO
 #endif
 
 #ifndef SharedDataSeparation
@@ -98,6 +89,10 @@ XCOMM $XFree86: xc/config/cf/sv3Lib.rules,v 3.1 1996/12/27 06:50:27 dawes Exp $
 # endif
 #endif
 
+#ifndef StripInstalledPrograms
+# define StripInstalledPrograms NO
+#endif
+
 #if 0
 /*
  * LibCleanDir - helper for cleaning library object subdirectories
@@ -114,7 +109,8 @@ XCOMM $XFree86: xc/config/cf/sv3Lib.rules,v 3.1 1996/12/27 06:50:27 dawes Exp $
 #define SharedLibObjCompile(options) $(RM) shared/$@ 	                   @@\
 	cat import.h $*.c >_$*.c                                           @@\
         $(CC) -c $(ANSICCOPTIONS) $(CCOPTIONS) $(ALLDEFINES) options \     @@\
-$(SHLIBDEF) $(SHAREDCODEDEF) $(PICFLAGS) $(CDEBUGFLAGS) _$*.c              @@\
+$(SHLIBDEF) $(SHAREDCODEDEF) $(PICFLAGS) $(CDEBUGFLAGS) $(CLIBDEBUGFLAGS) \@@\
+_$*.c                                                                      @@\
 	$(MV) _$*.o shared/$@                                              @@\
 	$(RM) _$*.c
 #endif
@@ -221,6 +217,30 @@ clean::									@@\
 	$(RM) Concat(lib,libname.rev) Concat3(lib,libname,_s.a)
 
 #endif /* SharedLibraryTarget */
+
+/*
+ * SharedDepLibraryTarget - generate rules to create a shared library.
+ */
+#ifndef SharedDepLibraryTarget
+#define SharedDepLibraryTarget(libname,rev,deplist,solist,down,up)	@@\
+AllTarget(Concat(lib,libname.rev))					@@\
+									@@\
+Concat(lib,libname.rev):  deplist					@@\
+	$(RM) $@ Concat3(lib,libname,_s.a)				@@\
+        $(CPP) -DDOWN=down ConnectionFlags ShlibDefines Concat(lib,libname.def) | \ @@\
+        sed -e '/^#  *[0-9][0-9]*  *.*$$/d; /^$$/d' >spec.cpp           @@\
+        sed -e '1,/#libraries/d; /#externals/,$$d' spec.cpp | \         @@\
+        nawk '{ system("ar x " $$1 " " $$2 )}'                          @@\
+        echo "#target " Concat($(LIBDIR)/shlib/lib,libname.rev) >spec   @@\
+        sed -e '/#libraries/,$$d' spec.cpp >>spec                             @@\
+        mkshlib -s spec -t $@ -h Concat3(lib,libname,_s.a) $(SHLIBLDFLAGS)    @@\
+        ar rulv Concat3(lib,libname,_s.a) `sed -e '1,/#externals/d' spec.cpp` @@\
+        $(RM) spec.cpp spec                                             @@\
+									@@\
+clean::									@@\
+	$(RM) Concat(lib,libname.rev) Concat3(lib,libname,_s.a)
+
+#endif /* SharedDepLibraryTarget */
 
 /*
  * SharedLibraryDataTarget - generate rules to create shlib data file;

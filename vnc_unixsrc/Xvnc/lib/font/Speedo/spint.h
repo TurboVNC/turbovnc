@@ -1,4 +1,4 @@
-/* $XConsortium: spint.h /main/12 1996/09/28 16:47:40 rws $ */
+/* $Xorg: spint.h,v 1.4 2001/02/09 02:04:00 xorgcvs Exp $ */
 /*
  * Copyright 1990, 1991 Network Computing Devices;
  * Portions Copyright 1987 by Digital Equipment Corporation
@@ -22,15 +22,13 @@
 
 /*
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -38,23 +36,28 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/lib/font/Speedo/spint.h,v 1.9 2001/01/17 19:43:20 dawes Exp $ */
 
 #ifndef _SPINT_H_
 #define _SPINT_H_
 
+#include <X11/fonts/fntfilst.h>
+#ifndef XFree86LOADER
 #include <stdio.h>
-#include "fntfilst.h"
+#else
+#include <xf86_ansic.h>
+#endif
 #include <X11/Xfuncproto.h>
 #include "speedo.h"
 
@@ -143,24 +146,27 @@ typedef struct _sp_font {
 
 extern SpeedoFontPtr sp_fp_cur;
 
-extern int  sp_open_font();
-extern int  sp_open_master();
-extern void sp_close_font();
-extern void sp_close_master_font();
-extern void sp_close_master_file();
-extern void sp_reset_master();
-#if NeedVarargsPrototypes
+extern int sp_open_font(char *, char *, FontEntryPtr, FontScalablePtr,
+			fsBitmapFormat, fsBitmapFormatMask, Mask,
+			SpeedoFontPtr *);
+extern int  sp_open_master(const char *, const char *, SpeedoMasterFontPtr *);
+extern void sp_close_font(SpeedoFontPtr);
+extern void sp_close_master_font(SpeedoMasterFontPtr);
+extern void sp_close_master_file(SpeedoMasterFontPtr);
+extern void sp_reset_master(SpeedoMasterFontPtr);
 extern void SpeedoErr(char *fmt, ...);
-#else
-extern void SpeedoErr();
-#endif
 
-extern void sp_make_standard_props();
-extern void sp_make_header();
-extern void sp_compute_bounds();
-extern void sp_compute_props();
-extern int  sp_build_all_bitmaps();
-extern unsigned long sp_compute_data_size();
+extern void sp_make_standard_props(void);
+extern void sp_make_header(SpeedoFontPtr, FontInfoPtr);
+extern void sp_compute_bounds(SpeedoFontPtr, FontInfoPtr, unsigned long, long *);
+extern void sp_compute_props(SpeedoFontPtr, char *, FontInfoPtr, long);
+extern int  sp_build_all_bitmaps(FontPtr, fsBitmapFormat, fsBitmapFormatMask);
+extern unsigned long sp_compute_data_size(FontPtr, int, int, unsigned long,
+						unsigned long);
+
+extern int SpeedoFontLoad(FontPtr *, char *, char *, FontEntryPtr,
+			  FontScalablePtr, fsBitmapFormat, fsBitmapFormatMask,
+			  Mask);
 
 extern int  sp_bics_map[];
 extern int  sp_bics_map_size;

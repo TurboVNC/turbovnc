@@ -1,16 +1,15 @@
 /*
- * $XConsortium: Xos.h /main/70 1996/11/15 16:00:41 kaleb $
- * $XFree86: xc/include/Xos.h,v 3.21.2.1 1998/01/23 12:35:11 dawes Exp $
+ * $XdotOrg: xc/include/Xos.h,v 1.8 2005/11/08 06:33:25 jkj Exp $
+ * $Xorg: Xos.h,v 1.6 2001/02/09 02:03:22 xorgcvs Exp $
  * 
  * 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -18,17 +17,18 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
  *
- * The X Window System is a Trademark of X Consortium.
+ * The X Window System is a Trademark of The Open Group.
  *
  */
+/* $XFree86: xc/include/Xos.h,v 3.41tsi Exp $ */
 
 /* This is a collection of things to try and minimize system dependencies
  * in a "signficant" number of source files.
@@ -52,22 +52,34 @@ in this Software without prior written authorization from the X Consortium.
 #define __TYPES__
 #endif /* __TYPES__ */
 #else /* USG */
-#if defined(_POSIX_SOURCE) && (defined(MOTOROLA) || defined(AMOEBA))
+#if defined(_POSIX_SOURCE) && defined(MOTOROLA)
 #undef _POSIX_SOURCE
 #include <sys/types.h>
 #define _POSIX_SOURCE
 #else
-#include <sys/types.h>
+# include <sys/types.h>
 #endif
 #endif /* USG */
 
+#ifndef sgi
+#if defined(__SCO__) || defined(__UNIXWARE__)
+#include <stdint.h>
+#endif
+#endif
+
+#ifdef _SEQUENT_
+/*
+ * in_systm.h compatibility between SysV and BSD types u_char u_short u_long
+ * select.h  for typedef of args to select, fd_set, may use SVR4 later
+ */
+#include <netinet/in_systm.h>
+#include <sys/select.h>
+#endif /* _SEQUENT_ */
 
 /*
  * Just about everyone needs the strings routines.  We provide both forms here,
  * index/rindex and strchr/strrchr, so any systems that don't provide them all
  * need to have #defines here.
- *
- * NOTE: The following ISN'T true for this XFree86 version of this file.
  *
  * These macros are defined this way, rather than, e.g.:
  *    #defined index(s,c) strchr(s,c)
@@ -80,6 +92,12 @@ in this Software without prior written authorization from the X Consortium.
 #ifndef X_NOT_STDC_ENV
 
 #include <string.h>
+#if defined(__SCO__) || defined(__UNIXWARE__)
+#include <strings.h>
+#else
+#if (defined(sun) && defined(__SVR4))
+#include <strings.h>
+#endif
 #ifdef __STDC__
 #ifndef index
 #define index(s,c) (strchr((s),(c)))
@@ -93,6 +111,7 @@ in this Software without prior written authorization from the X Consortium.
 #endif
 #ifndef rindex
 #define rindex strrchr
+#endif
 #endif
 #endif
 
@@ -128,7 +147,7 @@ extern int sys_nerr;
 /*
  * Get open(2) constants
  */
-#ifdef X_NOT_POSIX
+#if defined(X_NOT_POSIX)
 #include <fcntl.h>
 #if defined(USL) || defined(CRAY) || defined(MOTOROLA) || (defined(i386) && (defined(SYSV) || defined(SVR4))) || defined(__sxg__)
 #include <unistd.h>
@@ -150,16 +169,11 @@ extern int sys_nerr;
 #endif
 #endif /* X_NOT_POSIX else */
 
-#ifdef CSRG_BASED
-#include <stdlib.h>
-#include <unistd.h>
-#endif /* CSRG_BASED */
-
 /*
- * Get struct timeval
+ * Get struct timeval and struct tm
  */
 
-#ifdef SYSV
+#if defined(SYSV) && !defined(_SEQUENT_)
 
 #ifndef USL
 #include <sys/time.h>
@@ -190,25 +204,19 @@ struct timezone {
 
 #else /* not SYSV */
 
-#if defined(_ANSI_SOURCE) && defined(__bsdi__)
-#undef _ANSI_SOURCE
-#include <sys/time.h>
-#define _ANSI_SOURCE
-#endif
-
 #if defined(_POSIX_SOURCE) && defined(SVR4)
 /* need to omit _POSIX_SOURCE in order to get what we want in SVR4 */
 #undef _POSIX_SOURCE
 #include <sys/time.h>
 #define _POSIX_SOURCE
-#else /* defined(_POSIX_SOURCE) && defined(SVR4) */
-#ifdef WIN32
+#elif defined(WIN32)
 #include <time.h>
-#if !defined(_WINSOCKAPI_) && !defined(_WILLWINSOCK_)
+#if !defined(_WINSOCKAPI_) && !defined(_WILLWINSOCK_) && !defined(_TIMEVAL_DEFINED) && !defined(_STRUCT_TIMEVAL)
 struct timeval {
     long    tv_sec;         /* seconds */
     long    tv_usec;        /* and microseconds */
 };
+#define _TIMEVAL_DEFINED
 #endif
 #include <sys/timeb.h>
 #define gettimeofday(t) \
@@ -218,26 +226,18 @@ struct timeval {
     (t)->tv_sec = _gtodtmp.time; \
     (t)->tv_usec = _gtodtmp.millitm * 1000; \
 }
-#else /* WIN32 */
-#ifdef _SEQUENT_
+#elif defined(_SEQUENT_) || defined(Lynx)
 #include <time.h>
-#else /* _SEQUENT_ */
-#ifdef AMOEBA
-#include <time.h>
+#elif defined (__QNX__)
+typedef unsigned long fd_mask;
+/* Make sure we get 256 bit select masks */
+#define FD_SETSIZE 256
+#include <sys/select.h>
 #include <sys/time.h>
-#else /* AMOEBA */
-#ifdef MINIX
 #include <time.h>
-#else /* !MINIX */
-#ifndef Lynx
-#include <sys/time.h>
 #else
+#include <sys/time.h>
 #include <time.h>
-#endif /* Lynx */
-#endif /* MINIX */
-#endif /* AMOEBA */
-#endif /* _SEQUENT_ */
-#endif /* WIN32 else */
 #endif /* defined(_POSIX_SOURCE) && defined(SVR4) */
 
 #endif /* SYSV */
@@ -253,41 +253,16 @@ struct timeval {
 #endif
 #endif /* XPG4 else */
 
-#ifdef MINIX
-#include <errno.h>
-#include <net/gen/in.h>
-#include <net/gen/socket.h>
-#include <net/gen/udp.h>
-#include <net/gen/udp_hdr.h>
-
-struct sockaddr
-{
-	u16_t sa_family;
-	char sa_data[14];
-};
-
-struct sockaddr_in
-{
-	u16_t sin_family;
-	u16_t sin_port;
-	struct
-	{
-		ipaddr_t s_addr;
-	} sin_addr;
-	char sin_zero[8];
-};
-
-struct in_addr
-{
-	ipaddr_t s_addr;
-};
-
-typedef char *caddr_t;
-typedef unsigned char u_char;
-#endif /* MINIX */
-
-#ifdef __EMX__
+#ifdef __UNIXOS2__
 typedef unsigned long fd_mask;
+#include <limits.h>
+#define MAX_PATH _POSIX_PATH_MAX
+#endif
+
+#ifdef __GNU__
+#define PATH_MAX 4096
+#define MAXPATHLEN 4096
+#define OPEN_MAX 256 /* We define a reasonable limit.  */
 #endif
 
 /* use POSIX name for signal */
@@ -301,7 +276,9 @@ typedef unsigned long fd_mask;
 #define NGROUPS 16
 #endif
 
-#if defined(ISC) || defined(__EMX__)
+#if defined(ISC) || defined(__UNIXOS2__) || \
+    (defined(__linux__) && !defined(__GLIBC__)) || \
+    (defined(__QNX__) && !defined(UNIXCONN))
 /*
  *	Some OS's may not have this
  */
@@ -313,5 +290,7 @@ struct sockaddr_un {
 	char	sun_path[108];
 };
 #endif
+
+#include <X11/Xarch.h>
 
 #endif /* _XOS_H_ */

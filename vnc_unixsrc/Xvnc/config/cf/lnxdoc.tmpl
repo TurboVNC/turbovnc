@@ -1,93 +1,77 @@
-XCOMM $XFree86: xc/config/cf/lnxdoc.tmpl,v 3.5 1997/01/26 05:10:26 dawes Exp $
+XCOMM $XFree86: xc/config/cf/lnxdoc.tmpl,v 3.11tsi Exp $
 XCOMM
 
-#ifndef HasLinuxDoc
-#define HasLinuxDoc		NO
-#endif
-
 #ifndef HasSgmlFmt
-#define HasSgmlFmt		NO
+#define HasSgmlFmt	  NO
 #endif
 
-#ifndef LinuxDocDir
-#define LinuxDocDir		/usr/local/linuxdoc-sgml
+#ifndef HasLinuxDoc
+#define HasLinuxDoc	  NO
 #endif
 
-#ifndef LinuxDocBinDir
-#define LinuxDocBinDir		$(LINUXDOCPATH)/bin
-#endif
-
-#ifndef LinuxDocFormatCmd
-#define LinuxDocFormatCmd	$(LINUXDOCBIN)/ldformat
-#endif
-
-#ifndef LinuxDocRoffCmd
-#define LinuxDocRoffCmd		$(LINUXDOCBIN)/qroff
+#ifndef DoSgmlDocs
+#define DoSgmlDocs	  (HasLinuxDoc || HasSgmlFmt)
 #endif
 
 #ifndef XFree86IdentFix
-#define XFree86IdentFix		sed '/\$$\XFree86:/s/\$$/Generated from /'
+#define XFree86IdentFix	  sed -e '/\$$\XFree86:/s/....\/..\/.. ..:..:.. *//' \
+			      -e '/\$$\XFree86:/s/\$$/Generated from /'
 #endif
 
-#ifndef LinuxDocFixrefCmd
-#define LinuxDocFixrefCmd	$(LINUXDOCBIN)/fixref
+#ifndef XorgIdentFix
+#define XorgIdentFix	  sed -e '/\$$\XdotOrg:/s/....\/..\/.. ..:..:.. *//' \
+			      -e '/\$$\XdotOrg:/s/\$$/Generated from /'
 #endif
 
-#ifndef LinuxDocPreHtmlCmd
-#define LinuxDocPreHtmlCmd	$(LINUXDOCBIN)/prehtml
-#endif
-
-#ifndef LinuxDocHtmlCmd
-#define LinuxDocHtmlCmd		$(LINUXDOCBIN)/html2html
+#ifndef CVSIdentFix
+#define CVSIdentFix	  sed -e '/\$$\Id:/s/....\/..\/.. ..:..:.. *//' \
+			      -e '/\$$\Id:/s/\$$/Generated from /'
 #endif
 
 #ifndef HasLatex
-#define HasLatex		NO
-#endif
-
-#ifndef LinuxDocLatexCmd
-#define LinuxDocLatexCmd	$(LINUXDOCBIN)/qtex
+#define HasLatex	  NO
 #endif
 
 #ifndef SgmlFmtCmd
-#define SgmlFmtCmd		sgmlfmt
+#define SgmlFmtCmd	  sgmlfmt
 #endif
 
 #ifndef HasDvips
-#define HasDvips		NO
+#define HasDvips	  NO
 #endif
 
 #ifndef DvipsOptions
-#define DvipsOptions		/**/
+#define DvipsOptions	  /**/
 #endif
 
 #ifndef DvipsCmd
-#define DvipsCmd		dvips
+#define DvipsCmd	  dvips
 #endif
 
 #ifndef BuildLinuxDocText
-#define BuildLinuxDocText	HasLinuxDoc
+#define BuildLinuxDocText DoSgmlDocs
 #endif
 
 #ifndef BuildLinuxDocHtml
-#define BuildLinuxDocHtml	NO
+#define BuildLinuxDocHtml DoSgmlDocs
 #endif
 
 #ifndef BuildLinuxDocPS
-#define BuildLinuxDocPS		(HasLatex && HasDvips) || HasSgmlFmt
+#define BuildLinuxDocPS	  DoSgmlDocs
+#endif
+
+#ifndef BuildSgmlDocs
+#define BuildSgmlDocs	  DoSgmlDocs
+#endif
+
+#ifndef ReadmeFile
+#define ReadmeFile(base)  README.base     
 #endif
 
 
-     LINUXDOCPATH = LinuxDocDir
-      LINUXDOCENV = LINUXDOC=$(LINUXDOCPATH)
-      LINUXDOCBIN = LinuxDocBinDir
-   LINUXDOCFORMAT = $(LINUXDOCENV) LinuxDocFormatCmd
-     LINUXDOCROFF = $(LINUXDOCENV) LinuxDocRoffCmd
-    LINUXDOCLATEX = $(LINUXDOCENV) LinuxDocLatexCmd
-   LINUXDOCFIXREF = $(LINUXDOCENV) LinuxDocFixrefCmd
-  LINUXDOCPREHTML = $(LINUXDOCENV) LinuxDocPreHtmlCmd
-     LINUXDOCHTML = $(LINUXDOCENV) LinuxDocHtmlCmd
   XFREE86IDENTFIX = XFree86IdentFix
+     XORGIDENTFIX = XorgIdentFix
+      CVSIDENTFIX = CVSIdentFix
             DVIPS = DvipsCmd
      DVIPSOPTIONS = DvipsOptions
        SGMLFMTCMD = SgmlFmtCmd

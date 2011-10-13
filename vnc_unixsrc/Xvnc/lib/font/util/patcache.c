@@ -1,15 +1,14 @@
-/* $TOG: patcache.c /main/8 1997/06/12 11:51:59 barstow $ */
+/* $Xorg: patcache.c,v 1.4 2001/02/09 02:04:04 xorgcvs Exp $ */
 
 /*
 
-Copyright (c) 1991  X Consortium
+Copyright 1991, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -17,23 +16,26 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 */
-/* $XFree86: xc/lib/font/util/patcache.c,v 3.0.4.1 1997/07/05 15:55:37 dawes Exp $ */
+/* $XFree86: xc/lib/font/util/patcache.c,v 3.4 2001/01/17 19:43:33 dawes Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
  */
 
-#include    <fontmisc.h>
-#include    <fontstruct.h>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include    <X11/fonts/fontmisc.h>
+#include    <X11/fonts/fontstruct.h>
 
 /*
  * Static sized hash table for looking up font name patterns
@@ -62,56 +64,9 @@ typedef struct _FontPatternCache {
     FontPatternCacheEntryPtr	free;
 } FontPatternCacheRec;
 
-/* Create and initialize cache */
-FontPatternCachePtr
-MakeFontPatternCache ()
-{
-    FontPatternCachePtr	cache;
-    int			i;
-    cache = (FontPatternCachePtr) xalloc (sizeof *cache);
-    if (!cache)
-	return 0;
-    for (i = 0; i < NENTRIES; i++) {
-	cache->entries[i].patlen = 0;
-	cache->entries[i].pattern = 0;
-	cache->entries[i].pFont = 0;
-    }
-    EmptyFontPatternCache (cache);
-    return cache;
-}
-
-/* toss cache */
-void
-FreeFontPatternCache (cache)
-    FontPatternCachePtr	cache;
-{
-    int	    i;
-
-    for (i = 0; i < NENTRIES; i++)
-	xfree (cache->entries[i].pattern);
-    xfree (cache);
-}
-
-/* compute id for string */
-static
-Hash (string, len)
-    char    *string;
-    int	    len;
-{
-    int	hash;
-
-    hash = 0;
-    while (len--)
-	hash = (hash << 1) ^ *string++;
-    if (hash < 0)
-	hash = -hash;
-    return hash;
-}
-
 /* Empty cache (for rehash) */
 void
-EmptyFontPatternCache (cache)
-    FontPatternCachePtr	cache;
+EmptyFontPatternCache (FontPatternCachePtr cache)
 {
     int	    i;
     
@@ -130,13 +85,55 @@ EmptyFontPatternCache (cache)
     cache->entries[NENTRIES - 1].next = 0;
 }
 
+/* Create and initialize cache */
+FontPatternCachePtr
+MakeFontPatternCache (void)
+{
+    FontPatternCachePtr	cache;
+    int			i;
+    cache = (FontPatternCachePtr) xalloc (sizeof *cache);
+    if (!cache)
+	return 0;
+    for (i = 0; i < NENTRIES; i++) {
+	cache->entries[i].patlen = 0;
+	cache->entries[i].pattern = 0;
+	cache->entries[i].pFont = 0;
+    }
+    EmptyFontPatternCache (cache);
+    return cache;
+}
+
+/* toss cache */
+void
+FreeFontPatternCache (FontPatternCachePtr cache)
+{
+    int	    i;
+
+    for (i = 0; i < NENTRIES; i++)
+	xfree (cache->entries[i].pattern);
+    xfree (cache);
+}
+
+/* compute id for string */
+static int
+Hash (const char *string, int len)
+{
+    int	hash;
+
+    hash = 0;
+    while (len--)
+	hash = (hash << 1) ^ *string++;
+    if (hash < 0)
+	hash = -hash;
+    return hash;
+}
+
 /* add entry */
 void
-CacheFontPattern (cache, pattern, patlen, pFont)
-    FontPatternCachePtr	cache;
-    char		*pattern;
-    int			patlen;
-    FontPtr		pFont;
+CacheFontPattern (FontPatternCachePtr cache, 
+		  char *pattern, 
+		  int patlen, 
+		  FontPtr pFont)
 {
     FontPatternCacheEntryPtr	e;
     char			*newpat;
@@ -179,10 +176,9 @@ CacheFontPattern (cache, pattern, patlen, pFont)
 
 /* find matching entry */
 FontPtr
-FindCachedFontPattern (cache, pattern, patlen)
-    FontPatternCachePtr	cache;
-    char		*pattern;
-    int			patlen;
+FindCachedFontPattern (FontPatternCachePtr cache, 
+		       char *pattern, 
+		       int patlen)
 {
     int				hash;
     int				i;
@@ -202,9 +198,8 @@ FindCachedFontPattern (cache, pattern, patlen)
 }
 
 void
-RemoveCachedFontPattern (cache, pFont)
-    FontPatternCachePtr	cache;
-    FontPtr		pFont;
+RemoveCachedFontPattern (FontPatternCachePtr cache, 
+			 FontPtr pFont)
 {
     FontPatternCacheEntryPtr	e;
     int				i;

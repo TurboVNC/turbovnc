@@ -1,4 +1,4 @@
-/* $XConsortium: arith.h,v 1.3 94/03/22 19:08:56 gildea Exp $ */
+/* $Xorg: arith.h,v 1.3 2000/08/17 19:46:29 cpqbld Exp $ */
 /* Copyright International Business Machines, Corp. 1991
  * All Rights Reserved
  * Copyright Lexmark International, Inc. 1991
@@ -26,21 +26,20 @@
  * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
  * THIS SOFTWARE.
  */
+/* $XFree86: xc/lib/font/Type1/arith.h,v 1.4 1999/08/21 13:47:39 dawes Exp $ */
+
 /*SHARED*/
 
 #include <X11/Xmd.h>		/* LONG64 */
 
-void DLmult(),DLdiv(),DLadd(),DLsub();
- 
-fractpel FPmult();
-fractpel FPdiv();
-fractpel FPstarslash();
- 
 /*END SHARED*/
 /*SHARED*/
  
+#undef      SHORTSIZE
 #define     SHORTSIZE         (sizeof(short)*8)
+#undef      LONGSIZE
 #define     LONGSIZE          (SHORTSIZE*2)
+#undef      MAXSHORT
 #define     MAXSHORT          ((1<<SHORTSIZE)-1)
  
 /*END SHARED*/
@@ -66,5 +65,13 @@ typedef struct {
        dl.high >>= N; \
 }
 #endif
+
+extern void DLmult ( doublelong *product, unsigned long u, unsigned long v );
+extern void DLdiv ( doublelong *quotient, unsigned long divisor );
+extern void DLadd ( doublelong *u, doublelong *v );
+extern void DLsub ( doublelong *u, doublelong *v );
+extern fractpel FPmult ( fractpel u, fractpel v );
+extern fractpel FPdiv ( fractpel dividend, fractpel divisor );
+extern fractpel FPstarslash ( fractpel a, fractpel b, fractpel c );
 
 /*END SHARED*/

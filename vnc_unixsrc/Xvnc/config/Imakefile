@@ -1,12 +1,35 @@
-XCOMM $XConsortium: Imakefile /main/6 1996/09/28 16:04:42 rws $
+XCOMM $Xorg: Imakefile,v 1.3 2000/08/17 19:41:45 cpqbld Exp $
+XCOMM $XFree86: xc/config/Imakefile,v 1.3 2001/01/17 16:22:29 dawes Exp $
 #define IHaveSubdirs
-#define PassCDebugFlags CDEBUGFLAGS='$(CDEBUGFLAGS)' CC='$(CC)' EXTRA_LDOPTIONS='$(EXTRA_LDOPTIONS)'
+#define PassCDebugFlags CDEBUGFLAGS="$(CDEBUGFLAGS)" CC="$(CC)" EXTRA_LDOPTIONS="$(EXTRA_LDOPTIONS)"
 
 #undef BootstrapCleanSubdirs
 #define BootstrapCleanSubdirs BOOTSTRAPSUBDIRS="$(BOOTSTRAPSUBDIRS)"
 
 BOOTSTRAPSUBDIRS = imake makedepend
-SUBDIRS = cf $(BOOTSTRAPSUBDIRS) util
+#if BuildDPSLibrary
+PSWRAPDIR = pswrap
+#endif
+SUBDIRS = cf $(BOOTSTRAPSUBDIRS) util $(PSWRAPDIR)
+
+#if (defined(XFree86VersionString) || defined(XorgVersionString)) \
+	&& defined(ProjectRoot) && \
+	defined(BuildBindist)
+all:: version
+
+version: cf/version.def
+	RemoveFile(version)
+#if defined (XFree86VersionString)
+	echo XFree86VersionString > version
+#elif defined (XorgVersionString)
+	echo XorgVersionString > version
+#endif
+
+InstallNamedNonExec(version,.$(VENDORNAMESHORT)_Version,ProjectRoot)
+
+clean::
+	RemoveFile(version)
+#endif
 
 MakeSubdirs($(SUBDIRS))
 DependSubdirs($(SUBDIRS))

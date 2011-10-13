@@ -1,0 +1,25 @@
+XCOMM $XFree86: xc/lib/font/stubs/Imakefile,v 1.3 1999/12/15 01:14:35 robin Exp $
+
+#include <Server.tmpl>
+
+INCLUDES = -I$(FONTINCSRC) -I../include -I$(XINCLUDESRC)
+SRCS = cauthgen.c csignal.c delfntcid.c errorf.c fatalerror.c \
+       findoldfnt.c getcres.c getdefptsize.c getnewfntcid.c gettime.c \
+       initfshdl.c regfpefunc.c rmfshdl.c servclient.c setfntauth.c \
+       stfntcfnt.c xpstubs.c
+OBJS = cauthgen.o csignal.o delfntcid.o errorf.o fatalerror.o \
+       findoldfnt.o getcres.o getdefptsize.o getnewfntcid.o gettime.o \
+       initfshdl.o regfpefunc.o rmfshdl.o servclient.o setfntauth.o \
+       stfntcfnt.o xpstubs.o
+
+#undef _LinkBuildLibrary
+#define _LinkBuildLibrary(lib) LinkBuildLibrary(lib)
+
+NormalLibraryObjectRule()
+NormalLibraryTarget(fntstubs,$(OBJS))
+LintLibraryTarget(fntstubs,$(SRCS))
+InstallLibrary(fntstubs,$(USRLIBDIR))
+NormalLintTarget($(SRCS))
+DependTarget()
+
+/* end of file */

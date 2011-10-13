@@ -1,4 +1,4 @@
-XCOMM platform:  $XConsortium: generic.cf /main/8 1996/09/28 16:10:06 rws $
+XCOMM platform:  $Xorg: generic.cf,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
 
 #ifndef OSName
 #define OSName            Unknown Operating System

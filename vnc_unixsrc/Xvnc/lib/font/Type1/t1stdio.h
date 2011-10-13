@@ -1,4 +1,4 @@
-/* $XConsortium: t1stdio.h,v 1.4 91/10/10 11:19:49 rws Exp $ */
+/* $Xorg: t1stdio.h,v 1.3 2000/08/17 19:46:34 cpqbld Exp $ */
 /* Copyright International Business Machines,Corp. 1991
  * All Rights Reserved
  *
@@ -27,7 +27,15 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
  * SOFTWARE.
  */
+/* $XFree86: xc/lib/font/Type1/t1stdio.h,v 1.9 2001/01/17 19:43:24 dawes Exp $ */
 /* T1IO FILE structure and related stuff */
+#ifdef BUILDCID
+#define XFONT_CID 1
+#endif
+
+#ifdef XFree86LOADER
+#undef FILE
+#endif
 #define FILE F_FILE
 typedef unsigned char F_char;
  
@@ -49,25 +57,45 @@ typedef struct F_FILE {
 #define FIOERROR  (0x40)
  
 #ifndef NULL
-#define NULL 0       /* null pointer */
+#include <stddef.h>
 #endif
+
 #define EOF (-1)     /* end of file */
 #define F_BUFSIZ (512)
- 
-#define getc(f) \
+
+#define _XT1getc(f) \
   ( \
    ( ((f)->b_cnt > 0) && ((f)->flags == 0) ) ? \
    ( (f)->b_cnt--, (unsigned int)*( (f)->b_ptr++ ) ) : \
    T1Getc(f) \
   )
  
-extern FILE *T1Open(), *T1eexec();
-extern int T1Close(), T1ungetc(), T1Read();
- 
+#define  T1Feof(f)          (((f)->flags & FIOEOF) && ((f)->b_cnt==0))
+
+#if XFONT_CID
+extern F_FILE *CIDeexec ( FILE *f );
+#endif
+
+extern FILE *T1Open ( char *fn, char *mode );
+extern int T1Getc ( FILE *f );
+extern int T1Ungetc ( int c, FILE *f );
+extern int T1Read ( char *buffP, int size, int n, FILE *f );
+extern int T1Close ( FILE *f );
+extern FILE *T1eexec ( FILE *f );
+extern void resetDecrypt ( void );
+
+#undef fclose
+#undef fopen
+#undef ungetc
+#undef fgetc
+#undef fread
+#undef feof
+#undef ferror
 #define  fclose(f)          T1Close(f)
 #define  fopen(name,mode)   T1Open(name,mode)
 #define  ungetc(c,f)        T1Ungetc(c,f)
 #define  fgetc(f)           T1Getc(f)
+
 #define  fread(bufP,size,n,f) T1Read(bufP,size,n,f)
 #define  feof(f)            (((f)->flags & FIOEOF) && ((f)->b_cnt==0))
 #define  ferror(f)          (((f)->flags & FIOERROR)?(f)->error:0)

@@ -1,16 +1,14 @@
-/* $XConsortium: privates.c /main/5 1996/06/17 10:56:22 mor $ */
-/* $XFree86: xc/programs/Xserver/dix/privates.c,v 3.2 1997/01/23 10:57:19 dawes Exp $ */
+/* $Xorg: privates.c,v 1.4 2001/02/09 02:04:40 xorgcvs Exp $ */
+/* $XdotOrg: xc/programs/Xserver/dix/privates.c,v 1.10 2005/09/05 07:40:50 daniels Exp $ */
 /*
 
-Copyright (c) 1993  X Consortium
+Copyright 1993, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -18,19 +16,24 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/programs/Xserver/dix/privates.c,v 3.7 2001/01/17 22:36:44 dawes Exp $ */
 
-#include "X.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
 #include "scrnintstr.h"
 #include "misc.h"
 #include "os.h"
@@ -41,6 +44,7 @@ from the X Consortium.
 #include "colormapst.h"
 #include "servermd.h"
 #include "site.h"
+#include "inputstr.h"
 
 /*
  *  See the Wrappers and devPrivates section in "Definition of the
@@ -64,8 +68,8 @@ ResetClientPrivates()
     clientPrivateLen = 0;
     xfree(clientPrivateSizes);
     clientPrivateSizes = (unsigned *)NULL;
-    totalClientSize = sizeof(ClientRec);
-
+    totalClientSize =
+	((sizeof(ClientRec) + sizeof(long) - 1) / sizeof(long)) * sizeof(long);
 }
 
 int
@@ -75,11 +79,12 @@ AllocateClientPrivateIndex()
 }
 
 Bool
-AllocateClientPrivate(index2, amount)
-    int index2;
-    unsigned amount;
+AllocateClientPrivate(int index2, unsigned amount)
 {
     unsigned oldamount;
+
+    /* Round up sizes for proper alignment */
+    amount = ((amount + (sizeof(long) - 1)) / sizeof(long)) * sizeof(long);
 
     if (index2 >= clientPrivateLen)
     {
@@ -122,12 +127,12 @@ ResetScreenPrivates()
 int
 AllocateScreenPrivateIndex()
 {
-    int		index2;
+    int		idx;
     int		i;
     ScreenPtr	pScreen;
     DevUnion	*nprivs;
 
-    index2 = screenPrivateCount++;
+    idx = screenPrivateCount++;
     for (i = 0; i < screenInfo.numScreens; i++)
     {
 	pScreen = screenInfo.screens[i];
@@ -138,9 +143,11 @@ AllocateScreenPrivateIndex()
 	    screenPrivateCount--;
 	    return -1;
 	}
+	/* Zero the new private */
+	bzero(&nprivs[idx], sizeof(DevUnion));
 	pScreen->devPrivates = nprivs;
     }
-    return index2;
+    return idx;
 }
 
 
@@ -163,12 +170,12 @@ AllocateWindowPrivateIndex()
 }
 
 Bool
-AllocateWindowPrivate(pScreen, index2, amount)
-    register ScreenPtr pScreen;
-    int index2;
-    unsigned amount;
+AllocateWindowPrivate(register ScreenPtr pScreen, int index2, unsigned amount)
 {
     unsigned oldamount;
+
+    /* Round up sizes for proper alignment */
+    amount = ((amount + (sizeof(long) - 1)) / sizeof(long)) * sizeof(long);
 
     if (index2 >= pScreen->WindowPrivateLen)
     {
@@ -213,12 +220,12 @@ AllocateGCPrivateIndex()
 }
 
 Bool
-AllocateGCPrivate(pScreen, index2, amount)
-    register ScreenPtr pScreen;
-    int index2;
-    unsigned amount;
+AllocateGCPrivate(register ScreenPtr pScreen, int index2, unsigned amount)
 {
     unsigned oldamount;
+
+    /* Round up sizes for proper alignment */
+    amount = ((amount + (sizeof(long) - 1)) / sizeof(long)) * sizeof(long);
 
     if (index2 >= pScreen->GCPrivateLen)
     {
@@ -263,12 +270,12 @@ AllocatePixmapPrivateIndex()
 }
 
 Bool
-AllocatePixmapPrivate(pScreen, index2, amount)
-    register ScreenPtr pScreen;
-    int index2;
-    unsigned amount;
+AllocatePixmapPrivate(register ScreenPtr pScreen, int index2, unsigned amount)
 {
     unsigned oldamount;
+
+    /* Round up sizes for proper alignment */
+    amount = ((amount + (sizeof(long) - 1)) / sizeof(long)) * sizeof(long);
 
     if (index2 >= pScreen->PixmapPrivateLen)
     {
@@ -310,10 +317,7 @@ ResetColormapPrivates()
 
 
 int
-AllocateColormapPrivateIndex (initPrivFunc)
-
-InitCmapPrivFunc initPrivFunc;
-
+AllocateColormapPrivateIndex (InitCmapPrivFunc initPrivFunc)
 {
     int		index;
     int		i;
@@ -339,17 +343,59 @@ InitCmapPrivFunc initPrivFunc;
 	pColormap = (ColormapPtr) LookupIDByType (
 	    pScreen->defColormap, RT_COLORMAP);
 
-	privs = (DevUnion *) xrealloc (pColormap->devPrivates,
-	    colormapPrivateCount * sizeof(DevUnion));
-
-	pColormap->devPrivates = privs;
-
-	if (!privs || !(*initPrivFunc)(pColormap))
+	if (pColormap)
 	{
-	    colormapPrivateCount--;
-	    return -1;
+	    privs = (DevUnion *) xrealloc (pColormap->devPrivates,
+		colormapPrivateCount * sizeof(DevUnion));
+	    if (!privs) {
+		colormapPrivateCount--;
+		return -1;
+	    }
+	    bzero(&privs[index], sizeof(DevUnion));
+	    pColormap->devPrivates = privs;
+	    if (!(*initPrivFunc)(pColormap,index))
+	    {
+		colormapPrivateCount--;
+		return -1;
+	    }
 	}
     }
 
     return index;
+}
+
+/*
+ *  device private machinery
+ */
+
+static int devicePrivateIndex = 0;
+
+int
+AllocateDevicePrivateIndex()
+{
+    return devicePrivateIndex++;
+}
+
+Bool
+AllocateDevicePrivate(DeviceIntPtr device, int index)
+{
+    if (device->nPrivates < ++index) {
+	DevUnion *nprivs = (DevUnion *) xrealloc(device->devPrivates,
+						 index * sizeof(DevUnion));
+	if (!nprivs)
+	    return FALSE;
+	device->devPrivates = nprivs;
+	bzero(&nprivs[device->nPrivates], sizeof(DevUnion)
+	      * (index - device->nPrivates));
+	device->nPrivates = index;
+	return TRUE;
+    } else {
+	return TRUE;
+    }
+}
+
+void
+ResetDevicePrivateIndex(void)
+{
+    devicePrivateIndex = 0;
 }

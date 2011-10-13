@@ -1,13 +1,13 @@
+/* $XFree86: xc/programs/Xserver/include/colormap.h,v 1.5 2001/12/14 19:59:53 dawes Exp $ */
 /*
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -45,16 +45,12 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 */
-/* $XConsortium: colormap.h,v 1.28 94/04/17 20:25:32 dpw Exp $ */
+/* $Xorg: colormap.h,v 1.4 2001/02/09 02:05:14 xorgcvs Exp $ */
 
-
-
-
-/* $XFree86: xc/programs/Xserver/include/colormap.h,v 1.2 1997/01/14 22:22:38 dawes Exp $ */
 #ifndef CMAP_H
 #define CMAP_H 1
 
-#include "X11/Xproto.h"
+#include <X11/Xproto.h>
 #include "screenint.h"
 #include "window.h"
 
@@ -83,79 +79,51 @@ typedef struct _CMEntry *EntryPtr;
 typedef struct _colorResource *colorResourcePtr;
 
 extern int CreateColormap(
-#if NeedFunctionPrototypes
     Colormap /*mid*/,
     ScreenPtr /*pScreen*/,
     VisualPtr /*pVisual*/,
     ColormapPtr* /*ppcmap*/,
     int /*alloc*/,
-    int /*client*/
-#endif
-);
+    int /*client*/);
 
 extern int FreeColormap(
-#if NeedFunctionPrototypes
     pointer /*pmap*/,
-    XID /*mid*/
-#endif
-);
+    XID /*mid*/);
 
 extern int TellLostMap(
-#if NeedFunctionPrototypes
     WindowPtr /*pwin*/,
-    pointer /* Colormap *pmid */
-#endif
-);
+    pointer /* Colormap *pmid */);
 
 extern int TellGainedMap(
-#if NeedFunctionPrototypes
     WindowPtr /*pwin*/,
-    pointer /* Colormap *pmid */
-#endif
-);
+    pointer /* Colormap *pmid */);
 
 extern int CopyColormapAndFree(
-#if NeedFunctionPrototypes
     Colormap /*mid*/,
     ColormapPtr /*pSrc*/,
-    int /*client*/
-#endif
-);
+    int /*client*/);
 
 extern int AllocColor(
-#if NeedFunctionPrototypes
     ColormapPtr /*pmap*/,
     unsigned short* /*pred*/,
     unsigned short* /*pgreen*/,
     unsigned short* /*pblue*/,
     Pixel* /*pPix*/,
-    int /*client*/
-#endif
-);
+    int /*client*/);
 
 extern void FakeAllocColor(
-#if NeedFunctionPrototypes
     ColormapPtr /*pmap*/,
-    xColorItem * /*item*/
-#endif
-);
+    xColorItem * /*item*/);
 
 extern void FakeFreeColor(
-#if NeedFunctionPrototypes
     ColormapPtr /*pmap*/,
-    Pixel /*pixel*/
-#endif
-);
+    Pixel /*pixel*/);
 
 typedef int (*ColorCompareProcPtr)(
-#if NeedNestedPrototypes
     EntryPtr /*pent*/,
-    xrgb * /*prgb*/
-#endif
-);
+    xrgb * /*prgb*/);
 
 extern int FindColor(
-#if NeedFunctionPrototypes
     ColormapPtr /*pmap*/,
     EntryPtr /*pentFirst*/,
     int /*size*/,
@@ -163,40 +131,28 @@ extern int FindColor(
     Pixel* /*pPixel*/,
     int /*channel*/,
     int /*client*/,
-    ColorCompareProcPtr /*comp*/
-#endif
-);
+    ColorCompareProcPtr /*comp*/);
 
 extern int QueryColors(
-#if NeedFunctionPrototypes
     ColormapPtr /*pmap*/,
     int /*count*/,
     Pixel* /*ppixIn*/,
-    xrgb* /*prgbList*/
-#endif
-);
+    xrgb* /*prgbList*/);
 
 extern int FreeClientPixels(
-#if NeedFunctionPrototypes
     pointer /*pcr*/,
-    XID /*fakeid*/
-#endif
-);
+    XID /*fakeid*/);
 
 extern int AllocColorCells(
-#if NeedFunctionPrototypes
     int /*client*/,
     ColormapPtr /*pmap*/,
     int /*colors*/,
     int /*planes*/,
     Bool /*contig*/,
     Pixel* /*ppix*/,
-    Pixel* /*masks*/
-#endif
-);
+    Pixel* /*masks*/);
 
 extern int AllocColorPlanes(
-#if NeedFunctionPrototypes
     int /*client*/,
     ColormapPtr /*pmap*/,
     int /*colors*/,
@@ -207,33 +163,22 @@ extern int AllocColorPlanes(
     Pixel* /*pixels*/,
     Pixel* /*prmask*/,
     Pixel* /*pgmask*/,
-    Pixel* /*pbmask*/
-#endif
-);
+    Pixel* /*pbmask*/);
 
 extern int FreeColors(
-#if NeedFunctionPrototypes
     ColormapPtr /*pmap*/,
     int /*client*/,
     int /*count*/,
     Pixel* /*pixels*/,
-    Pixel /*mask*/
-#endif
-);
+    Pixel /*mask*/);
 
 extern int StoreColors(
-#if NeedFunctionPrototypes
     ColormapPtr /*pmap*/,
     int /*count*/,
-    xColorItem* /*defs*/
-#endif
-);
+    xColorItem* /*defs*/);
 
 extern int IsMapInstalled(
-#if NeedFunctionPrototypes
     Colormap /*map*/,
-    WindowPtr /*pWin*/
-#endif
-);
+    WindowPtr /*pWin*/);
 
 #endif /* CMAP_H */

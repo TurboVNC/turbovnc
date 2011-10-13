@@ -1,15 +1,13 @@
 /*
- * $XConsortium: cfbsolid.c,v 1.9 94/04/17 20:29:02 dpw Exp $
- * $XFree86: xc/programs/Xserver/cfb/cfbsolid.c,v 3.0 1996/06/29 09:05:51 dawes Exp $
+ * $Xorg: cfbsolid.c,v 1.4 2001/02/09 02:04:38 xorgcvs Exp $
  *
-Copyright (c) 1990  X Consortium
+Copyright 1990, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -17,20 +15,25 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
  *
  * Author:  Keith Packard, MIT X Consortium
  */
+/* $XFree86: xc/programs/Xserver/cfb/cfbsolid.c,v 3.8tsi Exp $ */
 
 
-#include "X.h"
-#include "Xmd.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
+#include <X11/Xmd.h>
 #include "servermd.h"
 #include "gcstruct.h"
 #include "window.h"
@@ -119,20 +122,18 @@ RROP_NAME(cfbFillRectSolid) (pDrawable, pGC, nBox, pBox)
     BoxPtr	    pBox;
 {
     register int    m;
-    register unsigned long   *pdst;
+    register CfbBits   *pdst;
     RROP_DECLARE
-    register unsigned long   leftMask, rightMask;
-    unsigned long   *pdstBase, *pdstRect;
+    CfbBits   *pdstBase, *pdstRect;
     int		    nmiddle;
     int		    h;
     int		    w;
     int		    widthDst;
-    cfbPrivGCPtr    devPriv;
 #if PSZ == 24
-    int leftIndex, rightIndex, xOffset;
+    int		    leftIndex, rightIndex;
+#else
+    register CfbBits   leftMask, rightMask;
 #endif
-
-    devPriv = cfbGetGCPrivate(pGC);
 
     cfbGetLongWidthAndPointer (pDrawable, widthDst, pdstBase)
 
@@ -213,7 +214,8 @@ RROP_NAME(cfbFillRectSolid) (pDrawable, pGC, nBox, pBox)
 	    case 1:
 		while(h--){
 #if RROP == GXcopy
-		    *pdst++ = ((*pdst) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+		    *pdst = ((*pdst) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+		    pdst++;
 		    *pdst++ = piQxelXor[1];
 		    *pdst-- = piQxelXor[2];
 #endif
@@ -247,7 +249,8 @@ RROP_NAME(cfbFillRectSolid) (pDrawable, pGC, nBox, pBox)
 	    case 2:
 		while(h--){
 #if RROP == GXcopy
-		    *pdst++ = ((*pdst) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
+		    *pdst = ((*pdst) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
+		    pdst++;
 		    *pdst-- = piQxelXor[2];
 #endif
 #if RROP == GXxor
@@ -300,7 +303,8 @@ RROP_NAME(cfbFillRectSolid) (pDrawable, pGC, nBox, pBox)
 #if RROP == GXcopy
 		    *pdst++ = piQxelXor[0];
 		    *pdst++ = piQxelXor[1];
-		    *pdst-- = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		    *pdst = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		    pdst--;
 #endif
 #if RROP == GXxor
 		    *pdst++ ^= piQxelXor[0];
@@ -332,9 +336,11 @@ RROP_NAME(cfbFillRectSolid) (pDrawable, pGC, nBox, pBox)
 	    case 1:
 		while(h--){
 #if RROP == GXcopy
-		    *pdst++ = ((*pdst) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+		    *pdst = ((*pdst) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+		    pdst++;
 		    *pdst++ = piQxelXor[1];
-		    *pdst-- = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		    *pdst = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		    pdst--;
 #endif
 #if RROP == GXxor
 		    *pdst++ ^= (piQxelXor[0] & 0xFF000000);
@@ -366,8 +372,10 @@ RROP_NAME(cfbFillRectSolid) (pDrawable, pGC, nBox, pBox)
 	    case 2:
 		while(h--){
 #if RROP == GXcopy
-		    *pdst++ = ((*pdst) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
-		    *pdst-- = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		    *pdst = ((*pdst) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
+		    pdst++;
+		    *pdst = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		    pdst--;
 #endif
 #if RROP == GXxor
 		    *pdst++ ^= (piQxelXor[1] & 0xFFFF0000);
@@ -417,8 +425,10 @@ RROP_NAME(cfbFillRectSolid) (pDrawable, pGC, nBox, pBox)
 	    case 2:
 		while(h--){
 #if RROP == GXcopy
-		    *pdst++ = ((*pdst) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
-		    *pdst-- = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		    *pdst = ((*pdst) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
+		    pdst++;
+		    *pdst = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		    pdst--;
 #endif
 #if RROP == GXxor
 		    *pdst++ ^= (piQxelXor[1] & 0xFFFF0000);
@@ -444,8 +454,10 @@ RROP_NAME(cfbFillRectSolid) (pDrawable, pGC, nBox, pBox)
 	    case 1:
 		while(h--){
 #if RROP == GXcopy
-		    *pdst++ = ((*pdst) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
-		    *pdst-- = ((*pdst) & 0xFFFF0000) | (piQxelXor[1] & 0xFFFF);
+		    *pdst = ((*pdst) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+		    pdst++;
+		    *pdst = ((*pdst) & 0xFFFF0000) | (piQxelXor[1] & 0xFFFF);
+		    pdst--;
 #endif
 #if RROP == GXxor
 		    *pdst++ ^= (piQxelXor[0] & 0xFF000000);
@@ -472,7 +484,8 @@ RROP_NAME(cfbFillRectSolid) (pDrawable, pGC, nBox, pBox)
 		while(h--){
 #if RROP == GXcopy
 		    *pdst++ = piQxelXor[0];
-		    *pdst-- = ((*pdst) & 0xFFFF0000) | (piQxelXor[1] & 0xFFFF);
+		    *pdst = ((*pdst) & 0xFFFF0000) | (piQxelXor[1] & 0xFFFF);
+		    pdst--;
 #endif
 #if RROP == GXxor
 		    *pdst++ ^= piQxelXor[0];
@@ -528,7 +541,8 @@ RROP_NAME(cfbFillRectSolid) (pDrawable, pGC, nBox, pBox)
 			break;
 		    case 1:
 #if RROP == GXcopy
-			*pdst++ = ((*pdst) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+			*pdst = ((*pdst) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+			pdst++;
 			*pdst++ = piQxelXor[1];
 			*pdst++ = piQxelXor[2];
 #endif
@@ -558,7 +572,8 @@ RROP_NAME(cfbFillRectSolid) (pDrawable, pGC, nBox, pBox)
 		    break;
 		    case 2:
 #if RROP == GXcopy
-			*pdst++ = (((*pdst) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000));
+			*pdst = (((*pdst) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000));
+			pdst++;
 			*pdst++ = piQxelXor[2];
 #endif
 #if RROP == GXxor
@@ -582,7 +597,8 @@ RROP_NAME(cfbFillRectSolid) (pDrawable, pGC, nBox, pBox)
 			break;
 		    case 3:
 #if RROP == GXcopy
-			*pdst++ = ((*pdst) & 0xFF) | (piQxelXor[2] & 0xFFFFFF00);
+			*pdst = ((*pdst) & 0xFF) | (piQxelXor[2] & 0xFFFFFF00);
+			pdst++;
 #endif
 #if RROP == GXxor
 			*pdst++ ^= (piQxelXor[2] & 0xFFFFFF00);
@@ -635,7 +651,8 @@ RROP_NAME(cfbFillRectSolid) (pDrawable, pGC, nBox, pBox)
 		  break;
 		case 1:
 #if RROP == GXcopy
-		  *pdst++ = ((*pdst) & 0xFF000000) | (piQxelXor[0] & 0xFFFFFF);
+		  *pdst = ((*pdst) & 0xFF000000) | (piQxelXor[0] & 0xFFFFFF);
+		  pdst++;
 #endif
 #if RROP == GXxor
 		  *pdst++ ^= (piQxelXor[0] & 0xFFFFFF);
@@ -647,13 +664,15 @@ RROP_NAME(cfbFillRectSolid) (pDrawable, pGC, nBox, pBox)
 		  *pdst++ |= (piQxelOr[0] & 0xFFFFFF);
 #endif
 #if RROP == GXset
-		  *pdst++ = DoMaskRRop((*pdst), piQxelAnd[0], piQxelXor[0], 0xFFFFFF);
+		  *pdst = DoMaskRRop((*pdst), piQxelAnd[0], piQxelXor[0], 0xFFFFFF);
+		  pdst++;
 #endif
 		  break;
 		case 2:
 #if RROP == GXcopy
 		  *pdst++ = piQxelXor[0];
-		  *pdst++ = ((*pdst) & 0xFFFF0000) | (piQxelXor[1] & 0xFFFF);
+		  *pdst = ((*pdst) & 0xFFFF0000) | (piQxelXor[1] & 0xFFFF);
+		  pdst++;
 #endif
 #if RROP == GXxor
 		  *pdst++ ^= piQxelXor[0];
@@ -669,16 +688,17 @@ RROP_NAME(cfbFillRectSolid) (pDrawable, pGC, nBox, pBox)
 #endif
 #if RROP == GXset
 		  *pdst = DoRRop((*pdst), piQxelAnd[0], piQxelXor[0]);
-		  *pdst++;
+		  pdst++;
 		  *pdst = DoMaskRRop((*pdst), piQxelAnd[1], piQxelXor[1], 0xFFFF);
-		  *pdst++;
+		  pdst++;
 #endif
 		  break;
 		case 3:
 #if RROP == GXcopy
 		  *pdst++ = piQxelXor[0];
 		  *pdst++ = piQxelXor[1];
-		  *pdst++ = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		  *pdst = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		  pdst++;
 #endif
 #if RROP == GXxor
 		  *pdst++ ^= piQxelXor[0];
@@ -755,6 +775,7 @@ RROP_NAME(cfbFillRectSolid) (pDrawable, pGC, nBox, pBox)
 	}
 #endif
     }
+    RROP_UNDECLARE
 }
 
 void
@@ -766,14 +787,13 @@ RROP_NAME(cfbSolidSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
     int		*pwidthInit;		/* pointer to list of n widths */
     int 	fSorted;
 {
-    unsigned long   *pdstBase;
+    CfbBits   *pdstBase;
     int		    widthDst;
 
     RROP_DECLARE
     
-    register unsigned long  *pdst;
+    register CfbBits  *pdst;
     register int	    nlmiddle;
-    register unsigned long  startmask, endmask;
     register int	    w;
     int			    x;
     
@@ -785,12 +805,14 @@ RROP_NAME(cfbSolidSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
     int		    *pwidth;
     cfbPrivGCPtr    devPriv;
 #if PSZ == 24
-    int leftIndex, rightIndex, xOffset;
+    int		    leftIndex, rightIndex;
+#else
+    register CfbBits  startmask, endmask;
 #endif
 
     devPriv = cfbGetGCPrivate(pGC);
     RROP_FETCH_GCPRIV(devPriv)
-    n = nInit * miFindMaxBand(devPriv->pCompositeClip);
+    n = nInit * miFindMaxBand(pGC->pCompositeClip);
     pwidthFree = (int *)ALLOCATE_LOCAL(n * sizeof(int));
     pptFree = (DDXPointRec *)ALLOCATE_LOCAL(n * sizeof(DDXPointRec));
     if(!pptFree || !pwidthFree)
@@ -801,8 +823,7 @@ RROP_NAME(cfbSolidSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
     }
     pwidth = pwidthFree;
     ppt = pptFree;
-    n = miClipSpans(devPriv->pCompositeClip,
-		     pptInit, pwidthInit, nInit,
+    n = miClipSpans(pGC->pCompositeClip, pptInit, pwidthInit, nInit,
 		     ppt, pwidth, fSorted);
 
     cfbGetLongWidthAndPointer (pDrawable, widthDst, pdstBase)
@@ -867,7 +888,8 @@ RROP_NAME(cfbSolidSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 		break;
 	    case 1:
 #if RROP == GXcopy
-		    *pdst++ = ((*pdst) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+		    *pdst = ((*pdst) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+		    pdst++;
 		    *pdst++ = piQxelXor[1];
 		    *pdst-- = piQxelXor[2];
 #endif
@@ -898,7 +920,8 @@ RROP_NAME(cfbSolidSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 		break;
 	    case 2:
 #if RROP == GXcopy
-		    *pdst++ = ((*pdst) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
+		    *pdst = ((*pdst) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
+		    pdst++;
 		    *pdst-- = piQxelXor[2];
 #endif
 #if RROP == GXxor
@@ -945,7 +968,8 @@ RROP_NAME(cfbSolidSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 #if RROP == GXcopy
 		    *pdst++ = piQxelXor[0];
 		    *pdst++ = piQxelXor[1];
-		    *pdst-- = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		    *pdst = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		    pdst--;
 #endif
 #if RROP == GXxor
 		    *pdst++ ^= piQxelXor[0];
@@ -975,9 +999,11 @@ RROP_NAME(cfbSolidSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 		break;
 	    case 1:
 #if RROP == GXcopy
-		    *pdst++ = ((*pdst) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+		    *pdst = ((*pdst) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+		    pdst++;
 		    *pdst++ = piQxelXor[1];
-		    *pdst-- = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		    *pdst = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		    pdst--;
 #endif
 #if RROP == GXxor
 		    *pdst++ ^= (piQxelXor[0] & 0xFF000000);
@@ -1007,8 +1033,10 @@ RROP_NAME(cfbSolidSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 	    case 2:
 /*		pdst++;*/
 #if RROP == GXcopy
-		    *pdst++ = ((*pdst) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
-		    *pdst-- = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		    *pdst = ((*pdst) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
+		    pdst++;
+		    *pdst = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		    pdst--;
 #endif
 #if RROP == GXxor
 		    *pdst++ ^= (piQxelXor[1] & 0xFFFF0000);
@@ -1034,8 +1062,10 @@ RROP_NAME(cfbSolidSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 	case 2: /* leftIndex + w = 2*/
 	    if(leftIndex){
 #if RROP == GXcopy
-		    *pdst++ = ((*pdst) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
-		    *pdst-- = ((*pdst) & 0xFFFF0000) | (piQxelXor[1] & 0xFFFF);
+		    *pdst = ((*pdst) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+		    pdst++;
+		    *pdst = ((*pdst) & 0xFFFF0000) | (piQxelXor[1] & 0xFFFF);
+		    pdst--;
 #endif
 #if RROP == GXxor
 		    *pdst++ ^= (piQxelXor[0] & 0xFF000000);
@@ -1059,7 +1089,8 @@ RROP_NAME(cfbSolidSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 	    else{ /*case 2 leftIndex === 0 */
 #if RROP == GXcopy
 		    *pdst++ = piQxelXor[0];
-		    *pdst-- = ((*pdst) & 0xFFFF0000) | (piQxelXor[1] & 0xFFFF);
+		    *pdst = ((*pdst) & 0xFFFF0000) | (piQxelXor[1] & 0xFFFF);
+		    pdst--;
 #endif
 #if RROP == GXxor
 		    *pdst++ ^= piQxelXor[0];
@@ -1107,7 +1138,8 @@ RROP_NAME(cfbSolidSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 			break;
 		    case 1:
 #if RROP == GXcopy
-			*pdst++ = ((*pdst) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+			*pdst = ((*pdst) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+			pdst++;
 			*pdst++ = piQxelXor[1];
 			*pdst++ = piQxelXor[2];
 #endif
@@ -1137,7 +1169,8 @@ RROP_NAME(cfbSolidSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 		    break;
 		    case 2:
 #if RROP == GXcopy
-			*pdst++ = (((*pdst) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000));
+			*pdst = (((*pdst) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000));
+			pdst++;
 			*pdst++ = piQxelXor[2];
 #endif
 #if RROP == GXxor
@@ -1161,7 +1194,8 @@ RROP_NAME(cfbSolidSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 			break;
 		    case 3:
 #if RROP == GXcopy
-			*pdst++ = ((*pdst) & 0xFF) | (piQxelXor[2] & 0xFFFFFF00);
+			*pdst = ((*pdst) & 0xFF) | (piQxelXor[2] & 0xFFFFFF00);
+			pdst++;
 #endif
 #if RROP == GXxor
 			*pdst++ ^= (piQxelXor[2] & 0xFFFFFF00);
@@ -1213,7 +1247,8 @@ RROP_NAME(cfbSolidSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 		  break;
 		case 1:
 #if RROP == GXcopy
-		  *pdst++ = ((*pdst) & 0xFF000000) | (piQxelXor[0] & 0xFFFFFF);
+		  *pdst = ((*pdst) & 0xFF000000) | (piQxelXor[0] & 0xFFFFFF);
+		  pdst++;
 #endif
 #if RROP == GXxor
 		  *pdst++ ^= (piQxelXor[0] & 0xFFFFFF);
@@ -1231,7 +1266,8 @@ RROP_NAME(cfbSolidSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 		case 2:
 #if RROP == GXcopy
 		  *pdst++ = piQxelXor[0];
-		  *pdst++ = ((*pdst) & 0xFFFF0000) | (piQxelXor[1] & 0xFFFF);
+		  *pdst = ((*pdst) & 0xFFFF0000) | (piQxelXor[1] & 0xFFFF);
+		  pdst++;
 #endif
 #if RROP == GXxor
 		  *pdst++ ^= piQxelXor[0];
@@ -1247,16 +1283,17 @@ RROP_NAME(cfbSolidSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 #endif
 #if RROP == GXset
 		  *pdst = DoRRop((*pdst), piQxelAnd[0], piQxelXor[0]);
-		  *pdst++;
+		  pdst++;
 		  *pdst = DoMaskRRop((*pdst), piQxelAnd[1], piQxelXor[1], 0xFFFF);
-		  *pdst++;
+		  pdst++;
 #endif
 		  break;
 		case 3:
 #if RROP == GXcopy
 		  *pdst++ = piQxelXor[0];
 		  *pdst++ = piQxelXor[1];
-		  *pdst++ = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		  *pdst = ((*pdst) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
+		  pdst++;
 #endif
 #if RROP == GXxor
 		  *pdst++ ^= piQxelXor[0];
@@ -1326,4 +1363,5 @@ RROP_NAME(cfbSolidSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
     }
     DEALLOCATE_LOCAL(pptFree);
     DEALLOCATE_LOCAL(pwidthFree);
+    RROP_UNDECLARE
 }

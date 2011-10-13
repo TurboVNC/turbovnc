@@ -1,14 +1,17 @@
-XCOMM $XConsortium: svr3.cf /main/1 1996/10/31 14:47:37 kaleb $
+XCOMM $Xorg: svr3.cf,v 1.3 2000/08/17 19:41:48 cpqbld Exp $
 
 
 
-XCOMM $XFree86: xc/config/cf/svr3.cf,v 3.9.2.1 1997/05/24 13:38:09 dawes Exp $
+XCOMM $XFree86: xc/config/cf/svr3.cf,v 3.15 2002/08/19 03:16:31 tsi Exp $
 
 #ifndef HasGcc
 #define HasGcc      YES
 #endif
 #ifndef HasGcc2
 #define HasGcc2     YES
+#endif
+#ifndef HasGcc3
+#define HasGcc3     NO
 #endif
 #ifndef GccUsesGas
 #define GccUsesGas  NO
@@ -59,10 +62,6 @@ XCOMM $XFree86: xc/config/cf/svr3.cf,v 3.9.2.1 1997/05/24 13:38:09 dawes Exp $
  */
 #ifndef HasSymLinks
 # define HasSymLinks NO
-#endif
-
-#ifndef StripInstalledPrograms
-# define StripInstalledPrograms	YES
 #endif
 
 #ifndef MotifBC
@@ -136,7 +135,7 @@ XCOMM $XFree86: xc/config/cf/svr3.cf,v 3.9.2.1 1997/05/24 13:38:09 dawes Exp $
 
 #ifndef ServerOSDefines
 # ifdef i386Architecture
-#  define ServerOSDefines -DDDXTIME XFree86ServerOSDefines -DPART_NET
+#  define ServerOSDefines -DDDXTIME XFree86ServerOSDefines
 # else
 #  define ServerOSDefines -DDDXTIME
 # endif
@@ -259,6 +258,8 @@ XCOMM $XFree86: xc/config/cf/svr3.cf,v 3.9.2.1 1997/05/24 13:38:09 dawes Exp $
 
 #ifndef InstallManPageLong
 #define InstallManPageLong(file,destdir,dest)                           @@\
+BuildInstallHtmlManPage(file,dest,$(MANSUFFIX))				@@\
+									@@\
 install.man:: file.man                                                  @@\
         MakeDir($(DESTDIR)destdir)                                      @@\
         $(RM) $(DESTDIR)destdir/dest.$(MANSUFFIX)*                      @@\
@@ -270,6 +271,8 @@ install.man:: file.man                                                  @@\
 
 #ifndef InstallGenManPageLong
 #define InstallGenManPageLong(file,destdir,dest,suffix)                 @@\
+BuildInstallHtmlManPage(file,dest,suffix)				@@\
+									@@\
 install.man:: file.man                                                  @@\
         MakeDir($(DESTDIR)destdir)                                      @@\
         $(RM) $(DESTDIR)destdir/dest.suffix*                            @@\
@@ -285,8 +288,8 @@ install.man:: list                                                      @@\
 	MakeDir($(DESTDIR)dest)						@@\
         @case '${MFLAGS}' in *[i]*) set +e;; esac; \                    @@\
         for i in list; do \                                             @@\
-                (set -x; \                                              @@\
-                MNAME=`echo $$i | cut -f1 -d.`; \			@@\
+                (MNAME=`echo $$i | cut -f1 -d.`; \			@@\
+		set -x; \						@@\
                 $(RM) $(DESTDIR)dest/$${MNAME}*; \                      @@\
                 $(RMDSDEMACCMD) $$i | neqn | nroff -man >/tmp/$$i; \    @@\
                 $(INSTALL) -c $(INSTMANFLAGS) /tmp/$$i $(DESTDIR)dest/$${MNAME}.$(MANSUFFIX); \      @@\
@@ -299,8 +302,9 @@ install.man:: list                                                      @@\
  * InstallManPageAliases - generate rules to install manual page aliases.
  * (Make hard links on SVR3.)
  */
-#ifndef InstallManPageAliases
-#define InstallManPageAliases(file,destdir,aliases)                     @@\
+#ifndef InstallManPageAliasesBase
+#define InstallManPageAliasesBase(file,destdir,aliases)			@@\
+
 install.man::                                                           @@\
         @(SUFFIX=`echo $(DESTDIR)destdir/file.* | cut -f2,3 -d.`; \     @@\
         for i in aliases; do (set -x; \                                 @@\
@@ -310,9 +314,18 @@ install.man::                                                           @@\
         done)
 #endif
 
+#ifndef InstallManPageAliases
+#define InstallManPageAliases(file,destdir,aliases)			@@\
+InstallHtmlManPageAliases(file,aliases,$(MANSUFFIX))			@@\
+									@@\
+InstallManPageAliasesBase(file,destdir,aliases)
+#endif
+
 #ifndef InstallGenManPageAliases
 #define InstallGenManPageAliases(file,destdir,suffix,aliases)		@@\
-	InstallManPageAliases(file,destdir,aliases)
+InstallHtmlManPageAliases(file,aliases,suffix)				@@\
+									@@\
+InstallManPageAliasesBase(file,destdir,aliases)
 #endif
 
 #endif /* FormattedManPages */
@@ -330,6 +343,6 @@ install.man::                                                           @@\
 #include <sv3Lib.rules>
 
 #ifdef i386Architecture
-#include <xfree86.cf>
+#include <xorg.cf>
 #endif
 

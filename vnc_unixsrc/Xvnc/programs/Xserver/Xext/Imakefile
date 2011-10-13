@@ -1,10 +1,35 @@
-XCOMM $XConsortium: Imakefile /main/56 1996/11/26 16:07:54 swick $
-XCOMM $XFree86: xc/programs/Xserver/Xext/Imakefile,v 3.11.2.1 1998/01/23 12:35:11 dawes Exp $
+/* $XdotOrg: xc/programs/Xserver/Xext/Imakefile,v 1.9 2005/04/24 01:10:12 gisburn Exp $ */
+XCOMM $Xorg: Imakefile,v 1.3 2000/08/17 19:47:55 cpqbld Exp $
+
+
+
+
+XCOMM $XFree86: xc/programs/Xserver/Xext/Imakefile,v 3.43 2003/04/21 18:56:48 sven Exp $
+
 #include <Server.tmpl>
 
+#if DoLoadableServer
+#define IHaveSubdirs
+SUBDIRS = extmod
+#endif
+
+#if BuildEVI
+#ifdef SGIArchitectureNotTog
+  EVISRCS = EVI.c sgiEVI.c
+  EVIOBJS = EVI.o sgiEVI.o
+#else
+  EVISRCS = EVI.c sampleEVI.c
+  EVIOBJS = EVI.o sampleEVI.o
+#endif
+#endif
 #if HasShm
   SHMSRCS = shm.c
   SHMOBJS = shm.o
+#endif
+
+#if BuildMultibuffer
+  MULTIBUFSRC = mbuf.c
+  MULTIBUFOBJ = mbuf.o
 #endif
 
 #if BuildScreenSaverExt
@@ -12,24 +37,44 @@ XCOMM $XFree86: xc/programs/Xserver/Xext/Imakefile,v 3.11.2.1 1998/01/23 12:35:1
   SCRNSAVOBJ = saver.o
 #endif
 
-#if BuildXF86VidModeExt
+#if BuildXF86VidModeExt && \
+    ((defined(XF86Server) && XF86Server) || \
+     (defined(XorgServer) && XorgServer))
  VIDMODESRCS = xf86vmode.c
  VIDMODEOBJS = xf86vmode.o
 #endif
 
-#if BuildXF86MiscExt
+#if BuildXF86MiscExt && \
+    ((defined(XF86Server) && XF86Server) || \
+     (defined(XorgServer) && XorgServer))
 XF86MISCSRCS = xf86misc.c
 XF86MISCOBJS = xf86misc.o
 #endif
 
-#if BuildXF86DGA
- XF86DGASRCS = xf86dga.c
- XF86DGAOBJS = xf86dga.o
+#if BuildXF86BigfontExt
+XF86BIGFSRCS = xf86bigfont.c
+XF86BIGFOBJS = xf86bigfont.o
+#if HasShm
+ SHM_DEFINES = -DHAS_SHM
+#endif
 #endif
 
-#if BuildDPMSExt
- DPMSSRCS = dpms.c
- DPMSOBJS = dpms.o
+#if BuildXF86DGA
+ XF86DGASRCS = xf86dga.c xf86dga2.c
+ XF86DGAOBJS = xf86dga.o xf86dga2.o
+#if HasShm
+ XVMCSHM_DEFINES = -DHAS_XVMCSHM
+#endif
+#endif
+
+#if BuildXvExt
+      XVSRCS = xvmain.c xvdisp.c xvmc.c
+      XVOBJS = xvmain.o xvdisp.o xvmc.o
+#endif
+
+#if BuildXResExt
+ XRESSRCS = xres.c
+ XRESOBJS = xres.o
 #endif
 
 #if BuildAppgroup
@@ -42,39 +87,114 @@ XF86MISCOBJS = xf86misc.o
  SERVERCONFIGDIR = ServerConfigDir
    POLICYFILEDEF = -DDEFAULTPOLICYFILE=\"$(SERVERCONFIGDIR)/SecurityPolicy\"
 #endif
+#if BuildCup
+         CUPSRCS = cup.c
+         CUPOBJS = cup.o
+#endif
+#if BuildXinerama
+        PNRXSRCS = panoramiX.c panoramiXSwap.c panoramiXprocs.c
+        PNRXOBJS = panoramiX.o panoramiXSwap.o panoramiXprocs.o
+    PNRXINCLUDES = -I$(FONTINCSRC) -I../mi -I../render
+#endif
+#if XdmxServer
+         DMXSRCS = dmx.c
+         DMXOBJS = dmx.o
+     DMXINCLUDES = -I../hw/dmx
+#endif
+#if BuildDPMS
+        DPMSSRCS = dpms.c
+        DPMSOBJS = dpms.o
+#endif
 
-       SRCS = shape.c $(SHMSRCS) mbuf.c \
+#if BuildFontCache
+   FONTCACHESRCS = fontcache.c
+   FONTCACHEOBJS = fontcache.o
+#if 0
+   FONTCACHEINCLUDES = -I$(XF86SRC)/os-support
+#endif
+#endif
+
+#if BuildXevie
+       XEVIESRCS = xevie.c
+       XEVIEOBJS = xevie.o
+#endif
+
+#if BuildXprint
+      XPRINTSRCS = xprint.c
+      XPRINTOBJS = xprint.o
+#endif
+
+       SRCS = shape.c $(SHMSRCS) $(MULTIBUFSRC) \
               mitmisc.c xtest.c xtest1di.c xtest1dd.c sleepuntil.c \
 	      bigreq.c sync.c $(SCRNSAVSRC) xcmisc.c $(VIDMODESRCS) \
-	      $(XF86MISCSRCS) $(XF86DGASRCS) $(SECURITYSRCS) \
-	      $(DPMSSRCS) \
-	      $(APPGROUPSRCS) xprint.c
-       OBJS = shape.o $(SHMOBJS) mbuf.o \
+	      $(XF86MISCSRCS) $(XF86BIGFSRCS) $(XF86DGASRCS) $(SECURITYSRCS) \
+	      $(APPGROUPSRCS) $(XPRINTSRCS) $(CUPSRCS) $(PNRXSRCS) $(DPMSSRCS) \
+	      $(XEVIESRCS) \
+	      $(EVISRCS) $(XVSRCS) $(FONTCACHESRCS) $(XRESSRCS) $(DMXSRCS)
+
+       OBJS = shape.o $(SHMOBJS) $(MULTIBUFOBJ) \
               mitmisc.o xtest.o xtest1di.o xtest1dd.o sleepuntil.o \
               bigreq.o sync.o $(SCRNSAVOBJ) xcmisc.o $(VIDMODEOBJS) \
-	      $(XF86MISCOBJS) $(XF86DGAOBJS) $(SECURITYOBJS) \
-	      $(DPMSOBJS) \
-	      $(APPGROUPOBJS) xprint.o
+	      $(XF86MISCOBJS) $(XF86BIGFOBJS) $(XF86DGAOBJS) $(SECURITYOBJS) \
+	      $(APPGROUPOBJS) $(XPRINTOBJS) $(CUPOBJS) $(PNRXOBJS) $(DPMSOBJS) \
+	      $(XEVIEOBJS) \
+	      $(EVIOBJS) $(XVOBJS) $(FONTCACHEOBJS) $(XRESOBJS) $(DMXOBJS)
 
-XF86INCLUDES = -I../hw/xfree86/common -I../hw/xfree86/os-support
-    INCLUDES = -I../include -I$(XINCLUDESRC) -I$(EXTINCSRC) $(XF86INCLUDES)
+      SOBJS = $(SHMOBJS) $(APPGROUPOBJS) $(SECURITYOBJS) $(XPRINTOBJS) \
+	      shape.o xtest.o xtest1di.o xtest1dd.o sleepuntil.o $(PNRXOBJS) \
+	      $(XEVIEOBJS) \
+	      $(XF86BIGFOBJS)
+
+#if (defined(XFree86Version) || defined(XorgVersion))
+/* XXX Check if this can be eliminated */
+XF86INCLUDES = -I$(XF86COMSRC)
+#endif
+    INCLUDES = -I. -I../include -I$(XINCLUDESRC) -I$(EXTINCSRC) \
+		$(PNRXINCLUDES) $(XF86INCLUDES) -I$(FONTINCSRC) \
+		$(FONTCACHEINCLUDES) $(DMXINCLUDES)
     LINTLIBS = ../dix/llib-ldix.ln ../os/llib-los.ln
 
+     DEFINES = $(EXT_DEFINES) $(XVMCSHM_DEFINES)
+
 NormalLibraryObjectRule()
+
+/*
+ * A hack to work around an optimization problem with gcc 2.95.2
+ */
+#if BuildXF86VidModeExt && defined(GccOptBug295)
+SpecialCObjectRule(xf86vmode,NullParameter,-O0)
+#endif
+
 NormalLibraryTarget(ext,$(OBJS))
 LintLibraryTarget(ext,$(SRCS))
 NormalLintTarget($(SRCS))
 
+#if DoLoadableServer
+NormalLibraryTarget(exts,$(SOBJS))
+#endif
+
+#if BuildXF86BigfontExt
+SpecialCObjectRule(xf86bigfont,$(ICONFIGFILES),$(SHM_DEFINES))
+#endif
 #if BuildXCSecurity
 SpecialCObjectRule(security,$(ICONFIGFILES),$(POLICYFILEDEF))
 #endif
 
-InstallLinkKitLibrary(ext,$(LINKKITDIR)/lib)
+LinkConfDirectory(xserver,.,xserver,.)
 
-LinkVarDirectory(xserver,.,xserver,.)
+LinkSourceFile(modinit.h,extmod)
 
 #if BuildXCSecurity && InstallSecurityConfig
 InstallNonExecFile(SecurityPolicy,$(SERVERCONFIGDIR))
 #endif
 
 DependTarget()
+
+#if DoLoadableServer
+MakeSubdirs($(SUBDIRS))
+DependSubdirs($(SUBDIRS))
+#endif
+
+InstallDriverSDKNonExecFile(dgaproc.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(xvdix.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(xvmcext.h,$(DRIVERSDKINCLUDEDIR))

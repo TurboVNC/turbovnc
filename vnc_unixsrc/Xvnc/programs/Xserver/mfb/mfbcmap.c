@@ -1,13 +1,13 @@
+/* $XFree86: xc/programs/Xserver/mfb/mfbcmap.c,v 1.7tsi Exp $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -45,11 +45,17 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $XConsortium: mfbcmap.c,v 5.6 94/04/17 20:28:19 dpw Exp $ */
-#include "X.h"
+/* $Xorg: mfbcmap.c,v 1.4 2001/02/09 02:05:18 xorgcvs Exp $ */
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
 #include "scrnintstr.h"
 #include "colormapst.h"
 #include "resource.h"
+#include "micmap.h"
+#include "mfb.h"
 
 /* A monochrome frame buffer is a static gray colormap with two entries.
  * We have a "required list" of length 1.  Because we can only support 1
@@ -64,17 +70,13 @@ SOFTWARE.
  * The required list concept is pretty much irrelevant when you can only
  * have one map installed at a time.  
  */
-static ColormapPtr InstalledMaps[MAXSCREENS];
 
 int
 mfbListInstalledColormaps(pScreen, pmaps)
     ScreenPtr	pScreen;
     Colormap	*pmaps;
 {
-    /* By the time we are processing requests, we can guarantee that there
-     * is always a colormap installed */
-    *pmaps = InstalledMaps[pScreen->myNum]->mid;
-    return (1);
+    return miListInstalledColormaps(pScreen, pmaps);
 }
 
 
@@ -82,38 +84,14 @@ void
 mfbInstallColormap(pmap)
     ColormapPtr	pmap;
 {
-    int index = pmap->pScreen->myNum;
-    ColormapPtr oldpmap = InstalledMaps[index];
-
-    if(pmap != oldpmap)
-    {
-	/* Uninstall pInstalledMap. No hardware changes required, just
-	 * notify all interested parties. */
-	if(oldpmap != (ColormapPtr)None)
-	    WalkTree(pmap->pScreen, TellLostMap, (pointer)&oldpmap->mid);
-	/* Install pmap */
-	InstalledMaps[index] = pmap;
-	WalkTree(pmap->pScreen, TellGainedMap, (pointer)&pmap->mid);
-
-    }
+    miInstallColormap(pmap);
 }
 
 void
 mfbUninstallColormap(pmap)
     ColormapPtr	pmap;
 {
-    int index = pmap->pScreen->myNum;
-    ColormapPtr curpmap = InstalledMaps[index];
-
-    if(pmap == curpmap)
-    {
-	if (pmap->mid != pmap->pScreen->defColormap)
-	{
-	    curpmap = (ColormapPtr) LookupIDByType(pmap->pScreen->defColormap,
-						   RT_COLORMAP);
-	    (*pmap->pScreen->InstallColormap)(curpmap);
-	}
-    }
+    miUninstallColormap(pmap);
 }
 
 /*ARGSUSED*/
@@ -182,18 +160,5 @@ Bool
 mfbCreateDefColormap (pScreen)
     ScreenPtr	pScreen;
 {
-    VisualPtr	pVisual;
-    ColormapPtr	pColormap;
-    
-    for (pVisual = pScreen->visuals;
-	 pVisual->vid != pScreen->rootVisual;
-	 pVisual++)
-	;
-    if (CreateColormap (pScreen->defColormap, pScreen, pVisual,
-			&pColormap, AllocNone, 0) != Success)
-    {
-	return FALSE;
-    }
-    (*pScreen->InstallColormap) (pColormap);
-    return TRUE;
+    return miCreateDefColormap(pScreen);
 }

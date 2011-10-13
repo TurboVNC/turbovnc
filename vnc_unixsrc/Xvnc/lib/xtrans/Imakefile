@@ -1,8 +1,24 @@
-XCOMM $XConsortium: Imakefile /main/12 1996/09/28 16:50:08 rws $
+XCOMM $Xorg: Imakefile,v 1.3 2000/08/17 19:46:44 cpqbld Exp $
 
 #define IncSubdir X11
 
 all::
 
+DEFINES = $(FAILDEFINES)
+
+# Since xtrans source is #include'd into software that uses it, we install
+# the .c files as if they were headers.
+HEADERS = \
+	Xtrans.h \
+	Xtrans.c \
+	Xtransdnet.c \
+	Xtransint.h \
+	Xtranslcl.c \
+	Xtransos2.c \
+	Xtranssock.c \
+	Xtranstli.c \
+	Xtransutil.c \
+	transport.c
+
 DependTarget()
-BuildIncludes(Xtrans.h,IncSubdir,..)
+BuildIncludes($(HEADERS),IncSubdir/Xtrans,../..)

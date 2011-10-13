@@ -1,4 +1,4 @@
-/* $XConsortium: out_outl.c,v 1.2 91/05/11 09:52:48 rws Exp $ */
+/* $Xorg: out_outl.c,v 1.3 2000/08/17 19:46:26 cpqbld Exp $ */
 
 /*
 
@@ -30,6 +30,9 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
  ****************************************************************************/
 
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "spdo_prv.h"               /* General definitions for Speedo     */
 
 

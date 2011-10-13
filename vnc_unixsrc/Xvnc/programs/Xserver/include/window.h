@@ -1,14 +1,13 @@
-/* $XConsortium: window.h /main/8 1996/03/21 13:35:33 mor $ */
+/* $Xorg: window.h,v 1.4 2001/02/09 02:05:16 xorgcvs Exp $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -46,6 +45,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
+/* $XFree86$ */
 
 #ifndef WINDOW_H
 #define WINDOW_H
@@ -53,7 +53,7 @@ SOFTWARE.
 #include "misc.h"
 #include "region.h"
 #include "screenint.h"
-#include "X11/Xproto.h"
+#include <X11/Xproto.h>
 
 #define TOTALLY_OBSCURED 0
 #define UNOBSCURED 1
@@ -72,65 +72,40 @@ typedef struct _BackingStore *BackingStorePtr;
 typedef struct _Window *WindowPtr;
 
 typedef int (*VisitWindowProcPtr)(
-#if NeedNestedPrototypes
     WindowPtr /*pWin*/,
-    pointer /*data*/
-#endif
-);
+    pointer /*data*/);
 
 extern int TraverseTree(
-#if NeedFunctionPrototypes
     WindowPtr /*pWin*/,
     VisitWindowProcPtr /*func*/,
-    pointer /*data*/
-#endif
-);
+    pointer /*data*/);
 
 extern int WalkTree(
-#if NeedFunctionPrototypes
     ScreenPtr /*pScreen*/,
     VisitWindowProcPtr /*func*/,
-    pointer /*data*/
-#endif
-);
+    pointer /*data*/);
 
 extern WindowPtr AllocateWindow(
-#if NeedFunctionPrototypes
-    ScreenPtr /*pScreen*/
-#endif
-);
+    ScreenPtr /*pScreen*/);
 
 extern Bool CreateRootWindow(
-#if NeedFunctionPrototypes
-    ScreenPtr /*pScreen*/
-#endif
-);
+    ScreenPtr /*pScreen*/);
 
 extern void InitRootWindow(
-#if NeedFunctionPrototypes
-    WindowPtr /*pWin*/
-#endif
-);
+    WindowPtr /*pWin*/);
 
 extern void ClippedRegionFromBox(
-#if NeedFunctionPrototypes
     WindowPtr /*pWin*/,
     RegionPtr /*Rgn*/,
     int /*x*/,
     int /*y*/,
     int /*w*/,
-    int /*h*/
-#endif
-);
+    int /*h*/);
 
 extern WindowPtr RealChildHead(
-#if NeedFunctionPrototypes
-    WindowPtr /*pWin*/
-#endif
-);
+    WindowPtr /*pWin*/);
 
 extern WindowPtr CreateWindow(
-#if NeedFunctionPrototypes
     Window /*wid*/,
     WindowPtr /*pParent*/,
     int /*x*/,
@@ -144,49 +119,43 @@ extern WindowPtr CreateWindow(
     int /*depth*/,
     ClientPtr /*client*/,
     VisualID /*visual*/,
-    int* /*error*/
-#endif
-);
+    int* /*error*/);
 
 extern int DeleteWindow(
-#if NeedFunctionPrototypes
     pointer /*pWin*/,
-    XID /*wid*/
-#endif
-);
+    XID /*wid*/);
 
 extern void DestroySubwindows(
-#if NeedFunctionPrototypes
     WindowPtr /*pWin*/,
-    ClientPtr /*client*/
-#endif
-);
+    ClientPtr /*client*/);
 
+/* Quartz support on Mac OS X uses the HIToolbox
+   framework whose ChangeWindowAttributes function conflicts here. */
+#ifdef __DARWIN__
+#define ChangeWindowAttributes Darwin_X_ChangeWindowAttributes
+#endif
 extern int ChangeWindowAttributes(
-#if NeedFunctionPrototypes
     WindowPtr /*pWin*/,
     Mask /*vmask*/,
     XID* /*vlist*/,
-    ClientPtr /*client*/
-#endif
-);
+    ClientPtr /*client*/);
 
+/* Quartz support on Mac OS X uses the HIToolbox
+   framework whose GetWindowAttributes function conflicts here. */
+#ifdef __DARWIN__
+#define GetWindowAttributes(w,c,x) Darwin_X_GetWindowAttributes(w,c,x)
+extern void Darwin_X_GetWindowAttributes(
+#else
 extern void GetWindowAttributes(
-#if NeedFunctionPrototypes
+#endif
     WindowPtr /*pWin*/,
     ClientPtr /*client*/,
-    xGetWindowAttributesReply* /* wa */
-#endif
-);
+    xGetWindowAttributesReply* /* wa */);
 
 extern RegionPtr CreateUnclippedWinSize(
-#if NeedFunctionPrototypes
-    WindowPtr /*pWin*/
-#endif
-);
+    WindowPtr /*pWin*/);
 
 extern void GravityTranslate(
-#if NeedFunctionPrototypes
     int /*x*/,
     int /*y*/,
     int /*oldx*/,
@@ -195,157 +164,102 @@ extern void GravityTranslate(
     int /*dh*/,
     unsigned /*gravity*/,
     int* /*destx*/,
-    int* /*desty*/
-#endif
-);
+    int* /*desty*/);
 
 extern int ConfigureWindow(
-#if NeedFunctionPrototypes
     WindowPtr /*pWin*/,
     Mask /*mask*/,
     XID* /*vlist*/,
-    ClientPtr /*client*/
-#endif
-);
+    ClientPtr /*client*/);
 
 extern int CirculateWindow(
-#if NeedFunctionPrototypes
     WindowPtr /*pParent*/,
     int /*direction*/,
-    ClientPtr /*client*/
-#endif
-);
+    ClientPtr /*client*/);
 
 extern int ReparentWindow(
-#if NeedFunctionPrototypes
     WindowPtr /*pWin*/,
     WindowPtr /*pParent*/,
     int /*x*/,
     int /*y*/,
-    ClientPtr /*client*/
-#endif
-);
+    ClientPtr /*client*/);
 
 extern int MapWindow(
-#if NeedFunctionPrototypes
     WindowPtr /*pWin*/,
-    ClientPtr /*client*/
-#endif
-);
+    ClientPtr /*client*/);
 
 extern void MapSubwindows(
-#if NeedFunctionPrototypes
     WindowPtr /*pParent*/,
-    ClientPtr /*client*/
-#endif
-);
+    ClientPtr /*client*/);
 
 extern int UnmapWindow(
-#if NeedFunctionPrototypes
     WindowPtr /*pWin*/,
-    Bool /*fromConfigure*/
-#endif
-);
+    Bool /*fromConfigure*/);
 
 extern void UnmapSubwindows(
-#if NeedFunctionPrototypes
-    WindowPtr /*pWin*/
-#endif
-);
+    WindowPtr /*pWin*/);
 
 extern void HandleSaveSet(
-#if NeedFunctionPrototypes
-    ClientPtr /*client*/
-#endif
-);
+    ClientPtr /*client*/);
 
 extern Bool VisibleBoundingBoxFromPoint(
-#if NeedFunctionPrototypes
     WindowPtr /*pWin*/,
     int /*x*/,
     int /*y*/,
-    BoxPtr /*box*/
-#endif
-);
+    BoxPtr /*box*/);
 
 extern Bool PointInWindowIsVisible(
-#if NeedFunctionPrototypes
     WindowPtr /*pWin*/,
     int /*x*/,
-    int /*y*/
-#endif
-);
+    int /*y*/);
 
 extern RegionPtr NotClippedByChildren(
-#if NeedFunctionPrototypes
-    WindowPtr /*pWin*/
-#endif
-);
+    WindowPtr /*pWin*/);
 
 extern void SendVisibilityNotify(
-#if NeedFunctionPrototypes
-    WindowPtr /*pWin*/
-#endif
-);
+    WindowPtr /*pWin*/);
 
 extern void SaveScreens(
-#if NeedFunctionPrototypes
     int /*on*/,
-    int /*mode*/
-#endif
-);
+    int /*mode*/);
 
 extern WindowPtr FindWindowWithOptional(
-#if NeedFunctionPrototypes
-    WindowPtr /*w*/
-#endif
-);
+    WindowPtr /*w*/);
 
 extern void CheckWindowOptionalNeed(
-#if NeedFunctionPrototypes
-    WindowPtr /*w*/
-#endif
-);
+    WindowPtr /*w*/);
 
 extern Bool MakeWindowOptional(
-#if NeedFunctionPrototypes
-    WindowPtr /*pWin*/
-#endif
-);
+    WindowPtr /*pWin*/);
 
 extern void DisposeWindowOptional(
-#if NeedFunctionPrototypes
-    WindowPtr /*pWin*/
-#endif
-);
+    WindowPtr /*pWin*/);
 
 extern WindowPtr MoveWindowInStack(
-#if NeedFunctionPrototypes
     WindowPtr /*pWin*/,
-    WindowPtr /*pNextSib*/
-#endif
-);
+    WindowPtr /*pNextSib*/);
 
 void SetWinSize(
-#if NeedFunctionPrototypes
-    WindowPtr /*pWin*/
-#endif
-);
+    WindowPtr /*pWin*/);
 
 void SetBorderSize(
-#if NeedFunctionPrototypes
-    WindowPtr /*pWin*/
-#endif
-);
+    WindowPtr /*pWin*/);
 
 void ResizeChildrenWinSize(
-#if NeedFunctionPrototypes
     WindowPtr /*pWin*/,
     int /*dx*/,
     int /*dy*/,
     int /*dw*/,
-    int /*dh*/
-#endif
-);
+    int /*dh*/);
+
+extern void SendShapeNotify(
+    WindowPtr /* pWin */,
+    int /* which */ );
+
+extern RegionPtr CreateBoundingShape(
+    WindowPtr /* pWin */ );
+
+extern RegionPtr CreateClipShape(
+    WindowPtr /* pWin */ );
 
 #endif /* WINDOW_H */

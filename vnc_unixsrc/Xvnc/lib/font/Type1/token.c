@@ -1,4 +1,4 @@
-/* $XConsortium: token.c,v 1.3 94/02/04 17:07:17 gildea Exp $ */
+/* $Xorg: token.c,v 1.4 2000/08/17 19:46:34 cpqbld Exp $ */
 /* Copyright International Business Machines,Corp. 1991
  * All Rights Reserved
  *
@@ -27,7 +27,11 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
  * SOFTWARE.
  */
+/* $XFree86: xc/lib/font/Type1/token.c,v 1.5tsi Exp $ */
 /* Authors: Sig Nin & Carol Thompson IBM Almaden Research Laboratory */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "t1stdio.h"
 #include "util.h"
 #include "digit.h"
@@ -97,15 +101,16 @@ static double Exp10T[128] = {
   1e56, 1e57, 1e58, 1e59, 1e60, 1e61, 1e62, 1e63
 };
  
-static double P10(exponent)
-  long exponent;
+static double 
+P10(long exponent)
 {
   double value, power;
  
   if (exponent < 0) {
     power = 0.1;
     value = (exponent & 1 ? power : 1.0);
-    exponent = -((exponent + 1) >> 1); /* portable C for -(exponent/2) */
+    exponent++;
+    exponent = -(exponent >> 1); /* portable C for -(exponent/2) */
   }
   else {
     power = 10.0;
@@ -132,7 +137,7 @@ static double P10(exponent)
 /* Get next character from the input --
  *
  */
-#define next_ch()    (getc(inputFileP))
+#define next_ch()    (_XT1getc(inputFileP))
  
 /* Push a character back into the input --
  *
@@ -144,7 +149,7 @@ static double P10(exponent)
  * required to return anything in particular, and callers should
  * not rely on the returned value.
  */
-#define back_ch(ch)   (ungetc(ch, inputFileP))
+#define back_ch(ch)   (T1Ungetc(ch, inputFileP))
  
 /* Push a character back into the input if it was not white space.
  * If it is a carriage return (\r) then check next char for
@@ -184,7 +189,7 @@ isWHITE_SPACE(ch)\
 )
 
 #define save_ch_no_inc(ch) \
-((tokenCharP < tokenMaxP) && (*tokenCharP = ch))
+if (tokenCharP < tokenMaxP) *tokenCharP = ch
  
 /*
  * -------------------------------------------------------------------
@@ -200,15 +205,15 @@ isWHITE_SPACE(ch)\
 #define DONE  (256)
  
 /* Get the next input character */
-static int next_char(ch)
-  int ch;
+static int 
+next_char(int ch)
 {
   return(next_ch());
 }
  
 /* Add character to token */
-static int add_char(ch)
-  int ch;
+static int 
+add_char(int ch)
 {
   save_ch(ch);
   return(next_ch());
@@ -220,8 +225,8 @@ static int add_char(ch)
  */
  
 /* Skip white space */
-static int skip_space(ch)
-  int ch;
+static int 
+skip_space(int ch)
 {
   do {
     ch = next_ch();
@@ -230,8 +235,8 @@ static int skip_space(ch)
 }
  
 /* Skip comments */
-static int skip_comment(ch)
-  int ch;
+static int 
+skip_comment(int ch)
 {
   do {
     ch = next_ch();
@@ -251,30 +256,29 @@ static long m_scale;
 /* real number exponent */
 static int e_sign;
 static long e_value;
-static long e_scale;
  
 /* radix number */
 static long r_base;
 static long r_value;
 static long r_scale;
  
-static int add_sign(ch)
-  int ch;
+static int 
+add_sign(int ch)
 {
   m_sign = ch;
   save_unsafe_ch(ch);
   return(next_ch());
 }
  
-static int add_1st_digits(ch)
-  int ch;
+static int 
+add_1st_digits(int ch)
 {
   m_sign = '+';
   return(add_digits(ch));
 }
  
-static int add_digits(ch)
-  int ch;
+static int 
+add_digits(int ch)
 {
   long value, p_value, scale;
   int digit;
@@ -360,20 +364,19 @@ static int add_digits(ch)
   /* Initialize for possible real */
   e_sign = '+';
   e_value = 0;
-  e_scale = 0;
  
   return(ch);
 }
  
-static int add_1st_decpt(ch)
-  int ch;
+static int 
+add_1st_decpt(int ch)
 {
   m_sign = '+';
   return(add_decpt(ch));
 }
  
-static int add_decpt(ch)
-  int ch;
+static int 
+add_decpt(int ch)
 {
   /* On entry, expect m_sign to be set to '+' or '-' */
   m_value = 0;
@@ -382,8 +385,8 @@ static int add_decpt(ch)
   return(next_ch());
 }
  
-static int add_fraction(ch)
-  int ch;
+static int 
+add_fraction(int ch)
 {
   long value, scale;
   int digit;
@@ -474,21 +477,20 @@ static int add_fraction(ch)
   /* Initialize for possible real */
   e_sign = '+';
   e_value = 0;
-  e_scale = 0;
  
   return(ch);
 }
  
-static int add_e_sign(ch)
-  int ch;
+static int 
+add_e_sign(int ch)
 {
   e_sign = ch;
   save_ch(ch);
   return(next_ch());
 }
  
-static int add_exponent(ch)
-  int ch;
+static int 
+add_exponent(int ch)
 {
   long value, p_value;
   long scale = 0;
@@ -552,13 +554,12 @@ static int add_exponent(ch)
  
   /* Store results */
   e_value = value;
-  e_scale = scale;
  
   return(ch);
 }
  
-static int add_radix(ch)
-  int ch;
+static int 
+add_radix(int ch)
 {
   if (2 <= m_value && m_value <= 36 && m_scale == 0) {
     r_base = m_value;
@@ -571,8 +572,8 @@ static int add_radix(ch)
   }
 }
  
-static int add_r_digits(ch)
-  int ch;
+static int 
+add_r_digits(int ch)
 {
   unsigned long value;
   long radix, scale;
@@ -653,8 +654,8 @@ static int add_r_digits(ch)
  */
  
 /* Done: Radix Number */
-static int RADIX_NUMBER(ch)
-  int ch;
+static int 
+RADIX_NUMBER(int ch)
 {
   back_ch_not_white(ch);
   if (r_scale == 0) {
@@ -668,8 +669,8 @@ static int RADIX_NUMBER(ch)
 }
  
 /* Done: Integer */
-static int INTEGER(ch)
-  int ch;
+static int 
+INTEGER(int ch)
 {
   back_ch_not_white(ch);
   if (m_scale == 0) {
@@ -684,16 +685,12 @@ static int INTEGER(ch)
 }
  
 /* Done: Real */
-static int REAL(ch)
-  int ch;
+static int 
+REAL(int ch)
 {
   double temp;
  
   back_ch_not_white(ch);
- 
-  /* NOTE: ignore e_scale, since e_value alone will cause
-   *   exponent overflow if e_scale > 0.
-   */
  
   /* HAZARD: exponent overflow of intermediate result
    * (e.g., in 370 floating point); this should not be a problem
@@ -721,8 +718,8 @@ static int REAL(ch)
  */
  
 /* Done: Hex String */
-static int HEX_STRING(ch)
-  int ch;
+static int 
+HEX_STRING(int ch)
 {
   int value;
  
@@ -794,8 +791,8 @@ static int HEX_STRING(ch)
  *   "\\", "\(", and "\)", simply store the second
  *   character.
  */
-static void save_digraph(ch)
-  int ch;
+static void 
+save_digraph(int ch)
 {
   int value;
  
@@ -857,8 +854,8 @@ static void save_digraph(ch)
 }
  
 /* Done: String */
-static int STRING(ch)
-  int ch;
+static int 
+STRING(int ch)
 {
   int nest_level = 1;
  
@@ -924,8 +921,8 @@ static int STRING(ch)
  *   start out looking like something else).
  */
  
-static int AAH_NAME(ch)
-  int ch;
+static int 
+AAH_NAME(int ch)
 {
   do {
     save_ch(ch);
@@ -938,8 +935,8 @@ static int AAH_NAME(ch)
 }
  
 /* Done: Name */
-static int NAME(ch)
-  int ch;
+static int 
+NAME(int ch)
 {
   save_unsafe_ch(ch);
   ch = next_ch();
@@ -978,8 +975,8 @@ static int NAME(ch)
 }
  
 /* Done: Literal Name */
-static int LITERAL_NAME(ch)
-  int ch;
+static int 
+LITERAL_NAME(int ch)
 {
   if (isNAME(ch)) {
     save_unsafe_ch(ch);
@@ -1016,8 +1013,8 @@ static int LITERAL_NAME(ch)
 }
  
 /* Done: immediate Name */
-static int IMMED_NAME(ch)
-  int ch;
+static int 
+IMMED_NAME(int ch)
 {
   ch = next_ch();
   if (isNAME(ch)) {
@@ -1055,8 +1052,8 @@ static int IMMED_NAME(ch)
 }
  
 /* Done: Name found while looking for something else */
-static int OOPS_NAME(ch)
-  int ch;
+static int 
+OOPS_NAME(int ch)
 {
   back_ch_not_white(ch);
   tokenType = TOKEN_NAME;
@@ -1069,40 +1066,40 @@ static int OOPS_NAME(ch)
  */
  
 /* Done: Unmatched Right Angle-Bracket */
-static int RIGHT_ANGLE(ch)
-  int ch;
+static int 
+RIGHT_ANGLE(int ch)
 {
   tokenType = TOKEN_RIGHT_ANGLE;
   return(DONE);
 }
  
 /* Done: Unmatched Right Parenthesis */
-static int RIGHT_PAREN(ch)
-  int ch;
+static int 
+RIGHT_PAREN(int ch)
 {
   tokenType = TOKEN_RIGHT_PAREN;
   return(DONE);
 }
  
 /* Done: Left Brace */
-static int LEFT_BRACE(ch)
-  int ch;
+static int 
+LEFT_BRACE(int ch)
 {
   tokenType = TOKEN_LEFT_BRACE;
   return(DONE);
 }
  
 /* Done: Right Brace */
-static int RIGHT_BRACE(ch)
-  int ch;
+static int 
+RIGHT_BRACE(int ch)
 {
   tokenType = TOKEN_RIGHT_BRACE;
   return(DONE);
 }
  
 /* Done: Left Bracket */
-static int LEFT_BRACKET(ch)
-  int ch;
+static int 
+LEFT_BRACKET(int ch)
 {
   save_unsafe_ch(ch);
   tokenType = TOKEN_LEFT_BRACKET;
@@ -1110,8 +1107,8 @@ static int LEFT_BRACKET(ch)
 }
  
 /* Done: Right Bracket */
-static int RIGHT_BRACKET(ch)
-  int ch;
+static int 
+RIGHT_BRACKET(int ch)
 {
   save_unsafe_ch(ch);
   tokenType = TOKEN_RIGHT_BRACKET;
@@ -1119,16 +1116,16 @@ static int RIGHT_BRACKET(ch)
 }
  
 /* Done: Break */
-static int BREAK_SIGNAL(ch)
-  int ch;
+static int 
+BREAK_SIGNAL(int ch)
 {
   tokenType = TOKEN_BREAK;
   return(DONE);
 }
  
 /* Done: No Token Found */
-static int NO_TOKEN(ch)
-  int ch;
+static int 
+NO_TOKEN(int ch)
 {
   tokenType = TOKEN_EOF;
   return(DONE);
@@ -1158,13 +1155,13 @@ static int NO_TOKEN(ch)
  *
  * -------------------------------------------------------------------
  */
-void scan_token(inputP)
-  psobj *inputP;
+void 
+scan_token(psobj *inputP)
 {
   int ch;
   unsigned char *stateP = s0;
   unsigned char entry;
-  int (*actionP)();
+  int (*actionP)(int);
  
   /* Define input source */
   inputFileP = inputP->data.fileP;

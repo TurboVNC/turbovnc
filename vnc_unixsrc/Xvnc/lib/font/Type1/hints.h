@@ -1,4 +1,4 @@
-/* $XConsortium: hints.h,v 1.2 91/10/10 11:18:19 rws Exp $ */
+/* $Xorg: hints.h,v 1.3 2000/08/17 19:46:30 cpqbld Exp $ */
 /* Copyright International Business Machines, Corp. 1991
  * All Rights Reserved
  * Copyright Lexmark International, Inc. 1991
@@ -26,17 +26,23 @@
  * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
  * THIS SOFTWARE.
  */
+/* $XFree86: xc/lib/font/Type1/hints.h,v 1.3 1999/08/22 08:58:51 dawes Exp $ */
+
 /*SHARED*/
  
-#define   InitHints()   t1_InitHints()
-void t1_InitHints();   /* Initialize hint data structure */
+#define   InitHints   t1_InitHints
+extern void t1_InitHints ( void );	/* Initialize hint data structure */
  
 #define   CloseHints(hintP)   t1_CloseHints(hintP)
-void t1_CloseHints();   /* Reverse hints that are still open */
+/* Reverse hints that are still open */
+extern void t1_CloseHints ( struct fractpoint *hintP );
  
 #define   ProcessHint(hP, currX, currY, hintP)   t1_ProcessHint(hP, currX, currY, hintP)
-void t1_ProcessHint();   /* Process a rasterization hint */
- 
+/* Process a rasterization hint */
+extern void t1_ProcessHint ( struct hintsegment *hP, fractpel currX, fractpel currY, struct fractpoint *hintP );
+
 #define   ApplyContinuity(R)  t1_ApplyContinuity(R)
-void t1_ApplyContinuity();    /* fix false connection breaks in a region      */
+/* fix false connection breaks in a region      */
+extern void t1_ApplyContinuity ( struct region *R );
+
 /*END SHARED*/

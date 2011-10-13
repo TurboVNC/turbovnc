@@ -1,17 +1,14 @@
-/* $XConsortium: fontxlfd.c /main/20 1996/09/28 16:49:26 rws $ */
-/* $XFree86: xc/lib/font/util/fontxlfd.c,v 3.5 1996/12/23 06:02:34 dawes Exp $ */
+/* $Xorg: fontxlfd.c,v 1.4 2001/02/09 02:04:04 xorgcvs Exp $ */
 
 /*
 
-Copyright (c) 1990  X Consortium
+Copyright 1990, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -19,31 +16,34 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/lib/font/util/fontxlfd.c,v 3.16tsi Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
  */
 
-#include	"fontmisc.h"
-#include	"fontstruct.h"
-#include	"fontxlfd.h"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include	<X11/fonts/fontmisc.h>
+#include	<X11/fonts/fontstruct.h>
+#include	<X11/fonts/fontxlfd.h>
+#include	<X11/fonts/fontutil.h>
 #include	<X11/Xos.h>
 #include	<math.h>
-#if !defined(X_NOT_STDC_ENV) || defined(SCO)
 #include	<stdlib.h>
-#endif
-#if defined(X_NOT_STDC_ENV) || (defined(sony) && !defined(SYSTYPE_SYSV) && !defined(_SYSTYPE_SYSV))
+#if defined(sony) && !defined(SYSTYPE_SYSV) && !defined(_SYSTYPE_SYSV)
 #define NO_LOCALE
 #endif
 #ifndef NO_LOCALE
@@ -53,9 +53,7 @@ from the X Consortium.
 #include	<stdio.h>	/* for sprintf() */
 
 static char *
-GetInt(ptr, val)
-    char       *ptr;
-    int        *val;
+GetInt(char *ptr, int *val)
 {
     if (*ptr == '*') {
 	*val = -1;
@@ -78,12 +76,9 @@ static struct lconv *locale = 0;
 static char *radix = ".", *plus = "+", *minus = "-";
 
 static char *
-readreal(ptr, result)
-char *ptr;
-double *result;
+readreal(char *ptr, double *result)
 {
     char buffer[80], *p1, *p2;
-    int count;
 
 #ifndef NO_LOCALE
     /* Figure out what symbols apply in this locale */
@@ -116,26 +111,13 @@ double *result;
     *p2 = 0;
 
     /* Now we have something that strtod() can interpret... do it. */
-#ifndef X_NOT_STDC_ENV
     *result = strtod(buffer, &p1);
     /* Return NULL if failure, pointer past number if success */
     return (p1 == buffer) ? (char *)0 : (ptr + (p1 - buffer));
-#else
-    for (p1 = buffer; isspace(*p1); p1++)
-	;
-    if (sscanf(p1, "%lf", result) != 1)
-	return (char *)0;
-    while (!isspace(*p1))
-	p1++;
-    return ptr + (p1 - buffer);
-#endif
 }
 
 static char *
-xlfd_double_to_text(value, buffer, space_required)
-double value;
-char *buffer;
-int space_required;
+xlfd_double_to_text(double value, char *buffer, int space_required)
 {
     char formatbuf[40];
     register char *p1;
@@ -208,15 +190,19 @@ int space_required;
 }
 
 double
-xlfd_round_double(x)
-double x;
+xlfd_round_double(double x)
 {
    /* Utility for XLFD users to round numbers to XLFD_NDIGITS
       significant digits.  How do you round to n significant digits on
       a binary machine?  */
 
-#if defined(__i386__) || defined(__alpha__)
-#if !defined(__EMX__)
+#if defined(i386) || defined(__i386__) || \
+    defined(ia64) || defined(__ia64__) || \
+    defined(__alpha__) || defined(__alpha) || \
+    defined(__hppa__) || \
+    defined(__amd64__) || defined(__amd64) || \
+    defined(sgi)
+#if !defined(__UNIXOS2__)
 #include <float.h>
 
 /* if we have IEEE 754 fp, we can round to binary digits... */
@@ -232,27 +218,27 @@ double x;
 
 /* convert # of decimal digits to # of binary digits */
 #define XLFD_NDIGITS_2 ((int)(XLFD_NDIGITS * M_LN10 / M_LN2 + 0.5))
-   
+
    union conv_d {
       double d;
       unsigned char b[8];
    } d;
    int i,j,k,d_exp;
-   
-   if (x == 0) 
+
+   if (x == 0)
       return x;
 
    /* do minor sanity check for IEEE 754 fp and correct byte order */
    d.d = 1.0;
    if (sizeof(double) == 8 && d.b[7] == 0x3f && d.b[6] == 0xf0) {
-      
-      /* 
+
+      /*
        * this code will round IEEE 754 double to XLFD_NDIGITS_2 binary digits
        */
-      
+
       d.d = x;
       d_exp = (d.b[7] << 4) | (d.b[6] >> 4);
-      
+
       i = (DBL_MANT_DIG-XLFD_NDIGITS_2) >> 3;
       j = 1 << ((DBL_MANT_DIG-XLFD_NDIGITS_2) & 0x07);
       for (; i<7; i++) {
@@ -267,25 +253,25 @@ double x;
 	 d.b[7] = d_exp >> 4;
 	 d.b[6] = (d.b[6] & 0x0f) | (d_exp << 4);
       }
-      
+
       i = (DBL_MANT_DIG-XLFD_NDIGITS_2) >> 3;
-      j = 1 << ((DBL_MANT_DIG-XLFD_NDIGITS_2) & 0x07);      
+      j = 1 << ((DBL_MANT_DIG-XLFD_NDIGITS_2) & 0x07);
       d.b[i] &= ~(j-1);
       for (;--i>=0;) d.b[i] = 0;
 
       return d.d;
    }
-   else 
+   else
 #endif
-#endif /* !__EMX__ */
-#endif /* defined(__i386__) || defined(__alpha__) */
+#endif /* !__UNIXOS2__ */
+#endif /* i386 || __i386__ */
     {
 	/*
-	 * If not IEEE 754:  Let printf() do it for you.  
+	 * If not IEEE 754:  Let printf() do it for you.
 	 */
-	 
+
 	char formatbuf[40], buffer[40];
-	 
+
 	sprintf(formatbuf, "%%.%dlg", XLFD_NDIGITS);
 	sprintf(buffer, formatbuf, x);
 	return atof(buffer);
@@ -293,10 +279,7 @@ double x;
 }
 
 static char *
-GetMatrix(ptr, vals, which)
-char *ptr;
-FontScalablePtr vals;
-int which;
+GetMatrix(char *ptr, FontScalablePtr vals, int which)
 {
     double *matrix;
 
@@ -341,7 +324,7 @@ int which;
     else
     {
 	int value;
-	if (ptr = GetInt(ptr, &value))
+	if ((ptr = GetInt(ptr, &value)))
 	{
 	    vals->values_supplied &= ~which;
 	    if (value > 0)
@@ -373,10 +356,8 @@ int which;
 }
 
 
-static void append_ranges(fname, nranges, ranges)
-char *fname;
-int nranges;
-fsRange *ranges;
+static void
+append_ranges(char *fname, int nranges, fsRange *ranges)
 {
     if (nranges)
     {
@@ -389,9 +370,9 @@ fsRange *ranges;
 	    sprintf(fname + strlen(fname), "%d",
 		    minchar(ranges[i]));
 	    if (ranges[i].min_char_low ==
-	        ranges[i].max_char_low &&
-	        ranges[i].min_char_high ==
-	        ranges[i].max_char_high) continue;
+		ranges[i].max_char_low &&
+		ranges[i].min_char_high ==
+		ranges[i].max_char_high) continue;
 	    sprintf(fname + strlen(fname), "_%d",
 		    maxchar(ranges[i]));
         }
@@ -400,10 +381,7 @@ fsRange *ranges;
 }
 
 Bool
-FontParseXLFDName(fname, vals, subst)
-    char       *fname;
-    FontScalablePtr vals;
-    int         subst;
+FontParseXLFDName(char *fname, FontScalablePtr vals, int subst)
 {
     register char *ptr;
     register char *ptr1,
@@ -422,7 +400,7 @@ FontParseXLFDName(fname, vals, subst)
     if (subst != FONT_XLFD_REPLACE_VALUE)
 	*vals = tmpvals;
 
-    if (!(*(ptr = fname) == '-' || *ptr++ == '*' && *ptr == '-') ||  /* fndry */
+    if (!(*(ptr = fname) == '-' || (*ptr++ == '*' && *ptr == '-')) ||  /* fndry */
 	    !(ptr = strchr(ptr + 1, '-')) ||	/* family_name */
 	    !(ptr1 = ptr = strchr(ptr + 1, '-')) ||	/* weight_name */
 	    !(ptr = strchr(ptr + 1, '-')) ||	/* slant */
@@ -607,9 +585,7 @@ FontParseXLFDName(fname, vals, subst)
     return TRUE;
 }
 
-fsRange *FontParseRanges(name, nranges)
-char *name;
-int *nranges;
+fsRange *FontParseRanges(char *name, int *nranges)
 {
     int n;
     unsigned long l;

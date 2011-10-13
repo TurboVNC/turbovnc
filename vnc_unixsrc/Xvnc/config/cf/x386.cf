@@ -1,4 +1,4 @@
-XCOMM platform:  $XConsortium: x386.cf /main/15 1996/09/28 16:14:00 rws $
+XCOMM platform:  $Xorg: x386.cf,v 1.3 2000/08/17 19:41:48 cpqbld Exp $
 
 /*****************************************************************************
  *			  Site-specfic parameters                            *
@@ -19,7 +19,7 @@ XCOMM platform:  $XConsortium: x386.cf /main/15 1996/09/28 16:14:00 rws $
  *                        Do not change anything below                       *
  *****************************************************************************/
 
-/* You must manually compute BootstrapCFlags for initial build */
+/* You mus manually compute BootstrapCFlags for initial build */
 #define BootstrapCFlags		OSDefines OSRelease
 
 #define StandardDefines		OSDefines OSRelease
@@ -31,6 +31,10 @@ XCOMM platform:  $XConsortium: x386.cf /main/15 1996/09/28 16:14:00 rws $
 
 #define NeedBerklib		YES
 #define HasSymLinks		NO
+
+#ifndef UseDeprecatedKeyboardDriver
+#define UseDeprecatedKeyboardDriver YES
+#endif
 
 /*
  * V/386 Release 3.2

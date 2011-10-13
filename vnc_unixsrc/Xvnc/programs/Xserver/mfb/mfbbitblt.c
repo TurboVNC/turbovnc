@@ -1,14 +1,14 @@
+/* $XFree86: xc/programs/Xserver/mfb/mfbbitblt.c,v 1.7tsi Exp $ */
 /* Combined Purdue/PurduePlus patches, level 2.0, 1/17/89 */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,13 +16,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -46,11 +46,14 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $XConsortium: mfbbitblt.c,v 5.25 94/04/17 20:28:16 dpw Exp $ */
-#include "X.h"
-#include "Xprotostr.h"
+/* $Xorg: mfbbitblt.c,v 1.4 2001/02/09 02:05:18 xorgcvs Exp $ */
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
-#include "miscstruct.h"
+#include <X11/X.h>
+#include <X11/Xprotostr.h>
+
 #include "regionstr.h"
 #include "gcstruct.h"
 #include "windowstr.h"
@@ -94,6 +97,7 @@ destination.  this is a simple translation.
  ** and much less overhead.  Nice for drawing lots of small pixmaps.
  */
  
+
 void
 mfbDoBitblt (pSrc, pDst, alu, prgnDst, pptSrc)
     DrawablePtr	    pSrc, pDst;
@@ -131,7 +135,7 @@ int srcx, srcy;
 int width, height;
 int dstx, dsty;
 {
-    RegionPtr prgnSrcClip;	/* may be a new region, or just a copy */
+    RegionPtr prgnSrcClip = NULL; /* may be a new region, or just a copy */
     Bool freeSrcClip = FALSE;
 
     RegionPtr prgnExposed;
@@ -148,7 +152,12 @@ int dstx, dsty;
     BoxRec fastBox;
     int fastClip = 0;		/* for fast clipping with pixmap source */
     int fastExpose = 0;		/* for fast exposures with pixmap source */
-    void (*localDoBitBlt)();
+    void (*localDoBitBlt)(
+	DrawablePtr /*pSrc*/,
+	DrawablePtr /*pDst*/,
+	int /*alu*/,
+	RegionPtr /*prgnDst*/,
+	DDXPointPtr /*pptSrc*/);
 
     origSource.x = srcx;
     origSource.y = srcy;
@@ -191,7 +200,7 @@ int dstx, dsty;
 	if ((pSrcDrawable == pDstDrawable) &&
 	    (pGC->clientClipType == CT_NONE))
 	{
-	    prgnSrcClip = ((mfbPrivGC *)(pGC->devPrivates[mfbGCPrivateIndex].ptr))->pCompositeClip;
+	    prgnSrcClip = pGC->pCompositeClip;
 	}
 	else
 	{
@@ -213,7 +222,7 @@ int dstx, dsty;
 	    else if ((pSrcDrawable == pDstDrawable) &&
 		(pGC->clientClipType == CT_NONE))
 	    {
-		prgnSrcClip = ((mfbPrivGC *)(pGC->devPrivates[mfbGCPrivateIndex].ptr))->pCompositeClip;
+		prgnSrcClip = pGC->pCompositeClip;
 	    }
 	    else
 	    {
@@ -299,7 +308,7 @@ int dstx, dsty;
 	/* If the destination composite clip is one rectangle we can
 	   do the clip directly.  Otherwise we have to create a full
 	   blown region and call intersect */
-	cclip = ((mfbPrivGC *)(pGC->devPrivates[mfbGCPrivateIndex].ptr))->pCompositeClip;
+	cclip = pGC->pCompositeClip;
         if (REGION_NUM_RECTS(cclip) == 1)
         {
 	    BoxPtr pBox = REGION_RECTS(cclip);
@@ -312,7 +321,7 @@ int dstx, dsty;
 	    /* Check to see if the region is empty */
 	    if (fastBox.x1 >= fastBox.x2 || fastBox.y1 >= fastBox.y2)
 	    {
-		REGION_INIT(pGC->pScreen, &rgnDst, NullBox, 0);
+		REGION_NULL(pGC->pScreen, &rgnDst);
 	    }
 	    else
 	    {
@@ -325,7 +334,7 @@ int dstx, dsty;
 	       a full blown region.  It is intersected with the
 	       composite clip below. */
 	    fastClip = 0;
-	    REGION_INIT(pGC->pScreen, &rgnDst, &fastBox,1);
+	    REGION_INIT(pGC->pScreen, &rgnDst, &fastBox, 1);
 	}
     }
     else
@@ -335,8 +344,7 @@ int dstx, dsty;
 
     if (!fastClip)
     {
-	REGION_INTERSECT(pGC->pScreen, &rgnDst, &rgnDst,
-	 ((mfbPrivGC *)(pGC->devPrivates[mfbGCPrivateIndex].ptr))->pCompositeClip);
+	REGION_INTERSECT(pGC->pScreen, &rgnDst, &rgnDst, pGC->pCompositeClip);
     }
 
     /* Do bit blitting */
@@ -366,7 +374,7 @@ int dstx, dsty;
     }
 
     prgnExposed = NULL;
-    if (((mfbPrivGC *)(pGC->devPrivates[mfbGCPrivateIndex].ptr))->fExpose) 
+    if (pGC->fExpose) 
     {
         /* Pixmap sources generate a NoExposed (we return NULL to do this) */
         if (!fastExpose)
@@ -383,6 +391,7 @@ int dstx, dsty;
     return prgnExposed;
 }
 
+
 /*
  * Devices which use mfb for 1-bit pixmap support
  * must register a function for n-to-1 copy operations
@@ -394,7 +403,17 @@ static int		copyPlaneScreenIndex = -1;
 Bool
 mfbRegisterCopyPlaneProc (pScreen, proc)
     ScreenPtr	pScreen;
-    RegionPtr	(*proc)();
+    RegionPtr	(*proc)(
+        DrawablePtr         /* pSrcDrawable */,
+        DrawablePtr         /* pDstDrawable */,
+        GCPtr               /* pGC */,
+        int                 /* srcx */,
+        int                 /* srcy */,
+        int                 /* width */,
+        int                 /* height */,
+        int                 /* dstx */,
+        int                 /* dsty */,
+        unsigned long       /* bitPlane */);
 {
     if (copyPlaneGeneration != serverGeneration)
     {
@@ -403,7 +422,7 @@ mfbRegisterCopyPlaneProc (pScreen, proc)
 	    return FALSE;
 	copyPlaneGeneration = serverGeneration;
     }
-    pScreen->devPrivates[copyPlaneScreenIndex].fptr = (pointer (*)()) proc;
+    pScreen->devPrivates[copyPlaneScreenIndex].fptr = proc;
     return TRUE;
 }
 
@@ -420,6 +439,7 @@ CopyArea().
 
 */
 
+
 RegionPtr
 mfbCopyPlane(pSrcDrawable, pDstDrawable,
 	    pGC, srcx, srcy, width, height, dstx, dsty, plane)
@@ -432,12 +452,23 @@ unsigned long plane;
 {
     int alu;
     RegionPtr	prgnExposed;
-    RegionPtr	(*copyPlane)();
+    RegionPtr	(*copyPlane)(
+        DrawablePtr         /* pSrcDrawable */,
+        DrawablePtr         /* pDstDrawable */,
+        GCPtr               /* pGC */,
+        int                 /* srcx */,
+        int                 /* srcy */,
+        int                 /* width */,
+        int                 /* height */,
+        int                 /* dstx */,
+        int                 /* dsty */,
+        unsigned long       /* bitPlane */);
+
 
     if (pSrcDrawable->depth != 1)
     {
 	if (copyPlaneScreenIndex >= 0 &&
-	    (copyPlane = (RegionPtr (*)()) 
+	    (copyPlane =
 		pSrcDrawable->pScreen->devPrivates[copyPlaneScreenIndex].fptr)
 	    )
 	{
@@ -476,3 +507,4 @@ unsigned long plane;
     }
     return prgnExposed;
 }
+

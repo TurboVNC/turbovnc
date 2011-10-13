@@ -1,13 +1,13 @@
+/* $XFree86: xc/programs/Xserver/dix/gc.c,v 3.9 2001/12/14 19:59:32 dawes Exp $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -46,12 +46,15 @@ SOFTWARE.
 
 ******************************************************************/
 
-/* $XConsortium: gc.c /main/70 1996/08/01 19:21:09 dpw $ */
-/* $XFree86: xc/programs/Xserver/dix/gc.c,v 3.4 1996/12/23 06:29:45 dawes Exp $ */
+/* $Xorg: gc.c,v 1.4 2001/02/09 02:04:40 xorgcvs Exp $ */
 
-#include "X.h"
-#include "Xmd.h"
-#include "Xproto.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
+#include <X11/Xmd.h>
+#include <X11/Xproto.h>
 #include "misc.h"
 #include "resource.h"
 #include "gcstruct.h"
@@ -66,18 +69,12 @@ SOFTWARE.
 extern XID clientErrorValue;
 extern FontPtr defaultFont;
 
-static Bool CreateDefaultTile(
-#if NeedFunctionPrototypes
-    GCPtr /*pGC*/
-#endif
-);
+static Bool CreateDefaultTile(GCPtr pGC);
 
 unsigned char DefaultDash[2] = {4, 4};
 
 void
-ValidateGC(pDraw, pGC)
-    DrawablePtr	pDraw;
-    GC		*pGC;
+ValidateGC(DrawablePtr pDraw, GC *pGC)
 {
     (*pGC->funcs->ValidateGC) (pGC, pGC->stateChanges, pDraw);
     pGC->stateChanges = 0;
@@ -100,14 +97,16 @@ ValidateGC(pDraw, pGC)
  * or pUnion, but not both; one of them must be NULL.  If you don't need
  * to pass any pointers, you can use either one:
  * 
- *     /* example calling dixChangeGC using pC32 parameter
+ *     example calling dixChangeGC using pC32 parameter
+ *
  *     CARD32 v[2];
  *     v[0] = foreground;
  *     v[1] = background;
  *     dixChangeGC(client, pGC, GCForeground|GCBackground, v, NULL);
  * 
- *     /* example calling dixChangeGC using pUnion parameter;
- *     /* same effect as above
+ *     example calling dixChangeGC using pUnion parameter;
+ *     same effect as above
+ *
  *     ChangeGCVal v[2];
  *     v[0].val = foreground;
  *     v[1].val = background;
@@ -116,10 +115,12 @@ ValidateGC(pDraw, pGC)
  * However, if you need to pass a pointer to a pixmap or font, you MUST
  * use the pUnion parameter.
  * 
- *     /* example calling dixChangeGC passing pointers in the value list
+ *     example calling dixChangeGC passing pointers in the value list
+ *     v[1].ptr is a pointer to a pixmap
+ *
  *     ChangeGCVal v[2];
  *     v[0].val = FillTiled;
- *     v[1].ptr = pPixmap; /* pointer to a pixmap
+ *     v[1].ptr = pPixmap;
  *     dixChangeGC(client, pGC, GCFillStyle|GCTile, NULL, v);
  * 
  * Note: we could have gotten by with just the pUnion parameter, but on
@@ -145,12 +146,7 @@ ValidateGC(pDraw, pGC)
     assert(pUnion); _var = (_type)pUnion->ptr; pUnion++; }
 
 int
-dixChangeGC(client, pGC, mask, pC32, pUnion)
-    ClientPtr client;
-    register GC 	*pGC;
-    register BITS32	mask;
-    CARD32		*pC32;
-    ChangeGCValPtr	pUnion;
+dixChangeGC(ClientPtr client, register GC *pGC, register BITS32 mask, CARD32 *pC32, ChangeGCValPtr pUnion)
 {
     register BITS32 	index2;
     register int 	error = 0;
@@ -405,8 +401,8 @@ dixChangeGC(client, pGC, mask, pC32, pUnion)
 		break;
 	    case GCClipMask:
 	    {
-		Pixmap pid;
-		int    clipType;
+		Pixmap pid = 0;
+		int    clipType = 0;
 
 		if (pUnion)
 		{
@@ -528,10 +524,7 @@ dixChangeGC(client, pGC, mask, pC32, pUnion)
 /* Publically defined entry to ChangeGC.  Just calls dixChangeGC and tells
  * it that all of the entries are constants or IDs */
 int
-ChangeGC(pGC, mask, pval)
-    register GC 	*pGC;
-    register BITS32	mask;
-    XID			*pval;
+ChangeGC(register GC *pGC, register BITS32 mask, XID *pval)
 {
     return (dixChangeGC(NullClient, pGC, mask, pval, NULL));
 }
@@ -557,21 +550,13 @@ NOTE:
 32 bits long
 */
 int
-DoChangeGC(pGC, mask, pval, fPointer)
-    register GC 	*pGC;
-    register BITS32	mask;
-    XID			*pval;
-    int			fPointer;
+DoChangeGC(register GC *pGC, register BITS32 mask, XID *pval, int fPointer)
 {
-    int r;
-
     if (fPointer)
     /* XXX might be a problem on 64 bit big-endian servers */
-	r = dixChangeGC(NullClient, pGC, mask, NULL, (ChangeGCValPtr)pval);
+	return dixChangeGC(NullClient, pGC, mask, NULL, (ChangeGCValPtr)pval);
     else
-	r = dixChangeGC(NullClient, pGC, mask, pval, NULL);
-
-    return r;
+	return dixChangeGC(NullClient, pGC, mask, pval, NULL);
 }
 
 
@@ -586,12 +571,7 @@ BUG:
 */
 
 static GCPtr
-#if NeedFunctionPrototypes
 AllocateGC(ScreenPtr pScreen)
-#else
-AllocateGC(pScreen)
-    ScreenPtr pScreen;
-#endif
 {
     GCPtr pGC;
     register char *ptr;
@@ -622,11 +602,7 @@ AllocateGC(pScreen)
 }
 
 GCPtr
-CreateGC(pDrawable, mask, pval, pStatus)
-    DrawablePtr	pDrawable;
-    BITS32	mask;
-    XID		*pval;
-    int		*pStatus;
+CreateGC(DrawablePtr pDrawable, BITS32 mask, XID *pval, int *pStatus)
 {
     register GCPtr pGC;
 
@@ -707,8 +683,7 @@ CreateGC(pDrawable, mask, pval, pStatus)
 }
 
 static Bool
-CreateDefaultTile (pGC)
-    GCPtr   pGC;
+CreateDefaultTile (GCPtr pGC)
 {
     XID		tmpval[3];
     PixmapPtr 	pTile;
@@ -751,10 +726,7 @@ CreateDefaultTile (pGC)
 }
 
 int
-CopyGC(pgcSrc, pgcDst, mask)
-    register GC		*pgcSrc;
-    register GC		*pgcDst;
-    register BITS32	mask;
+CopyGC(register GC *pgcSrc, register GC *pgcDst, register BITS32 mask)
 {
     register BITS32	index2;
     BITS32		maskQ;
@@ -912,16 +884,13 @@ CopyGC(pgcSrc, pgcDst, mask)
     return error;
 }
 
-/*****************
- * FreeGC 
- *   does the diX part of freeing the characteristics in the GC 
- ***************/
-
-/*ARGSUSED*/
+/**
+ * does the diX part of freeing the characteristics in the GC.
+ *
+ *  \param value  must conform to DeleteType
+ */
 int
-FreeGC(value, gid)
-    pointer value; /* must conform to DeleteType */
-    XID gid;
+FreeGC(pointer value, XID gid)
 {
     GCPtr pGC = (GCPtr)value;
 
@@ -941,10 +910,7 @@ FreeGC(value, gid)
 }
 
 void
-SetGCMask(pGC, selectMask, newDataMask)
-    GCPtr pGC;
-    Mask selectMask;
-    Mask newDataMask;
+SetGCMask(GCPtr pGC, Mask selectMask, Mask newDataMask)
 {
     pGC->stateChanges = (~selectMask & pGC->stateChanges) |
 		        (selectMask & newDataMask);
@@ -968,9 +934,7 @@ go with CreateGC() or ChangeGC().)
 */
 
 GCPtr
-CreateScratchGC(pScreen, depth)
-    ScreenPtr pScreen;
-    unsigned depth;
+CreateScratchGC(ScreenPtr pScreen, unsigned depth)
 {
     register GCPtr pGC;
 
@@ -1022,8 +986,7 @@ CreateScratchGC(pScreen, depth)
 }
 
 void
-FreeGCperDepth(screenNum)
-    int screenNum;
+FreeGCperDepth(int screenNum)
 {
     register int i;
     register ScreenPtr pScreen;
@@ -1039,8 +1002,7 @@ FreeGCperDepth(screenNum)
 
 
 Bool
-CreateGCperDepth(screenNum)
-    int screenNum;
+CreateGCperDepth(int screenNum)
 {
     register int i;
     register ScreenPtr pScreen;
@@ -1054,6 +1016,9 @@ CreateGCperDepth(screenNum)
     if (!(ppGC[0] = CreateScratchGC(pScreen, 1)))
 	return FALSE;
     ppGC[0]->graphicsExposures = FALSE;
+    /* Make sure we don't overflow GCperDepth[] */
+    if( pScreen->numDepths > MAXFORMATS )
+	    return FALSE;
 
     pDepth = pScreen->allowedDepths;
     for (i=0; i<pScreen->numDepths; i++, pDepth++)
@@ -1070,8 +1035,7 @@ CreateGCperDepth(screenNum)
 }
 
 Bool
-CreateDefaultStipple(screenNum)
-    int screenNum;
+CreateDefaultStipple(int screenNum)
 {
     register ScreenPtr pScreen;
     XID tmpval[3];
@@ -1108,19 +1072,14 @@ CreateDefaultStipple(screenNum)
 }
 
 void
-FreeDefaultStipple(screenNum)
-    int screenNum;
+FreeDefaultStipple(int screenNum)
 {
     ScreenPtr pScreen = screenInfo.screens[screenNum];
     (*pScreen->DestroyPixmap)(pScreen->PixmapPerDepth[0]);
 }
 
 int
-SetDashes(pGC, offset, ndash, pdash)
-register GCPtr pGC;
-unsigned offset;
-register unsigned ndash;
-register unsigned char *pdash;
+SetDashes(register GCPtr pGC, unsigned offset, unsigned ndash, unsigned char *pdash)
 {
     register long i;
     register unsigned char *p, *indash;
@@ -1176,10 +1135,7 @@ register unsigned char *pdash;
 }
 
 int
-VerifyRectOrder(nrects, prects, ordering)
-    int			nrects;
-    xRectangle		*prects;
-    int			ordering;
+VerifyRectOrder(int nrects, xRectangle *prects, int ordering)
 {
     register xRectangle	*prectP, *prectN;
     register int	i;
@@ -1229,12 +1185,8 @@ VerifyRectOrder(nrects, prects, ordering)
 }
 
 int
-SetClipRects(pGC, xOrigin, yOrigin, nrects, prects, ordering)
-    GCPtr		pGC;
-    int			xOrigin, yOrigin;
-    int			nrects;
-    xRectangle		*prects;
-    int			ordering;
+SetClipRects(GCPtr pGC, int xOrigin, int yOrigin, int nrects, 
+             xRectangle *prects, int ordering)
 {
     int			newct, size;
     xRectangle 		*prectsNew;
@@ -1270,9 +1222,7 @@ SetClipRects(pGC, xOrigin, yOrigin, nrects, prects, ordering)
    you use it often enough it will become real.)
 */
 GCPtr
-GetScratchGC(depth, pScreen)
-    register unsigned depth;
-    register ScreenPtr pScreen;
+GetScratchGC(register unsigned depth, register ScreenPtr pScreen)
 {
     register int i;
     register GCPtr pGC;
@@ -1321,8 +1271,7 @@ mark it as available.
    if not, free it for real
 */
 void
-FreeScratchGC(pGC)
-    register GCPtr pGC;
+FreeScratchGC(register GCPtr pGC)
 {
     register ScreenPtr pScreen = pGC->pScreen;
     register int i;

@@ -1,4 +1,4 @@
-/* $XConsortium: set_trns.c,v 1.6 94/02/10 11:05:59 gildea Exp $ */
+/* $Xorg: set_trns.c,v 1.3 2000/08/17 19:46:27 cpqbld Exp $ */
 
 /*
 
@@ -21,6 +21,7 @@ INCIDENTAL OR CONSEQUENTIAL DAMAGES, ARISING OUT OF OR IN ANY WAY CONNECTED
 WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 
 */
+/* $XFree86: xc/lib/font/Speedo/set_trns.c,v 1.5tsi Exp $ */
 
 
 
@@ -33,6 +34,9 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
  ****************************************************************************/
 
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "spdo_prv.h"               /* General definitions for Speedo   */
 
 #define   DEBUG      0
@@ -65,15 +69,9 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 
 /***** STATIC FUNCTIONS *****/
 
-#if PROTOS_AVAIL
 static void sp_constr_update(PROTO_DECL1);
 static ufix8 FONTFAR *sp_setup_pix_table(PROTO_DECL2 ufix8 FONTFAR *pointer,boolean short_form,fix15 no_X_ctrl_zones,fix15 no_Y_ctrl_zones);
 static ufix8 FONTFAR *sp_setup_int_table(PROTO_DECL2 ufix8 FONTFAR *pointer,fix15 no_X_int_zones,fix15 no_Y_int_zones);
-#else
-static void sp_constr_update();     /* Update constraint table */
-static ufix8 FONTFAR *sp_setup_pix_table();   /* Read control zone table */
-static ufix8 FONTFAR *sp_setup_int_table();   /* Read interpolation zone table */
-#endif
 
 
 FUNCTION void init_tcb()
@@ -86,13 +84,13 @@ GDECL
 sp_globals.tcb = sp_globals.tcb0;
 }
 
-FUNCTION void scale_tcb(ptcb, x_pos, y_pos, x_scale, y_scale)
+FUNCTION void scale_tcb(
 GDECL
-tcb_t GLOBALFAR *ptcb;    /* Transformation control block */
-fix15  x_pos;   /* X position (outline res units) */
-fix15  y_pos;   /* Y position (outline res units) */
-fix15  x_scale; /* X scale factor * ONE_SCALE */
-fix15  y_scale; /* Y scale factor * ONE_SCALE */
+tcb_t GLOBALFAR *ptcb,    /* Transformation control block */
+fix15  x_pos,   /* X position (outline res units) */
+fix15  y_pos,   /* Y position (outline res units) */
+fix15  x_scale, /* X scale factor * ONE_SCALE */
+fix15  y_scale) /* Y scale factor * ONE_SCALE */
 /*
  * Called by make_comp_char() to apply position and scale for each of the
  * components of a compound character.
@@ -115,10 +113,10 @@ ptcb->yoffset = MULT16(yx_mult, x_pos) + MULT16(yy_mult, y_pos) + y_offset;
 type_tcb(ptcb); /* Reclassify transformation types */
 }
 
-FUNCTION ufix8 FONTFAR *skip_interpolation_table(pointer,format)
+FUNCTION ufix8 FONTFAR *skip_interpolation_table(
 GDECL
-ufix8 FONTFAR *pointer;  /* Pointer to next byte in char data */
-ufix8    format;    /* Character format byte */
+ufix8 FONTFAR *pointer,  /* Pointer to next byte in char data */
+ufix8    format)    /* Character format byte */
 {
 fix15 i,n;
 ufix8 intsize[9];
@@ -133,8 +131,8 @@ intsize[6] = 2;
 intsize[7] = 0;
 intsize[8] = 0;
 
-n = ((format & BIT6)? (fix15)NEXT_BYTE(pointer): 0) +
-    ((format & BIT7)? (fix15)NEXT_BYTE(pointer): 0);
+n =  ((format & BIT6)? (fix15)NEXT_BYTE(pointer): 0);
+n += ((format & BIT7)? (fix15)NEXT_BYTE(pointer): 0);
 for (i = 0; i < n; i++)          /* For each entry in int table ... */
     {
     format = NEXT_BYTE(pointer); /* Read format byte */
@@ -150,14 +148,13 @@ for (i = 0; i < n; i++)          /* For each entry in int table ... */
     }
 return pointer;
 }
-FUNCTION ufix8 FONTFAR *skip_control_zone(pointer,format)
+FUNCTION ufix8 FONTFAR *skip_control_zone(
 GDECL
-ufix8 FONTFAR *pointer;  /* Pointer to next byte in char data */
-ufix8    format;    /* Character format byte */
+ufix8 FONTFAR *pointer,  /* Pointer to next byte in char data */
+ufix8    format)    /* Character format byte */
 {
 fix15    i,n;
 ufix16   tmpufix16;
-fix15    constr;
 
 n = sp_globals.no_X_orus + sp_globals.no_Y_orus - 2;
 for (i = 0; i < n; i++)          /* For each entry in control table ... */
@@ -167,7 +164,7 @@ for (i = 0; i < n; i++)          /* For each entry in control table ... */
     else
         pointer += 2;            /* Skip FROM and TO fields */
     /* skip constraints field */
-    constr = NEXT_BYTES (pointer, tmpufix16);
+    NEXT_BYTES (pointer, tmpufix16);
 
     }
 return pointer;
@@ -175,10 +172,10 @@ return pointer;
 
 #if INCL_RULES
 #else
-FUNCTION ufix8 FONTFAR *plaid_tcb(pointer, format)
+FUNCTION ufix8 FONTFAR *plaid_tcb(
 GDECL
-ufix8 FONTFAR *pointer;  /* Pointer to next byte in char data */
-ufix8    format;    /* Character format byte */
+ufix8 FONTFAR *pointer,  /* Pointer to next byte in char data */
+ufix8    format)    /* Character format byte */
 /* 
  * Called by make_simp_char() and make_comp_char() to set up the controlled
  * coordinate table and skip all other intelligent scaling rules embedded
@@ -211,10 +208,10 @@ return pointer;
 #endif
 
 #if INCL_RULES
-FUNCTION ufix8 FONTFAR *plaid_tcb(pointer, format)
+FUNCTION ufix8 FONTFAR *plaid_tcb(
 GDECL
-ufix8 FONTFAR *pointer;  /* Pointer to next byte in char data */
-ufix8    format;    /* Character format byte */
+ufix8 FONTFAR *pointer,  /* Pointer to next byte in char data */
+ufix8    format)    /* Character format byte */
 /* 
  * Called by make_simp_char() and make_comp_char() to set up the controlled
  * coordinate table and process all intelligent scaling rules embedded
@@ -348,7 +345,7 @@ for (j = 0; ; j++)
                 for (l = 2; l > 0; l--)     /* Skip 2 arguments */
                     {
                     format1 >>= 2;
-                    if (size = format1 & 0x03)
+                    if ((size = format1 & 0x03))
                         pointer += size - 1;
                     }
                 }
@@ -378,7 +375,7 @@ for (j = 0; ; j++)
             format1 = format;
             for (l = 3; l > 0; l--) /* Skip over 3 arguments */
                 {
-                if (size = format1 & 0x03)
+                if ((size = format1 & 0x03))
                     pointer += size - 1;
                 format1 >>= 2;
                 }
@@ -442,9 +439,9 @@ for (i = 0; i < n; i++)
 }
 #endif
 
-FUNCTION ufix8 FONTFAR *read_oru_table(pointer)
+FUNCTION ufix8 FONTFAR *read_oru_table(
 GDECL
-ufix8 FONTFAR *pointer;   /* Pointer to first byte in controlled coord table */
+ufix8 FONTFAR *pointer)   /* Pointer to first byte in controlled coord table */
 /*
  * Called by plaid_tcb() to read the controlled coordinate table from the
  * character data in the font. 
@@ -525,15 +522,14 @@ for (i = 0; i < n; i++)
 return pointer;             /* Update pointer */
 }
 #if INCL_SQUEEZING || INCL_ISW
-FUNCTION static void calculate_x_pix(start_edge, end_edge, constr_nr,
-        x_scale, x_offset, ppo, setwidth_pix)
+FUNCTION static void calculate_x_pix(
 GDECL
-ufix8 start_edge, end_edge;
-ufix16 constr_nr;
-fix31 x_scale;
-fix31 x_offset;
-fix31 ppo;
-fix15    setwidth_pix;
+ufix8 start_edge, ufix8 end_edge,
+ufix16 constr_nr,
+fix31 x_scale,
+fix31 x_offset,
+fix31 ppo,
+fix15    setwidth_pix)
 /*
  * Called by sp_setup_pix_table() when X squeezing is necessary
  * to insert the correct edge in the global pix array
@@ -593,14 +589,13 @@ if ((sp_globals.pspecs->flags & SQUEEZE_RIGHT) &&
 #endif
 
 #if INCL_SQUEEZING
-FUNCTION static void calculate_y_pix(start_edge, end_edge,constr_nr,
- 		top_scale, bottom_scale,ppo,em_top_pix, em_bot_pix)
+FUNCTION static void calculate_y_pix(
 GDECL
-ufix8 start_edge, end_edge;
-ufix16 constr_nr;
-fix31 top_scale, bottom_scale; 
-fix31 ppo;
-fix15 em_top_pix, em_bot_pix;
+ufix8 start_edge, ufix8 end_edge,
+ufix16 constr_nr,
+fix31 top_scale, fix31 bottom_scale,
+fix31 ppo,
+fix15 em_top_pix, fix15 em_bot_pix)
 
 /*
  * Called by sp_setup_pix_table() when Y squeezing is necessary
@@ -697,9 +692,9 @@ if ((sp_globals.pspecs->flags & SQUEEZE_BOTTOM) &&
 
 FUNCTION boolean calculate_x_scale(x_factor, x_offset, no_X_ctrl_zones)
 GDECL
-fix31 *x_factor;
-fix31 *x_offset;
-fix15   no_X_ctrl_zones; /* Number of X control zones */
+fix31 *x_factor,
+fix31 *x_offset,
+fix15   no_X_ctrl_zones) /* Number of X control zones */
 /*
  * Called by sp_setup_pix_table() when squeezing is included
  * to determine whether X scaling is necessary.  If it is, the
@@ -850,12 +845,11 @@ for (i=0; i < (no_X_ctrl_zones+1); i++)
 return TRUE;
 }
 
-FUNCTION boolean calculate_y_scale(top_scale, bottom_scale, 
-                                            first_Y_zone, no_Y_ctrl_zones)
+FUNCTION boolean calculate_y_scale(
 GDECL
-fix31   *top_scale, *bottom_scale;
-fix15  first_Y_zone;
-fix15  no_Y_ctrl_zones;
+fix31   *top_scale, fix31 *bottom_scale,
+fix15  first_Y_zone,
+fix15  no_Y_ctrl_zones)
 /*
  * Called by sp_setup_pix_table() when squeezing is included
  * to determine whether Y scaling is necessary.  If it is, 
@@ -929,12 +923,11 @@ return TRUE;
 
 #if INCL_RULES
 FUNCTION static ufix8 FONTFAR *sp_setup_pix_table(
-    pointer, short_form, no_X_ctrl_zones, no_Y_ctrl_zones)
 GDECL
-ufix8 FONTFAR *pointer;   /* Pointer to first byte in control zone table */
-boolean short_form; /* TRUE if 1 byte from/to specification */
-fix15   no_X_ctrl_zones; /* Number of X control zones */
-fix15   no_Y_ctrl_zones; /* Number of Y control zones */
+ufix8 FONTFAR *pointer,   /* Pointer to first byte in control zone table */
+boolean short_form, /* TRUE if 1 byte from/to specification */
+fix15   no_X_ctrl_zones, /* Number of X control zones */
+fix15   no_Y_ctrl_zones) /* Number of Y control zones */
 /*
  * Called by plaid_tcb() to read the control zone table from the
  * character data in the font.
@@ -945,8 +938,10 @@ fix15   no_Y_ctrl_zones; /* Number of Y control zones */
 {
 fix15    i, j, n;
 fix31    ppo;  
+#if INCL_SQUEEZING || INCL_ISW
 fix31    xppo0; /* top level pixels per oru */
 fix31    yppo0; /* top level pixels per oru */
+#endif
 ufix8    edge_org;
 ufix8    edge;
 ufix8    start_edge;
@@ -984,9 +979,9 @@ constr_org = 0;
 sp_globals.rnd_xmin = 0;  /* initialize the error for chars with no zone */
 n = no_X_ctrl_zones;
 ppo = sp_globals.tcb.xppo;
+#if INCL_SQUEEZING || INCL_ISW
 xppo0 = sp_globals.tcb0.xppo;
 yppo0 = sp_globals.tcb0.yppo;
-#if INCL_SQUEEZING || INCL_ISW
 squeezed_x = FALSE;
 #endif
 
@@ -1158,11 +1153,11 @@ return pointer;
 
 
 #if INCL_RULES
-FUNCTION static ufix8 FONTFAR *sp_setup_int_table(pointer, no_X_int_zones, no_Y_int_zones)
+FUNCTION static ufix8 FONTFAR *sp_setup_int_table(
 GDECL
-ufix8 FONTFAR *pointer;   /* Pointer to first byte in interpolation zone table */
-fix15  no_X_int_zones; /* Number of X interpolation zones */
-fix15  no_Y_int_zones; /* Number of X interpolation zones */
+ufix8 FONTFAR *pointer,   /* Pointer to first byte in interpolation zone table */
+fix15  no_X_int_zones, /* Number of X interpolation zones */
+fix15  no_Y_int_zones) /* Number of X interpolation zones */
 /*
  * Called by plaid_tcb() to read the interpolation zone table from the
  * character data in the font. 
@@ -1176,15 +1171,15 @@ fix15    i, j, k, l, n;
 ufix8    format;
 ufix8    format_copy;
 ufix8    tmpufix8;
-fix15    start_orus;
+fix15    start_orus = 0;
 ufix8    edge_org;
 ufix8    edge;
 ufix16   adj_factor;
 fix15    adj_orus;
-fix15    end_orus;
+fix15    end_orus = 0;
 fix31    zone_orus;
-fix15    start_pix;
-fix15    end_pix;
+fix15    start_pix = 0;
+fix15    end_pix = 0;
 
 
 #if INCL_PLAID_OUT               /* Plaid data monitoring included? */

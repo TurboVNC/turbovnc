@@ -1,0 +1,445 @@
+/*
+ * Cygwin shared library rules (DLL versions)
+ */
+
+#define HasSharedLibraries      YES
+#define NeedLibInsideFlag	NO
+#define ForceNormalLib		NO
+#define NormalLibX11            NO
+# define SharedLibFont		NO
+# define SharedLibFontEnc	NO
+# define SharedLibWindowsWM	NO
+# define SharedLibxkbfile	YES
+
+#ifndef SharedDataSeparation
+# define SharedDataSeparation	NO
+#endif
+#ifndef SharedCodeDef
+#define SharedCodeDef /**/
+#endif
+#ifndef SharedLibraryDef
+#define SharedLibraryDef /**/
+#endif
+#ifndef ShLibIncludeFile
+#define ShLibIncludeFile <mingw.tmpl>
+#endif
+#ifndef SharedLibraryLoadFlags
+#define SharedLibraryLoadFlags -dll /**/
+#endif
+#ifndef PositionIndependentCFlags
+#define PositionIndependentCFlags -D_DLL
+#endif
+#ifndef PositionIndependentCplusplusFlags
+#define PositionIndependentCplusplusFlags -D_DLL
+#endif
+#ifndef UseExportLists
+#define UseExportLists YES
+#endif
+
+#define SharedLibraryName(libname, rev) \
+Concat3(lib,libname,-$(shell echo rev|sed s=\\..*==).dll)
+
+#define ImportLibraryName(libname, rev) \
+Concat3(lib,libname,-$(shell echo rev|sed s=\\..*==).dll.a)
+
+#define ShortImportLibraryName(libname, rev) \
+Concat3(lib,libname,.dll.a)
+
+/*
+ * SharedDepLibraryTarget - generate rules to create a shared library.
+ */
+
+#ifndef SharedDepLibraryTarget
+# ifdef UseInstalled
+#  ifndef LinkBuildSonameLibrary
+#   define LinkBuildSonameLibrary(lib)
+#  endif
+# else /* !UseInstalled */
+#  ifndef LinkBuildSonameLibrary
+#   define LinkBuildSonameLibrary(lib) (RemoveFile($(BUILDLIBDIR)/lib); @@\
+	cd $(BUILDLIBDIR); $(LN) $(BUILDINCTOP)/$(CURRENT_DIR)/lib .)
+#  endif
+# endif /* UseInstalled */
+
+
+/*
+ * SharedDepLibraryTarget
+ */
+
+#define SharedDepLibraryTarget(libname,rev,deplist,solist,down,up)	@@\
+AllTarget(SharedLibraryName(libname,rev))                             @@\
+									@@\
+SharedLibraryName(libname,rev): deplist 				@@\
+	RemoveFile(ImportLibraryName(libname,rev))			@@\
+	RemoveFile(SharedLibraryName(libname,rev))			@@\
+	MakeDLL(libname,solist,rev)					@@\
+	LinkBuildLibrary(ImportLibraryName(libname,rev))		@@\
+	LinkImportLibrary(ImportLibraryName(libname,rev),LibraryTargetName(libname))	@@\
+	LinkBuildDLL(SharedLibraryName(libname,rev))			@@\
+									@@\
+clean::									@@\
+	RemoveFile(ImportLibraryName(libname,rev))				@@\
+	RemoveFile(SharedLibraryName(libname,rev))			@@\
+
+#endif /* SharedDepLibraryTarget */
+
+/*
+ * SharedDepCplusplusLibraryTarget - generate rules to create a shared library.
+ */
+
+#ifndef SharedDepCplusplusLibraryTarget
+# ifdef UseInstalled
+#  ifndef LinkBuildSonameLibrary
+#   define LinkBuildSonameLibrary(lib)
+#  endif
+# else /* !UseInstalled */
+#  ifndef LinkBuildSonameLibrary
+#   define LinkBuildSonameLibrary(lib) (RemoveFile($(BUILDLIBDIR)/lib); @@\
+	cd $(BUILDLIBDIR); $(LN) $(BUILDINCTOP)/$(CURRENT_DIR)/lib .)
+#  endif
+# endif /* UseInstalled */
+
+
+/*
+ * SharedDepCplusplusLibraryTarget
+ */
+
+#define SharedDepCplusplusLibraryTarget(libname,rev,deplist,solist,down,up) @@\
+AllTarget(SharedLibraryName(libname,rev))                             @@\
+                                                                            @@\
+SharedLibraryName(libname,rev): deplist					@@\
+	RemoveFile(ImportLibraryName(libname,rev))                      @@\
+	RemoveFile(SharedLibraryName(libname,rev))                      @@\
+	MakeCplusplusDLL(libname,solist,rev)                            @@\
+	LinkBuildLibrary(ImportLibraryName(libname,rev))                @@\
+	LinkImportLibrary(ImportLibraryName(libname,rev),LibraryTargetName(libname))	@@\
+	LinkBuildDLL(SharedLibraryName(libname,rev))                    @@\
+                                                                        @@\
+clean::                                                                 @@\
+	RemoveFile(ImportLibraryName(libname,rev))                      @@\
+	RemoveFile(SharedLibraryName(libname,rev))                      @@\
+
+#endif /* SharedDepCplusplusLibraryTarget */
+
+
+/*
+ * SharedDepModuleTarget
+ */
+
+#ifndef SharedDepModuleTarget
+#define SharedDepModuleTarget(name,deps,solist)				@@\
+AllTarget(name)								@@\
+									@@\
+name: deps								@@\
+	$(CC) -o $@ $(SHLIBLDFLAGS) solist $(REQUIREDLIBS) BaseShLibReqs @@\
+									@@\
+clean::									@@\
+	RemoveFile(name)
+#endif /* SharedDepModuleTarget */
+
+
+/*
+ * SharedLibraryDataTarget - generate rules to create shared data file
+ */
+
+#ifndef SharedLibraryDataTarget
+#define SharedLibraryDataTarget(libname,rev,salist)
+#endif
+
+
+/*
+ * InstallSharedLibraryData - generate rules to install the shared library data
+ */
+
+#ifndef InstallSharedLibraryData
+#define InstallSharedLibraryData(libname,rev,dest)
+#endif /* InstallSharedLibraryData */
+
+/*
+ * MakeDllProg
+ */ 
+    
+#define MakeDLLProg(libname,solist,prog,rev)			        @@\
+	prog -shared -Wl,--out-implib=ImportLibraryName(libname,rev) -Wl,--enable-auto-import,--enable-runtime-pseudo-reloc -Wl,--exclude-libs,ALL -o SharedLibraryName(libname,rev) solist $(REQUIREDLIBS) -lws2_32
+    
+/*
+ * MakeDll
+ */
+
+#define MakeDLL(libname,solist,rev)					@@\
+    MakeDLLProg(libname,solist,$(CC),rev)
+
+/*
+ * MakeCplusplusDll
+ */
+
+#define MakeCplusplusDLL(libname,solist,rev)				@@\
+    MakeDLLProg(libname,solist,$(CXX),rev)
+
+
+
+/*
+ * SharedLibraryTarget
+ */
+
+#define SharedLibraryTarget(libname,rev,solist,down,up)                 @@\
+AllTarget(SharedLibraryName(libname,rev))				@@\
+                                                                        @@\
+SharedLibraryName(libname,rev): solist					@@\
+	RemoveFile(ImportLibraryName(libname,rev))			@@\
+	RemoveFile(SharedLibraryName(libname,rev))			@@\
+	MakeDLL(libname,solist,rev)					@@\
+	LinkBuildLibrary(ImportLibraryName(libname,rev))		@@\
+	LinkImportLibrary(ImportLibraryName(libname,rev),LibraryTargetName(libname))	@@\
+	LinkBuildDLL(SharedLibraryName(libname,rev))			@@\
+clean::									@@\
+	RemoveFile(ImportLibraryName(libname,rev))			@@\
+	RemoveFile(SharedLibraryName(libname,rev))			@@\
+
+
+/*
+ * InstallLink
+ */
+
+#ifndef InstallLink
+#define InstallLink(step, file, link, dest)                             @@\
+step::                                                                  @@\
+	MakeDir($(DESTDIR)dest)                                         @@\
+	$(LN) -sf file $(DESTDIR)dest/link
+#endif
+
+/*
+ * InstallSharedLibrary
+ */
+
+#define InstallSharedLibrary(libname,rev,dest)                          @@\
+InstallTarget(install,ImportLibraryName(libname,rev),$(INSTLIBFLAGS),$(USRLIBDIR)) @@\
+InstallTarget(install,SharedLibraryName(libname,rev),$(INSTBINFLAGS),$(BINDIR)) @@\
+InstallLink(install,ImportLibraryName(libname,rev),ShortImportLibraryName(libname,rev),$(USRLIBDIR))
+
+
+/*
+ * ProgramTargetName - This can be simply 'target' or 'target.exe' when
+ * building on Cygwin proper, as Cygwin automatically appends .exe to compiled
+ * executables and make, rm, ln, etc. will automatically search for a file
+ * with .exe appended if the raw file name cannot be found.  However,
+ * building with a cross compiler requires 'target.exe', as the cross
+ * compiler doesn't know to append .exe, nor do the cross compiler tools
+ * know to search for files with .exe appended if the raw file name cannot
+ * be found.
+ */
+
+#define ProgramTargetName(target) Concat(target,.exe)
+
+
+/*
+ * HostProgramTargetName - Don't add .exe if cross-compiling.
+ */
+
+#ifndef HostProgramTargetName
+# if CrossCompiling
+#  define HostProgramTargetName(target) target
+# else
+#  define HostProgramTargetName(target) ProgramTargetName(target)
+# endif
+#endif
+
+
+/*
+ * LinkBuildDLL - Cygwin only rule, similar to LinkBuildModule.
+ * Unfortunately, we have to create a copy of each DLL in xc/exports/bin;
+ * linking doesn't work, the executables (e.g. xkbcomp) will report
+ * that they cannot find DLLs (e.g. libX11.dll).
+ */
+
+#ifdef UseInstalled
+#define LinkBuildDLL(lib) $(_NULLCMD_)
+#else
+#define LinkBuildDLL(lib) MakeDir($(BUILDBINDIR))			@@\
+	RemoveFile($(BUILDBINDIR)/lib)					@@\
+	cd $(BUILDBINDIR) && $(CP) $(BUILDBINTOP)/$(CURRENT_DIR)/lib .
+#endif
+
+#ifndef LinkImportLibrary
+#ifdef UseInstalled
+#define LinkImportLibrary(lib, importlib) $(_NULLCMD_)
+#else
+#define LinkImportLibrary(lib, importlib) MakeDir($(BUILDLIBDIR))     @@\
+	RemoveFile($(BUILDLIBDIR)/importlib)                            @@\
+	cd $(BUILDLIBDIR) && $(LN) lib importlib
+#endif
+#endif /* LinkImportLibrary */
+
+
+/*
+ * LinkBuildBinary - This rule normally creates a link in xc/exports/bin
+ * to a binary, but we create an actual copy of the binary.
+ * Creating a link causes the DLLs that the binary depend on, such as
+ * libX11.dll, not to be found.  Copying the binary causes the runtime
+ * directory to be xc/exports/bin, which is the location of the DLLs, thus,
+ * the DLLs can now be found by the binary.  Phew...
+ *
+ * Note that sometimes the binary is not an executable.  One example
+ * is the rgb binary file.
+ *
+ * Passing -p preserves the attributes as the date and prevents useless
+ * rebuilds.
+ *
+ * ProgramTargetName is passed to LinkBuildBinary if the binary
+ * is actually an executable; thus, we do not wrap the binary name
+ * with ProgramTargetName here.
+ */
+
+#ifndef LinkBuildBinary
+#define LinkBuildBinary(binary)						@@\
+all:: binary								@@\
+	MakeDir($(BUILDBINDIR))						@@\
+	RemoveFile($(BUILDBINDIR)/binary)				@@\
+	cd $(BUILDBINDIR) && $(CP) -p $(BUILDBINTOP)/$(CURRENT_DIR)/binary .
+#endif /* LinkBuildBinary */
+
+/*
+ * ProfiledRelocatableTarget - generate rules to produce a  profiled
+ * relocatable object file instead of a library.  Differs from Imake.rules
+ * by passing '--oformat pe-i386' to ld.
+ */
+
+#ifndef ProfiledRelocatableTarget
+#define	ProfiledRelocatableTarget(objname,objlist)			@@\
+AllTarget(Concat(objname,_p.Osuf))					@@\
+									@@\
+Concat(objname,_p.Osuf): objlist $(EXTRALIBRARYDEPS)			@@\
+	RemoveFile($@)							@@\
+	$(LD) -X -r --oformat pe-i386 objlist -o $@
+
+#endif /* ProfiledRelocatableTarget */
+
+
+/*
+ * DebuggedRelocatableTarget - generate rules to produce a debuggable
+ * relocatable object file instead of a library.  Differs from Imake.rules
+ * by passing '--oformat pe-i386' to ld.
+ */
+
+#ifndef DebuggedRelocatableTarget
+#define	DebuggedRelocatableTarget(objname,objlist)			@@\
+AllTarget(Concat(objname,_d.Osuf))					@@\
+									@@\
+Concat(objname,_d.Osuf): objlist $(EXTRALIBRARYDEPS)			@@\
+	RemoveFile($@)							@@\
+	$(LD) -X -r --oformat pe-i386 objlist -o $@
+
+#endif /* DebuggedRelocatableTarget */
+
+
+/*
+ * DependDependencyStatement - Imake.rules wraps $(DEPEND) in
+ * ProgramTargetName(), which causes cross compiling to think that
+ * $(DEPEND) hasn't been built, as $(DEPEND) is a host tool, and should
+ * not be wrapped with ProgramTargetName().  Perhaps there should be
+ * a HostProgramTargetName()...
+ */
+
+#ifndef DependDependencyStatement
+#if HasMakefileSafeInclude
+#define DependDependencyStatement()					@@\
+DependFileName:: $(DEPEND)
+#else
+#define DependDependencyStatement()					@@\
+depend:: $(DEPEND)
+#endif
+#endif
+
+
+/*
+ * DependDependency - Imake.rules wraps $(DEPEND) in ProgramTargetName().
+ * This doesn't work when cross compiling, see the locally defined
+ * DependDependencyStatement comment (above) for more information.
+ */
+
+#ifndef DependDependency
+#ifdef UseInstalled
+#define DependDependency() /**/
+#else
+#define DependDependency()						@@\
+DependDependencyStatement()						@@\
+									@@\
+NoCmpScript($(DEPEND))							@@\
+									@@\
+$(DEPEND):								@@\
+	@echo "checking $@ over in $(DEPENDSRC) first..."; \		@@\
+	cd $(DEPENDSRC) && $(MAKE) makedependonly; \			@@\
+	echo "okay, continuing in $(CURRENT_DIR)"
+
+#endif /* UseInstalled */
+#endif /* DependDependency */
+
+
+/*
+ * ImakeDependency - Imake.rules wraps $(IMAKE) in ProgramTargetName(),
+ * which doesn't work when cross compiling, as imake is supposed to be a
+ * host program.  See the locally defined DependDependencyStatement
+ * comment (above) for more information.
+ */
+
+#ifndef ImakeDependency
+#ifdef UseInstalled
+#define ImakeDependency(target) /**/
+#else
+#define ImakeDependency(target)						@@\
+target:: $(IMAKE)							@@\
+									@@\
+NoCmpScript($(IMAKE) $(IMAKE).Osuf)					@@\
+									@@\
+$(IMAKE) $(IMAKE).Osuf:							@@\
+	-@(cd $(IMAKESRC) && if [ -f Makefile ]; then \			@@\
+	echo "checking $@ in $(IMAKESRC) first..."; $(MAKE) imakeonly; else \	@@\
+	echo "bootstrapping $@ from Makefile.ini in $(IMAKESRC) first..."; \	@@\
+	$(MAKE) -f Makefile.ini BOOTSTRAPCFLAGS="$(BOOTSTRAPCFLAGS)"; fi; \	@@\
+	echo "okay, continuing in $(CURRENT_DIR)")
+#endif /* UseInstalled */
+#endif /* ImakeDependency */
+
+
+/*
+ * ResourceObjectRule - Build a Windows resouce file (.res) into
+ * an object file (.o) that can be linked in with the executable
+ * or library being built.
+ */
+
+#ifndef ResourceObjectRule
+#define ResourceObjectRule(basename,depends,options)			@@\
+AllTarget(basename.RESsuf)						@@\
+basename.RESsuf: basename.RCsuf depends					@@\
+	RemoveFile($@)							@@\
+	ClearmakeOSName \						@@\
+	WindresCmd basename.RCsuf options -O coff -o basename.RESsuf	@@\
+clean::									@@\
+	RemoveFiles(basename.RESsuf)
+
+#endif /* ResourceObjectRule */
+
+/* The arglist can get quite long. Make sure we can delete it though */
+#ifndef MakeFonts
+# define MakeFonts()							@@\
+all::  $(OBJS)								@@\
+									@@\
+MakeFontsDir($(OBJS))							@@\
+									@@\
+clean::									@@\
+	find -name "*.pcf" -o -name "*.pcf.Z" -o -name "*.pcf.gz" | xargs -r rm
+#endif /* MakeFonts */
+
+#ifndef IncludeMakefile
+#define IncludeMakefile(file) @@sinclude file
+#endif
+
+
+#ifndef ProjectUnsharedLibReferences
+#define ProjectUnsharedLibReferences(varname,libname,libsource,buildlibdir)	@@\
+Concat3(DEP,varname,LIB) = _UseCat($(USRLIBDIR)/,buildlibdir/,LibraryTargetName(libname))	@@\
+Concat(varname,LIB) = LoaderLibPrefix Concat(-l,libname) $(Concat(varname,EXTLIB)) @@\
+LintLibReferences(varname,libname,libsource)
+#endif
+
+XONLYEXTLIB = -lwsock32

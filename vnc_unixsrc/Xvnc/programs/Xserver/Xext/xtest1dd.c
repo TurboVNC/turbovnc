@@ -1,5 +1,4 @@
-/* $XConsortium: xtest1dd.c,v 1.14 94/04/17 20:33:00 gildea Exp $ */
-/* $XFree86: xc/programs/Xserver/Xext/xtest1dd.c,v 3.0 1996/05/06 05:55:42 dawes Exp $ */
+/* $Xorg: xtest1dd.c,v 1.4 2001/02/09 02:04:33 xorgcvs Exp $ */
 /*
  *	File: xtest1dd.c
  *
@@ -10,14 +9,13 @@
 /*
 
 
-Copyright (c) 1986, 1987, 1988   X Consortium
+Copyright 1986, 1987, 1988, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -25,13 +23,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1986, 1987, 1988 by Hewlett-Packard Corporation
@@ -54,6 +52,7 @@ Telephone and Telegraph Company or of the Regents of the
 University of California.
 
 */
+/* $XFree86: xc/programs/Xserver/Xext/xtest1dd.c,v 3.6 2003/10/28 23:08:44 tsi Exp $ */
 
 /***************************************************************
  * include files
@@ -62,15 +61,19 @@ University of California.
 #define	NEED_EVENTS
 #define	NEED_REPLIES
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #include <stdio.h>
-#include "Xos.h"
-#include "X.h"
-#include "Xmd.h"
-#include "Xproto.h"
+#include <X11/Xos.h>
+#include <X11/X.h>
+#include <X11/Xmd.h>
+#include <X11/Xproto.h>
 #include "misc.h"
 #include "dixstruct.h"
 #define  XTestSERVER_SIDE
-#include "xtestext1.h"	
+#include <X11/extensions/xtestext1.h>	
 
 #include "xtest1dd.h"
 
@@ -159,11 +162,6 @@ static xTestInputActionEvent	input_action_packet;
  */
 static int 			packet_index;
 /*
- * set to 1 when the input action event is full and needs to be sent to the 
- * client
- */
-static int			input_action_event_full = 0;
-/*
  * logical x position of the mouse during input action gathering
  */
 short				xtest_mousex;
@@ -171,14 +169,6 @@ short				xtest_mousex;
  * logical y position of the mouse during input action gathering
  */
 short				xtest_mousey;
-/*
- * logical x position of the mouse during input action playback
- */
-static short			mx;
-/*
- * logical y position of the mouse during input action playback
- */
-static short			my;
 /*
  * logical x position of the mouse while we are reading fake input actions
  * from the client and putting them into the fake input action array
@@ -289,60 +279,38 @@ KeyCode			xtest_command_key = 0;
  ***************************************************************/
 
 static void	parse_key_fake(
-#if NeedFunctionPrototypes
 			XTestKeyInfo	* /* fkey */
-#endif
 			);
 static void	parse_motion_fake(
-#if NeedFunctionPrototypes
 			XTestMotionInfo	* /* fmotion */
-#endif
 			);
 static void	parse_jump_fake(
-#if NeedFunctionPrototypes
 			XTestJumpInfo	* /* fjump */
-#endif
 			);
 static void	parse_delay_fake(
-#if NeedFunctionPrototypes
 			XTestDelayInfo	* /* tevent */
-#endif
 			);
 static void	send_ack(
-#if NeedFunctionPrototypes
 			ClientPtr	 /* client */
-#endif
 			);
 static void	start_play_clock(
-#if NeedFunctionPrototypes
 			void
-#endif
 			);
 static void	compute_action_time(
-#if NeedFunctionPrototypes
 			struct timeval	* /* rtime */
-#endif
 			);
 static int	find_residual_time(
-#if NeedFunctionPrototypes
 			struct timeval	* /* rtime */
-#endif
 			);
 
 static CARD16	check_time_event(
-#if NeedFunctionPrototypes
 			void
-#endif
 			);
 static CARD32	current_ms(
-#if NeedFunctionPrototypes
 			struct timeval	* /* otime */
-#endif
 			);
 static int	there_is_room(
-#if NeedFunctionPrototypes
 			int	/* actsize */
-#endif
 			);
 
 /******************************************************************************
@@ -472,7 +440,6 @@ flush_input_actions()
 	/*
 	 * re-initialize the input action event
 	 */
-	input_action_event_full = 0;
 	input_action_packet.type = XTestInputActionType;
  	packet_index = 0;
 }	
@@ -490,8 +457,8 @@ XTestStealJumpData(jx, jy, dev_type)
 /*
  * the x and y coordinates to jump to
  */
-short	jx;
-short	jy;
+int	jx;
+int	jy;
 /*
  * which device caused the jump
  */
@@ -691,7 +658,6 @@ int	actsize;
 {
 	if ((packet_index + actsize) > XTestACTIONS_SIZE)
 	{ 
-		input_action_event_full = 1;
 		return(0);
 	}
 	else
@@ -713,8 +679,8 @@ XTestStealMotionData(dx, dy, dev_type, mx, my)
 /*
  * the x and y delta motion of the locator
  */
-short	dx;
-short	dy;
+int	dx;
+int	dy;
 /*
  * which locator did the moving
  */
@@ -722,8 +688,8 @@ int	dev_type;
 /*
  * the x and y position of the locator before the delta motion
  */
-short	mx;
-short	my;
+int	mx;
+int	my;
 {
 	/*
 	 * pointer to a XTestMOTION_ACTION input action
@@ -831,20 +797,20 @@ XTestStealKeyData(keycode, keystate, dev_type, locx, locy)
 /*
  * which key/button moved
  */
-CARD8	keycode;
+unsigned	keycode;
 /*
  * whether the key/button was pressed or released
  */
-char	keystate;
+int		keystate;
 /*
  * which device caused the input action
  */
-int	dev_type;
+int		dev_type;
 /*
  * the x and y coordinates of the locator when the action happenned
  */
-short	locx;
-short	locy;
+int		locx;
+int		locy;
 {
 	/*
 	 * pointer to key/button motion input action
@@ -854,7 +820,7 @@ short	locy;
 	 * time delta from previous event
 	 */
 	CARD16			tchar;
-	char		keytrans;
+	char		keytrans = 0;
 
 	/*
 	 * update the logical position of the locator if the physical position
@@ -1317,8 +1283,6 @@ int mousex, mousey;
 					action_array[read_index].x, 
 					action_array[read_index].y, 
 					action_array[read_index].device);
-				mx = action_array[read_index].x;
-				my = action_array[read_index].y;
 			}
 			if (action_array[read_index].type == XTestKEY_ACTION)
 			    {

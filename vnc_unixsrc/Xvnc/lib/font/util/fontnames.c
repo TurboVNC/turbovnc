@@ -1,16 +1,14 @@
-/* $XConsortium: fontnames.c,v 1.2 94/04/17 20:17:32 keith Exp $ */
+/* $Xorg: fontnames.c,v 1.4 2001/02/09 02:04:04 xorgcvs Exp $ */
 
 /*
 
-Copyright (c) 1991  X Consortium
+Copyright 1991, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -18,17 +16,18 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/lib/font/util/fontnames.c,v 1.4 2001/01/17 19:43:33 dawes Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
@@ -36,12 +35,14 @@ from the X Consortium.
  *	@(#)fontnames.c	3.1	91/04/10
  */
 
-#include	"fontmisc.h"
-#include	"fontstruct.h"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include	<X11/fonts/fontmisc.h>
+#include	<X11/fonts/fontstruct.h>
 
 void
-FreeFontNames(pFN)
-    FontNamesPtr pFN;
+FreeFontNames(FontNamesPtr pFN)
 {
     int         i;
 
@@ -56,8 +57,7 @@ FreeFontNames(pFN)
 }
 
 FontNamesPtr
-MakeFontNamesRecord(size)
-    unsigned    size;
+MakeFontNamesRecord(unsigned int size)
 {
     FontNamesPtr pFN;
 
@@ -86,10 +86,7 @@ MakeFontNamesRecord(size)
 }
 
 int
-AddFontNamesName(names, name, length)
-    FontNamesPtr names;
-    char       *name;
-    int         length;
+AddFontNamesName(FontNamesPtr names, char *name, int length)
 {
     int         index = names->nnames;
     char       *nelt;

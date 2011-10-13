@@ -1,15 +1,14 @@
-/* $XConsortium: checktree.c,v 1.7 94/04/17 20:10:40 gildea Exp $ */
+/* $Xorg: checktree.c,v 1.4 2001/02/09 02:03:16 xorgcvs Exp $ */
 
 /*
 
-Copyright (c) 1993  X Consortium
+Copyright (c) 1993, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -17,14 +16,15 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 */
+/* $XFree86: xc/config/util/checktree.c,v 1.3 2001/07/29 05:01:10 tsi Exp $ */
 
 #include <X11/Xos.h>
 #include <stdio.h>
@@ -62,10 +62,6 @@ in this Software without prior written authorization from the X Consortium.
 #define fmode_bits_maxset 0777
 #define fmode_bits_write  0222
 #define dmode_bits_minset 0775
-
-#ifdef X_NOT_STDC_ENV
-extern int errno;
-#endif
 
 int dorcs = 1;			/* check RCS file */
 int do83 = 1;			/* check for 8+3 clash */

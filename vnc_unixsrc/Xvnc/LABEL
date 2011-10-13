@@ -1,128 +1,265 @@
 		     X Window System, Version 11
-			     Release 6.3
+			     Release 6.9
 
 			Portions Copyright by:
 
-			     X Consortium
-
-				 and
-				   
-			      Mark Adler
-		      Adobe Systems Incorporated
-			   AGE Logic, Inc.
-			 Gerrit Jan Akkerman
-			    Corin Anderson
-			      Doug Anson
-			 Apollo Computer Inc.
-			 Ares Software Corp.
-				 ATI
-			      AT&T, Inc.
-			   Robert V. Baron
-			    David Bateman
-			   Bigelow & Holmes
-			   Bitstream, Inc.
-			      Jon Block
+			      2d3d Inc.
 			     Adam de Boor
-			    Manfred Brands
-			   Richard Burdick
-			   Cognition Corp.
-			   Simon P. Cooper
-			    Regis Cridlig
-			    Robin Cutshaw
-			   Daniver Limited
-		     Daewoo Electronics Co.,Ltd.
-		       Data General Corporation
-			     David Dawes
-			    Jorge Delgado
-		    Digital Equipment Corporation
-	       Evans & Sutherland Computer Corporation
-			   Rickard E. Faith
-			     Erik Fortune
-		    Free Software Foundation, Inc.
-			   Joseph Friedman
-			 Fuji Xerox Co., Ltd.
-			   Fujitsu Limited
-		 Fujitsu Open Systems Solutions, Inc.
-			   Jean-loup Gailly
-			      Tiago Gons
-			    Pascal Haible
-			   Harm Hanemaayer
-			     Randy Hendry
-			    Matthieu Herrb
-		       Hewlett-Packard Company
-			    Hitachi, Ltd.
-			    David Holland
-			    Philip Homburg
+			     Adam Jackson
+			  Adobe Systems Inc.
+			  After X-TT Project
+			    AGE Logic Inc.
 			    Alan Hourihane
-			   IBM Corporation
-	      The Institute of Software, Academia Sinica
-		   INTERACTIVE Systems Corporation
-			  Kaleb S. Keithley
-			      Jeff Kirk
-			Marc Aurele La France
-			     Glenn G. Lai
-			     Scott Laird
-			    Thomas G. Lane
-			     Steven Lang
-			  Harry Langenbacher
-			   Patrick Lecoanet
-			     Sam Leffler
-			   Frederic Lepied
-		     Lexmark International, Inc.
-			  Sebastien Marineau
-			  Michael P. Marking
-			   Kevin E. Martin
-			     Davor Matic
+			   Andreas Monitzer
+			  Andrew C Aitchison
+			     Andy Ritger
+			      Ani Joshi
+			    Anton Zioviev
+			 Apollo Computer Inc.
+			 Apple Computer Inc.
+			 Ares Software Corp.
+			ATI Technologies Inc.
+			      AT&T Inc.
+			   Bigelow & Holmes
+			    Bill Reynolds
+			    Bitstream Inc.
+		      Brian Fundakowski Feldman
+			     Brian Goines
+			      Brian Paul
+			     Bruno Haible
+			    Charles Murcko
+			    Chen Xiangyang
+			   Chris Constello
+			   Cognition Corp.
+		     Compaq Computer Corporation
+		   Concurrent Computer Corporation
+			    Conectiva S.A.
+			    Corin Anderson
+			    Craig Struble
+		     Daewoo Electronics Co. Ltd.
+			   Dale Schumacher
+			    Damien Miller
+			     Daniel Borca
+			   Daniver Limited
+			    Daryll Strauss
+		       Data General Corporation
+			    David Bateman
+			     David Dawes
+			  David E. Wexelblat
+			    David Holland
+			    David J. McKay
 			   David McCullough
-			     David McKay
-		     MIPS Computer Systems, Inc.
-			       Joe Moss
-			    Thomas Mueller
-			     Rich Murphey
-			NCR Corporation, Inc.
-		       Netscape Communications
-		   Network Computing Devices, Inc.
-			     Novell, Inc.
+			 David Mosberger-Tang
+			   David S. Miller
+			    David Turner
+			   David Wexelblat
+			     Davor Matic
+		    Digital Equipment Corporation
+			     Dirk Hohndel
+			    Dmitry Golubev
+			      Doug Anson
+			  Edouard TISSERANT
+			   Eduardo Horvath
+			     Egbert Eich
+			     Eric Anholt
+			     Eric Fortune
+			    Eric Sunshine
+			     Erik Fortune
+			     Erik Nygren
+	       Evans & Sutherland Computer Corporation
+			    Felix Kuehling
+			   Finn Thoegersen
+		       Francesco Zappa Nardelli
+			   Frederic Lepied
+		    Free Software Foundation Inc.
+			   Fujitsu Limited
+		 Fujitsu Open Systems Solutions Inc.
+			 Fuji Xerox Co. Ltd.
+			  Geert Uytterhoeven
+			 Gerrit Jan Akkerman
+			      Gerry Toll
+			     Glenn G. Lai
+			     Go Watanabe
+			    Gregory Mokhin
+			     Greg Parker
+			     GROUPE BULL
+			       Hans Oey
+			    Harald Koenig
+			   Harm Hanemaayer
+			  Harry Langenbacher
+			    Henry A. Worth
+		       Hewlett-Packard Company
+			     Hitachi Ltd
+			     Holger Veit
+		    Hummingbird Communications Ltd
+			   IBM Corporation
+			  Intel Corporation
+		   INTERACTIVE Systems Corporation
+		International Business Machines Corp.
+			     Itai Nahshon
+			    Jakub Jelinek
+			    James Tsillas
+			     Jason Bacon
+			   Jean-loup Gailly
+			      Jeff Kirk
+			     Jeffrey Hsu
+			     Jim Tsillas
+			   J. Kean Johnston
+			      Jon Block
+			      Jon Tombs
+			    Jorge Delgado
+			   Joseph Friedman
+			    Joseph V. Moss
+			  Juliusz Chroboczek
+			    Jyunji Takagi
+			  Kaleb S. Keithley
+			Kazushi (Jam) Marukawa
+		       Kazuyuki (ikko-) Okamoto
+			    Keith Packard
+			    Keith Whitwell
+			   Kevin E. Martin
+			      Larry Wall
+		     Lawrence Berkeley Laboratory
+			  Lennart Augustsson
+		      Lexmark International Inc.
+			    Linus Torvalds
+			     Loïc Grenié
+		     Machine Vision Holdings Inc.
+			    Manfred Brands
+			Marc Aurele La France
+			      Mark Adler
+			   Mark J. Kilgard
+			     Mark Leisher
+			    Mark Smulders
+		Massachusetts Institute Of Technology
+			   Matrox Graphics
+			   Matthew Grossman
+			    Matthieu Herrb
+			   Metro Link Inc.
+			  Michael H. Schimek
+			  Michael P. Marking
+			   Michael Schimek
+			    Michael Smith
+			       Ming Yu
+		      MIPS Computer Systems Inc.
+			National Semiconductor
+			 NCR Corporation Inc.
+		 Netscape Communications Corporation
+		    Network Computing Devices Inc.
+			    Nicholas Miell
+			     Noah Levitt
+			     Novell Inc.
+			     Nozomi YTOW
 		       NTT Software Corporation
 		      Number Nine Computer Corp.
+		   Number Nine Visual Technologies
 			     NVIDIA Corp.
-			     Erik Nygren
-			       Hans Oey
-		       Kazuyuki (ikko-) Okamoto
-		  Oki Technosystems Laboratory, Inc.
+			    Olivier Danet
+		  Oki Technosystems Laboratory Inc.
 			  OMRON Corporation
 		       Open Software Foundation
+			   Orest Zborowski
+			   Pablo Saratxaga
 			     Panacea Inc.
+			Panagiotis Tsirigotis
+			    Paolo Severini
+			    Pascal Haible
+			   Patrick Lecoanet
+			    Patrick Lerda
+			     Paul Elliott
+			    Peter Kunzmann
+			    Peter Trattler
+			    Philip Homburg
+			Precision Insight Inc.
 			    Prentice Hall
 		      Quarterdeck Office Systems
+			     Randy Hendry
+			    Ranier Keller
+			     Red Hat Inc.
 	       Regents of the University of California
-			    Bill Reynolds
-			     Thomas Roell
-		    The Santa Cruz Operation, Inc.
-			   Dale Schumacher
-			    Paolo Severini
-			  ShoGraphics, Inc.
-	       Silicon Graphics Computer Systems, Inc.
+			    Rene Cougnenc
+			    Régis Cridlig
+			  Richard A. Hecker
+			   Richard Burdick
+			     Rich Murphey
+			   Rickard E. Faith
+			     Robert Baron
+			    Robert Chesler
+			   Robert V. Baron
+			    Robert Wilhelm
+			    Robin Cutshaw
+			    Roland Mainz
+			   S3 Graphics Inc.
+			     Sam Leffler
+			   SciTech Software
+			     Scott Laird
+			  Sebastien Marineau
+			   Shigehiro Nomura
+			   ShoGraphics Inc.
+			   Shunsuke Akiyama
+		Silicon Graphics Computer Systems Inc.
+		 Silicon Integrated Systems Corp Inc.
+			 Silicon Motion Inc.
+			   Simon P. Cooper
+		 Snitily Graphics Consulting Services
 			   Sony Corporation
 				 SRI
-			    Craig Struble
-			Sun Microsystems, Inc.
-			    SunSoft, Inc.
-			   Tektronix, Inc.
-			   Finn Thoegersen
-			      Jon Tombs
-			    Linus Torvalds
-			    TOSHIBA Corp.
-			    Peter Trattler
-			    James Tsillas
-			UniSoft Group Limited
-		    UNIX System Laboratories, Inc.
-			     Holger Veit
-			  Vrije Universiteit
-			      Larry Wall
-			  David E. Wexelblat
+			   Stanislav Brabec
+			    Stephan Dirsch
+			     Stephan Lang
+			     Steven Lang
+			Sun Microsystems Inc.
+			     SunSoft Inc.
+			      SuSE Inc.
+			     Sven Luther
+		      Takis Psarogiannakopoulos
+			   Takuya SHIOZAKI
+			    Tektronix Inc.
+		     The DOS-EMU-Development-Team
+	      The Institute of Software Academia Sinica
+			The NetBSD Foundation
+			    Theo de Raadt
+			    Theodore Ts'o
+			    The Open Group
+		     The Open Software Foundation
+	     The Regents of the University of California
+		    The Santa Cruz Operation Inc.
+			The Unichrome Project
+		       The Weather Channel Inc.
+			   The X Consortium
+		       The XFree86 Project Inc.
+			   Thomas A. Phelps
+			   Thomas E. Dickey
+			    Thomas G. Lane
+			    Thomas Mueller
+			     Thomas Roell
+			    Thomas Thanner
+			 Thomas Winischhofer
 			    Thomas Wolfram
-			    Henry A. Worth
-			Wyse Technology, Inc.
-		      The XFree86 Project, Inc.
-			   Orest Zborowski
+			     Thorsten.Ohl
+			      Tiago Gons
+			    Todd C. Miller
+			   Tomohiro KUBOTA
+			   Torrey T. Lyons
+			    TOSHIBA Corp.
+			    Trolltech AS
+			Tungsten Graphics Inc.
+			   UCHIYAMA Yasushi
+			     Unicode Inc.
+			UniSoft Group Limited
+			  University of Utah
+		    UNIX System Laboratories Inc.
+			      URW++ GmbH
+			   VA Linux Systems
+			VIA Technologies Inc.
+		      Video Electronics Standard
+			     VMware Inc.
+			  Vrije Universiteit
+			    Werner Lemberg
+			   Wittawat Yamwong
+			 Wyse Technology Inc.
+			     X Consortium
+			   Xi Graphics Inc.
+			  X-Oz Technologies
+		      X-TrueType Server Project
+			X.Org Foundation, LLC

@@ -1,5 +1,8 @@
-XCOMM $XConsortium: Threads.tmpl /main/11 1996/09/28 16:07:06 rws $
-XCOMM $XFree86: xc/config/cf/Threads.tmpl,v 3.2 1996/12/23 05:50:12 dawes Exp $
+XCOMM $Xorg: Threads.tmpl,v 1.3 2000/08/17 19:41:46 cpqbld Exp $
+
+
+
+XCOMM $XFree86: xc/config/cf/Threads.tmpl,v 3.3tsi Exp $
 
 /*
  * For a multi-threaded application or library,
@@ -22,6 +25,10 @@ XCOMM $XFree86: xc/config/cf/Threads.tmpl,v 3.2 1996/12/23 05:50:12 dawes Exp $
 #else
 #define LocalThreads YES
 #endif
+#endif
+
+#ifndef HasCThreads
+#define HasCThreads NO
 #endif
 
 #ifndef ThreadTypeDefines

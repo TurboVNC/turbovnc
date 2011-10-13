@@ -1,244 +1,210 @@
-XCOMM $XConsortium: os2Lib.rules /main/1 1996/10/31 14:47:29 kaleb $
+XCOMM $Xorg: os2Lib.rules,v 1.3 2000/08/17 19:41:48 cpqbld Exp $
 
 
 
-XCOMM $XFree86: xc/config/cf/os2Lib.rules,v 3.7 1997/01/27 06:12:49 dawes Exp $
+XCOMM $XFree86: xc/config/cf/os2Lib.rules,v 3.19 2003/10/11 09:40:15 herrb Exp $
 
 /*
  * OS2/EMX shared library rules (DLL version)
- */
-#ifndef __EMX__
-#error You must edit os2Lib.rules for your (non-EMX) OS/2 dev system
-#endif
+ *
+#ifndef __UNIXOS2__
+#error You must edit os2Lib.rules for your OS/2 dev system
+#endif */
 
-#ifndef HasSharedLibraries
 #define HasSharedLibraries YES
-#endif
-#ifndef ForceNormalLib
 #define ForceNormalLib NO
-#endif
-
 #define SharedOldX NO
-
-#ifndef SharedDataSeparation
 #define SharedDataSeparation NO
-#endif
-#ifndef SharedCodeDef
 #define SharedCodeDef /**/
-#endif
-#ifndef SharedLibraryDef
 #define SharedLibraryDef /**/
-#endif
-#ifndef ShLibIncludeFile
 #define ShLibIncludeFile <os2Lib.tmpl>
-#endif
-#ifndef SharedLibraryLoadFlags
 #define SharedLibraryLoadFlags /**/
-#endif
-#ifndef PositionIndependentCFlags
-#define PositionIndependentCFlags -Zdll -Zomf -Zmtd
-#endif
+#define PositionIndependentCFlags -Zmtd
 
-#ifndef NormalSharedLibObjCompile
-#define NormalSharedLibObjCompile(options) $(RM) $@                        @@\
-	$(CC) -c $(CFLAGS) options $(SHLIBDEF) $(SHAREDCODEDEF) $(PICFLAGS) $*.c @@\
-	touch $*.o
-#endif
+#define NormalSharedLibObjCompile(options) RemoveFile($@)                       @@\
+	$(CC) -c $(CFLAGS) options $(SHLIBDEF) $(SHAREDCODEDEF) $(PICFLAGS) $*.c
 
-#ifndef InstallSharedLibrary
-#ifdef BuildImplibs
 #define InstallSharedLibrary(libname,rev,dest)				@@\
-install:: libname.dll libname.a	libname.lib				@@\
+install:: libname.dll LibraryTargetName(libname) libname.lib		@@\
 	MakeDir($(DESTDIR)dest)						@@\
-	$(INSTALL) -c $(INSTLIBFLAGS) libname.dll $(DESTDIR)dest 	@@\
-	$(INSTALL) -c $(INSTLIBFLAGS) libname.a $(DESTDIR)dest 		@@\
-	$(INSTALL) -c $(INSTLIBFLAGS) libname.lib $(DESTDIR)dest
-#else
-#define InstallSharedLibrary(libname,rev,dest)				@@\
-install:: libname.dll libname.a						@@\
-	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTLIBFLAGS) $(DLLNAME) $(DESTDIR)dest 	@@\
+	$(INSTALL) -c $(INSTLIBFLAGS) LibraryTargetName(libname) $(DESTDIR)dest 		@@\
 	$(INSTALL) -c $(INSTLIBFLAGS) libname.a $(DESTDIR)dest		@@\
-	$(INSTALL) -c $(INSTLIBFLAGS) libname.dll $(DESTDIR)dest
-#endif
-#endif /* InstallSharedLibrary */
+	$(INSTALL) -c $(INSTLIBFLAGS) libname.lib $(DESTDIR)dest
 
-/*#ifdef UseInstalled
-#define LinkBuildLibrary(lib) $(_NULLCMD_)
-#else*/
-#define LinkBuildLibrary(lib) MakeDir($(BUILDLIBDIR))			@@\
-	RemoveFile($(BUILDLIBDIR)/lib)					@@\
-	ImakeIndir $(BUILDLIBDIR) $(LN) $(BUILDINCTOP)/$(CURRENT_DIR)/lib .
-/*#endif*/
+#define LinkBuildLibrary2(slib,ext) MakeDir($(BUILDLIBDIR))		@@\
+	RemoveFile($(BUILDLIBDIR)/slib.ext)				@@\
+	(cd $(BUILDLIBDIR); $(LN) $(BUILDINCTOP)/$(CURRENT_DIR)/slib.ext .)
+
+#define LinkBuildLibrary3(slib,rev,ext) MakeDir($(BUILDLIBDIR))	@@\
+	RemoveFile($(BUILDLIBDIR)/Concat3(slib,rev,ext))		@@\
+	(cd $(BUILDLIBDIR); $(LN) $(BUILDINCTOP)/$(CURRENT_DIR)/Concat3(slib,rev,ext) .)
+
+#define LinkBuildLibrary4(pre,slib,rev,ext) MakeDir($(BUILDLIBDIR))	@@\
+	RemoveFile($(BUILDLIBDIR)/Concat4(pre,slib,rev,ext))		@@\
+	(cd $(BUILDLIBDIR); $(LN) $(BUILDINCTOP)/$(CURRENT_DIR)/Concat4(pre,slib,rev,ext) .)
+
+#define LinkBuildLibrary5(slib,rev,ext) MakeDir($(BUILDLIBDIR))		@@\
+	RemoveFile($(BUILDLIBDIR)/$(DLLNAME))				@@\
+	(cd $(BUILDLIBDIR); $(LN) $(BUILDINCTOP)/$(CURRENT_DIR)/$(INSTDLLNAME) .)
 
         EMXIMP = emximp
-        EMXOMF = emxomf
-          SHLD = gcc -Zomf -Zdll -Zmtd
-     SHADDLIBS = -lbsd -lsocket -lc_import
-#ifndef BuildDllSupportLibs
-/*#ifdef UseInstalled
-#define BuildDllSupportLibs(slib) $(_NULLCMD_)
-#else*/
-#define BuildDllSupportLibs(slib)					@@\
-	$(EMXIMP) -o slib.imp slib.def					@@\
-	$(EMXIMP) -o slib.a slib.imp					@@\
-	$(EMXOMF) -s -l slib.a 						@@\
-	LinkBuildLibrary(slib.a)					@@\
-	LinkBuildLibrary(slib.lib)
-/*#endif*/
-#endif
+        EMXOMF = emxomf -p 32
+          SHLD = gcc -Zdll -Zmtd -Zmap -Zbin-files
+        SHXXLD = g++ -Zdll -Zmtd -Zmap -Zbin-files
+     SHADDLIBS = ExtraLibraries -lc_import
+       DLLNAME = `cat $(TOP)/$(CURRENT_DIR)/dll.name`
+   INSTDLLNAME = `cat $(BUILDINCTOP)/$(CURRENT_DIR)/dll.name`
 
-#ifndef BuildDllSupportLibs2
-/*#ifdef UseInstalled
-#define BuildDllSupportLibs2(slib) $(_NULLCMD_)
-#else*/
-#define BuildDllSupportLibs2(slib)					@@\
-	$(EMXIMP) -o slib.imp Concat3(slib,os2,.def)			@@\
-	$(EMXIMP) -o slib.a slib.imp					@@\
-	$(EMXOMF) -s -l slib.a 						@@\
-	LinkBuildLibrary(slib.a)					@@\
-	LinkBuildLibrary(slib.lib)
-/*#endif*/
-#endif
+#define BuildDllSupportLibs3(slib,rev)					@@\
+	$(EMXIMP) -o Concat3(slib,rev,.imp) Concat3(slib,os2,.def)	@@\
+	$(EMXIMP) -o Concat4(lib,slib,rev,.a) Concat3(slib,rev,.imp)	@@\
+	$(EMXIMP) -o Concat3(slib,rev,_o.imp) Concat3(slib,o_os2,.def) @@\
+	$(EMXIMP) -o Concat3(slib,rev,.a) Concat3(slib,rev,_o.imp)	@@\
+	$(EMXOMF) -s -l -o Concat3(slib,rev,.lib) Concat3(slib,rev,.a)	@@\
+	LinkBuildLibrary4(lib,slib,rev,.a)				@@\
 
-#ifndef BuildLibSupportLibs
-/*#ifdef UseInstalled
-#define BuildLibSupportLibs(slib) $(_NULLCMD_)
-#else*/
 #define BuildLibSupportLibs(slib)					@@\
-	$(EMXOMF) -s -l slib.a 						@@\
-	LinkBuildLibrary(slib.a)					@@\
-	LinkBuildLibrary(slib.lib)
-/*#endif*/
-#endif
+	$(EMXOMF) -s -l -o Concat(slib,.lib) Concat(slib,.a) 		@@\
+	LinkBuildLibrary3(lib,slib,.a)					@@\
 
-#ifndef SharedLibraryTarget
+#define BuildLibSupportLibs2(slib)					@@\
+	$(EMXOMF) -s -l -o Concat(slib,.lib) Concat3(lib,slib,.a) 		@@\
+	LinkBuildLibrary3(lib,slib,.a)					@@\
+
 #define SharedLibraryTarget(libname,rev,solist,down,up)			@@\
-AllTarget(libname.dll)							@@\
-.SUFFIXES: .obj .rsp .def						@@\
-        LBRPATH = $(subst /,\,$(LIBRARY_PATH))				@@\
-        LBRDEF = Concat3(libname,os2,.def)				@@\
-	LBRCPPDEF = Concat3(libname,os2,-def.cpp)			@@\
-	LBRRSP = Concat3(libname,os2,.rsp)				@@\
+AllTarget(Concat3(libname,rev,.dll))					@@\
+.SUFFIXES: .def								@@\
 									@@\
-link.rsp: $(LBRRSP) $(LBRDEF)						@@\
-	@echo $(LBRPATH)"\\dll0.obj+" >link.rsp				@@\
-	@cat $(LBRRSP) >>link.rsp					@@\
-	@echo $(LBRPATH)\\mt\\ $(LBRPATH)\\ $(REQUIREDLIBS) bsd socket c_alias c_static c_import os2 emx2 end >>link.rsp	@@\
-	@echo $(LBRDEF) >>link.rsp					@@\
+Concat(libname,os2.def): Concat(libname,-def.cpp)			@@\
+	cmd /c $(subst /,\\,$(CONFIGSRC)/util/makedef.cmd) $(CONFIGSRC)/cf/os2def.db libname @@\
+	cmd /c $(subst /,\\,$(CONFIGSRC)/util/makedef.cmd) -O1 $(CONFIGSRC)/cf/os2def.db libname @@\
 									@@\
-libname.dll:  $(OBJS) link.rsp						@@\
-	link386 @link.rsp >nul						@@\
-	BuildDllSupportLibs2(libname)					@@\
-	LinkBuildLibrary(libname.dll)					@@\
+Concat3(libname,rev,.dll):  solist Concat(libname,os2.def)		@@\
+	RemoveFile($@)							@@\
+	$(SHLD) -o $(DLLNAME) solist $(REQUIREDLIBS) $(SHADDLIBS) Concat(libname,o_os2.def)	@@\
+	touch $@							@@\
+	BuildDllSupportLibs3(libname,rev)				@@\
+	LinkBuildLibrary5(libname,rev,.dll)				@@\
 									@@\
 clean::									@@\
-	$(RM) libname.lib libname.imp *.obj link.rsp
-#endif /* SharedLibraryTarget */
+	RemoveFiles(Concat3(libname,rev,.imp) Concat3(libname,rev,_o.imp))	@@\
+	RemoveFiles(Concat(libname,os2.def) Concat(libname,o_os2.def))	@@\
+	RemoveFile(dll.name)
 
-#ifndef NormalLibraryTarget
 #define	NormalLibraryTarget(libname,objlist)				@@\
 AllTarget(LibraryTargetName(libname))					@@\
 									@@\
 LibraryTargetName(libname): objlist					@@\
 	RemoveFile($@)							@@\
 	MakeLibrary($@,objlist)						@@\
-	RanLibrary($@)							@@\
-	BuildLibSupportLibs($*)
-#endif /* NormalLibraryTarget */
+	BuildLibSupportLibs2(libname)
 
-#ifndef NormalDepLibraryTarget
-#define	NormalDepLibraryTarget(libname,deplist,objlist)			@@\
-AllTarget(LibraryTargetName(libname))					@@\
+#define SharedDepLibraryTarget(libname,rev,deplist,solist,down,up)	@@\
+AllTarget(Concat3(libname,rev,.dll))					@@\
 									@@\
-LibraryTargetName(libname): deplist					@@\
+Concat(libname,os2.def): deplist $(EXTRALIBRARYDEPS) Concat(libname,-def.cpp) @@\
+	cmd /c $(subst /,\\,$(CONFIGSRC)/util/makedef.cmd) $(CONFIGSRC)/cf/os2def.db libname @@\
+	cmd /c $(subst /,\\,$(CONFIGSRC)/util/makedef.cmd) -O1 $(CONFIGSRC)/cf/os2def.db libname @@\
+									@@\
+Concat3(libname,rev,.dll):  Concat(libname,os2.def)		@@\
 	RemoveFile($@)							@@\
-	MakeLibrary($@,objlist)						@@\
-	RanLibrary($@)							@@\
-	BuildLibSupportLibs($*)
-#endif /* NormalDepLibraryTarget */
+	(cd down; $(SHLD) -o up/$(DLLNAME) solist $(REQUIREDLIBS) $(SHADDLIBS) Concat(libname,o_os2.def)) @@\
+	touch $@							@@\
+	BuildDllSupportLibs3(libname,rev)				@@\
+	LinkBuildLibrary5(libname,rev,.dll)				@@\
+									@@\
+clean::									@@\
+	RemoveFiles(Concat3(libname,rev,.imp) Concat3(libname,rev,_o.imp))	@@\
+	RemoveFiles(Concat(libname,os2.def) Concat(libname,o_os2.def))	@@\
+	RemoveFile(dll.name)
 
-#ifndef SharedLibraryDataTarget
+#define SharedDepCplusplusLibraryTarget(libname,rev,deplist,solist,down,up)	@@\
+AllTarget(Concat3(libname,rev,.dll))					@@\
+									@@\
+Concat(libname,os2.def): deplist $(EXTRALIBRARYDEPS) Concat(libname,-def.cpp) @@\
+	cmd /c $(subst /,\\,$(CONFIGSRC)/util/makedef.cmd) $(CONFIGSRC)/cf/os2def.db libname @@\
+	cmd /c $(subst /,\\,$(CONFIGSRC)/util/makedef.cmd) -O1 $(CONFIGSRC)/cf/os2def.db libname @@\
+									@@\
+Concat3(libname,rev,.dll):  Concat(libname,os2.def)		@@\
+	RemoveFile($@)							@@\
+	(cd down; $(SHXXLD) -o up/$(DLLNAME) solist $(REQUIREDLIBS) $(SHADDLIBS) Concat(libname,o_os2.def)) @@\
+	touch $@							@@\
+	BuildDllSupportLibs3(libname,rev)				@@\
+	LinkBuildLibrary5(libname,rev,.dll)				@@\
+									@@\
+clean::									@@\
+	RemoveFiles(Concat3(libname,rev,.imp) Concat3(libname,rev,_o.imp))	@@\
+	RemoveFiles(Concat(libname,os2.def) Concat(libname,o_os2.def))	@@\
+	RemoveFile(dll.name)
+
+#define SharedDepModuleTarget(name,deps,solist)				@@\
+AllTarget(name)								@@\
+									@@\
+name: deps								@@\
+	$(CC) -o $@ $(SHLIBLDFLAGS) solist $(REQUIREDLIBS) BaseShLibReqs @@\
+									@@\
+clean::									@@\
+	RemoveFile(name)
+
 #define SharedLibraryDataTarget(libname,rev,salist)
-#endif /* SharedLibraryDataTarget */
 
-#ifndef InstallSharedLibraryData
 #define InstallSharedLibraryData(libname,rev,dest)
-#endif /* InstallSharedLibraryData */
 
-#ifndef InstallLibrary
 #define	InstallLibrary(libname,dest)					@@\
-install:: LibraryTargetName(libname)					@@\
+install:: LibraryTargetName(libname) Concat(libname,.lib)		@@\
 	MakeDir($(DESTDIR)dest)						@@\
 	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS) LibraryTargetName(libname) $(DESTDIR)dest @@\
 	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS) Concat(libname,.lib) $(DESTDIR)dest @@\
 	RanLibrary($(RANLIBINSTFLAGS) $(DESTDIR)dest/LibraryTargetName(libname))
-#endif /* InstallLibrary */
-
-#ifndef LibMkdir
-#define LibMkdir(dir) ImakeHelper 11 dir
-#endif
-
-#ifndef LibCleanDir
-#define LibCleanDir(dir) 						@@\
-	ImakeIndir dir call RemoveFiles(*.Osuf)
-#endif
 
 #define MakeStaticLibrary(libname) $(AR) libname *.o
 
-#ifndef UnsharedLibraryTarget
 #define	UnsharedLibraryTarget(libname,objlist,down,up)			@@\
-AllTarget(LibraryTargetName(Concat(libname,_s)))			@@\
+AllTarget(LibraryTargetNameSuffix(libname,_s))				@@\
 									@@\
-LibraryTargetName(Concat(libname,_s)): objlist				@@\
+LibraryTargetNameSuffix(libname,_s): objlist				@@\
 	RemoveFile($@)							@@\
-	ImakeIndir down MakeStaticLibrary(up/$@)			@@\
+	(cd down; MakeStaticLibrary(up/$@))				@@\
 	RanLibrary($@)							@@\
 	_LinkBuildLibrary($@)						@@\
 									@@\
-install::	LibraryTargetName(Concat(libname,_s))			@@\
-	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS) LibraryTargetName(Concat(libname,_s)) $(DESTDIR)$(SHLIBDIR)
-#endif
+install::	LibraryTargetNameSuffix(libname,_s)			@@\
+	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS) LibraryTargetNameSuffix(libname,_s) $(DESTDIR)$(SHLIBDIR)
 
-#ifndef UnsharedLibraryTarget3
 #define	UnsharedLibraryTarget3(libname,objlist1,objlist2,objlist3,down,up) @@\
-AllTarget(LibraryTargetName(Concat(libname,_s)))			@@\
+AllTarget(LibraryTargetNameSuffix(libname,_s))				@@\
 									@@\
-LibraryTargetName(Concat(libname,_s)): objlist1 objlist2 objlist3	@@\
+LibraryTargetNameSuffix(libname,_s): objlist1 objlist2 objlist3		@@\
 	RemoveFile($@)							@@\
-	ImakeIndir down MakeStaticLibrary(up/$@)			@@\
+	(cd down; MakeStaticLibrary(up/$@))				@@\
 	RanLibrary($@)							@@\
 	_LinkBuildLibrary($@)						@@\
 									@@\
-install::	LibraryTargetName(Concat(libname,_s))			@@\
-	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS) LibraryTargetName(Concat(libname,_s)) $(DESTDIR)$(SHLIBDIR)
-#endif /* UnsharedLibraryTarget3 */
+install::	LibraryTargetNameSuffix(libname,_s)			@@\
+	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS) LibraryTargetNameSuffix(libname,_s) $(DESTDIR)$(SHLIBDIR)
 
-/*
- * DebuggedLibraryTarget - generate rules to create a debuggable library.
- */
-#ifndef DebuggedLibraryTarget
 #define	DebuggedLibraryTarget(libname,objlist)				@@\
 AllTarget(LibraryTargetNameSuffix(libname,_d))				@@\
 									@@\
 LibraryTargetNameSuffix(libname,_d): objlist $(EXTRALIBRARYDEPS)	@@\
 	RemoveFile($@)							@@\
-	ImakeIndir debugger MakeStaticLibrary(../$@)			@@\
+	(cd debugger; MakeStaticLibrary(../$@))				@@\
 	RanLibrary($@)							@@\
 	_LinkBuildLibrary($@)
 
-#endif /* DebuggedLibraryTarget */
-
-/*
- * ProfiledLibraryTarget - generate rules to create a profiled library.
- */
-#ifndef ProfiledLibraryTarget
 #define	ProfiledLibraryTarget(libname,objlist)				@@\
 AllTarget(LibraryTargetNameSuffix(libname,_p))				@@\
 									@@\
 LibraryTargetNameSuffix(libname,_p): objlist $(EXTRALIBRARYDEPS)	@@\
 	RemoveFile($@)							@@\
-	ImakeIndir profiled MakeStaticLibrary(../$@)			@@\
+	(cd profiled; MakeStaticLibrary(../$@))				@@\
 	RanLibrary($@)							@@\
 	_LinkBuildLibrary($@)
 
-#endif /* ProfiledLibraryTarget */
+#define	LibraryModuleTarget(module,objlist)				@@\
+AllTarget(LibraryTargetName(module))					@@\
+									@@\
+LibraryTargetName(module): objlist					@@\
+	RemoveFile($@)							@@\
+	MakeLibrary($@,objlist)

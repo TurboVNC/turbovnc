@@ -1,4 +1,4 @@
-/* $XConsortium: lbxstr.h /main/27 1996/12/15 21:24:11 rws $ */
+/* $Xorg: lbxstr.h,v 1.4 2001/02/13 20:14:04 pookie Exp $ */
 /*
  * Copyright 1992 Network Computing Devices
  *
@@ -20,16 +20,30 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+/* $XFree86: xc/include/extensions/lbxstr.h,v 1.2 2001/08/01 00:44:35 tsi Exp $ */
  
 #ifndef _LBXSTR_H_
 #define _LBXSTR_H_
 
-#include "XLbx.h"
+#include <X11/extensions/XLbx.h>
 
 #define LBXNAME "LBX"
 
 #define LBX_MAJOR_VERSION	1
 #define LBX_MINOR_VERSION	0
+
+/*
+ * Redefine some basic types used by structures defined herein.  This removes
+ * any possibility on 64-bit architectures of one entity viewing communicated
+ * data as 32-bit quantities and another entity viewing the same data as 64-bit
+ * quantities.
+ */
+#define XID CARD32
+#define Atom CARD32
+#define Colormap CARD32
+#define Drawable CARD32
+#define VisualID CARD32
+#define Window CARD32
 
 typedef struct {
     BOOL	success;		/* TRUE */
@@ -905,5 +919,17 @@ extern int lbxDebug;
 #else
 #define DBG(n,m)
 #endif
+
+/*
+ * Cancel the previous redefinition of the basic types, thus restoring their
+ * X.h definitions.
+ */
+
+#undef XID
+#undef Atom
+#undef Colormap
+#undef Drawable
+#undef VisualID
+#undef Window
 
 #endif	/* _LBXSTR_H_ */

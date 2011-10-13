@@ -1,4 +1,4 @@
-/* $XConsortium: lbxbuf.h /main/7 1996/11/15 21:33:12 rws $ */
+/* $Xorg: lbxbuf.h,v 1.3 2000/08/18 04:05:45 coskrey Exp $ */
 /*
  * Copyright 1988, 1989, 1990, 1994 Network Computing Devices, Inc.
  *
@@ -38,8 +38,14 @@
 
 typedef struct _zlibbuffer  *ZlibBufferPtr;
 
-extern int  InitZlibBuffer();
-extern void FreeZlibBuffer();
-extern char *ReserveOutBuf();
+#include <X11/Xfuncproto.h>
+
+_XFUNCPROTOBEGIN
+
+extern int  InitZlibBuffer(ZlibBufferPtr b, int size);
+extern void FreeZlibBuffer(ZlibBufferPtr b);
+extern char *ReserveOutBuf(ZlibBufferPtr outbuf, int outlen);
+
+_XFUNCPROTOEND
 
 #endif	/* _BUFFER_H_ */

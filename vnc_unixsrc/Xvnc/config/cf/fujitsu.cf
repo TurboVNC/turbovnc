@@ -1,4 +1,4 @@
-XCOMM platform:  $TOG: fujitsu.cf /main/9 1997/04/17 14:11:44 barstow $
+XCOMM platform:  $Xorg: fujitsu.cf,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
 
 #ifndef OSName
 # define OSName		DefaultOSName

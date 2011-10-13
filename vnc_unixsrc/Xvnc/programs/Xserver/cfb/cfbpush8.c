@@ -2,16 +2,17 @@
  * Push Pixels for 8 bit displays.
  */
 
+/* $XFree86: xc/programs/Xserver/cfb/cfbpush8.c,v 1.5 2001/01/17 22:36:36 dawes Exp $ */
+
 /*
 
-Copyright (c) 1989  X Consortium
+Copyright 1989, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -19,21 +20,25 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 */
-/* $XConsortium: cfbpush8.c,v 5.14 94/04/17 20:28:58 dpw Exp $ */
+/* $Xorg: cfbpush8.c,v 1.4 2001/02/09 02:04:38 xorgcvs Exp $ */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
 #if PSZ == 8
 
-#include	"X.h"
-#include	"Xmd.h"
-#include	"Xproto.h"
+#include	<X11/X.h>
+#include	<X11/Xmd.h>
+#include	<X11/Xproto.h>
 #include	"gcstruct.h"
 #include	"windowstr.h"
 #include	"scrnintstr.h"
@@ -52,17 +57,17 @@ cfbPushPixels8 (pGC, pBitmap, pDrawable, dx, dy, xOrg, yOrg)
     DrawablePtr	pDrawable;
     int		dx, dy, xOrg, yOrg;
 {
-    register unsigned long   *src, *dst;
-    register unsigned long   pixel;
-    register unsigned long   c, bits;
-    unsigned long   *pdstLine, *psrcLine;
-    unsigned long   *pdstBase;
+    register CfbBits   *src, *dst;
+    register CfbBits   pixel;
+    register CfbBits   c, bits;
+    CfbBits   *pdstLine, *psrcLine;
+    CfbBits   *pdstBase;
     int		    srcWidth;
     int		    dstWidth;
     int		    xoff;
     int		    nBitmapLongs, nPixmapLongs;
     int		    nBitmapTmp, nPixmapTmp;
-    unsigned long   rightMask;
+    CfbBits   rightMask;
     BoxRec	    bbox;
     cfbPrivGCPtr    devPriv;
 
@@ -72,7 +77,7 @@ cfbPushPixels8 (pGC, pBitmap, pDrawable, dx, dy, xOrg, yOrg)
     bbox.y2 = bbox.y1 + dy;
     devPriv = cfbGetGCPrivate(pGC);
     
-    switch (RECT_IN_REGION(pGC->pScreen, devPriv->pCompositeClip, &bbox))
+    switch (RECT_IN_REGION(pGC->pScreen, pGC->pCompositeClip, &bbox))
     {
       case rgnPART:
 	mfbPushPixels(pGC, pBitmap, pDrawable, dx, dy, xOrg, yOrg);
@@ -82,7 +87,7 @@ cfbPushPixels8 (pGC, pBitmap, pDrawable, dx, dy, xOrg, yOrg)
 
     cfbGetLongWidthAndPointer (pDrawable, dstWidth, pdstBase)
 
-    psrcLine = (unsigned long *) pBitmap->devPrivate.ptr;
+    psrcLine = (CfbBits *) pBitmap->devPrivate.ptr;
     srcWidth = (int) pBitmap->devKind >> PWSH;
     
     pixel = devPriv->xor;

@@ -1,5 +1,6 @@
-XCOMM platform:  $XFree86: xc/config/cf/OpenBSD.cf,v 3.1.2.11 1998/02/15 16:08:33 hohndel Exp $
-XCOMM $OpenBSD: OpenBSD.cf,v 1.11 1997/12/09 03:03:48 gene Exp $
+XCOMM platform:  $XFree86: xc/config/cf/OpenBSD.cf,v 3.100 2004/01/08 22:51:41 herrb Exp $
+XCOMM $XdotOrg: xc/config/cf/OpenBSD.cf,v 1.12 2005/10/01 16:42:11 herrb Exp $
+XCOMM
 
 #ifndef OSName
 #define OSName			DefaultOSName OSBinaryType
@@ -19,6 +20,24 @@ XCOMM $OpenBSD: OpenBSD.cf,v 1.11 1997/12/09 03:03:48 gene Exp $
 #endif
 XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVersion)
 
+#ifdef Ports
+
+#define BinDir			/usr/local/bin
+#define LibDir			/usr/local/lib/X11
+#define UsrLibDir		/usr/local/lib
+#define ManDirectoryRoot	/usr/local/man
+#define LdPreLib		-L/usr/X11R6/lib -L/usr/local/lib
+#define XpmLibDir		/usr/X11R6/lib
+#define XpmIncDir		/usr/X11R6/include
+#define ConfigDir		/usr/X11R6/lib/X11/config
+#define IncRoot			/usr/local/include
+#define TopXInclude		-I/usr/X11R6/include
+#define ImakeCmd		imake -DPorts
+#define DocDir			/usr/local/share/doc
+#define BuildHtmlManPages	NO
+
+#endif
+
 /*
  * C library features
  */
@@ -26,6 +45,9 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #define HasNdbm         	YES
 #define HasPutenv       	YES
 #define HasSnprintf		YES
+#if OSMajorVersion == 2 && OSMinorVersion >= 4 || OSMajorVersion >= 3
+# define HasStrlcat		YES
+#endif
 #define HasBSD44Sockets 	YES
 #define Malloc0ReturnsNull	NO
 #define SetTtyGroup     	YES
@@ -34,20 +56,102 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #define HasShm          	YES
 #define HasWChar32		YES
 #define HasMkstemp		YES
+#define HasSetProcTitle		YES
+#define HasZlib			YES
+#ifndef HasLibpng
+# define HasLibpng		NO
+#endif
+#ifndef HasKrbIV
+# if OSMajorVersion == 2 || OSMajorVersion == 3 && OSMinorVersion < 3
+#  define HasKrbIV		YES
+#  if OSMajorVersion == 2 && OSMinorVersion <= 8
+#   define KrbIVLibraries	-lkrb -lkafs -ldes
+#  endif
+# else
+   /* Kerberos IV was removed after OpenBSD 3.3 */
+#  define HasKrbIV		NO
+# endif
+#endif
+#define HasUsableFileMmap	YES
+#define HasShadowPasswd		NO
+#define IPv6SocketsAlsoIPv4	NO
+
+#define HasArc4Random		YES
+
+#define HasNCurses		YES
+#define NCursesLibName		-lcurses
+#if defined(TermcapLibrary)
+#undef TermcapLibrary
+#endif
+#define TermcapLibrary		-lcurses
+
+#define HasVarRun		YES
+#define HasVarDb		YES
+#define VarLibDir		VarDbDirectory
+
+#define InstallXloadSetGID	NO
+
+#ifndef HasIssetugid
+# if (OSMajorVersion >= 2)
+#  define HasIssetugid		YES
+# endif
+#endif
+
+#ifndef HasMktemp
+# if (OSMajorVersion > 2) || (OSMajorVersion == 2 && OSMinorVersion >= 1)
+#  define HasMktemp		YES
+# else
+#  define HasMktemp		NO
+# endif
+#endif
+
+/* OpenBSD >= 2.7 has getifaddrs() */
+#if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion >= 7)
+#define HasGetIfAddrs		YES
+#endif
+
+/* OpenBSD >= 2.8 has setusercontext() */
+#if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion > 7)
+#define HasSetUserContext	YES
+#endif
+
+/* OpenBSD after 2.9 has BSD authentication */
+#if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion >= 9)
+# define HasBSDAuth		YES
+#endif
+
+/* OpenBSD 3.0 and later has getpeereid() */
+#if OSMajorVersion >= 3
+# define HasGetpeereid		YES
+#endif
+
+/* OpenBSD 3.0 has APM with kqueue interface */
+#if OSMajorVersion >= 3
+# define HasApmKqueue		YES
+#endif
+
+/* OpenBSD 3.0 has libusb, next versions have libusbhid */
+#if OSMajorVersion >= 3 
+# define HasLibUsb		YES
+# ifndef HasLibUsbHid
+#  if OSMajorVersion == 3 && OSMinorVersion > 0 || OSMajorVersion > 3
+#   define HasLibUsbHid		YES
+#   define UsbHidLib 		-lusbhid
+#  else
+#   define HasLibUsbHid		NO
+#   define UsbHidLib		-lusb
+#  endif
+# endif
+#endif
 
 /*
  * Compiler Features
  */
-#undef HasGcc
-#define HasGcc			YES
-#define HasGcc2			YES
-#ifndef HasGcc2ForCplusplus
-#define HasGcc2ForCplusplus	YES
-#endif
 #define GccUsesGas		YES
 #define UseGas			YES
 #define GnuCpp			YES
 
+#define UseGnuMalloc		NO
 
 #define NeedConstPrototypes	YES
 #define NeedFunctionPrototypes	YES
@@ -57,66 +161,63 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 
 #define MkdirHierCmd		mkdir -p
 
+#ifndef CppCmd
 #define CppCmd          	/usr/libexec/cpp
-#define StandardCppDefines	-traditional
+#endif
+#define StandardCppOptions	-traditional
+#define StandardCppDefines	/**/
 #define PreProcessCmd   	CppCmd
-#define PreIncDir 		DefaultGccIncludeDir
+#define PreIncDir		DefaultGccIncludeDir
 
-#undef CcCmd
-#define CcCmd 			gcc
-#if defined(UseInstalled) && (!defined(XF86LinkKit) || !XF86LinkKit)
-#define DefaultCCOptions 	/**/
+#ifndef CcCmd
+#define CcCmd 			cc
+#endif
+#ifndef AsCmd
+#define AsCmd			cc -c -x assembler
+#endif
+#ifndef DefaultCCOptions
+#if defined(UseInstalled)
+   /* conform to OpenBSD's habits */
+#  define DefaultCCOptions	$(COPTS)
 #else
-#define DefaultCCOptions 	-ansi -Dasm=__asm
+#  ifdef  PpcArchitecture
+#    define DefaultCCOptions	-pipe -fsigned-char GccWarningOptions
+#  else
+#    define DefaultCCOptions 	-pipe GccWarningOptions
+#  endif
+#endif
 #endif
 
 #define GccGasOption 		-DGCCUSESGAS
 #define AsmDefines 		-DUSE_GAS
 
-
-#ifdef i386Architecture
-# define OptimizedCDebugFlags 	DefaultGcc2i386Opt
-# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
-# define ServerExtraSysLibs	-li386
-#else
-# define OptimizedCDebugFlags 	-O2
-# if defined(SparcArchitecture) || defined(AlphaArchitecture) || defined(AmigaArchitecture) || defined(Sun3Architecture)
-#  define ServerOSDefines 	-DDDXOSINIT
+/* UseElfFormat defaults to YES if __ELF__ set */
+#ifndef UseElfFormat
+# ifdef __ELF__
+#  undef __ELF__			/* other imake files shouldn't care */
+#  define UseElfFormat YES
 # else
-#  define ServerOSDefines 	/**/
-# endif
-#endif
-#if defined(i386Architecture) || defined(ArcArchitecture)
-# define ServerExtraDefines GccGasOption XFree86ServerDefines
-# ifndef XFree86ConsoleDefines
-#  if defined(ArcArchitecture)
-#   define XFree86ConsoleDefines -DPCCONS_SUPPORT
-#  else
-#   define XFree86ConsoleDefines -DPCCONS_SUPPORT -DPCVT_SUPPORT
-#  endif
-# endif
-#else
-# if defined(AlphaArchitecture)
-#  define ServerExtraDefines GccGasOption -D_XSERVER64
-# else
-#  if !defined(Sun3Architecture)
-#   define ServerExtraDefines GccGasOption
-#  endif
+#  define UseElfFormat NO
 # endif
 #endif
 
-#define StandardDefines	-DCSRG_BASED
+/*
+ * Increment shared libraries major numbers if using Gcc Stack Protector
+ * (This introduces an ABI change)
+ */
+#ifndef OverrideShlibRevs
+# define OverrideShlibRevs     ProPoliceSupport
+#endif
+
 #define XawI18nDefines	-DUSE_XWCHAR_STRING -DUSE_XMBTOWC
 
 
-#ifndef ExtraLibraries
-#define ExtraLibraries		/**/
-#endif
-#define UseGnuMalloc		NO
-
-#define HasZlib			YES
-
 #define	AdmDir			/var/log
+
+#define HasFlex			YES
+
+/* OpenBSD doesn't have gperf in the base install */
+#define DontRebuildGperfOutput	YES
 
 /*
  * Make & install Features
@@ -124,11 +225,12 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 
 #define HasBsdMake		YES
 
-#define StripInstalledPrograms	YES
-#define CompressAllFonts	YES
+#define BuildCyrillicFonts	YES
 #define GzipFontCompression	YES
 #define DefaultUserPath		/bin:/usr/bin:/usr/local/bin:$(BINDIR)
 #define DefaultSystemPath	/sbin:/usr/sbin:/bin:/usr/bin:$(BINDIR)
+
+#define InstUidFlags		-m 4755
 
 #ifdef  InstallCmd
 # undef  InstallCmd
@@ -145,35 +247,31 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #define NeqnCmd			neqn -Tlatin1
 #define NroffCmd		nroff -Tlatin1
 #define	EqnCmd 			eqn -Tps
-#define TroffCmd        	groff -Tps
+#define HasGroff		YES
+
+#ifndef HasCookieMaker
+#  define HasCookieMaker	YES
+#  define MkCookieCmd \
+	'dd if=/dev/urandom bs=16 count=1 2>/dev/null | hexdump -e \\"%08x\\"'
+#endif
+
 
 /*
- * To use the NetBSD Aperture driver
+ * Man pages need to be formatted when installed, so override the default
+ * imake rules.
  */
-#if defined(i386Architecture)
-#ifndef HasNetBSDApertureDriver
-#define HasNetBSDApertureDriver	YES
-#endif
-#endif
-
-
-
-XCOMM Man pages need to be formatted when installed, so override the default
-XCOMM imake rules.
-
 #define ManSuffix	1
 #define FileManSuffix	5
 #define ManSourcePath	$(MANPATH)/cat
 
-#define InstallManPageLong(file,destdir,dest)                           @@\
+#define InstallManPageLongBase(file,destdir,dest)			@@\
 all:: file.0								@@\
 									@@\
-file.0:: file.man							@@\
-	@if [ -f file.man ]; \						@@\
+file.0:: file.$(MANNEWSUFFIX)						@@\
+	@if [ -f file.$(MANNEWSUFFIX) ]; \				@@\
 	then \								@@\
-	cat file.man | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) | $(COL) >/tmp/$$$$.man; \	@@\
-	cp /tmp/$$$$.man file.0; \					@@\
-	$(RM) /tmp/$$$$.man; \						@@\
+	cat file.$(MANNEWSUFFIX) | $(NEQN) | $(TBL) | \			@@\
+		$(NROFF) $(MANMACROS) | $(COL) > file.0; \		@@\
 	fi 								@@\
 									@@\
 install.man::                                                           @@\
@@ -181,10 +279,38 @@ install.man::                                                           @@\
 	-@if [ -f file.0 ]; \						@@\
 	then \								@@\
 	$(INSTALL) -c $(INSTMANFLAGS) file.0 $(DESTDIR)destdir/dest.0; \@@\
-	fi
+	fi								@@\
+									@@\
+clean::									@@\
+	RemoveFile(file.0)
+
+#define InstallManPageLong(file,destdir,dest)				@@\
+BuildInstallHtmlManPage(file,dest,$(MANSUFFIX))				@@\
+									@@\
+CppManTarget(file, $(EXTRAMANDEFS))					@@\
+									@@\
+InstallManPageLongBase(file,destdir,dest)
 
 #define InstallGenManPageLong(file,destdir,dest,suffix)			@@\
-	InstallManPageLong(file,destdir,dest)
+BuildInstallHtmlManPage(file,dest,suffix)				@@\
+									@@\
+CppManTarget(file, $(EXTRAMANDEFS))					@@\
+									@@\
+InstallManPageLongBase(file,destdir,dest)
+
+#define InstallMultipleMan(list,dest)                                   @@\
+install.man:: 								@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	case '${MFLAGS}' in *[i]*) set +e;; esac; \			@@\
+	for i in list; do \                                             @@\
+	  (MNAME=`echo $$i | cut -f1 -d.`; \				@@\
+	  set -x; \							@@\
+	  cat $$i | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) \		@@\
+		| $(COL) > $${MNAME}.0; \				@@\
+	  $(INSTALL) -c $(INSTMANFLAGS) $${MNAME}.0 \			@@\
+			$(DESTDIR)dest/$${MNAME}.0; \			@@\
+	  $(RM) $${MNAME}.0); \						@@\
+	done
 
 #define InstallMultipleManSuffix(list,dest,suff)                        @@\
 install.man:: 								@@\
@@ -192,15 +318,14 @@ install.man:: 								@@\
 	case '${MFLAGS}' in *[i]*) set +e;; esac; \			@@\
 	for i in list; do \                                             @@\
 	  (set -x; \							@@\
-	  cat $$i.suff | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) | $(COL) >/tmp/$$$$.suff; \	@@\
-	  $(INSTALL) -c $(INSTMANFLAGS) /tmp/$$$$.suff $(DESTDIR)dest/$$i.0; \	@@\
-	  $(RM) /tmp/$$$$.suff); \						@@\
+	  cat $$i.suff | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) \	@@\
+		| $(COL) > $$i.0; \					@@\
+	  $(INSTALL) -c $(INSTMANFLAGS) $$i.0	 \			@@\
+		$(DESTDIR)dest/$$i.0; \					@@\
+	  $(RM) $$i.0 ); \						@@\
 	done
 
-#define InstallMultipleMan(list,dest)                                   @@\
-	InstallMultipleManSuffix(list,dest,man)
-
-#define InstallManPageAliases(file,destdir,aliases)                     @@\
+#define InstallManPageAliasesBase(file,destdir,aliases)			@@\
 install.man:: 								@@\
 	@case '${MFLAGS}' in *[i]*) set +e;; esac; \                    @@\
 	for i in aliases; do \                                          @@\
@@ -210,58 +335,215 @@ install.man:: 								@@\
 		); \							@@\
 	done
 
+#define InstallManPageAliases(file,destdir,aliases)			@@\
+InstallHtmlManPageAliases(file,aliases,$(MANSUFFIX))			@@\
+									@@\
+InstallManPageAliasesBase(file,destdir,aliases)
+
 #define InstallGenManPageAliases(file,destdir,suffix,aliases)		@@\
-	InstallManPageAliases(file,destdir,aliases)
+InstallHtmlManPageAliases(file,aliases,suffix)				@@\
+									@@\
+InstallManPageAliasesBase(file,destdir,aliases)
 
 
+/*
+ * InstallFontAliases - generate rules to install font aliases
+ *                      databases without comments for X11R5 servers
+ */
+#ifndef InstallFontAliasesNoComment
+#define InstallFontAliasesNoComment(dest)				@@\
+install:: fonts.alias							@@\
+	$(RM) _fonts.alias 						@@\
+	sed -e '/^!/d' -e '/^$$/d' < fonts.alias > _fonts.alias		@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) $(INSTALLFLAGS) $(INSTALLDATFLAGS) _fonts.alias \	@@\
+	$(DESTDIR)dest/fonts.alias					@@\
+	$(RM) _fonts.alias
+#endif /* InstallFontAliasesNoComment */
+
+/*
+ * OpenBSD specific Imake Config files
+ */
+#ifndef LocalConfigFiles
+#define LocalConfigFiles \
+	OpenBSDLib.rules OpenBSDLib.tmpl
+#endif
 
 /*
  * Architecture specific sections - put all architecture dependent
  * options and setting here into the correct section
  */
 
+
 /*
  * Definitions for the alpha architecture
  */
 #ifdef AlphaArchitecture
 
-# define XF86Contrib
-# include <xf86.rules>
-# define BuildServer		NO
-# define XnestServer		NO
-# define XVirtualFramebufferServer	NO
-
- /*
-  * For the current ECOFF system
-  */
-# define HasSharedLibraries	NO
-# define UseElfFormat		NO
-# define BuildDynamicLoading	NO
- /*
-  * For the upcoming ELF system
-  */
-# if 0 /* NOT YET */
-#  define HasSharedLibraries	YES
-#  define UseElfFormat		YES
-#  define BuildDynamicLoading	YES
+# if OSMajorVersion == 3 && OSMinorVersion > 1 || OSMajorVersion > 3
+#  define HasWeakSymbols		YES
 # endif
+
+/* XXX Xvfb currently causes a linker error: */
+/* XXX crtbegin.c(.fini+0x10): relocation truncated to fit: BRADDR text */
+# ifdef XVirtualFramebufferServer
+#  undef XVirtualFramebufferServer
+# endif
+# define XVirtualFramebufferServer	NO
+# ifdef XnestServer
+#  undef XnestServer
+# endif
+# define XnestServer	NO
+
+# if (OSMajorVersion < 3)
+#  define HasSharedLibraries	NO
+# endif
+
+# ifndef XorgServer
+#  if OSMajorVersion == 3 && OSMinorVersion >= 2 || OSMajorVersion > 3
+#    define XorgServer		YES
+#  else
+#    define XorgServer		NO
+#  endif
+# endif
+
+/* Definitions for building the XFree86 server */
+# if XorgServer
+#   ifndef HasNetBSDApertureDriver
+#     define HasNetBSDApertureDriver	YES
+#   endif
+#   define ServerOSDefines	XFree86ServerOSDefines  -DDDXOSINIT
+#   define ServerExtraDefines	GccGasOption -D_XSERVER64 XFree86ServerDefines
+#   define ServerExtraSysLibs	-lalpha
+#   ifndef DoLoadableServer
+#     define DoLoadableServer	YES
+#   endif
+#   define XF86OSCardDrivers	wsfb
+#   ifndef XFree86ConsoleDefines
+#     define XFree86ConsoleDefines -DWSCONS_SUPPORT -DPCVT_SUPPORT
+#   endif
+#   define UseMatroxHal		NO	/* Matrox HAL is i386 only */
+
+# endif /* XorgServer */
+
+# include <xorg.cf>
 
 #endif /* AlphaArchitecture */
 
+/*
+ * Definitions for the AMD64 architecture
+ */
+#ifdef AMD64Architecture
+
+# define HasWeakSymbols		YES
+# define HasSharedLibraries	YES
+# define HasDlopen		YES
+
+# define XorgServer		YES
+
+# ifndef DoLoadableServer
+#  define DoLoadableServer	YES
+# endif
+
+# ifndef HasNetBSDApertureDriver
+#  define HasNetBSDApertureDriver	YES
+# endif
+
+# define HasAgpGart		YES
+
+# define ServerExtraSysLibs	-lamd64
+# define ServerExtraDefines	GccGasOption -D_XSERVER64 XFree86ServerDefines
+
+# ifndef XFree86ConsoleDefines
+#  define XFree86ConsoleDefines	-DWSCONS_SUPPORT -DPCVT_SUPPORT
+# endif
+
+# ifndef HasMMXSupport
+#   define HasMMXSupport	YES
+# endif
+
+# ifndef HasX86Support
+#  define HasX86Support		YES
+# endif
+# include <xorg.cf>
+
+#endif /* AMD64Architecture */
 
 /*
  * Definitions for the i386 architecture
  */
 #ifdef i386Architecture
 
-/*
- * For safety reasons, don't install the X server setuid on OpenBSD
- * use xdm instead
- */
-# define InstallXserverSetUID	NO
+# ifndef DoLoadableServer
+#  define DoLoadableServer	YES
+# endif
 
-# define BuildDynamicLoading	YES
-# include <xfree86.cf>
+/* Direct rendering (OpenBSD 3.3 and up). */ 
+# if OSMajorVersion > 3 || (OSMajorVersion == 3 && OSMinorVersion > 2)
+#  ifndef BuildXF86DRI
+#   define BuildXF86DRI			NO
+#  endif 
+# endif 
+
+# define HasWeakSymbols		YES
+
+/* To use the NetBSD Aperture driver */
+# ifndef HasNetBSDApertureDriver
+#  define HasNetBSDApertureDriver	YES
+# endif
+
+/* 2.7 and later have support for setting MTRRs */
+# ifndef HasMTRRSupport
+#  if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion > 6)
+#   define HasMTRRSupport		YES
+#  else
+#   define HasMTRRSupport		NO
+#  endif
+# endif
+
+/* 
+ * agpgart support (OpenBSD 3.2 and up) 
+ */ 
+# if OSMajorVersion > 3 || (OSMajorVersion == 3 && OSMinorVersion > 1)
+#  ifndef HasAgpGart 
+#   define HasAgpGart   YES 
+#  endif 
+# endif 
+ 
+
+# ifndef DefaultGcc2i386Opt
+#   if (OSMajorVersion == 2 && OSMinorVersion >= 3) || OSMajorVersion > 2
+      /* The GCC strength-reduce bug is fixed for OpenBSD 2.3 and later */
+#     define DefaultGcc2i386Opt	-O2 GccAliasingArgs
+#   endif
+# endif
+# define OptimizedCDebugFlags	DefaultGcc2i386Opt
+# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
+# define ServerExtraSysLibs	-li386
+# define LdPostLib		/**/
+# define ServerExtraDefines GccGasOption XFree86ServerDefines
+# ifndef XFree86ConsoleDefines
+#   define XFree86ConsoleDefines -DWSCONS_SUPPORT -DPCVT_SUPPORT
+# endif
+
+# define JoystickSupport	NO
+
+/* A hack to work around an optimization problem with gcc 2.95.2 */
+# if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion >= 6)
+#  define GccOptBug295
+# endif
+
+/* No MMX support in OpenBSD/a.out gas */
+# ifndef HasMMXSupport
+#   define HasMMXSupport	UseElfFormat
+# endif
+
+/* for DRI */
+# ifndef HasX86Support
+#  define HasX86Support		UseElfFormat
+# endif
+
+# include <xorg.cf>
 
 #endif /* i386Architecture */
 
@@ -275,11 +557,14 @@ install.man:: 								@@\
 /*
  * Function CSE makes gas -k not recognize external function calls as lazily
  * resolvable symbols, thus sometimes making ld.so report undefined symbol
- * errors on symbols found in shared library members that would never be 
+ * errors on symbols found in shared library members that would never be
  * called.  Ask niklas@openbsd.org for details.
  */
-# define PositionIndependentCFlags -fpic -fno-function-cse
 
+# define PositionIndependentCFlags -fpic -fno-function-cse
+# define BuildGlxExt		NO
+# define BuildGLXLibrary	YES
+ 
 #endif /* Mc68020Architecture */
 
 
@@ -288,9 +573,13 @@ install.man:: 								@@\
  */
 #ifdef AmigaArchitecture
 
-# define XF86Contrib
-# include <xf86.rules>
-# define BuildServer		NO
+# ifndef BuildServer
+#  define BuildServer		NO
+# endif
+
+# define ServerExtraDefines	-DXFree86Server
+
+# include <xorg.cf>
 
 #endif /* AmigaArchitecture */
 
@@ -300,8 +589,18 @@ install.man:: 								@@\
  */
 #ifdef Hp300Architecture
 
-# include <xf86.rules>
-# define BuildServer		NO
+# ifndef BuildServer
+#  define BuildServer		NO
+# endif
+/* For the X11R5 server */
+# define CompressAllFonts	NO
+# define InstallFontAliases	InstallFontAliasesNoComment
+# define UseRgbTxt		NO
+# define UseRgb			YES
+
+# define ServerExtraDefines	-DXFree86Server
+
+#include <xorg.cf>
 
 #endif /* Hp300Architecture */
 
@@ -309,12 +608,17 @@ install.man:: 								@@\
 /*
  * Definitions for the mac68k architecture
  */
-#ifdef mac68kArchitecture
+#ifdef Mac68kArchitecture
 
-# include <xf86.rules>
-# define BuildServer		NO
+# ifndef BuildServer
+#  define BuildServer		NO
+# endif
 
-#endif /* Mac68kArchitecture */
+# define ServerExtraDefines	-DXFree86Server
+
+# include <xorg.cf>
+
+#endif /* mac68kArchitecture */
 
 
 /*
@@ -322,8 +626,13 @@ install.man:: 								@@\
  */
 #ifdef Mvme68kArchitecture
 
-# include <xf86.rules>
-# define BuildServer		NO
+# ifndef BuildServer
+#  define BuildServer		NO
+# endif
+
+# define ServerExtraDefines	-DXFree86Server
+
+# include <xorg.cf>
 
 #endif /* Mvme68kArchitecture */
 
@@ -335,34 +644,23 @@ install.man:: 								@@\
 
 # include <xf86.rules>
 
-# define OptimizedCDebugFlags  -O2
 # define ServerOSDefines       -DDDXOSINIT
 # define BootstrapCFlags       -Dsun3
-# define UnalignedReferencesAllowed YES /* changes _XtCopyArgs() */
-/* Note: -ansi turns off -Dmc68000 */
-# define ServerExtraDefines    GccGasOption -Dmc68000 -Dmc68020
+# define UnalignedReferencesAllowed	YES /* changes _XtCopyArgs() */
+# define ServerExtraDefines    GccGasOption -Dmc68000 -Dmc68020 \
+				-DXFree86Server -DINCLUDE_CG2_HEADER
 
 # ifndef Xsun24Server
 #  define Xsun24Server		NO
 # endif
 # ifndef XsunServer
-#  define XsunServer		NO
+#  define XsunServer		YES
 # endif
 # ifndef XsunMonoServer
-#  define XsunMonoServer	YES
+#  define XsunMonoServer	NO
 # endif
 
-# ifndef BuildXKB
-#  define BuildXKB        	NO
-# endif
-
-# ifndef BuildXKBlib
-#  define BuildXKBlib     	NO
-# endif
-
-# ifndef BuildPexExt
-#  define BuildPexExt 		(XsunServer || Xsun24Server)
-# endif
+#define XkbServerDefines  -DXKB_ALWAYS_USES_SOFT_REPEAT
 
 #endif /* Sun3Architecture */
 
@@ -377,8 +675,8 @@ install.man:: 								@@\
   */
 # define PositionIndependentCFlags
 # define SharedLibraryLoadFlags -x -shared --whole-archive -soname `echo $@ | sed 's/\.[0-9]*$$//'`
-# define SharedXtReqs -L$(BUILDLIBDIR) $(XLIBONLY) $(SMLIB) $(ICELIB)
-# define SharedXmuReqs $(LDPRELIB) $(XTOOLONLYLIB) $(XONLYLIB) $(EXTENSIONLIB)
+# define SharedXtReqs -L$(BUILDLIBDIR) $(XONLYLIB) $(SMLIB) $(ICELIB)
+# define SharedXmuReqs $(LDPRELIB) $(XTOOLONLYLIB) $(XLIB)
 
 #endif /* MipsArchitecture */
 
@@ -388,7 +686,12 @@ install.man:: 								@@\
  */
 #ifdef ArcArchitecture
 
-# include <xfree86.cf>
+#  define ServerExtraDefines GccGasOption XFree86ServerDefines
+#  ifndef XFree86ConsoleDefines
+#    define XFree86ConsoleDefines -DPCCONS_SUPPORT
+#  endif
+
+# include <xorg.cf>
 
 #endif /* ArcArchitecture */
 
@@ -399,41 +702,246 @@ install.man:: 								@@\
 #ifdef PmaxArchitecture
 
 # include <xf86.rules>
-# define BuildServer		NO
+# ifndef BuildServer
+#  define BuildServer		NO
+# endif
+/* For the X11R5 server */
+# define CompressAllFonts	NO
+# define InstallFontAliases	InstallFontAliasesNoComment
+# define UseRgbTxt		NO
 
 #endif /* PmaxArchitecture */
 
+/*
+ * Definitions for the PowerPC architecture 
+ */
+#ifdef PpcArchitecture
+
+# define XkbServerDefines	-DXKB_ALWAYS_USES_SOFT_REPEAT
+# ifndef XFree86ConsoleDefines
+#   define XFree86ConsoleDefines	-DWSCONS_SUPPORT
+# endif
+
+# if OSMajorVersion == 3 && OSMinorVersion > 1 || OSMajorVersion > 3
+#  define HasWeakSymbols	YES
+# endif
+# ifndef GccWarningOptions
+#  if defined(XFree86Devel) && XFree86Devel
+#   define GccWarningOptions -Wall -Wpointer-arith -Wstrict-prototypes \
+			  -Wmissing-prototypes -Wmissing-declarations \
+			  -Wnested-externs
+#  else
+#   define GccWarningOptions -Wall -Wpointer-arith
+#  endif
+# endif
+
+# ifndef XorgServer
+#   define XorgServer		YES
+# endif
+
+/* Definitions for building the X server */
+# if XorgServer
+#   define ServerOSDefines	XFree86ServerOSDefines -DDDXOSINIT
+#   define ServerExtraDefines	GccGasOption XFree86ServerDefines
+#   ifndef DoLoadableServer
+#     define DoLoadableServer	YES
+#   endif
+#   define XF86OSCardDrivers	wsfb
+#   ifndef XF86CardDrivers
+#    define XF86CardDrivers	ati mga glint s3virge sis savage\
+				trident chips tdfx \
+				DevelDrivers vga \
+				XF86OSCardDrivers XF86ExtraCardDrivers
+#   endif
+#   ifndef DevelDrivers 
+#    define DevelDrivers nv
+#   endif
+
+# endif /* XorgServer */
+
+# include <xorg.cf>
+
+#endif /* PpcArchitecture */
 
 /*
  * Definitions for the sparc architecture
  */
 #ifdef SparcArchitecture
 
-# include <xf86.rules>
+# define BuildXF86MiscExt	NO
+# define BuildMITMiscExt	NO
 
-# ifndef Xsun24Server
-# define Xsun24Server	YES
-# endif
-# ifndef XsunServer
-# define XsunServer	YES
-# endif
-# ifndef XsunMonoServer
-# define XsunMonoServer	YES
+# if OSMajorVersion > 3 || OSMajorVersion == 3 && OSMinorVersion >= 2
+#  define HasWeakSymbols	YES
+#endif 
+
+# if OSMajorVersion == 2 || OSMajorVersion == 3 && OSMinorVersion < 2
+#  define ServerOSDefines 	-DDDXOSINIT
+#  define ServerExtraDefines	-DAVOID_GLYPHBLT -DPIXPRIV  -DXFree86Server \
+				DebugDefines -DINCLUDE_CG2_HEADER \
+				-DX_BYTE_ORDER=$(X_BYTE_ORDER)
+#  define XOrgServer		NO
+# else
+#  define XorgServer		YES
+# endif 
+
+# if !XorgServer
+
+#  ifndef Xsun24Server
+#   define Xsun24Server		YES
+#  endif
+#  ifndef XsunServer
+#   define XsunServer		YES
+#  endif
+#  ifndef XsunMonoServer
+#   define XsunMonoServer	YES
+#  endif
+#  ifndef InstallXserverSetUID
+#   define InstallXserverSetUID NO
+#  endif
+
+# else /* XF86Server */
+
+#  ifndef Xsun24Server
+#   define Xsun24Server		NO
+#  endif
+#  ifndef XsunServer
+#   define XsunServer		NO
+#  endif
+#  ifndef XsunMonoServer
+#   define XsunMonoServer	NO
+#  endif
+#  ifndef DoLoadableServer
+#    define DoLoadableServer	YES
+#  endif
+
+#  define XF86CardDrivers	wsfb
+#  define XFree86ConsoleDefines -DWSCONS_SUPPORT
+#  define BuildXInputExt	YES
+#  define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME -DDDXOSINIT
+#  define ServerExtraDefines	GccGasOption XFree86ServerDefines
+
 # endif
 
-#define XkbServerDefines  -DXKB_ALWAYS_USES_SOFT_REPEAT
+# define XkbServerDefines	-DXKB_ALWAYS_USES_SOFT_REPEAT
 
-# ifndef BuildPexExt
-#  define BuildPexExt 	(XsunServer || Xsun24Server)
+# define BuildXF86VidModeExt	NO
+# define BuildXF86DGA		NO
+# ifndef BuildXInputExt
+#  define BuildXInputExt	NO
 # endif
+# include <xorg.cf>
+
 #endif /* SparcArchitecture */
 
+/*
+ * Definitions for the sparc64 architecture
+ */
 
+#ifdef Sparc64Architecture
+
+# if OSMajorVersion == 3 && OSMinorVersion > 1 || OSMajorVersion > 3
+#  define HasWeakSymbols	YES
+# endif
+
+# ifndef XorgServer
+#  define XorgServer		YES
+# endif
+
+# define ServerExtraDefines	GccGasOption -D_XSERVER64 XFree86ServerDefines
+# define ServerOSDefines	XFree86ServerOSDefines -DDDXOSINIT
+# define XkbServerDefines	-DXKB_ALWAYS_USES_SOFT_REPEAT
+
+# if XorgServer
+#   ifndef DoLoadableServer
+#     define DoLoadableServer	YES
+#   endif
+#   define XF86OSCardDrivers	wsfb
+#   define XFree86ConsoleDefines -DWSCONS_SUPPORT
+# endif
+
+# include <xorg.cf>
+
+#endif /* Sparc64Architecture */
+
+/*
+ * Definitions for the vax architecture
+ */
+#ifdef VaxArchitecture
+
+# ifndef BuildServer
+#  define BuildServer		NO
+# endif
+
+/* For the X11R5 server */
+# define CompressAllFonts	NO
+# define InstallFontAliases	InstallFontAliasesNoComment
+# define UseRgbTxt		NO
+# define UseRgb			YES
+
+# define ServerExtraDefines	-DXFree86Server
+# define UnalignedReferencesAllowed YES
+# define HasSharedLibraries	NO
+# define HasDlopen		NO
+
+# define BuildGlxExt		NO
+# define BuildGLXLibrary	NO
+
+# include <xorg.cf>
+
+#endif /* VaxArchitecture */
+ 
 /* End or architecture specific section */
 
 /*
  * Generic settings for all architectures
+ * which can be overridden by architecture specific sections above
  */
+
+#ifndef StandardDefines
+# define StandardDefines	-DCSRG_BASED 
+#endif
+
+#if !defined(OptimizedCDebugFlags)
+# define OptimizedCDebugFlags	-O2
+#endif
+
+#ifndef ServerOSDefines
+#  define ServerOSDefines 	/**/
+#endif
+
+#ifndef ServerExtraDefines
+#  define ServerExtraDefines GccGasOption
+#endif
+
+#ifndef HasWeakSymbols
+# define HasWeakSymbols			NO
+#endif
+
+/*
+ * Multi-thread safe libs 
+ */	
+#if HasWeakSymbols == YES && (OSMajorVersion == 2 && OSMinorVersion >= 6 || OSMajorVersion >= 3)
+#  define HasPosixThreads		YES
+#  define ThreadedX			YES
+#  define NeedUIThrStubs		YES
+#  define ThreadsCompileFlag		-pthread
+#  define ThreadsLibraries		-pthread
+#else
+#  define ThreadedX			NO
+#endif
+
+
+/* Set this to YES when getpwuid_r is added to libc_r */
+#define HasThreadSafeAPI		NO
+
+#ifndef ExtraLibraries
+# define ExtraLibraries		/**/
+#endif
+
+#ifndef DoLoadableServer
+#define DoLoadableServer	NO
+#endif
 
 #ifndef XVirtualFramebufferServer
 # undef BuildServer
@@ -451,19 +959,23 @@ install.man:: 								@@\
 # define BuildScreenSaverLibrary	YES
 #endif
 
-#ifndef ForceNormalLib
-# define ForceNormalLib			YES
+#ifndef CompressAllFonts
+# define CompressAllFonts		YES
 #endif
 
-#ifndef BuildDynamicLoading
-# define BuildDynamicLoading		NO
+#ifndef SharedLibXdmGreet
+# define SharedLibXdmGreet		NO
 #endif
+
+#define HasFreetype2		NO
+#define HasExpat		NO
+#define	BuildXterm		BuildClients
 
 /*
- * XFree86 uses its own (more portable) database routines to speed up 
+ * XFree86 uses its own (more portable) database routines to speed up
  * the RGB database lookups
- * However, if you want to use ndbm anyway, you can set that to NO in 
- * site.def
+ * However, if you want to use ndbm anyway, you can set that to NO in
+ * host.def
  */
 #ifndef UseRgbTxt
 # define UseRgbTxt			YES
@@ -472,11 +984,34 @@ install.man:: 								@@\
 #ifndef OSBinaryType
 # if UseElfFormat
 #  define OSBinaryType			[ELF]
-# else 
+# else
 #  define OSBinaryType			/**/
 # endif
 #endif
 
-/* This must come last */
-#include <bsdLib.rules>
+#ifndef HasDlopen
+# define HasDlopen		YES
+#endif
 
+#ifndef DlLibrary
+# if UseElfFormat
+#  if (OSMajorVersion < 3 || OSMajorVersion == 3 && OSMinorVersion == 0)
+#   define DlLibrary -ldl
+#  else
+#   define DlLibrary -Wl,--export-dynamic
+#  endif
+# else
+#  define DlLibrary /**/
+# endif
+#endif
+
+#if !defined(GccWarningOptions)
+# define GccWarningOptions 		-Wall -Wpointer-arith
+#endif
+
+/* This must come last */
+#if OSMajorVersion == 2 && OSMinorVersion >= 8 || OSMajorVersion > 2
+# include <OpenBSDLib.rules>
+#else
+# include <bsdLib.rules>
+#endif

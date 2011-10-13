@@ -1,4 +1,4 @@
-/* $XConsortium: digit.h,v 1.2 91/10/10 11:18:01 rws Exp $ */
+/* $Xorg: digit.h,v 1.3 2000/08/17 19:46:29 cpqbld Exp $ */
 /* Copyright International Business Machines,Corp. 1991
  * All Rights Reserved
  *

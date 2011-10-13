@@ -1,4 +1,4 @@
-XCOMM platform:  $XConsortium: cray.cf /main/52 1996/09/28 16:09:55 rws $
+XCOMM platform:  $Xorg: cray.cf,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
 
 #ifndef OSName
 #define OSName			UNICOS 8.0
@@ -21,7 +21,6 @@ XCOMM operating system:  OSName
 #define HasXServer		NO
 #define ConnectionFlags		-DTCPCONN
 #define HasShm			NO
-#define PexNativeFPFormat	PEXCRAY_Floating
 #define NativeFPFormat		CRAY_Float
 #ifdef UseInstalled
 #define InstallCmd              install

@@ -15,7 +15,7 @@
 #define OSMinorVersion    50
 #endif
 
-XCOMM platform:  $XConsortium: Mips.cf /main/17 1996/09/28 16:06:25 rws $
+XCOMM platform:  $Xorg: Mips.cf,v 1.3 2000/08/17 19:41:46 cpqbld Exp $
 XCOMM operating system:  OSName
 
 /***************************************************************************

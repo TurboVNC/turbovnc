@@ -1,5 +1,5 @@
-XCOMM $XConsortium: Imakefile /main/38 1996/11/07 14:43:46 kaleb $
-XCOMM $XFree86: xc/config/cf/Imakefile,v 3.13.2.2 1997/07/27 02:41:03 dawes Exp $
+XCOMM $Xorg: Imakefile,v 1.3 2000/08/17 19:41:46 cpqbld Exp $
+XCOMM $XFree86: xc/config/cf/Imakefile,v 3.29 2002/10/16 14:07:49 tsi Exp $
 
 XCOMM Some compilers generate fatal errors if an -L directory does
 XCOMM not exist.  Since BUILDLIBDIR may not exist yet suppress its use.
@@ -15,10 +15,19 @@ HOSTDEFFILES = \
 host.def
 #endif
 
+#if defined(XFree86Version) || defined(XorgVersion)
+VERSIONDEFFILES = \
+date.def \
+version.def
+#endif
+
 DEFFILES = \
 xf86site.def \
+xorgsite.def \
+$(VERSIONDEFFILES) \
 $(HOSTDEFFILES) \
-site.def
+site.def \
+xorgversion.def  
 
 RULEFILES = \
 Imake.rules \
@@ -27,12 +36,17 @@ Win32.rules \
 X11.rules \
 bsdLib.rules \
 cde.rules \
+cygwin.rules \
+mingw.rules \
+darwinLib.rules \
+gnuLib.rules \
 hpLib.rules \
 ibmLib.rules \
 lnxLib.rules \
 lnxdoc.rules \
 necLib.rules \
 noop.rules \
+nto.rules \
 oldlib.rules \
 os2.rules \
 os2Lib.rules \
@@ -43,6 +57,7 @@ sgiLib.rules \
 sunLib.rules \
 sv3Lib.rules \
 sv4Lib.rules \
+QNX4.rules \
 xf86.rules
 
 TMPLFILES = \
@@ -56,7 +71,11 @@ WinLib.tmpl \
 X11.tmpl \
 bsdLib.tmpl \
 cde.tmpl \
+cygwin.tmpl \
+mingw.tmpl \
+darwinLib.tmpl \
 hpLib.tmpl \
+gnuLib.tmpl \
 ibmLib.tmpl \
 lnxLib.tmpl \
 lnxdoc.tmpl \
@@ -67,17 +86,21 @@ sgiLib.tmpl \
 sunLib.tmpl \
 sv3Lib.tmpl \
 sv4Lib.tmpl \
-xf86.tmpl
+xf86.tmpl \
+xorg.tmpl
 
 CFFILES = \
 Imake.cf \
 Amoeba.cf \
 DGUX.cf \
+DragonFly.cf \
 FreeBSD.cf \
 Mips.cf \
 NetBSD.cf \
 OpenBSD.cf \
 Oki.cf \
+cygwin.cf \
+mingw.cf \
 Win32.cf \
 apollo.cf \
 bsd.cf \
@@ -86,6 +109,7 @@ convex.cf \
 cray.cf \
 fujitsu.cf \
 generic.cf \
+gnu.cf \
 hp.cf \
 ibm.cf \
 isc.cf \
@@ -97,6 +121,7 @@ minix.cf \
 moto.cf \
 ncr.cf \
 nec.cf \
+nto.cf \
 os2.cf \
 osf1.cf \
 pegasus.cf \
@@ -112,14 +137,20 @@ ultrix.cf \
 usl.cf \
 lynx.cf \
 x386.cf \
-xfree86.cf
+QNX4.cf \
+darwin.cf \
+xfree86.cf \
+xorg.cf
 
 INSTFILES = $(RULEFILES) $(TMPLFILES) $(DEFFILES) $(CFFILES) $(LOCALFILES)
 
 all::
 
+#if BuildLibraries
 InstallMultipleDestFlags(install,$(INSTFILES),$(CONFIGDIR),$(INSTDATFLAGS))
-InstallLinkKitMultipleDestFlags($(INSTFILES),$(LINKKITDIR)/config/cf,$(INSTDATFLAGS))
+#endif
+
+InstallDriverSDKMultipleDestFlags($(INSTFILES),$(DRIVERSDKDIR)/config/cf,$(INSTDATFLAGS))
 
 #ifdef InstallEmptyHostDef
 install::
@@ -130,13 +161,13 @@ install::
 		$(DESTDIR)$(CONFIGDIR)/host.def; \
 	RemoveFile($${TMP}))
 
-#ifdef XFree86Version
-install.linkkit::
+#if defined(XFree86Version) || defined(XorgVersion)
+install.sdk::
 	@(TMP=/tmp/tmp.$$$$; \
 	RemoveFile($${TMP}); \
 	echo "" > $${TMP}; \
 	$(INSTALL) $(INSTALLFLAGS) $(INSTDATFLAGS) $${TMP} \
-		$(DESTDIR)$(LINKKITDIR)/config/cf/host.def; \
+		$(DESTDIR)$(DRIVERSDKDIR)/config/cf/host.def; \
 	RemoveFile($${TMP}))
 #endif
 #endif

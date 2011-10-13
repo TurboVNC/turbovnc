@@ -1,13 +1,12 @@
+/* $XFree86$ */
 /*
-Copyright (c) 1996  X Consortium
+Copyright 1996, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -15,33 +14,64 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 */
 
-/* $XConsortium: xpstubs.c /main/1 1996/09/28 17:12:15 rws $ */
+/* $Xorg: xpstubs.c,v 1.5 2001/03/08 17:52:08 pookie Exp $ */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
 #include "misc.h"
-#include "font.h"
+#include <X11/fonts/font.h>
+#ifdef XPRINT
+#include "DiPrint.h"
+#endif
 
 Bool
-XpClientIsBitmapClient(client)
-    ClientPtr client;
+XpClientIsBitmapClient(
+    ClientPtr client)
 {
     return TRUE;
 }
 
 Bool
-XpClientIsPrintClient(client, fpe)
-    ClientPtr client;
-    FontPathElementPtr fpe;
+XpClientIsPrintClient(
+    ClientPtr client,
+    FontPathElementPtr fpe)
 {
     return FALSE;
 }
+#ifdef XPRINT
+int
+PrinterOptions(
+    int argc,
+    char **argv,
+    int i)
+{
+    return i;
+}
+void
+PrinterInitOutput(
+     ScreenInfo *pScreenInfo,
+     int argc,
+     char **argv)
+{
+}
+void PrinterUseMsg(void)
+{
+}
+void PrinterInitGlobals(void)
+{
+}
+#endif /* XPRINT */
+

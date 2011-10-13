@@ -3,7 +3,7 @@
 #
 # install - install a program, script, or datafile
 #
-# $XConsortium: install.sh,v 1.2 89/12/18 14:47:22 jim Exp $
+# $Xorg: install.sh,v 1.3 2000/08/17 19:41:52 cpqbld Exp $
 #
 # This script is compatible with the BSD install script, but was written
 # from scratch.

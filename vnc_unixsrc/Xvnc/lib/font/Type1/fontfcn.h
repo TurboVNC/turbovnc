@@ -1,4 +1,4 @@
-/* $XConsortium: fontfcn.h,v 1.3 92/03/26 16:42:23 eswu Exp $ */
+/* $Xorg: fontfcn.h,v 1.3 2000/08/17 19:46:30 cpqbld Exp $ */
 /* Copyright International Business Machines,Corp. 1991
  * All Rights Reserved
  *
@@ -27,6 +27,62 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
  * SOFTWARE.
  */
+/* Copyright (c) 1994-1999 Silicon Graphics, Inc. All Rights Reserved.
+ *
+ * The contents of this file are subject to the CID Font Code Public Licence
+ * Version 1.0 (the "License"). You may not use this file except in compliance
+ * with the Licence. You may obtain a copy of the License at Silicon Graphics,
+ * Inc., attn: Legal Services, 2011 N. Shoreline Blvd., Mountain View, CA
+ * 94043 or at http://www.sgi.com/software/opensource/cid/license.html.
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis.
+ * ALL WARRANTIES ARE DISCLAIMED, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED
+ * WARRANTIES OF MERCHANTABILITY, OF FITNESS FOR A PARTICULAR PURPOSE OR OF
+ * NON-INFRINGEMENT. See the License for the specific language governing
+ * rights and limitations under the License.
+ *
+ * The Original Software is CID font code that was developed by Silicon
+ * Graphics, Inc.
+ */
+/* $XFree86: xc/lib/font/Type1/fontfcn.h,v 1.4 1999/08/22 08:58:50 dawes Exp $ */
+
+
+#ifdef BUILDCID
+#define XFONT_CID 1
+#endif
+
+/* modular config.h defines VERSION as libXfont version */
+#ifdef VERSION
+#undef VERSION
+#endif
+
+#if XFONT_CID
+/* Definition of a PostScript CIDFont resource */
+typedef struct cid_font {
+            char               *vm_start;
+            int                spacerangecnt;
+            int                notdefrangecnt;
+            int                cidrangecnt;
+            spacerange         *spacerangeP;
+            cidrange           *notdefrangeP;
+            cidrange           *cidrangeP;
+            int                binarydata; /* 1=binary data, 0=hex data */
+            long               bytecnt;
+            psobj              CIDFontFileName;
+            psdict             *CIDfontInfoP;
+} cidfont;
+
+/* Definition of a PostScript CMap resource */
+typedef struct cmap_res {
+            unsigned short firstCol;
+            unsigned short lastCol;
+            unsigned short firstRow;
+            unsigned short lastRow;
+            psobj   CMapFileName;
+            psdict  *CMapInfoP;
+} cmapres;
+#endif
+
 /*     Definition of a PostScript FONT             */
 typedef struct ps_font {
             char    *vm_start;
@@ -40,10 +96,13 @@ struct blues_struct *BluesP;
 /***================================================================***/
 /*  Routines in scan_font                                             */
 /***================================================================***/
- 
-extern boolean Init_StdEnc();
-extern int scan_font();
-extern int GetFontInfo();
+
+extern boolean Init_BuiltInEncoding ( void );
+#if XFONT_CID
+extern int scan_cidfont ( cidfont *CIDFontP, cmapres *CMapP );
+extern int scan_cidtype1font ( psfont *FontP );
+#endif
+extern int scan_font ( psfont *FontP );
 /***================================================================***/
 /*  Return codes from scan_font                                       */
 /***================================================================***/
@@ -55,7 +114,43 @@ extern int GetFontInfo();
 #define SCAN_TRUE            -5
 #define SCAN_FALSE           -6
 #define SCAN_END             -7
- 
+
+#if XFONT_CID
+/***================================================================***/
+/*  Name of CID FontInfo fields                                       */
+/***================================================================***/
+#define CIDCOUNT 1
+#define CIDFONTNAME 2
+#define CIDFONTTYPE 3
+#define CIDVERSION 4
+#define CIDREGISTRY 5
+#define CIDORDERING 6
+#define CIDSUPPLEMENT 7
+#define CIDMAPOFFSET 8
+#define CIDFDARRAY 9
+#define CIDFDBYTES 10
+#define CIDFONTBBOX 11
+#define CIDFULLNAME 12
+#define CIDFAMILYNAME 13
+#define CIDWEIGHT 14
+#define CIDNOTICE 15
+#define CIDGDBYTES 16
+#define CIDUIDBASE 17
+#define CIDXUID 18
+
+/***================================================================***/
+/*  Name of CMapInfo fields                                           */
+/***================================================================***/
+#define CMAPREGISTRY 1
+#define CMAPORDERING 2
+#define CMAPSUPPLEMENT 3
+#define CMAPNAME 4
+#define CMAPVERSION 5
+#define CMAPTYPE 6
+#define CMAPWMODE 7
+#define CMAPCIDCOUNT 8
+#endif
+
 /***================================================================***/
 /*  Name of FontInfo fields                                           */
 /***================================================================***/
@@ -96,3 +191,60 @@ extern int GetFontInfo();
 #define LENIV     14
 #define RNDSTEMUP 15
 #define EXPANSIONFACTOR 16
+
+#if XFONT_CID
+/***================================================================***/
+/*  Name of CID Type 1 Private values                                 */
+/***================================================================***/
+#define CIDT1MINFEATURE     1
+#define CIDT1LENIV          2
+#define CIDT1LANGGROUP      3
+#define CIDT1BLUEVALUES     4
+#define CIDT1OTHERBLUES     5
+#define CIDT1BLUESCALE      6
+#define CIDT1BLUEFUZZ       7
+#define CIDT1BLUESHIFT      8
+#define CIDT1FAMBLUES       9
+#define CIDT1FAMOTHERBLUES 10
+#define CIDT1STDHW         11
+#define CIDT1STDVW         12
+#define CIDT1STEMSNAPH     13
+#define CIDT1STEMSNAPV     14
+#define CIDT1SUBMAPOFF     15
+#define CIDT1SDBYTES       16
+#define CIDT1SUBRCNT       17
+#define CIDT1FORCEBOLD     18
+#define CIDT1RNDSTEMUP     19
+#define CIDT1EXPFACTOR     20
+
+#define CID_BITMAP_UNDEFINED       0
+extern int SearchDictName ( psdict *dictP, psobj *keyP );
+#if XFONT_CID
+extern boolean initCIDType1Font ( void );
+#endif
+extern boolean initFont ( int cnt );
+#if XFONT_CID
+extern int readCIDFont ( char *cidfontname, char *cmapfile );
+extern int readCIDType1Font ( void );
+#endif
+extern int readFont ( char *env );
+extern struct xobject *fontfcnB ( struct XYspace *S, unsigned char *code, 
+				  int *lenP, int *mode );
+#if XFONT_CID
+extern Bool CIDfontfcnA ( char *cidfontname, char *cmapfile, int *mode );
+extern Bool CIDType1fontfcnA ( int *mode );
+#endif
+extern Bool fontfcnA ( char *env, int *mode );
+#if XFONT_CID
+extern void CIDQueryFontLib ( char *cidfontname, char *cmapfile, 
+			      char *infoName, pointer infoValue, int *rcodeP );
+#endif
+extern void QueryFontLib ( char *env, char *infoName, pointer infoValue, 
+			   int *rcodeP );
+#if XFONT_CID
+extern struct xobject *CIDfontfcnC ( struct XYspace *S, psobj *theStringP, 
+				     psobj *SubrsArrayP,
+				     struct blues_struct *BluesP, int *lenP, 
+				     int *mode );
+#endif
+#endif

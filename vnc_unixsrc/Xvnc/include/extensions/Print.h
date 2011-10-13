@@ -1,4 +1,4 @@
-/* $XConsortium: Print.h /main/3 1996/12/10 14:59:02 rws $ */
+/* $Xorg: Print.h,v 1.3 2000/08/18 04:05:44 coskrey Exp $ */
 /******************************************************************************
  ******************************************************************************
  **
@@ -57,6 +57,7 @@
  **
  ******************************************************************************
  *****************************************************************************/
+/* $XFree86: xc/include/extensions/Print.h,v 1.4 2000/01/25 18:37:31 dawes Exp $ */
 
 #ifndef _XpPrint_H_
 #define _XpPrint_H_
@@ -261,18 +262,22 @@ typedef void (*XPFinishProc)( Display *display,
 /*
  * Typedefs for XpSetLocaleHinter and XpGetLocaleHinter
  */
-typedef char * (*XPHinterProc)();
+typedef char * (*XPHinterProc)(void);
 
+#if 0
 /*******************************************************************
  *
  * Extension version structures.
  *
+ **** this structure is now defined localy in the one file that uses it
+ **** in order to avoid clashes with its definition in XI.h
  */
 typedef struct {
         int     present;
         short   major_version;
         short   minor_version;
 } XExtensionVersion;
+#endif
 
 /********************************************************************
  *
@@ -318,8 +323,6 @@ typedef struct {
  *
  * Function prototypes for library side.
  */
-
-#if NeedFunctionPrototypes
 
 extern XPContext XpCreateContext (
     Display		*display,
@@ -531,10 +534,7 @@ extern char *XpGetLocaleHinter (
     XPHinterProc *hinter_proc
 );
 
-
-
-
-extern char *XpGetLocaleNetString();
+extern char *XpGetLocaleNetString(void);
 
 extern char *XpNotifyPdm (
     Display		*print_display,
@@ -544,50 +544,6 @@ extern char *XpNotifyPdm (
     Window		video_window,
     Bool		auth_flag
 );
-
-#else
-
-extern XPContext XpCreateContext ();
-extern void XpSetContext ();
-extern XPContext XpGetContext ();
-extern void XpDestroyContext ();
-extern Screen *XpGetScreenOfContext ();
-extern Status XpGetPageDimensions ();
-extern void XpStartJob ();
-extern void XpEndJob ();
-extern void XpCancelJob ();
-extern void XpStartDoc ();
-extern void XpEndDoc ();
-extern void XpCancelDoc ();
-extern void XpPutDocumentData ();
-extern Status XpGetDocumentData ();
-extern void XpStartPage ();
-extern void XpEndPage ();
-extern void XpCancelPage ();
-extern void XpSelectInput ();
-extern unsigned long XpInputSelected ();
-extern Bool XpSetImageResolution ();
-extern int XpGetImageResolution ();
-extern char *XpGetAttributes ();
-extern void XpSetAttributes ();
-extern char *XpGetOneAttribute ();
-extern XPPrinterList XpGetPrinterList ();
-extern void XpFreePrinterList ();
-extern void XpRehashPrinterList ();
-extern Status XpQueryVersion ();
-extern Bool XpQueryExtension ();
-extern Screen **XpQueryScreens ();
-extern Status XpGetPdmStartParams ();
-extern Status XpGetAuthParams ();
-extern Status XpSendAuth ();
-extern Status XpSendOneTicket ();
-extern void XpSetLocaleHinter ();
-extern char *XpGetLocaleHinter ();
-
-extern char *XpGetLocaleNetString ();
-extern char *XpNotifyPdm ();
-
-#endif /* NeedFunctionPrototypes */
 
 #endif /* _XP_PRINT_SERVER_ */
 

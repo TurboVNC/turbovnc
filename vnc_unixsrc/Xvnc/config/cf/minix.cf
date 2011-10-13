@@ -1,8 +1,8 @@
-XCOMM $XConsortium: minix.cf /main/1 1996/10/31 14:47:22 kaleb $
+XCOMM $Xorg: minix.cf,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
 
 
 
-XCOMM platform:  $XFree86: xc/config/cf/minix.cf,v 3.4 1996/12/27 06:50:21 dawes Exp $
+XCOMM platform:  $XFree86: xc/config/cf/minix.cf,v 3.5 1999/07/10 07:24:33 dawes Exp $
 
 
 /*
@@ -54,11 +54,11 @@ XCOMM platform:  $XFree86: xc/config/cf/minix.cf,v 3.4 1996/12/27 06:50:21 dawes
 #define HasPutenv		YES	/* for xsm */
 
 #ifndef AssembleObject
-#define AssembleObject(flags) $(RM) $@                                    @@\
-	$(CPP) AsmDefines $(DEFINES) $(INCLUDES) flags $*.s | \           @@\
-	    grep -v '^\#' > $*.i.s                                        @@\
-	$(AS) -o $*.o $*.i.s                                              @@\
-	$(RM) $*.i.s
+#define AssembleObject(basename,flags) $(RM) $@                           @@\
+	$(CPP) AsmDefines $(DEFINES) $(INCLUDES) flags basename.S | \     @@\
+	    grep -v '^\#' > basename.i.s                                  @@\
+	$(AS) -o $*.o basename.i.s                                        @@\
+	$(RM) basename.i.s
 #endif
 
-#include <xfree86.cf>
+#include <xorg.cf>

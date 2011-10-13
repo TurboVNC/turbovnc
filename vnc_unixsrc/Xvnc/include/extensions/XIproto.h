@@ -1,15 +1,14 @@
-/* $XConsortium: XIproto.h /main/26 1996/03/20 15:30:59 mor $ */
+/* $Xorg: XIproto.h,v 1.5 2001/02/09 02:03:24 xorgcvs Exp $ */
 
 /************************************************************
 
-Copyright (c) 1989  X Consortium
+Copyright 1989, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -17,15 +16,15 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
-Copyright (c) 1989 by Hewlett-Packard Company, Palo Alto, California.
+Copyright 1989 by Hewlett-Packard Company, Palo Alto, California.
 
 			All Rights Reserved
 
@@ -46,6 +45,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
+/* $XFree86: xc/include/extensions/XIproto.h,v 1.4 2001/01/17 17:53:17 dawes Exp $ */
 
 #ifndef _XIPROTO_H
 #define _XIPROTO_H
@@ -218,7 +218,11 @@ typedef struct _xDeviceInfo *xDeviceInfoPtr;
 typedef struct _xAnyClassinfo *xAnyClassPtr;
 
 typedef struct _xAnyClassinfo {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8 	c_class;
+#else
     CARD8 	class;
+#endif
     CARD8 	length;
     } xAnyClassInfo;
 
@@ -233,7 +237,11 @@ typedef struct _xDeviceInfo {
 typedef struct _xKeyInfo *xKeyInfoPtr;
 
 typedef struct _xKeyInfo {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8 	c_class;
+#else
     CARD8 	class;
+#endif
     CARD8 	length;
     KeyCode 	min_keycode; 
     KeyCode 	max_keycode; 
@@ -244,7 +252,11 @@ typedef struct _xKeyInfo {
 typedef struct _xButtonInfo *xButtonInfoPtr;
 
 typedef struct _xButtonInfo {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8 	c_class;
+#else
     CARD8 	class;
+#endif
     CARD8 	length;
     CARD16 	num_buttons B16;
     } xButtonInfo;
@@ -252,7 +264,11 @@ typedef struct _xButtonInfo {
 typedef struct _xValuatorInfo *xValuatorInfoPtr;
 
 typedef struct _xValuatorInfo {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8 	c_class;
+#else
     CARD8 	class;
+#endif
     CARD8 	length;
     CARD8 	num_axes;
     CARD8 	mode;
@@ -296,7 +312,11 @@ typedef struct {
     } xOpenDeviceReply;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8 	c_class;
+#else
     CARD8 	class;
+#endif
     CARD8 	event_type_base;
     } xInputClassInfo;
 
@@ -736,13 +756,21 @@ typedef struct {
 } xGetFeedbackControlReply;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8  	c_class; 	/* feedback class		*/
+#else
     CARD8  	class; 		/* feedback class		*/
+#endif
     CARD8  	id; 		/* feedback id    		*/
     CARD16  	length B16; 	/* feedback length		*/
 } xFeedbackState;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8   c_class;
+#else
     CARD8   class;
+#endif
     CARD8   id;
     CARD16  length B16;
     CARD16  pitch B16;
@@ -757,7 +785,11 @@ typedef struct {
 } xKbdFeedbackState;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8   c_class;
+#else
     CARD8   class;
+#endif
     CARD8   id;
     CARD16  length B16;
     CARD8   pad1,pad2;
@@ -767,7 +799,11 @@ typedef struct {
 } xPtrFeedbackState;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8  	c_class;  	/* feedback class id		*/
+#else
     CARD8  	class;  	/* feedback class id		*/
+#endif
     CARD8   	id;
     CARD16  	length B16; 	/* feedback length  		*/
     CARD32	resolution B32;
@@ -776,7 +812,11 @@ typedef struct {
 } xIntegerFeedbackState;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8  	c_class;  	/* feedback class id		*/
+#else
     CARD8  	class;  	/* feedback class id		*/
+#endif
     CARD8   	id;
     CARD16  	length B16; 	/* feedback length  		*/
     CARD16	max_symbols B16;
@@ -784,7 +824,11 @@ typedef struct {
 } xStringFeedbackState;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8  	c_class;  	/* feedback class id		*/
+#else
     CARD8  	class;  	/* feedback class id		*/
+#endif
     CARD8	id;
     CARD16  	length B16; 	/* feedback length  		*/
     CARD8	percent;
@@ -794,7 +838,11 @@ typedef struct {
 } xBellFeedbackState;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8  	c_class;  	/* feedback class id		*/
+#else
     CARD8  	class;  	/* feedback class id		*/
+#endif
     CARD8	id;
     CARD16  	length B16; 	/* feedback length  		*/
     CARD32	led_mask B32;
@@ -818,13 +866,21 @@ typedef struct {
 } xChangeFeedbackControlReq;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8  	c_class;  	/* feedback class id		*/
+#else
     CARD8  	class;  	/* feedback class id		*/
+#endif
     CARD8  	id; 		/* feedback id      		*/
     CARD16  	length B16; 	/* feedback length  		*/
 } xFeedbackCtl;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8  	c_class;  	/* feedback class id		*/
+#else
     CARD8  	class;  	/* feedback class id		*/
+#endif
     CARD8  	id; 		/* feedback length  		*/
     CARD16  	length B16; 	/* feedback length  		*/
     KeyCode 	key; 
@@ -838,7 +894,11 @@ typedef struct {
 } xKbdFeedbackCtl;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8  	c_class;  	/* feedback class id		*/
+#else
     CARD8  	class;  	/* feedback class id		*/
+#endif
     CARD8  	id; 		/* feedback id      		*/
     CARD16  	length B16; 	/* feedback length  		*/
     CARD8  	pad1,pad2;
@@ -848,14 +908,22 @@ typedef struct {
 } xPtrFeedbackCtl;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8  	c_class;  	/* feedback class id		*/
+#else
     CARD8  	class;  	/* feedback class id		*/
+#endif
     CARD8  	id; 		/* feedback id      		*/
     CARD16  	length B16; 	/* feedback length  		*/
     INT32	int_to_display B32;
 } xIntegerFeedbackCtl;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8  	c_class;  	/* feedback class id		*/
+#else
     CARD8  	class;  	/* feedback class id		*/
+#endif
     CARD8  	id; 		/* feedback id      		*/
     CARD16  	length B16; 	/* feedback length  		*/
     CARD8  	pad1,pad2;
@@ -863,7 +931,11 @@ typedef struct {
 } xStringFeedbackCtl;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8  	c_class;  	/* feedback class id		*/
+#else
     CARD8  	class;  	/* feedback class id		*/
+#endif
     CARD8  	id; 		/* feedback id      		*/
     CARD16  	length B16; 	/* feedback length  		*/
     INT8	percent;
@@ -873,7 +945,11 @@ typedef struct {
 } xBellFeedbackCtl;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8  	c_class;  	/* feedback class id		*/
+#else
     CARD8  	class;  	/* feedback class id		*/
+#endif
     CARD8  	id; 		/* feedback id      		*/
     CARD16  	length B16; 	/* feedback length  		*/
     CARD32	led_mask B32;
@@ -1074,7 +1150,11 @@ typedef struct {
 } xQueryDeviceStateReply;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8  	c_class;
+#else
     CARD8  	class;
+#endif
     CARD8  	length;
     CARD8	num_keys;
     BYTE   	pad1;
@@ -1082,7 +1162,11 @@ typedef struct {
 } xKeyState;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8  	c_class;
+#else
     CARD8  	class;
+#endif
     CARD8  	length;
     CARD8	num_buttons;
     BYTE   	pad1;
@@ -1090,7 +1174,11 @@ typedef struct {
 } xButtonState;
 
 typedef struct {
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD8  	c_class;
+#else
     CARD8  	class;
+#endif
     CARD8  	length;
     CARD8  	num_valuators;
     CARD8	mode;
@@ -1243,6 +1331,22 @@ typedef struct {
     CARD8  	num_valuators; 		/* number of valuators to change*/
     CARD8  	pad1,pad2;
 } xDeviceResolutionCtl;
+
+
+/* Merged from Metrolink tree for XINPUT stuff	*/
+
+typedef struct {
+     CARD16         control;
+     CARD16         length;
+     CARD32         min_x;
+     CARD32         max_x;
+     CARD32         min_y;
+     CARD32         max_y;
+     CARD32         button_threshold;
+} xDeviceTSCalibrationCtl;
+
+/* End of merged section	*/
+
 
 /**********************************************************
  *

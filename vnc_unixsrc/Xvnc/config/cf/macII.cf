@@ -1,4 +1,4 @@
-XCOMM platform:  $XConsortium: macII.cf /main/50 1996/09/28 16:11:19 rws $
+XCOMM platform:  $Xorg: macII.cf,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
 
 #ifndef OSName
 #define OSName            A/UX 3.0.1
@@ -26,7 +26,6 @@ XCOMM operating system:  OSName
 #define ExecableScripts     NO
 #define RemoveTargetProgramByMoving YES
 #define ExpandManNames      YES
-#define PexShmIPC           NO
 #define XmacIIServer        YES
 #define XawI18nDefines      -DUSE_XWCHAR_STRING -DUSE_XMBTOWC
 #if MacHasc89
@@ -42,7 +41,6 @@ XCOMM operating system:  OSName
 
 #if !HasGcc
 #define DefaultCCOptions -A 3
-#define PexCCOptions -A 4
 #endif
 
 /*

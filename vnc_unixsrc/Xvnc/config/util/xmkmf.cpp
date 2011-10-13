@@ -1,9 +1,10 @@
 XCOMM!/bin/sh
 
+XCOMM $XFree86: xc/config/util/xmkmf.cpp,v 1.3 2000/11/06 21:57:10 dawes Exp $
 XCOMM
 XCOMM make a Makefile from an Imakefile from inside or outside the sources
 XCOMM 
-XCOMM $XConsortium: xmkmf.cpp /main/22 1996/09/28 16:17:05 rws $
+XCOMM $Xorg: xmkmf.cpp,v 1.3 2000/08/17 19:41:53 cpqbld Exp $
 
 usage="usage:  $0 [-a] [top_of_sources_pathname [current_directory]]"
 
@@ -11,13 +12,24 @@ configdirspec=CONFIGDIRSPEC
 topdir=
 curdir=.
 do_all=
+imake_defines=
 
-case "$1" in
--a)
-    do_all="yes"
-    shift
-    ;;
-esac
+while [ $# -gt 0 ]
+do
+    case "$1" in
+    -D*)
+       	imake_defines="$imake_defines $1"
+	shift
+	;;
+    -a)
+	do_all="yes"
+	shift
+	;;
+    *)
+    	break
+	;;
+    esac
+done
 
 case $# in 
     0) ;;
@@ -41,10 +53,10 @@ else
     args="-I$topdir/config/cf -DTOPDIR=$topdir -DCURDIR=$curdir"
 fi
 
-echo imake $args
+echo imake $imake_defines $args
 case "$do_all" in
 yes)
-    imake $args && 
+    imake $imake_defines $args && 
     echo "make Makefiles" &&
     make Makefiles &&
     echo "make includes" &&
@@ -53,6 +65,6 @@ yes)
     make depend
     ;;
 *)
-    imake $args
+    imake $imake_defines $args
     ;;
 esac

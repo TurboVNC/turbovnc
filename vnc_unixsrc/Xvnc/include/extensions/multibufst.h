@@ -1,15 +1,13 @@
 /*
- * $XConsortium: multibufst.h,v 1.16 95/06/08 23:20:39 gildea Exp $
- * $XFree86: xc/include/extensions/multibufst.h,v 3.1 1996/05/06 05:52:39 dawes Exp $
+ * $Xorg: multibufst.h,v 1.4 2001/02/09 02:03:24 xorgcvs Exp $
  *
-Copyright (c) 1989  X Consortium
+Copyright 1989, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -17,14 +15,16 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
  */
+
+/* $XFree86: xc/include/extensions/multibufst.h,v 3.8 2001/12/19 21:37:29 dawes Exp $ */
 
 #ifndef _MULTIBUFST_H_
 #define _MULTIBUFST_H_
@@ -35,10 +35,10 @@ in this Software without prior written authorization from the X Consortium.
 
 #include "multibuf.h"
 #ifdef _MULTIBUF_SERVER_
-#include "input.h"
+#include "inputstr.h"
 #endif
 
-#if (defined(__STDC__) && !defined(UNIXCPP)) || defined(ANSICPP)
+#if !defined(UNIXCPP) || defined(ANSICPP)
 #define MbufGetReq(name,req,info) GetReq (name, req); \
 	req->reqType = info->codes->major_opcode; \
 	req->mbufReqType = X_##name;
@@ -265,7 +265,11 @@ typedef struct {
     CARD16	width B16;
     CARD16	height B16;
     CARD16	borderWidth B16;  
+#if defined(__cplusplus) || defined(c_plusplus)
+    CARD16	c_class B16;
+#else
     CARD16	class B16;
+#endif
     VisualID	visual B32;
     CARD32	mask B32;
 } xMbufCreateStereoWindowReq;		/* followed by value list */
@@ -305,7 +309,7 @@ typedef struct {
     pSTRUCT2->FUNC_NAME = tmpFn;					\
 }
 
-#if (defined(__STDC__) && !defined(UNIXCPP)) || defined(ANSICPP)
+#if !defined(UNIXCPP) || defined(ANSICPP)
 #define WRAP_SCREEN_FUNC(pSCREEN,pPRIV,FUNC_NAME, PRIV_FUNC_NAME)	\
 {									\
     if ((pPRIV->funcsWrapped & FUNC_NAME##Mask) == 0)			\
@@ -431,21 +435,15 @@ extern int		MultibufferWindowIndex;
 extern RESTYPE		MultibufferDrawableResType;
 
 extern void		MultibufferUpdate(	/* pMbuffer, time */
-#if NeedFunctionPrototypes
 				MultibufferPtr /* pMultibuffer */,
 				CARD32 /* time */
-#endif
 				);
 extern void		MultibufferExpose(	/* pMbuffer, pRegion */
-#if NeedFunctionPrototypes
 				MultibufferPtr /* pMultibuffer */,
 				RegionPtr /* pRegion */
-#endif
 				);
 extern void		MultibufferClobber(	/* pMbuffer */
-#if NeedFunctionPrototypes
 				MultibufferPtr /* pMultibuffer */
-#endif
 				);
 
 typedef struct _mbufWindow	*mbufWindowPtr;
@@ -511,61 +509,43 @@ typedef struct _mbufScreen {
     xMbufBufferInfo *pInfo;		/* buffer info (for Normal buffers) */
 
     int  (* CreateImageBuffers)(
-#if NeedNestedPrototypes
 		WindowPtr		/* pWin */,
 		int			/* nbuf */,
 		XID *			/* ids */,
 		int			/* action */,
 		int			/* hint */
-#endif
     		);
     void (* DestroyImageBuffers)(
-#if NeedNestedPrototypes
 		WindowPtr		/* pWin */
-#endif
     		);
     void (* DisplayImageBuffers)(
-#if NeedNestedPrototypes
 		ScreenPtr		/* pScreen */,
 		mbufBufferPtr *		/* ppMBBuffer */,
 		mbufWindowPtr *		/* ppMBWindow */,
 		int			/* nbuf */
-#endif
     		);
     void (* ClearImageBufferArea)(
-#if NeedNestedPrototypes
 		mbufBufferPtr		/* pMBBuffer */,
 		short			/* x */,
 		short			/* y */,
 		unsigned short		/* width */,
 		unsigned short		/* height */,
 		Bool			/* exposures */
-#endif
     		);
     Bool (* ChangeMBufferAttributes)(	/* pMBWindow, vmask */ 
-#if NeedNestedPrototypes
     		/* FIXME */
-#endif
     		);
     Bool (* ChangeBufferAttributes)(	/* pMBBuffer, vmask */
-#if NeedNestedPrototypes
     		/* FIXME */
-#endif
     		);
     void (* DeleteBufferDrawable)(
-#if NeedNestedPrototypes
 		DrawablePtr		/* pDrawable */
-#endif
     		);
     void (* WrapScreenFuncs)(
-#if NeedNestedPrototypes
 		ScreenPtr		/* pScreen */
-#endif
     		);
     void (* ResetProc)(
-#if NeedNestedPrototypes
 		ScreenPtr		/* pScreen */
-#endif
     		);
     DevUnion	devPrivate;
 } mbufScreenRec, *mbufScreenPtr;

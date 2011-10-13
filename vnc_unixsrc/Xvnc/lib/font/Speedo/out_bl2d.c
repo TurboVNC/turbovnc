@@ -1,4 +1,4 @@
-/* $XConsortium: out_bl2d.c,v 1.5 94/02/07 10:01:15 gildea Exp $ */
+/* $Xorg: out_bl2d.c,v 1.3 2000/08/17 19:46:26 cpqbld Exp $ */
 
 /*
 
@@ -21,6 +21,7 @@ INCIDENTAL OR CONSEQUENTIAL DAMAGES, ARISING OUT OF OR IN ANY WAY CONNECTED
 WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 
 */
+/* $XFree86: xc/lib/font/Speedo/out_bl2d.c,v 1.3 1999/02/07 11:47:14 dawes Exp $ */
 
 /*************************** O U T _ B L 2 D . C *****************************
  *                                                                           *
@@ -28,6 +29,9 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
  ****************************************************************************/
 
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "spdo_prv.h"              /* General definitions for speedo */
 
 #define   CLOCKWISE  1
@@ -54,21 +58,15 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 /***** STATIC FUNCTIONS *****/
 
 #if INCL_2D
-#if PROTOS_AVAIL
 static void sp_draw_vector_to_2d(PROTO_DECL2 fix15 x0,fix15 y0,fix15 x1,fix15 y1,band_t GLOBALFAR *band);
 static void sp_add_intercept_2d(PROTO_DECL2 fix15 y,fix15 x);
 static void sp_proc_intercepts_2d(PROTO_DECL1);
-#else
-static void    sp_add_intercept_2d();
-static void    sp_proc_intercepts_2d();
-static void    sp_draw_vector_to_2d();
-#endif
 #endif
 
 #if INCL_2D
-FUNCTION boolean init_2d(specsarg)
+FUNCTION boolean init_2d(
 GDECL
-specs_t GLOBALFAR *specsarg;
+specs_t GLOBALFAR *specsarg)
 /*
  * init_out_2d() is called by sp_set_specs() to initialize the output module.
  * Returns TRUE if output module can accept requested specifications.
@@ -87,11 +85,11 @@ return TRUE;
 #endif
 
 #if INCL_2D
-FUNCTION boolean begin_char_2d(Psw, Pmin, Pmax)
+FUNCTION boolean begin_char_2d(
 GDECL
-point_t Psw;                   
-point_t Pmin;                   
-point_t Pmax;                   
+point_t Psw,
+point_t Pmin,
+point_t Pmax)
 /* Called once at the start of the character generation process
  * Initializes intercept table, either calculates pixel maxima or
  * decides that they need to be collected
@@ -113,10 +111,10 @@ return TRUE;
 
 
 #if INCL_2D
-FUNCTION void begin_contour_2d(P1, outside)
+FUNCTION void begin_contour_2d(
 GDECL
-point_t P1;                   
-boolean outside;
+point_t P1,
+boolean outside)
 /* Called at the start of each contour
  */
 {
@@ -133,9 +131,9 @@ sp_globals.y0_spxl = P1.y;
 #endif
 
 #if INCL_2D
-FUNCTION void line_2d(P1)
+FUNCTION void line_2d(
 GDECL
-point_t P1;
+point_t P1)
 /*
  * Called for each vector in the transformed character
  *     "draws" vector into intercept table
@@ -180,13 +178,13 @@ sp_globals.x0_spxl = P1.x;
 sp_globals.y0_spxl = P1.y; /* update endpoint */
 }
 
-FUNCTION static void sp_draw_vector_to_2d(x0, y0, x1, y1, band)
+FUNCTION static void sp_draw_vector_to_2d(
 GDECL
-fix15 x0;                /* X coordinate */
-fix15 y0;                /* Y coordinate */
-fix15 x1;
-fix15 y1;
-band_t GLOBALFAR *band;
+fix15 x0,                /* X coordinate */
+fix15 y0,                /* Y coordinate */
+fix15 x1,
+fix15 y1,
+band_t GLOBALFAR *band)
 {
 register fix15     how_many_y;       /* # of intercepts at y = n + 1/2  */
 register fix15     yc;               /* Current scan-line */
@@ -290,7 +288,6 @@ if (how_many_y < 0)
 
 #if INCL_2D
 FUNCTION boolean end_char_2d()
-GDECL
 /* Called when all character data has been output
  * Return TRUE if output process is complete
  * Return FALSE to repeat output of the transformed data beginning
@@ -530,11 +527,11 @@ else
 #endif
 
 #if INCL_2D
-FUNCTION static  void sp_add_intercept_2d(y, x)
+FUNCTION static  void sp_add_intercept_2d(
 GDECL
-fix15 y;                 /* Y coordinate in relative pixel units */
+fix15 y,                 /* Y coordinate in relative pixel units */
                          /* (0 is lowest sample in band) */
-fix15 x;                 /* X coordinate of intercept in subpixel units */
+fix15 x)                 /* X coordinate of intercept in subpixel units */
 
 /*  Called by line() to add an intercept to the intercept list structure
  */
@@ -609,7 +606,6 @@ if (++sp_globals.next_offset >= MAX_INTERCEPTS) /* Intercept buffer full? */
 
 #if INCL_2D
 FUNCTION static  void sp_proc_intercepts_2d()
-GDECL
 /*  Called by sp_make_char to output accumulated intercept lists
  *  Clips output to xmin, xmax, sp_globals.ymin, ymax boundaries
  */
@@ -623,8 +619,6 @@ register fix15 scan_line;
          fix15 local_bmap_xmax;
          fix15 first_y, last_y;
          fix15 j,k;
-         fix15 xmin, xmax;
-         boolean clipleft, clipright;
 
 #if INCL_CLIPPING
 if ((sp_globals.specs.flags & CLIP_LEFT) != 0)
@@ -681,7 +675,7 @@ if (sp_globals.x_scan_active)      /* If xscanning, we need to make sure we don'
                 sp_intercepts.cdr[i] = sp_intercepts.cdr[from];
                 sp_intercepts.cdr[from] = j;
                 }
-skip_xint:  i = k;
+	    i = k;
             }
         }
     }

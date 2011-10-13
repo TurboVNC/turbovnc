@@ -1,14 +1,13 @@
 /*
- * $TOG: cfb8line.c /main/33 1997/07/17 19:33:47 kaleb $
+ * $Xorg: cfb8line.c,v 1.4 2001/02/09 02:04:37 xorgcvs Exp $
  *
-Copyright (c) 1990  X Consortium
+Copyright 1990, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,21 +15,25 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
  *
  * Author:  Keith Packard, MIT X Consortium
  *
- * $XFree86: xc/programs/Xserver/cfb/cfb8line.c,v 3.2.2.3 1997/07/19 04:59:19 dawes Exp $
+ * $XFree86: xc/programs/Xserver/cfb/cfb8line.c,v 3.18tsi Exp $
  * Jeff Anton'x fixes: cfb8line.c   97/02/07
  */
 
-#include "X.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
 
 #include "gcstruct.h"
 #include "windowstr.h"
@@ -68,7 +71,8 @@ in this Software without prior written authorization from the X Consortium.
 
 #ifdef POLYSEGMENT
 
-# ifdef sun
+# if (defined(sun) || defined(__bsdi__)) && \
+     (defined(sparc) || defined(__sparc__))
 #  define WIDTH_FAST  1152
 # endif
 
@@ -275,7 +279,7 @@ FUNC_NAME(cfb8LineSS1Rect) (pDrawable, pGC, mode, npt, pptInit, pptInitOrig,
     int	npt;		/* number of points */
     DDXPointPtr pptInit, pptInitOrig;
     int	*x1p, *y1p, *x2p, *y2p;
-#endif /* POLYSEGEMENT */
+#endif /* POLYSEGMENT */
 {
     register long   e;
     register int    y1_or_e1;
@@ -297,8 +301,8 @@ FUNC_NAME(cfb8LineSS1Rect) (pDrawable, pGC, mode, npt, pptInit, pptInitOrig,
 #else
     register int    c2;
 #endif
-#ifndef ORIGIN
-    register int _x1, _y1, _x2, _y2;	/* only used for CoordModePrevious */
+#if !defined(ORIGIN) && !defined(POLYSEGMENT)
+    register int _x1 = 0, _y1 = 0, _x2 = 0, _y2 = 0;
     int extents_x1, extents_y1, extents_x2, extents_y2;
 #endif /* !ORIGIN */
 #ifndef PREVIOUS
@@ -333,13 +337,16 @@ FUNC_NAME(cfb8LineSS1Rect) (pDrawable, pGC, mode, npt, pptInit, pptInitOrig,
 #if PSZ == 24
     int xBase;     /* x of addr */
     int xOffset;   /* x of addrp */
-    int xOffset_t; /* x of t */
     PixelType   *addrLineEnd;
     char *addrb;
     int stepmajor3, stepminor3, majordx, minordx;
 #endif
+#ifndef POLYSEGMENT
+#ifndef ORIGIN
 #ifdef BUGFIX_clip
     int ex_x1, ex_y1, ex_x2, ex_y2;
+#endif
+#endif
 #endif
     int		    octant;
     unsigned int    bias = miGetZeroLineBias(pDrawable->pScreen);
@@ -349,18 +356,22 @@ FUNC_NAME(cfb8LineSS1Rect) (pDrawable, pGC, mode, npt, pptInit, pptInitOrig,
 #ifndef REARRANGE
     RROP_FETCH_GCPRIV(devPriv);
 #endif
-    extents = &devPriv->pCompositeClip->extents;
+    extents = &pGC->pCompositeClip->extents;
 #ifndef PREVIOUS
     c2 = *((int *) &pDrawable->x);
     c2 -= (c2 & 0x8000) << 1;
     upperleft = *((int *) &extents->x1) - c2;
     lowerright = *((int *) &extents->x2) - c2 - 0x00010001;
 #endif /* !PREVIOUS */
+#ifndef POLYSEGMENT
+#ifndef ORIGIN
 #ifdef BUGFIX_clip
     ex_x1 = extents->x1 - pDrawable->x;
     ex_y1 = extents->y1 - pDrawable->y;
     ex_x2 = extents->x2 - pDrawable->x;
     ex_y2 = extents->y2 - pDrawable->y;
+#endif
+#endif
 #endif
 #if PSZ == 24
     xBase = pDrawable->x;
@@ -552,10 +563,10 @@ FUNC_NAME(cfb8LineSS1Rect) (pDrawable, pGC, mode, npt, pptInit, pptInitOrig,
 #if PSZ == 24
  	if (stepmajor == 1  ||  stepmajor == -1){
  	    stepmajor3 = stepmajor * 3;
- 	    stepminor3 = stepminor * sizeof (long);
+ 	    stepminor3 = stepminor * sizeof (CfbBits);
  	    majordx = stepmajor; minordx = 0;
          } else {
- 	    stepmajor3 = stepmajor * sizeof (long);
+ 	    stepmajor3 = stepmajor * sizeof (CfbBits);
  	    stepminor3 = stepminor * 3;
  	    majordx = 0; minordx = stepminor;
          }
@@ -652,7 +663,7 @@ FUNC_NAME(cfb8LineSS1Rect) (pDrawable, pGC, mode, npt, pptInit, pptInitOrig,
 #undef body
 #ifdef POLYSEGMENT
 	}
-	else
+	else /* Polysegment horizontal line optimization */
 	{
 # ifdef REARRANGE
 	    register int    e3;
@@ -688,11 +699,22 @@ FUNC_NAME(cfb8LineSS1Rect) (pDrawable, pGC, mode, npt, pptInit, pptInitOrig,
 # if PSZ == 24
 	    y1_or_e1 = xOffset & 3;
 # else
-	    /* Round addrp down to the next PixelGroup boundary, and
-	     * set y1_or_e1 to the excess (in pixels)
-	     * (assumes PGSZB is a power of 2). */
-	    y1_or_e1 = (((unsigned long) addrp) & (PGSZB - 1)) / (PSZ / 8);
-	    addrp -= y1_or_e1;
+#  if PGSZ == 64 /* PIM value from <cfbmskbits.h> is not it! (for 16/32 PSZ)*/
+	    y1_or_e1 = ((long) addrp) & 0x7;
+	    addrp = (PixelType *) (((unsigned char *) addrp) - y1_or_e1);
+#  else
+	    y1_or_e1 = ((long) addrp) & PIM;
+	    addrp = (PixelType *) (((unsigned char *) addrp) - y1_or_e1);
+#  endif
+#if PGSZ == 32
+#  if PWSH != 2
+	    y1_or_e1 >>= (2 - PWSH);
+#  endif
+#else /* PGSZ == 64 */
+#  if PWSH != 3
+	    y1_or_e1 >>= (3 - PWSH);
+#  endif
+#endif /* PGSZ */
 # endif /* PSZ == 24 */
 #if PSZ == 24
 	    {
@@ -723,16 +745,19 @@ FUNC_NAME(cfb8LineSS1Rect) (pDrawable, pGC, mode, npt, pptInit, pptInitOrig,
 		  *addrp   = piQxelXor[2];
 		  break;
 		case 1:
-		  *addrp++ = ((*addrp) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
-		  *addrp++ = piQxelXor[1];
-		  *addrp   = piQxelXor[2];
+		  *addrp = ((*addrp) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+		  addrp++;
+		  *addrp = piQxelXor[1];
+		  addrp++;
+		  *addrp = piQxelXor[2];
 		  break;
 		case 2:
-		  *addrp++ =((*addrp) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
+		  *addrp = ((*addrp) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
+		  addrp++;
 		  *addrp = piQxelXor[2];
 		  break;
 		case 3:
-		  *addrp =((*addrp) & 0xFF) | (piQxelXor[2] & 0xFFFFFF00);
+		  *addrp = ((*addrp) & 0xFF) | (piQxelXor[2] & 0xFFFFFF00);
 		  break;
 		}
 		break;
@@ -744,12 +769,15 @@ FUNC_NAME(cfb8LineSS1Rect) (pDrawable, pGC, mode, npt, pptInit, pptInitOrig,
 		  *addrp = ((*addrp) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
 		  break;
 		case 1:
-		  *addrp++ = ((*addrp) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
-		  *addrp++ = piQxelXor[1];
+		  *addrp = ((*addrp) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+		  addrp++;
+		  *addrp = piQxelXor[1];
+		  addrp++;
 		  *addrp = ((*addrp) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
 		  break;
 		case 2:
-		  *addrp++ =((*addrp) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
+		  *addrp = ((*addrp) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
+		  addrp++;
 		  *addrp = ((*addrp) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
 		  break;
 		}
@@ -758,12 +786,14 @@ FUNC_NAME(cfb8LineSS1Rect) (pDrawable, pGC, mode, npt, pptInit, pptInitOrig,
 		switch(leftIndex){
 /*
 		case 2:
-		  *addrp++ = ((*addrp) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
+		  *addrp = ((*addrp) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
+		  addrp++;
 		  *addrp = ((*addrp) & 0xFFFFFF00) | (piQxelXor[2] & 0xFF);
 		  break;
 */
 		case 1:
-		  *addrp++ = ((*addrp) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+		  *addrp = ((*addrp) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+		  addrp++;
 		  *addrp = ((*addrp) & 0xFFFF0000) | (piQxelXor[1] & 0xFFFF);
 		  break;
 		case 0:
@@ -778,7 +808,8 @@ FUNC_NAME(cfb8LineSS1Rect) (pDrawable, pGC, mode, npt, pptInit, pptInitOrig,
 		}
 /*
 		else{
-		*addrp++ =  ((*addrp) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+		*addrp =  ((*addrp) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+		addrp++;
 		*addrp =  ((*addrp) & 0xFFFF0000) | (piQxelXor[1] & 0xFFFF);
 		}
 */
@@ -794,16 +825,22 @@ FUNC_NAME(cfb8LineSS1Rect) (pDrawable, pGC, mode, npt, pptInit, pptInitOrig,
 		  case 0:
 		    break;
 		  case 1:
-		    *addrp++ = ((*addrp) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
-		    *addrp++ = piQxelXor[1];
-		    *addrp++ = piQxelXor[2];
+		    *addrp = ((*addrp) & 0xFFFFFF) | (piQxelXor[0] & 0xFF000000);
+		    addrp++;
+		    *addrp = piQxelXor[1];
+		    addrp++;
+		    *addrp = piQxelXor[2];
+		    addrp++;
 		    break;
 		  case 2:
-		    *addrp++ = ((*addrp) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
-		    *addrp++ = piQxelXor[2];
+		    *addrp = ((*addrp) & 0xFFFF) | (piQxelXor[1] & 0xFFFF0000);
+		    addrp++;
+		    *addrp = piQxelXor[2];
+		    addrp++;
 		    break;
 		  case 3:
-		    *addrp++ = ((*addrp) & 0xFF) | (piQxelXor[2] & 0xFFFFFF00);
+		    *addrp = ((*addrp) & 0xFF) | (piQxelXor[2] & 0xFFFFFF00);
+		    addrp++;
 		    break;
 		  }
 		  while(nlmiddle--){
@@ -836,20 +873,23 @@ FUNC_NAME(cfb8LineSS1Rect) (pDrawable, pGC, mode, npt, pptInit, pptInitOrig,
 			| (piQxelXor[0] & 0xFFFFFF & e3);
 		      break;
 		    case 1:
-		      *addrp++ = ((*addrp) & (0xFFFFFF | ~(e3<<24)))
-				  | (piQxelXor[0] & 0xFF000000 & (e3<<24));
+		      *addrp = ((*addrp) & (0xFFFFFF | ~(e3<<24)))
+				  + (piQxelXor[0] & 0xFF000000 & (e3<<24));
+		      addrp++;
 		      *addrp = ((*addrp) & (0xFFFF0000|~(e3 >> 8)))
 				  | (piQxelXor[1] & 0xFFFF & (e3 >> 8));
 		      break;
 		    case 2:
-		      *addrp++ = ((*addrp) & (0xFFFF|~(e3 << 16)))
+		      *addrp = ((*addrp) & (0xFFFF|~(e3 << 16)))
 				  | (piQxelXor[1] & 0xFFFF0000 & (e3 << 16));
+		      addrp++;
 		      *addrp = ((*addrp) & (0xFFFFFF00|~(e3>>16)))
 				  | (piQxelXor[2] & 0xFF & (e3 >> 16));
 		      break;
 		    case 3:
-		      *addrp++ = ((*addrp) & (0xFF|~(e3<<8)))
+		      *addrp = ((*addrp) & (0xFF|~(e3<<8)))
 				  | (piQxelXor[2] & 0xFFFFFF00 & (e3<<8));
+		      addrp++;
 		      break;
 		    }
 		  }
@@ -883,32 +923,24 @@ FUNC_NAME(cfb8LineSS1Rect) (pDrawable, pGC, mode, npt, pptInit, pptInitOrig,
 	    }
 #else /* PSZ == 24 */
 	    if (y1_or_e1 + x1_or_len <= PPW)
-	      {
+	    {
 		if (x1_or_len)
-		  {
+		{
 		    maskpartialbits(y1_or_e1, x1_or_len, e)
-		      RROP_SOLID_MASK((unsigned long *) addrp, e);
-		  }
-	      }
+		    RROP_SOLID_MASK((CfbBits *) addrp, e);
+		}
+	    }
 	    else
 	    {
 	    	maskbits(y1_or_e1, x1_or_len, e, e3, x1_or_len)
 	    	if (e)
 	    	{
-		    RROP_SOLID_MASK((unsigned long *) addrp, e);
+		    RROP_SOLID_MASK((CfbBits *) addrp, e);
 		    addrp += PPW;
 	    	}
-#if 0
-		RROP_SPAN_lu(addrp, x1_or_len)
-#else
 		RROP_SPAN(addrp, x1_or_len)
-#endif
 	    	if (e3)
-#if 0
-		    RROP_SOLID_MASK_lu((unsigned long *) addrp, e3);
-#else
-		    RROP_SOLID_MASK((unsigned long *) addrp, e3);
-#endif
+		    RROP_SOLID_MASK((CfbBits *) addrp, e3);
 	    }
 #endif /* PSZ == 24 */
 	}
@@ -933,9 +965,7 @@ FUNC_NAME(cfb8LineSS1Rect) (pDrawable, pGC, mode, npt, pptInit, pptInitOrig,
 #endif /* !ORIGIN */	    
 	return ((DDXPointPtr) ppt - pptInit) - 1;
     }
-#endif /* POLYSEGMENT */
 
-#ifndef POLYSEGMENT
 # ifndef ORIGIN
 #  define C2  c2
 # else
@@ -1061,6 +1091,7 @@ FUNC_NAME(cfb8LineSS1Rect) (pDrawable, pGC, mode, npt, pptInit, pptInitOrig,
 # endif
     }
 #endif /* !POLYSEGMENT */
+    RROP_UNDECLARE;
     return -1;
 }
 
@@ -1078,14 +1109,21 @@ cfb8SegmentSS1Rect (pDrawable, pGC, nseg, pSegInit)
     int		    nseg;
     xSegment	    *pSegInit;
 {
-    int	    (*func)();
-    void    (*clip)();
+    int	    (*func)(DrawablePtr, GCPtr, int, xSegment *);
+    void    (*clip)(DrawablePtr, GCPtr, int, int, int, int, BoxPtr, Bool);
     int	    drawn;
     cfbPrivGCPtr    devPriv;
 
+#if defined(__arm32__) && PSZ != 8
+    /* XXX -JJK */
+    /* There is a painting bug when PSZ != 8; I need to track it down! */
+    cfbSegmentSS(pDrawable, pGC, nseg, pSegInit);
+    return;
+#endif
+
     devPriv = cfbGetGCPrivate(pGC);
 #ifdef NO_ONE_RECT
-    if (REGION_NUM_RECTS(devPriv->pCompositeClip) != 1)
+    if (REGION_NUM_RECTS(pGC->pCompositeClip) != 1)
     {
        cfbSegmentSS(pDrawable, pGC, nseg, pSegInit);
        return;
@@ -1118,7 +1156,7 @@ cfb8SegmentSS1Rect (pDrawable, pGC, nseg, pSegInit)
 	(*clip) (pDrawable, pGC,
 			 pSegInit[drawn-1].x1, pSegInit[drawn-1].y1,
 			 pSegInit[drawn-1].x2, pSegInit[drawn-1].y2,
-			 &devPriv->pCompositeClip->extents,
+			 &pGC->pCompositeClip->extents,
 			 pGC->capStyle == CapNotLast);
 	pSegInit += drawn;
 	nseg -= drawn;
@@ -1135,16 +1173,25 @@ cfb8LineSS1Rect (pDrawable, pGC, mode, npt, pptInit)
     int		npt;
     DDXPointPtr	pptInit;
 {
-    int	    (*func)();
-    void    (*clip)();
+    int	    (*func)(DrawablePtr, GCPtr, int, int, 
+		    DDXPointPtr, DDXPointPtr,
+		    int *, int *, int *, int *);
+    void    (*clip)(DrawablePtr, GCPtr, int, int, int, int, BoxPtr, Bool);
     int	    drawn;
     cfbPrivGCPtr    devPriv;
     int x1, y1, x2, y2;
     DDXPointPtr pptInitOrig = pptInit;
 
+#if defined(__arm32__) && PSZ != 8
+    /* XXX -JJK */
+    /* There is a painting bug when PSZ != 8; I need to track it down! */
+    cfbLineSS(pDrawable, pGC, mode, npt, pptInit);
+    return;
+#endif
+
     devPriv = cfbGetGCPrivate(pGC);
 #ifdef NO_ONE_RECT
-    if (REGION_NUM_RECTS(devPriv->pCompositeClip) != 1)
+    if (REGION_NUM_RECTS(pGC->pCompositeClip) != 1)
     {
        cfbLineSS(pDrawable, pGC, mode, npt, pptInit);
        return;
@@ -1178,7 +1225,7 @@ cfb8LineSS1Rect (pDrawable, pGC, mode, npt, pptInit)
 	    if (drawn == -1)
 		break;
 	    (*clip) (pDrawable, pGC, x1, y1, x2, y2,
-		     &devPriv->pCompositeClip->extents,
+		     &pGC->pCompositeClip->extents,
 		     drawn != npt - 1 || pGC->capStyle == CapNotLast);
 	    pptInit += drawn;
 	    npt -= drawn;
@@ -1197,7 +1244,7 @@ cfb8LineSS1Rect (pDrawable, pGC, mode, npt, pptInit)
 	    (*clip) (pDrawable, pGC,
 		     pptInit[drawn-1].x, pptInit[drawn-1].y,
 		     pptInit[drawn].x, pptInit[drawn].y,
-		     &devPriv->pCompositeClip->extents,
+		     &pGC->pCompositeClip->extents,
 		     drawn != npt - 1 || pGC->capStyle == CapNotLast);
 	    pptInit += drawn;
 	    npt -= drawn;
@@ -1230,7 +1277,6 @@ RROP_NAME (cfb8ClippedLine) (pDrawable, pGC, x1, y1, x2, y2, boxp, shorten)
     Bool	    pt1_clipped, pt2_clipped;
     int		    changex, changey, result;
 #if PSZ == 24
-    int xOffset;
     PixelType   *addrLineEnd;
     char *addrb;
     int stepx3, stepy3;
@@ -1348,14 +1394,13 @@ RROP_NAME (cfb8ClippedLine) (pDrawable, pGC, x1, y1, x2, y2, boxp, shorten)
     RROP_FETCH_GC(pGC);
 
 #if PSZ == 24
-    xOffset = x1;
     addrLineEnd = addr + (y1 * nwidth);
     addrb = (char *)addrLineEnd + x1 * 3;
     if (stepx == 1  ||  stepx == -1){
       stepx3 = stepx * 3;
-      stepy3 = stepy * sizeof (long);
+      stepy3 = stepy * sizeof (CfbBits);
     } else {
-      stepx3 = stepx * sizeof (long);
+      stepx3 = stepx * sizeof (CfbBits);
       stepy3 = stepy * 3;
     }
 #else
@@ -1439,7 +1484,7 @@ RROP_NAME (cfb8ClippedLine) (pDrawable, pGC, x1, y1, x2, y2, boxp, shorten)
 	{
 	    body body;
 	}
-	if (len > 0 && len & 1)
+	if (len & 1)
 	    body;
 
 	IMPORTANT_END;
@@ -1451,6 +1496,7 @@ RROP_NAME (cfb8ClippedLine) (pDrawable, pGC, x1, y1, x2, y2, boxp, shorten)
     RROP_SOLID(addrp);
 #endif
 #undef body
+    RROP_UNDECLARE
     }
 }
 

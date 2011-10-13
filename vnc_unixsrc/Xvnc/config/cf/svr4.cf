@@ -1,5 +1,8 @@
-XCOMM $TOG: svr4.cf /main/17 1997/06/08 20:08:31 kaleb $
-XCOMM $XFree86: xc/config/cf/svr4.cf,v 3.25.2.2 1997/07/05 15:55:30 dawes Exp $
+XCOMM $Xorg: svr4.cf,v 1.3 2000/08/17 19:41:48 cpqbld Exp $
+
+
+
+XCOMM $XFree86: xc/config/cf/svr4.cf,v 3.50 2003/11/04 01:25:31 dawes Exp $
 /*
  * A default OS name
  */
@@ -42,7 +45,9 @@ XCOMM $XFree86: xc/config/cf/svr4.cf,v 3.25.2.2 1997/07/05 15:55:30 dawes Exp $
 
 /* Some stuff that all SVR4s should have */
 
+#ifndef SystemV4
 #define SystemV4		YES
+#endif
 #ifndef HasLdRunPath
 #define HasLdRunPath		YES
 #endif
@@ -67,6 +72,11 @@ XCOMM $XFree86: xc/config/cf/svr4.cf,v 3.25.2.2 1997/07/05 15:55:30 dawes Exp $
 #ifndef CppCmd
 #define	CppCmd	/usr/ccs/lib/cpp
 #endif
+#ifndef RawCppCmd
+#if !defined(SunArchitecture)
+#define RawCppCmd CppCmd -Uunix -Ui386
+#endif
+#endif
 #ifndef LdCmd
 #define	LdCmd	/usr/ccs/bin/ld
 #endif
@@ -81,6 +91,21 @@ XCOMM $XFree86: xc/config/cf/svr4.cf,v 3.25.2.2 1997/07/05 15:55:30 dawes Exp $
 #endif
 #ifndef MkdirHierCmd
 #define MkdirHierCmd mkdir -p
+#endif
+
+/*
+ * Add the s option to ArCmd and ArAddCmd so that empty archives can be created
+ */
+#ifndef ArCmd
+#define ArCmd ArCmdBase cqs
+#endif
+#ifndef ArAddCmd
+#define ArAddCmd ArCmdBase rus
+#endif
+
+/* Libtool on SVR4 uses minor numbers */
+#ifndef LibtoolMinorVersions
+#define LibtoolMinorVersions    YES
 #endif
 
 #ifndef SunArchitecture
@@ -113,19 +138,42 @@ XCOMM $XFree86: xc/config/cf/svr4.cf,v 3.25.2.2 1997/07/05 15:55:30 dawes Exp $
 #endif
 #endif
 
+/* SVR4 (including Solaris) doesn't have setenv() and unsetenv() */
+#ifndef HasSetenv
+#define HasSetenv		NO
+#endif
+
 #ifndef SunArchitecture
 #if (OSMinorVersion == 0)
 #ifndef XawI18nDefines
 #define XawI18nDefines		-DUSE_XWCHAR_STRING
 #endif
+#ifndef UseSmartScheduler
+#define UseSmartScheduler	NO
+#endif
+#endif
+#ifdef i386Architecture
+#ifndef HasPosixRegex
+#define HasPosixRegex		NO
+#endif
+#endif
+#ifndef LogDirectory
+#define LogDirectory		$(VARDIR)/adm
 #endif
 #endif
 
+#ifndef HasGcc3
+#define HasGcc3 NO
+#endif
 #ifndef HasGcc2
-#define HasGcc2 NO
+#define HasGcc2 HasGcc3
 #endif
 #ifndef HasGcc
 #define HasGcc HasGcc2
+#endif
+
+#ifndef HasPerl
+#define HasPerl			NO
 #endif
 
 #ifdef i386Architecture
@@ -138,7 +186,7 @@ XCOMM $XFree86: xc/config/cf/svr4.cf,v 3.25.2.2 1997/07/05 15:55:30 dawes Exp $
 #define HasParallelMake		YES
 #endif
 #if HasParallelMake
-#define ParallelDefines		-P -B
+#define TopParallelDefines	-P -B
 #define MutexDirective		.MUTEX
 #endif
 #else /* SVR4 < 4.2.2 */
@@ -153,17 +201,14 @@ XCOMM $XFree86: xc/config/cf/svr4.cf,v 3.25.2.2 1997/07/05 15:55:30 dawes Exp $
 #ifndef DefaultCCOptions
 #if !HasGcc
 #define DefaultCCOptions -Xa -Dasm=__asm
-#else
-#ifdef UseInstalled
-#define DefaultCCOptions /**/
-#else
-#define DefaultCCOptions -ansi -pedantic
-#endif
 #endif
 #endif
 #ifndef DefaultCDebugFlags
 #if HasGcc
 #if HasGcc2
+#ifndef CcCmd
+#define CcCmd gcc
+#endif
 #define DefaultCDebugFlags DefaultGcc2i386Opt
 #else
 #define DefaultCDebugFlags -O2
@@ -174,12 +219,6 @@ XCOMM $XFree86: xc/config/cf/svr4.cf,v 3.25.2.2 1997/07/05 15:55:30 dawes Exp $
 #endif
 #ifndef ServerOSDefines
 #define ServerOSDefines -DDDXTIME XFree86ServerOSDefines
-#endif
-#ifndef BuildDynamicLoading
-#define BuildDynamicLoading NO
-#endif
-#if BuildDynamicLoading
-#define ServerExtraSysLibs -ldl
 #endif
 #endif
 
@@ -210,8 +249,42 @@ XCOMM $XFree86: xc/config/cf/svr4.cf,v 3.25.2.2 1997/07/05 15:55:30 dawes Exp $
 #endif
 #endif
 
-#ifdef i386Architecture
-#include <xfree86.cf>
+#ifndef SharedLibXdmGreet
+#define SharedLibXdmGreet	HasSharedLibraries
+#endif
+
+/*
+ * At this point, an XFree86 port to Sparc/SunOS cannot be officially supported
+ * because the system I am using to develop this is just a loaner from Sun.
+ */
+#if defined(i386Architecture) || defined(AMD64Architecture) || \
+    defined(PpcArchitecture) || \
+    (defined(SparcArchitecture) && \
+     defined(SunArchitecture) && \
+     (!defined(XorgServer) || (XorgServer)))
+#ifndef DoLoadableServer
+#define DoLoadableServer	YES
+#endif
+#include <xorg.cf>
+#endif
+
+#ifndef DoLoadableServer
+# define DoLoadableServer	NO
+#endif
+#ifndef GccWarningOptions
+# define GccWarningOptions	/* */
+#endif
+#ifndef XFree86ServerDefines
+# define XFree86ServerDefines	/* */
+#endif
+#ifndef XFree86ServerOSDefines
+# define XFree86ServerOSDefines -DDDXOSINIT
+#endif
+
+#if HasGcc2ForCplusplus
+# ifndef CplusplusLibCDir
+#  define CplusplusLibCDir	/usr/local/lib
+# endif
 #endif
 
 #include <sv4Lib.rules>

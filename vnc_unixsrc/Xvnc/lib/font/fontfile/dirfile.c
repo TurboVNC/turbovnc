@@ -1,19 +1,14 @@
-/* $XFree86: xc/lib/font/fontfile/dirfile.c,v 3.3 1997/01/27 06:56:28 dawes Exp $ */
-#ifndef lint
-static char *rid=
-    "$XConsortium: dirfile.c /main/12 1995/12/08 19:02:23 gildea $";
-#endif /* lint */
+/* $Xorg: dirfile.c,v 1.4 2001/02/09 02:04:03 xorgcvs Exp $ */
 
 /*
 
-Copyright (c) 1991  X Consortium
+Copyright 1991, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -21,15 +16,16 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 */
+/* $XFree86: xc/lib/font/fontfile/dirfile.c,v 3.17 2004/02/08 01:52:27 dawes Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
@@ -41,44 +37,47 @@ in this Software without prior written authorization from the X Consortium.
  * Read fonts.dir and fonts.alias files
  */
 
-#include "fntfilst.h"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include <X11/fonts/fntfilst.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
-#ifdef X_NOT_STDC_ENV
-extern int errno;
-#endif
 
-static int ReadFontAlias();
+static Bool AddFileNameAliases ( FontDirectoryPtr dir );
+static int ReadFontAlias ( char *directory, Bool isFile,
+			   FontDirectoryPtr *pdir );
+static int lexAlias ( FILE *file, char **lexToken );
+static int lexc ( FILE *file );
 
 int
-FontFileReadDirectory (directory, pdir)
-    char		*directory;
-    FontDirectoryPtr	*pdir;
+FontFileReadDirectory (char *directory, FontDirectoryPtr *pdir)
 {
-    char        file_name[MAXFONTNAMELEN];
+    char        file_name[MAXFONTFILENAMELEN];
     char        font_name[MAXFONTNAMELEN];
-    char        dir_file[MAXFONTNAMELEN];
-#ifdef FONTDIRATTRIB
-    char	dir_path[MAXFONTNAMELEN];
+    char        dir_file[MAXFONTFILENAMELEN];
+    char	dir_path[MAXFONTFILENAMELEN];
     char	*ptr;
-#endif
     FILE       *file;
     int         count,
                 i,
                 status;
     struct stat	statb;
+    static char format[24] = "";
 
     FontDirectoryPtr	dir = NullFontDirectory;
 
-#ifdef FONTDIRATTRIB
+    if (strlen(directory) + 1 + sizeof(FontDirFile) > sizeof(dir_file))
+	return BadFontPath;
+
     /* Check for font directory attributes */
-#ifndef __EMX__
-    if (ptr = strchr(directory, ':')) {
+#if !defined(__UNIXOS2__) && !defined(WIN32)
+    if ((ptr = strchr(directory, ':'))) {
 #else
-    /* OS/2 path might start with a drive letter, don't clip this */
-    if (ptr = strchr(directory+2, ':')) {
+    /* OS/2 and WIN32 path might start with a drive letter, don't clip this */
+    if ((ptr = strchr(directory+2, ':'))) {
 #endif
 	strncpy(dir_path, directory, ptr - directory);
 	dir_path[ptr - directory] = '\0';
@@ -86,16 +85,22 @@ FontFileReadDirectory (directory, pdir)
 	strcpy(dir_path, directory);
     }
     strcpy(dir_file, dir_path);
-#else
-    strcpy(dir_file, directory);
-#endif
     if (dir_file[strlen(dir_file) - 1] != '/')
 	strcat(dir_file, "/");
     strcat(dir_file, FontDirFile);
-    file = fopen(dir_file, "r");
+    file = fopen(dir_file, "rt");
     if (file) {
+	Bool found_font = FALSE;
+
+#ifndef WIN32        
 	if (fstat (fileno(file), &statb) == -1)
+#else
+	if (stat (dir_file, &statb) == -1)
+#endif
+        {
+            fclose(file);
 	    return BadFontPath;
+        }
 	count = fscanf(file, "%d\n", &i);
 	if ((count == EOF) || (count != 1)) {
 	    fclose(file);
@@ -107,8 +112,12 @@ FontFileReadDirectory (directory, pdir)
 	    return BadFontPath;
 	}
 	dir->dir_mtime = statb.st_mtime;
-	while ((count = fscanf(file, "%s %[^\n]\n", file_name, font_name)) != EOF) {
-#ifdef __EMX__
+	if (format[0] == '\0')
+	    sprintf(format, "%%%ds %%%d[^\n]\n",
+		MAXFONTFILENAMELEN-1, MAXFONTNAMELEN-1);
+
+	while ((count = fscanf(file, format, file_name, font_name)) != EOF) {
+#if defined(__UNIXOS2__) || defined(WIN32)
 	    /* strip any existing trailing CR */
 	    for (i=0; i<strlen(font_name); i++) {
 		if (font_name[i]=='\r') font_name[i] = '\0';
@@ -119,22 +128,20 @@ FontFileReadDirectory (directory, pdir)
 		fclose(file);
 		return BadFontPath;
 	    }
-	    if (!FontFileAddFontFile (dir, font_name, file_name))
-	    {
-		FontFileFreeDir (dir);
-		fclose(file);
-		return BadFontPath;
-	    }
+	    if (FontFileAddFontFile (dir, font_name, file_name))
+		found_font = TRUE;
+	}
+	if (!found_font) {
+	    FontFileFreeDir (dir);
+	    fclose(file);
+	    return BadFontPath;
 	}
 	fclose(file);
+	
     } else if (errno != ENOENT) {
 	return BadFontPath;
     }
-#ifdef FONTDIRATTRIB
     status = ReadFontAlias(dir_path, FALSE, &dir);
-#else
-    status = ReadFontAlias(directory, FALSE, &dir);
-#endif
     if (status != Successful) {
 	if (dir)
 	    FontFileFreeDir (dir);
@@ -161,11 +168,13 @@ FontFileReadDirectory (directory, pdir)
 }
 
 Bool
-FontFileDirectoryChanged(dir)
-    FontDirectoryPtr	dir;
+FontFileDirectoryChanged(FontDirectoryPtr dir)
 {
-    char	dir_file[MAXFONTNAMELEN];
+    char	dir_file[MAXFONTFILENAMELEN];
     struct stat	statb;
+
+    if (strlen(dir->directory) + sizeof(FontDirFile) > sizeof(dir_file))
+	return FALSE;
 
     strcpy (dir_file, dir->directory);
     strcat (dir_file, FontDirFile);
@@ -195,11 +204,10 @@ FontFileDirectoryChanged(dir)
  */
 
 static Bool
-AddFileNameAliases(dir)
-    FontDirectoryPtr	dir;
+AddFileNameAliases(FontDirectoryPtr dir)
 {
     int		    i;
-    char	    copy[MAXFONTNAMELEN];
+    char	    copy[MAXFONTFILENAMELEN];
     char	    *fileName;
     FontTablePtr    table;
     FontRendererPtr renderer;
@@ -216,6 +224,8 @@ AddFileNameAliases(dir)
 	    continue;
 	
 	len = strlen (fileName) - renderer->fileSuffixLen;
+	if (len >= sizeof(copy))
+	    continue;
 	CopyISOLatin1Lowered (copy, fileName, len);
 	copy[len] = '\0';
 	name.name = copy;
@@ -247,22 +257,17 @@ AddFileNameAliases(dir)
  * token types
  */
 
-static int  lexAlias(), lexc();
-
 #define NAME		0
 #define NEWLINE		1
 #define DONE		2
 #define EALLOC		3
 
 static int
-ReadFontAlias(directory, isFile, pdir)
-    char		*directory;
-    Bool		isFile;
-    FontDirectoryPtr	*pdir;
+ReadFontAlias(char *directory, Bool isFile, FontDirectoryPtr *pdir)
 {
     char		alias[MAXFONTNAMELEN];
     char		font_name[MAXFONTNAMELEN];
-    char		alias_file[MAXFONTNAMELEN];
+    char		alias_file[MAXFONTFILENAMELEN];
     FILE		*file;
     FontDirectoryPtr	dir;
     int			token;
@@ -270,14 +275,18 @@ ReadFontAlias(directory, isFile, pdir)
     int			status = Successful;
     struct stat		statb;
 
+    if (strlen(directory) >= sizeof(alias_file))
+	return BadFontPath;
     dir = *pdir;
     strcpy(alias_file, directory);
     if (!isFile) {
+	if (strlen(directory) + 1 + sizeof(FontAliasFile) > sizeof(alias_file))
+	    return BadFontPath;
 	if (directory[strlen(directory) - 1] != '/')
 	    strcat(alias_file, "/");
 	strcat(alias_file, FontAliasFile);
     }
-    file = fopen(alias_file, "r");
+    file = fopen(alias_file, "rt");
     if (!file)
 	return ((errno == ENOENT) ? Successful : BadFontPath);
     if (!dir)
@@ -287,7 +296,11 @@ ReadFontAlias(directory, isFile, pdir)
 	fclose (file);
 	return AllocError;
     }
+#ifndef WIN32
     if (fstat (fileno (file), &statb) == -1)
+#else
+    if (stat (alias_file, &statb) == -1)
+#endif
     {
 	fclose (file);
 	return BadFontPath;
@@ -305,6 +318,10 @@ ReadFontAlias(directory, isFile, pdir)
 	    status = AllocError;
 	    break;
 	case NAME:
+	    if (strlen(lexToken) >= sizeof(alias)) {
+		status = BadFontPath;
+		break;
+	    }
 	    strcpy(alias, lexToken);
 	    token = lexAlias(file, &lexToken);
 	    switch (token) {
@@ -321,12 +338,12 @@ ReadFontAlias(directory, isFile, pdir)
 		status = AllocError;
 		break;
 	    case NAME:
-		CopyISOLatin1Lowered((unsigned char *) alias,
-				     (unsigned char *) alias,
-				     strlen(alias));
-		CopyISOLatin1Lowered((unsigned char *) font_name,
-				     (unsigned char *) lexToken,
-				     strlen(lexToken));
+		if (strlen(lexToken) >= sizeof(font_name)) {
+		    status = BadFontPath;
+		    break;
+		}
+		CopyISOLatin1Lowered(alias, alias, strlen(alias));
+		CopyISOLatin1Lowered(font_name, lexToken, strlen(lexToken));
 		if (!FontFileAddFontAlias (dir, alias, font_name))
 		    status = AllocError;
 		break;
@@ -347,9 +364,7 @@ ReadFontAlias(directory, isFile, pdir)
 static int  charClass;
 
 static int
-lexAlias(file, lexToken)
-    FILE       *file;
-    char      **lexToken;
+lexAlias(FILE *file, char **lexToken)
 {
     int         c;
     char       *t;
@@ -412,6 +427,8 @@ lexAlias(file, lexToken)
 		break;
 	    case Comment:
 		continue;
+	    default:
+		break;
 	    }
 	    *t++ = c;
 	    ++count;
@@ -447,8 +464,7 @@ lexAlias(file, lexToken)
 }
 
 static int
-lexc(file)
-    FILE       *file;
+lexc(FILE *file)
 {
     int         c;
 

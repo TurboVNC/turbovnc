@@ -1,40 +1,67 @@
-XCOMM $XConsortium: Imakefile,v 1.2 95/01/13 20:28:14 kaleb Exp $
-XCOMM $XFree86: xc/programs/Xserver/include/Imakefile,v 3.5.4.1 1997/05/12 12:52:39 hohndel Exp $
+XCOMM $Xorg: Imakefile,v 1.3 2000/08/17 19:53:29 cpqbld Exp $
+
+
+
+
+XCOMM $XFree86: xc/programs/Xserver/include/Imakefile,v 3.21 2001/01/17 22:36:56 dawes Exp $
+
+HEADERS = os.h misc.h
+
+#if defined(XorgVersion) || defined(XFree86Version) \
+	|| defined(BSDOSArchitecture)
+#if DoLoadableServer
+LinkSourceFile(xf86Module.h,$(XF86COMSRC))
+LinkSourceFile(xf86Opt.h,$(XF86COMSRC))
+#endif
+LinkSourceFile(xf86_libc.h,$(XF86OSSRC))
+LinkSourceFile(xf86_ansic.h,$(XF86OSSRC))
+LinkSourceFile(xf86Version.h,$(XF86SRC))
+LinkSourceFile(compiler.h,$(XF86COMSRC))
+#endif
+
+LinkSourceFile(osdep.h,../os)
+#ifdef cygwinArchitecture
+LinkFile(xxwindow.h,window.h)
+#endif
 
 all::
 
-InstallLinkKitNonExecFile(closure.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(colormap.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(colormapst.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(cursor.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(cursorstr.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(dix.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(dixfont.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(dixfontstr.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(dixstruct.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(extension.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(extnsionst.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(gc.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(gcstruct.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(input.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(inputstr.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(misc.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(miscstruct.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(opaque.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(os.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(pixmap.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(pixmapstr.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(property.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(resource.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(region.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(regionstr.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(screenint.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(scrnintstr.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(servermd.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(site.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(validate.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(window.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(windowstr.h,$(LINKKITDIR)/include)
-
 depend::
 
+InstallDriverSDKNonExecFile(XIstubs.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(bstore.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(bstorestr.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(colormap.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(colormapst.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(cursor.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(cursorstr.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(dix.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(dixstruct.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(exevents.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(extension.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(extnsionst.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(gc.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(gcstruct.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(globals.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(input.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(inputstr.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(misc.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(miscstruct.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(opaque.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(os.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(pixmap.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(pixmapstr.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(property.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(propertyst.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(region.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(regionstr.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(resource.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(screenint.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(scrnintstr.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(servermd.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(validate.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(window.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(windowstr.h,$(DRIVERSDKINCLUDEDIR))
+
+BuildIncludes($(HEADERS),X11,..)
+InstallMultipleFlags($(HEADERS),$(INCDIR)/X11,$(INSTINCFLAGS))

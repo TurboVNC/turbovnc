@@ -1,15 +1,13 @@
 /*
- * $XConsortium: cfbmap.h,v 1.11 95/06/08 23:20:39 gildea Exp $
- * $XFree86: xc/programs/Xserver/cfb/cfbmap.h,v 3.3 1996/06/29 09:05:40 dawes Exp $
+ * $Xorg: cfbmap.h,v 1.4 2001/02/09 02:04:38 xorgcvs Exp $
  *
-Copyright (c) 1991  X Consortium
+Copyright 1991, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -17,181 +15,330 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
  *
  * Author:  Keith Packard, MIT X Consortium
  */
+
+/* $XFree86: xc/programs/Xserver/cfb/cfbmap.h,v 3.11tsi Exp $ */
 
 /*
  * Map names around so that multiple depths can be supported simultaneously
  */
 
-/* a losing vendor cpp dumps core if we define NAME in terms of CATNAME */
+#if 0
+#undef QuartetBitsTable
+#undef QuartetPixelMaskTable
+#undef cfb8ClippedLineCopy
+#undef cfb8ClippedLineGeneral 
+#undef cfb8ClippedLineXor
+#undef cfb8LineSS1Rect
+#undef cfb8LineSS1RectCopy
+#undef cfb8LineSS1RectGeneral 
+#undef cfb8LineSS1RectPreviousCopy
+#undef cfb8LineSS1RectXor
+#undef cfb8SegmentSS1Rect
+#undef cfb8SegmentSS1RectCopy
+#undef cfb8SegmentSS1RectGeneral 
+#undef cfb8SegmentSS1RectShiftCopy
+#undef cfb8SegmentSS1RectXor
+#undef cfbAllocatePrivates
+#undef cfbBSFuncRec
+#undef cfbBitBlt
+#undef cfbBresD
+#undef cfbBresS
+#undef cfbChangeWindowAttributes
+#undef cfbCloseScreen
+#undef cfbCopyArea
+#undef cfbCopyImagePlane
+#undef cfbCopyPixmap
+#undef cfbCopyPlane
+#undef cfbCopyPlaneReduce
+#undef cfbCopyRotatePixmap
+#undef cfbCopyWindow
+#undef cfbCreateGC
+#undef cfbCreatePixmap
+#undef cfbCreateScreenResources
+#undef cfbCreateWindow
+#undef cfbDestroyPixmap
+#undef cfbDestroyWindow
+#undef cfbDoBitblt
+#undef cfbDoBitbltCopy
+#undef cfbDoBitbltGeneral
+#undef cfbDoBitbltOr
+#undef cfbDoBitbltXor
+#undef cfbFillBoxSolid
+#undef cfbFillBoxTile32
+#undef cfbFillBoxTile32sCopy
+#undef cfbFillBoxTile32sGeneral
+#undef cfbFillBoxTileOdd
+#undef cfbFillBoxTileOddCopy
+#undef cfbFillBoxTileOddGeneral
+#undef cfbFillPoly1RectCopy
+#undef cfbFillPoly1RectGeneral
+#undef cfbFillRectSolidCopy
+#undef cfbFillRectSolidGeneral
+#undef cfbFillRectSolidXor
+#undef cfbFillRectTile32Copy
+#undef cfbFillRectTile32General
+#undef cfbFillRectTileOdd
+#undef cfbFillSpanTile32sCopy
+#undef cfbFillSpanTile32sGeneral
+#undef cfbFillSpanTileOddCopy
+#undef cfbFillSpanTileOddGeneral
+#undef cfbFinishScreenInit
+#undef cfbGCFuncs
+#undef cfbGCPrivateIndex
+#undef cfbGetImage
+#undef cfbGetScreenPixmap
+#undef cfbGetSpans
+#undef cfbHorzS
+#undef cfbImageGlyphBlt8
+#undef cfbInitializeColormap
+#undef cfbInstallColormap
+#undef cfbLineSD
+#undef cfbLineSS
+#undef cfbListInstalledColormaps
+#undef cfbMapWindow
+#undef cfbMatchCommon
+#undef cfbNonTEOps
+#undef cfbNonTEOps1Rect
+#undef cfbPadPixmap
+#undef cfbPaintWindow
+#undef cfbPolyFillArcSolidCopy
+#undef cfbPolyFillArcSolidGeneral
+#undef cfbPolyFillRect
+#undef cfbPolyGlyphBlt8
+#undef cfbPolyGlyphRop8
+#undef cfbPolyPoint
+#undef cfbPositionWindow
+#undef cfbPutImage
+#undef cfbReduceRasterOp
+#undef cfbResolveColor
+#undef cfbRestoreAreas
+#undef cfbSaveAreas
+#undef cfbScreenInit
+#undef cfbScreenPrivateIndex
+#undef cfbSegmentSD
+#undef cfbSegmentSS
+#undef cfbSetScanline
+#undef cfbSetScreenPixmap
+#undef cfbSetSpans
+#undef cfbSetupScreen
+#undef cfbSolidSpansCopy
+#undef cfbSolidSpansGeneral
+#undef cfbSolidSpansXor
+#undef cfbStippleStack
+#undef cfbStippleStackTE
+#undef cfbTEGlyphBlt
+#undef cfbTEOps
+#undef cfbTEOps1Rect
+#undef cfbTile32FSCopy
+#undef cfbTile32FSGeneral
+#undef cfbUninstallColormap
+#undef cfbUnmapWindow
+#undef cfbUnnaturalStippleFS
+#undef cfbUnnaturalTileFS
+#undef cfbValidateGC
+#undef cfbVertS
+#undef cfbWindowPrivateIndex
+#undef cfbXRotatePixmap
+#undef cfbYRotatePixmap
+#undef cfbZeroPolyArcSS8Copy
+#undef cfbZeroPolyArcSS8General
+#undef cfbZeroPolyArcSS8Xor
+#undef cfbendpartial
+#undef cfbendtab
+#undef cfbmask
+#undef cfbrmask
+#undef cfbstartpartial
+#undef cfbstarttab
+#endif
+
+/* a losing vendor cpp dumps core if we define CFBNAME in terms of CATNAME */
 
 #if PSZ != 8
+
 #if PSZ == 32
-#if (defined(__STDC__) && !defined(UNIXCPP)) || defined(ANSICPP)
-#define NAME(subname) cfb32##subname
+#if !defined(UNIXCPP) || defined(ANSICPP)
+#define CFBNAME(subname) cfb32##subname
 #else
-#define NAME(subname) cfb32/**/subname
+#define CFBNAME(subname) cfb32/**/subname
 #endif
 #endif
 
 #if PSZ == 24
-#if (defined(__STDC__) && !defined(UNIXCPP)) || defined(ANSICPP)
-#define NAME(subname) cfb24##subname
+#if !defined(UNIXCPP) || defined(ANSICPP)
+#define CFBNAME(subname) cfb24##subname
 #else
-#define NAME(subname) cfb24/**/subname
+#define CFBNAME(subname) cfb24/**/subname
 #endif
 #endif
 
 #if PSZ == 16
-#if (defined(__STDC__) && !defined(UNIXCPP)) || defined(ANSICPP)
-#define NAME(subname) cfb16##subname
+#if !defined(UNIXCPP) || defined(ANSICPP)
+#define CFBNAME(subname) cfb16##subname
 #else
-#define NAME(subname) cfb16/**/subname
+#define CFBNAME(subname) cfb16/**/subname
 #endif
 #endif
 
 #if PSZ == 4
-#if (defined(__STDC__) && !defined(UNIXCPP)) || defined(ANSICPP)
-#define NAME(subname) cfb4##subname
+#if !defined(UNIXCPP) || defined(ANSICPP)
+#define CFBNAME(subname) cfb4##subname
 #else
-#define NAME(subname) cfb4/**/subname
+#define CFBNAME(subname) cfb4/**/subname
 #endif
 #endif
 
-#ifndef NAME
+#ifndef CFBNAME
 cfb can not hack PSZ yet
 #endif
 
-#if (defined(__STDC__) && !defined(UNIXCPP)) || defined(ANSICPP)
+#undef CATNAME
+
+#if !defined(UNIXCPP) || defined(ANSICPP)
 #define CATNAME(prefix,subname) prefix##subname
 #else
 #define CATNAME(prefix,subname) prefix/**/subname
 #endif
 
-#define cfbScreenPrivateIndex NAME(ScreenPrivateIndex)
-#define QuartetBitsTable NAME(QuartetBitsTable)
-#define QuartetPixelMaskTable NAME(QuartetPixelMaskTable)
-#define cfbAllocatePrivates NAME(AllocatePrivates)
-#define cfbBSFuncRec NAME(BSFuncRec)
-#define cfbBitBlt NAME(BitBlt)
-#define cfbBresD NAME(BresD)
-#define cfbBresS NAME(BresS)
-#define cfbChangeWindowAttributes NAME(ChangeWindowAttributes)
-#define cfbCloseScreen NAME(CloseScreen)
-#define cfbCopyArea NAME(CopyArea)
-#define cfbCopyImagePlane NAME(CopyImagePlane)
-#define cfbCopyPixmap NAME(CopyPixmap)
-#define cfbCopyPlane NAME(CopyPlane)
-#define cfbCopyRotatePixmap NAME(CopyRotatePixmap)
-#define cfbCopyWindow NAME(CopyWindow)
-#define cfbCreateGC NAME(CreateGC)
-#define cfbCreatePixmap NAME(CreatePixmap)
-#define cfbCreateWindow NAME(CreateWindow)
-#define cfbCreateScreenResources NAME(CreateScreenResources)
-#define cfbDestroyPixmap NAME(DestroyPixmap)
-#define cfbDestroyWindow NAME(DestroyWindow)
-#define cfbDoBitblt NAME(DoBitblt)
-#define cfbDoBitbltCopy NAME(DoBitbltCopy)
-#define cfbDoBitbltGeneral NAME(DoBitbltGeneral)
-#define cfbDoBitbltOr NAME(DoBitbltOr)
-#define cfbDoBitbltXor NAME(DoBitbltXor)
-#define cfbFillBoxSolid NAME(FillBoxSolid)
-#define cfbFillBoxTile32 NAME(FillBoxTile32)
-#define cfbFillBoxTile32sCopy NAME(FillBoxTile32sCopy)
-#define cfbFillBoxTile32sGeneral NAME(FillBoxTile32sGeneral)
-#define cfbFillBoxTileOdd NAME(FillBoxTileOdd)
-#define cfbFillBoxTileOddCopy NAME(FillBoxTileOddCopy)
-#define cfbFillBoxTileOddGeneral NAME(FillBoxTileOddGeneral)
-#define cfbFillPoly1RectCopy NAME(FillPoly1RectCopy)
-#define cfbFillPoly1RectGeneral NAME(FillPoly1RectGeneral)
-#define cfbFillRectSolidCopy NAME(FillRectSolidCopy)
-#define cfbFillRectSolidGeneral NAME(FillRectSolidGeneral)
-#define cfbFillRectSolidXor NAME(FillRectSolidXor)
-#define cfbFillRectTile32Copy NAME(FillRectTile32Copy)
-#define cfbFillRectTile32General NAME(FillRectTile32General)
-#define cfbFillRectTileOdd NAME(FillRectTileOdd)
-#define cfbFillSpanTile32sCopy NAME(FillSpanTile32sCopy)
-#define cfbFillSpanTile32sGeneral NAME(FillSpanTile32sGeneral)
-#define cfbFillSpanTileOddCopy NAME(FillSpanTileOddCopy)
-#define cfbFillSpanTileOddGeneral NAME(FillSpanTileOddGeneral)
-#define cfbFinishScreenInit NAME(FinishScreenInit)
-#define cfbGCFuncs NAME(GCFuncs)
-#define cfbGetImage NAME(GetImage)
-#define cfbGetSpans NAME(GetSpans)
-#define cfbHorzS NAME(HorzS)
-#define cfbImageGlyphBlt8 NAME(ImageGlyphBlt8)
-#define cfbLineSD NAME(LineSD)
-#define cfbLineSS NAME(LineSS)
-#define cfbMapWindow NAME(MapWindow)
-#define cfbMatchCommon NAME(MatchCommon)
-#define cfbNonTEOps NAME(NonTEOps)
-#define cfbNonTEOps1Rect NAME(NonTEOps1Rect)
-#define cfbPadPixmap NAME(PadPixmap)
-#define cfbPaintWindow NAME(PaintWindow)
-#define cfbPolyGlyphBlt8 NAME(PolyGlyphBlt8)
-#define cfbPolyGlyphRop8 NAME(PolyGlyphRop8)
-#define cfbPolyFillArcSolidCopy NAME(PolyFillArcSolidCopy)
-#define cfbPolyFillArcSolidGeneral NAME(PolyFillArcSolidGeneral)
-#define cfbPolyFillRect NAME(PolyFillRect)
-#define cfbPolyPoint NAME(PolyPoint)
-#define cfbPositionWindow NAME(PositionWindow)
-#define cfbPutImage NAME(PutImage)
-#define cfbReduceRasterOp NAME(ReduceRasterOp)
-#define cfbRestoreAreas NAME(RestoreAreas)
-#define cfbSaveAreas NAME(SaveAreas)
-#define cfbScreenInit NAME(ScreenInit)
-#define cfbSegmentSD NAME(SegmentSD)
-#define cfbSegmentSS NAME(SegmentSS)
-#define cfbSetScanline NAME(SetScanline)
-#define cfbSetSpans NAME(SetSpans)
-#define cfbSetupScreen NAME(SetupScreen)
-#define cfbSolidSpansCopy NAME(SolidSpansCopy)
-#define cfbSolidSpansGeneral NAME(SolidSpansGeneral)
-#define cfbSolidSpansXor NAME(SolidSpansXor)
-#define cfbStippleStack NAME(StippleStack)
-#define cfbStippleStackTE NAME(StippleStackTE)
-#define cfbTEGlyphBlt NAME(TEGlyphBlt)
-#define cfbTEOps NAME(TEOps)
-#define cfbTEOps1Rect NAME(TEOps1Rect)
-#define cfbTile32FSCopy NAME(Tile32FSCopy)
-#define cfbTile32FSGeneral NAME(Tile32FSGeneral)
-#define cfbUnmapWindow NAME(UnmapWindow)
-#define cfbUnnaturalStippleFS NAME(UnnaturalStippleFS)
-#define cfbUnnaturalTileFS NAME(UnnaturalTileFS)
-#define cfbValidateGC NAME(ValidateGC)
-#define cfbVertS NAME(VertS)
-#define cfbXRotatePixmap NAME(XRotatePixmap)
-#define cfbYRotatePixmap NAME(YRotatePixmap)
-#define cfbendpartial NAME(endpartial)
-#define cfbendtab NAME(endtab)
-#define cfbmask NAME(mask)
-#define cfbrmask NAME(rmask)
-#define cfbstartpartial NAME(startpartial)
-#define cfbstarttab NAME(starttab)
-#define cfb8LineSS1Rect NAME(LineSS1Rect)
-#define cfb8SegmentSS1Rect NAME(SegmentSS1Rect)
-#define cfb8ClippedLineCopy NAME(ClippedLineCopy)
-#define cfb8ClippedLineXor NAME(ClippedLineXor)
-#define cfb8ClippedLineGeneral  NAME(ClippedLineGeneral )
-#define cfb8SegmentSS1RectCopy NAME(SegmentSS1RectCopy)
-#define cfb8SegmentSS1RectXor NAME(SegmentSS1RectXor)
-#define cfb8SegmentSS1RectGeneral  NAME(SegmentSS1RectGeneral )
-#define cfb8SegmentSS1RectShiftCopy NAME(SegmentSS1RectShiftCopy)
-#define cfb8LineSS1RectCopy NAME(LineSS1RectCopy)
-#define cfb8LineSS1RectXor NAME(LineSS1RectXor)
-#define cfb8LineSS1RectGeneral  NAME(LineSS1RectGeneral )
-#define cfb8LineSS1RectPreviousCopy NAME(LineSS1RectPreviousCopy)
-#define cfbZeroPolyArcSS8Copy NAME(ZeroPolyArcSSCopy)
-#define cfbZeroPolyArcSS8Xor NAME(ZeroPolyArcSSXor)
-#define cfbZeroPolyArcSS8General NAME(ZeroPolyArcSSGeneral)
+#define QuartetBitsTable CFBNAME(QuartetBitsTable)
+#define QuartetPixelMaskTable CFBNAME(QuartetPixelMaskTable)
+#define cfb8ClippedLineCopy CFBNAME(ClippedLineCopy)
+#define cfb8ClippedLineGeneral  CFBNAME(ClippedLineGeneral )
+#define cfb8ClippedLineXor CFBNAME(ClippedLineXor)
+#define cfb8LineSS1Rect CFBNAME(LineSS1Rect)
+#define cfb8LineSS1RectCopy CFBNAME(LineSS1RectCopy)
+#define cfb8LineSS1RectGeneral  CFBNAME(LineSS1RectGeneral )
+#define cfb8LineSS1RectPreviousCopy CFBNAME(LineSS1RectPreviousCopy)
+#define cfb8LineSS1RectXor CFBNAME(LineSS1RectXor)
+#define cfb8SegmentSS1Rect CFBNAME(SegmentSS1Rect)
+#define cfb8SegmentSS1RectCopy CFBNAME(SegmentSS1RectCopy)
+#define cfb8SegmentSS1RectGeneral  CFBNAME(SegmentSS1RectGeneral )
+#define cfb8SegmentSS1RectShiftCopy CFBNAME(SegmentSS1RectShiftCopy)
+#define cfb8SegmentSS1RectXor CFBNAME(SegmentSS1RectXor)
+#define cfbAllocatePrivates CFBNAME(AllocatePrivates)
+#define cfbBSFuncRec CFBNAME(BSFuncRec)
+#define cfbBitBlt CFBNAME(BitBlt)
+#define cfbBresD CFBNAME(BresD)
+#define cfbBresS CFBNAME(BresS)
+#define cfbChangeWindowAttributes CFBNAME(ChangeWindowAttributes)
+#define cfbClearVisualTypes CFBNAME(cfbClearVisualTypes)
+#define cfbCloseScreen CFBNAME(CloseScreen)
+#define cfbCreateDefColormap CFBNAME (cfbCreateDefColormap)
+#define cfbCopyArea CFBNAME(CopyArea)
+#define cfbCopyImagePlane CFBNAME(CopyImagePlane)
+#define cfbCopyPixmap CFBNAME(CopyPixmap)
+#define cfbCopyPlane CFBNAME(CopyPlane)
+#define cfbCopyPlaneReduce CFBNAME(CopyPlaneReduce)
+#define cfbCopyRotatePixmap CFBNAME(CopyRotatePixmap)
+#define cfbCopyWindow CFBNAME(CopyWindow)
+#define cfbCreateGC CFBNAME(CreateGC)
+#define cfbCreatePixmap CFBNAME(CreatePixmap)
+#define cfbCreateScreenResources CFBNAME(CreateScreenResources)
+#define cfbCreateWindow CFBNAME(CreateWindow)
+#define cfbDestroyPixmap CFBNAME(DestroyPixmap)
+#define cfbDestroyWindow CFBNAME(DestroyWindow)
+#define cfbDoBitblt CFBNAME(DoBitblt)
+#define cfbDoBitbltCopy CFBNAME(DoBitbltCopy)
+#define cfbDoBitbltGeneral CFBNAME(DoBitbltGeneral)
+#define cfbDoBitbltOr CFBNAME(DoBitbltOr)
+#define cfbDoBitbltXor CFBNAME(DoBitbltXor)
+#define cfbExpandDirectColors CFBNAME(cfbExpandDirectColors)
+#define cfbFillBoxSolid CFBNAME(FillBoxSolid)
+#define cfbFillBoxTile32 CFBNAME(FillBoxTile32)
+#define cfbFillBoxTile32sCopy CFBNAME(FillBoxTile32sCopy)
+#define cfbFillBoxTile32sGeneral CFBNAME(FillBoxTile32sGeneral)
+#define cfbFillBoxTileOdd CFBNAME(FillBoxTileOdd)
+#define cfbFillBoxTileOddCopy CFBNAME(FillBoxTileOddCopy)
+#define cfbFillBoxTileOddGeneral CFBNAME(FillBoxTileOddGeneral)
+#define cfbFillPoly1RectCopy CFBNAME(FillPoly1RectCopy)
+#define cfbFillPoly1RectGeneral CFBNAME(FillPoly1RectGeneral)
+#define cfbFillRectSolidCopy CFBNAME(FillRectSolidCopy)
+#define cfbFillRectSolidGeneral CFBNAME(FillRectSolidGeneral)
+#define cfbFillRectSolidXor CFBNAME(FillRectSolidXor)
+#define cfbFillRectTile32Copy CFBNAME(FillRectTile32Copy)
+#define cfbFillRectTile32General CFBNAME(FillRectTile32General)
+#define cfbFillRectTileOdd CFBNAME(FillRectTileOdd)
+#define cfbFillSpanTile32sCopy CFBNAME(FillSpanTile32sCopy)
+#define cfbFillSpanTile32sGeneral CFBNAME(FillSpanTile32sGeneral)
+#define cfbFillSpanTileOddCopy CFBNAME(FillSpanTileOddCopy)
+#define cfbFillSpanTileOddGeneral CFBNAME(FillSpanTileOddGeneral)
+#define cfbFinishScreenInit CFBNAME(FinishScreenInit)
+#define cfbGCFuncs CFBNAME(GCFuncs)
+#define cfbGCPrivateIndex CFBNAME(GCPrivateIndex)
+#define cfbGetImage CFBNAME(GetImage)
+#define cfbGetScreenPixmap CFBNAME(GetScreenPixmap)
+#define cfbGetSpans CFBNAME(GetSpans)
+#define cfbHorzS CFBNAME(HorzS)
+#define cfbImageGlyphBlt8 CFBNAME(ImageGlyphBlt8)
+#define cfbInitializeColormap CFBNAME(InitializeColormap)
+#define cfbInitVisuals CFBNAME(cfbInitVisuals)
+#define cfbInstallColormap CFBNAME(InstallColormap)
+#define cfbLineSD CFBNAME(LineSD)
+#define cfbLineSS CFBNAME(LineSS)
+#define cfbListInstalledColormaps CFBNAME(ListInstalledColormaps)
+#define cfbMapWindow CFBNAME(MapWindow)
+#define cfbMatchCommon CFBNAME(MatchCommon)
+#define cfbNonTEOps CFBNAME(NonTEOps)
+#define cfbNonTEOps1Rect CFBNAME(NonTEOps1Rect)
+#define cfbPadPixmap CFBNAME(PadPixmap)
+#define cfbPaintWindow CFBNAME(PaintWindow)
+#define cfbPolyFillArcSolidCopy CFBNAME(PolyFillArcSolidCopy)
+#define cfbPolyFillArcSolidGeneral CFBNAME(PolyFillArcSolidGeneral)
+#define cfbPolyFillRect CFBNAME(PolyFillRect)
+#define cfbPolyGlyphBlt8 CFBNAME(PolyGlyphBlt8)
+#define cfbPolyGlyphRop8 CFBNAME(PolyGlyphRop8)
+#define cfbPolyPoint CFBNAME(PolyPoint)
+#define cfbPositionWindow CFBNAME(PositionWindow)
+#define cfbPutImage CFBNAME(PutImage)
+#define cfbReduceRasterOp CFBNAME(ReduceRasterOp)
+#define cfbResolveColor CFBNAME(ResolveColor)
+#define cfbRestoreAreas CFBNAME(RestoreAreas)
+#define cfbSaveAreas CFBNAME(SaveAreas)
+#define cfbScreenInit CFBNAME(ScreenInit)
+#define cfbScreenPrivateIndex CFBNAME(ScreenPrivateIndex)
+#define cfbSegmentSD CFBNAME(SegmentSD)
+#define cfbSegmentSS CFBNAME(SegmentSS)
+#define cfbSetScanline CFBNAME(SetScanline)
+#define cfbSetScreenPixmap CFBNAME(SetScreenPixmap)
+#define cfbSetSpans CFBNAME(SetSpans)
+#define cfbSetVisualTypes CFBNAME(cfbSetVisualTypes)
+#define cfbSetupScreen CFBNAME(SetupScreen)
+#define cfbSolidSpansCopy CFBNAME(SolidSpansCopy)
+#define cfbSolidSpansGeneral CFBNAME(SolidSpansGeneral)
+#define cfbSolidSpansXor CFBNAME(SolidSpansXor)
+#define cfbStippleStack CFBNAME(StippleStack)
+#define cfbStippleStackTE CFBNAME(StippleStackTE)
+#define cfbTEGlyphBlt CFBNAME(TEGlyphBlt)
+#define cfbTEOps CFBNAME(TEOps)
+#define cfbTEOps1Rect CFBNAME(TEOps1Rect)
+#define cfbTile32FSCopy CFBNAME(Tile32FSCopy)
+#define cfbTile32FSGeneral CFBNAME(Tile32FSGeneral)
+#define cfbUninstallColormap CFBNAME(UninstallColormap)
+#define cfbUnmapWindow CFBNAME(UnmapWindow)
+#define cfbUnnaturalStippleFS CFBNAME(UnnaturalStippleFS)
+#define cfbUnnaturalTileFS CFBNAME(UnnaturalTileFS)
+#define cfbValidateGC CFBNAME(ValidateGC)
+#define cfbVertS CFBNAME(VertS)
+#define cfbWindowPrivateIndex CFBNAME(WindowPrivateIndex)
+#define cfbXRotatePixmap CFBNAME(XRotatePixmap)
+#define cfbYRotatePixmap CFBNAME(YRotatePixmap)
+#define cfbZeroPolyArcSS8Copy CFBNAME(ZeroPolyArcSSCopy)
+#define cfbZeroPolyArcSS8General CFBNAME(ZeroPolyArcSSGeneral)
+#define cfbZeroPolyArcSS8Xor CFBNAME(ZeroPolyArcSSXor)
+#define cfbendpartial CFBNAME(endpartial)
+#define cfbendtab CFBNAME(endtab)
+#define cfbmask CFBNAME(mask)
+#define cfbrmask CFBNAME(rmask)
+#define cfbstartpartial CFBNAME(startpartial)
+#define cfbstarttab CFBNAME(starttab)
 
 #endif /* PSZ != 8 */

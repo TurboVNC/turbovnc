@@ -1,4 +1,4 @@
-XCOMM platform:  $XConsortium: Oki.cf /main/16 1996/09/28 16:06:53 rws $
+XCOMM platform:  $Xorg: Oki.cf,v 1.3 2000/08/17 19:41:46 cpqbld Exp $
 
 #ifndef OSName
 #define OSName			Unix System V/860 Release 4.0 Version 3

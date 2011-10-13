@@ -1,4 +1,4 @@
-/* $XConsortium: XKB.h /main/14 1996/02/05 10:19:11 kaleb $ */
+/* $Xorg: XKB.h,v 1.3 2000/08/18 04:05:45 coskrey Exp $ */
 /************************************************************
 Copyright (c) 1993 by Silicon Graphics Computer Systems, Inc.
 
@@ -24,6 +24,7 @@ OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION  WITH
 THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
+/* $XFree86: xc/include/extensions/XKB.h,v 1.5tsi Exp $ */
 
 #ifndef _XKB_H_
 #define	_XKB_H_
@@ -256,6 +257,8 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define	XkbIgnoreLockModsMask	 (1L << 29)
 #define	XkbPerKeyRepeatMask	 (1L << 30)
 #define	XkbControlsEnabledMask	 (1L << 31)
+
+#define	XkbAccessXOptionsMask    (XkbStickyKeysMask|XkbAccessXFeedbackMask)
 
 #define	XkbAllBooleanCtrlsMask	 (0x00001FFF)
 #define	XkbAllControlsMask	 (0xF8001FFF)
@@ -499,6 +502,10 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define	XkbSA_LastAction	XkbSA_DeviceValuator
 #define	XkbSA_NumActions	(XkbSA_LastAction+1)
 
+#if defined(XF86DDXACTIONS) || defined(XFree86Server)
+#define	XkbSA_XFree86Private	0x86
+#endif
+
     /*
      * Specifies the key actions that clear latched groups or modifiers.
      */
@@ -542,7 +549,8 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define	XkbMaxLegalKeyCode	255
 #define	XkbMaxKeyCount		(XkbMaxLegalKeyCode-XkbMinLegalKeyCode+1)
 #define	XkbPerKeyBitArraySize	((XkbMaxLegalKeyCode+1)/8)
-#define	XkbIsLegalKeycode(k)	(((k)>=XkbMinLegalKeyCode)&&((k)<=XkbMaxLegalKeyCode))
+/* Seems kinda silly to check that an unsigned char is <= 255... */
+#define	XkbIsLegalKeycode(k)	((k)>=XkbMinLegalKeyCode)
 
     /*
      * Assorted constants and limits.
@@ -675,8 +683,9 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define	XkbIM_UseCompat		(1L << 4)
 
 #define	XkbIM_UseNone	  0
-#define	XkbIM_UseAnyGroup (XkbIM_UseLatched|XkbIM_UseLocked|XkbIM_UseEffective)
-#define	XkbIM_UseAnyMods  (XkbIM_UseAnyGroup|XkbIM_UseCompat|XkbIM_UseBase)
+#define	XkbIM_UseAnyGroup (XkbIM_UseBase|XkbIM_UseLatched|XkbIM_UseLocked\
+                           |XkbIM_UseEffective)
+#define	XkbIM_UseAnyMods  (XkbIM_UseAnyGroup|XkbIM_UseCompat)
 
     /*
      * Compatibility Map Compontents:

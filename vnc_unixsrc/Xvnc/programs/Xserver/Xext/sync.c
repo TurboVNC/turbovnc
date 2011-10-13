@@ -1,16 +1,13 @@
-/* $XConsortium: sync.c /main/13 1996/12/16 16:51:55 rws $ */
-/* $XFree86: xc/programs/Xserver/Xext/sync.c,v 3.3 1997/01/18 06:53:00 dawes Exp $ */
+/* $Xorg: sync.c,v 1.4 2001/02/09 02:04:33 xorgcvs Exp $ */
 /*
 
-Copyright (c) 1991, 1993  X Consortium
+Copyright 1991, 1993, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -18,15 +15,15 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 
 Copyright 1991, 1993 by Digital Equipment Corporation, Maynard, Massachusetts,
@@ -53,13 +50,17 @@ OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 
 */
+/* $XFree86: xc/programs/Xserver/Xext/sync.c,v 3.13 2003/09/02 18:19:01 tsi Exp $ */
 
 #define NEED_REPLIES
 #define NEED_EVENTS
-#include <stdio.h>
-#include "X.h"
-#include "Xproto.h"
-#include "Xmd.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
+#include <X11/Xproto.h>
+#include <X11/Xmd.h>
 #include "misc.h"
 #include "os.h"
 #include "extnsionst.h"
@@ -67,13 +68,23 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "resource.h"
 #include "opaque.h"
 #define _SYNC_SERVER
-#include "sync.h"
-#include "syncstr.h"
+#include <X11/extensions/sync.h>
+#include <X11/extensions/syncstr.h>
+
+#ifdef EXTMODULE
+#include "xf86_ansic.h"
+#else
+#include <stdio.h>
+#if !defined(WIN32) && !defined(Lynx)
+#include <sys/time.h>
+#endif
+#endif
+
+#include "modinit.h"
 
 /*
  * Local Global Variables
  */
-static int      SyncReqCode;
 static int      SyncEventBase;
 static int      SyncErrorBase;
 static RESTYPE  RTCounter = 0;
@@ -92,219 +103,165 @@ static SyncCounter **SysCounterList = NULL;
 
 static int
 FreeAlarm(
-#if NeedFunctionPrototypes
     pointer /* addr */,
     XID /* id */
-#endif
 );
 
 static int
 FreeAlarmClient(
-#if NeedFunctionPrototypes
     pointer /* value */,
     XID /* id */
-#endif
 );
 
 static int
 FreeAwait(
-#if NeedFunctionPrototypes
     pointer /* addr */,
     XID /* id */
-#endif
 );
 
 static void
 ServertimeBracketValues(
-#if NeedFunctionPrototypes
     pointer /* pCounter */,
     CARD64 * /* pbracket_less */,
     CARD64 * /* pbracket_greater */
-#endif
 );
 
 static void
 ServertimeQueryValue(
-#if NeedFunctionPrototypes
     pointer /* pCounter */,
     CARD64 * /* pValue_return */
-#endif
 );
 
 static void
 ServertimeWakeupHandler(
-#if NeedFunctionPrototypes
     pointer /* env */,
     int /* rc */,
     pointer /* LastSelectMask */
-#endif
 );
 
 static int 
 SyncInitTrigger(
-#if NeedFunctionPrototypes
     ClientPtr /* client */,
     SyncTrigger * /* pTrigger */,
     XSyncCounter /* counter */,
     Mask /* changes */
-#endif
 );
 
 static void
 SAlarmNotifyEvent(
-#if NeedFunctionPrototypes
     xSyncAlarmNotifyEvent * /* from */,
     xSyncAlarmNotifyEvent * /* to */
-#endif
 );
 
 static void
 SCounterNotifyEvent(
-#if NeedFunctionPrototypes
     xSyncCounterNotifyEvent * /* from */,
     xSyncCounterNotifyEvent * /* to */
-#endif
 );
 
 static void
 ServertimeBlockHandler(
-#if NeedFunctionPrototypes
     pointer  /* env */,
     struct timeval ** /* wt */,
     pointer  /* LastSelectMask */
-#endif
 );
 
 static int
 SyncAddTriggerToCounter(
-#if NeedFunctionPrototypes
     SyncTrigger * /* pTrigger */
-#endif
 );
 
 extern void
 SyncAlarmCounterDestroyed(
-#if NeedFunctionPrototypes
     SyncTrigger * /* pTrigger */
-#endif
 );
 
 static void
 SyncAlarmTriggerFired(
-#if NeedFunctionPrototypes
     SyncTrigger * /* pTrigger */
-#endif
 );
 
 static void
 SyncAwaitTriggerFired(
-#if NeedFunctionPrototypes
     SyncTrigger * /* pTrigger */
-#endif
 );
 
 static int
 SyncChangeAlarmAttributes(
-#if NeedFunctionPrototypes
     ClientPtr /* client */,
     SyncAlarm * /* pAlarm */,
     Mask /* mask */,
     CARD32 * /* values */
-#endif
 );
 
 static Bool
 SyncCheckTriggerNegativeComparison(
-#if NeedFunctionPrototypes
     SyncTrigger * /* pTrigger */,
     CARD64 /* oldval */
-#endif
 );
 
 static Bool
 SyncCheckTriggerNegativeTransition(
-#if NeedFunctionPrototypes
     SyncTrigger * /* pTrigger */,
     CARD64 /* oldval */
-#endif
 );
 
 static Bool
 SyncCheckTriggerPositiveComparison(
-#if NeedFunctionPrototypes
     SyncTrigger * /* pTrigger */,
     CARD64 /* oldval */
-#endif
 );
 
 static Bool
 SyncCheckTriggerPositiveTransition(
-#if NeedFunctionPrototypes
     SyncTrigger * /* pTrigger */,
     CARD64 /* oldval */
-#endif
 );
 
 static SyncCounter *
 SyncCreateCounter(
-#if NeedFunctionPrototypes
     ClientPtr /* client */,
     XSyncCounter /* id */,
     CARD64 /* initialvalue */
-#endif
 );
 
 static void SyncComputeBracketValues(
-#if NeedFunctionPrototypes
     SyncCounter * /* pCounter */,
     Bool /* startOver */
-#endif
 );
 
 static void
 SyncDeleteTriggerFromCounter(
-#if NeedFunctionPrototypes
     SyncTrigger * /* pTrigger */
-#endif
 );
 
 static Bool
 SyncEventSelectForAlarm(
-#if NeedFunctionPrototypes
     SyncAlarm * /* pAlarm */,
     ClientPtr /* client */,
     Bool /* wantevents */
-#endif
 );
 
 static void
 SyncInitServerTime(
-#if NeedFunctionPrototypes
     void
-#endif
 );
 
 static void 
 SyncResetProc(
-#if NeedFunctionPrototypes
     ExtensionEntry * /* extEntry */
-#endif
 );
 
 static void
 SyncSendAlarmNotifyEvents(
-#if NeedFunctionPrototypes
     SyncAlarm * /* pAlarm */
-#endif
 );
 
 static void
 SyncSendCounterNotifyEvents(
-#if NeedFunctionPrototypes
     ClientPtr /* client */,
     SyncAwait ** /* ppAwait */,
     int /* num_events */
-#endif
 );
 
 static DISPATCH_PROC(ProcSyncAwait);
@@ -318,7 +275,6 @@ static DISPATCH_PROC(ProcSyncDispatch);
 static DISPATCH_PROC(ProcSyncGetPriority);
 static DISPATCH_PROC(ProcSyncInitialize);
 static DISPATCH_PROC(ProcSyncListSystemCounters);
-static DISPATCH_PROC(ProcSyncListSystemCounters);
 static DISPATCH_PROC(ProcSyncQueryAlarm);
 static DISPATCH_PROC(ProcSyncQueryCounter);
 static DISPATCH_PROC(ProcSyncSetCounter);
@@ -330,7 +286,6 @@ static DISPATCH_PROC(SProcSyncCreateAlarm);
 static DISPATCH_PROC(SProcSyncCreateCounter);
 static DISPATCH_PROC(SProcSyncDestroyAlarm);
 static DISPATCH_PROC(SProcSyncDestroyCounter);
-static DISPATCH_PROC(SProcSyncDispatch);
 static DISPATCH_PROC(SProcSyncDispatch);
 static DISPATCH_PROC(SProcSyncGetPriority);
 static DISPATCH_PROC(SProcSyncInitialize);
@@ -1077,10 +1032,8 @@ SyncCreateCounter(client, id, initialvalue)
 }
 
 static int FreeCounter(
-#if NeedFunctionPrototypes
     pointer /*env*/,
     XID     /*id*/
-#endif
 );
 
 /*
@@ -1094,8 +1047,13 @@ SyncCreateSystemCounter(name, initial, resolution, counterType,
     CARD64          initial;
     CARD64          resolution;
     SyncCounterType counterType;
-    void            (*QueryValue) ();
-    void            (*BracketValues) ();
+    void            (*QueryValue) (
+        pointer /* pCounter */, 
+        CARD64 * /* pValue_return */);
+    void            (*BracketValues) (
+        pointer /* pCounter */,
+        CARD64 * /* pbracket_less */,
+        CARD64 * /* pbracket_greater */);
 {
     SyncCounter    *pCounter;
 
@@ -1411,7 +1369,7 @@ ProcSyncListSystemCounters(client)
 {
     xSyncListSystemCountersReply  rep;
     int i, len;
-    xSyncSystemCounter *list, *walklist;
+    xSyncSystemCounter *list = NULL, *walklist = NULL;
     
     REQUEST_SIZE_MATCH(xSyncListSystemCountersReq);
 
@@ -1583,6 +1541,8 @@ ProcSyncSetCounter(client)
     REQUEST(xSyncSetCounterReq);
     SyncCounter    *pCounter;
     CARD64	   newvalue;
+
+    REQUEST_SIZE_MATCH(xSyncSetCounterReq);
 
     pCounter = (SyncCounter *)SecurityLookupIDByType(client, stuff->cid,
 					   RTCounter, SecurityWriteAccess);
@@ -2027,12 +1987,11 @@ static int
 ProcSyncDestroyAlarm(client)
     ClientPtr       client;
 {
-    SyncAlarm      *pAlarm;
     REQUEST(xSyncDestroyAlarmReq);
 
     REQUEST_SIZE_MATCH(xSyncDestroyAlarmReq);
 
-    if (!(pAlarm = (SyncAlarm *)SecurityLookupIDByType(client, stuff->alarm,
+    if (!((SyncAlarm *)SecurityLookupIDByType(client, stuff->alarm,
 					      RTAlarm, SecurityDestroyAccess)))
     {
 	client->errorValue = stuff->alarm;
@@ -2395,7 +2354,7 @@ SyncResetProc(extEntry)
  * ** Initialise the extension.
  */
 void 
-SyncExtensionInit()
+SyncExtensionInit(INITARGS)
 {
     ExtensionEntry *extEntry;
 
@@ -2420,7 +2379,6 @@ SyncExtensionInit()
 	return;
     }
 
-    SyncReqCode = extEntry->base;
     SyncEventBase = extEntry->eventBase;
     SyncErrorBase = extEntry->errorBase;
     EventSwapVector[SyncEventBase + XSyncCounterNotify] = (EventSwapPtr) SCounterNotifyEvent;
@@ -2446,9 +2404,6 @@ SyncExtensionInit()
  */
 
 
-#if !defined(WIN32) && !defined(MINIX) && !defined(Lynx)
-#include <sys/time.h>
-#endif
 
 static pointer ServertimeCounter;
 static XSyncValue Now;
@@ -2487,6 +2442,7 @@ pointer LastSelectMask;
 	{
 	    Bool overflow;
             XSyncValueSubtract(&delay, *pnext_time, Now, &overflow);
+	    (void)overflow;
             timeout = XSyncValueLow32(delay);
         }
         AdjustWaitForDelay(wt, timeout); /* os/utils.c */

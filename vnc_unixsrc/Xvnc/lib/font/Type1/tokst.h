@@ -1,4 +1,4 @@
-/* $XConsortium: tokst.h,v 1.2 91/10/10 11:20:00 rws Exp $ */
+/* $Xorg: tokst.h,v 1.3 2000/08/17 19:46:34 cpqbld Exp $ */
 /* Copyright International Business Machines,Corp. 1991
  * All Rights Reserved
  *
@@ -27,6 +27,8 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
  * SOFTWARE.
  */
+/* $XFree86: xc/lib/font/Type1/tokst.h,v 1.3 1999/08/22 08:58:54 dawes Exp $ */
+
 /* -------------------------------------- */
 /* --- MACHINE GENERATED, DO NOT EDIT --- */
 /* -------------------------------------- */
@@ -291,41 +293,41 @@ static unsigned char si11[258] = { 0x53,0x54,
  *   state. There are several entries for each state.
  *
  */
-static int AAH_NAME();
-static int BREAK_SIGNAL();
-static int HEX_STRING();
-static int IMMED_NAME();
-static int INTEGER();
-static int LEFT_BRACE();
-static int LEFT_BRACKET();
-static int LITERAL_NAME();
-static int NAME();
-static int NO_TOKEN();
-static int OOPS_NAME();
-static int RADIX_NUMBER();
-static int REAL();
-static int RIGHT_ANGLE();
-static int RIGHT_BRACE();
-static int RIGHT_BRACKET();
-static int RIGHT_PAREN();
-static int STRING();
-static int add_1st_decpt();
-static int add_1st_digits();
-static int add_char();
-static int add_decpt();
-static int add_digits();
-static int add_e_sign();
-static int add_exponent();
-static int add_fraction();
-static int add_r_digits();
-static int add_radix();
-static int add_sign();
-static int next_char();
-static int skip_comment();
-static int skip_space();
+static int AAH_NAME ( int ch );
+static int BREAK_SIGNAL ( int ch );
+static int HEX_STRING ( int ch );
+static int IMMED_NAME ( int ch );
+static int INTEGER ( int ch );
+static int LEFT_BRACE ( int ch );
+static int LEFT_BRACKET ( int ch );
+static int LITERAL_NAME ( int ch );
+static int NAME ( int ch );
+static int NO_TOKEN ( int ch );
+static int OOPS_NAME ( int ch );
+static int RADIX_NUMBER ( int ch );
+static int REAL ( int ch );
+static int RIGHT_ANGLE ( int ch );
+static int RIGHT_BRACE ( int ch );
+static int RIGHT_BRACKET ( int ch );
+static int RIGHT_PAREN ( int ch );
+static int STRING ( int ch );
+static int add_1st_decpt ( int ch );
+static int add_1st_digits ( int ch );
+static int add_char ( int ch );
+static int add_decpt ( int ch );
+static int add_digits ( int ch );
+static int add_exponent ( int ch );
+static int add_e_sign ( int ch );
+static int add_fraction ( int ch );
+static int add_radix ( int ch );
+static int add_r_digits ( int ch );
+static int add_sign ( int ch );
+static int next_char ( int ch );
+static int skip_comment ( int ch );
+static int skip_space ( int ch );
  
 static struct cat {
-  int (*actionRoutineP)();
+  int (*actionRoutineP)(int);
   unsigned char *nextStateP;
 } classActionTable[] = {
  

@@ -1,13 +1,13 @@
+/* $XFree86: xc/programs/Xserver/include/misc.h,v 3.28 2001/12/14 19:59:55 dawes Exp $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -66,8 +66,7 @@ TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
 OF THIS SOFTWARE.
 
 ******************************************************************/
-/* $XConsortium: misc.h /main/28 1996/12/02 10:22:01 lehors $ */
-/* $XFree86: xc/programs/Xserver/include/misc.h,v 3.5 1996/12/23 07:09:29 dawes Exp $ */
+/* $Xorg: misc.h,v 1.5 2001/02/09 02:05:15 xorgcvs Exp $ */
 #ifndef MISC_H
 #define MISC_H 1
 /*
@@ -82,30 +81,23 @@ extern unsigned long serverGeneration;
 #include <X11/Xfuncproto.h>
 #include <X11/Xmd.h>
 #include <X11/X.h>
+#include <X11/Xdefs.h>
 
+#ifndef IN_MODULE
 #ifndef NULL
-#ifndef X_NOT_STDC_ENV
 #include <stddef.h>
-#else
-#define NULL            0
 #endif
 #endif
 
 #ifndef MAXSCREENS
-#define MAXSCREENS	3
+#define MAXSCREENS	16
 #endif
-#define MAXCLIENTS	128
+#define MAXCLIENTS	256
 #define MAXDITS		1
 #define MAXEXTENSIONS	128
 #define MAXFORMATS	8
 #define MAXVISUALS_PER_SCREEN 50
 
-#if NeedFunctionPrototypes
-typedef void *pointer;
-#else
-typedef unsigned char *pointer;
-#endif
-typedef int Bool;
 typedef unsigned long PIXEL;
 typedef unsigned long ATOM;
 
@@ -113,16 +105,6 @@ typedef unsigned long ATOM;
 #ifndef TRUE
 #define TRUE 1
 #define FALSE 0
-#endif
-
-#ifndef _XTYPEDEF_FONTPTR
-typedef struct _Font *FontPtr; /* also in fonts/include/font.h */
-#define _XTYPEDEF_FONTPTR
-#endif
-
-#ifndef _XTYPEDEF_CLIENTPTR
-typedef struct _Client *ClientPtr; /* also in dix.h */
-#define _XTYPEDEF_CLIENTPTR
 #endif
 
 #ifndef _XTYPEDEF_CALLBACKLISTPTR
@@ -133,7 +115,9 @@ typedef struct _CallbackList *CallbackListPtr; /* also in dix.h */
 typedef struct _xReq *xReqPtr;
 
 #include "os.h" 	/* for ALLOCATE_LOCAL and DEALLOCATE_LOCAL */
+#ifndef IN_MODULE
 #include <X11/Xfuncs.h> /* for bcopy, bzero, and bcmp */
+#endif
 
 #define NullBox ((BoxPtr)0)
 #define MILLI_PER_MIN (1000 * 60)
@@ -156,18 +140,17 @@ typedef struct _xReq *xReqPtr;
 /* byte swap a short literal */
 #define lswaps(x) ((((x) & 0xff) << 8) | (((x) >> 8) & 0xff))
 
+#undef min
+#undef max
+
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
-#if !defined(AMOEBA) && !defined(__EMX__)
-#ifndef abs
-#define abs(a) ((a) > 0 ? (a) : -(a))
-#endif
-#else /* AMOEBA || __EMX__ */
+#ifndef IN_MODULE
 /* abs() is a function, not a macro; include the file declaring
  * it in case we haven't done that yet.
  */  
 #include <stdlib.h>
-#endif /* AMOEBA */
+#endif /* IN_MODULE */
 #ifndef Fabs
 #define Fabs(a) ((a) > 0.0 ? (a) : -(a))	/* floating absolute value */
 #endif
@@ -183,13 +166,32 @@ typedef struct _xReq *xReqPtr;
  */
 #define lowbit(x) ((x) & (~(x) + 1))
 
-#ifndef MAXSHORT
-#define MAXSHORT 32767
-#endif
-#ifndef MINSHORT
-#define MINSHORT -MAXSHORT 
-#endif
+#ifndef IN_MODULE
+/* XXX Not for modules */
+#include <limits.h>
+#if !defined(MAXSHORT) || !defined(MINSHORT) || \
+    !defined(MAXINT) || !defined(MININT)
+/*
+ * Some implementations #define these through <math.h>, so preclude
+ * #include'ing it later.
+ */
 
+#include <math.h>
+#endif
+#undef MAXSHORT
+#define MAXSHORT SHRT_MAX
+#undef MINSHORT
+#define MINSHORT SHRT_MIN
+#undef MAXINT
+#define MAXINT INT_MAX
+#undef MININT
+#define MININT INT_MIN
+
+#include <assert.h>
+#include <ctype.h>
+#include <stdio.h>	/* for fopen, etc... */
+
+#endif
 
 /* some macros to help swap requests, replies, and events */
 
@@ -236,30 +238,17 @@ typedef struct _xReq *xReqPtr;
 		 ((char *) &(dst))[1] = ((char *) &(src))[0]; }
 
 extern void SwapLongs(
-#if NeedFunctionPrototypes
     CARD32 *list,
-    unsigned long count
-#endif
-);
+    unsigned long count);
 
 extern void SwapShorts(
-#if NeedFunctionPrototypes
     short *list,
-    unsigned long count
-#endif
-);
+    unsigned long count);
 
-extern void MakePredeclaredAtoms(
-#if NeedFunctionPrototypes
-    void
-#endif
-);
+extern void MakePredeclaredAtoms(void);
 
 extern int Ones(
-#if NeedFunctionPrototypes
-    unsigned long /*mask*/
-#endif
-);
+    unsigned long /*mask*/);
 
 typedef struct _xPoint *DDXPointPtr;
 typedef struct _Box *BoxPtr;

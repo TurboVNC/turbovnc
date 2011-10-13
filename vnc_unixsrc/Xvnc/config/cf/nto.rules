@@ -1,0 +1,240 @@
+XCOMM $XFree86: xc/config/cf/nto.rules,v 1.7 2003/10/09 22:43:18 herrb Exp $ 
+XCOMM Rules for QNX/Neutrino
+XCOMM Note that some of these will disappear when we stop cross-compiling
+
+#ifndef HasSharedLibraries
+#define HasSharedLibraries YES
+#endif
+
+#ifndef SharedDataSeparation
+#define SharedDataSeparation NO
+#endif
+#ifndef SharedCodeDef
+#define SharedCodeDef /**/
+#endif
+#ifndef SharedLibraryDef
+#define SharedLibraryDef /**/
+#endif
+#ifndef SharedLibraryLoadFlags
+#define SharedLibraryLoadFlags -shared
+#endif
+#ifndef PositionIndependentCFlags
+#define PositionIndependentCFlags -fPIC
+#endif
+#ifndef PositionIndependentCplusplusFlags
+#define PositionIndependentCplusplusFlags -fPIC
+#endif
+
+#define LinkFile(tofile, fromfile)				@@\
+tofile:: fromfile						@@\
+	$(CP) fromfile tofile					@@\
+								@@\
+includes:: tofile						@@\
+								@@\
+depend:: tofile							@@\
+								@@\
+clean::								@@\
+	RemoveFile(tofile)
+
+#define ObjectFromSpecialSource(dst, src, flags)		@@\
+NoConfigRec(dst.c)						@@\
+								@@\
+dst.c: src.c							@@\
+	RemoveFile($@)						@@\
+	$(CP) $? $@						@@\
+								@@\
+SpecialCObjectRule(dst,NullParameter,flags)			@@\
+								@@\
+includes:: dst.c						@@\
+								@@\
+depend:: dst.c							@@\
+								@@\
+clean::								@@\
+	RemoveFile(dst.c)
+
+
+#define ObjectFromSpecialAsmSource(dst, src, flags)		@@\
+dst.S: src.S							@@\
+	RemoveFile($@)						@@\
+	$(CP) $? $@						@@\
+								@@\
+dst.o: dst.S							@@\
+	AssembleObject(dst,flags)				@@\
+								@@\
+dst.i: dst.S							@@\
+	CPPOnlyAsm(dst,flags)					@@\
+								@@\
+depend:: dst.S							@@\
+								@@\
+clean::								@@\
+	RemoveFile(dst.S)
+
+XCOMM Special rule ComplexHostProgramTarget needed to compile 
+XCOMM our utilities locally because we are cross-compiling...
+XCOMM
+
+#define ComplexHostProgramTarget(program)			@@\
+           CC=cc						@@\
+           STD_INCLUDES =					@@\
+           CFLAGS=$(TOP_INCLUDES) $(INCLUDES) $(BOOTSTRAPCFLAGS)	@@\
+           CCOPTIONS =						@@\
+           EXTRA_LOAD_FLAGS =					@@\
+           PROGRAM = program					@@\
+								@@\
+AllTarget(program)						@@\
+								@@\
+program: $(OBJS) $(DEPLIBS)					@@\
+	RemoveTargetProgram($@)					@@\
+	HostLinkRule($@,$(_NOOP_),$(OBJS),$(DEPLIBS) $(LOCAL_LIBRARIES)) @@\
+								@@\
+DependTarget()							@@\
+								@@\
+clean::								@@\
+	RemoveFile(ProgramTargetName(program))
+
+XCOMM And this rule is again for a host simple host program when cross-compiling.
+XCOMM
+
+#define SimpleHostProgramTarget(program)			@@\
+         OBJS = program.o					@@\
+         SRCS = program.c					@@\
+								@@\
+ComplexHostProgramTarget(program)
+	
+
+#ifndef FixupLibReferences
+#define FixupLibReferences()						@@\
+XMULIBONLY = -lXmu							@@\
+XMULIB = $(XMULIBONLY) $(XTOOLLIB) $(XLIB)
+#endif
+
+#ifndef SharedLibraryTarget
+#define SharedLibraryTarget(libname,rev,solist,down,up)			@@\
+AllTarget(Concat(lib,libname.so.rev))					@@\
+									@@\
+Concat(lib,libname.so.rev):  solist $(EXTRALIBRARYDEPS)			@@\
+	$(RM) $@~							@@\
+	@SONAME=`echo $@ | sed 's/\.[^\.]*$$//'`; set -x; \		@@\
+		(cd down; $(CC) -o up/$@~ $(SHLIBLDFLAGS) -Wl,-soname,$$SONAME solist $(REQUIREDLIBS) BaseShLibReqs); \ @@\
+		$(RM) $$SONAME; $(LN) $@ $$SONAME; \			@@\
+		LinkBuildSonameLibrary($$SONAME)			@@\
+	$(RM) $@ 							@@\
+	$(MV) $@~ $@							@@\
+	@if $(SOSYMLINK); then (set -x; \				@@\
+ 	 $(RM) Concat(lib,libname.so); \				@@\
+	 $(LN) $@ Concat(lib,libname.so)); fi				@@\
+	LinkBuildLibrary($@)						@@\
+	LinkBuildLibrary(Concat(lib,libname.so))			@@\
+									@@\
+clean::									@@\
+	@MAJREV=`echo rev | sed 's/\.[^\.]*$$//'`; \			@@\
+	set -x; $(RM) Concat(lib,libname.so.$$MAJREV)			@@\
+	$(RM) Concat(lib,libname.so.rev) Concat(lib,libname.so)
+#endif
+/*
+ * InstallSharedLibrary - generate rules to install the shared library.
+ * NOTE: file must be executable, hence "INSTBINFLAGS"
+ */
+#ifndef InstallSharedLibrary
+#define	InstallSharedLibrary(libname,rev,dest)				@@\
+install:: Concat(lib,libname.so.rev) 					@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) $(INSTALLFLAGS) $(INSTBINFLAGS) Concat(lib,libname.so.rev) $(DESTDIR)dest @@\
+	@T=`echo Concat($(DESTDIR)dest/lib,libname.so.rev) | sed 's/\.[^\.]*$$//'`;\
+	  set -x; $(RM) $$T && $(LN) Concat(lib,libname.so.rev) $$T	@@\
+	@if $(SOSYMLINK); then (set -x; \
+	  $(RM) Concat($(DESTDIR)dest/lib,libname.so); \		@@\
+	  $(LN) Concat(lib,libname.so.rev) Concat($(DESTDIR)dest/lib,libname.so)); fi
+#endif /* InstallSharedLibrary */
+
+/*
+ * SharedLibraryDataTarget - generate rules to create shlib data file;
+ */
+#ifndef SharedLibraryDataTarget
+#define SharedLibraryDataTarget(libname,rev,salist)
+#endif /* SharedLibraryTarget */
+
+/*
+ * InstallSharedLibraryData - generate rules to install the shared library data
+ */
+#ifndef InstallSharedLibraryData
+#define	InstallSharedLibraryData(libname,rev,dest)
+#endif /* InstallSharedLibraryData */
+
+#define BaseShLibReqs
+
+
+
+/*
+ * ServerTargetWithFlags - generate rules to compile, link, and relink a server
+ */
+#ifndef ServerTargetWithFlags
+#define	ServerTargetWithFlags(server,subdirs,objects,libs,syslibs,flags) @@\
+AllTarget(ProgramTargetName(server))					@@\
+ProgramTargetName(server): subdirs objects libs				@@\
+	MoveToBakFile($@)						@@\
+	LinkRule($@,$(LDOPTIONS),objects,libs $(LDLIBS) syslibs) 	@@\
+									@@\
+Concat(load,server):							@@\
+	MoveToBakFile(ProgramTargetName(server))			@@\
+	LinkRule(ProgramTargetName(server),$(LDOPTIONS),objects,libs $(LDLIBS) syslibs) @@\
+									@@\
+loadX:: Concat(load,server)						@@\
+									@@\
+SentinelProgramTarget(server,subdirs objects libs,objects libs $(LDLIBS) syslibs) @@\
+SentinelLinkTarget(Concat(load,server),server,objects libs $(LDLIBS) syslibs) @@\
+PurifyProgramTarget(server,subdirs objects libs,objects libs $(LDLIBS) syslibs) @@\
+PurifyLinkTarget(Concat(load,server),server,objects libs $(LDLIBS) syslibs) @@\
+ProofProgramTarget(server,subdirs objects libs,objects libs $(LDLIBS) syslibs) @@\
+ProofLinkTarget(Concat(load,server),server,objects libs $(LDLIBS) syslibs) @@\
+									@@\
+InstallProgramWithFlags(server,$(BINDIR),flags)				@@\
+									@@\
+clean::									@@\
+	RemoveFile(ProgramTargetName(server))
+#endif /* ServerTargetWithFlags */
+
+/*
+ * SharedDepLibraryTarget - generate rules to create a shared library.
+ */
+#ifndef SharedDepLibraryTarget
+#define SharedDepLibraryTarget(libname,rev,deplist,solist,down,up)	@@\
+AllTarget(Concat(lib,libname.so.rev))					@@\
+									@@\
+Concat(lib,libname.so.rev):  deplist $(EXTRALIBRARYDEPS)		@@\
+	$(RM) $@~							@@\
+	@SONAME=`echo $@ | sed 's/\.[^\.]*$$//'`; set -x; \		@@\
+		(cd down; $(CC) -o up/$@~ $(SHLIBLDFLAGS) -Wl,-soname,$$SONAME solist $(REQUIREDLIBS) BaseShLibReqs); \ @@\
+		$(RM) $$SONAME; $(LN) $@ $$SONAME; \			@@\
+		LinkBuildSonameLibrary($$SONAME)			@@\
+	$(RM) $@ 							@@\
+	$(MV) $@~ $@							@@\
+	@if $(SOSYMLINK); then (set -x; \				@@\
+	  $(RM) Concat(lib,libname.so); \				@@\
+	  $(LN) $@ Concat(lib,libname.so)); fi				@@\
+	LinkBuildLibrary($@)						@@\
+	LinkBuildLibraryMaybe(Concat(lib,libname.so),$(SOSYMLINK))	@@\
+									@@\
+clean::									@@\
+	@MAJREV=`echo rev | sed 's/\.[^\.]*$$//'`; \			@@\
+	set -x; $(RM) Concat(lib,libname.so.$$MAJREV)			@@\
+	$(RM) Concat(lib,libname.so.rev) Concat(lib,libname.so)
+
+#endif /* SharedDepLibraryTarget */
+
+#ifndef SharedDepModuleTarget
+#define SharedDepModuleTarget(name,deps,solist)				@@\
+AllTarget(name)								@@\
+
+									@@\
+name: deps								@@\
+	$(RM) $@~							@@\
+	$(CC) -o $@~ $(SHLIBLDFLAGS) solist $(REQUIREDLIBS) BaseShLibReqs @@\
+	$(RM) $@							@@\
+	$(MV) $@~ $@							@@\
+									@@\
+clean::									@@\
+	$(RM) name
+
+#endif /* SharedDepModuleTarget */
+

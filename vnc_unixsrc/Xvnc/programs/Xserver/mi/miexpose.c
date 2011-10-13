@@ -1,13 +1,14 @@
+/* $XdotOrg: xc/programs/Xserver/mi/miexpose.c,v 1.6 2005/07/03 08:53:51 daniels Exp $ */
+/* $XFree86: xc/programs/Xserver/mi/miexpose.c,v 3.9tsi Exp $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +16,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -45,14 +46,44 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
+/*****************************************************************
 
-/* $XConsortium: miexpose.c /main/43 1996/08/01 19:25:26 dpw $ */
-/* $XFree86: xc/programs/Xserver/mi/miexpose.c,v 3.1 1996/12/23 07:09:44 dawes Exp $ */
+Copyright (c) 1991, 1997 Digital Equipment Corporation, Maynard, Massachusetts.
 
-#include "X.h"
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software.
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+DIGITAL EQUIPMENT CORPORATION BE LIABLE FOR ANY CLAIM, DAMAGES, INCLUDING,
+BUT NOT LIMITED TO CONSEQUENTIAL OR INCIDENTAL DAMAGES, OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of Digital Equipment Corporation
+shall not be used in advertising or otherwise to promote the sale, use or other
+dealings in this Software without prior written authorization from Digital
+Equipment Corporation.
+
+******************************************************************/
+
+/* $Xorg: miexpose.c,v 1.4 2001/02/09 02:05:20 xorgcvs Exp $ */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
 #define NEED_EVENTS
-#include "Xproto.h"
-#include "Xprotostr.h"
+#include <X11/Xproto.h>
+#include <X11/Xprotostr.h>
 
 #include "misc.h"
 #include "regionstr.h"
@@ -64,9 +95,14 @@ SOFTWARE.
 
 #include "dixstruct.h"
 #include "mi.h"
-#include "Xmd.h"
+#include <X11/Xmd.h>
 
-extern WindowPtr *WindowTable;
+#include "globals.h"
+
+#ifdef PANORAMIX
+#include "panoramiX.h"
+#include "panoramiXsrv.h"
+#endif
 
 /*
     machine-independent graphics exposure code.  any device that uses
@@ -105,6 +141,7 @@ miHandleExposures(pSrcDrawable, pDstDrawable,
     int 			dstx, dsty;
     unsigned long		plane;
 {
+    register ScreenPtr pscr;
     RegionPtr prgnSrcClip;	/* drawable-relative source clip */
     RegionRec rgnSrcRec;
     RegionPtr prgnDstClip;	/* drawable-relative dest clip */
@@ -118,8 +155,11 @@ miHandleExposures(pSrcDrawable, pDstDrawable,
 				   the window background
 				*/
     WindowPtr pSrcWin;
-    BoxRec expBox = {0, };
+    BoxRec expBox;
     Bool extents;
+
+    /* This prevents warning about pscr not being used. */
+    pGC->pScreen = pscr = pGC->pScreen;
 
     /* avoid work if we can */
     if (!pGC->graphicsExposures &&
@@ -156,7 +196,7 @@ miHandleExposures(pSrcDrawable, pDstDrawable,
 	    if ((RECT_IN_REGION(pscr, &pSrcWin->clipList, &TsrcBox)) == rgnIN)
 		return NULL;
 	    prgnSrcClip = &rgnSrcRec;
-	    REGION_INIT(pscr, prgnSrcClip, NullBox, 0);
+	    REGION_NULL(pscr, prgnSrcClip);
 	    REGION_COPY(pscr, prgnSrcClip, &pSrcWin->clipList);
 	}
 	REGION_TRANSLATE(pscr, prgnSrcClip,
@@ -193,7 +233,7 @@ miHandleExposures(pSrcDrawable, pDstDrawable,
 	else
 	{
 	    prgnDstClip = &rgnDstRec;
-	    REGION_INIT(pscr, prgnDstClip, NullBox, 0);
+	    REGION_NULL(pscr, prgnDstClip);
 	    REGION_COPY(pscr, prgnDstClip,
 				&((WindowPtr)pDstDrawable)->clipList);
 	}
@@ -389,6 +429,7 @@ miSendGraphicsExpose (client, pRgn, drawable, major, minor)
     }
 }
 
+
 void
 miSendExposures(pWin, pRgn, dx, dy)
     WindowPtr pWin;
@@ -415,7 +456,40 @@ miSendExposures(pWin, pRgn, dx, dy)
 	pe->u.expose.height = pBox->y2 - pBox->y1;
 	pe->u.expose.count = i;
     }
+
+#ifdef PANORAMIX
+    if(!noPanoramiXExtension) {
+	int scrnum = pWin->drawable.pScreen->myNum;
+	int x = 0, y = 0;
+	XID realWin = 0;
+
+	if(!pWin->parent) {
+	    x = panoramiXdataPtr[scrnum].x;
+	    y = panoramiXdataPtr[scrnum].y;
+	    pWin = WindowTable[0];
+	    realWin = pWin->drawable.id;
+	} else if (scrnum) {
+	    PanoramiXRes *win;
+	    win = PanoramiXFindIDByScrnum(XRT_WINDOW, 
+			pWin->drawable.id, scrnum);
+	    if(!win) {
+		DEALLOCATE_LOCAL(pEvent);
+		return;
+	    }
+	    realWin = win->info[0].id;
+	    pWin = LookupIDByType(realWin, RT_WINDOW);
+	}
+	if(x || y || scrnum)
+	  for (i = 0; i < numRects; i++) {
+	      pEvent[i].u.expose.window = realWin;
+	      pEvent[i].u.expose.x += x;
+	      pEvent[i].u.expose.y += y;
+	  }
+    }
+#endif
+
     DeliverEvents(pWin, pEvent, numRects, NullWindow);
+
     DEALLOCATE_LOCAL(pEvent);
 }
 
@@ -541,9 +615,9 @@ static GCPtr	screenContext[MAXSCREENS];
 
 /*ARGSUSED*/
 static int
-tossGC (value, id)
-pointer value;
-XID id;
+tossGC (
+    pointer value,
+    XID id)
 {
     GCPtr pGC = (GCPtr)value;
     screenContext[pGC->pScreen->myNum] = (GCPtr)NULL;
@@ -580,9 +654,9 @@ int what;
     ChangeGCVal gcval[7];
     ChangeGCVal newValues [COUNT_BITS];
 
-    BITS32 gcmask = 0, index, mask;
+    BITS32 gcmask, index, mask;
     RegionRec prgnWin;
-    DDXPointRec oldCorner = {0, 0};
+    DDXPointRec oldCorner;
     BoxRec box;
     WindowPtr	pBgWin;
     GCPtr pGC;
@@ -592,7 +666,6 @@ int what;
     register xRectangle *prect;
     int numRects;
 
-    REGION_INIT(pWin->drawable.pScreen, &prgnWin, NullBox, 0);
     gcmask = 0;
 
     if (what == PW_BACKGROUND)

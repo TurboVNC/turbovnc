@@ -1,26 +1,27 @@
-/* $XConsortium: registry /main/119 1996/10/08 12:31:00 swick $ */
+/* $Xorg: registry,v 1.7 2001/06/01 18:55:58 coskrey Exp $ */
+/* $XdotOrg: xc/registry,v 1.3 2005/09/02 23:06:40 alanc Exp $ */
 
 				  X Registry
 
-The X Consortium is maintaining a registry of certain X-related items, to
-aid in avoiding conflicts and to aid in sharing of such items.  Requests to
-register items, or questions about registration, should be addressed to
+The X.Org Foundation is maintaining a registry of certain X-related 
+items, to aid in avoiding conflicts and to aid in sharing of such items.  
+Requests to register items, or questions about registration, should be 
+addressed to
 	xregistry@x.org
 or to
-	Registry
-	X Consortium
-	201 Broadway
-	Cambridge MA 02139-1955
-	USA
+	The X.Org Foundation -- X11 Registry
+	c/o Ienup Sung
+	Sun Microsystems, Inc.
+	4150 Network Circle, M/S USCA21-311
+	Santa Clara, CA 95054
 
-Electronic mail will be acknowledged upon receipt.  Please allow up to 4 weeks
-for a formal response to registration and inquiries.
+Electronic mail will be acknowledged upon receipt.
+Please allow up to 4 weeks for a formal response to registration and inquiries.
 
-The registry is published as part of the X software distribution from the
-X Consortium.  It is also usually available by sending a message to
-xstuff@x.org.  The message can have a subject line and no body, or a
-single-line body and no subject, in either case the line looking like:
-	send docs registry
+The registry is published as part of the X software distribution
+from The X.Org Foundation. The latest registry can be found at:
+
+	ftp://ftp.x.org/pub/DOCS/registry
 
 All registered items must have the postal address of someone responsible for
 the item, or a reference to a document describing the item and the postal
@@ -43,6 +44,7 @@ Name						Reference
 "Apple"						[22]
 "ARDENT"					[2]
 "BBN"						[61]
+"Compaq"					[82]
 "CRAB"						[84]
 "CRUC"						[30]
 "DEC"						[82]
@@ -53,6 +55,7 @@ Name						Reference
 "ES"						[75]
 "FXD"						[55]
 "FUJITSU"					[87]
+"HP"						[35]
 "IBM"						[33]
 "ICS"						[31]
 "ILA"						[62]
@@ -83,6 +86,7 @@ Name						Reference
 "Sun"						[58]
 "Tech-Source"					[106]
 "TEK"						[43]
+"TOG"						[133]
 "visual"					[5]
 "VIT"						[46]
 "WN"						[103]
@@ -99,9 +103,9 @@ Name						Reference
 2. KEYSYMS
 
 Only "private" keysyms (with 29th bit set) can be registered by organizations;
-standard keysyms must be approved by the Consortium.  Since keysym numeric
-values are explicitly private, we will permit (but not encourage) conflicting
-registration here.
+standard keysyms must be approved by the X.Org Foundation.  Since keysym 
+numeric values are explicitly private, we will permit (but not encourage) 
+conflicting registration here.
 
 Name			Value			Reference
 ----			-----			---------
@@ -308,6 +312,7 @@ String						Reference
 "Apollo Computer Inc."				[1]
 "Apple Computer, Inc."				[22]
 "Ardent Computer Corporation"			[2]
+"Compaq Computer Corporation"			[82]
 "Crab Advanced Technologies Ltd"		[84]
 "Crucible"					[30]
 "Data General Corporation"			[48]
@@ -315,6 +320,7 @@ String						Reference
 "EFW, Inc."					[124]
 "Evans & Sutherland"				[75]
 "FUJITSU LIMITED"				[87]
+"Hewlett-Packard Company"			[35]
 "International Business Machines"		[33]
 "JAPAN COMPUTER CORP."				[90]
 "Jupiter Systems Inc."				[93]
@@ -334,6 +340,9 @@ String						Reference
 "Sun Microsystems, Inc."			[101]
 "Tech-Source Inc."				[106]
 "The XFree86 Project, Inc"			[113]
+"The X.Org Foundation, Inc"			[8]
+"The X.Org Group"				[8]
+"The X.Org Group / The XFree86 Project, Inc"	[113] [8]
 "VIT-Visual Information Technologies, Inc (VITec)"	[46]
 "Wolfram Research, Inc."			[102]
 "Wyse Technology Inc."				[68]
@@ -363,6 +372,7 @@ Name						Reference
 "BIG-REQUESTS"					[97]
 "DEC-XTRAP"					[51]
 "DOUBLE-BUFFER"					[123]
+"DPMS"						[132]
 "ESMultiScreenExtension"			[75]
 "ESSetBitsExtension"				[75]
 "ESTraverse3DExtension"				[75]
@@ -408,6 +418,7 @@ Name						Reference
 "TeKDisplayListExtension"			[43]
 "TeKHardCopySupport"				[43]
 "TeKPeerWindows"				[43]
+"TOG-CUP"					[131]
 "VEX"						[14]
 "VIT-Image Display List Extension"		[46]
 "X/software X/bigX"				[115]
@@ -421,6 +432,7 @@ Name						Reference
 "XFree86-VidModeExtension"			[113]
 "XIE"						[110]
 "XInputExtension"				[128]
+"XINERAMA"					[130]
 "XKEYBOARD"					[111]
 "XPRINT"					[129]
 "XTEST"						[8]
@@ -431,13 +443,16 @@ Name						Reference
 6. HOST FAMILIES
 
 See the "family" component of the HOST structure in the protocol.
-Values for private families will be assigned by the X Consortium.
+Values for private families will be assigned by The X.Org Foundation.
 
 Value	Name					Reference
 -----	----					---------
 0	Internet				[23]
 1	DECnet					[23]
 2	Chaos					[23]
+5	ServerInterpreted			[23]
+6	InternetV6				[23]
+33	Amoeba					[8]
 252	LocalHost				[105]
 253	Kerberos5Principal			[94]
 254	Netname					[57]
@@ -496,6 +511,7 @@ Name						Reference
 "RGB_COLOR_MAP"					[18]
 "SPAN"						[16]
 "STRING"					[16]
+"UTF8_STRING"					[134]
 "WINDOW"					[16]
 "WM_HINTS"					[16]
 "WM_ICON_SIZE"					[16]
@@ -569,6 +585,7 @@ Name						Reference
 "TEXT"						[16]
 "TIMESTAMP"					[16]
 "USER"						[16]
+"UTF8_STRING"					[134]
 "_ADOBE_EPS"					[69]
 "_ADOBE_EPSI"					[69]
 "_SONY_CDFF"					[37]
@@ -705,6 +722,24 @@ Name						Reference
 	ISO Latin/Hebrew alphabet
 "ISO8859-9"					[15],[12]
 	ISO Latin alphabet No. 5
+"ISO8859-10"					[15],[12]
+	ISO Latin alphabet No. 6
+"ISO8859-13"					[15],[12]
+	ISO Latin alphabet No. 7
+"ISO8859-14"					[15],[12]
+	ISO Latin alphabet No. 8
+"ISO8859-15"					[15],[12]
+	ISO Latin alphabet No. 9
+"ISO8859-16"					[15],[12]
+	ISO Latin alphabet No. 10
+"FCD8859-15"					[7]
+	(deprecated)
+	ISO Latin alphabet No. 9, Final Committee Draft
+"ISO10646-1"					[133]
+	Unicode Universal Multiple-Octet Coded Character Set
+"ISO10646-MES"					[133]
+	(deprecated)
+	Unicode Minimum European Subset
 "JISX0201.1976-0"				[38],[12]
 	8-Bit Alphanumeric-Katakana Code
 "JISX0208.1983-0"				[40],[12]
@@ -716,18 +751,19 @@ Name						Reference
 "JISX0208.1983-1"				[40]
 	(deprecated)
 	Japanese Graphic Character Set,
-	GL encoding
+	GR encoding
 "JISX0212.1990-0"				[72]
 	Supplementary Japanese Graphic Character Set,
 	GL encoding
 "KOI8-R"					[119]
+	Cyrillic alphabet
 "KSC5601.1987-0"				[41],[12]
 	Korean Graphic Character Set,
 	GL encoding
 "KSC5601.1987-1"				[41]
 	(deprecated)
 	Korean Graphic Character Set,
-	GL encoding
+	GR encoding
 "omron_CNS11643-0"				[45]
 "omron_CNS11643-1"				[45]
 "omron_BIG5-0"					[45]
@@ -993,6 +1029,21 @@ See XIM_ENCODING_NEGOTIATION in section 4.6 of the XIM standard.
 
 "COMPOUND_TEXT"					[104]
 
+23. SERVER INTERPRETED ADDRESS TYPES
+
+Types of addresses used in the ChangeHosts protocol request.
+See the description of ChangeHosts in section 9 of the X11 Protocol standard.
+
+Registered address types:
+
+Name				Reference
+----				---------
+"hostname"			[135 - xc/doc/spec/SIAddresses/hostname.txt]
+"IPv6"				[135 - xc/doc/spec/SIAddresses/IPv6.txt]
+
+Vendor-specific prefixes:
+
+None registered yet.
 
 REFERENCES
 
@@ -1021,14 +1072,53 @@ REFERENCES
 	2011 N. Shoreline Blvd.
 	Mountain View, CA 94309-7311
 
-[7]	Ellis Cohen
-	Open Softare Foundation
-	11 Cambridge Center
-	Cambridge MA 02142
+[7]	The Open Group
+	Apex Plaza,Forbury Road,
+	Reading,Berks.RG1 1AX,England
+	http://www.opengroup.org/contacts/
 
-[8]	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+[8]	The X standards body maintaining X11 and related standards:
+	1988-1993 The MIT X Consortium
+	1993-1996 The X Consortium
+	1997-1998 The Open Group X Project Team
+	1998-2003 The X.Org Group
+	2003-     The X.Org Foundation
+
+	The X.Org Foundation current contact information:
+
+	X.Org website:		http://www.x.org/
+
+	X.Org mailing lists: 	
+			http://www.x.org/XOrg_Foundation_Join_OpenLists.html
+
+	X.Org Non-Profit Business Manager:
+
+		The Open Group
+		8 New England Executive Park, Suite 325
+		Burlington MA 01803-5007, USA
+		http://www.opengroup.org/contacts/
+
+		Birgit C. Hartje
+		b.hartje@opengroup.org
+
+	X.Org Foundation Board of Directors:
+	    xf_board@x.org
+
+	    Board Secretary:
+		Leon Shiman
+		Shiman Associates Inc.
+		163 Tappan Street
+		Brookline, MA 02445, USA
+	
+	X.Org Foundation Sponsor Group:
+
+	    Chair:
+		Stuart Kreitman
+		Sun Microsystems, Inc.
+		17 Network Circle, MS UMPK17-202
+		Menlo Park, CA 94025, USA
+		stuart.kreitman@sun.com
+
 
 [9]	PEX Protocol Specification
 	PEX Protocol Encoding
@@ -1036,47 +1126,40 @@ REFERENCES
 	Randi Rost, Digital, document editor
 
 [10]	Extending X for Double-Buffering, Multi-Buffering, and Stereo
-	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [11]	X Display Manager Control Protocol
-	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [12]	Compound Text Encoding
-	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [13]	X11 Nonrectangular Window Shape Extension
-	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [14]	VEX - Video Extension to X
 	Todd Brunhoff, Tektronix
 
-[15]	ISO 8859, Information processing - 8-bit single-byte coded graphic
-	character sets, parts 1 through 9
+[15]	ISO 8859, Information technology -- 8-bit single-byte coded graphic
+	character sets, Parts 1 through 10, 13, 14, 15, and 16
 
 [16]	Inter-Client Communication Conventions Manual
-	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [17]	Obsolete
 
 [18]	Xlib Manual
-	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [19]	X Logical Font Description Conventions
-	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [20]	IXI Limited
 
@@ -1085,20 +1168,23 @@ REFERENCES
 [22]	Apple Computer, Inc.
 
 [23]	X Window System Protocol
-	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [24]	Adobe Systems, Inc.
 
 [25]	Bitstream, Inc.
 
 [26]	Xt Intrinsics Manual
-	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [27]	Digital Equipment Corporation
+	Irene McCartney
+	Compaq Computer Corporation
+	110 Spitbrook Road, ZKO3-3/T79
+	Nashua, NH  03062
+	irene@zk3.dec.com
 
 [28]	Steve Pitschke
 	Stellar Computer, Inc.
@@ -1113,18 +1199,17 @@ REFERENCES
 [30]	Crucible
 	Santa Cruz, CA
 
-[31]	Chris D. Peterson
+[31]	Mark Hatch
 	Integrated Computer Solutions, Inc.
 	201 Broadway
-	Cambridge, MA  02139
+	Cambridge, MA 02139
 
 [32]	Kyou Katoh
 	PFU LIMITED
 	687-1 Tsuruma 7 Gou Machida-shi
 	Tokyo 194, Japan
 
-[33]	Jeanne K. Smith
-	D46/996    3500
+[33]	Dan McNichol  /IMAD 9564
 	International Business Machines
 	11400 Burnet Road
 	Austin, TX  78758
@@ -1132,17 +1217,14 @@ REFERENCES
 [34]	Anonymous
 	MIT Software Distribution
 
-[35]	Larry Woestman
-	Hewlett Packard Co.
-	Corvallis Workstation Operation
-	1000 NE Circle Blvd.
-	Corvallis, OR 97330
+[35]	(Originally Larry Woestman)
+	Paul Anderson
+	Hewlett Packard
+	3404 E. Harmony Road, MS-74
+	Fort Collins, CO  80528-9599
 
-[36]	Tom McFarland
-	Hewlett-Packard, Co.
-	Corvallis Information Systems
-	1000 N.E. Circle Blvd.
-	Covallis, OR  97330
+[36]	(Originally Tom McFarland)
+	See Reference [35]
 
 [37]	Hideo Irie
 	Work Station Division
@@ -1164,7 +1246,7 @@ REFERENCES
 	PO Box 7900
 	Mountain View, CA 94039-7900
 
-[43]	Dave Cassing
+[43]	(Originally Dave Cassing)
 	X Strategy Team 
 	Tektronix, Inc.
 	PO Box 1000
@@ -1212,6 +1294,7 @@ REFERENCES
 	Plano, TX 75075
 
 [47]	X11R4
+	See Reference [8]
 
 [48]	Data General Corp.
 	62 T.W. Alexander Dr.
@@ -1262,16 +1345,15 @@ REFERENCES
 	MIT Station
 	Cambridge, MA 02139-0901
 
-[57]	David Rosenthal
+[57]	(Previously David Rosenthal, Steve Swales)
+	Stuart Krietman
 	Sun Microsystems, Inc.
-	2550 Garcia Avenue
-	Mountain View, CA  94043
+	17 Network Circle, MS UMPK17-202
+	Menlo Park, CA 94025
+	stuart.krietman@sun.com
 
-[58]	Murali V. Srinivasan
-	MTV21-228
-	Sun Microsystems, Inc.
-	2550 Garcia Avenue
-	Mountain View, CA  94043-1100
+[58]	(Originally Murali V. Srinivasan)
+	See Reference [57]
 
 [59]	Keith Robson
 	Ipsys Software plc
@@ -1283,6 +1365,7 @@ REFERENCES
 	Lewis, Trachtenberg & Associates
 	One Kendall Square	(Building 200, Fourth Floor)
 	Cambridge, MA 02139-1564
+	dbl@ics.com
 
 [61]	James J Dempsey
 	Bolt Beranek and Newman Inc.
@@ -1354,11 +1437,8 @@ REFERENCES
 	P.O. Box 58700
 	Salt Lake City, UT 84158
 
-[76]	Cheryl Huntington
-	MS. MTV21-04
-	Sun Microsystems
-	2550 Garcia Ave.
-	Mountain View, CA.  94043-1100
+[76]	(Originally Cheryl Huntington)
+	See Reference [57]
 
 [77]	Junichi Hiramoto
 	Manager, Engineering Department
@@ -1366,15 +1446,13 @@ REFERENCES
 	No. 30 Kowa Bldg.  2-4-5 Roppongi, Minato-ku
 	Tokyo, 106 Japan
 
-[78]	Jeff Stevenson; MS 74
-	Hewlett-Packard Co.
-	3404 E. Harmony Road
-	Fort Collins, CO  80525-9599
+[78]	(Originally Jeff Stevenson)
+	See Reference [35]
 
 [79]	Garry M. Paxinos
 	Metro Link Incorporated
-	2213 W. McNab Rd
-	Pompano Beach, FL 33069
+	5807 N. Andrews Way
+	Ft. Lauderdale, FL 33309
 
 [80]	John Dennis
 	Stardent Computer
@@ -1392,6 +1470,11 @@ REFERENCES
 	Digital Equipment Corp.
 	146 Main St.
 	Maynard, MA  01754
+
+	Irene McCartney
+	Compaq Computer Corporation
+	110 Spitbrook Road, ZKO3-3/T79
+	Nashua, NH  03062
 
 [83]	Mark W. Snitily
 	Snitily Graphics Consulting Services
@@ -1438,10 +1521,8 @@ REFERENCES
 	3333 Coyote Hill Rd.
 	Palo Alto, CA 94304
 
-[92]	Rick Heli
-	Sun Microsystems, Inc.
-	2550 Garcia Avenue
-	Mountain View, CA  94043-1100
+[92]	(Originally Rick Heli)
+	See Reference [57]
 
 [93]	Russell Leefer
 	Jupiter Systems
@@ -1449,10 +1530,8 @@ REFERENCES
 	1351 Harbor Bay Parkway
 	Alameda, CA 94501
 
-[94]	Bob Scheifler
-	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+[94]	The X.Org Foundation
+	See Reference [8]
 
 [95]	Greg Stiehl
 	Kubota Pacific Computer
@@ -1460,14 +1539,12 @@ REFERENCES
 	Santa Clara, CA 95051-0905
 
 [96]	MIT Screen Saver Extension
-	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [97]	Big Requests Extension
-	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [98]	Randi Rost
 	Kubota Pacific Computer
@@ -1484,11 +1561,8 @@ REFERENCES
 	Omika Works, Hitatchi Ltd.
 	5-2-1 Omika-cho, Hitachi-shi, Ibaraki-ken, 319-12 Japan
 
-[101]	Milind Pansare
-	Mailstop MTV21-228
-	Sun Microsystems, Inc.
-	2550 Garcia Ave.,
-	Mountain View CA. 94043
+[101]	(Originally Milind Pansare)
+	See Reference [57]
 
 [102]	John L. Cwikla
 	Wolfram Research, Inc.
@@ -1498,14 +1572,11 @@ REFERENCES
 [103]	University of Washington
 	for WM Tamil fonts
 
-[104]	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+[104]	The X Consortium
+	See Reference [8]
 
-[105]	Stephen Gildea
-	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+[105]	The Open Group X Project Team
+	See Reference [8]
 
 [106]	Selwyn Henriques
 	Tech-Source, Inc.
@@ -1516,24 +1587,20 @@ REFERENCES
 	character set for information interchange
 
 [108]	X Synchronization Extension
-	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [109]	XC-MISC Extension
-	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [110]	X Image Extension
-	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [111]	X Keyboard Extension
-	X Consortium
-	201 Broadway
-	Cambridge MA 01239-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [112]	Allan Frankel
 	Megatek Corporation
@@ -1546,10 +1613,8 @@ REFERENCES
 	46030 Manekin Plaza, Suite 160
 	Dulles, VA  20166
 
-[114]	Stuart W. Marks
-	SunSoft, Inc.
-	2550 Garcia Avenue, Mail Stop UMTV 21-122
-	Mountain View, CA  94043-1100
+[114]	(Originally Stuart W. Marks)
+	See Reference [57]
 
 [115]	Michael Gehret
 	X/software
@@ -1581,22 +1646,16 @@ REFERENCES
 	E-mail: info@cronyx.ru
 
 [121]	Sun Microsystems Federal, Inc.  Trusted Solaris Extension, 
-	Milind Pansare
-	Secure User Interface Group,
-	Sun Microsystems Federal, Inc.
-	Mail Stop MIL06-94
-	2550 Garcia Avenue,
-	Mountain View, CA 94043-1100
+	(Originally Milind Pansare)
+	See Reference [57]
 
 [122]	Record Extension
-	X Consortium
-	201 Broadway
-	Cambridge MA 02139-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [123]	Double Buffer Extension Specification
-	X Consortium
-	201 Broadway
-	Cambridge MA 02139-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [124]	James A. Moulton
 	EFW, Inc
@@ -1604,26 +1663,52 @@ REFERENCES
 	Ft. Worth, Texas 76136
 
 [125]	Low Bandwidth X Extension Specification
-	X Consortium
-	201 Broadway
-	Cambridge MA 02139-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [126]	Security Extension Specification
-	X Consortium
-	201 Broadway
-	Cambridge MA 02139-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [127]	Application Group Extension Specification
-	X Consortium
-	201 Broadway
-	Cambridge MA 02139-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [128]	X11 Input Extension Protocol Specification
-	X Consortium
-	201 Broadway
-	Cambridge MA 02139-1955
+	The X.Org Foundation
+	See Reference [8]
 
 [129]	X Print Extension Protocol Specification
-	X Consortium
-	201 Broadway
-	Cambridge MA 02139-1955
+	The X.Org Foundation
+	See Reference [8]
+
+[130]	XINERAMA
+	The X.Org Foundation
+	See Reference [8]
+
+[131]	Colormap Utilization Policy Extension Protocol Specification
+	The X.Org Foundation
+	See Reference [8]
+
+[132]	Display Power Management Signaling Extension Protocol Specification
+	The X.Org Foundation
+	See Reference [8]
+
+[133]	ISO10646 Information technology -- Universal Multiple-Octet Coded 
+	Character Set (UCS), part 1
+	Markus G. Kuhn
+	University of Cambridge
+	Computer Laboratory
+	15 JJ Thomson Avenue
+	Cambridge CB3 0FD
+	United Kingdom
+
+[134]   In R6.6 X.Org is reserving the string UTF8_STRING for use as an ICCCM
+        property type and selection target.  The ICCCM spec will be updated
+        in a future release to fully specify UTF8_STRING.
+
+[135]	X.Org Foundation source implementation
+	See Reference [8]
+
+/* $XFree86: xc/registry,v 1.8 2003/07/09 15:27:23 tsi Exp $ */
+
