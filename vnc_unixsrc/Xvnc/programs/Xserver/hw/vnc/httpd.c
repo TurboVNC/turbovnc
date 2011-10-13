@@ -113,7 +113,7 @@ httpInitSockets()
 void
 httpCheckFds()
 {
-    int nfds, n;
+    int nfds;
     fd_set fds;
     struct timeval tv;
     struct sockaddr_in addr;
@@ -130,6 +130,7 @@ httpCheckFds()
     tv.tv_sec = 0;
     tv.tv_usec = 0;
     nfds = select(max(httpSock,httpListenSock) + 1, &fds, NULL, NULL, &tv);
+
     if (nfds == 0) {
 	return;
     }
@@ -345,7 +346,7 @@ httpProcessInput()
 	    char *dollar;
 	    buf[n] = 0; /* make sure it's null-terminated */
 
-	    while (dollar = strchr(ptr, '$')) {
+	    while ((dollar = strchr(ptr, '$'))) {
 		WriteExact(httpSock, ptr, (dollar - ptr));
 
 		ptr = dollar;
@@ -450,7 +451,7 @@ parseParams(const char *request, char *result, int max_bytes)
     const char *tail;
     char *delim_ptr;
     char *value_str;
-    int cur_bytes, len;
+    int cur_bytes, len = 0;
 
     result[0] = '\0';
     cur_bytes = 0;
