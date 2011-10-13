@@ -387,7 +387,7 @@ cfbCopyPlane32to1
 	psrcLine = (unsigned int *)psrcBase + srcy * widthSrc + srcx;
 #endif
 	pdstLine = (unsigned int *)pdstBase + dsty * widthDst + (dstx >> 5);
-	if (dstx + width <= 32)
+	if ((dstx & 0x1f) + width <= 32)
 	{
 	    mfbmaskpartialbits(dstx, width, startmask);
 	    nlMiddle = 0;
