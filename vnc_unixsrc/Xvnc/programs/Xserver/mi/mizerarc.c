@@ -779,7 +779,10 @@ miZeroPolyArc(pDraw, pGC, narcs, parcs)
 	if (miCanZeroArc(arc))
 	{
 	    if (pGC->lineStyle == LineSolid)
+	    {
 		pts = miZeroArcPts(arc, points);
+		oddPts = NULL;
+	    }
 	    else
 	    {
 		pts = points;
