@@ -64,6 +64,8 @@ SOFTWARE.
 #include "cfb.h"
 #include "cfbmskbits.h"
 
+extern PixelType mfbGetendtab(int);
+
 PixmapPtr
 cfbCreatePixmap (pScreen, width, height, depth)
     ScreenPtr	pScreen;

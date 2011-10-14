@@ -111,7 +111,7 @@ miGlyphs (CARD8		op,
     int		n;
     GlyphPtr	glyph;
     int		error;
-    BoxRec	extents;
+    BoxRec	extents = {0, 0, 1, 1};
     CARD32	component_alpha;
     
     if (maskFormat)

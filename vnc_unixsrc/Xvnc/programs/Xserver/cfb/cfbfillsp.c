@@ -421,7 +421,7 @@ int fSorted;
     PixmapPtr		    pStipple;	/* pointer to stipple we want to fill with */
     register int	    w;
     int			    width,  x, xrem, xSrc, ySrc;
-    CfbBits	    tmpSrc, tmpDst1, tmpDst2;
+    CfbBits	    tmpSrc, tmpDst1 = 0, tmpDst2 = 0;
     int			    stwidth, stippleWidth;
     CfbBits	    *psrcS;
     int			    rop, stiprop = 0;
