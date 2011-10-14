@@ -47,6 +47,21 @@ in this Software without prior written authorization from The Open Group.
 #else /* PSZ==8 */
 #include "cfbtab.h" /* provides starttab, endttab, partmasks */
 #endif /* PSZ==8 */
+#if PSZ == 16
+#undef   PSZ /* for maskbits.h */
+#include "maskbits.h"
+#define PSZ 16
+#endif /* PSZ==16 */
+#if PSZ == 24
+#undef   PSZ /* for maskbits.h */
+#include "maskbits.h"
+#define PSZ 24
+#endif /* PSZ==24 */
+#if PSZ == 32
+#undef   PSZ /* for maskbits.h */
+#include "maskbits.h"
+#define PSZ 32
+#endif /* PSZ==32 */
 
 
 void
