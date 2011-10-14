@@ -3,6 +3,7 @@
  */
 
 /*
+ *  Copyright (C) 2011 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
@@ -122,14 +123,16 @@ httpCheckFds()
     if (!httpDir)
 	return;
 
-    FD_ZERO(&fds);
-    FD_SET(httpListenSock, &fds);
-    if (httpSock >= 0) {
-	FD_SET(httpSock, &fds);
-    }
-    tv.tv_sec = 0;
-    tv.tv_usec = 0;
-    nfds = select(max(httpSock,httpListenSock) + 1, &fds, NULL, NULL, &tv);
+    do {
+        FD_ZERO(&fds);
+        FD_SET(httpListenSock, &fds);
+        if (httpSock >= 0) {
+            FD_SET(httpSock, &fds);
+        }
+        tv.tv_sec = 0;
+        tv.tv_usec = 0;
+        nfds = select(max(httpSock,httpListenSock) + 1, &fds, NULL, NULL, &tv);
+    } while (nfds < 0 && errno == EINTR);
 
     if (nfds == 0) {
 	return;

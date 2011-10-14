@@ -19,6 +19,7 @@
  */
 
 /*
+ *  Copyright (C) 2011 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -169,13 +170,16 @@ rfbCheckFds()
 	inetdInitDone = TRUE;
     }
 
-    memcpy((char *)&fds, (char *)&allFds, sizeof(fd_set));
-    tv.tv_sec = 0;
-    tv.tv_usec = 0;
-    nfds = select(maxFd + 1, &fds, NULL, NULL, &tv);
-    if (nfds == 0) {
-	return;
-    }
+    do {
+        memcpy((char *)&fds, (char *)&allFds, sizeof(fd_set));
+        tv.tv_sec = 0;
+        tv.tv_usec = 0;
+        nfds = select(maxFd + 1, &fds, NULL, NULL, &tv);
+        if (nfds == 0) {
+            return;
+        }
+    } while (nfds < 0 && errno == EINTR);
+
     if (nfds < 0) {
 	rfbLogPerror("rfbCheckFds: select");
 	return;
