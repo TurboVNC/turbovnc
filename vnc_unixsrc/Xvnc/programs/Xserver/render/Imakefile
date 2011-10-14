@@ -1,0 +1,46 @@
+XCOMM $XFree86: xc/programs/Xserver/render/Imakefile,v 1.10 2002/11/23 02:38:15 keithp Exp $
+#include <Server.tmpl>
+
+       SRCS =   animcur.c \
+                filter.c \
+                glyph.c \
+                miglyph.c \
+                miindex.c \
+                mipict.c \
+                mirect.c \
+                mitrap.c \
+                mitri.c \
+                picture.c \
+                render.c \
+		renderedge.c
+
+       OBJS =   animcur.o \
+                filter.o \
+                glyph.o \
+                miglyph.o \
+                miindex.o \
+                mipict.o \
+                mirect.o \
+                mitrap.o \
+                mitri.o \
+                picture.o \
+                render.o \
+		renderedge.o
+
+   INCLUDES = -I. -I../include -I../mi -I../../../include/fonts \
+                -I../fb -I../hw/kdrive -I$(EXTINCSRC) -I$(XINCLUDESRC) \
+                -I$(FONTINCSRC) -I../Xext
+   LINTLIBS = ../dix/llib-ldix.ln ../os/llib-los.ln
+
+NormalLibraryTarget(render,$(OBJS))
+NormalLibraryObjectRule()
+LintLibraryTarget(render,$(SRCS))
+NormalLintTarget($(SRCS))
+
+DependTarget()
+
+InstallDriverSDKNonExecFile(glyphstr.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(mipict.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(picture.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(picturestr.h,$(DRIVERSDKINCLUDEDIR))
+

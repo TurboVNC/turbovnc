@@ -1,0 +1,118 @@
+XCOMM $XFree86: xc/programs/Xserver/GL/glx/Imakefile,v 1.11 2004/01/28 18:11:50 alanh Exp $
+
+#if DoLoadableServer
+# if !BuildModuleInSubdir
+#  define IHaveModules
+# elif !defined(IHaveModules)
+#  define IHaveSubdirs
+SUBDIRS = module
+# endif
+#endif
+
+/* Large PIC tables needed for SPARC builds */
+#if defined(sparc) || defined(SparcArchitecture)
+# define LargePICTable YES
+   PICFLAGS = LargePositionIndependentCFlags
+#endif
+
+#include <Server.tmpl>
+
+LinkSourceFile(glcontextmodes.c, $(MESASRCDIR)/src/mesa/drivers/dri/common)
+LinkSourceFile(glcontextmodes.h, $(MESASRCDIR)/src/mesa/drivers/dri/common)
+LinkSourceFile(indirect_size.c, $(MESASRCDIR)/src/glx/x11)
+LinkSourceFile(indirect_size.h, $(MESASRCDIR)/src/glx/x11)
+
+         SRCS = global.c glxbuf.c glxcmds.c glxcmdsswap.c glxext.c \
+                glxfb.c glximports.c glxmem.c glxpix.c glxscreens.c \
+                glxutil.c render2.c render2swap.c renderpix.c \
+                renderpixswap.c rensize.c rensizetab.c single2.c \
+                single2swap.c singlepix.c singlepixswap.c \
+                singlesize.c xfont.c g_disptab.c g_disptab_EXT.c \
+                g_render.c g_renderswap.c g_single.c g_singleswap.c \
+                glcontextmodes.c indirect_size.c $(MSRCS)
+
+         OBJS = global.o glxbuf.o glxcmds.o glxcmdsswap.o glxext.o \
+                glxfb.o glximports.o glxmem.o glxpix.o glxscreens.o \
+                glxutil.o render2.o render2swap.o renderpix.o \
+                renderpixswap.o rensize.o rensizetab.o single2.o \
+                single2swap.o singlepix.o singlepixswap.o \
+                singlesize.o xfont.o g_disptab.o g_disptab_EXT.o \
+                g_render.o g_renderswap.o g_single.o g_singleswap.o \
+                glcontextmodes.o indirect_size.o $(MOBJS)
+
+     INCLUDES = -I$(SERVERSRC)/GL/glx -I$(SERVERSRC)/GL/include -I$(SERVERSRC)/include -I$(INCLUDESRC) -I$(MESASRCDIR)/include \
+                -I$(XINCLUDESRC) -I$(SERVERSRC)/mi \
+                -I$(EXTINCSRC) -I$(FONTINCSRC) -I$(LIBSRC)/GL/include \
+                -I$(XF86SRC)
+
+#if defined(DarwinArchitecture) && ((OSMajorVersion == 6 && OSMinorVersion < 3) || OSMajorVersion < 6)
+  NO_EXT_DEFS = -DMISSING_GL_EXTS
+#endif
+#if defined(Win32Architecture)
+# undef __stdcall
+  APIENTRY_DEFS = -DAPIENTRY=__stdcall
+#endif
+
+XCOMM If you add "-DDEBUG" in DEFINES, then make sure you also
+XCOMM add DEBUG to the define in ../mesa/src/X/xf86glx.c
+      DEFINES = $(GLX_DEFINES) $(NO_EXT_DEFS) $(APIENTRY_DEFS)
+
+
+#ifdef IHaveModules
+ModuleObjectRule()
+LibraryModuleTarget(glx,$(OBJS))
+#else
+NormalLibraryObjectRule()
+NormalLibraryTarget(glx,$(OBJS))
+#if defined(GlxUseWindows) && GlxUseWindows
+clean::
+	RemoveFiles($(foreach obj,$(OBJS), stdcall/$(obj)))
+includes::
+	MakeDir(stdcall)
+SpecialObjectRule(stdcall/%.o,%.c,-DUSE_OPENGL32 -o $@)
+NormalLibraryTarget(glx_stdcall,$(foreach obj,$(OBJS), stdcall/$(obj)))
+#endif
+#endif
+SubdirLibraryRule($(OBJS))
+
+LintLibraryTarget(glx,$(SRCS))
+NormalLintTarget($(SRCS))
+
+DependTarget()
+
+#ifdef IHaveSubdirs
+MakeSubdirs($(SUBDIRS))
+DependSubdirs($(SUBDIRS))
+#endif
+
+#ifdef LinkDirectory
+LinkSourceFile(global.c,LinkDirectory)
+LinkSourceFile(glxbuf.c,LinkDirectory)
+LinkSourceFile(glxcmds.c,LinkDirectory)
+LinkSourceFile(glxcmdsswap.c,LinkDirectory)
+LinkSourceFile(glxext.c,LinkDirectory)
+LinkSourceFile(glxfb.c,LinkDirectory)
+LinkSourceFile(glximports.c,LinkDirectory)
+LinkSourceFile(glxmem.c,LinkDirectory)
+LinkSourceFile(glxpix.c,LinkDirectory)
+LinkSourceFile(glxscreens.c,LinkDirectory)
+LinkSourceFile(glxutil.c,LinkDirectory)
+LinkSourceFile(render2.c,LinkDirectory)
+LinkSourceFile(render2swap.c,LinkDirectory)
+LinkSourceFile(renderpix.c,LinkDirectory)
+LinkSourceFile(renderpixswap.c,LinkDirectory)
+LinkSourceFile(rensize.c,LinkDirectory)
+LinkSourceFile(rensizetab.c,LinkDirectory)
+LinkSourceFile(single2.c,LinkDirectory)
+LinkSourceFile(single2swap.c,LinkDirectory)
+LinkSourceFile(singlepix.c,LinkDirectory)
+LinkSourceFile(singlepixswap.c,LinkDirectory)
+LinkSourceFile(singlesize.c,LinkDirectory)
+LinkSourceFile(xfont.c,LinkDirectory)
+LinkSourceFile(g_disptab.c,LinkDirectory)
+LinkSourceFile(g_disptab_EXT.c,LinkDirectory)
+LinkSourceFile(g_render.c,LinkDirectory)
+LinkSourceFile(g_renderswap.c,LinkDirectory)
+LinkSourceFile(g_single.c,LinkDirectory)
+LinkSourceFile(g_singleswap.c,LinkDirectory)
+#endif

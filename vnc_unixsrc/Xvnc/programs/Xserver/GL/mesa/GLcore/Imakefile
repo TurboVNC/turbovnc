@@ -1,0 +1,77 @@
+XCOMM $XFree86: xc/programs/Xserver/GL/mesa/GLcore/Imakefile,v 1.3 2002/05/31 18:12:36 dawes Exp $
+
+#if DoLoadableServer
+#if !BuildModuleInSubdir
+#define IHaveModules
+#elif !defined(IHaveModules)
+#define IHaveSubdirs
+SUBDIRS = module
+#endif
+#endif
+
+#include <Server.tmpl>
+
+#define NeedAllMesaSrc
+#define MesaInXServer
+#define MesaBuildDir ../main/
+#define MesaACBuildDir ../array_cache/
+#define MesaMathBuildDir ../math/
+#define MesaSwrastBuildDir ../swrast/
+#define MesaSwrastSetupBuildDir ../swrast_setup/
+#define MesaTnlBuildDir ../tnl/
+#define MesaShaderBuildDir ../shader/
+#define MesaGrammarBuildDir ../shader/grammar/
+#define MesaSlangBuildDir ../shader/slang/
+#define MesaXBuildDir ../X/
+
+#include "../../../../../lib/GL/mesa/array_cache/Imakefile.inc"
+#include "../../../../../lib/GL/mesa/swrast/Imakefile.inc"
+#include "../../../../../lib/GL/mesa/swrast_setup/Imakefile.inc"
+#include "../../../../../lib/GL/mesa/tnl/Imakefile.inc"
+#include "../../../../../lib/GL/mesa/main/Imakefile.inc"
+#include "../../../../../lib/GL/mesa/math/Imakefile.inc"
+#include "../../../../../lib/GL/mesa/shader/Imakefile.inc"
+#include "../../../../../lib/GL/mesa/shader/grammar/Imakefile.inc"
+#include "../../../../../lib/GL/mesa/shader/slang/Imakefile.inc"
+#include "../../../../../lib/GL/mesa/drivers/x11/Imakefile.inc"
+#include "../../../../../lib/GL/mesa/Imakefile.inc"
+
+#ifdef IHaveModules
+        MSRCS = GLcoremodule.c
+        MOBJS = GLcoremodule.o
+#endif
+
+        XOBJS = ../X/?*.o
+
+         OBJS = $(COREMESAOBJS) $(MOBJS)
+
+        DONES = ../main/DONE ../X/DONE ../array_cache/DONE \
+		../math/DONE ../swrast/DONE ../swrast_setup/DONE \
+		../tnl/DONE ../shader/DONE ../shader/grammar/DONE \
+                ../shader/slang/DONE
+
+     INCLUDES = -I$(INCLUDESRC) -I$(XINCLUDESRC) -I$(EXTINCSRC) \
+		-I$(MESASRCDIR)/include -I$(GLXLIBSRC)/include \
+		-I$(MESASRCDIR)/src/mesa \
+		-I$(SERVERSRC)/include
+
+      DEFINES = $(GLX_DEFINES)
+
+#ifdef IHaveModules
+ModuleObjectRule()
+
+DepLibraryModuleTarget(GLcore, $(DONES) $(OBJS),$(OBJS) $(XOBJS))
+InstallLibraryModule(GLcore,$(MODULEDIR),extensions)
+
+#else
+NormalDepLibraryTarget(GLcore, $(DONES) $(OBJS), $(OBJS) $(XOBJS))
+NormalLibraryObjectRule()
+#endif
+
+InstallDriverSDKLibraryModule(GLcore,$(DRIVERSDKMODULEDIR),extensions)
+
+#ifdef IHaveSubdirs
+MakeSubdirs($(SUBDIRS))
+DependSubdirs($(SUBDIRS))
+#endif
+

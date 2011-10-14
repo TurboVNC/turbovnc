@@ -1,0 +1,59 @@
+#if DoLoadableServer
+#if !BuildModuleInSubdir
+#define IHaveModules
+#elif !defined(IHaveModules)
+#define IHaveSubdirs
+SUBDIRS = module
+#endif
+#endif
+
+#if !defined(IHaveModules) || !BuildModuleInSubdir
+#define IHaveSubdirs
+      SUBDIRS = library
+#endif
+
+#include <Server.tmpl>
+
+#define NeedAllMesaSrc
+#define NeedToLinkMesaSrc
+#define MesaSlangBuildDir /**/
+#if !defined(IHaveModules) || !BuildModuleInSubdir
+#include "../../../../../../lib/GL/mesa/shader/slang/Imakefile.inc"
+#else
+#include "../../../../../../../lib/GL/mesa/shader/slang/Imakefile.inc"
+#endif
+
+         SRCS = $(MESA_SLANG_SRCS)
+         OBJS = $(MESA_SLANG_OBJS)
+
+     INCLUDES = -I$(MESASRCDIR)/src/mesa \
+		-I$(MESASRCDIR)/src/mesa/shader \
+                -I$(MESASRCDIR)/src/mesa/shader/grammar \
+		-I$(MESASRCDIR)/src/mesa/main \
+		-I$(MESASRCDIR)/src/mesa/glapi \
+		-I$(MESASRCDIR)/include \
+                -I$(SERVERSRC)/include -I$(XINCLUDESRC) \
+                -I$(SERVERSRC)/GL/include -I$(SERVERSRC)/GL/glx \
+                -I$(LIBSRC)/GL/include \
+                -I$(XF86SRC) -I$(INCLUDESRC)
+
+      DEFINES = $(GLX_DEFINES) /*-DUSE_X86_ASM*/ /*-DUSE_SPARC_ASM*/
+
+#ifdef IHaveModules
+ModuleObjectRule()
+#else
+NormalLibraryObjectRule()
+#endif
+
+SubdirLibraryRule($(OBJS))
+
+LintLibraryTarget(dri,$(SRCS))
+NormalLintTarget($(SRCS))
+
+DependTarget()
+
+#ifdef IHaveSubdirs
+MakeSubdirs($(SUBDIRS))
+DependSubdirs($(SUBDIRS))
+#endif
+

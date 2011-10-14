@@ -1,0 +1,66 @@
+XCOMM $XdotOrg: xc/programs/Xserver/GL/mesa/tnl/Imakefile,v 1.2 2004/08/19 07:34:44 kem Exp $
+XCOMM $XFree86: xc/programs/Xserver/GL/mesa/src/tnl/Imakefile,v 1.8 2002/11/22 22:56:02 tsi Exp $
+
+#if DoLoadableServer
+#if !BuildModuleInSubdir
+#define IHaveModules
+#elif !defined(IHaveModules)
+#define IHaveSubdirs
+SUBDIRS = module
+#endif
+#endif
+
+/* Large PIC tables needed for Solaris/SPARC builds */
+#if defined(SunArchitecture) && defined(SparcArchitecture) && defined(LargePositionIndependentCFlags)
+   PICFLAGS = LargePositionIndependentCFlags
+#endif
+
+
+#include <Server.tmpl>
+
+#define NeedAllMesaSrc
+#define NeedToLinkMesaSrc
+#define MesaTnlBuildDir /**/
+#if !defined(IHaveModules) || !BuildModuleInSubdir
+#include "../../../../../lib/GL/mesa/tnl/Imakefile.inc"
+#else
+#include "../../../../../../lib/GL/mesa/tnl/Imakefile.inc"
+#endif
+
+
+         SRCS = $(MESA_TNL_SRCS)
+         OBJS = $(MESA_TNL_OBJS)
+
+     INCLUDES = -I$(MESASRCDIR)/src/mesa \
+		-I$(MESASRCDIR)/src/mesa/array_cache \
+		-I$(MESASRCDIR)/src/mesa/math \
+		-I$(MESASRCDIR)/src/mesa/main \
+		-I$(MESASRCDIR)/src/mesa/glapi \
+		-I$(MESASRCDIR)/src/mesa/shader \
+		-I$(MESASRCDIR)/src/mesa/tnl \
+		-I$(MESASRCDIR)/include \
+                -I$(SERVERSRC)/include -I$(XINCLUDESRC) \
+                -I$(SERVERSRC)/GL/include -I$(SERVERSRC)/GL/glx \
+                -I$(LIBSRC)/GL/include \
+                -I$(XF86SRC) -I$(INCLUDESRC)
+
+      DEFINES = $(GLX_DEFINES) /*-DUSE_X86_ASM*/ /*-DUSE_SPARC_ASM*/
+
+#ifdef IHaveModules
+ModuleObjectRule()
+#else
+NormalLibraryObjectRule()
+#endif
+
+SubdirLibraryRule($(OBJS))
+
+LintLibraryTarget(dri,$(SRCS))
+NormalLintTarget($(SRCS))
+
+DependTarget()
+
+#ifdef IHaveSubdirs
+MakeSubdirs($(SUBDIRS))
+DependSubdirs($(SUBDIRS))
+#endif
+

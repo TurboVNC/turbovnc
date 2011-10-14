@@ -23,46 +23,22 @@
 #define BuildFontServer		NO
 #define BuildFonts		NO
 #define BuildLibraries		NO
-#define BuildLoadableXlibI18n	NO
 #define BuildXInputExt		NO
 #define BuildScreenSaverExt	NO
-#define BuildPexExt		NO
-#define BuildXIE		NO
-#define BuildXIElib		NO
-#define BuildGlxExt             NO
-#define BuildXKB		NO
-#define BuildXKBlib		NO
 #define BuildLBX		NO
 #define BuildXprint		NO
-#define BuildDBE		NO
-#define BuildDBElib		NO
-#define BuildRECORD		NO
-#define BuildRECORDlib		NO
 #define BuildRman		NO
-#define BuildScreenSaverLibrary	NO
-#define BuildXF86MiscLibrary	NO
-#define BuildXF86DGALibrary	NO
-#define BuildXF86VidModeLibrary	NO
-#define BuildDPMSLibrary	NO
-#define BuildXKBuilib		NO
 #define BuildXF86DGA		NO
 #define BuildDPMSExt		NO
 #define BuildXF86VidModeExt	NO
 #define BuildXF86MiscExt	NO
-#define BuildXF86Setup		NO
 #define BuildAppgroup		NO
 #define BuildXCSecurity		NO
-#define BuildPC98Servers	NO
 #define BuildRandR		NO
-#define BuildRandRLibrary	NO
-#define BuildRender		NO
-#define BuildRenderLibrary	NO
 #define BuildXinerama		NO
 #define BuildXF86DRI		NO
-#define BuildXfixes		NO
 #define BuildXTrap		NO
 #define BuildFreetype2Library	YES
-#define BuildXevie		NO
 #define BuildDPMS		NO
 #define BuildIPv6		NO
 
@@ -74,6 +50,8 @@
 #define SharedLibXau		NO
 #define SharedLibXdmcp		NO
 #define XF86AFB			NO
+
+#define MesaUseX86Asm		NO
 
 #define XDarwinServer		NO
 #define XdecServer              NO
@@ -104,7 +82,7 @@
 #include "tvnc_version.h"
 
 #define XVendorString		The\ VirtualGL\ Project
-#define XVendorRelease		60900000
+#define XVendorRelease		XorgVersion
 
 
 /*****************************************************************************/
@@ -122,31 +100,3 @@
 #endif
 
 #endif /* BeforeVendorCF */
-
-#ifdef AfterVendorCF
-
-#ifdef AIXArchitecture
-#ifdef XibmServer
-# undef XibmServer
-#endif
-#define XibmServer NO
-
-#ifdef ExtensionOSDefines
-# undef ExtensionOSDefines
-#endif 
-#define ExtensionOSDefines 
-#endif
-
-#ifdef HPArchitecture
-#ifdef XhpServer
-# undef XhpServer
-#endif
-#define XhpServer NO
-
-#ifdef ExtensionOSDefines
-# undef ExtensionOSDefines
-#endif 
-#define ExtensionOSDefines 
-#endif
-
-#endif /* AfterVendorCF */

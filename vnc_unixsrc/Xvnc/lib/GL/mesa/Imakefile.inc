@@ -1,0 +1,57 @@
+XCOMM $XFree86: xc/lib/GL/mesa/src/Imakefile.inc,v 1.7tsi Exp $
+
+#ifndef MesaBuildDir
+#define MesaBuildDir $(GLXLIBSRC)/mesa/
+#endif
+
+MESABUILDDIR = MesaBuildDir
+
+COREMESASRCS = $(COREMESABASESRCS) \
+		$(MESA_AC_SRCS) \
+		$(MESA_MATH_SRCS) \
+		$(MESA_SWRAST_SRCS) \
+		$(MESA_SWR_SETUP_SRCS) \
+		$(MESA_TNL_SRCS) \
+		$(MESA_SHADER_SRCS) \
+                $(MESA_GRAMMAR_SRCS) \
+                $(MESA_SLANG_SRCS)
+
+COREMESAOBJS = $(COREMESABASEOBJS) \
+		$(MESA_AC_OBJS) \
+		$(MESA_MATH_OBJS) \
+		$(MESA_SWRAST_OBJS) \
+		$(MESA_SWR_SETUP_OBJS) \
+		$(MESA_TNL_OBJS) \
+		$(MESA_SHADER_OBJS) \
+                $(MESA_GRAMMAR_OBJS) \
+                $(MESA_SLANG_OBJS)
+
+COREMESAUOBJS = $(COREMESABASEUOBJS) \
+		$(MESA_AC_UOBJS) \
+		$(MESA_MATH_UOBJS) \
+		$(MESA_SWRAST_UOBJS) \
+		$(MESA_SWR_SETUP_UOBJS) \
+		$(MESA_TNL_UOBJS) \
+		$(MESA_SHADER_UOBJS) \
+                $(MESA_GRAMMAR_UOBJS) \
+                $(MESA_SLANG_UOBJS)
+
+COREMESADOBJS = $(COREMESABASEDOBJS) \
+		$(MESA_AC_DOBJS) \
+		$(MESA_MATH_DOBJS) \
+		$(MESA_SWRAST_DOBJS) \
+		$(MESA_SWR_SETUP_DOBJS) \
+		$(MESA_TNL_DOBJS) \
+		$(MESA_SHADER_DOBJS) \
+                $(MESA_GRAMMAR_DOBJS) \
+                $(MESA_SLANG_DOBJS)
+
+COREMESAPOBJS = $(COREMESABASEPOBJS) \
+		$(MESA_AC_POBJS) \
+		$(MESA_MATH_POBJS) \
+		$(MESA_SWRAST_POBJS) \
+		$(MESA_SWR_SETUP_POBJS) \
+		$(MESA_TNL_POBJS) \
+		$(MESA_SHADER_POBJS) \
+                $(MESA_GRAMMAR_POBJS) \
+                $(MESA_SLANG_POBJS)
