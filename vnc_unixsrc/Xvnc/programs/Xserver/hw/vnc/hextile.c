@@ -301,7 +301,7 @@ testColours##bpp(data,size,mono,solid,bg,fg)				      \
     CARD##bpp *bg;							      \
     CARD##bpp *fg;							      \
 {									      \
-    CARD##bpp colour1, colour2;						      \
+    CARD##bpp colour1 = 0, colour2 = 0;						      \
     int n1 = 0, n2 = 0;							      \
     *mono = TRUE;							      \
     *solid = TRUE;							      \

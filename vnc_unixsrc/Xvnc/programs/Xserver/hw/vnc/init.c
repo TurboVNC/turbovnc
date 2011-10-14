@@ -84,8 +84,13 @@ from the X Consortium.
 #include <errno.h>
 #include <sys/param.h>
 #include "dix.h"
+#include "mi.h"
 #include "rfb.h"
 #include <time.h>
+
+extern Bool cfb16ScreenInit(ScreenPtr, pointer, int, int, int, int, int);
+extern Bool cfb32ScreenInit(ScreenPtr, pointer, int, int, int, int, int);
+extern Bool rfbDCInitialize(ScreenPtr, miPointerScreenFuncPtr);
 
 #ifdef CORBA
 #include <vncserverctrl.h>
@@ -363,8 +368,8 @@ ddxProcessArgument (argc, argv, i)
 		UseMsg ();
 		return 2;
 	    }
-	    if (q < 3 && *end != '.' ||
-	        q == 3 && *end != '\0') {
+	    if ((q < 3 && *end != '.') ||
+	        (q == 3 && *end != '\0')) {
 		UseMsg ();
 		return 2;
 	    }
@@ -699,7 +704,7 @@ InitInput(argc, argv)
     RegisterKeyboardDevice(k);
     RegisterPointerDevice(p);
     miRegisterPointerDevice(screenInfo.screens[0], p);
-    (void)mieqInit (k, p);
+    (void)mieqInit ((DevicePtr)k, (DevicePtr)p);
 }
 
 

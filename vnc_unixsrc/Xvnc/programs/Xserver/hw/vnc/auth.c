@@ -449,8 +449,6 @@ void
 rfbAuthInit()
 {
     AuthMethodData* a;
-    SecTypeData**   p;
-    SecTypeData*    s;
     int             nSelected = 0;
 
     ReadConfigFile();

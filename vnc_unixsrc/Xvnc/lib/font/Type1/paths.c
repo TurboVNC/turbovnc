@@ -1028,7 +1028,7 @@ void
 PathDelta(struct segment *p,       /* input path                             */
 	  struct fractpoint *pt)   /* pointer to x,y to set                  */
 {
-       struct fractpoint mypoint;  /* I pass this to TextDelta               */
+       struct fractpoint mypoint = {0, 0};  /* I pass this to TextDelta               */
        register fractpel x,y;  /* working variables for path current point   */
  
        for (x=y=0; p != NULL; p=p->link) {
