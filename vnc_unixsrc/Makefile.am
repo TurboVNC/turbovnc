@@ -13,17 +13,15 @@ noinst_HEADERS = Xvnc/config/cf/tvnc_version.h
 
 CLEANFILES = $(noinst_SCRIPTS) $(noinst_HEADERS)
 
-xserver: all
+xserver: all Xvnc/config/cf/tvnc_version.h Xvnc-configure
 	if [ ! "${top_srcdir}" = "${top_builddir}" ]; then \
 		rsync -av ${top_srcdir}/Xvnc ${top_builddir}; \
 	fi; \
 	cd Xvnc; \
-	rm -f config/imake/imake config/imake/*.o config/makedepend/makedepend \
-		config/makedepend/*.o config/util/lndir config/util/*.o; \
 	sh ../Xvnc-configure; \
-	$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)"
+	$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)" World
 
-xserver-rebuild: all
+xserver-rebuild: all Xvnc/config/cf/tvnc_version.h
 	if [ ! "${top_srcdir}" = "${top_builddir}" ]; then \
 		rsync -av ${top_srcdir}/Xvnc ${top_builddir}; \
 	fi; \
@@ -35,10 +33,8 @@ xserver-clean: Xvnc/config/cf/tvnc_version.h
 		rsync -av ${top_srcdir}/Xvnc ${top_builddir}; \
 	fi; \
 	cd Xvnc; \
-	rm -f config/imake/imake config/imake/*.o config/makedepend/makedepend \
-		config/makedepend/*.o; \
 	sh ../Xvnc-configure; \
-	$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)" clean
+	$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)" distclean
 
 xserver-install: vncserver
 	$(INSTALL) -m 755 ./vncserver $(DESTDIR)/$(bindir)/

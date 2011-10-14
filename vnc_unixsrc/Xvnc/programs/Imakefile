@@ -5,7 +5,7 @@ XCOMM $Xorg: Imakefile,v 1.4 2000/08/17 19:47:01 cpqbld Exp $
 XCOMM $XFree86: xc/programs/Imakefile,v 3.54 2003/04/14 20:37:16 herrb Exp $
 
 #define IHaveSubdirs
-#define PassCDebugFlags CDEBUGFLAGS="$(CDEBUGFLAGS)" CC="$(CC)" EXTRA_LDOPTIONS="$(EXTRA_LDOPTIONS)"
+#define PassCDebugFlags CDEBUGFLAGS="$(CDEBUGFLAGS)"
 
 #if BuildServer || UseRgbTxt
        RGBSRCDIR = rgb

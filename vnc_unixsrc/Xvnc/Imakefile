@@ -6,7 +6,7 @@ XCOMM $Xorg: Imakefile,v 1.5 2000/08/17 19:41:44 cpqbld Exp $
 XCOMM $XFree86: xc/Imakefile,v 3.29tsi Exp $
 
 #define IHaveSubdirs
-#define PassCDebugFlags CDEBUGFLAGS="$(CDEBUGFLAGS)" CC="$(CC)" EXTRA_LDOPTIONS="$(EXTRA_LDOPTIONS)"
+#define PassCDebugFlags CDEBUGFLAGS="$(CDEBUGFLAGS)"
 
 RELEASE = XOrgReleaseString
 
@@ -100,7 +100,7 @@ clean::
       MAKE_OPTS = -f xmakefile
 
 World::
-	$(MAKE) $(MFLAGS) $(MAKE_OPTS) $(TOPPARALLELMFLAGS) PassCDebugFlags all
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) $(TOPPARALLELMFLAGS) all
 
 Everything::
 	@echo ""
@@ -115,10 +115,10 @@ Everything::
 	fi
 	-$(RM) xmakefile.bak; $(MV) xmakefile xmakefile.bak
 	$(MAKE) $(MFLAGS) xmakefile
-	$(MAKE) $(MFLAGS) $(MAKE_OPTS) PassCDebugFlags Makefiles
-	$(MAKE) $(MFLAGS) $(MAKE_OPTS) PassCDebugFlags includes
-	$(MAKE) $(MFLAGS) $(MAKE_OPTS) PassCDebugFlags depend
-	$(MAKE) $(MFLAGS) $(MAKE_OPTS) $(WORLDOPTS) PassCDebugFlags
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) Makefiles
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) includes
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) depend
+	$(MAKE) $(MFLAGS) $(MAKE_OPTS) $(WORLDOPTS)
 	@echo ""
 	@date
 	@echo ""

@@ -1,5 +1,5 @@
 # $Xorg: Makefile,v 1.5 2000/08/17 19:41:44 cpqbld Exp $
-# $Id: Makefile,v 1.2 2011-10-13 08:14:33 dcommander Exp $
+# $Id: Makefile,v 1.3 2011-10-14 03:27:15 dcommander Exp $
 
 
 
@@ -56,11 +56,11 @@ World:
 	;; esac;
 	@date
 	@echo ""
-	@if [ -f xmakefile ]; then \
-	    $(MAKE_CMD) -k distclean || \
-	    $(MAKE_CMD) -k clean || \
-	    $(RM) xmakefile; \
-	fi
+#	@if [ -f xmakefile ]; then \
+#	    $(MAKE_CMD) -k distclean || \
+#	    $(MAKE_CMD) -k clean || \
+#	    $(RM) xmakefile; \
+#	fi
 	@if [ ! -f $(IRULESRC)/host.def ]; then \
 	    if [ ! -f $(TOP)/lib/Xt/Imakefile ]; then \
 		echo "#define BuildServersOnly YES" > $(IRULESRC)/host.def; \
@@ -88,7 +88,7 @@ World:
 	$(MAKE) $(MFLAGS) Makefile.boot
 	$(MAKE_CMD) $(MFLAGS) VerifyOS
 	$(MAKE_CMD) $(MFLAGS) Makefiles
-	$(MAKE_CMD) $(MFLAGS) BOOTSTRAPSUBDIRS= clean
+#	$(MAKE_CMD) $(MFLAGS) BOOTSTRAPSUBDIRS= clean
 	$(MAKE_CMD) $(MFLAGS) includes
 	$(MAKE_CMD) $(MFLAGS) depend
 	$(MAKE_CMD) $(MFLAGS) $(WORLDOPTS) World
