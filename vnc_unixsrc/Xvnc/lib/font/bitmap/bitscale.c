@@ -1840,7 +1840,7 @@ BitmapOpenScalable (FontPathElementPtr fpe,
 			dy, sdy,
 			savedX, savedY;
     FontPropPtr		props;
-    char		*isStringProp;
+    char		*isStringProp = NULL;
     int			propCount;
     int			status;
     long		sWidth;
