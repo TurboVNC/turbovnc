@@ -1915,12 +1915,12 @@ miComputeArcs (
 	double		a0, a1;
 	struct arcData	*data;
 	miArcDataPtr	arc;
-	xArc		xarc;
+	xArc		xarc = {0, 0, 1, 1, 0, 1};
 	int		iphase, prevphase = 0, joinphase;
 	int		arcsJoin;
 	int		selfJoin;
 
-	int		iDash = 0, dashRemaining;
+	int		iDash = 0, dashRemaining = 0;
 	int		iDashStart = 0, dashRemainingStart = 0, iphaseStart;
 	int		startAngle, spanAngle, endAngle, backwards = 0;
 	int		prevDashAngle, dashAngle;

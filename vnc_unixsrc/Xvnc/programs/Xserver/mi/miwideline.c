@@ -1710,7 +1710,7 @@ miWideDashSegment (
     double	    L, l;
     double	    k;
     PolyVertexRec   vertices[4];
-    PolyVertexRec   saveRight, saveBottom;
+    PolyVertexRec   saveRight = {0, 0}, saveBottom = {0, 0};
     PolySlopeRec    slopes[4];
     PolyEdgeRec	    left[2], right[2];
     LineFaceRec	    lcapFace, rcapFace;

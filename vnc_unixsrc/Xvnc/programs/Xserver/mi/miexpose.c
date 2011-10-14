@@ -155,7 +155,7 @@ miHandleExposures(pSrcDrawable, pDstDrawable,
 				   the window background
 				*/
     WindowPtr pSrcWin;
-    BoxRec expBox;
+    BoxRec expBox = {0, };
     Bool extents;
 
     /* This prevents warning about pscr not being used. */
@@ -656,7 +656,7 @@ int what;
 
     BITS32 gcmask, index, mask;
     RegionRec prgnWin;
-    DDXPointRec oldCorner;
+    DDXPointRec oldCorner = {0, 0};
     BoxRec box;
     WindowPtr	pBgWin;
     GCPtr pGC;
@@ -666,6 +666,7 @@ int what;
     register xRectangle *prect;
     int numRects;
 
+    REGION_INIT(pWin->drawable.pScreen, &prgnWin, NullBox, 0);
     gcmask = 0;
 
     if (what == PW_BACKGROUND)
