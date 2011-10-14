@@ -2284,7 +2284,7 @@ ProcXkbSetMap(ClientPtr client)
     XkbDescPtr		xkb;
     XkbChangesRec	change;
     XkbEventCauseRec	cause;
-    int			nTypes,nActions,error;
+    int			nTypes = 0,nActions,error;
     char *		tmp;
     CARD8	 	mapWidths[XkbMaxLegalKeyCode+1];
     CARD16	 	symsPerKey[XkbMaxLegalKeyCode+1];
@@ -3577,7 +3577,7 @@ ProcXkbSetNames(ClientPtr client)
     XkbNamesRec		*names;
     xkbNamesNotify	 nn;
     CARD32		*tmp;
-    Atom		 bad;
+    Atom		 bad = 0;
 
     REQUEST(xkbSetNamesReq);
     REQUEST_AT_LEAST_SIZE(xkbSetNamesReq);

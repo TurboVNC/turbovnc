@@ -421,7 +421,7 @@ ProcXF86BigfontQueryFont(
     int nCharInfos;
     int shmid;
 #ifdef HAS_SHM
-    ShmDescPtr pDesc;
+    ShmDescPtr pDesc = NULL;
 #else
 #define pDesc 0
 #endif

@@ -169,7 +169,6 @@ int ProcQueryVersion (client)
 {
     REQUEST (xXevieQueryVersionReq);
     xXevieQueryVersionReply rep;
-    register int n;
 
     REQUEST_SIZE_MATCH (xXevieQueryVersionReq);
     rep.type = X_Reply;
@@ -187,7 +186,6 @@ int ProcStart (client)
 {
     REQUEST (xXevieStartReq);
     xXevieStartReply rep;
-    register int n;
 
     REQUEST_SIZE_MATCH (xXevieStartReq);
     rep.pad1 = 0;
@@ -250,7 +248,6 @@ int ProcSend (client)
     REQUEST (xXevieSendReq);
     xXevieSendReply rep;
     xEvent *xE;
-    OsCommPtr oc;
     static unsigned char lastDetail = 0, lastType = 0;
 
     if (client->index != xevieClientIndex)
@@ -355,8 +352,6 @@ int SProcEnd (client)
     ClientPtr client;
 {
     register int n;
-    int count;
-    xColorItem* pItem;
 
     REQUEST (xXevieEndReq);
     swaps (&stuff->length, n);
@@ -370,7 +365,6 @@ int SProcSend (client)
     ClientPtr client;
 {
     register int n;
-    int count;
 
     REQUEST (xXevieSendReq);
     swaps (&stuff->length, n);
@@ -384,7 +378,6 @@ int SProcSelectInput (client)
     ClientPtr client;
 {
     register int n;
-    int count;
 
     REQUEST (xXevieSelectInputReq);
     swaps (&stuff->length, n);

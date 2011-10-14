@@ -867,7 +867,7 @@ _XkbFilterRedirectKey(	XkbSrvInfoPtr	xkbi,
 unsigned	realMods;
 xEvent 		ev;
 int		x,y;
-XkbStateRec	old;
+XkbStateRec	old = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 unsigned	mods,mask,oldCoreState = 0,oldCorePrevState = 0;
 xkbDeviceInfoPtr xkbPrivPtr = XKBDEVICEINFO(xkbi->device);
 

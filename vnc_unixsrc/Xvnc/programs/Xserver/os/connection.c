@@ -654,8 +654,10 @@ ClientAuthorized(ClientPtr client,
     XID	 		auth_id;
     char	 	*reason = NULL;
     XtransConnInfo	trans_conn;
+#ifdef LBX
     int			restore_trans_conn = 0;
     ClientPtr           lbxpc = NULL;
+#endif
 
     priv = (OsCommPtr)client->osPrivate;
     trans_conn = priv->trans_conn;

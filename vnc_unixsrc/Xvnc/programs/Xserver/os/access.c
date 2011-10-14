@@ -1807,7 +1807,7 @@ InvalidHost (
     ClientPtr			client)
 {
     int 			family;
-    pointer			addr;
+    pointer			addr = NULL;
     register HOST 		*selfhost, *host;
 
     if (!AccessEnabled)   /* just let them in */
