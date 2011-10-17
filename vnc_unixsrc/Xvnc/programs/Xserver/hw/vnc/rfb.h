@@ -492,8 +492,8 @@ extern Bool alrInit;
         pthread_mutex_unlock(&alrMutex); \
 }
 #define debugregion(r, m) \
-    rfbLog(m" %d, %d %d x %d\n", r.extents.x1, r.extents.y1, \
-        r.extents.x2 - r.extents.x1, r.extents.y2 - r.extents.y1)
+    rfbLog(m" %d, %d %d x %d\n", (r).extents.x1, (r).extents.y1, \
+        (r).extents.x2 - (r).extents.x1, (r).extents.y2 - (r).extents.y1)
 
 extern void rfbNewClientConnection(int sock);
 extern rfbClientPtr rfbReverseConnection(char *host, int port);
