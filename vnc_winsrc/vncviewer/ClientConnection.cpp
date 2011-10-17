@@ -1,4 +1,4 @@
-//  Copyright (C) 2009-2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2009-2011 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2008 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2003-2006 Constantin Kaplinsky. All Rights Reserved.
@@ -2267,10 +2267,17 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
 	// This is a static method, so we don't know which instantiation we're 
 	// dealing with.  But we've stored a 'pseudo-this' in the window data.
 	ClientConnection *_this = (ClientConnection *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
+	char *env = NULL;  static int x = 100, y = 100;
 
 	switch (iMsg) {
 	case WM_FBUPDATERECVD:
 		_this->SendAppropriateFramebufferUpdateRequest();
+		if((env = getenv("TVNC_FAKEMOUSE")) != NULL && !strcmp(env, "1"))
+		{
+			_this->SendPointerEvent(x, y, rfbButton1Mask | rfbButton3Mask);
+			if (x == 100) x = 101;  else x = 100;
+			if (y == 100) y = 101;  else y = 100;
+		}
 		return 0;
 	case WM_REGIONUPDATED:
 		_this->DoBlit();
