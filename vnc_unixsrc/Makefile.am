@@ -15,7 +15,7 @@ CLEANFILES = $(noinst_SCRIPTS) $(noinst_HEADERS)
 
 xserver: all
 	if [ ! "${top_srcdir}" = "${top_builddir}" ]; then \
-		rsync -av ${top_srcdir}/Xvnc ${top_builddir}; \
+		rsync -avC ${top_srcdir}/Xvnc ${top_builddir}; \
 	fi; \
 	cd Xvnc; \
 	rm -f config/imake/imake config/imake/*.o config/makedepend/makedepend \
@@ -25,14 +25,14 @@ xserver: all
 
 xserver-rebuild: all
 	if [ ! "${top_srcdir}" = "${top_builddir}" ]; then \
-		rsync -av ${top_srcdir}/Xvnc ${top_builddir}; \
+		rsync -avC ${top_srcdir}/Xvnc ${top_builddir}; \
 	fi; \
 	cd Xvnc; \
 	$(MAKE) CC="$(CC)" CDEBUGFLAGS="$(CFLAGS)" EXTRA_LDOPTIONS="$(LDFLAGS)"
 
 xserver-clean: Xvnc/config/cf/tvnc_version.h
 	if [ ! "${top_srcdir}" = "${top_builddir}" ]; then \
-		rsync -av ${top_srcdir}/Xvnc ${top_builddir}; \
+		rsync -avC ${top_srcdir}/Xvnc ${top_builddir}; \
 	fi; \
 	cd Xvnc; \
 	rm -f config/imake/imake config/imake/*.o config/makedepend/makedepend \
