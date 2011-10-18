@@ -1,17 +1,17 @@
 /*
  * cfb copy area
  */
-/* $XFree86: xc/programs/Xserver/cfb/cfbblt.c,v 3.13tsi Exp $ */
 
 /*
 
-Copyright 1989, 1998  The Open Group
+Copyright (c) 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -19,28 +19,23 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 Author: Keith Packard
 
 */
-/* $Xorg: cfbblt.c,v 1.4 2001/02/09 02:04:37 xorgcvs Exp $ */
+/* $XConsortium: cfbblt.c,v 1.13 94/04/17 20:28:44 dpw Exp $ */
+/* $XFree86: xc/programs/Xserver/cfb/cfbblt.c,v 3.1 1996/12/09 11:50:52 dawes Exp $ */
 
-/* 24-bit bug fixes: Peter Wainwright, 1998/11/28 */
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include	<X11/X.h>
-#include	<X11/Xmd.h>
-#include	<X11/Xproto.h>
+#include	"X.h"
+#include	"Xmd.h"
+#include	"Xproto.h"
 #include	"gcstruct.h"
 #include	"windowstr.h"
 #include	"scrnintstr.h"
@@ -62,75 +57,15 @@ Author: Keith Packard
 #define DO_MEMCPY
 #endif
 
-/* ................................................. */
-/* SPECIAL CODE FOR 24 BITS      by Peter Wainwright */
-
-#if PSZ == 24 && (MROP) == 0
-
-/* The default macros are defined in mergerop.h, and none of them are
-   really appropriate for what we want to do.
-
-   There are two ways of fixing this: either define SLOW_24BIT_COPY
-   to copy pixel by pixel, or (by default) use the following macros
-   modified from mergerop.h
-
-   MROP_SOLID and MROP_MASK are defined for each of the operations,
-   i.e. each value of MROP.
-
-   There are special cases for Mcopy, McopyInverted, Mxor, and Mor.
-   There is a completely generic version for MROP=0, and a simplified
-   generic version which works for (Mcopy|Mxor|MandReverse|Mor).
-
-   However, the generic version does not work for the 24-bit case
-   because the pixels cannot be packed exactly into a machine word (32
-   bits).
-
-   Alternative macros MROP_SOLID24 and MROP_MASK24 are provided for
-   the 24-bit case. However, these each copy a single *pixel*, not a
-   single machine word. They take an rvalue source pixel, an lvalue
-   destination, and the pixel index. The latter is used to find the
-   position of the pixel data within the two words *dst and *(dst+1).
-
-   Further macros MROP_SOLID24P and MROP_MASK24P are used to copy from
-   an lvalue source to an lvalue destination. MROP_PIXEL24 is used to
-   assemble the source pixel from the adjacent words *src and
-   *(src+1), and this is then split between the destination words
-   using the non-P macros above.
-
-   But we want to copy entire words for the sake of efficiency.
-   Unfortunately if a plane mask is specified this must be shifted
-   from one word to the next.  Fortunately the pattern repeats after 3
-   words, so we unroll the planemask here and redefine MROP_SOLID
-   and MROP_MASK. */
-
-
-#endif /* MROP == 0 && PSZ == 24 */
-
-/* ................................................. */
-
-#if PSZ == 24
-#define BYPP 3
-#if PGSZ == 32
-#define P3W 4 /* pixels in 3 machine words */
-#define PAM 3 /* pixel align mask; PAM = P3W -1 */
-#define P2WSH 2
-#else
-#define P3W 8 /* pixels in 3 machine words */
-#define PAM 7 /* pixel align mask; PAM = P3W -1 */
-#define P2WSH 3
-#endif
-#endif
-
 void
-MROP_NAME(cfbDoBitblt)(
-    DrawablePtr	    pSrc, 
-    DrawablePtr	    pDst,
-    int		    alu,
-    RegionPtr	    prgnDst,
-    DDXPointPtr	    pptSrc,
-    unsigned long   planemask)
+MROP_NAME(cfbDoBitblt)(pSrc, pDst, alu, prgnDst, pptSrc, planemask)
+    DrawablePtr	    pSrc, pDst;
+    int		    alu;
+    RegionPtr	    prgnDst;
+    DDXPointPtr	    pptSrc;
+    unsigned long   planemask;
 {
-    CfbBits *psrcBase, *pdstBase;	
+    unsigned long *psrcBase, *pdstBase;	
 				/* start of src and dst bitmaps */
     int widthSrc, widthDst;	/* add to get to same position in next line */
 
@@ -146,38 +81,36 @@ MROP_NAME(cfbDoBitblt)(
     int xdir;			/* 1 = left right, -1 = right left/ */
     int ydir;			/* 1 = top down, -1 = bottom up */
 
-    CfbBits *psrcLine, *pdstLine;	
+    unsigned long *psrcLine, *pdstLine;	
 				/* pointers to line with current src and dst */
-    register CfbBits *psrc;/* pointer to current src longword */
-    register CfbBits *pdst;/* pointer to current dst longword */
+    register unsigned long *psrc;/* pointer to current src longword */
+    register unsigned long *pdst;/* pointer to current dst longword */
 
     MROP_DECLARE_REG()
 
 				/* following used for looping through a line */
-    CfbBits startmask, endmask;	/* masks for writing ends of dst */
+    unsigned long startmask, endmask;	/* masks for writing ends of dst */
     int nlMiddle;		/* whole longwords in dst */
     int xoffSrc, xoffDst;
-    register int nl;		/* temp copy of nlMiddle */
-    int careful;
-
-#if (PSZ != 24) || (MROP != 0)
     register int leftShift, rightShift;
-    register CfbBits bits;
-    register CfbBits bits1;
-#endif
+    register unsigned long bits;
+    register unsigned long bits1;
+    register int nl;		/* temp copy of nlMiddle */
 
+				/* place to store full source word */
+    int nstart;			/* number of ragged bits at start of dst */
+    int nend;			/* number of ragged bits at end of dst */
+    int srcStartOver;		/* pulling nstart bits from src
+				   overflows into the next word? */
+    int careful;
+    int tmpSrc;
 #if PSZ == 24
 #ifdef DO_MEMCPY
     int w2;
 #endif
-
-#if MROP == 0
-    int widthSrcBytes = cfbGetByteWidth(pSrc);
-    int widthDstBytes = cfbGetByteWidth(pDst);
-#endif
 #endif
 
-    MROP_INITIALIZE(alu,planemask)
+    MROP_INITIALIZE(alu,planemask);
 
     cfbGetLongWidthAndPointer (pSrc, widthSrc, psrcBase)
 
@@ -298,7 +231,7 @@ MROP_NAME(cfbDoBitblt)(
 
 #if PSZ == 24
 #ifdef DO_MEMCPY
-	w2 = w * BYPP;
+	w2 = w * 3;
 #endif
 #endif
 	if (ydir == -1) /* start at last scanline of rectangle */
@@ -312,7 +245,7 @@ MROP_NAME(cfbDoBitblt)(
 	    pdstLine = pdstBase + (pbox->y1 * widthDst);
 	}
 #if PSZ == 24
-	if (w == 1 && ((pbox->x1 & PAM) == 0  ||  (pbox->x1 & PAM) == PAM))
+	if (w == 1 && ((pbox->x1 & 3) == 0  ||  (pbox->x1 & 3) == 3))
 #else
 	if ((pbox->x1 & PIM) + w <= PPW)
 #endif
@@ -326,18 +259,6 @@ MROP_NAME(cfbDoBitblt)(
 	    maskbits(pbox->x1, w, startmask, endmask, nlMiddle);
 	}
 
-#if PSZ == 24
-#if 0
-	nlMiddle = w - (pbox->x2 &PAM);;
-	if(pbox->x1 & PAM){
-	  nlMiddle -= (PAM+1 - (pbox->x1 &PAM));
-	}
-	nlMiddle >>= P2WSH;
-	if(nlMiddle < 0)
-	  nlMiddle = 0;
-#endif
-#endif
-
 #ifdef DO_MEMCPY
 	/* If the src and dst scanline don't overlap, do forward case.  */
 
@@ -345,8 +266,8 @@ MROP_NAME(cfbDoBitblt)(
 		|| (pptSrc->x + w <= pbox->x1))
 	{
 #if PSZ == 24
-	    char *psrc = (char *) psrcLine + (pptSrc->x * BYPP);
-	    char *pdst = (char *) pdstLine + (pbox->x1 * BYPP);
+	    char *psrc = (char *) psrcLine + (pptSrc->x * 3);
+	    char *pdst = (char *) pdstLine + (pbox->x1 * 3);
 #else
 	    char *psrc = (char *) psrcLine + pptSrc->x;
 	    char *pdst = (char *) pdstLine + pbox->x1;
@@ -365,51 +286,11 @@ MROP_NAME(cfbDoBitblt)(
 #else /* ! DO_MEMCPY */
 	if (xdir == 1)
 	{
-#if PSZ == 24 && MROP == 0
-	    /* Note: x is a pixel number; the byte offset is 3*x;
-	       therefore the offset within a word is (3*x) & 3 ==
-	       (4*x-x) & 3 == (-x) & 3.  The offsets therefore
-	       DECREASE by 1 for each pixel.
-	    */
-	  xoffSrc = ( - pptSrc->x) & PAM;
-	  xoffDst = ( - pbox->x1) & PAM;
-#if 1
-	  if((int)xoffSrc != (int)xoffDst /* Alignments must be same. */
-	     || ((widthDstBytes & PAM) != (widthSrcBytes & PAM) && h > 1))
-#else
-	    if(1)
-#endif
-	    /* Width also must be same, if hight > 1 */
-	    {
-	      /* ...otherwise, pixel by pixel operation */
-	  while (h--)
-	    {
-	      register int i, si, sii, di;
-
-	      for (i = 0, si = pptSrc->x, di = pbox->x1;
-		   i < w;
-		   i++, si++, di++) {
-		    psrc = psrcLine + ((si * BYPP) >> P2WSH);
-		    pdst = pdstLine + ((di * BYPP) >> P2WSH);
-		sii = (si & 3);
-		MROP_SOLID24P(psrc, pdst, sii, di);
-	      }
-	      pdstLine += widthDst;
-	      psrcLine += widthSrc;
-	    }
-	  }
-	  else
-#endif
-	  {
-
 #if PSZ == 24
-
-#if MROP != 0
-	    xoffSrc = ( - pptSrc->x) & PAM;
-	    xoffDst = ( - pbox->x1) & PAM;
-#endif
-	    pdstLine += (pbox->x1 * BYPP) >> P2WSH;
-	    psrcLine += (pptSrc->x * BYPP) >> P2WSH;
+	    xoffSrc = (4 - pptSrc->x) & 3;
+	    xoffDst = (4 - pbox->x1) & 3;
+	    pdstLine += (pbox->x1 * 3) >> 2;
+	    psrcLine += (pptSrc->x * 3) >> 2;
 #else
 	    xoffSrc = pptSrc->x & PIM;
 	    xoffDst = pbox->x1 & PIM;
@@ -418,57 +299,34 @@ MROP_NAME(cfbDoBitblt)(
 #endif
 #ifdef DO_UNALIGNED_BITBLT
 	    nl = xoffSrc - xoffDst;
-	    psrcLine = (CfbBits *)
+	    psrcLine = (unsigned long *)
 			(((unsigned char *) psrcLine) + nl);
 #else
-#if PSZ == 24 && MROP == 0
-	    /* alredy satisfied */
-#else
 	    if (xoffSrc == xoffDst)
-#endif
 #endif
 	    {
 		while (h--)
 		{
-#if PSZ == 24 && MROP == 0
-		    register int index;
-		    register int im3;
-#endif /*  PSZ == 24 && MROP == 0 */
 		    psrc = psrcLine;
 		    pdst = pdstLine;
 		    pdstLine += widthDst;
 		    psrcLine += widthSrc;
-#if PSZ == 24 && MROP == 0
-		    index = (int)(pdst - pdstBase);
-		    im3 = index % 3;
-#endif /*  PSZ == 24 && MROP == 0 */
 		    if (startmask)
 		    {
-#if PSZ == 24 && MROP == 0
-		      	*pdst = DoMaskMergeRop24u(*psrc, *pdst, startmask, im3);
-			index++;
-			im3 = index % 3;
-#else /* PSZ != 24 || MROP != 0 */
 			*pdst = MROP_MASK(*psrc, *pdst, startmask);
-#endif /*  PSZ == 24 && MROP == 0 */
 			psrc++;
 			pdst++;
 		    }
-
 		    nl = nlMiddle;
+
 #ifdef LARGE_INSTRUCTION_CACHE
 #ifdef FAST_CONSTANT_OFFSET_MODE
 
 		    psrc += nl & (UNROLL-1);
 		    pdst += nl & (UNROLL-1);
 
-#if PSZ == 24 && MROP == 0
-#define BodyOdd(n) pdst[-n] = DoMergeRop24u(psrc[-n], pdst[-n], ((int)(pdst - n - pdstBase))%3);
-#define BodyEven(n) pdst[-n] = DoMergeRop24u(psrc[-n], pdst[-n], ((int)(pdst - n - pdstBase))%3);
-#else /* PSZ != 24 || MROP != 0 */
 #define BodyOdd(n) pdst[-n] = MROP_SOLID (psrc[-n], pdst[-n]);
 #define BodyEven(n) pdst[-n] = MROP_SOLID (psrc[-n], pdst[-n]);
-#endif /*  PSZ == 24 && MROP == 0 */
 
 #define LoopReset \
 pdst += UNROLL; \
@@ -476,13 +334,8 @@ psrc += UNROLL;
 
 #else
 
-#if PSZ == 24 && MROP == 0
-#define BodyOdd(n)  *pdst = DoMergeRop24u(*psrc, *pdst, im3); pdst++; psrc++; index++; im3 = index % 3;
-#define BodyEven(n) BodyOdd(n)
-#else /* PSZ != 24 || MROP != 0 */
 #define BodyOdd(n)  *pdst = MROP_SOLID (*psrc, *pdst); pdst++; psrc++;
 #define BodyEven(n) BodyOdd(n)
-#endif /*  PSZ == 24 && MROP == 0 */
 
 #define LoopReset   ;
 
@@ -512,30 +365,17 @@ psrc += UNROLL;
 		    while (nl--)
 			*pdst++ = *psrc++;
 #endif
-#if 0 /*PSZ == 24 && MROP == 0*/
-		    DuffL(nl, label1,
-			    *pdst = DoMergeRop24u(*psrc, *pdst, im3);
-			    pdst++; psrc++; index++;im3 = index % 3;)
-#else /* !(PSZ == 24 && MROP == 0) */
 		    DuffL(nl, label1,
 			    *pdst = MROP_SOLID (*psrc, *pdst);
 			    pdst++; psrc++;)
-#endif /* PSZ == 24 && MROP == 0 */
 #endif
 
 		    if (endmask)
-#if PSZ == 24 && MROP == 0
-			*pdst = DoMaskMergeRop24u(*psrc, *pdst, endmask, (int)(pdst - pdstBase) % 3);
-#else /* !(PSZ == 24 && MROP == 0) */
 			*pdst = MROP_MASK(*psrc, *pdst, endmask);
-#endif /* PSZ == 24 && MROP == 0 */
 		}
 	    }
 #ifndef DO_UNALIGNED_BITBLT
-#if PSZ == 24 && MROP == 0
-		/* can not happen */ 
-#else /* !(PSZ == 24 && MROP == 0) */
-	    else /* xoffSrc != xoffDst */
+	    else
 	    {
 		if (xoffSrc > xoffDst)
 		{
@@ -581,6 +421,7 @@ psrc += UNROLL;
 			pdst++;
 		    }
 		    nl = nlMiddle;
+
 #ifdef LARGE_INSTRUCTION_CACHE
 		    bits1 = bits;
 
@@ -644,54 +485,16 @@ pdst++;
 		    }
 		}
 	    }
-#endif /* (PSZ == 24 && MROP == 0) */
 #endif /* DO_UNALIGNED_BITBLT */
-
-	  }
 	}
 #endif /* ! DO_MEMCPY */
 	else	/* xdir == -1 */
 	{
-#if PSZ == 24 && MROP == 0
-	  xoffSrc = (-(pptSrc->x + w)) & PAM;
-	  xoffDst = (-pbox->x2) & PAM;
-#if 1
-	  if(xoffSrc != xoffDst /* Alignments must be same. */
-	     || ((widthDstBytes & PAM) != (widthSrcBytes & PAM) && h > 1))
-#else
-	    if(1)
-#endif
-	    /* Width also must be same, if hight > 1 */
-	    {
-	      /* ...otherwise, pixel by pixel operation */
-	  while (h--)
-	    {
-	      register int i, si, sii, di;
-
-		    for (i = 0, si = pptSrc->x + w - 1, di = pbox->x2 - 1;
-		   i < w;
-			 i++, si--, di--) {
-		      psrc = psrcLine + ((si * BYPP) >> P2WSH);
-		      pdst = pdstLine + ((di * BYPP) >> P2WSH);
-		      sii = (si & PAM);
-		MROP_SOLID24P(psrc, pdst, sii, di);
-	      }
-	      psrcLine += widthSrc;
-	      pdstLine += widthDst;
-	    }
-	  }else
-#endif /* MROP == 0 && PSZ == 24 */
-	    {
-
 #if PSZ == 24
-#if MROP == 0
-	      /* already calculated */
-#else
-	    xoffSrc = (pptSrc->x + w) & PAM;
-	    xoffDst = pbox->x2 & PAM;
-#endif
-	    pdstLine += ((pbox->x2 * BYPP - 1) >> P2WSH) + 1;
-	    psrcLine += (((pptSrc->x+w) * BYPP - 1) >> P2WSH) + 1;
+	    xoffSrc = (pptSrc->x + w) & 3;
+	    xoffDst = pbox->x2 & 3;
+	    pdstLine += ((pbox->x2 * 3 - 1) >> 2) + 1;
+	    psrcLine += (((pptSrc->x+w) * 3 - 1) >> 2) + 1;
 #else
 	    xoffSrc = (pptSrc->x + w - 1) & PIM;
 	    xoffDst = (pbox->x2 - 1) & PIM;
@@ -704,53 +507,32 @@ pdst++;
 #else
 	    nl = xoffSrc - xoffDst;
 #endif
-	    psrcLine = (CfbBits *)
+	    psrcLine = (unsigned long *)
 			(((unsigned char *) psrcLine) + nl);
 #else
-#if PSZ == 24 && MROP == 0
-	    /* already satisfied */
-#else
 	    if (xoffSrc == xoffDst)
-#endif
 #endif
 	    {
 		while (h--)
 		{
-#if PSZ == 24 && MROP == 0
-		    register int index;
-		    register int im3;
-#endif /*  PSZ == 24 && MROP == 0 */
 		    psrc = psrcLine;
 		    pdst = pdstLine;
 		    pdstLine += widthDst;
 		    psrcLine += widthSrc;
-#if PSZ == 24 && MROP == 0
-		    index = (int)(pdst - pdstBase);
-#endif /*  PSZ == 24 && MROP == 0 */
-
 		    if (endmask)
 		    {
 			pdst--;
 			psrc--;
-#if PSZ == 24 && MROP == 0
-			index--;
-			im3 = index % 3;
-			*pdst = DoMaskMergeRop24u(*psrc, *pdst, endmask, im3);
-#else /* !(PSZ == 24 && MROP == 0) */
 			*pdst = MROP_MASK (*psrc, *pdst, endmask);
-#endif /* PSZ == 24 && MROP == 0 */
 		    }
 		    nl = nlMiddle;
+
 #ifdef LARGE_INSTRUCTION_CACHE
 #ifdef FAST_CONSTANT_OFFSET_MODE
 		    psrc -= nl & (UNROLL - 1);
 		    pdst -= nl & (UNROLL - 1);
 
-#if PSZ == 24 && MROP == 0
-#define BodyOdd(n) pdst[n-1] = DoMergeRop24u(psrc[n-1], pdst[n-1], ((int)(pdst - (n - 1) -pdstBase)) % 3);
-#else /* !(PSZ == 24 && MROP == 0) */
 #define BodyOdd(n) pdst[n-1] = MROP_SOLID (psrc[n-1], pdst[n-1]);
-#endif /* PSZ == 24 && MROP == 0 */
 
 #define BodyEven(n) BodyOdd(n)
 
@@ -760,11 +542,7 @@ psrc -= UNROLL;
 
 #else
 
-#if PSZ == 24 && MROP == 0
-#define BodyOdd(n)  --pdst; --psrc; --index; im3 = index % 3;*pdst = DoMergeRop24u(*psrc, *pdst, im3);
-#else /* !(PSZ == 24 && MROP == 0) */
 #define BodyOdd(n)  --pdst; --psrc; *pdst = MROP_SOLID(*psrc, *pdst);
-#endif /* PSZ == 24 && MROP == 0 */
 #define BodyEven(n) BodyOdd(n)
 #define LoopReset   ;
 
@@ -776,31 +554,19 @@ psrc -= UNROLL;
 #undef LoopReset
 
 #else
-#if PSZ == 24 && MROP == 0
-		    DuffL(nl,label3,
-			  --pdst; --psrc; --index; im3= index%3;*pdst = DoMergeRop24u(*psrc, *pdst, im3);)
-#else /* !(PSZ == 24 && MROP == 0) */
 		    DuffL(nl,label3,
 			 --pdst; --psrc; *pdst = MROP_SOLID (*psrc, *pdst);)
-#endif /* PSZ == 24 && MROP == 0 */
 #endif
 
 		    if (startmask)
 		    {
 			--pdst;
 			--psrc;
-#if PSZ == 24 && MROP == 0
-			*pdst = DoMaskMergeRop24u(*psrc, *pdst, startmask, (int)(pdst - pdstBase) % 3);
-#else /* !(PSZ == 24 && MROP == 0) */
 			*pdst = MROP_MASK(*psrc, *pdst, startmask);
-#endif /* PSZ == 24 && MROP == 0 */
 		    }
 		}
 	    }
 #ifndef DO_UNALIGNED_BITBLT
-#if PSZ == 24 && MROP == 0
-	    /* can not happen */
-#else /* !( PSZ == 24 && MROP == 0) */
 	    else
 	    {
 		if (xoffDst > xoffSrc)
@@ -853,6 +619,7 @@ psrc -= UNROLL;
 			*pdst = MROP_MASK(bits1, *pdst, endmask);
 		    }
 		    nl = nlMiddle;
+
 #ifdef LARGE_INSTRUCTION_CACHE
 		    bits1 = bits;
 #ifdef FAST_CONSTANT_OFFSET_MODE
@@ -913,9 +680,7 @@ bits1 = *--psrc; --pdst; \
 		    }
 		}
 	    }
-#endif  /* PSZ == 24 && MROP == 0 */
 #endif
-	    }
 	}
 	pbox++;
 	pptSrc++;

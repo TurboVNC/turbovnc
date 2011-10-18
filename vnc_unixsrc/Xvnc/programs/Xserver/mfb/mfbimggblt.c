@@ -1,14 +1,14 @@
-/* $XFree86: xc/programs/Xserver/mfb/mfbimggblt.c,v 3.5tsi Exp $ */
 /* Combined Purdue/PurduePlus patches, level 2.0, 1/17/89 */
 /***********************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,13 +16,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -46,16 +46,13 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $Xorg: mfbimggblt.c,v 1.4 2001/02/09 02:05:19 xorgcvs Exp $ */
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include	<X11/X.h>
-#include	<X11/Xmd.h>
-#include	<X11/Xproto.h>
+/* $XConsortium: mfbimggblt.c,v 5.17 94/04/17 20:28:25 dpw Exp $ */
+/* $XFree86: xc/programs/Xserver/mfb/mfbimggblt.c,v 3.0 1995/06/14 12:43:46 dawes Exp $ */
+#include	"X.h"
+#include	"Xmd.h"
+#include	"Xproto.h"
 #include	"mfb.h"
-#include	<X11/fonts/fontstruct.h>
+#include	"fontstruct.h"
 #include	"dixfontstr.h"
 #include	"gcstruct.h"
 #include	"windowstr.h"
@@ -143,8 +140,7 @@ MFBIMAGEGLYPHBLT(pDrawable, pGC, x, y, nglyph, ppci, pglyphBase)
     register PixelType endmask;
 
     register int nFirst;/* bits of glyph in current longword */
-    mfbPrivGC *pPrivGC;
-    mfbFillAreaProcPtr oldFillArea;
+    void (* oldFillArea)();
 			/* we might temporarily usurp this
 			   field in devPriv */
 
@@ -171,8 +167,9 @@ MFBIMAGEGLYPHBLT(pDrawable, pGC, x, y, nglyph, ppci, pglyphBase)
     bbox.y2 = y + info.overallDescent;
 
     /* UNCLEAN CODE
-       we know the mfbPolyFillRect uses only two fields in
-       devPrivate[mfbGCPrivateIndex].ptr, one of which (ropFillArea) is
+       we know the mfbPolyFillRect uses only three fields in
+       devPrivate[mfbGCPrivateIndex].ptr, two of which (the rotated
+       tile/stipple and the ropFillArea) are 
        irrelevant for solid filling, so we just poke the FillArea
        field.  the GC is now in an inconsistent state, but we'll fix
        it as soon as PolyFillRect returns.  fortunately, the server
@@ -186,19 +183,23 @@ MFBIMAGEGLYPHBLT(pDrawable, pGC, x, y, nglyph, ppci, pglyphBase)
        but that is usually not a cheap thing to do.
     */
 
-    pPrivGC = pGC->devPrivates[mfbGCPrivateIndex].ptr;
-    oldFillArea = pPrivGC->FillArea;
+    oldFillArea = ((mfbPrivGC *)(pGC->devPrivates[mfbGCPrivateIndex].ptr))->FillArea;
 
+/* pcc doesn't like this.  why?
+    ((mfbPrivGC *)(pGC->devPrivates[mfbGCPrivateIndex].ptr))->FillArea = 
+			((pGC->bgPixel & 1) ? mfbSolidWhiteArea : mfbSolidBlackArea);
+*/
     if (pGC->bgPixel & 1)
-        pPrivGC->FillArea = mfbSolidWhiteArea;
+        ((mfbPrivGC *)(pGC->devPrivates[mfbGCPrivateIndex].ptr))->FillArea = mfbSolidWhiteArea;
     else
-        pPrivGC->FillArea = mfbSolidBlackArea;
+        ((mfbPrivGC *)(pGC->devPrivates[mfbGCPrivateIndex].ptr))->FillArea = mfbSolidBlackArea;
 
     mfbPolyFillRect(pDrawable, pGC, 1, &backrect);
-    pPrivGC->FillArea = oldFillArea;
+    ((mfbPrivGC *)(pGC->devPrivates[mfbGCPrivateIndex].ptr))->FillArea = oldFillArea;
 
     /* the faint-hearted can open their eyes now */
-    switch (RECT_IN_REGION(pGC->pScreen, pGC->pCompositeClip, &bbox))
+    switch (RECT_IN_REGION(pGC->pScreen, 
+	((mfbPrivGC *)(pGC->devPrivates[mfbGCPrivateIndex].ptr))->pCompositeClip, &bbox))
     {
       case rgnOUT:
 	break;
@@ -291,9 +292,7 @@ MFBIMAGEGLYPHBLT(pDrawable, pGC, x, y, nglyph, ppci, pglyphBase)
 	int glyphRow;		/* first row of glyph not wholly
 				   clipped out */
 	int glyphCol;		/* leftmost visible column of glyph */
-#if GETLEFTBITS_ALIGNMENT > 1
 	int getWidth;		/* bits to get from glyph */
-#endif
 
 	if(!(ppos = (TEXTPOS *)ALLOCATE_LOCAL(nglyph * sizeof(TEXTPOS))))
 	    return;
@@ -329,7 +328,7 @@ MFBIMAGEGLYPHBLT(pDrawable, pGC, x, y, nglyph, ppci, pglyphBase)
 	    }
 	}
 
-	cclip = pGC->pCompositeClip;
+	cclip = ((mfbPrivGC *)(pGC->devPrivates[mfbGCPrivateIndex].ptr))->pCompositeClip;
 	pbox = REGION_RECTS(cclip);
 	nbox = REGION_NUM_RECTS(cclip);
 
@@ -393,9 +392,7 @@ MFBIMAGEGLYPHBLT(pDrawable, pGC, x, y, nglyph, ppci, pglyphBase)
 
 		glyphCol = (leftEdge - ppos[i].xpos) -
 			   (pci->metrics.leftSideBearing);
-#if GETLEFTBITS_ALIGNMENT > 1
 		getWidth = w + glyphCol;
-#endif
 		xoff = xchar + (leftEdge - ppos[i].xpos);
 		if (xoff > PLST)
 		{

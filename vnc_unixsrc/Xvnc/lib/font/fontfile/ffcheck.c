@@ -1,14 +1,15 @@
-/* $Xorg: ffcheck.c,v 1.4 2001/02/09 02:04:03 xorgcvs Exp $ */
+/* $XConsortium: ffcheck.c /main/1 1996/09/28 16:48:58 rws $ */
 
 /*
 
-Copyright 1991, 1998  The Open Group
+Copyright (c) 1991  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,46 +17,52 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 */
-/* $XFree86: xc/lib/font/fontfile/ffcheck.c,v 1.15tsi Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
  */
-/* $NCDXorg: @(#)fontfile.c,v 1.6 1991/07/02 17:00:46 lemke Exp $ */
+/* $NCDId: @(#)fontfile.c,v 1.6 1991/07/02 17:00:46 lemke Exp $ */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#include <X11/fonts/fntfilst.h>
-#include <X11/fonts/bitmap.h>
-#ifdef LOADABLEFONTS
-#include <X11/fonts/fontmod.h>
-#endif
+#include    "fntfilst.h"
 
 /*
  * Map FPE functions to renderer functions
  */
+
+extern int FontFileNameCheck();
+extern int FontFileInitFPE();
+extern int FontFileResetFPE();
+extern int FontFileFreeFPE();
+extern void FontFileCloseFont();
 
 
 /* Here we must check the client to see if it has a context attached to
  * it that allows us to access the printer fonts
  */
 
-static int
-FontFileCheckOpenFont (pointer client, FontPathElementPtr fpe, Mask flags, 
-		       char *name, int namelen, 
-		       fsBitmapFormat format, fsBitmapFormatMask fmask,
-		       XID id, FontPtr *pFont, char **aliasName, 
-		       FontPtr non_cachable_font)
+int
+FontFileCheckOpenFont (client, fpe, flags, name, namelen, format, fmask,
+		  id, pFont, aliasName, non_cachable_font)
+    pointer		client;
+    FontPathElementPtr	fpe;
+    int			flags;
+    char		*name;
+    int			namelen;
+    fsBitmapFormat	format;
+    fsBitmapFormatMask	fmask;
+    XID			id;
+    FontPtr		*pFont;
+    char		**aliasName;
+    FontPtr		non_cachable_font;
 {
     if (XpClientIsBitmapClient(client))
 	return (FontFileOpenFont  (client, fpe, flags, name, namelen, format, 
@@ -63,19 +70,26 @@ FontFileCheckOpenFont (pointer client, FontPathElementPtr fpe, Mask flags,
     return BadFontName;
 }
 
-static int
-FontFileCheckListFonts (pointer client, FontPathElementPtr fpe, 
-			char *pat, int len, int max, FontNamesPtr names)
+FontFileCheckListFonts (client, fpe, pat, len, max, names)
+    pointer     client;
+    FontPathElementPtr fpe;
+    char       *pat;
+    int         len;
+    int         max;
+    FontNamesPtr names;
 {
     if (XpClientIsBitmapClient(client))
 	return FontFileListFonts (client, fpe, pat, len, max, names);
     return BadFontName;
 }
 
-static int
-FontFileCheckStartListFontsWithInfo(pointer client, FontPathElementPtr fpe, 
-				    char *pat, int len, int max, 
-				    pointer *privatep)
+FontFileCheckStartListFontsWithInfo(client, fpe, pat, len, max, privatep)
+    pointer     client;
+    FontPathElementPtr fpe;
+    char       *pat;
+    int         len;
+    int         max;
+    pointer    *privatep;
 {
     if (XpClientIsBitmapClient(client))
 	return FontFileStartListFontsWithInfo(client, fpe, pat, len, 
@@ -83,11 +97,15 @@ FontFileCheckStartListFontsWithInfo(pointer client, FontPathElementPtr fpe,
     return BadFontName;
 }
 
-static int
-FontFileCheckListNextFontWithInfo(pointer client, FontPathElementPtr fpe, 
-				  char **namep, int *namelenp, 
-				  FontInfoPtr *pFontInfo,
-				  int *numFonts, pointer private)
+FontFileCheckListNextFontWithInfo(client, fpe, namep, namelenp, pFontInfo,
+			     numFonts, private)
+    pointer		client;
+    FontPathElementPtr	fpe;
+    char		**namep;
+    int			*namelenp;
+    FontInfoPtr		*pFontInfo;
+    int			*numFonts;
+    pointer		private;
 {
     if (XpClientIsBitmapClient(client))
 	return FontFileListNextFontWithInfo(client, fpe, namep, namelenp, 
@@ -95,10 +113,13 @@ FontFileCheckListNextFontWithInfo(pointer client, FontPathElementPtr fpe,
     return BadFontName;
 }
 
-static int
-FontFileCheckStartListFontsAndAliases(pointer client, FontPathElementPtr fpe, 
-				      char *pat, int len, int max, 
-				      pointer *privatep)
+FontFileCheckStartListFontsAndAliases(client, fpe, pat, len, max, privatep)
+    pointer     client;
+    FontPathElementPtr fpe;
+    char       *pat;
+    int         len;
+    int         max;
+    pointer    *privatep;
 {
     if (XpClientIsBitmapClient(client))
 	return FontFileStartListFontsAndAliases(client, fpe, pat, len, 
@@ -106,11 +127,16 @@ FontFileCheckStartListFontsAndAliases(pointer client, FontPathElementPtr fpe,
     return BadFontName;
 }
 
-static int
-FontFileCheckListNextFontOrAlias(pointer client, FontPathElementPtr fpe, 
-				 char **namep, int *namelenp, 
-				 char **resolvedp, int *resolvedlenp, 
-				 pointer private)
+int
+FontFileCheckListNextFontOrAlias(client, fpe, namep, namelenp, resolvedp,
+			    resolvedlenp, private)
+    pointer		client;
+    FontPathElementPtr	fpe;
+    char		**namep;
+    int			*namelenp;
+    char		**resolvedp;
+    int			*resolvedlenp;
+    pointer		private;
 {
     if (XpClientIsBitmapClient(client))
 	return FontFileListNextFontOrAlias(client, fpe, namep, namelenp, 
@@ -118,56 +144,30 @@ FontFileCheckListNextFontOrAlias(pointer client, FontPathElementPtr fpe,
     return BadFontName;
 }
 
-void
-FontFileCheckRegisterFpeFunctions (void)
+extern void FontFileEmptyBitmapSource();
+typedef int (*IntFunc) ();
+static int  font_file_check_type;
+
+FontFileCheckRegisterFpeFunctions ()
 {
-#ifndef LOADABLEFONTS
     BitmapRegisterFontFileFunctions ();
-
-
 #ifndef CRAY
-#ifdef BUILD_SPEEDO
     SpeedoRegisterFontFileFunctions ();
-#endif
-#ifdef BUILD_TYPE1
     Type1RegisterFontFileFunctions();
 #endif
-#endif
-#ifdef BUILD_CID
-    CIDRegisterFontFileFunctions();
-#endif
-#ifdef BUILD_FREETYPE
-    FreeTypeRegisterFontFileFunctions();
-#endif
-
-
-#else
-
-    {
-	int i;
-
-	if (FontModuleList) {
-	    for (i = 0; FontModuleList[i].name; i++) {
-		if (FontModuleList[i].initFunc)
-		    FontModuleList[i].initFunc();
-	    }
-	}
-    }
-#endif
-
     RegisterFPEFunctions(FontFileNameCheck,
-			 FontFileInitFPE,
-			 FontFileFreeFPE,
-			 FontFileResetFPE,
-			 FontFileCheckOpenFont,
-			 FontFileCloseFont,
-			 FontFileCheckListFonts,
-			 FontFileCheckStartListFontsWithInfo,
-			 FontFileCheckListNextFontWithInfo,
-			 NULL,
-			 NULL,
-			 NULL,
-			 FontFileCheckStartListFontsAndAliases,
-			 FontFileCheckListNextFontOrAlias,
-			 FontFileEmptyBitmapSource);
+				  FontFileInitFPE,
+				  FontFileFreeFPE,
+				  FontFileResetFPE,
+				  FontFileCheckOpenFont,
+				  FontFileCloseFont,
+				  FontFileCheckListFonts,
+				  FontFileCheckStartListFontsWithInfo,
+				  FontFileCheckListNextFontWithInfo,
+				  (IntFunc) 0,
+				  (IntFunc) 0,
+				  (IntFunc) 0,
+				  FontFileCheckStartListFontsAndAliases,
+				  FontFileCheckListNextFontOrAlias,
+				  FontFileEmptyBitmapSource);
 }

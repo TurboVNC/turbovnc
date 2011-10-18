@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/cfb/cfbimage.c,v 1.12 2001/10/28 03:33:01 tsi Exp $ */
 /***********************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -45,13 +45,9 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $Xorg: cfbimage.c,v 1.4 2001/02/09 02:04:38 xorgcvs Exp $ */
+/* $XConsortium: cfbimage.c,v 1.18 94/04/17 20:28:52 dpw Exp $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
+#include "X.h"
 #include "windowstr.h"
 #include "pixmapstr.h"
 #include "scrnintstr.h"
@@ -59,7 +55,6 @@ SOFTWARE.
 #include "cfb.h"
 #include "cfbmskbits.h"
 #include "servermd.h"
-#include "mi.h"
 
 void
 cfbPutImage(pDraw, pGC, depth, x, y, w, h, leftPad, format, pImage)
@@ -70,6 +65,7 @@ cfbPutImage(pDraw, pGC, depth, x, y, w, h, leftPad, format, pImage)
     int		format;
     char 	*pImage;
 {
+    int		bitsPerPixel;
     PixmapPtr   pPixmap;
 
     if ((w == 0) || (h == 0))
@@ -83,21 +79,21 @@ cfbPutImage(pDraw, pGC, depth, x, y, w, h, leftPad, format, pImage)
 	if (!pPixmap)
 	    return;
 	
-    	pGC->fExpose = FALSE;
+    	cfbGetGCPrivate(pGC)->fExpose = FALSE;
 	if (format == ZPixmap)
 	    (void)(*pGC->ops->CopyArea)((DrawablePtr)pPixmap, pDraw, pGC,
 					leftPad, 0, w, h, x, y);
 	else
 	    (void)(*pGC->ops->CopyPlane)((DrawablePtr)pPixmap, pDraw, pGC,
 					 leftPad, 0, w, h, x, y, 1);
-	pGC->fExpose = TRUE;
+	cfbGetGCPrivate(pGC)->fExpose = TRUE;
         FreeScratchPixmapHeader(pPixmap);
     }
     else
     {
-	CfbBits	oldFg, oldBg;
+	unsigned long	oldFg, oldBg;
 	XID		gcv[3];
-	CfbBits	oldPlanemask;
+	unsigned long	oldPlanemask;
 	unsigned long	i;
 	long		bytesPer;
 
@@ -125,7 +121,6 @@ cfbPutImage(pDraw, pGC, depth, x, y, w, h, leftPad, format, pImage)
 	gcv[1] = oldFg;
 	gcv[2] = oldBg;
 	DoChangeGC(pGC, GCPlaneMask | GCForeground | GCBackground, gcv, 0);
-	ValidateGC(pDraw, pGC);
     }
 }
 
@@ -151,12 +146,6 @@ cfbGetImage(pDrawable, sx, sy, w, h, format, planeMask, pdstLine)
 	return;
     }
     pScreen = pDrawable->pScreen;
-    /*
-     * XFree86 DDX empties the root borderClip when the VT is
-     * switched away; this checks for that case
-     */
-    if (!cfbDrawableEnabled (pDrawable))
-	return;
     if (format == ZPixmap)
     {
 	pPixmap = GetScratchPixmapHeader(pScreen, w, h, 
@@ -180,9 +169,7 @@ cfbGetImage(pDrawable, sx, sy, w, h, format, planeMask, pdstLine)
     }
     else
     {
-
-#if IMAGE_BYTE_ORDER == LSBFirst
-
+#if PSZ == 8
 	pPixmap = GetScratchPixmapHeader(pScreen, w, h,  /*depth*/ 1,
 			/*bpp*/ 1, BitmapBytePad(w), (pointer)pdstLine);
 	if (!pPixmap)

@@ -1,12 +1,13 @@
-/* $XFree86: xc/include/extensions/Xagstr.h,v 1.4 2001/12/14 19:53:28 dawes Exp $ */
 /*
-Copyright 1996, 1998, 2001  The Open Group
+Copyright (c) 1996  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -14,22 +15,22 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 */
-/* $Xorg: Xagstr.h,v 1.6 2001/02/09 02:03:24 xorgcvs Exp $ */
+/* $XConsortium: Xagstr.h /main/3 1996/11/12 12:19:03 swick $ */
 
 #ifndef _XAGSTR_H_ /* { */
 #define _XAGSTR_H_
 
-#include <X11/extensions/Xag.h>
+#include "Xag.h"
 
 #define XAppGroup CARD32
 
@@ -43,17 +44,6 @@ from The Open Group.
 #define XagWindowTypeWin32	2
 #define XagWindowTypeWin16	3
 
-/*
-* Redefine some basic types used by structures defined herein.  This allows
-* both the library and server to view communicated data as 32-bit entities,
-* thus preventing problems on 64-bit architectures where libXext sees this
-* data as 64 bits and the server sees it as 32 bits.
-*/
- 
-#define Colormap CARD32
-#define VisualID CARD32
-#define Window CARD32
- 
 typedef struct _XagQueryVersion {
     CARD8	reqType;	/* always XagReqCode */
     CARD8	xagReqType;	/* always X_XagQueryVersion */
@@ -79,7 +69,7 @@ typedef struct {
 #define sz_xXagQueryVersionReply	32
 
 /* Set AppGroup Attributes masks */
-#define XagSingleScreenMask		1 << 0
+#define XagSingleScreenMask		1 << XagNsingleScreen
 #define XagDefaultRootMask		1 << XagNdefaultRoot
 #define XagRootVisualMask		1 << XagNrootVisual
 #define XagDefaultColormapMask		1 << XagNdefaultColormap
@@ -169,14 +159,6 @@ typedef struct _XagDestroyAssoc {
 #define sz_xXagDestroyAssocReq		8
 
 #undef XAppGroup
-/*
- * Cancel the previous redefinition of the basic types, thus restoring their
- * X.h definitions.
- */
-
-#undef Window
-#undef Colormap
-#undef VisualID
 
 #endif /* } _XAGSTR_H_ */
 

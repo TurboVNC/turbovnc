@@ -84,13 +84,8 @@ from the X Consortium.
 #include <errno.h>
 #include <sys/param.h>
 #include "dix.h"
-#include "mi.h"
 #include "rfb.h"
 #include <time.h>
-
-extern Bool cfb16ScreenInit(ScreenPtr, pointer, int, int, int, int, int);
-extern Bool cfb32ScreenInit(ScreenPtr, pointer, int, int, int, int, int);
-extern Bool rfbDCInitialize(ScreenPtr, miPointerScreenFuncPtr);
 
 #ifdef CORBA
 #include <vncserverctrl.h>
@@ -121,6 +116,9 @@ Atom VNC_OTP;
 
 Atom VNC_ACL;
 #endif
+
+static HWEventQueueType alwaysCheckForInput[2] = { 0, 1 };
+static HWEventQueueType *mieqCheckForInput[2];
 
 static char primaryOrder[4] = "";
 static int redBits, greenBits, blueBits;
@@ -368,8 +366,8 @@ ddxProcessArgument (argc, argv, i)
 		UseMsg ();
 		return 2;
 	    }
-	    if ((q < 3 && *end != '.') ||
-	        (q == 3 && *end != '\0')) {
+	    if (q < 3 && *end != '.' ||
+	        q == 3 && *end != '\0') {
 		UseMsg ();
 		return 2;
 	    }
@@ -421,33 +419,6 @@ ddxProcessArgument (argc, argv, i)
     }
 
     return 0;
-}
-
-/*
- * GNDN
- */
-
-void
-ddxInitGlobals()
-{
-}
-
-
-/*
- * rfbBlockHandler - called just before the X server goes into select()
- */
-
-static void
-rfbBlockHandler(pointer data, OSTimePtr timeout, pointer readmask)
-{
-}
-
-
-static void
-rfbWakeupHandler(pointer data, int nfds, pointer readmask)
-{
-    rfbCheckFds();
-    httpCheckFds();
 }
 
 
@@ -528,8 +499,6 @@ InitOutput(screenInfo, argc, argv)
     if (AddScreen(rfbScreenInit, argc, argv) == -1) {
 	FatalError("Couldn't add screen");
     }
-
-    RegisterBlockAndWakeupHandlers(rfbBlockHandler, rfbWakeupHandler, 0);
 }
 
 
@@ -704,7 +673,10 @@ InitInput(argc, argv)
     RegisterKeyboardDevice(k);
     RegisterPointerDevice(p);
     miRegisterPointerDevice(screenInfo.screens[0], p);
-    (void)mieqInit ((DevicePtr)k, (DevicePtr)p);
+    (void)mieqInit (k, p);
+    mieqCheckForInput[0] = checkForInput[0];
+    mieqCheckForInput[1] = checkForInput[1];
+    SetInputCheck(&alwaysCheckForInput[0], &alwaysCheckForInput[1]);
 }
 
 
@@ -794,8 +766,15 @@ LegalModifier(key, pDev)
 void
 ProcessInputEvents()
 {
-    mieqProcessInputEvents();
-    miPointerUpdate();
+    rfbCheckFds();
+    httpCheckFds();
+#ifdef CORBA
+    corbaCheckFds();
+#endif
+    if (*mieqCheckForInput[0] != *mieqCheckForInput[1]) {
+	mieqProcessInputEvents();
+	miPointerUpdate();
+    }
 }
 
 

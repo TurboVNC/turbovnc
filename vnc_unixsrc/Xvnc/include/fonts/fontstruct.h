@@ -1,4 +1,5 @@
-/* $Xorg: fontstruct.h,v 1.3 2000/08/18 04:05:44 coskrey Exp $ */
+/* $XConsortium: fontstruct.h /main/17 1996/08/09 16:23:54 kaleb $ */
+/* $XFree86: xc/include/fonts/fontstruct.h,v 3.1 1996/12/23 05:58:39 dawes Exp $ */
 /***********************************************************
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -21,7 +22,6 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $XFree86: xc/include/fonts/fontstruct.h,v 3.3 1999/08/21 13:47:34 dawes Exp $ */
 
 #ifndef FONTSTR_H
 #define FONTSTR_H
@@ -29,7 +29,6 @@ SOFTWARE.
 #include <X11/Xproto.h>
 #include "font.h"
 #include <X11/Xfuncproto.h>
-#include <X11/Xdefs.h>
 
 /*
  * This version of the server font data strucutre is only for describing
@@ -109,20 +108,36 @@ typedef struct _Font {
     char        glyph;
     char        scan;
     fsBitmapFormat format;
-    int         (*get_glyphs) (FontPtr         /* font */,
-			       unsigned long   /* count */,
-			       unsigned char * /* chars */,
-			       FontEncoding    /* encoding */,
-			       unsigned long * /* count */,
-			       CharInfoPtr *   /* glyphs */);
-    int         (*get_metrics) (FontPtr         /* font */,
-				unsigned long   /* count */,
-				unsigned char * /* chars */,
-				FontEncoding    /* encoding */,
-				unsigned long * /* count */,
-				xCharInfo **    /* glyphs */);
-    void        (*unload_font) (FontPtr         /* font */);
-    void        (*unload_glyphs) (FontPtr         /* font */);
+    int         (*get_glyphs) (
+#if NeedNestedPrototypes
+	FontPtr         /* font */,
+	unsigned long   /* count */,
+	unsigned char * /* chars */,
+	FontEncoding    /* encoding */,
+	unsigned long * /* count */,
+	CharInfoPtr *   /* glyphs */
+#endif
+);
+    int         (*get_metrics) ( 
+#if NeedNestedPrototypes
+	FontPtr         /* font */,
+	unsigned long   /* count */,
+	unsigned char * /* chars */,
+	FontEncoding    /* encoding */,
+	unsigned long * /* count */,
+	xCharInfo **    /* glyphs */
+#endif
+);
+    void        (*unload_font) ( 
+#if NeedNestedPrototypes
+	FontPtr         /* font */
+#endif
+);
+    void        (*unload_glyphs) ( 
+#if NeedNestedPrototypes
+	FontPtr         /* font */
+#endif
+);
     FontPathElementPtr fpe;
     pointer     svrPrivate;
     pointer     fontPrivate;
@@ -130,6 +145,19 @@ typedef struct _Font {
     int		maxPrivate;
     pointer	*devPrivates;
 }           FontRec;
+
+extern Bool     _FontSetNewPrivate (
+#if NeedFunctionPrototypes
+                FontPtr        /* pFont */,
+                int            /* n */,
+                pointer        /* ptr */
+#endif
+                );
+extern int      AllocateFontPrivateIndex (
+#if NeedFunctionPrototypes
+                void
+#endif
+                );
 
 #define FontGetPrivate(pFont,n) ((n) > (pFont)->maxPrivate ? (pointer) 0 : \
 			     (pFont)->devPrivates[n])
@@ -154,88 +182,114 @@ typedef struct _FontPathElement {
     pointer     private;
 }           FontPathElementRec;
 
-typedef Bool (*NameCheckFunc) (char *name);
-typedef int (*InitFpeFunc) (FontPathElementPtr fpe);
-typedef int (*FreeFpeFunc) (FontPathElementPtr fpe);
-typedef int (*ResetFpeFunc) (FontPathElementPtr fpe);
-typedef int (*OpenFontFunc) ( pointer client,
-			      FontPathElementPtr fpe,
-			      Mask flags,
-			      char* name,
-			      int namelen,
-			      fsBitmapFormat format,
-			      fsBitmapFormatMask fmask,
-			      XID id,
-			      FontPtr* pFont,
-			      char** aliasName,
-			      FontPtr non_cachable_font);
-typedef void (*CloseFontFunc) (FontPathElementPtr fpe, FontPtr pFont);
-typedef int (*ListFontsFunc) (pointer client,
-			      FontPathElementPtr fpe,
-			      char* pat,
-			      int len,
-			      int max,
-			      FontNamesPtr names);
-
-typedef int (*StartLfwiFunc) (pointer client,
-			      FontPathElementPtr fpe,
-			      char* pat,
-			      int len,
-			      int max,
-			      pointer* privatep);
-
-typedef int (*NextLfwiFunc) (pointer client,
-			     FontPathElementPtr fpe,
-			     char** name,
-			     int* namelen,
-			     FontInfoPtr* info,
-			     int* numFonts,
-			     pointer private);
-
-typedef int (*WakeupFpeFunc) (FontPathElementPtr fpe,
-			      unsigned long* LastSelectMask);
-
-typedef void (*ClientDiedFunc) (pointer client,
-			       FontPathElementPtr fpe);
-
-typedef int (*LoadGlyphsFunc) (pointer client,
-			       FontPtr pfont,
-			       Bool range_flag,
-			       unsigned int nchars,
-			       int item_size,
-			       unsigned char* data);
-
-typedef int (*StartLaFunc) (pointer client,
-			    FontPathElementPtr fpe,
-			    char* pat,
-			    int len,
-			    int max,
-			    pointer* privatep);
-
-typedef int (*NextLaFunc) (pointer client,
-			   FontPathElementPtr fpe,
-			   char** namep,
-			   int* namelenp,
-			   char** resolvedp,
-			   int* resolvedlenp,
-			   pointer private);
-
-typedef void (*SetPathFunc)(void);
-
 typedef struct _FPEFunctions {
-    NameCheckFunc       name_check;
-    InitFpeFunc 	init_fpe;
-    ResetFpeFunc	reset_fpe;
-    FreeFpeFunc         free_fpe;
-    OpenFontFunc        open_font;
-    CloseFontFunc       close_font;
-    ListFontsFunc       list_fonts;
-    StartLaFunc         start_list_fonts_and_aliases;
-    NextLaFunc          list_next_font_or_alias;
-    StartLfwiFunc       start_list_fonts_with_info;
-    NextLfwiFunc        list_next_font_with_info;
-    WakeupFpeFunc       wakeup_fpe;
-    ClientDiedFunc 	client_died;
+    int         (*name_check) (
+#if NeedFunctionPrototypes
+			       char* /* name */
+#endif
+			       );
+    int         (*init_fpe) (
+#if NeedNestedPrototypes
+			     FontPathElementPtr /* fpe */
+#endif
+			     );
+    int         (*reset_fpe) (
+#if NeedNestedPrototypes
+			     FontPathElementPtr /* fpe */
+#endif
+			     );
+    int         (*free_fpe) (
+#if NeedNestedPrototypes
+			     FontPathElementPtr /* fpe */
+#endif
+			     );
+    int         (*open_font) (
+#if NeedNestedPrototypes
+			      pointer /* client */,
+			      FontPathElementPtr /* fpe */,
+			      int /* flags */,
+			      char* /* name */,
+			      int /* namelen */,
+			      fsBitmapFormat /* format */,
+			      fsBitmapFormatMask /* fmask */,
+			      unsigned long /* id (type XID or FSID) */,
+			      FontPtr* /* pFont */,
+			      char** /* aliasName */,
+			      FontPtr /* non_cachable_font */
+#endif
+			      );
+
+    int         (*close_font) (
+#if NeedNestedPrototypes
+			       FontPathElementPtr /* fpe */,
+			       FontPtr /* pFont */
+#endif
+			       );
+    int         (*list_fonts) (
+#if NeedNestedPrototypes
+			       pointer /* client */,
+			       FontPathElementPtr /* fpe */,
+			       char* /* pat */,
+			       int /* len */,
+			       int /* max */,
+			       FontNamesPtr /* names */
+#endif
+			       );
+    int         (*start_list_fonts_and_aliases) (
+#if NeedNestedPrototypes
+						 pointer /* client */,
+						 FontPathElementPtr /* fpe */,
+						 char* /* pat */,
+						 int /* len */,
+						 int /* max */,
+						 pointer* /* privatep */
+#endif
+						 );
+    int         (*list_next_font_or_alias) (
+#if NeedNestedPrototypes
+					    pointer /* client */,
+					    FontPathElementPtr /* fpe */,
+					    char** /* namep */,
+					    int* /* namelenp */,
+					    char** /* resolvedp */,
+					    int* /* resolvedlenp */,
+					    pointer /* private */
+#endif
+					    );
+    int         (*start_list_fonts_with_info) (
+#if NeedNestedPrototypes
+					       pointer /* client */,
+					       FontPathElementPtr /* fpe */,
+					       char* /* pat */,
+					       int /* patlen */,
+					       int /* maxnames */,
+					       pointer* /* privatep */
+#endif
+					       );
+    int         (*list_next_font_with_info) (	/* client, fpe, name, namelen,
+					         info, num, data */
+#if NeedNestedPrototypes
+					     pointer /* client */,
+					     FontPathElementPtr /* fpe */,
+					     char** /* name */,
+					     int* /* namelen */,
+					     FontInfoPtr* /* info */,
+					     int* /* numFonts */,
+					     pointer /* private */
+#endif
+					     );
+    int         (*wakeup_fpe) (
+#if NeedNestedPrototypes
+			       FontPathElementPtr /* fpe */,
+			       unsigned long* /* LastSelectMask */
+#endif
+			       );
+    int		(*client_died) (
+#if NeedNestedPrototypes
+				pointer /* client */,
+				FontPathElementPtr /* fpe */
+#endif
+				);
 		/* for load_glyphs, range_flag = 0 ->
 			nchars = # of characters in data
 			item_size = bytes/char
@@ -244,9 +298,26 @@ typedef struct _FPEFunctions {
 			nchars = # of fsChar2b's in data
 			item_size is ignored
 			data = list of fsChar2b's */
-    LoadGlyphsFunc	load_glyphs;
-    SetPathFunc		set_path_hook;
-} FPEFunctionsRec, FPEFunctions;
+    int		(*load_glyphs) (
+#if NeedNestedPrototypes
+				pointer /* client */,
+				FontPtr /* pfont */,
+				Bool /* range_flag */,
+				unsigned int /* nchars */,
+				int /* item_size */,
+				unsigned char* /* data */
+#endif
+				);
+    void	(*set_path_hook)(
+#if NeedFunctionPrototypes
+				 void
+#endif
+				 );
+}           FPEFunctionsRec, FPEFunctions;
+
+#if 0	/* unused */
+extern int  InitFPETypes();
+#endif
 
 /*
  * Various macros for computing values based on contents of
@@ -289,7 +360,5 @@ typedef struct _FPEFunctions {
 			    (pi)->ink_maxbounds.rightSideBearing : \
 				(pi)->ink_maxbounds.characterWidth)
 #define FONT_MAX_WIDTH(pi)	(FONT_MAX_RIGHT(pi) - FONT_MIN_LEFT(pi))
-
-#include "fontproto.h"
 
 #endif				/* FONTSTR_H */

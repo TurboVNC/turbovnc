@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/mi/mibitblt.c,v 3.10 2001/08/06 20:51:17 dawes Exp $ */
 /***********************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -45,15 +45,12 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $Xorg: mibitblt.c,v 1.5 2001/02/09 02:05:20 xorgcvs Exp $ */
+/* $XConsortium: mibitblt.c /main/55 1996/08/01 19:25:20 dpw $ */
+/* $XFree86: xc/programs/Xserver/mi/mibitblt.c,v 3.1 1996/12/23 07:09:43 dawes Exp $ */
 /* Author: Todd Newman  (aided and abetted by Mr. Drewry) */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
-#include <X11/Xprotostr.h>
+#include "X.h"
+#include "Xprotostr.h"
 
 #include "misc.h"
 #include "gcstruct.h"
@@ -62,12 +59,8 @@ SOFTWARE.
 #include "scrnintstr.h"
 #include "mi.h"
 #include "regionstr.h"
-#include <X11/Xmd.h>
+#include "Xmd.h"
 #include "servermd.h"
-
-#ifndef HAS_FFS
-extern int ffs(int);
-#endif
 
 /* MICOPYAREA -- public entry for the CopyArea request 
  * For each rectangle in the source region
@@ -277,25 +270,18 @@ miCopyArea(pSrcDrawable, pDstDrawable,
  * No clever strategy here, we grab a scanline at a time, pull out the
  * bits and then stuff them in a 1 bit deep map.
  */
-/*
- * This should be replaced with something more general.  mi shouldn't have to
- * care about such things as scanline padding et alia.
- */
 static
-MiBits	*
-miGetPlane(
-    DrawablePtr		pDraw,
-    int			planeNum,	/* number of the bitPlane */
-    int			sx,
-    int			sy,
-    int			w,
-    int			h,
-    MiBits	*result)
+unsigned long	*
+miGetPlane(pDraw, planeNum, sx, sy, w, h, result)
+    DrawablePtr		pDraw;
+    int			planeNum;	/* number of the bitPlane */
+    int			sx, sy, w, h;
+    unsigned long	*result;
 {
     int			i, j, k, width, bitsPerPixel, widthInBytes;
     DDXPointRec 	pt = {0, 0};
-    MiBits	pixel;
-    MiBits	bit;
+    unsigned long	pixel;
+    unsigned long	bit;
     unsigned char	*pCharsOut = NULL;
 
 #if BITMAP_SCANLINE_UNIT == 8
@@ -318,9 +304,9 @@ miGetPlane(
     sy += pDraw->y;
     widthInBytes = BitmapBytePad(w);
     if(!result)
-        result = (MiBits *)xalloc(h * widthInBytes);
+        result = (unsigned long *)xalloc(h * widthInBytes);
     if (!result)
-	return (MiBits *)NULL;
+	return (unsigned long *)NULL;
     bitsPerPixel = pDraw->bitsPerPixel;
     bzero((char *)result, h * widthInBytes);
     pOut = (OUT_TYPE *) result;
@@ -360,22 +346,11 @@ miGetPlane(
 		 * Now get the bit and insert into a bitmap in XY format.
 		 */
 		bit = (pixel >> planeNum) & 1;
-#ifndef XFree86Server
 		/* XXX assuming bit order == byte order */
 #if BITMAP_BIT_ORDER == LSBFirst
 		bit <<= k;
 #else
 		bit <<= ((BITMAP_SCANLINE_UNIT - 1) - k);
-#endif
-#else
-		/* XXX assuming byte order == LSBFirst */
-		if (screenInfo.bitmapBitOrder == LSBFirst)
-			bit <<= k;
-		else
-			bit <<= ((screenInfo.bitmapScanlineUnit - 1) -
-				 (k % screenInfo.bitmapScanlineUnit)) +
-				((k / screenInfo.bitmapScanlineUnit) *
-				 screenInfo.bitmapScanlineUnit);
 #endif
 		*pOut |= (OUT_TYPE) bit;
 		k++;
@@ -407,7 +382,7 @@ miOpqStipDrawable(pDraw, pGC, prgnSrc, pbits, srcx, w, h, dstx, dsty)
     DrawablePtr pDraw;
     GCPtr	pGC;
     RegionPtr	prgnSrc;
-    MiBits	*pbits;
+    unsigned long	*pbits;
     int		srcx, w, h, dstx, dsty;
 {
     int		oldfill, i;
@@ -564,7 +539,7 @@ miCopyPlane(pSrcDrawable, pDstDrawable,
     int 		dstx, dsty;
     unsigned long	bitPlane;
 {
-    MiBits	*ptile;
+    unsigned long	*ptile;
     BoxRec 		box;
     RegionPtr		prgnSrc, prgnExposed;
 
@@ -613,10 +588,10 @@ miCopyPlane(pSrcDrawable, pDstDrawable,
 	box.x2 -= pSrcDrawable->x;
 	box.y1 -= pSrcDrawable->y;
 	box.y2 -= pSrcDrawable->y;
-	ptile = miGetPlane(pSrcDrawable, ffs(bitPlane) - 1,
+	ptile = miGetPlane(pSrcDrawable, ffsl(bitPlane) - 1,
 			   box.x1, box.y1,
 			   box.x2 - box.x1, box.y2 - box.y1,
-			   (MiBits *) NULL);
+			   (unsigned long *) NULL);
 	if (ptile)
 	{
 	    miOpqStipDrawable(pDstDrawable, pGC, prgnSrc, ptile, 0,
@@ -684,7 +659,6 @@ miGetImage(pDraw, sx, sy, w, h, format, planeMask, pDst)
  	     */
  	    ValidateGC((DrawablePtr)pPixmap, pGC);
  	    pt.x = pt.y = 0;
-            width = w;
 	    (*pGC->ops->FillSpans)((DrawablePtr)pPixmap, pGC, 1, &pt, &width,
 				   TRUE);
  
@@ -723,10 +697,11 @@ miGetImage(pDraw, sx, sy, w, h, format, planeMask, pDst)
     }
     else
     {
-	(void) miGetPlane(pDraw, ffs(planeMask) - 1, sx, sy, w, h,
-			  (MiBits *)pDst);
+	(void) miGetPlane(pDraw, ffsl(planeMask) - 1, sx, sy, w, h,
+			  (unsigned long *)pDst);
     }
 }
+
 
 /* MIPUTIMAGE -- public entry for the PutImage request
  * Here we benefit from knowing the format of the bits pointed to by pImage,
@@ -778,7 +753,7 @@ miPutImage(pDraw, pGC, depth, x, y, w, h, leftPad, format, pImage)
 	box.y2 = h;
 	prgnSrc = REGION_CREATE(pGC->pScreen, &box, 1);
 
-        miOpqStipDrawable(pDraw, pGC, prgnSrc, (MiBits *) pImage,
+        miOpqStipDrawable(pDraw, pGC, prgnSrc, (unsigned long *) pImage,
 			  leftPad, w, h, x, y);
 	REGION_DESTROY(pGC->pScreen, prgnSrc);
 	break;
@@ -808,7 +783,6 @@ miPutImage(pDraw, pGC, depth, x, y, w, h, leftPad, format, pImage)
 	gcv[1] = (XID)oldFg;
 	gcv[2] = (XID)oldBg;
 	DoChangeGC(pGC, GCPlaneMask | GCForeground | GCBackground, gcv, 0);
-	ValidateGC(pDraw, pGC);
 	break;
 
       case ZPixmap:

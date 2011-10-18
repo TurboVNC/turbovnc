@@ -1,11 +1,9 @@
-XCOMM $Xorg: ibmLib.rules,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
-XCOMM $XdotOrg: xc/config/cf/ibmLib.rules,v 1.2 2004/04/23 18:41:58 eich Exp $
+XCOMM $XConsortium: ibmLib.rules /main/15 1996/12/30 16:06:05 kaleb $
 
 /*
  * AIX shared library rules
  */
 
-XCOMM $XFree86: xc/config/cf/ibmLib.rules,v 3.5 2000/02/13 06:15:18 dawes Exp $
 #ifndef HasSharedLibraries
 # define HasSharedLibraries YES
 #endif
@@ -18,12 +16,8 @@ XCOMM $XFree86: xc/config/cf/ibmLib.rules,v 3.5 2000/02/13 06:15:18 dawes Exp $
 #ifndef SharedCodeDef
 # define SharedCodeDef -DSHAREDCODE
 #endif
-#if OSMajorVersion < 5
-# ifndef SharedLibraryDef
-#  define SharedLibraryDef -DAIXSHLIB
-# endif
-#else
-# define SharedLibraryDef /**/
+#ifndef SharedLibraryDef
+# define SharedLibraryDef -DAIXSHLIB
 #endif
 #ifndef ShLibIncludeFile
 # define ShLibIncludeFile <ibmLib.tmpl>
@@ -36,9 +30,9 @@ XCOMM $XFree86: xc/config/cf/ibmLib.rules,v 3.5 2000/02/13 06:15:18 dawes Exp $
 #endif
 #if !defined(LdPostLib) && !defined(UseInstalled) && OSMajorVersion > 3
 # if ThreadedX
-#  define LdPostLib -bnoipath -blibpath:$(USRLIBDIRPATH):/usr/lib/threads:/usr/lib:/lib
+#  define LdPostLib -blibpath:$(USRLIBDIRPATH):/usr/lib/threads:/usr/lib:/lib
 # else
-#  define LdPostLib -bnoipath -blibpath:$(USRLIBDIRPATH):/usr/lib:/lib
+#  define LdPostLib -blibpath:$(USRLIBDIRPATH):/usr/lib:/lib
 # endif
 # define SharedLibPostRef $(LDPOSTLIBS)
 #endif
@@ -84,66 +78,25 @@ XCOMM $XFree86: xc/config/cf/ibmLib.rules,v 3.5 2000/02/13 06:15:18 dawes Exp $
     && !defined(UseImports) && !defined(ImportX11)
    /* we want this to be defined only when building X */
 
-# if OSMajorVersion < 5
-#  if OSMajorVersion < 4
+# if OSMajorVersion < 4
 /*
- * SharedLibReferences - variables for shared libraries
+ * SharedDSLibReferences - variables for shared libraries
  */
-
-#   ifndef SharedLibReferences
-#    define SharedLibReferences(varname,libname,libsource,revname,rev)	@@\
-Concat3(DEP,varname,LIB) = /**/						@@\
-Concat(varname,LIB) = _Use(Concat(-l,libname),Concat(libsource/lib,libname.a)) @@\
-LintLibReferences(varname,libname,libsource)
-#   endif
-
-#  else /* OSMajorVersion < 4 */
-
-#   ifndef SharedLibReferences
-#    define SharedLibReferences(varname,libname,libsource,revname,rev)	@@\
-Concat3(DEP,varname,LIB) = /**/						@@\
-Concat(varname,LIB) = _Use(Concat(-l,libname),Concat($(BUILDLIBDIR),/libname.imp) Concat3($(BUILDLIBDIR),/lib,libname.a)) @@\
-LintLibReferences(varname,libname,libsource)
-#   endif
-
-#  endif
-# else /* OSMajorVersion < 5 */
 
 #  ifndef SharedLibReferences
 #   define SharedLibReferences(varname,libname,libsource,revname,rev)	@@\
 Concat3(DEP,varname,LIB) = /**/						@@\
-Concat(varname,LIB) = _Use(Concat(-l,libname), Concat3($(BUILDLIBDIR),/lib,libname.so)) @@\
+Concat(varname,LIB) = _Use(Concat(-l,libname),Concat(libsource/lib,libname.a)) @@\
 LintLibReferences(varname,libname,libsource)
 #  endif
 
-# endif
+# else
 
-# if OSMajorVersion < 5
-#  if OSMajorVersion < 4
-/*
- * SharedFontLibReferences - shared font libraries
- */
-
-#   ifndef SharedFontLibReferences
-#    define SharedFontLibReferences()					@@\
-DEPFONTLIB = /**/							@@\
-FONTLIB = -L$(FREETYPELIBDIR) _Use(-lXfont,$(FONTLIBSRC)/libXfont.a)	@@\
-LintLibReferences(XFONT,Xfont,$(FONTLIBSRC))
-#   endif
-#  else
-#   ifndef SharedFontLibReferences
-#    define SharedFontLibReferences()					@@\
-DEPFONTLIB = /**/							@@\
-FONTLIB = -L$(FREETYPELIBDIR) _Use(-lXfont,$(BUILDLIBDIR)/font.imp) $(BUILDLIBDI)/libXfont.a)) @@\
-LintLibReferences(XFONT,Xfont,$(FONTLIBSRC))
-#   endif
-#  endif
-# else /* OSMajorVersion < 5 */
-#  ifndef SharedFontLibReferences
-#   define SharedFontLibReferences()					@@\
-DEPFONTLIB = /**/							@@\
-FONTLIB = -L$(FREETYPELIBDIR) _Use(-lXfont,$(BUILDLIBDI)/libXfont.so)) @@\
-LintLibReferences(XFONT,Xfont,$(FONTLIBSRC))
+#  ifndef SharedLibReferences
+#   define SharedLibReferences(varname,libname,libsource,revname,rev)	@@\
+Concat3(DEP,varname,LIB) = /**/						@@\
+Concat(varname,LIB) = _Use(Concat(-l,libname),Concat($(BUILDLIBDIR),/libname.imp) Concat3($(BUILDLIBDIR),/lib,libname.a)) @@\
+LintLibReferences(varname,libname,libsource)
 #  endif
 
 # endif
@@ -175,15 +128,8 @@ LintLibReferences(varname,libname,libsource)
  * InstallSharedLibrary - generate rules to install the shared library.
  */
 #ifndef InstallSharedLibrary
-# if OSMajorVersion < 5
-#  define InstallSharedLibrary(libname,rev,dest)			@@\
+# define InstallSharedLibrary(libname,rev,dest)				@@\
 InstallLibrary(libname,dest)
-# else /* OSMajorVersion < 5 */
-#  define InstallSharedLibrary(libname,rev,dest)			@@\
-install:: Concat(lib,libname.so)					@@\
-	MakeDir($(DESTDIR)dest)						@@\
-	$(INSTALL) $(INSTALLFLAGS) $(INSTBINFLAGS) Concat(lib,libname.so) $(DESTDIR)dest
-# endif /* OSMajorVersion < 5 */
 #endif /* InstallSharedLibrary */
 
 /*
@@ -201,11 +147,10 @@ install:: Concat(lib,libname.so)					@@\
  * IBM uses an unusual shared object file name (shr4.o) in some libraries. 
  * Duplicate this behavior to preserve compatibility with IBM's libraries.
  */
-#if OSMajorVersion < 5
-# if OSMajorVersion < 4
+#if OSMajorVersion < 4
 
-#  ifndef SharedLibraryTarget
-#   define SharedLibraryTarget(libname,rev,solist,down,up)		@@\
+# ifndef SharedLibraryTarget
+#  define SharedLibraryTarget(libname,rev,solist,down,up)		@@\
 AllTarget(Concat(lib,libname.a))					@@\
 									@@\
 Concat(lib,libname.a):  solist $(UNSHAREDOBJS) $(EXTRALIBRARYDEPS)	@@\
@@ -223,12 +168,12 @@ Concat(lib,libname.a):  solist $(UNSHAREDOBJS) $(EXTRALIBRARYDEPS)	@@\
 									@@\
 clean::									@@\
 	$(RM) Concat(lib,libname.a)
-#  endif /* SharedLibraryTarget */
+# endif /* SharedLibraryTarget */
 
-# else /* OSMajorVersion < 4 */
+#else /* OSMajorVersion >= 4 */
 
-#  ifndef SharedLibraryTarget
-#   define SharedLibraryTarget(libname,rev,solist,down,up)		@@\
+# ifndef SharedLibraryTarget
+#  define SharedLibraryTarget(libname,rev,solist,down,up)		@@\
 AllTarget(Concat(lib,libname.a))					@@\
 									@@\
 Concat(lib,libname.a):  solist $(UNSHAREDOBJS) $(EXTRALIBRARYDEPS)	@@\
@@ -247,99 +192,9 @@ Concat(lib,libname.a):  solist $(UNSHAREDOBJS) $(EXTRALIBRARYDEPS)	@@\
 									@@\
 clean::									@@\
 	$(RM) Concat(lib,libname.a)
-#  endif /* SharedLibraryTarget */
-# endif /* OSMajorVersion < 4 */
-#else /* OSMajorVersion < 5 */
-# ifndef SharedLibraryTarget
-#  define SharedLibraryTarget(libname,rev,solist,down,up)		@@\
-AllTarget(Concat(lib,libname.so))					@@\
-									@@\
-Concat(lib,libname.so): solist $(EXTRALIBRARYDEPS)			@@\
-	$(RM) $@~							@@\
-	$(AR) $*.a solist						@@\
-	dump -g $*.a | sed -n -e 's/^[  ]*[0-9][0-9]*[[:space:]]*\([_[:alpha:]][[:alnum:]]*\)/\1/p' | egrep -v \\\. | sort | uniq > $*.syms	@@\
-	$(LD) -bnoipath -bnoentry -bM\:SRE -bE\:$*.syms -o $@~ solist $(REQUIREDLIBS) BaseShLibReqs -lc	@@\
-	$(RM) $@ $*.a $*.syms						@@\
-	$(MV) $@~ $@							@@\
-	LinkBuildLibrary($@)						@@\
-									@@\
-clean::									@@\
-	$(RM) Concat(lib,libname.so.rev) Concat(lib,libname.so)
-
 # endif /* SharedLibraryTarget */
-#endif /* OSMajorVersion < 5 */
 
-/*
- * SharedDepLibraryTarget - generate rules to create a shared library.
- */
-#if OSMajorVersion < 5
-# if OSMajorVersion < 4
-
-#  ifndef SharedDepLibraryTarget
-#   define SharedDepLibraryTarget(libname,rev,deplist,solist,down,up)	@@\
-AllTarget(Concat(lib,libname.a))					@@\
-									@@\
-Concat(lib,libname.a):  deplist $(UNSHAREDOBJS) $(EXTRALIBRARYDEPS)	@@\
-	$(RM) $@~ shr.o shr4.o						@@\
-	(cd down; $(AR) up/$@~ solist)					@@\
-	dump -g $@~ | sed -n -e 's/^[   ]*[0-9][0-9]*[   ]*\([^  .][^    ]*\)$$/\1/p' > $@.syms	@@\
-	$(LD) -o shr.o $@~ -H512 -T512 -bM\:SRE -bE\:$@.syms $(REQUIREDLIBS) BaseShLibReqs SharedLibPostRef	@@\
-	$(LN) shr.o shr4.o						@@\
-	$(RM) $@~							@@\
-	case ,$(SHR4OBJLIBS), in *,libname,*) shr4obj=shr4.o;; esac &&\	@@\
-		$(AR) $@~ $${shr4obj} shr.o $(UNSHAREDOBJS)		@@\
-	$(RM) $@.syms $@ shr.o shr4.o					@@\
-	$(MV) $@~ $@							@@\
-	LinkBuildLibrary($@)						@@\
-									@@\
-clean::									@@\
-	$(RM) Concat(lib,libname.a)
-#  endif /* SharedDepLibraryTarget */
-
-# else /* OSMajorVersion < 4 */
-
-#  ifndef SharedDepLibraryTarget
-#   define SharedDepLibraryTarget(libname,rev,deplist,solist,down,up)	@@\
-AllTarget(Concat(lib,libname.a))					@@\
-									@@\
-Concat(lib,libname.a):  deplist $(UNSHAREDOBJS) $(EXTRALIBRARYDEPS)	@@\
-	RemoveFiles($@~ shr.o shr4.o)					@@\
-	(cd down; $(AR) up/$@~ solist)					@@\
-	MakeExportList(libname,libname.imp)				@@\
-	$(LD) -o shr.o $@~ -H512 -T512 -bM\:SRE -bE\:libname.imp -bnoentry $(REQUIREDLIBS) BaseShLibReqs $(LDPOSTLIBS)	@@\
-	$(LN) shr.o shr4.o						@@\
-	RemoveFile($@~)							@@\
-	case ,$(SHR4OBJLIBS), in *,libname,*) shr4obj=shr4.o;; esac &&\	@@\
-		$(AR) $@~ $${shr4obj} shr.o $(UNSHAREDOBJS)		@@\
-	RemoveFile($@)							@@\
-	$(MV) $@~ $@							@@\
-	LinkBuildLibrary($@)						@@\
-	LinkBuildLibrary(libname.imp)					@@\
-									@@\
-clean::									@@\
-	$(RM) Concat(lib,libname.a)
-#  endif /* SharedDepLibraryTarget */
-
-# endif /* OSMajorVersion < 4 */
-#else /* OSMajorVersion < 5 */
-# ifndef SharedDepLibraryTarget
-#  define SharedDepLibraryTarget(libname,rev,deplist,solist,down,up)	@@\
-AllTarget(Concat(lib,libname.so))					@@\
-									@@\
-Concat(lib,libname.so):  deplist $(EXTRALIBRARYDEPS)			@@\
-	$(RM) $@~							@@\
-	$(AR) $*.a solist						@@\
-	dump -g $*.a | sed -n -e 's/^[  ]*[0-9][0-9]*[[:space:]]*\([_[:alpha:]][[:alnum:]]*\)/\1/p' | egrep -v \\\. | sort | uniq > $*.syms	@@\
-	$(LD) -bnoipath -bnoentry -bsymbolic -bM\:SRE -bE\:$*.syms -o $@~ solist $(REQUIREDLIBS) BaseShLibReqs -lc	@@\
-	$(RM) $@ $*.a $*.syms						@@\
-	$(MV) $@~ $@							@@\
-	LinkBuildLibrary($@)						@@\
-									@@\
-clean::									@@\
-	$(RM) Concat(lib,libname.so) Concat(lib,libname.so)
-
-# endif /* SharedDepLibraryTarget */
-#endif /* OSMajorVersion < 5 */
+#endif
 
 /*
  * SharedLibraryDataTarget - generate rules to create shlib data file;

@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/dix/swaprep.c,v 3.7 2001/12/14 19:59:33 dawes Exp $ */
 /************************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -46,38 +46,46 @@ SOFTWARE.
 
 ********************************************************/
 
-/* $Xorg: swaprep.c,v 1.4 2001/02/09 02:04:41 xorgcvs Exp $ */
+/* $XConsortium: swaprep.c /main/25 1995/12/08 13:39:45 dpw $ */
+/* $XFree86: xc/programs/Xserver/dix/swaprep.c,v 3.2 1996/04/15 11:19:58 dawes Exp $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
+#include "X.h"
 #define NEED_REPLIES
 #define NEED_EVENTS
-#include <X11/Xproto.h>
+#include "Xproto.h"
 #include "misc.h"
 #include "dixstruct.h"
-#include <X11/fonts/fontstruct.h>
+#include "fontstruct.h"
 #include "scrnintstr.h"
 #include "swaprep.h"
-#include "globals.h"
 
-static void SwapFontInfo(xQueryFontReply *pr);
+static void SwapFontInfo(
+#if NeedFunctionPrototypes
+    xQueryFontReply * /* pr */
+#endif
+);
 
 #ifndef LBX
-static void SwapCharInfo(xCharInfo *pInfo);
+static void SwapCharInfo(
+#if NeedFunctionPrototypes
+    xCharInfo * /* pInfo */
+#endif
+    );
 
-static void SwapFont(xQueryFontReply *pr, Bool hasGlyphs);
+static void SwapFont(
+#if NeedFunctionPrototypes
+    xQueryFontReply * /* pr */,
+    Bool /* hasGlyphs */
+#endif
+    );
 #endif
 
-/**
- * Thanks to Jack Palevich for testing and subsequently rewriting all this
- *
- *  \param size size in bytes
- */
+/* Thanks to Jack Palevich for testing and subsequently rewriting all this */
 void
-Swap32Write(ClientPtr pClient, int size, register CARD32 *pbuf)
+Swap32Write(pClient, size, pbuf)
+    ClientPtr	pClient;
+    int		size;  /* in bytes */
+    register CARD32 *pbuf;
 {
     register int i;
     register char n;
@@ -92,12 +100,11 @@ Swap32Write(ClientPtr pClient, int size, register CARD32 *pbuf)
     (void)WriteToClient(pClient, size << 2, (char *) pbuf);
 }
 
-/**
- *
- * \param size size in bytes
- */
 void
-CopySwap32Write(ClientPtr pClient, int size, CARD32 *pbuf)
+CopySwap32Write(pClient, size, pbuf)
+    ClientPtr	pClient;
+    int		size;   /* in bytes */
+    CARD32	*pbuf;
 {
     int bufsize = size;
     CARD32 *pbufT;
@@ -140,12 +147,11 @@ CopySwap32Write(ClientPtr pClient, int size, CARD32 *pbuf)
 	DEALLOCATE_LOCAL ((char *) pbufT);
 }
 
-/**
- *
- * \param size size in bytes
- */
 void
-CopySwap16Write(ClientPtr pClient, int size, short *pbuf)
+CopySwap16Write(pClient, size, pbuf)
+    ClientPtr	pClient;
+    int		size;   /* in bytes */
+    short	*pbuf;
 {
     int bufsize = size;
     short *pbufT;
@@ -191,7 +197,10 @@ CopySwap16Write(ClientPtr pClient, int size, short *pbuf)
 
 /* Extra-small reply */
 void
-SGenericReply(ClientPtr pClient, int size, xGenericReply *pRep)
+SGenericReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xGenericReply		*pRep;
 {
     register char n;
 
@@ -201,8 +210,10 @@ SGenericReply(ClientPtr pClient, int size, xGenericReply *pRep)
 
 /* Extra-large reply */
 void
-SGetWindowAttributesReply(ClientPtr pClient, int size,
-                          xGetWindowAttributesReply *pRep)
+SGetWindowAttributesReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xGetWindowAttributesReply	*pRep;
 {
     register char n;
 
@@ -220,7 +231,10 @@ SGetWindowAttributesReply(ClientPtr pClient, int size,
 }
 
 void
-SGetGeometryReply(ClientPtr pClient, int size, xGetGeometryReply *pRep)
+SGetGeometryReply(pClient, size, pRep)
+    ClientPtr		pClient;
+    int			size;
+    xGetGeometryReply	*pRep;
 {
     register char n;
 
@@ -235,7 +249,10 @@ SGetGeometryReply(ClientPtr pClient, int size, xGetGeometryReply *pRep)
 }
 
 void
-SQueryTreeReply(ClientPtr pClient, int size, xQueryTreeReply *pRep)
+SQueryTreeReply(pClient, size, pRep)
+    ClientPtr		pClient;
+    int			size;
+    xQueryTreeReply	*pRep;
 {
     register char n;
 
@@ -248,7 +265,10 @@ SQueryTreeReply(ClientPtr pClient, int size, xQueryTreeReply *pRep)
 }
 
 void
-SInternAtomReply(ClientPtr pClient, int size, xInternAtomReply *pRep)
+SInternAtomReply(pClient, size, pRep)
+    ClientPtr		pClient;
+    int			size;
+    xInternAtomReply	*pRep;
 {
     register char n;
 
@@ -258,7 +278,10 @@ SInternAtomReply(ClientPtr pClient, int size, xInternAtomReply *pRep)
 }
 
 void
-SGetAtomNameReply(ClientPtr pClient, int size, xGetAtomNameReply *pRep)
+SGetAtomNameReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xGetAtomNameReply	*pRep;
 {
     register char n;
 
@@ -270,7 +293,10 @@ SGetAtomNameReply(ClientPtr pClient, int size, xGetAtomNameReply *pRep)
 
 
 void
-SGetPropertyReply(ClientPtr pClient, int size, xGetPropertyReply *pRep)
+SGetPropertyReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xGetPropertyReply	*pRep;
 {
     register char n;
 
@@ -283,7 +309,10 @@ SGetPropertyReply(ClientPtr pClient, int size, xGetPropertyReply *pRep)
 }
 
 void
-SListPropertiesReply(ClientPtr pClient, int size, xListPropertiesReply *pRep)
+SListPropertiesReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xListPropertiesReply	*pRep;
 {
     register char n;
 
@@ -294,8 +323,10 @@ SListPropertiesReply(ClientPtr pClient, int size, xListPropertiesReply *pRep)
 }
 
 void
-SGetSelectionOwnerReply(ClientPtr pClient, int size,
-                        xGetSelectionOwnerReply *pRep)
+SGetSelectionOwnerReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xGetSelectionOwnerReply	*pRep;
 {
     register char n;
 
@@ -306,7 +337,10 @@ SGetSelectionOwnerReply(ClientPtr pClient, int size,
 
 
 void
-SQueryPointerReply(ClientPtr pClient, int size, xQueryPointerReply *pRep)
+SQueryPointerReply(pClient, size, pRep)
+    ClientPtr		pClient;
+    int			size;
+    xQueryPointerReply	*pRep;
 {
     register char n;
 
@@ -322,7 +356,8 @@ SQueryPointerReply(ClientPtr pClient, int size, xQueryPointerReply *pRep)
 }
 
 void
-SwapTimecoord(xTimecoord* pCoord)
+SwapTimecoord(pCoord)
+    xTimecoord *pCoord;
 {
     register char n;
 
@@ -332,7 +367,10 @@ SwapTimecoord(xTimecoord* pCoord)
 }
 
 void
-SwapTimeCoordWrite(ClientPtr pClient, int size, xTimecoord *pRep)
+SwapTimeCoordWrite(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xTimecoord			*pRep;
 {
     int	i, n;
     xTimecoord			*pRepT;
@@ -348,7 +386,10 @@ SwapTimeCoordWrite(ClientPtr pClient, int size, xTimecoord *pRep)
 
 }
 void
-SGetMotionEventsReply(ClientPtr pClient, int size, xGetMotionEventsReply *pRep)
+SGetMotionEventsReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xGetMotionEventsReply	*pRep;
 {
     register char n;
 
@@ -359,7 +400,10 @@ SGetMotionEventsReply(ClientPtr pClient, int size, xGetMotionEventsReply *pRep)
 }
 
 void
-STranslateCoordsReply(ClientPtr pClient, int size, xTranslateCoordsReply *pRep)
+STranslateCoordsReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xTranslateCoordsReply	*pRep;
 {
     register char n;
 
@@ -371,7 +415,10 @@ STranslateCoordsReply(ClientPtr pClient, int size, xTranslateCoordsReply *pRep)
 }
 
 void
-SGetInputFocusReply(ClientPtr pClient, int size, xGetInputFocusReply *pRep)
+SGetInputFocusReply(pClient, size, pRep)
+    ClientPtr		pClient;
+    int			size;
+    xGetInputFocusReply	*pRep;
 {
     register char n;
 
@@ -382,7 +429,10 @@ SGetInputFocusReply(ClientPtr pClient, int size, xGetInputFocusReply *pRep)
 
 /* extra long reply */
 void
-SQueryKeymapReply(ClientPtr pClient, int size, xQueryKeymapReply *pRep)
+SQueryKeymapReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xQueryKeymapReply	*pRep;
 {
     register char n;
 
@@ -395,7 +445,8 @@ SQueryKeymapReply(ClientPtr pClient, int size, xQueryKeymapReply *pRep)
 static
 #endif
 void
-SwapCharInfo(xCharInfo *pInfo)
+SwapCharInfo(pInfo)
+    xCharInfo	*pInfo;
 {
     register char n;
 
@@ -408,7 +459,8 @@ SwapCharInfo(xCharInfo *pInfo)
 }
 
 static void
-SwapFontInfo(xQueryFontReply *pr)
+SwapFontInfo(pr)
+    xQueryFontReply *pr;
 {
     register char		n;
 
@@ -427,7 +479,9 @@ SwapFontInfo(xQueryFontReply *pr)
 static
 #endif
 void
-SwapFont(xQueryFontReply *pr, Bool hasGlyphs)
+SwapFont( pr, hasGlyphs)
+    xQueryFontReply *	pr;
+    Bool hasGlyphs;
 {
     unsigned	i;
     xCharInfo *	pxci;
@@ -459,14 +513,20 @@ SwapFont(xQueryFontReply *pr, Bool hasGlyphs)
 }
 
 void
-SQueryFontReply(ClientPtr pClient, int size, xQueryFontReply *pRep)
+SQueryFontReply(pClient, size, pRep)
+    ClientPtr		pClient;
+    int			size;
+    xQueryFontReply	*pRep;
 {
     SwapFont(pRep, TRUE);
     (void)WriteToClient(pClient, size, (char *) pRep);
 }
 
 void
-SQueryTextExtentsReply(ClientPtr pClient, int size, xQueryTextExtentsReply *pRep)
+SQueryTextExtentsReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xQueryTextExtentsReply	*pRep;
 {
     register char n;
 
@@ -482,7 +542,10 @@ SQueryTextExtentsReply(ClientPtr pClient, int size, xQueryTextExtentsReply *pRep
 }
 
 void
-SListFontsReply(ClientPtr pClient, int size, xListFontsReply *pRep)
+SListFontsReply(pClient, size, pRep)
+    ClientPtr		pClient;
+    int			size;
+    xListFontsReply	*pRep;
 {
     register char n;
 
@@ -493,15 +556,20 @@ SListFontsReply(ClientPtr pClient, int size, xListFontsReply *pRep)
 }
 
 void
-SListFontsWithInfoReply(ClientPtr pClient, int size,
-                        xListFontsWithInfoReply *pRep)
+SListFontsWithInfoReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xListFontsWithInfoReply	*pRep;
 {
     SwapFont((xQueryFontReply *)pRep, FALSE);
     (void)WriteToClient(pClient, size, (char *) pRep);
 }
 
 void
-SGetFontPathReply(ClientPtr pClient, int size, xGetFontPathReply *pRep)
+SGetFontPathReply(pClient, size, pRep)
+    ClientPtr		pClient;
+    int			size;
+    xGetFontPathReply	*pRep;
 {
     register char n;
 
@@ -512,7 +580,10 @@ SGetFontPathReply(ClientPtr pClient, int size, xGetFontPathReply *pRep)
 }
 
 void
-SGetImageReply(ClientPtr pClient, int size, xGetImageReply *pRep)
+SGetImageReply(pClient, size, pRep)
+    ClientPtr		pClient;
+    int			size;
+    xGetImageReply	*pRep;
 {
     register char n;
 
@@ -524,8 +595,10 @@ SGetImageReply(ClientPtr pClient, int size, xGetImageReply *pRep)
 }
 
 void
-SListInstalledColormapsReply(ClientPtr pClient, int size,
-                             xListInstalledColormapsReply *pRep)
+SListInstalledColormapsReply(pClient, size, pRep)
+    ClientPtr				pClient;
+    int					size;
+    xListInstalledColormapsReply	*pRep;
 {
     register char n;
 
@@ -552,7 +625,10 @@ SAllocColorReply(pClient, size, pRep)
 }
 
 void
-SAllocNamedColorReply(ClientPtr pClient, int size, xAllocNamedColorReply *pRep)
+SAllocNamedColorReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xAllocNamedColorReply	*pRep;
 {
     register char n;
 
@@ -568,7 +644,10 @@ SAllocNamedColorReply(ClientPtr pClient, int size, xAllocNamedColorReply *pRep)
 }
 
 void
-SAllocColorCellsReply(ClientPtr pClient, int size, xAllocColorCellsReply *pRep)
+SAllocColorCellsReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xAllocColorCellsReply	*pRep;
 {
     register char n;
 
@@ -581,7 +660,10 @@ SAllocColorCellsReply(ClientPtr pClient, int size, xAllocColorCellsReply *pRep)
 
 
 void
-SAllocColorPlanesReply(ClientPtr pClient, int size, xAllocColorPlanesReply *pRep)
+SAllocColorPlanesReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xAllocColorPlanesReply	*pRep;
 {
     register char n;
 
@@ -595,7 +677,8 @@ SAllocColorPlanesReply(ClientPtr pClient, int size, xAllocColorPlanesReply *pRep
 }
 
 void
-SwapRGB(xrgb *prgb)
+SwapRGB(prgb)
+    xrgb	*prgb;
 {
     register char n;
 
@@ -605,7 +688,10 @@ SwapRGB(xrgb *prgb)
 }
 
 void
-SQColorsExtend(ClientPtr pClient, int size, xrgb *prgb)
+SQColorsExtend(pClient, size, prgb)
+    ClientPtr	pClient;
+    int		size;
+    xrgb	*prgb;
 {
     int		i, n;
     xrgb	*prgbT;
@@ -621,7 +707,10 @@ SQColorsExtend(ClientPtr pClient, int size, xrgb *prgb)
 }
 
 void
-SQueryColorsReply(ClientPtr pClient, int size, xQueryColorsReply* pRep)
+SQueryColorsReply(pClient, size, pRep)
+    ClientPtr		pClient;
+    int			size;
+    xQueryColorsReply	*pRep;
 {
     register char n;
 
@@ -632,7 +721,10 @@ SQueryColorsReply(ClientPtr pClient, int size, xQueryColorsReply* pRep)
 }
 
 void
-SLookupColorReply(ClientPtr pClient, int size, xLookupColorReply *pRep)
+SLookupColorReply(pClient, size, pRep)
+    ClientPtr		pClient;
+    int			size;
+    xLookupColorReply	*pRep;
 {
     register char n;
 
@@ -647,7 +739,10 @@ SLookupColorReply(ClientPtr pClient, int size, xLookupColorReply *pRep)
 }
 
 void
-SQueryBestSizeReply(ClientPtr pClient, int size, xQueryBestSizeReply *pRep)
+SQueryBestSizeReply(pClient, size, pRep)
+    ClientPtr		pClient;
+    int			size;
+    xQueryBestSizeReply	*pRep;
 {
     register char n;
 
@@ -658,7 +753,10 @@ SQueryBestSizeReply(ClientPtr pClient, int size, xQueryBestSizeReply *pRep)
 }
 
 void
-SListExtensionsReply(ClientPtr pClient, int size, xListExtensionsReply *pRep)
+SListExtensionsReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xListExtensionsReply	*pRep;
 {
     register char n;
 
@@ -668,8 +766,10 @@ SListExtensionsReply(ClientPtr pClient, int size, xListExtensionsReply *pRep)
 }
 
 void
-SGetKeyboardMappingReply(ClientPtr pClient, int size,
-                         xGetKeyboardMappingReply *pRep)
+SGetKeyboardMappingReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xGetKeyboardMappingReply	*pRep;
 {
     register char n;
 
@@ -679,8 +779,10 @@ SGetKeyboardMappingReply(ClientPtr pClient, int size,
 }
 
 void
-SGetPointerMappingReply(ClientPtr pClient, int size,
-                        xGetPointerMappingReply *pRep)
+SGetPointerMappingReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xGetPointerMappingReply	*pRep;
 {
     register char n;
 
@@ -690,8 +792,10 @@ SGetPointerMappingReply(ClientPtr pClient, int size,
 }
 
 void
-SGetModifierMappingReply(ClientPtr pClient, int size,
-                         xGetModifierMappingReply *pRep)
+SGetModifierMappingReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xGetModifierMappingReply	*pRep;
 {
     register char n;
 
@@ -701,7 +805,10 @@ SGetModifierMappingReply(ClientPtr pClient, int size,
 }
 
 void
-SGetKeyboardControlReply(ClientPtr pClient, int size, xGetKeyboardControlReply *pRep)
+SGetKeyboardControlReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xGetKeyboardControlReply	*pRep;
 {
     register char n;
 
@@ -714,7 +821,10 @@ SGetKeyboardControlReply(ClientPtr pClient, int size, xGetKeyboardControlReply *
 }
 
 void
-SGetPointerControlReply(ClientPtr pClient, int size, xGetPointerControlReply *pRep)
+SGetPointerControlReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xGetPointerControlReply	*pRep;
 {
     register char n;
 
@@ -726,7 +836,10 @@ SGetPointerControlReply(ClientPtr pClient, int size, xGetPointerControlReply *pR
 }
 
 void
-SGetScreenSaverReply(ClientPtr pClient, int size, xGetScreenSaverReply *pRep)
+SGetScreenSaverReply(pClient, size, pRep)
+    ClientPtr			pClient;
+    int				size;
+    xGetScreenSaverReply	*pRep;
 {
     register char n;
 
@@ -737,7 +850,10 @@ SGetScreenSaverReply(ClientPtr pClient, int size, xGetScreenSaverReply *pRep)
 }
 
 void
-SLHostsExtend(ClientPtr pClient, int size, char *buf)
+SLHostsExtend(pClient, size, buf)
+    ClientPtr		pClient;
+    int			size;
+    char		*buf;
 {
     char *bufT = buf;
     char *endbuf = buf + size;
@@ -752,7 +868,10 @@ SLHostsExtend(ClientPtr pClient, int size, char *buf)
 }
 
 void
-SListHostsReply(ClientPtr pClient, int size, xListHostsReply *pRep)
+SListHostsReply(pClient, size, pRep)
+    ClientPtr		pClient;
+    int			size;
+    xListHostsReply	*pRep;
 {
     register char n;
 
@@ -765,7 +884,8 @@ SListHostsReply(ClientPtr pClient, int size, xListHostsReply *pRep)
 
 
 void
-SErrorEvent(xError *from, xError *to)
+SErrorEvent(from, to)
+    xError	*from, *to;
 {
     to->type = X_Error;
     to->errorCode = from->errorCode;
@@ -776,7 +896,8 @@ SErrorEvent(xError *from, xError *to)
 }
 
 void
-SKeyButtonPtrEvent(xEvent *from, xEvent *to)
+SKeyButtonPtrEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     to->u.u.detail = from->u.u.detail;
@@ -804,7 +925,8 @@ SKeyButtonPtrEvent(xEvent *from, xEvent *to)
 }
 
 void
-SEnterLeaveEvent(xEvent *from, xEvent *to)
+SEnterLeaveEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     to->u.u.detail = from->u.u.detail;
@@ -823,7 +945,8 @@ SEnterLeaveEvent(xEvent *from, xEvent *to)
 }
 
 void
-SFocusEvent(xEvent *from, xEvent *to)
+SFocusEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     to->u.u.detail = from->u.u.detail;
@@ -833,7 +956,8 @@ SFocusEvent(xEvent *from, xEvent *to)
 }
 
 void
-SExposeEvent(xEvent *from, xEvent *to)
+SExposeEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -846,7 +970,8 @@ SExposeEvent(xEvent *from, xEvent *to)
 }
 
 void
-SGraphicsExposureEvent(xEvent *from, xEvent *to)
+SGraphicsExposureEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -869,7 +994,8 @@ SGraphicsExposureEvent(xEvent *from, xEvent *to)
 }
 
 void
-SNoExposureEvent(xEvent *from, xEvent *to)
+SNoExposureEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -879,7 +1005,8 @@ SNoExposureEvent(xEvent *from, xEvent *to)
 }
 
 void
-SVisibilityEvent(xEvent *from, xEvent *to)
+SVisibilityEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -888,7 +1015,8 @@ SVisibilityEvent(xEvent *from, xEvent *to)
 }
 
 void
-SCreateNotifyEvent(xEvent *from, xEvent *to)
+SCreateNotifyEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -904,7 +1032,8 @@ SCreateNotifyEvent(xEvent *from, xEvent *to)
 }
 
 void
-SDestroyNotifyEvent(xEvent *from, xEvent *to)
+SDestroyNotifyEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -913,7 +1042,8 @@ SDestroyNotifyEvent(xEvent *from, xEvent *to)
 }
 
 void
-SUnmapNotifyEvent(xEvent *from, xEvent *to)
+SUnmapNotifyEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -923,7 +1053,8 @@ SUnmapNotifyEvent(xEvent *from, xEvent *to)
 }
 
 void
-SMapNotifyEvent(xEvent *from, xEvent *to)
+SMapNotifyEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -933,7 +1064,8 @@ SMapNotifyEvent(xEvent *from, xEvent *to)
 }
 
 void
-SMapRequestEvent(xEvent *from, xEvent *to)
+SMapRequestEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -942,7 +1074,8 @@ SMapRequestEvent(xEvent *from, xEvent *to)
 }
 
 void
-SReparentEvent(xEvent *from, xEvent *to)
+SReparentEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -955,7 +1088,8 @@ SReparentEvent(xEvent *from, xEvent *to)
 }
 
 void
-SConfigureNotifyEvent(xEvent *from, xEvent *to)
+SConfigureNotifyEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -976,7 +1110,8 @@ SConfigureNotifyEvent(xEvent *from, xEvent *to)
 }
 
 void
-SConfigureRequestEvent(xEvent *from, xEvent *to)
+SConfigureRequestEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     to->u.u.detail = from->u.u.detail;  /* actually stack-mode */
@@ -1001,7 +1136,8 @@ SConfigureRequestEvent(xEvent *from, xEvent *to)
 
 
 void
-SGravityEvent(xEvent *from, xEvent *to)
+SGravityEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -1012,7 +1148,8 @@ SGravityEvent(xEvent *from, xEvent *to)
 }
 
 void
-SResizeRequestEvent(xEvent *from, xEvent *to)
+SResizeRequestEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -1022,7 +1159,8 @@ SResizeRequestEvent(xEvent *from, xEvent *to)
 }
 
 void
-SCirculateEvent(xEvent *from, xEvent *to)
+SCirculateEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     to->u.u.detail = from->u.u.detail;
@@ -1034,7 +1172,8 @@ SCirculateEvent(xEvent *from, xEvent *to)
 }
 
 void
-SPropertyEvent(xEvent *from, xEvent *to)
+SPropertyEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -1045,7 +1184,8 @@ SPropertyEvent(xEvent *from, xEvent *to)
 }
 
 void
-SSelectionClearEvent(xEvent *from, xEvent *to)
+SSelectionClearEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -1055,7 +1195,8 @@ SSelectionClearEvent(xEvent *from, xEvent *to)
 }
 
 void
-SSelectionRequestEvent(xEvent *from, xEvent *to)
+SSelectionRequestEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -1073,7 +1214,8 @@ SSelectionRequestEvent(xEvent *from, xEvent *to)
 }
 
 void
-SSelectionNotifyEvent(xEvent *from, xEvent *to)
+SSelectionNotifyEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -1089,7 +1231,8 @@ SSelectionNotifyEvent(xEvent *from, xEvent *to)
 }
 
 void
-SColormapEvent(xEvent *from, xEvent *to)
+SColormapEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -1100,7 +1243,8 @@ SColormapEvent(xEvent *from, xEvent *to)
 }
 
 void
-SMappingEvent(xEvent *from, xEvent *to)
+SMappingEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     cpswaps(from->u.u.sequenceNumber, to->u.u.sequenceNumber);
@@ -1111,7 +1255,8 @@ SMappingEvent(xEvent *from, xEvent *to)
 }
 
 void
-SClientMessageEvent(xEvent *from, xEvent *to)
+SClientMessageEvent(from, to)
+    xEvent	*from, *to;
 {
     to->u.u.type = from->u.u.type;
     to->u.u.detail = from->u.u.detail;  /* actually format */
@@ -1162,7 +1307,8 @@ SClientMessageEvent(xEvent *from, xEvent *to)
 }
 
 void
-SKeymapNotifyEvent(xEvent *from, xEvent *to)
+SKeymapNotifyEvent(from, to)
+    xEvent	*from, *to;
 {
     /* Keymap notify events are special; they have no
        sequence number field, and contain entirely 8-bit data */
@@ -1170,47 +1316,47 @@ SKeymapNotifyEvent(xEvent *from, xEvent *to)
 }
 
 void
-SwapConnSetupInfo(
-    char 	*pInfo,
-    char 	*pInfoT
-)
+SwapConnSetupInfo(pInfo, pInfoTBase)
+    char 		*pInfo;
+    char 		*pInfoTBase;
 {
     int		i, j, k;
+    ScreenPtr	pScreen;
+    DepthPtr	pDepth;
+    char	*pInfoT;
     xConnSetup	*pConnSetup = (xConnSetup *)pInfo;
-    xDepth	*depth;
-    xWindowRoot *root;
 
+    pInfoT = pInfoTBase;
     SwapConnSetup(pConnSetup, (xConnSetup *)pInfoT);
     pInfo += sizeof(xConnSetup);
     pInfoT += sizeof(xConnSetup);
 
     /* Copy the vendor string */
     i = (pConnSetup->nbytesVendor + 3) & ~3;
-    memcpy(pInfoT, pInfo, i);
+    memmove(pInfoT, pInfo, i);
     pInfo += i;
     pInfoT += i;
 
     /* The Pixmap formats don't need to be swapped, just copied. */
-    i = sizeof(xPixmapFormat) * pConnSetup->numFormats;
-    memcpy(pInfoT, pInfo, i);
+    i = sizeof(xPixmapFormat) * screenInfo.numPixmapFormats;
+    memmove(pInfoT, pInfo, i);
     pInfo += i;
     pInfoT += i;
 
-    for(i = 0; i < pConnSetup->numRoots; i++)
+    for(i = 0; i < screenInfo.numScreens; i++)
     {
-	root = (xWindowRoot*)pInfo;
-	SwapWinRoot(root, (xWindowRoot *)pInfoT);
+	pScreen = screenInfo.screens[i];
+	SwapWinRoot((xWindowRoot *)pInfo, (xWindowRoot *)pInfoT);
 	pInfo += sizeof(xWindowRoot);
 	pInfoT += sizeof(xWindowRoot);
-
-	for(j = 0; j < root->nDepths; j++)
+	pDepth = pScreen->allowedDepths;
+	for(j = 0; j < pScreen->numDepths; j++, pDepth++)
 	{
-	    depth = (xDepth*)pInfo;
-            ((xDepth *)pInfoT)->depth = depth->depth;
-	    cpswaps(depth->nVisuals, ((xDepth *)pInfoT)->nVisuals);
+            ((xDepth *)pInfoT)->depth = ((xDepth *)pInfo)->depth;
+	    cpswaps(((xDepth *)pInfo)->nVisuals, ((xDepth *)pInfoT)->nVisuals);
 	    pInfo += sizeof(xDepth);
 	    pInfoT += sizeof(xDepth);
-	    for(k = 0; k < depth->nVisuals; k++)
+	    for(k = 0; k < pDepth->numVids; k++)
 	    {
 		SwapVisual((xVisualType *)pInfo, (xVisualType *)pInfoT);
 		pInfo += sizeof(xVisualType);
@@ -1222,7 +1368,10 @@ SwapConnSetupInfo(
 
 
 void
-WriteSConnectionInfo(ClientPtr pClient, unsigned long size, char *pInfo)
+WriteSConnectionInfo(pClient, size, pInfo)
+    ClientPtr		pClient;
+    unsigned long	size;
+    char 		*pInfo;
 {
     char	*pInfoTBase;
 
@@ -1238,7 +1387,8 @@ WriteSConnectionInfo(ClientPtr pClient, unsigned long size, char *pInfo)
 }
 
 void
-SwapConnSetup(xConnSetup *pConnSetup, xConnSetup *pConnSetupT)
+SwapConnSetup(pConnSetup, pConnSetupT)
+    xConnSetup 	*pConnSetup, *pConnSetupT;
 {
     cpswapl(pConnSetup->release, pConnSetupT->release);
     cpswapl(pConnSetup->ridBase, pConnSetupT->ridBase);
@@ -1257,7 +1407,8 @@ SwapConnSetup(xConnSetup *pConnSetup, xConnSetup *pConnSetupT)
 }
 
 void
-SwapWinRoot(xWindowRoot *pRoot, xWindowRoot *pRootT)
+SwapWinRoot(pRoot, pRootT)
+    xWindowRoot	*pRoot, *pRootT;
 {
     cpswapl(pRoot->windowId, pRootT->windowId);
     cpswapl(pRoot->defaultColormap, pRootT->defaultColormap);
@@ -1278,7 +1429,8 @@ SwapWinRoot(xWindowRoot *pRoot, xWindowRoot *pRootT)
 }
 
 void
-SwapVisual(xVisualType *pVis, xVisualType *pVisT)
+SwapVisual(pVis, pVisT)
+    xVisualType 	*pVis, *pVisT;
 {
     cpswapl(pVis->visualID, pVisT->visualID);
     pVisT->class = pVis->class;
@@ -1290,7 +1442,9 @@ SwapVisual(xVisualType *pVis, xVisualType *pVisT)
 }
 
 void
-SwapConnSetupPrefix(xConnSetupPrefix *pcspFrom, xConnSetupPrefix *pcspTo)
+SwapConnSetupPrefix(pcspFrom, pcspTo)
+    xConnSetupPrefix	*pcspFrom;
+    xConnSetupPrefix	*pcspTo;
 {
     pcspTo->success = pcspFrom->success;
     pcspTo->lengthReason = pcspFrom->lengthReason;
@@ -1300,7 +1454,9 @@ SwapConnSetupPrefix(xConnSetupPrefix *pcspFrom, xConnSetupPrefix *pcspTo)
 }
 
 void
-WriteSConnSetupPrefix(ClientPtr pClient, xConnSetupPrefix *pcsp)
+WriteSConnSetupPrefix(pClient, pcsp)
+    ClientPtr		pClient;
+    xConnSetupPrefix	*pcsp;
 {
     xConnSetupPrefix	cspT;
 

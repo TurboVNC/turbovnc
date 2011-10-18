@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/dix/dixutils.c,v 3.13 2003/01/12 02:44:26 dawes Exp $ */
 /***********************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -82,24 +82,25 @@ Author:  Adobe Systems Incorporated
 
 */
 
-/* $Xorg: dixutils.c,v 1.4 2001/02/09 02:04:40 xorgcvs Exp $ */
+/* $TOG: dixutils.c /main/33 1997/05/22 10:02:20 kaleb $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
 
-#include <X11/X.h>
-#include <X11/Xmd.h>
+
+
+/* $XFree86: xc/programs/Xserver/dix/dixutils.c,v 3.1.2.1 1997/05/23 12:19:35 dawes Exp $ */
+
+#include "X.h"
+#include "Xmd.h"
 #include "misc.h"
 #include "windowstr.h"
 #include "dixstruct.h"
 #include "pixmapstr.h"
 #include "scrnintstr.h"
 #define  XK_LATIN1
-#include <X11/keysymdef.h>
+#include "keysymdef.h"
 #ifdef XCSECURITY
 #define _SECURITY_SERVER
-#include <X11/extensions/security.h>
+#include "extensions/security.h"
 #endif
 
 /*
@@ -108,7 +109,8 @@ Author:  Adobe Systems Incorporated
  */
 
 int
-CompareTimeStamps(TimeStamp a, TimeStamp b)
+CompareTimeStamps(a, b)
+    TimeStamp a, b;
 {
     if (a.months < b.months)
 	return EARLIER;
@@ -127,7 +129,8 @@ CompareTimeStamps(TimeStamp a, TimeStamp b)
 
 #define HALFMONTH ((unsigned long) 1<<31)
 TimeStamp
-ClientTimeToServerTime(CARD32 c)
+ClientTimeToServerTime(c)
+     CARD32 c;
 {
     TimeStamp ts;
     if (c == CurrentTime)
@@ -154,49 +157,25 @@ ClientTimeToServerTime(CARD32 c)
  * beware of too-small buffers
  */
 
-static unsigned char
-ISOLatin1ToLower (unsigned char source)
-{
-    unsigned char   dest;
-    if ((source >= XK_A) && (source <= XK_Z))
-       dest = source + (XK_a - XK_A);
-    else if ((source >= XK_Agrave) && (source <= XK_Odiaeresis))
-       dest = source + (XK_agrave - XK_Agrave);
-    else if ((source >= XK_Ooblique) && (source <= XK_Thorn))
-       dest = source + (XK_oslash - XK_Ooblique);
-    else
-       dest = source;
-    return dest;
-}
-
-
 void
-CopyISOLatin1Lowered(unsigned char *dest, unsigned char *source, int length)
+CopyISOLatin1Lowered(dest, source, length)
+    register unsigned char *dest, *source;
+    int length;
 {
     register int i;
 
     for (i = 0; i < length; i++, source++, dest++)
-	*dest = ISOLatin1ToLower (*source);
-    *dest = '\0';
-}
-
-int
-CompareISOLatin1Lowered(unsigned char *s1, int s1len, 
-			unsigned char *s2, int s2len)
-{
-    unsigned char   c1, c2;
-    
-    for (;;) 
     {
-	/* note -- compare against zero so that -1 ignores len */
-	c1 = s1len-- ? *s1++ : '\0';
-	c2 = s2len-- ? *s2++ : '\0';
-	if (!c1 || 
-	    (c1 != c2 && 
-	     (c1 = ISOLatin1ToLower (c1)) != (c2 = ISOLatin1ToLower (c2))))
-	    break;
+	if ((*source >= XK_A) && (*source <= XK_Z))
+	    *dest = *source + (XK_a - XK_A);
+	else if ((*source >= XK_Agrave) && (*source <= XK_Odiaeresis))
+	    *dest = *source + (XK_agrave - XK_Agrave);
+	else if ((*source >= XK_Ooblique) && (*source <= XK_Thorn))
+	    *dest = *source + (XK_oslash - XK_Ooblique);
+	else
+	    *dest = *source;
     }
-    return (int) c1 - (int) c2;
+    *dest = '\0';
 }
 
 #ifdef XCSECURITY
@@ -210,7 +189,10 @@ CompareISOLatin1Lowered(unsigned char *s1, int s1len,
  */
 
 WindowPtr
-SecurityLookupWindow(XID rid, ClientPtr client, Mask access_mode)
+SecurityLookupWindow(rid, client, access_mode)
+    XID rid;
+    ClientPtr client;
+    Mask access_mode;
 {
     WindowPtr	pWin;
 
@@ -237,7 +219,10 @@ SecurityLookupWindow(XID rid, ClientPtr client, Mask access_mode)
 
 
 pointer
-SecurityLookupDrawable(XID rid, ClientPtr client, Mask access_mode)
+SecurityLookupDrawable(rid, client, access_mode)
+    XID rid;
+    ClientPtr client;
+    Mask access_mode;
 {
     register DrawablePtr pDraw;
 
@@ -260,13 +245,17 @@ SecurityLookupDrawable(XID rid, ClientPtr client, Mask access_mode)
  */
 
 WindowPtr
-LookupWindow(XID rid, ClientPtr client)
+LookupWindow(rid, client)
+    XID rid;
+    ClientPtr client;
 {
     return SecurityLookupWindow(rid, client, SecurityUnknownAccess);
 }
 
 pointer
-LookupDrawable(XID rid, ClientPtr client)
+LookupDrawable(rid, client)
+    XID rid;
+    ClientPtr client;
 {
     return SecurityLookupDrawable(rid, client, SecurityUnknownAccess);
 }
@@ -274,7 +263,9 @@ LookupDrawable(XID rid, ClientPtr client)
 #else /* not XCSECURITY */
 
 WindowPtr
-LookupWindow(XID rid, ClientPtr client)
+LookupWindow(rid, client)
+    XID rid;
+    ClientPtr client;
 {
     WindowPtr	pWin;
 
@@ -299,7 +290,9 @@ LookupWindow(XID rid, ClientPtr client)
 
 
 pointer
-LookupDrawable(XID rid, ClientPtr client)
+LookupDrawable(rid, client)
+    XID rid;
+    ClientPtr client;
 {
     register DrawablePtr pDraw;
 
@@ -316,7 +309,9 @@ LookupDrawable(XID rid, ClientPtr client)
 #endif /* XCSECURITY */
 
 ClientPtr
-LookupClient(XID rid, ClientPtr client)
+LookupClient(rid, client)
+    XID rid;
+    ClientPtr client;
 {
     pointer pRes = (pointer)SecurityLookupIDByClass(client, rid, RC_ANY,
 						    SecurityReadAccess);
@@ -331,11 +326,13 @@ LookupClient(XID rid, ClientPtr client)
 
 
 int
-AlterSaveSetForClient(ClientPtr client, WindowPtr pWin, unsigned mode,
-                      Bool toRoot, Bool remap)
+AlterSaveSetForClient(client, pWin, mode)
+    ClientPtr client;
+    WindowPtr pWin;
+    unsigned mode;
 {
     int numnow;
-    SaveSetElt *pTmp = NULL;
+    pointer *pTmp;
     int j;
 
     numnow = client->numSaved;
@@ -343,7 +340,7 @@ AlterSaveSetForClient(ClientPtr client, WindowPtr pWin, unsigned mode,
     if (numnow)
     {
 	pTmp = client->saveSet;
-	while ((j < numnow) && (SaveSetWindow(pTmp[j]) != (pointer)pWin))
+	while ((j < numnow) && (pTmp[j] != (pointer)pWin))
 	    j++;
     }
     if (mode == SetModeInsert)
@@ -351,14 +348,12 @@ AlterSaveSetForClient(ClientPtr client, WindowPtr pWin, unsigned mode,
 	if (j < numnow)         /* duplicate */
 	   return(Success);
 	numnow++;
-	pTmp = (SaveSetElt *)xrealloc(client->saveSet, sizeof(*pTmp) * numnow);
+	pTmp = (pointer *)xrealloc(client->saveSet, sizeof(pointer) * numnow);
 	if (!pTmp)
 	    return(BadAlloc);
 	client->saveSet = pTmp;
        	client->numSaved = numnow;
-	SaveSetAssignWindow(client->saveSet[numnow - 1], pWin);
-	SaveSetAssignToRoot(client->saveSet[numnow - 1], toRoot);
-	SaveSetAssignRemap(client->saveSet[numnow - 1], remap);
+	client->saveSet[numnow - 1] = (pointer)pWin;
 	return(Success);
     }
     else if ((mode == SetModeDelete) && (j < numnow))
@@ -371,14 +366,15 @@ AlterSaveSetForClient(ClientPtr client, WindowPtr pWin, unsigned mode,
 	numnow--;
         if (numnow)
 	{
-	    pTmp = (SaveSetElt *)xrealloc(client->saveSet, sizeof(*pTmp) * numnow);
+    	    pTmp = (pointer *)xrealloc(client->saveSet,
+				       sizeof(pointer) * numnow);
 	    if (pTmp)
 		client->saveSet = pTmp;
 	}
         else
         {
             xfree(client->saveSet);
-	    client->saveSet = (SaveSetElt *)NULL;
+	    client->saveSet = (pointer *)NULL;
 	}
 	client->numSaved = numnow;
 	return(Success);
@@ -387,7 +383,8 @@ AlterSaveSetForClient(ClientPtr client, WindowPtr pWin, unsigned mode,
 }
 
 void
-DeleteWindowFromAnySaveSet(WindowPtr pWin)
+DeleteWindowFromAnySaveSet(pWin)
+    WindowPtr pWin;
 {
     register int i;
     register ClientPtr client;
@@ -396,7 +393,7 @@ DeleteWindowFromAnySaveSet(WindowPtr pWin)
     {    
 	client = clients[i];
 	if (client && client->numSaved)
-	    (void)AlterSaveSetForClient(client, pWin, SetModeDelete, FALSE, TRUE);
+	    (void)AlterSaveSetForClient(client, pWin, SetModeDelete);
     }
 }
 
@@ -406,7 +403,12 @@ DeleteWindowFromAnySaveSet(WindowPtr pWin)
  * procedure to call than to check if there's a procedure 
  */
 void
-NoopDDA(void)
+NoopDDA(
+#undef NeedVarargsPrototypes
+#if NeedVarargsPrototypes
+    void* f, ...
+#endif
+)
 {
 }
 
@@ -423,13 +425,11 @@ static int		sizeHandlers;
 static Bool		inHandler;
 static Bool		handlerDeleted;
 
-/**
- * 
- *  \param pTimeout   DIX doesn't want to know how OS represents time
- *  \param pReadMask  nor how it represents the det of descriptors
- */
+/* called from the OS layer */
 void
-BlockHandler(pointer pTimeout, pointer pReadmask)
+BlockHandler(pTimeout, pReadmask)
+pointer	pTimeout;	/* DIX doesn't want to know how OS represents time */
+pointer pReadmask;	/* nor how it represents the set of descriptors */
 {
     register int i, j;
     
@@ -457,13 +457,10 @@ BlockHandler(pointer pTimeout, pointer pReadmask)
     --inHandler;
 }
 
-/**
- *
- *  \param result    32 bits of undefined result from the wait
- *  \param pReadmask the resulting descriptor mask
- */
 void
-WakeupHandler(int result, pointer pReadmask)
+WakeupHandler(result, pReadmask)
+int	result;	/* 32 bits of undefined result from the wait */
+pointer pReadmask;	/* the resulting descriptor mask */
 {
     register int i, j;
 
@@ -491,14 +488,15 @@ WakeupHandler(int result, pointer pReadmask)
     --inHandler;
 }
 
-/**
- * Reentrant with BlockHandler and WakeupHandler, except wakeup won't
+/* Reentrant with BlockHandler and WakeupHandler, except wakeup won't
  * get called until next time
  */
+
 Bool
-RegisterBlockAndWakeupHandlers (BlockHandlerProcPtr blockHandler, 
-                                WakeupHandlerProcPtr wakeupHandler, 
-                                pointer blockData)
+RegisterBlockAndWakeupHandlers (blockHandler, wakeupHandler, blockData)
+    BlockHandlerProcPtr blockHandler;
+    WakeupHandlerProcPtr wakeupHandler;
+    pointer blockData;
 {
     BlockHandlerPtr new;
 
@@ -520,9 +518,10 @@ RegisterBlockAndWakeupHandlers (BlockHandlerProcPtr blockHandler,
 }
 
 void
-RemoveBlockAndWakeupHandlers (BlockHandlerProcPtr blockHandler, 
-                              WakeupHandlerProcPtr wakeupHandler, 
-                              pointer blockData)
+RemoveBlockAndWakeupHandlers (blockHandler, wakeupHandler, blockData)
+    BlockHandlerProcPtr blockHandler;
+    WakeupHandlerProcPtr wakeupHandler;
+    pointer blockData;
 {
     int	    i;
 
@@ -564,7 +563,7 @@ WorkQueuePtr		workQueue;
 static WorkQueuePtr	*workQueueLast = &workQueue;
 
 void
-ProcessWorkQueue(void)
+ProcessWorkQueue()
 {
     WorkQueuePtr    q, *p;
 
@@ -575,7 +574,7 @@ ProcessWorkQueue(void)
      * they will be called again.  This must be reentrant with
      * QueueWorkProc.
      */
-    while ((q = *p))
+    while (q = *p)
     {
 	if ((*q->function) (q->client, q->closure))
 	{
@@ -592,12 +591,12 @@ ProcessWorkQueue(void)
 }
 
 void
-ProcessWorkQueueZombies(void)
+ProcessWorkQueueZombies()
 {
     WorkQueuePtr    q, *p;
 
     p = &workQueue;
-    while ((q = *p))
+    while (q = *p)
     {
 	if (q->client && q->client->clientGone)
 	{
@@ -615,9 +614,22 @@ ProcessWorkQueueZombies(void)
 }
 
 Bool
+#if NeedFunctionPrototypes
 QueueWorkProc (
-    Bool (*function)(ClientPtr /* pClient */, pointer /* closure */),
-    ClientPtr client, pointer closure)
+    Bool	(*function)(
+#if NeedNestedPrototypes
+		ClientPtr	/* pClient */,
+		pointer		/* closure */
+#endif
+		),
+    ClientPtr	client,
+    pointer	closure)
+#else
+QueueWorkProc (function, client, closure)
+    Bool	(*function)();
+    ClientPtr	client;
+    pointer	closure;
+#endif
 {
     WorkQueuePtr    q;
 
@@ -651,7 +663,10 @@ typedef struct _SleepQueue {
 static SleepQueuePtr	sleepQueue = NULL;
 
 Bool
-ClientSleep (ClientPtr client, ClientSleepProcPtr function, pointer closure)
+ClientSleep (client, function, closure)
+    ClientPtr	client;
+    ClientSleepProcPtr function;
+    pointer	closure;
 {
     SleepQueuePtr   q;
 
@@ -669,7 +684,8 @@ ClientSleep (ClientPtr client, ClientSleepProcPtr function, pointer closure)
 }
 
 Bool
-ClientSignal (ClientPtr client)
+ClientSignal (client)
+    ClientPtr	client;
 {
     SleepQueuePtr   q;
 
@@ -682,7 +698,8 @@ ClientSignal (ClientPtr client)
 }
 
 void
-ClientWakeup (ClientPtr client)
+ClientWakeup (client)
+    ClientPtr	client;
 {
     SleepQueuePtr   q, *prev;
 
@@ -694,11 +711,7 @@ ClientWakeup (ClientPtr client)
 	    *prev = q->next;
 	    xfree (q);
 	    if (client->clientGone)
-		/* Oops -- new zombie cleanup code ensures this only
-		 * happens from inside CloseDownClient; don't want to
-		 * recurse here...
-		 */
-		/* CloseDownClient(client) */;
+		CloseDownClient(client);
 	    else
 		AttendClient (client);
 	    break;
@@ -708,7 +721,8 @@ ClientWakeup (ClientPtr client)
 }
 
 Bool
-ClientIsAsleep (ClientPtr client)
+ClientIsAsleep (client)
+    ClientPtr	client;
 {
     SleepQueuePtr   q;
 
@@ -728,10 +742,17 @@ static int numCallbackListsToCleanup = 0;
 static CallbackListPtr **listsToCleanup = NULL;
 
 static Bool 
+#if NeedFunctionPrototypes
 _AddCallback(
     CallbackListPtr *pcbl,
     CallbackProcPtr callback,
     pointer         data)
+#else
+_AddCallback(pcbl, callback, data)
+    CallbackListPtr *pcbl;
+    CallbackProcPtr callback;
+    pointer         data;
+#endif
 {
     CallbackPtr     cbr;
 
@@ -747,10 +768,17 @@ _AddCallback(
 }
 
 static Bool 
+#if NeedFunctionPrototypes
 _DeleteCallback(
     CallbackListPtr *pcbl,
     CallbackProcPtr callback,
     pointer         data)
+#else
+_DeleteCallback(pcbl, callback, data)
+    CallbackListPtr *pcbl;
+    CallbackProcPtr callback;
+    pointer         data;
+#endif
 {
     CallbackListPtr cbl = *pcbl;
     CallbackPtr     cbr, pcbr;
@@ -783,9 +811,15 @@ _DeleteCallback(
 }
 
 static void 
+#if NeedFunctionPrototypes
 _CallCallbacks(
     CallbackListPtr    *pcbl,
     pointer	    call_data)
+#else
+_CallCallbacks(pcbl, call_data)
+    CallbackListPtr    *pcbl;
+    pointer	    call_data;
+#endif
 {
     CallbackListPtr cbl = *pcbl;
     CallbackPtr     cbr, pcbr;
@@ -840,8 +874,13 @@ _CallCallbacks(
 }
 
 static void
+#if NeedFunctionPrototypes
 _DeleteCallbackList(
     CallbackListPtr    *pcbl)
+#else
+_DeleteCallbackList(pcbl)
+    CallbackListPtr    *pcbl;
+#endif
 {
     CallbackListPtr cbl = *pcbl;
     CallbackPtr     cbr, nextcbr;
@@ -882,7 +921,9 @@ static CallbackFuncsRec default_cbfuncs =
 /* ===== Public Procedures ===== */
 
 Bool
-CreateCallbackList(CallbackListPtr *pcbl, CallbackFuncsPtr cbfuncs)
+CreateCallbackList(pcbl, cbfuncs)
+    CallbackListPtr  *pcbl;
+    CallbackFuncsPtr cbfuncs;
 {
     CallbackListPtr  cbl;
     int i;
@@ -914,7 +955,10 @@ CreateCallbackList(CallbackListPtr *pcbl, CallbackFuncsPtr cbfuncs)
 }
 
 Bool 
-AddCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, pointer data)
+AddCallback(pcbl, callback, data)
+    CallbackListPtr *pcbl;
+    CallbackProcPtr callback;
+    pointer         data;
 {
     if (!pcbl) return FALSE;
     if (!*pcbl)
@@ -926,21 +970,27 @@ AddCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, pointer data)
 }
 
 Bool 
-DeleteCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, pointer data)
+DeleteCallback(pcbl, callback, data)
+    CallbackListPtr *pcbl;
+    CallbackProcPtr callback;
+    pointer         data;
 {
     if (!pcbl || !*pcbl) return FALSE;
     return ((*(*pcbl)->funcs.DeleteCallback) (pcbl, callback, data));
 }
 
 void 
-CallCallbacks(CallbackListPtr *pcbl, pointer call_data)
+CallCallbacks(pcbl, call_data)
+    CallbackListPtr    *pcbl;
+    pointer	    call_data;
 {
     if (!pcbl || !*pcbl) return;
     (*(*pcbl)->funcs.CallCallbacks) (pcbl, call_data);
 }
 
 void
-DeleteCallbackList(CallbackListPtr *pcbl)
+DeleteCallbackList(pcbl)
+    CallbackListPtr    *pcbl;
 {
     if (!pcbl || !*pcbl) return;
     (*(*pcbl)->funcs.DeleteCallbackList) (pcbl);

@@ -1,5 +1,4 @@
-/* $Xorg: mivaltree.c,v 1.4 2001/02/09 02:05:22 xorgcvs Exp $ */
-/* $XdotOrg: xc/programs/Xserver/mi/mivaltree.c,v 1.6 2005/07/03 07:01:51 daniels Exp $ */
+/* $XConsortium: mivaltree.c,v 5.33 94/04/17 20:27:58 dpw Exp $ */
 /*
  * mivaltree.c --
  *	Functions for recalculating window clip lists. Main function
@@ -52,37 +51,6 @@ in this Software without prior written authorization from The Open Group.
  * 
  ******************************************************************/
 
-/* The panoramix components contained the following notice */
-/*****************************************************************
-
-Copyright (c) 1991, 1997 Digital Equipment Corporation, Maynard, Massachusetts.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software.
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-DIGITAL EQUIPMENT CORPORATION BE LIABLE FOR ANY CLAIM, DAMAGES, INCLUDING,
-BUT NOT LIMITED TO CONSEQUENTIAL OR INCIDENTAL DAMAGES, OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-Except as contained in this notice, the name of Digital Equipment Corporation
-shall not be used in advertising or otherwise to promote the sale, use or other
-dealings in this Software without prior written authorization from Digital
-Equipment Corporation.
-
-******************************************************************/
-
-/* $XFree86: xc/programs/Xserver/mi/mivaltree.c,v 1.9tsi Exp $ */
-
  /* 
   * Aug '86: Susan Angebranndt -- original code
   * July '87: Adam de Boor -- substantially modified and commented
@@ -92,11 +60,8 @@ Equipment Corporation.
   *		Bob Scheifler -- avoid miComputeClips for unmapped windows,
   *				 valdata changes
   */
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
 
-#include    <X11/X.h>
+#include    "X.h"
 #include    "scrnintstr.h"
 #include    "validate.h"
 #include    "windowstr.h"
@@ -104,13 +69,10 @@ Equipment Corporation.
 #include    "regionstr.h"
 #include    "mivalidate.h"
 
-#include    "globals.h"
-
 #ifdef SHAPE
 /*
  * Compute the visibility of a shaped window
  */
-int
 miShapedWindowIn (pScreen, universe, bounding, rect, x, y)
     ScreenPtr	pScreen;
     RegionPtr	universe, bounding;
@@ -171,23 +133,11 @@ miShapedWindowIn (pScreen, universe, bounding, rect, x, y)
 }
 #endif
 
-static GetRedirectBorderClipProcPtr	miGetRedirectBorderClipProc;
-static SetRedirectBorderClipProcPtr	miSetRedirectBorderClipProc;
-
-void
-miRegisterRedirectBorderClipProc (SetRedirectBorderClipProcPtr setBorderClip,
-				  GetRedirectBorderClipProcPtr getBorderClip)
-{
-    miSetRedirectBorderClipProc = setBorderClip;
-    miGetRedirectBorderClipProc = getBorderClip;
-}
-
 #define HasParentRelativeBorder(w) (!(w)->borderIsPixel && \
 				    HasBorder(w) && \
 				    (w)->backgroundState == ParentRelative)
 
-
-/*
+/*-
  *-----------------------------------------------------------------------
  * miComputeClips --
  *	Recompute the clipList, borderClip, exposed and borderExposed
@@ -203,13 +153,14 @@ miRegisterRedirectBorderClipProc (SetRedirectBorderClipProcPtr setBorderClip,
  *
  *-----------------------------------------------------------------------
  */
+
 static void
-miComputeClips (
-    register WindowPtr	pParent,
-    register ScreenPtr	pScreen,
-    register RegionPtr	universe,
-    VTKind		kind,
-    RegionPtr		exposed ) /* for intermediate calculations */
+miComputeClips (pParent, pScreen, universe, kind, exposed)
+    register WindowPtr	pParent;
+    register ScreenPtr	pScreen;
+    register RegionPtr	universe;
+    VTKind		kind;
+    RegionPtr		exposed; /* for intermediate calculations */
 {
     int			dx,
 			dy;
@@ -221,6 +172,7 @@ miComputeClips (
     Bool		overlap;
     RegionPtr		borderVisible;
     Bool		resized;
+    
     /*
      * Figure out the new visibility of this window.
      * The extent of the universe should be the same as the extent of
@@ -229,6 +181,7 @@ miComputeClips (
      * completely). If the window is completely obscured, none of the
      * universe will cover the rectangle.
      */
+
     borderSize.x1 = pParent->drawable.x - wBorderWidth(pParent);
     borderSize.y1 = pParent->drawable.y - wBorderWidth(pParent);
     dx = (int) pParent->drawable.x + (int) pParent->drawable.width + wBorderWidth(pParent);
@@ -279,18 +232,6 @@ miComputeClips (
 	((pParent->eventMask | wOtherEventMasks(pParent)) & VisibilityChangeMask))
 	SendVisibilityNotify(pParent);
 
-#ifdef COMPOSITE
-    /*
-     * In redirected drawing case, reset universe to borderSize
-     */
-    if (pParent->redirectDraw)
-    {
-	if (miSetRedirectBorderClipProc)
-	    (*miSetRedirectBorderClipProc) (pParent, universe);
-	REGION_COPY(pScreen, universe, &pParent->borderSize);
-    }
-#endif
-
     dx = pParent->drawable.x - pParent->valdata->before.oldAbsCorner.x;
     dy = pParent->drawable.y - pParent->valdata->before.oldAbsCorner.y;
 
@@ -326,8 +267,9 @@ miComputeClips (
 		    }
 		    if (pChild->valdata)
 		    {
-			REGION_NULL(pScreen,
-				    &pChild->valdata->after.borderExposed);
+			REGION_INIT(pScreen, 
+				    &pChild->valdata->after.borderExposed,
+				    NullBox, 0);
 			if (HasParentRelativeBorder(pChild))
 			{
 			    REGION_SUBTRACT(pScreen,
@@ -335,7 +277,8 @@ miComputeClips (
 					 &pChild->borderClip,
 					 &pChild->winSize);
 			}
-			REGION_NULL(pScreen, &pChild->valdata->after.exposed);
+			REGION_INIT( pScreen, &pChild->valdata->after.exposed,
+						 NullBox, 0);
 		    }
 		    if (pChild->firstChild)
 		    {
@@ -376,8 +319,8 @@ miComputeClips (
 
     borderVisible = pParent->valdata->before.borderVisible;
     resized = pParent->valdata->before.resized;
-    REGION_NULL(pScreen, &pParent->valdata->after.borderExposed);
-    REGION_NULL(pScreen, &pParent->valdata->after.exposed);
+    REGION_INIT( pScreen, &pParent->valdata->after.borderExposed, NullBox, 0);
+    REGION_INIT( pScreen, &pParent->valdata->after.exposed, NullBox, 0);
 
     /*
      * Since the borderClip must not be clipped by the children, we do
@@ -427,8 +370,8 @@ miComputeClips (
     
     if ((pChild = pParent->firstChild) && pParent->mapped)
     {
-	REGION_NULL(pScreen, &childUniverse);
-	REGION_NULL(pScreen, &childUnion);
+	REGION_INIT(pScreen, &childUniverse, NullBox, 0);
+	REGION_INIT(pScreen, &childUnion, NullBox, 0);
 	if ((pChild->drawable.y < pParent->lastChild->drawable.y) ||
 	    ((pChild->drawable.y == pParent->lastChild->drawable.y) &&
 	     (pChild->drawable.x < pParent->lastChild->drawable.x)))
@@ -537,8 +480,8 @@ miComputeClips (
 }
 
 static void
-miTreeObscured(
-    register WindowPtr pParent )
+miTreeObscured(pParent)
+    register WindowPtr pParent;
 {
     register WindowPtr pChild;
     register int    oldVis;
@@ -566,7 +509,7 @@ miTreeObscured(
     }
 }
 
-/*
+/*-
  *-----------------------------------------------------------------------
  * miValidateTree --
  *	Recomputes the clip list for pParent and all its inferiors.
@@ -622,8 +565,8 @@ miValidateTree (pParent, pChild, kind)
     if (pChild == NullWindow)
 	pChild = pParent->firstChild;
 
-    REGION_NULL(pScreen, &childClip);
-    REGION_NULL(pScreen, &exposed);
+    REGION_INIT(pScreen, &childClip, NullBox, 0);
+    REGION_INIT(pScreen, &exposed, NullBox, 0);
 
     /*
      * compute the area of the parent window occupied
@@ -631,7 +574,7 @@ miValidateTree (pParent, pChild, kind)
      * is the area which can be divied up among the marked
      * children in their new configuration.
      */
-    REGION_NULL(pScreen, &totalClip);
+    REGION_INIT(pScreen, &totalClip, NullBox, 0);
     viewvals = 0;
     if (REGION_BROKEN (pScreen, &pParent->clipList) &&
 	!REGION_BROKEN (pScreen, &pParent->borderClip))
@@ -667,12 +610,7 @@ miValidateTree (pParent, pChild, kind)
 	    {
 		if (pWin->valdata)
 		{
-		    RegionPtr	pBorderClip = &pWin->borderClip;
-#ifdef COMPOSITE
-		    if (pWin->redirectDraw && miGetRedirectBorderClipProc)
-			pBorderClip = (*miGetRedirectBorderClipProc)(pWin);
-#endif
-		    REGION_APPEND( pScreen, &totalClip, pBorderClip );
+		    REGION_APPEND( pScreen, &totalClip, &pWin->borderClip);
 		    if (pWin->viewable)
 			viewvals++;
 		}
@@ -686,12 +624,7 @@ miValidateTree (pParent, pChild, kind)
 	    {
 		if (pWin->valdata)
 		{
-		    RegionPtr	pBorderClip = &pWin->borderClip;
-#ifdef COMPOSITE
-		    if (pWin->redirectDraw && miGetRedirectBorderClipProc)
-			pBorderClip = (*miGetRedirectBorderClipProc)(pWin);
-#endif
-		    REGION_APPEND( pScreen, &totalClip, pBorderClip );
+		    REGION_APPEND( pScreen, &totalClip, &pWin->borderClip);
 		    if (pWin->viewable)
 			viewvals++;
 		}
@@ -723,7 +656,7 @@ miValidateTree (pParent, pChild, kind)
 	     * lower than the cost of multiple Subtracts in the
 	     * loop below.
 	     */
-	    REGION_NULL(pScreen, &childUnion);
+	    REGION_INIT(pScreen, &childUnion, NullBox, 0);
 	    if (forward)
 	    {
 		for (pWin = pChild; pWin; pWin = pWin->nextSib)
@@ -787,8 +720,8 @@ miValidateTree (pParent, pChild, kind)
 	REGION_UNINIT(pScreen, &childUnion);
     }
 
-    REGION_NULL(pScreen, &pParent->valdata->after.exposed);
-    REGION_NULL(pScreen, &pParent->valdata->after.borderExposed);
+    REGION_INIT( pScreen, &pParent->valdata->after.exposed, NullBox, 0);
+    REGION_INIT( pScreen, &pParent->valdata->after.borderExposed, NullBox, 0);
 
     /*
      * each case below is responsible for updating the

@@ -1,7 +1,4 @@
-XCOMM $Xorg: X11.rules,v 1.4 2000/08/17 19:41:46 cpqbld Exp $
-
-
-XCOMM $XFree86: xc/config/cf/X11.rules,v 1.6 2001/01/17 16:22:31 dawes Exp $
+XCOMM $TOG: X11.rules /main/4 1997/04/30 15:23:24 kaleb $
 
 /* Note whether we are the top level project. */
 #ifndef SeenTopLevelProject
@@ -35,14 +32,6 @@ XCOMM $XFree86: xc/config/cf/X11.rules,v 1.6 2001/01/17 16:22:31 dawes Exp $
 # define ImportX11		NO
 #endif
 
-#if defined(X11ProjectRoot)
-# define XBinDir	$(XPROJECTROOT)/bin
-#elif defined(ProjectRoot) 
-# define XBinDir	$(PROJECTROOT)/bin
-#else
-# define XBinDir	$(BINDIR)
-#endif
-
 #ifdef X11ProjectRoot
 # define XUsrLibDirPath	$(USRLIBDIR):$(XPROJECTROOT)/lib
 #else
@@ -51,11 +40,7 @@ XCOMM $XFree86: xc/config/cf/X11.rules,v 1.6 2001/01/17 16:22:31 dawes Exp $
 #ifdef UsrLibDirPath
 # undef UsrLibDirPath
 #endif
-#ifdef ExtraLibDirPath
-#define UsrLibDirPath	XUsrLibDirPath:ExtraLibDirPath
-#else
 #define UsrLibDirPath	XUsrLibDirPath
-#endif
 
 #if ImportX11
 # define XLdPreLibs	-L$(LIBSRC)
@@ -79,18 +64,12 @@ XCOMM $XFree86: xc/config/cf/X11.rules,v 1.6 2001/01/17 16:22:31 dawes Exp $
 #endif
 #define LdPostLibs	LdPostLib XLdPostLibs
 
-#ifndef TopXInclude
-# if ImportX11 
-#  define TopXInclude	-I$(TOP)/imports/x11/include
-# elif !UseInstalledX11
-#  define TopXInclude	-I$(TOP)/exports/include
+#if ImportX11
+# define TopXInclude	-I$(TOP)/imports/x11/include
+#elif !UseInstalledX11
+# define TopXInclude	-I$(TOP)/exports/include
 #else
-#  ifdef X11ProjectRoot
-#   define TopXInclude	-I$(XPROJECTROOT)/include
-#  else
-#   define TopXInclude	/**/
-#  endif
-# endif
+# define TopXInclude	-I$(XPROJECTROOT)/include
 #endif
 #ifdef TopIncludes
 # undef TopIncludes
@@ -106,13 +85,10 @@ XCOMM $XFree86: xc/config/cf/X11.rules,v 1.6 2001/01/17 16:22:31 dawes Exp $
 #else
 # define X11BuildLibPath	$(TOP)/exports/lib
 #endif
-
-#ifndef BuildLibPath
 #ifdef SystemBuildLibPath
 # define BuildLibPath		$(XENVLIBDIR):$(SYSTEMENVLIBDIR)
 #else
 # define BuildLibPath		$(XENVLIBDIR)
-#endif
 #endif
 
 #ifndef X11ProjectDefines
@@ -124,13 +100,3 @@ XCOMM $XFree86: xc/config/cf/X11.rules,v 1.6 2001/01/17 16:22:31 dawes Exp $
 # define X11CplusplusProjectDefines	X11ProjectDefines
 #endif
 #define CplusplusProjectDefines	X11CplusplusProjectDefines
-
-#ifndef XtransFailSoft
-# define XtransFailSoft NO
-#endif
-
-#if  XtransFailSoft
-# define XtransFailDefine /**/
-#else 
-# define XtransFailDefine -DFAIL_HARD
-#endif

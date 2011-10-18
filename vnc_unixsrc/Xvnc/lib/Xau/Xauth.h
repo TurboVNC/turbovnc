@@ -1,14 +1,15 @@
-/* $Xorg: Xauth.h,v 1.4 2001/02/09 02:03:42 xorgcvs Exp $ */
+/* $XConsortium: Xauth.h /main/18 1996/07/31 16:08:18 dpw $ */
 
 /*
 
-Copyright 1988, 1998  The Open Group
+Copyright (c) 1988  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,17 +17,15 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 */
-
-/* $XFree86: xc/lib/Xau/Xauth.h,v 1.5 2001/12/14 19:54:36 dawes Exp $ */
 
 #ifndef _Xauth_h
 #define _Xauth_h
@@ -59,33 +58,44 @@ typedef struct xauth {
 
 _XFUNCPROTOBEGIN
 
-char *XauFileName(void);
+char *XauFileName();
 
 Xauth *XauReadAuth(
+#if NeedFunctionPrototypes
 FILE*	/* auth_file */
+#endif
 );
 
 int XauLockAuth(
+#if NeedFunctionPrototypes
 _Xconst char*	/* file_name */,
 int		/* retries */,
 int		/* timeout */,
 long		/* dead */
+#endif
 );
 
 int XauUnlockAuth(
+#if NeedFunctionPrototypes
 _Xconst char*	/* file_name */
+#endif
 );
 
 int XauWriteAuth(
+#if NeedFunctionPrototypes
 FILE*		/* auth_file */,
 Xauth*		/* auth */
+#endif
 );
 
 Xauth *XauGetAuthByName(
+#if NeedFunctionPrototypes
 _Xconst char*	/* display_name */
+#endif
 );
 
 Xauth *XauGetAuthByAddr(
+#if NeedFunctionPrototypes
 #if NeedWidePrototypes
 unsigned int	/* family */,
 unsigned int	/* address_length */,
@@ -106,9 +116,11 @@ unsigned int	/* name_length */,
 unsigned short	/* name_length */,
 #endif
 _Xconst char*	/* name */
+#endif
 );
 
 Xauth *XauGetBestAuthByAddr(
+#if NeedFunctionPrototypes
 #if NeedWidePrototypes
 unsigned int	/* family */,
 unsigned int	/* address_length */,
@@ -126,10 +138,13 @@ _Xconst char*	/* number */,
 int		/* types_length */,
 char**		/* type_names */,
 _Xconst int*	/* type_lengths */
+#endif
 );
 
 void XauDisposeAuth(
+#if NeedFunctionPrototypes
 Xauth*		/* auth */
+#endif
 );
 
 #ifdef K5AUTH
@@ -139,13 +154,17 @@ Xauth*		/* auth */
 #undef xfree
 
 int XauKrb5Encode(
+#if NeedFunctionPrototypes
      krb5_principal	/* princ */,
      krb5_data *	/* outbuf */
+#endif
 );
 
 int XauKrb5Decode(
+#if NeedFunctionPrototypes
      krb5_data		/* inbuf */,
      krb5_principal *	/* princ */
+#endif
 );
 #endif /* K5AUTH */
 

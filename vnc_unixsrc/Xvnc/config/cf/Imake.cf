@@ -1,4 +1,3 @@
-XCOMM $XdotOrg: xc/config/cf/Imake.cf,v 1.12 2005/11/08 06:33:24 jkj Exp $
 XCOMM $Xorg: Imake.cf,v 1.4 2000/08/17 19:41:45 cpqbld Exp $
 /*
  * To add support for another platform:
@@ -18,7 +17,7 @@ XCOMM $Xorg: Imake.cf,v 1.4 2000/08/17 19:41:45 cpqbld Exp $
  *
  *     4.  Create a .cf file with the name given by MacroFile.
  */
-XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
+XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.66 2001/04/18 16:13:17 dawes Exp $
 
 #if defined(__APPLE__)
 # undef __APPLE__
@@ -48,9 +47,6 @@ XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
 #define cygwinArchitecture
 #define i386Architecture
 #undef i386
-#undef i486
-#undef i586
-#undef i686
 #undef __i386__
 #undef _X86_
 #undef __CYGWIN__
@@ -72,7 +68,7 @@ XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
 # define UltrixArchitecture
 #endif /* ultrix */
 
-#if defined(vax) && !defined(UltrixArchitecture) && !defined(__OpenBSD__)
+#if defined(vax) && !defined(UltrixArchitecture)
 # define MacroIncludeFile <bsd.cf>
 # define MacroFile bsd.cf
 # undef vax
@@ -80,13 +76,10 @@ XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
 # define VaxArchitecture
 #endif /* vax */
 
-#ifdef __bsdi__
+#ifdef bsdi
 # define MacroIncludeFile <bsdi.cf>
 # define MacroFile bsdi.cf
-# undef __bsdi__
-# ifdef bsdi
-#  undef bsdi
-# endif
+# undef bsdi
 # define BSDOSArchitecture
 # if defined(__i386__) || defined(i386)
 #  define i386BsdArchitecture
@@ -94,14 +87,7 @@ XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
 #  undef i386
 #  undef __i386__
 # endif
-# if defined(__ppc__) || defined(ppc)
-#  define PpcBsdArchitecture
-#  define PpcArchitecture
-#  undef ppc
-#  undef __ppc__
-# endif
 # if defined(__sparc__) || defined(__sparc_v9__) || defined(sparc)
-#  define SparcBsdArchitecture
 #  define SparcArchitecture
 #  undef sparc
 #  undef __sparc__
@@ -113,7 +99,6 @@ XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
 # undef __OpenBSD__
 # undef __NetBSD__
 # define OpenBSDArchitecture
-# define KOpenBSDArchitecture
 # define MacroIncludeFile <OpenBSD.cf>
 # define MacroFile OpenBSD.cf
 # ifdef __i386__
@@ -122,14 +107,10 @@ XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
 #  undef i386
 # endif
 # if defined(__sparc__) || defined(sparc)
-#  if !defined(__arch64__)
-#   define SparcArchitecture
-#  else
-#   define Sparc64Architecture
-#  endif
+#  define SparcArchitecture
 #  undef sparc
 # endif
-# if defined(__mips__) || defined(mips)
+# ifdef mips
 #   define MipsArchitecture
 #   ifdef arc
 #     define ArcArchitecture
@@ -141,18 +122,11 @@ XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
 #   endif
 #   undef mips
 # endif
-# if defined(__alpha__) || defined(alpha)
+# ifdef __alpha__
 #   define AlphaArchitecture
 #   undef __alpha__
-#   undef alpha
 # endif
-# if defined(__amd64__) || defined(__x86_64__)
-#   define AMD64Architecture
-#   undef __amd64__
-#   undef __x86_64__
-#   undef amd64
-# endif
-# if defined(__mc68020__) || defined(mc68020)
+# ifdef mc68020
 #  define Mc68020Architecture
 #  if defined(amiga)
 #   define AmigaArchitecture
@@ -179,47 +153,22 @@ XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
 # ifdef __powerpc__
 #  define PpcArchitecture
 #  undef __powerpc__
-#  undef __macppc__
-#  undef macppc
 # endif
-# ifdef __vax__
-#  undef vax
-#  undef __vax__
-#  define VaxArchitecture
-# endif
-# ifdef __hppa__
-#  ifndef HPArchitecture
-#   define HPArchitecture
-#  endif
-#  undef __hppa__
-# endif /* __hppa__ */
 #endif /* OpenBSD */
-
-/* Systems based on kernel of OpenBSD */
-#if defined(__OpenBSD_kernel__)
-#define KOpenBSDArchitecture
-#endif
 
 #ifdef __NetBSD__
 # define MacroIncludeFile <NetBSD.cf>
 # define MacroFile NetBSD.cf
 # undef __NetBSD__
 # define NetBSDArchitecture
-# define KNetBSDArchitecture
 # ifdef __i386__
 #  define i386BsdArchitecture
 #  define i386Architecture
 #  undef i386
 # endif
-# if defined(__sparc64__) || defined(__sparc_v9__) || defined(__arch64__)
-#  define Sparc64Architecture
-# endif
 # if defined(__sparc__) || defined(sparc)
 #  define SparcArchitecture
 #  undef sparc
-#  if defined(__sparc_v9__) || defined(__arch64__)
-#    define Sparc64Architecture
-#  endif
 # endif
 # ifdef mips
 #   define MipsArchitecture
@@ -228,7 +177,6 @@ XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
 # endif
 # ifdef __alpha__
 #   define AlphaArchitecture
-#   define AlphaBsdArchitecture
 #   undef __alpha__
 # endif
 # ifdef mc68000
@@ -248,44 +196,11 @@ XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
 # endif
 #endif /* NetBSD */
 
-/* Systems based on kernel of NetBSD */
-#if defined(__NetBSD_kernel__)
-#define KNetBSDArchitecture
-#endif
-
-#ifdef __DragonFly__
-# define MacroIncludeFile <DragonFly.cf>
-# define MacroFile DragonFly.cf
-# undef __DragonFly__
-# undef __FreeBSD__
-# define DragonFlyArchitecture
-# define FreeBSDArchitecture
-# ifdef __i386__
-#  define i386BsdArchitecture
-#  define i386Architecture
-#  undef i386
-# endif
-# ifdef __sparc64__
-#  define Sparc64Architecture
-#  undef __sparc64__
-# endif
-# ifdef __ia64__
-#  define ia64Architecture
-#  undef __ia64__
-# endif
-# ifdef __amd64__
-#  define x86_64Architecture
-#  undef __amd64__
-#  undef __x86_64__
-# endif
-#endif /* __DragonFly__ */
-
 #ifdef __FreeBSD__
 # define MacroIncludeFile <FreeBSD.cf>
 # define MacroFile FreeBSD.cf
 # undef __FreeBSD__
 # define FreeBSDArchitecture
-# define KFreeBSDArchitecture
 # ifdef __i386__
 #  define i386BsdArchitecture
 #  define i386Architecture
@@ -296,29 +211,7 @@ XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
 #  define AlphaArchitecture
 #  undef __alpha__
 # endif
-# ifdef __sparc64__
-#  define Sparc64Architecture
-#  undef __sparc64__
-# endif
-# ifdef __ia64__
-#  define ia64Architecture
-#  undef __ia64__
-# endif
-# ifdef __amd64__
-#  define AMD64Architecture
-#  undef __amd64__
-#  undef __x86_64__
-# endif
-# ifdef __powerpc__
-#  define PpcArchitecture
-#  undef __powerpc__
-# endif
 #endif /* __FreeBSD__ */
-
-/* Systems based on kernel of FreeBSD */
-#if defined(__FreeBSD_kernel__)
-#define KFreeBSDArchitecture
-#endif
 
 #ifdef AMOEBA
  /* Should be before the 'sun' entry because we may be cross-compiling */
@@ -352,22 +245,11 @@ XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
 # endif
 # ifdef sparc
 #  undef sparc
-#  define SparcArchitecture
-# endif
-# ifdef __sparcv9
-#  undef __sparcv9
-#  define Sparc64Architecture
+# define SparcArchitecture
 # endif
 # ifdef mc68000
 #  undef mc68000
-#  define Sun3Architecture
-# endif
-# if defined(__amd64) || defined(__x86_64)
-#  undef __amd64
-#  undef __x86_64
-#  undef amd64
-#  undef i386
-#  define AMD64Architecture
+# define Sun3Architecture
 # endif
 # ifdef i386
 #  undef i386
@@ -377,17 +259,16 @@ XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
 # define SunArchitecture
 #endif /* sun */
 
-#ifdef hpux
+#ifdef __hpux
 # define MacroIncludeFile <hp.cf>
 # define MacroFile hp.cf
-# undef hpux
+# undef __hpux
 # define HPArchitecture
-#endif /* hpux */
+#endif /* __hpux */
 
-#ifdef __SCO__
+#ifdef sco
 # define MacroIncludeFile <sco5.cf>
 # define MacroFile sco5.cf
-# undef __SCO__
 # undef sco
 # undef USL
 # undef SYSV
@@ -400,60 +281,18 @@ XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
 # define SVR3Architecture
 # define i386ScoArchitecture
 # define i386Sco325Architecture
-# undef i386
-# undef i486
-# undef i586
-# undef i686
-# undef k6
-# undef __i386__
-# undef __i486__
-# undef __i586__
-# undef __i686__
-# undef __k6__
-# undef __i386
-# undef __i486
-# undef __i586
-# undef __i686
-# undef __k6
-# undef pentium
-# undef __pentium
-# undef pentiumpro
-# undef __pentiumpro
-#endif /* __SCO__ - SCO Open Server 5 */
+#endif /* sco - SCO Open Server 5 */
 
-#ifdef __UNIXWARE__
+#ifdef USL
 # define MacroIncludeFile <usl.cf>
 # define MacroFile usl.cf
-# undef __UNIXWARE__
 # undef USL
 # undef SVR4
 # undef i386
-# undef SVR5
-# undef SYSV5
 # define SVR4Architecture
 # define i386Architecture
 # define USLArchitecture
-# define UnixWareArchitecture
-# undef i386
-# undef i486
-# undef i586
-# undef i686
-# undef k6
-# undef __i386__
-# undef __i486__
-# undef __i586__
-# undef __i686__
-# undef __k6__
-# undef __i386
-# undef __i486
-# undef __i586
-# undef __i686
-# undef __k6
-# undef pentium
-# undef __pentium
-# undef pentiumpro
-# undef __pentiumpro
-#endif /* __UNIXWARE__ */
+#endif /* USL */
 
 #ifdef NCR
 # define MacroIncludeFile <ncr.cf>
@@ -577,11 +416,7 @@ XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
 # endif
 # ifdef _IBMR2
 #  undef _IBMR2
-#  if (DefaultOSMajorVersion < 5)
-#   define RsArchitecture
-#  else
-#   define PpcArchitecture
-#  endif
+#  define RsArchitecture
 # endif
 #endif /* ibm */
 
@@ -759,34 +594,17 @@ XCOMM $XFree86: xc/config/cf/Imake.cf,v 3.88 2003/12/16 21:30:21 herrb Exp $
 # undef SVR4
 #endif /* Oki */
 
-#if defined(WIN32) && !defined(__GNUC__)
+#ifdef WIN32
 # define MacroIncludeFile <Win32.cf>
 # define MacroFile Win32.cf
 # define Win32Architecture
 #endif /* WIN32 */
 
-#if defined(WIN32) && defined(__GNUC__)
-#define MacroIncludeFile <mingw.cf>
-#define MacroFile mingw.cf
-#define Win32Architecture
-#define mingwArchitecture
-#define i386Architecture
-#undef i386
-#undef i486
-#undef i586
-#undef i686
-#undef __i386__
-#undef _X86_
-#undef __MINGW32__
-#endif /* CYGWIN */
-
-#if defined(linux) || defined(__GLIBC__)
+#ifdef linux 
 # define MacroIncludeFile <linux.cf>
 # define MacroFile linux.cf
 # undef linux
-# ifdef __linux__
-#  define LinuxArchitecture
-# endif
+# define LinuxArchitecture
 # ifdef i386
 #  ifndef i386Architecture
 #   define i386Architecture
@@ -878,12 +696,6 @@ XCOMM Keep cpp from replacing path elements containing i486/i586/i686
 #  endif
 #  undef __k6
 # endif /* __k6 */
-/* Keep this order! s390x has also __s390__ defined */
-# if defined(__s390x__)
-#  define s390xArchitecture
-#  undef __s390x__
-#  undef __s390__
-# endif
 # ifdef __s390__
 #   define s390Architecture
 #  undef __s390__
@@ -903,30 +715,20 @@ XCOMM Keep cpp from replacing path elements containing i486/i586/i686
 #  undef arm
 #  undef __arm
 #  undef __arm__
-#  if defined(__ARMEB__)
-#   define Arm32ebArchitecture
-#  endif
-#  undef __ARMEB__
 # endif
 # ifdef mc68000
 #  define Mc68020Architecture
 #  undef mc68000
 # endif /* mc68000 */
-# if defined (powerpc) && !defined(__powerpc64__) && !defined (powerpc64)
+# ifdef powerpc
 #  define PpcArchitecture
 #  undef powerpc
 # endif
-# if defined (__powerpc__) && !defined(__powerpc64__) && !defined (powerpc64)
+# ifdef __powerpc__
 #  ifndef PpcArchitecture
 #   define PpcArchitecture
 #  endif
 #  undef __powerpc__
-# endif
-# ifdef __powerpc64__
-#  ifndef Ppc64Architecture
-#   define Ppc64Architecture
-#  endif
-#  undef __powerpc64__
 # endif
 # ifdef sparc
 #  define SparcArchitecture
@@ -937,6 +739,16 @@ XCOMM Keep cpp from replacing path elements containing i486/i586/i686
 #   define SparcArchitecture
 #  endif
 #  undef __sparc__
+# endif
+# ifdef x86_64 
+#  define x86_64Architecture
+#  undef x86_64 
+# endif
+# ifdef __x86_64__
+#  ifndef x86_64Architecture
+#   define x86_64Architecture
+#  endif
+#  undef __x86_64__
 # endif
 # ifdef ia64 
 #  define ia64Architecture
@@ -995,27 +807,11 @@ XCOMM Keep cpp from replacing path elements containing i486/i586/i686
 #  endif
 #  undef __SH4__
 # endif /* __SH4__ */
-/* for compatibility with 3.3.x */
+XCOMM  for compatibility with 3.3.x 
 # ifdef PpcArchitecture
 #  define PowerPCArchitecture
 # endif
-# if defined(__s390x__)
-#  define s390xArchitecture
-#  undef __s390x__
-# endif
-# if defined(__amd64__) || defined (__x86_64__)
-#  undef __amd64__
-#  undef __x86_64__
-#  define AMD64Architecture
-# endif
-# if defined(amd64__) || defined (x86_64__)
-#  undef amd64__
-#  undef x86_64__
-#  ifndef AMD64Architecture
-#   define AMD64Architecture
-#  endif
-# endif
-#endif /* linux || __GLIBC__ */
+#endif /* linux */
 
 #if (defined(__Lynx__) || defined(Lynx)) && (defined(i386) || defined(__i386__) || defined(__x86__) || defined(__powerpc__) || defined(__sparc__) || defined(sparc))
 # define MacroIncludeFile <lynx.cf>
@@ -1094,19 +890,10 @@ XCOMM Keep cpp from replacing path elements containing i486/i586/i686
 #define i386Architecture
 #endif /* minix */
 
-/* Systems with GNU libc and userland */
-#if defined(__GNU__)
-#define GNUArchitecture
-#define MacroIncludeFile <gnu.cf>
-#define MacroFile gnu.cf
-#ifdef __i386__
-#define i386Architecture
-#endif
-#endif
-
 #ifdef MACH
 #ifdef __GNU__
-/* Mach-based GNU system */
+#define MacroIncludeFile <gnu.cf>
+#define MacroFile gnu.cf
 #define GNUMachArchitecture
 #else
 #define MacroIncludeFile <mach.cf>
@@ -1146,30 +933,31 @@ XCOMM Keep cpp from replacing path elements containing i486/i586/i686
 #define MacroIncludeFile <nto.cf>
 #define MacroFile nto.cf
 #define NTOArchitecture
-# ifdef PPC
-#  define PPCArchitecture
-#  undef PPC
-# endif
-# ifdef MIPS
-#  define mipsArchitecture
-#  undef MIPS
-# endif
-# ifdef i386
-#  define i386Architecture
-#  undef i386
-# endif /* i386 */
-# ifdef __i386__
-#  ifndef i386Architecture
-#   define i386Architecture
-#  endif
-#  undef __i386__
-# endif /* __i386__ */
+#ifdef PPC
+# define PPCArchitecture
+# undef PPC
+#else
+#ifdef MIPS
+# define mipsArchitecture
+# undef MIPS
+#else
+#ifdef i386
+# define i386Architecture
+# undef i386
+#endif
+#endif
+#endif
 #endif /* QNX/Neutrino */
 
 #ifdef SparcArchitecture
 # if defined(__sparc_v9) || defined(__arch64__)
 #  define Sparc64Architecture
 # endif
+#endif
+
+#if defined(x86_64Architecture) && defined(i386Architecture)
+# undef x86_64Architecture
+# define i386m32Architecture
 #endif
 
 #ifndef MacroIncludeFile

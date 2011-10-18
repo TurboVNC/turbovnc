@@ -1,12 +1,13 @@
 /***********************************************************
 
-Copyright 1987, 1989, 1998  The Open Group
+Copyright (c) 1987, 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -14,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987, 1989 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -43,9 +44,9 @@ WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
-
 ******************************************************************/
-/* $Xorg: io.c,v 1.6 2001/02/09 02:05:23 xorgcvs Exp $ */
+/* $XConsortium: io.c /main/72 1996/12/27 15:40:56 rws $ */
+/* $XFree86: xc/programs/Xserver/os/io.c,v 3.15 1997/01/18 06:58:00 dawes Exp $ */
 /*****************************************************************
  * i/o functions
  *
@@ -53,41 +54,34 @@ SOFTWARE.
  *   InsertFakeRequest, ResetCurrentRequest
  *
  *****************************************************************/
-/* $XFree86: xc/programs/Xserver/os/io.c,v 3.34 2002/05/31 18:46:05 dawes Exp $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#if 0
-#define DEBUG_COMMUNICATION
-#endif
 #ifdef WIN32
 #include <X11/Xwinsock.h>
 #endif
 #include <stdio.h>
-#include <X11/Xtrans/Xtrans.h>
-#include <X11/Xmd.h>
+#include <X11/Xtrans.h>
+#ifdef X_NOT_STDC_ENV
+extern int errno;
+#endif
+#include "Xmd.h"
 #include <errno.h>
-#if !defined(__UNIXOS2__) && !defined(WIN32)
+#if !defined(AMOEBA) && !defined(MINIX) && !defined(__EMX__) && !defined(WIN32)
 #ifndef Lynx
 #include <sys/uio.h>
 #else
 #include <uio.h>
 #endif
 #endif
-#include <X11/X.h>
+#include "X.h"
 #define NEED_REPLIES
-#include <X11/Xproto.h>
+#include "Xproto.h"
 #include "os.h"
+#include "Xpoll.h"
 #include "osdep.h"
-#include <X11/Xpoll.h>
 #include "opaque.h"
 #include "dixstruct.h"
 #include "misc.h"
 #ifdef LBX
-#include "colormapst.h"
-#include "propertyst.h"
 #include "lbxserve.h"
 #endif
 
@@ -97,8 +91,7 @@ CallbackListPtr       FlushCallback;
 /* check for both EAGAIN and EWOULDBLOCK, because some supposedly POSIX
  * systems are broken and return EWOULDBLOCK when they should return EAGAIN
  */
-#ifndef __UNIXOS2__
-#ifndef WIN32
+#ifndef __EMX__
 #if defined(EAGAIN) && defined(EWOULDBLOCK)
 #define ETEST(err) (err == EAGAIN || err == EWOULDBLOCK)
 #else
@@ -108,12 +101,16 @@ CallbackListPtr       FlushCallback;
 #define ETEST(err) (err == EWOULDBLOCK)
 #endif
 #endif
-#else /* WIN32 The socket errorcodes differ from the normal errors*/
-#define ETEST(err) (err == EAGAIN || err == WSAEWOULDBLOCK)
-#endif
-#else /* __UNIXOS2__  Writing to full pipes may return ENOSPC */
+#else /* __EMX__  Writing to full pipes may return ENOSPC */
 #define ETEST(err) (err == EAGAIN || err == EWOULDBLOCK || err == ENOSPC)
 #endif
+
+extern fd_set ClientsWithInput, IgnoredClientsWithInput, AllClients;
+extern fd_set ClientsWriteBlocked;
+extern fd_set OutputPending;
+extern int ConnectionTranslation[];
+extern Bool NewOutputPending;
+extern Bool AnyClientsWriteBlocked;
 
 Bool CriticalOutputPending;
 int timesThisConnection = 0;
@@ -125,7 +122,7 @@ OsCommPtr AvailableInput = (OsCommPtr)NULL;
 			      lswaps((req)->length) : (req)->length)
 
 #ifdef BIGREQS
-#include <X11/extensions/bigreqstr.h>
+#include "bigreqstr.h"
 
 #define get_big_req_len(req,cli) ((cli)->swapped ? \
 				  lswapl(((xBigReq *)(req))->length) : \
@@ -200,30 +197,20 @@ OsCommPtr AvailableInput = (OsCommPtr)NULL;
 #define YieldControlDeath()			\
         { timesThisConnection = 0; }
 
-#ifdef hpux_not_tog
-#define LBX_NEED_OLD_SYMBOL_FOR_LOADABLES
-#endif
-
-#ifdef LBX
-#ifdef LBX_NEED_OLD_SYMBOL_FOR_LOADABLES
-#undef ReadRequestFromClient
+#if defined(LBX) || defined(LBX_COMPAT)
 int
-ReadRequestFromClient(ClientPtr client)
-{
-    return (*client->readRequest)(client);
-}
-#endif
-int
-StandardReadRequestFromClient(ClientPtr client)
+StandardReadRequestFromClient(client)
+    ClientPtr client;
 #else
 int
-ReadRequestFromClient(ClientPtr client)
+ReadRequestFromClient(client)
+    ClientPtr client;
 #endif
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
-    ConnectionInputPtr oci = oc->input;
+    register ConnectionInputPtr oci = oc->input;
     int fd = oc->fd;
-    unsigned int gotnow, needed;
+    register int gotnow, needed;
     int result;
     register xReq *request;
     Bool need_header;
@@ -261,7 +248,7 @@ ReadRequestFromClient(ClientPtr client)
 
     if (!oci)
     {
-	if ((oci = FreeInputs))
+	if (oci = FreeInputs)
 	{
 	    FreeInputs = oci->next;
 	}
@@ -476,29 +463,14 @@ ReadRequestFromClient(ClientPtr client)
 	    )
 	    FD_SET(fd, &ClientsWithInput);
 	else
-	{
-#ifdef SMART_SCHEDULE
-	    if (!SmartScheduleDisable)
-		FD_CLR(fd, &ClientsWithInput);
-	    else
-#endif
-		YieldControlNoInput();
-	}
+	    YieldControlNoInput();
     }
     else
     {
 	if (!gotnow)
 	    AvailableInput = oc;
-#ifdef SMART_SCHEDULE
-	if (!SmartScheduleDisable)
-	    FD_CLR(fd, &ClientsWithInput);
-	else
-#endif
-	    YieldControlNoInput();
+	YieldControlNoInput();
     }
-#ifdef SMART_SCHEDULE
-    if (SmartScheduleDisable)
-#endif
     if (++timesThisConnection >= MAX_TIMES_PER)
 	YieldControl();
 #ifdef BIGREQS
@@ -512,13 +484,6 @@ ReadRequestFromClient(ClientPtr client)
     }
 #endif
     client->requestBuffer = (pointer)oci->bufptr;
-#ifdef DEBUG_COMMUNICATION
-    {
-	xReq *req = client->requestBuffer;
-	ErrorF("REQUEST: ClientIDX: %i, type: 0x%x data: 0x%x len: %i\n",
-	       client->index,req->reqType,req->data,req->length);
-    }
-#endif
     return needed;
 }
 
@@ -529,18 +494,21 @@ ReadRequestFromClient(ClientPtr client)
  **********************/
 
 Bool
-InsertFakeRequest(ClientPtr client, char *data, int count)
+InsertFakeRequest(client, data, count)
+    ClientPtr client;
+    char *data;
+    int count;
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
-    ConnectionInputPtr oci = oc->input;
+    register ConnectionInputPtr oci = oc->input;
     int fd = oc->fd;
-    int gotnow, moveup;
+    register int gotnow, moveup;
 
     if (AvailableInput)
     {
 	if (AvailableInput != oc)
 	{
-	    ConnectionInputPtr aci = AvailableInput->input;
+	    register ConnectionInputPtr aci = AvailableInput->input;
 	    if (aci->size > BUFWATERMARK)
 	    {
 		xfree(aci->buffer);
@@ -557,7 +525,7 @@ InsertFakeRequest(ClientPtr client, char *data, int count)
     }
     if (!oci)
     {
-	if ((oci = FreeInputs))
+	if (oci = FreeInputs)
 	    FreeInputs = oci->next;
 	else if (!(oci = AllocateInputBuffer()))
 	    return FALSE;
@@ -602,8 +570,8 @@ InsertFakeRequest(ClientPtr client, char *data, int count)
  *
  **********************/
 
-void
-ResetCurrentRequest(ClientPtr client)
+ResetCurrentRequest(client)
+    ClientPtr client;
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
     register ConnectionInputPtr oci = oc->input;
@@ -611,6 +579,7 @@ ResetCurrentRequest(ClientPtr client)
     register xReq *request;
     int gotnow, needed;
 #ifdef LBX
+    Bool part;
     LbxClientPtr lbxClient = LbxClient(client);
 
     if (lbxClient) {
@@ -686,10 +655,10 @@ ResetCurrentRequest(ClientPtr client)
  **********************/
 
 xReqPtr
-PeekNextRequest(
-    xReqPtr req,	/* request we're starting from */
-    ClientPtr client,	/* client whose requests we're skipping */
-    Bool readmore)	/* attempt to read more if next request isn't there? */
+PeekNextRequest(req, client, readmore)
+    xReqPtr req;	/* request we're starting from */
+    ClientPtr client;	/* client whose requests we're skipping */
+    Bool readmore;	/* attempt to read more if next request isn't there? */
 {
     register ConnectionInputPtr oci = ((OsCommPtr)client->osPrivate)->input;
     xReqPtr pnextreq;
@@ -748,10 +717,10 @@ PeekNextRequest(
 CallbackListPtr SkippedRequestsCallback = NULL;
 
 void
-SkipRequests(
-    xReqPtr req,	/* last request being skipped */
-    ClientPtr client,   /* client whose requests we're skipping */
-    int numskipped)	/* how many requests we're skipping */
+SkipRequests(req, client, numskipped)
+    xReqPtr req;	/* last request being skipped */
+    ClientPtr client;   /* client whose requests we're skipping */
+    int numskipped;	/* how many requests we're skipping */
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
     register ConnectionInputPtr oci = oc->input;
@@ -800,252 +769,6 @@ SkipRequests(
 static int padlength[4] = {0, 3, 2, 1};
 
  /********************
- * FlushAllOutput()
- *    Flush all clients with output.  However, if some client still
- *    has input in the queue (more requests), then don't flush.  This
- *    will prevent the output queue from being flushed every time around
- *    the round robin queue.  Now, some say that it SHOULD be flushed
- *    every time around, but...
- *
- **********************/
-
-void
-FlushAllOutput(void)
-{
-    register int index, base;
-    register fd_mask mask; /* raphael */
-    OsCommPtr oc;
-    register ClientPtr client;
-    Bool newoutput = NewOutputPending;
-#if defined(WIN32)
-    fd_set newOutputPending;
-#endif
-
-    if (FlushCallback)
-	CallCallbacks(&FlushCallback, NULL);
-
-    if (!newoutput)
-	return;
-
-    /*
-     * It may be that some client still has critical output pending,
-     * but he is not yet ready to receive it anyway, so we will
-     * simply wait for the select to tell us when he's ready to receive.
-     */
-    CriticalOutputPending = FALSE;
-    NewOutputPending = FALSE;
-
-#ifndef WIN32
-    for (base = 0; base < howmany(XFD_SETSIZE, NFDBITS); base++)
-    {
-	mask = OutputPending.fds_bits[ base ];
-	OutputPending.fds_bits[ base ] = 0;
-	while (mask)
-	{
-	    index = ffs(mask) - 1;
-	    mask &= ~lowbit(mask);
-	    if ((index = ConnectionTranslation[(base * (sizeof(fd_mask)*8)) + index]) == 0)
-		continue;
-	    client = clients[index];
-	    if (client->clientGone)
-		continue;
-	    oc = (OsCommPtr)client->osPrivate;
-	    if (
-#ifdef LBX
-		!oc->proxy &&
-#endif
-		FD_ISSET(oc->fd, &ClientsWithInput))
-	    {
-		FD_SET(oc->fd, &OutputPending); /* set the bit again */
-		NewOutputPending = TRUE;
-	    }
-	    else
-		(void)FlushClient(client, oc, (char *)NULL, 0);
-	}
-    }
-#else  /* WIN32 */
-    FD_ZERO(&newOutputPending);
-    for (base = 0; base < XFD_SETCOUNT(&OutputPending); base++)
-    {
-	    index = XFD_FD(&OutputPending, base);
-	    if ((index = GetConnectionTranslation(index)) == 0)
-		continue;
-	    client = clients[index];
-	    if (client->clientGone)
-		continue;
-	    oc = (OsCommPtr)client->osPrivate;
-	    if (
-#ifdef LBX
-		!oc->proxy &&
-#endif
-		FD_ISSET(oc->fd, &ClientsWithInput))
-	    {
-		FD_SET(oc->fd, &newOutputPending); /* set the bit again */
-		NewOutputPending = TRUE;
-	    }
-	    else
-		(void)FlushClient(client, oc, (char *)NULL, 0);
-    }
-    XFD_COPYSET(&newOutputPending, &OutputPending);
-#endif /* WIN32 */
-}
-
-void
-FlushIfCriticalOutputPending(void)
-{
-    if (CriticalOutputPending)
-	FlushAllOutput();
-}
-
-void
-SetCriticalOutputPending(void)
-{
-    CriticalOutputPending = TRUE;
-}
-
-/*****************
- * WriteToClient
- *    Copies buf into ClientPtr.buf if it fits (with padding), else
- *    flushes ClientPtr.buf and buf to client.  As of this writing,
- *    every use of WriteToClient is cast to void, and the result
- *    is ignored.  Potentially, this could be used by requests
- *    that are sending several chunks of data and want to break
- *    out of a loop on error.  Thus, we will leave the type of
- *    this routine as int.
- *****************/
-
-int
-WriteToClient (ClientPtr who, int count, char *buf)
-{
-    OsCommPtr oc = (OsCommPtr)who->osPrivate;
-    ConnectionOutputPtr oco = oc->output;
-    int padBytes;
-#ifdef DEBUG_COMMUNICATION
-    Bool multicount = FALSE;
-#endif
-    if (!count)
-	return(0);
-#ifdef DEBUG_COMMUNICATION
-    {
-	char info[128];
-	xError *err;
-	xGenericReply *rep;
-	xEvent *ev;
-	
-	if (!who->replyBytesRemaining) {
-	    switch(buf[0]) {
-	    case X_Reply:
-		rep = (xGenericReply*)buf;
-		if (rep->sequenceNumber == who->sequence) {
-		    snprintf(info,127,"Xreply: type: 0x%x data: 0x%x "
-			     "len: %i seq#: 0x%x", rep->type, rep->data1,
-			     rep->length, rep->sequenceNumber);
-		    multicount = TRUE;
-		}
-		break;
-	    case X_Error:
-		err = (xError*)buf;
-		snprintf(info,127,"Xerror: Code: 0x%x resID: 0x%x maj: 0x%x "
-			 "min: %x", err->errorCode,err->resourceID,
-			 err->minorCode,err->majorCode);
-		break;
-	    default:
-		if ((buf[0] & 0x7f) == KeymapNotify) 
-		    snprintf(info,127,"KeymapNotifyEvent: %i",buf[0]);
-		else {
-		    ev = (xEvent*)buf;
-		    snprintf(info,127,"XEvent: type: 0x%x detail: 0x%x "
-			     "seq#: 0x%x",  ev->u.u.type, ev->u.u.detail,
-			     ev->u.u.sequenceNumber);
-		}
-	    }
-	    ErrorF("REPLY: ClientIDX: %i %s\n",who->index, info);
-	} else
-	    multicount = TRUE;
-    }
-#endif
-
-    if (!oco)
-    {
-	if ((oco = FreeOutputs))
-	{
-	    FreeOutputs = oco->next;
-	}
-	else if (!(oco = AllocateOutputBuffer()))
-	{
-	    if (oc->trans_conn) {
-		_XSERVTransDisconnect(oc->trans_conn);
-		_XSERVTransClose(oc->trans_conn);
-		oc->trans_conn = NULL;
-	    }
-	    MarkClientException(who);
-	    return -1;
-	}
-	oc->output = oco;
-    }
-
-    padBytes = padlength[count & 3];
-
-    if(ReplyCallback)
-    {
-        ReplyInfoRec replyinfo;
-
-	replyinfo.client = who;
-	replyinfo.replyData = buf;
-	replyinfo.dataLenBytes = count + padBytes;
-	if (who->replyBytesRemaining)
-	{ /* still sending data of an earlier reply */
-	    who->replyBytesRemaining -= count + padBytes;
-	    replyinfo.startOfReply = FALSE;
-	    replyinfo.bytesRemaining = who->replyBytesRemaining;
-	    CallCallbacks((&ReplyCallback), (pointer)&replyinfo);
-	}
-	else if (who->clientState == ClientStateRunning
-		 && buf[0] == X_Reply)
-        { /* start of new reply */
-	    CARD32 replylen;
-	    unsigned long bytesleft;
-	    char n;
-
-	    replylen = ((xGenericReply *)buf)->length;
-	    if (who->swapped)
-		swapl(&replylen, n);
-	    bytesleft = (replylen * 4) + SIZEOF(xReply) - count - padBytes;
-	    replyinfo.startOfReply = TRUE;
-	    replyinfo.bytesRemaining = who->replyBytesRemaining = bytesleft;
-	    CallCallbacks((&ReplyCallback), (pointer)&replyinfo);
-	} 	                      
-    }
-#ifdef DEBUG_COMMUNICATION
-    else if (multicount) {
-	if (who->replyBytesRemaining) {
-	    who->replyBytesRemaining -= (count + padBytes);
-	} else {
-	    CARD32 replylen;
-	    replylen = ((xGenericReply *)buf)->length;
-	    who->replyBytesRemaining =
-		(replylen * 4) + SIZEOF(xReply) - count - padBytes;
-	}
-    }
-#endif
-    if (oco->count + count + padBytes > oco->size)
-    {
-	FD_CLR(oc->fd, &OutputPending);
-	if(!XFD_ANYSET(&OutputPending)) {
-	  CriticalOutputPending = FALSE;
-	  NewOutputPending = FALSE;
-	}
-	return FlushClient(who, oc, buf, count);
-    }
-
-    NewOutputPending = TRUE;
-    FD_SET(oc->fd, &OutputPending);
-    memmove((char *)oco->buf + oco->count, buf, count);
-    oco->count += count + padBytes;
-    return(count);
-}
-
- /********************
  * FlushClient()
  *    If the client isn't keeping up with us, then we try to continue
  *    buffering the data and set the apropriate bit in ClientsWritable
@@ -1055,24 +778,18 @@ WriteToClient (ClientPtr who, int count, char *buf)
  *
  **********************/
 
+int
 #ifdef LBX
-#ifdef LBX_NEED_OLD_SYMBOL_FOR_LOADABLES
-#undef FlushClient
-int
-FlushClient(ClientPtr who, OsCommPtr oc, char *extraBuf, int extraCount)
-{
-    return (*oc->Flush)(who, oc, extraBuf, extraCount);
-}
-#endif
-int
-StandardFlushClient(ClientPtr who, OsCommPtr oc, 
-    char *extraBuf, int extraCount)
+StandardFlushClient(who, oc, extraBuf, extraCount)
 #else
-int
-FlushClient(ClientPtr who, OsCommPtr oc, char *extraBuf, int extraCount)
+FlushClient(who, oc, extraBuf, extraCount)
 #endif
+    ClientPtr who;
+    OsCommPtr oc;
+    char *extraBuf;
+    int extraCount; /* do not modify... returned below */
 {
-    ConnectionOutputPtr oco = oc->output;
+    register ConnectionOutputPtr oco = oc->output;
     int connection = oc->fd;
     XtransConnInfo trans_conn = oc->trans_conn;
     struct iovec iov[3];
@@ -1093,7 +810,7 @@ FlushClient(ClientPtr who, OsCommPtr oc, char *extraBuf, int extraCount)
 	long remain = todo;	/* amount to try this time, <= notWritten */
 	int i = 0;
 	long len;
-	
+
 	/* You could be very general here and have "in" and "out" iovecs
 	 * and write a loop without using a macro, but what the heck.  This
 	 * translates to:
@@ -1237,10 +954,205 @@ FlushClient(ClientPtr who, OsCommPtr oc, char *extraBuf, int extraCount)
     return extraCount; /* return only the amount explicitly requested */
 }
 
-ConnectionInputPtr
-AllocateInputBuffer(void)
+ /********************
+ * FlushAllOutput()
+ *    Flush all clients with output.  However, if some client still
+ *    has input in the queue (more requests), then don't flush.  This
+ *    will prevent the output queue from being flushed every time around
+ *    the round robin queue.  Now, some say that it SHOULD be flushed
+ *    every time around, but...
+ *
+ **********************/
+
+void
+FlushAllOutput()
 {
-    ConnectionInputPtr oci;
+    register int index, base;
+    fd_mask mask;
+    OsCommPtr oc;
+    register ClientPtr client;
+    Bool newoutput = NewOutputPending;
+#ifdef WIN32
+    fd_set newOutputPending;
+#endif
+
+    if (FlushCallback)
+	CallCallbacks(&FlushCallback, NULL);
+
+    if (!newoutput)
+	return;
+
+    /*
+     * It may be that some client still has critical output pending,
+     * but he is not yet ready to receive it anyway, so we will
+     * simply wait for the select to tell us when he's ready to receive.
+     */
+    CriticalOutputPending = FALSE;
+    NewOutputPending = FALSE;
+
+#ifndef WIN32
+    for (base = 0; base < howmany(XFD_SETSIZE, NFDBITS); base++)
+    {
+	mask = OutputPending.fds_bits[ base ];
+	OutputPending.fds_bits[ base ] = 0;
+	while (mask)
+	{
+	    index = ffsl(mask) - 1;
+	    mask &= ~lowbit(mask);
+	    if ((index = ConnectionTranslation[(base * sizeof(fd_mask) * 8) + index]) == 0)
+		continue;
+	    client = clients[index];
+	    if (client->clientGone)
+		continue;
+	    oc = (OsCommPtr)client->osPrivate;
+	    if (
+#ifdef LBX
+		!oc->proxy &&
+#endif
+		FD_ISSET(oc->fd, &ClientsWithInput))
+	    {
+		FD_SET(oc->fd, &OutputPending); /* set the bit again */
+		NewOutputPending = TRUE;
+	    }
+	    else
+		(void)FlushClient(client, oc, (char *)NULL, 0);
+	}
+    }
+#else  /* WIN32 */
+    FD_ZERO(&newOutputPending);
+    for (base = 0; base < XFD_SETCOUNT(&OutputPending); base++)
+    {
+	    index = XFD_FD(&OutputPending, base);
+	    if ((index = ConnectionTranslation[index]) == 0)
+		continue;
+	    client = clients[index];
+	    if (client->clientGone)
+		continue;
+	    oc = (OsCommPtr)client->osPrivate;
+	    if (
+#ifdef LBX
+		!oc->proxy &&
+#endif
+		FD_ISSET(oc->fd, &ClientsWithInput))
+	    {
+		FD_SET(oc->fd, &newOutputPending); /* set the bit again */
+		NewOutputPending = TRUE;
+	    }
+	    else
+		(void)FlushClient(client, oc, (char *)NULL, 0);
+    }
+    XFD_COPYSET(&newOutputPending, &OutputPending);
+#endif /* WIN32 */
+}
+
+void
+FlushIfCriticalOutputPending()
+{
+    if (CriticalOutputPending)
+	FlushAllOutput();
+}
+
+void
+SetCriticalOutputPending()
+{
+    CriticalOutputPending = TRUE;
+}
+
+/*****************
+ * WriteToClient
+ *    Copies buf into ClientPtr.buf if it fits (with padding), else
+ *    flushes ClientPtr.buf and buf to client.  As of this writing,
+ *    every use of WriteToClient is cast to void, and the result
+ *    is ignored.  Potentially, this could be used by requests
+ *    that are sending several chunks of data and want to break
+ *    out of a loop on error.  Thus, we will leave the type of
+ *    this routine as int.
+ *****************/
+
+int
+WriteToClient (who, count, buf)
+    ClientPtr who;
+    char *buf;
+    int count;
+{
+    OsCommPtr oc = (OsCommPtr)who->osPrivate;
+    register ConnectionOutputPtr oco = oc->output;
+    int padBytes;
+
+    if (!count)
+	return(0);
+
+    if (!oco)
+    {
+	if (oco = FreeOutputs)
+	{
+	    FreeOutputs = oco->next;
+	}
+	else if (!(oco = AllocateOutputBuffer()))
+	{
+	    if (oc->trans_conn) {
+		_XSERVTransDisconnect(oc->trans_conn);
+		_XSERVTransClose(oc->trans_conn);
+		oc->trans_conn = NULL;
+	    }
+	    MarkClientException(who);
+	    return -1;
+	}
+	oc->output = oco;
+    }
+
+    padBytes = padlength[count & 3];
+
+    if(ReplyCallback)
+    {
+        ReplyInfoRec replyinfo;
+
+	replyinfo.client = who;
+	replyinfo.replyData = buf;
+	replyinfo.dataLenBytes = count + padBytes;
+	if (who->replyBytesRemaining)
+	{ /* still sending data of an earlier reply */
+	    who->replyBytesRemaining -= count + padBytes;
+	    replyinfo.startOfReply = FALSE;
+	    replyinfo.bytesRemaining = who->replyBytesRemaining;
+	    CallCallbacks((&ReplyCallback), (pointer)&replyinfo);
+	}
+	else if (who->clientState == ClientStateRunning
+		 && buf[0] == X_Reply)
+        { /* start of new reply */
+	    CARD32 replylen;
+	    unsigned long bytesleft;
+	    char n;
+
+	    replylen = ((xGenericReply *)buf)->length;
+	    if (who->swapped)
+		swapl(&replylen, n);
+	    bytesleft = (replylen * 4) + SIZEOF(xReply) - count - padBytes;
+	    replyinfo.startOfReply = TRUE;
+	    replyinfo.bytesRemaining = who->replyBytesRemaining = bytesleft;
+	    CallCallbacks((&ReplyCallback), (pointer)&replyinfo);
+	} 	                      
+    } 
+  
+    if (oco->count + count + padBytes > oco->size)
+    {
+	FD_CLR(oc->fd, &OutputPending);
+	CriticalOutputPending = FALSE;
+	NewOutputPending = FALSE;
+	return FlushClient(who, oc, buf, count);
+    }
+
+    NewOutputPending = TRUE;
+    FD_SET(oc->fd, &OutputPending);
+    memmove((char *)oco->buf + oco->count, buf, count);
+    oco->count += count + padBytes;
+    return(count);
+}
+
+ConnectionInputPtr
+AllocateInputBuffer()
+{
+    register ConnectionInputPtr oci;
 
     oci = (ConnectionInputPtr)xalloc(sizeof(ConnectionInput));
     if (!oci)
@@ -1259,9 +1171,9 @@ AllocateInputBuffer(void)
 }
 
 ConnectionOutputPtr
-AllocateOutputBuffer(void)
+AllocateOutputBuffer()
 {
-    ConnectionOutputPtr oco;
+    register ConnectionOutputPtr oco;
 
     oco = (ConnectionOutputPtr)xalloc(sizeof(ConnectionOutput));
     if (!oco)
@@ -1281,14 +1193,15 @@ AllocateOutputBuffer(void)
 }
 
 void
-FreeOsBuffers(OsCommPtr oc)
+FreeOsBuffers(oc)
+    OsCommPtr oc;
 {
-    ConnectionInputPtr oci;
-    ConnectionOutputPtr oco;
+    register ConnectionInputPtr oci;
+    register ConnectionOutputPtr oco;
 
     if (AvailableInput == oc)
 	AvailableInput = (OsCommPtr)NULL;
-    if ((oci = oc->input))
+    if (oci = oc->input)
     {
 	if (FreeInputs)
 	{
@@ -1304,7 +1217,7 @@ FreeOsBuffers(OsCommPtr oc)
 	    oci->lenLastReq = 0;
 	}
     }
-    if ((oco = oc->output))
+    if (oco = oc->output)
     {
 	if (FreeOutputs)
 	{
@@ -1319,7 +1232,7 @@ FreeOsBuffers(OsCommPtr oc)
 	}
     }
 #ifdef LBX
-    if ((oci = oc->largereq)) {
+    if (oci = oc->largereq) {
 	xfree(oci->buffer);
 	xfree(oci);
     }
@@ -1327,18 +1240,18 @@ FreeOsBuffers(OsCommPtr oc)
 }
 
 void
-ResetOsBuffers(void)
+ResetOsBuffers()
 {
-    ConnectionInputPtr oci;
-    ConnectionOutputPtr oco;
+    register ConnectionInputPtr oci;
+    register ConnectionOutputPtr oco;
 
-    while ((oci = FreeInputs))
+    while (oci = FreeInputs)
     {
 	FreeInputs = oci->next;
 	xfree(oci->buffer);
 	xfree(oci);
     }
-    while ((oco = FreeOutputs))
+    while (oco = FreeOutputs)
     {
 	FreeOutputs = oco->next;
 	xfree(oco->buf);

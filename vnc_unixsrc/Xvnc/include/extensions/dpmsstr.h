@@ -1,4 +1,3 @@
-/* $Xorg: dpmsstr.h,v 1.3 2000/08/18 04:05:45 coskrey Exp $ */
 /*****************************************************************
 
 Copyright (c) 1996 Digital Equipment Corporation, Maynard, Massachusetts.
@@ -26,7 +25,6 @@ dealings in this Software without prior written authorization from Digital
 Equipment Corporation.
 
 ******************************************************************/
-/* $XFree86$ */
 
 /*
  * HISTORY
@@ -35,8 +33,6 @@ Equipment Corporation.
  * @(#)RCSfile: dpmsstr.h,v Revision: 1.1.4.2  (DEC) Date: 1995/11/21 19:34:19
  */
 
-#ifndef _DPMSSTR_H_
-#define _DPMSSTR_H_
 
 #define X_DPMSGetVersion	0
 #define X_DPMSCapable		1
@@ -183,4 +179,7 @@ typedef struct {
 } xDPMSInfoReply;
 #define sz_xDPMSInfoReply 32
 
-#endif /* _DPMSSTR_H_ */
+
+
+
+

@@ -1,15 +1,17 @@
-/* $Xorg: lndir.c,v 1.5 2001/02/09 02:03:17 xorgcvs Exp $ */
+/* $XConsortium: lndir.c /main/16 1996/09/28 16:16:40 rws $ */
+/* $XFree86: xc/config/util/lndir.c,v 3.6 1997/01/18 06:51:01 dawes Exp $ */
 /* Create shadow link tree (after X11R4 script of the same name)
    Mark Reinhold (mbr@lcs.mit.edu)/3 January 1990 */
 
 /* 
-Copyright (c) 1990, 1998 The Open Group
+Copyright (c) 1990,  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -17,23 +19,22 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 */
-/* $XFree86: xc/config/util/lndir.c,v 3.18 2003/06/24 15:44:45 eich Exp $ */
 
 /* From the original /bin/sh script:
 
   Used to create a copy of the a directory tree that has links for all
-  non-directories (except, by default, those named BitKeeper, RCS, SCCS
-  or CVS.adm).  If you are building the distribution on more than one
-  machine, you should use this technique.
+  non-directories (except those named RCS, SCCS or CVS.adm).  If you are
+  building the distribution on more than one machine, you should use
+  this technique.
 
   If your master sources are located in /usr/local/src/X and you would like
   your link tree to be in /usr/local/src/new-X, do the following:
@@ -73,49 +74,77 @@ in this Software without prior written authorization from The Open Group.
 #define MAXPATHLEN 2048
 #endif
 
+#if NeedVarargsPrototypes
 #include <stdarg.h>
+#endif
 
+#ifdef X_NOT_STDC_ENV
+extern int errno;
+#endif
 int silent = 0;			/* -silent */
 int ignore_links = 0;		/* -ignorelinks */
-int with_revinfo = 0;		/* -withrevinfo */
 
 char *rcurdir;
 char *curdir;
 
-static void
-quit (int code, char * fmt, ...)
+void
+quit (
+#if NeedVarargsPrototypes
+    int code, char * fmt, ...)
+#else
+    code, fmt, a1, a2, a3)
+    char *fmt;
+#endif
 {
+#if NeedVarargsPrototypes
     va_list args;
     va_start(args, fmt);
     vfprintf (stderr, fmt, args);
     va_end(args);
+#else
+    fprintf (stderr, fmt, a1, a2, a3);
+#endif
     putc ('\n', stderr);
     exit (code);
 }
 
-static void
-quiterr (int code, char *s)
+void
+quiterr (code, s)
+    char *s;
 {
     perror (s);
     exit (code);
 }
 
-static void
-msg (char * fmt, ...)
+void
+msg (
+#if NeedVarargsPrototypes
+    char * fmt, ...)
+#else
+    fmt, a1, a2, a3)
+    char *fmt;
+#endif
 {
+#if NeedVarargsPrototypes
     va_list args;
+#endif
     if (curdir) {
 	fprintf (stderr, "%s:\n", curdir);
 	curdir = 0;
     }
+#if NeedVarargsPrototypes
     va_start(args, fmt);
     vfprintf (stderr, fmt, args);
     va_end(args);
+#else
+    fprintf (stderr, fmt, a1, a2, a3);
+#endif
     putc ('\n', stderr);
 }
 
-static void
-mperror (char *s)
+void
+mperror (s)
+    char *s;
 {
     if (curdir) {
 	fprintf (stderr, "%s:\n", curdir);
@@ -125,18 +154,17 @@ mperror (char *s)
 }
 
 
-static int 
-equivalent(char *lname, char *rname, char **p)
+int equivalent(lname, rname)
+    char *lname;
+    char *rname;
 {
     char *s;
 
     if (!strcmp(lname, rname))
 	return 1;
     for (s = lname; *s && (s = strchr(s, '/')); s++) {
-	while (s[1] == '/') {
+	while (s[1] == '/')
 	    strcpy(s+1, s+2);
-	    if (*p) (*p)--;
-	}
     }
     return !strcmp(lname, rname);
 }
@@ -144,12 +172,12 @@ equivalent(char *lname, char *rname, char **p)
 
 /* Recursively create symbolic links from the current directory to the "from"
    directory.  Assumes that files described by fs and ts are directories. */
-static int
-dodir (char *fn,		/* name of "from" directory, either absolute or
+
+dodir (fn, fs, ts, rel)
+char *fn;			/* name of "from" directory, either absolute or
 				   relative to cwd */
-       struct stat *fs, 
-       struct stat *ts,		/* stats for the "from" directory and cwd */
-       int rel)			/* if true, prepend "../" to fn before using */
+struct stat *fs, *ts;		/* stats for the "from" directory and cwd */
+int rel;			/* if true, prepend "../" to fn before using */
 {
     DIR *df;
     struct dirent *dp;
@@ -179,22 +207,15 @@ dodir (char *fn,		/* name of "from" directory, either absolute or
     }
 
     p = buf + strlen (buf);
-    if (*(p - 1) != '/')
-	*p++ = '/';
+    *p++ = '/';
     n_dirs = fs->st_nlink;
-    while ((dp = readdir (df))) {
+    while (dp = readdir (df)) {
 	if (dp->d_name[strlen(dp->d_name) - 1] == '~')
 	    continue;
-#ifdef __DARWIN__
-	/* Ignore these Mac OS X Finder data files */
-	if (!strcmp(dp->d_name, ".DS_Store") || 
-	    !strcmp(dp->d_name, "._.DS_Store")) 
-	    continue;
-#endif
 	strcpy (p, dp->d_name);
 
 	if (n_dirs > 0) {
-	    if (lstat (buf, &sb) < 0) {
+	    if (stat (buf, &sb) < 0) {
 		mperror (buf);
 		continue;
 	    }
@@ -202,7 +223,7 @@ dodir (char *fn,		/* name of "from" directory, either absolute or
 #ifdef S_ISDIR
 	    if(S_ISDIR(sb.st_mode))
 #else
-	    if ((sb.st_mode & S_IFMT) == S_IFDIR)
+	    if (sb.st_mode & S_IFDIR) 
 #endif
 	    {
 		/* directory */
@@ -211,20 +232,14 @@ dodir (char *fn,		/* name of "from" directory, either absolute or
 		    (dp->d_name[1] == '\0' || (dp->d_name[1] == '.' &&
 					       dp->d_name[2] == '\0')))
 		    continue;
-		if (!with_revinfo) {
-		    if (!strcmp (dp->d_name, "BitKeeper"))
-			continue;
-		    if (!strcmp (dp->d_name, "RCS"))
-			continue;
-		    if (!strcmp (dp->d_name, "SCCS"))
-			continue;
-		    if (!strcmp (dp->d_name, "CVS"))
-			continue;
-		    if (!strcmp (dp->d_name, "CVS.adm"))
-			continue;
-		    if (!strcmp (dp->d_name, ".svn"))
-			continue;
-		}
+		if (!strcmp (dp->d_name, "RCS"))
+		    continue;
+		if (!strcmp (dp->d_name, "SCCS"))
+		    continue;
+		if (!strcmp (dp->d_name, "CVS"))
+		    continue;
+		if (!strcmp (dp->d_name, "CVS.adm"))
+		    continue;
 		ocurdir = rcurdir;
 		rcurdir = buf;
 		curdir = silent ? buf : (char *)0;
@@ -273,58 +288,10 @@ dodir (char *fn,		/* name of "from" directory, either absolute or
 
 	if (symlen >= 0) {
 	    /* Link exists in new tree.  Print message if it doesn't match. */
-	    if (!equivalent (basesymlen>=0 ? basesym : buf, symbuf,
-			     basesymlen>=0 ? (char **) 0 : &p))
+	    if (!equivalent (basesymlen>=0 ? basesym : buf, symbuf))
 		msg ("%s: %s", dp->d_name, symbuf);
 	} else {
-	    char *sympath;
-
-	    if (basesymlen>=0) {
-		if ((buf[0] == '.') && (buf[1] == '.') && (buf[2] == '/') &&
-		    (basesym[0] == '.') && (basesym[1] == '.') &&
-		    (basesym[2] == '/')) {
-		    /* It becomes very tricky here. We have
-		       ../../bar/foo symlinked to ../xxx/yyy. We
-		       can't just use ../xxx/yyy. We have to use
-		       ../../bar/foo/../xxx/yyy.  */
-
-		    int i;
-		    char *start, *end;
-
-		    strcpy (symbuf, buf);
-		    /* Find the first char after "../" in symbuf.  */
-		    start = symbuf;
-		    do {
-			start += 3;
-		    } while ((start[0] == '.') && (start[1] == '.') &&
-			     (start[2] == '/'));
-
-		    /* Then try to eliminate "../"s in basesym.  */
-		    i = 0;
-		    end = strrchr (symbuf, '/');
-		    if (start < end) {
-			do {
-			    i += 3;
-			    end--;
-			    while ((*end != '/') && (end != start))
-				end--;
-			    if (end == start)
-				break;
-			} while ((basesym[i] == '.') &&
-				 (basesym[i + 1] == '.') &&
-				 (basesym[i + 2] == '/'));
-		    }
-		    if (*end == '/')
-			end++;
-		    strcpy (end, &basesym[i]);
-		    sympath = symbuf;
-		}
-		else
-		    sympath = basesym;
-	    }
-	    else
-		sympath = buf;
-	    if (symlink (sympath, dp->d_name) < 0)
+	    if (symlink (basesymlen>=0 ? basesym : buf, dp->d_name) < 0)
 		mperror (dp->d_name);
 	}
     }
@@ -333,8 +300,10 @@ dodir (char *fn,		/* name of "from" directory, either absolute or
     return 0;
 }
 
-int
-main (int ac, char *av[])
+
+main (ac, av)
+int ac;
+char **av;
 {
     char *prog_name = av[0];
     char *fn, *tn;
@@ -345,8 +314,6 @@ main (int ac, char *av[])
 	    silent = 1;
 	else if (strcmp(*av, "-ignorelinks") == 0)
 	    ignore_links = 1;
-	else if (strcmp(*av, "-withrevinfo") == 0)
-	    with_revinfo = 1;
 	else if (strcmp(*av, "--") == 0) {
 	    ++av, --ac;
 	    break;
@@ -371,7 +338,7 @@ main (int ac, char *av[])
 #ifdef S_ISDIR
     if (!(S_ISDIR(ts.st_mode)))
 #else
-    if (!(ts.st_mode & S_IFMT) == S_IFDIR)
+    if (!(ts.st_mode & S_IFDIR))
 #endif
 	quit (2, "%s: Not a directory", tn);
     if (chdir (tn) < 0)
@@ -383,7 +350,7 @@ main (int ac, char *av[])
 #ifdef S_ISDIR
     if (!(S_ISDIR(fs.st_mode)))
 #else
-    if (!(fs.st_mode & S_IFMT) == S_IFDIR)
+    if (!(fs.st_mode & S_IFDIR))
 #endif
 	quit (2, "%s: Not a directory", fn);
 

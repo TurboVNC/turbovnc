@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/mi/mipushpxl.c,v 3.12 2001/12/14 20:00:26 dawes Exp $ */
 /***********************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -45,18 +45,14 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $Xorg: mipushpxl.c,v 1.4 2001/02/09 02:05:21 xorgcvs Exp $ */
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
+/* $XConsortium: mipushpxl.c,v 5.5 94/04/17 20:27:47 dpw Exp $ */
+/* $XFree86: xc/programs/Xserver/mi/mipushpxl.c,v 3.1 1996/12/09 12:02:49 dawes Exp $ */
+#include "X.h"
 #include "gcstruct.h"
 #include "scrnintstr.h"
 #include "pixmapstr.h"
-#include "regionstr.h"
+#include "miscstruct.h"
 #include "../mfb/maskbits.h"
-#include "mi.h"
 
 #define NPT 128
 
@@ -74,11 +70,6 @@ per scanline, scanline unit = 32 bits; later, this might mean
 bitsizeof(int) padding and sacnline unit == bitsizeof(int).)
 
  */
-
-/*
- * in order to have both (MSB_FIRST and LSB_FIRST) versions of this
- * in the server, we need to rename one of them
- */
 void
 miPushPixels(pGC, pBitMap, pDrawable, dx, dy, xOrg, yOrg)
     GCPtr	pGC;
@@ -87,33 +78,16 @@ miPushPixels(pGC, pBitMap, pDrawable, dx, dy, xOrg, yOrg)
     int		dx, dy, xOrg, yOrg;
 {
     int		h, dxDivPPW, ibEnd;
-    MiBits *pwLineStart;
-    register MiBits	*pw, *pwEnd;
-    register MiBits msk;
+    unsigned long *pwLineStart;
+    register unsigned long	*pw, *pwEnd;
+    register unsigned long msk;
     register int ib, w;
     register int ipt;		/* index into above arrays */
     Bool 	fInBox;
     DDXPointRec	pt[NPT], ptThisLine;
     int		width[NPT];
-#ifdef XFree86Server
-    PixelType	startmask;
-    if (screenInfo.bitmapBitOrder == IMAGE_BYTE_ORDER)
-      if (screenInfo.bitmapBitOrder == LSBFirst)
-        startmask = (MiBits)(-1) ^
-            LONG2CHARSSAMEORDER((MiBits)(-1) << 1);
-      else
-        startmask = (MiBits)(-1) ^
-            LONG2CHARSSAMEORDER((MiBits)(-1) >> 1);
-    else
-      if (screenInfo.bitmapBitOrder == LSBFirst)
-        startmask = (MiBits)(-1) ^
-            LONG2CHARSDIFFORDER((MiBits)(-1) << 1);
-      else
-        startmask = (MiBits)(-1) ^
-            LONG2CHARSDIFFORDER((MiBits)(-1) >> 1);
-#endif
 
-    pwLineStart = (MiBits *)xalloc(BitmapBytePad(dx));
+    pwLineStart = (unsigned long *)xalloc(BitmapBytePad(dx));
     if (!pwLineStart)
 	return;
     ipt = 0;
@@ -135,11 +109,7 @@ miPushPixels(pGC, pBitMap, pDrawable, dx, dy, xOrg, yOrg)
 	while(pw  < pwEnd)
 	{
 	    w = *pw;
-#ifdef XFree86Server
-	    msk = startmask;
-#else
-	    msk = (MiBits)(-1) ^ SCRRIGHT((MiBits)(-1), 1);
-#endif
+	    msk = endtab[1];
 	    for(ib = 0; ib < PPW; ib++)
 	    {
 		if(w & msk)
@@ -168,21 +138,7 @@ miPushPixels(pGC, pBitMap, pDrawable, dx, dy, xOrg, yOrg)
 			fInBox = FALSE;
 		    }
 		}
-#ifdef XFree86Server
-    		/* This is not quite right, but it'll do for now */
-		if (screenInfo.bitmapBitOrder == IMAGE_BYTE_ORDER)
-		  if (screenInfo.bitmapBitOrder == LSBFirst)
-		    msk = LONG2CHARSSAMEORDER(LONG2CHARSSAMEORDER(msk) << 1);
-		  else
-		    msk = LONG2CHARSSAMEORDER(LONG2CHARSSAMEORDER(msk) >> 1);
-		else
-		  if (screenInfo.bitmapBitOrder == LSBFirst)
-		    msk = LONG2CHARSDIFFORDER(LONG2CHARSDIFFORDER(msk) << 1);
-		  else
-		    msk = LONG2CHARSDIFFORDER(LONG2CHARSDIFFORDER(msk) >> 1);
-#else
 		msk = SCRRIGHT(msk, 1);
-#endif
 	    }
 	    pw++;
 	}
@@ -191,11 +147,7 @@ miPushPixels(pGC, pBitMap, pDrawable, dx, dy, xOrg, yOrg)
 	{
 	    /* Process final partial word on line */
 	    w = *pw;
-#ifdef XFree86Server
-	    msk = startmask;
-#else
-	    msk = (MiBits)(-1) ^ SCRRIGHT((MiBits)(-1), 1);
-#endif
+	    msk = endtab[1];
 	    for(ib = 0; ib < ibEnd; ib++)
 	    {
 		if(w & msk)
@@ -224,21 +176,7 @@ miPushPixels(pGC, pBitMap, pDrawable, dx, dy, xOrg, yOrg)
 			fInBox = FALSE;
 		    }
 		}
-#ifdef XFree86Server
-    		/* This is not quite right, but it'll do for now */
-		if (screenInfo.bitmapBitOrder == IMAGE_BYTE_ORDER)
-		  if (screenInfo.bitmapBitOrder == LSBFirst)
-		    msk = LONG2CHARSSAMEORDER(LONG2CHARSSAMEORDER(msk) << 1);
-		  else
-		    msk = LONG2CHARSSAMEORDER(LONG2CHARSSAMEORDER(msk) >> 1);
-		else
-		  if (screenInfo.bitmapBitOrder == LSBFirst)
-		    msk = LONG2CHARSDIFFORDER(LONG2CHARSDIFFORDER(msk) << 1);
-		  else
-		    msk = LONG2CHARSDIFFORDER(LONG2CHARSDIFFORDER(msk) >> 1);
-#else
 		msk = SCRRIGHT(msk, 1);
-#endif
 	    }
 	}
 	/* If scanline ended with last bit set, end the box */

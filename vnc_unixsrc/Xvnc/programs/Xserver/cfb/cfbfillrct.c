@@ -1,17 +1,17 @@
 /*
  * Fill rectangles.
  */
-/* $XFree86: xc/programs/Xserver/cfb/cfbfillrct.c,v 3.7 2001/01/17 22:36:35 dawes Exp $ */
 
 /*
 
-Copyright 1989, 1998  The Open Group
+Copyright (c) 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -19,30 +19,27 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 */
 
-/* $Xorg: cfbfillrct.c,v 1.4 2001/02/09 02:04:37 xorgcvs Exp $ */
+/* $XConsortium: cfbfillrct.c,v 5.18 94/04/17 20:28:47 dpw Exp $ */
+/* $XFree86: xc/programs/Xserver/cfb/cfbfillrct.c,v 3.1.4.1 1997/05/10 07:02:48 hohndel Exp $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
-#include <X11/Xmd.h>
+#include "X.h"
+#include "Xmd.h"
 #include "servermd.h"
 #include "gcstruct.h"
 #include "window.h"
 #include "pixmapstr.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
-#include "mi.h"
+
 #include "cfb.h"
 #include "cfbmskbits.h"
 #include "mergerop.h"
@@ -74,7 +71,7 @@ cfbFillRectTileOdd (pDrawable, pGC, nBox, pBox)
     BoxPtr	pBox;
 {
     int	xrot, yrot;
-    void    (*fill)(DrawablePtr, int, BoxPtr, PixmapPtr, int, int, int, unsigned long);
+    void    (*fill)();
 
     xrot = pDrawable->x + pGC->patOrg.x;
     yrot = pDrawable->y + pGC->patOrg.y;
@@ -121,7 +118,7 @@ cfbPolyFillRect(pDrawable, pGC, nrectFill, prectInit)
     BoxRec	    stackRects[NUM_STACK_RECTS];
     cfbPrivGC	    *priv;
     int		    numRects;
-    void	    (*BoxFill)(DrawablePtr, GCPtr, int, BoxPtr);
+    void	    (*BoxFill)();
     int		    n;
     int		    xorg, yorg;
 
@@ -134,7 +131,7 @@ cfbPolyFillRect(pDrawable, pGC, nrectFill, prectInit)
 #endif
 
     priv = cfbGetGCPrivate(pGC);
-    prgnClip = pGC->pCompositeClip;
+    prgnClip = priv->pCompositeClip;
 
     BoxFill = 0;
     switch (pGC->fillStyle)
@@ -153,7 +150,7 @@ cfbPolyFillRect(pDrawable, pGC, nrectFill, prectInit)
 	}
 	break;
     case FillTiled:
-	if (!pGC->pRotatedPixmap)
+	if (!cfbGetGCPrivate(pGC)->pRotatedPixmap)
 	    BoxFill = cfbFillRectTileOdd;
 	else
 	{
@@ -165,13 +162,13 @@ cfbPolyFillRect(pDrawable, pGC, nrectFill, prectInit)
 	break;
 #if PSZ == 8
     case FillStippled:
-	if (!pGC->pRotatedPixmap)
+	if (!cfbGetGCPrivate(pGC)->pRotatedPixmap)
 	    BoxFill = cfb8FillRectStippledUnnatural;
 	else
 	    BoxFill = cfb8FillRectTransparentStippled32;
 	break;
     case FillOpaqueStippled:
-	if (!pGC->pRotatedPixmap)
+	if (!cfbGetGCPrivate(pGC)->pRotatedPixmap)
 	    BoxFill = cfb8FillRectStippledUnnatural;
 	else
 	    BoxFill = cfb8FillRectOpaqueStippled32;

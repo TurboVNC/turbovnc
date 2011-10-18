@@ -1,14 +1,15 @@
-/* $Xorg: miline.h,v 1.4 2001/02/09 02:05:21 xorgcvs Exp $ */
+/* $XConsortium: miline.h /main/6 1996/08/12 21:51:09 dpw $ */
 
 /*
 
-Copyright 1994, 1998  The Open Group
+Copyright (c) 1994  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,20 +17,17 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 */
-/* $XFree86: xc/programs/Xserver/mi/miline.h,v 1.6 2001/08/06 20:51:19 dawes Exp $ */
 
 #ifndef MILINE_H
-
-#include "screenint.h"
 
 /*
  * Public definitions used for configuring basic pixelization aspects
@@ -79,8 +77,10 @@ in this Software without prior written authorization from The Open Group.
  */
 
 extern void miSetZeroLineBias(
+#if NeedFunctionPrototypes
     ScreenPtr /* pScreen */,
     unsigned int /* bias */
+#endif
 );
 
 /*
@@ -102,14 +102,6 @@ extern void miSetZeroLineBias(
     if	    ( (_y) <  (_pbox)->y1) (_result) |= OUT_ABOVE; \
     else if ( (_y) >= (_pbox)->y2) (_result) |= OUT_BELOW;
 
-#define MIOUTCODES(outcode, x, y, xmin, ymin, xmax, ymax) \
-{\
-     if (x < xmin) outcode |= OUT_LEFT;\
-     if (x > xmax) outcode |= OUT_RIGHT;\
-     if (y < ymin) outcode |= OUT_ABOVE;\
-     if (y > ymax) outcode |= OUT_BELOW;\
-}
-  
 #define SWAPINT(i, j) \
 {  register int _t = i;  i = j;  j = _t; }
 
@@ -153,6 +145,7 @@ extern void miSetZeroLineBias(
 extern int miZeroLineScreenIndex;
 
 extern int miZeroClipLine(
+#if NeedFunctionPrototypes
     int /*xmin*/,
     int /*ymin*/,
     int /*xmax*/,
@@ -169,6 +162,7 @@ extern int miZeroClipLine(
     unsigned int /*bias*/,
     int /*oc1*/,
     int /*oc2*/
+#endif
 );
 
 #endif /* MILINE_H */

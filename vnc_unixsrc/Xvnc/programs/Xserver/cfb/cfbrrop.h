@@ -1,13 +1,15 @@
 /*
- * $Xorg: cfbrrop.h,v 1.4 2001/02/09 02:04:38 xorgcvs Exp $
+ * $XConsortium: cfbrrop.h,v 1.10 95/06/08 23:20:39 gildea Exp $
+ * $XFree86: xc/programs/Xserver/cfb/cfbrrop.h,v 3.2 1997/01/08 20:32:41 dawes Exp $
  *
-Copyright 1989, 1998  The Open Group
+Copyright (c) 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,25 +17,19 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
  *
  * Author:  Keith Packard, MIT X Consortium
  */
 
-/* $XFree86: xc/programs/Xserver/cfb/cfbrrop.h,v 3.10tsi Exp $ */
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifndef GXcopy
-#include <X11/X.h>
+#include "X.h"
 #endif
 
 #define RROP_FETCH_GC(gc) \
@@ -45,8 +41,8 @@ in this Software without prior written authorization from The Open Group.
 
 #if RROP == GXcopy
 #if PSZ == 24
-#define RROP_DECLARE	register CfbBits	rrop_xor; \
-    CfbBits piQxelXor[3], spiQxelXor[8];
+#define RROP_DECLARE	register unsigned long	rrop_xor; \
+    unsigned long piQxelXor[3], spiQxelXor[8];
 #define RROP_FETCH_GCPRIV(devPriv)  rrop_xor = (devPriv)->xor; \
     spiQxelXor[0] = rrop_xor & 0xFFFFFF; \
     spiQxelXor[2] = rrop_xor << 24; \
@@ -70,21 +66,21 @@ in this Software without prior written authorization from The Open Group.
 	    (*(dst) = piQxelXor[(idx)])
 #define RROP_SOLID_MASK(dst,mask,idx) \
 	    (*(dst) = (*(dst) & ~(mask))|(piQxelXor[(idx)] & (mask)))
-#define RROP_UNDECLARE (void)piQxelXor;  (void)spiQxelXor;
 #else
 #define RROP_FETCH_GCPRIV(devPriv)  rrop_xor = (devPriv)->xor;
-#define RROP_DECLARE	register CfbBits	rrop_xor;
+#define RROP_DECLARE	register unsigned long	rrop_xor;
 #define RROP_SOLID(dst)	    (*(dst) = (rrop_xor))
 #define RROP_SOLID_MASK(dst,mask) (*(dst) = (*(dst) & ~(mask)) | ((rrop_xor) & (mask)))
-#define RROP_UNDECLARE
+#define RROP_SOLID_lu(dst)	    stl_u(rrop_xor, dst)
+#define RROP_SOLID_MASK_lu(dst,mask) stl_u((ldl_u(dst) & ~(mask)) | ((rrop_xor) & (mask)), dst)
 #endif
 #define RROP_NAME(prefix)   RROP_NAME_CAT(prefix,Copy)
 #endif /* GXcopy */
 
 #if RROP == GXxor
 #if PSZ == 24
-#define RROP_DECLARE	register CfbBits	rrop_xor; \
-    CfbBits piQxelXor[3], spiQxelXor[8];
+#define RROP_DECLARE	register unsigned long	rrop_xor; \
+    unsigned long piQxelXor[3], spiQxelXor[8];
 #define RROP_FETCH_GCPRIV(devPriv)  rrop_xor = (devPriv)->xor; \
     spiQxelXor[0] = rrop_xor & 0xFFFFFF; \
     spiQxelXor[2] = rrop_xor << 24; \
@@ -106,21 +102,19 @@ in this Software without prior written authorization from The Open Group.
 	    (*(dst) ^= piQxelXor[(idx)])
 #define RROP_SOLID_MASK(dst,mask,idx) \
 	    (*(dst) ^= (piQxelXor[(idx)] & (mask)))
-#define RROP_UNDECLARE (void)piQxelXor; (void)spiQxelXor;
 #else
-#define RROP_DECLARE	register CfbBits	rrop_xor;
+#define RROP_DECLARE	register unsigned long	rrop_xor;
 #define RROP_FETCH_GCPRIV(devPriv)  rrop_xor = (devPriv)->xor;
 #define RROP_SOLID(dst)	    (*(dst) ^= (rrop_xor))
 #define RROP_SOLID_MASK(dst,mask) (*(dst) ^= ((rrop_xor) & (mask)))
-#define RROP_UNDECLARE
 #endif
 #define RROP_NAME(prefix)   RROP_NAME_CAT(prefix,Xor)
 #endif /* GXxor */
 
 #if RROP == GXand
 #if PSZ == 24
-#define RROP_DECLARE	register CfbBits	rrop_and; \
-    CfbBits piQxelAnd[3], spiQxelAnd[6];
+#define RROP_DECLARE	register unsigned long	rrop_and; \
+    unsigned long piQxelAnd[3], spiQxelAnd[6];
 #define RROP_FETCH_GCPRIV(devPriv)  rrop_and = (devPriv)->and; \
     spiQxelAnd[0] = (rrop_and & 0xFFFFFF) | 0xFF000000; \
     spiQxelAnd[2] = (rrop_and << 24) | 0xFFFFFF; \
@@ -153,21 +147,19 @@ in this Software without prior written authorization from The Open Group.
 	    (*(dst) &= piQxelAnd[(idx)])
 #define RROP_SOLID_MASK(dst,mask,idx) \
 	    (*(dst) &= (piQxelAnd[(idx)] | ~(mask)))
-#define RROP_UNDECLARE (void)piQxelAnd; (void)spiQxelAnd;
 #else
-#define RROP_DECLARE	register CfbBits	rrop_and;
+#define RROP_DECLARE	register unsigned long	rrop_and;
 #define RROP_FETCH_GCPRIV(devPriv)  rrop_and = (devPriv)->and;
 #define RROP_SOLID(dst)	    (*(dst) &= (rrop_and))
 #define RROP_SOLID_MASK(dst,mask) (*(dst) &= ((rrop_and) | ~(mask)))
-#define RROP_UNDECLARE
 #endif
 #define RROP_NAME(prefix)   RROP_NAME_CAT(prefix,And)
 #endif /* GXand */
 
 #if RROP == GXor
 #if PSZ == 24
-#define RROP_DECLARE	register CfbBits	rrop_or; \
-    CfbBits piQxelOr[3], spiQxelOr[6];
+#define RROP_DECLARE	register unsigned long	rrop_or; \
+    unsigned long piQxelOr[3], spiQxelOr[6];
 #define RROP_FETCH_GCPRIV(devPriv)  rrop_or = (devPriv)->xor; \
     spiQxelOr[0] = rrop_or & 0xFFFFFF; \
     spiQxelOr[1] = rrop_or << 24; \
@@ -200,13 +192,11 @@ in this Software without prior written authorization from The Open Group.
 	    (*(dst) |= piQxelOr[(idx)])
 #define RROP_SOLID_MASK(dst,mask,idx) \
 	    (*(dst) |= (piQxelOr[(idx)] & (mask)))
-#define RROP_UNDECLARE (void)piQxelOr;  (void)spiQxelOr;
 #else
-#define RROP_DECLARE	register CfbBits	rrop_or;
+#define RROP_DECLARE	register unsigned long	rrop_or;
 #define RROP_FETCH_GCPRIV(devPriv)  rrop_or = (devPriv)->xor;
 #define RROP_SOLID(dst)	    (*(dst) |= (rrop_or))
 #define RROP_SOLID_MASK(dst,mask) (*(dst) |= ((rrop_or) & (mask)))
-#define RROP_UNDECLARE
 #endif
 #define RROP_NAME(prefix)   RROP_NAME_CAT(prefix,Or)
 #endif /* GXor */
@@ -217,13 +207,12 @@ in this Software without prior written authorization from The Open Group.
 #define RROP_SOLID(dst)
 #define RROP_SOLID_MASK(dst,mask)
 #define RROP_NAME(prefix)   RROP_NAME_CAT(prefix,Noop)
-#define RROP_UNDECLARE
 #endif /* GXnoop */
 
 #if RROP ==  GXset
 #if PSZ == 24
-#define RROP_DECLARE	    register CfbBits	rrop_and, rrop_xor; \
-    CfbBits piQxelAnd[3], piQxelXor[3],  spiQxelAnd[6], spiQxelXor[6];
+#define RROP_DECLARE	    register unsigned long	rrop_and, rrop_xor; \
+    unsigned long piQxelAnd[3], piQxelXor[3],  spiQxelAnd[6], spiQxelXor[6];
 #define RROP_FETCH_GCPRIV(devPriv)  rrop_and = (devPriv)->and; \
 				    rrop_xor = (devPriv)->xor; \
     spiQxelXor[0] = rrop_xor & 0xFFFFFF; \
@@ -266,15 +255,12 @@ in this Software without prior written authorization from The Open Group.
 	    (*(dst) = DoRRop (*(dst), piQxelAnd[(idx)], piQxelXor[(idx)]))
 #define RROP_SOLID_MASK(dst,mask,idx) \
 	    (*(dst) = DoMaskRRop (*(dst), piQxelAnd[(idx)], piQxelXor[(idx)], (mask)))
-#define RROP_UNDECLARE (void)piQxelAnd;  (void)piQxelXor; \
-		       (void)spiQxelAnd;  (void)spiQxelXor;
 #else
-#define RROP_DECLARE	    register CfbBits	rrop_and, rrop_xor;
+#define RROP_DECLARE	    register unsigned long	rrop_and, rrop_xor;
 #define RROP_FETCH_GCPRIV(devPriv)  rrop_and = (devPriv)->and; \
 				    rrop_xor = (devPriv)->xor;
 #define RROP_SOLID(dst)	    (*(dst) = DoRRop (*(dst), rrop_and, rrop_xor))
 #define RROP_SOLID_MASK(dst,mask)   (*(dst) = DoMaskRRop (*(dst), rrop_and, rrop_xor, (mask)))
-#define RROP_UNDECLARE
 #endif
 #define RROP_NAME(prefix)   RROP_NAME_CAT(prefix,General)
 #endif /* GXset */
@@ -319,24 +305,29 @@ in this Software without prior written authorization from The Open Group.
 #define RROP_SPAN(pdst,nmiddle) {\
     int part = (nmiddle) & RROP_UNROLL_MASK; \
     (nmiddle) >>= RROP_UNROLL_SHIFT; \
-    (pdst) += part * (sizeof (CfbBits) / sizeof (*pdst)); \
+    (pdst) += part * (sizeof (unsigned long) / sizeof (*pdst)); \
     switch (part) {\
-	RROP_UNROLL_CASE((CfbBits *) (pdst)) \
+	RROP_UNROLL_CASE((unsigned long *) (pdst)) \
     } \
     while (--(nmiddle) >= 0) { \
-	(pdst) += RROP_UNROLL * (sizeof (CfbBits) / sizeof (*pdst)); \
-	RROP_UNROLL_LOOP((CfbBits *) (pdst)) \
+	(pdst) += RROP_UNROLL * (sizeof (unsigned long) / sizeof (*pdst)); \
+	RROP_UNROLL_LOOP((unsigned long *) (pdst)) \
     } \
 }
 #else
 #define RROP_SPAN(pdst,nmiddle) \
     while (--(nmiddle) >= 0) { \
-	RROP_SOLID((CfbBits *) (pdst)); \
-	(pdst) += sizeof (CfbBits) / sizeof (*pdst); \
+	RROP_SOLID((unsigned long *) (pdst)); \
+	(pdst) += sizeof (unsigned long) / sizeof (*pdst); \
+    }
+#define RROP_SPAN_lu(pdst,nmiddle) \
+    while (--(nmiddle) >= 0) { \
+	RROP_SOLID_lu((unsigned long *) (pdst)); \
+	(pdst) += sizeof (unsigned long) / sizeof (*pdst); \
     }
 #endif
 
-#if !defined(UNIXCPP) || defined(ANSICPP)
+#if (defined(__STDC__) && !defined(UNIXCPP)) || defined(ANSICPP)
 #define RROP_NAME_CAT(prefix,suffix)	prefix##suffix
 #else
 #define RROP_NAME_CAT(prefix,suffix)	prefix/**/suffix

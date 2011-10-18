@@ -1,190 +1,22 @@
-XCOMM platform:  $XFree86: xc/config/cf/DGUX.cf,v 1.5 2000/07/07 20:06:56 tsi Exp $
-/* Copyright Takis Psarogiannakopoulos <takis@pmms.cam.ac.uk>
- * This is the DG/ux configuration file of X11R6.3 
- */
-#define	OSName	DG/ux R4.20MU03
-#define i386Architecture
-#ifndef OSVendor
-#define OSVendor Data General Corporation
+XCOMM platform:  $XConsortium: DGUX.cf /main/5 1996/09/28 16:04:56 rws $
+
+#ifndef OSName
+#define OSName            DG/UX 4.32
+#endif
+XCOMM operating system:  OSName
+#ifndef OSMajorVersion
+#define OSMajorVersion    4
+#endif
+#ifndef OSMinorVersion
+#define OSMinorVersion    32
 #endif
 
-#define	OSMajorVersion	4
-#define	OSMinorVersion	20
-#define	OSTeenyVersion	3
-#define BootstrapCFlags		-DDGUX
+#define BootstrapCFlags   -DDGUX
+#define StandardDefines   -DDGUX -DSYSV
+#define SystemV           YES
+#define HasPutenv         YES
+#define HasGcc            YES
+#define BuildServer       NO
+#define UNCOMPRESSPATH /usr/bin/X11/uncompress
 
-/* Some stuff that all SVR4s ,so and DG/ux, should have */
-
-#define SystemV4		YES
-#ifndef HasLdRunPath
-#define HasLdRunPath		YES
-#endif
-#define HasPoll			YES
-#ifndef SVR4Architecture
-#define SVR4Architecture
-#endif
-#ifndef PatheticCpp
-#define PatheticCpp		YES
-#endif
-#define Malloc0ReturnsNull	YES		/* in case -lmalloc used */
-
-/*
- * Here are the default paths to use tools for building.
- */
-
-#define ArCmdBase       /usr/bin/ar
-#define AsCmd           /usr/bin/as
-#define CppCmd          /usr/lib/cpp
-#define LdCmd           /usr/bin/ld
-#define LexCmd          /usr/bin/lex
-#define CcCmd           /usr/local/bin/gcc      /* ?  -fpcc-struct-return */
-#define UNCOMPRESSPATH  /usr/bin/uncompress
-#define MakeCmd         /usr/local/bin/make
-#define YaccCmd         /usr/bin/yacc
-#define InstallCmd      /usr/bin/install   /* I use gnu install-sh */
-#define LnCmd           ln -s
-#define RanlibCmd true                         /* Or make a link ranlib->true */ 
-#define CplusplusCmd    /usr/local/bin/g++
-
-
-
-
-
-
-#ifndef MkdirHierCmd
-#define MkdirHierCmd mkdir -p
-#endif
-/* Stuff for SVR4 4.0 */
-#ifndef XawI18nDefines
-#define XawI18nDefines          -DUSE_XWCHAR_STRING
-#endif
-
-#define HasPutenv YES
-#define HasVFork YES
-#define HasVoidSignalReturn  YES
-#define HasBsearch YES
-#define HasSockets YES
-#define BuildServer YES
-#define HasSharedLibraries YES   /* to build shared libs */
-#define HasCplusplus YES
-#define HasGnuMake YES          /* Added for 3.2Xc */
-#define UseGnuMalloc YES
-#define GnuMallocLibrary -L/usr/local/lib -lmalloc
-#define Malloc0ReturnsNull YES  /* Added for 3.2Xh,i... GNU does return 0 */
-#define Malloc0ReturnsNullDefines -DMALLOC_0_RETURNS_NULL   /* define for GNU malloc X3.2i */
-/*******TCL TK DEFINITIONS ***********/
-#define HasTk  YES                 /* Comment out if you dont have this */
-#define TkLibDir    /usr/X11R6.3/lib
-#define TkIncDir    /usr/X11R6.3/include
-#define TkLibName   tk8.0
-#define HasTcl YES
-#define TclLibName  tcl8.0
-#define TclLibDir   /usr/X11R6.3/lib
-#define TclIncDir   /usr/X11R6.3/include
-
-#define SystemManDirectory /usr/local/man/X
-
-#define ExtraLibraries -lelf -lgen -lresolv -lsocket -lnsl -lw
-
-#define StandardDefines -DDGUX -DSVR4 -Di386 -D__ix86 -D_DGUX_SOURCE -D_LITTLE_ENDIAN -D_PENTIUM_CHANGE
-
-#define PositionIndependentCFlags -fpic
-#define PositionIndependentCplusplusFlags -fpic
-
-/*
- * To forceably build static libraries in addition to shared libraries,
- * we put this.
- */
-#define ForceNormalLib          YES
-
-#ifndef ToolkitStringsABIOptions
-#define ToolkitStringsABIOptions -intelabi -earlyR6bc
-#endif
-
-#ifndef DefaultCCOptions
-#define DefaultCCOptions     /* -ansi -pedantic */
-#endif
-#define OptimizedCDebugFlags -O2  /* Add -g -mstandard for full debuging info */
-#define OptimizedCplusplusDebugFlags
-#define DebuggableCDebugFlags -g -mstandard
-#define DebuggableCplusplusDebugFlags
-#define SharedLibraryLoadFlags -G -z text
-#define PositionIndependentCFlags -fpic
-#define PositionIndependentCplusplusFlags -fpic
-
-
-
-/*
- * The default optimisation flags for GCC 2.x.  -fno-strength-reduce is
- * here to work around a bug in -O2 for GCC 2.x on i386 platforms.
- * If you are using a version that doesn't have this bug, you can
- * uncomment the following line, and remove '-fno-strength-reduce'
- *
-#define DefaultGcc2i386Opt      -O2 -fno-strength-reduce
- */
-
-/* Compress all the Fonts */
-#define CompressAllFonts        YES
-
-
-
-/* Manual pages installed under their full names */ 
-
-#define ExpandManNames          YES
-#define CompressManPages        YES
-
-
-
-
-/* Install with stripping before ? */
-#define StripInstalledPrograms  YES
-
-/* Server to Install */
-#define XserverNeedsSetUID YES
-#define InstallXserverSetUID YES
-
-
-#ifndef ServerOSDefines
-#define ServerOSDefines -DDDXTIME XFree86ServerOSDefines
-#endif
-#ifndef BuildDynamicLoading
-#define BuildDynamicLoading NO
-#endif
-#if BuildDynamicLoading
-#define ServerExtraSysLibs -ldl
-#endif
-
-/*
- * The TLI interface is more robust on most SVR4s, so it will be the default.
- */
-#ifndef ConnectionFlags
-#define ConnectionFlags	-DSTREAMSCONN -DUNIXCONN -DLOCALCONN
-#endif
-
-#ifndef ManSuffix
-#define ManSuffix               1x
-#define ManDir			$(MANSOURCEPATH)1
-#endif
-#ifndef LibManSuffix
-#define LibManSuffix            3x
-#define LibmanDir		$(MANSOURCEPATH)3
-#endif
-#ifndef FileManSuffix
-#define FileManSuffix           4
-#endif
-
-#ifndef StaticLibrary
-#ifndef HasGcc
-#define StaticLibrary(libpath,libname) -B static Concat(-L,libpath) Concat(-l,libname) -B dynamic
-#endif
-#endif
-
-#ifndef UseDeprecatedKeyboardDriver
-#define UseDeprecatedKeyboardDriver YES
-#endif
-
-#ifdef i386Architecture
-#include <xorg.cf>
-#endif
-
-#include <sv4Lib.rules>
+#define ExtraFilesToClean *.lg

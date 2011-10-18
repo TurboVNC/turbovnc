@@ -29,48 +29,73 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 int
 ChangeKeyboardDevice (
+#if NeedFunctionPrototypes
 	DeviceIntPtr           /* old_dev */,
-	DeviceIntPtr           /* new_dev */);
+	DeviceIntPtr           /* new_dev */
+#endif
+	);
 
 int
 ChangePointerDevice (
+#if NeedFunctionPrototypes
 	DeviceIntPtr           /* old_dev */,
 	DeviceIntPtr           /* new_dev */,
 	unsigned char          /* x */,
-	unsigned char          /* y */);
+	unsigned char          /* y */
+#endif
+	);
 
 void
 CloseInputDevice (
+#if NeedFunctionPrototypes
 	DeviceIntPtr           /* d */,
-	ClientPtr              /* client */);
+	ClientPtr              /* client */
+#endif
+	);
 
 void
-AddOtherInputDevices (void);
+AddOtherInputDevices (
+#if NeedFunctionPrototypes
+	void
+#endif
+	);
 
 void
 OpenInputDevice (
+#if NeedFunctionPrototypes
 	DeviceIntPtr           /* dev */,
 	ClientPtr              /* client */,
-	int *                  /* status */);
+	int *                  /* status */
+#endif
+	);
 
 int
 SetDeviceMode (
+#if NeedFunctionPrototypes
 	ClientPtr              /* client */,
 	DeviceIntPtr           /* dev */,
-	int                    /* mode */);
+	int                    /* mode */
+#endif
+	);
 
 int
 SetDeviceValuators (
+#if NeedFunctionPrototypes
 	ClientPtr              /* client */,
 	DeviceIntPtr           /* dev */,
 	int *                  /* valuators */,
 	int                    /* first_valuator */,
-	int                    /* num_valuators */);
+	int                    /* num_valuators */
+#endif
+	);
 
 int
 ChangeDeviceControl (
+#if NeedFunctionPrototypes
 	ClientPtr             /* client */,
 	DeviceIntPtr          /* dev */,
-	xDeviceCtl *          /* control */);
+	xDeviceCtl *          /* control */
+#endif
+	);
 
 #endif /* XI_STUBS_H */

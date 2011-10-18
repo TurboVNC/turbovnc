@@ -1,22 +1,20 @@
-XCOMM $Xorg: hpLib.tmpl,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
-
-
-
-XCOMM $XFree86$
+XCOMM $XConsortium: hpLib.tmpl /main/10 1996/12/04 11:57:22 swick $
 
 /*
  * HP shared library template
  */
 
 #define SharedThreadReqs	/**/
-#define SharedOldXReqs		$(XONLYLIB)
+#define SharedOldXReqs		$(XLIBONLY)
 #define SharedX11Reqs		SharedThreadReqs
-#define SharedXtReqs		$(XONLYLIB) $(SMLIB) $(ICELIB) SharedThreadReqs
-#define SharedXawReqs		$(XMULIB) $(XTOOLLIB) $(EXTRAXAWREQS) $(XLIB)
+#define SharedXtReqs		$(XLIBONLY) $(SMLIB) $(ICELIB) SharedThreadReqs
+#define SharedXawReqs		$(XMULIB) $(XTOOLLIB) $(XLIB)
 #define SharedXmuReqs		$(XTOOLLIB) $(XLIB)
-#define SharedXextReqs		$(XONLYLIB)
+#define SharedXextReqs		$(XLIBONLY)
 #define SharedXiReqs		$(XLIB)
+#define SharedPexReqs		$(XLIBONLY) MathLibrary
 #define SharedXtstReqs		$(XLIB)
+#define SharedXieReqs		$(XLIBONLY)
 #define SharedSMReqs		$(ICELIB)
 #define SharedXpReqs		$(XLIB)
 

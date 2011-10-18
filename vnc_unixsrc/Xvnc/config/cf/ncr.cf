@@ -1,9 +1,5 @@
-XCOMM platform:  $Xorg: ncr.cf,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
-
-
-
-
-XCOMM platform:  $XFree86: xc/config/cf/ncr.cf,v 3.20 2001/01/17 16:22:32 dawes Exp $
+XCOMM platform:  $XConsortium: ncr.cf /main/28 1996/09/28 16:11:31 rws $
+XCOMM platform:  $XFree86: xc/config/cf/ncr.cf,v 3.18 1996/12/27 06:50:22 dawes Exp $
 
 #ifndef OSName
 #define OSName			Unix System V Release 4/MP-RAS
@@ -24,9 +20,7 @@ XCOMM These flags build correctly on SVR4/MP-RAS 3.0. If building on
 XCOMM SVR4/MP-RAS 2.X, you must add -DWINTCP to StandardDefines
 XCOMM
 #define StandardDefines		-DSVR4 -DNCR -Di386
-#ifndef DefaultCCOptions
 #define DefaultCCOptions	-Xa -Hnocopyr -W0,-asm
-#endif
 #define DefaultCDebugFlags	-O3
 #define AllocateLocalDefines	-DINCLUDE_ALLOCA_H
 #define ServerExtraDefines      -DNO_SECONDARY AllocateLocalDefines XFree86ServerDefines
@@ -76,19 +70,19 @@ XCOMM #define ExtensionOSDefines	-DXTESTEXT1
  * imake rules.
  */
 #define InstallManPageLong(file,destdir,dest)                           @@\
-CppManTarget(file, $(EXTRAMANDEFS))					@@\
-									@@\
 all:: file.z								@@\
 									@@\
-file.z:: file.$(MANNEWSUFFIX)						@@\
-	@if [ -f file.$(MANNEWSUFFIX) ]; \				@@\
+file.z:: file.man							@@\
+	@if [ -f file.man ]; \						@@\
 	then \								@@\
-	cat file.$(MANNEWSUFFIX) | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) | $(COL) >/tmp/$$$$.man; \	@@\
+	cat file.man | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) | $(COL) >/tmp/$$$$.man; \	@@\
 	$(RM) /tmp/$$$$.man.z; \					@@\
 	pack -f /tmp/$$$$.man; \					@@\
 	cp /tmp/$$$$.man.z file.z; \					@@\
 	$(RM) /tmp/$$$$.man.z; \					@@\
 	fi 								@@\
+									@@\
+file.man::								@@\
 									@@\
 install.man::                                                           @@\
 	MakeDir($(DESTDIR)destdir)					@@\

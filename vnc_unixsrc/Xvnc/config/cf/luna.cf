@@ -1,4 +1,4 @@
-XCOMM platform:  $Xorg: luna.cf,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
+XCOMM platform:  $XConsortium: luna.cf /main/35 1996/09/28 16:11:11 rws $
 /*
  *	Please set the values for OSMajorVerion and OSMinorVersion
  *	before making makefiles.	 
@@ -103,10 +103,12 @@ XCOMM operating system:  OSName
 
 #ifdef Mc68000Architecture
 #define UnalignedReferencesAllowed YES  /* if arbitrary deref is okay */
+#define BuildPexExt		NO		
 #define XlunaServer 		YES
 #endif
 
 #ifdef Mc88000Architecture
+#define BuildPexExt		NO
 #define XlunaServer 		YES
 #endif
 

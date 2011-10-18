@@ -1,15 +1,20 @@
-XCOMM $Xorg: Imakefile,v 1.3 2000/08/17 19:53:40 cpqbld Exp $
-
-
-
-
-XCOMM $XFree86: xc/programs/Xserver/os/Imakefile,v 3.40 2003/09/09 03:20:41 dawes Exp $
-
+XCOMM $XConsortium: Imakefile /main/84 1996/12/15 21:26:59 rws $
+XCOMM $XFree86: xc/programs/Xserver/os/Imakefile,v 3.18.2.2 1998/02/21 06:07:15 robin Exp $
 #include <Server.tmpl>
 
 /*
  * If you have any extra files to be put into the library, define them here.
  */
+
+#ifdef HPArchitecture
+#define OtherSources hpsocket.c 
+#define OtherObjects hpsocket.o
+#endif
+
+#ifdef AmoebaArchitecture
+#define OtherSources iopreader.c
+#define OtherObjects iopreader.o
+#endif
 
 /*
  * do not modify the following two definitions
@@ -52,10 +57,6 @@ KRB5SRCS = k5auth.c k5encode.c
    SOCK_DEFINES = -DBSD44SOCKETS
 #endif
 
-#if HasGetIfAddrs
-   IFADDRS_DEFINES = -DHAS_GETIFADDRS
-#endif
-
 #if BuildLBX
    LBX_SRCS = lbxio.c
    LBX_OBJS = lbxio.o
@@ -64,45 +65,15 @@ KRB5SRCS = k5auth.c k5encode.c
    LBX_OBJS =
 #endif
 
-#if !defined(DDXOsColor)
-COLOR_SRCS=oscolor.c
-COLOR_OBJS=oscolor.o
-#endif
-
-#if UseInternalMalloc
-MALLOC_SRCS=xalloc.c
-MALLOC_OBJS=xalloc.o
-#endif
-
-#if !HasSnprintf
-SNPRINTF_SRCS = snprintf.c
-SNPRINTF_OBJS = snprintf.o
-#endif
-
-#if !HasStrlcat
-STRLCAT_SRCS = strlcat.c strlcpy.c
-STRLCAT_OBJS = strlcat.o strlcpy.o
-#endif
-
-#if HasGetpeerucred
-GETPEER_DEFINES = -DHAS_GETPEERUCRED
-#else
-# if HasGetpeereid
-GETPEER_DEFINES = -DHAS_GETPEEREID
-# endif
-#endif
-
 BOOTSTRAPCFLAGS = 
-           SRCS = WaitFor.c access.c connection.c io.c $(COLOR_SRCS) \
-                  osinit.c utils.c log.c auth.c mitauth.c secauth.c \
-                  $(XDMAUTHSRCS) $(RPCSRCS) $(KRB5SRCS) xdmcp.c OtherSources \
-                  transport.c $(SNPRINTF_SRCS) $(STRLCAT_SRCS) \
-		  $(MALLOC_SRCS) $(LBX_SRCS) xprintf.c
-           OBJS = WaitFor.o access.o connection.o io.o $(COLOR_OBJS) \
-                  osinit.o utils.o log.o auth.o mitauth.o secauth.o \
-                  $(XDMAUTHOBJS) $(RPCOBJS) $(KRB5OBJS) xdmcp.o OtherObjects \
-                  transport.o $(SNPRINTF_OBJS) $(STRLCAT_OBJS) \
-		  $(MALLOC_OBJS) $(LBX_OBJS) xprintf.o
+           SRCS = WaitFor.c access.c connection.c io.c oscolor.c \
+                  osinit.c utils.c auth.c mitauth.c secauth.c $(XDMAUTHSRCS) \
+                  $(RPCSRCS) $(KRB5SRCS) xdmcp.c decompress.c OtherSources \
+                  transport.c xalloc.c $(LBX_SRCS)
+           OBJS = WaitFor.o access.o connection.o io.o oscolor.o \
+                  osinit.o utils.o auth.o mitauth.o secauth.o $(XDMAUTHOBJS) \
+                  $(RPCOBJS) $(KRB5OBJS) xdmcp.o decompress.o OtherObjects \
+                  transport.o xalloc.o $(LBX_OBJS)
 
 #if SpecialMalloc
      MEM_DEFINES = -DSPECIAL_MALLOC
@@ -118,23 +89,13 @@ BOOTSTRAPCFLAGS =
 #endif
     DBM_DEFINES = NdbmDefines
     ADM_DEFINES = -DADMPATH=\"$(ADMDIR)/X\%smsgs\"
+    EXT_DEFINES = ExtensionDefines
   XDMCP_DEFINES = ServerXdmcpDefines
+     OS_DEFINES = ServerOSDefines
    KRB5_DEFINES = Krb5Defines
- XALLOC_DEFINES = XallocDefines
-  ERROR_DEFINES = ServerErrorDefines
-#if HasPam && HasPamMisc
-    PAM_DEFINES = -DUSE_PAM
-#endif
-        DEFINES = -DXSERV_t -DTRANS_SERVER $(CONNECTION_FLAGS) $(MEM_DEFINES) \
-		  $(XDMAUTHDEFS) $(RPCDEFS) $(SIGNAL_DEFINES) $(OS_DEFINES) \
-		  $(KRB5_DEFINES) $(RGB_DEFINES) $(GETPEER_DEFINES) \
-		  $(RANDOM_DEFINES) $(BUGMSG) $(XTRANS_FAILDEFINES)
-       INCLUDES = -I. -I../include -I$(XINCLUDESRC) -I$(EXTINCSRC) \
-		  -I$(SERVERSRC)/Xext -I$(FONTINCSRC) -I$(SERVERSRC)/render \
-		  -I$(TOP)/lib/Xau -I../lbx -I../Xprint Krb5Includes
- DEPEND_DEFINES = $(DBM_DEFINES) $(XDMCP_DEFINES) $(EXT_DEFINES) \
-		  $(TRANS_INCLUDES) $(CONNECTION_FLAGS) $(GETPEER_DEFINES) \
-		  DependDefines
+        DEFINES = -DXSERV_t -DTRANS_SERVER ConnectionFlags $(MEM_DEFINES) $(XDMAUTHDEFS) $(RPCDEFS) $(SIGNAL_DEFINES) $(OS_DEFINES) $(KRB5_DEFINES) $(RGB_DEFINES)
+       INCLUDES = -I.  -I../include -I$(XINCLUDESRC) -I$(EXTINCSRC) -I$(TOP)/lib/Xau -I../lbx Krb5Includes
+ DEPEND_DEFINES = $(DBM_DEFINES) $(XDMCP_DEFINES) $(EXT_DEFINES) $(TRANS_INCLUDES) ConnectionFlags
        LINTLIBS = ../dix/llib-ldix.ln
 
 #ifdef NEED_ALLOCA_FROM_LIBPW
@@ -156,7 +117,7 @@ alloca.o:  $(PWLIB)
 	ar x $(PWLIB) alloca.o
 #endif /* NEED_ALLOCA_FROM_LIBPW */
 
-SpecialCObjectRule(access,$(ICONFIGFILES),$(XDMCP_DEFINES) $(SOCK_DEFINES) $(IFADDRS_DEFINES))
+SpecialCObjectRule(access,$(ICONFIGFILES),$(SOCK_DEFINES) $(XDMCP_DEFINES))
 SpecialCObjectRule(auth,$(ICONFIGFILES),$(XDMCP_DEFINES))
 SpecialCObjectRule(xdmauth,$(ICONFIGFILES),$(XDMCP_DEFINES))
 SpecialCObjectRule(xdmcp,$(ICONFIGFILES),$(SOCK_DEFINES) $(XDMCP_DEFINES))
@@ -169,8 +130,8 @@ SpecialCObjectRule(io,$(ICONFIGFILES),$(EXT_DEFINES))
 #if BuildLBX
 SpecialCObjectRule(lbxio,$(ICONFIGFILES),$(EXT_DEFINES))
 #endif
-SpecialCObjectRule(utils,$(ICONFIGFILES),$(XDMCP_DEFINES) $(EXT_DEFINES) $(ERROR_DEFINES) $(PAM_DEFINES))
-SpecialCObjectRule(xalloc,$(ICONFIGFILES),$(XALLOC_DEFINES))
+SpecialCObjectRule(utils,$(ICONFIGFILES),$(XDMCP_DEFINES) $(EXT_DEFINES))
+SpecialCObjectRule(xalloc,$(ICONFIGFILES),NullParameter)
 #if defined(SparcArchitecture) && HasGcc && !HasGcc2
 oscolor.o: oscolor.c $(ICONFIGFILES)
 	$(RM) $@
@@ -179,22 +140,18 @@ oscolor.o: oscolor.c $(ICONFIGFILES)
 SpecialCObjectRule(oscolor,$(ICONFIGFILES),$(DBM_DEFINES))
 #endif
 
+#if UseXserverWrapper
+AllTarget(wrapper.o)
+
+       WRAPPER_DEFINES = -DXSERVER_PATH=\"$(BINDIR)/X\"
+
+SpecialCObjectRule(wrapper,NullParameter,$(WRAPPER_DEFINES))
+#endif
+
 #if HasKrb5
 LinkSourceFile(k5encode.c,$(XAUTHSRC))
 #endif
 
-#if !HasSnprintf
-LinkSourceFile(snprintf.c,$(LIBSRC)/misc)
-#endif
-
-#if !HasStrlcat
-LinkSourceFile(strlcat.c,$(LIBSRC)/misc)
-LinkSourceFile(strlcpy.c,$(LIBSRC)/misc)
-#endif
-
-#if DoLoadableServer
-AllTarget(libcwrapper.o)
-ObjectFromSpecialSource(libcwrapper,$(XF86OSSRC)/shared/libc_wrapper,-DSELF_CONTAINED_WRAPPER)
-#endif
+InstallLinkKitLibrary(os,$(LINKKITDIR)/lib)
 
 DependTarget()

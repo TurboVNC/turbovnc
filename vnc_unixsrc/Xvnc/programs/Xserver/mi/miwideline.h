@@ -1,13 +1,15 @@
-/* $Xorg: miwideline.h,v 1.4 2001/02/09 02:05:22 xorgcvs Exp $ */
+/* $XConsortium: miwideline.h,v 1.11 94/04/17 20:28:02 dpw Exp $ */
 /*
 
-Copyright 1988, 1998  The Open Group
+Copyright (c) 1988  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -15,23 +17,21 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: xc/programs/Xserver/mi/miwideline.h,v 1.11 2001/10/25 12:03:47 alanh Exp $ */
 
 /* Author:  Keith Packard, MIT X Consortium */
 
 #include "mispans.h"
-#include "mifpoly.h" /* for ICEIL */
 
 /* 
  * interface data to span-merging polygon filler
@@ -155,7 +155,24 @@ typedef struct _LineFace {
     } \
 }
 
+#ifdef NOINLINEICEIL
+#define ICEIL(x) ((int)ceil(x))
+#else
+#ifdef __GNUC__
+static __inline int ICEIL(x)
+    double x;
+{
+    int _cTmp = x;
+    return ((x == _cTmp) || (x < 0.0)) ? _cTmp : _cTmp+1;
+}
+#else
+#define ICEIL(x) ((((x) == (_cTmp = (x))) || ((x) < 0.0)) ? _cTmp : _cTmp+1)
+#define ICEILTEMPDECL static int _cTmp;
+#endif
+#endif
+
 extern void miFillPolyHelper(
+#if NeedFunctionPrototypes
     DrawablePtr /*pDrawable*/,
     GCPtr /*pGC*/,
     unsigned long /*pixel*/,
@@ -166,14 +183,18 @@ extern void miFillPolyHelper(
     PolyEdgePtr /*right*/,
     int /*left_count*/,
     int /*right_count*/
+#endif
 );
 extern int miRoundJoinFace(
+#if NeedFunctionPrototypes
     LineFacePtr /*face*/,
     PolyEdgePtr /*edge*/,
     Bool * /*leftEdge*/
+#endif
 );
 
 extern void miRoundJoinClip(
+#if NeedFunctionPrototypes
     LineFacePtr /*pLeft*/,
     LineFacePtr /*pRight*/,
     PolyEdgePtr /*edge1*/,
@@ -182,16 +203,20 @@ extern void miRoundJoinClip(
     int * /*y2*/,
     Bool * /*left1*/,
     Bool * /*left2*/
+#endif
 );
 
 extern int miRoundCapClip(
+#if NeedFunctionPrototypes
     LineFacePtr /*face*/,
     Bool /*isInt*/,
     PolyEdgePtr /*edge*/,
     Bool * /*leftEdge*/
+#endif
 );
 
 extern void miLineProjectingCap(
+#if NeedFunctionPrototypes
     DrawablePtr /*pDrawable*/,
     GCPtr /*pGC*/,
     unsigned long /*pixel*/,
@@ -201,24 +226,21 @@ extern void miLineProjectingCap(
     double /*xorg*/,
     double /*yorg*/,
     Bool /*isInt*/
+#endif
 );
 
 extern SpanDataPtr miSetupSpanData(
+#if NeedFunctionPrototypes
     GCPtr /*pGC*/,
     SpanDataPtr /*spanData*/,
     int /*npt*/
+#endif
 );
 
 extern void miCleanupSpanData(
+#if NeedFunctionPrototypes
     DrawablePtr /*pDrawable*/,
     GCPtr /*pGC*/,
     SpanDataPtr /*spanData*/
+#endif
 );
-
-extern int miPolyBuildEdge(double x0, double y0, double k, int dx, int dy,
-				int xi, int yi, int left, PolyEdgePtr edge);
-extern int miPolyBuildPoly(PolyVertexPtr vertices, PolySlopePtr slopes,
-				int count, int xi, int yi, PolyEdgePtr left,
-				PolyEdgePtr right, int *pnleft, int *pnright,
-				int *h);
-

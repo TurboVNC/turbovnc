@@ -1,330 +1,483 @@
-XCOMM $XdotOrg: xc/config/cf/darwin.cf,v 1.8 2005/04/01 01:22:07 torrey Exp $
-XCOMM platform:  $XFree86: xc/config/cf/darwin.cf,v 1.50 2004/01/20 23:54:50 torrey Exp $
+XCOMM platform:  $XFree86: xc/config/cf/OpenBSD.cf,v 3.1.2.11 1998/02/15 16:08:33 hohndel Exp $
+XCOMM $OpenBSD: OpenBSD.cf,v 1.11 1997/12/09 03:03:48 gene Exp $
 
-/* Darwin / Mac OS X configuration by John Carmack <johnc@idsoftware.com> */
-
-/* imake determines the default values by parsing uname */
 #ifndef OSName
-#define OSName                  DefaultOSName
-#endif
-#ifndef OSVendor
-#define OSVendor                Apple Computer, Inc.
+#define OSName			DefaultOSName OSBinaryType
 #endif
 #ifndef OSMajorVersion
-#define OSMajorVersion          DefaultOSMajorVersion
+#define OSMajorVersion		DefaultOSMajorVersion
 #endif
 #ifndef OSMinorVersion
-#define OSMinorVersion          DefaultOSMinorVersion
+#define OSMinorVersion		DefaultOSMinorVersion
 #endif
 #ifndef OSTeenyVersion
-#define OSTeenyVersion          DefaultOSTeenyVersion
+#define OSTeenyVersion		DefaultOSTeenyVersion
 #endif
 
+#ifndef OSVendor
+#define	OSVendor	/**/
+#endif
 XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVersion)
 
 /*
- * Define the operating system's capabilities
+ * C library features
  */
-#define HasSnprintf             YES
-#define HasPutenv               YES
-#define HasBSD44Sockets         YES
-#define Malloc0ReturnsNull      NO
-#define HasShadowPasswd         NO
-#define HasUsableFileMmap       YES
-#define HasZlib                 YES
-#ifndef HasShm
-# define HasShm                 YES
-#endif
-#define HasNdbm                 YES
-#if OSMajorVersion >= 6
-# define HasNCurses             YES
-# define HasArc4Random          YES
-# define HasGetIfAddrs          YES
-# define HasStrlcat             YES
-#else
-# define HasBasename            NO
-# define HasNCurses             NO
-#endif
-#ifndef HasGroff
-# define HasGroff               YES
-#endif
-#ifndef HasGcc3
-# define HasGcc3                NO
-#endif
-#ifndef HasFreetype2
-# define HasFreetype2           NO
-#endif
-#ifndef HasExpat
-# define HasExpat               NO
-#endif
-#ifndef HasLibpng
-# define HasLibpng              NO
-#endif
-
-/* Older versions don't really support IPv6, but #define AF_INET6. */
-#if OSMajorVersion < 6
-# define BuildIPv6              NO
-#endif
-
-/* Thread support */
-#define HasPosixThreads         YES
-#define SystemMTDefines         -D_REENTRANT
-#if OSMajorVersion >= 6
-# define HasThreadSafeAPI       YES
-# define MTSafeAPIDefines       -DXUSE_MTSAFE_API -DXNO_MTSAFE_UNISTDAPI
-#else
-# define HasThreadSafeAPI       NO
-# define MTSafeAPIDefines       -DXOS_USE_MTSAFE_NETDBAPI
-#endif
-
-/* Libtool on Darwin always uses minor numbers */
-#define LibtoolMinorVersions    YES
-
-/* The most common file system, HFS+, is not case sensitive. */
-#ifndef CaseSensitiveFileSystem
-# define CaseSensitiveFileSystem NO
-#endif
+#define HasPoll			YES
+#define HasNdbm         	YES
+#define HasPutenv       	YES
+#define HasSnprintf		YES
+#define HasBSD44Sockets 	YES
+#define Malloc0ReturnsNull	NO
+#define SetTtyGroup     	YES
+#define DBMLibrary		/**/
+#define HasLibCrypt		NO
+#define HasShm          	YES
+#define HasWChar32		YES
+#define HasMkstemp		YES
 
 /*
- * This enables some settings for developers.
+ * Compiler Features
  */
-#ifndef XFree86Devel
-# define XFree86Devel           NO
+#undef HasGcc
+#define HasGcc			YES
+#define HasGcc2			YES
+#ifndef HasGcc2ForCplusplus
+#define HasGcc2ForCplusplus	YES
+#endif
+#define GccUsesGas		YES
+#define UseGas			YES
+#define GnuCpp			YES
+
+
+#define NeedConstPrototypes	YES
+#define NeedFunctionPrototypes	YES
+#define NeedNestedPrototypes	YES
+#define NeedVarargsPrototypes	YES
+#define NeedWidePrototypes	NO
+
+#define MkdirHierCmd		mkdir -p
+
+#define CppCmd          	/usr/bin/cpp
+#define StandardCppDefines	-traditional
+#define PreProcessCmd   	CppCmd
+#define PreIncDir 		DefaultGccIncludeDir
+
+#undef CcCmd
+#define CcCmd 			gcc
+#if defined(UseInstalled) && (!defined(XF86LinkKit) || !XF86LinkKit)
+#define DefaultCCOptions 	/**/
+#else
+#define DefaultCCOptions 	-ansi -Dasm=__asm
 #endif
 
-/*
- * This enables Quartz compatibility.
- * Turn off to build on raw Darwin systems.
- */
-#ifndef DarwinQuartzSupport
-# define DarwinQuartzSupport    YES
-#endif
+#define GccGasOption 		-DGCCUSESGAS
+#define AsmDefines 		-DUSE_GAS
 
-#if DarwinQuartzSupport
+#define FontDir			/usr/X11R6/lib/X11/fonts
 
-# if OSMajorVersion >= 7
-   PROJ_BUILD = xcodebuild
+#ifdef i386Architecture
+# define OptimizedCDebugFlags 	DefaultGcc2i386Opt
+# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
+# define ServerExtraSysLibs	-li386
+#else
+# define OptimizedCDebugFlags 	-O2
+# if defined(SparcArchitecture) || defined(AlphaArchitecture) || defined(AmigaArchitecture) || defined(Sun3Architecture)
+#  define ServerOSDefines 	-DDDXOSINIT
 # else
-   PROJ_BUILD = pbxbuild
+#  define ServerOSDefines 	/**/
 # endif
-
-# ifndef HasXplugin
-#  if OSMajorVersion >= 7
-#   define HasXplugin           YES
+#endif
+#if defined(i386Architecture) || defined(ArcArchitecture)
+# define ServerExtraDefines GccGasOption XFree86ServerDefines
+# ifndef XFree86ConsoleDefines
+#  if defined(ArcArchitecture)
+#   define XFree86ConsoleDefines -DPCCONS_SUPPORT
 #  else
-#   define HasXplugin           NO
+#   define XFree86ConsoleDefines -DPCCONS_SUPPORT -DPCVT_SUPPORT
 #  endif
 # endif
-
-# if HasXplugin
-#  ifndef XpLibDir
-#   define XpLibDir             /usr/lib
-#  endif
-#  ifndef XpIncDir
-#   define XpIncDir             $(SERVERSRC)/hw/darwin/quartz/xpr
-#  endif
-   XPLIBDIR = XpLibDir
-   XPINCDIR = XpIncDir
-#  define XpluginLibrary        Concat(-L,$(XPLIBDIR)) -lXplugin
+#else
+# if defined(AlphaArchitecture)
+#  define ServerExtraDefines GccGasOption -D_XSERVER64
 # else
-#  define XpluginLibrary        /**/
-# endif
-
-# ifndef BuildAppleDRI
-#  if HasXplugin
-#   define BuildAppleDRI        YES
-#  else
-#   define BuildAppleDRI        NO
+#  if !defined(Sun3Architecture)
+#   define ServerExtraDefines GccGasOption
 #  endif
 # endif
+#endif
 
-# if BuildAppleDRI
-#  define GlxExtraDefines -DGLX_DIRECT_RENDERING -DGLX_USE_APPLEGL GlxArchDefines
+#define StandardDefines	-DCSRG_BASED
+#define XawI18nDefines	-DUSE_XWCHAR_STRING -DUSE_XMBTOWC
+
+
+#ifndef ExtraLibraries
+#define ExtraLibraries		/**/
+#endif
+#define UseGnuMalloc		NO
+
+#define HasZlib			YES
+
+#define	AdmDir			/var/log
+
+/*
+ * Make & install Features
+ */
+
+#define HasBsdMake		YES
+
+#define StripInstalledPrograms	YES
+#define CompressAllFonts	YES
+#define GzipFontCompression	YES
+#define DefaultUserPath		/bin:/usr/bin:/usr/local/bin:$(BINDIR)
+#define DefaultSystemPath	/sbin:/usr/sbin:/bin:/usr/bin:$(BINDIR)
+
+#ifdef  InstallCmd
+# undef  InstallCmd
+# define InstallCmd 		/usr/bin/install
+#endif
+
+#ifndef ExtraFilesToClean
+# define ExtraFilesToClean 	*.core
+#endif
+
+/*
+ * Documentation formatting
+ */
+#define NeqnCmd			neqn -Tlatin1
+#define NroffCmd		nroff -Tlatin1
+#define	EqnCmd 			eqn -Tps
+#define TroffCmd        	groff -Tps
+
+/*
+ * To use the NetBSD Aperture driver
+ */
+#if defined(i386Architecture)
+#ifndef HasNetBSDApertureDriver
+#define HasNetBSDApertureDriver	YES
+#endif
+#endif
+
+
+
+XCOMM Man pages need to be formatted when installed, so override the default
+XCOMM imake rules.
+
+#define ManSuffix	1
+#define FileManSuffix	5
+#define ManSourcePath	$(MANPATH)/cat
+
+#define InstallManPageLong(file,destdir,dest)                           @@\
+all:: file.0								@@\
+									@@\
+file.0:: file.man							@@\
+	@if [ -f file.man ]; \						@@\
+	then \								@@\
+	cat file.man | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) | $(COL) >/tmp/$$$$.man; \	@@\
+	cp /tmp/$$$$.man file.0; \					@@\
+	$(RM) /tmp/$$$$.man; \						@@\
+	fi 								@@\
+									@@\
+install.man::                                                           @@\
+	MakeDir($(DESTDIR)destdir)					@@\
+	-@if [ -f file.0 ]; \						@@\
+	then \								@@\
+	$(INSTALL) -c $(INSTMANFLAGS) file.0 $(DESTDIR)destdir/dest.0; \@@\
+	fi
+
+#define InstallGenManPageLong(file,destdir,dest,suffix)			@@\
+	InstallManPageLong(file,destdir,dest)
+
+#define InstallMultipleManSuffix(list,dest,suff)                        @@\
+install.man:: 								@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	case '${MFLAGS}' in *[i]*) set +e;; esac; \			@@\
+	for i in list; do \                                             @@\
+	  (set -x; \							@@\
+	  cat $$i.suff | $(NEQN) | $(TBL) | $(NROFF) $(MANMACROS) | $(COL) >/tmp/$$$$.suff; \	@@\
+	  $(INSTALL) -c $(INSTMANFLAGS) /tmp/$$$$.suff $(DESTDIR)dest/$$i.0; \	@@\
+	  $(RM) /tmp/$$$$.suff); \						@@\
+	done
+
+#define InstallMultipleMan(list,dest)                                   @@\
+	InstallMultipleManSuffix(list,dest,man)
+
+#define InstallManPageAliases(file,destdir,aliases)                     @@\
+install.man:: 								@@\
+	@case '${MFLAGS}' in *[i]*) set +e;; esac; \                    @@\
+	for i in aliases; do \                                          @@\
+		(set -x; \						@@\
+		$(RM) $(DESTDIR)destdir/$$i.0;\  			@@\
+		(cd $(DESTDIR)/destdir; $(LN) file.0 $$i.0);\ 		@@\
+		); \							@@\
+	done
+
+#define InstallGenManPageAliases(file,destdir,suffix,aliases)		@@\
+	InstallManPageAliases(file,destdir,aliases)
+
+
+
+/*
+ * Architecture specific sections - put all architecture dependent
+ * options and setting here into the correct section
+ */
+
+/*
+ * Definitions for the alpha architecture
+ */
+#ifdef AlphaArchitecture
+
+# define XF86Contrib
+# include <xf86.rules>
+# define BuildServer		NO
+# define XnestServer		NO
+# define XVirtualFramebufferServer	NO
+
+ /*
+  * For the current ECOFF system
+  */
+# define HasSharedLibraries	NO
+# define UseElfFormat		NO
+# define BuildDynamicLoading	NO
+ /*
+  * For the upcoming ELF system
+  */
+# if 0 /* NOT YET */
+#  define HasSharedLibraries	YES
+#  define UseElfFormat		YES
+#  define BuildDynamicLoading	YES
 # endif
 
-# define BuildRootless          YES
-# define BuildAppleWMLibrary    YES
+#endif /* AlphaArchitecture */
 
-#endif  /* DarwinQuartzSupport */
-
-/* we don't need -lm */
-#define MathLibrary             /**/
-
-#define TermcapLibrary          -lcurses
-#define SetTtyGroup             YES             /* for xterm */
-
-/* we don't have a dbm library */
-#define DBMLibrary              /**/
-
-#define MkdirHierCmd            mkdir -p
-
-/* Use flex -l for compatibility with various versions of flex. */
-#ifndef LexCmd
-# define LexCmd                 flex -l
-#endif
-#define HasFlex                 YES
 
 /*
- * Our cpp isn't in /lib/cpp and early versions don't like -undef.
- * The gcc 3.3 cpp that Apple ships inserts spurious #pragmas,
- * so we use the 3.1-based version in this case.
+ * Definitions for the i386 architecture
  */
-#if (GccMajorVersion == 3) && (GccMinorVersion == 3)
-# define CppCmd                 /usr/bin/cpp3
-#else
-# define CppCmd                 /usr/bin/cpp
-#endif
-#if (GccMajorVersion == 3) && (GccMinorVersion == 3) || (GccMajorVersion > 3)
-# define StandardCppOptions     -traditional -D__GNUC__
-#endif
-#if HasGcc3
-# define RawCppCmd              CppCmd -undef
-#else
-# define RawCppCmd              CppCmd
-#endif
+#ifdef i386Architecture
 
-/* we have a gcc compatible compiler, but its not called gcc */
-#define CcCmd                   /usr/bin/cc
-#define CplusplusCmd            /usr/bin/c++
+/*
+ * For safety reasons, don't install the X server setuid on OpenBSD
+ * use xdm instead
+ */
+# define InstallXserverSetUID	NO
 
-/* default flags to pass to cc */
-#ifndef DefaultCCOptions
-#if XFree86Devel
-# define DefaultCCOptions       -Wall -Wpointer-arith -Wstrict-prototypes \
-                                -Wmissing-prototypes -Wmissing-declarations \
-                                -Wredundant-decls -Wnested-externs \
-                                -no-cpp-precomp
-#else
-# define DefaultCCOptions       -Wall -Wpointer-arith -no-cpp-precomp
-#endif
-#endif
+# define BuildDynamicLoading	YES
+# include <xfree86.cf>
 
-/* flags to pass to cc when building libraries */
-#ifndef LibraryCCOptions
-# define LibraryCCOptions       DefaultCCOptions -fno-common
-#endif
+#endif /* i386Architecture */
 
-/* The cr implementation does not build with NEED_SCREEN_REGIONS,
-   so play it safe. */
-#ifndef ServerCCOptions
-# define ServerCCOptions        DefaultCCOptions -UNEED_SCREEN_REGIONS
-#endif
 
-#ifdef PpcDarwinArchitecture
-# define DarwinMachineDefines   -D__powerpc__
-# if HasGcc3
-#  define OptimizedCDebugFlags  -Os
-# else
-#  define OptimizedCDebugFlags  -O2
+/*
+ * Definitions for the m68k architecture (currently amiga, hp300,
+ * mac68k, mvme68k, sun3)
+ */
+#ifdef Mc68020Architecture
+
+/*
+ * Function CSE makes gas -k not recognize external function calls as lazily
+ * resolvable symbols, thus sometimes making ld.so report undefined symbol
+ * errors on symbols found in shared library members that would never be 
+ * called.  Ask niklas@openbsd.org for details.
+ */
+# define PositionIndependentCFlags -fpic -fno-function-cse
+
+#endif /* Mc68020Architecture */
+
+
+/*
+ * Definitions for the amiga architecture
+ */
+#ifdef AmigaArchitecture
+
+# define XF86Contrib
+# include <xf86.rules>
+# define BuildServer		NO
+
+#endif /* AmigaArchitecture */
+
+
+/*
+ * Definitions for the hp300 architecture
+ */
+#ifdef Hp300Architecture
+
+# include <xf86.rules>
+# define BuildServer		NO
+
+#endif /* Hp300Architecture */
+
+
+/*
+ * Definitions for the mac68k architecture
+ */
+#ifdef mac68kArchitecture
+
+# include <xf86.rules>
+# define BuildServer		NO
+
+#endif /* Mac68kArchitecture */
+
+
+/*
+ * Definitions for the mvme68k architecture
+ */
+#ifdef Mvme68kArchitecture
+
+# include <xf86.rules>
+# define BuildServer		NO
+
+#endif /* Mvme68kArchitecture */
+
+
+/*
+ * Definitions for the sun3 architecture
+ */
+#ifdef Sun3Architecture
+
+# include <xf86.rules>
+
+# define OptimizedCDebugFlags  -O2
+# define ServerOSDefines       -DDDXOSINIT
+# define BootstrapCFlags       -Dsun3
+# define UnalignedReferencesAllowed YES /* changes _XtCopyArgs() */
+/* Note: -ansi turns off -Dmc68000 */
+# define ServerExtraDefines    GccGasOption -Dmc68000 -Dmc68020
+
+# ifndef Xsun24Server
+#  define Xsun24Server		NO
 # endif
-# define ByteOrder              X_BIG_ENDIAN
-#endif /* PpcDarwinArchitecture */
-
-#ifdef i386DarwinArchitecture
-# define DarwinMachineDefines   -D__i386__
-# if HasGcc3
-#  define OptimizedCDebugFlags  -Os
-# else
-#  define OptimizedCDebugFlags  -O2 -fno-strength-reduce
+# ifndef XsunServer
+#  define XsunServer		NO
 # endif
-# define ByteOrder              X_LITTLE_ENDIAN
-#endif /* i386DarwinArchitecture */
+# ifndef XsunMonoServer
+#  define XsunMonoServer	YES
+# endif
 
-#if OSMajorVersion < 7
-# define DarwinLocaleDefines    -DX_LOCALE
-#else
-# define DarwinLocaleDefines    /**/
-# define XawI18nDefines         -DHAS_WCHAR_H -DHAS_WCTYPE_H -DNO_WIDEC_H
+# ifndef BuildXKB
+#  define BuildXKB        	NO
+# endif
+
+# ifndef BuildXKBlib
+#  define BuildXKBlib     	NO
+# endif
+
+# ifndef BuildPexExt
+#  define BuildPexExt 		(XsunServer || Xsun24Server)
+# endif
+
+#endif /* Sun3Architecture */
+
+
+/*
+ * Definitions for the mips architecture (currently arc, pmax)
+ */
+#ifdef MipsArchitecture
+
+ /*
+  * Mips ELF shared libs need some special handling.
+  */
+# define PositionIndependentCFlags
+# define SharedLibraryLoadFlags -x -shared --whole-archive -soname `echo $@ | sed 's/\.[0-9]*$$//'`
+# define SharedXtReqs -L$(BUILDLIBDIR) $(XLIBONLY) $(SMLIB) $(ICELIB)
+# define SharedXmuReqs $(LDPRELIB) $(XTOOLONLYLIB) $(XONLYLIB) $(EXTENSIONLIB)
+
+#endif /* MipsArchitecture */
+
+
+/*
+ * Definitions for the arc architecture
+ */
+#ifdef ArcArchitecture
+
+# include <xfree86.cf>
+
+#endif /* ArcArchitecture */
+
+
+/*
+ * Definitions for the pmax architecture
+ */
+#ifdef PmaxArchitecture
+
+# include <xf86.rules>
+# define BuildServer		NO
+
+#endif /* PmaxArchitecture */
+
+
+/*
+ * Definitions for the sparc architecture
+ */
+#ifdef SparcArchitecture
+
+# include <xf86.rules>
+
+# ifndef Xsun24Server
+# define Xsun24Server	YES
+# endif
+# ifndef XsunServer
+# define XsunServer	YES
+# endif
+# ifndef XsunMonoServer
+# define XsunMonoServer	YES
+# endif
+
+#define XkbServerDefines  -DXKB_ALWAYS_USES_SOFT_REPEAT
+
+# ifndef BuildPexExt
+#  define BuildPexExt 	(XsunServer || Xsun24Server)
+# endif
+#endif /* SparcArchitecture */
+
+
+/* End or architecture specific section */
+
+/*
+ * Generic settings for all architectures
+ */
+
+#ifndef XVirtualFramebufferServer
+# undef BuildServer
+# define BuildServer			YES
+# define XVirtualFramebufferServer	YES
+#endif
+
+#ifndef XnestServer
+# undef BuildServer
+# define BuildServer			YES
+# define XnestServer			YES
+#endif
+
+#ifndef BuildScreenSaverLibrary
+# define BuildScreenSaverLibrary	YES
+#endif
+
+#ifndef ForceNormalLib
+# define ForceNormalLib			YES
+#endif
+
+#ifndef BuildDynamicLoading
+# define BuildDynamicLoading		NO
 #endif
 
 /*
- * __DARWIN__ will be used for platform specific #ifdefs that can't
- * be handled by existing X defines.
- *
- * Darwin's alloca() seg faults (rather than returning NULL) on failed
- * allocations, so we can't use it.
+ * XFree86 uses its own (more portable) database routines to speed up 
+ * the RGB database lookups
+ * However, if you want to use ndbm anyway, you can set that to NO in 
+ * site.def
  */
-#define StandardDefines         DarwinMachineDefines -D__DARWIN__ \
-                                -DNO_ALLOCA -DCSRG_BASED DarwinLocaleDefines
-
-/*
- * Set this to NO to just build the client libs, which should work without
- * having to write any platform specific code.
- */
-#ifndef BuildServer
-# define BuildServer            YES
-
-/* our custom X server */
-# define XDarwinServer          YES
+#ifndef UseRgbTxt
+# define UseRgbTxt			YES
 #endif
 
-/* Thanks to the IOKit, the X server does not have to be SetUID. */
-#ifndef InstallXserverSetUID
-# define InstallXserverSetUID   NO
+#ifndef OSBinaryType
+# if UseElfFormat
+#  define OSBinaryType			[ELF]
+# else 
+#  define OSBinaryType			/**/
+# endif
 #endif
 
-/* Allow Xtrans to work with non-SetUID server. */
-#ifndef XtransFailSoft
-# define XtransFailSoft         YES
-#endif
+/* This must come last */
+#include <bsdLib.rules>
 
-/* disable XKB by default as it can cause problems */
-#define DfltDisableXKB          YES
-
-/* no direct graphics extension */
-#define BuildXF86DGA            NO
-
-/* Support for tablets and other non-standard input devices */
-#ifndef BuildXInputExt
-# define BuildXInputExt         YES
-#endif
-#define BuildXInputLib          YES
-
-/* no Display Power Management extension */
-#define BuildDPMS               NO
-
-/* no XFree86-Misc extension */
-#define BuildXF86MiscExt        NO
-
-/* no XFree86-VidMode extension */
-#define BuildXF86VidModeExt     NO
-
-#ifndef BuildXterm
-# define BuildXterm             BuildClients    /* Not enabled by default */
-#endif
-
-#define BuildLibPathVar         DYLD_LIBRARY_PATH
-
-/* include rules to build shared libraries */
-#include <darwinLib.rules>
-
-/*
- * BundleProgramTarget - Generate rules for compiling, linking and
- * installing a bundle executable. 
- */
-#ifndef BundleProgramTarget
-#define BundleProgramTarget(program,loader,subdirs,objs,deplib,syslib,dstdir) @@\
-                                                                        @@\
-AllTarget(program)                                                      @@\
-                                                                        @@\
-program: loader subdirs objs deplib                                     @@\
-	RemoveTargetProgram($@)                                             @@\
-	LinkRule($@,-bundle $(LDOPTIONS),objs,deplib $(LDLIBS) syslib -bundle_loader loader) @@\
-                                                                        @@\
-InstallProgram(program,dstdir/program.bundle/Contents/MacOS)            @@\
-                                                                        @@\
-clean::                                                                 @@\
-	RemoveFile(program)
-#endif /* BundleProgramTarget */
-
-/*
- * Darwin specific Imake Config files
- */
-#ifndef LocalConfigFiles
-#define LocalConfigFiles \
-	darwinLib.rules \
-	darwinLib.tmpl
-#endif
-
-/* include all the X.Org rules */
-#include <xorg.cf>

@@ -1,36 +1,35 @@
-XCOMM $Xorg: osfLib.tmpl,v 1.3 2000/08/17 19:41:48 cpqbld Exp $
+XCOMM $XConsortium: osfLib.tmpl /main/22 1996/09/28 16:12:00 rws $
 
 /*
  * OSF/1 shared library template
  */
-
-XCOMM $XFree86: xc/config/cf/osfLib.tmpl,v 1.3tsi Exp $
 
 #if ThreadedX && ModernOSF1
 #if OSMajorVersion < 4
 #define SharedX11Reqs -lpthreads -lmach
 #endif
 #endif
-#define SharedOldXReqs $(LDPRELIBS) $(XONLYLIB)
+#define SharedOldXReqs $(LDPRELIBS) $(XLIBONLY)
 
 #if ThreadedX && ModernOSF1 && OSMajorVersion < 4
 #define SharedThreadReqs -lpthreads -lmach
 #else
 #define SharedThreadReqs /**/
 #endif
-#define SharedXtReqs $(LDPRELIBS) $(XONLYLIB) $(SMLIB) $(ICELIB) SharedThreadReqs
+#define SharedXtReqs $(LDPRELIBS) $(XLIBONLY) $(SMLIB) $(ICELIB) SharedThreadReqs
 #if ModernOSF1
-#define SharedXawReqs $(LDPRELIBS) $(XMULIB) $(XTOOLLIB) $(EXTRAXAWREQS) $(XLIB)
+#define SharedXawReqs $(LDPRELIBS) $(XMULIB) $(XTOOLLIB) $(XLIB)
 #else
-#define SharedXawReqs $(LDPRELIBS) $(XMULIB) $(XTOOLLIB) $(EXTRAXAWREQS) $(XLIB) -init _XawFixupVendorShell
+#define SharedXawReqs $(LDPRELIBS) $(XMULIB) $(XTOOLLIB) $(XLIB) -init _XawFixupVendorShell
 #endif
 #define SharedXmuReqs $(LDPRELIBS) $(XTOOLLIB) $(XLIB)
-#define SharedXextReqs $(LDPRELIBS) $(XONLYLIB)
+#define SharedXextReqs $(LDPRELIBS) $(XLIBONLY)
 #define SharedXiReqs $(LDPRELIBS) $(XLIB)
+#define SharedPexReqs $(LDPRELIBS) $(XLIBONLY) MathLibrary
 #define SharedXtstReqs $(LDPRELIBS) $(XLIB)
+#define SharedXieReqs $(LDPRELIBS) $(XLIBONLY)
 #define SharedSMReqs $(LDPRELIBS) $(ICELIB)
 #define SharedXpReqs $(LDPRELIBS) $(XLIB)
-#define SharedXpmReqs $(LDPRELIBS) $(XLIB)
 
 #define SharedXReqs $(XTOOLLIB) $(XPLIB) $(XLIB) SharedThreadReqs $(LDPOSTLIBS)
 #define SharedXmReqs $(LDPRELIBS) SharedXReqs

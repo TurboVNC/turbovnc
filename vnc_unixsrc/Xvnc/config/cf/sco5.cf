@@ -1,32 +1,27 @@
-XCOMM $XFree86: xc/config/cf/sco5.cf,v 3.15 2003/12/19 02:05:37 dawes Exp $
-XCOMM $XdotOrg: xc/config/cf/sco5.cf,v 1.9 2005/12/20 22:30:48 alanc Exp $
+XCOMM $XFree86: xc/config/cf/sco5.cf,v 3.1.2.4 1997/07/19 04:59:08 dawes Exp $
 
 /*
- * This is for SCO Open Server 5.0.6A or later. You must have the
- * Execution Environment update (OSS646) installed on 5.0.6 (it
- * ships standard in 5.0.7 and later), as well as the Graphics,
- * Web and X11 (gwxlibs) package OSS631 installed, which also ships
- * standard with 5.0.7 and later.
- *
- * It is suggested that you use the GNU Development Tools for compiling
- * XFree86. Almost no testing has been done with the native development
- * system.
+ * This is for SCO Open Server 5.0.2 or later.
  */
 
+#ifndef ScoOsMouse
+# define ScoOsMouse             YES
+#endif
+
 #ifndef OSName
-#define OSName			UNIX System V/386 Open Server Release 5
+#define OSName                  UNIX System V/386 Open Server 5.0.4
 #endif
 #ifndef OSVendor
-#define OSVendor		SCO-Group
+#define OSVendor                SCO
 #endif
 #ifndef OSMajorVersion
-#define OSMajorVersion		5
+#define OSMajorVersion          5
 #endif
 #ifndef OSMinorVersion
-#define OSMinorVersion		0
+#define OSMinorVersion          0
 #endif
 #ifndef OSTeenyVersion
-#define OSTeenyVersion		7
+#define OSTeenyVersion          4
 #endif
 
 /*
@@ -34,347 +29,111 @@ XCOMM $XdotOrg: xc/config/cf/sco5.cf,v 1.9 2005/12/20 22:30:48 alanc Exp $
  * guarantee that the same FD_SETSIZE is used. Havoc abounds if we do not
  * do this, as some files which include sys/socket.h and sys/types.h will
  * have different values for FD_SETSIZE.
- *
- * Note 2: We also define _SVID3, as this seems to enable more Streams
- * based options which are closer to the "desired" state for X11. A by-
- * product of this is that we get better signals too.
  */
 
-#ifndef HasGcc2
-# define HasGcc2		YES
-#endif
-#ifndef HasGcc3
-# define HasGcc3		NO
-#endif
-#ifndef HasGcc2ForCplusplus
-# define HasGcc2ForCplusplus	YES
-#endif
-
-#ifndef HasGcc
-# if HasGcc2 || HasGcc3
-#  define HasGcc		YES
-# endif
-#endif
-
-/*
- * Although OpenServer does not currently have threads, there are plans
- * for it in the near future, and libc/libsocket are already thread
- * safe, so use -D_REENTRANT when compiling libraries so that if an
- * app that has either the new forthcoming threads, or one that uses
- * GNU PTH or FSU pthreads is linked against X, that the libraries are
- * safe at least with regards to things like errno and various _r functions.
- */
-#ifndef LibraryCCOptions
-# define LibraryCCOptions	-D_REENTRANT -DFD_SETSIZE=11000 -D_NO_STATIC -DMAXPATHLEN=1024
-#endif
-
-#ifndef UseExportLists
-# define UseExportLists		NO
-#endif
-
-#define StandardDefines		-DSYSV -Di386 -DSCO325 -D__SCO__
-#if HasGcc
-# define DefaultCCOptions	GccWarningOptions
-# ifndef CcCmd
-#  define CcCmd			gcc
-# endif
-# ifndef DefaultCDebugFlags
-#  define DefaultCDebugFlags	-O6 -fomit-frame-pointer -march=i586 -mcpu=i586
-# endif
-# ifndef OptimizedCDebugFlags
-#  define OptimizedCDebugFlags	-O6 -fomit-frame-pointer -march=i586 -mcpu=i586
-# endif
+#define StandardDefines         -Dsco -DSCO -DSYSV -Di386 -DSCO325 -DFD_SETSIZE=256 -D_NO_STATIC
+#ifdef HasGcc2
+# define DefaultCCOptions       -melf
+# define CcCmd                  gcc
+# define ExtraLoadOptions       -melf
+# define DefaultCDebugFlags     -O
+# define OptimizedCDebugFlags   -O
 #else
-# ifndef CcCmd
-#  define CcCmd			cc -belf
-# endif
-# define DefaultCCOptions	-dy
-# ifndef DefaultCDebugFlags
-#  define DefaultCDebugFlags	-O2
-# endif
-# ifndef OptimizedCDebugFlags
-#  define OptimizedCDebugFlags	-O2
-# endif
+# define DefaultCCOptions       -dy 
+# define CcCmd                  cc
+# define ExtraLoadOptions       -b elf
+# define DefaultCDebugFlags     -O
+# define OptimizedCDebugFlags   -O
 #endif
 
-#define BuildLibPathVar		LD_LIBRARY_PATH
-
-#ifndef HasNCurses
-# define HasNCurses		YES
+#ifndef PexDynamicModule
+#define PexDynamicModule        YES
 #endif
-#ifndef NCursesLibName
-# define NCursesLibName		-lcurses
-#endif
-#ifndef TermcapLibrary
-# define TermcapLibrary		-lcurses
+#ifndef XieDynamicModule
+#define XieDynamicModule        YES
 #endif
 
-#ifndef BuildXterm
-# define BuildXterm		BuildClients
+#ifndef HasSymLinks
+# define HasSymLinks            YES
 #endif
 
-#ifndef UseDeprecatedKeyboardDriver
-#define UseDeprecatedKeyboardDriver	NO
+#ifdef BuildDynamicLoading
+#define SCODynamicFlags         -Wl,-Bexport
 #endif
 
-#ifndef SCOHasGWXLIBS
-# define SCOHasGWXLIBS		YES
-#endif
- 
-#ifndef LogDirectory
-# define LogDirectory		/var/adm
-#endif
-
-#ifndef DoLoadableServer
-# define DoLoadableServer	YES
-#endif
-
-#if DoLoadableServer
-# if HasGcc
-#  define SCODynamicFlags	-rdynamic
-# else
-#  define SCODynamicFlags	-Wl,-Bexport
-# endif
+#define XawI18nDefines          -DHAS_WCHAR_H -DHAS_ISW_FUNCS
+#if ScoOsMouse
+# define ServerExtraSysLibs     $(CBRT) -lm -levent SCODynamicFlags
+# define ServerExtraDefines     ServerCCOptions -DUSE_OSMOUSE XFree86ServerDefines
 #else
-# define SCODynamicFlags	/**/
+# define ServerExtraSysLibs     $(CBRT) -lm SCODynamicFlags
+# define ServerExtraDefines     ServerCCOptions XFree86ServerDefines
 #endif
-
-#ifndef BuildFreetypeDlModule
-# define BuildFreetypeDlModule	NO
-#endif
-
-#ifndef AsmDefines
-# define AsmDefines		-D__ELF__ -D__PIC__
-#endif
-
-#ifndef XawI18nDefines
-# define XawI18nDefines		-DHAS_WCHAR_H -DHAS_WCTYPE_H -DHAS_ISW_FUNCS
-#endif
-
-#ifndef ServerExtraSysLibs
-# define ServerExtraSysLibs	$(CBRT) -lm SCODynamicFlags
-#endif
-
-#ifndef ExtraLibraries
-# define ExtraLibraries		-lsocket
-#endif
-
-#ifndef NeedWidePrototypes
-# define NeedWidePrototypes	YES
-#endif
-
-#define SCOBuildFlags		-DFD_SETSIZE=11000 -DMAXPATHLEN=1024 -DPATH_MAX=1024
-
-#define ServerExtraDefines	-D_REENTRANT SCOBuildFlags -DDDXTIME XFree86ServerDefines
-
-#ifndef ThreadedX
-# define ThreadedX		NO
-#endif
-
-#ifndef HasThreadSafeAPI
-# define HasThreadSafeAPI	NO
-#endif
-
-#define HasNdbm			YES
-#define HasVFork		YES
-#define HasPutenv		YES
-#define HasSnprintf		NO
+#define ExtraLibraries          -lsocket
+#define NeedWidePrototypes      NO
+#define ServerOSDefines         -DDDXTIME
 #define ToolkitStringsABIOptions -intelabi
-#define HasSetenv		NO
-#define HasMkstemp		YES
-#define ExecableScripts		YES
+#define ThreadedX               NO
+#define HasThreadSafeAPI        NO
+#define HasNdbm                 YES
+#define HasVFork                YES
+#define HasPutenv               YES
+#define ExecableScripts         YES
 #define HasShadowPasswd         YES
+#define ManSourcePath           $(MANPATH)/cat.
+#define Malloc0ReturnsNull      YES
+#define RemoveDSDENroffMacros   NO
+#define CompressManPages        YES
 
-#define HasSymLinks		YES
-#define HasDlopen		YES
-#define HasShm			YES
-#define HasStrcasecmp		YES
-#define HasLdRunPath		YES
-#define HasPoll			YES
-
-#ifndef HasGnuMake
-# define HasGnuMake		YES
-#endif
-
-#if SCOHasGWXLIBS
-# define HasExpat		YES
-# define HasFreetype2		YES
-# define HasLibpng		YES
-# define HasZlib		YES
-# define HasFontconfig		YES
-#endif
-
-#define InstallHardcopyDocs	NO
-
-#define HasPerl			YES
-#define HasPerl5		YES
-
-#ifndef ManSourcePath
-# define ManSourcePath		$(MANPATH)/man
-#endif
-
-#define Malloc0ReturnsNull	YES
-#define RemoveDSDENroffMacros	NO
-
-#ifndef CompressManPages
-# define CompressManPages	NO
-#endif
- 
 #ifndef HasLibCrypt
-# define HasLibCrypt		YES
-# define SpecialLibCrypt	-lcrypt
+# define HasLibCrypt            YES
+# define SpecialLibCrypt        -lcrypt
 #endif
-
-#ifndef PosixLibraries
-# define PosixLibraries          /**/
-#endif
+#define PosixLibraries          /**/
 
 #ifndef ForceNormalLib
-# define ForceNormalLib		NO 
+# define ForceNormalLib         YES 
 #endif
 
-#define SharedLibXmu		YES
-#define SystemV			YES
-#define LdCombineFlags		-r 
+#define SharedLibXmu            NO
+#define SystemV                 YES
+#define LdCombineFlags          -r 
 
-#define AvoidNullMakeCommand	YES
-#define PatheticCpp		YES
+#define HasLdRunPath            YES
+#define HasPoll                 NO
+#define PatheticCpp             YES
 
-#define MesaUseX86Asm		NO
+#define ArCmdBase               ar
+#define AsCmd                   as
+#define CppCmd                  /lib/cpp
+#define LdCmd                   ld
+#define LexCmd                  lex
+#define MakeCmd	                make
+#define YaccCmd                 yacc
 
-#define MakeNamedTargetSubdir(dir,flags,subname)\
-	$(MAKE) -C dir $(MFLAGS) $(PARALLELMFLAGS) flags subname
-
-#define ArCmdBase		ar
-
-#ifndef AsCmd
-# define AsCmd			CcCmd
-#endif
-
-#ifndef CppCmd
-# define CppCmd			/lib/cpp
-#endif
-
-#ifndef PreProcessCmd
-# define PreProcessCmd		CppCmd
-#endif
-
-#ifndef RawCppCmd
-# define RawCppCmd		CppCmd
-#endif
-
-#ifndef LdCmd
-# define LdCmd			CcCmd
-#endif
-
-#ifdef HasGcc2
-# ifndef SharedLibraryLoadFlags
-#  define SharedLibraryLoadFlags -shared
-# endif
-# undef LdCombineFlags
-# define LdCombineFlags		-nostdlib -r
-#endif
-
-#ifndef LexCmd
-# define LexCmd			/usr/gnu/bin/flex
-#endif
-
-#ifndef MakeCmd
-# define MakeCmd                /usr/gnu/bin/gmake
-#endif
-
-#ifndef YaccCmd
-# define YaccCmd		/usr/gnu/bin/bison -y
-#endif
-
-#ifndef InstallCmd
-# define InstallCmd		/usr/gnu/bin/ginstall
-#endif
-
-#ifndef UseSeparateConfDir
-# define UseSeparateConfDir	NO
-#endif
-
-#ifndef BuildHtmlManPages
-# define BuildHtmlManPages	NO
-#endif
-
-#ifndef DefaultUserPath
-# define DefaultUserPath	/bin:/usr/bin:$(BINDIR):/usr/bin/X11:/usr/gnu/bin:/usr/local/bin:/etc
-#endif
-
-#ifndef DefaultSystemPath
-# define DefaultSystemPath	/etc:/bin:/usr/bin:$(BINDIR):/usr/bin/X11
-#endif
-
-#define ConnectionFlags		-DLOCALCONN -DTCPCONN -DUNIXCONN 
-
-#define ExportListGenSource	elistgen.usl
-#define ShlibExportListOpt(filename)	Concat(-Bexport:,filename)
+#define DefaultUserPath         /bin:/usr/bin:$(BINDIR):/usr/bin/X11:/usr/local/bin:/etc
+#define DefaultSystemPath       /etc:/bin:/usr/bin:$(BINDIR):/usr/bin/X11
 
 /*
- * These settings control the interdependence of the shared libraries.
- * Mostly borrowed from darwinLib.tmpl.
+ * If you are compiling on an SCO Open Server release prior to 5.0.2,
+ * you may need to remove -DLOCALCONN. There have been reports of it
+ * working on some 5.0.0 machines but not others.
  */
-#ifndef FixupLibReferences
-#define FixupLibReferences()						@@\
-XMULIBONLY = -lXmu							@@\
-XMULIB = $(XMULIBONLY) $(XTOOLLIB) $(XLIB)
-#endif
+#define ConnectionFlags         -DLOCALCONN -DTCPCONN -DUNIXCONN
 
-#ifndef XawClientLibs
-#define XawClientLibs $(XAWLIB) $(XMULIBONLY) $(XTOOLLIB) $(XPMLIB) $(EXTRAXAWCLIENTLIBS) $(XLIB)
-#endif
+#define InstallManPageAliases(file,destdir,aliases)                     @@\
+install.man::                                                           @@\
+        @(SUFFIX=`echo $(DESTDIR)destdir/file.* | cut -f3,4 -d.`; \     @@\
+        for i in aliases; do (set -x; \                                 @@\
+        $(RM) $(DESTDIR)destdir/$$i.*; \                                @@\
+        (cd $(DESTDIR)destdir; $(LN) file.$${SUFFIX} \                  @@\
+        $$i.$${SUFFIX})); \                                             @@\
+        done)
 
-#define SharedXlibi18nReqs	$(LDPRELIB) $(XLIBONLY)
-
-#define SharedXfontReqs		$(LDPRELIB) $(FONTSTUBLIB) GzipLibrary $(FREETYPE2LIB) $(XLIB)
-#define SharedFontencReqs	$(LDPRELIB) GzipLibrary
-#define SharedGLReqs		$(LDPRELIB) $(XLIB)
-#define SharedGLUReqs		$(LDPRELIB) $(XLIB) $(GLXLIB)
-#define SharedOSMesaReqs	$(LDPRELIB) $(XLIB) $(GLXLIB)
-#define SharedSMReqs		$(LDPRELIB) $(ICELIB)
-#define SharedX11Reqs		$(LDPRELIB) -lsocket
-#define SharedXawReqs		$(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XPMLIB) $(EXTRAXAWREQS) $(XLIB)
-#define SharedXaw7Reqs		$(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XPMLIB) $(XLIB)
-#define SharedXaw6Reqs		$(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XLIB)
-#define SharedXcursorReqs	$(LDPRELIB) $(XRENDERLIB) $(XLIB)
-#define SharedXextReqs		$(LDPRELIB) $(XONLYLIB)
-#define SharedXiReqs		$(LDPRELIB) $(XLIB)
-#define SharedXmuReqs		$(LDPRELIB) $(XTOOLLIB) $(XLIB)
-#define SharedXmuuReqs		$(LDPRELIB) $(XONLYLIB)
-#define SharedXpReqs		$(LDPRELIB) $(XLIB)
-#define SharedXpmReqs		$(LDPRELIB) $(XLIB)
-#define SharedXrandrReqs	$(LDPRELIB) $(XRENDERLIB) $(XLIB)
-#define SharedXrenderReqs	$(LDPRELIB) $(XLIB)
-#define SharedXtReqs		$(LDPRELIB) $(XONLYLIB) $(SMLIB) $(ICELIB)
-#define SharedXtstReqs		$(LDPRELIB) $(XLIB)
-#define SharedXvReqs		$(LDPRELIB) $(XLIB)
-#define SharedDPSReqs		$(LDPRELIB) $(SMLIB) $(ICELIB) $(XTOOLLIB) $(XLIB)
-#define SharedDPSTKReqs		$(LDPRELIB) $(SMLIB) $(ICELIB) $(XTOOLLIB) $(DPSLIB) $(XLIB)
-#define SharedOldXReqs		$(LDPRELIB) $(XONLYLIB)
-#define SharedpsresReqs		$(LDPRELIB) $(SMLIB) $(ICELIB) $(XTOOLLIB) $(XLIB)
-#define SharedXResReqs		$(LDPRELIB) $(XLIB)
-#define SharedXfontcacheReqs	$(LDPRELIB) $(XLIB)
-#define SharedXineramaReqs	$(LDPRELIB) $(XLIB)
-#define SharedXssReqs		$(LDPRELIB) $(XLIB)
-#define SharedXvMCReqs		$(LDPRELIB) $(XLIB)
-#define SharedXxf86miscReqs	$(LDPRELIB) $(XLIB)
-#define SharedXxf86vmReqs	$(LDPRELIB) $(XLIB)
-#define SharedxkbfileReqs	$(LDPRELIB) $(XONLYLIB)
-#define SharedxkbuiReqs		$(LDPRELIB) $(XKBFILELIB) $(XONLYLIB)
-#define SharedXReqs		$(XTOOLLIB) $(XPLIB) $(XLIB)
-#define SharedXmReqs		$(LDPRELIB) SharedXReqs
-#define SharedMrmReqs		$(LDPRELIB) $(XMLIB) SharedXReqs
-#define SharedUilReqs		$(LDPRELIB) $(XMLIB) SharedXReqs
-
-#define ObjectFromAsmSource(src,flags)					@@\
-									@@\
-src.o: src.S								@@\
-	RemoveFile(src.o)						@@\
-	$(CC) -c AsmDefines $(DEFINES) $(INCLUDES) flags src.S
-
-#include <scoLib.rules>		/* minor changes to sv4Lib.rules */
+#include <scoLib.rules>  /* minor changes to sv4Lib.rules */
 #include <sv4Lib.rules>
 
-#include <xorg.cf>
+#ifdef i386Architecture
+#include <xfree86.cf>
+#endif
+

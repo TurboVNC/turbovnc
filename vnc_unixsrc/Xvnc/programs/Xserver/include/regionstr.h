@@ -1,5 +1,4 @@
-/* $XdotOrg: xc/programs/Xserver/include/regionstr.h,v 1.7 2005/08/24 11:18:31 daniels Exp $ */
-/* $Xorg: regionstr.h,v 1.4 2001/02/09 02:05:15 xorgcvs Exp $ */
+/* $XConsortium: regionstr.h,v 1.8 94/04/17 20:26:01 dpw Exp $ */
 /***********************************************************
 
 Copyright 1987, 1998  The Open Group
@@ -29,13 +28,13 @@ Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
                         All Rights Reserved
 
-Permission to use, copy, modify, and distribute this software and its
-documentation for any purpose and without fee is hereby granted,
+Permission to use, copy, modify, and distribute this software and its 
+documentation for any purpose and without fee is hereby granted, 
 provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in
+both that copyright notice and this permission notice appear in 
 supporting documentation, and that the name of Digital not be
 used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.
+software without specific, written prior permission.  
 
 DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
 ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
@@ -46,12 +45,8 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $XFree86: xc/programs/Xserver/include/regionstr.h,v 1.12tsi Exp $ */
-
 #ifndef REGIONSTRUCT_H
 #define REGIONSTRUCT_H
-
-typedef struct _Region RegionRec, *RegionPtr;
 
 #include "miscstruct.h"
 
@@ -63,7 +58,7 @@ typedef struct _Region RegionRec, *RegionPtr;
 
 #define NullRegion ((RegionPtr)0)
 
-/*
+/* 
  *   clip region
  */
 
@@ -73,10 +68,10 @@ typedef struct _RegData {
 /*  BoxRec	rects[size];   in memory but not explicitly declared */
 } RegDataRec, *RegDataPtr;
 
-struct _Region {
+typedef struct _Region {
     BoxRec 	extents;
     RegDataPtr	data;
-};
+} RegionRec, *RegionPtr;
 
 extern BoxRec miEmptyBox;
 extern RegDataRec miEmptyData;
@@ -95,203 +90,184 @@ extern RegDataRec miBrokenData;
 #define REGION_END(reg) REGION_BOX(reg, (reg)->data->numRects - 1)
 #define REGION_SZOF(n) (sizeof(RegDataRec) + ((n) * sizeof(BoxRec)))
 
-/* Keith recommends weaning the region code of pScreen argument */
-#define REG_pScreen	screenInfo.screens[0]
-
 #ifdef NEED_SCREEN_REGIONS
 
 #define REGION_CREATE(_pScreen, _rect, _size) \
-    (*(REG_pScreen)->RegionCreate)(_rect, _size)
+    (*(_pScreen)->RegionCreate)(_rect, _size)
 
 #define REGION_INIT(_pScreen, _pReg, _rect, _size) \
-    (*(REG_pScreen)->RegionInit)(_pReg, _rect, _size)
+    (*(_pScreen)->RegionInit)(_pReg, _rect, _size)
 
 #define REGION_COPY(_pScreen, dst, src) \
-    (*(REG_pScreen)->RegionCopy)(dst, src)
+    (*(_pScreen)->RegionCopy)(dst, src)
 
 #define REGION_DESTROY(_pScreen, _pReg) \
-    (*(REG_pScreen)->RegionDestroy)(_pReg)
+    (*(_pScreen)->RegionDestroy)(_pReg)
 
 #define REGION_UNINIT(_pScreen, _pReg) \
-    (*(REG_pScreen)->RegionUninit)(_pReg)
+    (*(_pScreen)->RegionUninit)(_pReg)
 
 #define REGION_INTERSECT(_pScreen, newReg, reg1, reg2) \
-    (*(REG_pScreen)->Intersect)(newReg, reg1, reg2)
+    (*(_pScreen)->Intersect)(newReg, reg1, reg2)
 
 #define REGION_UNION(_pScreen, newReg, reg1, reg2) \
-    (*(REG_pScreen)->Union)(newReg, reg1, reg2)
+    (*(_pScreen)->Union)(newReg, reg1, reg2)
 
 #define REGION_SUBTRACT(_pScreen, newReg, reg1, reg2) \
-    (*(REG_pScreen)->Subtract)(newReg, reg1, reg2)
+    (*(_pScreen)->Subtract)(newReg, reg1, reg2)
 
 #define REGION_INVERSE(_pScreen, newReg, reg1, invRect) \
-    (*(REG_pScreen)->Inverse)(newReg, reg1, invRect)
+    (*(_pScreen)->Inverse)(newReg, reg1, invRect)
 
 #define REGION_RESET(_pScreen, _pReg, _pBox) \
-    (*(REG_pScreen)->RegionReset)(_pReg, _pBox)
+    (*(_pScreen)->RegionReset)(_pReg, _pBox)
 
 #define REGION_TRANSLATE(_pScreen, _pReg, _x, _y) \
-    (*(REG_pScreen)->TranslateRegion)(_pReg, _x, _y)
+    (*(_pScreen)->TranslateRegion)(_pReg, _x, _y)
 
 #define RECT_IN_REGION(_pScreen, _pReg, prect) \
-    (*(REG_pScreen)->RectIn)(_pReg, prect)
+    (*(_pScreen)->RectIn)(_pReg, prect)
 
 #define POINT_IN_REGION(_pScreen, _pReg, _x, _y, prect) \
-    (*(REG_pScreen)->PointInRegion)(_pReg, _x, _y, prect)
+    (*(_pScreen)->PointInRegion)(_pReg, _x, _y, prect)
 
 #define REGION_NOTEMPTY(_pScreen, _pReg) \
-    (*(REG_pScreen)->RegionNotEmpty)(_pReg)
-
-#define REGION_EQUAL(_pScreen, _pReg1, _pReg2) \
-    (*(REG_pScreen)->RegionEqual)(_pReg1, _pReg2)
+    (*(_pScreen)->RegionNotEmpty)(_pReg)
 
 #define REGION_BROKEN(_pScreen, _pReg) \
-    (*(REG_pScreen)->RegionBroken)(_pReg)
+    (*(_pScreen)->RegionBroken)(_pReg)
 
 #define REGION_BREAK(_pScreen, _pReg) \
-    (*(REG_pScreen)->RegionBreak)(_pReg)
+    (*(_pScreen)->RegionBreak)(_pReg)
 
 #define REGION_EMPTY(_pScreen, _pReg) \
-    (*(REG_pScreen)->RegionEmpty)(_pReg)
+    (*(_pScreen)->RegionEmpty)(_pReg)
 
 #define REGION_EXTENTS(_pScreen, _pReg) \
-    (*(REG_pScreen)->RegionExtents)(_pReg)
+    (*(_pScreen)->RegionExtents)(_pReg)
 
 #define REGION_APPEND(_pScreen, dstrgn, rgn) \
-    (*(REG_pScreen)->RegionAppend)(dstrgn, rgn)
+    (*(_pScreen)->RegionAppend)(dstrgn, rgn)
 
 #define REGION_VALIDATE(_pScreen, badreg, pOverlap) \
-    (*(REG_pScreen)->RegionValidate)(badreg, pOverlap)
+    (*(_pScreen)->RegionValidate)(badreg, pOverlap)
 
 #define BITMAP_TO_REGION(_pScreen, pPix) \
-    (*(REG_pScreen)->BitmapToRegion)(pPix)
+    (*(_pScreen)->BitmapToRegion)(pPix)
 
 #define RECTS_TO_REGION(_pScreen, nrects, prect, ctype) \
-    (*(REG_pScreen)->RectsToRegion)(nrects, prect, ctype)
+    (*(_pScreen)->RectsToRegion)(nrects, prect, ctype)
 
 #else /* !NEED_SCREEN_REGIONS */
 
-/* Reference _pScreen macro argument and check its type */
-#define REGION_SCREEN(_pScreen) (void)((REG_pScreen)->myNum)
-
 #define REGION_CREATE(_pScreen, _rect, _size) \
-    (REGION_SCREEN(_pScreen), miRegionCreate(_rect, _size))
+    miRegionCreate(_rect, _size)
 
 #define REGION_COPY(_pScreen, dst, src) \
-    (REGION_SCREEN(_pScreen), miRegionCopy(dst, src))
+    miRegionCopy(dst, src)
 
 #define REGION_DESTROY(_pScreen, _pReg) \
-    (REGION_SCREEN(_pScreen), miRegionDestroy(_pReg))
+    miRegionDestroy(_pReg)
 
 #define REGION_INTERSECT(_pScreen, newReg, reg1, reg2) \
-    (REGION_SCREEN(_pScreen), miIntersect(newReg, reg1, reg2))
+    miIntersect(newReg, reg1, reg2)
 
 #define REGION_UNION(_pScreen, newReg, reg1, reg2) \
-    (REGION_SCREEN(_pScreen), miUnion(newReg, reg1, reg2))
+    miUnion(newReg, reg1, reg2)
 
 #define REGION_SUBTRACT(_pScreen, newReg, reg1, reg2) \
-    (REGION_SCREEN(_pScreen), miSubtract(newReg, reg1, reg2))
+    miSubtract(newReg, reg1, reg2)
 
 #define REGION_INVERSE(_pScreen, newReg, reg1, invRect) \
-    (REGION_SCREEN(_pScreen), miInverse(newReg, reg1, invRect))
+    miInverse(newReg, reg1, invRect)
 
 #define REGION_TRANSLATE(_pScreen, _pReg, _x, _y) \
-    (REGION_SCREEN(_pScreen), miTranslateRegion(_pReg, _x, _y))
+    miTranslateRegion(_pReg, _x, _y)
 
 #define RECT_IN_REGION(_pScreen, _pReg, prect) \
-    (REGION_SCREEN(_pScreen), miRectIn(_pReg, prect))
+    miRectIn(_pReg, prect)
 
 #define POINT_IN_REGION(_pScreen, _pReg, _x, _y, prect) \
-    (REGION_SCREEN(_pScreen), miPointInRegion(_pReg, _x, _y, prect))
+    miPointInRegion(_pReg, _x, _y, prect)
 
 #define REGION_APPEND(_pScreen, dstrgn, rgn) \
-    (REGION_SCREEN(_pScreen), miRegionAppend(dstrgn, rgn))
+    miRegionAppend(dstrgn, rgn)
 
 #define REGION_VALIDATE(_pScreen, badreg, pOverlap) \
-    (REGION_SCREEN(_pScreen), miRegionValidate(badreg, pOverlap))
+    miRegionValidate(badreg, pOverlap)
 
 #define BITMAP_TO_REGION(_pScreen, pPix) \
     (*(_pScreen)->BitmapToRegion)(pPix) /* no mi version?! */
 
 #define RECTS_TO_REGION(_pScreen, nrects, prect, ctype) \
-    (REGION_SCREEN(_pScreen), miRectsToRegion(nrects, prect, ctype))
-
-#define REGION_EQUAL(_pScreen, _pReg1, _pReg2) \
-    (REGION_SCREEN(_pScreen), miRegionEqual(_pReg1, _pReg2))
+    miRectsToRegion(nrects, prect, ctype)
 
 #define REGION_BREAK(_pScreen, _pReg) \
-    (REGION_SCREEN(_pScreen), miRegionBreak(_pReg))
+    miRegionBreak(_pReg)
 
 #ifdef DONT_INLINE_REGION_OPS
 
 #define REGION_INIT(_pScreen, _pReg, _rect, _size) \
-    (REGION_SCREEN(_pScreen), miRegionInit(_pReg, _rect, _size))
+    miRegionInit(_pReg, _rect, _size)
 
 #define REGION_UNINIT(_pScreen, _pReg) \
-    (REGION_SCREEN(_pScreen), miRegionUninit(_pReg))
+    miRegionUninit(_pReg)
 
 #define REGION_RESET(_pScreen, _pReg, _pBox) \
-    (REGION_SCREEN(_pScreen), miRegionReset(_pReg, _pBox))
+    miRegionReset(_pReg, _pBox)
 
 #define REGION_NOTEMPTY(_pScreen, _pReg) \
-    (REGION_SCREEN(_pScreen), miRegionNotEmpty(_pReg))
+    miRegionNotEmpty(_pReg)
 
 #define REGION_BROKEN(_pScreen, _pReg) \
-    (REGION_SCREEN(_pScreen), miRegionBroken(_pReg))
+    miRegionBroken(_pReg)
 
 #define REGION_EMPTY(_pScreen, _pReg) \
-    (REGION_SCREEN(_pScreen), miRegionEmpty(_pReg))
+    miRegionEmpty(_pReg)
 
 #define REGION_EXTENTS(_pScreen, _pReg) \
-    (REGION_SCREEN(_pScreen), miRegionExtents(_pReg))
+    miRegionExtents(_pReg)
 
 #else /* inline certain simple region ops for performance */
 
 #define REGION_INIT(_pScreen, _pReg, _rect, _size) \
 { \
-    REGION_SCREEN(_pScreen); \
     if (_rect) \
     { \
-        (_pReg)->extents = *(_rect); \
-        (_pReg)->data = (RegDataPtr)NULL; \
+	(_pReg)->extents = *(_rect); \
+	(_pReg)->data = (RegDataPtr)NULL; \
     } \
     else \
     { \
-        (_pReg)->extents = miEmptyBox; \
-        if (((_size) > 1) && ((_pReg)->data = \
-                             (RegDataPtr)xalloc(REGION_SZOF(_size)))) \
-        { \
-            (_pReg)->data->size = (_size); \
-            (_pReg)->data->numRects = 0; \
-        } \
-        else \
-            (_pReg)->data = &miEmptyData; \
+	(_pReg)->extents = miEmptyBox; \
+	if (((_size) > 1) && ((_pReg)->data = \
+			     (RegDataPtr)xalloc(REGION_SZOF(_size)))) \
+	{ \
+	    (_pReg)->data->size = (_size); \
+	    (_pReg)->data->numRects = 0; \
+	} \
+	else \
+	    (_pReg)->data = &miEmptyData; \
     } \
- }
-
+}
 
 #define REGION_UNINIT(_pScreen, _pReg) \
 { \
-    REGION_SCREEN(_pScreen); \
-    if ((_pReg)->data && (_pReg)->data->size) { \
-	xfree((_pReg)->data); \
-	(_pReg)->data = NULL; \
-    } \
+    if ((_pReg)->data && (_pReg)->data->size) xfree((_pReg)->data); \
 }
 
 #define REGION_RESET(_pScreen, _pReg, _pBox) \
 { \
-    REGION_SCREEN(_pScreen); \
     (_pReg)->extents = *(_pBox); \
     REGION_UNINIT(_pScreen, _pReg); \
     (_pReg)->data = (RegDataPtr)NULL; \
 }
 
 #define REGION_NOTEMPTY(_pScreen, _pReg) \
-    (REGION_SCREEN(_pScreen), !REGION_NIL(_pReg))
+    !REGION_NIL(_pReg)
 
 #define REGION_BROKEN(_pScreen, _pReg) \
-    (REGION_SCREEN(_pScreen), REGION_NAR(_pReg))
+    REGION_NAR(_pReg)
 
 #define REGION_EMPTY(_pScreen, _pReg) \
 { \
@@ -302,111 +278,155 @@ extern RegDataRec miBrokenData;
 }
 
 #define REGION_EXTENTS(_pScreen, _pReg) \
-    (REGION_SCREEN(_pScreen), &(_pReg)->extents)
-
-#define REGION_NULL(_pScreen, _pReg) \
-{ \
-    REGION_SCREEN(_pScreen); \
-    (_pReg)->extents = miEmptyBox; \
-    (_pReg)->data = &miEmptyData; \
-}
+    &(_pReg)->extents
 
 #endif /* DONT_INLINE_REGION_OPS */
 
 #endif /* NEED_SCREEN_REGIONS */
 
-#ifndef REGION_NULL
-#define REGION_NULL(_pScreen, _pReg) \
-    REGION_INIT(_pScreen, _pReg, NullBox, 1)
-#endif
-
 /* moved from mi.h */
 
 extern RegionPtr miRegionCreate(
+#if NeedFunctionPrototypes
     BoxPtr /*rect*/,
-    int /*size*/);
+    int /*size*/
+#endif
+);
 
 extern void miRegionInit(
+#if NeedFunctionPrototypes
     RegionPtr /*pReg*/,
     BoxPtr /*rect*/,
-    int /*size*/);
+    int /*size*/
+#endif
+);
 
 extern void miRegionDestroy(
-    RegionPtr /*pReg*/);
+#if NeedFunctionPrototypes
+    RegionPtr /*pReg*/
+#endif
+);
 
 extern void miRegionUninit(
-    RegionPtr /*pReg*/);
+#if NeedFunctionPrototypes
+    RegionPtr /*pReg*/
+#endif
+);
 
 extern Bool miRegionCopy(
+#if NeedFunctionPrototypes
     RegionPtr /*dst*/,
-    RegionPtr /*src*/);
+    RegionPtr /*src*/
+#endif
+);
 
 extern Bool miIntersect(
+#if NeedFunctionPrototypes
     RegionPtr /*newReg*/,
     RegionPtr /*reg1*/,
-    RegionPtr /*reg2*/);
+    RegionPtr /*reg2*/
+#endif
+);
 
 extern Bool miUnion(
+#if NeedFunctionPrototypes
     RegionPtr /*newReg*/,
     RegionPtr /*reg1*/,
-    RegionPtr /*reg2*/);
+    RegionPtr /*reg2*/
+#endif
+);
 
 extern Bool miRegionAppend(
+#if NeedFunctionPrototypes
     RegionPtr /*dstrgn*/,
-    RegionPtr /*rgn*/);
+    RegionPtr /*rgn*/
+#endif
+);
 
 extern Bool miRegionValidate(
+#if NeedFunctionPrototypes
     RegionPtr /*badreg*/,
-    Bool * /*pOverlap*/);
+    Bool * /*pOverlap*/
+#endif
+);
 
 extern RegionPtr miRectsToRegion(
+#if NeedFunctionPrototypes
     int /*nrects*/,
     xRectanglePtr /*prect*/,
-    int /*ctype*/);
+    int /*ctype*/
+#endif
+);
 
 extern Bool miSubtract(
+#if NeedFunctionPrototypes
     RegionPtr /*regD*/,
     RegionPtr /*regM*/,
-    RegionPtr /*regS*/);
+    RegionPtr /*regS*/
+#endif
+);
 
 extern Bool miInverse(
+#if NeedFunctionPrototypes
     RegionPtr /*newReg*/,
     RegionPtr /*reg1*/,
-    BoxPtr /*invRect*/);
+    BoxPtr /*invRect*/
+#endif
+);
 
 extern int miRectIn(
+#if NeedFunctionPrototypes
     RegionPtr /*region*/,
-    BoxPtr /*prect*/);
+    BoxPtr /*prect*/
+#endif
+);
 
 extern void miTranslateRegion(
+#if NeedFunctionPrototypes
     RegionPtr /*pReg*/,
     int /*x*/,
-    int /*y*/);
+    int /*y*/
+#endif
+);
 
 extern void miRegionReset(
+#if NeedFunctionPrototypes
     RegionPtr /*pReg*/,
-    BoxPtr /*pBox*/);
+    BoxPtr /*pBox*/
+#endif
+);
 
 extern Bool miRegionBreak(
-    RegionPtr /*pReg*/);
+#if NeedFunctionPrototypes
+    RegionPtr /*pReg*/
+#endif
+);
 
 extern Bool miPointInRegion(
+#if NeedFunctionPrototypes
     RegionPtr /*pReg*/,
     int /*x*/,
     int /*y*/,
-    BoxPtr /*box*/);
-
-extern Bool miRegionEqual(
-    RegionPtr /*pReg1*/,
-    RegionPtr /*pReg2*/);
+    BoxPtr /*box*/
+#endif
+);
 
 extern Bool miRegionNotEmpty(
-    RegionPtr /*pReg*/);
+#if NeedFunctionPrototypes
+    RegionPtr /*pReg*/
+#endif
+);
 
 extern void miRegionEmpty(
-    RegionPtr /*pReg*/);
+#if NeedFunctionPrototypes
+    RegionPtr /*pReg*/
+#endif
+);
 
 extern BoxPtr miRegionExtents(
-    RegionPtr /*pReg*/);
+#if NeedFunctionPrototypes
+    RegionPtr /*pReg*/
+#endif
+);
 
 #endif /* REGIONSTRUCT_H */

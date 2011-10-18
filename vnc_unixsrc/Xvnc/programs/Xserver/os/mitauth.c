@@ -1,13 +1,15 @@
-/* $Xorg: mitauth.c,v 1.4 2001/02/09 02:05:23 xorgcvs Exp $ */
+/* $XConsortium: mitauth.c /main/11 1996/10/28 22:56:36 dpw $ */
 /*
 
-Copyright 1988, 1998  The Open Group
+Copyright (c) 1988  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -15,31 +17,25 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: xc/programs/Xserver/os/mitauth.c,v 1.4 2001/01/17 22:37:11 dawes Exp $ */
 
 /*
  * MIT-MAGIC-COOKIE-1 authorization scheme
  * Author:  Keith Packard, MIT X Consortium
  */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
+#include "X.h"
 #include "os.h"
-#include "osdep.h"
 #include "dixstruct.h"
 
 static struct auth {
@@ -50,10 +46,10 @@ static struct auth {
 } *mit_auth;
 
 int
-MitAddCookie (
-    unsigned short	data_length,
-    char		*data,
-    XID			id)
+MitAddCookie (data_length, data, id)
+unsigned short	data_length;
+char	*data;
+XID	id;
 {
     struct auth	*new;
 
@@ -74,11 +70,11 @@ MitAddCookie (
 }
 
 XID
-MitCheckCookie (
-    unsigned short	data_length,
-    char		*data,
-    ClientPtr		client,
-    char		**reason)
+MitCheckCookie (data_length, data, client, reason)
+    unsigned short	data_length;
+    char	*data;
+    ClientPtr client;
+    char	**reason;
 {
     struct auth	*auth;
 
@@ -92,7 +88,7 @@ MitCheckCookie (
 }
 
 int
-MitResetCookie (void)
+MitResetCookie ()
 {
     struct auth	*auth, *next;
 
@@ -106,9 +102,9 @@ MitResetCookie (void)
 }
 
 XID
-MitToID (
-	unsigned short	data_length,
-	char		*data)
+MitToID (data_length, data)
+unsigned short	data_length;
+char	*data;
 {
     struct auth	*auth;
 
@@ -121,10 +117,10 @@ MitToID (
 }
 
 int
-MitFromID (
-	XID		id,
-	unsigned short	*data_lenp,
-	char		**datap)
+MitFromID (id, data_lenp, datap)
+XID id;
+unsigned short	*data_lenp;
+char	**datap;
 {
     struct auth	*auth;
 
@@ -139,9 +135,9 @@ MitFromID (
 }
 
 int
-MitRemoveCookie (
-	unsigned short	data_length,
-	char		*data)
+MitRemoveCookie (data_length, data)
+unsigned short	data_length;
+char	*data;
 {
     struct auth	*auth, *prev;
 
@@ -167,12 +163,12 @@ MitRemoveCookie (
 static char cookie[16]; /* 128 bits */
 
 XID
-MitGenerateCookie (
-    unsigned	data_length,
-    char	*data,
-    XID		id,
-    unsigned	*data_length_return,
-    char	**data_return)
+MitGenerateCookie (data_length, data, id, data_length_return, data_return)
+    unsigned int data_length;
+    char *data;
+    XID id;
+    unsigned int *data_length_return;
+    char	**data_return;
 {
     int i = 0;
     int status;

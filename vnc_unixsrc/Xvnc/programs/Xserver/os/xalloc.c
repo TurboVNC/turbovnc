@@ -1,4 +1,3 @@
-#define FATALERRORS 1
 /*
 Copyright (C) 1995 Pascal Haible.  All Rights Reserved.
 
@@ -26,22 +25,26 @@ dealings in this Software without prior written authorization from
 Pascal Haible.
 */
 
-/* $XFree86: xc/programs/Xserver/os/xalloc.c,v 3.35tsi Exp $ */
+/* $XFree86: xc/programs/Xserver/os/xalloc.c,v 3.12.2.1 1997/05/10 07:03:02 hohndel Exp $ */
 
 /* Only used if INTERNAL_MALLOC is defined
  * - otherwise xalloc() in utils.c is used
  */
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifdef INTERNAL_MALLOC
 
+#if defined(__STDC__) || defined(AMOEBA)
+#ifndef NOSTDHDRS
 #include <stdlib.h>	/* for malloc() etc. */
+#endif
+#else
+extern char *malloc();
+extern char *calloc();
+extern char *realloc();
+#endif
 
-#include <X11/Xos.h>
+#include "Xos.h"
 #include "misc.h"
-#include <X11/X.h>
+#include "X.h"
 
 #ifdef XALLOC_LOG
 #include <stdio.h>
@@ -169,7 +172,7 @@ extern Bool Must_have_memory;
 #define SIZE_STEPS		(sizeof(double))
 #define SIZE_HEADER		(2*sizeof(long)) /* = sizeof(double) for 32bit */
 #ifdef XALLOC_DEBUG
-#if defined(__sparc__)
+#if defined(__sparc__) || defined(__hppa__)
 #define SIZE_TAIL		(2*sizeof(long)) /* = sizeof(double) for 32bit */
 #else
 #define SIZE_TAIL		(sizeof(long))
@@ -183,20 +186,11 @@ extern Bool Must_have_memory;
 #define TAIL_SIZE		0
 #endif
 
-#if defined (_LP64) || \
-    defined(__alpha__) || defined(__alpha) || \
-    defined(__ia64__) || defined(ia64) || \
-    defined(__sparc64__) || \
-    defined(__s390x__) || \
-    defined(__amd64__) || defined(amd64) || \
-    defined(__powerpc64__) || \
-    (defined(sgi) && _MIPS_SZLONG == 64))
+#ifdef __alpha__
 #define MAGIC			0x1404196414071968
-#define MAGIC_FREE              0x1506196615061966
 #define MAGIC2			0x2515207525182079
 #else
 #define MAGIC			0x14071968
-#define MAGIC_FREE              0x15061966
 #define MAGIC2			0x25182079
 #endif
 
@@ -248,18 +242,7 @@ static unsigned long *free_lists[MAX_SMALL/SIZE_STEPS];
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <asm/page.h>	/* PAGE_SIZE */
-#define HAS_SC_PAGESIZE	/* _SC_PAGESIZE may be an enum for Linux */
-#define HAS_GETPAGESIZE
 #endif /* linux */
-
-#if defined(__GNU__)
-#define HAS_MMAP_ANON
-#include <sys/types.h>
-#include <sys/mman.h>
-#include <mach/vm_param.h>     /* PAGE_SIZE */
-#define HAS_SC_PAGESIZE
-#define HAS_GETPAGESIZE
-#endif /* __GNU__ */
 
 #if defined(CSRG_BASED)
 #define HAS_MMAP_ANON
@@ -268,20 +251,12 @@ static unsigned long *free_lists[MAX_SMALL/SIZE_STEPS];
 #include <sys/mman.h>
 #endif /* CSRG_BASED */
 
-#if defined(DGUX)
-#define HAS_GETPAGESIZE
+#if defined(SVR4)
 #define MMAP_DEV_ZERO
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#endif /* DGUX */
-
-#if defined(SVR4) && !defined(DGUX)
-#define MMAP_DEV_ZERO
-#include <sys/types.h>
-#include <sys/mman.h>
-#include <unistd.h>
-#endif /* SVR4 && !DGUX */
+#endif /* SVR4 */
 
 #if defined(sun) && !defined(SVR4) /* SunOS */
 #define MMAP_DEV_ZERO	/* doesn't SunOS have MAP_ANON ?? */
@@ -301,18 +276,15 @@ static int pagesize;
 #ifdef MMAP_DEV_ZERO
 static int devzerofd = -1;
 #include <errno.h>
+#ifdef X_NOT_STDC_ENV
+extern int errno;
+#endif
 #endif
 
-/*
- * empty trap function for gdb. Breakpoint here
- * to find who tries to free a free area
- */
-void XfreeTrap(void)
-{
-}
 
-void *
-Xalloc (unsigned long amount)
+unsigned long *
+Xalloc (amount)
+    unsigned long amount;
 {
     register unsigned long *ptr;
     int indx;
@@ -322,7 +294,7 @@ Xalloc (unsigned long amount)
     /* zero size requested */
     if (amount == 0) {
 	LOG_ALLOC("Xalloc=0", amount, 0);
-	return NULL;
+	return (unsigned long *)NULL;
     }
     /* negative size (or size > 2GB) - what do we do? */
     if ((long)amount < 0) {
@@ -333,17 +305,11 @@ Xalloc (unsigned long amount)
  	ErrorF("Xalloc warning: Xalloc(<0) ignored..\n");
 #endif
  	LOG_ALLOC("Xalloc<0", amount, 0);
-	return NULL;
+	return (unsigned long *)NULL;
     }
 
     /* alignment check */
-#if defined(__alpha__) || defined(__alpha) || \
-    defined(__sparc__) || \
-    defined(__mips__) || \
-    defined(__powerpc__) || \
-    defined(__arm32__) || \
-    defined(__ia64__) || defined(ia64) || \
-    defined(__s390x__) || defined(__s390__)
+#if defined(__alpha__) || defined(__sparc__) || defined(__mips__) || defined(__hppa__)
     amount = (amount + (sizeof(long)-1)) & ~(sizeof(long)-1);
 #endif
 
@@ -363,13 +329,12 @@ Xalloc (unsigned long amount)
 		if (NULL!=ptr) {
 			int i;
 			unsigned long *p1, *p2;
-			p1 = 0;
 			p2 = (unsigned long *)((char *)ptr + SIZE_HEADER);
 			for (i=0; i<(amount<100 ? 40 : 20); i++) {
 				p1 = p2;
 				p1[-2] = amount;
 #ifdef XALLOC_DEBUG
-				p1[-1] = MAGIC_FREE;
+				p1[-1] = MAGIC;
 #endif /* XALLOC_DEBUG */
 #ifdef SIZE_TAIL
 				*(unsigned long *)((unsigned char *)p1 + amount) = MAGIC2;
@@ -384,18 +349,14 @@ Xalloc (unsigned long amount)
 			/* take the fist one */
 			ptr = (unsigned long *)((char *)ptr + SIZE_HEADER);
 			LOG_ALLOC("Xalloc-S", amount, ptr);
-			ptr[-1] = MAGIC;
-			return (void *)ptr;
+			return ptr;
 		} /* else fall through to 'Out of memory' */
 	} else {
 		/* take that piece of mem out of the list */
 		free_lists[indx] = *((unsigned long **)ptr);
 		/* already has size (and evtl. magic) filled in */
-#ifdef XALLOC_DEBUG
-		ptr[-1] = MAGIC;
-#endif /* XALLOC_DEBUG */
 		LOG_ALLOC("Xalloc-S", amount, ptr);
-		return (void *)ptr;
+		return ptr;
 	}
 
 #if defined(HAS_MMAP_ANON) || defined(MMAP_DEV_ZERO)
@@ -429,11 +390,17 @@ Xalloc (unsigned long amount)
 		ptr[1] = MAGIC;
 #endif /* XALLOC_DEBUG */
 #ifdef SIZE_TAIL
-		((unsigned long *)((char *)ptr + amount - TAIL_SIZE))[0] = MAGIC2;
+# ifdef __hppa__
+		/* reserved space for 2 * sizeof(long), so use correct one */
+		/* see SIZE_TAIL macro */
+		((unsigned long *)((char *)ptr + amount))[-2] = MAGIC2;
+# else
+		((unsigned long *)((char *)ptr + amount))[-1] = MAGIC2;
+# endif /* __hppa__ */
 #endif /* SIZE_TAIL */
 		ptr = (unsigned long *)((char *)ptr + SIZE_HEADER);
 		LOG_ALLOC("Xalloc-L", amount, ptr);
-		return (void *)ptr;
+		return ptr;
 	} /* else fall through to 'Out of memory' */
 #endif /* HAS_MMAP_ANON || MMAP_DEV_ZERO */
     } else {
@@ -452,13 +419,13 @@ Xalloc (unsigned long amount)
 #endif /* SIZE_TAIL */
 		ptr = (unsigned long *)((char *)ptr + SIZE_HEADER);
 		LOG_ALLOC("Xalloc-M", amount, ptr);
-		return (void *)ptr;
+		return ptr;
 	}
     }
     if (Must_have_memory)
 	FatalError("Out of memory");
     LOG_ALLOC("Xalloc-oom", amount, 0);
-    return NULL;
+    return (unsigned long *)NULL;
 }
 
 /*****************
@@ -466,15 +433,16 @@ Xalloc (unsigned long amount)
  * "no failure" realloc, alternate interface to Xalloc w/o Must_have_memory
  *****************/
 
-pointer
-XNFalloc (unsigned long amount)
+unsigned long *
+XNFalloc (amount)
+    unsigned long amount;
 {
-    register pointer ptr;
+    register unsigned long *ptr;
 
     /* zero size requested */
     if (amount == 0) {
 	LOG_ALLOC("XNFalloc=0", amount, 0);
-	return NULL;
+	return (unsigned long *)NULL;
     }
     /* negative size (or size > 2GB) - what do we do? */
     if ((long)amount < 0) {
@@ -499,31 +467,14 @@ XNFalloc (unsigned long amount)
  * Xcalloc
  *****************/
 
-pointer
-Xcalloc (unsigned long amount)
+unsigned long *
+Xcalloc (amount)
+    unsigned long   amount;
 {
-    pointer ret;
+    unsigned long   *ret;
 
     ret = Xalloc (amount);
-    if (ret != 0
-#if defined(HAS_MMAP_ANON) || defined(MMAP_DEV_ZERO)
-	    && (amount < MIN_LARGE)	/* mmaped anonymous mem is already cleared */
-#endif
-       )
-	bzero ((char *) ret, (int) amount);
-    return ret;
-}
-
-/*****************
- * XNFcalloc
- *****************/
-void *
-XNFcalloc (unsigned long amount)
-{
-    pointer ret;
-
-    ret = XNFalloc (amount);
-    if (ret != 0
+    if (ret
 #if defined(HAS_MMAP_ANON) || defined(MMAP_DEV_ZERO)
 	    && (amount < MIN_LARGE)	/* mmaped anonymous mem is already cleared */
 #endif
@@ -536,8 +487,10 @@ XNFcalloc (unsigned long amount)
  * Xrealloc
  *****************/
 
-void *
-Xrealloc (pointer ptr, unsigned long amount)
+unsigned long *
+Xrealloc (ptr, amount)
+    register pointer ptr;
+    unsigned long amount;
 {
     register unsigned long *new_ptr;
 
@@ -546,7 +499,7 @@ Xrealloc (pointer ptr, unsigned long amount)
 	if (ptr)
 		Xfree(ptr);
 	LOG_REALLOC("Xrealloc=0", ptr, amount, 0);
-	return NULL;
+	return (unsigned long *)NULL;
     }
     /* negative size (or size > 2GB) - what do we do? */
     if ((long)amount < 0) {
@@ -559,7 +512,7 @@ Xrealloc (pointer ptr, unsigned long amount)
 	if (ptr)
 		Xfree(ptr);	/* ?? */
 	LOG_REALLOC("Xrealloc<0", ptr, amount, 0);
-	return NULL;
+	return (unsigned long *)NULL;
     }
 
     new_ptr = Xalloc(amount);
@@ -568,29 +521,14 @@ Xrealloc (pointer ptr, unsigned long amount)
 	old_size = ((unsigned long *)ptr)[-2];
 #ifdef XALLOC_DEBUG
 	if (MAGIC != ((unsigned long *)ptr)[-1]) {
-	    if (MAGIC_FREE == ((unsigned long *)ptr)[-1]) {
 #ifdef FATALERRORS
-		XfreeTrap();
-		FatalError("Xalloc error: range already freed in Xrealloc() :-(\n");
-#else
-		ErrorF("Xalloc error: range already freed in Xrealloc() :-(\a\n");
-		sleep(5);
-		XfreeTrap();
-#endif
-		LOG_REALLOC("Xalloc error: ranged already freed in Xrealloc() :-(",
-			ptr, amount, 0);
-		return NULL;
-	    }
-#ifdef FATALERRORS
-	    XfreeTrap();
 		FatalError("Xalloc error: header corrupt in Xrealloc() :-(\n");
 #else
 		ErrorF("Xalloc error: header corrupt in Xrealloc() :-(\n");
-		XfreeTrap();
 #endif
 		LOG_REALLOC("Xalloc error: header corrupt in Xrealloc() :-(",
 			ptr, amount, 0);
-		return NULL;
+		return (unsigned long *)NULL;
 	}
 #endif /* XALLOC_DEBUG */
 	/* copy min(old size, new size) */
@@ -600,12 +538,12 @@ Xrealloc (pointer ptr, unsigned long amount)
 	Xfree(ptr);
     if (new_ptr) {
 	LOG_REALLOC("Xrealloc", ptr, amount, new_ptr);
-	return (void *)new_ptr;
+	return new_ptr;
     }
     if (Must_have_memory)
 	FatalError("Out of memory");
     LOG_REALLOC("Xrealloc", ptr, amount, 0);
-    return NULL;
+    return (unsigned long *)NULL;
 }
                     
 /*****************
@@ -613,14 +551,16 @@ Xrealloc (pointer ptr, unsigned long amount)
  * "no failure" realloc, alternate interface to Xrealloc w/o Must_have_memory
  *****************/
 
-void *
-XNFrealloc (pointer ptr, unsigned long amount)
+unsigned long *
+XNFrealloc (ptr, amount)
+    register pointer ptr;
+    unsigned long amount;
 {
     if (( ptr = (pointer)Xrealloc( ptr, amount ) ) == NULL)
     {
         FatalError( "Out of memory" );
     }
-    return ptr;
+    return ((unsigned long *)ptr);
 }
 
 /*****************
@@ -629,7 +569,8 @@ XNFrealloc (pointer ptr, unsigned long amount)
  *****************/    
 
 void
-Xfree(pointer ptr)
+Xfree(ptr)
+    register pointer ptr;
 {
     unsigned long size;
     unsigned long *pheader;
@@ -642,24 +583,10 @@ Xfree(pointer ptr)
 #ifdef XALLOC_DEBUG
     if (MAGIC != pheader[1]) {
 	/* Diagnostic */
-	if (MAGIC_FREE == pheader[1]) {
 #ifdef FATALERRORS
-	    XfreeTrap();
-	    FatalError("Xalloc error: range already freed in Xrealloc() :-(\n");
-#else
-	    ErrorF("Xalloc error: range already freed in Xrealloc() :-(\a\n");
-	    sleep(5);
-	    XfreeTrap();
-#endif
-	    LOG_FREE("Xalloc error: ranged already freed in Xrealloc() :-(", ptr);
-	    return;
-	}
-#ifdef FATALERRORS
-	XfreeTrap();
 	FatalError("Xalloc error: Header corrupt in Xfree() :-(\n");
 #else
 	ErrorF("Xalloc error: Header corrupt in Xfree() :-(\n");
-	XfreeTrap();
 #endif
 	LOG_FREE("Xalloc error:  Header corrupt in Xfree() :-(", ptr);
 	return;
@@ -676,11 +603,9 @@ Xfree(pointer ptr)
 	if (MAGIC2 != *(unsigned long *)((char *)ptr + size)) {
 		/* Diagnostic */
 #ifdef FATALERRORS
-	    	XfreeTrap();
 		FatalError("Xalloc error: Tail corrupt in Xfree() for small block (adr=0x%x, val=0x%x)\n",(char *)ptr + size,*(unsigned long *)((char *)ptr + size));
 #else
 		ErrorF("Xalloc error: Tail corrupt in Xfree() for small block (adr=0x%x, val=0x%x)\n",(char *)ptr + size,*(unsigned long *)((char *)ptr + size));
-		XfreeTrap();
 #endif
 		LOG_FREE("Xalloc error: Tail corrupt in Xfree() for small block", ptr);
 		return;
@@ -690,9 +615,7 @@ Xfree(pointer ptr)
 #ifdef XFREE_ERASES
 	memset(ptr,0xF0,size);
 #endif /* XFREE_ERASES */
-#ifdef XALLOC_DEBUG
-	pheader[1] = MAGIC_FREE;
-#endif
+
 	/* put this small block at the head of the list */
 	indx = (size-1) / SIZE_STEPS;
 	*(unsigned long **)(ptr) = free_lists[indx];
@@ -709,11 +632,9 @@ Xfree(pointer ptr)
 	if (MAGIC2 != ((unsigned long *)((char *)ptr + size))[0]) {
 		/* Diagnostic */
 #ifdef FATALERRORS
-	    XfreeTrap();
 		FatalError("Xalloc error: Tail corrupt in Xfree() for big block (adr=0x%x, val=0x%x)\n",(char *)ptr+size,((unsigned long *)((char *)ptr + size))[0]);
 #else
 		ErrorF("Xalloc error: Tail corrupt in Xfree() for big block (adr=0x%x, val=0x%x)\n",(char *)ptr+size,((unsigned long *)((char *)ptr + size))[0]);
-		XfreeTrap();
 #endif
 		LOG_FREE("Xalloc error: Tail corrupt in Xfree() for big block", ptr);
 		return;
@@ -735,11 +656,9 @@ Xfree(pointer ptr)
 	if (MAGIC2 != *(unsigned long *)((char *)ptr + size)) {
 		/* Diagnostic */
 #ifdef FATALERRORS
-	    XfreeTrap();
 		FatalError("Xalloc error: Tail corrupt in Xfree() for medium block (adr=0x%x, val=0x%x)\n",(char *)ptr + size,*(unsigned long *)((char *)ptr + size));
 #else
 		ErrorF("Xalloc error: Tail corrupt in Xfree() for medium block (adr=0x%x, val=0x%x)\n",(char *)ptr + size,*(unsigned long *)((char *)ptr + size));
-		XfreeTrap();
 #endif
 		LOG_FREE("Xalloc error: Tail corrupt in Xfree() for medium block", ptr);
 		return;
@@ -749,9 +668,6 @@ Xfree(pointer ptr)
 #ifdef XFREE_ERASES
 	memset(pheader,0xF0,size+SIZE_HEADER);
 #endif /* XFREE_ERASES */
-#ifdef XALLOC_DEBUG
-	pheader[1] = MAGIC_FREE;
-#endif
 
 	LOG_FREE("Xfree", ptr);
 	free((char *)pheader);
@@ -759,7 +675,7 @@ Xfree(pointer ptr)
 }
 
 void
-OsInitAllocator (void)
+OsInitAllocator ()
 {
     static Bool beenhere = FALSE;
 
@@ -768,24 +684,15 @@ OsInitAllocator (void)
     beenhere = TRUE;
 
 #if defined(HAS_MMAP_ANON) || defined (MMAP_DEV_ZERO)
-    pagesize = -1;
-#if defined(_SC_PAGESIZE) || defined(HAS_SC_PAGESIZE)
+#if defined(_SC_PAGESIZE) /* || defined(linux) */
     pagesize = sysconf(_SC_PAGESIZE);
-#endif
-#ifdef _SC_PAGE_SIZE
-    if (pagesize == -1)
-	pagesize = sysconf(_SC_PAGE_SIZE);
-#endif
+#else
 #ifdef HAS_GETPAGESIZE
-    if (pagesize == -1)
-	pagesize = getpagesize();
+    pagesize = getpagesize();
+#else
+    pagesize = PAGE_SIZE;
 #endif
-#ifdef PAGE_SIZE
-    if (pagesize == -1)
-	pagesize = PAGE_SIZE;
 #endif
-    if (pagesize == -1)
-	FatalError("OsInitAllocator: Cannot determine page size\n");
 #endif
 
     /* set up linked lists of free blocks */

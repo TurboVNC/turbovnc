@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/mi/mifillarc.c,v 3.7 2001/12/14 20:00:22 dawes Exp $ */
 /************************************************************
 
-Copyright 1989, 1998  The Open Group
+Copyright (c) 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,28 +15,25 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 Author:  Bob Scheifler, MIT X Consortium
 
 ********************************************************/
 
-/* $Xorg: mifillarc.c,v 1.4 2001/02/09 02:05:20 xorgcvs Exp $ */
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
+/* $XConsortium: mifillarc.c,v 5.18 95/01/10 20:59:49 kaleb Exp $ */
+/* $XFree86: xc/programs/Xserver/mi/mifillarc.c,v 3.2 1995/01/28 16:15:52 dawes Exp $ */
 
 #include <math.h>
-#include <X11/X.h>
-#include <X11/Xprotostr.h>
-#include "regionstr.h"
+#include "X.h"
+#include "Xprotostr.h"
+#include "miscstruct.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"
 #include "mifpoly.h"
@@ -142,12 +139,11 @@ miFillArcDSetup(arc, info)
 }
 
 static void
-miGetArcEdge(
-	     register xArc *arc,
-	     register miSliceEdgePtr edge,
-	     int k,
-	     Bool top, 
-	     Bool left )
+miGetArcEdge(arc, edge, k, top, left)
+    register xArc *arc;
+    register miSliceEdgePtr edge;
+    int k;
+    Bool top, left;
 {
     register int xady, y;
 
@@ -272,12 +268,11 @@ miEllipseAngleToSlope (angle, width, height, dxp, dyp, d_dxp, d_dyp)
 }
 
 static void
-miGetPieEdge(
-	     register xArc *arc,
-	     register int angle,
-	     register miSliceEdgePtr edge,
-	     Bool top, 
-	     Bool left )
+miGetPieEdge(arc, angle, edge, top, left)
+    register xArc *arc;
+    register int angle;
+    register miSliceEdgePtr edge;
+    Bool top, left;
 {
     register int k;
     int	dx, dy;
@@ -547,10 +542,10 @@ miFillArcSliceSetup(arc, slice, pGC)
     }
 
 static void
-miFillEllipseI(
-	       DrawablePtr pDraw,
-	       GCPtr pGC,
-	       xArc *arc )
+miFillEllipseI(pDraw, pGC, arc)
+    DrawablePtr pDraw;
+    GCPtr pGC;
+    xArc *arc;
 {
     register int x, y, e;
     int yk, xk, ym, xm, dx, dy, xorg, yorg;
@@ -590,10 +585,10 @@ miFillEllipseI(
 }
 
 static void
-miFillEllipseD(
-	       DrawablePtr pDraw,
-	       GCPtr pGC,
-	       xArc *arc )
+miFillEllipseD(pDraw, pGC, arc)
+    DrawablePtr pDraw;
+    GCPtr pGC;
+    xArc *arc;
 {
     register int x, y;
     int xorg, yorg, dx, dy, slw;
@@ -655,10 +650,10 @@ miFillEllipseD(
     }
 
 static void
-miFillArcSliceI(
-		DrawablePtr pDraw,
-		GCPtr pGC,
-		xArc *arc )
+miFillArcSliceI(pDraw, pGC, arc)
+    DrawablePtr pDraw;
+    GCPtr pGC;
+    xArc *arc;
 {
     int yk, xk, ym, xm, dx, dy, xorg, yorg, slw;
     register int x, y, e;
@@ -718,10 +713,10 @@ miFillArcSliceI(
 }
 
 static void
-miFillArcSliceD(
-		DrawablePtr pDraw,
-		GCPtr pGC,
-		xArc *arc )
+miFillArcSliceD(pDraw, pGC, arc)
+    DrawablePtr pDraw;
+    GCPtr pGC;
+    xArc *arc;
 {
     register int x, y;
     int dx, dy, xorg, yorg, slw;

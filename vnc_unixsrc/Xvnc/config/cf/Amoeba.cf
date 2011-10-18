@@ -1,5 +1,5 @@
-XCOMM platform:  $Xorg: Amoeba.cf,v 1.3 2000/08/17 19:41:45 cpqbld Exp $
-XCOMM platform:  $XFree86: xc/config/cf/Amoeba.cf,v 3.10tsi Exp $
+XCOMM platform:  $XConsortium: Amoeba.cf /main/12 1996/09/28 16:04:48 rws $
+XCOMM platform:  $XFree86: xc/config/cf/Amoeba.cf,v 3.9 1996/12/23 05:50:00 dawes Exp $
 
 /*  The presence of this configuration file in the X distribution
  *  does not imply full support for the system it describes.
@@ -59,12 +59,14 @@ XCOMM operating system:  OSName
 
 #define BuildFonts              NO
 #define BuildFontServer         NO
+#define BuildPexExt		NO
 #define BuildXIE		NO
 
 #define YaccCmd                 byacc
 #define TermcapLibrary          /* in libajax */
 #define LexLib			/* not needed */
 
+#define PexCCOptions		DefaultCCOptions
 #define ServerOSDefines		XFree86ServerOSDefines
 
 #define UsrLibDir               $(DESTDIR)/profile/module/x11/lib
@@ -184,7 +186,7 @@ ARCH            = i80386
 TOOLSET         = ack
 ALDFLAGS        = /* -mam_i80386 now in CCopts */ -.c -Rcv-s32
 
-#include <xorg.cf>
+#include <xfree86.cf>
 #endif
 
 #if defined(Sun3Architecture)
@@ -251,7 +253,7 @@ ComplexHostProgramTarget(program)
 
 
 #ifndef Concat
-#if (defined(__STDC__) && !defined(UnixCpp)) || defined(AnsiCpp)
+#if (__STDC__ && !defined(UnixCpp)) || defined(AnsiCpp)
 #define Concat(a,b)a##b
 #else
 #define Concat(a,b)a/**/b

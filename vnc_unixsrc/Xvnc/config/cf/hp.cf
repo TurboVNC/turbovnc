@@ -1,4 +1,4 @@
-XCOMM platform:  $Xorg: hp.cf,v 1.5 2000/08/17 19:41:47 cpqbld Exp $
+XCOMM platform:  $TOG: hp.cf /main/85 1997/04/17 14:11:34 barstow $
 
 #ifndef OSName
 # define OSName		DefaultOSName
@@ -77,11 +77,6 @@ XCOMM operating system:  OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 
 #define SystemV				YES
 #define Malloc0ReturnsNull		YES
-#if OSMajorVersion > 9
-# define AllocateLocalDefines		-DINCLUDE_ALLOCA_H
-#else
-# define AllocateLocalDefines		-DNO_ALLOCA
-#endif
 
 #ifdef __hp9000s800
 # ifndef OptimizedCDebugFlags
@@ -93,8 +88,12 @@ XCOMM operating system:  OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 # ifndef SharedLibraryCCOptions
 #  define SharedLibraryCCOptions	-Ae
 # endif
+# if OSMajorVersion > 9
+#  define StandardDefines		-Dhpux -DSYSV -DHPUX_10
+# else
 # define StandardDefines		-Dhpux -DSYSV
-# define ServerExtraDefines		-DXOS -DBSTORE -DSOFTWARE_CURSOR -DSCREEN_PIXMAPS -DMERGE_SAVE_UNDERS -DHAS_IFREQ -DFORCE_SEPARATE_PRIVATE AllocateLocalDefines
+# endif
+# define ServerExtraDefines		-DXOS -DBSTORE -DSOFTWARE_CURSOR -DNO_ALLOCA -DSCREEN_PIXMAPS -DMERGE_SAVE_UNDERS -DHAS_IFREQ -DFORCE_SEPARATE_PRIVATE
 
 # if OSMajorVersion > 9
 #  include <hpLib.rules>
@@ -104,9 +103,12 @@ XCOMM operating system:  OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 # define StandardDefines	-Dhpux -DSYSV
 # if OSMajorVersion < 8
 #  define DefaultCCOptions	-Wc,-Nd4000,-Ns4100,-Ne700,-Np200,-Nw300
+#  define PexCCOptions		-Wp,-H150000 -Wc,-Nd4000,-Ns8100,-Ne700,-Np200
 # else
 #  define OptimizedCDebugFlags	+O1
+#  define PexCCOptions		-Wp,-H250000
 # endif
+# define PexShmIPC		NO
 # define LintOpts		-ax -Nd4000 -Ns8000 -Ne700 -Np200 -Na25000
 #endif
 #define MvCmd			mv -f
@@ -121,7 +123,9 @@ XCOMM operating system:  OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 #define DBMLibrary		/usr/lib/libdbm.a
 #define PrimaryScreenResolution	91
 #define ExtensionOSDefines	-DHPINPUT -DXTESTEXT1
+#ifndef XhpServer
 #define XhpServer		YES
+#endif
 #define ServerExtraSysLibs	-ldld
 #ifndef BuildXInputExt
 # define BuildXInputExt		YES
@@ -129,8 +133,6 @@ XCOMM operating system:  OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 #define HPFastScrolling		YES
 #ifndef BuildServer
 # define BuildServer		__hp9000s700
-#endif
-#if OSMajorVersion < 10
 #define NeedBerklib		(BuildServer|BuildFontServer)
 #endif
 #define XawI18nDefines		-DHAS_WCHAR_H -DHAS_ISW_FUNCS
@@ -170,9 +172,7 @@ XCOMM operating system:  OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 # if ThreadedX
 #  define MTSafeAPIDefines	-DXUSE_MTSAFE_API -DXUSE_NETDB_R_API
 # endif
-# ifndef CppCmd
-#  define CppCmd			/usr/ccs/lbin/cpp
-# endif
+# define CppCmd			/opt/langtools/lbin/cpp
 #endif
 
 /* CC does not recognize -Ae, and has a different meaning for +e. */

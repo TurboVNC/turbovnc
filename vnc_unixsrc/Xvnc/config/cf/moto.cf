@@ -1,4 +1,4 @@
-XCOMM platform:  $Xorg: moto.cf,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
+XCOMM platform:  $XConsortium: moto.cf /main/16 1996/09/28 16:11:24 rws $
 
 #if defined(MotoR3Architecture)
 

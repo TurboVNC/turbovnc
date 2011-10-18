@@ -1,13 +1,13 @@
-/* $Xorg: Xos_r.h,v 1.4 2001/02/09 02:03:22 xorgcvs Exp $ */
-/* $XdotOrg: xc/include/Xos_r.h,v 1.5 2005/07/13 07:23:56 keithp Exp $ */
-/*
-Copyright 1996, 1998  The Open Group
+/* $XConsortium: Xos_r.h /main/5 1996/12/18 16:29:14 lehors $ */
+/* 
+Copyright (c) 1996  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,17 +15,17 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 */
-/* $XFree86: xc/include/Xos_r.h,v 1.18tsi Exp $ */
+/* $XFree86: xc/include/Xos_r.h,v 1.3 1997/01/18 07:17:11 dawes Exp $ */
 
-/*
+/* 
  * Various and sundry Thread-Safe functions used by X11, Motif, and CDE.
  *
  * Use this file in MT-safe code where you would have included
@@ -55,7 +55,7 @@ in this Software without prior written authorization from The Open Group.
  * NOTE: On systems lacking appropriate _r functions Getgrgid() and
  *	Getgrnam() do NOT copy the list of group members!
  *
- * This header is nominally intended to simplify porting X11, Motif, and
+ * This header is nominally intended to simplify porting X11, Motif, and 
  * CDE; it may be useful to other people too.  The structure below is
  * complicated, mostly because P1003.1c (the IEEE POSIX Threads spec)
  * went through lots of drafts, and some vendors shipped systems based
@@ -82,11 +82,6 @@ in this Software without prior written authorization from The Open Group.
 #   define _POSIX_SOURCE
 #   include <limits.h>
 #   undef _POSIX_SOURCE
-#  endif
-#  ifndef LINE_MAX
-#   define X_LINE_MAX 2048
-#  else
-#   define X_LINE_MAX LINE_MAX
 #  endif
 # endif
 #endif /* _XOS_R_H */
@@ -151,9 +146,7 @@ extern void (*_XUnlockMutex_fn)(
 #   endif
 #  endif
 # elif defined(XOS_USE_XT_LOCKING)
-#  ifndef _XtThreadsI_h
-extern void (*_XtProcessLock)(void);
-#  endif
+extern void (*_XtProcessLock)();
 #  ifndef _XtintrinsicP_h
 #   include <X11/Xfuncproto.h>	/* for NeedFunctionPrototypes */
 extern void XtProcessLock(
@@ -190,21 +183,11 @@ extern void XtProcessUnlock(
 
 #endif /* !defined WIN32 */
 
-/*
- * Solaris defines the POSIX thread-safe feature test macro, but
- * uses the older SVR4 thread-safe functions unless the POSIX ones
- * are specifically requested.  Fix the feature test macro.
+/* 
+ * Solaris 2.5 has SVR4 thread-safe API, but defines the POSIX
+ * thread-safe feature test macro.  Fix the feature test macro.
  */
-#if defined(sun) && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && \
-	(_POSIX_C_SOURCE - 0 < 199506L) && !defined(_POSIX_PTHREAD_SEMANTICS)
-# undef _POSIX_THREAD_SAFE_FUNCTIONS
-#endif
-
-/*
- * LynxOS 3.1 defines _POSIX_THREAD_SAFE_FUNCTIONS but
- * getpwuid_r has different semantics than defined by POSIX
- */
-#if defined(Lynx) && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
+#if defined(sun) && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
 # undef _POSIX_THREAD_SAFE_FUNCTIONS
 #endif
 
@@ -231,7 +214,6 @@ extern void XtProcessUnlock(
 # endif
 #endif
 
-#undef X_NEEDS_PWPARAMS
 #if !defined(X_INCLUDE_PWD_H) || defined(_XOS_INCLUDED_PWD_H)
 /* Do nothing */
 
@@ -246,53 +228,12 @@ typedef int _Xgetpwparams;	/* dummy */
 
 #elif !defined(XOS_USE_MTSAFE_PWDAPI) || defined(XNO_MTSAFE_PWDAPI)
 /* UnixWare 2.0, or other systems with thread support but no _r API. */
-# define X_NEEDS_PWPARAMS
 typedef struct {
   struct passwd pws;
   char   pwbuf[1024];
   struct passwd* pwp;
   size_t len;
 } _Xgetpwparams;
-
-/*
- * NetBSD and FreeBSD, at least, are missing several of the unixware passwd
- * fields.
- */
-
-#if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__) || \
-    defined(__APPLE__) || defined(__DragonFly__)
-static __inline__ void _Xpw_copyPasswd(_Xgetpwparams p)
-{
-   memcpy(&(p).pws, (p).pwp, sizeof(struct passwd));
-
-   (p).pws.pw_name = (p).pwbuf;
-   (p).len = strlen((p).pwp->pw_name);
-   strcpy((p).pws.pw_name, (p).pwp->pw_name);
-
-   (p).pws.pw_passwd = (p).pws.pw_name + (p).len + 1;
-   (p).len = strlen((p).pwp->pw_passwd);
-   strcpy((p).pws.pw_passwd,(p).pwp->pw_passwd);
-
-   (p).pws.pw_class = (p).pws.pw_passwd + (p).len + 1;
-   (p).len = strlen((p).pwp->pw_class);
-   strcpy((p).pws.pw_class, (p).pwp->pw_class);
-
-   (p).pws.pw_gecos = (p).pws.pw_class + (p).len + 1;
-   (p).len = strlen((p).pwp->pw_gecos);
-   strcpy((p).pws.pw_gecos, (p).pwp->pw_gecos);
-
-   (p).pws.pw_dir = (p).pws.pw_gecos + (p).len + 1;
-   (p).len = strlen((p).pwp->pw_dir);
-   strcpy((p).pws.pw_dir, (p).pwp->pw_dir);
-
-   (p).pws.pw_shell = (p).pws.pw_dir + (p).len + 1;
-   (p).len = strlen((p).pwp->pw_shell);
-   strcpy((p).pws.pw_shell, (p).pwp->pw_shell);
-
-   (p).pwp = &(p).pws;
-}
-
-#else
 # define _Xpw_copyPasswd(p) \
    (memcpy(&(p).pws, (p).pwp, sizeof(struct passwd)), \
     ((p).pws.pw_name = (p).pwbuf), \
@@ -318,24 +259,25 @@ static __inline__ void _Xpw_copyPasswd(_Xgetpwparams p)
     strcpy((p).pws.pw_shell, (p).pwp->pw_shell), \
     ((p).pwp = &(p).pws), \
     0 )
-#endif
 # define _XGetpwuid(u,p) \
 ( (_Xos_processLock), \
-  (((p).pwp = getpwuid((u))) ? _Xpw_copyPasswd(p), 0 : 0), \
+  (((p).pwp = getpwuid((u))) ? _Xpw_copyPasswd(p) : 0), \
   (_Xos_processUnlock), \
   (p).pwp )
 # define _XGetpwnam(u,p) \
 ( (_Xos_processLock), \
-  (((p).pwp = getpwnam((u))) ? _Xpw_copyPasswd(p), 0 : 0), \
+  (((p).pwp = getpwnam((u))) ? _Xpw_copyPasswd(p) : 0), \
   (_Xos_processUnlock), \
   (p).pwp )
 
-#elif !defined(_POSIX_THREAD_SAFE_FUNCTIONS) && !defined(__APPLE__)
+#elif !defined(_POSIX_THREAD_SAFE_FUNCTIONS)
 /* SVR4 threads, AIX 4.2.0 and earlier and OSF/1 3.2 and earlier pthreads */
-# define X_NEEDS_PWPARAMS
+# if defined(Lynx) && !defined(LINE_MAX)
+#  define LINE_MAX	2048		/* what Xthreads.h does */
+# endif
 typedef struct {
   struct passwd pws;
-  char pwbuf[X_LINE_MAX];
+  char pwbuf[LINE_MAX];
 } _Xgetpwparams;
 # if defined(_POSIX_REENTRANT_FUNCTIONS) || !defined(SVR4) || defined(Lynx)
 #  ifndef Lynx
@@ -363,19 +305,18 @@ typedef struct {
 extern int _Pgetpwuid_r(uid_t, struct passwd *, char *, size_t, struct passwd **);
 extern int _Pgetpwnam_r(const char *, struct passwd *, char *, size_t, struct passwd **);
 # endif
-# define X_NEEDS_PWPARAMS
 typedef struct {
   struct passwd pws;
-  char pwbuf[X_LINE_MAX];
+  char pwbuf[LINE_MAX];
   struct passwd* pwp;
 } _Xgetpwparams;
 typedef int _Xgetpwret;
 # define _XGetpwuid(u,p) \
-((getpwuid_r((u),&(p).pws,(p).pwbuf,sizeof((p).pwbuf),&(p).pwp) == 0) ? \
- (p).pwp : NULL)
+((getpwuid_r((u),&(p).pws,(p).pwbuf,sizeof((p).pwbuf),&(p).pwp) == -1) ? \
+ NULL : (p).pwp)
 # define _XGetpwnam(u,p) \
-((getpwnam_r((u),&(p).pws,(p).pwbuf,sizeof((p).pwbuf),&(p).pwp) == 0) ? \
- (p).pwp : NULL)
+((getpwnam_r((u),&(p).pws,(p).pwbuf,sizeof((p).pwbuf),&(p).pwp) == -1) ? \
+ NULL : (p).pwp)
 #endif /* X_INCLUDE_PWD_H */
 
 #if defined(X_INCLUDE_PWD_H) && !defined(_XOS_INCLUDED_PWD_H)
@@ -385,7 +326,7 @@ typedef int _Xgetpwret;
 
 /***** <netdb.h> wrappers *****/
 
-/*
+/* 
  * Effective prototypes for <netdb.h> wrappers:
  *
  * NOTE: On systems lacking the appropriate _r functions Gethostbyname(),
@@ -400,13 +341,12 @@ typedef int _Xgetpwret;
  * typedef ... _Xgetservbynameparams;
  *
  * struct hostent* _XGethostbyname(const char* name,_Xgethostbynameparams);
- * struct hostent* _XGethostbyaddr(const char* addr, int len, int type,
+ * struct hostent* _XGethostbyaddr(const char* addr, int len, int type, 
  *				   _Xgethostbynameparams);
  * struct servent* _XGetservbyname(const char* name, const char* proto,
  *				 _Xgetservbynameparams);
  */
 
-#undef XTHREADS_NEEDS_BYNAMEPARAMS
 #if defined(X_INCLUDE_NETDB_H) && !defined(_XOS_INCLUDED_NETDB_H) \
     && !defined(WIN32)
 # include <netdb.h>
@@ -430,10 +370,6 @@ typedef int _Xgetservbynameparams; /* dummy */
 /* UnixWare 2.0, or other systems with thread support but no _r API. */
 /* WARNING:  The h_addr_list and s_aliases values are *not* copied! */
 
-#if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__DragonFly__)
-#include <sys/param.h>
-#endif
-
 typedef struct {
   struct hostent hent;
   char           h_name[MAXHOSTNAMELEN];
@@ -445,9 +381,6 @@ typedef struct {
   char		 s_proto[255];
   struct servent *sptr;
 } _Xgetservbynameparams;
-
-# define XTHREADS_NEEDS_BYNAMEPARAMS
-
 # define _Xg_copyHostent(hp) \
    (memcpy(&(hp).hent, (hp).hptr, sizeof(struct hostent)), \
     strcpy((hp).h_name, (hp).hptr->h_name), \
@@ -494,17 +427,15 @@ typedef struct {
 #  define X_POSIX_THREAD_SAFE_FUNCTIONS 1
 # endif
 
-# define XTHREADS_NEEDS_BYNAMEPARAMS
-
 # ifndef X_POSIX_THREAD_SAFE_FUNCTIONS
 typedef struct {
     struct hostent      hent;
-    char                hbuf[X_LINE_MAX];
+    char                hbuf[LINE_MAX];
     int                 herr;
 } _Xgethostbynameparams;
 typedef struct {
     struct servent      sent;
-    char                sbuf[X_LINE_MAX];
+    char                sbuf[LINE_MAX];
 } _Xgetservbynameparams;
 #  define _XGethostbyname(h,hp) \
   gethostbyname_r((h),&(hp).hent,(hp).hbuf,sizeof((hp).hbuf),&(hp).herr)
@@ -557,7 +488,7 @@ typedef int _Xgetservbynameparams; /* dummy */
  * #define X_INCLUDE_DIRENT_H
  * #define XOS_USE_..._LOCKING
  * #include <X11/Xos_r.h>
- *
+ * 
  * typedef ... _Xreaddirparams;
  *
  * struct dirent *_XReaddir(DIR *dir_pointer, _Xreaddirparams);
@@ -622,8 +553,7 @@ typedef struct {
 # endif
 } _Xreaddirparams;
 
-# if defined(_POSIX_THREAD_SAFE_FUNCTIONS) || defined(AIXV3) || \
-     defined(AIXV4) || defined(__APPLE__)
+# if defined(AIXV3) || defined(AIXV4) || defined(_POSIX_THREAD_SAFE_FUNCTIONS)
 /* AIX defines the draft POSIX symbol, but uses the final API. */
 /* POSIX final API, returns (int)0 on success. */
 #  if defined(__osf__)
@@ -681,7 +611,7 @@ extern int _Preaddir_r(DIR *, struct dirent *, struct dirent **);
  * #define X_INCLUDE_UNISTD_H
  * #define XOS_USE_..._LOCKING
  * #include <X11/Xos_r.h>
- *
+ * 
  * typedef ... _Xgetloginparams;
  * typedef ... _Xttynameparams;
  *
@@ -842,8 +772,7 @@ typedef struct {
 #elif !defined(XTHREADS) && !defined(X_FORCE_USE_MTSAFE_API)
 /* Use regular, unsafe API. */
 typedef int _Xstrtokparams;	/* dummy */
-# define _XStrtok(s1,s2,p) \
- ( p = 0, (void)p, strtok((s1),(s2)) )
+# define _XStrtok(s1,s2,p)	strtok((s1),(s2))
 
 #elif !defined(XOS_USE_MTSAFE_STRINGAPI) || defined(XNO_MTSAFE_STRINGAPI)
 /* Systems with thread support but no _r API. */
@@ -1064,7 +993,11 @@ typedef int _Xgetgrparams;	/* dummy */
 /* Systems with thread support but no _r API.  UnixWare 2.0. */
 typedef struct {
   struct group grp;
-  char buf[X_LINE_MAX];	/* Should be sysconf(_SC_GETGR_R_SIZE_MAX)? */
+#ifdef LINE_MAX
+  char buf[LINE_MAX];	/* Should be sysconf(_SC_GETGR_R_SIZE_MAX)? */
+#else
+  char buf[1024];	/* Should be sysconf(_SC_GETGR_R_SIZE_MAX)? */
+#endif
   struct group *pgrp;
   size_t len;
 } _Xgetgrparams;
@@ -1105,7 +1038,11 @@ typedef struct {
  */
 typedef struct {
   struct group grp;
-  char buf[X_LINE_MAX];	/* Should be sysconf(_SC_GETGR_R_SIZE_MAX)? */
+#ifdef LINE_MAX
+  char buf[LINE_MAX];	/* Should be sysconf(_SC_GETGR_R_SIZE_MAX)? */
+#else
+  char buf[1024];	/* Should be sysconf(_SC_GETGR_R_SIZE_MAX)? */
+#endif
 } _Xgetgrparams;
 #define _XGetgrgid(g,p)	getgrgid_r((g), &(p).grp, (p).buf, sizeof((p).buf))
 #define _XGetgrnam(n,p)	getgrnam_r((n), &(p).grp, (p).buf, sizeof((p).buf))
@@ -1118,7 +1055,11 @@ typedef struct {
  */
 typedef struct {
   struct group grp;
-  char buf[X_LINE_MAX];	/* Should be sysconf(_SC_GETGR_R_SIZE_MAX)? */
+#ifdef LINE_MAX
+  char buf[LINE_MAX];	/* Should be sysconf(_SC_GETGR_R_SIZE_MAX)? */
+#else
+  char buf[1024];	/* Should be sysconf(_SC_GETGR_R_SIZE_MAX)? */
+#endif
 } _Xgetgrparams;
 #define _XGetgrgid(g,p)	\
  ((getgrgid_r((g), &(p).grp, (p).buf, sizeof((p).buf)) ? NULL : &(p).grp))
@@ -1138,7 +1079,11 @@ extern int _Pgetgrnam_r(const char *, struct group *, char *, size_t, struct gro
 # endif
 typedef struct {
   struct group grp;
-  char buf[X_LINE_MAX];	/* Should be sysconf(_SC_GETGR_R_SIZE_MAX)? */
+#ifdef LINE_MAX
+  char buf[LINE_MAX];	/* Should be sysconf(_SC_GETGR_R_SIZE_MAX)? */
+#else
+  char buf[1024];	/* Should be sysconf(_SC_GETGR_R_SIZE_MAX)? */
+#endif
   struct group *result;
 } _Xgetgrparams;
 

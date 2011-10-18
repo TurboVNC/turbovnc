@@ -2,7 +2,7 @@
  * This script serves as a helper cmd file for imake. Install this in
  * the path just like imake itself.
  *
- * $XFree86: xc/config/imake/imakesvc.cmd,v 3.13 1999/04/29 09:13:23 dawes Exp $
+ * $XFree86: xc/config/imake/imakesvc.cmd,v 3.10.2.1 1997/07/19 04:59:10 dawes Exp $
  */
 '@echo off'
 ADDRESS CMD
@@ -170,38 +170,9 @@ SELECT
       ind = TRANSLATE(WORD(all,2),'\','/')
       frm = TRANSLATE(WORD(all,3),'\','/')
       tof = ind'\'WORD(all,4)
-      IF \(exists(ind)) THEN call SysMkDir ind
+      IF \(exists(ind)) THEN MKDIR ind
       rc = SysFileDelete(tof)
       COPY frm' 'tof
-   END
-   WHEN code=14 THEN DO
-      /* imakesvc 14 destdir srcfile... */
-      destdir = TRANSLATE(WORD(all,2),'\','/')
-      DO i=3 TO WORDS(all)
-	src = stripsuffix(WORD(all,i))
-	tgt = destdir'\'src'.gz'
-	'groff -e -t -man -Tascii 'src'.man | col -b | gzip -n >'tgt
-      END
-   END
-   WHEN code=15 THEN DO
-      /* imakesvc 15 destdir suffix srcfile... */
-      destdir = TRANSLATE(WORD(all,2),'\','/')
-      suffix = WORD(all,3)
-      DO i=4 TO WORDS(all)
-	src = stripsuffix(WORD(all,i))
-	tgt = destdir'\'src'.'suffix
-	'groff -e -t -man -Tascii 'src'.man | col -b >'tgt
-      END
-   END
-   WHEN code=16 THEN DO
-      /* imakesvc 16 dirlist...*/
-      mkfontdir = TRANSLATE(WORD(all,2),'\','/')
-      earg=''
-      DO i=3 TO WORDS(all)
-        arg = WORD(all,i)
-        earg = earg' -e 'arg
-      END
-      mkfontdir' -r -p inst/ 'earg' .'
    END
    OTHERWISE NOP
 END

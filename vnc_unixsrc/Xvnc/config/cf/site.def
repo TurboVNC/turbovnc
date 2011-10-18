@@ -1,4 +1,5 @@
-XCOMM site:  $TOG: site.sample /main/r64_final/1 1998/02/05 16:28:49 kaleb $
+XCOMM site:  $XConsortium: site.def /main/revisionist/4 1996/12/31 08:02:07 kaleb $
+XCOMM site:  $XFree86: xc/config/cf/site.def,v 3.17.2.1 1997/06/22 10:32:21 dawes Exp $
 
 /***************************************************************************
  *                                                                         *
@@ -21,7 +22,6 @@ XCOMM site:  $TOG: site.sample /main/r64_final/1 1998/02/05 16:28:49 kaleb $
  * .cf file, not overridden in site.def.                                   *
  *                                                                         *
  ***************************************************************************/
-XCOMM site:  $XFree86: xc/config/cf/site.def,v 3.24 2000/06/25 20:17:29 dawes Exp $
 
 /* if you want host-specific customization, this is one way to do it */
 /*
@@ -44,12 +44,12 @@ XCOMM site:  $XFree86: xc/config/cf/site.def,v 3.24 2000/06/25 20:17:29 dawes Ex
 
 /* REMOVE
 #ifndef SiteIConfigFiles
-#define SiteIConfigFiles $(IRULESRC)/xorgsite.def $(IRULESRC)/host.def
+#define SiteIConfigFiles $(IRULESRC)/xf86site.def $(IRULESRC)/host.def
 #endif
 
 #include <host.def>
 
-#include <xorgsite.def>
+#include <xf86site.def>
 */
 
 #define SiteIConfigFiles $(IRULESRC)/vnc.def
@@ -58,14 +58,14 @@ XCOMM site:  $XFree86: xc/config/cf/site.def,v 3.24 2000/06/25 20:17:29 dawes Ex
 /* END ORL VNC modification
 ================================================================*/
 
-/* On systems where cpp doesn't correctly expand macros in include directives
+/* On systems where cpp doesn't expand correctly macros in include directives
  * the two following macros need to be defined directly (where "X11" is
  * really whatever the TopLevelProject macro is defined to be).
  */
 # if defined(AIXArchitecture) || defined(SVR4Architecture) || \
      defined(SCOArchitecture) || defined(Win32Architecture) || \
      defined(UXPArchitecture) || defined(SunArchitecture) || \
-     defined(DynixPtxArchitecture) || defined(i386IscArchitecture)
+     defined(i386IscArchitecture)
 #  ifndef ProjectRulesFile
 #   define ProjectRulesFile	<X11.rules>
 #  endif
@@ -97,24 +97,10 @@ XCOMM site:  $XFree86: xc/config/cf/site.def,v 3.24 2000/06/25 20:17:29 dawes Ex
 /* END ORL VNC modification
 ================================================================*/
 
-/*
- * On some platforms, some things may be installed outside of ProjectRoot
- * by default.  To disable this, uncomment the following line.
- *
-#define NothingOutsideProjectRoot YES
- */
-
-/*
- * Set EtcX11Directory if you want config file links installed under
- * ProjectRoot rather than in /etc/X11.  See also HasVarDirectory,
- * UseEtcX11 and UseSeparateConfDir.
- *
-#define EtcX11Directory ProjectRoot/etc
- */
-
-
 /* Only set HasXdmAuth to YES if you have a Wraphelp.c file. */
-/* #define HasXdmAuth YES */
+#define HasXdmAuth YES
+
+/* #define PreIncDir DefaultGccIncludeDir */
 
 /*
 #if defined(SunArchitecture) && defined(SparcArchitecture)
@@ -160,7 +146,7 @@ XCOMM site:  $XFree86: xc/config/cf/site.def,v 3.24 2000/06/25 20:17:29 dawes Ex
 /* You MAY need SetUID if users run the server by hand or under xinit */
 /* Consult your system administrator before making the X server setuid */
 /*
-#if defined(XFree86Version) || defined (XorgVersion)
+#ifdef XFree86Version
 #define InstallXserverSetUID YES
 #endif
 */

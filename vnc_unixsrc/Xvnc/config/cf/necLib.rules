@@ -1,10 +1,8 @@
-XCOMM $Xorg: necLib.rules,v 1.3 2000/08/17 19:41:48 cpqbld Exp $
+XCOMM $XConsortium: necLib.rules /main/4 1996/09/28 16:11:42 rws $
 
 /*
  * NECOS shared library rules
  */
-
-XCOMM $XFree86: xc/config/cf/necLib.rules,v 1.2 1999/01/11 05:13:07 dawes Exp $
 
 #ifndef HasSharedLibraries
 #define HasSharedLibraries YES
@@ -86,32 +84,6 @@ clean::									@@\
 	$(RM) Concat(lib,libname.so.rev)
 
 #endif /* SharedLibraryTarget */
-
-/*
- * SharedDepLibraryTarget - generate rules to create a shared library.
- */
-#ifndef SharedDepLibraryTarget
-#define SharedDepLibraryTarget(libname,rev,deplist,solist,down,up)	@@\
-AllTarget(Concat(lib,libname.so.rev))					@@\
-									@@\
-Concat(lib,libname.so.rev):  deplist $(EXTRALIBRARYDEPS)		@@\
-	$(RM) $@~							@@\
-	$(CC) -G -o $@~ $(SHLIBLDFLAGS) solist				@@\
-	$(RM) $@ 							@@\
-	$(MV) $@~ $@							@@\
-									@@\
-AllTarget(Concat(lib,libname.so))					@@\
-									@@\
-Concat(lib,libname.so):  Concat(lib,libname.so.rev)			@@\
-	$(RM) $@ 							@@\
-	$(LN) $? $@							@@\
-	LinkBuildLibrary($@)						@@\
-	LinkBuildLibrary(Concat(lib,libname.so))			@@\
-									@@\
-clean::									@@\
-	$(RM) Concat(lib,libname.so.rev)
-
-#endif /* SharedDepLibraryTarget */
 
 /*
  * SharedLibraryDataTarget - generate rules to create shlib data file;

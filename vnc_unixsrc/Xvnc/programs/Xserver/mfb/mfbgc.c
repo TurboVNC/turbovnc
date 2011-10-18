@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/mfb/mfbgc.c,v 1.9 2003/07/16 01:38:55 dawes Exp $ */
 /***********************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -45,17 +45,13 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $Xorg: mfbgc.c,v 1.4 2001/02/09 02:05:19 xorgcvs Exp $ */
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
-#include <X11/Xmd.h>
-#include <X11/Xproto.h>
+/* $XConsortium: mfbgc.c,v 5.35 94/04/17 20:28:23 dpw Exp $ */
+#include "X.h"
+#include "Xmd.h"
+#include "Xproto.h"
 #include "mfb.h"
 #include "dixfontstr.h"
-#include <X11/fonts/fontstruct.h>
+#include "fontstruct.h"
 #include "gcstruct.h"
 #include "windowstr.h"
 #include "pixmapstr.h"
@@ -76,7 +72,6 @@ static GCFuncs	mfbFuncs = {
 	miDestroyClip,
 	miCopyClip
 };
-
 
 static GCOps	whiteTECopyOps = {
 	mfbWhiteSolidFS,
@@ -134,8 +129,8 @@ static GCOps	whiteTEInvertOps = {
 	mfbInvertSolidFS,
 	mfbSetSpans,
 	mfbPutImage,
-	miCopyArea,
-	miCopyPlane,
+	mfbCopyArea,
+	mfbCopyPlane,
 	mfbPolyPoint,
 	mfbLineSS,
 	mfbSegmentSS,
@@ -364,18 +359,12 @@ static GCOps	fgEqBgInvertOps = {
 #endif
 };
 
-
 struct commonOps {
     int		    fg, bg;
     int		    rrop;
     int		    terminalFont;
     GCOps	    *ops;
-    void	    (*fillArea)(
-	DrawablePtr /*pDraw*/,
-    	int /*nbox*/,
-    	BoxPtr /*pbox*/,
-    	int /*alu*/,
-    	PixmapPtr /*nop*/);
+    void	    (*fillArea)();
 };
 
 static struct commonOps mfbCommonOps[] = {
@@ -396,8 +385,8 @@ static struct commonOps mfbCommonOps[] = {
 #define numberCommonOps	(sizeof (mfbCommonOps) / sizeof (mfbCommonOps[0]))
 
 static GCOps *
-matchCommon (
-    GCPtr   pGC)
+matchCommon (pGC)
+    GCPtr   pGC;
 {
     int	i;
     struct commonOps	*cop;
@@ -431,7 +420,6 @@ matchCommon (
     return 0;
 }
 
-
 Bool
 mfbCreateGC(pGC)
     register GCPtr pGC;
@@ -455,51 +443,12 @@ mfbCreateGC(pGC)
 
     pPriv = (mfbPrivGC *)(pGC->devPrivates[mfbGCPrivateIndex].ptr);
     pPriv->rop = mfbReduceRop(pGC->alu, pGC->fgPixel);
-    pGC->fExpose = TRUE;
-    pGC->pRotatedPixmap = NullPixmap;
-    pGC->freeCompClip = FALSE;
+    pPriv->fExpose = TRUE;
+    pPriv->pRotatedPixmap = NullPixmap;
+    pPriv->freeCompClip = FALSE;
     pPriv->FillArea = mfbSolidInvertArea;
     return TRUE;
 }
-
-/* some noop functions */
-static void
-mfbPolyGlyphBltNoop(
-    DrawablePtr pDrawable,
-    GCPtr pGC,
-    int x,
-    int y,
-    unsigned int nglyph,
-    CharInfoPtr * ppci,
-    pointer pglyphBase)
-{
-    /* this is a no-op function */
-}
-
-static void
-mfbNoopFS(
-    DrawablePtr pDrawable,
-    GCPtr pGC,
-    int nInit,
-    DDXPointPtr pptInit,
-    int * pwidthInit,
-    int fSorted)
-{
-    /* this is a no-op function */
-}
-
-static void
-mfbFillPolyNoop(
-    DrawablePtr pDrawable,
-    GCPtr pGC,
-    int shape,
-    int mode,
-    int count,
-    DDXPointPtr ptsIn)
-{
-    /* this is a no-op function */
-}
-
 
 /* Clipping conventions
 	if the drawable is a window
@@ -668,7 +617,7 @@ mfbValidateGC(pGC, changes, pDrawable)
 		!(pGC->tile.pixmap->drawable.width & (pGC->tile.pixmap->drawable.width - 1)))
 	    {
 		mfbCopyRotatePixmap(pGC->tile.pixmap,
-				    &pGC->pRotatedPixmap, xrot, yrot);
+				    &devPriv->pRotatedPixmap, xrot, yrot);
 		new_pix = TRUE;
 	    }
 	    break;
@@ -678,15 +627,15 @@ mfbValidateGC(pGC, changes, pDrawable)
 	    	!(pGC->stipple->drawable.width & (pGC->stipple->drawable.width - 1)))
 	    {
 		mfbCopyRotatePixmap(pGC->stipple,
-				    &pGC->pRotatedPixmap, xrot, yrot);
+				    &devPriv->pRotatedPixmap, xrot, yrot);
 		new_pix = TRUE;
 	    }
 	}
 	/* destroy any previously rotated tile or stipple */
-	if (!new_pix && pGC->pRotatedPixmap)
+	if (!new_pix && devPriv->pRotatedPixmap)
 	{
-	    (*pDrawable->pScreen->DestroyPixmap)(pGC->pRotatedPixmap);
-	    pGC->pRotatedPixmap = (PixmapPtr)NULL;
+	    (*pDrawable->pScreen->DestroyPixmap)(devPriv->pRotatedPixmap);
+	    devPriv->pRotatedPixmap = (PixmapPtr)NULL;
 	}
     }
 
@@ -740,7 +689,7 @@ mfbValidateGC(pGC, changes, pDrawable)
     {
 	GCOps	*newops;
 
-	if ((newops = matchCommon (pGC)))
+	if (newops = matchCommon (pGC))
  	{
 	    if (pGC->ops->devPrivate.val)
 		miDestroyGCOps (pGC->ops);
@@ -818,8 +767,6 @@ mfbValidateGC(pGC, changes, pDrawable)
 	else
 	{
 	    /* special case ImageGlyphBlt for terminal emulator fonts */
-
-
 	    if ((pGC->font) &&
 		TERMINALFONT(pGC->font) &&
 		((pGC->fgPixel & 1) != (pGC->bgPixel & 1)))
@@ -834,8 +781,6 @@ mfbValidateGC(pGC, changes, pDrawable)
 		    pGC->ops->ImageGlyphBlt = mfbTEGlyphBltBlack;
 	    }
 	    else
-
-
 	    {
 	        if (pGC->fgPixel & 1)
 		    pGC->ops->ImageGlyphBlt = mfbImageGlyphBltWhite;
@@ -857,7 +802,7 @@ mfbValidateGC(pGC, changes, pDrawable)
 		else if (rrop == RROP_INVERT)
 		    pGC->ops->PolyGlyphBlt = mfbPolyGlyphBltInvert;
 		else
-		    pGC->ops->PolyGlyphBlt = mfbPolyGlyphBltNoop;
+		    pGC->ops->PolyGlyphBlt = (void (*)())NoopDDA;
 	    }
 	    else
 	    {
@@ -867,8 +812,6 @@ mfbValidateGC(pGC, changes, pDrawable)
     }
 
     if (new_fill)
-
-
     {
 	/* install a suitable fillspans and pushpixels */
 	pGC->ops->PushPixels = mfbPushPixels;
@@ -893,19 +836,19 @@ mfbValidateGC(pGC, changes, pDrawable)
 		pGC->ops->FillPolygon = mfbFillPolyInvert;
 		break;
 	      case RROP_NOP:
-		pGC->ops->FillSpans = mfbNoopFS;
-		pGC->ops->FillPolygon = mfbFillPolyNoop;
+		pGC->ops->FillSpans = (void (*)())NoopDDA;
+		pGC->ops->FillPolygon = (void (*)())NoopDDA;
 		break;
 	    }
 	}
 	/* beyond this point, opaqueStippled ==> fg != bg */
 	else if (((pGC->fillStyle == FillTiled) ||
 		  (pGC->fillStyle == FillOpaqueStippled)) &&
-		 !pGC->pRotatedPixmap)
+		 !devPriv->pRotatedPixmap)
 	{
 	    pGC->ops->FillSpans = mfbUnnaturalTileFS;
 	}
-	else if ((pGC->fillStyle == FillStippled) && !pGC->pRotatedPixmap)
+	else if ((pGC->fillStyle == FillStippled) && !devPriv->pRotatedPixmap)
 	{
 	    pGC->ops->FillSpans = mfbUnnaturalStippleFS;
 	}
@@ -923,7 +866,7 @@ mfbValidateGC(pGC, changes, pDrawable)
 		pGC->ops->FillSpans = mfbInvertStippleFS;
 		break;
 	      case RROP_NOP:
-		pGC->ops->FillSpans = mfbNoopFS;
+		pGC->ops->FillSpans = (void (*)())NoopDDA;
 		break;
 	    }
 	}
@@ -940,7 +883,7 @@ mfbValidateGC(pGC, changes, pDrawable)
 	 */
 	if ((((pGC->fillStyle == FillTiled) ||
 	      (pGC->fillStyle == FillStippled)) &&
-	     !pGC->pRotatedPixmap) ||
+	     !devPriv->pRotatedPixmap) ||
 	    ((pGC->fillStyle == FillOpaqueStippled) &&
 	     ((pGC->fgPixel & 1) != (pGC->bgPixel & 1)))
 	   )
@@ -967,7 +910,7 @@ mfbValidateGC(pGC, changes, pDrawable)
 		    devPriv->FillArea = mfbSolidInvertArea;
 		    break;
 		  case RROP_NOP:
-		    devPriv->FillArea = (mfbFillAreaProcPtr)NoopDDA;
+		    devPriv->FillArea = (void (*)())NoopDDA;
 		    break;
 		}
 	    }
@@ -985,7 +928,7 @@ mfbValidateGC(pGC, changes, pDrawable)
 		    devPriv->FillArea = mfbStippleInvertArea;
 		    break;
 		  case RROP_NOP:
-		    devPriv->FillArea = (mfbFillAreaProcPtr)NoopDDA;
+		    devPriv->FillArea = (void (*)())NoopDDA;
 		    break;
 		}
 	    }
@@ -1003,8 +946,6 @@ mfbValidateGC(pGC, changes, pDrawable)
 	    }
 	} /* end of natural rectangles */
     } /* end of new_fill */
-
-
 }
 
 /* table to map alu(src, dst) to alu(~src, dst) */
@@ -1027,18 +968,12 @@ int InverseAlu[16] = {
 	GXset
 };
 
-int mfbGetInverseAlu(i)
-    int i;
-{
-    return InverseAlu[i];
-}
-
 int
 mfbReduceRop(alu, src)
     register int alu;
     register Pixel src;
 {
-    int rop = 0;
+    int rop;
     if ((src & 1) == 0)	/* src is black */
     {
 	switch(alu)

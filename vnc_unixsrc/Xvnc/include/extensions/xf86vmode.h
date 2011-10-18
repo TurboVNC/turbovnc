@@ -1,7 +1,7 @@
-/* $XFree86: xc/include/extensions/xf86vmode.h,v 3.30 2001/05/07 20:09:50 mvojkovi Exp $ */
+/* $XFree86: xc/include/extensions/xf86vmode.h,v 3.20.2.1 1997/07/13 14:44:57 dawes Exp $ */
 /*
 
-Copyright 1995  Kaleb S. KEITHLEY
+Copyright (c) 1995  Kaleb S. KEITHLEY
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -28,9 +28,9 @@ or other dealings in this Software without prior written authorization
 from Kaleb S. KEITHLEY
 
 */
-/* $Xorg: xf86vmode.h,v 1.3 2000/08/18 04:05:46 coskrey Exp $ */
+/* $XConsortium: xf86vmode.h /main/9 1996/10/26 21:38:11 kaleb $ */
 
-/* THIS IS NOT AN X CONSORTIUM STANDARD OR AN X PROJECT TEAM SPECIFICATION */
+/* THIS IS NOT AN X CONSORTIUM STANDARD */
 
 #ifndef _XF86VIDMODE_H_
 #define _XF86VIDMODE_H_
@@ -51,17 +51,6 @@ from Kaleb S. KEITHLEY
 #define X_XF86VidModeSwitchToMode	10
 #define X_XF86VidModeGetViewPort	11
 #define X_XF86VidModeSetViewPort	12
-/* new for version 2.x of this extension */
-#define X_XF86VidModeGetDotClocks	13
-#define X_XF86VidModeSetClientVersion	14
-#define X_XF86VidModeSetGamma		15
-#define X_XF86VidModeGetGamma		16
-#define X_XF86VidModeGetGammaRamp	17
-#define X_XF86VidModeSetGammaRamp	18
-#define X_XF86VidModeGetGammaRampSize	19
-#define X_XF86VidModeGetPermissions	20
-
-#define CLKFLAG_PROGRAMABLE		1
 
 #ifdef XF86VIDMODE_EVENTS
 #define XF86VidModeNotify		0
@@ -84,9 +73,6 @@ from Kaleb S. KEITHLEY
 #define XF86VidModeZoomLocked		6
 #define XF86VidModeNumberErrors		(XF86VidModeZoomLocked + 1)
 
-#define XF86VM_READ_PERMISSION	1
-#define XF86VM_WRITE_PERMISSION	2
-
 #ifndef _XF86VIDMODE_SERVER_
 
 typedef struct {
@@ -94,7 +80,6 @@ typedef struct {
     unsigned short	hsyncstart;
     unsigned short	hsyncend;
     unsigned short	htotal;
-    unsigned short	hskew;
     unsigned short	vdisplay;
     unsigned short	vsyncstart;
     unsigned short	vsyncend;
@@ -115,7 +100,6 @@ typedef struct {
     unsigned short	hsyncstart;
     unsigned short	hsyncend;
     unsigned short	htotal;
-    unsigned short	hskew;
     unsigned short	vdisplay;
     unsigned short	vsyncstart;
     unsigned short	vsyncend;
@@ -157,13 +141,6 @@ typedef struct {
     Time time;			/* event timestamp */
 } XF86VidModeNotifyEvent;
 
-typedef struct {
-    float red;			/* Red Gamma value */
-    float green;		/* Green Gamma value */
-    float blue;			/* Blue Gamma value */
-} XF86VidModeGamma;
-
-
 #define XF86VidModeSelectNextMode(disp, scr) \
 	XF86VidModeSwitchMode(disp, scr, 1)
 #define XF86VidModeSelectPrevMode(disp, scr) \
@@ -172,147 +149,120 @@ typedef struct {
 _XFUNCPROTOBEGIN
 
 Bool XF86VidModeQueryVersion(
+#if NeedFunctionPrototypes
     Display*		/* dpy */,
     int*		/* majorVersion */,
     int*		/* minorVersion */
+#endif
 );
 
 Bool XF86VidModeQueryExtension(
+#if NeedFunctionPrototypes
     Display*		/* dpy */,
     int*		/* event_base */,
     int*		/* error_base */
-);
-
-Bool XF86VidModeSetClientVersion(
-    Display*		/* dpy */
+#endif
 );
 
 Bool XF86VidModeGetModeLine(
+#if NeedFunctionPrototypes
     Display*			/* dpy */,
     int				/* screen */,
     int*			/* dotclock */,
     XF86VidModeModeLine*	/* modeline */
+#endif
 );
 
 Bool XF86VidModeGetAllModeLines(
+#if NeedFunctionPrototypes
     Display*			/* dpy */,
     int				/* screen */,
     int*			/* modecount */,
     XF86VidModeModeInfo***	/* modelinesPtr */
+#endif
 );
 
 Bool XF86VidModeAddModeLine(
+#if NeedFunctionPrototypes
     Display*			/* dpy */,
     int				/* screen */,
     XF86VidModeModeInfo*	/* new modeline */,
     XF86VidModeModeInfo*	/* after modeline */
+#endif
 );
 
 Bool XF86VidModeDeleteModeLine(
+#if NeedFunctionPrototypes
     Display*			/* dpy */,
     int				/* screen */,
     XF86VidModeModeInfo*	/* modeline */
+#endif
 );
 
 Bool XF86VidModeModModeLine(
+#if NeedFunctionPrototypes
     Display*			/* dpy */,
     int				/* screen */,
     XF86VidModeModeLine*	/* modeline */
+#endif
 );
 
 Status XF86VidModeValidateModeLine(
+#if NeedFunctionPrototypes
     Display*			/* dpy */,
     int				/* screen */,
     XF86VidModeModeInfo*	/* modeline */
+#endif
 );
 
 Bool XF86VidModeSwitchMode(
+#if NeedFunctionPrototypes
     Display*		/* dpy */,
     int			/* screen */,
     int			/* zoom */
+#endif
 );
 
 Bool XF86VidModeSwitchToMode(
+#if NeedFunctionPrototypes
     Display*			/* dpy */,
     int				/* screen */,
     XF86VidModeModeInfo*	/* modeline */
+#endif
 );
 
 Bool XF86VidModeLockModeSwitch(
+#if NeedFunctionPrototypes
     Display*		/* dpy */,
     int			/* screen */,
     int			/* lock */
+#endif
 );
 
 Bool XF86VidModeGetMonitor(
+#if NeedFunctionPrototypes
     Display*		/* dpy */,
     int			/* screen */,
     XF86VidModeMonitor*	/* monitor */
+#endif
 );
 
 Bool XF86VidModeGetViewPort(
+#if NeedFunctionPrototypes
     Display*		/* dpy */,
     int			/* screen */,
     int*		/* x return */,
     int*		/* y return */
+#endif
 );
 
 Bool XF86VidModeSetViewPort(
+#if NeedFunctionPrototypes
     Display*		/* dpy */,
     int			/* screen */,
     int			/* x */,
     int			/* y */
-);
-
-Bool XF86VidModeGetDotClocks(
-    Display*		/* dpy */,
-    int			/* screen */,
-    int*		/* flags return */,
-    int*		/* number of clocks return */,
-    int*		/* max dot clock return */,
-    int**		/* clocks return */
-);
-
-Bool XF86VidModeGetGamma(
-    Display*			/* dpy */,
-    int				/* screen */,
-    XF86VidModeGamma*		/* Gamma */
-);
-
-Bool XF86VidModeSetGamma(
-    Display*			/* dpy */,
-    int				/* screen */,
-    XF86VidModeGamma*		/* Gamma */
-);
-
-Bool XF86VidModeSetGammaRamp(
-    Display*                    /* dpy */,
-    int                         /* screen */,
-    int				/* size */, 
-    unsigned short*             /* red array */,
-    unsigned short*             /* green array */,
-    unsigned short*             /* blue array */
-);
-
-Bool XF86VidModeGetGammaRamp(
-    Display*                    /* dpy */,
-    int                         /* screen */,
-    int                         /* size */,
-    unsigned short*             /* red array */,
-    unsigned short*             /* green array */,
-    unsigned short*             /* blue array */
-);
-
-Bool XF86VidModeGetGammaRampSize(
-    Display*                    /* dpy */,
-    int                         /* screen */,
-    int*                        /* size */
-);
-
-Bool XF86VidModeGetPermissions(
-    Display*                    /* dpy */,
-    int                         /* screen */,
-    int*			/* permissions */
+#endif
 );
 
 _XFUNCPROTOEND

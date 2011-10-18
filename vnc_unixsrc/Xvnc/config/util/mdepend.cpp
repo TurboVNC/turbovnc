@@ -1,19 +1,18 @@
 XCOMM!/bin/sh
 XCOMM
-XCOMM $Xorg: mdepend.cpp,v 1.3 2000/08/17 19:41:52 cpqbld Exp $
-XCOMM $XdotOrg: xc/config/util/mdepend.cpp,v 1.4 2005/08/26 05:01:37 daniels Exp $
+XCOMM $TOG: mdepend.cpp /main/13 1997/06/20 21:12:18 kaleb $
 XCOMM
 XCOMM	Do the equivalent of the 'makedepend' program, but do it right.
 XCOMM
 XCOMM	Usage:
 XCOMM
 XCOMM	makedepend [cpp-flags] [-w width] [-s magic-string] [-f makefile]
-XCOMM	  [-o object-suffix] [-v] [-a] [-cc compiler] [-d dependencyflag]
+XCOMM	  [-o object-suffix]
 XCOMM
 XCOMM	Notes:
 XCOMM
 XCOMM	The C compiler used can be overridden with the environment
-XCOMM	variable "CC" or the command line flag -cc.
+XCOMM	variable "CC".
 XCOMM
 XCOMM	The "-v" switch of the "makedepend" program is not supported.
 XCOMM
@@ -23,28 +22,22 @@ XCOMM	work on both USG and BSD systems.  However, when System V.4 comes out,
 XCOMM	USG users will probably have to change "silent" to "-s" instead of
 XCOMM	"-" (at least, that is what the documentation implies).
 XCOMM
-XCOMM $XFree86: xc/config/util/mdepend.cpp,v 3.9 2001/04/26 20:55:10 dawes Exp $
+XCOMM $XFree86: xc/config/util/mdepend.cpp,v 3.1.8.1 1997/06/29 08:43:27 dawes Exp $
 XCOMM
 
 CC=PREPROC
 
 silent='-'
 
-TMP=`pwd`/.mdep$$
+TMP=/tmp/mdep$$
+CPPCMD=${TMP}a
+DEPENDLINES=${TMP}b
+TMPMAKEFILE=${TMP}c
+MAGICLINE=${TMP}d
+ARGS=${TMP}e
 
-rm -rf ${TMP}
-if ! mkdir -p ${TMP}; then
-  echo "$0: cannot create ${TMP}, exit." >&2
-fi
-
-CPPCMD=${TMP}/a
-DEPENDLINES=${TMP}/b
-TMPMAKEFILE=${TMP}/c
-MAGICLINE=${TMP}/d
-ARGS=${TMP}/e
-
-trap "rm -rf ${TMP}; exit 1" 1 2 15
-trap "rm -rf ${TMP}; exit 0" 1 2 13
+trap "rm -f ${TMP}*; exit 1" 1 2 15
+trap "rm -f ${TMP}*; exit 0" 1 2 13
 
 echo " \c" > $CPPCMD
 if [ `wc -c < $CPPCMD` -eq 1 ]
@@ -66,7 +59,6 @@ width=78
 endmarker=""
 verbose=n
 append=n
-compilerlistsdepends=n
 
 while [ $# != 0 ]
 do
@@ -74,7 +66,7 @@ do
 	endmarker=""
     else
 	case "$1" in
-	    -D*|-I*|-U*)
+	    -D*|-I*)
 		echo $n " '$1'$c" >> $ARGS
 		;;
 
@@ -95,13 +87,9 @@ do
 			-f*)
 			    if [ "$1" = "-f-" ]; then
 				makefile="-"
-			    elif [ "$1" = "-f" ]; then
+			    else
 				makefile="$2"
 				shift
-			    else
-				echo "$1" | sed 's/^\-f//' >${TMP}arg
-				makefile="`cat ${TMP}arg`"
-				rm -f ${TMP}arg
 			    fi
 			    ;;
 			-o)
@@ -130,15 +118,6 @@ do
 			    shift
 			    ;;
 
-			# Flag to tell compiler to output dependencies directly
-			# For example, with Sun compilers, -xM or -xM1 or
-			# with gcc, -M
-		        -d)
-			    compilerlistsdepends="y"
-			    compilerlistdependsflag="$2"
-			    shift
-			    ;;
-
 			-*)
 			    echo "Unknown option '$1' ignored" 1>&2
 			    ;;
@@ -153,10 +132,6 @@ do
     shift
 done
 echo ' $*' >> $ARGS
-
-if [ "$compilerlistsdepends"x = "y"x ] ; then
-  CC="$CC $compilerlistdependsflag"
-fi
 
 echo "#!/bin/sh" > $CPPCMD
 echo "exec $CC `cat $ARGS`" >> $CPPCMD
@@ -186,13 +161,6 @@ if [ "$verbose"x = "y"x ]; then
 fi
 
 echo '' > $DEPENDLINES
-
-if [ "$compilerlistsdepends"x = "y"x ] ; then
-    for i in $files
-    do
-	$CPPCMD $i >> $DEPENDLINES
-    done
-else
 for i in $files
 do
     $CPPCMD $i \
@@ -203,15 +171,8 @@ done \
   | awk '{
 	if ($1 != $4  &&  $2 != "#ident" && $2 != "#pragma")
 	    {
-	    numparts = split( $1, ofileparts, "\." )
-	    ofile = ""
-	    for ( i = 1; i < numparts; i = i+1 )
-		{
-		if (i != 1 )
-		    ofile = ofile "."
-		ofile = ofile ofileparts[i]
-		}
-	    print ofile "'"$objsuffix"'", $4
+	    ofile = substr ($1, 1, length ($1) - 2) "'"$objsuffix"'"
+	    print ofile, $4
 	    }
 	}' \
   | sort -u \
@@ -239,7 +200,6 @@ done \
 		print rec
 	    }' \
   | egrep -v '^[^:]*:[ 	]*$' >> $DEPENDLINES
-fi
 
 trap "" 1 2 13 15	# Now we are committed
 case "$makefile" in
@@ -282,5 +242,5 @@ case "$makefile" in
 
 esac
 
-rm -rf ${TMP}*
+rm -f ${TMP}*
 exit 0

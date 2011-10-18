@@ -1,7 +1,7 @@
 /* 
  *  @OSF_COPYRIGHT@
  *  COPYRIGHT NOTICE
- *  Copyright (c) 1990, 1991, 1992, 1993, 1998 The Open Group, Inc.
+ *  Copyright (c) 1990, 1991, 1992, 1993 Open Software Foundation, Inc.
  *  ALL RIGHTS RESERVED (MOTIF). See the file named COPYRIGHT.MOTIF for
  *  the full copyright text.
  *
@@ -13,7 +13,7 @@
  * (c) Copyright 1996 FUJITSU LIMITED.
  * (c) Copyright 1996 Hitachi.
  */ 
-XCOMM $Xorg: Motif.tmpl,v 1.3 2000/08/17 19:41:46 cpqbld Exp $
+XCOMM $XConsortium: Motif.tmpl /main/2 1996/12/04 10:12:55 swick $
 
 /* Include the X11 project template file. */
 #include <X11.tmpl>
@@ -356,11 +356,6 @@ XCOMM $Xorg: Motif.tmpl,v 1.3 2000/08/17 19:41:46 cpqbld Exp $
 # define TestUilClientDepLibs UilClientDepLibs
 #endif
 
-/* hardcoded default path.  Contrary to the original duplicate of USRLIBDIR
-   in the Imakefiles. */
-#ifndef VirtualBindingsPath
-# define VirtualBindingsPath /usr/lib/Xm/bindings
-#endif
 
               MTOP = MTop
 TOP_MOTIF_INCLUDES = -I$(MINCLUDESRC)

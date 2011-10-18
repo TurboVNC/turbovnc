@@ -1,4 +1,3 @@
-/* $Xorg: dpms.h,v 1.3 2000/08/18 04:05:45 coskrey Exp $ */
 /*****************************************************************
 
 Copyright (c) 1996 Digital Equipment Corporation, Maynard, Massachusetts.
@@ -26,10 +25,6 @@ dealings in this Software without prior written authorization from Digital
 Equipment Corporation.
 
 ******************************************************************/
-/* $XFree86: xc/include/extensions/dpms.h,v 3.4 2000/03/15 16:51:51 tsi Exp $ */
-
-#ifndef _X11_EXTENSIONS_DPMS_H
-#define _X11_EXTENSIONS_DPMS_H 1
 
 /*
  * HISTORY
@@ -44,24 +39,5 @@ Equipment Corporation.
 #define DPMSModeSuspend	2
 #define DPMSModeOff	3
 
-#ifndef DPMS_SERVER
 
-#include <X11/X.h>
-#include <X11/Xmd.h>
-
-_XFUNCPROTOBEGIN
-
-extern Bool DPMSQueryExtension(Display *, int *, int *);
-extern Status DPMSGetVersion(Display *, int *, int *);
-extern Bool DPMSCapable(Display *);
-extern Status DPMSSetTimeouts(Display *, CARD16, CARD16, CARD16);
-extern Bool DPMSGetTimeouts(Display *, CARD16 *, CARD16 *, CARD16 *);
-extern Status DPMSEnable(Display *);
-extern Status DPMSDisable(Display *);
-extern Status DPMSForceLevel(Display *, CARD16);
-extern Status DPMSInfo(Display *, CARD16 *, BOOL *);
-
-_XFUNCPROTOEND
-#endif /* !DPMS_SERVER */
-#endif /* !_X11_EXTENSIONS_DPMS_H */
 

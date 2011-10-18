@@ -1,13 +1,14 @@
 /*
- * $Xorg: extutil.h,v 1.4 2001/02/09 02:03:24 xorgcvs Exp $
+ * $XConsortium: extutil.h,v 1.15 94/10/07 15:36:33 kaleb Exp $
  *
-Copyright 1989, 1998  The Open Group
+Copyright (c) 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,15 +16,15 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
  *
- * Author:  Jim Fulton, MIT The Open Group
+ * Author:  Jim Fulton, MIT X Consortium
  * 
  *                     Xlib Extension-Writing Utilities
  *
@@ -31,12 +32,9 @@ in this Software without prior written authorization from The Open Group.
  * protocol extensions.  THESE INTERFACES ARE NOT PART OF THE X STANDARD AND
  * ARE SUBJECT TO CHANGE!
  */
-/* $XFree86: xc/include/extensions/extutil.h,v 1.9 2001/12/14 19:53:28 dawes Exp $ */
 
 #ifndef _EXTUTIL_H_
 #define _EXTUTIL_H_
-
-#include <X11/extensions/Xext.h>
 
 /*
  * We need to keep a list of open displays since the Xlib display list isn't
@@ -58,85 +56,117 @@ typedef struct _XExtensionInfo {
 
 typedef struct _XExtensionHooks {
     int (*create_gc)(
+#if NeedNestedPrototypes
 	      Display*			/* display */,
 	      GC			/* gc */,
 	      XExtCodes*		/* codes */
+#endif
 );
     int (*copy_gc)(
+#if NeedNestedPrototypes
 	      Display*			/* display */,
               GC			/* gc */,
               XExtCodes*		/* codes */
+#endif
 );
     int (*flush_gc)(
+#if NeedNestedPrototypes
 	      Display*			/* display */,
               GC			/* gc */,
               XExtCodes*		/* codes */
+#endif
 );
     int (*free_gc)(
+#if NeedNestedPrototypes
 	      Display*			/* display */,
               GC			/* gc */,
               XExtCodes*		/* codes */
+#endif
 );
     int (*create_font)(
+#if NeedNestedPrototypes
 	      Display*			/* display */,
               XFontStruct*		/* fs */,
               XExtCodes*		/* codes */
+#endif
 );
     int (*free_font)(
+#if NeedNestedPrototypes
 	      Display*			/* display */,
               XFontStruct*		/* fs */,
               XExtCodes*		/* codes */
+#endif
 );
     int (*close_display)(
+#if NeedNestedPrototypes
 	      Display*			/* display */,
               XExtCodes*		/* codes */
+#endif
 );
     Bool (*wire_to_event)(
+#if NeedNestedPrototypes
 	       Display*			/* display */,
                XEvent*			/* re */,
                xEvent*			/* event */
+#endif
 );
     Status (*event_to_wire)(
+#if NeedNestedPrototypes
 	      Display*			/* display */,
               XEvent*			/* re */,
               xEvent*			/* event */
+#endif
 );
     int (*error)(
+#if NeedNestedPrototypes
 	      Display*			/* display */,
               xError*			/* err */,
               XExtCodes*		/* codes */,
               int*			/* ret_code */
+#endif
 );
     char *(*error_string)(
+#if NeedNestedPrototypes
 	        Display*		/* display */,
                 int			/* code */,
                 XExtCodes*		/* codes */,
                 char*			/* buffer */,
                 int			/* nbytes */
+#endif
 );
 } XExtensionHooks;
 
 extern XExtensionInfo *XextCreateExtension(
+#if NeedFunctionPrototypes
     void
+#endif
 );
 extern void XextDestroyExtension(
+#if NeedFunctionPrototypes
     XExtensionInfo*	/* info */
+#endif
 );
 extern XExtDisplayInfo *XextAddDisplay(
+#if NeedFunctionPrototypes
     XExtensionInfo*	/* extinfo */,
     Display*		/* dpy */,
     char*		/* ext_name */,
     XExtensionHooks*	/* hooks */,
     int			/* nevents */,
     XPointer		/* data */
+#endif
 );
 extern int XextRemoveDisplay(
+#if NeedFunctionPrototypes
     XExtensionInfo*	/* extinfo */,
     Display*		/* dpy */
+#endif
 );
 extern XExtDisplayInfo *XextFindDisplay(
+#if NeedFunctionPrototypes
     XExtensionInfo*	/* extinfo */,
     Display*		/* dpy */
+#endif
 );
 
 #define XextHasExtension(i) ((i) && ((i)->codes))
@@ -153,7 +183,8 @@ extern XExtDisplayInfo *XextFindDisplay(
  * something that is called many, many times would be bad.
  */
 #define XEXT_GENERATE_FIND_DISPLAY(proc,extinfo,extname,hooks,nev,data) \
-XExtDisplayInfo *proc (Display *dpy) \
+XExtDisplayInfo *proc (dpy) \
+    register Display *dpy; \
 { \
     XExtDisplayInfo *dpyinfo; \
     if (!extinfo) { if (!(extinfo = XextCreateExtension())) return NULL; } \
@@ -162,20 +193,21 @@ XExtDisplayInfo *proc (Display *dpy) \
     return dpyinfo; \
 }
 
-#define XEXT_FIND_DISPLAY_PROTO(proc) \
-	XExtDisplayInfo *proc(Display *dpy)
-
 #define XEXT_GENERATE_CLOSE_DISPLAY(proc,extinfo) \
-int proc (Display *dpy, XExtCodes *codes) \
+int proc (dpy, codes) \
+    Display *dpy; \
+    XExtCodes *codes; \
 { \
     return XextRemoveDisplay (extinfo, dpy); \
 }
 
-#define XEXT_CLOSE_DISPLAY_PROTO(proc) \
-	int proc(Display *dpy, XExtCodes *codes)
-
 #define XEXT_GENERATE_ERROR_STRING(proc,extname,nerr,errl) \
-char *proc (Display *dpy, int code, XExtCodes *codes, char *buf, int n) \
+char *proc (dpy, code, codes, buf, n) \
+    Display  *dpy; \
+    int code; \
+    XExtCodes *codes; \
+    char *buf; \
+    int n; \
 {  \
     code -= codes->first_error;  \
     if (code >= 0 && code < nerr) { \
@@ -187,6 +219,4 @@ char *proc (Display *dpy, int code, XExtCodes *codes, char *buf, int n) \
     return (char *)0; \
 }
 
-#define XEXT_ERROR_STRING_PROTO(proc) \
-	char *proc(Display *dpy, int code, XExtCodes *codes, char *buf, int n)
 #endif

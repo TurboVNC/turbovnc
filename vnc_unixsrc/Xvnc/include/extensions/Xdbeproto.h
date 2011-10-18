@@ -1,4 +1,4 @@
-/* $Xorg: Xdbeproto.h,v 1.3 2000/08/18 04:05:45 coskrey Exp $ */
+/* $XConsortium: Xdbeproto.h /main/3 1995/09/22 10:20:16 dpw $ */
 /******************************************************************************
  * 
  * Copyright (c) 1994, 1995  Hewlett-Packard Company

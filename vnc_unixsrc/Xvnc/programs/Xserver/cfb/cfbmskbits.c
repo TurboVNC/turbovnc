@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/cfb/cfbmskbits.c,v 3.1 1998/10/04 09:37:46 dawes Exp $ */
 /************************************************************
 Copyright 1987 by Sun Microsystems, Inc. Mountain View, CA.
 
@@ -9,10 +8,10 @@ software  and  its documentation for any purpose and without
 fee is hereby granted, provided that the above copyright no-
 tice  appear  in all copies and that both that copyright no-
 tice and this permission notice appear in  supporting  docu-
-mentation,  and  that the names of Sun or The Open Group
+mentation,  and  that the names of Sun or X Consortium
 not be used in advertising or publicity pertaining to 
 distribution  of  the software  without specific prior 
-written permission. Sun and The Open Group make no 
+written permission. Sun and X Consortium make no 
 representations about the suitability of this software for 
 any purpose. It is provided "as is" without any express or 
 implied warranty.
@@ -28,7 +27,8 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
-/* $Xorg: cfbmskbits.c,v 1.3 2000/08/17 19:48:14 cpqbld Exp $ */
+/* $XConsortium: cfbmskbits.c,v 4.13 94/07/28 12:30:41 dpw Exp $ */
+/* $XFree86: xc/programs/Xserver/cfb/cfbmskbits.c,v 3.0 1996/06/29 09:05:41 dawes Exp $ */
 
 /*
  * ==========================================================================
@@ -48,12 +48,8 @@ bit index 32-n in a longword
 
    see also cfbmskbits.h
 */
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include	<X11/X.h>
-#include	<X11/Xmd.h>
+#include	<X.h>
+#include	<Xmd.h>
 #include	<servermd.h>
 #include	"cfb.h"
 #include	"cfbmskbits.h"

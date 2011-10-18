@@ -34,8 +34,6 @@
 #include <X11/keysym.h>
 #include <Xatom.h>
 #include "rfb.h"
-#include "mi.h"
-#include "mipointer.h"
 
 extern WindowPtr *WindowTable; /* Why isn't this in a header file? */
 

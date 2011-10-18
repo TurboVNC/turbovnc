@@ -3,21 +3,19 @@ XCOMM!/bin/sh
 XCOMM
 XCOMM makedepend which uses 'gcc -M'
 XCOMM
-XCOMM $XFree86: xc/config/util/gccmdep.cpp,v 3.10tsi Exp $
+XCOMM $XFree86: xc/config/util/gccmdep.cpp,v 3.3 1996/02/25 01:16:15 dawes Exp $
 XCOMM
 XCOMM Based on mdepend.cpp and code supplied by Hongjiu Lu <hjl@nynexst.com>
 XCOMM
 
-TMP=mdep$$.tmp
+TMP=/tmp/mdep$$
 CC=CCCMD
 RM=RMCMD
 LN=LNCMD
 MV=MVCMD
 
-${RM} ${TMP}
-
-trap "${RM} ${TMP}*; exit 1" 1 2 15
-trap "${RM} ${TMP}*; exit 0" 1 2 13
+trap "$RM ${TMP}*; exit 1" 1 2 15
+trap "$RM ${TMP}*; exit 0" 1 2 13
 
 files=
 makefile=
@@ -25,16 +23,17 @@ endmarker=
 magic_string='# DO NOT DELETE'
 append=n
 args=
+asmfiles=
 
 while [ $# != 0 ]; do
     if [ "$endmarker"x != x -a "$endmarker" = "$1" ]; then
 	endmarker=
     else
 	case "$1" in
-	    -D*|-I*|-U*)
+	    -D*|-I*)
 		args="$args '$1'"
 		;;
-	    -g*|-O*)
+	    -g|-o)
 		;;
 	    *)
 		if [ "$endmarker"x = x ]; then
@@ -49,17 +48,12 @@ XCOMM ignore these flags
 			    magic_string="$2"
 			    shift
 			    ;;
-			-f*)
-			    if [ "$1" = "-f-" ]; then
-				makefile="-"
-			    elif [ "$1" = "-f" ]; then
-				makefile="$2"
-				shift
-			    else
-				echo "$1" | sed 's/^\-f//' >${TMP}arg
-				makefile="`cat ${TMP}arg`"
-				rm -f ${TMP}arg
-			    fi
+			-f-)
+			    makefile="-"
+			    ;;
+			-f)
+			    makefile="$2"
+			    shift
 			    ;;
 			--*)
 			    endmarker=`echo $1 | sed 's/^\-\-//'`
@@ -111,7 +105,20 @@ if [ X"$makefile" != X- ]; then
     fi
 fi
 
-CMD="$CC -M $args $files"
+XCOMM need to link .s files to .S
+for i in $files; do
+    case $i in
+	*.s)
+	    dir=`dirname $i`
+	    base=`basename $i .s`
+	    (cd $dir; $RM ${base}.S; $LN ${base}.s ${base}.S)
+	    asmfiles="$asmfiles ${base}.S"
+	    ;;
+    esac
+done
+
+CMD="$CC -M $args `echo $files | sed -e 's,\.s$,\.S,g' -e 's,\.s ,\.S ,g'` | \
+	sed -e 's,\.S$,\.s,g' -e 's,\.S ,\.s ,g'"
 if [ X"$makefile" != X- ]; then
     CMD="$CMD >> $TMP"
 fi
@@ -122,5 +129,8 @@ if [ X"$makefile" != X- ]; then
     $MV $TMP $makefile
 fi
 
+if [ x"$asmfiles" != x ]; then
+    $RM $asmfiles
+fi
 $RM ${TMP}*
 exit 0

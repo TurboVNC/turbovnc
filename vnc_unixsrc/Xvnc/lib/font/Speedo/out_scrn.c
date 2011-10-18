@@ -1,4 +1,4 @@
-/* $Xorg: out_scrn.c,v 1.3 2000/08/17 19:46:26 cpqbld Exp $ */
+/* $XConsortium: out_scrn.c,v 1.5 94/02/10 14:15:39 gildea Exp $ */
 
 /*
 
@@ -21,7 +21,6 @@ INCIDENTAL OR CONSEQUENTIAL DAMAGES, ARISING OUT OF OR IN ANY WAY CONNECTED
 WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 
 */
-/* $XFree86: xc/lib/font/Speedo/out_scrn.c,v 1.4 1999/12/27 00:39:25 robin Exp $ */
 
 
 /*************************** O U T _ S C R N . C *****************************
@@ -31,9 +30,6 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
  *****************************************************************************/
 
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 #include "spdo_prv.h"               /* General definitions for Speedo   */
 
 #define   DEBUG      0
@@ -60,14 +56,19 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 
 /***** STATIC FUNCTIONS *****/
 
+#if PROTOS_AVAIL
 static void sp_add_intercept_screen(PROTO_DECL2 fix15 y,fix31 x);
 static void sp_proc_intercepts_screen(PROTO_DECL1);
+#else
+static void    sp_add_intercept_screen();
+static void    sp_proc_intercepts_screen();
+#endif
 
 
 #if INCL_SCREEN
-FUNCTION boolean init_screen(
+FUNCTION boolean init_screen(specsarg)
 GDECL
-specs_t FONTFAR *specsarg)
+specs_t FONTFAR *specsarg;
 /*
  * init_out0() is called by sp_set_specs() to initialize the output module.
  * Returns TRUE if output module can accept requested specifications.
@@ -83,11 +84,11 @@ return (TRUE);
 
 
 #if INCL_SCREEN
-FUNCTION boolean begin_char_screen(
+FUNCTION boolean begin_char_screen(Psw, Pmin, Pmax)
 GDECL
-point_t Psw,
-point_t Pmin,
-point_t Pmax)
+point_t Psw;                   
+point_t Pmin;                   
+point_t Pmax;                   
 /* Called once at the start of the character generation process
  */
 {
@@ -110,10 +111,10 @@ return TRUE;
 
 
 #if INCL_SCREEN
-FUNCTION void begin_contour_screen(
+FUNCTION void begin_contour_screen(P1, outside)
 GDECL
-point_t P1,
-boolean outside)
+point_t P1;                   
+boolean outside;
 /* Called at the start of each contour
  */
 {
@@ -129,10 +130,10 @@ sp_globals.y_pxl = (sp_globals.y0_spxl + sp_globals.pixrnd) >> sp_globals.pixshi
 #endif
 
 #if INCL_SCREEN
-FUNCTION void curve_screen(
+FUNCTION void curve_screen(P1, P2, P3, depth)
 GDECL
-point_t P1, point_t P2, point_t P3,
-fix15 depth)
+point_t P1, P2, P3;
+fix15 depth;
 {
 fix31   X0;
 fix31   Y0;
@@ -186,9 +187,9 @@ sp_globals.y0_spxl = P3.y;
 sp_globals.y_pxl = (P3.y + sp_globals.pixrnd) >> sp_globals.pixshift;   /* calculate new end-scan sp_globals.line */
 }
 
-FUNCTION void scan_curve_screen(
+FUNCTION void scan_curve_screen(X0,Y0,X1,Y1,X2,Y2,X3,Y3)
 GDECL
-fix31 X0, fix31 Y0, fix31 X1, fix31 Y1, fix31 X2, fix31 Y2, fix31 X3, fix31 Y3)
+fix31 X0,Y0,X1,Y1,X2,Y2,X3,Y3;
 /* Called for each curve in the transformed character if curves out enabled
  */
 {
@@ -199,7 +200,7 @@ fix31 Pctrl1y;
 fix31 Pctrl2x;
 fix31 Pctrl2y;
 
-#ifdef DBGCRV
+#if DBGCRV
 printf("SCAN_CURVE_SCREEN(%6.4f, %6.4f, %6.4f, %6.4f, %6.4f, %6.4f, %6.4f, %6.4f)\n", 
     (real)(X0-32768) / 65536.0, (real)(Y0-32768) / 65536.0,
     (real)(X1-32768) / 65536.0, (real)(Y1-32768) / 65536.0,
@@ -213,7 +214,7 @@ if (((Y3 >> 16)) == (Y0 >> 16) || (Y3+1) == Y0 || Y3 == (Y0+1))
     }
 if ((X3 >> 16) == (X0 >> 16))
     {
-    vert_line_screen(X3,(fix15)(Y0>>16),(fix15)(Y3>>16));
+    vert_line_screen(X3,(Y0>>16),(Y3>>16));
 	return;
     }
 Pmidx = (X0 + (X1 + X2) * 3 + X3 + 4 ) >> 3;
@@ -232,13 +233,13 @@ Pctrl2y = (Y2 + Y3 + 1 ) >> 1;
 scan_curve_screen(Pmidx,Pmidy, Pctrl1x,Pctrl1y, Pctrl2x,Pctrl2y, X3,Y3);
 }             
 
-FUNCTION void vert_line_screen(
+FUNCTION void vert_line_screen(x,y1,y2)
 GDECL
-fix31 x,
-fix15 y1, fix15 y2)
+fix31 x;
+fix15 y1, y2;
 {                                                 
 
-#ifdef DBGCRV
+#if DBGCRV
 printf("VERT_LINE_SCREEN(%6.4f, %6.4f, %6.4f)\n",
     (real)(x - 32768) / 65536.0, 
     (real)(y1 - 32768) / 65536.0,
@@ -286,9 +287,9 @@ else if (y2 > y1)                              /* Line goes upwards ? */
 
 
 #if INCL_SCREEN
-FUNCTION void line_screen(
+FUNCTION void line_screen(P1)
 GDECL
-point_t P1)
+point_t P1;                   
 /* Called for each vector in the transformed character
  */
 {
@@ -682,11 +683,11 @@ else
 #endif
 
 #if INCL_SCREEN
-FUNCTION LOCAL  void sp_add_intercept_screen(
+FUNCTION LOCAL  void sp_add_intercept_screen(y, x)
 GDECL
-fix15 y,                 /* Y coordinate in relative pixel units */
+fix15 y;                 /* Y coordinate in relative pixel units */
                          /* (0 is lowest sample in band) */
-fix31 x)                 /* X coordinate of intercept in subpixel units */
+fix31 x;                 /* X coordinate of intercept in subpixel units */
 
 /*  Called by line() to add an intercept to the intercept list structure
  */
@@ -766,6 +767,8 @@ register fix15 y;
 register fix15 scan_line;
          fix15 first_y, last_y;
          fix15 xsave;
+         fix15 xmin, xmax;
+         boolean clipleft, clipright;
 
 
 fix15 diff;

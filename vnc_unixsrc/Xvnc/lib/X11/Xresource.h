@@ -1,14 +1,16 @@
-/* $Xorg: Xresource.h,v 1.7 2001/02/09 02:03:39 xorgcvs Exp $ */
+/* $XConsortium: Xresource.h /main/38 1996/10/22 14:24:34 kaleb $ */
+/* $XFree86: xc/lib/X11/Xresource.h,v 3.1 1996/12/23 05:59:51 dawes Exp $ */
 
 /***********************************************************
 
-Copyright 1987, 1988, 1998  The Open Group
+Copyright (c) 1987, 1988  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,13 +18,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -46,14 +48,11 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $XFree86: xc/lib/X11/Xresource.h,v 3.8 2001/12/14 19:54:10 dawes Exp $ */
 
 #ifndef _XRESOURCE_H_
 #define _XRESOURCE_H_
 
-#ifndef _XP_PRINT_SERVER_
-#include <X11/Xlib.h>
-#endif
+/* You must include <X11/Xlib.h> before including this file */
 
 /****************************************************************
  ****************************************************************
@@ -74,7 +73,9 @@ _XFUNCPROTOBEGIN
  ****************************************************************/
 
 extern char *Xpermalloc(
+#if NeedFunctionPrototypes
     unsigned int	/* size */
+#endif
 );
 
 /****************************************************************
@@ -83,7 +84,7 @@ extern char *Xpermalloc(
  *
  ****************************************************************/
 
-typedef int       XrmQuark, *XrmQuarkList;
+typedef int     XrmQuark, *XrmQuarkList;
 #define NULLQUARK ((XrmQuark) 0)
 
 typedef char *XrmString;
@@ -91,20 +92,28 @@ typedef char *XrmString;
 
 /* find quark for string, create new quark if none already exists */
 extern XrmQuark XrmStringToQuark(
+#if NeedFunctionPrototypes
     _Xconst char* 	/* string */
+#endif
 );
 
 extern XrmQuark XrmPermStringToQuark(
+#if NeedFunctionPrototypes
     _Xconst char* 	/* string */
+#endif
 );
 
 /* find string for quark */
 extern XrmString XrmQuarkToString(
+#if NeedFunctionPrototypes
     XrmQuark 		/* quark */
+#endif
 );
 
 extern XrmQuark XrmUniqueQuark(
+#if NeedFunctionPrototypes
     void
+#endif
 );
 
 #define XrmStringsEqual(a1, a2) (strcmp(a1, a2) == 0)
@@ -119,14 +128,18 @@ extern XrmQuark XrmUniqueQuark(
 typedef enum {XrmBindTightly, XrmBindLoosely} XrmBinding, *XrmBindingList;
 
 extern void XrmStringToQuarkList(
+#if NeedFunctionPrototypes
     _Xconst char*	/* string */,
     XrmQuarkList	/* quarks_return */
+#endif
 );
 
 extern void XrmStringToBindingQuarkList(
+#if NeedFunctionPrototypes
     _Xconst char*	/* string */,
     XrmBindingList	/* bindings_return */,
     XrmQuarkList	/* quarks_return */
+#endif
 );
 
 /****************************************************************
@@ -178,72 +191,92 @@ typedef struct _XrmHashBucketRec *XrmDatabase;
 
 
 extern void XrmDestroyDatabase(
+#if NeedFunctionPrototypes
     XrmDatabase		/* database */    
+#endif
 );
 
 extern void XrmQPutResource(
+#if NeedFunctionPrototypes
     XrmDatabase*	/* database */,
     XrmBindingList	/* bindings */,
     XrmQuarkList	/* quarks */,
     XrmRepresentation	/* type */,
     XrmValue*		/* value */
+#endif
 );
 
 extern void XrmPutResource(
+#if NeedFunctionPrototypes
     XrmDatabase*	/* database */,
     _Xconst char*	/* specifier */,
     _Xconst char*	/* type */,
     XrmValue*		/* value */
+#endif
 );
 
 extern void XrmQPutStringResource(
+#if NeedFunctionPrototypes
     XrmDatabase*	/* database */,
     XrmBindingList      /* bindings */,
     XrmQuarkList	/* quarks */,
     _Xconst char*	/* value */
+#endif
 );
 
 extern void XrmPutStringResource(
+#if NeedFunctionPrototypes
     XrmDatabase*	/* database */,
     _Xconst char*	/* specifier */,
     _Xconst char*	/* value */
+#endif
 );
 
 extern void XrmPutLineResource(
+#if NeedFunctionPrototypes
     XrmDatabase*	/* database */,
     _Xconst char*	/* line */
+#endif
 );
 
 extern Bool XrmQGetResource(
+#if NeedFunctionPrototypes
     XrmDatabase		/* database */,
     XrmNameList		/* quark_name */,
     XrmClassList	/* quark_class */,
     XrmRepresentation*	/* quark_type_return */,
     XrmValue*		/* value_return */
+#endif
 );
 
 extern Bool XrmGetResource(
+#if NeedFunctionPrototypes
     XrmDatabase		/* database */,
     _Xconst char*	/* str_name */,
     _Xconst char*	/* str_class */,
     char**		/* str_type_return */,
     XrmValue*		/* value_return */
+#endif
 );
 
 extern Bool XrmQGetSearchList(
+#if NeedFunctionPrototypes
     XrmDatabase		/* database */,
     XrmNameList		/* names */,
     XrmClassList	/* classes */,
     XrmSearchList	/* list_return */,
     int			/* list_length */
+#endif
 );
 
 extern Bool XrmQGetSearchResource(
+#if NeedFunctionPrototypes
     XrmSearchList	/* list */,
     XrmName		/* name */,
     XrmClass		/* class */,
     XrmRepresentation*	/* type_return */,
     XrmValue*		/* value_return */
+#endif
 );
 
 /****************************************************************
@@ -252,70 +285,88 @@ extern Bool XrmQGetSearchResource(
  *
  ****************************************************************/
 
-#ifndef _XP_PRINT_SERVER_
-
 extern void XrmSetDatabase(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XrmDatabase		/* database */
+#endif
 );
 
 extern XrmDatabase XrmGetDatabase(
+#if NeedFunctionPrototypes
     Display*		/* display */
+#endif
 );
 
-#endif /* !_XP_PRINT_SERVER_ */
-
 extern XrmDatabase XrmGetFileDatabase(
+#if NeedFunctionPrototypes
     _Xconst char*	/* filename */
+#endif
 );
 
 extern Status XrmCombineFileDatabase(
+#if NeedFunctionPrototypes
     _Xconst char* 	/* filename */,
     XrmDatabase*	/* target */,
     Bool		/* override */
+#endif
 );
 
 extern XrmDatabase XrmGetStringDatabase(
+#if NeedFunctionPrototypes
     _Xconst char*	/* data */  /*  null terminated string */
+#endif
 );
 
 extern void XrmPutFileDatabase(
+#if NeedFunctionPrototypes
     XrmDatabase		/* database */,
     _Xconst char*	/* filename */
+#endif
 );
 
 extern void XrmMergeDatabases(
+#if NeedFunctionPrototypes
     XrmDatabase		/* source_db */,
     XrmDatabase*	/* target_db */
+#endif
 );
 
 extern void XrmCombineDatabase(
+#if NeedFunctionPrototypes
     XrmDatabase		/* source_db */,
     XrmDatabase*	/* target_db */,
     Bool		/* override */
+#endif
 );
 
 #define XrmEnumAllLevels 0
 #define XrmEnumOneLevel  1
 
 extern Bool XrmEnumerateDatabase(
+#if NeedFunctionPrototypes
     XrmDatabase		/* db */,
     XrmNameList		/* name_prefix */,
     XrmClassList	/* class_prefix */,
     int			/* mode */,
     Bool (*)(
+#if NeedNestedPrototypes
 	     XrmDatabase*	/* db */,
 	     XrmBindingList	/* bindings */,
 	     XrmQuarkList	/* quarks */,
 	     XrmRepresentation*	/* type */,
 	     XrmValue*		/* value */,
 	     XPointer		/* closure */
+#endif
 	     )		/* proc */,
     XPointer		/* closure */
+#endif
 );
 
-extern const char *XrmLocaleOfDatabase(
+extern char *XrmLocaleOfDatabase(
+#if NeedFunctionPrototypes
     XrmDatabase 	/* database */
+#endif
 );
 
 
@@ -346,12 +397,14 @@ typedef struct {
 
 
 extern void XrmParseCommand(
+#if NeedFunctionPrototypes
     XrmDatabase*	/* database */,
     XrmOptionDescList	/* table */,
     int			/* table_count */,
     _Xconst char*	/* name */,
     int*		/* argc_in_out */,
     char**		/* argv_in_out */		     
+#endif
 );
 
 _XFUNCPROTOEND

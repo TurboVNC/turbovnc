@@ -22,10 +22,29 @@ else
 fi
 
 SYSNAME=`uname -s`
-REV=`uname -r`
-MAJOR=`echo $REV | awk -F. 'NF < 1 {print "0"} {print $1}'`
-MINOR=`echo $REV | awk -F. 'NF < 2 {print "0"} {print $2}'`
-TEENY=`echo $REV | awk -F. 'NF < 3 {print "0"} {print $3}'`
+
+if [ "$SYSNAME" = AIX ]
+then
+    MAJOR=`uname -v`
+    MINOR=`uname -r`
+    TEENY=0
+else
+    REV=`uname -r`
+
+    if [ "$SYSNAME" = HP-UX ]
+    then
+        REV=`echo $REV | sed -e 's/^[^.]*\.//'`
+    else
+        if [ "$SYSNAME" != Darwin ]
+        then
+            REV=`echo $REV | sed -e 's/^V//' -e 's/-.*$//'`
+        fi
+    fi
+
+    MAJOR=`echo $REV | awk -F. 'NF < 1 {print "0"} {print $1}'`
+    MINOR=`echo $REV | awk -F. 'NF < 2 {print "0"} {print $2}'`
+    TEENY=`echo $REV | awk -F. 'NF < 3 {print "0"} {print $3}'`
+fi
 
 echo "#define OSName $SYSNAME" > config/cf/platform.def
 echo "#define OSMajorVersion $MAJOR" >> config/cf/platform.def
@@ -38,10 +57,10 @@ fi
 case "$CPU" in
     i*86)
         echo "#define i386Architecture" >> config/cf/platform.def
-        echo "#undef AMD64Architecture" >> config/cf/platform.def
+        echo "#undef x86_64Architecture" >> config/cf/platform.def
         ;;
     x86_64 | amd64)
-        echo "#define AMD64Architecture" >> config/cf/platform.def
+        echo "#define x86_64Architecture" >> config/cf/platform.def
         ;;
 esac
 if [ ! "$JPEGINC" = "" ]; then
@@ -51,5 +70,38 @@ if [ ! "$JPEGLINK" = "" ]; then
     echo "#define JPEGLibraryFlags $JPEGLINK" >>config/cf/platform.def
 fi
 echo '#define VncIncludeDir "-I@abs_top_srcdir@/include"' >>config/cf/platform.def
+
+if [ "$SYSNAME" = AIX ]
+then
+#  xmkmf and imake are broken on AIX
+    cd config/imake
+    imake -I../cf -DTOPDIR=../.. -DCURDIR=.
+    make Makefiles
+    make includes
+    make depend
+    make
+    cd ../..
+    imake -I./config/cf -DTOPDIR=./ -DCURDIR=.
+    make Makefiles
+    make includes
+    make depend
+else
+    cd config/imake
+    xmkmf ../../
+    make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
+    cd ../..
+    cd config/makedepend
+    xmkmf ../../
+    make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
+    cd ../..
+    cd config/util
+    xmkmf ../../
+    make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
+    cd ../..
+    config/imake/imake -I./config/cf -DTOPDIR=./ -DCURDIR=.
+    make Makefiles CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
+    make includes CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
+    make depend CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
+fi
 
 exit 0

@@ -1,4 +1,4 @@
-/* $Xorg: bdfread.c,v 1.5 2001/02/09 02:04:01 xorgcvs Exp $ */
+/* $XConsortium: bdfread.c,v 1.22 94/04/17 20:17:10 gildea Exp $ */
 
 /************************************************************************
 Copyright 1989 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -25,13 +25,15 @@ SOFTWARE.
 
 /*
 
-Copyright 1994, 1998  The Open Group
+Copyright (c) 1994  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -39,44 +41,45 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: xc/lib/font/bitmap/bdfread.c,v 1.12tsi Exp $ */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#ifndef FONTMODULE
 #include <ctype.h>
-#endif
-#include <X11/fonts/fntfilst.h>
-#include <X11/fonts/fontutil.h>
+#include "fntfilst.h"
 /* use bitmap structure */
-#include <X11/fonts/bitmap.h>
-#include <X11/fonts/bdfint.h>
+#include "bitmap.h"
+#include "bdfint.h"
 
 #define INDICES 256
 #define MAXENCODING 0xFFFF
 #define BDFLINELEN  1024
 
-static Bool bdfPadToTerminal(FontPtr pFont);
+extern int  bitmapGetGlyphs(), bitmapGetMetrics();
+extern int  bitmapGetBitmaps(), bitmapGetExtents();
+void        bdfUnloadFont();
+static Bool bdfPadToTerminal();
 extern int  bdfFileLineNum;
 
 /***====================================================================***/
 
 static Bool
-bdfReadBitmap(CharInfoPtr pCI, FontFilePtr file, int bit, int byte, 
-	      int glyph, int scan, CARD32 *sizes)
+bdfReadBitmap(pCI, file, bit, byte, glyph, scan, sizes)
+    CharInfoPtr pCI;
+    FontFilePtr file;
+    int         bit,
+                byte,
+                glyph,
+                scan;
+    CARD32      sizes[GLYPHPADOPTIONS];
 {
     int         widthBits,
                 widthBytes,
@@ -86,10 +89,11 @@ bdfReadBitmap(CharInfoPtr pCI, FontFilePtr file, int bit, int byte,
     int         i,
                 inLineLen,
                 nextByte;
+    Bool        badbits;
     unsigned char *pInBits,
                *picture,
                *line = NULL;
-    unsigned char        lineBuf[BDFLINELEN];
+    char        lineBuf[BDFLINELEN];
 
     widthBits = GLYPHWIDTHPIXELS(pCI);
     height = GLYPHHEIGHTPIXELS(pCI);
@@ -97,10 +101,8 @@ bdfReadBitmap(CharInfoPtr pCI, FontFilePtr file, int bit, int byte,
     widthBytes = BYTES_PER_ROW(widthBits, glyph);
     if (widthBytes * height > 0) {
 	picture = (unsigned char *) xalloc(widthBytes * height);
-	if (!picture) {
-          bdfError("Couldn't allocate picture (%d*%d)\n", widthBytes, height);        
+	if (!picture)
 	    goto BAILOUT;
-      }
     } else
 	picture = NULL;
     pCI->bits = (char *) picture;
@@ -109,6 +111,7 @@ bdfReadBitmap(CharInfoPtr pCI, FontFilePtr file, int bit, int byte,
 	for (i = 0; i < GLYPHPADOPTIONS; i++)
 	    sizes[i] += BYTES_PER_ROW(widthBits, (1 << i)) * height;
     }
+    badbits = FALSE;
     nextByte = 0;
     widthHexChars = BYTES_PER_ROW(widthBits, 1);
 
@@ -151,7 +154,9 @@ bdfReadBitmap(CharInfoPtr pCI, FontFilePtr file, int bit, int byte,
 	    mask = 0xff << (8 - (widthBits & 0x7));
 	    if (mask && picture[nextByte - 1] & ~mask) {
 		picture[nextByte - 1] &= mask;
-	    }
+		badbits = TRUE;
+	    } else if (inLineLen > widthHexChars)
+		badbits = TRUE;
 	}
 
 	if (widthBytes > widthHexChars) {
@@ -194,11 +199,13 @@ BAILOUT:
 /***====================================================================***/
 
 static Bool
-bdfSkipBitmap(FontFilePtr file, int height)
+bdfSkipBitmap(file, height)
+    FontFilePtr file;
+    int         height;
 {
     unsigned char *line;
     int         i = 0;
-    unsigned char        lineBuf[BDFLINELEN];
+    char        lineBuf[BDFLINELEN];
 
     do {
 	line = bdfGetLine(file, lineBuf, BDFLINELEN);
@@ -214,40 +221,16 @@ bdfSkipBitmap(FontFilePtr file, int height)
 
 /***====================================================================***/
 
-static void
-bdfFreeFontBits(FontPtr pFont)
-{
-    BitmapFontPtr  bitmapFont;
-    BitmapExtraPtr bitmapExtra;
-    int         i, nencoding;
-
-    bitmapFont = (BitmapFontPtr) pFont->fontPrivate;
-    bitmapExtra = (BitmapExtraPtr) bitmapFont->bitmapExtra;
-    xfree(bitmapFont->ink_metrics);
-    if(bitmapFont->encoding) {
-        nencoding = (pFont->info.lastCol - pFont->info.firstCol + 1) *
-	    (pFont->info.lastRow - pFont->info.firstRow + 1);
-        for(i=0; i<NUM_SEGMENTS(nencoding); i++)
-            xfree(bitmapFont->encoding[i]);
-    }
-    xfree(bitmapFont->encoding);
-    for (i = 0; i < bitmapFont->num_chars; i++)
-	xfree(bitmapFont->metrics[i].bits);
-    xfree(bitmapFont->metrics);
-    if (bitmapExtra)
-    {
-	xfree (bitmapExtra->glyphNames);
-	xfree (bitmapExtra->sWidths);
-	xfree (bitmapExtra);
-    }
-    xfree(pFont->info.props);
-    xfree(bitmapFont);
-}
-
 
 static Bool
-bdfReadCharacters(FontFilePtr file, FontPtr pFont, bdfFileState *pState, 
-		  int bit, int byte, int glyph, int scan)
+bdfReadCharacters(file, pFont, pState, bit, byte, glyph, scan)
+    FontFilePtr file;
+    FontPtr     pFont;
+    bdfFileState *pState;
+    int         bit,
+                byte,
+                glyph,
+                scan;
 {
     unsigned char *line;
     register CharInfoPtr ci;
@@ -261,7 +244,7 @@ bdfReadCharacters(FontFilePtr file, FontPtr pFont, bdfFileState *pState,
     BitmapFontPtr  bitmapFont;
     BitmapExtraPtr bitmapExtra;
     CARD32     *bitmapsSizes;
-    unsigned char        lineBuf[BDFLINELEN];
+    char        lineBuf[BDFLINELEN];
     int         nencoding;
 
     bitmapFont = (BitmapFontPtr) pFont->fontPrivate;
@@ -294,7 +277,6 @@ bdfReadCharacters(FontFilePtr file, FontPtr pFont, bdfFileState *pState,
 		 sizeof(CharInfoRec));
 	goto BAILOUT;
     }
-    bzero((char *)ci, nchars * sizeof(CharInfoRec));
     bitmapFont->metrics = ci;
 
     if (bitmapExtra) {
@@ -345,7 +327,7 @@ bdfReadCharacters(FontFilePtr file, FontPtr pFont, bdfFileState *pState,
 	    bdfError("bad 'ENCODING' in BDF file\n");
 	    goto BAILOUT;
 	}
-	if (enc < -1 || (t == 2 && enc2 < -1)) {
+	if (enc < -1 || t == 2 && enc2 < -1) {
 	    bdfError("bad ENCODING value");
 	    goto BAILOUT;
 	}
@@ -428,7 +410,7 @@ bdfReadCharacters(FontFilePtr file, FontPtr pFont, bdfFileState *pState,
 		    (*p == ' ') || (*p == '\t');
 		    p++)
 		 /* empty for loop */ ;
-	    ci->metrics.attributes = (bdfHexByte(p) << 8) + bdfHexByte(p + 2);
+	    ci->metrics.attributes = bdfHexByte(p) << 8 + bdfHexByte(p + 2);
 	    line = bdfGetLine(file, lineBuf, BDFLINELEN);
 	} else
 	    ci->metrics.attributes = 0;
@@ -482,13 +464,11 @@ bdfReadCharacters(FontFilePtr file, FontPtr pFont, bdfFileState *pState,
 
     nencoding = (pFont->info.lastRow - pFont->info.firstRow + 1) *
 	(pFont->info.lastCol - pFont->info.firstCol + 1);
-    bitmapFont->encoding = 
-      (CharInfoPtr **) xcalloc(NUM_SEGMENTS(nencoding),
-                               sizeof(CharInfoPtr*));
+    bitmapFont->encoding = (CharInfoPtr *) xalloc(nencoding * sizeof(CharInfoPtr));
     if (!bitmapFont->encoding) {
 	bdfError("Couldn't allocate ppCI (%d,%d)\n",
-                 NUM_SEGMENTS(nencoding),
-                 sizeof(CharInfoPtr*));
+		 nencoding,
+		 sizeof(CharInfoPtr));
 	goto BAILOUT;
     }
     pFont->info.allExist = TRUE;
@@ -498,26 +478,19 @@ bdfReadCharacters(FontFilePtr file, FontPtr pFont, bdfFileState *pState,
 	    char_row++) {
 	if (bdfEncoding[char_row] == (CharInfoPtr *) NULL) {
 	    pFont->info.allExist = FALSE;
-            i += pFont->info.lastCol - pFont->info.firstCol + 1;
+	    for (char_col = pFont->info.firstCol;
+		    char_col <= pFont->info.lastCol;
+		    char_col++) {
+		bitmapFont->encoding[i++] = NullCharInfo;
+	    }
 	} else {
 	    for (char_col = pFont->info.firstCol;
 		    char_col <= pFont->info.lastCol;
 		    char_col++) {
 		if (!bdfEncoding[char_row][char_col])
 		    pFont->info.allExist = FALSE;
-                else {
-                    if (!bitmapFont->encoding[SEGMENT_MAJOR(i)]) {
-                        bitmapFont->encoding[SEGMENT_MAJOR(i)]=
-                            (CharInfoPtr*)xcalloc(BITMAP_FONT_SEGMENT_SIZE,
-                                                  sizeof(CharInfoPtr));
-                        if (!bitmapFont->encoding[SEGMENT_MAJOR(i)])
-                            goto BAILOUT;
-                    }
-                    ACCESSENCODINGL(bitmapFont->encoding,i) = 
-                        bdfEncoding[char_row][char_col];
-                }
-                i++;
-            }
+		bitmapFont->encoding[i++] = bdfEncoding[char_row][char_col];
+	    }
 	}
     }
     for (i = 0; i < 256; i++)
@@ -535,11 +508,13 @@ BAILOUT:
 /***====================================================================***/
 
 static Bool
-bdfReadHeader(FontFilePtr file, bdfFileState *pState)
+bdfReadHeader(file, pState)
+    FontFilePtr file;
+    bdfFileState *pState;
 {
     unsigned char *line;
     char        namebuf[BDFLINELEN];
-    unsigned char        lineBuf[BDFLINELEN];
+    char        lineBuf[BDFLINELEN];
 
     line = bdfGetLine(file, lineBuf, BDFLINELEN);
     if (!line || sscanf((char *) line, "STARTFONT %s", namebuf) != 1 ||
@@ -578,7 +553,10 @@ bdfReadHeader(FontFilePtr file, bdfFileState *pState)
 /***====================================================================***/
 
 static Bool
-bdfReadProperties(FontFilePtr file, FontPtr pFont, bdfFileState *pState)
+bdfReadProperties(file, pFont, pState)
+    FontFilePtr file;
+    FontPtr     pFont;
+    bdfFileState *pState;
 {
     int         nProps, props_left,
                 nextProp;
@@ -588,12 +566,12 @@ bdfReadProperties(FontFilePtr file, FontPtr pFont, bdfFileState *pState)
                 secondbuf[BDFLINELEN],
                 thirdbuf[BDFLINELEN];
     unsigned char *line;
-    unsigned char        lineBuf[BDFLINELEN];
+    char        lineBuf[BDFLINELEN];
     BitmapFontPtr  bitmapFont = (BitmapFontPtr) pFont->fontPrivate;
 
     line = bdfGetLine(file, lineBuf, BDFLINELEN);
     if (!line || !bdfIsPrefix(line, "STARTPROPERTIES")) {
-	bdfError("missing 'STARTPROPERTIES'\n");
+	bdfError(file, "missing 'STARTPROPERTIES'\n");
 	return (FALSE);
     }
     if (sscanf((char *) line, "STARTPROPERTIES %d", &nProps) != 1) {
@@ -602,7 +580,6 @@ bdfReadProperties(FontFilePtr file, FontPtr pFont, bdfFileState *pState)
     }
     pFont->info.isStringProp = NULL;
     pFont->info.props = NULL;
-    pFont->info.nprops = 0;
 
     stringProps = (char *) xalloc((nProps + BDF_GENPROPS) * sizeof(char));
     pFont->info.isStringProp = stringProps;
@@ -618,8 +595,6 @@ bdfReadProperties(FontFilePtr file, FontPtr pFont, bdfFileState *pState)
 						      sizeof(FontPropRec));
 	goto BAILOUT;
     }
-    bzero((char *)props, (nProps + BDF_GENPROPS) * sizeof(FontPropRec));
-
     nextProp = 0;
     props_left = nProps;
     while (props_left-- > 0) {
@@ -645,7 +620,7 @@ bdfReadProperties(FontFilePtr file, FontPtr pFont, bdfFileState *pState)
 	    if (secondbuf[0] == '"') {
 		stringProps[nextProp] = TRUE;
 		props[nextProp].value =
-		    bdfGetPropertyValue((char *)line + strlen(namebuf) + 1);
+		    bdfGetPropertyValue(line + strlen(namebuf) + 1);
 		if (!props[nextProp].value)
 		    goto BAILOUT;
 		break;
@@ -666,7 +641,7 @@ bdfReadProperties(FontFilePtr file, FontPtr pFont, bdfFileState *pState)
 	    if (secondbuf[0] == '"') {
 		stringProps[nextProp] = TRUE;
 		props[nextProp].value =
-		    bdfGetPropertyValue((char *)line + strlen(namebuf) + 1);
+		    bdfGetPropertyValue(line + strlen(namebuf) + 1);
 		if (!props[nextProp].value)
 		    goto BAILOUT;
 		break;
@@ -773,16 +748,14 @@ BAILOUT:
 
 /***====================================================================***/
 
-static void
-bdfUnloadFont(FontPtr pFont)
-{
-    bdfFreeFontBits (pFont);
-    DestroyFontRec(pFont);
-}
-
 int
-bdfReadFont(FontPtr pFont, FontFilePtr file, 
-	    int bit, int byte, int glyph, int scan)
+bdfReadFont(pFont, file, bit, byte, glyph, scan)
+    FontPtr     pFont;
+    FontFilePtr file;
+    int         bit,
+                byte,
+                glyph,
+                scan;
 {
     bdfFileState state;
     xCharInfo  *min,
@@ -798,11 +771,8 @@ bdfReadFont(FontPtr pFont, FontFilePtr file,
 	goto BAILOUT;
 
     bitmapFont = (BitmapFontPtr) xalloc(sizeof(BitmapFontRec));
-    if (!bitmapFont) {
-      bdfError("Couldn't allocate bitmapFontRec (%d)\n", sizeof(BitmapFontRec));
+    if (!bitmapFont)
 	goto BAILOUT;
-    }
-    bzero((char *)bitmapFont, sizeof(BitmapFontRec));
 
     pFont->fontPrivate = (pointer) bitmapFont;
     bitmapFont->metrics = 0;
@@ -810,14 +780,7 @@ bdfReadFont(FontPtr pFont, FontFilePtr file,
     bitmapFont->bitmaps = 0;
     bitmapFont->encoding = 0;
     bitmapFont->pDefault = NULL;
-
     bitmapFont->bitmapExtra = (BitmapExtraPtr) xalloc(sizeof(BitmapExtraRec));
-    if (!bitmapFont->bitmapExtra) {
-      bdfError("Couldn't allocate bitmapExtra (%d)\n", sizeof(BitmapExtraRec));
-        goto BAILOUT;
-    }
-    bzero((char *)bitmapFont->bitmapExtra, sizeof(BitmapExtraRec));
-    
     bitmapFont->bitmapExtra->glyphNames = 0;
     bitmapFont->bitmapExtra->sWidths = 0;
 
@@ -837,8 +800,7 @@ bdfReadFont(FontPtr pFont, FontFilePtr file,
 	    cols = pFont->info.lastCol - pFont->info.firstCol + 1;
 	    r = r - pFont->info.firstRow;
 	    c = c - pFont->info.firstCol;
-	    bitmapFont->pDefault = ACCESSENCODING(bitmapFont->encoding, 
-                                                 r * cols + c);
+	    bitmapFont->pDefault = bitmapFont->encoding[r * cols + c];
 	}
     }
     pFont->bit = bit;
@@ -855,12 +817,8 @@ bdfReadFont(FontPtr pFont, FontFilePtr file,
     FontComputeInfoAccelerators(&pFont->info);
     if (bitmapFont->bitmapExtra)
 	FontComputeInfoAccelerators(&bitmapFont->bitmapExtra->info);
-    if (pFont->info.constantMetrics) {
-      if (!bitmapAddInkMetrics(pFont)) {
-        bdfError("Failed to add bitmap ink metrics\n");
-        goto BAILOUT;
-      }
-    }    
+    if (pFont->info.constantMetrics)
+	bitmapAddInkMetrics(pFont);
     if (bitmapFont->bitmapExtra)
 	bitmapFont->bitmapExtra->info.inkMetrics = pFont->info.inkMetrics;
 
@@ -893,13 +851,37 @@ BAILOUT:
     return AllocError;
 }
 
+bdfFreeFontBits(pFont)
+    FontPtr pFont;
+{
+    BitmapFontPtr  bitmapFont;
+    BitmapExtraPtr bitmapExtra;
+    int         i;
+
+    bitmapFont = (BitmapFontPtr) pFont->fontPrivate;
+    bitmapExtra = (BitmapExtraPtr) bitmapFont->bitmapExtra;
+    xfree(bitmapFont->ink_metrics);
+    xfree(bitmapFont->encoding);
+    for (i = 0; i < bitmapFont->num_chars; i++)
+	xfree(bitmapFont->metrics[i].bits);
+    xfree(bitmapFont->metrics);
+    if (bitmapExtra)
+    {
+	xfree (bitmapExtra->glyphNames);
+	xfree (bitmapExtra->sWidths);
+	xfree (bitmapExtra);
+    }
+    xfree(pFont->info.props);
+    xfree(bitmapFont);
+}
+
 int
-bdfReadFontInfo(FontInfoPtr pFontInfo, FontFilePtr file)
+bdfReadFontInfo(pFontInfo, file)
+    FontInfoPtr pFontInfo;
+    FontFilePtr file;
 {
     FontRec     font;
     int         ret;
-
-    bzero(&font, sizeof (FontRec));
 
     ret = bdfReadFont(&font, file, MSBFirst, LSBFirst, 1, 1);
     if (ret == Successful) {
@@ -912,8 +894,18 @@ bdfReadFontInfo(FontInfoPtr pFontInfo, FontFilePtr file)
     return ret;
 }
 
+void
+bdfUnloadFont(pFont)
+    FontPtr     pFont;
+{
+    bdfFreeFontBits (pFont);
+    xfree (pFont->devPrivates);
+    xfree(pFont);
+}
+
 static Bool
-bdfPadToTerminal(FontPtr pFont)
+bdfPadToTerminal(pFont)
+    FontPtr     pFont;
 {
     BitmapFontPtr  bitmapFont;
     BitmapExtraPtr bitmapExtra;
@@ -924,21 +916,16 @@ bdfPadToTerminal(FontPtr pFont)
                 h;
 
     bitmapFont = (BitmapFontPtr) pFont->fontPrivate;
-
-    bzero(&new, sizeof(CharInfoRec)); 
     new.metrics.ascent = pFont->info.fontAscent;
     new.metrics.descent = pFont->info.fontDescent;
     new.metrics.leftSideBearing = 0;
     new.metrics.rightSideBearing = pFont->info.minbounds.characterWidth;
     new.metrics.characterWidth = new.metrics.rightSideBearing;
     new_size = BYTES_FOR_GLYPH(&new, pFont->glyph);
-
     for (i = 0; i < bitmapFont->num_chars; i++) {
 	new.bits = (char *) xalloc(new_size);
-	if (!new.bits) {
-          bdfError("Couldn't allocate bits (%d)\n", new_size);
+	if (!new.bits)
 	    return FALSE;
-      }
 	FontCharReshape(pFont, &bitmapFont->metrics[i], &new);
         new.metrics.attributes = bitmapFont->metrics[i].metrics.attributes;
 	xfree(bitmapFont->metrics[i].bits);

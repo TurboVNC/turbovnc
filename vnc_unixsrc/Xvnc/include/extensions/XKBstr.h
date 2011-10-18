@@ -1,4 +1,4 @@
-/* $Xorg: XKBstr.h,v 1.3 2000/08/18 04:05:45 coskrey Exp $ */
+/* $TOG: XKBstr.h /main/16 1997/06/10 06:53:12 kaleb $ */
 /************************************************************
 Copyright (c) 1993 by Silicon Graphics Computer Systems, Inc.
 

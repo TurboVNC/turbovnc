@@ -4,17 +4,18 @@
  * mi sprite structures
  */
 
-/* $Xorg: mispritest.h,v 1.4 2001/02/09 02:05:22 xorgcvs Exp $ */
+/* $XConsortium: mispritest.h,v 5.14 94/04/17 20:27:55 dpw Exp $ */
 
 /*
 
-Copyright 1989, 1998  The Open Group
+Copyright (c) 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -22,82 +23,60 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 */
-/* $XFree86: xc/programs/Xserver/mi/mispritest.h,v 1.4 2001/01/17 22:37:07 dawes Exp $ */
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#ifndef _MISPRITEST_H_
-#define _MISPRITEST_H_
 
 # include   "misprite.h"
-#ifdef RENDER
-# include   "picturestr.h"
-#endif
-# include   "damage.h"
 
 /*
  * per screen information
  */
 
 typedef struct {
-    /* screen procedures */
     CloseScreenProcPtr			CloseScreen;
     GetImageProcPtr			GetImage;
     GetSpansProcPtr			GetSpans;
     SourceValidateProcPtr		SourceValidate;
-    
-    /* window procedures */
-    CopyWindowProcPtr			CopyWindow;
-    
-    /* backing store procedures */
-    SaveDoomedAreasProcPtr		SaveDoomedAreas;
-    
-    /* colormap procedures */
+    CreateGCProcPtr			CreateGC;
+    ScreenBlockHandlerProcPtr		BlockHandler;
     InstallColormapProcPtr		InstallColormap;
     StoreColorsProcPtr			StoreColors;
-    
-    /* os layer procedures */
-    ScreenBlockHandlerProcPtr		BlockHandler;
+    PaintWindowBackgroundProcPtr	PaintWindowBackground;
+    PaintWindowBorderProcPtr		PaintWindowBorder;
+    CopyWindowProcPtr			CopyWindow;
+    ClearToBackgroundProcPtr		ClearToBackground;
+    SaveDoomedAreasProcPtr		SaveDoomedAreas;
+    RestoreAreasProcPtr			RestoreAreas;
 
     CursorPtr	    pCursor;
-    int		    x;			/* cursor hotspot */
+    int		    x;
     int		    y;
-    BoxRec	    saved;		/* saved area from the screen */
-    Bool	    isUp;		/* cursor in frame buffer */
-    Bool	    shouldBeUp;		/* cursor should be displayed */
-    WindowPtr	    pCacheWin;		/* window the cursor last seen in */
+    BoxRec	    saved;
+    Bool	    isUp;
+    Bool	    shouldBeUp;
+    WindowPtr	    pCacheWin;
     Bool	    isInCacheWin;
-    Bool	    checkPixels;	/* check colormap collision */
+    Bool	    checkPixels;
     xColorItem	    colors[2];
     ColormapPtr	    pInstalledMap;
     ColormapPtr	    pColormap;
     VisualPtr	    pVisual;
     miSpriteCursorFuncPtr    funcs;
-    DamagePtr	    pDamage;		/* damage tracking structure */
 } miSpriteScreenRec, *miSpriteScreenPtr;
 
 #define SOURCE_COLOR	0
 #define MASK_COLOR	1
 
-#define miSpriteIsUpTRUE(pScreen, pScreenPriv) if (!pScreenPriv->isUp) { \
-    pScreenPriv->isUp = TRUE; \
-    DamageRegister (&(*pScreen->GetScreenPixmap) (pScreen)->drawable, pScreenPriv->pDamage); \
-}
-
-#define miSpriteIsUpFALSE(pScreen, pScreenPriv) if (pScreenPriv->isUp) { \
-    DamageUnregister (&(*pScreen->GetScreenPixmap) (pScreen)->drawable, pScreenPriv->pDamage); \
-    pScreenPriv->isUp = FALSE; \
-}
+typedef struct {
+    GCFuncs		*wrapFuncs;
+    GCOps		*wrapOps;
+} miSpriteGCRec, *miSpriteGCPtr;
 
 /*
  * Overlap BoxPtr and Box elements
@@ -130,5 +109,3 @@ typedef struct {
 
 #define LINE_OVERLAP(pCbox,x1,y1,x2,y2,lw2) \
     BOX_OVERLAP((pCbox), (x1)-(lw2), (y1)-(lw2), (x2)+(lw2), (y2)+(lw2))
-
-#endif /* _MISPRITEST_H_ */

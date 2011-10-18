@@ -1,13 +1,15 @@
-/* $Xorg: fastblt.h,v 1.4 2001/02/09 02:05:17 xorgcvs Exp $ */
+/* $XConsortium: fastblt.h,v 1.7 94/04/17 20:28:07 dpw Exp $ */
 /*
 
-Copyright 1989, 1998  The Open Group
+Copyright (c) 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -15,18 +17,17 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: xc/programs/Xserver/mfb/fastblt.h,v 1.4 2001/01/17 22:37:01 dawes Exp $ */
 
 /*
  * Fast bitblt macros for certain hardware.  If your machine has an addressing
@@ -47,10 +48,6 @@ from The Open Group.
 #define SwitchEven(n) case n: BodyEven(n)
 
 /* to allow mfb and cfb to share code... */
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifndef BitRight
 #define BitRight(a,b) SCRRIGHT(a,b)
 #define BitLeft(a,b) SCRLEFT(a,b)
@@ -82,6 +79,7 @@ from The Open Group.
     }
 #endif
 
+#if PPW == 32
 #define DuffL(counter,label,body) \
     switch (counter & 3) { \
     label: \
@@ -96,3 +94,27 @@ from The Open Group.
 	if ((counter -= 4) >= 0) \
 	    goto label; \
     }
+#else /* PPW == 64 */
+#define DuffL(counter,label,body) \
+    switch (counter & 7) { \
+    label: \
+        body \
+    case 7: \
+	body \
+    case 6: \
+	body \
+    case 5: \
+	body \
+    case 4: \
+	body \
+    case 3: \
+	body \
+    case 2: \
+	body \
+    case 1: \
+	body \
+    case 0: \
+	if ((counter -= 8) >= 0) \
+	    goto label; \
+    }
+#endif /* PPW */

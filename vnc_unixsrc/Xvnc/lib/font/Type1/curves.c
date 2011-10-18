@@ -1,4 +1,4 @@
-/* $Xorg: curves.c,v 1.3 2000/08/17 19:46:29 cpqbld Exp $ */
+/* $XConsortium: curves.c,v 1.4 92/07/07 17:14:55 gildea Exp $ */
 /* Copyright International Business Machines,Corp. 1991              */
 /* All Rights Reserved                                               */
  
@@ -29,8 +29,6 @@
 /* CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT        */
 /* OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS           */
 /* SOFTWARE.                                                         */
-/* $XFree86: xc/lib/font/Type1/curves.c,v 1.7 2001/08/27 19:49:52 dawes Exp $ */
-
 /*
 :h1.CURVES Module - Stepping Beziers
  
@@ -43,12 +41,7 @@ through.
  
 Include files needed:
 */
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#ifdef FONTMODULE
-# include "os.h"
-#endif
+ 
 #include "objects.h"
 #include "spaces.h"
 #include "paths.h"
@@ -95,11 +88,8 @@ struct bezierinfo {
    to subdivide.
 */
  
-static int 
-BezierTerminationTest(fractpel xa, fractpel ya,
-		      fractpel xb, fractpel yb,
-		      fractpel xc, fractpel yc,
-		      fractpel xd, fractpel yd)
+static int BezierTerminationTest(xa,ya,xb,yb,xc,yc,xd,yd)
+fractpel xa,ya,xb,yb,xc,yc,xd,yd;
 {
   fractpel dmax;
   dmax =          ABS(xa - xb);
@@ -122,12 +112,13 @@ Bezier to define his curves as he did.  If the input region 'R' is NULL,
 the result is a path that is the 'flattened' curve; otherwise StepBezier
 returns nothing special.
 */
-static struct segment *
-StepBezierRecurse(struct bezierinfo *I, /* Region under construction or NULL */
-		  fractpel xA, fractpel yA, /* A control point               */
-		  fractpel xB, fractpel yB, /* B control point               */
-		  fractpel xC, fractpel yC, /* C control point               */
-		  fractpel xD, fractpel yD) /* D control point               */
+static struct segment *StepBezierRecurse(I,xA,yA,xB,yB,xC,yC,xD,yD)
+       struct bezierinfo *I; /* Region under construction or NULL            */
+       fractpel xA,yA;       /* A control point                              */
+       fractpel xB,yB;       /* B control point                              */
+       fractpel xC,yC;       /* C control point                              */
+       fractpel xD,yD;       /* D control point                              */
+ 
 {
  if (BezierTerminationTest(xA,yA,xB,yB,xC,yC,xD,yD))
  {
@@ -176,7 +167,6 @@ StepBezierRecurse(struct bezierinfo *I, /* Region under construction or NULL */
    StepBezierRecurse(I, xABCD, yABCD, xBCD, yBCD, xCD, yCD, xD, yD);
   }
  }
- return NULL;
  /*NOTREACHED*/
 }
  
@@ -187,7 +177,6 @@ Intermediate values in the Bezier subdivision are 8 times bigger than
 the starting values.  If this overflows, a 'long', we are in trouble:
 */
  
-#undef   BITS
 #define  BITS         (sizeof(long)*8)
 #define  HIGHTEST(p)  (((p)>>(BITS-4)) != 0)  /* includes sign bit */
 #define  TOOBIG(xy)   ((xy < 0) ? HIGHTEST(-xy) : HIGHTEST(xy))
@@ -198,12 +187,12 @@ the starting values.  If this overflows, a 'long', we are in trouble:
 This is the entry point called from outside the module.
 */
  
-struct segment *
-StepBezier(struct region *R, /* Region under construction or NULL            */
-	   fractpel xA, fractpel yA, /* A control point                      */
-	   fractpel xB, fractpel yB, /* B control point                      */
-	   fractpel xC, fractpel yC, /* C control point                      */
-	   fractpel xD, fractpel yD) /* D control point                      */
+struct segment *StepBezier(R, xA, yA, xB, yB, xC, yC, xD, yD)
+       struct region *R;     /* Region under construction or NULL            */
+       fractpel xA,yA;       /* A control point                              */
+       fractpel xB,yB;       /* B control point                              */
+       fractpel xC,yC;       /* C control point                              */
+       fractpel xD,yD;       /* D control point                              */
 {
        struct bezierinfo Info;
  
@@ -220,7 +209,7 @@ StepBezier(struct region *R, /* Region under construction or NULL            */
  
        if ( TOOBIG(xB) || TOOBIG(yB) || TOOBIG(xC) || TOOBIG(yC)
             || TOOBIG(xD) || TOOBIG(yD) )
-               Abort("Beziers this big not yet supported");
+               abort("Beziers this big not yet supported");
  
        return(StepBezierRecurse(&Info,
                                 (fractpel) 0, (fractpel) 0, xB, yB, xC, yC, xD, yD));

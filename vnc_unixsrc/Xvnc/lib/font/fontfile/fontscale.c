@@ -1,14 +1,16 @@
-/* $Xorg: fontscale.c,v 1.5 2001/02/09 02:04:03 xorgcvs Exp $ */
+/* $XConsortium: fontscale.c /main/15 1996/09/28 16:49:13 rws $ */
+/* $XFree86: xc/lib/font/fontfile/fontscale.c,v 3.4 1996/12/24 02:23:08 dawes Exp $ */
 
 /*
 
-Copyright 1991, 1998  The Open Group
+Copyright (c) 1991  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,25 +18,21 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 */
-/* $XFree86: xc/lib/font/fontfile/fontscale.c,v 3.9 2001/08/27 19:49:54 dawes Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#include    <X11/fonts/fntfilst.h>
+#include    "fntfilst.h"
 #ifdef _XOPEN_SOURCE
 #include <math.h>
 #else
@@ -44,8 +42,11 @@ in this Software without prior written authorization from The Open Group.
 #endif
 
 Bool
-FontFileAddScaledInstance (FontEntryPtr entry, FontScalablePtr vals, 
-			   FontPtr pFont, char *bitmapName)
+FontFileAddScaledInstance (entry, vals, pFont, bitmapName)
+    FontEntryPtr		entry;
+    FontScalablePtr		vals;
+    FontPtr			pFont;
+    char			*bitmapName;
 {
     FontScalableEntryPtr    scalable;
     FontScalableExtraPtr    extra;
@@ -75,8 +76,8 @@ FontFileAddScaledInstance (FontEntryPtr entry, FontScalablePtr vals,
 
 /* Must call this after the directory is sorted */
 
-void
-FontFileSwitchStringsToBitmapPointers (FontDirectoryPtr dir)
+FontFileSwitchStringsToBitmapPointers (dir)
+    FontDirectoryPtr	dir;
 {
     int	    s;
     int	    b;
@@ -100,7 +101,9 @@ FontFileSwitchStringsToBitmapPointers (FontDirectoryPtr dir)
 }
 
 void
-FontFileRemoveScaledInstance (FontEntryPtr entry, FontPtr pFont)
+FontFileRemoveScaledInstance (entry, pFont)
+    FontEntryPtr	entry;
+    FontPtr		pFont;
 {
     FontScalableEntryPtr    scalable;
     FontScalableExtraPtr    extra;
@@ -122,8 +125,11 @@ FontFileRemoveScaledInstance (FontEntryPtr entry, FontPtr pFont)
 }
 
 Bool
-FontFileCompleteXLFD (FontScalablePtr vals, FontScalablePtr def)
+FontFileCompleteXLFD (vals, def)
+    register FontScalablePtr	vals;
+    FontScalablePtr	def;
 {
+    int		best;
     FontResolutionPtr res;
     int		num_res;
     double	sx, sy, temp_matrix[4];
@@ -243,7 +249,7 @@ FontFileCompleteXLFD (FontScalablePtr vals, FontScalablePtr def)
 
 	pixel_setsize_adjustment = (double)vals->x / (double)vals->y;
 	vals->pixel_matrix[0] *= pixel_setsize_adjustment;
-	vals->values_supplied  = (vals->values_supplied & ~PIXELSIZE_MASK) |
+	vals->values_supplied  = vals->values_supplied & ~PIXELSIZE_MASK |
 				 PIXELSIZE_SCALAR_NORMALIZED;
     }
 
@@ -345,7 +351,8 @@ FontFileCompleteXLFD (FontScalablePtr vals, FontScalablePtr def)
 }
 
 static Bool
-MatchScalable (FontScalablePtr a, FontScalablePtr b)
+MatchScalable (a, b)
+    FontScalablePtr	a, b;
 {
     int i;
 
@@ -365,15 +372,15 @@ MatchScalable (FontScalablePtr a, FontScalablePtr b)
 
     if (!(a->x == b->x &&
 	  a->y == b->y &&
-	  (a->width == b->width || a->width == 0 || b->width == 0 || b->width == -1) &&
+	  (a->width == b->width || a->width == 0 || b->width == 0) &&
 	  (!(b->values_supplied & PIXELSIZE_MASK) ||
-	    ((a->values_supplied & PIXELSIZE_MASK) ==
-	     (b->values_supplied & PIXELSIZE_MASK) &&
-	    EQUAL(a->pixel_matrix, b->pixel_matrix))) &&
+	    (a->values_supplied & PIXELSIZE_MASK) ==
+	    (b->values_supplied & PIXELSIZE_MASK) &&
+	    EQUAL(a->pixel_matrix, b->pixel_matrix)) &&
 	  (!(b->values_supplied & POINTSIZE_MASK) ||
-	    ((a->values_supplied & POINTSIZE_MASK) ==
-	     (b->values_supplied & POINTSIZE_MASK) &&
-	    EQUAL(a->point_matrix, b->point_matrix))) &&
+	    (a->values_supplied & POINTSIZE_MASK) ==
+	    (b->values_supplied & POINTSIZE_MASK) &&
+	    EQUAL(a->point_matrix, b->point_matrix)) &&
 	  (a->nranges == 0 || a->nranges == b->nranges)))
       return FALSE;
 
@@ -388,8 +395,9 @@ MatchScalable (FontScalablePtr a, FontScalablePtr b)
 }
 
 FontScaledPtr
-FontFileFindScaledInstance (FontEntryPtr entry, FontScalablePtr vals, 
-			    int noSpecificSize)
+FontFileFindScaledInstance (entry, vals, noSpecificSize)
+    FontEntryPtr	entry;
+    FontScalablePtr	vals;
 {
     FontScalableEntryPtr    scalable;
     FontScalableExtraPtr    extra;

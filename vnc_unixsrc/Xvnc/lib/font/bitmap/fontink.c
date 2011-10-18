@@ -1,14 +1,16 @@
-/* $Xorg: fontink.c,v 1.4 2001/02/09 02:04:02 xorgcvs Exp $ */
+/* $XConsortium: fontink.c,v 1.4 94/04/17 20:17:14 gildea Exp $ */
 
 /*
 
-Copyright 1990, 1998  The Open Group
+Copyright (c) 1990  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -16,30 +18,23 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: xc/lib/font/bitmap/fontink.c,v 1.6 2001/01/17 19:43:27 dawes Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <X11/fonts/fntfilst.h>
-#include <X11/fonts/bitmap.h>
-#include <X11/fonts/bdfint.h>
+#include "fntfilst.h"
 
 static unsigned char ink_mask_msb[8] = {
     0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01,
@@ -49,21 +44,23 @@ static unsigned char ink_mask_lsb[8] = {
     0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
 };
 
-void
-FontCharInkMetrics(FontPtr pFont, CharInfoPtr pCI, xCharInfo *pInk)
+FontCharInkMetrics(pFont, pCI, pInk)
+    FontPtr     pFont;
+    CharInfoPtr pCI;
+    xCharInfo  *pInk;
 {
     int         leftBearing,
                 ascent,
                 descent;
     register int vpos,
                 hpos,
-                bpos = 0;
+                bpos;
     int         bitmapByteWidth,
                 bitmapByteWidthPadded;
     int         bitmapBitWidth;
     int         span;
     register unsigned char *p;
-    unsigned char *ink_mask = 0;
+    unsigned char *ink_mask;
     register int bmax;
     register unsigned char charbits;
 
@@ -160,8 +157,10 @@ found_right:
 #define Min(a,b)    ((a)<(b)?(a):(b))
 #define Max(a,b)    ((a)>(b)?(a):(b))
 
-void
-FontCharReshape(FontPtr pFont, CharInfoPtr pSrc, CharInfoPtr pDst)
+FontCharReshape(pFont, pSrc, pDst)
+    FontPtr     pFont;
+    CharInfoPtr pSrc,
+                pDst;
 {
     int         x,
                 y;
@@ -216,4 +215,5 @@ FontCharReshape(FontPtr pFont, CharInfoPtr pSrc, CharInfoPtr pDst)
 	    out_line += out_bytes;
 	}
     }
+    return;
 }

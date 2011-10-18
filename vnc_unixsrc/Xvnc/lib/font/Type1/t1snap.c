@@ -1,4 +1,4 @@
-/* $Xorg: t1snap.c,v 1.3 2000/08/17 19:46:34 cpqbld Exp $ */
+/* $XConsortium: t1snap.c,v 1.3 91/10/10 11:19:47 rws Exp $ */
 /* Copyright International Business Machines,Corp. 1991
  * All Rights Reserved
  *
@@ -27,16 +27,10 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
  * SOFTWARE.
  */
-/* $XFree86: xc/lib/font/Type1/t1snap.c,v 1.3 1999/08/22 08:58:54 dawes Exp $ */
-
  
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 #include "objects.h"
 #include "spaces.h"
 #include "paths.h"
-#include "pictures.h"
  
 /*
 :h2.Handle Functions
@@ -46,15 +40,15 @@
 This is a user operator.  Its new name is QueryHandle.
 */
  
-struct segment *
-t1_Phantom(struct segment *p) /* object to take the Phantom of             */
+struct segment *t1_Phantom(obj)
+       register struct xobject *obj;  /* object to take the Phantom of       */
 {
        struct fractpoint pt; /* handle size will built here                  */
  
-       if (p == NULL)
+       if (obj == NULL)
                pt.x = pt.y = 0;
        else
-               PathDelta(p, &pt);
+               PathDelta(obj, &pt);
  
        return(PathSegment(MOVETYPE, pt.x, pt.y));
 }
@@ -65,8 +59,8 @@ t1_Phantom(struct segment *p) /* object to take the Phantom of             */
 This is a user operator.
 */
  
-struct segment *
-t1_Snap(struct segment *p)   /* path to snap                                 */
+struct xobject *t1_Snap(p)
+       register struct segment *p;  /* path to snap                          */
 {
        struct fractpoint pt; /* for finding length of path                   */
  
@@ -81,5 +75,5 @@ t1_Snap(struct segment *p)   /* path to snap                                 */
        }
        else
                p = JoinSegment(p, MOVETYPE, -pt.x, -pt.y, NULL);
-       return(p);
+       return((struct xobject *)p);
 }

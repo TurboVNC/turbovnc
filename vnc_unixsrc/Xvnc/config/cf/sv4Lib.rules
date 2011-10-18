@@ -1,19 +1,15 @@
-XCOMM $Xorg: sv4Lib.rules,v 1.3 2000/08/17 19:41:48 cpqbld Exp $
+XCOMM $XConsortium: sv4Lib.rules /main/18 1996/09/28 16:13:29 rws $
+XCOMM $XFree86: xc/config/cf/sv4Lib.rules,v 3.4 1996/12/23 05:50:34 dawes Exp $
 
 /*
  * SVR4 shared library rules
  */
-
-XCOMM $XFree86: xc/config/cf/sv4Lib.rules,v 3.8tsi Exp $
 
 #ifndef HasSharedLibraries
 # define HasSharedLibraries YES
 #endif
 #ifndef SharedDataSeparation
 # define SharedDataSeparation NO
-#endif
-#ifndef HasGcc2ForCplusplus
-# define HasGcc2ForCplusplus HasGcc2
 #endif
 #ifndef SharedCodeDef
 # define SharedCodeDef /**/
@@ -24,40 +20,25 @@ XCOMM $XFree86: xc/config/cf/sv4Lib.rules,v 3.8tsi Exp $
 #ifndef ShLibIncludeFile
 # define ShLibIncludeFile <sv4Lib.tmpl>
 #endif
-#ifndef SharedLibraryLdCmd
-# define SharedLibraryLdCmd $(LD)
-#endif
 #ifndef SharedLibraryLoadFlags
 # define SharedLibraryLoadFlags -G -z text
 #endif
-#ifndef RpathLoadFlags
-#define RpathLoadFlags /**/
-#endif
-#ifndef LibraryRpathLoadFlags
-#define LibraryRpathLoadFlags RpathLoadFlags
-#endif
-#ifndef HardCodeLibdirFlag
-#define HardCodeLibdirFlag RpathLoadFlags
-#endif
 #ifndef PositionIndependentCFlags
 # if HasGcc2
-#  define PositionIndependentCFlags -fPIC
+#  define PositionIndependentCFlags -fpic
 # else
 #  define PositionIndependentCFlags -K PIC
 # endif
 #endif
 #ifndef PositionIndependentCplusplusFlags
 # if HasGcc2ForCplusplus
-#  define PositionIndependentCplusplusFlags -fPIC
+#  define PositionIndependentCplusplusFlags -fpic
 # else
 #  define PositionIndependentCplusplusFlags -K PIC
 # endif
 #endif
 #ifndef UseExportLists
 # define UseExportLists NO
-#endif
-#ifndef StripInstalledPrograms
-# define StripInstalledPrograms NO
 #endif
 
 /*
@@ -70,19 +51,15 @@ install:: Concat(lib,libname.so.rev) 					@@\
 	MakeDir($(DESTDIR)dest)						@@\
 	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS) Concat(lib,libname.so.rev) $(DESTDIR)dest @@\
 	mcs -d Concat($(DESTDIR)dest/lib,libname.so.rev)		@@\
-	@if $(SOSYMLINK); then (set -x; \				@@\
-	  $(RM) Concat($(DESTDIR)dest/lib,libname.so); \		@@\
-	  cd $(DESTDIR)dest; \						@@\
-	  $(LN) Concat(lib,libname.so.rev) Concat(lib,libname.so)); fi
+	$(RM) Concat($(DESTDIR)dest/lib,libname.so)			@@\
+	cd $(DESTDIR)dest; $(LN) Concat(lib,libname.so.rev) Concat(lib,libname.so)
 #else
 # define InstallSharedLibrary(libname,rev,dest)				@@\
 install:: Concat(lib,libname.so.rev) 					@@\
 	MakeDir($(DESTDIR)dest)						@@\
 	$(INSTALL) $(INSTALLFLAGS) $(INSTLIBFLAGS) Concat(lib,libname.so.rev) $(DESTDIR)dest @@\
-	@if $(SOSYMLINK); then (set -x; \				@@\
-	  $(RM) Concat($(DESTDIR)dest/lib,libname.so); \		@@\
-	  cd $(DESTDIR)dest; \						@@\
-	  $(LN) Concat(lib,libname.so.rev) Concat(lib,libname.so)); fi
+	$(RM) Concat($(DESTDIR)dest/lib,libname.so)			@@\
+	cd $(DESTDIR)dest; $(LN) Concat(lib,libname.so.rev) Concat(lib,libname.so)
 #endif
 
 #endif /* InstallSharedLibrary */
@@ -97,17 +74,17 @@ install:: Concat(lib,libname.so.rev) 					@@\
 #ifndef LinkWithExports
 # if UseExportLists
 #  define LinkWithExports(libname,rev,solist,down,up) \
-	(cd down; $(CCENVSETUP) SharedLibraryLdCmd -o up/$@~ $(SHLIBLDFLAGS) -h $@ solist $(REQUIREDLIBS))	@@\
+	(cd down; $(CCENVSETUP) $(LD) -o up/$@~ $(SHLIBLDFLAGS) -h $@ solist $(REQUIREDLIBS))	@@\
 	if [ -f Concat(lib,libname.elist) ]; then \			@@\
 	    $(RM) down/$@.exports $@.list; \				@@\
 	    $(CPP) $(ALLINCLUDES) $(EXTRA_DEFINES) $(PROTO_DEFINES) $(THREADS_DEFINES) $(DEFINES) Concat(lib,libname.elist) | CppSedMagic >$@.list; \	@@\
 	    $(EXPORTLISTGEN) $@~ $@.list > down/$@.exports; \		@@\
-	    (cd down; $(CCENVSETUP) SharedLibraryLdCmd -o up/$@~ $(SHLIBLDFLAGS) -h $@ ShlibExportListOpt($@.exports) solist $(REQUIREDLIBS)); \	@@\
+	    (cd down; $(CCENVSETUP) $(LD) -o up/$@~ $(SHLIBLDFLAGS) -h $@ ShlibExportListOpt($@.exports) solist $(REQUIREDLIBS)); \	@@\
 	    $(RM) down/$@.exports $@.list; \				@@\
 	fi;
 # else
 #  define LinkWithExports(libname,rev,solist,down,up) \
-	(cd down; $(CCENVSETUP) SharedLibraryLdCmd -o up/$@~ $(SHLIBLDFLAGS) -h $@ solist $(REQUIREDLIBS))
+	(cd down; $(CCENVSETUP) $(LD) -o up/$@~ $(SHLIBLDFLAGS) -h $@ solist $(REQUIREDLIBS))
 # endif
 #endif
 
@@ -125,61 +102,15 @@ Concat(lib,libname.so.rev):  solist $(EXTRALIBRARYDEPS)			@@\
 	LinkWithExports(libname,rev,solist,down,up)			@@\
 	$(RM) $@ 							@@\
 	$(MV) $@~ $@							@@\
-	@if $(SOSYMLINK); then (set -x; \				@@\
-	  $(RM) Concat(lib,libname.so); \				@@\
-	  $(LN) $@ Concat(lib,libname.so)); fi				@@\
+	$(RM) Concat(lib,libname.so)					@@\
+	$(LN) $@ Concat(lib,libname.so)					@@\
 	LinkBuildLibrary($@)						@@\
-	LinkBuildLibraryMaybe(Concat(lib,libname.so),$(SOSYMLINK))	@@\
+	LinkBuildLibrary(Concat(lib,libname.so))			@@\
 									@@\
 clean::									@@\
 	$(RM) Concat(lib,libname.so.rev) Concat(lib,libname.so)
 
 #endif /* SharedLibraryTarget */
-
-/*
- * SharedDepLibraryTarget - generate rules to create a shared library.
- */
-#ifndef SharedDepLibraryTarget
-# define SharedDepLibraryTarget(libname,rev,deplist,solist,down,up)	@@\
-AllTarget(Concat(lib,libname.so.rev))					@@\
-									@@\
-Concat(lib,libname.so.rev):  deplist $(EXTRALIBRARYDEPS)		@@\
-	$(RM) $@~							@@\
-	LinkWithExports(libname,rev,solist,down,up)			@@\
-	$(RM) $@ 							@@\
-	$(MV) $@~ $@							@@\
-	@if $(SOSYMLINK); then (set -x; \				@@\
-	  $(RM) Concat(lib,libname.so); \				@@\
-	  $(LN) $@ Concat(lib,libname.so)); fi				@@\
-	LinkBuildLibrary($@)						@@\
-	LinkBuildLibraryMaybe(Concat(lib,libname.so),$(SOSYMLINK))	@@\
-									@@\
-clean::									@@\
-	$(RM) Concat(lib,libname.so.rev) Concat(lib,libname.so)
-
-#endif /* SharedDepLibraryTarget */
-
-/*
- * SharedDepCplusplusLibraryTarget - generate rules to create a shared library.
- */
-#ifndef SharedDepCplusplusLibraryTarget
-#define SharedDepCplusplusLibraryTarget(libname,rev,deplist,solist,down,up) @@\
-AllTarget(Concat(lib,libname.so.rev))					@@\
-									@@\
-Concat(lib,libname.so.rev):  deplist $(EXTRALIBRARYDEPS)		@@\
-	$(RM) $@~							@@\
-	(cd down; $(CXX) -o up/$@~ $(SHLIBLDFLAGS) solist $(REQUIREDLIBS)) @@\
-	$(RM) $@ 							@@\
-	$(MV) $@~ $@							@@\
-	@if $(SOSYMLINK); then (set -x; \				@@\
-	  $(RM) Concat(lib,libname.so); \				@@\
-	  $(LN) $@ Concat(lib,libname.so)); fi				@@\
-	LinkBuildLibrary($@)						@@\
-	LinkBuildLibraryMaybe(Concat(lib,libname.so),$(SOSYMLINK))	@@\
-									@@\
-clean::									@@\
-	$(RM) Concat(lib,libname.so.rev)				
-#endif /* SharedDepCplusplusLibraryTarget */
 
 
 #ifndef SharedDepModuleTarget
@@ -188,7 +119,7 @@ AllTarget(name)								@@\
 									@@\
 name: deps								@@\
 	$(RM) $@~							@@\
-	SharedLibraryLdCmd -o $@~ $(SHLIBLDFLAGS) solist $(REQUIREDLIBS) @@\
+	$(LD) -o $@~ $(SHLIBLDFLAGS) solist $(REQUIREDLIBS)		@@\
 	$(RM) $@							@@\
 	$(MV) $@~ $@							@@\
 									@@\

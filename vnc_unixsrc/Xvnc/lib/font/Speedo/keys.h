@@ -1,4 +1,4 @@
-/* $Xorg: keys.h,v 1.3 2000/08/17 19:46:25 cpqbld Exp $ */
+/* $XConsortium: keys.h,v 1.3 93/10/28 15:27:11 gildea Exp $ */
 
 /*
 

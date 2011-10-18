@@ -1,14 +1,13 @@
-/* $XdotOrg: xc/programs/Xserver/dix/globals.c,v 1.7 2005/07/03 08:53:38 daniels Exp $ */
-/* $XFree86: xc/programs/Xserver/dix/globals.c,v 1.12tsi Exp $ */
 /************************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -47,14 +46,16 @@ SOFTWARE.
 
 ********************************************************/
 
-/* $Xorg: globals.c,v 1.4 2001/02/09 02:04:40 xorgcvs Exp $ */
+/* $XConsortium: globals.c,v 1.53 94/04/17 20:26:37 rws Exp $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
 
-#include <X11/X.h>
-#include <X11/Xmd.h>
+
+
+
+/* $XFree86: xc/programs/Xserver/dix/globals.c,v 1.2.2.1 1997/06/01 12:33:21 dawes Exp $ */
+
+#include "X.h"
+#include "Xmd.h"
 #include "misc.h"
 #include "windowstr.h"
 #include "scrnintstr.h"
@@ -84,7 +85,6 @@ PtrCtrl defaultPointerControl = {
 ClientPtr *clients;
 ClientPtr  serverClient;
 int  currentMaxClients;   /* current size of clients array */
-long maxBigRequestSize = MAX_BIG_REQUEST_SIZE;
 
 WindowPtr *WindowTable;
 
@@ -98,23 +98,14 @@ int  ScreenSaverBlanking;
 int  ScreenSaverAllowExposures;
 
 #ifdef DPMSExtension
-# ifndef DEFAULT_STANDBY_TIME
-#  define DEFAULT_STANDBY_TIME DEFAULT_SCREEN_SAVER_TIME * 2
-# endif
-# ifndef DEFAULT_SUSPEND_TIME
-#  define DEFAULT_SUSPEND_TIME DEFAULT_SCREEN_SAVER_TIME * 3
-# endif
-# ifndef DEFAULT_OFF_TIME
-#  define DEFAULT_OFF_TIME DEFAULT_SCREEN_SAVER_TIME * 4
-# endif
-# ifndef DEFAULT_DPMS_ENABLED
-#  define DEFAULT_DPMS_ENABLED FALSE
-# endif
+#define DEFAULT_STANDBY_TIME DEFAULT_SCREEN_SAVER_TIME * 2
+#define DEFAULT_SUSPEND_TIME DEFAULT_SCREEN_SAVER_TIME * 3
+#define DEFAULT_OFF_TIME DEFAULT_SCREEN_SAVER_TIME * 4
 CARD32 defaultDPMSStandbyTime = DEFAULT_STANDBY_TIME;
 CARD32 defaultDPMSSuspendTime = DEFAULT_SUSPEND_TIME;
 CARD32 defaultDPMSOffTime = DEFAULT_OFF_TIME;
 CARD16 DPMSPowerLevel = 0;
-Bool defaultDPMSEnabled = DEFAULT_DPMS_ENABLED;
+Bool defaultDPMSEnabled = FALSE;
 Bool DPMSEnabledSwitch = FALSE;	  /* these denote the DPMS command line */
 Bool DPMSDisabledSwitch = FALSE;  /*                      switch states */
 Bool DPMSCapableFlag = FALSE;
@@ -139,9 +130,7 @@ char *rgbPath = RGB_DB;
 char *defaultDisplayClass = COMPILEDDISPLAYCLASS;
 FontPtr defaultFont;   /* not declared in dix.h to avoid including font.h in
 			every compilation of dix code */
-Bool loadableFonts = FALSE;
 CursorPtr rootCursor;
-Bool blackRoot=FALSE;
 ClientPtr requestingClient;	/* XXX this should be obsolete now, remove? */
 
 TimeStamp currentTime;
@@ -159,5 +148,3 @@ char *display;
 CARD32 TimeOutValue = DEFAULT_TIMEOUT * MILLI_PER_SECOND;
 int	argcGlobal;
 char	**argvGlobal;
-
-DDXPointRec dixScreenOrigins[MAXSCREENS];

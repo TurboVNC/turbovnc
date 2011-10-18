@@ -1,13 +1,15 @@
-/* $Xorg: Xlocale.h,v 1.4 2001/02/09 02:03:38 xorgcvs Exp $ */
+/* $XConsortium: Xlocale.h,v 1.10 94/04/17 20:21:51 rws Exp $ */
 /*
 
-Copyright 1991, 1998  The Open Group
+Copyright (c) 1991  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -15,24 +17,29 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: xc/lib/X11/Xlocale.h,v 1.4 2001/12/14 19:54:09 dawes Exp $ */
 
 #ifndef _XLOCALE_H_
 #define _XLOCALE_H_
 
 #include <X11/Xfuncproto.h>
 #include <X11/Xosdefs.h>
+
+#ifndef X_LOCALE
+#ifdef X_NOT_STDC_ENV
+#define X_LOCALE
+#endif
+#endif
 
 #ifndef X_LOCALE
 #include <locale.h>
@@ -47,14 +54,18 @@ from The Open Group.
 
 _XFUNCPROTOBEGIN
 extern char *_Xsetlocale(
+#if NeedFunctionPrototypes
     int /* category */,
     _Xconst char* /* name */
+#endif
 );
 _XFUNCPROTOEND
 
 #define setlocale _Xsetlocale
 
-#include <stddef.h>
+#ifndef NULL
+#define NULL 0
+#endif
 
 #endif /* X_LOCALE */
 

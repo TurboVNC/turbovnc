@@ -540,7 +540,7 @@ rfbSpriteStoreColors (pMap, ndef, pdef)
 	{
 	    /* Direct color - match on any of the subfields */
 
-#define MaskMatch(a,b,mask) (((a) & (pVisual->mask)) == ((b) & (pVisual->mask)))
+#define MaskMatch(a,b,mask) ((a) & (pVisual->mask) == (b) & (pVisual->mask))
 
 #define UpdateDAC(plane,dac,mask) {\
     if (MaskMatch (pPriv->colors[plane].pixel,pdef[i].pixel,mask)) {\
@@ -1612,7 +1612,7 @@ rfbSpriteText (pDraw, pGC, x, y, count, chars, fontEncoding, textType, cursorBox
     unsigned long i;
     unsigned int  n;
     int		  w;
-    void   	  (*drawFunc)() = NULL;
+    void   	  (*drawFunc)();
 
     Bool imageblt;
 

@@ -31,34 +31,56 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef EXEVENTS_H
 #define EXEVENTS_H
 
-extern void RegisterOtherDevice (
-	DeviceIntPtr           /* device */);
+void
+RegisterOtherDevice (
+#if NeedFunctionPrototypes
+	DeviceIntPtr           /* device */
+#endif
+	);
 
-extern void ProcessOtherEvent (
+void
+ProcessOtherEvent (
+#if NeedFunctionPrototypes
 	xEventPtr /* FIXME deviceKeyButtonPointer * xE */,
 	DeviceIntPtr           /* other */,
-	int                    /* count */);
+	int                    /* count */
+#endif
+	);
 
-extern int InitProximityClassDeviceStruct(
-	DeviceIntPtr           /* dev */);
+int
+InitProximityClassDeviceStruct(
+#if NeedFunctionPrototypes
+	DeviceIntPtr           /* dev */
+#endif
+	);
 
-extern void InitValuatorAxisStruct(
+void
+InitValuatorAxisStruct(
+#if NeedFunctionPrototypes
 	DeviceIntPtr           /* dev */,
 	int                    /* axnum */,
 	int                    /* minval */,
 	int                    /* maxval */,
 	int                    /* resolution */,
 	int                    /* min_res */,
-	int                    /* max_res */);
+	int                    /* max_res */
+#endif
+	);
 
-extern void DeviceFocusEvent(
+void
+DeviceFocusEvent(
+#if NeedFunctionPrototypes
 	DeviceIntPtr           /* dev */,
 	int                    /* type */,
 	int                    /* mode */,
 	int                    /* detail */,
-	WindowPtr              /* pWin */);
+	WindowPtr              /* pWin */
+#endif
+	);
 
-extern int GrabButton(
+int
+GrabButton(
+#if NeedFunctionPrototypes
 	ClientPtr              /* client */,
 	DeviceIntPtr           /* dev */,
 	BYTE                   /* this_device_mode */,
@@ -70,9 +92,13 @@ extern int GrabButton(
 	BOOL                   /* ownerEvents */,
 	Cursor                 /* rcursor */,
 	Window                 /* rconfineTo */,
-	Mask                   /* eventMask */);
+	Mask                   /* eventMask */
+#endif
+	);
 
-extern int GrabKey(
+int
+GrabKey(
+#if NeedFunctionPrototypes
 	ClientPtr              /* client */,
 	DeviceIntPtr           /* dev */,
 	BYTE                   /* this_device_mode */,
@@ -82,60 +108,96 @@ extern int GrabKey(
 	CARD8                  /* key */,
 	Window                 /* grabWindow */,
 	BOOL                   /* ownerEvents */,
-	Mask                   /* mask */);
+	Mask                   /* mask */
+#endif
+	);
 
-extern int SelectForWindow(
+int
+SelectForWindow(
+#if NeedFunctionPrototypes
 	DeviceIntPtr           /* dev */,
 	WindowPtr              /* pWin */,
 	ClientPtr              /* client */,
 	Mask                   /* mask */,
 	Mask                   /* exclusivemasks */,
-	Mask                   /* validmasks */);
+	Mask                   /* validmasks */
+#endif
+	);
 
-extern int AddExtensionClient (
+int 
+AddExtensionClient (
+#if NeedFunctionPrototypes
 	WindowPtr              /* pWin */,
 	ClientPtr              /* client */,
 	Mask                   /* mask */,
-	int                    /* mskidx */);
+	int                    /* mskidx */
+#endif
+	);
 
-extern void RecalculateDeviceDeliverableEvents(
-	WindowPtr              /* pWin */);
+void
+RecalculateDeviceDeliverableEvents(
+#if NeedFunctionPrototypes
+	WindowPtr              /* pWin */
+#endif
+	);
 
-extern int InputClientGone(
+int
+InputClientGone(
+#if NeedFunctionPrototypes
 	WindowPtr              /* pWin */,
-	XID                    /* id */);
+	XID                    /* id */
+#endif
+	);
 
-extern int SendEvent (
+int
+SendEvent (
+#if NeedFunctionPrototypes
 	ClientPtr              /* client */,
 	DeviceIntPtr           /* d */,
 	Window                 /* dest */,
 	Bool                   /* propagate */,
 	xEvent *               /* ev */,
 	Mask                   /* mask */,
-	int                    /* count */);
+	int                    /* count */
+#endif
+	);
 
-extern int SetButtonMapping (
+int
+SetButtonMapping (
+#if NeedFunctionPrototypes
 	ClientPtr              /* client */,
 	DeviceIntPtr           /* dev */,
 	int                    /* nElts */,
-	BYTE *                 /* map */);
+	BYTE *                 /* map */
+#endif
+	);
 
-extern int SetModifierMapping(
+int 
+SetModifierMapping(
+#if NeedFunctionPrototypes
 	ClientPtr              /* client */,
 	DeviceIntPtr           /* dev */,
 	int                    /* len */,
 	int                    /* rlen */,
 	int                    /* numKeyPerModifier */,
 	KeyCode *              /* inputMap */,
-	KeyClassPtr *          /* k */);
+	KeyClassPtr *          /* k */
+#endif
+	);
 
-extern void SendDeviceMappingNotify(
+void
+SendDeviceMappingNotify(
+#if NeedFunctionPrototypes
 	CARD8                  /* request, */,
 	KeyCode                /* firstKeyCode */,
 	CARD8                  /* count */,
-	DeviceIntPtr           /* dev */);
+	DeviceIntPtr           /* dev */
+#endif
+);
 
-extern int ChangeKeyMapping(
+int
+ChangeKeyMapping(
+#if NeedFunctionPrototypes
 	ClientPtr              /* client */,
 	DeviceIntPtr           /* dev */,
 	unsigned               /* len */,
@@ -143,41 +205,71 @@ extern int ChangeKeyMapping(
 	KeyCode                /* firstKeyCode */,
 	CARD8                  /* keyCodes */,
 	CARD8                  /* keySymsPerKeyCode */,
-	KeySym *               /* map */);
+	KeySym *               /* map */
+#endif
+	);
 
-extern void DeleteWindowFromAnyExtEvents(
+void
+DeleteWindowFromAnyExtEvents(
+#if NeedFunctionPrototypes
 	WindowPtr              /* pWin */,
-	Bool                   /* freeResources */);
+	Bool                   /* freeResources */
+#endif
+);
 
-extern void DeleteDeviceFromAnyExtEvents(
+void
+DeleteDeviceFromAnyExtEvents(
+#if NeedFunctionPrototypes
 	WindowPtr              /* pWin */,
-	DeviceIntPtr           /* dev */);
+	DeviceIntPtr           /* dev */
+#endif
+	);
 
-extern int MaybeSendDeviceMotionNotifyHint (
+int
+MaybeSendDeviceMotionNotifyHint (
+#if NeedFunctionPrototypes
 	deviceKeyButtonPointer * /* pEvents */,
-	Mask                   /* mask */);
+	Mask                   /* mask */
+#endif
+);
 
-extern void CheckDeviceGrabAndHintWindow (
+void
+CheckDeviceGrabAndHintWindow (
+#if NeedFunctionPrototypes
 	WindowPtr              /* pWin */,
 	int                    /* type */,
 	deviceKeyButtonPointer * /* xE */,
 	GrabPtr                /* grab */,
 	ClientPtr              /* client */,
-	Mask                   /* deliveryMask */);
+	Mask                   /* deliveryMask */
+#endif
+	);
 
-extern Mask DeviceEventMaskForClient(
+Mask
+DeviceEventMaskForClient(
+#if NeedFunctionPrototypes
 	DeviceIntPtr           /* dev */,
 	WindowPtr              /* pWin */,
-	ClientPtr              /* client */);
+	ClientPtr              /* client */
+#endif
+);
 
-extern void MaybeStopDeviceHint(
+void
+MaybeStopDeviceHint(
+#if NeedFunctionPrototypes
 	DeviceIntPtr           /* dev */,
-	ClientPtr              /* client */);
+	ClientPtr              /* client */
+#endif
+	);
 
-extern int DeviceEventSuppressForWindow(
+int
+DeviceEventSuppressForWindow(
+#if NeedFunctionPrototypes
 	WindowPtr              /* pWin */,
 	ClientPtr              /* client */,
 	Mask                   /* mask */,
-	int                    /* maskndx */);
+	int                    /* maskndx */
+#endif
+	);
 
 #endif /* EXEVENTS_H */

@@ -1,5 +1,0 @@
-NAME Xorg NOTWINDOWCOMPAT
-DESCRIPTION "@#XORG:4.4.0#@ $XdotOrg: xc/programs/Xserver/Xorg.def,v 1.2 2004/04/23 18:44:35 eich Exp $"
-PROTMODE
-EXETYPE OS2
-

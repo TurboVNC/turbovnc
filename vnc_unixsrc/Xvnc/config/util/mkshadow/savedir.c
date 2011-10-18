@@ -1,4 +1,4 @@
-/* $Xorg: savedir.c,v 1.3 2000/08/17 19:41:53 cpqbld Exp $ */
+/* $XConsortium: savedir.c,v 1.1 94/04/13 18:26:54 rws Exp $ */
 /* savedir.c -- save the list of files in a directory in a string
    Copyright 1990, 1993 Free Software Foundation, Inc.
 
@@ -13,8 +13,6 @@
 
    (The FSF has modified its usual distribution terms, for this file,
    as a courtesy to the X project.)  */
-
-/* $XFree86$ */
 
 /* Written by David MacKenzie <djm@ai.mit.edu>.
    Modified to use <dirent.h> by default.  Per Bothner <bothner@cygnus.com>. */
@@ -45,9 +43,17 @@
 #define CLOSEDIR(d) closedir (d)
 #endif
 
+#ifdef STDC_HEADERS
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
+#else
+char *malloc ();
+char *realloc ();
+int strlen ();
+#ifndef NULL
+#define NULL 0
+#endif
+#endif
 
 char *stpcpy ();
 

@@ -1,14 +1,15 @@
-/* $XdotOrg: xc/config/util/makestrs.c,v 1.4 2005/05/24 15:58:51 ago Exp $ */
+/* $XConsortium: makestrs.c /main/10 1996/11/22 07:27:41 kaleb $ */
 
 /*
 
-Copyright (c) 1991, 1998 The Open Group
+Copyright (c) 1991  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,23 +17,25 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 */
-/* $XFree86: xc/config/util/makestrs.c,v 3.6 2001/07/25 15:04:41 dawes Exp $ */
 
 /* Constructs string definitions */
 
 #include <stdio.h>
 #include <X11/Xos.h>
+#ifndef X_NOT_STDC_ENV
 #include <stdlib.h>
-#include <unistd.h>
+#else
+char *malloc();
+#endif
 #if defined(macII) && !defined(__STDC__)  /* stdlib.h fails to define these */
 char *malloc();
 #endif /* macII */
@@ -73,13 +76,6 @@ static char* fileprotstr;
 static char* externrefstr;
 static char* externdefstr;
 
-#ifndef FALSE
-# define FALSE 0
-# define TRUE  !(FALSE)
-#endif
-
-static int   solaris_abi_names = FALSE;
-
 #define X_DEFAULT_ABI	0
 #define X_ARRAYPER_ABI	1
 #define X_INTEL_ABI	2
@@ -89,36 +85,9 @@ static int   solaris_abi_names = FALSE;
 
 #define X_MAGIC_STRING "<<<STRING_TABLE_GOES_HERE>>>"
 
-/* Wrapper for fopen()
- * Prepend filename with an includedir which can be specified on the 
- * commandline. Needed to separate source and build directories.
- */
-static char* includedir = NULL;
-static FILE *ifopen(const char *file, const char *mode)
-{
-    size_t len;
-    char *buffer;
-    FILE *ret;
-    
-    if (includedir == NULL)
-        return fopen(file, mode);
-
-    len = strlen(file) + strlen(includedir) + 1;
-    buffer = (char*)malloc(len + 1);
-    if (buffer == NULL)
-        return NULL;
-            
-    strcpy(buffer, includedir);
-    strcat(buffer, "/");
-    strcat(buffer, file);
-
-    ret = fopen(buffer, mode);
-
-    free(buffer);
-    return ret;
-}
-
-static void WriteHeaderProlog (FILE *f, File *phile)
+static void WriteHeaderProlog (f, phile)
+    FILE* f;
+    File* phile;
 {
     Table* t;
     TableEnt* te;
@@ -139,7 +108,9 @@ static void WriteHeaderProlog (FILE *f, File *phile)
     (void) fprintf (f, "%s", "#else\n");
 }
 
-static void IntelABIWriteHeader (FILE *f, File *phile)
+static void IntelABIWriteHeader (f, phile)
+    FILE* f;
+    File* phile;
 {
     Table* t;
     TableEnt* te;
@@ -158,7 +129,9 @@ static void IntelABIWriteHeader (FILE *f, File *phile)
     (void) fprintf (f, "#endif /* %s */\n", featurestr);
 }
 
-static void SPARCABIWriteHeader (FILE *f, File *phile)
+static void SPARCABIWriteHeader (f, phile)
+    FILE* f;
+    File* phile;
 {
     Table* t;
     TableEnt* te;
@@ -169,7 +142,9 @@ static void SPARCABIWriteHeader (FILE *f, File *phile)
 			    prefixstr, te->left, te->right);
 }
 
-static void FunctionWriteHeader (FILE *f, File *phile)
+static void FunctionWriteHeader (f, phile)
+    FILE* f;
+    File* phile;
 {
     Table* t;
     TableEnt* te;
@@ -190,7 +165,9 @@ static void FunctionWriteHeader (FILE *f, File *phile)
     (void) fprintf (f, "#endif /* %s */\n", featurestr);
 }
 
-static void ArrayperWriteHeader (FILE *f, File *phile)
+static void ArrayperWriteHeader (f, phile)
+    FILE* f;
+    File* phile;
 {
     Table* t;
     TableEnt* te;
@@ -208,7 +185,9 @@ static void ArrayperWriteHeader (FILE *f, File *phile)
     (void) fprintf (f, "#endif /* %s */\n", featurestr);
 }
 
-static void DefaultWriteHeader (FILE *f, File *phile)
+static void DefaultWriteHeader (f, phile)
+    FILE* f;
+    File* phile;
 {
     Table* t;
     TableEnt* te;
@@ -229,7 +208,9 @@ static void DefaultWriteHeader (FILE *f, File *phile)
     (void) fprintf (f, "#endif /* %s */\n", featurestr);
 }
 
-static void CopyTmplProlog (FILE *tmpl, FILE *f)
+static void CopyTmplProlog (tmpl, f)
+    FILE* tmpl;
+    FILE* f;
 {
     char buf[1024];
     static char* magic_string = X_MAGIC_STRING;
@@ -243,7 +224,9 @@ static void CopyTmplProlog (FILE *tmpl, FILE *f)
     }
 }
 
-static void CopyTmplEpilog (FILE *tmpl, FILE *f)
+static void CopyTmplEpilog (tmpl, f)
+    FILE* tmpl;
+    FILE* f;
 {
     char buf[1024];
 
@@ -254,11 +237,16 @@ static void CopyTmplEpilog (FILE *tmpl, FILE *f)
 static char* abistring[] = {
     "Default", "Array per string", "Intel", "Intel BC", "SPARC", "Function" };
 
-static void WriteHeader (char *tagline, File *phile, int abi)
+static void WriteHeader (tagline, phile, abi)
+    char* tagline;
+    File* phile;
+    int abi;
 {
     FILE* f;
     char* tmp;
-    static void (*headerproc[])(FILE *f, File *phile) = { 
+    Table* t;
+    TableEnt* te;
+    static void (*headerproc[])() = { 
 	DefaultWriteHeader, ArrayperWriteHeader,
 	IntelABIWriteHeader, IntelABIWriteHeader,
 	SPARCABIWriteHeader, FunctionWriteHeader };
@@ -269,7 +257,7 @@ static void WriteHeader (char *tagline, File *phile, int abi)
 
     (void) fprintf (f, 
 	"%s\n%s\n/* %s ABI version -- Do not edit */\n", 
-	"/* $Xorg: makestrs.c,v 1.6 2001/02/09 02:03:17 xorgcvs Exp $ */",
+	"/* $XConsortium: makestrs.c /main/10 1996/11/22 07:27:41 kaleb $ */",
 	"/* This file is automatically generated. */",
 	abistring[abi]);
 
@@ -297,7 +285,9 @@ static void WriteHeader (char *tagline, File *phile, int abi)
     (void) fclose (f);
 }
 
-static void WriteSourceLine (TableEnt *te, int abi, int fudge)
+static void WriteSourceLine (te, abi, fudge)
+    TableEnt* te;
+    int abi;
 {
     char* c;
 
@@ -309,7 +299,8 @@ static void WriteSourceLine (TableEnt *te, int abi, int fudge)
 
 static char* const_string = "%s %sConst char %s[] = {\n";
 
-static void IntelABIWriteSource (int abi)
+static void IntelABIWriteSource (abi)
+    int abi;
 {
     File* phile;
 
@@ -327,7 +318,8 @@ static void IntelABIWriteSource (int abi)
     }
 }
 
-static void IntelABIBCWriteSource (int abi)
+static void IntelABIBCWriteSource (abi)
+    int abi;
 {
     File* phile;
 
@@ -354,7 +346,8 @@ static void IntelABIBCWriteSource (int abi)
     }
 }
 
-static void FunctionWriteSource (int abi)
+static void FunctionWriteSource (abi)
+    int abi;
 {
     File* phile;
 
@@ -376,7 +369,8 @@ static void FunctionWriteSource (int abi)
     }
 }
 
-static void ArrayperWriteSource (int abi)
+static void ArrayperWriteSource (abi)
+    int abi;
 {
     File* phile;
     static int done_atom;
@@ -393,13 +387,13 @@ static void ArrayperWriteSource (int abi)
 		}
 		(void) printf ("%s %sConst char %s%s[] = \"%s\";\n",
 			       externdefstr, conststr ? conststr : "",
-			       prefixstr, 
-			       te->left, te->right);
+			       prefixstr,  te->left, te->right);
 	    }
     }
 }
 
-static void DefaultWriteSource (int abi)
+static void DefaultWriteSource (abi)
+    int abi;
 {
     File* phile;
 
@@ -417,9 +411,11 @@ static void DefaultWriteSource (int abi)
     }
 }
 
-static void WriteSource(char *tagline, int abi)
+static void WriteSource(tagline, abi)
+    char* tagline;
+    int abi;
 {
-    static void (*sourceproc[])(int) = { 
+    static void (*sourceproc[])() = { 
 	DefaultWriteSource, ArrayperWriteSource,
 	IntelABIWriteSource, IntelABIBCWriteSource,
 	DefaultWriteSource, FunctionWriteSource };
@@ -427,7 +423,7 @@ static void WriteSource(char *tagline, int abi)
     FILE* tmpl;
 
     if (ctmplstr) {
-	tmpl = ifopen (ctmplstr, "r");
+	tmpl = fopen (ctmplstr, "r");
 
 	if (tmpl) CopyTmplProlog (tmpl, stdout);
 	else {
@@ -440,7 +436,7 @@ static void WriteSource(char *tagline, int abi)
 
 
     (void) printf ("%s\n%s\n/* %s ABI version -- Do not edit */\n", 
-		   "/* $Xorg: makestrs.c,v 1.6 2001/02/09 02:03:17 xorgcvs Exp $ */",
+		   "/* $XConsortium: makestrs.c /main/10 1996/11/22 07:27:41 kaleb $ */",
 		   "/* This file is automatically generated. */",
 		   abistring[abi]);
 
@@ -451,7 +447,8 @@ static void WriteSource(char *tagline, int abi)
     if (tmpl) CopyTmplEpilog (tmpl, stdout);
 }
 
-static void DoLine(char *buf)
+static void DoLine(buf)
+    char* buf;
 {
 #define X_NO_TOKEN 0
 #define X_FILE_TOKEN 1
@@ -526,13 +523,6 @@ static void DoLine(char *buf)
 	    if ((table->name = malloc (strlen (buf + strlen (table_str)) + 1)) == NULL) 
 		exit(1);
 	    (void) strcpy (table->name, buf + strlen (table_str) + 1);
-	    if (solaris_abi_names) {
-		if (strcmp(table->name, "XtStringsR6") == 0) {
-		    strcpy(table->name, "XtR6Strings");
-		} else if (strcmp(table->name, "XtShellStringsR6") == 0) {
-		    strcpy(table->name, "XtR6ShellStrings");
-		}
-	    }
 	    table->tableent = NULL;
 	    table->tableentcurrent = NULL;
 	    table->tableenttail = &table->tableent;
@@ -570,7 +560,7 @@ static void DoLine(char *buf)
 	(void) strcpy (ctmplstr, buf + strlen (ctmpl_str) + 1);
 	break;
     case X_HTMPL_TOKEN:
-	if ((filecurrent->tmpl = ifopen (buf + strlen (htmpl_str) + 1, "r")) == NULL) {
+	if ((filecurrent->tmpl = fopen (buf + strlen (htmpl_str) + 1, "r")) == NULL) {
 	    (void) fprintf (stderr, 
 			    "Expected template %s, not found\n", htmpl_str);
 	    exit (1);
@@ -589,7 +579,7 @@ static void DoLine(char *buf)
 	    int rlen;
 	    int len;
 
-	    if ((right = index(buf, ' ')))
+	    if (right = index(buf, ' '))
 		*right++ = 0;
 	    else
 		right = buf + 1;
@@ -622,7 +612,8 @@ static void DoLine(char *buf)
     }
 }
 
-static void IntelABIIndexEntries (File *file)
+static void IntelABIIndexEntries (file)
+    File* file;
 {
     Table* t;
     TableEnt* te;
@@ -635,7 +626,8 @@ static void IntelABIIndexEntries (File *file)
     }
 }
 
-static void DefaultIndexEntries (File *file)
+static void DefaultIndexEntries (file)
+    File* file;
 {
     Table* t;
     TableEnt* te;
@@ -649,7 +641,9 @@ static void DefaultIndexEntries (File *file)
     }
 }
 
-static void IndexEntries (File *file, int abi)
+static void IndexEntries (file,abi)
+    File* file;
+    int abi;
 {
     switch (abi) {
     case X_SPARC_ABI:
@@ -664,7 +658,8 @@ static void IndexEntries (File *file, int abi)
     }
 }
 
-static char* DoComment (char *line)
+static char* DoComment (line)
+    char* line;
 {
     char* tag;
     char* eol;
@@ -682,7 +677,9 @@ static char* DoComment (char *line)
     return ret;
 }
 
-int main(int argc, char *argv[])
+int main(argc, argv)
+    int argc;
+    char** argv;
 {
     int len, i;
     char* tagline = NULL;
@@ -705,12 +702,6 @@ int main(int argc, char *argv[])
 		else
 		    return 1;
 	    }
-	    if (strcmp (argv[i], "-i") == 0) {
-		if (++i < argc)
-		    includedir = argv[i];
-		else
-		    return 1;
-	    }
 	    if (strcmp (argv[i], "-sparcabi") == 0)
 		abi = X_SPARC_ABI;
 	    if (strcmp (argv[i], "-intelabi") == 0)
@@ -725,8 +716,6 @@ int main(int argc, char *argv[])
 	    if (strcmp (argv[i], "-defaultabi") == 0)
 		abi = X_DEFAULT_ABI;
 #endif
-	    if (strcmp (argv[i], "-solarisabinames") == 0)
-		solaris_abi_names = TRUE;
 	}
     }
 

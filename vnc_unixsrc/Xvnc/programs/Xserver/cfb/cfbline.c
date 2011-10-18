@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/cfb/cfbline.c,v 3.5 2001/10/28 03:33:01 tsi Exp $ */
 /***********************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -45,12 +45,9 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $Xorg: cfbline.c,v 1.4 2001/02/09 02:04:38 xorgcvs Exp $ */
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
+/* $XConsortium: cfbline.c,v 1.24 94/07/28 14:33:33 dpw Exp $ */
+/* $XFree86: xc/programs/Xserver/cfb/cfbline.c,v 3.0 1996/06/29 09:05:38 dawes Exp $ */
+#include "X.h"
 
 #include "gcstruct.h"
 #include "windowstr.h"
@@ -119,7 +116,7 @@ cfbLineSS (pDrawable, pGC, mode, npt, pptInit)
     unsigned int oc1;		/* outcode of point 1 */
     unsigned int oc2;		/* outcode of point 2 */
 
-    CfbBits *addrl;	/* address of destination pixmap */
+    unsigned long *addrl;	/* address of destination pixmap */
     int nlwidth;		/* width in longwords of destination pixmap */
     int xorg, yorg;		/* origin of window */
 
@@ -139,11 +136,11 @@ cfbLineSS (pDrawable, pGC, mode, npt, pptInit)
     register int x1, x2;
     RegionPtr cclip;
     cfbPrivGCPtr    devPriv;
-    CfbBits   xor, and;
+    unsigned long   xor, and;
     int		    alu;
 
     devPriv = cfbGetGCPrivate(pGC);
-    cclip = pGC->pCompositeClip;
+    cclip = devPriv->pCompositeClip;
     pboxInit = REGION_RECTS(cclip);
     nboxInit = REGION_NUM_RECTS(cclip);
 
@@ -433,8 +430,8 @@ cfbLineSS (pDrawable, pGC, mode, npt, pptInit)
 		(x2 <  pbox->x2) &&
 		(y2 <  pbox->y2))
 	    {
-		CfbBits mask;
-		CfbBits scrbits;
+		unsigned long mask;
+		unsigned long scrbits;
 
 #if PSZ == 24
 		mask = cfbmask[(x2 & 3)<<1];
@@ -486,7 +483,7 @@ cfbLineSD( pDrawable, pGC, mode, npt, pptInit)
     register unsigned int oc1;		/* outcode of point 1 */
     register unsigned int oc2;		/* outcode of point 2 */
 
-    CfbBits *addrl;		/* address of destination pixmap */
+    unsigned long *addrl;		/* address of destination pixmap */
     int nlwidth;		/* width in longwords of destination pixmap */
     int xorg, yorg;		/* origin of window */
 
@@ -512,7 +509,7 @@ cfbLineSD( pDrawable, pGC, mode, npt, pptInit)
     cfbPrivGCPtr    devPriv;
 
     devPriv = cfbGetGCPrivate(pGC);
-    cclip = pGC->pCompositeClip;
+    cclip = devPriv->pCompositeClip;
     rrops[0].rop = devPriv->rop;
     rrops[0].and = devPriv->and;
     rrops[0].xor = devPriv->xor;
@@ -642,6 +639,7 @@ cfbLineSD( pDrawable, pGC, mode, npt, pptInit)
 		int clip1 = 0, clip2 = 0;
 		int clipdx, clipdy;
 		int err;
+		int dashIndexTmp, dashOffsetTmp;
 		
 		if (miZeroClipLine(pbox->x1, pbox->y1, pbox->x2-1,
 				   pbox->y2-1,
@@ -733,7 +731,7 @@ dontStep:	;
 		(x2 <  pbox->x2) &&
 		(y2 <  pbox->y2))
 	    {
-		CfbBits	mask;
+		unsigned long	mask;
 		int		pix;
 
 		pix = 0;

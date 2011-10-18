@@ -26,25 +26,10 @@ in this Software without prior written authorization from the X Consortium.
  *
  * Author:  Keith Packard, MIT X Consortium
  */
-/* $XFree86$ */
 
 #ifndef _SAVERPROTO_H_
 #define _SAVERPROTO_H_
-
-#include <X11/extensions/saver.h>
-
-#define Window CARD32
-#define Drawable CARD32
-#define Font CARD32
-#define Pixmap CARD32
-#define Cursor CARD32
-#define Colormap CARD32
-#define GContext CARD32
-#define Atom CARD32
-#define VisualID CARD32
-#define Time CARD32
-#define KeyCode CARD8
-#define KeySym CARD32
+#include "saver.h"
 
 #define X_ScreenSaverQueryVersion   0
 
@@ -151,18 +136,5 @@ typedef struct _ScreenSaverNotify {
     CARD32 pad3 B32;
 } xScreenSaverNotifyEvent;
 #define sz_xScreenSaverNotifyEvent	32
-
-#undef Window
-#undef Drawable
-#undef Font
-#undef Pixmap
-#undef Cursor
-#undef Colormap
-#undef GContext
-#undef Atom
-#undef VisualID
-#undef Time
-#undef KeyCode
-#undef KeySym
 
 #endif /* _SAVERPROTO_H_ */

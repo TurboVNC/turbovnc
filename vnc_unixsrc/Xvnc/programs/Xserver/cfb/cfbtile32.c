@@ -2,17 +2,17 @@
  * Fill 32 bit tiled rectangles.  Used by both PolyFillRect and PaintWindow.
  * no depth dependencies.
  */
-/* $XFree86: xc/programs/Xserver/cfb/cfbtile32.c,v 3.6tsi Exp $ */
 
 /*
 
-Copyright 1989, 1998  The Open Group
+Copyright (c) 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -20,23 +20,20 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 */
 
-/* $Xorg: cfbtile32.c,v 1.4 2001/02/09 02:04:39 xorgcvs Exp $ */
+/* $XConsortium: cfbtile32.c,v 1.8 94/04/17 20:29:05 dpw Exp $ */
+/* $XFree86: xc/programs/Xserver/cfb/cfbtile32.c,v 3.0 1996/06/29 09:05:53 dawes Exp $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
-#include <X11/Xmd.h>
+#include "X.h"
+#include "Xmd.h"
 #include "servermd.h"
 #include "gcstruct.h"
 #include "window.h"
@@ -226,43 +223,35 @@ MROP_NAME(cfbFillRectTile32) (pDrawable, pGC, nBox, pBox)
     int		    nBox;	/* number of boxes to fill */
     BoxPtr 	    pBox;	/* pointer to list of boxes to fill */
 {
-    register CfbBits srcpix;	
-    CfbBits *psrc;		/* pointer to bits in tile, if needed */
+    register unsigned long srcpix;	
+    unsigned long *psrc;		/* pointer to bits in tile, if needed */
     int tileHeight;	/* height of the tile */
 
     int nlwDst;		/* width in longwords of the dest pixmap */
     int w;		/* width of current box */
     register int h;	/* height of current box */
-    register CfbBits startmask;
-    register CfbBits endmask; /* masks for reggedy bits at either end of line */
+    register unsigned long startmask;
+    register unsigned long endmask; /* masks for reggedy bits at either end of line */
     int nlwMiddle;	/* number of longwords between sides of boxes */
     int nlwExtra;	/* to get from right of box to left of next span */
-    register int nlw = 0;	/* loop version of nlwMiddle */
-    register CfbBits *p;	/* pointer to bits we're writing */
+    register int nlw;	/* loop version of nlwMiddle */
+    register unsigned long *p;	/* pointer to bits we're writing */
     int y;		/* current scan line */
     int srcy;		/* current tile position */
 
-    CfbBits *pbits;/* pointer to start of pixmap */
+    unsigned long *pbits;/* pointer to start of pixmap */
     PixmapPtr	    tile;	/* rotated, expanded tile */
-#if MROP == 0 && PSZ == 24
-    DeclareMergeRop()
-#else
     MROP_DECLARE_REG()
-#endif
     MROP_PREBUILT_DECLARE()
 #if PSZ == 24
-    CfbBits xtmp;
+    unsigned long xtmp;
 #endif
 
-    tile = pGC->pRotatedPixmap;
+    tile = cfbGetGCPrivate(pGC)->pRotatedPixmap;
     tileHeight = tile->drawable.height;
-    psrc = (CfbBits *)tile->devPrivate.ptr;
+    psrc = (unsigned long *)tile->devPrivate.ptr;
 
-#if MROP == 0 && PSZ == 24
-    InitializeMergeRop(pGC->alu, pGC->planemask);
-#else
     MROP_INITIALIZE(pGC->alu, pGC->planemask);
-#endif
 
     cfbGetLongWidthAndPointer (pDrawable, nlwDst, pbits)
 
@@ -349,29 +338,25 @@ MROP_NAME(cfbTile32FS)(pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
     int			n;	/* number of spans to fill */
     DDXPointPtr		ppt;	/* pointer to list of start points */
     int			*pwidth;/* pointer to list of n widths */
-    CfbBits	*pbits;	/* pointer to start of bitmap */
+    unsigned long	*pbits;	/* pointer to start of bitmap */
     int			nlwDst;	/* width in longwords of bitmap */
-    register CfbBits *p;	/* pointer to current longword in bitmap */
+    register unsigned long *p;	/* pointer to current longword in bitmap */
     register int	w;	/* current span width */
     register int	nlw;
     register int	x;
-    register CfbBits startmask;
-    register CfbBits endmask;
-    register CfbBits  srcpix;
+    register unsigned long startmask;
+    register unsigned long endmask;
+    register unsigned long  srcpix;
     int			y;
     int			*pwidthFree;/* copies of the pointers to free */
     DDXPointPtr		pptFree;
     PixmapPtr		tile;
-    CfbBits	*psrc;	/* pointer to bits in tile */
+    unsigned long	*psrc;	/* pointer to bits in tile */
     int			tileHeight;/* height of the tile */
-#if MROP == 0 && PSZ == 24
-    DeclareMergeRop()
-#else
-    MROP_DECLARE_REG()
-#endif
+    MROP_DECLARE_REG ()
     MROP_PREBUILT_DECLARE()
 #if PSZ == 24      
-    CfbBits	xtmp;
+    unsigned long	xtmp;
 #endif
 
     n = nInit * miFindMaxBand( cfbGetCompositeClip(pGC) );
@@ -389,15 +374,11 @@ MROP_NAME(cfbTile32FS)(pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
 		     pptInit, pwidthInit, nInit,
 		     ppt, pwidth, fSorted);
 
-    tile = pGC->pRotatedPixmap;
+    tile = cfbGetGCPrivate(pGC)->pRotatedPixmap;
     tileHeight = tile->drawable.height;
-    psrc = (CfbBits *)tile->devPrivate.ptr;
+    psrc = (unsigned long *)tile->devPrivate.ptr;
 
-#if MROP == 0 && PSZ == 24
-    InitializeMergeRop(pGC->alu, pGC->planemask);
-#else
     MROP_INITIALIZE(pGC->alu, pGC->planemask);
-#endif
 
     cfbGetLongWidthAndPointer (pDrawable, nlwDst, pbits)
 

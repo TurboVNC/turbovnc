@@ -1,32 +1,7 @@
-/* $XFree86: xc/programs/Xserver/os/lbxio.c,v 3.17 2002/05/31 18:46:06 dawes Exp $ */
-/*
-
-Copyright 1996, 1998  The Open Group
-
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
-AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-Except as contained in this notice, the name of The Open Group shall not be
-used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
-
-*/
 /***********************************************************
 Copyright 1987, 1989 by Digital Equipment Corporation, Maynard, Massachusetts,
 and the Massachusetts Institute of Technology, Cambridge, Massachusetts.
+Copyright 1996 X Consortium, Inc.
 
                         All Rights Reserved
 
@@ -47,34 +22,36 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $Xorg: lbxio.c,v 1.4 2001/02/09 02:05:23 xorgcvs Exp $ */
+/* $XConsortium: lbxio.c /main/10 1996/12/16 23:03:30 rws $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
+
+
+
+/* $XFree86: xc/programs/Xserver/os/lbxio.c,v 3.8 1997/01/18 07:18:31 dawes Exp $ */
 
 #include <stdio.h>
-#include <X11/Xtrans/Xtrans.h>
-#include <X11/Xmd.h>
+#include <X11/Xtrans.h>
+#ifdef X_NOT_STDC_ENV
+extern int errno;
+#endif
+#include "Xmd.h"
 #include <errno.h>
 #ifndef Lynx
 #include <sys/param.h>
-#ifndef __UNIXOS2__
+#ifndef __EMX__
 #include <sys/uio.h>
 #endif
 #else
 #include <uio.h>
 #endif
-#include <X11/X.h>
-#include <X11/Xproto.h>
+#include "X.h"
+#include "Xproto.h"
 #include "os.h"
-#include <X11/Xpoll.h>
+#include "Xpoll.h"
 #include "osdep.h"
 #include "opaque.h"
 #include "dixstruct.h"
 #include "misc.h"
-#include "colormapst.h"
-#include "propertyst.h"
 #include "lbxserve.h"
 
 /* check for both EAGAIN and EWOULDBLOCK, because some supposedly POSIX
@@ -90,6 +67,19 @@ SOFTWARE.
 #endif
 #endif
 
+extern fd_set ClientsWithInput, IgnoredClientsWithInput;
+extern fd_set AllClients, AllSockets;
+extern fd_set ClientsWriteBlocked;
+extern fd_set OutputPending;
+extern int ConnectionTranslation[];
+extern Bool NewOutputPending;
+extern Bool AnyClientsWriteBlocked;
+extern Bool CriticalOutputPending;
+extern int timesThisConnection;
+extern ConnectionInputPtr FreeInputs;
+extern ConnectionOutputPtr FreeOutputs;
+extern OsCommPtr AvailableInput;
+
 #define get_req_len(req,cli) ((cli)->swapped ? \
 			      lswaps((req)->length) : (req)->length)
 
@@ -101,15 +91,13 @@ SOFTWARE.
 	  FD_CLR(fd, &ClientsWithInput); }
 
 void
-SwitchClientInput (ClientPtr client, Bool pending)
+SwitchClientInput (client, pending)
+    ClientPtr client;
+    Bool pending;
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
-
-#ifndef WIN32    
+    
     ConnectionTranslation[oc->fd] = client->index;
-#else
-    SetConnectionTranslation(oc->fd, client->index);
-#endif
     if (pending)
 	FD_SET(oc->fd, &ClientsWithInput);
     else
@@ -117,7 +105,9 @@ SwitchClientInput (ClientPtr client, Bool pending)
 }
 
 void
-LbxPrimeInput(ClientPtr client, LbxProxyPtr proxy)
+LbxPrimeInput(client, proxy)
+    ClientPtr	client;
+    LbxProxyPtr proxy;
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
     ConnectionInputPtr oci = oc->input;
@@ -135,7 +125,8 @@ LbxPrimeInput(ClientPtr client, LbxProxyPtr proxy)
 }
 
 void
-AvailableClientInput (ClientPtr client)
+AvailableClientInput (client)
+    ClientPtr	client;
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
 
@@ -150,16 +141,19 @@ AvailableClientInput (ClientPtr client)
  **********************/
  
 Bool
-AppendFakeRequest (ClientPtr client, char *data, int count)
+AppendFakeRequest (client, data, count)
+    ClientPtr client;
+    char *data;
+    int count;
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
-    ConnectionInputPtr oci = oc->input;
+    register ConnectionInputPtr oci = oc->input;
     int fd = oc->fd;
-    int gotnow;
+    register int gotnow;
 
     if (!oci)
     {
-	if ((oci = FreeInputs))
+	if (oci = FreeInputs)
 	    FreeInputs = oci->next;
 	else if (!(oci = AllocateInputBuffer()))
 	    return FALSE;
@@ -198,8 +192,11 @@ AppendFakeRequest (ClientPtr client, char *data, int count)
 }
 
 static int
-LbxWrite(XtransConnInfo trans_conn, LbxProxyPtr proxy, 
-    char *buf, int len)
+LbxWrite(trans_conn, proxy, buf, len)
+    XtransConnInfo trans_conn;
+    LbxProxyPtr proxy;
+    char *buf;
+    int len;
 {
     struct iovec iov;
     int n;
@@ -239,7 +236,10 @@ LbxWrite(XtransConnInfo trans_conn, LbxProxyPtr proxy,
 }
 
 static Bool
-LbxAppendOutput(LbxProxyPtr proxy, ClientPtr client, ConnectionOutputPtr oco)
+LbxAppendOutput(proxy, client, oco)
+    LbxProxyPtr proxy;
+    ClientPtr client;
+    ConnectionOutputPtr oco;
 {
     ConnectionOutputPtr noco = proxy->olast;
     LbxClientPtr lbxClient = LbxClient(client);
@@ -275,7 +275,7 @@ LbxAppendOutput(LbxProxyPtr proxy, ClientPtr client, ConnectionOutputPtr oco)
 	int n;
 
 	if (!noco || (noco->size - noco->count) < sz_xLbxSwitchEvent) {
-	    if ((noco = FreeOutputs))
+	    if (noco = FreeOutputs)
 		FreeOutputs = noco->next;
 	    else
 		noco = AllocateOutputBuffer();
@@ -311,13 +311,17 @@ LbxAppendOutput(LbxProxyPtr proxy, ClientPtr client, ConnectionOutputPtr oco)
 }
 
 static int
-LbxClientOutput(ClientPtr client, OsCommPtr oc, 
-    char *extraBuf, int extraCount, Bool nocompress)
+LbxClientOutput(client, oc, extraBuf, extraCount, nocompress)
+    ClientPtr client;
+    OsCommPtr oc;
+    char *extraBuf;
+    int extraCount;
+    Bool nocompress;
 {
     ConnectionOutputPtr oco;
     int len;
 
-    if ((oco = oc->output)) {
+    if (oco = oc->output) {
 	oc->output = NULL;
 	if (!LbxAppendOutput(oc->proxy, client, oco))
 	    return -1;
@@ -357,7 +361,8 @@ LbxClientOutput(ClientPtr client, OsCommPtr oc,
 }
 
 void
-LbxForceOutput(LbxProxyPtr proxy)
+LbxForceOutput(proxy)
+    LbxProxyPtr proxy;
 {
     int i;
     LbxClientPtr lbxClient;
@@ -369,7 +374,7 @@ LbxForceOutput(LbxProxyPtr proxy)
 	if (!lbxClient)
 	    continue;
 	coc = (OsCommPtr)lbxClient->client->osPrivate;
-	if ((oco = coc->output)) {
+	if (oco = coc->output) {
 	    coc->output = NULL;
 	    LbxAppendOutput(proxy, lbxClient->client, oco);
 	}
@@ -377,13 +382,16 @@ LbxForceOutput(LbxProxyPtr proxy)
 }
 
 int
-LbxFlushClient(ClientPtr who, OsCommPtr oc, 
-    char *extraBuf, int extraCount)
+LbxFlushClient(who, oc, extraBuf, extraCount)
+    ClientPtr who;
+    OsCommPtr oc;
+    char *extraBuf;
+    int extraCount;
 {
     LbxProxyPtr proxy;
     ConnectionOutputPtr oco;
     int n;
-    XtransConnInfo trans_conn = NULL;
+    XtransConnInfo trans_conn;
 
     if (extraBuf)
 	return LbxClientOutput(who, oc, extraBuf, extraCount, FALSE);
@@ -393,7 +401,7 @@ LbxFlushClient(ClientPtr who, OsCommPtr oc,
     LbxForceOutput(proxy);
     if (!proxy->compHandle)
 	trans_conn = ((OsCommPtr)LbxProxyClient(proxy)->osPrivate)->trans_conn;
-    while ((oco = proxy->ofirst)) {
+    while (oco = proxy->ofirst) {
 	/* XXX bundle up into writev someday */
 	if (proxy->compHandle) {
 	    if (oco->nocompress)
@@ -445,17 +453,20 @@ LbxFlushClient(ClientPtr who, OsCommPtr oc,
 }
 
 int
-UncompressedWriteToClient (ClientPtr who, int count, char *buf)
+UncompressedWriteToClient (who, count, buf)
+    ClientPtr who;
+    char *buf;
+    int count;
 {
     return LbxClientOutput(who, (OsCommPtr)who->osPrivate, buf, count, TRUE);
 }
 
-void
-LbxFreeOsBuffers(LbxProxyPtr proxy)
+LbxFreeOsBuffers(proxy)
+    LbxProxyPtr proxy;
 {
     ConnectionOutputPtr oco;
 
-    while ((oco = proxy->ofirst)) {
+    while (oco = proxy->ofirst) {
 	proxy->ofirst = oco->next;
 	xfree(oco->buf);
 	xfree(oco);
@@ -463,13 +474,15 @@ LbxFreeOsBuffers(LbxProxyPtr proxy)
 }
 
 Bool
-AllocateLargeReqBuffer(ClientPtr client, int size)
+AllocateLargeReqBuffer(client, size)
+    ClientPtr client;
+    int size;
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
-    ConnectionInputPtr oci;
+    register ConnectionInputPtr oci;
 
     if (!(oci = oc->largereq)) {
-	if ((oci = FreeInputs))
+	if (oci = FreeInputs)
 	    FreeInputs = oci->next;
 	else {
 	    oci = (ConnectionInputPtr)xalloc(sizeof(ConnectionInput));
@@ -502,10 +515,13 @@ AllocateLargeReqBuffer(ClientPtr client, int size)
 }
 
 Bool
-AddToLargeReqBuffer(ClientPtr client, char *data, int size)
+AddToLargeReqBuffer(client, data, size)
+    ClientPtr client;
+    char *data;
+    int size;
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
-    ConnectionInputPtr oci = oc->largereq;
+    register ConnectionInputPtr oci = oc->largereq;
 
     if (!oci || (oci->bufcnt + size > oci->lenLastReq))
 	return FALSE;
@@ -517,10 +533,11 @@ AddToLargeReqBuffer(ClientPtr client, char *data, int size)
 static OsCommRec lbxAvailableInput;
 
 int
-PrepareLargeReqBuffer(ClientPtr client)
+PrepareLargeReqBuffer(client)
+    ClientPtr client;
 {
     OsCommPtr oc = (OsCommPtr)client->osPrivate;
-    ConnectionInputPtr oci = oc->largereq;
+    register ConnectionInputPtr oci = oc->largereq;
 
     if (!oci)
 	return client->req_len << 2;
@@ -536,7 +553,7 @@ PrepareLargeReqBuffer(ClientPtr client)
     oci->lenLastReq = 0;
     if (AvailableInput)
     {
-	ConnectionInputPtr aci = AvailableInput->input;
+	register ConnectionInputPtr aci = AvailableInput->input;
 	if (aci->size > BUFWATERMARK)
 	{
 	    xfree(aci->buffer);

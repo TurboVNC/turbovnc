@@ -1,4 +1,5 @@
-/* $Xorg: font.h,v 1.3 2000/08/18 04:05:44 coskrey Exp $ */
+/* $XConsortium: font.h /main/14 1996/09/28 16:32:33 rws $ */
+/* $XFree86: xc/include/fonts/font.h,v 3.2 1997/01/14 22:13:06 dawes Exp $ */
 /***********************************************************
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -21,8 +22,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $XFree86: xc/include/fonts/font.h,v 3.4 2000/11/27 00:10:02 dawes Exp $ */
-/* $NCDXorg: @(#)font.h,v 1.7 1991/06/24 17:00:23 lemke Exp $ */
+/* $NCDId: @(#)font.h,v 1.7 1991/06/24 17:00:23 lemke Exp $ */
 
 #ifndef FONT_H
 #define FONT_H
@@ -96,30 +96,36 @@ typedef int DrawDirection;
 #define CACHING_OFF 0
 #define CACHE_16_BIT_GLYPHS 1
 #define CACHE_ALL_GLYPHS 2
-#define DEFAULT_GLYPH_CACHING_MODE CACHE_16_BIT_GLYPHS
+#define DEFAULT_GLYPH_CACHING_MODE CACHING_OFF
 extern int glyphCachingMode;
 
-struct _Client;
-
 extern int StartListFontsWithInfo(
-    struct _Client * /*client*/,
+#if NeedFunctionPrototypes
+    ClientPtr /*client*/,
     int /*length*/,
-    unsigned char * /*pattern*/,
+    unsigned char */*pattern*/,
     int /*max_names*/
+#endif
 );
 
 extern FontNamesPtr MakeFontNamesRecord(
+#if NeedFunctionPrototypes
     unsigned /* size */
+#endif
 );
 
 extern void FreeFontNames(
+#if NeedFunctionPrototypes
     FontNamesPtr /* pFN*/
+#endif
 );
 
 extern int  AddFontNamesName(
+#if NeedFunctionPrototypes
     FontNamesPtr /* names */,
     char * /* name */,
     int /* length */
+#endif
 );
 
 #if 0 /* unused */
@@ -130,36 +136,50 @@ extern FontResolutionPtr GetClientResolution();
 typedef struct _FontPatternCache    *FontPatternCachePtr;
 
 extern FontPatternCachePtr  MakeFontPatternCache (
+#if NeedFunctionPrototypes
     void
+#endif
 );
 
 extern void		    FreeFontPatternCache (
+#if NeedFunctionPrototypes
     FontPatternCachePtr /* cache */
+#endif
 );
 
 extern void		    EmptyFontPatternCache (
+#if NeedFunctionPrototypes
     FontPatternCachePtr /* cache */
+#endif
 );
 
 extern void		    CacheFontPattern (
+#if NeedFunctionPrototypes
     FontPatternCachePtr /* cache */,
     char * /* pattern */,
     int /* patlen */,
     FontPtr /* pFont */
+#endif
 );
 extern FontResolutionPtr GetClientResolutions(
+#if NeedFunctionPrototypes
     int * /* num */
+#endif
 );
 
 extern FontPtr		    FindCachedFontPattern (
+#if NeedFunctionPrototypes
     FontPatternCachePtr /* cache */,
     char * /* pattern */,
     int /* patlen */
+#endif
 );
 
 extern void		    RemoveCachedFontPattern (
+#if NeedFunctionPrototypes
     FontPatternCachePtr /* cache */,
     FontPtr /* pFont */
+#endif
 );
 
 typedef enum {

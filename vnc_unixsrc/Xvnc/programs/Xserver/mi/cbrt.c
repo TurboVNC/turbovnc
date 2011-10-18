@@ -1,13 +1,16 @@
-/* $Xorg: cbrt.c,v 1.4 2001/02/09 02:05:19 xorgcvs Exp $ */
+/* $XConsortium: cbrt.c,v 1.2 94/04/17 20:27:10 dpw Exp $ */
+/* $XFree86: xc/programs/Xserver/mi/cbrt.c,v 3.0 1994/04/29 14:11:16 dawes Exp $ */
 /*
 
-Copyright 1990, 1998  The Open Group
+Copyright (c) 1990  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -15,31 +18,25 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: xc/programs/Xserver/mi/cbrt.c,v 3.3 2001/05/29 22:24:06 dawes Exp $ */
 
 /* simple cbrt, in case your math library doesn't have a good one */
 
-/*
- * Would normally include <math.h> for this, but for the sake of compiler
- * warnings, we don't want to get duplicate declarations for cbrt().
- */
-
-double pow(double, double);
-double cbrt(double);
+double pow();
 
 double
-cbrt(double x)
+cbrt(x)
+    double x;
 {
     if (x > 0.0)
 	return pow(x, 1.0/3.0);

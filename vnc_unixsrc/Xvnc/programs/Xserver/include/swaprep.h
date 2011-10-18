@@ -27,268 +27,488 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef SWAPREP_H
 #define SWAPREP_H 1
 
-extern void Swap32Write(
+void
+Swap32Write(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    CARD32 * /* pbuf */);
+    CARD32 * /* pbuf */
+#endif
+);
 
-extern void CopySwap32Write(
+void
+CopySwap32Write(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    CARD32 * /* pbuf */);
+    CARD32 * /* pbuf */
+#endif
+);
 
-extern void CopySwap16Write(
+void
+CopySwap16Write(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    short * /* pbuf */);
+    short * /* pbuf */
+#endif
+);
 
-extern void SGenericReply(
+void
+SGenericReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xGenericReply * /* pRep */);
+    xGenericReply * /* pRep */
+#endif
+);
 
-extern void SGetWindowAttributesReply(
+void
+SGetWindowAttributesReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xGetWindowAttributesReply * /* pRep */);
+    xGetWindowAttributesReply * /* pRep */
+#endif
+);
 
-extern void SGetGeometryReply(
+void
+SGetGeometryReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xGetGeometryReply * /* pRep */);
+    xGetGeometryReply * /* pRep */
+#endif
+);
 
-extern void SQueryTreeReply(
+void
+SQueryTreeReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xQueryTreeReply * /* pRep */);
+    xQueryTreeReply * /* pRep */
+#endif
+);
 
-extern void SInternAtomReply(
+void
+SInternAtomReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xInternAtomReply * /* pRep */);
+    xInternAtomReply * /* pRep */
+#endif
+);
 
-extern void SGetAtomNameReply(
+void
+SGetAtomNameReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xGetAtomNameReply * /* pRep */);
+    xGetAtomNameReply * /* pRep */
+#endif
+);
 
-extern void SGetPropertyReply(
+void
+SGetPropertyReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xGetPropertyReply * /* pRep */);
+    xGetPropertyReply * /* pRep */
+#endif
+);
 
-extern void SListPropertiesReply(
+void
+SListPropertiesReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xListPropertiesReply * /* pRep */);
+    xListPropertiesReply * /* pRep */
+#endif
+);
 
-extern void SGetSelectionOwnerReply(
+void
+SGetSelectionOwnerReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xGetSelectionOwnerReply * /* pRep */);
+    xGetSelectionOwnerReply * /* pRep */
+#endif
+);
 
-extern void SQueryPointerReply(
+void
+SQueryPointerReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xQueryPointerReply * /* pRep */);
+    xQueryPointerReply * /* pRep */
+#endif
+);
 
-extern void SwapTimecoord(
-    xTimecoord * /* pCoord */);
+void
+SwapTimecoord(
+#if NeedFunctionPrototypes
+    xTimecoord * /* pCoord */
+#endif
+);
 
-extern void SwapTimeCoordWrite(
+void
+SwapTimeCoordWrite(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xTimecoord * /* pRep */);
+    xTimecoord * /* pRep */
+#endif
+);
 
-extern void SGetMotionEventsReply(
+void
+SGetMotionEventsReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xGetMotionEventsReply * /* pRep */);
+    xGetMotionEventsReply * /* pRep */
+#endif
+);
 
-extern void STranslateCoordsReply(
+void
+STranslateCoordsReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xTranslateCoordsReply * /* pRep */);
+    xTranslateCoordsReply * /* pRep */
+#endif
+);
 
-extern void SGetInputFocusReply(
+void
+SGetInputFocusReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xGetInputFocusReply * /* pRep */);
+    xGetInputFocusReply * /* pRep */
+#endif
+);
 
-extern void SQueryKeymapReply(
+void
+SQueryKeymapReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xQueryKeymapReply * /* pRep */);
+    xQueryKeymapReply * /* pRep */
+#endif
+);
 
 #ifdef LBX
-extern void SwapCharInfo(
-    xCharInfo * /* pInfo */);
+void
+SwapCharInfo(
+#if NeedFunctionPrototypes
+    xCharInfo * /* pInfo */
+#endif
+);
 #endif
 
 #ifdef LBX
-extern void SwapFont(
+void
+SwapFont(
+#if NeedFunctionPrototypes
     xQueryFontReply * /* pr */,
-    Bool /* hasGlyphs */);
+    Bool /* hasGlyphs */
+#endif
+);
 #endif
 
-extern void SQueryFontReply(
+void
+SQueryFontReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xQueryFontReply * /* pRep */);
+    xQueryFontReply * /* pRep */
+#endif
+);
 
-extern void SQueryTextExtentsReply(
+void
+SQueryTextExtentsReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xQueryTextExtentsReply * /* pRep */);
+    xQueryTextExtentsReply * /* pRep */
+#endif
+);
 
-extern void SListFontsReply(
+void
+SListFontsReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xListFontsReply * /* pRep */);
+    xListFontsReply * /* pRep */
+#endif
+);
 
-extern void SListFontsWithInfoReply(
+void
+SListFontsWithInfoReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xListFontsWithInfoReply * /* pRep */);
+    xListFontsWithInfoReply * /* pRep */
+#endif
+);
 
-extern void SGetFontPathReply(
+void
+SGetFontPathReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xGetFontPathReply * /* pRep */);
+    xGetFontPathReply * /* pRep */
+#endif
+);
 
-extern void SGetImageReply(
+void
+SGetImageReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xGetImageReply * /* pRep */);
+    xGetImageReply * /* pRep */
+#endif
+);
 
-extern void SListInstalledColormapsReply(
+void
+SListInstalledColormapsReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xListInstalledColormapsReply * /* pRep */);
+    xListInstalledColormapsReply * /* pRep */
+#endif
+);
 
-extern void SAllocColorReply(
+void
+SAllocColorReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xAllocColorReply * /* pRep */);
+    xAllocColorReply * /* pRep */
+#endif
+);
 
-extern void SAllocNamedColorReply(
+void
+SAllocNamedColorReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xAllocNamedColorReply * /* pRep */);
+    xAllocNamedColorReply * /* pRep */
+#endif
+);
 
-extern void SAllocColorCellsReply(
+void
+SAllocColorCellsReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xAllocColorCellsReply * /* pRep */);
+    xAllocColorCellsReply * /* pRep */
+#endif
+);
 
-extern void SAllocColorPlanesReply(
+void
+SAllocColorPlanesReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xAllocColorPlanesReply * /* pRep */);
+    xAllocColorPlanesReply * /* pRep */
+#endif
+);
 
-extern void SwapRGB(
-    xrgb * /* prgb */);
+void
+SwapRGB(
+#if NeedFunctionPrototypes
+    xrgb * /* prgb */
+#endif
+);
 
-extern void SQColorsExtend(
+void
+SQColorsExtend(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xrgb * /* prgb */);
+    xrgb * /* prgb */
+#endif
+);
 
-extern void SQueryColorsReply(
+void
+SQueryColorsReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xQueryColorsReply * /* pRep */);
+    xQueryColorsReply * /* pRep */
+#endif
+);
 
-extern void SLookupColorReply(
+void
+SLookupColorReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xLookupColorReply * /* pRep */);
+    xLookupColorReply * /* pRep */
+#endif
+);
 
-extern void SQueryBestSizeReply(
+void
+SQueryBestSizeReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xQueryBestSizeReply * /* pRep */);
+    xQueryBestSizeReply * /* pRep */
+#endif
+);
 
-extern void SListExtensionsReply(
+void
+SListExtensionsReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xListExtensionsReply * /* pRep */);
+    xListExtensionsReply * /* pRep */
+#endif
+);
 
-extern void SGetKeyboardMappingReply(
+void
+SGetKeyboardMappingReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xGetKeyboardMappingReply * /* pRep */);
+    xGetKeyboardMappingReply * /* pRep */
+#endif
+);
 
-extern void SGetPointerMappingReply(
+void
+SGetPointerMappingReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xGetPointerMappingReply * /* pRep */);
+    xGetPointerMappingReply * /* pRep */
+#endif
+);
 
-extern void SGetModifierMappingReply(
+void
+SGetModifierMappingReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xGetModifierMappingReply * /* pRep */);
+    xGetModifierMappingReply * /* pRep */
+#endif
+);
 
-extern void SGetKeyboardControlReply(
+void
+SGetKeyboardControlReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xGetKeyboardControlReply * /* pRep */);
+    xGetKeyboardControlReply * /* pRep */
+#endif
+);
 
-extern void SGetPointerControlReply(
+void
+SGetPointerControlReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xGetPointerControlReply * /* pRep */);
+    xGetPointerControlReply * /* pRep */
+#endif
+);
 
-extern void SGetScreenSaverReply(
+void
+SGetScreenSaverReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xGetScreenSaverReply * /* pRep */);
+    xGetScreenSaverReply * /* pRep */
+#endif
+);
 
-extern void SLHostsExtend(
+void
+SLHostsExtend(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    char * /* buf */);
+    char * /* buf */
+#endif
+);
 
-extern void SListHostsReply(
+void
+SListHostsReply(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     int /* size */,
-    xListHostsReply * /* pRep */);
+    xListHostsReply * /* pRep */
+#endif
+);
 
-extern void SErrorEvent(
+void
+SErrorEvent(
+#if NeedFunctionPrototypes
     xError * /* from */,
-    xError * /* to */);
+    xError * /* to */
+#endif
+);
 
-extern void SwapConnSetupInfo(
+void
+SwapConnSetupInfo(
+#if NeedFunctionPrototypes
     char * /* pInfo */,
-    char * /* pInfoTBase */);
+    char * /* pInfoTBase */
+#endif
+);
 
-extern void WriteSConnectionInfo(
+void
+WriteSConnectionInfo(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
     unsigned long /* size */,
-    char * /* pInfo */);
+    char * /* pInfo */
+#endif
+);
 
-extern void SwapConnSetup(
+void
+SwapConnSetup(
+#if NeedFunctionPrototypes
     xConnSetup * /* pConnSetup */,
-    xConnSetup * /* pConnSetupT */);
+    xConnSetup * /* pConnSetupT */
+#endif
+);
 
-extern void SwapWinRoot(
+void
+SwapWinRoot(
+#if NeedFunctionPrototypes
     xWindowRoot * /* pRoot */,
-    xWindowRoot * /* pRootT */);
+    xWindowRoot * /* pRootT */
+#endif
+);
 
-extern void SwapVisual(
+void
+SwapVisual(
+#if NeedFunctionPrototypes
     xVisualType * /* pVis */,
-    xVisualType * /* pVisT */);
+    xVisualType * /* pVisT */
+#endif
+);
 
-extern void SwapConnSetupPrefix(
+void
+SwapConnSetupPrefix(
+#if NeedFunctionPrototypes
     xConnSetupPrefix * /* pcspFrom */,
-    xConnSetupPrefix * /* pcspTo */);
+    xConnSetupPrefix * /* pcspTo */
+#endif
+);
 
-extern void WriteSConnSetupPrefix(
+void
+WriteSConnSetupPrefix(
+#if NeedFunctionPrototypes
     ClientPtr /* pClient */,
-    xConnSetupPrefix * /* pcsp */);
+    xConnSetupPrefix * /* pcsp */
+#endif
+);
 
 #undef SWAPREP_PROC
+#if NeedFunctionPrototypes
 #define SWAPREP_PROC(func) void func(xEvent * /* from */, xEvent * /* to */)
+#else
+#define SWAPREP_PROC(func) void func(/* xEvent * from,    xEvent *    to */)
+#endif
 
 SWAPREP_PROC(SCirculateEvent);
 SWAPREP_PROC(SClientMessageEvent);

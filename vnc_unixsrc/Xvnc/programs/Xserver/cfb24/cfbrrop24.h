@@ -1,7 +1,7 @@
-/* $XFree86: xc/programs/Xserver/cfb24/cfbrrop24.h,v 3.1tsi Exp $ */
+/* $XFree86: xc/programs/Xserver/cfb24/cfbrrop24.h,v 3.0 1996/06/29 09:06:09 dawes Exp $ */
 
-#define RROP_DECLARE \
-    unsigned long piQxelAnd[3], piQxelXor[3], spiQxelXor[8];
+#define RROP_DECLARE	    register unsigned long rrop_and, rrop_xor; \
+    unsigned long piQxelAnd[3], piQxelXor[3],  spiQxelAnd[8], spiQxelXor[8];
 
 #define RROP_COPY_SETUP(ptn)  \
     spiQxelXor[0] = ptn & 0xFFFFFF; \
@@ -26,6 +26,12 @@
     spiQxelXor[3] = xor << 8; \
     spiQxelXor[4] = (xor >> 8) & 0xFFFF; \
     spiQxelXor[5] = (xor >> 16) & 0xFF; \
+    spiQxelAnd[0] = (and & 0xFFFFFF) | 0xFF000000; \
+    spiQxelAnd[1] = (and << 24) | 0xFFFFFF; \
+    spiQxelAnd[2] = (and << 16) | 0xFFFF; \
+    spiQxelAnd[3] = (and << 8) | 0xFF; \
+    spiQxelAnd[4] = ((and >> 8) & 0xFFFF) | 0xFFFF0000; \
+    spiQxelAnd[5] = ((and >> 16) & 0xFF) | 0xFFFFFF00; \
     piQxelAnd[0] = (and & 0xFFFFFF)|(and << 24); \
     piQxelAnd[1] = (and << 16)|((and >> 8) & 0xFFFF); \
     piQxelAnd[2] = (and << 8)|((and >> 16) & 0xFF); \

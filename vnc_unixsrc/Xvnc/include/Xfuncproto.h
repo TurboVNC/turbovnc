@@ -1,13 +1,14 @@
-/* $Xorg: Xfuncproto.h,v 1.4 2001/02/09 02:03:22 xorgcvs Exp $ */
+/* $XConsortium: Xfuncproto.h,v 1.9 95/06/08 23:20:39 gildea Exp $ */
 /* 
  * 
-Copyright 1989, 1991, 1998  The Open Group
+Copyright (c) 1989, 1991  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,16 +16,15 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
  *
  */
-/* $XFree86: xc/include/Xfuncproto.h,v 3.4 2001/12/14 19:53:25 dawes Exp $ */
 
 /* Definitions to make function prototypes manageable */
 
@@ -32,21 +32,37 @@ in this Software without prior written authorization from The Open Group.
 #define _XFUNCPROTO_H_
 
 #ifndef NeedFunctionPrototypes
+#if defined(FUNCPROTO) || defined(__STDC__) || defined(__cplusplus) || defined(c_plusplus)
 #define NeedFunctionPrototypes 1
+#else
+#define NeedFunctionPrototypes 0
+#endif
 #endif /* NeedFunctionPrototypes */
 
 #ifndef NeedVarargsPrototypes
+#if defined(__STDC__) || defined(__cplusplus) || defined(c_plusplus) || (FUNCPROTO&2)
 #define NeedVarargsPrototypes 1
+#else
+#define NeedVarargsPrototypes 0
+#endif
 #endif /* NeedVarargsPrototypes */
 
 #if NeedFunctionPrototypes
 
 #ifndef NeedNestedPrototypes
+#if defined(__STDC__) || defined(__cplusplus) || defined(c_plusplus) || (FUNCPROTO&8)
 #define NeedNestedPrototypes 1
+#else
+#define NeedNestedPrototypes 0
+#endif
 #endif /* NeedNestedPrototypes */
 
 #ifndef _Xconst
+#if defined(__STDC__) || defined(__cplusplus) || defined(c_plusplus) || (FUNCPROTO&4)
 #define _Xconst const
+#else
+#define _Xconst
+#endif
 #endif /* _Xconst */
 
 #ifndef NeedWidePrototypes
@@ -60,7 +76,7 @@ in this Software without prior written authorization from The Open Group.
 #endif /* NeedFunctionPrototypes */
 
 #ifndef _XFUNCPROTOBEGIN
-#if defined(__cplusplus) || defined(c_plusplus) /* for C++ V2.0 */
+#ifdef __cplusplus			/* for C++ V2.0 */
 #define _XFUNCPROTOBEGIN extern "C" {	/* do not leave open across includes */
 #define _XFUNCPROTOEND }
 #else
@@ -68,33 +84,5 @@ in this Software without prior written authorization from The Open Group.
 #define _XFUNCPROTOEND
 #endif
 #endif /* _XFUNCPROTOBEGIN */
-
-#if defined(__GNUC__) && (__GNUC__ >= 4)
-# define _X_SENTINEL(x) __attribute__ ((__sentinel__(x)))
-# define _X_ATTRIBUTE_PRINTF(x,y) __attribute__((__format__(__printf__,x,y)))
-#else
-# define _X_SENTINEL(x)
-# define _X_ATTRIBUTE_PRINTF(x,y)
-#endif /* GNUC >= 4 */
-
-#if defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) >= 303)
-# define _X_EXPORT      __attribute__((visibility("default")))
-# define _X_HIDDEN      __attribute__((visibility("hidden")))
-# define _X_INTERNAL    __attribute__((visibility("internal")))
-#elif defined(__SUNPRO_C) && (__SUNPRO_C >= 0x550)
-# define _X_EXPORT      __global
-# define _X_HIDDEN      __hidden
-# define _X_INTERNAL    __hidden
-#else /* not gcc >= 3.3 and not Sun Studio >= 8 */
-# define _X_EXPORT
-# define _X_HIDDEN
-# define _X_INTERNAL
-#endif
-
-#if defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) >= 301)
-# define _X_DEPRECATED  __attribute__((deprecated))
-#else /* not gcc >= 3.1 */
-# define _X_DEPRECATED
-#endif
 
 #endif /* _XFUNCPROTO_H_ */

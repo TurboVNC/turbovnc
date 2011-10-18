@@ -1,4 +1,4 @@
-/* $Xorg: snfread.c,v 1.5 2001/02/09 02:04:02 xorgcvs Exp $ */
+/* $XConsortium: snfread.c,v 1.17 94/04/17 20:17:16 gildea Exp $ */
 /************************************************************************
 Copyright 1989 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -24,13 +24,15 @@ SOFTWARE.
 
 /*
 
-Copyright 1994, 1998  The Open Group
+Copyright (c) 1994  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -38,49 +40,30 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: xc/lib/font/bitmap/snfread.c,v 1.12 2003/11/17 22:20:22 dawes Exp $ */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#ifndef FONTMODULE
 #include <ctype.h>
-#endif
-
-#include <X11/fonts/fntfilst.h>
-#include <X11/fonts/bitmap.h>
+#include "fntfilst.h"
+#include "bitmap.h"
 #include "snfstr.h"
 
-#include <stdarg.h>
-
-void
-snfError(const char* message, ...)
-{
-    va_list args;
-
-    va_start(args, message);
-
-    fprintf(stderr, "SNF Error: ");
-    vfprintf(stderr, message, args);
-    va_end(args);
-}
-              
-static void snfUnloadFont(FontPtr pFont);
+static void snfUnloadFont();
 
 static int
-snfReadCharInfo(FontFilePtr file, CharInfoPtr charInfo, char *base)
+snfReadCharInfo(file, charInfo, base)
+    FontFilePtr file;
+    CharInfoPtr charInfo;
+    char       *base;
 {
     snfCharInfoRec snfCharInfo;
 
@@ -100,7 +83,9 @@ snfReadCharInfo(FontFilePtr file, CharInfoPtr charInfo, char *base)
 }
 
 static int
-snfReadxCharInfo(FontFilePtr file, xCharInfo *charInfo)
+snfReadxCharInfo(file, charInfo)
+    FontFilePtr file;
+    xCharInfo  *charInfo;
 {
     snfCharInfoRec snfCharInfo;
 
@@ -112,8 +97,10 @@ snfReadxCharInfo(FontFilePtr file, xCharInfo *charInfo)
     return Successful;
 }
 
-static void
-snfCopyInfo(snfFontInfoPtr snfInfo, FontInfoPtr pFontInfo)
+static
+snfCopyInfo(snfInfo, pFontInfo)
+    snfFontInfoPtr snfInfo;
+    FontInfoPtr pFontInfo;
 {
     pFontInfo->firstCol = snfInfo->firstCol;
     pFontInfo->lastCol = snfInfo->lastCol;
@@ -139,7 +126,10 @@ snfCopyInfo(snfFontInfoPtr snfInfo, FontInfoPtr pFontInfo)
 }
 
 static int
-snfReadProps(snfFontInfoPtr snfInfo, FontInfoPtr pFontInfo, FontFilePtr file)
+snfReadProps(snfInfo, pFontInfo, file)
+    snfFontInfoPtr snfInfo;
+    FontInfoPtr pFontInfo;
+    FontFilePtr file;
 {
     char       *strings;
     FontPropPtr pfp;
@@ -151,10 +141,8 @@ snfReadProps(snfFontInfoPtr snfInfo, FontInfoPtr pFontInfo, FontFilePtr file)
     bytestoalloc = snfInfo->nProps * sizeof(snfFontPropRec) +
 	BYTESOFSTRINGINFO(snfInfo);
     propspace = (char *) xalloc(bytestoalloc);
-    if (!propspace) {
-      snfError("snfReadProps(): Couldn't allocate propspace (%d)\n", bytestoalloc);
+    if (!propspace)
 	return AllocError;
-    }
 
     if (FontFileRead(file, propspace, bytestoalloc) != bytestoalloc) {
 	xfree(propspace);
@@ -179,8 +167,10 @@ snfReadProps(snfFontInfoPtr snfInfo, FontInfoPtr pFontInfo, FontFilePtr file)
     return Successful;
 }
 
-static int
-snfReadHeader(snfFontInfoPtr snfInfo, FontFilePtr file)
+int
+snfReadHeader(snfInfo, file)
+    snfFontInfoPtr snfInfo;
+    FontFilePtr file;
 {
     if (FontFileRead(file, (char *) snfInfo, sizeof *snfInfo) != sizeof *snfInfo)
 	return BadFontName;
@@ -191,37 +181,18 @@ snfReadHeader(snfFontInfoPtr snfInfo, FontFilePtr file)
     return Successful;
 }
 
-static int  snf_set;
-static int  snf_bit, snf_byte, snf_glyph, snf_scan;
-
-void
-SnfSetFormat (int bit, int byte, int glyph, int scan)
-{
-    snf_bit = bit;
-    snf_byte = byte;
-    snf_glyph = glyph;
-    snf_scan = scan;
-    snf_set = 1;
-}
-
-static void
-SnfGetFormat (int *bit, int *byte, int *glyph, int *scan)
-{
-    if (!snf_set)
-	FontDefaultFormat (&snf_bit, &snf_byte, &snf_glyph, &snf_scan);
-    *bit = snf_bit;
-    *byte = snf_byte;
-    *glyph = snf_glyph;
-    *scan = snf_scan;
-}
-
 int
-snfReadFont(FontPtr pFont, FontFilePtr file, 
-	    int bit, int byte, int glyph, int scan)
+snfReadFont(pFont, file, bit, byte, glyph, scan)
+    FontPtr     pFont;
+    FontFilePtr file;
+    int         bit,
+                byte,
+                glyph,
+                scan;
 {
     snfFontInfoRec fi;
     unsigned    bytestoalloc;
-    int         i, j;
+    int         i;
     char       *fontspace;
     BitmapFontPtr  bitmapFont;
     int         num_chars;
@@ -258,8 +229,7 @@ snfReadFont(FontPtr pFont, FontFilePtr file,
     metrics_off = bytestoalloc;
     bytestoalloc += num_chars * sizeof(CharInfoRec);	/* metrics */
     encoding_off = bytestoalloc;
-    bytestoalloc += NUM_SEGMENTS(num_chars) * sizeof(CharInfoPtr**);	
-                                                /* encoding */
+    bytestoalloc += num_chars * sizeof(CharInfoPtr);	/* encoding */
     props_off = bytestoalloc;
     bytestoalloc += fi.nProps * sizeof(FontPropRec);	/* props */
     isStringProp_off = bytestoalloc;
@@ -270,14 +240,12 @@ snfReadFont(FontPtr pFont, FontFilePtr file,
 	bytestoalloc += num_chars * sizeof(xCharInfo);	/* ink_metrics */
 
     fontspace = (char *) xalloc(bytestoalloc);
-    if (!fontspace) {
-      snfError("snfReadFont(): Couldn't allocate fontspace (%d)\n", bytestoalloc);
+    if (!fontspace)
 	return AllocError;
-    }
+
     bitmaps = (char *) xalloc (bitmapsSize);
     if (!bitmaps)
     {
-      snfError("snfReadFont(): Couldn't allocate bitmaps (%d)\n", bitmapsSize);
 	xfree (fontspace);
 	return AllocError;
     }
@@ -288,7 +256,7 @@ snfReadFont(FontPtr pFont, FontFilePtr file,
     bitmapFont = (BitmapFontPtr) fontspace;
     bitmapFont->num_chars = num_chars;
     bitmapFont->metrics = (CharInfoPtr) (fontspace + metrics_off);
-    bitmapFont->encoding = (CharInfoPtr **) (fontspace + encoding_off);
+    bitmapFont->encoding = (CharInfoPtr *) (fontspace + encoding_off);
     bitmapFont->bitmaps = bitmaps;
     bitmapFont->pDefault = NULL;
     bitmapFont->bitmapExtra = NULL;
@@ -304,30 +272,16 @@ snfReadFont(FontPtr pFont, FontFilePtr file,
      */
 
     ret = Successful;
-    memset(bitmapFont->encoding, 0, 
-           NUM_SEGMENTS(num_chars)*sizeof(CharInfoPtr*));
     for (i = 0; ret == Successful && i < num_chars; i++) {
 	ret = snfReadCharInfo(file, &bitmapFont->metrics[i], bitmaps);
-	if (bitmapFont->metrics[i].bits) {
-            if (!bitmapFont->encoding[SEGMENT_MAJOR(i)]) {
-                bitmapFont->encoding[SEGMENT_MAJOR(i)]=
-                    (CharInfoPtr*)xcalloc(BITMAP_FONT_SEGMENT_SIZE,
-                                          sizeof(CharInfoPtr));
-                if (!bitmapFont->encoding[SEGMENT_MAJOR(i)]) {
-                    ret = AllocError;
-                    break;
-                }
-            }
-            ACCESSENCODINGL(bitmapFont->encoding,i) = &bitmapFont->metrics[i];
-        }
+	if (bitmapFont->metrics[i].bits)
+	    bitmapFont->encoding[i] = &bitmapFont->metrics[i];
+	else
+	    bitmapFont->encoding[i] = 0;
     }
 
     if (ret != Successful) {
 	xfree(bitmaps);
-        if(bitmapFont->encoding) {
-            for(j=0; j<SEGMENT_MAJOR(i); j++)
-                xfree(bitmapFont->encoding[i]);
-        }
 	xfree(fontspace);
 	return ret;
     }
@@ -335,23 +289,23 @@ snfReadFont(FontPtr pFont, FontFilePtr file,
      * read the glyphs
      */
 
-    if (FontFileRead(file, bitmaps, bitmapsSize) != bitmapsSize) {
+    if (FontFileRead(file, (char *) bitmaps, bitmapsSize) != bitmapsSize) {
 	xfree(bitmaps);
 	xfree(fontspace);
 	return BadFontName;
     }
 
     if (def_bit != bit)
-	BitOrderInvert((unsigned char *)bitmaps, bitmapsSize);
+	BitOrderInvert(bitmaps, bitmapsSize);
     if ((def_byte == def_bit) != (bit == byte)) {
 	switch (bit == byte ? def_scan : scan) {
 	case 1:
 	    break;
 	case 2:
-	    TwoByteSwap((unsigned char *)bitmaps, bitmapsSize);
+	    TwoByteSwap(bitmaps, bitmapsSize);
 	    break;
 	case 4:
-	    FourByteSwap((unsigned char *)bitmaps, bitmapsSize);
+	    FourByteSwap(bitmaps, bitmapsSize);
 	    break;
 	}
     }
@@ -371,7 +325,6 @@ snfReadFont(FontPtr pFont, FontFilePtr file,
 	}
 	padbitmaps = (char *) xalloc(sizepadbitmaps);
 	if (!padbitmaps) {
-	    snfError("snfReadFont(): Couldn't allocate padbitmaps (%d)\n", sizepadbitmaps);
 	    xfree (bitmaps);
 	    xfree (fontspace);
 	    return AllocError;
@@ -446,7 +399,9 @@ snfReadFont(FontPtr pFont, FontFilePtr file,
 }
 
 int
-snfReadFontInfo(FontInfoPtr pFontInfo, FontFilePtr file)
+snfReadFontInfo(pFontInfo, file)
+    FontInfoPtr pFontInfo;
+    FontFilePtr file;
 {
     int         ret;
     snfFontInfoRec fi;
@@ -459,20 +414,17 @@ snfReadFontInfo(FontInfoPtr pFontInfo, FontFilePtr file)
     snfCopyInfo(&fi, pFontInfo);
 
     pFontInfo->props = (FontPropPtr) xalloc(fi.nProps * sizeof(FontPropRec));
-    if (!pFontInfo->props) {
-      snfError("snfReadFontInfo(): Couldn't allocate props (%d*%d)\n", fi.nProps, sizeof(FontPropRec));
+    if (!pFontInfo->props)
 	return AllocError;
-    }
     pFontInfo->isStringProp = (char *) xalloc(fi.nProps * sizeof(char));
     if (!pFontInfo->isStringProp) {
-      snfError("snfReadFontInfo(): Couldn't allocate isStringProp (%d*%d)\n", fi.nProps, sizeof(char));
 	xfree(pFontInfo->props);
 	return AllocError;
     }
     num_chars = n2dChars(&fi);
     bytestoskip = num_chars * sizeof(snfCharInfoRec);	/* charinfos */
     bytestoskip += BYTESOFGLYPHINFO(&fi);
-    (void)FontFileSkip(file, bytestoskip);
+    FontFileSkip(file, bytestoskip);
 
     ret = snfReadProps(&fi, pFontInfo, file);
     if (ret != Successful) {
@@ -502,13 +454,38 @@ snfReadFontInfo(FontInfoPtr pFontInfo, FontFilePtr file)
 }
 
 static void
-snfUnloadFont(FontPtr pFont)
+snfUnloadFont(pFont)
+    FontPtr	    pFont;
 {
     BitmapFontPtr   bitmapFont;
 
     bitmapFont = (BitmapFontPtr) pFont->fontPrivate;
     xfree (bitmapFont->bitmaps);
     xfree (bitmapFont);
-    DestroyFontRec (pFont);
+    xfree (pFont->devPrivates);
+    xfree (pFont);
 }
 
+static int  snf_set;
+static int  snf_bit, snf_byte, snf_glyph, snf_scan;
+
+SnfSetFormat (bit, byte, glyph, scan)
+    int	bit, byte, glyph, scan;
+{
+    snf_bit = bit;
+    snf_byte = byte;
+    snf_glyph = glyph;
+    snf_scan = scan;
+    snf_set = 1;
+}
+
+SnfGetFormat (bit, byte, glyph, scan)
+    int	*bit, *byte, *glyph, *scan;
+{
+    if (!snf_set)
+	FontDefaultFormat (&snf_bit, &snf_byte, &snf_glyph, &snf_scan);
+    *bit = snf_bit;
+    *byte = snf_byte;
+    *glyph = snf_glyph;
+    *scan = snf_scan;
+}

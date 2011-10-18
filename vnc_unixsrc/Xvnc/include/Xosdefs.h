@@ -1,16 +1,17 @@
 /*
  * O/S-dependent (mis)feature macro definitions
  *
- * $XdotOrg: xc/include/Xosdefs.h,v 1.7 2005/11/08 06:33:25 jkj Exp $
- * $Xorg: Xosdefs.h,v 1.5 2001/02/09 02:03:23 xorgcvs Exp $
+ * $XConsortium: Xosdefs.h /main/16 1996/09/28 16:17:29 rws $
+ * $XFree86: xc/include/Xosdefs.h,v 3.11 1996/12/23 05:58:09 dawes Exp $
  *
-Copyright 1991, 1998  The Open Group
+Copyright (c) 1991  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -18,15 +19,14 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
  */
-/* $XFree86: xc/include/Xosdefs.h,v 3.20 2002/05/31 18:45:39 dawes Exp $ */
 
 #ifndef _XOSDEFS_H_
 #define _XOSDEFS_H_
@@ -80,21 +80,16 @@ in this Software without prior written authorization from The Open Group.
 #endif
 #endif
 
-#ifdef _SCO_DS
-#ifndef __SCO__
-#define __SCO__
-#endif
-#endif
-
 #ifdef i386
 #ifdef SYSV
-#if !defined(ISC) && !defined(__SCO__) && !defined(_SEQUENT_) && \
-	!defined(__UNIXWARE__) && !defined(sun)
-#if !defined(_POSIX_SOURCE)
+#if !(defined(ISC) && defined(_POSIX_SOURCE))
+#ifndef SCO
+#ifndef _SCO_DS /* SCO 5.0 has SVR4 header files */
 #define X_NOT_POSIX
 #endif
 #define X_NOT_STDC_ENV
 #endif
+#endif /* !(defined(ISC) && defined(_POSIX_SOURCE)) */
 #endif
 #endif
 
@@ -105,12 +100,6 @@ in this Software without prior written authorization from The Open Group.
 #endif
 
 #ifdef sun
-/* Imake configs define SVR4 on Solaris, but cc & gcc only define __SVR4
- * This check allows non-Imake configured programs to build correctly.
- */
-#if defined(__SVR4) && !defined(SVR4)
-#define SVR4 1
-#endif
 #ifdef SVR4
 /* define this to whatever it needs to be */
 #define X_POSIX_C_SOURCE 199300L
@@ -128,39 +117,12 @@ in this Software without prior written authorization from The Open Group.
 #define X_NOT_STDC_ENV
 #endif
 
-#ifdef __UNIXOS2__
+#ifdef __EMX__
 #define USGISH
-#define NULL_NOT_ZERO
-#endif
-
-#ifdef __DARWIN__
-#define NULL_NOT_ZERO
-#endif
-
-#ifdef __GNU__
-#ifndef PATH_MAX
-#define PATH_MAX 4096
-#endif
-#ifndef MAXPATHLEN
-#define MAXPATHLEN 4096
-#endif
-#endif
-
-#if defined(__SCO__) || defined(__UNIXWARE__)
-# ifndef PATH_MAX
-#  define PATH_MAX	1024
-# endif
-# ifndef MAXPATHLEN
-#  define MAXPATHLEN	1024
-# endif
-#endif
-
-#if defined(__OpenBSD__) || defined(__NetBSD__) || defined(__FreeBSD__) \
-	|| defined(__Darwin__) || defined(__DragonFly__)
-# ifndef CSRG_BASED
-#  define CSRG_BASED
-# endif
+/* EMX claims to be ANSI, so X_NOT_STDC_ENV does not hold */
+/* could have been provided as std flags as well */
+#define X_WCHAR
+#define X_LOCALE
 #endif
 
 #endif /* _XOSDEFS_H_ */
-

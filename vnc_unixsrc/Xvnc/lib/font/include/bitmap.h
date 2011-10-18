@@ -1,14 +1,16 @@
-/* $Xorg: bitmap.h,v 1.4 2001/02/09 02:04:04 xorgcvs Exp $ */
+/* $XConsortium: bitmap.h,v 1.5 94/04/17 20:17:27 gildea Exp $ */
 
 /*
 
-Copyright 1990, 1998  The Open Group
+Copyright (c) 1990  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -16,18 +18,17 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: xc/lib/font/include/bitmap.h,v 1.9 2001/01/17 19:43:31 dawes Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
@@ -36,19 +37,12 @@ from The Open Group.
 #ifndef _BITMAP_H_
 #define _BITMAP_H_
 
-#include <X11/fonts/fntfilio.h>
-#ifndef FONTMODULE
+#include <fntfilio.h>
 #include <stdio.h>  /* just for NULL */
-#else
-#include "xf86_ansic.h"
-#endif
 
 /*
  * Internal format used to store bitmap fonts
  */
-
-/* number of encoding entries in one segment */
-#define BITMAP_FONT_SEGMENT_SIZE 128
 
 typedef struct _BitmapExtra {
     Atom       *glyphNames;
@@ -64,53 +58,17 @@ typedef struct _BitmapFont {
     CharInfoPtr metrics;	/* font metrics, including glyph pointers */
     xCharInfo  *ink_metrics;	/* ink metrics */
     char       *bitmaps;	/* base of bitmaps, useful only to free */
-    CharInfoPtr **encoding;	/* array of arrays of char info pointers */
+    CharInfoPtr *encoding;	/* array of char info pointers */
     CharInfoPtr pDefault;	/* default character */
     BitmapExtraPtr bitmapExtra;	/* stuff not used by X server */
 }           BitmapFontRec, *BitmapFontPtr;
 
-#define ACCESSENCODING(enc,i) \
-(enc[(i)/BITMAP_FONT_SEGMENT_SIZE]?\
-(enc[(i)/BITMAP_FONT_SEGMENT_SIZE][(i)%BITMAP_FONT_SEGMENT_SIZE]):\
-0)
-#define ACCESSENCODINGL(enc,i) \
-(enc[(i)/BITMAP_FONT_SEGMENT_SIZE][(i)%BITMAP_FONT_SEGMENT_SIZE])
+extern int  bitmapReadFont(), bitmapReadFontInfo();
+extern int  bitmapGetGlyphs(), bitmapGetMetrics();
+extern int  bitmapGetBitmaps(), bitmapGetExtents();
+extern void bitmapUnloadFont();
 
-#define SEGMENT_MAJOR(n) ((n)/BITMAP_FONT_SEGMENT_SIZE)
-#define SEGMENT_MINOR(n) ((n)%BITMAP_FONT_SEGMENT_SIZE)
-#define NUM_SEGMENTS(n) \
-  (((n)+BITMAP_FONT_SEGMENT_SIZE-1)/BITMAP_FONT_SEGMENT_SIZE)
-
-extern int bitmapGetGlyphs ( FontPtr pFont, unsigned long count, 
-			     unsigned char *chars, FontEncoding charEncoding, 
-			     unsigned long *glyphCount, CharInfoPtr *glyphs );
-extern int bitmapGetMetrics ( FontPtr pFont, unsigned long count, 
-			      unsigned char *chars, FontEncoding charEncoding,
-			      unsigned long *glyphCount, xCharInfo **glyphs );
-
-extern void bitmapComputeFontBounds ( FontPtr pFont );
-extern void bitmapComputeFontInkBounds ( FontPtr pFont );
-extern Bool bitmapAddInkMetrics ( FontPtr pFont );
-extern int bitmapComputeWeight ( FontPtr pFont );
-
-extern int BitmapOpenBitmap ( FontPathElementPtr fpe, FontPtr *ppFont, 
-			      int flags, FontEntryPtr entry, char *fileName, 
-			      fsBitmapFormat format, fsBitmapFormatMask fmask,
-			      FontPtr non_cachable_font );
-extern int BitmapGetInfoBitmap ( FontPathElementPtr fpe, 
-				 FontInfoPtr pFontInfo, FontEntryPtr entry, 
-				 char *fileName );
-extern void BitmapRegisterFontFileFunctions ( void );
-extern int BitmapGetRenderIndex ( FontRendererPtr renderer );
-
-extern int BitmapOpenScalable ( FontPathElementPtr fpe, FontPtr *pFont, 
-				int flags, FontEntryPtr entry, char *fileName,
-				FontScalablePtr vals, fsBitmapFormat format, 
-				fsBitmapFormatMask fmask, 
-				FontPtr non_cachable_font );
-extern int BitmapGetInfoScalable ( FontPathElementPtr fpe, 
-				   FontInfoPtr pFontInfo, FontEntryPtr entry, 
-				   FontNamePtr fontName, char *fileName, 
-				   FontScalablePtr vals );
+extern void bitmapComputeFontBounds();
+extern void bitmapComputeFontInkBounds();
 
 #endif				/* _BITMAP_H_ */

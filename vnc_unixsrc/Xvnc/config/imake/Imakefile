@@ -1,58 +1,29 @@
-XCOMM $XdotOrg: xc/config/imake/Imakefile,v 1.3 2005/10/10 23:49:09 kem Exp $
-XCOMM $Xorg: Imakefile,v 1.3 2000/08/17 19:41:50 cpqbld Exp $
+XCOMM $TOG: Imakefile /main/10 1997/04/30 15:39:17 kaleb $
 XCOMM
 XCOMM
 XCOMM
 XCOMM
-XCOMM $XFree86: xc/config/imake/Imakefile,v 3.18 2003/10/21 17:41:44 tsi Exp $
+XCOMM $XFree86: xc/config/imake/Imakefile,v 3.6.2.1 1997/06/11 12:08:33 dawes Exp $
 
 XCOMM Some compilers generate fatal errors if an -L directory does
 XCOMM not exist.  Since BUILDLIBDIR may not exist yet suppress its use.
          LDPRELIB =
         LDPRELIBS =
 
-DEPLIBS =
+DEPLIBS = 
 
 INCLUDES = -I$(TOP)/include $(TOP_X_INCLUDES)/X11
 CPP_PROGRAM = CppCmd
 CPP_DEFINES = -DCPP_PROGRAM="\"$(CPP_PROGRAM)\""
-GCC_COMMAND = $(CC) -fmerge-constants -xc /dev/null -S -o /dev/null 2> /dev/null 1> /dev/null
-GCC_DEFINES = -DHAS_MERGE_CONSTANTS=`if $(GCC_COMMAND); then echo 1; else echo 0; fi`
-
-EXTRA_DEFINES=-DMONOLITH
-
-#ifdef CrossCompileDir
-CROSSCOMPILEDIR = CrossCompileDir
-CROSSCOMPILEDEFINES=-DCROSSCOMPILE -DCROSSCOMPILEDIR=\"$(CROSSCOMPILEDIR)\"
-#else
-CROSSCOMPILEDIR =
-CROSSCOMPILEDEFINES=
-BOOTSTRAPDEFINES =
-#endif
-
-DEFINES = $(SIGNAL_DEFINES) $(BOOTSTRAPCFLAGS) $(CPP_DEFINES) $(GCC_DEFINES) \
-	 $(CROSSCOMPILEDEFINES)
-
-EXTRAMANDEFS = -D__cpp__="\"$(CPP_PROGRAM)\""
+DEFINES = $(SIGNAL_DEFINES) $(BOOTSTRAPCFLAGS) $(CPP_DEFINES)
 
 #if defined(MacIIArchitecture) || defined(SequentArchitecture) || defined(i386ScoArchitecture)
 XBSDLIB = /**/
 #endif
 
-#ifdef CrossCompileDir
-# ifdef TargetPreProcessCmd
-CPP = TargetPreProcessCmd
-# else
-CPP = CrossCompileDir/cc -E -
-# endif
-IMAKEMDEFS_CPPDEFINES = $(DEFINES) -DCROSSCOMPILE_CPP
-CppFileTarget(imakemdep_cpp.h,imakemdep.h,$(IMAKEMDEFS_CPPDEFINES),\
-	NullParameter)
-#endif
-
+#if !defined(OS2Architecture)
 #undef ImakeDependency
 #define ImakeDependency(dummy) @@\
-imake.o: imakemdep_cpp.h @@\
 Makefile::  ProgramTargetName(imake)
 
 #if CrossCompiling
@@ -60,10 +31,17 @@ SimpleHostProgramTarget(imake)
 #else
 SimpleProgramTarget(imake)
 #endif
+InstallLinkKitNamedProg(imake,imake,$(LINKKITDIR)/config/imake)
+#else /* OS2Architecture */
+all::
 
-imakeonly:: $(PROGRAM)
-
-InstallDriverSDKNamedProg(imake,imake,$(DRIVERSDKDIR)/config/imake)
+CCOPTIONS = -Zsysv-signals
+EXTRA_LIBRARIES = /*nothing*/
+SimpleProgramTarget(imake)
+InstallLinkKitNamedProg(imake,imake,$(LINKKITDIR)/config/imake)
+InstallNamedProg(imakesvc.cmd,imakesvc.cmd,$(BINDIR))
+InstallLinkKitNamedProg(imakesvc.cmd,imakesvc.cmd,$(LINKKITDIR)/config/imake)
+#endif
 
 #if HasClearmake
 bootstrapdepend: depend
@@ -73,12 +51,4 @@ bootstrapdepend:
 
 clean::
 	RemoveFile(ProgramTargetName(ccimake))
-	RemoveFile(Makefile.proto)
-	RemoveFile(imakemdep_cpp.h)
 	$(RM) -r bootstrap
-
-#ifdef OS2Architecture
-clean::
-	RemoveFiles(imake ccimake)
-
-#endif

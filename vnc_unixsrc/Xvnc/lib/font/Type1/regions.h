@@ -1,4 +1,4 @@
-/* $Xorg: regions.h,v 1.3 2000/08/17 19:46:32 cpqbld Exp $ */
+/* $XConsortium: regions.h,v 1.6 94/04/02 15:49:51 rws Exp $ */
 /* Copyright International Business Machines, Corp. 1991
  * All Rights Reserved
  * Copyright Lexmark International, Inc. 1991
@@ -26,7 +26,6 @@
  * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
  * THIS SOFTWARE.
  */
-/* $XFree86: xc/lib/font/Type1/regions.h,v 1.7 2001/01/17 19:43:23 dawes Exp $ */
 /*SHARED*/
  
 #define   Interior(p,rule)        t1_Interior(p,rule)
@@ -34,27 +33,21 @@
 #define   Intersect(a1,a2)        t1_Intersect(a1,a2)
 #define   Complement(area)        t1_Complement(area)
 #define   Overlap(a1,a2)          t1_OverLap(a1,a2)
-
-
-/* returns the interior of a closed path        */
-extern struct region *t1_Interior ( struct segment *p, int fillrule );
-#if 0
+ 
+struct region *t1_Interior(); /* returns the interior of a closed path        */
 struct region *t1_Union();   /* set union of paths or regions                */
 struct region *t1_Intersect();  /* set intersection of regions                */
 struct region *t1_Complement();  /* complement of a region                    */
 int t1_Overlap();             /* returns a Boolean; TRUE if regions overlap   */
-#endif
-
-#define   TT_INFINITY    t1_Infinity
+ 
+#define   INFINITY    t1_Infinity
  
 /*END SHARED*/
 /*SHARED*/
  
 #define   ChangeDirection(type,R,x,y,dy)  t1_ChangeDirection(type,R,x,y,dy)
  
-/* called when we change direction in Y         */
-extern void t1_ChangeDirection ( int type, struct region *R, fractpel x, 
-				 fractpel y, fractpel dy );
+void t1_ChangeDirection();    /* called when we change direction in Y         */
 #define   CD_FIRST         -1  /* enumeration of ChangeDirection type       */
 #define   CD_CONTINUE       0  /* enumeration of ChangeDirection type        */
 #define   CD_LAST           1  /* enumeration of ChangeDirection type        */
@@ -70,37 +63,17 @@ extern void t1_ChangeDirection ( int type, struct region *R, fractpel x,
 #define    MoveEdges(R,dx,dy) t1_MoveEdges(R,dx,dy)
 #define    UnJumble(R)        t1_UnJumble(R)
  
-typedef struct edgelist *(*SwathFunc)(struct edgelist *, struct edgelist *);
-
-/* get longer edge list for stepping            */
-extern void t1_MoreWorkArea ( struct region *R, fractpel x1, fractpel y1, 
-			      fractpel x2, fractpel y2 );
-/* duplicate a region                       */
-extern struct region *t1_CopyRegion ( struct region *area );
-/* destroy a region                             */
-extern void t1_KillRegion ( struct region *area );
-/* clip a region to a rectangle                 */
-extern struct region *t1_BoxClip ( struct region *R, pel xmin, pel ymin, 
-				   pel xmax, pel ymax );
-/* sort edges onto growing edge list        */
-extern struct edgelist *t1_SortSwath ( struct edgelist *anchor, 
-				       struct edgelist *edge, 
-				       SwathFunc swathfcn );
-/* 'union' two edges into a swath          */
-extern struct edgelist *t1_SwathUnion ( struct edgelist *before0, 
-					struct edgelist *edge );
-/* returns bounding box of a region       */
-extern struct segment *t1_RegionBounds ( struct region *R );
-#ifdef notdef
-/* force text to become a true region      */
-struct region *t1_CoerceRegion(struct textpath *tp);  
-#endif
-/* moves the edge values in a region            */
-extern void t1_MoveEdges ( struct region *R, fractpel dx, fractpel dy );
-/* sort the edges and reset the jumbled flag    */
-extern void t1_UnJumble ( struct region *region );
+void t1_MoreWorkArea();       /* get longer edge list for stepping            */
+struct region *t1_CopyRegion();  /* duplicate a region                       */
+void t1_KillRegion();         /* destroy a region                             */
+struct region *t1_BoxClip();  /* clip a region to a rectangle                 */
+struct edgelist *t1_SortSwath();  /* sort edges onto growing edge list        */
+struct edgelist *t1_SwathUnion();  /* 'union' two edges into a swath          */
+struct segment *t1_RegionBounds();  /* returns bounding box of a region       */
+struct region *t1_CoerceRegion();  /* force text to become a true region      */
+void t1_MoveEdges();          /* moves the edge values in a region            */
+void t1_UnJumble();           /* sort the edges and reset the jumbled flag    */
  
-
 /*END SHARED*/
 /*SHARED*/
  
@@ -122,10 +95,8 @@ extern void t1_UnJumble ( struct region *region );
    else if (x2 > R->edgexmax) R->edgexmax = x2; \
 }
  
-#ifndef FONTMODULE
 #ifndef __sxg__
 #include <limits.h>
-#endif
 #endif
 #ifdef SHRT_MIN
 #define MINPEL SHRT_MIN
@@ -151,9 +122,6 @@ to be made unique for that reason (i.e., references > 1).
 /*END SHARED*/
 /*SHARED*/
  
-typedef void (*NewEdgeFunc)(struct region *, 
-			   fractpel, fractpel, fractpel, fractpel, int);
-
 struct region {
        XOBJ_COMMON           /* xobject common data define 3-26-91 PNM    */
                              /* type = REGIONTYPE                         */
@@ -176,7 +144,7 @@ scratchpad areas used while the region is being built:
        struct edgelist *lastedge,*firstedge;  /* last and first edges in subpath */
        pel *edge;            /* pointer to array of X values for edge        */
        fractpel edgeYstop;   /* Y value where 'edges' array ends             */
-       NewEdgeFunc newedgefcn;  /* function to use when building a new edge  */
+       void (*newedgefcn)();  /* function to use when building a new edge    */
        struct strokeinfo *strokeinfo;  /* scratchpad info during stroking only */
 } ;
 /*
@@ -243,8 +211,3 @@ Interior() rule enumerations:
 #define   CONTINUITY  0x80   /* can be added to above rules; e.g. WINDINGRULE+CONTINUITY */
  
 /*END SHARED*/
-
-/* dump a region structure                     */
-extern void t1_DumpArea ( struct region *area );
-/* dump a region's edge list                   */
-extern void t1_DumpEdges ( struct edgelist *edges );

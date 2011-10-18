@@ -1,13 +1,15 @@
 /*
- * $Xorg: multibuf.h,v 1.4 2001/02/09 02:03:24 xorgcvs Exp $
+ * $XConsortium: multibuf.h,v 1.18 94/04/17 20:11:21 dpw Exp $
+ * $XFree86: xc/include/extensions/multibuf.h,v 3.0 1996/05/06 05:52:38 dawes Exp $
  *
-Copyright 1989, 1998  The Open Group
+Copyright (c) 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,16 +17,14 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
  */
-
-/* $XFree86: xc/include/extensions/multibuf.h,v 3.4 2001/12/14 19:53:28 dawes Exp $ */
 
 #ifndef _MULTIBUF_H_
 #define _MULTIBUF_H_
@@ -173,75 +173,96 @@ typedef struct {
 _XFUNCPROTOBEGIN
 
 extern Bool XmbufQueryExtension(
+#if NeedFunctionPrototypes
     Display*		/* dpy */,
     int*		/* event_base_return */,
     int*		/* error_base_return */
+#endif
 );
 
 extern Status XmbufGetVersion(
+#if NeedFunctionPrototypes
     Display*		/* dpy */,
     int*		/* major_version_return */,
     int*		/* minor_version_return */
+#endif
 );
 
 extern int XmbufCreateBuffers(
+#if NeedFunctionPrototypes
     Display*		/* dpy */,
     Window		/* w */,
     int			/* count */,
     int			/* update_action */,
     int			/* update_hint */,
     Multibuffer*	/* buffers */
+#endif
 );
 
 extern void XmbufDestroyBuffers(
+#if NeedFunctionPrototypes
     Display*		/* dpy */,
     Window		/* window */
+#endif
 );
 
 extern void XmbufDisplayBuffers(
+#if NeedFunctionPrototypes
     Display*		/* dpy */,
     int			/* count */,
     Multibuffer*	/* buffers */,
     int			/* min_delay */,
     int			/* max_delay */
+#endif
 );
 
 extern Status XmbufGetWindowAttributes(
+#if NeedFunctionPrototypes
     Display*			/* dpy */,
     Window			/* w */,
     XmbufWindowAttributes*	/* attr */
+#endif
 );
 
 extern void XmbufChangeWindowAttributes(
+#if NeedFunctionPrototypes
     Display*			/* dpy */,
     Window			/* w */,
     unsigned long		/* valuemask */,
     XmbufSetWindowAttributes*	/* attr */
+#endif
 );
 
 extern Status XmbufGetBufferAttributes(
+#if NeedFunctionPrototypes
     Display*			/* dpy */,
     Multibuffer			/* b */,
     XmbufBufferAttributes*	/* attr */
+#endif
 );
 
 extern void XmbufChangeBufferAttributes(
+#if NeedFunctionPrototypes
     Display*			/* dpy */,
     Multibuffer			/* b */,
     unsigned long		/* valuemask */,
     XmbufSetBufferAttributes*	/* attr */
+#endif
 );
 
 extern Status XmbufGetScreenInfo(
+#if NeedFunctionPrototypes
     Display*			/* dpy */,
     Drawable			/* d */,
     int*			/* nmono_return */,
     XmbufBufferInfo**		/* mono_info_return */,
     int*			/* nstereo_return */,
     XmbufBufferInfo**		/* stereo_info_return */
+#endif
 );
 
 extern Window XmbufCreateStereoWindow(
+#if NeedFunctionPrototypes
     Display*			/* dpy */,
     Window			/* parent */,
     int				/* x */,
@@ -256,9 +277,11 @@ extern Window XmbufCreateStereoWindow(
     XSetWindowAttributes*	/* attr */,
     Multibuffer*		/* leftp */,
     Multibuffer*		/* rightp */
+#endif
 );
 
 extern void XmbufClearBufferArea(
+#if NeedFunctionPrototypes
     Display*			/* dpy */,
     Multibuffer			/* buffer */,
     int				/* x */,
@@ -266,29 +289,33 @@ extern void XmbufClearBufferArea(
     unsigned int		/* width */,
     unsigned int		/* height */,
     Bool			/* exposures */
+#endif
 );
 
 _XFUNCPROTOEND
 
 #else
 
-#include "scrnintstr.h"
-
 typedef Bool	(* mbInitFunc)();
 
 struct _mbufScreen;		/* declared in multibufst.h */
 
 extern void	RegisterMultibufferInit(
+#if NeedFunctionPrototypes
     ScreenPtr			/* pScreen */,
     Bool (* /* bufMultibufferInit */)(
+#if NeedNestedPrototypes
 	ScreenPtr		/* pScreen */,
 	struct _mbufScreen *	/* pMBScreen */
+#endif
     )
+#endif
 );
 
 struct xMbufBufferInfo;		/* declared in multibufst.h */
 
 extern void	RegisterDoubleBufferHardware(
+#if NeedFunctionPrototypes
     ScreenPtr			/* pScreen */,
     int				/* nInfo */,
     struct xMbufBufferInfo *	/* pInfo */,
@@ -296,21 +323,28 @@ extern void	RegisterDoubleBufferHardware(
     DevUnion			/* selectPlane */,
     void (* /* CopyBufferBitsFunc */ )(),
     void (* /* DrawSelectPlaneFunc */ )()
+#endif
 );
 
 extern int	CreateImageBuffers (
+#if NeedFunctionPrototypes
     WindowPtr			/* pWin */,
     int				/* nbuf */,
     XID *			/* ids */,
     int				/* action */,
     int				/* hint */
+#endif
 );
 extern void	DestroyImageBuffers (
+#if NeedFunctionPrototypes
     WindowPtr			/* pWin */
+#endif
 );
 extern int	DisplayImageBuffers (
+#if NeedFunctionPrototypes
     XID *			/* ids */,
     int				/* nbuf */
+#endif
 );
 
 #endif /* _MULTIBUF_SERVER_ */

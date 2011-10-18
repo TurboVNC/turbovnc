@@ -1,6 +1,6 @@
 /*
 #ifndef lint
-$Xorg: recordstr.h,v 1.3 2000/08/18 04:05:46 coskrey Exp $
+$XConsortium: recordstr.h /main/2 1996/01/09 18:15:19 gildea $
 static char sccsid[ ] = "@(#) recordstr.h 1.5 6/5/95 12:37:44";
 #endif
 */
@@ -24,12 +24,8 @@ static char sccsid[ ] = "@(#) recordstr.h 1.5 6/5/95 12:37:44";
  * AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  **************************************************************************/
-/* $XFree86$ */
 
-#ifndef _RECORDSTR_H_
-#define _RECORDSTR_H_
-
-#include <X11/extensions/record.h>
+#include "record.h"
 
 #define RECORD_NAME			"RECORD"
 #define RECORD_MAJOR_VERSION		1
@@ -319,4 +315,4 @@ typedef struct
 #undef RECORD_ELEMENT_HEADER
 #undef RECORD_CLIENTSPEC
 
-#endif
+

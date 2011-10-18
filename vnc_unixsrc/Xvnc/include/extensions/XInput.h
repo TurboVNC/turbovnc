@@ -1,14 +1,15 @@
-/* $Xorg: XInput.h,v 1.4 2001/02/09 02:03:23 xorgcvs Exp $ */
+/* $XConsortium: XInput.h,v 1.22 94/04/17 20:11:13 rws Exp $ */
 
 /************************************************************
 
-Copyright 1989, 1998  The Open Group
+Copyright (c) 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,15 +17,15 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
-Copyright 1989 by Hewlett-Packard Company, Palo Alto, California.
+Copyright (c) 1989 by Hewlett-Packard Company, Palo Alto, California.
 
 			All Rights Reserved
 
@@ -45,15 +46,19 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ********************************************************/
-/* $XFree86: xc/include/extensions/XInput.h,v 1.3 2001/12/14 19:53:28 dawes Exp $ */
 
 /* Definitions used by the library and client */
 
 #ifndef _XINPUT_H_
 #define _XINPUT_H_
 
+#ifndef _XLIB_H_
 #include <X11/Xlib.h>
-#include <X11/extensions/XI.h>
+#endif
+
+#ifndef _XI_H_
+#include "XI.h"
+#endif
 
 #define _deviceKeyPress		0
 #define _deviceKeyRelease	1
@@ -833,18 +838,23 @@ typedef struct {
 _XFUNCPROTOBEGIN
 
 extern int	XChangeKeyboardDevice(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */
+#endif
 );
 
 extern int	XChangePointerDevice(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     int			/* xaxis */,
     int			/* yaxis */
+#endif
 );
 
 extern int	XGrabDevice(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     Window		/* grab_window */,
@@ -854,15 +864,19 @@ extern int	XGrabDevice(
     int			/* this_device_mode */,
     int			/* other_devices_mode */,
     Time		/* time */
+#endif
 );
 
 extern int	XUngrabDevice(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     Time 		/* time */
+#endif
 );
 
 extern int	XGrabDeviceKey(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     unsigned int	/* key */,
@@ -874,18 +888,22 @@ extern int	XGrabDeviceKey(
     XEventClass*	/* event_list */,
     int			/* this_device_mode */,
     int			/* other_devices_mode */
+#endif
 );
 
 extern int	XUngrabDeviceKey(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     unsigned int	/* key */,
     unsigned int	/* modifiers */,
     XDevice*		/* modifier_dev */,
     Window		/* grab_window */
+#endif
 );
 
 extern int	XGrabDeviceButton(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     unsigned int	/* button */,
@@ -897,66 +915,84 @@ extern int	XGrabDeviceButton(
     XEventClass*	/* event_list */,
     int			/* this_device_mode */,
     int			/* other_devices_mode */
+#endif
 );
 
 extern int	XUngrabDeviceButton(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     unsigned int	/* button */,
     unsigned int	/* modifiers */,
     XDevice*		/* modifier_dev */,
     Window		/* grab_window */
+#endif
 );
 
 extern int	XAllowDeviceEvents(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     int			/* event_mode */,
     Time		/* time */
+#endif
 );
 
 extern int	XGetDeviceFocus(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     Window*		/* focus */,
     int*		/* revert_to */,
     Time*		/* time */
+#endif
 );
 
 extern int	XSetDeviceFocus(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     Window		/* focus */,
     int			/* revert_to */,
     Time		/* time */
+#endif
 );
 
 extern XFeedbackState	*XGetFeedbackControl(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     int*		/* num_feedbacks */
+#endif
 );
 
-extern void	XFreeFeedbackList(
+extern int	XFreeFeedbackList(
+#if NeedFunctionPrototypes
     XFeedbackState*	/* list */
+#endif
 );
 
 extern int	XChangeFeedbackControl(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     unsigned long	/* mask */,
     XFeedbackControl*	/* f */
+#endif
 );
 
 extern int	XDeviceBell(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     XID			/* feedbackclass */,
     XID			/* feedbackid */,
     int			/* percent */
+#endif
 );
 
 extern KeySym	*XGetDeviceKeyMapping(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
 #if NeedWidePrototypes
@@ -966,133 +1002,175 @@ extern KeySym	*XGetDeviceKeyMapping(
 #endif
     int			/* keycount */,
     int*		/* syms_per_code */
+#endif
 );
 
 extern int	XChangeDeviceKeyMapping(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     int			/* first */,
     int			/* syms_per_code */,
     KeySym*		/* keysyms */,
     int			/* count */
+#endif
 );
 
 extern XModifierKeymap	*XGetDeviceModifierMapping(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */
+#endif
 );
 
 extern int	XSetDeviceModifierMapping(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     XModifierKeymap*	/* modmap */
+#endif
 );
 
 extern int	XSetDeviceButtonMapping(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     unsigned char*	/* map[] */,
     int			/* nmap */
+#endif
 );
 
 extern int	XGetDeviceButtonMapping(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     unsigned char*	/* map[] */,
     unsigned int	/* nmap */
+#endif
 );
 
 extern XDeviceState	*XQueryDeviceState(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */
+#endif
 );
 
-extern void	XFreeDeviceState(
+extern int	XFreeDeviceState(
+#if NeedFunctionPrototypes
     XDeviceState*	/* list */
+#endif
 );
 
 extern XExtensionVersion	*XGetExtensionVersion(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     _Xconst char*	/* name */
+#endif
 );
 
 extern XDeviceInfo	*XListInputDevices(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     int*		/* ndevices */
+#endif
 );
 
-extern void	XFreeDeviceList(
+extern int	XFreeDeviceList(
+#if NeedFunctionPrototypes
     XDeviceInfo*	/* list */
+#endif
 );
 
 extern XDevice	*XOpenDevice(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XID			/* id */
+#endif
 );
 
 extern int	XCloseDevice(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */
+#endif
 );
 
 extern int	XSetDeviceMode(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     int			/* mode */
+#endif
 );
 
 extern int	XSetDeviceValuators(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     int*		/* valuators */,
     int			/* first_valuator */,
     int			/* num_valuators */
+#endif
 );
 
 extern XDeviceControl	*XGetDeviceControl(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     int			/* control */
+#endif
 );
 
 extern int	XChangeDeviceControl(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     int			/* control */,
     XDeviceControl*	/* d */
+#endif
 );
 
 extern int	XSelectExtensionEvent(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     Window		/* w */,
     XEventClass*	/* event_list */,
     int			/* count */
+#endif
 );
 
 extern int XGetSelectedExtensionEvents(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     Window		/* w */,
     int*		/* this_client_count */,
     XEventClass**	/* this_client_list */,
     int*		/* all_clients_count */,
     XEventClass**	/* all_clients_list */
+#endif
 );
 
 extern int	XChangeDeviceDontPropagateList(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     Window		/* window */,
     int			/* count */,
     XEventClass*	/* events */,
     int			/* mode */
+#endif
 );
 
 extern XEventClass	*XGetDeviceDontPropagateList(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     Window		/* window */,
     int*		/* count */
+#endif
 );
 
 extern Status	XSendExtensionEvent(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     Window		/* dest */,
@@ -1100,9 +1178,11 @@ extern Status	XSendExtensionEvent(
     int			/* count */,
     XEventClass*	/* list */,
     XEvent*		/* event */
+#endif
 );
 
 extern XDeviceTimeCoord	*XGetDeviceMotionEvents(
+#if NeedFunctionPrototypes
     Display*		/* display */,
     XDevice*		/* device */,
     Time		/* start */,
@@ -1110,14 +1190,19 @@ extern XDeviceTimeCoord	*XGetDeviceMotionEvents(
     int*		/* nEvents */,
     int*		/* mode */,
     int*		/* axis_count */
+#endif
 );
 
-extern void	XFreeDeviceMotionEvents(
+extern int	XFreeDeviceMotionEvents(
+#if NeedFunctionPrototypes
     XDeviceTimeCoord*	/* events */
+#endif
 );
 
-extern void	XFreeDeviceControl(
+extern int	XFreeDeviceControl(
+#if NeedFunctionPrototypes
     XDeviceControl*	/* control */
+#endif
 );
 
 _XFUNCPROTOEND

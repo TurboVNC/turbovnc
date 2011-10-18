@@ -1,14 +1,14 @@
-/* $XFree86: xc/programs/Xserver/mfb/mfbgetsp.c,v 1.3tsi Exp $ */
 /* Combined Purdue/PurduePlus patches, level 2.0, 1/17/89 */
 /***********************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,13 +16,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -46,13 +46,9 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $Xorg: mfbgetsp.c,v 1.4 2001/02/09 02:05:19 xorgcvs Exp $ */
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
-#include <X11/Xmd.h>
+/* $XConsortium: mfbgetsp.c,v 5.10 94/04/17 20:28:24 dpw Exp $ */
+#include "X.h"
+#include "Xmd.h"
 
 #include "misc.h"
 #include "region.h"
@@ -81,7 +77,7 @@ mfbGetSpans(pDrawable, wMax, ppt, pwidth, nspans, pchardstStart)
     int			nspans;		/* number of scanlines to copy */
     char		*pchardstStart;	/* where to put the bits */
 {
-    PixelType		*pdstStart = (PixelType *)(pointer)pchardstStart;
+    PixelType		*pdstStart = (PixelType *)pchardstStart;
     register PixelType	*pdst;	/* where to put the bits */
     register PixelType	*psrc;	/* where to get the bits */
     register PixelType	tmpSrc;	/* scratch buffer for bits */
@@ -90,7 +86,7 @@ mfbGetSpans(pDrawable, wMax, ppt, pwidth, nspans, pchardstStart)
     register DDXPointPtr pptLast;	/* one past last point to get */
     int         	xEnd;		/* last pixel to copy from */
     register int	nstart; 
-    int	 		nend = 0; 
+    int	 		nend; 
     int	 		srcStartOver; 
     PixelType 		startmask, endmask;
     unsigned int	srcBit;

@@ -1,10 +1,10 @@
-XCOMM $Xorg: bsdLib.rules,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
+XCOMM $XConsortium: bsdLib.rules /main/3 1996/09/28 16:09:18 rws $
 
 
 
 
 
-XCOMM $XFree86: xc/config/cf/bsdLib.rules,v 3.27 2003/11/20 00:41:37 dawes Exp $
+XCOMM $XFree86: xc/config/cf/bsdLib.rules,v 3.4.2.1 1997/05/11 05:04:04 dawes Exp $
 /*
  * NetBSD/FreeBSD shared library rules
  */
@@ -16,9 +16,7 @@ XCOMM $XFree86: xc/config/cf/bsdLib.rules,v 3.27 2003/11/20 00:41:37 dawes Exp $
 #if !UseElfFormat
 /* a.out shared libs */
 #ifndef HasSharedLibraries
-# ifndef Arm32Architecture
-#  define HasSharedLibraries YES
-# endif
+#define HasSharedLibraries YES
 #endif
 #ifndef SharedDataSeparation
 #define SharedDataSeparation NO
@@ -72,25 +70,6 @@ clean::									@@\
 
 #endif /* SharedLibraryTarget */
 
-/*
- * SharedDepLibraryTarget - generate rules to create a shared library.
- */
-#ifndef SharedDepLibraryTarget
-#define SharedDepLibraryTarget(libname,rev,deplist,solist,down,up)	@@\
-AllTarget(Concat(lib,libname.so.rev))					@@\
-									@@\
-Concat(lib,libname.so.rev):  deplist $(EXTRALIBRARYDEPS)		@@\
-	$(RM) $@~							@@\
-	(cd down; $(LD) -o up/$@~ $(SHLIBLDFLAGS) solist $(REQUIREDLIBS)) @@\
-	$(RM) $@							@@\
-	$(MV) $@~ $@							@@\
-	LinkBuildLibrary($@)						@@\
-									@@\
-clean::									@@\
-	$(RM) Concat(lib,libname.so.rev)
-
-#endif /* SharedDepLibraryTarget */
-
 #ifndef SharedDepModuleTarget
 #define SharedDepModuleTarget(name,deps,solist)				@@\
 AllTarget(name)								@@\
@@ -128,17 +107,6 @@ Concat(varname,LIB) = LoaderLibPrefix Concat(-l,libname)		@@\
 LintLibReferences(varname,libname,libsource)
 #endif
 
- /*
- * SharedFontLibReferences - shared font libraries
- */
-#ifndef SharedFontLibReferences
-#define SharedFontLibReferences()					@@\
-SOFONTREV = SharedFontRev						@@\
-DEPFONTLIB = SharedLibDependencies(Xfont,$(FONTLIBSRC),SOFONTREV)	@@\
-FONTLIB = -L$(FREETYPELIBDIR) -L$(FONTLIBSRC) LoaderLibPrefix -lXfont	@@\
-LintLibReferences(XFONT,Xfont,$(FONTLIBSRC))
-#endif
-
 /*
  * SharedDSLibReferences - variables for shared libraries
  */
@@ -158,9 +126,7 @@ LintLibReferences(varname,libname,libsource)
  *
  * 	Shared libraries depend on -lc.  Since we don't have to worry
  *	about libc vs. libg, etc., this is a good idea.  (This is actually
- *	implied by using $(CC) to build the shared libraries.)  Adding it
- *	explicitly will break threaded applications on platforms that use
- *	libc_r for thread support.
+ *	implied by using $(CC) to build the shared libraries.)
  */
 
 #ifndef HasSharedLibraries
@@ -170,12 +136,8 @@ LintLibReferences(varname,libname,libsource)
 #define ForceNormalLib YES
 #endif
 
-#ifndef UseRpath
-#define UseRpath YES
-#endif
-
 #ifndef BaseShLibReqs
-#define BaseShLibReqs		/* -lc */
+#define BaseShLibReqs		/* -lc implied by $(CC) */
 #endif
 
 #ifndef SharedDataSeparation
@@ -190,18 +152,8 @@ LintLibReferences(varname,libname,libsource)
 #ifndef ShLibIncludeFile
 #define ShLibIncludeFile <bsdLib.tmpl>
 #endif
-#ifndef RpathLoadFlags
-#if UseRpath
-#define RpathLoadFlags -Wl,-rpath,$(USRLIBDIRPATH)
-#else
-#define RpathLoadFlags /**/
-#endif
-#endif
-#ifndef LibraryRpathLoadFlags
-#define LibraryRpathLoadFlags RpathLoadFlags
-#endif
 #ifndef SharedLibraryLoadFlags
-#define SharedLibraryLoadFlags -shared LibraryRpathLoadFlags
+#define SharedLibraryLoadFlags -shared -Wl,-rpath,$(USRLIBDIR)
 #endif
 #ifndef PositionIndependentCFlags
 #define PositionIndependentCFlags -fPIC
@@ -211,93 +163,28 @@ LintLibReferences(varname,libname,libsource)
 #endif
 #ifndef ExtraLoadFlags
 #ifdef UseInstalled
-#define ExtraLoadFlags RpathLoadFlags
+#define ExtraLoadFlags -Wl,-rpath,$(USRLIBDIRPATH)
 #else
-#define ExtraLoadFlags RpathLoadFlags -Wl,-rpath-link,$(BUILDLIBDIR)
+#define ExtraLoadFlags -Wl,-rpath,$(USRLIBDIRPATH) -Wl,-rpath-link,$(BUILDLIBDIR)
 #endif
-#endif
-
-#ifndef HardCodeLibdirFlag
-#define HardCodeLibdirFlag RpathLoadFlags
-#endif
-
-#if !defined(ShlibGlobalsFlags)
-#define ShlibGlobalsFlags -Wl,-Bsymbolic
 #endif
 
 /*
  * InstallSharedLibrary - generate rules to install the shared library.
  * NOTE: file must be executable, hence "INSTBINFLAGS"
  */
-#ifndef FreeBSDArchitecture
-INSTALLMINORREV = true
-#else
-INSTALLMINORREV = false
-#endif
-
 #ifndef InstallSharedLibrary
 #define InstallSharedLibrary(libname,rev,dest)				@@\
 install:: Concat(lib,libname.so.rev) 					@@\
 	MakeDir($(DESTDIR)dest)						@@\
-	@T=`echo Concat(lib,libname.so.rev) | sed 's/\(lib[^\.]*\.so\.[0-9]*\)\(\.[0-9]*\)\{1,2\}/\1/'`;\	@@\
-	if $(INSTALLMINORREV); then \					@@\
-	  INST=Concat(lib,libname.so.rev); \				@@\
-	  LINK=$$T; \							@@\
-	else \								@@\
-	  INST=$$T; \							@@\
-	fi; \								@@\
-	(set -x; \							@@\
-	$(INSTALL) $(INSTALLFLAGS) $(INSTBINFLAGS) $$INST $(DESTDIR)dest); \ @@\
-	if [ X"$$LINK" != X ]; then (set -x; \				@@\
-	  $(RM) $(DESTDIR)dest/$$LINK; \			@@\
-	  $(LN) $$INST $(DESTDIR)dest/$$LINK); \			@@\
-	fi; \								@@\
-	if $(SOSYMLINK); then (set -x; \				@@\
-	  $(RM) Concat($(DESTDIR)dest/lib,libname.so); \	@@\
-	  $(LN) $$T Concat($(DESTDIR)dest/lib,libname.so)); \		@@\
-	fi
+	$(INSTALL) $(INSTALLFLAGS) $(INSTBINFLAGS) Concat(lib,libname.so.rev) $(DESTDIR)dest @@\
+	(T=`echo Concat($(DESTDIR)dest/lib,libname.so.rev) | sed 's/\.[^\.]*$$//'`;\
+		$(RM) $$T && $(LN) Concat(lib,libname.so.rev) $$T)	@@\
+	(T=`echo Concat($(DESTDIR)dest/lib,libname.so.rev) | sed 's/\.so.*$$/.so/'`;\
+		$(RM) $$T && $(LN) Concat(lib,libname.so.rev) $$T)	@@\
+	$(RM) Concat($(DESTDIR)dest/lib,libname.so)			@@\
+	$(LN) Concat(lib,libname.so.rev) Concat($(DESTDIR)dest/lib,libname.so)
 #endif /* InstallSharedLibrary */
-
-#ifndef InstallSharedLibtoolLibrary
-
-#define SetRevisions(rev) V=`expr rev : '\([^:]*\)'`; \			@@\
-		R=`expr rev : '.*:\([^:]*\):'`; \			@@\
-		A=`expr rev : '.*:\([^:]*\)'`; \			@@\
-		REV=$$V; \						@@\
-		REVLIST=""; \						@@\
-		i=$$A; \						@@\
-		while [ $$i -gt 0 ]; do \				@@\
-			REVLIST="$$REVLIST `expr $$REV - $$i`"; \	@@\
-			i=`expr $$i - 1`; \				@@\
-		done
-
-#define InstallSharedLibtoolLibrary(libname,rev,dest)			@@\
-install:: Concat(lib,libname.so) 					@@\
-	MakeDir($(DESTDIR)dest)						@@\
-	@set +e; SetRevisions(rev); \					@@\
-	set -e; \							@@\
-	T=Concat(lib,libname.so.$$REV); \				@@\
-	if $(INSTALLMINORREV); then \					@@\
-	  INST=$$T.0; \							@@\
-	  LINK=$$T; \							@@\
-	else \								@@\
-	  INST=$$T; \							@@\
-	fi; \								@@\
-	(set -x; \							@@\
-	$(INSTALL) $(INSTALLFLAGS) $(INSTBINFLAGS) $$INST $(DESTDIR)dest); \ @@\
-	if [ X"$$LINK" != X ]; then (set -x; \				@@\
-	  $(RM) $(DESTDIR)dest/$$LINK; \				@@\
-	  $(LN) $$INST $(DESTDIR)dest/$$LINK); \			@@\
-	fi; \								@@\
-	for i in $$REVLIST; do (set -x; \				@@\
-	  $(RM) Concat($(DESTDIR)dest/lib,libname.so.$$i); \		@@\
-	  $(LN) Concat(lib,libname.so.$$REV) Concat($(DESTDIR)dest/lib,libname.so.$$i)); \ @@\
-	done; \								@@\
-	if $(SOSYMLINK); then (set -x; \				@@\
-	  $(RM) Concat($(DESTDIR)dest/lib,libname.so); \		@@\
-	  $(LN) Concat(lib,libname.so.$$REV) Concat($(DESTDIR)dest/lib,libname.so)); \									@@\
-	fi
-#endif /* InstallSharedLibtoolLibrary */
 
 /*
  * InstallSharedLibraryData - generate rules to install the shared library data
@@ -313,72 +200,19 @@ install:: Concat(lib,libname.so) 					@@\
  * the library gone for long periods.
  */
 #ifndef SharedLibraryTarget
+#ifdef UseInstalled  
+#define LinkBuildSonameLibrary(lib) true
+#else
+#define LinkBuildSonameLibrary(lib) (RemoveFile($(BUILDLIBDIR)/lib); \
+	cd $(BUILDLIBDIR); $(LN) $(BUILDINCTOP)/$(CURRENT_DIR)/lib .)
+#endif
+
 #define SharedLibraryTarget(libname,rev,solist,down,up)			@@\
 AllTarget(Concat(lib,libname.so.rev))					@@\
 									@@\
 Concat(lib,libname.so.rev):  solist					@@\
 	$(RM) $@~							@@\
-	@SONAME=`echo $@ | sed 's/\(lib[^\.]*\.so\.[0-9]*\)\(\.[0-9]*\)\{1,2\}/\1/'`; \			@@\
-		(set -x; cd down; $(CC) -o up/$@~ $(SHLIBLDFLAGS) -Wl,-soname,$$SONAME solist $(REQUIREDLIBS) BaseShLibReqs); \ @@\
-		(set -x; $(RM) $$SONAME; $(LN) $@ $$SONAME); \		@@\
-		LinkBuildSonameLibrary($$SONAME)			@@\
-	$(RM) $@							@@\
-	$(MV) $@~ $@							@@\
-	LinkBuildLibrary($@)						@@\
-	@if $(SOSYMLINK); then (set -x; \				@@\
-	  $(RM) Concat(lib,libname.so); \				@@\
-	  $(LN) $@ Concat(lib,libname.so)); fi				@@\
-	LinkBuildLibraryMaybe(Concat(lib,libname.so),$(SOSYMLINK))	@@\
-									@@\
-clean::									@@\
-	@SONAME=`echo Concat(lib,libname.so.rev) | sed 's/\(lib[^\.]*\.so\.[0-9]*\)\(\.[0-9]*\)\{1,2\}/\1/'`; \ @@\
-	set -x; $(RM) $$SONAME						@@\
-	$(RM) Concat(lib,libname.so)					@@\
-	$(RM) Concat(lib,libname.so.rev)
-
-#endif /* SharedLibraryTarget */
-
-#ifndef SharedLibtoolLibraryTarget
-#define SharedLibtoolLibraryTarget(libname,rev,solist,down,up)		@@\
-AllTarget(Concat(lib,libname.so))					@@\
-									@@\
-Concat(lib,libname.so):  solist						@@\
-	$(RM) $@~							@@\
-	@set +e; SetRevisions(rev); \					@@\
-	SONAME=$@.$$REV; \						@@\
-	set -e; \							@@\
-	(set -x; cd down; $(CC) -o up/$$SONAME~ $(SHLIBLDFLAGS) -Wl,-soname,$$SONAME solist $(REQUIREDLIBS) BaseShLibReqs); \ @@\
-	(set -x; $(RM) $$SONAME; $(MV) $$SONAME~ $$SONAME); \		@@\
-	LinkBuildSonameLibrary($$SONAME); \				@@\
-	if $(INSTALLMINORREV); then (set -x; \				@@\
-	  $(RM) $$SONAME.0; \						@@\
-	  $(LN) $$SONAME $$SONAME.0); \					@@\
-	fi; \								@@\
-	if $(SOSYMLINK); then (set -x; \				@@\
-	  $(RM) $@; \							@@\
-	  $(LN) $$SONAME $@); \						@@\
-	  LinkBuildLibraryInline($@); \					@@\
-	fi								@@\
-									@@\
-clean::									@@\
-	@set +e; SetRevisions(rev); \					@@\
-		set -xe; \						@@\
-		$(RM) Concat(lib,libname.so.$$REV); \			@@\
-		$(RM) Concat(lib,libname.so.$$REV.0)			@@\
-	$(RM) Concat(lib,libname.so)
-
-#endif /* SharedLibtoolLibraryTarget */
-
-/*
- * SharedDepLibraryTarget - generate rules to create a shared library.
- */
-#ifndef SharedDepLibraryTarget
-#define SharedDepLibraryTarget(libname,rev,deplist,solist,down,up)	@@\
-AllTarget(Concat(lib,libname.so.rev))					@@\
-									@@\
-Concat(lib,libname.so.rev):  deplist					@@\
-	$(RM) $@~							@@\
-	@SONAME=`echo $@ | sed 's/\(lib[^\.]*\.so\.[0-9]*\)\(\.[0-9]*\)\{1,2\}/\1/'`; set -x; \		@@\
+	SONAME=`echo $@ | sed 's/\.[^\.]*$$//'`; \			@@\
 		(cd down; $(CC) -o up/$@~ $(SHLIBLDFLAGS) -Wl,-soname,$$SONAME solist $(REQUIREDLIBS) BaseShLibReqs); \ @@\
 		$(RM) $$SONAME; $(LN) $@ $$SONAME; \			@@\
 		LinkBuildSonameLibrary($$SONAME)			@@\
@@ -390,72 +224,9 @@ Concat(lib,libname.so.rev):  deplist					@@\
 	LinkBuildLibrary(Concat(lib,libname.so))			@@\
 									@@\
 clean::									@@\
-	@SONAME=`echo Concat(lib,libname.so.rev) | sed 's/\(lib[^\.]*\.so\.[0-9]*\)\(\.[0-9]*\)\{1,2\}/\1/'`; \ @@\
-	set -x; $(RM) $$SONAME						@@\
-	$(RM) Concat(lib,libname.so)					@@\
 	$(RM) Concat(lib,libname.so.rev)
 
-#endif /* SharedDepLibraryTarget */
-
-/*
- * SharedDepCplusplusLibraryTarget - generate rules to create a shared library.
- */
-#ifndef SharedDepCplusplusLibraryTarget
-#define SharedDepCplusplusLibraryTarget(libname,rev,deplist,solist,down,up)	@@\
-AllTarget(Concat(lib,libname.so.rev))					@@\
-									@@\
-Concat(lib,libname.so.rev):  deplist					@@\
-	$(RM) $@~							@@\
-	@SONAME=`echo $@ | sed 's/\(lib[^\.]*\.so\.[0-9]*\)\(\.[0-9]*\)\{1,2\}/\1/'`; set -x; \		@@\
-		(cd down; $(CXX) -o up/$@~ $(SHLIBLDFLAGS) -Wl,-soname,$$SONAME solist $(REQUIREDLIBS) BaseShLibReqs); \ @@\
-		$(RM) $$SONAME; $(LN) $@ $$SONAME; \			@@\
-		LinkBuildSonameLibrary($$SONAME)			@@\
-	$(RM) $@							@@\
-	$(MV) $@~ $@							@@\
-	$(RM) Concat(lib,libname.so)					@@\
-	$(LN) $@ Concat(lib,libname.so)					@@\
-	LinkBuildLibrary($@)						@@\
-	LinkBuildLibrary(Concat(lib,libname.so))			@@\
-									@@\
-clean::									@@\
-	@SONAME=`echo Concat(lib,libname.so.rev) | sed 's/\(lib[^\.]*\.so\.[0-9]*\)\(\.[0-9]*\)\{1,2\}/\1/'`; \ @@\
-	set -x; $(RM) $$SONAME						@@\
-	$(RM) Concat(lib,libname.so)					@@\
-	$(RM) Concat(lib,libname.so.rev)
-
-#endif /* SharedDepCplusplusLibraryTarget */
-
-#ifndef SharedDepModuleTarget
-#define SharedDepModuleTarget(name,deps,solist)				@@\
-AllTarget(name)								@@\
-									@@\
-name: deps								@@\
-	$(RM) $@~							@@\
-	$(CC) -o $@~ $(SHLIBLDFLAGS) solist $(REQUIREDLIBS)		@@\
-	$(RM) $@							@@\
-	$(MV) $@~ $@							@@\
-									@@\
-clean::									@@\
-	$(RM) name
-
-#endif /* SharedDepModuleTarget */
-
-#ifndef SharedDriModuleTarget
-#define SharedDriModuleTarget(name,deps,solist)				@@\
-AllTarget(name)								@@\
-									@@\
-name: deps								@@\
-	$(RM) $@~ $@.map						@@\
-	@(echo 'DRI_MODULE { global: __dri*; local: *; };' > $@.map)	@@\
-	$(CC) -o $@~ -Wl,--version-script=$@.map $(SHLIBLDFLAGS) solist $(REQUIREDLIBS) BaseShLibReqs @@\
-	$(RM) $@ $@.map							@@\
-	$(MV) $@~ $@							@@\
-									@@\
-clean::									@@\
-	$(RM) name							@@\
-	$(RM) name.map
-
-#endif /* SharedDriModuleTarget */
+#endif /* SharedLibraryTarget */
 
 /*
  * SharedLibraryDataTarget - generate rules to create shlib data file;
@@ -463,78 +234,5 @@ clean::									@@\
 #ifndef SharedLibraryDataTarget
 #define SharedLibraryDataTarget(libname,rev,salist)
 #endif /* SharedLibraryTarget */
-
-#if defined(FreeBSDArchitecture)
-
-/*
- * Support for building a.out compatibility libraries on a FreeBSD/ELF system.
- */
-#ifndef BuildAoutLibraries
-#define BuildAoutLibraries NO
-#endif
-
-#if BuildAoutLibraries
-
-#define ExtraLibRules
-
-#ifndef AoutSharedLibraryDef
-#define AoutSharedLibraryDef -DBSDSHLIB
-#endif
-#ifndef AoutSharedLibraryLoadFlags
-#define AoutSharedLibraryLoadFlags -aout -Bshareable
-#endif
-#ifndef AoutPositionIndependentCFlags
-#define AoutPositionIndependentCFlags -fpic
-#endif
-
-/*
- * InstallAoutSharedLibrary - generate rules to install the shared library.
- */
-#ifndef InstallAoutSharedLibrary
-#define InstallAoutSharedLibrary(libname,rev,dest)			@@\
-install:: Concat(aout/lib,libname.so.rev)				@@\
-	MakeDir($(DESTDIR)dest)						@@\
-	$(INSTALL) -c $(INSTLIBFLAGS) Concat(aout/lib,libname.so.rev) $(DESTDIR)dest 
-@@\
-
-#endif /* InstallAoutSharedLibrary */
-
-/*
- * AoutSharedLibraryTarget - generate rules to create a shared library;
- * build it into a different name so that we do not hose people by having
- * the library gone for long periods.
- */
-#ifndef AoutSharedLibraryTarget
-#define AoutSharedLibraryTarget(libname,rev,solist,down,up)		@@\
-AllTarget(Concat(down/lib,libname.so.rev))				@@\
-									@@\
-Concat(down/lib,libname.so.rev):  solist $(EXTRALIBRARYDEPS)		@@\
-	$(RM) $@~							@@\
-	(cd down; $(LD) -o up/$@~ AoutSharedLibraryLoadFlags solist)	@@\
-	$(RM) $@							@@\
-	$(MV) $@~ $@							@@\
-									@@\
-clean::									@@\
-	$(RM) Concat(down/lib,libname.so.rev)
-
-#endif /* AoutSharedLibraryTarget */
-
-#define AoutCDebugFlags -aout DefaultCDebugFlags
-#define AoutCplusplusDebugFlags -aout DefaultCplusplusDebugFlags
-
-#define AoutLibObjCompile(options) LibObjCompile(aout,AoutCDebugFlags AoutSharedLibraryDef AoutPositionIndependentCFlags options)
-#define AoutLibObjCplusplusCompile(options) LibObjCompile(aout,AoutCplusplusDebugFlags options)
-
-#define ExtraLibMkdir() _LibMkdir(aout)
-#define ExtraObjCompile(options) AoutLibObjCompile(options)
-#define ExtraObjCplusplusCompile(options) AoutLibObjCplusplusCompile(options)
-#define ExtraCleanDir() LibCleanDir(aout)
-
-#define ExtraLibraryTarget(libname,so,objs) AoutSharedLibraryTarget(libname,so,objs,aout,..)
-#define ExtraInstallLibrary(libname,so) InstallAoutSharedLibrary(libname,so,$(SHLIBDIR)/aout)
-
-#endif
-#endif
-
 
 #endif /* UseElfFormat */

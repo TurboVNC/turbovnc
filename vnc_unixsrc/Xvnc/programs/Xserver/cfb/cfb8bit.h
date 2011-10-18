@@ -7,17 +7,17 @@
  * are used for depths other than 8.  Perhaps the file should be
  * renamed.  dpw
  */
-/* $XFree86: xc/programs/Xserver/cfb/cfb8bit.h,v 3.7 2001/12/14 19:59:20 dawes Exp $ */
 
 /*
 
-Copyright 1989, 1998  The Open Group
+Copyright (c) 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -25,20 +25,17 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 */
 
-/* $Xorg: cfb8bit.h,v 1.4 2001/02/09 02:04:37 xorgcvs Exp $ */
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
+/* $XConsortium: cfb8bit.h,v 1.18 95/04/07 18:59:27 kaleb Exp $ */
+/* $XFree86: xc/programs/Xserver/cfb/cfb8bit.h,v 3.2 1996/06/29 09:05:22 dawes Exp $ */
 
 #include "servermd.h"
 
@@ -173,11 +170,13 @@ extern int		cfb8StippleRRop;
 
 #define RRopBitGroup(dst,bits)					\
     {								\
+    register PixelGroup    _bitsTmp = (bits);			\
     *(dst) = RRopPixels(*(dst),bits);				\
     }
 
 #define MaskRRopBitGroup(dst,bits,mask)				\
     {								\
+    register PixelGroup   _bitsTmp = (bits);			\
     *(dst) = MaskRRopPixels(*(dst),bits,mask);			\
     }
 #endif /* PSZ == 8 */
@@ -1549,19 +1548,24 @@ extern int		cfb8StippleRRop;
 extern PixelGroup cfb8BitLenMasks[PGSZ];
 
 extern int cfb8SetStipple (
+#if NeedFunctionPrototypes
     int	/*alu*/,
-    CfbBits /*fg*/,
-    CfbBits /*planemask*/
+    unsigned long /*fg*/,
+    unsigned long /*planemask*/
+#endif
 );
 
 extern int cfb8SetOpaqueStipple (
+#if NeedFunctionPrototypes
     int /*alu*/,
-    CfbBits /*fg*/,
-    CfbBits /*bg*/,
-    CfbBits /*planemask*/
+    unsigned long /*fg*/,
+    unsigned long /*bg*/,
+    unsigned long /*planemask*/
+#endif
 );
 
 extern int cfb8ComputeClipMasks32 (
+#if NeedFunctionPrototypes
     BoxPtr	/*pBox*/,
     int		/*numRects*/,
     int		/*x*/,
@@ -1569,4 +1573,5 @@ extern int cfb8ComputeClipMasks32 (
     int		/*w*/,
     int		/*h*/,
     CARD32 * /*clips*/
+#endif
 );

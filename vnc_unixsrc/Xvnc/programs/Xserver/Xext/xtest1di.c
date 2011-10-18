@@ -1,5 +1,5 @@
-/* $XdotOrg: xc/programs/Xserver/Xext/xtest1di.c,v 1.6 2005/07/03 08:53:36 daniels Exp $ */
-/* $Xorg: xtest1di.c,v 1.4 2001/02/09 02:04:33 xorgcvs Exp $ */
+/* $XConsortium: xtest1di.c,v 1.13 94/04/17 20:33:01 rws Exp $ */
+/* $XFree86: xc/programs/Xserver/Xext/xtest1di.c,v 3.0 1996/05/06 05:55:45 dawes Exp $ */
 /*
  *	File:  xtest1di.c
  *
@@ -10,13 +10,14 @@
 /*
 
 
-Copyright 1986, 1987, 1988, 1998  The Open Group
+Copyright (c) 1986, 1987, 1988   X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -24,13 +25,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1986, 1987, 1988 by Hewlett-Packard Corporation
@@ -53,7 +54,6 @@ Telephone and Telegraph Company or of the Regents of the
 University of California.
 
 */
-/* $XFree86: xc/programs/Xserver/Xext/xtest1di.c,v 3.5 2003/09/13 21:33:03 dawes Exp $ */
 
 /*****************************************************************************
  * include files
@@ -62,13 +62,9 @@ University of California.
 #define	 NEED_EVENTS
 #define	 NEED_REPLIES
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #include <stdio.h>
-#include <X11/X.h>
-#include <X11/Xproto.h>
+#include "X.h"
+#include "Xproto.h"
 #include "misc.h"
 #include "os.h"
 #include "gcstruct.h"   
@@ -76,14 +72,30 @@ University of California.
 #include "dixstruct.h"
 #include "opaque.h"
 #define  XTestSERVER_SIDE
-#include <X11/extensions/xtestext1.h>
-#include "modinit.h"
+#include "xtestext1.h"
 
 #include "xtest1dd.h"
 
 /*****************************************************************************
  * defines
  ****************************************************************************/
+
+/*****************************************************************************
+ * externals
+ ****************************************************************************/
+
+/*
+ * id of client using XTestGetInput
+ *
+ * defined in xtest1dd.c
+ */
+extern ClientPtr	current_xtest_client;
+/*
+ * id of client using XTestFakeInput
+ *
+ * defined in xtest1dd.c
+ */
+extern ClientPtr	playback_client;
 
 /*****************************************************************************
  * variables
@@ -139,21 +151,29 @@ static DISPATCH_PROC(ProcTestQueryInputSize);
 static DISPATCH_PROC(SProcTestQueryInputSize);
 
 static void	XTestResetProc(
+#if NeedFunctionPrototypes
 	ExtensionEntry *	/* unused */
+#endif
 	);
 static void	SReplyXTestDispatch(
+#if NeedFunctionPrototypes
 	ClientPtr		/* client_ptr */,
 	int			/* size */,
 	char *			/* reply_ptr */
+#endif
 	);
 static void	SEventXTestDispatch(
+#if NeedFunctionPrototypes
 	xEvent *		/* from */,
 	xEvent *		/* to */
+#endif
 	);
 
 static int	XTestCurrentClientGone(
+#if NeedFunctionPrototypes
 	pointer			/* value */,
 	XID			/* id */
+#endif
 	);
 
 /*****************************************************************************
@@ -167,7 +187,7 @@ static int	XTestCurrentClientGone(
  *	(other than the core errors).
  */
 void
-XTestExtension1Init(INITARGS)
+XTestExtension1Init()
 {
 	/*
 	 * holds the pointer to the extension entry structure

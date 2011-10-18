@@ -1,6 +1,6 @@
-/* $Xorg: decompress.c,v 1.4 2001/02/09 02:04:03 xorgcvs Exp $ */
+/* $XConsortium: decompress.c,v 1.6 94/04/17 20:17:00 gildea Exp $ */
 /*
- * Copyright 1985, 1986 The Regents of the University of California.
+ * Copyright (c) 1985, 1986 The Regents of the University of California.
  * All rights reserved.
  *
  * This code is derived from software contributed to Berkeley by
@@ -22,13 +22,14 @@
 
 /*
 
-Copyright 1993, 1998  The Open Group
+Copyright (c) 1993  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -36,25 +37,21 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 */
-/* $XFree86: xc/lib/font/fontfile/decompress.c,v 1.4 2001/01/17 19:43:29 dawes Exp $ */
 /* 
  * decompress - cat a compressed file
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#include <X11/fonts/fontmisc.h>
-#include <X11/fonts/bufio.h>
+#include "fontmisc.h"
+#include <bufio.h>
 
 #define BITS	16
 
@@ -91,6 +88,8 @@ static char_type magic_header[] = { "\037\235" };	/* 1F 9D */
 #else
 # define MAXCODE(n_bits)	((1 << (n_bits)) - 1)
 #endif /* COMPATIBLE */
+
+static code_int getcode();
 
 /*
  * the next two codes should not be changed lightly, as they must not
@@ -134,13 +133,11 @@ static int hsize_table[] = {
     69001	/* 16 bits - 95% occupancy */
 };
 
-static int BufCompressedClose ( BufFilePtr f, int doClose );
-static int BufCompressedFill ( BufFilePtr f );
-static code_int getcode ( CompressedFile *file );
-static int BufCompressedSkip ( BufFilePtr f, int bytes );
+static int  BufCompressedFill(), BufCompressedSkip(), BufCompressedClose();
 
 BufFilePtr
-BufFilePushCompressed (BufFilePtr f)
+BufFilePushCompressed (f)
+    BufFilePtr	f;
 {
     int		    code;
     int		    maxbits;
@@ -154,8 +151,6 @@ BufFilePushCompressed (BufFilePtr f)
 	return 0;
     }
     code = BufFileGet (f);
-    if (code == BUFFILEEOF) return 0;
-    
     maxbits = code & BIT_MASK;
     if (maxbits > BITS || maxbits < 12)
 	return 0;
@@ -184,19 +179,18 @@ BufFilePushCompressed (BufFilePtr f)
     file->offset = 0;
     file->size = 0;
     file->stackp = file->de_stack;
-    bzero(file->buf, BITS);
     file->finchar = file->oldcode = getcode (file);
     if (file->oldcode != -1)
 	*file->stackp++ = file->finchar;
     return BufFileCreate ((char *) file,
 			  BufCompressedFill,
-			  0,
 			  BufCompressedSkip,
 			  BufCompressedClose);
 }
 
 static int
-BufCompressedClose (BufFilePtr f, int doClose)
+BufCompressedClose (f, doClose)
+    BufFilePtr	f;
 {
     CompressedFile  *file;
     BufFilePtr	    raw;
@@ -209,7 +203,8 @@ BufCompressedClose (BufFilePtr f, int doClose)
 }
 
 static int
-BufCompressedFill (BufFilePtr f)
+BufCompressedFill (f)
+    BufFilePtr	    f;
 {
     CompressedFile  *file;
     register char_type *stackp, *de_stack;
@@ -305,7 +300,8 @@ BufCompressedFill (BufFilePtr f)
 static char_type rmask[9] = {0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff};
 
 static code_int
-getcode(CompressedFile *file)
+getcode(file)
+    CompressedFile  *file;
 {
     register code_int code;
     register int r_off, bits;
@@ -379,7 +375,9 @@ getcode(CompressedFile *file)
 }
 
 static int
-BufCompressedSkip (BufFilePtr f, int bytes)
+BufCompressedSkip (f, bytes)
+    BufFilePtr	f;
+    int		bytes;
 {
     int		    c;
     while (bytes--) 
@@ -392,8 +390,9 @@ BufCompressedSkip (BufFilePtr f, int bytes)
 }
 
 #ifdef TEST
-int
-main (int argc, char *argv[])
+main (argc, argv)
+    int	    argc;
+    char    **argv;
 {
     BufFilePtr	    inputraw, input, output;
     int		    c;
@@ -401,10 +400,9 @@ main (int argc, char *argv[])
     inputraw = BufFileOpenRead (0);
     input = BufFilePushCompressed (inputraw);
     output = BufFileOpenWrite (1);
-    while ((c = BufFileGet (input)) != BUFFILEEOF)
+    while ((c = BufFileGet (input)) != -1)
 	BufFilePut (c, output);
     BufFileClose (input, FALSE);
     BufFileClose (output, FALSE);
-    return 0;
 }
 #endif

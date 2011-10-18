@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/cfb/cfbpolypnt.c,v 3.5 2001/10/28 03:33:01 tsi Exp $ */
 /************************************************************
 
-Copyright 1989, 1998  The Open Group
+Copyright (c) 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,23 +15,20 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 ********************************************************/
 
-/* $Xorg: cfbpolypnt.c,v 1.4 2001/02/09 02:04:38 xorgcvs Exp $ */
+/* $XConsortium: cfbpolypnt.c,v 5.17 94/04/17 20:28:57 dpw Exp $ */
+/* $XFree86: xc/programs/Xserver/cfb/cfbpolypnt.c,v 3.0 1996/06/29 09:05:47 dawes Exp $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
+#include "X.h"
 #include "gcstruct.h"
 #include "windowstr.h"
 #include "pixmapstr.h"
@@ -77,19 +74,17 @@ cfbPolyPoint(pDrawable, pGC, mode, npt, pptInit)
 {
     register INT32   pt;
     register INT32   c1, c2;
-    register CARD32    ClipMask = 0x80008000;
-    register CfbBits   xor;
+    register unsigned long   ClipMask = 0x80008000;
+    register unsigned long   xor;
 #ifdef PIXEL_ADDR
     register PixelType   *addrp;
     register int    npwidth;
-#if PSZ != 24
     PixelType	    *addrpt;
-#endif
 #else
-    register CfbBits    *addrl;
+    register unsigned long    *addrl;
     register int    nlwidth;
     register int    xoffset;
-    CfbBits   *addrlt;
+    unsigned long   *addrlt;
 #endif
 #if PSZ == 24
     RROP_DECLARE
@@ -101,7 +96,7 @@ cfbPolyPoint(pDrawable, pGC, mode, npt, pptInit)
     int		    nbox;
     register int    i;
     register BoxPtr pbox;
-    CfbBits   and;
+    unsigned long   and;
     int		    rop = pGC->alu;
     int		    off;
     cfbPrivGCPtr    devPriv;
@@ -111,7 +106,7 @@ cfbPolyPoint(pDrawable, pGC, mode, npt, pptInit)
     rop = devPriv->rop;
     if (rop == GXnoop)
 	return;
-    cclip = pGC->pCompositeClip;
+    cclip = devPriv->pCompositeClip;
     xor = devPriv->xor;
     if ((mode == CoordModePrevious) && (npt > 1))
     {

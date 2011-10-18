@@ -28,7 +28,6 @@
 #include "rfb.h"
 #include "selection.h"
 #include "input.h"
-#include "property.h"
 #include <Xatom.h>
 
 extern WindowPtr *WindowTable; /* Why isn't this in a header file? */

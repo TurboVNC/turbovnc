@@ -1,10 +1,8 @@
-XCOMM $Xorg: hpLib.rules,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
+XCOMM $XConsortium: hpLib.rules /main/16 1996/12/04 11:44:35 swick $
 
 /*
  * HP shared library rules
  */
-
-XCOMM $XFree86: xc/config/cf/hpLib.rules,v 3.3 1999/01/11 05:13:06 dawes Exp $
 
 #ifndef HasSharedLibraries
 # define HasSharedLibraries YES
@@ -112,29 +110,6 @@ clean::									@@\
 	$(RM) Concat(lib,libname.sl.rev) Concat(lib,libname.sl)
 
 #endif /* SharedLibraryTarget */
-
-/*
- * SharedDepLibraryTarget - generate rules to create a shared library.
- */
-#ifndef SharedDepLibraryTarget
-# define SharedDepLibraryTarget(libname,rev,deplist,solist,down,up)	@@\
-AllTarget(Concat(lib,libname.sl.rev))					@@\
-									@@\
-Concat(lib,libname.sl.rev):  deplist $(EXTRALIBRARYDEPS)		@@\
-	$(RM) $@~							@@\
-	LinkWithExports(libname,rev,solist,down,up)			@@\
-	-RemoveFiles($@ $@.bak)						@@\
-	MoveToBakFile($@)						@@\
-	$(MV) $@~ $@							@@\
-	$(RM) Concat(lib,libname.sl)					@@\
-	$(LN) $@ Concat(lib,libname.sl)					@@\
-	LinkBuildLibrary($@)						@@\
-	LinkBuildLibrary(Concat(lib,libname.sl))			@@\
-									@@\
-clean::									@@\
-	$(RM) Concat(lib,libname.sl.rev) Concat(lib,libname.sl)
-
-#endif /* SharedDepLibraryTarget */
 
 /*
  * SharedLibraryDataTarget - generate rules to create shlib data file;

@@ -1,14 +1,15 @@
-/* $Xorg: AuGetBest.c,v 1.4 2001/02/09 02:03:42 xorgcvs Exp $ */
+/* $XConsortium: AuGetBest.c /main/23 1996/12/04 11:04:55 lehors $ */
 
 /*
 
-Copyright 1988, 1998  The Open Group
+Copyright (c) 1988  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,20 +17,16 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 */
-/* $XFree86: xc/lib/Xau/AuGetBest.c,v 1.7 2001/12/14 19:54:36 dawes Exp $ */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 #include <X11/Xauth.h>
 #include <X11/Xos.h>
 #ifdef XTHREADS
@@ -41,8 +38,10 @@ in this Software without prior written authorization from The Open Group.
 #include <X11/Xos_r.h>
 #endif
 
-static int
-binaryEqual (_Xconst char *a, _Xconst char *b, int len)
+static
+binaryEqual (a, b, len)
+register char	*a, *b;
+register int	len;
 {
     while (len--)
 	if (*a++ != *b++)
@@ -50,6 +49,7 @@ binaryEqual (_Xconst char *a, _Xconst char *b, int len)
     return 1;
 }
 
+#if NeedFunctionPrototypes
 Xauth *
 XauGetBestAuthByAddr (
 #if NeedWidePrototypes
@@ -69,6 +69,20 @@ XauGetBestAuthByAddr (
     int			types_length,
     char**		types,
     _Xconst int*	type_lengths)
+#else
+Xauth *
+XauGetBestAuthByAddr (family, address_length, address,
+			  number_length, number,
+			  types_length, types, type_lengths)
+    unsigned short	family;
+    unsigned short	address_length;
+    char		*address;
+    unsigned short	number_length;
+    char		*number;
+    int			types_length;
+    char		**types;
+    int			*type_lengths;
+#endif
 {
     FILE    *auth_file;
     char    *auth_name;
@@ -92,9 +106,7 @@ XauGetBestAuthByAddr (
 
 #ifdef hpux
     if (family == FamilyLocal) {
-#ifdef XTHREADS_NEEDS_BYNAMEPARAMS
 	_Xgethostbynameparams hparams;
-#endif
 	struct hostent *hostp;
 
 	/* make sure we try fully-qualified hostname */
@@ -119,14 +131,16 @@ XauGetBestAuthByAddr (
 	/*
 	 * Match when:
 	 *   either family or entry->family are FamilyWild or
-	 *    family and entry->family are the same and
-	 *     address and entry->address are the same
+	 *    family and entry->family are the same
+	 *  and
+	 *   either address or entry->address are empty or
+	 *    address and entry->address are the same
 	 *  and
 	 *   either number or entry->number are empty or
 	 *    number and entry->number are the same
 	 *  and
-	 *   either name or entry->name are empty or
-	 *    name and entry->name are the same
+	 *   name matches one of the specified names, or no names
+	 *    were specified
 	 */
 
 	if ((family == FamilyWild || entry->family == FamilyWild ||

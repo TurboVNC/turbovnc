@@ -1,14 +1,16 @@
-/* $Xorg: fileio.c,v 1.4 2001/02/09 02:04:03 xorgcvs Exp $ */
+/* $XConsortium: fileio.c /main/5 1996/11/03 19:32:03 kaleb $ */
+/* $XFree86: xc/lib/font/fontfile/fileio.c,v 3.1 1996/12/23 06:02:20 dawes Exp $ */
 
 /*
 
-Copyright 1991, 1998  The Open Group
+Copyright (c) 1991  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,32 +18,29 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 */
-/* $XFree86: xc/lib/font/fontfile/fileio.c,v 3.9 2001/12/14 19:56:51 dawes Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#include <X11/fonts/fntfilio.h>
+#include <fntfilio.h>
 #include <X11/Xos.h>
 #ifndef O_BINARY
-#define O_BINARY O_RDONLY
+#define O_BINARY 0
 #endif
 
 FontFilePtr
-FontFileOpen (const char *name)
+FontFileOpen (name)
+    char    *name;
 {
     int		fd;
     int		len;
@@ -57,7 +56,7 @@ FontFileOpen (const char *name)
 	return 0;
     }
     len = strlen (name);
-#ifndef __UNIXOS2__
+#ifndef __EMX__
     if (len > 2 && !strcmp (name + len - 2, ".Z")) {
 #else
     if (len > 2 && (!strcmp (name + len - 4, ".pcz") || 
@@ -82,9 +81,9 @@ FontFileOpen (const char *name)
     return (FontFilePtr) raw;
 }
 
-int
-FontFileClose (FontFilePtr f)
+FontFileClose (f)
+    FontFilePtr	f;
 {
-    return BufFileClose ((BufFilePtr) f, TRUE);
+    BufFileClose ((BufFilePtr) f, TRUE);
 }
 

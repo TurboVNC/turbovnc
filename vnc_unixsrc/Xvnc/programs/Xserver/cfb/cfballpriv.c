@@ -1,13 +1,14 @@
 /*
- * $Xorg: cfballpriv.c,v 1.4 2001/02/09 02:04:37 xorgcvs Exp $
+ * $XConsortium: cfballpriv.c,v 1.5 94/04/17 20:28:42 dpw Exp $
  *
-Copyright 1991, 1998  The Open Group
+Copyright (c) 1991  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,24 +16,19 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
  *
  * Author:  Keith Packard, MIT X Consortium
  */
-/* $XFree86: xc/programs/Xserver/cfb/cfballpriv.c,v 1.11 2001/01/30 22:06:15 tsi Exp $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
-#include <X11/Xmd.h>
+#include "X.h"
+#include "Xmd.h"
 #include "servermd.h"
 #include "scrnintstr.h"
 #include "pixmapstr.h"
@@ -46,15 +42,13 @@ in this Software without prior written authorization from The Open Group.
 #include "cfbmskbits.h"
 #include "mibstore.h"
 
-#if 1 || PSZ==8
-int cfbWindowPrivateIndex = -1;
-int cfbGCPrivateIndex = -1;
-#endif
+int cfbWindowPrivateIndex;
+int cfbGCPrivateIndex;
 #ifdef CFB_NEED_SCREEN_PRIVATE
-int cfbScreenPrivateIndex = -1;
-static unsigned long cfbGeneration = 0;
+int cfbScreenPrivateIndex;
 #endif
 
+extern RegionPtr (*cfbPuntCopyPlane)();
 
 Bool
 cfbAllocatePrivates(pScreen, window_index, gc_index)
@@ -62,7 +56,7 @@ cfbAllocatePrivates(pScreen, window_index, gc_index)
     int		*window_index, *gc_index;
 {
     if (!window_index || !gc_index ||
-	(*window_index == -1 && *gc_index == -1))
+	*window_index == -1 && *gc_index == -1)
     {
     	if (!mfbAllocatePrivates(pScreen,
 			     	 &cfbWindowPrivateIndex, &cfbGCPrivateIndex))
@@ -81,12 +75,9 @@ cfbAllocatePrivates(pScreen, window_index, gc_index)
 			       sizeof(cfbPrivWin)) ||
 	!AllocateGCPrivate(pScreen, cfbGCPrivateIndex, sizeof(cfbPrivGC)))
 	return FALSE;
+    cfbPuntCopyPlane = miCopyPlane;
 #ifdef CFB_NEED_SCREEN_PRIVATE
-    if (cfbGeneration != serverGeneration)
-    {
-      cfbScreenPrivateIndex = AllocateScreenPrivateIndex ();
-      cfbGeneration = serverGeneration;
-    }
+    cfbScreenPrivateIndex = AllocateScreenPrivateIndex ();
     if (cfbScreenPrivateIndex == -1)
 	return FALSE;
 #endif

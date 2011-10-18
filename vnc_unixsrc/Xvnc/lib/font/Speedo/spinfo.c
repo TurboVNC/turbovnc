@@ -1,4 +1,4 @@
-/* $Xorg: spinfo.c,v 1.4 2001/02/09 02:04:00 xorgcvs Exp $ */
+/* $TOG: spinfo.c /main/17 1997/06/09 14:19:24 barstow $ */
 /*
  * Copyright 1990, 1991 Network Computing Devices;
  * Portions Copyright 1987 by Digital Equipment Corporation
@@ -24,13 +24,15 @@
 
 /*
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -38,30 +40,21 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: xc/lib/font/Speedo/spinfo.c,v 1.12 2001/12/14 19:56:42 dawes Exp $ */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#include <X11/fonts/fntfilst.h>
-#include <X11/fonts/fontutil.h>
+#include "fntfilst.h"
 #include "spint.h"
-#ifndef FONTMODULE
 #include <math.h>
-#else
-#include "xf86_ansic.h"
-#endif
 
 /* percentage of pointsize used to specify ascent & descent */
 #define	STRETCH_FACTOR	120
@@ -78,35 +71,33 @@ typedef struct _fontProp {
 }           fontProp;
 
 static fontProp fontNamePropTable[] = {
-    { "FOUNDRY", 0, atom },
-    { "FAMILY_NAME", 0, atom },
-    { "WEIGHT_NAME", 0, atom },
-    { "SLANT", 0, atom },
-    { "SETWIDTH_NAME", 0, atom },
-    { "ADD_STYLE_NAME", 0, atom },
-    { "PIXEL_SIZE", 0, pixel_size },
-    { "POINT_SIZE", 0, point_size },
-    { "RESOLUTION_X", 0, resolution_x },
-    { "RESOLUTION_Y", 0, resolution_y },
-    { "SPACING", 0, atom },
-    { "AVERAGE_WIDTH", 0, average_width },
-    { "CHARSET_REGISTRY", 0, atom },
-    { "CHARSET_ENCODING", 0, truncate_atom }
+    "FOUNDRY", 0, atom,
+    "FAMILY_NAME", 0, atom,
+    "WEIGHT_NAME", 0, atom,
+    "SLANT", 0, atom,
+    "SETWIDTH_NAME", 0, atom,
+    "ADD_STYLE_NAME", 0, atom,
+    "PIXEL_SIZE", 0, pixel_size,
+    "POINT_SIZE", 0, point_size,
+    "RESOLUTION_X", 0, resolution_x,
+    "RESOLUTION_Y", 0, resolution_y,
+    "SPACING", 0, atom,
+    "AVERAGE_WIDTH", 0, average_width,
+    "CHARSET_REGISTRY", 0, atom,
+    "CHARSET_ENCODING", 0, truncate_atom,
 };
 
 /* Warning: following array is closely related to the sequence of
    defines after it. */
 
 static fontProp extraProps[] = {
-    { "FONT", 0, },
-    { "COPYRIGHT", 0, },
-    { "RAW_PIXEL_SIZE", 0, },
-    { "RAW_POINT_SIZE", 0, },
-    { "RAW_ASCENT", 0, },
-    { "RAW_DESCENT", 0, },
-    { "RAW_AVERAGE_WIDTH", 0, },
-    { "FONT_TYPE", 0, },
-    { "RASTERIZER_NAME", 0, }
+    "FONT", 0, 0,
+    "COPYRIGHT", 0, 0,
+    "RAW_PIXEL_SIZE", 0, 0,
+    "RAW_POINT_SIZE", 0, 0,
+    "RAW_ASCENT", 0, 0,
+    "RAW_DESCENT", 0, 0,
+    "RAW_AVERAGE_WIDTH", 0, 0,
 };
 
 /* this is a bit kludgy */
@@ -117,8 +108,7 @@ static fontProp extraProps[] = {
 #define RAWASCENTPROP	4
 #define RAWDESCENTPROP	5
 #define RAWWIDTHPROP	6
-#define FONT_TYPEPROP   7
-#define RASTERIZER_NAMEPROP 8
+
 
 #define NNAMEPROPS (sizeof(fontNamePropTable) / sizeof(fontProp))
 #define NEXTRAPROPS (sizeof(extraProps) / sizeof(fontProp))
@@ -140,9 +130,9 @@ sp_make_standard_props()
 }
 
 void
-sp_make_header(
-    SpeedoFontPtr spf,
-    FontInfoPtr pinfo)
+sp_make_header(spf, pinfo)
+    SpeedoFontPtr spf;
+    FontInfoPtr pinfo;
 {
     int         pixel_size;
     SpeedoMasterFontPtr spmf = spf->master;
@@ -182,10 +172,10 @@ sp_make_header(
 }
 
 static void
-adjust_min_max(
+adjust_min_max(minc, maxc, tmp)
     xCharInfo  *minc,
-    xCharInfo  *maxc,
-    xCharInfo  *tmp)
+               *maxc,
+               *tmp;
 {
 #define MINMAX(field,ci) \
 	if (minc->field > (ci)->field) \
@@ -209,11 +199,11 @@ adjust_min_max(
 
 
 void
-sp_compute_bounds(
-    SpeedoFontPtr spf,
-    FontInfoPtr pinfo,
-    unsigned long flags,
-    long *sWidth)
+sp_compute_bounds(spf, pinfo, flags, sWidth)
+    SpeedoFontPtr spf;
+    FontInfoPtr pinfo;
+    unsigned long flags;
+    long *sWidth;
 {
     int         i,
                 id,
@@ -337,18 +327,18 @@ sp_compute_bounds(
 }
 
 void
-sp_compute_props(
-    SpeedoFontPtr spf,
-    char       *fontname,
-    FontInfoPtr pinfo,
-    long	sWidth)
+sp_compute_props(spf, fontname, pinfo, sWidth)
+    SpeedoFontPtr spf;
+    char       *fontname;
+    FontInfoPtr pinfo;
+    long	sWidth;
 {
     FontPropPtr pp;
     int         i,
                 nprops;
     fontProp   *fpt;
     char       *is_str;
-    char       *ptr1 = NULL,
+    char       *ptr1,
                *ptr2;
     char       *ptr3;
     char	tmpname[1024];
@@ -362,7 +352,6 @@ sp_compute_props(
 	pinfo->isStringProp = (char *) 0;
 	xfree(pinfo->props);
 	pinfo->props = (FontPropPtr) 0;
-	pinfo->nprops = 0;
 	return;
     }
     bzero(pinfo->isStringProp, (sizeof(char) * nprops));
@@ -426,16 +415,6 @@ sp_compute_props(
 	    *is_str = TRUE;
 	    pp->value = MakeAtom(spf->master->copyright,
 				 strlen(spf->master->copyright), TRUE);
-	    break;
-	case FONT_TYPEPROP:
-	    *is_str = TRUE;
-	    pp->value = MakeAtom("Speedo", strlen("Speedo"), TRUE);
-	    break;
-	case RASTERIZER_NAMEPROP:
-	    *is_str = TRUE;
-	    pp->value = MakeAtom("X Consortium Speedo Rasterizer",
-                                 strlen("X Consortium Speedo Rasterizer"), 
-                                 TRUE);
 	    break;
          case RAWPIXELPROP:
             *is_str = FALSE;

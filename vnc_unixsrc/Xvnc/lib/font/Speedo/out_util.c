@@ -1,4 +1,4 @@
-/* $Xorg: out_util.c,v 1.3 2000/08/17 19:46:26 cpqbld Exp $ */
+/* $XConsortium: out_util.c,v 1.2 91/05/11 09:53:35 rws Exp $ */
 
 /*
 
@@ -21,12 +21,8 @@ INCIDENTAL OR CONSEQUENTIAL DAMAGES, ARISING OUT OF OR IN ANY WAY CONNECTED
 WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 
 */
-/* $XFree86: xc/lib/font/Speedo/out_util.c,v 1.2 1999/02/07 06:18:17 dawes Exp $ */
 
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 #define	DEBUG	0
 
 /*************************** O U T _ U T I L . C *****************************
@@ -41,9 +37,9 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 #define   ABS(X)     ( (X < 0) ? -X : X)
 #if INCL_BLACK || INCL_2D || INCL_SCREEN
 
-FUNCTION  void init_char_out(
+FUNCTION  void init_char_out(Psw,Pmin,Pmax)
 GDECL
-point_t Psw, point_t Pmin, point_t Pmax)
+point_t Psw, Pmin, Pmax;
 {
 sp_globals.set_width.x = (fix31)Psw.x << sp_globals.poshift;
 sp_globals.set_width.y = (fix31)Psw.y << sp_globals.poshift;
@@ -68,11 +64,11 @@ else
 sp_globals.first_pass = TRUE;
 }
 
-FUNCTION void begin_sub_char_out(
+FUNCTION void begin_sub_char_out(Psw, Pmin, Pmax)
 GDECL
-point_t Psw,
-point_t Pmin,
-point_t Pmax)
+point_t Psw;                   
+point_t Pmin;                   
+point_t Pmax;                   
 /* Called at the start of each sub-character in a composite character
  */
 {
@@ -93,10 +89,10 @@ if (!sp_globals.extents_running)
 	}
 }
 
-FUNCTION void curve_out(
+FUNCTION void curve_out(P1, P2, P3,depth)
 GDECL
-point_t P1, point_t P2, point_t P3,
-fix15 depth)
+point_t P1, P2, P3;                   
+fix15 depth;
 /* Called for each curve in the transformed character if curves out enabled
  */
 {
@@ -220,10 +216,10 @@ sp_globals.first_offset = sp_globals.next_offset;
 
 
 
-FUNCTION void set_first_band_out(
+FUNCTION void set_first_band_out(Pmin, Pmax)
 GDECL
-point_t Pmin,
-point_t Pmax)
+point_t Pmin;
+point_t Pmax;
 {
 
 sp_globals.ymin = Pmin.y;

@@ -3,12 +3,8 @@
  * Do not change!  Changing this file implies a protocol change!
  */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
-#include <X11/Xatom.h>
+#include "X.h"
+#include "Xatom.h"
 #include "misc.h"
 #include "dix.h"
 void MakePredeclaredAtoms()

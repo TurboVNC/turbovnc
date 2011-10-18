@@ -1,13 +1,15 @@
-/* $Xorg: auth.c,v 1.5 2001/02/09 02:05:23 xorgcvs Exp $ */
+/* $XConsortium: auth.c /main/27 1996/12/02 10:22:41 lehors $ */
 /*
 
-Copyright 1988, 1998  The Open Group
+Copyright (c) 1988  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -15,59 +17,86 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: auth.c,v 1.13 2003/04/27 21:31:08 herrb Exp $ */
 
 /*
  * authorization hooks for the server
  * Author:  Keith Packard, MIT X Consortium
  */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifdef K5AUTH
 # include   <krb5/krb5.h>
 #endif
-# include   <X11/X.h>
-# include   <X11/Xauth.h>
+# include   "X.h"
+# include   "Xauth.h"
 # include   "misc.h"
-# include   "osdep.h"
 # include   "dixstruct.h"
 # include   <sys/types.h>
 # include   <sys/stat.h>
 #ifdef XCSECURITY
 #define _SECURITY_SERVER
-# include   <X11/extensions/security.h>
+# include   "extensions/security.h"
 #endif
 #ifdef WIN32
-#include    <X11/Xw32defs.h>
+#include "Xw32defs.h"
 #endif
 
 struct protocol {
     unsigned short   name_length;
     char    *name;
-    AuthAddCFunc	Add;	/* new authorization data */
-    AuthCheckFunc	Check;	/* verify client authorization data */
-    AuthRstCFunc	Reset;	/* delete all authorization data entries */
-    AuthToIDFunc	ToID;	/* convert cookie to ID */
-    AuthFromIDFunc	FromID;	/* convert ID to cookie */
-    AuthRemCFunc	Remove;	/* remove a specific cookie */
+    int     (*Add)();	    /* new authorization data */
+    XID	    (*Check)();	    /* verify client authorization data */
+    int     (*Reset)();	    /* delete all authorization data entries */
+    XID	    (*ToID)();	    /* convert cookie to ID */
+    int	    (*FromID)();    /* convert ID to cookie */
+    int	    (*Remove)();    /* remove a specific cookie */
 #ifdef XCSECURITY
-    AuthGenCFunc	Generate;
+    XID     (*Generate)();
 #endif
 };
+
+extern int  MitAddCookie ();
+extern XID  MitCheckCookie ();
+extern int  MitResetCookie ();
+extern XID  MitToID ();
+extern int  MitFromID (), MitRemoveCookie ();
+extern XID  MitGenerateCookie();
+
+#ifdef HASXDMAUTH
+extern int  XdmAddCookie ();
+extern XID  XdmCheckCookie ();
+extern int  XdmResetCookie ();
+extern XID  XdmToID ();
+extern int  XdmFromID (), XdmRemoveCookie ();
+#endif
+
+#ifdef SECURE_RPC
+extern int  SecureRPCAdd();
+extern XID  SecureRPCCheck();
+extern int  SecureRPCReset();
+extern XID  SecureRPCToID();
+extern int  SecureRPCFromID(), SecureRPCRemove();
+#endif
+
+#ifdef K5AUTH
+extern int K5Add();
+extern XID K5Check();
+extern int K5Reset();
+extern XID K5ToID();
+extern int K5FromID(), K5Remove();
+#endif
+
+extern XID AuthSecurityCheck();
 
 static struct protocol   protocols[] = {
 {   (unsigned short) 18,    "MIT-MAGIC-COOKIE-1",
@@ -127,13 +156,14 @@ static char *authorization_file = (char *)NULL;
 static Bool ShouldLoadAuth = TRUE;
 
 void
-InitAuthorization (char *file_name)
+InitAuthorization (file_name)
+char	*file_name;
 {
     authorization_file = file_name;
 }
 
-static int
-LoadAuthorization (void)
+int
+LoadAuthorization ()
 {
     FILE    *f;
     Xauth   *auth;
@@ -143,12 +173,10 @@ LoadAuthorization (void)
     ShouldLoadAuth = FALSE;
     if (!authorization_file)
 	return 0;
-
-    f = Fopen (authorization_file, "r");
+    f = fopen (authorization_file, "r");
     if (!f)
-	return -1;
-
-    while ((auth = XauReadAuth (f)) != 0) {
+	return 0;
+    while (auth = XauReadAuth (f)) {
 	for (i = 0; i < NUM_AUTHORIZATION; i++) {
 	    if (protocols[i].name_length == auth->name_length &&
 		memcmp (protocols[i].name, auth->name, (int) auth->name_length) == 0 &&
@@ -161,8 +189,7 @@ LoadAuthorization (void)
 	}
 	XauDisposeAuth (auth);
     }
-
-    Fclose (f);
+    fclose (f);
     return count;
 }
 
@@ -172,7 +199,7 @@ LoadAuthorization (void)
  * schemes supported by the display
  */
 void
-RegisterAuthorizations (void)
+RegisterAuthorizations ()
 {
     int	    i;
 
@@ -183,25 +210,22 @@ RegisterAuthorizations (void)
 #endif
 
 XID
-CheckAuthorization (
-    unsigned int name_length,
-    char	*name,
-    unsigned int data_length,
-    char	*data,
-    ClientPtr client,
-    char	**reason)	/* failure message.  NULL for default msg */
+CheckAuthorization (name_length, name, data_length, data, client, reason)
+    unsigned int name_length;
+    char	*name;
+    unsigned int data_length;
+    char	*data;
+    ClientPtr client;
+    char	**reason;	/* failure message.  NULL for default msg */
 {
     int	i;
     struct stat buf;
     static time_t lastmod = 0;
-    static Bool loaded = FALSE;
 
     if (!authorization_file || stat(authorization_file, &buf))
     {
-	if (lastmod != 0) {
-	    lastmod = 0;
-	    ShouldLoadAuth = TRUE;	/* stat lost, so force reload */
-	}
+	lastmod = 0;
+	ShouldLoadAuth = TRUE;	/* stat lost, so force reload */
     }
     else if (buf.st_mtime > lastmod)
     {
@@ -210,45 +234,24 @@ CheckAuthorization (
     }
     if (ShouldLoadAuth)
     {
-	int loadauth = LoadAuthorization();
-
-	/*
-	 * If the authorization file has at least one entry for this server,
-	 * disable local host access. (loadauth > 0)
-	 *
-	 * If there are zero entries (either initially or when the
-	 * authorization file is later reloaded), or if a valid
-	 * authorization file was never loaded, enable local host access.
-	 * (loadauth == 0 || !loaded)
-	 *
-	 * If the authorization file was loaded initially (with valid
-	 * entries for this server), and reloading it later fails, don't
-	 * change anything. (loadauth == -1 && loaded)
-	 */
-	
-	if (loadauth > 0)
-	{
+	if (LoadAuthorization())
 	    DisableLocalHost(); /* got at least one */
-	    loaded = TRUE;
-	}
-	else if (loadauth == 0 || !loaded)
+	else
 	    EnableLocalHost ();
     }
-    if (name_length) {
+    if (name_length)
 	for (i = 0; i < NUM_AUTHORIZATION; i++) {
 	    if (protocols[i].name_length == name_length &&
 		memcmp (protocols[i].name, name, (int) name_length) == 0)
 	    {
 		return (*protocols[i].Check) (data_length, data, client, reason);
 	    }
-	    *reason = "Protocol not supported by server\n";
 	}
-    } else *reason = "No protocol specified\n";
     return (XID) ~0L;
 }
 
 void
-ResetAuthorization (void)
+ResetAuthorization ()
 {
     int	i;
 
@@ -259,11 +262,11 @@ ResetAuthorization (void)
 }
 
 XID
-AuthorizationToID (
-	unsigned short	name_length,
-	char		*name,
-	unsigned short	data_length,
-	char		*data)
+AuthorizationToID (name_length, name, data_length, data)
+unsigned short	name_length;
+char	*name;
+unsigned short	data_length;
+char	*data;
 {
     int	i;
 
@@ -279,12 +282,12 @@ AuthorizationToID (
 }
 
 int
-AuthorizationFromID (
-	XID 		id,
-	unsigned short	*name_lenp,
-	char		**namep,
-	unsigned short	*data_lenp,
-	char		**datap)
+AuthorizationFromID (id, name_lenp, namep, data_lenp, datap)
+XID id;
+unsigned short	*name_lenp;
+char	**namep;
+unsigned short	*data_lenp;
+char	**datap;
 {
     int	i;
 
@@ -300,11 +303,11 @@ AuthorizationFromID (
 }
 
 int
-RemoveAuthorization (
-	unsigned short	name_length,
-	char		*name,
-	unsigned short	data_length,
-	char		*data)
+RemoveAuthorization (name_length, name, data_length, data)
+unsigned short	name_length;
+char	*name;
+unsigned short	data_length;
+char	*data;
 {
     int	i;
 
@@ -320,7 +323,11 @@ RemoveAuthorization (
 }
 
 int
-AddAuthorization (unsigned name_length, char *name, unsigned data_length, char *data)
+AddAuthorization (name_length, name, data_length, data)
+unsigned int name_length;
+char	*name;
+unsigned int data_length;
+char	*data;
 {
     int	i;
 
@@ -338,13 +345,14 @@ AddAuthorization (unsigned name_length, char *name, unsigned data_length, char *
 #ifdef XCSECURITY
 
 XID
-GenerateAuthorization(
-	unsigned name_length,
-	char	*name,
-	unsigned data_length,
-	char	*data,
-	unsigned *data_length_return,
-	char	**data_return)
+GenerateAuthorization(name_length, name, data_length, data,
+		      data_length_return, data_return)
+unsigned int name_length;
+char	*name;
+unsigned int data_length;
+char	*data;
+unsigned int *data_length_return;
+char	**data_return;
 {
     int	i;
 
@@ -367,20 +375,23 @@ GenerateAuthorization(
 static unsigned long int next = 1;
 
 static int
-xdm_rand(void)
+xdm_rand()
 {
     next = next * 1103515245 + 12345;
     return (unsigned int)(next/65536) % 32768;
 }
 
 static void
-xdm_srand(unsigned int seed)
+xdm_srand(seed)
+    unsigned int seed;
 {
     next = seed;
 }
 
 void
-GenerateRandomData (int len, char *buf)
+GenerateRandomData (len, buf)
+int	len;
+char	*buf;
 {
     static int seed;
     int value;

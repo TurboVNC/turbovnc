@@ -1,4 +1,4 @@
-/* $Xorg: Printstr.h,v 1.3 2000/08/18 04:05:44 coskrey Exp $ */
+/* $XConsortium: Printstr.h /main/2 1996/11/16 15:20:15 rws $ */
 /******************************************************************************
  ******************************************************************************
  **
@@ -43,7 +43,6 @@
  **
  ******************************************************************************
  *****************************************************************************/
-/* $XFree86: xc/include/extensions/Printstr.h,v 1.5 2001/08/01 00:44:35 tsi Exp $ */
 
 
 #ifndef _XpPrintstr_H_
@@ -662,8 +661,9 @@ extern XPHinterProc  _xp_hinter_proc;
 extern char         *_xp_hinter_desc;
 extern int           _xp_hinter_init;
 
-#else /* _XP_PRINT_SERVER_ */
+#endif /* _XP_PRINT_SERVER_ */
 
+#ifdef _XP_PRINT_SERVER_
 /***********************************************************************
  *
  * Server-only definitions shared between the extension and DDX layers.
@@ -676,70 +676,27 @@ extern int           _xp_hinter_init;
  */
 #define Suspended 84
 
-struct _XpContext;
-
 extern void XpRegisterPrinterScreen(
     ScreenPtr pScreen,
-    int (*CreateContext)(struct _XpContext *));
+    int (*CreateContext)());
 
 typedef struct _xpprintFuncs {
-    int (*StartJob)(
-	struct _XpContext *	/* pContext */,
-	Bool			/* sendClientData */,
-	ClientPtr		/* client */);
-    int (*EndJob)(struct _XpContext *, int);
-    int (*StartDoc)(
-	struct _XpContext *	/* pContext */,
-	XPDocumentType		/* type */);
-    int (*EndDoc)(struct _XpContext *, int);
-    int (*StartPage)(
-	struct _XpContext *	/* pContext */,
-	WindowPtr		/* pWin */);
-    int (*EndPage)(
-	struct _XpContext *	/* pContext */,
-	WindowPtr		/* pWin */);
-    int (*PutDocumentData)(
-	struct _XpContext *	/* pContext */,
-    	DrawablePtr		/* pDraw */,
-	char *			/* pData */,
-	int			/* len_data */,
-	char *			/* pDoc_fmt */,
-	int			/* len_fmt */,
-	char *			/* pOptions */,
-	int			/* len_options */,
-	ClientPtr		/* client */);
-    int (*GetDocumentData)(
-	struct _XpContext *	/* pContext */,
-	ClientPtr		/* client */,
-	int			/* maxBufferSize */);
-    int (*DestroyContext)(
-	struct _XpContext *);	/* pContext */
-    char *(*GetAttributes)(
-	struct _XpContext *,
-	XPAttributes 		/* pool */);
-    char *(*GetOneAttribute)(
-	struct _XpContext *	/* pContext */,
-	XPAttributes 		/* pool */,
-	char *			/* attrs */);
-    int (*SetAttributes)(
-	struct _XpContext *	/* pContext */,
-	XPAttributes 		/* pool */,
-	char *			/* attrs */);
-    int (*AugmentAttributes)(
-	struct _XpContext *	/* pContext */,
-	XPAttributes 		/* pool */,
-	char *			/* attrs */);
-    int (*GetMediumDimensions)(
-	struct _XpContext *	/* pPrintContext */,
-	CARD16 *		/* pWidth */,
-	CARD16 *		/* pHeight */);
-    int (*GetReproducibleArea)(
-	struct _XpContext *	/* pPrintContext */,
-	xRectangle *		/* pRect */);
-    int (*SetImageResolution)(
-	struct _XpContext *	/* pPrintContext */,
-	int			/* imageRes */,
-	Bool *			/* pStatus */);
+    int (*StartJob)(); /* pContext, client */
+    int (*EndJob)(); /* pContext, client */
+    int (*StartDoc)(); /* pContext, client */
+    int (*EndDoc)(); /* pContext, client */
+    int (*StartPage)(); /* pContext, pWin, client, exposures */
+    int (*EndPage)(); /* pContext, client */
+    int (*PutDocumentData)(); /* pContext,pDraw,pData,len_data,pFmt,len_fmt,pOpt,len_opt, client */
+    int (*GetDocumentData)(); /* pContext,pData,len_data,pFmt,len_fmt,pOpt,len_opt, client */
+    int (*DestroyContext)(); /* pContext, client */
+    char *(*GetAttributes)(); /* pContext, pool */
+    char *(*GetOneAttribute)(); /* pContext, pool, attr */
+    int (*SetAttributes)(); /* pContext, pool, attrs */
+    int (*AugmentAttributes)(); /* pContext, pool, attrs */
+    int (*GetMediumDimensions)(); /* pPrintContext, pWidth, pHeight */
+    int (*GetReproducibleArea)(); /* pPrintContext, pRect */
+    int (*SetImageResolution)(); /* pPrintContext, imageRes, pStatus */
 } XpDriverFuncs, *XpDriverFuncsPtr;
 
 /*
@@ -764,20 +721,12 @@ typedef struct _XpContext {
 	int imageRes;
 } XpContextRec, *XpContextPtr;
 
-#include <X11/fonts/fontstruct.h>	/* FontResolutionPtr */
-
-extern Bool XpAllocateContextPrivate(int, unsigned);
-extern FontResolutionPtr XpGetClientResolutions(ClientPtr, int *);
-extern XpContextPtr XpContextOfClient(ClientPtr);
-extern XpContextPtr XpGetPrintContext(ClientPtr);
-extern int XpAllocateContextPrivateIndex(void);
-extern int XpRehashPrinterList(void);
-extern void XpSetFontResFunc(ClientPtr);
-extern void XpUnsetFontResFunc(ClientPtr);
-extern void XpRegisterInitFunc(ScreenPtr, char *, int (*)(struct _XpContext *));
+extern XpContextPtr XpGetPrintContext(
+    ClientPtr client);
 
 #endif /* _XP_PRINT_SERVER_ */
 
 _XFUNCPROTOEND
 
 #endif /* _XpPrintstr_H_ */
+

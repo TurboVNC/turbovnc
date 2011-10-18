@@ -1,14 +1,13 @@
-/* $XdotOrg: xc/programs/Xserver/include/cursor.h,v 1.6 2005/08/24 11:18:30 daniels Exp $ */
-/* $XFree86: xc/programs/Xserver/include/cursor.h,v 1.6 2002/09/17 01:15:14 dawes Exp $ */
 /***********************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -46,8 +45,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $Xorg: cursor.h,v 1.4 2001/02/09 02:05:15 xorgcvs Exp $ */
-
+/* $XConsortium: cursor.h,v 1.22 94/04/17 20:25:34 dpw Exp $ */
 #ifndef CURSOR_H
 #define CURSOR_H 
 
@@ -57,49 +55,34 @@ SOFTWARE.
 
 #define NullCursor ((CursorPtr)NULL)
 
-/* Provide support for alpha composited cursors */
-#ifdef RENDER
-#define ARGB_CURSOR
-#endif
-
 typedef struct _Cursor *CursorPtr;
 typedef struct _CursorMetric *CursorMetricPtr;
 
 extern CursorPtr rootCursor;
 
 extern int FreeCursor(
+#if NeedFunctionPrototypes
     pointer /*pCurs*/,
-    XID /*cid*/);
-
-/* Quartz support on Mac OS X pulls in the QuickDraw
-   framework whose AllocCursor function conflicts here. */ 
-#ifdef __DARWIN__
-#define AllocCursor Darwin_X_AllocCursor
+    XID /*cid*/
 #endif
-extern CursorPtr AllocCursor(
-    unsigned char* /*psrcbits*/,
-    unsigned char* /*pmaskbits*/,
-    CursorMetricPtr /*cm*/,
-    unsigned /*foreRed*/,
-    unsigned /*foreGreen*/,
-    unsigned /*foreBlue*/,
-    unsigned /*backRed*/,
-    unsigned /*backGreen*/,
-    unsigned /*backBlue*/);
+);
 
-extern CursorPtr AllocCursorARGB(
+extern CursorPtr AllocCursor(
+#if NeedFunctionPrototypes
     unsigned char* /*psrcbits*/,
     unsigned char* /*pmaskbits*/,
-    CARD32* /*argb*/,
     CursorMetricPtr /*cm*/,
     unsigned /*foreRed*/,
     unsigned /*foreGreen*/,
     unsigned /*foreBlue*/,
     unsigned /*backRed*/,
     unsigned /*backGreen*/,
-    unsigned /*backBlue*/);
+    unsigned /*backBlue*/
+#endif
+);
 
 extern int AllocGlyphCursor(
+#if NeedFunctionPrototypes
     Font /*source*/,
     unsigned int /*sourceChar*/,
     Font /*mask*/,
@@ -111,39 +94,59 @@ extern int AllocGlyphCursor(
     unsigned /*backGreen*/,
     unsigned /*backBlue*/,
     CursorPtr* /*ppCurs*/,
-    ClientPtr /*client*/);
+    ClientPtr /*client*/
+#endif
+);
 
 extern CursorPtr CreateRootCursor(
+#if NeedFunctionPrototypes
     char* /*pfilename*/,
-    unsigned int /*glyph*/);
+    unsigned int /*glyph*/
+#endif
+);
 
 extern int ServerBitsFromGlyph(
+#if NeedFunctionPrototypes
     FontPtr /*pfont*/,
     unsigned int /*ch*/,
     register CursorMetricPtr /*cm*/,
-    unsigned char ** /*ppbits*/);
+    unsigned char ** /*ppbits*/
+#endif
+);
 
 extern Bool CursorMetricsFromGlyph(
+#if NeedFunctionPrototypes
     FontPtr /*pfont*/,
     unsigned /*ch*/,
-    CursorMetricPtr /*cm*/);
+    CursorMetricPtr /*cm*/
+#endif
+);
 
 extern void CheckCursorConfinement(
-    WindowPtr /*pWin*/);
+#if NeedFunctionPrototypes
+    WindowPtr /*pWin*/
+#endif
+);
 
 extern void NewCurrentScreen(
+#if NeedFunctionPrototypes
     ScreenPtr /*newScreen*/,
     int /*x*/,
-    int /*y*/);
+    int /*y*/
+#endif
+);
 
-extern Bool PointerConfinedToScreen(void);
+extern Bool PointerConfinedToScreen(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
 extern void GetSpritePosition(
+#if NeedFunctionPrototypes
     int * /*px*/,
-    int * /*py*/);
-
-#ifdef PANORAMIX
-extern int XineramaGetCursorScreen(void);
-#endif /* PANORAMIX */
+    int * /*py*/
+#endif
+);
 
 #endif /* CURSOR_H */

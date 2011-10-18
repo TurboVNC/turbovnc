@@ -1,5 +1,6 @@
 /*
- * $Xorg: ifparser.c,v 1.3 2000/08/17 19:41:50 cpqbld Exp $
+ * $XConsortium: ifparser.c /main/10 1996/09/28 16:15:18 rws $
+ * $XFree86: xc/config/makedepend/ifparser.c,v 3.6 1996/12/30 13:57:55 dawes Exp $
  *
  * Copyright 1992 Network Computing Devices, Inc.
  * 
@@ -36,7 +37,6 @@
  *     VALUE		:=	'('  EXPRESSION  ')'
  * 			 |	'!'  VALUE
  * 			 |	'-'  VALUE
- * 			 |	'+'  VALUE
  *			 |	'~'  VALUE
  * 			 |	'defined'  '('  variable  ')'
  * 			 |	'defined'  variable
@@ -59,13 +59,9 @@
  * 
  *     ParseIfExpression		parse a string for #if
  */
-/* $XFree86: xc/config/makedepend/ifparser.c,v 3.10tsi Exp $ */
 
 #include "ifparser.h"
 #include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
 
 /****************************************************************************
 		   Internal Macros and Utilities for Parser
@@ -78,7 +74,10 @@
 
 
 static const char *
-parse_variable (IfParser *g, const char *cp, const char **varp)
+parse_variable (g, cp, varp)
+    IfParser *g;
+    const char *cp;
+    const char **varp;
 {
     SKIPSPACE (cp);
 
@@ -93,55 +92,32 @@ parse_variable (IfParser *g, const char *cp, const char **varp)
 
 
 static const char *
-parse_number (IfParser *g, const char *cp, long *valp)
+parse_number (g, cp, valp)
+    IfParser *g;
+    const char *cp;
+    long *valp;
 {
-    long base = 10;
     SKIPSPACE (cp);
 
     if (!isdigit(*cp))
 	return CALLFUNC(g, handle_error) (g, cp, "number");
 
-    *valp = 0;
-
-    if (*cp == '0') {
-	cp++;
-	if ((*cp == 'x') || (*cp == 'X')) {
-	    base = 16;
-	    cp++;
-	} else {
-	    base = 8;
-	}
-    }
-
-    /* Ignore overflows and assume ASCII, what source is usually written in */
-    while (1) {
-	int increment = -1;
-	if (base == 8) {
-	    if ((*cp >= '0') && (*cp <= '7'))
-		increment = *cp++ - '0';
-	} else if (base == 16) {
-	    if ((*cp >= '0') && (*cp <= '9'))
-		increment = *cp++ - '0';
-	    else if ((*cp >= 'A') &&  (*cp <= 'F'))
-		increment = *cp++ - ('A' - 10);
-	    else if ((*cp >= 'a') && (*cp <= 'f'))
-		increment = *cp++ - ('a' - 10);
-	} else {	/* Decimal */
-	    if ((*cp >= '0') && (*cp <= '9'))
-		increment = *cp++ - '0';
-	}
-	if (increment < 0)
-	    break;
-	*valp = (*valp * base) + increment;
-    }
-
-    /* Skip trailing qualifiers */
+    *valp = strtol(cp, &cp, 0);
+    /* skip trailing qualifiers */
     while (*cp == 'U' || *cp == 'u' || *cp == 'L' || *cp == 'l') cp++;
+#if 0
+    *valp = atoi (cp);
+    /* EMPTY */
+    for (cp++; isdigit(*cp); cp++) ;
+#endif
     return cp;
 }
 
 static const char *
-parse_character (IfParser *g, const char *cp, long *valp)
+parse_character (g, cp, valp)
+    IfParser *g;
+    const char *cp;
+    long *valp;
 {
     char val;
 
@@ -170,9 +146,12 @@ parse_character (IfParser *g, const char *cp, long *valp)
 }
 
 static const char *
-parse_value (IfParser *g, const char *cp, long *valp)
+parse_value (g, cp, valp)
+    IfParser *g;
+    const char *cp;
+    long *valp;
 {
-    const char *var, *varend;
+    const char *var;
 
     *valp = 0;
 
@@ -197,10 +176,6 @@ parse_value (IfParser *g, const char *cp, long *valp)
       case '-':
 	DO (cp = parse_value (g, cp + 1, valp));
 	*valp = -(*valp);
-	return cp;
-
-      case '+':
-	DO (cp = parse_value (g, cp + 1, valp));
 	return cp;
 
       case '~':
@@ -256,24 +231,7 @@ parse_value (IfParser *g, const char *cp, long *valp)
 	return CALLFUNC(g, handle_error) (g, cp, "variable or number");
     else {
 	DO (cp = parse_variable (g, cp, &var));
-	varend = cp;
-	SKIPSPACE(cp);
-	if (*cp != '(') {
-	    *valp = (*(g->funcs.eval_variable)) (g, var, varend - var);
-	} else {
-	    do {
-		long dummy;
-		DO (cp = ParseIfExpression (g, cp + 1, &dummy));
-		SKIPSPACE(cp);
-		if (*cp == ')')
-		    break;
-		if (*cp != ',')
-		    return CALLFUNC(g, handle_error) (g, cp, ",");
-	    } while (1);
-
-	    *valp = 1;	/* XXX */
-	    cp++;
-	}
+	*valp = (*(g->funcs.eval_variable)) (g, var, cp - var);
     }
     
     return cp;
@@ -282,7 +240,10 @@ parse_value (IfParser *g, const char *cp, long *valp)
 
 
 static const char *
-parse_product (IfParser *g, const char *cp, long *valp)
+parse_product (g, cp, valp)
+    IfParser *g;
+    const char *cp;
+    long *valp;
 {
     long rightval;
 
@@ -297,10 +258,7 @@ parse_product (IfParser *g, const char *cp, long *valp)
 
       case '/':
 	DO (cp = parse_product (g, cp + 1, &rightval));
-    if (rightval)
-	    *valp = (*valp / rightval);
-    else
-        *valp = LONG_MAX;
+	*valp = (*valp / rightval);
 	break;
 
       case '%':
@@ -313,7 +271,10 @@ parse_product (IfParser *g, const char *cp, long *valp)
 
 
 static const char *
-parse_sum (IfParser *g, const char *cp, long *valp)
+parse_sum (g, cp, valp)
+    IfParser *g;
+    const char *cp;
+    long *valp;
 {
     long rightval;
 
@@ -336,7 +297,10 @@ parse_sum (IfParser *g, const char *cp, long *valp)
 
 
 static const char *
-parse_shift (IfParser *g, const char *cp, long *valp)
+parse_shift (g, cp, valp)
+    IfParser *g;
+    const char *cp;
+    long *valp;
 {
     long rightval;
 
@@ -363,7 +327,10 @@ parse_shift (IfParser *g, const char *cp, long *valp)
 
 
 static const char *
-parse_inequality (IfParser *g, const char *cp, long *valp)
+parse_inequality (g, cp, valp)
+    IfParser *g;
+    const char *cp;
+    long *valp;
 {
     long rightval;
 
@@ -396,7 +363,10 @@ parse_inequality (IfParser *g, const char *cp, long *valp)
 
 
 static const char *
-parse_equality (IfParser *g, const char *cp, long *valp)
+parse_equality (g, cp, valp)
+    IfParser *g;
+    const char *cp;
+    long *valp;
 {
     long rightval;
 
@@ -423,7 +393,10 @@ parse_equality (IfParser *g, const char *cp, long *valp)
 
 
 static const char *
-parse_band (IfParser *g, const char *cp, long *valp)
+parse_band (g, cp, valp)
+    IfParser *g;
+    const char *cp;
+    long *valp;
 {
     long rightval;
 
@@ -443,7 +416,10 @@ parse_band (IfParser *g, const char *cp, long *valp)
 
 
 static const char *
-parse_bxor (IfParser *g, const char *cp, long *valp)
+parse_bxor (g, cp, valp)
+    IfParser *g;
+    const char *cp;
+    long *valp;
 {
     long rightval;
 
@@ -461,7 +437,10 @@ parse_bxor (IfParser *g, const char *cp, long *valp)
 
 
 static const char *
-parse_bor (IfParser *g, const char *cp, long *valp)
+parse_bor (g, cp, valp)
+    IfParser *g;
+    const char *cp;
+    long *valp;
 {
     long rightval;
 
@@ -481,7 +460,10 @@ parse_bor (IfParser *g, const char *cp, long *valp)
 
 
 static const char *
-parse_land (IfParser *g, const char *cp, long *valp)
+parse_land (g, cp, valp)
+    IfParser *g;
+    const char *cp;
+    long *valp;
 {
     long rightval;
 
@@ -501,7 +483,10 @@ parse_land (IfParser *g, const char *cp, long *valp)
 
 
 static const char *
-parse_lor (IfParser *g, const char *cp, long *valp)
+parse_lor (g, cp, valp)
+    IfParser *g;
+    const char *cp;
+    long *valp;
 {
     long rightval;
 
@@ -521,7 +506,10 @@ parse_lor (IfParser *g, const char *cp, long *valp)
 
 
 static const char *
-parse_cond(IfParser *g, const char *cp, long *valp)
+parse_cond(g, cp, valp)
+    IfParser *g;
+    const char *cp;
+    long *valp;
 {
     long trueval, falseval;
 
@@ -547,7 +535,10 @@ parse_cond(IfParser *g, const char *cp, long *valp)
  ****************************************************************************/
 
 const char *
-ParseIfExpression (IfParser *g, const char *cp, long *valp)
+ParseIfExpression (g, cp, valp)
+    IfParser *g;
+    const char *cp;
+    long *valp;
 {
     return parse_cond (g, cp, valp);
 }

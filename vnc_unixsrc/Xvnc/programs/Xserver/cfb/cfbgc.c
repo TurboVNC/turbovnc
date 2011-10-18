@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/cfb/cfbgc.c,v 1.5 2001/01/17 22:36:35 dawes Exp $ */
 /***********************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -46,17 +46,13 @@ SOFTWARE.
 
 ******************************************************************/
 
-/* $Xorg: cfbgc.c,v 1.4 2001/02/09 02:04:37 xorgcvs Exp $ */
+/* $XConsortium: cfbgc.c,v 5.62 94/04/17 20:28:49 dpw Exp $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
-#include <X11/Xmd.h>
-#include <X11/Xproto.h>
+#include "X.h"
+#include "Xmd.h"
+#include "Xproto.h"
 #include "cfb.h"
-#include <X11/fonts/fontstruct.h>
+#include "fontstruct.h"
 #include "dixfontstr.h"
 #include "gcstruct.h"
 #include "windowstr.h"
@@ -89,12 +85,10 @@ SOFTWARE.
 # define usePolyGlyphBlt	miPolyGlyphBlt
 #endif
 
-static void cfbUnPushPixels (GCPtr, PixmapPtr, DrawablePtr, int, int, int, int);
-
 #ifdef FOUR_BIT_CODE
 # define usePushPixels	cfbPushPixels8
 #else
-# define usePushPixels	cfbUnPushPixels
+# define usePushPixels	mfbPushPixels
 #endif
 
 #ifdef PIXEL_ADDR
@@ -286,14 +280,6 @@ cfbCreateGC(pGC)
     pGC->clientClip = NULL;
     pGC->clientClipType = CT_NONE;
 
-    if (cfbNonTEOps.PushPixels == cfbUnPushPixels)
-    {
-        cfbTEOps1Rect.PushPixels    = mfbPushPixelsWeak();
-        cfbNonTEOps1Rect.PushPixels = mfbPushPixelsWeak();
-        cfbTEOps.PushPixels         = mfbPushPixelsWeak();
-        cfbNonTEOps.PushPixels      = mfbPushPixelsWeak();		    
-    }
-
     /*
      * some of the output primitives aren't really necessary, since they
      * will be filled in ValidateGC because of dix/CreateGC() setting all
@@ -310,9 +296,9 @@ cfbCreateGC(pGC)
     pPriv = cfbGetGCPrivate(pGC);
     pPriv->rop = pGC->alu;
     pPriv->oneRect = FALSE;
-    pGC->fExpose = TRUE;
-    pGC->freeCompClip = FALSE;
-    pGC->pRotatedPixmap = (PixmapPtr) NULL;
+    pPriv->fExpose = TRUE;
+    pPriv->freeCompClip = FALSE;
+    pPriv->pRotatedPixmap = (PixmapPtr) NULL;
     return TRUE;
 }
 
@@ -369,7 +355,7 @@ cfbValidateGC(pGC, changes, pDrawable)
 #ifdef NO_ONE_RECT
 	devPriv->oneRect = FALSE;
 #else
-	oneRect = REGION_NUM_RECTS(pGC->pCompositeClip) == 1;
+	oneRect = REGION_NUM_RECTS(devPriv->pCompositeClip) == 1;
 	if (oneRect != devPriv->oneRect)
 	    new_line = TRUE;
 	devPriv->oneRect = oneRect;
@@ -494,7 +480,8 @@ cfbValidateGC(pGC, changes, pDrawable)
 
 		if ((width <= PGSZ) && !(width & (width - 1)))
 		{
-		    cfbCopyRotatePixmap(pGC->tile.pixmap, &pGC->pRotatedPixmap,
+		    cfbCopyRotatePixmap(pGC->tile.pixmap,
+					&devPriv->pRotatedPixmap,
 					xrot, yrot);
 		    new_pix = TRUE;
 		}
@@ -508,18 +495,18 @@ cfbValidateGC(pGC, changes, pDrawable)
 
 		if ((width <= PGSZ) && !(width & (width - 1)))
 		{
-		    mfbCopyRotatePixmap(pGC->stipple, &pGC->pRotatedPixmap,
-					xrot, yrot);
+		    mfbCopyRotatePixmap(pGC->stipple,
+					&devPriv->pRotatedPixmap, xrot, yrot);
 		    new_pix = TRUE;
 		}
 	    }
 	    break;
 #endif
 	}
-	if (!new_pix && pGC->pRotatedPixmap)
+	if (!new_pix && devPriv->pRotatedPixmap)
 	{
-	    (*pGC->pScreen->DestroyPixmap)(pGC->pRotatedPixmap);
-	    pGC->pRotatedPixmap = (PixmapPtr) NULL;
+	    (*pGC->pScreen->DestroyPixmap)(devPriv->pRotatedPixmap);
+	    devPriv->pRotatedPixmap = (PixmapPtr) NULL;
 	}
     }
 
@@ -550,7 +537,7 @@ cfbValidateGC(pGC, changes, pDrawable)
     {
 	GCOps	*newops;
 
-	if ((newops = cfbMatchCommon (pGC, devPriv)))
+	if (newops = cfbMatchCommon (pGC, devPriv))
  	{
 	    if (pGC->ops->devPrivate.val)
 		miDestroyGCOps (pGC->ops);
@@ -736,7 +723,7 @@ cfbValidateGC(pGC, changes, pDrawable)
 	    }
 	    break;
 	case FillTiled:
-	    if (pGC->pRotatedPixmap)
+	    if (devPriv->pRotatedPixmap)
 	    {
 		if (pGC->alu == GXcopy && (pGC->planemask & PMSK) == PMSK)
 		    pGC->ops->FillSpans = cfbTile32FSCopy;
@@ -748,7 +735,7 @@ cfbValidateGC(pGC, changes, pDrawable)
 	    break;
 	case FillStippled:
 #ifdef FOUR_BIT_CODE
-	    if (pGC->pRotatedPixmap)
+	    if (devPriv->pRotatedPixmap)
 		pGC->ops->FillSpans = cfb8Stipple32FS;
 	    else
 #endif
@@ -756,7 +743,7 @@ cfbValidateGC(pGC, changes, pDrawable)
 	    break;
 	case FillOpaqueStippled:
 #ifdef FOUR_BIT_CODE
-	    if (pGC->pRotatedPixmap)
+	    if (devPriv->pRotatedPixmap)
 		pGC->ops->FillSpans = cfb8OpaqueStipple32FS;
 	    else
 #endif
@@ -776,7 +763,7 @@ cfbValidateGC(pGC, changes, pDrawable)
 	}
 #endif
 #ifdef FOUR_BIT_CODE
-	pGC->ops->PushPixels = mfbPushPixelsWeak();
+	pGC->ops->PushPixels = mfbPushPixels;
 	if (pGC->fillStyle == FillSolid && devPriv->rop == GXcopy)
 	    pGC->ops->PushPixels = cfbPushPixels8;
 #endif
@@ -794,18 +781,4 @@ cfbValidateGC(pGC, changes, pDrawable)
 	    }
 	}
     }
-}
-
-/*
- * this is never called, it just exists to have its address
- * taken in mfbCreateGC.
- */
-static void
-cfbUnPushPixels (pGC, pBitmap, pDrawable, dx, dy, xOrg, yOrg)
-    GCPtr       pGC;
-    PixmapPtr   pBitmap;
-    DrawablePtr pDrawable;
-    int         dx, dy, xOrg, yOrg;
-{
-    return;
 }

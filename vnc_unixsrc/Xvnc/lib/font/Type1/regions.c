@@ -1,4 +1,5 @@
-/* $Xorg: regions.c,v 1.3 2000/08/17 19:46:31 cpqbld Exp $ */
+/* $XConsortium: regions.c,v 1.6 94/02/06 16:22:21 gildea Exp $ */
+/* $XFree86: xc/lib/font/Type1/regions.c,v 3.0 1996/08/25 13:58:26 dawes Exp $ */
 /* Copyright International Business Machines, Corp. 1991
  * All Rights Reserved
  * Copyright Lexmark International, Inc. 1991
@@ -26,7 +27,6 @@
  * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
  * THIS SOFTWARE.
  */
-/* $XFree86: xc/lib/font/Type1/regions.c,v 3.8tsi Exp $ */
  /* REGIONS  CWEB         V0023 LOTS                                 */
 /*
 :h1 id=regions.REGIONS Module - Regions Operator Handler
@@ -41,36 +41,29 @@ This module is responsible for creating and manipulating regions.
 The included files are:
 */
  
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#ifdef FONTMODULE
-# include  "os.h"
-#endif
 #include  "objects.h"
 #include  "spaces.h"
-#include  "paths.h"
 #include  "regions.h"
+#include  "paths.h"
 #include  "curves.h"
 #include  "lines.h"
 #include  "pictures.h"
 #include  "fonts.h"
 #include  "hints.h"
 #include  "strokes.h"      /* to pick up 'DoStroke'                        */
-
-
-static void newfilledge ( struct region *R, fractpel xmin, fractpel xmax, 
-			  fractpel ymin, fractpel ymax, int isdown );
-static struct edgelist *splitedge ( struct edgelist *list, pel y );
-static void vertjoin ( struct edgelist *top, struct edgelist *bottom );
-static int touches ( int h, pel *left, pel *right );
-static int crosses ( int h, pel *left, pel *right );
-static void edgemin ( int h, pel *e1, pel *e2 );
-static void edgemax ( int h, pel *e1, pel *e2 );
-static struct edgelist *NewEdge ( pel xmin, pel xmax, pel ymin, pel ymax, 
-				  pel *xvalues, int isdown );
-static struct edgelist *swathxsort ( struct edgelist *before0, 
-				     struct edgelist *edge );
+static Unwind();
+static void newfilledge();
+static struct edgelist *splitedge();
+static void vertjoin();
+static int touches();
+static int crosses();
+static void edgemin();
+static void edgemax();
+static discard();
+static edgecheck();
+static struct edgelist *NewEdge();
+static struct edgelist *swathxsort();  /* 'SortSwath' function               */
+ 
 /*
 :h3.Functions Provided to the TYPE1IMAGER User
  
@@ -139,19 +132,19 @@ set.  The flag is used to optimize some paths.
  
 /*SHARED LINE(S) ORIGINATED HERE*/
 /*
-:h4."TT_INFINITY" - A Constant Region Structure of Infinite Extent
+:h4."INFINITY" - A Constant Region Structure of Infinite Extent
  
 Infinity is the complement of a null area:
 Note - removed the refcount = 1 init, replaced with references = 2 3-26-91 PNM
 */
-static struct region _infinity = { REGIONTYPE,
+static struct region infinity = { REGIONTYPE,
                            ISCOMPLEMENT(ON)+ISINFINITE(ON)+ISPERMANENT(ON)+ISIMMORTAL(ON), 2,
-                           {0, 0}, {0, 0},
+                           0, 0, 0, 0,
                            0, 0, 0, 0,
                            NULL, NULL,
                            0, 0, 0, 0, 0, NULL, NULL,
                            NULL, 0, NULL, NULL };
-struct region *TT_INFINITY = &_infinity;
+struct region *INFINITY = &infinity;
  
 /*
 :h4."EmptyRegion" - A Region Structure with Zero Area
@@ -164,7 +157,7 @@ Note - replaced refcount = 1 init with references = 2 3-26-91 PNM
 /*SHARED LINE(S) ORIGINATED HERE*/
 struct region EmptyRegion = { REGIONTYPE,
                            ISPERMANENT(ON)+ISIMMORTAL(ON), 2,
-                           {0, 0}, {0, 0},
+                           0, 0, 0, 0,
                            MAXPEL, MAXPEL, MINPEL, MINPEL,
                            NULL, NULL,
                            0, 0, 0, 0, 0, NULL, NULL,
@@ -232,14 +225,14 @@ associated (thresholded) picture.
 Note - added conditional return based on references 3-26-91 PNM
 */
  
-void 
-KillRegion(struct region *area)  /* area to free                             */
+void KillRegion(area)
+        register struct region *area;  /* area to free                       */
 {
         register struct edgelist *p;  /* loop variable                       */
         register struct edgelist *next;  /* loop variable                    */
  
         if (area->references < 0)
-               Abort("KillRegion:  negative reference count");
+               abort("KillRegion:  negative reference count");
         if ( (--(area->references) > 1) ||
            ( (area->references == 1) && !ISPERMANENT(area->flag) ) )
             return;
@@ -255,11 +248,11 @@ KillRegion(struct region *area)  /* area to free                             */
 /*
 :h3.CopyRegion() - Makes a Copy of a Region
 */
-struct region *
-CopyRegion(struct region *area)        /* region to duplicate                */
+struct region *CopyRegion(area)
+        register struct region *area;  /* region to duplicate                */
 {
         register struct region *r;  /* output region built here              */
-        register struct edgelist *last = NULL;  /* loop variable             */
+        register struct edgelist *last;  /* loop variable                    */
         register struct edgelist *p,*newp;  /* loop variables                */
  
         r = (struct region *)Allocate(sizeof(struct region), area, 0);
@@ -289,11 +282,11 @@ edgelist structure to free all memory associated with it.  Damn
 clever, huh?
 */
  
-static struct edgelist *     
-NewEdge(pel xmin, pel xmax,  /* X extent of edge                             */
-	pel ymin, pel ymax,  /* Y extent of edge                             */
-	pel *xvalues,        /* list of X values for entire edge             */
-	int isdown)          /* flag:  TRUE means edge progresses downward   */
+static struct edgelist *NewEdge(xmin, xmax, ymin, ymax, xvalues, isdown)
+       pel xmin,xmax;        /* X extent of edge                             */
+       pel ymin,ymax;        /* Y extent of edge                             */
+       pel *xvalues;         /* list of X values for entire edge             */
+       int isdown;           /* flag:  TRUE means edge progresses downward   */
 {
        static struct edgelist template = {
                  EDGETYPE, 0, 1, NULL, NULL,
@@ -302,8 +295,10 @@ NewEdge(pel xmin, pel xmax,  /* X extent of edge                             */
        register struct edgelist *r;  /* returned structure                   */
        register int iy;      /* ymin adjusted for 'long' alignment purposes  */
  
+       IfTrace2((RegionDebug),"....new edge: ymin=%d, ymax=%d ",
+                                              (long)ymin, (long) ymax);
        if (ymin >= ymax)
-               Abort("newedge: height not positive");
+               abort("newedge: height not positive");
 /*
 We are going to copy the xvalues into a newly allocated area.  It
 helps performance if the values are all "long" aligned.  We can test
@@ -335,97 +330,10 @@ Allocate() makes everything it allocates be in multiples of longs.
 */
        LONGCOPY(&r[1], xvalues, (ymax - iy) * sizeof(pel) + sizeof(long) - 1);
  
+       IfTrace1((RegionDebug),"result=%x\n", r);
        return(r);
 }
-
-/*
-:h3 id=discard.discard() - Discard All Edges Between Two Edges
  
-At first glance it would seem that we could discard an edgelist
-structure merely by unlinking it from the list and freeing it.  You are
-wrong, region-breath!  For performance, the X values associated with an
-edge are allocated contiguously with it.  So, we free the X values when
-we free a structure.  However, once an edge has been split, we are no
-longer sure which control block actually is part of the memory block
-that contains the edges.  Rather than trying to decide, we play it safe
-and never free part of a region.
- 
-So, to mark a 'edgelist' structure as discarded, we move it to the end
-of the list and set ymin=ymax.
-*/
- 
-static void
-discard(struct edgelist *left,  /* all edges between here exclusive          */
-	struct edgelist *right) /*   should be discarded                     */
-{
-       register struct edgelist *beg,*end,*p;
- 
-       beg = left->link;
-       if (beg == right)
-               return;
- 
-       for (p = beg; p != right; p = p->link) {
-               if (p->link == NULL && right != NULL)
-                       Abort("discard():  ran off end");
-               p->ymin = p->ymax = 32767;
-               end = p;
-       }
-       /*
-       * now put the chain beg/end at the end of right, if it is not
-       * already there:
-       */
-       if (right != NULL) {
-               left->link = right;
-               while (right->link != NULL)
-                       right = right->link;
-               right->link = beg;
-       }
-       end->link = NULL;
-}
- 
-/*
-:h4.Unwind() - Discards Edges That Fail the Winding Rule Test
- 
-The winding rule says that upward going edges should be paired with
-downward going edges only, and vice versa.  So, if two upward edges
-or two downward edges are nominally left/right pairs, Unwind() should
-discard the second one.  Everything should balance; we should discard
-an even number of edges; of course, we abort if we don't.
-*/
-static void
-Unwind(struct edgelist *area)   /* input area modified in place              */
-{
-       register struct edgelist *last = NULL,*next;  /* struct before and after current one */
-       register int y;       /* ymin of current swath                        */
-       register int count,newcount;  /* winding count registers              */
- 
-       while (VALIDEDGE(area)) {
- 
-               count = 0;
-               y = area->ymin;
- 
-               do {
-                       next = area->link;
- 
-                       if (ISDOWN(area->flag))
-                               newcount = count + 1;
-                       else
-                               newcount = count - 1;
- 
-                       if (count == 0 || newcount == 0)
-                               last = area;
-                       else
-                               discard(last, next);
- 
-                       count = newcount;
-                       area = next;
- 
-               } while (area != NULL && area->ymin == y);
- 
-               if (count != 0)
-                       Abort("Unwind:  uneven edges");
-       }
-}
 /*
 :h2.Building Regions
  
@@ -454,9 +362,9 @@ region, we allow the same ChangeDirection logic to be used by stroking.
  
 /*SHARED LINE(S) ORIGINATED HERE*/
  
-struct region *
-Interior(struct segment *p,  /* take interior of this path          */
-	 int fillrule)       /* rule to follow if path crosses itself */
+struct region *Interior(p, fillrule)
+       register struct segment *p;    /* take interior of this path          */
+       register int fillrule;         /* rule to follow if path crosses itself */
 {
        register fractpel x,y;  /* keeps ending point of path segment         */
        fractpel lastx,lasty; /* previous x,y from path segment before        */
@@ -465,6 +373,8 @@ Interior(struct segment *p,  /* take interior of this path          */
        struct fractpoint hint; /* accumulated hint value */
        char tempflag;        /* flag; is path temporary?                     */
        char Cflag;           /* flag; should we apply continuity?            */
+ 
+       IfTrace2((MustTraceCalls),".  INTERIOR(%z, %d)\n", p, (long) fillrule);
  
        if (p == NULL)
                return(NULL);
@@ -487,12 +397,11 @@ user asked, >1: do it regardless).
 /*             if (fillrule != EVENODDRULE)
                else */
                        return((struct region *)UniquePath(p));
-       if (p->type == STROKEPATHTYPE) {
+       if (p->type == STROKEPATHTYPE)
                if (fillrule == WINDINGRULE)
                        return((struct region *)DoStroke(p));
                else
                        p = CoercePath(p);
-       }
  
        R = (struct region *)Allocate(sizeof(struct region), &EmptyRegion, 0);
  
@@ -542,6 +451,8 @@ The hints data structure must be initialized once for each path.
                x = lastx + p->dest.x;
                y = lasty + p->dest.y;
  
+               IfTrace2((HintDebug > 0),"Ending point = (%p,%p)\n", x, y);
+ 
                nextP = p->link;
  
 /*
@@ -560,6 +471,8 @@ the first on the path), we need to close (reverse) any open hints.
                if (ProcessHints)
                        if ((p->type == MOVETYPE) && (p->last == NULL)) {
                                CloseHints(&hint);
+                               IfTrace2((HintDebug>0),"Closed point= (%p,%p)\n",
+                                               x+hint.x, y+hint.y);
                        }
  
 /*
@@ -571,8 +484,7 @@ segment (or NULL), and each hint segment will be freed if necessary.
  
                while ((nextP != NULL) && (nextP->type == HINTTYPE))  {
                        if (ProcessHints)
-                               ProcessHint((struct hintsegment *)nextP, 
-					   x + hint.x, y + hint.y, &hint);
+                               ProcessHint(nextP, x + hint.x, y + hint.y, &hint);
  
                        {
                                register struct segment *saveP = nextP;
@@ -589,6 +501,8 @@ We now apply the full hint value to the ending point of the path segment.
  
                x += hint.x;
                y += hint.y;
+ 
+               IfTrace2((HintDebug>0),"Hinted ending point = (%p,%p)\n", x, y);
  
                switch(p->type) {
  
@@ -640,7 +554,7 @@ MOVETYPE at the end of the path, if it isn't closed:
                        break;
  
                    default:
-                       Abort("Interior: path type error");
+                       abort("Interior: path type error");
                }
 /*
 We're done with this segment.  Advance to the next path segment in
@@ -663,6 +577,51 @@ Finally, clean up the region's based on the user's 'fillrule' request:
        if (fillrule == WINDINGRULE)
              Unwind(R->anchor);
        return(R);
+}
+/*
+:h4.Unwind() - Discards Edges That Fail the Winding Rule Test
+ 
+The winding rule says that upward going edges should be paired with
+downward going edges only, and vice versa.  So, if two upward edges
+or two downward edges are nominally left/right pairs, Unwind() should
+discard the second one.  Everything should balance; we should discard
+an even number of edges; of course, we abort if we don't.
+*/
+static Unwind(area)
+       register struct edgelist *area;  /* input area modified in place      */
+{
+       register struct edgelist *last,*next;  /* struct before and after current one */
+       register int y;       /* ymin of current swath                        */
+       register int count,newcount;  /* winding count registers              */
+ 
+       IfTrace1((RegionDebug>0),"...Unwind(%z)\n", area);
+ 
+       while (VALIDEDGE(area)) {
+ 
+               count = 0;
+               y = area->ymin;
+ 
+               do {
+                       next = area->link;
+ 
+                       if (ISDOWN(area->flag))
+                               newcount = count + 1;
+                       else
+                               newcount = count - 1;
+ 
+                       if (count == 0 || newcount == 0)
+                               last = area;
+                       else
+                               discard(last, next);
+ 
+                       count = newcount;
+                       area = next;
+ 
+               } while (area != NULL && area->ymin == y);
+ 
+               if (count != 0)
+                       abort("Unwind:  uneven edges");
+       }
 }
 /*
 :h3."workedge" Array
@@ -688,34 +647,42 @@ emerging edgelist at 'anchor' by calling whatever "newedgefcn"
 is appropriate.
 */
  
-void 
-ChangeDirection(int type,    /* CD_FIRST, CD_CONTINUE, or CD_LAST            */
-		struct region *R, /* region in which we are changing direction */
-		fractpel x, fractpel y, /* current beginning x,y             */
-		fractpel dy) /* direction and magnitude of change in y       */
+void ChangeDirection(type, R, x, y, dy)
+       int type;             /* CD_FIRST, CD_CONTINUE, or CD_LAST            */
+       register struct region *R;  /* region in which we are changing direction */
+       fractpel x,y;         /* current beginning x,y                        */
+       fractpel dy;          /* direction and magnitude of change in y       */
 {
        register fractpel ymin,ymax;  /* minimum and maximum Y since last call */
+       register fractpel x_at_ymin,x_at_ymax;  /* their respective X's       */
        register pel iy;      /* nearest integer pel to 'y'                   */
        register pel idy;     /* nearest integer pel to 'dy'                  */
        register int ydiff;   /* allowed Y difference in 'currentworkarea'    */
+ 
+       IfTrace4((RegionDebug>0),"Change Y direction (%d) from (%p,%p), dy=%p\n",
+                                         (long) type, x, y, dy);
  
        if (type != CD_FIRST) {
  
                if (R->lastdy > 0) {
                        ymin = R->firsty;
+                       x_at_ymin = R->firstx;
                        ymax = y;
+                       x_at_ymax = x;
                }
                else {
                        ymin = y;
+                       x_at_ymin = x;
                        ymax = R->firsty;
+                       x_at_ymax = R->firstx;
                }
  
                if (ymax < ymin)
-                       Abort("negative sized edge?");
+                       abort("negative sized edge?");
  
  
                (*R->newedgefcn)(R, R->edgexmin, R->edgexmax, ymin, ymax,
-                                   R->lastdy > 0);
+                                   R->lastdy > 0, x_at_ymin, x_at_ymax);
  
        }
  
@@ -766,11 +733,11 @@ This function also has to keep the bounding box of the region
 up to date.
 */
  
-static void 
-newfilledge(struct region *R,  /* region being built                         */
-	    fractpel xmin, fractpel xmax, /* X range of this edge            */
-	    fractpel ymin, fractpel ymax, /* Y range of this edge            */
-	    int isdown)      /* flag:  TRUE means edge goes down, else up    */
+static void newfilledge(R, xmin, xmax, ymin, ymax, isdown)
+       register struct region *R;  /* region being built                     */
+       fractpel xmin,xmax;   /* X range of this edge                         */
+       fractpel ymin,ymax;   /* Y range of this edge                         */
+       int isdown;           /* flag:  TRUE means edge goes down, else up    */
 {
  
        register pel pelxmin,pelymin,pelxmax,pelymax;  /* pel versions of bounds */
@@ -823,14 +790,24 @@ exactly where the bottom part belongs.
 #define   TOP(e)      ((e)->ymin)  /* the top of an edge (for readability    */
 #define   BOTTOM(e)   ((e)->ymax)  /* the bottom of an edge (for readability */
  
-struct edgelist *
-SortSwath(struct edgelist *anchor,   /* list being built                     */
-	  struct edgelist *edge,     /* incoming edge or pair of edges       */
-	  SwathFunc swathfcn)        /* horizontal sorter                    */
+struct edgelist *SortSwath(anchor, edge, swathfcn)
+       struct edgelist *anchor;  /* list being built                         */
+       register struct edgelist *edge;  /* incoming edge or pair of edges    */
+       struct edgelist *(*swathfcn)();  /* horizontal sorter                 */
 {
        register struct edgelist *before,*after;
        struct edgelist base;
  
+       if (RegionDebug > 0) {
+               if (RegionDebug > 2)  {
+                       IfTrace3(TRUE,"SortSwath(anchor=%z, edge=%z, fcn=%x)\n",
+                            anchor, edge, swathfcn);
+               }
+               else  {
+                       IfTrace3(TRUE,"SortSwath(anchor=%x, edge=%x, fcn=%x)\n",
+                            anchor, edge, swathfcn);
+               }
+       }
        if (anchor == NULL)
                return(edge);
  
@@ -875,6 +852,8 @@ If the bottom of 'after' is above the bottom of the swath,
                        break;
                }
                else if (TOP(after) > TOP(edge)) {
+                       IfTrace0((BOTTOM(edge) < TOP(after) && RegionDebug > 0),
+                                                "SortSwath:  disjoint edges\n");
                        if (BOTTOM(edge) > TOP(after)) {
                                after = SortSwath(after,
                                          splitedge(edge, TOP(after)), swathfcn);
@@ -903,9 +882,13 @@ contains all the edges before.  Whew!  A simple matter now of adding
 */
        before->link = edge;
        if (RegionDebug > 1) {
+               IfTrace3(TRUE,"SortSwath:  in between %x and %x are %x",
+                                                before, after, edge);
                while (edge->link != NULL) {
                        edge = edge->link;
+                       IfTrace1(TRUE," and %x", edge);
                }
+               IfTrace0(TRUE,"\n");
        }
        else
                for (; edge->link != NULL; edge = edge->link) { ; }
@@ -922,14 +905,16 @@ is guaranteed not to change the address of the old swath while splitting
 it.
 */
  
-static struct edgelist *
-splitedge(struct edgelist *list, /* area to split                            */
-	  pel y)             /* Y value to split list at                     */
+static struct edgelist *splitedge(list, y)
+       struct edgelist *list;  /* area to split                              */
+       register pel y;       /* Y value to split list at                     */
 {
        register struct edgelist *new;  /* anchor for newly built list        */
-       register struct edgelist *last = NULL;  /* end of newly built list    */
+       register struct edgelist *last;  /* end of newly built list           */
        register struct edgelist *r;  /* temp pointer to new structure        */
        register struct edgelist *lastlist;  /* temp pointer to last 'list' value */
+ 
+       IfTrace2((RegionDebug > 1),"splitedge of %x at %d ", list, (long) y);
  
        lastlist = new = NULL;
  
@@ -937,9 +922,9 @@ splitedge(struct edgelist *list, /* area to split                            */
                if (y < list->ymin)
                        break;
                if (y >= list->ymax)
-                       Abort("splitedge: above top of list");
+                       abort("splitedge: above top of list");
                if (y == list->ymin)
-                       Abort("splitedge: would be null");
+                       abort("splitedge: would be null");
  
                r = (struct edgelist *)Allocate(sizeof(struct edgelist), list, 0);
 /*
@@ -979,9 +964,10 @@ list at 'lastlist', and add the broken off part to the end of 'new'.
 Then, we return the caller a pointer to 'new':
 */
        if (new == NULL)
-               Abort("null splitedge");
+               abort("null splitedge");
        lastlist->link = NULL;
        last->link = list;
+       IfTrace1((RegionDebug > 1),"yields %x\n", new);
        return(new);
 }
  
@@ -995,7 +981,7 @@ static void vertjoin(top, bottom)
        register struct edgelist *bottom;  /* bottommost region               */
 {
        if (BOTTOM(top) > TOP(bottom))
-               Abort("vertjoin not disjoint");
+               abort("vertjoin not disjoint");
  
        for (; top->link != NULL; top=top->link) { ; }
  
@@ -1013,13 +999,13 @@ all swath functions, this function returns a pointer to the edge
 BEFORE the given edge in the sort.
 */
  
-static struct edgelist *
-swathxsort(struct edgelist *before0,  /* edge before this swath              */
-	   struct edgelist *edge)     /* input edge                          */
+static struct edgelist *swathxsort(before0, edge)
+       register struct edgelist *before0;  /* edge before this swath         */
+       register struct edgelist *edge;  /* input edge                        */
 {
        register struct edgelist *before;
        register struct edgelist *after;
-       register pel y = 0;
+       register pel y;
  
        before = before0;
        after = before->link;
@@ -1061,6 +1047,7 @@ recursively with the part of the edge that is below the crossing point:
        y -= TOP(edge);
  
        if (h0 <= 0) {
+               IfTrace0((RegionDebug>0),"swathxsort: exactly equal edges\n");
                return(before);
        }
  
@@ -1088,18 +1075,21 @@ fun comes in they overlap the existing edges.  Then some edges
 will disappear.
 */
  
-struct edgelist *
-SwathUnion(struct edgelist *before0,   /* edge before the swath              */
-	   struct edgelist *edge)      /* list of two edges to be unioned    */
+struct edgelist *SwathUnion(before0, edge)
+       register struct edgelist *before0;  /* edge before the swath          */
+       register struct edgelist *edge;  /* list of two edges to be unioned   */
 {
        register int h;       /* saves height of edge                         */
        register struct edgelist *rightedge;  /* saves right edge of 'edge'   */
        register struct edgelist *before,*after;  /* edge before and after    */
        int h0;               /* saves initial height                         */
  
+       IfTrace2((RegionDebug > 1),"SwathUnion entered, before=%x, edge=%x\n",
+                      before0, edge);
+ 
        h0 = h = edge->ymax - edge->ymin;
        if (h <= 0)
-               Abort("SwathUnion:  0 height swath?");
+               abort("SwathUnion:  0 height swath?");
  
        before = before0;
        after = before->link;
@@ -1134,6 +1124,9 @@ the height by that amount.
  
        if (after == NULL || TOP(after) != TOP(edge) ||
                    after->xvalues[0] > rightedge->xvalues[0]) {
+              IfTrace2((RegionDebug > 1),
+                       "SwathUnion starts disjoint: before=%x after=%x\n",
+                                     before, after);
 /*
 On this side of the the above 'if', the new edge is disjoint from the
 existing edges in the swath.  This is the picture:
@@ -1198,6 +1191,9 @@ out the new situation:
  
                        h -= touches(h, rightedge->xvalues, after->xvalues);
  
+               IfTrace3((RegionDebug > 1),
+                      "SwathUnion is overlapped until %d: before=%x after=%x\n",
+                                          (long) TOP(edge) + h, before, after);
 /*
 OK, if we touched either of our neighbors we need to split at that point
 and recursively sort the split edge onto the list.  One tricky part
@@ -1229,7 +1225,6 @@ were overlapped and have been combined with the new incoming 'edge':
        }
        return(before);
 }
-#ifdef notused
 /*
 :h3.swathrightmost() - Simply Sorts New Edge to Rightmost of Swath
  
@@ -1237,9 +1232,9 @@ Like all swath functions, this function returns a pointer to the edge
 BEFORE the given edge in the sort.
 */
  
-static struct edgelist *
-swathrightmost(struct edgelist *before,  /* edge before this swath           */
-	       struct edgelist *edge)    /* input edge                       */
+static struct edgelist *swathrightmost(before, edge)
+       register struct edgelist *before;  /* edge before this swath         */
+       register struct edgelist *edge;  /* input edge                        */
 {
        register struct edgelist *after;
  
@@ -1253,7 +1248,6 @@ swathrightmost(struct edgelist *before,  /* edge before this swath           */
        return(before);
  
 }
-#endif
 /*
 :h3.touches() - Returns the Remaining Height When Two Edges Touch
  
@@ -1261,8 +1255,9 @@ So, it will return 0 if they never touch.  Allows incredibly(?) mnemonic
 if (touches(...)) construct.
 */
  
-static int 
-touches(int h, pel *left, pel *right)
+static int touches(h, left, right)
+       register int h;
+       register pel *left,*right;
 {
        for (; h > 0; h--)
                if (*left++ >= *right++)
@@ -1275,8 +1270,9 @@ touches(int h, pel *left, pel *right)
 So, it will return 0 if they never cross.
 */
  
-static int 
-crosses(int h, pel *left, pel *right)
+static int crosses(h, left, right)
+       register int h;
+       register pel *left,*right;
 {
        for (; h > 0; h--)
                if (*left++ > *right++)
@@ -1287,8 +1283,10 @@ crosses(int h, pel *left, pel *right)
 :h3.cedgemin() - Stores the Mininum of an Edge and an X Value
 */
  
-static void 
-cedgemin(int h, pel *e1, pel x)
+static void cedgemin(h, e1, x)
+       register int h;
+       register pel *e1;
+       register pel x;
 {
        for (; --h >= 0; e1++)
                if (*e1 > x)
@@ -1298,8 +1296,10 @@ cedgemin(int h, pel *e1, pel x)
 :h3.cedgemax() - Stores the Maximum of an Edge and an X Value
 */
  
-static void 
-cedgemax(int h, pel *e1, pel x)
+static void cedgemax(h, e1, x)
+       register int h;
+       register pel *e1;
+       register pel x;
 {
        for (; --h >= 0; e1++)
                if (*e1 < x)
@@ -1309,8 +1309,9 @@ cedgemax(int h, pel *e1, pel x)
 :h3.edgemin() - Stores the Mininum of Two Edges in First Edge
 */
  
-static void 
-edgemin(int h, pel *e1, pel *e2)
+static void edgemin(h, e1, e2)
+       register int h;
+       register pel *e1,*e2;
 {
        for (; --h >= 0; e1++,e2++)
                if (*e1 > *e2)
@@ -1320,12 +1321,60 @@ edgemin(int h, pel *e1, pel *e2)
 :h3.edgemax() - Stores the Maximum of Two Edges in First Edge
 */
  
-static void 
-edgemax(int h, pel *e1, pel *e2)
+static void edgemax(h, e1, e2)
+       register int h;
+       register pel *e1,*e2;
 {
        for (; --h >= 0; e1++,e2++)
                if (*e1 < *e2)
                        *e1 = *e2;
+}
+/*
+:h3 id=discard.discard() - Discard All Edges Between Two Edges
+ 
+At first glance it would seem that we could discard an edgelist
+structure merely by unlinking it from the list and freeing it.  You are
+wrong, region-breath!  For performance, the X values associated with an
+edge are allocated contiguously with it.  So, we free the X values when
+we free a structure.  However, once an edge has been split, we are no
+longer sure which control block actually is part of the memory block
+that contains the edges.  Rather than trying to decide, we play it safe
+and never free part of a region.
+ 
+So, to mark a 'edgelist' structure as discarded, we move it to the end
+of the list and set ymin=ymax.
+*/
+ 
+static discard(left, right)
+       register struct edgelist *left,*right;  /* all edges between here exclusive */
+                                       /* should be discarded */
+{
+       register struct edgelist *beg,*end,*p;
+ 
+       IfTrace2((RegionDebug > 0),"discard:  l=%x, r=%x\n", left, right);
+ 
+       beg = left->link;
+       if (beg == right)
+               return;
+ 
+       for (p = beg; p != right; p = p->link) {
+               if (p->link == NULL && right != NULL)
+                       abort("discard():  ran off end");
+               IfTrace1((RegionDebug > 0),"discarding %x\n", p);
+               p->ymin = p->ymax = 32767;
+               end = p;
+       }
+       /*
+       * now put the chain beg/end at the end of right, if it is not
+       * already there:
+       */
+       if (right != NULL) {
+               left->link = right;
+               while (right->link != NULL)
+                       right = right->link;
+               right->link = beg;
+       }
+       end->link = NULL;
 }
  
 /*
@@ -1338,9 +1387,9 @@ region.
  
 */
  
-void
-MoveEdges(struct region *R,      /* region to modify                         */
-	  fractpel dx, fractpel dy) /* delta X and Y to move edge list by    */
+void MoveEdges(R, dx, dy)
+       register struct region *R; /* region to modify                        */
+       register fractpel dx,dy;  /* delta X and Y to move edge list by       */
 {
        register struct edgelist *edge;  /* for looping through edges         */
  
@@ -1387,8 +1436,8 @@ From now on we will deal with dx and dy as integer pel values:
 It is an open question whether it pays in general to do this.
 */
  
-void 
-UnJumble(struct region *region) /* region to sort                            */
+void UnJumble(region)
+       struct region *region;  /* region to sort                             */
 {
        register struct edgelist *anchor;  /* new lists built here            */
        register struct edgelist *edge;  /* edge pointer for loop             */
@@ -1398,7 +1447,7 @@ UnJumble(struct region *region) /* region to sort                            */
  
        for (edge=region->anchor; VALIDEDGE(edge); edge=next) {
                if (edge->link == NULL)
-                       Abort("UnJumble:  unpaired edge?");
+                       abort("UnJumble:  unpaired edge?");
                next = edge->link->link;
                edge->link->link = NULL;
                anchor = SortSwath(anchor, edge, t1_SwathUnion);
@@ -1413,9 +1462,9 @@ UnJumble(struct region *region) /* region to sort                            */
  
 /*
 */
-#ifdef notused 
-static void
-OptimizeRegion(struct region *R) /* region to optimize                       */
+ 
+static OptimizeRegion(R)
+       struct region *R;     /* region to optimize                           */
 {
        register pel *xP;     /* pel pointer for inner loop                   */
        register int x;       /* holds X value                                */
@@ -1436,16 +1485,15 @@ OptimizeRegion(struct region *R) /* region to optimize                       */
                if (xmin != xmax || (xmin != R->xmin && xmax != R->xmax))
                        R->flag &= ~ISRECTANGULAR(ON);
                if (xmin < e->xmin || xmax > e->xmax)
-                       Abort("Tighten: existing edge bound was bad");
+                       abort("Tighten: existing edge bound was bad");
                if (xmin < R->xmin || xmax > R->xmax)
-                       Abort("Tighten: existing region bound was bad");
+                       abort("Tighten: existing region bound was bad");
                e->xmin = xmin;
                e->xmax = xmax;
        }
        R->flag |= ISOPTIMIZED(ON);
 }
-#endif
-
+ 
 /*
 :h2.Miscelaneous Routines
  
@@ -1457,10 +1505,10 @@ it gets a shorter 'dy'.
 */
  
 /*ARGSUSED*/
-void 
-MoreWorkArea(struct region *R, /* region we are generating                   */
-	     fractpel x1, fractpel y1, /* starting point of line             */
-	     fractpel x2, fractpel y2) /* ending point of line               */
+void MoreWorkArea(R, x1, y1, x2, y2)
+       struct region *R;     /* region we are generating                     */
+       fractpel x1,y1;       /* starting point of line                       */
+       fractpel x2,y2;       /* ending point of line                         */
 {
        register int idy;     /* integer dy of line                           */
  
@@ -1472,6 +1520,7 @@ MoreWorkArea(struct region *R, /* region we are generating                   */
        * need to store:
        */
        if (++idy > currentsize) {
+               IfTrace1((RegionDebug > 0),"Allocating edge of %d pels\n", idy);
                if (currentworkarea != workedge)
                        NonObjectFree(currentworkarea);
                currentworkarea = (pel *)Allocate(0, NULL, idy * sizeof(pel));
@@ -1488,27 +1537,37 @@ clipping box is specified in REGION coordinates, that is, in
 coordinates relative to the region (0,0) point
 */
  
-struct region *
-BoxClip(struct region *R,       /* region to clip                            */
-	pel xmin, pel ymin,     /* upper left hand corner of rectangle       */
-	pel xmax, pel ymax)     /* lower right hand corner                   */
+struct region *BoxClip(R, xmin, ymin, xmax, ymax)
+       register struct region *R;  /* region to clip                         */
+       register pel xmin,ymin;  /* upper left hand corner of rectangle       */
+       register pel xmax,ymax;  /* lower right hand corner                   */
 {
        struct edgelist anchor;  /* pretend edgelist to facilitate discards   */
        register struct edgelist *e,*laste;
  
+       IfTrace1((OffPageDebug),"BoxClip of %z:\n", R);
+ 
        R = UniqueRegion(R);
  
        if (xmin > R->xmin) {
+               IfTrace2((OffPageDebug),"BoxClip:  left clip old %d new %d\n",
+                                            (long) R->xmin, (long) xmin);
                R->xmin = xmin;
        }
        if (xmax < R->xmax) {
+               IfTrace2((OffPageDebug),"BoxClip:  right clip old %d new %d\n",
+                                            (long) R->xmax, (long) xmax);
                R->xmax = xmax;
        }
  
        if (ymin > R->ymin) {
+               IfTrace2((OffPageDebug),"BoxClip:  top clip old %d new %d\n",
+                                            (long) R->ymin, (long) ymin);
                R->ymin = ymin;
        }
        if (ymax < R->ymax) {
+               IfTrace2((OffPageDebug),"BoxClip:  bottom clip old %d new %d\n",
+                                            (long) R->ymax, (long) ymax);
                R->ymax = ymax;
        }
  
@@ -1558,8 +1617,8 @@ couldn't have it be consumed) and this would probably require
 unnecessary CopyRegions in most cases.
 */
  
-struct region *
-CoerceRegion(struct textpath *tp) /* input TEXTTYPE                          */
+struct region *CoerceRegion(tp)
+       register struct textpath *tp;  /* input TEXTTYPE                     */
 {
        struct segment *path; /* temporary character path                     */
        struct region *R;     /* returned region                              */
@@ -1574,9 +1633,11 @@ CoerceRegion(struct textpath *tp) /* input TEXTTYPE                          */
 :h3.RegionBounds() - Returns Bounding Box of a Region
 */
  
-struct segment *
-RegionBounds(struct region *R)
+struct segment *RegionBounds(R)
+       register struct region *R;
 {
+       extern struct XYspace *IDENTITY;
+ 
        register struct segment *path;  /* returned path                      */
  
        path = BoxPath(IDENTITY, R->ymax - R->ymin, R->xmax - R->xmin);
@@ -1591,9 +1652,14 @@ RegionBounds(struct region *R)
  
 :h3.DumpArea() - Display a Region
 */
-void 
-DumpArea(struct region *area)
+void DumpArea(area)
+       register struct region *area;
 {
+       IfTrace1(TRUE,"Dumping area %x,", area);
+       IfTrace4(TRUE," X %d:%d Y %d:%d;", (long) area->xmin,
+                      (long) area->xmax, (long) area->ymin,(long) area->ymax);
+       IfTrace4(TRUE," origin=(%p,%p), ending=(%p,%p)\n",
+               area->origin.x, area->origin.y, area->ending.x, area->ending.y);
        DumpEdges(area->anchor);
 }
  
@@ -1601,39 +1667,31 @@ DumpArea(struct region *area)
 /*
 :h3.DumpEdges() - Display Run End Lists (Edge Lists)
 */
-
-/*
-:h3.edgecheck() - For Debug, Verify that an Edge Obeys the Rules
-*/
  
-/*ARGSUSED*/
-static void
-edgecheck(struct edgelist *edge, int oldmin, int oldmax)
-{
-       if (edge->type != EDGETYPE)
-               Abort("EDGE ERROR: non EDGETYPE in list");
-/*
-The following check is not valid if the region is jumbled so I took it
-out:
-*/
-/*     if (edge->ymin < oldmax && edge->ymin != oldmin)
-               Abort("EDGE ERROR: overlapping swaths"); */
-}
+static pel RegionDebugYMin = MINPEL;
+static pel RegionDebugYMax = MAXPEL;
  
-void 
-DumpEdges(struct edgelist *edges)
+void DumpEdges(edges)
+       register struct edgelist *edges;
 {
        register struct edgelist *p,*p2;
        register pel ymin = MINPEL;
        register pel ymax = MINPEL;
+       register int y;
  
        if (edges == NULL) {
+               IfTrace0(TRUE,"    NULL area.\n");
                return;
        }
        if (RegionDebug <= 1) {
                for (p=edges; p != NULL; p = p->link) {
                        edgecheck(p, ymin, ymax);
                        ymin = p->ymin;  ymax = p->ymax;
+                       IfTrace3(TRUE,". at %x type=%d flag=%x",
+                                        p, (long) p->type,(long) p->flag);
+                       IfTrace4(TRUE," bounding box HxW is %dx%d at (%d,%d)\n",
+                               (long) ymax - ymin, (long) p->xmax - p->xmin,
+                               (long) p->xmin, (long) ymin);
                }
        }
        else {
@@ -1644,8 +1702,45 @@ DumpEdges(struct edgelist *edges)
                        ymin = p2->ymin;
                        ymax = p2->ymax;
  
+                       if (RegionDebug > 3 || (ymax > RegionDebugYMin
+                                   && ymin < RegionDebugYMax)) {
+                               IfTrace2 (TRUE,". Swath from %d to %d:\n",
+                                                              ymin, ymax);
+                               for (p=p2; INSWATH(p,ymin,ymax); p = p->link) {
+                                       IfTrace4(TRUE,". . at %x[%x] range %d:%d, ",
+                                                 p, (long) p->flag,
+                                                 (long) p->xmin, (long)p->xmax);
+                                       IfTrace1(TRUE, "subpath=%x,\n", p->subpath);
+                               }
+                       }
+                       for (y=MAX(ymin,RegionDebugYMin); y < MIN(ymax, RegionDebugYMax); y++) {
+                               IfTrace1(TRUE,". . . Y[%5d] ", (long) y);
+                               for (p=p2; INSWATH(p,ymin,ymax); p = p->link)
+                                       IfTrace1(TRUE,"%5d ",
+                                                (long) p->xvalues[y - ymin]);
+                               IfTrace0(TRUE,"\n");
+                       }
                        while (INSWATH(p2, ymin, ymax))
                                p2 = p2->link;
                }
        }
+}
+ 
+/*
+:h3.edgecheck() - For Debug, Verify that an Edge Obeys the Rules
+*/
+ 
+/*ARGSUSED*/
+static edgecheck(edge, oldmin, oldmax)
+       struct edgelist *edge;
+       int oldmin,oldmax;
+{
+       if (edge->type != EDGETYPE)
+               abort("EDGE ERROR: non EDGETYPE in list");
+/*
+The following check is not valid if the region is jumbled so I took it
+out:
+*/
+/*     if (edge->ymin < oldmax && edge->ymin != oldmin)
+               abort("EDGE ERROR: overlapping swaths"); */
 }

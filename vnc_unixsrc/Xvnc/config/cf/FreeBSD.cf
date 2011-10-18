@@ -1,22 +1,8 @@
-XCOMM platform:  $Xorg: FreeBSD.cf,v 1.3 2000/08/17 19:41:45 cpqbld Exp $
-XCOMM platform:  $XdotOrg: xc/config/cf/FreeBSD.cf,v 1.11 2005/05/04 04:14:57 anholt Exp $
-XCOMM
-XCOMM
-XCOMM
-XCOMM platform:  $XFree86: xc/config/cf/FreeBSD.cf,v 3.147 2004/01/28 01:46:21 dawes Exp $
-
-#ifndef UseElfFormat
-#define UseElfFormat		DefaultToElfFormat
-#endif
-
-#if UseElfFormat
-#define OSBinaryFormat		[ELF]
-#else
-#define OSBinaryFormat		[a.out]
-#endif
+XCOMM platform:  $TOG: FreeBSD.cf /main/18 1997/06/12 07:40:35 kaleb $
+XCOMM platform:  $XFree86: xc/config/cf/FreeBSD.cf,v 3.58.2.11 1998/03/01 01:08:59 dawes Exp $
 
 #ifndef OSName
-#define OSName			DefaultOSName OSBinaryFormat
+#define OSName			DefaultOSName
 #endif
 #ifndef OSVendor
 #define OSVendor		/**/
@@ -30,107 +16,26 @@ XCOMM platform:  $XFree86: xc/config/cf/FreeBSD.cf,v 3.147 2004/01/28 01:46:21 d
 #ifndef OSTeenyVersion
 #define OSTeenyVersion		DefaultOSTeenyVersion
 #endif
+XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVersion)
 
-#ifndef OSRelVersion
-/* Include this to get finer-grained information about the OS version */
-#include "/usr/include/osreldate.h"
-#define OSRelVersion __FreeBSD_version
-#endif
-
-XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVersion) (OSRelVersion)
-
-
+#define HasGcc			YES
+#define HasGcc2			YES
 #define HasCplusplus		YES
+#define HasGcc2ForCplusplus	YES
 #define GccUsesGas		YES
 #define UseGas			YES
 #define GnuCpp			YES
-#define HasNdbm			YES
-#define HasPutenv		YES
+#define HasNdbm         	YES
+#define HasPutenv       	YES
 #define HasSnprintf		YES
-#if OSMajorVersion == 3 && OSMinorVersion >= 3 || OSMajorVersion > 3
-# define HasStrlcat		YES
-#endif
-#if OSMajorVersion == 4 && OSMinorVersion >= 2 || OSMajorVersion > 4
-# define HasBasename		YES
-#else
-# define HasBasename		NO
-#endif
 #define HasBSD44Sockets 	YES
-#define HasDlopen		YES
-#if ((OSRelVersion >= 410002) && OSRelVersion < 500000) || (OSRelVersion >= 500012)
-#define HasSetProcTitle		YES
-#endif
 #ifndef HasLibCrypt
 # define HasLibCrypt		YES
 #endif
 #ifndef HasShm
-# define HasShm			YES
+# define HasShm          	YES
 #endif
 #define HasWChar32		YES
-#define HasUsableFileMmap	YES
-#define HasNCurses		YES
-#define HasVarRun		YES
-#define HasVarDb		YES
-#ifndef BuildPDFdocs
-# define BuildPDFdocs NO
-#endif
-#if (OSMajorVersion >= 3)
-#define HasIssetugid		YES
-#define HasPoll			YES
-#endif
-
-#if OSMajorVersion >= 4
-#define HasGetIfAddrs		YES
-#endif
-
-/* All versions define AF_INET6. 3.x and earlier don't have IPv6 support. */
-#if OSMajorVersion < 4
-#ifndef BuildIPv6
-#define BuildIPv6		NO
-#endif
-#endif
-
-#define IPv6SocketsAlsoIPv4	NO
-
-#if (OSMajorVersion > 1)
-#define InstallXloadSetGID	NO
-#else
-#define InstallXloadSetGID	YES
-#endif
-
-#define HasWeakSymbols		UseElfFormat
-
-/*
- * Multi-thread safe libs 
- */	
-/* 2.2.7 and later has libc_r (POSIX threads) */
-#if OSMajorVersion == 2 && OSMinorVersion == 2 && OSTeenyVersion >= 7 || \
-    OSMajorVersion >= 3
-# define HasPosixThreads	YES
-# define ThreadedX		YES
-# define HasThreadSafeAPI	YES
-# if OSRelVersion < 501000
-#  define MTSafeAPIDefines	-DXUSE_MTSAFE_API -DXNO_MTSAFE_PWDAPI
-# else
-#  define MTSafeAPIDefines	-DXUSE_MTSAFE_API
-# endif
-# if (OSRelVersion < 500043)
-#  define NeedUIThrStubs	YES
-# endif
-# if (OSRelVersion >= 502102)
-#  define ThreadsLibraries	-lpthread
-# elif (OSRelVersion >= 500016)
-#  define ThreadsLibraries	-lc_r
-# else
-#  define ThreadsLibraries	-pthread
-# endif
-# define SystemMTDefines	-D_THREAD_SAFE
-#endif
-
-/* This fixes linking C programs against libGLU on FreeBSD 3.x */
-#if (OSMajorVersion == 3)
-#define SharedGLUReqs		$(LDPRELIB) $(XLIB) $(GLXLIB) -lstdc++ -lgcc
-#endif
 
 #define AvoidNullMakeCommand	YES
 #define StripInstalledPrograms	YES
@@ -142,68 +47,19 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #define NeedVarargsPrototypes	YES
 #define NeedWidePrototypes	NO
 
-#define HasPlugin		YES
-#define VendorHasX11R6_3libXext	YES	/* XC or XFree86 >= 3.3.1 */
-
 #define MkdirHierCmd		mkdir -p
 
-#ifndef LexCmd
-#define LexCmd			flex -l
-#endif
-#ifndef HasFlex
-#define HasFlex			YES
-#endif
-
-#ifndef HasMktemp
-#if (OSMajorVersion >= 4) || (OSMajorVersion == 3 && OSMinorVersion >= 1) || \
-	(OSMajorVersion == 2 && OSMinorVersion == 2 && OSTeenyVersion >= 7)
-#define HasMktemp		YES
-#else
-#define HasMktemp		NO
-#endif
-#endif
-
-/*
- * 2.2.x has perl 4 by default, not perl 5.
- */
-#if (OSMajorVersion <= 2)
-#ifndef HasPerl5
-#define HasPerl5		NO
-#endif
-#endif
-
-#ifndef CcCmd
 #define CcCmd			cc
-#endif
-#ifndef CplusplusCmd
-#define CplusplusCmd		c++
-#endif
-#define CppCmd			/usr/bin/cpp
+#define CppCmd			/usr/libexec/cpp
 #define PreProcessCmd		CppCmd
-#define StandardCppOptions	-traditional
-#define StandardCppDefines	/**/
-#ifndef DefaultCCOptions
-#if defined(UseInstalled)
+#define StandardCppDefines	-traditional
+#if defined(UseInstalled) && (!defined(XF86LinkKit) || !XF86LinkKit)
 #define DefaultCCOptions	/**/
 #else
-#if defined(HasGcc3) && HasGcc3
-#define NoSystemWarn		-Wno-system-headers
-#else
-#define NoSystemWarn
-#endif
-#define DefaultCCOptions	-ansi -pedantic NoSystemWarn -Dasm=__asm \
-	GccWarningOptions
-#endif
+#define DefaultCCOptions	-ansi -pedantic -Dasm=__asm
 #endif
 #ifndef ExtraLibraries
-/* support for multi-byte locales is in libxpg4 rather than libc */
-#if (OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion >= 2)) && \
-    !(OSMajorVersion == 4 && OSRelVersion >= 400020) && \
-    !(OSRelVersion >= 500005)
-#define ExtraLibraries		-lxpg4
-#else
 #define ExtraLibraries		/**/
-#endif
 #endif
 #ifndef UseGnuMalloc
 /* 2.2 doesn't really have GnuMalloc */
@@ -213,64 +69,11 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #define UseGnuMalloc		NO
 #endif
 #endif
+
 /* 2.2.2 and later has setusercontext() */
 #if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion > 2) || \
      (OSMajorVersion == 2 && OSMinorVersion == 2 && OSTeenyVersion >= 2)
 #define HasSetUserContext	YES
-#endif
-
-#if OSMajorVersion >= 5 || (OSMajorVersion == 4 && OSMinorVersion >= 6)
-#define HasGetpeereid		YES
-#endif
-
-/* 3.3(?) and later has support for setting MTRRs */
-#ifndef HasMTRRSupport
-#if OSMajorVersion > 3 || (OSMajorVersion == 3 && OSMinorVersion >= 3)
-#define HasMTRRSupport		YES
-#else
-#define HasMTRRSupport		NO
-#endif
-#endif
-
-/*
- * Drivers that don't need AGP can work with 4.0, but we don't have a
- * mechanism for specifying a subset of drivers in the OS.cf files yet.
- */
-#ifndef BuildXF86DRI
-#if OSMajorVersion >= 5 || (OSMajorVersion == 4 && OSMinorVersion >= 1)
-#define BuildXF86DRI		YES
-#endif
-#endif
-
-/*
- * 4.1/i386 and 5.0/i386,alpha,ia64,amd64 have the AGP driver.
- */
-#ifndef HasAgpGart
-#if defined(i386Architecture) && \
-	(OSMajorVersion >= 5 || (OSMajorVersion == 4 && OSMinorVersion >= 1))
-#define HasAgpGart		YES
-#endif
-#if (defined(AlphaArchitecture) || defined(ia64Architecture) || \
-	defined(AMD64Architecture)) && (OSMajorVersion >= 5)
-#define HasAgpGart		YES
-#endif
-#endif
-
-/*
- * SSE and 3DNow will be autodetected, so binutils is the only 
- * requirement for enabling this.  By 4.2 they were all supported.
- */
-#if defined(AMD64Architecture) || defined(i386Architecture) && \
-	(OSMajorVersion >= 5 || (OSMajorVersion == 4 && OSMinorVersion >= 2))
-# define HasX86Support          YES
-# define HasMMXSupport		YES
-# define Has3DNowSupport	YES
-# define HasSSESupport		YES
-#else
-# define HasX86Support	        NO
-# define HasMMXSupport		NO
-# define Has3DNowSupport	NO
-# define HasSSESupport		NO
 #endif
 
 /* 
@@ -306,53 +109,10 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
  * and they can remove it from the list of directories they add to ld.so.cache 
  * in their /etc/rc file.
  */
-
-#ifndef UseRpath
-# define UseRpath		YES
+#if OSMajorVersion > 2 || (OsMajorVersion == 2 && OSMinorVersion >= 2)
+#ifndef ExtraLoadFlags
+#define ExtraLoadFlags		-Wl,-R,$(USRLIBDIRPATH)
 #endif
-
-#if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion >= 2)
-
-# ifndef RpathLoadFlags
-#  if UseRpath
-#   if UseElfFormat
-#    define RpathLoadFlags	-Wl,-rpath,$(USRLIBDIRPATH)
-#   else
-#    define RpathLoadFlags	-Wl,-R,$(USRLIBDIRPATH)
-#   endif
-#  else
-#   define RpathLoadFlags	/**/
-#  endif
-# endif
-
-# ifndef ExtraLoadFlags
-#  if UseElfFormat && !defined(UseInstalled)
-#   define ExtraLoadFlags	RpathLoadFlags -Wl,-rpath-link,$(BUILDLIBDIR)
-#  else
-#   define ExtraLoadFlags	RpathLoadFlags
-#  endif
-# endif
-
-#endif
-
-#ifndef LibraryRpathLoadFlags
-# if UseRpath
-#  if UseElfFormat
-#   define LibraryRpathLoadFlags	-rpath $(USRLIBDIRPATH)
-#  else
-#   define LibraryRpathLoadFlags	-R $(USRLIBDIRPATH)
-#  endif
-# else
-#  define LibraryRpathLoadFlags		/**/
-# endif
-#endif
-
-#ifndef SharedLibraryLoadFlags
-# if UseElfFormat
-#  define SharedLibraryLoadFlags	-shared LibraryRpathLoadFlags
-# else
-#  define SharedLibraryLoadFlags	-Bshareable LibraryRpathLoadFlags
-# endif
 #endif
 
 #ifndef GnuMallocLibrary
@@ -367,85 +127,103 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #endif
 #endif
 
-/* PAM appeared in FreeBSD 3.1 */
-#if (OSMajorVersion > 3) || (OSMajorVersion == 3 && OSMinorVersion >=1 )
-#ifndef HasPam
-#define HasPam		YES
+#if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion >= 2) || \
+    (OSMajorVersion == 2 && OSMinorVersion == 2 && OSTeenyVersion > 2)
+/*
+ * FreeBSD 2.2.5 or later.
+ *
+ * Don't make any assumptions about the version of Tcl in the base OS.
+ * These settings assume that the tcl-7.6 and tk-4.2 packages have been
+ * installed.
+ *
+ * Note the static libs in some versions of the FreeBSD packages are
+ * broken.  The symptom of this is unresolved symbols when linking
+ * XF86Setup.  If you run into this problem, either build your own
+ * static libs from the standard Tcl and Tk source, or change the
+ * definitions of XF86SetupUsesStatic{Tcl,Tk}.  The latter is not
+ * recommended for binaries that are going to be redistributed.
+ */
+#ifndef TkLibName
+#define TkLibName		tk42
 #endif
+#ifndef TkIncDir
+#define TkIncDir		/usr/local/include/tk4.2
+#endif
+#ifndef TclLibName
+#define TclLibName		tcl76
+#endif
+#ifndef TclIncDir
+#define TclIncDir		/usr/local/include/tcl7.6
+#endif
+#else
+#if OSMajorVersion == 2 && OSMinorVersion == 2
+/*
+ * FreeBSD 2.2 prior to 2.2.5
+ *
+ * Note: the tk-4.1 package for FreeBSD doesn't have the static lib, so
+ * you'll have to build it yourself, or change the definition of
+ * XF86SetupUsesStaticTk.
+ */
+#ifndef TkLibName
+#define TkLibName		tk41
+#endif
+#ifndef TclLibName
+#define TclLibName		tcl
+#endif
+#ifndef TclLibDir
+#define TclLibDir		/usr/lib
+#endif
+#ifndef TclIncDir
+#define TclIncDir		/usr/include
+#endif
+/* FreeBSD 2.2 has libtcl in the base system */
+#ifndef XF86SetupUsesStaticTcl
+#define XF86SetupUsesStaticTcl	NO
 #endif
 
-/* There are two options for building.  One is to assume that the system has
- * many of the dependencies provided by the ports tree.  The other is to just
- * build everything from this tree.
+#else /* ! 2.2 or later */
+
+#if OSMajorVersion == 2 && OSMinorVersion == 1 && OSTeenyVersion >= 6
+
+/*
+ * 2.1.x with x >=6 has tk 4.1 and tcl 7.5 in the packages collection.
+ * Neither packages include the static libs, so you either need to build
+ * them yourself or set XF86SetupUsesStaticTcl and XF86SetupUsesStaticTk
+ * to NO.  This isn't the default because we don't want the XFree86
+ * binaries to have these packages as a dependency.
  */
 
-#ifndef HasStandardPorts
-#define HasStandardPorts	YES
+#ifndef TkLibName
+#define TkLibName		tk41
+#endif
+#ifndef TclLibName
+#define TclLibName		tcl75
 #endif
 
-#ifndef LocalBase
-#define LocalBase		/usr/local
-#endif
-#ifndef X11Base
-#define X11Base			/usr/X11R6
-#endif
+#else /* ! 2.1.6 or later */
 
-#if HasStandardPorts
-
-#ifndef HasExpat
-# define HasExpat		YES
-# define ExpatDir		LocalBase
+#ifndef TkLibName
+#define TkLibName		tk40
+#endif
+#ifndef TclLibName
+#define TclLibName		tcl74
 #endif
 
-#ifndef HasFreetype2
-# define HasFreetype2		YES
-# define Freetype2Dir		LocalBase
 #endif
-
-#ifndef HasFontconfig
-# define HasFontconfig		YES
-# define FontconfigDir		X11Base
 #endif
-
-#ifndef HasLibpng
-# define HasLibpng		YES
-# define LibpngDir		LocalBase
 #endif
-
-#endif /* HasStandardPorts */
 
 #undef  InstallCmd
 #define InstallCmd		/usr/bin/install
 
-#if UseElfFormat
-# define AsmElfDefines		-D__ELF__
-#else
-# define AsmElfDefines /**/
-#endif
-
 #if GccUsesGas
-# define GccGasOption		-DGCCUSESGAS
-# define AsmDefines		-DUSE_GAS AsmElfDefines
+# define GccGasOption 		-DGCCUSESGAS
+# define AsmDefines		-DUSE_GAS
 #else
 # define GccGasOption /**/
-# define AsmDefines		AsmElfDefines
 #endif
 
-#ifdef i386Architecture
 #define ServerExtraDefines GccGasOption XFree86ServerDefines
-#endif
-#if defined(AlphaArchitecture) || defined(Sparc64Architecture) || \
-	defined(ia64Architecture) || defined(AMD64Architecture)
-#define ServerExtraDefines GccGasOption XFree86ServerDefines -D_XSERVER64
-#endif
-#ifdef Sparc64Architecture
-#define AsVISOption		-Av9a
-#define AsOutputArchSize	64
-#endif
-
-#ifdef PpcArchitecture
-#define XF86INT10_BUILD		X86INT10_STUB
-#endif
 
 #define StandardDefines	-DCSRG_BASED
 
@@ -455,8 +233,8 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #define HasMakefileSafeInclude	YES
 #define IncludeMakefile(file) @@# dependencies are in .depend
 #define DependFileName		.depend
-#ifndef DoLoadableServer
-#define DoLoadableServer	YES
+#ifndef BuildDynamicLoading
+#define BuildDynamicLoading	YES
 #endif
 #ifndef ForceNormalLib
 #define ForceNormalLib		YES
@@ -470,23 +248,22 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 /* The GCC strength-reduce bug is fixed for FreeBSD 2.1.5 and later */
 #ifndef DefaultGcc2i386Opt
 #if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion > 1) || (OSMajorVersion == 2 && OSMinorVersion == 1 && OSTeenyVersion >= 5)
-#define DefaultGcc2i386Opt -O2 GccAliasingArgs
+#define DefaultGcc2i386Opt -O2
 #endif
 #endif
 
 #ifdef i386Architecture
 # define OptimizedCDebugFlags DefaultGcc2i386Opt
 #else
-# define OptimizedCDebugFlags -O
+# define OptimizedCDebugFlags -O2
 #endif
 
 #ifndef PreIncDir
 # define PreIncDir	/usr/include
 #endif
 
-#define HasGroff	YES
-#define NroffCmd	env GROFF_NO_SGR=y groff -Tascii
-#define SetTtyGroup	YES
+#define TroffCmd        groff -Tps
+#define SetTtyGroup     YES
 
 #ifndef ExtraFilesToClean
 # define ExtraFilesToClean *.core
@@ -504,7 +281,72 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
  * Compress manual pages
  */
 #ifndef CompressManPages
-# define CompressManPages	YES
+# define CompressManPages        YES
+#endif
+
+#if CompressManPages
+
+#ifndef CompressManCmd
+# define CompressManCmd		gzip -n
+#endif
+   COMPRESSMANCMD = CompressManCmd
+
+#ifndef InstallManPageLong
+#define InstallManPageLong(file,destdir,dest)                           @@\
+install.man:: file.man                                                  @@\
+	MakeDir($(DESTDIR)destdir)                                      @@\
+	$(RM) $(DESTDIR)destdir/dest.$(MANSUFFIX)*                      @@\
+	$(INSTALL) -c $(INSTMANFLAGS) file.man \                        @@\
+          $(DESTDIR)destdir/dest.$(MANSUFFIX)                           @@\
+	-$(COMPRESSMANCMD) $(DESTDIR)destdir/dest.$(MANSUFFIX)
+#endif
+
+#ifndef InstallGenManPageLong
+#define InstallGenManPageLong(file,destdir,dest,suffix)                 @@\
+install.man:: file.man                                                  @@\
+	MakeDir($(DESTDIR)destdir)                                      @@\
+	$(RM) $(DESTDIR)destdir/dest.suffix*                            @@\
+	$(INSTALL) -c $(INSTMANFLAGS) file.man \                        @@\
+          $(DESTDIR)destdir/dest.suffix                                 @@\
+	-$(COMPRESSMANCMD) $(DESTDIR)destdir/dest.suffix
+#endif
+
+#ifndef InstallMultipleMan
+#define InstallMultipleMan(list,dest)                                   @@\
+install.man:: list                                                      @@\
+	MakeDir($(DESTDIR)dest)						@@\
+	@case '${MFLAGS}' in *[i]*) set +e;; esac; \                    @@\
+	for i in list; do \                                             @@\
+	        (set -x; \                                              @@\
+	        MNAME=`echo $$i | cut -f1 -d.`; \			@@\
+	        $(RM) $(DESTDIR)dest/$${MNAME}*; \                      @@\
+	        $(INSTALL) -c $(INSTMANFLAGS) $$i \                     @@\
+		  $(DESTDIR)dest/$${MNAME}.$(MANSUFFIX); \              @@\
+	        $(COMPRESSMANCMD) $(DESTDIR)dest/$${MNAME}.$(MANSUFFIX)); \  @@\
+	done
+#endif
+
+/*
+ * InstallManPageAliases - install soft links for aliases.
+ */
+#ifndef InstallManPageAliases
+#define InstallManPageAliases(file,destdir,aliases)                     @@\
+install.man::                                                           @@\
+	@(SUFFIX=`echo $(DESTDIR)destdir/file.* | sed -e 's,.*/[^\.]*.,,'`; \ @@\
+	for i in aliases; do (set -x; \                                 @@\
+	$(RM) $(DESTDIR)destdir/$$i.*; \                                @@\
+	(cd $(DESTDIR)destdir; $(LN) file.$${SUFFIX} \                  @@\
+	$$i.$${SUFFIX})); \                                             @@\
+	done)
+#endif
+
+/*
+ * InstallGenManPageAliases - install soft links for aliases.
+ */
+#ifndef InstallGenManPageAliases
+#define InstallGenManPageAliases(file,destdir,suffix,aliases)              @@\
+	InstallManPageAliases(file,destdir,aliases)
+#endif
 #endif
 
 #if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion >= 1)
@@ -515,68 +357,8 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #define StaticLibrary(libpath,libname) -Wl,-Bstatic Concat(-L,libpath) Concat(-l,libname) -Wl,-Bdynamic
 #endif
 
-#if UseElfFormat
-#define DlLibrary		-rdynamic
-#else
-#define DlLibrary		/**/
-#endif
-
-#ifdef AlphaArchitecture
-#define IoLibrary		-lio
-#else
-#define IoLibrary		/**/
-#endif
-
-#define ServerExtraSysLibs	IoLibrary
- 
-#ifndef PamLibraries
-#define PamLibraries		-lpam DlLibrary
-#endif
-
-#ifndef SharedLibXdmGreet
-# define SharedLibXdmGreet		NO
-#endif
-
-/*
- * On FreeBSD, the run-time loader will use the built-in "rpath" before
- * LD_LIBRARY_PATH.  This means that utilities like mkfontdir will load
- * installed libraries (if they exist) in preference to the ones in the
- * build tree, even though LD_LIBRARY_PATH points to the build tree.
- * This can result in the build failing.  One way to avoid this is to
- * pre-load the libraries from the build tree.
- *
- * There should be a better way than this hack...
- */
-#if UseElfFormat
-#ifndef PreloadFontSetup
-#define PreloadFontSetup	LD_PRELOAD="`(cd $(XENVLIBDIR); echo $(XFONTPRELOADPATTERN))`"
-#endif
-#ifndef PreloadFreetypeSetup
-#define PreloadFreetypeSetup	LD_PRELOAD="`(cd $(XENVLIBDIR); echo $(FT2PRELOADPATTERN))`"
-#endif
-#ifndef PreloadXFTSetup
-#define PreloadXFTSetup		LD_PRELOAD="`(cd $(XENVLIBDIR); echo $(FT2PRELOADPATTERN) $(XFTPRELOADPATTERN) $(XRENDERPRELOADPATTERN) $(FCPRELOADPATTERN))`"
-#endif
-#endif
-
-#ifndef HasCookieMaker
-/* Which versions have /dev/urandom? */
-#if OSMajorVersion >= 4
-#define HasCookieMaker		YES
-#define MkCookieCmd \
-	'dd if=/dev/urandom bs=16 count=1 2>/dev/null | hexdump -e \\"%08x\\"'
-#else
-#define HasCookieMaker		NO
-#endif
-#endif
-
-/*
- * A hack to work around an optimization problem with gcc 2.95.2 - 2.95.4
- */
-#if (GccMajorVersion == 2 && GccMinorVersion == 95)
-#define GccOptBug295
-#endif
-
 #include <bsdLib.rules>
 
-#include <xorg.cf>
+#ifdef i386Architecture
+#include <xfree86.cf>
+#endif

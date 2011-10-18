@@ -1,26 +1,6 @@
-XCOMM $Xorg: Imakefile,v 1.3 2000/08/17 19:53:32 cpqbld Exp $
-
-
-
-
-XCOMM $XFree86: xc/programs/Xserver/mfb/Imakefile,v 3.16 2002/05/31 16:12:18 dawes Exp $
-
-#if DoLoadableServer
-#if !BuildModuleInSubdir
-#define IHaveModules
-#elif !defined(IHaveModules)
-#define IHaveSubdirs
-SUBDIRS = module
-#endif
-#endif
-
+XCOMM $XConsortium: Imakefile /main/42 1996/11/04 16:09:42 kaleb $
+XCOMM $XFree86: xc/programs/Xserver/mfb/Imakefile,v 3.2 1996/12/23 07:09:36 dawes Exp $
 #include <Server.tmpl>
-
-#if defined(IHaveModules)
-XF86INCL = -I$(XF86COMSRC) -I$(XF86SRC)
-XFMODSRC = mfbmodule.c
-XFMODOBJ = mfbmodule.o
-#endif
 
 SRCS1 =	 mfbgc.c mfbwindow.c mfbfont.c \
 	 mfbfillrct.c mfbpntwin.c maskbits.c mfbpixmap.c \
@@ -29,7 +9,7 @@ SRCS1 =	 mfbgc.c mfbwindow.c mfbfont.c \
          mfbfillsp.c mfbsetsp.c mfbscrinit.c mfbscrclse.c mfbclip.c \
          mfbbitblt.c mfbgetsp.c mfbpolypnt.c \
 	 mfbbltC.c mfbbltX.c mfbbltCI.c mfbbltO.c mfbbltG.c \
-	 mfbcmap.c mfbtileC.c mfbtileG.c mfbmisc.c mfbbstore.c $(XFMODSRC)
+	 mfbcmap.c mfbtileC.c mfbtileG.c mfbmisc.c mfbbstore.c
 
 SRCS =	 $(SRCS1) mfbseg.c mfbpgbwht.c mfbpgbblak.c mfbpgbinv.c mfbigbwht.c \
 	 mfbigbblak.c mfbpawhite.c mfbpablack.c mfbpainv.c mfbtewhite.c \
@@ -47,25 +27,17 @@ OBJS =   mfbgc.o mfbwindow.o mfbfont.o \
 	 mfbigbwht.o mfbigbblak.o mfbcmap.o \
 	 mfbpawhite.o mfbpablack.o mfbpainv.o mfbtileC.o mfbtileG.o \
          mfbtewhite.o mfbteblack.o mfbmisc.o mfbbstore.o \
-         mfbplywhite.o mfbplyblack.o mfbplyinv.o $(XFMODOBJ)
+         mfbplywhite.o mfbplyblack.o mfbplyinv.o
 
-INCLUDES = -I$(SERVERSRC)/mfb -I$(SERVERSRC)/mi -I$(SERVERSRC)/include \
-	   -I$(XINCLUDESRC) -I$(FONTINCSRC) $(XF86INCL)
+INCLUDES = -I. -I../mi -I../include -I$(XINCLUDESRC) -I$(FONTINCSRC)
 LINTDEFS = -DMFBPOLYGLYPHBLT=mfbPolyGlyphBltWhite \
 	   -DMFBIMAGEGLYPHBLT=mfbImageGlyphBltWhite \
 	   -DEQWHOLEWORD=MFB_EQWHOLEWORD_WHITE -DOPEQ=MFB_OPEQ_WHITE
 
-LINTLIBS = $(SERVERSRC)/dix/llib-ldix.ln $(SERVERSRC)/os/llib-los.ln \
-	   $(SERVERSRC)/mi/llib-lmi.ln
+LINTLIBS = ../dix/llib-ldix.ln ../os/llib-los.ln ../mi/llib-lmi.ln
 
-#ifdef IHaveModules
-ModuleObjectRule()
-LibraryModuleTarget(mfb,$(OBJS))
-#else
 NormalLibraryObjectRule()
 NormalLibraryTarget(mfb,$(OBJS))
-#endif
-
 LintLibraryTarget(mfb,$(SRCS1))
 NormalLintTarget($(LINTDEFS) $(SRCS1))
 
@@ -113,56 +85,9 @@ ObjectFromSpecialSource(mfbtileG,mfbtile,-DMROP=0)
 
 SpecialCObjectRule(mfbpixmap,$(ICONFIGFILES),$(_NOOP_))
 
-#ifdef IHaveModules
-InstallLibraryModule(mfb,$(MODULEDIR),.)
-#endif
+InstallLinkKitLibrary(mfb,$(LINKKITDIR)/lib)
+InstallLinkKitNonExecFile(fastblt.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(mfb.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(mergerop.h,$(LINKKITDIR)/include)
 
 DependTarget()
-
-#ifdef IHaveSubdirs
-MakeSubdirs($(SUBDIRS))
-DependSubdirs($(SUBDIRS))
-#endif
-
-InstallDriverSDKLibraryModule(mfb,$(DRIVERSDKMODULEDIR),.)
-
-InstallDriverSDKNonExecFile(mfb.h,$(DRIVERSDKINCLUDEDIR))
-
-
-#ifdef LinkDirectory
-LinkSourceFile(maskbits.c,LinkDirectory)
-LinkSourceFile(mfbbitblt.c,LinkDirectory)
-LinkSourceFile(mfbblt.c,LinkDirectory)
-LinkSourceFile(mfbbres.c,LinkDirectory)
-LinkSourceFile(mfbbresd.c,LinkDirectory)
-LinkSourceFile(mfbbstore.c,LinkDirectory)
-LinkSourceFile(mfbclip.c,LinkDirectory)
-LinkSourceFile(mfbcmap.c,LinkDirectory)
-LinkSourceFile(mfbfillarc.c,LinkDirectory)
-LinkSourceFile(mfbfillrct.c,LinkDirectory)
-LinkSourceFile(mfbfillsp.c,LinkDirectory)
-LinkSourceFile(mfbfont.c,LinkDirectory)
-LinkSourceFile(mfbgc.c,LinkDirectory)
-LinkSourceFile(mfbgetsp.c,LinkDirectory)
-LinkSourceFile(mfbhrzvert.c,LinkDirectory)
-LinkSourceFile(mfbimage.c,LinkDirectory)
-LinkSourceFile(mfbimggblt.c,LinkDirectory)
-LinkSourceFile(mfbline.c,LinkDirectory)
-LinkSourceFile(mfbmisc.c,LinkDirectory)
-LinkSourceFile(mfbmodule.c,LinkDirectory)
-LinkSourceFile(mfbpixmap.c,LinkDirectory)
-LinkSourceFile(mfbply1rct.c,LinkDirectory)
-LinkSourceFile(mfbplygblt.c,LinkDirectory)
-LinkSourceFile(mfbpntarea.c,LinkDirectory)
-LinkSourceFile(mfbpntwin.c,LinkDirectory)
-LinkSourceFile(mfbpolypnt.c,LinkDirectory)
-LinkSourceFile(mfbpushpxl.c,LinkDirectory)
-LinkSourceFile(mfbscrclse.c,LinkDirectory)
-LinkSourceFile(mfbscrinit.c,LinkDirectory)
-LinkSourceFile(mfbsetsp.c,LinkDirectory)
-LinkSourceFile(mfbtegblt.c,LinkDirectory)
-LinkSourceFile(mfbtile.c,LinkDirectory)
-LinkSourceFile(mfbwindow.c,LinkDirectory)
-LinkSourceFile(mfbzerarc.c,LinkDirectory)
-#endif
-

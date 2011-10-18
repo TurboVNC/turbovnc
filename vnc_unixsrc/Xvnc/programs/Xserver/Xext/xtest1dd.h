@@ -1,4 +1,4 @@
-/* $XFree86: xc/programs/Xserver/Xext/xtest1dd.h,v 3.2 2001/08/01 00:44:44 tsi Exp $ */
+/* $XFree86: xc/programs/Xserver/Xext/xtest1dd.h,v 3.0 1996/05/06 05:55:43 dawes Exp $ */
 /************************************************************
 
 Copyright 1996 by Thomas E. Dickey <dickey@clark.net>
@@ -24,10 +24,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifndef XTEST1DD_H
 #define XTEST1DD_H 1
 
@@ -39,89 +35,92 @@ extern	ClientPtr	playback_client;
 extern	KeyCode		xtest_command_key;
 
 extern void stop_stealing_input(
+#if NeedFunctionPrototypes
 	void
+#endif
 );
 
 extern void
 steal_input(
+#if NeedFunctionPrototypes
 	ClientPtr              /* client */,
 	CARD32                 /* mode */
+#endif
 );
 
 extern void
 flush_input_actions(
+#if NeedFunctionPrototypes
 	void
+#endif
 );
 
 extern void
 XTestStealJumpData(
-	int                    /* jx */,
-	int                    /* jy */,
+#if NeedFunctionPrototypes2
+	short                  /* jx */,
+	short                  /* jy */,
 	int                    /* dev_type */
+#endif
 );
 
 extern void
 XTestStealMotionData(
-	int                    /* dx */,
-	int                    /* dy */,
+#if NeedFunctionPrototypes2
+	short                  /* dx */,
+	short                  /* dy */,
 	int                    /* dev_type */,
-	int                    /* mx */,
-	int                    /* my */
+	short                  /* mx */,
+	short                  /* my */
+#endif
 );
 
 extern Bool
 XTestStealKeyData(
-	unsigned               /* keycode */,
-	int                    /* keystate */,
+#if NeedFunctionPrototypes2
+	CARD8                  /* keycode */,
+	char                   /* keystate */,
 	int                    /* dev_type */,
-	int                    /* locx */,
-	int                    /* locy */
+	short                  /* locx */,
+	short                  /* locy */
+#endif
 );
 
 extern void
 parse_fake_input(
+#if NeedFunctionPrototypes
 	ClientPtr              /* client */,
 	char *                 /* req */
+#endif
 );
 
 extern void
 XTestComputeWaitTime(
+#if NeedFunctionPrototypes
 	struct timeval *       /* waittime */
+#endif
 );
 
 extern int
 XTestProcessInputAction(
+#if NeedFunctionPrototypes
 	int                    /* readable */,
 	struct timeval *       /* waittime */
+#endif
 );
 
 extern void
 abort_play_back(
+#if NeedFunctionPrototypes
 	void
+#endif
 );
 
 extern void
 return_input_array_size(
+#if NeedFunctionPrototypes
 	ClientPtr              /* client */
-);
-
-extern void XTestGenerateEvent(
-	int                    /* dev_type */,
-	int                    /* keycode */,
-	int                    /* keystate */,
-	int                    /* mousex */,
-	int                    /* mousey */
-);
-
-extern void XTestGetPointerPos(
-	short *                /* fmousex */,
-	short *                /* fmousey */
-);
-
-extern void XTestJumpPointer(
-	int                    /* jx */,
-	int                    /* jy */,
-	int                    /* dev_type */
+#endif
 );
 
 #endif /* XTEST1DD_H */

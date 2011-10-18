@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/cfb/cfbbstore.c,v 1.4 1999/01/31 12:21:41 dawes Exp $ */
 /*-
  * cfbbstore.c --
  *	Functions required by the backing-store implementation in MI.
@@ -15,14 +14,13 @@
  *
  *
  */
-/* $Xorg: cfbbstore.c,v 1.3 2000/08/17 19:48:13 cpqbld Exp $ */
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
+#ifndef lint
+static char rcsid[] =
+"$XConsortium: cfbbstore.c,v 5.8 93/12/13 17:21:51 dpw Exp $ SPRITE (Berkeley)";
 #endif
 
 #include    "cfb.h"
-#include    <X11/X.h>
+#include    "X.h"
 #include    "mibstore.h"
 #include    "regionstr.h"
 #include    "scrnintstr.h"
@@ -78,8 +76,11 @@ cfbSaveAreas(pPixmap, prgnSave, xorg, yorg, pWin)
 	pBox++;
     }
 
-    pScrPix = (*pScreen->GetWindowPixmap)(pWin);
-
+#ifdef CFB_NEED_SCREEN_PRIVATE
+    pScrPix = (PixmapPtr) pScreen->devPrivates[cfbScreenPrivateIndex].ptr;
+#else
+    pScrPix = (PixmapPtr) pScreen->devPrivate;
+#endif
 
     cfbDoBitbltCopy((DrawablePtr) pScrPix, (DrawablePtr)pPixmap,
 		    GXcopy, prgnSave, pPtsInit, ~0L);
@@ -136,7 +137,11 @@ cfbRestoreAreas(pPixmap, prgnRestore, xorg, yorg, pWin)
 	pBox++;
     }
 
-    pScrPix = (*pScreen->GetWindowPixmap)(pWin);
+#ifdef CFB_NEED_SCREEN_PRIVATE
+    pScrPix = (PixmapPtr) pScreen->devPrivates[cfbScreenPrivateIndex].ptr;
+#else
+    pScrPix = (PixmapPtr) pScreen->devPrivate;
+#endif
 
     cfbDoBitbltCopy((DrawablePtr)pPixmap, (DrawablePtr) pScrPix,
 		    GXcopy, prgnRestore, pPtsInit, ~0L);

@@ -1,12 +1,14 @@
-/* $Xorg: secauth.c,v 1.4 2001/02/09 02:05:23 xorgcvs Exp $ */
+/* $XConsortium: secauth.c /main/4 1996/11/27 16:57:14 swick $ */
 /*
-Copyright 1996, 1998  The Open Group
+Copyright (c) 1996  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -14,27 +16,21 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 */
-/* $XFree86: xc/programs/Xserver/os/secauth.c,v 1.10 2001/08/01 00:44:59 tsi Exp $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
+#include "X.h"
 #include "os.h"
 #include "osdep.h"
 #include "dixstruct.h"
-#include "swaprep.h"
 
 /*================================================================
    BEGIN ORL VNC modification
@@ -45,7 +41,7 @@ from The Open Group.
 #ifdef XCSECURITY
 */
 #define _SECURITY_SERVER
-#include <X11/extensions/security.h>
+#include "extensions/security.h"
 /* REMOVE
 #endif
 */
@@ -57,13 +53,13 @@ static char InvalidPolicyReason[] = "invalid policy specification";
 static char PolicyViolationReason[] = "policy violation";
 
 static Bool
-AuthCheckSitePolicy(
-    unsigned short *data_lengthP,
-    char	**dataP,
-    ClientPtr	client,
-    char	**reason)
+AuthCheckSitePolicy(data_lengthP, dataP, client, reason)
+    unsigned short *data_lengthP;
+    char	**dataP;
+    ClientPtr	client;
+    char	**reason;
 {
-    CARD8	*policy = *(CARD8 **)dataP;
+    char	*policy = *dataP;
     int		length;
     Bool	permit;
     int		nPolicies;
@@ -77,7 +73,7 @@ AuthCheckSitePolicy(
     }
 
     permit = (*policy++ == 0);
-    nPolicies = (CARD8) *policy++;
+    nPolicies = *policy++;
 
     length -= 2;
 
@@ -91,7 +87,7 @@ AuthCheckSitePolicy(
 	    return FALSE;
 	}
 
-	strLen = (CARD8) *policy++;
+	strLen = *policy++;
 	if (--length < strLen) {
 	    *reason = InvalidPolicyReason;
 	    return FALSE;
@@ -103,7 +99,7 @@ AuthCheckSitePolicy(
 	    {
 		char *testPolicy = sitePolicies[sitePolicy];
 		if ((strLen == strlen(testPolicy)) &&
-		    (strncmp((char *)policy, testPolicy, strLen) == 0))
+		    (strncmp(policy, testPolicy, strLen) == 0))
 		{
 		    found = TRUE; /* need to continue parsing the policy... */
 		    break;
@@ -123,18 +119,20 @@ AuthCheckSitePolicy(
     }
 
     *data_lengthP = length;
-    *dataP = (char *)policy;
+    *dataP = policy;
     return TRUE;
 }
 
 XID
-AuthSecurityCheck (
-    unsigned short	data_length,
-    char		*data,
-    ClientPtr		client,
-    char		**reason)
+AuthSecurityCheck (data_length, data, client, reason)
+    unsigned short	data_length;
+    char	*data;
+    ClientPtr client;
+    char	**reason;
 {
 #ifdef XCSECURITY
+    OsCommPtr oc = (OsCommPtr)client->osPrivate;
+    register ConnectionInputPtr oci = oc->input;
     xConnSetupPrefix csp;
     xReq freq;
 
@@ -173,12 +171,6 @@ AuthSecurityCheck (
     }
     else if (!GetAccessControl())
     {
-	/*
-	 * The client - possibly the X FireWall Proxy - gave
-	 * no auth data and host-based authorization is turned
-	 * off.  In this case, the client should be denied
-	 * access to the X server.
-	 */
 	*reason = "server host access control is disabled";
 	return (XID) -1;
     }

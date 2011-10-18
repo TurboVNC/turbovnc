@@ -1,4 +1,4 @@
-/* $Xorg: arith.c,v 1.3 2000/08/17 19:46:29 cpqbld Exp $ */
+/* $XConsortium: arith.c,v 1.4 94/03/22 19:08:54 gildea Exp $ */
 /* Copyright International Business Machines, Corp. 1991
  * All Rights Reserved
  * Copyright Lexmark International, Inc. 1991
@@ -26,8 +26,6 @@
  * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
  * THIS SOFTWARE.
  */
-/* $XFree86: xc/lib/font/Type1/arith.c,v 1.6tsi Exp $ */
-
  /* ARITH    CWEB         V0006 ********                             */
 /*
 :h1.ARITH Module - Portable Module for Multiple Precision Fixed Point Arithmetic
@@ -49,17 +47,10 @@ assembly language, unlike C, will have 64-bit multiply products and
  
 The included files are:
 */
-
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#ifdef FONTMODULE
-# include "os.h"
-#endif
+ 
 #include "objects.h"
 #include "spaces.h"
 #include "arith.h"
-
  
 /*
 :h3.
@@ -113,8 +104,10 @@ SIGNBITON tests the high order bit of a long 'w':
 The two multiplicands must be positive.
 */
  
-void 
-DLmult(doublelong *product, unsigned long u, unsigned long v)
+void DLmult(product, u, v)
+  register doublelong *product;
+  register unsigned long u;
+  register unsigned long v;
 {
 #ifdef LONG64
 /* printf("DLmult(? ?, %lx, %lx)\n", u, v); */
@@ -162,9 +155,9 @@ DLmult(doublelong *product, unsigned long u, unsigned long v)
 Both the dividend and the divisor must be positive.
 */
  
-void 
-DLdiv(doublelong *quotient,  /* also where dividend is, originally     */
-      unsigned long divisor)
+void DLdiv(quotient, divisor)
+       doublelong *quotient;       /* also where dividend is, originally     */
+       unsigned long divisor;
 {
 #ifdef LONG64
 /* printf("DLdiv(%lx %lx)\n", quotient, divisor); */
@@ -220,7 +213,7 @@ DLdiv(doublelong *quotient,  /* also where dividend is, originally     */
        divisor >>= 1;
  
        if ((u1u2 >> (LONGSIZE - shift)) != 0 && shift != 0)
-               Abort("DLdiv:  dividend too large");
+               abort("DLdiv:  dividend too large");
        u1u2 = (u1u2 << shift) + ((shift == 0) ? 0 : u3u4 >> (LONGSIZE - shift));
        u3u4 <<= shift;
  
@@ -283,7 +276,7 @@ DLdiv(doublelong *quotient,  /* also where dividend is, originally     */
                */
                u1u2 = t;
                if (HIGHDIGIT(u1u2) != 0)
-                       Abort("divide algorithm error");
+                       abort("divide algorithm error");
                u1u2 = ASSEMBLE(u1u2, LOWDIGIT(u3));
                u3 = LOWDIGIT(u3u4);
                q3q4 = ASSEMBLE(q3q4, qhat);
@@ -306,9 +299,9 @@ carry.  Conversely, if there was a carry, the sum of the lows must be
 less than the max of the lows.  So, the test is "if and only if".
 */
  
-void 
-DLadd(doublelong *u, /* u = u + v                                    */
-      doublelong *v)
+void DLadd(u, v)
+       doublelong *u;        /* u = u + v                                    */
+       doublelong *v;
 {
 #ifdef LONG64
 /* printf("DLadd(%lx %lx)\n", *u, *v); */
@@ -331,9 +324,9 @@ Testing for a borrow is even easier.  If the v.low is greater than
 u.low, there must be a borrow.
 */
  
-void 
-DLsub(doublelong *u, /* u = u - v                                    */
-      doublelong *v)
+void DLsub(u, v)
+       doublelong *u;        /* u = u - v                                    */
+       doublelong *v;
 {
 #ifdef LONG64
 /* printf("DLsub(%lx %lx)\n", *u, *v); */
@@ -365,8 +358,8 @@ overflow will occur when the resulting value is passed back as
 a fractpel.
 */
  
-fractpel 
-FPmult(fractpel u, fractpel v)
+fractpel FPmult(u, v)
+  register fractpel u,v;
 {
   doublelong w;
   register int negative = FALSE; /* sign flag */
@@ -387,12 +380,14 @@ FPmult(fractpel u, fractpel v)
   DLrightshift(w, FRACTBITS);
 #ifndef LONG64
   if (w.high != 0 || SIGNBITON(w.low)) {
+        IfTrace2(TRUE,"FPmult: overflow, %px%p\n", u, v);
         w.low = TOFRACTPEL(MAXSHORT);
   }
  
   return ((negative) ? -w.low : w.low);
 #else
   if (w & 0xffffffff80000000L ) {
+        IfTrace2(TRUE,"FPmult: overflow, %px%p\n", u, v);
         ret = TOFRACTPEL(MAXSHORT);
   }
   else
@@ -408,8 +403,9 @@ FPmult(fractpel u, fractpel v)
 These values may be signed.  The function returns the quotient.
 */
  
-fractpel 
-FPdiv(fractpel dividend, fractpel divisor)
+fractpel FPdiv(dividend, divisor)
+       register fractpel dividend;
+       register fractpel divisor;
 {
        doublelong w;         /* result will be built here                    */
        int negative = FALSE; /* flag for sign bit                            */
@@ -430,6 +426,7 @@ FPdiv(fractpel dividend, fractpel divisor)
        w.high = dividend >> (LONGSIZE - FRACTBITS);
        DLdiv(&w, divisor);
        if (w.high != 0 || SIGNBITON(w.low)) {
+               IfTrace2(TRUE,"FPdiv: overflow, %p/%p\n", dividend, divisor);
                w.low = TOFRACTPEL(MAXSHORT);
        }
        return( (negative) ? -w.low : w.low);
@@ -437,6 +434,7 @@ FPdiv(fractpel dividend, fractpel divisor)
        w = ((long)dividend) << FRACTBITS;
        DLdiv(&w, divisor);
        if (w & 0xffffffff80000000L ) {
+               IfTrace2(TRUE,"FPdiv: overflow, %p/%p\n", dividend, divisor);
                ret = TOFRACTPEL(MAXSHORT);
        }
        else
@@ -453,10 +451,8 @@ an operator that first multiplies by one constant then divides by
 another, keeping the intermediate result in extended precision.
 */
  
-fractpel 
-FPstarslash(fractpel a,   /* result = a * b / c                              */
-	    fractpel b, 
-	    fractpel c)
+fractpel FPstarslash(a, b, c)
+       register fractpel a,b,c;  /* result = a * b / c                       */
 {
        doublelong w;         /* result will be built here                    */
        int negative = FALSE;
@@ -472,11 +468,13 @@ FPstarslash(fractpel a,   /* result = a * b / c                              */
        DLdiv(&w, c);
 #ifndef LONG64
        if (w.high != 0 || SIGNBITON(w.low)) {
+               IfTrace3(TRUE,"FPstarslash: overflow, %p*%p/%p\n", a, b, c);
                w.low = TOFRACTPEL(MAXSHORT);
        }
        return((negative) ? -w.low : w.low);
 #else
        if (w & 0xffffffff80000000L ) {
+               IfTrace3(TRUE,"FPstarslash: overflow, %p*%p/%p\n", a, b, c);
                ret = TOFRACTPEL(MAXSHORT);
        }
        else

@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/cfb/cfbbresd.c,v 3.5 2001/01/17 22:36:34 dawes Exp $ */
 /***********************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -45,12 +45,9 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $Xorg: cfbbresd.c,v 1.4 2001/02/09 02:04:37 xorgcvs Exp $ */
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
+/* $XConsortium: cfbbresd.c,v 1.16 94/04/17 20:28:45 dpw Exp $ */
+/* $XFree86: xc/programs/Xserver/cfb/cfbbresd.c,v 3.1 1996/08/25 14:05:42 dawes Exp $ */
+#include "X.h"
 #include "misc.h"
 #include "cfb.h"
 #include "cfbmskbits.h"
@@ -69,7 +66,7 @@ cfbBresD(rrops,
     int		    numInDashList;	/* total length of dash list */
     int		    *pdashOffset;	/* offset into current dash */
     int		    isDoubleDash;
-    CfbBits   *addrl;		/* pointer to base of bitmap */
+    unsigned long   *addrl;		/* pointer to base of bitmap */
     int		    nlwidth;		/* width in longwords of bitmap */
     int		    signdx, signdy;	/* signs of directions */
     int		    axis;		/* major axis (Y_AXIS or X_AXIS) */
@@ -86,11 +83,11 @@ cfbBresD(rrops,
     int			dashIndex;
     int			dashOffset;
     int			dashRemaining;
-    CfbBits	xorFg, andFg, xorBg, andBg;
+    unsigned long	xorFg, andFg, xorBg, andBg;
     Bool		isCopy;
     int			thisDash;
 #if PSZ == 24
-    CfbBits xorPiQxlFg[3], andPiQxlFg[3], xorPiQxlBg[3], andPiQxlBg[3]; 
+    unsigned long xorPiQxlFg[3], andPiQxlFg[3], xorPiQxlBg[3], andPiQxlBg[3]; 
     char *addrb;
     int signdx3, signdy3;
 #endif
@@ -167,7 +164,7 @@ cfbBresD(rrops,
     signdy *= nlwidth;
 #if PSZ == 24
     signdx3 = signdx * 3;
-    signdy3 = signdy * sizeof (CfbBits);
+    signdy3 = signdy * sizeof (long);
 #endif
     if (axis == Y_AXIS)
     {
@@ -283,8 +280,8 @@ cfbBresD(rrops,
     }
 #else /* !PIXEL_ADDR */
     {
-    	register CfbBits	tmp;
-	CfbBits		startbit, bit;
+    	register unsigned long	tmp;
+	unsigned long		startbit, bit;
 
     	/* point to longword containing first point */
 #if PSZ == 24

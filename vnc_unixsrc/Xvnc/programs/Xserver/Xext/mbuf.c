@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/Xext/mbuf.c,v 3.15 2003/10/28 23:08:43 tsi Exp $ */
 /************************************************************
 
-Copyright 1989, 1998  The Open Group
+Copyright (c) 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,46 +15,39 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 ********************************************************/
 
-/* $Xorg: mbuf.c,v 1.4 2001/02/09 02:04:32 xorgcvs Exp $ */
+/* $XConsortium: mbuf.c /main/25 1996/12/02 10:19:23 lehors $ */
+/* $XFree86: xc/programs/Xserver/Xext/mbuf.c,v 3.3 1997/01/18 06:52:58 dawes Exp $ */
 #define NEED_REPLIES
 #define NEED_EVENTS
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
-#include <X11/Xproto.h>
+#include <stdio.h>
+#include "X.h"
+#include "Xproto.h"
 #include "window.h"
 #include "os.h"
 #include "windowstr.h"
 #include "scrnintstr.h"
 #include "pixmapstr.h"
-#include "gcstruct.h"
 #include "extnsionst.h"
 #include "dixstruct.h"
 #include "resource.h"
 #include "opaque.h"
-#include "sleepuntil.h"
 #define _MULTIBUF_SERVER_	/* don't want Xlib structures */
-#include <X11/extensions/multibufst.h>
-
-#ifdef EXTMODULE
-#include "xf86_ansic.h"
-#else
-#include <stdio.h>
-#if !defined(WIN32) && !defined(Lynx)
+#include "regionstr.h"
+#include "gcstruct.h"
+#include "inputstr.h"
+#include "multibufst.h"
+#if !defined(WIN32) && !defined(MINIX) && !defined(Lynx)
 #include <sys/time.h>
-#endif
 #endif
 
 /* given an OtherClientPtr obj, get the ClientPtr */
@@ -65,40 +58,50 @@ in this Software without prior written authorization from The Open Group.
 
 #define ValidEventMasks (ExposureMask|MultibufferClobberNotifyMask|MultibufferUpdateNotifyMask)
 
-#if 0
 static unsigned char	MultibufferReqCode;
-#endif
 static int		MultibufferEventBase;
 static int		MultibufferErrorBase;
 int			MultibufferScreenIndex = -1;
 int			MultibufferWindowIndex = -1;
 
 static void		PerformDisplayRequest (
+#if NeedFunctionPrototypes
 				MultibuffersPtr * /* ppMultibuffers */,
 				MultibufferPtr * /* pMultibuffer */,
 				int /* nbuf */
+#endif
 				);
 static Bool		QueueDisplayRequest (
+#if NeedFunctionPrototypes
 				ClientPtr /* client */,
 				TimeStamp /* activateTime */
+#endif
 				);
 
 static void		BumpTimeStamp (
+#if NeedFunctionPrototypes
 				TimeStamp * /* ts */,
 				CARD32 /* inc */
+#endif
 				);
 
 static void		AliasMultibuffer (
+#if NeedFunctionPrototypes
 				MultibuffersPtr /* pMultibuffers */,
 				int /* i */
+#endif
 				);
 static void		RecalculateMultibufferOtherEvents (
+#if NeedFunctionPrototypes
 				MultibufferPtr /* pMultibuffer */
+#endif
 				);
 static int		EventSelectForMultibuffer(
+#if NeedFunctionPrototypes
 				MultibufferPtr /* pMultibuffer */,
 				ClientPtr /* client */,
 				Mask /* mask */
+#endif
 				);
 
 /*
@@ -107,8 +110,10 @@ static int		EventSelectForMultibuffer(
  */
 RESTYPE			MultibufferDrawableResType;
 static int		MultibufferDrawableDelete (
+#if NeedFunctionPrototypes
 				pointer /* value */,
 				XID /* id */
+#endif
 				);
 /*
  * The per-buffer data can be found as a resource with this type.
@@ -117,8 +122,10 @@ static int		MultibufferDrawableDelete (
  */
 static RESTYPE		MultibufferResType;
 static int		MultibufferDelete (
+#if NeedFunctionPrototypes
 				pointer /* value */,
 				XID /* id */
+#endif
 				);
 
 /*
@@ -127,8 +134,10 @@ static int		MultibufferDelete (
  */
 static RESTYPE		MultibuffersResType;
 static int		MultibuffersDelete (
+#if NeedFunctionPrototypes
 				pointer /* value */,
 				XID /* id */
+#endif
 				);
 
 /*
@@ -137,8 +146,10 @@ static int		MultibuffersDelete (
  */
 static RESTYPE		OtherClientResType;
 static int		OtherClientDelete (
+#if NeedFunctionPrototypes
 				pointer /* value */,
 				XID /* id */
+#endif
 				);
 
 /****************
@@ -173,32 +184,44 @@ static DISPATCH_PROC(SProcSetBufferAttributes);
 static DISPATCH_PROC(SProcSetMBufferAttributes);
 
 static void		MultibufferResetProc(
+#if NeedFunctionPrototypes
 				ExtensionEntry * /* extEntry */
+#endif
 				);
 static void		SClobberNotifyEvent(
+#if NeedFunctionPrototypes
 				xMbufClobberNotifyEvent * /* from */,
 				xMbufClobberNotifyEvent	* /* to */
+# endif
 				);
 static void		SUpdateNotifyEvent(
+#if NeedFunctionPrototypes
 				xMbufUpdateNotifyEvent * /* from */,
 				xMbufUpdateNotifyEvent * /* to */
+#endif
 				);
 static Bool		MultibufferPositionWindow(
+#if NeedFunctionPrototypes
 				WindowPtr /* pWin */,
 				int /* x */,
 				int /* y */
+#endif
 				);
 
 static void		SetupBackgroundPainter (
+#if NeedFunctionPrototypes
 				WindowPtr /* pWin */,
 				GCPtr /* pGC */
+#endif
 				);
 
 static int		DeliverEventsToMultibuffer (
+#if NeedFunctionPrototypes
 				MultibufferPtr /* pMultibuffer */,
 				xEvent * /* pEvents */,
 				int /* count */,
 				Mask /* filter */
+#endif
 				);
 
 void
@@ -253,9 +276,7 @@ MultibufferExtensionInit()
 				 ProcMultibufferDispatch, SProcMultibufferDispatch,
 				 MultibufferResetProc, StandardMinorOpcode)))
     {
-#if 0
 	MultibufferReqCode = (unsigned char)extEntry->base;
-#endif
 	MultibufferEventBase = extEntry->eventBase;
 	MultibufferErrorBase = extEntry->errorBase;
 	EventSwapVector[MultibufferEventBase + MultibufferClobberNotify] = (EventSwapPtr) SClobberNotifyEvent;
@@ -345,8 +366,8 @@ SetupBackgroundPainter (pWin, pGC)
     case BackgroundPixmap:
 	gcvalues[0] = (pointer) FillTiled;
 	gcvalues[1] = (pointer) background.pixmap;
-	gcvalues[2] = (pointer)(long) ts_x_origin;
-	gcvalues[3] = (pointer)(long) ts_y_origin;
+	gcvalues[2] = (pointer) ts_x_origin;
+	gcvalues[3] = (pointer) ts_y_origin;
 	gcmask = GCFillStyle|GCTile|GCTileStipXOrigin|GCTileStipYOrigin;
 	break;
 
@@ -444,7 +465,6 @@ CreateImageBuffers (pWin, nbuf, ids, action, hint)
     return Success;
 }
 
-
 static int
 ProcCreateImageBuffers (client)
     register ClientPtr	client;
@@ -507,7 +527,7 @@ ProcCreateImageBuffers (client)
     	swapl(&rep.length, n);
 	swaps(&rep.numberBuffer, n);
     }
-    WriteToClient(client, sizeof (xMbufCreateImageBuffersReply), (char*)&rep);
+    WriteToClient(client, sizeof (xMbufCreateImageBuffersReply), (char *)&rep);
     return (client->noClientException);
 }
 
@@ -524,7 +544,6 @@ ProcDisplayImageBuffers (client)
     CARD32	    minDelay;
     TimeStamp	    activateTime, bufferTime;
     
-
     REQUEST_AT_LEAST_SIZE (xMbufDisplayImageBuffersReq);
     nbuf = stuff->length - (sizeof (xMbufDisplayImageBuffersReq) >> 2);
     if (!nbuf)
@@ -544,8 +563,7 @@ ProcDisplayImageBuffers (client)
     activateTime.milliseconds = 0;
     for (i = 0; i < nbuf; i++)
     {
-	pMultibuffer[i] = (MultibufferPtr) LookupIDByType (ids[i], 
-MultibufferResType);
+	pMultibuffer[i] = (MultibufferPtr) LookupIDByType (ids[i], MultibufferResType);
 	if (!pMultibuffer[i])
 	{
 	    DEALLOCATE_LOCAL(ppMultibuffers);
@@ -577,12 +595,10 @@ MultibufferResType);
     }
     else
 	PerformDisplayRequest (ppMultibuffers, pMultibuffer, nbuf);
-
     DEALLOCATE_LOCAL(ppMultibuffers);
     DEALLOCATE_LOCAL(pMultibuffer);
     return Success;
 }
-
 
 static int
 ProcDestroyImageBuffers (client)
@@ -1195,6 +1211,7 @@ PerformDisplayRequest (ppMultibuffers, pMultibuffer, nbuf)
 	    	if (pExposed)
 	    	{
 		    RegionPtr	pWinSize;
+		    ScreenPtr pScreen = pWin->drawable.pScreen;
 
 		    pWinSize = CreateUnclippedWinSize (pWin);
 		    /* pExposed is window-relative, but at this point
@@ -1202,13 +1219,13 @@ PerformDisplayRequest (ppMultibuffers, pMultibuffer, nbuf)
 		     * window-relative so that region ops involving
 		     * pExposed and pWinSize behave sensibly.
 		     */
-		    REGION_TRANSLATE(pWin->drawable.pScreen, pWinSize,
-				     -pWin->drawable.x, -pWin->drawable.y);
-		    REGION_INTERSECT(pWin->drawable.pScreen, pExposed,
-				     pExposed, pWinSize);
-		    REGION_DESTROY(pWin->drawable.pScreen, pWinSize);
+		    REGION_TRANSLATE(pScreen, pWinSize,
+				     -pWin->drawable.x,
+				     -pWin->drawable.y);
+		    REGION_INTERSECT(pScreen, pExposed, pExposed, pWinSize);
+		    REGION_DESTROY(pScreen, pWinSize);
 	    	    MultibufferExpose (pPrevMultibuffer, pExposed);
-	    	    REGION_DESTROY(pWin->drawable.pScreen, pExposed);
+	    	    REGION_DESTROY(pScreen, pExposed);
 	    	}
 	    	graphicsExpose = FALSE;
 	    	DoChangeGC (pGC, GCGraphicsExposures, &graphicsExpose, FALSE);

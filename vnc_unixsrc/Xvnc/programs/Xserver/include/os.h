@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/include/os.h,v 3.54 2003/10/30 21:21:06 herrb Exp $ */
 /***********************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -46,20 +46,15 @@ SOFTWARE.
 
 ******************************************************************/
 
-/* $Xorg: os.h,v 1.4 2001/02/09 02:05:15 xorgcvs Exp $ */
+/* $XConsortium: os.h /main/60 1996/12/15 21:25:13 rws $ */
+/* $XFree86: xc/programs/Xserver/include/os.h,v 3.16.2.1 1998/01/22 10:47:13 dawes Exp $ */
 
 #ifndef OS_H
 #define OS_H
-
 #include "misc.h"
 #define ALLOCATE_LOCAL_FALLBACK(_size) Xalloc((unsigned long)(_size))
 #define DEALLOCATE_LOCAL_FALLBACK(_ptr) Xfree((pointer)(_ptr))
-#include <X11/Xalloca.h>
-#ifndef IN_MODULE
-#include <stdarg.h>
-#else
-#include "xf86_ansic.h"
-#endif
+#include "Xalloca.h"
 
 #define NullFID ((FID) 0)
 
@@ -72,31 +67,34 @@ SOFTWARE.
 #define MAX_REQUEST_SIZE 65535
 #endif
 #ifndef MAX_BIG_REQUEST_SIZE
-#define MAX_BIG_REQUEST_SIZE 4194303
+#define MAX_BIG_REQUEST_SIZE 1048575
 #endif
 
 typedef pointer	FID;
 typedef struct _FontPathRec *FontPathPtr;
 typedef struct _NewClientRec *NewClientPtr;
 
-#ifndef xalloc
 #define xnfalloc(size) XNFalloc((unsigned long)(size))
-#define xnfcalloc(_num, _size) XNFcalloc((unsigned long)(_num)*(unsigned long)(_size))
 #define xnfrealloc(ptr, size) XNFrealloc((pointer)(ptr), (unsigned long)(size))
 
 #define xalloc(size) Xalloc((unsigned long)(size))
+#define xnfalloc(size) XNFalloc((unsigned long)(size))
 #define xcalloc(_num, _size) Xcalloc((unsigned long)(_num)*(unsigned long)(_size))
 #define xrealloc(ptr, size) Xrealloc((pointer)(ptr), (unsigned long)(size))
+#define xnfrealloc(ptr, size) XNFrealloc((pointer)(ptr), (unsigned long)(size))
 #define xfree(ptr) Xfree((pointer)(ptr))
-#define xstrdup(s) Xstrdup(s)
-#define xnfstrdup(s) XNFstrdup(s)
-#endif
 
-#ifndef IN_MODULE
-#ifdef __SCO__
+#ifdef SCO
 #include <stdio.h>
 #endif
+#ifndef X_NOT_STDC_ENV
 #include <string.h>
+#else
+#ifdef SYSV
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 #endif
 
 /* have to put $(SIGNAL_DEFINES) in DEFINES in Imakefile to get this right */
@@ -107,330 +105,629 @@ typedef struct _NewClientRec *NewClientPtr;
 #endif
 
 extern Bool OsDelayInitColors;
-extern void (*OsVendorVErrorFProc)(const char *, va_list args);
 
 extern int WaitForSomething(
+#if NeedFunctionPrototypes
     int* /*pClientsReady*/
+#endif
 );
 
 #ifdef LBX
 #define ReadRequestFromClient(client)   ((client)->readRequest(client))
-extern int StandardReadRequestFromClient(ClientPtr /*client*/);
-
-extern int ClientConnectionNumber(ClientPtr /*client*/);
+extern int StandardReadRequestFromClient(
+#if NeedFunctionPrototypes
+    ClientPtr /*client*/
+#endif
+);
 #else
-extern int ReadRequestFromClient(ClientPtr /*client*/);
+extern int ReadRequestFromClient(
+#if NeedFunctionPrototypes
+    ClientPtr /*client*/
+#endif
+);
 #endif /* LBX */
 
 extern Bool InsertFakeRequest(
-    ClientPtr /*client*/, 
-    char* /*data*/, 
-    int /*count*/);
+#if NeedFunctionPrototypes
+    ClientPtr /*client*/,
+    char* /*data*/,
+    int /*count*/
+#endif
+);
 
-extern void ResetCurrentRequest(ClientPtr /*client*/);
+extern int ResetCurrentRequest(
+#if NeedFunctionPrototypes
+    ClientPtr /*client*/
+#endif
+);
 
-extern void FlushAllOutput(void);
+extern void FlushAllOutput(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-extern void FlushIfCriticalOutputPending(void);
+extern void FlushIfCriticalOutputPending(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-extern void SetCriticalOutputPending(void);
+extern void SetCriticalOutputPending(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-extern int WriteToClient(ClientPtr /*who*/, int /*count*/, char* /*buf*/);
+extern int WriteToClient(
+#if NeedFunctionPrototypes
+    ClientPtr /*who*/,
+    int /*count*/,
+    char* /*buf*/
+#endif
+);
 
-extern void ResetOsBuffers(void);
+extern void ResetOsBuffers(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-extern void InitConnectionLimits(void);
+extern void CreateWellKnownSockets(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-extern void CreateWellKnownSockets(void);
+extern void ResetWellKnownSockets(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-extern void ResetWellKnownSockets(void);
-
-extern void CloseWellKnownConnections(void);
-
-extern XID AuthorizationIDOfClient(ClientPtr /*client*/);
+extern XID
+AuthorizationIDOfClient(
+#if NeedFunctionPrototypes
+    ClientPtr /*client*/
+#endif
+);
 
 extern char *ClientAuthorized(
+#if NeedFunctionPrototypes
     ClientPtr /*client*/,
     unsigned int /*proto_n*/,
     char* /*auth_proto*/,
     unsigned int /*string_n*/,
-    char* /*auth_string*/);
+    char* /*auth_string*/
+#endif
+);
 
 extern Bool EstablishNewConnections(
+#if NeedFunctionPrototypes
     ClientPtr /*clientUnused*/,
-    pointer /*closure*/);
-
-extern void CheckConnections(void);
-
-extern void CloseDownConnection(ClientPtr /*client*/);
-
-extern void AddEnabledDevice(int /*fd*/);
-
-extern void RemoveEnabledDevice(int /*fd*/);
-
-extern void OnlyListenToOneClient(ClientPtr /*client*/);
-
-extern void ListenToAllClients(void);
-
-extern void IgnoreClient(ClientPtr /*client*/);
-
-extern void AttendClient(ClientPtr /*client*/);
-
-extern void MakeClientGrabImpervious(ClientPtr /*client*/);
-
-extern void MakeClientGrabPervious(ClientPtr /*client*/);
-
-#ifdef LBX
-extern void CloseDownFileDescriptor(ClientPtr /* client */);
+    pointer /*closure*/
 #endif
+);
 
-extern void AvailableClientInput(ClientPtr /* client */);
+extern void CheckConnections(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-extern CARD32 GetTimeInMillis(void);
+extern void CloseDownConnection(
+#if NeedFunctionPrototypes
+    ClientPtr /*client*/
+#endif
+);
 
-extern void AdjustWaitForDelay(
+extern int AddEnabledDevice(
+#if NeedFunctionPrototypes
+    int /*fd*/
+#endif
+);
+
+extern int RemoveEnabledDevice(
+#if NeedFunctionPrototypes
+    int /*fd*/
+#endif
+);
+
+extern int OnlyListenToOneClient(
+#if NeedFunctionPrototypes
+    ClientPtr /*client*/
+#endif
+);
+
+extern int ListenToAllClients(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
+
+extern int IgnoreClient(
+#if NeedFunctionPrototypes
+    ClientPtr /*client*/
+#endif
+);
+
+extern int AttendClient(
+#if NeedFunctionPrototypes
+    ClientPtr /*client*/
+#endif
+);
+
+extern int MakeClientGrabImpervious(
+#if NeedFunctionPrototypes
+    ClientPtr /*client*/
+#endif
+);
+
+extern int MakeClientGrabPervious(
+#if NeedFunctionPrototypes
+    ClientPtr /*client*/
+#endif
+);
+
+extern void Error(
+#if NeedFunctionPrototypes
+    char* /*str*/
+#endif
+);
+
+extern CARD32 GetTimeInMillis(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
+
+extern int AdjustWaitForDelay(
+#if NeedFunctionPrototypes
     pointer /*waitTime*/,
-    unsigned long /*newdelay*/);
+    unsigned long /*newdelay*/
+#endif
+);
 
 typedef	struct _OsTimerRec *OsTimerPtr;
 
 typedef CARD32 (*OsTimerCallback)(
+#if NeedFunctionPrototypes
     OsTimerPtr /* timer */,
     CARD32 /* time */,
-    pointer /* arg */);
+    pointer /* arg */
+#endif
+);
 
-extern void TimerInit(void);
+extern void TimerInit(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-extern Bool TimerForce(OsTimerPtr /* timer */);
+extern Bool TimerForce(
+#if NeedFunctionPrototypes
+    OsTimerPtr /* timer */
+#endif
+);
 
 #define TimerAbsolute (1<<0)
 #define TimerForceOld (1<<1)
 
 extern OsTimerPtr TimerSet(
+#if NeedFunctionPrototypes
     OsTimerPtr /* timer */,
     int /* flags */,
     CARD32 /* millis */,
     OsTimerCallback /* func */,
-    pointer /* arg */);
-
-extern void TimerCheck(void);
-extern void TimerCancel(OsTimerPtr /* pTimer */);
-extern void TimerFree(OsTimerPtr /* pTimer */);
-
-extern void SetScreenSaverTimer(void);
-extern void FreeScreenSaverTimer(void);
-
-#ifdef DPMSExtension
-extern void SetDPMSTimers(void);
-extern void FreeDPMSTimers(void);
+    pointer /* arg */
 #endif
+);
 
-extern SIGVAL AutoResetServer(int /*sig*/);
-
-extern SIGVAL GiveUp(int /*sig*/);
-
-extern void UseMsg(void);
-
-extern void InitGlobals(void);
-
-extern void ProcessCommandLine(int /*argc*/, char* /*argv*/[]);
-
-extern int set_font_authorizations(
-    char ** /* authorizations */, 
-    int * /*authlen */, 
-    pointer /* client */);
-
-#ifndef _HAVE_XALLOC_DECLS
-#define _HAVE_XALLOC_DECLS
-extern pointer Xalloc(unsigned long /*amount*/);
-extern pointer Xcalloc(unsigned long /*amount*/);
-extern pointer Xrealloc(pointer /*ptr*/, unsigned long /*amount*/);
-extern void Xfree(pointer /*ptr*/);
+extern void TimerCheck(
+#if NeedFunctionPrototypes
+    void
 #endif
+);
 
-extern pointer XNFalloc(unsigned long /*amount*/);
-extern pointer XNFcalloc(unsigned long /*amount*/);
-extern pointer XNFrealloc(pointer /*ptr*/, unsigned long /*amount*/);
+extern void TimerCancel(
+#if NeedFunctionPrototypes
+    OsTimerPtr /* pTimer */
+#endif
+);
 
-extern void OsInitAllocator(void);
+extern void TimerFree(
+#if NeedFunctionPrototypes
+    OsTimerPtr /* pTimer */
+#endif
+);
 
-extern char *Xstrdup(const char *s);
-extern char *XNFstrdup(const char *s);
-extern char *Xprintf(const char *fmt, ...);
-extern char *Xvprintf(const char *fmt, va_list va);
-extern char *XNFprintf(const char *fmt, ...);
-extern char *XNFvprintf(const char *fmt, va_list va);
+extern SIGVAL AutoResetServer(
+#if NeedFunctionPrototypes
+    int /*sig*/
+#endif
+);
 
-typedef SIGVAL (*OsSigHandlerPtr)(int /* sig */);
+extern SIGVAL GiveUp(
+#if NeedFunctionPrototypes
+    int /*sig*/
+#endif
+);
 
-extern OsSigHandlerPtr OsSignal(int /* sig */, OsSigHandlerPtr /* handler */);
+extern void UseMsg(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
+
+extern void ProcessCommandLine(
+#if NeedFunctionPrototypes
+    int /*argc*/,
+    char* /*argv*/[]
+#endif
+);
+
+extern unsigned long *Xalloc(
+#if NeedFunctionPrototypes
+    unsigned long /*amount*/
+#endif
+);
+
+extern unsigned long *XNFalloc(
+#if NeedFunctionPrototypes
+    unsigned long /*amount*/
+#endif
+);
+
+extern unsigned long *Xcalloc(
+#if NeedFunctionPrototypes
+    unsigned long /*amount*/
+#endif
+);
+
+extern unsigned long *Xrealloc(
+#if NeedFunctionPrototypes
+    pointer /*ptr*/,
+    unsigned long /*amount*/
+#endif
+);
+
+extern unsigned long *XNFrealloc(
+#if NeedFunctionPrototypes
+    pointer /*ptr*/,
+    unsigned long /*amount*/
+#endif
+);
+
+extern void Xfree(
+#if NeedFunctionPrototypes
+    pointer /*ptr*/
+#endif
+);
+
+extern void OsInitAllocator(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
+
+typedef SIGVAL (*OsSigHandlerPtr)(
+#if NeedFunctionPrototypes
+    int /* sig */
+#endif
+);
+
+extern OsSigHandlerPtr OsSignal(
+#if NeedFunctionPrototypes
+    int /* sig */,
+    OsSigHandlerPtr /* handler */
+#endif
+);
 
 extern int auditTrailLevel;
 
+extern void AuditF(
+#if NeedVarargsPrototypes
+    char* /*f*/,
+    ...
+#endif
+);
+
+extern void FatalError(
+#if NeedVarargsPrototypes
+    char* /*f*/,
+    ...
+#endif
+)
+#if __GNUC__ == 2 && __GNUC_MINOR__ > 4 
+__attribute((noreturn))
+#endif
+;
+
+extern void ErrorF(
+#if NeedVarargsPrototypes
+    char* /*f*/,
+    ...
+#endif
+);
+
 #ifdef SERVER_LOCK
-extern void LockServer(void);
-extern void UnlockServer(void);
+extern void LockServer(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
+
+extern void UnlockServer(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 #endif
 
 extern int OsLookupColor(
+#if NeedFunctionPrototypes
     int	/*screen*/,
     char * /*name*/,
     unsigned /*len*/,
     unsigned short * /*pred*/,
     unsigned short * /*pgreen*/,
-    unsigned short * /*pblue*/);
+    unsigned short * /*pblue*/
+#endif
+);
 
-extern void OsInit(void);
+extern void OsInit(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-extern void OsCleanup(Bool);
+extern void OsCleanup(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-extern void OsVendorFatalError(void);
+extern void OsVendorFatalError(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-extern void OsVendorInit(void);
+extern void OsVendorInit(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-extern int OsInitColors(void);
+extern int OsInitColors(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-void OsBlockSignals (void);
+#if !defined(WIN32) && !defined(__EMX__)
+extern int System(
+#if NeedFunctionPrototypes
+    char *
+#endif
+);
 
-void OsReleaseSignals (void);
+extern pointer Popen(
+#if NeedFunctionPrototypes
+    char *,
+    char *
+#endif
+);
 
-#if !defined(WIN32) && !defined(__UNIXOS2__)
-extern int System(char *);
-extern pointer Popen(char *, char *);
-extern int Pclose(pointer);
-extern pointer Fopen(char *, char *);
-extern int Fclose(pointer);
+extern int Pclose(
+#if NeedFunctionPrototypes
+    pointer
+#endif
+);
 #else
 #define System(a) system(a)
 #define Popen(a,b) popen(a,b)
 #define Pclose(a) pclose(a)
-#define Fopen(a,b) fopen(a,b)
-#define Fclose(a) fclose(a)
 #endif
 
-extern void CheckUserParameters(int argc, char **argv, char **envp);
-extern void CheckUserAuthorization(void);
-
 extern int AddHost(
+#if NeedFunctionPrototypes
     ClientPtr	/*client*/,
     int         /*family*/,
     unsigned    /*length*/,
-    pointer     /*pAddr*/);
+    pointer     /*pAddr*/
+#endif
+);
 
 extern Bool ForEachHostInFamily (
+#if NeedFunctionPrototypes
     int	    /*family*/,
     Bool    (* /*func*/ )(
+#if NeedNestedPrototypes
             unsigned char * /* addr */,
             short           /* len */,
-            pointer         /* closure */),
-    pointer /*closure*/);
+            pointer         /* closure */
+#endif
+            ),
+    pointer /*closure*/
+#endif
+);
 
 extern int RemoveHost(
+#if NeedFunctionPrototypes
     ClientPtr	/*client*/,
     int         /*family*/,
     unsigned    /*length*/,
-    pointer     /*pAddr*/);
+    pointer     /*pAddr*/
+#endif
+);
 
 extern int GetHosts(
+#if NeedFunctionPrototypes
     pointer * /*data*/,
     int	    * /*pnHosts*/,
     int	    * /*pLen*/,
-    BOOL    * /*pEnabled*/);
+    BOOL    * /*pEnabled*/
+#endif
+);
 
 typedef struct sockaddr * sockaddrPtr;
 
-extern int InvalidHost(sockaddrPtr /*saddr*/, int /*len*/, ClientPtr client);
+extern int InvalidHost(
+#if NeedFunctionPrototypes
+    sockaddrPtr /*saddr*/,
+    int		/*len*/
+#endif
+);
 
-extern int LocalClient(ClientPtr /* client */);
+extern int LocalClient(
+#if NeedFunctionPrototypes
+    ClientPtr /* client */
+#endif
+);
 
-extern int LocalClientCred(ClientPtr, int *, int *);
+extern int ChangeAccessControl(
+#if NeedFunctionPrototypes
+    ClientPtr /*client*/,
+    int /*fEnabled*/
+#endif
+);
 
-extern int ChangeAccessControl(ClientPtr /*client*/, int /*fEnabled*/);
+extern int GetAccessControl(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-extern int GetAccessControl(void);
 
+extern void AddLocalHosts(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-extern void AddLocalHosts(void);
+extern void ResetHosts(
+#if NeedFunctionPrototypes
+    char *display
+#endif
+);
 
-extern void ResetHosts(char *display);
+extern void EnableLocalHost(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-extern void EnableLocalHost(void);
+extern void DisableLocalHost(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-extern void DisableLocalHost(void);
+extern void AccessUsingXdmcp(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-extern void AccessUsingXdmcp(void);
+extern void DefineSelf(
+#if NeedFunctionPrototypes
+    int /*fd*/
+#endif
+);
 
-extern void DefineSelf(int /*fd*/);
+extern void AugmentSelf(
+#if NeedFunctionPrototypes
+    pointer /*from*/,
+    int /*len*/
+#endif
+);
 
-extern void AugmentSelf(pointer /*from*/, int /*len*/);
+extern void InitAuthorization(
+#if NeedFunctionPrototypes
+    char * /*filename*/
+#endif
+);
 
-extern void InitAuthorization(char * /*filename*/);
+extern int LoadAuthorization(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
-/* extern int LoadAuthorization(void); */
-
-extern void RegisterAuthorizations(void);
-
-extern XID AuthorizationToID (
-	unsigned short	name_length,
-	char		*name,
-	unsigned short	data_length,
-	char		*data);
-
-extern int AuthorizationFromID (
-	XID 		id,
-	unsigned short	*name_lenp,
-	char		**namep,
-	unsigned short	*data_lenp,
-	char		**datap);
+extern void RegisterAuthorizations(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
 extern XID CheckAuthorization(
+#if NeedFunctionPrototypes
     unsigned int /*namelength*/,
     char * /*name*/,
     unsigned int /*datalength*/,
     char * /*data*/,
     ClientPtr /*client*/,
     char ** /*reason*/
+#endif
 );
 
-extern void ResetAuthorization(void);
-
-extern int RemoveAuthorization (
-    unsigned short	name_length,
-    char		*name,
-    unsigned short	data_length,
-    char		*data);
+extern void ResetAuthorization(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
 
 extern int AddAuthorization(
-    unsigned int	/*name_length*/,
-    char *		/*name*/,
-    unsigned int	/*data_length*/,
-    char *		/*data*/);
+#if NeedFunctionPrototypes
+    unsigned int /*name_length*/,
+    char * /*name*/,
+    unsigned int /*data_length*/,
+    char * /*data*/
+#endif
+);
 
 extern XID GenerateAuthorization(
+#if NeedFunctionPrototypes
     unsigned int   /* name_length */,
     char	*  /* name */,
     unsigned int   /* data_length */,
     char	*  /* data */,
     unsigned int * /* data_length_return */,
-    char	** /* data_return */);
-
-#ifdef COMMANDLINE_CHALLENGED_OPERATING_SYSTEMS
-extern void ExpandCommandLine(int * /*pargc*/, char *** /*pargv*/);
+    char	** /* data_return */
 #endif
+);
 
-extern void ddxInitGlobals(void);
+extern void ExpandCommandLine(
+#if NeedFunctionPrototypes
+    int * /*pargc*/,
+    char *** /*pargv*/
+#endif
+);
 
-extern int ddxProcessArgument(int /*argc*/, char * /*argv*/ [], int /*i*/);
-
-extern void ddxUseMsg(void);
+extern int ddxProcessArgument(
+#if NeedFunctionPrototypes
+    int /*argc*/,
+    char * /*argv*/ [],
+    int /*i*/
+#endif
+);
 
 /*
  *  idiom processing stuff
  */
 
-extern xReqPtr PeekNextRequest(xReqPtr req, ClientPtr client, Bool readmore);
+xReqPtr PeekNextRequest(
+#if NeedFunctionPrototypes
+    xReqPtr req, ClientPtr client, Bool readmore
+#endif
+);
 
-extern void SkipRequests(xReqPtr req, ClientPtr client, int numskipped);
+void SkipRequests(
+#if NeedFunctionPrototypes
+    xReqPtr req, ClientPtr client, int numskipped
+#endif
+);
 
 /* int ReqLen(xReq *req, ClientPtr client)
  * Given a pointer to a *complete* request, return its length in bytes.
@@ -475,72 +772,5 @@ typedef struct {
 
 /* stuff for FlushCallback */
 extern CallbackListPtr FlushCallback;
-
-extern void AbortDDX(void);
-extern void ddxGiveUp(void);
-extern int TimeSinceLastInputEvent(void);
-
-/* Logging. */
-typedef enum _LogParameter {
-    XLOG_FLUSH,
-    XLOG_SYNC,
-    XLOG_VERBOSITY,
-    XLOG_FILE_VERBOSITY
-} LogParameter;
-
-/* Flags for log messages. */
-typedef enum {
-    X_PROBED,			/* Value was probed */
-    X_CONFIG,			/* Value was given in the config file */
-    X_DEFAULT,			/* Value is a default */
-    X_CMDLINE,			/* Value was given on the command line */
-    X_NOTICE,			/* Notice */
-    X_ERROR,			/* Error message */
-    X_WARNING,			/* Warning message */
-    X_INFO,			/* Informational message */
-    X_NONE,			/* No prefix */
-    X_NOT_IMPLEMENTED,		/* Not implemented */
-    X_UNKNOWN = -1		/* unknown -- this must always be last */
-} MessageType;
-
-/* XXX Need to check which GCC versions have the format(printf) attribute. */
-#if defined(__GNUC__) && \
-    ((__GNUC__ > 2) || ((__GNUC__ == 2) && (__GNUC_MINOR__ > 4)))
-#define _printf_attribute(a,b) __attribute((format(__printf__,a,b)))
-#else
-#define _printf_attribute(a,b) /**/
-#endif
-
-extern const char *LogInit(const char *fname, const char *backup);
-extern void LogClose(void);
-extern Bool LogSetParameter(LogParameter param, int value);
-extern void LogVWrite(int verb, const char *f, va_list args);
-extern void LogWrite(int verb, const char *f, ...) _printf_attribute(2,3);
-extern void LogVMessageVerb(MessageType type, int verb, const char *format,
-			    va_list args);
-extern void LogMessageVerb(MessageType type, int verb, const char *format,
-			   ...) _printf_attribute(3,4);
-extern void LogMessage(MessageType type, const char *format, ...)
-			_printf_attribute(2,3);
-extern void FreeAuditTimer(void);
-extern void AuditF(const char *f, ...) _printf_attribute(1,2);
-extern void VAuditF(const char *f, va_list args);
-extern void FatalError(const char *f, ...) _printf_attribute(1,2)
-#if defined(__GNUC__) && \
-    ((__GNUC__ > 2) || ((__GNUC__ == 2) && (__GNUC_MINOR__ > 4)))
-__attribute((noreturn))
-#endif
-;
-
-extern void VErrorF(const char *f, va_list args);
-extern void ErrorF(const char *f, ...) _printf_attribute(1,2);
-extern void Error(char *str);
-extern void LogPrintMarkers(void);
-
-#if defined(NEED_SNPRINTF) && !defined(IN_MODULE)
-extern int snprintf(char *str, size_t size, const char *format, ...)
-	_printf_attribute(3,4);
-extern int vsnprintf(char *str, size_t size, const char *format, va_list ap);
-#endif
 
 #endif /* OS_H */

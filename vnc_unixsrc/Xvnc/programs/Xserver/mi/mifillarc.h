@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/mi/mifillarc.h,v 3.6 2001/10/25 12:03:47 alanh Exp $ */
 /************************************************************
 
-Copyright 1989, 1998  The Open Group
+Copyright (c) 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,20 +15,18 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 ********************************************************/
 
-/* $Xorg: mifillarc.h,v 1.4 2001/02/09 02:05:20 xorgcvs Exp $ */
-
-#ifndef __MIFILLARC_H__
-#define __MIFILLARC_H__
+/* $XConsortium: mifillarc.h,v 5.9 95/01/11 16:19:24 dpw Exp $ */
+/* $XFree86: xc/programs/Xserver/mi/mifillarc.h,v 3.2 1995/01/28 16:15:53 dawes Exp $ */
 
 #define FULLCIRCLE (360 * 64)
 
@@ -179,25 +177,34 @@ typedef struct _miArcSlice {
 			       ((slw > 1) || (ine != inxk)))
 
 extern int miFreeArcCache(
+#if NeedFunctionPrototypes
     pointer /*data*/,
     XID /*id*/
+#endif
 );
 
 extern struct finalSpan *realAllocSpan(
+#if NeedFunctionPrototypes
     void
+#endif
 );
 
 extern void miFillArcSetup(
+#if NeedFunctionPrototypes
     xArc * /*arc*/,
     miFillArcRec * /*info*/
+#endif
 );
 
 extern void miFillArcDSetup(
+#if NeedFunctionPrototypes
     xArc * /*arc*/,
     miFillArcDRec * /*info*/
+#endif
 );
 
 extern void miEllipseAngleToSlope(
+#if NeedFunctionPrototypes
     int /*angle*/,
     int /*width*/,
     int /*height*/,
@@ -205,12 +212,14 @@ extern void miEllipseAngleToSlope(
     int * /*dyp*/,
     double * /*d_dxp*/,
     double * /*d_dyp*/
+#endif
 );
 
 extern void miFillArcSliceSetup(
+#if NeedFunctionPrototypes
     xArc * /*arc*/,
     miArcSliceRec * /*slice*/,
     GCPtr /*pGC*/
+#endif
 );
 
-#endif /* __MIFILLARC_H__ */

@@ -1,13 +1,16 @@
-/* $Xorg: rpcauth.c,v 1.4 2001/02/09 02:05:23 xorgcvs Exp $ */
+/* $XConsortium: rpcauth.c,v 1.9 94/04/17 20:27:06 gildea Exp $ */
+/* $XFree86: xc/programs/Xserver/os/rpcauth.c,v 3.0 1995/07/07 15:46:07 dawes Exp $ */
 /*
 
-Copyright 1991, 1998  The Open Group
+Copyright (c) 1991  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -15,18 +18,17 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: xc/programs/Xserver/os/rpcauth.c,v 3.7 2001/12/14 20:00:35 dawes Exp $ */
 
 /*
  * SUN-DES-1 authentication mechanism
@@ -34,29 +36,16 @@ from The Open Group.
  */
 
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifdef SECURE_RPC
 
-#include <X11/X.h>
+#include <stdlib.h>
+#include "X.h"
 #include "Xauth.h"
 #include "misc.h"
 #include "os.h"
 #include "dixstruct.h"
 
 #include <rpc/rpc.h>
-
-#ifdef sun
-/* <rpc/auth.h> only includes this if _KERNEL is #defined... */
-extern bool_t xdr_opaque_auth(XDR *, struct opaque_auth *);
-#endif
-
-#if defined(DGUX)
-#include <time.h>
-#include <rpc/auth_des.h>
-#endif /* DGUX */
 
 #ifdef ultrix
 #include <time.h>
@@ -66,7 +55,9 @@ extern bool_t xdr_opaque_auth(XDR *, struct opaque_auth *);
 static enum auth_stat why;
 
 static char * 
-authdes_ezdecode(char *inmsg, int len)
+authdes_ezdecode(inmsg, len)
+char *inmsg;
+int  len;
 {
     struct rpc_msg  msg;
     char            cred_area[MAX_AUTH_BYTES];
@@ -125,11 +116,10 @@ bad1:
 static XID  rpc_id = (XID) ~0L;
 
 static Bool
-CheckNetName (
-    unsigned char    *addr,
-    short	    len,
-    pointer	    closure
-)
+CheckNetName (addr, len, closure)
+    unsigned char    *addr;
+    int		    len;
+    pointer	    closure;
 {
     return (len == strlen ((char *) closure) &&
 	    strncmp ((char *) addr, (char *) closure, len) == 0);
@@ -138,8 +128,11 @@ CheckNetName (
 static char rpc_error[MAXNETNAMELEN+50];
 
 XID
-SecureRPCCheck (unsigned short data_length, char *data, 
-    ClientPtr client, char **reason)
+SecureRPCCheck (data_length, data, client, reason)
+    register unsigned short	data_length;
+    char	*data;
+    ClientPtr client;
+    char	**reason;
 {
     char *fullname;
     
@@ -151,53 +144,62 @@ SecureRPCCheck (unsigned short data_length, char *data,
 	    sprintf(rpc_error, "Unable to authenticate secure RPC client (why=%d)", why);
 	    *reason = rpc_error;
 	} else {
-	    if (ForEachHostInFamily (FamilyNetname, CheckNetName, fullname))
+	    if (ForEachHostInFamily (FamilyNetname, CheckNetName,
+				     (pointer) fullname))
 		return rpc_id;
-	    sprintf(rpc_error, "Principal \"%s\" is not authorized to connect",
+	    else {
+		sprintf(rpc_error, "Principal \"%s\" is not authorized to connect",
 			fullname);
-	    *reason = rpc_error;
+		*reason = rpc_error;
+	    }
 	}
     }
     return (XID) ~0L;
 }
     
-void
-SecureRPCInit (void)
+
+SecureRPCInit ()
 {
     if (rpc_id == ~0L)
 	AddAuthorization (9, "SUN-DES-1", 0, (char *) 0);
 }
 
 int
-SecureRPCAdd (unsigned short data_length, char *data, XID id)
+SecureRPCAdd (data_length, data, id)
+unsigned short	data_length;
+char	*data;
+XID	id;
 {
     if (data_length)
 	AddHost ((pointer) 0, FamilyNetname, data_length, data);
     rpc_id = id;
-    return 1;
 }
 
 int
-SecureRPCReset (void)
+SecureRPCReset ()
 {
     rpc_id = (XID) ~0L;
-    return 1;
 }
 
 XID
-SecureRPCToID (unsigned short data_length, char *data)
+SecureRPCToID (data_length, data)
+    unsigned short	data_length;
+    char		*data;
 {
     return rpc_id;
 }
 
-int
-SecureRPCFromID (XID id, unsigned short *data_lenp, char **datap)
+SecureRPCFromID (id, data_lenp, datap)
+     XID id;
+     unsigned short	*data_lenp;
+     char	**datap;
 {
     return 0;
 }
 
-int
-SecureRPCRemove (unsigned short data_length, char *data)
+SecureRPCRemove (data_length, data)
+     unsigned short	data_length;
+     char	*data;
 {
     return 0;
 }

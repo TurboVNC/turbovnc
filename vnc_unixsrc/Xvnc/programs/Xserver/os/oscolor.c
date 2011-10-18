@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/os/oscolor.c,v 3.10 2003/07/16 01:39:03 dawes Exp $ */
 /***********************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -45,11 +45,8 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $Xorg: oscolor.c,v 1.4 2001/02/09 02:05:23 xorgcvs Exp $ */
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
+/* $XConsortium: oscolor.c,v 1.23 94/04/17 20:27:04 dpw Exp $ */
+/* $XFree86: xc/programs/Xserver/os/oscolor.c,v 3.2.4.1 1998/01/22 10:47:14 dawes Exp $ */
 
 #ifndef USE_RGB_TXT
 
@@ -74,13 +71,10 @@ DBM *rgb_dbm = (DBM *)NULL;
 int rgb_dbm = 0;
 #endif
 
-extern void CopyISOLatin1Lowered(
-    unsigned char * /*dest*/,
-    unsigned char * /*source*/,
-    int /*length*/);
+extern void CopyISOLatin1Lowered();
 
 int
-OsInitColors(void)
+OsInitColors()
 {
     if (!rgb_dbm)
     {
@@ -100,8 +94,12 @@ OsInitColors(void)
 
 /*ARGSUSED*/
 int
-OsLookupColor(int screen, char *name, unsigned int len, 
-    unsigned short *pred, unsigned short *pgreen, unsigned short *pblue)
+OsLookupColor(screen, name, len, pred, pgreen, pblue)
+    int		screen;
+    char	*name;
+    unsigned	len;
+    unsigned short	*pred, *pgreen, *pblue;
+
 {
     datum		dbent;
     RGB			rgb;
@@ -167,23 +165,23 @@ typedef struct _dbEntry {
 } dbEntry;
 
 
-extern void CopyISOLatin1Lowered(
-    unsigned char * /*dest*/,
-    unsigned char * /*source*/,
-    int /*length*/);
+extern void CopyISOLatin1Lowered();
 
 static dbEntryPtr hashTab[HASHSIZE];
 
 
 static dbEntryPtr
-lookup(char *name, int len, Bool create)
+lookup(name, len, create)
+     char *name;
+     int  len;
+     Bool create;
 {
   unsigned int h = 0, g;
-  dbEntryPtr   entry, *prev = NULL;
+  dbEntryPtr   entry, *prev;
   char         *str = name;
 
   if (!(name = (char*)ALLOCATE_LOCAL(len +1))) return NULL;
-  CopyISOLatin1Lowered((unsigned char *)name, (unsigned char *)str, len);
+  CopyISOLatin1Lowered(name, str, len);
   name[len] = '\0';
 
   for(str = name; *str; str++) {
@@ -193,7 +191,7 @@ lookup(char *name, int len, Bool create)
   }
   h %= HASHSIZE;
 
-  if ( (entry = hashTab[h]) )
+  if ( entry = hashTab[h] )
     {
       for( ; entry; prev = (dbEntryPtr*)entry, entry = entry->link )
 	if (! strcmp(name, entry->name) ) break;
@@ -215,7 +213,7 @@ lookup(char *name, int len, Bool create)
 
 
 Bool
-OsInitColors(void)
+OsInitColors()
 {
   FILE       *rgb;
   char       *path;
@@ -228,7 +226,7 @@ OsInitColors(void)
 
   if (!was_here)
     {
-#ifndef __UNIXOS2__
+#ifndef __EMX__
       path = (char*)ALLOCATE_LOCAL(strlen(rgbPath) +5);
       strcpy(path, rgbPath);
       strcat(path, ".txt");
@@ -248,7 +246,7 @@ OsInitColors(void)
       while(fgets(line, sizeof(line), rgb))
 	{
 	  lineno++;
-#ifndef __UNIXOS2__
+#ifndef __EMX__
 	  if (sscanf(line,"%d %d %d %[^\n]\n", &red, &green, &blue, name) == 4)
 #else
 	  if (sscanf(line,"%d %d %d %[^\n\r]\n", &red, &green, &blue, name) == 4)
@@ -258,7 +256,7 @@ OsInitColors(void)
 		  green >= 0 && green <= 0xff &&
 		  blue >= 0  && blue <= 0xff)
 		{
-		  if ((entry = lookup(name, strlen(name), TRUE)))
+		  if (entry = lookup(name, strlen(name), TRUE))
 		    {
 		      entry->red   = (red * 65535)   / 255;
 		      entry->green = (green * 65535) / 255;
@@ -284,12 +282,16 @@ OsInitColors(void)
 
 
 Bool
-OsLookupColor(int screen, char *name, unsigned int len, 
-    unsigned short *pred, unsigned short *pgreen, unsigned short *pblue)
+OsLookupColor(screen, name, len, pred, pgreen, pblue)
+    int		   screen;
+    char	   *name;
+    unsigned	   len;
+    unsigned short *pred, *pgreen, *pblue;
+
 {
   dbEntryPtr entry;
 
-  if ((entry = lookup(name, len, FALSE)))
+  if (entry = lookup(name, len, FALSE))
     {
       *pred   = entry->red;
       *pgreen = entry->green;

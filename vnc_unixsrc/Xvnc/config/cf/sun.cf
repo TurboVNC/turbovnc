@@ -1,10 +1,9 @@
-XCOMM $XdotOrg: xc/config/cf/sun.cf,v 1.34 2005/12/03 17:20:48 alanc Exp $
-XCOMM platform:  $Xorg: sun.cf,v 1.4 2000/08/17 19:41:48 cpqbld Exp $
+XCOMM platform:  $TOG: sun.cf /main/163 1997/06/08 20:08:23 kaleb $
 
 
 
 
-XCOMM platform:  $XFree86: xc/config/cf/sun.cf,v 3.70 2004/01/13 02:42:51 tsi Exp $
+XCOMM platform:  $XFree86: xc/config/cf/sun.cf,v 3.31.2.7 1997/12/01 13:31:17 dawes Exp $
 
 #ifndef OSName
 # define OSName		DefaultOSName
@@ -20,61 +19,6 @@ XCOMM platform:  $XFree86: xc/config/cf/sun.cf,v 3.70 2004/01/13 02:42:51 tsi Ex
 #endif
 XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVersion)
 
-/* For various reasons, Sun uses different settings when compiling the 
- * X Window System packages included in Solaris than are normally used
- * by most people building the X.Org software releases.   Sun also has
- * two different X server hierarchies in Solaris - Xsun in /usr/openwin
- * and Xorg in /usr/X11.
- *
- * If you want to try to match Sun's settings as closely as possible
- * add this setting to your host.def:
- *  #define BuildLikeSun YES
- *
- * If you're trying to match the openwin directory layout as well, you'll 
- * need to also add:
- *  #define ProjectRoot /usr/openwin
- * otherwise it will use /usr/X11.  (Note that these settings match closer
- * to Sun's Xorg delivery in /usr/X11 than the older X11R6.6-based delivery
- * in /usr/openwin though.)
- */
-#ifndef BuildLikeSun
-# define BuildLikeSun NO
-#endif
-
-#if BuildLikeSun
-# ifndef ProjectRoot
-#  define ProjectRoot		/usr/X11
-# endif
-# ifndef DocDir
-#  define DocDir		Concat(ProjectRoot,/share/doc)
-# endif
-# ifndef ManDirectoryRoot
-#  define ManDirectoryRoot	Concat(ProjectRoot,/share/man)
-# endif
-# ifndef ManSuffix
-#  define ManSuffix		1
-# endif
-# ifndef LibraryCCOptions
-#  if DoSharedLib && defined(SharedLibraryCCOptions)
-#   define LibraryCCOptions SharedLibraryCCOptions ArchLibraryCCOptions
-#  else
-#   define LibraryCCOptions DefaultCCOptions ArchLibraryCCOptions
-#  endif
-# endif
-#endif
-
-/* Flag passed to makestrs in Xt build to control string array names in the
- * libXt headers.   -solarisabinames matches those used in the libXt in 
- * Solaris, but not in other OS'es.
- */
-#ifndef SolarisABIFlag
-# if BuildLikeSun
-#  define SolarisABIFlag -solarisabinames
-# else
-#  define SolarisABIFlag /**/
-# endif
-#endif
-
 /*
  * Compiler setup.  This sun.cf file knows what options to use with 
  * certain compilers, including Sun C, CenterLine C, and gcc.  It 
@@ -85,11 +29,15 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
  *
  * For SunPro C, define HasSunC to YES in site.def.  
  * For CenterLine C, define HasCenterLineC to YES in site.def
- * For gcc, gcc2 or gcc3, define HasGcc, HasGcc2 or HasGcc3 to YES in site.def
+ * For gcc or gcc2, define HasGcc or HasGcc2 to YES in site.def
  * For other compilers, define HasSunC to NO in site.def, then 
  *    provide appropriate values for the various compiler related
  *    configuration varibles used here.
  * 
+ * If you say you have the SunPro C compiler, we assume you have 
+ * version 2.0.x of the compiler.  If you have version 3.0.x instead, 
+ * define CCompilerMajorVersion as 3 in site.def
+ *
  * If you don't tell us which C compiler you have, we assume you have 
  * the SunPro C compiler under Solaris 2.x, and the bundled /bin/cc 
  * under SunOS 4.1.x
@@ -111,18 +59,15 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
  *
  */
 
-#ifndef HasGcc3
-#define HasGcc3 NO
-#endif
 #ifndef HasGcc2
-#define HasGcc2 HasGcc3
+#define HasGcc2 NO
 #endif
 #ifndef HasGcc
 #define HasGcc HasGcc2
 #endif
 
 #ifndef HasSunC
-# if HasCenterLineC || HasGcc || HasGcc2 || HasGcc3 || (OSMajorVersion < 5)
+# if (HasCenterLineC || HasGcc || HasGcc2 || OSMajorVersion < 5)
 #  define HasSunC NO
 # else
 #  define HasSunC YES
@@ -131,146 +76,21 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 
 #if HasSunC 
 # ifndef CCompilerMajorVersion
-#  define CCompilerMajorVersion DefaultSunProCCompilerMajorVersion
+#  define CCompilerMajorVersion 3
+#  define DefaultCDebugFlags	-xO3
+#  define OptimizedCDebugFlags	-xO3
 # endif
-# ifndef CCompilerMinorVersion
-#  define CCompilerMinorVersion DefaultSunProCCompilerMinorVersion
-# endif
-XCOMM SunPro C CCompilerMajorVersion./**/CCompilerMinorVersion
-
-/* Choose some reasonable default optimizer flags based on compiler & 
-   OS versions */
-# ifndef OptimizedCDebugFlags
-#  if (CCompilerMajorVersion > 5) || \
-	(CCompilerMajorVersion == 5 && CCompilerMinorVersion > 2)
-#   define OptimizedCDebugFlags -xO4 -xbuiltin=%all -xlibmil -xstrconst ArchOptimizedFlags
-#  else
-#   define OptimizedCDebugFlags -xO4 -xstrconst ArchOptimizedFlags
-#  endif
-# endif
-# ifndef ArchOptimizedFlags
-#  if OSMajorVersion == 5 
-#   if defined(SparcArchitecture) && !defined(Sparc64Architecture)
-#    if OSMinorVersion > 9 /* Solaris 10 and later only run on UltraSPARC's */
-#     define ArchOptimizedFlags -xarch=v8plus
-#    else
-#     define ArchOptimizedFlags -xarch=v8
-#    endif
-#   elif defined(i386Architecture) || defined(AMD64Architecture)
-#    if (CCompilerMajorVersion > 5) || \
-	(CCompilerMajorVersion == 5 && CCompilerMinorVersion >= 7)
-/* -xregs=no%frameptr is required on x86 when compiling at -xO4 or higher to
- * avoid losing stack frame pointers so you can't get stack traces or debug.
- * This may lose a small bit of performance, so you can override by adding
- * #define FramePtrFlags -xregs=frameptr if you care about performance more 
- * than debuggability.
- */
-#     ifndef FramePtrFlags
-#      define FramePtrFlags -xregs=no%frameptr
-#     endif
-#    endif
-#    ifndef FramePtrFlags
-#     define FramePtrFlags /* */
-#    endif
-#    if defined(i386Architecture) && (OSMinorVersion > 8)
-       /* Solaris 9 and later require Pentium or better */
-#      define ArchOptimizedFlags -xpentium FramePtrFlags
-#    else
-#     define ArchOptimizedFlags FramePtrFlags
-#    endif
-#   endif
-#  endif
-#  ifndef ArchOptimizedFlags
-#   define ArchOptimizedFlags /**/
-#  endif
-# endif
-# ifndef DefaultCDebugFlags
-#  define DefaultCDebugFlags OptimizedCDebugFlags
-# endif
-# ifndef SharedLibraryLdCmd
-#  define SharedLibraryLdCmd $(CC)
-# endif
-/* Flags for lint version included with Sun C compilers */
-# if OSMajorVersion >= 5
-#  ifndef LintLibFlag
-#   define LintLibFlag -y -o
-#  endif
-#  ifndef LintOpts
-#   define LintOpts -b -h -u -erroff=E_INDISTING_FROM_TRUNC2 $(LINTSECFLAG) ExtraLibraries MathLibrary -lc
-#  endif
-#  ifndef LintSecFlag
-#   if (CCompilerMajorVersion > 5) || \
-       (CCompilerMajorVersion == 5 && CCompilerMinorVersion >= 6)
-#    define LintSecFlag -errsecurity=standard
-#   else
-#    define LintSecFlag /**/
-#   endif
-#  endif
-      LINTSECFLAG = LintSecFlag
-#  ifndef LintLibReferences
-#   define LintLibReferences(varname,libname,libsource)                    @@\
-       Concat(LINT,varname) = _UseCat(-L $(LINTLIBDIR) -l, -L libsource -l,libname)
-#  endif
-
-# endif /* Lint Flags for Solaris */
-
-#endif /* HasSunC */
-
-#ifndef ArchLibraryCCOptions
-# if HasSunC && defined(SparcArchitecture) && CCompilerMajorVersion > 3
-#  define ArchLibraryCCOptions -xregs=no%appl
-# else
-#  define ArchLibraryCCOptions
-# endif
-#endif /* ArchLibraryCCOptions */
-
-/* we used to have this here :
- *
- * #if HasSunC 
- * # ifndef CCompilerMajorVersion
- * #  define CCompilerMajorVersion 3
- * #  define DefaultCDebugFlags	-xO3
- * #  define OptimizedCDebugFlags	-xO3
- * # endif
- * #endif
- */
-
-#ifndef HasSunCplusplus
-# define HasSunCplusplus HasSunC	/* ??? */
 #endif
+
 #if HasSunCplusplus
 # ifndef HasCplusplus
 #  define HasCplusplus YES
-#  define OptimizedCplusplusDebugFlags	-xO4 -xbuiltin=%all -xlibmil
+#  define OptimizedCplusplusDebugFlags	-xO3
 # endif
 # ifndef CplusplusCompilerMajorVersion
-#  ifdef DefaultSunProCplusplusCompilerMajorVersion
-#   define CplusplusCompilerMajorVersion DefaultSunProCplusplusCompilerMajorVersion
-#  else
-#   define CplusplusCompilerMajorVersion 3
-#  endif
+#  define CplusplusCompilerMajorVersion	4
 # endif
-# ifndef CplusplusCompilerMinorVersion
-#  ifdef DefaultSunProCplusplusCompilerMinorVersion
-#   define CplusplusCompilerMinorVersion DefaultSunProCplusplusCompilerMinorVersion
-#  else
-#   define CplusplusCompilerMinorVersion 0
-#  endif
-# endif
-# ifndef CplusplusLibC
-#  if CplusplusCompilerMajorVersion >= 5
-#   define CplusplusLibC -norunpath -lCrun
-#  endif
-# endif
-XCOMM SunPro C++ CplusplusCompilerMajorVersion./**/CplusplusCompilerMinorVersion
 #endif
-
-/* we used to have this here :
- *
- * # ifndef CplusplusCompilerMajorVersion
- * #  define CplusplusCompilerMajorVersion	4
- * # endif
- */
 
 #if HasCenterLineC
 # ifndef CcCmd
@@ -290,6 +110,7 @@ XCOMM SunPro C++ CplusplusCompilerMajorVersion./**/CplusplusCompilerMinorVersion
 # endif
 #endif
 
+
 #if OSMajorVersion < 4 || (OSMajorVersion == 4 && OSMinorVersion < 1)
 /* We do not guarantee this will work */
 # define BootstrapCFlags	-DNOSTDHDRS
@@ -307,115 +128,45 @@ XCOMM SunPro C++ CplusplusCompilerMajorVersion./**/CplusplusCompilerMinorVersion
 # endif
 #endif
 
-/* The Xsun server was not building for SunOS 5.7 due to 
-   includes of <sys/cg2reg.h>. 
-*/
-#if OSMajorVersion < 5 
-# define IncludeCG2HeaderDefine	-DINCLUDE_CG2_HEADER
+#ifdef x86_64Architecture
+# define XServer64Defines -D_XSERVER64
 #else
-# define IncludeCG2HeaderDefine /**/
+# define XServer64Defines
 #endif
 
-#if defined(i386Architecture) || defined(AMD64Architecture)
-# if (OSMajorVersion > 5) || ((OSMajorVersion == 5) && (OSMinorVersion >= 8))
-#  define OSServerExtraDefines	-D__SOL8__
-# endif
-#endif
-
-#if !HasGcc 
-# if HasSunC
-#  if defined(AMD64Architecture)
-#   define AsmArch amd64
-#   define AsmFlags -xarch=amd64
-#  elif defined(i386Architecture)
-#   define AsmArch ia32
-#   define AsmFlags /**/
-#  elif defined(Sparc64Architecture)
-#   define AsmArch sparcv8plus
-#   define AsmFlags -xarch=v9
-#  elif defined(SparcArchitecture)
-#   define AsmArch sparcv8plus
-#   define AsmFlags -xarch=v8plus
-#  endif
-#  ifndef CompilerServerExtraDefines
-#   define CompilerServerExtraDefines $(SERVERSRC)/hw/xfree86/os-support/sunos/AsmArch.il
-#  endif
-# endif
-#endif
-
-#ifndef CompilerServerExtraDefines
-# define CompilerServerExtraDefines /**/
-#endif
-
-#ifndef OSServerExtraDefines
-# define OSServerExtraDefines	/**/
-#endif
-
-#ifndef ArchServerExtraDefines
-# if defined(Sparc64Architecture) || defined(AMD64Architecture)
-#  define ArchServerExtraDefines -D_XSERVER64
+#ifdef i386Architecture
+# if OSMajorVersion > 4
+#  define ServerExtraDefines AllocateLocalDefines XFree86ServerDefines -D__EXTENSIONS__ XServer64Defines
+#  define ServerOSDefines    XFree86ServerOSDefines
 # else
-#  define ArchServerExtraDefines /**/
+#  define ServerExtraDefines AllocateLocalDefines XServer64Defines
+#  define ServerOSDefines   -DDDXOSINIT
 # endif
+#else
+# define ServerExtraDefines AllocateLocalDefines XServer64Defines
+# define ServerOSDefines   -DDDXOSINIT
 #endif
 
-#define ServerOSDefines		XFree86ServerOSDefines IncludeCG2HeaderDefine
-#define ServerExtraDefines	AllocateLocalDefines XFree86ServerDefines \
-				CompilerServerExtraDefines \
-				OSServerExtraDefines ArchServerExtraDefines
-
-#ifndef HasPerl
-/* Solaris 8 comes with perl.  Earlier versions don't. */
-# if (OSMajorVersion == 5) && (OSMinorVersion >= 8)
-#  define HasPerl		YES
-# else
-#  define HasPerl		NO
-# endif
-#endif
-
-#ifndef XkbServerDefines
-# if BuildLikeSun
-#  define XkbServerDefines  -DXKB_ALWAYS_USES_SOFT_REPEAT \
-	-DXKM_OUTPUT_DIR='"/var/run/xkb/"' -DXKM_OUTPUT_DIR_MODE=0775 \
-	-DMAKE_XKM_OUTPUT_DIR
-# else
-#  define XkbServerDefines  -DXKB_ALWAYS_USES_SOFT_REPEAT
-# endif
-#endif
+#define XkbServerDefines  -DXKB_ALWAYS_USES_SOFT_REPEAT
 
 #if OSMajorVersion > 4
-# define ConnectionFlags		-DTCPCONN -DUNIXCONN -DLOCALCONN
-# if HasSunC
-#  ifdef DefaultSunProCCompilerDir
-#   ifndef  CcCmd
-#    define CcCmd		DefaultSunProCCompilerDir/cc
-#   endif
-#  endif
-#  ifdef DefaultSunProCplusplusCompilerDir
-#   ifndef  CplusplusCmd
-#    define CplusplusCmd	DefaultSunProCplusplusCompilerDir/CC
-#   endif
-#   ifndef  CplusplusFilt
-#    define CplusplusFilt	DefaultSunProCplusplusCompilerDir/c++filt
-#   endif
-#   ifndef  CplusplusWhatdir
-#    define CplusplusWhatdir	DefaultSunProCplusplusCompilerDir/whatdir
-#   endif
-#  else /* DefaultSunProCplusplusCompilerDir not defined */
-#   ifndef  CplusplusWhatdir
-#    define CplusplusWhatdir	whatdir
-#   endif
-#  endif /* DefaultSunProCplusplusCompilerDir */
-#  ifndef  CplusplusDependIncludes
-#   if CplusplusCompilerMajorVersion > 3
-#    define CplusplusDependIncludes	-I`CplusplusWhatdir CC`/../include/CC
-#   elif CplusplusCompilerMajorVersion > 2
-#    define CplusplusDependIncludes	-I/opt/SUNWspro/SC3.0/include/CC
-#   else
-#    define CplusplusDependIncludes	-I/opt/SUNWspro/SC2.0.1/include/CC
-#   endif
-#  endif 
-# endif /* HasSunC */
+#if HasSunC
+/* 
+ * Assume /opt/SUNWspro/bin/ contains symlinks to the appropriate tools
+ */
+#ifndef  CcCmd
+# define CcCmd		cc
+#endif
+#ifndef  CplusplusCmd
+# define CplusplusCmd	CC
+#endif
+#ifndef  CplusplusFilt
+# define CplusplusFilt	c++filt
+#endif
+#ifndef  CplusplusDependIncludes
+# define CplusplusDependIncludes	
+#endif
+#endif
 
 # if HasSunC && (CCompilerMajorVersion < 3)
 #  define BootstrapCFlags	-DSVR4
@@ -432,35 +183,26 @@ XCOMM SunPro C++ CplusplusCompilerMajorVersion./**/CplusplusCompilerMinorVersion
 # if OSMinorVersion > 3
 #  define InstallCmd	    /usr/ucb/install
 # endif
-#ifndef LargefileDefines
-# if (OSMajorVersion > 5) || (OSMajorVersion == 5 && OSMinorVersion >= 6)
-#  define LargefileDefines -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+# if HasSunC
+#  define MtFlag -mt
 # else
-#  define LargefileDefines /* */
+#  define MtFlag
 # endif
-#endif
-# ifdef AMD64Architecture
-#  define StandardDefines	-Dsun -DSVR4 -D__EXTENSIONS__ -D__amd64
-#  define ToolkitStringsABIOptions	-intelabi SolarisABIFlag
-# elif defined(i386Architecture)
-#  if (OSMajorVersion < 4) || ((OSMajorVersion == 5) && (OSMinorVersion <= 5))
-#   define StandardDefines	-Dsun -Di386 -DSVR4 -D__EXTENSIONS__ -D__i386 \
-				-D__SOL64__ LargefileDefines
+# ifdef i386Architecture
+#  ifdef x86_64Architecture
+#   define StandardDefines	  -Dsun -Di386 -DSVR4 -D__x86_64__ MtFlag
 #  else
-#   define StandardDefines	-Dsun -Di386 -DSVR4 -D__EXTENSIONS__ -D__i386 \
-                                LargefileDefines
+#   define StandardDefines	  -Dsun -Di386 -DSVR4 -D__i386__ MtFlag
 #  endif
-#  define ToolkitStringsABIOptions	-intelabi SolarisABIFlag
+#  define ToolkitStringsABIOptions	-intelabi
 # else
-#  define StandardDefines	  -Dsun -Dsparc -DSVR4 -D__EXTENSIONS__ LargefileDefines
-#  define ToolkitStringsABIOptions	-sparcabi SolarisABIFlag
+#  define StandardDefines	  -Dsun -DSVR4 MtFlag
+#  define ToolkitStringsABIOptions	-sparcabi
+#  define HasPlugin         YES
 # endif
 # define ExtraLibraries    -lsocket -lnsl
-# define HasWeakSymbols	  YES
 # if OSMinorVersion > 1
-#  ifndef ThreadedX
-#   define ThreadedX	  YES
-#  endif
+#  define ThreadedX	  YES
 #  define MTSafeAPIDefines	-DXUSE_MTSAFE_API -DXUSE_NETDB_R_API
 #  if HasSunC && CCompilerMajorVersion > 2
 #   define ThreadsCompileFlags -mt
@@ -476,33 +218,15 @@ XCOMM SunPro C++ CplusplusCompilerMajorVersion./**/CplusplusCompilerMinorVersion
 #  endif
 # endif 		/* OSMinorVersion > 1 */
 # ifndef UseExportLists
-#  if (OSMinorVersion > 4) && !HasGcc2
+#  if OSMinorVersion > 4
 #   define UseExportLists YES
 #  else
 #   define UseExportLists NO
 #  endif
 # endif
-# if OSMinorVersion > 5 /* Solaris 2.6 and later */
-#  define HasSnprintf YES
-# endif
-# if OSMinorVersion > 7 /* Solaris 8 and later */
-#  define HasStrlcat	YES
-#  define HasStrcasecmp	YES
-#  define HasVarRun	YES
-# endif
-# if OSMinorVersion > 9 /* Solaris 10 and later */
-#  define HasSetenv	YES
-#  define HasGetpeerucred YES
-#  define HasGetoptLong YES
-#  define DlLibrary	-lc  /* dlopen() is in libc in Solaris 10 */
-# endif
-# define HasVFork	NO
-# define HasDlopen	YES
-# define InstallXloadSetGID	NO /* libkstat doesn't require gid kmem */
-# define InstKmemFlags	-g sys -m 2711
+# define HasVFork          NO
+# define InstKmemFlags	  -g sys -m 2711
 # define ShLibIncludeFile <sunLib.tmpl>
-# define LinkerRuntimeLibraryPathFlag(path) Concat(-R,path)
-# define RpathLoadFlags LinkerRuntimeLibraryPathFlag($(USRLIBDIRPATH))
 /*
  * Set flags for position independent code before including sv4Lib.rules
  * if the compiler in use doesn't use standard SVR4 flags
@@ -510,87 +234,15 @@ XCOMM SunPro C++ CplusplusCompilerMajorVersion./**/CplusplusCompilerMinorVersion
 # if HasSunC || HasCenterLineC
 #  define PositionIndependentCFlags -Kpic
 #  define LargePositionIndependentCFlags -KPIC
-#  ifdef Sparc64Architecture
-#   define LargePICTable YES
-#  endif
 # endif
 # if HasSunCplusplus || HasCenterLineCplusplus
 #  define PositionIndependentCplusplusFlags -pic
 #  define LargePositionIndependentCplusplusFlags -PIC
 # endif
-/* As is done in sco5.cf, we lie and say Solaris has NCURSES, since
- * the system curses is close enough for xorgcfg's purposes.  xorgcfg
- * should not depend on the NCURSES package but rather on a "capable curses", 
- * of which NCURSES is just one.
- */
-#define	HasNCurses		YES
-#define NCursesLibName		-lcurses
 #else /* not OSMajorVersion > 4 */
 #define InstKmemFlags	  -g kmem -m 2711
 #include <sunLib.rules>
 #endif /* OSMajorVersion > 4 (else) */
-
-/* Solaris 10 includes FreeType already.  It's also available in GNOME 2.0 for
- * Solaris 8 & 9, and in Solaris 9 4/03 and later, but there's no easy way to
- * detect that in imake, so users of those releases who want to use the 
- * installed FreeType instead of the one in this tree should copy the following
- * two settings to their host.def.  Those who want to use the in-tree copy
- * regardless of OS version should add "#define HasFreetype2 NO" to host.def.
- */
-#ifndef HasFreetype2
-# if (OSMajorVersion > 5) || ((OSMajorVersion == 5) && (OSMinorVersion >= 10))
-#  define HasFreetype2 YES 
-#  ifndef Freetype2Dir
-#   define Freetype2Dir /usr/sfw
-#  endif
-# else
-#  define HasFreetype2 NO
-# endif
-#endif
-
-#ifndef HasExpat
-# if (OSMajorVersion > 5) || ((OSMajorVersion == 5) && (OSMinorVersion >= 10))
-#  define HasExpat YES 
-#  ifndef ExpatDir
-#   define ExpatDir /usr/sfw
-#  endif
-# else
-#  define HasExpat NO
-# endif
-#endif
-
-/* Solaris 10 includes fontconfig, but not the fcprivate.h header needed by
- * Xft1 library.
- */
-#ifndef HasFontconfig
-# define HasFontconfig NO
-#endif
-
-/* libpng was in /usr/sfw/lib on Solaris 9, moved to /usr/lib in Solaris 10 */
-#ifndef HasLibpng
-# if (OSMajorVersion > 5) || ((OSMajorVersion == 5) && (OSMinorVersion >= 9))
-#  define HasLibpng YES 
-#  if !defined(LibpngDir) && ((OSMajorVersion == 5) && (OSMinorVersion == 9))
-#   define LibpngDir /usr/sfw
-#  endif
-# else
-#  define HasLibpng NO
-# endif
-#endif
-
-#ifndef HasZlib
-# if (OSMajorVersion > 5) || ((OSMajorVersion == 5) && (OSMinorVersion >= 8))
-#  define HasZlib YES
-# else
-#  define HasZlib NO
-# endif
-#endif
-
-#ifndef TroffCmd
-# if !(HasGroff)
-#  define TroffCmd troff -Tpost
-# endif
-#endif
 
 #define BuildLibPathVar	  LD_LIBRARY_PATH
 #define HasNdbm		  YES
@@ -598,100 +250,49 @@ XCOMM SunPro C++ CplusplusCompilerMajorVersion./**/CplusplusCompilerMinorVersion
 #define HasSecureRPC	  YES
 #define SetTtyGroup	  YES
 #define HasPutenv	  YES
-#define HasMkstemp        YES
-#if (OSMajorVersion > 5) || ((OSMajorVersion == 5) && (OSMinorVersion >= 8))
-#define HasDevRandom	  YES	/* /dev/random is in Solaris 8 patches 	*/
-#define PollDevRandom	  YES	/* /dev/random is poll()able on Solaris */
-#endif
-#if (OSMajorVersion > 5) || ((OSMajorVersion == 5) && (OSMinorVersion >= 9))
-# define HasIssetugid	  YES
-#endif
-#if defined(Sun3Architecture) || defined(SparcArchitecture) || defined(Sparc64Architecture)
+#ifndef i386Architecture
 # ifndef Xsun24Server
 #  define Xsun24Server	  NO		/* color, mono, multiple depths */
 # endif
 # ifndef XsunServer
-#  define XsunServer	  NO		/* color and mono, 8 bit only */
+#  define XsunServer	  YES		/* color and mono, 8 bit only */
 # endif
 # ifndef XsunMonoServer
 #  define XsunMonoServer	  NO		/* monochrome only */
 # endif
-# ifndef XorgServer
-#  define XorgServer	(!(Xsun24Server || XsunServer || XsunMonoServer))
-# endif 
-# undef BuildXF86DRI
-# define BuildXF86DRI     NO
-# if (OSMajorVersion > 4)
-#  if !defined(AsOutputArchSize) || \
-      ((AsOutputArchSize != 32) && (AsOutputArchSize != 64))
-#   undef AsOutputArchSize
-#   define AsOutputArchSize	32
-#  endif
-#  ifndef AsVISOption
-#   if AsOutputArchSize == 32
-#    ifdef UseGas
-#     define AsVISOption		-Av8plusa
-#    else
-#     define AsVISOption		-xarch=v8plusa
-#    endif
-#   else
-#    ifdef UseGas
-#     define AsVISOption		-Av9a
-#    else
-#     define AsVISOption		-xarch=v9a
-#    endif
-#   endif
-#  endif
+# ifndef BuildPexExt
+#  define BuildPexExt	  (XsunServer || Xsun24Server)
 # endif
-#endif /* SPARC or Sun3/M68k */
+#endif /* not i386Architecture */
 
-#if OSMajorVersion >= 4
-#define HasUsableFileMap YES
+#if (OSMajorVersion > 4) && defined(i386Architecture)
+#ifndef HasSolx86ApertureDriver
+#define HasSolx86ApertureDriver	YES
 #endif
-
-#ifndef UseDeprecatedKeyboardDriver
-#define UseDeprecatedKeyboardDriver YES
 #endif
 
 #if HasGcc
-# if OSMajorVersion > 4
+# define UseInternalMalloc NO
+# if OSMajorVersion > 4 && defined(i386Architecture)
 #  ifndef DefaultCCOptions
-#   ifdef UseInstalled
-#    define DefaultCCOptions -DNO_ASM
-#   elif OSMinorVersion > 6
-#    define DefaultCCOptions -DNO_ASM GccWarningOptions
-#   elif OSMinorVersion > 3
-#    define DefaultCCOptions -DNO_ASM GccWarningOptions -ansi -pedantic
+#   if UseInstalled
+#    define DefaultCCOptions -DNO_ASM -D_POSIX_SOURCE -D__EXTENSIONS__
 #   else
-#    define DefaultCCOptions -DNO_ASM
+#    if OSMinorVersion > 3
+#     define DefaultCCOptions -ansi -pedantic -DNO_ASM -D_POSIX_SOURCE -D__EXTENSIONS__
+#    else
+#     define DefaultCCOptions -DNO_ASM -D_POSIX_SOURCE -D__EXTENSIONS__
+#    endif
 #   endif
 #  endif
 # endif
 # if HasGcc2
-#  ifndef CcCmd
-#   define CcCmd gcc
-#  endif
-#  ifndef AsCmd
-#   define AsCmd CcCmd -c -x assembler
-#  endif
+#  define UseInternalMalloc NO
 #  ifndef OptimizedCDebugFlags
 #   ifdef i386Architecture
 #    define OptimizedCDebugFlags DefaultGcc2i386Opt
-#   elif defined(AMD64Architecture)
-#    define OptimizedCDebugFlags DefaultGcc2AMD64Opt
 #   else
 #    define OptimizedCDebugFlags -O2
-#   endif
-#  endif
-#  if !defined(SharedLibraryLoadFlags) && !defined(SharedLibraryLdCmd)
-#   if OSMajorVersion == 5 && OSMinorVersion > 6 && defined(i386Architecture)
-    /* This is to work around what appears to be a PIC bug in some gcc/egcs
-       versions that shows up with the Solaris 7/x86 <ctype.h>. */
-#    define SharedLibraryLdCmd $(LD)
-#    define SharedLibraryLoadFlags -G -z textwarn
-#   else
-#    define SharedLibraryLdCmd $(CC)
-#    define SharedLibraryLoadFlags -shared -z text
 #   endif
 #  endif
 # else
@@ -709,10 +310,7 @@ XCOMM SunPro C++ CplusplusCompilerMajorVersion./**/CplusplusCompilerMinorVersion
 # define AllocateLocalDefines -DINCLUDE_ALLOCA_H
 
 /* Set up compiler-dependent options for Sun C */
-/*
- * To build 64-bit binaries define Sparc64Architecture or AMD64Architecture
- * in your site.def or host.def file.
- */
+
 # if HasSunC
 #  ifdef Sun3Architecture
 #   ifndef DefaultCCOptions
@@ -724,23 +322,8 @@ XCOMM SunPro C++ CplusplusCompilerMajorVersion./**/CplusplusCompilerMinorVersion
 #     define DefaultCCOptions -pipe
 #    endif
 #   else /* OSMajorVersion >= 5*/
-#     ifndef DefaultXArchOptions
-#      ifdef Sparc64Architecture
-#	define DefaultXArchOptions -xarch=v9
-#      elif defined(AMD64Architecture)
-#	define DefaultXArchOptions -xarch=generic64
-#      else
-#       define DefaultXArchOptions /* */
-#     endif
-#     ifndef DefaultCCOptions
-#      define DefaultCCOptions -Xa -v DefaultXArchOptions -z lazyload -z combreloc -xstrconst -xildoff
-#     endif
-#     ifndef DefaultCplusplusOptions
-#      define DefaultCplusplusOptions DefaultXArchOptions -z lazyload -z combreloc -xildoff
-#     endif
-#     ifndef SharedLibraryLoadFlags
-#      define SharedLibraryLoadFlags -G DefaultXArchOptions -z text $(EXTRA_LOAD_FLAGS)
-#     endif
+#    ifndef DefaultCCOptions
+#     define DefaultCCOptions -Xa
 #    endif
 #   endif	
 #  endif	
@@ -764,85 +347,14 @@ XCOMM SunPro C++ CplusplusCompilerMajorVersion./**/CplusplusCompilerMinorVersion
 # endif
 
 
+# define PexCCOptions DefaultCCOptions
+
 #endif /* HasGcc (else) */
 
 #if OSMajorVersion < 5
 # define SharedAllocateLocalDefines -DINCLUDE_ALLOCA_H
 # define LibraryCCOptions /* don't want special floating point */
-#else /* OSMajorVersion >= 5, i.e. Solaris 2.0 & later */
-/* Only load libraries when needed on Solaris 7 & later */
-# if OSMinorVersion >= 7 
-#  define LazyLoadFlag -z lazyload -z combreloc
-# else
-#  define LazyLoadFlag /* */
-# endif
-/* Link with extra mapfiles for some performance & security enhancements */
-#ifndef MapfileFlag
-# if HasSunC
-#  define MapfileFlag -M
-# else
-#  define MapfileFlag -Wl,-M,
-# endif
-#endif
-#ifndef Mapfile_BssAlign
-# if OSMinorVersion >= 9
-#  define Mapfile_BssAlign $(MAPFILEFLAG)/usr/lib/ld/map.bssalign
-# else
-#  define Mapfile_BssAlign /**/
-# endif
-#endif
-#ifndef Mapfile_PageAlign
-# if OSMinorVersion >= 10
-#  define Mapfile_PageAlign $(MAPFILEFLAG)/usr/lib/ld/map.pagealign
-# else
-#  define Mapfile_PageAlign /**/
-# endif
-#endif
-#ifndef Mapfile_NoExStack
-# if OSMinorVersion >= 9
-#  define Mapfile_NoExStack $(MAPFILEFLAG)/usr/lib/ld/map.noexstk
-# else
-#  define Mapfile_NoExStack /**/
-# endif
-#endif
-#ifndef Mapfile_NoExData
-# if defined(SparcArchitecture)
-/* SPARC archictecture requires PLT section in .data be executable, so
-   we can only make .bss, not all of .data no-exec on SPARC */
-#   define Mapfile_NoExData /**/
-# else
-#  if OSMinorVersion >= 10
-#   define Mapfile_NoExData $(MAPFILEFLAG)/usr/lib/ld/map.noexdata
-#  else
-#   define Mapfile_NoExData /**/
-#  endif
-# endif
-#endif
-       MAPFILEFLAG = MapfileFlag
-  MAPFILES_FOR_ALL = Mapfile_PageAlign Mapfile_NoExData
-MAPFILES_FOR_PROGS = Mapfile_BssAlign Mapfile_NoExStack
-/* ExtraLoadFlags apply to all binaries - programs & libraries */
-# ifndef ExtraLoadFlags
-#  define ExtraLoadFlags LazyLoadFlag $(MAPFILES_FOR_ALL)
-# endif
-/* ExtraLoadOptions only apply to programs */
-# ifndef ExtraLoadOptions
-#  define ExtraLoadOptions -B direct $(MAPFILES_FOR_PROGS)
-# endif
 #endif /* OSMajorVersion < 5 */
-
-/* 64-bit build support */
-#ifndef Solaris64bitSubdir
-# ifdef Sparc64Architecture
-#  define Solaris64bitSubdir	sparcv9
-# elif defined(AMD64Architecture)
-#  define Solaris64bitSubdir	amd64
-# endif
-#endif
-
-#ifdef Solaris64bitSubdir
-# define LibDirName Concat3(lib,/,Solaris64bitSubdir)
-#endif
 
 #if OSMajorVersion > 4
 # include <svr4.cf>
@@ -860,30 +372,6 @@ man_keywords::								@@\
 # endif
 #endif
 
-/* PAM appeared in SunOS 5.6 */
-#if !defined(HasPam)
-# if (OSMajorVersion > 5) || (OSMajorVersion == 5 && OSMinorVersion >= 6)
-#  define HasPam		YES
-# endif
-#endif
-
-#ifndef PamLibraries
-#define PamLibraries		-lpam
-#endif
-
-#ifndef HasMotif
-/* Solaris's Motif depends on Solaris libX11 and won't work with libX11 built
- * from this tree, so only use it when using libX11 from outside the tree.
- */
-# define HasMotif (defined(UseInstalled) || UseInstalledX11)
-# define MotifDir /usr/dt
-#endif /* !HasMotif */
-#ifndef HasMotif2
-/* Solaris's Motif2 version is broken and misses XmPrintShell
- * (see http://xprint.mozdev.org/bugs/show_bug.cgi?id=1366) */
-# define HasMotif2 NO
-#endif /* !HasMotif2 */
-
 #define MotifDefines			\
 	-DNO_ISDIR -DNO_REGCOMP -DNO_ALLOCA -DBOGUS_MB_MAX -DNO_CONST
 #define PamUnixDefines		-DPAM_NIS
@@ -895,7 +383,7 @@ man_keywords::								@@\
 
 #define baseDtMailDefines	\
 	-DSunOS=OSMajorVersion\#\#OSMinorVersion -DMMAP_NORESERVE -DSPRO_V2
-#if !defined(i386Architecture) && !defined(AMD64Architecture)
+#ifndef i386Architecture
 # define DtMailDefines		baseDtMailDefines
 #else
 # define DtMailDefines		-DBIG_ENDIAN baseDtMailDefines
@@ -913,49 +401,30 @@ man_keywords::								@@\
 	-D_XOPEN_SOURCE -D__EXTENSIONS__ \
 	-DOSMAJORVERSION=OSMajorVersion -DOSMINORVERSION=OSMinorVersion
 
-
-/*
- * Turn off HTML manpages like we do under NetBSD.
- */
-#ifndef	BuildHtmlManPages
-#define	BuildHtmlManPages	NO
-#endif
-
-/*
- * Turn off seperate configuration directories.
- */
-#ifndef	UseSeparateConfDir
-#define	UseSeparateConfDir	NO
-#endif
-
-/* Hackery for building modules as Solaris shared objects with dependencies */
-#if MakeDllModules && DoLoadableServer
-
-/* If you change this, you will need to change find-deps.pl to match */
-#define DlModuleDependencyName(module) Concat(module,_deps)
-
-#define DlModuleTarget(module,deplist,modlist)                          @@\
-DepDynamicModuleTarget(module,deplist DlModuleDependencyName(module),modlist LazyLoadFlag `cat DlModuleDependencyName(module)`) @@\
-									@@\
-DlModuleDependencyName(module):						@@\
-	touch $@							@@\
-									@@\
-clean::                                                                 @@\
-        RemoveFile(DlModuleDependencyName(module))
-
-#define ObjectModuleTarget(module,objects)				@@\
-DlModuleTarget(Concat(module,_drv.so), objects, objects)
-
-#define LibraryModuleTarget(module,objects)				@@\
-NormalLibraryTarget(module, objects)					@@\
-DlModuleTarget(Concat3(lib,module,.so), objects, objects)
-
-#define DepLibraryModuleTarget(module,deplist,objects)			@@\
-NormalDepLibraryTarget(module, deplist, objects)			@@\
-DlModuleTarget(Concat3(lib,module,.so), deplist, objects)
-
-#endif
-
 #ifndef XvncAuthPAM
 #define XvncAuthPAM     YES
+#endif
+
+#ifndef JPEGIncludeFlags
+#ifdef SparcArchitecture
+#define JPEGIncludeFlags -I$(TOP)/../turbojpeg
+#else
+#define JPEGIncludeFlags -I/opt/libjpeg-turbo/include
+#endif
+#endif
+
+#ifndef JPEGLibraryFlags
+#ifdef SparcArchitecture
+#define JPEGLibraryFlags $(TOP)/../turbojpeg/libturbojpeg.a
+#else
+#ifdef x86_64Architecture
+#define JPEGLibraryFlags /opt/libjpeg-turbo/lib/amd64/libturbojpeg.a
+#else
+#define JPEGLibraryFlags /opt/libjpeg-turbo/lib/libturbojpeg.a
+#endif
+#endif
+#endif
+
+#ifdef SparcArchitecture
+# define AsmDefines	/**/
 #endif

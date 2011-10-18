@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/cfb/cfbzerarc.c,v 3.4tsi Exp $ */
 /************************************************************
 
-Copyright 1989, 1998  The Open Group
+Copyright (c) 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,17 +15,18 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 ********************************************************/
 
-/* $Xorg: cfbzerarc.c,v 1.4 2001/02/09 02:04:39 xorgcvs Exp $ */
+/* $XConsortium: cfbzerarc.c /main/24 1995/12/06 16:58:51 dpw $ */
+/* $XFree86: xc/programs/Xserver/cfb/cfbzerarc.c,v 3.0 1996/06/29 09:05:57 dawes Exp $ */
 
 /* Derived from:
  * "Algorithm for drawing ellipses or hyperbolae with a digital plotter"
@@ -33,13 +34,9 @@ in this Software without prior written authorization from The Open Group.
  * The Computer Journal, November 1967, Volume 10, Number 3, pp. 282-289
  */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
-#include <X11/Xprotostr.h>
-#include "regionstr.h"
+#include "X.h"
+#include "Xprotostr.h"
+#include "miscstruct.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"
 #include "scrnintstr.h"
@@ -52,10 +49,10 @@ in this Software without prior written authorization from The Open Group.
 #ifdef PIXEL_ADDR
 
 static void
-RROP_NAME(cfbZeroArcSS8)(
-    DrawablePtr pDraw,
-    GCPtr pGC,
-    xArc *arc)
+RROP_NAME(cfbZeroArcSS8) (pDraw, pGC, arc)
+    DrawablePtr pDraw;
+    GCPtr pGC;
+    xArc *arc;
 {
     miZeroArcRec info;
     Bool do360;
@@ -270,7 +267,6 @@ RROP_NAME(cfbZeroArcSS8)(
 	    RROP_SOLID(yorgop - yoffset + info.xorg + x);
 #endif /* PSZ == 24 */
     }
-    RROP_UNDECLARE
 }
 
 void

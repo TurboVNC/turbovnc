@@ -1,14 +1,11 @@
-XCOMM $Xorg: ibmLib.tmpl,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
-XCOMM $XdotOrg: xc/config/cf/ibmLib.tmpl,v 1.6 2005/05/19 18:53:42 ajax Exp $
+XCOMM $XConsortium: ibmLib.tmpl /main/21 1996/12/04 12:21:49 swick $
 
 /*
  * AIX shared library template
  */
 
-XCOMM $XFree86: xc/config/cf/ibmLib.tmpl,v 1.3tsi Exp $
-
 /*
- * IBM used an unusual shared object file name in some libraries. 
+ * IBM used an unusual shared object file name in some librares. 
  * Mimic this behavior to preserve compatibility with IBM's libraries.
  */
 #ifndef IBMShr4Compatibility
@@ -30,34 +27,17 @@ XCOMM $XFree86: xc/config/cf/ibmLib.tmpl,v 1.3tsi Exp $
 #define SharedThreadReqs /**/
 #endif
 
-#define SharedXextReqs	$(XONLYLIB)
+#define SharedXextReqs	$(XLIBONLY)
 #define SharedXmuReqs	$(XTOOLLIB) $(XLIB)
-#define SharedXmuuReqs	$(XLIBONLY)
 #define SharedOldXReqs	$(XLIBONLY)
 #define SharedXtReqs	$(XLIBONLY) $(SMLIB) $(ICELIB) SharedThreadReqs
-#define SharedXawReqs	$(XMULIB) $(XTOOLLIB) $(EXTRAXAWREQS) $(XLIB) $(XPMLIB)
-#define SharedXaw7Reqs	$(XMULIB) $(XTOOLLIB) $(XLIB) $(XPMLIB)
-#define SharedXaw6Reqs	$(XMULIB) $(XTOOLLIB) $(XLIB)
+#define SharedXawReqs	$(XMULIB) $(XTOOLLIB) $(XLIB)
 #define SharedXiReqs	$(XLIB)
 #define SharedXtstReqs	$(XLIB)
-#define SharedXieReqs	$(XONLYLIB)
+#define SharedPexReqs	$(XLIBONLY)
+#define SharedXieReqs	$(XLIBONLY)
 #define SharedSMReqs	$(ICELIB)
 #define SharedXpReqs	$(XLIB)
-#define SharedXpmReqs	$(XLIB)
-#define SharedDPSReqs	$(XTOOLLIB) $(XLIB)
-#define SharedDPSTKReqs	$(DPSLIB) $(XTOOLLIB) $(XLIB)
-#define SharedXrenderReqs	$(XLIB)
-#define SharedXrandrReqs	$(XRENDERLIB) $(XLIB)
-#define SharedXcursorReqs	$(XRENDERLIB) $(XLIB)
-#define SharedxkbfileReqs	$(XLIBONLY)
-#define SharedxkbuiReqs	$(XLIBONLY) $(XKBFILELIB)
-#define SharedFontencReqs	$(BUILDLIBDIR)/libz.a
-#define SharedXfontcacheReqs	$(XLIB)
-#define SharedXfontReqs	stubs/libfntstubs.a $(FREETYPE2LIB)
-#define SharedXfixesReqs	$(XONLYLIB)
-#define SharedXdamageReqs	$(XONLYLIB)
-#define SharedXcompositeReqs	$(XONLYLIB)
-#define SharedXevieReqs		$(XONLYLIB) $(EXTENSIONLIB)
 
 #define SharedXReqs	$(XTOOLLIB) $(XPLIB) $(XLIB) SharedThreadReqs
 #define SharedXmReqs	$(LDPRELIBS) SharedXReqs

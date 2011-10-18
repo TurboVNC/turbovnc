@@ -1,14 +1,15 @@
-/* $Xorg: atom.c,v 1.5 2001/02/09 02:04:04 xorgcvs Exp $ */
+/* $XConsortium: atom.c,v 1.4 94/04/17 20:17:31 gildea Exp $ */
 
 /*
 
-Copyright 1990, 1994, 1998  The Open Group
+Copyright (c) 1990, 1994  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,16 +17,15 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 */
-/* $XFree86: xc/lib/font/util/atom.c,v 1.9 2002/09/19 13:22:00 tsi Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
@@ -33,10 +33,7 @@ in this Software without prior written authorization from The Open Group.
 
 /* lame atom replacement routines for font applications */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#include <X11/fonts/fontmisc.h>
+#include "fontmisc.h"
 
 typedef struct _AtomList {
     char		*name;
@@ -55,8 +52,9 @@ static AtomListPtr  *reverseMap;
 static int	    reverseMapSize;
 static Atom	    lastAtom;
 
-static int
-Hash(char *string, int len)
+static
+Hash(string, len)
+    char    *string;
 {
     int	h;
 
@@ -68,8 +66,8 @@ Hash(char *string, int len)
     return h;
 }
 
-static int
-ResizeHashTable (void)
+static
+ResizeHashTable ()
 {
     int		newHashSize;
     int		newHashMask;
@@ -84,12 +82,8 @@ ResizeHashTable (void)
     else
 	newHashSize = hashSize * 2;
     newHashTable = (AtomListPtr *) xalloc (newHashSize * sizeof (AtomListPtr));
-    if (!newHashTable) {
-	fprintf(stderr, "ResizeHashTable(): Error: Couldn't allocate"
-		" newHashTable (%ld)\n",
-		newHashSize * (unsigned long)sizeof (AtomListPtr));
+    if (!newHashTable)
 	return FALSE;
-    }
     bzero ((char *) newHashTable, newHashSize * sizeof (AtomListPtr));
     newHashMask = newHashSize - 1;
     newRehash = (newHashMask - 2);
@@ -118,26 +112,21 @@ ResizeHashTable (void)
     return TRUE;
 }
 
-static int
-ResizeReverseMap (void)
+static
+ResizeReverseMap ()
 {
-    int ret = TRUE;
     if (reverseMapSize == 0)
 	reverseMapSize = 1000;
     else
 	reverseMapSize *= 2;
     reverseMap = (AtomListPtr *) xrealloc (reverseMap, reverseMapSize * sizeof (AtomListPtr));
-    if (!reverseMap) {
-	fprintf(stderr, "ResizeReverseMap(): Error: Couldn't reallocate"
-		" reverseMap (%ld)\n",
-		reverseMapSize * (unsigned long)sizeof(AtomListPtr));
-	ret = FALSE;
-    }
-    return ret;
+    if (!reverseMap)
+	return FALSE;
 }
 
-static int
-NameEqual (const char *a, const char *b, int l)
+static
+NameEqual (a, b, l)
+    char    *a, *b;
 {
     while (l--)
 	if (*a++ != *b++)
@@ -146,11 +135,14 @@ NameEqual (const char *a, const char *b, int l)
 }
 
 Atom 
-MakeAtom(char *string, unsigned len, int makeit)
+MakeAtom(string, len, makeit)
+    char *string;
+    unsigned len;
+    int makeit;
 {
     AtomListPtr	a;
     int		hash;
-    int		h = 0;
+    int		h;
     int		r;
 
     hash = Hash (string, len);
@@ -183,11 +175,6 @@ MakeAtom(char *string, unsigned len, int makeit)
     if (!makeit)
 	return None;
     a = (AtomListPtr) xalloc (sizeof (AtomListRec) + len + 1);
-    if (a == NULL) {
-	fprintf(stderr, "MakeAtom(): Error: Couldn't allocate AtomListRec"
-		" (%ld)\n", (unsigned long)sizeof (AtomListRec) + len + 1);
-	return None;
-    }
     a->name = (char *) (a + 1);
     a->len = len;
     strncpy (a->name, string, len);
@@ -210,24 +197,23 @@ MakeAtom(char *string, unsigned len, int makeit)
     }
     hashTable[h] = a;
     hashUsed++;
-    if (reverseMapSize <= a->atom) {
-	if (!ResizeReverseMap())
-	    return None;
-    }
+    if (reverseMapSize <= a->atom)
+	ResizeReverseMap();
     reverseMap[a->atom] = a;
     return a->atom;
 }
 
-int 
-ValidAtom(Atom atom)
+ValidAtom(atom)
+    Atom atom;
 {
     return (atom != None) && (atom <= lastAtom);
 }
 
 char *
-NameForAtom(Atom atom)
+NameForAtom(atom)
+    Atom atom;
 {
     if (atom != None && atom <= lastAtom)
 	return reverseMap[atom]->name;
-    return NULL;
+    return 0;
 }

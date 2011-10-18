@@ -1,0 +1,455 @@
+Only in .: DIFFS
+Only in .: README
+diff -cr ../../../../../XFree86/3.3.2/lean-xc/config/cf/linux.cf ./config/cf/linux.cf
+*** ../../../../../XFree86/3.3.2/lean-xc/config/cf/linux.cf	Mon Mar  2 11:55:22 1998
+--- ./config/cf/linux.cf	Mon May 11 17:38:06 1998
+***************
+*** 259,265 ****
+--- 259,277 ----
+  #define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+  #endif /* Mc68020Architecture */
+  
++ /*================================================================
++    BEGIN ORL VNC modification
++    Always define _REENTRANT since we may use threaded libraries */
++ 
++ /* REMOVE
+  #define StandardDefines		-Dlinux LinuxMachineDefines LinuxSourceDefines
++ */
++ 
++ #define StandardDefines		-Dlinux LinuxMachineDefines \
++ 				LinuxSourceDefines -D_REENTRANT
++ 
++ /* END ORL VNC modification
++ ================================================================*/
+  
+  #if UseElfFormat
+  #define DlLibrary		-rdynamic -ldl
+diff -cr ../../../../../XFree86/3.3.2/lean-xc/config/cf/site.def ./config/cf/site.def
+*** ../../../../../XFree86/3.3.2/lean-xc/config/cf/site.def	Sun Jun 22 11:32:21 1997
+--- ./config/cf/site.def	Thu May  7 17:13:57 1998
+***************
+*** 37,42 ****
+--- 37,48 ----
+  /*
+   * Include this for easy XFree86 customisations
+   */
++ 
++ /*================================================================
++    BEGIN ORL VNC modification
++    Use vnc.def instead of xf86site.def and host.def */
++ 
++ /* REMOVE
+  #ifndef SiteIConfigFiles
+  #define SiteIConfigFiles $(IRULESRC)/xf86site.def $(IRULESRC)/host.def
+  #endif
+***************
+*** 44,49 ****
+--- 50,62 ----
+  #include <host.def>
+  
+  #include <xf86site.def>
++ */
++ 
++ #define SiteIConfigFiles $(IRULESRC)/vnc.def
++ #include <vnc.def>
++ 
++ /* END ORL VNC modification
++ ================================================================*/
+  
+  /* On systems where cpp doesn't expand correctly macros in include directives
+   * the two following macros need to be defined directly (where "X11" is
+***************
+*** 71,79 ****
+--- 84,101 ----
+  
+  #ifdef AfterVendorCF
+  
++ /*================================================================
++    BEGIN ORL VNC modification
++    Define ProjectRoot in vnc.def */
++ 
++ /* REMOVE
+  #ifndef ProjectRoot
+  #define ProjectRoot /usr/X11R6
+  #endif
++ */
++ 
++ /* END ORL VNC modification
++ ================================================================*/
+  
+  /* Only set HasXdmAuth to YES if you have a Wraphelp.c file. */
+  /* #define HasXdmAuth YES */
+***************
+*** 129,134 ****
+--- 151,165 ----
+  #endif
+  */
+  
++ /*================================================================
++    BEGIN ORL VNC modification
++    No host.def */
++ 
++ /* REMOVE
+  #include <host.def>
++ */
++ 
++ /* END ORL VNC modification
++ ================================================================*/
+  
+  #endif /* AfterVendorCF */
+diff -cr ../../../../../XFree86/3.3.2/lean-xc/config/cf/ultrix.cf ./config/cf/ultrix.cf
+*** ../../../../../XFree86/3.3.2/lean-xc/config/cf/ultrix.cf	Sun Dec 22 03:15:23 1996
+--- ./config/cf/ultrix.cf	Mon Aug 16 10:22:57 1999
+***************
+*** 38,45 ****
+  
+  #ifdef MipsArchitecture
+  #if OSMajorVersion > 4 || (OSMajorVersion == 4 && OSMinorVersion >= 2)
+! #define XdecServer YES
+! #define ServerOSDefines -DDDXTIME
+  /* Even under ultrix 4.2, the compiler miscompiles some alloca calls */
+  #define AllocateLocalDefines /* -DINCLUDE_ALLOCA_H */
+  #else
+--- 38,45 ----
+  
+  #ifdef MipsArchitecture
+  #if OSMajorVersion > 4 || (OSMajorVersion == 4 && OSMinorVersion >= 2)
+! /*#define XdecServer YES
+! #define ServerOSDefines -DDDXTIME*/
+  /* Even under ultrix 4.2, the compiler miscompiles some alloca calls */
+  #define AllocateLocalDefines /* -DINCLUDE_ALLOCA_H */
+  #else
+Only in ./config/cf: vnc.def
+Only in ./config/cf: vnclibs.def
+diff -cr ../../../../../XFree86/3.3.2/lean-xc/lib/font/bitmap/bitscale.c ./lib/font/bitmap/bitscale.c
+*** ../../../../../XFree86/3.3.2/lean-xc/lib/font/bitmap/bitscale.c	Wed Jun 11 13:08:40 1997
+--- ./lib/font/bitmap/bitscale.c	Mon Aug 16 10:20:56 1999
+***************
+*** 577,583 ****
+  	       the matrix appropriately */
+  	    vals->pixel_matrix[0] *= rescale_x;
+  	    vals->pixel_matrix[1] *= rescale_x;
+!     #ifdef NOTDEF
+  	    /* This would force the pointsize and pixelsize fields in the
+  	       FONT property to display as matrices to more accurately
+  	       report the font being supplied.  It might also break existing
+--- 577,583 ----
+  	       the matrix appropriately */
+  	    vals->pixel_matrix[0] *= rescale_x;
+  	    vals->pixel_matrix[1] *= rescale_x;
+! #ifdef NOTDEF
+  	    /* This would force the pointsize and pixelsize fields in the
+  	       FONT property to display as matrices to more accurately
+  	       report the font being supplied.  It might also break existing
+***************
+*** 585,593 ****
+  	    vals->values_supplied =
+  		vals->values_supplied & ~(PIXELSIZE_MASK | POINTSIZE_MASK) |
+  		PIXELSIZE_ARRAY;
+!     #else /* NOTDEF */
+  	    vals->values_supplied = vals->values_supplied & ~POINTSIZE_MASK;
+!     #endif /* NOTDEF */
+  	    /* Recompute and reround the FontScalablePtr values after
+  	       rescaling for the new width. */
+  	    FontFileCompleteXLFD(vals, vals);
+--- 585,593 ----
+  	    vals->values_supplied =
+  		vals->values_supplied & ~(PIXELSIZE_MASK | POINTSIZE_MASK) |
+  		PIXELSIZE_ARRAY;
+! #else /* NOTDEF */
+  	    vals->values_supplied = vals->values_supplied & ~POINTSIZE_MASK;
+! #endif /* NOTDEF */
+  	    /* Recompute and reround the FontScalablePtr values after
+  	       rescaling for the new width. */
+  	    FontFileCompleteXLFD(vals, vals);
+diff -cr ../../../../../XFree86/3.3.2/lean-xc/lib/font/fontfile/dirfile.c ./lib/font/fontfile/dirfile.c
+*** ../../../../../XFree86/3.3.2/lean-xc/lib/font/fontfile/dirfile.c	Mon Jan 27 06:56:28 1997
+--- ./lib/font/fontfile/dirfile.c	Tue Aug 17 14:25:22 1999
+***************
+*** 140,147 ****
+  	    FontFileFreeDir (dir);
+  	return status;
+      }
+!     if (!dir)
+! 	return BadFontPath;
+  
+      FontFileSortDir(dir);
+  
+--- 140,158 ----
+  	    FontFileFreeDir (dir);
+  	return status;
+      }
+!     if (!dir) {
+!         /*** TJR - dirty hack - this variable is set in
+! 	     programs/Xserver/dix/dixfont.c when setting default font path  */
+! 	extern int settingDefaultFontPath;
+! 	if (settingDefaultFontPath) {
+! 	    fprintf(stderr,"Font directory '%s' not found - ignoring\n",
+! 		    directory);
+! 	    dir = FontFileMakeDir(directory, 0);
+! 	}
+! 
+! 	if (!dir)
+! 	    return BadFontPath;
+!     }
+  
+      FontFileSortDir(dir);
+  
+diff -cr ../../../../../XFree86/3.3.2/lean-xc/programs/Xserver/Imakefile ./programs/Xserver/Imakefile
+*** ../../../../../XFree86/3.3.2/lean-xc/programs/Xserver/Imakefile	Mon Mar  2 11:55:22 1998
+--- ./programs/Xserver/Imakefile	Thu Nov 26 16:27:31 1998
+***************
+*** 1696,1701 ****
+--- 1696,1721 ----
+  #endif /* XVirtualFramebufferServer */
+  
+  
++ #if XvncServer
++ XCOMM
++ XCOMM VNC X server
++ XCOMM
++ MFBDIR   = mfb
++ CFB8DIR  = cfb
++ CFB16DIR = cfb16
++ CFB24DIR = cfb24
++ CFB32DIR = cfb32
++ DDXDIR1  = hw/vnc
++ XVNCDIRS = $(STDDIRS) $(MFBDIR) $(CFB8DIR) $(CFB16DIR) $(CFB24DIR) $(CFB32DIR) $(DDXDIR1) $(DEPDIRS)
++ XVNCOBJS = 
++ #include <vnclibs.def>
++ XVNC = hw/vnc/libvnc.a $(VNCLIBS)
++ XVNCLIBS = PreFbLibs $(XVNC) $(CFB) PostFbLibs
++ XVNCSYSLIBS = $(SYSLIBS) $(VNCSYSLIBS)
++ ServerTarget(Xvnc,$(XVNCDIRS),$(XVNCOBJS),$(XVNCLIBS),$(XVNCSYSLIBS))
++ #endif /* XvncServer */
++ 
++ 
+  #if UseXserverWrapper
+  SetUIDProgramTarget(Xwrapper,os/wrapper.o,NullParameter,NullParameter,NullParameter)
+  InstallProgramWithFlags(Xwrapper,$(BINDIR),$(INSTUIDFLAGS))
+diff -cr ../../../../../XFree86/3.3.2/lean-xc/programs/Xserver/cfb/cfb8line.c ./programs/Xserver/cfb/cfb8line.c
+*** ../../../../../XFree86/3.3.2/lean-xc/programs/Xserver/cfb/cfb8line.c	Sat Jul 19 05:59:19 1997
+--- ./programs/Xserver/cfb/cfb8line.c	Tue Jun  8 17:56:52 1999
+***************
+*** 688,704 ****
+  # if PSZ == 24
+  	    y1_or_e1 = xOffset & 3;
+  # else
+! 	    y1_or_e1 = ((long) addrp) & PIM;
+! 	    addrp = (PixelType *) (((unsigned char *) addrp) - y1_or_e1);
+! #if PGSZ == 32
+! #  if PWSH != 2
+! 	    y1_or_e1 >>= (2 - PWSH);
+! #  endif
+! #else /* PGSZ == 64 */
+! #  if PWSH != 3
+! 	    y1_or_e1 >>= (3 - PWSH);
+! #  endif
+! #endif /* PGSZ */
+  # endif /* PSZ == 24 */
+  #if PSZ == 24
+  	    {
+--- 688,698 ----
+  # if PSZ == 24
+  	    y1_or_e1 = xOffset & 3;
+  # else
+! 	    /* Round addrp down to the next PixelGroup boundary, and
+! 	     * set y1_or_e1 to the excess (in pixels)
+! 	     * (assumes PGSZB is a power of 2). */
+! 	    y1_or_e1 = (((unsigned long) addrp) & (PGSZB - 1)) / (PSZ / 8);
+! 	    addrp -= y1_or_e1;
+  # endif /* PSZ == 24 */
+  #if PSZ == 24
+  	    {
+diff -cr ../../../../../XFree86/3.3.2/lean-xc/programs/Xserver/cfb/cfbmskbits.h ./programs/Xserver/cfb/cfbmskbits.h
+*** ../../../../../XFree86/3.3.2/lean-xc/programs/Xserver/cfb/cfbmskbits.h	Tue May 27 07:28:09 1997
+--- ./programs/Xserver/cfb/cfbmskbits.h	Thu May  7 17:13:09 1998
+***************
+*** 808,813 ****
+--- 808,819 ----
+      *(destpix) = (*(psrcpix)) & QuartetPixelMaskTable[q]; \
+  }
+  #else /* BITMAP_BIT_ORDER == LSB */
++ 
++ /*================================================================
++    BEGIN ORL VNC modification
++    Only use ldq_u on XFREE86 platforms */
++ 
++ #ifdef XFREE86
+  #define getstipplepixels( psrcstip, xt, w, ones, psrcpix, destpix ) \
+  { \
+      PixelGroup q; \
+***************
+*** 817,822 ****
+--- 823,843 ----
+      q = QuartetBitsTable[(w)] & ((ones) ? q : ~q); \
+      *(destpix) = (*(psrcpix)) & QuartetPixelMaskTable[q]; \
+  }
++ #else /* XFREE86 */
++ #define getstipplepixels( psrcstip, xt, w, ones, psrcpix, destpix ) \
++ { \
++     PixelGroup q; \
++     q = *(psrcstip) >> (xt); \
++     if ( ((xt)+(w)) > (PPW*PSZ) ) \
++         q |= (*((psrcstip)+1)) << ((PPW*PSZ)-(xt)); \
++     q = QuartetBitsTable[(w)] & ((ones) ? q : ~q); \
++     *(destpix) = (*(psrcpix)) & QuartetPixelMaskTable[q]; \
++ }
++ #endif /* XFREE86 */
++ 
++ /* END ORL VNC modification
++ ================================================================*/
++ 
+  #if PSZ == 24
+  # if 0
+  #define getstipplepixels24( psrcstip,xt,w,ones,psrcpix,destpix,stipindex,srcindex,dstindex) \
+diff -cr ../../../../../XFree86/3.3.2/lean-xc/programs/Xserver/dix/dixfonts.c ./programs/Xserver/dix/dixfonts.c
+*** ../../../../../XFree86/3.3.2/lean-xc/programs/Xserver/dix/dixfonts.c	Mon Dec 23 06:29:40 1996
+--- ./programs/Xserver/dix/dixfonts.c	Mon Aug 16 15:51:54 1999
+***************
+*** 1803,1808 ****
+--- 1803,1811 ----
+      return err;
+  }
+  
++ /*** TJR - dirty hack - this variable is used in lib/font/fontfile/dirfile.c */
++ int settingDefaultFontPath = 0;
++ 
+  int
+  SetDefaultFontPath(path)
+      char       *path;
+***************
+*** 1838,1844 ****
+--- 1841,1851 ----
+      }
+      *nump = (unsigned char) size;
+  
++     settingDefaultFontPath = 1;
++ 
+      err = SetFontPathElements(num, newpath, &bad);
++ 
++     settingDefaultFontPath = 0;
+  
+      DEALLOCATE_LOCAL(newpath);
+  
+diff -cr ../../../../../XFree86/3.3.2/lean-xc/programs/Xserver/dix/property.c ./programs/Xserver/dix/property.c
+*** ../../../../../XFree86/3.3.2/lean-xc/programs/Xserver/dix/property.c	Tue Dec 24 11:52:04 1996
+--- ./programs/Xserver/dix/property.c	Tue Jun  2 19:11:39 1998
+***************
+*** 390,395 ****
+--- 390,402 ----
+  	event.u.property.time = currentTime.milliseconds;
+  	DeliverEvents(pWin, &event, 1, (WindowPtr)NULL);
+      }
++ 
++     /* Addition for RFB X server */
++     if (pWin->parent == NullWindow) {
++ 	extern void rfbRootPropertyChange();
++ 	rfbRootPropertyChange(pProp);
++     }
++ 
+      return(Success);
+  #endif
+  }
+Only in ./programs/Xserver/hw: vnc
+diff -cr ../../../../../XFree86/3.3.2/lean-xc/programs/Xserver/os/connection.c ./programs/Xserver/os/connection.c
+*** ../../../../../XFree86/3.3.2/lean-xc/programs/Xserver/os/connection.c	Sat Jul  5 16:55:45 1997
+--- ./programs/Xserver/os/connection.c	Mon May 11 18:02:17 1998
+***************
+*** 109,114 ****
+--- 109,124 ----
+  
+  #if defined(TCPCONN) || defined(STREAMSCONN)
+  # include <netinet/in.h>
++ 
++ /*================================================================
++    BEGIN ORL VNC modification
++    include arpa/inet.h for inet_ntoa function prototype */
++ 
++ #include <arpa/inet.h>
++ 
++ /* END ORL VNC modification
++ ================================================================*/
++ 
+  # ifndef hpux
+  #  ifdef apollo
+  #   ifndef NO_TCP_H
+***************
+*** 365,370 ****
+--- 375,385 ----
+       * useful
+       */
+  #ifndef WIN32
++ /*================================================================
++    BEGIN ORL VNC modification
++    Don't use SIGUSR1 - linuxthread uses this internally */
++ 
++ /* REMOVE
+      if (OsSignal (SIGUSR1, SIG_IGN) == SIG_IGN)
+  	RunFromSmartParent = TRUE;
+      ParentProcess = getppid ();
+***************
+*** 373,378 ****
+--- 388,397 ----
+  	    kill (ParentProcess, SIGUSR1);
+  	}
+      }
++ */
++ 
++ /* END ORL VNC modification
++ ================================================================*/
+  #endif
+  #ifdef XDMCP
+      XdmcpInit ();
+***************
+*** 426,436 ****
+--- 445,464 ----
+       * See above in CreateWellKnownSockets about SIGUSR1
+       */
+  #ifndef WIN32
++ /*================================================================
++    BEGIN ORL VNC modification
++    Don't use SIGUSR1 - linuxthread uses this internally */
++ 
++ /* REMOVE
+      if (RunFromSmartParent) {
+  	if (ParentProcess > 0) {
+  	    kill (ParentProcess, SIGUSR1);
+  	}
+      }
++ */
++ 
++ /* END ORL VNC modification
++ ================================================================*/
+  #endif
+      /*
+       * restart XDMCP
+diff -cr ../../../../../XFree86/3.3.2/lean-xc/programs/Xserver/os/secauth.c ./programs/Xserver/os/secauth.c
+*** ../../../../../XFree86/3.3.2/lean-xc/programs/Xserver/os/secauth.c	Sun Dec 22 03:33:36 1996
+--- ./programs/Xserver/os/secauth.c	Thu May  7 17:05:51 1998
+***************
+*** 32,41 ****
+--- 32,53 ----
+  #include "osdep.h"
+  #include "dixstruct.h"
+  
++ /*================================================================
++    BEGIN ORL VNC modification
++    Need function prototype for SecurityGetSitePolicyStrings even when
++    XCSECURITY isn't defined */
++ 
++ /* REMOVE
+  #ifdef XCSECURITY
++ */
+  #define _SECURITY_SERVER
+  #include "extensions/security.h"
++ /* REMOVE
+  #endif
++ */
++ 
++ /* END ORL VNC modification
++ ================================================================*/
+  
+  static char InvalidPolicyReason[] = "invalid policy specification";
+  static char PolicyViolationReason[] = "policy violation";

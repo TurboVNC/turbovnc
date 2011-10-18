@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/mi/mizerarc.c,v 1.6 2001/12/14 20:00:28 dawes Exp $ */
 /************************************************************
 
 Copyright 1989, 1998  The Open Group
@@ -27,7 +26,7 @@ Author:  Bob Scheifler, MIT X Consortium
 
 ********************************************************/
 
-/* $Xorg: mizerarc.c,v 1.4 2001/02/09 02:05:22 xorgcvs Exp $ */
+/* $XConsortium: mizerarc.c,v 5.36 94/04/17 20:28:04 dpw Exp $ */
 
 /* Derived from:
  * "Algorithm for drawing ellipses or hyperbolae with a digital plotter"
@@ -35,14 +34,10 @@ Author:  Bob Scheifler, MIT X Consortium
  * The Computer Journal, November 1967, Volume 10, Number 3, pp. 282-289
  */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #include <math.h>
-#include <X11/X.h>
-#include <X11/Xprotostr.h>
-#include "regionstr.h"
+#include "X.h"
+#include "Xprotostr.h"
+#include "miscstruct.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"
 #include "mi.h"
@@ -507,14 +502,12 @@ miZeroArcPts(arc, pts)
     }
 
 static void
-miZeroArcDashPts(
-    GCPtr pGC,
-    xArc *arc,
-    DashInfo *dinfo,
-    register DDXPointPtr points,
-    int maxPts,
-    register DDXPointPtr *evenPts, 
-    register DDXPointPtr *oddPts )
+miZeroArcDashPts(pGC, arc, dinfo, points, maxPts, evenPts, oddPts)
+    GCPtr pGC;
+    xArc *arc;
+    DashInfo *dinfo;
+    int maxPts;
+    register DDXPointPtr points, *evenPts, *oddPts;
 {
     miZeroArcRec info;
     register int x, y, a, b, d, mask;
@@ -745,7 +738,7 @@ miZeroPolyArc(pDraw, pGC, narcs, parcs)
     if (!maxPts)
 	return;
     numPts = maxPts << 2;
-    dospans = (pGC->fillStyle != FillSolid);
+    dospans = (pGC->lineStyle != LineSolid) || (pGC->fillStyle != FillSolid);
     if (dospans)
     {
 	widths = (int *)ALLOCATE_LOCAL(sizeof(int) * numPts);

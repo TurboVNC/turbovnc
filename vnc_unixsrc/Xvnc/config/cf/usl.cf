@@ -1,9 +1,9 @@
-XCOMM platform:  $Xorg: usl.cf,v 1.3 2000/08/17 19:41:48 cpqbld Exp $
+XCOMM platform:  $TOG: usl.cf /main/50 1997/04/17 14:11:39 barstow $
 
 
 
 
-XCOMM platform:  $XFree86: xc/config/cf/usl.cf,v 3.22 2001/01/12 19:28:24 dawes Exp $
+XCOMM platform:  $XFree86: xc/config/cf/usl.cf,v 3.13.2.1 1997/05/03 09:43:10 dawes Exp $
 
 #ifndef OSName
 # define OSName		DefaultOSName
@@ -22,204 +22,49 @@ XCOMM operating system: OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVer
 #ifndef  CcCmd
 # define CcCmd			/usr/ccs/bin/cc
 #endif
-#ifndef LexCmd
-# define LexCmd			/usr/ccs/bin/lex
+#ifndef  CplusplusCmd
+# define CplusplusCmd		/usr/ccs/bin/CC
 #endif
-#ifndef YaccCmd
-# define YaccCmd		/usr/ccs/bin/yacc
+#ifndef  CplusplusFilt
+# define CplusplusFilt		/usr/ccs/bin/c++filt
 #endif
-#ifndef MakeCmd
-# define MakeCmd		/usr/gnu/bin/gmake
-#endif
-
-#ifndef HasGcc2ForCplusplus
-# ifndef  CplusplusCmd
-#  define CplusplusCmd		/usr/ccs/bin/CC
-# endif
-# ifndef  CplusplusFilt
-#  define CplusplusFilt		/usr/ccs/bin/c++filt
-# endif
-# ifndef  CplusplusDependIncludes
-#  define CplusplusDependIncludes	-I/usr/include/CC
-# endif
-#else
-# ifndef  CplusplusCmd
-#  define CplusplusCmd		/usr/gnu/bin/g++
-# endif
-# ifndef  CplusplusFilt
-#  define CplusplusFilt		/usr/gnu/bin/c++filt
-# endif
-#endif
-
-#ifndef LibraryCCOptions
-# define LibraryCCOptions	-D_REENTRANT -DFD_SETSIZE=16384 
+#ifndef  CplusplusDependIncludes
+# define CplusplusDependIncludes	-I/usr/include/CC
 #endif
 
 #define BootstrapCFlags		/* none needed */
-#define StandardDefines		-DSVR4 -DSVR5 -Di386 -D__UNIXWARE__
-#define NeedWidePrototypes	YES
-
-#ifdef HasGcc2
-# define DefaultCCOptions	GccWarningOptions
-# ifndef CcCmd
-#  define CcCmd			/usr/gnu/bin/gcc
-# endif
-# define DefaultCDebugFlags	-O6 -fomit-frame-pointer -march=i586 -mcpu=i586
-# ifndef OptimizedCDebugFlags
-#  define OptimizedCDebugFlags	-O6 -fomit-frame-pointer -march=i586 -mcpu=i586
-# endif
-#else
-# ifndef CcCmd
-#  define CcCmd			/usr/ccs/bin/cc
-# endif
-# define DefaultCCOptions	-dy -O -Kalloca -Dasm=__asm
-# define DefaultCDebugFlags	-O
-# ifndef OptimizedCDebugFlags
-#  define OptimizedCDebugFlags	-O
-# endif
-#endif
-
-#ifndef DoLoadableServer
-# define DoLoadableServer	YES
-#endif
-
-#if DoLoadableServer
-# if HasGcc
-#  define USLDynamicFlags	-rdynamic
-# else
-#  define USLDynamicFlags	-Wl,-Bexport
-# endif
-#else
-# define USLDynamicFlags	/**/
-#endif
-
-#define ServerExtraDefines	XFree86ServerDefines
-#ifndef ServerExtraSysLibs 
-# define ServerExtraSysLibs	$(CBRT) -lm USLDynamicFlags
-#endif
-
-#define ServerOSDefines		-D_REENTRANT -DFD_SETSIZE=16384 -DDDXTIME XFree86ServerOSDefines
+#define StandardDefines		-DUSL -DSVR4 -Di386
+#define NeedWidePrototypes	NO	/* experimental */
+#define ServerExtraDefines	-D__USLC__ XFree86ServerDefines
+#define ServerOSDefines		-DDDXTIME XFree86ServerOSDefines
 #define ToolkitStringsABIOptions -intelabi
 #if OSMajorVersion < 2
 #define XawI18nDefines		-DHAS_WCTYPE_H -DHAS_ISW_FUNCS
 #else
 #define XawI18nDefines		-DHAS_WCHAR_H -DHAS_ISW_FUNCS
 #endif
-#if OSMajorVersion > 1 || OSTeenyVersion > 1
-# if OSMajorVersion >= 7
-#  define ExtraLibraries		-lsocket -lnsl -lgen
-# else
-#  define ExtraLibraries		-lsocket -lnsl -lgen -lw
-# endif
+#if OSTeenyVersion > 1
+# define ExtraLibraries		-lsocket -lnsl -lgen -lw
 # define ThreadedX		YES
 # define HasThreadSafeAPI	NO
 /* UnixWare does not have MT-safe pwd routines. */
-# define MTSafeAPIDefines	-DXUSE_MTSAFE_API -DXNO_MTSAFE_PWDAPI -DXNO_MTSAFE_GRPAPI
+# define MTSafeAPIDefines	\
+-DXUSE_MTSAFE_API -DXNO_MTSAFE_PWDAPI -DXNO_MTSAFE_GRPAPI
 # define SystemMTDefines	-D_REENTRANT
-# ifdef HasGcc2
-#  define ThreadsLoadFlags	-pthread
-# else
-#  define ThreadsLoadFlags	-Kpthread
-# endif
+# define ThreadsLibraries	-lthread
+# define ThreadsCplusplusLibraries	-lthread
+# define DefaultCCOptions	-W0,-2A -Xa -Dasm=__asm
 #endif
-#define BuildLibPathVar		LD_LIBRARY_PATH
-
-#ifndef BuildXterm
-# define BuildXterm		BuildClients
-#endif
-
-#ifndef HasNCurses
-# define HasNCurses		YES
-#endif
-#ifndef NCursesLibName
-# define NCursesLibName		-lcurses
-#endif
-#ifndef TermcapLibrary
-# define TermcapLibrary		-lcurses
-#endif
-
-#ifndef BuildFreetypeDlModule
-# define BuildFreetypeDlModule	NO
-#endif
-
-#ifndef UseDeprecatedKeyboardDriver
-#define UseDeprecatedKeyboardDriver NO
-#endif
-
-#ifndef ManSuffix
-# define ManSuffix		1
-#endif
-
-#ifndef LibManSuffix
-# define LibManSuffix		3
-#endif
-
-#ifndef FileManSuffix
-# define FileManSuffix		4
-#endif
+#define BuildLibPathVar	  LD_LIBRARY_PATH
 
 #ifndef UseExportLists
-# define UseExportLists		NO
+# define UseExportLists YES
 #endif
 
 #define GencatFlags		-m
 
-#ifndef HasCplusplus
-# define HasCplusplus		YES
-#endif
+#include <svr4.cf>
 
-#ifndef HasDlopen
-# define HasDlopen		YES
-#endif
-
-#ifndef HasShm
-# define HasShm			YES
-#endif
-
-#ifndef HasStrcasecmp
-# define HasStrcasecmp		YES
-#endif
-
-#ifndef HasSnprintf
-# define HasSnprintf		NO
-#endif
-
-#ifndef UseSmartScheduler
-# define UseSmartScheduler	NO
-#endif
- 
-#define SharedLibXmu            YES
-
-#ifndef NothingOutsideProjectRoot 
-# define NothingOutsideProjectRoot YES
-#endif
-
-#ifndef UseSeparateConfDir
-# define UseSeparateConfDir	NO
-#endif
-
-#ifndef BuildHtmlManPages
-# define BuildHtmlManPages	NO
-#endif
-
-#ifndef SCOHasGWXLIBS
-# define SCOHasGWXLIBS		YES
-#endif
-
-#if SCOHasGWXLIBS
-#define HasExpat		YES
-#define HasFreetype2		YES
-#define HasLibpng		YES
-#define HasZlib			YES
-#define HasFontconfig		YES
-#define HasXpm			YES
-#endif /* SCOHasGWXLIBS */
-
-#define InstallHardcopyDocs	NO
-
-#define HasPerl			YES
-#define HasPerl5		YES
- 
 /*
  * When generating templates the UnixWare 2.02 C++ compiler leaves
  * protected .i files behind.  Remove them so other people can
@@ -234,11 +79,15 @@ XCOMM operating system: OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVer
 /* USL does not have a shared regex library. */
 #define UseLocalRegex		YES
 
-#define XmDefines		-DSUPPORT_ZERO_WIDTH -DHAS_WIDECHAR_FUNCTIONS
-#define DtSvcDefines		-DXK_MISCELLANY -DMULTIBYTE
+#define XmDefines		\
+	-DNO_REGCOMP -DNEED_STRCASECMP \
+	-DSUPPORT_ZERO_WIDTH -DHAS_WIDECHAR_FUNCTIONS
+#define DtSvcDefines		-DXK_MISCELLANY -DMULTIBYTE -DNO_REGCOMP
 #define DtSearchDefines		-DI18N_MSG DtSvcDefines
 #define DtWidgetDefines		DtSearchDefines
 #define DtPrintDefines		DtSearchDefines
+
+#define HasStrcasecmp		NO
 
 /* For DtHelp's TIFF processing routines. */
 #define LSBBitOrder		YES
@@ -248,71 +97,16 @@ XCOMM operating system: OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVer
 #define ExportListGenSource	elistgen.usl
 #define ShlibExportListOpt(filename)	Concat(-Bexport:,filename)
 
+/* Remove -lc because select.o is not relocatable. */
+/* Remove -lgen (and set UseLocalRegex) because no shared library exists. */
+#define SharedXmReqs $(LDPRELIBS) SharedXReqs -lsocket -lnsl -lw
+#define SharedMrmReqs $(LDPRELIBS) $(XMLIB) SharedXReqs -lsocket -lnsl -lw
+#define SharedUilReqs $(LDPRELIBS) $(MRESOURCELIB) $(XMLIB) SharedXReqs -lsocket -lnsl -lw
+  
 /* <X11/Xos_r.h> requires process locking for missing _r functions */
 #define TtClientLibs $(TTLIB) $(XTOOLLIB) $(XLIB)
 #define TtClientDepLibs $(DEPTTLIB) $(DEPXTOOLLIB) $(DEPXLIB)
 
 #define CdeProjectDefines \
-	-DANSICPP -DMULTIBYTE -DNLS16 \
+	-DANSICPP -DMULTIBYTE -DNLS16 -DNEED_STRCASECMP \
 	-DOSMAJORVERSION=OSMajorVersion -DOSMINORVERSION=OSMinorVersion
-
-/*
- * These settings control the interdependence of the shared libraries.
- * Mostly borrowed from darwinLib.tmpl.
- */
-#ifndef FixupLibReferences
-#define FixupLibReferences()						@@\
-XMULIBONLY = -lXmu							@@\
-XMULIB = $(XMULIBONLY) $(XTOOLLIB) $(XLIB)
-#endif
-
-#ifndef XawClientLibs
-#define XawClientLibs $(XAWLIB) $(XMULIBONLY) $(XTOOLLIB) $(XPMLIB) $(EXTRAXAWCLIENTLIBS) $(XLIB)
-#endif
-
-#define SharedXlibi18nReqs	$(LDPRELIB) $(XLIBONLY)
-
-#define SharedXfontReqs		$(LDPRELIB) $(FONTSTUBLIB) GzipLibrary $(FREETYPE2LIB) $(XLIB)
-#define SharedFontencReqs	$(LDPRELIB) GzipLibrary
-#define SharedGLReqs		$(LDPRELIB) $(XLIB)
-#define SharedGLUReqs		$(LDPRELIB) $(XLIB) $(GLXLIB)
-#define SharedOSMesaReqs	$(LDPRELIB) $(XLIB) $(GLXLIB)
-#define SharedPexReqs		$(LDPRELIB) $(XONLYLIB) MathLibrary
-#define SharedSMReqs		$(LDPRELIB) $(ICELIB)
-#define SharedX11Reqs		$(LDPRELIB) -lsocket -lnsl
-#define SharedXawReqs		$(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XPMLIB) $(EXTRAXAWREQS) $(XLIB)
-#define SharedXaw7Reqs		$(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XPMLIB) $(XLIB)
-#define SharedXaw6Reqs		$(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XLIB)
-#define SharedXcursorReqs	$(LDPRELIB) $(XRENDERLIB) $(XLIB)
-#define SharedXextReqs		$(LDPRELIB) $(XONLYLIB)
-#define SharedXiReqs		$(LDPRELIB) $(XLIB)
-#define SharedXieReqs		$(LDPRELIB) $(XONLYLIB)
-#define SharedXmuReqs		$(LDPRELIB) $(XTOOLLIB) $(XLIB)
-#define SharedXmuuReqs		$(LDPRELIB) $(XONLYLIB)
-#define SharedXpReqs		$(LDPRELIB) $(XLIB)
-#define SharedXpmReqs		$(LDPRELIB) $(XLIB)
-#define SharedXrandrReqs	$(LDPRELIB) $(XRENDERLIB) $(XLIB)
-#define SharedXrenderReqs	$(LDPRELIB) $(XLIB)
-#define SharedXtReqs		$(LDPRELIB) $(XONLYLIB) $(SMLIB) $(ICELIB)
-#define SharedXtstReqs		$(LDPRELIB) $(XLIB)
-#define SharedXvReqs		$(LDPRELIB) $(XLIB)
-#define SharedDPSReqs		$(LDPRELIB) $(SMLIB) $(ICELIB) $(XTOOLLIB) $(XLIB)
-#define SharedDPSTKReqs		$(LDPRELIB) $(SMLIB) $(ICELIB) $(XTOOLLIB) $(DPSLIB) $(XLIB)
-#define SharedOldXReqs		$(LDPRELIB) $(XONLYLIB)
-#define SharedpsresReqs		$(LDPRELIB) $(SMLIB) $(ICELIB) $(XTOOLLIB) $(XLIB)
-#define SharedXResReqs		$(LDPRELIB) $(XLIB)
-#define SharedXfontcacheReqs	$(LDPRELIB) $(XLIB)
-#define SharedXineramaReqs	$(LDPRELIB) $(XLIB)
-#define SharedXssReqs		$(LDPRELIB) $(XLIB)
-#define SharedXvMCReqs		$(LDPRELIB) $(XLIB)
-#define SharedXxf86miscReqs	$(LDPRELIB) $(XLIB)
-#define SharedXxf86vmReqs	$(LDPRELIB) $(XLIB)
-#define SharedxkbfileReqs	$(LDPRELIB) $(XONLYLIB)
-#define SharedxkbuiReqs		$(LDPRELIB) $(XKBFILELIB) $(XONLYLIB)
-#define SharedXReqs		$(XTOOLLIB) $(XPLIB) $(XLIB)
-#define SharedXmReqs		$(LDPRELIB) SharedXReqs
-#define SharedMrmReqs		$(LDPRELIB) $(XMLIB) SharedXReqs
-#define SharedUilReqs		$(LDPRELIB) $(XMLIB) SharedXReqs
-
-#include <scoLib.rules>		/* minor changes to sv4Lib.rules */
-#include <svr4.cf>

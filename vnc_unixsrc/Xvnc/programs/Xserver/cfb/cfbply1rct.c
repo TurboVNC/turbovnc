@@ -1,13 +1,15 @@
 /*
- * $Xorg: cfbply1rct.c,v 1.4 2001/02/09 02:04:38 xorgcvs Exp $
+ * $XConsortium: cfbply1rct.c /main/16 1996/08/12 22:07:31 dpw $
+ * $XFree86: xc/programs/Xserver/cfb/cfbply1rct.c,v 3.3 1996/12/23 06:29:21 dawes Exp $
  *
-Copyright 1990, 1998  The Open Group
+Copyright (c) 1990  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,23 +17,18 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
  *
  * Author:  Keith Packard, MIT X Consortium
  */
-/* $XFree86: xc/programs/Xserver/cfb/cfbply1rct.c,v 3.10 2003/10/29 22:44:53 tsi Exp $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
+#include "X.h"
 
 #include "gcstruct.h"
 #include "windowstr.h"
@@ -55,35 +52,29 @@ RROP_NAME(cfbFillPoly1Rect) (pDrawable, pGC, shape, mode, count, ptsIn)
 {
     cfbPrivGCPtr    devPriv;
     int		    nwidth;
-    CfbBits	    *addrl, *addr;
+    unsigned long   *addrl, *addr;
 #if PSZ == 24
-    CfbBits	    startmask, endmask;
-    register int    pidx;
-#else
-#if PPW > 1
-    CfbBits	    mask, bits = ~((CfbBits)0);
-#endif
+    unsigned long startmask, endmask;
+    register int pidx;
 #endif
     int		    maxy;
     int		    origin;
     register int    vertex1, vertex2;
-    int		    c = 0;
+    int		    c;
     BoxPtr	    extents;
     int		    clip;
     int		    y;
-    int		    *vertex1p = NULL, *vertex2p;
+    int		    *vertex1p, *vertex2p;
     int		    *endp;
-    int		    x1 = 0, x2 = 0;
-    int		    dx1 = 0, dx2 = 0;
-    int		    dy1 = 0, dy2 = 0;
-    int		    e1 = 0, e2 = 0;
-    int		    step1 = 0, step2 = 0;
-    int		    sign1 = 0, sign2 = 0;
+    int		    x1, x2;
+    int		    dx1, dx2;
+    int		    dy1, dy2;
+    int		    e1, e2;
+    int		    step1, step2;
+    int		    sign1, sign2;
     int		    h;
-    int		    l;
-#if PSZ != 24 && PPW > 1
-    int		    r;
-#endif
+    int		    l, r;
+    unsigned long   mask, bits = ~((unsigned long)0);
     int		    nmiddle;
     RROP_DECLARE
 
@@ -95,7 +86,7 @@ RROP_NAME(cfbFillPoly1Rect) (pDrawable, pGC, shape, mode, count, ptsIn)
     
     devPriv = cfbGetGCPrivate(pGC);
 #ifdef NO_ONE_RECT
-    if (REGION_NUM_RECTS(pGC->pCompositeClip) != 1)
+    if (REGION_NUM_RECTS(devPriv->pCompositeClip) != 1)
     {
 	miFillPolygon (pDrawable, pGC, shape, mode, count, ptsIn);
 	return;
@@ -103,7 +94,7 @@ RROP_NAME(cfbFillPoly1Rect) (pDrawable, pGC, shape, mode, count, ptsIn)
 #endif
     origin = *((int *) &pDrawable->x);
     vertex2 = origin - ((origin & 0x8000) << 1);
-    extents = &pGC->pCompositeClip->extents;
+    extents = &devPriv->pCompositeClip->extents;
     RROP_FETCH_GCPRIV(devPriv);
     vertex1 = *((int *) &extents->x1) - vertex2;
     vertex2 = *((int *) &extents->x2) - vertex2 - 0x00010001;
@@ -182,9 +173,9 @@ RROP_NAME(cfbFillPoly1Rect) (pDrawable, pGC, shape, mode, count, ptsIn)
 	return;
     }
 
-#define AddrYPlus(a,y)  (CfbBits *) (((unsigned char *) (a)) + (y) * nwidth)
+#define AddrYPlus(a,y)  (unsigned long *) (((unsigned char *) (a)) + (y) * nwidth)
 
-    cfbGetTypedWidthAndPointer(pDrawable, nwidth, addrl, unsigned char, CfbBits);
+    cfbGetTypedWidthAndPointer(pDrawable, nwidth, addrl, unsigned char, unsigned long);
     addrl = AddrYPlus(addrl,y + pDrawable->y);
     origin = intToX(origin);
     vertex2p = vertex1p;
@@ -193,7 +184,7 @@ RROP_NAME(cfbFillPoly1Rect) (pDrawable, pGC, shape, mode, count, ptsIn)
 	vertex2p = (int *) ptsIn;
 #define Setup(c,x,vertex,dx,dy,e,sign,step) {\
     x = intToX(vertex); \
-    if ((dy = intToY(c) - y)) { \
+    if (dy = intToY(c) - y) { \
     	dx = intToX(c) - x; \
 	step = 0; \
     	if (dx >= 0) \
@@ -269,17 +260,13 @@ RROP_NAME(cfbFillPoly1Rect) (pDrawable, pGC, shape, mode, count, ptsIn)
 	for (;;)
 	{
 	    l = x1;
-#if PSZ != 24 && PPW > 1
 	    r = x2;
-#endif
 	    nmiddle = x2 - x1;
     	    if (nmiddle < 0)
 	    {
 	    	nmiddle = -nmiddle;
 	    	l = x2;
-#if PSZ != 24 && PPW > 1
 	    	r = x1;
-#endif
     	    }
 #if PPW > 1
 	    c = l & PIM;
@@ -293,7 +280,17 @@ RROP_NAME(cfbFillPoly1Rect) (pDrawable, pGC, shape, mode, count, ptsIn)
 #endif /* PGSZ */
 
 #if PSZ == 24
-	    addr = (CfbBits *)((char *)addrl + ((l * 3) & ~0x03));
+	    addr = (unsigned long *)((char *)addrl + ((l * 3) & ~0x03));
+#else /* PSZ == 24 */
+#if PWSH > LWRD_SHIFT
+	    l = l >> (PWSH - LWRD_SHIFT);
+#endif
+#if PWSH < LWRD_SHIFT
+	    l = l << (LWRD_SHIFT - PWSH);
+#endif
+	    addr = (unsigned long *) (((char *) addrl) + l);
+#endif /* PSZ == 24 */
+#if PSZ == 24
 	    if (nmiddle <= 1){
 	      if (nmiddle)
 	        RROP_SOLID24(addr, l);
@@ -316,13 +313,6 @@ RROP_NAME(cfbFillPoly1Rect) (pDrawable, pGC, shape, mode, count, ptsIn)
 		RROP_SOLID_MASK(addr, endmask, pidx);
 	    }
 #else /* PSZ == 24 */
-#if PWSH > LWRD_SHIFT
-	    l = l >> (PWSH - LWRD_SHIFT);
-#endif
-#if PWSH < LWRD_SHIFT
-	    l = l << (LWRD_SHIFT - PWSH);
-#endif
-	    addr = (CfbBits *) (((char *) addrl) + l);
 #if PPW > 1
 	    if (c + nmiddle < PPW)
 	    {
@@ -344,7 +334,7 @@ RROP_NAME(cfbFillPoly1Rect) (pDrawable, pGC, shape, mode, count, ptsIn)
 		    RROP_SOLID(addr); addr++;
 		}
 #if PPW > 1
-	    	if ((mask = ~SCRRIGHT(bits, r & PIM)))
+	    	if (mask = ~SCRRIGHT(bits, r & PIM))
 	    	    RROP_SOLID_MASK(addr,mask);
 	    }
 #endif
@@ -359,5 +349,4 @@ RROP_NAME(cfbFillPoly1Rect) (pDrawable, pGC, shape, mode, count, ptsIn)
 	    break;
 	addrl = AddrYPlus (addrl, 1);
     }
-    RROP_UNDECLARE
 }

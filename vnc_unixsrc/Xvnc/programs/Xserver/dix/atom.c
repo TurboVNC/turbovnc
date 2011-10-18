@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/dix/atom.c,v 3.3 2001/12/14 19:59:29 dawes Exp $ */
 /***********************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -46,14 +46,11 @@ SOFTWARE.
 
 ******************************************************************/
 
-/* $Xorg: atom.c,v 1.4 2001/02/09 02:04:39 xorgcvs Exp $ */
+/* $XConsortium: atom.c,v 1.30 94/04/17 20:26:16 dpw Exp $ */
+/* $XFree86: xc/programs/Xserver/dix/atom.c,v 3.0 1996/04/15 11:19:31 dawes Exp $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
-#include <X11/Xatom.h>
+#include "X.h"
+#include "Xatom.h"
 #include "misc.h"
 #include "resource.h"
 #include "dix.h"
@@ -72,10 +69,11 @@ static NodePtr atomRoot = (NodePtr)NULL;
 static unsigned long tableLength;
 static NodePtr *nodeTable;
 
-void FreeAtom(NodePtr patom);
-
 Atom 
-MakeAtom(char *string, unsigned len, Bool makeit)
+MakeAtom(string, len, makeit)
+    char *string;
+    unsigned len;
+    Bool makeit;
 {
     register    NodePtr * np;
     unsigned i;
@@ -152,13 +150,15 @@ MakeAtom(char *string, unsigned len, Bool makeit)
 }
 
 Bool
-ValidAtom(Atom atom)
+ValidAtom(atom)
+    Atom atom;
 {
     return (atom != None) && (atom <= lastAtom);
 }
 
 char *
-NameForAtom(Atom atom)
+NameForAtom(atom)
+    Atom atom;
 {
     NodePtr node;
     if (atom > lastAtom) return 0;
@@ -173,7 +173,8 @@ AtomError()
 }
 
 void
-FreeAtom(NodePtr patom)
+FreeAtom(patom)
+    NodePtr patom;
 {
     if(patom->left)
 	FreeAtom(patom->left);

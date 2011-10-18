@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/dix/cursor.c,v 3.8 2003/01/12 02:44:26 dawes Exp $ */
 /***********************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -47,14 +47,11 @@ SOFTWARE.
 ******************************************************************/
 
 
-/* $Xorg: cursor.c,v 1.4 2001/02/09 02:04:39 xorgcvs Exp $ */
+/* $XConsortium: cursor.c /main/19 1996/08/01 19:20:16 dpw $ */
+/* $XFree86: xc/programs/Xserver/dix/cursor.c,v 3.1 1996/12/23 06:29:36 dawes Exp $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
-#include <X11/Xmd.h>
+#include "X.h"
+#include "Xmd.h"
 #include "servermd.h"
 #include "scrnintstr.h"
 #include "dixstruct.h"
@@ -72,20 +69,18 @@ typedef struct _GlyphShare {
 
 static GlyphSharePtr sharedGlyphs = (GlyphSharePtr)NULL;
 
-#ifdef XFIXES
-static CARD32	cursorSerial;
-#endif
-
 static void
+#if NeedFunctionPrototypes
 FreeCursorBits(CursorBitsPtr bits)
+#else
+FreeCursorBits(bits)
+    CursorBitsPtr bits;
+#endif
 {
     if (--bits->refcnt > 0)
 	return;
     xfree(bits->source);
     xfree(bits->mask);
-#ifdef ARGB_CURSOR
-    xfree(bits->argb);
-#endif
     if (bits->refcnt == 0)
     {
 	register GlyphSharePtr *prev, this;
@@ -104,13 +99,14 @@ FreeCursorBits(CursorBitsPtr bits)
     }
 }
 
-/**
- * To be called indirectly by DeleteResource; must use exactly two args.
- *
- *  \param value must conform to DeleteType
+/*
+ * To be called indirectly by DeleteResource; must use exactly two args
  */
+/*ARGSUSED*/
 int
-FreeCursor(pointer value, XID cid)
+FreeCursor(value, cid)
+    pointer	value; /* must conform to DeleteType */
+    XID 	cid;	
 {
     int		nscr;
     CursorPtr 	pCurs = (CursorPtr)value;
@@ -130,44 +126,18 @@ FreeCursor(pointer value, XID cid)
     return(Success);
 }
 
-
 /*
- * We check for empty cursors so that we won't have to display them
- */
-static void
-CheckForEmptyMask(CursorBitsPtr bits)
-{
-    register unsigned char *msk = bits->mask;
-    int n = BitmapBytePad(bits->width) * bits->height;
-
-    bits->emptyMask = FALSE;
-    while(n--) 
-	if(*(msk++) != 0) return;
-#ifdef ARGB_CURSOR
-    if (bits->argb)
-    {
-	CARD32 *argb = bits->argb;
-	int n = bits->width * bits->height;
-	while (n--)
-	    if (*argb++ & 0xff000000) return;
-    }
-#endif
-    bits->emptyMask = TRUE;
-}
-
-/**
  * does nothing about the resource table, just creates the data structure.
  * does not copy the src and mask bits
- *
- *  \param psrcbits  server-defined padding
- *  \param pmaskbits server-defined padding
- *  \param argb      no padding
  */
 CursorPtr 
-AllocCursorARGB(unsigned char *psrcbits, unsigned char *pmaskbits, CARD32 *argb, 
-                CursorMetricPtr cm,
-                unsigned foreRed, unsigned foreGreen, unsigned foreBlue, 
-                unsigned backRed, unsigned backGreen, unsigned backBlue)
+AllocCursor(psrcbits, pmaskbits, cm,
+	    foreRed, foreGreen, foreBlue, backRed, backGreen, backBlue)
+    unsigned char *	psrcbits;		/* server-defined padding */
+    unsigned char *	pmaskbits;		/* server-defined padding */
+    CursorMetricPtr	cm;
+    unsigned		foreRed, foreGreen, foreBlue;
+    unsigned		backRed, backGreen, backBlue;
 {
     CursorBitsPtr  bits;
     CursorPtr 	pCurs;
@@ -184,22 +154,14 @@ AllocCursorARGB(unsigned char *psrcbits, unsigned char *pmaskbits, CARD32 *argb,
     bits = (CursorBitsPtr)((char *)pCurs + sizeof(CursorRec));
     bits->source = psrcbits;
     bits->mask = pmaskbits;
-#ifdef ARGB_CURSOR
-    bits->argb = argb;
-#endif
     bits->width = cm->width;
     bits->height = cm->height;
     bits->xhot = cm->xhot;
     bits->yhot = cm->yhot;
     bits->refcnt = -1;
-    CheckForEmptyMask(bits);
 
     pCurs->bits = bits;
     pCurs->refcnt = 1;		
-#ifdef XFIXES
-    pCurs->serialNumber = ++cursorSerial;
-    pCurs->name = None;
-#endif
 
     pCurs->foreRed = foreRed;
     pCurs->foreGreen = foreGreen;
@@ -230,27 +192,16 @@ AllocCursorARGB(unsigned char *psrcbits, unsigned char *pmaskbits, CARD32 *argb,
     return pCurs;
 }
 
-/**
- *
- * \param psrcbits   server-defined padding
- * \param pmaskbits  server-defined padding
- */
-CursorPtr 
-AllocCursor(unsigned char *psrcbits, unsigned char *pmaskbits, 
-            CursorMetricPtr cm,
-            unsigned foreRed, unsigned foreGreen, unsigned foreBlue,
-            unsigned backRed, unsigned backGreen, unsigned backBlue)
-{
-    return AllocCursorARGB (psrcbits, pmaskbits, (CARD32 *) 0, cm,
-			    foreRed, foreGreen, foreBlue,
-			    backRed, backGreen, backBlue);
-}
-
 int
-AllocGlyphCursor(Font source, unsigned sourceChar, Font mask, unsigned maskChar,
-                unsigned foreRed, unsigned foreGreen, unsigned foreBlue, 
-                unsigned backRed, unsigned backGreen, unsigned backBlue,
-                CursorPtr *ppCurs, ClientPtr client)
+AllocGlyphCursor(source, sourceChar, mask, maskChar,
+		 foreRed, foreGreen, foreBlue, backRed, backGreen, backBlue,
+		 ppCurs, client)
+    Font source, mask;
+    unsigned int sourceChar, maskChar;
+    unsigned foreRed, foreGreen, foreBlue;
+    unsigned backRed, backGreen, backBlue;
+    CursorPtr *ppCurs;
+    ClientPtr client;
 {
     FontPtr  sourcefont, maskfont;
     unsigned char   *srcbits;
@@ -357,9 +308,6 @@ AllocGlyphCursor(Font source, unsigned sourceChar, Font mask, unsigned maskChar,
 	}
 	bits->source = srcbits;
 	bits->mask = mskbits;
-#ifdef ARGB_CURSOR
-	bits->argb = 0;
-#endif
 	bits->width = cm.width;
 	bits->height = cm.height;
 	bits->xhot = cm.xhot;
@@ -384,13 +332,8 @@ AllocGlyphCursor(Font source, unsigned sourceChar, Font mask, unsigned maskChar,
 	    sharedGlyphs = pShare;
 	}
     }
-    CheckForEmptyMask(bits);
     pCurs->bits = bits;
     pCurs->refcnt = 1;
-#ifdef XFIXES
-    pCurs->serialNumber = ++cursorSerial;
-    pCurs->name = None;
-#endif
 
     pCurs->foreRed = foreRed;
     pCurs->foreGreen = foreGreen;
@@ -422,7 +365,8 @@ AllocGlyphCursor(Font source, unsigned sourceChar, Font mask, unsigned maskChar,
     return Success;
 }
 
-/** CreateRootCursor
+/***********************************************************
+ * CreateRootCursor
  *
  * look up the name of a font
  * open the font
@@ -432,7 +376,9 @@ AllocGlyphCursor(Font source, unsigned sourceChar, Font mask, unsigned maskChar,
  *************************************************************/
 
 CursorPtr 
-CreateRootCursor(char *pfilename, unsigned glyph)
+CreateRootCursor(pfilename, glyph)
+    char *		pfilename;
+    unsigned int	glyph;
 {
     CursorPtr 	curs;
     FontPtr 	cursorfont;

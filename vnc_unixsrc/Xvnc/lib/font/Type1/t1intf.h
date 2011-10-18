@@ -1,4 +1,4 @@
-/* $Xorg: t1intf.h,v 1.3 2000/08/17 19:46:33 cpqbld Exp $ */
+/* $XConsortium: t1intf.h,v 1.2 91/10/10 11:19:39 rws Exp $ */
 /* Copyright International Business Machines,Corp. 1991
  * All Rights Reserved
  *
@@ -27,117 +27,10 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
  * SOFTWARE.
  */
-/* Copyright (c) 1994-1999 Silicon Graphics, Inc. All Rights Reserved.
- *
- * The contents of this file are subject to the CID Font Code Public Licence
- * Version 1.0 (the "License"). You may not use this file except in compliance
- * with the Licence. You may obtain a copy of the License at Silicon Graphics,
- * Inc., attn: Legal Services, 2011 N. Shoreline Blvd., Mountain View, CA
- * 94043 or at http://www.sgi.com/software/opensource/cid/license.html.
- *
- * Software distributed under the License is distributed on an "AS IS" basis.
- * ALL WARRANTIES ARE DISCLAIMED, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED
- * WARRANTIES OF MERCHANTABILITY, OF FITNESS FOR A PARTICULAR PURPOSE OR OF
- * NON-INFRINGEMENT. See the License for the specific language governing
- * rights and limitations under the License.
- *
- * The Original Software is CID font code that was developed by Silicon
- * Graphics, Inc.
- */
-/* $XFree86: xc/lib/font/Type1/t1intf.h,v 1.6 2001/01/17 19:43:23 dawes Exp $ */
-
-#ifdef BUILDCID
-#define XFONT_CID 1
-#endif
-
-#if XFONT_CID
-#include "AFM.h"
-#endif
+ 
+#define FIRSTCOL  32
  
 struct type1font {
        CharInfoPtr  pDefault;
-       CharInfoRec  glyphs[256];
+       CharInfoRec  glyphs[256-FIRSTCOL];
 };
-
-#if XFONT_CID
-typedef struct cid_glyphs {
-       char           *CIDFontName;
-       char           *CMapName;
-       long            dataoffset;
-       double          pixel_matrix[4];
-       CharInfoPtr     pDefault;
-       CharInfoRec   **glyphs;
-       FontInfo       *AFMinfo;
-#ifdef USE_MMAP
-       unsigned char  *CIDdata;
-       long            CIDsize;
-#endif
-} cidglyphs;
-#endif
-
-/*
- * Function prototypes
- */
-/* t1funcs.c */
-#if XFONT_CID
-extern int CIDOpenScalable ( FontPathElementPtr fpe, FontPtr *ppFont,
-			     int flags, FontEntryPtr entry, char *fileName, 
-			     FontScalablePtr vals, fsBitmapFormat format, 
-			     fsBitmapFormatMask fmask, 
-			     FontPtr non_cachable_font );
-#endif
-extern int Type1OpenScalable ( FontPathElementPtr fpe, FontPtr *ppFont, 
-			       int flags, FontEntryPtr entry, char *fileName,
-			       FontScalablePtr vals, fsBitmapFormat format, 
-			       fsBitmapFormatMask fmask,
-			       FontPtr non_cachable_font );
-#if XFONT_CID
-extern unsigned int getCID ( FontPtr pFont, unsigned int charcode );
-extern int CIDGetGlyphs ( FontPtr pFont, unsigned long count, 
-			  unsigned char *chars, FontEncoding charEncoding, 
-			  unsigned long *glyphCount, CharInfoPtr *glyphs );
-extern int CIDGetMetrics ( FontPtr pFont, unsigned long count, 
-			   unsigned char *chars, FontEncoding charEncoding, 
-			   unsigned long *glyphCount, xCharInfo **glyphs );
-extern void CIDCloseFont ( FontPtr pFont );
-#endif
-extern void Type1CloseFont ( FontPtr pFont );
-extern int Type1ReturnCodeToXReturnCode ( int rc );
-#if XFONT_CID
-extern CharInfoPtr CIDRenderGlyph ( FontPtr pFont, psobj *charstringP, 
-				    psobj *subarrayP, 
-				    struct blues_struct *bluesP, 
-				    CharInfoPtr pci, int *mode );
-#endif
-
-/* t1info.c */
-#ifdef CID_ALL_CHARS
-extern void ComputeBoundsAllChars ( FontPtr pFont, char *cfmfilename, double sxmult );
-#endif
-#if XFONT_CID
-extern int CIDGetInfoScalable ( FontPathElementPtr fpe, FontInfoPtr pInfo, 
-				FontEntryPtr entry, FontNamePtr fontName, 
-				char *fileName, FontScalablePtr Vals );
-#endif
-extern int Type1GetInfoScalable ( FontPathElementPtr fpe, FontInfoPtr pInfo, 
-				  FontEntryPtr entry, FontNamePtr fontName, 
-				  char *fileName, FontScalablePtr Vals );
-#if XFONT_CID
-extern void CIDFillFontInfo ( FontPtr pFont, FontScalablePtr Vals, 
-			      char *Filename, char *Fontname, char *Cmapname, 
-#ifdef HAVE_CFM
-			      char *cfmfilename,
-#endif
-			      long sAscent, long sDescent, double sxmult );
-#endif
-extern void T1FillFontInfo ( FontPtr pFont, FontScalablePtr Vals, 
-			     char *Filename, char *Fontname, long sWidth );
-extern void Type1InitStdProps ( void );
-
-/* cidchar.c */
-extern CharInfoPtr CIDGetGlyphInfo ( FontPtr pFont, unsigned int cidcode, 
-				     CharInfoPtr pci, int *rc );
-extern int CIDGetAFM ( FontPtr pFont, unsigned long count, 
-		       unsigned char *chars, FontEncoding charEncoding, 
-		       unsigned long *glyphCount, CharInfoPtr *glyphs, 
-		       char *cidafmfile );

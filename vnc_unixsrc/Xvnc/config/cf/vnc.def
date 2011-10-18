@@ -22,53 +22,80 @@
 
 #define BuildFontServer		NO
 #define BuildFonts		NO
-#define BuildLibraries		NO
 #define BuildXInputExt		NO
 #define BuildScreenSaverExt	NO
+#define BuildPexExt		NO
+#define BuildXIE		NO
+#define BuildXIElib		NO
+#define BuildGlxExt             NO
+#define BuildXKB		NO
+#define BuildXKBlib		NO
 #define BuildLBX		NO
 #define BuildXprint		NO
-#define BuildRman		NO
+#define BuildDBE		NO
+#define BuildDBElib		NO
+#define BuildRECORD		NO
+#define BuildRECORDlib		NO
+#define BuildScreenSaverLibrary	NO
+#define BuildXF86MiscLibrary	NO
+#define BuildXF86DGALibrary	NO
+#define BuildXF86VidModeLibrary	NO
+#define BuildDPMSLibrary	NO
+#define BuildXKBuilib		NO
 #define BuildXF86DGA		NO
 #define BuildDPMSExt		NO
 #define BuildXF86VidModeExt	NO
 #define BuildXF86MiscExt	NO
+#define BuildXF86Setup		NO
 #define BuildAppgroup		NO
 #define BuildXCSecurity		NO
-#define BuildRandR		NO
-#define BuildXinerama		NO
-#define BuildXF86DRI		NO
-#define BuildXTrap		NO
-#define BuildFreetype2Library	YES
-#define BuildDPMS		NO
-#define BuildIPv6		NO
+#define BuildPC98Servers	NO
 
-#define DoLoadableServer	NO
-#define ForceNormalLib		YES
-
-#define SharedLibFont		NO
-#define SharedLibFreetype2	NO
-#define SharedLibXau		NO
-#define SharedLibXdmcp		NO
-#define XF86AFB			NO
-
-#define MesaUseX86Asm		NO
-
-#define XDarwinServer		NO
+#define X386Server              NO
+#define XF68FBDevServer         NO
+#define XF86AGXServer           NO
+#define XF86I128Server          NO
+#define XF86I8514Server         NO
+#define XF86Mach32Server        NO
+#define XF86Mach64Server        NO
+#define XF86Mach8Server         NO
+#define XF86MonoDualServer      NO
+#define XF86MonoServer          NO
+#define XF86P9000Server         NO
+#define XF86S3Server            NO
+#define XF86S3VServer           NO
+#define XF86SVGAServer          NO
+#define XF86TGAServer           NO
+#define XF86VGA16DualServer     NO
+#define XF86VGA16Server         NO
+#define XF86W32Server           NO
+#define XF98EGCServer           NO
+#define XF98GA968Server         NO
+#define XF98GANBWAPServer       NO
+#define XF98MGAServer           NO
+#define XF98NEC480Server        NO
+#define XF98NECS3Server         NO
+#define XF98NKVNECServer        NO
+#define XF98PWLBServer          NO
+#define XF98PWSKBServer         NO
+#define XF98SVGAServer          NO
+#define XF98TGUIServer          NO
+#define XF98WABEPServer         NO
+#define XF98WABSServer          NO
+#define XF98WSNAServer          NO
+#define XVirtualFramebufferServer	NO
 #define XdecServer              NO
-#define XdecMultiDepthServer	NO
-#define XdmxServer		NO
-#define XF86Server		NO
+#define XhpServer               NO
+#define XmacIIServer            NO
+#define XmipsServer             NO
 #define XnestServer             NO
-#define XnonServer		NO
-#define XorgServer		NO
 #define XprtServer              NO
 #define Xsun24Server            NO
-#define XsunLynxMonoServer	NO
-#define XsunLynxServer		NO
+#define XsunAmoebaMonoServer    NO
+#define XsunAmoebaServer        NO
 #define XsunMonoServer          NO
 #define XsunServer              NO
-#define XVirtualFramebufferServer NO
-#define XWinServer		NO
+
 
 /*****************************************************************************/
 /*
@@ -81,8 +108,8 @@
 
 #include "tvnc_version.h"
 
-#define XVendorString		The\ VirtualGL\ Project
-#define XVendorRelease		XorgVersion
+#define XVendorString		\"AT&T Laboratories Cambridge\"
+#define XVendorRelease		3332
 
 
 /*****************************************************************************/
@@ -100,3 +127,31 @@
 #endif
 
 #endif /* BeforeVendorCF */
+
+#ifdef AfterVendorCF
+
+#ifdef AIXArchitecture
+#ifdef XibmServer
+# undef XibmServer
+#endif
+#define XibmServer NO
+
+#ifdef ExtensionOSDefines
+# undef ExtensionOSDefines
+#endif 
+#define ExtensionOSDefines 
+#endif
+
+#ifdef HPArchitecture
+#ifdef XhpServer
+# undef XhpServer
+#endif
+#define XhpServer NO
+
+#ifdef ExtensionOSDefines
+# undef ExtensionOSDefines
+#endif 
+#define ExtensionOSDefines 
+#endif
+
+#endif /* AfterVendorCF */

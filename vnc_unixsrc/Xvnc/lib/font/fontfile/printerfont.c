@@ -1,14 +1,15 @@
-/* $Xorg: printerfont.c,v 1.4 2001/02/09 02:04:03 xorgcvs Exp $ */
+/* $XConsortium: printerfont.c /main/1 1996/09/28 16:49:21 rws $ */
 
 /*
 
-Copyright 1991, 1998  The Open Group
+Copyright (c) 1991  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,31 +17,31 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 */
-/* $XFree86: xc/lib/font/fontfile/printerfont.c,v 1.5tsi Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
  */
-/* $NCDXorg: @(#)fontfile.c,v 1.6 1991/07/02 17:00:46 lemke Exp $ */
+/* $NCDId: @(#)fontfile.c,v 1.6 1991/07/02 17:00:46 lemke Exp $ */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#include    <X11/fonts/fntfilst.h>
+#include    "fntfilst.h"
 
 /*
  * Map FPE functions to renderer functions
  */
 
+extern int FontFileInitFPE();
+extern int FontFileResetFPE();
+extern int FontFileFreeFPE();
+extern void FontFileCloseFont();
 #define PRINTERPATHPREFIX  "PRINTER:"
 
 /* STUB
@@ -50,8 +51,9 @@ FontPathElementPtr	fpe;
 { return 1; }
  */
 
-static int
-PrinterFontNameCheck (char *name)
+int
+PrinterFontNameCheck (name)
+    char    *name;
 {
     if (strncmp(name,PRINTERPATHPREFIX,strlen(PRINTERPATHPREFIX)) != 0)
 	return 0;
@@ -63,8 +65,9 @@ PrinterFontNameCheck (char *name)
 #endif
 }
 
-static int
-PrinterFontInitFPE (FontPathElementPtr fpe)
+int
+PrinterFontInitFPE (fpe)
+    FontPathElementPtr	fpe;
 {
     int			status;
     FontDirectoryPtr	dir;
@@ -89,12 +92,20 @@ PrinterFontInitFPE (FontPathElementPtr fpe)
  * it that allows us to access the printer fonts
  */
 
-static int
-PrinterFontOpenFont (pointer client, FontPathElementPtr fpe, Mask flags, 
-		     char *name, int namelen, 
-		     fsBitmapFormat format, fsBitmapFormatMask fmask,
-		     XID id, FontPtr *pFont, char **aliasName, 
-		     FontPtr non_cachable_font)
+int
+PrinterFontOpenFont (client, fpe, flags, name, namelen, format, fmask,
+		  id, pFont, aliasName, non_cachable_font)
+    pointer		client;
+    FontPathElementPtr	fpe;
+    int			flags;
+    char		*name;
+    int			namelen;
+    fsBitmapFormat	format;
+    fsBitmapFormatMask	fmask;
+    XID			id;
+    FontPtr		*pFont;
+    char		**aliasName;
+    FontPtr		non_cachable_font;
 {
     if (XpClientIsPrintClient(client,fpe))
 	return (FontFileOpenFont  (client, fpe, flags, name, namelen, format, 
@@ -102,19 +113,26 @@ PrinterFontOpenFont (pointer client, FontPathElementPtr fpe, Mask flags,
     return BadFontName;
 }
 
-static int
-PrinterFontListFonts (pointer client, FontPathElementPtr fpe, char *pat, 
-		      int len, int max, FontNamesPtr names)
+PrinterFontListFonts (client, fpe, pat, len, max, names)
+    pointer     client;
+    FontPathElementPtr fpe;
+    char       *pat;
+    int         len;
+    int         max;
+    FontNamesPtr names;
 {
     if (XpClientIsPrintClient(client,fpe))
 	return FontFileListFonts (client, fpe, pat, len, max, names);
     return BadFontName;
 }
 
-static int
-PrinterFontStartListFontsWithInfo(pointer client, FontPathElementPtr fpe, 
-				  char *pat, int len, int max, 
-				  pointer *privatep)
+PrinterFontStartListFontsWithInfo(client, fpe, pat, len, max, privatep)
+    pointer     client;
+    FontPathElementPtr fpe;
+    char       *pat;
+    int         len;
+    int         max;
+    pointer    *privatep;
 {
     if (XpClientIsPrintClient(client,fpe))
 	return FontFileStartListFontsWithInfo(client, fpe, pat, len, 
@@ -122,11 +140,15 @@ PrinterFontStartListFontsWithInfo(pointer client, FontPathElementPtr fpe,
     return BadFontName;
 }
 
-static int
-PrinterFontListNextFontWithInfo(pointer client, FontPathElementPtr fpe, 
-				char **namep, int *namelenp, 
-				FontInfoPtr *pFontInfo,
-				int *numFonts, pointer private)
+PrinterFontListNextFontWithInfo(client, fpe, namep, namelenp, pFontInfo,
+			     numFonts, private)
+    pointer		client;
+    FontPathElementPtr	fpe;
+    char		**namep;
+    int			*namelenp;
+    FontInfoPtr		*pFontInfo;
+    int			*numFonts;
+    pointer		private;
 {
     if (XpClientIsPrintClient(client,fpe))
 	return FontFileListNextFontWithInfo(client, fpe, namep, namelenp, 
@@ -134,10 +156,13 @@ PrinterFontListNextFontWithInfo(pointer client, FontPathElementPtr fpe,
     return BadFontName;
 }
 
-static int
-PrinterFontStartListFontsAndAliases(pointer client, FontPathElementPtr fpe, 
-				    char *pat, int len, int max, 
-				    pointer *privatep)
+PrinterFontStartListFontsAndAliases(client, fpe, pat, len, max, privatep)
+    pointer     client;
+    FontPathElementPtr fpe;
+    char       *pat;
+    int         len;
+    int         max;
+    pointer    *privatep;
 {
     if (XpClientIsPrintClient(client,fpe))
 	return FontFileStartListFontsAndAliases(client, fpe, pat, len, 
@@ -145,11 +170,16 @@ PrinterFontStartListFontsAndAliases(pointer client, FontPathElementPtr fpe,
     return BadFontName;
 }
 
-static int
-PrinterFontListNextFontOrAlias(pointer client, FontPathElementPtr fpe, 
-			       char **namep, int *namelenp, 
-			       char **resolvedp, int *resolvedlenp, 
-			       pointer private)
+int
+PrinterFontListNextFontOrAlias(client, fpe, namep, namelenp, resolvedp,
+			    resolvedlenp, private)
+    pointer		client;
+    FontPathElementPtr	fpe;
+    char		**namep;
+    int			*namelenp;
+    char		**resolvedp;
+    int			*resolvedlenp;
+    pointer		private;
 {
     if (XpClientIsPrintClient(client,fpe))
 	return FontFileListNextFontOrAlias(client, fpe, namep, namelenp, 
@@ -157,22 +187,26 @@ PrinterFontListNextFontOrAlias(pointer client, FontPathElementPtr fpe,
     return BadFontName;
 }
 
-void
-PrinterFontRegisterFpeFunctions (void)
+extern void FontFileEmptyBitmapSource();
+typedef int (*IntFunc) ();
+static int  printer_font_type;
+
+PrinterFontRegisterFpeFunctions ()
 {
-    RegisterFPEFunctions(PrinterFontNameCheck,
-			 PrinterFontInitFPE,
-			 FontFileFreeFPE,
-			 FontFileResetFPE,
-			 PrinterFontOpenFont,
-			 FontFileCloseFont,
-			 PrinterFontListFonts,
-			 PrinterFontStartListFontsWithInfo,
-			 PrinterFontListNextFontWithInfo,
-			 NULL,
-			 NULL,
-			 NULL,
-			 PrinterFontStartListFontsAndAliases,
-			 PrinterFontListNextFontOrAlias,
-			 FontFileEmptyBitmapSource);
+    /* what is the use of printer font type? */
+    printer_font_type = RegisterFPEFunctions(PrinterFontNameCheck,
+					  PrinterFontInitFPE,
+					  FontFileFreeFPE,
+					  FontFileResetFPE,
+					  PrinterFontOpenFont,
+					  FontFileCloseFont,
+					  PrinterFontListFonts,
+					  PrinterFontStartListFontsWithInfo,
+					  PrinterFontListNextFontWithInfo,
+					  (IntFunc) 0,
+					  (IntFunc) 0,
+					  (IntFunc) 0,
+					  PrinterFontStartListFontsAndAliases,
+					  PrinterFontListNextFontOrAlias,
+					  FontFileEmptyBitmapSource);
 }

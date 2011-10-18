@@ -1,5 +1,4 @@
-XCOMM platform:  $XdotOrg: xc/config/cf/ibm.cf,v 1.3 2004/08/30 13:32:51 kem Exp $
-XCOMM platform:  $Xorg: ibm.cf,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
+XCOMM platform:  $XConsortium: ibm.cf /main/80 1996/12/26 08:52:31 kaleb $
 
 #ifndef OSName
 # define OSName		DefaultOSName
@@ -21,22 +20,15 @@ XCOMM platform:  $Xorg: ibm.cf,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
 #endif
 XCOMM operating system:  OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 
-#define RemoveFiles(files) for f in files; do RemoveFile($$f); done
-
-#if (OSMajorVersion > 4)
-#  define HasSnprintf YES
-#  define HasStrcasecmp	YES
-#endif
 #if OSMajorVersion > 3 || (OSMajorVersion == 3 && OSMinorVersion >= 2)
 #define HasBSD44Sockets		YES
 #define HasPutenv		YES
-#define HasPlugin		YES
 /*
  * If you do not have threads support installed, put
  * #define HasPosixThreads	NO
  * in the BeforeVendorCF section of your site.def.
  */
-#if !defined(HasPosixThreads) && ((OSMajorVersion == 3 && (OSMinorVersion > 2 || (OSMinorVersion == 2 && OSTeenyVersion > 4))) || (OSMajorVersion == 4 && (OSMinorVersion > 1 || (OSMinorVersion == 1 && OSTeenyVersion > 1))) || (OSMajorVersion >= 5))
+#if !defined(HasPosixThreads) && ((OSMajorVersion == 3 && (OSMinorVersion > 2 || (OSMinorVersion == 2 && OSTeenyVersion > 4))) || (OSMajorVersion == 4 && (OSMinorVersion > 1 || (OSMinorVersion == 1 && OSTeenyVersion > 1))))
 #define HasPosixThreads		YES
 #endif
 #if HasPosixThreads
@@ -46,26 +38,6 @@ XCOMM operating system:  OSName (OSMajorVersion.OSMinorVersion.OSTeenyVersion)
 #endif
 #endif
 #endif /* OS > 3.2 */
-
-#define NeedConstPrototypes	YES
-#define NeedFunctionPrototypes	YES
-#define NeedNestedPrototypes	YES
-#define NeedVarargsPrototypes	YES
-
-#ifndef XVirtualFramebufferServer
-#define XVirtualFramebufferServer YES
-#endif
-
-#if !defined(TermcapLibrary)
-#define TermcapLibrary		-lcurses
-#endif
-
-#if !defined(HasPam) && ((OSMajorVersion == 5) && (OSMinorVersion >= 2) || OSMajorVersion > 5)
-#define HasPam			YES
-#ifndef PamLibraries
-#define PamLibraries		-lpam
-#endif
-#endif
 
 /*
  * For IBM platforms, we must define both the location of the compiler
@@ -129,16 +101,14 @@ baseobj.Osuf:	basedep.CCsuf						@@\
 #define CppCmd			/usr/ccs/lib/cpp
 #define ExpandManNames		YES
 #define ExtensionOSDefines	-DXTESTEXT1
+#define XibmServer		YES
+#define ibmIncludeSKYWAY	YES
 
 /* IBM cpp has slightly non-standard line directives, but supports -P */
 #define CppNoLineInfoOption	-P
 
 #if OSMajorVersion > 3
-#if OSMajorVersion > 4
-#define StandardDefines		-DSYSV -DAIXV3 -DAIXV4 -DAIXV5 -D_ALL_SOURCE
-#else
 #define StandardDefines		-DSYSV -DAIXV3 -DAIXV4 -D_ALL_SOURCE
-#endif
 #define XawI18nDefines		-DHAS_WCHAR_H -DHAS_ISW_FUNCS
 #define ServerExtraDefines	-D_IBM_LFT
 #if ThreadedX

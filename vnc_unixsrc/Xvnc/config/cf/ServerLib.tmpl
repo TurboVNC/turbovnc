@@ -1,7 +1,7 @@
-XCOMM $XFree86: xc/config/cf/ServerLib.tmpl,v 3.0tsi Exp $
+XCOMM $XFree86: xc/config/cf/ServerLib.tmpl,v 3.0 1996/10/03 08:28:07 dawes Exp $
 /*
  * Server Library imakefile info - this contains any special
- * redefinitions, etc. that Imakefiles in the various server library
+ * redefinitions, etc. that Imakefiles in the various server library 
  * subtrees will need.
  *
  * Before including this, you must set the following boolean variables:
@@ -10,7 +10,7 @@ XCOMM $XFree86: xc/config/cf/ServerLib.tmpl,v 3.0tsi Exp $
  */
 
 #ifndef DoNormalLib
-#define DoNormalLib	YES
+#define DoNormalLib 	YES
 #endif
 
 #ifndef LibraryDefines
@@ -88,7 +88,6 @@ XCOMM $XFree86: xc/config/cf/ServerLib.tmpl,v 3.0tsi Exp $
 #endif
 
 #define SRCsuf c
-#define Isuf i
 
 #ifndef LibraryObjectRule
 #define LibraryObjectRule()						@@\
@@ -129,7 +128,7 @@ objs: depends								@@\
 #define SpecialCLibObjectRule(basename,depends,options)			@@\
 SpecialLibObjectRule(basename.Osuf,basename.SRCsuf depends,options)	@@\
 									@@\
-basename.Isuf: basename.SRCsuf depends					@@\
+basename.i: basename.SRCsuf depends					@@\
 	CPPOnlyCompile(basename.SRCsuf,options)				@@\
 									@@\
 CenterLoadTarget(debug_src,basename.SRCsuf,NullParameter,$(ALLDEFINES) options)

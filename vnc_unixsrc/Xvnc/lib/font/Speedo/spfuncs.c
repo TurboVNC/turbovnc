@@ -1,4 +1,4 @@
-/* $Xorg: spfuncs.c,v 1.4 2001/02/09 02:04:00 xorgcvs Exp $ */
+/* $XConsortium: spfuncs.c,v 1.13 94/06/06 17:42:26 gildea Exp $ */
 /*
  * Copyright 1990, 1991 Network Computing Devices;
  * Portions Copyright 1987 by Digital Equipment Corporation
@@ -24,13 +24,15 @@
 
 /*
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -38,41 +40,34 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: xc/lib/font/Speedo/spfuncs.c,v 1.7 2001/08/27 19:49:51 dawes Exp $ */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#ifndef FONTMODULE
 #include <X11/Xos.h>
-#endif
-#include <X11/fonts/fntfilst.h>
-#include <X11/fonts/fontutil.h>
+#include "fntfilst.h"
 #include "spint.h"
 
 /* ARGSUSED */
-static int 
-SpeedoOpenScalable (
-    FontPathElementPtr	fpe,
-    FontPtr		*pFont,
-    int			flags,
-    FontEntryPtr	entry,
-    char		*fileName,
-    FontScalablePtr	vals,
-    fsBitmapFormat	format,
-    fsBitmapFormatMask	fmask,
-    FontPtr		non_cachable_font)	/* We don't do licensing */
+SpeedoOpenScalable (fpe, pFont, flags, entry, fileName, vals, format, fmask,
+		    non_cachable_font)
+    FontPathElementPtr	fpe;
+    FontPtr		*pFont;
+    int			flags;
+    FontEntryPtr	entry;
+    char		*fileName;
+    FontScalablePtr	vals;
+    fsBitmapFormat	format;
+    fsBitmapFormatMask	fmask;
+    FontPtr		non_cachable_font;	/* We don't do licensing */
 {
     char	fullName[MAXFONTNAMELEN];
 
@@ -91,13 +86,13 @@ SpeedoOpenScalable (
  * and to simply save the values without doing the work.
  */
 static int
-get_font_info(
-    FontInfoPtr pinfo,
-    char       *fontname,
-    char       *filename,
-    FontEntryPtr	entry,
-    FontScalablePtr	vals,
-    SpeedoFontPtr *spfont)
+get_font_info(pinfo, fontname, filename, entry, vals, spfont)
+    FontInfoPtr pinfo;
+    char       *fontname;
+    char       *filename;
+    FontEntryPtr	entry;
+    FontScalablePtr	vals;
+    SpeedoFontPtr *spfont;
 {
     SpeedoFontPtr spf;
     int         err;
@@ -128,14 +123,13 @@ get_font_info(
 }
 
 /* ARGSUSED */
-static int
-SpeedoGetInfoScaleable(
-    FontPathElementPtr	fpe,
-    FontInfoPtr		pFontInfo,
-    FontEntryPtr	entry,
-    FontNamePtr		fontName,
-    char		*fileName,
-    FontScalablePtr	vals)
+SpeedoGetInfoScaleable(fpe, pFontInfo, entry, fontName, fileName, vals)
+    FontPathElementPtr	fpe;
+    FontInfoPtr		pFontInfo;
+    FontEntryPtr	entry;
+    FontNamePtr		fontName;
+    char		*fileName;
+    FontScalablePtr	vals;
 {
     SpeedoFontPtr spf = NULL;
     char        fullName[MAXFONTNAMELEN];
@@ -153,12 +147,11 @@ SpeedoGetInfoScaleable(
 }
 
 static FontRendererRec renderer = {
-    ".spd", 4, NULL, SpeedoOpenScalable,
-	NULL, SpeedoGetInfoScaleable, 0
+    ".spd", 4, (int (*)()) 0, SpeedoOpenScalable,
+	(int (*)()) 0, SpeedoGetInfoScaleable, 0
     , CAP_MATRIX | CAP_CHARSUBSETTING
 };
     
-void
 SpeedoRegisterFontFileFunctions()
 {
     sp_make_standard_props();

@@ -1,13 +1,16 @@
-/* $Xorg: Xtransdnet.c,v 1.4 2001/02/09 02:04:06 xorgcvs Exp $ */
+/* $XConsortium: Xtransdnet.c,v 1.16 95/02/10 17:54:09 mor Exp $ */
+/* $XFree86: xc/lib/xtrans/Xtransdnet.c,v 3.2 1996/05/10 06:55:47 dawes Exp $ */
 /*
 
-Copyright 1993, 1994, 1998  The Open Group
+Copyright (c) 1993, 1994  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -15,20 +18,19 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: xc/lib/xtrans/Xtransdnet.c,v 3.7tsi Exp $ */
 
-/* Copyright 1993, 1994 NCR Corporation - Dayton, Ohio, USA
+/* Copyright (c) 1993, 1994 NCR Corporation - Dayton, Ohio, USA
  *
  * All Rights Reserved
  *
@@ -101,7 +103,9 @@ from The Open Group.
  */
 
 static int
-TRANS(DNETGetAddr) (XtransConnInfo ciptr)
+TRANS(DNETGetAddr) (ciptr)
+
+XtransConnInfo ciptr;
 
 {
     struct sockaddr_dn	sockname;
@@ -142,7 +146,9 @@ TRANS(DNETGetAddr) (XtransConnInfo ciptr)
  */
 
 static int
-TRANS(DNETGetPeerAddr) (XtransConnInfo ciptr)
+TRANS(DNETGetPeerAddr) (ciptr)
+
+XtransConnInfo ciptr;
 
 {
     struct sockaddr_dn	sockname;
@@ -179,8 +185,12 @@ TRANS(DNETGetPeerAddr) (XtransConnInfo ciptr)
 #ifdef TRANS_CLIENT
 
 static XtransConnInfo
-TRANS(DNETOpenCOTSClient) (Xtransport *thistrans, char *protocol, 
-			   char *host, char *port)
+TRANS(DNETOpenCOTSClient) (thistrans, protocol, host, port)
+
+Xtransport	*thistrans;
+char		*protocol;
+char		*host;
+char		*port;
 
 {
     XtransConnInfo	ciptr;
@@ -207,8 +217,12 @@ TRANS(DNETOpenCOTSClient) (Xtransport *thistrans, char *protocol,
 #ifdef TRANS_SERVER
 
 static XtransConnInfo
-TRANS(DNETOpenCOTSServer) (Xtransport *thistrans, char *protocol, 
-			   char *host, char *port)
+TRANS(DNETOpenCOTSServer) (thistrans, protocol, host, port)
+
+Xtransport	*thistrans;
+char		*protocol;
+char		*host;
+char		*port;
 
 {
     XtransConnInfo	ciptr;
@@ -239,8 +253,12 @@ TRANS(DNETOpenCOTSServer) (Xtransport *thistrans, char *protocol,
 #ifdef TRANS_CLIENT
 
 static XtransConnInfo
-TRANS(DNETOpenCLTSClient) (Xtransport *thistrans, char *protocol, 
-			   char *host, char *port)
+TRANS(DNETOpenCLTSClient) (thistrans, protocol, host, port)
+
+Xtransport	*thistrans;
+char		*protocol;
+char		*host;
+char		*port;
 
 {
     XtransConnInfo	ciptr;
@@ -267,8 +285,12 @@ TRANS(DNETOpenCLTSClient) (Xtransport *thistrans, char *protocol,
 #ifdef TRANS_SERVER
 
 static XtransConnInfo
-TRANS(DNETOpenCLTSServer) (Xtransport *thistrans, char *protocol, 
-			   char *host, char *port)
+TRANS(DNETOpenCLTSServer) (thistrans, protocol, host, port)
+
+Xtransport	*thistrans;
+char		*protocol;
+char		*host;
+char		*port;
 
 {
     /* NEED TO IMPLEMENT */
@@ -283,7 +305,11 @@ TRANS(DNETOpenCLTSServer) (Xtransport *thistrans, char *protocol,
 #ifdef TRANS_REOPEN
 
 static XtransConnInfo
-TRANS(DNETReopenCOTSServer) (Xtransport *thistrans, int fd, char *port)
+TRANS(DNETReopenCOTSServer) (thistrans, fd, port)
+
+Xtransport	*thistrans;
+int		fd;
+char		*port;
 
 {
     XtransConnInfo	ciptr;
@@ -304,7 +330,11 @@ TRANS(DNETReopenCOTSServer) (Xtransport *thistrans, int fd, char *port)
 }
 
 static XtransConnInfo
-TRANS(DNETReopenCLTSServer) (Xtransport *thistrans, int fd, char *port)
+TRANS(DNETReopenCLTSServer) (thistrans, fd, port)
+
+Xtransport	*thistrans;
+int		fd;
+char		*port;
 
 {
     XtransConnInfo	ciptr;
@@ -328,7 +358,11 @@ TRANS(DNETReopenCLTSServer) (Xtransport *thistrans, int fd, char *port)
 
 
 static int
-TRANS(DNETSetOption) (XtransConnInfo ciptr, int option, int arg)
+TRANS(DNETSetOption) (ciptr, option, arg)
+
+XtransConnInfo	ciptr;
+int		option;
+int		arg;
 
 {
     PRMSG (2,"DNETSetOption(%d,%d,%d)\n", ciptr->fd, option, arg);
@@ -340,7 +374,10 @@ TRANS(DNETSetOption) (XtransConnInfo ciptr, int option, int arg)
 #ifdef TRANS_SERVER
 
 static int
-TRANS(DNETCreateListener) (XtransConnInfo ciptr, char *port, unsigned int flags)
+TRANS(DNETCreateListener) (ciptr, port)
+
+XtransConnInfo	ciptr;
+char		*port;
 
 {
     struct sockaddr_dn  dnsock;
@@ -377,14 +414,17 @@ TRANS(DNETCreateListener) (XtransConnInfo ciptr, char *port, unsigned int flags)
 
     /* Set a flag to indicate that this connection is a listener */
 
-    ciptr->flags = 1 | (ciptr->flags & TRANS_KEEPFLAGS);
+    ciptr->flags = 1;
 
     return 0;
 }
 
 
 static XtransConnInfo
-TRANS(DNETAccept) (XtransConnInfo ciptr, int *status)
+TRANS(DNETAccept) (ciptr, status)
+
+XtransConnInfo	ciptr;
+int		*status;
 
 {
     XtransConnInfo	newciptr;
@@ -451,7 +491,11 @@ TRANS(DNETAccept) (XtransConnInfo ciptr, int *status)
 #define OBJBUFSIZE 64
 
 static int
-TRANS(DNETConnect) (XtransConnInfo ciptr, char *host, char *port)
+TRANS(DNETConnect) (ciptr, host, port)
+
+XtransConnInfo	ciptr;
+char		*host;
+char		*port;
 
 {
     char objname[OBJBUFSIZE];
@@ -519,17 +563,16 @@ TRANS(DNETConnect) (XtransConnInfo ciptr, char *host, char *port)
 
 
 static int
-TRANS(DNETBytesReadable) (XtransConnInfo ciptr, BytesReadable_t *pend)
+TRANS(DNETBytesReadable) (ciptr, pend)
+
+XtransConnInfo	ciptr;
+BytesReadable_t	*pend;
 
 {
     PRMSG (2,"DNETBytesReadable(%x,%d,%x)\n", ciptr, ciptr->fd, pend);
 
 #ifdef WIN32
-    {
-	int ret = ioctlsocket ((SOCKET) ciptr->fd, FIONREAD, (u_long *) pend);
-	errno = WSAGetLastError();
-	return ret;
-    }
+    return ioctlsocket ((SOCKET) ciptr->fd, FIONREAD, (u_long *) pend);
 #else
     return ioctl(ciptr->fd, FIONREAD, (char *)pend);
 #endif /* WIN32 */
@@ -537,17 +580,17 @@ TRANS(DNETBytesReadable) (XtransConnInfo ciptr, BytesReadable_t *pend)
 
 
 static int
-TRANS(DNETRead) (XtransConnInfo ciptr, char *buf, int size)
+TRANS(DNETRead) (ciptr, buf, size)
+
+XtransConnInfo	ciptr;
+char		*buf;
+int		size;
 
 {
     PRMSG (2,"DNETRead(%d,%x,%d)\n", ciptr->fd, buf, size);
 
 #ifdef WIN32
-    {
-	int ret = recv ((SOCKET)ciptr->fd, buf, size, 0);
-	errno = WSAGetLastError();
-	return ret;
-    }
+    return recv ((SOCKET)ciptr->fd, buf, size, 0);
 #else
     return read (ciptr->fd, buf, size);
 #endif /* WIN32 */
@@ -555,17 +598,17 @@ TRANS(DNETRead) (XtransConnInfo ciptr, char *buf, int size)
 
 
 static int
-TRANS(DNETWrite) (XtransConnInfo ciptr, char *buf, int size)
+TRANS(DNETWrite) (ciptr, buf, size)
+
+XtransConnInfo	ciptr;
+char		*buf;
+int		size;
 
 {
     PRMSG (2,"DNETWrite(%d,%x,%d)\n", ciptr->fd, buf, size);
 
 #ifdef WIN32
-    {
-	int ret = send ((SOCKET)ciptr->fd, buf, size, 0);
-	errno = WSAGetLastError();
-	return ret;
-    }
+    return send ((SOCKET)ciptr->fd, buf, size, 0);
 #else
     return write (ciptr->fd, buf, size);
 #endif /* WIN32 */
@@ -573,7 +616,11 @@ TRANS(DNETWrite) (XtransConnInfo ciptr, char *buf, int size)
 
 
 static int
-TRANS(DNETReadv) (XtransConnInfo ciptr, struct iovec *buf, int size)
+TRANS(DNETReadv) (ciptr, buf, size)
+
+XtransConnInfo	ciptr;
+struct iovec	*buf;
+int		size;
 
 {
     PRMSG (2,"DNETReadv(%d,%x,%d)\n", ciptr->fd, buf, size);
@@ -583,7 +630,11 @@ TRANS(DNETReadv) (XtransConnInfo ciptr, struct iovec *buf, int size)
 
 
 static int
-TRANS(DNETWritev) (XtransConnInfo ciptr, struct iovec *buf, int size)
+TRANS(DNETWritev) (ciptr, buf, size)
+
+XtransConnInfo	ciptr;
+struct iovec	*buf;
+int		size;
 
 {
     PRMSG (2,"DNETWritev(%d,%x,%d)\n", ciptr->fd, buf, size);
@@ -593,38 +644,26 @@ TRANS(DNETWritev) (XtransConnInfo ciptr, struct iovec *buf, int size)
 
 
 static int
-TRANS(DNETDisconnect) (XtransConnInfo ciptr)
+TRANS(DNETDisconnect) (ciptr)
+
+XtransConnInfo	ciptr;
 
 {
     PRMSG (2,"DNETDisconnect(%x,%d)\n", ciptr, ciptr->fd, 0);
 
-#ifdef WIN32
-    {
-	int ret = shutdown (ciptr->fd, 2);
-	errno = WSAGetLastError();
-	return ret;
-    }
-#else
     return shutdown (ciptr->fd, 2); /* disallow further sends and receives */
-#endif
 }
 
 
 static int
-TRANS(DNETClose) (XtransConnInfo ciptr)
+TRANS(DNETClose) (ciptr)
+
+XtransConnInfo	ciptr;
 
 {
     PRMSG (2,"DNETClose(%x,%d)\n", ciptr, ciptr->fd, 0);
 
-#ifdef WIN32
-    {
-	int ret = close (ciptr->fd);
-	errno = WSAGetLastError();
-	return ret;
-    }
-#else
     return close (ciptr->fd);
-#endif
 }
 
 

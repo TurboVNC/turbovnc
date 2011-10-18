@@ -1,5 +1,5 @@
-XCOMM $Xorg: lnxLib.tmpl,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
-XCOMM $XFree86: xc/config/cf/lnxLib.tmpl,v 3.19 2003/10/15 22:47:48 herrb Exp $
+XCOMM $XConsortium: lnxLib.tmpl,v 1.5 95/01/11 21:44:44 kaleb Exp $
+XCOMM $XFree86: xc/config/cf/lnxLib.tmpl,v 3.9 1996/02/24 04:32:52 dawes Exp $
 
 /*
  * Linux shared library template
@@ -14,53 +14,22 @@ XMULIB = $(XMULIBONLY) $(XTOOLLIB) $(XLIB)
 #endif
 
 #ifndef XawClientLibs
-#define XawClientLibs $(XAWLIB) $(XMULIBONLY) $(XTOOLLIB) $(XPMLIB) $(EXTRAXAWCLIENTLIBS) $(XLIB)
+#define XawClientLibs $(XAWLIB) $(XMULIBONLY) $(XTOOLLIB) $(XLIB)
 #endif
+
+#define CplusplusLibC
 
 #define SharedX11Reqs
-#define SharedXlibi18nReqs $(LDPRELIB) $(XONLYLIB)
-#define SharedOldXReqs	  $(LDPRELIB) $(XONLYLIB)
-#define SharedXtReqs	  $(LDPRELIB) $(XONLYLIB) $(SMLIB) $(ICELIB)
-#define SharedXaw6Reqs	  $(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XLIB)
-#define SharedXaw7Reqs	  $(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XPMLIB) $(XLIB)
-#define SharedXawReqs	  $(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XPMLIB) $(EXTRAXAWREQS) $(XLIB)
-#define SharedXmuReqs	  $(LDPRELIB) $(XTOOLLIB) $(XLIB)
-#define SharedXmuuReqs	  $(LDPRELIB) $(XONLYLIB)
-#define SharedXextReqs	  $(LDPRELIB) $(XONLYLIB)
-#define SharedXiReqs	  $(LDPRELIB) $(XLIB)
-#define SharedXpReqs	  $(LDPRELIB) $(XLIB)
-#define SharedXpmReqs	  $(LDPRELIB) $(XLIB)
-#define SharedXrandrReqs  $(LDPRELIB) $(XRENDERLIB) $(XLIB)
-#define SharedXrenderReqs $(LDPRELIB) $(XLIB)
-#define SharedXtstReqs	  $(LDPRELIB) $(XLIB)
-#define SharedXvReqs	  $(LDPRELIB) $(XLIB)
-#define SharedSMReqs	  $(LDPRELIB) $(ICELIB)
-#define SharedXcursorReqs $(LDPRELIB) $(XRENDERLIB) $(XLIB)
-#define SharedFontencReqs $(LDPRELIB) GzipLibrary
-
-#if GlxUseBuiltInDRIDriver
-#define ExtraSharedGLReqs /**/
-#else
-#define ExtraSharedGLReqs -ldl
-#endif
-#define SharedGLReqs	  $(LDPRELIB) $(XLIB) ExtraSharedGLReqs
-#ifndef SharedGLUReqs
-#define SharedGLUReqs	  $(LDPRELIB) $(XLIB) $(GLXLIB)
-#endif
-#define SharedDPSReqs	  $(LDPRELIB) $(SMLIB) $(ICELIB) $(XTOOLLIB) $(XLIB)
-#define SharedDPSTKReqs	  $(LDPRELIB) $(SMLIB) $(ICELIB) $(XTOOLLIB) $(DPSLIB) $(XLIB)
-#define SharedpsresReqs	  $(LDPRELIB) $(SMLIB) $(ICELIB) $(XTOOLLIB) $(XLIB)
-
-#define SharedXResReqs	  $(LDPRELIB) $(XLIB)
-#define SharedXfontcacheReqs	$(LDPRELIB) $(XLIB)
-#define SharedXineramaReqs	$(LDPRELIB) $(XLIB)
-#define SharedXssReqs	$(LDPRELIB) $(XLIB)
-#define SharedXvMCReqs	$(LDPRELIB) $(XLIB)
-#define SharedXxf86dgaReqs	$(LDPRELIB) $(XLIB)
-#define SharedXxf86miscReqs	$(LDPRELIB) $(XLIB)
-#define SharedXxf86vmReqs	$(LDPRELIB) $(XLIB)
-#define SharedxkbfileReqs	$(LDPRELIB) $(XONLYLIB)
-#define SharedxkbuiReqs $(LDPRELIB) $(XKBFILELIB) $(XONLYLIB)
+#define SharedOldXReqs	$(LDPRELIB) $(XLIBONLY)
+#define SharedXtReqs	$(LDPRELIB) $(XLIBONLY) $(SMLIB) $(ICELIB)
+#define SharedXawReqs	$(LDPRELIB) $(XMULIB) $(XTOOLLIB) $(XLIB)
+#define SharedXmuReqs	$(LDPRELIB) $(XTOOLLIB) $(XLIB)
+#define SharedXextReqs	$(LDPRELIB) $(XLIBONLY)
+#define SharedXiReqs	$(LDPRELIB) $(XLIB)
+#define SharedPexReqs	$(LDPRELIB) $(XLIBONLY) MathLibrary
+#define SharedXtstReqs	$(LDPRELIB) $(XLIB)
+#define SharedXieReqs	$(LDPRELIB) $(XLIBONLY)
+#define SharedSMReqs	$(LDPRELIB) $(ICELIB)
 
 #else	/* UseElfFormat */
 
@@ -70,17 +39,3 @@ XMULIB = -lXmu $(XLIB)
 #endif
 
 #endif	/* UseElfFormat */
-
-#ifndef SharedXReqs
-# define SharedXReqs $(XTOOLLIB) $(XPLIB) $(XLIB) $(LDPOSTLIBS)
-#endif
-
-#ifndef SharedXmReqs
-# define SharedXmReqs $(LDPRELIBS) SharedXReqs -lc
-#endif
-
-#ifndef SharedTtReqs
-# define SharedTtReqs $(LDPRELIBS) SharedXReqs $(CXXLIB)
-#endif
-
-#define NoMessageCatalog

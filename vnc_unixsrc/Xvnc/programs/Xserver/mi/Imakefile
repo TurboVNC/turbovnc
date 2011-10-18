@@ -1,26 +1,10 @@
-XCOMM $Xorg: Imakefile,v 1.3 2000/08/17 19:53:36 cpqbld Exp $
-
-
-
-
-XCOMM $XFree86: xc/programs/Xserver/mi/Imakefile,v 3.34 2002/05/22 21:38:31 herrb Exp $
-
+XCOMM $XFree86: xc/programs/Xserver/mi/Imakefile,v 3.11.2.1 1997/05/03 09:50:45 dawes Exp $
+XCOMM $XConsortium: Imakefile /main/44 1996/12/02 10:22:16 lehors $
 #include <Server.tmpl>
 
 #if ! HasCbrt
 CBRT_SRC = cbrt.c
 CBRT_OBJ = cbrt.o
-#endif
-
-#if HasFfs
-FFS_DEFINES = -DHAS_FFS
-#endif
-
-#if DoLoadableServer
-EXTRAMIINITEXTOBJ = miinitext.o
-#else
-MIINITEXTSRC = miinitext.c
-MIINITEXTOBJ = miinitext.o
 #endif
 
 SRCS =  $(CBRT_SRC) mivaltree.c mipolyseg.c mipolyrect.c \
@@ -29,10 +13,9 @@ SRCS =  $(CBRT_SRC) mivaltree.c mipolyseg.c mipolyrect.c \
 	miarc.c mizerarc.c mifillarc.c \
 	miwindow.c micursor.c miregion.c \
 	mipolytext.c mibitblt.c mipolypnt.c mipushpxl.c \
-	miexpose.c miglblt.c mizerline.c mizerclip.c mifpolycon.c \
-	midash.c mibstore.c mibank.c $(MIINITEXTSRC) mieq.c \
-	mipointer.c misprite.c midispcur.c miscrinit.c miclipn.c migc.c \
-	micmap.c mioverlay.c
+	miexpose.c miglblt.c mizerline.c mifpolycon.c \
+	midash.c mibstore.c miinitext.c mieq.c \
+	mipointer.c misprite.c midispcur.c miscrinit.c miclipn.c migc.c
 
 OBJS =	$(CBRT_OBJ) mivaltree.o mipolyseg.o mipolyrect.o \
 	mipoly.o mipolycon.o mipolygen.o mipolyutil.o \
@@ -40,25 +23,30 @@ OBJS =	$(CBRT_OBJ) mivaltree.o mipolyseg.o mipolyrect.o \
 	miarc.o mizerarc.o mifillarc.o \
 	miwindow.o micursor.o miregion.o \
 	mipolytext.o mibitblt.o mipolypnt.o mipushpxl.o \
-	miexpose.o miglblt.o mizerline.o mizerclip.o mifpolycon.o \
-	midash.o mibstore.o mibank.o $(MIINITEXTOBJ) mieq.o \
-	mipointer.o misprite.o midispcur.o miscrinit.o miclipn.o migc.o \
-	micmap.o mioverlay.o
+	miexpose.o miglblt.o mizerline.o mifpolycon.o \
+	midash.o mibstore.o miinitext.o mieq.o \
+	mipointer.o misprite.o midispcur.o miscrinit.o miclipn.o migc.o
 
-#if (defined (XFree86Version) || defined(XorgVersion))
+#ifdef XFree86Version
 /* 
  * Make sure XINPUT, XF86VidTune, etc aren't defined for the miinitext.o 
  * used by Xnest, Xvfb 
  */
-EXT_DEFINES = ExtensionDefines -UXINPUT -UXF86VIDMODE -UXFreeXDGA -UXF86MISC \
-	-UXFree86LOADER
+EXT_DEFINES = ExtensionDefines -UXINPUT -UXF86VIDMODE -UXFreeXDGA -UXF86MISC
+#else
+EXT_DEFINES = ExtensionDefines
 #endif
+#if PexDynamicModule
+PEX_MODULE_DEFINES = -DPEX_MODULE
+#endif
+#if XieDynamicModule
+XIE_MODULE_DEFINES = -DXIE_MODULE
+#endif
+EXT_MODULES_DEFINES = $(PEX_MODULE_DEFINES) $(XIE_MODULE_DEFINES)
 
-INCLUDES = -I. -I../include -I../../../include/fonts -I../render \
-	    -I../xfixes -I../damageext -I../miext/damage \
-           -I$(XINCLUDESRC) -I$(FONTINCSRC) -I$(EXTINCSRC) -I$(SERVERSRC)/Xext
+INCLUDES = -I. -I../include -I../../../include/fonts \
+           -I$(XINCLUDESRC) -I$(FONTINCSRC)
 LINTLIBS = ../dix/llib-ldix.ln ../os/llib-los.ln
-DEFINES  = $(FFS_DEFINES)
 
 NormalLibraryObjectRule()
 NormalLibraryTarget(mi,$(OBJS))
@@ -69,26 +57,18 @@ NormalLintTarget($(SRCS))
 NormalLibraryTarget(cbrt,cbrt.o)
 #endif
 
-SpecialCObjectRule(miinitext,$(ICONFIGFILES),$(EXT_DEFINES))
+SpecialCObjectRule(miinitext,$(ICONFIGFILES),$(EXT_DEFINES) -UGLXEXT)
 SpecialCObjectRule(miscrinit,$(ICONFIGFILES),$(EXT_DEFINES))
-#ifdef ItsyCompilerBug
-SpecialCObjectRule(mipolycon,$(_NOOP_),-O0)
-#endif
-#if defined(OpenBSDArchitecture) && defined(Sparc64Architecture)
-SpecialCObjectRule(mizerclip,NullParameter,-O0)
-#endif
 
-AllTarget($(EXTRAMIINITEXTOBJ))
+InstallLinkKitLibrary(mi,$(LINKKITDIR)/lib)
+InstallLinkKitLibrary(cbrt,$(LINKKITDIR)/lib)
+InstallLinkKitNonExecFile(mi.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(mibstore.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(miline.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(mipointer.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(misprite.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(mispritest.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(mistruct.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(miinitext.c,$(LINKKITDIR))
 
 DependTarget()
-
-InstallDriverSDKNonExecFile(mi.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(mibank.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(mibstore.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(micmap.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(migc.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(miline.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(mipointer.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(mipointrst.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(mizerarc.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(micoord.h,$(DRIVERSDKINCLUDEDIR))

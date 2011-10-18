@@ -1,4 +1,4 @@
-/* $Xorg: out_blk.c,v 1.3 2000/08/17 19:46:26 cpqbld Exp $ */
+/* $XConsortium: out_blk.c,v 1.4 94/02/07 10:01:11 gildea Exp $ */
 
 /*
 
@@ -21,7 +21,7 @@ INCIDENTAL OR CONSEQUENTIAL DAMAGES, ARISING OUT OF OR IN ANY WAY CONNECTED
 WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 
 */
-/* $XFree86: xc/lib/font/Speedo/out_blk.c,v 1.2 1999/02/07 06:18:16 dawes Exp $ */
+
 
 
 /*************************** O U T _ B L K . C *********************************
@@ -31,9 +31,6 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
  *****************************************************************************/
 
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 #include "spdo_prv.h"               /* General definitions for Speedo   */
 
 #define   DEBUG      0
@@ -61,15 +58,20 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 /***** STATIC FUNCTIONS *****/
 
 #if INCL_BLACK
+#if PROTOS_AVAIL
 static void sp_add_intercept_black(PROTO_DECL2 fix15 y, fix15 x);
 static void sp_proc_intercepts_black(PROTO_DECL1);
+#else
+static void    sp_add_intercept_black();
+static void    sp_proc_intercepts_black();
+#endif
 #endif
 
 
 #if INCL_BLACK
-FUNCTION boolean init_black(
+FUNCTION boolean init_black(specsarg)
 GDECL
-specs_t GLOBALFAR *specsarg)
+specs_t GLOBALFAR *specsarg;
 /*
  * init_out0() is called by sp_set_specs() to initialize the output module.
  * Returns TRUE if output module can accept requested specifications.
@@ -87,11 +89,11 @@ return (TRUE);
 
 
 #if INCL_BLACK
-FUNCTION boolean begin_char_black(
+FUNCTION boolean begin_char_black(Psw, Pmin, Pmax)
 GDECL
-point_t Psw,
-point_t Pmin,
-point_t Pmax)
+point_t Psw;                   
+point_t Pmin;                   
+point_t Pmax;                   
 /* Called once at the start of the character generation process
  */
 {
@@ -108,10 +110,10 @@ return TRUE;
 
 
 #if INCL_BLACK
-FUNCTION void begin_contour_black(
+FUNCTION void begin_contour_black(P1, outside)
 GDECL
-point_t P1,
-boolean outside)
+point_t P1;                   
+boolean outside;
 /* Called at the start of each contour
  */
 {
@@ -127,9 +129,9 @@ sp_globals.y_pxl = (sp_globals.y0_spxl + sp_globals.pixrnd) >> sp_globals.pixshi
 #endif
 
 #if INCL_BLACK
-FUNCTION void line_black(
+FUNCTION void line_black(P1)
 GDECL
-point_t P1)
+point_t P1;                   
 /* Called for each vector in the transformed character
  */
 {
@@ -520,11 +522,11 @@ else
 #endif
 
 #if INCL_BLACK
-FUNCTION LOCAL  void sp_add_intercept_black(
+FUNCTION LOCAL  void sp_add_intercept_black(y, x)
 GDECL
-fix15 y,                 /* Y coordinate in relative pixel units */
+fix15 y;                 /* Y coordinate in relative pixel units */
                          /* (0 is lowest sample in band) */
-fix15 x)                 /* X coordinate of intercept in subpixel units */
+fix15 x;                 /* X coordinate of intercept in subpixel units */
 
 /*  Called by line() to add an intercept to the intercept list structure
  */
@@ -597,6 +599,8 @@ register fix15 from, to;          /* Start and end of run in pixel units
 register fix15 y;
 register fix15 scan_line;
          fix15 first_y, last_y;
+         fix15 xmin, xmax;
+         boolean clipleft, clipright;
 
 #if DEBUG
 printf("\nIntercept lists:\n");

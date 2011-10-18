@@ -1,44 +1,27 @@
-XCOMM $Xorg: lynx.cf,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
+XCOMM platform:  $XFree86: xc/config/cf/lynx.cf,v 3.12.2.6 1998/02/01 16:03:19 robin Exp $
 
-
-
-
-XCOMM platform:  $XFree86: xc/config/cf/lynx.cf,v 3.47 2003/04/24 22:14:53 herrb Exp $
-
-
-#ifndef OSName
-#define OSName			DefaultOSName
+#ifdef i386Architecture
+# define OSName			LynxOS AT
 #endif
-#ifndef OSVendor
-#define OSVendor		(LynuxWorks Inc.)
+#ifdef ppcArchitecture
+# define OSName			LynxOS PowerPC
 #endif
-#ifndef OSMajorVersion
-#define OSMajorVersion		DefaultOSMajorVersion
+#ifdef SparcArchitecture
+# define OSName			LynxOS microSPARC
 #endif
-#ifndef OSMinorVersion
-#define OSMinorVersion		DefaultOSMinorVersion
-#endif
-#ifndef OSTeenyVersion
-#define OSTeenyVersion		DefaultOSTeenyVersion
-#endif
-XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVersion)
+#define OSVendor		(LYNX Real-Time Systems, Inc)
+#define OSMajorVersion		2
+#define OSMinorVersion		5
+#define OSTeenyVersion		0
 
-#ifndef HasSetenv
-#define HasSetenv		NO
-#endif
-
-#if  OSMajorVersion > 2
-#define HasGcc2			YES
-#endif
-
-#ifndef HasGcc2
-#define HasGcc2			NO
-#endif
-
-#if  OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion > 2)
+#define HasGcc			YES
+#if OSMajorVersion == 2 && OSMinorVersion > 2
+# define HasGcc2		YES
 # ifndef HasGcc2ForCplusplus
 #  define HasGcc2ForCplusplus	YES
 # endif
+#else
+# define HasGcc2		NO
 #endif
 #ifndef HasGcc2ForCplusplus
 # define HasGcc2ForCplusplus	YES
@@ -51,48 +34,17 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 # define HasLibCrypt		NO
 #endif
 #define HasPutenv		YES
-#define HasSutenv		NO
-#define HasSnprintf		NO
 #define HasShm			YES
 #define HasSockets		YES
 #define HasVFork		NO
 #define HasVarDirectory		NO
-#if  OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion > 4)
+#if OSMajorVersion == 2 && OSMinorVersion > 4
 # define HasBSD44Sockets 	YES
-#endif
-#define HasStickyDirBit		NO
-#ifndef HasPosixRegex
-# define HasPosixRegex		NO
-#endif
-#ifndef HasPerl
-# define HasPerl		NO
-#endif
-#ifndef HasFreetype2
-# define HasFreetype2		NO
-#endif
-
-#if OSMajorVersion <= 2
-# define USE_MACHINE_ABSOLUTE
-#endif
-
-/* At least on x86 we're seeing spurious server crashes when
- * using signals (SmartScheduler, SilkenMouse) starting with
- * LynxOS 3.1.0.
- */
-#if OSMajorVersion > 3 || (OSMajorVersion == 3 && OSMinorVersion == 1)
-# ifndef UseSmartScheduler
-#  define UseSmartScheduler	NO
-# endif
-#endif
-
-#ifdef UseSmartScheduler
-/* pull in real sigio in os-support instead of sigiostubs */
-# define AllowSIGIO		YES
 #endif
 
 #define HasPosixThreads		YES
 #define ThreadedX		YES
-#define HasThreadSafeAPI	YES
+#define HasThreadSafeAPI	YES	/* only 2.[345].0 ?? */
 #if HasGcc2
 # if OSMajorVersion == 2 && OSMinorVersion == 3
 #  define ThreadsCompileFlags	-mposix -mthreads
@@ -108,11 +60,11 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #if OSMajorVersion == 2 && OSMinorVersion < 3
 # define ThreadsLibraries /lib/thread/libc.a /lib/thread/libc_p.a
 #endif
-#if (OSMajorVersion == 3 && OSMinorVersion == 0) || (OSMajorVersion == 2 && OSMinorVersion <= 5)
+#if OSMinorVersion <= 5
 # define ThreadPreStdAPIDefines	-DXPRE_STANDARD_API
 #endif
 #define AvoidNullMakeCommand	YES
-#if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion > 2)
+#if OSMajorVersion == 2 && OSMinorVersion > 2
 #define StripInstalledPrograms	YES
 #else
 /* under LynxOS AT V2.x /bin/strip will leave file.unstripped around
@@ -127,8 +79,6 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #define NeedNestedPrototypes	YES
 #define NeedVarargsPrototypes	YES
 #define NeedWidePrototypes	NO
-#define MkdirHierCmd		mkdir -p
-#define DirFailPrefix 		-
 
 #if HasGcc2
 # if OSMajorVersion == 2 && OSMinorVersion == 3
@@ -138,39 +88,27 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #  define CplusplusCmd		g++
 #  define CcCmd			gcc
 # endif
-# if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion == 5)
-#  if defined(UseInstalled)
-#   define DefaultCCOptions	-fcommon -D__NO_INCLUDE_WARN__
-#  else
-#   define DefaultCCOptions -ansi -pedantic -fcommon -D__NO_INCLUDE_WARN__ GccWarningOptions
-#  endif
+# if OSMajorVersion == 2 && OSMinorVersion == 5
+#  define DefaultCCOptions -ansi -pedantic -fcommon
 # endif
 #else
 # define CplusplusCmd		g++ 
 # define CcCmd			gcc 
-# define DefaultCCOptions	-ansi GccWarningOptions
+# define DefaultCCOptions	-ansi
 # define GccGasOption		-DGCCUSESGAS /* For SuperProbe */
 #endif
 #define AsCmd			as
 #define LdCmd			ld
 #define AsmDefines		-DUSE_GAS
-#if OSMajorVersion < 4
-# define CppCmd			/lib/cpp
-#else
-# define CppCmd			/bin/cpp
-#endif
-#define RawCppCmd              CppCmd
-#if !CrossCompiling
+#define CppCmd			/lib/cpp
 #define YaccCmd			bison -y
 /* make sure we take the right flex on 2.3.0 and 2.4.0 */
 #define LexCmd			/bin/flex
-#endif
-#if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion >= 5)
+#if OSMinorVersion >= 5
 # define LexLib			-lfl
 #else
 # define LexLib			/**/
 #endif
-#define HasFlex			YES
 /* On LynxOS AT 2.3.0 /lib/libm.a is a symbolic link to /lib/libc.a, so we
  * screw up some POSIX functionality when -lm comes before -lc_p in our
  * ld argument list. For LynxOS-AT we don't need -lm but for others we 
@@ -200,33 +138,20 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #if OSMajorVersion == 2 && OSMinorVersion <= 2
 # define StandardDefines		-DLynx -DLynx_22 -DX_NOT_POSIX
 #else
-# if defined(i386Architecture)
+# if defined(i386Architecture) && OSMajorVersion == 2 && OSMinorVersion > 4
 /* need __i386__ for 2.5.0 AT and higher */
-#  if OSMajorVersion <= 3
-#   define StandardDefines		-DLynx -DX_LOCALE -D__i386__ -DNO_MMAP
-#  else
-#   define StandardDefines		-DLynx -DX_LOCALE -D__i386__
-#  endif
+#  define StandardDefines		-DLynx -DX_LOCALE -D__i386__
 # else
-#  if OSMajorVersion <= 3
-#   define StandardDefines		-DLynx -DX_LOCALE -DNO_MMAP
-#  else
-#   define StandardDefines		-DLynx -DX_LOCALE
-#  endif
+#  define StandardDefines		-DLynx -DX_LOCALE
 # endif
 #endif
-
-#define StandardCppOptions	-traditional
-#define StandardCppDefines	StandardDefines
-#if defined(i386Architecture) || defined(PpcArchitecture)
-# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
+#define StandardCppDefines	-traditional StandardDefines
+#ifdef i386Architecture
+# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME -DPART_NET
 # define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
-# if OSMajorVersion == 2 && OSMinorVersion < 5
-#  define XkbServerDefines      -DNEED_POPEN_WORKAROUND
-# endif
 #else
 # if defined(SparcArchitecture)
-#  define SparcConsoleDefines	/* -DPATCHED_CONSOLE */
+#  define SparcConsoleDefines	-DPATCHED_CONSOLE
 #  define ServerOSDefines 	-DDDXOSINIT
 #  define ServerExtraDefines	-DGCCUSESGAS SparcConsoleDefines
 #  define XkbServerDefines	-DXKB_ALWAYS_USES_SOFT_REPEAT
@@ -237,7 +162,7 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #endif
 #define ServerExtraSysLibs	$(CBRT) MathLibrary
 #define ConnectionFlags		-DUNIXCONN -DTCPCONN
-#if OSMajorVersion <= 2 && OSMinorVersion < 5
+#if OSMajorVersion == 2 && OSMinorVersion < 5
 # define ExtraLibraries		-lbsd
 #else
 # define ExtraLibraries		-lbsd -llynx
@@ -249,26 +174,12 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 # define XawI18nDefines		-DUSE_XWCHAR_STRING -DUSE_XMBTOWC
 #endif
 
-/* If you have the mtrr driver installed you might want to enable this */
-#ifndef HasMTRRSupport
-#define HasMTRRSupport		NO
-#endif
-
-#if (defined(i386Architecture) || defined(PpcArchitecture)) && (OSMajorVersion > 2 || OSMinorVersion > 2)
-# ifndef DoLoadableServer
-#  define DoLoadableServer	YES
-# endif
-#endif
-
-
 /* define HasMotif to YES for LynxOS with Motif
  * installed according to the notes in README.LynxOS.
  */
 #ifndef HasMotif
 # define HasMotif 		NO
 #endif
-#ifndef MetroLink
-/* We handle the Motif stuff elsewhere */
 #if HasMotif
 # ifndef UseInstalledMotif
 #  define UseInstalledMotif	YES
@@ -278,7 +189,6 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 # endif
 # define LocalTmplFile		<Motif.tmpl>
 # define LocalRulesFile		<Motif.rules>
-#endif
 #endif
 
 #define ManSourcePath   $(MANPATH)/cat
@@ -302,35 +212,27 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 # define FileManDir	$(MANSOURCEPATH)5
 #endif
 
-#define HasGroff	YES
-
 /* groff 1.09 compiles right out of the box with LynxOS 2.3,
  * so if you want to have manual pages you should install groff 1.09
  * before you run 'make install.man'
  */
 #ifndef InstallManPageLong
 #define InstallManPageLong(file,destdir,dest)                           @@\
-BuildInstallHtmlManPage(file,dest,$(MANSUFFIX))				@@\
-									@@\
-CppManTarget(file, $(EXTRAMANDEFS))					@@\
-									@@\
-install.man:: file.$(MANNEWSUFFIX)                                      @@\
+install.man:: file.man                                                  @@\
 	MakeDir($(DESTDIR)destdir)					@@\
 	$(RM) $(DESTDIR)destdir/dest.$(MANSUFFIX)*			@@\
-	groff -e -t -man -Tascii file.$(MANNEWSUFFIX) >/tmp/file.man	@@\
+	groff -e -t -man -Tascii file.man >/tmp/file.man		@@\
 	$(INSTALL) -c $(INSTMANFLAGS) /tmp/file.man $(DESTDIR)destdir/dest.$(MANSUFFIX) @@\
 	echo dest dest $(MANSUFFIX) >> $(DESTDIR)destdir/LIST$(MANSUFFIX) @@\
 	gawk '					\			@@\
 	/^\.SH[ 	]*NAME/ 	{ 	\			@@\
 		getline; sub("\\\\", "(" p ") "); print; exit	\	@@\
-	}' p=$(MANSUFFIX) file.$(MANNEWSUFFIX)  >> $(DESTDIR)destdir/../whatis	@@\
+	}' p=$(MANSUFFIX) file.man  >> $(DESTDIR)destdir/../whatis	@@\
 	$(RM) /tmp/file.man
 #endif
 
 #ifndef InstallManPageAliases
 #define InstallManPageAliases(file,destdir,aliases)                     @@\
-InstallHtmlManPageAliases(file,aliases,$(MANSUFFIX))			@@\
-									@@\
 install.man::                                                           @@\
 	@(SUFFIX=`echo $(DESTDIR)destdir/file.* | cut -f2,3 -d.`; \	@@\
 	for i in aliases; do (set -x; \ 				@@\
@@ -343,21 +245,17 @@ install.man::                                                           @@\
 
 #ifndef InstallGenManPageLong
 #define InstallGenManPageLong(file,destdir,dest,suffix)                 @@\
-BuildInstallHtmlManPage(file,dest,suffix)				@@\
-									@@\
-CppManTarget(file, $(EXTRAMANDEFS))					@@\
-									@@\
-install.man:: file.$(MANNEWSUFFIX)                                      @@\
+install.man:: file.man                                                  @@\
 	MakeDir($(DESTDIR)destdir)					@@\
 	$(RM) $(DESTDIR)destdir/dest.suffix*				@@\
-	groff -e -t -man -Tascii file.$(MANNEWSUFFIX) >/tmp/file.man	@@\
+	groff -e -t -man -Tascii file.man >/tmp/file.man		@@\
 	$(INSTALL) -c $(INSTMANFLAGS) /tmp/file.man $(DESTDIR)destdir/dest.suffix @@\
 	echo dest dest suffix >> $(DESTDIR)destdir/Concat(LIST,suffix)	 @@\
 	gawk '					\			@@\
 	/^\.SH[ 	]*NAME/ 	{ 	\			@@\
 		getline; sub("\\\\", "(" p ") "); print; exit	\	@@\
-	}' p=suffix file.$(MANNEWSUFFIX)  >> $(DESTDIR)destdir/../whatis	@@\
-	$(RM) /tmp/file.man
+	}' p=suffix file.man  >> $(DESTDIR)destdir/../whatis	@@\
+	$(RM) /tmp/file.man)
 #endif
 
 #ifndef InstallMultipleMan
@@ -366,8 +264,8 @@ install.man:: list                                                      @@\
 	MakeDir($(DESTDIR)dest)						@@\
 	@case '${MFLAGS}' in *[i]*) set +e;; esac; \			@@\
 	for i in list; do \						@@\
-		(MNAME=`echo $$i | cut -f1 -d.`; \			@@\
-		set -x; \						@@\
+		(set -x; \						@@\
+		MNAME=`echo $$i | cut -f1 -d.`; \			@@\
 		$(RM) $(DESTDIR)dest/$${MNAME}*; \			@@\
 		groff -e -t -man -Tascii $$i >/tmp/$$i; \		@@\
 		$(INSTALL) -c $(INSTMANFLAGS) /tmp/$$i $(DESTDIR)dest/$${MNAME}.$(MANSUFFIX); \      @@\
@@ -386,6 +284,8 @@ install.man:: list                                                      @@\
 #ifdef SparcArchitecture
 # define XsunLynxServer			YES
 # define XsunLynxMonoServer		NO
+# define BuildPexExt			YES
+# define BuildXIE			YES
 # ifndef BuildScreenSaverLibrary
 #  define BuildScreenSaverLibrary	YES
 # endif
@@ -393,8 +293,11 @@ install.man:: list                                                      @@\
 #  undef BuildXInputExt
 # endif
 # define BuildXInputExt			NO
+# if BuildDPMSExt
+#  undef BuildDPMSExt
+# endif
+# define BuildDPMSExt			NO
 # define BuildXF86MiscExt		NO
-# define BuildXF86VidModeExt		NO
 /*
  * XFree86 uses its own (more portable) database routines to speed up 
  * the RGB database lookups
@@ -406,16 +309,8 @@ install.man:: list                                                      @@\
 # endif
 #endif
 
-#if !defined(i386Architecture) && !defined(PpcArchitecture)
+#ifndef i386Architecture
 # define BuildXF86DGA NO
 #endif
 
-#if 0
-#include <lynxLib.rules>
-#endif
-
-#ifndef UseDeprecatedKeyboardDriver
-#define UseDeprecatedKeyboardDriver YES
-#endif
-
-#include <xorg.cf>
+#include <xfree86.cf>

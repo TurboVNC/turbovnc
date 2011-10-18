@@ -1,204 +1,83 @@
-XCOMM $XdotOrg: xc/config/cf/linux.cf,v 1.31 2005/10/21 19:10:27 ajax Exp $
-XCOMM platform:  $Xorg: linux.cf,v 1.3 2000/08/17 19:41:47 cpqbld Exp $
-
-
-
-
-
-XCOMM platform:  $XFree86: xc/config/cf/linux.cf,v 3.220 2003/12/30 22:38:33 tsi Exp $
+XCOMM platform:  $TOG: linux.cf /main/36 1997/06/16 22:21:03 kaleb $
+XCOMM platform:  $XFree86: xc/config/cf/linux.cf,v 3.57.2.12 1998/03/01 01:57:10 dawes Exp $
 
 #ifndef LinuxElfDefault
-# define LinuxElfDefault	YES
+#define LinuxElfDefault		YES
 #endif
 
 #ifndef UseElfFormat
-# define UseElfFormat		LinuxElfDefault
+#define UseElfFormat		LinuxElfDefault
 #endif
 
 #ifndef OSBinaryType
-# if UseElfFormat
-#  define OSBinaryType		[ELF]
-# else
-#  ifdef AlphaArchitecture
-#   define OSBinaryType		[ECOFF]
-#  else
-#   define OSBinaryType		[a.out]
-#  endif
-# endif
+#if UseElfFormat
+#define OSBinaryType		[ELF]
+#else
+#ifdef AlphaArchitecture
+#define OSBinaryType		[ECOFF]
+#else
+#define OSBinaryType		[a.out]
+#endif
+#endif
 #endif
 
 #ifndef OSName
-# define OSName			DefaultOSName OSBinaryType
+#define OSName			DefaultOSName OSBinaryType
 #endif
 
 #ifndef OSVendor
-# define OSVendor		/**/
+#define OSVendor		/**/
 #endif
 #ifndef OSMajorVersion
-# define OSMajorVersion		DefaultOSMajorVersion
+#define OSMajorVersion		DefaultOSMajorVersion
 #endif
 #ifndef OSMinorVersion
-# define OSMinorVersion		DefaultOSMinorVersion
+#define OSMinorVersion		DefaultOSMinorVersion
 #endif
 #ifndef OSTeenyVersion
-# define OSTeenyVersion		DefaultOSTeenyVersion
+#define OSTeenyVersion		DefaultOSTeenyVersion
 #endif
 
-#ifndef LinuxDistribution
-# define LinuxDistribution	DefaultLinuxDistribution
-/*
-  Add "#define LinuxDistribution Linux<mumble>" to your site.def or host.def.
-  Currently only LinuxSuSE, LinuxRedHat and LinuxDebian will be figured out
-  automatically.
-  Valid values are (from the list at www.linux.org in Oct. '97):
-    LinuxUnknown    (0)
-    LinuxSuSE       (1)
-    LinuxCaldera    (2)
-    LinuxCraftworks (3)
-    LinuxDebian     (4)
-    LinuxInfoMagic  (5)
-    LinuxKheops     (6)
-    LinuxPro        (7)
-    LinuxRedHat     (8)
-    LinuxSlackware  (9)
-    LinuxTurbo      (10)
-    LinuxWare       (11)
-    LinuxYggdrasil  (12)
-*/
+/* Set some defaults for the Default* values in case imake doesn't find them */
+#ifndef DefaultLinuxCLibMajorVersion
+#if defined(AlphaArchitecture) || defined(PowerPCArchitecture) || \
+    defined(SparcArchitecture) || defined(ArmArchitecure) || \
+    defined(i386Architecture) || defined(s390Architecture) || \
+    defined(s390xArchitecture) || defined(ia64Architecture) || \
+    defined(x86_64Architecture)
+#define DefaultLinuxCLibMajorVersion	6
+#else
+#define DefaultLinuxCLibMajorVersion	5
 #endif
-#ifndef LinuxDistName
-# define LinuxDistName		DefaultLinuxDistName
 #endif
+#ifndef DefaultLinuxCLibMinorVersion
+#if DefaultLinuxCLibMajorVersion > 5
+#define DefaultLinuxCLibMinorVersion	0
+#else
+#define DefaultLinuxCLibMinorVersion	4
+#endif
+#endif
+#ifndef DefaultLinuxCLibTeenyVersion
+#define DefaultLinuxCLibTeenyVersion	0
+#endif
+
 #ifndef LinuxCLibMajorVersion
-# define LinuxCLibMajorVersion	DefaultLinuxCLibMajorVersion
+#define LinuxCLibMajorVersion	DefaultLinuxCLibMajorVersion
 #endif
 #ifndef LinuxCLibMinorVersion
-# define LinuxCLibMinorVersion	DefaultLinuxCLibMinorVersion
+#define LinuxCLibMinorVersion	DefaultLinuxCLibMinorVersion
 #endif
 #ifndef LinuxCLibTeenyVersion
-# define LinuxCLibTeenyVersion	DefaultLinuxCLibTeenyVersion
-#endif
-
-#ifndef HasGhostScript
-# define HasGhostScript YES
-#endif
-#ifndef BuildPDFdocs
-# define BuildPDFdocs NO
+#define LinuxCLibTeenyVersion	DefaultLinuxCLibTeenyVersion
 #endif
 
 #ifndef LinuxBinUtilsMajorVersion
-# define LinuxBinUtilsMajorVersion	DefaultLinuxBinUtilsMajorVersion
+#define LinuxBinUtilsMajorVersion	DefaultLinuxBinUtilsMajorVersion
 #endif
 
 XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVersion)
 XCOMM libc:	(LinuxCLibMajorVersion./**/LinuxCLibMinorVersion./**/LinuxCLibTeenyVersion)
 XCOMM binutils:	(LinuxBinUtilsMajorVersion)
-
-#if LinuxDistribution == LinuxDebian
-# if !defined(NothingOutsideProjectRoot) || !NothingOutsideProjectRoot
-#  define SystemManDirectory	/usr/share/man
-# endif
-# define HasPam			YES
-/* un-comment this when it is un-broken */
-/* # define JoystickSupport YES */
-# if !defined(NothingOutsideProjectRoot) || !NothingOutsideProjectRoot
-#  define XAppLoadDir		EtcX11Directory/app-defaults
-# define XFileSearchPathDefault	Concat4(EtcX11Directory/%L/%T/%N%C,%S:EtcX11Directory/%l/%T/%N%C,%S:EtcX11Directory/%T/%N%C,%S:EtcX11Directory/%L/%T/%N%S:EtcX11Directory/%l/%T/%N%S:EtcX11Directory/%T/%N%S):Concat4($(LIBDIR)/%L/%T/%N%C,%S:$(LIBDIR)/%l/%T/%N%C,%S:$(LIBDIR)/%T/%N%C,%S:$(LIBDIR)/%L/%T/%N%S:$(LIBDIR)/%l/%T/%N%S:$(LIBDIR)/%T/%N%S)
-/* the relative symlink created by this rule causes problems for us */
-# if defined(InstallAppDefFiles) && InstallAppDefFiles
-#  define InstallAppDefaultsLong(file,class)				@@\
-InstallNamedTarget(install,file.ad,$(INSTAPPFLAGS),$(XAPPLOADDIR),class)
-# else
-#  define InstallAppDefaultsLong(file,class)				@@\
-InstallNamedTargetNoClobber(install,file.ad,$(INSTAPPFLAGS),$(XAPPLOADDIR),class)
-# endif /* InstallAppDefFiles */
-# endif /* !defined(NothingOutsideProjectRoot) || !NothingOutsideProjectRoot */
-# define SharedLibXdmGreet	NO
-# define LinkGLToUsrInclude	NO
-# define LinkGLToUsrLib		NO
-# define SharedLibFont		NO
-# define SharedLibGlu		YES
-# define NormalLibGlu		YES
-# define FSUseSyslog		YES
-
-# define BuildLibGlxWithoutPIC  NO
-
-# define DriverManSuffix       4x
-# define DriverManDir          $(MANSOURCEPATH)4
-
-# define MiscManSuffix         7x
-# define MiscManDir            $(MANSOURCEPATH)7
-
-/*
- *
- *
-# define DebianMaintainer	YES
- *
- *
- */
-
-# ifdef DebianMaintainer
-#  ifndef XorgCustomVersion
-#   define XorgCustomVersion		"Debian"
-#  endif
-#  ifndef BuilderEMailAddr
-#   define BuilderEMailAddr		"debian-x@lists.debian.org"
-#  endif
-#  define XFree86Devel			YES
-#  define BuildAllSpecsDocs		YES
-#  define InstallXinitConfig		YES
-#  define InstallXdmConfig		YES
-#  define InstallFSConfig		YES
-#  define DebuggableLibraries		YES
-#  define ForceNormalLib		YES
-#  define BuildSpecsDocs		YES
-#  define SpecsDocDirs			CTEXT GL ICCCM X11 Xext Xv i18n xterm
-#  define BuildRman			NO
-#  define BuildHtmlManPages		NO
-
-/* we build-depend on libfreetype6-dev (FreeType 2.x) */
-#   define BuildFreetype2Library	NO
-#   define HasFreetype2			YES
-/* m68k has no 2.4 kernel yet */
-#   ifndef Mc68020Architecture
-#    define HasLinuxInput		YES
-#   endif
-#   define HasXdmAuth			YES
-#   define HasLatex			YES
-/* at present, glide2 only works on i386 */
-#   if defined(__linux__) && defined(i386Architecture)
-#    define HasGlide2			YES
-#    define Glide2IncDir		/usr/include/glide
-#   endif /* __linux__ && i386Architecture */
-/* at present, glide3 only works on alpha, amd64, i386 and ia64 */
-#   if defined(__linux__) && (defined(i386Architecture) || \
-       defined(AlphaArchitecture) || defined(ia64Architecture) || \
-       defined(AMD64Architecture))
-#    define HasGlide3			YES
-#    define Glide3IncDir		/usr/include/glide3
-#   endif /* __linux__ && (i386Architecture || AlphaArchitecture || \
-             ia64Architecture || AMD64Architecture) */
-/* extended instruction set support */
-#   ifdef i386Architecture
-#   define HasX86Support		YES
-#    define HasMMXSupport		YES
-#    define Has3DNowSupport		YES
-/* 2.4 is not yet the official (or predominant) kernel in unstable */
-#    define HasSSESupport		NO
-#   endif /* i386Architecture */
-# endif /* DebianMaintainer */
-#endif /* LinuxDebian */
-
-#if LinuxDistribution == LinuxRedHat
-#define FSUseSyslog		YES
-#endif
-
-#ifndef HasDevRandom
-# define HasDevRandom YES
-# ifndef RandomDeviceName
-#  define RandomDeviceName /dev/urandom
-# endif
-#endif
 
 /*
  * The Linux BinUtils major version.  25 => 2.5.x, which is what is included
@@ -208,281 +87,49 @@ InstallNamedTargetNoClobber(install,file.ad,$(INSTAPPFLAGS),$(XAPPLOADDIR),class
  *
  */
 #ifndef BinUtilsMajorVersion
-# define BinUtilsMajorVersion	LinuxBinUtilsMajorVersion
+#define BinUtilsMajorVersion	LinuxBinUtilsMajorVersion
 #endif
 
-#if (LinuxCLibMajorVersion >= 6 || LinuxDistribution == LinuxSuSE)
-# define LinuxLocaleDefines	/**/
+#if LinuxCLibMajorVersion >= 6 || \
+	(LinuxCLibMajorVersion == 5 && LinuxCLibMinorVersion == 99)
+#define LinuxSourceDefines	-D_POSIX_C_SOURCE=199309L \
+				-D_POSIX_SOURCE -D_XOPEN_SOURCE=500L \
+				-D_BSD_SOURCE -D_SVID_SOURCE
+#define XawI18nDefines		-DHAS_WCHAR_H -DHAS_WCTYPE_H -DNO_WIDEC_H
+#if !defined(AlphaArchitecture)
+#define HasPosixThreads		YES
+#define ThreadedX		YES
+#define HasThreadSafeAPI	YES
+#define ThreadsLibraries	-lpthread
+#define SystemMTDefines		-D_REENTRANT
+#endif
+#ifndef HasLibCrypt
+#define HasLibCrypt		YES
+#endif
 #else
-# define LinuxLocaleDefines	-DX_LOCALE
+#define LinuxSourceDefines	-D_POSIX_SOURCE \
+				-D_BSD_SOURCE -D_SVID_SOURCE -DX_LOCALE
+#define XawI18nDefines		-DUSE_XWCHAR_STRING -DUSE_XMBTOWC
+#ifndef HasLibCrypt
+#define HasLibCrypt		NO
 #endif
-
-#ifndef  LinuxAdditionalIncludes
-# define LinuxAdditionalIncludes	/**/
-#endif
-
-#ifndef LinuxGnuSourceDefines
-# ifdef UseInstalled
-#  define LinuxGnuSourceDefines	/**/
-# else
-#  define LinuxGnuSourceDefines	-D_GNU_SOURCE
-# endif
-#endif
-
-#if LinuxCLibMajorVersion >= 6
-# define LinuxSourceDefines	-D_POSIX_C_SOURCE=199309L \
-				-D_POSIX_SOURCE -D_XOPEN_SOURCE \
-				-D_BSD_SOURCE -D_SVID_SOURCE \
-                                -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
-				LinuxAdditionalIncludes LinuxGnuSourceDefines \
-				LinuxLocaleDefines
-# define XawI18nDefines		-DHAS_WCHAR_H -DHAS_WCTYPE_H -DNO_WIDEC_H
-# define HasPosixThreads	YES
-# define ThreadedX		YES
-# define HasThreadSafeAPI	YES
-# define ThreadsLibraries	-lpthread
-# define SystemMTDefines	-D_REENTRANT
-# ifndef HasLibCrypt
-#  define HasLibCrypt		YES
-# endif
-/* netscape wraps select but not poll as of communicator 4.72 */
-# ifndef HasPoll
-#  define HasPoll		NO
-# endif
-#else
-# define LinuxSourceDefines	-D_POSIX_SOURCE -D_POSIX_C_SOURCE=2 \
-				-D_BSD_SOURCE -D_SVID_SOURCE \
-				LinuxGnuSourceDefines LinuxLocaleDefines
-# define XawI18nDefines		-DUSE_XWCHAR_STRING -DUSE_XMBTOWC
-# ifndef HasLibCrypt
-#  define HasLibCrypt		NO
-# endif
-# ifndef HasBasename
-#  define HasBasename		NO
-# endif
-  /* Proliferation of C99isms makes -ansi unpalatable... */
-# if !defined(DefaultCCOptions) && !defined(UseInstalled) && HasGcc
-#  define DefaultCCOptions	GccWarningOptions
-# endif
-#endif
-
-#ifndef InstallXloadSetGID
-#define InstallXloadSetGID	NO
-#endif
-
-/*
- * XXX Check which versions of Linux really have IPv6.  glibc 2.0 on
- * Red Hat 5.2 doesn't.
- */
-#if LinuxCLibMajorVersion < 6 || \
-    (LinuxCLibMajorVersion == 6 && LinuxCLibMinorVersion == 0)
-#define BuildIPv6		NO
-#endif
-
-/* <linux/input.h> support mainly for USB support */
-#ifndef HasLinuxInput
-# if defined(__linux__) && (OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion >= 4))
-#  define HasLinuxInput YES
-# else
-#  define HasLinuxInput NO
-# endif
-#endif
-
-#ifndef JoystickSupport
-# define JoystickSupport	NO	/* joystick driver is broken */
-#endif
-
-/* <linux/joystick.h> appeared in 2.1.45 (officially) */
-#ifndef HasLinuxSupport
-# if defined(__linux__) && (JoystickSupport || \
-     (OSMajorVersion > 2) || \
-     ((OSMajorVersion == 2) && (OSMinorVersion > 1)) || \
-     ((OSMajorVersion == 2) && (OSMinorVersion == 1) && (OSTeenyVersion >= 45)))
-#  define HasLinuxJoystick	YES
-# else
-#  define HasLinuxJoystick	NO
-# endif
-#endif
-
-/* Libtool on linux always uses minor numbers */
-#define LibtoolMinorVersions	YES
-
-/* On x86, determine whether to build with MTRR support */
-#ifndef HasMTRRSupport
-# if defined (i386Architecture) || defined (AMD64Architecture)
-#  if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion > 1) || \
-      (OSMajorVersion == 2 && OSMinorVersion == 1 && OSTeenyVersion >= 99)
-#   define HasMTRRSupport	YES
-#  else
-#   define HasMTRRSupport	NO
-#  endif
-# else
-#  define HasMTRRSupport	NO	/* no for non-ix86 */
-# endif
-#endif
-
-#ifndef XF86INT10_BUILD
-# if defined(__linux__) && defined(i386Architecture)
-#  define XF86INT10_BUILD	X86VM
-# elif defined(__linux__) && defined(AMD64Architecture)
-#  define XF86INT10_BUILD	X86EMU_OS
-# else
-#  define XF86INT10_BUILD	X86EMU_GENERIC
-# endif
-#endif
-
-/* 
- * Let the OS restore console fonts instead of the generic VGA
- * layer. This exists for Linux only at the moment so put it
- * here.
- */
-#ifndef DoOSFontRestore
-# define DoOSFontRestore YES
-#endif
-
-/* Should we check the OS version to determine if the kernel supports it? */
-#if DoOSFontRestore
-# ifndef FontRestoreCheckOsVersion
-#  define FontRestoreCheckOsVersion YES
-# endif
-#endif
-
-/* The DRM module requires kernel services that appeared in late 2.1.x
-   kernels and are known to be present in 2.2.x kernels. */
-#ifndef BuildXF86DRI
-#  if defined(AlphaArchitecture)
-#    define BuildXF86DRI	YES
-#  elif defined(Arm32Architecture)
-#    define BuildXF86DRI	NO
-#  elif defined(HPArchitecture)
-#    define BuildXF86DRI	YES
-#  elif defined(i386Architecture)
-#    if (defined(__linux__) && (OSMajorVersion > 2 || (OSMajorVersion == 2 && \
-        OSMinorVersion >= 2))) || \
-        defined(__FreeBSD_kernel__)
-#      define BuildXF86DRI	YES
-#    else
-#      define BuildXF86DRI	NO
-#    endif
-#  elif defined(ia64Architecture)
-#    define BuildXF86DRI	YES
-#  elif defined(Mc68020Architecture)
-#    define BuildXF86DRI	NO
-#  elif defined(MipsArchitecture)
-#    define BuildXF86DRI	NO
-#  elif defined(PpcArchitecture)
-#    define BuildXF86DRI	YES
-#  elif defined(Ppc64Architecture)
-#    define BuildXF86DRI	NO
-#  elif defined(s390Architecture) || defined(s390xArchitecture)
-#    define BuildXF86DRI	NO
-#  elif defined(SparcArchitecture)
-#    define BuildXF86DRI	YES
-#  elif defined(SuperHArchitecture)
-#    define BuildXF86DRI	NO
-#  elif defined(AMD64Architecture)
-#    define BuildXF86DRI	YES
-#  else
-#    define BuildXF86DRI	NO
-#  endif
-#endif
-
-/*
- * Build shared libGL and the DRI modules without -fPIC on some architectures.
- * This improves performance.
- */
-#ifndef BuildLibGlxWithoutPIC
-# if BuildXF86DRI
-#  if defined(i386Architecture)
-#   define BuildLibGlxWithoutPIC	YES
-#  endif
-# endif
-#endif
-
-#ifndef HasAgpGart
-#  if defined(i386Architecture) || defined(ia64Architecture) || defined(AMD64Architecture)
-     /* The AGPGART header file is included in os-support/linux, which
-        allows all drivers that depend on AGP to build properly. */
-#    define HasAgpGart	YES
-#  else
-#    define HasAgpGart	NO
-#  endif
-#endif
-
-/*
- * Support for Intel's SSE Native Instructions, also known as the
- * Streaming SIMD Extensions, was introduced in the 2.4.x kernels.
- */
-#ifndef HasSSESupport
-#  if defined(i386Architecture)
-#    if OSMajorVersion > 2 || (OSMajorVersion == 2 && OSMinorVersion >= 4)
-#      define HasSSESupport		YES
-#    else
-#      define HasSSESupport		NO
-#    endif
-#  else
-#    define HasSSESupport		NO
-#  endif
-#endif
-
-/*
- * Support for MMX isn't present in the Assembler used in Red Hat 4.2, so
- * don't enable it for libc5 as a reasonable default.
- */
-#ifndef HasMMXSupport
-#  if defined(i386Architecture)
-#    if (LinuxCLibMajorVersion > 5)
-#      define HasMMXSupport		YES
-#    else
-#      define HasMMXSupport		NO
-#    endif
-#  else
-#    define HasMMXSupport		NO
-#  endif
-#endif
-
-/*
- * Support for 3DNow isn't present in the Assembler used in Red Hat 4.2, so
- * don't enable it for libc5 as a reasonable default.
- *
- * XXX This is preliminary.
- */
-#ifndef Has3DNowSupport
-#  if defined(i386Architecture)
-#    if (LinuxCLibMajorVersion > 5)
-#      define Has3DNowSupport		YES
-#    else
-#      define Has3DNowSupport		NO
-#    endif
-#  else
-#    define Has3DNowSupport		NO
-#  endif
-#endif
-
-/*
- * The Rush extension support.
- */
-#ifndef BuildXF86RushExt
-# define BuildXF86RushExt	YES
-#endif
-
-#if defined(__linux__) && !defined(LinuxFBDevSupport)
-# define LinuxFBDevSupport	YES
 #endif
 
 /* For compatibility */
 #define SourceDefines		LinuxSourceDefines
 
-#define BuildLibPathVar		LD_LIBRARY_PATH
+#ifndef HasGcc
+#define HasGcc			YES
+#endif
+#ifndef HasGcc2
+#define HasGcc2			YES
+#endif
+#ifndef HasGcc2ForCplusplus
+# define HasGcc2ForCplusplus	YES
+#endif
 #define GccUsesGas		YES
 #define UseGas			YES
 #define GnuCpp			YES
-#if UseElfFormat
-# ifndef HasDlopen
-#  define HasDlopen		YES
-# endif
-#endif
-#define HasWeakSymbols		UseElfFormat
 #ifndef HasShadowPasswd
 # if UseElfFormat
 #  define HasShadowPasswd	YES
@@ -491,62 +138,15 @@ InstallNamedTargetNoClobber(install,file.ad,$(INSTAPPFLAGS),$(XAPPLOADDIR),class
 # endif
 #endif
 #define HasPutenv		YES
-#ifndef HasShm
-# define HasShm			YES
-#endif
-
-/* Use SecureRPC (used for SUN-DES-1 auth. and other goodies) when
- * glibc has support for it */
-#ifndef HasSecureRPC
-# if !(LinuxCLibMajorVersion < 6 || \
-       (LinuxCLibMajorVersion == 6 && LinuxCLibMinorVersion < 3))
-#  define HasSecureRPC          YES
-# endif
-#endif
-
+#define HasShm			YES
 #define HasSockets		YES
 #if UseElfFormat || defined(AlphaArchitecture)
-#ifndef HasSnprintf
 #define HasSnprintf		YES
-#endif
 #define HasMkstemp		YES
-#endif
-/* getresuid() appeared in 2.1.4, and getresgid in 2.1.44 */
-#if !defined(HasGetresuid) && \
- (((OSMajorVersion*100000) + (OSMinorVersion*1000) + OSTeenyVersion) >= 201044)
-#define HasGetresuid		YES
-#endif
-#if OSMajorVersion >= 2
-#define HasUsableFileMmap	YES
-#endif
-#ifndef HasNCurses
-#define HasNCurses		YES
-#endif
-
-#ifndef HasGroff
-#define HasGroff		YES
-#endif
-
-#ifndef HasZlib
-#define HasZlib			YES
-#endif
-
-#ifndef HasLibpng
-#define HasLibpng		YES
-#endif
-
-#ifndef HasExpat
-# define HasExpat		YES
-#endif
-
-#ifndef HasFreetype2
-# define HasFreetype2		YES
 #endif
 
 #define AvoidNullMakeCommand	YES
-#ifndef DebuggableLibraries
-#define DebuggableLibraries	NO
-#endif
+#define StripInstalledPrograms	YES
 #define CompressAllFonts	YES
 #define Malloc0ReturnsNull	YES
 #define NeedConstPrototypes	YES
@@ -562,453 +162,204 @@ InstallNamedTargetNoClobber(install,file.ad,$(INSTAPPFLAGS),$(XAPPLOADDIR),class
 #define UseStaticTermcapLib	NO
 #endif
 
-#ifndef HasCookieMaker
-#define HasCookieMaker		YES
-#define MkCookieCmd		mcookie
-#endif
-
-#ifndef BourneShell
-/*
- * This will cause builds/installs to terminate on errors, as on other
- * platforms.
- */
-#define BourneShell		/bin/sh -e
-#endif
-
 #define MkdirHierCmd		mkdir -p
-
-#ifndef HaveLib64
-# if defined (AMD64Architecture) || defined (s390xArchitecture) || defined (Ppc64Architecture)
-#  define HaveLib64	YES
-# else
-#  define HaveLib64	NO
-# endif
-#endif
-
-#if UseElfFormat
-# ifndef DoLoadableServer
-#  if defined(MipsArchitecture) || defined(SuperHArchitecture)
-#   define DoLoadableServer	NO
-#  else
-#   define DoLoadableServer	YES
-#  endif
-# endif
-#endif
-
-
 #if LinuxElfDefault
-# if UseElfFormat
-#  ifdef MipsArchitecture
-#   ifndef AsCmd
-#     define AsCmd		gcc -c -x assembler-with-cpp
-#   endif
-#   ifndef MakeDllModules
-#     define MakeDllModules	YES
-#   endif
-#  endif /* MipsArchitecure */
-#  if defined (i386Architecture) && ((GccMajorVersion >3) \
-   || ((GccMajorVersion == 3) &&  (GccMinorVersion >= 1)))
-#   ifndef CcCmd
-#    define CcCmd		gcc -m32
-#   endif
-#   ifndef CplusplusCmd
-#    define CplusplusCmd	c++ -m32
-#   endif
-#  endif
-#  if defined (Ppc64Architecture)
-#   ifndef CcCmd
-#    define CcCmd		gcc -m64
-#   endif
-#   ifndef CplusplusCmd
-#    define CplusplusCmd	c++ -m64
-#   endif
-#  endif
-#  ifndef CcCmd
-#   define CcCmd		gcc
-#   define CplusplusCmd		c++
-#  endif
-#  ifndef AsCmd
-#   define AsCmd		CcCmd -c -x assembler
-#  endif
-#  define AsmDefines		-D__ELF__
-#  ifndef LdCmd
-#   define LdCmd		CcCmd -nostdlib
-#  endif
-#  ifndef LinuxUsesNcurses
-#   if LinuxCLibMajorVersion >= 6 || (LinuxDistribution == LinuxSuSE)
-#    define LinuxUsesNcurses	YES
-#   else
-#    define LinuxUsesNcurses	NO
-#   endif
-#  endif
-#  ifndef TermcapLibrary
-#   if UseStaticTermcapLib
-#    if LinuxUsesNcurses
-#     if !HaveLib64
-#      define TermcapLibrary	StaticLibrary(/usr/lib,ncurses)
-#     else
-#      define TermcapLibrary	StaticLibrary(/usr/lib64,ncurses)
-#     endif
-#    else
-#     if !HaveLib64
-#      define TermcapLibrary	StaticLibrary(/usr/lib/termcap,termcap)
-#     else
-#      define TermcapLibrary	StaticLibrary(/usr/lib64/termcap,termcap)
-#     endif
-#    endif
-#   else
-#    if LinuxUsesNcurses
-#     define TermcapLibrary	-lncurses
-#    else
-#     define TermcapLibrary	-ltermcap
-#    endif
-#   endif
-#  endif
-# else /* UseElfFormat */
-#  ifdef AlphaArchitecture
-#   define CcCmd		gcc -b alpha-linuxecoff
-#   define CplusplusCmd		g++ -b alpha-linuxecoff
-#   define AsCmd		CcCmd -c -x assembler
-#   define LdCmd		CcCmd -nostdlib -Wl,"-m alpha"
-#   define AsmDefines		-DUSE_GAS -U__ELF__
-#  endif /* AlphaArchitecture */
-#  ifdef HPArchitecture
-#   define CcCmd		gcc
-#   define CplusplusCmd		g++
-#   define AsCmd		CcCmd -c -x assembler
-#   define LdCmd		CcCmd -nostdlib
-#   define AsmDefines		-DUSE_GAS -U__ELF__
-#  endif /* HPArchitecture */
-#  ifdef i386Architecture
-#   define CcCmd		gcc -b i486-linuxaout
-#   define CplusplusCmd		g++ -b i486-linuxaout
-#   define AsCmd		CcCmd -c -x assembler
-#   define LdCmd		CcCmd -nostdlib -Wl,"-m i386linux"
-#   define AsmDefines		-DUSE_GAS -U__ELF__
-#  endif /* i386Architecture */
-#  ifdef ia64Architecture
-#   define CcCmd		gcc
-#   define CplusplusCmd		g++
-#   define AsCmd		CcCmd -c -x assembler
-#   define LdCmd		CcCmd -nostdlib
-#   define AsmDefines		-DUSE_GAS -U__ELF__
-#  endif /* ia64Architecture */
-#  ifdef Mc68020Architecture
-#   define CcCmd		gcc -b m68k-linuxaout
-#   define CplusplusCmd		g++ -b m68k-linuxaout
-#   define AsCmd		CcCmd -c -x assembler
-#   define LdCmd		CcCmd -nostdlib -Wl,"-m m68klinux"
-#   define AsmDefines		-DUSE_GAS -U__ELF__
-#  endif /* Mc68020Architecture */
-#  ifdef AMD64Architecture
-#   define CcCmd		gcc
-#   define CplusplusCmd		g++
-#   define AsCmd		CcCmd -c -x assembler
-#   define LdCmd		CcCmd -nostdlib
-#   define AsmDefines		-DUSE_GAS -U__ELF__
-#  endif /* AMD64Architecture */
-# endif /* UseElfFormat */
+#if UseElfFormat
+#define CcCmd			gcc
+#define AsCmd			as
+#define LdCmd			ld
+#define AsmDefines		-D__ELF__
+#define CplusplusCmd		c++
+#if UseStaticTermcapLib
+#define TermcapLibrary		StaticLibrary(/usr/lib/termcap,termcap)
+#endif
 #else
-# if UseElfFormat
-#  ifdef AlphaArchitecture
-#   define CcCmd		gcc -b alpha-linux
-#   define AsCmd		CcCmd -c -x assembler
-#   define LdCmd		CcCmd -nostdlib -Wl,"-m elf64alpha"
-#   define AsmDefines		-D__ELF__
-#   define CplusplusCmd		c++ -b alpha-linux
-#  endif /* AlphaArchitecture */
-#  ifdef HPArchitecture
-#   define CcCmd		gcc
-#   define CplusplusCmd		g++
-#   define AsCmd		CcCmd -c -x assembler
-#   define LdCmd		CcCmd -nostdlib
-#   define AsmDefines		-D__ELF__
-#   define SharedLibXau		YES
-#  endif /* HPArchitecture */
-#  ifdef i386Architecture
-#   define CcCmd		gcc -b i486-linux
-#   define AsCmd		CcCmd -c -x assembler
-#   define LdCmd		CcCmd -nosdlib -Wl,"-m elf_i386"
-#   define AsmDefines		-D__ELF__
-#   define CplusplusCmd		c++ -b i486-linux
-#  endif /* i386Architecture */
-#  ifdef ia64Architecture
-#   define CcCmd		gcc
-#   define CplusplusCmd		g++
-#   define AsCmd		CcCmd -c -x assembler
-#   define LdCmd		CcCmd -nostdlib
-#   define AsmDefines		-D__ELF__
-#  endif /* ia64Architecture */
-#  ifdef Mc68020Architecture
-#   define CcCmd		gcc -b m68k-linux
-#   define AsCmd		CcCmd -c -x assembler
-#   define LdCmd		CcCmd -nostdlib -W,l"-m m68kelf"
-#   define AsmDefines		-D__ELF__
-#   define CplusplusCmd		c++ -b m68k-linux
-#  endif /* Mc68020Architecture */
-#  ifdef AMD64Architecture
-#   define CcCmd                 gcc
-#   define CplusplusCmd          g++
-#   define AsCmd                 CcCmd -c -x assembler
-#   define LdCmd                 CcCmd -nostdlib
-#   define AsmDefines            -D__ELF__
-#  endif /* AMD64Architecture */
-# else
-#  define CcCmd			gcc
-#  define AsCmd			CcCmd -c -x assembler
-#  define LdCmd			CcCmd -nostdlib
-#  define AsmDefines		-DUSE_GAS
-# endif
+#ifdef AlphaArchitecture
+#define CcCmd			gcc -b alpha-linuxecoff
+#define CplusplusCmd		g++ -b alpha-linuxecoff
+#define AsCmd			/usr/alpha-linuxecoff/bin/as
+#define LdCmd			/usr/alpha-linuxecoff/bin/ld -m alpha
+#define AsmDefines		-DUSE_GAS -U__ELF__
+#endif /* AlphaArchitecture */
+#ifdef SparcArchitecture
+#define AsmDefines		-D__ELF__
+#endif /* SparcArchitecture */
+#ifdef i386Architecture
+#define CcCmd			gcc -b i486-linuxaout
+#define CplusplusCmd		g++ -b i486-linuxaout
+#define AsCmd			/usr/i486-linuxaout/bin/as
+#define LdCmd			/usr/i486-linuxaout/bin/ld -m i386linux
+#define AsmDefines		-DUSE_GAS -U__ELF__
+#endif /* i386Architecture */
+#ifdef Mc68020Architecture
+#define CcCmd			gcc -b m68k-linuxaout
+#define CplusplusCmd		g++ -b m68k-linuxaout
+#define AsCmd			/usr/m68k-linuxaout/bin/as
+#define LdCmd			/usr/m68k-linuxaout/bin/ld -m m68klinux
+#define AsmDefines		-DUSE_GAS -U__ELF__
+#endif /* Mc68020Architecture */
 #endif
-
-/*
- * Some older distros still need /lib/cpp.  There's probably a better
- * test, but this handles the older Red Hat releases at least.
- */
-#ifndef CppCmd
-# if (LinuxDistribution == LinuxRedHat) && \
-     ((LinuxCLibMajorVersion < 6) || \
-      (LinuxCLibMajorVersion == 6 && LinuxCLibMinorVersion < 1))
-#  define CppCmd		/lib/cpp
-# else
-#  define CppCmd		cpp
-# endif
+#else
+#if UseElfFormat
+#ifdef AlphaArchitecture
+#define CcCmd			gcc -b alpha-linux
+#define AsCmd			/usr/alpha-linux/bin/as
+#define LdCmd			ld -m elf64alpha
+#define AsmDefines		-D__ELF__
+#define CplusplusCmd		c++ -b alpha-linux
+#endif /* AlphaArchitecture */
+#ifdef SparcArchitecture
+#define AsmDefines		-D__ELF__
+#endif /* SparcArchitecture */
+#ifdef i386Architecture
+#define CcCmd			gcc -b i486-linux
+#define AsCmd			/usr/i486-linux/bin/as
+#define LdCmd			ld -m elf_i386
+#define AsmDefines		-D__ELF__
+#define CplusplusCmd		c++ -b i486-linux
+#endif /* i386Architecture */
+#ifdef Mc68020Architecture
+#define CcCmd			gcc -b m68k-linux
+#define AsCmd			/usr/m68k-linux/bin/as
+#define LdCmd			ld -m m68kelf
+#define AsmDefines		-D__ELF__
+#define CplusplusCmd		c++ -b m68k-linux
+#endif /* Mc68020Architecture */
+#else
+#define CcCmd			gcc
+#define AsCmd			as
+#define LdCmd			ld
+#define AsmDefines		-DUSE_GAS
 #endif
-
-/* Some Linux distributions have yacc, some don't. All have bison. */
+#endif
+#if UseElfFormat
+#ifndef BuildDynamicLoading
+#define BuildDynamicLoading	YES
+#endif
+#endif
+#define CppCmd			/lib/cpp
+#ifdef USE_BYACC
+#define YaccCmd			byacc
+#else
 #define YaccCmd			bison -y
+#endif
 #define LexCmd			flex -l
-#define HasFlex			YES
 #define LexLib			-lfl
 #define PreProcessCmd		CcCmd -E
 #define PostIncDir		DefaultGccIncludeDir
 #define LdCombineFlags		-r
-#ifndef LdPostLib
-# define LdPostLib		/* Never needed */
-#endif
+#define LdPostLib		/* Never needed */
 #define HasWChar32		YES
-#define StandardCppOptions	-traditional
-#define StandardCppDefines	StandardDefines
+#define StandardCppDefines	-traditional StandardDefines
 
-#define HasVarRun		YES
-#ifndef VarDbDirectory
-# define VarDbDirectory		$(VARDIR)/lib
-#endif
-
-#ifndef XF86OSCardDrivers
-# ifdef __linux__
-#  define XF86OSCardDrivers	fbdev v4l sisusb
-# else
-#  define XF86OSCardDrivers	/**/
-# endif
-#endif
-
-#ifndef OSXInputDrivers
-# if HasLinuxJoystick
-#  define OSXInputDrivers1	ur98
-# else
-#  define OSXInputDrivers1	/**/
-# endif
-# if HasLinuxInput
-#  define OSXInputDrivers2	aiptek evdev
-# else
-#  define OSXInputDrivers2	/**/
-# endif
-# define OSXInputDrivers	OSXInputDrivers1 OSXInputDrivers2
-#endif
-
-#if UseElfFormat
-# define HasPlugin			YES
-# define VendorHasX11R6_3libXext	YES	/* XC or XFree86 >= 3.3.1 */
-#endif
-
-#ifdef AlphaArchitecture
-# ifndef OptimizedCDebugFlags
-#  define OptimizedCDebugFlags	DefaultGcc2AxpOpt
-# endif
-# define LinuxMachineDefines	-D__alpha__
-# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
-# define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines -D_XSERVER64 -DJENSEN_SUPPORT
-# ifdef UseCompaqMathLibrary
-#  define MathLibrary		-lcpml -lm
-# endif
-#endif /* AlphaArchitecture */
-
-#ifdef Arm32Architecture
-# define DefaultCCOptions
-# ifndef OptimizedCDebugFlags
-#  define OptimizedCDebugFlags	-O3
-# endif
-# define LinuxMachineDefines	-D__arm__ -D__arm32__ -U__arm -Uarm
-# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
-# define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
-#endif /* Arm32Achitecture */
-
-#ifdef HPArchitecture
-# define OptimizedCDebugFlags	-O2  GccAliasingArgs
-# define LinuxMachineDefines	-D__hppa__
-# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
-# define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
-#endif
-
+#ifdef x86_64Architecture
+#define OptimizedCDebugFlags	-O2
+#define LinuxMachineDefines	-D__x86_64__
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
+#else
 #ifdef i386Architecture
-# ifndef OptimizedCDebugFlags
-#  define OptimizedCDebugFlags	DefaultGcc2i386Opt
-# endif
-# define LinuxMachineDefines	-D__i386__
-# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
-# define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+#define OptimizedCDebugFlags	DefaultGcc2i386Opt
+#define LinuxMachineDefines	-D__i386__
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
 #endif /* i386Architecture */
+#endif /* x86_64Architecture */
 
 #ifdef ia64Architecture
-# ifndef OptimizedCDebugFlags
-#  define OptimizedCDebugFlags	-O2  GccAliasingArgs
-# endif
-# define LinuxMachineDefines	-D__ia64__
-# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
-# define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
+#define OptimizedCDebugFlags	-O2
+#define LinuxMachineDefines	-D__ia64__
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
 #endif /* ia64Architecture */
 
+#ifdef AlphaArchitecture
+#define OptimizedCDebugFlags	-O2
+#define LinuxMachineDefines	-D__alpha__
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
+#endif /* AlphaArchitecture */
+
 #ifdef Mc68020Architecture
-# ifndef OptimizedCDebugFlags
-#  define OptimizedCDebugFlags	-O2  GccAliasingArgs
-# endif
-# define LinuxMachineDefines	-D__mc68000__
-# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
-# define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+#define OptimizedCDebugFlags	-O2
+#define LinuxMachineDefines 	-D__mc68000__
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
 #endif /* Mc68020Architecture */
 
-#ifdef MipsArchitecture
-# ifndef OptimizedCDebugFlags
-#  define OptimizedCDebugFlags	DefaultGcc2MipsOpt
-# endif
-# define LinuxMachineDefines	-D__mips__
-# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
-# define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
-#endif
-
-#ifdef Ppc64Architecture
-# define DefaultCCOptions	-mminimal-toc
-# ifndef OptimizedCDebugFlags
-#  define OptimizedCDebugFlags	DefaultGcc2Ppc64Opt
-# endif
-# define LinuxMachineDefines	-D__powerpc64__ -D__powerpc__
-# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME -DPART_NET
-# define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
-#endif /* Ppc64Architecture */
-
-#ifdef PpcArchitecture
-# define DefaultCCOptions	
-# ifndef OptimizedCDebugFlags
-#  define OptimizedCDebugFlags	DefaultGcc2PpcOpt
-# endif
-# define LinuxMachineDefines	-D__powerpc__
-# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
-# define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
-#endif /* PpcArchitecture */
-
 #ifdef s390Architecture
-# ifndef OptimizedCDebugFlags
-#  define OptimizedCDebugFlags	-O2 -fomit-frame-pointer GccAliasingArgs
-# endif
-# define LinuxMachineDefines	-D__s390__
-# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
-# define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+#define OptimzedCDebugFlags	-O2
+#define LinuxMachineDefines	-D__s390__
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
 #endif /* s390Architecture */
 
 #ifdef s390xArchitecture
-/*#define DefaultCCOptions	-fsigned-char */
-#define OptimizedCDebugFlags	-O3 -fomit-frame-pointer
+#define OptimzedCDebugFlags	-O2
 #define LinuxMachineDefines	-D__s390x__
-#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME
-#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
 #endif /* s390xArchitecture */
 
+#ifdef PowerPCArchitecture
+#define DefaultCCOptions        -fsigned-char
+#define OptimizedCDebugFlags	-O2
+#define LinuxMachineDefines 	-D__powerpc__
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+#endif /* PowerPCArchitecture */
+
+#ifdef ArmArchitecture
+#define DefaultCCOptions	-fsigned-char
+#define OptimizedCDebugFlags	-O2
+#define LinuxMachineDefines	-D__arm__
+#define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+#endif /* Arm */
+
 #ifdef SparcArchitecture
-# ifndef OptimizedCDebugFlags
-#  define OptimizedCDebugFlags	-O2  GccAliasingArgs
-# endif
-# define LinuxMachineDefines	-D__sparc__
-# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
-# define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
-# define AsVISOption		-Av9a
-# ifdef Sparc64Architecture
-#  define AsOutputArchSize	64
-# else
-#  define AsOutputArchSize	32
-# endif
+#define OptimizedCDebugFlags	-O2
+#define LinuxMachineDefines 	-D__sparc__
+#define ServerOSDefines		-DDDXOSINIT
+#define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
+#define AsVISOption		-Av9a
+#ifdef Sparc64Architecture
+#define AsOutputArchSize	64
+#else
+#define AsOutputArchSize	32
 #endif
-
-#ifdef SuperHArchitecture
-# ifndef SuperHArchOptFlags
-#  ifdef SuperH4Architecture
-#   define SuperHArchOptFlags	-m4
-#  elif defined(SuperH4NOFPUArchitecture)
-#   define SuperHArchOptFlags	-m4-nofpu
-#  else
-#   define SuperHArchOptFlags	-m3
-#  endif
-# endif 
-# ifndef SuperHebArchitecture
-#  ifdef SuperHebArchitecture
-#   define SuperHEndianFlags	-mb
-#  else
-#   define SuperHEndianFlags	-ml
-#  endif
-# endif
-# ifndef OptimizedCDebugFlags
-#  define OptimizedCDebugFlags	-O2 SuperHArchOptFlags SuperHEndianFlags  GccAliasingArgs
-# endif
-# define LinuxMachineDefines	-D__sh__
-# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
-# define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
-# ifndef DoLoadableServer
-#  define DoLoadableServer NO
-# endif
+#if LinuxCLibMajorVersion <= 5
+/* Why we lack this when everybody else has it? */
+#define HasCbrt NO
 #endif
+#endif /* SparcArchitecture */
 
-#ifdef AMD64Architecture
-# ifndef OptimizedCDebugFlags
-#  define OptimizedCDebugFlags	DefaultGcc2AMD64Opt
-# endif
-# define LinuxMachineDefines   -D__amd64__
-# define ServerOSDefines	XFree86ServerOSDefines -DDDXTIME
-# define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
-#endif /* AMD64Architecture */
+/*================================================================
+   BEGIN ORL VNC modification
+   Always define _REENTRANT since we may use threaded libraries */
 
-#ifndef StandardDefines
-# ifdef __linux__
-#  define StandardDefines	-Dlinux LinuxMachineDefines LinuxSourceDefines
-# else
-#  define StandardDefines	LinuxMachineDefines LinuxSourceDefines
-# endif
-#endif
+/* REMOVE
+#define StandardDefines		-Dlinux LinuxMachineDefines LinuxSourceDefines
+*/
+
+#define StandardDefines		-Dlinux LinuxMachineDefines \
+				LinuxSourceDefines -D_REENTRANT
+
+/* END ORL VNC modification
+================================================================*/
 
 #if UseElfFormat
-# define DlLibrary		-rdynamic -ldl
+#define DlLibrary		-rdynamic -ldl
 #else
-# define DlLibrary		/**/
+#define DlLibrary		/**/
 #endif
 
+#if BuildDynamicLoading
+#define ServerExtraSysLibs	DlLibrary
+#else
 #define ServerExtraSysLibs	/**/
-
-#ifndef PamLibraries
-#define PamLibraries		-lpam DlLibrary
 #endif
-
-#ifndef PamMiscLibraries
-#define PamMiscLibraries	-lpam_misc
-#endif
-
-#ifndef HasDECnet
-#define HasDECnet		NO
-#endif
-#if HasDECnet
-# define ConnectionFlags	-DUNIXCONN -DTCPCONN -DDNETCONN
-# define ExtraLibraries		-ldnet
-#else
-# define ConnectionFlags	-DUNIXCONN -DTCPCONN
-#endif
+#define ConnectionFlags		-DUNIXCONN -DTCPCONN
 
 /* Some of these man page defaults are overriden in the above OS sections */
 #ifndef ManSuffix
@@ -1031,50 +382,33 @@ InstallNamedTargetNoClobber(install,file.ad,$(INSTAPPFLAGS),$(XAPPLOADDIR),class
 #endif
 
 #ifndef StaticLibrary
-# define StaticLibrary(libpath,libname) -Wl,-Bstatic Concat(-L,libpath) Concat(-l,libname) -Wl,-Bdynamic
+#define StaticLibrary(libpath,libname) -Wl,-Bstatic Concat(-L,libpath) Concat(-l,libname) -Wl,-Bdynamic
 #endif
 
-#ifndef LinkGLToUsrLib
-# define LinkGLToUsrLib		YES
-#endif
-# ifndef LinkGLToUsrInclude
-# define LinkGLToUsrInclude	YES
-#endif
-
-
-#define HasGnuMake		YES
+#define HasGnuMake	YES
 
 #define MakeNamedTargetSubdir(dir,flags,subname)\
 	$(MAKE) -C dir $(MFLAGS) $(PARALLELMFLAGS) flags subname
 
-#define ArchitectureDefines	-DLINUX_ARCHITECTURE
-
-#define TtClientLibs $(TTLIB) $(XTOOLLIB) $(XLIB)
-#define TtClientDepLibs $(DEPTTLIB) $(DEPXTOOLLIB) $(DEPXLIB)
-
-#if HaveLib64
-# ifndef LibDirName
-#  define LibDirName		lib64
-# endif
-# ifndef SystemUsrLibDir
-#  define SystemUsrLibDir	/usr/lib64
-# endif
-# ifndef TkLibDir
-#  define TkLibDir		/usr/lib64
-# endif
+#ifndef HasZlib
+# define HasZlib	YES
 #endif
 
-#ifndef BuildDmx
-#define BuildDmx	YES
+#ifndef HasFfsl
+#define HasFfsl         YES
 #endif
 
 #ifndef XvncAuthPAM
 #define XvncAuthPAM     YES
 #endif
 
-#include <lnxLib.rules>
-# include <xorg.cf>
-
-#ifndef XFree86ServerOSDefines
-# define XFree86ServerOSDefines
+#ifndef JPEGIncludeFlags
+#define JPEGIncludeFlags
 #endif
+
+#ifndef JPEGLibraryFlags
+#define JPEGLibraryFlags -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic
+#endif
+
+#include <lnxLib.rules>
+#include <xfree86.cf>

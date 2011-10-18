@@ -1,13 +1,16 @@
-/* $Xorg: miscrinit.c,v 1.4 2001/02/09 02:05:21 xorgcvs Exp $ */
+/* $XConsortium: miscrinit.c /main/13 1996/08/12 21:51:16 dpw $ */
+/* $XFree86: xc/programs/Xserver/mi/miscrinit.c,v 3.2 1996/12/23 07:09:46 dawes Exp $ */
 /*
 
-Copyright 1990, 1998  The Open Group
+Copyright (c) 1990  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -15,35 +18,27 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: xc/programs/Xserver/mi/miscrinit.c,v 3.15tsi Exp $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
+#include "X.h"
 #include "servermd.h"
 #include "misc.h"
 #include "mi.h"
 #include "scrnintstr.h"
 #include "pixmapstr.h"
+#include "mibstore.h"
 #include "dix.h"
 #include "miline.h"
-#ifdef MITSHM
-#define _XSHM_SERVER_
-#include <X11/extensions/XShm.h>
-#endif
 
 /* We use this structure to propogate some information from miScreenInit to
  * miCreateScreenResources.  miScreenInit allocates the structure, fills it
@@ -75,64 +70,25 @@ miModifyPixmapHeader(pPixmap, width, height, depth, bitsPerPixel, devKind,
 {
     if (!pPixmap)
 	return FALSE;
-
-    /*
-     * If all arguments are specified, reinitialize everything (including
-     * validated state).
-     */
-    if ((width > 0) && (height > 0) && (depth > 0) && (bitsPerPixel > 0) &&
-	(devKind > 0) && pPixData) {
-	pPixmap->drawable.depth = depth;
-	pPixmap->drawable.bitsPerPixel = bitsPerPixel;
-	pPixmap->drawable.id = 0;
-	pPixmap->drawable.serialNumber = NEXT_SERIAL_NUMBER;
-	pPixmap->drawable.x = 0;
-	pPixmap->drawable.y = 0;
-	pPixmap->drawable.width = width;
-	pPixmap->drawable.height = height;
-	pPixmap->devKind = devKind;
-	pPixmap->refcnt = 1;
-	pPixmap->devPrivate.ptr = pPixData;
-    } else {
-	/*
-	 * Only modify specified fields, keeping all others intact.
-	 */
-
-	if (width > 0)
-	    pPixmap->drawable.width = width;
-
-	if (height > 0)
-	    pPixmap->drawable.height = height;
-
-	if (depth > 0)
-	    pPixmap->drawable.depth = depth;
-
-	if (bitsPerPixel > 0)
-	    pPixmap->drawable.bitsPerPixel = bitsPerPixel;
-	else if ((bitsPerPixel < 0) && (depth > 0))
-	    pPixmap->drawable.bitsPerPixel = BitsPerPixel(depth);
-
-	/*
-	 * CAVEAT:  Non-SI DDXen may use devKind and devPrivate fields for
-	 *          other purposes.
-	 */
-	if (devKind > 0)
-	    pPixmap->devKind = devKind;
-	else if ((devKind < 0) && ((width > 0) || (depth > 0)))
-	    pPixmap->devKind = PixmapBytePad(pPixmap->drawable.width,
-		pPixmap->drawable.depth);
-
-	if (pPixData)
-	    pPixmap->devPrivate.ptr = pPixData;
-    }
+    pPixmap->drawable.depth = depth;
+    pPixmap->drawable.bitsPerPixel = bitsPerPixel;
+    pPixmap->drawable.id = 0;
+    pPixmap->drawable.serialNumber = NEXT_SERIAL_NUMBER;
+    pPixmap->drawable.x = 0;
+    pPixmap->drawable.y = 0;
+    pPixmap->drawable.width = width;
+    pPixmap->drawable.height = height;
+    pPixmap->devKind = devKind;
+    pPixmap->refcnt = 1;
+    pPixmap->devPrivate.ptr = pPixData;
     return TRUE;
 }
 
 
 /*ARGSUSED*/
 Bool
-miCloseScreen (iScreen, pScreen)
-    int		iScreen;
+miCloseScreen (index, pScreen)
+    int		index;
     ScreenPtr	pScreen;
 {
     return ((*pScreen->DestroyPixmap)((PixmapPtr)pScreen->devPrivate));
@@ -169,8 +125,7 @@ miCreateScreenResources(pScreen)
 	    return FALSE;
 
 	if (!(*pScreen->ModifyPixmapHeader)(pPixmap, pScreen->width,
-		    pScreen->height, pScreen->rootDepth,
-		    BitsPerPixel(pScreen->rootDepth),
+		    pScreen->height, pScreen->rootDepth, pScreen->rootDepth,
 		    PixmapBytePad(pScrInitParms->width, pScreen->rootDepth),
 		    pScrInitParms->pbits))
 	    return FALSE;
@@ -206,9 +161,16 @@ miScreenDevPrivateInit(pScreen, width, pbits)
     return TRUE;
 }
 
+/*
+ * If you pass in bsfuncs, then you must preinitialize the missing
+ * screen procs before calling miScreenInit, so that the backing store
+ * code can correctly wrap them.
+ */
+
 Bool
 miScreenInit(pScreen, pbits, xsize, ysize, dpix, dpiy, width,
-	     rootDepth, numDepths, depths, rootVisual, numVisuals, visuals)
+	     rootDepth, numDepths, depths, rootVisual, numVisuals, visuals,
+	     bsfuncs)
     register ScreenPtr pScreen;
     pointer pbits;		/* pointer to screen bits */
     int xsize, ysize;		/* in pixels */
@@ -220,6 +182,7 @@ miScreenInit(pScreen, pbits, xsize, ysize, dpix, dpiy, width,
     VisualID rootVisual;	/* root visual */
     int numVisuals;		/* number of visuals supported */
     VisualRec *visuals;		/* supported visuals */
+    miBSFuncPtr	bsfuncs;	/* backing store functions */
 {
     pScreen->width = xsize;
     pScreen->height = ysize;
@@ -232,13 +195,11 @@ miScreenInit(pScreen, pbits, xsize, ysize, dpix, dpiy, width,
     /* defColormap */
     pScreen->minInstalledCmaps = 1;
     pScreen->maxInstalledCmaps = 1;
-    pScreen->backingStoreSupport = NotUseful;
+    pScreen->backingStoreSupport = Always;
     pScreen->saveUnderSupport = NotUseful;
     /* whitePixel, blackPixel */
     pScreen->ModifyPixmapHeader = miModifyPixmapHeader;
     pScreen->CreateScreenResources = miCreateScreenResources;
-    pScreen->GetScreenPixmap = miGetScreenPixmap;
-    pScreen->SetScreenPixmap = miSetScreenPixmap;
     pScreen->numVisuals = numVisuals;
     pScreen->visuals = visuals;
     if (width)
@@ -250,23 +211,21 @@ miScreenInit(pScreen, pbits, xsize, ysize, dpix, dpiy, width,
     }
     /* else CloseScreen */
     /* QueryBestSize, SaveScreen, GetImage, GetSpans */
-    pScreen->PointerNonInterestBox = (PointerNonInterestBoxProcPtr) 0;
-    pScreen->SourceValidate = (SourceValidateProcPtr) 0;
+    pScreen->PointerNonInterestBox = (void (*)()) 0;
+    pScreen->SourceValidate = (void (*)()) 0;
     /* CreateWindow, DestroyWindow, PositionWindow, ChangeWindowAttributes */
     /* RealizeWindow, UnrealizeWindow */
     pScreen->ValidateTree = miValidateTree;
-    pScreen->PostValidateTree = (PostValidateTreeProcPtr) 0;
+    pScreen->PostValidateTree = (void (*)()) 0;
     pScreen->WindowExposures = miWindowExposures;
     /* PaintWindowBackground, PaintWindowBorder, CopyWindow */
     pScreen->ClearToBackground = miClearToBackground;
-    pScreen->ClipNotify = (ClipNotifyProcPtr) 0;
-    pScreen->RestackWindow = (RestackWindowProcPtr) 0;
+    pScreen->ClipNotify = (void (*)()) 0;
     /* CreatePixmap, DestroyPixmap */
     /* RealizeFont, UnrealizeFont */
     /* CreateGC */
     /* CreateColormap, DestroyColormap, InstallColormap, UninstallColormap */
     /* ListInstalledColormaps, StoreColors, ResolveColor */
-#ifdef NEED_SCREEN_REGIONS
     pScreen->RegionCreate = miRegionCreate;
     pScreen->RegionInit = miRegionInit;
     pScreen->RegionCopy = miRegionCopy;
@@ -281,23 +240,21 @@ miScreenInit(pScreen, pbits, xsize, ysize, dpix, dpiy, width,
     pScreen->RectIn = miRectIn;
     pScreen->PointInRegion = miPointInRegion;
     pScreen->RegionNotEmpty = miRegionNotEmpty;
-    pScreen->RegionEqual = miRegionEqual;
     pScreen->RegionBroken = miRegionBroken;
     pScreen->RegionBreak = miRegionBreak;
     pScreen->RegionEmpty = miRegionEmpty;
     pScreen->RegionExtents = miRegionExtents;
     pScreen->RegionAppend = miRegionAppend;
     pScreen->RegionValidate = miRegionValidate;
-#endif /* NEED_SCREEN_REGIONS */
     /* BitmapToRegion */
-#ifdef NEED_SCREEN_REGIONS
     pScreen->RectsToRegion = miRectsToRegion;
-#endif /* NEED_SCREEN_REGIONS */
     pScreen->SendGraphicsExpose = miSendGraphicsExpose;
-    pScreen->BlockHandler = (ScreenBlockHandlerProcPtr)NoopDDA;
-    pScreen->WakeupHandler = (ScreenWakeupHandlerProcPtr)NoopDDA;
+    pScreen->BlockHandler = (void (*)())NoopDDA;
+    pScreen->WakeupHandler = (void (*)())NoopDDA;
     pScreen->blockData = (pointer)0;
     pScreen->wakeupData = (pointer)0;
+    if (bsfuncs)
+	miInitializeBackingStore (pScreen, bsfuncs);
     pScreen->MarkWindow = miMarkWindow;
     pScreen->MarkOverlappedWindows = miMarkOverlappedWindows;
     pScreen->ChangeSaveUnder = miChangeSaveUnder;
@@ -306,19 +263,12 @@ miScreenInit(pScreen, pbits, xsize, ysize, dpix, dpiy, width,
     pScreen->ResizeWindow = miSlideAndSizeWindow;
     pScreen->GetLayerWindow = miGetLayerWindow;
     pScreen->HandleExposures = miHandleValidateExposures;
-    pScreen->ReparentWindow = (ReparentWindowProcPtr) 0;
+    pScreen->ReparentWindow = (void (*)())0;
     pScreen->ChangeBorderWidth = miChangeBorderWidth;
 #ifdef SHAPE
     pScreen->SetShape = miSetShape;
 #endif
     pScreen->MarkUnrealizedWindow = miMarkUnrealizedWindow;
-
-    pScreen->SaveDoomedAreas = 0;
-    pScreen->RestoreAreas = 0;
-    pScreen->ExposeCopy = 0;
-    pScreen->TranslateBackingStore = 0;
-    pScreen->ClearBackingStore = 0;
-    pScreen->DrawGuarantee = 0;
 
     miSetZeroLineBias(pScreen, DEFAULTZEROLINEBIAS);
 
@@ -340,7 +290,7 @@ miAllocateGCPrivateIndex()
 }
 
 int miZeroLineScreenIndex;
-unsigned int miZeroLineGeneration = 0;
+int miZeroLineGeneration;
 
 void
 miSetZeroLineBias(pScreen, bias)
@@ -354,19 +304,4 @@ miSetZeroLineBias(pScreen, bias)
     }
     if (miZeroLineScreenIndex >= 0)
 	pScreen->devPrivates[miZeroLineScreenIndex].uval = bias;
-}
-
-PixmapPtr
-miGetScreenPixmap(pScreen)
-    ScreenPtr pScreen;
-{
-    return (PixmapPtr)(pScreen->devPrivate);
-}
-
-void
-miSetScreenPixmap(pPix)
-    PixmapPtr pPix;
-{
-    if (pPix)
-	pPix->drawable.pScreen->devPrivate = (pointer)pPix;
 }

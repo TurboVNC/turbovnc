@@ -1,4 +1,4 @@
-/* $Xorg: Xdbe.h,v 1.3 2000/08/18 04:05:45 coskrey Exp $ */
+/* $XConsortium: Xdbe.h /main/3 1995/09/22 10:20:01 dpw $ */
 /******************************************************************************
  * 
  * Copyright (c) 1994, 1995  Hewlett-Packard Company
@@ -30,7 +30,7 @@
  *     Header file for Xlib-related DBE
  *
  *****************************************************************************/
-/* $XFree86: xc/include/extensions/Xdbe.h,v 3.2 2001/08/01 00:44:35 tsi Exp $ */
+
 
 #ifndef XDBE_H
 #define XDBE_H
@@ -39,7 +39,7 @@
 /* INCLUDES */
 
 #include <X11/Xfuncproto.h>
-#include <X11/extensions/Xdbeproto.h>
+#include "Xdbeproto.h"
 
 
 /* DEFINES */
@@ -85,49 +85,67 @@ XdbeBufferError;
 _XFUNCPROTOBEGIN
 
 extern Status XdbeQueryExtension(
+#if NeedFunctionPrototypes
     Display*		/* dpy                  */,
     int*		/* major_version_return */,
     int*		/* minor_version_return */
+#endif
 );
 
 extern XdbeBackBuffer XdbeAllocateBackBufferName(
+#if NeedFunctionPrototypes
     Display*		/* dpy         */,
     Window		/* window      */,
     XdbeSwapAction	/* swap_action */
+#endif
 );
 
 extern Status XdbeDeallocateBackBufferName(
+#if NeedFunctionPrototypes
     Display*		/* dpy    */,
     XdbeBackBuffer	/* buffer */
+#endif
 );
 
 extern Status XdbeSwapBuffers(
+#if NeedFunctionPrototypes
     Display*		/* dpy         */,
     XdbeSwapInfo*	/* swap_info   */,
     int			/* num_windows */
+#endif
 );
 
 extern Status XdbeBeginIdiom(
+#if NeedFunctionPrototypes
     Display*		/* dpy */
+#endif
 );
 
 extern Status XdbeEndIdiom(
+#if NeedFunctionPrototypes
     Display*		/* dpy */
+#endif
 );
 
 extern XdbeScreenVisualInfo *XdbeGetVisualInfo(
+#if NeedFunctionPrototypes
     Display*		/* dpy               */,
     Drawable*		/* screen_specifiers */,
     int*		/* num_screens       */
+#endif
 );
 
 extern void XdbeFreeVisualInfo(
+#if NeedFunctionPrototypes
     XdbeScreenVisualInfo*	/* visual_info */
+#endif
 );
 
 extern XdbeBackBufferAttributes *XdbeGetBackBufferAttributes(
+#if NeedFunctionPrototypes
     Display*		/* dpy    */,
     XdbeBackBuffer	/* buffer */
+#endif
 );
 
 _XFUNCPROTOEND

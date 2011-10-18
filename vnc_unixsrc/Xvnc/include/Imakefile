@@ -1,38 +1,25 @@
-XCOMM $Xorg: Imakefile,v 1.3 2000/08/18 04:05:43 coskrey Exp $
+XCOMM $TOG: Imakefile /main/93 1997/06/13 15:34:58 kaleb $
 
 
 
 
-XCOMM $XFree86: xc/include/Imakefile,v 3.28 2001/04/28 23:52:31 dawes Exp $
+XCOMM $XFree86: xc/include/Imakefile,v 3.9.2.1 1997/06/15 07:25:25 dawes Exp $
 #define IHaveSubdirs
-#define PassCDebugFlags /**/
+#define PassCDebugFlags CDEBUGFLAGS='$(CDEBUGFLAGS)' CC='$(CC)' EXTRA_LDOPTIONS='$(EXTRA_LDOPTIONS)'
 
-#if BuildGlxExt || BuildGLXLibrary
-GLXDIR = GL
-#endif
-
-#if BuildDPSLibrary
-DPSDIR = DPS
-#endif
-
-SUBDIRS = bitmaps extensions fonts $(GLXDIR) $(DPSDIR)
+SUBDIRS = bitmaps extensions fonts
 
 #ifdef Win32Architecture
-EXTRA_HEADERS = Xw32defs.h Xwinsock.h Xwindows.h
-#elif defined(cygwinArchitecture)
-EXTRA_HEADERS = Xwindows.h
+EXTRA_HEADERS = Xw32defs.h Xwinsock.h
 #endif
 
 HEADERS = DECkeysym.h \
 	HPkeysym.h \
 	Sunkeysym.h \
 	X.h \
-	XF86keysym.h \
 	XWDFile.h \
 	Xalloca.h \
-	Xarch.h \
 	Xatom.h \
-	Xdefs.h \
 	Xfuncproto.h \
 	Xfuncs.h \
 	Xmd.h \
@@ -52,40 +39,19 @@ all::
 
 BuildIncludes($(HEADERS),X11,..)
 
-#if BuildLibraries
 InstallMultipleFlags($(HEADERS),$(INCDIR)/X11,$(INSTINCFLAGS))
-#endif
 MakeSubdirs($(SUBDIRS))
-DependSubdirs($(SUBDIRS))
 
-InstallDriverSDKNonExecFile(X.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(Xalloca.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(Xarch.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(Xdefs.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(Xdefs.h,$(DRIVERSDKINCLUDEDIR)/X11)
-InstallDriverSDKNonExecFile(Xfuncproto.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(Xfuncs.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(Xmd.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(Xosdefs.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(Xproto.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(Xprotostr.h,$(DRIVERSDKINCLUDEDIR))
-InstallDriverSDKNonExecFile(keysym.h,$(DRIVERSDKINCLUDEDIR))
+InstallLinkKitNonExecFile(X.h,$(LINKKITDIR)/include/X11)
+InstallLinkKitNonExecFile(Xalloca.h,$(LINKKITDIR)/include/X11)
+InstallLinkKitNonExecFile(Xfuncproto.h,$(LINKKITDIR)/include/X11)
+InstallLinkKitNonExecFile(Xfuncs.h,$(LINKKITDIR)/include/X11)
+InstallLinkKitNonExecFile(Xmd.h,$(LINKKITDIR)/include/X11)
+InstallLinkKitNonExecFile(Xos.h,$(LINKKITDIR)/include/X11)
+InstallLinkKitNonExecFile(Xosdefs.h,$(LINKKITDIR)/include/X11)
+InstallLinkKitNonExecFile(Xproto.h,$(LINKKITDIR)/include/X11)
+InstallLinkKitNonExecFile(Xprotostr.h,$(LINKKITDIR)/include/X11)
 
-/* _XOPEN_SOURCE is defined where needed to move __fds_bits to fds_bits. */
-USE_FDS_BITS = fds_bits
-	
-Xpoll.h: Xpoll.h.in
-	sed -e "s/@USE_FDS_BITS@/$(USE_FDS_BITS)/;" < Xpoll.h.in > Xpoll.h
+depend::
 
 clean::
-	-$(RM) Xpoll.h
-
-XCOMM For the Linux/OpenGL base standard
-#if LinkGLToUsrInclude && AlternateIncRoot
-install::
-	MakeDir($(DESTDIR)$(SYSTEMUSRINCDIR))
-	-$(RM) $(DESTDIR)$(SYSTEMUSRINCDIR)/GL
-	@if [ ! -d $(DESTDIR)$(SYSTEMUSRINCDIR)/GL ]; then \
-		set -x; $(LN) $(INCDIR)/GL $(DESTDIR)$(SYSTEMUSRINCDIR)/GL; \
-	fi
-#endif

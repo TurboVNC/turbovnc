@@ -1,13 +1,8 @@
-XCOMM $Xorg: Imakefile,v 1.3 2000/08/17 19:48:16 cpqbld Exp $
-
-
-
-
-XCOMM $XFree86: xc/programs/Xserver/dix/Imakefile,v 3.17 2003/04/15 18:30:43 alanh Exp $
-
+XCOMM $XConsortium: Imakefile /main/52 1996/12/02 10:20:03 lehors $
+XCOMM $XFree86: xc/programs/Xserver/dix/Imakefile,v 3.8 1997/01/08 20:32:47 dawes Exp $
 #include <Server.tmpl>
 
-#if !BuildXprint || PrintOnlyServer
+#if PrintOnlyServer
 XPSRC = xpstubs.c
 XPOBJ = xpstubs.o
 #endif
@@ -17,17 +12,23 @@ FFS_SRC = ffs.c
 FFS_OBJ = ffs.o
 #endif
 
+#if !HasFfsl
+FFSL_SRC = ffsl.c
+FFSL_OBJ = ffsl.o
+#endif
+
 SRCS = atom.c colormap.c cursor.c devices.c dispatch.c dixutils.c events.c \
 	extension.c gc.c globals.c glyphcurs.c grabs.c \
 	main.c property.c resource.c swaprep.c swapreq.c \
-	tables.c window.c initatoms.c dixfonts.c privates.c pixmap.c $(FFS_SRC)
+	tables.c window.c initatoms.c dixfonts.c privates.c pixmap.c $(FFS_SRC) \
+        $(FFSL_SRC)
 OBJS = atom.o colormap.o cursor.o devices.o dispatch.o dixutils.o events.o \
 	extension.o gc.o globals.o glyphcurs.o grabs.o \
 	main.o property.o resource.o swaprep.o swapreq.o \
-	tables.o window.o initatoms.o dixfonts.o privates.o pixmap.o $(FFS_OBJ)
+	tables.o window.o initatoms.o dixfonts.o privates.o pixmap.o $(FFS_OBJ) \
+        $(FFSL_OBJ)
 
-    INCLUDES = -I../include -I$(XINCLUDESRC) -I$(FONTINCSRC) -I$(EXTINCSRC) \
-	       -I$(SERVERSRC)/Xext -I$(SERVERSRC)/lbx -I../Xprint
+    INCLUDES = -I../include -I$(XINCLUDESRC) -I$(FONTINCSRC) -I$(EXTINCSRC)
     LINTLIBS = ../os/llib-los.ln
 
 /*
@@ -59,27 +60,21 @@ DEFAULTDISPLAYCLASS = DefaultDisplayClass
 
 #ifdef XVendorString
 VENDORSTRING = XVendorString
-   VENDOR_STRING = -DVENDOR_STRING=\"$(VENDORSTRING)\"
+   VENDOR_STRING = -DVENDOR_STRING="$(VENDORSTRING)"
 #endif
 
 #ifdef XVendorRelease
 VENDORRELEASE = XVendorRelease
-   VENDOR_RELEASE = -DVENDOR_RELEASE="$(VENDORRELEASE)"
+   VENDOR_RELEASE = -DVENDOR_RELEASE=$(VENDORRELEASE)
 #endif
 
 #if HasKrb5
          K5DEFS = Krb5Defines
 #endif
 
-#ifdef DarwinArchitecture
-#if DarwinQuartzSupport
-    QUARTZ_DEFINES = -DDARWIN_WITH_QUARTZ
-#endif
-#endif
-
 SITE_DEFINES = $(SITE_FONT_PATH) $(SITE_RGB_DB) $(SITE_DISPLAY_CLASS)
 
-VENDOR_DEFINES = $(VENDOR_STRING) $(VENDOR_RELEASE) $(QUARTZ_DEFINES)
+VENDOR_DEFINES = $(VENDOR_STRING) $(VENDOR_RELEASE)
 
 NormalLibraryObjectRule()
 NormalLibraryTarget(dix,$(OBJS))
@@ -92,10 +87,12 @@ SpecialCObjectRule(dispatch,$(ICONFIGFILES),$(K5DEFS))
 SpecialCObjectRule(main,$(ICONFIGFILES),$(VENDOR_DEFINES))
 SpecialCObjectRule(pixmap,$(ICONFIGFILES),$(_NOOP_))
 SpecialCObjectRule(privates,$(ICONFIGFILES),$(_NOOP_))
-SpecialCObjectRule(window,$(ICONFIGFILES),$(QUARTZ_DEFINES))
 
-#if !BuildXprint || PrintOnlyServer
+#if PrintOnlyServer
 NormalLibraryTarget(xpstubs,$(XPOBJ))
 #endif
+
+InstallLinkKitLibrary(dix,$(LINKKITDIR)/lib)
+InstallLinkKitLibrary(xpstubs,$(LINKKITDIR)/lib)
 
 DependTarget()

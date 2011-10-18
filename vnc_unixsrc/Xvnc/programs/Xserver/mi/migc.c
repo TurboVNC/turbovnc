@@ -1,13 +1,15 @@
-/* $Xorg: migc.c,v 1.4 2001/02/09 02:05:21 xorgcvs Exp $ */
+/* $XConsortium: migc.c,v 1.4 94/04/17 20:27:36 dpw Exp $ */
 /*
 
-Copyright 1993, 1998  The Open Group
+Copyright (c) 1993  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -15,29 +17,48 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
 
-/* $XFree86: xc/programs/Xserver/mi/migc.c,v 1.8 2001/08/06 20:51:18 dawes Exp $ */
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
 
 #include "scrnintstr.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"
 #include "windowstr.h"
 #include "migc.h"
+
+/* This structure has to line up with the mfb and cfb gc private structures so
+ * that when it is superimposed on them, the three fields that migc.c needs to
+ * see will be accessed correctly.  I know this is not beautiful, but it seemed
+ * better than all the code duplication in cfb and mfb.
+ */
+typedef struct {
+    unsigned char       pad1;
+    unsigned char       pad2;
+    unsigned char       pad3;
+    unsigned		pad4:1;
+    unsigned		freeCompClip:1;
+    PixmapPtr		pRotatedPixmap;
+    RegionPtr		pCompositeClip;
+} miPrivGC;
+
+static int miGCPrivateIndex;
+
+void
+miRegisterGCPrivateIndex(gcindex)
+    int gcindex;
+{
+    miGCPrivateIndex = gcindex;
+}
 
 /* ARGSUSED */
 void
@@ -52,10 +73,13 @@ void
 miDestroyGC(pGC)
     GCPtr           pGC;
 {
-    if (pGC->pRotatedPixmap)
-	(*pGC->pScreen->DestroyPixmap) (pGC->pRotatedPixmap);
-    if (pGC->freeCompClip)
-	REGION_DESTROY(pGC->pScreen, pGC->pCompositeClip);
+    miPrivGC       *pPriv;
+
+    pPriv = (miPrivGC *) (pGC->devPrivates[miGCPrivateIndex].ptr);
+    if (pPriv->pRotatedPixmap)
+	(*pGC->pScreen->DestroyPixmap) (pPriv->pRotatedPixmap);
+    if (pPriv->freeCompClip)
+	REGION_DESTROY(pGC->pScreen, pPriv->pCompositeClip);
     miDestroyGCOps(pGC->ops);
 }
 
@@ -68,6 +92,7 @@ miCreateGCOps(prototype)
     GCOpsPtr        prototype;
 {
     GCOpsPtr        ret;
+    extern Bool     Must_have_memory;
 
      /* XXX */ Must_have_memory = TRUE;
     ret = (GCOpsPtr) xalloc(sizeof(GCOps));
@@ -180,10 +205,7 @@ miComputeCompositeClip(pGC, pDrawable)
     GCPtr           pGC;
     DrawablePtr     pDrawable;
 {
-    ScreenPtr       pScreen;
-
-    /* This prevents warnings about pScreen not being used. */
-    pGC->pScreen = pScreen = pGC->pScreen;
+    miPrivGC *devPriv = (miPrivGC *) (pGC->devPrivates[miGCPrivateIndex].ptr);
 
     if (pDrawable->type == DRAWABLE_WINDOW)
     {
@@ -201,7 +223,7 @@ miComputeCompositeClip(pGC, pDrawable)
 	    pregWin = &pWin->clipList;
 	    freeTmpClip = FALSE;
 	}
-	freeCompClip = pGC->freeCompClip;
+	freeCompClip = devPriv->freeCompClip;
 
 	/*
 	 * if there is no client clip, we can get by with just keeping the
@@ -213,9 +235,9 @@ miComputeCompositeClip(pGC, pDrawable)
 	if (pGC->clientClipType == CT_NONE)
 	{
 	    if (freeCompClip)
-		REGION_DESTROY(pScreen, pGC->pCompositeClip);
-	    pGC->pCompositeClip = pregWin;
-	    pGC->freeCompClip = freeTmpClip;
+		REGION_DESTROY(pScreen, devPriv->pCompositeClip);
+	    devPriv->pCompositeClip = pregWin;
+	    devPriv->freeCompClip = freeTmpClip;
 	}
 	else
 	{
@@ -234,7 +256,7 @@ miComputeCompositeClip(pGC, pDrawable)
 
 	    if (freeCompClip)
 	    {
-		REGION_INTERSECT(pGC->pScreen, pGC->pCompositeClip,
+		REGION_INTERSECT(pGC->pScreen, devPriv->pCompositeClip,
 					    pregWin, pGC->clientClip);
 		if (freeTmpClip)
 		    REGION_DESTROY(pScreen, pregWin);
@@ -242,15 +264,15 @@ miComputeCompositeClip(pGC, pDrawable)
 	    else if (freeTmpClip)
 	    {
 		REGION_INTERSECT(pScreen, pregWin, pregWin, pGC->clientClip);
-		pGC->pCompositeClip = pregWin;
+		devPriv->pCompositeClip = pregWin;
 	    }
 	    else
 	    {
-		pGC->pCompositeClip = REGION_CREATE(pScreen, NullBox, 0);
-		REGION_INTERSECT(pScreen, pGC->pCompositeClip,
+		devPriv->pCompositeClip = REGION_CREATE(pScreen, NullBox, 0);
+		REGION_INTERSECT(pScreen, devPriv->pCompositeClip,
 				       pregWin, pGC->clientClip);
 	    }
-	    pGC->freeCompClip = TRUE;
+	    devPriv->freeCompClip = TRUE;
 	    REGION_TRANSLATE(pScreen, pGC->clientClip,
 					 -(pDrawable->x + pGC->clipOrg.x),
 					 -(pDrawable->y + pGC->clipOrg.y));
@@ -261,41 +283,29 @@ miComputeCompositeClip(pGC, pDrawable)
 	BoxRec          pixbounds;
 
 	/* XXX should we translate by drawable.x/y here ? */
-	/* If you want pixmaps in offscreen memory, yes */
-	pixbounds.x1 = pDrawable->x;
-	pixbounds.y1 = pDrawable->y;
-	pixbounds.x2 = pDrawable->x + pDrawable->width;
-	pixbounds.y2 = pDrawable->y + pDrawable->height;
+	pixbounds.x1 = 0;
+	pixbounds.y1 = 0;
+	pixbounds.x2 = pDrawable->width;
+	pixbounds.y2 = pDrawable->height;
 
-	if (pGC->freeCompClip)
+	if (devPriv->freeCompClip)
 	{
-	    REGION_RESET(pScreen, pGC->pCompositeClip, &pixbounds);
+	    REGION_RESET(pScreen, devPriv->pCompositeClip, &pixbounds);
 	}
 	else
 	{
-	    pGC->freeCompClip = TRUE;
-	    pGC->pCompositeClip = REGION_CREATE(pScreen, &pixbounds, 1);
+	    devPriv->freeCompClip = TRUE;
+	    devPriv->pCompositeClip = REGION_CREATE(pScreen, &pixbounds, 1);
 	}
 
 	if (pGC->clientClipType == CT_REGION)
 	{
-	    if(pDrawable->x || pDrawable->y) {
-	        REGION_TRANSLATE(pScreen, pGC->clientClip,
-					  pDrawable->x + pGC->clipOrg.x, 
-					  pDrawable->y + pGC->clipOrg.y);
-	        REGION_INTERSECT(pScreen, pGC->pCompositeClip,
-				pGC->pCompositeClip, pGC->clientClip);
-	        REGION_TRANSLATE(pScreen, pGC->clientClip,
-					  -(pDrawable->x + pGC->clipOrg.x), 
-					  -(pDrawable->y + pGC->clipOrg.y));
-	    } else {
-	        REGION_TRANSLATE(pScreen, pGC->pCompositeClip,
+	    REGION_TRANSLATE(pScreen, devPriv->pCompositeClip,
 					 -pGC->clipOrg.x, -pGC->clipOrg.y);
-	        REGION_INTERSECT(pScreen, pGC->pCompositeClip,
-				pGC->pCompositeClip, pGC->clientClip);
-	        REGION_TRANSLATE(pScreen, pGC->pCompositeClip,
+	    REGION_INTERSECT(pScreen, devPriv->pCompositeClip,
+				devPriv->pCompositeClip, pGC->clientClip);
+	    REGION_TRANSLATE(pScreen, devPriv->pCompositeClip,
 					 pGC->clipOrg.x, pGC->clipOrg.y);
-	    }
 	}
     }	/* end of composite clip for pixmap */
 } /* end miComputeCompositeClip */

@@ -1,14 +1,15 @@
-/* $Xorg: bitsource.c,v 1.4 2001/02/09 02:04:03 xorgcvs Exp $ */
+/* $XConsortium: bitsource.c,v 1.9 94/04/17 20:16:59 gildea Exp $ */
 
 /*
 
-Copyright 1991, 1998  The Open Group
+Copyright (c) 1991  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,30 +17,27 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 */
-/* $XFree86: xc/lib/font/fontfile/bitsource.c,v 1.3 2001/01/17 19:43:29 dawes Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-#include <X11/fonts/fntfilst.h>
+#include "fntfilst.h"
 
 BitmapSourcesRec	FontFileBitmapSources;
 
 Bool
-FontFileRegisterBitmapSource (FontPathElementPtr fpe)
+FontFileRegisterBitmapSource (fpe)
+    FontPathElementPtr	fpe;
 {
     FontPathElementPtr	*new;
     int			i;
@@ -62,7 +60,8 @@ FontFileRegisterBitmapSource (FontPathElementPtr fpe)
 }
 
 void
-FontFileUnregisterBitmapSource (FontPathElementPtr fpe)
+FontFileUnregisterBitmapSource (fpe)
+    FontPathElementPtr	fpe;
 {
     int	    i;
 
@@ -92,7 +91,7 @@ FontFileUnregisterBitmapSource (FontPathElementPtr fpe)
  * The bitmap sources in the new path will be registered by the init_func.
  */
 void
-FontFileEmptyBitmapSource(void)
+FontFileEmptyBitmapSource()
 {
     if (FontFileBitmapSources.count == 0)
 	return;
@@ -103,16 +102,16 @@ FontFileEmptyBitmapSource(void)
     FontFileBitmapSources.fpe = 0;
 }
 
-int
-FontFileMatchBitmapSource (FontPathElementPtr fpe, 
-			   FontPtr *pFont, 
-			   int flags, 
-			   FontEntryPtr entry, 
-			   FontNamePtr zeroPat, 
-			   FontScalablePtr vals, 
-			   fsBitmapFormat format, 
-			   fsBitmapFormatMask fmask, 
-			   Bool noSpecificSize)
+FontFileMatchBitmapSource (fpe, pFont, flags, entry, zeroPat, vals, format, fmask, noSpecificSize)
+    FontPathElementPtr	fpe;
+    FontPtr		*pFont;
+    int			flags;
+    FontEntryPtr	entry;
+    FontNamePtr		zeroPat;
+    FontScalablePtr	vals;
+    fsBitmapFormat	format;
+    fsBitmapFormatMask	fmask;
+    Bool		noSpecificSize;
 {
     int			source;
     FontEntryPtr	zero;

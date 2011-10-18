@@ -1,4 +1,4 @@
-/* $Xorg: lines.c,v 1.3 2000/08/17 19:46:30 cpqbld Exp $ */
+/* $XConsortium: lines.c,v 1.2 91/10/10 11:18:21 rws Exp $ */
 /* Copyright International Business Machines, Corp. 1991
  * All Rights Reserved
  * Copyright Lexmark International, Inc. 1991
@@ -26,8 +26,6 @@
  * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
  * THIS SOFTWARE.
  */
-/* $XFree86: xc/lib/font/Type1/lines.c,v 1.4tsi Exp $ */
-
  /* LINES    CWEB         V0003 ********                             */
 /*
 :h1.LINES Module - Rasterizing Lines
@@ -40,12 +38,8 @@
 The included files are:
 */
  
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 #include "objects.h"
 #include "spaces.h"
-#include "paths.h"
 #include "regions.h"
 #include "lines.h"
  
@@ -82,6 +76,9 @@ void StepLine(R, x1, y1, x2, y2)
        register fractpel x2,y2;  /* ending point                             */
 {
        register fractpel dy;
+ 
+       IfTrace4((LineDebug > 0), ".....StepLine: (%p,%p) to (%p,%p)\n",
+                                            x1, y1, x2, y2);
  
        dy = y2 - y1;
  

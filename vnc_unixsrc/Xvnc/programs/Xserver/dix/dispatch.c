@@ -1,14 +1,15 @@
-/* $XdotOrg: xc/programs/Xserver/dix/dispatch.c,v 1.13 2005/09/13 01:33:19 daniels Exp $ */
-/* $Xorg: dispatch.c,v 1.5 2001/02/09 02:04:40 xorgcvs Exp $ */
+/* $XConsortium: dispatch.c /main/195 1996/12/15 21:24:40 rws $ */
+/* $XFree86: xc/programs/Xserver/dix/dispatch.c,v 3.7 1996/12/23 06:29:38 dawes Exp $ */
 /************************************************************
 
-Copyright 1987, 1989, 1998  The Open Group
+Copyright (c) 1987, 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,13 +17,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987, 1989 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -47,48 +48,8 @@ SOFTWARE.
 
 ********************************************************/
 
-/* The panoramix components contained the following notice */
-/*****************************************************************
-
-Copyright (c) 1991, 1997 Digital Equipment Corporation, Maynard, Massachusetts.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software.
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-DIGITAL EQUIPMENT CORPORATION BE LIABLE FOR ANY CLAIM, DAMAGES, INCLUDING,
-BUT NOT LIMITED TO CONSEQUENTIAL OR INCIDENTAL DAMAGES, OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-Except as contained in this notice, the name of Digital Equipment Corporation
-shall not be used in advertising or otherwise to promote the sale, use or other
-dealings in this Software without prior written authorization from Digital
-Equipment Corporation.
-
-******************************************************************/
-
-/* $XFree86: xc/programs/Xserver/dix/dispatch.c,v 3.32 2003/11/10 18:21:45 tsi Exp $ */
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#ifdef PANORAMIX_DEBUG
-#include <stdio.h>
-int ProcInitialConnection();
-#endif
-
 #include "windowstr.h"
-#include <X11/fonts/fontstruct.h>
+#include "fontstruct.h"
 #include "dixfontstr.h"
 #include "gcstruct.h"
 #include "selection.h"
@@ -103,41 +64,34 @@ int ProcInitialConnection();
 #include "dispatch.h"
 #include "swaprep.h"
 #include "swapreq.h"
-#ifdef PANORAMIX
-#include "panoramiX.h"
-#include "panoramiXsrv.h"
-#endif
+#include "dixevents.h"
 #ifdef XCSECURITY
 #define _SECURITY_SERVER
-#include <X11/extensions/security.h>
+#include "extensions/security.h"
 #endif
 #ifdef XAPPGROUP
-#include <X11/extensions/Xagsrv.h>
-#endif
-#ifdef XKB
-#define XKB_IN_SERVER
-#include "inputstr.h"
-#include <X11/extensions/XKBsrv.h>
-#endif
-#ifdef LBX
-#include "lbxserve.h"
+#include "extensions/Xagsrv.h"
 #endif
 
 #define mskcnt ((MAXCLIENTS + 31) / 32)
-#define BITMASK(i) (1U << ((i) & 31))
+#define BITMASK(i) (1 << ((i) & 31))
 #define MASKIDX(i) ((i) >> 5)
 #define MASKWORD(buf, i) buf[MASKIDX(i)]
 #define BITSET(buf, i) MASKWORD(buf, i) |= BITMASK(i)
 #define BITCLEAR(buf, i) MASKWORD(buf, i) &= ~BITMASK(i)
 #define GETBIT(buf, i) (MASKWORD(buf, i) & BITMASK(i))
 
+extern WindowPtr *WindowTable;
 extern xConnSetupPrefix connSetupPrefix;
 extern char *ConnectionInfo;
 
 Selection *CurrentSelections;
 int NumCurrentSelections;
-CallbackListPtr SelectionCallback = NULL;
 
+extern CARD32 defaultScreenSaverTime;
+extern CARD32 defaultScreenSaverInterval;
+extern int  defaultScreenSaverBlanking;
+extern int  defaultScreenSaverAllowExposures;
 static ClientPtr grabClient;
 #define GrabNone 0
 #define GrabActive 1
@@ -148,23 +102,33 @@ CallbackListPtr ServerGrabCallback = NULL;
 HWEventQueuePtr checkForInput[2];
 extern int connBlockScreenStart;
 
-static void KillAllClients(void);
+#ifdef XKB
+extern Bool noXkbExtension;
+#endif
 
-static void DeleteClientFromAnySelections(ClientPtr client);
+static void KillAllClients(
+#if NeedFunctionPrototypes
+    void
+#endif
+);
+
+static void DeleteClientFromAnySelections(
+#if NeedFunctionPrototypes
+    ClientPtr /*client*/
+#endif
+);
+
+#ifdef LBX
+extern unsigned long  StandardRequestLength();
+#endif
 
 static int nextFreeClientID; /* always MIN free client ID */
 
 static int	nClients;	/* number of authorized clients */
 
 CallbackListPtr ClientStateCallback;
-
-/* dispatchException & isItTimeToYield must be declared volatile since they
- * are modified by signal handlers - otherwise optimizer may assume it doesn't
- * need to actually check value in memory when used and may miss changes from
- * signal handlers.
- */
-volatile char dispatchException = 0;
-volatile char isItTimeToYield;
+char dispatchException = 0;
+char isItTimeToYield;
 
 /* Various of the DIX function interfaces were not designed to allow
  * the client->errorValue to be set on BadValue and other errors.
@@ -177,7 +141,8 @@ XID clientErrorValue;   /* XXX this is a kludge */
     (a.pScreen == b.pScreen))
 
 void
-SetInputCheck(HWEventQueuePtr c0, HWEventQueuePtr c1)
+SetInputCheck(c0, c1)
+    HWEventQueuePtr c0, c1;
 {
     checkForInput[0] = c0;
     checkForInput[1] = c1;
@@ -225,7 +190,8 @@ InitSelections()
 }
 
 void 
-FlushClientCaches(XID id)
+FlushClientCaches(id)
+    XID id;
 {
     int i;
     register ClientPtr client;
@@ -251,123 +217,17 @@ FlushClientCaches(XID id)
 	}
     }
 }
-#ifdef SMART_SCHEDULE
-
-#undef SMART_DEBUG
-
-#define SMART_SCHEDULE_DEFAULT_INTERVAL	20	    /* ms */
-#define SMART_SCHEDULE_MAX_SLICE	200	    /* ms */
-
-Bool	    SmartScheduleDisable = FALSE;
-long	    SmartScheduleSlice = SMART_SCHEDULE_DEFAULT_INTERVAL;
-long	    SmartScheduleInterval = SMART_SCHEDULE_DEFAULT_INTERVAL;
-long	    SmartScheduleMaxSlice = SMART_SCHEDULE_MAX_SLICE;
-long	    SmartScheduleTime;
-ClientPtr   SmartLastClient;
-int	    SmartLastIndex[SMART_MAX_PRIORITY-SMART_MIN_PRIORITY+1];
-int         SmartScheduleClient(int *clientReady, int nready);
-
-#ifdef SMART_DEBUG
-long	    SmartLastPrint;
-#endif
-
-void        Dispatch(void);
-void        InitProcVectors(void);
-
-int
-SmartScheduleClient (int *clientReady, int nready)
-{
-    ClientPtr	pClient;
-    int		i;
-    int		client;
-    int		bestPrio, best = 0;
-    int		bestRobin, robin;
-    long	now = SmartScheduleTime;
-    long	idle;
-
-    bestPrio = -0x7fffffff;
-    bestRobin = 0;
-    idle = 2 * SmartScheduleSlice;
-    for (i = 0; i < nready; i++)
-    {
-	client = clientReady[i];
-	pClient = clients[client];
-	/* Praise clients which are idle */
-	if ((now - pClient->smart_check_tick) >= idle)
-	{
-	    if (pClient->smart_priority < 0)
-		pClient->smart_priority++;
-	}
-	pClient->smart_check_tick = now;
-	
-	/* check priority to select best client */
-	robin = (pClient->index - SmartLastIndex[pClient->smart_priority-SMART_MIN_PRIORITY]) & 0xff;
-	if (pClient->smart_priority > bestPrio ||
-	    (pClient->smart_priority == bestPrio && robin > bestRobin))
-	{
-	    bestPrio = pClient->smart_priority;
-	    bestRobin = robin;
-	    best = client;
-	}
-#ifdef SMART_DEBUG
-	if ((now - SmartLastPrint) >= 5000)
-	    fprintf (stderr, " %2d: %3d", client, pClient->smart_priority);
-#endif
-    }
-#ifdef SMART_DEBUG
-    if ((now - SmartLastPrint) >= 5000)
-    {
-	fprintf (stderr, " use %2d\n", best);
-	SmartLastPrint = now;
-    }
-#endif
-    pClient = clients[best];
-    SmartLastIndex[bestPrio-SMART_MIN_PRIORITY] = pClient->index;
-    /*
-     * Set current client pointer
-     */
-    if (SmartLastClient != pClient)
-    {
-	pClient->smart_start_tick = now;
-	SmartLastClient = pClient;
-    }
-    /*
-     * Adjust slice
-     */
-    if (nready == 1)
-    {
-	/*
-	 * If it's been a long time since another client
-	 * has run, bump the slice up to get maximal
-	 * performance from a single client
-	 */
-	if ((now - pClient->smart_start_tick) > 1000 &&
-	    SmartScheduleSlice < SmartScheduleMaxSlice)
-	{
-	    SmartScheduleSlice += SmartScheduleInterval;
-	}
-    }
-    else
-    {
-	SmartScheduleSlice = SmartScheduleInterval;
-    }
-    return best;
-}
-#endif
 
 #define MAJOROP ((xReq *)client->requestBuffer)->reqType
 
 void
-Dispatch(void)
+Dispatch()
 {
     register int        *clientReady;     /* array of request ready clients */
     register int	result;
     register ClientPtr	client;
     register int	nready;
     register HWEventQueuePtr* icheck = checkForInput;
-#ifdef SMART_SCHEDULE
-    long			start_tick;
-#endif
 
     nextFreeClientID = 1;
     InitSelections();
@@ -387,13 +247,6 @@ Dispatch(void)
 
 	nready = WaitForSomething(clientReady);
 
-#ifdef SMART_SCHEDULE
-	if (nready && !SmartScheduleDisable)
-	{
-	    clientReady[0] = SmartScheduleClient (clientReady, nready);
-	    nready = 1;
-	}
-#endif
        /***************** 
 	*  Handle events in round robin fashion, doing input between 
 	*  each round 
@@ -416,9 +269,6 @@ Dispatch(void)
 	    isItTimeToYield = FALSE;
  
             requestingClient = client;
-#ifdef SMART_SCHEDULE
-	    start_tick = SmartScheduleTime;
-#endif
 	    while (!isItTimeToYield)
 	    {
 	        if (*icheck[0] != *icheck[1])
@@ -426,16 +276,7 @@ Dispatch(void)
 		    ProcessInputEvents();
 		    FlushIfCriticalOutputPending();
 		}
-#ifdef SMART_SCHEDULE
-		if (!SmartScheduleDisable && 
-		    (SmartScheduleTime - start_tick) >= SmartScheduleSlice)
-		{
-		    /* Penalize clients which consume ticks */
-		    if (client->smart_priority > SMART_MIN_PRIORITY)
-			client->smart_priority--;
-		    break;
-		}
-#endif
+	   
 		/* now, finally, deal with client requests */
 
 	        result = ReadRequestFromClient(client);
@@ -453,7 +294,7 @@ Dispatch(void)
 		client->requestLog[client->requestLogIndex] = MAJOROP;
 		client->requestLogIndex++;
 #endif
-		if (result > (maxBigRequestSize << 2))
+		if (result > (MAX_BIG_REQUEST_SIZE << 2))
 		    result = BadLength;
 		else
 		    result = (* client->requestVector[MAJOROP])(client);
@@ -468,23 +309,13 @@ Dispatch(void)
 					  client->errorValue, result);
 		    break;
 	        }
-#ifdef DAMAGEEXT
-		FlushIfCriticalOutputPending ();
-#endif
 	    }
 	    FlushAllOutput();
-#ifdef SMART_SCHEDULE
-	    client = clients[clientReady[nready]];
-	    if (client)
-		client->smart_stop_tick = SmartScheduleTime;
-#endif
+
 	    requestingClient = NULL;
 	}
 	dispatchException &= ~DE_PRIORITYCHANGE;
     }
-#if defined(DDXBEFORERESET)
-    ddxBeforeReset ();
-#endif
     KillAllClients();
     DEALLOCATE_LOCAL(clientReady);
     dispatchException &= ~DE_RESET;
@@ -492,14 +323,17 @@ Dispatch(void)
 
 #undef MAJOROP
 
+/*ARGSUSED*/
 int
-ProcBadRequest(ClientPtr client)
+ProcBadRequest(client)
+    ClientPtr client;
 {
     return (BadRequest);
 }
 
 int
-ProcCreateWindow(ClientPtr client)
+ProcCreateWindow(client)
+    register ClientPtr client;
 {
     register WindowPtr pParent, pWin;
     REQUEST(xCreateWindowReq);
@@ -542,7 +376,8 @@ ProcCreateWindow(ClientPtr client)
 }
 
 int
-ProcChangeWindowAttributes(register ClientPtr client)
+ProcChangeWindowAttributes(client)
+    register ClientPtr client;
 {
     register WindowPtr pWin;
     REQUEST(xChangeWindowAttributesReq);
@@ -568,7 +403,8 @@ ProcChangeWindowAttributes(register ClientPtr client)
 }
 
 int
-ProcGetWindowAttributes(register ClientPtr client)
+ProcGetWindowAttributes(client)
+    register ClientPtr client;
 {
     register WindowPtr pWin;
     REQUEST(xResourceReq);
@@ -585,7 +421,8 @@ ProcGetWindowAttributes(register ClientPtr client)
 }
 
 int
-ProcDestroyWindow(register ClientPtr client)
+ProcDestroyWindow(client)
+    register ClientPtr client;
 {
     register WindowPtr pWin;
     REQUEST(xResourceReq);
@@ -601,7 +438,8 @@ ProcDestroyWindow(register ClientPtr client)
 }
 
 int
-ProcDestroySubwindows(register ClientPtr client)
+ProcDestroySubwindows(client)
+    register ClientPtr client;
 {
     register WindowPtr pWin;
     REQUEST(xResourceReq);
@@ -616,7 +454,8 @@ ProcDestroySubwindows(register ClientPtr client)
 }
 
 int
-ProcChangeSaveSet(register ClientPtr client)
+ProcChangeSaveSet(client)
+    register ClientPtr client;
 {
     register WindowPtr pWin;
     REQUEST(xChangeSaveSetReq);
@@ -631,7 +470,7 @@ ProcChangeSaveSet(register ClientPtr client)
         return BadMatch;
     if ((stuff->mode == SetModeInsert) || (stuff->mode == SetModeDelete))
     {
-        result = AlterSaveSetForClient(client, pWin, stuff->mode, FALSE, TRUE);
+        result = AlterSaveSetForClient(client, pWin, stuff->mode);
 	if (client->noClientException != Success)
 	    return(client->noClientException);
 	else
@@ -645,7 +484,8 @@ ProcChangeSaveSet(register ClientPtr client)
 }
 
 int
-ProcReparentWindow(register ClientPtr client)
+ProcReparentWindow(client)
+    register ClientPtr client;
 {
     register WindowPtr pWin, pParent;
     REQUEST(xReparentWindowReq);
@@ -680,7 +520,8 @@ ProcReparentWindow(register ClientPtr client)
 }
 
 int
-ProcMapWindow(register ClientPtr client)
+ProcMapWindow(client)
+    register ClientPtr client;
 {
     register WindowPtr pWin;
     REQUEST(xResourceReq);
@@ -696,7 +537,8 @@ ProcMapWindow(register ClientPtr client)
 }
 
 int
-ProcMapSubwindows(register ClientPtr client)
+ProcMapSubwindows(client)
+    register ClientPtr client;
 {
     register WindowPtr pWin;
     REQUEST(xResourceReq);
@@ -712,7 +554,8 @@ ProcMapSubwindows(register ClientPtr client)
 }
 
 int
-ProcUnmapWindow(register ClientPtr client)
+ProcUnmapWindow(client)
+    register ClientPtr client;
 {
     register WindowPtr pWin;
     REQUEST(xResourceReq);
@@ -728,7 +571,8 @@ ProcUnmapWindow(register ClientPtr client)
 }
 
 int
-ProcUnmapSubwindows(register ClientPtr client)
+ProcUnmapSubwindows(client)
+    register ClientPtr client;
 {
     register WindowPtr pWin;
     REQUEST(xResourceReq);
@@ -743,7 +587,8 @@ ProcUnmapSubwindows(register ClientPtr client)
 }
 
 int
-ProcConfigureWindow(register ClientPtr client)
+ProcConfigureWindow(client)
+    register ClientPtr client;
 {
     register WindowPtr pWin;
     REQUEST(xConfigureWindowReq);
@@ -767,7 +612,8 @@ ProcConfigureWindow(register ClientPtr client)
 }
 
 int
-ProcCirculateWindow(register ClientPtr client)
+ProcCirculateWindow(client)
+    register ClientPtr client;
 {
     register WindowPtr pWin;
     REQUEST(xCirculateWindowReq);
@@ -788,7 +634,9 @@ ProcCirculateWindow(register ClientPtr client)
 }
 
 int
-GetGeometry(register ClientPtr client, xGetGeometryReply *rep)
+GetGeometry(client, rep)
+    register ClientPtr client;
+    xGetGeometryReply *rep;
 {
     register DrawablePtr pDraw;
     REQUEST(xResourceReq);
@@ -829,7 +677,8 @@ GetGeometry(register ClientPtr client, xGetGeometryReply *rep)
 
 
 int
-ProcGetGeometry(register ClientPtr client)
+ProcGetGeometry(client)
+    register ClientPtr client;
 {
     xGetGeometryReply rep;
     int status;
@@ -843,8 +692,10 @@ ProcGetGeometry(register ClientPtr client)
 
 
 int
-ProcQueryTree(register ClientPtr client)
+ProcQueryTree(client)
+    register ClientPtr client;
 {
+
     xQueryTreeReply reply;
     int numChildren = 0;
     register WindowPtr pChild, pWin, pHead;
@@ -863,6 +714,7 @@ ProcQueryTree(register ClientPtr client)
 	reply.parent = pWin->parent->drawable.id;
     else
         reply.parent = (Window)None;
+
     pHead = RealChildHead(pWin);
     for (pChild = pWin->lastChild; pChild != pHead; pChild = pChild->prevSib)
 	numChildren++;
@@ -892,7 +744,8 @@ ProcQueryTree(register ClientPtr client)
 }
 
 int
-ProcInternAtom(register ClientPtr client)
+ProcInternAtom(client)
+    register ClientPtr client;
 {
     Atom atom;
     char *tchar;
@@ -921,7 +774,8 @@ ProcInternAtom(register ClientPtr client)
 }
 
 int
-ProcGetAtomName(register ClientPtr client)
+ProcGetAtomName(client)
+    register ClientPtr client;
 {
     char *str;
     xGetAtomNameReply reply;
@@ -952,7 +806,8 @@ extern int k5_bad();
 #endif
 
 int
-ProcSetSelectionOwner(register ClientPtr client)
+ProcSetSelectionOwner(client)
+    register ClientPtr client;
 {
     WindowPtr pWin;
     TimeStamp time;
@@ -1030,14 +885,6 @@ ProcSetSelectionOwner(register ClientPtr client)
 	CurrentSelections[i].window = stuff->window;
 	CurrentSelections[i].pWin = pWin;
 	CurrentSelections[i].client = (pWin ? client : NullClient);
-	if (SelectionCallback)
-	{
-	    SelectionInfoRec	info;
-
-	    info.selection = &CurrentSelections[i];
-	    info.kind= SelectionSetOwner;
-	    CallCallbacks(&SelectionCallback, &info);
-	}
 	return (client->noClientException);
     }
     else 
@@ -1048,7 +895,8 @@ ProcSetSelectionOwner(register ClientPtr client)
 }
 
 int
-ProcGetSelectionOwner(register ClientPtr client)
+ProcGetSelectionOwner(client)
+    register ClientPtr client;
 {
     REQUEST(xResourceReq);
 
@@ -1079,7 +927,8 @@ ProcGetSelectionOwner(register ClientPtr client)
 }
 
 int
-ProcConvertSelection(register ClientPtr client)
+ProcConvertSelection(client)
+    register ClientPtr client;
 {
     Bool paramsOkay;
     xEvent event;
@@ -1143,7 +992,8 @@ ProcConvertSelection(register ClientPtr client)
 }
 
 int
-ProcGrabServer(register ClientPtr client)
+ProcGrabServer(client)
+    register ClientPtr client;
 {
     REQUEST_SIZE_MATCH(xReq);
     if (grabState != GrabNone && client != grabClient)
@@ -1170,7 +1020,12 @@ ProcGrabServer(register ClientPtr client)
 }
 
 static void
+#if NeedFunctionPrototypes
 UngrabServer(ClientPtr client)
+#else
+UngrabServer(client)
+    ClientPtr client;
+#endif
 {
     int i;
 
@@ -1197,7 +1052,8 @@ UngrabServer(ClientPtr client)
 }
 
 int
-ProcUngrabServer(register ClientPtr client)
+ProcUngrabServer(client)
+    register ClientPtr client;
 {
     REQUEST_SIZE_MATCH(xReq);
     UngrabServer(client);
@@ -1205,7 +1061,8 @@ ProcUngrabServer(register ClientPtr client)
 }
 
 int
-ProcTranslateCoords(register ClientPtr client)
+ProcTranslateCoords(client)
+    register ClientPtr client;
 {
     REQUEST(xTranslateCoordsReq);
 
@@ -1259,12 +1116,6 @@ ProcTranslateCoords(register ClientPtr client)
 		&& (!wBoundingShape(pWin) ||
 		    POINT_IN_REGION(pWin->drawable.pScreen, 
 					&pWin->borderSize, x, y, &box))
-		
-		&& (!wInputShape(pWin) ||
-		    POINT_IN_REGION(pWin->drawable.pScreen,
-				    wInputShape(pWin),
-				    x - pWin->drawable.x,
-				    y - pWin->drawable.y, &box))
 #endif
 		)
             {
@@ -1283,7 +1134,8 @@ ProcTranslateCoords(register ClientPtr client)
 }
 
 int
-ProcOpenFont(register ClientPtr client)
+ProcOpenFont(client)
+    register ClientPtr client;
 {
     int	err;
     REQUEST(xOpenFontReq);
@@ -1302,7 +1154,8 @@ ProcOpenFont(register ClientPtr client)
 }
 
 int
-ProcCloseFont(register ClientPtr client)
+ProcCloseFont(client)
+    register ClientPtr client;
 {
     FontPtr pFont;
     REQUEST(xResourceReq);
@@ -1323,7 +1176,8 @@ ProcCloseFont(register ClientPtr client)
 }
 
 int
-ProcQueryFont(register ClientPtr client)
+ProcQueryFont(client)
+    register ClientPtr client;
 {
     xQueryFontReply	*reply;
     FontPtr pFont;
@@ -1382,7 +1236,8 @@ ProcQueryFont(register ClientPtr client)
 }
 
 int
-ProcQueryTextExtents(register ClientPtr client)
+ProcQueryTextExtents(client)
+    register ClientPtr client;
 {
     REQUEST(xQueryTextExtentsReq);
     xQueryTextExtentsReply reply;
@@ -1432,7 +1287,8 @@ ProcQueryTextExtents(register ClientPtr client)
 }
 
 int
-ProcListFonts(register ClientPtr client)
+ProcListFonts(client)
+    register ClientPtr client;
 {
     REQUEST(xListFontsReq);
 
@@ -1443,7 +1299,8 @@ ProcListFonts(register ClientPtr client)
 }
 
 int
-ProcListFontsWithInfo(register ClientPtr client)
+ProcListFontsWithInfo(client)
+    register ClientPtr client;
 {
     REQUEST(xListFontsWithInfoReq);
 
@@ -1453,19 +1310,19 @@ ProcListFontsWithInfo(register ClientPtr client)
 				  (unsigned char *) &stuff[1], stuff->maxNames);
 }
 
-/**
- *
- *  \param value must conform to DeleteType
- */
+/*ARGSUSED*/
 int
-dixDestroyPixmap(pointer value, XID pid)
+dixDestroyPixmap(value, pid)
+    pointer value; /* must conform to DeleteType */
+    XID pid;
 {
     PixmapPtr pPixmap = (PixmapPtr)value;
     return (*pPixmap->drawable.pScreen->DestroyPixmap)(pPixmap);
 }
 
 int
-ProcCreatePixmap(register ClientPtr client)
+ProcCreatePixmap(client)
+    register ClientPtr client;
 {
     PixmapPtr pMap;
     register DrawablePtr pDraw;
@@ -1482,23 +1339,6 @@ ProcCreatePixmap(register ClientPtr client)
     {
 	client->errorValue = 0;
         return BadValue;
-    }
-    if (stuff->width > 32767 || stuff->height > 32767)
-    {
-	/* It is allowed to try and allocate a pixmap which is larger than
-	 * 32767 in either dimension. However, all of the framebuffer code
-	 * is buggy and does not reliably draw to such big pixmaps, basically
-	 * because the Region data structure operates with signed shorts
-	 * for the rectangles in it.
-	 *
-	 * Furthermore, several places in the X server computes the
-	 * size in bytes of the pixmap and tries to store it in an
-	 * integer. This integer can overflow and cause the allocated size
-	 * to be much smaller.
-	 *
-	 * So, such big pixmaps are rejected here with a BadAlloc
-	 */
-	return BadAlloc;
     }
     if (stuff->depth != 1)
     {
@@ -1524,7 +1364,8 @@ CreatePmap:
 }
 
 int
-ProcFreePixmap(register ClientPtr client)
+ProcFreePixmap(client)
+    register ClientPtr client;
 {
     PixmapPtr pMap;
 
@@ -1546,7 +1387,8 @@ ProcFreePixmap(register ClientPtr client)
 }
 
 int
-ProcCreateGC(register ClientPtr client)
+ProcCreateGC(client)
+    register ClientPtr client;
 {
     int error;
     GC *pGC;
@@ -1572,7 +1414,8 @@ ProcCreateGC(register ClientPtr client)
 }
 
 int
-ProcChangeGC(register ClientPtr client)
+ProcChangeGC(client)
+    register ClientPtr client;
 {
     GC *pGC;
     REQUEST(xChangeGCReq);
@@ -1584,7 +1427,6 @@ ProcChangeGC(register ClientPtr client)
     len = client->req_len -  (sizeof(xChangeGCReq) >> 2);
     if (len != Ones(stuff->mask))
         return BadLength;
-
     result = dixChangeGC(client, pGC, stuff->mask, (CARD32 *) &stuff[1], 0);
     if (client->noClientException != Success)
         return(client->noClientException);
@@ -1596,7 +1438,8 @@ ProcChangeGC(register ClientPtr client)
 }
 
 int
-ProcCopyGC(register ClientPtr client)
+ProcCopyGC(client)
+    register ClientPtr client;
 {
     register GC *dstGC;
     register GC *pGC;
@@ -1619,7 +1462,8 @@ ProcCopyGC(register ClientPtr client)
 }
 
 int
-ProcSetDashes(register ClientPtr client)
+ProcSetDashes(client)
+    register ClientPtr client;
 {
     register GC *pGC;
     int result;
@@ -1646,7 +1490,8 @@ ProcSetDashes(register ClientPtr client)
 }
 
 int
-ProcSetClipRectangles(register ClientPtr client)
+ProcSetClipRectangles(client)
+    register ClientPtr client;
 {
     int	nr;
     int result;
@@ -1675,7 +1520,8 @@ ProcSetClipRectangles(register ClientPtr client)
 }
 
 int
-ProcFreeGC(register ClientPtr client)
+ProcFreeGC(client)
+    register ClientPtr client;
 {
     register GC *pGC;
     REQUEST(xResourceReq);
@@ -1687,7 +1533,8 @@ ProcFreeGC(register ClientPtr client)
 }
 
 int
-ProcClearToBackground(register ClientPtr client)
+ProcClearToBackground(client)
+    register ClientPtr client;
 {
     REQUEST(xClearAreaReq);
     register WindowPtr pWin;
@@ -1714,7 +1561,8 @@ ProcClearToBackground(register ClientPtr client)
 }
 
 int
-ProcCopyArea(register ClientPtr client)
+ProcCopyArea(client)
+    register ClientPtr client;
 {
     register DrawablePtr pDst;
     register DrawablePtr pSrc;
@@ -1755,7 +1603,8 @@ ProcCopyArea(register ClientPtr client)
 }
 
 int
-ProcCopyPlane(register ClientPtr client)
+ProcCopyPlane(client)
+    register ClientPtr client;
 {
     register DrawablePtr psrcDraw, pdstDraw;
     register GC *pGC;
@@ -1802,7 +1651,8 @@ ProcCopyPlane(register ClientPtr client)
 }
 
 int
-ProcPolyPoint(register ClientPtr client)
+ProcPolyPoint(client)
+    register ClientPtr client;
 {
     int npoint;
     register GC *pGC;
@@ -1825,7 +1675,8 @@ ProcPolyPoint(register ClientPtr client)
 }
 
 int
-ProcPolyLine(register ClientPtr client)
+ProcPolyLine(client)
+    register ClientPtr client;
 {
     int npoint;
     register GC *pGC;
@@ -1848,7 +1699,8 @@ ProcPolyLine(register ClientPtr client)
 }
 
 int
-ProcPolySegment(register ClientPtr client)
+ProcPolySegment(client)
+    register ClientPtr client;
 {
     int nsegs;
     register GC *pGC;
@@ -1867,7 +1719,8 @@ ProcPolySegment(register ClientPtr client)
 }
 
 int
-ProcPolyRectangle (register ClientPtr client)
+ProcPolyRectangle (client)
+    register ClientPtr client;
 {
     int nrects;
     register GC *pGC;
@@ -1887,7 +1740,8 @@ ProcPolyRectangle (register ClientPtr client)
 }
 
 int
-ProcPolyArc(register ClientPtr client)
+ProcPolyArc(client)
+    register ClientPtr client;
 {
     int		narcs;
     register GC *pGC;
@@ -1906,7 +1760,8 @@ ProcPolyArc(register ClientPtr client)
 }
 
 int
-ProcFillPoly(register ClientPtr client)
+ProcFillPoly(client)
+    register ClientPtr client;
 {
     int          things;
     register GC *pGC;
@@ -1937,7 +1792,8 @@ ProcFillPoly(register ClientPtr client)
 }
 
 int
-ProcPolyFillRectangle(register ClientPtr client)
+ProcPolyFillRectangle(client)
+    register ClientPtr client;
 {
     int             things;
     register GC *pGC;
@@ -1950,7 +1806,6 @@ ProcPolyFillRectangle(register ClientPtr client)
     if (things & 4)
 	return(BadLength);
     things >>= 3;
-
     if (things)
         (*pGC->ops->PolyFillRect) (pDraw, pGC, things,
 		      (xRectangle *) &stuff[1]);
@@ -1958,7 +1813,8 @@ ProcPolyFillRectangle(register ClientPtr client)
 }
 
 int
-ProcPolyFillArc(register ClientPtr client)
+ProcPolyFillArc(client)
+    register ClientPtr client;
 {
     int		narcs;
     register GC *pGC;
@@ -1976,49 +1832,6 @@ ProcPolyFillArc(register ClientPtr client)
     return (client->noClientException);
 }
 
-#ifdef MATCH_CLIENT_ENDIAN
-
-int
-ServerOrder (void)
-{
-    int	    whichbyte = 1;
-
-    if (*((char *) &whichbyte))
-	return LSBFirst;
-    return MSBFirst;
-}
-
-#define ClientOrder(client) ((client)->swapped ? !ServerOrder() : ServerOrder())
-
-void
-ReformatImage (char *base, int nbytes, int bpp, int order)
-{
-    switch (bpp) {
-    case 1:	/* yuck */
-	if (BITMAP_BIT_ORDER != order)
-	    BitOrderInvert ((unsigned char *) base, nbytes);
-#if IMAGE_BYTE_ORDER != BITMAP_BIT_ORDER && BITMAP_SCANLINE_UNIT != 8
-	ReformatImage (base, nbytes, BITMAP_SCANLINE_UNIT, order);
-#endif
-	break;
-    case 4:
-	break;  /* yuck */
-    case 8:
-	break;
-    case 16:
-	if (IMAGE_BYTE_ORDER != order)
-	    TwoByteSwap ((unsigned char *) base, nbytes);
-	break;
-    case 32:
-	if (IMAGE_BYTE_ORDER != order)
-	    FourByteSwap ((unsigned char *) base, nbytes);
-	break;
-    }
-}
-#else
-#define ReformatImage(b,n,bpp,o)
-#endif
-
 /* 64-bit server notes: the protocol restricts padding of images to
  * 8-, 16-, or 32-bits. We would like to have 64-bits for the server
  * to use internally. Removes need for internal alignment checking.
@@ -2031,7 +1844,8 @@ ReformatImage (char *base, int nbytes, int bpp, int order)
  * boundary, even if the scanlines are padded to our satisfaction.
  */
 int
-ProcPutImage(register ClientPtr client)
+ProcPutImage(client)
+    register ClientPtr client;
 {
     register	GC *pGC;
     register	DrawablePtr pDraw;
@@ -2048,6 +1862,9 @@ ProcPutImage(register ClientPtr client)
 	    (stuff->leftPad >= (unsigned int)screenInfo.bitmapScanlinePad))
             return BadMatch;
         length 	    = BitmapBytePad(stuff->width + stuff->leftPad);
+#ifdef INTERNAL_VS_EXTERNAL_PADDING
+        lengthProto = BitmapBytePadProto(stuff->width + stuff->leftPad);
+#endif
     }
     else if (stuff->format == XYPixmap)
     {
@@ -2056,12 +1873,19 @@ ProcPutImage(register ClientPtr client)
             return BadMatch;
         length      = BitmapBytePad(stuff->width + stuff->leftPad);
 	length      *= stuff->depth;
+#ifdef INTERNAL_VS_EXTERNAL_PADDING
+        lengthProto = BitmapBytePadProto(stuff->width + stuff->leftPad);
+	lengthProto *= stuff->depth;
+#endif
     }
     else if (stuff->format == ZPixmap)
     {
         if ((pDraw->depth != stuff->depth) || (stuff->leftPad != 0))
             return BadMatch;
         length      = PixmapBytePad(stuff->width, stuff->depth);
+#ifdef INTERNAL_VS_EXTERNAL_PADDING
+        lengthProto = PixmapBytePadProto(stuff->width, stuff->depth);
+#endif
     }
     else
     {
@@ -2069,40 +1893,89 @@ ProcPutImage(register ClientPtr client)
         return BadValue;
     }
 
+#ifdef INTERNAL_VS_EXTERNAL_PADDING
+    /* handle 64 bit case where protocol may pad to 32 and we want 64 */
+    if ( length != lengthProto ) {
+	register int 	i;
+	char 		* stuffptr, /* pointer into protocol data */
+			* tmpptr;   /* new location to copy to */
+
+        if(!(tmpImage = (char *) ALLOCATE_LOCAL(length*stuff->height)))
+            return (BadAlloc);
+    
+	bzero(tmpImage,length*stuff->height);
+    
+	if ( stuff->format == XYPixmap ) {
+	    int lineBytes = BitmapBytePad(stuff->width + stuff->leftPad);
+	    int lineBytesProto = 
+		BitmapBytePadProto(stuff->width + stuff->leftPad);
+	    int depth = stuff->depth;
+
+	    stuffptr = (char *)&stuff[1];
+	    tmpptr = tmpImage;
+	    for ( i = 0; i < stuff->height*stuff->depth;
+	        stuffptr += lineBytesProto,tmpptr += lineBytes, i++) 
+	        memmove(tmpptr,stuffptr,lineBytesProto);
+	}
+	else {
+	    for ( i = 0,stuffptr = (char *)&stuff[1],tmpptr=tmpImage;
+	        i < stuff->height;
+	        stuffptr += lengthProto,tmpptr += length, i++) 
+	        memmove(tmpptr,stuffptr,lengthProto);
+	}
+    }
+
+    /* handle 64-bit case where stuff is not 64-bit aligned */
+    else if ((unsigned long)&stuff[1] & (sizeof(long)-1)) {
+        if(!(tmpImage = (char *) ALLOCATE_LOCAL(length*stuff->height)))
+            return (BadAlloc);
+	memmove(tmpImage,(char *)&stuff[1],length*stuff->height);
+    }
+    else
+	tmpImage = (char *)&stuff[1];
+#else
     tmpImage = (char *)&stuff[1];
     lengthProto = length;
+#endif /* INTERNAL_VS_EXTERNAL_PADDING */
 	
     if (((((lengthProto * stuff->height) + (unsigned)3) >> 2) + 
 	(sizeof(xPutImageReq) >> 2)) != client->req_len)
 	return BadLength;
 
-    ReformatImage (tmpImage, lengthProto * stuff->height, 
-		   stuff->format == ZPixmap ? BitsPerPixel (stuff->depth) : 1,
-		   ClientOrder(client));
-    
     (*pGC->ops->PutImage) (pDraw, pGC, stuff->depth, stuff->dstX, stuff->dstY,
 		  stuff->width, stuff->height, 
 		  stuff->leftPad, stuff->format, tmpImage);
+
+#ifdef INTERNAL_VS_EXTERNAL_PADDING
+    /* free up our temporary space if used */
+    if (tmpImage != (char *)&stuff[1])
+        DEALLOCATE_LOCAL(tmpImage);
+#endif /* INTERNAL_VS_EXTERNAL_PADDING */
 
      return (client->noClientException);
 }
 
 
 int
-DoGetImage(register ClientPtr client, int format, Drawable drawable, 
-           int x, int y, int width, int height, 
-           Mask planemask, xGetImageReply **im_return)
+DoGetImage(client, format, drawable, x, y, width, height, planemask, im_return)
+    register ClientPtr	client;
+    Drawable drawable;
+    int format;
+    int x, y, width, height;
+    Mask planemask;
+    xGetImageReply **im_return;
 {
     register DrawablePtr pDraw;
     int			nlines, linesPerBuf;
     register int	linesDone;
     long		widthBytesLine, length;
-    Mask		plane = 0;
+#ifdef INTERNAL_VS_EXTERNAL_PADDING
+    long		widthBytesLineProto, lengthProto;
+#endif
+    Mask		plane;
     char		*pBuf;
     xGetImageReply	xgi;
-#ifdef XCSECURITY
     RegionPtr pVisibleRegion = NULL;
-#endif
 
     if ((format != XYPixmap) && (format != ZPixmap))
     {
@@ -2149,6 +2022,10 @@ DoGetImage(register ClientPtr client, int format, Drawable drawable,
 	widthBytesLine = PixmapBytePad(width, pDraw->depth);
 	length = widthBytesLine * height;
 
+#ifdef INTERNAL_VS_EXTERNAL_PADDING
+	widthBytesLineProto = PixmapBytePadProto(width, pDraw->depth);
+	lengthProto 	    = widthBytesLineProto * height;
+#endif
     }
     else 
     {
@@ -2158,9 +2035,18 @@ DoGetImage(register ClientPtr client, int format, Drawable drawable,
 	length = widthBytesLine * height *
 		 Ones(planemask & (plane | (plane - 1)));
 
+#ifdef INTERNAL_VS_EXTERNAL_PADDING
+	widthBytesLineProto = BitmapBytePadProto(width);
+	lengthProto = widthBytesLineProto * height *
+		 Ones(planemask & (plane | (plane - 1)));
+#endif
     }
 
+#ifdef INTERNAL_VS_EXTERNAL_PADDING
+    xgi.length = lengthProto;
+#else
     xgi.length = length;
+#endif
 
     if (im_return) {
 	pBuf = (char *)xalloc(sz_xGetImageReply + length);
@@ -2190,12 +2076,12 @@ DoGetImage(register ClientPtr client, int format, Drawable drawable,
 	{
 	    /* we have to make sure intermediate buffers don't need padding */
 	    while ((linesPerBuf > 1) &&
-		   (length & ((1L << LOG2_BYTES_PER_SCANLINE_PAD)-1)))
+		   (length & ((1 << LOG2_BYTES_PER_SCANLINE_PAD)-1)))
 	    {
 		linesPerBuf--;
 		length -= widthBytesLine;
 	    }
-	    while (length & ((1L << LOG2_BYTES_PER_SCANLINE_PAD)-1))
+	    while (length & ((1 << LOG2_BYTES_PER_SCANLINE_PAD)-1))
 	    {
 		linesPerBuf++;
 		length += widthBytesLine;
@@ -2213,7 +2099,7 @@ DoGetImage(register ClientPtr client, int format, Drawable drawable,
 	pVisibleRegion = NotClippedByChildren((WindowPtr)pDraw);
 	if (pVisibleRegion)
 	{
-	    REGION_TRANSLATE(pDraw->pScreen, pVisibleRegion, -pDraw->x, -pDraw->y);
+	    REGION_TRANSLATE(pScreen, pVisibleRegion, -pDraw->x, -pDraw->y);
 	}
     }
 #endif
@@ -2243,19 +2129,35 @@ DoGetImage(register ClientPtr client, int format, Drawable drawable,
 			nlines, format, pBuf);
 #endif
 
+#ifdef INTERNAL_VS_EXTERNAL_PADDING
+	    /* for 64-bit server, convert image to pad to 32 bits */
+	    if ( widthBytesLine != widthBytesLineProto ) {
+		register char * bufPtr, * protoPtr;
+		register int i;
+
+		for (i = 1,
+		     bufPtr = pBuf + widthBytesLine,
+		     protoPtr = pBuf + widthBytesLineProto;
+		     i < nlines;
+		     bufPtr += widthBytesLine,
+		     protoPtr += widthBytesLineProto, 
+		     i++)
+		    memmove(protoPtr, bufPtr, widthBytesLineProto);
+	    }
+#endif
 	    /* Note that this is NOT a call to WriteSwappedDataToClient,
                as we do NOT byte swap */
 	    if (!im_return)
-	    {
-		ReformatImage (pBuf, (int)(nlines * widthBytesLine),
-			       BitsPerPixel (pDraw->depth),
-			       ClientOrder(client));
-
 /* Don't split me, gcc pukes when you do */
+#ifdef INTERNAL_VS_EXTERNAL_PADDING
+		(void)WriteToClient(client,
+				    (int)(nlines * widthBytesLineProto),
+				    pBuf);
+#else
 		(void)WriteToClient(client,
 				    (int)(nlines * widthBytesLine),
 				    pBuf);
-	    }
+#endif
 	    linesDone += nlines;
         }
     }
@@ -2285,21 +2187,41 @@ DoGetImage(register ClientPtr client, int format, Drawable drawable,
 				nlines, format, pBuf);
 #endif
 
+#ifdef INTERNAL_VS_EXTERNAL_PADDING
+	    	    /* for 64-bit server, convert image to pad to 32 bits */
+	    	    if ( widthBytesLine != widthBytesLineProto ) {
+			register char * bufPtr, * protoPtr;
+			register int i;
+
+			for (i = 1,
+			     bufPtr = pBuf + widthBytesLine,
+			     protoPtr = pBuf + widthBytesLineProto;
+			     i < nlines;
+			     bufPtr += widthBytesLine,
+			     protoPtr += widthBytesLineProto,
+			     i++)
+		    	    memmove(protoPtr, bufPtr, widthBytesLineProto);
+	    	    }
+#endif
 		    /* Note: NOT a call to WriteSwappedDataToClient,
 		       as we do NOT byte swap */
 		    if (im_return) {
+#ifdef INTERNAL_VS_EXTERNAL_PADDING
+			pBuf += nlines * widthBytesLineProto;
+#else
 			pBuf += nlines * widthBytesLine;
-		    } else {
-			ReformatImage (pBuf, 
-				       (int)(nlines * widthBytesLine), 
-				       1,
-				       ClientOrder (client));
-
+#endif
+		    } else
 /* Don't split me, gcc pukes when you do */
+#ifdef INTERNAL_VS_EXTERNAL_PADDING
+			(void)WriteToClient(client,
+					(int)(nlines * widthBytesLineProto),
+					pBuf);
+#else
 			(void)WriteToClient(client,
 					(int)(nlines * widthBytesLine),
 					pBuf);
-		    }
+#endif
 		    linesDone += nlines;
 		}
             }
@@ -2307,7 +2229,7 @@ DoGetImage(register ClientPtr client, int format, Drawable drawable,
     }
 #ifdef XCSECURITY
     if (pVisibleRegion)
-	REGION_DESTROY(pDraw->pScreen, pVisibleRegion);
+	REGION_DESTROY(pScreen, pVisibleRegion);
 #endif
     if (!im_return)
 	DEALLOCATE_LOCAL(pBuf);
@@ -2315,7 +2237,8 @@ DoGetImage(register ClientPtr client, int format, Drawable drawable,
 }
 
 int
-ProcGetImage(register ClientPtr client)
+ProcGetImage(client)
+    register ClientPtr	client;
 {
     REQUEST(xGetImageReq);
 
@@ -2328,7 +2251,8 @@ ProcGetImage(register ClientPtr client)
 }
 
 int
-ProcPolyText(register ClientPtr client)
+ProcPolyText(client)
+    register ClientPtr client;
 {
     int	err;
     REQUEST(xPolyTextReq);
@@ -2357,7 +2281,8 @@ ProcPolyText(register ClientPtr client)
 }
 
 int
-ProcImageText8(register ClientPtr client)
+ProcImageText8(client)
+    register ClientPtr client;
 {
     int	err;
     register DrawablePtr pDraw;
@@ -2387,7 +2312,8 @@ ProcImageText8(register ClientPtr client)
 }
 
 int
-ProcImageText16(register ClientPtr client)
+ProcImageText16(client)
+    register ClientPtr client;
 {
     int	err;
     register DrawablePtr pDraw;
@@ -2418,7 +2344,8 @@ ProcImageText16(register ClientPtr client)
 
 
 int
-ProcCreateColormap(register ClientPtr client)
+ProcCreateColormap(client)
+    register ClientPtr client;
 {
     VisualPtr	pVisual;
     ColormapPtr	pmap;
@@ -2461,7 +2388,8 @@ ProcCreateColormap(register ClientPtr client)
 }
 
 int
-ProcFreeColormap(register ClientPtr client)
+ProcFreeColormap(client)
+    register ClientPtr client;
 {
     ColormapPtr pmap;
     REQUEST(xResourceReq);
@@ -2485,7 +2413,8 @@ ProcFreeColormap(register ClientPtr client)
 
 
 int
-ProcCopyColormapAndFree(register ClientPtr client)
+ProcCopyColormapAndFree(client)
+    register ClientPtr client;
 {
     Colormap	mid;
     ColormapPtr	pSrcMap;
@@ -2512,7 +2441,8 @@ ProcCopyColormapAndFree(register ClientPtr client)
 }
 
 int
-ProcInstallColormap(register ClientPtr client)
+ProcInstallColormap(client)
+    register ClientPtr client;
 {
     ColormapPtr pcmp;
     REQUEST(xResourceReq);
@@ -2533,7 +2463,8 @@ ProcInstallColormap(register ClientPtr client)
 }
 
 int
-ProcUninstallColormap(register ClientPtr client)
+ProcUninstallColormap(client)
+    register ClientPtr client;
 {
     ColormapPtr pcmp;
     REQUEST(xResourceReq);
@@ -2555,7 +2486,8 @@ ProcUninstallColormap(register ClientPtr client)
 }
 
 int
-ProcListInstalledColormaps(register ClientPtr client)
+ProcListInstalledColormaps(client)
+    register ClientPtr client;
 {
     xListInstalledColormapsReply *preply; 
     int nummaps;
@@ -2590,7 +2522,8 @@ ProcListInstalledColormaps(register ClientPtr client)
 }
 
 int
-ProcAllocColor (register ClientPtr client)
+ProcAllocColor(client)
+    register ClientPtr client;
 {
     ColormapPtr pmap;
     int	retval;
@@ -2626,9 +2559,6 @@ ProcAllocColor (register ClientPtr client)
 	    else
 	        return (retval);
 	}
-#ifdef PANORAMIX
-	if (noPanoramiXExtension || !pmap->pScreen->myNum)
-#endif
         WriteReplyToClient(client, sizeof(xAllocColorReply), &acr);
 	return (client->noClientException);
 
@@ -2641,7 +2571,8 @@ ProcAllocColor (register ClientPtr client)
 }
 
 int
-ProcAllocNamedColor (register ClientPtr client)
+ProcAllocNamedColor           (client)
+    register ClientPtr client;
 {
     ColormapPtr pcmp;
     REQUEST(xAllocNamedColorReq);
@@ -2684,9 +2615,6 @@ ProcAllocNamedColor (register ClientPtr client)
                 else
     	            return(retval);
 	    }
-#ifdef PANORAMIX
-	    if (noPanoramiXExtension || !pcmp->pScreen->myNum)
-#endif
             WriteReplyToClient(client, sizeof (xAllocNamedColorReply), &ancr);
 	    return (client->noClientException);
 	}
@@ -2702,7 +2630,8 @@ ProcAllocNamedColor (register ClientPtr client)
 }
 
 int
-ProcAllocColorCells (register ClientPtr client)
+ProcAllocColorCells           (client)
+    register ClientPtr client;
 {
     ColormapPtr pcmp;
     REQUEST(xAllocColorCellsReq);
@@ -2753,19 +2682,14 @@ ProcAllocColorCells (register ClientPtr client)
 	    else
 	        return(retval);
 	}
-#ifdef PANORAMIX
-	if (noPanoramiXExtension || !pcmp->pScreen->myNum)
-#endif
-	{
-	    accr.type = X_Reply;
-	    accr.length = length >> 2;
-	    accr.sequenceNumber = client->sequence;
-	    accr.nPixels = npixels;
-	    accr.nMasks = nmasks;
-	    WriteReplyToClient(client, sizeof (xAllocColorCellsReply), &accr);
-	    client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
-	    WriteSwappedDataToClient(client, length, ppixels);
-	}
+	accr.type = X_Reply;
+	accr.length = length >> 2;
+	accr.sequenceNumber = client->sequence;
+	accr.nPixels = npixels;
+	accr.nMasks = nmasks;
+        WriteReplyToClient(client, sizeof (xAllocColorCellsReply), &accr);
+	client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
+	WriteSwappedDataToClient(client, length, ppixels);
 	DEALLOCATE_LOCAL(ppixels);
         return (client->noClientException);        
     }
@@ -2777,7 +2701,8 @@ ProcAllocColorCells (register ClientPtr client)
 }
 
 int
-ProcAllocColorPlanes(register ClientPtr client)
+ProcAllocColorPlanes(client)
+    register ClientPtr client;
 {
     ColormapPtr pcmp;
     REQUEST(xAllocColorPlanesReq);
@@ -2831,14 +2756,9 @@ ProcAllocColorPlanes(register ClientPtr client)
 	        return(retval);
 	}
 	acpr.length = length >> 2;
-#ifdef PANORAMIX
-	if (noPanoramiXExtension || !pcmp->pScreen->myNum)
-#endif
-	{
-	    WriteReplyToClient(client, sizeof(xAllocColorPlanesReply), &acpr);
-	    client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
-	    WriteSwappedDataToClient(client, length, ppixels);
-	}
+	WriteReplyToClient(client, sizeof(xAllocColorPlanesReply), &acpr);
+	client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
+	WriteSwappedDataToClient(client, length, ppixels);
 	DEALLOCATE_LOCAL(ppixels);
         return (client->noClientException);        
     }
@@ -2850,7 +2770,8 @@ ProcAllocColorPlanes(register ClientPtr client)
 }
 
 int
-ProcFreeColors(register ClientPtr client)
+ProcFreeColors          (client)
+    register ClientPtr client;
 {
     ColormapPtr pcmp;
     REQUEST(xFreeColorsReq);
@@ -2885,7 +2806,8 @@ ProcFreeColors(register ClientPtr client)
 }
 
 int
-ProcStoreColors (ClientPtr client)
+ProcStoreColors               (client)
+    register ClientPtr client;
 {
     ColormapPtr pcmp;
     REQUEST(xStoreColorsReq);
@@ -2919,7 +2841,8 @@ ProcStoreColors (ClientPtr client)
 }
 
 int
-ProcStoreNamedColor (register ClientPtr client)
+ProcStoreNamedColor           (client)
+    register ClientPtr client;
 {
     ColormapPtr pcmp;
     REQUEST(xStoreNamedColorReq);
@@ -2953,7 +2876,8 @@ ProcStoreNamedColor (register ClientPtr client)
 }
 
 int
-ProcQueryColors(register ClientPtr client)
+ProcQueryColors(client)
+    register ClientPtr client;
 {
     ColormapPtr pcmp;
     REQUEST(xQueryColorsReq);
@@ -3004,7 +2928,8 @@ ProcQueryColors(register ClientPtr client)
 } 
 
 int
-ProcLookupColor(register ClientPtr client)
+ProcLookupColor(client)
+    register ClientPtr client;
 {
     ColormapPtr pcmp;
     REQUEST(xLookupColorReq);
@@ -3042,7 +2967,8 @@ ProcLookupColor(register ClientPtr client)
 }
 
 int
-ProcCreateCursor (register ClientPtr client)
+ProcCreateCursor( client)
+    register ClientPtr client;
 {
     CursorPtr	pCursor;
 
@@ -3132,7 +3058,8 @@ ProcCreateCursor (register ClientPtr client)
 }
 
 int
-ProcCreateGlyphCursor (register ClientPtr client)
+ProcCreateGlyphCursor( client)
+    register ClientPtr client;
 {
     CursorPtr pCursor;
     int res;
@@ -3156,7 +3083,8 @@ ProcCreateGlyphCursor (register ClientPtr client)
 
 
 int
-ProcFreeCursor (register ClientPtr client)
+ProcFreeCursor(client)
+    register ClientPtr client;
 {
     CursorPtr pCursor;
     REQUEST(xResourceReq);
@@ -3177,7 +3105,8 @@ ProcFreeCursor (register ClientPtr client)
 }
 
 int
-ProcQueryBestSize (register ClientPtr client)
+ProcQueryBestSize   (client)
+    register ClientPtr client;
 {
     xQueryBestSizeReply	reply;
     register DrawablePtr pDraw;
@@ -3210,7 +3139,8 @@ ProcQueryBestSize (register ClientPtr client)
 
 
 int
-ProcSetScreenSaver (register ClientPtr client)
+ProcSetScreenSaver            (client)
+    register ClientPtr client;
 {
     int blankingOption, exposureOption;
     REQUEST(xSetScreenSaverReq);
@@ -3260,13 +3190,12 @@ ProcSetScreenSaver (register ClientPtr client)
 	ScreenSaverInterval = stuff->interval * MILLI_PER_SECOND;
     else
 	ScreenSaverInterval = defaultScreenSaverInterval;
-
-    SetScreenSaverTimer();
     return (client->noClientException);
 }
 
 int
-ProcGetScreenSaver(register ClientPtr client)
+ProcGetScreenSaver(client)
+    register ClientPtr client;
 {
     xGetScreenSaverReply rep;
 
@@ -3283,7 +3212,8 @@ ProcGetScreenSaver(register ClientPtr client)
 }
 
 int
-ProcChangeHosts(register ClientPtr client)
+ProcChangeHosts(client)
+    register ClientPtr client;
 {
     REQUEST(xChangeHostsReq);
     int result;
@@ -3307,12 +3237,12 @@ ProcChangeHosts(register ClientPtr client)
 }
 
 int
-ProcListHosts(register ClientPtr client)
+ProcListHosts(client)
+    register ClientPtr client;
 {
     xListHostsReply reply;
     int	len, nHosts, result;
     pointer	pdata;
-    /* REQUEST(xListHostsReq); */
 
     REQUEST_SIZE_MATCH(xListHostsReq);
 #ifdef XCSECURITY
@@ -3341,7 +3271,8 @@ ProcListHosts(register ClientPtr client)
 }
 
 int
-ProcChangeAccessControl(register ClientPtr client)
+ProcChangeAccessControl(client)
+    register ClientPtr client;
 {
     int result;
     REQUEST(xSetAccessControlReq);
@@ -3359,7 +3290,8 @@ ProcChangeAccessControl(register ClientPtr client)
 }
 
 int
-ProcKillClient(register ClientPtr client)
+ProcKillClient(client)
+    register ClientPtr client;
 {
     REQUEST(xResourceReq);
     ClientPtr	killclient;
@@ -3393,7 +3325,8 @@ ProcKillClient(register ClientPtr client)
 }
 
 int
-ProcSetFontPath(register ClientPtr client)
+ProcSetFontPath(client)
+    register ClientPtr client;
 {
     unsigned char *ptr;
     unsigned long nbytes, total;
@@ -3428,12 +3361,12 @@ ProcSetFontPath(register ClientPtr client)
 }
 
 int
-ProcGetFontPath(register ClientPtr client)
+ProcGetFontPath(client)
+    register ClientPtr client;
 {
     xGetFontPathReply reply;
     int stringLens, numpaths;
     unsigned char *bufferStart;
-    /* REQUEST (xReq); */
 
     REQUEST_SIZE_MATCH(xReq);
     bufferStart = GetFontPath(&numpaths, &stringLens);
@@ -3450,7 +3383,8 @@ ProcGetFontPath(register ClientPtr client)
 }
 
 int
-ProcChangeCloseDownMode(register ClientPtr client)
+ProcChangeCloseDownMode(client)
+    register ClientPtr client;
 {
     REQUEST(xSetCloseDownModeReq);
 
@@ -3469,7 +3403,8 @@ ProcChangeCloseDownMode(register ClientPtr client)
     }
 }
 
-int ProcForceScreenSaver(register ClientPtr client)
+int ProcForceScreenSaver(client)
+    register ClientPtr client;
 {    
     REQUEST(xForceScreenSaverReq);
 
@@ -3485,7 +3420,8 @@ int ProcForceScreenSaver(register ClientPtr client)
     return client->noClientException;
 }
 
-int ProcNoOperation(register ClientPtr client)
+int ProcNoOperation(client)
+    register ClientPtr client;
 {
     REQUEST_AT_LEAST_SIZE(xReq);
     
@@ -3494,7 +3430,7 @@ int ProcNoOperation(register ClientPtr client)
 }
 
 void
-InitProcVectors(void)
+InitProcVectors()
 {
     int i;
     for (i = 0; i<256; i++)
@@ -3525,10 +3461,11 @@ InitProcVectors(void)
  *  then killed again, the client is really destroyed.
  *********************/
 
-char dispatchExceptionAtReset = DE_RESET;
+Bool terminateAtReset = FALSE;
 
 void
-CloseDownClient(register ClientPtr client)
+CloseDownClient(client)
+    register ClientPtr client;
 {
     Bool really_close_down = client->clientGone ||
 			     client->closeDownMode == DestroyAll;
@@ -3590,8 +3527,12 @@ CloseDownClient(register ClientPtr client)
     if (really_close_down)
     {
 	if (client->clientState == ClientStateRunning && nClients == 0)
-	    dispatchException |= dispatchExceptionAtReset;
-
+	{
+	    if (terminateAtReset)
+		dispatchException |= DE_TERMINATE;
+	    else
+		dispatchException |= DE_RESET;
+	}
 	client->clientState = ClientStateGone;
 	if (ClientStateCallback)
 	{
@@ -3606,9 +3547,6 @@ CloseDownClient(register ClientPtr client)
 	if (client->index < nextFreeClientID)
 	    nextFreeClientID = client->index;
 	clients[client->index] = NullClient;
-#ifdef SMART_SCHEDULE
-	SmartLastClient = NullClient;
-#endif
 	xfree(client);
 
 	while (!clients[currentMaxClients-1])
@@ -3621,11 +3559,8 @@ KillAllClients()
 {
     int i;
     for (i=1; i<currentMaxClients; i++)
-        if (clients[i]) {
-            /* Make sure Retained clients are released. */
-            clients[i]->closeDownMode = DestroyAll;
+        if (clients[i])
             CloseDownClient(clients[i]);     
-        }
 }
 
 /*********************
@@ -3650,7 +3585,10 @@ CloseDownRetainedResources()
     }
 }
 
-void InitClient(ClientPtr client, int i, pointer ospriv)
+void InitClient(client, i, ospriv)
+    ClientPtr client;
+    int i;
+    pointer ospriv;
 {
     client->index = i;
     client->sequence = 0; 
@@ -3671,7 +3609,7 @@ void InitClient(ClientPtr client, int i, pointer ospriv)
     client->lastGC = (GCPtr) NULL;
     client->lastGCID = INVALID;
     client->numSaved = 0;
-    client->saveSet = (SaveSetElt *)NULL;
+    client->saveSet = (pointer *)NULL;
     client->noClientException = Success;
 #ifdef DEBUG
     client->requestLogIndex = 0;
@@ -3702,12 +3640,6 @@ void InitClient(ClientPtr client, int i, pointer ospriv)
     client->appgroup = NULL;
 #endif
     client->fontResFunc = NULL;
-#ifdef SMART_SCHEDULE
-    client->smart_priority = 0;
-    client->smart_start_tick = SmartScheduleTime;
-    client->smart_stop_tick = SmartScheduleTime;
-    client->smart_check_tick = SmartScheduleTime;
-#endif
 }
 
 extern int clientPrivateLen;
@@ -3715,7 +3647,8 @@ extern unsigned *clientPrivateSizes;
 extern unsigned totalClientSize;
 
 int
-InitClientPrivates(ClientPtr client)
+InitClientPrivates(client)
+    ClientPtr client;
 {
     register char *ptr;
     DevUnion *ppriv;
@@ -3756,7 +3689,9 @@ InitClientPrivates(ClientPtr client)
  * Returns NULL if there are no free clients.
  *************************/
 
-ClientPtr NextAvailableClient(pointer ospriv)
+ClientPtr
+NextAvailableClient(ospriv)
+    pointer ospriv;
 {
     register int i;
     register ClientPtr client;
@@ -3800,7 +3735,8 @@ ClientPtr NextAvailableClient(pointer ospriv)
 }
 
 int
-ProcInitialConnection(register ClientPtr client)
+ProcInitialConnection(client)
+    register ClientPtr client;
 {
     REQUEST(xReq);
     register xConnClientPrefix *prefix;
@@ -3835,7 +3771,9 @@ IncrementClientCount()
 #endif
 
 int
-SendConnSetup(register ClientPtr client, char *reason)
+SendConnSetup(client, reason)
+    register ClientPtr client;
+    char *reason;
 {
     register xWindowRoot *root;
     register int i;
@@ -3846,6 +3784,7 @@ SendConnSetup(register ClientPtr client, char *reason)
     if (reason)
     {
 	xConnSetupPrefix csp;
+	char pad[3];
 
 	csp.success = xFalse;
 	csp.lengthReason = strlen(reason);
@@ -3878,19 +3817,8 @@ SendConnSetup(register ClientPtr client, char *reason)
 #endif
     ((xConnSetup *)lConnectionInfo)->ridBase = client->clientAsMask;
     ((xConnSetup *)lConnectionInfo)->ridMask = RESOURCE_ID_MASK;
-#ifdef MATCH_CLIENT_ENDIAN
-    ((xConnSetup *)lConnectionInfo)->imageByteOrder = ClientOrder (client);
-    ((xConnSetup *)lConnectionInfo)->bitmapBitOrder = ClientOrder (client);
-#endif
     /* fill in the "currentInputMask" */
     root = (xWindowRoot *)(lConnectionInfo + connBlockScreenStart);
-#ifdef PANORAMIX
-    if (noPanoramiXExtension)
-	numScreens = screenInfo.numScreens;
-    else 
-        numScreens = ((xConnSetup *)ConnectionInfo)->numRoots;
-#endif
-
     for (i=0; i<numScreens; i++) 
     {
 	register unsigned int j;
@@ -3935,7 +3863,8 @@ SendConnSetup(register ClientPtr client, char *reason)
 }
 
 int
-ProcEstablishConnection(register ClientPtr client)
+ProcEstablishConnection(client)
+    register ClientPtr client;
 {
     char *reason, *auth_proto, *auth_string;
     register xConnClientPrefix *prefix;
@@ -3969,8 +3898,12 @@ ProcEstablishConnection(register ClientPtr client)
 }
 
 void
-SendErrorToClient(ClientPtr client, unsigned majorCode, unsigned minorCode, 
-                  XID resId, int errorCode)
+SendErrorToClient(client, majorCode, minorCode, resId, errorCode)
+    ClientPtr client;
+    unsigned int majorCode;
+    unsigned int minorCode;
+    XID resId;
+    int errorCode;
 {
     xError rep;
 
@@ -3985,21 +3918,14 @@ SendErrorToClient(ClientPtr client, unsigned majorCode, unsigned minorCode,
 }
 
 void
-DeleteWindowFromAnySelections(WindowPtr pWin)
+DeleteWindowFromAnySelections(pWin)
+    WindowPtr pWin;
 {
     register int i;
 
     for (i = 0; i< NumCurrentSelections; i++)
         if (CurrentSelections[i].pWin == pWin)
         {
-	    if (SelectionCallback)
-	    {
-	        SelectionInfoRec    info;
-
-		info.selection = &CurrentSelections[i];
-		info.kind = SelectionWindowDestroy;
-		CallCallbacks(&SelectionCallback, &info);
-	    }
             CurrentSelections[i].pWin = (WindowPtr)NULL;
             CurrentSelections[i].window = None;
 	    CurrentSelections[i].client = NullClient;
@@ -4007,21 +3933,14 @@ DeleteWindowFromAnySelections(WindowPtr pWin)
 }
 
 static void
-DeleteClientFromAnySelections(ClientPtr client)
+DeleteClientFromAnySelections(client)
+    ClientPtr client;
 {
     register int i;
 
     for (i = 0; i< NumCurrentSelections; i++)
         if (CurrentSelections[i].client == client)
         {
-	    if (SelectionCallback)
-	    {
-	        SelectionInfoRec    info;
-
-		info.selection = &CurrentSelections[i];
-		info.kind = SelectionWindowDestroy;
-		CallCallbacks(&SelectionCallback, &info);
-	    }
             CurrentSelections[i].pWin = (WindowPtr)NULL;
             CurrentSelections[i].window = None;
 	    CurrentSelections[i].client = NullClient;
@@ -4029,7 +3948,8 @@ DeleteClientFromAnySelections(ClientPtr client)
 }
 
 void
-MarkClientException(ClientPtr client)
+MarkClientException(client)
+    ClientPtr client;
 {
     client->noClientException = -1;
 }

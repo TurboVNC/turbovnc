@@ -60,6 +60,7 @@ in this Software without prior written authorization from the X Consortium.
 #include "regionstr.h"
 #include "dixfontstr.h"
 #include "rfb.h"
+#include "mfb.h"
 
 extern WindowPtr *WindowTable; /* Why isn't this in a header file? */
 
@@ -73,8 +74,10 @@ Bool cuCopyArea = FALSE;
  */
 /****************************************************************************/
 
+/* SLIGHTLY DIRTY HACK - use Composite Clip region calculated by mfb */
+
 #define WINDOW_CLIP_REGION(_w, _gc) \
-  ((_gc)->pCompositeClip)
+  (((mfbPrivGCPtr)((_gc)->devPrivates[mfbGCPrivateIndex].ptr))->pCompositeClip)
 
 #define TRC(x) /* (fprintf x) */
 

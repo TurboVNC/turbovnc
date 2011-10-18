@@ -1,14 +1,15 @@
-/* $XdotOrg: xc/programs/Xserver/cfb/cfbpntwin.c,v 1.5 2005/07/03 07:01:15 daniels Exp $ */
-/* $Xorg: cfbpntwin.c,v 1.4 2001/02/09 02:04:38 xorgcvs Exp $ */
+/* $XConsortium: cfbpntwin.c,v 5.18 94/04/17 20:28:57 dpw Exp $ */
+/* $XFree86: xc/programs/Xserver/cfb/cfbpntwin.c,v 3.0 1996/06/29 09:05:45 dawes Exp $ */
 /***********************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,13 +17,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -46,13 +47,8 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $XFree86: xc/programs/Xserver/cfb/cfbpntwin.c,v 3.7tsi Exp $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
+#include "X.h"
 
 #include "windowstr.h"
 #include "regionstr.h"
@@ -62,11 +58,6 @@ SOFTWARE.
 #include "cfb.h"
 #include "cfbmskbits.h"
 #include "mi.h"
-
-#ifdef PANORAMIX
-#include "panoramiX.h"
-#include "panoramiXsrv.h"
-#endif
 
 void
 cfbPaintWindow(pWin, pRegion, what)
@@ -78,7 +69,6 @@ cfbPaintWindow(pWin, pRegion, what)
     WindowPtr	pBgWin;
 
     pPrivWin = cfbGetWindowPrivate(pWin);
-
 
     switch (what) {
     case PW_BACKGROUND:
@@ -102,22 +92,11 @@ cfbPaintWindow(pWin, pRegion, what)
 	    }
 	    else
 	    {
-		int xorg = pWin->drawable.x;
-		int yorg = pWin->drawable.y;
-#ifdef PANORAMIX
-		if(!noPanoramiXExtension) {
-		    int index = pWin->drawable.pScreen->myNum;
-		    if(WindowTable[index] == pWin) {
-			xorg -= panoramiXdataPtr[index].x;
-			yorg -= panoramiXdataPtr[index].y;
-		    }
-		}
-#endif
 		cfbFillBoxTileOdd ((DrawablePtr)pWin,
 				   (int)REGION_NUM_RECTS(pRegion),
 				   REGION_RECTS(pRegion),
 				   pWin->background.pixmap,
-				   xorg, yorg);
+				   (int) pWin->drawable.x, (int) pWin->drawable.y);
 	    }
 	    break;
 	case BackgroundPixel:
@@ -145,30 +124,16 @@ cfbPaintWindow(pWin, pRegion, what)
 	}
 	else
 	{
-	    int xorg, yorg;
-
 	    for (pBgWin = pWin;
 		 pBgWin->backgroundState == ParentRelative;
 		 pBgWin = pBgWin->parent);
-
-	    xorg = pBgWin->drawable.x;
-	    yorg = pBgWin->drawable.y;
-
-#ifdef PANORAMIX
-	    if(!noPanoramiXExtension) {
-		int index = pWin->drawable.pScreen->myNum;
-		if(WindowTable[index] == pBgWin) {
-		    xorg -= panoramiXdataPtr[index].x;
-		    yorg -= panoramiXdataPtr[index].y;
-		}
-	    }
-#endif
 
 	    cfbFillBoxTileOdd ((DrawablePtr)pWin,
 			       (int)REGION_NUM_RECTS(pRegion),
 			       REGION_RECTS(pRegion),
 			       pWin->border.pixmap,
-			       xorg, yorg);
+			       (int) pBgWin->drawable.x,
+ 			       (int) pBgWin->drawable.y);
 	}
 	break;
     }
@@ -228,30 +193,27 @@ cfbFillBoxSolid (pDrawable, nBox, pBox, pixel)
     BoxPtr	    pBox;
     unsigned long   pixel;
 {
-    CfbBits   *pdstBase;
+    unsigned long   *pdstBase;
     int		    widthDst;
     register int    h;
-    register CfbBits   *pdst;
+    register unsigned long   rrop_xor;
+    register unsigned long   *pdst;
+    register unsigned long   leftMask, rightMask;
     int		    nmiddle;
+    register int    m;
     int		    w;
 #if PSZ == 24
     int leftIndex, rightIndex;
-    CfbBits piQxelArray[3], *pdstULC; /*upper left corner*/
+    unsigned long piQxelArray[3], xOffset, *pdstULC; /*upper left corner*/
 
     piQxelArray[0] = (pixel&0xFFFFFF) | ((pixel&0xFF)<<24);
     piQxelArray[1] = ((pixel&0xFFFF00)>>8) | ((pixel&0xFFFF)<<16);
     piQxelArray[2] = ((pixel&0xFFFFFF)<<8) | ((pixel&0xFF0000)>>16);
-#else
-    register CfbBits   rrop_xor;
-    register CfbBits   leftMask, rightMask;
-    register int    m;
 #endif
 
     cfbGetLongWidthAndPointer(pDrawable, widthDst, pdstBase);
 
-#if PSZ != 24
     rrop_xor = PFILL(pixel);
-#endif
     for (; nBox; nBox--, pBox++)
     {
     	pdst = pdstBase + pBox->y1 * widthDst;
@@ -300,8 +262,7 @@ cfbFillBoxSolid (pDrawable, nBox, pBox, pixel)
 	      break;
 	    case 1:
 	      while(h--){
-		*pdst = ((*pdst) & 0xFFFFFF) | (piQxelArray[0] & 0xFF000000);
-		pdst++;
+		*pdst++ = ((*pdst) & 0xFFFFFF) | (piQxelArray[0] & 0xFF000000);
 		*pdst++ = piQxelArray[1];
 		*pdst   = piQxelArray[2];
 		pdst -=2;
@@ -310,8 +271,7 @@ cfbFillBoxSolid (pDrawable, nBox, pBox, pixel)
 	      break;
 	    case 2:
 	      while(h--){
-		*pdst = ((*pdst) & 0xFFFF) | (piQxelArray[1] & 0xFFFF0000);
-		pdst++;
+		*pdst++ = ((*pdst) & 0xFFFF) | (piQxelArray[1] & 0xFFFF0000);
 		*pdst-- = piQxelArray[2];
 		pdst += widthDst;
 	      }
@@ -330,29 +290,24 @@ cfbFillBoxSolid (pDrawable, nBox, pBox, pixel)
 	      while(h--){
 		*pdst++ = piQxelArray[0];
 		*pdst++ = piQxelArray[1];
-		*pdst = ((*pdst) & 0xFFFFFF00) | (piQxelArray[2] & 0xFF);
-		pdst--;
+		*pdst-- = ((*pdst) & 0xFFFFFF00) | (piQxelArray[2] & 0xFF);
 		pdst--;
 		pdst += widthDst;
 	      }
 	      break;
 	    case 1:
 	      while(h--){
-		*pdst = ((*pdst) & 0xFFFFFF) | (piQxelArray[0] & 0xFF000000);
-		pdst++;
+		*pdst++ = ((*pdst) & 0xFFFFFF) | (piQxelArray[0] & 0xFF000000);
 		*pdst++ = piQxelArray[1];
-		*pdst = ((*pdst) & 0xFFFFFF00) | (piQxelArray[2] & 0xFF);
-		pdst--;
+		*pdst-- = ((*pdst) & 0xFFFFFF00) | (piQxelArray[2] & 0xFF);
 		pdst--;
 		pdst += widthDst;
 	      }
 	      break;
 	    case 2:
 	      while(h--){
-		*pdst = ((*pdst) & 0xFFFF) | (piQxelArray[1] & 0xFFFF0000);
-		pdst++;
-		*pdst = ((*pdst) & 0xFFFFFF00) | (piQxelArray[2] & 0xFF);
-		pdst--;
+		*pdst++ = ((*pdst) & 0xFFFF) | (piQxelArray[1] & 0xFFFF0000);
+		*pdst-- = ((*pdst) & 0xFFFFFF00) | (piQxelArray[2] & 0xFF);
 		pdst += widthDst;
 	      }
 	      break;
@@ -361,14 +316,12 @@ cfbFillBoxSolid (pDrawable, nBox, pBox, pixel)
 	  case 2:
 	    while(h--){
 	      if(leftIndex){
-		*pdst = ((*pdst) & 0xFFFFFF) | (piQxelArray[0] & 0xFF000000);
-		pdst++;
+		*pdst++ = ((*pdst) & 0xFFFFFF) | (piQxelArray[0] & 0xFF000000);
 	      }
 	      else{
 		*pdst++ = piQxelArray[0];
 	      }
-		*pdst = ((*pdst) & 0xFFFF0000) | (piQxelArray[1] & 0xFFFF);
-		pdst--;
+		*pdst-- = ((*pdst) & 0xFFFF0000) | (piQxelArray[1] & 0xFFFF);
 		pdst += widthDst;
 	    }
 	    break;
@@ -392,19 +345,16 @@ cfbFillBoxSolid (pDrawable, nBox, pBox, pixel)
 	      case 0:
 		break;
 	      case 1:
-		*pdst = ((*pdst) & 0xFFFFFF) | (piQxelArray[0] & 0xFF000000);
-		pdst++;
+		*pdst++ = ((*pdst) & 0xFFFFFF) | (piQxelArray[0] & 0xFF000000);
 		*pdst++ = piQxelArray[1];
 		*pdst++ = piQxelArray[2];
 	        break;
 	      case 2:
-		*pdst = ((*pdst) & 0xFFFF) | (piQxelArray[1] & 0xFFFF0000);
-		pdst++;
+		*pdst++ = ((*pdst) & 0xFFFF) | (piQxelArray[1] & 0xFFFF0000);
 		*pdst++ = piQxelArray[2];
 	        break;
 	      case 3:
-		*pdst = ((*pdst) & 0xFF) | (piQxelArray[2] & 0xFFFFFF00);
-		pdst++;
+		*pdst++ = ((*pdst) & 0xFF) | (piQxelArray[2] & 0xFFFFFF00);
 	        break;
 	      }
 	      while(nmiddle--){
@@ -491,30 +441,29 @@ cfbFillBoxTile32 (pDrawable, nBox, pBox, tile)
     BoxPtr 	    pBox;	/* pointer to list of boxes to fill */
     PixmapPtr	    tile;	/* rotated, expanded tile */
 {
-    register CfbBits  *pdst;
-    CfbBits	    *psrc;
+    register unsigned long  rrop_xor;	
+    register unsigned long  *pdst;
+    register int	    m;
+    unsigned long	    *psrc;
     int			    tileHeight;
 
     int			    widthDst;
     int			    w;
     int			    h;
+    register unsigned long  leftMask;
+    register unsigned long  rightMask;
     int			    nmiddle;
     int			    y;
     int			    srcy;
 
-    CfbBits	    *pdstBase;
+    unsigned long	    *pdstBase;
 #if PSZ == 24
     int			    leftIndex, rightIndex;
-    CfbBits piQxelArray[3], *pdstULC;
-#else
-    register CfbBits  rrop_xor;	
-    register CfbBits  leftMask;
-    register CfbBits  rightMask;
-    register int      m;
+    unsigned long piQxelArray[3], xOffset, *pdstULC;
 #endif
 
     tileHeight = tile->drawable.height;
-    psrc = (CfbBits *)tile->devPrivate.ptr;
+    psrc = (unsigned long *)tile->devPrivate.ptr;
 
     cfbGetLongWidthAndPointer (pDrawable, widthDst, pdstBase);
 
@@ -563,8 +512,7 @@ cfbFillBoxTile32 (pDrawable, nBox, pBox, tile)
 	    case 1:
 	      while(h--){
 		  StepTile
-		*pdst = ((*pdst) & 0xFFFFFF) | (piQxelArray[0] & 0xFF000000);
-		pdst++;
+		*pdst++ = ((*pdst) & 0xFFFFFF) | (piQxelArray[0] & 0xFF000000);
 		*pdst++ = piQxelArray[1];
 		*pdst   = piQxelArray[2];
 		pdst-=2;
@@ -574,8 +522,7 @@ cfbFillBoxTile32 (pDrawable, nBox, pBox, tile)
 	    case 2:
 	      while(h--){
 		  StepTile
-		*pdst = ((*pdst) & 0xFFFF) | (piQxelArray[1] & 0xFFFF0000);
-		pdst++;
+		*pdst++ = ((*pdst) & 0xFFFF) | (piQxelArray[1] & 0xFFFF0000);
 		*pdst--   = piQxelArray[2];
 		pdst += widthDst;
 	      }
@@ -596,8 +543,7 @@ cfbFillBoxTile32 (pDrawable, nBox, pBox, tile)
 		  StepTile
 		*pdst++ = piQxelArray[0];
 		*pdst++ = piQxelArray[1];
-		*pdst = ((*pdst) & 0xFFFFFF00) | (piQxelArray[2] & 0xFF);
-		pdst--;
+		*pdst-- = ((*pdst) & 0xFFFFFF00) | (piQxelArray[2] & 0xFF);
 		pdst--;
 		pdst += widthDst;
 	      }
@@ -605,11 +551,9 @@ cfbFillBoxTile32 (pDrawable, nBox, pBox, tile)
 	    case 1:
 	      while(h--){
 		  StepTile
-		*pdst = ((*pdst) & 0xFFFFFF) | (piQxelArray[0] & 0xFF000000);
-		pdst++;
+		*pdst++ = ((*pdst) & 0xFFFFFF) | (piQxelArray[0] & 0xFF000000);
 		*pdst++ = piQxelArray[1];
-		*pdst = ((*pdst) & 0xFFFFFF00) | (piQxelArray[2] & 0xFF);
-		pdst--;
+		*pdst-- = ((*pdst) & 0xFFFFFF00) | (piQxelArray[2] & 0xFF);
 		pdst--;
 		pdst += widthDst;
 	      }
@@ -617,10 +561,8 @@ cfbFillBoxTile32 (pDrawable, nBox, pBox, tile)
 	    case 2:
 	      while(h--){
 		  StepTile
-		*pdst = ((*pdst) & 0xFFFF) | (piQxelArray[1] & 0xFFFF0000);
-		pdst++;
-		*pdst = ((*pdst) & 0xFFFFFF00) | (piQxelArray[2] & 0xFF);
-		pdst--;
+		*pdst++ = ((*pdst) & 0xFFFF) | (piQxelArray[1] & 0xFFFF0000);
+		*pdst-- = ((*pdst) & 0xFFFFFF00) | (piQxelArray[2] & 0xFF);
 		pdst += widthDst;
 	      }
 	      break;
@@ -630,14 +572,12 @@ cfbFillBoxTile32 (pDrawable, nBox, pBox, tile)
 	    while(h--){
 		  StepTile
 	      if(leftIndex){
-		*pdst = ((*pdst) & 0xFFFFFF) | (piQxelArray[0] & 0xFF000000);
-		pdst++;
+		*pdst++ = ((*pdst) & 0xFFFFFF) | (piQxelArray[0] & 0xFF000000);
 	      }
 	      else{
 		*pdst++ = piQxelArray[0];
 	      }
-		*pdst = ((*pdst) & 0xFFFF0000) | (piQxelArray[1] & 0xFFFF);
-		pdst--;
+		*pdst-- = ((*pdst) & 0xFFFF0000) | (piQxelArray[1] & 0xFFFF);
 		pdst += widthDst;
 	    }
 	    break;
@@ -663,19 +603,16 @@ cfbFillBoxTile32 (pDrawable, nBox, pBox, tile)
 	      case 0:
 		break;
 	      case 1:
-		*pdst = ((*pdst) & 0xFFFFFF) | (piQxelArray[0] & 0xFF000000);
-		pdst++;
+		*pdst++ = ((*pdst) & 0xFFFFFF) | (piQxelArray[0] & 0xFF000000);
 		*pdst++ = piQxelArray[1];
 		*pdst++ = piQxelArray[2];
 	        break;
 	      case 2:
-		*pdst = ((*pdst) & 0xFFFF) | (piQxelArray[1] & 0xFFFF0000);
-		pdst++;
+		*pdst++ = ((*pdst) & 0xFFFF) | (piQxelArray[1] & 0xFFFF0000);
 		*pdst++ = piQxelArray[2];
 	        break;
 	      case 3:
-		*pdst = ((*pdst) & 0xFF) | (piQxelArray[2] & 0xFFFFFF00);
-		pdst++;
+		*pdst++ = ((*pdst) & 0xFF) | (piQxelArray[2] & 0xFFFFFF00);
 	        break;
 	      }
 	      while(nmiddle--){

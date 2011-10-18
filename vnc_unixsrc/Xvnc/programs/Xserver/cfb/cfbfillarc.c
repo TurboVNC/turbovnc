@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/cfb/cfbfillarc.c,v 3.6tsi Exp $ */
 /************************************************************
 
-Copyright 1989, 1998  The Open Group
+Copyright (c) 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,25 +15,22 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 ********************************************************/
 
-/* $Xorg: cfbfillarc.c,v 1.4 2001/02/09 02:04:37 xorgcvs Exp $ */
+/* $XConsortium: cfbfillarc.c /main/17 1995/12/06 16:57:18 dpw $ */
+/* $XFree86: xc/programs/Xserver/cfb/cfbfillarc.c,v 3.1 1996/08/13 11:27:33 dawes Exp $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
-#include <X11/Xprotostr.h>
-#include "regionstr.h"
+#include "X.h"
+#include "Xprotostr.h"
+#include "miscstruct.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"
 #include "scrnintstr.h"
@@ -51,10 +48,10 @@ in this Software without prior written authorization from The Open Group.
 #endif
 
 static void
-RROP_NAME(cfbFillEllipseSolid)(
-    DrawablePtr pDraw,
-    GCPtr pGC,
-    xArc *arc)
+RROP_NAME(cfbFillEllipseSolid) (pDraw, pGC, arc)
+    DrawablePtr pDraw;
+    GCPtr pGC;
+    xArc *arc;
 {
     STUPID int x, y, e;
     STUPID int yk, xk, ym, xm, dx, dy, xorg, yorg;
@@ -62,15 +59,15 @@ RROP_NAME(cfbFillEllipseSolid)(
 #if PSZ == 24
     unsigned char *addrlt, *addrlb;
 #else
-    CfbBits *addrlt, *addrlb;
+    unsigned long *addrlt, *addrlb;
 #endif
-    register CfbBits *addrl;
+    register unsigned long *addrl;
     register int n;
     int nlwidth;
     RROP_DECLARE
     register int xpos;
     register int slw;
-    CfbBits startmask, endmask;
+    unsigned long startmask, endmask;
     int	nlmiddle;
 #if PSZ == 24
     register int pidx;
@@ -101,11 +98,11 @@ RROP_NAME(cfbFillEllipseSolid)(
 	xpos = xorg - x;
 #if PSZ == 24
 	xpos3 = (xpos * 3) & ~0x03;
-	addrl = (CfbBits *)((char *)addrlt + xpos3);
+	addrl = (unsigned long *)((char *)addrlt + xpos3);
 	if (slw == 1){
 	  RROP_SOLID24(addrl, xpos);
 	  if (miFillArcLower(slw)){
-	    addrl = (CfbBits *)((char *)addrlb + xpos3);
+	    addrl = (unsigned long *)((char *)addrlb + xpos3);
 	    RROP_SOLID24(addrl, xpos);
           }
 	  continue;
@@ -130,7 +127,7 @@ RROP_NAME(cfbFillEllipseSolid)(
 	  RROP_SOLID_MASK(addrl, endmask, pidx);
 	if (!miFillArcLower(slw))
 	  continue;
-	addrl = (CfbBits *)((char *)addrlb + xpos3);
+	addrl = (unsigned long *)((char *)addrlb + xpos3);
 	pidx = xpos;
 	if (startmask){
 	  RROP_SOLID_MASK(addrl, startmask, pidx-1);
@@ -185,14 +182,13 @@ RROP_NAME(cfbFillEllipseSolid)(
 	    RROP_SOLID_MASK(addrl, endmask);
 #endif /* PSZ == 24 */
     }
-    RROP_UNDECLARE
 }
 
 #if PSZ == 24
 #define FILLSPAN(xl,xr,addr) \
     if (xr >= xl){ \
 	n = xr - xl + 1; \
-	addrl = (CfbBits *)((char *)addr + ((xl * 3) & ~0x03)); \
+	addrl = (unsigned long *)((char *)addr + ((xl * 3) & ~0x03)); \
 	if (n <= 1){ \
           if (n) \
             RROP_SOLID24(addrl, xl); \
@@ -259,10 +255,10 @@ RROP_NAME(cfbFillEllipseSolid)(
     }
 
 static void
-RROP_NAME(cfbFillArcSliceSolid)(
-    DrawablePtr pDraw,
-    GCPtr pGC,
-    xArc *arc)
+RROP_NAME(cfbFillArcSliceSolid)(pDraw, pGC, arc)
+    DrawablePtr pDraw;
+    GCPtr pGC;
+    xArc *arc;
 {
     int yk, xk, ym, xm, dx, dy, xorg, yorg, slw;
     register int x, y, e;
@@ -272,13 +268,13 @@ RROP_NAME(cfbFillArcSliceSolid)(
 #if PSZ == 24
     unsigned char *addrlt, *addrlb;
 #else
-    CfbBits *addrlt, *addrlb;
+    unsigned long *addrlt, *addrlb;
 #endif
-    register CfbBits *addrl;
+    register unsigned long *addrl;
     register int n;
     int nlwidth;
     RROP_DECLARE
-    CfbBits startmask, endmask;
+    unsigned long startmask, endmask;
 #if PSZ == 24
     register int pidx;
 #endif /* PSZ == 24 */
@@ -318,7 +314,6 @@ RROP_NAME(cfbFillArcSliceSolid)(
 	    FILLSLICESPANS(slice.flip_bot, addrlb);
 	}
     }
-    RROP_UNDECLARE
 }
 
 void

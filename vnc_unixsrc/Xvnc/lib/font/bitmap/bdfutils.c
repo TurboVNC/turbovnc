@@ -1,4 +1,4 @@
-/* $Xorg: bdfutils.c,v 1.5 2001/02/09 02:04:02 xorgcvs Exp $ */
+/* $XConsortium: bdfutils.c,v 1.11 94/04/17 20:17:10 gildea Exp $ */
 /************************************************************************
 Copyright 1989 by Digital Equipment Corporation, Maynard, Massachusetts.
 
@@ -24,13 +24,15 @@ SOFTWARE.
 
 /*
 
-Copyright 1994, 1998  The Open Group
+Copyright (c) 1994  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -38,61 +40,61 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: xc/lib/font/bitmap/bdfutils.c,v 1.10 2001/12/14 19:56:45 dawes Exp $ */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#ifndef FONTMODULE
 #include <ctype.h>
-#include <stdio.h>
-#include <stdarg.h>
-#endif
 
-#include <X11/fonts/fntfilst.h>
-#include <X11/fonts/fontstruct.h>
+#include <stdio.h>
+#include "fntfilst.h"
+#include "fontstruct.h"
 /* use bitmap structure */
-#include <X11/fonts/bitmap.h>
-#include <X11/fonts/bdfint.h>
+#include "bitmap.h"
+#include "bdfint.h"
 
 int bdfFileLineNum;
 
 /***====================================================================***/
 
+/*VARARGS1*/
 void
-bdfError(char* message, ...)
+bdfError(message, a0, a1, a2, a3, a4, a5)
+    char       *message;
+    pointer     a0,
+                a1,
+                a2,
+                a3,
+                a4,
+                a5;
 {
-    va_list args;
-
-    va_start (args, message);
     fprintf(stderr, "BDF Error on line %d: ", bdfFileLineNum);
-    vfprintf(stderr, message, args);
-    va_end (args);
+    fprintf(stderr, message, a0, a1, a2, a3, a4, a5);
 }
 
 /***====================================================================***/
 
+/*VARARGS1*/
 void
-bdfWarning(char *message, ...)
+bdfWarning(message, a0, a1, a2, a3, a4, a5)
+    char       *message;
+    pointer     a0,
+                a1,
+                a2,
+                a3,
+                a4,
+                a5;
 {
-    va_list args;
-
-    va_start (args, message);
     fprintf(stderr, "BDF Warning on line %d: ", bdfFileLineNum);
-    vfprintf(stderr, message, args);
-    va_end (args);
+    fprintf(stderr, message, a0, a1, a2, a3, a4, a5);
 }
 
 /*
@@ -101,7 +103,10 @@ bdfWarning(char *message, ...)
  */
 
 unsigned char *
-bdfGetLine(FontFilePtr file, unsigned char *buf, int len)
+bdfGetLine(file, buf, len)
+    FontFilePtr file;
+    unsigned char *buf;
+    int         len;
 {
     int         c;
     unsigned char *b;
@@ -131,17 +136,16 @@ bdfGetLine(FontFilePtr file, unsigned char *buf, int len)
 /***====================================================================***/
 
 Atom
-bdfForceMakeAtom(char *str, int *size)
+bdfForceMakeAtom(str, size)
+    register char *str;
+    register int *size;
 {
     register int len = strlen(str);
-    Atom the_atom;
+    extern Atom	MakeAtom();
 
     if (size != NULL)
 	*size += len + 1;
-    the_atom = MakeAtom(str, len, TRUE);
-    if (the_atom == None)
-      bdfError("Atom allocation failed\n");
-    return the_atom;
+    return MakeAtom(str, len, TRUE);
 }
 
 /***====================================================================***/
@@ -151,7 +155,8 @@ bdfForceMakeAtom(char *str, int *size)
  */
 
 Atom
-bdfGetPropertyValue(char *s)
+bdfGetPropertyValue(s)
+    char       *s;
 {
     register char *p,
                *pp;
@@ -177,10 +182,6 @@ bdfGetPropertyValue(char *s)
     /* quoted string: strip outer quotes and undouble inner quotes */
     s++;
     pp = p = (char *) xalloc((unsigned) strlen(s) + 1);
-    if (pp == NULL) {
-  bdfError("Couldn't allocate property value string (%d)\n", strlen(s) + 1);
-  return None;
-    }
     while (*s) {
 	if (*s == '"') {
 	    if (*(s + 1) != '"') {
@@ -205,7 +206,8 @@ bdfGetPropertyValue(char *s)
  * return TRUE if string is a valid integer
  */
 int
-bdfIsInteger(char *str)
+bdfIsInteger(str)
+    char       *str;
 {
     char        c;
 
@@ -213,7 +215,7 @@ bdfIsInteger(char *str)
     if (!(isdigit(c) || c == '-' || c == '+'))
 	return (FALSE);
 
-    while ((c = *str++))
+    while (c = *str++)
 	if (!isdigit(c))
 	    return (FALSE);
 
@@ -227,7 +229,8 @@ bdfIsInteger(char *str)
  */
 
 unsigned char
-bdfHexByte(unsigned char *s)
+bdfHexByte(s)
+    char       *s;
 {
     unsigned char b = 0;
     register char c;
@@ -280,8 +283,11 @@ static char *SpecialAtoms[] = {
 };
 
 Bool
-bdfSpecialProperty(FontPtr pFont, FontPropPtr prop, 
-		   char isString, bdfFileState *bdfState)
+bdfSpecialProperty(pFont, prop, isString, bdfState)
+    FontPtr     pFont;
+    FontPropPtr prop;
+    char        isString;
+    bdfFileState *bdfState;
 {
     char      **special;
     char       *name;

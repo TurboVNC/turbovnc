@@ -1,13 +1,14 @@
-/* $Xorg: include.c,v 1.4 2001/02/09 02:03:16 xorgcvs Exp $ */
+/* $XConsortium: include.c /main/20 1996/12/04 10:11:18 swick $ */
 /*
 
-Copyright (c) 1993, 1994, 1998 The Open Group
+Copyright (c) 1993, 1994  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,46 +16,47 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 */
-/* $XFree86: xc/config/makedepend/include.c,v 3.6 2001/04/29 23:25:02 tsi Exp $ */
 
 
 #include "def.h"
 
 extern struct	inclist	inclist[ MAXFILES ],
-			*inclistp, *inclistnext;
-extern char	*includedirs[ ],
-		**includedirsnext;
+			*inclistp;
+extern char	*includedirs[ ];
 extern char	*notdotdot[ ];
 extern boolean show_where_not;
 extern boolean warn_multiple;
 
-static boolean
-isdot(char *p)
+boolean
+isdot(p)
+	register char	*p;
 {
 	if(p && *p++ == '.' && *p++ == '\0')
 		return(TRUE);
 	return(FALSE);
 }
 
-static boolean
-isdotdot(char *p)
+boolean
+isdotdot(p)
+	register char	*p;
 {
 	if(p && *p++ == '.' && *p++ == '.' && *p++ == '\0')
 		return(TRUE);
 	return(FALSE);
 }
 
-static boolean
-issymbolic(char *dir, char *component)
+boolean
+issymbolic(dir, component)
+	register char	*dir, *component;
 {
 #ifdef S_IFLNK
 	struct stat	st;
@@ -80,8 +82,9 @@ issymbolic(char *dir, char *component)
  * Any of the 'x/..' sequences within the name can be eliminated.
  * (but only if 'x' is not a symbolic link!!)
  */
-static void
-remove_dotdot(char *path)
+void
+remove_dotdot(path)
+	char	*path;
 {
 	register char	*end, *from, *to, **cp;
 	char		*components[ MAXFILES ],
@@ -152,8 +155,8 @@ remove_dotdot(char *path)
 /*
  * Add an include file to the list of those included by 'file'.
  */
-struct inclist *
-newinclude(char *newfile, char *incstring)
+struct inclist *newinclude(newfile, incstring)
+	register char	*newfile, *incstring;
 {
 	register struct inclist	*ip;
 
@@ -170,12 +173,12 @@ newinclude(char *newfile, char *incstring)
 	else
 		ip->i_incstring = copy(incstring);
 
-	inclistnext = inclistp;
 	return(ip);
 }
 
 void
-included_by(struct inclist *ip, struct inclist *newfile)
+included_by(ip, newfile)
+	register struct inclist	*ip, *newfile;
 {
 	register int i;
 
@@ -225,7 +228,7 @@ included_by(struct inclist *ip, struct inclist *newfile)
 }
 
 void
-inc_clean (void)
+inc_clean ()
 {
 	register struct inclist *ip;
 
@@ -234,85 +237,84 @@ inc_clean (void)
 	}
 }
 
-struct inclist *
-inc_path(char *file, char *include, int type)
+struct inclist *inc_path(file, include, dot)
+	register char	*file,
+			*include;
+	boolean	dot;
 {
-	static char		path[ BUFSIZ ];
+	static char	path[ BUFSIZ ];
 	register char		**pp, *p;
 	register struct inclist	*ip;
-	struct stat		st;
+	struct stat	st;
+	boolean	found = FALSE;
 
 	/*
 	 * Check all previously found include files for a path that
 	 * has already been expanded.
 	 */
-	if ((type == INCLUDE) || (type == INCLUDEDOT))
-		inclistnext = inclist;
-	ip = inclistnext;
+	for (ip = inclist; ip->i_file; ip++)
+	    if ((strcmp(ip->i_incstring, include) == 0) &&
+		!(ip->i_flags & INCLUDED_SYM))
+	    {
+		found = TRUE;
+		break;
+	    }
 
-	for (; ip->i_file; ip++) {
-		if ((strcmp(ip->i_incstring, include) == 0) &&
-		    !(ip->i_flags & INCLUDED_SYM)) {
-			inclistnext = ip + 1;
-			return ip;
+	/*
+	 * If the path was surrounded by "" or is an absolute path,
+	 * then check the exact path provided.
+	 */
+	if (!found && (dot || *include == '/')) {
+		if (stat(include, &st) == 0) {
+			ip = newinclude(include, include);
+			found = TRUE;
 		}
-	}
-
-	if (inclistnext == inclist) {
-		/*
-		 * If the path was surrounded by "" or is an absolute path,
-		 * then check the exact path provided.
-		 */
-		if ((type == INCLUDEDOT) ||
-		    (type == INCLUDENEXTDOT) ||
-		    (*include == '/')) {
-			if (stat(include, &st) == 0)
-				return newinclude(include, include);
-			if (show_where_not)
-				warning1("\tnot in %s\n", include);
-		}
-
-		/*
-		 * If the path was surrounded by "" see if this include file is
-		 * in the directory of the file being parsed.
-		 */
-		if ((type == INCLUDEDOT) || (type == INCLUDENEXTDOT)) {
-			for (p=file+strlen(file); p>file; p--)
-				if (*p == '/')
-					break;
-			if (p == file) {
-				strcpy(path, include);
-			} else {
-				strncpy(path, file, (p-file) + 1);
-				path[ (p-file) + 1 ] = '\0';
-				strcpy(path + (p-file) + 1, include);
-			}
-			remove_dotdot(path);
-			if (stat(path, &st) == 0)
-				return newinclude(path, include);
-			if (show_where_not)
-				warning1("\tnot in %s\n", path);
-		}
+		else if (show_where_not)
+			warning1("\tnot in %s\n", include);
 	}
 
 	/*
-	 * Check the include directories specified.  Standard include dirs
-	 * should be at the end.
+	 * If the path was surrounded by "" see if this include file is in the
+	 * directory of the file being parsed.
 	 */
-	if ((type == INCLUDE) || (type == INCLUDEDOT))
-		includedirsnext = includedirs;
-	pp = includedirsnext;
-
-	for (; *pp; pp++) {
-		sprintf(path, "%s/%s", *pp, include);
+	if (!found && dot) {
+		for (p=file+strlen(file); p>file; p--)
+			if (*p == '/')
+				break;
+		if (p == file)
+			strcpy(path, include);
+		else {
+			strncpy(path, file, (p-file) + 1);
+			path[ (p-file) + 1 ] = '\0';
+			strcpy(path + (p-file) + 1, include);
+		}
 		remove_dotdot(path);
 		if (stat(path, &st) == 0) {
-			includedirsnext = pp + 1;
-			return newinclude(path, include);
+			ip = newinclude(path, include);
+			found = TRUE;
 		}
-		if (show_where_not)
+		else if (show_where_not)
 			warning1("\tnot in %s\n", path);
 	}
 
-	return NULL;
+	/*
+	 * Check the include directories specified. (standard include dir
+	 * should be at the end.)
+	 */
+	if (!found)
+		for (pp = includedirs; *pp; pp++) {
+			sprintf(path, "%s/%s", *pp, include);
+			remove_dotdot(path);
+			if (stat(path, &st) == 0) {
+				ip = newinclude(path, include);
+				found = TRUE;
+				break;
+			}
+			else if (show_where_not)
+				warning1("\tnot in %s\n", path);
+		}
+
+	if (!found)
+		ip = NULL;
+	return(ip);
 }

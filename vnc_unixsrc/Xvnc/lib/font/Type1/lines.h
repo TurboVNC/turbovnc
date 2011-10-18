@@ -1,4 +1,4 @@
-/* $Xorg: lines.h,v 1.3 2000/08/17 19:46:30 cpqbld Exp $ */
+/* $XConsortium: lines.h,v 1.2 91/10/10 11:18:23 rws Exp $ */
 /* Copyright International Business Machines, Corp. 1991
  * All Rights Reserved
  * Copyright Lexmark International, Inc. 1991
@@ -26,14 +26,12 @@
  * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
  * THIS SOFTWARE.
  */
-/* $XFree86: xc/lib/font/Type1/lines.h,v 1.3 1999/08/22 08:58:52 dawes Exp $ */
-
 /*SHARED*/
  
 #define   StepLine(R,x1,y1,x2,y2)   t1_StepLine(R,x1,y1,x2,y2)
 #define   Bresenham(e,x1,y1,x2,y2)  t1_Bresenham(e,x1,y1,x2,y2)
  
-extern void t1_StepLine ( struct region *R, fractpel x1, fractpel y1, fractpel x2, fractpel y2 );
-extern void t1_Bresenham ( pel *edgeP, fractpel x1, fractpel y1, fractpel x2, fractpel y2 );
+void t1_StepLine();           /* check for special conditions, call Bresenham */
+void t1_Bresenham();          /* produce run ends for lines                   */
  
 /*END SHARED*/

@@ -1,180 +1,42 @@
-                       README for X11R6.9 and X11R7.0
+=======================
+Xvnc - the VNC X server
+=======================
 
-                            The X.Org Foundation
+This is the top level directory for Xvnc, the VNC X server (or the X VNC
+server, depending on how you look at it.)
 
-                              21 December 2005
+Xvnc is based on the XFree86 3.3.2 "server only" distribution, which in turn is
+based on the X11R6.3 distribution from the X consortium.
 
-                                  Abstract
+The code specific to the TurboVNC/TightVNC X server is located in the
+programs/Xserver/hw/vnc directory.  The rest of the code is a cut-down
+version of the standard XFree86 distribution without many of the later
+X extensions or hardware-specific code.  See the file DIFFS for details
+of all changes made to files from the XFree86 distribution.
 
-     X11R6.9 and X11R7.0 are Open Source versions of the X Window System
-     that supports many UNIX(R) and UNIX-like operating systems (such as
-     Linux, FreeBSD, NetBSD, OpenBSD and Solaris x86) on Intel and other
-     platforms.  This version is compatible with X11R6.8 and other X
-     window system implementations which support the X11R6 standard.
+Configurable Authentication
+---------------------------
+This version of Xvnc incorporates code which allows different authentication
+methods to be selected at run time.  This code supports the standard "None" and
+"VNC" authentication methods as well as methods for using one-time passwords
+(OTP) and Pluggable Authentication Modules (PAM).
 
-1.  What are X11R6.9 and X11R7.0?
+The Xvnc server will look in the authentication configuration file
+(default "/etc/turbovncserver-auth.conf") at run time for authentication
+configuration directives.
 
-X11R6.9 is the ninth and final full release in the X11R6 series, and X11R7.0
-is the first release in the new X11R7 series.
+To enable PAM support (required for the "pam-userpwd" authentication
+method), "XvncAuthPAM" must be defined at compile time.  This is the default
+for Linux.  To enable or disable PAM support, #define XvncAuthPAM to YES or
+NO in the platform-specific config file under config/cf.
 
-The 6.9 version is a new release that includes additional hardware support,
-functional enhancements and bug fixes.  The 7.0 version is built from the
-same source code as the 6.9 so it contains the same additional hardware sup-
-port, functional enhancements and bug fixes; however, it has been split into
-logical modules that can be developed, built and maintained separately, but
-still fit together coherently into the larger source code base as they have
-in the 6.9 tree.  Specific release enhancements can be viewed in the Release
-Notes.
+The pam-userpwd authentication method requires the TurboVNC Viewer or another
+VNC viewer that can handle the Tight security type and the Unix Login
+authentication capability.  You will also need to configure PAM as appropriate
+for your system.  The default PAM service name is "turbovnc".
 
-X11R6.9 and X11R7.0 are being released at the same time to assist in the
-transition from the older monolithic source tree to the new modular source
-tree.  It will take time for everyone to make this transition, so we will
-maintain the older X11R6 series through update releases to both X11R6.9 and
-X11R6.8.
+NOTE: interaction with PAM is limited to supplying a user name and password.
+The exchange of any additional information is not supported.
 
-Most modern PC video hardware is supported in both releases, and most PC
-video hardware that isn't supported explicitly can be used with the "vesa"
-driver.  The Release Notes has a table showing the drivers provided with
-X11R6.9 and X11R7.0, and links to related documentation.
-
-The X.Org Foundation X releases are produced by the X.Org Foundation.  The
-X.Org Foundation has been formed as a Delaware corporation organized to oper-
-ate as a scientific charity under IRS code 501(c)(3) chartered to develop and
-execute effective strategies which provide world-wide stewardship of the X
-Window System technology and standards. Membership in the X.Org Foundation is
-free to all participants. Applications for Membership are now being accepted,
-and active participants in the further development of the X Window Technology
-are invited to complete a membership application
-<URL:http://www.x.org/XOrg_Foundation_Membership.html>.  The X11R6.9 and
-X11R7.0 codebase forms the fourth X Window System release since the formation
-of the X.Org Foundation and includes code from the X Consortium, the Open
-Group and the XFree86[tm] project.  This release is dedicated to the greater
-X community, developers and users alike.
-
-2.  Licensing
-
-X Window System source code is covered by many licenses.  All of these
-licenses have in common the fact that they do not impose significant condi-
-tions on the modification or redistribution or either source code or binaries
-beyond requiring one or more of the following:
-
-  1.  Copyright and/or license notices are left intact.
-
-  2.  Copyright and/or license notices are reproduced verbatim in documenta-
-      tion accompanying binary distributions.
-
-  3.  Attributions are included with documentation accompanying binaries.
-
-Most of these licenses are based on the MIT, X Consortium, or BSD (original
-and revised) licenses.  All of them are consistent with the Open Source Defi-
-nition, and most are consistent with the Free Software Foundation's Free
-Software Definition.
-
-Copyright and Licensing information for X, including the reproduction of
-copyright and/or license notices and attributions required by some of the
-licenses for binary distributions, can be found in the License Document.  If
-you find any omissions in that document, please contact us with details at
-<xf_board@x.org>.  While the current licenses are all open source licenses,
-the X.Org Foundation is attempting, with time, to bring as much as possible
-of the code's licenses in the distribution into compliance with the Debian
-Free Software Guidelines.
-
-3.  Pointers to additional information
-
-The documentation for this release can be found online at the X.Org web site
-<URL:http://wiki.x.org/>.  Information about binary distributions and the
-attendant installation instructions can be found in the Installation Docu-
-ment.
-
-The X11 version numbering system (including historical information) can be
-found in the Versions Document.
-
-Additional information may be available at the X.Org Foundation Wiki
-<URL:http://wiki.x.org/>.
-
-4.  The Public Mailing Lists
-
-Current information about the X.Org Foundation public mailing lists is avail-
-able on the X.Org mailing list page <URL:http://lists.x.org/mail-
-man/listinfo/> and related desktop technology mailing lists can be found on
-Freedesktop.org's mailing list page <URL:http://freedesktop.org/mail-
-man/listinfo>.
-
-5.  Contributing to the X.Org Foundation's X efforts.
-
-If you have any new work or enhancements/bug fixes for existing work, please
-send them to <xorg@freedesktop.org> or to our bug tracking system
-<URL:https://bugs.freedesktop.org/> using the xorg component.  This will help
-ensure that they are included in future releases.
-
-6.  How to get the release
-
-Information about X11R6.9 and X11R7.0 can be found from the X.Org Foundation
-wiki at <URL:http://wiki.x.org>, and at mirrors of this server.  Information
-about obtaining and installing binary distributions of this release can be
-found in the Installation Document.
-
-Note that both X11R6.9 and X11R7.0 are being released simultaneously but only
-one source tree is required to build the release.  Information about obtain-
-ing the release in source form is given below.
-
-6.1  X11R6.9
-
-The source for version 6.9.0 is available as a single tarball:
-
-     X11R6.9.0-src.tar.gz
-
-and also is available split into seven separate tarballs:
-
-     X11R6.9.0-src1.tar.gz
-     X11R6.9.0-src2.tar.gz
-     X11R6.9.0-src3.tar.gz
-     X11R6.9.0-src4.tar.gz
-     X11R6.9.0-src5.tar.gz
-     X11R6.9.0-src6.tar.gz
-     X11R6.9.0-src7.tar.gz
-
-The first three of the separate tarballs contain everything except the fonts
-and general X11 documentation.  Those three are sufficient for building
-X11R6.9 if you already have a set of fonts.  The fourth and fifth contain the
-fonts.  The sixth contains the source for the general X11 documentation.  The
-seventh contains the general X11 documentation in hardcopy format.
-
-6.2  X11R7.0
-
-This is the first release of the new modular source code tree.  The souce
-code has been split into nine logical modules: app, data, doc, driver, font,
-lib. proto, util and xserver.  Each of these modules contain one or more
-packages that can be configured, built and installed separately.  Please see
-an X11R7.0 release site for a complete list of the tarballs.
-
-For information on how to build the modular tree packages see the Modular
-Developer's Guide <URL:http://wiki.x.org/wiki/ModularDevelopersGuide>.  This
-guide also contains information for developers who want to help improve the
-modular build system and modular code base.
-
-6.3  The current development tree
-
-The X source code for this and all releases/snapshots as well as development
-versions can also be accessed via the Freedesktop.org CVS repository.  It's
-also possible to browse the freedesktop CVS repository
-<URL:http://cvs.freedesktop.org/xorg/>.  The CVS tag for the 6.9 version is
-"XORG-6_9_0" and the CVS tag for the 7.0 version is "XORG-7_0_0".  The CVS
-tag for the stable branch for the %relvers; release is "XORG-6_9-branch".
-
-To check out the latest development version, don't specify any tag.
-
-7.  Reporting Bugs
-
-Bugs should be reported to bug tracking system <URL:https://bugs.freedesk-
-top.org/> using the xorg component.  Before reporting bugs, please check the
-server log file, which can be found at /var/log/Xorg.0.log on most platforms.
-If you can't resolve the problem yourself, send the entire log file with your
-bug report but not the operating system core dump.  Do not edit the log file
-as our developers use it to reproduce and debug your problem.  Please attach
-it to your bug report.
-
-     Generated from Id: README.sgml,v 1.6 alanc Exp $.
-
-
-$XdotOrg: xc/README,v 1.4 2005/12/21 05:39:04 kem Exp $
+See the Xvnc man page for details on the command-line options which control
+configurable authentication.

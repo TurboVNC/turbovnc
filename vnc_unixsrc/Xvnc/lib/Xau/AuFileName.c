@@ -1,14 +1,16 @@
-/* $Xorg: AuFileName.c,v 1.5 2001/02/09 02:03:42 xorgcvs Exp $ */
+/* $XConsortium: AuFileName.c /main/8 1996/09/28 16:43:20 rws $ */
+/* $XFree86: xc/lib/Xau/AuFileName.c,v 3.2 1996/12/24 08:46:53 dawes Exp $ */
 
 /*
 
-Copyright 1988, 1998  The Open Group
+Copyright (c) 1988  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,23 +18,24 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 */
-/* $XFree86: xc/lib/Xau/AuFileName.c,v 3.6 2001/07/25 15:04:48 dawes Exp $ */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 #include <X11/Xauth.h>
 #include <X11/Xos.h>
+
+#ifdef X_NOT_STDC_ENV
+char *malloc (), *getenv ();
+#else
 #include <stdlib.h>
+#endif
 
 char *
 XauFileName ()
@@ -46,13 +49,13 @@ XauFileName ()
 #endif
     int	    size;
 
-    if ((name = getenv ("XAUTHORITY")))
+    if (name = getenv ("XAUTHORITY"))
 	return name;
     name = getenv ("HOME");
     if (!name) {
 #ifdef WIN32
 	(void) strcpy (dir, "/users/");
-	if ((name = getenv("USERNAME"))) {
+	if (name = getenv("USERNAME")) {
 	    (void) strcat (dir, name);
 	    name = dir;
 	}

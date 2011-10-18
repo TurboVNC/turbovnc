@@ -1,13 +1,13 @@
-/* $XFree86: xc/programs/Xserver/include/gc.h,v 1.5 2001/12/14 19:59:54 dawes Exp $ */
 /***********************************************************
 
-Copyright 1987, 1998  The Open Group
+Copyright (c) 1987  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -45,14 +45,14 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-/* $Xorg: gc.h,v 1.4 2001/02/09 02:05:15 xorgcvs Exp $ */
+/* $XConsortium: gc.h /main/16 1996/08/01 19:18:17 dpw $ */
 
 #ifndef GC_H
 #define GC_H 
 
-#include <X11/X.h>	/* for GContext, Mask */
-#include <X11/Xdefs.h>	/* for Bool */
-#include <X11/Xproto.h>
+#include "misc.h"	/* for Bool */
+#include "X11/X.h"	/* for GContext, Mask */
+#include "X11/Xproto.h"
 #include "screenint.h"	/* for ScreenPtr */
 #include "pixmap.h"	/* for DrawablePtr */
 
@@ -87,19 +87,28 @@ typedef struct _GC    *GCPtr;
 typedef struct _GCOps *GCOpsPtr;
 
 extern void ValidateGC(
+#if NeedFunctionPrototypes
     DrawablePtr /*pDraw*/,
-    GCPtr /*pGC*/);
+    GCPtr /*pGC*/
+#endif
+);
 
 extern int ChangeGC(
+#if NeedFunctionPrototypes
     GCPtr/*pGC*/,
     BITS32 /*mask*/,
-    XID* /*pval*/);
+    XID* /*pval*/
+#endif
+);
 
 extern int DoChangeGC(
+#if NeedFunctionPrototypes
     GCPtr/*pGC*/,
     BITS32 /*mask*/,
     XID* /*pval*/,
-    int /*fPointer*/);
+    int /*fPointer*/
+#endif
+);
 
 typedef union {
     CARD32 val;
@@ -107,72 +116,117 @@ typedef union {
 } ChangeGCVal, *ChangeGCValPtr;
 
 extern int dixChangeGC(
+#if NeedFunctionPrototypes
     ClientPtr /*client*/,
     GCPtr /*pGC*/,
     BITS32 /*mask*/,
     CARD32 * /*pval*/,
-    ChangeGCValPtr /*pCGCV*/);
+    ChangeGCValPtr /*pCGCV*/
+#endif
+);
 
 extern GCPtr CreateGC(
+#if NeedFunctionPrototypes
     DrawablePtr /*pDrawable*/,
     BITS32 /*mask*/,
     XID* /*pval*/,
-    int* /*pStatus*/);
+    int* /*pStatus*/
+#endif
+);
 
 extern int CopyGC(
+#if NeedFunctionPrototypes
     GCPtr/*pgcSrc*/,
     GCPtr/*pgcDst*/,
-    BITS32 /*mask*/);
+    BITS32 /*mask*/
+#endif
+);
 
 extern int FreeGC(
+#if NeedFunctionPrototypes
     pointer /*pGC*/,
-    XID /*gid*/);
+    XID /*gid*/
+#endif
+);
 
 extern void SetGCMask(
+#if NeedFunctionPrototypes
     GCPtr /*pGC*/,
     Mask /*selectMask*/,
-    Mask /*newDataMask*/);
+    Mask /*newDataMask*/
+#endif
+);
 
 extern GCPtr CreateScratchGC(
+#if NeedFunctionPrototypes
     ScreenPtr /*pScreen*/,
-    unsigned /*depth*/);
+    unsigned /*depth*/
+#endif
+);
 
 extern void FreeGCperDepth(
-    int /*screenNum*/);
+#if NeedFunctionPrototypes
+    int /*screenNum*/
+#endif
+);
 
 extern Bool CreateGCperDepth(
-    int /*screenNum*/);
+#if NeedFunctionPrototypes
+    int /*screenNum*/
+#endif
+);
 
 extern Bool CreateDefaultStipple(
-    int /*screenNum*/);
+#if NeedFunctionPrototypes
+    int /*screenNum*/
+#endif
+);
 
 extern void FreeDefaultStipple(
-    int /*screenNum*/);
+#if NeedFunctionPrototypes
+    int /*screenNum*/
+#endif
+);
 
 extern int SetDashes(
+#if NeedFunctionPrototypes
     GCPtr /*pGC*/,
     unsigned /*offset*/,
     unsigned /*ndash*/,
-    unsigned char* /*pdash*/);
+    unsigned char* /*pdash*/
+#endif
+);
 
 extern int VerifyRectOrder(
+#if NeedFunctionPrototypes
     int /*nrects*/,
     xRectangle* /*prects*/,
-    int /*ordering*/);
+    int /*ordering*/
+#endif
+);
 
 extern int SetClipRects(
+#if NeedFunctionPrototypes
     GCPtr /*pGC*/,
     int /*xOrigin*/,
     int /*yOrigin*/,
     int /*nrects*/,
     xRectangle* /*prects*/,
-    int /*ordering*/);
+    int /*ordering*/
+#endif
+);
 
 extern GCPtr GetScratchGC(
+#if NeedFunctionPrototypes
     unsigned /*depth*/,
-    ScreenPtr /*pScreen*/);
+    ScreenPtr /*pScreen*/
+#endif
+);
 
 extern void FreeScratchGC(
-    GCPtr /*pGC*/);
+#if NeedFunctionPrototypes
+    GCPtr /*pGC*/
+#endif
+);
 
 #endif /* GC_H */

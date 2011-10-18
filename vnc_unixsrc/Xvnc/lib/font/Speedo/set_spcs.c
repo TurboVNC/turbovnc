@@ -1,4 +1,4 @@
-/* $Xorg: set_spcs.c,v 1.3 2000/08/17 19:46:26 cpqbld Exp $ */
+/* $XConsortium: set_spcs.c,v 1.6 94/02/10 10:18:23 gildea Exp $ */
 
 /*
 
@@ -21,7 +21,6 @@ INCIDENTAL OR CONSEQUENTIAL DAMAGES, ARISING OUT OF OR IN ANY WAY CONNECTED
 WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 
 */
-/* $XFree86: xc/lib/font/Speedo/set_spcs.c,v 1.3 2001/01/17 19:43:17 dawes Exp $ */
 
 
 /*************************** S E T _ S P C S . C *****************************
@@ -29,9 +28,6 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
  * This module implements all sp_set_specs() functionality.                  *
  *                                                                           *
  ****************************************************************************/
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 #define SET_SPCS
 #include "spdo_prv.h"               /* General definitions for Speedo    */
 #include "keys.h"
@@ -56,21 +52,29 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 
 /****** STATIC FUNCTIONS *****/
 
+#if PROTOS_AVAIL
 static boolean sp_setup_consts(PROTO_DECL2 fix15 xmin, fix15 xmax,
 	fix15 ymin, fix15 ymax);
 static void sp_setup_tcb(PROTO_DECL2 tcb_t GLOBALFAR *ptcb);
 static fix15 sp_setup_mult(PROTO_DECL2 fix31 input_mult);
 static fix31 sp_setup_offset(PROTO_DECL2 fix31 input_offset);
+#else
+static void    sp_setup_tcb();      /* Set up transformation control block */
+static fix15 sp_setup_mult();       /* Convert mult to internal form */
+static fix31 sp_setup_offset();     /* Convert offset to internal form */
+static boolean sp_setup_consts();   /* Set up scaling constants */
+#endif
 
 
 
-FUNCTION boolean set_specs(
+FUNCTION boolean set_specs(specsarg)
 GDECL
-specs_t STACKFAR *specsarg)     /* Bundle of conversion specifications */
+specs_t STACKFAR *specsarg;     /* Bundle of conversion specifications */
 /* 
  * Called by host software to set character generation specifications
  */
 {
+ufix8 FONTFAR  *pointer;       /* Pointer to font data */
 fix31   offcd;         /* Offset to start of character directory */
 fix31   ofcns;         /* Offset to start of constraint data */ 
 fix31   cd_size;       /* Size of character directory */
@@ -333,10 +337,10 @@ return TRUE;
 
 #if INCL_MULTIDEV
 #if INCL_BLACK || INCL_SCREEN || INCL_2D
-FUNCTION boolean set_bitmap_device(
+FUNCTION boolean set_bitmap_device(bfuncs,size)
 GDECL
-bitmap_t *bfuncs,
-ufix16 size)
+bitmap_t *bfuncs;
+ufix16 size;
 {
 
 if (size != sizeof(sp_globals.bitmap_device))
@@ -348,10 +352,10 @@ sp_globals.bitmap_device_set = TRUE;
 #endif
 
 #if INCL_OUTLINE
-FUNCTION boolean set_outline_device(
+FUNCTION boolean set_outline_device(ofuncs,size)
 GDECL
-outline_t *ofuncs,
-ufix16 size)
+outline_t *ofuncs;
+ufix16 size;
 {
 
 if (size != sizeof(sp_globals.outline_device))
@@ -365,20 +369,15 @@ sp_globals.outline_device_set = TRUE;
 
 
 #ifdef old
-FUNCTION boolean sp_setup_consts(
-GDECL
-fix15   xmin,          /* Minimum X ORU value in font */
-fix15   xmax,          /* Maximum X ORU value in font */
-fix15   ymin,          /* Minimum Y ORU value in font */
-fix15   ymax)          /* Maximum Y ORU value in font */
+FUNCTION boolean sp_setup_consts(xmin, xmax, ymin, ymax)
 #else
-static FUNCTION boolean sp_setup_consts(
-GDECL
-fix15   xmin,          /* Minimum X ORU value in font */
-fix15   xmax,          /* Maximum X ORU value in font */
-fix15   ymin,          /* Minimum Y ORU value in font */
-fix15   ymax)          /* Maximum Y ORU value in font */
+static FUNCTION boolean sp_setup_consts(xmin, xmax, ymin, ymax)
 #endif
+GDECL
+fix15   xmin;          /* Minimum X ORU value in font */
+fix15   xmax;          /* Maximum X ORU value in font */
+fix15   ymin;          /* Minimum Y ORU value in font */
+fix15   ymax;          /* Maximum Y ORU value in font */
 /*
  * Sets the following constants used for fixed point arithmetic:
  *      sp_globals.multshift    multipliers and products; range is 14 to 8
@@ -405,7 +404,7 @@ fix31   offset;        /* Constant in transformation */
 fix15   i;             /* Loop counter */
 fix15   x, y;          /* Successive corners of bounding box in ORUs */
 fix31   pixval;        /* Successive pixel values multiplied by orus per em */
-fix15   xx = 0, yy = 0;/* Bounding box corner that produces max pixel value */
+fix15   xx, yy;        /* Bounding box corner that produces max pixel value */
 
 /* Determine numerator and denominator of largest multiplier value */
 mult = sp_globals.pspecs->xxmult >> 16;
@@ -533,14 +532,12 @@ return TRUE;
 }
 
 #ifdef old
-FUNCTION void sp_setup_tcb(
-GDECL
-tcb_t GLOBALFAR *ptcb)           /* Pointer to transformation control bloxk */
+FUNCTION void sp_setup_tcb(ptcb)
 #else
-static FUNCTION void sp_setup_tcb(
-GDECL
-tcb_t GLOBALFAR *ptcb)           /* Pointer to transformation control bloxk */
+static FUNCTION void sp_setup_tcb(ptcb)
 #endif
+GDECL
+tcb_t GLOBALFAR *ptcb;           /* Pointer to transformation control bloxk */
 /* 
  * Convert transformation coeffs to internal form 
  */
@@ -563,9 +560,9 @@ SHOW(ptcb->yoffset);
 type_tcb(ptcb); /* Classify transformation type */
 }
 
-FUNCTION static fix15 sp_setup_mult(
+FUNCTION static fix15 sp_setup_mult(input_mult)
 GDECL
-fix31   input_mult)    /* Multiplier in input format */
+fix31   input_mult;    /* Multiplier in input format */
 /*
  * Called by sp_setup_tcb() to convert multiplier in transformation
  * matrix from external to internal form.
@@ -586,9 +583,9 @@ else
     return -(fix15)((-input_mult + imrnd) / imdenom);
 }
 
-FUNCTION static fix31 sp_setup_offset(
+FUNCTION static fix31 sp_setup_offset(input_offset)
 GDECL
-fix31   input_offset)   /* Multiplier in input format */
+fix31   input_offset;   /* Multiplier in input format */
 /*
  * Called by sp_setup_tcb() to convert offset in transformation
  * matrix from external to internal form.
@@ -603,9 +600,9 @@ imrnd = ((fix31)1 << imshift) >> 1;
 return (((input_offset >> 1) + imrnd) >> imshift) + sp_globals.mprnd;
 }
 
-FUNCTION void type_tcb(
+FUNCTION void type_tcb(ptcb)
 GDECL
-tcb_t GLOBALFAR *ptcb)           /* Pointer to transformation control bloxk */
+tcb_t GLOBALFAR *ptcb;           /* Pointer to transformation control bloxk */
 {
 fix15   x_trans_type;
 fix15   y_trans_type;
@@ -737,9 +734,9 @@ SHOW(ptcb->xpos);
 SHOW(ptcb->ypos);
 }
 
-FUNCTION fix31 read_long(
+FUNCTION fix31 read_long(pointer)
 GDECL
-ufix8 FONTFAR *pointer)    /* Pointer to first byte of encrypted 3-byte integer */
+ufix8 FONTFAR *pointer;    /* Pointer to first byte of encrypted 3-byte integer */
 /*
  * Reads a 3-byte encrypted integer from the byte string starting at 
  * the specified point.
@@ -754,9 +751,9 @@ tmpfix31 += (fix31)((*pointer) ^ sp_globals.key6);                    /* Read le
 return tmpfix31;
 }
 
-FUNCTION fix15 read_word_u(
+FUNCTION fix15 read_word_u(pointer)
 GDECL
-ufix8 FONTFAR *pointer)    /* Pointer to first byte of unencrypted 2-byte integer */
+ufix8 FONTFAR *pointer;    /* Pointer to first byte of unencrypted 2-byte integer */
 /*
  * Reads a 2-byte unencrypted integer from the byte string starting at 
  * the specified point.

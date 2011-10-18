@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/cfb/cfbmskbits.h,v 3.13tsi Exp $ */
 /************************************************************
 Copyright 1987 by Sun Microsystems, Inc. Mountain View, CA.
 
@@ -9,10 +8,10 @@ software  and  its documentation for any purpose and without
 fee is hereby granted, provided that the above copyright no-
 tice  appear  in all copies and that both that copyright no-
 tice and this permission notice appear in  supporting  docu-
-mentation,  and  that the names of Sun or The Open Group
+mentation,  and  that the names of Sun or X Consortium
 not be used in advertising or publicity pertaining to 
 distribution  of  the software  without specific prior 
-written permission. Sun and The Open Group make no 
+written permission. Sun and X Consortium make no 
 representations about the suitability of this software for 
 any purpose. It is provided "as is" without any express or 
 implied warranty.
@@ -28,15 +27,15 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
-/* $Xorg: cfbmskbits.h,v 1.3 2000/08/17 19:48:14 cpqbld Exp $ */
+/* $XConsortium: cfbmskbits.h,v 4.25 94/04/17 20:28:55 dpw Exp $ */
+/* $XFree86: xc/programs/Xserver/cfb/cfbmskbits.h,v 3.3.2.1 1997/05/27 06:28:09 dawes Exp $ */
 /* Optimizations for PSZ == 32 added by Kyle Marvin (marvin@vitec.com) */
 
-#include	<X11/X.h>
-#include	<X11/Xmd.h>
+#include	"X.h"
+#include	"Xmd.h"
 #include	"servermd.h"
-#if defined(XFREE86) || ( defined(__OpenBSD__) && defined(__alpha__) ) \
-	|| (defined(__bsdi__))
-#include	"xf86_ansic.h"
+#ifdef XFREE86
+#define NO_COMPILER_H_EXTRAS
 #include	"compiler.h"
 #endif
 
@@ -101,10 +100,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
  * parameter to the putbits and putbitsrop macros that is the plane
  * mask.
  * ==========================================================================
- *
- * Keith Packard (keithp@suse.com)
- * 64bit code is no longer supported; it requires DIX support
- * for repadding images which significantly impacts performance
  */
 
 /*
@@ -118,20 +113,20 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 /*
  *  PixelGroup is the data type used to operate on groups of pixels.
- *  We typedef it here to CARD32 with the assumption that you
- *  want to manipulate 32 bits worth of pixels at a time as you can.  If CARD32
- *  is not appropriate for your server, define it to something else
+ *  We typedef it here to unsigned long with the assumption that you
+ *  want to manipulate as many pixels at a time as you can.  If unsigned
+ *  long is not appropriate for your server, define it to something else
  *  before including this file.  In this case you will also have to define
  *  PGSZB to the size in bytes of PixelGroup.
  */
 #ifndef PixelGroup
-#define PixelGroup CARD32
+typedef unsigned long PixelGroup;
+#ifdef LONG64
+#define PGSZB 8
+#else
 #define PGSZB 4
+#endif /* LONG64 */
 #endif /* PixelGroup */
-    
-#ifndef CfbBits
-#define CfbBits	CARD32
-#endif
 
 #define PGSZ	(PGSZB << 3)
 #define PPW	(PGSZ/PSZ)
@@ -446,7 +441,7 @@ getleftbits(psrc, w, dst)
 	}; \
 }
 
-#define putbits24(src, w, pdst, planemask, index) {\
+#define putbits24(src, x, w, pdst, planemask, index) {\
     register PixelGroup dstpixel; \
     register unsigned int idx; \
     switch(idx = ((index)&3)<<1){ \
@@ -531,7 +526,7 @@ getleftbits(psrc, w, dst)
     abort()
 #define getbits24(psrc, dst, index) \
     abort()
-#define putbits24(src, w, pdst, planemask, index) \
+#define putbits24(src, x, w, pdst, planemask, index) \
     abort()
 #define putbitsrop24(src, x, pdst, planemask, rop) \
     abort()
@@ -562,8 +557,8 @@ if ( ((x)+(w)) <= PPW) \
 } \
 else \
 { \
-    unsigned int m; \
-    unsigned int n; \
+    unsigned long m; \
+    unsigned long n; \
     PixelGroup pm = PFILL(planemask); \
     m = PPW-(x); \
     n = (w) - m; \
@@ -621,8 +616,8 @@ if ( ((x)+(w)) <= PPW) \
 } \
 else \
 { \
-    CfbBits m; \
-    CfbBits n; \
+    unsigned long m; \
+    unsigned long n; \
     PixelGroup t1, t2; \
     PixelGroup pm; \
     PFILL2(planemask, pm); \
@@ -812,38 +807,46 @@ if ((x) + (w) <= PPW) {\
     q = QuartetBitsTable[(w)] & ((ones) ? q : ~q); \
     *(destpix) = (*(psrcpix)) & QuartetPixelMaskTable[q]; \
 }
-/* I just copied this to get the linker satisfied on PowerPC,
- * so this may not be correct at all.
- */
-#define getstipplepixels24(psrcstip,xt,ones,psrcpix,destpix,stipindex) \
-{ \
-    PixelGroup q; \
-    q = *(psrcstip) >> (xt); \
-    q = ((ones) ? q : ~q) & 1; \
-    *(destpix) = (*(psrcpix)) & QuartetPixelMaskTable[q]; \
-}
 #else /* BITMAP_BIT_ORDER == LSB */
 
-/* this must load 32 bits worth; for most machines, thats an int */
-#define CfbFetchUnaligned(x)	ldl_u(x)
+/*================================================================
+   BEGIN ORL VNC modification
+   Only use ldq_u on XFREE86 platforms */
 
+#ifdef XFREE86
 #define getstipplepixels( psrcstip, xt, w, ones, psrcpix, destpix ) \
 { \
     PixelGroup q; \
-    q = CfbFetchUnaligned(psrcstip) >> (xt); \
+    q = ldq_u(psrcstip) >> (xt); \
     if ( ((xt)+(w)) > (PPW*PSZ) ) \
-        q |= (CfbFetchUnaligned((psrcstip)+1)) << ((PPW*PSZ)-(xt)); \
+        q |= (ldq_u((psrcstip)+1)) << ((PPW*PSZ)-(xt)); \
     q = QuartetBitsTable[(w)] & ((ones) ? q : ~q); \
     *(destpix) = (*(psrcpix)) & QuartetPixelMaskTable[q]; \
 }
-#if PSZ == 24
-# if 0
-#define getstipplepixels24(psrcstip,xt,w,ones,psrcpix,destpix,stipindex,srcindex,dstindex) \
+#else /* XFREE86 */
+#define getstipplepixels( psrcstip, xt, w, ones, psrcpix, destpix ) \
 { \
     PixelGroup q; \
-    CfbBits src; \
+    q = *(psrcstip) >> (xt); \
+    if ( ((xt)+(w)) > (PPW*PSZ) ) \
+        q |= (*((psrcstip)+1)) << ((PPW*PSZ)-(xt)); \
+    q = QuartetBitsTable[(w)] & ((ones) ? q : ~q); \
+    *(destpix) = (*(psrcpix)) & QuartetPixelMaskTable[q]; \
+}
+#endif /* XFREE86 */
+
+/* END ORL VNC modification
+================================================================*/
+
+#if PSZ == 24
+# if 0
+#define getstipplepixels24( psrcstip,xt,w,ones,psrcpix,destpix,stipindex,srcindex,dstindex) \
+{ \
+    PixelGroup q, srcpix, srcstip; \
+    unsigned long src; \
     register unsigned int sidx; \
     register unsigned int didx; \
+    register unsigned int stipidx; \
     sidx = ((srcindex) & 3)<<1; \
     didx = ((dstindex) & 3)<<1; \
     q = *(psrcstip) >> (xt); \
@@ -875,7 +878,9 @@ if ((x) + (w) <= PPW) {\
 # else
 #define getstipplepixels24(psrcstip,xt,ones,psrcpix,destpix,stipindex) \
 { \
-    PixelGroup q; \
+    PixelGroup q, srcpix, srcstip; \
+    unsigned long src; \
+    register unsigned int stipidx; \
     q = *(psrcstip) >> (xt); \
     q = ((ones) ? q : ~q) & 1; \
     *(destpix) = (*(psrcpix)) & QuartetPixelMaskTable[q]; \

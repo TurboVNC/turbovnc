@@ -1,9 +1,4 @@
-XCOMM platform:  $Xorg: Win32.rules,v 1.3 2000/08/17 19:41:46 cpqbld Exp $
-
-
-
-
-XCOMM $XFree86$
+XCOMM platform:  $XConsortium: Win32.rules /main/49 1996/12/02 14:12:47 kaleb $
 
 #define HasSharedLibraries YES
 #define NeedLibInsideFlag YES
@@ -328,8 +323,7 @@ Avoid.Error $(XVARuse0:/=\):						@@\
 #ifdef UseInstalled
 # define ImakeSubCmdHelper $(IMAKE_CMD)
 #else
-# define ImakeSubCmdHelper ..\$(IMAKE) -I../$(IRULESRC) \
-			   $(IMAKE_DEFINES) $(IMAKE_WARNINGS)
+# define ImakeSubCmdHelper ..\$(IMAKE) -I../$(IRULESRC) $(IMAKE_DEFINES)
 #endif
 
 #define NamedTargetSubdirs(name,dirs,verb,flags,subname)		@@\
@@ -420,7 +414,7 @@ InstallTarget(install,libname.dll,$(INSTLIBFLAGS),dest)
 #define	InstallSharedLibraryData(libname,rev,dest)
 
 #define MakeDLL(libname,solist) $(LD) @<<				@@\
-$(SHLIBLDFLAGS) -out:libname.dll libname.exp solist			@@\
+SharedLibraryLoadFlags -out:libname.dll libname.exp solist		@@\
 <<
 
 #define SharedLibraryTarget(libname,rev,solist,down,up)			@@\
@@ -434,6 +428,9 @@ LibraryTargetName(libname): $(XVARuse0:.o=.obj) libname.def $(EXTRALIBRARYDEPS)	
 	RemoveFile($@)							@@\
 	MakeLibrary($@,-def:libname.def $(XVARuse0:.o=.obj))		@@\
 	LinkBuildLibrary($@)						@@\
+	RemoveFile(libname.dll)						@@\
+	MakeDLL(libname,$(XVARuse0:.o=.obj) $(REQUIREDLIBS) $(EXTRA_LIBRARIES)) @@\
+	LinkBuildDLL(libname.dll)					@@\
 									@@\
 libname.dll: LibraryTargetName(libname) $(EXTRALIBRARYDEPS)		@@\
 	RemoveFile(libname.dll)						@@\

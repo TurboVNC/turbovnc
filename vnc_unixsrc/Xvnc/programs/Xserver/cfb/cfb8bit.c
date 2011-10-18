@@ -1,13 +1,15 @@
-/* $Xorg: cfb8bit.c,v 1.4 2001/02/09 02:04:37 xorgcvs Exp $ */
+/* $XConsortium: cfb8bit.c,v 1.13 94/09/29 20:33:11 dpw Exp $ */
 /*
 
-Copyright 1989, 1994, 1998  The Open Group
+Copyright (c) 1989, 1994  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -15,18 +17,17 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: xc/programs/Xserver/cfb/cfb8bit.c,v 1.4 2001/01/17 22:36:34 dawes Exp $ */
 
 /*
  * cfb8bit.c
@@ -35,15 +36,11 @@ from The Open Group.
  */
 
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #if PSZ == 8
 
-#include	<X11/X.h>
-#include	<X11/Xmd.h>
-#include	<X11/Xproto.h>
+#include	"X.h"
+#include	"Xmd.h"
+#include	"Xproto.h"
 #include	"gcstruct.h"
 #include	"windowstr.h"
 #include	"scrnintstr.h"
@@ -198,11 +195,11 @@ PixelGroup cfb8StippleAnd[NUM_MASKS], cfb8StippleXor[NUM_MASKS];
 int
 cfb8SetStipple (alu, fg, planemask)
 int		alu;
-CfbBits	fg, planemask;
+unsigned long	fg, planemask;
 {
-    CfbBits   and, xor, rrop;
+    unsigned long   and, xor, rrop;
     int	s;
-    CfbBits   c;
+    unsigned long   c;
 
     cfb8StippleMode = FillStippled;
     cfb8StippleAlu = alu;
@@ -227,11 +224,11 @@ CfbBits	fg, planemask;
 int
 cfb8SetOpaqueStipple (alu, fg, bg, planemask)
 int		alu;
-CfbBits	fg, bg, planemask;
+unsigned long	fg, bg, planemask;
 {
-    CfbBits   andfg, xorfg, andbg, xorbg, rropfg, rropbg;
+    unsigned long   andfg, xorfg, andbg, xorbg, rropfg, rropbg;
     int	s;
-    CfbBits   c;
+    unsigned long   c;
 
     cfb8StippleMode = FillOpaqueStippled;
     cfb8StippleAlu = alu;
@@ -376,7 +373,7 @@ cfb8ComputeClipMasks32 (pBox, numRects, x, y, w, h, clips)
 {
     int	    yBand, yBandBot;
     int	    ch;
-    CfbBits	    clip;
+    unsigned long	    clip;
     int	    partIN = FALSE, partOUT = FALSE;
     int	    result;
 

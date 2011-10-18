@@ -1,4 +1,4 @@
-/* $Xorg: DiPrint.h,v 1.3 2000/08/17 19:48:04 cpqbld Exp $ */
+/* $XConsortium: DiPrint.h /main/1 1996/09/28 16:57:42 rws $ */
 /*
 (c) Copyright 1996 Hewlett-Packard Company
 (c) Copyright 1996 International Business Machines Corp.
@@ -38,15 +38,6 @@ copyright holders.
  * request will allow us to build it with the description in the locale of
  * the requesting client.
  */
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#ifndef _XpDiPrint_H_
-#define _XpDiPrint_H_ 1
-
-#include "scrnintstr.h"
-
 typedef struct _diListEntry {
     char *name;
     char *description;
@@ -61,21 +52,3 @@ extern XpDiListEntry **XpDiGetPrinterList(
     char *name,
     int localeLen,
     char *locale);
-
-extern char * XpDiGetDriverName(int index, char *printerName);
-
-extern WindowPtr XpDiValidatePrinter(char *printerName, int printerNameLen);
-
-extern int PrinterOptions(int argc, char **argv, int i);
-
-extern void PrinterUseMsg(void);
-
-extern void PrinterInitGlobals(void);
-
-extern void PrinterInitOutput(ScreenInfo *pScreenInfo, int argc, char **argv);
-
-extern void _XpVoidNoop(void);
-
-extern Bool _XpBoolNoop(void);
-
-#endif /* _XpDiPrint_H_ */

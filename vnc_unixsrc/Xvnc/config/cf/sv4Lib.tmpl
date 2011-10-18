@@ -1,10 +1,10 @@
-XCOMM $Xorg: sv4Lib.tmpl,v 1.3 2000/08/17 19:41:48 cpqbld Exp $
+XCOMM $XConsortium: sv4Lib.tmpl /main/23 1996/12/04 10:11:01 swick $
 
 /*
  * SVR4 shared library template
  */
 
-XCOMM $XFree86: xc/config/cf/sv4Lib.tmpl,v 3.7 2003/05/29 21:56:57 herrb Exp $
+XCOMM $XFree86: xc/config/cf/sv4Lib.tmpl,v 3.3 1996/12/30 13:57:39 dawes Exp $
 
 /* SVR4 shared libraries are deficient in link semantics */
 XMULIBONLY = -lXmu
@@ -13,7 +13,7 @@ XMULIBONLY = -lXmu
 XMULIB = $(XMULIBONLY) -z nodefs
 #endif
 #ifndef XawClientLibs
-# define XawClientLibs $(XAWLIB) $(XMULIBONLY) $(XTOOLLIB) $(XPMLIB) $(EXTRAXAWCLIENTLIBS) $(XLIB)
+# define XawClientLibs $(XAWLIB) $(XMULIBONLY) $(XTOOLLIB) $(XLIB)
 #endif
 
 #if 0
@@ -38,10 +38,6 @@ XMULIB = $(XMULIBONLY) -z nodefs
 
 #ifndef SharedXReqs
 # define SharedXReqs $(XTOOLLIB) $(XPLIB) $(XLIB) SharedThreadReqs $(LDPOSTLIBS)
-#endif
-
-#ifndef SharedXlibi18nReqs
-# define SharedXlibi18nReqs $(LDPRELIB) $(XLIBONLY)
 #endif
 
 #ifndef SharedXmReqs
@@ -79,11 +75,3 @@ DYNLIBSYSLIB = -ldl
 # define IafSysLib	-liaf
 #endif
 IAFSYSLIB = IafSysLib
-
-#ifndef SharedGLUReqs
-# if HasGcc2ForCplusplus
-#  define SharedGLUReqs $(LDPRELIBS) $(XLIB) $(GLXLIB) $(CXXLIB)
-# else
-#  define SharedGLUReqs $(LDPRELIBS) $(XLIB) $(GLXLIB)
-# endif
-#endif

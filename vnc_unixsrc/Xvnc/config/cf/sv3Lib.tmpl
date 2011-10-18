@@ -1,8 +1,8 @@
-XCOMM $Xorg: sv3Lib.tmpl,v 1.3 2000/08/17 19:41:48 cpqbld Exp $
+XCOMM $XConsortium: sv3Lib.tmpl /main/1 1996/10/31 14:47:35 kaleb $
 
 
 
-XCOMM $XFree86: xc/config/cf/sv3Lib.tmpl,v 3.2 2001/01/17 16:38:49 dawes Exp $
+XCOMM $XFree86: xc/config/cf/sv3Lib.tmpl,v 3.1 1996/12/27 06:50:28 dawes Exp $
 /*
  * SVR3 shared library template
  * Copyright (c) 1992, 1993 by Thomas Wolfram, Berlin, Germany
@@ -30,6 +30,9 @@ XCOMM $XFree86: xc/config/cf/sv3Lib.tmpl,v 3.2 2001/01/17 16:38:49 dawes Exp $
 #endif
 #ifndef SharedXinputRev
 #define SharedXinputRev 6.0
+#endif
+#ifndef SharedPexRev
+#define SharedPexRev 1.0
 #endif
 
      SHLIBLDFLAGS = SharedLibraryLoadFlags
@@ -66,5 +69,9 @@ XCOMM $XFree86: xc/config/cf/sv3Lib.tmpl,v 3.2 2001/01/17 16:38:49 dawes Exp $
 #if SharedLibXinput
          DEPXILIB = _UseCat($(USRLIBDIR),$(XILIBSRC),/libXi_s.a)
             XILIB = LoaderLibPrefix _Use(-lXi_s,$(DEPXILIB))
+#endif
+#if SharedLibPhigs
+      DEPPHIGSLIB = _UseCat($(USRLIBDIR),$(PHIGSLIBSRC),/libphigs_s.a)
+         PHIGSLIB = LoaderLibPrefix _Use(-lphigs_s,$(DEPPHIGSLIB))
 #endif
 

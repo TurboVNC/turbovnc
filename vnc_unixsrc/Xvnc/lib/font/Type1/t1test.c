@@ -1,4 +1,4 @@
-/* $Xorg: t1test.c,v 1.3 2000/08/17 19:46:34 cpqbld Exp $ */
+/* $XConsortium: t1test.c /main/4 1996/09/28 16:47:53 rws $ */
 /* Copyright International Business Machines,Corp. 1991
  * All Rights Reserved
  *
@@ -28,8 +28,10 @@
  * SOFTWARE.
  */
  
-#include <X11/fonts/fntfilst.h>
-#include <X11/fonts/FSproto.h>
+#include "fntfilst.h"
+#include "FSproto.h"
+ 
+void Display();
  
 #define DECIPOINTSPERINCH 722.7
 #define DEFAULTRES 75

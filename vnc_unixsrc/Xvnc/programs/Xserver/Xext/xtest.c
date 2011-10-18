@@ -1,14 +1,16 @@
-/* $XdotOrg: xc/programs/Xserver/Xext/xtest.c,v 1.6 2005/07/03 08:53:36 daniels Exp $ */
-/* $Xorg: xtest.c,v 1.4 2001/02/09 02:04:33 xorgcvs Exp $ */
+/* $XConsortium: xtest.c,v 1.22 94/04/17 20:32:59 dpw Exp $ */
+/* $XFree86: xc/programs/Xserver/Xext/xtest.c,v 3.1 1996/05/06 05:55:41 dawes Exp $ */
 /*
 
-Copyright 1992, 1998  The Open Group
+Copyright (c) 1992  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -16,26 +18,21 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall
+Except as contained in this notice, the name of the X Consortium shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from The Open Group.
+from the X Consortium.
 
 */
-/* $XFree86: xc/programs/Xserver/Xext/xtest.c,v 3.10 2003/10/28 23:08:44 tsi Exp $ */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/X.h>
+#include "X.h"
 #define NEED_EVENTS
-#include <X11/Xproto.h>
+#include "Xproto.h"
 #include "misc.h"
 #include "os.h"
 #include "dixstruct.h"
@@ -44,41 +41,32 @@ from The Open Group.
 #include "inputstr.h"
 #include "scrnintstr.h"
 #include "dixevents.h"
-#include "sleepuntil.h"
 #define _XTEST_SERVER_
-#include <X11/extensions/XTest.h>
-#include <X11/extensions/xteststr.h>
+#include "XTest.h"
+#include "xteststr.h"
 #ifdef XINPUT
-#include <X11/extensions/XI.h>
-#include <X11/extensions/XIproto.h>
+#include "XI.h"
+#include "XIproto.h"
 #define EXTENSION_EVENT_BASE	64
 #include "extinit.h"		/* LookupDeviceIntRec */
 #endif /* XINPUT */
-#ifdef EXTMODULE
-#include "xf86_ansic.h"
-#endif
 
-#include "modinit.h"
-
-#if 0
 static unsigned char XTestReqCode;
-#endif
 
 #ifdef XINPUT
 extern int DeviceValuator;
 #endif /* XINPUT */
 
-#ifdef PANORAMIX
-#include "panoramiX.h"
-#include "panoramiXsrv.h"
-#endif
-
 static void XTestResetProc(
+#if NeedFunctionPrototypes
     ExtensionEntry * /* extEntry */
+#endif
 );
 static int XTestSwapFakeInput(
+#if NeedFunctionPrototypes
     ClientPtr /* client */,
     xReq * /* req */
+#endif
 );
 
 static DISPATCH_PROC(ProcXTestCompareCursor);
@@ -93,20 +81,14 @@ static DISPATCH_PROC(SProcXTestGetVersion);
 static DISPATCH_PROC(SProcXTestGrabControl);
 
 void
-XTestExtensionInit(INITARGS)
+XTestExtensionInit()
 {
-#if 0
     ExtensionEntry *extEntry;
 
     if ((extEntry = AddExtension(XTestExtensionName, 0, 0,
 				 ProcXTestDispatch, SProcXTestDispatch,
 				 XTestResetProc, StandardMinorOpcode)) != 0)
 	XTestReqCode = (unsigned char)extEntry->base;
-#else
-    (void) AddExtension(XTestExtensionName, 0, 0,
-			ProcXTestDispatch, SProcXTestDispatch,
-			XTestResetProc, StandardMinorOpcode);
-#endif
 }
 
 /*ARGSUSED*/
@@ -182,12 +164,12 @@ ProcXTestFakeInput(client)
     int nev;
     int	n;
     xEvent *ev;
-    DeviceIntPtr dev = NULL;
+    DeviceIntPtr dev;
     WindowPtr root;
     int type;
 #ifdef XINPUT
     Bool extension = FALSE;
-    deviceValuator *dv = NULL;
+    deviceValuator *dv;
     int base;
     int *values;
 #endif /* XINPUT */
@@ -394,33 +376,6 @@ ProcXTestFakeInput(client)
 	    client->errorValue = ev->u.u.detail;
 	    return BadValue;
 	}
-
-#ifdef PANORAMIX
-	if (!noPanoramiXExtension) {
-	    ScreenPtr pScreen = root->drawable.pScreen;
-	    BoxRec    box;
-	    int       i;
-	    int       x = ev->u.keyButtonPointer.rootX + panoramiXdataPtr[0].x;
-	    int       y = ev->u.keyButtonPointer.rootY + panoramiXdataPtr[0].y;
-	    if (!POINT_IN_REGION(pScreen, &XineramaScreenRegions[pScreen->myNum],
-				 x, y, &box)) {
-		FOR_NSCREENS(i) {
-		    if (i == pScreen->myNum) continue;
-		    if (POINT_IN_REGION(pScreen,
-					&XineramaScreenRegions[i],
-					x, y, &box)) {
-			root = WindowTable[i];
-			x   -= panoramiXdataPtr[i].x;
-			y   -= panoramiXdataPtr[i].y;
-			ev->u.keyButtonPointer.rootX = x;
-			ev->u.keyButtonPointer.rootY = y;
-			break;
-		    }
-		}
-	    }
-	}
-#endif
-
 	if (ev->u.keyButtonPointer.rootX < 0)
 	    ev->u.keyButtonPointer.rootX = 0;
 	else if (ev->u.keyButtonPointer.rootX >= root->drawable.width)
@@ -429,15 +384,7 @@ ProcXTestFakeInput(client)
 	    ev->u.keyButtonPointer.rootY = 0;
 	else if (ev->u.keyButtonPointer.rootY >= root->drawable.height)
 	    ev->u.keyButtonPointer.rootY = root->drawable.height - 1;
-
-#ifdef PANORAMIX
-	if ((!noPanoramiXExtension
-	     && root->drawable.pScreen->myNum != XineramaGetCursorScreen())
-	    || (noPanoramiXExtension && root != GetCurrentRootWindow()))
-
-#else
 	if (root != GetCurrentRootWindow())
-#endif
 	{
 	    NewCurrentScreen(root->drawable.pScreen,
 			     ev->u.keyButtonPointer.rootX,

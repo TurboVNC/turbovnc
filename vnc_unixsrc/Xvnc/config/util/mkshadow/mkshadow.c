@@ -1,4 +1,4 @@
-/* $Xorg: mkshadow.c,v 1.3 2000/08/17 19:41:53 cpqbld Exp $ */
+/* $XConsortium: mkshadow.c /main/2 1996/12/04 10:11:51 swick $ */
 /* mkshadow.c - make a "shadow copy" of a directory tree with symlinks.
    Copyright 1990, 1993 Free Software Foundation, Inc.
 
@@ -350,7 +350,7 @@ DoCopy(master, current, depth)
 	    if (!in_current)
 		MakeLink(master, current, depth);
 	    else if (!S_ISLNK(stat_current.st_mode)) {
-		fprintf(stderr, "Existing file %s is not a symbolic link.\n",
+		fprintf(stderr, "Existing file %s is not a symbolc link.\n",
 			current);
 	    } else {
 		if (stat(current, &stat_current) || stat(master, &stat_master))

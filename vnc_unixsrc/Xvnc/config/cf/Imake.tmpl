@@ -1,12 +1,11 @@
 XCOMM ----------------------------------------------------------------------
 XCOMM Makefile generated from IMAKE_TEMPLATE and INCLUDE_IMAKEFILE
-XCOMM $Xorg: Imake.tmpl,v 1.4 2000/08/17 19:41:46 cpqbld Exp $
-XCOMM $XdotOrg: xc/config/cf/Imake.tmpl,v 1.16 2005/11/08 06:33:24 jkj Exp $
+XCOMM $TOG: Imake.tmpl /main/245 1997/05/20 10:05:47 kaleb $
 XCOMM
 XCOMM
 XCOMM
 XCOMM
-XCOMM $XFree86: xc/config/cf/Imake.tmpl,v 3.155 2003/12/24 18:58:41 dickey Exp $
+XCOMM $XFree86: xc/config/cf/Imake.tmpl,v 3.32.2.8 1998/02/08 11:19:24 dawes Exp $
 XCOMM ----------------------------------------------------------------------
 
 /*
@@ -33,10 +32,6 @@ all::
 
 .SUFFIXES: .i
 
-/* Intercept clean rules for current directory */
-#undef clean
-#define clean cleandir
-
 #include <Imake.cf>
 
 XCOMM -----------------------------------------------------------------------
@@ -46,26 +41,12 @@ XCOMM the platform-specific parameters - edit site.def to change
 #include <site.def>
 #undef BeforeVendorCF
 
-#if defined(HasGcc3) && !defined(HasGcc2)
-# define HasGcc2 HasGcc3
-#endif
 #if defined(HasGcc2) && !defined(HasGcc)
 # define HasGcc HasGcc2
 #endif
 
-#ifndef HasCenterLineC
-#define HasCenterLineC NO
-#endif
-#ifndef HasCenterLineCplusplus
-#define HasCenterLineCplusplus NO
-#endif
-
 #ifndef HasClearmake
 # define HasClearmake NO
-#endif
-
-#ifndef ProPoliceSupport
-#define ProPoliceSupport NO
 #endif
 
 /*
@@ -121,37 +102,11 @@ XCOMM the platform-specific parameters - edit site.def to change
 
 /* the following are needed before we can include Imake.rules */
 
-#ifndef NothingOutsideProjectRoot
-#define NothingOutsideProjectRoot NO
-#endif
-
-#ifndef RemoveObsoleteFiles
-#define RemoveObsoleteFiles YES
-#endif
-
 #ifndef HasVarDirectory
-#define HasVarDirectory		YES
+#define HasVarDirectory		NO
 #endif
-#ifndef UseEtcX11
-#define UseEtcX11		YES
-#endif
-#ifndef UseInstalledX11
-# define UseInstalledX11        NO
-#endif
-#ifdef UseInstalled
-# undef UseInstalledX11
-# define UseInstalledX11        YES
-#endif
-#if NothingOutsideProjectRoot
-#undef UseEtcX11
-#define UseEtcX11		NO
-#endif
-#ifndef UseSeparateConfDir
-#define UseSeparateConfDir	(UseEtcX11 || HasVarDirectory)
-#endif
-#if NothingOutsideProjectRoot
-#undef UseSeparateConfDir
-#define UseSeparateConfDir	NO
+#ifndef HasSymLinks
+#define HasSymLinks		YES
 #endif
 #ifndef SystemV
 #define SystemV			NO	/* SYSV (R3) */
@@ -171,17 +126,11 @@ XCOMM the platform-specific parameters - edit site.def to change
 #ifndef HasTestCenter
 #define HasTestCenter		NO
 #endif
-#ifndef HasGnuMake
-#define HasGnuMake		NO
-#endif
-/*
- * The following fixes a glitch with GNU make -j
- */
-#ifndef ForceServerRemake
-#define ForceServerRemake	HasGnuMake
-#endif
 #ifndef HasBsdMake
 #define HasBsdMake		NO
+#endif
+#ifndef HasGnuMake
+#define HasGnuMake		NO
 #endif
 #ifndef HasParallelMake
 #define HasParallelMake		NO
@@ -206,111 +155,10 @@ XCOMM the platform-specific parameters - edit site.def to change
 
 #ifndef HasMakefileSafeInclude	    /* -include or sinclude in a Makefile */
 #if HasClearmake || HasBsdMake
-#define HasMakefileSafeInclude	YES
+#define HasMakefileSafeInclude YES
 #else
-#define HasMakefileSafeInclude	NO   /* see also vendor-specific .cf files */
+#define HasMakefileSafeInclude NO   /* see also vendor-specific .cf files */
 #endif
-#endif
-
-#ifndef HasSymLinks
-#define HasSymLinks YES
-#endif
-
-#ifndef HasPerl
-#define HasPerl			YES
-#endif
-
-#ifndef HasPerl5
-#define HasPerl5		HasPerl
-#endif
-
-#ifndef PerlCmd
-#define PerlCmd			perl
-#endif
-
-#ifndef PerlOptions
-#define PerlOptions		/**/
-#endif
-
-#ifndef PerlEnvSetup
-#define PerlEnvSetup		env LC_ALL=C
-#endif
-
-#ifndef BuildRman
-#define BuildRman YES
-#endif
-
-#ifndef HasGperf
-#define HasGperf		NO
-#endif
-
-#ifndef GperfCmd
-#define GperfCmd		gperf
-#endif
-
-#ifndef RmanCmd
-#if BuildRman
-#ifdef UseInstalled		/* assume BINDIR in path */
-#define RmanCmd rman
-#else
-#define RmanCmd $(TOP)/config/util/rman
-#endif
-#endif
-#endif
-
-#ifndef RmanOptions
-#if BuildRman
-#define RmanOptions -f HTML
-#endif
-#endif
-
-#ifndef BuildHtmlManPages
-#ifdef RmanCmd
-#define BuildHtmlManPages YES
-#else
-#define BuildHtmlManPages NO
-#endif
-#endif
-/* Can't do this while bootstrapping imake */
-#ifdef BootStrap
-#undef BuildHtmlManPages
-#define BuildHtmlManPages NO
-#endif
-
-#ifndef DontPreprocessManPages
-#ifdef UseInstalled
-#define DontPreprocessManPages YES
-#else
-#define DontPreprocessManPages NO
-#endif
-#endif
-
-#ifndef CompressManPages
-#define CompressManPages NO
-#endif
-
-#ifndef HasGroff
-#define HasGroff NO
-#endif
-#ifndef HasGroffHtml
-#define HasGroffHtml NO
-#endif
-
-#ifndef HasCookieMaker
-#define HasCookieMaker	NO
-#endif
-
-#ifndef DoLoadableServer
-#define DoLoadableServer NO
-#endif
-#ifndef MakeDllModules
-#define MakeDllModules NO
-#endif
-#ifndef StripInstalledPrograms
-#define StripInstalledPrograms NO	/* leave symbol table just in case */
-#endif
-#ifndef StaticNeedsPicForShared
-#define StaticNeedsPicForShared NO
 #endif
 
 #include <Imake.rules>
@@ -325,7 +173,7 @@ XCOMM the platform-specific parameters - edit site.def to change
 #define OSMinorVersion          0
 #endif
 #ifndef OSTeenyVersion
-#define OSTeenyVersion		0
+#define OSTeenyVersion          0
 #endif
 #ifndef UnalignedReferencesAllowed
 #define UnalignedReferencesAllowed NO	/* if arbitrary deref is okay */
@@ -351,7 +199,6 @@ XCOMM the platform-specific parameters - edit site.def to change
 
 #ifndef CrossCompiling
 #define CrossCompiling		NO
-#undef  CrossCompileDir
 #endif
 #ifndef BourneShell			/* to force shell in makefile */
 #define BourneShell		/bin/sh
@@ -370,16 +217,6 @@ XCOMM the platform-specific parameters - edit site.def to change
 
 #ifndef HasLargeTmp
 #define HasLargeTmp		NO	/* be paranoid */
-#endif
-
-#ifndef HasMotif
-#define HasMotif		NO
-#endif
-#ifndef HasMotif2
-#define HasMotif2		NO      /* only if system has working Motif2 or OpenMotif */
-#endif
-#ifndef HasBSDAuth
-#define HasBSDAuth		NO
 #endif
 
 #ifndef HasBSD44Sockets
@@ -408,9 +245,6 @@ XCOMM the platform-specific parameters - edit site.def to change
 #define HasVFork		YES
 #endif
 #endif
-#ifndef HasSetProcTitle
-#define HasSetProcTitle		NO
-#endif
 #ifndef HasSetUserContext
 #define HasSetUserContext	NO
 #endif
@@ -419,10 +253,6 @@ XCOMM the platform-specific parameters - edit site.def to change
 #endif
 #ifndef HasPutenv
 #define HasPutenv		NO	/* assume not */
-#endif
-/* setenv(3) and unsetenv(3) */
-#ifndef HasSetenv
-#define HasSetenv		YES	/* assume yes */
 #endif
 #ifndef HasVoidSignalReturn
 #define HasVoidSignalReturn	YES	/* assume yes */
@@ -433,118 +263,11 @@ XCOMM the platform-specific parameters - edit site.def to change
 #ifndef HasSnprintf
 #define HasSnprintf		NO	/* assume not */
 #endif
-#ifndef HasStrlcat
-#define HasStrlcat		NO	/* assume not */
-#endif
-#ifndef HasDlopen
-#define HasDlopen		NO	/* assume not */
-#endif
-#ifndef HasWeakSymbols
-#define HasWeakSymbols		NO	/* assume not */
-#endif
-#ifndef HasIssetugid
-#define HasIssetugid		NO	/* assume not */
-#endif
-#ifndef HasGetresuid
-#define HasGetresuid		NO	/* assume not */
-#endif
 #ifndef HasMkstemp
 #define HasMkstemp		NO	/* assume not */
 #endif
-#ifndef HasUsableFileMmap
-#define HasUsableFileMmap	NO	/* assume not */
-#endif
-#ifndef HasGetIfAddrs
-#define HasGetIfAddrs		NO	/* assume not */
-#endif
-#ifndef HasStickyDirBit
-#define HasStickyDirBit		YES
-#endif
-#ifndef HasFchown
-#define HasFchown		YES
-#endif
-#ifndef HasPam
-#define HasPam			NO
-#endif
-#ifndef HasPamMisc
-#define HasPamMisc		NO
-#endif
-#ifndef HasGetpeereid
-#define HasGetpeereid		NO
-#endif
-#ifndef HasGetpeerucred
-#define HasGetpeerucred		NO
-#endif
-#ifndef NoStrstr
-#define NoStrstr		NO
-#endif
-#ifndef HasShadowPasswd
-#define HasShadowPasswd		NO
-#endif
-#ifndef HasBasename
-#define HasBasename		YES
-#endif
-#ifndef HasGetopt
-# if !defined(Win32Architecture) && !defined(OS2Architecture)
-#  define HasGetopt		YES
-# else
-#  define HasGetopt		NO
-# endif
-#endif
-#ifndef HasGetoptLong
-# define HasGetoptLong		NO
-#endif
-/* byte-order defaults */
-#ifndef ByteOrder
-#if defined(VaxArchitecture)
-#define ByteOrder		X_LITTLE_ENDIAN
-#elif defined(MipsArchitecture) && defined(MipselArchitecture)
-#define ByteOrder		X_LITTLE_ENDIAN
-#elif defined(MipsArchitecture)
-#define ByteOrder		X_BIG_ENDIAN
-#elif defined(i386Architecture)
-#define ByteOrder		X_LITTLE_ENDIAN
-#elif defined(ia64Architecture)
-#define ByteOrder		X_LITTLE_ENDIAN
-#elif defined(AMD64Architecture)
-#define ByteOrder		X_LITTLE_ENDIAN
-#elif defined(SparcArchitecture) || defined(Sparc64Architecture)
-#define ByteOrder		X_BIG_ENDIAN
-#elif defined(AlphaArchitecture)
-#define ByteOrder		X_LITTLE_ENDIAN
-#elif defined(Mc68000Architecture)
-#define ByteOrder		X_BIG_ENDIAN
-#elif defined(Mc68020Architecture)
-#define ByteOrder		X_BIG_ENDIAN
-#elif defined(Mc88000Architecture)
-#define ByteOrder		X_BIG_ENDIAN
-#elif defined(s390Architecture)
-#define ByteOrder		X_BIG_ENDIAN
-#elif defined(s390xArchitecture)
-#define ByteOrder		X_BIG_ENDIAN
-#elif defined(Arm32ebArchitecture)
-#define ByteOrder		X_BIG_ENDIAN
-#elif defined(Arm32Architecture)
-#define ByteOrder		X_LITTLE_ENDIAN
-#elif defined(RsArchitecture)
-#define ByteOrder		X_BIG_ENDIAN
-#elif defined(PpcArchitecture) || defined(Ppc64Architecture)
-#define ByteOrder		X_BIG_ENDIAN
-#elif defined(HPArchitecture)
-#define ByteOrder		X_BIG_ENDIAN
-#elif defined(SuperHArchitecture)
-#define ByteOrder		X_LITTLE_ENDIAN
-#elif defined(SuperHebArchitecture)
-#define ByteOrder		X_BIG_ENDIAN
-#endif
-#endif /* ByteOrder */
-X_BYTE_ORDER = ByteOrder
-
 #ifndef HasFortran
 #define HasFortran		NO
-#endif
-#ifndef HasGcc2ForCplusplus
-#define HasGcc2ForCplusplus	NO
 #endif
 #ifndef HasCplusplus
 #if HasGcc2ForCplusplus
@@ -553,23 +276,17 @@ X_BYTE_ORDER = ByteOrder
 #define HasCplusplus		NO
 #endif
 #endif
-#ifndef HasMktemp
-#define HasMktemp		NO	/* if you have the mktemp command */
-#endif
 #ifndef HasNdbm
 #define HasNdbm			NO
 #endif
 #ifndef HasSecureRPC
 #define HasSecureRPC		NO	/* if you have Secure RPC */
 #endif
-#ifndef HasKrbIV
-#define HasKrbIV		NO	/* if you have Kerberos IV */
-#endif
 #ifndef HasKrb5
 #define HasKrb5			NO      /* if you have Kerberos V5 */
 #endif
 #ifndef HasLatex
-#define HasLatex		NO
+#define HasLatex		YES
 #endif
 #ifndef HasShm
 #if SystemV || SystemV4
@@ -584,39 +301,17 @@ X_BYTE_ORDER = ByteOrder
 #ifndef HasFfs
 #define HasFfs			YES
 #endif
+#ifndef HasFfsl
+#define HasFfsl			NO
+#endif
 #ifndef HasZlib
-#define HasZlib			YES
+#define HasZlib			NO
 #endif
-#ifndef OsNeedZlibHeaders
-#define OsNeedZlibHeaders	!HasZlib
-#endif
-#if !HasZlib		/* if OS doesn't have it, we'll build it */
-XCOMM Building your own zlib can be a harmful security risk and is
-XCOMM deprecated; please strongly consider using vendor-supplied packages.
-#undef GzipLibrary	/* GzipLibrary was valid only if HasZlib */
+#if !HasZlib		/* GzipLibrary was valid only if HasZlib */
+#define GzipLibrary -L/usr/local/lib -lz
 #endif
 #ifndef GzipLibrary	/* if OS config didn't define it, assume it's -lz */
 #define GzipLibrary -lz
-#endif
-/* If the system has the Freetype2 library - if NO, the copy in extras is built */
-#ifndef HasFreetype2
-#define HasFreetype2		YES
-#endif
-/* If the system has the Fontconfig library - if NO, the copy in extras is built  */
-#ifndef HasFontconfig
-#define HasFontconfig		NO
-#endif
-/* If the system has the PNG library - if NO, xcursorgen is not built */
-#ifndef HasLibpng
-#define HasLibpng		NO
-#endif
-#if HasKrbIV
-#ifndef KrbIVIncludes
-#define KrbIVIncludes /**/
-#endif
-#ifndef KrbIVLibraries
-#define KrbIVLibraries -lkrb -ldes
-#endif
 #endif
 #if HasKrb5
 #ifndef Krb5Includes
@@ -644,62 +339,6 @@ XCOMM deprecated; please strongly consider using vendor-supplied packages.
 #define MallocLibraries	/**/
 #endif
 #endif
-#ifndef HasPosixRegex		/* Most modern platforms have it */
-#define HasPosixRegex		YES
-#endif
-#ifndef RegexLibrary
-#if HasPosixRegex
-#define RegexLibrary		/**/
-#else
-#define RegexLibrary		-lregex
-#endif
-#endif
-#ifndef HasNCurses
-#define HasNCurses		NO
-#endif
-#ifndef NCursesLibName
-#if HasNCurses
-#define NCursesLibName	-lncurses
-#else
-#define NCursesLibName
-#endif
-#endif
-#ifdef NCursesLibDir
-NCURSESLIBDIR = NCursesLibDir
-#endif
-#ifdef NCursesIncDir
-NCURSESINCDIR = NCursesIncDir
-#endif
-#ifndef HasGlide2
-#define HasGlide2 NO
-#endif
-#ifndef Glide2IncDir
-#if HasGlide2
-#define Glide2IncDir /usr/include/glide
-#else
-#define Glide2IncDir
-#endif
-#endif
-GLIDE2INCDIR = Glide2IncDir
-#ifndef HasGlide3
-#define HasGlide3 NO
-#endif
-#ifndef Glide3IncDir
-#if HasGlide3
-#define Glide3IncDir /usr/include/glide3
-#else
-#define Glide3IncDir
-#endif
-#endif
-GLIDE3INCDIR = Glide3IncDir
-#ifndef Glide3LibName
-#if HasGlide3
-#define Glide3LibName glide3
-#else
-#define Glide3LibName
-#endif
-#endif
-GLIDE3LIBNAME = Glide3LibName
 #ifndef HasTk
 #define HasTk NO
 #endif
@@ -766,20 +405,6 @@ TCLIBDIR = TclLibDir
 #define TclLibrary
 #endif
 #endif
-#ifndef HasTsLib
-#define HasTsLib NO
-#endif
-/*
- * Libtool has two different behaviours for version numbers.
- * On platforms which support a minor number, the library
- * version is (version - minor).minor, on those that don't,
- * the version if version.0.  Linux and Darwin support minor
- * numbers; some BSDs do as well.  Set this to YES if libtool
- * uses minor numbers on your platform.
- */
-#ifndef LibtoolMinorVersions
-#define LibtoolMinorVersions	NO
-#endif
 #ifndef NeedConstPrototypes
 #define NeedConstPrototypes	NO
 #endif
@@ -796,15 +421,14 @@ TCLIBDIR = TclLibDir
 #define NeedWidePrototypes	YES	/* mix and match ANSI-C, non-ANSI */
 #endif
 
+#ifndef StripInstalledPrograms
+#define StripInstalledPrograms NO	/* leave symbol table just in case */
+#endif
 #ifndef UseCCMakeDepend			/* use slow cc -E script */
 #define UseCCMakeDepend NO
 #endif
 #ifndef UseGccMakeDepend		/* use slowish but correct gcc -M */
 #define UseGccMakeDepend NO
-#endif
-
-#ifndef CaseSensitiveFileSystem
-#define CaseSensitiveFileSystem YES
 #endif
 
 /* DefaultUsrBin is independent of ProjectRoot.
@@ -814,18 +438,14 @@ TCLIBDIR = TclLibDir
 #define	DefaultUsrBin /usr/bin
 #endif
 
-#ifndef LibDirName
-# define LibDirName lib
-#endif
-
 #ifndef UsrLibDir
 #ifdef ProjectRoot
-#define UsrLibDir Concat3(ProjectRoot,/,LibDirName)
+#define UsrLibDir Concat(ProjectRoot,/lib)
 #ifndef AlternateUsrLibDir
 #define AlternateUsrLibDir YES
 #endif
 #else
-#define UsrLibDir Concat3(/usr,/,LibDirName)
+#define UsrLibDir /usr/lib
 #ifndef AlternateUsrLibDir
 #define AlternateUsrLibDir NO
 #endif
@@ -835,27 +455,12 @@ TCLIBDIR = TclLibDir
 #define AlternateUsrLibDir YES
 #endif
 #endif
-#ifndef VarDirectory
-#ifdef ProjectVar
-#define VarDirectory ProjectVar
-#else
-#define VarDirectory /var
-#endif
-#endif
 #ifndef VarLibDir
-#define VarLibDir $(VARDIR)/lib
+#ifdef ProjectVar
+#define VarLibDir Concat(ProjectVar,/lib)
+#else
+#define VarLibDir /var/lib
 #endif
-
-/*
- * SystemUsrLibDir is independent of ProjectRoot.  It is used primarily
- * to allow links for shared libraries in /usr/lib for compliance to
- * various standards (e.g., Linux/OpenGL).
- */
-#ifndef SystemUsrLibDir
-#define SystemUsrLibDir /usr/LibDirName
-#endif
-#ifndef SystemUsrIncDir
-#define SystemUsrIncDir /usr/include
 #endif
 
 #ifndef ShLibDir
@@ -910,87 +515,6 @@ TCLIBDIR = TclLibDir
 #ifndef FileManDir
 #define FileManDir $(MANSOURCEPATH)$(FILEMANSUFFIX)
 #endif
-#ifndef MiscManDir
-#define MiscManDir $(MANSOURCEPATH)$(MISCMANSUFFIX)
-#endif
-#ifndef DriverManDir
-#define DriverManDir $(MANSOURCEPATH)$(DRIVERMANSUFFIX)
-#endif
-#ifndef AppLoadDefs
-#define AppLoadDefs -D__apploaddir__=$(XAPPLOADDIR)
-#endif
-#ifndef AppManDefs
-#define AppManDefs -D__appmansuffix__=$(MANSUFFIX)
-#endif
-#ifndef LibManDefs
-#define LibManDefs -D__libmansuffix__=$(LIBMANSUFFIX)
-#endif
-#ifndef FileManDefs
-#define FileManDefs -D__filemansuffix__=$(FILEMANSUFFIX)
-#endif
-#ifndef MiscManDefs
-#define MiscManDefs -D__miscmansuffix__=$(MISCMANSUFFIX)
-#endif
-#ifndef DriverManDefs
-#define DriverManDefs -D__drivermansuffix__=$(DRIVERMANSUFFIX)
-#endif
-#ifndef AdminManDefs
-#define AdminManDefs -D__adminmansuffix__=$(ADMINMANSUFFIX)
-#endif
-#ifndef ProjectManDefs
-#define ProjectManDefs -D__projectroot__=$(PROJECTROOT)
-#endif
-#ifndef XConfigFileManDefs
-#define XConfigFileManDefs -D__xconfigfile__=$(XCONFIGFILE)
-#endif
-#ifndef XConfigDirManDefs
-#define XConfigDirManDefs -D__xconfigdir__=$(XCONFIGDIR)
-#endif
-#ifndef XLogFileManDefs
-#define XLogFileManDefs -D__xlogfile__=$(XLOGFILE)
-#endif
-#ifndef XServerManDefs
-#define XServerManDefs -D__xservername__=$(XSERVERNAME)
-#endif
-
-#ifndef CompressManCmd
-#define CompressManCmd gzip -n
-#endif
-
-#ifndef HtmlIndexCmd
-#if BuildHtmlManPages
-#define HtmlIndexCmd $(MKHTMLINDEX)
-#endif
-#endif
-
-#ifndef LogDirectory
-#if HasVarDirectory
-#define LogDirectory $(VARDIR)/log
-#else
-#define LogDirectory /usr/adm
-#endif
-#endif
-
-#ifndef HasVarRun
-#define HasVarRun NO
-#endif
-
-#ifndef VarRunDirectory
-#if HasVarRun
-#define VarRunDirectory $(VARDIR)/run
-#endif
-#endif
-
-#ifndef HasVarDb
-#define HasVarDb NO
-#endif
-
-#ifndef VarDbDirectory
-#if HasVarDb
-#define VarDbDirectory $(VARDIR)/db
-#endif
-#endif
-
 #ifndef ConfigSrc
 #define ConfigSrc $(TOP)/config
 #endif
@@ -1002,7 +526,7 @@ TCLIBDIR = TclLibDir
 #endif
 #endif
 #ifndef UNCOMPRESSPATH
-#define UNCOMPRESSPATH /usr/ucb/uncompress /* obsolete */
+#define UNCOMPRESSPATH /usr/ucb/uncompress
 #endif
 #ifndef OptimizedCDebugFlags
 #define OptimizedCDebugFlags -O
@@ -1037,18 +561,11 @@ TCLIBDIR = TclLibDir
 #ifndef DefaultCplusplusOptions
 #define DefaultCplusplusOptions /* floating point, etc. */
 #endif
-#ifndef HardCodeLibdirFlag
-#define HardCodeLibdirFlag	/**/
-#endif
 #ifndef NoRConst
 #define NoRConst NO /* YES if const for structs of funcs is bad */
 #endif
 #ifndef InstPgmFlags
-# if CrossCompiling
-#  define InstPgmFlags
-# else
-#  define InstPgmFlags -s
-# endif
+#define InstPgmFlags -s
 #endif
 #ifndef InstBinFlags
 #define InstBinFlags -m 0755
@@ -1101,30 +618,27 @@ TCLIBDIR = TclLibDir
 #ifndef BootstrapCFlags
 #define BootstrapCFlags /**/
 #endif
-#ifndef HasGcc3
-#define HasGcc3 NO
-#endif
 #ifndef HasGcc2
-#define HasGcc2 HasGcc3
+#define HasGcc2 NO
 #endif
 #ifndef HasGcc
 #define HasGcc HasGcc2
 #endif
-#ifndef HasIntelC
-#define HasIntelC NO
+#ifndef HasGcc2ForCplusplus
+#define HasGcc2ForCplusplus NO
 #endif
-#ifndef HasSunC
-#define HasSunC NO
+#ifndef HasCenterLineC
+#define HasCenterLineC NO
 #endif
-#ifndef HasBrokenCCForLink
-#define HasBrokenCCForLink NO
+#ifndef HasCenterLineCplusplus
+#define HasCenterLineCplusplus NO
 #endif
 #ifndef CcCmd
 #if HasGcc2
-#define CcCmd gcc -fpcc-struct-return
+#define CcCmd gcc -fpcc-struct-return 
 #else
 #if HasGcc
-#define CcCmd gcc -fstrength-reduce -fpcc-struct-return
+#define CcCmd gcc -fstrength-reduce -fpcc-struct-return 
 #else
 #if HasCenterLineC
 #define CcCmd clcc
@@ -1145,11 +659,7 @@ TCLIBDIR = TclLibDir
 # define CplusplusFilt	c++filt
 #endif
 #ifndef CplusplusLibC
-#if HasGcc2ForCplusplus
-#define CplusplusLibC	-lstdc++
-#else
 #define CplusplusLibC /**/
-#endif
 #endif
 #ifndef CplusplusStandardDefines
 #define CplusplusStandardDefines StandardDefines
@@ -1164,7 +674,7 @@ TCLIBDIR = TclLibDir
 #define CplusplusDependIncludes /**/
 #endif
 #ifndef CplusplusOptions
-#define CplusplusOptions DefaultCplusplusOptions
+#define CplusplusOptions /**/
 #endif
 #ifndef CplusplusSpecialOptions
 #define CplusplusSpecialOptions /**/
@@ -1183,9 +693,6 @@ TCLIBDIR = TclLibDir
 #ifndef AsCmd
 #define AsCmd as
 #endif
-#ifndef AsmDefines
-#define AsmDefines /**/
-#endif
 #ifndef CompressCmd
 #define CompressCmd compress
 #endif
@@ -1193,10 +700,7 @@ TCLIBDIR = TclLibDir
 #define GzipCmd gzip
 #endif
 #ifndef CppCmd
-#define CppCmd /LibDirName/cpp
-#endif
-#ifndef RawCppCmd
-#define RawCppCmd CppCmd -undef
+#define CppCmd /lib/cpp
 #endif
 #ifndef CppNoLineInfoOption
 #define CppNoLineInfoOption /**/
@@ -1218,26 +722,14 @@ TCLIBDIR = TclLibDir
 #ifndef InstallFlags
 #define InstallFlags -c
 #endif
-#ifndef StripCmd
-#define StripCmd strip
-#endif
 #ifndef LdCmd
 #define LdCmd ld
-#endif
-#ifndef M4Cmd
-#define M4Cmd m4
-#endif
-#ifndef M4Flags
-#define M4Flags /**/
 #endif
 #ifndef LexCmd
 #define LexCmd lex
 #endif
 #ifndef LexLib
 #define LexLib -ll
-#endif
-#ifndef HasFlex
-#define HasFlex NO
 #endif
 #ifndef YaccCmd
 #define YaccCmd yacc
@@ -1287,48 +779,6 @@ TCLIBDIR = TclLibDir
 #ifndef RmCmd
 #define RmCmd rm -f
 #endif
-
-/*
- * Module cross-compile stuff.  By default they are defined to be exactly the
- * same as the non-module versions.
- */
-#ifndef ModuleCcCmd
-#define ModuleCcCmd CcCmd
-#endif
-#ifndef ModuleCppCmd
-#define ModuleCppCmd CppCmd
-#endif
-#ifndef ModuleCFlags
-#define ModuleCFlags $(CFLAGS)
-#endif
-#ifndef ModuleAsCmd
-#define ModuleAsCmd AsCmd
-#endif
-#ifndef ModuleAsFlags
-#define ModuleAsFlags /**/
-#endif
-#ifndef ModuleLdCmd
-#define ModuleLdCmd LdCmd
-#endif
-#ifndef ModuleLdFlags
-#define ModuleLdFlags /**/
-#endif
-#ifndef ModuleLdCombineFlags
-#define ModuleLdCombineFlags LdCombineFlags
-#endif
-#ifndef ModuleArCmd
-#define ModuleArCmd ArCmd
-#endif
-#ifndef NeedModuleRanlib
-#define NeedModuleRanlib NO
-#endif
-#ifndef ModuleRanlibCmd
-#define ModuleRanlibCmd RanlibCmd
-#endif
-
-#ifndef HostCcCmd
-#define HostCcCmd cc
-#endif
 #ifndef StandardIncludes	/* for platform-specifics */
 #define StandardIncludes /**/
 #endif
@@ -1343,11 +793,8 @@ TCLIBDIR = TclLibDir
 #endif
 #endif
 #endif
-#ifndef StandardCppOptions
-#define StandardCppOptions /**/
-#endif
 #ifndef StandardCppDefines
-#define StandardCppDefines StandardCppOptions StandardDefines
+#define StandardCppDefines StandardDefines
 #endif
 #ifndef Malloc0ReturnsNull
 #if UseGnuMalloc
@@ -1371,22 +818,19 @@ TCLIBDIR = TclLibDir
 #define NdbmDefines /**/
 #endif
 #endif
-#ifndef HasLdRunPath
-#define HasLdRunPath NO
-#endif
 #ifndef LdPreLib
-# if !defined(UseInstalled)
-#  define LdPreLib -L$(BUILDLIBDIR)
-# else
-# if AlternateUsrLibDir
-#  define LdPreLib -L$(USRLIBDIR)
-# else
-# define LdPreLib /**/
-# endif
+#if !defined(UseInstalled)
+#define LdPreLib -L$(BUILDLIBDIR)
+#else
+#if AlternateUsrLibDir
+#define LdPreLib -L$(USRLIBDIR)
+#else
+#define LdPreLib /**/
+#endif
 #endif
 #endif
 #ifndef LdPostLib
-#if !defined(UseInstalled) && AlternateUsrLibDir && !HasLdRunPath && !defined(CrossCompileDir)
+#if !defined(UseInstalled) && AlternateUsrLibDir && !HasLdRunPath
 #define LdPostLib -L$(USRLIBDIR)
 #else
 #define LdPostLib /**/
@@ -1441,21 +885,12 @@ TCLIBDIR = TclLibDir
 #define ImakeCmd $(IMAKESRC)/imake
 #endif
 #endif
-#ifndef ImakeWarningFlags
-#define ImakeWarningFlags	/* Nothing */
-#endif
 #ifndef DependCmd
 #if UseGccMakeDepend
 #ifdef UseInstalled		/* assume BINDIR in path */
 #define DependCmd gccmakedep
 #else
 #define DependCmd $(DEPENDSRC)/gccmakedep
-#endif
-#elif UseCCMakeDepend
-#ifdef UseInstalled		/* assume BINDIR in path */
-#define DependCmd ccmakedep
-#else
-#define DependCmd $(DEPENDSRC)/ccmakedep
 #endif
 #else
 #ifdef UseInstalled		/* assume BINDIR in path */
@@ -1464,13 +899,6 @@ TCLIBDIR = TclLibDir
 #define DependCmd $(DEPENDSRC)/makedepend
 #endif
 #endif
-#endif
-#ifndef DependDefines
-# if UseCCMakeDepend || UseGccMakeDepend
-#  define DependDefines /**/
-# else
-#  define DependDefines -DUSE_MAKEDEPEND
-# endif
 #endif
 #ifndef DependFlags
 #define DependFlags /**/
@@ -1485,10 +913,12 @@ TCLIBDIR = TclLibDir
 #ifndef ExportListCmd
 # ifndef ExportListGenSource
 #  define ExportListCmd		/**/
-# elif !defined(UseInstalled)
-#  define ExportListCmd		$(CONFIGSRC)/util/exportlistgen
 # else
-#  define ExportListCmd		exportlistgen
+#  if !defined(UseInstalled)
+#   define ExportListCmd		$(CONFIGSRC)/util/exportlistgen
+#  else
+#   define ExportListCmd		exportlistgen
+#  endif
 # endif
 #endif
 #ifndef MkdirHierCmd
@@ -1498,32 +928,11 @@ TCLIBDIR = TclLibDir
 #define MkdirHierCmd $(SHELL) $(CONFIGSRC)/util/mkdirhier.sh
 #endif
 #endif
-#ifndef RevPathCmd
-#ifdef UseInstalled		/* assume BINDIR in path */
-#define RevPathCmd revpath
-#else
-#define RevPathCmd $(CONFIGSRC)/util/revpath
-#endif
-#endif
 #ifndef TroffCmd
-#if HasGroff
-#define TroffCmd groff -Tps
-#else
-#define TroffCmd troff -Tps
-#endif
+#define TroffCmd psroff
 #endif
 #ifndef NroffCmd
 #define NroffCmd nroff
-#endif
-#ifndef HTMLroffCmd
-#if HasGroff && HasGroffHtml
-#define HTMLroffCmd groff -Thtml
-#endif
-#endif
-#ifdef HTMLroffCmd
-#ifndef DocFilesToClean
-#define DocFilesToClean grohtml*.png *-auto-*.png
-#endif
 #endif
 #ifndef MsMacros
 #define MsMacros -ms
@@ -1543,35 +952,11 @@ TCLIBDIR = TclLibDir
 #ifndef ColCmd
 #define ColCmd col
 #endif
-#ifndef ColFlags
-#define ColFlags -b
-#endif
 #ifndef DvipsCmd
 #define DvipsCmd dvips
 #endif
 #ifndef LatexCmd
 #define LatexCmd latex
-#endif
-#ifndef HasPdfLatex
-#define HasPdfLatex NO
-#endif
-#ifndef PdfLatexCmd
-#define PdfLatexCmd pdflatex
-#endif
-#ifndef GhostScriptCmd
-#define GhostScriptCmd gs
-#endif
-#ifndef HasGhostPCL
-#define HasGhostPCL NO
-#endif
-#ifndef HasGhostScript
-#define HasGhostScript NO
-#endif
-#ifndef BuildPDFdocs
-#define BuildPDFdocs (HasGhostScript)
-#endif
-#if BuildPDFdocs
-#define PsToPdfCmd GhostScriptCmd -q -sOutputFile=- -sDEVICE=pdfwrite -dSAFER -dNOPAUSE -
 #endif
 #if HasSentinel
 #ifndef SentinelCmd
@@ -1622,39 +1007,12 @@ TCLIBDIR = TclLibDir
 #define FileManSuffix	5		/* use just one tab or cpp will die */
 #endif
 #endif
-#ifndef MiscManSuffix
-#if SystemV || SystemV4 || defined(OSF1Architecture)
-#define MiscManSuffix	5		/* use just one tab or cpp will die */
-#else
-#define MiscManSuffix	7		/* use just one tab or cpp will die */
-#endif
-#endif
-#ifndef DriverManSuffix
-#if SystemV || SystemV4 || defined(OSF1Architecture)
-#define DriverManSuffix	7		/* use just one tab or cpp will die */
-#else
-#define DriverManSuffix	4		/* use just one tab or cpp will die */
-#endif
-#endif
-#ifndef AdminManSuffix
-#if SystemV || SystemV4
-#define AdminManSuffix	1m		/* use just one tab or cpp will die */
-#else
-#define AdminManSuffix	8		/* use just one tab or cpp will die */
-#endif
-#endif
 #ifndef ExpandManNames
 #if SystemV
 #define ExpandManNames NO
 #else
 #define ExpandManNames YES
 #endif
-#endif
-#ifndef ManSrcSuffix
-#define ManSrcSuffix	man
-#endif
-#ifndef ManNewSuffix
-#define ManNewSuffix	_man
 #endif
 #ifndef TOPDIR
 #define TOPDIR .
@@ -1671,67 +1029,8 @@ TCLIBDIR = TclLibDir
 #ifndef ExtraFilesToClean
 #define ExtraFilesToClean /**/
 #endif
-#ifndef DocFilesToClean
-#define DocFilesToClean /**/
-#endif
 #ifndef FilesToClean
-#define FilesToClean *.CKP *.ln *.BAK *.bak *.Osuf core errs ,* *~ *.a .emacs_* tags TAGS make.log MakeOut
-#endif
-
-#ifdef CrossCompileDir
-# ifndef StripPath
-#  define StripPath(x) `echo x|sed "s%.*/%%"`
-# endif
-# ifndef CrossArCmd
-#  define CrossArCmd Concat3(CrossCompileDir,/,StripPath(ArCmd))
-# endif
-# ifndef CrossCcCmd
-#  define CrossCcCmd Concat3(CrossCompileDir,/,StripPath(CcCmd))
-# endif
-# ifndef CrossAsCmd
-#  define CrossAsCmd Concat3(CrossCompileDir,/,StripPath(AsCmd))
-# endif
-# ifdef HasFortran
-#  ifndef CrossFortranCmd
-#   define CrossFortranCmd Concat3(CrossCompileDir,/,StripPath(FortranCmd))
-#  endif
-# endif
-# ifndef CrossCplusplusCmd
-#  define CrossCplusplusCmd Concat3(CrossCompileDir,/,StripPath(CplusplusCmd))
-# endif
-# ifndef CrossCppCmd
-#  define CrossCppCmd Concat3(CrossCompileDir,/,StripPath(CppCmd))
-# endif
-# ifndef CrossRawCppCmdCmd
-#  define CrossRawCppCmd Concat3(CrossCompileDir,/,StripPath(RawCppCmd))
-# endif
-# ifndef CrossPreProcessCmd
-#  define CrossPreProcessCmd Concat3(CrossCompileDir,/,StripPath(PreProcessCmd))
-# endif
-# ifndef CrossAsCmd
-#  define CrossAsCmd Concat3(CrossCompileDir,/,StripPath(AsCmd))
-# endif
-# ifndef CrossLdCmd
-#  define CrossLdCmd Concat3(CrossCompileDir,/,StripPath(LdCmd))
-# endif
-# ifndef CrossModuleLdCmd
-#  define CrossModuleLdCmd CrossLdCmd
-# endif
-# ifndef CrossLintCmd
-#  define CrossLintCmd Concat3(CrossCompileDir,/,StripPath(LintCmd))
-# endif
-# ifndef CrossRanlibCmd
-#  define CrossRanlibCmd Concat3(CrossCompileDir,/,StripPath(RanlibCmd))
-# endif
-# ifndef CrossModuleCcCmd
-#  define CrossModuleCcCmd Concat3(CrossCompileDir,/,StripPath(ModuleCcCmd))
-# endif
-# ifndef CrossAsCmd
-#  define CrossAsCmd Concat3(CrossCompileDir,/,StripPath(AsCmd))
-# endif
-# ifndef CrossStripCmd
-#  define CrossStripCmd Concat3(CrossCompileDir,/,StripPath(StripCmd))
-# endif
+#define FilesToClean *.CKP *.ln *.BAK *.bak *.Osuf core errs ,* *~ *.a .emacs_* tags TAGS make.log MakeOut 
 #endif
 
           PATHSEP = PathSeparator
@@ -1743,21 +1042,14 @@ TCLIBDIR = TclLibDir
             IMAKE = ImakeCmd
            DEPEND = DependCmd
         MKDIRHIER = MkdirHierCmd
-          REVPATH = RevPathCmd
     EXPORTLISTGEN = ExportListCmd
-             RMAN = RmanCmd
-     RMANBASENAME = HostProgramTargetName(rman)
-      RMANOPTIONS = RmanOptions
         CONFIGSRC = ConfigSrc
          IMAKESRC = $(CONFIGSRC)/imake
         DEPENDSRC = DependDir
 
           INCROOT = IncRoot		/* base of where to put header files */
         USRLIBDIR = UsrLibDir		/* nonshared libraries */
-           VARDIR = VarDirectory	/* usually /var */
         VARLIBDIR = VarLibDir		/* xdm runtime files */
-  SYSTEMUSRLIBDIR = SystemUsrLibDir	/* system's "/usr/lib" */
-  SYSTEMUSRINCDIR = SystemUsrIncDir	/* system's "/usr/include" */
          SHLIBDIR = ShLibDir            /* shared libraries */
        LINTLIBDIR = LintlibDir		/* lint libraries */
           MANPATH = ManPath		/* top of manual page tree */
@@ -1765,95 +1057,45 @@ TCLIBDIR = TclLibDir
            MANDIR = ManDir		/* man pages for commands */
         LIBMANDIR = LibmanDir		/* man pages for library routines */
        FILEMANDIR = FileManDir		/* man pages for config files */
-       MISCMANDIR = MiscManDir		/* man pages for miscellaneous files */
-     DRIVERMANDIR = DriverManDir	/* man pages for drivers */
-     LOGDIRECTORY = LogDirectory	/* OS location of log files */
-#ifdef VarRunDirectory
-        VARRUNDIR = VarRunDirectory	/* OS location of PID files */
-#endif
-#ifdef VarDbDirectory
-         VARDBDIR = VarDbDirectory	/* OS location of db/state files */
-#endif
-#ifdef CrossCompileDir
-               AR = CrossArCmd
-#else
+
                AR = ArCmd
-#endif
-XCOMM Nice try but useless: make will inherit BOOTSTRAPCFLAGS
-XCOMM from  top Makefile
   BOOTSTRAPCFLAGS = BootstrapCFlags	/* set if cpp does not have uniq sym */
-#ifdef CrossCompileDir
-               CC = CrossCcCmd
-               AS = CrossAsCmd
-#else
                CC = CcCmd
                AS = AsCmd
-#endif
 #if HasFortran
-# ifdef CrossCompileDir
-               FC = CrossFortranCmd
-# else
                FC = FortranCmd
-# endif
       FDEBUGFLAGS = FortranDebugFlags
           FCFLAGS = FortranFlags $(FDEBUGFLAGS)
 #endif
 #if HasCplusplus
 
-.SUFFIXES: Concat(.,CCsuf)
+.SUFFIXES: .CCsuf
 
-#ifdef CrossCompileDir
-              CXX = CrossCplusplusCmd
-#else
               CXX = CplusplusCmd
-#endif
           CXXFILT = CplusplusFilt
-#ifdef CplusplusLibCDir
-        CXXLIBDIR = CplusplusLibCDir
-           CXXLIB = -L$(CXXLIBDIR) CplusplusLibC
-#else
            CXXLIB = CplusplusLibC
-#endif
-
     CXXDEBUGFLAGS = DefaultCplusplusDebugFlags
 CXXDEPENDINCLUDES = CplusplusDependIncludes
  CXXEXTRA_DEFINES = CplusplusExtraDefines
 CXXEXTRA_INCLUDES = CplusplusExtraIncludes
    CXXSTD_DEFINES = CplusplusStandardDefines $(CXXPROJECT_DEFINES)
        CXXOPTIONS = CplusplusOptions
-      CXXINCLUDES = $(INCLUDES) $(TOP_INCLUDES) $(CXXEXTRA_INCLUDES)
-       CXXDEFINES = $(CXXINCLUDES) $(CXXSTD_DEFINES) $(THREADS_CXXDEFINES) $(DEFINES) $(CXXEXTRA_DEFINES)
+      CXXINCLUDES = $(INCLUDES) $(TOP_INCLUDES) $(CXXEXTRA_INCLUDES) 
+       CXXDEFINES = $(CXXINCLUDES) $(CXXSTD_DEFINES) $(THREADS_CXXDEFINES) $(CXXEXTRA_DEFINES) $(DEFINES)
          CXXFLAGS = $(CXXDEBUGFLAGS) $(CXXOPTIONS) $(THREADS_CXXFLAGS) $(CXXDEFINES)
 #endif
          COMPRESS = CompressCmd
           GZIPCMD = GzipCmd
-#ifdef CrossCompileDir
-              CPP = CrossCppCmd $(STD_CPP_DEFINES)
-           RAWCPP = CrossRawCppCmd $(STD_CPP_OPTIONS)
-    PREPROCESSCMD = CrossPreProcessCmd $(STD_CPP_DEFINES)
-#else
               CPP = CppCmd $(STD_CPP_DEFINES)		/* simple filters */
-           RAWCPP = RawCppCmd $(STD_CPP_OPTIONS)
     PREPROCESSCMD = PreProcessCmd $(STD_CPP_DEFINES)	/* prefered; mdep */
-#endif
           INSTALL = InstallCmd
      INSTALLFLAGS = InstallFlags
-#ifdef CrossCompileDir
-               LD = CrossLdCmd
-#else
                LD = LdCmd
-#endif
               LEX = LexCmd
-               M4 = M4Cmd
-          M4FLAGS = M4Flags
            LEXLIB = LexLib
              YACC = YaccCmd
            CCYACC = CplusplusYaccCmd
-#ifdef CrossCompileDir
-             LINT = CrossLintCmd
-#else
              LINT = LintCmd
-#endif
       LINTLIBFLAG = LintLibFlag
          LINTOPTS = LintOpts
                LN = LnCmd
@@ -1861,72 +1103,24 @@ CXXEXTRA_INCLUDES = CplusplusExtraIncludes
                MV = MvCmd
                CP = CpCmd
 #if DoRanlibCmd
-#ifdef CrossCompileDir
-           RANLIB = CrossCompileDir/RanlibCmd
-#else
            RANLIB = RanlibCmd
-#endif
   RANLIBINSTFLAGS = RanlibInstFlags
 #endif
                RM = RmCmd
-             PERL = PerlCmd
-         PERLOPTS = PerlOptions
-     PERLENVSETUP = PerlEnvSetup
         MANSUFFIX = ManSuffix		/* suffix for command man pages */
      LIBMANSUFFIX = LibManSuffix	/* suffix for library man pages */
-    FILEMANSUFFIX = FileManSuffix	/* suffix for file format man pages */
-    MISCMANSUFFIX = MiscManSuffix	/* suffix for misc man pages */
-  DRIVERMANSUFFIX = DriverManSuffix	/* suffix for driver man pages */
-   ADMINMANSUFFIX = AdminManSuffix	/* suffix for admin command man pages */
-     MANSRCSUFFIX = ManSrcSuffix	/* suffix for man page source */
-     MANNEWSUFFIX = ManNewSuffix	/* suffix for preprocessed man source */
-          MANDEFS = AppLoadDefs AppManDefs FileManDefs LibManDefs MiscManDefs DriverManDefs AdminManDefs ProjectManDefs XConfigFileManDefs XConfigDirManDefs XLogFileManDefs XServerManDefs $(XORGMANDEFS) $(VENDORMANDEFS)
-
-   COMPRESSMANCMD = CompressManCmd
-
+    FILEMANSUFFIX = FileManSuffix	/* suffix for config file man pages */
             TROFF = TroffCmd
             NROFF = NroffCmd
-#ifdef HTMLroffCmd
-         HTMLROFF = HTMLroffCmd
-#endif
-#ifdef PsToPdfCmd
-       PSTOPDFCMD = PsToPdfCmd
-#endif
          MSMACROS = MsMacros
         MANMACROS = ManMacros
               TBL = TblCmd
               EQN = EqnCmd
              NEQN = NeqnCmd
               COL = ColCmd
-         COLFLAGS = ColFlags
-#ifdef CrossCompileDir
-	    MODCC = CrossModuleCcCmd
-#else
-            MODCC = ModuleCcCmd
-#endif
-           MODCPP = ModuleCppCmd
-        MODCFLAGS = ModuleCFlags
-            MODAS = ModuleAsCmd
-       MODASFLAGS = ModuleAsFlags
-#ifdef CrossCompileDir
-	    MODLD = CrossModuleLdCmd
-#else
-            MODLD = ModuleLdCmd
-#endif
-       MODLDFLAGS = ModuleLdFlags
-MODLDCOMBINEFLAGS = ModuleLdCombineFlags
-            MODAR = ModuleArCmd
-#ifdef CrossCompileDir
-        MODRANLIB = CrossCompileDir/ModuleRanlibCmd
-#else
-        MODRANLIB = ModuleRanlibCmd
-#endif
 #if HasLatex
             DVIPS = DvipsCmd
             LATEX = LatexCmd
-#endif
-#if HasPdfLatex
-      PDFLATEXCMD = PdfLatexCmd
 #endif
 #if HasSentinel
          SENTINEL = SentinelCmd
@@ -1940,12 +1134,8 @@ MODLDCOMBINEFLAGS = ModuleLdCombineFlags
            PROOF = ProofCmd
     PROOFOPTIONS = ProofOptions
 #endif
-#if CrossCompiling
-          HOST_CC = HostCcCmd
-#endif
      STD_INCLUDES = StandardIncludes
-  STD_CPP_OPTIONS = StandardCppOptions
-  STD_CPP_DEFINES = StandardCppOptions StandardCppDefines $(PROJECT_DEFINES)
+  STD_CPP_DEFINES = StandardCppDefines $(PROJECT_DEFINES)
       STD_DEFINES = StandardDefines $(PROJECT_DEFINES)
  EXTRA_LOAD_FLAGS = ExtraLoadFlags
   EXTRA_LDOPTIONS = ExtraLoadOptions
@@ -1962,22 +1152,12 @@ MODLDCOMBINEFLAGS = ModuleLdCombineFlags
     SHAREDCODEDEF = SharedCodeDef
          SHLIBDEF = SharedLibraryDef
 #ifdef SharedLibraryLoadFlags
-     SHLIBLDFLAGS = SharedLibraryLoadFlags $(SHLIBGLOBALSFLAGS)
-#if HasGcc
-         NOSTDLIB = -nostdlib
-     POSTNOSTDLIB = -Wl,-Bstatic -lgcc -Wl,-Bdynamic
-#elif HasIntelC
-         NOSTDLIB = -nostdlib
-     POSTNOSTDLIB =
-#elif HasSunC
-         NOSTDLIB = -xnolib
-     POSTNOSTDLIB =
-#endif
+     SHLIBLDFLAGS = SharedLibraryLoadFlags
 #endif
 /*
- * Here we set up flags needed to produce position-independent code
+ * Here we set up flags needed to produce position-independent code 
  * when doing C and C++ compilation.  The default if you specify C
- * PIC flags without also specifying C++ PIC flags is to assume that
+ * PIC flags without also specifying C++ PIC flags is to assume that 
  * the C flags work for both.  If your C++ compiler requires different
  * flags, specify them explicitly in PositionIndependentCplusplusFlags.
  */
@@ -2032,14 +1212,14 @@ MODLDCOMBINEFLAGS = ModuleLdCombineFlags
 #else
 #define _wideprotodef -DNARROWPROTO
 #endif
-    PROTO_DEFINES = _funcprotodef _wideprotodef
+    PROTO_DEFINES = _funcprotodef _wideprotodef 
 #undef _funcprotodef
 #undef _wideprotodef
 
 #if StripInstalledPrograms
      INSTPGMFLAGS = InstPgmFlags	/* install flags for stripping */
 #else
-     INSTPGMFLAGS =
+     INSTPGMFLAGS = 
 #endif
      INSTBINFLAGS = InstBinFlags	/* install flags for programs */
      INSTUIDFLAGS = InstUidFlags	/* install flags for setuid programs */
@@ -2061,7 +1241,6 @@ MODLDCOMBINEFLAGS = ModuleLdCombineFlags
 #else
 # define TopInclude	-I$(TOP)
 #endif
-
       CDEBUGFLAGS = DefaultCDebugFlags
         CCOPTIONS = DefaultCCOptions	/* to distinguish from param flags */
 /*
@@ -2071,11 +1250,11 @@ MODLDCOMBINEFLAGS = ModuleLdCombineFlags
  * INCLUDES contains client-specific includes set in Imakefile
  * LOCAL_LDFLAGS contains client-specific ld flags flags set in Imakefile
  */
-      ALLINCLUDES = $(INCLUDES) $(EXTRA_INCLUDES) $(TOP_INCLUDES) $(INSTALLED_INCLUDES) $(STD_INCLUDES)
-       ALLDEFINES = $(ALLINCLUDES) $(STD_DEFINES) $(PROTO_DEFINES) $(THREADS_DEFINES) $(MODULE_DEFINES) $(DEFINES) $(EXTRA_DEFINES)
-           CFLAGS = $(CDEBUGFLAGS) $(CCOPTIONS) $(THREADS_CFLAGS) $(MODULE_CFLAGS) $(ALLDEFINES)
+      ALLINCLUDES = $(INCLUDES) $(EXTRA_INCLUDES) $(TOP_INCLUDES) $(STD_INCLUDES)
+       ALLDEFINES = $(ALLINCLUDES) $(STD_DEFINES) $(EXTRA_DEFINES) $(PROTO_DEFINES) $(THREADS_DEFINES) $(DEFINES)
+           CFLAGS = $(CDEBUGFLAGS) $(CCOPTIONS) $(THREADS_CFLAGS) $(ALLDEFINES)
         LINTFLAGS = $(LINTOPTS) -DLINT $(ALLDEFINES) $(DEPEND_DEFINES)
-         LDPRELIB = LdPreLib $(INSTALLED_LIBS)
+         LDPRELIB = LdPreLib
         LDPOSTLIB = LdPostLib
         LDOPTIONS = $(CDEBUGFLAGS) $(CCOPTIONS)  $(EXTRA_LDOPTIONS) $(THREADS_LDFLAGS) $(LOCAL_LDFLAGS) $(LDPRELIBS)
      CXXLDOPTIONS = $(CXXDEBUGFLAGS) $(CXXOPTIONS) $(EXTRA_LDOPTIONS) $(THREADS_CXXLDFLAGS) $(LOCAL_LDFLAGS) $(LDPRELIBS)
@@ -2100,7 +1279,6 @@ MODLDCOMBINEFLAGS = ModuleLdCombineFlags
      LDSTRIPFLAGS = LdStripFlags
    LDCOMBINEFLAGS = LdCombineFlags
       DEPENDFLAGS = DependFlags
-   DEPEND_DEFINES = DependDefines
 
 XCOMM Not sure this belongs here
          TKLIBDIR = TkLibDir
@@ -2116,14 +1294,12 @@ XCOMM Not sure this belongs here
            RM_CMD = $(RM)
 
     IMAKE_DEFINES = /* leave blank, for command line use only */
-   IMAKE_WARNINGS = ImakeWarningFlags
 #ifdef UseInstalled
          IRULESRC = $(CONFIGDIR)	/* used in rules file */
-        IMAKE_CMD = $(IMAKE) -DUseInstalled -I$(IRULESRC) $(IMAKE_DEFINES) \
-		    $(IMAKE_WARNINGS)
+        IMAKE_CMD = $(IMAKE) -DUseInstalled -I$(IRULESRC) $(IMAKE_DEFINES)
 #else
          IRULESRC = $(CONFIGSRC)/cf
-        IMAKE_CMD = $(IMAKE) -I$(IRULESRC) $(IMAKE_DEFINES) $(IMAKE_WARNINGS)
+        IMAKE_CMD = $(IMAKE) -I$(IRULESRC) $(IMAKE_DEFINES)
 #endif
 #if !HasClearmake
      /* clearmake records relevant defines and flags in the build script,
@@ -2161,14 +1337,6 @@ XCOMM Not sure this belongs here
 #endif
 #include LocalTmplFile
 
-#if !BuildLibraries && AlternateIncRoot && !defined(CrossCompileDir)
-INSTALLED_INCLUDES = -I$(INCROOT)
-#endif
-
-#if !defined(UseInstalled) && !BuildLibraries && AlternateUsrLibDir && !defined(CrossCompileDir)
-INSTALLED_LIBS = -L$(USRLIBDIR)
-#endif
-
 #ifdef FixupLibReferences
 FixupLibReferences()
 #endif
@@ -2179,11 +1347,10 @@ FixupLibReferences()
            OSNAME = OSName
 #endif
     USRLIBDIRPATH = UsrLibDirPath
-        LDPRELIBS = LdPreLibs $(INSTALLED_LIBS)
+        LDPRELIBS = LdPreLibs
        LDPOSTLIBS = LdPostLibs
      TOP_INCLUDES = TopIncludes
   PROJECT_DEFINES = ProjectDefines
-   VENDOR_DEFINES = VendorDefines
 #if HasCplusplus
 CXXPROJECT_DEFINES = CplusplusProjectDefines
 #endif
@@ -2197,20 +1364,6 @@ XCOMM common rules for all Makefiles - do not edit
 
 .c.i:
 	CPPOnlyCompile($*.c,$(_NOOP_))
-
-.SUFFIXES: .ii
-
-.cc.ii:
-	CPPOnlyCompile($*.cc,$(_NOOP_))
-
-.SUFFIXES: .s
-
-.c.s:
-	CompileCToAsm($(_NOOP_))
-
-.cc.s:
-	CompileCplusplusToAsm($(_NOOP_))
-
 /*
  * These need to be here so that rules in Imakefile occur first;  the blank
  * emptyrule is to make sure that an empty Imakefile does not default to make
@@ -2224,10 +1377,6 @@ CleanTarget()
 MakefileTarget()
 #endif
 
-#if BuildHtmlManPages
-RmanDependency()
-#endif
-
 TagsTarget()
 #ifdef MakefileAdditions
 MakefileAdditions()
@@ -2239,53 +1388,23 @@ CenterLoadTarget(debug_obj,$(OBJS),NullParameter,$(ALLDEFINES))
 
 ManKeywordsTarget($(MANPATH))
 
-HtmlManIndex
-
-/* Generate the "real" clean rules */
-#undef clean
-
-clean:: cleandir
-
-distclean:: cleandir
-
 #ifdef IHaveSubdirs
 XCOMM ----------------------------------------------------------------------
 XCOMM rules for building in SUBDIRS - do not edit
 
 InstallSubdirs($(SUBDIRS))
 InstallManSubdirs($(SUBDIRS))
-InstallDriverSDKSubdirs($(SUBDIRS))
+InstallLinkKitSubdirs($(SUBDIRS))
 CleanSubdirs($(SUBDIRS))
 TagSubdirs($(SUBDIRS))
 MakefileSubdirs($(SUBDIRS))
 IncludesSubdirs($(SUBDIRS))
 
-/* "distclean" subdirectories */
-#undef  BootstrapCleanSubdirs
-#define BootstrapCleanSubdirs /**/
-#define clean distclean
-CleanSubdirs($(SUBDIRS))
-#undef clean
-
 #endif
 
-#if !DontPreprocessManPages || defined(PreprocessManPages)
-    PREPROCESSMANPAGES = true
-#endif
 /* must be after all install.man rules that install anything */
-#ifndef MakeManKeywords
-#define MakeManKeywords		NO
-#endif
 #if MakeManKeywords		/* typically only at top level */
 install.man:: man_keywords
-#endif
-
-/* must be after all install.man rules that install anything */
-#ifndef MakeHtmlManIndex
-#define MakeHtmlManIndex	NO
-#endif
-#if MakeHtmlManIndex		/* typically only at top level */
-install.man:: html_index
 #endif
 
 #ifndef IHaveSubdirs
@@ -2298,8 +1417,8 @@ install::
 install.man::
 	@echo "install.man in $(CURRENT_DIR) done"
 
-install.sdk::
-	@echo "install.sdk in $(CURRENT_DIR) done"
+install.linkkit::
+	@echo "install.linkkit in $(CURRENT_DIR) done"
 
 Makefiles::
 
@@ -2308,12 +1427,6 @@ includes::
 depend::
 
 #endif /* if subdirectory rules are needed */
-
-#ifndef IHaveSpecialMakefileTarget
-/* "distclean" also removes the Makefile and the depend file */
-distclean::
-	RemoveFiles(Makefile DependFileName)
-#endif
 
 XCOMM ----------------------------------------------------------------------
 XCOMM dependencies generated by makedepend

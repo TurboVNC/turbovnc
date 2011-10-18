@@ -1,4 +1,4 @@
-XCOMM $XFree86: xc/config/cf/lnxdoc.rules,v 3.27 2003/01/15 03:17:29 dawes Exp $
+XCOMM $XFree86: xc/config/cf/lnxdoc.rules,v 3.9 1997/01/26 05:10:25 dawes Exp $
 XCOMM
 XCOMM Rules for formatting Linuxdoc-SGML documentation
 XCOMM
@@ -8,43 +8,31 @@ XCOMM
 #ifdef DontInstallLinuxDoc
 #define LinuxDocInstall(file,dest)	/* do nothing */
 #define LinuxDocInstallMultiple(files,dest)	/* do nothing */
-#define LinuxDocInstallIfExists(file,dest)	/* do nothing */
 #else
 #define LinuxDocInstall(file,dest)	InstallNonExecFile(file,dest)
 #define LinuxDocInstallMultiple(files,dest)				@@\
 InstallMultipleDest(install,files,dest)
-
-#define LinuxDocInstallIfExists(file,dir)				@@\
-install::								@@\
-	MakeDir($(DESTDIR)dir)						@@\
-	@if [ -f file ]; then set -x; \					@@\
-	  $(INSTALL) $(INSTALLFLAGS) $(INSTDATFLAGS) \			@@\
-		file $(DESTDIR)dir; \					@@\
-	fi
 #endif
 
-/* Version for sgmlfmt */
-
+#if !HasSgmlFmt
+/* Version for Linuxdoc-SGML */
 #if BuildLinuxDocPS
 #define LinuxDocSgmlToPs(sgmlfile,base) 				@@\
-all:: base.ps PdfTarget(base)						@@\
+AllTarget(base.ps)							@@\
 									@@\
-base.ps: sgmlfile $(SGMLDEPENDS)					@@\
-	RemoveFile(_$@ $@)						@@\
-	@(BASE=`basename sgmlfile .sgml`;\				@@\
-	  set -x;\							@@\
-	  RemoveFile($$BASE.ps);\					@@\
-	  $(SGMLFMTCMD) -f ps sgmlfile && \				@@\
-		$(MV) $$BASE.ps _$@ && $(MV) _$@ $@)			@@\
+base.ps: sgmlfile							@@\
+	RemoveFile(base.dvi)						@@\
+	$(LINUXDOCFORMAT) -T latex sgmlfile | \				@@\
+	    $(LINUXDOCLATEX) -d > base.dvi				@@\
+	RemoveFile(base.ps)						@@\
+	$(DVIPS) $(DVIPSOPTIONS) -o base._ps base.dvi && \		@@\
+	    $(MV) base._ps $@						@@\
+	RemoveFile(base.dvi)						@@\
 									@@\
 LinuxDocInstall(base.ps,$(XFREE86PSDOCDIR))				@@\
 									@@\
-ConvertPsToPdf(base)							@@\
-									@@\
-LinuxDocInstallIfExists(base.pdf,$(XFREE86PDFDOCDIR))			@@\
-									@@\
 clean::									@@\
-	RemoveFile(Concat(_,base.ps) base.ps)
+	RemoveFiles(base.dvi base._ps base.ps)
 #else
 #define LinuxDocSgmlToPs(sgmlfile,base) /**/
 #endif
@@ -53,19 +41,93 @@ clean::									@@\
 #define LinuxDocSgmlToText(sgmlfile,textfile)				@@\
 AllTarget(textfile)							@@\
 									@@\
-textfile: sgmlfile $(SGMLDEPENDS)					@@\
-	RemoveFiles(_$@ $@)						@@\
-	@(BASE=`basename sgmlfile .sgml`;\				@@\
-	  set -x;\							@@\
-	  RemoveFile($$BASE.latin1);\					@@\
-	  $(SGMLFMTCMD) -f latin1 -b -n sgmlfile && \			@@\
-	  $(CVSIDENTFIX) < $$BASE.latin1 | $(XORGIDENTFIX) | $(XFREE86IDENTFIX) > _$@ && $(MV) _$@ $@ && \	@@\
-	  RemoveFile($$BASE.latin1))					@@\
+textfile: sgmlfile							@@\
+	RemoveFile(textfile)						@@\
+	$(LINUXDOCFORMAT) -T nroff sgmlfile | \				@@\
+	    $(LINUXDOCROFF) | $(XFREE86IDENTFIX) > _$@ && \		@@\
+	    $(MV) _$@ $@						@@\
 									@@\
 LinuxDocInstall(textfile,$(XFREE86DOCDIR))				@@\
 									@@\
 clean::									@@\
-	@(file=textfile; set -x; RemoveFiles(_$$file $$file))
+	RemoveFiles(Concat(_,textfile) textfile)
+#else
+#define LinuxDocSgmlToText(sgmlfile,textfile) /**/
+#endif
+
+/*
+ * The 'echo' stuff here is a bit of a hack, but 'set -x' doesn't show
+ * what is going on.
+ */
+#if BuildLinuxDocHtml
+#define LinuxDocSgmlToHtml(sgmlfile,base)				@@\
+AllTarget(base.html)							@@\
+									@@\
+base.html: sgmlfile							@@\
+	@(TMP=/tmp/tmp.$$$$; \						@@\
+	  RemoveFile($${TMP}); \					@@\
+	  echo RemoveFiles(base*.html); \				@@\
+	  RemoveFiles(base*.html); \					@@\
+	  echo "$(LINUXDOCFORMAT) -T html sgmlfile |" \			@@\
+	    "$(LINUXDOCPREHTML) | $(LINUXDOCFIXREF) > $${TMP}"; \	@@\
+	  $(LINUXDOCFORMAT) -T html sgmlfile | \			@@\
+	    $(LINUXDOCPREHTML) | $(LINUXDOCFIXREF) > $${TMP};	 \	@@\
+	  echo "$(LINUXDOCFORMAT) -T html sgmlfile |" \			@@\
+	    "$(LINUXDOCPREHTML) >> $${TMP}"; \				@@\
+	  $(LINUXDOCFORMAT) -T html sgmlfile | \			@@\
+	    $(LINUXDOCPREHTML) >> $${TMP}; \				@@\
+	  echo "$(LINUXDOCHTML) base < $${TMP} > base.html &&" \	@@\
+	    "$(MV) base._html $@"; \					@@\
+	  $(LINUXDOCHTML) base < $${TMP} > base._html && \		@@\
+	    $(MV) base._html $@; \					@@\
+	  RemoveFile($${TMP}))						@@\
+									@@\
+LinuxDocInstallMultiple(base*.html,$(XFREE86HTMLDOCDIR))		@@\
+									@@\
+clean::									@@\
+	RemoveFiles(base*.html base._html)
+#else
+#define LinuxDocSgmlToHtml(sgmlfile,base) /**/
+#endif
+
+#else /* HasSgmlFmt */
+
+/* Version for FreeBSD's sgmlfmt */
+#if BuildLinuxDocPS
+#define LinuxDocSgmlToPs(sgmlfile,base) 				@@\
+AllTarget(base.ps)							@@\
+									@@\
+base.ps: sgmlfile							@@\
+	RemoveFile(base.ps)						@@\
+	@(BASE=`basename sgmlfile .sgml`;\				@@\
+	  set -x;\							@@\
+	  RemoveFile($$BASE.ps);\					@@\
+	  $(SGMLFMTCMD) -f ps sgmlfile && $(MV) $$BASE.ps $@)		@@\
+									@@\
+LinuxDocInstall(base.ps,$(XFREE86PSDOCDIR))				@@\
+									@@\
+clean::									@@\
+	RemoveFile(base.ps)
+#else
+#define LinuxDocSgmlToPs(sgmlfile,base) /**/
+#endif
+
+#if BuildLinuxDocText
+#define LinuxDocSgmlToText(sgmlfile,textfile)				@@\
+AllTarget(textfile)							@@\
+									@@\
+textfile: sgmlfile							@@\
+	RemoveFile(textfile)						@@\
+	@(BASE=`basename sgmlfile .sgml`;\				@@\
+	  set -x;\							@@\
+	  RemoveFile($$BASE.latin1);\					@@\
+	  $(SGMLFMTCMD) -f latin1 sgmlfile; \				@@\
+	  $(XFREE86IDENTFIX) < $$BASE.latin1 > _$@ && $(MV) _$@ $@)	@@\
+									@@\
+LinuxDocInstall(textfile,$(XFREE86DOCDIR))				@@\
+									@@\
+clean::									@@\
+	RemoveFiles(Concat(_,textfile) textfile)
 #else
 #define LinuxDocSgmlToText(sgmlfile,textfile) /**/
 #endif
@@ -74,7 +136,7 @@ clean::									@@\
 #define LinuxDocSgmlToHtml(sgmlfile,base)				@@\
 AllTarget(base.html)							@@\
 									@@\
-base.html: sgmlfile $(SGMLDEPENDS)					@@\
+base.html: sgmlfile							@@\
 	@if [ sgmlfile != base.sgml ]; then $(LN) sgmlfile base.sgml; fi @@\
 	RemoveFiles(base*.html)						@@\
 	$(SGMLFMTCMD) -f html base.sgml || RemoveFile($@)		@@\
@@ -88,57 +150,16 @@ clean::									@@\
 #define LinuxDocSgmlToHtml(sgmlfile,base) /**/
 #endif
 
-/*
- * Rule for maintainers to use to updated formatted copies of docs in the
- * source tree.  Use with care.
- */
+#endif /* HasSgmlFmt */
 
-#ifndef UpdateFormattedDocLong
-#define UpdateFormattedDocLong(textfile,dstdir,dstfile)			@@\
-update.docs:: textfile							@@\
-	-@if [ -f dstdir/dstfile ]; then \				@@\
-	    if [ "$(FORCEUPDATE)" = yes ]; then set -x; \		@@\
-		if [ "$(FOLLOWLINK)" = no ]; then \			@@\
-			$(RM) dstdir/dstfile; \				@@\
-		fi; \							@@\
-		cp textfile dstdir/dstfile; \				@@\
-		echo "" >> dstdir/dstfile; \				@@\
-		echo "\$$XdotOrg\$$" >> dstdir/dstfile; \		@@\
-	    else \							@@\
-		$(RM) __tmp1__ __tmp2__; \				@@\
-		fgrep -v "\$$XdotOrg:" textfile > __tmp1__; \		@@\
-		fgrep -v "\$$XdotOrg:" dstdir/dstfile > __tmp2__; \	@@\
-		if diff -B __tmp1__ __tmp2__ > /dev/null 2>&1; then :; \	@@\
-		else set -x; \						@@\
-			if [ "$(FOLLOWLINK)" = no ]; then \		@@\
-				$(RM) dstdir/dstfile; \			@@\
-			fi; \						@@\
-			cp textfile dstdir/dstfile ; \			@@\
-			echo "" >> dstdir/dstfile; \			@@\
-			echo "\$$XdotOrg"": \$$" >> dstdir/dstfile; \	@@\
-		fi; \							@@\
-	    fi; \							@@\
-	fi								@@\
-	@$(RM) __tmp1__ __tmp2__
-#endif
 
-#ifndef UpdateFormattedDoc
-#define UpdateFormattedDoc(textfile,dstdir)				@@\
-UpdateFormattedDocLong(textfile,dstdir,textfile)
-#endif
-
-/*
- * Avoid using LinuxDocTargetLong with base != sgmlfile because HTML
- * index generation assumes that base == sgmlfile.
- */
 #define LinuxDocTargetLong(sgmlfile,textfile,base)			@@\
 LinuxDocSgmlToText(sgmlfile,textfile)					@@\
 LinuxDocSgmlToHtml(sgmlfile,base)					@@\
-LinuxDocSgmlToPs(sgmlfile,base)						@@\
-UpdateFormattedDoc(textfile,$(FORMATTEDDIR))
+LinuxDocSgmlToPs(sgmlfile,base)
 
 #define LinuxDocReadmeTarget(base)					@@\
-LinuxDocTargetLong(base.sgml,ReadmeFile(base),base)
+LinuxDocTargetLong(base.sgml,README.base,base)
 
 #define LinuxDocTarget(base)						@@\
 LinuxDocTargetLong(base.sgml,base,base)
