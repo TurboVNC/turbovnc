@@ -65,7 +65,7 @@ conv(int num_msg, MESSAGE_ARG_TYPE msg, struct pam_response** resp,
         return(PAM_BUF_ERR);
     }
 
-    memset(responses, sizeof(struct pam_response) * num_msg, 0);
+    memset(responses, 0, sizeof(struct pam_response) * num_msg);
     rp = responses;
     for (i = 0; (i < num_msg) && (pamRet == PAM_SUCCESS); i++, rp++) {
         m = msg[i];
