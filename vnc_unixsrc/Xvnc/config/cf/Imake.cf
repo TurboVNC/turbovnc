@@ -711,7 +711,7 @@ XCOMM Keep cpp from replacing path elements containing i486/i586/i686
 #  undef __alpha__
 # endif /* __alpha__ */
 # ifdef __arm__
-#  define Arm32Architecture
+#  define ArmArchitecture
 #  undef arm
 #  undef __arm
 #  undef __arm__
