@@ -79,7 +79,7 @@ install -m 644 $SRCDIR/../vnc_docs/LICEN*.txt $SRCDIR/../vnc_docs/*.html $SRCDIR
 sudo ln -fs /Library/Documentation/$pkgname "$PKGROOT/Applications/$pkgname/Documentation"
 
 sudo chown -R root:admin $PKGROOT 
-cp $SRCDIR/License.rtf $SRCDIR/Welcome.rtf $SRCDIR/ReadMe.rtf $pkgtmpdir/pkg/Resources/ 
+cp $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.rtf $SRCDIR/release/ReadMe.rtf $pkgtmpdir/pkg/Resources/ 
 mkdir $pkgtmpdir/dmg
 $PACKAGEMAKER -build -v -p $pkgtmpdir/dmg/$pkgname.pkg \
 	-f $PKGROOT -r $pkgtmpdir/pkg/Resources \
