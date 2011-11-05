@@ -439,12 +439,6 @@ extern void rfbClearToBackground(WindowPtr, int x, int y, int w,
 extern RegionPtr rfbRestoreAreas(WindowPtr, RegionPtr);
 
 
-/* cutpaste.c */
-
-extern void rfbSetXCutText(char *str, int len);
-extern void rfbGotXCutText(char *str, int len);
-
-
 /* kbdptr.c */
 
 extern Bool compatibleKbd;
@@ -505,6 +499,11 @@ extern Bool rfbSendSetColourMapEntries(rfbClientPtr cl, int firstColour,
 				       int nColours);
 extern void rfbSendBell();
 extern void rfbSendServerCutText(char *str, int len);
+
+
+/* vncextinit.c */
+
+extern void vncClientCutText(const char* str, int len);
 
 
 /* translate.c */

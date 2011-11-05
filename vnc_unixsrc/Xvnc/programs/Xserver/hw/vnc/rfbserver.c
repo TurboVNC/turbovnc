@@ -1084,7 +1084,7 @@ rfbProcessClientNormalMessage(cl)
 
 	/* NOTE: We do not accept cut text from a view-only client */
 	if (!rfbViewOnly && !cl->viewOnly)
-	    rfbSetXCutText(str, msg.cct.length);
+	    vncClientCutText(str, msg.cct.length);
 
 	xfree(str);
 	return;

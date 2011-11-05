@@ -165,6 +165,7 @@ extern void GlxExtensionInit(INITARGS);
 InitExtension GlxExtensionInitPtr = NULL;
 #endif
 #endif
+extern void vncExtensionInit(INITARGS);
 
 /*ARGSUSED*/
 void
@@ -277,4 +278,5 @@ InitExtensions(argc, argv)
     }
 #endif
 #endif
+    vncExtensionInit();
 }
