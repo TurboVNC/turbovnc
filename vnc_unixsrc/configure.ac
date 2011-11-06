@@ -7,7 +7,6 @@ BUILD=`date +%Y%m%d`
 
 AM_INIT_AUTOMAKE([-Wall foreign dist-bzip2])
 AC_PREFIX_DEFAULT(/opt/TurboVNC)
-AC_CONFIG_SUBDIRS([autocutsel])
 
 if test "x$prefix" = "xNONE" -a "x$ac_default_prefix" != "x"; then
   prefix=$ac_default_prefix
@@ -170,6 +169,7 @@ AC_OUTPUT([
 Makefile
 libvncauth/Makefile
 turbojpeg/Makefile
+tvncconfig/Makefile
 vncconnect/Makefile
 vncpasswd/Makefile
 vncviewer/Makefile

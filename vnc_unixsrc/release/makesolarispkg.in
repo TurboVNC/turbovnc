@@ -76,12 +76,12 @@ i depend
 i pkginfo
 d none $pkgname 0755 root bin
 d none $pkgname/bin 0755 root bin
+f none $pkgname/bin/tvncconfig 0755 root bin
 f none $pkgname/bin/vncpasswd 0755 root bin
 f none $pkgname/bin/vncviewer 0755 root bin
 f none $pkgname/bin/vncserver 0755 root bin
 f none $pkgname/bin/vncconnect 0755 root bin
 f none $pkgname/bin/Xvnc 0755 root bin
-f none $pkgname/bin/autocutsel 0755 root bin
 d none $pkgname/doc 0755 root bin
 f none $pkgname/doc/LICENCE.TXT 0644 root bin
 f none $pkgname/doc/TurboVNC-ChangeLog.txt 0644 root bin

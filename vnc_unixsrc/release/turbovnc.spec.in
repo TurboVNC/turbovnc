@@ -95,10 +95,10 @@ fi
 %config(noreplace) /usr/share/applications/tvncviewer.desktop
 @MANDIR@/man1/vncviewer.1*
 @prefix@/bin/Xvnc
+@prefix@/bin/tvncconfig
 @prefix@/bin/vncserver
 @prefix@/bin/vncpasswd
 @prefix@/bin/vncconnect
-@prefix@/bin/autocutsel
 @prefix@/vnc/classes/index.vnc
 @prefix@/vnc/classes/VncViewer.jar
 @prefix@/vnc/classes/README
