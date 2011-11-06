@@ -436,7 +436,7 @@ ReadConfigFile()
 
         n = 17;
         if (!strncmp(buf2, "max-idle-timeout=", n)) {
-            CARD32 t;
+            int t;
 
             if (buf2[n] == '\0') {
                 FatalError("ERROR in %s: max-idle-timeout is empty!", rfbAuthConfigFile);
@@ -446,7 +446,7 @@ ReadConfigFile()
                 FatalError("ERROR in %s: max-idle-timeout value must be > 0!", rfbAuthConfigFile);
             }
 
-            rfbMaxIdleTimeout = t;
+            rfbMaxIdleTimeout = (CARD32)t;
             continue;
         }
 
@@ -461,8 +461,6 @@ void
 rfbAuthInit()
 {
     AuthMethodData* a;
-    SecTypeData**   p;
-    SecTypeData*    s;
     int             nSelected = 0;
 
     ReadConfigFile();

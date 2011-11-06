@@ -380,8 +380,6 @@ rfbSetClientColourMap(cl, firstColour, nColours)
     int firstColour;
     int nColours;
 {
-    EntryPtr pent;
-    int i, r, g, b;
     BoxRec box;
 
     if (nColours == 0) {

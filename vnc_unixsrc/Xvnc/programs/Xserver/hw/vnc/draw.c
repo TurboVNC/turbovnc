@@ -151,7 +151,6 @@ Bool cuCopyArea = FALSE;
 static void rfbScheduleDeferredUpdate(rfbClientPtr cl);
 static void rfbCopyRegion(ScreenPtr pScreen, rfbClientPtr cl,
 			  RegionPtr src, RegionPtr dst, int dx, int dy);
-static void PrintRegion(ScreenPtr pScreen, RegionPtr reg);
 
 /* GC funcs */
 
@@ -1897,6 +1896,7 @@ rfbScheduleDeferredUpdate(rfbClientPtr cl)
  * PrintRegion is useful for debugging.
  */
 
+#if 0
 static void
 PrintRegion(pScreen,reg)
     ScreenPtr pScreen;
@@ -1919,3 +1919,4 @@ PrintRegion(pScreen,reg)
 	       REGION_RECTS(reg)[i].y2-REGION_RECTS(reg)[i].y1);
     }
 }
+#endif
