@@ -439,6 +439,12 @@ extern void rfbClearToBackground(WindowPtr, int x, int y, int w,
 extern RegionPtr rfbRestoreAreas(WindowPtr, RegionPtr);
 
 
+/* cutpaste.c */
+
+extern void rfbSetXCutText(char *str, int len);
+extern void rfbGotXCutText(char *str, int len);
+
+
 /* kbdptr.c */
 
 extern Bool compatibleKbd;

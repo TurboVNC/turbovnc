@@ -827,6 +827,13 @@ static Bool CheckDisplayNumber(int n)
 void
 rfbRootPropertyChange(PropertyPtr pProp)
 {
+    if ((pProp->propertyName == XA_CUT_BUFFER0) && (pProp->type == XA_STRING)
+	&& (pProp->format == 8))
+    {
+	rfbGotXCutText(pProp->data, pProp->size);
+	return;
+    }
+
     if (
 	!rfbAuthDisableRevCon &&
 	(pProp->propertyName == VNC_CONNECT) && (pProp->type == XA_STRING)

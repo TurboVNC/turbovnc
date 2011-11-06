@@ -1083,8 +1083,10 @@ rfbProcessClientNormalMessage(cl)
 	}
 
 	/* NOTE: We do not accept cut text from a view-only client */
-	if (!rfbViewOnly && !cl->viewOnly && !rfbAuthDisableCBRecv)
+	if (!rfbViewOnly && !cl->viewOnly && !rfbAuthDisableCBRecv) {
 	    vncClientCutText(str, msg.cct.length);
+	    rfbSetXCutText(str, msg.cct.length);
+        }
 
 	xfree(str);
 	return;
