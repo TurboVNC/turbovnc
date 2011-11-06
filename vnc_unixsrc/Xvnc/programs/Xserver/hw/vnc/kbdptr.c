@@ -30,6 +30,8 @@
 #define NEED_EVENTS
 #include "X11/Xproto.h"
 #include "inputstr.h"
+#include "mi.h"
+#include "mipointer.h"
 #define XK_CYRILLIC
 #include <X11/keysym.h>
 #include <Xatom.h>

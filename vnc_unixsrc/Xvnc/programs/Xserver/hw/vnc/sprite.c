@@ -541,7 +541,7 @@ rfbSpriteStoreColors (pMap, ndef, pdef)
 	{
 	    /* Direct color - match on any of the subfields */
 
-#define MaskMatch(a,b,mask) ((a) & (pVisual->mask) == (b) & (pVisual->mask))
+#define MaskMatch(a,b,mask) (((a) & (pVisual->mask)) == ((b) & (pVisual->mask)))
 
 #define UpdateDAC(plane,dac,mask) {\
     if (MaskMatch (pPriv->colors[plane].pixel,pdef[i].pixel,mask)) {\
@@ -1613,7 +1613,7 @@ rfbSpriteText (pDraw, pGC, x, y, count, chars, fontEncoding, textType, cursorBox
     unsigned long i;
     unsigned int  n;
     int		  w;
-    void   	  (*drawFunc)();
+    void   	  (*drawFunc)() = 0;
 
     Bool imageblt;
 
@@ -1655,6 +1655,8 @@ rfbSpriteText (pDraw, pGC, x, y, count, chars, fontEncoding, textType, cursorBox
 	case TT_IMAGE16:
 	    drawFunc = pGC->ops->ImageText16;
 	    break;
+        default:
+            FatalError("Unhandled text type in rfbSpriteText()\n");
 	}
 	(*drawFunc) (pDraw, pGC, x, y, (int) count, chars);
 #else /* don't AVOID_GLYPHBLT */

@@ -85,6 +85,7 @@ from the X Consortium.
 #include <sys/param.h>
 #include "dix.h"
 #include "rfb.h"
+#include "mi.h"
 #include <time.h>
 
 #ifdef CORBA
@@ -96,6 +97,10 @@ from the X Consortium.
 #define RFB_DEFAULT_DEPTH  24
 #define RFB_DEFAULT_WHITEPIXEL 0
 #define RFB_DEFAULT_BLACKPIXEL 1
+
+extern Bool cfb16ScreenInit(ScreenPtr, pointer, int, int, int, int, int);
+extern Bool cfb32ScreenInit(ScreenPtr, pointer, int, int, int, int, int);
+extern Bool rfbDCInitialize(ScreenPtr, miPointerScreenFuncPtr);
 
 rfbScreenInfo rfbScreen;
 int rfbGCIndex;
@@ -345,6 +350,7 @@ ddxProcessArgument (argc, argv, i)
 	unsigned long octet;
 	char *p, *end;
 	int q;
+	got.s_addr = 0;
 	if (i + 1 >= argc) {
 	    UseMsg();
 	    return 2;
@@ -360,8 +366,8 @@ ddxProcessArgument (argc, argv, i)
 		UseMsg ();
 		return 2;
 	    }
-	    if (q < 3 && *end != '.' ||
-	        q == 3 && *end != '\0') {
+	    if ((q < 3 && *end != '.') ||
+	        (q == 3 && *end != '\0')) {
 		UseMsg ();
 		return 2;
 	    }
@@ -667,7 +673,7 @@ InitInput(argc, argv)
     RegisterKeyboardDevice(k);
     RegisterPointerDevice(p);
     miRegisterPointerDevice(screenInfo.screens[0], p);
-    (void)mieqInit (k, p);
+    (void)mieqInit ((DevicePtr)k, (DevicePtr)p);
     mieqCheckForInput[0] = checkForInput[0];
     mieqCheckForInput[1] = checkForInput[1];
     SetInputCheck(&alwaysCheckForInput[0], &alwaysCheckForInput[1]);
