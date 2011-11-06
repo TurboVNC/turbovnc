@@ -184,7 +184,6 @@ static int ProcVncExtSetServerCutText(ClientPtr client)
     FatalError("ProcVncExtSetServerCutText(): Memory allocation failure\n");
   strncpy(str, (char*)&stuff[1], stuff->textLen);
   str[stuff->textLen] = 0;
-  rfbLog("rfbSendServerCutText(%s, %d)\n", str, stuff->textLen);  
   rfbSendServerCutText(str, stuff->textLen);
   xfree (str);
   return (client->noClientException);
