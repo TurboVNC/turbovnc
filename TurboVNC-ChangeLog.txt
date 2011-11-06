@@ -19,13 +19,20 @@ elapsed since the last active VNC viewer connection.
 -------------------------------------------------------------------------------
 [4]
 Added a '-noxstartup' option to vncserver, which prevents it from executing
-the xstartup.turbovnc script.  This is useful for those that may want to
+the xstartup.turbovnc script.  This is useful for those who may want to
 occasionally run TurboVNC without a window manager.
 -------------------------------------------------------------------------------
 [5]
 Fixed image corruption that occurred when using the Lossless Tight or Lossless
 Tight + Zlib protocols with the Unix TurboVNC Viewer running on a
 16-bit-per-pixel X server.
+-------------------------------------------------------------------------------
+[6]
+Due to several problems with autocutsel (occasional interaction issues with
+Motif applications, buffer overruns, etc.), it has been replaced with a
+stripped-down implementation of the VNC X11 extension and the vncconfig utility
+from RealVNC.  This should provide a much more robust mechanism for
+synchronizing the clipboard with VNC viewers.
 -------------------------------------------------------------------------------
 
 
