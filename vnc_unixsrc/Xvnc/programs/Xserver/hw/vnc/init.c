@@ -289,6 +289,11 @@ ddxProcessArgument (argc, argv, i)
 	return 1;
     }
 
+    if (strcmp(argv[i], "-nocutbuffersync") == 0) {
+	rfbSyncCutBuffer = FALSE;
+	return 1;
+    }
+
     if (strcmp(argv[i], "-otpauth") == 0) {
 	rfbOptOtpauth = TRUE;
 	return 1;
@@ -828,7 +833,7 @@ void
 rfbRootPropertyChange(PropertyPtr pProp)
 {
     if ((pProp->propertyName == XA_CUT_BUFFER0) && (pProp->type == XA_STRING)
-	&& (pProp->format == 8))
+	&& (pProp->format == 8) && rfbSyncCutBuffer)
     {
 	rfbGotXCutText(pProp->data, pProp->size);
 	return;
@@ -1036,6 +1041,8 @@ ddxUseMsg()
     ErrorF("-otpauth               enable one-time password (OTP) authentication\n");
     ErrorF("-pamauth               enable PAM user/password authentication\n");
     ErrorF("-rfbauth passwd-file   enable VNC password authentication\n");
+    ErrorF("-nocutbuffersync       disable clipboard synchronization for applications\n");
+    ErrorF("                       that use the (obsolete) X cut buffer\n");
     ErrorF("-httpd dir             serve files via HTTP from here\n");
     ErrorF("-httpport port         port for HTTP\n");
     ErrorF("-deferupdate time      time in ms to defer updates "
