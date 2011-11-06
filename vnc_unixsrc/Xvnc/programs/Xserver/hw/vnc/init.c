@@ -256,12 +256,6 @@ ddxProcessArgument (argc, argv, i)
 	return 2;
     }
 
-    if (strcmp(argv[i], "-idletimeout") == 0) { /* -idletimeout sec */
-	if (i + 1 >= argc) UseMsg();
-	rfbIdleTimeout = atoi(argv[i+1]);
-	return 2;
-    }
-
     if (strcmp(argv[i], "-nocursor") == 0) {
 	noCursor = TRUE;
 	return 1;
@@ -272,6 +266,16 @@ ddxProcessArgument (argc, argv, i)
 	rfbOptRfbauth = TRUE;
 	rfbAuthPasswdFile = argv[i+1];
 	return 2;
+    }
+
+    if (strcmp(argv[i], "-otpauth") == 0) {
+	rfbOptOtpauth = TRUE;
+	return 1;
+    }
+
+    if (strcmp(argv[i], "-pamauth") == 0) {
+	rfbOptPamauth = TRUE;
+	return 1;
     }
 
     if (strcmp(argv[i], "-noreverse") == 0) {
@@ -294,20 +298,9 @@ ddxProcessArgument (argc, argv, i)
 	return 1;
     }
 
-    if (strcmp(argv[i], "-otpauth") == 0) {
-	rfbOptOtpauth = TRUE;
-	return 1;
-    }
-
-    if (strcmp(argv[i], "-pamauth") == 0) {
-	rfbOptPamauth = TRUE;
-	return 1;
-    }
-
-    if (strcmp(argv[i], "-alr") == 0) {
+    if (strcmp(argv[i], "-idletimeout") == 0) { /* -idletimeout sec */
 	if (i + 1 >= argc) UseMsg();
-	rfbAutoLosslessRefresh = atof(argv[i+1]);
-	if (rfbAutoLosslessRefresh <= 0.0) UseMsg();
+	rfbIdleTimeout = atoi(argv[i+1]);
 	return 2;
     }
 
@@ -326,6 +319,13 @@ ddxProcessArgument (argc, argv, i)
     if (strcmp(argv[i], "-deferupdate") == 0) {	/* -deferupdate ms */
 	if (i + 1 >= argc) UseMsg();
 	rfbDeferUpdateTime = atoi(argv[i+1]);
+	return 2;
+    }
+
+    if (strcmp(argv[i], "-alr") == 0) {
+	if (i + 1 >= argc) UseMsg();
+	rfbAutoLosslessRefresh = atof(argv[i+1]);
+	if (rfbAutoLosslessRefresh <= 0.0) UseMsg();
 	return 2;
     }
 
@@ -1038,15 +1038,21 @@ ddxUseMsg()
     ErrorF("-rfbport port          TCP port for RFB protocol\n");
     ErrorF("-rfbwait time          max time in ms to wait for RFB client\n");
     ErrorF("-nocursor              don't put up a cursor\n");
+    ErrorF("-rfbauth passwd-file   enable VNC password authentication\n");
     ErrorF("-otpauth               enable one-time password (OTP) authentication\n");
     ErrorF("-pamauth               enable PAM user/password authentication\n");
-    ErrorF("-rfbauth passwd-file   enable VNC password authentication\n");
+    ErrorF("-noreverse             disable reverse connections\n");
+    ErrorF("-noclipboardsend       disable server->client clipboard synchronization\n");
+    ErrorF("-noclipboardrecv       disable client->server clipboard synchronization\n");
     ErrorF("-nocutbuffersync       disable clipboard synchronization for applications\n");
     ErrorF("                       that use the (obsolete) X cut buffer\n");
+    ErrorF("-idletimeout S         exit if S seconds elapse with no VNC viewer connections\n");
     ErrorF("-httpd dir             serve files via HTTP from here\n");
     ErrorF("-httpport port         port for HTTP\n");
     ErrorF("-deferupdate time      time in ms to defer updates "
 							     "(default 40)\n");
+    ErrorF("-alr S                 enable automatic lossless refresh and set timer to S\n");
+    ErrorF("                       seconds (S is floating point)\n");
     ErrorF("-economictranslate     less memory-hungry translation\n");
     ErrorF("-desktop name          VNC desktop name (default x11)\n");
     ErrorF("-alwaysshared          always treat new clients as shared\n");
@@ -1063,10 +1069,6 @@ ddxUseMsg()
     ErrorF("-compatiblekbd         set META key = ALT key as in the original "
 								"VNC\n");
     ErrorF("-version               report Xvnc version on stderr\n");
-    ErrorF("-noreverse             disable reverse connections\n");
-    ErrorF("-alr S                 enable automatic lossless refresh and set timer to S\n");
-    ErrorF("                       seconds (S is floating point)\n");
-    ErrorF("-idletimeout S         exit if S seconds elapse with no VNC viewer connections\n");
     exit(1);
 }
 

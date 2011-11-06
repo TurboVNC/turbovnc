@@ -24,7 +24,7 @@ Xvnc \- an X server providing VNC connectivity
 [\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-udpinputport \fIport\fR]
 [\-rfbport \fIport\fR] [\-rfbwait \fItime\fR] [\-nocursor]
 [\-rfbauth \fIpasswd-file\fR] [\-otpauth] [\-pamauth]
-[\-noclipboardsend] [\-noclipboardrecv] [\-noreverse]
+[\-noreverse] [\-noclipboardsend] [\-noclipboardrecv] [\-nocutbuffersync]
 [\-idletimeout \fItime\fR] [\-httpd \fIdir\fR]
 [\-httpport \fIport\fR] [\-deferupdate \fItime\fR] [\-alr \fItime\fR]
 [\-economictranslate] [\-desktop \fIname\fR] [\-alwaysshared]
