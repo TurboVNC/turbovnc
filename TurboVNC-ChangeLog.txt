@@ -6,6 +6,9 @@ Fixed image corruption that occurred when using the Lossless Tight or Lossless
 Tight + Zlib protocols with the Unix TurboVNC Viewer running on a
 16-bit-per-pixel X server.
 -------------------------------------------------------------------------------
+[2]
+Fixed build on ARM Linux
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
