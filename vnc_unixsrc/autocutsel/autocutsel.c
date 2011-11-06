@@ -2,7 +2,6 @@
  * autocutsel by Michael Witrant <mike @ lepton . fr>
  * Synchronizes the cutbuffer and the selection
  * Copyright (c) 2001-2006 Michael Witrant.
- * Copyright (c) 2011 D. R. Commander.
  * 
  * Most code taken from:
  * * clear-cut-buffers.c by "E. Jay Berkenbilt" <ejb @ ql . org>
@@ -120,13 +119,6 @@ static void LoseSelection(Widget w, Atom *selection)
   options.own_selection = 0;
 }
 
-static void SelectionDone(Widget w, Atom *selection, Atom *target)
-{
-  if (options.debug)
-    printf("Selection done\n");
-  XtDisownSelection(w, *selection, CurrentTime);
-}
-
 // Returns true if value (or length) is different
 // than current ones.
 static int ValueDiffers(char *value, int length)
@@ -181,7 +173,7 @@ static void OwnSelectionIfDiffers(Widget w, XtPointer client_data,
     
     if (XtOwnSelection(box, options.selection,
         0, //XtLastTimestampProcessed(dpy),
-        ConvertSelection, LoseSelection, SelectionDone) == True) {
+        ConvertSelection, LoseSelection, NULL) == True) {
       if (options.debug)
         printf("Selection owned\n");
       options.own_selection = 1;

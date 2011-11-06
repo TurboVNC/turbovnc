@@ -2,7 +2,6 @@
  * autocutsel by Michael Witrant <mike @ lepton . fr>
  * Manipulates the cutbuffer and the selection
  * Copyright (c) 2001-2006 Michael Witrant.
- * Copyright (c) 2011 D. R. Commander.
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,17 +90,14 @@ Boolean ConvertSelection(Widget w, Atom *selection, Atom *target,
     
     XmuConvertStandardSelection(w, req->time, selection, target, type,
         &std_targets, &std_length, format);
-    *value = XtMalloc(sizeof(Atom)*(std_length + 7));
+    *value = XtMalloc(sizeof(Atom)*(std_length + 4));
     targetP = *(Atom**)value;
     atoms = targetP;
-    *length = std_length + 7;
+    *length = std_length + 4;
     *targetP++ = XA_STRING;
     *targetP++ = XA_TEXT(d);
-    *targetP++ = XA_UTF8_STRING(d);
-    *targetP++ = XA_COMPOUND_TEXT(d);
     *targetP++ = XA_LENGTH(d);
     *targetP++ = XA_LIST_LENGTH(d);
-    *targetP++ = XA_CHARACTER_POSITION(d);
     memmove( (char*)targetP, (char*)std_targets, sizeof(Atom)*std_length);
     XtFree((char*)std_targets);
     *type = XA_ATOM;
@@ -133,33 +129,6 @@ Boolean ConvertSelection(Widget w, Atom *selection, Atom *target,
     return True;
   }
   
-  if (*target == XA_UTF8_STRING(d) || *target == XA_COMPOUND_TEXT(d)) {
-    XTextProperty prop;
-    int ret, style = 0;
-
-    if (*target == XA_UTF8_STRING(d))
-      style = XUTF8StringStyle;
-    else if (*target == XA_COMPOUND_TEXT(d))
-      style = XCompoundTextStyle;
-
-    ret = XmbTextListToTextProperty (d, &options.value, 1, style, &prop);
-    if (ret >= Success) {
-      *length = prop.nitems;
-      *value = prop.value;
-      *type = prop.encoding;
-      *format = prop.format;
-
-      if (options.debug) {
-        printf("Returning ");
-        PrintValue((char*)*value, *length);
-        printf("\n");
-      }
-
-      return True;
-    } else
-      return False;
-  }
-
   if (*target == XA_LIST_LENGTH(d)) {
     CARD32 *temp = (CARD32 *) XtMalloc(sizeof(CARD32));
     *temp = 1L;
@@ -169,7 +138,7 @@ Boolean ConvertSelection(Widget w, Atom *selection, Atom *target,
     *format = 32;
 
     if (options.debug)
-      printf("Returning %du\n", *temp);
+      printf("Returning %ld\n", *temp);
 
     return True;
   }
@@ -183,26 +152,11 @@ Boolean ConvertSelection(Widget w, Atom *selection, Atom *target,
     *format = 32;
 
     if (options.debug)
-      printf("Returning %du\n", *temp);
+      printf("Returning %ld\n", *temp);
 
     return True;
   }
   
-  if (*target == XA_CHARACTER_POSITION(d)) {
-    CARD32 *temp = (CARD32 *) XtMalloc(2 * sizeof(CARD32));
-    temp[0] = 0L;
-    temp[1] = options.length;
-    *value = (XtPointer) temp;
-    *type = XA_SPAN(d);
-    *length = 2;
-    *format = 32;
-
-    if (options.debug)
-      printf("Returning %du\n", temp[1]);
-
-    return True;
-  }
-
   if (XmuConvertStandardSelection(w, req->time, selection, target, type,
           (XPointer *)value, length, format)) {
     printf("Returning conversion of standard selection\n");
