@@ -545,6 +545,8 @@ extern Bool  rfbOptRfbauth;
 extern char* rfbAuthOTPValue;
 extern int   rfbAuthOTPValueLen;
 extern Bool  rfbAuthDisableRevCon;
+extern Bool  rfbAuthDisableCBSend;
+extern Bool  rfbAuthDisableCBRecv;
 
 #ifdef XVNC_AuthPAM
 extern void rfbAuthAddUser(const char* name, Bool viewOnly);

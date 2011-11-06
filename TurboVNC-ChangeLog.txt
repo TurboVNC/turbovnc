@@ -34,6 +34,10 @@ stripped-down implementation of the VNC X11 extension and the vncconfig utility
 from RealVNC.  This should provide a much more robust mechanism for
 synchronizing the clipboard with VNC viewers.
 -------------------------------------------------------------------------------
+[7]
+Added Xvnc command line options and authentication configuration file
+directives for disabling clipboard transfer.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

@@ -23,12 +23,13 @@ Xvnc \- an X server providing VNC connectivity
 [\-geometry \fIwidth\fRx\fIheight\fR] [\-depth \fIdepth\fR]
 [\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-udpinputport \fIport\fR]
 [\-rfbport \fIport\fR] [\-rfbwait \fItime\fR] [\-nocursor]
-[\-rfbauth \fIpasswd-file\fR] [\-otpauth] [\-pamauth] [\-httpd \fIdir\fR]
+[\-rfbauth \fIpasswd-file\fR] [\-otpauth] [\-pamauth]
+[\-noclipboardsend] [\-noclipboardrecv] [\-noreverse]
+[\-idletimeout \fItime\fR] [\-httpd \fIdir\fR]
 [\-httpport \fIport\fR] [\-deferupdate \fItime\fR] [\-alr \fItime\fR]
 [\-economictranslate] [\-desktop \fIname\fR] [\-alwaysshared]
 [\-nevershared] [\-dontdisconnect] [\-viewonly] [\-localhost]
 [\-interface ipaddr] [\-inetd] [\-compatiblekbd]
-[\-idletimeout \fItime\fR]
 [\fIX-options\fR...]
 .SH DESCRIPTION
 \fBXvnc\fR is a VNC (Virtual Network Computing) server for Unix and Linux
@@ -107,6 +108,29 @@ This option can be set for all TurboVNC sessions on this system by using the
 \fIno-reverse-connections\fR directive in the authentication configuration
 file.  See the AUTHENTICATION CONFIGURATION FILE section for more details.
 .TP
+\fB-noclipboardsend\fR
+Disable outbound clipboard synchronization.  This prevents the clipboard of
+any connected viewers from being synchronized with the clipboard of the
+TurboVNC session whenever the latter changes.  This option can be set for all
+TurboVNC sessions on this system by using the \fIno-clipboard-send\fR
+directive in the authentication configuration file.  See the AUTHENTICATION
+CONFIGURATION FILE section for more details.
+.TP
+\fB-noclipboardrecv\fR
+Disable inbound clipboard synchronization.  This prevents the clipboard of
+the TurboVNC session from being synchronized with the clipboard of a connected
+viewer whenever the latter changes.  This option can be set for all
+TurboVNC sessions on this system by using the \fIno-clipboard-recv\fR
+directive in the authentication configuration file.  See the AUTHENTICATION
+CONFIGURATION FILE section for more details.
+.TP
+\fB\-idletimeout\fR \fItime\fR
+Time, in seconds, which the TurboVNC Server can sit idle (with no VNC viewer
+connections) before it automatically exits (default: no timeout.)  This
+argument has no effect if the \fImax-idle-timeout\fR directive is specified in
+the authentication configuration file and if that value is lower than
+\fItime\fR.
+.TP
 \fB\-httpd\fR \fIdir\fR
 Specify directory where the Java viewer classes are located.
 .TP
@@ -133,13 +157,6 @@ X[Shm]PutImage() are eligible for ALR.  This is designed to work in conjunction
 with VirtualGL and to prevent blinking cursors from confusing the ALR
 algorithm.  You can, however, set the \fBTVNC_ALRALL\fR environment variable to
 \fB1\fR to make all screen regions eligible for ALR.
-.TP
-\fB\-idletimeout\fR \fItime\fR
-Time, in seconds, which the TurboVNC Server can sit idle (with no VNC viewer
-connections) before it automatically exits (default: no timeout.)  This
-argument has no effect if the \fImax-idle-timeout\fR directive is specified in
-the authentication configuration file and if that value is lower than
-\fItime\fR.
 .TP
 \fB\-economictranslate\fR
 Use less memory-hungry pixel format translation.
@@ -312,6 +329,12 @@ TurboVNC session can remain idle (with no VNC viewer connections) before
 Xvnc automatically exits.  If this value is set to a number greater than 0,
 then all TurboVNC sessions on this machine will use this idle timeout value by
 default, and the user will only be allowed to override it with a lower value.
+.IP \fIno-clipboard-send\fR
+This prevents any TurboVNC server sessions running on this machine from
+sending clipboard changes to their connected viewers.
+.IP \fIno-clipboard-recv\fR
+This prevents any TurboVNC server sessions running on this machine from
+receiving clipboard changes from their connected viewers.
 .IP \fIno-reverse-connections\fR
 Do not allow reverse connections to be made from any TurboVNC server running on
 this machine.  This causes Xvnc to ignore requests from the
