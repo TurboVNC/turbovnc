@@ -47,7 +47,7 @@ int cutTextLen = 0;
 char* selection[2] = {0, 0};
 int selectionLen[2] = {0, 0};
 int debug = 0;
-int sendPrimary = 1;
+int syncPrimary = 1;
 
 inline const char *selectionName(Atom sel) {
   if (sel == xaCLIPBOARD) return "CLIPBOARD";
@@ -112,7 +112,7 @@ void selectionNotify(XSelectionEvent* ev, Atom type, int format,
     cutText = (char*)malloc(nitems); // assuming XFree() same as free()
     memcpy(cutText, data, nitems);
     cutTextLen = nitems;
-    if (sendPrimary || ev->selection != XA_PRIMARY) {
+    if (syncPrimary || ev->selection != XA_PRIMARY) {
       debugprint("sending %s selection as server cut text: '%.*s%s'",
                  selectionName(ev->selection), cutTextLen<9?cutTextLen:8,
                  cutText, cutTextLen<9?"":"...");
@@ -203,7 +203,7 @@ void handleEvent(XEvent* ev)
                  cutTextLen<9?cutTextLen:8, cutText,
                  cutTextLen<9?"":"...");
       XStoreBytes(dpy, cutText, cutTextLen);
-      ownSelection(XA_PRIMARY, win, cutEv->time);
+      if (syncPrimary) ownSelection(XA_PRIMARY, win, cutEv->time);
       ownSelection(xaCLIPBOARD, win, cutEv->time);
       free(selection[0]);
       free(selection[1]);
@@ -214,7 +214,7 @@ void handleEvent(XEvent* ev)
     debugprint("selection change event");
     XVncExtSelectionChangeEvent* selEv = (XVncExtSelectionChangeEvent*)ev;
     if (selEv->selection == xaCLIPBOARD ||
-        (selEv->selection == XA_PRIMARY && sendPrimary)) {
+        (selEv->selection == XA_PRIMARY && syncPrimary)) {
       if (selectionOwner(selEv->selection) != win)
         XConvertSelection(dpy, selEv->selection, XA_STRING,
                           selEv->selection, win, CurrentTime);
@@ -229,7 +229,7 @@ void usage(char *progName)
   fprintf(stderr, "-display <d> = Handle clipboard for X display <d>\n");
   fprintf(stderr, "               (default: read from DISPLAY environment variable)\n");
   fprintf(stderr, "-debug = Print debugging output\n");
-  fprintf(stderr, "-noprimary = Do not send PRIMARY selection to viewers\n\n");
+  fprintf(stderr, "-noprimary = Do not sync PRIMARY selection with client machine's clipboard\n\n");
   exit(1);
 }
 
@@ -242,7 +242,7 @@ int main(int argc, char** argv)
       else usage(argv[0]);
     }
     else if (!strncasecmp(argv[i], "-de", 3)) debug = 1;
-    else if (!strncasecmp(argv[i], "-n", 2)) sendPrimary = 0;
+    else if (!strncasecmp(argv[i], "-n", 2)) syncPrimary = 0;
     else if (!strncasecmp(argv[i], "-h", 2)) usage(argv[0]);
     else if (!strncasecmp(argv[i], "-?", 2)) usage(argv[0]);
   }
@@ -264,7 +264,7 @@ int main(int argc, char** argv)
 
   XVncExtSelectInput(dpy, win, VncExtClientCutTextMask|
                                VncExtSelectionChangeMask);
-  XConvertSelection(dpy, XA_PRIMARY, XA_STRING,
+  if (syncPrimary) XConvertSelection(dpy, XA_PRIMARY, XA_STRING,
                     XA_PRIMARY, win, CurrentTime);
   XConvertSelection(dpy, xaCLIPBOARD, XA_STRING,
                     xaCLIPBOARD, win, CurrentTime);
