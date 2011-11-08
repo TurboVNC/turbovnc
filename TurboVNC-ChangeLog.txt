@@ -31,11 +31,9 @@ Tight + Zlib protocols with the Unix TurboVNC Viewer running on a
 Fixed TurboVNC Server build on ARM-based Linux systems
 -------------------------------------------------------------------------------
 [7]
-Due to several problems with autocutsel (occasional interaction issues with
-Motif applications, buffer overruns, etc.), it has been replaced with a
-stripped-down implementation of the VNC X11 extension and the vncconfig utility
-from RealVNC.  This should provide a much more robust mechanism for
-synchronizing the clipboard with VNC viewers.
+autocutsel has been replaced with a more robust and configurable clipboard
+transfer mechanism based on the VNC X11 extension and the vncconfig utility
+used by RealVNC.
 -------------------------------------------------------------------------------
 [8]
 Added Xvnc command line options and authentication configuration file
