@@ -24,7 +24,7 @@ Xvnc \- an X server providing VNC connectivity
 [\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-udpinputport \fIport\fR]
 [\-rfbport \fIport\fR] [\-rfbwait \fItime\fR] [\-nocursor]
 [\-rfbauth \fIpasswd-file\fR] [\-otpauth] [\-pamauth]
-[\-noreverse] [\-noclipboardsend] [\-noclipboardrecv] [\-nocutbuffersync]
+[\-noreverse] [\-noclipboardsend] [\-noclipboardrecv]
 [\-idletimeout \fItime\fR] [\-httpd \fIdir\fR]
 [\-httpport \fIport\fR] [\-deferupdate \fItime\fR] [\-alr \fItime\fR]
 [\-economictranslate] [\-desktop \fIname\fR] [\-alwaysshared]
@@ -123,16 +123,6 @@ viewer whenever the latter changes.  This option can be set for all
 TurboVNC sessions on this system by using the \fIno-clipboard-recv\fR
 directive in the authentication configuration file.  See the AUTHENTICATION
 CONFIGURATION FILE section for more details.
-.TP
-\fB-nocutbuffersync\fR
-Normally, TurboVNC will synchronize the X cut buffer with the client's
-clipboard.  The cut buffer is an obsolete mechanism that legacy applications
-used to use to implement clipboard operations.  Disabling synchronization of
-the cut buffer is known to be necessary to make at least one legacy application
-work properly in a VNC environment.  This option does not affect clipboard
-synchronization for modern applications.  Other implementations of VNC, such as
-RealVNC and TigerVNC, do not support synchronization of the cut buffer at all,
-so this option makes TurboVNC behave like those implementations.
 .TP
 \fB\-idletimeout\fR \fItime\fR
 Time, in seconds, which the TurboVNC Server can sit idle (with no VNC viewer
