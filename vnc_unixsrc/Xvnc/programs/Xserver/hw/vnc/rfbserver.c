@@ -62,7 +62,7 @@ Bool rfbViewOnly = FALSE; /* run server in view only mode - Ehud Karni SW */
 Bool rfbSyncCutBuffer = TRUE;
 double rfbAutoLosslessRefresh = 0.0;
 int rfbALRQualityLevel = -1;
-int rfbALRSubsampLevel = TVNC_444;
+int rfbALRSubsampLevel = TVNC_1X;
 
 extern Bool cuCopyArea;
 
