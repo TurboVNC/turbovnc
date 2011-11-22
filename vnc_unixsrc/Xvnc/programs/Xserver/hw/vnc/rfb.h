@@ -489,6 +489,9 @@ extern Bool rfbDontDisconnect;
 extern Bool rfbViewOnly; /* run server in view-only mode - Ehud Karni SW */
 extern Bool rfbSyncCutBuffer;
 extern double rfbAutoLosslessRefresh;
+extern int rfbALRQualityLevel;
+extern int rfbALRSubsampLevel;
+
 #define debugregion(r, m) \
     rfbLog(m" %d, %d %d x %d\n", (r).extents.x1, (r).extents.y1, \
         (r).extents.x2 - (r).extents.x1, (r).extents.y2 - (r).extents.y1)
@@ -614,8 +617,10 @@ extern Bool rfbSendRectEncodingZlib(rfbClientPtr cl, int x, int y, int w,
 
 /* tight.c */
 
+#define TVNC_SAMPOPT 4
+enum {TVNC_1X=0, TVNC_4X, TVNC_2X, TVNC_GRAY};
 #define TIGHT_DEFAULT_COMPRESSION  1
-#define TIGHT_DEFAULT_SUBSAMP      0
+#define TIGHT_DEFAULT_SUBSAMP      TVNC_1X
 #define TIGHT_DEFAULT_QUALITY      95
 
 extern int rfbNumCodedRectsTight(rfbClientPtr cl, int x,int y,int w,int h);

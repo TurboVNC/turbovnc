@@ -61,6 +61,8 @@ Bool rfbDontDisconnect = FALSE;
 Bool rfbViewOnly = FALSE; /* run server in view only mode - Ehud Karni SW */
 Bool rfbSyncCutBuffer = TRUE;
 double rfbAutoLosslessRefresh = 0.0;
+int rfbALRQualityLevel = -1;
+int rfbALRSubsampLevel = TVNC_444;
 
 extern Bool cuCopyArea;
 
@@ -117,13 +119,15 @@ alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
 {
     RegionRec copyRegionSave, modifiedRegionSave, requestedRegionSave;
     rfbClientPtr cl = (rfbClientPtr)arg;
-    int tightCompressLevelSave, tightQualityLevelSave, copyDXSave, copyDYSave;
+    int tightCompressLevelSave, tightQualityLevelSave, copyDXSave, copyDYSave,
+        tightSubsampLevelSave;
 
     if(!cl->firstUpdate && REGION_NOTEMPTY(pScreen, &cl->lossyRegion)
         && (!putImageOnly || cl->alrTrigger)) {
 
         tightCompressLevelSave = cl->tightCompressLevel;
         tightQualityLevelSave = cl->tightQualityLevel;
+        tightSubsampLevelSave = cl->tightSubsampLevel;
         copyDXSave = cl->copyDX;
         copyDYSave = cl->copyDY;
         REGION_INIT(pScreen, &copyRegionSave, NullBox, 0);
@@ -134,7 +138,8 @@ alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
         REGION_COPY(pScreen, &requestedRegionSave, &cl->requestedRegion);
 
         cl->tightCompressLevel = 1;
-        cl->tightQualityLevel = -1;
+        cl->tightQualityLevel = rfbALRQualityLevel;
+        cl->tightSubsampLevel = rfbALRSubsampLevel;
         cl->copyDX = cl->copyDY = 0;
         REGION_EMPTY(pScreen, &cl->copyRegion);
         REGION_EMPTY(pScreen, &cl->modifiedRegion);
@@ -150,6 +155,7 @@ alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
         REGION_EMPTY(pScreen, &cl->lossyRegion);
         cl->tightCompressLevel = tightCompressLevelSave;
         cl->tightQualityLevel = tightQualityLevelSave;
+        cl->tightSubsampLevel = tightSubsampLevelSave;
         cl->copyDX = copyDXSave;
         cl->copyDY = copyDYSave;
         REGION_COPY(pScreen, &cl->copyRegion, &copyRegionSave);

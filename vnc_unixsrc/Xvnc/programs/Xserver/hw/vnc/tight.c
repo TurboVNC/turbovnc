@@ -78,7 +78,7 @@ static int compressLevel;
 static int qualityLevel;
 static int subsampLevel;
 
-static const int subsampLevel2tjsubsamp[4] = {
+static const int subsampLevel2tjsubsamp[TVNC_SAMPOPT] = {
     TJ_444, TJ_420, TJ_422, TJ_GRAYSCALE
 };
 
