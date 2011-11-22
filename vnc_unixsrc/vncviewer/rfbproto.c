@@ -1674,7 +1674,7 @@ HandleRFBServerMessage()
       tElapsed = gettime() - tStart;
 
       if (tElapsed > 5.) {
-        printf("Updates/sec: %.2f  Mpixels/sec: %.2f  Mpixels/update: %.2f  Time/update:  Total = %.3f ms  Recv = %.3f ms  Decode = %.3f ms  Blit = %.3f ms  Other = %.3f ms\n",
+        printf("Updates/sec: %.2f  Mpixels/sec: %.2f  Time/update:  Total = %.3f ms  Recv = %.3f ms  Decode = %.3f ms  Blit = %.3f ms  Other = %.3f ms\n",
           (double)iter/tElapsed, mpixels/tElapsed, tUpdateTime/(double)iter*1000.,
           tRecvTime/(double)iter*1000., tDecodeTime/(double)iter*1000.,
           tBlitTime/(double)iter*1000.,
