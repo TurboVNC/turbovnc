@@ -96,6 +96,7 @@ static double tUpdateTime = 0., tDecodeTime = 0., tBlitTime = 0., tStart = -1.,
   tElapsed;
 double tRecvTime = 0.;
 static unsigned long iter = 0; 
+static double mpixels = 0.;
 
 double gettime(void)
 {
@@ -1467,6 +1468,9 @@ HandleRFBServerMessage()
       rect.r.w = Swap16IfLE(rect.r.w);
       rect.r.h = Swap16IfLE(rect.r.h);
 
+      if (rfbProfile) {
+        mpixels += (double)rect.r.w * (double)rect.r.h / 1000000.;
+      }
       if (rect.encoding == rfbEncodingXCursor ||
 	  rect.encoding == rfbEncodingRichCursor) {
 	if (!HandleCursorShape(rect.r.x, rect.r.y, rect.r.w, rect.r.h,
@@ -1670,8 +1674,8 @@ HandleRFBServerMessage()
       tElapsed = gettime() - tStart;
 
       if (tElapsed > 5.) {
-        printf("Updates/sec: %.2f  Time/update:  Total = %.3f ms  Recv = %.3f ms  Decode = %.3f ms  Blit = %.3f ms  Other = %.3f ms\n",
-          (double)iter/tElapsed, tUpdateTime/(double)iter*1000.,
+        printf("Updates/sec: %.2f  Mpixels/sec: %.2f  Mpixels/update: %.2f  Time/update:  Total = %.3f ms  Recv = %.3f ms  Decode = %.3f ms  Blit = %.3f ms  Other = %.3f ms\n",
+          (double)iter/tElapsed, mpixels/tElapsed, tUpdateTime/(double)iter*1000.,
           tRecvTime/(double)iter*1000., tDecodeTime/(double)iter*1000.,
           tBlitTime/(double)iter*1000.,
           (tElapsed-tUpdateTime)/(double)iter*1000.);
@@ -1682,7 +1686,7 @@ HandleRFBServerMessage()
         }
         printf("\n");
         tUpdateTime=tRecvTime=tDecodeTime=tBlitTime=0.;
-        iter=0;
+        iter=0;  mpixels=0.;
         tStart=gettime();
       }
     }
