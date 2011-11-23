@@ -88,10 +88,12 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 	}
 }
 
+#define WidthOf(rect) ((rect).right - (rect).left)
+#define HeightOf(rect) ((rect).bottom - (rect).top)
+
 typedef struct _FSMetrics {
-	RECT screenArea, workArea;
+	RECT screenArea, workArea, screenArea0, workArea0;
 	bool equal;
-	int primaryWidth, primaryHeight;
 } FSMetrics;
 
 static BOOL CALLBACK MonitorEnumProc(HMONITOR hmon, HDC hdc, LPRECT rect,
@@ -104,19 +106,36 @@ static BOOL CALLBACK MonitorEnumProc(HMONITOR hmon, HDC hdc, LPRECT rect,
 	mi.cbSize = sizeof(MONITORINFO);
 	GetMonitorInfo(hmon, &mi);
 
-	if ((mi.rcMonitor.right - mi.rcMonitor.left != fsm->primaryWidth) ||
-		(mi.rcMonitor.bottom - mi.rcMonitor.top != fsm->primaryHeight))
+	// If any monitors aren't equal in resolution to and evenly offset from the
+	// primary, then we can't use the simple path.
+	if (WidthOf(mi.rcMonitor) != WidthOf(fsm->screenArea0) ||
+	    HeightOf(mi.rcMonitor) != HeightOf(fsm->screenArea0) ||
+	    (abs(mi.rcMonitor.top - fsm->screenArea0.top) %
+	     HeightOf(fsm->screenArea0)) != 0 ||
+	    (abs(mi.rcMonitor.left - fsm->screenArea0.left) %
+	     WidthOf(fsm->screenArea0)) != 0)
 		fsm->equal = 0;
 
-	if (mi.rcMonitor.top >= 0 && mi.rcMonitor.bottom <= fsm->primaryHeight &&
-		mi.rcMonitor.left >= 0) {
+	// If the screen areas of the primary monitor and this monitor overlap
+	// vertically, then allow the full-screen window to extend horizontally to
+	// this monitor, and constrain it vertically, if necessary, to fit within
+	// this monitor's dimensions.
+	if (min(mi.rcMonitor.bottom, fsm->screenArea0.bottom) -
+	    max(mi.rcMonitor.top, fsm->screenArea0.top) > 0) {
 		fsm->screenArea.top = max(mi.rcMonitor.top, fsm->screenArea.top);
 		fsm->screenArea.left = min(mi.rcMonitor.left, fsm->screenArea.left);
 		fsm->screenArea.right = max(mi.rcMonitor.right, fsm->screenArea.right);
 		fsm->screenArea.bottom = min(mi.rcMonitor.bottom, fsm->screenArea.bottom);
 	}
 
-	if (mi.rcWork.top == 0 && mi.rcWork.left >= 0) {
+	// If the work areas of the primary monitor and this monitor overlap
+	// vertically, and if the top portion of the primary monitor intersects with
+	// this monitor's work area, then allow the non-full-screen window to extend
+	// horizontally to this monitor, and constrain it vertically, if necessary,
+	// to fit within this monitor's work area dimensions.
+	if (mi.rcWork.top <= 0 && mi.rcWork.left >=0 &&
+	    min(mi.rcWork.bottom, fsm->workArea0.bottom) -
+	    max(mi.rcWork.top, fsm->workArea0.top) > 0) {
 		fsm->workArea.top = max(mi.rcWork.top, fsm->workArea.top);
 		fsm->workArea.left = min(mi.rcWork.left, fsm->workArea.left);
 		fsm->workArea.right = max(mi.rcWork.right, fsm->workArea.right);
@@ -129,28 +148,32 @@ static BOOL CALLBACK MonitorEnumProc(HMONITOR hmon, HDC hdc, LPRECT rect,
 void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea)
 {
 	FSMetrics fsm;
-	fsm.primaryWidth = GetSystemMetrics(SM_CXSCREEN);
-	fsm.primaryHeight = GetSystemMetrics(SM_CYSCREEN);
+	int primaryWidth = GetSystemMetrics(SM_CXSCREEN);
+	int primaryHeight = GetSystemMetrics(SM_CYSCREEN);
 	int scaledWidth = m_si.framebufferWidth * m_opts.m_scale_num /
 		m_opts.m_scale_den;
 	int scaledHeight = m_si.framebufferHeight * m_opts.m_scale_num /
 		m_opts.m_scale_den;
 	fsm.equal = 1;
 	fsm.screenArea.top = fsm.screenArea.left = 0;
-	fsm.screenArea.right = fsm.primaryWidth;
-	fsm.screenArea.bottom = fsm.primaryHeight;
+	fsm.screenArea.right = primaryWidth;
+	fsm.screenArea.bottom = primaryHeight;
+	fsm.screenArea0 = fsm.screenArea;
 	SystemParametersInfo(SPI_GETWORKAREA, 0, &fsm.workArea, 0);
+	fsm.workArea0 = fsm.workArea;
 
 	if (m_opts.m_Span == SPAN_PRIMARY ||
 	    (m_opts.m_Span == SPAN_AUTO &&
-	     scaledWidth <= fsm.primaryWidth && scaledHeight <= fsm.primaryHeight) ||
+	     scaledWidth <= primaryWidth && scaledHeight <= primaryHeight) ||
 	    !EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)&fsm)) {
-		SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
-		screenArea.left = screenArea.top = 0;
-		screenArea.right = fsm.primaryWidth;
-		screenArea.bottom = fsm.primaryHeight;
+		workArea = fsm.workArea0;
+		screenArea = fsm.screenArea0;
 	} else {
 		if (fsm.equal) {
+			// All monitors are equal in resolution and aligned in a perfect grid.
+			// Thus, we can extend the viewer window to all of them, both
+			// horizontally and vertically (otherwise, the viewer window can only
+			// be extended horizontally.)
 			screenArea.left = GetSystemMetrics(SM_XVIRTUALSCREEN);
 			screenArea.top = GetSystemMetrics(SM_YVIRTUALSCREEN);
 			screenArea.right = GetSystemMetrics(SM_CXVIRTUALSCREEN);
