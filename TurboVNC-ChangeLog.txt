@@ -44,6 +44,13 @@ Added two options (-alrqual and -alrsamp) to Xvnc that allow for sending
 automatic lossless refreshes using JPEG rather than mathematically lossless
 images.
 -------------------------------------------------------------------------------
+[10]
+Changed the default full-screen behavior in the Windows TurboVNC Viewer such
+that the window only spans multiple monitors if the remote desktop will not
+fit on a single monitor.  Added options to the command line, GUI, and .vnc
+file to allow users to override this behavior and force full-screen windows to
+always occupy one monitor or all monitors.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
