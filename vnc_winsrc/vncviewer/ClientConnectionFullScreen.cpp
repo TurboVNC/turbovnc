@@ -94,7 +94,8 @@ typedef struct _FSMetrics {
 	int primaryWidth, primaryHeight;
 } FSMetrics;
 
-static BOOL MonitorEnumProc(HMONITOR hmon, HDC hdc, LPRECT rect, LPARAM data)
+static BOOL CALLBACK MonitorEnumProc(HMONITOR hmon, HDC hdc, LPRECT rect,
+	LPARAM data)
 {
 	FSMetrics *fsm = (FSMetrics *)data;
 	MONITORINFO mi;
