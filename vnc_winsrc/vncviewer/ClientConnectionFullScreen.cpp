@@ -70,7 +70,7 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 		
 		SetWindowLong(m_hwnd1, GWL_STYLE, style);
 		int w, h, x, y;
-		GetFullScreenMetrics(w, h, x, y);
+		GetFullScreenMetrics(x, y, w, h);
 		SetWindowPos(m_hwnd1, HWND_TOPMOST, x, y, w, h, SWP_FRAMECHANGED);
 		CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_FULLSCREEN, MF_BYCOMMAND|MF_CHECKED);
 		
@@ -87,7 +87,7 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 	}
 }
 
-void ClientConnection::GetFullScreenMetrics(int &w, int &h, int &x, int &y)
+void ClientConnection::GetFullScreenMetrics(int &x, int &y, int &w, int &h)
 {
 	int multi_w = GetSystemMetrics(SM_CXVIRTUALSCREEN);
 	int multi_h = GetSystemMetrics(SM_CYVIRTUALSCREEN);
@@ -117,7 +117,7 @@ bool ClientConnection::BumpScroll(int x, int y)
 	int dx = 0;
 	int dy = 0;
 	int w, h, x_dc, y_dc;
-	GetFullScreenMetrics(w, h, x_dc, y_dc);
+	GetFullScreenMetrics(x_dc, y_dc, w, h);
 	int rightborder = w - BUMPSCROLLBORDER;
 	int bottomborder = h - BUMPSCROLLBORDER;
 	if (x < BUMPSCROLLBORDER)
