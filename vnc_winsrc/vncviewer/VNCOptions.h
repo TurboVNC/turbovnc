@@ -1,4 +1,4 @@
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2011 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -46,6 +46,10 @@
 #define SMALLCURSOR 3
 #define MAX_LEN_COMBO 5
 
+#define FS_SINGLE 0
+#define FS_MULTI 1
+#define FS_AUTO 2
+
 #define KEY_VNCVIEWER_HISTORI _T("Software\\TurboVNC\\VNCviewer\\History")
 
 struct COMBOSTRING {
@@ -90,6 +94,7 @@ public:
 	// default connection options - can be set through Dialog
 	bool	m_ViewOnly;
 	bool	m_FullScreen;
+	int		m_FullScreenMode;
 	bool	m_Use8Bit;
 	bool	m_DoubleBuffer;
 	int		m_PreferredEncoding;

@@ -1,4 +1,4 @@
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2011 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -52,6 +52,7 @@ VNCOptions::VNCOptions()
 
 	m_ViewOnly = false;
 	m_FullScreen = false;
+	m_FullScreenMode = FS_AUTO;
 	m_FSAltEnter = false;
 	m_toolbar = true;
 	m_historyLimit = 32;
@@ -132,6 +133,7 @@ VNCOptions& VNCOptions::operator=(VNCOptions& s)
 	
 	m_ViewOnly			= s.m_ViewOnly;
 	m_FullScreen		= s.m_FullScreen;
+	m_FullScreenMode	= s.m_FullScreenMode;
 	m_FSAltEnter		= s.m_FSAltEnter;
 	m_Use8Bit			= s.m_Use8Bit;
 	m_DoubleBuffer      = s.m_DoubleBuffer;
@@ -307,6 +309,21 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			m_ViewOnly = true;
 		} else if ( SwitchMatch(args[j], _T("fullscreen"))) {
 			m_FullScreen = true;
+		} else if ( SwitchMatch(args[j], _T("fsmode"))) {
+			if (++j == i) {
+				ArgError(_T("No full-screen mode specified"));
+				continue;
+			}
+			if (_tcsicmp(args[j], _T("single")) == 0) {
+				m_FullScreenMode = FS_SINGLE;
+			} else if (_tcsicmp(args[j], _T("multi")) == 0) {
+				m_FullScreenMode = FS_MULTI;
+			} else if (_tcsicmp(args[j], _T("auto")) == 0) {
+				m_FullScreenMode = FS_AUTO;
+			} else {
+				ArgError(_T("Invalid full-screen mode specified"));
+				continue;
+			}
 		} else if ( SwitchMatch(args[j], _T("notoolbar"))) {
 			m_toolbar = false;
 		} else if ( SwitchMatch(args[j], _T("8bit"))) {
@@ -581,6 +598,7 @@ void VNCOptions::Save(char *fname)
 	saveInt("restricted",			m_restricted,		fname);
 	saveInt("viewonly",				m_ViewOnly,			fname);
 	saveInt("fullscreen",			m_FullScreen,		fname);
+	saveInt("fsmode",				m_FullScreenMode,	fname);
 	saveInt("fsaltenter",			m_FSAltEnter,		fname);
 	saveInt("8bit",					m_Use8Bit,			fname);
 	saveInt("doublebuffer",			m_DoubleBuffer,		fname);
@@ -618,6 +636,7 @@ void VNCOptions::Load(char *fname)
 	m_restricted =			readInt("restricted",		m_restricted,	fname) != 0 ;
 	m_ViewOnly =			readInt("viewonly",			m_ViewOnly,		fname) != 0;
 	m_FullScreen =			readInt("fullscreen",		m_FullScreen,	fname) != 0;
+	m_FullScreenMode =		readInt("fsmode",			m_FullScreenMode, fname);
 	m_FSAltEnter =			readInt("fsaltenter",		m_FSAltEnter,	fname) != 0;
 	m_Use8Bit =				readInt("8bit",				m_Use8Bit,		fname) != 0;
 	m_DoubleBuffer =		readInt("doublebuffer",		m_DoubleBuffer,	fname) != 0;
@@ -1648,6 +1667,7 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 	m_restricted =			read(RegKey, "restricted",        m_restricted           ) != 0;
 	m_ViewOnly =			read(RegKey, "viewonly",	      m_ViewOnly             ) != 0;
 	m_FullScreen =			read(RegKey, "fullscreen",        m_FullScreen           ) != 0;
+	m_FullScreenMode =		read(RegKey, "fsmode",            m_FullScreenMode       );
 	m_FSAltEnter =			read(RegKey, "fsaltenter",        m_FSAltEnter           ) != 0;
 //	m_Use8Bit =				read(RegKey, "8bit",	          m_Use8Bit              ) != 0;
 	m_DoubleBuffer =		read(RegKey, "doublebuffer",	  m_DoubleBuffer         ) != 0;
@@ -1724,6 +1744,7 @@ void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
 	save(RegKey, "restricted",			m_restricted		);
 	save(RegKey, "viewonly",			m_ViewOnly			);
 	save(RegKey, "fullscreen",			m_FullScreen		);
+	save(RegKey, "fsmode",				m_FullScreenMode	);
 	save(RegKey, "fsaltenter",			m_FSAltEnter		);
 	save(RegKey, "scaling",				m_scaling			);
 	save(RegKey, "8bit",				m_Use8Bit			);

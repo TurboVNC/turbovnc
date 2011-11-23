@@ -1,5 +1,5 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2011 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -69,11 +69,9 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 		style &= ~(WS_DLGFRAME | WS_THICKFRAME | WS_BORDER);
 		
 		SetWindowLong(m_hwnd1, GWL_STYLE, style);
-		int cx = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-		int cy = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-		int x = GetSystemMetrics(SM_XVIRTUALSCREEN);
-		int y = GetSystemMetrics(SM_YVIRTUALSCREEN);
-		SetWindowPos(m_hwnd1, HWND_TOPMOST, x, y, cx, cy, SWP_FRAMECHANGED);
+		int w, h, x, y;
+		GetFullScreenMetrics(w, h, x, y);
+		SetWindowPos(m_hwnd1, HWND_TOPMOST, x, y, w, h, SWP_FRAMECHANGED);
 		CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_FULLSCREEN, MF_BYCOMMAND|MF_CHECKED);
 		
 	} else {
@@ -89,12 +87,39 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 	}
 }
 
+void ClientConnection::GetFullScreenMetrics(int &w, int &h, int &x, int &y)
+{
+	int multi_w = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+	int multi_h = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+	int single_w = GetSystemMetrics(SM_CXSCREEN);
+	int single_h = GetSystemMetrics(SM_CYSCREEN);
+	int scaled_w = m_si.framebufferWidth * m_opts.m_scale_num /
+		m_opts.m_scale_den;
+	int scaled_h = m_si.framebufferHeight * m_opts.m_scale_num /
+		m_opts.m_scale_den;
+
+	if (m_opts.m_FullScreenMode == FS_SINGLE ||
+	    (m_opts.m_FullScreenMode == FS_AUTO && scaled_w <= single_w &&
+	     scaled_h <= single_h)) {
+		w = single_w;
+		h = single_h;
+		x = y = 0;
+	} else {
+		w = multi_w;
+		h = multi_h;
+		x = GetSystemMetrics(SM_XVIRTUALSCREEN);
+		y = GetSystemMetrics(SM_YVIRTUALSCREEN);
+	}
+}
+
 bool ClientConnection::BumpScroll(int x, int y)
 {
 	int dx = 0;
 	int dy = 0;
-	int rightborder = GetSystemMetrics(SM_CXVIRTUALSCREEN)-BUMPSCROLLBORDER;
-	int bottomborder = GetSystemMetrics(SM_CYVIRTUALSCREEN)-BUMPSCROLLBORDER;
+	int w, h, x_dc, y_dc;
+	GetFullScreenMetrics(w, h, x_dc, y_dc);
+	int rightborder = w - BUMPSCROLLBORDER;
+	int bottomborder = h - BUMPSCROLLBORDER;
 	if (x < BUMPSCROLLBORDER)
 		dx = -BUMPSCROLLAMOUNTX * m_opts.m_scale_num / m_opts.m_scale_den;
 	if (x >= rightborder)
