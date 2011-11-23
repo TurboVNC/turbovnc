@@ -64,7 +64,6 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 		}
 		ShowWindow(m_hToolbar, SW_HIDE);
 		EnableMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOOLBAR, MF_BYCOMMAND|MF_GRAYED);
-		ShowWindow(m_hwnd1, SW_MAXIMIZE);
 		style = GetWindowLong(m_hwnd1, GWL_STYLE);
 		style &= ~(WS_DLGFRAME | WS_THICKFRAME | WS_BORDER);
 		

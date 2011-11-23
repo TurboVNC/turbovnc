@@ -9,6 +9,11 @@ Tight + Zlib protocols with the Unix TurboVNC Viewer running on a
 [2]
 Fixed TurboVNC Server build on ARM-based Linux systems
 -------------------------------------------------------------------------------
+[3]
+Fixed an issue whereby the Windows TurboVNC Viewer would display an all-white
+image on one of the monitors in a multi-monitor configuration the first time
+the viewer was switched to full-screen mode.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
