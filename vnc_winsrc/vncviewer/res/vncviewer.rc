@@ -57,7 +57,7 @@ BEGIN
     PUSHBUTTON      "&Cancel",IDCANCEL,77,61,50,14
 END
 
-IDD_OPTIONDIALOG DIALOG DISCARDABLE  0, 0, 350, 200
+IDD_OPTIONDIALOG DIALOG DISCARDABLE  0, 0, 350, 214
 STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
@@ -92,7 +92,7 @@ BEGIN
     CHECKBOX        "View only (inputs ignored)",IDC_VIEWONLY,12,162,109,10
     CONTROL         "Disable clipboard transfer",IDC_DISABLECLIPBOARD,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,12,174,109,10
-    GROUPBOX        "Display",IDC_STATIC_DISPLAY,186,4,160,64
+    GROUPBOX        "Display",IDC_STATIC_DISPLAY,186,4,160,80
     LTEXT           "Scale by:",IDC_STATIC_SCALE,195,15,36,10,SS_CENTERIMAGE
     COMBOBOX        IDC_SCALE_EDIT,231,14,36,85,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
@@ -100,27 +100,31 @@ BEGIN
     CHECKBOX        "Double buffering",IDC_DBCHECK,195,29,145,10, WS_GROUP
     CONTROL         "Full-screen mode",IDC_FULLSCREEN,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,195,41,145,10
+    LTEXT           "Full-screen spanning:",IDC_STATIC_FSSPAN,195,55,70,10,
+                    SS_CENTERIMAGE
+    COMBOBOX        IDC_FSSPAN,265,53,75,50,CBS_DROPDOWNLIST | 
+                    CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Deiconify on remote Bell event",IDC_BELLDEICONIFY,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,195,53,145,10
-    GROUPBOX        "Mouse",IDC_STATIC_MOUSE,186,73,160,39
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,195,69,145,10
+    GROUPBOX        "Mouse",IDC_STATIC_MOUSE,186,89,160,39
     CONTROL         "Emulate 3 buttons (with 2-button click)",
                     IDC_EMULATECHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | 
-                    WS_TABSTOP,195,84,145,10
+                    WS_TABSTOP,195,100,145,10
     CONTROL         "Swap mouse buttons 2 and 3",ID_SESSION_SWAPMOUSE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,195,96,145,10
-    GROUPBOX        "Mouse cursor",IDC_STATIC_MCURSOR,186,116,160,49
+                    BS_AUTOCHECKBOX | WS_TABSTOP,195,112,145,10
+    GROUPBOX        "Mouse cursor",IDC_STATIC_MCURSOR,186,132,160,49
     CONTROL         "Track remote cursor locally",IDC_CSHAPE_ENABLE_RADIO,
                     "Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,195,
-                    127,145,10
+                    143,145,10
     CONTROL         "Let remote server deal with mouse cursor",
                     IDC_CSHAPE_DISABLE_RADIO,"Button",BS_AUTORADIOBUTTON,195,
-                    139,145,10
+                    155,145,10
     CONTROL         "Don't show remote cursor",IDC_CSHAPE_IGNORE_RADIO,
-                    "Button",BS_AUTORADIOBUTTON,195,151,145,10
+                    "Button",BS_AUTORADIOBUTTON,195,167,145,10
     CONTROL         "Request shared session",IDC_SHARED,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,195,172,145,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,195,188,145,10
     CONTROL         "Continuous Updates",IDC_CU,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,195,186,145,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,195,200,145,10
 END
 
 IDD_FTBROWSE_DLG DIALOGEX 0, 0, 183, 196
@@ -274,15 +278,15 @@ BEGIN
                     WS_VSCROLL | WS_HSCROLL
 END
 
-IDD_PARENT DIALOGEX 0, 0, 366, 245
+IDD_PARENT DIALOGEX 0, 0, 366, 259
 STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTEXTHELP | WS_EX_CONTROLPARENT
 CAPTION "TurboVNC Viewer Options"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    PUSHBUTTON      "&OK",IDOK,256,227,50,14
-    PUSHBUTTON      "&Cancel",IDCANCEL,311,227,50,14
-    CONTROL         "Tab1",IDC_TAB,"SysTabControl32",WS_TABSTOP,5,5,356,218
+    PUSHBUTTON      "&OK",IDOK,256,241,50,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,311,241,50,14
+    CONTROL         "Tab1",IDC_TAB,"SysTabControl32",WS_TABSTOP,5,5,356,232
 END
 
 IDD_CONNECTING_DIALOG DIALOG DISCARDABLE  0, 0, 210, 61
@@ -647,6 +651,8 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDC_EMULATECHECK        "If this option is checked, pressing the left and right mouse buttons simultaneously will emulate a middle button click. This is useful if your mouse lacks a middle button."
     IDC_FULLSCREEN          "In full-screen mode, the viewer will show only the remote desktop. The local desktop, toolbar, and window decorations will not be shown."
+    IDC_FSSPAN              "This option specifies whether the full-screen window should span all monitors, only one monitor, or whether it should span all monitors only if it cannot fit on one monitor (automatic.)"
+    IDC_STATIC_FSSPAN       "This option specifies whether the full-screen window should span all monitors, only one monitor, or whether it should span all monitors only if it cannot fit on one monitor (automatic.)"
     IDC_DISABLECLIPBOARD    "If this option is checked, the viewer will not send local clipboard changes to the server."
     IDC_CSHAPE_DISABLE_RADIO 
                             "In this mode, the server draws the mouse cursor and sends it to the client as an image. Mouse movements can be painfully slow in this mode, so use it only if the default setting does not work."

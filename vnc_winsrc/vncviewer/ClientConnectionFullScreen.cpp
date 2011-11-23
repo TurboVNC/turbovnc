@@ -98,8 +98,8 @@ void ClientConnection::GetFullScreenMetrics(int &w, int &h, int &x, int &y)
 	int scaled_h = m_si.framebufferHeight * m_opts.m_scale_num /
 		m_opts.m_scale_den;
 
-	if (m_opts.m_FullScreenMode == FS_SINGLE ||
-	    (m_opts.m_FullScreenMode == FS_AUTO && scaled_w <= single_w &&
+	if (m_opts.m_FullScreenSpan == FSSPAN_SINGLE ||
+	    (m_opts.m_FullScreenSpan == FSSPAN_AUTO && scaled_w <= single_w &&
 	     scaled_h <= single_h)) {
 		w = single_w;
 		h = single_h;

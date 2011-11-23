@@ -166,12 +166,14 @@
 #define IDC_STATIC_LOGIN                1148
 #define IDC_STATIC_PASSWD               1149
 #define IDC_CU                          1150
+#define IDC_FSSPAN                      1151
 #define IDC_STATIC_SUBSAMP              5000
 #define IDC_STATIC_QUAL                 5001
 #define IDC_STATIC_COMPRESS             5002
 #define IDC_STATIC_SFAST                5003
 #define IDC_STATIC_SBEST                5004
 #define IDC_STATIC_SLEVEL               5005
+#define IDC_STATIC_FSSPAN               5006
 #define ID_SESSION_SET_CRECT            32777
 #define IDC_SUBSAMPLEVEL                32778
 #define IDC_ALLOW_JPEG                  32779
