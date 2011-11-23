@@ -1423,8 +1423,8 @@ void ClientConnection::ReadCapabilityList(CapsContainer *caps, int count)
 void ClientConnection::SizeWindow(bool centered)
 {
 	// Find how large the desktop work area is
-	RECT workrect;
-	SystemParametersInfo(SPI_GETWORKAREA, 0, &workrect, 0);
+	RECT screenArea, workrect;
+	GetFullScreenMetrics(screenArea, workrect);
 	int workwidth = workrect.right -  workrect.left;
 	int workheight = workrect.bottom - workrect.top;
 	vnclog.Print(2, _T("Screen work area is %d x %d\n"),

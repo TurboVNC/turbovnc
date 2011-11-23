@@ -100,9 +100,9 @@ BEGIN
     CHECKBOX        "Double buffering",IDC_DBCHECK,195,29,145,10, WS_GROUP
     CONTROL         "Full-screen mode",IDC_FULLSCREEN,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,195,41,145,10
-    LTEXT           "Full-screen spanning:",IDC_STATIC_FSSPAN,195,55,70,10,
+    LTEXT           "Span mode:",IDC_STATIC_SPAN,195,55,45,10,
                     SS_CENTERIMAGE
-    COMBOBOX        IDC_FSSPAN,265,53,75,50,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_SPAN,240,53,90,50,CBS_DROPDOWNLIST | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Deiconify on remote Bell event",IDC_BELLDEICONIFY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,195,69,145,10
@@ -601,7 +601,7 @@ BEGIN
     ID_CLOSEDAEMON          "Stop listening for incoming connections"
     ID_SHOWWINDOW           "Display a connection window"
     ID_NEWCONN              "Make a manual connection"
-    IDS_HELP                "vncviewer [/8bit] [/no8bit] [/shared] [/noshared] [/swapmouse] \r\n      [/belldeiconify] [/listen [<port>]] [/fullscreen] [/restricted] [/viewonly] \r\n      [/emulate3] [/noemulate3] [/emulate3timeout <ms>] [/emulate3fuzz <pixels>] \r\n      [/notoolbar] [/scale <percentage>] [/config <filename>] [/disableclipboard] \r\n      [/encoding <encname>] [/compresslevel <n>] [/samp <gray | 1X | 2X | 4X>] \r\n      [/quality <1-100>] [/copyrect] [/nocopyrect] [/loglevel <n>] [/logfile <filename>] \r\n      [/register] [/nocursor] [/dotcursor] [/smalldotcursor] [/normalcursor] [/help] \r\n      [/jpeg] [/nojpeg] [/nocursorshape] [/noremotecursor] [/singlebuffer] \r\n      [/doublebuffer] [/fsaltenter] [/nofsaltenter] [/fsmode <single | multi | auto>]\r\n      [/cu] [/nocu] [/user <user name>] [/nounixlogin]\r\n      [/password <clear text password>] [<server>[:<display>]] \r\n\r\nFor more details, see the documentation."
+    IDS_HELP                "vncviewer [/8bit] [/no8bit] [/shared] [/noshared] [/swapmouse] \r\n      [/belldeiconify] [/listen [<port>]] [/fullscreen] [/restricted] [/viewonly] \r\n      [/emulate3] [/noemulate3] [/emulate3timeout <ms>] [/emulate3fuzz <pixels>] \r\n      [/notoolbar] [/scale <percentage>] [/config <filename>] [/disableclipboard] \r\n      [/encoding <encname>] [/compresslevel <n>] [/samp <gray | 1X | 2X | 4X>] \r\n      [/quality <1-100>] [/copyrect] [/nocopyrect] [/loglevel <n>] [/logfile <filename>] \r\n      [/register] [/nocursor] [/dotcursor] [/smalldotcursor] [/normalcursor] [/help] \r\n      [/jpeg] [/nojpeg] [/nocursorshape] [/noremotecursor] [/singlebuffer] \r\n      [/doublebuffer] [/fsaltenter] [/nofsaltenter] [/span <primary | all | auto>]\r\n      [/cu] [/nocu] [/user <user name>] [/nounixlogin]\r\n      [/password <clear text password>] [<server>[:<display>]] \r\n\r\nFor more details, see the documentation."
 END
 
 STRINGTABLE DISCARDABLE 
@@ -651,8 +651,8 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDC_EMULATECHECK        "If this option is checked, pressing the left and right mouse buttons simultaneously will emulate a middle button click. This is useful if your mouse lacks a middle button."
     IDC_FULLSCREEN          "In full-screen mode, the viewer will show only the remote desktop. The local desktop, toolbar, and window decorations will not be shown."
-    IDC_FSSPAN              "This option specifies whether the full-screen window should span all monitors, only one monitor, or whether it should span all monitors only if it cannot fit on one monitor (automatic.)"
-    IDC_STATIC_FSSPAN       "This option specifies whether the full-screen window should span all monitors, only one monitor, or whether it should span all monitors only if it cannot fit on one monitor (automatic.)"
+    IDC_SPAN                "This option specifies whether the viewer window should span all monitors, only the primary monitor, or whether it should span all monitors only if it cannot fit on the primary monitor (automatic.)"
+    IDC_STATIC_SPAN         "This option specifies whether the viewer window should span all monitors, only the primary monitor, or whether it should span all monitors only if it cannot fit on the primary monitor (automatic.)"
     IDC_DISABLECLIPBOARD    "If this option is checked, the viewer will not send local clipboard changes to the server."
     IDC_CSHAPE_DISABLE_RADIO 
                             "In this mode, the server draws the mouse cursor and sends it to the client as an image. Mouse movements can be painfully slow in this mode, so use it only if the default setting does not work."

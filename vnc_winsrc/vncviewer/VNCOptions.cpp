@@ -52,7 +52,7 @@ VNCOptions::VNCOptions()
 
 	m_ViewOnly = false;
 	m_FullScreen = false;
-	m_FullScreenSpan = FSSPAN_AUTO;
+	m_Span = SPAN_AUTO;
 	m_FSAltEnter = false;
 	m_toolbar = true;
 	m_historyLimit = 32;
@@ -133,7 +133,7 @@ VNCOptions& VNCOptions::operator=(VNCOptions& s)
 	
 	m_ViewOnly			= s.m_ViewOnly;
 	m_FullScreen		= s.m_FullScreen;
-	m_FullScreenSpan	= s.m_FullScreenSpan;
+	m_Span				= s.m_Span;
 	m_FSAltEnter		= s.m_FSAltEnter;
 	m_Use8Bit			= s.m_Use8Bit;
 	m_DoubleBuffer      = s.m_DoubleBuffer;
@@ -309,19 +309,19 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			m_ViewOnly = true;
 		} else if ( SwitchMatch(args[j], _T("fullscreen"))) {
 			m_FullScreen = true;
-		} else if ( SwitchMatch(args[j], _T("fsspan"))) {
+		} else if ( SwitchMatch(args[j], _T("span"))) {
 			if (++j == i) {
-				ArgError(_T("No full-screen mode specified"));
+				ArgError(_T("No monitor spanning mode specified"));
 				continue;
 			}
-			if (_tcsicmp(args[j], _T("single")) == 0) {
-				m_FullScreenSpan = FSSPAN_SINGLE;
-			} else if (_tcsicmp(args[j], _T("multi")) == 0) {
-				m_FullScreenSpan = FSSPAN_MULTI;
+			if (_tcsicmp(args[j], _T("primary")) == 0) {
+				m_Span = SPAN_PRIMARY;
+			} else if (_tcsicmp(args[j], _T("all")) == 0) {
+				m_Span = SPAN_ALL;
 			} else if (_tcsicmp(args[j], _T("auto")) == 0) {
-				m_FullScreenSpan = FSSPAN_AUTO;
+				m_Span = SPAN_AUTO;
 			} else {
-				ArgError(_T("Invalid full-screen mode specified"));
+				ArgError(_T("Invalid monitor spanning mode specified"));
 				continue;
 			}
 		} else if ( SwitchMatch(args[j], _T("notoolbar"))) {
@@ -598,7 +598,7 @@ void VNCOptions::Save(char *fname)
 	saveInt("restricted",			m_restricted,		fname);
 	saveInt("viewonly",				m_ViewOnly,			fname);
 	saveInt("fullscreen",			m_FullScreen,		fname);
-	saveInt("fsspan",				m_FullScreenSpan,	fname);
+	saveInt("span",					m_Span,				fname);
 	saveInt("fsaltenter",			m_FSAltEnter,		fname);
 	saveInt("8bit",					m_Use8Bit,			fname);
 	saveInt("doublebuffer",			m_DoubleBuffer,		fname);
@@ -636,7 +636,7 @@ void VNCOptions::Load(char *fname)
 	m_restricted =			readInt("restricted",		m_restricted,	fname) != 0 ;
 	m_ViewOnly =			readInt("viewonly",			m_ViewOnly,		fname) != 0;
 	m_FullScreen =			readInt("fullscreen",		m_FullScreen,	fname) != 0;
-	m_FullScreenSpan =		readInt("fsspan",			m_FullScreenSpan, fname);
+	m_Span =				readInt("span",				m_Span,			fname);
 	m_FSAltEnter =			readInt("fsaltenter",		m_FSAltEnter,	fname) != 0;
 	m_Use8Bit =				readInt("8bit",				m_Use8Bit,		fname) != 0;
 	m_DoubleBuffer =		readInt("doublebuffer",		m_DoubleBuffer,	fname) != 0;
@@ -966,15 +966,15 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 			HWND hFullScreen = GetDlgItem(hwnd, IDC_FULLSCREEN);
 			SendMessage(hFullScreen, BM_SETCHECK, _this->m_FullScreen, 0);
 			
-			HWND hFSSpan = GetDlgItem(hwnd, IDC_FSSPAN);
-			char fsspancombo[FSSPAN_OPTS][13] = {
-				"1 monitor", "All monitors", "Automatic"
+			HWND hSpan = GetDlgItem(hwnd, IDC_SPAN);
+			char spancombo[SPAN_OPTS][21] = {
+				"Primary monitor only", "All monitors", "Automatic"
 			};
-			for (i = 0; i < FSSPAN_OPTS; i++) {
-				SendMessage(hFSSpan, CB_INSERTSTRING, (WPARAM)i,
-							(LPARAM)(int FAR*)fsspancombo[i]);
+			for (i = 0; i < SPAN_OPTS; i++) {
+				SendMessage(hSpan, CB_INSERTSTRING, (WPARAM)i,
+							(LPARAM)(int FAR*)spancombo[i]);
 			}
-			SendMessage(hFSSpan, CB_SETCURSEL, (WPARAM)_this->m_FullScreenSpan, 0);
+			SendMessage(hSpan, CB_SETCURSEL, (WPARAM)_this->m_Span, 0);
 
 			HWND hEmulate = GetDlgItem(hwnd, IDC_EMULATECHECK);
 			SendMessage(hEmulate, BM_SETCHECK, _this->m_Emul3Buttons, 0);
@@ -1166,10 +1166,10 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 				_this->m_FullScreen = 
 					(SendMessage(hFullScreen, BM_GETCHECK, 0, 0) == BST_CHECKED);
 
-				HWND hFSSpan = GetDlgItem(hwnd, IDC_FSSPAN);
-				i = (int)SendMessage(hFSSpan, CB_GETCURSEL, 0, 0);
-				if (i >= 0 && i < FSSPAN_OPTS)
-					_this->m_FullScreenSpan = i;
+				HWND hSpan = GetDlgItem(hwnd, IDC_SPAN);
+				i = (int)SendMessage(hSpan, CB_GETCURSEL, 0, 0);
+				if (i >= 0 && i < SPAN_OPTS)
+					_this->m_Span = i;
 				
 				HWND hEmulate = GetDlgItem(hwnd, IDC_EMULATECHECK);
 				_this->m_Emul3Buttons =
@@ -1682,7 +1682,7 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 	m_restricted =			read(RegKey, "restricted",        m_restricted           ) != 0;
 	m_ViewOnly =			read(RegKey, "viewonly",	      m_ViewOnly             ) != 0;
 	m_FullScreen =			read(RegKey, "fullscreen",        m_FullScreen           ) != 0;
-	m_FullScreenSpan =		read(RegKey, "fsspan",            m_FullScreenSpan       );
+	m_Span =				read(RegKey, "span",              m_Span                 );
 	m_FSAltEnter =			read(RegKey, "fsaltenter",        m_FSAltEnter           ) != 0;
 //	m_Use8Bit =				read(RegKey, "8bit",	          m_Use8Bit              ) != 0;
 	m_DoubleBuffer =		read(RegKey, "doublebuffer",	  m_DoubleBuffer         ) != 0;
@@ -1759,7 +1759,7 @@ void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
 	save(RegKey, "restricted",			m_restricted		);
 	save(RegKey, "viewonly",			m_ViewOnly			);
 	save(RegKey, "fullscreen",			m_FullScreen		);
-	save(RegKey, "fsspan",				m_FullScreenSpan	);
+	save(RegKey, "span",				m_Span				);
 	save(RegKey, "fsaltenter",			m_FSAltEnter		);
 	save(RegKey, "scaling",				m_scaling			);
 	save(RegKey, "8bit",				m_Use8Bit			);

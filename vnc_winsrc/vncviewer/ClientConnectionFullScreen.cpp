@@ -64,14 +64,15 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 		}
 		ShowWindow(m_hToolbar, SW_HIDE);
 		EnableMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOOLBAR, MF_BYCOMMAND|MF_GRAYED);
-		ShowWindow(m_hwnd1, SW_MAXIMIZE);
 		style = GetWindowLong(m_hwnd1, GWL_STYLE);
 		style &= ~(WS_DLGFRAME | WS_THICKFRAME | WS_BORDER);
 		
 		SetWindowLong(m_hwnd1, GWL_STYLE, style);
-		int w, h, x, y;
-		GetFullScreenMetrics(x, y, w, h);
-		SetWindowPos(m_hwnd1, HWND_TOPMOST, x, y, w, h, SWP_FRAMECHANGED);
+		RECT screenArea, workArea;
+		GetFullScreenMetrics(screenArea, workArea);
+		SetWindowPos(m_hwnd1, HWND_TOPMOST, screenArea.left, screenArea.top,
+			screenArea.right - screenArea.left,
+			screenArea.bottom - screenArea.top, SWP_FRAMECHANGED);
 		CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_FULLSCREEN, MF_BYCOMMAND|MF_CHECKED);
 		
 	} else {
@@ -80,35 +81,74 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 		style |= (WS_DLGFRAME | WS_THICKFRAME | WS_BORDER);
 		
 		SetWindowLong(m_hwnd1, GWL_STYLE, style);
-		SetWindowPos(m_hwnd1, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 		ShowWindow(m_hwnd1, SW_NORMAL);		
+		SizeWindow(true);
 		CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_FULLSCREEN, MF_BYCOMMAND|MF_UNCHECKED);
 
 	}
 }
 
-void ClientConnection::GetFullScreenMetrics(int &x, int &y, int &w, int &h)
+static BOOL MonitorEnumProc(HMONITOR hmon, HDC hdc, LPRECT rect, LPARAM data)
 {
-	int multi_w = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-	int multi_h = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-	int single_w = GetSystemMetrics(SM_CXSCREEN);
-	int single_h = GetSystemMetrics(SM_CYSCREEN);
-	int scaled_w = m_si.framebufferWidth * m_opts.m_scale_num /
-		m_opts.m_scale_den;
-	int scaled_h = m_si.framebufferHeight * m_opts.m_scale_num /
-		m_opts.m_scale_den;
+	MONITORINFO *mit = (MONITORINFO *)data, mi;
 
-	if (m_opts.m_FullScreenSpan == FSSPAN_SINGLE ||
-	    (m_opts.m_FullScreenSpan == FSSPAN_AUTO && scaled_w <= single_w &&
-	     scaled_h <= single_h)) {
-		w = single_w;
-		h = single_h;
-		x = y = 0;
+	memset(&mi, 0, sizeof(MONITORINFO));
+	mi.cbSize = sizeof(MONITORINFO);
+	GetMonitorInfo(hmon, &mi);
+
+	if (mi.rcMonitor.top < 0 || mi.rcMonitor.left < 0) return FALSE;
+	if (mit->rcMonitor.top < 0) mit->rcMonitor.top = mi.rcMonitor.top;
+	if(mit->rcMonitor.left < 0) mit->rcMonitor.left = mi.rcMonitor.left;
+	if(mit->rcMonitor.right < 0) mit->rcMonitor.right = mi.rcMonitor.right;
+	if(mit->rcMonitor.bottom < 0) mit->rcMonitor.bottom = mi.rcMonitor.bottom;
+	mit->rcMonitor.top = max(mi.rcMonitor.top, mit->rcMonitor.top);
+	mit->rcMonitor.left = min(mi.rcMonitor.left, mit->rcMonitor.left);
+	mit->rcMonitor.right = max(mi.rcMonitor.right, mit->rcMonitor.right);
+	mit->rcMonitor.bottom = min(mi.rcMonitor.bottom, mit->rcMonitor.bottom);
+
+	if(mi.rcWork.top < 0 || mi.rcWork.left < 0) return FALSE;
+	if(mit->rcWork.top < 0) mit->rcWork.top = mi.rcWork.top;
+	if(mit->rcWork.left < 0) mit->rcWork.left = mi.rcWork.left;
+	if(mit->rcWork.right < 0) mit->rcWork.right = mi.rcWork.right;
+	if(mit->rcWork.bottom < 0) mit->rcWork.bottom = mi.rcWork.bottom;
+	mit->rcWork.top = max(mi.rcWork.top, mit->rcWork.top);
+	mit->rcWork.left = min(mi.rcWork.left, mit->rcWork.left);
+	mit->rcWork.right = max(mi.rcWork.right, mit->rcWork.right);
+	mit->rcWork.bottom = min(mi.rcWork.bottom, mit->rcWork.bottom);
+	return TRUE;
+}
+
+void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea)
+{
+	MONITORINFO mit;
+	int primaryWidth = GetSystemMetrics(SM_CXSCREEN);
+	int primaryHeight = GetSystemMetrics(SM_CYSCREEN);
+	int scaledWidth = m_si.framebufferWidth * m_opts.m_scale_num /
+		m_opts.m_scale_den;
+	int scaledHeight = m_si.framebufferHeight * m_opts.m_scale_num /
+		m_opts.m_scale_den;
+	mit.rcMonitor.top = mit.rcMonitor.left = mit.rcMonitor.right =
+		mit.rcMonitor.bottom = -1;
+	mit.rcWork.top = mit.rcWork.left = mit.rcWork.right =
+		mit.rcWork.bottom = -1;
+
+	if (m_opts.m_Span == SPAN_PRIMARY ||
+	    (m_opts.m_Span == SPAN_AUTO &&
+	     scaledWidth <= primaryWidth && scaledHeight <= primaryHeight) ||
+	    !EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)&mit)) {
+		SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
+		screenArea.left = screenArea.top = 0;
+		screenArea.right = primaryWidth;
+		screenArea.bottom = primaryHeight;
 	} else {
-		w = multi_w;
-		h = multi_h;
-		x = GetSystemMetrics(SM_XVIRTUALSCREEN);
-		y = GetSystemMetrics(SM_YVIRTUALSCREEN);
+		screenArea = mit.rcMonitor;
+		workArea = mit.rcWork;
+		vnclog.Print(0, _T("\nTotal area:       %d, %d %d x %d\n"), screenArea.left,
+			screenArea.top, screenArea.right-screenArea.left,
+			screenArea.bottom-screenArea.top);
+		vnclog.Print(0, _T("\nTotal work area:  %d, %d %d x %d\n"), workArea.left,
+			workArea.top, workArea.right-workArea.left,
+			workArea.bottom-workArea.top);
 	}
 }
 
@@ -116,10 +156,10 @@ bool ClientConnection::BumpScroll(int x, int y)
 {
 	int dx = 0;
 	int dy = 0;
-	int w, h, x_dc, y_dc;
-	GetFullScreenMetrics(x_dc, y_dc, w, h);
-	int rightborder = w - BUMPSCROLLBORDER;
-	int bottomborder = h - BUMPSCROLLBORDER;
+	RECT screenArea, workArea;
+	GetFullScreenMetrics(screenArea, workArea);
+	int rightborder = screenArea.right - screenArea.left - BUMPSCROLLBORDER;
+	int bottomborder = screenArea.bottom - screenArea.top - BUMPSCROLLBORDER;
 	if (x < BUMPSCROLLBORDER)
 		dx = -BUMPSCROLLAMOUNTX * m_opts.m_scale_num / m_opts.m_scale_den;
 	if (x >= rightborder)
