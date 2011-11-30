@@ -347,7 +347,7 @@ static XtResource appDataResourceList[] = {
    XtOffsetOf(AppData, useX11Cursor), XtRImmediate, (XtPointer) False},
 
   {"grabKeyboard", "GrabKeyboard", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, grabKeyboard), XtRImmediate, (XtPointer) False},
+   XtOffsetOf(AppData, grabKeyboard), XtRImmediate, (XtPointer) True},
 
   {"doubleBuffer", "DoubleBuffer", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, doubleBuffer), XtRImmediate, (XtPointer) True},
