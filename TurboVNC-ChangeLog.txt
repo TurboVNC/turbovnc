@@ -51,6 +51,9 @@ fit on a single monitor.  Added options to the command line, GUI, and .vnc
 file to allow users to override this behavior and force full-screen windows to
 always occupy one monitor or all monitors.
 -------------------------------------------------------------------------------
+[11]
+Fixed numerous issues with full-screen mode in the Unix TurboVNC Viewer.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
