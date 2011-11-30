@@ -34,7 +34,6 @@ static Bool scrollLeft, scrollRight, scrollUp, scrollDown;
 static Position desktopX, desktopY;
 static Dimension viewportWidth, viewportHeight;
 static Dimension scrollbarWidth, scrollbarHeight;
-static Widget grabWidget;
 
 
 
@@ -122,13 +121,12 @@ FullScreenOn()
   Dimension toplevelWidth, toplevelHeight;
   Dimension oldViewportWidth, oldViewportHeight, clipWidth, clipHeight;
   Position viewportX, viewportY;
-  Bool fullScreenPrevious = appData.fullScreen;
 
   appData.fullScreen = True;
 
   if (si.framebufferWidth > dpyWidth || si.framebufferHeight > dpyHeight) {
 
-    XtVaSetValues(viewport, XtNforceBars, False, NULL);
+    XtVaSetValues(viewport, XtNforceBars, True, NULL);
     XtVaGetValues(viewport, XtNwidth, &oldViewportWidth,
 		  XtNheight, &oldViewportHeight, NULL);
     XtVaGetValues(XtNameToWidget(viewport, "clip"),
@@ -137,16 +135,12 @@ FullScreenOn()
     scrollbarWidth = oldViewportWidth - clipWidth;
     scrollbarHeight = oldViewportHeight - clipHeight;
 
-    if (si.framebufferWidth > dpyWidth) {
+    if (si.framebufferWidth > dpyWidth || si.framebufferHeight > dpyHeight) {
       viewportWidth = toplevelWidth = dpyWidth + scrollbarWidth;
+      viewportHeight = toplevelHeight = dpyHeight + scrollbarHeight;
     } else {
       viewportWidth = si.framebufferWidth + scrollbarWidth;
       toplevelWidth = dpyWidth;
-    }
-
-    if (si.framebufferHeight > dpyHeight) {
-      viewportHeight = toplevelHeight = dpyHeight + scrollbarHeight;
-    } else {
       viewportHeight = si.framebufferHeight + scrollbarHeight;
       toplevelHeight = dpyHeight;
     }
@@ -218,16 +212,8 @@ FullScreenOn()
 
   /* Optionally, grab the keyboard. */
 
-  /* I have no idea why this is necessary, but if I don't do it, the keyboard
-     doesn't get fully grabbed when switching from non-full-screen to
-     full-screen.  */
-  if (fullScreenPrevious != appData.fullScreen)
-      grabWidget = toplevel;
-  else
-      grabWidget = desktop;
-
   if (appData.grabKeyboard &&
-      XtGrabKeyboard(grabWidget, True, GrabModeAsync,
+      XtGrabKeyboard(toplevel, True, GrabModeAsync,
 		     GrabModeAsync, CurrentTime) != GrabSuccess) {
     fprintf(stderr, "XtGrabKeyboard() failed.\n");
   }
@@ -258,12 +244,7 @@ FullScreenOff()
   appData.fullScreen = False;
 
   if (appData.grabKeyboard)
-    XtUngrabKeyboard(grabWidget, CurrentTime);
-
-  /* Another example of having to work around an unexplained difference in
-     behavior between starting vncviewer in full-screen and switching from
-     non-full-screen to full-screen */
-  if (grabWidget == desktop) XtUnmapWidget(toplevel);
+    XtUngrabKeyboard(toplevel, CurrentTime);
 
   XtVaSetValues(toplevel, XtNmaxWidth, si.framebufferWidth,
 		XtNmaxHeight, si.framebufferHeight, NULL);
@@ -300,10 +281,7 @@ FullScreenOff()
 
   XtResizeWidget(toplevel, toplevelWidth, toplevelHeight, 0);
 
-  if (grabWidget == desktop) XtMapWidget(toplevel);
   XSync(dpy, False);
-
-  XtRealizeWidget(toplevel);
 
   /* Set the popup back to non-overrideRedirect */
 
