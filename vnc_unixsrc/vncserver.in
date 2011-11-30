@@ -5,6 +5,7 @@
 #                     All Rights Reserved.
 #  Copyright (C) 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
 #  Copyright (C) 2002-2009 Constantin Kaplinsky.  All Rights Reserved.
+#  Copyright (C) 2002-2003 RealVNC Ltd.  All Rights Reserved.
 #  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
 #
 #  This is free software; you can redistribute it and/or modify
@@ -339,18 +340,27 @@ $vncPort = 5900 + $displayNumber;
 $desktopLog = "$vncUserDir/$host:$displayNumber.log";
 unlink($desktopLog);
 
-# Make an X server cookie - use as the seed the sum of the current time, our
-# PID and part of the encrypted form of the password.  Ideally we'd use
-# /dev/urandom, but that's only available on Linux.
+# Make an X server cookie - use /dev/urandom on systems that have it,
+# otherwise use perl's random number generator, seeded with the sum
+# of the current time, our PID and part of the encrypted form of the password.
 
-if (-e "$vncUserDir/passwd") {
-    srand(time+$$+unpack("L",`cat $vncUserDir/passwd`));
-} else {
-    srand(time+$$);
+my $cookie = "";
+if (open(URANDOM, '<', '/dev/urandom')) {
+  my $randata;
+  if (sysread(URANDOM, $randata, 16) == 16) {
+    $cookie = unpack 'h*', $randata;
+  }
+  close(URANDOM);
 }
-$cookie = "";
-for (1..16) {
-    $cookie .= sprintf("%02x", int(rand(256)));
+if ($cookie eq "") {
+  if (-e "$vncUserDir/passwd") {
+      srand(time+$$+unpack("L",`cat $vncUserDir/passwd`));
+  } else {
+      srand(time+$$);
+  }
+  for (1..16) {
+    $cookie .= sprintf("%02x", int(rand(256)) % 256);
+  }
 }
 
 system("$xauth -f $xauthorityFile add $host:$displayNumber . $cookie");
