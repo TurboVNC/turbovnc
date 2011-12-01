@@ -153,8 +153,7 @@ DesktopInitAfterRealization()
 static void
 HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev, Boolean *cont)
 {
-  int i;  char *env=NULL;
-  static int x = 100, y = 100;
+  int i;
 
   switch (ev->type) {
 
@@ -195,13 +194,25 @@ HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev, Boolean *cont)
       && ev->xclient.format == 8
       && !strcmp(ev->xclient.data.b, "SendRFBUpdate"))
       SendIncrementalFramebufferUpdateRequest();
-    if((env = getenv("TVNC_FAKEMOUSE")) != NULL && !strcmp(env, "1")) {
-      SendPointerEvent(x, y, rfbButton1Mask | rfbButton3Mask);
-      if(x == 100) x = 101;  else x = 100;
-      if(y == 100) y = 101;  else y = 100;
-    }
     break;
   }
+}
+
+
+static int fakeMouseTimeout = 10;  /* Send ~100 events/second */
+static Bool fakeMouseEnabled = FALSE;
+static Bool fakeMousePending = FALSE;
+
+static void
+FakeMouseCallback(XtPointer clientData, XtIntervalId *id)
+{
+    static int x = 100, y = 100;
+    if (!fakeMouseEnabled) return;
+    fakeMousePending = FALSE;
+    SendPointerEvent(x, y, rfbButton1Mask | rfbButton3Mask);
+    if(x == 100) x = 101;  else x = 100;
+    if(y == 100) y = 101;  else y = 100;
+    XtAppAddTimeOut(appContext, fakeMouseTimeout, FakeMouseCallback, NULL);
 }
 
 
@@ -222,7 +233,7 @@ void
 SendRFBEvent(Widget w, XEvent *ev, String *params, Cardinal *num_params)
 {
   KeySym ks;
-  char keyname[256];
+  char keyname[256], *env = NULL;
   int buttonMask, x, y;
 
   if (appData.fullScreen && ev->type == MotionNotify) {
@@ -316,6 +327,15 @@ SendRFBEvent(Widget w, XEvent *ev, String *params, Cardinal *num_params)
     SendPointerEvent(ev->xbutton.x, ev->xbutton.y,
 		     (((ev->xbutton.state & 0x1f00) >> 8) |
 		      (1 << (ev->xbutton.button - 1))));
+    if((env = getenv("TVNC_FAKEMOUSE")) != NULL && !strcmp(env, "1") &&
+       ((ev->xbutton.button == Button1 && (ev->xbutton.state & Button3Mask)) ||
+        (ev->xbutton.button == Button3 && (ev->xbutton.state & Button1Mask)))) {
+      fakeMouseEnabled = !fakeMouseEnabled;
+      if (fakeMouseEnabled && !fakeMousePending) {
+        XtAppAddTimeOut(appContext, fakeMouseTimeout, FakeMouseCallback, NULL);
+        fakeMousePending = TRUE;
+      }
+    }
     return;
 
   case ButtonRelease:
