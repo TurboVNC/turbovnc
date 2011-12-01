@@ -113,7 +113,6 @@ Bool cuCopyArea = FALSE;
 #define _SCHEDULE_FB_UPDATE_CU(pScreen,prfb,trigger)                    \
   if (!prfb->dontSendFramebufferUpdate) {                               \
       rfbClientPtr cl, nextCl;                                          \
-      RegionRec requestedRegionSave;                                    \
       for (cl = rfbClientHead; cl; cl = nextCl) {                       \
           nextCl = cl->next;                                            \
           if (cl->continuousUpdates && !cl->firstUpdate) {              \
@@ -121,18 +120,11 @@ Bool cuCopyArea = FALSE;
               box.x1 = x;  box.y1 = y;                                  \
               box.x2 = x + w;  box.y2 = y + h;                          \
               REGION_INIT(pScreen, &tmpRegion, &box, 0);                \
-              REGION_INIT(pScreen, &requestedRegionSave, NullBox, 0);   \
-              REGION_COPY(pScreen, &requestedRegionSave,                \
-                  &cl->requestedRegion);                                \
-              REGION_EMPTY(pScreen, &cl->requestedRegion);              \
               REGION_UNION(pScreen, &cl->requestedRegion,               \
                   &cl->requestedRegion, &tmpRegion);                    \
               REGION_UNINIT(pScreen, &tmpRegion);                       \
               cl->putImageTrigger = trigger;                            \
               rfbSendFramebufferUpdate(cl);                             \
-              REGION_COPY(pScreen, &cl->requestedRegion,                \
-                  &requestedRegionSave);                                \
-              REGION_UNINIT(pScreen, &requestedRegionSave);             \
           }                                                             \
           else if (!cl->deferredUpdateScheduled &&                      \
               FB_UPDATE_PENDING(cl) &&                                  \
