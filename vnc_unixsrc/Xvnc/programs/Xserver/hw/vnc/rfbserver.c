@@ -97,7 +97,7 @@ idleTimeoutCallback(OsTimerPtr timer, CARD32 time, pointer arg)
  */
 
 static BOOL rfbProfile = FALSE;
-static double tUpdateTime = 0., tStart = -1., tElapsed;
+static double tUpdateTime = 0., tStart = -1., tElapsed, mpixels = 0.;
 static unsigned long iter = 0; 
 
 double gettime(void)
@@ -1345,6 +1345,8 @@ rfbSendFramebufferUpdate(cl)
 	cl->rfbRawBytesEquivalent += (sz_rfbFramebufferUpdateRectHeader
 				      + w * (cl->format.bitsPerPixel / 8) * h);
 
+	if (rfbProfile) mpixels += (double)w * (double)h / 1000000.;
+
 	switch (cl->preferredEncoding) {
 	case rfbEncodingRaw:
 	    if (!rfbSendRectEncodingRaw(cl, x, y, w, h)) {
@@ -1399,12 +1401,14 @@ rfbSendFramebufferUpdate(cl)
 	iter++;
 
 	if (tElapsed > 5.) {
-	    rfbLog("Updates/sec: %.2f  Encode time/update: %.3f ms  Other time/update: %.3f ms\n",
-		(double)iter/tElapsed, tUpdateTime/(double)iter*1000.,
-		(tElapsed-tUpdateTime)/(double)iter*1000.);
-	    tUpdateTime=0.;
-	    iter=0;
-	    tStart=gettime();
+	    rfbLog("Updates/sec: %.2f  Mpixels/sec: %.2f  Encode time/update: %.3f ms  Other time/update: %.3f ms\n",
+		(double)iter / tElapsed, mpixels / tElapsed,
+		tUpdateTime / (double)iter * 1000.,
+		(tElapsed - tUpdateTime) / (double)iter * 1000.);
+	    tUpdateTime = 0.;
+	    iter = 0;
+	    mpixels = 0.;
+	    tStart = gettime();
 	}
     }
 
