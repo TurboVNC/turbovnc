@@ -101,8 +101,7 @@ Bool cuCopyArea = FALSE;
       rfbClientPtr cl, nextCl;						\
       for (cl = rfbClientHead; cl; cl = nextCl) {			\
 	  nextCl = cl->next;						\
-	  if (!cl->deferredUpdateScheduled && FB_UPDATE_PENDING(cl) &&	\
-	      REGION_NOTEMPTY(pScreen,&cl->requestedRegion))		\
+	  if (!cl->deferredUpdateScheduled && FB_UPDATE_PENDING(cl))	\
 	  {								\
 	      cl->putImageTrigger=trigger;				\
 	      rfbScheduleDeferredUpdate(cl);				\
@@ -127,8 +126,7 @@ Bool cuCopyArea = FALSE;
               rfbSendFramebufferUpdate(cl);                             \
           }                                                             \
           else if (!cl->deferredUpdateScheduled &&                      \
-              FB_UPDATE_PENDING(cl) &&                                  \
-              REGION_NOTEMPTY(pScreen, &cl->requestedRegion)) {         \
+              FB_UPDATE_PENDING(cl)) {                                  \
               cl->putImageTrigger = trigger;                            \
               rfbScheduleDeferredUpdate(cl);                            \
           }                                                             \
@@ -1856,12 +1854,13 @@ rfbCopyRegion(pScreen, cl, src, dst, dx, dy)
 static CARD32
 rfbDeferredUpdateCallback(OsTimerPtr timer, CARD32 now, pointer arg)
 {
-  rfbClientPtr cl = (rfbClientPtr)arg;
+    rfbClientPtr cl = (rfbClientPtr)arg;
 
-  rfbSendFramebufferUpdate(cl);
+    if (cl->deferredUpdateScheduled && FB_UPDATE_PENDING(cl))
+	    rfbSendFramebufferUpdate(cl);
 
-  cl->deferredUpdateScheduled = FALSE;
-  return 0;
+    cl->deferredUpdateScheduled = FALSE;
+    return 0;
 }
 
 
@@ -1878,6 +1877,7 @@ rfbScheduleDeferredUpdate(rfbClientPtr cl)
 					   rfbDeferUpdateTime,
 					   rfbDeferredUpdateCallback, cl);
 	cl->deferredUpdateScheduled = TRUE;
+	cl->deferredUpdateStart = gettime();
     } else {
 	rfbSendFramebufferUpdate(cl);
     }

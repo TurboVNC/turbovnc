@@ -231,6 +231,7 @@ typedef struct rfbClientRec {
 
     Bool deferredUpdateScheduled;
     OsTimerPtr deferredUpdateTimer;
+    double deferredUpdateStart;
 
     /* translateFn points to the translation function which is used to copy
        and translate a rectangle from the framebuffer to an output buffer. */
@@ -474,6 +475,8 @@ extern void KbdReleaseAllKeys();
 #define UPDATE_BUF_SIZE 30000
 extern char updateBuf[UPDATE_BUF_SIZE];
 extern int ublen;
+
+extern double gettime(void);
 
 extern rfbClientPtr rfbClientHead;
 extern rfbClientPtr pointerClient;

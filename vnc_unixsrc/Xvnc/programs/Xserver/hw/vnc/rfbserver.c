@@ -100,7 +100,7 @@ static BOOL rfbProfile = FALSE;
 static double tUpdateTime = 0., tStart = -1., tElapsed;
 static unsigned long iter = 0; 
 
-static double gettime(void)
+double gettime(void)
 {
     struct timeval __tv;
     gettimeofday(&__tv, (struct timezone *)NULL);
@@ -298,6 +298,7 @@ rfbNewClient(sock)
 
     cl->deferredUpdateScheduled = FALSE;
     cl->deferredUpdateTimer = NULL;
+    cl->deferredUpdateStart = gettime();
 
     cl->format = rfbServerFormat;
     cl->translateFn = rfbTranslateNone;
@@ -989,8 +990,11 @@ rfbProcessClientNormalMessage(cl)
 			    &tmpRegion);
 	}
 
-	if (FB_UPDATE_PENDING(cl)) {
+	if (FB_UPDATE_PENDING(cl) &&
+	    (!cl->deferredUpdateScheduled || rfbDeferUpdateTime == 0 ||
+	     gettime() - cl->deferredUpdateStart >= (double)rfbDeferUpdateTime)) {
 	    rfbSendFramebufferUpdate(cl);
+	    cl->deferredUpdateScheduled = FALSE;
 	}
 
 	REGION_UNINIT(pScreen,&tmpRegion);
