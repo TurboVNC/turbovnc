@@ -272,6 +272,27 @@ rfbCheckFds()
 }
 
 
+Bool
+rfbSockBusy(sock)
+    int sock;
+{
+    int nfds;
+    fd_set fds;
+    struct timeval tv;
+
+    FD_ZERO(&fds);
+    FD_SET(sock, &fds);
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+    nfds = select(sock + 1, NULL, &fds, NULL, &tv);
+    if (nfds < 0) {
+	rfbLogPerror("rfbIsBusy: select");
+	return FALSE;
+    }
+    return (nfds == 0);
+}
+
+
 void
 rfbDisconnectUDPSock()
 {
