@@ -1,7 +1,7 @@
 /*
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
                        All Rights Reserved.
- *  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2011 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  *  Copyright (C) 2000-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -432,6 +432,8 @@ InitialiseRFBConnection(void)
   if (!WriteExact(rfbsock, pv, sz_rfbProtocolVersionMsg))
     return False;
 
+  InitCapabilities();
+
   /* Read or select the security type. */
   if (protocolMinorVersion >= 7) {
     secType = SelectSecurityType();
@@ -452,7 +454,6 @@ InitialiseRFBConnection(void)
     break;
   case rfbSecTypeTight:
     tightVncProtocol = True;
-    InitCapabilities();
     if (!SetupTunneling())
       return False;
     if (!PerformAuthenticationTight())
