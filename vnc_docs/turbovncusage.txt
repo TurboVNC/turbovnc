@@ -143,7 +143,7 @@ web browser to:
 
 The level of image compression in TurboVNC can be adjusted to balance the
 (sometimes conflicting) goals of high image quality and high performance.
-There are four options which control the manner in which TurboVNC compresses
+There are four options that control the manner in which TurboVNC compresses
 images:
 
 	Allow JPEG compression :: {:}
@@ -273,20 +273,20 @@ when the user stops manipulating the scene, then a fully lossless copy of the
 3D image is sent for them to study in detail.
 
 The default ALR behavior is to monitor and send lossless copies of only the
-screen regions which were drawn using ''X[Shm]PutImage()''.  When used with
+screen regions that were drawn using ''X[Shm]PutImage()''.  When used with
 VirtualGL, this means that ALRs will mainly be sent for just the 3D screen
 regions.  This should be fine for most 3D applications, since the 3D regions are
-the ones which are quality-critical.  The default ALR behavior also prevents
+the ones that are quality-critical.  The default ALR behavior also prevents
 what might best be termed the "blinking cursor dilemma."  Certain ill-behaved
 window managers update a small region of the taskbar continuously, even though
 none of the pixels in that region have changed.  Also, certain programs have a
-blinking cursor which may update more frequently than the ALR timeout.  Since
+blinking cursor that may update more frequently than the ALR timeout.  Since
 an ALR is triggered based on a period of inactivity relative to the last
 framebuffer update, these continuous updates prevent an ALR from ever being
 sent.  Fortunately, these ill-behaved window managers and blinking cursors 
 do not typically use ''X[Shm]PutImage()'' to perform their continuous updates,
-so the problem can be worked around by limiting the regions which are
-"eligible" for ALR to just the subset of regions which were drawn with the
+so the problem can be worked around by limiting the regions that are
+"eligible" for ALR to just the subset of regions that were drawn with the
 ''X[Shm]PutImage()'' functions.
 
 You can override the default ALR behavior, thus making all screen regions

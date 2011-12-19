@@ -58,7 +58,7 @@ TurboVNC with other VNC flavors.
 		TightVNC or TigerVNC server.
 		{nl}{nl}
 
-	* TurboVNC supports an extension to the TightVNC protocol which allows the
+	* TurboVNC supports an extension to the TightVNC protocol that allows the
 		server to tell the viewer not to use Zlib to decompress a particular
 		rectangle.  Zlib introduces a tremendous amount of performance overhead,
 		even when compression level 0 (no compression) is used.  Thus, when a

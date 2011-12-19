@@ -3,7 +3,7 @@
 ** Server Settings
 
 | Environment Variable | ''TVNC_ALRALL = ''__''0 \| 1''__ |
-| Summary | Disable/Enable automatic lossless refresh for regions which were \
+| Summary | Disable/Enable automatic lossless refresh for regions that were \
 drawn using methods other than ''X[Shm]PutImage()'' |
 | Platforms | Unix |
 | Default Value | Disabled |

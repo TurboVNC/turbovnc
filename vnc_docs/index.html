@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2011-09-30T18:33:55">
+<meta name="date" content="2011-12-19T14:37:22">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -181,7 +181,7 @@ windows.</p>
 <p>This document and all associated illustrations are licensed under the 
 <span class="remote"><a href="http://creativecommons.org/licenses/by/2.5/" class="remote">Creative 
 Commons Attribution 2.5 License</a></span><a name="idx001"></a>.  Any 
-works which contain material derived from this document must cite The 
+works that contain material derived from this document must cite The 
 VirtualGL Project as the source of the material and list the current URL 
 for the VirtualGL web site.</p>
 
@@ -326,7 +326,7 @@ distributions without interference.</p>
     <span class="remote"><a href="http://www.redhat.com/" class="remote">Red 
     Hat</a></span><a name="idx007"></a> or 
     <span class="remote"><a href="http://www.novell.com/linux/" class="remote">SuSE</a></span><a name="idx008"></a> 
-    families which contains GLIBC 2.3.4 or later (including 
+    families that contains GLIBC 2.3.4 or later (including 
     <span class="remote"><a href="http://fedoraproject.org/" class="remote">Fedora</a></span><a name="idx009"></a> 
     4 and later, and 
     <span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0010"></a> 
@@ -885,7 +885,7 @@ connect.</p>
 
 <p>The level of image compression in TurboVNC can be adjusted to balance 
 the (sometimes conflicting) goals of high image quality and high 
-performance. There are four options which control the manner in which 
+performance. There are four options that control the manner in which 
 TurboVNC compresses images:</p>
 
 <dl class="Description">
@@ -1054,22 +1054,22 @@ a 3D scene, but when the user stops manipulating the scene, then a fully
 lossless copy of the 3D image is sent for them to study in detail.</p>
 
 <p>The default ALR behavior is to monitor and send lossless copies of only 
-the screen regions which were drawn using <code>X[Shm]PutImage()</code>.  
+the screen regions that were drawn using <code>X[Shm]PutImage()</code>.  
 When used with VirtualGL, this means that ALRs will mainly be sent for 
 just the 3D screen regions.  This should be fine for most 3D 
-applications, since the 3D regions are the ones which are 
+applications, since the 3D regions are the ones that are 
 quality-critical.  The default ALR behavior also prevents what might 
 best be termed the &ldquo;blinking cursor dilemma.&rdquo;  Certain 
 ill-behaved window managers update a small region of the taskbar 
 continuously, even though none of the pixels in that region have 
-changed.  Also, certain programs have a blinking cursor which may update 
+changed.  Also, certain programs have a blinking cursor that may update 
 more frequently than the ALR timeout.  Since an ALR is triggered based 
 on a period of inactivity relative to the last framebuffer update, these 
 continuous updates prevent an ALR from ever being sent.  Fortunately, 
 these ill-behaved window managers and blinking cursors do not typically 
 use <code>X[Shm]PutImage()</code> to perform their continuous updates, 
-so the problem can be worked around by limiting the regions which are 
-&ldquo;eligible&rdquo; for ALR to just the subset of regions which were 
+so the problem can be worked around by limiting the regions that are 
+&ldquo;eligible&rdquo; for ALR to just the subset of regions that were 
 drawn with the <code>X[Shm]PutImage()</code> functions.</p>
 
 <p>You can override the default ALR behavior, thus making all screen 
@@ -1433,7 +1433,7 @@ embedded VGL Transport.</p>
         Transport&rsquo;s only lossless option is uncompressed RGB.
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        TurboVNC includes a lossless refresh feature which will, on demand, send 
+        TurboVNC includes a lossless refresh feature that will, on demand, send 
         a mathematically lossless image of the current VNC desktop to the 
         client. A user connecting over a low-bandwidth connection can use 
         low-quality JPEG to achieve the best performance when manipulating the 
@@ -1761,7 +1761,7 @@ mixing TurboVNC with other VNC flavors.</p>
         connecting to a TightVNC or TigerVNC server. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        TurboVNC supports an extension to the TightVNC protocol which allows the 
+        TurboVNC supports an extension to the TightVNC protocol that allows the 
         server to tell the viewer not to use Zlib to decompress a particular 
         rectangle.  Zlib introduces a tremendous amount of performance overhead, 
         even when compression level 0 (no compression) is used.  Thus, when a 
@@ -1842,7 +1842,7 @@ RealVNC Viewer when connecting to RealVNC servers.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Disable/Enable automatic lossless refresh for regions which were drawn using methods other than <code>X[Shm]PutImage()</code></td>
+    <td class="standard">Disable/Enable automatic lossless refresh for regions that were drawn using methods other than <code>X[Shm]PutImage()</code></td>
   </tr>
   <tr class="standard">
     <td class="high standard">Platforms</td>
