@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2011-12-19T14:37:22">
+<meta name="date" content="2011-12-19T15:36:43">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -206,22 +206,22 @@ License, v2</a><a name="idx004"></a>.</p>
 <p>TurboVNC is an optimized version of VNC (more specifically, of 
 <span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx005"></a> 
 1.3.x.)  On the surface, TurboVNC behaves similarly to its parent, but 
-TurboVNC has been tuned to provide interactive performance for 
-full-screen video and 3D workloads.  On these types of workloads, 
-TurboVNC performs as much as an order of magnitude faster than TightVNC 
-1.3.x, uses more than an order of magnitude less CPU time to compress 
-each frame, and it produces generally better compression ratios.  As 
-with TightVNC, TurboVNC uses JPEG compression for image tiles with a 
-high number of unique colors and indexed color encoding for image tiles 
-with a low number of unique colors.  Part of TurboVNC&rsquo;s speedup 
-comes from the use of libjpeg-turbo, the same high-speed SIMD-optimized 
-JPEG codec used by VirtualGL.  However, TurboVNC also bypasses the 
-CPU-hungry smoothness detection routines that TightVNC uses to determine 
-whether a tile is a good candidate for JPEG compression.  Furthermore, 
-TurboVNC eliminates buffer copies, it maximizes network efficiency by 
-using the largest tile sizes supported by the TightVNC protocol, and it 
-never uses a Zlib compression level higher than 1.  In the aggregate, 
-TurboVNC compresses 2D application workloads a bit less efficiently than 
+TurboVNC has been tuned to provide peak performance for full-screen 
+video and 3D workloads.  On these types of workloads, TurboVNC performs 
+as much as an order of magnitude faster than TightVNC 1.3.x, uses more 
+than an order of magnitude less CPU time to compress each frame, and it 
+produces generally better compression ratios.  As with TightVNC, 
+TurboVNC uses JPEG compression for image tiles with a high number of 
+unique colors and indexed color encoding for image tiles with a low 
+number of unique colors.  Part of TurboVNC&rsquo;s speedup comes from 
+the use of libjpeg-turbo, the same high-speed SIMD-optimized JPEG codec 
+used by VirtualGL.  However, TurboVNC also bypasses the CPU-hungry 
+smoothness detection routines that TightVNC uses to determine whether a 
+tile is a good candidate for JPEG compression.  Furthermore, TurboVNC 
+eliminates buffer copies, it maximizes network efficiency by using the 
+largest tile sizes supported by the TightVNC protocol, and it never uses 
+a Zlib compression level higher than 1.  In the aggregate, TurboVNC 
+compresses 2D application workloads a bit less efficiently than 
 TightVNC, but it generally does a better job than TightVNC of 
 compressing 3D application workloads.</p>
 
@@ -238,11 +238,11 @@ report</a></span><a name="idx006"></a>.</p>
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
         Fine-grained control over the JPEG image quality and the level of 
-        chrominance subsampling.
+        chrominance subsampling
     </li>
     <li class="Itemize-1 Itemize asterisk">
         (Optional) double buffering on the client side to reduce tearing 
-        artifacts in 3D and video applications.
+        artifacts in 3D and video applications
     </li>
     <li class="Itemize-1 Itemize asterisk">
         TurboVNC has the ability to hide network latency by decompressing and 
@@ -274,7 +274,7 @@ report</a></span><a name="idx006"></a>.</p>
 robust solution for remotely displaying 3D applications over all types 
 of networks.</p>
 
-<p>TurboVNC is capable of sending 30+ Megapixels/second of image data over 
+<p>TurboVNC is capable of sending 50+ Megapixels/second of image data over 
 a 100 Megabit/second local area network with perceptually lossless image 
 quality. TurboVNC can deliver between 10 and 12 Megapixels/second of 
 image data over a 5 Megabit/second broadband connection at reduced (but 
@@ -326,11 +326,12 @@ distributions without interference.</p>
     <span class="remote"><a href="http://www.redhat.com/" class="remote">Red 
     Hat</a></span><a name="idx007"></a> or 
     <span class="remote"><a href="http://www.novell.com/linux/" class="remote">SuSE</a></span><a name="idx008"></a> 
-    families that contains GLIBC 2.3.4 or later (including 
-    <span class="remote"><a href="http://fedoraproject.org/" class="remote">Fedora</a></span><a name="idx009"></a> 
-    4 and later, and 
+    families that contains GLIBC 2.3.2 or later (including 
+    <span class="remote"><a href="http://fedoraproject.org/" class="remote">Fedora</a></span><a name="idx009"></a>, 
     <span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0010"></a> 
-    4 and later)
+    3 and later, and 
+    <span class="remote"><a href="http://www.whiteboxlinux.org/" class="remote">White 
+    Box</a></span><a name="idx0011"></a>)
 </li>
 <li class="Itemize-0">
     Ubuntu Linux v6.0 or later
@@ -482,9 +483,9 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
         Download the appropriate TurboVNC binary package for your system from 
         the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-        area</a></span><a name="idx0011"></a> of the 
+        area</a></span><a name="idx0012"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0012"></a>. <br />
+        SourceForge project page</a></span><a name="idx0013"></a>. <br />
     </li>
     <li class="Ordered-1 Ordered" value="2">
         Log in as root, cd to the directory where you downloaded the binary 
@@ -520,9 +521,9 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
         <code>TurboVNC-</code><em><code>{version}</code></em><code>-solarisx64.pkg.bz2</code> 
         for 64-bit systems) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-        area</a></span><a name="idx0013"></a> of the 
+        area</a></span><a name="idx0014"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0014"></a>. <br />
+        SourceForge project page</a></span><a name="idx0015"></a>. <br />
     </li>
     <li class="Ordered-1 Ordered" value="2">
         Log in as root, cd to the directory where you downloaded the package, 
@@ -564,9 +565,9 @@ pkgadd&nbsp;-d&nbsp;TurboVNC*.pkg
         (<code>TurboVNC-</code><em><code>{version}</code></em><code>.dmg</code>) 
         from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-        area</a></span><a name="idx0015"></a> of the 
+        area</a></span><a name="idx0016"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0016"></a>.
+        SourceForge project page</a></span><a name="idx0017"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Open the disk image, then open 
@@ -588,9 +589,9 @@ pkgadd&nbsp;-d&nbsp;TurboVNC*.pkg
         <code>TurboVNC64-</code><em><code>{version}</code></em><code>.exe</code> 
         for 64-bit systems) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-        area</a></span><a name="idx0017"></a> of the 
+        area</a></span><a name="idx0018"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0018"></a>.
+        SourceForge project page</a></span><a name="idx0019"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Run the TurboVNC installer.  The installation of TurboVNC should be 
@@ -609,9 +610,9 @@ TurboVNC source tarball
 (<code>turbovnc-</code><em><code>{version}</code></em><code>.tar.gz</code>) 
 from the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-area</a></span><a name="idx0019"></a> of the 
+area</a></span><a name="idx0020"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-SourceForge project page</a></span><a name="idx0020"></a>, uncompress 
+SourceForge project page</a></span><a name="idx0021"></a>, uncompress 
 it, <code>cd&nbsp;vnc/vnc_unixsrc</code>, and read 
 <code>BUILDING.txt</code> for further instructions on how to build 
 TurboVNC from source.</p>
@@ -669,9 +670,9 @@ sudo&nbsp;/opt/TurboVNC/bin/uninstall
 
 <h3 id="hd004006004">Windows</h3>
 
-<p>Use the &ldquo;Add or Remove Programs&rdquo; applet in the Control Panel 
-(or the &ldquo;Programs and Features&rdquo; applet if you are running 
-Windows Vista), or select &ldquo;Uninstall TurboVNC&rdquo; in the 
+<p>Use the &ldquo;Programs and Features&rdquo; applet in the Control Panel 
+(or the &ldquo;Add or Remove Programs&rdquo; applet if you are running 
+Windows XP), or &ldquo;Uninstall TurboVNC&rdquo; in the 
 &ldquo;TurboVNC&rdquo; Start Menu group.</p>
 
 <p><br /></p>
@@ -808,7 +809,7 @@ ssh&nbsp;{user}@{server}
         <br /> Enter the VNC session password or the Unix username/password and 
         click &ldquo;OK&rdquo; (Windows) or press Enter (Linux/Mac/Solaris.) 
         <br /><br /> A TurboVNC desktop window should appear on your client 
-        machine.  This window contains a virtual X server with which you can 
+        machine.  This window contains a virtual desktop with which you can 
         interact to launch X-Windows applications on the TurboVNC server machine.
     </li>
 </ol>
@@ -862,8 +863,7 @@ a machine that does not have a native TurboVNC Viewer installed (or a
 machine for which no native TurboVNC Viewer is available.)  The Java 
 viewer is significantly slower than the native viewer on high-speed 
 networks, but on low-speed networks the Java viewer and native viewers 
-have comparable performance.  The Java viewer does not currently support 
-double buffering.</p>
+have comparable performance.</p>
 
 <p>To use the Java TurboVNC Viewer, point your web browser to:</p>
 
@@ -894,8 +894,8 @@ TurboVNC compresses images:</p>
          If this option is enabled, then TurboVNC will use JPEG compression for 
          all image tiles with more than 24 unique colors and indexed color 
          encoding for all other image tiles.  If this option is disabled, then 
-         TurboVNC will select between indexed color or raw encoding depending on 
-         the size of the image tile and its color count.
+         TurboVNC will select between indexed color or raw encoding, depending 
+         on the size of the image tile and its color count.
     </dd>
     <dt class="Description-1 Description">JPEG image quality</dt>
     <dd class="Description-1 Description">
@@ -930,7 +930,7 @@ button in the &ldquo;TurboVNC Connection&rdquo; dialog box or, after
 connecting to the server, click on the Connection Options button in the 
 toolbar.)  In the Unix TurboVNC Viewer, press F8 after connecting to 
 bring up the options menu.  In the Java viewer, click on the Options 
-button at the top of the browser window.</p>
+button at the top of the viewer window.</p>
 
 <p>The TurboVNC Viewer provides five image encoding protocols, 
 corresponding to the most useful combinations of the image compression 
@@ -1029,7 +1029,7 @@ can request a lossless refresh of TurboVNC&rsquo;s virtual screen.</p>
 press CTRL-ALT-SHIFT-L (in the Windows TurboVNC Viewer, you can also 
 click on the Lossless Refresh toolbar icon.)  In the Java TurboVNC 
 Viewer, click on the &ldquo;Lossless Refresh&rdquo; button at the top of 
-the browser window.</p>
+the viewer window.</p>
 
 
 
@@ -1208,7 +1208,7 @@ man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;{vncserver&nbsp;|&nbsp;Xvnc&nbsp;|&nbsp;
     <dt class="Description-1 Description">Windows</dt>
     <dd class="Description-1 Description">
         Use the embedded help feature (the question mark button in the upper 
-        right of the TurboVNC Viewer window.)
+        right of the TurboVNC Viewer dialogs.)
     </dd>
 </dl>
 
@@ -1603,10 +1603,11 @@ TurboVNC server for this procedure to perform well.</p>
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully backward compatible with TightVNC, RealVNC, 
-and other VNC flavors, as well as fully forward compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0021"></a>. 
+and other VNC flavors, as well as fully compatible with 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0022"></a>. 
 You can use the TurboVNC Viewer to connect to a non-TurboVNC server (or 
-vice versa), although this will result in some decrease in performance.</p>
+vice versa), although this will generally result in some decrease in 
+performance.</p>
 
 <p>The following sections list additional things to bear in mind when 
 mixing TurboVNC with other VNC flavors.</p>
@@ -1738,17 +1739,20 @@ mixing TurboVNC with other VNC flavors.</p>
         TurboVNC, on the other hand, includes extensions to the Tight protocol 
         that allow the JPEG quality to be specified on the standard 1-100 scale 
         and allow the JPEG chrominance subsampling to be specified seperately. 
-        <br /><br /> When a TurboVNC viewer is connected to a TightVNC or 
-        TigerVNC server, setting the JPEG quality to N in the TurboVNC Viewer 
-        sets the JPEG quality level to N/10 on the TightVNC or TigerVNC server.  
-        For instance, if you set the JPEG quality to 95 in the TurboVNC Viewer, 
-        this would translate to a JPEG quality level of 9, which would set the 
-        actual JPEG quality/subsampling to 80/2X on a TightVNC server or 100/1X 
-        on a TigerVNC server. <br /><br />
+        TigerVNC 1.2 and later includes the same extensions on the server side, 
+        so the TigerVNC 1.2 Server should behave like the TurboVNC Server when a 
+        TurboVNC Viewer is connected to it. <br /><br /> When a TurboVNC viewer 
+        is connected to a TightVNC or TigerVNC 1.0/1.1 server, setting the JPEG 
+        quality to N in the TurboVNC Viewer sets the JPEG quality level to N/10 
+        on the TightVNC or TigerVNC server.  For instance, if you set the JPEG 
+        quality to 95 in the TurboVNC Viewer, this would translate to a JPEG 
+        quality level of 9, which would set the actual JPEG quality/subsampling 
+        to 80/2X on a TightVNC server or 100/1X on a TigerVNC server. 
+        <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
         Changing the JPEG chrominance subsampling option in the TurboVNC Viewer 
-        has no effect when connecting to a TightVNC or TigerVNC server. 
+        has no effect when connecting to a TightVNC or TigerVNC 1.0/1.1 server. 
         <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -1773,10 +1777,11 @@ mixing TurboVNC with other VNC flavors.</p>
     </li>
     <li class="Itemize-1 Itemize asterisk">
         The TightVNC Server will use much more CPU time across the board than 
-        the TurboVNC Server, all else being equal.  Since TigerVNC uses the same 
-        SIMD-accelerated JPEG codec as TurboVNC, it will come much closer to the 
-        performance of TurboVNC.  However, TigerVNC still lags behind the 
-        performance of TurboVNC a bit as of this writing.
+        the TurboVNC Server, all else being equal.  TigerVNC 1.2 can be made to 
+        perform similarly to TurboVNC, barring the absense of multithreading in 
+        the former, but this requires using non-default settings in TigerVNC.  
+        The default TigerVNC settings will produce significantly slower 
+        performance than TurboVNC on 3D and video workloads.
     </li>
 </ul>
 

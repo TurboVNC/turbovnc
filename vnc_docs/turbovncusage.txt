@@ -78,7 +78,7 @@
 		"OK" (Windows) or press Enter (Linux/Mac/Solaris.)
 		{nl}{nl}
 		A TurboVNC desktop window should appear on your client machine.  This
-		window contains a virtual X server with which you can interact to launch
+		window contains a virtual desktop with which you can interact to launch
 		X-Windows applications on the TurboVNC server machine.
 
 ** Disconnecting and Killing a TurboVNC Session
@@ -122,8 +122,7 @@ can be used to connect to the TurboVNC session from a machine that does not
 have a native TurboVNC Viewer installed (or a machine for which no native
 TurboVNC Viewer is available.)  The Java viewer is significantly slower than
 the native viewer on high-speed networks, but on low-speed networks the Java
-viewer and native viewers have comparable performance.  The Java viewer does
-not currently support double buffering.
+viewer and native viewers have comparable performance.
 
 To use the Java TurboVNC Viewer, point your web browser to:
 
@@ -150,7 +149,7 @@ images:
 		If this option is enabled, then TurboVNC will use JPEG compression for all
 		image tiles with more than 24 unique colors and indexed color encoding for
 		all other image tiles.  If this option is disabled, then TurboVNC will
-		select between indexed color or raw encoding depending on the size of the
+		select between indexed color or raw encoding, depending on the size of the
 		image tile and its color count.
 
 	JPEG image quality :: {:}
@@ -180,7 +179,7 @@ the Options dialog box (click on the "Options" button in the "TurboVNC
 Connection" dialog box or, after connecting to the server, click on the
 Connection Options button in the toolbar.)  In the Unix TurboVNC Viewer, press
 F8 after connecting to bring up the options menu.  In the Java viewer, click on
-the Options button at the top of the browser window.
+the Options button at the top of the viewer window.
 
 The TurboVNC Viewer provides five image encoding protocols, corresponding
 to the most useful combinations of the image compression options described
@@ -253,7 +252,7 @@ can request a lossless refresh of TurboVNC's virtual screen.
 To perform a lossless refresh in the Windows or Unix TurboVNC Viewers, press
 CTRL-ALT-SHIFT-L (in the Windows TurboVNC Viewer, you can also click on the
 Lossless Refresh toolbar icon.)  In the Java TurboVNC Viewer, click on the
-"Lossless Refresh" button at the top of the browser window.
+"Lossless Refresh" button at the top of the viewer window.
 
 *** Automatic Lossless Refresh
 {anchor: ALR}
@@ -391,4 +390,4 @@ For more detailed instructions on the usage of TurboVNC:
 	---
 
 	Windows :: Use the embedded help feature (the question mark button in the
-	upper right of the TurboVNC Viewer window.)
+	upper right of the TurboVNC Viewer dialogs.)

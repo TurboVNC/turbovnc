@@ -19,9 +19,10 @@
 	| {list type=ul: \
 			{item:Any distribution in the \
 				[[http://www.redhat.com/][Red Hat]] or [[http://www.novell.com/linux/][SuSE]] \
-				families that contains GLIBC 2.3.4 or later (including \
-				[[http://fedoraproject.org/][Fedora]] 4 and later, \
-				and [[http://www.centos.org/][CentOS]] 4 and later)} \
+				families that contains GLIBC 2.3.2 or later (including \
+				[[http://fedoraproject.org/][Fedora]], \
+				[[http://www.centos.org/][CentOS]] 3 and later, and \
+				[[http://www.whiteboxlinux.org/][White Box]])} \
 			{item:Ubuntu Linux v6.0 or later}} \
 	| < \
 	| < \
