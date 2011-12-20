@@ -998,11 +998,15 @@ public class VncViewer extends java.applet.Applet
     if (rfb != null)
       disconnect();
 
-    vncContainer.hide();
+    vncContainer.setVisible(false);
 
     if (!inAnApplet) {
       System.exit(0);
     }
+  }
+
+  public boolean isAppletVisible() {
+    return vncContainer.isVisible();
   }
 
   //
