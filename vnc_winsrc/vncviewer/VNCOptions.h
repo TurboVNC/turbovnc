@@ -131,6 +131,8 @@ public:
 	bool	m_noUnixLogin;
 	char	m_user[256];
 
+	bool	m_autoPass;
+
     // Logging
     int     m_logLevel;
     bool    m_logToFile, m_logToConsole;

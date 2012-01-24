@@ -105,6 +105,8 @@ VNCOptions::VNCOptions()
 	m_user[0] = '\0';
 	m_noUnixLogin = false;
 
+	m_autoPass = false;
+
 	LoadGenOpt();
 
 	m_hParent = 0;
@@ -182,6 +184,8 @@ VNCOptions& VNCOptions::operator=(VNCOptions& s)
 	m_ignoreShapeUpdates	= s.m_ignoreShapeUpdates;
 	m_noUnixLogin			= s.m_noUnixLogin;
 	strcpy(m_user, s.m_user);
+
+	m_autoPass			= s.m_autoPass;
 
 #ifdef UNDER_CE
 	m_palmpc			= s.m_palmpc;
@@ -550,6 +554,8 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			strncpy(m_user, args[j], 255);
 			m_user[255]='\0';
 			m_noUnixLogin=false;
+		} else if ( SwitchMatch(args[j], _T("autopass") )) {
+			m_autoPass=true;
 		} else if ( SwitchMatch(args[j], _T("register") )) {
 			Register();
 			exit(1);

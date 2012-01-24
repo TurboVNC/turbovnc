@@ -54,6 +54,11 @@ always occupy one monitor or all monitors.
 [11]
 Fixed numerous issues with full-screen mode in the Unix TurboVNC Viewer.
 -------------------------------------------------------------------------------
+[12]
+Implemented -autopass option in the Windows TurboVNC Viewer, which works the
+same as the equivalent option in the Unix TurboVNC Viewer.  In both viewers,
+-autopass can now be used with Unix Login Authentication as well.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
