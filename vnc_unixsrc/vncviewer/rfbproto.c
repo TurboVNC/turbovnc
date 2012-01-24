@@ -777,7 +777,7 @@ AuthenticateVNC(void)
     }
   } else if (appData.autoPass) {
     passwd = buffer;
-    cstatus = fgets(buffer, sizeof buffer, stdin);
+    cstatus = fgets(buffer, sizeof(buffer), stdin);
     if (cstatus == NULL)
        buffer[0] = '\0';
     else
@@ -841,7 +841,8 @@ AuthenticateUnixLogin(void)
         } else {
             passwd = buffer;
             int len = strlen(buffer);
-            if (len > 0 && buffer[len - 1] == '\n') buffer[len - 1] = '\0';
+            if (len > 0 && buffer[len - 1] == '\n')
+                buffer[len - 1] = '\0';
         }
     } else if (appData.passwordDialog) {
 	DoUserPwdDialog(&user, &passwd);
