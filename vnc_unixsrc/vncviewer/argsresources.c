@@ -163,7 +163,7 @@ char *fallback_resources[] = {
   "*popup.buttonForm.translations: #override\\n\
      <KeyPress>: SendRFBEvent() HidePopup()",
 
-  "*popupButtonCount: 14",
+  "*popupButtonCount: 15",
 
   "*popup*button1.label: Dismiss popup",
   "*popup*button1.translations: #override\\n\
