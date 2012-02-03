@@ -14,6 +14,10 @@ Fixed an issue whereby the Windows TurboVNC Viewer, when running on Windows 7,
 would display an all-white image on one of the monitors in a multi-monitor
 configuration the first time the viewer was switched to full-screen mode.
 -------------------------------------------------------------------------------
+[4]
+Added an option to the F8 menu in the Unix TurboVNC Viewer that allows
+view-only mode to be enabled/disabled on an active VNC connection.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
