@@ -148,6 +148,8 @@ char *fallback_resources[] = {
   "*subsamp4X.label: 4X",
   "*subsamp2X.label: 2X",
   "*subsamp1X.label: None",
+  
+  "*viewOnly.label: View only",
 
   "*enableJPEG.label: Enable JPEG Compression",
 
