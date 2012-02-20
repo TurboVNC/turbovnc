@@ -126,6 +126,11 @@ can be aborted with CTRL-C, and (2) the VNC server will exit as soon as the
 user logs out of the window manager in the VNC session.  This may be necessary
 when launching TurboVNC from within certain grid computing environments.
 .TP
+\fB\-noxstartup\fR
+Do not run the ~/.vnc/xstartup.turbovnc script after launching Xvnc.  This
+option allows you to manually start a window manager in your TurboVNC session
+or to run a full-screen application without a window manager.
+.TP
 \fB\-fp\fR \fIfont-path\fR
 The vncserver script will normally examine your system to figure out where it
 stores its X11 fonts and then generate an appropriate font path for Xvnc based
