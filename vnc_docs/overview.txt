@@ -3,7 +3,7 @@
 
 TurboVNC is an optimized version of VNC (more specifically, of
 [[http://www.tightvnc.com][TightVNC]] 1.3.x.)  On the surface, TurboVNC behaves
-similarly to its parent, but TurboVNC has been tuned to provide interactive
+similarly to its parent, but TurboVNC has been tuned to provide peak
 performance for full-screen video and 3D workloads.  On these types of
 workloads, TurboVNC performs as much as an order of magnitude faster than
 TightVNC 1.3.x, uses more than an order of magnitude less CPU time to compress
@@ -31,10 +31,10 @@ TurboVNC's image encoding optimizations, see
 In addition, TurboVNC provides the following features:
 
 	* Fine-grained control over the JPEG image quality and the level of
-		chrominance subsampling.
+		chrominance subsampling
 
 	* (Optional) double buffering on the client side to reduce tearing
-		artifacts in 3D and video applications.
+		artifacts in 3D and video applications
 
 	* TurboVNC has the ability to hide network latency by decompressing and
 		drawing a frame on the client while the next frame is being fetched from
@@ -59,7 +59,7 @@ In addition, TurboVNC provides the following features:
 TurboVNC, when used with VirtualGL, provides a highly performant and robust
 solution for remotely displaying 3D applications over all types of networks.
 
-TurboVNC is capable of sending 30+ Megapixels/second of image data over a
+TurboVNC is capable of sending 50+ Megapixels/second of image data over a
 100 Megabit/second local area network with perceptually lossless image quality.
 TurboVNC can deliver between 10 and 12 Megapixels/second of image data over a 5
 Megabit/second broadband connection at reduced (but usable) image quality.

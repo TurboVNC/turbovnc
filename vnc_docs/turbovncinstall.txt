@@ -142,6 +142,6 @@ sudo /opt/TurboVNC/bin/uninstall
 *** Windows
 #OPT: noList! plain!
 
-Use the "Add or Remove Programs" applet in the Control Panel (or the
-"Programs and Features" applet if you are running Windows Vista), or select
+Use the "Programs and Features" applet in the Control Panel (or the
+"Add or Remove Programs" applet if you are running Windows XP), or
 "Uninstall TurboVNC" in the "TurboVNC" Start Menu group.

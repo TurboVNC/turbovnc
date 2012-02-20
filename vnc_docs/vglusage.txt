@@ -41,7 +41,7 @@ client machine without using VirtualGL's embedded VGL Transport.
 		expense of higher server CPU usage.)  The VGL Transport's only
 		lossless option is uncompressed RGB.
 
-	* TurboVNC includes a lossless refresh feature which will, on demand, send
+	* TurboVNC includes a lossless refresh feature that will, on demand, send
 		a mathematically lossless image of the current VNC desktop to the client.
 		A user connecting over a low-bandwidth connection can use low-quality JPEG
 		to achieve the best performance when manipulating the 3D model, then they

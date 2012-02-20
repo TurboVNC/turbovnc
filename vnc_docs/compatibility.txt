@@ -4,9 +4,9 @@
 In order to realize the full performance benefits of TurboVNC, it is necessary
 to use a TurboVNC server and a TurboVNC viewer in concert.  However, TurboVNC
 is fully backward compatible with TightVNC, RealVNC, and other VNC flavors, as
-well as fully forward compatible with [[http://www.tigervnc.com][TigerVNC]].
+well as fully compatible with [[http://www.tigervnc.com][TigerVNC]].
 You can use the TurboVNC Viewer to connect to a non-TurboVNC server (or vice
-versa), although this will result in some decrease in performance.
+versa), although this will generally result in some decrease in performance.
 
 The following sections list additional things to bear in mind when mixing
 TurboVNC with other VNC flavors.
@@ -36,8 +36,11 @@ TurboVNC with other VNC flavors.
 	TurboVNC, on the other hand, includes extensions to the Tight protocol that
 	allow the JPEG quality to be specified on the standard 1-100 scale and
 	allow the JPEG chrominance subsampling to be specified seperately.
+	TigerVNC 1.2 and later includes the same extensions on the server side, so
+	the TigerVNC 1.2 Server should behave like the TurboVNC Server when a
+	TurboVNC Viewer is connected to it.
 	{nl}{nl}
-	When a TurboVNC viewer is connected to a TightVNC or TigerVNC server,
+	When a TurboVNC viewer is connected to a TightVNC or TigerVNC 1.0/1.1 server,
 	setting the JPEG quality to N in the TurboVNC Viewer sets the JPEG quality
 	level to N/10 on the TightVNC or TigerVNC server.  For instance, if you set
 	the JPEG quality to 95 in the TurboVNC Viewer, this would translate to a JPEG
@@ -46,7 +49,7 @@ TurboVNC with other VNC flavors.
 	{nl}{nl}
 
 	* Changing the JPEG chrominance subsampling option in the TurboVNC Viewer has
-		no effect when connecting to a TightVNC or TigerVNC server.
+		no effect when connecting to a TightVNC or TigerVNC 1.0/1.1 server.
 		{nl}{nl}
 
 	* The TurboVNC Server only supports Zlib compression level 1, because higher
@@ -58,7 +61,7 @@ TurboVNC with other VNC flavors.
 		TightVNC or TigerVNC server.
 		{nl}{nl}
 
-	* TurboVNC supports an extension to the TightVNC protocol which allows the
+	* TurboVNC supports an extension to the TightVNC protocol that allows the
 		server to tell the viewer not to use Zlib to decompress a particular
 		rectangle.  Zlib introduces a tremendous amount of performance overhead,
 		even when compression level 0 (no compression) is used.  Thus, when a
@@ -70,10 +73,11 @@ TurboVNC with other VNC flavors.
 		{nl}{nl}
 
 	* The TightVNC Server will use much more CPU time across the board than the
-		TurboVNC Server, all else being equal.  Since TigerVNC uses the same
-		SIMD-accelerated JPEG codec as TurboVNC, it will come much closer to the
-		performance of TurboVNC.  However, TigerVNC still lags behind the
-		performance of TurboVNC a bit as of this writing.
+		TurboVNC Server, all else being equal.  TigerVNC 1.2 can be made to perform
+		similarly to TurboVNC, barring the absense of multithreading in the former,
+		but this requires using non-default settings in TigerVNC.  The default
+		TigerVNC settings will produce significantly slower performance than
+		TurboVNC on 3D and video workloads.
 
 ** TightVNC or TigerVNC Viewers
 
