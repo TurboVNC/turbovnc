@@ -61,7 +61,7 @@ Bool rfbDontDisconnect = FALSE;
 Bool rfbViewOnly = FALSE; /* run server in view only mode - Ehud Karni SW */
 double rfbAutoLosslessRefresh = 0.0;
 int rfbALRQualityLevel = -1;
-int rfbALRSubsampLevel = TVNC_444;
+int rfbALRSubsampLevel = TVNC_1X;
 
 static rfbClientPtr rfbNewClient(int sock);
 static void rfbProcessClientProtocolVersion(rfbClientPtr cl);
@@ -132,23 +132,10 @@ ALRThreadFunc(param)
                 && gettime()-cl->lastFramebufferUpdate > rfbAutoLosslessRefresh
                 && REGION_NOTEMPTY(pScreen, &cl->lossyRegion)
                 && (!putImageOnly || cl->alrTrigger)) {
-=======
-        tightCompressLevelSave = cl->tightCompressLevel;
-        tightQualityLevelSave = cl->tightQualityLevel;
-        tightSubsampLevelSave = cl->tightSubsampLevel;
-        copyDXSave = cl->copyDX;
-        copyDYSave = cl->copyDY;
-        REGION_INIT(pScreen, &copyRegionSave, NullBox, 0);
-        REGION_COPY(pScreen, &copyRegionSave, &cl->copyRegion);
-        REGION_INIT(pScreen, &modifiedRegionSave, NullBox, 0);
-        REGION_COPY(pScreen, &modifiedRegionSave, &cl->modifiedRegion);
-        REGION_INIT(pScreen, &requestedRegionSave, NullBox, 0);
-        REGION_COPY(pScreen, &requestedRegionSave, &cl->requestedRegion);
->>>>>>> .merge-right.r4739
 
-<<<<<<< .working
                 tightCompressLevelSave = cl->tightCompressLevel;
                 tightQualityLevelSave = cl->tightQualityLevel;
+                tightSubsampLevelSave = cl->tightSubsampLevel;
                 copyDXSave = cl->copyDX;
                 copyDYSave = cl->copyDY;
                 REGION_INIT(pScreen, &copyRegionSave, NullBox, 0);
@@ -157,22 +144,10 @@ ALRThreadFunc(param)
                 REGION_COPY(pScreen, &modifiedRegionSave, &cl->modifiedRegion);
                 REGION_INIT(pScreen, &requestedRegionSave, NullBox, 0);
                 REGION_COPY(pScreen, &requestedRegionSave, &cl->requestedRegion);
-=======
-        cl->tightCompressLevel = 1;
-        cl->tightQualityLevel = rfbALRQualityLevel;
-        cl->tightSubsampLevel = rfbALRSubsampLevel;
-        cl->copyDX = cl->copyDY = 0;
-        REGION_EMPTY(pScreen, &cl->copyRegion);
-        REGION_EMPTY(pScreen, &cl->modifiedRegion);
-        REGION_UNION(pScreen, &cl->modifiedRegion, &cl->modifiedRegion,
-            &cl->lossyRegion);
-        REGION_EMPTY(pScreen, &cl->requestedRegion);
-        REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
-            &cl->lossyRegion);
->>>>>>> .merge-right.r4739
 
                 cl->tightCompressLevel = 1;
-                cl->tightQualityLevel = -1;
+                cl->tightQualityLevel = rfbALRQualityLevel;
+                cl->tightSubsampLevel = rfbALRSubsampLevel;
                 cl->copyDX = cl->copyDY = 0;
                 REGION_EMPTY(pScreen, &cl->copyRegion);
                 REGION_EMPTY(pScreen, &cl->modifiedRegion);
@@ -182,13 +157,13 @@ ALRThreadFunc(param)
                 REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
                     &cl->lossyRegion);
 
-<<<<<<< .working
                 if (!rfbSendFramebufferUpdate(cl)) continue;
                 cl->alrTrigger = FALSE;
 
                 REGION_EMPTY(pScreen, &cl->lossyRegion);
                 cl->tightCompressLevel = tightCompressLevelSave;
                 cl->tightQualityLevel = tightQualityLevelSave;
+                cl->tightSubsampLevel = tightSubsampLevelSave;
                 cl->copyDX = copyDXSave;
                 cl->copyDY = copyDYSave;
                 REGION_COPY(pScreen, &cl->copyRegion, &copyRegionSave);
@@ -201,20 +176,6 @@ ALRThreadFunc(param)
         }
         pthread_mutex_unlock(&alrMutex);
         usleep(100000);
-=======
-        REGION_EMPTY(pScreen, &cl->lossyRegion);
-        cl->tightCompressLevel = tightCompressLevelSave;
-        cl->tightQualityLevel = tightQualityLevelSave;
-        cl->tightSubsampLevel = tightSubsampLevelSave;
-        cl->copyDX = copyDXSave;
-        cl->copyDY = copyDYSave;
-        REGION_COPY(pScreen, &cl->copyRegion, &copyRegionSave);
-        REGION_COPY(pScreen, &cl->modifiedRegion, &modifiedRegionSave);
-        REGION_COPY(pScreen, &cl->requestedRegion, &requestedRegionSave);
-        REGION_UNINIT(pScreen, &copyRegionSave);
-        REGION_UNINIT(pScreen, &modifiedRegionSave);
-        REGION_UNINIT(pScreen, &requestedRegionSave);
->>>>>>> .merge-right.r4739
     }
     alrInit = FALSE;
     pthread_mutex_unlock(&alrMutex);
