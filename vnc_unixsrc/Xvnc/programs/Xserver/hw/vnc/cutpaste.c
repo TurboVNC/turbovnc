@@ -27,6 +27,7 @@
 #include <Xproto.h>
 #include "rfb.h"
 #include "selection.h"
+#include "property.h"
 #include "input.h"
 #include <Xatom.h>
 

@@ -85,6 +85,7 @@ idleTimeoutCallback(OsTimerPtr timer, CARD32 time, pointer arg)
 {
     FatalError("TurboVNC server has been idle for %d seconds.  Exiting.\n",
         rfbIdleTimeout);
+    return 0;
 }
 
 
