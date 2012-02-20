@@ -371,6 +371,28 @@ static const int rfbEndianTest = 1;
 }
 
 
+/*
+ * These can be used to add profiling information anywhere within the code
+ */
+
+#define ProfileInit()  \
+    static double __start, __mpixels = 0.;  \
+    static int __first = 1;  \
+    double __elapsed;  \
+    static int __iter = 0;  \
+    if (__first) {__start = gettime();  __first = 0;}
+
+#define ProfileCount(message, pixels, time)  \
+    __iter++;  \
+    __mpixels += (double)(pixels) / 1000000.;  \
+    if ((__elapsed = gettime() - __start) >= (double)(time)) {  \
+        rfbLog(message":  %f/sec  %f Mpixels/sec\n",  \
+            (double)__iter / __elapsed, __mpixels / __elapsed);  \
+        __start = gettime();  \
+        __iter = 0;  __mpixels = 0.;  \
+    }
+
+
 /* init.c */
 
 extern char *desktopName;
