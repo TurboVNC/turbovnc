@@ -1764,7 +1764,7 @@ rfbSendServerCutText(char *str, int len)
     rfbClientPtr cl, nextCl;
     rfbServerCutTextMsg sct;
 
-    if (rfbViewOnly || !str || len <= 0 || rfbAuthDisableCBSend)
+    if (rfbViewOnly || rfbAuthDisableCBSend || !str || len <= 0)
 	return;
 
     for (cl = rfbClientHead; cl; cl = nextCl) {
