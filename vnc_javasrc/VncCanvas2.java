@@ -1,6 +1,7 @@
 //
-//  Copyright (C) 2006 Constantin Kaplinsky.  All Rights Reserved.
+//  Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
 //  Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
+//  Copyright (C) 2006 Constantin Kaplinsky.  All Rights Reserved.
 //
 //  This is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -34,16 +35,10 @@ class VncCanvas2 extends VncCanvas implements MouseWheelListener {
     enableMouseWheelListener();
   }
 
-  public VncCanvas2(VncViewer v, int maxWidth_, int maxHeight_)
-    throws IOException {
-
-    super(v, maxWidth_, maxHeight_);
-    disableFocusTraversalKeys();
-    enableMouseWheelListener();
-  }
-
   public void paintScaledFrameBuffer(Graphics g) {
     Graphics2D g2d = (Graphics2D)g;
+    g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                         RenderingHints.VALUE_INTERPOLATION_BILINEAR);
     g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
                          RenderingHints.VALUE_RENDER_QUALITY);
     g2d.drawImage(memImage, 0, 0, scaledWidth, scaledHeight, null);

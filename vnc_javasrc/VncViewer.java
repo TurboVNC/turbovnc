@@ -33,7 +33,7 @@ import java.io.*;
 import java.net.*;
 
 public class VncViewer extends java.applet.Applet
-  implements java.lang.Runnable, WindowListener {
+  implements java.lang.Runnable, WindowListener, ComponentListener {
 
   boolean inAnApplet = true;
   boolean inSeparateFrame = false;
@@ -128,8 +128,10 @@ public class VncViewer extends java.applet.Applet
     recordingStatusChanged = false;
     cursorUpdatesDef = null;
 
-    if (inSeparateFrame)
+    if (inSeparateFrame) {
       vncFrame.addWindowListener(this);
+      vncFrame.addComponentListener(this);
+    }
 
     rfbThread = new Thread(this);
     rfbThread.start();
@@ -161,59 +163,67 @@ public class VncViewer extends java.applet.Applet
       connectAndAuthenticate();
       doProtocolInitialisation();
 
-      // FIXME: Use auto-scaling not only in a separate frame.
-      if (options.autoScale && inSeparateFrame) {
-	Dimension screenSize;
-	try {
-	  screenSize = vncContainer.getToolkit().getScreenSize();
-	} catch (Exception e) {
-	  screenSize = new Dimension(0, 0);
-	}
-	createCanvas(screenSize.width - 32, screenSize.height - 32);
-      } else {
-	createCanvas(0, 0);
+      if (showControls) {
+        buttonPanel.enableButtons();
       }
 
+      // Determine if Java 2D API is available and use a special
+      // version of VncCanvas if it is present.
+      vc = null;
+      try {
+        // This throws ClassNotFoundException if there is no Java 2D API.
+        Class cl = Class.forName("java.awt.Graphics2D");
+        // If we could load Graphics2D class, then we can use VncCanvas2.
+        cl = Class.forName("VncCanvas2");
+        Class[] argClasses = { this.getClass() };
+        java.lang.reflect.Constructor cstr = cl.getConstructor(argClasses);
+        Object[] argObjects = { this };
+        vc = (VncCanvas)cstr.newInstance(argObjects);
+      } catch (Exception e) {
+        System.out.println("Warning: Java 2D API is not available");
+      }
+      // If we failed to create VncCanvas2, use old VncCanvas.
+      if (vc == null)
+        vc = new VncCanvas(this);
+
+      // Create a panel which itself is resizeable and can hold
+      // non-resizeable VncCanvas component at the top left corner.
+      Panel canvasPanel = new Panel();
+      canvasPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+      canvasPanel.add(vc);
+
+      // Create a ScrollPane and add the canvasPanel to it.
+      desktopScrollPane = new ScrollPane(ScrollPane.SCROLLBARS_AS_NEEDED);
       gbc.weightx = 1.0;
       gbc.weighty = 1.0;
+      gbc.fill = GridBagConstraints.BOTH;
+      gridbag.setConstraints(desktopScrollPane, gbc);
+      desktopScrollPane.add(canvasPanel);
+
+      // Prevent ScrollPane from capturing mouse wheel events.
+      try {
+        Class[] argClasses = { Boolean.TYPE };
+        java.lang.reflect.Method method =
+          desktopScrollPane.getClass().getMethod("setWheelScrollingEnabled", argClasses);
+        Object[] argObjects = { new Boolean(false) };
+        method.invoke(desktopScrollPane, argObjects);
+      } catch (Exception e) {}
 
       if (inSeparateFrame) {
-
-	// Create a panel which itself is resizeable and can hold
-	// non-resizeable VncCanvas component at the top left corner.
-	Panel canvasPanel = new Panel();
-	canvasPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-	canvasPanel.add(vc);
-
-	// Create a ScrollPane which will hold a panel with VncCanvas
-	// inside.
-	desktopScrollPane = new ScrollPane(ScrollPane.SCROLLBARS_AS_NEEDED);
-	gbc.fill = GridBagConstraints.BOTH;
-	gridbag.setConstraints(desktopScrollPane, gbc);
-	desktopScrollPane.add(canvasPanel);
-
-	// Prevent ScrollPane from capturing mouse wheel events (JVM 1.4+).
-	try {
-	  desktopScrollPane.setWheelScrollingEnabled(false);
-	} catch (NoSuchMethodError e) {}
-
-	// Finally, add our ScrollPane to the Frame window.
+	// Add the ScrollPane to the Frame window.
 	vncFrame.add(desktopScrollPane);
 	vncFrame.setTitle(rfb.desktopName);
-	vncFrame.pack();
-	vc.resizeDesktopFrame();
-
+	// Set the initial window size, and Auto-Scale if needed.
+	vc.resizeWindowFrame();
       } else {
-
-	// Just add the VncCanvas component to the Applet.
-	gridbag.setConstraints(vc, gbc);
-	add(vc);
+	// Add the ScrollPane to the Applet.
+	add(desktopScrollPane);
 	validate();
-
+	// Auto-Scale now that the window has been assembled.
+	if (options.autoScale || options.fixedRatioScale) {
+	  vc.setScaledSize();
+	}
       }
-
-      if (showControls)
-	buttonPanel.enableButtons();
 
       moveFocusToDesktop();
       processNormalProtocol();
@@ -264,33 +274,6 @@ public class VncViewer extends java.applet.Applet
       }
     }
     
-  }
-
-  //
-  // Create a VncCanvas instance.
-  //
-
-  void createCanvas(int maxWidth, int maxHeight) throws IOException {
-    // Determine if Java 2D API is available and use a special
-    // version of VncCanvas if it is present.
-    vc = null;
-    try {
-      // This throws ClassNotFoundException if there is no Java 2D API.
-      Class cl = Class.forName("java.awt.Graphics2D");
-      // If we could load Graphics2D class, then we can use VncCanvas2D.
-      cl = Class.forName("VncCanvas2");
-      Class[] argClasses = { this.getClass(), Integer.TYPE, Integer.TYPE };
-      java.lang.reflect.Constructor cstr = cl.getConstructor(argClasses);
-      Object[] argObjects =
-        { this, new Integer(maxWidth), new Integer(maxHeight) };
-      vc = (VncCanvas)cstr.newInstance(argObjects);
-    } catch (Exception e) {
-      System.out.println("Warning: Java 2D API is not available");
-    }
-
-    // If we failed to create VncCanvas2D, use old VncCanvas.
-    if (vc == null)
-      vc = new VncCanvas(this, maxWidth, maxHeight);
   }
 
 
@@ -838,12 +821,12 @@ public class VncViewer extends java.applet.Applet
     if (vc != null) {
       double sec = (System.currentTimeMillis() - vc.statStartTime) / 1000.0;
       double rate = Math.round(vc.statNumUpdates / sec * 100) / 100.0;
-      int nRealRects = vc.statNumPixelRects;
-      int nPseudoRects = vc.statNumTotalRects - vc.statNumPixelRects;
+      long nRealRects = vc.statNumPixelRects;
+      long nPseudoRects = vc.statNumTotalRects - vc.statNumPixelRects;
       System.out.println("Updates received: " + vc.statNumUpdates + " (" +
                          nRealRects + " rectangles + " + nPseudoRects +
                          " pseudo), " + rate + " updates/sec");
-      int numRectsOther = nRealRects - vc.statNumRectsTight
+      long numRectsOther = nRealRects - vc.statNumRectsTight
         - vc.statNumRectsZRLE - vc.statNumRectsHextile
         - vc.statNumRectsRaw - vc.statNumRectsCopy;
       System.out.println("Rectangles:" +
@@ -855,8 +838,8 @@ public class VncViewer extends java.applet.Applet
                          " CopyRect=" + vc.statNumRectsCopy +
                          " other=" + numRectsOther);
 
-      int raw = vc.statNumBytesDecoded;
-      int compressed = vc.statNumBytesEncoded;
+      long raw = vc.statNumBytesDecoded;
+      long compressed = vc.statNumBytesEncoded;
       if (compressed > 0) {
           double ratio = Math.round((double)raw / compressed * 1000) / 1000.0;
           System.out.println("Pixel data: " + vc.statNumBytesDecoded +
@@ -911,11 +894,7 @@ public class VncViewer extends java.applet.Applet
     if (rfb != null)
       rfb.close();
 
-    if (inAnApplet) {
-      showMessage(str);
-    } else {
-      System.exit(1);
-    }
+    showMessage(str);
   }
 
   //
@@ -990,6 +969,25 @@ public class VncViewer extends java.applet.Applet
   public void enableInput(boolean enable) {
     vc.enableInput(enable);
   }
+  
+  //
+  // Resize framebuffer if autoScale is enabled.
+  //
+  
+  public void componentResized(ComponentEvent e) {
+    if (e.getComponent() == vncFrame && vc != null &&
+        (options.autoScale || options.fixedRatioScale)) {
+      vc.setScaledSize();
+    }
+  }
+  
+  //
+  // Ignore component events we're not interested in.
+  //
+  
+  public void componentShown(ComponentEvent e) { }
+  public void componentMoved(ComponentEvent e) { }
+  public void componentHidden(ComponentEvent e) { }
 
   //
   // Close application properly on window close event.
