@@ -59,6 +59,7 @@ from the X Consortium.
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <unistd.h>
 #include <stdarg.h>
 #include <sys/types.h>
@@ -321,6 +322,25 @@ ddxProcessArgument (argc, argv, i)
     if (strcmp(argv[i], "-deferupdate") == 0) {	/* -deferupdate ms */
 	if (i + 1 >= argc) UseMsg();
 	rfbDeferUpdateTime = atoi(argv[i+1]);
+	return 2;
+    }
+
+    if (strcmp(argv[i], "-alrqual") == 0) {
+	if (i + 1 >= argc) UseMsg();
+	rfbALRQualityLevel = atoi(argv[i+1]);
+	if (rfbALRQualityLevel < 1 || rfbALRQualityLevel > 100) UseMsg();
+	return 2;
+    }
+
+    if (strcmp(argv[i], "-alrsamp") == 0) {
+	if (i + 1 >= argc) UseMsg();
+	switch(toupper(argv[i+1][0])) {
+	    case 'G': case '0':  rfbALRSubsampLevel = TVNC_GRAY;  break;
+	    case '1':  rfbALRSubsampLevel = TVNC_1X;  break;
+	    case '2':  rfbALRSubsampLevel = TVNC_2X;  break;
+	    case '4':  rfbALRSubsampLevel = TVNC_4X;  break;
+	    default:  UseMsg();
+	}
 	return 2;
     }
 

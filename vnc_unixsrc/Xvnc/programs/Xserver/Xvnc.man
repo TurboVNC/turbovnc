@@ -27,6 +27,7 @@ Xvnc \- an X server providing VNC connectivity
 [\-noclipboardsend] [\-noclipboardrecv] [\-noreverse]
 [\-idletimeout \fItime\fR] [\-httpd \fIdir\fR]
 [\-httpport \fIport\fR] [\-deferupdate \fItime\fR] [\-alr \fItime\fR]
+[\-alrqual \fIlevel\fR] [\-alrsamp \fI1X | 2X | 4X | gray\fR]
 [\-economictranslate] [\-desktop \fIname\fR] [\-alwaysshared]
 [\-nevershared] [\-dontdisconnect] [\-viewonly] [\-localhost]
 [\-interface ipaddr] [\-inetd] [\-compatiblekbd]
@@ -157,6 +158,17 @@ X[Shm]PutImage() are eligible for ALR.  This is designed to work in conjunction
 with VirtualGL and to prevent blinking cursors from confusing the ALR
 algorithm.  You can, however, set the \fBTVNC_ALRALL\fR environment variable to
 \fB1\fR to make all screen regions eligible for ALR.
+.TP
+\fB\-alrqual\fR \fIlevel\fR
+Instead of sending a mathematically lossless image for an automatic lossless
+refresh, send a JPEG image with the specified JPEG quality (95 is a good
+choice, as this is the equivalent of the "Tight + Perceptually Lossless JPEG"
+preset.)
+.TP
+\fB\-alrsamp\fR \fI1X | 2X | 4X | gray\fR
+Specify the level of chrominance subsampling to be used when sending an
+automatic lossless refresh (default: 1X.)  This has no effect unless
+\fI-alrqual\fR is also specified.
 .TP
 \fB\-economictranslate\fR
 Use less memory-hungry pixel format translation.
