@@ -256,6 +256,12 @@ ddxProcessArgument (argc, argv, i)
 	return 2;
     }
 
+    if (strcmp(argv[i], "-idletimeout") == 0) { /* -idletimeout sec */
+	if (i + 1 >= argc) UseMsg();
+	rfbIdleTimeout = atoi(argv[i+1]);
+	return 2;
+    }
+
     if (strcmp(argv[i], "-nocursor") == 0) {
 	noCursor = TRUE;
 	return 1;
@@ -981,7 +987,17 @@ AbortDDX()
 void
 OsVendorInit()
 {
-	rfbAuthInit();
+    rfbAuthInit();
+    if (rfbMaxIdleTimeout > 0 && (rfbIdleTimeout > rfbMaxIdleTimeout
+        || rfbIdleTimeout == 0)) {
+        rfbIdleTimeout = rfbMaxIdleTimeout;
+        rfbLog("NOTICE: idle timeout set to %d seconds per system policy\n",
+            rfbIdleTimeout);
+    }
+    if (rfbIdleTimeout > 0) {
+        idleTimer = TimerSet(idleTimer, 0, rfbIdleTimeout * 1000,
+            idleTimeoutCallback, NULL);
+    }
 }
 
 void
@@ -1036,6 +1052,7 @@ ddxUseMsg()
     ErrorF("-noreverse             disable reverse connections\n");
     ErrorF("-alr S                 enable automatic lossless refresh and set timer to S\n");
     ErrorF("                       seconds (S is floating point)\n");
+    ErrorF("-idletimeout S         exit if S seconds elapse with no VNC viewer connections\n");
     exit(1);
 }
 

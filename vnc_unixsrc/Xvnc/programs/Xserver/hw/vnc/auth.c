@@ -422,6 +422,22 @@ ReadConfigFile()
             continue;
         }
 
+        n = 17;
+        if (!strncmp(buf2, "max-idle-timeout=", n)) {
+            CARD32 t;
+
+            if (buf2[n] == '\0') {
+                FatalError("ERROR in %s: max-idle-timeout is empty!", rfbAuthConfigFile);
+            }
+
+            if (sscanf(&buf2[n], "%d", &t) < 1 || t <= 0) {
+                FatalError("ERROR in %s: max-idle-timeout value must be > 0!", rfbAuthConfigFile);
+            }
+
+            rfbMaxIdleTimeout = t;
+            continue;
+        }
+
         if (buf2[0] != '#')
             rfbLog("WARNING: unrecognized auth config line '%s'\n", buf);
     }

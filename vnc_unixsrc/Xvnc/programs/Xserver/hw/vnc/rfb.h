@@ -476,6 +476,11 @@ extern int ublen;
 extern rfbClientPtr rfbClientHead;
 extern rfbClientPtr pointerClient;
 
+extern CARD32 rfbMaxIdleTimeout;
+extern CARD32 rfbIdleTimeout;
+extern OsTimerPtr idleTimer;
+CARD32 idleTimeoutCallback(OsTimerPtr, CARD32, pointer);
+
 extern Bool rfbAlwaysShared;
 extern Bool rfbNeverShared;
 extern Bool rfbDontDisconnect;
