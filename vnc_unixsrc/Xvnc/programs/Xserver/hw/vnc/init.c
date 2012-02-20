@@ -279,6 +279,16 @@ ddxProcessArgument (argc, argv, i)
 	return 1;
     }
 
+    if (strcmp(argv[i], "-noclipboardsend") == 0) {
+	rfbAuthDisableCBSend = TRUE;
+	return 1;
+    }
+
+    if (strcmp(argv[i], "-noclipboardrecv") == 0) {
+	rfbAuthDisableCBRecv = TRUE;
+	return 1;
+    }
+
     if (strcmp(argv[i], "-otpauth") == 0) {
 	rfbOptOtpauth = TRUE;
 	return 1;

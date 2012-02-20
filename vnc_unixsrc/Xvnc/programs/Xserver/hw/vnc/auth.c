@@ -61,6 +61,8 @@ static void rfbVncAuthSendChallenge(rfbClientPtr cl);
 
 char* rfbAuthConfigFile = AUTH_DEFAULT_CONF_FILE;
 Bool  rfbAuthDisableRevCon = FALSE;
+Bool  rfbAuthDisableCBSend = FALSE;
+Bool  rfbAuthDisableCBRecv = FALSE;
 
 static int nAuthMethodsEnabled = 0;
 static int preferenceLimit = 1;	/* Force once through the loop in rfbSendAuthCaps */
@@ -389,6 +391,16 @@ ReadConfigFile()
 
         if (!strcmp(buf2, "no-remote-connections")) {
             interface.s_addr = htonl (INADDR_LOOPBACK);
+            continue;
+        }
+
+        if (!strcmp(buf2, "no-clipboard-send")) {
+            rfbAuthDisableCBSend = TRUE;
+            continue;
+        }
+
+        if (!strcmp(buf2, "no-clipboard-recv")) {
+            rfbAuthDisableCBRecv = TRUE;
             continue;
         }
 

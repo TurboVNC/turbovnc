@@ -1133,7 +1133,7 @@ rfbProcessClientNormalMessage(cl)
 	}
 
 	/* NOTE: We do not accept cut text from a view-only client */
-	if (!rfbViewOnly && !cl->viewOnly)
+	if (!rfbViewOnly && !cl->viewOnly && !rfbAuthDisableCBRecv)
 	    rfbSetXCutText(str, msg.cct.length);
 
 	xfree(str);
@@ -1753,7 +1753,7 @@ rfbSendServerCutText(char *str, int len)
     rfbClientPtr cl, nextCl;
     rfbServerCutTextMsg sct;
 
-    if (rfbViewOnly || !str || len <= 0)
+    if (rfbViewOnly || !str || len <= 0 || rfbAuthDisableCBSend)
 	return;
 
     for (cl = rfbClientHead; cl; cl = nextCl) {
