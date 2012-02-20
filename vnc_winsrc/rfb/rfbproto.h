@@ -688,19 +688,19 @@ typedef struct _rfbZlibHeader {
  *             if 1001 (0x09), then the compression type is "jpeg",
  *             if 1010 (0x0A), then the compression type is "basic" and no
  *               Zlib compression was used,
+ *             if 1110 (0x0E), then the compression type is "basic", no Zlib
+ *               compression was used, and a "filter id" byte follows this
+ *               byte,
  *             if 0xxx, then the compression type is "basic" and Zlib
  *               compression was used,
  *             values greater than 1010 are not valid.
  *
  * If the compression type is "basic" and Zlib compression was used, then bits
- * 5..4 of the compression control byte specify the following:
+ * 6..4 of the compression control byte (those xxx in 0xxx) specify the
+ * following:
  *
  *   bits 5-4:  decimal representation is the index of a particular zlib
- *              stream which should be used for decompressing the data.
- *
- * Bit 6 of the compression control byte specifies the following, regardless of
- * whether Zlib compression was used:
- *
+ *              stream which should be used for decompressing the data;
  *   bit 6:     if 1, then a "filter id" byte is following this byte.
  *
  *-- The data that follows after the compression control byte described
