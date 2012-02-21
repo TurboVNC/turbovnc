@@ -1,7 +1,7 @@
 /*
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
                        All Rights Reserved.
- *  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2011 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  *  Copyright (C) 2000-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -768,7 +768,7 @@ AuthenticateVNC(void)
     }
   } else if (appData.autoPass) {
     passwd = buffer;
-    cstatus = fgets(buffer, sizeof buffer, stdin);
+    cstatus = fgets(buffer, sizeof(buffer), stdin);
     if (cstatus == NULL)
        buffer[0] = '\0';
     else
@@ -812,6 +812,7 @@ AuthenticateUnixLogin(void)
     char* user;
     char* passwd;
     char  buf[64], buf2[256];
+    char  buffer[256];
     CARD32 userLen;
     CARD32 pwdLen;
     CARD32 t;
@@ -824,9 +825,18 @@ AuthenticateUnixLogin(void)
     if ((appData.userLogin != NULL) && (strlen(appData.userLogin) > 0))
 	user = appData.userLogin;
 
-    if (appData.passwordDialog) {
+    if (user && appData.autoPass) {
+        if ( fgets(buffer, sizeof(buffer), stdin) == NULL ) {
+            buffer[0] = '\0';
+            DoUserPwdDialog(&user, &passwd);
+        } else {
+            passwd = buffer;
+            int len = strlen(buffer);
+            if (len > 0 && buffer[len - 1] == '\n')
+                buffer[len - 1] = '\0';
+        }
+    } else if (appData.passwordDialog) {
 	DoUserPwdDialog(&user, &passwd);
-
     } else {
 	if (user == NULL) {
 	    buf2[0] = 0;
@@ -887,6 +897,8 @@ AuthenticateUnixLogin(void)
 
     if (!WriteExact(rfbsock, (char *)passwd, pwdLen))
 	return False;
+
+    memset(buffer, '\0', sizeof(buffer));
 
     while (*passwd == '\0')
     	*passwd++ = '\0';
