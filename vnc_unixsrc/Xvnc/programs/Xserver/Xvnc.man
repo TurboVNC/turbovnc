@@ -161,9 +161,9 @@ algorithm.  You can, however, set the \fBTVNC_ALRALL\fR environment variable to
 .TP
 \fB\-alrqual\fR \fIlevel\fR
 Instead of sending a mathematically lossless image for an automatic lossless
-refresh, instead send a JPEG image with the specified JPEG quality (95 is a
-good choice, as this is the equivalent of the "Tight + Perceptually Lossless
-JPEG" preset.)
+refresh, send a JPEG image with the specified JPEG quality (95 is a good
+choice, as this is the equivalent of the "Tight + Perceptually Lossless JPEG"
+preset.)
 .TP
 \fB\-alrsamp\fR \fI1X | 2X | 4X | gray\fR
 Specify the level of chrominance subsampling to be used when sending an
