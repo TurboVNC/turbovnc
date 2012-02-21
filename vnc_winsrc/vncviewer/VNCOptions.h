@@ -1,4 +1,4 @@
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2011 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -129,6 +129,8 @@ public:
 	bool	m_FSAltEnter;
 	bool	m_noUnixLogin;
 	char	m_user[256];
+
+	bool	m_autoPass;
 
     // Logging
     int     m_logLevel;

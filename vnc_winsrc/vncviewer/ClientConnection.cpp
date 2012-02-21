@@ -1,4 +1,4 @@
-//  Copyright (C) 2009-2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2009-2011 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2008 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2003-2006 Constantin Kaplinsky. All Rights Reserved.
@@ -1235,7 +1235,18 @@ bool ClientConnection::AuthenticateVNC(char *errBuf, int errBufSize)
 
 	char passwd[MAXPWLEN + 1];
 	// Was the password already specified in a config file?
-	if (m_passwdSet) {
+	if (m_opts.m_autoPass) {
+		char *cstatus = fgets(passwd, sizeof(passwd), stdin);
+		size_t len    = strlen(passwd);
+		if ( (cstatus == NULL) || (len == 0) ) {
+			passwd[0] = '\0';
+			_snprintf(errBuf, errBufSize, "Empty password");
+			return false;
+		} else {
+			if (len > 0 && passwd[len-1] == '\n') passwd[len-1] = '\0';
+		}
+	}
+	else if (m_passwdSet) {
 		char *pw = vncDecryptPasswd(m_encPasswd);
 		strcpy(passwd, pw);
 		free(pw);
@@ -1292,22 +1303,34 @@ bool ClientConnection::AuthenticateUnixLogin(char *errBuf, int errBufSize)
 		user[255] = '\0';
 	}
 
-	LoginAuthDialog ad(m_opts.m_display, "Unix Login Authentication", user);
-	ad.DoDialog();
-	strncpy(user, ad.m_username, 255);
-	user[255] = '\0';
-	if (strlen(user) == 0) {
-		_snprintf(errBuf, errBufSize, "Empty user name");
-		return false;
-	}
-	strncpy(m_opts.m_user, user, 255);
-	m_opts.m_user[255] = '\0';
+	if ( (strlen(user) > 0) && m_opts.m_autoPass) {
+		char *cstatus = fgets(passwd, sizeof(passwd), stdin);
+		size_t len    = strlen(passwd);
+		if ( (cstatus == NULL) || (len == 0) ) {
+			passwd[0] = '\0';
+			_snprintf(errBuf, errBufSize, "Empty password");
+			return false;
+		} else {
+			if (len > 0 && passwd[len-1] == '\n') passwd[len-1] = '\0';
+		}
+	} else {
+		LoginAuthDialog ad(m_opts.m_display, "Unix Login Authentication", user);
+		ad.DoDialog();
+		strncpy(user, ad.m_username, 255);
+		user[255] = '\0';
+		if (strlen(user) == 0) {
+			_snprintf(errBuf, errBufSize, "Empty user name");
+			return false;
+		}
+		strncpy(m_opts.m_user, user, 255);
+		m_opts.m_user[255] = '\0';
 
-	strncpy(passwd, ad.m_passwd, 255);
-	passwd[255] = '\0';
-	if (strlen(passwd) == 0) {
-		_snprintf(errBuf, errBufSize, "Empty password");
-		return false;
+		strncpy(passwd, ad.m_passwd, 255);
+		passwd[255] = '\0';
+		if (strlen(passwd) == 0) {
+			_snprintf(errBuf, errBufSize, "Empty password");
+			return false;
+		}
 	}
 
 	t = Swap32IfLE(strlen(user));
