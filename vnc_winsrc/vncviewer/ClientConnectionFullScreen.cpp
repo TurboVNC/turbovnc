@@ -1,5 +1,5 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2011 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -68,11 +68,11 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 		style &= ~(WS_DLGFRAME | WS_THICKFRAME | WS_BORDER);
 		
 		SetWindowLong(m_hwnd1, GWL_STYLE, style);
-		int cx = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-		int cy = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-		int x = GetSystemMetrics(SM_XVIRTUALSCREEN);
-		int y = GetSystemMetrics(SM_YVIRTUALSCREEN);
-		SetWindowPos(m_hwnd1, HWND_TOPMOST, x, y, cx, cy, SWP_FRAMECHANGED);
+		RECT screenArea, workArea;
+		GetFullScreenMetrics(screenArea, workArea);
+		SetWindowPos(m_hwnd1, HWND_TOPMOST, screenArea.left, screenArea.top,
+			screenArea.right - screenArea.left,
+			screenArea.bottom - screenArea.top, SWP_FRAMECHANGED);
 		CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_FULLSCREEN, MF_BYCOMMAND|MF_CHECKED);
 		
 	} else {
@@ -81,10 +81,106 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 		style |= (WS_DLGFRAME | WS_THICKFRAME | WS_BORDER);
 		
 		SetWindowLong(m_hwnd1, GWL_STYLE, style);
-		SetWindowPos(m_hwnd1, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 		ShowWindow(m_hwnd1, SW_NORMAL);		
+		SizeWindow(true);
 		CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_FULLSCREEN, MF_BYCOMMAND|MF_UNCHECKED);
 
+	}
+}
+
+#define WidthOf(rect) ((rect).right - (rect).left)
+#define HeightOf(rect) ((rect).bottom - (rect).top)
+
+typedef struct _FSMetrics {
+	RECT screenArea, workArea, screenArea0, workArea0;
+	bool equal;
+} FSMetrics;
+
+static BOOL CALLBACK MonitorEnumProc(HMONITOR hmon, HDC hdc, LPRECT rect,
+	LPARAM data)
+{
+	FSMetrics *fsm = (FSMetrics *)data;
+	MONITORINFO mi;
+
+	memset(&mi, 0, sizeof(MONITORINFO));
+	mi.cbSize = sizeof(MONITORINFO);
+	GetMonitorInfo(hmon, &mi);
+
+	// If any monitors aren't equal in resolution to and evenly offset from the
+	// primary, then we can't use the simple path.
+	if (WidthOf(mi.rcMonitor) != WidthOf(fsm->screenArea0) ||
+	    HeightOf(mi.rcMonitor) != HeightOf(fsm->screenArea0) ||
+	    (abs(mi.rcMonitor.top - fsm->screenArea0.top) %
+	     HeightOf(fsm->screenArea0)) != 0 ||
+	    (abs(mi.rcMonitor.left - fsm->screenArea0.left) %
+	     WidthOf(fsm->screenArea0)) != 0)
+		fsm->equal = 0;
+
+	// If the screen areas of the primary monitor and this monitor overlap
+	// vertically, then allow the full-screen window to extend horizontally to
+	// this monitor, and constrain it vertically, if necessary, to fit within
+	// this monitor's dimensions.
+	if (min(mi.rcMonitor.bottom, fsm->screenArea0.bottom) -
+	    max(mi.rcMonitor.top, fsm->screenArea0.top) > 0) {
+		fsm->screenArea.top = max(mi.rcMonitor.top, fsm->screenArea.top);
+		fsm->screenArea.left = min(mi.rcMonitor.left, fsm->screenArea.left);
+		fsm->screenArea.right = max(mi.rcMonitor.right, fsm->screenArea.right);
+		fsm->screenArea.bottom = min(mi.rcMonitor.bottom, fsm->screenArea.bottom);
+	}
+
+	// If the work areas of the primary monitor and this monitor overlap
+	// vertically, and if the top portion of the primary monitor intersects with
+	// this monitor's work area, then allow the non-full-screen window to extend
+	// horizontally to this monitor, and constrain it vertically, if necessary,
+	// to fit within this monitor's work area dimensions.
+	if (mi.rcWork.top <= 0 && mi.rcWork.left >=0 &&
+	    min(mi.rcWork.bottom, fsm->workArea0.bottom) -
+	    max(mi.rcWork.top, fsm->workArea0.top) > 0) {
+		fsm->workArea.top = max(mi.rcWork.top, fsm->workArea.top);
+		fsm->workArea.left = min(mi.rcWork.left, fsm->workArea.left);
+		fsm->workArea.right = max(mi.rcWork.right, fsm->workArea.right);
+		fsm->workArea.bottom = min(mi.rcWork.bottom, fsm->workArea.bottom);
+	}
+
+	return TRUE;
+}
+
+void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea)
+{
+	FSMetrics fsm;
+	int primaryWidth = GetSystemMetrics(SM_CXSCREEN);
+	int primaryHeight = GetSystemMetrics(SM_CYSCREEN);
+	int scaledWidth = m_si.framebufferWidth * m_opts.m_scale_num /
+		m_opts.m_scale_den;
+	int scaledHeight = m_si.framebufferHeight * m_opts.m_scale_num /
+		m_opts.m_scale_den;
+	fsm.equal = 1;
+	fsm.screenArea.top = fsm.screenArea.left = 0;
+	fsm.screenArea.right = primaryWidth;
+	fsm.screenArea.bottom = primaryHeight;
+	fsm.screenArea0 = fsm.screenArea;
+	SystemParametersInfo(SPI_GETWORKAREA, 0, &fsm.workArea, 0);
+	fsm.workArea0 = fsm.workArea;
+
+	if (m_opts.m_Span == SPAN_PRIMARY ||
+	    (m_opts.m_Span == SPAN_AUTO &&
+	     scaledWidth <= primaryWidth && scaledHeight <= primaryHeight) ||
+	    !EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)&fsm)) {
+		workArea = fsm.workArea0;
+		screenArea = fsm.screenArea0;
+	} else {
+		if (fsm.equal) {
+			// All monitors are equal in resolution and aligned in a perfect grid.
+			// Thus, we can extend the viewer window to all of them, both
+			// horizontally and vertically (otherwise, the viewer window can only
+			// be extended horizontally.)
+			screenArea.left = GetSystemMetrics(SM_XVIRTUALSCREEN);
+			screenArea.top = GetSystemMetrics(SM_YVIRTUALSCREEN);
+			screenArea.right = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+			screenArea.bottom = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+		}
+		else screenArea = fsm.screenArea;
+		workArea = fsm.workArea;
 	}
 }
 
@@ -92,8 +188,10 @@ bool ClientConnection::BumpScroll(int x, int y)
 {
 	int dx = 0;
 	int dy = 0;
-	int rightborder = GetSystemMetrics(SM_CXVIRTUALSCREEN)-BUMPSCROLLBORDER;
-	int bottomborder = GetSystemMetrics(SM_CYVIRTUALSCREEN)-BUMPSCROLLBORDER;
+	RECT screenArea, workArea;
+	GetFullScreenMetrics(screenArea, workArea);
+	int rightborder = screenArea.right - screenArea.left - BUMPSCROLLBORDER;
+	int bottomborder = screenArea.bottom - screenArea.top - BUMPSCROLLBORDER;
 	if (x < BUMPSCROLLBORDER)
 		dx = -BUMPSCROLLAMOUNTX * m_opts.m_scale_num / m_opts.m_scale_den;
 	if (x >= rightborder)

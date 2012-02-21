@@ -46,6 +46,9 @@
 #define SMALLCURSOR 3
 #define MAX_LEN_COMBO 5
 
+#define SPAN_OPTS 3
+enum {SPAN_PRIMARY=0, SPAN_ALL, SPAN_AUTO};
+
 #define KEY_VNCVIEWER_HISTORI _T("Software\\TurboVNC\\VNCviewer\\History")
 
 struct COMBOSTRING {
@@ -90,6 +93,7 @@ public:
 	// default connection options - can be set through Dialog
 	bool	m_ViewOnly;
 	bool	m_FullScreen;
+	int		m_Span;
 	bool	m_Use8Bit;
 	bool	m_DoubleBuffer;
 	int		m_PreferredEncoding;

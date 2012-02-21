@@ -242,6 +242,7 @@ private:
 	void SetFullScreenMode(bool enable, bool suppressPrompt=false);
 	bool InFullScreenMode();
 	void RealiseFullScreenMode(bool suppressPrompt);
+	void GetFullScreenMetrics(RECT &screenArea, RECT &workArea);
 	bool BumpScroll(int x, int y);
 
 	// ClientConnectionClipboard.cpp
