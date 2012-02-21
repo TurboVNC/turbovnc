@@ -38,6 +38,43 @@ static Dimension scrollbarWidth, scrollbarHeight;
 
 
 /*
+ * These functions are borrowed from OpenSUSE.  They give the window manager a
+ * hint that the window is full-screen so the taskbar won't appear on top
+ * of it.
+ */
+
+#define _NET_WM_STATE_REMOVE        0    /* remove/unset property */
+#define _NET_WM_STATE_ADD           1    /* add/set property */
+
+static void
+netwm_set_state(Display *dpy, Window win, int operation, Atom state)
+{
+    XEvent e;
+    Atom _NET_WM_STATE = XInternAtom(dpy, "_NET_WM_STATE", False);
+
+    memset(&e, 0, sizeof(e));
+    e.xclient.type = ClientMessage;
+    e.xclient.message_type = _NET_WM_STATE;
+    e.xclient.display = dpy;
+    e.xclient.window = win;
+    e.xclient.format = 32;
+    e.xclient.data.l[0] = operation;
+    e.xclient.data.l[1] = state;
+
+    XSendEvent(dpy, DefaultRootWindow(dpy), False,
+               SubstructureRedirectMask, &e);
+}
+
+static void
+netwm_fullscreen(Display *dpy, Window win, int state)
+{
+    Atom _NET_WM_STATE_FULLSCREEN = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
+    int op = state ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE;
+    netwm_set_state(dpy, win, op, _NET_WM_STATE_FULLSCREEN);
+}
+
+
+/*
  * FullScreenOn goes into full-screen mode.  It makes the toplevel window
  * unmanaged by the window manager and sets its geometry appropriately.
  *
@@ -98,16 +135,12 @@ FullScreenOn()
     scrollbarWidth = oldViewportWidth - clipWidth;
     scrollbarHeight = oldViewportHeight - clipHeight;
 
-    if (si.framebufferWidth > dpyWidth) {
+    if (si.framebufferWidth > dpyWidth || si.framebufferHeight > dpyHeight) {
       viewportWidth = toplevelWidth = dpyWidth + scrollbarWidth;
+      viewportHeight = toplevelHeight = dpyHeight + scrollbarHeight;
     } else {
       viewportWidth = si.framebufferWidth + scrollbarWidth;
       toplevelWidth = dpyWidth;
-    }
-
-    if (si.framebufferHeight > dpyHeight) {
-      viewportHeight = toplevelHeight = dpyHeight + scrollbarHeight;
-    } else {
       viewportHeight = si.framebufferHeight + scrollbarHeight;
       toplevelHeight = dpyHeight;
     }
@@ -122,16 +155,16 @@ FullScreenOn()
   viewportX = (toplevelWidth - viewportWidth) / 2;
   viewportY = (toplevelHeight - viewportHeight) / 2;
 
+  XtVaSetValues(toplevel, XtNmaxWidth, toplevelWidth,
+		XtNmaxHeight, toplevelHeight, NULL);
+  netwm_fullscreen(dpy, XtWindow(toplevel), True);
+  XSync(dpy, False);
 
   /* We want to stop the window manager from managing our toplevel window.
      This is not really a nice thing to do, so may not work properly with every
-     window manager.  We do this simply by setting overrideRedirect and
-     reparenting our window to the root.  The window manager will get a
-     ReparentNotify and hopefully clean up its frame window. */
+     window manager.  We do this simply by setting overrideRedirect. */
 
   XtVaSetValues(toplevel, XtNoverrideRedirect, True, NULL);
-
-  XReparentWindow(dpy, XtWindow(toplevel), DefaultRootWindow(dpy), 0, 0);
 
   /* Some WMs does not obey x,y values of XReparentWindow; the window
      is not placed in the upper, left corner. The code below fixes
@@ -180,7 +213,7 @@ FullScreenOn()
   /* Optionally, grab the keyboard. */
 
   if (appData.grabKeyboard &&
-      XtGrabKeyboard(desktop, True, GrabModeAsync,
+      XtGrabKeyboard(toplevel, True, GrabModeAsync,
 		     GrabModeAsync, CurrentTime) != GrabSuccess) {
     fprintf(stderr, "XtGrabKeyboard() failed.\n");
   }
@@ -211,9 +244,10 @@ FullScreenOff()
   appData.fullScreen = False;
 
   if (appData.grabKeyboard)
-    XtUngrabKeyboard(desktop, CurrentTime);
+    XtUngrabKeyboard(toplevel, CurrentTime);
 
-  XtUnmapWidget(toplevel);
+  XtVaSetValues(toplevel, XtNmaxWidth, si.framebufferWidth,
+		XtNmaxHeight, si.framebufferHeight, NULL);
 
   XtResizeWidget(toplevel,
 		 viewportWidth - scrollbarWidth,
@@ -247,12 +281,13 @@ FullScreenOff()
 
   XtResizeWidget(toplevel, toplevelWidth, toplevelHeight, 0);
 
-  XtMapWidget(toplevel);
   XSync(dpy, False);
 
   /* Set the popup back to non-overrideRedirect */
 
   XtVaSetValues(popup, XtNoverrideRedirect, False, NULL);
+
+  netwm_fullscreen(dpy, XtWindow(toplevel), False);
 }
 
 

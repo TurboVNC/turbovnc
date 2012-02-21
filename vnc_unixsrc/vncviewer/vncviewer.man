@@ -75,11 +75,7 @@ Disable transfer of mouse and keyboard events from the client to the
 server.
 .TP
 \fB\-fullscreen\fR
-Start in full\-screen mode.  Please be aware that operating in
-full\-screen mode may confuse X window managers.  Typically, such
-conflicts cause incorrect handling of input focus or make the viewer
-window disappear mysteriously.  See the grabKeyboard setting in the
-RESOURCES section below for a method to solve the input focus problem.
+Start in full\-screen mode.
 .TP
 \fB\-noraiseonbeep\fR
 By default, if an application running on the VNC server generates a
@@ -342,7 +338,7 @@ Equivalent of the \fB\-fullscreen\fR option.  Default false.
 .TP
 .B grabKeyboard
 Grab keyboard in full-screen mode.  This can help to solve problems
-with losing keyboard focus.  Default false.
+with losing keyboard focus.  Default true.
 .TP
 .B raiseOnBeep
 If set to false, this is the equivalent of the \fB\-noraiseonbeep\fR option.

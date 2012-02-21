@@ -111,45 +111,34 @@ ToplevelInitBeforeRealization()
   dpyWidth = WidthOfScreen(DefaultScreenOfDisplay(dpy));
   dpyHeight = HeightOfScreen(DefaultScreenOfDisplay(dpy));
 
-  if (appData.fullScreen) {
+  /* not full screen - work out geometry for middle of screen unless
+     specified by user */
 
-    /* full screen - set position to 0,0, but defer size calculation until
-       widgets are realized */
+  XtVaGetValues(toplevel, XtNgeometry, &geometry, NULL);
 
-    XtVaSetValues(toplevel, XtNoverrideRedirect, True,
-		  XtNgeometry, "+0+0", NULL);
+  if (geometry == NULL) {
+    Dimension toplevelX, toplevelY;
+    Dimension toplevelWidth = si.framebufferWidth;
+    Dimension toplevelHeight = si.framebufferHeight;
 
-  } else {
+    if ((toplevelWidth + appData.wmDecorationWidth) >= dpyWidth)
+      toplevelWidth = dpyWidth - appData.wmDecorationWidth;
 
-    /* not full screen - work out geometry for middle of screen unless
-       specified by user */
+    if ((toplevelHeight + appData.wmDecorationHeight) >= dpyHeight)
+      toplevelHeight = dpyHeight - appData.wmDecorationHeight;
 
-    XtVaGetValues(toplevel, XtNgeometry, &geometry, NULL);
+    toplevelX = (dpyWidth - toplevelWidth - appData.wmDecorationWidth) / 2;
 
-    if (geometry == NULL) {
-      Dimension toplevelX, toplevelY;
-      Dimension toplevelWidth = si.framebufferWidth;
-      Dimension toplevelHeight = si.framebufferHeight;
+    toplevelY = (dpyHeight - toplevelHeight - appData.wmDecorationHeight) /2;
 
-      if ((toplevelWidth + appData.wmDecorationWidth) >= dpyWidth)
-	toplevelWidth = dpyWidth - appData.wmDecorationWidth;
+    /* set position via "geometry" so that window manager thinks it's a
+       user-specified position and therefore honours it */
 
-      if ((toplevelHeight + appData.wmDecorationHeight) >= dpyHeight)
-	toplevelHeight = dpyHeight - appData.wmDecorationHeight;
+    geometry = XtMalloc(256);
 
-      toplevelX = (dpyWidth - toplevelWidth - appData.wmDecorationWidth) / 2;
-
-      toplevelY = (dpyHeight - toplevelHeight - appData.wmDecorationHeight) /2;
-
-      /* set position via "geometry" so that window manager thinks it's a
-	 user-specified position and therefore honours it */
-
-      geometry = XtMalloc(256);
-
-      sprintf(geometry, "%dx%d+%d+%d",
-	      toplevelWidth, toplevelHeight, toplevelX, toplevelY);
-      XtVaSetValues(toplevel, XtNgeometry, geometry, NULL);
-    }
+    sprintf(geometry, "%dx%d+%d+%d",
+	    toplevelWidth, toplevelHeight, toplevelX, toplevelY);
+    XtVaSetValues(toplevel, XtNgeometry, geometry, NULL);
   }
 
   /* Test if the keyboard is grabbed.  If so, it's probably because the
