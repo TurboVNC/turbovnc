@@ -53,9 +53,6 @@ In addition, TurboVNC provides the following features:
 		automatically if the user stops interacting with the application for a
 		certain period of time.
 
-	* TurboVNC is fully supported on Solaris platforms (client and server) and on
-		Intel-based Macs (client only.)
-
 TurboVNC, when used with VirtualGL, provides a highly performant and robust
 solution for remotely displaying 3D applications over all types of networks.
 

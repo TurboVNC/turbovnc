@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2011-12-19T15:36:43">
+<meta name="date" content="2012-02-21T06:32:03">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -24,11 +24,6 @@
 <div class="title">
 <p class="title">User&rsquo;s Guide for TurboVNC 1.1</p>
 </div>
-<a name="file000"></a>
-<p><em>Intended audience:</em> System Administrators, Researchers, and 
-others with knowledge of the Linux or Solaris operating systems and X 
-windows.</p>
-
 <div id="Table_of_Contents">
 <div id="Table_of_ContentsBlock" class="toc">
 <h1 class="toc">Table of Contents</h1>
@@ -46,13 +41,10 @@ windows.</p>
                 <a href="#hd003001" class="toc">3.1 Linux/x86</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd003002" class="toc">3.2 Solaris/x86</a>
+                <a href="#hd003002" class="toc">3.2 Mac/x86</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd003003" class="toc">3.3 Mac/x86</a>
-            </li>
-            <li class="Itemize-3 toc">
-                <a href="#hd003004" class="toc">3.4 Windows</a>
+                <a href="#hd003003" class="toc">3.3 Windows</a>
             </li>
         </ul>
     </li>
@@ -63,21 +55,18 @@ windows.</p>
                 <a href="#hd004001" class="toc">4.1 Installing TurboVNC on Linux</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd004002" class="toc">4.2 Installing TurboVNC on Solaris</a>
-            </li>
-            <li class="Itemize-3 toc">
-                <a href="#hd004003" class="toc">4.3 Installing the TurboVNC Viewer on OS 
+                <a href="#hd004002" class="toc">4.2 Installing the TurboVNC Viewer on OS 
                 X</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd004004" class="toc">4.4 Installing the TurboVNC Viewer on 
+                <a href="#hd004003" class="toc">4.3 Installing the TurboVNC Viewer on 
                 Windows</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd004005" class="toc">4.5 Installing TurboVNC from Source</a>
+                <a href="#hd004004" class="toc">4.4 Installing TurboVNC from Source</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd004006" class="toc">4.6 Uninstalling TurboVNC</a>
+                <a href="#hd004005" class="toc">4.5 Uninstalling TurboVNC</a>
             </li>
         </ul>
     </li>
@@ -169,6 +158,7 @@ windows.</p>
     </li>
 </ul>
 </div></div>
+<a name="file000"></a>
 <p><br /></p>
 
 <hr class="break" />
@@ -264,10 +254,6 @@ report</a></span><a name="idx006"></a>.</p>
         refresh automatically if the user stops interacting with the application 
         for a certain period of time.
     </li>
-    <li class="Itemize-1 Itemize asterisk">
-        TurboVNC is fully supported on Solaris platforms (client and server) and 
-        on Intel-based Macs (client only.)
-    </li>
 </ul>
 
 <p>TurboVNC, when used with VirtualGL, provides a highly performant and 
@@ -349,53 +335,7 @@ distributions without interference.</p>
 
 
 
-<h2 id="hd003002">3.2&nbsp;Solaris/x86</h2>
-
-<div class="table">
-<table class="standard">
-  <thead class="standard">
-  <tr class="head ">
-    <th class="head standard"></th>
-    <th class="head standard">Server (x86)</th>
-    <th class="head standard">Server (x86-64)</th>
-    <th class="head standard">Client</th>
-  </tr>
-  </thead>
-  <tr class="standard">
-    <td class="high standard">Recommended CPU</td>
-    <td class="standard">Pentium 4, 1.7 GHz or faster (or equivalent) <ul class="Itemize"><li class="Itemize-0">
-    For optimal performance, the processor should support SSE2 extensions.
-</li>
-<li class="Itemize-0">
-    Dual processors or dual cores recommended
-</li></ul></td>
-    <td class="standard">Pentium 4/Xeon with EM64T, or&hellip;<br /> AMD Opteron or Athlon64, 1.8 GHz or faster <ul class="Itemize"><li class="Itemize-0">
-    Dual processors or dual cores recommended
-</li></ul></td>
-    <td class="standard">Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent)</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">O/S</td>
-    <td class="standard" colspan="3"><ul class="Itemize"><li class="Itemize-0">
-    Solaris 10 Update 1 or newer (Update 3 or newer recommended)
-</li>
-<li class="Itemize-0">
-    OpenSolaris 2008.11 (or newer)
-</li></ul></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Other Software</td>
-    <td class="standard"></td>
-    <td class="standard"></td>
-    <td class="standard">X server configured to export True Color (24-bit or 32-bit) visuals</td>
-  </tr>
-</table>
-</div>
-
-
-
-
-<h2 id="hd003003">3.3&nbsp;Mac/x86</h2>
+<h2 id="hd003002">3.2&nbsp;Mac/x86</h2>
 
 <div class="table">
 <table class="standard">
@@ -423,7 +363,7 @@ distributions without interference.</p>
 
 
 
-<h2 id="hd003004">3.4&nbsp;Windows</h2>
+<h2 id="hd003003">3.3&nbsp;Windows</h2>
 
 <div class="table">
 <table class="standard">
@@ -511,53 +451,7 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
 
 
 
-<h2 id="hd004002">4.2&nbsp;Installing TurboVNC on Solaris</h2>
-
-<ol class="Ordered numeric">
-    <li class="Ordered-1 Ordered" value="1">
-        Download the TurboVNC Solaris package 
-        (<code>TurboVNC-</code><em><code>{version}</code></em><code>-solarisx86.pkg.bz2</code> 
-        for 32-bit systems or 
-        <code>TurboVNC-</code><em><code>{version}</code></em><code>-solarisx64.pkg.bz2</code> 
-        for 64-bit systems) from the 
-        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-        area</a></span><a name="idx0014"></a> of the 
-        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0015"></a>. <br />
-    </li>
-    <li class="Ordered-1 Ordered" value="2">
-        Log in as root, cd to the directory where you downloaded the package, 
-        and issue the following commands:
-        <dl class="Description">
-            <dt class="Description-3 Description">If TurboVNC 0.6 or older is installed</dt>
-            <dd class="Description-3 Description">
-<pre class="verbatim">
-pkgrm&nbsp;SUNWtvnc
-</pre>
-
-            </dd>
-            <dt class="Description-3 Description">If TurboVNC 1.0 or newer is installed</dt>
-            <dd class="Description-3 Description">
-<pre class="verbatim">
-pkgrm&nbsp;TurboVNC
-</pre>
-
-            </dd>
-        </dl>
-        (answer &ldquo;Y&rdquo; when prompted.)
-<pre class="verbatim">
-bzip2&nbsp;-d&nbsp;TurboVNC*.pkg.bz2
-pkgadd&nbsp;-d&nbsp;TurboVNC*.pkg
-</pre>
-
-        Select the <code>TurboVNC</code> package (usually option 1) from the 
-        menu.
-    </li>
-</ol>
-
-
-
-<h2 id="hd004003">4.3&nbsp;Installing the TurboVNC Viewer on OS X</h2>
+<h2 id="hd004002">4.2&nbsp;Installing the TurboVNC Viewer on OS X</h2>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
@@ -565,9 +459,9 @@ pkgadd&nbsp;-d&nbsp;TurboVNC*.pkg
         (<code>TurboVNC-</code><em><code>{version}</code></em><code>.dmg</code>) 
         from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-        area</a></span><a name="idx0016"></a> of the 
+        area</a></span><a name="idx0014"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0017"></a>.
+        SourceForge project page</a></span><a name="idx0015"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Open the disk image, then open 
@@ -579,7 +473,7 @@ pkgadd&nbsp;-d&nbsp;TurboVNC*.pkg
 
 
 
-<h2 id="hd004004">4.4&nbsp;Installing the TurboVNC Viewer on Windows</h2>
+<h2 id="hd004003">4.3&nbsp;Installing the TurboVNC Viewer on Windows</h2>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
@@ -589,9 +483,9 @@ pkgadd&nbsp;-d&nbsp;TurboVNC*.pkg
         <code>TurboVNC64-</code><em><code>{version}</code></em><code>.exe</code> 
         for 64-bit systems) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-        area</a></span><a name="idx0018"></a> of the 
+        area</a></span><a name="idx0016"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0019"></a>.
+        SourceForge project page</a></span><a name="idx0017"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Run the TurboVNC installer.  The installation of TurboVNC should be 
@@ -602,7 +496,7 @@ pkgadd&nbsp;-d&nbsp;TurboVNC*.pkg
 
 
 
-<h2 id="hd004005">4.5&nbsp;Installing TurboVNC from Source</h2>
+<h2 id="hd004004">4.4&nbsp;Installing TurboVNC from Source</h2>
 
 <p>If you are using a Unix platform for which there is not a pre-built 
 TurboVNC binary package available, then log in as root, download the 
@@ -610,19 +504,19 @@ TurboVNC source tarball
 (<code>turbovnc-</code><em><code>{version}</code></em><code>.tar.gz</code>) 
 from the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-area</a></span><a name="idx0020"></a> of the 
+area</a></span><a name="idx0018"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-SourceForge project page</a></span><a name="idx0021"></a>, uncompress 
+SourceForge project page</a></span><a name="idx0019"></a>, uncompress 
 it, <code>cd&nbsp;vnc/vnc_unixsrc</code>, and read 
 <code>BUILDING.txt</code> for further instructions on how to build 
 TurboVNC from source.</p>
 
 
 
-<h2 id="hd004006">4.6&nbsp;Uninstalling TurboVNC</h2>
+<h2 id="hd004005">4.5&nbsp;Uninstalling TurboVNC</h2>
 
 
-<h3 id="hd004006001">Linux</h3>
+<h3 id="hd004005001">Linux</h3>
 
 <p>As root, issue one of the following commands:</p>
 
@@ -645,19 +539,7 @@ dpkg&nbsp;-r&nbsp;turbovnc
 
 
 
-<h3 id="hd004006002">Solaris</h3>
-
-<p>As root, issue the following command:</p>
-
-<pre class="verbatim">
-pkgrm&nbsp;TurboVNC
-</pre>
-
-<p>Answer &ldquo;yes&rdquo; when prompted.</p>
-
-
-
-<h3 id="hd004006003">OS X</h3>
+<h3 id="hd004005002">OS X</h3>
 
 <p>Use the &ldquo;Uninstall TurboVNC&rdquo; application provided in the 
 TurboVNC disk image, or issue the following command from the Terminal:</p>
@@ -668,7 +550,7 @@ sudo&nbsp;/opt/TurboVNC/bin/uninstall
 
 
 
-<h3 id="hd004006004">Windows</h3>
+<h3 id="hd004005003">Windows</h3>
 
 <p>Use the &ldquo;Programs and Features&rdquo; applet in the Control Panel 
 (or the &ldquo;Add or Remove Programs&rdquo; applet if you are running 
@@ -704,7 +586,7 @@ Windows XP), or &ldquo;Uninstall TurboVNC&rdquo; in the
         In the new Command Prompt/terminal/xterm window, open a Secure Shell 
         (SSH) session into the TurboVNC server machine:
         <dl class="Description">
-            <dt class="Description-3 Description">Linux/Mac/Solaris clients</dt>
+            <dt class="Description-3 Description">Linux/Unix/Mac clients</dt>
             <dd class="Description-3 Description">
 <pre class="verbatim">
 ssh&nbsp;{user}@{server}
@@ -744,7 +626,7 @@ ssh&nbsp;{user}@{server}
     <li class="Ordered-1 Ordered">
         On the client machine, start the TurboVNC Viewer.
         <dl class="Description">
-            <dt class="Description-3 Description">Linux/Mac/Solaris clients</dt>
+            <dt class="Description-3 Description">Linux/Unix/Mac clients</dt>
             <dd class="Description-3 Description">
                  Open a new terminal/xterm and type
 <pre class="verbatim">
@@ -766,7 +648,7 @@ ssh&nbsp;{user}@{server}
           <thead class="standard">
           <tr class="head ">
             <th class="head standard">Windows TurboVNC Viewer</th>
-            <th class="head standard">Linux/Mac/Solaris TurboVNC Viewer</th>
+            <th class="head standard">Linux/Unix/Mac TurboVNC Viewer</th>
           </tr>
           </thead>
           <tr class="standard">
@@ -778,7 +660,7 @@ ssh&nbsp;{user}@{server}
         
         <br /> Enter the X display name (hostname/IP address and display number) 
         of the TurboVNC session in the &ldquo;VNC server&rdquo; field, then 
-        click &ldquo;Connect&rdquo; (Windows) or press Enter (Linux/Mac/Solaris.)
+        click &ldquo;Connect&rdquo; (Windows) or press Enter (Linux/Unix/Mac.)
     </li>
     <li class="Ordered-1 Ordered">
         Another dialog box appears, prompting for the password (if standard VNC 
@@ -790,7 +672,7 @@ ssh&nbsp;{user}@{server}
           <tr class="head ">
             <th class="head standard"></th>
             <th class="head standard">Windows TurboVNC Viewer</th>
-            <th class="head standard">Linux/Mac/Solaris TurboVNC Viewer</th>
+            <th class="head standard">Linux/Unix/Mac TurboVNC Viewer</th>
           </tr>
           </thead>
           <tr class="standard">
@@ -807,7 +689,7 @@ ssh&nbsp;{user}@{server}
         </div>
         
         <br /> Enter the VNC session password or the Unix username/password and 
-        click &ldquo;OK&rdquo; (Windows) or press Enter (Linux/Mac/Solaris.) 
+        click &ldquo;OK&rdquo; (Windows) or press Enter (Linux/Unix/Mac.) 
         <br /><br /> A TurboVNC desktop window should appear on your client 
         machine.  This window contains a virtual desktop with which you can 
         interact to launch X-Windows applications on the TurboVNC server machine.
@@ -998,9 +880,9 @@ in the &ldquo;TurboVNC Connection&rdquo; dialog box or, after connecting
 to the server, click on the Connection Options button in the toolbar.)  
 In the Java viewer, the same thing is accomplished by clicking on the 
 &ldquo;Options&rdquo; button at the top of the browser window.  With the 
-Linux/Mac/Solaris TurboVNC Viewer, the &ldquo;Perceptually 
-Lossless&rdquo; protocol is the default, and you can use the following 
-command-line switches to select another protocol:</p>
+Linux/Unix/Mac TurboVNC Viewer, the &ldquo;Perceptually Lossless&rdquo; 
+protocol is the default, and you can use the following command-line 
+switches to select another protocol:</p>
 
 <p><code>-medqual</code> = select the &ldquo;Tight + Medium Quality 
 JPEG&rdquo; protocol <br /> <code>-lowqual</code> = select the 
@@ -1091,7 +973,7 @@ machine, open a new SSH connection into the TurboVNC server machine
 using the following command line:</p>
 
 <dl class="Description">
-    <dt class="Description-1 Description">Linux/Mac/Solaris clients</dt>
+    <dt class="Description-1 Description">Linux/Unix/Mac clients</dt>
     <dd class="Description-1 Description">
 <pre class="verbatim">
 ssh&nbsp;-L&nbsp;{5900+n}:localhost:{5900+n}&nbsp;{user}@{server}
@@ -1118,7 +1000,7 @@ server <code>my_server</code> using user account <code>my_user</code>,
 you would type:</p>
 
 <dl class="Description">
-    <dt class="Description-1 Description">Linux/Mac/Solaris clients</dt>
+    <dt class="Description-1 Description">Linux/Unix/Mac clients</dt>
     <dd class="Description-1 Description">
 <pre class="verbatim">
 ssh&nbsp;-L&nbsp;5901:localhost:5901&nbsp;my_user@my_server
@@ -1197,7 +1079,7 @@ penalty for using SSH tunneling with TurboVNC.</p>
 <p>For more detailed instructions on the usage of TurboVNC:</p>
 
 <dl class="Description">
-    <dt class="Description-1 Description">Linux/Mac/Solaris</dt>
+    <dt class="Description-1 Description">Linux/Unix/Mac</dt>
     <dd class="Description-1 Description">
         Refer to the TurboVNC man pages:
 <pre class="verbatim">
@@ -1604,7 +1486,7 @@ TurboVNC server for this procedure to perform well.</p>
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully backward compatible with TightVNC, RealVNC, 
 and other VNC flavors, as well as fully compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0022"></a>. 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0020"></a>. 
 You can use the TurboVNC Viewer to connect to a non-TurboVNC server (or 
 vice versa), although this will generally result in some decrease in 
 performance.</p>

@@ -15,7 +15,7 @@
 	#. In the new Command Prompt/terminal/xterm window, open a Secure Shell (SSH)
 		session into the TurboVNC server machine:
 
-		Linux/Mac/Solaris clients :: {:}
+		Linux/Unix/Mac clients :: {:}
 		#Verb: <<---
 		ssh {user}@{server}
 		---
@@ -48,7 +48,7 @@
 
 	#. On the client machine, start the TurboVNC Viewer.
 
-		Linux/Mac/Solaris clients :: {:}
+		Linux/Unix/Mac clients :: {:}
 		Open a new terminal/xterm and type
 		#Verb: <<---
 		/opt/TurboVNC/bin/vncviewer
@@ -59,23 +59,23 @@
 
 	#. A small dialog box will appear.
 		{nl}{nl}
-		|| Windows TurboVNC Viewer || Linux/Mac/Solaris TurboVNC Viewer ||
+		|| Windows TurboVNC Viewer || Linux/Unix/Mac TurboVNC Viewer ||
 		| {img:turbovnc1.png} | {img:turbovnc2.png} |
 		{nl}
 		Enter the X display name (hostname/IP address and display number) of the
 		TurboVNC session in the "VNC server" field, then click "Connect" (Windows)
-		or press Enter (Linux/Mac/Solaris.)
+		or press Enter (Linux/Unix/Mac.)
 
 	#. Another dialog box appears, prompting for the password (if standard
 		VNC authentication is being used) or for the username and password (if
 		Unix login authentication is being used.)
 		{nl}{nl}
-		|| || Windows TurboVNC Viewer || Linux/Mac/Solaris TurboVNC Viewer ||
+		|| || Windows TurboVNC Viewer || Linux/Unix/Mac TurboVNC Viewer ||
 		| Standard VNC Authentication Dialog | {img:turbovnc3.png} | {img:turbovnc4.png} |
 		| Unix Login Authentication Dialog   | {img:turbovnc5.png} | {img:turbovnc6.png} |
 		{nl}
 		Enter the VNC session password or the Unix username/password and click
-		"OK" (Windows) or press Enter (Linux/Mac/Solaris.)
+		"OK" (Windows) or press Enter (Linux/Unix/Mac.)
 		{nl}{nl}
 		A TurboVNC desktop window should appear on your client machine.  This
 		window contains a virtual desktop with which you can interact to launch
@@ -226,7 +226,7 @@ the Options dialog box (click on the "Options" button in the "TurboVNC
 Connection" dialog box or, after connecting to the server, click on the
 Connection Options button in the toolbar.)  In the Java viewer, the same thing
 is accomplished by clicking on the "Options" button at the top of the browser
-window.  With the Linux/Mac/Solaris TurboVNC Viewer, the "Perceptually
+window.  With the Linux/Unix/Mac TurboVNC Viewer, the "Perceptually
 Lossless" protocol is the default, and you can use the following command-line
 switches to select another protocol:
 
@@ -302,7 +302,7 @@ you have started a TurboVNC session on the TurboVNC server machine, open a new
 SSH connection into the TurboVNC server machine using the following command
 line:
 
-	Linux/Mac/Solaris clients :: {:}
+	Linux/Unix/Mac clients :: {:}
 	#Verb: <<---
 	ssh -L {5900+n}:localhost:{5900+n} {user}@{server}
 	---
@@ -320,7 +320,7 @@ you want to connect.
 For instance, if you wish to connect to display '':1'' on server ''my_server''
 using user account ''my_user'', you would type:
 
-	Linux/Mac/Solaris clients :: {:}
+	Linux/Unix/Mac clients :: {:}
 	#Verb: <<---
 	ssh -L 5901:localhost:5901 my_user@my_server
 	---
@@ -384,7 +384,7 @@ tunneling with TurboVNC.
 
 For more detailed instructions on the usage of TurboVNC:
 
-	Linux/Mac/Solaris :: Refer to the TurboVNC man pages:
+	Linux/Unix/Mac :: Refer to the TurboVNC man pages:
 	#Verb: <<---
 	man -M /opt/TurboVNC/man {vncserver | Xvnc | vncviewer | vncconnect | vncpasswd}
 	---
