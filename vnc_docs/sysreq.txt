@@ -33,34 +33,6 @@
 	|
 #OPT: hiCol=first
 
-** Solaris/x86
-
-|| || Server (x86) || Server (x86-64) || Client ||
-| Recommended CPU \
-	| Pentium 4, 1.7 GHz or faster (or equivalent) \
-		{list type=ul: \
-			{item:For optimal performance, the processor should support SSE2 \
-				extensions.} \
-			{item:Dual processors or dual cores recommended}} \
-	| Pentium 4/Xeon with EM64T, or...{nl} \
-		AMD Opteron or Athlon64, 1.8 GHz or faster \
-		{list type=ul: \
-			{item:Dual processors or dual cores recommended}} \
-	| Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent) \
-	|
-| O/S \
-	| {list type=ul: \
-			{item: Solaris 10 Update 1 or newer (Update 3 or newer recommended)} \
-			{item: OpenSolaris 2008.11 (or newer)}} \
-	| < \
-	| < \
-	|
-| Other Software \
-	| {:} | {:} \
-	| X server configured to export True Color (24-bit or 32-bit) visuals \
-	|
-#OPT: hiCol=first
-
 ** Mac/x86
 
 || || Client ||

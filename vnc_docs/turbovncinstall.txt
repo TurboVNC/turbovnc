@@ -37,38 +37,6 @@ following error:
 		dpkg -i turbovnc*.deb
 		---
 
-** Installing TurboVNC on Solaris
-
-	1. Download the TurboVNC Solaris package
-		(''TurboVNC-''__''{version}''__''-solarisx86.pkg.bz2'' for 32-bit systems or
-		''TurboVNC-''__''{version}''__''-solarisx64.pkg.bz2'' for 64-bit systems)
-		from the
-		[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
-		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
-		{nl}
-
-	2. Log in as root, cd to the directory where you downloaded the package, and
-		issue the following commands:
-
-		If TurboVNC 0.6 or older is installed :: {:}
-		#Verb: <<---
-		pkgrm SUNWtvnc
-		---
-
-		If TurboVNC 1.0 or newer is installed :: {:}
-		#Verb: <<---
-		pkgrm TurboVNC
-		---
-
-	(answer "Y" when prompted.)
-
-	#Verb: <<---
-	bzip2 -d TurboVNC*.pkg.bz2
-	pkgadd -d TurboVNC*.pkg
-	---
-
-	Select the ''TurboVNC'' package (usually option 1) from the menu.
-
 ** Installing the TurboVNC Viewer on OS X
 
 	#. Download the TurboVNC Mac disk image
@@ -117,17 +85,6 @@ As root, issue one of the following commands:
 	#Verb: <<---
 	dpkg -r turbovnc
 	---
-
-*** Solaris
-#OPT: noList! plain!
-
-As root, issue the following command:
-
-#Verb: <<---
-pkgrm TurboVNC
----
-
-Answer "yes" when prompted.
 
 *** OS X
 #OPT: noList! plain!
