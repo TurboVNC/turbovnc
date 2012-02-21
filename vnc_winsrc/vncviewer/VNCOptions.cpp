@@ -1674,7 +1674,7 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 	m_Span =				read(RegKey, "span",              m_Span                 );
 	m_FSAltEnter =			read(RegKey, "fsaltenter",        m_FSAltEnter           ) != 0;
 //	m_Use8Bit =				read(RegKey, "8bit",	          m_Use8Bit              ) != 0;
-	m_DoubleBuffer =		read(RegKey, "doublebuffer",	  m_DoubleBuffer              ) != 0;
+	m_DoubleBuffer =		read(RegKey, "doublebuffer",	  m_DoubleBuffer         ) != 0;
 	m_Shared =				read(RegKey, "shared",            m_Shared               ) != 0;
 	m_SwapMouse =			read(RegKey, "swapmouse",         m_SwapMouse	         ) != 0;
 	m_DeiconifyOnBell =		read(RegKey, "belldeiconify",     m_DeiconifyOnBell      ) != 0;

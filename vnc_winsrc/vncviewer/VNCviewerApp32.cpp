@@ -49,7 +49,7 @@ VNCviewerApp32::VNCviewerApp32(HINSTANCE hInstance, PSTR szCmdLine) :
 	// Start listening daemons if requested
 	
 	if ((m_options.m_listening) && (FindWindow("VNCviewer Daemon", 0) == NULL)) {
-		vnclog.Print(3, _T("In listening mode - staring daemons\n"));
+		vnclog.Print(3, _T("In listening mode - starting daemons\n"));
 		ListenMode();
 	} else {
 		m_options.m_listening = false;
