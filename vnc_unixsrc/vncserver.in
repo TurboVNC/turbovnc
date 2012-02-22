@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  Copyright (C) 2009-2011 D. R. Commander.  All Rights Reserved.
+#  Copyright (C) 2009-2012 D. R. Commander.  All Rights Reserved.
 #  Copyright (C) 2010 University Corporation for Atmospheric Research.
 #                     All Rights Reserved.
 #  Copyright (C) 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
@@ -90,6 +90,18 @@ $defaultXStartup
        "if [ -f /etc/X11/xinit/xinitrc ]; then\n".
        "  exec sh /etc/X11/xinit/xinitrc\n".
        "fi\n".
+       "if [ -x \$HOME/.xinitrc ]; then\n".
+       "  exec \$HOME/.xinitrc\n".
+       "fi\n".
+       "if [ -f \$HOME/.xinitrc ]; then\n".
+       "  exec sh \$HOME/.xinitrc\n".
+       "fi\n".
+       "if [ -x /usr/local/lib/X11/xinit/xinitrc ]; then\n".
+       "  exec /usr/local/lib/X11/xinit/xinitrc\n".
+       "fi\n".
+       "if [ -f /usr/local/lib/X11/xinit/xinitrc ]; then\n".
+       "  exec sh /usr/local/lib/X11/xinit/xinitrc\n".
+       "fi\n".
        "if [ \$OS = 'SunOS' -a -f \$HOME/.dt/sessions/lastsession ]; then\n".
        "  if [ -x `cat \$HOME/.dt/sessions/lastsession` ]; then\n".
        "    exec `cat \$HOME/.dt/sessions/lastsession`\n".
@@ -140,7 +152,7 @@ unless ($xauthorityFile) {
 chop($host = `uname -n`);
 chop($os = `uname`);
 
-@fontpaths = ('/usr/share/X11/fonts', '/usr/share/fonts', '/usr/share/fonts/X11/');
+@fontpaths = ('/usr/share/X11/fonts', '/usr/share/fonts', '/usr/share/fonts/X11/', '/usr/local/lib/X11/fonts');
 if (! -l "/usr/lib/X11") {push(@fontpaths, '/usr/lib/X11/fonts');}
 if (! -l "/usr/X11") {push(@fontpaths, '/usr/X11/lib/X11/fonts');}
 if (! -l "/usr/openwin") {push(@fontpaths, '/usr/openwin/lib/X11/fonts');}

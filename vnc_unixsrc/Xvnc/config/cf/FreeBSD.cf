@@ -49,10 +49,18 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 
 #define MkdirHierCmd		mkdir -p
 
-#define CcCmd			cc
-#define CppCmd			/usr/libexec/cpp
+#ifdef x86_64Architecture
+#define FreeBSDMachineDefines	-D__x86_64__
+#else
+#ifdef i386Architecture
+#define FreeBSDMachineDefines	-D__i386__
+#endif /* i386Architecture */
+#endif /* x86_64Architecture */
+
+#define CcCmd			gcc
+#define CppCmd			cpp
 #define PreProcessCmd		CppCmd
-#define StandardCppDefines	-traditional
+#define StandardCppDefines	-traditional FreeBSDMachineDefines
 #if defined(UseInstalled) && (!defined(XF86LinkKit) || !XF86LinkKit)
 #define DefaultCCOptions	/**/
 #else
@@ -223,9 +231,13 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 # define GccGasOption /**/
 #endif
 
+#ifdef x86_64Architecture
+#define ServerExtraDefines GccGasOption XFree86ServerDefines -D_XSERVER64
+#else
 #define ServerExtraDefines GccGasOption XFree86ServerDefines
+#endif
 
-#define StandardDefines	-DCSRG_BASED
+#define StandardDefines	FreeBSDMachineDefines -DCSRG_BASED
 
 #if OSMajorVersion > 1
 #define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME
@@ -252,7 +264,7 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #endif
 #endif
 
-#ifdef i386Architecture
+#if defined(i386Architecture) || defined(x86_64Architecture)
 # define OptimizedCDebugFlags DefaultGcc2i386Opt
 #else
 # define OptimizedCDebugFlags -O2
@@ -357,8 +369,20 @@ install.man::                                                           @@\
 #define StaticLibrary(libpath,libname) -Wl,-Bstatic Concat(-L,libpath) Concat(-l,libname) -Wl,-Bdynamic
 #endif
 
+#ifndef XvncAuthPAM
+#define XvncAuthPAM     YES
+#endif
+
+#ifndef JPEGIncludeFlags
+#define JPEGIncludeFlags
+#endif
+
+#ifndef JPEGLibraryFlags
+#define JPEGLibraryFlags -Wl,-Bstatic -lturbojpeg -Wl,-Bdynamic
+#endif
+
 #include <bsdLib.rules>
 
-#ifdef i386Architecture
+#if defined(i386Architecture) || defined(x86_64Architecture)
 #include <xfree86.cf>
 #endif

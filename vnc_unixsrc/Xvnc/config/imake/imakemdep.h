@@ -254,7 +254,7 @@ in this Software without prior written authorization from the X Consortium.
 #define DEFAULT_CPP "/lib/pcpp"
 #endif
 #if defined(__386BSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__FreeBSD__)
-#define DEFAULT_CPP "/usr/libexec/cpp"
+#define DEFAULT_CPP "cpp"
 #endif
 #if defined(__sgi) && defined(__ANSI_CPP__)
 #define USE_CC_E

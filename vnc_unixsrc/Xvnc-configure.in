@@ -90,6 +90,9 @@ else
     xmkmf ../../
     make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
     cd ../..
+    config/imake/imake -I./config/cf -DTOPDIR=./ -DCURDIR=.
+    make Makefiles CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
+    make includes CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
     cd config/makedepend
     xmkmf ../../
     make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
@@ -98,9 +101,6 @@ else
     xmkmf ../../
     make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
     cd ../..
-    config/imake/imake -I./config/cf -DTOPDIR=./ -DCURDIR=.
-    make Makefiles CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
-    make includes CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
     make depend CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
 fi
 
