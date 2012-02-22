@@ -76,8 +76,8 @@ binary.  See below for 64-bit build instructions.)
 NOTE: Running autoreconf is only necessary if building TurboVNC from the CVS
 repository or if configure.ac has been modified.
 
-On supported platforms (Linux and Solaris, at the moment), the TurboVNC Server
-(Xvnc) can then be built by executing:
+On supported platforms (Linux, Solaris, and FreeBSD, at the moment), the
+TurboVNC Server (Xvnc) can then be built by executing:
 
   make xserver
 
