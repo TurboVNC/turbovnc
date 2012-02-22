@@ -60,9 +60,9 @@
  *     ParseIfExpression		parse a string for #if
  */
 
+#include <stdlib.h>
 #include "ifparser.h"
 #include <ctype.h>
-#include <stdlib.h>
 #include <string.h>
 
 /****************************************************************************
