@@ -73,6 +73,9 @@ same as the equivalent option in the Unix TurboVNC Viewer.  In both viewers,
 Added an option to the F8 menu in the Unix TurboVNC Viewer that allows
 view-only mode to be enabled/disabled on an active VNC connection.
 -------------------------------------------------------------------------------
+[13]
+TurboVNC should now build and run properly on FreeBSD.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
