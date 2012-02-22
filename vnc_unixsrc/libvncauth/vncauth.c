@@ -207,8 +207,6 @@ vncDecryptPasswdFromFile2(char *fname,
 int
 vncDecryptPasswd(char *encryptedPasswd, char *decryptedPasswd)
 {
-    int i;
-
     if (!encryptedPasswd || !decryptedPasswd || strlen(encryptedPasswd) < 8)
         return 0;
 

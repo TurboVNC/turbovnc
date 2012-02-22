@@ -471,7 +471,7 @@ init()
 	 * the default.  Or if cpp is not the default.  Or if the make
 	 * found by the PATH variable is not the default.
 	 */
-	if (p = getenv("IMAKEINCLUDE")) {
+	if ((p = getenv("IMAKEINCLUDE"))) {
 		if (*p != '-' || *(p+1) != 'I')
 			LogFatal("Environment var IMAKEINCLUDE %s",
 				"must begin with -I");
@@ -482,9 +482,9 @@ init()
 				AddCppArg(p);
 			}
 	}
-	if (p = getenv("IMAKECPP"))
+	if ((p = getenv("IMAKECPP")))
 		cpp = p;
-	if (p = getenv("IMAKEMAKE"))
+	if ((p = getenv("IMAKEMAKE")))
 		make_argv[0] = p;
 
 	if (signal(SIGINT, SIG_IGN) != SIG_IGN)
@@ -1209,7 +1209,7 @@ CleanCppOutput(tmpfd, tmpfname)
 	char	*input;
 	int	blankline = 0;
 
-	while(input = ReadLine(tmpfd, tmpfname)) {
+	while((input = ReadLine(tmpfd, tmpfname))) {
 		if (isempty(input)) {
 			if (blankline++)
 				continue;

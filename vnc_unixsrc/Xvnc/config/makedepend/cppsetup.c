@@ -60,6 +60,7 @@ extern char	slotab[];
 struct filepointer	*currentfile;
 struct inclist		*currentinc;
 
+int
 cppsetup(line, filep, inc)
 	register char	*line;
 	register struct filepointer	*filep;
@@ -110,6 +111,7 @@ struct symtab **lookup(symbol)
 	return (sp);
 }
 
+void
 pperror(tag, x0,x1,x2,x3,x4)
 	int	tag,x0,x1,x2,x3,x4;
 {
@@ -216,6 +218,7 @@ my_eval_variable (ip, var, len)
 }
 
 
+int
 cppsetup(line, filep, inc)
 	register char	*line;
 	register struct filepointer	*filep;

@@ -33,6 +33,7 @@ in this Software without prior written authorization from the X Consortium.
 #include <X11/Xmd.h>
 #include <X11/Xdmcp.h>
 
+int
 XdmcpCompareKeys (a, b)
     XdmAuthKeyPtr   a, b;
 {
