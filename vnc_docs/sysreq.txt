@@ -1,6 +1,6 @@
 * System Requirements
 
-** Linux/x86
+** Linux/x86 and Other x86 Unix Variants
 
 || || Server (x86) || Server (x86-64) || Client ||
 | Recommended CPU \
