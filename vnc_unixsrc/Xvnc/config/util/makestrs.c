@@ -30,6 +30,7 @@ in this Software without prior written authorization from the X Consortium.
 /* Constructs string definitions */
 
 #include <stdio.h>
+#include <string.h>
 #include <X11/Xos.h>
 #ifndef X_NOT_STDC_ENV
 #include <stdlib.h>
@@ -244,8 +245,6 @@ static void WriteHeader (tagline, phile, abi)
 {
     FILE* f;
     char* tmp;
-    Table* t;
-    TableEnt* te;
     static void (*headerproc[])() = { 
 	DefaultWriteHeader, ArrayperWriteHeader,
 	IntelABIWriteHeader, IntelABIWriteHeader,
@@ -579,7 +578,7 @@ static void DoLine(buf)
 	    int rlen;
 	    int len;
 
-	    if (right = index(buf, ' '))
+	    if ((right = index(buf, ' ')))
 		*right++ = 0;
 	    else
 		right = buf + 1;

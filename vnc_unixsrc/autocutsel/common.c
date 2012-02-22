@@ -138,7 +138,7 @@ Boolean ConvertSelection(Widget w, Atom *selection, Atom *target,
     *format = 32;
 
     if (options.debug)
-      printf("Returning %ld\n", *temp);
+      printf("Returning %u\n", *temp);
 
     return True;
   }
@@ -152,7 +152,7 @@ Boolean ConvertSelection(Widget w, Atom *selection, Atom *target,
     *format = 32;
 
     if (options.debug)
-      printf("Returning %ld\n", *temp);
+      printf("Returning %u\n", *temp);
 
     return True;
   }

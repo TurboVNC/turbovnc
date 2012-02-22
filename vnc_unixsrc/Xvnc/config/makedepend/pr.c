@@ -37,6 +37,10 @@ extern boolean	printed;
 extern boolean	verbose;
 extern boolean	show_where_not;
 
+int find_includes();
+void freefile();
+void included_by();
+
 void
 add_include(filep, file, file_red, include, dot, failOK)
 	struct filepointer	*filep;

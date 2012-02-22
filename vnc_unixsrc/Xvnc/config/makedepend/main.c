@@ -103,8 +103,14 @@ boolean	verbose = FALSE;
 boolean	show_where_not = FALSE;
 boolean warn_multiple = FALSE;	/* Warn on multiple includes of same file */
 
+void define();
+void define2();
+int find_includes();
 void freefile();
+void inc_clean();
+void recursive_pr_include();
 void redirect();
+void undefine();
 #if !NeedVarargsPrototypes
 void fatalerr();
 void warning();
@@ -138,6 +144,7 @@ catch (sig)
 struct sigaction sig_act;
 #endif /* USGISH */
 
+int
 main(argc, argv)
 	int	argc;
 	char	**argv;
@@ -545,6 +552,7 @@ char *copy(str)
 	return(p);
 }
 
+int
 match(str, list)
 	register char	*str, **list;
 {

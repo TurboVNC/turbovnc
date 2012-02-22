@@ -49,7 +49,7 @@ XauFileName ()
 #endif
     int	    size;
 
-    if (name = getenv ("XAUTHORITY"))
+    if ((name = getenv ("XAUTHORITY")))
 	return name;
     name = getenv ("HOME");
     if (!name) {
