@@ -58,21 +58,13 @@ typedef struct TIGHT_CONF_s {
     int monoMinRectSize;
     int idxZlibLevel, monoZlibLevel, rawZlibLevel;
     int idxMaxColorsDivisor;
+    int palMaxColorsWithJPEG;
 } TIGHT_CONF;
 
-static TIGHT_CONF tightConf[2] = {
-    { 65536, 2048,   6, 0, 0, 0,   4 },
-#if 0
-    {  2048,  128,   6, 1, 1, 1,   8 },
-    {  6144,  256,   8, 3, 3, 2,  24 },
-    { 10240, 1024,  12, 5, 5, 3,  32 },
-    { 16384, 2048,  12, 6, 6, 4,  32 },
-    { 32768, 2048,  12, 7, 7, 5,  32 },
-    { 65536, 2048,  16, 7, 7, 6,  48 },
-    { 65536, 2048,  16, 8, 8, 7,  64 },
-    { 65536, 2048,  32, 9, 9, 8,  64 },
-#endif
-    { 65536, 2048,  32, 1, 1, 1,  96 }
+static TIGHT_CONF tightConf[3] = {
+    { 65536, 2048,   6, 0, 0, 0,   4, 24 },
+    { 65536, 2048,  32, 1, 1, 1,  96, 24 },
+    { 65536, 2048,  32, 3, 3, 2,  96, 96 }
 };
 
 static int compressLevel;
@@ -352,19 +344,22 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
         if (!threadInit) return FALSE;
     }
 
-    compressLevel = cl->tightCompressLevel > 0 ? 1 : 0;
+    compressLevel = cl->tightCompressLevel;
     qualityLevel = cl->tightQualityLevel;
-    if (qualityLevel != -1) {
-        compressLevel = 1;
-        tightConf[compressLevel].idxZlibLevel = 1;
-        tightConf[compressLevel].monoZlibLevel = 1;
-        tightConf[compressLevel].rawZlibLevel = 1;
-    } else {
-        tightConf[compressLevel].idxZlibLevel = cl->tightCompressLevel;
-        tightConf[compressLevel].monoZlibLevel = cl->tightCompressLevel;
-        tightConf[compressLevel].rawZlibLevel = cl->tightCompressLevel;
-    }
     subsampLevel = cl->tightSubsampLevel;
+
+    /* Our studies have shown that, when JPEG is enabled, compression level 2
+       can reduce bandwidth by as much as 30% relative to compression level 1
+       on workloads that have low numbers of unique colors (that is, workloads
+       that aren't good candidates for JPEG compression.)  However, increasing
+       the amount of Zlib compression beyond this offers no significant
+       bandwidth savings except in very rare corner cases that are not
+       performance-critical to begin with. */
+    if (compressLevel > 2) compressLevel = 2;
+
+    /* With JPEG disabled, increasing the Zlib compression level offers no
+       significant bandwidth savings relative to compression level 1. */
+    if (qualityLevel == -1 && compressLevel > 1) compressLevel = 1;
 
     if ( cl->format.depth == 24 && cl->format.redMax == 0xFF &&
          cl->format.greenMax == 0xFF && cl->format.blueMax == 0xFF ) {
@@ -804,7 +799,7 @@ SendSubrect(t, x, y, w, h)
 
     t->paletteMaxColors = w * h / tightConf[compressLevel].idxMaxColorsDivisor;
     if(qualityLevel != -1)
-        t->paletteMaxColors = 24;
+        t->paletteMaxColors = tightConf[compressLevel].palMaxColorsWithJPEG;
     if ( t->paletteMaxColors < 2 &&
          w * h >= tightConf[compressLevel].monoMinRectSize ) {
         t->paletteMaxColors = 2;
