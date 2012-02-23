@@ -22,6 +22,14 @@ following error:
 	1. Download the appropriate TurboVNC binary package for your system from the
 		[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
+		Packages are provided for Linux distributions in the
+		[[http://www.redhat.com/][Red Hat]],
+		[[http://www.novell.com/linux/][SuSE]], or
+		[[http://www.debian.org/][Debian]] families that contain GLIBC 2.3.2
+		or later (including [[http://fedoraproject.org/][Fedora]],
+		[[http://www.centos.org/][CentOS]] 3 and later,
+		[[http://www.ubuntu.com/][Ubuntu Linux]] v6.0 or later,
+		and [[http://www.whiteboxlinux.org/][White Box]].)
 		{nl}
 
 	2. Log in as root, cd to the directory where you downloaded the binary

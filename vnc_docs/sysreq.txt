@@ -15,18 +15,6 @@
 			{item:Dual processors or dual cores recommended}} \
 	| Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent) \
 	|
-| Recommended O/S \
-	| {list type=ul: \
-			{item:Any distribution in the \
-				[[http://www.redhat.com/][Red Hat]] or [[http://www.novell.com/linux/][SuSE]] \
-				families that contains GLIBC 2.3.2 or later (including \
-				[[http://fedoraproject.org/][Fedora]], \
-				[[http://www.centos.org/][CentOS]] 3 and later, and \
-				[[http://www.whiteboxlinux.org/][White Box]])} \
-			{item:Ubuntu Linux v6.0 or later}} \
-	| < \
-	| < \
-	|
 | Other Software \
 	| {:} | {:} \
 	| X server configured to export True Color (24-bit or 32-bit) visuals \
