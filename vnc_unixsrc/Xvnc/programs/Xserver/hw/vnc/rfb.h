@@ -26,6 +26,10 @@
  *  USA.
  */
 
+#ifndef __RFB_H__
+#define __RFB_H__
+
+
 #include "scrnintstr.h"
 #include "colormapst.h"
 #include "gcstruct.h"
@@ -262,6 +266,14 @@ typedef struct rfbClientRec {
     Bool compStreamInited;
 
     CARD32 zlibCompressLevel;
+
+    /* ZRLE encoding */
+
+    void* zrleData;
+    int zywrleLevel;
+    int zywrleBuf[rfbZRLETileWidth * rfbZRLETileHeight];
+    char *zrleBeforeBuf;
+    void *paletteHelper;
 
     /* tight encoding -- preserve zlib streams' state for each client */
 
@@ -640,6 +652,12 @@ extern Bool rfbSendRectEncodingZlib(rfbClientPtr cl, int x, int y, int w,
 				    int h);
 
 
+/* zrle.c */
+extern Bool rfbSendRectEncodingZRLE(rfbClientPtr cl, int x, int y, int w,
+				    int h);
+void rfbFreeZrleData(rfbClientPtr cl);
+
+
 /* tight.c */
 
 #define TVNC_SAMPOPT 4
@@ -663,3 +681,6 @@ extern Bool rfbSendCursorPos(rfbClientPtr cl, ScreenPtr pScreen);
 
 extern void rfbResetStats(rfbClientPtr cl);
 extern void rfbPrintStats(rfbClientPtr cl);
+
+
+#endif /* __RFB_H__ */
