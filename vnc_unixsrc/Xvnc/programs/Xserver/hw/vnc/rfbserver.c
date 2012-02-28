@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2011 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2012 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -644,7 +644,7 @@ rfbProcessClientInitMessage(cl)
 /* Update these constants on changing capability lists below! */
 #define N_SMSG_CAPS  0
 #define N_CMSG_CAPS  1
-#define N_ENC_CAPS  14
+#define N_ENC_CAPS  16
 
 void
 rfbSendInteractionCaps(cl)
