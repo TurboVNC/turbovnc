@@ -76,6 +76,10 @@ view-only mode to be enabled/disabled on an active VNC connection.
 [13]
 TurboVNC should now build and run properly on FreeBSD.
 -------------------------------------------------------------------------------
+[14]
+Added ZRLE encoding, which may improve performance with the RealVNC Viewer
+under certain circumstances.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

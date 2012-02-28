@@ -284,6 +284,9 @@ rfbNewClient(sock)
     cl->preferredEncoding = rfbEncodingTight;
     cl->correMaxWidth = 48;
     cl->correMaxHeight = 48;
+    cl->zrleData = NULL;
+    cl->paletteHelper = NULL;
+    cl->zrleBeforeBuf = NULL;
 
     REGION_INIT(pScreen,&cl->copyRegion,NullBox,0);
     cl->copyDX = 0;
@@ -424,6 +427,8 @@ rfbClientConnectionGone(sock)
     if (cl->translateLookupTable) free(cl->translateLookupTable);
 
     if(cl->alrTimer) TimerFree(cl->alrTimer);
+
+    rfbFreeZrleData(cl);
 
     xfree(cl);
 
@@ -694,6 +699,8 @@ rfbSendInteractionCaps(cl)
     SetCapInfo(&enc_list[i++],  rfbEncodingCoRRE,          rfbStandardVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingHextile,        rfbStandardVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingZlib,           rfbTridiaVncVendor);
+    SetCapInfo(&enc_list[i++],  rfbEncodingZRLE,           rfbTridiaVncVendor);
+    SetCapInfo(&enc_list[i++],  rfbEncodingZYWRLE,         rfbTridiaVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingTight,          rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingCompressLevel0, rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingQualityLevel0,  rfbTightVncVendor);
@@ -859,6 +866,20 @@ rfbProcessClientNormalMessage(cl)
 		if (cl->preferredEncoding == -1) {
 		    cl->preferredEncoding = enc;
 		    rfbLog("Using zlib encoding for client %s\n",
+			   cl->host);
+		}
+              break;
+	    case rfbEncodingZRLE:
+		if (cl->preferredEncoding == -1) {
+		    cl->preferredEncoding = enc;
+		    rfbLog("Using ZRLE encoding for client %s\n",
+			   cl->host);
+		}
+              break;
+	    case rfbEncodingZYWRLE:
+		if (cl->preferredEncoding == -1) {
+		    cl->preferredEncoding = enc;
+		    rfbLog("Using ZYWRLE encoding for client %s\n",
 			   cl->host);
 		}
               break;
@@ -1374,6 +1395,13 @@ rfbSendFramebufferUpdate(cl)
 	    break;
 	case rfbEncodingZlib:
 	    if (!rfbSendRectEncodingZlib(cl, x, y, w, h)) {
+		REGION_UNINIT(pScreen,&updateRegion);
+		return FALSE;
+	    }
+	    break;
+	case rfbEncodingZRLE:
+	case rfbEncodingZYWRLE:
+	    if (!rfbSendRectEncodingZRLE(cl, x, y, w, h)) {
 		REGION_UNINIT(pScreen,&updateRegion);
 		return FALSE;
 	    }

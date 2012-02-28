@@ -447,6 +447,7 @@ typedef struct _rfbInteractionCapsMsg {
 #define rfbEncodingTight     7
 #define rfbEncodingZlibHex   8
 #define rfbEncodingZRLE     16
+#define rfbEncodingZYWRLE   17
 
 /* signatures for basic encoding types */
 #define sig_rfbEncodingRaw       "RAW_____"
@@ -458,6 +459,7 @@ typedef struct _rfbInteractionCapsMsg {
 #define sig_rfbEncodingTight     "TIGHT___"
 #define sig_rfbEncodingZlibHex   "ZLIBHEX_"
 #define sig_rfbEncodingZRLE      "ZRLE____"
+#define sig_rfbEncodingZYWRLE    "ZYWRLE__"
 
 /*
  * Special encoding numbers:
@@ -878,6 +880,21 @@ typedef struct _rfbXCursorColors {
  * in the XCursor encoding). If (w * h == 0), cursor should be hidden (or
  * default local cursor should be set by the client).
  */
+
+
+/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * ZRLE - encoding combining Zlib compression, tiling, palettisation and
+ * run-length encoding.
+ */
+
+typedef struct {
+    CARD32 length;
+} rfbZRLEHeader;
+
+#define sz_rfbZRLEHeader 4
+
+#define rfbZRLETileWidth 64
+#define rfbZRLETileHeight 64
 
 
 /*-----------------------------------------------------------------------------
