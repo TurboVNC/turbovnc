@@ -36,20 +36,7 @@ in this Software without prior written authorization from the X Consortium.
 #define _FONTMISC_H_
 
 #include <X11/Xfuncs.h>
-
-typedef unsigned char	*pointer;
-typedef int		Bool;
-
-#ifndef X_PROTOCOL
-#ifndef _XSERVER64
-typedef unsigned long	Atom;
-typedef unsigned long	XID;
-#else
-#include <X11/Xmd.h>
-typedef CARD32 XID;
-typedef CARD32 Atom;
-#endif 
-#endif
+#include "X11/Xdefs.h"
 
 #ifndef LSBFirst
 #define LSBFirst	0

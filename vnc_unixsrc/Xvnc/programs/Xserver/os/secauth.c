@@ -49,6 +49,7 @@ from the X Consortium.
 /* END ORL VNC modification
 ================================================================*/
 
+#if 0
 static char InvalidPolicyReason[] = "invalid policy specification";
 static char PolicyViolationReason[] = "policy violation";
 
@@ -122,6 +123,7 @@ AuthCheckSitePolicy(data_lengthP, dataP, client, reason)
     *dataP = policy;
     return TRUE;
 }
+#endif
 
 XID
 AuthSecurityCheck (data_length, data, client, reason)

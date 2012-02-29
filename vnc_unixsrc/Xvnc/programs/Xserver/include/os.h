@@ -135,7 +135,7 @@ extern Bool InsertFakeRequest(
 #endif
 );
 
-extern int ResetCurrentRequest(
+extern void ResetCurrentRequest(
 #if NeedFunctionPrototypes
     ClientPtr /*client*/
 #endif
@@ -221,49 +221,49 @@ extern void CloseDownConnection(
 #endif
 );
 
-extern int AddEnabledDevice(
+extern void AddEnabledDevice(
 #if NeedFunctionPrototypes
     int /*fd*/
 #endif
 );
 
-extern int RemoveEnabledDevice(
+extern void RemoveEnabledDevice(
 #if NeedFunctionPrototypes
     int /*fd*/
 #endif
 );
 
-extern int OnlyListenToOneClient(
+extern void OnlyListenToOneClient(
 #if NeedFunctionPrototypes
     ClientPtr /*client*/
 #endif
 );
 
-extern int ListenToAllClients(
+extern void ListenToAllClients(
 #if NeedFunctionPrototypes
     void
 #endif
 );
 
-extern int IgnoreClient(
+extern void IgnoreClient(
 #if NeedFunctionPrototypes
     ClientPtr /*client*/
 #endif
 );
 
-extern int AttendClient(
+extern void AttendClient(
 #if NeedFunctionPrototypes
     ClientPtr /*client*/
 #endif
 );
 
-extern int MakeClientGrabImpervious(
+extern void MakeClientGrabImpervious(
 #if NeedFunctionPrototypes
     ClientPtr /*client*/
 #endif
 );
 
-extern int MakeClientGrabPervious(
+extern void MakeClientGrabPervious(
 #if NeedFunctionPrototypes
     ClientPtr /*client*/
 #endif
@@ -281,7 +281,7 @@ extern CARD32 GetTimeInMillis(
 #endif
 );
 
-extern int AdjustWaitForDelay(
+extern void AdjustWaitForDelay(
 #if NeedFunctionPrototypes
     pointer /*waitTime*/,
     unsigned long /*newdelay*/
@@ -426,17 +426,13 @@ extern OsSigHandlerPtr OsSignal(
 extern int auditTrailLevel;
 
 extern void AuditF(
-#if NeedVarargsPrototypes
     char* /*f*/,
     ...
-#endif
 );
 
 extern void FatalError(
-#if NeedVarargsPrototypes
     char* /*f*/,
     ...
-#endif
 )
 #if __GNUC__ == 2 && __GNUC_MINOR__ > 4 
 __attribute((noreturn))
@@ -444,10 +440,8 @@ __attribute((noreturn))
 ;
 
 extern void ErrorF(
-#if NeedVarargsPrototypes
     char* /*f*/,
     ...
-#endif
 );
 
 #ifdef SERVER_LOCK

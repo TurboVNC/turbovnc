@@ -191,7 +191,7 @@ lookup(name, len, create)
   }
   h %= HASHSIZE;
 
-  if ( entry = hashTab[h] )
+  if ( (entry = hashTab[h]) )
     {
       for( ; entry; prev = (dbEntryPtr*)entry, entry = entry->link )
 	if (! strcmp(name, entry->name) ) break;
@@ -256,7 +256,7 @@ OsInitColors()
 		  green >= 0 && green <= 0xff &&
 		  blue >= 0  && blue <= 0xff)
 		{
-		  if (entry = lookup(name, strlen(name), TRUE))
+		  if ((entry = lookup(name, strlen(name), TRUE)))
 		    {
 		      entry->red   = (red * 65535)   / 255;
 		      entry->green = (green * 65535) / 255;
@@ -291,7 +291,7 @@ OsLookupColor(screen, name, len, pred, pgreen, pblue)
 {
   dbEntryPtr entry;
 
-  if (entry = lookup(name, len, FALSE))
+  if ((entry = lookup(name, len, FALSE)))
     {
       *pred   = entry->red;
       *pgreen = entry->green;

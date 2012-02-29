@@ -1,16 +1,13 @@
-/* $XConsortium: Xtrans.c,v 1.31 95/03/28 19:49:02 mor Exp $ */
-/* $XFree86: xc/lib/xtrans/Xtrans.c,v 3.15.2.2 1997/07/19 04:59:16 dawes Exp $ */
+/* $Xorg: Xtrans.c,v 1.4 2001/02/09 02:04:06 xorgcvs Exp $ */
 /*
 
-Copyright (c) 1993, 1994  X Consortium
+Copyright 1993, 1994, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -18,19 +15,20 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/lib/xtrans/Xtrans.c,v 3.34 2003/12/05 05:12:50 dawes Exp $ */
 
-/* Copyright (c) 1993, 1994 NCR Corporation - Dayton, Ohio, USA
+/* Copyright 1993, 1994 NCR Corporation - Dayton, Ohio, USA
  *
  * All Rights Reserved
  *
@@ -88,34 +86,34 @@ from the X Consortium.
 static
 Xtransport_table Xtransports[] = {
 #if defined(STREAMSCONN)
-    &TRANS(TLITCPFuncs),	TRANS_TLI_TCP_INDEX,
-    &TRANS(TLIINETFuncs),	TRANS_TLI_INET_INDEX,
-    &TRANS(TLITLIFuncs),	TRANS_TLI_TLI_INDEX,
+    { &TRANS(TLITCPFuncs),	TRANS_TLI_TCP_INDEX },
+    { &TRANS(TLIINETFuncs),	TRANS_TLI_INET_INDEX },
+    { &TRANS(TLITLIFuncs),	TRANS_TLI_TLI_INDEX },
 #endif /* STREAMSCONN */
 #if defined(TCPCONN)
-    &TRANS(SocketTCPFuncs),	TRANS_SOCKET_TCP_INDEX,
-    &TRANS(SocketINETFuncs),	TRANS_SOCKET_INET_INDEX,
+    { &TRANS(SocketTCPFuncs),	TRANS_SOCKET_TCP_INDEX },
+    { &TRANS(SocketINETFuncs),	TRANS_SOCKET_INET_INDEX },
 #endif /* TCPCONN */
 #if defined(DNETCONN)
-    &TRANS(DNETFuncs),		TRANS_DNET_INDEX,
+    { &TRANS(DNETFuncs),	TRANS_DNET_INDEX },
 #endif /* DNETCONN */
 #if defined(UNIXCONN)
 #if !defined(LOCALCONN)
-    &TRANS(SocketLocalFuncs),	TRANS_SOCKET_LOCAL_INDEX,
+    { &TRANS(SocketLocalFuncs),	TRANS_SOCKET_LOCAL_INDEX },
 #endif /* !LOCALCONN */
-    &TRANS(SocketUNIXFuncs),	TRANS_SOCKET_UNIX_INDEX,
+    { &TRANS(SocketUNIXFuncs),	TRANS_SOCKET_UNIX_INDEX },
 #endif /* UNIXCONN */
 #if defined(OS2PIPECONN)
-    &TRANS(OS2LocalFuncs),	TRANS_LOCAL_LOCAL_INDEX,
+    { &TRANS(OS2LocalFuncs),	TRANS_LOCAL_LOCAL_INDEX },
 #endif /* OS2PIPECONN */
 #if defined(LOCALCONN)
-    &TRANS(LocalFuncs),		TRANS_LOCAL_LOCAL_INDEX,
-    &TRANS(PTSFuncs),		TRANS_LOCAL_PTS_INDEX,
+    { &TRANS(LocalFuncs),	TRANS_LOCAL_LOCAL_INDEX },
+    { &TRANS(PTSFuncs),		TRANS_LOCAL_PTS_INDEX },
 #ifdef SVR4
-    &TRANS(NAMEDFuncs),		TRANS_LOCAL_NAMED_INDEX,
+    { &TRANS(NAMEDFuncs),	TRANS_LOCAL_NAMED_INDEX },
 #endif
-    &TRANS(ISCFuncs),		TRANS_LOCAL_ISC_INDEX,
-    &TRANS(SCOFuncs),		TRANS_LOCAL_SCO_INDEX,
+    { &TRANS(ISCFuncs),		TRANS_LOCAL_ISC_INDEX },
+    { &TRANS(SCOFuncs),		TRANS_LOCAL_SCO_INDEX },
 #endif /* LOCALCONN */
 #if defined(AMRPCCONN) || defined(AMTCPCONN)
     &TRANS(AmConnFuncs),	TRANS_AMOEBA_INDEX,
@@ -132,6 +130,9 @@ Xtransport_table Xtransports[] = {
 #ifdef WIN32
 #define ioctl ioctlsocket
 #endif
+
+
+int TRANS(GetHostname) (char *, int);
 
 
 
@@ -178,7 +179,8 @@ char *protocol;
      * a case insensitive match.
      */
 
-    strncpy (protobuf, protocol, PROTOBUFSIZE);
+    strncpy (protobuf, protocol, PROTOBUFSIZE - 1);
+    protobuf[PROTOBUFSIZE-1] = '\0';
 
     for (i = 0; i < PROTOBUFSIZE && protobuf[i] != '\0'; i++)
 	if (isupper (protobuf[i]))
@@ -315,8 +317,6 @@ char	**port;
     }
 
     /* Get the port */
-
-get_port:
 
     _port = mybuf;
 
@@ -463,9 +463,11 @@ char	*address;
 
     if (ciptr == NULL)
     {
-	if (!(thistrans->flags & TRANS_DISABLED))
+	if (!(thistrans->flags & TRANS_DISABLED)) 
+	{
 	    PRMSG (1,"Open: transport open failed for %s/%s:%s\n",
 	           protocol, host, port);
+	}
 	xfree (protocol);
 	xfree (host);
 	xfree (port);

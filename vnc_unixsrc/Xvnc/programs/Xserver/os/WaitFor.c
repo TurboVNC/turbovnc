@@ -104,6 +104,8 @@ extern Bool AnyClientsWriteBlocked;
 
 extern WorkQueuePtr workQueue;
 
+extern int ffsl(unsigned long);
+
 
 #ifdef XTESTEXT1
 /*
@@ -159,7 +161,7 @@ WaitForSomething(pClientsReady)
     int selecterr;
     int nready;
     fd_set devicesReadable;
-    CARD32 now;
+    CARD32 now = 0;
 
     FD_ZERO(&clientsReadable);
 

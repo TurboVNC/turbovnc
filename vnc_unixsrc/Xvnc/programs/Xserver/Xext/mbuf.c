@@ -41,6 +41,7 @@ in this Software without prior written authorization from the X Consortium.
 #include "dixstruct.h"
 #include "resource.h"
 #include "opaque.h"
+#include "sleepuntil.h"
 #define _MULTIBUF_SERVER_	/* don't want Xlib structures */
 #include "regionstr.h"
 #include "gcstruct.h"
@@ -366,8 +367,8 @@ SetupBackgroundPainter (pWin, pGC)
     case BackgroundPixmap:
 	gcvalues[0] = (pointer) FillTiled;
 	gcvalues[1] = (pointer) background.pixmap;
-	gcvalues[2] = (pointer) ts_x_origin;
-	gcvalues[3] = (pointer) ts_y_origin;
+	gcvalues[2] = (pointer)(long) ts_x_origin;
+	gcvalues[3] = (pointer)(long) ts_y_origin;
 	gcmask = GCFillStyle|GCTile|GCTileStipXOrigin|GCTileStipYOrigin;
 	break;
 
@@ -1211,7 +1212,6 @@ PerformDisplayRequest (ppMultibuffers, pMultibuffer, nbuf)
 	    	if (pExposed)
 	    	{
 		    RegionPtr	pWinSize;
-		    ScreenPtr pScreen = pWin->drawable.pScreen;
 
 		    pWinSize = CreateUnclippedWinSize (pWin);
 		    /* pExposed is window-relative, but at this point

@@ -20,6 +20,7 @@ HEADERS = DECkeysym.h \
 	XWDFile.h \
 	Xalloca.h \
 	Xatom.h \
+	Xdefs.h \
 	Xfuncproto.h \
 	Xfuncs.h \
 	Xmd.h \
@@ -44,6 +45,7 @@ MakeSubdirs($(SUBDIRS))
 
 InstallLinkKitNonExecFile(X.h,$(LINKKITDIR)/include/X11)
 InstallLinkKitNonExecFile(Xalloca.h,$(LINKKITDIR)/include/X11)
+InstallLinkKitNonExecFile(Xdefs.h,$(LINKKITDIR)/include/X11)
 InstallLinkKitNonExecFile(Xfuncproto.h,$(LINKKITDIR)/include/X11)
 InstallLinkKitNonExecFile(Xfuncs.h,$(LINKKITDIR)/include/X11)
 InstallLinkKitNonExecFile(Xmd.h,$(LINKKITDIR)/include/X11)

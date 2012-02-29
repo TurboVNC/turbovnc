@@ -596,7 +596,6 @@ DefineSelf (fd)
 {
     char		buf[2048], *cp, *cplim;
     struct ifconf	ifc;
-    register int	n;
     int 		len;
     unsigned char *	addr;
     int 		family;
@@ -830,7 +829,7 @@ ResetHosts (display)
 
     AccessEnabled = defeatAccessControl ? FALSE : DEFAULT_ACCESS_CONTROL;
     LocalHostEnabled = FALSE;
-    while (host = validhosts)
+    while ((host = validhosts) != 0)
     {
         validhosts = host->next;
         FreeHost (host);
@@ -851,16 +850,16 @@ ResetHosts (display)
     strcpy(fname, (char*)__XOS2RedirRoot(fname));
 #endif /* __EMX__ */
 
-    if (fd = fopen (fname, "r")) 
+    if ((fd = fopen (fname, "r")) != 0)
     {
         while (fgets (ohostname, sizeof (ohostname), fd))
 	{
 	if (*ohostname == '#')
 	    continue;
-    	if (ptr = strchr(ohostname, '\n'))
+    	if ((ptr = strchr(ohostname, '\n')) != 0)
     	    *ptr = 0;
 #ifdef __EMX__
-    	if (ptr = strchr(ohostname, '\r'))
+    	if ((ptr = strchr(ohostname, '\r')) != 0)
     	    *ptr = 0;
 #endif
         hostlen = strlen(ohostname) + 1;
@@ -947,7 +946,7 @@ ResetHosts (display)
 #if defined(TCPCONN) || defined(STREAMSCONN) || defined(MNX_TCPCONN)
 	{
     	    /* host name */
-    	    if (family == FamilyInternet && (hp = gethostbyname (hostname)) ||
+    	    if ((family == FamilyInternet && (hp = gethostbyname (hostname))) ||
 		 (hp = gethostbyname (hostname)))
 	    {
     		saddr.sa.sa_family = hp->h_addrtype;
@@ -1279,6 +1278,7 @@ CheckAddr (family, pAddr, length)
 /* Check if a host is not in the access control list. 
  * Returns 1 if host is invalid, 0 if we've found it. */
 
+int
 InvalidHost (saddr, len)
 #ifndef AMOEBA_ORIG
     register struct sockaddr	*saddr;

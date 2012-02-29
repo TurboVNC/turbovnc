@@ -116,7 +116,7 @@ main(int argc, char **argv, char **envp)
 {
     enum BadCode bad = NotBad;
     int i, j;
-    char *a, *e;
+    char *a, *e = "{UNSET}";
 
 #if CHECK_EUID
     if (geteuid() == 0 && getuid() != geteuid()) {

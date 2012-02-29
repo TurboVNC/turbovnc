@@ -1,5 +1,4 @@
-/* $XConsortium: xdmcp.c /main/34 1996/12/02 10:23:29 lehors $ */
-/* $XFree86: xc/programs/Xserver/os/xdmcp.c,v 3.9 1997/01/18 06:58:04 dawes Exp $ */
+/* $Xorg: xdmcp.c,v 1.4 2001/01/31 13:37:19 pookie Exp $ */
 /*
  * Copyright 1989 Network Computing Devices, Inc., Mountain View, California.
  *
@@ -14,6 +13,7 @@
  * without express or implied warranty.
  *
  */
+/* $XFree86: xc/programs/Xserver/os/xdmcp.c,v 3.29 2003/11/22 04:51:02 dawes Exp $ */
 
 #ifdef WIN32
 /* avoid conflicting definitions */
@@ -162,20 +162,20 @@ static void recv_alive_msg(
 #endif
 );
 
-static XdmcpFatal(
+static void XdmcpFatal(
 #if NeedFunctionPrototypes
     char */*type*/,
     ARRAY8Ptr /*status*/
 #endif
 );
 
-static XdmcpWarning(
+static void XdmcpWarning(
 #if NeedFunctionPrototypes
     char */*str*/
 #endif
 );
 
-static get_manager_by_name(
+static void get_manager_by_name(
 #if NeedFunctionPrototypes
     int /*argc*/,
     char **/*argv*/,
@@ -189,13 +189,13 @@ static void receive_packet(
 #endif
 );
 
-static send_packet(
+static void send_packet(
 #if NeedFunctionPrototypes
     void
 #endif
 );
 
-extern int XdmcpDeadSession(
+extern void XdmcpDeadSession(
 #if NeedFunctionPrototypes
     char */*reason*/
 #endif
@@ -207,7 +207,7 @@ static void timeout(
 #endif
 );
 
-static restart(
+static void restart(
 #if NeedFunctionPrototypes
     void
 #endif
@@ -236,6 +236,13 @@ void XdmcpRegisterManufacturerDisplayID(
 #endif
 );
 
+extern void XdmAuthenticationInit(
+#if NeedFunctionPrototypes
+    char    * /*cookie*/,
+    int	    /*cookie_len*/
+#endif
+);
+
 #ifdef MINIX
 static void read_cb(
 #if NeedFunctionPrototypes
@@ -249,6 +256,7 @@ static void read_cb(
 static short	xdm_udp_port = XDM_UDP_PORT;
 static Bool	OneSession = FALSE;
 
+void
 XdmcpUseMsg ()
 {
     ErrorF("-query host-name       contact named host for XDMCP\n");
@@ -726,6 +734,7 @@ XdmcpWakeupHandler(data, i, pReadmask)
  * user's host menu when the user selects a host
  */
 
+static void
 XdmcpSelectHost(host_sockaddr, host_len, AuthenticationName)
     struct sockaddr_in	*host_sockaddr;
     int			host_len;
@@ -745,6 +754,7 @@ XdmcpSelectHost(host_sockaddr, host_len, AuthenticationName)
  */
 
 /*ARGSUSED*/
+static void
 XdmcpAddHost(from, fromlen, AuthenticationName, hostname, status)
     struct sockaddr_in  *from;
     ARRAY8Ptr		AuthenticationName, hostname, status;
@@ -767,7 +777,7 @@ receive_packet()
     XdmcpHeader	header;
 
     /* read message off socket */
-    if (!XdmcpFill (xdmcpSocket, &buffer, (struct sockaddr *) &from, &fromlen))
+    if (!XdmcpFill (xdmcpSocket, &buffer, (XdmcpNetaddr) &from, &fromlen))
 	return;
 
     /* reset retransmission backoff */
@@ -781,7 +791,7 @@ receive_packet()
 
     switch (header.opcode) {
     case WILLING:
-	recv_willing_msg(&from, fromlen, header.length);
+	recv_willing_msg((struct sockaddr_in *) &from, fromlen, header.length);
 	break;
     case UNWILLING:
 	XdmcpFatal("Manager unwilling", &UnwillingMessage);
@@ -808,7 +818,7 @@ receive_packet()
  * send the appropriate message given the current state
  */
 
-static
+static void
 send_packet()
 {
     int rtx;
@@ -827,6 +837,8 @@ send_packet()
     case XDM_KEEPALIVE:
 	send_keepalive_msg();
 	break;
+    default:
+	break;
     }
     rtx = (XDM_MIN_RTX << timeOutRtx);
     if (rtx > XDM_MAX_RTX)
@@ -839,6 +851,7 @@ send_packet()
  * timeouts, or Keepalive failure.
  */
 
+void
 XdmcpDeadSession (reason)
     char *reason;
 {
@@ -892,11 +905,13 @@ timeout()
     case XDM_AWAIT_ALIVE_RESPONSE:
 	state = XDM_KEEPALIVE;
 	break;
+    default:
+	break;
     }
     send_packet();
 }
 
-static
+static void
 restart()
 {
     state = XDM_INIT_STATE;
@@ -904,6 +919,7 @@ restart()
     send_packet();
 }
 
+int
 XdmcpCheckAuthentication (Name, Data, packet_type)
     ARRAY8Ptr	Name, Data;
     int	packet_type;
@@ -913,6 +929,7 @@ XdmcpCheckAuthentication (Name, Data, packet_type)
 	     (*AuthenticationFuncs->Validator) (AuthenticationData, Data, packet_type)));
 }
 
+int
 XdmcpAddAuthorization (name, data)
     ARRAY8Ptr	name, data;
 {
@@ -1049,6 +1066,8 @@ send_query_msg()
 	header.opcode = (CARD16) INDIRECT_QUERY;
 	state = XDM_COLLECT_INDIRECT_QUERY;
 	break;
+    default:
+	break;
     }
     header.length = 1;
     for (i = 0; i < AuthenticationNames.length; i++)
@@ -1061,12 +1080,12 @@ send_query_msg()
 	int i;
 
 	for (i = 0; i < NumBroadcastAddresses; i++)
-	    XdmcpFlush (xdmcpSocket, &buffer, &BroadcastAddresses[i],
+	    XdmcpFlush (xdmcpSocket, &buffer, (XdmcpNetaddr) &BroadcastAddresses[i],
 			sizeof (struct sockaddr_in));
     }
     else
     {
-	XdmcpFlush (xdmcpSocket, &buffer, &ManagerAddress,
+	XdmcpFlush (xdmcpSocket, &buffer, (XdmcpNetaddr) &ManagerAddress,
 		    sizeof (ManagerAddress));
     }
 }
@@ -1100,6 +1119,8 @@ recv_willing_msg(from, fromlen, length)
 	    case XDM_COLLECT_INDIRECT_QUERY:
 	    	XdmcpAddHost(from, fromlen, &authenticationName, &hostname, &status);
 	    	break;
+	    default:
+		break;
     	    }
     	}
     }
@@ -1154,7 +1175,8 @@ send_request_msg()
     XdmcpDisposeARRAY8 (&authenticationData);
     XdmcpWriteARRAYofARRAY8 (&buffer, &AuthorizationNames);
     XdmcpWriteARRAY8 (&buffer, &ManufacturerDisplayID);
-    if (XdmcpFlush (xdmcpSocket, &buffer, &req_sockaddr, req_socklen))
+    if (XdmcpFlush (xdmcpSocket, &buffer, 
+			(XdmcpNetaddr) &req_sockaddr, req_socklen))
 	state = XDM_AWAIT_REQUEST_RESPONSE;
 }
 
@@ -1251,7 +1273,7 @@ send_manage_msg()
     XdmcpWriteCARD16 (&buffer, DisplayNumber);
     XdmcpWriteARRAY8 (&buffer, &DisplayClass);
     state = XDM_AWAIT_MANAGE_RESPONSE;
-    XdmcpFlush (xdmcpSocket, &buffer, &req_sockaddr, req_socklen);
+    XdmcpFlush (xdmcpSocket, &buffer, (XdmcpNetaddr) &req_sockaddr, req_socklen);
 }
 
 static void
@@ -1310,7 +1332,7 @@ send_keepalive_msg()
     XdmcpWriteCARD32 (&buffer, SessionID);
 
     state = XDM_AWAIT_ALIVE_RESPONSE;
-    XdmcpFlush (xdmcpSocket, &buffer, &req_sockaddr, req_socklen);
+    XdmcpFlush (xdmcpSocket, &buffer, (XdmcpNetaddr) &req_sockaddr, req_socklen);
 }
 
 static void
@@ -1319,7 +1341,6 @@ recv_alive_msg (length)
 {
     CARD8   SessionRunning;
     CARD32  AliveSessionID;
-    int	    dormancy;
 
     if (state != XDM_AWAIT_ALIVE_RESPONSE)
 	return;
@@ -1348,7 +1369,7 @@ recv_alive_msg (length)
     }
 }
 
-static 
+static  void
 XdmcpFatal (type, status)
     char	*type;
     ARRAY8Ptr	status;
@@ -1357,14 +1378,14 @@ XdmcpFatal (type, status)
 	   status->length, status->length, status->data);
 }
 
-static 
+static  void
 XdmcpWarning(str)
     char *str;
 {
     ErrorF("XDMCP warning: %s\n", str);
 }
 
-static
+static void
 get_manager_by_name(argc, argv, i)
     int	    argc, i;
     char    **argv;

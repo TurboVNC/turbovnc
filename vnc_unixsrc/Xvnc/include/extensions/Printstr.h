@@ -724,6 +724,8 @@ typedef struct _XpContext {
 extern XpContextPtr XpGetPrintContext(
     ClientPtr client);
 
+extern void XpUnsetFontResFunc(ClientPtr);
+
 #endif /* _XP_PRINT_SERVER_ */
 
 _XFUNCPROTOEND

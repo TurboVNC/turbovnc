@@ -1,13 +1,13 @@
+/* $XFree86: xc/programs/Xserver/Xext/shm.c,v 3.42 2003/12/18 10:15:24 alanh Exp $ */
 /************************************************************
 
-Copyright (c) 1989  X Consortium
+Copyright 1989, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,20 +15,19 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 ********************************************************/
 
-/* THIS IS NOT AN X CONSORTIUM STANDARD */
+/* THIS IS NOT AN X CONSORTIUM STANDARD OR AN X PROJECT TEAM SPECIFICATION */
 
-/* $XConsortium: shm.c,v 1.25 95/04/06 16:00:55 dpw Exp $ */
-/* $XFree86: xc/programs/Xserver/Xext/shm.c,v 3.8 1997/01/18 06:52:59 dawes Exp $ */
+/* $Xorg: shm.c,v 1.4 2001/02/09 02:04:33 xorgcvs Exp $ */
 
 #include <sys/types.h>
 #ifndef Lynx
@@ -38,6 +37,8 @@ in this Software without prior written authorization from the X Consortium.
 #include <ipc.h>
 #include <shm.h>
 #endif
+#include <unistd.h>
+#include <sys/stat.h>
 #define NEED_REPLIES
 #define NEED_EVENTS
 #include "X.h"
@@ -168,14 +169,23 @@ static Bool CheckForShmSyscall()
 
     badSysCall = FALSE;
     shmid = shmget(IPC_PRIVATE, 4096, IPC_CREAT);
-    /* Clean up */
+
     if (shmid != -1)
     {
+        /* Successful allocation - clean up */
 	shmctl(shmid, IPC_RMID, (struct shmid_ds *)NULL);
+    }
+    else
+    {
+        /* Allocation failed */
+        badSysCall = TRUE;
     }
     signal(SIGSYS, oldHandler);
     return(!badSysCall);
 }
+
+#define MUST_CHECK_FOR_SHM_SYSCALL
+
 #endif
     
 void
@@ -184,7 +194,7 @@ ShmExtensionInit()
     ExtensionEntry *extEntry;
     int i;
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#ifdef MUST_CHECK_FOR_SHM_SYSCALL
     if (!CheckForShmSyscall())
     {
 	ErrorF("MIT-SHM extension disabled due to lack of kernel support\n");
@@ -637,8 +647,8 @@ ProcShmGetImage(client)
     register ClientPtr client;
 {
     register DrawablePtr pDraw;
-    long		lenPer, length;
-    Mask		plane;
+    long		lenPer = 0, length;
+    Mask		plane = 0;
     xShmGetImageReply	xgi;
     ShmDescPtr		shmdesc;
     int			n;

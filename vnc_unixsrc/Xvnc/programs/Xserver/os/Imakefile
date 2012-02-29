@@ -94,7 +94,7 @@ BOOTSTRAPCFLAGS =
      OS_DEFINES = ServerOSDefines
    KRB5_DEFINES = Krb5Defines
         DEFINES = -DXSERV_t -DTRANS_SERVER ConnectionFlags $(MEM_DEFINES) $(XDMAUTHDEFS) $(RPCDEFS) $(SIGNAL_DEFINES) $(OS_DEFINES) $(KRB5_DEFINES) $(RGB_DEFINES)
-       INCLUDES = -I.  -I../include -I$(XINCLUDESRC) -I$(EXTINCSRC) -I$(TOP)/lib/Xau -I../lbx Krb5Includes -I$(SERVERSRC)/render
+       INCLUDES = -I.  -I../include -I$(XINCLUDESRC) -I$(EXTINCSRC) -I$(TOP)/lib/Xau -I../lbx Krb5Includes -I$(FONTINCSRC) -I$(SERVERSRC)/render
  DEPEND_DEFINES = $(DBM_DEFINES) $(XDMCP_DEFINES) $(EXT_DEFINES) $(TRANS_INCLUDES) ConnectionFlags
        LINTLIBS = ../dix/llib-ldix.ln
 

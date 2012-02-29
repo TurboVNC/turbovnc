@@ -1,5 +1,4 @@
-/* $XConsortium: Xdmcp.h,v 1.9 95/06/07 18:30:59 gildea Exp $ */
-/* $XFree86: xc/lib/Xdmcp/Xdmcp.h,v 3.1 1996/01/05 13:12:04 dawes Exp $ */
+/* $Xorg: Xdmcp.h,v 1.7 2001/04/13 14:43:00 steve Exp $ */
 /*
  * Copyright 1989 Network Computing Devices, Inc., Mountain View, California.
  *
@@ -14,11 +13,30 @@
  * without express or implied warranty.
  *
  */
+/* $XFree86: xc/lib/Xdmcp/Xdmcp.h,v 3.8 2003/11/22 04:50:59 dawes Exp $ */
 
 #ifndef _XDMCP_H_
 #define _XDMCP_H_
+
+#include <X11/Xmd.h>
+
+#include <X11/Xfuncproto.h>
+
+_XFUNCPROTOBEGIN
+
 #define XDM_PROTOCOL_VERSION	1
 #define XDM_UDP_PORT		177
+
+/* IANA has assigned FF0X:0:0:0:0:0:0:12B as the permanently assigned 
+ * multicast addresses for XDMCP, where X in the prefix may be replaced
+ * by any valid scope identifier, such as 1 for Node-Local, 2 for Link-Local,
+ * 5 for Site-Local, and so on.  We set the default here to the Link-Local
+ * version to most closely match the old IPv4 subnet broadcast behavior.
+ * Both xdm and X -query allow specifying a different address if a different
+ * scope is defined.
+ */
+#define XDM_DEFAULT_MCAST_ADDR6	"ff02:0:0:0:0:0:0:12b"
+
 #define XDM_MAX_MSGLEN		8192
 #define XDM_MIN_RTX		2
 #define XDM_MAX_RTX		32
@@ -29,8 +47,8 @@
 
 typedef enum {
     BROADCAST_QUERY = 1, QUERY, INDIRECT_QUERY, FORWARD_QUERY,
-    WILLING, UNWILLING, REQUEST, ACCEPT, DECLINE, MANAGE, REFUSE, 
-    FAILED, KEEPALIVE, ALIVE 
+    WILLING, UNWILLING, REQUEST, ACCEPT, DECLINE, MANAGE, REFUSE,
+    FAILED, KEEPALIVE, ALIVE
 } xdmOpCode;
 
 typedef enum {
@@ -38,7 +56,11 @@ typedef enum {
     XDM_COLLECT_BROADCAST_QUERY, XDM_COLLECT_INDIRECT_QUERY,
     XDM_START_CONNECTION, XDM_AWAIT_REQUEST_RESPONSE,
     XDM_AWAIT_MANAGE_RESPONSE, XDM_MANAGE, XDM_RUN_SESSION, XDM_OFF,
-    XDM_AWAIT_USER_INPUT, XDM_KEEPALIVE, XDM_AWAIT_ALIVE_RESPONSE
+    XDM_AWAIT_USER_INPUT, XDM_KEEPALIVE, XDM_AWAIT_ALIVE_RESPONSE,
+#if defined(IPv6) && defined(AF_INET6)
+    XDM_MULTICAST, XDM_COLLECT_MULTICAST_QUERY,
+#endif
+    XDM_KEEP_ME_LAST
 } xdmcp_states;
 
 #ifdef NOTDEF
@@ -98,34 +120,45 @@ typedef struct _XdmAuthKey {
 
 typedef char *XdmcpNetaddr;
 
+extern int XdmcpWriteARRAY16(XdmcpBufferPtr buffer, ARRAY16Ptr array);
+extern int XdmcpWriteARRAY32(XdmcpBufferPtr buffer, ARRAY32Ptr array);
+extern int XdmcpWriteARRAY8(XdmcpBufferPtr buffer, ARRAY8Ptr array);
+extern int XdmcpWriteARRAYofARRAY8(XdmcpBufferPtr buffer, ARRAYofARRAY8Ptr array);
+extern int XdmcpWriteCARD16(XdmcpBufferPtr buffer, unsigned value);
+extern int XdmcpWriteCARD32(XdmcpBufferPtr buffer, unsigned value);
+extern int XdmcpWriteCARD8(XdmcpBufferPtr buffer, unsigned value);
+extern int XdmcpWriteHeader(XdmcpBufferPtr  buffer, XdmcpHeaderPtr  header);
 
-extern int XdmcpWriteCARD8(),		XdmcpWriteCARD16();
-extern int XdmcpWriteCARD32();
-extern int XdmcpWriteARRAY8(),		XdmcpWriteARRAY16();
-extern int XdmcpWriteARRAY32(),		XdmcpWriteARRAYofARRAY8();
-extern int XdmcpWriteHeader(),		XdmcpFlush();
+extern int XdmcpFlush(int fd, XdmcpBufferPtr buffer, XdmcpNetaddr to, int tolen);
 
-extern int XdmcpReadCARD8(),		XdmcpReadCARD16();
-extern int XdmcpReadCARD32();
-extern int XdmcpReadARRAY8(),		XdmcpReadARRAY16();
-extern int XdmcpReadARRAY32(),		XdmcpReadARRAYofARRAY8();
-extern int XdmcpReadHeader(),		XdmcpFill();
+extern int XdmcpReadARRAY16(XdmcpBufferPtr buffer, ARRAY16Ptr array);
+extern int XdmcpReadARRAY32(XdmcpBufferPtr buffer, ARRAY32Ptr array);
+extern int XdmcpReadARRAY8(XdmcpBufferPtr buffer, ARRAY8Ptr array);
+extern int XdmcpReadARRAYofARRAY8(XdmcpBufferPtr buffer, ARRAYofARRAY8Ptr array);
+extern int XdmcpReadCARD16(XdmcpBufferPtr buffer, CARD16Ptr valuep);
+extern int XdmcpReadCARD32(XdmcpBufferPtr buffer, CARD32Ptr valuep);
+extern int XdmcpReadCARD8(XdmcpBufferPtr buffer, CARD8Ptr valuep);
+extern int XdmcpReadHeader(XdmcpBufferPtr buffer, XdmcpHeaderPtr header);
 
-extern int  XdmcpReadRemaining();
+extern int XdmcpFill(int fd, XdmcpBufferPtr buffer, XdmcpNetaddr from, int *fromlen);
 
-extern void XdmcpDisposeARRAY8(),	XdmcpDisposeARRAY16();
-extern void XdmcpDisposeARRAY32(),	XdmcpDisposeARRAYofARRAY8();
+extern int XdmcpReadRemaining(XdmcpBufferPtr buffer);
 
-extern int XdmcpCopyARRAY8();
+extern void XdmcpDisposeARRAY8(ARRAY8Ptr array);
+extern void XdmcpDisposeARRAY16(ARRAY16Ptr array);
+extern void XdmcpDisposeARRAY32(ARRAY32Ptr array);
+extern void XdmcpDisposeARRAYofARRAY8(ARRAYofARRAY8Ptr array);
 
-extern int XdmcpARRAY8Equal();
+extern int XdmcpCopyARRAY8(ARRAY8Ptr src, ARRAY8Ptr dst);
 
+extern int XdmcpARRAY8Equal(ARRAY8Ptr array1, ARRAY8Ptr array2);
+
+extern void XdmcpGenerateKey (XdmAuthKeyPtr key);
+extern void XdmcpIncrementKey (XdmAuthKeyPtr key);
+extern void XdmcpDecrementKey (XdmAuthKeyPtr key);
 #ifdef HASXDMAUTH
-extern void XdmcpGenerateKey();
-extern void XdmcpIncrementKey();
-extern void XdmcpDecrementKey();
-extern void XdmcpWrap();
-extern void XdmcpUnwrap();
+extern void XdmcpWrap(unsigned char *input, unsigned char *wrapper, unsigned char *output, int bytes);
+extern void XdmcpUnwrap(unsigned char *input, unsigned char *wrapper, unsigned char *output, int bytes);
 #endif
 
 #ifndef TRUE
@@ -134,8 +167,23 @@ extern void XdmcpUnwrap();
 #endif
 
 #if !defined(Xalloc) && !defined(xalloc) && !defined(Xrealloc)
-extern long *Xalloc (), *Xrealloc ();
-extern void Xfree();
+extern void *Xalloc (unsigned long amount);
+extern void *Xrealloc (void *old, unsigned long amount);
+extern void Xfree(void *old);
 #endif
+
+extern int XdmcpCompareKeys (XdmAuthKeyPtr a, XdmAuthKeyPtr b);
+
+extern int XdmcpAllocARRAY16 (ARRAY16Ptr array, int length);
+extern int XdmcpAllocARRAY32 (ARRAY32Ptr array, int length);
+extern int XdmcpAllocARRAY8 (ARRAY8Ptr array, int length);
+extern int XdmcpAllocARRAYofARRAY8 (ARRAYofARRAY8Ptr array, int length);
+
+extern int XdmcpReallocARRAY16 (ARRAY16Ptr array, int length);
+extern int XdmcpReallocARRAY32 (ARRAY32Ptr array, int length);
+extern int XdmcpReallocARRAY8 (ARRAY8Ptr array, int length);
+extern int XdmcpReallocARRAYofARRAY8 (ARRAYofARRAY8Ptr array, int length);
+
+_XFUNCPROTOEND
 
 #endif /* _XDMCP_H_ */

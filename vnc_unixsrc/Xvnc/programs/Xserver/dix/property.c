@@ -659,7 +659,7 @@ int
 ProcListProperties(client)
     ClientPtr client;
 {
-    Atom *pAtoms, *temppAtoms;
+    Atom *pAtoms = NULL, *temppAtoms;
     xListPropertiesReply xlpr;
     int	numProps = 0;
     WindowPtr pWin;

@@ -1,15 +1,13 @@
-/* $TOG: utils.c /main/128 1997/06/01 13:50:39 sekhar $ */
+/* $Xorg: utils.c,v 1.5 2001/02/09 02:05:24 xorgcvs Exp $ */
 /*
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -17,15 +15,15 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts,
@@ -51,7 +49,7 @@ OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE
 OR PERFORMANCE OF THIS SOFTWARE.
 
 */
-/* $XFree86: xc/programs/Xserver/os/utils.c,v 3.27.2.6 1998/02/20 15:13:58 robin Exp $ */
+/* $XFree86: xc/programs/Xserver/os/utils.c,v 3.95 2003/10/01 18:36:38 alanh Exp $ */
 
 #ifdef WIN32
 #include <X11/Xwinsock.h>
@@ -62,6 +60,8 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include "X.h"
 #include "input.h"
 #include "opaque.h"
+#include "dixfont.h"
+#include "osdep.h"
 #ifdef X_POSIX_C_SOURCE
 #define _POSIX_C_SOURCE X_POSIX_C_SOURCE
 #include <signal.h>
@@ -75,6 +75,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #undef _POSIX_SOURCE
 #endif
 #endif
+#include <sys/wait.h>
 #if !defined(SYSV) && !defined(AMOEBA) && !defined(_MINIX) && !defined(WIN32) && !defined(Lynx)
 #include <sys/resource.h>
 #endif
@@ -84,9 +85,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include <time.h>
 #include <sys/stat.h>
 #include <ctype.h>    /* for isspace */
-#if NeedVarargsPrototypes
 #include <stdarg.h>
-#endif
 
 #ifdef AMOEBA
 #include "osdep.h"
@@ -148,9 +147,7 @@ Bool noTestExtensions;
 int auditTrailLevel = 1;
 
 void ddxUseMsg();
-#if NeedVarargsPrototypes
 void VErrorF(char*, va_list);
-#endif
 
 #ifdef DEBUG
 #ifndef SPECIAL_MALLOC
@@ -491,6 +488,7 @@ GetTimeInMillis()
 }
 #endif
 
+void
 AdjustWaitForDelay (waitTime, newdelay)
     pointer	    waitTime;
     unsigned long   newdelay;
@@ -631,7 +629,7 @@ char	*argv[];
     for ( i = 1; i < argc; i++ )
     {
 	/* call ddx first, so it can peek/override if it wants */
-        if(skip = ddxProcessArgument(argc, argv, i))
+        if((skip = ddxProcessArgument(argc, argv, i)))
 	{
 	    i += (skip - 1);
 	}
@@ -1167,7 +1165,7 @@ Xalloc (amount)
 	((random() % MEM_FAIL_SCALE) < Memory_fail))
 	return (unsigned long *)NULL;
 #endif
-    if (ptr = (pointer)malloc(amount)) {
+    if ((ptr = (pointer)malloc(amount))) {
 	return (unsigned long *)ptr;
     }
     if (Must_have_memory)
@@ -1268,7 +1266,8 @@ XNFrealloc (ptr, amount)
 {
     if (( ptr = (pointer)Xrealloc( ptr, amount ) ) == NULL)
     {
-        FatalError( "Out of memory" );
+	if ((long)amount > 0)
+            FatalError( "Out of memory" );
     }
     return ((unsigned long *)ptr);
 }
@@ -1315,9 +1314,9 @@ AuditPrefix(f)
     {
 	time(&tm);
 	autime = ctime(&tm);
-	if (s = strchr(autime, '\n'))
+	if ((s = strchr(autime, '\n')))
 	    *s = '\0';
-	if (s = strrchr(argvGlobal[0], '/'))
+	if ((s = strrchr(argvGlobal[0], '/')))
 	    s++;
 	else
 	    s = argvGlobal[0];
@@ -1328,51 +1327,27 @@ AuditPrefix(f)
 /*VARARGS1*/
 void
 AuditF(
-#if NeedVarargsPrototypes
     char * f, ...)
-#else
-    f, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9) /* limit of ten args */
-    char *f;
-    char *s0, *s1, *s2, *s3, *s4, *s5, *s6, *s7, *s8, *s9;
-#endif
 {
-#if NeedVarargsPrototypes
     va_list args;
-#endif
 
     AuditPrefix(f);
 
-#if NeedVarargsPrototypes
     va_start(args, f);
     VErrorF(f, args);
     va_end(args);
-#else
-    ErrorF(f, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9);
-#endif
 }
 
 /*VARARGS1*/
 void
 FatalError(
-#if NeedVarargsPrototypes
     char *f, ...)
-#else
-f, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9) /* limit of ten args */
-    char *f;
-    char *s0, *s1, *s2, *s3, *s4, *s5, *s6, *s7, *s8, *s9;
-#endif
 {
-#if NeedVarargsPrototypes
     va_list args;
-#endif
     ErrorF("\nFatal server error:\n");
-#if NeedVarargsPrototypes
     va_start(args, f);
     VErrorF(f, args);
     va_end(args);
-#else
-    ErrorF(f, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9);
-#endif
     ErrorF("\n");
 #ifdef DDXOSFATALERROR
     OsVendorFatalError();
@@ -1381,7 +1356,6 @@ f, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9) /* limit of ten args */
     /*NOTREACHED*/
 }
 
-#if NeedVarargsPrototypes
 void
 VErrorF(f, args)
     char *f;
@@ -1389,33 +1363,16 @@ VErrorF(f, args)
 {
     vfprintf(stderr, f, args);
 }
-#endif
 
 /*VARARGS1*/
 void
 ErrorF(
-#if NeedVarargsPrototypes
     char * f, ...)
-#else
- f, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9) /* limit of ten args */
-    char *f;
-    char *s0, *s1, *s2, *s3, *s4, *s5, *s6, *s7, *s8, *s9;
-#endif
 {
-#if NeedVarargsPrototypes
     va_list args;
     va_start(args, f);
     VErrorF(f, args);
     va_end(args);
-#else
-#ifdef AMOEBA
-    mu_lock(&print_lock);
-#endif
-    fprintf( stderr, f, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9);
-#ifdef AMOEBA
-    mu_unlock(&print_lock);
-#endif
-#endif
 }
 
 #if !defined(WIN32) && !defined(__EMX__)
@@ -1479,7 +1436,6 @@ Popen(command, type)
     struct pid *cur;
     FILE *iop;
     int pdes[2], pid;
-    void (*csig)();
 
     if (command == NULL || type == NULL)
 	return NULL;
@@ -1549,7 +1505,6 @@ Pclose(iop)
     pointer iop;
 {
     struct pid *cur, *last;
-    int omask;
     int pstat;
     int pid;
 
@@ -1560,7 +1515,7 @@ Pclose(iop)
     fclose(iop);
 
     for (last = NULL, cur = pidlist; cur; last = cur, cur = cur->next)
-	if (cur->fp = iop)
+	if (cur->fp == iop)
 	    break;
     if (cur == NULL)
 	return -1;

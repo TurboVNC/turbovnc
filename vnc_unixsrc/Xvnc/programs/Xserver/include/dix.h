@@ -514,16 +514,6 @@ extern void WakeupHandler(
 #endif
 );
 
-typedef struct timeval ** OSTimePtr;
-
-typedef void (* BlockHandlerProcPtr)(
-#if NeedNestedPrototypes
-    pointer /* blockData */,
-    OSTimePtr /* pTimeout */,
-    pointer /* pReadmask */
-#endif
-);
-
 typedef void (* WakeupHandlerProcPtr)(
 #if NeedNestedPrototypes
     pointer /* blockData */,
@@ -559,6 +549,8 @@ extern void ProcessWorkQueue(
     void
 #endif
 );
+
+extern void ProcessWorkQueueZombies(void);
 
 extern Bool QueueWorkProc(
 #if NeedFunctionPrototypes

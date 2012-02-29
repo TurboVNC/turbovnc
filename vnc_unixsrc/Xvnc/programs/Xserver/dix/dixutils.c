@@ -332,7 +332,7 @@ AlterSaveSetForClient(client, pWin, mode)
     unsigned mode;
 {
     int numnow;
-    pointer *pTmp;
+    pointer *pTmp = NULL;
     int j;
 
     numnow = client->numSaved;
@@ -574,7 +574,7 @@ ProcessWorkQueue()
      * they will be called again.  This must be reentrant with
      * QueueWorkProc.
      */
-    while (q = *p)
+    while ((q = *p))
     {
 	if ((*q->function) (q->client, q->closure))
 	{
@@ -596,7 +596,7 @@ ProcessWorkQueueZombies()
     WorkQueuePtr    q, *p;
 
     p = &workQueue;
-    while (q = *p)
+    while ((q = *p))
     {
 	if (q->client && q->client->clientGone)
 	{

@@ -854,7 +854,7 @@ short	locy;
 	 * time delta from previous event
 	 */
 	CARD16			tchar;
-	char		keytrans;
+	char		keytrans = 0;
 
 	/*
 	 * update the logical position of the locator if the physical position

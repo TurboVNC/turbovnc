@@ -1172,9 +1172,9 @@ FindColor (pmap, pentFirst, size, prgb, pPixel, channel, client, comp)
 {
     EntryPtr	pent;
     Bool	foundFree;
-    Pixel	pixel, Free;
-    int		npix, count, *nump;
-    Pixel	**pixp, *ppix;
+    Pixel	pixel, Free = 0;
+    int		npix, count, *nump = NULL;
+    Pixel	**pixp = NULL, *ppix;
     xColorItem	def;
 
     foundFree = FALSE;

@@ -1985,10 +1985,12 @@ DoGetImage(client, format, drawable, x, y, width, height, planemask, im_return)
 #ifdef INTERNAL_VS_EXTERNAL_PADDING
     long		widthBytesLineProto, lengthProto;
 #endif
-    Mask		plane;
+    Mask		plane = 0;
     char		*pBuf;
     xGetImageReply	xgi;
+#ifdef XCSECURITY
     RegionPtr pVisibleRegion = NULL;
+#endif
 
     if ((format != XYPixmap) && (format != ZPixmap))
     {
@@ -3797,7 +3799,6 @@ SendConnSetup(client, reason)
     if (reason)
     {
 	xConnSetupPrefix csp;
-	char pad[3];
 
 	csp.success = xFalse;
 	csp.lengthReason = strlen(reason);

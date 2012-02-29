@@ -53,6 +53,7 @@ from the X Consortium.
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <stdlib.h>
 #ifdef XSERV_t
 #include "os.h"
 #else

@@ -728,16 +728,19 @@ ComputeFreezes()
 	w = XYToWindow(
 	    xE->u.keyButtonPointer.rootX, xE->u.keyButtonPointer.rootY);
 	for (i = 0; i < spriteTraceGood; i++)
+	{
 	    if (syncEvents.replayWin == spriteTrace[i])
 	    {
-		if (!CheckDeviceGrabs(replayDev, xE, i+1, count))
+		if (!CheckDeviceGrabs(replayDev, xE, i+1, count)) {
 		    if (replayDev->focus)
 			DeliverFocusedEvent(replayDev, xE, w, count);
 		    else
 			DeliverDeviceEvents(w, xE, NullGrab, NullWindow,
-					    replayDev, count);
+					        replayDev, count);
+		}
 		goto playmore;
 	    }
+	}
 	/* must not still be in the same stack */
 	if (replayDev->focus)
 	    DeliverFocusedEvent(replayDev, xE, w, count);
@@ -1188,7 +1191,7 @@ DeliverEventsToWindow(pWin, pEvents, count, filter, grab, mskidx)
     int attempt;
     register InputClients *other;
     ClientPtr client = NullClient;
-    Mask deliveryMask; 	/* If a grab occurs due to a button press, then
+    Mask deliveryMask = 0; /* If a grab occurs due to a button press, then
 		              this mask is the mask of the grab. */
     int type = pEvents->u.u.type;
 
@@ -1851,7 +1854,7 @@ CheckDeviceGrabs(device, xE, checkFirst, count)
     int count;
 {
     register int i;
-    register WindowPtr pWin;
+    register WindowPtr pWin = NULL;
     register FocusClassPtr focus = device->focus;
 
     if ((xE->u.u.type == ButtonPress
@@ -2864,7 +2867,7 @@ SetInputFocus(client, dev, focusID, revertTo, ctime, followOK)
     }
     time = ClientTimeToServerTime(ctime);
     if ((focusID == None) || (focusID == PointerRoot))
-	focusWin = (WindowPtr)focusID;
+	focusWin = (WindowPtr)(long)focusID;
     else if ((focusID == FollowKeyboard) && followOK)
 	focusWin = inputInfo.keyboard->focus->win;
     else if (!(focusWin = SecurityLookupWindow(focusID, client,

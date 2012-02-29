@@ -1,13 +1,13 @@
+/* $XFree86: xc/programs/Xserver/dix/gc.c,v 3.10 2003/11/17 22:20:34 dawes Exp $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -46,8 +46,7 @@ SOFTWARE.
 
 ******************************************************************/
 
-/* $XConsortium: gc.c /main/70 1996/08/01 19:21:09 dpw $ */
-/* $XFree86: xc/programs/Xserver/dix/gc.c,v 3.4 1996/12/23 06:29:45 dawes Exp $ */
+/* $Xorg: gc.c,v 1.4 2001/02/09 02:04:40 xorgcvs Exp $ */
 
 #include "X.h"
 #include "Xmd.h"
@@ -100,14 +99,16 @@ ValidateGC(pDraw, pGC)
  * or pUnion, but not both; one of them must be NULL.  If you don't need
  * to pass any pointers, you can use either one:
  * 
- *     /* example calling dixChangeGC using pC32 parameter
+ *     example calling dixChangeGC using pC32 parameter
+ *
  *     CARD32 v[2];
  *     v[0] = foreground;
  *     v[1] = background;
  *     dixChangeGC(client, pGC, GCForeground|GCBackground, v, NULL);
  * 
- *     /* example calling dixChangeGC using pUnion parameter;
- *     /* same effect as above
+ *     example calling dixChangeGC using pUnion parameter;
+ *     same effect as above
+ *
  *     ChangeGCVal v[2];
  *     v[0].val = foreground;
  *     v[1].val = background;
@@ -116,10 +117,12 @@ ValidateGC(pDraw, pGC)
  * However, if you need to pass a pointer to a pixmap or font, you MUST
  * use the pUnion parameter.
  * 
- *     /* example calling dixChangeGC passing pointers in the value list
+ *     example calling dixChangeGC passing pointers in the value list
+ *     v[1].ptr is a pointer to a pixmap
+ *
  *     ChangeGCVal v[2];
  *     v[0].val = FillTiled;
- *     v[1].ptr = pPixmap; /* pointer to a pixmap
+ *     v[1].ptr = pPixmap;
  *     dixChangeGC(client, pGC, GCFillStyle|GCTile, NULL, v);
  * 
  * Note: we could have gotten by with just the pUnion parameter, but on
@@ -405,8 +408,8 @@ dixChangeGC(client, pGC, mask, pC32, pUnion)
 		break;
 	    case GCClipMask:
 	    {
-		Pixmap pid;
-		int    clipType;
+		Pixmap pid = 0;
+		int    clipType = 0;
 
 		if (pUnion)
 		{

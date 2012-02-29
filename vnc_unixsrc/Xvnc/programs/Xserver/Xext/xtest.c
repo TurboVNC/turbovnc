@@ -41,6 +41,7 @@ from the X Consortium.
 #include "inputstr.h"
 #include "scrnintstr.h"
 #include "dixevents.h"
+#include "sleepuntil.h"
 #define _XTEST_SERVER_
 #include "XTest.h"
 #include "xteststr.h"
@@ -164,12 +165,12 @@ ProcXTestFakeInput(client)
     int nev;
     int	n;
     xEvent *ev;
-    DeviceIntPtr dev;
+    DeviceIntPtr dev = NULL;
     WindowPtr root;
     int type;
 #ifdef XINPUT
     Bool extension = FALSE;
-    deviceValuator *dv;
+    deviceValuator *dv = NULL;
     int base;
     int *values;
 #endif /* XINPUT */

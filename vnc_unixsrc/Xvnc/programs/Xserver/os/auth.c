@@ -176,7 +176,7 @@ LoadAuthorization ()
     f = fopen (authorization_file, "r");
     if (!f)
 	return 0;
-    while (auth = XauReadAuth (f)) {
+    while ((auth = XauReadAuth (f)) != 0) {
 	for (i = 0; i < NUM_AUTHORIZATION; i++) {
 	    if (protocols[i].name_length == auth->name_length &&
 		memcmp (protocols[i].name, auth->name, (int) auth->name_length) == 0 &&

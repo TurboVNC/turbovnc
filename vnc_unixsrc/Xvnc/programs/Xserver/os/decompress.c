@@ -195,6 +195,7 @@ CompressedFontFileDone (fid)
 
 #define getdcchar(file)    ((file)->stackp > (file)->de_stack ? (*--((file)->stackp)) : _filldcbuf (file))
 
+int
 _filldcbuf (file)
     CompressedFile  *file;
 {
@@ -342,6 +343,7 @@ getcode(file)
     return code;
 }
 
+int
 CompressedFontFileRead (buf, itemsize, nitems, fid)
     char	*buf;
     unsigned	itemsize;
@@ -364,11 +366,12 @@ CompressedFontFileRead (buf, itemsize, nitems, fid)
     return nitems - nbytes / itemsize;
 }
 
+int
 CompressedFontFileSkip (bytes, fid)
     unsigned	bytes;
     FID		fid;
 {
-    int	    c;
+    int	    c = 0;
 
     while (bytes-- && ((c = getdcchar((CompressedFile *)fid)) != EOF))
 	    ;

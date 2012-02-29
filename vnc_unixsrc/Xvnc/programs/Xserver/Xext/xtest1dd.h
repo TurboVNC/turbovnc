@@ -123,4 +123,23 @@ return_input_array_size(
 #endif
 );
 
+extern void XTestGenerateEvent(
+	int                    /* dev_type */,
+	int                    /* keycode */,
+	int                    /* keystate */,
+	int                    /* mousex */,
+	int                    /* mousey */
+);
+
+extern void XTestGetPointerPos(
+	short *                /* fmousex */,
+	short *                /* fmousey */
+);
+
+extern void XTestJumpPointer(
+	int                    /* jx */,
+	int                    /* jy */,
+	int                    /* dev_type */
+);
+
 #endif /* XTEST1DD_H */

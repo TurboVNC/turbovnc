@@ -1368,6 +1368,7 @@ FreeAlarmClient(value, id)
     }
     FatalError("alarm client not on event list");
     /*NOTREACHED*/
+    return 0;
 }
 
 
@@ -1411,7 +1412,7 @@ ProcSyncListSystemCounters(client)
 {
     xSyncListSystemCountersReply  rep;
     int i, len;
-    xSyncSystemCounter *list, *walklist;
+    xSyncSystemCounter *list = NULL, *walklist = NULL;
     
     REQUEST_SIZE_MATCH(xSyncListSystemCountersReq);
 

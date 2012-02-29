@@ -1,16 +1,13 @@
-/* $XConsortium: Xtrans.h,v 1.29 95/06/08 23:20:39 gildea Exp $ */
-/* $XFree86: xc/lib/xtrans/Xtrans.h,v 3.9 1997/01/18 06:52:39 dawes Exp $ */
+/* $Xorg: Xtrans.h,v 1.4 2001/02/09 02:04:06 xorgcvs Exp $ */
 /*
 
-Copyright (c) 1993, 1994  X Consortium
+Copyright 1993, 1994, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -18,19 +15,20 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/lib/xtrans/Xtrans.h,v 3.22 2003/07/24 13:50:19 eich Exp $ */
 
-/* Copyright (c) 1993, 1994 NCR Corporation - Dayton, Ohio, USA
+/* Copyright 1993, 1994 NCR Corporation - Dayton, Ohio, USA
  *
  * All Rights Reserved
  *
@@ -70,7 +68,9 @@ from the X Consortium.
 #else
 #define TRANS(func) _X11Trans/**/func
 #endif
+#ifdef XTRANSDEBUG
 static char* __xtransname = "_X11Trans";
+#endif
 #endif /* X11_t */
 
 #ifdef XSERV_t
@@ -79,7 +79,9 @@ static char* __xtransname = "_X11Trans";
 #else
 #define TRANS(func) _XSERVTrans/**/func
 #endif
+#ifdef XTRANSDEBUG
 static char* __xtransname = "_XSERVTrans";
+#endif
 #define X11_t
 #endif /* X11_t */
 
@@ -89,7 +91,9 @@ static char* __xtransname = "_XSERVTrans";
 #else
 #define TRANS(func) _XimXTrans/**/func
 #endif
+#ifdef XTRANSDEBUG
 static char* __xtransname = "_XimTrans";
+#endif
 #endif /* XIM_t */
 
 #ifdef FS_t
@@ -98,7 +102,9 @@ static char* __xtransname = "_XimTrans";
 #else
 #define TRANS(func) _FSTrans/**/func
 #endif
+#ifdef XTRANSDEBUG
 static char* __xtransname = "_FSTrans";
+#endif
 #endif /* FS_t */
 
 #ifdef FONT_t
@@ -107,7 +113,9 @@ static char* __xtransname = "_FSTrans";
 #else
 #define TRANS(func) _FontTrans/**/func
 #endif
+#ifdef XTRANSDEBUG
 static char* __xtransname = "_FontTrans";
+#endif
 #endif /* FONT_t */
 
 #ifdef ICE_t
@@ -116,7 +124,9 @@ static char* __xtransname = "_FontTrans";
 #else
 #define TRANS(func) _IceTrans/**/func
 #endif
+#ifdef XTRANSDEBUG
 static char* __xtransname = "_IceTrans";
+#endif
 #endif /* ICE_t */
 
 #ifdef TEST_t
@@ -125,7 +135,9 @@ static char* __xtransname = "_IceTrans";
 #else
 #define TRANS(func) _TESTTrans/**/func
 #endif
+#ifdef XTRANSDEBUG
 static char* __xtransname = "_TESTTrans";
+#endif
 #endif /* TEST_t */
 
 #if !defined(TRANS)
@@ -134,7 +146,9 @@ static char* __xtransname = "_TESTTrans";
 #else
 #define TRANS(func) _XTrans/**/func
 #endif
+#ifdef XTRANSDEBUG
 static char* __xtransname = "_XTrans";
+#endif
 #endif /* !TRANS */
 
 

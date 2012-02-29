@@ -1,16 +1,13 @@
-/* $XConsortium: privates.c /main/5 1996/06/17 10:56:22 mor $ */
-/* $XFree86: xc/programs/Xserver/dix/privates.c,v 3.2 1997/01/23 10:57:19 dawes Exp $ */
+/* $Xorg: privates.c,v 1.4 2001/02/09 02:04:40 xorgcvs Exp $ */
 /*
 
-Copyright (c) 1993  X Consortium
+Copyright 1993, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -18,17 +15,18 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/programs/Xserver/dix/privates.c,v 3.8 2001/12/14 19:59:32 dawes Exp $ */
 
 #include "X.h"
 #include "scrnintstr.h"
@@ -122,12 +120,12 @@ ResetScreenPrivates()
 int
 AllocateScreenPrivateIndex()
 {
-    int		index2;
+    int		idx;
     int		i;
     ScreenPtr	pScreen;
     DevUnion	*nprivs;
 
-    index2 = screenPrivateCount++;
+    idx = screenPrivateCount++;
     for (i = 0; i < screenInfo.numScreens; i++)
     {
 	pScreen = screenInfo.screens[i];
@@ -138,9 +136,11 @@ AllocateScreenPrivateIndex()
 	    screenPrivateCount--;
 	    return -1;
 	}
+	/* Zero the new private */
+	bzero(&nprivs[idx], sizeof(DevUnion));
 	pScreen->devPrivates = nprivs;
     }
-    return index2;
+    return idx;
 }
 
 
@@ -339,15 +339,18 @@ InitCmapPrivFunc initPrivFunc;
 	pColormap = (ColormapPtr) LookupIDByType (
 	    pScreen->defColormap, RT_COLORMAP);
 
-	privs = (DevUnion *) xrealloc (pColormap->devPrivates,
-	    colormapPrivateCount * sizeof(DevUnion));
-
-	pColormap->devPrivates = privs;
-
-	if (!privs || !(*initPrivFunc)(pColormap))
+	if (pColormap)
 	{
-	    colormapPrivateCount--;
-	    return -1;
+	    privs = (DevUnion *) xrealloc (pColormap->devPrivates,
+		colormapPrivateCount * sizeof(DevUnion));
+    
+	    pColormap->devPrivates = privs;
+    
+	    if (!privs || !(*initPrivFunc)(pColormap))
+	    {
+		colormapPrivateCount--;
+		return -1;
+	    }
 	}
     }
 
