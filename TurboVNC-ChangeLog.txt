@@ -8,10 +8,19 @@ than waiting for a framebuffer update request from a viewer.  This greatly
 improves the performance of video players and VirtualGL on high-latency
 networks.
 -------------------------------------------------------------------------------
-[7]
+[2]
 autocutsel has been replaced with a more robust and configurable clipboard
 transfer mechanism based on the VNC X11 extension and the vncconfig utility
 used by RealVNC.
+-------------------------------------------------------------------------------
+[3]
+Re-enabled Compression Level 2 whenever JPEG is used.  Compression Level 2 uses
+a higher level of Zlib compression on non-JPEG subrectangles, and it also uses
+a palette threshold of 96 instead of 24, meaning that the encoder will tend to
+send more indexed color subrectangles than it would under Compression Level 1.
+This has been shown to benefit some types of workloads, but only when JPEG is
+enabled.  Higher levels of Zlib compression have not been shown to be
+beneficial.
 -------------------------------------------------------------------------------
 
 
