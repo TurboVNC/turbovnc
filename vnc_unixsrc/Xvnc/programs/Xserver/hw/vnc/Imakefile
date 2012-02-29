@@ -17,8 +17,8 @@ PAMOBJS = authpam.o
 
 #include <vnclibs.def>
 INCLUDES = -I. -I$(XBUILDINCDIR) -I$(FONTINCSRC) -I$(XINCLUDESRC) \
-	   -I../../cfb -I../../mfb -I../../mi -I../../include -I../../os \
-	   $(VNCCPPFLAGS)
+	   -I../../fb -I../../mfb -I../../mi -I../../include -I../../os \
+	   $(VNCCPPFLAGS) -I$(XINCLUDESRC)/extensions -I../../render
 
 DEFINES = ServerOSDefines
 

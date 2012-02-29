@@ -1,16 +1,13 @@
-/* $XConsortium: miscrinit.c /main/13 1996/08/12 21:51:16 dpw $ */
-/* $XFree86: xc/programs/Xserver/mi/miscrinit.c,v 3.2 1996/12/23 07:09:46 dawes Exp $ */
+/* $Xorg: miscrinit.c,v 1.4 2001/02/09 02:05:21 xorgcvs Exp $ */
 /*
 
-Copyright (c) 1990  X Consortium
+Copyright 1990, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -18,17 +15,18 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/programs/Xserver/mi/miscrinit.c,v 3.16 2003/04/23 21:51:53 tsi Exp $ */
 
 #include "X.h"
 #include "servermd.h"
@@ -39,6 +37,9 @@ from the X Consortium.
 #include "mibstore.h"
 #include "dix.h"
 #include "miline.h"
+#define FB_OLD_GC
+#define FB_OLD_SCREEN
+#include "fb.h"
 
 /* We use this structure to propogate some information from miScreenInit to
  * miCreateScreenResources.  miScreenInit allocates the structure, fills it
@@ -70,17 +71,56 @@ miModifyPixmapHeader(pPixmap, width, height, depth, bitsPerPixel, devKind,
 {
     if (!pPixmap)
 	return FALSE;
-    pPixmap->drawable.depth = depth;
-    pPixmap->drawable.bitsPerPixel = bitsPerPixel;
-    pPixmap->drawable.id = 0;
-    pPixmap->drawable.serialNumber = NEXT_SERIAL_NUMBER;
-    pPixmap->drawable.x = 0;
-    pPixmap->drawable.y = 0;
-    pPixmap->drawable.width = width;
-    pPixmap->drawable.height = height;
-    pPixmap->devKind = devKind;
-    pPixmap->refcnt = 1;
-    pPixmap->devPrivate.ptr = pPixData;
+
+    /*
+     * If all arguments are specified, reinitialize everything (including
+     * validated state).
+     */
+    if ((width > 0) && (height > 0) && (depth > 0) && (bitsPerPixel > 0) &&
+	(devKind > 0) && pPixData) {
+	pPixmap->drawable.depth = depth;
+	pPixmap->drawable.bitsPerPixel = bitsPerPixel;
+	pPixmap->drawable.id = 0;
+	pPixmap->drawable.serialNumber = NEXT_SERIAL_NUMBER;
+	pPixmap->drawable.x = 0;
+	pPixmap->drawable.y = 0;
+	pPixmap->drawable.width = width;
+	pPixmap->drawable.height = height;
+	pPixmap->devKind = devKind;
+	pPixmap->refcnt = 1;
+	pPixmap->devPrivate.ptr = pPixData;
+    } else {
+	/*
+	 * Only modify specified fields, keeping all others intact.
+	 */
+
+	if (width > 0)
+	    pPixmap->drawable.width = width;
+
+	if (height > 0)
+	    pPixmap->drawable.height = height;
+
+	if (depth > 0)
+	    pPixmap->drawable.depth = depth;
+
+	if (bitsPerPixel > 0)
+	    pPixmap->drawable.bitsPerPixel = bitsPerPixel;
+	else if ((bitsPerPixel < 0) && (depth > 0))
+	    pPixmap->drawable.bitsPerPixel = BitsPerPixel(depth);
+
+	/*
+	 * CAVEAT:  Non-SI DDXen may use devKind and devPrivate fields for
+	 *          other purposes.
+	 */
+	if (devKind > 0)
+	    pPixmap->devKind = devKind;
+	else if ((devKind < 0) && ((width > 0) || (depth > 0)))
+	    pPixmap->devKind = PixmapBytePad(pPixmap->drawable.width,
+		pPixmap->drawable.depth);
+
+	if (pPixData)
+	    pPixmap->devPrivate.ptr = pPixData;
+    }
     return TRUE;
 }
 
@@ -125,7 +165,8 @@ miCreateScreenResources(pScreen)
 	    return FALSE;
 
 	if (!(*pScreen->ModifyPixmapHeader)(pPixmap, pScreen->width,
-		    pScreen->height, pScreen->rootDepth, pScreen->rootDepth,
+		    pScreen->height, pScreen->rootDepth,
+		    BitsPerPixel(pScreen->rootDepth),
 		    PixmapBytePad(pScrInitParms->width, pScreen->rootDepth),
 		    pScrInitParms->pbits))
 	    return FALSE;

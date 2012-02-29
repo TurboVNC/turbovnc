@@ -280,9 +280,20 @@ extern RegDataRec miBrokenData;
 #define REGION_EXTENTS(_pScreen, _pReg) \
     &(_pReg)->extents
 
+#define REGION_NULL(_pScreen, _pReg) \
+{ \
+    (_pReg)->extents = miEmptyBox; \
+    (_pReg)->data = &miEmptyData; \
+}
+
 #endif /* DONT_INLINE_REGION_OPS */
 
 #endif /* NEED_SCREEN_REGIONS */
+
+#ifndef REGION_NULL
+#define REGION_NULL(_pScreen, _pReg) \
+    REGION_INIT(_pScreen, _pReg, NullBox, 1)
+#endif
 
 /* moved from mi.h */
 

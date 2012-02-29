@@ -1,4 +1,15 @@
 
-This is the directory containing the code specific to the TightVNC X server.
+This is the directory containing the code specific to the VNC X server.
 Note that within this directory the name RFB is still used instead of VNC.
 
+NOTE:
+
+This version of TurboVNC contains code from the xf4vnc project
+(http://xf4vnc.sourceforge.net) by Alan Hourihane <alanh@fairlite.demon.co.uk>.
+Mostly, we merged only the code that was necessary to implement the X Rendering
+Extension, but this involved some systemic changes, such as replacing cfb and
+mfb with fb and modifying mi where necessary to support fb.  We also merged in
+any minor fixes, such as compiler warning elimination, formatting improvements,
+safety checks, etc. that had no risk of destabilization.  The render/ and fb/
+directories are mostly copied verbatim from xf4vnc, whereas the other code
+borrows from xf4vnc only where it needs to.

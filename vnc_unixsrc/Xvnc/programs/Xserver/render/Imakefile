@@ -1,0 +1,44 @@
+XCOMM $XFree86: xc/programs/Xserver/render/Imakefile,v 1.11 2003/04/21 12:32:14 sven Exp $
+#include <Server.tmpl>
+
+       SRCS =   animcur.c \
+                filter.c \
+                glyph.c \
+                miglyph.c \
+                miindex.c \
+                mipict.c \
+                mirect.c \
+                mitrap.c \
+                mitri.c \
+                picture.c \
+                render.c
+
+       OBJS =   animcur.o \
+                filter.o \
+                glyph.o \
+                miglyph.o \
+                miindex.o \
+                mipict.o \
+                mirect.o \
+                mitrap.o \
+                mitri.o \
+                picture.o \
+                render.o
+
+   INCLUDES = -I. -I../include -I../mi -I../../../include/fonts \
+                -I../fb -I../hw/kdrive -I$(EXTINCSRC) -I$(XINCLUDESRC) \
+                -I$(FONTINCSRC) -I../Xext
+   LINTLIBS = ../dix/llib-ldix.ln ../os/llib-los.ln
+
+NormalLibraryTarget(render,$(OBJS))
+NormalLibraryObjectRule()
+LintLibraryTarget(render,$(SRCS))
+NormalLintTarget($(SRCS))
+
+DependTarget()
+
+InstallLinkKitNonExecFile(glyphstr.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(mipict.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(picture.h,$(LINKKITDIR)/include)
+InstallLinkKitNonExecFile(picturestr.h,$(LINKKITDIR)/include)
+

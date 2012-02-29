@@ -208,6 +208,9 @@ XCOMM $XFree86: xc/config/cf/X11.tmpl,v 1.8.2.4 1998/01/23 12:35:08 dawes Exp $
 #ifndef BuildDPMSLibrary
 #define BuildDPMSLibrary	BuildDPMSExt
 #endif
+#ifndef BuildRender
+#define BuildRender		YES
+#endif
 
 #ifndef InstallLibManPages
 #define InstallLibManPages	YES
@@ -511,6 +514,14 @@ XCOMM $XFree86: xc/config/cf/X11.tmpl,v 1.8.2.4 1998/01/23 12:35:08 dawes Exp $
 #endif
 #endif
 
+#ifndef RenderDefines
+#if BuildRender
+#define RenderDefines -DRENDER
+#else
+#define RenderDefines /**/
+#endif
+#endif
+
 #ifndef SitePervasiveExtensionDefines
 #define SitePervasiveExtensionDefines /**/
 #endif
@@ -519,7 +530,7 @@ XCOMM $XFree86: xc/config/cf/X11.tmpl,v 1.8.2.4 1998/01/23 12:35:08 dawes Exp $
 				  LbxDefines AppgroupDefines \
 				  XCSecurityDefines PervasiveDBEDefines \
 				  DPMSExtensionDefines \
-				  XprintDefines SitePervasiveExtensionDefines
+				  XprintDefines SitePervasiveExtensionDefines RenderDefines
 #endif
 #ifndef SiteExtensionDefines
 #define SiteExtensionDefines /**/

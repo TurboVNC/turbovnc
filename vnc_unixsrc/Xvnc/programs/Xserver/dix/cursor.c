@@ -1,13 +1,13 @@
+/* $XFree86: xc/programs/Xserver/dix/cursor.c,v 3.9 2003/11/17 22:20:33 dawes Exp $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -47,8 +47,7 @@ SOFTWARE.
 ******************************************************************/
 
 
-/* $XConsortium: cursor.c /main/19 1996/08/01 19:20:16 dpw $ */
-/* $XFree86: xc/programs/Xserver/dix/cursor.c,v 3.1 1996/12/23 06:29:36 dawes Exp $ */
+/* $Xorg: cursor.c,v 1.4 2001/02/09 02:04:39 xorgcvs Exp $ */
 
 #include "X.h"
 #include "Xmd.h"
@@ -81,6 +80,9 @@ FreeCursorBits(bits)
 	return;
     xfree(bits->source);
     xfree(bits->mask);
+#ifdef ARGB_CURSOR
+    xfree(bits->argb);
+#endif
     if (bits->refcnt == 0)
     {
 	register GlyphSharePtr *prev, this;
@@ -131,10 +133,11 @@ FreeCursor(value, cid)
  * does not copy the src and mask bits
  */
 CursorPtr 
-AllocCursor(psrcbits, pmaskbits, cm,
+AllocCursorARGB(psrcbits, pmaskbits, argb, cm,
 	    foreRed, foreGreen, foreBlue, backRed, backGreen, backBlue)
     unsigned char *	psrcbits;		/* server-defined padding */
     unsigned char *	pmaskbits;		/* server-defined padding */
+    CARD32 *		argb;			/* no padding */
     CursorMetricPtr	cm;
     unsigned		foreRed, foreGreen, foreBlue;
     unsigned		backRed, backGreen, backBlue;
@@ -154,6 +157,9 @@ AllocCursor(psrcbits, pmaskbits, cm,
     bits = (CursorBitsPtr)((char *)pCurs + sizeof(CursorRec));
     bits->source = psrcbits;
     bits->mask = pmaskbits;
+#ifdef ARGB_CURSOR
+    bits->argb = argb;
+#endif
     bits->width = cm->width;
     bits->height = cm->height;
     bits->xhot = cm->xhot;
@@ -190,6 +196,20 @@ AllocCursor(psrcbits, pmaskbits, cm,
 	}
     }
     return pCurs;
+}
+
+CursorPtr 
+AllocCursor(psrcbits, pmaskbits, cm,
+	    foreRed, foreGreen, foreBlue, backRed, backGreen, backBlue)
+    unsigned char *	psrcbits;		/* server-defined padding */
+    unsigned char *	pmaskbits;		/* server-defined padding */
+    CursorMetricPtr	cm;
+    unsigned		foreRed, foreGreen, foreBlue;
+    unsigned		backRed, backGreen, backBlue;
+{
+    return AllocCursorARGB (psrcbits, pmaskbits, (CARD32 *) 0, cm,
+			    foreRed, foreGreen, foreBlue,
+			    backRed, backGreen, backBlue);
 }
 
 int
@@ -308,6 +328,9 @@ AllocGlyphCursor(source, sourceChar, mask, maskChar,
 	}
 	bits->source = srcbits;
 	bits->mask = mskbits;
+#ifdef ARGB_CURSOR
+	bits->argb = 0;
+#endif
 	bits->width = cm.width;
 	bits->height = cm.height;
 	bits->xhot = cm.xhot;

@@ -1,5 +1,7 @@
 /*
  * rfb.h - header file for RFB DDX implementation.
+ *
+ * Modified for XFree86 4.x by Alan Hourihane <alanh@fairlite.demon.co.uk>
  */
 
 /*
@@ -39,6 +41,9 @@
 #include <zlib.h>
 #include <stdarg.h>
 #include <pthread.h>
+#ifdef RENDER
+#include "picturestr.h"
+#endif
 
 /* It's a good idea to keep these values a bit greater than required. */
 #define MAX_ENCODINGS 10
@@ -119,6 +124,9 @@ typedef struct
     CopyWindowProcPtr			CopyWindow;
     ClearToBackgroundProcPtr		ClearToBackground;
     RestoreAreasProcPtr			RestoreAreas;
+#ifdef RENDER
+    CompositeProcPtr			Composite;
+#endif
 
 } rfbScreenInfo, *rfbScreenInfoPtr;
 
@@ -465,6 +473,24 @@ extern void rfbStoreColors(ColormapPtr pmap, int ndef, xColorItem *pdefs);
 
 extern int rfbDeferUpdateTime;
 
+#ifdef RENDER
+extern void
+rfbComposite(
+    CARD8 op,
+    PicturePtr pSrc,
+    PicturePtr pMask,
+    PicturePtr pDst,
+    INT16 xSrc,
+    INT16 ySrc,
+    INT16 xMask,
+    INT16 yMask,
+    INT16 xDst,
+    INT16 yDst,
+    CARD16 width,
+    CARD16 height
+);
+#endif
+
 extern Bool rfbCloseScreen(int,ScreenPtr);
 extern Bool rfbCreateGC(GCPtr);
 extern void rfbPaintWindowBackground(WindowPtr, RegionPtr, int what);
@@ -473,6 +499,9 @@ extern void rfbCopyWindow(WindowPtr, DDXPointRec, RegionPtr);
 extern void rfbClearToBackground(WindowPtr, int x, int y, int w,
 				 int h, Bool generateExposures);
 extern RegionPtr rfbRestoreAreas(WindowPtr, RegionPtr);
+
+/* dispcur.c */
+extern Bool rfbDCInitialize();
 
 
 /* cutpaste.c */

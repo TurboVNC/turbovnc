@@ -15,7 +15,8 @@ SRCS =  $(CBRT_SRC) mivaltree.c mipolyseg.c mipolyrect.c \
 	mipolytext.c mibitblt.c mipolypnt.c mipushpxl.c \
 	miexpose.c miglblt.c mizerline.c mifpolycon.c \
 	midash.c mibstore.c miinitext.c mieq.c \
-	mipointer.c misprite.c midispcur.c miscrinit.c miclipn.c migc.c
+	mipointer.c misprite.c midispcur.c miscrinit.c miclipn.c migc.c \
+	micmap.c
 
 OBJS =	$(CBRT_OBJ) mivaltree.o mipolyseg.o mipolyrect.o \
 	mipoly.o mipolycon.o mipolygen.o mipolyutil.o \
@@ -25,7 +26,8 @@ OBJS =	$(CBRT_OBJ) mivaltree.o mipolyseg.o mipolyrect.o \
 	mipolytext.o mibitblt.o mipolypnt.o mipushpxl.o \
 	miexpose.o miglblt.o mizerline.o mifpolycon.o \
 	midash.o mibstore.o miinitext.o mieq.o \
-	mipointer.o misprite.o midispcur.o miscrinit.o miclipn.o migc.o
+	mipointer.o misprite.o midispcur.o miscrinit.o miclipn.o migc.o \
+	micmap.o
 
 #ifdef XFree86Version
 /* 
@@ -44,8 +46,8 @@ XIE_MODULE_DEFINES = -DXIE_MODULE
 #endif
 EXT_MODULES_DEFINES = $(PEX_MODULE_DEFINES) $(XIE_MODULE_DEFINES)
 
-INCLUDES = -I. -I../include -I../../../include/fonts \
-           -I$(XINCLUDESRC) -I$(FONTINCSRC)
+INCLUDES = -I. -I../include -I../../../include/fonts -I../render -I../fb \
+           -I$(XINCLUDESRC) -I$(FONTINCSRC) -I$(EXTINCSRC)
 LINTLIBS = ../dix/llib-ldix.ln ../os/llib-los.ln
 
 NormalLibraryObjectRule()

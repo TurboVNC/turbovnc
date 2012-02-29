@@ -136,6 +136,10 @@ extern Bool defeatAccessControl;
 static Bool nolock = FALSE;
 #endif
 
+#ifdef RENDER
+#include "picture.h"
+#endif
+
 extern char* protNoListen;
 
 Bool CoreDump;
@@ -571,6 +575,9 @@ void UseMsg()
     ErrorF("-nopn                  reject failure to listen on all ports\n");
     ErrorF("-r                     turns off auto-repeat\n");
     ErrorF("r                      turns on auto-repeat \n");
+#ifdef RENDER
+    ErrorF("-render [default|mono|gray|color] set render color alloc policy\n");
+#endif
     ErrorF("-s #                   screen-saver timeout (minutes)\n");
 #ifdef XCSECURITY
     ErrorF("-sp file               security policy file\n");
@@ -940,6 +947,22 @@ char	*argv[];
         {
             SyncOn++;
         }
+#endif
+#ifdef RENDER
+	else if ( strcmp( argv[i], "-render" ) == 0)
+	{
+	    if (++i < argc)
+	    {
+		int policy = PictureParseCmapPolicy (argv[i]);
+
+		if (policy != PictureCmapPolicyInvalid)
+		    PictureCmapPolicy = policy;
+		else
+		    UseMsg ();
+	    }
+	    else
+		UseMsg ();
+	}
 #endif
  	else
  	{

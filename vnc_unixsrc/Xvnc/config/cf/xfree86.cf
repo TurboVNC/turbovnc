@@ -749,6 +749,11 @@ XCOMM $XConsortium: xfree86.cf /main/34 1996/12/06 11:45:18 rws $
 #define BuildXInputExt		YES
 #endif
 
+/* Build Render extension */
+#ifndef BuildRender
+# define BuildRender		YES
+#endif
+
 /*
  * Include support for these XInput devices
  */

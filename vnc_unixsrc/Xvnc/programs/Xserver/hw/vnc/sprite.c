@@ -2,6 +2,8 @@
  * sprite.c
  *
  * software sprite routines - based on misprite
+ *
+ * Modified for XFree86 4.x by Alan Hourihane <alanh@fairlite.demon.co.uk>
  */
 
 /*
@@ -67,6 +69,9 @@ in this Software without prior written authorization from the X Consortium.
 # include   "spritest.h"
 # include   "dixfontstr.h"
 # include   "fontstruct.h"
+#ifdef RENDER
+# include   "mipict.h"
+#endif
 #include "rfb.h"
 
 /*
@@ -88,6 +93,31 @@ static void	    rfbSpritePaintWindowBackground();
 static void	    rfbSpritePaintWindowBorder();
 static void	    rfbSpriteCopyWindow();
 static void	    rfbSpriteClearToBackground();
+
+#ifdef RENDER
+static void	    rfbSpriteComposite(CARD8	op,
+				      PicturePtr pSrc,
+				      PicturePtr pMask,
+				      PicturePtr pDst,
+				      INT16	xSrc,
+				      INT16	ySrc,
+				      INT16	xMask,
+				      INT16	yMask,
+				      INT16	xDst,
+				      INT16	yDst,
+				      CARD16	width,
+				      CARD16	height);
+
+static void	    rfbSpriteGlyphs(CARD8	op,
+				   PicturePtr	pSrc,
+				   PicturePtr	pDst,
+				   PictFormatPtr maskFormat,
+				   INT16	xSrc,
+				   INT16	ySrc,
+				   int		nlist,
+				   GlyphListPtr	list,
+				   GlyphPtr	*glyphs);
+#endif
 
 static void	    rfbSpriteSaveDoomedAreas();
 static RegionPtr    rfbSpriteRestoreAreas();
@@ -251,6 +281,9 @@ rfbSpriteInitialize (pScreen, cursorFuncs, screenFuncs)
 {
     rfbSpriteScreenPtr	pPriv;
     VisualPtr		pVisual;
+#ifdef RENDER
+    PictureScreenPtr	ps = GetPictureScreenIfSet(pScreen);
+#endif
     
     if (rfbSpriteGeneration != serverGeneration)
     {
@@ -291,6 +324,13 @@ rfbSpriteInitialize (pScreen, cursorFuncs, screenFuncs)
 
     pPriv->SaveDoomedAreas = pScreen->SaveDoomedAreas;
     pPriv->RestoreAreas = pScreen->RestoreAreas;
+#ifdef RENDER
+    if (ps)
+    {
+	pPriv->Composite = ps->Composite;
+	pPriv->Glyphs = ps->Glyphs;
+    }
+#endif
 
     pPriv->pCursor = NULL;
     pPriv->x = 0;
@@ -325,6 +365,13 @@ rfbSpriteInitialize (pScreen, cursorFuncs, screenFuncs)
     pScreen->RestoreAreas = rfbSpriteRestoreAreas;
 
     pScreen->DisplayCursor = rfbDisplayCursor;
+#ifdef RENDER
+    if (ps)
+    {
+	ps->Composite = rfbSpriteComposite;
+	ps->Glyphs = rfbSpriteGlyphs;
+    }
+#endif
 
     return TRUE;
 }
@@ -343,6 +390,9 @@ rfbSpriteCloseScreen (i, pScreen)
     ScreenPtr	pScreen;
 {
     rfbSpriteScreenPtr   pScreenPriv;
+#ifdef RENDER
+    PictureScreenPtr	ps = GetPictureScreenIfSet(pScreen);
+#endif
 
     pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
 
@@ -361,6 +411,13 @@ rfbSpriteCloseScreen (i, pScreen)
 
     pScreen->SaveDoomedAreas = pScreenPriv->SaveDoomedAreas;
     pScreen->RestoreAreas = pScreenPriv->RestoreAreas;
+#ifdef RENDER
+    if (ps)
+    {
+	ps->Composite = pScreenPriv->Composite;
+	ps->Glyphs = pScreenPriv->Glyphs;
+    }
+#endif
 
     xfree ((pointer) pScreenPriv);
 
@@ -540,7 +597,7 @@ rfbSpriteStoreColors (pMap, ndef, pdef)
 	{
 	    /* Direct color - match on any of the subfields */
 
-#define MaskMatch(a,b,mask) (((a) & (pVisual->mask)) == ((b) & (pVisual->mask)))
+#define MaskMatch(a,b,mask) ((a) & ((pVisual->mask) == (b)) & (pVisual->mask))
 
 #define UpdateDAC(plane,dac,mask) {\
     if (MaskMatch (pPriv->colors[plane].pixel,pdef[i].pixel,mask)) {\
@@ -1844,6 +1901,133 @@ static void
 rfbSpriteLineHelper()
 {
     FatalError("rfbSpriteLineHelper called\n");
+}
+#endif
+
+#ifdef RENDER
+
+# define mod(a,b)	((b) == 1 ? 0 : (a) >= 0 ? (a) % (b) : (b) - (-a) % (b))
+
+static void
+rfbSpritePictureOverlap (PicturePtr  pPict,
+			INT16	    x,
+			INT16	    y,
+			CARD16	    w,
+			CARD16	    h)
+{
+    if (pPict->pDrawable->type == DRAWABLE_WINDOW)
+    {
+	WindowPtr		pWin = (WindowPtr) (pPict->pDrawable);
+	rfbSpriteScreenPtr	pScreenPriv = (rfbSpriteScreenPtr)
+	    pPict->pDrawable->pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+	if (GC_CHECK(pWin))
+	{
+	    if (pPict->repeat)
+	    {
+		x = mod(x,pWin->drawable.width);
+		y = mod(y,pWin->drawable.height);
+	    }
+	    if (ORG_OVERLAP (&pScreenPriv->saved, pWin->drawable.x, pWin->drawable.y,
+			     x, y, w, h))
+		rfbSpriteRemoveCursor (pWin->drawable.pScreen);
+	}
+    }
+}
+
+#define PICTURE_PROLOGUE(ps, pScreenPriv, field) \
+    ps->field = pScreenPriv->field
+
+#define PICTURE_EPILOGUE(ps, field, wrap) \
+    ps->field = wrap
+
+static void
+rfbSpriteComposite(CARD8	op,
+		  PicturePtr pSrc,
+		  PicturePtr pMask,
+		  PicturePtr pDst,
+		  INT16	xSrc,
+		  INT16	ySrc,
+		  INT16	xMask,
+		  INT16	yMask,
+		  INT16	xDst,
+		  INT16	yDst,
+		  CARD16	width,
+		  CARD16	height)
+{
+    ScreenPtr		pScreen = pDst->pDrawable->pScreen;
+    PictureScreenPtr	ps = GetPictureScreen(pScreen);
+    rfbSpriteScreenPtr	pScreenPriv;
+
+    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    PICTURE_PROLOGUE(ps, pScreenPriv, Composite);
+    rfbSpritePictureOverlap (pSrc, xSrc, ySrc, width, height);
+    if (pMask)
+	rfbSpritePictureOverlap (pMask, xMask, yMask, width, height);
+    rfbSpritePictureOverlap (pDst, xDst, yDst, width, height);
+
+    (*ps->Composite) (op,
+		       pSrc,
+		       pMask,
+		       pDst,
+		       xSrc,
+		       ySrc,
+		       xMask,
+		       yMask,
+		       xDst,
+		       yDst,
+		       width,
+		       height);
+    
+    PICTURE_EPILOGUE(ps, Composite, rfbSpriteComposite);
+}
+
+static void
+rfbSpriteGlyphs(CARD8		op,
+	       PicturePtr	pSrc,
+	       PicturePtr	pDst,
+	       PictFormatPtr	maskFormat,
+	       INT16		xSrc,
+	       INT16		ySrc,
+	       int		nlist,
+	       GlyphListPtr	list,
+	       GlyphPtr		*glyphs)
+{
+    ScreenPtr		pScreen = pDst->pDrawable->pScreen;
+    PictureScreenPtr	ps = GetPictureScreen(pScreen);
+    rfbSpriteScreenPtr	pScreenPriv;
+
+    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    PICTURE_PROLOGUE(ps, pScreenPriv, Glyphs);
+    if (pSrc->pDrawable->type == DRAWABLE_WINDOW)
+    {
+	WindowPtr   pSrcWin = (WindowPtr) (pSrc->pDrawable);
+
+	if (GC_CHECK(pSrcWin))
+	    rfbSpriteRemoveCursor (pScreen);
+    }
+    if (pDst->pDrawable->type == DRAWABLE_WINDOW)
+    {
+	WindowPtr   pDstWin = (WindowPtr) (pDst->pDrawable);
+
+	if (GC_CHECK(pDstWin))
+	{
+	    BoxRec  extents;
+
+	    miGlyphExtents (nlist, list, glyphs, &extents);
+	    if (BOX_OVERLAP(&pScreenPriv->saved,
+			    extents.x1 + pDstWin->drawable.x,
+			    extents.y1 + pDstWin->drawable.y,
+			    extents.x2 + pDstWin->drawable.x,
+			    extents.y2 + pDstWin->drawable.y))
+	    {
+		rfbSpriteRemoveCursor (pScreen);
+	    }
+	}
+    }
+    
+    (*ps->Glyphs) (op, pSrc, pDst, maskFormat, xSrc, ySrc, nlist, list, glyphs);
+    
+    PICTURE_EPILOGUE (ps, Glyphs, rfbSpriteGlyphs);
 }
 #endif
 

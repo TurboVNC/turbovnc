@@ -50,7 +50,7 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #define MkdirHierCmd		mkdir -p
 
 #ifdef x86_64Architecture
-#define FreeBSDMachineDefines	-D__x86_64__
+#define FreeBSDMachineDefines	-D__x86_64__ -D__AMD64__
 #else
 #ifdef i386Architecture
 #define FreeBSDMachineDefines	-D__i386__

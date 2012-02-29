@@ -2,6 +2,8 @@
  * spritest.h
  *
  * sprite structures - based on misprite
+ *
+ * Modified for XFree86 4.x by Alan Hourihane <alanh@fairlite.demon.co.uk>
  */
 
 /*
@@ -51,6 +53,10 @@ in this Software without prior written authorization from the X Consortium.
 
 # include   "sprite.h"
 
+#ifdef RENDER
+# include   "picturestr.h"
+#endif
+
 /*
  * per screen information
  */
@@ -70,6 +76,10 @@ typedef struct {
     SaveDoomedAreasProcPtr		SaveDoomedAreas;
     RestoreAreasProcPtr			RestoreAreas;
     DisplayCursorProcPtr		DisplayCursor;
+#ifdef RENDER
+    CompositeProcPtr			Composite;
+    GlyphsProcPtr			Glyphs;
+#endif
 
     CursorPtr	    pCursor;
     int		    x;

@@ -254,7 +254,7 @@ XCOMM binutils:	(LinuxBinUtilsMajorVersion)
 
 #ifdef x86_64Architecture
 #define OptimizedCDebugFlags	-O2
-#define LinuxMachineDefines	-D__x86_64__
+#define LinuxMachineDefines	-D__x86_64__ -D__AMD64__
 #define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
 #define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines -D_XSERVER64
 #else
@@ -312,7 +312,7 @@ XCOMM binutils:	(LinuxBinUtilsMajorVersion)
 #ifdef ArmArchitecture
 #define DefaultCCOptions	-fsigned-char
 #define OptimizedCDebugFlags	-O2
-#define LinuxMachineDefines	-D__arm__
+#define LinuxMachineDefines	-D__arm__ -D__arm32__
 #define ServerOSDefines		XFree86ServerOSDefines -DDDXTIME -DPART_NET
 #define ServerExtraDefines	-DGCCUSESGAS XFree86ServerDefines
 #endif /* Arm */

@@ -5,6 +5,8 @@
  * drawing.  If the RFB client is ready then the modified region of the screen
  * is sent to the client, otherwise the modified region will simply grow with
  * each drawing request until the client is ready.
+ *
+ * Modified for XFree86 4.x by Alan Hourihane <alanh@fairlite.demon.co.uk>
  */
 
 /*
@@ -60,7 +62,9 @@ in this Software without prior written authorization from the X Consortium.
 #include "regionstr.h"
 #include "dixfontstr.h"
 #include "rfb.h"
-#include "mfb.h"
+#define FB_OLD_GC
+#define FB_OLD_SCREEN
+#include "fb.h"
 
 extern WindowPtr *WindowTable; /* Why isn't this in a header file? */
 
@@ -76,10 +80,9 @@ Bool cuCopyArea = FALSE;
 
 /* SLIGHTLY DIRTY HACK - use Composite Clip region calculated by mfb */
 
-#define WINDOW_CLIP_REGION(_w, _gc) \
-  (((mfbPrivGCPtr)((_gc)->devPrivates[mfbGCPrivateIndex].ptr))->pCompositeClip)
+#define WINDOW_CLIP_REGION(_w, _gc) fbGetCompositeClip(_gc)
 
-#define TRC(x) /* (fprintf x) */
+#define TRC(x) /* (rfbLog x) */
 
 /* ADD_TO_MODIFIED_REGION adds the given region to the modified region for each
    client */
@@ -1712,7 +1715,47 @@ rfbPushPixels(pGC, pBitMap, pDrawable, w, h, x, y)
     GC_OP_EPILOGUE(pGC);
 }
 
+#ifdef RENDER
+void
+rfbComposite(
+    CARD8 op,
+    PicturePtr pSrc,
+    PicturePtr pMask,
+    PicturePtr pDst,
+    INT16 xSrc,
+    INT16 ySrc,
+    INT16 xMask,
+    INT16 yMask,
+    INT16 xDst,
+    INT16 yDst,
+    CARD16 width,
+    CARD16 height
+){
+    ScreenPtr pScreen = pDst->pDrawable->pScreen;
+    rfbScreenInfoPtr prfb = &rfbScreen;
+    RegionRec tmpRegion;
+    BoxRec box;
+    PictureScreenPtr ps = GetPictureScreen(pScreen);
 
+    box.x1 = pDst->pDrawable->x + xDst;
+    box.y1 = pDst->pDrawable->y + yDst;
+    box.x2 = box.x1 + width;
+    box.y2 = box.y1 + height;
+
+    REGION_INIT(pScreen, &tmpRegion, &box, 0);
+
+    ADD_TO_MODIFIED_REGION(pScreen, &tmpRegion);
+
+    ps->Composite = prfb->Composite;
+    (*ps->Composite)(op, pSrc, pMask, pDst, xSrc, ySrc,
+		     xMask, yMask, xDst, yDst, width, height);
+    ps->Composite = rfbComposite;
+
+    SCHEDULE_FB_UPDATE(pScreen, prfb);
+
+    REGION_UNINIT(pScreen, &tmpRegion);
+}
+#endif /* RENDER */
 
 /****************************************************************************/
 /*

@@ -190,7 +190,7 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 # endif
 # ifdef i386Architecture
 #  ifdef x86_64Architecture
-#   define StandardDefines	  -Dsun -Di386 -DSVR4 -D__x86_64__ MtFlag
+#   define StandardDefines	  -Dsun -Di386 -DSVR4 -D__x86_64__ -D__AMD64__ MtFlag
 #  else
 #   define StandardDefines	  -Dsun -Di386 -DSVR4 -D__i386__ MtFlag
 #  endif

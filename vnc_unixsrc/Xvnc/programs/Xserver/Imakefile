@@ -130,11 +130,15 @@ XPDDXFBLIBS = $(MFB) $(CFB32)
 XPFBLIBS = dix/LibraryTargetName(xpstubs)
 #endif
 
+#if BuildRender
+      RENDERDIR = render
+      RENDERLIB = $(RENDERDIR)/librender.a
+#endif
       OTHEREXTS = Xext/LibraryTargetName(ext) $(XKBEXT) $(XINPUTEXT) \
                   $(XIEEXT) $(LBXEXT) $(DBEEXT) $(RECORDEXT) $(SITEEXTS)
         EXTDIRS = Xext $(XKBDIR) $(XIDIR) $(XIEDIR) $(PEXDIR) $(GLXDIR) \
-                  $(LBXDIRS) $(DBEDIR) $(RECORDDIR) $(SITEEXTDIRS)
-     EXTENSIONS = $(OTHEREXTS) $(PEXLIBS) $(GLXLIB)
+                  $(LBXDIRS) $(DBEDIR) $(RECORDDIR) $(SITEEXTDIRS) $(RENDERDIR)
+     EXTENSIONS = $(OTHEREXTS) $(PEXLIBS) $(GLXLIB) $(RENDERLIB)
          XAULIB = $(XAUTHSRC)/LibraryTargetName(Xau)
        XDMCPLIB = $(XDMCPLIBSRC)/LibraryTargetName(Xdmcp)
 #if BuildLBX || GzipFontCompression
@@ -143,6 +147,7 @@ XPFBLIBS = dix/LibraryTargetName(xpstubs)
              OS = os/LibraryTargetName(os) $(XAULIB) $(XDMCPLIB)
         BSDEMUL = $(DEPXBSDLIB)
             MFB = mfb/LibraryTargetName(mfb)
+             FB = fb/LibraryTargetName(fb)
             CFB = cfb/LibraryTargetName(cfb) cfb16/LibraryTargetName(cfb) cfb24/LibraryTargetName(cfb) cfb32/LibraryTargetName(cfb)
            CFB8 = cfb/LibraryTargetName(cfb)
           CFB4  = cfb/LibraryTargetName(cfb) cfb4/LibraryTargetName(cfb)
@@ -1700,17 +1705,13 @@ ServerTarget(Xvfb,$(XVFBDIRS),$(XVFBOBJS),$(XVFBLIBS),$(XVFBSYSLIBS))
 XCOMM
 XCOMM VNC X server
 XCOMM
-MFBDIR   = mfb
-CFB8DIR  = cfb
-CFB16DIR = cfb16
-CFB24DIR = cfb24
-CFB32DIR = cfb32
+FBDIR    = fb
 DDXDIR1  = hw/vnc
-XVNCDIRS = $(STDDIRS) $(MFBDIR) $(CFB8DIR) $(CFB16DIR) $(CFB24DIR) $(CFB32DIR) $(DDXDIR1) $(DEPDIRS)
+XVNCDIRS = $(STDDIRS) $(FBDIR) $(DDXDIR1) $(DEPDIRS)
 XVNCOBJS = 
 #include <vnclibs.def>
 XVNC = hw/vnc/libvnc.a $(VNCLIBS)
-XVNCLIBS = PreFbLibs $(XVNC) $(CFB) PostFbLibs
+XVNCLIBS = PreFbLibs $(XVNC) $(FB) NoMfbPostFbLibs
 XVNCSYSLIBS = $(SYSLIBS) $(VNCSYSLIBS)
 ServerTarget(Xvnc,$(XVNCDIRS),$(XVNCOBJS),$(XVNCLIBS),$(XVNCSYSLIBS))
 #endif /* XvncServer */
@@ -1725,7 +1726,7 @@ CFBDIRS = $(CFB8DIR) $(CFB16DIR) $(CFB24DIR) $(CFB32DIR)
 IPLANDIRS = $(IPLAN2P2DIR) $(IPLAN2P4DIR) $(IPLAN2P8DIR)
 DDXDIRS = $(DDXDIR1) $(DDXDIR2) $(DDXDIR3) $(XVFBDDXDIR) $(XNESTDDXDIR)
 SUBDIRS = $(STDDIRS) $(MFBDIR) $(CFBDIRS) $(IPLANDIRS) $(ILBMDIR) $(AFBDIR) \
-          $(DDXDIRS)
+          $(DDXDIRS) $(FBDIR)
 
 #if defined(ServerToInstall) && !defined(OS2Architecture)
 install::

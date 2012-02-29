@@ -1,5 +1,7 @@
 /*
  * init.c
+ *
+ * Modified for XFree86 4.x by Alan Hourihane <alanh@fairlite.demon.co.uk>
  */
 
 /*
@@ -72,8 +74,7 @@ from the X Consortium.
 #include "X11/Xos.h"
 #include "scrnintstr.h"
 #include "servermd.h"
-#define PSZ 8
-#include "cfb.h"
+#include "fb.h"
 #include "mibstore.h"
 #include "colormapst.h"
 #include "gcstruct.h"
@@ -85,8 +86,9 @@ from the X Consortium.
 #include <errno.h>
 #include <sys/param.h>
 #include "dix.h"
+#include "micmap.h"
+#include "globals.h"
 #include "rfb.h"
-#include "mi.h"
 #include <time.h>
 
 #ifdef CORBA
@@ -98,10 +100,6 @@ from the X Consortium.
 #define RFB_DEFAULT_DEPTH  24
 #define RFB_DEFAULT_WHITEPIXEL 0
 #define RFB_DEFAULT_BLACKPIXEL 1
-
-extern Bool cfb16ScreenInit(ScreenPtr, pointer, int, int, int, int, int);
-extern Bool cfb32ScreenInit(ScreenPtr, pointer, int, int, int, int, int);
-extern Bool rfbDCInitialize(ScreenPtr, miPointerScreenFuncPtr);
 
 rfbScreenInfo rfbScreen;
 int rfbGCIndex;
@@ -469,12 +467,32 @@ ddxProcessArgument (argc, argv, i)
  * will call rfbScreenInit.
  */
 
+/* Common pixmap formats */
+
+static PixmapFormatRec formats[MAXFORMATS] = {
+	{ 1,	1,	BITMAP_SCANLINE_PAD },
+	{ 4,	8,	BITMAP_SCANLINE_PAD },
+	{ 8,	8,	BITMAP_SCANLINE_PAD },
+	{ 15,	16,	BITMAP_SCANLINE_PAD },
+	{ 16,	16,	BITMAP_SCANLINE_PAD },
+	{ 24,	32,	BITMAP_SCANLINE_PAD },
+#ifdef RENDER
+	{ 32,	32,	BITMAP_SCANLINE_PAD },
+#endif
+};
+#ifdef RENDER
+static int numFormats = 7;
+#else
+static int numFormats = 6;
+#endif
+
 void
 InitOutput(screenInfo, argc, argv)
     ScreenInfo *screenInfo;
     int argc;
     char **argv;
 {
+    int i;
     initOutputCalled = TRUE;
 
     rfbLog("Xvnc version %s\n", XVNCRELEASE);
@@ -482,6 +500,7 @@ InitOutput(screenInfo, argc, argv)
     rfbLog("Copyright (C) 2010 University Corporation for Atmospheric Research\n");
     rfbLog("Copyright (C) 2004-2008 Sun Microsystems, Inc.\n");
     rfbLog("Copyright (C) 2004 Landmark Graphics Corporation\n");
+    rfbLog("Copyright (C) 2001-2004 Alan Hourihane\n");
     rfbLog("Copyright (C) 2000-2009 TightVNC Group\n");
     rfbLog("Copyright (C) 1999 AT&T Laboratories Cambridge\n");
     rfbLog("All Rights Reserved.\n");
@@ -515,15 +534,9 @@ InitOutput(screenInfo, argc, argv)
     screenInfo->bitmapScanlineUnit = BITMAP_SCANLINE_UNIT;
     screenInfo->bitmapScanlinePad = BITMAP_SCANLINE_PAD;
     screenInfo->bitmapBitOrder = BITMAP_BIT_ORDER;
-    screenInfo->numPixmapFormats = 2;
-
-    screenInfo->formats[0].depth = 1;
-    screenInfo->formats[0].bitsPerPixel = 1;
-    screenInfo->formats[0].scanlinePad = BITMAP_SCANLINE_PAD;
-
-    screenInfo->formats[1].depth = rfbScreen.depth;
-    screenInfo->formats[1].bitsPerPixel = rfbBitsPerPixel(rfbScreen.depth);
-    screenInfo->formats[1].scanlinePad = BITMAP_SCANLINE_PAD;
+    screenInfo->numPixmapFormats = numFormats;
+    for (i = 0; i < numFormats; i++)
+    	screenInfo->formats[i] = formats[i];
 
     rfbGCIndex = AllocateGCPrivateIndex();
     if (rfbGCIndex < 0) {
@@ -556,6 +569,10 @@ rfbScreenInit(index, pScreen, argc, argv)
     char *pbits;
     VisualPtr vis;
     extern int monitorResolution;
+#ifdef RENDER
+    PictureScreenPtr	ps;
+#endif
+    BOOL bigEndian = !(*(char *)&rfbEndianTest);
 
     if (monitorResolution != 0) {
 	dpix = monitorResolution;
@@ -567,38 +584,88 @@ rfbScreenInit(index, pScreen, argc, argv)
     pbits = rfbAllocateFramebufferMemory(prfb);
     if (!pbits) return FALSE;
 
-    if (prfb->bitsPerPixel > 1) {
-	extern int defaultColorVisualClass;
-	if (defaultColorVisualClass != -1) {
-	    cfbSetVisualTypes(prfb->depth, (1 << defaultColorVisualClass), 8);
-	} else {
-	    cfbSetVisualTypes(prfb->depth, (1 << TrueColor), 8);
-	}
-    }
+    miClearVisualTypes();
+
+    if (defaultColorVisualClass == -1)
+    	defaultColorVisualClass = TrueColor;
+
+    if (!miSetVisualTypes(prfb->depth, miGetDefaultVisualMask(prfb->depth), 8,
+						defaultColorVisualClass) )
+	return FALSE;
+
+    miSetPixmapDepths();
 
     switch (prfb->bitsPerPixel)
     {
-    case 1:
-	ret = mfbScreenInit(pScreen, pbits, prfb->width, prfb->height,
-			    dpix, dpiy, prfb->paddedWidthInBytes * 8);
-	break;
     case 8:
-	ret = cfbScreenInit(pScreen, pbits, prfb->width, prfb->height,
-			    dpix, dpiy, prfb->paddedWidthInBytes);
+	ret = fbScreenInit(pScreen, pbits, prfb->width, prfb->height,
+			    dpix, dpiy, prfb->paddedWidthInBytes, 8);
 	break;
     case 16:
-	ret = cfb16ScreenInit(pScreen, pbits, prfb->width, prfb->height,
-			      dpix, dpiy, prfb->paddedWidthInBytes / 2);
+	ret = fbScreenInit(pScreen, pbits, prfb->width, prfb->height,
+			      dpix, dpiy, prfb->paddedWidthInBytes / 2, 16);
+	if (prfb->depth == 15) {
+  	    blueBits = 5; greenBits = 5; redBits = 5;
+	} else {
+	    blueBits = 5; greenBits = 6; redBits = 5;
+	}
 	break;
     case 32:
-	ret = cfb32ScreenInit(pScreen, pbits, prfb->width, prfb->height,
-			      dpix, dpiy, prfb->paddedWidthInBytes / 4);
+	ret = fbScreenInit(pScreen, pbits, prfb->width, prfb->height,
+			      dpix, dpiy, prfb->paddedWidthInBytes / 4, 32);
+	blueBits = 8; greenBits = 8; redBits = 8;
 	break;
     default:
 	return FALSE;
     }
 
     if (!ret) return FALSE;
+
+    fbInitializeBackingStore(pScreen);
+
+    if (prfb->bitsPerPixel > 8) {
+	int xBits = prfb->bitsPerPixel - redBits - greenBits - blueBits;        
+    	if (strcasecmp(primaryOrder, "bgr") == 0) {
+	    if (bigEndian)
+		rfbLog("Framebuffer: XBGR %d/%d/%d/%d\n",
+		    xBits, blueBits, greenBits, redBits);
+	    else
+		rfbLog("Framebuffer: RGBX %d/%d/%d/%d\n",
+		    redBits, greenBits, blueBits, xBits);
+            vis = pScreen->visuals + pScreen->numVisuals;
+            while (--vis >= pScreen->visuals) {
+	    	if ((vis->class | DynamicClass) == DirectColor) {
+		    vis->offsetRed = 0;
+		    vis->redMask = (1 << redBits) - 1;
+		    vis->offsetGreen = redBits;
+		    vis->greenMask = ((1 << greenBits) - 1) << vis->offsetGreen;
+		    vis->offsetBlue = redBits + greenBits;
+		    vis->blueMask = ((1 << blueBits) - 1) << vis->offsetBlue;
+	    	}
+	    }
+    	} else {
+	    if (bigEndian)
+		rfbLog("Framebuffer: XRGB %d/%d/%d/%d\n",
+		    xBits, redBits, greenBits, blueBits);
+	    else
+		rfbLog("Framebuffer: BGRX %d/%d/%d/%d\n",
+		    blueBits, greenBits, redBits, xBits);
+       	    vis = pScreen->visuals + pScreen->numVisuals;
+            while (--vis >= pScreen->visuals) {
+	    	if ((vis->class | DynamicClass) == DirectColor) {
+		    vis->offsetBlue = 0;
+		    vis->blueMask = (1 << blueBits) - 1;
+		    vis->offsetGreen = blueBits;
+		    vis->greenMask = ((1 << greenBits) - 1) << vis->offsetGreen;
+		    vis->offsetRed = blueBits + greenBits;
+		    vis->redMask = ((1 << redBits) - 1) << vis->offsetRed;
+	    	}
+	    }
+    	}
+    }
+
+    if (prfb->bitsPerPixel > 4)
+	fbPictureInit(pScreen, 0, 0);
 
     if (!AllocateGCPrivate(pScreen, rfbGCIndex, sizeof(rfbGCRec))) {
 	FatalError("rfbScreenInit: AllocateGCPrivate failed\n");
@@ -614,7 +681,11 @@ rfbScreenInit(index, pScreen, argc, argv)
     prfb->CopyWindow = pScreen->CopyWindow;
     prfb->ClearToBackground = pScreen->ClearToBackground;
     prfb->RestoreAreas = pScreen->RestoreAreas;
-
+#ifdef RENDER
+    ps = GetPictureScreenIfSet(pScreen);
+    if (ps)
+    	prfb->Composite = ps->Composite;
+#endif
     pScreen->CloseScreen = rfbCloseScreen;
     pScreen->CreateGC = rfbCreateGC;
     pScreen->PaintWindowBackground = rfbPaintWindowBackground;
@@ -622,6 +693,10 @@ rfbScreenInit(index, pScreen, argc, argv)
     pScreen->CopyWindow = rfbCopyWindow;
     pScreen->ClearToBackground = rfbClearToBackground;
     pScreen->RestoreAreas = rfbRestoreAreas;
+#ifdef RENDER
+    if (ps)
+    	ps->Composite = rfbComposite;
+#endif
 
     pScreen->InstallColormap = rfbInstallColormap;
     pScreen->UninstallColormap = rfbUninstallColormap;
@@ -640,36 +715,16 @@ rfbScreenInit(index, pScreen, argc, argv)
     pScreen->blackPixel = prfb->blackPixel;
     pScreen->whitePixel = prfb->whitePixel;
 
-    for (vis = pScreen->visuals; vis->vid != pScreen->rootVisual; vis++)
-	;
-
-    if (!vis) {
-	rfbLog("rfbScreenInit: couldn't find root visual\n");
-	exit(1);
-    }
-
-    if (strcasecmp(primaryOrder, "rgb") == 0) {
-	vis->offsetBlue = 0;
-	vis->blueMask = (1 << blueBits) - 1;
-	vis->offsetGreen = blueBits;
-	vis->greenMask = ((1 << greenBits) - 1) << vis->offsetGreen;
-	vis->offsetRed = vis->offsetGreen + greenBits;
-	vis->redMask = ((1 << redBits) - 1) << vis->offsetRed;
-    } else if (strcasecmp(primaryOrder, "bgr") == 0) {
-	rfbLog("BGR format %d %d %d\n", blueBits, greenBits, redBits);
-	vis->offsetRed = 0;
-	vis->redMask = (1 << redBits) - 1;
-	vis->offsetGreen = redBits;
-	vis->greenMask = ((1 << greenBits) - 1) << vis->offsetGreen;
-	vis->offsetBlue = vis->offsetGreen + greenBits;
-	vis->blueMask = ((1 << blueBits) - 1) << vis->offsetBlue;
-    }
-
     rfbServerFormat.bitsPerPixel = prfb->bitsPerPixel;
     rfbServerFormat.depth = prfb->depth;
-    rfbServerFormat.bigEndian = !(*(char *)&rfbEndianTest);
+    rfbServerFormat.bigEndian = bigEndian;
+
+    /* Find the root visual and set the server format */
+    for (vis = pScreen->visuals; vis->vid != pScreen->rootVisual; vis++)
+	;
     rfbServerFormat.trueColour = (vis->class == TrueColor);
-    if (rfbServerFormat.trueColour) {
+
+    if ( (vis->class == TrueColor) || (vis->class == DirectColor) ) {
 	rfbServerFormat.redMax = vis->redMask >> vis->offsetRed;
 	rfbServerFormat.greenMax = vis->greenMask >> vis->offsetGreen;
 	rfbServerFormat.blueMax = vis->blueMask >> vis->offsetBlue;
@@ -678,19 +733,14 @@ rfbScreenInit(index, pScreen, argc, argv)
 	rfbServerFormat.blueShift = vis->offsetBlue;
     } else {
 	rfbServerFormat.redMax
-	    = rfbServerFormat.greenMax = rfbServerFormat.blueMax = 0;
+	    = rfbServerFormat.greenMax 
+	    = rfbServerFormat.blueMax = 0;
 	rfbServerFormat.redShift
-	    = rfbServerFormat.greenShift = rfbServerFormat.blueShift = 0;
+	    = rfbServerFormat.greenShift 
+	    = rfbServerFormat.blueShift = 0;
     }
 
-    if (prfb->bitsPerPixel == 1)
-    {
-	ret = mfbCreateDefColormap(pScreen);
-    }
-    else
-    {
-	ret = cfbCreateDefColormap(pScreen);
-    }
+    ret = fbCreateDefColormap(pScreen);
 
     return ret;
 

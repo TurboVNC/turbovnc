@@ -20,8 +20,11 @@ LBXHEADERS = lbxbuf.h lbxbufstr.h lbxdeltastr.h lbximage.h lbxopts.h lbxstr.h lb
 #if BuildDPMSLibrary
 DPMSHEADERS = dpms.h dpmsstr.h
 #endif
+#if BuildRender || BuildXftLibrary
+RENDERHEADERS = render.h renderproto.h
+#endif
 
-EXTRAHEADERS = $(SCREENSAVERHEADERS) $(XF86VIDMODEHEADERS) $(XF86DGAHEADERS) $(XF86MISCHEADERS) $(LBXHEADERS) $(DPMSHEADERS)
+EXTRAHEADERS = $(SCREENSAVERHEADERS) $(XF86VIDMODEHEADERS) $(XF86DGAHEADERS) $(XF86MISCHEADERS) $(LBXHEADERS) $(DPMSHEADERS) $(RENDERHEADERS)
 
 
 
