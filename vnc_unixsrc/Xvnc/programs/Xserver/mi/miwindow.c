@@ -363,7 +363,9 @@ miMarkOverlappedWindows(pWin, pFirst, ppLayerWin)
     register WindowPtr pChild, pLast;
     Bool anyMarked = FALSE;
     void (* MarkWindow)() = pWin->drawable.pScreen->MarkWindow;
-    ScreenPtr pScreen = pWin->drawable.pScreen;
+    ScreenPtr pScreen;
+
+    pScreen = pWin->drawable.pScreen;
 
     /* single layered systems are easy */
     if (ppLayerWin) *ppLayerWin = pWin;
@@ -446,8 +448,10 @@ miHandleValidateExposures(pWin)
 {
     register WindowPtr pChild;
     register ValidatePtr val;
-    ScreenPtr pScreen = pWin->drawable.pScreen;
+    ScreenPtr pScreen;
     void (* WindowExposures)();
+
+    pScreen = pWin->drawable.pScreen;
 
     pChild = pWin;
     WindowExposures = pChild->drawable.pScreen->WindowExposures;

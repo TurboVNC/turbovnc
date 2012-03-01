@@ -62,6 +62,8 @@ SOFTWARE.
 #include "Xmd.h"
 #include "servermd.h"
 
+extern int ffsl(unsigned long);
+
 /* MICOPYAREA -- public entry for the CopyArea request 
  * For each rectangle in the source region
  *     get the pixels with GetSpans

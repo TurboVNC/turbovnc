@@ -78,7 +78,7 @@ Bool cuCopyArea = FALSE;
  */
 /****************************************************************************/
 
-/* SLIGHTLY DIRTY HACK - use Composite Clip region calculated by mfb */
+/* SLIGHTLY DIRTY HACK - use Composite Clip region calculated by fb */
 
 #define WINDOW_CLIP_REGION(_w, _gc) fbGetCompositeClip(_gc)
 

@@ -1044,6 +1044,8 @@ InsertFileIntoCommandLine(resargc, resargv, prefix_argc, prefix_argv,
 
     *resargc = prefix_argc + insert_argc + suffix_argc;
     *resargv = (char **) xalloc((*resargc + 1) * sizeof(char *));
+    if (!*resargv)
+	FatalError("Out of Memory\n");
 
     memcpy(*resargv, prefix_argv, prefix_argc * sizeof(char *));
 
@@ -1146,9 +1148,8 @@ pointer client;
 
 #ifndef INTERNAL_MALLOC
 
-unsigned long * 
-Xalloc (amount)
-    unsigned long amount;
+void * 
+Xalloc(unsigned long amount)
 {
 #if !defined(__STDC__) && !defined(AMOEBA)
     char		*malloc();
@@ -1178,9 +1179,8 @@ Xalloc (amount)
  * "no failure" realloc, alternate interface to Xalloc w/o Must_have_memory
  *****************/
 
-unsigned long *
-XNFalloc (amount)
-    unsigned long amount;
+void *
+XNFalloc(unsigned long amount)
 {
 #if !defined(__STDC__) && !defined(AMOEBA)
     char             *malloc();
@@ -1205,9 +1205,8 @@ XNFalloc (amount)
  * Xcalloc
  *****************/
 
-unsigned long *
-Xcalloc (amount)
-    unsigned long   amount;
+void *
+Xcalloc(unsigned long amount)
 {
     unsigned long   *ret;
 
@@ -1221,10 +1220,8 @@ Xcalloc (amount)
  * Xrealloc
  *****************/
 
-unsigned long *
-Xrealloc (ptr, amount)
-    register pointer ptr;
-    unsigned long amount;
+void *
+Xrealloc(pointer ptr, unsigned long amount)
 {
 #if !defined(__STDC__) && !defined(AMOEBA)
     char *malloc();
@@ -1259,10 +1256,8 @@ Xrealloc (ptr, amount)
  * "no failure" realloc, alternate interface to Xrealloc w/o Must_have_memory
  *****************/
 
-unsigned long *
-XNFrealloc (ptr, amount)
-    register pointer ptr;
-    unsigned long amount;
+void *
+XNFrealloc(pointer ptr, unsigned long amount)
 {
     if (( ptr = (pointer)Xrealloc( ptr, amount ) ) == NULL)
     {

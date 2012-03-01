@@ -1,4 +1,4 @@
-/* $XConsortium: mibstore.c,v 5.63 94/10/21 20:25:08 dpw Exp $ */
+/* $Xorg: mibstore.c,v 1.4 2001/02/09 02:05:20 xorgcvs Exp $ */
 /***********************************************************
 
 Copyright 1987, 1998  The Open Group
@@ -41,6 +41,8 @@ of this software for any purpose.  It is provided "as is" without express or
 implied warranty.
 
 ******************************************************************/
+
+/* $XFree86: xc/programs/Xserver/mi/mibstore.c,v 1.11 2003/11/10 18:22:47 tsi Exp $ */
 
 #define NEED_EVENTS
 #include "X.h"
@@ -1091,6 +1093,7 @@ miBSDoCopy(pWin, pGC, srcx, srcy, w, h, dstx, dsty, plane, copyProc, ppRgn)
     BoxPtr		pBoxExp, pBoxObs;
 
     SETUP_BACKING (pWin, pGC);
+    (void)oldFuncs;
 
     /*
      * Create a region of exposed boxes in pRgnExp.
@@ -2596,7 +2599,9 @@ miBSFree(pWin)
     WindowPtr pWin;
 {
     miBSWindowPtr 	pBackingStore;
-    register ScreenPtr	pScreen = pWin->drawable.pScreen;
+    register ScreenPtr	pScreen;
+
+    pScreen = pWin->drawable.pScreen;
 
     pBackingStore = (miBSWindowPtr)pWin->backStorage;
     if (pBackingStore)

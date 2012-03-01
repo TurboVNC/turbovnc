@@ -366,32 +366,32 @@ extern void ProcessCommandLine(
 #endif
 );
 
-extern unsigned long *Xalloc(
+extern pointer Xalloc(
 #if NeedFunctionPrototypes
     unsigned long /*amount*/
 #endif
 );
 
-extern unsigned long *XNFalloc(
+extern pointer XNFalloc(
 #if NeedFunctionPrototypes
     unsigned long /*amount*/
 #endif
 );
 
-extern unsigned long *Xcalloc(
+extern pointer Xcalloc(
 #if NeedFunctionPrototypes
     unsigned long /*amount*/
 #endif
 );
 
-extern unsigned long *Xrealloc(
+extern pointer Xrealloc(
 #if NeedFunctionPrototypes
     pointer /*ptr*/,
     unsigned long /*amount*/
 #endif
 );
 
-extern unsigned long *XNFrealloc(
+extern pointer XNFrealloc(
 #if NeedFunctionPrototypes
     pointer /*ptr*/,
     unsigned long /*amount*/

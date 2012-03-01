@@ -1155,7 +1155,7 @@ void rfbLog(char *format, ...)
     va_start(args, format);
 
     time(&clock);
-    strftime(buf, 255, "%d/%m/%y %T ", localtime(&clock));
+    strftime(buf, 255, "%d/%m/%Y %H:%M:%S ", localtime(&clock));
     fprintf(stderr, buf);
 
     vfprintf(stderr, format, args);

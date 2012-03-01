@@ -40,6 +40,7 @@ from the X Consortium.
 # include   "X.h"
 # include   "Xauth.h"
 # include   "misc.h"
+# include   "osdep.h"
 # include   "dixstruct.h"
 # include   <sys/types.h>
 # include   <sys/stat.h>

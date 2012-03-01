@@ -125,7 +125,9 @@ miValidatePicture (PicturePtr pPicture,
 		   Mask       mask)
 {
     DrawablePtr	    pDrawable = pPicture->pDrawable;
-    ScreenPtr       pScreen = pDrawable->pScreen;
+    ScreenPtr       pScreen;
+
+    pScreen = pDrawable->pScreen;
 
     if ((mask & (CPClipXOrigin|CPClipYOrigin|CPClipMask|CPSubwindowMode)) ||
 	(pDrawable->serialNumber != (pPicture->serialNumber & DRAWABLE_SERIAL_BITS)))

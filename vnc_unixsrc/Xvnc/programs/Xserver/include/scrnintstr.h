@@ -628,7 +628,7 @@ typedef    void (* ScreenBlockHandlerProcPtr)(
 #if NeedNestedPrototypes
 	int /*screenNum*/,
 	pointer /*blockData*/,
-	struct timeval ** /*pTimeout*/,
+	pointer /*pTimeout*/,
 	pointer /*pReadmask*/
 #endif
 );

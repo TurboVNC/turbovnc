@@ -73,6 +73,7 @@ in this Software without prior written authorization from The Open Group.
 /*
  * Compute the visibility of a shaped window
  */
+int
 miShapedWindowIn (pScreen, universe, bounding, rect, x, y)
     ScreenPtr	pScreen;
     RegionPtr	universe, bounding;

@@ -151,7 +151,7 @@ miTriangles (CARD8	    op,
 	     xTriangle	    *tris)
 {
     ScreenPtr		pScreen = pDst->pDrawable->pScreen;
-    BoxRec		bounds;
+    BoxRec		bounds = {0, 0, 1, 1};
     PicturePtr		pPicture = 0;
     INT16		xDst, yDst;
     INT16		xRel, yRel;
@@ -218,7 +218,7 @@ miTriStrip (CARD8	    op,
 {
     ScreenPtr		pScreen = pDst->pDrawable->pScreen;
     xTriangle		tri;
-    BoxRec		bounds;
+    BoxRec		bounds = {0, 0, 1, 1};
     PicturePtr		pPicture = 0;
     INT16		xDst, yDst;
     INT16		xRel, yRel;
@@ -289,7 +289,7 @@ miTriFan (CARD8		op,
 {
     ScreenPtr		pScreen = pDst->pDrawable->pScreen;
     xTriangle		tri;
-    BoxRec		bounds;
+    BoxRec		bounds = {0, 0, 1, 1};
     PicturePtr		pPicture = 0;
     xPointFixed		*first;
     INT16		xDst, yDst;

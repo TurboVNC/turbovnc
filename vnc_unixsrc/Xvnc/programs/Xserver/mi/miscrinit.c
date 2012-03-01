@@ -37,6 +37,10 @@ from The Open Group.
 #include "mibstore.h"
 #include "dix.h"
 #include "miline.h"
+#ifdef MITSHM
+#define _XSHM_SERVER_
+#include "XShm.h"
+#endif
 #define FB_OLD_GC
 #define FB_OLD_SCREEN
 #include "fb.h"
