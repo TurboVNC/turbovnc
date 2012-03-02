@@ -22,6 +22,11 @@ This has been shown to benefit some types of workloads, but only when JPEG is
 enabled.  Higher levels of Zlib compression have not been shown to be
 beneficial.
 -------------------------------------------------------------------------------
+[4]
+The Unix TurboVNC Server now implements the X RENDER extension, which enables
+font anti-aliasing.  Additionally, the server now embeds the FreeType library
+for improved font display and compatibility.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
