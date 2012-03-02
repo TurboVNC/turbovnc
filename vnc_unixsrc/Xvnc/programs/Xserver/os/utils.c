@@ -147,7 +147,7 @@ Bool noTestExtensions;
 int auditTrailLevel = 1;
 
 void ddxUseMsg();
-void VErrorF(char*, va_list);
+void VErrorF(const char*, va_list);
 
 #ifdef DEBUG
 #ifndef SPECIAL_MALLOC
@@ -1322,7 +1322,7 @@ AuditPrefix(f)
 /*VARARGS1*/
 void
 AuditF(
-    char * f, ...)
+    const char * f, ...)
 {
     va_list args;
 
@@ -1336,7 +1336,7 @@ AuditF(
 /*VARARGS1*/
 void
 FatalError(
-    char *f, ...)
+    const char *f, ...)
 {
     va_list args;
     ErrorF("\nFatal server error:\n");
@@ -1353,7 +1353,7 @@ FatalError(
 
 void
 VErrorF(f, args)
-    char *f;
+    const char *f;
     va_list args;
 {
     vfprintf(stderr, f, args);
@@ -1362,7 +1362,7 @@ VErrorF(f, args)
 /*VARARGS1*/
 void
 ErrorF(
-    char * f, ...)
+    const char * f, ...)
 {
     va_list args;
     va_start(args, f);

@@ -1,4 +1,4 @@
-/* $XConsortium: speedo.h,v 1.7 95/06/08 23:20:39 gildea Exp $ */
+/* $Xorg: speedo.h,v 1.3 2000/08/17 19:46:27 cpqbld Exp $ */
 
 /*
 
@@ -21,6 +21,7 @@ INCIDENTAL OR CONSEQUENTIAL DAMAGES, ARISING OUT OF OR IN ANY WAY CONNECTED
 WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 
 */
+/* $XFree86: xc/lib/font/Speedo/speedo.h,v 3.6 2001/07/25 15:04:55 dawes Exp $ */
 
 #ifndef _SPEEDO_H_
 #define _SPEEDO_H_
@@ -94,9 +95,9 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 #define SHORT_LISTS 1                  /* 1 to allocate small intercept lists */
 #endif
 
-#ifndef PROTOS_AVAIL                /* 1 to use function prototyping */
-#define PROTOS_AVAIL 0   			/* 0 to suppress it */
-#endif
+#ifndef INCL_PLAID_OUT
+#define  INCL_PLAID_OUT 0          /* 1 to include plaid data monitoring */
+#endif                             /* 0 to omit plaid data monitoring */
 
 #ifndef FONTFAR						/* if Intel mixed memory model implementation */
 #define FONTFAR						/* pointer type modifier for font buffer */
@@ -171,7 +172,7 @@ typedef   CARD32   ufix32;
 #endif
 
 #ifndef NULL
-#define NULL       0
+#include <stddef.h>
 #endif
 
 #define  FUNCTION
@@ -215,15 +216,12 @@ typedef   CARD32   ufix32;
 #endif
 
 /*****  STRUCTURE DEFINITIONS *****/
-#if PROTOS_AVAIL
-
 #if REENTRANT_ALLOC
 #define PROTO_DECL1 struct speedo_global_data GLOBALFAR *sp_global_ptr
 #define PROTO_DECL2 PROTO_DECL1 ,
 #else
 #define PROTO_DECL1 void
 #define PROTO_DECL2
-#endif
 #endif
 
 typedef
@@ -280,11 +278,7 @@ typedef struct specs_tag
                                    /*   Bit 14: Clip top if set             */
                                    /*   Bit 15: Clip bottom if set          */
                                    /*   Bits 16-31   not used               */
-#ifdef __STDC__
     void *out_info;                /* information for output module         */
-#else
-    char *out_info;
-#endif
     }
 specs_t;                           /* Specs structure for fw_set_specs      */
 
@@ -365,7 +359,6 @@ typedef struct plaid_tag
 #endif
 
 #if INCL_MULTIDEV
-#if PROTOS_AVAIL
 typedef struct bitmap_tag 
 	{
 	void (*p_open_bitmap)(PROTO_DECL2 fix31 x_set_width, fix31 y_set_width, fix31 xorg, fix31 yorg, fix15 xsize,fix15 ysize);
@@ -383,25 +376,6 @@ typedef struct outline_tag
 	void (*p_close_contour)(PROTO_DECL1);
 	void (*p_close_outline)(PROTO_DECL1);
 	} outline_t;
-#else
-typedef struct bitmap_tag 
-	{
-	void (*p_open_bitmap)();
-	void (*p_set_bits)();
-	void (*p_close_bitmap)();
-	} bitmap_t;
-
-typedef struct outline_tag 
-	{
-	void (*p_open_outline)();
-	void (*p_start_char)();
-	void (*p_start_contour)();
-	void (*p_curve)();
-	void (*p_line)();
-	void (*p_close_contour)();
-	void (*p_close_outline)();
-	} outline_t;
-#endif
 #endif
 
 /* ---------------------------------------------------*/
@@ -521,7 +495,6 @@ typedef struct speedo_global_data
          fix15    pixfix;         /* Mask to remove fractional pixels */
          fix15    onepix;         /* 1.0 pixels in sub-pixel units */
 
-#if PROTOS_AVAIL
          boolean (*init_out)(PROTO_DECL2 specs_t GLOBALFAR *specsarg);
          boolean (*begin_char)(PROTO_DECL2 point_t Psw,point_t Pmin,point_t Pmax); 
          void    (*begin_sub_char)(PROTO_DECL2 point_t Psw,point_t Pmin,point_t Pmax);
@@ -531,18 +504,6 @@ typedef struct speedo_global_data
          void    (*end_contour)(PROTO_DECL1); 
          void    (*end_sub_char)(PROTO_DECL1);
          boolean (*end_char)(PROTO_DECL1);    
-#else                                                                /* if not protos */
-         boolean (*init_out)();
-         boolean (*begin_char)(); 
-         void    (*begin_sub_char)();
-         void    (*begin_contour)(); 
-         void    (*curve)();         
-         void    (*line)();               
-         void    (*end_contour)(); 
-         void    (*end_sub_char)();
-         boolean (*end_char)();
-#endif                                                               /* end not protos */
-
          specs_t GLOBALFAR *pspecs;    /* Pointer to specifications bundle */
          specs_t specs;                /* copy specs onto stack */
          ufix8 FONTFAR  *font_org;     /* Pointer to start of font data */
@@ -762,7 +723,6 @@ EXTERN SPEEDO_GLOBALS GLOBALFAR *sp_global_ptr;
  *
  ***********************************************************************************/
 
-#if PROTOS_AVAIL
 /*  do_char.c functions */
 ufix16 sp_get_char_id(PROTO_DECL2 ufix16 char_index);
 boolean sp_make_char(PROTO_DECL2 ufix16 char_index);
@@ -926,156 +886,5 @@ void sp_begin_int_zones(PROTO_DECL2 fix15 no_X_int_zones, fix15 no_Y_int_zones);
 void sp_record_int_zone(PROTO_DECL2 fix31 start, fix31 end);          /* Record interpolation zone data */
 void sp_end_plaid_data(PROTO_DECL1);           /* Signal end of plaid data */
 #endif
-
-#else   /* NO PROTOTYPES AVAILABLE */
-
-
-
-/*  do_char.c functions */
-boolean sp_make_char();          /* Make specified character */
-#if  INCL_ISW       
-fix31 sp_compute_isw_scale();
-static boolean sp_do_make_char();
-boolean sp_make_char_isw();     /* Make specified character with */
-                                /* imported set widths.*/
-static boolean sp_reset_xmax();
-#endif
-#if INCL_ISW || INCL_SQUEEZING
-static void sp_preview_bounding_box();
-#endif
-ufix16  sp_get_char_id();        /* Get character id for specified char */
-
-#if INCL_METRICS                 /* Metrics functions supported? */
-fix31   sp_get_char_width();     /* Get character width for specified char */
-fix15   sp_get_track_kern();     /* Get track kerning for specified size */
-fix31   sp_get_pair_kern();      /* Get kerning for specified char pair */
-boolean sp_get_char_bbox();
-#endif
-
-/* do_trns.c functions */
-ufix8 FONTFAR *sp_read_bbox();              /* Read bounding box */
-void   sp_proc_outl_data();         /* Process outline data */
-
-/* out_0c.c functions */
-boolean sp_init_black();
-boolean sp_begin_char_black();
-void sp_begin_contour_black();
-void sp_line_black();
-boolean sp_end_char_black();
-
-/* out_util.c functions */
-#if INCL_BLACK || INCL_SCREEN || INCL_2D
-
-void sp_init_char_out();
-void sp_begin_sub_char_out();
-void sp_curve_out();
-void sp_end_contour_out();
-void sp_end_sub_char_out();
-void sp_init_intercepts_out();
-void sp_restart_intercepts_out();
-void sp_set_first_band_out();
-void sp_reduce_band_size_out();
-boolean sp_next_band_out();
-#endif
-
-#if INCL_USEROUT
-boolean sp_init_userout();
-#endif
-
-/* reset.c functions */
-void sp_reset();                 /* Initialize Fontware mechanism */
-
-#if INCL_KEYS
-void sp_set_key();
-#endif
-ufix16 sp_get_cust_no();
-
-/* set_spcs.c functions */
-boolean    sp_set_specs();       /* Set specifications */
-void       sp_type_tcb();           /* Update transformation class in tcb */
-
-fix31   sp_read_long();      /* Read long as 3 bytes encrypted */
-fix15   sp_read_word_u();    /* Read word as 2 bytes unencrypted */
-
-/* set_trns.c functions */
-void    sp_init_tcb();              /* Initialize current trans control block */
-void    sp_scale_tcb();             /* Transform trans control block */
-ufix8 FONTFAR *sp_plaid_tcb();             /* Enable intelligent transformation */
-ufix8 FONTFAR *sp_skip_interpolation_table();
-ufix8 FONTFAR *sp_skip_control_zone();
-
-ufix8 FONTFAR *sp_read_oru_table();    /* Read controlled coord table */
-#if INCL_SQUEEZING || INCL_ISW
-static void sp_calculate_x_pix();
-#endif
-#if INCL_SQUEEZING
-static void sp_calculate_y_pix();
-boolean sp_calculate_x_scale();
-boolean sp_calculate_y_scale() ;
-#endif
-
-/* user defined functions */
-
-#if INCL_BLACK || INCL_SCREEN || INCL_2D
-void sp_open_bitmap();
-void sp_set_bitmap_bits();
-void sp_close_bitmap();
-#endif
-
-#if INCL_OUTLINE
-void sp_open_outline();
-void sp_start_new_char();
-void sp_start_contour();
-void sp_curve_to();
-void sp_line_to();
-void sp_close_contour();
-void sp_close_outline();
-#endif
-
-#if INCL_LCD                     /* Dynamic load character data supported? */
-buff_t *sp_load_char_data();        /* Load character data from font file */
-#endif
-
-#if INCL_PLAID_OUT               /* Plaid data monitoring included? */
-void   sp_record_xint();            /* Record xint data */
-void   sp_record_yint();            /* Record yint data */
-void sp_begin_plaid_data();         /* Signal start of plaid data */
-void sp_begin_ctrl_zones();         /* Signal start of control zones */
-void sp_record_ctrl_zone();         /* Record control zone data */
-void sp_begin_int_zones();          /* Signal start of interpolation zones */
-void sp_record_int_zone();          /* Record interpolation zone data */
-void sp_end_plaid_data();           /* Signal end of plaid data */
-#endif
-
-boolean sp_init_screen();        /* If only screen-writer mode supported */
-boolean sp_begin_char_screen();      /* If screenwriter mode supported */
-void    sp_begin_contour_screen();   /* If screenwriter mode supported */
-void    sp_line_screen();            /* If screenwriter mode supported */
-void    sp_curve_screen();           /* If screenwriter mode supported */
-void sp_scan_curve_screen();
-void sp_vert_line_screen();
-void sp_end_contour_screen();
-boolean sp_end_char_screen();        /* If screenwriter mode supported */
-
-
-boolean sp_init_outline();        /* If only vector output mode supported */
-boolean sp_begin_char_outline();      /* If only vector output mode supported */
-void    sp_begin_sub_char_outline();  /* If only vector output mode supported */
-void    sp_begin_contour_outline();   /* If only vector output mode supported */
-void    sp_curve_outline();           /* If only vector output mode supported */
-void    sp_line_outline();            /* If only vector output mode supported */
-void    sp_end_contour_outline();     /* If only vector output mode supported */
-void    sp_end_sub_char_outline();    /* If only vector output mode supported */
-boolean sp_end_char_outline();        /* If only vector output mode supported */
-
-boolean sp_init_2d();       /* If screen-writer and other modes supported */
-boolean sp_begin_char_2d();     /* If screen-writer and other modes supported */
-void    sp_begin_contour_2d();  /* If screen-writer and other modes supported */
-void    sp_line_2d();           /* If screen-writer and other modes supported */
-boolean sp_end_char_2d();       /* If screen-writer and other modes supported */
-
-#endif
-
-
 
 #endif /* _SPEEDO_H_ */

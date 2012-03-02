@@ -1,4 +1,4 @@
-/* $XConsortium: htest.c,v 1.2 91/05/11 09:48:58 rws Exp $ */
+/* $Xorg: htest.c,v 1.3 2000/08/17 19:46:25 cpqbld Exp $ */
 
 /*
 

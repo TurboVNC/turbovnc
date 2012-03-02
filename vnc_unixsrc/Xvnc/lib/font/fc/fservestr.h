@@ -1,4 +1,4 @@
-/* $XConsortium: fservestr.h,v 1.13 95/06/09 22:16:29 gildea Exp $ */
+/* $Xorg: fservestr.h,v 1.3 2000/08/17 19:46:36 cpqbld Exp $ */
 /*
  * Copyright 1990 Network Computing Devices
  *
@@ -23,6 +23,7 @@
  *
  * Author:  	Dave Lemke, Network Computing Devices, Inc
  */
+/* $XFree86: xc/lib/font/fc/fservestr.h,v 3.4 2001/07/25 15:04:56 dawes Exp $ */
 
 #ifndef _FSERVESTR_H_
 #define _FSERVESTR_H_
@@ -37,18 +38,21 @@
  * font server private storage
  */
 
+typedef struct _fs_glyph {
+    struct _fs_glyph	*next;
+} FSGlyphRec, *FSGlyphPtr;
 
 typedef struct _fs_font {
     CharInfoPtr pDefault;
     CharInfoPtr encoding;
     CharInfoPtr inkMetrics;
+    FSGlyphPtr	glyphs;
 }           FSFontRec, *FSFontPtr;
 
 /* FS special data for the font */
 typedef struct _fs_font_data {
     long        fontid;
     int		generation;	/* FS generation when opened */
-    FontPathElementPtr fpe;
     unsigned long glyphs_to_get;	/* # glyphs remaining to be gotten */
 
     /* Following data needed in case font needs to be reopened. */
@@ -65,22 +69,23 @@ typedef struct fs_clients_depending {
 
 /* OpenFont specific data for blocked request */
 typedef struct _fs_blocked_font {
-    FontPtr     pfont;
+    FontPtr     pfont;		/* must be first for fs_read_glyphs */
     long        fontid;
     int         state;		/* how many of the replies have landed */
-    int         errcode;
     int         flags;
+    Bool	freeFont;	/* free this font on failure */
+    CARD16	queryInfoSequence;
+    CARD16	queryExtentsSequence;
+    CARD16	queryBitmapsSequence;
     fsBitmapFormat format;
     FSClientsDependingPtr	clients_depending;
 }           FSBlockedFontRec;
 
 /* LoadGlyphs data for blocked request */
 typedef struct _fs_blocked_glyphs {
-    FontPtr     pfont;
+    FontPtr     pfont;		/* must be first for fs_read_glyphs */
     int		num_expected_ranges;
     fsRange     *expected_ranges;
-    int         errcode;
-    Bool        done;
     FSClientsDependingPtr	clients_depending;
 }           FSBlockedGlyphRec;
 
@@ -89,7 +94,6 @@ typedef struct _fs_blocked_extents {
     FontPtr     pfont;
     fsRange    *expected_ranges;
     int         nranges;
-    Bool        done;
     unsigned long nextents;
     fsXCharInfo *extents;
 }           FSBlockedExtentRec;
@@ -99,7 +103,6 @@ typedef struct _fs_blocked_bitmaps {
     FontPtr     pfont;
     fsRange    *expected_ranges;
     int         nranges;
-    Bool        done;
     unsigned long size;
     unsigned long nglyphs;
     fsOffset32   *offsets;
@@ -109,29 +112,25 @@ typedef struct _fs_blocked_bitmaps {
 /* state for blocked ListFonts */
 typedef struct _fs_blocked_list {
     FontNamesPtr names;
-    int         patlen;
-    int         errcode;
-    Bool        done;
 }           FSBlockedListRec;
 
 /* state for blocked ListFontsWithInfo */
 typedef struct _fs_blocked_list_info {
     int         status;
-    char       *name;
     int         namelen;
-    FontInfoPtr pfi;
+    FontInfoRec info;
+    char	name[256];
     int         remaining;
-    int         errcode;
 }           FSBlockedListInfoRec;
 
 /* state for blocked request */
 typedef struct _fs_block_data {
-    int			    type;	/* Open Font, LoadGlyphs, ListFonts,
-					 * ListWithInfo */
+    int			    type;	    /* Open Font, LoadGlyphs, ListFonts,
+					     * ListWithInfo */
     pointer		    client;	    /* who wants it */
-    int			    sequence_number;/* expected */
-    fsGenericReply	    header;
+    CARD16    		    sequenceNumber; /* expected */
     pointer		    data;	    /* type specific data */
+    int			    errcode;	    /* Suspended, et al. */
     struct _fs_block_data   *depending;	    /* clients depending on this one */
     struct _fs_block_data   *next;
 }           FSBlockDataRec;
@@ -142,7 +141,7 @@ typedef struct _fs_reconnect {
 } FSReconnectRec, *FSReconnectPtr;
 
 
-#if (defined(__STDC__) && !defined(UNIXCPP)) || defined(ANSICPP)
+#if !defined(UNIXCPP) || defined(ANSICPP)
 #define fsCat(x,y) x##_##y
 #else
 #define fsCat(x,y) x/**/_/**/y
@@ -184,5 +183,29 @@ typedef struct _fs_reconnect {
     fsUnpack_XCharInfo((packet)->font_header_max_bounds, &(structure)->maxbounds); \
     fsUnpack_XCharInfo((packet)->font_header_max_bounds, &(structure)->ink_maxbounds)
 
-
+extern void _fs_init_fontinfo ( FSFpePtr conn, FontInfoPtr pfi );
+extern int _fs_convert_props ( fsPropInfo *pi, fsPropOffset *po, pointer pd, 
+			       FontInfoPtr pfi );
+extern int _fs_convert_lfwi_reply ( FSFpePtr conn, FontInfoPtr pfi, 
+				    fsListFontsWithXInfoReply *fsrep, 
+				    fsPropInfo *pi, fsPropOffset *po, 
+				    pointer pd );
+extern int fs_build_range ( FontPtr pfont, Bool range_flag, 
+			    unsigned int count, int item_size, 
+			    unsigned char *data, int *nranges, 
+			    fsRange **ranges );
+extern void _fs_clean_aborted_loadglyphs ( FontPtr pfont, 
+					   int num_expected_ranges, 
+					   fsRange *expected_ranges );
+extern int _fs_check_extents ( FontPtr pfont, Mask flags, int nranges, 
+			       fsRange *range, FSBlockDataPtr blockrec );
+extern int _fs_check_bitmaps ( FontPtr pfont, fsBitmapFormat format, 
+			       Mask flags, int nranges, fsRange *range, 
+			       FSBlockDataPtr blockrec );
+extern int _fs_get_glyphs ( FontPtr pFont, unsigned long count, 
+			    unsigned char *chars, FontEncoding charEncoding, 
+			    unsigned long *glyphCount, CharInfoPtr *glyphs );
+extern void _fs_unload_font ( FontPtr pfont );
+extern void _fs_init_font ( FontPtr pfont );
+extern pointer fs_alloc_glyphs (FontPtr pFont, int size);
 #endif				/* _FSERVESTR_H_ */

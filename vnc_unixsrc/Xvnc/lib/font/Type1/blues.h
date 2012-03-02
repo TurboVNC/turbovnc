@@ -1,4 +1,4 @@
-/* $XConsortium: blues.h,v 1.2 91/10/10 11:17:52 rws Exp $ */
+/* $Xorg: blues.h,v 1.3 2000/08/17 19:46:29 cpqbld Exp $ */
 /* Copyright International Business Machines, Corp. 1991
  * All Rights Reserved
  * Copyright Lexmark International, Inc. 1991
@@ -28,8 +28,10 @@
  * CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+/* $XFree86: xc/lib/font/Type1/blues.h,v 1.4 2001/01/17 19:43:22 dawes Exp $ */
+
  
-extern psobj *GetType1CharString();
+extern psobj *GetType1CharString ( psfont *fontP, unsigned char code );
  
 #define TOPLEFT 1
 #define BOTTOMRIGHT 2

@@ -1,4 +1,4 @@
-/* $XConsortium: util.h,v 1.3 92/03/26 16:42:29 eswu Exp $ */
+/* $Xorg: util.h,v 1.3 2000/08/17 19:46:34 cpqbld Exp $ */
 /* Copyright International Business Machines,Corp. 1991
  * All Rights Reserved
  *
@@ -27,6 +27,25 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
  * SOFTWARE.
  */
+/* Copyright (c) 1994-1999 Silicon Graphics, Inc. All Rights Reserved.
+ *
+ * The contents of this file are subject to the CID Font Code Public Licence
+ * Version 1.0 (the "License"). You may not use this file except in compliance
+ * with the Licence. You may obtain a copy of the License at Silicon Graphics,
+ * Inc., attn: Legal Services, 2011 N. Shoreline Blvd., Mountain View, CA
+ * 94043 or at http://www.sgi.com/software/opensource/cid/license.html.
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis.
+ * ALL WARRANTIES ARE DISCLAIMED, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED
+ * WARRANTIES OF MERCHANTABILITY, OF FITNESS FOR A PARTICULAR PURPOSE OR OF
+ * NON-INFRINGEMENT. See the License for the specific language governing
+ * rights and limitations under the License.
+ *
+ * The Original Software is CID font code that was developed by Silicon
+ * Graphics, Inc.
+ */
+/* $XFree86: xc/lib/font/Type1/util.h,v 1.5 2001/01/17 19:43:24 dawes Exp $ */
+
 #ifndef UTIL_H
 #define UTIL_H
  
@@ -61,7 +80,11 @@ typedef int boolean;
  
 /* this is the size of memory allocated for reading fonts */
  
+#ifdef BUILDCID
+#define VM_SIZE               (100*1024)
+#else
 #define VM_SIZE               (50*1024)
+#endif
 /***================================================================***/
  
 #ifndef MIN
@@ -71,11 +94,13 @@ typedef int boolean;
 /***================================================================***/
 /*  Routines for managing virtual memory                              */
 /***================================================================***/
-extern boolean  vm_init();
+
+extern boolean  vm_init ( int cnt );
 extern long     vm_free;
 extern long     vm_size;
 extern char    *vm_next;
-extern char    *vm_alloc();
+extern char    *vm_alloc ( int bytes );
+
 /***================================================================***/
 /*  Macros for managing virtual memory                                */
 /***================================================================***/
@@ -173,10 +198,17 @@ typedef struct ps_dict {
 #define objPSetString(o)         ((o)->type = OBJ_STRING)
 #define objPSetName(o)           ((o)->type = OBJ_NAME)
 #define objPSetFile(o)           ((o)->type = OBJ_FILE)
- 
+
 /***================================================================***/
-/* Entry point for Type1Char to get entry from CharStrings            */
+/* Prototypes of object formatting functions */
 /***================================================================***/
-extern psobj *GetType1CharString();
- 
+extern void objFormatInteger ( psobj *objP, int value );
+extern void objFormatReal ( psobj *objP, float value );
+extern void objFormatBoolean ( psobj *objP, boolean value );
+extern void objFormatEncoding ( psobj *objP, int length, psobj *valueP );
+extern void objFormatArray ( psobj *objP, int length, psobj *valueP );
+extern void objFormatString ( psobj *objP, int length, char *valueP );
+extern void objFormatName ( psobj *objP, int length, char *valueP );
+extern void objFormatFile ( psobj *objP, FILE *valueP );
+
 #endif

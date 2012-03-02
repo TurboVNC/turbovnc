@@ -1,4 +1,4 @@
-/* $XConsortium: trig.h,v 1.2 91/10/10 11:20:04 rws Exp $ */
+/* $Xorg: trig.h,v 1.3 2000/08/17 19:46:34 cpqbld Exp $ */
 /* Copyright International Business Machines,Corp. 1991
  * All Rights Reserved
  *
@@ -28,6 +28,12 @@
  * SOFTWARE.
  */
 /*SHARED*/
+
+/* $XFree86: xc/lib/font/Type1/trig.h,v 1.3 2001/01/17 19:43:24 dawes Exp $ */
+
+#undef    DegreeCos
+#undef    DegreeSin
+#undef    sqrt
  
 #define   DegreeCos(d)    xiStub()
 #define   DegreeSin(d)    xiStub()

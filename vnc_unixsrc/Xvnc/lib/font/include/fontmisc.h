@@ -1,15 +1,14 @@
-/* $TOG: fontmisc.h /main/7 1997/06/10 14:11:11 barstow $ */
+/* $Xorg: fontmisc.h,v 1.4 2001/02/09 02:04:04 xorgcvs Exp $ */
 
 /*
 
-Copyright (c) 1991  X Consortium
+Copyright 1991, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -17,16 +16,16 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 */
-/* $XFree86: xc/lib/font/include/fontmisc.h,v 3.0.4.1 1997/06/11 12:08:42 dawes Exp $ */
+/* $XFree86: xc/lib/font/include/fontmisc.h,v 3.17 2003/09/13 21:33:02 dawes Exp $ */
 
 /*
  * Author:  Keith Packard, MIT X Consortium
@@ -35,8 +34,21 @@ in this Software without prior written authorization from the X Consortium.
 #ifndef _FONTMISC_H_
 #define _FONTMISC_H_
 
+#ifndef FONTMODULE
 #include <X11/Xfuncs.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#ifndef X_NOT_POSIX
+#include <unistd.h>
+#else
+extern int close();
+#endif
+
+#endif /* FONTMODULE */
+
 #include "X11/Xdefs.h"
+
 
 #ifndef LSBFirst
 #define LSBFirst	0
@@ -52,16 +64,70 @@ in this Software without prior written authorization from the X Consortium.
 #define FALSE 0
 #endif
 
-extern char	    *NameForAtom ();
+extern Atom MakeAtom ( char *string, unsigned len, int makeit );
+extern int ValidAtom ( Atom atom );
+extern char *NameForAtom (Atom atom);
 
-extern unsigned long *Xalloc();
-extern unsigned long *Xrealloc();
+#ifndef _HAVE_XALLOC_DECLS
+#define _HAVE_XALLOC_DECLS
+extern pointer Xalloc(unsigned long);
+extern pointer Xrealloc(pointer, unsigned long);
+extern void Xfree(pointer);
+extern pointer Xcalloc(unsigned long);
+#endif
+extern int f_strcasecmp(const char *s1, const char *s2);
 
+#ifndef xalloc
 #define xalloc(n)   Xalloc ((unsigned) n)
 #define xfree(p)    Xfree ((pointer) p)
 #define xrealloc(p,n)	Xrealloc ((pointer)p,n)
+#define xcalloc(n,s)    Xcalloc((unsigned) n * (unsigned) s)
+#endif
 #define lowbit(x) ((x) & (~(x) + 1))
 
-#define assert(x)
+#undef assert
+#define assert(x)	((void)0)
+
+#ifndef strcasecmp
+#if defined(NEED_STRCASECMP) && !defined(FONTMODULE)
+#define strcasecmp(s1,s2) f_strcasecmp(s1,s2)
+#endif
+#endif
+
+extern void
+BitOrderInvert(
+    register unsigned char *,
+    register int
+);
+
+extern void
+TwoByteSwap(
+    register unsigned char *,
+    register int
+);
+
+extern void
+FourByteSwap(
+    register unsigned char *,
+    register int
+);
+
+extern int
+RepadBitmap (
+    char*, 
+    char*,
+    unsigned, 
+    unsigned,
+    int, 
+    int
+);
+
+extern void CopyISOLatin1Lowered(
+    char * /*dest*/,
+    char * /*source*/,
+    int /*length*/
+);
+
+extern void register_fpe_functions(void);
 
 #endif /* _FONTMISC_H_ */

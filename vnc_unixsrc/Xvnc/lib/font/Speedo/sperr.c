@@ -1,4 +1,4 @@
-/* $XConsortium: sperr.c,v 1.6 94/04/17 20:17:47 dpw Exp $ */
+/* $Xorg: sperr.c,v 1.4 2001/02/09 02:04:00 xorgcvs Exp $ */
 /*
  * Copyright 1990, 1991 Network Computing Devices;
  * Portions Copyright 1987 by Digital Equipment Corporation
@@ -27,15 +27,13 @@
 
 /*
 
-Copyright (c) 1994  X Consortium
+Copyright 1994, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -43,21 +41,26 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/lib/font/Speedo/sperr.c,v 1.7 2002/05/31 18:45:48 dawes Exp $ */
+
 #include	"spint.h"
 
-#if NeedVarargsPrototypes
+#ifndef FONTMODULE
 #include <stdarg.h>
+#endif
+
+extern void ErrorF(const char* f, ...);
 
 void
 SpeedoErr(char *str, ...)
@@ -72,20 +75,6 @@ SpeedoErr(char *str, ...)
     va_end(v);
 }
 
-#else
-
-/* VARARGS1 */
-void
-SpeedoErr(str, a1)
-    char       *str;
-    char       *a1;
-{
-    ErrorF("Speedo: ");
-    ErrorF(str, a1);
-}
-#endif /* NeedVarargsPrototypes else */
-
-
 /*
  * Called by Speedo character generator to report an error.
  *
@@ -93,8 +82,7 @@ SpeedoErr(str, a1)
  *  that happens many times, don't report it to user
  */
 void
-sp_report_error(n)
-    fix15       n;
+sp_report_error(fix15 n)
 {
     switch (n) {
     case 1:

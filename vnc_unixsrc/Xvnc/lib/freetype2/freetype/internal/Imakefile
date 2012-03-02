@@ -1,0 +1,63 @@
+XCOMM $XFree86: xc/lib/freetype2/freetype/internal/Imakefile,v 1.6 2003/05/29 03:05:09 dawes Exp $
+
+FREETYPETOP = $(TOP)/extras/freetype2
+FREETYPESRC = $(FREETYPETOP)/src
+FREETYPEINC = $(FREETYPETOP)/include/freetype
+
+HEADERS= \
+        autohint.h \
+        bdftypes.h \
+        cfftypes.h \
+        fnttypes.h \
+        ftcalc.h \
+        ftcore.h \
+        ftdebug.h \
+        ftdriver.h \
+        ftexcept.h \
+        ftgloadr.h \
+        fthash.h \
+        ftmemory.h \
+        ftobject.h \
+        ftobjs.h \
+        ftstream.h \
+        fttrace.h \
+        internal.h \
+        pcftypes.h \
+        psaux.h \
+        pfr.h \
+        pshints.h \
+        psnames.h \
+        sfnt.h \
+        t1types.h \
+        t42types.h \
+        tttypes.h
+
+BuildIncludes($(HEADERS),freetype2/freetype/internal,../../..)
+InstallMultipleFlags($(HEADERS),$(INCDIR)/freetype2/freetype/internal,$(INSTINCFLAGS))
+
+LinkSourceFile(autohint.h,$(FREETYPEINC)/internal)
+LinkSourceFile(bdftypes.h,$(FREETYPEINC)/internal)
+LinkSourceFile(cfftypes.h,$(FREETYPEINC)/internal)
+LinkSourceFile(fnttypes.h,$(FREETYPEINC)/internal)
+LinkSourceFile(ftcalc.h,$(FREETYPEINC)/internal)
+LinkSourceFile(ftcore.h,$(FREETYPEINC)/internal)
+LinkSourceFile(ftdebug.h,$(FREETYPEINC)/internal)
+LinkSourceFile(ftdriver.h,$(FREETYPEINC)/internal)
+LinkSourceFile(ftexcept.h,$(FREETYPEINC)/internal)
+LinkSourceFile(ftgloadr.h,$(FREETYPEINC)/internal)
+LinkSourceFile(fthash.h,$(FREETYPEINC)/internal)
+LinkSourceFile(ftmemory.h,$(FREETYPEINC)/internal)
+LinkSourceFile(ftobject.h,$(FREETYPEINC)/internal)
+LinkSourceFile(ftobjs.h,$(FREETYPEINC)/internal)
+LinkSourceFile(ftstream.h,$(FREETYPEINC)/internal)
+LinkSourceFile(fttrace.h,$(FREETYPEINC)/internal)
+LinkSourceFile(internal.h,$(FREETYPEINC)/internal)
+LinkSourceFile(pcftypes.h,$(FREETYPEINC)/internal)
+LinkSourceFile(pfr.h,$(FREETYPEINC)/internal)
+LinkSourceFile(psaux.h,$(FREETYPEINC)/internal)
+LinkSourceFile(pshints.h,$(FREETYPEINC)/internal)
+LinkSourceFile(psnames.h,$(FREETYPEINC)/internal)
+LinkSourceFile(sfnt.h,$(FREETYPEINC)/internal)
+LinkSourceFile(t1types.h,$(FREETYPEINC)/internal)
+LinkSourceFile(t42types.h,$(FREETYPEINC)/internal)
+LinkSourceFile(tttypes.h,$(FREETYPEINC)/internal)

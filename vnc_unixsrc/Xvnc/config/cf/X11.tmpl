@@ -1,11 +1,11 @@
 XCOMM ----------------------------------------------------------------------
 XCOMM X Window System Build Parameters and Rules
-XCOMM $TOG: X11.tmpl /main/292 1997/05/20 10:05:59 kaleb $
+XCOMM $Xorg: X11.tmpl,v 1.6 2000/08/17 19:41:46 cpqbld Exp $
 XCOMM
 XCOMM
 XCOMM
 XCOMM
-XCOMM $XFree86: xc/config/cf/X11.tmpl,v 1.8.2.4 1998/01/23 12:35:08 dawes Exp $
+XCOMM $XFree86: xc/config/cf/X11.tmpl,v 1.239 2003/12/12 03:20:32 dawes Exp $
 
 /***************************************************************************
  *                                                                         *
@@ -51,6 +51,21 @@ XCOMM $XFree86: xc/config/cf/X11.tmpl,v 1.8.2.4 1998/01/23 12:35:08 dawes Exp $
 #endif
 #ifndef BuildFontServer
 #define BuildFontServer		YES
+#endif
+#ifndef XserverStaticFontLib
+#define XserverStaticFontLib	YES
+#endif
+#ifndef BuildSpeedo
+#define BuildSpeedo		YES
+#endif
+#ifndef BuildType1
+#define BuildType1		YES
+#endif
+#ifndef BuildCID
+#define BuildCID		YES
+#endif
+#ifndef BuildFreeType
+#define BuildFreeType		YES
 #endif
 #ifndef BuildFonts
 #define BuildFonts		(BuildServer | BuildFontServer)
@@ -120,6 +135,9 @@ XCOMM $XFree86: xc/config/cf/X11.tmpl,v 1.8.2.4 1998/01/23 12:35:08 dawes Exp $
 #endif
 #ifndef BuildXIElib
 #define BuildXIElib		BuildXIE
+#endif
+#ifndef BuildFontLib
+#define BuildFontLib		YES
 #endif
 #ifndef BuildXKB
 #define BuildXKB		YES
@@ -210,6 +228,16 @@ XCOMM $XFree86: xc/config/cf/X11.tmpl,v 1.8.2.4 1998/01/23 12:35:08 dawes Exp $
 #endif
 #ifndef BuildRender
 #define BuildRender		YES
+#endif
+#ifndef BuildFreetype2Library
+#define BuildFreetype2Library	YES
+#endif
+#ifndef Freetype2BuildDefines
+#define Freetype2BuildDefines	/**/
+#endif
+/* For FreeType 1.x */
+#ifndef Freetype1BuildDefines
+#define Freetype1BuildDefines	Freetype2BuildDefines
 #endif
 
 #ifndef InstallLibManPages
@@ -865,6 +893,7 @@ XCOMM X Window System make variables; these need to be coordinated with rules
         EXTINCSRC = $(XTOP)/include/extensions
      TRANSCOMMSRC = $(LIBSRC)/xtrans
    TRANS_INCLUDES = -I$(TRANSCOMMSRC)
+ CONNECTION_FLAGS = ConnectionFlags
 #ifdef X11ProjectRoot
      XPROJECTROOT = X11ProjectRoot
 #endif
@@ -1478,8 +1507,13 @@ SharedLibReferences(FS,FS,$(FSLIBSRC),SOFSREV,SharedFSRev)
 ProjectUnsharedLibReferences(FS,FS,$(FSLIBSRC),XBuildLibDir)
 #endif
 
+#ifndef NormalLibFont
+#define NormalLibFont YES
+#endif
          FONTLIBSRC = $(LIBSRC)/font
-ProjectUnsharedLibReferences(FONT,font,$(FONTLIBSRC),XBuildLibDir)
+ProjectUnsharedLibReferences(XFONT,Xfont,$(FONTLIBSRC),XBuildLibDir)
+         DEPFONTLIB = $(DEPXFONTLIB) $(DEPFREETYPE2LIB)
+            FONTLIB = $(XFONTLIB) $(FREETYPE2LIB)
 
           XPMLIBSRC = $(LIBSRC)/Xpm
 #if SharedLibXpm
@@ -1511,7 +1545,19 @@ ProjectUnsharedLibReferences(XKBFILE,xkbfile,$(XKBFILELIBSRC),XBuildLibDir)
 #else
 #define XkbClientLibs /**/
 #endif
+
 #endif
+
+#if BuildFreetype2Library
+ProjectUnsharedLibReferences(FREETYPE2,freetype,$(FREETYPE2LIBSRC),XBuildLibDir)
+#ifndef NormalLibFreetype2
+#define NormalLibFreetype2 YES
+#endif
+FREETYPE2INCDIR=$(BUILDINCDIR)
+FREETYPE2INCLUDES = -I$(FREETYPE2INCDIR) -I$(FREETYPE2INCDIR)/freetype2
+FREETYPE2DEFINES = -DFREETYPE2
+#endif
+
 #if defined(UseInstalled) || defined(OS2Architecture)
      XKBCOMPCMD = XkbComp                       /* assume BINDIR in path */
 #else

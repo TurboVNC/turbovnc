@@ -213,6 +213,7 @@ typedef struct _XtransConnInfo *XtransConnInfo;
 
 #define TRANS_CONNECT_FAILED 	-1
 #define TRANS_TRY_CONNECT_AGAIN -2
+#define TRANS_IN_PROGRESS	-3
 
 
 /*

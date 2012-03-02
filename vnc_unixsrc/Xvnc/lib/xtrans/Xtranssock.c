@@ -1242,6 +1242,7 @@ char 		*port;
 
 {
     struct sockaddr_in	sockname;
+    int		res;
 #if defined(SVR4) || defined(SCO325)
     size_t namelen = sizeof sockname;
 #else
@@ -1390,45 +1391,61 @@ else
 	int olderrno = errno;
 #endif
 
-	PRMSG (1,"SocketINETConnect: Can't connect: errno = %d\n",
-	  EGET(),0, 0);
-
 	/*
 	 * If the error was ECONNREFUSED, the server may be overloaded
 	 * and we should try again.
 	 *
+	 * If the error was EWOULDBLOCK or EINPROGRESS then the socket
+	 * was non-blocking and we should poll using select
+	 *
 	 * If the error was EINTR, the connect was interrupted and we
 	 * should try again.
+	 *
+	 * If multiple addresses are found for a host then we should
+	 * try to connect again with a different address for a larger
+	 * number of errors that made us quit before, since those
+	 * could be caused by trying to use an IPv6 address to contact
+	 * a machine with an IPv4-only server or other reasons that
+	 * only affect one of a set of addresses.  
 	 */
 
 	if (olderrno == ECONNREFUSED || olderrno == EINTR)
-	    return TRANS_TRY_CONNECT_AGAIN;
+	    res = TRANS_TRY_CONNECT_AGAIN;
+	else if (olderrno == EWOULDBLOCK || olderrno == EINPROGRESS)
+	    res = TRANS_IN_PROGRESS;
 	else
-	    return TRANS_CONNECT_FAILED;	
-    }
+	{
+	    PRMSG (2,"SocketINETConnect: Can't connect: errno = %d\n",
+		   olderrno,0, 0);
+
+	    res = TRANS_CONNECT_FAILED;	
+	}
+    } else {
+	res = 0;
     
 
-    /*
-     * Sync up the address fields of ciptr.
-     */
+	/*
+	 * Sync up the address fields of ciptr.
+	 */
     
-    if (TRANS(SocketINETGetAddr) (ciptr) < 0)
-    {
-	PRMSG (1,
-	   "SocketINETConnect: ...SocketINETGetAddr() failed:\n",
-	   0, 0, 0);
-	return TRANS_CONNECT_FAILED;
-    }
-
-    if (TRANS(SocketINETGetPeerAddr) (ciptr) < 0)
-    {
-	PRMSG (1,
-	 "SocketINETConnect: ...SocketINETGetPeerAddr() failed:\n",
+	if (TRANS(SocketINETGetAddr) (ciptr) < 0)
+	{
+	    PRMSG (1,
+	     "SocketINETConnect: ...SocketINETGetAddr() failed:\n",
 	      0, 0, 0);
-	return TRANS_CONNECT_FAILED;
+	    res = TRANS_CONNECT_FAILED;
+	}
+
+	else if (TRANS(SocketINETGetPeerAddr) (ciptr) < 0)
+	{
+	    PRMSG (1,
+	      "SocketINETConnect: ...SocketINETGetPeerAddr() failed:\n",
+	      0, 0, 0);
+	    res = TRANS_CONNECT_FAILED;
+	}
     }
 
-    return 0;
+    return res;
 }
 
 #endif /* TCPCONN */
@@ -1634,13 +1651,28 @@ char *port;
 	{
 	    errno = olderrno;
 	    
-	    PRMSG (1,"SocketUNIXConnect: Can't connect: errno = %d\n",
-		  EGET(),0, 0);
+	    /*
+	     * If the error was ENOENT, the server may be starting up
+	     * and we should try again.
+	     *
+	     * If the error was EWOULDBLOCK or EINPROGRESS then the socket
+	     * was non-blocking and we should poll using select
+	     *
+	     * If the error was EINTR, the connect was interrupted and we
+	     * should try again.
+	     */
 
 	    if (olderrno == ENOENT || olderrno == EINTR)
 		return TRANS_TRY_CONNECT_AGAIN;
+	    else if (olderrno == EWOULDBLOCK || olderrno == EINPROGRESS)
+		return TRANS_IN_PROGRESS;
 	    else
+	    {
+		PRMSG (2,"SocketUNIXConnect: Can't connect: errno = %d\n",
+		       EGET(),0, 0);
+
 		return TRANS_CONNECT_FAILED;
+	    }
 	}
     }
 

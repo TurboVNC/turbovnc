@@ -1,4 +1,4 @@
-/* $XConsortium: out_outl.c,v 1.2 91/05/11 09:52:48 rws Exp $ */
+/* $Xorg: out_outl.c,v 1.3 2000/08/17 19:46:26 cpqbld Exp $ */
 
 /*
 

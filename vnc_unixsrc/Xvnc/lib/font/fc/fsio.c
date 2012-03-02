@@ -1,5 +1,4 @@
-/* $XConsortium: fsio.c,v 1.37 95/04/05 19:58:13 kaleb Exp $ */
-/* $XFree86: xc/lib/font/fc/fsio.c,v 3.5.2.1 1998/02/15 16:08:40 hohndel Exp $ */
+/* $Xorg: fsio.c,v 1.3 2000/08/17 19:46:36 cpqbld Exp $ */
 /*
  * Copyright 1990 Network Computing Devices
  *
@@ -24,6 +23,7 @@
  *
  * Author:  	Dave Lemke, Network Computing Devices, Inc
  */
+/* $XFree86: xc/lib/font/fc/fsio.c,v 3.17 2003/05/27 22:26:49 tsi Exp $ */
 /*
  * font server i/o routines
  */
@@ -32,18 +32,18 @@
 #define _WILLWINSOCK_
 #endif
 
-#include	"FS.h"
-#include	"FSproto.h"
-
 #include 	"X11/Xtrans.h"
 #include	"X11/Xpoll.h"
+#include	"FS.h"
+#include	"FSproto.h"
 #include	"fontmisc.h"
-#include	"fsio.h"
+#include	"fontstruct.h"
+#include	"fservestr.h"
 
 #include	<stdio.h>
 #include	<signal.h>
 #include	<sys/types.h>
-#if !defined(WIN32) && !defined(AMOEBA) && !defined(_MINIX)
+#if !defined(WIN32)
 #ifndef Lynx
 #include	<sys/socket.h>
 #else
@@ -51,111 +51,65 @@
 #endif
 #endif
 #include	<errno.h>
-#ifdef X_NOT_STDC_ENV
-extern int errno;
-#endif 
 #ifdef WIN32
 #define EWOULDBLOCK WSAEWOULDBLOCK
 #undef EINTR
 #define EINTR WSAEINTR
 #endif
 
-#ifdef MINIX
-#include <sys/nbio.h>
-#define select(n,r,w,x,t) nbio_select(n,r,w,x,t)
-#endif
-
-#ifdef __EMX__
+#ifdef __UNIXOS2__
 #define select(n,r,w,x,t) os2PseudoSelect(n,r,w,x,t)
 #endif
 
-/* check for both EAGAIN and EWOULDBLOCK, because some supposedly POSIX
- * systems are broken and return EWOULDBLOCK when they should return EAGAIN
- */
-#ifdef WIN32
-#define ETEST() (WSAGetLastError() == WSAEWOULDBLOCK)
-#else
-#if defined(EAGAIN) && defined(EWOULDBLOCK)
-#define ETEST() (errno == EAGAIN || errno == EWOULDBLOCK)
-#else
-#ifdef EAGAIN
-#define ETEST() (errno == EAGAIN)
-#else
-#define ETEST() (errno == EWOULDBLOCK)
-#endif
-#endif
-#endif
-#ifdef WIN32
-#define ECHECK(err) (WSAGetLastError() == err)
-#define ESET(val) WSASetLastError(val)
-#else
-#ifdef ISC
-#define ECHECK(err) ((errno == err) || ETEST())
-#else
-#define ECHECK(err) (errno == err)
-#endif
-#define ESET(val) errno = val
-#endif
 
 static int  padlength[4] = {0, 3, 2, 1};
 fd_set _fs_fd_mask;
 
-int  _fs_wait_for_readable();
+static int
+_fs_resize (FSBufPtr buf, long size);
 
-#ifdef SIGNALRETURNSINT
-#define SIGNAL_T int
-#else
-#define SIGNAL_T void
-#endif
-
-/* ARGSUSED */
-static      SIGNAL_T
-_fs_alarm(foo)
-    int         foo;
+static void
+_fs_downsize (FSBufPtr buf, long size);
+    
+int
+_fs_poll_connect (XtransConnInfo trans_conn, int timeout)
 {
-    return;
+    fd_set	    w_mask;
+    struct timeval  tv;
+    int		    fs_fd = _FontTransGetConnectionNumber (trans_conn);
+    int		    ret;
+
+    do
+    {
+	tv.tv_usec = 0;
+	tv.tv_sec = timeout;
+	FD_ZERO (&w_mask);
+	FD_SET (fs_fd, &w_mask);
+	ret = Select (fs_fd + 1, NULL, &w_mask, NULL, &tv);
+    } while (ret < 0 && ECHECK(EINTR));
+    if (ret == 0)
+	return FSIO_BLOCK;
+    if (ret < 0)
+	return FSIO_ERROR;
+    return FSIO_READY;
 }
 
-static XtransConnInfo
-_fs_connect(servername, timeout)
-    char       *servername;
-    int         timeout;
+XtransConnInfo
+_fs_connect(char *servername, int *err)
 {
-    XtransConnInfo trans_conn;		/* transport connection object */
-    int         ret = -1;
-#ifdef SIGALRM
-    unsigned    oldTime;
-
-    SIGNAL_T(*oldAlarm) ();
-#endif
+    XtransConnInfo  trans_conn;		/* transport connection object */
+    int		    ret;
+    int		    i = 0;
+    int		    retries = 5;
 
     /*
      * Open the network connection.
      */
     if( (trans_conn=_FontTransOpenCOTSClient(servername)) == NULL )
-	{
-	return (NULL);
-	}
-
-#ifdef SIGALRM
-    oldTime = alarm((unsigned) 0);
-    oldAlarm = signal(SIGALRM, _fs_alarm);
-    alarm((unsigned) timeout);
-#endif
-
-    ret = _FontTransConnect(trans_conn,servername);
-
-#ifdef SIGALRM
-    alarm((unsigned) 0);
-    signal(SIGALRM, oldAlarm);
-    alarm(oldTime);
-#endif
-
-    if (ret < 0)
-	{
-	_FontTransClose(trans_conn);
-	return (NULL);
-	}
+    {
+	*err = FSIO_ERROR;
+	return 0;
+    }
 
     /*
      * Set the connection non-blocking since we use select() to block.
@@ -163,348 +117,309 @@ _fs_connect(servername, timeout)
 
     _FontTransSetOption(trans_conn, TRANS_NONBLOCKING, 1);
 
+    do {
+	if (i == TRANS_TRY_CONNECT_AGAIN)
+	    sleep(1);
+	i = _FontTransConnect(trans_conn,servername);
+    } while ((i == TRANS_TRY_CONNECT_AGAIN) && (retries-- > 0));
+
+    if (i < 0)
+    {
+	if (i == TRANS_IN_PROGRESS)
+	    ret = FSIO_BLOCK;
+	else
+	    ret = FSIO_ERROR;
+    }
+    else
+	ret = FSIO_READY;
+
+    if (ret == FSIO_ERROR)
+    {
+	_FontTransClose(trans_conn);
+	trans_conn = 0;
+    }
+
+    *err = ret;
     return trans_conn;
 }
 
-static int  generationCount;
-
-/* ARGSUSED */
-static Bool
-_fs_setup_connection(conn, servername, timeout, copy_name_p)
-    FSFpePtr    conn;
-    char       *servername;
-    int         timeout;
-    Bool	copy_name_p;
+int
+_fs_fill (FSFpePtr conn)
 {
-    fsConnClientPrefix prefix;
-    fsConnSetup rep;
-    int         setuplength;
-    fsConnSetupAccept conn_accept;
-    int         endian;
-    int         i;
-    int         alt_len;
-    char       *auth_data = NULL,
-               *vendor_string = NULL,
-               *alt_data = NULL,
-               *alt_dst;
-    FSFpeAltPtr alts;
-    int         nalts;
-
-    if ((conn->trans_conn = _fs_connect(servername, 5)) == NULL)
-	return FALSE;
-
-    conn->fs_fd = _FontTransGetConnectionNumber (conn->trans_conn);
-
-    conn->generation = ++generationCount;
-
-    /* send setup prefix */
-    endian = 1;
-    if (*(char *) &endian)
-	prefix.byteOrder = 'l';
-    else
-	prefix.byteOrder = 'B';
-
-    prefix.major_version = FS_PROTOCOL;
-    prefix.minor_version = FS_PROTOCOL_MINOR;
-
-/* XXX add some auth info here */
-    prefix.num_auths = 0;
-    prefix.auth_len = 0;
-
-    if (_fs_write(conn, (char *) &prefix, SIZEOF(fsConnClientPrefix)) == -1)
-	return FALSE;
-
-    /* read setup info */
-    if (_fs_read(conn, (char *) &rep, SIZEOF(fsConnSetup)) == -1)
-	return FALSE;
-
-    conn->fsMajorVersion = rep.major_version;
-    if (rep.major_version > FS_PROTOCOL)
-	return FALSE;
-
-    alts = 0;
-    /* parse alternate list */
-    if (nalts = rep.num_alternates) {
-	setuplength = rep.alternate_len << 2;
-	alts = (FSFpeAltPtr) xalloc(nalts * sizeof(FSFpeAltRec) +
-				    setuplength);
-	if (!alts) {
-	    _FontTransClose(conn->trans_conn);
-	    errno = ENOMEM;
-	    return FALSE;
-	}
-	alt_data = (char *) (alts + nalts);
-	if (_fs_read(conn, (char *) alt_data, setuplength) == -1) {
-	    xfree(alts);
-	    return FALSE;
-	}
-	alt_dst = alt_data;
-	for (i = 0; i < nalts; i++) {
-	    alts[i].subset = alt_data[0];
-	    alt_len = alt_data[1];
-	    alts[i].name = alt_dst;
-	    memmove(alt_dst, alt_data + 2, alt_len);
-	    alt_dst[alt_len] = '\0';
-	    alt_dst += (alt_len + 1);
-	    alt_data += (2 + alt_len + padlength[(2 + alt_len) & 3]);
-	}
-    }
-    if (conn->alts)
-	xfree(conn->alts);
-    conn->alts = alts;
-    conn->numAlts = nalts;
-
-    setuplength = rep.auth_len << 2;
-    if (setuplength &&
-	    !(auth_data = (char *) xalloc((unsigned int) setuplength))) {
-	_FontTransClose(conn->trans_conn);
-	errno = ENOMEM;
-	return FALSE;
-    }
-    if (_fs_read(conn, (char *) auth_data, setuplength) == -1) {
-	xfree(auth_data);
-	return FALSE;
-    }
-    if (rep.status != AuthSuccess) {
-	xfree(auth_data);
-	_FontTransClose(conn->trans_conn);
-	errno = EPERM;
-	return FALSE;
-    }
-    /* get rest */
-    if (_fs_read(conn, (char *) &conn_accept, (long) SIZEOF(fsConnSetupAccept)) == -1) {
-	xfree(auth_data);
-	return FALSE;
-    }
-    if ((vendor_string = (char *)
-	 xalloc((unsigned) conn_accept.vendor_len + 1)) == NULL) {
-	xfree(auth_data);
-	_FontTransClose(conn->trans_conn);
-	errno = ENOMEM;
-	return FALSE;
-    }
-    if (_fs_read_pad(conn, (char *) vendor_string, conn_accept.vendor_len) == -1) {
-	xfree(vendor_string);
-	xfree(auth_data);
-	return FALSE;
-    }
-    xfree(auth_data);
-    xfree(vendor_string);
-
-    if (copy_name_p)
+    long    avail;
+    long    bytes_read;
+    Bool    waited = FALSE;
+    
+    if (_fs_flush (conn) < 0)
+	return FSIO_ERROR;
+    /*
+     * Don't go overboard here; stop reading when we've
+     * got enough to satisfy the pending request
+     */
+    while ((conn->inNeed - (conn->inBuf.insert - conn->inBuf.remove)) > 0)
     {
-        conn->servername = (char *) xalloc(strlen(servername) + 1);
-        if (conn->servername == NULL)
-	    return FALSE;
-        strcpy(conn->servername, servername);
-    }
-    else
-        conn->servername = servername;
-
-    return TRUE;
-}
-
-static Bool
-_fs_try_alternates(conn, timeout)
-    FSFpePtr    conn;
-    int         timeout;
-{
-    int         i;
-
-    for (i = 0; i < conn->numAlts; i++)
-	if (_fs_setup_connection(conn, conn->alts[i].name, timeout, TRUE))
-	    return TRUE;
-    return FALSE;
-}
-
-#define FS_OPEN_TIMEOUT	    30
-#define FS_REOPEN_TIMEOUT   10
-
-FSFpePtr
-_fs_open_server(servername)
-    char       *servername;
-{
-    FSFpePtr    conn;
-
-    conn = (FSFpePtr) xalloc(sizeof(FSFpeRec));
-    if (!conn) {
-	errno = ENOMEM;
-	return (FSFpePtr) NULL;
-    }
-    bzero((char *) conn, sizeof(FSFpeRec));
-    if (!_fs_setup_connection(conn, servername, FS_OPEN_TIMEOUT, TRUE)) {
-	if (!_fs_try_alternates(conn, FS_OPEN_TIMEOUT)) {
-	    xfree(conn->alts);
-	    xfree(conn);
-	    return (FSFpePtr) NULL;
+	avail = conn->inBuf.size - conn->inBuf.insert;
+	/*
+	 * For SVR4 with a unix-domain connection, ETEST() after selecting
+	 * readable means the server has died.  To do this here, we look for
+	 * two consecutive reads returning ETEST().
+	 */
+	ESET (0);
+	bytes_read =_FontTransRead(conn->trans_conn,
+				   conn->inBuf.buf + conn->inBuf.insert,
+				   avail);
+	if (bytes_read > 0) {
+	    conn->inBuf.insert += bytes_read;
+	    waited = FALSE;
+	}
+	else
+	{
+	    if (bytes_read == 0 || ETEST ())
+	    {
+		if (!waited)
+		{
+		    waited = TRUE;
+		    if (_fs_wait_for_readable (conn, 0) == FSIO_BLOCK)
+			return FSIO_BLOCK;
+		    continue;
+		}
+	    }
+	    _fs_connection_died (conn);
+	    return FSIO_ERROR;
 	}
     }
-    return conn;
-}
-
-Bool
-_fs_reopen_server(conn)
-    FSFpePtr    conn;
-{
-    if (_fs_setup_connection(conn, conn->servername, FS_REOPEN_TIMEOUT, FALSE))
-	return TRUE;
-    if (_fs_try_alternates(conn, FS_REOPEN_TIMEOUT))
-	return TRUE;
-    return FALSE;
+    return FSIO_READY;
 }
 
 /*
- * expects everything to be here.  *not* to be called when reading huge
- * numbers of replies, but rather to get each chunk
+ * Make space and return whether data have already arrived
  */
-_fs_read(conn, data, size)
-    FSFpePtr    conn;
-    char       *data;
-    unsigned long size;
+
+int
+_fs_start_read (FSFpePtr conn, long size, char **buf)
 {
-    long        bytes_read;
-#if defined(SVR4) && defined(i386)
-    int		num_failed_reads = 0;
-#endif
-
-    if (size == 0) {
-
-#ifdef DEBUG
-	fprintf(stderr, "tried to read 0 bytes \n");
-#endif
-
-	return 0;
-    }
-    ESET(0);
-    /*
-     * For SVR4 with a unix-domain connection, ETEST() after selecting
-     * readable means the server has died.  To do this here, we look for
-     * two consecutive reads returning ETEST().
-     */
-    while ((bytes_read = _FontTransRead(conn->trans_conn,
-	data, (int) size)) != size) {
-	if (bytes_read > 0) {
-	    size -= bytes_read;
-	    data += bytes_read;
-#if defined(SVR4) && defined(i386)
-	    num_failed_reads = 0;
-#endif
-	} else if (ETEST()) {
-	    /* in a perfect world, this shouldn't happen */
-	    /* ... but then, its less than perfect... */
-	    if (_fs_wait_for_readable(conn) == -1) {	/* check for error */
-		_fs_connection_died(conn);
-		ESET(EPIPE);
-		return -1;
-	    }
-#if defined(SVR4) && defined(i386)
-	    num_failed_reads++;
-	    if (num_failed_reads > 1) {
-		_fs_connection_died(conn);
-		ESET(EPIPE);
-		return -1;
-	    }
-#endif
-	    ESET(0);
-	} else if (ECHECK(EINTR)) {
-#if defined(SVR4) && defined(i386)
-	    num_failed_reads = 0;
-#endif
-	    continue;
-	} else {		/* something bad happened */
-	    if (conn->fs_fd > 0)
-		_fs_connection_died(conn);
-	    ESET(EPIPE);
-	    return -1;
+    int	    ret;
+    
+    conn->inNeed = size;
+    if (fs_inqueued(conn) < size)
+    {
+	if (_fs_resize (&conn->inBuf, size) != FSIO_READY)
+	{
+	    _fs_connection_died (conn);
+	    return FSIO_ERROR;
 	}
+	ret = _fs_fill (conn);
+	if (ret == FSIO_ERROR)
+	    return ret;
+	if (ret == FSIO_BLOCK || fs_inqueued(conn) < size)
+	    return FSIO_BLOCK;
     }
-    return 0;
+    if (buf)
+	*buf = conn->inBuf.buf + conn->inBuf.remove;
+    return FSIO_READY;
 }
 
-_fs_write(conn, data, size)
-    FSFpePtr    conn;
-    char       *data;
-    unsigned long size;
+void
+_fs_done_read (FSFpePtr conn, long size)
 {
-    long        bytes_written;
+    if (conn->inBuf.insert - conn->inBuf.remove < size)
+    {
+#ifdef DEBUG
+	fprintf (stderr, "_fs_done_read skipping to many bytes\n");
+#endif
+	return;
+    }
+    conn->inBuf.remove += size;
+    conn->inNeed -= size;
+    _fs_downsize (&conn->inBuf, FS_BUF_MAX);
+}
 
+long
+_fs_pad_length (long len)
+{
+    return len + padlength[len&3];
+}
+
+int
+_fs_flush (FSFpePtr conn)
+{
+    long    bytes_written;
+    long    remain;
+    
+    /* XXX - hack.  The right fix is to remember that the font server
+       has gone away when we first discovered it. */
+    if (conn->fs_fd < 0)
+	return FSIO_ERROR;
+
+    while ((remain = conn->outBuf.insert - conn->outBuf.remove) > 0)
+    {
+	bytes_written = _FontTransWrite(conn->trans_conn,
+					conn->outBuf.buf + conn->outBuf.remove,
+					(int) remain);
+	if (bytes_written > 0)
+	{
+	    conn->outBuf.remove += bytes_written;
+	}
+	else
+	{
+	    if (bytes_written == 0 || ETEST ())
+	    {
+		conn->brokenWriteTime = GetTimeInMillis () + FS_FLUSH_POLL;
+		_fs_mark_block (conn, FS_BROKEN_WRITE);
+		break;
+	    }
+	    if (!ECHECK (EINTR))
+	    {
+		_fs_connection_died (conn);
+		return FSIO_ERROR;
+	    }
+	}
+    }
+    if (conn->outBuf.remove == conn->outBuf.insert)
+    {
+	_fs_unmark_block (conn, FS_BROKEN_WRITE|FS_PENDING_WRITE);
+	if (conn->outBuf.size > FS_BUF_INC)
+	    conn->outBuf.buf = xrealloc (conn->outBuf.buf, FS_BUF_INC);
+	conn->outBuf.remove = conn->outBuf.insert = 0;
+    }
+    return FSIO_READY;
+}
+
+static int
+_fs_resize (FSBufPtr buf, long size)
+{
+    char    *new;
+    long    new_size;
+
+    if (buf->remove)
+    {
+	if (buf->remove != buf->insert)
+	{
+	    memmove (buf->buf, 
+		     buf->buf + buf->remove,
+		     buf->insert - buf->remove);
+	}
+	buf->insert -= buf->remove;
+	buf->remove = 0;
+    }
+    if (buf->size - buf->remove < size)
+    {
+	new_size = ((buf->remove + size + FS_BUF_INC) / FS_BUF_INC) * FS_BUF_INC;
+	new = xrealloc (buf->buf, new_size);
+	if (!new)
+	    return FSIO_ERROR;
+	buf->buf = new;
+	buf->size = new_size;
+    }
+    return FSIO_READY;
+}
+
+static void
+_fs_downsize (FSBufPtr buf, long size)
+{
+    if (buf->insert == buf->remove)
+    {
+	buf->insert = buf->remove = 0;
+	if (buf->size > size)
+	{
+	    buf->buf = xrealloc (buf->buf, size);
+	    buf->size = size;
+	}
+    }
+}
+
+void
+_fs_io_reinit (FSFpePtr conn)
+{
+    conn->outBuf.insert = conn->outBuf.remove = 0;
+    _fs_downsize (&conn->outBuf, FS_BUF_INC);
+    conn->inBuf.insert = conn->inBuf.remove = 0;
+    _fs_downsize (&conn->inBuf, FS_BUF_MAX);
+}
+
+Bool
+_fs_io_init (FSFpePtr conn)
+{
+    conn->outBuf.insert = conn->outBuf.remove = 0;
+    conn->outBuf.buf = xalloc (FS_BUF_INC);
+    if (!conn->outBuf.buf)
+	return FALSE;
+    conn->outBuf.size = FS_BUF_INC;
+    
+    conn->inBuf.insert = conn->inBuf.remove = 0;
+    conn->inBuf.buf = xalloc (FS_BUF_INC);
+    if (!conn->inBuf.buf)
+    {
+	xfree (conn->outBuf.buf);
+	conn->outBuf.buf = 0;
+	return FALSE;
+    }
+    conn->inBuf.size = FS_BUF_INC;
+    
+    return TRUE;
+}
+
+void
+_fs_io_fini (FSFpePtr conn)
+{
+    if (conn->outBuf.buf)
+	xfree (conn->outBuf.buf);
+    if (conn->inBuf.buf)
+	xfree (conn->inBuf.buf);
+}
+
+static int
+_fs_do_write(FSFpePtr conn, char *data, long len, long size)
+{
     if (size == 0) {
-
 #ifdef DEBUG
 	fprintf(stderr, "tried to write 0 bytes \n");
 #endif
-
-	return 0;
+	return FSIO_READY;
     }
 
-    /* XXX - hack.  The right fix is to remember that the font server
-       has gone away when we first discovered it. */
-    if (!conn->trans_conn)
-	return -1;
-
-    ESET(0);
-    while ((bytes_written = _FontTransWrite(conn->trans_conn,
-	data, (int) size)) != size) {
-	if (bytes_written > 0) {
-	    size -= bytes_written;
-	    data += bytes_written;
-	} else if (ETEST()) {
-	    /* XXX -- we assume this can't happen */
-
-#ifdef DEBUG
-	    fprintf(stderr, "fs_write blocking\n");
-#endif
-	} else if (ECHECK(EINTR)) {
-	    continue;
-	} else {		/* something bad happened */
-	    _fs_connection_died(conn);
-	    ESET(EPIPE);
-	    return -1;
+    if (conn->fs_fd == -1)
+	return FSIO_ERROR;
+    
+    while (conn->outBuf.insert + size > conn->outBuf.size) 
+    {
+	if (_fs_flush (conn) < 0)
+	    return FSIO_ERROR;
+	if (_fs_resize (&conn->outBuf, size) < 0)
+	{
+	    _fs_connection_died (conn);
+	    return FSIO_ERROR;
 	}
     }
-    return 0;
+    memcpy (conn->outBuf.buf + conn->outBuf.insert, data, len);
+    conn->outBuf.insert += size;
+    _fs_mark_block (conn, FS_PENDING_WRITE);
+    return FSIO_READY;
 }
 
-_fs_read_pad(conn, data, len)
-    FSFpePtr    conn;
-    char       *data;
-    int         len;
+/*
+ * Write the indicated bytes
+ */
+int
+_fs_write (FSFpePtr conn, char *data, long len)
 {
-    char        pad[3];
-
-    if (_fs_read(conn, data, len) == -1)
-	return -1;
-
-    /* read the junk */
-    if (padlength[len & 3]) {
-	return _fs_read(conn, pad, padlength[len & 3]);
-    }
-    return 0;
+    return _fs_do_write (conn, data, len, len);
 }
-
-_fs_write_pad(conn, data, len)
-    FSFpePtr    conn;
-    char       *data;
-    int         len;
+    
+/*
+ * Write the indicated bytes adding any appropriate pad
+ */
+int
+_fs_write_pad(FSFpePtr conn, char *data, long len)
 {
-    static char pad[3];
-
-    if (_fs_write(conn, data, len) == -1)
-	return -1;
-
-    /* write the pad */
-    if (padlength[len & 3]) {
-	return _fs_write(conn, pad, padlength[len & 3]);
-    }
-    return 0;
+    return _fs_do_write (conn, data, len, len + padlength[len & 3]);
 }
 
 /*
  * returns the amount of data waiting to be read
  */
 int
-_fs_data_ready(conn)
-    FSFpePtr    conn;
+_fs_data_ready(FSFpePtr conn)
 {
     BytesReadable_t readable;
 
@@ -514,80 +429,65 @@ _fs_data_ready(conn)
 }
 
 int
-_fs_wait_for_readable(conn)
-    FSFpePtr    conn;
+_fs_wait_for_readable(FSFpePtr conn, int ms)
 {
-#ifndef AMOEBA
-    fd_set r_mask;
-    fd_set e_mask;
+    fd_set	r_mask;
+    fd_set	e_mask;
     int         result;
+    struct timeval  tv;
 
-#ifdef DEBUG
-    fprintf(stderr, "read would block\n");
-#endif
-
-    do {
+    for (;;) {
+	if (conn->fs_fd < 0)
+	    return FSIO_ERROR;
 	FD_ZERO(&r_mask);
-#ifndef MINIX
 	FD_ZERO(&e_mask);
-#endif
+	tv.tv_sec = ms / 1000;
+	tv.tv_usec = (ms % 1000) * 1000;
 	FD_SET(conn->fs_fd, &r_mask);
 	FD_SET(conn->fs_fd, &e_mask);
-	result = Select(conn->fs_fd + 1, &r_mask, NULL, &e_mask, NULL);
-	if (result == -1) {
+	result = Select(conn->fs_fd + 1, &r_mask, NULL, &e_mask, &tv);
+	if (result < 0)
+	{
 	    if (ECHECK(EINTR) || ECHECK(EAGAIN))
 		continue;
 	    else
-		return -1;
+		return FSIO_ERROR;
 	}
-	if (result && FD_ISSET(conn->fs_fd, &e_mask))
-	    return -1;
-    } while (result <= 0);
-
-    return 0;
-#else
-    printf("fs_wait_for_readable(): fail\n");
-    return -1;
-#endif
+	if (result == 0)
+	    return FSIO_BLOCK;
+	if (FD_ISSET(conn->fs_fd, &r_mask))
+	    return FSIO_READY;
+	return FSIO_ERROR;
+    }
 }
 
 int
-_fs_set_bit(mask, fd)
-    fd_set* mask;
-    int         fd;
+_fs_set_bit(fd_set *mask, int fd)
 {
     FD_SET(fd, mask);
     return fd;
 }
 
 int
-_fs_is_bit_set(mask, fd)
-    fd_set* mask;
-    int         fd;
+_fs_is_bit_set(fd_set *mask, int fd)
 {
     return FD_ISSET(fd, mask);
 }
 
 void
-_fs_bit_clear(mask, fd)
-    fd_set* mask;
-    int         fd;
+_fs_bit_clear(fd_set *mask, int fd)
 {
     FD_CLR(fd, mask);
 }
 
 int
-_fs_any_bit_set(mask)
-    fd_set* mask;
+_fs_any_bit_set(fd_set *mask)
 {
     return XFD_ANYSET(mask);
 }
 
-int
-_fs_or_bits(dst, m1, m2)
-    fd_set* dst;
-    fd_set* m1;
-    fd_set* m2;
+void
+_fs_or_bits(fd_set *dst, fd_set *m1, fd_set *m2)
 {
 #ifdef WIN32
     int i;
@@ -606,49 +506,4 @@ _fs_or_bits(dst, m1, m2)
 #else
     XFD_ORSET(dst, m1, m2);
 #endif
-
-    return 0;
-}
-
-_fs_drain_bytes(conn, len)
-    FSFpePtr    conn;
-    int         len;
-{
-    char        buf[128];
-
-#ifdef DEBUG
-    fprintf(stderr, "draining wire\n");
-#endif
-
-    while (len > 0) {
-	if (_fs_read(conn, buf, (len < 128) ? len : 128) < 0)
-	    return -1;
-	len -= 128;
-    }
-    return 0;
-}
-
-_fs_drain_bytes_pad(conn, len)
-    FSFpePtr    conn;
-    int         len;
-{
-    _fs_drain_bytes(conn, len);
-
-    /* read the junk */
-    if (padlength[len & 3]) {
-	_fs_drain_bytes(conn, padlength[len & 3]);
-    }
-}
-
-_fs_eat_rest_of_error(conn, err)
-    FSFpePtr    conn;
-    fsError    *err;
-{
-    int         len = (err->length - (SIZEOF(fsGenericReply) >> 2)) << 2;
-
-#ifdef DEBUG
-    fprintf(stderr, "clearing error\n");
-#endif
-
-    _fs_drain_bytes(conn, len);
 }

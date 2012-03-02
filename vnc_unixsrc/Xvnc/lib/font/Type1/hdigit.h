@@ -1,4 +1,4 @@
-/* $XConsortium: hdigit.h,v 1.2 91/10/10 11:18:11 rws Exp $ */
+/* $Xorg: hdigit.h,v 1.3 2000/08/17 19:46:30 cpqbld Exp $ */
 /* Copyright International Business Machines,Corp. 1991
  * All Rights Reserved
  *

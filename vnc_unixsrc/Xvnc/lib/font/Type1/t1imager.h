@@ -1,4 +1,4 @@
-/* $XConsortium: t1imager.h,v 1.5 92/03/20 14:36:05 keith Exp $ */
+/* $Xorg: t1imager.h,v 1.3 2000/08/17 19:46:33 cpqbld Exp $ */
 /* Copyright International Business Machines,Corp. 1991
  * All Rights Reserved
  *
@@ -27,41 +27,22 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
  * SOFTWARE.
  */
+/* $XFree86: xc/lib/font/Type1/t1imager.h,v 1.5 2001/07/25 15:04:55 dawes Exp $ */
 
-#include "fontmisc.h"
+
+#include "objects.h"
+#include "spaces.h"
+#include "paths.h"
+#include "regions.h"
+
+typedef  struct xobject *xobject;
+typedef  struct segment *path;
+typedef  struct region *region;
+typedef  struct XYspace *XYspace;
  
-typedef  pointer xobject;
-typedef  pointer location;
-typedef  pointer path;
-typedef  pointer region;
-typedef  pointer XYspace;
- 
-#ifndef NOEXTERNS
-/*
-The following are the user entry locations to TYPE1IMAGER
-*/
-extern path    t1_Bezier();
-extern path    t1_ClosePath();
-extern xobject t1_Destroy();
-extern xobject t1_Dup();
-extern char   *t1_ErrorMsg();
-extern void    t1_InitImager();
-extern region  t1_Interior();
-extern location  t1_ILoc();
-extern xobject t1_Join();
-extern path    t1_Line();
-extern xobject t1_Permanent();
-extern path    t1_Phantom();
-extern location   t1_Loc();
-extern xobject t1_Scale();
-extern xobject t1_Snap();
-extern location  t1_SubLoc();
-extern xobject t1_Temporary();
- 
-#endif
- 
+
 #ifndef   NULL
-#define   NULL         0
+#include <stddef.h>
 #endif
  
 #ifndef   TRUE
@@ -71,57 +52,13 @@ extern xobject t1_Temporary();
 #ifndef   FALSE
 #define   FALSE         0
 #endif
- 
-/*
-Here are some TYPE1IMAGER functions that are defined in terms of others:
-*/
- 
-#define   t1_AddLoc(p1,p2)    t1_Join(p1,p2)
- 
-#ifndef   NONAMES
-/*
-Define the simple form of all the subroutine names:
-*/
-#define   AddLoc(p1,p2)          t1_AddLoc(p1,p2)
-#define   Bezier(B,C,D)      t1_Bezier(B,C,D)
-#define   ClosePath(p)       t1_ClosePath(p,0)
-#define   Complement(area)   t1_Complement(area)
-#define   Destroy(o)         t1_Destroy(o)
-#define   Dup(o)             t1_Dup(o)
-#define   ErrorMsg()         t1_ErrorMsg()
-#define   HeadSegment(p)     t1_HeadSegment(p)
-#define   InitImager()       t1_InitImager()
-#define   Interior(p,rule)   t1_Interior(p,rule)
-#define   ILoc(S,x,y)        t1_ILoc(S,x,y)
-#define   Join(p1,p2)        t1_Join(p1,p2)
-#define   Line(P)            t1_Line(P)
-#define   Permanent(o)       t1_Permanent(o)
-#define   Phantom(o)         t1_Phantom(o)
-#define   Loc(S,x,y)         t1_Loc(S,(double)x,(double)y)
-#define   Scale(o,sx,sy)     t1_Scale(o,(double)sx,(double)sy)
-#define   Snap(o)            t1_Snap(o)
-#define   SubLoc(a,b)        t1_SubLoc(a,b)
-#define   Temporary(o)       t1_Temporary(o)
-#define   TermImager()       t1_TermImager()
-#define   Transform(o,cxx,cyx,cxy,cyy)  t1_Transform(o,(double)cxx,(double)cyx,\
-    (double)cxy,(double)cyy)
- 
-#endif
- 
+  
+
 #define   WINDINGRULE -2
 #define   EVENODDRULE -3
  
 #define   CONTINUITY  0x80   /* can be added to above rules; e.g. WINDINGRULE+CONTINUITY */
  
-/*
-Stroke() line style constants:
-*/
- 
-/*
-Coordinate space constants:
-*/
-#define   IDENTITY      t1_Identity
-extern XYspace *IDENTITY;
  
 /*
 Generic null object definition:
@@ -145,4 +82,3 @@ extern     region       *INFINITY;
 #define    FF_PARSE_ERROR  5
 #define    FF_PATH         1
  
-extern pointer xiStub();

@@ -1,4 +1,4 @@
-/* $XConsortium: t1test.c /main/4 1996/09/28 16:47:53 rws $ */
+/* $Xorg: t1test.c,v 1.3 2000/08/17 19:46:34 cpqbld Exp $ */
 /* Copyright International Business Machines,Corp. 1991
  * All Rights Reserved
  *

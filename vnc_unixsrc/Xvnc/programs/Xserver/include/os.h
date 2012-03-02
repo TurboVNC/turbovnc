@@ -426,12 +426,12 @@ extern OsSigHandlerPtr OsSignal(
 extern int auditTrailLevel;
 
 extern void AuditF(
-    char* /*f*/,
+    const char* /*f*/,
     ...
 );
 
 extern void FatalError(
-    char* /*f*/,
+    const char* /*f*/,
     ...
 )
 #if __GNUC__ == 2 && __GNUC_MINOR__ > 4 
@@ -440,7 +440,7 @@ __attribute((noreturn))
 ;
 
 extern void ErrorF(
-    char* /*f*/,
+    const char* /*f*/,
     ...
 );
 

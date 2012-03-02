@@ -1,4 +1,4 @@
-/* $XConsortium: type1.c,v 1.7 94/02/07 15:30:22 gildea Exp $ */
+/* $Xorg: type1.c,v 1.4 2000/08/17 19:46:34 cpqbld Exp $ */
 /* Copyright International Business Machines, Corp. 1991
  * All Rights Reserved
  * Copyright Lexmark International, Inc. 1991
@@ -28,6 +28,24 @@
  * CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+/* Copyright (c) 1994-1999 Silicon Graphics, Inc. All Rights Reserved.
+ *
+ * The contents of this file are subject to the CID Font Code Public Licence
+ * Version 1.0 (the "License"). You may not use this file except in compliance
+ * with the Licence. You may obtain a copy of the License at Silicon Graphics,
+ * Inc., attn: Legal Services, 2011 N. Shoreline Blvd., Mountain View, CA
+ * 94043 or at http://www.sgi.com/software/opensource/cid/license.html.
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis.
+ * ALL WARRANTIES ARE DISCLAIMED, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED
+ * WARRANTIES OF MERCHANTABILITY, OF FITNESS FOR A PARTICULAR PURPOSE OR OF
+ * NON-INFRINGEMENT. See the License for the specific language governing
+ * rights and limitations under the License.
+ *
+ * The Original Software is CID font code that was developed by Silicon
+ * Graphics, Inc.
+ */
+/* $XFree86: xc/lib/font/Type1/type1.c,v 1.10 2003/05/27 22:26:47 tsi Exp $ */
  
 /*********************************************************************/
 /*                                                                   */
@@ -46,16 +64,24 @@
 /******************/
 /* Include Files: */
 /******************/
+#ifndef FONTMODULE
 #include  <stdio.h>          /* a system-dependent include, usually */
- 
+#include  <math.h>
+#else
+#include  "Xdefs.h"
+#include  "Xmd.h"
+#include  "xf86_ansic.h"
+#endif
 #include  "objects.h"
 #include  "spaces.h"
 #include  "paths.h"
 #include  "fonts.h"        /* understands about TEXTTYPEs */
 #include  "pictures.h"     /* understands about handles */
+#include  "range.h"
  
 typedef struct xobject xobject;
 #include  "util.h"       /* PostScript objects */
+#include  "fontfcn.h"
 #include  "blues.h"          /* Blues structure for font-level hints */
  
 /**********************************/
@@ -66,7 +92,11 @@ typedef struct xobject xobject;
 #define MAXPSFAKESTACK 32  /* Max depth of fake PostScript stack (local) */
 #define MAXSTRLEN 512      /* Max length of a Type 1 string (local) */
 #define MAXLABEL 256       /* Maximum number of new hints */
+#ifdef BUILDCID
+#define MAXSTEMS 500       /* Maximum number of VSTEM and HSTEM hints */
+#else
 #define MAXSTEMS 128       /* Maximum number of VSTEM and HSTEM hints */
+#endif
 #define EPS 0.001          /* Small number for comparisons */
  
 /************************************/
@@ -106,14 +136,12 @@ typedef struct xobject xobject;
 /*****************/
 /* Useful macros */
 /*****************/
-static double tmpx;  /* Store macro argument in tmpx to avoid re-evaluation */
-static long tmpi;    /* Store converted value in tmpi to avoid re-evaluation */
  
-#define FABS(x) (((tmpx = (x)) < 0.0) ? -tmpx : tmpx)
+#define FABS(x) fabs(x)
  
-#define CEIL(x) (((tmpi = (long) (tmpx = (x))) < tmpx) ? ++tmpi : tmpi)
+#define CEIL(x) ceil(x)
  
-#define FLOOR(x) (((tmpi = (long) (tmpx = (x))) > tmpx) ? --tmpi : tmpi)
+#define FLOOR(x) floor(x)
  
 #define ROUND(x) FLOOR((x) + 0.5)
  
@@ -121,11 +149,6 @@ static long tmpi;    /* Store converted value in tmpi to avoid re-evaluation */
  
 #define Error {errflag = TRUE; return;}
 #define ErrorRet(ret) {errflag = TRUE; return (ret);}
- 
-#define Error0(errmsg) {IfTrace0(TRUE, errmsg); Error;}
-#define Error0Ret(errmsg, ret) {IfTrace0(TRUE, errmsg); ErrorRet(ret);}
- 
-#define Error1(errmsg,arg) {IfTrace1(TRUE, errmsg, arg); Error;}
  
 /********************/
 /* global variables */
@@ -138,7 +161,14 @@ struct stem {                     /* representation of a STEM hint */
     struct segment *rthint, *rtrevhint;   /* right or top    hint adjustment */
 };
  
-extern struct XYspace *IDENTITY;
+struct xobject *Type1Char(char *env, struct XYspace *S, 
+			  psobj *charstrP, psobj *subrsP, psobj *osubrsP, 
+			  struct blues_struct *bluesP, int *modeP);
+#ifdef BUILDCID
+struct xobject *CIDChar(char *env, struct XYspace *S, 
+			psobj *charstrP, psobj *subrsP, psobj *osubrsP, 
+			struct blues_struct *bluesP, int *modeP);
+#endif
  
 static double escapementX, escapementY;
 static double sidebearingX, sidebearingY;
@@ -152,30 +182,62 @@ static int errflag;
 /*************************************************/
 static char *Environment;
 static struct XYspace *CharSpace;
-static psobj *CharStringP, *SubrsP, *OtherSubrsP;
-static int *ModeP;
+static psobj *CharStringP, *SubrsP;
  
 /************************/
 /* Forward declarations */
 /************************/
-static double Div();
-static double PSFakePop();
-static DoCommand();
-static Escape();
-static HStem();
-static VStem();
-static RLineTo();
-static RRCurveTo();
-static DoClosePath();
-static CallSubr();
-static Return();
-static EndChar();
-static RMoveTo();
-static DotSection();
-static Seac();
-static Sbw();
-static CallOtherSubr();
-static SetCurrentPoint();
+static struct segment *Applyhint ( struct segment *p, int stemnumber, 
+				   int half );
+static struct segment *Applyrevhint ( struct segment *p, int stemnumber, 
+				      int half );
+static void CallOtherSubr ( int othersubrno );
+static void CallSubr ( int subrno );
+static struct segment *CenterStem ( double edge1, double edge2 );
+static void ClearCallStack ( void );
+static void ClearPSFakeStack ( void );
+static void ClearStack ( void );
+static void ComputeAlignmentZones ( void );
+static void ComputeStem ( int stemno );
+static void Decode ( int Code );
+static unsigned char Decrypt ( unsigned char cipher );
+static double Div ( double num1, double num2 );
+static void DoClosePath ( void );
+static void DoCommand ( int Code );
+static int DoRead ( int *CodeP );
+static void DotSection ( void );
+static void EndChar ( void );
+static void Escape ( int Code );
+static struct segment *FindStems ( double x, double y, double dx, double dy );
+static void FinitStems ( void );
+static void FlxProc ( double c1x2, double c1y2, double c3x0, double c3y0, 
+		      double c3x1, double c3y1, double c3x2, double c3y2, 
+		      double c4x0, double c4y0, double c4x1, double c4y1, 
+		      double c4x2, double c4y2, double epY, double epX, 
+		      int idmin );
+static void FlxProc1 ( void );
+static void FlxProc2 ( void );
+static void HintReplace ( void );
+static void HStem ( double y, double dy );
+static void InitStems ( void );
+static void PopCall ( psobj **CurrStrPP, int *CurrIndexP, 
+		      unsigned short *CurrKeyP );
+static double PSFakePop ( void );
+static void PSFakePush ( double Num );
+static void Push ( double Num );
+static void PushCall ( psobj *CurrStrP, int CurrIndex, 
+		       unsigned short CurrKey );
+static void Return ( void );
+static void RLineTo ( double dx, double dy );
+static void RMoveTo ( double dx, double dy );
+static void RRCurveTo ( double dx1, double dy1, double dx2, double dy2, 
+			double dx3, double dy3 );
+static void Sbw ( double sbx, double sby, double wx, double wy );
+static void Seac ( double asb, double adx, double ady, unsigned char bchar, 
+		   unsigned char achar );
+static void SetCurrentPoint ( double x, double y );
+static void StartDecrypt ( void );
+static void VStem ( double x, double dx );
 
 /*****************************************/
 /* statics for Flex procedures (FlxProc) */
@@ -196,7 +258,8 @@ static int numalignmentzones;	   /* total number of alignment zones */
 /******************************************/
 /* Fill in the alignment zone structures. */
 /******************************************/
-static ComputeAlignmentZones()
+static void
+ComputeAlignmentZones(void)
 {
   int i;
   double dummy, bluezonepixels, familyzonepixels;
@@ -274,14 +337,16 @@ static int oldhorhalf, oldverthalf;  /* Remember which half of the stem */
 static double wsoffsetX, wsoffsetY;  /* White space offset - for VSTEM3,HSTEM3 */
 static int wsset;                    /* Flag for whether we've set wsoffsetX,Y */
  
-static InitStems()  /* Initialize the STEM hint data structures */
+static void
+InitStems(void)  /* Initialize the STEM hint data structures */
 {
   InDotSection = FALSE;
   currstartstem = numstems = 0;
   oldvert = oldhor = -1;
 }
  
-static FinitStems()  /* Terminate the STEM hint data structures */
+static void
+FinitStems(void)  /* Terminate the STEM hint data structures */
 {
   int i;
  
@@ -297,8 +362,8 @@ static FinitStems()  /* Terminate the STEM hint data structures */
 /* Compute the dislocation that a stemhint should cause for points */
 /* inside the stem.                                                */
 /*******************************************************************/
-static ComputeStem(stemno)
-int stemno;
+static void
+ComputeStem(int stemno)
 {
   int verticalondevice, idealwidth;
   double stemstart, stemwidth;
@@ -446,10 +511,10 @@ int stemno;
       if (unitpixels < blues->BlueScale)
         suppressovershoot = TRUE;
       else
-        if (alignmentzones[i].topzone)
+	if (alignmentzones[i].topzone) {
           if (stemtop >= alignmentzones[i].bottomy + blues->BlueShift)
             enforceovershoot = TRUE;
-        else
+        } else 
           if (stembottom <= alignmentzones[i].topy - blues->BlueShift)
             enforceovershoot = TRUE;
  
@@ -488,20 +553,21 @@ int stemno;
            it falls at least one pixel beyond the flat position. */
  
         if (enforceovershoot)
-          if (overshoot < onepixel)
+	  if (overshoot < onepixel) {
             if (alignmentzones[i].topzone)
               stemshift += onepixel - overshoot;
             else
               stemshift -= onepixel - overshoot;
- 
+	  }
         /* SUPPRESS overshoot by aligning the stem to the alignment zone's
            flat position. */
  
-        if (suppressovershoot)
+        if (suppressovershoot) {
           if (alignmentzones[i].topzone)
             stemshift -= overshoot;
           else
             stemshift += overshoot;
+	}
       }
  
       /************************************************************/
@@ -565,9 +631,8 @@ int stemno;
 /* hint value or the right/top hint value depending on where the     */
 /* point lies in the stem.                                           */
 /*********************************************************************/
-static struct segment *Applyhint(p, stemnumber, half)
-struct segment *p;
-int stemnumber, half;
+static struct segment *
+Applyhint(struct segment *p, int stemnumber, int half)
 {
   if (half == LEFT || half == BOTTOM)
     return Join(p, stems[stemnumber].lbhint); /* left  or bottom hint */
@@ -580,9 +645,8 @@ int stemnumber, half;
 /* hint value or the right/top hint value depending on where the     */
 /* point lies in the stem.                                           */
 /*********************************************************************/
-static struct segment *Applyrevhint(p, stemnumber, half)
-struct segment *p;
-int stemnumber, half;
+static struct segment *
+Applyrevhint(struct segment *p, int stemnumber, int half)
 {
   if (half == LEFT || half == BOTTOM)
     return Join(p, stems[stemnumber].lbrevhint); /* left  or bottom hint */
@@ -598,8 +662,8 @@ int stemnumber, half;
 /*   The actual hintvalue is returned as a location.                   */
 /* Hints are ignored inside a DotSection.                              */
 /***********************************************************************/
-static struct segment *FindStems(x, y, dx, dy)
-double x, y, dx, dy;
+static struct segment *
+FindStems(double x, double y, double dx, double dy)
 {
   int i;
   int newvert, newhor;
@@ -692,76 +756,75 @@ static int CallTop;
 static double PSFakeStack[MAXPSFAKESTACK];
 static int PSFakeTop;
  
-static ClearStack()
+static void
+ClearStack(void)
 {
   Top = -1;
 }
  
-static Push(Num)
-        double Num;
+static void
+Push(double Num)
 {
   if (++Top < MAXSTACK) Stack[Top] = Num;
-  else Error0("Push: Stack full\n");
+  else Error;
 }
  
-static ClearCallStack()
+static void
+ClearCallStack(void)
 {
   CallTop = -1;
 }
  
-static PushCall(CurrStrP, CurrIndex, CurrKey)
-  psobj *CurrStrP;
-  int CurrIndex;
-  unsigned short CurrKey;
+static void
+PushCall(psobj *CurrStrP, int CurrIndex, unsigned short CurrKey)
 {
   if (++CallTop < MAXCALLSTACK) {
     CallStack[CallTop].currstrP = CurrStrP;   /* save CharString pointer */
     CallStack[CallTop].currindex = CurrIndex; /* save CharString index */
     CallStack[CallTop].currkey = CurrKey;     /* save decryption key */
   }
-  else Error0("PushCall: Stack full\n");
+  else Error;
 }
  
-static PopCall(CurrStrPP, CurrIndexP, CurrKeyP)
-  psobj **CurrStrPP;
-  int *CurrIndexP;
-  unsigned short *CurrKeyP;
+static void
+PopCall(psobj **CurrStrPP, int *CurrIndexP, unsigned short *CurrKeyP)
 {
   if (CallTop >= 0) {
     *CurrStrPP = CallStack[CallTop].currstrP; /* restore CharString pointer */
     *CurrIndexP = CallStack[CallTop].currindex; /* restore CharString index */
     *CurrKeyP = CallStack[CallTop--].currkey;   /* restore decryption key */
   }
-  else Error0("PopCall: Stack empty\n");
+  else Error;
 }
  
-static ClearPSFakeStack()
+static void
+ClearPSFakeStack(void)
 {
   PSFakeTop = -1;
 }
  
 /* PSFakePush: Pushes a number onto the fake PostScript stack */
-static PSFakePush(Num)
-  double Num;
+static void
+PSFakePush(double Num)
 {
   if (++PSFakeTop < MAXPSFAKESTACK) PSFakeStack[PSFakeTop] = Num;
-  else Error0("PSFakePush: Stack full\n");
+  else Error;
 }
  
 /* PSFakePop: Removes a number from the top of the fake PostScript stack */
-static double PSFakePop ()
+static double
+PSFakePop (void)
 {
   if (PSFakeTop >= 0) return(PSFakeStack[PSFakeTop--]);
-  else Error0Ret("PSFakePop : Stack empty\n", 0.0);
+  else ErrorRet(0.0);
   /*NOTREACHED*/
 }
  
 /***********************************************************************/
 /* Center a stem on the pixel grid -- used by HStem3 and VStem3        */
 /***********************************************************************/
-static struct segment *CenterStem(edge1, edge2)
-    double edge1;
-    double edge2;
+static struct segment *
+CenterStem(double edge1, double edge2)
 {
   int idealwidth, verticalondevice;
   double leftx, lefty, rightx, righty, center, width;
@@ -830,8 +893,8 @@ static struct segment *CenterStem(edge1, edge2)
  
 static unsigned short r; /* Pseudo-random sequence of keys */
  
-static unsigned char Decrypt(cipher)
-unsigned char cipher;
+static unsigned char 
+Decrypt(unsigned char cipher)
 {
   unsigned char plain;
  
@@ -841,8 +904,8 @@ unsigned char cipher;
 }
  
 /* Get the next byte from the codestring being interpreted */
-static int DoRead(CodeP)
-  int *CodeP;
+static int 
+DoRead(int *CodeP)
 {
   if (strindex >= CharStringP->len) return(FALSE); /* end of string */
   *CodeP = Decrypt((unsigned char) CharStringP->data.stringP[strindex++]);
@@ -852,18 +915,19 @@ static int DoRead(CodeP)
 /* Strip blues->lenIV bytes from CharString and update encryption key */
 /* (the lenIV entry in the Private dictionary specifies the number of */
 /* random bytes at the beginning of each CharString; default is 4)    */
-static void StartDecrypt()
+static void 
+StartDecrypt(void)
 {
   int Code;
  
   r = KEY; /* Initial key (seed) for CharStrings decryption */
   for (strindex = 0; strindex < blues->lenIV;)
     if (!DoRead(&Code)) /* Read a byte and update decryption key */
-      Error0("StartDecrypt: Premature end of CharString\n");
+      Error;
 }
  
-static Decode(Code)
-  int Code;
+static void
+Decode(int Code)
 {
   int Code1, Code2, Code3, Code4;
  
@@ -888,47 +952,47 @@ static Decode(Code)
   }
   return;
  
-ended: Error0("Decode: Premature end of Type 1 CharString");
+ended: Error;
 }
  
 /* Interpret a command code */
-static DoCommand(Code)
-  int Code;
+static void
+DoCommand(int Code)
 {
   switch(Code) {
     case HSTEM: /* |- y dy HSTEM |- */
       /* Vertical range of a horizontal stem zone */
-      if (Top < 1) Error0("DoCommand: Stack low\n");
+      if (Top < 1) Error;
       HStem(Stack[0], Stack[1]);
       ClearStack();
       break;
     case VSTEM: /* |- x dx VSTEM |- */
       /* Horizontal range of a vertical stem zone */
-      if (Top < 1) Error0("DoCommand: Stack low\n");
+      if (Top < 1) Error;
       VStem(Stack[0], Stack[1]);
       ClearStack();
       break;
     case VMOVETO: /* |- dy VMOVETO |- */
       /* Vertical MOVETO, equivalent to 0 dy RMOVETO */
-      if (Top < 0) Error0("DoCommand: Stack low\n");
+      if (Top < 0) Error;
       RMoveTo(0.0, Stack[0]);
       ClearStack();
       break;
     case RLINETO: /* |- dx dy RLINETO |- */
       /* Like RLINETO in PostScript */
-      if (Top < 1) Error0("DoCommand: Stack low\n");
+      if (Top < 1) Error;
       RLineTo(Stack[0], Stack[1]);
       ClearStack();
       break;
     case HLINETO: /* |- dx HLINETO |- */
       /* Horizontal LINETO, equivalent to dx 0 RLINETO */
-      if (Top < 0) Error0("DoCommand: Stack low\n");
+      if (Top < 0) Error;
       RLineTo(Stack[0], 0.0);
       ClearStack();
       break;
     case VLINETO: /* |- dy VLINETO |- */
       /* Vertical LINETO, equivalent to 0 dy RLINETO */
-      if (Top < 0) Error0("DoCommand: Stack low\n");
+      if (Top < 0) Error;
       RLineTo(0.0, Stack[0]);
       ClearStack();
       break;
@@ -937,7 +1001,7 @@ static DoCommand(Code)
       /* Relative RCURVETO, equivalent to dx1 dy1 */
       /* (dx1+dx2) (dy1+dy2) (dx1+dx2+dx3) */
       /* (dy1+dy2+dy3) RCURVETO in PostScript */
-      if (Top < 5) Error0("DoCommand: Stack low\n");
+      if (Top < 5) Error;
       RRCurveTo(Stack[0], Stack[1], Stack[2], Stack[3],
         Stack[4], Stack[5]);
       ClearStack();
@@ -951,7 +1015,7 @@ static DoCommand(Code)
     case CALLSUBR: /* subr# CALLSUBR - */
       /* Calls a CharString subroutine with index */
       /* subr# from the Subrs array */
-      if (Top < 0) Error0("DoCommand: Stack low\n");
+      if (Top < 0) Error;
       CallSubr((int)Stack[Top--]);
       break;
     case RETURN: /* - RETURN - */
@@ -960,7 +1024,7 @@ static DoCommand(Code)
       Return();
       break;
     case ESCAPE: /* ESCAPE to two-byte command code */
-      if (!DoRead(&Code)) Error0("DoCommand: ESCAPE is last byte\n");
+      if (!DoRead(&Code)) Error;
       Escape(Code);
       break;
     case HSBW: /* |- sbx wx HSBW |- */
@@ -968,7 +1032,7 @@ static DoCommand(Code)
       /* set the character width vector to (wx,0). */
       /* Equivalent to sbx 0 wx 0 SBW.  Space */
       /* character should have sbx = 0 */
-      if (Top < 1) Error0("DoCommand: Stack low\n");
+      if (Top < 1) Error;
       Sbw(Stack[0], 0.0, Stack[1], 0.0);
       ClearStack();
       break;
@@ -979,20 +1043,20 @@ static DoCommand(Code)
       break;
     case RMOVETO: /* |- dx dy RMOVETO |- */
       /* Behaves like RMOVETO in PostScript */
-      if (Top < 1) Error0("DoCommand: Stack low\n");
+      if (Top < 1) Error;
       RMoveTo(Stack[0], Stack[1]);
       ClearStack();
       break;
     case HMOVETO: /* |- dx HMOVETO |- */
       /* Horizontal MOVETO. Equivalent to dx 0 RMOVETO */
-      if (Top < 0) Error0("DoCommand: Stack low\n");
+      if (Top < 0) Error;
       RMoveTo(Stack[0], 0.0);
       ClearStack();
       break;
     case VHCURVETO: /* |- dy1 dx2 dy2 dx3 VHCURVETO |- */
       /* Vertical-Horizontal CURVETO, equivalent to */
       /* 0 dy1 dx2 dy2 dx3 0 RRCURVETO */
-      if (Top < 3) Error0("DoCommand: Stack low\n");
+      if (Top < 3) Error;
       RRCurveTo(0.0, Stack[0], Stack[1], Stack[2],
               Stack[3], 0.0);
       ClearStack();
@@ -1000,18 +1064,18 @@ static DoCommand(Code)
     case HVCURVETO: /* |- dx1 dx2 dy2 dy3 HVCURVETO |- */
       /* Horizontal-Vertical CURVETO, equivalent to */
       /* dx1 0 dx2 dy2 0 dy3 RRCURVETO */
-      if (Top < 3) Error0("DoCommand: Stack low\n");
+      if (Top < 3) Error;
       RRCurveTo(Stack[0], 0.0, Stack[1], Stack[2], 0.0, Stack[3]);
       ClearStack();
       break;
     default: /* Unassigned command code */
       ClearStack();
-      Error1("DoCommand: Unassigned code %d\n", Code);
+      Error;
   }
 }
  
-static Escape(Code)
-  int Code;
+static void
+Escape(int Code)
 {
   int i, Num;
   struct segment *p;
@@ -1027,7 +1091,7 @@ static Escape(Code)
       /* Declares the horizontal ranges of three */
       /* vertical stem zones between x0 and x0+dx0, */
       /* x1 and x1+dx1, and x2 and x2+dx2. */
-      if (Top < 5) Error0("DoCommand: Stack low\n");
+      if (Top < 5) Error;
       if (!wsset && ProcessHints) {
         /* Shift the whole character so that the middle stem is centered. */
         p = CenterStem(Stack[2] + sidebearingX, Stack[3]);
@@ -1044,7 +1108,7 @@ static Escape(Code)
       /* Declares the vertical ranges of three hori- */
       /* zontal stem zones between y0 and y0+dy0, */
       /* y1 and y1+dy1, and y2 and y2+dy2. */
-      if (Top < 5) Error0("DoCommand: Stack low\n");
+      if (Top < 5) Error;
       HStem(Stack[0], Stack[1]);
       HStem(Stack[2], Stack[3]);
       HStem(Stack[4], Stack[5]);
@@ -1052,7 +1116,7 @@ static Escape(Code)
       break;
     case SEAC: /* |- asb adx ady bchar achar SEAC |- */
       /* Standard Encoding Accented Character. */
-      if (Top < 4) Error0("DoCommand: Stack low\n");
+      if (Top < 4) Error;
       Seac(Stack[0], Stack[1], Stack[2],
         (unsigned char) Stack[3],
         (unsigned char) Stack[4]);
@@ -1061,25 +1125,32 @@ static Escape(Code)
     case SBW: /* |- sbx sby wx wy SBW |- */
       /* Set the left sidebearing point to (sbx,sby), */
       /* set the character width vector to (wx,wy). */
-      if (Top < 3) Error0("DoCommand: Stack low\n");
+      if (Top < 3) Error;
       Sbw(Stack[0], Stack[1], Stack[2], Stack[3]);
       ClearStack();
       break;
     case DIV: /* num1 num2 DIV quotient */
       /* Behaves like DIV in the PostScript language */
-      if (Top < 1) Error0("DoCommand: Stack low\n");
+      if (Top < 1) Error;
       Stack[Top-1] = Div(Stack[Top-1], Stack[Top]);
       Top--;
       break;
     case CALLOTHERSUBR:
       /* arg1 ... argn n othersubr# CALLOTHERSUBR - */
       /* Make calls on the PostScript interpreter */
-      if (Top < 1) Error0("DoCommand: Stack low\n");
+      if (Top < 1) Error;
       Num = Stack[Top-1];
-      if (Top < Num+1) Error0("DoCommand: Stack low\n");
+      if (Top < Num+1) Error;
       for (i = 0; i < Num; i++) PSFakePush(Stack[Top - i - 2]);
       Top -= Num + 2;
+#ifdef BUILDCID
+      if ((int)Stack[Top + Num + 2] > 3)
+        ClearPSFakeStack();
+      else
+        CallOtherSubr((int)Stack[Top + Num + 2]);
+#else
       CallOtherSubr((int)Stack[Top + Num + 2]);
+#endif
       break;
     case POP: /* - POP number */
       /* Removes a number from the top of the */
@@ -1091,13 +1162,13 @@ static Escape(Code)
       /* Sets the current point to (x,y) in absolute */
       /* character space coordinates without per- */
       /* forming a CharString MOVETO command */
-      if (Top < 1) Error0("DoCommand: Stack low\n");
+      if (Top < 1) Error;
       SetCurrentPoint(Stack[0], Stack[1]);
       ClearStack();
       break;
     default: /* Unassigned escape code command */
       ClearStack();
-      Error1("Escape: Unassigned code %d\n", Code);
+      Error;
   }
 }
  
@@ -1105,12 +1176,11 @@ static Escape(Code)
 /* Declares the vertical range of a horizontal stem zone */
 /* between coordinates y and y + dy */
 /* y is relative to the left sidebearing point */
-static HStem(y, dy)
-  double y, dy;
+static void
+HStem(double y, double dy)
 {
-  IfTrace2((FontDebug), "Hstem %f %f\n", &y, &dy);
   if (ProcessHints) {
-    if (numstems >= MAXSTEMS) Error0("HStem: Too many hints\n");
+    if (numstems >= MAXSTEMS) Error;
     if (dy < 0.0) {y += dy; dy = -dy;}
     stems[numstems].vertical = FALSE;
     stems[numstems].x = 0.0;
@@ -1126,12 +1196,12 @@ static HStem(y, dy)
 /* Declares the horizontal range of a vertical stem zone */
 /* between coordinates x and x + dx */
 /* x is relative to the left sidebearing point */
-static VStem(x, dx)
-  double x, dx;
+
+static void
+VStem(double x, double dx)
 {
-  IfTrace2((FontDebug), "Vstem %f %f\n", &x, &dx);
   if (ProcessHints) {
-    if (numstems >= MAXSTEMS) Error0("VStem: Too many hints\n");
+    if (numstems >= MAXSTEMS) Error;
     if (dx < 0.0) {x += dx; dx = -dx;}
     stems[numstems].vertical = TRUE;
     stems[numstems].x = sidebearingX + x + wsoffsetX;
@@ -1145,12 +1215,10 @@ static VStem(x, dx)
  
 /* |- dx dy RLINETO |- */
 /* Behaves like RLINETO in PostScript */
-static RLineTo(dx, dy)
-  double dx, dy;
+static void
+RLineTo(double dx, double dy)
 {
   struct segment *B;
- 
-  IfTrace2((FontDebug), "RLineTo %f %f\n", &dx, &dy);
  
   B = Loc(CharSpace, dx, dy);
  
@@ -1168,13 +1236,11 @@ static RLineTo(dx, dy)
 /* Relative RCURVETO, equivalent to dx1 dy1 */
 /* (dx1+dx2) (dy1+dy2) (dx1+dx2+dx3) */
 /* (dy1+dy2+dy3) RCURVETO in PostScript */
-static RRCurveTo(dx1, dy1, dx2, dy2, dx3, dy3)
-  double dx1, dy1, dx2, dy2, dx3, dy3;
+static void
+RRCurveTo(double dx1, double dy1, double dx2, double dy2, 
+	  double dx3, double dy3)
 {
   struct segment *B, *C, *D;
- 
-  IfTrace4((FontDebug), "RRCurveTo %f %f %f %f ", &dx1, &dy1, &dx2, &dy2);
-  IfTrace2((FontDebug), "%f %f\n", &dx3, &dy3);
  
   B = Loc(CharSpace, dx1, dy1);
   C = Loc(CharSpace, dx2, dy2);
@@ -1192,20 +1258,20 @@ static RRCurveTo(dx1, dy1, dx2, dy2, dx3, dy3)
   /* Since XIMAGER is not completely relative, */
   /* we need to add up the delta values */
  
-  C = Join(C, Dup(B));
-  D = Join(D, Dup(C));
+  C = Join(C, (struct segment *)Dup(B));
+  D = Join(D, (struct segment *)Dup(C));
  
-  path = Join(path, Bezier(B, C, D));
+  path = Join(path, (struct segment *)Bezier(B, C, D));
 }
  
 /* - CLOSEPATH |- */
 /* Closes a subpath WITHOUT repositioning the */
 /* current point */
-static DoClosePath()
+static void
+DoClosePath(void)
 {
   struct segment *CurrentPoint;
  
-  IfTrace0((FontDebug), "DoClosePath\n");
   CurrentPoint = Phantom(path);
   path = ClosePath(path);
   path = Join(Snap(path), CurrentPoint);
@@ -1214,12 +1280,11 @@ static DoClosePath()
 /* subr# CALLSUBR - */
 /* Calls a CharString subroutine with index */
 /* subr# from the Subrs array */
-static CallSubr(subrno)
-  int subrno;
+static void
+CallSubr(int subrno)
 {
-  IfTrace1((FontDebug), "CallSubr %d\n", subrno);
   if ((subrno < 0) || (subrno >= SubrsP->len))
-    Error0("CallSubr: subrno out of range\n");
+    Error;
   PushCall(CharStringP, strindex, r);
   CharStringP = &SubrsP->data.arrayP[subrno];
   StartDecrypt();
@@ -1228,9 +1293,9 @@ static CallSubr(subrno)
 /* - RETURN - */
 /* Returns from a Subrs array CharString */
 /* subroutine called with CALLSUBR */
-static Return()
+static void
+Return(void)
 {
-  IfTrace0((FontDebug), "Return\n");
   PopCall(&CharStringP, &strindex, &r);
 }
  
@@ -1242,10 +1307,9 @@ static Return()
 /* HSBW or SBW.  It then calls a special version of FILL */
 /* or STROKE depending on the value of PaintType in the */
 /* font dictionary */
-static EndChar()
+static void
+EndChar(void)
 {
-  IfTrace0((FontDebug), "EndChar\n");
- 
   /* There is no need to compute and set bounding box for
      the cache, since XIMAGER does that on the fly. */
  
@@ -1259,12 +1323,10 @@ static EndChar()
  
 /* |- dx dy RMOVETO |- */
 /* Behaves like RMOVETO in PostScript */
-static RMoveTo(dx,dy)
-  double dx,dy;
+static void
+RMoveTo(double dx, double dy)
 {
   struct segment *B;
- 
-  IfTrace2((FontDebug), "RMoveTo %f %f\n", &dx, &dy);
  
   B = Loc(CharSpace, dx, dy);
  
@@ -1281,23 +1343,20 @@ static RMoveTo(dx,dy)
 /* - DOTSECTION |- */
 /* Brackets an outline section for the dots in */
 /* letters such as "i", "j", and "!". */
-static DotSection()
+static void
+DotSection(void)
 {
-  IfTrace0((FontDebug), "DotSection\n");
   InDotSection = !InDotSection;
 }
  
 /* |- asb adx ady bchar achar SEAC |- */
 /* Standard Encoding Accented Character. */
-static Seac(asb, adx, ady, bchar, achar)
-  double asb, adx, ady;
-  unsigned char bchar, achar;
+static void
+Seac(double asb, double adx, double ady, 
+     unsigned char bchar, unsigned char achar)
 {
   int Code;
   struct segment *mypath;
- 
-  IfTrace4((FontDebug), "SEAC %f %f %f %d ", &asb, &adx, &ady, bchar);
-  IfTrace1((FontDebug), "%d\n", achar);
  
   /* Move adx - asb, ady over and up from base char's sbpoint. */
   /* (We use adx - asb to counteract the accents sb shift.) */
@@ -1311,7 +1370,7 @@ static Seac(asb, adx, ady, bchar, achar)
   path = NULL;
  
   /* Go find the CharString for the accent's code via an upcall */
-  CharStringP = GetType1CharString(Environment, achar);
+  CharStringP = GetType1CharString((psfont *)Environment, achar);
   StartDecrypt();
  
   ClearStack();
@@ -1331,7 +1390,7 @@ static Seac(asb, adx, ady, bchar, achar)
   accentoffsetX = accentoffsetY = 0;
  
   /* go find the CharString for the base char's code via an upcall */
-  CharStringP = GetType1CharString(Environment, bchar);
+  CharStringP = GetType1CharString((psfont *)Environment, bchar);
   StartDecrypt();
  
   ClearStack();
@@ -1353,11 +1412,9 @@ static Seac(asb, adx, ady, bchar, achar)
 /* |- sbx sby wx wy SBW |- */
 /* Set the left sidebearing point to (sbx,sby), */
 /* set the character width vector to (wx,wy). */
-static Sbw(sbx, sby, wx, wy)
-  double sbx, sby, wx, wy;
+static void
+Sbw(double sbx, double sby, double wx, double wy)
 {
-  IfTrace4((FontDebug), "SBW %f %f %f %f\n", &sbx, &sby, &wx, &wy);
- 
   escapementX = wx; /* Character width vector */
   escapementY = wy;
  
@@ -1371,10 +1428,9 @@ static Sbw(sbx, sby, wx, wy)
  
  /* num1 num2 DIV quotient */
 /* Behaves like DIV in the PostScript language */
-static double Div(num1, num2)
-  double num1, num2;
+static double 
+Div(double num1, double num2)
 {
-  IfTrace2((FontDebug), "Div %f %f\n", &num1, &num2);
   return(num1 / num2);
 }
  
@@ -1458,13 +1514,11 @@ static double Div(num1, num2)
 /*   Calling sequence: 'idmin epX epY 3 0 callothersubr' */
 /*   Computes Flex values, and renders the Flex path,    */
 /*   and returns (leaves) ending coordinates on stack    */
-static void FlxProc(c1x2, c1y2, c3x0, c3y0, c3x1, c3y1, c3x2, c3y2,
-             c4x0, c4y0, c4x1, c4y1, c4x2, c4y2, epY, epX, idmin)
-  double c1x2, c1y2;
-  double c3x0, c3y0, c3x1, c3y1, c3x2, c3y2;
-  double c4x0, c4y0, c4x1, c4y1, c4x2, c4y2;
-  double epX, epY;
-  int idmin;
+static void
+FlxProc(double c1x2, double c1y2, double c3x0, double c3y0, 
+	double c3x1, double c3y1, double c3x2, double c3y2,
+        double c4x0, double c4y0, double c4x1, double c4y1, 
+	double c4x2, double c4y2, double epY, double epX, int idmin)
 {
   double dmin;
   double c1x0, c1y0, c1x1, c1y1;
@@ -1483,6 +1537,8 @@ static void FlxProc(c1x2, c1y2, c3x0, c3y0, c3x1, c3y1, c3x2, c3y2,
   double cx, cy;
   double ex, ey;
  
+  c1x0 = c1y0 = c1x1 = c1y1 = c2x0 = c2y0 = c2x1 = c2y1 = c2x2 = c2y2 = 0.0;
+
   Destroy(path);
   path = FlxOldPath; /* Restore previous path (stored in FlxProc1) */
  
@@ -1537,7 +1593,8 @@ static void FlxProc(c1x2, c1y2, c3x0, c3y0, c3x1, c3y1, c3x2, c3y2,
           if (erode)
             cy -= 0.5;
           ey = cy + dY;
-          ey = CEIL(ey) - ey + FLOOR(ey);
+          ey = CEIL(ey) - ey;
+          ey = ey + FLOOR(cy + dY);
           if (erode)
             ey += 0.5;
  
@@ -1587,7 +1644,8 @@ static void FlxProc(c1x2, c1y2, c3x0, c3y0, c3x1, c3y1, c3x2, c3y2,
           if (erode)
             cx -= 0.5;
           ex = cx + dX;
-          ex = CEIL(ex) - ex + FLOOR(ex);
+          ex = CEIL(ex) - ex;
+          ex = ex + FLOOR(cx + dX);
           if (erode)
             ex += 0.5;
  
@@ -1624,7 +1682,8 @@ static void FlxProc(c1x2, c1y2, c3x0, c3y0, c3x1, c3y1, c3x2, c3y2,
 /* FlxProc1() = OtherSubrs[1]; Part of Flex            */
 /*   Calling sequence: '0 1 callothersubr'             */
 /*   Saves and clears path, then restores currentpoint */
-static void FlxProc1()
+static void 
+FlxProc1(void)
 {
   struct segment *CurrentPoint;
  
@@ -1637,7 +1696,8 @@ static void FlxProc1()
 /* FlxProc2() = OtherSubrs[2]; Part of Flex */
 /*   Calling sequence: '0 2 callothersubr'  */
 /*   Returns currentpoint on stack          */
-static void FlxProc2()
+static void 
+FlxProc2(void)
 {
   struct segment *CurrentPoint;
   double CurrentX, CurrentY;
@@ -1654,7 +1714,8 @@ static void FlxProc2()
 /* HintReplace() = OtherSubrs[3]; Hint Replacement            */
 /*   Calling sequence: 'subr# 1 3 callothersubr pop callsubr' */
 /*   Reinitializes stem hint structure                        */
-static void HintReplace()
+static void 
+HintReplace(void)
 {
   /* Effectively retire the current stems, but keep them around for */
   /* revhint use in case we are in a stem when we replace hints. */
@@ -1666,14 +1727,12 @@ static void HintReplace()
 /* arg1 ... argn n othersubr# CALLOTHERSUBR - */
 /* Make calls on the PostScript interpreter (or call equivalent C code) */
 /* NOTE: The n arguments have been pushed on the fake PostScript stack */
-static CallOtherSubr(othersubrno)
-  int othersubrno;
+static void
+CallOtherSubr(int othersubrno)
 {
-  IfTrace1((FontDebug), "CallOtherSubr %d\n", othersubrno);
- 
   switch(othersubrno) {
     case 0: /* OtherSubrs[0]; Main part of Flex */
-      if (PSFakeTop < 16) Error0("CallOtherSubr: PSFakeStack low");
+      if (PSFakeTop < 16) Error;
       ClearPSFakeStack();
       FlxProc(
         PSFakeStack[0],  PSFakeStack[1],  PSFakeStack[2],  PSFakeStack[3],
@@ -1701,25 +1760,20 @@ static CallOtherSubr(othersubrno)
 /* Sets the current point to (x,y) in absolute */
 /* character space coordinates without per- */
 /* forming a CharString MOVETO command */
-static SetCurrentPoint(x, y)
-  double x, y;
+static void
+SetCurrentPoint(double x, double y)
 {
-  IfTrace2((FontDebug), "SetCurrentPoint %f %f\n", &x, &y);
- 
   currx = x;
   curry = y;
 }
  
 /* The Type1Char routine for use by PostScript. */
 /************************************************/
-struct xobject *Type1Char(env, S, charstrP, subrsP, osubrsP, bluesP, modeP)
-  char *env;
-  struct XYspace *S;
-  psobj *charstrP;
-  psobj *subrsP;
-  psobj *osubrsP;
-  struct blues_struct *bluesP;  /* FontID's ptr to the blues struct */
-  int *modeP;
+struct xobject *
+Type1Char(char *env, struct XYspace *S, psobj *charstrP, psobj *subrsP, 
+	  psobj *osubrsP, 
+	  struct blues_struct *bluesP, /* FontID's ptr to the blues struct */
+	  int *modeP)
 {
   int Code;
  
@@ -1731,8 +1785,6 @@ struct xobject *Type1Char(env, S, charstrP, subrsP, osubrsP, bluesP, modeP)
   CharSpace = S; /* used when creating path elements */
   CharStringP = charstrP;
   SubrsP = subrsP;
-  OtherSubrsP = osubrsP;
-  ModeP = modeP;
  
     blues = bluesP;
  
@@ -1770,7 +1822,64 @@ struct xobject *Type1Char(env, S, charstrP, subrsP, osubrsP, bluesP, modeP)
       path = NULL;   /* Indicate that character could not be built */
     }
   }
- 
+
   return((struct xobject *) path);
 }
- 
+
+#ifdef BUILDCID
+struct xobject *
+CIDChar(char *env, struct XYspace *S, 
+	psobj *charstrP, psobj *subrsP, psobj *osubrsP, 
+	struct blues_struct *bluesP, /* FontID's ptr to the blues struct */
+	int *modeP)
+{
+  int Code;
+
+  path = NULL;
+  errflag = FALSE;
+
+  /* Make parameters available to all CID routines */
+  Environment = env;
+  CharSpace = S; /* used when creating path elements */
+  CharStringP = charstrP;
+  SubrsP = subrsP;
+
+  blues = bluesP;
+
+  /* compute the alignment zones */
+  ComputeAlignmentZones();
+
+  StartDecrypt();
+
+  ClearStack();
+  ClearPSFakeStack();
+  ClearCallStack();
+
+  InitStems();
+
+  currx = curry = 0;
+  escapementX = escapementY = 0;
+  sidebearingX = sidebearingY = 0;
+  accentoffsetX = accentoffsetY = 0;
+  wsoffsetX = wsoffsetY = 0;           /* No shift to preserve whitspace. */
+  wsset = 0;                           /* wsoffsetX,Y haven't been set yet. */
+
+  for (;;) {
+    if (!DoRead(&Code)) break;
+    Decode(Code);
+    if (errflag) break;
+  }
+
+  FinitStems();
+
+  /* Clean up if an error has occurred */
+  if (errflag) {
+    if (path != NULL) {
+      Destroy(path); /* Reclaim storage */
+      path = NULL;   /* Indicate that character could not be built */
+    }
+  }
+
+  return((struct xobject *) path);
+}
+#endif

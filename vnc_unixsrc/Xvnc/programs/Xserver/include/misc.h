@@ -140,18 +140,17 @@ typedef struct _xReq *xReqPtr;
 /* byte swap a short literal */
 #define lswaps(x) ((((x) & 0xff) << 8) | (((x) >> 8) & 0xff))
 
+#undef min
+#undef max
+
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
-#if !defined(AMOEBA) && !defined(__EMX__)
-#ifndef abs
-#define abs(a) ((a) > 0 ? (a) : -(a))
-#endif
-#else /* AMOEBA || __EMX__ */
+#ifndef IN_MODULE
 /* abs() is a function, not a macro; include the file declaring
  * it in case we haven't done that yet.
  */  
 #include <stdlib.h>
-#endif /* AMOEBA */
+#endif /* IN_MODULE */
 #ifndef Fabs
 #define Fabs(a) ((a) > 0.0 ? (a) : -(a))	/* floating absolute value */
 #endif

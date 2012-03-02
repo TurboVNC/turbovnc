@@ -1,4 +1,4 @@
-/* $XConsortium: t1hdigit.h,v 1.2 91/10/10 11:19:31 rws Exp $ */
+/* $Xorg: t1hdigit.h,v 1.3 2000/08/17 19:46:33 cpqbld Exp $ */
 /* Copyright International Business Machines,Corp. 1991
  * All Rights Reserved
  *

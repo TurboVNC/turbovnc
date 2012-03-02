@@ -1,16 +1,14 @@
-/* $XConsortium: bitmaputil.c,v 1.6 94/04/17 20:17:12 gildea Exp $ */
+/* $Xorg: bitmaputil.c,v 1.5 2001/02/09 02:04:02 xorgcvs Exp $ */
 
 /*
 
-Copyright (c) 1990, 1994  X Consortium
+Copyright 1990, 1994, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -18,20 +16,22 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/lib/font/bitmap/bitmaputil.c,v 1.11 2003/02/19 01:22:34 dawes Exp $ */
 
 #include "fntfilst.h"
 #include "bitmap.h"
+#include "bdfint.h"
 
 #ifndef MAXSHORT
 #define MAXSHORT    32767
@@ -53,8 +53,8 @@ MINSHORT, MINSHORT, MINSHORT, MINSHORT, MINSHORT, 0x0000};
 	     maxbounds->field = (ci)->field;
 
 #define COMPUTE_MINMAX(ci) \
-    if ((ci)->ascent != -(ci)->descent || \
-	(ci)->leftSideBearing != (ci)->rightSideBearing || \
+    if ((ci)->ascent || (ci)->descent || \
+	(ci)->leftSideBearing || (ci)->rightSideBearing || \
 	(ci)->characterWidth) \
     { \
 	MINMAX(ascent, (ci)); \
@@ -65,15 +65,13 @@ MINSHORT, MINSHORT, MINSHORT, MINSHORT, MINSHORT, 0x0000};
     }
 
 void
-bitmapComputeFontBounds(pFont)
-    FontPtr     pFont;
+bitmapComputeFontBounds(FontPtr pFont)
 {
     BitmapFontPtr  bitmapFont = (BitmapFontPtr) pFont->fontPrivate;
     int         nchars;
     int         r,
                 c;
-    CharInfoPtr ci,
-               *pci;
+    CharInfoPtr ci;
     int         maxOverlap;
     int         overlap;
     xCharInfo  *minbounds,
@@ -114,11 +112,11 @@ bitmapComputeFontBounds(pFont)
 	maxbounds = &pFont->info.maxbounds;
 	*minbounds = initMinMetrics;
 	*maxbounds = initMaxMetrics;
-	pci = bitmapFont->encoding;
+        i = 0;
 	maxOverlap = MINSHORT;
 	for (r = pFont->info.firstRow; r <= pFont->info.lastRow; r++) {
 	    for (c = pFont->info.firstCol; c <= pFont->info.lastCol; c++) {
-		ci = *pci++;
+		ci = ACCESSENCODING(bitmapFont->encoding, i);
 		if (ci) {
 		    COMPUTE_MINMAX(&ci->metrics);
 		    if (ci->metrics.characterWidth < 0)
@@ -132,6 +130,7 @@ bitmapComputeFontBounds(pFont)
 		    if (maxOverlap < overlap)
 			maxOverlap = overlap;
 		}
+                i++;
 	    }
 	}
     }
@@ -143,15 +142,13 @@ bitmapComputeFontBounds(pFont)
 }
 
 void
-bitmapComputeFontInkBounds(pFont)
-    FontPtr     pFont;
+bitmapComputeFontInkBounds(FontPtr pFont)
 {
     BitmapFontPtr  bitmapFont = (BitmapFontPtr) pFont->fontPrivate;
     int         nchars;
     int         r,
                 c;
-    CharInfoPtr *pci,
-                cit;
+    CharInfoPtr cit;
     xCharInfo  *ci;
     int         offset;
     xCharInfo  *minbounds,
@@ -186,10 +183,10 @@ bitmapComputeFontInkBounds(pFont)
 	    maxbounds = &pFont->info.ink_maxbounds;
 	    *minbounds = initMinMetrics;
 	    *maxbounds = initMaxMetrics;
-	    pci = bitmapFont->encoding;
+            i=0;
 	    for (r = pFont->info.firstRow; r <= pFont->info.lastRow; r++) {
 		for (c = pFont->info.firstCol; c <= pFont->info.lastCol; c++) {
-		    cit = *pci++;
+		    cit = ACCESSENCODING(bitmapFont->encoding, i);
 		    if (cit) {
 			offset = cit - bitmapFont->metrics;
 			ci = &bitmapFont->ink_metrics[offset];
@@ -197,6 +194,7 @@ bitmapComputeFontInkBounds(pFont)
 			minbounds->attributes &= ci->attributes;
 			maxbounds->attributes |= ci->attributes;
 		    }
+                    i++;
 		}
 	    }
 	}
@@ -204,16 +202,18 @@ bitmapComputeFontInkBounds(pFont)
 }
 
 Bool
-bitmapAddInkMetrics(pFont)
-    FontPtr     pFont;
+bitmapAddInkMetrics(FontPtr pFont)
 {
     BitmapFontPtr  bitmapFont;
     int         i;
 
     bitmapFont = (BitmapFontPtr) pFont->fontPrivate;
     bitmapFont->ink_metrics = (xCharInfo *) xalloc(bitmapFont->num_chars * sizeof(xCharInfo));
-    if (!bitmapFont->ink_metrics)
+    if (!bitmapFont->ink_metrics) {
+      fprintf(stderr, "Error: Couldn't allocate ink_metrics (%d*%ld)\n",
+	      bitmapFont->num_chars, (unsigned long)sizeof(xCharInfo));
 	return FALSE;
+    }
     for (i = 0; i < bitmapFont->num_chars; i++)
 	FontCharInkMetrics(pFont, &bitmapFont->metrics[i], &bitmapFont->ink_metrics[i]);
     pFont->info.inkMetrics = TRUE;
@@ -222,8 +222,7 @@ bitmapAddInkMetrics(pFont)
 
 /* ARGSUSED */
 int
-bitmapComputeWeight(pFont)
-    FontPtr     pFont;
+bitmapComputeWeight(FontPtr pFont)
 {
     return 10;
 }

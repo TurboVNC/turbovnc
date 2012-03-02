@@ -1,4 +1,4 @@
-/* $XConsortium: do_trns.c,v 1.4 94/04/17 20:17:43 gildea Exp $ */
+/* $Xorg: do_trns.c,v 1.3 2000/08/17 19:46:25 cpqbld Exp $ */
 
 /*
 
@@ -21,6 +21,7 @@ INCIDENTAL OR CONSEQUENTIAL DAMAGES, ARISING OUT OF OR IN ANY WAY CONNECTED
 WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 
 */
+/* $XFree86: xc/lib/font/Speedo/do_trns.c,v 1.4 2001/08/27 19:49:50 dawes Exp $ */
 
 /**************************** D O _ T R N S . C ******************************
  *                                                                           *
@@ -53,21 +54,16 @@ WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 
 /***** STATIC FUNCTIONS *****/
 
-#if PROTOS_AVAIL
 static void sp_split_curve(PROTO_DECL2 point_t P1,point_t P2,point_t P3,fix15 depth);
 static ufix8 FONTFAR *sp_get_args(PROTO_DECL2 ufix8 FONTFAR *pointer,ufix8  format,point_t STACKFAR *pP);
-#else
-static void   sp_split_curve();            /* Split Bezier curve into vectors */
-static ufix8 FONTFAR *sp_get_args();      /* Read X Y argument pair */
-#endif
 
 
-FUNCTION ufix8 FONTFAR *read_bbox(pointer, pPmin, pPmax, set_flag)
+FUNCTION ufix8 FONTFAR *read_bbox(
 GDECL
-ufix8 FONTFAR *pointer;    /* Pointer to next byte in char data */
-point_t STACKFAR *pPmin;      /* Lower left corner of bounding box */
-point_t STACKFAR *pPmax;      /* Upper right corner of bounding box */
-boolean set_flag; /* flag to indicate whether global oru bbox should be saved */
+ufix8 FONTFAR *pointer,    /* Pointer to next byte in char data */
+point_t STACKFAR *pPmin,      /* Lower left corner of bounding box */
+point_t STACKFAR *pPmax,      /* Upper right corner of bounding box */
+boolean set_flag) /* flag to indicate whether global oru bbox should be saved */
 /*
  * Called by make_simp_char() and make_comp_char() to read the 
  * bounding box data from the font.
@@ -79,7 +75,7 @@ boolean set_flag; /* flag to indicate whether global oru bbox should be saved */
  */
 {
 ufix8    format1;
-ufix8    format;
+ufix8    format = 0;
 fix15    i;
 point_t  P;
 
@@ -155,9 +151,9 @@ printf("BBOX %6.1f(Xint 0), %6.1f(Yint 0), %6.1f(Xint %d), %6.1f(Yint %d)\n",
 return pointer;
 }
 
-FUNCTION void proc_outl_data(pointer)
+FUNCTION void proc_outl_data(
 GDECL
-ufix8 FONTFAR *pointer;      /* Pointer to next byte in char data */
+ufix8 FONTFAR *pointer)      /* Pointer to next byte in char data */
 /*
  * Called by make_simp_char() and make_comp_char() to read the 
  * outline data from the font.
@@ -310,12 +306,12 @@ record_yint((fix15)(sp_globals.y_int - sp_globals.Y_int_org)); /* Record yint da
     }
 }
 
-FUNCTION static void sp_split_curve(P1, P2, P3, depth)
+FUNCTION static void sp_split_curve(
 GDECL
-point_t P1;    /* First control point of Bezier curve */
-point_t P2;    /* Second  control point of Bezier curve */
-point_t P3;    /* End point of Bezier curve */
-fix15   depth; /* Levels of recursive subdivision required */
+point_t P1,    /* First control point of Bezier curve */
+point_t P2,    /* Second  control point of Bezier curve */
+point_t P3,    /* End point of Bezier curve */
+fix15   depth) /* Levels of recursive subdivision required */
 /*
  * Called by proc_outl_data() to subdivide Bezier curves into an
  * appropriate number of vectors, whenever curves are not enabled
@@ -369,11 +365,11 @@ else
     }
 }
 
-FUNCTION static ufix8 FONTFAR *sp_get_args(pointer, format, pP)
+FUNCTION static ufix8 FONTFAR *sp_get_args(
 GDECL
-ufix8 FONTFAR  *pointer;  /* Pointer to next byte in char data */
-ufix8     format;    /* Format specifiaction of argument pair */
-point_t STACKFAR *pP;        /* Resulting transformed point */
+ufix8 FONTFAR  *pointer,  /* Pointer to next byte in char data */
+ufix8     format,    /* Format specifiaction of argument pair */
+point_t STACKFAR *pP)        /* Resulting transformed point */
 /*
  * Called by read_bbox() and proc_outl_data() to read an X Y argument
  * pair from the font.

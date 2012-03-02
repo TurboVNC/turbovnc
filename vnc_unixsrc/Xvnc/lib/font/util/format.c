@@ -1,4 +1,4 @@
-/* $XConsortium: format.c,v 1.5 94/04/17 20:17:34 dpw Exp $ */
+/* $Xorg: format.c,v 1.4 2001/02/09 02:04:04 xorgcvs Exp $ */
 /*
  * Copyright 1990, 1991 Network Computing Devices;
  * Portions Copyright 1987 by Digital Equipment Corporation
@@ -25,15 +25,13 @@
 
 /*
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -41,30 +39,32 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/lib/font/util/format.c,v 1.5 2001/12/14 19:56:57 dawes Exp $ */
 
 #include	"FSproto.h"
 #include	"font.h"
+#include	"fontstruct.h"
+#include	"fontutil.h"
 
 int
-CheckFSFormat(format, fmask, bit_order, byte_order, scan, glyph, image)
-    fsBitmapFormat format;
-    fsBitmapFormatMask fmask;
-    int        *bit_order,
-               *byte_order,
-               *scan,
-               *glyph,
-               *image;
+CheckFSFormat(fsBitmapFormat format, 
+	      fsBitmapFormatMask fmask, 
+	      int *bit_order, 
+	      int *byte_order, 
+	      int *scan, 
+	      int *glyph, 
+	      int *image)
 {
     /* convert format to what the low levels want */
     if (fmask & BitmapFormatMaskBit) {

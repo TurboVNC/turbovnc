@@ -45,6 +45,10 @@ XF86EXTLIBS = $(XF86MISCLIB) $(XF86VMLIB) $(XF86DGALIB)
 XDPMSLIBDIR = Xdpms
 #endif
 
+#if BuildFreetype2Library
+FREETYPE2BUILDDIR = freetype2
+#endif
+
 #if BuildLBX
 LBXUTILDIR = lbxutil
 #endif
@@ -68,7 +72,7 @@ XEXTDIR = Xext
 #endif
 
 LINTSUBDIRS = Xau Xdmcp X11 $(XEXTDIR) $(XKBLIBDIR) $(XKBUILIBDIR) \
-	      $(LBXUTILDIR) $(XF86EXTLIBS)
+	      $(LBXUTILDIR) $(XF86EXTLIBS) $(FREETYPE2BUILDDIR)
 #endif
 
 SUBDIRS = $(BERKDIR) xtrans $(LINTSUBDIRS) $(FONTSUBDIR)

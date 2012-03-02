@@ -1,4 +1,4 @@
-/* $XConsortium: curves.h,v 1.2 91/10/10 11:17:59 rws Exp $ */
+/* $Xorg: curves.h,v 1.3 2000/08/17 19:46:29 cpqbld Exp $ */
 /* Copyright International Business Machines, Corp. 1991
  * All Rights Reserved
  * Copyright Lexmark International, Inc. 1991
@@ -26,6 +26,8 @@
  * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
  * THIS SOFTWARE.
  */
+/* $XFree86: xc/lib/font/Type1/curves.h,v 1.4 2001/01/17 19:43:22 dawes Exp $ */
+
 /*SHARED*/
  
 #define   StepConic(R,xA,yA,xB,yB,xC,yC,r)      t1_StepConic(R,xA,yA,xB,yB,xC,yC,r)
@@ -33,8 +35,10 @@
  
 #define   FlattenConic(xM,yM,xC,yC,r)        t1_StepConic(NULL,(fractpel)0,(fractpel)0,xM,yM,xC,yC,r)
 #define   FlattenBezier(xB,yB,xC,yC,xD,yD)   t1_StepBezier(NULL,(fractpel)0,(fractpel)0,xB,yB,xC,yC,xD,yD)
- 
+
+#if 0 
 struct segment *t1_StepConic();
-struct segment *t1_StepBezier();
- 
+#endif
+extern struct segment *t1_StepBezier ( struct region *R, fractpel xA, fractpel yA, fractpel xB, fractpel yB, fractpel xC, fractpel yC, fractpel xD, fractpel yD );
+
 /*END SHARED*/

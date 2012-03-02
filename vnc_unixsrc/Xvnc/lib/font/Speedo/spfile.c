@@ -1,4 +1,4 @@
-/* $TOG: spfile.c /main/13 1997/06/09 09:38:27 barstow $ */
+/* $Xorg: spfile.c,v 1.4 2001/02/09 02:04:00 xorgcvs Exp $ */
 /*
  * Copyright 1990, 1991 Network Computing Devices;
  * Portions Copyright 1987 by Digital Equipment Corporation
@@ -24,15 +24,13 @@
 
 /*
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -40,22 +38,29 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/lib/font/Speedo/spfile.c,v 1.14 2001/12/14 19:56:41 dawes Exp $ */
 
-#include <stdio.h>
 #include "fntfilst.h"
+#include "fontenc.h"
+#ifndef FONTMODULE
+#include <stdio.h>
+#else
+#include "xf86_ansic.h"
+#endif
 
 #include "spint.h"
+#include "bics-unicode.h"
 
 SpeedoFontPtr sp_fp_cur = (SpeedoFontPtr) 0;
 
@@ -124,8 +129,7 @@ static ufix8 mkey[] =
 
 
 static      fix15
-read_2b(ptr)
-    ufix8      *ptr;
+read_2b(ufix8 *ptr)
 {
     fix15       tmp;
 
@@ -135,8 +139,7 @@ read_2b(ptr)
 }
 
 static      fix31
-read_4b(ptr)
-    ufix8      *ptr;
+read_4b(ufix8 *ptr)
 {
     fix31       tmp;
 
@@ -151,10 +154,7 @@ read_4b(ptr)
  * loads the specified char's data
  */
 buff_t     *
-sp_load_char_data(file_offset, num, cb_offset)
-    fix31       file_offset;
-    fix15       num;
-    fix15       cb_offset;
+sp_load_char_data(fix31 file_offset, fix15 num, fix15 cb_offset)
 {
     SpeedoMasterFontPtr master = sp_fp_cur->master;
 
@@ -174,10 +174,115 @@ sp_load_char_data(file_offset, num, cb_offset)
     return &master->char_data;
 }
 
+struct speedo_encoding {
+    char *name;
+    int *enc;
+    int enc_size;
+};
+
+/* Takes care of caching encodings already referenced */
+static int
+find_encoding(const char *fontname, const char *filename,
+		int **enc, int *enc_size)
+{
+    static struct speedo_encoding *known_encodings=0;
+    static int number_known_encodings=0;
+    static int known_encodings_size=0;
+    
+    char *encoding_name;
+    int iso8859_1;
+    FontMapPtr mapping;
+    int i, j, k, size;
+    struct speedo_encoding *temp;
+    int *new_enc;
+    char *new_name;
+    
+    iso8859_1 = 0;
+    
+    encoding_name = FontEncFromXLFD(fontname, strlen(fontname));
+    if(!encoding_name) {
+        encoding_name="iso8859-1";
+        iso8859_1=1;
+    }
+    /* We don't go through the font library if asked for Latin-1 */
+    iso8859_1 = iso8859_1 || !strcmp(encoding_name, "iso8859-1");
+    
+    for(i=0; i<number_known_encodings; i++) {
+        if(!strcmp(encoding_name, known_encodings[i].name)) {
+            *enc=known_encodings[i].enc;
+            *enc_size=known_encodings[i].enc_size;
+            return Successful;
+        }
+    }
+    
+    /* it hasn't been cached yet, need to compute it */
+    
+    /* ensure we've got enough storage first */
+  
+    if(known_encodings==0) {
+        if((known_encodings=
+            (struct speedo_encoding*)xalloc(2*sizeof(struct speedo_encoding)))
+           ==0)
+            return AllocError;
+        number_known_encodings=0;
+        known_encodings_size=2;
+    }
+  
+    if(number_known_encodings >= known_encodings_size) {
+        if((temp=
+            (struct speedo_encoding*)xrealloc(known_encodings,
+                                              2*sizeof(struct speedo_encoding)*
+                                              known_encodings_size))==0)
+            return AllocError;
+        known_encodings=temp;
+        known_encodings_size*=2;
+    }
+
+    mapping=0;
+    if(!iso8859_1) {
+        mapping = FontEncMapFind(encoding_name, 
+                                 FONT_ENCODING_UNICODE, -1, -1,
+                                 filename);
+    }
+#define SPEEDO_RECODE(c) \
+  (mapping? \
+   unicode_to_bics(FontEncRecode(c, mapping)): \
+   unicode_to_bics(c))
+        
+    if((new_name = (char*)xalloc(strlen(encoding_name)))==0)
+        return AllocError;
+    strcpy(new_name, encoding_name);
+    
+    /* For now, we limit ourselves to 256 glyphs */
+    size=0;
+    for(i=0; i < (mapping?mapping->encoding->size:256) && i < 256; i++)
+        if(SPEEDO_RECODE(i)>=0)
+            size++;
+    new_enc = (int*)xalloc(2*size*sizeof(int));
+    if(!new_enc) {
+        xfree(new_name);
+        return AllocError;
+    }
+    for(i=j=0; i < (mapping?mapping->encoding->size:256) && i < 256; i++)
+        if((k = SPEEDO_RECODE(i))>=0) {
+            new_enc[2*j] = i;
+            new_enc[2*j+1] = k;
+            j++;
+        }
+    known_encodings[number_known_encodings].name = new_name;
+    known_encodings[number_known_encodings].enc = new_enc;
+    known_encodings[number_known_encodings].enc_size = size;
+    number_known_encodings++;
+    
+    *enc = new_enc;
+    *enc_size = size;
+    return Successful;
+#undef SPEEDO_RECODE
+}
+
 int
-sp_open_master(filename, master)
-    char       *filename;
-    SpeedoMasterFontPtr *master;
+sp_open_master(const char *fontname, const char *filename,
+		SpeedoMasterFontPtr *master)
 {
     SpeedoMasterFontPtr spmf;
     ufix8       tmp[16];
@@ -275,8 +380,8 @@ sp_open_master(filename, master)
     spmf->num_chars = read_2b(f_buffer + FH_NCHRL);
 
 
-    spmf->enc = sp_bics_map;
-    spmf->enc_size = sp_bics_map_size;
+    spmf->enc = 0;
+    spmf->enc_size = 0;
 
 #ifdef EXTRAFONTS
     {				/* choose the proper encoding */
@@ -293,7 +398,11 @@ sp_open_master(filename, master)
     }
 #endif
 
-    /* XXX slam back to ISO Latin1 */
+    if(!spmf->enc)
+      if((ret=find_encoding(fontname, filename, &spmf->enc, &spmf->enc_size))
+         !=Successful)
+        goto cleanup;
+
     spmf->first_char_id = spmf->enc[0];
     /* size of extents array */
     spmf->max_id = spmf->enc[(spmf->enc_size - 1) * 2];
@@ -310,8 +419,7 @@ cleanup:
 }
 
 void
-sp_close_master_font(spmf)
-    SpeedoMasterFontPtr spmf;
+sp_close_master_font(SpeedoMasterFontPtr spmf)
 {
     if (!spmf)
 	return;
@@ -326,8 +434,7 @@ sp_close_master_font(spmf)
 }
 
 void
-sp_close_master_file(spmf)
-    SpeedoMasterFontPtr spmf;
+sp_close_master_file(SpeedoMasterFontPtr spmf)
 {
     (void) fclose(spmf->fp);
     spmf->state &= ~MasterFileOpen;
@@ -338,8 +445,7 @@ sp_close_master_file(spmf)
  * reset the encryption key, and make sure the file is opened
  */
 void
-sp_reset_master(spmf)
-    SpeedoMasterFontPtr spmf;
+sp_reset_master(SpeedoMasterFontPtr spmf)
 {
     sp_set_key(spmf->key);
     if (!(spmf->state & MasterFileOpen)) {

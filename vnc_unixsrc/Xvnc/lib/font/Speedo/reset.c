@@ -1,4 +1,4 @@
-/* $XConsortium: reset.c,v 1.2 91/05/11 09:53:59 rws Exp $ */
+/* $Xorg: reset.c,v 1.3 2000/08/17 19:46:26 cpqbld Exp $ */
 
 /*
 
@@ -21,6 +21,7 @@ INCIDENTAL OR CONSEQUENTIAL DAMAGES, ARISING OUT OF OR IN ANY WAY CONNECTED
 WITH THE SPEEDO SOFTWARE OR THE BITSTREAM CHARTER OUTLINE FONT.
 
 */
+/* $XFree86: xc/lib/font/Speedo/reset.c,v 1.3 2001/01/17 19:43:17 dawes Exp $ */
 
 
 
@@ -85,9 +86,9 @@ sp_globals.outline_device_set = FALSE;
 }
 
 #if INCL_KEYS
-FUNCTION void set_key(key)
+FUNCTION void set_key(
 GDECL
-ufix8 key[];         /* Specified decryption key */
+ufix8 key[])         /* Specified decryption key */
 /*
  * Dynamically sets font decryption key.
  */
@@ -102,9 +103,9 @@ sp_globals.key8 = key[8];
 
 
 
-FUNCTION ufix16 get_cust_no(font_buff)
+FUNCTION ufix16 get_cust_no(
 GDECL
-buff_t font_buff;
+buff_t font_buff)
 /*
 	returns customer number from font 
 */
