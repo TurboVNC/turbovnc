@@ -131,6 +131,8 @@ uIntf *v                /* working area: values in order of bit length */
   uInt z;                       /* number of entries in current table */
 
 
+  r.base = 0;
+
   /* Generate counts for each bit length */
   p = c;
 #define C0 *p++ = 0;

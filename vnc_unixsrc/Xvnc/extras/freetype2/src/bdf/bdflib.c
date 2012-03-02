@@ -1442,7 +1442,7 @@
     int                c, mask_index;
     char*              s;
     unsigned char*     bp;
-    unsigned long      i, slen, nibbles;
+    unsigned long      i, slen = 0, nibbles;
 
     _bdf_parse_t*      p;
     bdf_glyph_t*       glyph;
@@ -1962,7 +1962,7 @@
                     void*          call_data,
                     void*          client_data )
   {
-    unsigned long      slen;
+    unsigned long      slen = 0;
     _bdf_line_func_t*  next;
     _bdf_parse_t*      p;
     bdf_font_t*        font;

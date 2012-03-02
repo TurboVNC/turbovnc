@@ -135,6 +135,7 @@ in this Software without prior written authorization from The Open Group.
    *  Repad a bitmap.
    */
 
+#if 0
   static int
   RepadBitmap( char*         pSrc,
                char*         pDst,
@@ -214,6 +215,7 @@ in this Software without prior written authorization from The Open Group.
 
     return dstWidthBytes * height;
   }
+#endif
 
 
 /* END */

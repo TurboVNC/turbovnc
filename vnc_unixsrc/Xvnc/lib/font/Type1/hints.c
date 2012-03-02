@@ -128,7 +128,7 @@ ComputeHint(struct hintsegment *hP,
 {
   fractpel currRef, currWidth;
   int idealWidth;
-  fractpel hintValue;
+  fractpel hintValue = 0;
   char orientation;
  
 /*
@@ -218,7 +218,7 @@ ProcessHint(struct hintsegment *hP,
 	    fractpel currX, fractpel currY, 
 	    struct fractpoint *hintP)
 {
-  struct fractpoint thisHint;
+  struct fractpoint thisHint = {0, 0};
  
   if ((hP->adjusttype == 'm')      /* Move */
     || (hP->adjusttype == 'a'))    /* Adjust */
@@ -362,6 +362,7 @@ SearchXofY(register struct edgelist *edge,   /* represents edge              */
  
        Abort("bad subpath chain");
        /*NOTREACHED*/
+       return 0;
 }
 /*
 :h3.ISBREAK() Macro - Tests if an Edge List is at a "Break"
@@ -444,6 +445,7 @@ Now we have everything to return the answer:
        else
                Abort("ImpliedHorizontalLine:  why ask?");
        /*NOTREACHED*/
+       return 0;
 }
  
 /*

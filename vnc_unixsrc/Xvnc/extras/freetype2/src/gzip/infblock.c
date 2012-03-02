@@ -153,8 +153,8 @@ int r )
           Tracev((stderr, "inflate:     fixed codes block%s\n",
                  s->last ? " (last)" : ""));
           {
-            uInt bl, bd;
-            inflate_huft *tl, *td;
+            uInt bl = 0, bd = 0;
+            inflate_huft *tl = NULL, *td = NULL;
 
             inflate_trees_fixed(&bl, &bd, &tl, &td, z);
             s->sub.decode.codes = inflate_codes_new(bl, bd, tl, td, z);

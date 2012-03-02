@@ -44,6 +44,7 @@ THE SOFTWARE.
   FourByteSwap( unsigned char*  buf,
                 int             nbytes);
 
+#if 0
   static int
   RepadBitmap( char*           pSrc,
                char*           pDst,
@@ -51,6 +52,7 @@ THE SOFTWARE.
                unsigned int    dstPad,
                int             width,
                int             height);
+#endif
 
 #endif /* __PCFUTIL_H__ */
 

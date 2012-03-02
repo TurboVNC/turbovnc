@@ -59,7 +59,9 @@ from the copyright holders.
 #ifndef WIN32
 
 #if defined(TCPCONN) || defined(UNIXCONN)
+#include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #else
 #ifdef ESIX
 #include <lan/in.h>
@@ -838,9 +840,11 @@ char 		*port;
 #endif
     struct servent *servp;
 
+#ifdef X11_t
 #define PORTBUFSIZE	64	/* what is a real size for this? */
 
     char	portbuf[PORTBUFSIZE];
+#endif
     
     PRMSG (2, "SocketINETCreateListener(%s)\n", port, 0, 0);
 
@@ -1248,15 +1252,16 @@ char 		*port;
 #else
     int namelen = sizeof sockname;
 #endif
+#ifdef XTHREADS_NEEDS_BYNAMEPARAMS
     _Xgethostbynameparams hparams;
     _Xgetservbynameparams sparams;
+#endif
     struct hostent	*hostp;
     struct servent	*servp;
 
 #define PORTBUFSIZE	64	/* what is a real size for this? */
     char	portbuf[PORTBUFSIZE];
 
-    int			ret;
     short		tmpport;
     unsigned long 	tmpaddr;
     char 		hostnamebuf[256];		/* tmp space */
@@ -1483,7 +1488,9 @@ char *host;
 	 */
 	char specified_local_addr_list[10][4];
 	int scount, equiv, i, j;
+#ifdef XTHREADS_NEEDS_BYNAMEPARAMS
 	_Xgethostbynameparams hparams;
+#endif
 	struct hostent *hostp;
 
 	if ((hostp = _XGethostbyname (host,hparams)) == NULL)

@@ -54,6 +54,7 @@ system it is a pretty safe bet that these are external entry points and
 you do do not need to include these header files.
 */
  
+#include  <stdio.h>
 #ifndef FONTMODULE
 #include  <string.h>
 #include  <ctype.h>

@@ -1047,7 +1047,7 @@ T1FillFontInfo(FontPtr pFont, FontScalablePtr Vals,
 {
     FontInfoPtr         pInfo = &pFont->info;
     struct type1font *p = (struct type1font *)pFont->fontPrivate;
-    long sAscent, sDescent;	/* Scalable 1000-pixel values */
+    long sAscent = 0, sDescent = 0;	/* Scalable 1000-pixel values */
  
     FillHeader(pInfo, Vals);
  

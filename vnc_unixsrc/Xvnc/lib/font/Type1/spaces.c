@@ -39,6 +39,7 @@ This module is responsible for handling the TYPE1IMAGER "XYspace" object.
 :h3.Include Files
 */
 
+#include <stdio.h>
 #ifdef FONTMODULE
 #include "Xdefs.h"	/* Bool declaration ??? */
 #include "Xmd.h"	/* INT32 declaration ??? */

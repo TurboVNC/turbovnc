@@ -38,6 +38,7 @@ routines (malloc/free).
  
 */
 
+#include <stdio.h>
 #ifdef FONTMODULE
 #include "Xdefs.h"	/* Bool declaration */
 #include "Xmd.h"	/* INT32 declaration */
@@ -258,13 +259,13 @@ If we have too many uncombined blocks, call combine() to combine one.
         if (++uncombined > MAXUNCOMBINED) {
                 combine();
                 if (mallocdebug) {
-                        printf("xiFree(%p) with combine, ", addr);
+                        printf("xiFree(%p) with combine, ", (void *)addr);
                         dumpchain();
                 }
         }
         else {
                 if (mallocdebug) {
-                        printf("xiFree(%p), ", addr);
+                        printf("xiFree(%p), ", (void *)addr);
                         dumpchain();
                 }
         }
@@ -470,7 +471,7 @@ only to be "unhook"ed:
                         unhook(p);
                         uncombined--;
                         if (mallocdebug) {
-                               printf("fast xiMalloc(%ld) = %p, ", size, p);
+                               printf("fast xiMalloc(%ld) = %p, ", size, (void *)p);
                                dumpchain();
                         }
                         AvailableWords += size;  /* decreases AvailableWords */
@@ -527,7 +528,7 @@ flag that this block is allocated:
         area[size - 1] = area[0] = - size;
  
         if (mallocdebug) {
-                printf("slow xiMalloc(%ld) @ %p, ", size, area);
+                printf("slow xiMalloc(%ld) @ %p, ", size, (void *)area);
                 dumpchain();
         }
         whocalledme(area, &Size);
@@ -646,7 +647,7 @@ dumpchain(void)
                 if (--i < 0)
                         Abort("too many uncombined areas");
                 size = p->size;
-                printf(". . . area @ %p, size = %ld\n", p, -size);
+                printf(". . . area @ %p, size = %ld\n", (void *)p, -size);
                 if (size >= 0 || size != ((int *) p)[-1 - size])
                         Abort("dumpchain: bad size");
                 if (p->back != back)
@@ -656,7 +657,7 @@ dumpchain(void)
         printf("DUMPING COMBINED FREE LIST:\n");
         for (; p != &lastfree; p = p->fore)  {
                 size = p->size;
-                printf(". . . area @ %p, size = %ld\n", p, size);
+                printf(". . . area @ %p, size = %ld\n", (void *)p, size);
                 if (size <= 0 || size != ((int *) p)[size - 1])
                         Abort("dumpchain: bad size");
                 if (p->back != back)

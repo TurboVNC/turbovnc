@@ -2772,7 +2772,7 @@ _fs_send_conn_client_prefix (FSFpePtr conn)
 static int
 _fs_recv_conn_setup (FSFpePtr conn)
 {
-    int			ret;
+    int			ret = 0;
     fsConnSetup		*setup;
     FSFpeAltPtr		alts;
     int			i, alt_len;

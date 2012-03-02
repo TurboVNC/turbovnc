@@ -509,6 +509,12 @@ TRANS(GetPeerNetworkId)(
 
 #endif /* ICE_t */
 
+int 
+TRANS(GetHostname) (
+    char *	/* buf */,
+    int 	/* maxlen */
+);
+
 #if defined(WIN32) && (defined(TCPCONN) || defined(DNETCONN))
 int TRANS(WSAStartup)();
 #endif
