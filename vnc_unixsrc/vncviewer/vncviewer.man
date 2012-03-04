@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TurboVNC distribution.
 .\"
-.TH vncviewer 1 "January 2011" "" "TurboVNC"
+.TH vncviewer 1 "March 2012" "" "TurboVNC"
 .SH NAME
 vncviewer \- an X11 viewer/client for TurboVNC
 .SH SYNOPSIS
@@ -178,12 +178,6 @@ responsiveness.  Disabling cursor shape updates causes the server to
 instead draw the mouse cursor and send it to the client as an image.
 Disabling cursor shape updates can cause mouse movements to be painfully
 slow, so do it only if something isn't working right.
-.TP
-\fB\-x11cursor\fR
-Use a real X11 cursor with X-style cursor shape updates instead of
-drawing the remote cursor on the framebuffer.  This option also
-disables the dot cursor and disables cursor position updates unless
-the viewer is running in full\-screen mode.
 .TP
 \fB\-autopass\fR
 Read a plain-text password from stdin.  Irrelevant if Unix login

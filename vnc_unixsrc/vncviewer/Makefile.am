@@ -41,5 +41,6 @@ endif
 
 vncviewer_CFLAGS = -I${top_srcdir}/include @X_CFLAGS@ $(JPEGCFLAGS)
 
-vncviewer_LDADD = @X_PRE_LIBS@ @X_LIBS@ -lXaw -lXmu -lXt -lX11 @X_EXTRA_LIBS@ \
-	$(top_builddir)/libvncauth/libvncauth.a -lz -lpthread $(JPEGLDFLAGS)
+vncviewer_LDADD = @X_PRE_LIBS@ @X_LIBS@ -lXaw -lXmu -lXt -lX11 -lXcursor \
+        @X_EXTRA_LIBS@ $(top_builddir)/libvncauth/libvncauth.a -lz -lpthread \
+        $(JPEGLDFLAGS)

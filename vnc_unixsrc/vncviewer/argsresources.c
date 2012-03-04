@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2009-2011 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2012 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
                        All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -345,9 +345,6 @@ static XtResource appDataResourceList[] = {
   {"useRemoteCursor", "UseRemoteCursor", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, useRemoteCursor), XtRImmediate, (XtPointer) True},
 
-  {"useX11Cursor", "UseX11Cursor", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, useX11Cursor), XtRImmediate, (XtPointer) False},
-
   {"grabKeyboard", "GrabKeyboard", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, grabKeyboard), XtRImmediate, (XtPointer) True},
 
@@ -388,7 +385,6 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-quality",       "*qualityLevel",       XrmoptionSepArg, 0},
   {"-nojpeg",        "*enableJPEG",         XrmoptionNoArg,  "False"},
   {"-nocursorshape", "*useRemoteCursor",    XrmoptionNoArg,  "False"},
-  {"-x11cursor",     "*useX11Cursor",       XrmoptionNoArg,  "True"},
   {"-singlebuffer",  "*doubleBuffer",       XrmoptionNoArg,  "False"},
   {"-lowqual",       "*qualityLevel",       XrmoptionNoArg,  "-1"},
   {"-medqual",       "*qualityLevel",       XrmoptionNoArg,  "-2"},
@@ -484,7 +480,6 @@ usage(void)
 	  "        -quality <JPEG IMAGE QUALITY> (1..100: 1-low, 100-high)\n"
 	  "        -nojpeg\n"
 	  "        -nocursorshape\n"
-	  "        -x11cursor\n"
 	  "        -autopass\n"
 	  "        -singlebuffer\n"
 	  "        -lowqual (preset for -samp 4x -quality 30)\n"
@@ -746,9 +741,6 @@ GetArgsAndResources(int argc, char **argv)
     }
     return;
   }
-
-  if (appData.doubleBuffer)
-    appData.useX11Cursor = True;
 
   if (strlen(vncServerHost) == 0 && vncServerPort < 1) {
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010, 2012 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -170,9 +170,6 @@ extern void SetVisualAndCmap();
 
 extern Bool HandleCursorShape(int xhot, int yhot, int width, int height,
                               CARD32 enc);
-extern void SoftCursorLockArea(int x, int y, int w, int h);
-extern void SoftCursorUnlockScreen(void);
-extern void SoftCursorMove(int x, int y);
 
 /* desktop.c */
 

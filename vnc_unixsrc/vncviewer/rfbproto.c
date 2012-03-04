@@ -1087,9 +1087,9 @@ SetFormatAndEncodings()
 
     if (appData.useRemoteCursor) {
       if (se->nEncodings < MAX_ENCODINGS)
-	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingXCursor);
-      if (se->nEncodings < MAX_ENCODINGS)
 	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRichCursor);
+      if (se->nEncodings < MAX_ENCODINGS)
+	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingXCursor);
       if (se->nEncodings < MAX_ENCODINGS)
 	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingPointerPos);
     }
@@ -1140,8 +1140,8 @@ SetFormatAndEncodings()
     }
 
     if (appData.useRemoteCursor) {
-      encs[se->nEncodings++] = Swap32IfLE(rfbEncodingXCursor);
       encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRichCursor);
+      encs[se->nEncodings++] = Swap32IfLE(rfbEncodingXCursor);
       encs[se->nEncodings++] = Swap32IfLE(rfbEncodingPointerPos);
     }
 
@@ -1206,9 +1206,6 @@ SendPointerEvent(int x, int y, int buttonMask)
   pe.buttonMask = buttonMask;
   if (x < 0) x = 0;
   if (y < 0) y = 0;
-
-  if (!appData.useX11Cursor)
-    SoftCursorMove(x, y);
 
   pe.x = Swap16IfLE(x);
   pe.y = Swap16IfLE(y);
@@ -1458,7 +1455,6 @@ HandleRFBServerMessage()
 	  if (r1->encoding == rfbEncodingTight
 	     || r1->encoding == rfbEncodingRaw
 	     || r1->encoding == rfbEncodingHextile) {
-	     SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h); 
 	     if (node->isFill) {
 	       XChangeGC(dpy, gc, GCForeground, &node->gcv);
 	       XFillRectangle(dpy, desktopWin, gc,
@@ -1471,7 +1467,6 @@ HandleRFBServerMessage()
 	   list = list->next;
 	   free(node);
 	}
-	SoftCursorUnlockScreen(); 
 	if (rfbProfile) tBlitTime += gettime() - tBlitStart;
 	break;
       }
@@ -1512,10 +1507,6 @@ HandleRFBServerMessage()
 	fprintf(stderr,"Zero size rect - ignoring\n");
 	continue;
       }
-
-      /* If RichCursor encoding is used, we should prevent collisions
-	 between framebuffer updates and cursor drawing operations. */
-      SoftCursorLockArea(rect.r.x, rect.r.y, rect.r.w, rect.r.h);
 
       if (rfbProfile) tDecodeStart = gettime();
 
@@ -1561,7 +1552,6 @@ HandleRFBServerMessage()
 	   rectangle) to the source rectangle as well. */
         
 	if (rfbProfile) tBlitStart = gettime();
-	SoftCursorLockArea(cr.srcX, cr.srcY, rect.r.w, rect.r.h);
 
 	if (appData.copyRectDelay != 0) {
 	  XFillRectangle(dpy, desktopWin, srcGC, cr.srcX, cr.srcY,
@@ -1631,9 +1621,6 @@ HandleRFBServerMessage()
       }
 
       if (rfbProfile) tDecodeTime += gettime() - tDecodeStart;
-
-      /* Now we may discard "soft cursor locks". */
-      SoftCursorUnlockScreen();
     }
 
     for (i = 1; i < nt; i++) {
@@ -1654,7 +1641,6 @@ HandleRFBServerMessage()
 	  if (r1->encoding == rfbEncodingTight
 	    || r1->encoding == rfbEncodingRaw
 	    || r1->encoding == rfbEncodingHextile) {
-	    SoftCursorLockArea(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
 	    if (node->isFill) {
 		XChangeGC(dpy, gc, GCForeground, &node->gcv);
 		XFillRectangle(dpy, desktopWin, gc,
@@ -1667,7 +1653,6 @@ HandleRFBServerMessage()
 	   list = list->next;
 	   free(node);
         }
-	SoftCursorUnlockScreen();
 	if (rfbProfile) tBlitTime += gettime() - tBlitStart;
     }
 
