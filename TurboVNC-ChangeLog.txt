@@ -24,8 +24,14 @@ beneficial.
 -------------------------------------------------------------------------------
 [4]
 The Unix TurboVNC Server now implements the X RENDER extension, which enables
-font anti-aliasing.  Additionally, the server now embeds the FreeType library
-for improved font display and compatibility.
+font anti-aliasing and animated cursors and fixes various issues with KDE 4.
+Additionally, the server now embeds the FreeType library for improved font
+display and compatibility.
+-------------------------------------------------------------------------------
+[5]
+The Unix TurboVNC Server now implements rich (full-color) cursor encoding, so
+viewers that support the RFB rich cursor pseudo-encoding can display full-color
+animated cursors.
 -------------------------------------------------------------------------------
 
 
@@ -93,6 +99,12 @@ TurboVNC should now build and run properly on FreeBSD.
 [14]
 Added ZRLE encoding, which may improve performance with the RealVNC Viewer
 under certain circumstances.
+-------------------------------------------------------------------------------
+[15]
+Replaced the broken "software cursor" implementation of rich (full-color)
+cursor rendering in the Unix TurboVNC Viewer with a proper implementation that
+uses the Xcursor library.  This specifically fixes pointer issues that occurred
+when connecting to the Unix TigerVNC 1.2 Server.
 -------------------------------------------------------------------------------
 
 
