@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2001,2002 Constantin Kaplinsky.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
@@ -22,34 +23,11 @@
  * RichCursor preudo-encodings).
  */
 
+#include <assert.h>
 #include <vncviewer.h>
+#include <X11/Xcursor/Xcursor.h>
 
-
-#define OPER_SAVE     0
-#define OPER_RESTORE  1
-
-#define RGB24_TO_PIXEL(bpp,r,g,b)                                       \
-   ((((CARD##bpp)(r) & 0xFF) * myFormat.redMax + 127) / 255             \
-    << myFormat.redShift |                                              \
-    (((CARD##bpp)(g) & 0xFF) * myFormat.greenMax + 127) / 255           \
-    << myFormat.greenShift |                                            \
-    (((CARD##bpp)(b) & 0xFF) * myFormat.blueMax + 127) / 255            \
-    << myFormat.blueShift)
-
-
-static Bool prevSoftCursorSet = False;
-static Pixmap rcSavedArea;
-static CARD8 *rcSource, *rcMask;
-static int rcHotX, rcHotY, rcWidth, rcHeight;
-static int rcCursorX = 0, rcCursorY = 0;
-static int rcLockX, rcLockY, rcLockWidth, rcLockHeight;
-static Bool rcCursorHidden, rcLockSet;
-
-static Bool SoftCursorInLockedArea(void);
-static void SoftCursorCopyArea(int oper);
-static void SoftCursorDraw(void);
-static void FreeSoftCursor(void);
-static void FreeX11Cursor();
+static void FreeX11Cursor(void);
 
 /* Copied from Xvnc/lib/font/util/utilbitmap.c */
 static unsigned char _reverse_byte[0x100] = {
@@ -92,7 +70,7 @@ static Bool prevXCursorSet = False;
 static Cursor prevXCursor;
 
 
-Bool HandleXCursor(int xhot, int yhot, int width, int height)
+static Bool HandleXCursor(int xhot, int yhot, int width, int height)
 {
   rfbXCursorColors colors;
   size_t bytesPerRow, bytesData;
@@ -112,7 +90,7 @@ Bool HandleXCursor(int xhot, int yhot, int width, int height)
     if (!ReadFromRFBServer((char *)&colors, sz_rfbXCursorColors))
       return False;
 
-    buf = malloc(bytesData * 2);
+    buf = (char *)malloc(bytesData * 2);
     if (buf == NULL)
       return False;
 
@@ -158,157 +136,138 @@ Bool HandleXCursor(int xhot, int yhot, int width, int height)
 }
 
 
-
-/*********************************************************************
- * HandleCursorShape(). Support for XCursor and RichCursor shape
- * updates. We emulate cursor operating on the frame buffer (that is
- * why we call it "software cursor").
- ********************************************************************/
-
-Bool HandleCursorShape(int xhot, int yhot, int width, int height, CARD32 enc)
+static Bool HandleRichCursor(int xhot, int yhot, int width, int height)
 {
   int bytesPerPixel;
   size_t bytesPerRow, bytesMaskData;
-  Drawable dr;
-  rfbXCursorColors rgb;
-  CARD32 colors[2];
-  char *buf;
-  CARD8 *ptr;
+  XcursorImage *source;
+  Cursor cursor;
+  CARD8 *rcSource = NULL, *rcMask = NULL, *m, *src;
+  XcursorPixel *dst, red, green, blue;
   int x, y, b;
+  char *buf = NULL;
+  Bool status = False;
+
+  if (xhot < 0 || xhot >= width)
+    return False;
+  if (yhot < 0 || yhot >= height)
+    return False;
 
   bytesPerPixel = myFormat.bitsPerPixel / 8;
   bytesPerRow = (width + 7) / 8;
   bytesMaskData = bytesPerRow * height;
-  dr = DefaultRootWindow(dpy);
-
-  FreeSoftCursor();
-
-  if (width * height == 0)
-    return True;
 
   /* Allocate memory for pixel data and temporary mask data. */
-
-  rcSource = malloc(width * height * bytesPerPixel);
+  rcSource = (CARD8*)malloc(width * height * bytesPerPixel);
   if (rcSource == NULL)
-    return False;
+    goto bailout;
 
-  buf = malloc(bytesMaskData);
-  if (buf == NULL) {
-    free(rcSource);
-    return False;
-  }
-
-  /* Read and decode cursor pixel data, depending on the encoding type. */
-
-  if (enc == rfbEncodingXCursor) {
-    if (appData.useX11Cursor) {
-      HandleXCursor(xhot, yhot, width, height);
-      return True;
-    }
-
-    /* Read and convert background and foreground colors. */
-    if (!ReadFromRFBServer((char *)&rgb, sz_rfbXCursorColors)) {
-      free(rcSource);
-      free(buf);
-      return False;
-    }
-    colors[0] = RGB24_TO_PIXEL(32, rgb.backRed, rgb.backGreen, rgb.backBlue);
-    colors[1] = RGB24_TO_PIXEL(32, rgb.foreRed, rgb.foreGreen, rgb.foreBlue);
-
-    /* Read 1bpp pixel data into a temporary buffer. */
-    if (!ReadFromRFBServer(buf, bytesMaskData)) {
-      free(rcSource);
-      free(buf);
-      return False;
-    }
-
-    /* Convert 1bpp data to byte-wide color indices. */
-    ptr = rcSource;
-    for (y = 0; y < height; y++) {
-      for (x = 0; x < width / 8; x++) {
-	for (b = 7; b >= 0; b--) {
-	  *ptr = buf[y * bytesPerRow + x] >> b & 1;
-	  ptr += bytesPerPixel;
-	}
-      }
-      for (b = 7; b > 7 - width % 8; b--) {
-	*ptr = buf[y * bytesPerRow + x] >> b & 1;
-	ptr += bytesPerPixel;
-      }
-    }
-
-    /* Convert indices into the actual pixel values. */
-    switch (bytesPerPixel) {
-    case 1:
-      for (x = 0; x < width * height; x++)
-	rcSource[x] = (CARD8)colors[rcSource[x]];
-      break;
-    case 2:
-      for (x = 0; x < width * height; x++)
-	((CARD16 *)rcSource)[x] = (CARD16)colors[rcSource[x * 2]];
-      break;
-    case 4:
-      for (x = 0; x < width * height; x++)
-	((CARD32 *)rcSource)[x] = colors[rcSource[x * 4]];
-      break;
-    }
-
-  } else {			/* enc == rfbEncodingRichCursor */
-
-    if (!ReadFromRFBServer((char *)rcSource, width * height * bytesPerPixel)) {
-      free(rcSource);
-      free(buf);
-      return False;
-    }
-
-  }
+  if (!ReadFromRFBServer((char *)rcSource, width * height * bytesPerPixel))
+    goto bailout;
 
   /* Read and decode mask data. */
+  buf = (char*)malloc(bytesMaskData);
+  if (buf == NULL)
+    goto bailout;
 
-  if (!ReadFromRFBServer(buf, bytesMaskData)) {
-    free(rcSource);
-    free(buf);
-    return False;
-  }
+  if (!ReadFromRFBServer(buf, bytesMaskData))
+    goto bailout;
 
-  rcMask = malloc(width * height);
-  if (rcMask == NULL) {
-    free(rcSource);
-    free(buf);
-    return False;
-  }
+  rcMask = (CARD8*)malloc(width * height);
+  if (rcMask == NULL)
+    goto bailout;
 
-  ptr = rcMask;
+  m = rcMask;
   for (y = 0; y < height; y++) {
     for (x = 0; x < width / 8; x++) {
       for (b = 7; b >= 0; b--) {
-	*ptr++ = buf[y * bytesPerRow + x] >> b & 1;
+	*m++ = buf[y * bytesPerRow + x] >> b & 1;
       }
     }
     for (b = 7; b > 7 - width % 8; b--) {
-      *ptr++ = buf[y * bytesPerRow + x] >> b & 1;
+      *m++ = buf[y * bytesPerRow + x] >> b & 1;
     }
   }
 
-  free(buf);
+  free(buf);  buf = NULL;
 
-  /* Set remaining data associated with cursor. */
+  source = XcursorImageCreate(width, height);
+  if (!source)
+    goto bailout;
+  source->xhot = xhot;
+  source->yhot = yhot;
 
-  dr = DefaultRootWindow(dpy);
-  rcSavedArea = XCreatePixmap(dpy, dr, width, height, visdepth);
-  rcHotX = xhot;
-  rcHotY = yhot;
-  rcWidth = width;
-  rcHeight = height;
+  dst = source->pixels;
 
-  SoftCursorCopyArea(OPER_SAVE);
-  SoftCursorDraw();
+  #define RICH_DECODE_ARGB(bpp) {                                        \
+    CARD##bpp *src = (CARD##bpp *)rcSource;                              \
+    int rShift = 16 + 9 - ffs(myFormat.redMax + 1);                      \
+    int gShift = 8 + 9 - ffs(myFormat.greenMax + 1);                     \
+    int bShift = 9 - ffs(myFormat.blueMax + 1);                          \
+                                                                         \
+    for (y = 0; y < height; y++) {                                       \
+      for (x = 0; x < width; x++) {                                      \
+	/* Server tries to be nice and send us our native format, but */ \
+	/* Xcursor needs ARGB */                                         \
+	red = ((*src >> myFormat.redShift) & myFormat.redMax);           \
+	green = ((*src >> myFormat.greenShift) & myFormat.greenMax);     \
+	blue = ((*src >> myFormat.blueShift) & myFormat.blueMax);        \
+	*dst = (*m ? 0xff : 0) << 24;                                    \
+	*dst |= (red << rShift) | (green << gShift) | (blue << bShift);  \
+	src++;  dst++;  m++;                                             \
+      }                                                                  \
+    }                                                                    \
+  }
 
-  rcCursorHidden = False;
-  rcLockSet = False;
+  src = rcSource;  m = rcMask;
+  switch (bytesPerPixel) {
+  case 1:
+    RICH_DECODE_ARGB(8)
+    break;
+  case 2:
+    RICH_DECODE_ARGB(16)
+    break;
+  case 4:
+    RICH_DECODE_ARGB(32)
+    break;
+  default:
+    return False;
+  }
 
-  prevSoftCursorSet = True;
+  cursor = XcursorImageLoadCursor(dpy, source);
+  XDefineCursor(dpy, desktopWin, cursor);
+  XFreeCursor(dpy, cursor);
+  XcursorImageDestroy(source);
+
+  bailout:
+  if (rcMask) free(rcMask);
+  if (buf) free(buf);
+  if (rcSource) free(rcSource);
   return True;
+}
+
+
+/*********************************************************************
+ * HandleCursorShape(). Support for XCursor and RichCursor shape
+ * updates.
+ ********************************************************************/
+
+Bool HandleCursorShape(int xhot, int yhot, int width, int height, CARD32 enc)
+{
+  if (width * height == 0)
+    return True;
+
+  /* Read and decode cursor pixel data, depending on the encoding type. */
+  if (enc == rfbEncodingXCursor) {
+    HandleXCursor(xhot, yhot, width, height);
+    return True;
+  }
+  else if (enc == rfbEncodingRichCursor) {
+    HandleRichCursor(xhot, yhot, width, height);
+    return True;
+  }
+
+  return False;
 }
 
 /*********************************************************************
@@ -319,192 +278,14 @@ Bool HandleCursorShape(int xhot, int yhot, int width, int height, CARD32 enc)
 
 Bool HandleCursorPos(int x, int y)
 {
-  if (appData.useX11Cursor) {
-    if (appData.fullScreen)
-      XWarpPointer(dpy, None, desktopWin, 0, 0, 0, 0, x, y);
+  if (appData.fullScreen)
+    XWarpPointer(dpy, None, desktopWin, 0, 0, 0, 0, x, y);
     
-    return True; 
-  }
-
-  if (x >= si.framebufferWidth)
-    x = si.framebufferWidth - 1;
-  if (y >= si.framebufferHeight)
-    y = si.framebufferHeight - 1;
-
-  SoftCursorMove(x, y);
-  return True;
-}
-
-/*********************************************************************
- * SoftCursorLockArea(). This function should be used to prevent
- * collisions between simultaneous framebuffer update operations and
- * cursor drawing operations caused by movements of pointing device.
- * The parameters denote a rectangle where mouse cursor should not be
- * drawn. Every next call to this function expands locked area so
- * previous locks remain active.
- ********************************************************************/
-
-void SoftCursorLockArea(int x, int y, int w, int h)
-{
-  int newX, newY;
-
-  if (!prevSoftCursorSet)
-    return;
-
-  if (!rcLockSet) {
-    rcLockX = x;
-    rcLockY = y;
-    rcLockWidth = w;
-    rcLockHeight = h;
-    rcLockSet = True;
-  } else {
-    newX = (x < rcLockX) ? x : rcLockX;
-    newY = (y < rcLockY) ? y : rcLockY;
-    rcLockWidth = (x + w > rcLockX + rcLockWidth) ?
-      (x + w - newX) : (rcLockX + rcLockWidth - newX);
-    rcLockHeight = (y + h > rcLockY + rcLockHeight) ?
-      (y + h - newY) : (rcLockY + rcLockHeight - newY);
-    rcLockX = newX;
-    rcLockY = newY;
-  }
-
-  if (!rcCursorHidden && SoftCursorInLockedArea()) {
-    SoftCursorCopyArea(OPER_RESTORE);
-    rcCursorHidden = True;
-  }
-}
-
-/*********************************************************************
- * SoftCursorUnlockScreen(). This function discards all locks
- * performed since previous SoftCursorUnlockScreen() call.
- ********************************************************************/
-
-void SoftCursorUnlockScreen(void)
-{
-  if (!prevSoftCursorSet)
-    return;
-
-  if (rcCursorHidden) {
-    SoftCursorCopyArea(OPER_SAVE);
-    SoftCursorDraw();
-    rcCursorHidden = False;
-  }
-  rcLockSet = False;
-}
-
-/*********************************************************************
- * SoftCursorMove(). Moves soft cursor into a particular location. 
- * This function respects locking of screen areas so when the cursor
- * is moved into the locked area, it becomes invisible until
- * SoftCursorUnlock() functions is called.
- ********************************************************************/
-
-void SoftCursorMove(int x, int y)
-{
-  if (prevSoftCursorSet && !rcCursorHidden) {
-    SoftCursorCopyArea(OPER_RESTORE);
-    rcCursorHidden = True;
-  }
-
-  rcCursorX = x;
-  rcCursorY = y;
-
-  if (prevSoftCursorSet && !(rcLockSet && SoftCursorInLockedArea())) {
-    SoftCursorCopyArea(OPER_SAVE);
-    SoftCursorDraw();
-    rcCursorHidden = False;
-  }
+  return True; 
 }
 
 
-/*********************************************************************
- * Internal (static) low-level functions.
- ********************************************************************/
-
-static Bool SoftCursorInLockedArea(void)
-{
-  return (rcLockX < rcCursorX - rcHotX + rcWidth &&
-	  rcLockY < rcCursorY - rcHotY + rcHeight &&
-	  rcLockX + rcLockWidth > rcCursorX - rcHotX &&
-	  rcLockY + rcLockHeight > rcCursorY - rcHotY);
-}
-
-static void SoftCursorCopyArea(int oper)
-{
-  int x, y, w, h;
-
-  x = rcCursorX - rcHotX;
-  y = rcCursorY - rcHotY;
-  if (x >= si.framebufferWidth || y >= si.framebufferHeight)
-    return;
-
-  w = rcWidth;
-  h = rcHeight;
-  if (x < 0) {
-    w += x;
-    x = 0;
-  } else if (x + w > si.framebufferWidth) {
-    w = si.framebufferWidth - x;
-  }
-  if (y < 0) {
-    h += y;
-    y = 0;
-  } else if (y + h > si.framebufferHeight) {
-    h = si.framebufferHeight - y;
-  }
-
-  if (oper == OPER_SAVE) {
-    /* Save screen area in memory. */
-#ifdef MITSHM
-    if (appData.useShm)
-      XSync(dpy, False);
-#endif
-    XCopyArea(dpy, desktopWin, rcSavedArea, gc, x, y, w, h, 0, 0);
-  } else {
-    /* Restore screen area. */
-    XCopyArea(dpy, rcSavedArea, desktopWin, gc, 0, 0, w, h, x, y);
-  }
-}
-
-static void SoftCursorDraw(void)
-{
-  int x, y, x0, y0;
-  int offset, bytesPerPixel;
-  char *pos;
-
-  bytesPerPixel = myFormat.bitsPerPixel / 8;
-
-  /* FIXME: Speed optimization is possible. */
-  for (y = 0; y < rcHeight; y++) {
-    y0 = rcCursorY - rcHotY + y;
-    if (y0 >= 0 && y0 < si.framebufferHeight) {
-      for (x = 0; x < rcWidth; x++) {
-	x0 = rcCursorX - rcHotX + x;
-	if (x0 >= 0 && x0 < si.framebufferWidth) {
-	  offset = y * rcWidth + x;
-	  if (rcMask[offset]) {
-	    pos = (char *)&rcSource[offset * bytesPerPixel];
-	    CopyDataToImage(pos, x0, y0, 1, 1);
-	  }
-	}
-      }
-    }
-  }
-}
-
-static void FreeSoftCursor(void)
-{
-  if (prevSoftCursorSet) {
-    SoftCursorCopyArea(OPER_RESTORE);
-    XFreePixmap(dpy, rcSavedArea);
-    free(rcSource);
-    free(rcMask);
-    prevSoftCursorSet = False;
-  }
-}
-
-
-static void FreeX11Cursor()
+static void FreeX11Cursor(void)
 {
   if (prevXCursorSet) {
     XFreeCursor(dpy, prevXCursor);

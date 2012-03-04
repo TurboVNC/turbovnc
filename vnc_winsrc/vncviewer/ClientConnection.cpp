@@ -1,4 +1,4 @@
-//  Copyright (C) 2009-2011 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2009-2012 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2008 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2003-2006 Constantin Kaplinsky. All Rights Reserved.
@@ -1825,8 +1825,8 @@ void ClientConnection::SetFormatAndEncodings()
 
 	// Request cursor shape updates if enabled by user
 	if (m_opts.m_requestShapeUpdates) {
-		encs[se->nEncodings++] = Swap32IfLE(rfbEncodingXCursor);
 		encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRichCursor);
+		encs[se->nEncodings++] = Swap32IfLE(rfbEncodingXCursor);
 		if (!m_opts.m_ignoreShapeUpdates)
 			encs[se->nEncodings++] = Swap32IfLE(rfbEncodingPointerPos);
 	}
