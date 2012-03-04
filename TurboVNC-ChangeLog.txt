@@ -63,6 +63,12 @@ TurboVNC should now build and run properly on FreeBSD.
 Added ZRLE encoding, which may improve performance with the RealVNC Viewer
 under certain circumstances.
 -------------------------------------------------------------------------------
+[15]
+Replaced the broken "software cursor" implementation of rich (full-color)
+cursor rendering in the Unix TurboVNC Viewer with a proper implementation that
+uses the Xcursor library.  This specifically fixes pointer issues that occurred
+when connecting to the TigerVNC 1.2 Server.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
