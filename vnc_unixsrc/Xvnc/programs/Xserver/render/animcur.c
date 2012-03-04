@@ -81,7 +81,7 @@ static AnimCurStateRec  animCurState;
 static unsigned char empty[4];
 
 static CursorBits   animCursorBits = {
-    empty, empty, 2, 1, 1, 0, 0, { (pointer)1 }
+    empty, empty, 1, 1, 0, 0, 1
 };
 
 int	AnimCurScreenPrivateIndex = -1;
