@@ -66,7 +66,14 @@ static unsigned char _reverse_byte[0x100] = {
 	0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff
 };
 
-
+#ifdef ARGB_CURSOR
+static int EncodeRichCursorDataARGB8 (char *buf, rfbPixelFormat *fmt,
+				      CursorPtr pCursor);
+static int EncodeRichCursorDataARGB16 (char *buf, rfbPixelFormat *fmt,
+				       CursorPtr pCursor);
+static int EncodeRichCursorDataARGB32 (char *buf, rfbPixelFormat *fmt,
+				       CursorPtr pCursor);
+#endif
 static int EncodeRichCursorData8 (char *buf, rfbPixelFormat *fmt,
 				  CursorPtr pCursor);
 static int EncodeRichCursorData16 (char *buf, rfbPixelFormat *fmt,
@@ -188,37 +195,83 @@ rfbSendCursorShape(cl, pScreen)
 	}
     } else {
 	/* RichCursor encoding. */
-	switch (cl->format.bitsPerPixel) {
-	case 8:
-	    ublen += EncodeRichCursorData8(&updateBuf[ublen],
-					   &cl->format, pCursor);
-	    break;
-	case 16:
-	    ublen += EncodeRichCursorData16(&updateBuf[ublen],
-					    &cl->format, pCursor);
-	    break;
-	case 32:
-	    ublen += EncodeRichCursorData32(&updateBuf[ublen],
-					    &cl->format, pCursor);
-	    break;
-	default:
-	    return FALSE;
+#ifdef ARGB_CURSOR
+	if (pCursor->bits->argb) {
+	    switch (cl->format.bitsPerPixel) {
+	    case 8:
+		ublen += EncodeRichCursorDataARGB8(&updateBuf[ublen],
+						   &cl->format, pCursor);
+		break;
+	    case 16:
+		ublen += EncodeRichCursorDataARGB16(&updateBuf[ublen],
+						    &cl->format, pCursor);
+		break;
+	    case 32:
+		ublen += EncodeRichCursorDataARGB32(&updateBuf[ublen],
+						    &cl->format, pCursor);
+		break;
+	    default:
+		return FALSE;
+	    }
+	} else {
+#endif
+	    switch (cl->format.bitsPerPixel) {
+	    case 8:
+		ublen += EncodeRichCursorData8(&updateBuf[ublen],
+					       &cl->format, pCursor);
+		break;
+	    case 16:
+		ublen += EncodeRichCursorData16(&updateBuf[ublen],
+					        &cl->format, pCursor);
+		break;
+	    case 32:
+		ublen += EncodeRichCursorData32(&updateBuf[ublen],
+					        &cl->format, pCursor);
+		break;
+	    default:
+		return FALSE;
+	    }
+#ifdef ARGB_CURSOR
 	}
+#endif
     }
 
     /* Prepare transparency mask. */
+#ifdef ARGB_CURSOR
+    if (pCursor->bits->argb) {
+	int b;
+	CARD32 *src = pCursor->bits->argb;
+	CARD8 *dst = (CARD8 *)&updateBuf[ublen];
 
-    bitmapData = (CARD8 *)pCursor->bits->mask;
-
-    for (i = 0; i < pCursor->bits->height; i++) {
-	for (j = 0; j < bitmapRowBytes; j++) {
-	    bitmapByte = bitmapData[i * paddedRowBytes + j];
-	    if (screenInfo.bitmapBitOrder == LSBFirst) {
-		bitmapByte = _reverse_byte[bitmapByte];
+	memset(dst, 0, maskBytes);
+	for (i = 0; i < pCursor->bits->height; i++) {
+	    for (j = 0; j < bitmapRowBytes; j++) {
+		for (b = 0; b < 8 && j * 8 + b < pCursor->bits->width; b++) {
+		    if (((*src >> 24) & 0xFF) > 127)
+			*dst |= 1 << b;
+		    src++;
+		}
+		if (screenInfo.bitmapBitOrder == LSBFirst)
+		    *dst = _reverse_byte[*dst];
+		dst++;  ublen++;
 	    }
-	    updateBuf[ublen++] = (char)bitmapByte;
 	}
+    } else {
+#endif
+	bitmapData = (CARD8 *)pCursor->bits->mask;
+
+	for (i = 0; i < pCursor->bits->height; i++) {
+	    for (j = 0; j < bitmapRowBytes; j++) {
+		bitmapByte = bitmapData[i * paddedRowBytes + j];
+		if (screenInfo.bitmapBitOrder == LSBFirst) {
+		    bitmapByte = _reverse_byte[bitmapByte];
+		}
+		updateBuf[ublen++] = (char)bitmapByte;
+	    }
+	}
+#ifdef ARGB_CURSOR
     }
+#endif
 
     /* Update statistics. */
 
@@ -384,3 +437,39 @@ EncodeRichCursorData##bpp(buf, fmt, pCursor)				 \
 DEFINE_RICH_ENCODE(16)
 DEFINE_RICH_ENCODE(32)
 
+#ifdef ARGB_CURSOR
+
+#define DEFINE_RICH_ENCODE_ARGB(bpp)                                     \
+                                                                         \
+static int                                                               \
+EncodeRichCursorDataARGB##bpp(buf, fmt, pCursor)                         \
+    char *buf;								 \
+    rfbPixelFormat *fmt;						 \
+    CursorPtr pCursor;							 \
+{                                                                        \
+    int x, y;                                                            \
+    CARD32 *src = pCursor->bits->argb;                                   \
+    CARD##bpp *dst = (CARD##bpp *)buf;                                   \
+    int rShift = 16 + 9 - ffs(fmt->redMax + 1);                          \
+    int gShift = 8 + 9 - ffs(fmt->greenMax + 1);                         \
+    int bShift = 9 - ffs(fmt->blueMax + 1);                              \
+                                                                         \
+    for (y = 0; y < pCursor->bits->height; y++) {                        \
+	for (x = 0; x < pCursor->bits->width; x++) {                     \
+	    CARD32 r = (*src >> rShift) & fmt->redMax;                   \
+	    CARD32 g = (*src >> gShift) & fmt->greenMax;                 \
+	    CARD32 b = (*src >> bShift) & fmt->blueMax;                  \
+	    *dst = ((CARD##bpp)r << fmt->redShift)                       \
+		 | ((CARD##bpp)g << fmt->greenShift)                     \
+		 | ((CARD##bpp)b << fmt->blueShift);                     \
+	    src++;  dst++;                                               \
+	}                                                                \
+    }                                                                    \
+    return (pCursor->bits->width * pCursor->bits->height * (bpp / 8));   \
+}                                                                        \
+
+DEFINE_RICH_ENCODE_ARGB(8)
+DEFINE_RICH_ENCODE_ARGB(16)
+DEFINE_RICH_ENCODE_ARGB(32)
+
+#endif
