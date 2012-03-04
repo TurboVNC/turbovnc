@@ -37,6 +37,8 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "resource.h"
 #include "fb.h"
 
+#define XFree86Server
+
 #ifndef XFree86Server
 ColormapPtr FbInstalledMaps[MAXSCREENS];
 
