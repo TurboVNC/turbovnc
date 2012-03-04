@@ -67,7 +67,7 @@ void vncExtensionInit(void)
   ExtensionEntry* extEntry;
 
   if (vncExtGeneration == serverGeneration) {
-    rfbLog("vncExtensionInit() called twice in same generation?");
+    rfbLog("vncExtensionInit() called twice in same generation?\n");
     return;
   }
   vncExtGeneration = serverGeneration;
@@ -84,7 +84,7 @@ void vncExtensionInit(void)
   vncErrorBase = extEntry->errorBase;
   vncEventBase = extEntry->eventBase;
 
-  rfbLog("VNC extension running!");
+  rfbLog("VNC extension running!\n");
 
   if (!AddCallback(&ClientStateCallback, vncClientStateChange, 0)) {
     FatalError("Add ClientStateCallback failed\n");
