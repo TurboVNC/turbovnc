@@ -146,7 +146,6 @@ static Bool HandleRichCursor(int xhot, int yhot, int width, int height)
   XcursorPixel *dst, red, green, blue;
   int x, y, b;
   char *buf = NULL;
-  Bool status = False;
 
   if (xhot < 0 || xhot >= width)
     return False;
