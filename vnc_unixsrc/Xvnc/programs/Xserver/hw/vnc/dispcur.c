@@ -168,6 +168,7 @@ rfbDCInitialize (pScreen, screenFuncs)
 
 static Bool
 rfbDCCloseScreen (index, pScreen)
+    int		index;
     ScreenPtr	pScreen;
 {
     rfbDCScreenPtr   pScreenPriv;

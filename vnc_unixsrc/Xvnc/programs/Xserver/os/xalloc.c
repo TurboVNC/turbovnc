@@ -25,7 +25,7 @@ dealings in this Software without prior written authorization from
 Pascal Haible.
 */
 
-/* $XFree86: xc/programs/Xserver/os/xalloc.c,v 3.12.2.1 1997/05/10 07:03:02 hohndel Exp $ */
+/* $XFree86: xc/programs/Xserver/os/xalloc.c,v 3.36 2003/11/03 05:12:00 tsi Exp $ */
 
 /* Only used if INTERNAL_MALLOC is defined
  * - otherwise xalloc() in utils.c is used
@@ -282,9 +282,8 @@ extern int errno;
 #endif
 
 
-unsigned long *
-Xalloc (amount)
-    unsigned long amount;
+void *
+Xalloc (unsigned long amount)
 {
     register unsigned long *ptr;
     int indx;
@@ -294,7 +293,7 @@ Xalloc (amount)
     /* zero size requested */
     if (amount == 0) {
 	LOG_ALLOC("Xalloc=0", amount, 0);
-	return (unsigned long *)NULL;
+	return NULL;
     }
     /* negative size (or size > 2GB) - what do we do? */
     if ((long)amount < 0) {
@@ -305,7 +304,7 @@ Xalloc (amount)
  	ErrorF("Xalloc warning: Xalloc(<0) ignored..\n");
 #endif
  	LOG_ALLOC("Xalloc<0", amount, 0);
-	return (unsigned long *)NULL;
+	return NULL;
     }
 
     /* alignment check */
@@ -349,14 +348,14 @@ Xalloc (amount)
 			/* take the fist one */
 			ptr = (unsigned long *)((char *)ptr + SIZE_HEADER);
 			LOG_ALLOC("Xalloc-S", amount, ptr);
-			return ptr;
+			return (void *)ptr;
 		} /* else fall through to 'Out of memory' */
 	} else {
 		/* take that piece of mem out of the list */
 		free_lists[indx] = *((unsigned long **)ptr);
 		/* already has size (and evtl. magic) filled in */
 		LOG_ALLOC("Xalloc-S", amount, ptr);
-		return ptr;
+		return (void *)ptr;
 	}
 
 #if defined(HAS_MMAP_ANON) || defined(MMAP_DEV_ZERO)
@@ -400,7 +399,7 @@ Xalloc (amount)
 #endif /* SIZE_TAIL */
 		ptr = (unsigned long *)((char *)ptr + SIZE_HEADER);
 		LOG_ALLOC("Xalloc-L", amount, ptr);
-		return ptr;
+		return (void *)ptr;
 	} /* else fall through to 'Out of memory' */
 #endif /* HAS_MMAP_ANON || MMAP_DEV_ZERO */
     } else {
@@ -419,13 +418,13 @@ Xalloc (amount)
 #endif /* SIZE_TAIL */
 		ptr = (unsigned long *)((char *)ptr + SIZE_HEADER);
 		LOG_ALLOC("Xalloc-M", amount, ptr);
-		return ptr;
+		return (void *)ptr;
 	}
     }
     if (Must_have_memory)
 	FatalError("Out of memory");
     LOG_ALLOC("Xalloc-oom", amount, 0);
-    return (unsigned long *)NULL;
+    return NULL;
 }
 
 /*****************
@@ -433,16 +432,15 @@ Xalloc (amount)
  * "no failure" realloc, alternate interface to Xalloc w/o Must_have_memory
  *****************/
 
-unsigned long *
-XNFalloc (amount)
-    unsigned long amount;
+pointer
+XNFalloc (unsigned long amount)
 {
-    register unsigned long *ptr;
+    register pointer ptr;
 
     /* zero size requested */
     if (amount == 0) {
 	LOG_ALLOC("XNFalloc=0", amount, 0);
-	return (unsigned long *)NULL;
+	return NULL;
     }
     /* negative size (or size > 2GB) - what do we do? */
     if ((long)amount < 0) {
@@ -467,14 +465,13 @@ XNFalloc (amount)
  * Xcalloc
  *****************/
 
-unsigned long *
-Xcalloc (amount)
-    unsigned long   amount;
+pointer
+Xcalloc (unsigned long amount)
 {
-    unsigned long   *ret;
+    pointer ret;
 
     ret = Xalloc (amount);
-    if (ret
+    if (ret != 0
 #if defined(HAS_MMAP_ANON) || defined(MMAP_DEV_ZERO)
 	    && (amount < MIN_LARGE)	/* mmaped anonymous mem is already cleared */
 #endif
@@ -487,10 +484,8 @@ Xcalloc (amount)
  * Xrealloc
  *****************/
 
-unsigned long *
-Xrealloc (ptr, amount)
-    register pointer ptr;
-    unsigned long amount;
+void *
+Xrealloc (pointer ptr, unsigned long amount)
 {
     register unsigned long *new_ptr;
 
@@ -499,7 +494,7 @@ Xrealloc (ptr, amount)
 	if (ptr)
 		Xfree(ptr);
 	LOG_REALLOC("Xrealloc=0", ptr, amount, 0);
-	return (unsigned long *)NULL;
+	return NULL;
     }
     /* negative size (or size > 2GB) - what do we do? */
     if ((long)amount < 0) {
@@ -512,7 +507,7 @@ Xrealloc (ptr, amount)
 	if (ptr)
 		Xfree(ptr);	/* ?? */
 	LOG_REALLOC("Xrealloc<0", ptr, amount, 0);
-	return (unsigned long *)NULL;
+	return NULL;
     }
 
     new_ptr = Xalloc(amount);
@@ -528,7 +523,7 @@ Xrealloc (ptr, amount)
 #endif
 		LOG_REALLOC("Xalloc error: header corrupt in Xrealloc() :-(",
 			ptr, amount, 0);
-		return (unsigned long *)NULL;
+		return NULL;
 	}
 #endif /* XALLOC_DEBUG */
 	/* copy min(old size, new size) */
@@ -538,12 +533,12 @@ Xrealloc (ptr, amount)
 	Xfree(ptr);
     if (new_ptr) {
 	LOG_REALLOC("Xrealloc", ptr, amount, new_ptr);
-	return new_ptr;
+	return (void *)new_ptr;
     }
     if (Must_have_memory)
 	FatalError("Out of memory");
     LOG_REALLOC("Xrealloc", ptr, amount, 0);
-    return (unsigned long *)NULL;
+    return NULL;
 }
                     
 /*****************
@@ -551,16 +546,14 @@ Xrealloc (ptr, amount)
  * "no failure" realloc, alternate interface to Xrealloc w/o Must_have_memory
  *****************/
 
-unsigned long *
-XNFrealloc (ptr, amount)
-    register pointer ptr;
-    unsigned long amount;
+void *
+XNFrealloc (pointer ptr, unsigned long amount)
 {
     if (( ptr = (pointer)Xrealloc( ptr, amount ) ) == NULL)
     {
         FatalError( "Out of memory" );
     }
-    return ((unsigned long *)ptr);
+    return ptr;
 }
 
 /*****************
@@ -569,8 +562,7 @@ XNFrealloc (ptr, amount)
  *****************/    
 
 void
-Xfree(ptr)
-    register pointer ptr;
+Xfree(pointer ptr)
 {
     unsigned long size;
     unsigned long *pheader;
@@ -675,7 +667,7 @@ Xfree(ptr)
 }
 
 void
-OsInitAllocator ()
+OsInitAllocator (void)
 {
     static Bool beenhere = FALSE;
 

@@ -387,6 +387,7 @@ rfbSpriteInitialize (pScreen, cursorFuncs, screenFuncs)
 
 static Bool
 rfbSpriteCloseScreen (i, pScreen)
+    int		i;
     ScreenPtr	pScreen;
 {
     rfbSpriteScreenPtr   pScreenPriv;
@@ -1071,6 +1072,7 @@ rfbSpritePutImage(pDrawable, pGC, depth, x, y, w, h, leftPad, format, pBits)
     int	    	  y;
     int	    	  w;
     int	    	  h;
+    int           leftPad;
     int	    	  format;
     char    	  *pBits;
 {
@@ -2060,9 +2062,7 @@ rfbSpriteUnrealizeCursor (pScreen, pCursor)
 }
 
 static void
-rfbSpriteSetCursor (pScreen, pCursor, x, y)
-    ScreenPtr	pScreen;
-    CursorPtr	pCursor;
+rfbSpriteSetCursor (ScreenPtr pScreen, CursorPtr pCursor, int x, int y)
 {
     rfbSpriteScreenPtr	pScreenPriv;
     rfbClientPtr cl, nextCl;

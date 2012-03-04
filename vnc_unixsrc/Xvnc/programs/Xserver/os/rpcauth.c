@@ -1,16 +1,13 @@
-/* $XConsortium: rpcauth.c,v 1.9 94/04/17 20:27:06 gildea Exp $ */
-/* $XFree86: xc/programs/Xserver/os/rpcauth.c,v 3.0 1995/07/07 15:46:07 dawes Exp $ */
+/* $Xorg: rpcauth.c,v 1.4 2001/02/09 02:05:23 xorgcvs Exp $ */
 /*
 
-Copyright (c) 1991  X Consortium
+Copyright 1991, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
@@ -18,17 +15,18 @@ in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR
+IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall
+Except as contained in this notice, the name of The Open Group shall
 not be used in advertising or otherwise to promote the sale, use or
 other dealings in this Software without prior written authorization
-from the X Consortium.
+from The Open Group.
 
 */
+/* $XFree86: xc/programs/Xserver/os/rpcauth.c,v 3.8 2003/04/27 21:31:09 herrb Exp $ */
 
 /*
  * SUN-DES-1 authentication mechanism
@@ -46,6 +44,11 @@ from the X Consortium.
 #include "dixstruct.h"
 
 #include <rpc/rpc.h>
+
+#ifdef sun
+/* <rpc/auth.h> only includes this if _KERNEL is #defined... */
+extern bool_t xdr_opaque_auth(XDR *, struct opaque_auth *);
+#endif
 
 #ifdef ultrix
 #include <time.h>
@@ -116,10 +119,11 @@ bad1:
 static XID  rpc_id = (XID) ~0L;
 
 static Bool
-CheckNetName (addr, len, closure)
-    unsigned char    *addr;
-    int		    len;
-    pointer	    closure;
+CheckNetName (
+    unsigned char    *addr,
+    short	    len,
+    pointer	    closure
+)
 {
     return (len == strlen ((char *) closure) &&
 	    strncmp ((char *) addr, (char *) closure, len) == 0);
@@ -158,6 +162,7 @@ SecureRPCCheck (data_length, data, client, reason)
 }
     
 
+void
 SecureRPCInit ()
 {
     if (rpc_id == ~0L)
@@ -189,6 +194,7 @@ SecureRPCToID (data_length, data)
     return rpc_id;
 }
 
+int
 SecureRPCFromID (id, data_lenp, datap)
      XID id;
      unsigned short	*data_lenp;
@@ -197,6 +203,7 @@ SecureRPCFromID (id, data_lenp, datap)
     return 0;
 }
 
+int
 SecureRPCRemove (data_length, data)
      unsigned short	data_length;
      char	*data;

@@ -128,13 +128,13 @@ __inline static const int min (const int x, const int y)
 #else
 
 static int
-max (x, y)
+max (int x, int y)
 {
 	return x>y? x:y;
 }
 
 static int
-min (x, y)
+min (int x, int y)
 {
 	return x<y? x:y;
 }

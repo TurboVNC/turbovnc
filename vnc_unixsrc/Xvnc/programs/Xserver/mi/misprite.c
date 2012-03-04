@@ -529,7 +529,7 @@ static void
 miSpriteBlockHandler (i, blockData, pTimeout, pReadmask)
     int	i;
     pointer	blockData;
-    OSTimePtr	pTimeout;
+    pointer	pTimeout;
     pointer	pReadmask;
 {
     ScreenPtr		pScreen = screenInfo.screens[i];
@@ -2071,6 +2071,8 @@ static void
 miSpriteSetCursor (pScreen, pCursor, x, y)
     ScreenPtr	pScreen;
     CursorPtr	pCursor;
+    int		x;
+    int		y;
 {
     miSpriteScreenPtr	pScreenPriv;
 

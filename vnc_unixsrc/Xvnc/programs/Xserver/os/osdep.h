@@ -168,6 +168,9 @@ typedef struct _k5_state {
 typedef struct _LbxProxy *OsProxyPtr;
 #endif
 
+#define AuthInitArgs void
+typedef void (*AuthInitFunc) (AuthInitArgs);
+
 typedef struct _osComm {
     int fd;
     ConnectionInputPtr input;
@@ -225,6 +228,11 @@ extern ConnectionOutputPtr AllocateOutputBuffer(
     void
 #endif
 );
+
+/* in rpcauth.c */
+#ifdef SECURE_RPC
+extern void SecureRPCInit     (AuthInitArgs);
+#endif
 
 /* in xdmcp.c */
 extern void XdmcpUseMsg (void);

@@ -101,8 +101,8 @@ XdmAuthenticationGenerator (privateData, outgoingData, packet_type)
 
 static Bool
 XdmAuthenticationAddAuth (name_len, name, data_len, data)
-    int	    name_len, data_len;
-    char    *name, *data;
+    unsigned int  name_len, data_len;
+    char          *name, *data;
 {
     Bool    ret;
     XdmcpUnwrap ((unsigned char *)data, (unsigned char *)&privateKey, (unsigned char *)data, data_len);

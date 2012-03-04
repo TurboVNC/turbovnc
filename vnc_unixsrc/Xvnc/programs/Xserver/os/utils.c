@@ -1297,7 +1297,7 @@ OsInitAllocator ()
 
 void
 AuditPrefix(f)
-    char *f;
+    const char *f;
 {
 #ifdef X_NOT_STDC_ENV
     long tm;

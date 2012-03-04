@@ -107,12 +107,9 @@ static void send_query_msg(
 );
 
 static void recv_willing_msg(
-#if NeedFunctionPrototypes
-    struct sockaddr_in */*from*/,
+    struct sockaddr */*from*/,
     int /*fromlen*/,
-    unsigned /*length*/
-#endif
-);
+    unsigned /*length*/);
 
 static void send_request_msg(
 #if NeedFunctionPrototypes
@@ -735,10 +732,10 @@ XdmcpWakeupHandler(data, i, pReadmask)
  */
 
 static void
-XdmcpSelectHost(host_sockaddr, host_len, AuthenticationName)
-    struct sockaddr_in	*host_sockaddr;
-    int			host_len;
-    ARRAY8Ptr		AuthenticationName;
+XdmcpSelectHost(
+    struct sockaddr	*host_sockaddr,
+    int			host_len,
+    ARRAY8Ptr		AuthenticationName)
 {
     state = XDM_START_CONNECTION;
     memmove(&req_sockaddr, host_sockaddr, host_len);
@@ -755,9 +752,12 @@ XdmcpSelectHost(host_sockaddr, host_len, AuthenticationName)
 
 /*ARGSUSED*/
 static void
-XdmcpAddHost(from, fromlen, AuthenticationName, hostname, status)
-    struct sockaddr_in  *from;
-    ARRAY8Ptr		AuthenticationName, hostname, status;
+XdmcpAddHost(
+    struct sockaddr    *from,
+    int			fromlen,
+    ARRAY8Ptr		AuthenticationName,
+    ARRAY8Ptr		hostname,
+    ARRAY8Ptr		status)
 {
     XdmcpSelectHost(from, fromlen, AuthenticationName);
 }
@@ -791,7 +791,7 @@ receive_packet()
 
     switch (header.opcode) {
     case WILLING:
-	recv_willing_msg((struct sockaddr_in *) &from, fromlen, header.length);
+	recv_willing_msg((struct sockaddr *) &from, fromlen, header.length);
 	break;
     case UNWILLING:
 	XdmcpFatal("Manager unwilling", &UnwillingMessage);
@@ -1091,10 +1091,10 @@ send_query_msg()
 }
 
 static void
-recv_willing_msg(from, fromlen, length)
-    struct sockaddr_in	*from;
-    int			fromlen;
-    unsigned		length;
+recv_willing_msg(
+    struct sockaddr	*from,
+    int			fromlen,
+    unsigned		length)
 {
     ARRAY8	authenticationName;
     ARRAY8	hostname;
