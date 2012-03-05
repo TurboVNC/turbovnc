@@ -116,6 +116,11 @@ static ShmFuncsPtr shmFuncs[MAXSCREENS];
 static ShmFuncs miFuncs = {NULL, miShmPutImage};
 static ShmFuncs fbFuncs = {fbShmCreatePixmap, fbShmPutImage};
 
+/* From fb.h */
+#define BitsPerPixel(d) (\
+    ((1 << PixmapWidthPaddingInfo[d].padBytesLog2) * 8 / \
+    (PixmapWidthPaddingInfo[d].padRoundUp+1)))
+
 #define VERIFY_SHMSEG(shmseg,shmdesc,client) \
 { \
     shmdesc = (ShmDescPtr)LookupIDByType(shmseg, ShmSegType); \
@@ -431,7 +436,7 @@ fbShmPutImage(dst, pGC, depth, format, w, h, sx, sy, sw, sh, dx, dy, data)
 	PixmapPtr pPixmap;
 
 	pPixmap = GetScratchPixmapHeader(dst->pScreen, w, h, depth,
-			/*XXX*/depth, PixmapBytePad(w, depth), (pointer)data);
+		BitsPerPixel(depth), PixmapBytePad(w, depth), (pointer)data);
 	if (!pPixmap)
 	    return;
 	if (format == XYBitmap)
@@ -883,8 +888,10 @@ fbShmCreatePixmap (pScreen, width, height, depth, addr)
 	return NullPixmap;
 
     if (!(*pScreen->ModifyPixmapHeader)(pPixmap, width, height, depth,
-		  /*XXX*/depth, PixmapBytePad(width, depth), (pointer)addr))
+	    BitsPerPixel(depth), PixmapBytePad(width, depth), (pointer)addr)) {
+	(*pScreen->DestroyPixmap)(pPixmap);
 	return NullPixmap;
+    }
     return pPixmap;
 }
 
