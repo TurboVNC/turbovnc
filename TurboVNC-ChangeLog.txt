@@ -1,5 +1,5 @@
 ===============================================================================
-1.1 pre-beta
+1.2 pre-beta
 ===============================================================================
 [1]
 Added a "continuous updates" feature which will, optionally, send framebuffer
@@ -8,12 +8,16 @@ than waiting for a framebuffer update request from a viewer.  This greatly
 improves the performance of video players and VirtualGL on high-latency
 networks.
 -------------------------------------------------------------------------------
-[2]
+
+===============================================================================
+1.1 beta1
+===============================================================================
+[1]
 autocutsel has been replaced with a more robust and configurable clipboard
 transfer mechanism based on the VNC X11 extension and the vncconfig utility
 used by RealVNC.
 -------------------------------------------------------------------------------
-[3]
+[2]
 Re-enabled Compression Level 2 whenever JPEG is used.  Compression Level 2 uses
 a higher level of Zlib compression on non-JPEG subrectangles, and it also uses
 a palette threshold of 96 instead of 24, meaning that the encoder will tend to
@@ -22,89 +26,88 @@ This has been shown to benefit some types of workloads, but only when JPEG is
 enabled.  Higher levels of Zlib compression have not been shown to be
 beneficial.
 -------------------------------------------------------------------------------
-[4]
+[3]
 The Unix TurboVNC Server now implements the X RENDER extension, which enables
 font anti-aliasing and animated cursors and fixes various issues with KDE 4.
 Additionally, the server now embeds the FreeType library for improved font
 display and compatibility.
 -------------------------------------------------------------------------------
+[4]
+Replaced the broken "software cursor" implementation of rich (full-color)
+cursor rendering in the Unix TurboVNC Viewer with a proper implementation that
+uses the Xcursor library.  This specifically fixes pointer issues that occurred
+when connecting to the Unix TigerVNC 1.2 Server.
+-------------------------------------------------------------------------------
 [5]
 The Unix TurboVNC Server now implements rich (full-color) cursor encoding, so
-viewers that support the RFB rich cursor pseudo-encoding can display full-color
-animated cursors.
+viewers that support this RFB extension (including TigerVNC 1.2 and later and
+TurboVNC 1.1 and later) can display full-color animated cursors.
 -------------------------------------------------------------------------------
-
-
-===============================================================================
-1.0.3
-===============================================================================
-[1]
+[6]
 Enhanced the screen scaling feature in the Java TurboVNC Viewer and added a GUI
 option to control it.
 -------------------------------------------------------------------------------
-[2]
+[7]
 Added an idle timeout feature to the Unix TurboVNC Server which, when enabled,
 will cause it to exit automatically whenever a certain number of seconds have
 elapsed since the last active VNC viewer connection.
 -------------------------------------------------------------------------------
-[3]
+[8]
 Added a '-noxstartup' option to vncserver, which prevents it from executing
 the xstartup.turbovnc script.  This is useful for those who may want to
 occasionally run TurboVNC without a window manager.
 -------------------------------------------------------------------------------
-[4]
+[9]
 Fixed image corruption that occurred when using the Lossless Tight or Lossless
 Tight + Zlib protocols with the Unix TurboVNC Viewer running on a
 16-bit-per-pixel X server.
 -------------------------------------------------------------------------------
-[5]
+[10]
 Fixed TurboVNC Server build on ARM-based Linux systems
 -------------------------------------------------------------------------------
-[6]
-Added Xvnc command line options and authentication configuration file
+[11]
+Added Xvnc command-line options and authentication configuration file
 directives for disabling clipboard transfer.
 -------------------------------------------------------------------------------
-[7]
+[12]
 Added two options (-alrqual and -alrsamp) to Xvnc that allow for sending
 automatic lossless refreshes using JPEG rather than mathematically lossless
 images.
 -------------------------------------------------------------------------------
-[8]
+[13]
 Fixed an issue whereby the Windows TurboVNC Viewer, when running on Windows 7,
 would display an all-white image on one of the monitors in a multi-monitor
 configuration the first time the viewer was switched to full-screen mode.
 -------------------------------------------------------------------------------
-[9]
+[14]
 Changed the default full-screen behavior in the Windows TurboVNC Viewer such
 that the window only spans multiple monitors if the remote desktop will not
 fit on a single monitor.  Added options to the command line, GUI, and .vnc
 file to allow users to override this behavior and force full-screen windows to
 always occupy one monitor or all monitors.
 -------------------------------------------------------------------------------
-[10]
+[15]
 Fixed numerous issues with full-screen mode in the Unix TurboVNC Viewer.
 -------------------------------------------------------------------------------
-[11]
+[16]
 Implemented -autopass option in the Windows TurboVNC Viewer, which works the
 same as the equivalent option in the Unix TurboVNC Viewer.  In both viewers,
 -autopass can now be used with Unix Login Authentication as well.
 -------------------------------------------------------------------------------
-[12]
+[17]
 Added an option to the F8 menu in the Unix TurboVNC Viewer that allows
 view-only mode to be enabled/disabled on an active VNC connection.
 -------------------------------------------------------------------------------
-[13]
+[18]
 TurboVNC should now build and run properly on FreeBSD.
 -------------------------------------------------------------------------------
-[14]
-Added ZRLE encoding, which may improve performance with the RealVNC Viewer
-under certain circumstances.
+[19]
+Added ZRLE encoding to the Unix TurboVNC Server, which may improve performance
+with the RealVNC Viewer under certain circumstances.
 -------------------------------------------------------------------------------
-[15]
-Replaced the broken "software cursor" implementation of rich (full-color)
-cursor rendering in the Unix TurboVNC Viewer with a proper implementation that
-uses the Xcursor library.  This specifically fixes pointer issues that occurred
-when connecting to the Unix TigerVNC 1.2 Server.
+[20]
+The Windows TurboVNC Server is no longer provided, as it was badly broken, and
+the only way to fix it would involve a complete re-architecture.
 -------------------------------------------------------------------------------
 
 
