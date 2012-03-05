@@ -108,8 +108,7 @@
 
 #include "tvnc_version.h"
 
-#define XVendorString		\"AT&T Laboratories Cambridge\"
-#define XVendorRelease		3332
+#define XVendorString		\"TurboVNC\"
 
 
 /*****************************************************************************/
