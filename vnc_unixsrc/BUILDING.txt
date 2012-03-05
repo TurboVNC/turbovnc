@@ -40,10 +40,6 @@ Build Requirements
      the "Files" area of:
      http://sourceforge.net/projects/libjpeg-turbo/
 
--- SPARC ONLY:  Sun mediaLib
-   * mediaLib is pre-installed on Solaris 10 and later, and it can also be
-     downloaded for free from http://www.sun.com/processors/vis/mlib.html.
-
 
 ==================
 Out-of-Tree Builds
@@ -196,17 +192,6 @@ Add
 to the configure command line.
 
 
-32-bit TurboVNC Viewer Build on 64-bit FreeBSD
-----------------------------------------------
-
-Add
-
-  --host i386-unknown-freebsd CC='gcc -B /usr/lib32' CFLAGS='-O3 -m32' \
-    LDFLAGS='-B/usr/lib32'
-
-to the configure command line.
-
-
 Sun Studio
 ----------
 
@@ -253,24 +238,10 @@ make udmg [BUILDDIR32={32-bit build directory}]
   by default, but you can override this by setting the BUILDDIR32 variable on
   the make command line as shown above.
 
-make sunpkg
-
-  Build a Solaris package.  This requires pkgmk, pkgtrans, and bzip2.
-
 
 =============
 Other Options
 =============
-
-mediaLib Build
---------------
-
-Adding --with-medialib to the configure command line will build a version of
-TurboVNC that uses mediaLib for JPEG compression/decompression rather than
-libjpeg-turbo.  On x86 platforms, this is meant primarily for testing purposes,
-since libjpeg-turbo is generally faster than mediaLib.  Building against
-mediaLib is the default on SPARC platforms.
-
 
 Custom builds of libjpeg-turbo
 ------------------------------
