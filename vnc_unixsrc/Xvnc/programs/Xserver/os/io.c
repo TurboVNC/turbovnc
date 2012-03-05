@@ -111,7 +111,7 @@ extern fd_set OutputPending;
 extern int ConnectionTranslation[];
 extern Bool NewOutputPending;
 extern Bool AnyClientsWriteBlocked;
-extern int ffsl(unsigned long);
+extern int ffsl(long);
 
 Bool CriticalOutputPending;
 int timesThisConnection = 0;

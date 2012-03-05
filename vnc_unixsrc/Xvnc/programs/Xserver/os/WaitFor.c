@@ -104,7 +104,7 @@ extern Bool AnyClientsWriteBlocked;
 
 extern WorkQueuePtr workQueue;
 
-extern int ffsl(unsigned long);
+extern int ffsl(long);
 
 
 #ifdef XTESTEXT1

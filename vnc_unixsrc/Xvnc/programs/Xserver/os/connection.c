@@ -178,7 +178,7 @@ extern __const__ int _nfiles;
 extern char *display;		/* The display number */
 int lastfdesc;			/* maximum file descriptor */
 
-extern int ffsl(unsigned long);
+extern int ffsl(long);
 
 fd_set WellKnownConnections;	/* Listener mask */
 fd_set EnabledDevices;		/* mask for input devices that are on */
