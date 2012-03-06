@@ -99,15 +99,21 @@ Added an option to the F8 menu in the Unix TurboVNC Viewer that allows
 view-only mode to be enabled/disabled on an active VNC connection.
 -------------------------------------------------------------------------------
 [18]
-TurboVNC should now build and run properly on FreeBSD.
+The TurboVNC Server should now build and run properly on FreeBSD.
 -------------------------------------------------------------------------------
 [19]
 Added ZRLE encoding to the Unix TurboVNC Server, which may improve performance
 with the RealVNC Viewer under certain circumstances.
 -------------------------------------------------------------------------------
 [20]
-The Windows TurboVNC Server is no longer provided, as it was badly broken, and
-the only way to fix it would involve a complete re-architecture.
+The Windows TurboVNC Server (WinVNC) is no longer provided, as it was badly
+broken, and the only way to fix it would have involved a complete
+re-architecture.
+-------------------------------------------------------------------------------
+[21]
+The TurboVNC Server now includes a non-functional implementation of the X Input
+extension, primarily to avoid crashes in recent versions of Gnome that aren't
+smart enough to check for that extension's existence before using it.
 -------------------------------------------------------------------------------
 
 
