@@ -134,7 +134,7 @@ XPFBLIBS = dix/LibraryTargetName(xpstubs)
       RENDERDIR = render
       RENDERLIB = $(RENDERDIR)/librender.a
 #endif
-      OTHEREXTS = Xext/LibraryTargetName(ext) $(XKBEXT) $(XINPUTEXT) \
+      OTHEREXTS = Xext/LibraryTargetName(ext) $(XKBEXT) \
                   $(XIEEXT) $(LBXEXT) $(DBEEXT) $(RECORDEXT) $(SITEEXTS)
         EXTDIRS = Xext $(XKBDIR) $(XIDIR) $(XIEDIR) $(PEXDIR) $(GLXDIR) \
                   $(LBXDIRS) $(DBEDIR) $(RECORDDIR) $(SITEEXTDIRS) $(RENDERDIR)
@@ -1711,7 +1711,7 @@ XVNCDIRS = $(STDDIRS) $(FBDIR) $(DDXDIR1) $(DEPDIRS)
 XVNCOBJS = 
 #include <vnclibs.def>
 XVNC = hw/vnc/libvnc.a $(VNCLIBS)
-XVNCLIBS = PreFbLibs $(XVNC) $(FB) NoMfbPostFbLibs
+XVNCLIBS = PreFbLibs $(XINPUTEXT) $(XVNC) $(FB) NoMfbPostFbLibs
 XVNCSYSLIBS = $(SYSLIBS) $(VNCSYSLIBS)
 ServerTarget(Xvnc,$(XVNCDIRS),$(XVNCOBJS),$(XVNCLIBS),$(XVNCSYSLIBS))
 #endif /* XvncServer */

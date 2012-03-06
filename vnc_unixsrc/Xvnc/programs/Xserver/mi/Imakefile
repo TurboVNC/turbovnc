@@ -34,7 +34,7 @@ OBJS =	$(CBRT_OBJ) mivaltree.o mipolyseg.o mipolyrect.o \
  * Make sure XINPUT, XF86VidTune, etc aren't defined for the miinitext.o 
  * used by Xnest, Xvfb 
  */
-EXT_DEFINES = ExtensionDefines -UXINPUT -UXF86VIDMODE -UXFreeXDGA -UXF86MISC
+EXT_DEFINES = ExtensionDefines -UXF86VIDMODE -UXFreeXDGA -UXF86MISC
 #else
 EXT_DEFINES = ExtensionDefines
 #endif

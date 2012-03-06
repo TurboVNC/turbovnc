@@ -35,6 +35,8 @@ from the X Consortium.
 
 #include <X11/Xmd.h>
 
+#include "globals.h"
+
 extern char *defaultFontPath;
 extern char *defaultTextFont;
 extern char *defaultCursorFont;
