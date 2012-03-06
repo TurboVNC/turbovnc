@@ -36,13 +36,10 @@ VersionInfoVersion=@VERSION@
 ChangesAssociations=yes
 
 [Components]
-Name: "server"; Description: "TurboVNC Server"; Types: custom;
 Name: "viewer"; Description: "TurboVNC Viewer"; Types: full compact custom;
 Name: "doc";    Description: "Documentation";   Types: full custom;
 
 [Files]
-Source: "@CMAKE_CURRENT_BINARY_DIR@\winvnc\{#BUILD_DIR}WinVNC.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: server
-Source: "@CMAKE_CURRENT_BINARY_DIR@\winvnc\{#BUILD_DIR}VNCHooks.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: server
 Source: "@CMAKE_CURRENT_BINARY_DIR@\vncviewer\{#BUILD_DIR}vncviewer.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 Source: "@CMAKE_CURRENT_BINARY_DIR@\putty\{#BUILD_DIR}putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 Source: "@CMAKE_SOURCE_DIR@\LICENCE.txt"; DestDir: "{app}"; Flags: ignoreversion
@@ -56,16 +53,9 @@ Source: "@CMAKE_SOURCE_DIR@\..\vnc_docs\LIC*.txt"; DestDir: "{app}\doc"; Flags: 
 Source: "@CMAKE_SOURCE_DIR@\..\vnc_docs\*.css"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
 
 [Icons]
-Name: "{group}\Launch TurboVNC Server";               FileName: "{app}\WinVNC.exe";                                    WorkingDir: "{app}";     Components: server;
-Name: "{group}\Show About Box";                       FileName: "{app}\WinVNC.exe";    Parameters: "-about";           WorkingDir: "{app}";     Components: server;
-Name: "{group}\Show User Settings";                   FileName: "{app}\WinVNC.exe";    Parameters: "-settings";        WorkingDir: "{app}";     Components: server;
 Name: "{group}\TurboVNC Viewer";                      FileName: "{app}\vncviewer.exe";                                 WorkingDir: "{app}";     Components: viewer;
 Name: "{group}\TurboVNC Viewer (Listen Mode)";        FileName: "{app}\vncviewer.exe"; Parameters: "-listen";          WorkingDir: "{app}";     Components: viewer;
 Name: "{group}\Uninstall TurboVNC";                   FileName: "{uninstallexe}";                                      WorkingDir: "{app}";                        
-Name: "{group}\Administration\Install VNC Service";   FileName: "{app}\WinVNC.exe";    Parameters: "-install";         WorkingDir: "{app}";     Components: server;
-Name: "{group}\Administration\Remove VNC Service";    FileName: "{app}\WinVNC.exe";    Parameters: "-remove";          WorkingDir: "{app}";     Components: server;
-Name: "{group}\Administration\Run Service Helper";    FileName: "{app}\WinVNC.exe";    Parameters: "-servicehelper";   WorkingDir: "{app}";     Components: server;
-Name: "{group}\Administration\Show Default Settings"; FileName: "{app}\WinVNC.exe";    Parameters: "-defaultsettings"; WorkingDir: "{app}";     Components: server;
 Name: "{group}\Documentation\TurboVNC User's Guide";  FileName: "{app}\doc\index.html";                                WorkingDir: "{app}\doc"; Components: doc;
 Name: "{group}\Documentation\Licensing Terms";        FileName: "write.exe";           Parameters: "LICENCE.txt";      WorkingDir: "{app}";     Flags: "useapppaths"
 Name: "{group}\Documentation\TurboVNC Web Site";      FileName: "{app}\TurboVNC.url"
@@ -74,19 +64,9 @@ Name: "{group}\Documentation\TurboVNC Change Log";    FileName: "write.exe";    
 
 [Tasks]
 Name: associate; Description: "&Associate .vnc files with TurboVNC Viewer"; GroupDescription: "File associations:"; Components: viewer
-Name: installservice; Description: "&Register TurboVNC Server as a system service"; GroupDescription: "Server configuration:"; Components: server; Flags: unchecked; OnlyBelowVersion: 0,6.0
 
 [Registry]
 Root: HKCR; Subkey: ".vnc"; ValueType: string; ValueName: ""; ValueData: "VncViewer.Config"; Flags: uninsdeletevalue; Tasks: associate
 Root: HKCR; Subkey: "VncViewer.Config"; ValueType: string; ValueName: ""; ValueData: "VNCviewer Config File"; Flags: uninsdeletekey; Tasks: associate
 Root: HKCR; Subkey: "VncViewer.Config\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\vncviewer.exe,0"; Tasks: associate
 Root: HKCR; Subkey: "VncViewer.Config\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\vncviewer.exe"" -config ""%1"""; Tasks: associate
-
-[Run]
-Filename: "{app}\WinVNC.exe"; Parameters: "-silent -reinstall"; Tasks: installservice
-Filename: "net"; Parameters: "start WinVNC"; Tasks: installservice; MinVersion: 0,4.0
-Filename: "{app}\WinVNC.exe"; Parameters: "-servicehelper"; Tasks: installservice
-
-[UninstallRun]
-Filename: "{app}\WinVNC.exe"; Parameters: "-kill"; OnlyBelowVersion: 0,4.0
-Filename: "{app}\WinVNC.exe"; Parameters: "-silent -remove";

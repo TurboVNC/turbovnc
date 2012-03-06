@@ -1,4 +1,0 @@
-#define __APPNAME "@APPNAME@"
-#define __RCVERSION @RCVERSION@
-#define __RCVERSIONSTR "@RCVERSION@\0"
-#cmakedefine WIN64
