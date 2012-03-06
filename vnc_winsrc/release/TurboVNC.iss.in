@@ -43,7 +43,6 @@ Name: "doc";    Description: "Documentation";   Types: full custom;
 Source: "@CMAKE_CURRENT_BINARY_DIR@\vncviewer\{#BUILD_DIR}vncviewer.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 Source: "@CMAKE_CURRENT_BINARY_DIR@\putty\{#BUILD_DIR}putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 Source: "@CMAKE_SOURCE_DIR@\LICENCE.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "@CMAKE_SOURCE_DIR@\WhatsNew.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "@CMAKE_SOURCE_DIR@\..\TurboVNC-ChangeLog.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "@CMAKE_SOURCE_DIR@\TurboVNC.url"; DestDir: "{app}"; Flags: ignoreversion
 Source: "@CMAKE_SOURCE_DIR@\..\vnc_docs\*.png"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
@@ -59,7 +58,6 @@ Name: "{group}\Uninstall TurboVNC";                   FileName: "{uninstallexe}"
 Name: "{group}\Documentation\TurboVNC User's Guide";  FileName: "{app}\doc\index.html";                                WorkingDir: "{app}\doc"; Components: doc;
 Name: "{group}\Documentation\Licensing Terms";        FileName: "write.exe";           Parameters: "LICENCE.txt";      WorkingDir: "{app}";     Flags: "useapppaths"
 Name: "{group}\Documentation\TurboVNC Web Site";      FileName: "{app}\TurboVNC.url"
-Name: "{group}\Documentation\TightVNC Change Log";    FileName: "write.exe";           Parameters: "WhatsNew.txt";     WorkingDir: "{app}";     Flags: "useapppaths"
 Name: "{group}\Documentation\TurboVNC Change Log";    FileName: "write.exe";           Parameters: "TurboVNC-ChangeLog.txt"; WorkingDir: "{app}"; Flags: "useapppaths"
 
 [Tasks]
