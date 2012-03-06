@@ -138,11 +138,11 @@ class ButtonPanel extends Panel implements ActionListener {
         final int modifiers = InputEvent.CTRL_MASK | InputEvent.ALT_MASK;
 
         KeyEvent ctrlAltDelEvent =
-          new KeyEvent(this, KeyEvent.KEY_PRESSED, 0, modifiers, 127);
+          new KeyEvent(this, KeyEvent.KEY_PRESSED, 0, modifiers, 127, KeyEvent.CHAR_UNDEFINED);
         viewer.rfb.writeKeyEvent(ctrlAltDelEvent);
 
         ctrlAltDelEvent =
-          new KeyEvent(this, KeyEvent.KEY_RELEASED, 0, modifiers, 127);
+          new KeyEvent(this, KeyEvent.KEY_RELEASED, 0, modifiers, 127, KeyEvent.CHAR_UNDEFINED);
         viewer.rfb.writeKeyEvent(ctrlAltDelEvent);
 
       } catch (IOException e) {

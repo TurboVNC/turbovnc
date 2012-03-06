@@ -1,5 +1,6 @@
 //
 //  Copyright (C) 2002 Constantin Kaplinsky, Inc.  All Rights Reserved.
+//  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
 //
 //  This is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -40,7 +41,7 @@ class HTTPConnectSocket extends Socket {
 			     " HTTP/1.0\r\n\r\n").getBytes());
 
     // Read the first line of the response
-    DataInputStream is = new DataInputStream(getInputStream());
+    BufferedReader is = new BufferedReader(new InputStreamReader(getInputStream()));
     String str = is.readLine();
 
     // Check the HTTP error code -- it should be "200" on success
