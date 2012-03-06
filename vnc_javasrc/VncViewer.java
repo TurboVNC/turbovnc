@@ -306,7 +306,7 @@ public class VncViewer extends java.applet.Applet
     showConnectionStatus("Initializing...");
     if (inSeparateFrame) {
       vncFrame.pack();
-      vncFrame.show();
+      vncFrame.setVisible(true);
     } else {
       validate();
     }
