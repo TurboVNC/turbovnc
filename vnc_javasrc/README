@@ -1,21 +1,23 @@
 
-  Java TurboVNC Viewer
-
-======================================================================
+Java TurboVNC Viewer
+====================
 
 This distribution is based on the standard VNC source and includes new
-features and fixes, such as additional low-bandwidth optimizations, major GUI
-improvements, and more.
+TurboVNC-specific features and fixes, such as additional low-bandwidth
+optimizations, major GUI improvements, and more.
 
-	Copyright (C) 1999 AT&T Laboratories Cambridge.
-	Copyright (C) 2000 Tridia Corp.
-	Copyright (C) 2002-2003 RealVNC Ltd.
-	Copyright (C) 2001-2004 HorizonLive.com, Inc.
-	Copyright (C) 2000-2007 Constantin Kaplinsky
-	Copyright (C) 2000-2009 TightVNC Group
-	Copyright (C) 2009 Paul Donohue
-	Copyright (C) 2009-2011 D. R. Commander
-	All rights reserved.
+    Copyright (C) 1999 AT&T Laboratories Cambridge.
+    Copyright (C) 2000 Tridia Corp.
+    Copyright (C) 2002 Cendio Systems
+    Copyright (C) 2002-2005 RealVNC Ltd.
+    Copyright (C) 2001-2004 HorizonLive.com, Inc.
+    Copyright (C) 2001-2006 Constantin Kaplinsky
+    Copyright (C) 2000-2009 TightVNC Group
+    Copyright (C) 2006-2008 Sun Microsystems, Inc.
+    Copyright (C) 2009 Paul Donohue
+    Copyright (C) 2009-2012 D. R. Commander
+    Copyright (C) 2012 Secure Mission Solutions, Inc.
+    All rights reserved.
 
 This software is distributed under the GNU General Public Licence as
 published by the Free Software Foundation.  See the file LICENCE.TXT for the
@@ -30,7 +32,7 @@ Compiling
 
 To compile all of the .java files into .class files, simply do:
 
-	% make
+    % make
 
 This will also generate a JAR (Java ARchive) file containing all of the
 classes.  Most JVM (Java Virtual Machine) implementations are able to use
@@ -44,10 +46,10 @@ There are three basic ways to use the Java TurboVNC Viewer:
 
   1. Running the applet as part of a TurboVNC Server installation.
 
-     Both the Unix and Windows versions of the TurboVNC Server include a small
-     built-in HTTP server that can serve the Java TurboVNC Viewer to web
-     clients.  This enables easy access to the shared desktop without the need
-     to install any software on the client machine.
+     The TurboVNC Server includes a small built-in HTTP server that can serve
+     the Java TurboVNC Viewer to web clients.  This enables easy access to the
+     remote desktop without the need to install any software on the client
+     machine.
 
      The Unix TurboVNC Server (Xvnc) is able to serve up any set of files that
      are present in a particular directory, which is specified in the -httpd
@@ -56,10 +58,6 @@ There are three basic ways to use the Java TurboVNC Viewer:
      the vncserver script.  Thus, one can easily deploy a modified version of
      the Java TurboVNC Viewer by simply copying a new JAR file into this
      directory.
-
-     The Windows TurboVNC Server (WinVNC) embeds the JAR file inside of its
-     executable, so deploying a modified version of the Java TurboVNC Viewer
-     on a Windows server requires rebuilding WinVNC.
 
   2. Running the applet from a standalone web server.
 

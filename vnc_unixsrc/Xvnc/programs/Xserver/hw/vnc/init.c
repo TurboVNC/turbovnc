@@ -496,14 +496,7 @@ InitOutput(screenInfo, argc, argv)
     initOutputCalled = TRUE;
 
     rfbLog("Xvnc version %s\n", XVNCRELEASE);
-    rfbLog("Copyright (C) 2009-2010 D. R. Commander\n");
-    rfbLog("Copyright (C) 2010 University Corporation for Atmospheric Research\n");
-    rfbLog("Copyright (C) 2004-2008 Sun Microsystems, Inc.\n");
-    rfbLog("Copyright (C) 2004 Landmark Graphics Corporation\n");
-    rfbLog("Copyright (C) 2001-2004 Alan Hourihane\n");
-    rfbLog("Copyright (C) 2000-2009 TightVNC Group\n");
-    rfbLog("Copyright (C) 1999 AT&T Laboratories Cambridge\n");
-    rfbLog("All Rights Reserved.\n");
+    rfbLog("Copyright (C) 2004-2012 The VirtualGL Project and many others\n");
     rfbLog("See http://www.virtualgl.org for more information\n");
     rfbLog("Desktop name '%s' (%s:%s)\n",desktopName,rfbThisHost,display);
     rfbLog("Protocol versions supported: 3.3, 3.7, 3.8, 3.7t, 3.8t\n");
