@@ -115,6 +115,11 @@ The TurboVNC Server now includes a non-functional implementation of the X Input
 extension, primarily to avoid crashes in recent versions of Gnome that aren't
 smart enough to check for that extension's existence before using it.
 -------------------------------------------------------------------------------
+[22]
+Implemented an authentication plugin mechanism for the Java TurboVNC Viewer,
+which allows sites to write their own external class for obtaining Unix login
+authentication credentials.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
