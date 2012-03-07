@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2012 Secure Mission Solutions, Inc.  All Rights Reserved.
 //  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
 //  Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
 //  Copyright (C) 2001-2004 HorizonLive.com, Inc.  All Rights Reserved.
@@ -27,9 +28,14 @@
 //
 
 import java.io.*;
-import java.awt.*;
 import java.awt.event.*;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.ReadOnlyBufferException;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
 import java.util.zip.*;
 
 class RfbProto {
@@ -461,6 +467,50 @@ class RfbProto {
     os.write(pw.getBytes());
 
     readSecurityResult("Unix login authentication");
+  }
+  
+  // 
+  // Convert a character array to a byte array with the default character set.
+  //
+  // An empty byte array is returned if any errors are detected during the
+  // conversion.
+  //
+
+  private byte[] charArrayToByteArray(char[] chars) {
+    byte[] bytes;
+
+    try {
+      Charset charset = Charset.defaultCharset();
+      CharsetEncoder encoder = charset.newEncoder();
+      CharBuffer cbuf = CharBuffer.wrap(chars);
+      ByteBuffer bbuf = encoder.encode(cbuf);
+      bytes = bbuf.array();
+    }
+    catch ( CharacterCodingException ex )      { bytes = new byte[0]; }
+    catch ( ReadOnlyBufferException ex )       { bytes = new byte[0]; }
+    catch ( UnsupportedOperationException ex ) { bytes = new byte[0]; }
+
+    return(bytes);
+  }
+
+  //
+  // Perform Unix login authentication using a plugin.
+  //
+
+  void authenticateUnixLogin(String user, char[] pw, String authType)
+    throws Exception {
+    byte[] bpw = charArrayToByteArray(pw);
+
+    if (user.length() < 1)
+      throw new Exception("Empty user name");
+    writeInt(user.length());
+    if (bpw.length < 1)
+      throw new Exception("Empty password");
+    writeInt(pw.length);
+    os.write(user.getBytes());
+    os.write(bpw);
+
+    readSecurityResult("Unix login authentication (" + authType + ")");
   }
 
   //

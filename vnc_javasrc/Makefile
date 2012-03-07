@@ -12,7 +12,8 @@ PAGES = index.vnc
 INSTALL_DIR = /usr/local/vnc/classes
 
 CLASSES = VncViewer.class RfbProto.class AuthPanel.class VncCanvas.class \
-	  VncCanvas2.class \
+	  VncCanvas2.class AuthPlugin.class AuthFactory.class \
+	  AuthClipboard.class AuthClipboardFactory.class \
 	  OptionsFrame.class ClipboardFrame.class ButtonPanel.class \
 	  DesCipher.class CapabilityInfo.class CapsContainer.class \
 	  RecordingFrame.class RFBUpdateEvent.class SessionRecorder.class \
@@ -21,7 +22,8 @@ CLASSES = VncViewer.class RfbProto.class AuthPanel.class VncCanvas.class \
 	  InStream.class MemInStream.class ZlibInStream.class
 
 SOURCES = VncViewer.java RfbProto.java AuthPanel.java VncCanvas.java \
-	  VncCanvas2.java \
+	  VncCanvas2.java AuthPlugin.java AuthFactory.java \
+	  AuthClipboard.java AuthClipboardFactory.java \
 	  OptionsFrame.java ClipboardFrame.java ButtonPanel.java \
 	  DesCipher.java CapabilityInfo.java CapsContainer.java \
 	  RecordingFrame.java RFBUpdateEvent.java SessionRecorder.java \

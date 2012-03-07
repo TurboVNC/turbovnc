@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2012 Secure Mission Solutions, Inc.  All Rights Reserved.
 //  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
 //  Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
 //  Copyright (C) 2001-2004 HorizonLive.com, Inc.  All Rights Reserved.
@@ -31,6 +32,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.*;
+import java.util.Arrays;
 
 public class VncViewer extends java.applet.Applet
   implements java.lang.Runnable, WindowListener, ComponentListener {
@@ -92,6 +94,9 @@ public class VncViewer extends java.applet.Applet
   int deferUpdateRequests;
   int debugStatsExcludeUpdates;
   int debugStatsMeasureUpdates;
+  
+  String authFactory  = null;
+  AuthPlugin authPlugin = null;
 
   // Reference to this applet for inter-applet communication.
   public static java.applet.Applet refApplet;
@@ -351,12 +356,22 @@ public class VncViewer extends java.applet.Applet
       }
       break;
     case RfbProto.AuthUnixLogin:
-      showConnectionStatus("Performing Unix login authentication");
-      AuthPanel authPanel = createAuthPanel(true);
-      String pw = authPanel.getPassword();
-      String user = authPanel.getUsername();
-      vncContainer.remove(authPanel);
-      rfb.authenticateUnixLogin(user, pw);
+      if (authPlugin != null) {
+        showConnectionStatus("Performing Unix login authentication ("
+          + authPlugin.getTitle() + " plug-in)");
+        char[] cpw = authPlugin.getPassword();
+        rfb.authenticateUnixLogin(authPlugin.getUser(), cpw,
+          authPlugin.getTitle());
+        authPlugin.clear();
+        Arrays.fill(cpw, '0');
+      } else {
+        showConnectionStatus("Performing Unix login authentication");
+        AuthPanel authPanel = createAuthPanel(true);
+        String pw = authPanel.getPassword();
+        String user = authPanel.getUsername();
+        vncContainer.remove(authPanel);
+        rfb.authenticateUnixLogin(user, pw);
+      }
       break;
     default:
       throw new Exception("Unknown authentication scheme " + authType);
@@ -731,6 +746,25 @@ public class VncViewer extends java.applet.Applet
 
     // SocketFactory.
     socketFactory = readParameter("SocketFactory", false);
+    
+    // AuthFactory.
+    authFactory   = readParameter("AuthFactory", false);
+    if (authFactory != null) {
+      try {
+        Class factoryClass = Class.forName(authFactory);
+        AuthFactory factory = (AuthFactory) factoryClass.newInstance();
+        authPlugin = factory.createAuthPlugin(this, userParam, passwordParam);
+      }
+      catch ( ClassNotFoundException ex ) {
+        fatalError("Could not find AuthFactory '" + authFactory + "'.");
+      }      
+      catch ( InstantiationException ex ) {
+        fatalError("Could not create AuthFactory '" + authFactory + "'.");
+      } 
+      catch ( IllegalAccessException ex ) {
+        fatalError("Illegal access to AuthFactory '" + authFactory + "'.");
+      }    
+    }
   }
 
   //
@@ -854,7 +888,8 @@ public class VncViewer extends java.applet.Applet
     clipboard.dispose();
     if (rec != null)
       rec.dispose();
-
+    if (authPlugin != null) 
+      authPlugin.dispose();
     if (inAnApplet) {
       showMessage("Disconnected");
     } else {
@@ -958,6 +993,8 @@ public class VncViewer extends java.applet.Applet
       rec.dispose();
     if (rfb != null && !rfb.closed())
       rfb.close();
+    if (authPlugin != null) 
+      authPlugin.dispose();
     if (inSeparateFrame)
       vncFrame.dispose();
   }

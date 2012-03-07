@@ -415,6 +415,16 @@ Here is the complete list of parameters supported in the Java TurboVNC Viewer:
     will cause delays in updating the screen when there is no mouse and
     keyboard activity on the client side.
 
+--> "AuthFactory" (no GUI equivalent)
+
+    Value: name of the class
+    Default: none
+
+    This option provides a way to define an alternate Unix login authentication 
+    mechanism.  The dynamically-referenced class must implement the
+    AuthFactory interface and return an implementation of the AuthPlugin
+    interface.  See AuthClipboard.java for an example.
+
 --> "SocketFactory" (no GUI equivalent)
 
     Value: name of the class
