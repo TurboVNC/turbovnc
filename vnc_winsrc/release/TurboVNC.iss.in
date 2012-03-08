@@ -30,7 +30,7 @@ BackColor=clBlack
 BackColor2=clBlue
 DirExistsWarning=no
 VersionInfoCompany=The VirtualGL Project
-VersionInfoDescription=A fast VNC implementation designed for video and 3D apps
+VersionInfoDescription=A highly-optimized version of VNC that can be used with performance-critical applications
 VersionInfoVersion=@VERSION@
 
 ChangesAssociations=yes
