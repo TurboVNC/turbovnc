@@ -108,9 +108,9 @@ section below for more information about CopyRect encoding.)
 
 This version of vncviewer also supports Hextile encoding, for backward
 compatibility with RealVNC.  Specifying "hextile" at the head of the encoding
-list will force the use of this protocol.  Hextile will also be used
+list will force the use of this encoding type.  Hextile will also be used
 automatically whenever you connect to any VNC server that doesn't support Tight
-encoding.  Since Hextile is a very latency-sensitive protocol, you may wish to
+encoding.  Since Hextile is very latency-sensitive, you may wish to
 override this behavior and use Raw encoding instead if your network is
 sufficiently fast.  For more information on encodings, see the ENCODINGS section
 below.
