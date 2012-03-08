@@ -36,6 +36,7 @@ import java.nio.ReadOnlyBufferException;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
+import java.util.Arrays;
 import java.util.zip.*;
 
 class RfbProto {
@@ -509,6 +510,7 @@ class RfbProto {
     writeInt(pw.length);
     os.write(user.getBytes());
     os.write(bpw);
+    Arrays.fill(bpw, (byte) 0);
 
     readSecurityResult("Unix login authentication (" + authType + ")");
   }
