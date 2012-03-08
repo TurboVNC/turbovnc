@@ -28,7 +28,7 @@ applications.  TurboVNC, in combination with VirtualGL, provides a complete
 solution for remotely displaying 3D applications with interactive performance.
 
 #-->%prep
-#-->%setup -q -n vnc/vnc_unixsrc
+#-->%setup -q -n vnc/unix
 
 #-->%build
 #-->./configure --prefix=@prefix@ --sysconfdir=/etc --mandir=@MANDIR@
@@ -62,7 +62,7 @@ Type=Application
 Categories=Application;Utility;X-Red-Hat-Extra;
 EOF
 
-chmod 644 %{_srcdir}/LICENCE.TXT %{_srcdir}/../TurboVNC-ChangeLog.txt %{_srcdir}/../vnc_docs/LICEN*.txt %{_srcdir}/../vnc_docs/*.html %{_srcdir}/../vnc_docs/*.png %{_srcdir}/../vnc_docs/*.css
+chmod 644 %{_srcdir}/../ChangeLog.txt %{_srcdir}/../doc/LICEN*.txt %{_srcdir}/../doc/*.html %{_srcdir}/../doc/*.png %{_srcdir}/../doc/*.css
 
 %clean
 rm -rf %{buildroot}
@@ -89,7 +89,7 @@ fi
 %config(noreplace) /etc/sysconfig/tvncservers
 %config(noreplace) /etc/turbovncserver.conf
 %config(noreplace) /etc/turbovncserver-auth.conf
-%doc %{_srcdir}/LICENCE.TXT  %{_srcdir}/../TurboVNC-ChangeLog.txt %{_srcdir}/../vnc_docs/LICEN*.txt %{_srcdir}/../vnc_docs/*.html %{_srcdir}/../vnc_docs/*.png %{_srcdir}/../vnc_docs/*.css
+%doc %{_srcdir}/../ChangeLog.txt %{_srcdir}/../doc/LICEN*.txt %{_srcdir}/../doc/*.html %{_srcdir}/../doc/*.png %{_srcdir}/../doc/*.css
 
 %dir @prefix@
 %dir @prefix@/bin

@@ -17,7 +17,7 @@ optimizations, major GUI improvements, file transfers, and more.
     All rights reserved.
 
 This software is distributed under the GNU General Public Licence as published
-by the Free Software Foundation.  See the file LICENCE.TXT for the conditions
+by the Free Software Foundation.  See the file LICENSE.txt for the conditions
 under which this software is made available.  TurboVNC also contains code from
 other sources.  See the Acknowledgements section below, and the individual
 files for details of the conditions under which they are made available.

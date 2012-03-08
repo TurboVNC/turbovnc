@@ -42,14 +42,14 @@ Name: "doc";    Description: "Documentation";   Types: full custom;
 [Files]
 Source: "@CMAKE_CURRENT_BINARY_DIR@\vncviewer\{#BUILD_DIR}vncviewer.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 Source: "@CMAKE_CURRENT_BINARY_DIR@\putty\{#BUILD_DIR}putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
-Source: "@CMAKE_SOURCE_DIR@\LICENCE.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "@CMAKE_SOURCE_DIR@\..\TurboVNC-ChangeLog.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "@CMAKE_SOURCE_DIR@\..\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "@CMAKE_SOURCE_DIR@\..\ChangeLog.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "@CMAKE_SOURCE_DIR@\TurboVNC.url"; DestDir: "{app}"; Flags: ignoreversion
-Source: "@CMAKE_SOURCE_DIR@\..\vnc_docs\*.png"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
-Source: "@CMAKE_SOURCE_DIR@\..\vnc_docs\*.html"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
-Source: "@CMAKE_SOURCE_DIR@\..\vnc_docs\LIC*.TXT"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
-Source: "@CMAKE_SOURCE_DIR@\..\vnc_docs\LIC*.txt"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
-Source: "@CMAKE_SOURCE_DIR@\..\vnc_docs\*.css"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
+Source: "@CMAKE_SOURCE_DIR@\..\doc\*.png"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
+Source: "@CMAKE_SOURCE_DIR@\..\doc\*.html"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
+Source: "@CMAKE_SOURCE_DIR@\..\doc\LIC*.TXT"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
+Source: "@CMAKE_SOURCE_DIR@\..\doc\LIC*.txt"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
+Source: "@CMAKE_SOURCE_DIR@\..\doc\*.css"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
 
 [Icons]
 Name: "{group}\TurboVNC Viewer";                      FileName: "{app}\vncviewer.exe";                                 WorkingDir: "{app}";     Components: viewer;

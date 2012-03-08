@@ -73,9 +73,8 @@ cp pkgscripts/Description.plist $pkgtmpdir/pkg/
 cp pkgscripts/Info.plist $pkgtmpdir/pkg/
 install -m 755 $SRCDIR/release/uninstall $PKGROOT/opt/$pkgname/bin/uninstall
 install -m 644 $SRCDIR/vncviewer/vncviewer.man $PKGROOT/opt/$pkgname/man/man1/vncviewer.1
-install -m 644 $SRCDIR/LICENCE.TXT $PKGROOT/Library/Documentation/$pkgname
-install -m 644 $SRCDIR/../TurboVNC-ChangeLog.txt $PKGROOT/Library/Documentation/$pkgname
-install -m 644 $SRCDIR/../vnc_docs/LICEN*.txt $SRCDIR/../vnc_docs/*.html $SRCDIR/../vnc_docs/*.png $SRCDIR/../vnc_docs/*.css $PKGROOT/Library/Documentation/$pkgname
+install -m 644 $SRCDIR/../ChangeLog.txt $PKGROOT/Library/Documentation/$pkgname
+install -m 644 $SRCDIR/../doc/LICEN*.txt $SRCDIR/../doc/*.html $SRCDIR/../doc/*.png $SRCDIR/../doc/*.css $PKGROOT/Library/Documentation/$pkgname
 sudo ln -fs /Library/Documentation/$pkgname "$PKGROOT/Applications/$pkgname/Documentation"
 
 sudo chown -R root:admin $PKGROOT 

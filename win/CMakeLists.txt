@@ -82,7 +82,7 @@ endif()
 add_subdirectory(zlib)
 add_subdirectory(vncviewer)
 add_subdirectory(putty)
-add_subdirectory(../vnc_docs doc)
+add_subdirectory(../doc doc)
 
 configure_file(release/TurboVNC.iss.in pkgscripts/TurboVNC.iss)
 
@@ -92,5 +92,5 @@ add_custom_target(installer
 	DEPENDS vncviewer putty
 	SOURCES pkgscripts/TurboVNC.iss)
 
-install(FILES LICENCE.txt TurboVNC.url ../TurboVNC-ChangeLog.txt
+install(FILES ../LICENSE.txt TurboVNC.url ../ChangeLog.txt
 	DESTINATION .)

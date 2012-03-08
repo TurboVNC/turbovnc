@@ -74,7 +74,7 @@ binary package available, then log in as root, download the TurboVNC source
 tarball (''turbovnc-''__''{version}''__''.tar.gz'') from the 
 [[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
 of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]],
-uncompress it, ''cd vnc/vnc_unixsrc'', and read ''BUILDING.txt'' for further
+uncompress it, ''cd vnc/unix'', and read ''BUILDING.txt'' for further
 instructions on how to build TurboVNC from source.
 
 ** Uninstalling TurboVNC

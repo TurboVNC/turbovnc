@@ -50,9 +50,8 @@ install: $(CLASSES) $(ARCHIVE)
 	$(CP) $(CLASSES) $(ARCHIVE) $(PAGES) $(INSTALL_DIR)
 
 release: $(ARCHIVE) README
-	$(CP) $(ARCHIVE) ../vnc_unixsrc/classes/
-	$(CP) README ../vnc_unixsrc/classes/
-	$(CP) $(ARCHIVE) ../vnc_winsrc/winvnc/res/
+	$(CP) $(ARCHIVE) ../unix/classes/
+	$(CP) README ../unix/classes/
 
 export:: $(CLASSES) $(ARCHIVE) $(PAGES)
 	@$(ExportJavaClasses)
