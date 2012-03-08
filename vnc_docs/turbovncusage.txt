@@ -147,10 +147,10 @@ images:
 
 	Allow JPEG compression :: {:}
 		If this option is enabled, then TurboVNC will use JPEG compression for all
-		image tiles with more than 24 unique colors and indexed color encoding for
-		all other image tiles.  If this option is disabled, then TurboVNC will
-		select between indexed color or raw encoding, depending on the size of the
-		image tile and its color count.
+		subrectangles with more than 24 unique colors and indexed color encoding for
+		all other subrectangles with more than 2 colors.  If this option is
+		disabled, then TurboVNC will select between indexed color or raw encoding,
+		depending on the size of the subrectangle and its color count.
 
 	JPEG image quality :: {:}
 		Lower quality levels produce grainier JPEG images with more noticeable
@@ -168,11 +168,11 @@ images:
 		least.
 
 	Zlib compression level :: {:}
-		If Zlib compression is enabled, then indexed color and raw-encoded image
-		tiles will be compressed with Zlib prior to transmission.  This decreases
-		network bandwidth usage at the expense of increased server CPU usage.  If
-		JPEG compression is enabled, then Zlib compression is always used with
-		non-JPEG image tiles.
+		If Zlib compression is enabled, then indexed color, mono, and raw-encoded
+		subrectangles will be compressed with Zlib prior to transmission.  This
+		decreases network bandwidth usage at the expense of increased server CPU
+		usage.  If JPEG compression is enabled, then Zlib compression is always
+		used with non-JPEG subrectangles.
 
 In the Windows TurboVNC Viewer, these parameters can be adjusted by accessing
 the Options dialog box (click on the "Options" button in the "TurboVNC
@@ -181,73 +181,75 @@ Connection Options button in the toolbar.)  In the Unix TurboVNC Viewer, press
 F8 after connecting to bring up the options menu.  In the Java viewer, click on
 the Options button at the top of the viewer window.
 
-The TurboVNC Viewer provides five image encoding protocols, corresponding
+The TurboVNC Viewer provides five "encoding methods", corresponding
 to the most useful combinations of the image compression options described
 above:
 
-|| Image encoding protocol || Allow JPEG || JPEG image quality || \
+|| Encoding method || Allow JPEG || JPEG image quality || \
 	JPEG chrominance subsampling || Zlib compression level || Notes ||
 | "Tight + Perceptually Lossless JPEG" | Yes | 95 | 1x | N/A | \
-	This protocol should be perceptually lossless (that is, any image \
+	This encoding method should be perceptually lossless (that is, any image \
 	compression artifacts it produces should be imperceptible to the human \
-	eye under most viewing conditions.)  This protocol requires a great deal \
-	of network bandwidth, however, and is generally not recommended except on \
-	50 Megabit/second and faster networks. |
+	eye under most viewing conditions.)  This encoding method requires a great \
+	deal of network bandwidth, however, and is generally not recommended except \
+	on 50 Megabit/second and faster networks. |
 | "Tight + Medium Quality JPEG" | Yes | 80 | 2x | N/A | \
-	For image tiles with a high number of unique colors, this protocol produces \
-	some minor, but generally not very noticeable, image compression artifacts. \
-	All else being equal, this protocol typically uses about twice the network \
-	bandwidth of the "Low Quality JPEG" protocol and about half the bandwidth of the \
-	"Perceptually Lossless JPEG" protocol, making it appropriate for medium-speed \
-	networks such as 10 Megabit Ethernet. |
+	For subrectangles with a high number of unique colors, this encoding method \
+	produces some minor, but generally not very noticeable, image compression \
+	artifacts.  All else being equal, this encoding method typically uses about \
+	twice the network bandwidth of the "Tight + Low Quality JPEG" encoding \
+	method and about half the bandwidth of the "Tight + Perceptually Lossless \
+	JPEG" encoding method, making it appropriate for medium-speed networks such \
+	as 10 Megabit Ethernet. |
 | "Tight + Low Quality JPEG" | Yes | 30 | 4x | N/A | \
-	For image tiles with a high number of unique colors, this protocol produces \
-	very noticeable image compression artifacts.  However, it performs \
+	For subrectangles with a high number of unique colors, this encoding method \
+	produces very noticeable image compression artifacts.  However, it performs \
 	optimally on low-bandwidth connections.  If image quality is more critical \
-	than performance, then use one of the other connection protocols or take \
-	advantage of the "Lossless Refresh" feature. |
+	than performance, then use one of the other encoding methods or take \
+	advantage of the Lossless Refresh feature. |
 | "Lossless Tight" | No | N/A | N/A | 0 | \
-	This protocol uses indexed color encoding for image tiles with a low number \
-	of unique colors but otherwise does not perform any image compression at \
-	all.  It is thus suitable only for gigabit and faster networks.  This \
-	protocol uses significantly less CPU time than any of the JPEG-based \
-	protocols. |
+	This encoding method uses indexed color encoding for subrectangles with a \
+	low number of unique colors but otherwise does not perform any image \
+	compression at all.  It is thus suitable only for gigabit and faster \
+	networks.  This encoding method uses significantly less CPU time than any \
+	of the JPEG-based encoding methods. |
 | "Lossless Tight + Zlib" | No | N/A | N/A | 1 | \
-	This protocol uses indexed color encoding for image tiles with a low number \
-	of unique colors and raw encoding for image tiles with a high number of \
-	unique colors.  It compresses all image tiles using Zlib with compression \
-	level 1.  For certain types of applications (CAD applications, in \
-	particular), this protocol uses less network bandwidth than the \
-	"Perceptually Lossless JPEG" protocol, but it also uses significantly more \
-	CPU time on the server than any of the JPEG-based protocols. |
+	This encoding method uses indexed color encoding for subrectangles with a \
+	low number of unique colors and raw encoding for subrectangles with a high \
+	number of unique colors.  It compresses all subrectangles using Zlib with \
+	compression level 1.  For certain types of applications (CAD applications, \
+	in particular), this encoding method uses less network bandwidth than the \
+	"Tight + Perceptually Lossless JPEG" encoding method, but it also uses \
+	significantly more CPU time on the server than any of the JPEG-based \
+	encoding methods. |
 
-In the Windows TurboVNC Viewer, the image encoding protocol can be set using
+In the Windows TurboVNC Viewer, the encoding method can be set using
 the Options dialog box (click on the "Options" button in the "TurboVNC
 Connection" dialog box or, after connecting to the server, click on the
 Connection Options button in the toolbar.)  In the Java viewer, the same thing
 is accomplished by clicking on the "Options" button at the top of the browser
 window.  With the Linux/Unix/Mac TurboVNC Viewer, the "Perceptually
-Lossless" protocol is the default, and you can use the following command-line
-switches to select another protocol:
+Lossless" encoding method is the default, and you can use the following
+command-line switches to select another encoding method:
 
-''-medqual'' = select the "Tight + Medium Quality JPEG" protocol {nl}
-''-lowqual'' = select the "Tight + Low Quality JPEG" protocol {nl}
-''-lossless'' = select the "Lossless Tight" protocol {nl}
-''-losslesswan'' = select the "Lossless Tight + Zlib" protocol {nl}
+''-medqual'' = select the "Tight + Medium Quality JPEG" encoding method {nl}
+''-lowqual'' = select the "Tight + Low Quality JPEG" encoding method {nl}
+''-lossless'' = select the "Lossless Tight" encoding method {nl}
+''-losslesswan'' = select the "Lossless Tight + Zlib" encoding method {nl}
 
 You can also press the F8 key after connecting to pop up a menu from which you
-can select a different protocol.
+can select a different encoding method.
 
 *** Lossless Refresh
 
-Since both of TurboVNC's mathematically lossless protocols have performance
-drawbacks, another option for image-quality-critical applications is the
-"Lossless Refresh" feature.  When a lossless refresh is requested by a TurboVNC
-viewer, the server will send a mathematically lossless image of the current
-TurboVNC desktop to the requesting viewer.  So, for instance, a user can
-rotate/pan/zoom an object in their 3D application using a very low-quality JPEG
-setting, then when that user is ready to interpret or analyze the object, they
-can request a lossless refresh of TurboVNC's virtual screen.
+Since both of TurboVNC's mathematically lossless encoding methods have
+performance drawbacks, another option for image-quality-critical applications
+is the "Lossless Refresh" feature.  When a lossless refresh is requested by a
+TurboVNC viewer, the server will send a mathematically lossless image of the
+current TurboVNC desktop to the requesting viewer.  So, for instance, a user
+can rotate/pan/zoom an object in their 3D application using a very low-quality
+JPEG setting, then when that user is ready to interpret or analyze the object,
+they can request a lossless refresh of TurboVNC's virtual screen.
 
 To perform a lossless refresh in the Windows or Unix TurboVNC Viewers, press
 CTRL-ALT-SHIFT-L (in the Windows TurboVNC Viewer, you can also click on the
@@ -263,7 +265,9 @@ session.  ALR will monitor all of the VNC viewer connections, and if more than
 __''{timeout}''__ seconds have elapsed since the last framebuffer update was
 sent to a given viewer, then the TurboVNC Server will send to that viewer a
 mathematically lossless copy of screen regions that have been affected by
-lossy compression.
+lossy compression.  You can also pass arguments of ''-alrqual'' and
+''-alrsamp'' to ''vncserver'' to specify that automatic lossless refreshes
+should be sent using JPEG instead (see the ''Xvnc'' man page for details.)
 
 The ALR feature is designed mainly for use by interactive visualization
 applications.  The idea is that, on a low-bandwidth connection, low-quality

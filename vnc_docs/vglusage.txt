@@ -32,8 +32,8 @@ client machine without using VirtualGL's embedded VGL Transport.
 
 	* For 3D applications whose rendered images do not contain very many unique
 		colors (for instance, CAD applications in wireframe mode), the hybrid
-		protocol used by TurboVNC will generally use less network bandwidth than
-		the pure motion JPEG protocol used by the VGL Transport.
+		encoding methods used by TurboVNC will generally use less network bandwidth
+		than the pure JPEG encoding method used by the VGL Transport.
 
 	* TurboVNC provides two lossless compression modes, one of which is designed
 		to reduce server CPU usage on gigabit networks and the other of which is

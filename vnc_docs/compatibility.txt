@@ -3,10 +3,10 @@
 
 In order to realize the full performance benefits of TurboVNC, it is necessary
 to use a TurboVNC server and a TurboVNC viewer in concert.  However, TurboVNC
-is fully backward compatible with TightVNC, RealVNC, and other VNC flavors, as
-well as fully compatible with [[http://www.tigervnc.com][TigerVNC]].
-You can use the TurboVNC Viewer to connect to a non-TurboVNC server (or vice
-versa), although this will generally result in some decrease in performance.
+is fully compatible with [[http://www.tigervnc.com][TigerVNC]], TightVNC,
+RealVNC, and other VNC flavors.  You can use the TurboVNC Viewer to connect to
+a non-TurboVNC server (or vice versa), although this will generally result in
+some decrease in performance.
 
 The following sections list additional things to bear in mind when mixing
 TurboVNC with other VNC flavors.
@@ -52,13 +52,16 @@ TurboVNC with other VNC flavors.
 		no effect when connecting to a TightVNC or TigerVNC 1.0/1.1 server.
 		{nl}{nl}
 
-	* The TurboVNC Server only supports Zlib compression level 1, because higher
-		compression levels use too much CPU time to be useful for the types of
-		image workloads that TurboVNC is designed to support.  However, although
-		Zlib compression levels 2-9 cannot be set using the TurboVNC Viewer GUI,
-		you can still specify these higher Zlib compression levels from the
-		TurboVNC Viewer command line.  This may be useful when connecting to a
-		TightVNC or TigerVNC server.
+	* The TurboVNC Server only supports Tight compression levels 1-2 if JPEG
+		encoding is enabled, and Tight compression levels 0-1 if JPEG encoding
+		is disabled.  Extensive experimentation has shown that TurboVNC's encoding
+		methods cannot produce significantly tighter output by increasing the Zlib
+		compression level beyond this, except on rare corner cases (such as the
+		console output of a large compilation) that are not performance-critical to
+		begin with.  Although compression levels 2-9 cannot be set using the
+		TurboVNC Viewer GUI, you can still specify these higher compression levels
+		from the TurboVNC Viewer command line.  This may be useful when connecting
+		to a TightVNC or TigerVNC server.
 		{nl}{nl}
 
 	* TurboVNC supports an extension to the TightVNC protocol that allows the
@@ -95,19 +98,19 @@ TurboVNC with other VNC flavors.
 
 ** RealVNC
 
-The TurboVNC Server and Viewer both support the Hextile and Raw protocols,
-which are compatible with RealVNC.  Neither of these protocols can be selected
-from the TurboVNC Viewer GUI, but Hextile will be selected automatically when
+The TurboVNC Viewer supports the Hextile and Raw encoding types, which are
+compatible with RealVNC.  Neither of these encoding types can be selected from
+the TurboVNC Viewer GUI, but Hextile will be selected automatically when
 connecting to a RealVNC server.  Raw will be automatically selected when
-connecting to a VNC server running on the same machine as the viewer.  Both
-Raw and Hextile can also be manually selected from the ''vncviewer'' command
-line.
+connecting to a VNC server running on the same machine as the viewer.  Both Raw
+and Hextile can also be manually selected from the ''vncviewer'' command line.
+The TurboVNC Server additionally supports the CoRRE, RRE, Zlib, and ZRLE
+encoding types, for compatibility with RealVNC viewers.
 
-The Raw protocol can perform well on gigabit links.  The Hextile protocol,
-however, uses very small tiles, and thus it incurs a large amount of overhead,
-even on the fastest of networks.  Thus, neither protocol should be used unless
+The Raw encoding type can perform well on gigabit links.  Hextile, however,
+uses very small tiles, and thus it incurs a large amount of overhead, even on
+the fastest of networks.  Thus, neither encoding type should be used unless
 absolutely necessary.  One interesting note, however, is that many of the
 TurboVNC viewer enhancements (including optimized blitting, hiding network
 latency, and double buffering) are available even when using these legacy
-protocols.  Thus, in some cases, the TurboVNC Viewer may actually perform
-better than the RealVNC Viewer when connecting to RealVNC servers.
+encoding types.

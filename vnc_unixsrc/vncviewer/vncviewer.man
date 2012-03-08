@@ -7,7 +7,7 @@
 .\" Copyright (C) 2001-2003 Constantin Kaplinsky
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
 .\" Copyright (C) 2010 University Corporation for Atmospheric Research
-.\" Copyright (C) 2010-2011 D. R. Commander
+.\" Copyright (C) 2010-2012 D. R. Commander
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
@@ -100,7 +100,7 @@ login authentication and you want to override this preference for a particular
 connection (for instance, to use a one-time password.)
 .TP
 \fB\-encodings\fR \fIencoding\-list\fR
-This option specifies a list of image encoding methods that vncviewer is
+This option specifies a list of encoding types that vncviewer is
 allowed to use.  The default list is "tight copyrect" for remote connections and
 "raw copyrect" for local connections.  You can specify "tight" as the encoding
 list in order to disable the use of CopyRect encoding (see the ENCODINGS
@@ -131,25 +131,25 @@ allows the VNC server to control the viewer's colormap.
 Try to use a TrueColor visual for the VNC viewer.
 .TP
 \fB\-depth\fR \fIdepth\fR
-If the VNC viewer is running on an X display which supports multiple TrueColor
+If the VNC viewer is running on an X display that supports multiple TrueColor
 visuals of different depths, this option tells the viewer to use a visual with
 the specified depth (in bits per pixel.)  If successful, the VNC server will
 send pixels using this color depth.
 .TP
 \fB\-compresslevel \fIlevel\fR
 Level 1 applies a minimum amount of Zlib compression to the Lossless Tight
-protocol in order to reduce its bandwidth usage.  Level 0 disables Zlib
-compression in the Lossless Tight protocol in order to decrease server CPU
-usage.  This option has no effect if JPEG compression is enabled.
+encoding method in order to reduce its bandwidth usage.  Level 0 disables Zlib
+compression in the Lossless Tight encoding method in order to decrease server
+CPU usage.  This option has no effect if JPEG compression is enabled.
 .TP
 \fB\-nojpeg\fR
-Disable the use of JPEG compression in the Tight protocol.  The resulting
-"Lossless Tight" image protocol is mathematically lossless but will use
-significantly more network bandwidth than the Tight+JPEG protocol.
+Disable the use of JPEG compression in the Tight encoder.  The resulting
+"Lossless Tight" encoding method is mathematically lossless but will use
+significantly more network bandwidth than the Tight+JPEG encoding methods.
 .TP
 \fB\-samp \fI1X | 2X | 4X | gray\fR
 Specifies the level of chrominance subsampling to use when compressing JPEG
-images with the Tight+JPEG protocol.
+images with the Tight+JPEG encoding methods.
 
 Each pixel in a JPEG image is represented as a brightness (luminance)
 value and a pair of color (chrominance) values.  Chrominance subsampling
@@ -164,7 +164,7 @@ image, leaving only luminance.  1X subsampling is the same as no subsampling
 .TP
 \fB\-quality \fIlevel\fR
 Specifies the JPEG quality (1..100) to use when compressing JPEG images with
-the Tight+JPEG protocol.
+the Tight+JPEG encoding methods.
 
 Higher JPEG quality levels result in less compression but better image quality.
 The default quality level of 95, when used without chrominance subsampling,
@@ -180,8 +180,7 @@ Disabling cursor shape updates can cause mouse movements to be painfully
 slow, so do it only if something isn't working right.
 .TP
 \fB\-autopass\fR
-Read a plain-text password from stdin.  Irrelevant if Unix login
-authentication is used.
+Read a plain-text password from stdin.
 .TP
 \fB\-singlebuffer\fR
 The TurboVNC Viewer's default behavior is to wait until all tiles in a
@@ -193,58 +192,58 @@ cause it to draw each tile in the framebuffer update as it is received.
 This may be desirable on very slow connections.
 .TP
 \fB\-lowqual\fR
-Select the "Tight + Low Quality JPEG" image encoding protocol.  This is the
+Select the "Tight + Low Quality JPEG" encoding method.  This is the
 equivalent of \fB\-samp 4X -quality 30\fR.
 
-The Tight + Low Quality JPEG protocol uses paletted encoding with Zlib
-compression level 1 to encode image rectangles with <= 24 colors and
+The Tight + Low Quality JPEG encoding method uses indexed color encoding with
+Zlib compression level 1 to encode subrectangles with <= 24 colors and
 low-quality TurboJPEG encoding (quality level 30 with 4X subsampling) to encode
-all other image rectangles.  This protocol will produce very noticeable image
-compression artifacts on rectangles with large numbers of unique colors, but it
-will perform optimally on low-bandwidth, high-latency connections such as
-broadband.  You can use TurboVNC's "Lossless Refresh" feature if you need to
-occasionally send a frame without compression artifacts.
+all other subrectangles.  This encoding method will produce very noticeable
+image compression artifacts on subrectangles with large numbers of unique
+colors, but it will perform optimally on low-bandwidth, high-latency
+connections such as broadband.  You can use TurboVNC's "Lossless Refresh"
+feature if you need to occasionally send a frame without compression artifacts.
 .TP
 \fB\-medqual\fR
-Select the "Tight + Medium Quality JPEG" image encoding protocol.  This is the
+Select the "Tight + Medium Quality JPEG" encoding method.  This is the
 equivalent of \fB\-samp 2X -quality 80\fR.
 
-The Tight + Medium Quality JPEG protocol uses paletted encoding with Zlib
-compression level 1 to encode image rectangles with <= 24 colors and
+The Tight + Medium Quality JPEG encoding method uses indexed color encoding
+with Zlib compression level 1 to encode subrectangles with <= 24 colors and
 medium-quality TurboJPEG encoding (quality level 80 with 2X subsampling) to
-encode all other image rectangles.  This protocol may produce some compression
-artifacts on rectangles with large numbers of unique colors, but these
-artifacts are generally minor and not very noticeable.  This protocol uses about
-half the network bandwidth of the default protocol (Tight + Perceptually
-Lossless JPEG) and about twice the network bandwidth of the
-Tight + Low Quality JPEG protocol.
+encode all other subrectangles.  This encoding method may produce some
+compression artifacts on subrectangles with large numbers of unique colors, but
+these artifacts are generally minor and not very noticeable.  This encoding
+method uses about half the network bandwidth of the default encoding method
+(Tight + Perceptually Lossless JPEG) and about twice the network bandwidth of
+the Tight + Low Quality JPEG encoding method.
 .TP
 \fB\-lossless\fR
-Select the "Lossless Tight" image encoding protocol.  This is the equivalent
+Select the "Lossless Tight" encoding method.  This is the equivalent
 of \fB\-nojpeg -compresslevel 0\fR.
 
-The Lossless Tight protocol uses uncompressed paletted encoding for image
-rectangles with low numbers of unique colors and uncompressed raw encoding for
-image rectangles with high numbers of unique colors.  This protocol, on average,
-uses quite a bit less CPU time than Tight+JPEG and requires much less bandwidth
-than Raw encoding.  However, it uses much more bandwidth than Tight+JPEG
-encoding and is thus only appropriate for use on gigabit and faster
-connections.
+The Lossless Tight encoding method uses uncompressed indexed color encoding for
+subrectangles with low numbers of unique colors and uncompressed raw encoding
+for subrectangles with high numbers of unique colors.  This encoding method, on
+average, uses quite a bit less CPU time than Tight+JPEG and requires much less
+bandwidth than Raw encoding.  However, it uses much more bandwidth than the
+Tight+JPEG encoding methods and is thus only appropriate for use on gigabit and
+faster connections.
 .TP
 \fB\-losslesswan\fR
-Select the "Lossless Tight + Zlib" image encoding protocol.  This is the
+Select the "Lossless Tight + Zlib" encoding method.  This is the
 equivalent of \fB\-nojpeg -compresslevel 1\fR.
 
-The Lossless Tight + Zlib protocol is the same as the Lossless Tight
-protocol, except that it compresses all image rectangles with Zlib compression
-level 1 prior to transmission.  For image rectangles with low numbers of unique
-colors, this protocol will perform similarly to the Tight+JPEG protocol.
-However, it will use significantly more bandwidth and CPU time than Tight+JPEG
-when sending image rectangles with high numbers of unique colors.  The
-usefulness of this protocol is debatable, but it is included for those who
-absolutely must use mathematically lossless compression in environments where
-performance is constrained more by the network than the server CPU.  The
-Lossless Refresh feature in TurboVNC uses this protocol.
+The Lossless Tight + Zlib encoding method is the same as the Lossless Tight
+encoding method, except that it compresses all subrectangles with Zlib
+compression level 1 prior to transmission.  For subrectangles with low numbers
+of unique colors, this encoding method will perform similarly to the Tight+JPEG
+methods.  However, it will use significantly more bandwidth and CPU time than
+Tight+JPEG when sending subrectangles with high numbers of unique colors.  The
+usefulness of this encoding method is debatable, but it is included for those
+who absolutely must use mathematically lossless compression in environments
+where performance is constrained more by the network than the server CPU.  The
+Lossless Refresh feature in TurboVNC uses this encoding method.
 .TP
 \fB\-cu\fR
 Enable continuous updates.  Normally, RFB (the protocol used by VNC) is a
@@ -284,9 +283,9 @@ values.
 refers to how an image is represented on the network.  The VNC server normally
 sends only the areas of its display that have changed since the last update.
 These areas are sent as separate rectangles of pixels, and each rectangle can
-be encoded using a different method.  All rectangles contain a header which
-specifies the location and size of the rectangle and how it was encoded.  The
-encoding methods supported by the TurboVNC Viewer are listed below.
+be encoded using a different encoding type.  All rectangles contain a header
+that specifies the location and size of the rectangle and how it was encoded.
+The encoding types supported by the TurboVNC Viewer are listed below.
 .TP
 .B Raw
 Raw encoding sends the raw pixel values from the VNC server's virtual desktop,
@@ -313,16 +312,21 @@ local-area networks.  It is included only for backward compatibility with other
 VNC flavors and should not be used except when absolutely necessary.
 .TP
 .B Tight
-Tight encoding analyzes each image rectangle to determine the optimal encoding
-method to use for it.  Rectangles with only one color are encoded as a bounding
-box and a fill color.  Rectangles with only two colors are encoded as a
-1-bit-per-pixel bitmap with a 2-color palette.  Rectangles with low numbers of
-unique colors are encoded as a color palette and an indexed bitmap containing 8
-index bits per pixel.  Rectangles with high numbers of unique colors are
-encoded using either JPEG or Raw encoding, depending on the user's preference.
-Zlib can optionally be used to compress the paletted and raw-encoded
-rectangles.  In TurboVNC, the Tight protocol has been optimized for maximum
-performance with 3D and video workloads.
+The Tight encoder attempts to encode each rectangle in the most efficient way
+possible by splitting it into subrectangles and encoding each subrectangle
+using a different "subencoding type".  The process by which it does this is
+referred to as an "encoding method" in the TurboVNC documentation and GUI.  The
+Tight encoder first analyzes a rectangle to determine if any significant
+portion of it is solid, and if so, that portion is encoded as a bounding box
+and a fill color.  Of the remaining subrectangles, those with only two colors
+are encoded as a 1-bit-per-pixel bitmap with a 2-color palette, those with low
+numbers of unique colors are encoded as a color palette and an indexed bitmap
+containing 8 index bits per pixel, and subrectangles with high numbers of
+unique colors are encoded using either JPEG or Raw encoding, depending on the
+encoding method.  Zlib can optionally be used to compress the indexed color and
+raw-encoded subrectangles.  TurboVNC uses a modified version of the Tight
+encoder that has been optimized for maximum performance with 3D and video
+workloads.
 .SH RESOURCES
 X resources for \fBvncviewer\fR can be set in a file called \fBVncviewer\fR
 (case-sensitive), which can reside either in the user's home directory or in

@@ -1,5 +1,5 @@
 //
-//  Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2010, 2012 D. R. Commander.  All Rights Reserved.
 //  Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
 //  Copyright (C) 2006-2008 Sun Microsystems, Inc.  All Rights Reserved.
 //  Copyright (C) 2001 HorizonLive.com, Inc.  All Rights Reserved.
@@ -37,7 +37,7 @@ class OptionsFrame extends Frame
   implements WindowListener, ActionListener, ItemListener {
 
   static String[] names = {
-    "Image encoding protocol",
+    "Encoding method",
     "Allow JPEG compression",
     "JPEG chrominance subsampling",
     "JPEG image quality",

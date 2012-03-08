@@ -6,14 +6,14 @@
 .\" Copyright (C) 2000, 2001 Red Hat, Inc.
 .\" Copyright (C) 2001, 2002 Constantin Kaplinsky
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
-.\" Copyright (C) 2010 D. R. Commander
+.\" Copyright (C) 2010, 2012 D. R. Commander
 .\" Copyright (C) 2010 University Corporation for Atmospheric Research
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "November 2011" "" "TurboVNC"
+.TH Xvnc 1 "March 2012" "" "TurboVNC"
 .SH NAME
 Xvnc \- an X server providing VNC connectivity
 .SH SYNOPSIS
@@ -151,7 +151,7 @@ updates have been sent to a given client in the past \fItime\fR seconds, and if
 "eligible" areas of the screen have been transmitted to that client using JPEG
 since the last lossless refresh, then those areas of the screen are
 re-transmitted using mathematically lossless image compression (specifically,
-the Lossless Tight + Zlib protocol.)
+the Lossless Tight + Zlib encoding method.)
 
 The default ALR behavior is that only regions which were drawn using
 X[Shm]PutImage() are eligible for ALR.  This is designed to work in conjunction

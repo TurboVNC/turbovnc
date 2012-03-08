@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2012-02-23T14:08:20">
+<meta name="date" content="2012-03-08T08:17:45">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -194,37 +194,48 @@ License, v2</a><a name="idx004"></a>.</p>
 
 <p><a name="Overview"></a></p>
 
-<p>TurboVNC is an optimized version of VNC (more specifically, of 
+<p>TurboVNC is a derivative of VNC that is tuned to provide peak 
+performance for full-screen video and 3D workloads.  TurboVNC is based 
+on the 
 <span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx005"></a> 
-1.3.x.)  On the surface, TurboVNC behaves similarly to its parent, but 
-TurboVNC has been tuned to provide peak performance for full-screen 
-video and 3D workloads.  On these types of workloads, TurboVNC performs 
-as much as an order of magnitude faster than TightVNC 1.3.x, uses more 
-than an order of magnitude less CPU time to compress each frame, and it 
-produces generally better compression ratios.  As with TightVNC, 
-TurboVNC uses JPEG compression for image tiles with a high number of 
-unique colors and indexed color encoding for image tiles with a low 
-number of unique colors.  Part of TurboVNC&rsquo;s speedup comes from 
-the use of libjpeg-turbo, the same high-speed SIMD-optimized JPEG codec 
-used by VirtualGL.  However, TurboVNC also bypasses the CPU-hungry 
-smoothness detection routines that TightVNC uses to determine whether a 
-tile is a good candidate for JPEG compression.  Furthermore, TurboVNC 
-eliminates buffer copies, it maximizes network efficiency by using the 
-largest tile sizes supported by the TightVNC protocol, and it never uses 
-a Zlib compression level higher than 1.  In the aggregate, TurboVNC 
-compresses 2D application workloads a bit less efficiently than 
-TightVNC, but it generally does a better job than TightVNC of 
-compressing 3D application workloads.</p>
+1.3.x and 
+<span class="remote"><a href="http://xf4vnc.sourceforge.net/" class="remote">xf4vnc</a></span><a name="idx006"></a> 
+code bases, and on the surface, it behaves similarly to its parents.  
+However, on 3D and video workloads, TurboVNC performs as much as an 
+order of magnitude faster than TightVNC 1.3.x, uses more than an order 
+of magnitude less CPU time to compress each frame, and it produces 
+generally better compression ratios.  As with TightVNC, TurboVNC 
+analyzes each framebuffer update, separates large solid areas (if any), 
+and sends those first using a simple bounding box and fill color.  It 
+then splits the remaining part of the update into a number of 
+&ldquo;subrectangles&rdquo;, using JPEG compression to encode 
+subrectangles with a high number of unique colors and indexed color or 
+mono encoding to encode subrectangles with a low number of unique colors.</p>
+
+<p>Part of TurboVNC&rsquo;s speedup comes from the use of libjpeg-turbo, 
+the same high-speed SIMD-optimized JPEG codec used by VirtualGL.  
+However, TurboVNC also bypasses the CPU-hungry smoothness detection 
+routines that TightVNC uses to determine whether a subrectangle is a 
+good candidate for JPEG compression, and TurboVNC&rsquo;s encoding 
+methods tend to favor the use of JPEG more, since it is now generally 
+the fastest subencoding type.  Furthermore, TurboVNC eliminates buffer 
+copies, it maximizes network efficiency by splitting framebuffer updates 
+into relatively large subrectangles, and it never uses a Zlib 
+compression level higher than 1.  In the aggregate, TurboVNC compresses 
+2D application workloads less efficiently than TightVNC, but it 
+generally does a better job than TightVNC of compressing 
+performance-critical 3D and video application workloads.</p>
 
 <p>TurboVNC is the product of extensive research, in which many different 
 permutations of the TightVNC encoder were benchmarked at the low level 
 against a variety of captured RFB sessions that simulated real-world 
 application workloads, both 2D and 3D.  For more information on the 
-research leading to TurboVNC&rsquo;s image encoding optimizations, see 
+research leading to TurboVNC&rsquo;s encoder design, see 
 <span class="remote"><a href="http://www.virtualgl.org/pmwiki/uploads/About/tighttoturbo.pdf" class="remote">this 
-report</a></span><a name="idx006"></a>.</p>
+report</a></span><a name="idx007"></a>.</p>
 
-<p>In addition, TurboVNC provides the following features:</p>
+<p>In addition to high performance, other notable features of TurboVNC 
+include:</p>
 
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
@@ -232,8 +243,8 @@ report</a></span><a name="idx006"></a>.</p>
         chrominance subsampling
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        (Optional) double buffering on the client side to reduce tearing 
-        artifacts in 3D and video applications
+        Double buffering on the client side to reduce tearing artifacts in 3D 
+        and video applications
     </li>
     <li class="Itemize-1 Itemize asterisk">
         TurboVNC has the ability to hide network latency by decompressing and 
@@ -243,17 +254,22 @@ report</a></span><a name="idx006"></a>.</p>
     </li>
     <li class="Itemize-1 Itemize asterisk">
         TurboVNC supports authentication with one-time passwords or Unix login 
-        credentials.
+        credentials.  Access control lists can be used to share VNC sessions 
+        with only certain users.
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        TurboVNC allows security/authentication policies to be set globally for 
+        a particular server machine.
     </li>
     <li class="Itemize-1 Itemize asterisk">
         TurboVNC provides a &ldquo;lossless refresh&rdquo; feature, which sends 
-        a mathematically lossless copy of the current screen image.  This is 
-        useful in situations in which image quality is critical but the network 
-        is too slow to support sending a high-quality image for every frame.  
-        Lossless refreshes can be performed manually when a certain hotkey is 
-        pressed, or the TurboVNC Server can be configured to send a lossless 
-        refresh automatically if the user stops interacting with the application 
-        for a certain period of time.
+        a lossless copy of the current screen image.  This is useful in 
+        situations in which image quality is critical but the network is too 
+        slow to support sending a high-quality image for every frame.  Lossless 
+        refreshes can be performed manually when a certain hotkey is pressed, or 
+        the TurboVNC Server can be configured to send a lossless refresh 
+        automatically if the user stops interacting with the application for a 
+        certain period of time.
     </li>
 </ul>
 
@@ -406,23 +422,23 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
         Download the appropriate TurboVNC binary package for your system from 
         the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-        area</a></span><a name="idx007"></a> of the 
+        area</a></span><a name="idx008"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx008"></a>. Packages are 
+        SourceForge project page</a></span><a name="idx009"></a>. Packages are 
         provided for Linux distributions in the 
         <span class="remote"><a href="http://www.redhat.com/" class="remote">Red 
-        Hat</a></span><a name="idx009"></a>, 
-        <span class="remote"><a href="http://www.novell.com/linux/" class="remote">SuSE</a></span><a name="idx0010"></a>, 
+        Hat</a></span><a name="idx0010"></a>, 
+        <span class="remote"><a href="http://www.novell.com/linux/" class="remote">SuSE</a></span><a name="idx0011"></a>, 
         or 
-        <span class="remote"><a href="http://www.debian.org/" class="remote">Debian</a></span><a name="idx0011"></a> 
+        <span class="remote"><a href="http://www.debian.org/" class="remote">Debian</a></span><a name="idx0012"></a> 
         families that contain GLIBC 2.3.2 or later (including 
-        <span class="remote"><a href="http://fedoraproject.org/" class="remote">Fedora</a></span><a name="idx0012"></a>, 
-        <span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0013"></a> 
+        <span class="remote"><a href="http://fedoraproject.org/" class="remote">Fedora</a></span><a name="idx0013"></a>, 
+        <span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0014"></a> 
         3 and later, 
         <span class="remote"><a href="http://www.ubuntu.com/" class="remote">Ubuntu 
-        Linux</a></span><a name="idx0014"></a> v6.0 or later, and 
+        Linux</a></span><a name="idx0015"></a> v6.0 or later, and 
         <span class="remote"><a href="http://www.whiteboxlinux.org/" class="remote">White 
-        Box</a></span><a name="idx0015"></a>.) <br />
+        Box</a></span><a name="idx0016"></a>.) <br />
     </li>
     <li class="Ordered-1 Ordered" value="2">
         Log in as root, cd to the directory where you downloaded the binary 
@@ -456,9 +472,9 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
         (<code>TurboVNC-</code><em><code>{version}</code></em><code>.dmg</code>) 
         from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-        area</a></span><a name="idx0016"></a> of the 
+        area</a></span><a name="idx0017"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0017"></a>.
+        SourceForge project page</a></span><a name="idx0018"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Open the disk image, then open 
@@ -480,9 +496,9 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
         <code>TurboVNC64-</code><em><code>{version}</code></em><code>.exe</code> 
         for 64-bit systems) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-        area</a></span><a name="idx0018"></a> of the 
+        area</a></span><a name="idx0019"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0019"></a>.
+        SourceForge project page</a></span><a name="idx0020"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Run the TurboVNC installer.  The installation of TurboVNC should be 
@@ -501,9 +517,9 @@ TurboVNC source tarball
 (<code>turbovnc-</code><em><code>{version}</code></em><code>.tar.gz</code>) 
 from the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-area</a></span><a name="idx0020"></a> of the 
+area</a></span><a name="idx0021"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-SourceForge project page</a></span><a name="idx0021"></a>, uncompress 
+SourceForge project page</a></span><a name="idx0022"></a>, uncompress 
 it, <code>cd&nbsp;vnc/vnc_unixsrc</code>, and read 
 <code>BUILDING.txt</code> for further instructions on how to build 
 TurboVNC from source.</p>
@@ -771,10 +787,11 @@ TurboVNC compresses images:</p>
     <dt class="Description-1 Description">Allow JPEG compression</dt>
     <dd class="Description-1 Description">
          If this option is enabled, then TurboVNC will use JPEG compression for 
-         all image tiles with more than 24 unique colors and indexed color 
-         encoding for all other image tiles.  If this option is disabled, then 
-         TurboVNC will select between indexed color or raw encoding, depending 
-         on the size of the image tile and its color count.
+         all subrectangles with more than 24 unique colors and indexed color 
+         encoding for all other subrectangles with more than 2 colors.  If this 
+         option is disabled, then TurboVNC will select between indexed color or 
+         raw encoding, depending on the size of the subrectangle and its color 
+         count.
     </dd>
     <dt class="Description-1 Description">JPEG image quality</dt>
     <dd class="Description-1 Description">
@@ -795,11 +812,11 @@ TurboVNC compresses images:</p>
     </dd>
     <dt class="Description-1 Description">Zlib compression level</dt>
     <dd class="Description-1 Description">
-         If Zlib compression is enabled, then indexed color and raw-encoded 
-         image tiles will be compressed with Zlib prior to transmission.  This 
-         decreases network bandwidth usage at the expense of increased server 
-         CPU usage.  If JPEG compression is enabled, then Zlib compression is 
-         always used with non-JPEG image tiles.
+         If Zlib compression is enabled, then indexed color, mono, and 
+         raw-encoded subrectangles will be compressed with Zlib prior to 
+         transmission.  This decreases network bandwidth usage at the expense of 
+         increased server CPU usage.  If JPEG compression is enabled, then Zlib 
+         compression is always used with non-JPEG subrectangles.
     </dd>
 </dl>
 
@@ -811,7 +828,7 @@ toolbar.)  In the Unix TurboVNC Viewer, press F8 after connecting to
 bring up the options menu.  In the Java viewer, click on the Options 
 button at the top of the viewer window.</p>
 
-<p>The TurboVNC Viewer provides five image encoding protocols, 
+<p>The TurboVNC Viewer provides five &ldquo;encoding methods&rdquo;, 
 corresponding to the most useful combinations of the image compression 
 options described above:</p>
 
@@ -819,7 +836,7 @@ options described above:</p>
 <table class="standard">
   <thead class="standard">
   <tr class="head ">
-    <th class="head standard">Image encoding protocol</th>
+    <th class="head standard">Encoding method</th>
     <th class="head standard">Allow JPEG</th>
     <th class="head standard">JPEG image quality</th>
     <th class="head standard">JPEG chrominance subsampling</th>
@@ -833,7 +850,7 @@ options described above:</p>
     <td class="standard">95</td>
     <td class="standard">1x</td>
     <td class="standard">N/A</td>
-    <td class="standard">This protocol should be perceptually lossless (that is, any image compression artifacts it produces should be imperceptible to the human eye under most viewing conditions.)  This protocol requires a great deal of network bandwidth, however, and is generally not recommended except on 50 Megabit/second and faster networks.</td>
+    <td class="standard">This encoding method should be perceptually lossless (that is, any image compression artifacts it produces should be imperceptible to the human eye under most viewing conditions.)  This encoding method requires a great deal of network bandwidth, however, and is generally not recommended except on 50 Megabit/second and faster networks.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Tight + Medium Quality JPEG&rdquo;</td>
@@ -841,7 +858,7 @@ options described above:</p>
     <td class="standard">80</td>
     <td class="standard">2x</td>
     <td class="standard">N/A</td>
-    <td class="standard">For image tiles with a high number of unique colors, this protocol produces some minor, but generally not very noticeable, image compression artifacts. All else being equal, this protocol typically uses about twice the network bandwidth of the &ldquo;Low Quality JPEG&rdquo; protocol and about half the bandwidth of the &ldquo;Perceptually Lossless JPEG&rdquo; protocol, making it appropriate for medium-speed networks such as 10 Megabit Ethernet.</td>
+    <td class="standard">For subrectangles with a high number of unique colors, this encoding method produces some minor, but generally not very noticeable, image compression artifacts.  All else being equal, this encoding method typically uses about twice the network bandwidth of the &ldquo;Tight + Low Quality JPEG&rdquo; encoding method and about half the bandwidth of the &ldquo;Tight + Perceptually Lossless JPEG&rdquo; encoding method, making it appropriate for medium-speed networks such as 10 Megabit Ethernet.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Tight + Low Quality JPEG&rdquo;</td>
@@ -849,7 +866,7 @@ options described above:</p>
     <td class="standard">30</td>
     <td class="standard">4x</td>
     <td class="standard">N/A</td>
-    <td class="standard">For image tiles with a high number of unique colors, this protocol produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other connection protocols or take advantage of the &ldquo;Lossless Refresh&rdquo; feature.</td>
+    <td class="standard">For subrectangles with a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the Lossless Refresh feature.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Lossless Tight&rdquo;</td>
@@ -857,7 +874,7 @@ options described above:</p>
     <td class="standard">N/A</td>
     <td class="standard">N/A</td>
     <td class="standard">0</td>
-    <td class="standard">This protocol uses indexed color encoding for image tiles with a low number of unique colors but otherwise does not perform any image compression at all.  It is thus suitable only for gigabit and faster networks.  This protocol uses significantly less CPU time than any of the JPEG-based protocols.</td>
+    <td class="standard">This encoding method uses indexed color encoding for subrectangles with a low number of unique colors but otherwise does not perform any image compression at all.  It is thus suitable only for gigabit and faster networks.  This encoding method uses significantly less CPU time than any of the JPEG-based encoding methods.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Lossless Tight + Zlib&rdquo;</td>
@@ -865,37 +882,37 @@ options described above:</p>
     <td class="standard">N/A</td>
     <td class="standard">N/A</td>
     <td class="standard">1</td>
-    <td class="standard">This protocol uses indexed color encoding for image tiles with a low number of unique colors and raw encoding for image tiles with a high number of unique colors.  It compresses all image tiles using Zlib with compression level 1.  For certain types of applications (CAD applications, in particular), this protocol uses less network bandwidth than the &ldquo;Perceptually Lossless JPEG&rdquo; protocol, but it also uses significantly more CPU time on the server than any of the JPEG-based protocols.</td>
+    <td class="standard">This encoding method uses indexed color encoding for subrectangles with a low number of unique colors and raw encoding for subrectangles with a high number of unique colors.  It compresses all subrectangles using Zlib with compression level 1.  For certain types of applications (CAD applications, in particular), this encoding method uses less network bandwidth than the &ldquo;Tight + Perceptually Lossless JPEG&rdquo; encoding method, but it also uses significantly more CPU time on the server than any of the JPEG-based encoding methods.</td>
   </tr>
 </table>
 </div>
 
 
-<p>In the Windows TurboVNC Viewer, the image encoding protocol can be set 
-using the Options dialog box (click on the &ldquo;Options&rdquo; button 
-in the &ldquo;TurboVNC Connection&rdquo; dialog box or, after connecting 
-to the server, click on the Connection Options button in the toolbar.)  
-In the Java viewer, the same thing is accomplished by clicking on the 
+<p>In the Windows TurboVNC Viewer, the encoding method can be set using the 
+Options dialog box (click on the &ldquo;Options&rdquo; button in the 
+&ldquo;TurboVNC Connection&rdquo; dialog box or, after connecting to the 
+server, click on the Connection Options button in the toolbar.)  In the 
+Java viewer, the same thing is accomplished by clicking on the 
 &ldquo;Options&rdquo; button at the top of the browser window.  With the 
 Linux/Unix/Mac TurboVNC Viewer, the &ldquo;Perceptually Lossless&rdquo; 
-protocol is the default, and you can use the following command-line 
-switches to select another protocol:</p>
+encoding method is the default, and you can use the following 
+command-line switches to select another encoding method:</p>
 
 <p><code>-medqual</code> = select the &ldquo;Tight + Medium Quality 
-JPEG&rdquo; protocol <br /> <code>-lowqual</code> = select the 
-&ldquo;Tight + Low Quality JPEG&rdquo; protocol <br /> 
+JPEG&rdquo; encoding method <br /> <code>-lowqual</code> = select the 
+&ldquo;Tight + Low Quality JPEG&rdquo; encoding method <br /> 
 <code>-lossless</code> = select the &ldquo;Lossless Tight&rdquo; 
-protocol <br /> <code>-losslesswan</code> = select the &ldquo;Lossless 
-Tight + Zlib&rdquo; protocol <br /></p>
+encoding method <br /> <code>-losslesswan</code> = select the 
+&ldquo;Lossless Tight + Zlib&rdquo; encoding method <br /></p>
 
 <p>You can also press the F8 key after connecting to pop up a menu from 
-which you can select a different protocol.</p>
+which you can select a different encoding method.</p>
 
 
 <h3 id="hd005004001">5.4.1&nbsp;Lossless Refresh</h3>
 
-<p>Since both of TurboVNC&rsquo;s mathematically lossless protocols have 
-performance drawbacks, another option for image-quality-critical 
+<p>Since both of TurboVNC&rsquo;s mathematically lossless encoding methods 
+have performance drawbacks, another option for image-quality-critical 
 applications is the &ldquo;Lossless Refresh&rdquo; feature.  When a 
 lossless refresh is requested by a TurboVNC viewer, the server will send 
 a mathematically lossless image of the current TurboVNC desktop to the 
@@ -924,7 +941,11 @@ viewer connections, and if more than <em><code>{timeout}</code></em>
 seconds have elapsed since the last framebuffer update was sent to a 
 given viewer, then the TurboVNC Server will send to that viewer a 
 mathematically lossless copy of screen regions that have been affected 
-by lossy compression.</p>
+by lossy compression.  You can also pass arguments of 
+<code>-alrqual</code> and <code>-alrsamp</code> to 
+<code>vncserver</code> to specify that automatic lossless refreshes 
+should be sent using JPEG instead (see the <code>Xvnc</code> man page 
+for details.)</p>
 
 <p>The ALR feature is designed mainly for use by interactive visualization 
 applications.  The idea is that, on a low-bandwidth connection, 
@@ -1301,8 +1322,8 @@ embedded VGL Transport.</p>
     <li class="Itemize-1 Itemize asterisk">
         For 3D applications whose rendered images do not contain very many 
         unique colors (for instance, CAD applications in wireframe mode), the 
-        hybrid protocol used by TurboVNC will generally use less network 
-        bandwidth than the pure motion JPEG protocol used by the VGL Transport.
+        hybrid encoding methods used by TurboVNC will generally use less network 
+        bandwidth than the pure JPEG encoding method used by the VGL Transport.
     </li>
     <li class="Itemize-1 Itemize asterisk">
         TurboVNC provides two lossless compression modes, one of which is 
@@ -1481,12 +1502,11 @@ TurboVNC server for this procedure to perform well.</p>
 
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
-However, TurboVNC is fully backward compatible with TightVNC, RealVNC, 
-and other VNC flavors, as well as fully compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0022"></a>. 
-You can use the TurboVNC Viewer to connect to a non-TurboVNC server (or 
-vice versa), although this will generally result in some decrease in 
-performance.</p>
+However, TurboVNC is fully compatible with 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0023"></a>, 
+TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
+Viewer to connect to a non-TurboVNC server (or vice versa), although 
+this will generally result in some decrease in performance.</p>
 
 <p>The following sections list additional things to bear in mind when 
 mixing TurboVNC with other VNC flavors.</p>
@@ -1635,13 +1655,17 @@ mixing TurboVNC with other VNC flavors.</p>
         <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        The TurboVNC Server only supports Zlib compression level 1, because 
-        higher compression levels use too much CPU time to be useful for the 
-        types of image workloads that TurboVNC is designed to support.  However, 
-        although Zlib compression levels 2-9 cannot be set using the TurboVNC 
-        Viewer GUI, you can still specify these higher Zlib compression levels 
-        from the TurboVNC Viewer command line.  This may be useful when 
-        connecting to a TightVNC or TigerVNC server. <br /><br />
+        The TurboVNC Server only supports Tight compression levels 1-2 if JPEG 
+        encoding is enabled, and Tight compression levels 0-1 if JPEG encoding 
+        is disabled.  Extensive experimentation has shown that TurboVNC&rsquo;s 
+        encoding methods cannot produce significantly tighter output by 
+        increasing the Zlib compression level beyond this, except on rare corner 
+        cases (such as the console output of a large compilation) that are not 
+        performance-critical to begin with.  Although compression levels 2-9 
+        cannot be set using the TurboVNC Viewer GUI, you can still specify these 
+        higher compression levels from the TurboVNC Viewer command line.  This 
+        may be useful when connecting to a TightVNC or TigerVNC server. 
+        <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
         TurboVNC supports an extension to the TightVNC protocol that allows the 
@@ -1689,23 +1713,23 @@ mixing TurboVNC with other VNC flavors.</p>
 
 <h2 id="hd009003">9.3&nbsp;RealVNC</h2>
 
-<p>The TurboVNC Server and Viewer both support the Hextile and Raw 
-protocols, which are compatible with RealVNC.  Neither of these 
-protocols can be selected from the TurboVNC Viewer GUI, but Hextile will 
-be selected automatically when connecting to a RealVNC server.  Raw will 
-be automatically selected when connecting to a VNC server running on the 
+<p>The TurboVNC Viewer supports the Hextile and Raw encoding types, which 
+are compatible with RealVNC.  Neither of these encoding types can be 
+selected from the TurboVNC Viewer GUI, but Hextile will be selected 
+automatically when connecting to a RealVNC server.  Raw will be 
+automatically selected when connecting to a VNC server running on the 
 same machine as the viewer.  Both Raw and Hextile can also be manually 
-selected from the <code>vncviewer</code> command line.</p>
+selected from the <code>vncviewer</code> command line. The TurboVNC 
+Server additionally supports the CoRRE, RRE, Zlib, and ZRLE encoding 
+types, for compatibility with RealVNC viewers.</p>
 
-<p>The Raw protocol can perform well on gigabit links.  The Hextile 
-protocol, however, uses very small tiles, and thus it incurs a large 
-amount of overhead, even on the fastest of networks.  Thus, neither 
-protocol should be used unless absolutely necessary.  One interesting 
-note, however, is that many of the TurboVNC viewer enhancements 
-(including optimized blitting, hiding network latency, and double 
-buffering) are available even when using these legacy protocols.  Thus, 
-in some cases, the TurboVNC Viewer may actually perform better than the 
-RealVNC Viewer when connecting to RealVNC servers.</p>
+<p>The Raw encoding type can perform well on gigabit links.  Hextile, 
+however, uses very small tiles, and thus it incurs a large amount of 
+overhead, even on the fastest of networks.  Thus, neither encoding type 
+should be used unless absolutely necessary.  One interesting note, 
+however, is that many of the TurboVNC viewer enhancements (including 
+optimized blitting, hiding network latency, and double buffering) are 
+available even when using these legacy encoding types.</p>
 
 <p><br /></p>
 

@@ -216,23 +216,23 @@ char *fallback_resources[] = {
      <Visible>: SetCUState()\\n\
      <Btn1Down>,<Btn1Up>: toggle() ToggleCU()",
 
-  "*popup*button11.label: Protocol: Tight + Perceptually Lossless JPEG (LAN)",
+  "*popup*button11.label: Encoding method: Tight + Perceptually Lossless JPEG (LAN)",
   "*popup*button11.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualHigh()",
 
-  "*popup*button12.label: Protocol: Tight + Medium Quality JPEG",
+  "*popup*button12.label: Encoding method: Tight + Medium Quality JPEG",
   "*popup*button12.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualMed()",
 
-  "*popup*button13.label: Protocol: Tight + Low Quality JPEG (WAN)",
+  "*popup*button13.label: Encoding method: Tight + Low Quality JPEG (WAN)",
   "*popup*button13.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualLow()",
 
-  "*popup*button14.label: Protocol: Lossless Tight (Gigabit)",
+  "*popup*button14.label: Encoding method: Lossless Tight (Gigabit)",
   "*popup*button14.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualLossless()",
 
-  "*popup*button15.label: Protocol: Lossless Tight + Zlib (WAN)",
+  "*popup*button15.label: Encoding method: Lossless Tight + Zlib (WAN)",
   "*popup*button15.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualLosslessWAN()",
 
