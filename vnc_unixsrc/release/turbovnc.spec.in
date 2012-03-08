@@ -1,4 +1,4 @@
-Summary:   A highly-optimized version of VNC that can be used with real-time video applications
+Summary:   A highly-optimized version of VNC that can be used with performance-critical applications
 Name:      @PACKAGE_NAME@
 Version:   @VERSION@
 Release:   @BUILD@
@@ -13,12 +13,19 @@ BuildPrereq: /usr/bin/perl libjpeg-turbo
 BuildRequires: zlib-devel
 
 %description
-Virtual Network Computing (VNC) is a remote display system which
-allows you to view a computing 'desktop' environment not only on the
-machine where it is running, but from anywhere on the Internet and
-from a wide variety of machine architectures.  TurboVNC is a sleek and
-fast VNC distribution, containing a high-performance implementation of
-Tight encoding designed to work in conjunction with VirtualGL.
+Virtual Network Computing (VNC) is a remote display system that allows you to
+view and interact with a desktop environment that is running on a remote
+computer.  Using VNC, you can run graphical applications on a remote machine
+and send only the display from these applications to your local machine.  VNC
+is platform-independent and supports a wide variety of operating systems and
+architectures as both servers and clients.
+
+TurboVNC is a high-speed version of VNC derived from TightVNC.  It contains
+a variant of Tight encoding that is tuned to maximize performance for image-
+intensive applications (such as VirtualGL, video applications, and image
+editors) while still providing excellent performance for other types of
+applications.  TurboVNC, in combination with VirtualGL, provides a complete
+solution for remotely displaying 3D applications with interactive performance.
 
 #-->%prep
 #-->%setup -q -n vnc/vnc_unixsrc
