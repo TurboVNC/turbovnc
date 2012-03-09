@@ -1,15 +1,4 @@
 ===============================================================================
-1.2 pre-beta
-===============================================================================
-[1]
-Added a "continuous updates" feature which will, optionally, send framebuffer
-updates that result from large X[Shm]PutImage() operations immediately rather
-than waiting for a framebuffer update request from a viewer.  This greatly
-improves the performance of video players and VirtualGL on high-latency
-networks.
--------------------------------------------------------------------------------
-
-===============================================================================
 1.1 beta1
 ===============================================================================
 [1]
