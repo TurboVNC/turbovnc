@@ -216,7 +216,7 @@ BEGIN
     LTEXT           "Based on VNC software\nCopyright (C) 1999 AT&&T Laboratories Cambridge\nCopyright (C) 2000 Tridia Corp.\nCopyright (C) 2002-2005 RealVNC Ltd.\nhttp://www.realvnc.com/",
                     IDC_STATIC_BASEDON,122,87,190,42
     LTEXT           __APPNAME,IDC_STATIC_URL,122,7,190,9
-    LTEXT           "Copyright (C) 2004-2012 The VirtualGL Project and many others\nhttp://www.virtualgl.org",
+    LTEXT           "Copyright (C) 1999-2012 The VirtualGL Project and many others\nhttp://www.virtualgl.org",
                     IDC_STATIC_COPYRIGHTS,122,23,200,23
     LTEXT           "[build time unknown]",IDC_BUILDTIME,122,15,190,9
 END
