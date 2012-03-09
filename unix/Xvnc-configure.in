@@ -86,10 +86,14 @@ then
     make includes
     make depend
 else
+    SVR4FLAGS=
+    if [ "`uname -s`" = "SunOS" ]; then
+        SVR4FLAGS=-DSVR4;
+    fi
     cd config/imake && if [ -f Makefile ]; then \
-        make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"; \
+        make CC="$CC" CDEBUGFLAGS="$CFLAGS $SVR4FLAGS" EXTRA_LDOPTIONS="$LDFLAGS"; \
     else \
-        make -f Makefile.ini CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"; \
+        make -f Makefile.ini CC="$CC" CDEBUGFLAGS="$CFLAGS $SVR4FLAGS" EXTRA_LDOPTIONS="$LDFLAGS"; \
     fi
     cd ../..
     config/imake/imake -I./config/cf -DTOPDIR=./ -DCURDIR=.
