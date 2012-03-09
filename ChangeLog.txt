@@ -100,6 +100,11 @@ Implemented an authentication plugin mechanism for the Java TurboVNC Viewer,
 which allows sites to write their own external class for obtaining Unix login
 authentication credentials.
 -------------------------------------------------------------------------------
+[22]
+Although there were no known issues with the implementation of the automatic
+lossless refresh feature in TurboVNC 1.0.x, the feature was re-implemented
+without the use of threads, in order to make it easier to maintain.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
