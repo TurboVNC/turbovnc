@@ -64,7 +64,7 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #if defined(UseInstalled) && (!defined(XF86LinkKit) || !XF86LinkKit)
 #define DefaultCCOptions	/**/
 #else
-#define DefaultCCOptions	-ansi -pedantic -Dasm=__asm
+#define DefaultCCOptions	/* -ansi -pedantic */ -Dasm=__asm
 #endif
 #ifndef ExtraLibraries
 #define ExtraLibraries		/**/

@@ -1222,7 +1222,7 @@ XFREE86JAPANESEDOCDIR = $(XFREE86DOCDIR)/Japanese
 #ifdef UseInstalled
 #define DefaultCCOptions /* -ansi */
 #else
-#define DefaultCCOptions -ansi -pedantic
+#define DefaultCCOptions /* -ansi -pedantic */
 #endif
 #endif
 #if defined(UseInstalled) || XF86LinkKit

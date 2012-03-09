@@ -57,7 +57,7 @@ rfbPrintStats(rfbClientPtr cl)
 {
     int i;
     int totalRectanglesSent = 0;
-    int totalBytesSent = 0;
+    long long totalBytesSent = 0;
 
     rfbLog("Statistics:\n");
 
@@ -99,8 +99,8 @@ rfbPrintStats(rfbClientPtr cl)
     }
 
     if ((totalBytesSent - cl->rfbBytesSent[rfbEncodingCopyRect]) != 0) {
-	rfbLog("  raw bytes equivalent %d, compression ratio %f\n",
-		cl->rfbRawBytesEquivalent,
+	rfbLog("  raw equivalent %f Mbytes, compression ratio %f\n",
+		(double)cl->rfbRawBytesEquivalent / 1000000.,
 		(double)cl->rfbRawBytesEquivalent
 		/ (double)(totalBytesSent -
 			   cl->rfbBytesSent[rfbEncodingCopyRect] -

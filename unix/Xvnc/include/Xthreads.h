@@ -1,16 +1,14 @@
 /*
- * $XConsortium: Xthreads.h /main/35 1996/12/04 10:23:02 lehors $
- * $XFree86: xc/include/Xthreads.h,v 3.3 1996/12/23 05:58:11 dawes Exp $
+ * $Xorg: Xthreads.h,v 1.5 2001/02/09 02:03:23 xorgcvs Exp $
  *
  * 
-Copyright (c) 1993  X Consortium
+Copyright 1993, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -18,15 +16,16 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
  * *
  */
+/* $XFree86: xc/include/Xthreads.h,v 3.11 2003/03/08 19:14:53 herrb Exp $ */
 
 #ifndef _XTHREADS_H_
 #define _XTHREADS_H_
@@ -64,12 +63,9 @@ typedef struct mutex xmutex_rec;
 #define xcondition_broadcast(cv) condition_broadcast(cv)
 #define xcondition_set_name(cv,str) condition_set_name(cv,str)
 #else /* !CTHREADS */
-#if defined(SVR4) && !defined(__sgi)
+#if defined(SVR4) && !defined(__sgi) && !defined(_SEQUENT_)
 #include <thread.h>
 #include <synch.h>
-#ifndef LINE_MAX
-#define LINE_MAX 2048
-#endif
 typedef thread_t xthread_t;
 typedef thread_key_t xthread_key_t;
 typedef cond_t xcondition_rec;
@@ -86,7 +82,6 @@ typedef mutex_t xmutex_rec;
 #endif
 #define xthread_set_specific(k,v) thr_setspecific(k,v)
 #define xthread_get_specific(k,vp) thr_getspecific(k,vp)
-#define XMUTEX_INITIALIZER {0}
 #define xmutex_init(m) mutex_init(m,USYNC_THREAD,0)
 #define xmutex_clear(m) mutex_destroy(m)
 #define xmutex_lock(m) mutex_lock(m)
@@ -201,10 +196,38 @@ typedef pthread_mutex_t xmutex_rec;
 #define xcondition_signal(c) tis_cond_signal(c)
 #define xcondition_broadcast(c) tis_cond_broadcast(c)
 #else
+#ifdef USE_NBSD_THREADLIB
+/*
+ * NetBSD threadlib support is intended for thread safe libraries.
+ * This should not be used for general client programming.
+ */
+#include <threadlib.h>
+typedef thr_t xthread_t;
+typedef thread_key_t xthread_key_t;
+typedef cond_t xcondition_rec;
+typedef mutex_t xmutex_rec;
+#define xthread_self thr_self
+#define xthread_fork(func,closure) { thr_t _tmpxthr; \
+	/* XXX Create it detached?  --thorpej */ \
+	thr_create(&_tmpxthr,NULL,func,closure); }
+#define xthread_yield() thr_yield()
+#define xthread_exit(v) thr_exit(v)
+#define xthread_key_create(kp,d) thr_keycreate(kp,d)
+#define xthread_key_delete(k) thr_keydelete(k)
+#define xthread_set_specific(k,v) thr_setspecific(k,v)
+#define xthread_get_specific(k,vp) *(vp) = thr_getspecific(k)
+#define XMUTEX_INITIALIZER MUTEX_INITIALIZER
+#define xmutex_init(m) mutex_init(m, 0)
+#define xmutex_clear(m) mutex_destroy(m)
+#define xmutex_lock(m) mutex_lock(m)
+#define xmutex_unlock(m) mutex_unlock(m)
+#define xcondition_init(c) cond_init(c, 0, 0)
+#define xcondition_clear(c) cond_destroy(c)
+#define xcondition_wait(c,m) cond_wait(c,m)
+#define xcondition_signal(c) cond_signal(c)
+#define xcondition_broadcast(c) cond_broadcast(c)
+#else
 #include <pthread.h>
-#ifndef LINE_MAX
-#define LINE_MAX 2048
-#endif
 typedef pthread_t xthread_t;
 typedef pthread_key_t xthread_key_t;
 typedef pthread_cond_t xcondition_rec;
@@ -238,19 +261,25 @@ typedef pthread_mutex_t xmutex_rec;
 #define xcondition_wait(c,m) pthread_cond_wait(c,m)
 #define xcondition_signal(c) pthread_cond_signal(c)
 #define xcondition_broadcast(c) pthread_cond_broadcast(c)
-#if defined(_DECTHREADS_) || defined(linux)
+#if defined(_DECTHREADS_)
 static xthread_t _X_no_thread_id;
 #define xthread_have_id(id) !pthread_equal(id, _X_no_thread_id)
 #define xthread_clear_id(id) id = _X_no_thread_id
 #define xthread_equal(id1,id2) pthread_equal(id1, id2)
-#endif /* _DECTHREADS_ || linux */
-#if _CMA_VENDOR_ == _CMA__IBM
+#endif /* _DECTHREADS_ */
+#if defined(linux)
+#define xthread_have_id(id) !pthread_equal(id, 0)
+#define xthread_clear_id(id) id = 0
+#define xthread_equal(id1,id2) pthread_equal(id1, id2)
+#endif /* linux */
+#if defined(_CMA_VENDOR_) && defined(_CMA__IBM) && (_CMA_VENDOR_ == _CMA__IBM)
 #ifdef DEBUG			/* too much of a hack to enable normally */
 /* see also cma__obj_set_name() */
 #define xmutex_set_name(m,str) ((char**)(m)->field1)[5] = (str)
 #define xcondition_set_name(cv,str) ((char**)(cv)->field1)[5] = (str)
 #endif /* DEBUG */
 #endif /* _CMA_VENDOR_ == _CMA__IBM */
+#endif /* USE_NBSD_THREADLIB */
 #endif /* USE_TIS_SUPPORT */
 #endif /* WIN32 */
 #endif /* SVR4 */

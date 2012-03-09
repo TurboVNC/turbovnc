@@ -256,16 +256,16 @@ typedef struct rfbClientRec {
 
     /* statistics */
 
-    int rfbBytesSent[MAX_ENCODINGS];
+    long long rfbBytesSent[MAX_ENCODINGS];
     int rfbRectanglesSent[MAX_ENCODINGS];
     int rfbLastRectMarkersSent;
-    int rfbLastRectBytesSent;
-    int rfbCursorShapeBytesSent;
+    long long rfbLastRectBytesSent;
+    long long rfbCursorShapeBytesSent;
     int rfbCursorShapeUpdatesSent;
-    int rfbCursorPosBytesSent;
+    long long rfbCursorPosBytesSent;
     int rfbCursorPosUpdatesSent;
     int rfbFramebufferUpdateMessagesSent;
-    int rfbRawBytesEquivalent;
+    long long rfbRawBytesEquivalent;
     int rfbKeyEventsRcvd;
     int rfbPointerEventsRcvd;
 

@@ -279,7 +279,7 @@ XCOMM operating system:  OSName (OSMajorVersion./**/OSMinorVersion./**/OSTeenyVe
 #    define DefaultCCOptions -DNO_ASM -D_POSIX_SOURCE -D__EXTENSIONS__
 #   else
 #    if OSMinorVersion > 3
-#     define DefaultCCOptions -ansi -pedantic -DNO_ASM -D_POSIX_SOURCE -D__EXTENSIONS__
+#     define DefaultCCOptions /* -ansi -pedantic */ -DNO_ASM -D_POSIX_SOURCE -D__EXTENSIONS__
 #    else
 #     define DefaultCCOptions -DNO_ASM -D_POSIX_SOURCE -D__EXTENSIONS__
 #    endif
