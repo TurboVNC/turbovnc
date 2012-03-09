@@ -86,19 +86,19 @@ then
     make includes
     make depend
 else
-    cd config/imake
-    xmkmf ../../
-    make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
+    cd config/imake && if [ -f Makefile ]; then \
+        make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"; \
+    else \
+        make -f Makefile.ini CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"; \
+    fi
     cd ../..
     config/imake/imake -I./config/cf -DTOPDIR=./ -DCURDIR=.
     make Makefiles CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
     make includes CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
     cd config/makedepend
-    xmkmf ../../
     make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
     cd ../..
     cd config/util
-    xmkmf ../../
     make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
     cd ../..
     make depend CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
