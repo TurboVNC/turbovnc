@@ -1,5 +1,5 @@
 #!/bin/sh
-# $XConsortium: aminstall.sh,v 1.1 94/03/29 15:54:08 gildea Exp $
+# $Xorg: aminstall.sh,v 1.3 2000/08/17 19:41:52 cpqbld Exp $
 # aminstall - transfer cross-compiled files to system running Amoeba.
 # Usage: aminstall binary-directory [-s stksz] unix-source amoeba-dest
 

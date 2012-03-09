@@ -16,8 +16,6 @@ Build Requirements
 
 -- make
 
--- xmkmf and imake (if building the TurboVNC Server)
-
 -- rsync (if building the TurboVNC Server using an out-of-tree build)
 
 -- GCC

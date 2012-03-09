@@ -1,4 +1,4 @@
-/* $XConsortium: wildmat.c,v 1.2 94/04/13 18:40:59 rws Exp $ */
+/* $Xorg: wildmat.c,v 1.3 2000/08/17 19:41:53 cpqbld Exp $ */
 /*
 **
 **  Do shell-style pattern matching for ?, \, [], and * characters.

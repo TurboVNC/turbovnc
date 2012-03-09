@@ -1,6 +1,6 @@
 XCOMM!/bin/sh
 XCOMM
-XCOMM $TOG: mdepend.cpp /main/13 1997/06/20 21:12:18 kaleb $
+XCOMM $Xorg: mdepend.cpp,v 1.3 2000/08/17 19:41:52 cpqbld Exp $
 XCOMM
 XCOMM	Do the equivalent of the 'makedepend' program, but do it right.
 XCOMM
@@ -22,14 +22,14 @@ XCOMM	work on both USG and BSD systems.  However, when System V.4 comes out,
 XCOMM	USG users will probably have to change "silent" to "-s" instead of
 XCOMM	"-" (at least, that is what the documentation implies).
 XCOMM
-XCOMM $XFree86: xc/config/util/mdepend.cpp,v 3.1.8.1 1997/06/29 08:43:27 dawes Exp $
+XCOMM $XFree86: xc/config/util/mdepend.cpp,v 3.10 2001/08/17 13:27:50 dawes Exp $
 XCOMM
 
 CC=PREPROC
 
 silent='-'
 
-TMP=/tmp/mdep$$
+TMP=`pwd`/.mdep$$
 CPPCMD=${TMP}a
 DEPENDLINES=${TMP}b
 TMPMAKEFILE=${TMP}c
@@ -66,7 +66,7 @@ do
 	endmarker=""
     else
 	case "$1" in
-	    -D*|-I*)
+	    -D*|-I*|-U*)
 		echo $n " '$1'$c" >> $ARGS
 		;;
 
@@ -87,9 +87,13 @@ do
 			-f*)
 			    if [ "$1" = "-f-" ]; then
 				makefile="-"
-			    else
+			    elif [ "$1" = "-f" ]; then
 				makefile="$2"
 				shift
+			    else
+				echo "$1" | sed 's/^\-f//' >${TMP}arg
+				makefile="`cat ${TMP}arg`"
+				rm -f ${TMP}arg
 			    fi
 			    ;;
 			-o)
@@ -171,8 +175,15 @@ done \
   | awk '{
 	if ($1 != $4  &&  $2 != "#ident" && $2 != "#pragma")
 	    {
-	    ofile = substr ($1, 1, length ($1) - 2) "'"$objsuffix"'"
-	    print ofile, $4
+	    numparts = split( $1, ofileparts, "\." )
+	    ofile = ""
+	    for ( i = 1; i < numparts; i = i+1 )
+		{
+		if (i != 1 )
+		    ofile = ofile "."
+		ofile = ofile ofileparts[i]
+		}
+	    print ofile "'"$objsuffix"'", $4
 	    }
 	}' \
   | sort -u \

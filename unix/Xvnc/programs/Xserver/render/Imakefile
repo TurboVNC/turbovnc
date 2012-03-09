@@ -37,8 +37,8 @@ NormalLintTarget($(SRCS))
 
 DependTarget()
 
-InstallLinkKitNonExecFile(glyphstr.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(mipict.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(picture.h,$(LINKKITDIR)/include)
-InstallLinkKitNonExecFile(picturestr.h,$(LINKKITDIR)/include)
+InstallDriverSDKNonExecFile(glyphstr.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(mipict.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(picture.h,$(DRIVERSDKINCLUDEDIR))
+InstallDriverSDKNonExecFile(picturestr.h,$(DRIVERSDKINCLUDEDIR))
 

@@ -1,0 +1,45 @@
+.\" $XFree86: xc/config/util/revpath.man,v 1.2 2001/01/27 18:19:55 dawes Exp $
+.TH REVPATH 1 __vendorversion__
+.SH NAME
+revpath \- generate a relative path that can be used to undo a change-directory
+.SH SYNOPSIS
+.B revpath
+.I path
+.SH DESCRIPTION
+The
+.I revpath
+program prints out a relative path that is the ``reverse'' or ``inverse'' of
+.IR path .
+Start with two directories
+.I top
+and
+.IR bottom ,
+with the latter below the former, and
+.I path
+is the location of
+.I bottom
+relative to
+.IR top .
+The output of
+.I revpath
+is the location of
+.I top
+relative to
+.IR bottom .
+The resulting path contains a trailing `/' character when the result is
+non-trivial.
+If
+.I path
+is equivalent to `.', the resulting output is empty.
+If
+.I path
+is invalid in some way (e.g., doesn't represent the path to a subdirectory)
+the output is also empty and no error messages are ever generated.
+.SH DIAGNOSTICS
+There are no diagnostics.  Error conditions are silently ignored, and the
+exit status is always 0.
+.SH BUGS
+It isn't possible to reverse arbitrary relative paths.
+If any path element between the two end points of
+.I path
+is a symbolic link, the results will probably be incorrect.

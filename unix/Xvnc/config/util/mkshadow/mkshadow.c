@@ -1,4 +1,4 @@
-/* $XConsortium: mkshadow.c /main/2 1996/12/04 10:11:51 swick $ */
+/* $Xorg: mkshadow.c,v 1.3 2000/08/17 19:41:53 cpqbld Exp $ */
 /* mkshadow.c - make a "shadow copy" of a directory tree with symlinks.
    Copyright 1990, 1993 Free Software Foundation, Inc.
 

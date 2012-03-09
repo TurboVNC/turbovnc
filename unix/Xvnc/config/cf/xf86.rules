@@ -157,6 +157,158 @@ NamedTargetSubdirs(install.linkkit,dirs,"installing link kit",DESTDIR='$(DESTDIR
 InstallMultipleDestFlags(install.linkkit,list,dest,flags)
 #endif
 
+/*
+ * Rules for installing Driver SDK parts (target is install.sdk)
+ */
+
+#ifndef InstallDriverSDKNonExecFile
+#if !DoLoadableServer
+#define InstallDriverSDKNonExecFile(file,dest)				/**/
+#else
+#define InstallDriverSDKNonExecFile(file,dest)				@@\
+install.sdk:: file							@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTDATFLAGS) file $(DESTDIR)dest
+#endif
+#endif
+
+#ifndef InstallDriverSDKLibrary
+#if !DoLoadableServer
+#define InstallDriverSDKLibrary(libname,dest)				/**/
+#else
+#define InstallDriverSDKLibrary(libname,dest)				@@\
+install.sdk:: Concat(lib,libname.a)					@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTLIBFLAGS) Concat(lib,libname.a) $(DESTDIR)dest @@\
+	RanLibrary($(RANLIBINSTFLAGS) Concat($(DESTDIR)dest/lib,libname.a))
+#endif
+#endif
+
+#ifndef InstallDriverSDKNamedLibrary
+#if !DoLoadableServer
+#define InstallDriverSDKNamedLibrary(libname,dlibname,dest)		/**/
+#else
+#define InstallDriverSDKNamedLibrary(libname,dlibname,dest)		@@\
+install.sdk:: Concat(lib,libname.a)					@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTLIBFLAGS) Concat(lib,libname.a) \		@@\
+	  Concat($(DESTDIR)dest/lib,dlibname.a)				@@\
+	RanLibrary($(RANLIBINSTFLAGS) Concat($(DESTDIR)dest/lib,dlibname.a))
+#endif
+#endif
+
+#ifndef InstallDriverSDKNamedNonExec
+#if !DoLoadableServer
+#define InstallDriverSDKNamedNonExec(srcname,dstname,dest)		/**/
+#else
+#define InstallDriverSDKNamedNonExec(srcname,dstname,dest)		@@\
+install.sdk:: srcname							@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTDATFLAGS) srcname $(DESTDIR)dest/dstname
+#endif
+#endif
+
+#ifndef InstallDriverSDKNamedProg
+#if !DoLoadableServer
+#define InstallDriverSDKNamedProg(srcname,dstname,dest)			/**/
+#else
+#define InstallDriverSDKNamedProg(srcname,dstname,dest)			@@\
+install.sdk:: srcname							@@\
+	MakeDir($(DESTDIR)dest)						@@\
+	$(INSTALL) -c $(INSTBINFLAGS) srcname $(DESTDIR)dest/dstname
+#endif
+#endif
+
+#ifndef InstallDriverSDKSubdirs
+#if !DoLoadableServer
+#define InstallDriverSDKSubdirs(dirs)					/**/
+#else
+#define InstallDriverSDKSubdirs(dirs) \
+NamedTargetSubdirs(install.sdk,dirs,"installing driver SDK",DESTDIR='$(DESTDIR)',install.sdk)
+#endif
+#endif
+
+#ifndef InstallDriverSDKMultipleDestFlags
+#if !DoLoadableServer
+#define InstallDriverSDKMultipleDestFlags(list,dest,flags)		/**/
+#else
+#define InstallDriverSDKMultipleDestFlags(list,dest,flags) \
+InstallMultipleDestFlags(install.sdk,list,dest,flags)
+#endif
+#endif
+
+#ifndef InstallDriverSDKDynamicModule
+#if !DoLoadableServer
+#define InstallDriverSDKDynamicModule(module,dest,subdir)		/**/
+#else
+#define InstallDriverSDKDynamicModule(module,dest,subdir)		@@\
+install.sdk:: module							@@\
+	MakeDir($(DESTDIR)dest/subdir)					@@\
+	$(INSTALL) -c module $(DESTDIR)dest/subdir
+#endif
+#endif
+
+#ifndef InstallDriverSDKObjectModule
+#if !DoLoadableServer
+#define InstallDriverSDKObjectModule(module,dest,subdir)		/**/
+#else
+#if MakeDllModules
+#define InstallDriverSDKObjectModule(module,dest,subdir)		@@\
+InstallDriverSDKDynamicModule(Concat(module,_drv.so),dest,subdir)
+#else
+#define InstallDriverSDKObjectModule(module,dest,subdir)		@@\
+InstallDriverSDKDynamicModule(Concat(module,_drv.o),dest,subdir)
+#endif
+#endif
+#endif
+
+
+#ifndef InstallDriverSDKObjectSubModule
+#if !DoLoadableServer
+#define InstallDriverSDKObjectSubModule(module,dest,subdir)		/**/
+#else
+#if MakeDllModules
+#define InstallDriverSDKObjectSubModule(module,dest,subdir)		@@\
+InstallDriverSDKDynamicModule(Concat(module,.o),dest,subdir)
+#else
+#define InstallDriverSDKObjectSubModule(module,dest,subdir)		@@\
+InstallDriverSDKDynamicModule(Concat(module,.o),dest,subdir)
+#endif
+#endif
+#endif
+
+#ifndef InstallDriverSDKLibraryModule
+#if !DoLoadableServer
+#define InstallDriverSDKLibraryModule(module,dest,subdir)		/**/
+#else
+#if MakeDllModules
+#define InstallDriverSDKLibraryModule(module,dest,subdir)		@@\
+InstallDriverSDKDynamicModule(Concat3(lib,module,.so),dest,subdir)
+#else
+#define InstallDriverSDKLibraryModule(module,dest,subdir)		@@\
+InstallDriverSDKDynamicModule(ModuleLibraryTargetName(module),dest,subdir)
+#endif
+#endif
+#endif
+
+#ifndef ServerDriverSDKTarget
+#if !DoLoadableServer
+#define ServerDriverSDKTarget(program)					/**/
+#else
+#define ServerDriverSDKTarget(program)					@@\
+InstallDriverSDKProgramWithFlags(program,$(DRIVERSDKDIR),$(_NOOP_))
+#endif
+#endif
+
+#ifndef InstallDriverSDKProgramWithFlags
+#if !DoLoadableServer
+#define InstallDriverSDKProgramWithFlags(program,dest,flags)		/**/
+#else
+#define InstallDriverSDKProgramWithFlags(program,dest,flags)		@@\
+InstallTarget(install.sdk,ProgramTargetName(program),$(INSTPGMFLAGS) flags,dest)
+#endif
+#endif
+
 #endif /* !XF86LinkKit */
 
 /*

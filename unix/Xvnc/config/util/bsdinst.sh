@@ -1,10 +1,10 @@
 #!/bin/sh
 
-# $XFree86: xc/config/util/bsdinst.sh,v 3.3 1996/12/23 05:56:13 dawes Exp $
+# $XFree86: xc/config/util/bsdinst.sh,v 3.4 2001/01/17 16:39:01 dawes Exp $
 #
 # This accepts bsd-style install arguments and makes the appropriate calls
 # to the System V install.
-# $XConsortium: bsdinst.sh /main/8 1996/09/28 16:16:11 rws $
+# $Xorg: bsdinst.sh,v 1.3 2000/08/17 19:41:52 cpqbld Exp $
 
 flags=""
 dst=""

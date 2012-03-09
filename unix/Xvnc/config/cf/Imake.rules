@@ -21,6 +21,7 @@ XCOMM rules:  $XFree86: xc/config/cf/Imake.rules,v 3.33.2.7 1998/02/06 09:02:17 
  * _MUse			(a,b)
  * _MUseCat			(a,b,c)
  * ProgramTargetName		(target)
+ * HostProgramTargetName	(target)
  * RunProgram			(progvar,options)
  * RunProgramWithSetup		(setup,progvar,options)
  * RemoveFile			(file)
@@ -293,6 +294,10 @@ XCOMM special target for clearmake					@@\
 
 #ifndef ProgramTargetName
 #define ProgramTargetName(target)target
+#endif
+
+#ifndef HostProgramTargetName
+#define HostProgramTargetName(target)target
 #endif
 
 #ifndef RunProgram
@@ -622,6 +627,77 @@ NormalProgramTarget(program,objects,NullParameter,locallibs,syslibs)
 									@@\
 ComplexProgramTarget(program)
 #endif /* SimpleProgramTarget */
+
+#ifndef SimpleProgramTarget_1
+#define	SimpleProgramTarget_1(program)					@@\
+           OBJS1 = program.o						@@\
+           SRCS1 = program.c						@@\
+									@@\
+ComplexProgramTarget_1(program,$(LOCAL_LIBRARIES),NullParameter)
+#endif /* SimpleProgramTarget_1 */
+#ifndef SimpleProgramTarget_2
+#define	SimpleProgramTarget_2(program)					@@\
+           OBJS2 = program.o						@@\
+           SRCS2 = program.c						@@\
+									@@\
+ComplexProgramTarget_2(program,$(LOCAL_LIBRARIES),NullParameter)
+#endif /* SimpleProgramTarget_2 */
+#ifndef SimpleProgramTarget_3
+#define	SimpleProgramTarget_3(program)					@@\
+           OBJS3 = program.o						@@\
+           SRCS3 = program.c						@@\
+									@@\
+ComplexProgramTarget_3(program,$(LOCAL_LIBRARIES),NullParameter)
+#endif /* SimpleProgramTarget_3 */
+#ifndef SimpleProgramTarget_4
+#define	SimpleProgramTarget_4(program)					@@\
+           OBJS4 = program.o						@@\
+           SRCS4 = program.c						@@\
+									@@\
+ComplexProgramTarget_4(program,$(LOCAL_LIBRARIES),NullParameter)
+#endif /* SimpleProgramTarget_4 */
+#ifndef SimpleProgramTarget_5
+#define	SimpleProgramTarget_5(program)					@@\
+           OBJS5 = program.o						@@\
+           SRCS5 = program.c						@@\
+									@@\
+ComplexProgramTarget_5(program,$(LOCAL_LIBRARIES),NullParameter)
+#endif /* SimpleProgramTarget_5 */
+#ifndef SimpleProgramTarget_6
+#define	SimpleProgramTarget_6(program)					@@\
+           OBJS6 = program.o						@@\
+           SRCS6 = program.c						@@\
+									@@\
+ComplexProgramTarget_6(program,$(LOCAL_LIBRARIES),NullParameter)
+#endif /* SimpleProgramTarget_6 */
+#ifndef SimpleProgramTarget_7
+#define	SimpleProgramTarget_7(program)					@@\
+           OBJS7 = program.o						@@\
+           SRCS7 = program.c						@@\
+									@@\
+ComplexProgramTarget_7(program,$(LOCAL_LIBRARIES),NullParameter)
+#endif /* SimpleProgramTarget_7 */
+#ifndef SimpleProgramTarget_8
+#define	SimpleProgramTarget_8(program)					@@\
+           OBJS8 = program.o						@@\
+           SRCS8 = program.c						@@\
+									@@\
+ComplexProgramTarget_8(program,$(LOCAL_LIBRARIES),NullParameter)
+#endif /* SimpleProgramTarget_8 */
+#ifndef SimpleProgramTarget_9
+#define	SimpleProgramTarget_9(program)					@@\
+           OBJS9 = program.o						@@\
+           SRCS9 = program.c						@@\
+									@@\
+ComplexProgramTarget_9(program,$(LOCAL_LIBRARIES),NullParameter)
+#endif /* SimpleProgramTarget_9 */
+#ifndef SimpleProgramTarget_10
+#define	SimpleProgramTarget_10(program)					@@\
+           OBJS10 = program.o						@@\
+           SRCS10 = program.c						@@\
+									@@\
+ComplexProgramTarget_10(program,$(LOCAL_LIBRARIES),NullParameter)
+#endif /* SimpleProgramTarget_10 */
 
 #ifndef SimpleCplusplusProgramTarget
 #define SimpleCplusplusProgramTarget(program)				@@\

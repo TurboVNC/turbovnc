@@ -1,14 +1,13 @@
-/* $XConsortium: pr.c /main/20 1996/12/04 10:11:41 swick $ */
+/* $Xorg: pr.c,v 1.4 2001/02/09 02:03:16 xorgcvs Exp $ */
 /*
 
-Copyright (c) 1993, 1994  X Consortium
+Copyright (c) 1993, 1994, 1998 The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -16,15 +15,16 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 */
+/* $XFree86: xc/config/makedepend/pr.c,v 1.5 2001/12/14 19:53:21 dawes Exp $ */
 
 #include "def.h"
 
@@ -37,16 +37,10 @@ extern boolean	printed;
 extern boolean	verbose;
 extern boolean	show_where_not;
 
-int find_includes();
-void freefile();
-void included_by();
-
 void
-add_include(filep, file, file_red, include, dot, failOK)
-	struct filepointer	*filep;
-	struct inclist	*file, *file_red;
-	char	*include;
-	boolean	dot;
+add_include(struct filepointer *filep, struct inclist *file, 
+	    struct inclist *file_red, char *include, int type,
+	    boolean failOK)
 {
 	register struct inclist	*newfile;
 	register struct filepointer	*content;
@@ -54,7 +48,7 @@ add_include(filep, file, file_red, include, dot, failOK)
 	/*
 	 * First decide what the pathname of this include file really is.
 	 */
-	newfile = inc_path(file->i_file, include, dot);
+	newfile = inc_path(file->i_file, include, type);
 	if (newfile == NULL) {
 		if (failOK)
 		    return;
@@ -65,7 +59,7 @@ add_include(filep, file, file_red, include, dot, failOK)
 			warning("%s, line %d: ", file->i_file, filep->f_line);
 		warning1("cannot find include file \"%s\"\n", include);
 		show_where_not = TRUE;
-		newfile = inc_path(file->i_file, include, dot);
+		newfile = inc_path(file->i_file, include, type);
 		show_where_not = FALSE;
 	}
 
@@ -80,10 +74,8 @@ add_include(filep, file, file_red, include, dot, failOK)
 	}
 }
 
-void
-pr(ip, file, base)
-	register struct inclist  *ip;
-	char	*file, *base;
+static void
+pr(struct inclist *ip, char *file, char *base)
 {
 	static char	*lastfile;
 	static int	current_len;
@@ -118,11 +110,9 @@ pr(ip, file, base)
 }
 
 void
-recursive_pr_include(head, file, base)
-	register struct inclist	*head;
-	register char	*file, *base;
+recursive_pr_include(struct inclist *head, char *file, char *base)
 {
-	register int	i;
+	int	i;
 
 	if (head->i_flags & MARKED)
 		return;
