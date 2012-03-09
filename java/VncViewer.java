@@ -876,8 +876,10 @@ public class VncViewer extends java.applet.Applet
       long compressed = vc.statNumBytesEncoded;
       if (compressed > 0) {
           double ratio = Math.round((double)raw / compressed * 1000) / 1000.0;
-          System.out.println("Pixel data: " + vc.statNumBytesDecoded +
-                             " bytes, " + vc.statNumBytesEncoded +
+          System.out.println("Pixel data: " +
+                             (double)vc.statNumBytesDecoded / 1000000.0 +
+                             " Mbytes, " +
+                             (double)vc.statNumBytesEncoded / 1000000.0 +
                              " compressed, ratio " + ratio);
       }
     }

@@ -67,8 +67,8 @@ class VncCanvas extends Canvas
   int statNumRectsHextile;      // Hextile-encoded rectangles
   int statNumRectsRaw;          // Raw-encoded rectangles
   int statNumRectsCopy;         // CopyRect rectangles
-  int statNumBytesEncoded;      // number of bytes in updates, as received
-  int statNumBytesDecoded;      // number of bytes, as if Raw encoding was used
+  long statNumBytesEncoded;     // number of bytes in updates, as received
+  long statNumBytesDecoded;     // number of bytes, as if Raw encoding was used
 
   // ZRLE encoder's data.
   byte[] zrleBuf;
