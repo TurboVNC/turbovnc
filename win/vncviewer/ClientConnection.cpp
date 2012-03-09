@@ -160,7 +160,6 @@ void ClientConnection::Init(VNCviewerApp *pApp)
 	m_threadStarted = true;
 	m_running = false;
 	m_pendingFormatChange = false;
-	m_pendingCUChange = false;
 
 	m_hScrollPos = 0; m_vScrollPos = 0;
 
@@ -223,8 +222,6 @@ void ClientConnection::InitCapabilities()
 						sig_rfbFileDownloadCancel, "File download cancel request");
 	m_clientMsgCaps.Add(rfbFileUploadFailed, rfbTightVncVendor,
 						sig_rfbFileUploadFailed, "File upload failure notification");
-	m_clientMsgCaps.Add(rfbEnableContinuousUpdates, rfbTightVncVendor,
-						sig_rfbEnableContinuousUpdates, "Enable/disable continuous updates");
 
 	// Supported encoding types
 	m_encodingCaps.Add(rfbEncodingCopyRect, rfbStandardVendor,
@@ -310,8 +307,6 @@ void ClientConnection::Run()
 			m_enableFileTransfers = true;
 		}
 	}
-
-	if (m_opts.m_CU) SendCUMessage(true);
 
 	// Close the "Connecting..." dialog box if not closed yet.
 	if (m_connDlg != NULL) {
@@ -2094,14 +2089,9 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 				if (SetForegroundWindow(_this->m_opts.m_hParent) != 0) return 0;
 				int prev_scale_num = _this->m_opts.m_scale_num;
 				int prev_scale_den = _this->m_opts.m_scale_den;
-				bool prev_CU = _this->m_opts.m_CU;
-
-				if (_this->m_opts.DoDialog(true,
-					_this->m_clientMsgCaps.IsEnabled(rfbEnableContinuousUpdates))) {
+				
+				if (_this->m_opts.DoDialog(true)) {
 					_this->m_pendingFormatChange = true;
-					if (prev_CU != _this->m_opts.m_CU) {
-						_this->m_pendingCUChange = true;
-					}
 					if (_this->m_opts.m_FitWindow) {
 						_this->m_opts.m_scaling = true;
 						_this->PositionChildWindow();
@@ -3073,10 +3063,6 @@ inline void ClientConnection::SendFullFramebufferUpdateRequest()
 
 void ClientConnection::SendAppropriateFramebufferUpdateRequest()
 {
-	if (m_pendingCUChange) {
-		SendCUMessage(m_opts.m_CU);
-		m_pendingCUChange = false;
-	}
 	if (m_pendingFormatChange) {
 		vnclog.Print(3, _T("Requesting new pixel format\n") );
 		rfbPixelFormat oldFormat = m_myFormat;
@@ -3095,28 +3081,6 @@ void ClientConnection::SendAppropriateFramebufferUpdateRequest()
 			SendIncrementalFramebufferUpdateRequest();
 	}
 }
-
-
-void ClientConnection::SendCUMessage(bool enable)
-{
-	rfbEnableContinuousUpdatesMsg fencu;
-
-	if (!m_clientMsgCaps.IsEnabled(rfbEnableContinuousUpdates)) {
-	    return;
-	}
-
-	fencu.type = rfbEnableContinuousUpdates;
-	fencu.enable = enable ? 1 : 0;
-	fencu.x = 0;
-	fencu.y = 0;
-	fencu.w = Swap16IfLE(m_si.framebufferWidth);
-	fencu.h = Swap16IfLE(m_si.framebufferHeight);
-
-	vnclog.Print(2, "%s continuous updates\n", enable? "Enabling":"Disabling");
-
-	WriteExact((char *)&fencu, sz_rfbEnableContinuousUpdatesMsg);
-}
-
 
 
 // A ScreenUpdate message has been received

@@ -11,21 +11,6 @@ drawn using methods other than ''X[Shm]PutImage()'' |
 
 	Description :: See {ref prefix="Section ": ALR}
 
-| Environment Variable | ''TVNC_CUCOPYAREA = ''__''0 \| 1''__ |
-| Summary | Disable/Enable continuous updates for large regions drawn using \
-''XCopyArea()'' |
-| Platforms | Unix |
-| Default Value | Disabled |
-#OPT: hiCol=first
-
-	Description :: Normally, when the continuous updates feature is enabled,
-	continuous updates are only sent for image regions drawn using
-	''X[Shm]PutImage()''.  When ''TVNC_CUCOPYAREA'' is set to ''1'', continuous
-	updates are also sent for regions drawn using ''XCopyArea()''.  This may be
-	necessary in order to make the continuous updates feature work properly with
-	some applications.  ''man -M /opt/TurboVNC/man vncviewer'' for more
-	information about the continuous updates feature.
-
 | Environment Variable | ''TVNC_MT = ''__''0 \| 1''__ |
 | Summary | Disable/Enable multithreaded image encoding |
 | Platforms | Unix |

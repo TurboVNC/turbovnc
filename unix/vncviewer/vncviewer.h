@@ -135,7 +135,6 @@ typedef struct {
   Bool autoPass;
 
   Bool doubleBuffer;
-  Bool continuousUpdates;
 
   char *configFile;
 
@@ -247,8 +246,6 @@ extern void ShowPopup(Widget w, XEvent *event, String *params,
 extern void HidePopup(Widget w, XEvent *event, String *params,
 		      Cardinal *num_params);
 extern void CreatePopup();
-extern void SetCUState(Widget w, XEvent *ev, String *params,
-		       Cardinal *num_params);
 
 /* rfbproto.c */
 
@@ -273,9 +270,6 @@ extern Bool SendClientCutText(char *str, int len);
 extern Bool HandleRFBServerMessage();
 
 extern void PrintPixelFormat(rfbPixelFormat *format);
-
-extern void ToggleCU(Widget w, XEvent *ev, String *params,
-		     Cardinal *num_params);
 
 typedef struct _UpdateList {
    rfbFramebufferUpdateRectHeader region;

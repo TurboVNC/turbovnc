@@ -74,8 +74,6 @@ static Bool HandleTight32(int rx, int ry, int rw, int rh);
 static void ReadConnFailedReason(void);
 static long ReadCompactLen (void);
 
-static void SendContinuousUpdatesMessage(Bool enable);
-
 extern void UpdateQual(void);
 extern Bool HandleCursorPos(int, int);
 
@@ -324,10 +322,6 @@ InitCapabilities(void)
   CapsAdd(authCaps, rfbAuthUnixLogin, rfbTightVncVendor, sig_rfbAuthUnixLogin,
 	  "Unix login authentication");
 
-  /* Supported non-standard client-to-server messages */
-  CapsAdd(clientMsgCaps, rfbEnableContinuousUpdates, rfbTightVncVendor,
-	  sig_rfbEnableContinuousUpdates, "Enable/disable continuous updates");
-
   /* Supported encoding types */
   CapsAdd(encodingCaps, rfbEncodingCopyRect, rfbStandardVendor,
 	  sig_rfbEncodingCopyRect, "Standard CopyRect encoding");
@@ -432,8 +426,6 @@ InitialiseRFBConnection(void)
   if (!WriteExact(rfbsock, pv, sz_rfbProtocolVersionMsg))
     return False;
 
-  InitCapabilities();
-
   /* Read or select the security type. */
   if (protocolMinorVersion >= 7) {
     secType = SelectSecurityType();
@@ -454,6 +446,7 @@ InitialiseRFBConnection(void)
     break;
   case rfbSecTypeTight:
     tightVncProtocol = True;
+    InitCapabilities();
     if (!SetupTunneling())
       return False;
     if (!PerformAuthenticationTight())
@@ -504,8 +497,6 @@ InitialiseRFBConnection(void)
 
   if((env = getenv("TVNC_PROFILE"))!=NULL && !strcmp(env, "1"))
     rfbProfile = TRUE;
-
-  if(appData.continuousUpdates) SendContinuousUpdatesMessage(True);
 
   return True;
 }
@@ -1226,47 +1217,6 @@ SendKeyEvent(CARD32 key, Bool down)
   ke.down = down ? 1 : 0;
   ke.key = Swap32IfLE(key);
   return WriteExact(rfbsock, (char *)&ke, sz_rfbKeyEventMsg);
-}
-
-
-/*
- * SendContinuousUpdatesMessage.
- */
-
-static void
-SendContinuousUpdatesMessage(Bool enable)
-{
-  rfbEnableContinuousUpdatesMsg fencu;
-
-  if (!CapsIsEnabled(clientMsgCaps, rfbEnableContinuousUpdates)) {
-    fprintf(stderr, "WARNING: Continuous updates not supported by the server.\n");
-    return;
-  }
-
-  fencu.type = rfbEnableContinuousUpdates;
-  fencu.enable = enable ? 1 : 0;
-  fencu.x = 0;
-  fencu.y = 0;
-  fencu.w = Swap16IfLE(si.framebufferWidth);
-  fencu.h = Swap16IfLE(si.framebufferHeight);
-
-  fprintf(stderr, "%s continuous updates\n", enable? "Enabling":"Disabling");
-
-  WriteExact(rfbsock, (char *)&fencu, sz_rfbEnableContinuousUpdatesMsg);
-
-  return;
-}
-
-
-/*
- * ToggleCU is an action which toggles in and out of continuous updates mode.
- */
-
-void
-ToggleCU(Widget w, XEvent *ev, String *params, Cardinal *num_params)
-{
-  appData.continuousUpdates = !appData.continuousUpdates;
-  SendContinuousUpdatesMessage(appData.continuousUpdates);
 }
 
 

@@ -420,8 +420,6 @@ typedef struct _rfbInteractionCapsMsg {
 #define rfbFileUploadFailed 135
 #define rfbFileCreateDirRequest 136
 
-#define rfbEnableContinuousUpdates 150
-
 /* signatures for non-standard messages */
 #define sig_rfbFileListRequest "FTC_LSRQ"
 #define sig_rfbFileDownloadRequest "FTC_DNRQ"
@@ -430,7 +428,6 @@ typedef struct _rfbInteractionCapsMsg {
 #define sig_rfbFileDownloadCancel "FTC_DNCN"
 #define sig_rfbFileUploadFailed "FTC_UPFL"
 #define sig_rfbFileCreateDirRequest "FTC_FCDR"
-#define sig_rfbEnableContinuousUpdates "CUC_ENCU"
 
 /*****************************************************************************
  *
@@ -1273,21 +1270,6 @@ typedef struct _rfbFileCreateDirRequestMsg {
 #define sz_rfbFileCreateDirRequestMsg 4
 
 /*-----------------------------------------------------------------------------
- * EnableContinuousUpdates
- */
-
-typedef struct _rfbEnableContinuousUpdatesMsg {
-    CARD8 type;			/* always rfbEnableContinuousUpdates */
-    CARD8 enable;
-    CARD16 x;
-    CARD16 y;
-    CARD16 w;
-    CARD16 h;
-} rfbEnableContinuousUpdatesMsg;
-
-#define sz_rfbEnableContinuousUpdatesMsg 10
-
-/*-----------------------------------------------------------------------------
  * Union of all client->server messages.
  */
 
@@ -1307,5 +1289,4 @@ typedef union _rfbClientToServerMsg {
     rfbFileDownloadCancelMsg fdc;
     rfbFileUploadFailedMsg fuf;
     rfbFileCreateDirRequestMsg fcdr;
-    rfbEnableContinuousUpdatesMsg fencu;
 } rfbClientToServerMsg;

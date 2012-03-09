@@ -45,7 +45,6 @@ class OptionsFrame extends Frame
     "Double buffering",
     "Cursor shape updates",
     "Use CopyRect",
-    "Continuous updates",
     "Mouse buttons 2 and 3",
     "View only",
     "Scaling factor",
@@ -73,7 +72,6 @@ class OptionsFrame extends Frame
     { "Yes", "No" },
     { "Enable", "Ignore", "Disable" },
     { "Yes", "No" },
-    { "Yes", "No" },
     { "Normal", "Reversed" },
     { "Yes", "No" },
     { "Auto", "Fixed Ratio", "50%", "75%", "95%", "100%", "105%", "125%",
@@ -91,12 +89,11 @@ class OptionsFrame extends Frame
     doubleBufferIndex    = 5,
     cursorUpdatesIndex   = 6,
     useCopyRectIndex     = 7,
-    contUpdatesIndex     = 8,
-    mouseButtonIndex     = 9,
-    viewOnlyIndex        = 10,
-    scalingFactorIndex   = 11,
-    scaleCursorIndex     = 12,
-    shareDesktopIndex    = 13;
+    mouseButtonIndex     = 8,
+    viewOnlyIndex        = 9,
+    scalingFactorIndex   = 10,
+    scaleCursorIndex     = 11,
+    shareDesktopIndex    = 12;
 
   Label[] labels = new Label[names.length];
   Choice[] choices = new Choice[names.length];
@@ -115,7 +112,6 @@ class OptionsFrame extends Frame
   boolean enableJpeg;
   boolean doubleBuffer;
   boolean useCopyRect;
-  boolean continuousUpdates;
   boolean requestCursorUpdates;
   boolean ignoreCursorUpdates;
 
@@ -181,7 +177,6 @@ class OptionsFrame extends Frame
     choices[doubleBufferIndex].select("Yes");
     choices[cursorUpdatesIndex].select("Enable");
     choices[useCopyRectIndex].select("Yes");
-    choices[contUpdatesIndex].select("No");
     choices[mouseButtonIndex].select("Normal");
     choices[viewOnlyIndex].select("No");
     choices[scaleCursorIndex].select("No");
@@ -217,7 +212,6 @@ class OptionsFrame extends Frame
     // Make the booleans and encodings array correspond to the state of the GUI
 
     setEncodings();
-    setContinuousUpdates();
     setOtherOptions();
   }
   
@@ -268,20 +262,6 @@ class OptionsFrame extends Frame
   void disableShareDesktop() {
     labels[shareDesktopIndex].setEnabled(false);
     choices[shareDesktopIndex].setEnabled(false);
-  }
-
-
-  //
-  // Disable the "Continuous updates" option. This method is called
-  // when we figure out that the server does not support corresponding
-  // protocol extensions.
-  //
-
-  void disableContUpdates() {
-    labels[contUpdatesIndex].setEnabled(false);
-    choices[contUpdatesIndex].setEnabled(false);
-    choices[contUpdatesIndex].select("No");
-    continuousUpdates = false;
   }
 
 
@@ -358,18 +338,6 @@ class OptionsFrame extends Frame
 
     viewer.setEncodings();
     setPreset();
-  }
-
-  //
-  // setContinuousUpdates sets continuousUpdates variable depending on
-  // the GUI setting. VncViewer monitors the state of this variable and
-  // send corresponding protocol messages to the server when necessary.
-  //
-
-  void setContinuousUpdates() {
-
-    continuousUpdates =
-      choices[contUpdatesIndex].getSelectedItem().equals("Yes");
   }
 
   //
@@ -543,10 +511,6 @@ class OptionsFrame extends Frame
       if (source == choices[cursorUpdatesIndex]) {
         setOtherOptions();      // update scaleCursor state
       }
-
-    } else if (source == choices[contUpdatesIndex]) {
-
-      setContinuousUpdates();
 
     } else if (source == choices[mouseButtonIndex] ||
 	       source == choices[shareDesktopIndex] ||

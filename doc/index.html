@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2012-03-08T11:03:28">
+<meta name="date" content="2012-03-09T10:12:47">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1767,42 +1767,6 @@ available even when using these legacy encoding types.</p>
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
         See Section <a href="#ALR" class="ref">5.4.2</a>
-    </dd>
-</dl>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_CUCOPYAREA&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">Disable/Enable continuous updates for large regions drawn using <code>XCopyArea()</code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Platforms</td>
-    <td class="standard">Unix</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">Disabled</td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        Normally, when the continuous updates feature is enabled, continuous 
-        updates are only sent for image regions drawn using 
-        <code>X[Shm]PutImage()</code>.  When <code>TVNC_CUCOPYAREA</code> is set 
-        to <code>1</code>, continuous updates are also sent for regions drawn 
-        using <code>XCopyArea()</code>.  This may be necessary in order to make 
-        the continuous updates feature work properly with some applications.  
-        <code>man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;vncviewer</code> for more 
-        information about the continuous updates feature.
     </dd>
 </dl>
 

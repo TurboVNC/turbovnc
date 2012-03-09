@@ -102,7 +102,6 @@ public:
  	int     m_Emul3Timeout;
  	int     m_Emul3Fuzz;
 	bool	m_Shared;
-	bool	m_CU;
 	bool	m_DeiconifyOnBell;
 	bool	m_DisableClipboard;
 	int     m_localCursor;
@@ -148,7 +147,7 @@ public:
 	int m_slowgdi;
 #endif
 
-	INT_PTR DoDialog(bool running, bool CUSupported);
+	INT_PTR DoDialog(bool running = false);
 	BOOL RaiseDialog();
 	void CloseDialog();
 
@@ -179,7 +178,7 @@ private:
 	void SetComboBox(HWND hwnd);
 
 	// Just for temporary use
-	bool m_running, m_CUSupported;
+	bool m_running;
 
 	void setHistoryLimit(int newLimit);
 };

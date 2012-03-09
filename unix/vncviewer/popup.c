@@ -216,17 +216,6 @@ button1XProc(Widget w, XtPointer client, XtPointer p)
   UpdateQual();
 }
 
-
-void
-SetCUState(Widget w, XEvent *ev, String *params, Cardinal *num_params)
-{
-  if (appData.continuousUpdates)
-    XtVaSetValues(w, XtNstate, True, NULL);
-  else
-    XtVaSetValues(w, XtNstate, False, NULL);
-}
-
-
 void
 CreatePopup()
 {

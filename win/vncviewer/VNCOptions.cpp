@@ -65,7 +65,6 @@ VNCOptions::VNCOptions()
 	m_Emul3Timeout = 100; // milliseconds
 	m_Emul3Fuzz = 4;      // pixels away before emulation is cancelled
 	m_Shared = true;
-	m_CU = false;
 	m_DeiconifyOnBell = false;
 	m_DisableClipboard = false;
 	m_localCursor = DOTCURSOR;
@@ -145,7 +144,6 @@ VNCOptions& VNCOptions::operator=(VNCOptions& s)
 	m_Emul3Timeout		= s.m_Emul3Timeout;
 	m_Emul3Fuzz			= s.m_Emul3Fuzz;      // pixels away before emulation is cancelled
 	m_Shared			= s.m_Shared;
-	m_CU				= s.m_CU;
 	m_DeiconifyOnBell	= s.m_DeiconifyOnBell;
 	m_DisableClipboard  = s.m_DisableClipboard;
 	m_scaling			= s.m_scaling;
@@ -342,10 +340,6 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			m_Shared = true;
 		} else if ( SwitchMatch(args[j], _T("noshared"))) {
 			m_Shared = false;
-		} else if ( SwitchMatch(args[j], _T("cu"))) {
-			m_CU = true;
-		} else if ( SwitchMatch(args[j], _T("nocu"))) {
-			m_CU = false;
 		} else if ( SwitchMatch(args[j], _T("swapmouse"))) {
 			m_SwapMouse = true;
 		} else if ( SwitchMatch(args[j], _T("nocursor"))) {
@@ -609,7 +603,6 @@ void VNCOptions::Save(char *fname)
 	saveInt("8bit",					m_Use8Bit,			fname);
 	saveInt("doublebuffer",			m_DoubleBuffer,		fname);
 	saveInt("shared",				m_Shared,			fname);
-	saveInt("continuousupdates",	m_CU,				fname);
 	saveInt("swapmouse",			m_SwapMouse,		fname);
 	saveInt("belldeiconify",		m_DeiconifyOnBell,	fname);
 	saveInt("emulate3",				m_Emul3Buttons,		fname);
@@ -647,7 +640,6 @@ void VNCOptions::Load(char *fname)
 	m_Use8Bit =				readInt("8bit",				m_Use8Bit,		fname) != 0;
 	m_DoubleBuffer =		readInt("doublebuffer",		m_DoubleBuffer,	fname) != 0;
 	m_Shared =				readInt("shared",			m_Shared,		fname) != 0;
-	m_CU =					readInt("continuousupdates",m_CU,			fname) != 0;
 	m_SwapMouse =			readInt("swapmouse",		m_SwapMouse,	fname) != 0;
 	m_DeiconifyOnBell =		readInt("belldeiconify",	m_DeiconifyOnBell, fname) != 0;
 	m_Emul3Buttons =		readInt("emulate3",			m_Emul3Buttons, fname) != 0;
@@ -730,10 +722,9 @@ void VNCOptions::Register()
 }
 
 // The dialog box allows you to change the session-specific parameters
-INT_PTR VNCOptions::DoDialog(bool running, bool CUSupported)
+INT_PTR VNCOptions::DoDialog(bool running)
 {
 	m_running = running;
-	m_CUSupported = CUSupported;
 	return DialogBoxParam(pApp->m_instance, DIALOG_MAKEINTRESOURCE(IDD_PARENT), 
 							NULL, (DLGPROC) DlgProc, (LONG) this); 	
 }
@@ -947,10 +938,6 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 			HWND hShared = GetDlgItem(hwnd, IDC_SHARED);
 			SendMessage(hShared, BM_SETCHECK, _this->m_Shared, 0);
 			EnableWindow(hShared, !_this->m_running);
-
-			HWND hCU = GetDlgItem(hwnd, IDC_CU);
-			SendMessage(hCU, BM_SETCHECK, _this->m_CU, 0);
-			EnableWindow(hCU, _this->m_CUSupported);
 			
 			HWND hViewOnly = GetDlgItem(hwnd, IDC_VIEWONLY);
 			SendMessage(hViewOnly, BM_SETCHECK, _this->m_ViewOnly, 0);
@@ -1159,10 +1146,6 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 				HWND hShared = GetDlgItem(hwnd, IDC_SHARED);
 				_this->m_Shared =
 					(SendMessage(hShared, BM_GETCHECK, 0, 0) == BST_CHECKED);
-
-				HWND hCU = GetDlgItem(hwnd, IDC_CU);
-				_this->m_CU =
-					(SendMessage(hCU, BM_GETCHECK, 0, 0) == BST_CHECKED);
 				
 				HWND hViewOnly = GetDlgItem(hwnd, IDC_VIEWONLY);
 				_this->m_ViewOnly = 
@@ -1693,7 +1676,6 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 //	m_Use8Bit =				read(RegKey, "8bit",	          m_Use8Bit              ) != 0;
 	m_DoubleBuffer =		read(RegKey, "doublebuffer",	  m_DoubleBuffer         ) != 0;
 	m_Shared =				read(RegKey, "shared",            m_Shared               ) != 0;
-	m_CU =					read(RegKey, "continuousupdates", m_CU                   ) != 0;
 	m_SwapMouse =			read(RegKey, "swapmouse",         m_SwapMouse	         ) != 0;
 	m_DeiconifyOnBell =		read(RegKey, "belldeiconify",     m_DeiconifyOnBell      ) != 0;
 	m_Emul3Buttons =		read(RegKey, "emulate3",	      m_Emul3Buttons         ) != 0;
@@ -1771,7 +1753,6 @@ void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
 	save(RegKey, "8bit",				m_Use8Bit			);
 	save(RegKey, "doublebuffer",		m_DoubleBuffer		);
 	save(RegKey, "shared",				m_Shared			);
-	save(RegKey, "continuousupdates",	m_CU				);
 	save(RegKey, "swapmouse",			m_SwapMouse			);
 	save(RegKey, "belldeiconify",		m_DeiconifyOnBell	);
 	save(RegKey, "emulate3",			m_Emul3Buttons		);

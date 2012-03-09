@@ -228,16 +228,6 @@ class RfbProto {
   CapsContainer serverMsgCaps, clientMsgCaps;
   CapsContainer encodingCaps;
 
-  // "Continuous updates" is a TightVNC-specific feature that allows
-  // receiving framebuffer updates continuously, without sending update
-  // requests. The variables below track the state of this feature.
-  // Initially, continuous updates are disabled. They can be enabled
-  // by calling tryEnableContinuousUpdates() method, and only if this
-  // feature is supported by the server. To disable continuous updates,
-  // tryDisableContinuousUpdates() should be called.
-  private boolean continuousUpdatesActive = false;
-  private boolean continuousUpdatesEnding = false;
-
   // If true, informs that the RFB socket was closed.
   private boolean closed;
 
@@ -573,9 +563,7 @@ class RfbProto {
     // [NONE]
 
     // Supported non-standard client-to-server messages
-    clientMsgCaps.add(EnableContinuousUpdates, TightVncVendor,
-                      SigEnableContinuousUpdates,
-                      "Enable/disable continuous updates");
+    // [NONE]
 
     // Supported encoding types
     encodingCaps.add(EncodingCopyRect, StandardVendor,
@@ -1410,103 +1398,6 @@ class RfbProto {
       writeKeyEvent(0xffe9, (newModifiers & ALT_MASK) != 0);
 
     oldModifiers = newModifiers;
-  }
-
-
-  //
-  // Enable continuous updates for the specified area of the screen (but
-  // only if EnableContinuousUpdates message is supported by the server).
-  //
-
-  void tryEnableContinuousUpdates(int x, int y, int w, int h)
-    throws IOException
-  {
-    if (!clientMsgCaps.isEnabled(EnableContinuousUpdates)) {
-      System.out.println("Continuous updates not supported by the server");
-      return;
-    }
-
-    if (continuousUpdatesActive) {
-      System.out.println("Continuous updates already active");
-      return;
-    }
-
-    byte[] b = new byte[10];
-
-    b[0] = (byte) EnableContinuousUpdates;
-    b[1] = (byte) 1; // enable
-    b[2] = (byte) ((x >> 8) & 0xff);
-    b[3] = (byte) (x & 0xff);
-    b[4] = (byte) ((y >> 8) & 0xff);
-    b[5] = (byte) (y & 0xff);
-    b[6] = (byte) ((w >> 8) & 0xff);
-    b[7] = (byte) (w & 0xff);
-    b[8] = (byte) ((h >> 8) & 0xff);
-    b[9] = (byte) (h & 0xff);
-
-    os.write(b);
-
-    continuousUpdatesActive = true;
-    System.out.println("Continuous updates activated");
-  }
-
-
-  //
-  // Disable continuous updates (only if EnableContinuousUpdates message
-  // is supported by the server).
-  //
-
-  void tryDisableContinuousUpdates() throws IOException
-  {
-    if (!clientMsgCaps.isEnabled(EnableContinuousUpdates)) {
-      System.out.println("Continuous updates not supported by the server");
-      return;
-    }
-
-    if (!continuousUpdatesActive) {
-      System.out.println("Continuous updates already disabled");
-      return;
-    }
-
-    if (continuousUpdatesEnding)
-      return;
-
-    byte[] b = { (byte)EnableContinuousUpdates, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    os.write(b);
-
-    if (!serverMsgCaps.isEnabled(EndOfContinuousUpdates)) {
-      // If the server did not advertise support for the
-      // EndOfContinuousUpdates message (should not normally happen
-      // when EnableContinuousUpdates is supported), then we clear
-      // 'continuousUpdatesActive' variable immediately. Normally,
-      // it will be reset on receiving EndOfContinuousUpdates message
-      // from the server.
-      continuousUpdatesActive = false;
-    } else {
-      // Indicate that we are waiting for EndOfContinuousUpdates.
-      continuousUpdatesEnding = true;
-    }
-  }
-
-
-  //
-  // Process EndOfContinuousUpdates message received from the server.
-  //
-
-  void endOfContinuousUpdates()
-  {
-    continuousUpdatesActive = false;
-    continuousUpdatesEnding = false;
-  }
-
-
-  //
-  // Check if continuous updates are in effect.
-  //
-
-  boolean continuousUpdatesAreActive()
-  {
-    return continuousUpdatesActive;
   }
 
   //

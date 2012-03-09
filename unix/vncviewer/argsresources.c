@@ -165,7 +165,7 @@ char *fallback_resources[] = {
   "*popup.buttonForm.translations: #override\\n\
      <KeyPress>: SendRFBEvent() HidePopup()",
 
-  "*popupButtonCount: 15",
+  "*popupButtonCount: 14",
 
   "*popup*button1.label: Dismiss popup",
   "*popup*button1.translations: #override\\n\
@@ -210,30 +210,24 @@ char *fallback_resources[] = {
   "*popup*button9.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: SendRFBEvent(key,F8) HidePopup()",
 
-  "*popup*button10.label: Continuous updates",
-  "*popup*button10.type: toggle",
+  "*popup*button10.label: Encoding method: Tight + Perceptually Lossless JPEG (LAN)",
   "*popup*button10.translations: #override\\n\
-     <Visible>: SetCUState()\\n\
-     <Btn1Down>,<Btn1Up>: toggle() ToggleCU()",
-
-  "*popup*button11.label: Encoding method: Tight + Perceptually Lossless JPEG (LAN)",
-  "*popup*button11.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualHigh()",
 
-  "*popup*button12.label: Encoding method: Tight + Medium Quality JPEG",
-  "*popup*button12.translations: #override\\n\
+  "*popup*button11.label: Encoding method: Tight + Medium Quality JPEG",
+  "*popup*button11.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualMed()",
 
-  "*popup*button13.label: Encoding method: Tight + Low Quality JPEG (WAN)",
-  "*popup*button13.translations: #override\\n\
+  "*popup*button12.label: Encoding method: Tight + Low Quality JPEG (WAN)",
+  "*popup*button12.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualLow()",
 
-  "*popup*button14.label: Encoding method: Lossless Tight (Gigabit)",
-  "*popup*button14.translations: #override\\n\
+  "*popup*button13.label: Encoding method: Lossless Tight (Gigabit)",
+  "*popup*button13.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualLossless()",
 
-  "*popup*button15.label: Encoding method: Lossless Tight + Zlib (WAN)",
-  "*popup*button15.translations: #override\\n\
+  "*popup*button14.label: Encoding method: Lossless Tight + Zlib (WAN)",
+  "*popup*button14.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: QualLosslessWAN()",
 
   NULL
@@ -354,9 +348,6 @@ static XtResource appDataResourceList[] = {
   {"autoPass", "AutoPass", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, autoPass), XtRImmediate, (XtPointer) False},
 
-  {"continuousUpdates", "ContinuousUpdates", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, continuousUpdates), XtRImmediate, (XtPointer) False},
-
   {"configFile", "ConfigFile", XtRString, sizeof(String),
    XtOffsetOf(AppData, configFile), XtRImmediate, (XtPointer) 0},
 };
@@ -393,7 +384,6 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-autopass",      "*autoPass",           XrmoptionNoArg,  "True"},
   {"-user",          "*userLogin",          XrmoptionSepArg,  0},
   {"-nounixlogin",   "*noUnixLogin",        XrmoptionNoArg,  "True"},
-  {"-cu",            "*continuousUpdates",  XrmoptionNoArg,  "True"},
   {"-config",        "*configFile",         XrmoptionSepArg, 0}
 };
 
@@ -427,8 +417,6 @@ static XtActionsRec actions[] = {
     {"Pause", Pause},
     {"RunCommand", RunCommand},
     {"Quit", Quit},
-    {"SetCUState", SetCUState},
-    {"ToggleCU", ToggleCU}
 };
 
 
@@ -488,7 +476,6 @@ usage(void)
 	  "        -losslesswan (preset for -nojpeg -compresslevel 1)\n"
 	  "        -user <USER NAME> (Unix login authentication)\n"
 	  "        -nounixlogin\n"
-	  "        -cu\n"
 	  "        -config <CONFIG-FILENAME>\n"
 	  "\n"
 	  "Option names may be abbreviated, for example, -q instead of -quality.\n"
@@ -617,7 +604,6 @@ LoadConfigFile(char *filename)
     ReadConfigBool("8bit=", appData.useBGR233);
     ReadConfigBool("doublebuffer=", appData.doubleBuffer);
     ReadConfigBool("shared=", appData.shareDesktop);
-    ReadConfigBool("continuousupdates=", appData.continuousUpdates);
     ReadConfigBool("belldeiconify=", appData.raiseOnBeep);
     ReadConfigInt("compresslevel=", appData.compressLevel, 0, 9);
     ReadConfigInt("subsampling=", appData.subsampLevel, 0, 3);
