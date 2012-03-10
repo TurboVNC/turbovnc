@@ -2,9 +2,9 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.56])
-AC_INIT([turbovnc], [1.0.80])
+AC_INIT([turbovnc], [1.1.80])
 BUILD=`date +%Y%m%d`
-XVENDORRELEASE=10080000
+XVENDORRELEASE=10180000
 
 AM_INIT_AUTOMAKE([-Wall foreign dist-bzip2])
 AC_PREFIX_DEFAULT(/opt/TurboVNC)
