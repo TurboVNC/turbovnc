@@ -152,22 +152,22 @@ static Bool SendMonoRect      (threadparam *t, int w, int h);
 static Bool SendIndexedRect   (threadparam *t, int w, int h);
 static Bool SendFullColorRect (threadparam *t, int w, int h);
 
-static Bool CompressData(threadparam *t, int streamId, int dataLen,
-                         int zlibLevel, int zlibStrategy);
-static Bool SendCompressedData(threadparam *t, char *buf, int compressedLen);
+static Bool CompressData (threadparam *t, int streamId, int dataLen,
+                          int zlibLevel, int zlibStrategy);
+static Bool SendCompressedData (threadparam *t, char *buf, int compressedLen);
 
-static void FillPalette8(threadparam *t, int count);
-static void FillPalette16(threadparam *t, int count);
-static void FillPalette32(threadparam *t, int count);
-static void FastFillPalette16(threadparam *t, CARD16 *data, int w, int pitch,
-                              int h);
-static void FastFillPalette32(threadparam *t, CARD32 *data, int w, int pitch,
-                              int h);
+static void FillPalette8 (threadparam *t, int count);
+static void FillPalette16 (threadparam *t, int count);
+static void FillPalette32 (threadparam *t, int count);
+static void FastFillPalette16 (threadparam *t, CARD16 *data, int w, int pitch,
+                               int h);
+static void FastFillPalette32 (threadparam *t, CARD32 *data, int w, int pitch,
+                               int h);
 
-static void PaletteReset(threadparam *t);
-static int PaletteInsert(threadparam *t, CARD32 rgb, int numPixels, int bpp);
+static void PaletteReset (threadparam *t);
+static int PaletteInsert (threadparam *t, CARD32 rgb, int numPixels, int bpp);
 
-static void Pack24(char *buf, rfbPixelFormat *fmt, int count);
+static void Pack24 (char *buf, rfbPixelFormat *fmt, int count);
 
 static void EncodeIndexedRect16(threadparam *t, CARD8 *buf, int count);
 static void EncodeIndexedRect32(threadparam *t, CARD8 *buf, int count);
@@ -1692,15 +1692,15 @@ SendJpegRect(t, x, y, w, h, quality)
     if (rfbServerFormat.bitsPerPixel == 8)
         return SendFullColorRect(t, w, h);
 
-
-    if(ps < 2) {
-      rfbLog("Error: JPEG requires 16-bit, 24-bit, or 32-bit pixel format.\n");
-      return 0;
+    if (ps < 2) {
+        rfbLog("Error: JPEG requires 16-bit, 24-bit, or 32-bit pixel format.\n");
+        return 0;
     }
-    if(!t->j) {
-      if((t->j = tjInitCompress()) == NULL) {
-        rfbLog("JPEG Error: %s\n", tjGetErrorStr());  return 0;
-      }
+    if (!t->j) {
+        if ((t->j = tjInitCompress()) == NULL) {
+            rfbLog("JPEG Error: %s\n", tjGetErrorStr());
+            return 0;
+        }
     }
 
     if (t->tightAfterBufSize < TJBUFSIZE(w, h)) {
@@ -1709,7 +1709,7 @@ SendJpegRect(t, x, y, w, h, quality)
         else
             t->tightAfterBuf = (char *)xrealloc(t->tightAfterBuf,
                                                 TJBUFSIZE(w, h));
-        if(!t->tightAfterBuf) {
+        if (!t->tightAfterBuf) {
             rfbLog("Memory allocation failure!\n");
             return 0;
         }
@@ -1729,14 +1729,14 @@ SendJpegRect(t, x, y, w, h, quality)
         for(j = 0; j < h; j++) {
             CARD16 *srcptr2 = srcptr;
             unsigned char *dst2 = dst;
-            for(i = 0; i < w; i++) {
+            for (i = 0; i < w; i++) {
                 pix = *srcptr2++;
-                inRed = (int)(pix >> rfbServerFormat.redShift
-                              & rfbServerFormat.redMax);
-                inGreen = (int)(pix >> rfbServerFormat.greenShift
-                                & rfbServerFormat.greenMax);
-                inBlue  = (int)(pix >> rfbServerFormat.blueShift
-                                & rfbServerFormat.blueMax);
+                inRed = (int) (pix >> rfbServerFormat.redShift
+                               & rfbServerFormat.redMax);
+                inGreen = (int) (pix >> rfbServerFormat.greenShift
+                                 & rfbServerFormat.greenMax);
+                inBlue  = (int) (pix >> rfbServerFormat.blueShift
+                                 & rfbServerFormat.blueMax);
                 *dst2++ = (CARD8)
                     ((inRed * 255 + rfbServerFormat.redMax / 2)
                      / rfbServerFormat.redMax);                          
