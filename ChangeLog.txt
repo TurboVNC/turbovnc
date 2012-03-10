@@ -21,7 +21,8 @@ when connecting to the Unix TigerVNC 1.2 Server.
 [4]
 The Unix TurboVNC Server now implements rich (full-color) cursor encoding, so
 viewers that support this RFB extension (including TigerVNC 1.2 and later and
-TurboVNC 1.1 and later) can display full-color animated cursors.
+TurboVNC 1.1 and later) can display full-color animated cursors when connecting
+to the TurboVNC Server.
 -------------------------------------------------------------------------------
 [5]
 Enhanced the screen scaling feature in the Java TurboVNC Viewer and added a GUI
