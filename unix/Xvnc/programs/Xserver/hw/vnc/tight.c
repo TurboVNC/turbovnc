@@ -49,6 +49,29 @@
 static Bool usePixelFormat24;
 
 
+/* ALR stuff */
+#define ADD_TO_LOSSY_REGION(x, y, w, h)  \
+    if (rfbAutoLosslessRefresh > 0.0) {  \
+        RegionRec tmpRegion;  BoxRec box;  \
+        box.x1 = x;  box.y1 = y;  \
+        box.x2 = x + w;  box.y2 = y + h;  \
+        REGION_INIT(pScreen, &tmpRegion, &box, 0);  \
+        REGION_UNION(pScreen, &t->lossyRegion, &t->lossyRegion, &tmpRegion);  \
+        REGION_UNINIT(pScreen, &tmpRegion);  \
+    }
+
+#define ADD_TO_LOSSLESS_REGION(x, y, w, h)  \
+    if (rfbAutoLosslessRefresh > 0.0) {  \
+        RegionRec tmpRegion;  BoxRec box;  \
+        box.x1 = x;  box.y1 = y;  \
+        box.x2 = x + w;  box.y2 = y + h;  \
+        REGION_INIT(pScreen, &tmpRegion, &box, 0);  \
+        REGION_UNION(pScreen, &t->losslessRegion, &t->losslessRegion,  \
+                     &tmpRegion);  \
+        REGION_UNINIT(pScreen, &tmpRegion);  \
+    }
+
+
 /* Compression level stuff. The following array contains various
    encoder parameters for each of 10 compression levels (0..9).
    Last three parameters correspond to JPEG quality levels (0..9). */
@@ -121,7 +144,7 @@ typedef struct _threadparam {
     int streamId, baseStreamId, nStreams;
     pthread_mutex_t ready, done;
     Bool status, deadyet;
-    RegionRec lossyRegion;
+    RegionRec lossyRegion, losslessRegion;
 } threadparam;
 
 static threadparam tparam[TVNC_MAXTHREADS];
@@ -388,8 +411,10 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
         tparam[i].w = w;
         tparam[i].h = (i == nt - 1) ? (h - (h / nt * i)) : h / nt;
         tparam[i].bytessent = tparam[i].rectsent = 0;
-        if (rfbAutoLosslessRefresh > 0.0)
+        if (rfbAutoLosslessRefresh > 0.0) {
             REGION_INIT(pScreen, &tparam[i].lossyRegion, NullBox, 0);
+            REGION_INIT(pScreen, &tparam[i].losslessRegion, NullBox, 0);
+        }
         if(i < 4) {
             int n = min(nt, 4);
             tparam[i].baseStreamId = 4 / n * i;
@@ -437,6 +462,9 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
             REGION_UNION(pScreen, &cl->lossyRegion, &cl->lossyRegion,
                          &tparam[i].lossyRegion);
             REGION_UNINIT(pScreen, &tparam[i].lossyRegion);
+            REGION_SUBTRACT(pScreen, &cl->lossyRegion, &cl->lossyRegion,
+                         &tparam[i].losslessRegion);
+            REGION_UNINIT(pScreen, &tparam[i].losslessRegion);
         }
     }
 
@@ -556,6 +584,7 @@ SendRectEncodingTight(t, x, y, w, h)
 
                 if (!SendSolidRect(t))
                     return FALSE;
+                ADD_TO_LOSSLESS_REGION(x_best, y_best, w_best, h_best);
 
                 /* Send remaining rectangles (at right and bottom). */
 
@@ -862,19 +891,23 @@ SendSubrect(t, x, y, w, h)
             success = SendJpegRect(t, x, y, w, h, qualityLevel);
         } else {
             success = SendFullColorRect(t, w, h);
+            ADD_TO_LOSSLESS_REGION(x, y, w, h);
         }
         break;
     case 1:
         /* Solid rectangle */
         success = SendSolidRect(t);
+        ADD_TO_LOSSLESS_REGION(x, y, w, h);
         break;
     case 2:
         /* Two-color rectangle */
         success = SendMonoRect(t, w, h);
+        ADD_TO_LOSSLESS_REGION(x, y, w, h);
         break;
     default:
         /* Up to 256 different colors */
         success = SendIndexedRect(t, w, h);
+        ADD_TO_LOSSLESS_REGION(x, y, w, h);
     }
     return success;
 }
@@ -1687,10 +1720,11 @@ SendJpegRect(t, x, y, w, h, quality)
     int flags = 0, pitch;
     unsigned char *tmpbuf = NULL;
     unsigned long jpegDstDataLen;
-    RegionRec tmpRegion;  BoxRec box;
 
-    if (rfbServerFormat.bitsPerPixel == 8)
+    if (rfbServerFormat.bitsPerPixel == 8) {
+        ADD_TO_LOSSLESS_REGION(x, y, w, h);
         return SendFullColorRect(t, w, h);
+    }
 
     if (ps < 2) {
         rfbLog("Error: JPEG requires 16-bit, 24-bit, or 32-bit pixel format.\n");
@@ -1780,13 +1814,7 @@ SendJpegRect(t, x, y, w, h, quality)
     t->updateBuf[(*t->ublen)++] = (char)(rfbTightJpeg << 4);
     t->bytessent++;
 
-    if (rfbAutoLosslessRefresh > 0.0) {
-        box.x1 = x;  box.y1 = y;
-        box.x2 = x + w;  box.y2 = y + h;
-        REGION_INIT(pScreen, &tmpRegion, &box, 0);
-        REGION_UNION(pScreen, &t->lossyRegion, &t->lossyRegion, &tmpRegion);
-        REGION_UNINIT(pScreen, &tmpRegion);
-    }
+    ADD_TO_LOSSY_REGION(x, y, w, h);
 
     return SendCompressedData(t, t->tightAfterBuf, jpegDstDataLen);
 }
