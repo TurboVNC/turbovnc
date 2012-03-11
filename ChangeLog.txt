@@ -9,6 +9,18 @@ improves the performance of video players and VirtualGL on high-latency
 networks.
 -------------------------------------------------------------------------------
 
+
+===============================================================================
+1.1
+===============================================================================
+[1]
+Improved the behavior of the automatic lossless refresh feature so that it
+doesn't send an ALR for screen regions that were sent using JPEG but then
+re-sent using a lossless subencoding (such as color index) prior to the ALR
+being triggered.
+-------------------------------------------------------------------------------
+
+
 ===============================================================================
 1.1 beta1
 ===============================================================================
