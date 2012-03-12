@@ -1171,11 +1171,14 @@ CompressData(t, streamId, dataLen, zlibLevel, zlibStrategy)
         return TRUE;
     }
 
-    /* Tight encoding has only a limited number of Zlib streams (4), and they
-       are all used by the first thread.  The streams must all be left open
-       as long as the client is connected, or performance suffers.  Thus,
-       Zlib compression can't be multi-threaded, and it must be disabled for
-       threads other than 0. */
+    /* Tight encoding has only a limited number of Zlib streams (4).  The
+       streams must all be left open as long as the client is connected, or
+       performance suffers.  Thus, multiple threads can't use the same Zlib
+       stream.  We divide the pool of 4 evenly among the available threads (up
+       to the first 4 threads), and if each thread has more than one stream, it
+       cycles between them in a round-robin fashion.  If we have more than 4
+       threads, then threads 5 and beyond must encode their data without Zlib
+       compression. */
     if (zlibLevel == 0 || t->id > 3)
         return SendCompressedData (t, t->tightBeforeBuf, dataLen);
 
