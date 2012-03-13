@@ -19,6 +19,16 @@ doesn't send an ALR for screen regions that were sent using JPEG but then
 re-sent using a lossless subencoding (such as color index) prior to the ALR
 being triggered.
 -------------------------------------------------------------------------------
+[2]
+Previously, empty cursors were not encoded correctly by the TurboVNC Server,
+and this caused some VNC viewers (notably, TigerVNC) to render a system default
+cursor instead of the empty cursor.  This has been fixed.
+-------------------------------------------------------------------------------
+[3]
+Fixed the rendering of empty cursors in the Unix TurboVNC Viewer.  This also
+fixed an issue whereby the viewer would crash when opening recent versions of
+xterm in the TurboVNC Server session.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
