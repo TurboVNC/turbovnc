@@ -343,8 +343,9 @@ InitCapabilities(void)
 	  sig_rfbEncodingQualityLevel0, "JPEG quality level");
   CapsAdd(encodingCaps, rfbEncodingXCursor, rfbTightVncVendor,
 	  sig_rfbEncodingXCursor, "X-style cursor shape update");
-  CapsAdd(encodingCaps, rfbEncodingRichCursor, rfbTightVncVendor,
-	  sig_rfbEncodingRichCursor, "Rich-color cursor shape update");
+  if (appData.useRichCursor)
+    CapsAdd(encodingCaps, rfbEncodingRichCursor, rfbTightVncVendor,
+	    sig_rfbEncodingRichCursor, "Rich-color cursor shape update");
   CapsAdd(encodingCaps, rfbEncodingPointerPos, rfbTightVncVendor,
 	  sig_rfbEncodingPointerPos, "Pointer position update");
   CapsAdd(encodingCaps, rfbEncodingLastRect, rfbTightVncVendor,
@@ -1086,7 +1087,7 @@ SetFormatAndEncodings()
     }
 
     if (appData.useRemoteCursor) {
-      if (se->nEncodings < MAX_ENCODINGS)
+      if (se->nEncodings < MAX_ENCODINGS && appData.useRichCursor)
 	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRichCursor);
       if (se->nEncodings < MAX_ENCODINGS)
 	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingXCursor);
@@ -1140,7 +1141,8 @@ SetFormatAndEncodings()
     }
 
     if (appData.useRemoteCursor) {
-      encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRichCursor);
+      if (appData.useRichCursor)
+        encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRichCursor);
       encs[se->nEncodings++] = Swap32IfLE(rfbEncodingXCursor);
       encs[se->nEncodings++] = Swap32IfLE(rfbEncodingPointerPos);
     }

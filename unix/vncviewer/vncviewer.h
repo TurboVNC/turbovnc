@@ -132,6 +132,7 @@ typedef struct {
   Bool enableJPEG;
   Bool useRemoteCursor;
   Bool useX11Cursor;
+  Bool useRichCursor;
   Bool autoPass;
 
   Bool doubleBuffer;

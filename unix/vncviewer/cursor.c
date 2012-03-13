@@ -27,7 +27,6 @@
 #include <vncviewer.h>
 #include <X11/Xcursor/Xcursor.h>
 
-static void FreeX11Cursor(void);
 
 /* Copied from Xvnc/lib/font/util/utilbitmap.c */
 static unsigned char _reverse_byte[0x100] = {
@@ -65,10 +64,6 @@ static unsigned char _reverse_byte[0x100] = {
 	0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff
 };
 
-/* Data kept for HandleXCursor() function. */
-static Bool prevXCursorSet = False;
-static Cursor prevXCursor;
-
 
 static Bool HandleXCursor(int xhot, int yhot, int width, int height)
 {
@@ -103,11 +98,11 @@ static Bool HandleXCursor(int xhot, int yhot, int width, int height)
   }
 
   if (width * height == 0 || wret < width || hret < height) {
-    /* Free resources */
-    if (buf != NULL)
-      free(buf);
-    FreeX11Cursor();
-    return True;
+    width = height = bytesPerRow = bytesData = 1;
+    buf = (char *)malloc(2);
+    if (buf == NULL)
+      return False;
+    buf[0] = buf[1] = 0;
   }
 
   bg.red   = (unsigned short)colors.backRed   << 8 | colors.backRed;
@@ -128,9 +123,7 @@ static Bool HandleXCursor(int xhot, int yhot, int width, int height)
   free(buf);
 
   XDefineCursor(dpy, desktopWin, cursor);
-  FreeX11Cursor();
-  prevXCursor = cursor;
-  prevXCursorSet = True;
+  XFreeCursor(dpy, cursor);
 
   return True;
 }
@@ -147,10 +140,10 @@ static Bool HandleRichCursor(int xhot, int yhot, int width, int height)
   int x, y, b;
   char *buf = NULL;
 
-  if (xhot < 0 || xhot >= width)
-    return False;
-  if (yhot < 0 || yhot >= height)
-    return False;
+  if (xhot < 0) xhot = 0;
+  if (xhot >= width) xhot = width - 1;
+  if (yhot < 0) yhot = 0;
+  if (yhot >= height) yhot = height - 1;
 
   bytesPerPixel = myFormat.bitsPerPixel / 8;
   bytesPerRow = (width + 7) / 8;
@@ -253,11 +246,8 @@ static Bool HandleRichCursor(int xhot, int yhot, int width, int height)
 
 Bool HandleCursorShape(int xhot, int yhot, int width, int height, CARD32 enc)
 {
-  if (width * height == 0)
-    return True;
-
   /* Read and decode cursor pixel data, depending on the encoding type. */
-  if (enc == rfbEncodingXCursor) {
+  if (enc == rfbEncodingXCursor || width * height == 0) {
     HandleXCursor(xhot, yhot, width, height);
     return True;
   }
@@ -282,13 +272,3 @@ Bool HandleCursorPos(int x, int y)
     
   return True; 
 }
-
-
-static void FreeX11Cursor(void)
-{
-  if (prevXCursorSet) {
-    XFreeCursor(dpy, prevXCursor);
-    prevXCursorSet = False;
-  }
-}
-
