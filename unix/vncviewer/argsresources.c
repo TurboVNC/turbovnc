@@ -339,6 +339,9 @@ static XtResource appDataResourceList[] = {
   {"useRemoteCursor", "UseRemoteCursor", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, useRemoteCursor), XtRImmediate, (XtPointer) True},
 
+  {"useRichCursor", "UseRichCursor", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, useRichCursor), XtRImmediate, (XtPointer) True},
+
   {"grabKeyboard", "GrabKeyboard", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, grabKeyboard), XtRImmediate, (XtPointer) True},
 
@@ -376,6 +379,7 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-quality",       "*qualityLevel",       XrmoptionSepArg, 0},
   {"-nojpeg",        "*enableJPEG",         XrmoptionNoArg,  "False"},
   {"-nocursorshape", "*useRemoteCursor",    XrmoptionNoArg,  "False"},
+  {"-norichcursor",  "*useRichCursor",      XrmoptionNoArg,  "False"},
   {"-singlebuffer",  "*doubleBuffer",       XrmoptionNoArg,  "False"},
   {"-lowqual",       "*qualityLevel",       XrmoptionNoArg,  "-1"},
   {"-medqual",       "*qualityLevel",       XrmoptionNoArg,  "-2"},
