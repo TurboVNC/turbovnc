@@ -82,6 +82,26 @@ static int EncodeRichCursorData32 (char *buf, rfbPixelFormat *fmt,
 				   CursorPtr pCursor);
 
 
+static Bool
+EmptyMask(CursorBitsPtr bits)
+{
+    unsigned char *mask = bits->mask;
+    int n = BitmapBytePad(bits->width) * bits->height;
+
+    while(n--) 
+	if(*mask++ != 0) return FALSE;
+#ifdef ARGB_CURSOR
+    if (bits->argb) {
+	CARD32 *argb = bits->argb;
+	n = bits->width * bits->height;
+	while (n--)
+	    if (*argb++ & 0xff000000) return FALSE;
+    }
+#endif
+    return TRUE;
+}
+
+
 /*
  * Send cursor shape either in X-style format or in client pixel format.
  */
@@ -110,10 +130,7 @@ rfbSendCursorShape(cl, pScreen)
 
     /* If there is no cursor, send update with empty cursor data. */
 
-    if ( pCursor != NULL &&
-	 pCursor->bits->width == 1 &&
-	 pCursor->bits->height == 1 &&
-	 pCursor->bits->mask[0] == 0 ) {
+    if ( pCursor != NULL && EmptyMask(pCursor->bits) ) {
 	pCursor = NULL;
     }
 
