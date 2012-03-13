@@ -41,47 +41,27 @@ SOFTWARE.
 #include	<stdio.h>
 #endif
 
+#ifdef PANORAMIX
+#include "panoramiX.h"
+#endif
+
+#ifdef LBX
+#include "lbxserve.h"
+#endif
+
+#ifdef XF86BIGFONT
+#define _XF86BIGFONT_SERVER_
+#include "xf86bigfont.h"
+#endif
+
 #define QUERYCHARINFO(pci, pr)  *(pr) = (pci)->metrics
-
-static Mask FontFormat = 
-#if IMAGE_BYTE_ORDER == LSBFirst
-    BitmapFormatByteOrderLSB |
-#else
-    BitmapFormatByteOrderMSB |
-#endif
-
-#if BITMAP_BIT_ORDER == LSBFirst
-    BitmapFormatBitOrderLSB |
-#else
-    BitmapFormatBitOrderMSB |
-#endif
-
-    BitmapFormatImageRectMin |
-
-#if GLYPHPADBYTES == 1
-    BitmapFormatScanlinePad8 |
-#endif
-
-#if GLYPHPADBYTES == 2
-    BitmapFormatScanlinePad16 |
-#endif
-
-#if GLYPHPADBYTES == 4
-    BitmapFormatScanlinePad32 |
-#endif
-
-#if GLYPHPADBYTES == 8
-    BitmapFormatScanlinePad64 |
-#endif
-
-    BitmapFormatScanlineUnit8;
 
 extern pointer fosNaturalParams;
 extern FontPtr defaultFont;
 
 static FontPathElementPtr *font_path_elements = (FontPathElementPtr *) 0;
 static int  num_fpes = 0;
-static FPEFunctions *fpe_functions = (FPEFunctions *) 0;
+FPEFunctions *fpe_functions = (FPEFunctions *) 0;
 static int  num_fpe_types = 0;
 
 static unsigned char *font_path_string;
@@ -101,8 +81,8 @@ FontToXError(err)
     case AllocError:
 	return BadAlloc;
     case BadFontName:
-    case BadFontPath:
 	return BadName;
+    case BadFontPath:
     case BadFontFormat:	/* is there something better? */
     case BadCharRange:
 	return BadValue;
@@ -213,23 +193,13 @@ FontWakeup(data, count, LastSelectMask)
 
 /* XXX -- these two funcs may want to be broken into macros */
 static void
-#if NeedFunctionPrototypes
 UseFPE(FontPathElementPtr fpe)
-#else
-UseFPE(fpe)
-    FontPathElementPtr fpe;
-#endif
 {
     fpe->refcount++;
 }
 
 static void
-#if NeedFunctionPrototypes
 FreeFPE (FontPathElementPtr fpe)
-#else
-FreeFPE (fpe)
-    FontPathElementPtr	fpe;
-#endif
 {
     fpe->refcount--;
     if (fpe->refcount == 0) {
@@ -240,13 +210,7 @@ FreeFPE (fpe)
 }
 
 static Bool
-#if NeedFunctionPrototypes
 doOpenFont(ClientPtr client, OFclosurePtr c)
-#else
-doOpenFont(client, c)
-    ClientPtr   client;
-    OFclosurePtr c;
-#endif
 {
     FontPtr     pfont = NullFont;
     FontPathElementPtr fpe = NULL;
@@ -257,6 +221,36 @@ doOpenFont(client, c)
                *newname;
     int         newlen;
     int		aliascount = 20;
+    /*
+     * Decide at runtime what FontFormat to use.
+     */
+    Mask FontFormat = 
+
+	((screenInfo.imageByteOrder == LSBFirst) ?
+	    BitmapFormatByteOrderLSB : BitmapFormatByteOrderMSB) |
+
+	((screenInfo.bitmapBitOrder == LSBFirst) ?
+	    BitmapFormatBitOrderLSB : BitmapFormatBitOrderMSB) |
+
+	BitmapFormatImageRectMin |
+
+#if GLYPHPADBYTES == 1
+	BitmapFormatScanlinePad8 |
+#endif
+
+#if GLYPHPADBYTES == 2
+	BitmapFormatScanlinePad16 |
+#endif
+
+#if GLYPHPADBYTES == 4
+	BitmapFormatScanlinePad32 |
+#endif
+
+#if GLYPHPADBYTES == 8
+	BitmapFormatScanlinePad64 |
+#endif
+
+	BitmapFormatScanlineUnit8;
 
     if (client->clientGone)
     {
@@ -466,7 +460,7 @@ CloseFont(value, fid)
     if (pfont == NullFont)
 	return (Success);
     if (--pfont->refcnt == 0) {
-	if (patternCache && pfont->info.cachable)
+	if (patternCache)
 	    RemoveCachedFontPattern (patternCache, pfont);
 	/*
 	 * since the last reference is gone, ask each screen to free any
@@ -481,6 +475,9 @@ CloseFont(value, fid)
 	    defaultFont = NULL;
 #ifdef LBX
 	LbxFreeFontTag(pfont);
+#endif
+#ifdef XF86BIGFONT
+	XF86BigfontFreeFontShm(pfont);
 #endif
 	fpe = pfont->fpe;
 	(*fpe_functions[fpe->type].close_font) (fpe, pfont);
@@ -550,8 +547,8 @@ QueryFont(pFont, pReply, nProtoCCIStructs)
 	    chars[i++] = r;
 	    chars[i++] = c;
 	}
-	(*pFont->get_metrics) (pFont, ncols, chars, TwoD16Bit,
-			       &count, charInfos);
+	(*pFont->get_metrics) (pFont, ncols, chars, 
+				TwoD16Bit, &count, charInfos);
 	i = 0;
 	for (i = 0; i < (int) count && ninfos < nProtoCCIStructs; i++) {
 	    *prCI = *charInfos[i];
@@ -563,13 +560,7 @@ QueryFont(pFont, pReply, nProtoCCIStructs)
 }
 
 static Bool
-#if NeedFunctionPrototypes
 doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
-#else
-doListFontsAndAliases(client, c)
-    ClientPtr   client;
-    LFclosurePtr c;
-#endif
 {
     FontPathElementPtr fpe;
     int         err = Successful;
@@ -985,7 +976,11 @@ doListFontsWithInfo(client, c)
 		c->saved = c->current;
 		c->haveSaved = TRUE;
 		c->savedNumFonts = numFonts;
-		c->savedName = (char *) pFontInfo;
+		if (c->savedName)
+		  xfree(c->savedName);
+		c->savedName = (char *)xalloc(namelen + 1);
+		if (c->savedName)
+		  memmove(c->savedName, name, namelen + 1);
 		aliascount = 20;
 	    }
 	    memmove(c->current.pattern, name, namelen);
@@ -1092,6 +1087,7 @@ bail:
 	FreeFPE(c->fpe_list[i]);
     xfree(c->reply);
     xfree(c->fpe_list);
+    if (c->savedName) xfree(c->savedName);
     xfree(c);
     return TRUE;
 }
@@ -1142,6 +1138,7 @@ StartListFontsWithInfo(client, length, pattern, max_names)
     c->savedNumFonts = 0;
     c->haveSaved = FALSE;
     c->slept = FALSE;
+    c->savedName = 0;
     doListFontsWithInfo(client, c);
     return Success;
 badAlloc:
@@ -1401,7 +1398,10 @@ bail:
 
     if (c->err != Success) err = c->err;
     if (err != Success && c->client != serverClient) {
-	SendErrorToClient(c->client, c->reqType, 0, 0, err);
+#ifdef PANORAMIX
+        if (noPanoramiXExtension || !c->pGC->pScreen->myNum)
+#endif
+	    SendErrorToClient(c->client, c->reqType, 0, 0, err);
     }
     if (c->slept)
     {
@@ -1626,12 +1626,7 @@ ImageText(client, pDraw, pGC, nChars, data, xorg, yorg, reqType, did)
 
 /* does the necessary magic to figure out the fpe type */
 static int
-#if NeedFunctionPrototypes
 DetermineFPEType(char *pathname)
-#else
-DetermineFPEType(pathname)
-    char       *pathname;
-#endif
 {
     int         i;
 
@@ -1644,14 +1639,7 @@ DetermineFPEType(pathname)
 
 
 static void
-#if NeedFunctionPrototypes
 FreeFontPath(FontPathElementPtr *list, int n, Bool force)
-#else
-FreeFontPath(list, n, force)
-    FontPathElementPtr	*list;
-    Bool		force;
-    int         n;
-#endif
 {
     int         i;
 
@@ -1678,15 +1666,7 @@ FreeFontPath(list, n, force)
 }
 
 static FontPathElementPtr
-#if NeedFunctionPrototypes
 find_existing_fpe(FontPathElementPtr *list, int num, unsigned char *name, int len)
-#else
-find_existing_fpe(list, num, name, len)
-    FontPathElementPtr *list;
-    int         num;
-    unsigned char *name;
-    int         len;
-#endif
 {
     FontPathElementPtr fpe;
     int         i;
@@ -1701,14 +1681,7 @@ find_existing_fpe(list, num, name, len)
 
 
 static int
-#if NeedFunctionPrototypes
-SetFontPathElements(int npaths, unsigned char *paths, int *bad)
-#else
-SetFontPathElements(npaths, paths, bad)
-    int         npaths;
-    unsigned char *paths;
-    int        *bad;
-#endif
+SetFontPathElements(int npaths, unsigned char *paths, int *bad, Bool persist)
 {
     int         i, err = 0;
     int         valid_paths = 0;
@@ -1726,63 +1699,83 @@ SetFontPathElements(npaths, paths, bad)
 	if (fpe_functions[i].set_path_hook)
 	    (*fpe_functions[i].set_path_hook) ();
     }
-    for (i = 0; i < npaths; i++) {
+    for (i = 0; i < npaths; i++) 
+    {
 	len = (unsigned int) (*cp++);
 
-	if (len) {
+	if (len == 0) 
+	{
+	    if (persist)
+		ErrorF ("Removing empty element from the valid list of fontpaths\n");
+	    err = BadValue;
+	}
+	else
+	{
 	    /* if it's already in our active list, just reset it */
 	    /*
 	     * note that this can miss FPE's in limbo -- may be worth catching
 	     * them, though it'd muck up refcounting
 	     */
 	    fpe = find_existing_fpe(font_path_elements, num_fpes, cp, len);
-	    if (fpe) {
+	    if (fpe) 
+	    {
 		err = (*fpe_functions[fpe->type].reset_fpe) (fpe);
-		if (err == Successful) {
+		if (err == Successful) 
+		{
 		    UseFPE(fpe);/* since it'll be decref'd later when freed
 				 * from the old list */
-		    fplist[valid_paths++] = fpe;
-		    cp += len;
-		    continue;
 		}
-		/* if error or can't do it, act like it's a new one */
+		else
+		    fpe = 0;
 	    }
-	    fpe = (FontPathElementPtr) xalloc(sizeof(FontPathElementRec));
-	    if (!fpe) {
-		err = BadAlloc;
-		goto bail;
+	    /* if error or can't do it, act like it's a new one */
+	    if (!fpe)
+	    {
+		fpe = (FontPathElementPtr) xalloc(sizeof(FontPathElementRec));
+		if (!fpe) 
+		{
+		    err = BadAlloc;
+		    goto bail;
+		}
+		fpe->name = (char *) xalloc(len + 1);
+		if (!fpe->name) 
+		{
+		    xfree(fpe);
+		    err = BadAlloc;
+		    goto bail;
+		}
+		fpe->refcount = 1;
+    
+		strncpy(fpe->name, (char *) cp, (int) len);
+		fpe->name[len] = '\0';
+		fpe->name_length = len;
+		fpe->type = DetermineFPEType(fpe->name);
+		if (fpe->type == -1)
+		    err = BadValue;
+		else
+		    err = (*fpe_functions[fpe->type].init_fpe) (fpe);
+		if (err != Successful)
+		{
+		    if (persist)
+		    {
+			ErrorF("Could not init font path element %s, removing from list!\n",
+			       fpe->name);
+		    }
+		    xfree (fpe->name);
+		    xfree (fpe);
+		}
 	    }
-	    fpe->name = (char *) xalloc(len + 1);
-	    if (!fpe->name) {
-		xfree(fpe);
-		err = BadAlloc;
-		goto bail;
-	    }
-	    fpe->refcount = 1;
-
-	    strncpy(fpe->name, (char *) cp, (int) len);
-	    cp += len;
-	    fpe->name[len] = '\0';
-	    fpe->name_length = len;
-	    fpe->type = DetermineFPEType(fpe->name);
-	    if (fpe->type == -1) {
-		xfree(fpe->name);
-		xfree(fpe);
-		err = BadValue;
-		goto bail;
-	    }
-	    err = (*fpe_functions[fpe->type].init_fpe) (fpe);
-	    if (err != Successful) {
-		xfree(fpe->name);
-		xfree(fpe);
-		err = BadValue;
-		goto bail;
-	    }
-	    fplist[valid_paths++] = fpe;
-	} else {
-	    err = BadValue;
-	    goto bail;
 	}
+	if (err != Successful)
+	{
+	    if (!persist)
+		goto bail;
+	}
+	else
+	{
+	    fplist[valid_paths++] = fpe;
+	}
+	cp += len;
     }
 
     FreeFontPath(font_path_elements, num_fpes, FALSE);
@@ -1794,10 +1787,10 @@ SetFontPathElements(npaths, paths, bad)
     return Success;
 bail:
     *bad = i;
-    while (--i >= 0)
-	FreeFPE(fplist[i]);
+    while (--valid_paths >= 0)
+	FreeFPE(fplist[valid_paths]);
     xfree(fplist);
-    return err;
+    return FontToXError(err);
 }
 
 /* XXX -- do we need to pass error down to each renderer? */
@@ -1812,15 +1805,12 @@ SetFontPath(client, npaths, paths, error)
 
     if (npaths == 0) {
 	if (SetDefaultFontPath(defaultFontPath) != Success)
-	    return BadName;
+	    return BadValue;
     } else {
-	err = SetFontPathElements(npaths, paths, error);
+	err = SetFontPathElements(npaths, paths, error, FALSE);
     }
     return err;
 }
-
-/*** TJR - dirty hack - this variable is used in lib/font/fontfile/dirfile.c */
-int settingDefaultFontPath = 0;
 
 int
 SetDefaultFontPath(path)
@@ -1857,11 +1847,7 @@ SetDefaultFontPath(path)
     }
     *nump = (unsigned char) size;
 
-    settingDefaultFontPath = 1;
-
-    err = SetFontPathElements(num, newpath, &bad);
-
-    settingDefaultFontPath = 0;
+    err = SetFontPathElements(num, newpath, &bad, TRUE);
 
     DEALLOCATE_LOCAL(newpath);
 
@@ -1935,13 +1921,21 @@ InitFonts ()
 {
     patternCache = MakeFontPatternCache();
 
+#ifndef KDRIVESERVER
     if (screenInfo.numScreens > screenInfo.numVideoScreens) {
 	PrinterFontRegisterFpeFunctions();
 	FontFileCheckRegisterFpeFunctions();
 	check_fs_register_fpe_functions();
-    } else {
+    } else 
+#endif
+    {
+#ifdef KDRIVESERVER
+	BuiltinRegisterFpeFunctions();
+#endif
 	FontFileRegisterFpeFunctions();
+#ifndef NOFONTSERVERACCESS
 	fs_register_fpe_functions();
+#endif
     }
 }
 
