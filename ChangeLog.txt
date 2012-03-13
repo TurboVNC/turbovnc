@@ -29,6 +29,10 @@ Fixed the rendering of empty cursors in the Unix TurboVNC Viewer.  This also
 fixed an issue whereby the viewer would crash when opening recent versions of
 xterm in the TurboVNC Server session.
 -------------------------------------------------------------------------------
+[4]
+Fixed a crash (xcb_io.c:507: _XReply: Assertion `!dpy->xcb->reply_data' failed)
+that occurred when running recent versions of twm in a TurboVNC Server session.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
