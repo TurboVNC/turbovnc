@@ -20,6 +20,8 @@ xterm in the TurboVNC Server session.
 [4]
 Fixed a crash (xcb_io.c:507: _XReply: Assertion `!dpy->xcb->reply_data' failed)
 that occurred when running recent versions of twm in a TurboVNC Server session.
+Fixing this also fixed an issue in openSUSE 12 whereby Xvnc would abort with
+"could not open default font 'fixed'".
 -------------------------------------------------------------------------------
 
 
