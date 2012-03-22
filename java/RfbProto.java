@@ -487,6 +487,7 @@ class RfbProto {
       ByteBuffer bbuf = encoder.encode(cbuf);
       bytes = bbuf.array();
     }
+    catch ( NullPointerException ex )          { bytes = new byte[0]; }
     catch ( CharacterCodingException ex )      { bytes = new byte[0]; }
     catch ( ReadOnlyBufferException ex )       { bytes = new byte[0]; }
     catch ( UnsupportedOperationException ex ) { bytes = new byte[0]; }

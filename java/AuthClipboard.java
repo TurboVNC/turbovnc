@@ -42,7 +42,7 @@ public class AuthClipboard implements AuthPlugin {
    */
   public AuthClipboard(final VncViewer viewer, String defUser,
                        String defPasswd) {
-    this.user   = defUser;
+    this.user   = (defUser == null ? "" : defUser);
     this.passwd = (defPasswd == null ? "" : defPasswd);
   }
  
