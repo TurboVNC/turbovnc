@@ -55,6 +55,9 @@ public interface AuthPlugin {
   /**
    * Get the user name for Unix login authentication.
    *
+   * A non-zero-length string must be returned for a connection to be
+   * attempted. 
+   *
    * @return The user name for Unix login authentication.
    */
   public String getUser();
@@ -62,8 +65,9 @@ public interface AuthPlugin {
   /**
    * Get the password for Unix login authentication.
    *
-   * An empty password is returned as a zero-length byte array.  For security,
-   * the caller should wipe the returned array once authentication is complete.
+   * A non-zero-length byte array must be returned for a connection to be
+   * attempted.  For security, the caller should wipe the returned array once
+   * authentication is complete.
    *
    * @return Byte array representing the password.
    */
