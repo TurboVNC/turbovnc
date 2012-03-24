@@ -473,6 +473,8 @@ void ClientConnection::CreateDisplay()
 		AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
 		AppendMenu(hsysmenu, MF_STRING, ID_FULLSCREEN,
 				   _T("&Full screen\tCtrl-Alt-Shift-F"));
+		AppendMenu(hsysmenu, MF_STRING, ID_DEFAULT_WINDOW_SIZE,
+				   _T("Default window si&ze/position\tCtrl-Alt-Shift-Z"));
 		AppendMenu(hsysmenu, MF_STRING, ID_TOOLBAR,
 				   _T("Show &toolbar\tCtrl-Alt-Shift-T"));
 		AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
@@ -2095,6 +2097,7 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 				int prev_scale_num = _this->m_opts.m_scale_num;
 				int prev_scale_den = _this->m_opts.m_scale_den;
 				bool prev_CU = _this->m_opts.m_CU;
+				bool prev_FullScreen = _this->m_opts.m_FullScreen;
 
 				if (_this->m_opts.DoDialog(true,
 					_this->m_clientMsgCaps.IsEnabled(rfbEnableContinuousUpdates))) {
@@ -2113,6 +2116,8 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 							InvalidateRect(_this->m_hwnd, NULL, FALSE);
 						}
 					}
+					if (prev_FullScreen != _this->m_opts.m_FullScreen)
+						_this->RealiseFullScreenMode(false);
 				}
 				
 				if (_this->m_serverInitiated) {
@@ -2146,6 +2151,11 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 		case ID_FULLSCREEN_NODIALOG:
 			// Toggle full screen mode
 			_this->SetFullScreenMode(!_this->InFullScreenMode(), true);
+			return 0;
+		case ID_DEFAULT_WINDOW_SIZE:
+			// Reset window geometry to default (taking into account spanning option)
+			ShowWindow(_this->m_hwnd1, SW_NORMAL);
+			_this->SizeWindow(true);
 			return 0;
 		case ID_REQUEST_REFRESH: 
 			// Request a full-screen update
