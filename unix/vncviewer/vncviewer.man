@@ -77,6 +77,12 @@ server.
 \fB\-fullscreen\fR
 Start in full\-screen mode.
 .TP
+\fB\-fsaltenter\fR
+Normally, vncviewer will switch into and out of full-screen mode when
+Ctrl-Alt-Shift-F is pressed or "Full screen" is selected from the F8 menu.
+Specifying this option will additionally cause it to switch into and out of
+full-screen mode when Alt-Enter is pressed.
+.TP
 \fB\-noraiseonbeep\fR
 By default, if an application running on the VNC server generates a
 "bell" event, it will cause the VNC viewer window to restore itself
