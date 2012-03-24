@@ -1,4 +1,4 @@
-// Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+// Copyright (C) 2010, 2012 D. R. Commander. All Rights Reserved.
 // Copyright (C) 2003 TightVNC Development Team. All Rights Reserved.
 //
 //  TightVNC is free software; you can redistribute it and/or modify
@@ -71,6 +71,10 @@ void HotKeys::Init(bool FSAltEnter)
 	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
 	accel[i].key = 0x45;	// "E"
 	accel[i++].cmd = IDD_FILETRANSFER;
+
+	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+	accel[i].key = 0x5A;	// "Z"
+	accel[i++].cmd = ID_DEFAULT_WINDOW_SIZE;
 
 	if(FSAltEnter) {
 		accel[i].fVirt = FVIRTKEY | FALT | FNOINVERT;
