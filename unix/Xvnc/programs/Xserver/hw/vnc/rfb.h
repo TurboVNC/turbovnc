@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2010-2011 D. R. Commander
+ *  Copyright (C) 2010-2012 D. R. Commander
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2000-2004 Const Kaplinsky.  All Rights Reserved.
@@ -292,6 +292,7 @@ typedef struct rfbClientRec {
     int tightCompressLevel;
     int tightSubsampLevel;
     int tightQualityLevel;
+    int imageQualityLevel;
 
     Bool enableLastRectEncoding;   /* client supports LastRect encoding */
     Bool enableCursorShapeUpdates; /* client supports cursor shape updates */
