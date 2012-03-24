@@ -35,6 +35,24 @@ that occurred when running recent versions of twm in a TurboVNC Server session.
 Fixing this also fixed an issue in openSUSE 12 whereby Xvnc would abort with
 "could not open default font 'fixed'".
 -------------------------------------------------------------------------------
+[5]
+The Windows TurboVNC Viewer will now properly switch into/out of full-screen
+mode whenever the "Full-screen mode" check box is selected or de-selected in
+the TurboVNC Viewer Options dialog and a connection is active.
+-------------------------------------------------------------------------------
+[6]
+Fixed an issue whereby the Windows TurboVNC Viewer window would remain on top
+of other windows and dialogs (including dialogs raised by the TurboVNC Viewer
+itself) when exiting full-screen mode.
+-------------------------------------------------------------------------------
+[7]
+Beginning with 1.1 beta, whenever the Windows TurboVNC Viewer left full-screen
+mode, it would set the window size and position to default values.  It now
+restores the window's size and position to the values they had before the
+viewer was placed in full-screen mode.  An option has been added to the system
+menu to manually resize and reposition the window to default values (taking
+into account the spanning option.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
