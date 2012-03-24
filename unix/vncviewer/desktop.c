@@ -142,6 +142,11 @@ DesktopInitAfterRealization()
     valuemask |= CWCursor;
   }
 
+
+  if(appData.fsAltEnter)
+    XtOverrideTranslations (desktop,
+      XtParseTranslationTable ("Alt <Key>Return: ToggleFullScreen()"));
+
   XChangeWindowAttributes(dpy, desktopWin, valuemask, &attr);
 }
 

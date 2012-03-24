@@ -91,6 +91,7 @@ typedef struct {
   Bool shareDesktop;
   Bool viewOnly;
   Bool fullScreen;
+  Bool fsAltEnter;
   Bool grabKeyboard;
   Bool raiseOnBeep;
 

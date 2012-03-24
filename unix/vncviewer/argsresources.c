@@ -58,7 +58,9 @@ char *fallback_resources[] = {
 
   "*desktop.baseTranslations:\
      <Key>F8: ShowPopup()\\n\
+     Ctrl Alt Shift <Key>F: ToggleFullScreen()\\n\
      Ctrl Alt Shift <Key>L: LosslessRefresh()\\n\
+     Ctrl Alt Shift <Key>R: SendRFBEvent(fbupdate)\\n\
      <ButtonPress>: SendRFBEvent()\\n\
      <ButtonRelease>: SendRFBEvent()\\n\
      <Motion>: SendRFBEvent()\\n\
@@ -175,7 +177,7 @@ char *fallback_resources[] = {
   "*popup*button2.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: Quit()",
 
-  "*popup*button3.label: Full screen",
+  "*popup*button3.label: Full screen (CTRL-ALT-SHIFT-F)",
   "*popup*button3.type: toggle",
   "*popup*button3.translations: #override\\n\
      <Visible>: SetFullScreenState()\\n\
@@ -189,7 +191,7 @@ char *fallback_resources[] = {
   "*popup*button5.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: SelectionFromVNC(always) HidePopup()",
 
-  "*popup*button6.label: Request refresh",
+  "*popup*button6.label: Request refresh (CTRL-ALT-SHIFT-R)",
   "*popup*button6.translations: #override\\n\
      <Btn1Down>,<Btn1Up>: SendRFBEvent(fbupdate) HidePopup()",
 
@@ -266,6 +268,9 @@ static XtResource appDataResourceList[] = {
 
   {"fullScreen", "FullScreen", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, fullScreen), XtRImmediate, (XtPointer) False},
+
+  {"fsAltEnter", "FSAltEnter", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, fsAltEnter), XtRImmediate, (XtPointer) False},
 
   {"raiseOnBeep", "RaiseOnBeep", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, raiseOnBeep), XtRImmediate, (XtPointer) True},
@@ -366,6 +371,7 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-noshared",      "*shareDesktop",       XrmoptionNoArg,  "False"},
   {"-viewonly",      "*viewOnly",           XrmoptionNoArg,  "True"},
   {"-fullscreen",    "*fullScreen",         XrmoptionNoArg,  "True"},
+  {"-fsaltenter",    "*fsAltEnter",         XrmoptionNoArg,  "True"},
   {"-noraiseonbeep", "*raiseOnBeep",        XrmoptionNoArg,  "False"},
   {"-passwd",        "*passwordFile",       XrmoptionSepArg, 0},
   {"-encodings",     "*encodings",          XrmoptionSepArg, 0},
@@ -460,6 +466,7 @@ usage(void)
 	  "        -noshared\n"
 	  "        -viewonly\n"
 	  "        -fullscreen\n"
+          "        -fsaltenter\n"
 	  "        -noraiseonbeep\n"
 	  "        -passwd <PASSWD-FILENAME> (standard VNC authentication)\n"
 	  "        -encodings <ENCODING-LIST> (example: \"tight copyrect\")\n"
@@ -605,6 +612,7 @@ LoadConfigFile(char *filename)
     ReadConfigInt("preferred_encoding=", preferred_encoding, 0, 16);
     ReadConfigBool("viewonly=", appData.viewOnly);
     ReadConfigBool("fullscreen=", appData.fullScreen);
+    ReadConfigBool("fsaltenter=", appData.fsAltEnter);
     ReadConfigBool("8bit=", appData.useBGR233);
     ReadConfigBool("doublebuffer=", appData.doubleBuffer);
     ReadConfigBool("shared=", appData.shareDesktop);

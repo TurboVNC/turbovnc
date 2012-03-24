@@ -41,6 +41,11 @@ viewer was placed in full-screen mode.  An option has been added to the system
 menu to manually resize and reposition the window to default values (taking
 into account the spanning option.)
 -------------------------------------------------------------------------------
+[8]
+Added Ctrl-Alt-Shift-F and Ctrl-Alt-Shift-R hotkeys to the Unix TurboVNC
+Viewer to toggle full-screen mode and request a refresh (respectively.)  These
+emulate the behavior of the Windows TurboVNC Viewer.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
