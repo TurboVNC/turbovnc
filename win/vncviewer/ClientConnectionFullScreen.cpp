@@ -1,5 +1,5 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
-//  Copyright (C) 2010-2011 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2012 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -53,6 +53,7 @@ void ClientConnection::SetFullScreenMode(bool enable, bool suppressPrompt)
 void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 {
 	LONG style = GetWindowLong(m_hwnd1, GWL_STYLE);
+	static RECT savedRect = {-1, -1, -1, -1};
 	if (m_opts.m_FullScreen) {
 		if (!suppressPrompt && !pApp->m_options.m_skipprompt) {
 			MessageBox(m_hwnd1, 
@@ -70,6 +71,7 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 		SetWindowLong(m_hwnd1, GWL_STYLE, style);
 		RECT screenArea, workArea;
 		GetFullScreenMetrics(screenArea, workArea);
+		GetWindowRect(m_hwnd1, &savedRect);
 		SetWindowPos(m_hwnd1, HWND_TOPMOST, screenArea.left, screenArea.top,
 			screenArea.right - screenArea.left,
 			screenArea.bottom - screenArea.top, SWP_FRAMECHANGED);
@@ -81,8 +83,14 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 		style |= (WS_DLGFRAME | WS_THICKFRAME | WS_BORDER);
 		
 		SetWindowLong(m_hwnd1, GWL_STYLE, style);
-		ShowWindow(m_hwnd1, SW_NORMAL);		
-		SizeWindow(true);
+		if (savedRect.bottom - savedRect.top > 0 &&
+			savedRect.right - savedRect.left > 0)
+			SetWindowPos(m_hwnd1, HWND_NOTOPMOST, savedRect.left,
+				savedRect.top, savedRect.right - savedRect.left,
+				savedRect.bottom - savedRect.top, 0);
+		else
+			SetWindowPos(m_hwnd1, HWND_NOTOPMOST, 0, 0, 0, 0,
+				SWP_NOMOVE | SWP_NOSIZE);
 		CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_FULLSCREEN, MF_BYCOMMAND|MF_UNCHECKED);
 
 	}
