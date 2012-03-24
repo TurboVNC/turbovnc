@@ -2095,6 +2095,7 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 				int prev_scale_num = _this->m_opts.m_scale_num;
 				int prev_scale_den = _this->m_opts.m_scale_den;
 				bool prev_CU = _this->m_opts.m_CU;
+				bool prev_FullScreen = _this->m_opts.m_FullScreen;
 
 				if (_this->m_opts.DoDialog(true,
 					_this->m_clientMsgCaps.IsEnabled(rfbEnableContinuousUpdates))) {
@@ -2113,6 +2114,8 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 							InvalidateRect(_this->m_hwnd, NULL, FALSE);
 						}
 					}
+					if (prev_FullScreen != _this->m_opts.m_FullScreen)
+						_this->RealiseFullScreenMode(false);
 				}
 				
 				if (_this->m_serverInitiated) {
