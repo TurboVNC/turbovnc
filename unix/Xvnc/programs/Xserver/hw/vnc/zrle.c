@@ -115,11 +115,11 @@ Bool rfbSendRectEncodingZRLE(rfbClientPtr cl, int x, int y, int w, int h)
   zrleBeforeBuf = cl->zrleBeforeBuf;
 
   if (cl->preferredEncoding == rfbEncodingZYWRLE) {
-	  if (cl->tightQualityLevel < 0) {
+	  if (cl->imageQualityLevel < 0) {
 		  cl->zywrleLevel = 1;
-	  } else if (cl->tightQualityLevel < 3) {
+	  } else if (cl->imageQualityLevel < 3) {
 		  cl->zywrleLevel = 3;
-	  } else if (cl->tightQualityLevel < 6) {
+	  } else if (cl->imageQualityLevel < 6) {
 		  cl->zywrleLevel = 2;
 	  } else {
 		  cl->zywrleLevel = 1;
