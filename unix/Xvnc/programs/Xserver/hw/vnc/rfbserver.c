@@ -310,6 +310,7 @@ rfbNewClient(sock)
     cl->tightCompressLevel = TIGHT_DEFAULT_COMPRESSION;
     cl->tightSubsampLevel = TIGHT_DEFAULT_SUBSAMP;
     cl->tightQualityLevel = -1;
+    cl->imageQualityLevel = -1;
     for (i = 0; i < 4; i++)
         cl->zsActive[i] = FALSE;
 
@@ -819,6 +820,7 @@ rfbProcessClientNormalMessage(cl)
 	cl->tightCompressLevel = TIGHT_DEFAULT_COMPRESSION;
 	cl->tightSubsampLevel = TIGHT_DEFAULT_SUBSAMP;
 	cl->tightQualityLevel = -1;
+	cl->imageQualityLevel = -1;
 
 	for (i = 0; i < msg.se.nEncodings; i++) {
 	    if ((n = ReadExact(cl->sock, (char *)&enc, 4)) <= 0) {
@@ -941,12 +943,18 @@ rfbProcessClientNormalMessage(cl)
 			    enc <= (CARD32)rfbEncodingQualityLevel9 ) {
 		    cl->tightQualityLevel = JPEG_QUAL[enc & 0x0F];
 		    cl->tightSubsampLevel = JPEG_SUBSAMP[enc & 0x0F];
-		    rfbLog("Using JPEG subsampling %d, Q%d for client %s\n",
-			   cl->tightSubsampLevel, cl->tightQualityLevel, cl->host);
+		    cl->imageQualityLevel = enc & 0x0F;
+		    if (cl->preferredEncoding == rfbEncodingTight)
+			rfbLog("Using JPEG subsampling %d, Q%d for client %s\n",
+			    cl->tightSubsampLevel, cl->tightQualityLevel,
+			    cl->host);
+		    else
+			rfbLog("Using image quality level %d for client %s\n",
+			    cl->imageQualityLevel, cl->host);
 		} else if ( enc >= (CARD32)rfbEncodingFineQualityLevel0 + 1 &&
 			    enc <= (CARD32)rfbEncodingFineQualityLevel100 ) {
 		    cl->tightQualityLevel = enc & 0xFF;
-		    rfbLog("Using image quality level %d for client %s\n",
+		    rfbLog("Using JPEG quality level %d for client %s\n",
 			   cl->tightQualityLevel, cl->host);
 		} else {
 		    rfbLog("rfbProcessClientNormalMessage: ignoring unknown "
