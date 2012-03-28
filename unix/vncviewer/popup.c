@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2012 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -48,19 +48,7 @@ UpdateQual(void)
   strncpy(title, titleFormat, 1023);
   if((ptr=strrchr(title, '['))!=NULL)
   {
-    if (!appData.encodingsString || HasEncoding("tight")) {
-      if (!appData.enableJPEG) {
-        char zlibstr[80];
-        zlibstr[0]=0;
-        if (appData.compressLevel > 0)
-          snprintf(zlibstr, 79, " + Zlib %d", appData.compressLevel);
-        snprintf(ptr, 1023-(ptr-title), "[Lossless Tight%s]", zlibstr);
-      }
-      else
-        snprintf(ptr, 1023-(ptr-title), "[Tight + JPEG %s Q%d]", subsampLevel2str[appData.subsampLevel],
-          appData.qualityLevel);
-    }
-    else snprintf(ptr, 1023-(ptr-title), "[%s]", appData.encodingsString);
+    UpdateTitleString(ptr, 1024-(ptr-title));
     XtVaSetValues(toplevel, XtNtitle, title, XtNiconName, title, NULL);
   }
   XawScrollbarSetThumb(qualslider, (float)appData.qualityLevel/100., 0.);
