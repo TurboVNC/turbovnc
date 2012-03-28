@@ -146,11 +146,12 @@ There are four options that control the manner in which TurboVNC compresses
 images:
 
 	Allow JPEG compression :: {:}
-		If this option is enabled, then TurboVNC will use JPEG compression for all
-		subrectangles with more than 24 unique colors and indexed color encoding for
-		all other subrectangles with more than 2 colors.  If this option is
-		disabled, then TurboVNC will select between indexed color or raw encoding,
-		depending on the size of the subrectangle and its color count.
+		If this option is enabled, then TurboVNC will use JPEG compression for
+		subrectangles that have a high number of unique colors and indexed color
+		subencoding for subrectangles that have a low number of unique colors.  If
+		this option is disabled, then TurboVNC will select between indexed color or
+		raw subencoding, depending on the size of the subrectangle and its color
+		count.
 
 	JPEG image quality :: {:}
 		Lower quality levels produce grainier JPEG images with more noticeable
@@ -158,21 +159,29 @@ images:
 		bandwidth and CPU time.
 
 	JPEG chrominance subsampling :: {:}
-		After converting the image from RGB to YUV, chrominance subsampling
-		discards some of the U and V (chrominance) components to save space.  1x
-		subsampling retains the chrominance components for all pixels, 2x
-		subsampling retains the chrominance components for every other pixel, 4x
-		subsampling retains the chrominance components for every fourth pixel, and
-		grayscale throws out all of the chrominance components.  1x subsampling
-		uses the most network bandwidth and CPU time, whereas grayscale uses the
-		least.
+		When compressing an image using JPEG, the RGB pixels are first converted to
+		the YUV colorspace, a colorspace in which each pixel is represented as a
+		brightness (Y, or "luminance") value and a pair of color (U & V, or
+		"chrominance") values.  After this colorspace conversion, chrominance
+		subsampling can be used to discard some of the chrominance components in
+		order to save bandwidth.  1X subsampling (the default in TurboVNC) retains
+		the chrominance components for all pixels, and thus it provides the best
+		image quality but also uses the most network bandwidth and CPU time.  2X
+		subsampling retains the chrominance components for every other pixel, and
+		4X subsampling retains the chrominance components for every fourth pixel
+		(this is typically implemented as 2X subsampling in both X and Y
+		directions.)  Grayscale throws out all of the chrominance components,
+		leaving only luminance.  2X and 4X subsampling will typically produce
+		noticeable aliasing of lines and other sharp features, but with
+		photographic or other "smooth" image content, it may be difficult to detect
+		any difference between 1X, 2X, and 4X.
 
 	Zlib compression level :: {:}
 		If Zlib compression is enabled, then indexed color, mono, and raw-encoded
 		subrectangles will be compressed with Zlib prior to transmission.  This
-		decreases network bandwidth usage at the expense of increased server CPU
-		usage.  If JPEG compression is enabled, then Zlib compression is always
-		used with non-JPEG subrectangles.
+		decreases network bandwidth usage at the expense of increased CPU usage.
+		If JPEG compression is enabled, then Zlib compression is always used with
+		non-JPEG subrectangles.
 
 In the Windows TurboVNC Viewer, these parameters can be adjusted by accessing
 the Options dialog box (click on the "Options" button in the "TurboVNC
@@ -208,19 +217,19 @@ above:
 	than performance, then use one of the other encoding methods or take \
 	advantage of the Lossless Refresh feature. |
 | "Lossless Tight" | No | N/A | N/A | 0 | \
-	This encoding method uses indexed color encoding for subrectangles with a \
-	low number of unique colors but otherwise does not perform any image \
+	This encoding method uses indexed color subencoding for subrectangles with \
+	a low number of unique colors but otherwise does not perform any image \
 	compression at all.  It is thus suitable only for gigabit and faster \
 	networks.  This encoding method uses significantly less CPU time than any \
 	of the JPEG-based encoding methods. |
 | "Lossless Tight + Zlib" | No | N/A | N/A | 1 | \
-	This encoding method uses indexed color encoding for subrectangles with a \
-	low number of unique colors and raw encoding for subrectangles with a high \
-	number of unique colors.  It compresses all subrectangles using Zlib with \
-	compression level 1.  For certain types of applications (CAD applications, \
-	in particular), this encoding method uses less network bandwidth than the \
-	"Tight + Perceptually Lossless JPEG" encoding method, but it also uses \
-	significantly more CPU time on the server than any of the JPEG-based \
+	This encoding method uses indexed color subencoding for subrectangles with \
+	a low number of unique colors and raw subencoding for subrectangles with a \
+	high number of unique colors.  It compresses all subrectangles using Zlib \
+	with compression level 1.  For certain types of low-color workloads (CAD \
+	applications, in particular), this encoding method may use less network \
+	bandwidth than the "Tight + Perceptually Lossless JPEG" encoding method, \
+	but it also uses significantly more CPU time than any of the JPEG-based \
 	encoding methods. |
 
 In the Windows TurboVNC Viewer, the encoding method can be set using

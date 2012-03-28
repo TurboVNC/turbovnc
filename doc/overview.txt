@@ -1,33 +1,47 @@
 * Overview
 {anchor: Overview}
 
-TurboVNC is a derivative of VNC that is tuned to provide peak performance for
-full-screen video and 3D workloads.  TurboVNC is based on the
-[[http://www.tightvnc.com][TightVNC]] 1.3.x and
+TurboVNC is a derivative of VNC (Virtual Network Computing) that is tuned to
+provide peak performance for full-screen video and 3D workloads.  TurboVNC is
+based on the [[http://www.tightvnc.com][TightVNC]] 1.3.x and
 [[http://xf4vnc.sourceforge.net/][xf4vnc]] code bases, and on the surface, it
-behaves similarly to its parents.  However, on 3D and video workloads,
-TurboVNC performs as much as an order of magnitude faster than TightVNC 1.3.x,
-uses more than an order of magnitude less CPU time to compress each frame, and
-it produces generally better compression ratios.  As with TightVNC, TurboVNC
-analyzes each framebuffer update, separates large solid areas (if any), and
-sends those first using a simple bounding box and fill color.  It then splits
-the remaining part of the update into a number of "subrectangles", using JPEG
-compression to encode subrectangles with a high number of unique colors and
-indexed color or mono encoding to encode subrectangles with a low number of
-unique colors.
+behaves similarly to its parents.  However, TurboVNC compresses 3D and video
+workloads better than the "tightest" compression mode of TightVNC 1.3.x while
+using only typically 15-20% of the CPU time of the latter.
+
+All VNC implementations, including TurboVNC, use the RFB (remote framebuffer)
+protocol to send "framebuffer updates" from the
+VNC server to any connected "viewers."  Each framebuffer update can contain
+multiple "rectangles" (regions that have changed since the last update.)  As
+with TightVNC, TurboVNC analyzes each rectangle, splits it into multiple
+"subrectangles", and attempts to encode each subrectangle using the
+"subencoding type" that will provide the most efficient compression, given the
+number of unique colors in the subrectangle.  The process by which TurboVNC
+does this is referred to as an "encoding method."  A rectangle is first
+analyzed to determine if any significant portion of it is solid,
+and if so, that portion is encoded as a bounding box and a fill color ("Solid
+subencoding.")  Of the remaining subrectangles, those with only two colors are
+encoded as a 1-bit-per-pixel bitmap with a 2-color palette ("Mono
+subencoding"), those with low numbers of unique colors are encoded as a color
+palette and an indexed bitmap containing 8 index bits per pixel ("Indexed color
+subencoding"), and subrectangles with high numbers of unique colors are encoded
+using either JPEG or arrays of RGB pixels ("Raw subencoding"), depending on the
+encoding method.  Zlib can optionally be used to compress the indexed color,
+mono and raw subrectangles.
 
 Part of TurboVNC's speedup comes from the use of libjpeg-turbo, the same
 high-speed SIMD-optimized JPEG codec used by VirtualGL.  However, TurboVNC also
-bypasses the CPU-hungry smoothness detection routines that TightVNC uses to
+eliminates the CPU-hungry smoothness detection routines that TightVNC uses to
 determine whether a subrectangle is a good candidate for JPEG compression, and
 TurboVNC's encoding methods tend to favor the use of JPEG more, since it is now
 generally the fastest subencoding type.  Furthermore, TurboVNC eliminates
 buffer copies, it maximizes network efficiency by splitting framebuffer updates
-into relatively large subrectangles, and it never uses a Zlib compression level
-higher than 1.  In the aggregate, TurboVNC compresses 2D application workloads
-less efficiently than TightVNC, but it generally does a better job than
-TightVNC of compressing performance-critical 3D and video application
-workloads.
+into relatively large subrectangles, and it uses only the Zlib compression
+levels that can be shown to have a measurable performance benefit.  TurboVNC
+can compress 3D and video workloads somewhat better and many times faster than
+any mode that TightVNC 1.3.x provided, and (using non-default settings)
+TurboVNC can also compress 2D workloads nearly as well as TightVNC while using
+only half of the CPU time.
 
 TurboVNC is the product of extensive research, in which many different
 permutations of the TightVNC encoder were benchmarked at the low level against

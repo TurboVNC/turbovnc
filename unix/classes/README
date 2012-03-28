@@ -169,11 +169,12 @@ Here is the complete list of parameters supported in the Java TurboVNC Viewer:
     Values: "Yes", "No"
     Default: "Yes"
 
-    If this option is enabled, then TurboVNC will use JPEG compression for all
-    image tiles with more than 24 unique colors and paletted encoding for all
-    other image tiles.  If this option is disabled, then TurboVNC will select
-    between paletted or raw encoding depending on the size of the image tile
-    and its color count.
+    If this option is enabled, then TurboVNC will use JPEG compression for
+    subrectangles that have a high number of unique colors and indexed color
+    subencoding for subrectangles that have a low number of unique colors.  If
+    this option is disabled, then TurboVNC will select between indexed color or
+    raw subencoding, depending on the size of the subrectangle and its color
+    count.
 
 --> "JPEG image quality"
 
@@ -183,7 +184,8 @@ Here is the complete list of parameters supported in the Java TurboVNC Viewer:
     Lower quality levels produce grainier JPEG images with more noticeable
     compression artifacts, but lower quality levels also use less network
     bandwidth and CPU time.  The default value of 95 should be "perceptually
-    lossless" under most viewing conditions.
+    lossless" (that is, any image compression artifacts it produces should be
+    imperceptible to the human eye under most viewing conditions.)
 
 --> "JPEG chrominance subsampling"
 
@@ -191,55 +193,65 @@ Here is the complete list of parameters supported in the Java TurboVNC Viewer:
     Default: "None"
 
     When compressing an image using JPEG, the RGB pixels are first converted
-    to the YUV colorspace.  After this colorspace conversion, chrominance
-    subsampling can be used to discard some of the U and V (chrominance)
-    components in order to save bandwidth.  1x subsampling retains the
-    chrominance components for all pixels, 2x subsampling retains the
-    chrominance components for every other pixel, 4x subsampling retains the
-    chrominance components for every fourth pixel, and grayscale throws out all
-    of the chrominance components.  1x subsampling uses the most network
-    bandwidth and CPU time, whereas grayscale uses the least.
+    to the YUV colorspace, a colorspace in which each pixel is represented as a
+    brightness (Y, or “luminance”) value and a pair of color (U & V, or
+    “chrominance”) values.  After this colorspace conversion, chrominance
+    subsampling can be used to discard some of the chrominance components in
+    order to save bandwidth.  1X subsampling ("None") retains the chrominance
+    components for all pixels, and thus it provides the best image quality but
+    also uses the most network bandwidth and CPU time.  2X subsampling retains
+    the chrominance components for every other pixel, and 4X subsampling
+    retains the chrominance components for every fourth pixel (this is
+    typically implemented as 2X subsampling in both X and Y directions.)
+    Grayscale throws out all of the chrominance components, leaving only
+    luminance.  2X and 4X subsampling will typically produce noticeable
+    aliasing of lines and other sharp features, but with photographic or other
+    “smooth” image content, it may be difficult to detect any difference
+    between 1X, 2X, and 4X. 
 
 --> "Zlib compression level"
 
     Values: "None", "1"
     Default: "1" if JPEG compression is enabled, "None" otherwise
 
-    If Zlib compression is enabled, then paletted and raw-encoded image tiles
-    will be compressed with Zlib prior to transmission.  This decreases network
-    bandwidth usage at the expense of increased server CPU usage.  If JPEG
-    compression is enabled, then Zlib compression is always used with non-JPEG
-    image tiles.
+    If Zlib compression is enabled, then indexed color, mono, and raw-encoded
+    subrectangles will be compressed with Zlib prior to transmission.  This
+    decreases network bandwidth usage at the expense of increased CPU usage.
+    If JPEG compression is enabled, then Zlib compression is always used with
+    non-JPEG subrectangles. 
 
 --> "Double buffering"
 
     Values: "Yes", "No"
     Default: "Yes"
 
-    The TurboVNC Viewer's default behavior is to wait until all tiles in a
-    framebuffer update have been received and decoded before it draws the
+    The TurboVNC Viewer's default behavior is to wait until all rectangles in
+    a framebuffer update have been received and decoded before it draws the
     framebuffer update to the screen.  This is a form of double buffering, and
     it reduces tearing artifacts when 3D or video applications switch frames.
     Setting this option to "No" will cause the TurboVNC Viewer to draw each
-    tile in the framebuffer update as it is received.  This may be desirable on
-    very slow connections.
+    rectangle in the framebuffer update as it is received.  This may be
+    desirable on very slow connections.
 
 --> "Cursor shape updates"
 
     Values: "Enable", "Ignore", "Disable"
     Default: "Enable"
 
-    Cursor shape updates is a protocol extension used to handle remote cursor
-    movements locally on the client, thus saving bandwidth and eliminating
-    delays in mouse pointer movement.  Note that the current implementation of
-    cursor shape updates does not allow a client to track the actual mouse
-    cursor position on the server.  This means that clients would not see mouse
-    cursor movements if the mouse was moved either locally on the server or by
-    another remote VNC client.  Set this parameter to "Disable" if you always
-    want to see the server's real cursor position.  Setting this option to
-    "Ignore" is similar to "Enable", but the remote cursor will not be visible
-    at all.  This can be a reasonable setting if you don't care about cursor
-    shape and don't want to see two mouse cursors, one above the other.
+    Normally, TurboVNC and compatible servers will send only changes to the
+    remote mouse cursor's shape and position.  This results in the best mouse
+    responsiveness.  Disabling cursor shape updates causes the server to
+    instead draw the mouse cursor and send it to the viewer as an image every
+    time the cursor moves.  Thus, disabling cursor shape updates can increase
+    network "chatter" between server and client significantly, which may cause
+    performance problems on slow networks.  However, disabling cursor shape
+    updates can be advantageous with shared sessions, since it will allow you
+    to see the cursor movements of other connected users.
+
+    Setting this option to "Ignore" is similar to "Enable", but the remote
+    cursor will not be visible at all.  This can be a reasonable setting if you
+    don't care about the cursor shape and don't want to see two mouse cursors,
+    one above the other.
 
 --> "Use CopyRect"
 
@@ -429,8 +441,6 @@ Here is the complete list of parameters supported in the Java TurboVNC Viewer:
     that supports Unix login authentication and you want to override this
     preference for a particular connection (for instance, to use a one-time
     password.)
-
-
 
 --> "DEBUG_XU" (no GUI equivalent)
 
