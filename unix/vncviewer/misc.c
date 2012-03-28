@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -71,6 +72,35 @@ HasEncoding(const char *str)
 
 
 /*
+ * Update window title
+ */
+
+void
+UpdateTitleString(char *str, int len)
+{
+  if (!appData.encodingsString || HasEncoding("tight")) {
+    char zlibstr[80];
+    zlibstr[0] = 0;
+    if (!appData.enableJPEG) {
+      if (appData.compressLevel == 1)
+        snprintf(zlibstr, 79, " + Zlib", appData.compressLevel);
+      if (appData.compressLevel > 1)
+        snprintf(zlibstr, 79, " + CL %d", appData.compressLevel);
+      snprintf(str, len, "[Lossless Tight%s]", zlibstr);
+    }
+    else {
+      if (appData.compressLevel > 1)
+        snprintf(zlibstr, 79, " + CL %d", appData.compressLevel);
+      snprintf(str, len, "[Tight + JPEG %s Q%d%s]",
+        subsampLevel2str[appData.subsampLevel], appData.qualityLevel,
+        zlibstr);
+    }
+  }
+  else snprintf(str, len, "[%s]", appData.encodingsString);
+}
+
+
+/*
  * ToplevelInitBeforeRealization sets the title, geometry and other resources
  * on the toplevel window.
  */
@@ -84,19 +114,8 @@ ToplevelInitBeforeRealization()
   char temps[80];
 
   XtVaGetValues(toplevel, XtNtitle, &titleFormat, NULL);
-  if (!appData.encodingsString || HasEncoding("tight")) {
-    if(!appData.enableJPEG) {
-      char zlibstr[80];
-      zlibstr[0]=0;
-      if (appData.compressLevel > 0)
-        snprintf(zlibstr, 79, " + Zlib %d", appData.compressLevel);
-      snprintf(temps, 79, " [Lossless Tight%s]", zlibstr);
-    }
-    else
-      snprintf(temps, 79, " [Tight + JPEG %s Q%d]", subsampLevel2str[appData.subsampLevel],
-        appData.qualityLevel);
-  }
-  else snprintf(temps, 79, " [%s]", appData.encodingsString);
+  temps[0]=' ';
+  UpdateTitleString(&temps[1], 79);
 
   title = XtMalloc(strlen(titleFormat) + strlen(desktopName)
     + strlen(temps) + 1);
