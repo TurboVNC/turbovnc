@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2012-03-08T11:03:28">
+<meta name="date" content="2012-03-28T16:07:20">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -194,37 +194,54 @@ License, v2</a><a name="idx004"></a>.</p>
 
 <p><a name="Overview"></a></p>
 
-<p>TurboVNC is a derivative of VNC that is tuned to provide peak 
-performance for full-screen video and 3D workloads.  TurboVNC is based 
-on the 
+<p>TurboVNC is a derivative of VNC (Virtual Network Computing) that is 
+tuned to provide peak performance for full-screen video and 3D 
+workloads.  TurboVNC is based on the 
 <span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx005"></a> 
 1.3.x and 
 <span class="remote"><a href="http://xf4vnc.sourceforge.net/" class="remote">xf4vnc</a></span><a name="idx006"></a> 
 code bases, and on the surface, it behaves similarly to its parents.  
-However, on 3D and video workloads, TurboVNC performs as much as an 
-order of magnitude faster than TightVNC 1.3.x, uses more than an order 
-of magnitude less CPU time to compress each frame, and it produces 
-generally better compression ratios.  As with TightVNC, TurboVNC 
-analyzes each framebuffer update, separates large solid areas (if any), 
-and sends those first using a simple bounding box and fill color.  It 
-then splits the remaining part of the update into a number of 
-&ldquo;subrectangles&rdquo;, using JPEG compression to encode 
-subrectangles with a high number of unique colors and indexed color or 
-mono encoding to encode subrectangles with a low number of unique colors.</p>
+However, TurboVNC compresses 3D and video workloads better than the 
+&ldquo;tightest&rdquo; compression mode of TightVNC 1.3.x while using 
+only typically 15-20% of the CPU time of the latter.</p>
+
+<p>All VNC implementations, including TurboVNC, use the RFB (remote 
+framebuffer) protocol to send &ldquo;framebuffer updates&rdquo; from the 
+VNC server to any connected &ldquo;viewers.&rdquo;  Each framebuffer 
+update can contain multiple &ldquo;rectangles&rdquo; (regions that have 
+changed since the last update.)  As with TightVNC, TurboVNC analyzes 
+each rectangle, splits it into multiple &ldquo;subrectangles&rdquo;, and 
+attempts to encode each subrectangle using the &ldquo;subencoding 
+type&rdquo; that will provide the most efficient compression, given the 
+number of unique colors in the subrectangle.  The process by which 
+TurboVNC does this is referred to as an &ldquo;encoding method.&rdquo;  
+A rectangle is first analyzed to determine if any significant portion of 
+it is solid, and if so, that portion is encoded as a bounding box and a 
+fill color (&ldquo;Solid subencoding.&rdquo;)  Of the remaining 
+subrectangles, those with only two colors are encoded as a 
+1-bit-per-pixel bitmap with a 2-color palette (&ldquo;Mono 
+subencoding&rdquo;), those with low numbers of unique colors are encoded 
+as a color palette and an indexed bitmap containing 8 index bits per 
+pixel (&ldquo;Indexed color subencoding&rdquo;), and subrectangles with 
+high numbers of unique colors are encoded using either JPEG or arrays of 
+RGB pixels (&ldquo;Raw subencoding&rdquo;), depending on the encoding 
+method.  Zlib can optionally be used to compress the indexed color, mono 
+and raw subrectangles.</p>
 
 <p>Part of TurboVNC&rsquo;s speedup comes from the use of libjpeg-turbo, 
 the same high-speed SIMD-optimized JPEG codec used by VirtualGL.  
-However, TurboVNC also bypasses the CPU-hungry smoothness detection 
+However, TurboVNC also eliminates the CPU-hungry smoothness detection 
 routines that TightVNC uses to determine whether a subrectangle is a 
 good candidate for JPEG compression, and TurboVNC&rsquo;s encoding 
 methods tend to favor the use of JPEG more, since it is now generally 
 the fastest subencoding type.  Furthermore, TurboVNC eliminates buffer 
 copies, it maximizes network efficiency by splitting framebuffer updates 
-into relatively large subrectangles, and it never uses a Zlib 
-compression level higher than 1.  In the aggregate, TurboVNC compresses 
-2D application workloads less efficiently than TightVNC, but it 
-generally does a better job than TightVNC of compressing 
-performance-critical 3D and video application workloads.</p>
+into relatively large subrectangles, and it uses only the Zlib 
+compression levels that can be shown to have a measurable performance 
+benefit.  TurboVNC can compress 3D and video workloads somewhat better 
+and many times faster than any mode that TightVNC 1.3.x provided, and 
+(using non-default settings) TurboVNC can also compress 2D workloads 
+nearly as well as TightVNC while using only half of the CPU time.</p>
 
 <p>TurboVNC is the product of extensive research, in which many different 
 permutations of the TightVNC encoder were benchmarked at the low level 
@@ -786,11 +803,11 @@ TurboVNC compresses images:</p>
     <dt class="Description-1 Description">Allow JPEG compression</dt>
     <dd class="Description-1 Description">
          If this option is enabled, then TurboVNC will use JPEG compression for 
-         all subrectangles with more than 24 unique colors and indexed color 
-         encoding for all other subrectangles with more than 2 colors.  If this 
-         option is disabled, then TurboVNC will select between indexed color or 
-         raw encoding, depending on the size of the subrectangle and its color 
-         count.
+         subrectangles that have a high number of unique colors and indexed 
+         color subencoding for subrectangles that have a low number of unique 
+         colors.  If this option is disabled, then TurboVNC will select between 
+         indexed color or raw subencoding, depending on the size of the 
+         subrectangle and its color count.
     </dd>
     <dt class="Description-1 Description">JPEG image quality</dt>
     <dd class="Description-1 Description">
@@ -800,21 +817,30 @@ TurboVNC compresses images:</p>
     </dd>
     <dt class="Description-1 Description">JPEG chrominance subsampling</dt>
     <dd class="Description-1 Description">
-         After converting the image from RGB to YUV, chrominance subsampling 
-         discards some of the U and V (chrominance) components to save space.  
-         1x subsampling retains the chrominance components for all pixels, 2x 
-         subsampling retains the chrominance components for every other pixel, 
-         4x subsampling retains the chrominance components for every fourth 
-         pixel, and grayscale throws out all of the chrominance components.  1x 
-         subsampling uses the most network bandwidth and CPU time, whereas 
-         grayscale uses the least.
+         When compressing an image using JPEG, the RGB pixels are first 
+         converted to the YUV colorspace, a colorspace in which each pixel is 
+         represented as a brightness (Y, or &ldquo;luminance&rdquo;) value and a 
+         pair of color (U &amp; V, or &ldquo;chrominance&rdquo;) values.  After 
+         this colorspace conversion, chrominance subsampling can be used to 
+         discard some of the chrominance components in order to save bandwidth.  
+         1X subsampling (the default in TurboVNC) retains the chrominance 
+         components for all pixels, and thus it provides the best image quality 
+         but also uses the most network bandwidth and CPU time.  2X subsampling 
+         retains the chrominance components for every other pixel, and 4X 
+         subsampling retains the chrominance components for every fourth pixel 
+         (this is typically implemented as 2X subsampling in both X and Y 
+         directions.)  Grayscale throws out all of the chrominance components, 
+         leaving only luminance.  2X and 4X subsampling will typically produce 
+         noticeable aliasing of lines and other sharp features, but with 
+         photographic or other &ldquo;smooth&rdquo; image content, it may be 
+         difficult to detect any difference between 1X, 2X, and 4X.
     </dd>
     <dt class="Description-1 Description">Zlib compression level</dt>
     <dd class="Description-1 Description">
          If Zlib compression is enabled, then indexed color, mono, and 
          raw-encoded subrectangles will be compressed with Zlib prior to 
          transmission.  This decreases network bandwidth usage at the expense of 
-         increased server CPU usage.  If JPEG compression is enabled, then Zlib 
+         increased CPU usage. If JPEG compression is enabled, then Zlib 
          compression is always used with non-JPEG subrectangles.
     </dd>
 </dl>
@@ -873,7 +899,7 @@ options described above:</p>
     <td class="standard">N/A</td>
     <td class="standard">N/A</td>
     <td class="standard">0</td>
-    <td class="standard">This encoding method uses indexed color encoding for subrectangles with a low number of unique colors but otherwise does not perform any image compression at all.  It is thus suitable only for gigabit and faster networks.  This encoding method uses significantly less CPU time than any of the JPEG-based encoding methods.</td>
+    <td class="standard">This encoding method uses indexed color subencoding for subrectangles with a low number of unique colors but otherwise does not perform any image compression at all.  It is thus suitable only for gigabit and faster networks.  This encoding method uses significantly less CPU time than any of the JPEG-based encoding methods.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Lossless Tight + Zlib&rdquo;</td>
@@ -881,7 +907,7 @@ options described above:</p>
     <td class="standard">N/A</td>
     <td class="standard">N/A</td>
     <td class="standard">1</td>
-    <td class="standard">This encoding method uses indexed color encoding for subrectangles with a low number of unique colors and raw encoding for subrectangles with a high number of unique colors.  It compresses all subrectangles using Zlib with compression level 1.  For certain types of applications (CAD applications, in particular), this encoding method uses less network bandwidth than the &ldquo;Tight + Perceptually Lossless JPEG&rdquo; encoding method, but it also uses significantly more CPU time on the server than any of the JPEG-based encoding methods.</td>
+    <td class="standard">This encoding method uses indexed color subencoding for subrectangles with a low number of unique colors and raw subencoding for subrectangles with a high number of unique colors.  It compresses all subrectangles using Zlib with compression level 1.  For certain types of low-color workloads (CAD applications, in particular), this encoding method may use less network bandwidth than the &ldquo;Tight + Perceptually Lossless JPEG&rdquo; encoding method, but it also uses significantly more CPU time than any of the JPEG-based encoding methods.</td>
   </tr>
 </table>
 </div>
@@ -1638,15 +1664,15 @@ mixing TurboVNC with other VNC flavors.</p>
         that allow the JPEG quality to be specified on the standard 1-100 scale 
         and allow the JPEG chrominance subsampling to be specified seperately. 
         TigerVNC 1.2 and later includes the same extensions on the server side, 
-        so the TigerVNC 1.2 Server should behave like the TurboVNC Server when a 
+        so the TigerVNC 1.2 Server will behave like the TurboVNC Server when a 
         TurboVNC Viewer is connected to it. <br /><br /> When a TurboVNC viewer 
         is connected to a TightVNC or TigerVNC 1.0/1.1 server, setting the JPEG 
         quality to N in the TurboVNC Viewer sets the JPEG quality level to N/10 
-        on the TightVNC or TigerVNC server.  For instance, if you set the JPEG 
+        in the TightVNC or TigerVNC server.  For instance, if you set the JPEG 
         quality to 95 in the TurboVNC Viewer, this would translate to a JPEG 
         quality level of 9, which would set the actual JPEG quality/subsampling 
-        to 80/2X on a TightVNC server or 100/1X on a TigerVNC server. 
-        <br /><br />
+        to 80/2X if connected to a TightVNC server or 100/1X if connected to a 
+        TigerVNC 1.0/1.1 server. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
         Changing the JPEG chrominance subsampling option in the TurboVNC Viewer 
@@ -1654,17 +1680,13 @@ mixing TurboVNC with other VNC flavors.</p>
         <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        The TurboVNC Server only supports Tight compression levels 1-2 if JPEG 
-        encoding is enabled, and Tight compression levels 0-1 if JPEG encoding 
-        is disabled.  Extensive experimentation has shown that TurboVNC&rsquo;s 
-        encoding methods cannot produce significantly tighter output by 
-        increasing the Zlib compression level beyond this, except on rare corner 
-        cases (such as the console output of a large compilation) that are not 
-        performance-critical to begin with.  Although compression levels 2-9 
-        cannot be set using the TurboVNC Viewer GUI, you can still specify these 
-        higher compression levels from the TurboVNC Viewer command line.  This 
-        may be useful when connecting to a TightVNC or TigerVNC server. 
-        <br /><br />
+        Although compression levels 2-9 cannot be set using the TurboVNC Viewer 
+        GUI, you can still specify these higher compression levels from the 
+        TurboVNC Viewer command line.  It should be noted, however, that our 
+        experiments have shown that compression levels higher than 5 are 
+        generally not useful in the TightVNC or TigerVNC Servers.  They increase 
+        CPU usage exponentially without providing any significant savings in 
+        bandwidth relative to Compression Level 5. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
         TurboVNC supports an extension to the TightVNC protocol that allows the 
@@ -1682,8 +1704,11 @@ mixing TurboVNC with other VNC flavors.</p>
         the TurboVNC Server, all else being equal.  TigerVNC 1.2 can be made to 
         perform similarly to TurboVNC, barring the absense of multithreading in 
         the former, but this requires using non-default settings in TigerVNC.  
-        The default TigerVNC settings will produce significantly slower 
-        performance than TurboVNC on 3D and video workloads.
+        The default TigerVNC settings are roughly equivalent to Compression 
+        Level 2 in TurboVNC, which will produce significantly slower performance 
+        than Compression Level 1 on 3D and video workloads.  Compression Level 1 
+        should be used in TigerVNC in order to simulate the behavior of 
+        TurboVNC&rsquo;s &ldquo;Tight + JPEG&rdquo; encoding methods.
     </li>
 </ul>
 
@@ -1704,7 +1729,22 @@ mixing TurboVNC with other VNC flavors.</p>
         certain cases, cause the connection to abort with a &ldquo;bad 
         subencoding value&rdquo; error. This is because the TurboVNC Server is 
         attempting to send the image tiles with no Zlib compression, and the 
-        TightVNC and TigerVNC viewers don&rsquo;t support this.
+        TightVNC and TigerVNC viewers don&rsquo;t support this. <br /><br />
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        The TurboVNC Server only supports compression levels 1-2 if JPEG 
+        encoding is enabled, and compression levels 0-1 if JPEG encoding is 
+        disabled. Extensive experimentation has shown that TurboVNC&rsquo;s 
+        encoding methods cannot produce significantly tighter output by 
+        increasing the Zlib compression level beyond this, except on rare corner 
+        cases (such as the console output of a large compilation) that are not 
+        performance-critical to begin with. In general, increasing the 
+        Compression Level from 1 to 2 with JPEG enabled will increase the CPU 
+        usage for 3D and video workloads without providing any significant 
+        bandwidth savings.  However, Compression Level 2 can be shown to reduce 
+        bandwidth for some 2D workloads, particular those with low numbers of 
+        unique colors, by 20-40% (with a commensurate increase in CPU usage.) 
+        <br /><br />
     </li>
 </ul>
 
@@ -1722,9 +1762,11 @@ selected from the <code>vncviewer</code> command line. The TurboVNC
 Server additionally supports the CoRRE, RRE, Zlib, and ZRLE encoding 
 types, for compatibility with RealVNC viewers.</p>
 
-<p>The Raw encoding type can perform well on gigabit links.  Hextile, 
-however, uses very small tiles, and thus it incurs a large amount of 
-overhead, even on the fastest of networks.  Thus, neither encoding type 
+<p>The Raw encoding type can perform well on gigabit links, if you can 
+spare the bandwidth.  Hextile, however, uses very small tiles, which 
+causes it to incur a large amount of computational overhead.  It 
+compresses too poorly to perform well on slow links but uses too much 
+CPU time to perform well on fast links. Thus, neither Raw nor Hextile 
 should be used unless absolutely necessary.  One interesting note, 
 however, is that many of the TurboVNC viewer enhancements (including 
 optimized blitting, hiding network latency, and double buffering) are 
