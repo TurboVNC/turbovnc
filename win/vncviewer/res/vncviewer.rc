@@ -189,7 +189,7 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,189,43,57,14
     PUSHBUTTON      "&Listening mode",IDC_LIST_MODE,189,64,57,14
     LTEXT           "VNC server:",IDC_STATIC_SERVER,7,9,39,8
-    LTEXT           "NOTE:  To set connection profile, click on 'Options' and select an image encoding protocol",IDC_CONN_PROF,51,28,129,54
+    LTEXT           "NOTE:  To set connection profile, click on 'Options' and select an encoding method",IDC_CONN_PROF,51,28,129,54
     CONTROL         108,IDC_STATIC_PICTURE,"Static",SS_BITMAP,9,28,32,30
 END
 
@@ -228,7 +228,7 @@ BEGIN
     GROUPBOX        "Interface options",IDC_STATIC_IOPTIONS,4,4,167,77
     CONTROL         "Show toolbars by default",IDC_CHECK_TOOLBAR,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,12,16,152,10
-    CONTROL         "Warn at switching to the full-screen mode",
+    CONTROL         "Warn when switching to full-screen mode",
                     IDC_CHECK_MESSAGE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     12,30,152,10
     LTEXT           "Number of connections to remember:",IDC_STATIC_LIST,12,
@@ -637,8 +637,8 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDC_EDIT_LOG_LEVEL      "Specifies the level of detail to include in the log file. Level 0 causes the viewer to log only the most important events, whereas Level 12 generates a lot of debugging output."
-    IDC_SHARED              "Enable multiple simultaneous viewer connections to the same server desktop. If the session is not shared, then only one viewer can connect to the same session at the same time. Unlike the standard VNC, TurboVNC uses shared sessions by default."
-    IDC_ENCODING            "Choose one of these preset settings based on the type of network you are using and your desired image quality and performance."
+    IDC_SHARED              "Enable multiple simultaneous viewer connections to the same server desktop. If the session is not shared, then only one viewer can connect to the same session at the same time. Unlike some VNC flavors, TurboVNC uses shared sessions by default."
+    IDC_ENCODING            "Choose one of these encoding methods based on the type of network you are using and your desired image quality and performance."
     IDC_SCALE_EDIT          "Reduce or enlarge the image of the remote dektop."
     IDC_DOTCURSOR_RADIO     "Show local cursor position as a dot."
     IDC_NOCURSOR_RADIO      "Do not show local cursor position."
@@ -655,7 +655,7 @@ BEGIN
                             "In this mode, the server draws the mouse cursor and sends it to the client as an image. Mouse movements can be painfully slow in this mode, so use it only if the default setting does not work."
     IDC_QUALITYLEVEL        "Higher JPEG quality levels result in less compression but better image quality."
     IDC_SUBSAMPLEVEL        "Each pixel in a JPEG image is represented as a brightness (luminance) value and a color (chrominance) value. Chrominance subsampling discards some or all chrominance values to reduce the image size, but it can create visible artifacts."
-    IDC_COMPRESSLEVEL       "Enabling Zlib compression will greatly reduce the bandwidth usage of Lossless encoding, but Zlib requires a lot of server CPU time (more than JPEG, even.)  Thus, Zlib is only really useful on slow networks."
+    IDC_COMPRESSLEVEL       "Enabling Zlib compression will greatly reduce the bandwidth usage of the Lossless Tight encoding method, but Zlib requires a lot of server CPU time (more than JPEG, even.)  Thus, Zlib is only really useful on slow networks."
     IDC_CSHAPE_ENABLE_RADIO "In this mode, the server sends only changes to the remote cursor's shape and position. This results in the best mouse responsiveness."
     IDC_CSHAPE_IGNORE_RADIO "In this mode, the remote mouse cursor will not be shown at all. Cursor shape updates and new coordinates received from the server will be ignored."
 END
@@ -663,7 +663,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_SESSION_SET_CRECT    "When a rectangular area on the server's display changes position (such as when a window is moved), CopyRect encoding allows the server to send only the coordinates of the new position rather than completely re-sending the rectangular area."
-    IDC_ALLOW_JPEG          "TurboVNC can use TurboJPEG to compress image tiles that have a large number of unique colors, thus saving a significant amount of bandwidth.  JPEG is mathematically lossy, but if High Quality JPEG is used, the loss should not be perceptible."
+    IDC_ALLOW_JPEG          "TurboVNC can use JPEG to compress subrectangles that have a large number of unique colors, thus reducing bandwidth significantly.  JPEG is mathematically lossy, but if Perceptually Lossless JPEG is used, the loss should be imperceptible to human vision."
 END
 
 STRINGTABLE DISCARDABLE 
