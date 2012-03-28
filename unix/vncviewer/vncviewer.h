@@ -240,6 +240,7 @@ extern void RunCommand(Widget w, XEvent *event, String *params,
 extern void Quit(Widget w, XEvent *event, String *params,
 		 Cardinal *num_params);
 extern void Cleanup();
+extern void UpdateTitleString(char *str, int len);
 
 /* popup.c */
 
