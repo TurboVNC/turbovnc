@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2012-03-28T15:49:46">
+<meta name="date" content="2012-04-05T01:55:11">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1157,12 +1157,12 @@ viewer:</p>
     <dt class="Description-1 Description">VNC Password Authentication</dt>
     <dd class="Description-1 Description">
          A valid VNC password must be sent from the VNC viewer using the 
-         &ldquo;Standard VNC&rdquo; authentication capability (see below) before 
-         it is allowed to connect. The VNC password is typically stored in a 
-         file under the user&rsquo;s home directory on the server machine.  It 
-         is separate from any other login credentials and thus represents less 
-         of a security threat if compromised (that is, assuming the VNC password 
-         and the Unix login password are not set to the same value.)
+         &ldquo;Standard VNC&rdquo; authentication scheme (see below) before it 
+         is allowed to connect. The VNC password is typically stored in a file 
+         under the user&rsquo;s home directory on the server machine.  It is 
+         separate from any other login credentials and thus represents less of a 
+         security threat if compromised (that is, assuming the VNC password and 
+         the Unix login password are not set to the same value.)
     </dd>
     <dt class="Description-1 Description">One-Time Password (OTP) Authentication</dt>
     <dd class="Description-1 Description">
@@ -1172,7 +1172,7 @@ viewer:</p>
          <code>vncpasswd</code> for more details.)  The user enters this 
          password in the VNC viewer as if it were a VNC password, and the viewer 
          sends the OTP using the &ldquo;Standard VNC&rdquo; authentication 
-         capability (see below.) However, once the OTP has been used once to 
+         scheme (see below.) However, once the OTP has been used once to 
          authenticate a viewer, it is forgotten and cannot be reused.  OTP 
          authentication can be used, for instance, to launch or connect to 
          TurboVNC sessions from an automated web portal or from a job scheduler.  
@@ -1183,22 +1183,22 @@ viewer:</p>
     <dd class="Description-1 Description">
          The TurboVNC Server uses Pluggable Authentication Modules (PAM) to 
          validate a username and password received from a VNC viewer via the 
-         &ldquo;Unix login&rdquo; authentication capability (see below.)  The 
+         &ldquo;Unix login&rdquo; authentication scheme (see below.)  The 
          username and password received from the VNC viewer need not necessarily 
          be validated against Unix login credentials.  Generally, the server can 
          be configured to use any user/password authentication credentials that 
          can be accessed through PAM. Since the &ldquo;Unix login&rdquo; 
-         authentication capability sends the password as plain text, it is 
-         strongly recommended that this authentication method be enabled only if 
-         the server is restricted to only allow loopback (SSH) connections and 
-         to disallow reverse connections (see Section 
+         authentication scheme sends the password as plain text, it is strongly 
+         recommended that this authentication method be enabled only if the 
+         server is restricted to only allow loopback (SSH) connections and to 
+         disallow reverse connections (see Section 
          <a href="#Secure_TurboVNC_Usage" class="ref">5.5</a>.)
     </dd>
 </dl>
 
-<p>The TurboVNC Viewer supports three &ldquo;authentication 
-capabilities&rdquo;, which are protocols used to validate authentication 
-credentials with a VNC server:</p>
+<p>The TurboVNC Viewer supports three &ldquo;authentication schemes&rdquo;, 
+which are protocols used to validate authentication credentials with a 
+VNC server:</p>
 
 <dl class="Description">
     <dt class="Description-1 Description">None</dt>
@@ -1217,7 +1217,7 @@ credentials with a VNC server:</p>
     <dd class="Description-1 Description">
          Both the username and password are sent to the server as plain text. 
          Thus, it is <em>strongly</em> recommended that this authentication 
-         capability be used only with an SSH-encrypted TurboVNC connection (see 
+         scheme be used only with an SSH-encrypted TurboVNC connection (see 
          Section <a href="#Secure_TurboVNC_Usage" class="ref">5.5</a>.)
     </dd>
 </dl>
@@ -1234,13 +1234,13 @@ server&rsquo;s authentication configuration file.  See the
 <code>Xvnc</code> man page for more details.</p>
 
 <p>If the server allows multiple authentication methods that support 
-multiple authentication capabilities, then the client&rsquo;s default 
-authentication capability will be determined by the preferred 
-authentication method on the server.  In this case, the user can 
-override the default by passing command-line arguments to 
-<code>vncviewer</code>.  If the server prefers an authentication method 
-that supports standard VNC authentication, then the user can force the 
-use of Unix login authentication by passing an argument of 
+multiple authentication schemes, then the client&rsquo;s default 
+authentication scheme will be determined by the preferred authentication 
+method on the server.  In this case, the user can override the default 
+by passing command-line arguments to <code>vncviewer</code>.  If the 
+server prefers an authentication method that supports standard VNC 
+authentication, then the user can force the use of Unix login 
+authentication by passing an argument of 
 <code>-user&nbsp;</code><em><code>{user_name}</code></em> to 
 <code>vncviewer</code> when connecting to the TurboVNC session.  
 Similarly, if the server prefers an authentication method that supports 

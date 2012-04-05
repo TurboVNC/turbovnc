@@ -8,7 +8,7 @@ validate authentication credentials sent from a VNC viewer:
 
 	VNC Password Authentication :: {:}
 		A valid VNC password must be sent from the VNC viewer using the "Standard
-		VNC" authentication capability (see below) before it is allowed to connect.
+		VNC" authentication scheme (see below) before it is allowed to connect.
 		The VNC password is typically stored in a file under the user's home
 		directory on the server machine.  It is separate from any other login
 		credentials and thus represents less of a security threat if compromised
@@ -20,7 +20,7 @@ validate authentication credentials sent from a VNC viewer:
 		TurboVNC session and is printed on the server's command line (see the man
 		page for ''vncpasswd'' for more details.)  The user enters this password in
 		the VNC viewer as if it were a VNC password, and the viewer sends the
-		OTP using the "Standard VNC" authentication capability (see below.)
+		OTP using the "Standard VNC" authentication scheme (see below.)
 		However, once the OTP has been used once to authenticate a viewer, it is
 		forgotten and cannot be reused.  OTP authentication can be used, for
 		instance, to launch or connect to TurboVNC sessions from an automated web
@@ -30,17 +30,17 @@ validate authentication credentials sent from a VNC viewer:
 	PAM User/Password Authentication :: {:}
 		The TurboVNC Server uses Pluggable Authentication Modules (PAM) to validate
 		a username and password received from a VNC viewer via the "Unix login"
-		authentication capability (see below.)  The username and password received
+		authentication scheme (see below.)  The username and password received
 		from the VNC viewer need not necessarily be validated against Unix login
 		credentials.  Generally, the server can be configured to use any
 		user/password authentication credentials that can be accessed through PAM.
-		Since the "Unix login" authentication capability sends the password as
+		Since the "Unix login" authentication scheme sends the password as
 		plain text, it is strongly recommended that this authentication method be
 		enabled only if the server is restricted to only allow loopback (SSH)
 		connections and to disallow reverse connections (see
 		{ref prefix="Section ": Secure_TurboVNC_Usage}.)
 
-The TurboVNC Viewer supports three "authentication capabilities", which are
+The TurboVNC Viewer supports three "authentication schemes", which are
 protocols used to validate authentication credentials with a VNC server:
 
 	None :: {:}
@@ -55,7 +55,7 @@ protocols used to validate authentication credentials with a VNC server:
 
 	Unix Login Authentication :: {:}
 		Both the username and password are sent to the server as plain text.
-		Thus, it is __strongly__ recommended that this authentication capability
+		Thus, it is __strongly__ recommended that this authentication scheme
 		be used only with an SSH-encrypted TurboVNC connection (see
 		{ref prefix="Section ": Secure_TurboVNC_Usage}.)
 
@@ -69,8 +69,8 @@ the authentication methods by editing the server's authentication configuration
 file.  See the ''Xvnc'' man page for more details.
 
 If the server allows multiple authentication methods that support multiple
-authentication capabilities, then the client's default authentication
-capability will be determined by the preferred authentication method on the
+authentication schemes, then the client's default authentication
+scheme will be determined by the preferred authentication method on the
 server.  In this case, the user can override the default by passing
 command-line arguments to ''vncviewer''.  If the server prefers an
 authentication method that supports standard VNC authentication, then the user
