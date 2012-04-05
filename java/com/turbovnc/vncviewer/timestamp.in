@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Main-Class: com.turbovnc.vncviewer.VncViewer
+Package-Date: @JAVA_DATE@
+Package-Time: @JAVA_TIME@
+Version: @VERSION@
+Build: @BUILD@

@@ -8,6 +8,10 @@ than waiting for a framebuffer update request from a viewer.  This greatly
 improves the performance of video players and VirtualGL on high-latency
 networks.
 -------------------------------------------------------------------------------
+[2]
+All-new Java viewer code base, which is based roughly upon the TigerVNC 1.2
+Java viewer but which has numerous TurboVNC-specific enhancements.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

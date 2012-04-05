@@ -1,0 +1,20 @@
+<!-- 
+     index.vnc - default HTML page for TurboVNC Java viewer applet, to be
+     used with Xvnc. On any file ending in .vnc, the HTTP server embedded in
+     Xvnc will substitute the following variables when preceded by a dollar:
+     USER, DESKTOP, DISPLAY, APPLETWIDTH, APPLETHEIGHT, WIDTH, HEIGHT, PORT,
+     Use two dollar signs ($$) to get a dollar sign in the generated
+     HTML page.
+-->
+
+<HTML>
+<TITLE>
+$USER's $DESKTOP desktop ($DISPLAY)
+</TITLE>
+<APPLET CODE=com.turbovnc.vncviewer.VncViewer ARCHIVE=VncViewer.jar
+        WIDTH=$APPLETWIDTH HEIGHT=$APPLETHEIGHT>
+<param name=PORT value=$PORT>
+</APPLET>
+<BR>
+<A href="http://www.virtualgl.org/">TurboVNC site</A>
+</HTML>
