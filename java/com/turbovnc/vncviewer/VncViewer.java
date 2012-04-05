@@ -340,48 +340,35 @@ public class VncViewer extends java.applet.Applet implements Runnable
     }
   }
 
-  BoolParameter fastCopyRect
-  = new BoolParameter("FastCopyRect",
-  "    Use fast CopyRect.  Turn this off if you get screen corruption when\n"+
-  "    copying from off-screen.", true);
+  StringParameter vncServerName
+  = new StringParameter("Server",
+  "    The VNC server to which to connect.  This can be specified in the format\n"+
+  "    <host>[:<display number>] or <host>::<port>, where <host> is the host name\n"+
+  "    or IP address of the machine on which the VNC server is running,\n"+
+  "    <display number> is an optional X display number (default: 0), and <port>\n"+
+  "    is a TCP port.", null);
 
-  BoolParameter useLocalCursor
-  = new BoolParameter("UseLocalCursor",
-  "    Normally, TurboVNC and compatible servers will send only changes to the\n"+
-  "    remote mouse cursor's shape and position.  This results in the best mouse\n"+
-  "    responsiveness.  Disabling this option causes the server to instead draw\n"+
-  "    the mouse cursor and send it to the viewer as an image every time the\n"+
-  "    cursor moves.  Thus, using a remote cursor can increase network \"chatter\"\n"+
-  "    between server and client significantly, which may cause performance\n"+
-  "    problems on slow networks.  However, using a remote cursor can be\n"+
-  "    advantageous with shared sessions, since it will allow you to see the\n"+
-  "    cursor movements of other connected users.", true);
+  BoolParameter alwaysShowConnectionDialog
+  = new BoolParameter("AlwaysShowConnectionDialog",
+  "    Always show the \"New TurboVNC Connection\" dialog even if the server has\n"+
+  "    been specified in an applet parameter or on the command line.", false);
 
-  IntParameter colors
-  = new IntParameter("Colors",
-  "    The color depth to use for the viewer's window.  Specifying 8 will use a\n"+
-  "    BGR111 pixel format (1 bit for each red, green, and blue component.)\n"+
-  "    Specifying 64 will use a BGR222 pixel format, and specifying 256 will use\n"+
-  "    an 8-bit indexed color pixel format.  Lowering the color depth can\n"+
-  "    significantly reduce bandwidth, particularly when using encoding types\n"+
-  "    other than Tight or when using Tight encoding without JPEG.  However,\n"+
-  "    colors will not be represented accurately.  The default is to use the\n"+
-  "    native color depth of the display on which the viewer is running, which is\n"+
-  "    usually true color (8 bits per component.)", -1);
+  IntParameter vncServerPort
+  = new IntParameter("Port",
+  "    The TCP port number on which the VNC server session is listening.  For Unix\n"+
+  "    VNC servers, this is typically 5900 + the X display number of the VNC\n"+
+  "    session (example: 5901 if connecting to display :1.)  For Windows and Mac\n"+
+  "    VNC servers, this is typically 5900.  (default = 5900)\n\n"+
+  "    If listen mode is enabled, this parameter specifies the TCP port on which\n"+
+  "    the viewer will listen for connections from a VNC server.  (default = 5500)",
+  -1);
 
-  StringParameter preferredEncoding
-  = new StringParameter("PreferredEncoding",
-  "    Preferred encoding type to use.  If the server does not support the\n"+
-  "    preferred encoding type, then the next best one will be chosen.  There\n"+
-  "    should be no reason to use an encoding type other than Tight when\n"+
-  "    connecting to a TurboVNC server, but this option can be useful when\n"+
-  "    connecting to other types of VNC servers, such as RealVNC.",
-  "Tight", "Tight, ZRLE, Hextile, Raw");
-
-  BoolParameter viewOnly
-  = new BoolParameter("ViewOnly",
-  "    Ignore all keyboard and mouse events in the viewer window and do not pass\n"+
-  "    these events to the VNC server.", false);
+  BoolParameter listenMode
+  = new BoolParameter("Listen",
+  "    Start the viewer in \"listen mode.\"  The viewer will listen on port 5500\n"+
+  "    (or on the port specified by the Port parameter) for reverse connections\n"+
+  "    from a VNC server.  To connect to a listening viewer from the Unix/Linux\n"+
+  "    TurboVNC Server, use the vncconnect program.", false);
 
   BoolParameter shared
   = new BoolParameter("Shared",
@@ -392,31 +379,14 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "    default settings, then you will only be able to connect to the server if\n"+
   "    no one else is already connected.", true);
 
+  BoolParameter viewOnly
+  = new BoolParameter("ViewOnly",
+  "    Ignore all keyboard and mouse events in the viewer window and do not pass\n"+
+  "    these events to the VNC server.", false);
+
   BoolParameter fullScreen
   = new BoolParameter("FullScreen",
   "    Start the viewer in full-screen mode.", false);
-
-  BoolParameter acceptClipboard
-  = new BoolParameter("RecvClipboard",
-  "    Synchronize the local clipboard with the clipboard of the TurboVNC session\n"+
-  "    whenever the latter changes.", true);
-
-  BoolParameter sendClipboard
-  = new BoolParameter("SendClipboard",
-  "    Synchronize the TurboVNC session clipboard with the local clipboard\n"+
-  "    whenever the latter changes.", true);
-
-  StringParameter desktopSize
-  = new StringParameter("DesktopSize",
-  "    If the VNC server supports desktop resizing, attempt to resize the remote\n"+
-  "    desktop to the specified size (example: 1920x1200).", null);
-
-  BoolParameter listenMode
-  = new BoolParameter("Listen",
-  "    Start the viewer in \"listen mode.\"  The viewer will listen on port 5500\n"+
-  "    (or on the port specified by the Port parameter) for reverse connections\n"+
-  "    from a VNC server.  To connect to a listening viewer from the Unix/Linux\n"+
-  "    TurboVNC Server, use the vncconnect program.", false);
 
   StringParameter scalingFactor
   = new StringParameter("ScalingFactor",
@@ -430,54 +400,34 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "    \"FixedRatio\", then automatic scaling is performed, but the original aspect\n"+
   "    ratio is preserved.", "100", "1-1000, Auto, or FixedRatio");
 
-  BoolParameter alwaysShowConnectionDialog
-  = new BoolParameter("AlwaysShowConnectionDialog",
-  "    Always show the \"New TurboVNC Connection\" dialog even if the server has\n"+
-  "    been specified in an applet parameter or on the command line.", false);
+  StringParameter desktopSize
+  = new StringParameter("DesktopSize",
+  "    If the VNC server supports desktop resizing, attempt to resize the remote\n"+
+  "    desktop to the specified size (example: 1920x1200).", null);
 
-  StringParameter vncServerName
-  = new StringParameter("Server",
-  "    The VNC server to which to connect.  This can be specified in the format\n"+
-  "    <host>[:<display number>] or <host>::<port>, where <host> is the host name\n"+
-  "    or IP address of the machine on which the VNC server is running,\n"+
-  "    <display number> is an optional X display number (default: 0), and <port>\n"+
-  "    is a TCP port.", null);
+  BoolParameter acceptClipboard
+  = new BoolParameter("RecvClipboard",
+  "    Synchronize the local clipboard with the clipboard of the TurboVNC session\n"+
+  "    whenever the latter changes.", true);
 
-  IntParameter vncServerPort
-  = new IntParameter("Port",
-  "    The TCP port number on which the VNC server session is listening.  For Unix\n"+
-  "    VNC servers, this is typically 5900 + the X display number of the VNC\n"+
-  "    session (example: 5901 if connecting to display :1.)  For Windows and Mac\n"+
-  "    VNC servers, this is typically 5900.  (default = 5900)\n\n"+
-  "    If listen mode is enabled, this parameter specifies the TCP port on which\n"+
-  "    the viewer will listen for connections from a VNC server.  (default = 5500)",
-  -1);
+  BoolParameter sendClipboard
+  = new BoolParameter("SendClipboard",
+  "    Synchronize the TurboVNC session clipboard with the local clipboard\n"+
+  "    whenever the latter changes.", true);
 
   BoolParameter acceptBell
   = new BoolParameter("AcceptBell",
   "    Produce a system beep when a \"bell\" event is received from the server.",
   true);
 
-//  StringParameter via
-//  = new StringParameter("via", "Gateway to tunnel via", null);
-
-  IntParameter compressLevel
-  = new IntParameter("CompressLevel",
-  "    When Tight encoding is used, the compression level specifies the amount of\n"+
-  "    Zlib compression to apply to subrectangles encoded using the indexed color,\n"+
-  "    mono, and raw subencoding types.  If the JPEG subencoding type is enabled,\n"+
-  "    then the compression level also defines the \"palette threshold\", or the\n"+
-  "    minimum number of colors that a subrectangle must have before it is encoded\n"+
-  "    using JPEG.  Higher compression levels have higher palette thresholds and\n"+
-  "    thus favor the use of indexed color subencoding, whereas lower compression\n"+
-  "    levels favor the use of JPEG.\n\n"+
-  "    Compression Level 1 is always the default whenever JPEG is enabled, because\n"+
-  "    extensive experimentation has revealed little or no benefit to using higher\n"+
-  "    compression levels with most 3D and video workloads.  However, v1.1 and\n"+
-  "    later of the TurboVNC Server also supports Compression Level 2 when JPEG is\n"+
-  "    enabled.  Compression Level 2 can be shown to reduce the bandwidth of\n"+
-  "    certain types of low-color workloads by typically 20-40% (with a\n"+
-  "    commensurate increase in CPU usage.)", 1, 0, 9);
+  StringParameter preferredEncoding
+  = new StringParameter("PreferredEncoding",
+  "    Preferred encoding type to use.  If the server does not support the\n"+
+  "    preferred encoding type, then the next best one will be chosen.  There\n"+
+  "    should be no reason to use an encoding type other than Tight when\n"+
+  "    connecting to a TurboVNC server, but this option can be useful when\n"+
+  "    connecting to other types of VNC servers, such as RealVNC.",
+  "Tight", "Tight, ZRLE, Hextile, Raw");
 
   BoolParameter allowJpeg
   = new BoolParameter("AllowJPEG",
@@ -518,6 +468,53 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "    content, it may be difficult to detect any difference between 1X, 2X, and\n"+
   "    4X.", "1X", "1X, 2X, 4X, Gray");
 
+  IntParameter compressLevel
+  = new IntParameter("CompressLevel",
+  "    When Tight encoding is used, the compression level specifies the amount of\n"+
+  "    Zlib compression to apply to subrectangles encoded using the indexed color,\n"+
+  "    mono, and raw subencoding types.  If the JPEG subencoding type is enabled,\n"+
+  "    then the compression level also defines the \"palette threshold\", or the\n"+
+  "    minimum number of colors that a subrectangle must have before it is encoded\n"+
+  "    using JPEG.  Higher compression levels have higher palette thresholds and\n"+
+  "    thus favor the use of indexed color subencoding, whereas lower compression\n"+
+  "    levels favor the use of JPEG.\n\n"+
+  "    Compression Level 1 is always the default whenever JPEG is enabled, because\n"+
+  "    extensive experimentation has revealed little or no benefit to using higher\n"+
+  "    compression levels with most 3D and video workloads.  However, v1.1 and\n"+
+  "    later of the TurboVNC Server also supports Compression Level 2 when JPEG is\n"+
+  "    enabled.  Compression Level 2 can be shown to reduce the bandwidth of\n"+
+  "    certain types of low-color workloads by typically 20-40% (with a\n"+
+  "    commensurate increase in CPU usage.)", 1, 0, 9);
+
+  IntParameter colors
+  = new IntParameter("Colors",
+  "    The color depth to use for the viewer's window.  Specifying 8 will use a\n"+
+  "    BGR111 pixel format (1 bit for each red, green, and blue component.)\n"+
+  "    Specifying 64 will use a BGR222 pixel format, and specifying 256 will use\n"+
+  "    an 8-bit indexed color pixel format.  Lowering the color depth can\n"+
+  "    significantly reduce bandwidth, particularly when using encoding types\n"+
+  "    other than Tight or when using Tight encoding without JPEG.  However,\n"+
+  "    colors will not be represented accurately.  The default is to use the\n"+
+  "    native color depth of the display on which the viewer is running, which is\n"+
+  "    usually true color (8 bits per component.)", -1);
+
+  BoolParameter fastCopyRect
+  = new BoolParameter("FastCopyRect",
+  "    Use fast CopyRect.  Turn this off if you get screen corruption when\n"+
+  "    copying from off-screen.", true);
+
+  BoolParameter useLocalCursor
+  = new BoolParameter("UseLocalCursor",
+  "    Normally, TurboVNC and compatible servers will send only changes to the\n"+
+  "    remote mouse cursor's shape and position.  This results in the best mouse\n"+
+  "    responsiveness.  Disabling this option causes the server to instead draw\n"+
+  "    the mouse cursor and send it to the viewer as an image every time the\n"+
+  "    cursor moves.  Thus, using a remote cursor can increase network \"chatter\"\n"+
+  "    between server and client significantly, which may cause performance\n"+
+  "    problems on slow networks.  However, using a remote cursor can be\n"+
+  "    advantageous with shared sessions, since it will allow you to see the\n"+
+  "    cursor movements of other connected users.", true);
+
   StringParameter secTypes = SecurityClient.secTypes;
 
   StringParameter user
@@ -553,6 +550,9 @@ public class VncViewer extends java.applet.Applet implements Runnable
   AliasParameter passwd
   = new AliasParameter("passwd",
   "    Alias for PasswordFile", passwordFile);
+
+//  StringParameter via
+//  = new StringParameter("via", "Gateway to tunnel via", null);
 
   Thread thread;
   boolean applet, firstApplet;
