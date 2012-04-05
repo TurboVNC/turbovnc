@@ -241,7 +241,7 @@ class OptionsDialog extends Dialog implements
 
     fullScreen = new JCheckBox("Full-screen mode");
     fullScreen.addItemListener(this);
-    shared = new JCheckBox("Shared connection (do not disconnect other viewers)");
+    shared = new JCheckBox("Shared connection");
     shared.addItemListener(this);
     useLocalCursor = new JCheckBox("Render cursor locally");
     useLocalCursor.addItemListener(this);
