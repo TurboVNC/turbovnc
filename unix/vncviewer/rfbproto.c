@@ -719,7 +719,7 @@ PerformAuthenticationTight(void)
     return AuthenticateUnixLogin();
 
   default:                      /* should never happen */
-    fprintf(stderr, "Internal error: Invalid authentication type\n");
+    fprintf(stderr, "Internal error: Invalid authentication scheme\n");
     return False;
   }
 }
