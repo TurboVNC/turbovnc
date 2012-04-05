@@ -138,7 +138,7 @@ Here is the complete list of parameters supported in the Java TurboVNC Viewer:
 
     This parameter specifies the TCP port number on which the VNC server
     session is listening.  For Unix VNC servers, this is typically 5900 + the
-    X display number of of the VNC session (example: 5901 if connecting to
+    X display number of the VNC session (example: 5901 if connecting to
     display :1.)  For Windows VNC servers, this is typically 5900.
 
 --> "PASSWORD"
@@ -278,7 +278,7 @@ Here is the complete list of parameters supported in the Java TurboVNC Viewer:
     Values: "Yes", "No"
     Default: "No"
 
-    If set to "Yes", then all keyboard and mouse events in the desktop window
+    If set to "Yes", then all keyboard and mouse events in the viewer window
     will be silently ignored and will not be passed to the TurboVNC server.
 
 --> "Scale remote cursor"
