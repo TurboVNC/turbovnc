@@ -419,7 +419,7 @@ Equivalent of \fB\-compresslevel\fR option
 .B subsampling
 Equivalent of the \fB\-samp\fR option
 .TP
-.B qualityLevel
+.B quality
 Equivalent of the \fB\-quality\fR option
 .TP
 .B enableJPEG
