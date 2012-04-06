@@ -389,7 +389,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "    Start the viewer in full-screen mode.", false);
 
   StringParameter scalingFactor
-  = new StringParameter("ScalingFactor",
+  = new StringParameter("Scale",
   "    Reduce or enlarge the remote desktop image.  The value is interpreted as a\n"+
   "    scaling factor in percent.  The default value of 100% corresponds to the\n"+
   "    original remote desktop size.  Values below 100 reduce the image size,\n"+
@@ -421,7 +421,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
   true);
 
   StringParameter preferredEncoding
-  = new StringParameter("PreferredEncoding",
+  = new StringParameter("Encoding",
   "    Preferred encoding type to use.  If the server does not support the\n"+
   "    preferred encoding type, then the next best one will be chosen.  There\n"+
   "    should be no reason to use an encoding type other than Tight when\n"+
@@ -467,6 +467,10 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "    other sharp features, but with photographic or other \"smooth\" image\n"+
   "    content, it may be difficult to detect any difference between 1X, 2X, and\n"+
   "    4X.", "1X", "1X, 2X, 4X, Gray");
+
+  AliasParameter samp
+  = new AliasParameter("Samp",
+  "    Alias for Subsampling", subsampling);
 
   IntParameter compressLevel
   = new IntParameter("CompressLevel",

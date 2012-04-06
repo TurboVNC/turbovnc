@@ -28,7 +28,7 @@ public class AliasParameter extends VoidParameter {
   public boolean setParam(String v) { return param.setParam(v); }
   public boolean setParam() { return param.setParam(); }
 
-  public String getDefaultStr() { return param.getDefaultStr(); }
+  public String getDefaultStr() { return null; }
   public String getValueStr() { return param.getValueStr(); }
   public String getValues() { return null; }
   public boolean isBool() { return param.isBool(); }
