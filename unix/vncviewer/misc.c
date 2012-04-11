@@ -83,7 +83,7 @@ UpdateTitleString(char *str, int len)
     zlibstr[0] = 0;
     if (!appData.enableJPEG) {
       if (appData.compressLevel == 1)
-        snprintf(zlibstr, 79, " + Zlib", appData.compressLevel);
+        snprintf(zlibstr, 79, " + Zlib");
       if (appData.compressLevel > 1)
         snprintf(zlibstr, 79, " + CL %d", appData.compressLevel);
       snprintf(str, len, "[Lossless Tight%s]", zlibstr);
