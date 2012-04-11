@@ -478,7 +478,7 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
             REGION_SUBTRACT(pScreen, &cl->lossyRegion, &cl->lossyRegion,
                          &tparam[i].losslessRegion);
             REGION_UNINIT(pScreen, &tparam[i].losslessRegion);
-            memset(&tparam[i].losslessregion, 0, sizeof(RegionRec));
+            memset(&tparam[i].losslessRegion, 0, sizeof(RegionRec));
         }
     }
 
