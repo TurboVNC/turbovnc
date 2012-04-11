@@ -1764,8 +1764,10 @@ SendJpegRect(t, x, y, w, h, quality)
         unsigned char *dst;
         int inRed, inGreen, inBlue, i, j;
 
-        if((tmpbuf = (unsigned char *)malloc(w * h * 3)) == NULL)
+        if((tmpbuf = (unsigned char *)malloc(w * h * 3)) == NULL) {
             rfbLog("Memory allocation failure!\n");
+            return 0;
+        }
         srcptr = (CARD16 *)
             &rfbScreen.pfbMemory[y * rfbScreen.paddedWidthInBytes + x * ps];
         dst = tmpbuf;
