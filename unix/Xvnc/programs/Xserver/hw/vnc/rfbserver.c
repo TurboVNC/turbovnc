@@ -381,6 +381,9 @@ rfbClientConnectionGone(sock)
 	return;
     }
 
+    TimerFree(cl->alrTimer);
+    TimerFree(cl->deferredUpdateTimer);
+
     if (cl->login != NULL) {
 	rfbLog("Client %s (%s) gone\n", cl->login, cl->host);
 	free(cl->login);
@@ -415,13 +418,10 @@ rfbClientConnectionGone(sock)
 
     REGION_UNINIT(pScreen,&cl->copyRegion);
     REGION_UNINIT(pScreen,&cl->modifiedRegion);
-    TimerFree(cl->deferredUpdateTimer);
 
     rfbPrintStats(cl);
 
     if (cl->translateLookupTable) free(cl->translateLookupTable);
-
-    if(cl->alrTimer) TimerFree(cl->alrTimer);
 
     rfbFreeZrleData(cl);
 
