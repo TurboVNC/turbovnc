@@ -150,6 +150,7 @@ typedef struct _threadparam {
 
 static threadparam tparam[TVNC_MAXTHREADS];
 
+
 /* Prototypes for static functions. */
 
 static void FindBestSolidArea (int x, int y, int w, int h,
