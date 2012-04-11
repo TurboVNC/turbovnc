@@ -72,7 +72,7 @@ extern WindowPtr    *WindowTable;
 
 /* per-screen private data */
 
-static int	rfbDCScreenIndex;
+int	rfbDCScreenIndex = -1;
 static unsigned long rfbDCGeneration = 0;
 
 static Bool	rfbDCCloseScreen();
