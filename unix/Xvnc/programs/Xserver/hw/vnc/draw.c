@@ -11,7 +11,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2010-2011 D. R. Commander
+ *  Copyright (C) 2010-2012 D. R. Commander
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -1898,11 +1898,12 @@ static CARD32
 rfbDeferredUpdateCallback(OsTimerPtr timer, CARD32 now, pointer arg)
 {
     rfbClientPtr cl = (rfbClientPtr)arg;
+    BOOL status = TRUE;
 
     if (cl->deferredUpdateScheduled && FB_UPDATE_PENDING(cl))
-	    rfbSendFramebufferUpdate(cl);
+	    status = rfbSendFramebufferUpdate(cl);
 
-    cl->deferredUpdateScheduled = FALSE;
+    if (status) cl->deferredUpdateScheduled = FALSE;
     return 0;
 }
 

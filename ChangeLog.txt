@@ -58,6 +58,12 @@ Added Ctrl-Alt-Shift-F and Ctrl-Alt-Shift-R hotkeys to the Unix TurboVNC
 Viewer to toggle full-screen mode and request a refresh (respectively.)  These
 emulate the behavior of the Windows TurboVNC Viewer.
 -------------------------------------------------------------------------------
+[9]
+Fixed several invalid reads/writes reported by valgrind.  These occurred under
+certain circumstances when a Tight-compatible client disconnected from a
+TurboVNC session, and the issues were known to cause one rare segfault when
+disconnecting from a TurboVNC session that had multithreading and ALR enabled.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
