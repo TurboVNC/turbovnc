@@ -49,6 +49,22 @@ RESTYPE		PictFormatType;
 RESTYPE		GlyphSetType;
 int		PictureCmapPolicy = PictureCmapPolicyDefault;
 
+/* Nasty hack to prevent the VNC code from double-freeing pRootPicture */
+
+typedef struct {
+    GCPtr	    pSourceGC, pMaskGC;
+    GCPtr	    pSaveGC, pRestoreGC;
+    GCPtr	    pPixSourceGC, pPixMaskGC;
+    CloseScreenProcPtr CloseScreen;
+    PixmapPtr	    pSave;
+#ifdef ARGB_CURSOR
+    PicturePtr      pRootPicture;
+    PicturePtr      pTempPicture;
+#endif
+} rfbDCScreenRec, *rfbDCScreenPtr;
+
+extern int rfbDCScreenIndex;
+
 Bool
 PictureDestroyWindow (WindowPtr pWindow)
 {
@@ -56,6 +72,7 @@ PictureDestroyWindow (WindowPtr pWindow)
     PicturePtr		pPicture;
     PictureScreenPtr    ps = GetPictureScreen(pScreen);
     Bool		ret;
+    rfbDCScreenPtr	pScreenPriv;
 
     while ((pPicture = GetPictureWindow(pWindow)))
     {
@@ -63,6 +80,15 @@ PictureDestroyWindow (WindowPtr pWindow)
 	if (pPicture->id)
 	    FreeResource (pPicture->id, PictureType);
 	FreePicture ((pointer) pPicture, pPicture->id);
+	/* Nasty hack to prevent the VNC code from double-freeing pRootPicture */
+	if (rfbDCScreenIndex >= 0) {
+	    pScreenPriv =
+		(rfbDCScreenPtr) pScreen->devPrivates[rfbDCScreenIndex].ptr;
+	    if (pPicture == pScreenPriv->pRootPicture)
+		pScreenPriv->pRootPicture = NULL;
+	    if (pPicture == pScreenPriv->pTempPicture)
+		pScreenPriv->pTempPicture = NULL;
+	}
     }
     pScreen->DestroyWindow = ps->DestroyWindow;
     ret = (*pScreen->DestroyWindow) (pWindow);

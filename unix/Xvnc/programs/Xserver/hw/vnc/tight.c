@@ -297,6 +297,7 @@ void
 ShutdownTightThreads(void)
 {
     int i;
+    if (!threadInit) return;
     if (_nt > 1) {
         for (i = 1; i < _nt; i++) {
             if(thnd[i]) {
@@ -314,6 +315,10 @@ ShutdownTightThreads(void)
         if (tparam[i].tightBeforeBuf) xfree(tparam[i].tightBeforeBuf);
         if (i != 0 && tparam[i].updateBuf) xfree(tparam[i].updateBuf);
         if (tparam[i].j) tjDestroy(tparam[i].j);
+        if (!REGION_NAR(&tparam[i].losslessRegion))
+            REGION_UNINIT(pScreen, &tparam[i].losslessRegion);
+        if (!REGION_NAR(&tparam[i].lossyRegion))
+            REGION_UNINIT(pScreen, &tparam[i].lossyRegion);
         memset(&tparam[i], 0, sizeof(threadparam));
     }
     threadInit = FALSE;
@@ -469,9 +474,11 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
             REGION_UNION(pScreen, &cl->lossyRegion, &cl->lossyRegion,
                          &tparam[i].lossyRegion);
             REGION_UNINIT(pScreen, &tparam[i].lossyRegion);
+            memset(&tparam[i].lossyRegion, 0, sizeof(RegionRec));
             REGION_SUBTRACT(pScreen, &cl->lossyRegion, &cl->lossyRegion,
                          &tparam[i].losslessRegion);
             REGION_UNINIT(pScreen, &tparam[i].losslessRegion);
+            memset(&tparam[i].losslessregion, 0, sizeof(RegionRec));
         }
     }
 
