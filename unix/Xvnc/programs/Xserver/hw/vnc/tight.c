@@ -435,10 +435,9 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
 
     status &= SendRectEncodingTight(&tparam[0], tparam[0].x, tparam[0].y,
                                     tparam[0].w, tparam[0].h);
-    if (status) {
-        cl->rfbBytesSent[rfbEncodingTight] += tparam[0].bytessent;
-        cl->rfbRectanglesSent[rfbEncodingTight] += tparam[0].rectsent;
-    }
+    if (!status) return FALSE;
+    cl->rfbBytesSent[rfbEncodingTight] += tparam[0].bytessent;
+    cl->rfbRectanglesSent[rfbEncodingTight] += tparam[0].rectsent;
 
     if (nt > 1) {
         for (i = 1; i < nt; i++) {
