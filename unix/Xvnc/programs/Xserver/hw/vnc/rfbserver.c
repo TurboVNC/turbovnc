@@ -400,6 +400,9 @@ rfbClientConnectionGone(sock)
 
     ShutdownTightThreads();
 
+    if(rfbAutoLosslessRefresh > 0.0)
+	REGION_UNINIT(pScreen,&cl->lossyRegion);
+
     /* Release the compression state structures if any. */
     if ( cl->compStreamInited == TRUE ) {
 	deflateEnd( &(cl->compStream) );
