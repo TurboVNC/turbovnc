@@ -147,7 +147,7 @@ alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
         REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
             &cl->lossyRegion);
 
-        rfbSendFramebufferUpdate(cl);
+        if (!rfbSendFramebufferUpdate(cl)) return 0;
         cl->alrTrigger = FALSE;
 
         REGION_EMPTY(pScreen, &cl->lossyRegion);
