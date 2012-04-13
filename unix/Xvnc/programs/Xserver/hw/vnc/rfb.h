@@ -313,6 +313,9 @@ typedef struct rfbClientRec {
 
     Bool continuousUpdates;
 
+    char *cutText;
+    int cutTextLen;
+
 } rfbClientRec, *rfbClientPtr;
 
 

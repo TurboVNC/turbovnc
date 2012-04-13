@@ -202,7 +202,6 @@ void handleEvent(XEvent* ev)
       debugprint("Got client cut text: '%.*s%s'",
                  cutTextLen<9?cutTextLen:8, cutText,
                  cutTextLen<9?"":"...");
-      XStoreBytes(dpy, cutText, cutTextLen);
       if (syncPrimary) ownSelection(XA_PRIMARY, win, cutEv->time);
       ownSelection(xaCLIPBOARD, win, cutEv->time);
       free(selection[0]);
