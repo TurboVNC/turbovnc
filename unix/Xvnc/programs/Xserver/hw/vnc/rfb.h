@@ -311,6 +311,9 @@ typedef struct rfbClientRec {
 
     struct rfbClientRec *next;
 
+    char *cutText;
+    int cutTextLen;
+
 } rfbClientRec, *rfbClientPtr;
 
 
