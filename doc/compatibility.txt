@@ -78,10 +78,11 @@ TurboVNC with other VNC flavors.
 		similarly to TurboVNC, barring the absense of multithreading in the former,
 		but this requires using non-default settings in TigerVNC.  The default
 		TigerVNC settings are roughly equivalent to Compression Level 2 in
-		TurboVNC, which will produce significantly slower performance than
-		Compression Level 1 on 3D and video workloads.  Compression Level 1 should
-		be used in TigerVNC in order to simulate the behavior of TurboVNC's
-		"Tight + JPEG" encoding methods.
+		TurboVNC, which will use significantly more CPU time than Compression
+		Level 1.  Additionally, TigerVNC does inter-frame comparison by default
+		whenever Compression Level 2 or above is selected, and this increases CPU
+		time even more.  Compression Level 1 should be used in TigerVNC in order to
+		simulate the behavior of TurboVNC's "Tight + JPEG" encoding methods.
 
 ** TightVNC or TigerVNC Viewers
 
@@ -105,11 +106,11 @@ TurboVNC with other VNC flavors.
 		level beyond this, except on rare corner cases (such as the console output
 		of a large compilation) that are not performance-critical to begin with.
 		In general, increasing the Compression Level from 1 to 2 with JPEG enabled
-		will increase the CPU usage for 3D and video workloads without providing
-		any significant bandwidth savings.  However, Compression Level 2 can be
-		shown to reduce bandwidth for some 2D workloads, particular those with low
-		numbers of unique colors, by 20-40% (with a commensurate increase
-		in CPU usage.)
+		will increase the CPU usage for most 3D and video workloads without
+		providing any significant bandwidth savings.  However, Compression Level 2
+		can be shown to reduce bandwidth by 20-40% (with a commensurate increase in
+		CPU usage) for certain types of workloads that have low numbers of unique
+		colors.
 		{nl}{nl}
 
 ** RealVNC

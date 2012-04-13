@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2012-04-05T01:55:11">
+<meta name="date" content="2012-04-13T05:11:21">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1705,10 +1705,12 @@ mixing TurboVNC with other VNC flavors.</p>
         perform similarly to TurboVNC, barring the absense of multithreading in 
         the former, but this requires using non-default settings in TigerVNC.  
         The default TigerVNC settings are roughly equivalent to Compression 
-        Level 2 in TurboVNC, which will produce significantly slower performance 
-        than Compression Level 1 on 3D and video workloads.  Compression Level 1 
-        should be used in TigerVNC in order to simulate the behavior of 
-        TurboVNC&rsquo;s &ldquo;Tight + JPEG&rdquo; encoding methods.
+        Level 2 in TurboVNC, which will use significantly more CPU time than 
+        Compression Level 1.  Additionally, TigerVNC does inter-frame comparison 
+        by default whenever Compression Level 2 or above is selected, and this 
+        increases CPU time even more.  Compression Level 1 should be used in 
+        TigerVNC in order to simulate the behavior of TurboVNC&rsquo;s 
+        &ldquo;Tight + JPEG&rdquo; encoding methods.
     </li>
 </ul>
 
@@ -1740,10 +1742,10 @@ mixing TurboVNC with other VNC flavors.</p>
         cases (such as the console output of a large compilation) that are not 
         performance-critical to begin with. In general, increasing the 
         Compression Level from 1 to 2 with JPEG enabled will increase the CPU 
-        usage for 3D and video workloads without providing any significant 
+        usage for most 3D and video workloads without providing any significant 
         bandwidth savings.  However, Compression Level 2 can be shown to reduce 
-        bandwidth for some 2D workloads, particular those with low numbers of 
-        unique colors, by 20-40% (with a commensurate increase in CPU usage.) 
+        bandwidth by 20-40% (with a commensurate increase in CPU usage) for 
+        certain types of workloads that have low numbers of unique colors. 
         <br /><br />
     </li>
 </ul>
