@@ -25,8 +25,9 @@ Build Requirements
 
 ... OR ...
 
--- SOLARIS ONLY:  Sun Studio/Workshop Pro Compiler v12 or later
-   * See http://www.sun.com/software/products/studio/ for a free download.
+-- SOLARIS ONLY:  Oracle Solaris Studio 12 or later
+   * See http://www.oracle.com/technetwork/server-storage/solarisstudio/ for a
+     free download.
 
 -- X Intrinsics/Athena Widgets development kit
    * libXaw, libXt, and all dependencies thereof
@@ -190,8 +191,8 @@ Add
 to the configure command line.
 
 
-Sun Studio
-----------
+Oracle Solaris Studio
+---------------------
 
 Add
 
@@ -200,7 +201,7 @@ Add
 to the configure command line.  TurboVNC will automatically be built with
 the maximum optimization level (-xO5) unless you override CFLAGS.
 
-To build a 64-bit version of TurboVNC using Sun Studio, add
+To build a 64-bit version of TurboVNC using Oracle Solaris Studio, add
 
   --host x86_64-pc-solaris CC=cc CFLAGS='-xO5 -m64' LDFLAGS=-m64
 
