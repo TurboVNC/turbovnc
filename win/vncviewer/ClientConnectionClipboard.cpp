@@ -1,4 +1,5 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
+//  Copyright (C) 2012 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -116,10 +117,16 @@ void ClientConnection::UpdateLocalClipboard(char *buf, size_t len) {
         omni_mutex_lock l(m_clipMutex);
 
         if (!OpenClipboard(m_hwnd)) {
-	        throw WarningException("Failed to open clipboard\n");
+            vnclog.Print(0, _T("Failed to open clipboard (error = %d)\n"),
+                GetLastError());
+            delete [] wincontents;
+            return;
         }
         if (! ::EmptyClipboard()) {
-	        throw WarningException("Failed to empty clipboard\n");
+            vnclog.Print(0, _T("Failed to empty clipboard (error = %d)\n"),
+                GetLastError());
+            delete [] wincontents;
+            return;
         }
 
         // Allocate a global memory object for the text. 
@@ -136,7 +143,9 @@ void ClientConnection::UpdateLocalClipboard(char *buf, size_t len) {
         delete [] wincontents;
 
         if (! ::CloseClipboard()) {
-	        throw WarningException("Failed to close clipboard\n");
+            vnclog.Print(0, _T("Failed to close clipboard (error = %d)\n"),
+                GetLastError());
+            return;
         }
     }
 }

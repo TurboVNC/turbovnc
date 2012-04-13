@@ -361,6 +361,9 @@ rfbNewClient(sock)
         TimerCancel(idleTimer);
     }
 
+    cl->cutText = NULL;
+    cl->cutTextLen = 0;
+
     return cl;
 }
 
@@ -433,6 +436,9 @@ rfbClientConnectionGone(sock)
     if (cl->translateLookupTable) free(cl->translateLookupTable);
 
     rfbFreeZrleData(cl);
+
+    if (cl->cutText)
+	xfree(cl->cutText);
 
     xfree(cl);
 
@@ -1782,7 +1788,13 @@ rfbSendServerCutText(char *str, int len)
     for (cl = rfbClientHead; cl; cl = nextCl) {
 	nextCl = cl->next;
 	if (cl->state != RFB_NORMAL || cl->viewOnly)
-	  continue;
+	    continue;
+	if (cl->cutTextLen == len && cl->cutText && !memcmp(cl->cutText, str, len))
+	    continue;
+	if (cl->cutText)
+	    xfree(cl->cutText);
+	cl->cutText = strdup(str);
+	cl->cutTextLen = len;
 	sct.type = rfbServerCutText;
 	sct.length = Swap32IfLE(len);
 	if (WriteExact(cl->sock, (char *)&sct,

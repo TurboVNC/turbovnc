@@ -898,7 +898,14 @@ rfbRootPropertyChange(PropertyPtr pProp)
     if ((pProp->propertyName == XA_CUT_BUFFER0) && (pProp->type == XA_STRING)
 	&& (pProp->format == 8) && rfbSyncCutBuffer)
     {
-	rfbGotXCutText(pProp->data, pProp->size);
+	char *str;
+	str = (char *)xalloc(pProp->size + 1);
+	if (!str)
+	    FatalError("rfbRootPropertyChange(): Memory allocation failure\n");
+	strncpy(str, pProp->data, pProp->size);
+	str[pProp->size] = 0;
+	rfbGotXCutText(str, pProp->size);
+	xfree(str);
 	return;
     }
 

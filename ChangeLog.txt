@@ -68,6 +68,17 @@ certain circumstances when a Tight-compatible client disconnected from a
 TurboVNC session, and the issues were known to cause one rare segfault when
 disconnecting from a TurboVNC session that had multithreading and ALR enabled.
 -------------------------------------------------------------------------------
+[10]
+Fixed an issue whereby selecting text in xterm would sometimes cause the
+Windows TurboVNC Viewer to abort with "Failed to open clipboard."
+-------------------------------------------------------------------------------
+[11]
+Fixed an issue whereby clipboard changes were being immediately sent back to
+the viewer as soon as they were received by the server.  This specifically
+caused copy/paste operations in some Windows applications to behave
+incorrectly, since the clipboard contents were being converted from Unicode to
+ASCII when they were bounced back.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
