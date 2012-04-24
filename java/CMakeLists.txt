@@ -42,7 +42,7 @@ set(JAVA_CLASSNAMES
   F8Menu
   OptionsDialogCallback
   PasswdDialog
-  PixelBufferImage
+  PlatformPixelBuffer
   OptionsDialog
   ServerDialog
   UserPrefs
