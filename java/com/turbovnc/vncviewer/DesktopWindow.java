@@ -128,6 +128,9 @@ class DesktopWindow extends JPanel implements
 
     hideLocalCursor();
 
+    if (hotspot == null)
+      hotspot = new Point(0, 0);
+
     cursor.hotspot = hotspot;
 
     Dimension bsc = tk.getBestCursorSize(w, h);
@@ -164,12 +167,8 @@ class DesktopWindow extends JPanel implements
     int cw = (int)Math.floor((float)cursor.width() * scaleWidthRatio);
     int ch = (int)Math.floor((float)cursor.height() * scaleHeightRatio);
     int hint = java.awt.Image.SCALE_DEFAULT;
-    if (hotspot != null) {
-      hotspot = new Point((int)Math.floor((float)hotspot.x * scaleWidthRatio),
-                          (int)Math.floor((float)hotspot.y * scaleHeightRatio));
-    } else {
-      hotspot = new Point(0, 0);
-    }
+    hotspot = new Point((int)Math.floor((float)hotspot.x * scaleWidthRatio),
+                        (int)Math.floor((float)hotspot.y * scaleHeightRatio));
     Image cursorImage = (cw <= 0 || ch <= 0) ? tk.createImage(bitmap) :
       tk.createImage(bitmap).getScaledInstance(cw,ch,hint);
     softCursor = tk.createCustomCursor(cursorImage,
