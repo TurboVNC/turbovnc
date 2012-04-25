@@ -79,6 +79,8 @@ public class VncViewer extends java.applet.Applet implements Runnable
       UIManager.put("TitledBorder.titleColor",Color.blue);
     } catch (java.lang.Exception exc) { }
     VncViewer viewer = new VncViewer(argv);
+    viewer.firstApplet = true;
+    viewer.stop = false;
     viewer.start();
   }
 
@@ -245,7 +247,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
     }
     nViewers++;
     String host = null;
-    if (firstApplet) {
+    if (applet && firstApplet) {
       alwaysShowConnectionDialog.setParam(true);
       Configuration.readAppletParams(this);
       host = getCodeBase().getHost();
@@ -261,6 +263,10 @@ public class VncViewer extends java.applet.Applet implements Runnable
     }
     thread = new Thread(this);
     thread.start();
+  }
+
+  public void stop() {
+    stop = true;
   }
 
   public void paint(Graphics g) {
@@ -319,8 +325,12 @@ public class VncViewer extends java.applet.Applet implements Runnable
 
     try {
       cc = new CConn(this, sock, vncServerName.getValue());
-      while (true)
+      while (!stop)
         cc.processMsg();
+      if (nViewers > 1) {
+        cc = null;
+        return;
+      }
     } catch (EndOfStream e) {
       vlog.info(e.toString());
     } catch (java.lang.Exception e) {
@@ -554,7 +564,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
 //  = new StringParameter("via", "Gateway to tunnel via", null);
 
   Thread thread;
-  boolean applet, firstApplet;
+  boolean applet, firstApplet, stop;
   Image logo;
   static int nViewers;
   static LogWriter vlog = new LogWriter("main");
