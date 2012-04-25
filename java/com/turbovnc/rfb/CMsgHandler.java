@@ -96,6 +96,7 @@ abstract public class CMsgHandler {
   abstract public PixelFormat getPreferredPF();
   abstract public CSecurity getCurrentCSecurity();
 
+
   public ConnParams cp;
 
   static LogWriter vlog = new LogWriter("CMsgHandler");
