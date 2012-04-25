@@ -114,6 +114,7 @@ public class CConn extends CConnection
     }
     cp.supportsDesktopResize = true;
     cp.supportsExtendedDesktopSize = true;
+    cp.supportsSetDesktopSize = true;
     cp.supportsClientRedirect = true;
     cp.supportsDesktopRename = true;
     cp.supportsLocalCursor = viewer.useLocalCursor.getValue();
@@ -361,8 +362,8 @@ public class CConn extends CConnection
         writer().writeFence(fenceTypes.fenceFlagRequest | fenceTypes.fenceFlagSyncNext, 0, null);
 
       if (cp.supportsSetDesktopSize &&
-          viewer.desktopSize.getValue() != null &&
-          viewer.desktopSize.getValue().split("x").length == 2) {
+          viewer.desktopSize.getValueStr() != null &&
+          viewer.desktopSize.getValueStr().split("x").length == 2) {
         width = Integer.parseInt(viewer.desktopSize.getValue().split("x")[0]);
         height = Integer.parseInt(viewer.desktopSize.getValue().split("x")[1]);
         ScreenSet layout;
