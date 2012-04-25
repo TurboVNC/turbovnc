@@ -35,6 +35,9 @@ public class Viewport extends JFrame
     setTitle(name+" - TurboVNC");
     setFocusable(false);
     setFocusTraversalKeysEnabled(false);
+    sp = new JScrollPane();
+    sp.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+    getContentPane().add(sp);
     addWindowFocusListener(new WindowAdapter() {
       public void windowGainedFocus(WindowEvent e) {
         sp.getViewport().getView().requestFocusInWindow();
@@ -82,18 +85,8 @@ public class Viewport extends JFrame
     });
   }
 
-  public void addChild(DesktopWindow child) {
-    sp = new JScrollPane(child);
-    sp.setDoubleBuffered(true);
-    child.setBackground(Color.BLACK);
-    child.setOpaque(true);
-    sp.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
-    getContentPane().add(sp);
-  }
-
   public void setChild(DesktopWindow child) {
-    getContentPane().removeAll();
-    addChild(child);
+    sp.getViewport().setView(child);
   }
 
   public void setGeometry(int x, int y, int w, int h, boolean pack) {

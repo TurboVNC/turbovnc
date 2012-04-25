@@ -523,11 +523,9 @@ public class CConn extends CConnection
       icon = new ImageIcon(url);
       viewport.setIconImage(icon.getImage());
     }
-    viewport.addChild(desktop);
     reconfigureViewport();
     if ((cp.width > 0) && (cp.height > 0))
       viewport.setVisible(true);
-    desktop.initGraphics();
     desktop.requestFocusInWindow();
   }
 
