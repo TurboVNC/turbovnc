@@ -25,22 +25,20 @@ import java.nio.channels.SelectionKey;
 
 public class FdOutStream extends OutStream {
 
-  static final int defaultBufSize = 8192;
+  static final int DEFAULT_BUF_SIZE = 16384;
   static final int minBulkSize = 1024;
 
   public FdOutStream(FileDescriptor fd_, boolean blocking_, int timeoutms_, int bufSize_)
   {
-    fd = fd_;
-    blocking = blocking_;
-    timeoutms = timeoutms_;
-    bufSize = bufSize_;
+    fd = fd_; blocking = blocking_; timeoutms = timeoutms_;
+    bufSize = ((bufSize_ > 0) ? bufSize_ : DEFAULT_BUF_SIZE);
     b = new byte[bufSize];
     offset = 0;
     ptr = sentUpTo = start = 0;
     end = start + bufSize;
   }
 
-  public FdOutStream(FileDescriptor fd_) { this(fd_, false, 0, defaultBufSize); }
+  public FdOutStream(FileDescriptor fd_) { this(fd_, true, -1, 0); }
 
   public void setTimeout(int timeoutms_) {
     timeoutms = timeoutms_;
@@ -80,7 +78,7 @@ public class FdOutStream extends OutStream {
         }
 
         // Proper timeout
-        //throw TimedOut();
+        throw new TimedOut();
       }
 
       sentUpTo += n;
@@ -94,19 +92,19 @@ public class FdOutStream extends OutStream {
 
   private int writeWithTimeout(byte[] data, int dataPtr, int length, int timeoutms)
   {
-    int timeout;
     int n;
 
     do {
     
+      Integer tv;
       if (timeoutms != -1) {
-        timeout = timeoutms;
+        tv = new Integer(timeoutms);
       } else {
-        timeout = 0;
+        tv = null;
       }
 
       try {
-        n = fd.select(SelectionKey.OP_WRITE, timeout);
+        n = fd.select(SelectionKey.OP_WRITE, tv);
       } catch (java.lang.Exception e) {
         System.out.println(e.toString());
         throw new Exception(e.toString());
@@ -114,10 +112,11 @@ public class FdOutStream extends OutStream {
           
     } while (n < 0);
 
+    if (n == 0) return 0;
+
     try {
       n = fd.write(data, dataPtr, length);
     } catch (java.lang.Exception e) {
-      System.out.println("read:"+e.toString());
       throw new Exception(e.toString());
     }
     
