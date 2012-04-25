@@ -833,7 +833,6 @@ public class CConn extends CConnection
 
     options.fullScreen.setSelected(fullScreen);
     options.useLocalCursor.setSelected(viewer.useLocalCursor.getValue());
-    options.fastCopyRect.setSelected(viewer.fastCopyRect.getValue());
     options.acceptBell.setSelected(viewer.acceptBell.getValue());
     String scaleString = viewer.scalingFactor.getValue();
     if (scaleString.equals("Auto")) {
@@ -882,7 +881,6 @@ public class CConn extends CConnection
     viewer.viewOnly.setParam(options.viewOnly.isSelected());
     viewer.acceptClipboard.setParam(options.acceptClipboard.isSelected());
     viewer.sendClipboard.setParam(options.sendClipboard.isSelected());
-    viewer.fastCopyRect.setParam(options.fastCopyRect.isSelected());
     viewer.acceptBell.setParam(options.acceptBell.isSelected());
     String scaleString =
       options.scalingFactor.getSelectedItem().toString();

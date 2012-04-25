@@ -502,11 +502,6 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "    native color depth of the display on which the viewer is running, which is\n"+
   "    usually true color (8 bits per component.)", -1);
 
-  BoolParameter fastCopyRect
-  = new BoolParameter("FastCopyRect",
-  "    Use fast CopyRect.  Turn this off if you get screen corruption when\n"+
-  "    copying from off-screen.", true);
-
   BoolParameter useLocalCursor
   = new BoolParameter("UseLocalCursor",
   "    Normally, TurboVNC and compatible servers will send only changes to the\n"+
