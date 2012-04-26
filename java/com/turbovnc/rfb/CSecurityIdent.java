@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 Brian P Hinz
+/* Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify

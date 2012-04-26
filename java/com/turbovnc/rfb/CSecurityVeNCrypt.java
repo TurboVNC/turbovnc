@@ -2,7 +2,7 @@
  * Copyright (C) 2006 OCCAM Financial Technology
  * Copyright (C) 2005-2006 Martin Koegler
  * Copyright (C) 2010 TigerVNC Team
- * Copyright (C) 2011 Brian P Hinz
+ * Copyright (C) 2011 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

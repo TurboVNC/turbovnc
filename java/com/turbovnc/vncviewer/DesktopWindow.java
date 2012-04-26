@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2012 Brian P Hinz.  All Rights Reserved.
+/* Copyright (C) 2011-2012 Brian P. Hinz.  All Rights Reserved.
  * Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
  * Copyright (C) 2006 Constantin Kaplinsky.  All Rights Reserved.
