@@ -1,5 +1,6 @@
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,6 +22,7 @@
  * vncviewer.c - the Xt-based VNC viewer.
  */
 
+#include <sys/socket.h>
 #include "vncviewer.h"
 
 char *programName;
@@ -44,6 +46,13 @@ main(int argc, char **argv)
      option, when a successful incoming connection has been accepted,
      listenForIncomingConnections() returns, setting the listenSpecified
      flag. */
+
+  for (i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "-ipv6") == 0) {
+      family = AF_INET6;
+      removeArgs(&argc, argv, i, 1);
+    }
+  }
 
   for (i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-listen") == 0) {

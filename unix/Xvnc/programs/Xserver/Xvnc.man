@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "April 2012" "" "TurboVNC"
+.TH Xvnc 1 "May 2012" "" "TurboVNC"
 .SH NAME
 Xvnc \- an X server providing VNC connectivity
 .SH SYNOPSIS
@@ -30,7 +30,7 @@ Xvnc \- an X server providing VNC connectivity
 [\-alrqual \fIlevel\fR] [\-alrsamp \fI1X | 2X | 4X | gray\fR]
 [\-economictranslate] [\-desktop \fIname\fR] [\-alwaysshared]
 [\-nevershared] [\-dontdisconnect] [\-viewonly] [\-localhost]
-[\-interface ipaddr] [\-inetd] [\-compatiblekbd]
+[\-interface ipaddr] [\-ipv6] [\-inetd] [\-compatiblekbd]
 [\fIX-options\fR...]
 .SH DESCRIPTION
 \fBXvnc\fR is a VNC (Virtual Network Computing) server for Unix and Linux
@@ -200,13 +200,24 @@ Only allow loopback connections from localhost.  This option is useful
 in conjunction with SSH tunneling.  This option can be set for all TurboVNC
 sessions on this system by using the \fIno-remote-connections\fR directive in
 the authentication configuration file.  See the AUTHENTICATION CONFIGURATION
-FILE section for more details.
+FILE section for more details.  Unless \fB-ipv6\fR is also specified, only
+connections from IPv4 clients are accepted.
 .TP
 \fB\-interface\fR \fIipaddr\fR
 Listen only on the network interface with the given \fIipaddr\fR.
 .TP
+\fB\-ipv6\fR
+Enable IPv6 support.  If your system supports IPv4-mapped IPv6 addresses, then
+this option causes Xvnc to accept both local and remote connections from both
+IPv4 and IPv6 clients.  Otherwise, only connections from IPv6 clients will be
+accepted.  If \fB-localhost\fR is also specified, or if the
+\fIno-remote-connections\fR directive is specified in the authentication
+configuration file, then this option causes Xvnc to accept only local
+connections from IPv6 clients (the equivalent of specifying
+\fB-interface ::1\fR).
+.TP
 \fB\-inetd\fR
-If Xvnc is launched by inetd, this option causes \fBXvnc\fR to redirect
+If Xvnc is launched by inetd, this option causes Xvnc to redirect
 network input/output to stdin/stdout.
 .TP
 \fB\-compatiblekbd\fR

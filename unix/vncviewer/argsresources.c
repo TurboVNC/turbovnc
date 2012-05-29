@@ -501,6 +501,7 @@ usage(void)
 	  "        -nounixlogin\n"
 	  "        -cu\n"
 	  "        -config <CONFIG-FILENAME>\n"
+	  "        -ipv6\n"
 	  "\n"
 	  "Option names may be abbreviated, for example, -q instead of -quality.\n"
 	  "See the manual page for more information."
@@ -775,7 +776,9 @@ GetArgsAndResources(int argc, char **argv)
       exit(1);
     }
 
-    colonPos = strchr(vncServerName, ':');
+    colonPos = strrchr(vncServerName, ':');
+    while (colonPos > vncServerName && *(colonPos - 1) == ':')
+      colonPos--;
     if (colonPos == NULL) {
       /* No colon -- use default port number */
       strcpy(vncServerHost, vncServerName);

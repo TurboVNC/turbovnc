@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2011 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2012 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
@@ -152,6 +152,8 @@ static char inetdDisplayNumStr[10];
 
 /* Interface address to bind to. */
 struct in_addr interface;
+struct in6_addr interface6;
+int family = -1;
 
 
 /*
@@ -177,6 +179,7 @@ ddxProcessArgument (argc, argv, i)
 	rfbScreen.pfbMemory = NULL;
 	gethostname(rfbThisHost, 255);
 	interface.s_addr = htonl (INADDR_ANY);
+	interface6 = in6addr_any;
 	firstTime = FALSE;
     }
 
@@ -381,39 +384,39 @@ ddxProcessArgument (argc, argv, i)
 
     if (strcmp(argv[i], "-localhost") == 0) {
 	interface.s_addr = htonl (INADDR_LOOPBACK);
+	interface6 = in6addr_loopback;
+	return 1;
+    }
+
+    if (strcmp(argv[i], "-ipv6") == 0) {
+	if (family == -1) family = AF_INET6;
 	return 1;
     }
 
     if (strcmp(argv[i], "-interface") == 0) {	/* -interface ipaddr */
-	struct in_addr got;
-	unsigned long octet;
-	char *p, *end;
-	int q;
-	got.s_addr = 0;
+	struct addrinfo hints, *addr;
 	if (i + 1 >= argc) {
 	    UseMsg();
 	    return 2;
 	}
-	if (interface.s_addr != htonl (INADDR_ANY)) {
+	if (interface.s_addr != htonl (INADDR_ANY) ||
+	    memcmp(&interface6, &in6addr_any, sizeof(interface6))) {
 	    /* Already set (-localhost?). */
 	    return 2;
 	}
-	p = argv[i + 1];
-	for (q = 0; q < 4; q++) {
-	    octet = strtoul (p, &end, 10);
-	    if (p == end || octet > 255) {
-		UseMsg ();
-		return 2;
-	    }
-	    if ((q < 3 && *end != '.') ||
-	        (q == 3 && *end != '\0')) {
-		UseMsg ();
-		return 2;
-	    }
-	    got.s_addr = (got.s_addr << 8) | octet;
-	    p = end + 1;
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
+	if (getaddrinfo(argv[i + 1], NULL, &hints, &addr) == 0) {
+	    struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)addr->ai_addr;
+	    struct sockaddr_in *addr4 = (struct sockaddr_in *)addr->ai_addr;
+	    family = addr->ai_family;
+	    if (family == AF_INET6)
+		interface6 = addr6->sin6_addr;
+	    else
+		interface.s_addr = addr4->sin_addr.s_addr;
 	}
-	interface.s_addr = htonl (got.s_addr);
 	return 2;
     }
 
@@ -866,15 +869,29 @@ static Bool CheckDisplayNumber(int n)
 {
     char fname[32];
     int sock;
-    struct sockaddr_in addr;
+    struct sockaddr_storage addr;
+    struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)&addr;
+    struct sockaddr_in *addr4 = (struct sockaddr_in *)&addr;
+
+    sock = socket(AF_INET6, SOCK_STREAM, 0);
+
+    memset(&addr, 0, sizeof(addr));
+    addr6->sin6_family = AF_INET6;
+    addr6->sin6_addr = in6addr_any;
+    addr6->sin6_port = htons(6000+n);
+    if (bind(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in6)) < 0) {
+	close(sock);
+	return FALSE;
+    }
+    close(sock);
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
 
     memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    addr.sin_port = htons(6000+n);
-    if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+    addr4->sin_family = AF_INET;
+    addr4->sin_addr.s_addr = htonl(INADDR_ANY);
+    addr4->sin_port = htons(6000+n);
+    if (bind(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) < 0) {
 	close(sock);
 	return FALSE;
     }
@@ -916,15 +933,15 @@ rfbRootPropertyChange(PropertyPtr pProp)
     ) {
 	int i;
 	rfbClientPtr cl;
+	char *colonPos;
 	int port = 5500;
 	char *host = (char *)Xalloc(pProp->size+1);
 	memcpy(host, pProp->data, pProp->size);
 	host[pProp->size] = 0;
-	for (i = 0; i < pProp->size; i++) {
-	    if (host[i] == ':') {
-		port = atoi(&host[i+1]);
-		host[i] = 0;
-	    }
+	colonPos = strrchr(host, ':');
+	if (colonPos && colonPos < &host[strlen(host) - 1]) {
+	    port = atoi(colonPos + 1);
+	    *colonPos = 0;
 	}
 
 	cl = rfbReverseConnection(host, port);
@@ -1135,6 +1152,7 @@ ddxUseMsg()
     ErrorF("-localhost             only allow connections from localhost\n");
     ErrorF("-interface ipaddr      only bind to specified interface "
 								"address\n");
+    ErrorF("-ipv6                  enable IPv6 support\n");
     ErrorF("-inetd                 Xvnc is launched by inetd\n");
     ErrorF("-compatiblekbd         set META key = ALT key as in the original "
 								"VNC\n");

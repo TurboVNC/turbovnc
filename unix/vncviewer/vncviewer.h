@@ -310,12 +310,13 @@ extern Bool ReadFromRFBServer(char *out, unsigned int n);
 extern Bool WriteExact(int sock, char *buf, int n);
 extern int FindFreeTcpPort(void);
 extern int ListenAtTcpPort(int port);
-extern int ConnectToTcpAddr(unsigned int host, int port);
+extern int ConnectToTcpAddr(const char *hostname, int port);
 extern int AcceptTcpConnection(int listenSock);
 extern Bool SetNonBlocking(int sock);
 
-extern int StringToIPAddr(const char *str, unsigned int *addr);
 extern Bool SameMachine(int sock);
+
+extern int family;
 
 /* tunnel.c */
 

@@ -41,6 +41,7 @@
 #include <zlib.h>
 #include <stdarg.h>
 #include <pthread.h>
+#include <sys/socket.h>
 #ifdef RENDER
 #include "picturestr.h"
 #endif
@@ -431,6 +432,8 @@ extern int rfbGCIndex;
 
 extern int inetdSock;
 extern struct in_addr interface;
+extern struct in6_addr interface6;
+extern int family;
 
 extern int rfbBitsPerPixel(int depth);
 extern void rfbLog(char *format, ...);
@@ -461,6 +464,9 @@ extern int WriteExact(int sock, char *buf, int len);
 extern int ListenOnTCPPort(int port);
 extern int ListenOnUDPPort(int port);
 extern int ConnectToTcpAddr(char *host, int port);
+
+extern const char *sockaddr_string(struct sockaddr_storage *addr, char *buf,
+				   int len);
 
 
 /* cmap.c */

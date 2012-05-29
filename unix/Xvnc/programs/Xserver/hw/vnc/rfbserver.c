@@ -246,8 +246,9 @@ rfbNewClient(sock)
     rfbProtocolVersionMsg pv;
     rfbClientPtr cl;
     BoxRec box;
-    struct sockaddr_in addr;
-    socklen_t addrlen = sizeof(struct sockaddr_in);
+    struct sockaddr_storage addr;
+    socklen_t addrlen = sizeof(struct sockaddr_storage);
+    char addrStr[INET6_ADDRSTRLEN];
     int i;
     char *env = NULL;
 
@@ -271,7 +272,7 @@ rfbNewClient(sock)
 
     cl->sock = sock;
     getpeername(sock, (struct sockaddr *)&addr, &addrlen);
-    cl->host = strdup(inet_ntoa(addr.sin_addr));
+    cl->host = strdup(sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
     cl->login = NULL;
 
     /* Dispatch client input to rfbProcessClientProtocolVersion(). */

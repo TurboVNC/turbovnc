@@ -20,6 +20,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -71,10 +72,33 @@ int rfbListenSock = -1;
 int udpPort = 0;
 int udpSock = -1;
 Bool udpSockConnected = FALSE;
-static struct sockaddr_in udpRemoteAddr;
+static struct sockaddr_storage udpRemoteAddr;
 
 static fd_set allFds;
 static int maxFd = 0;
+
+
+/*
+ * Convenience function to return a string from either an IPv4 or an IPv6
+ * address
+ */
+const char *
+sockaddr_string(struct sockaddr_storage *addr, char *buf, int len)
+{
+    const char *string = NULL;
+    if (!addr || !buf || len < 1)
+	return "Invalid argument";
+    if (addr->ss_family == AF_INET6)
+	string = inet_ntop(addr->ss_family,
+			   &((struct sockaddr_in6 *)addr)->sin6_addr, buf,
+			   len);
+    else
+	string = inet_ntop(addr->ss_family,
+			   &((struct sockaddr_in *)addr)->sin_addr, buf, len);
+    if (!string)
+	return strerror(errno);
+    return string;
+}
 
 
 /*
@@ -157,8 +181,9 @@ rfbCheckFds()
     int nfds;
     fd_set fds;
     struct timeval tv;
-    struct sockaddr_in addr;
+    struct sockaddr_storage addr;
     socklen_t addrlen = sizeof(addr);
+    char addrStr[INET6_ADDRSTRLEN];
     char buf[6];
     const int one = 1;
     int sock;
@@ -205,16 +230,18 @@ rfbCheckFds()
 	fprintf(stderr,"\n");
 
 #if USE_LIBWRAP
-        if (!hosts_ctl("Xvnc", STRING_UNKNOWN, inet_ntoa(addr.sin_addr),
+        if (!hosts_ctl("Xvnc", STRING_UNKNOWN,
+                       sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN),
                        STRING_UNKNOWN)) {
           rfbLog("Rejected connection from client %s\n",
-                 inet_ntoa(addr.sin_addr));
+                 sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN))
           close(sock);
           return;
         }
 #endif
 
-	rfbLog("Got connection from client %s\n", inet_ntoa(addr.sin_addr));
+	rfbLog("Got connection from client %s\n",
+	       sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
 
 	AddEnabledDevice(sock);
 	FD_SET(sock, &allFds);
@@ -510,24 +537,38 @@ int
 ListenOnTCPPort(port)
     int port;
 {
-    struct sockaddr_in addr;
+    struct sockaddr_storage addr;
+    struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)&addr;
+    struct sockaddr_in *addr4 = (struct sockaddr_in *)&addr;
+    socklen_t addrlen;
+    char hostname[NI_MAXHOST];
     int sock;
     int one = 1;
 
     memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
-    addr.sin_addr.s_addr = interface.s_addr;
+    if (family == AF_INET6) {
+	addr6->sin6_family = family;
+	addr6->sin6_port = htons(port);
+	addr6->sin6_addr = interface6;
+	addrlen = sizeof(struct sockaddr_in6);
+    } else {
+	family = AF_INET;
+	addr4->sin_family = family;
+	addr4->sin_port = htons(port);
+	addr4->sin_addr.s_addr = interface.s_addr;
+	addrlen = sizeof(struct sockaddr_in);
+    }
 
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    if ((sock = socket(family, SOCK_STREAM, 0)) < 0) {
 	return -1;
     }
+
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
 		   (char *)&one, sizeof(one)) < 0) {
 	close(sock);
 	return -1;
     }
-    if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+    if (bind(sock, (struct sockaddr *)&addr, addrlen) < 0) {
 	close(sock);
 	return -1;
     }
@@ -536,6 +577,10 @@ ListenOnTCPPort(port)
 	return -1;
     }
 
+    if (getnameinfo((struct sockaddr *)&addr, addrlen, hostname,
+		    NI_MAXHOST, NULL, 0, NI_NUMERICHOST) == 0) {
+        rfbLog("  Interface %s\n", hostname);
+    }
     return sock;
 }
 
@@ -545,32 +590,29 @@ ConnectToTcpAddr(host, port)
     char *host;
     int port;
 {
-    struct hostent *hp;
+    char portname[10];
     int sock;
-    struct sockaddr_in addr;
+    struct addrinfo hints, *addr;
 
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    snprintf(portname, 10, "%d", port);
+    if (getaddrinfo(host, portname, &hints, &addr) != 0)
+	return -1;
 
-    if ((addr.sin_addr.s_addr = inet_addr(host)) == -1)
-    {
-	if (!(hp = gethostbyname(host))) {
-	    errno = EINVAL;
-	    return -1;
-	}
-	addr.sin_addr.s_addr = *(unsigned long *)hp->h_addr;
-    }
-
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    if ((sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol)) < 0) {
+	freeaddrinfo(addr);
 	return -1;
     }
 
-    if (connect(sock, (struct sockaddr *)&addr, (sizeof(addr))) < 0) {
+    if (connect(sock, addr->ai_addr, addr->ai_addrlen) < 0) {
 	close(sock);
+	freeaddrinfo(addr);
 	return -1;
     }
 
+    freeaddrinfo(addr);
     return sock;
 }
 
@@ -579,23 +621,36 @@ int
 ListenOnUDPPort(port)
     int port;
 {
-    struct sockaddr_in addr;
+    struct sockaddr_storage addr;
+    struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)&addr;
+    struct sockaddr_in *addr4 = (struct sockaddr_in *)&addr;
+    socklen_t addrlen;
     int sock;
     int one = 1;
 
     memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
-    addr.sin_addr.s_addr = interface.s_addr;
+    if (family == AF_INET6) {
+	addr6->sin6_family = family;
+	addr6->sin6_port = htons(port);
+	addr6->sin6_addr = interface6;
+	addrlen = sizeof(struct sockaddr_in6);
+    } else {
+	family = AF_INET;
+	addr4->sin_family = family;
+	addr4->sin_port = htons(port);
+	addr4->sin_addr.s_addr = interface.s_addr;
+	addrlen = sizeof(struct sockaddr_in);
+    }
 
-    if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    if ((sock = socket(family, SOCK_DGRAM, 0)) < 0) {
 	return -1;
     }
+
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
 		   (char *)&one, sizeof(one)) < 0) {
 	return -1;
     }
-    if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+    if (bind(sock, (struct sockaddr *)&addr, addrlen) < 0) {
 	return -1;
     }
 

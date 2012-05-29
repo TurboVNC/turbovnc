@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010, 2012 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2003-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -391,6 +391,7 @@ ReadConfigFile()
 
         if (!strcmp(buf2, "no-remote-connections")) {
             interface.s_addr = htonl (INADDR_LOOPBACK);
+            interface6 = in6addr_loopback;
             continue;
         }
 

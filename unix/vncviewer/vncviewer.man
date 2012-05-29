@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TurboVNC distribution.
 .\"
-.TH vncviewer 1 "March 2012" "" "TurboVNC"
+.TH vncviewer 1 "May 2012" "" "TurboVNC"
 .SH NAME
 vncviewer \- an X11 viewer/client for TurboVNC
 .SH SYNOPSIS
@@ -105,6 +105,11 @@ Start the viewer in "listen mode."  The viewer will listen on port
 5500+\fIdisplay\fR for reverse connections from a VNC server.  To connect
 to a listening viewer from the Unix/Linux TurboVNC Server, use the
 \fBvncconnect\fR(1) program.
+.TP
+\fB\-ipv6\fR
+When used with \fB-listen\fR, this causes vncviewer to accept connections from
+IPv6-enabled servers.  If your system supports IPv4-mapped IPv6 addresses, then
+connections from IPv4 servers can also be accepted when this option is enabled.
 .TP
 \fB\-via\fR \fIgateway\fR
 Automatically create an encrypted TCP tunnel to machine \fIgateway\fR,

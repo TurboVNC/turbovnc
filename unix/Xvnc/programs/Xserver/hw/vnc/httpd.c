@@ -3,6 +3,7 @@
  */
 
 /*
+ *  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
@@ -117,8 +118,9 @@ httpCheckFds()
     int nfds;
     fd_set fds;
     struct timeval tv;
-    struct sockaddr_in addr;
+    struct sockaddr_storage addr;
     socklen_t addrlen = sizeof(addr);
+    char addrStr[INET6_ADDRSTRLEN];
 
     if (!httpDir)
 	return;
@@ -156,10 +158,11 @@ httpCheckFds()
 	}
 
 #if USE_LIBWRAP
-	if (!hosts_ctl("Xvnc", STRING_UNKNOWN, inet_ntoa(addr.sin_addr),
+	if (!hosts_ctl("Xvnc", STRING_UNKNOWN,
+		       sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN),
 		       STRING_UNKNOWN)) {
 	    rfbLog("Rejected HTTP connection from client %s\n",
-		   inet_ntoa(addr.sin_addr));
+		   sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
 	    close(httpSock);
 	    httpSock = -1;
 	    return;
@@ -198,8 +201,9 @@ httpCloseSock()
 static void
 httpProcessInput()
 {
-    struct sockaddr_in addr;
+    struct sockaddr_storage addr;
     socklen_t addrlen = sizeof(addr);
+    char addrStr[INET6_ADDRSTRLEN];
     char fullFname[512];
     char params[1024];
     char *ptr;
@@ -286,7 +290,7 @@ httpProcessInput()
 
     getpeername(httpSock, (struct sockaddr *)&addr, &addrlen);
     rfbLog("httpd: get '%s' for %s\n", fname+1,
-	   inet_ntoa(addr.sin_addr));
+	   sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
 
     /* Extract parameters from the URL string if necessary */
 

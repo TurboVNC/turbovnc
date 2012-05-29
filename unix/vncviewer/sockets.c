@@ -1,6 +1,6 @@
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2011 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2011-2012 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ Bool errorMessageOnReadFailure = True;
 static char buf[BUF_SIZE];
 static char *bufoutptr = buf;
 static int buffered = 0;
+int family = AF_INET;
 
 /*
  * Profiling stuff
@@ -211,29 +212,41 @@ WriteExact(int sock, char *buf, int n)
  */
 
 int
-ConnectToTcpAddr(unsigned int host, int port)
+ConnectToTcpAddr(const char *hostname, int port)
 {
+  char portname[10];
   int sock;
-  struct sockaddr_in addr;
+  struct addrinfo hints, *addr;
   int one = 1;
 
-  addr.sin_family = AF_INET;
-  addr.sin_port = htons(port);
-  addr.sin_addr.s_addr = host;
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  snprintf(portname, 10, "%d", port);
+  if (strlen(hostname) < 1)
+    hostname = NULL;
+  if (getaddrinfo(hostname, portname, &hints, &addr) != 0) {
+    fprintf(stderr,"Couldn't convert '%s' to host address\n", hostname);
+    return -1;
+  }
 
-  sock = socket(AF_INET, SOCK_STREAM, 0);
+  sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
   if (sock < 0) {
     fprintf(stderr,"%s",programName);
     perror(": ConnectToTcpAddr: socket");
+    freeaddrinfo(addr);
     return -1;
   }
 
-  if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+  if (connect(sock, addr->ai_addr, addr->ai_addrlen) < 0) {
     fprintf(stderr,"%s",programName);
     perror(": ConnectToTcpAddr: connect");
     close(sock);
+    freeaddrinfo(addr);
     return -1;
   }
+
+  freeaddrinfo(addr);
 
   if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
 		 (char *)&one, sizeof(one)) < 0) {
@@ -298,14 +311,26 @@ int
 ListenAtTcpPort(int port)
 {
   int sock;
-  struct sockaddr_in addr;
+  struct sockaddr_storage addr;
+  struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)&addr;
+  struct sockaddr_in *addr4 = (struct sockaddr_in *)&addr;
+  socklen_t addrlen;
   int one = 1;
 
-  addr.sin_family = AF_INET;
-  addr.sin_port = htons(port);
-  addr.sin_addr.s_addr = INADDR_ANY;
+  memset(&addr, 0, sizeof(addr));
+  if (family == AF_INET6) {
+    addr6->sin6_family = family;
+    addr6->sin6_port = htons(port);
+    addr6->sin6_addr = in6addr_any;
+    addrlen = sizeof(struct sockaddr_in6);
+  } else {
+    addr4->sin_family = family;
+    addr4->sin_port = htons(port);
+    addr4->sin_addr.s_addr = INADDR_ANY;
+    addrlen = sizeof(struct sockaddr_in);
+  }
 
-  sock = socket(AF_INET, SOCK_STREAM, 0);
+  sock = socket(family, SOCK_STREAM, 0);
   if (sock < 0) {
     fprintf(stderr,"%s",programName);
     perror(": ListenAtTcpPort: socket");
@@ -320,7 +345,7 @@ ListenAtTcpPort(int port)
     return -1;
   }
 
-  if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+  if (bind(sock, (struct sockaddr *)&addr, addrlen) < 0) {
     fprintf(stderr,"%s",programName);
     perror(": ListenAtTcpPort: bind");
     close(sock);
@@ -346,7 +371,7 @@ int
 AcceptTcpConnection(int listenSock)
 {
   int sock;
-  struct sockaddr_in addr;
+  struct sockaddr_storage addr;
   socklen_t addrlen = sizeof(addr);
   int one = 1;
 
@@ -386,49 +411,27 @@ SetNonBlocking(int sock)
 
 
 /*
- * StringToIPAddr - convert a host string to an IP address.
- */
-
-Bool
-StringToIPAddr(const char *str, unsigned int *addr)
-{
-  struct hostent *hp;
-
-  if (strcmp(str,"") == 0) {
-    *addr = 0; /* local */
-    return True;
-  }
-
-  *addr = inet_addr(str);
-
-  if (*addr != -1)
-    return True;
-
-  hp = gethostbyname(str);
-
-  if (hp) {
-    *addr = *(unsigned int *)hp->h_addr;
-    return True;
-  }
-
-  return False;
-}
-
-
-/*
  * Test if the other end of a socket is on the same machine.
  */
 
 Bool
 SameMachine(int sock)
 {
-  struct sockaddr_in peeraddr, myaddr;
-  socklen_t addrlen = sizeof(struct sockaddr_in);
+  struct sockaddr_storage peeraddr, myaddr;
+  struct sockaddr_in *peeraddr4 = (struct sockaddr_in *)&peeraddr;
+  struct sockaddr_in6 *peeraddr6 = (struct sockaddr_in6 *)&peeraddr;
+  struct sockaddr_in *myaddr4 = (struct sockaddr_in *)&myaddr;
+  struct sockaddr_in6 *myaddr6 = (struct sockaddr_in6 *)&myaddr;
+  socklen_t addrlen = sizeof(struct sockaddr_storage);
 
   getpeername(sock, (struct sockaddr *)&peeraddr, &addrlen);
   getsockname(sock, (struct sockaddr *)&myaddr, &addrlen);
 
-  return (peeraddr.sin_addr.s_addr == myaddr.sin_addr.s_addr);
+  if (myaddr.ss_family == AF_INET6)
+    return (!memcmp(&peeraddr6->sin6_addr, &myaddr6->sin6_addr,
+                    sizeof(struct in6_addr)));
+  else
+    return (peeraddr4->sin_addr.s_addr == myaddr4->sin_addr.s_addr);
 }
 
 

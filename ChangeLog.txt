@@ -12,6 +12,9 @@ networks.
 All-new Java viewer code base, which is based roughly upon the TigerVNC 1.2
 Java viewer but which has numerous TurboVNC-specific enhancements.
 -------------------------------------------------------------------------------
+[3]
+IPv6 support
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

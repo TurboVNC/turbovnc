@@ -1,7 +1,7 @@
 /*
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
                        All Rights Reserved.
- *  Copyright (C) 2009-2011 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2012 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  *  Copyright (C) 2000-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -364,14 +364,7 @@ InitCapabilities(void)
 Bool
 ConnectToRFBServer(const char *hostname, int port)
 {
-  unsigned int host;
-
-  if (!StringToIPAddr(hostname, &host)) {
-    fprintf(stderr,"Couldn't convert '%s' to host address\n", hostname);
-    return False;
-  }
-
-  rfbsock = ConnectToTcpAddr(host, port);
+  rfbsock = ConnectToTcpAddr(hostname, port);
 
   if (rfbsock < 0) {
     fprintf(stderr,"Unable to connect to VNC server\n");
