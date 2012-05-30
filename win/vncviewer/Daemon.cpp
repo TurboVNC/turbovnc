@@ -1,4 +1,4 @@
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2012 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -39,7 +39,7 @@
 //////////////////////////////////////////////////////////////////////
 #define DAEMON_CLASS_NAME "VNCviewer Daemon"
 
-Daemon::Daemon(int port)
+Daemon::Daemon(int port, bool ipv6)
 {
 
 	// Create a dummy window
@@ -78,13 +78,26 @@ Daemon::Daemon(int port)
 	m_hmenu = LoadMenu(pApp->m_instance, MAKEINTRESOURCE(IDR_TRAYMENU));
 
 	// Create a listening socket
-    struct sockaddr_in addr;
+    struct sockaddr_storage addr;
+    struct sockaddr_in6 *addr6 = (struct sockaddr_in6 *)&addr;
+    struct sockaddr_in *addr4 = (struct sockaddr_in *)&addr;
+    int addrlen;
 
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
-    addr.sin_addr.s_addr = INADDR_ANY;
+    memset(&addr, 0, sizeof(addr));
+    int family = ipv6 ? AF_INET6 : AF_INET;
+    if (family == AF_INET6) {
+        addr6->sin6_family = family;
+        addr6->sin6_port = htons(port);
+        addr6->sin6_addr = in6addr_any;
+        addrlen = sizeof(struct sockaddr_in6);
+    } else {
+        addr4->sin_family = family;
+        addr4->sin_port = htons(port);
+        addr4->sin_addr.s_addr = INADDR_ANY;
+        addrlen = sizeof(struct sockaddr_in);
+    }
 
-    m_sock = socket(AF_INET, SOCK_STREAM, 0);
+    m_sock = socket(family, SOCK_STREAM, 0);
 	if (!m_sock)
 		throw WarningException("Error creating Daemon socket");
 
@@ -96,7 +109,7 @@ Daemon::Daemon(int port)
 	//	throw WarningException("Error setting Daemon socket options");
 	//}
 
-	res = bind(m_sock, (struct sockaddr *)&addr, sizeof(addr));
+	res = bind(m_sock, (struct sockaddr *)&addr, addrlen);
 	if (res == SOCKET_ERROR) {
 		closesocket(m_sock);
 		m_sock = 0;

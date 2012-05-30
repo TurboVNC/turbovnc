@@ -43,7 +43,7 @@
 	| Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent) \
 	|
 | O/S \
-	| Windows 2000 or later \
+	| Windows 2000 SP1 or later \
 	|
 | Other \
 	| For best performance, client display should have a 24-bit or 32-bit (True \

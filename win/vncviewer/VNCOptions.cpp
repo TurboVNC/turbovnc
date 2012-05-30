@@ -1,4 +1,4 @@
-//  Copyright (C) 2010-2011 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2012 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -92,6 +92,7 @@ VNCOptions::VNCOptions()
 	m_configFilename[0] = '\0';
 	m_listening = false;
 	m_listenPort = INCOMING_PORT_OFFSET;
+	m_ipv6 = false;
 	m_restricted = false;
 
 	m_subsampLevel = TVNC_1X;
@@ -174,6 +175,7 @@ VNCOptions& VNCOptions::operator=(VNCOptions& s)
 
 	m_listening			= s.m_listening;
 	m_listenPort		= s.m_listenPort;
+	m_ipv6				= s.m_ipv6;
 	m_restricted		= s.m_restricted;
 
 	m_subsampLevel			= s.m_subsampLevel;
@@ -307,6 +309,8 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 				}
 				j++;
 			}
+		} else if ( SwitchMatch(args[j], _T("ipv6"))) {
+			m_ipv6 = true;
 		} else if ( SwitchMatch(args[j], _T("restricted"))) {
 			m_restricted = true;
 		} else if ( SwitchMatch(args[j], _T("viewonly"))) {

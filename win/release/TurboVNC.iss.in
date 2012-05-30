@@ -54,6 +54,7 @@ Source: "@CMAKE_SOURCE_DIR@\..\doc\*.css"; DestDir: "{app}\doc"; Flags: ignoreve
 [Icons]
 Name: "{group}\TurboVNC Viewer";                      FileName: "{app}\vncviewer.exe";                                 WorkingDir: "{app}";     Components: viewer;
 Name: "{group}\TurboVNC Viewer (Listen Mode)";        FileName: "{app}\vncviewer.exe"; Parameters: "-listen";          WorkingDir: "{app}";     Components: viewer;
+Name: "{group}\TurboVNC Viewer (Listen Mode - IPv6)"; FileName: "{app}\vncviewer.exe"; Parameters: "-listen -ipv6";    WorkingDir: "{app}";     Components: viewer;
 Name: "{group}\Uninstall TurboVNC";                   FileName: "{uninstallexe}";                                      WorkingDir: "{app}";                        
 Name: "{group}\Documentation\TurboVNC User's Guide";  FileName: "{app}\doc\index.html";                                WorkingDir: "{app}\doc"; Components: doc;
 Name: "{group}\Documentation\Licensing Terms";        FileName: "write.exe";           Parameters: "LICENCE.txt";      WorkingDir: "{app}";     Flags: "useapppaths"

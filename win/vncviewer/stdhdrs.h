@@ -1,5 +1,5 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2012 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -32,6 +32,7 @@
 #define _WIN32_WINDOWS 0x0410
 
 #include <winsock2.h>
+#include <WS2tcpip.h>
 #include <stdio.h>
 #include <process.h>
 #include <assert.h>

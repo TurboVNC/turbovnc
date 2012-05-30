@@ -1,4 +1,4 @@
-//  Copyright (C) 2010-2011 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2012 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -79,6 +79,7 @@ public:
 	void VNCOptions::SaveOpt(char subkey[256],char keyname[256]);
 	// process options
 	bool	m_listening;
+	bool	m_ipv6;
 	int		m_listenPort;
 	TCHAR	m_display[256];
 	bool	m_toolbar;

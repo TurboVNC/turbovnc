@@ -1,3 +1,4 @@
+//  Copyright (C) 2012 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -147,7 +148,7 @@ void VNCviewerApp32::NewConnection(SOCKET sock) {
 void VNCviewerApp32::ListenMode() {
 
 	try {
-		m_pdaemon = new Daemon(m_options.m_listenPort);
+		m_pdaemon = new Daemon(m_options.m_listenPort, m_options.m_ipv6);
 	} catch (WarningException &e) {
 		char msg[1024];
 		sprintf(msg, "Error creating listening daemon:\n\r(%s)\n\r%s",

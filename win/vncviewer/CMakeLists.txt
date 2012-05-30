@@ -1,4 +1,4 @@
-add_definitions(-D_WINSTATIC -D_WIN32_WINNT=0x0400)
+add_definitions(-D_WINSTATIC -D_WIN32_WINNT=0x0500 -DNTDDI_VERSION=0x05000100)
 include_directories(omnithread zlib ${CMAKE_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}/res)
 
@@ -46,6 +46,6 @@ add_executable(vncviewer WIN32
 	res/vncviewer.rc)
 
 target_link_libraries(vncviewer zlib
-	wsock32.lib winmm.lib htmlhelp.lib comctl32.lib ${TJPEG_LIBRARY})
+	ws2_32.lib winmm.lib htmlhelp.lib comctl32.lib ${TJPEG_LIBRARY})
 
 install(TARGETS vncviewer DESTINATION .)

@@ -99,19 +99,22 @@ ClientConnection::ClientConnection(VNCviewerApp *pApp)
 
 ClientConnection::ClientConnection(VNCviewerApp *pApp, SOCKET sock) 
 {
+	char hostname[NI_MAXHOST];
 	Init(pApp);
 	m_sock = sock;
 	m_serverInitiated = true;
-	struct sockaddr_in svraddr;
+	struct sockaddr_storage svraddr;
 	int sasize = sizeof(svraddr);
-	if (getpeername(sock, (struct sockaddr *) &svraddr, 
-		&sasize) != SOCKET_ERROR) {
-		_stprintf(m_host, _T("%d.%d.%d.%d"), 
-			svraddr.sin_addr.S_un.S_un_b.s_b1, 
-			svraddr.sin_addr.S_un.S_un_b.s_b2, 
-			svraddr.sin_addr.S_un.S_un_b.s_b3, 
-			svraddr.sin_addr.S_un.S_un_b.s_b4);
-		m_port = svraddr.sin_port;
+	if (getpeername(sock, (struct sockaddr *) &svraddr,
+		&sasize) != SOCKET_ERROR &&
+		getnameinfo((struct sockaddr *)&svraddr, sasize, hostname,
+		NI_MAXHOST, NULL, 0, NI_NUMERICHOST) == 0) {
+		_sntprintf(m_host, 256, _T("%s"), hostname);
+		m_host[255] = 0;
+		if (svraddr.ss_family == AF_INET6)
+			m_port = ((sockaddr_in6 *)&svraddr)->sin6_port;
+		else
+			m_port = ((sockaddr_in *)&svraddr)->sin_port;
 	} else {
 		_tcscpy(m_host,_T("(unknown)"));
 		m_port = 0;
@@ -818,43 +821,43 @@ void ClientConnection::GetConnectDetails()
 
 void ClientConnection::Connect()
 {
-	struct sockaddr_in thataddr;
+	ADDRINFOA hints, *addr;
+	char portname[10], *hostname = m_host;
 	int res;
 
 	if (m_connDlg != NULL)
 		m_connDlg->SetStatus("Connection initiated");
 
-	m_sock = socket(PF_INET, SOCK_STREAM, 0);
-	if (m_sock == INVALID_SOCKET) throw WarningException(_T("Error creating socket"));
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	_snprintf(portname, 10, "%d", m_port);
+	if (strlen(hostname) < 1)
+		hostname = NULL;
+	if (getaddrinfo(hostname, portname, &hints, &addr) != 0) {
+		char msg[512];
+		sprintf(msg, "Failed to get server address (%s).\n"
+				"Did you type the host name correctly?", m_host);
+		throw WarningException(msg);
+	}
+
+	m_sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+	if (m_sock == INVALID_SOCKET) {
+		freeaddrinfo(addr);
+		throw WarningException(_T("Error creating socket"));
+	}
 	int one = 1;
-	
-	// The host may be specified as a dotted address "a.b.c.d"
-	// Try that first
-	thataddr.sin_addr.s_addr = inet_addr(m_host);
-	
-	// If it wasn't one of those, do gethostbyname
-	if (thataddr.sin_addr.s_addr == INADDR_NONE) {
-		LPHOSTENT lphost;
-		lphost = gethostbyname(m_host);
-		
-		if (lphost == NULL) { 
-			char msg[512];
-			sprintf(msg, "Failed to get server address (%s).\n"
-					"Did you type the host name correctly?", m_host);
-			throw WarningException(msg);
-		};
-		thataddr.sin_addr.s_addr = ((LPIN_ADDR) lphost->h_addr)->s_addr;
-	};
-	
-	thataddr.sin_family = AF_INET;
-	thataddr.sin_port = htons(m_port);
-	res = connect(m_sock, (LPSOCKADDR) &thataddr, sizeof(thataddr));
+
+	res = connect(m_sock, addr->ai_addr, (int)addr->ai_addrlen);
 	if (res == SOCKET_ERROR) {
 		char msg[512];
 		sprintf(msg, "Failed to connect to server (%.255s)", m_opts.m_display);
+		freeaddrinfo(addr);
 		throw WarningException(msg);
 	}
 	vnclog.Print(0, _T("Connected to %s port %d\n"), m_host, m_port);
+
+	freeaddrinfo(addr);
 
 	if (m_connDlg != NULL)
 		m_connDlg->SetStatus("Connection established");

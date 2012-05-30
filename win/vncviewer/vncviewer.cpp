@@ -1,4 +1,4 @@
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2012 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -132,7 +132,9 @@ bool ParseDisplay(LPTSTR display, LPTSTR phost, int hostlen, int *pport)
         return false;
 
     int tmp_port;
-    TCHAR *colonpos = _tcschr(display, L':');
+    TCHAR *colonpos = _tcsrchr(display, L':');
+    while (colonpos > display && *(colonpos - 1) == L':')
+      colonpos--;
     if (colonpos == NULL) {
 		// No colon -- use default port number
         tmp_port = RFB_PORT_OFFSET;
