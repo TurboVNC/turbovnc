@@ -349,7 +349,6 @@ public class CConn extends CConnection
     // Note: This might not be true if sync fences are supported
     pendingUpdate = false;
 
-    viewport.setIgnoreRepaint(true);
     requestNewUpdate();
   }
 
@@ -361,7 +360,6 @@ public class CConn extends CConnection
   {
 
     desktop.updateWindow();
-    viewport.setIgnoreRepaint(false);
 
     if (firstUpdate) {
       int width, height;
