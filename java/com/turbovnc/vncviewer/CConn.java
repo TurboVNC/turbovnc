@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright (C) 2011-2012 D. R. Commander.  All Rights Reserved.
- * Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2011-2012 Brian P. Hinz
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -325,9 +325,7 @@ public class CConn extends CConnection
       setServerPort(port);
       sock = new TcpSocket(host, port);
       vlog.info("Redirected to "+host+":"+port);
-      setStreams(sock.inStream(), sock.outStream());
-      sock.inStream().setBlockCallback(this);
-      initialiseProtocol();
+      viewer.newViewer(viewer, sock, true);
     } catch (java.lang.Exception e) {
       throw new Exception(e.toString());
     }
@@ -689,7 +687,7 @@ public class CConn extends CConnection
   void showInfo() {
     JOptionPane.showMessageDialog(viewport,
       "Desktop name: "+cp.name()+"\n"
-      +"Host: "+serverHost+":"+serverPort+"\n"
+      +"Host: "+sock.getPeerName()+":"+sock.getPeerPort()+"\n"
       +"Size: "+cp.width+"x"+cp.height+"\n"
       +"Pixel format: "+desktop.getPF().print()+"\n"
       +"(server default "+serverPF.print()+")\n"
