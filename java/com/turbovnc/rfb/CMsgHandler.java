@@ -1,4 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+ * Copyright 2009-2011 Pierre Ossman for Cendio AB
+ * Copyright (C) 2011 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  * 
  * This is free software; you can redistribute it and/or modify

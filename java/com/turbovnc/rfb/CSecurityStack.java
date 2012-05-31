@@ -1,4 +1,5 @@
 /* Copyright (C) 2005 Martin Koegler
+ * Copyright (C) 2006 OCCAM Financial Technology
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011 Brian P. Hinz
  * 

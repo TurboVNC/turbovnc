@@ -3,7 +3,7 @@
  * Copyright (C) 2005 Martin Koegler
  * Copyright (C) 2010 m-privacy GmbH
  * Copyright (C) 2010 TigerVNC Team
- * Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2011-2012 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
