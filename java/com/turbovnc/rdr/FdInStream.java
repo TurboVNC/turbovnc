@@ -27,7 +27,7 @@ import java.util.Iterator;
 
 public class FdInStream extends InStream {
 
-  static final int DEFAULT_BUF_SIZE = 8192;
+  static final int DEFAULT_BUF_SIZE = 131072;
   static final int minBulkSize = 1024;
 
   public FdInStream(FileDescriptor fd_, int timeoutms_, int bufSize_,
