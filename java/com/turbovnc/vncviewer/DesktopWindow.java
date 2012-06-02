@@ -211,7 +211,7 @@ class DesktopWindow extends JPanel implements
   {
     Rect r = damage;
     if (!r.is_empty()) {
-      repaint(r.tl.x, r.tl.y, r.width(), r.height());
+      paintImmediately(r.tl.x, r.tl.y, r.width(), r.height());
       damage.clear();
     }
   }
