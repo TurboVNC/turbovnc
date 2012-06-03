@@ -56,17 +56,69 @@ foreach(class ${JAVA_CLASSNAMES})
     ${CMAKE_CURRENT_BINARY_DIR}/${CLASSPATH}/${class}.class)
 endforeach()
 
+set(JSCH_CLASSNAMES
+  DH
+  DHG1
+  DHG14
+  DHGEX
+  JSch
+  Session
+  UserAuth
+  UserAuthKeyboardInteractive
+  UserAuthPassword
+  UserAuthPublicKey
+  UserAuthNone
+  jce/AES128CBC
+  jce/AES192CTR
+  jce/ARCFOUR128
+  jce/BlowfishCBC
+  jce/HMACMD5
+  jce/KeyPairGenDSA
+  jce/Random
+  jce/SignatureRSA
+  jce/AES128CTR
+  jce/AES256CBC
+  jce/ARCFOUR256
+  jce/DH
+  jce/HMACSHA196
+  jce/KeyPairGenRSA
+  jce/SHA1
+  jce/TripleDESCBC
+  jce/AES192CBC
+  jce/AES256CTR
+  jce/ARCFOUR
+  jce/HMACMD596
+  jce/HMACSHA1
+  jce/MD5
+  jce/SignatureDSA
+  jce/TripleDESCTR
+  jcraft/Compression
+  jcraft/HMAC
+  jcraft/HMACMD596
+  jcraft/HMACMD5
+  jcraft/HMACSHA196
+  jcraft/HMACSHA1)
+set(JSCH_SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/com/jcraft/jsch)
+foreach(class ${JSCH_CLASSNAMES})
+  set(JAVA_SOURCES ${JAVA_SOURCES} ${JSCH_SRCDIR}/${class}.java)
+  set(JAVA_CLASSES_FULL ${JAVA_CLASSES_FULL}
+    ${CMAKE_CURRENT_BINARY_DIR}/com/jcraft/jsch/${class}.class)
+endforeach()
+
 file(GLOB DEPEND_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/com/turbovnc/rfb/*.java
   ${CMAKE_CURRENT_SOURCE_DIR}/com/turbovnc/rdr/*.java
   ${CMAKE_CURRENT_SOURCE_DIR}/com/turbovnc/network/*.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/com/jcraft/jsch/*.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/com/jcraft/jsch/jcraft/*.java
+  ${CMAKE_CURRENT_SOURCE_DIR}/com/jcraft/jsch/jgss/*.java
   ${CMAKE_CURRENT_SOURCE_DIR}/com/jcraft/jzlib/*.java)
 
 string(REGEX REPLACE " " ";" JAVACFLAGS "${JAVACFLAGS}")
 add_custom_command(OUTPUT ${JAVA_CLASSES_FULL}
   DEPENDS ${JAVA_SOURCES} ${DEPEND_SOURCES}
   COMMAND ${JAVA_COMPILE}
-  ARGS ${JAVACFLAGS} -cp ${CMAKE_CURRENT_SOURCE_DIR}
+  ARGS ${JAVACFLAGS} -sourcepath ${CMAKE_CURRENT_SOURCE_DIR}
     -d ${CMAKE_CURRENT_BINARY_DIR} ${JAVA_SOURCES})
 
 configure_file(${CLASSPATH}/timestamp.in ${CLASSPATH}/timestamp)
@@ -99,6 +151,9 @@ add_custom_command(OUTPUT VncViewer.jar
     com/turbovnc/rdr/*.class
     com/turbovnc/network/*.class
     com/jcraft/jzlib/*.class
+    com/jcraft/jsch/jcraft/*.class
+    com/jcraft/jsch/jce/*.class
+    com/jcraft/jsch/*.class
     com/turbovnc/vncviewer/turbovnc.png
     com/turbovnc/vncviewer/turbovnc.ico
   COMMAND ${CMAKE_COMMAND}

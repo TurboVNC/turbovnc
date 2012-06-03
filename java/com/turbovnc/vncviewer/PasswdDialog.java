@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2011-2012 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
@@ -20,10 +20,14 @@
 
 package com.turbovnc.vncviewer;
 
+import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import com.jcraft.jsch.*;
 
-class PasswdDialog extends Dialog implements KeyListener{
+class PasswdDialog extends Dialog implements KeyListener,
+                                             UserInfo,
+                                             UIKeyboardInteractive {
 
   public PasswdDialog(String title, boolean userDisabled,
     String userName, boolean passwdDisabled) {
@@ -84,8 +88,90 @@ class PasswdDialog extends Dialog implements KeyListener{
     }
   }
 
+  public String getPassword() { 
+    return new String(passwdEntry.getPassword());
+  }
+  public String getPassphrase(){ return null; }
+  public boolean promptPassphrase(String message){ return false; }
+  public boolean promptPassword(String message){
+    setTitle(message);
+    showDialog();
+    if (passwdEntry != null)
+      return true;
+    return false;
+  }
+  public void showMessage(String message){
+    JOptionPane.showMessageDialog(null, message);
+  }
+  public boolean promptYesNo(String str){
+    Object[] options={ "yes", "no" };
+    int foo=JOptionPane.showOptionDialog(null, 
+           str,
+           "Warning", 
+           JOptionPane.DEFAULT_OPTION, 
+           JOptionPane.WARNING_MESSAGE,
+           null, options, options[0]);
+     return foo==0;
+  }
+  public String[] promptKeyboardInteractive(String destination,
+                                            String name,
+                                            String instruction,
+                                            String[] prompt,
+                                            boolean[] echo){
+    Container panel = new JPanel();
+    panel.setLayout(new GridBagLayout());
+
+    GridBagConstraints gbc = 
+      new GridBagConstraints(0,0,1,1,1,1,
+                             GridBagConstraints.NORTHWEST,
+                             GridBagConstraints.NONE,
+                             new Insets(0,0,0,0),0,0);
+    gbc.weightx = 1.0;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridx = 0;
+    panel.add(new JLabel(instruction), gbc);
+    gbc.gridy++;
+
+    gbc.gridwidth = GridBagConstraints.RELATIVE;
+
+    JTextField[] texts=new JTextField[prompt.length];
+    for(int i=0; i<prompt.length; i++){
+      gbc.fill = GridBagConstraints.NONE;
+      gbc.gridx = 0;
+      gbc.weightx = 1;
+      panel.add(new JLabel(prompt[i]),gbc);
+
+      gbc.gridx = 1;
+      gbc.fill = GridBagConstraints.HORIZONTAL;
+      gbc.weighty = 1;
+      if(echo[i]){
+        texts[i]=new JTextField(20);
+      }
+      else{
+        texts[i]=new JPasswordField(20);
+      }
+      panel.add(texts[i], gbc);
+      gbc.gridy++;
+    }
+
+    if(JOptionPane.showConfirmDialog(null, panel, 
+                                     destination+": "+name,
+                                     JOptionPane.OK_CANCEL_OPTION,
+                                     JOptionPane.QUESTION_MESSAGE)
+       ==JOptionPane.OK_OPTION){
+      String[] response=new String[prompt.length];
+      for(int i=0; i<prompt.length; i++){
+        response[i]=texts[i].getText();
+      }
+	return response;
+    }
+    else{
+      return null;  // cancel
+    }
+  }
+
   JLabel userLabel;
   JTextField userEntry;
   JLabel passwdLabel;
-  JTextField passwdEntry;
+  JPasswordField passwdEntry;
 }

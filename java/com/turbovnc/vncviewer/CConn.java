@@ -263,7 +263,7 @@ public class CConn extends CConnection
     if (user != null)
         user.append(dlg.userEntry.getText());
     if (passwd != null)
-      passwd.append(dlg.passwdEntry.getText());
+      passwd.append(dlg.passwdEntry.getPassword());
     return true;
   }
 

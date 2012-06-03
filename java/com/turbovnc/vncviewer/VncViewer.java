@@ -45,8 +45,6 @@ import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 import com.turbovnc.network.*;
 
-//import com.jcraft.jsch.*;
-
 public class VncViewer extends java.applet.Applet implements Runnable
 {
   public static final String about1 = "TurboVNC Viewer";
@@ -56,8 +54,6 @@ public class VncViewer extends java.applet.Applet implements Runnable
                                       "for more information on TurboVNC.";
   public static String version = null;
   public static String build = null;
-
-  private static int SERVER_PORT_OFFSET = 5900;
 
   public static void setLookAndFeel() {
     try {
@@ -122,6 +118,17 @@ public class VncViewer extends java.applet.Applet implements Runnable
       vncServerName.setParam(argv[i]);
     }
 
+    if (via.getValue() != null || tunnel.getValue()) {
+      if (vncServerName.getValue() == null)
+        usage();
+      try {
+        Tunnel.createTunnel(this);
+      } catch (java.lang.Exception e) {
+        System.out.println("Could not create SSH tunnel:\n"+e.toString());
+        System.exit(1);
+      }
+    }
+
   }
 
   public static void usage() {
@@ -149,75 +156,6 @@ public class VncViewer extends java.applet.Applet implements Runnable
     System.err.print(usage);
     System.exit(1);
   }
-
-  /* Tunnelling support. */
-//  private void
-//  interpretViaParam(String gatewayHost, String remoteHost,
-//  		   Integer remotePort, StringParameter vncServerName,
-//  		   Integer localPort)
-//  {
-//    int pos = vncServerName.getValueStr().indexOf(":");
-//    if (pos == -1)
-//      remotePort = new Integer(SERVER_PORT_OFFSET);
-//    else {
-//      int portOffset = SERVER_PORT_OFFSET;
-//      int len;
-//      len =  vncServerName.getValueStr().substring(pos).length();
-//      if (vncServerName.getValueStr().substring(pos).startsWith(":")) {
-//        /* Two colons is an absolute port number, not an offset. */
-//        pos++;
-//        len--;
-//        portOffset = 0;
-//      }
-//      try {
-//        if (len <= 0)
-//          usage();
-//        remotePort = 
-//          new Integer(vncServerName.getValueStr().substring(pos) + portOffset);
-//      } catch (java.lang.NumberFormatException e) {
-//        usage();
-//      }
-//    }
-//  
-//    if (vncServerName != null)
-//      remoteHost = vncServerName.getValueStr();
-//  
-//    gatewayHost = new String(via.getValueStr());
-//    vncServerName.setParam("localhost::"+localPort);
-//  }
-
-//  private void
-//  createTunnel(String gatewayHost, String remoteHost,
-//  	      Integer remotePort, Integer localPort)
-//  {
-//    //char *cmd = getenv ("VNC_VIA_CMD");
-//    //char *percent;
-//    //char lport[10], rport[10];
-//    //sprintf (lport, "%d", localPort);
-//    //sprintf (rport, "%d", remotePort);
-//    //setenv ("G", gatewayHost, 1);
-//    //setenv ("H", remoteHost, 1);
-//    //setenv ("R", rport, 1);
-//    //setenv ("L", lport, 1);
-//    //if (!cmd)
-//      //cmd = "/usr/bin/ssh -f -L \"$L\":\"$H\":\"$R\" \"$G\" sleep 20";
-//    try{
-//      JSch jsch=new JSch();
-//      Session session=jsch.getSession("user", remoteHost, 22);
-//      // username and passphrase will be given via UserInfo interface.
-//      //UserInfo ui=new MyUserInfo();
-//      //session.setUserInfo(ui);
-//      session.connect();
-//
-//      session.setPortForwardingL(localPort, remoteHost, remotePort);
-//    } catch (java.lang.Exception e) {
-//      System.out.println(e);
-//    }
-////    /* Compatibility with TigerVNC's method. */
-////    while ((percent = strchr (cmd, '%')) != NULL)
-////     *percent = '$';
-////    system (cmd);
-//  }
 
   public VncViewer() {
     applet = true;
@@ -299,19 +237,6 @@ public class VncViewer extends java.applet.Applet implements Runnable
 
   public void run() {
     CConn cc = null;
-
-    /* Tunnelling support. */
-//    if (via.getValueStr() != null) {
-//      String gatewayHost = new String("");
-//      String remoteHost = new String("localhost");
-//      Integer localPort = new Integer(TcpSocket.findFreeTcpPort());
-//      Integer remotePort = new Integer(SERVER_PORT_OFFSET);
-//      if (vncServerName.getValueStr() == null)
-//        usage();
-//      interpretViaParam(gatewayHost, remoteHost, remotePort,
-//        vncServerName, localPort);
-//      createTunnel(gatewayHost, remoteHost, remotePort, localPort);
-//    }
 
     if (listenMode.getValue()) {
       int port = 5500;
@@ -576,8 +501,22 @@ public class VncViewer extends java.applet.Applet implements Runnable
   = new AliasParameter("passwd",
   "    Alias for PasswordFile", passwordFile);
 
-//  StringParameter via
-//  = new StringParameter("via", "Gateway to tunnel via", null);
+  StringParameter via
+  = new StringParameter("Via",
+  "    This parameter specifies an SSH server (\"gateway\") through which the VNC\n"+
+  "    connection should be tunneled.  Note that when using the \"Via\" parameter,\n"+
+  "    the VNC server host should be specified from the point of view of the\n"+
+  "    gateway.  For example, specifying Via=gateway_machine Server=localhost:1\n"+
+  "    will connect to display :1 on gateway_machine.  The VNC server must be\n"+
+  "    specified on the command line or in the \"Server\" parameter when using the\n"+
+  "    Via parameter.\n", null);
+
+  BoolParameter tunnel
+  = new BoolParameter("Tunnel",
+  "    Same as Via, except that the gateway is assumed to be the same as the VNC\n"+
+  "    server host, so you do not need to specify it separately.  The VNC server\n"+
+  "    must be specified on the command line or in the \"Server\" parameter when\n"+
+  "    using the Tunnel parameter.", false);
 
   Thread thread;
   Socket sock;
