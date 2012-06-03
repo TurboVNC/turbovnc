@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +22,9 @@ package com.turbovnc.rfb;
 public class Hostname {
 
   public static String getHost(String vncServerName) {
-    int colonPos = vncServerName.indexOf(':');
+    int colonPos = vncServerName.lastIndexOf(':');
+    while (colonPos > 0 && vncServerName.charAt(colonPos - 1) == ':')
+      colonPos--;
     if (colonPos == 0)
       return "localhost";
     if (colonPos == -1)
@@ -30,7 +33,9 @@ public class Hostname {
   }
 
   public static int getPort(String vncServerName) {
-    int colonPos = vncServerName.indexOf(':');
+    int colonPos = vncServerName.lastIndexOf(':');
+    while (colonPos > 0 && vncServerName.charAt(colonPos - 1) == ':')
+      colonPos--;
     if (colonPos == -1 || colonPos == vncServerName.length()-1)
       return 5900;
     if (vncServerName.charAt(colonPos+1) == ':') {
