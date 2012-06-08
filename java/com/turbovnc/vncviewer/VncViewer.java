@@ -339,6 +339,11 @@ public class VncViewer extends java.applet.Applet implements Runnable
   = new BoolParameter("FullScreen",
   "Start the viewer in full-screen mode.", false);
 
+  StringParameter menuKey
+  = new StringParameter("MenuKey",
+  "The key used to display the popup menu", "F8",
+  menukey.getMenuKeyValueStr());
+
   StringParameter scalingFactor
   = new StringParameter("Scale",
   "Reduce or enlarge the remote desktop image.  The value is interpreted as a "+

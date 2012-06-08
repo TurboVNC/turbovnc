@@ -226,8 +226,9 @@ class OptionsDialog extends Dialog implements
     sendClipboard = new JCheckBox("Send clipboard to server");
     sendClipboard.addItemListener(this);
     JLabel menuKeyLabel = new JLabel("Menu Key");
-    String[] menuKeys = 
-      { "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12" };
+    String[] menuKeys = new String[menukey.getMenuKeySymbolCount()]; 
+    for (int i = 0; i < menukey.getMenuKeySymbolCount(); i++)
+      menuKeys[i] = menukey.getMenuKeySymbols()[i].name;
     menuKey  = new JComboBox(menuKeys);
     menuKey.addItemListener(this);
     addGBComponent(viewOnly,InputsPanel,        0, 0, 2, 1, 2, 2, 1, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.LINE_START, new Insets(4,5,0,5));

@@ -95,7 +95,7 @@ public class CConn extends CConnection
       fullColour = false;
     formatChange = false; encodingChange = false;
     fullScreen = viewer.fullScreen.getValue();
-    menuKey = Keysyms.F8;
+    menuKeyCode = menukey.getMenuKeyCode();
     options = new OptionsDialog(this);
     options.initDialog();
     clipboardDialog = new ClipboardDialog(this);
@@ -741,7 +741,7 @@ public class CConn extends CConnection
     options.viewOnly.setSelected(viewer.viewOnly.getValue());
     options.acceptClipboard.setSelected(viewer.acceptClipboard.getValue());
     options.sendClipboard.setSelected(viewer.sendClipboard.getValue());
-    options.menuKey.setSelectedIndex(menuKey-0xFFBE);
+    options.menuKey.setSelectedItem(KeyEvent.getKeyText(menukey.getMenuKeyCode()));
 
     if (state() == RFBSTATE_NORMAL) {
       options.shared.setEnabled(false);
@@ -920,8 +920,8 @@ public class CConn extends CConnection
     }
 
     clipboardDialog.setSendingEnabled(viewer.sendClipboard.getValue());
-    menuKey = (options.menuKey.getSelectedIndex()+0xFFBE);
-    F8Menu.f8.setText("Send F"+(menuKey-Keysyms.F1+1));
+    viewer.menuKey.setParam(menukey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].name);
+    F8Menu.f8.setText("Send "+KeyEvent.getKeyText(menukey.getMenuKeyCode()));
 
     setShared(options.shared.isSelected());
     viewer.useLocalCursor.setParam(options.useLocalCursor.isSelected());
@@ -1255,7 +1255,7 @@ public class CConn extends CConnection
 
   private boolean supportsSyncFence;
 
-  public int menuKey;
+  public int menuKeyCode;
   Viewport viewport;
   private boolean fullColour;
   boolean fullScreen;

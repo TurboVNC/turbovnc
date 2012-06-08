@@ -251,7 +251,6 @@ class DesktopWindow extends JPanel implements
     damageRect(new Rect(x, y, x+w, y+h));
   }
 
-
   // mutex MUST be held when overlapsCursor() is called
   final boolean overlapsCursor(int x, int y, int w, int h) {
     return (x < cursorBackingX + cursorBacking.width() &&
@@ -409,8 +408,7 @@ class DesktopWindow extends JPanel implements
   public void keyReleased(KeyEvent e) {}
   /** Handle the key-pressed event. */
   public void keyPressed(KeyEvent e) {
-    if (e.getKeyCode() == 
-        (KeyEvent.VK_F1+cc.menuKey-Keysyms.F1)) {
+    if (e.getKeyCode() == menukey.getMenuKeyCode()) {
       int sx = (scaleWidthRatio == 1.00) 
         ? lastX : (int)Math.floor(lastX*scaleWidthRatio);
       int sy = (scaleHeightRatio == 1.00) 
