@@ -1,5 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+ * Copyright 2004-2005 Cendio AB.
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright 2012 Brian P. Hinz
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,21 +66,43 @@ public class Configuration {
     return null;
   }
 
-  public static String listParams() {
-    StringBuffer s = new StringBuffer();
-
+  public static void listParams(int width) {
     VoidParameter current = head;
-    while (current != null) {
-      s.append("--> "+current.getName() + "\n    ");
-      if (current.getValues() != null)
-        s.append("Values: " + current.getValues() + " ");
-      if (current.getDefaultStr() != null)
-        s.append("(default = " + current.getDefaultStr() + ")\n");
-      s.append("\n" + current.getDescription() + "\n\n");
-      current = current.next;
-    }
 
-    return s.toString();
+    while (current != null) {
+      String desc = current.getDescription().trim();
+      System.err.print("--> " + current.getName() + "\n    ");
+      if (current.getValues() != null)
+        System.err.print("Values: " + current.getValues() + " ");
+      if (current.getDefaultStr() != null)
+        System.err.print("(default = " + current.getDefaultStr() + ")\n");
+      System.err.print("\n   ");
+
+      int column = 4;
+      while (true) {
+        int s = desc.indexOf(' ');
+        while (desc.charAt(s + 1) == ' ') s++;
+        int wordLen;
+        if (s > -1) wordLen = s;
+        else wordLen = desc.length();
+  
+        if (column + wordLen + 1 > width) {
+          System.err.print("\n   ");
+          column = 4;
+        }
+        System.err.format(" %" + wordLen + "s", desc.substring(0, wordLen));
+        column += wordLen + 1;
+        if (wordLen >= 1 && desc.charAt(wordLen - 1) == '\n') {
+          System.err.print("\n   ");
+          column = 4;
+        }
+
+        if (s == -1) break;
+        desc = desc.substring(wordLen+1);
+      }
+      current = current.next;
+      System.err.print("\n\n");
+    }
   }
 
   public static void readAppletParams(java.applet.Applet applet) {
