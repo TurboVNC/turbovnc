@@ -210,7 +210,7 @@ public class CConn extends CConnection
   public void blockCallback() {
     try {
       synchronized(this) {
-        wait(1);
+        wait(0,50000);
       }
     } catch (java.lang.InterruptedException e) {
       throw new Exception(e.toString());
