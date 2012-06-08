@@ -81,16 +81,16 @@ public class SecurityClient extends Security {
 
   public static StringParameter secTypes 
   = new StringParameter("SecurityTypes",
-  "    A comma-separated list of the VeNCrypt security types that can be used, if\n"+
-  "    the server supports them.  The 12 supported security types (None, VncAuth,\n"+
-  "    Plain, Ident, TLSNone, TLSVnc, TLSPlain, TLSIdent, X509None, X509Vnc,\n"+
-  "    X509Plain, and X509Ident) are combinations of three encryption methods\n"+
-  "    (None, Anonymous TLS, and TLS with X.509 certificates) and four\n"+
-  "    authentication schemes (None, Standard VNC, Plain, and Ident.)  \"Plain\"\n"+
-  "    authenticates using a plain text user name and password, so it is strongly\n"+
-  "    recommended that it only be used with encrypted connections.  \"Ident\"\n"+
-  "    authenticates using only a user name.  The order of this list does not\n"+
-  "    matter, since the server's preferred order is always used.",
+  "A comma-separated list of the VeNCrypt security types that can be used, if "+
+  "the server supports them.  The 12 supported security types (None, VncAuth, "+
+  "Plain, Ident, TLSNone, TLSVnc, TLSPlain, TLSIdent, X509None, X509Vnc, "+
+  "X509Plain, and X509Ident) are combinations of three encryption methods "+
+  "(None, Anonymous TLS, and TLS with X.509 certificates) and four "+
+  "authentication schemes (None, Standard VNC, Plain, and Ident.)  \"Plain\" "+
+  "authenticates using a plain text user name and password, so it is strongly "+
+  "recommended that it only be used with encrypted connections.  \"Ident\" "+
+  "authenticates using only a user name.  The order of this list does not "+
+  "matter, since the server's preferred order is always used.",
   "X509Plain,X509Ident,X509Vnc,X509None,TLSPlain,TLSIdent,TLSVnc,TLSNone,VncAuth,Ident,Plain,None");
 
 }
