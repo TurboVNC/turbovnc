@@ -342,7 +342,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
   StringParameter menuKey
   = new StringParameter("MenuKey",
   "The key used to display the popup menu", "F8",
-  menukey.getMenuKeyValueStr());
+  MenuKey.getMenuKeyValueStr());
 
   StringParameter scalingFactor
   = new StringParameter("Scale",
