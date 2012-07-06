@@ -71,8 +71,6 @@ abstract public class PlatformPixelBuffer extends PixelBuffer
 
   abstract public void imageRect(int x, int y, int w, int h, Object pix);
 
-  abstract public void damageRect(int x, int y, int w, int h);
-
   // setColourMapEntries() changes some of the entries in the colourmap.
   // However these settings won't take effect until updateColourMap() is
   // called.  This is because getting java to recalculate its internal

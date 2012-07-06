@@ -34,14 +34,10 @@ public class BIPixelBuffer extends PlatformPixelBuffer implements ImageObserver
 
   public void setPF(PixelFormat pf) {
     super.setPF(pf);
-    if (source != null)
-      source.newPixels(data, cm, 0, width_);
   }
 
   public void updateColourMap() {
     cm = new IndexColorModel(8, nColours, reds, greens, blues);
-    if (source != null)
-      source.newPixels(data, cm, 0, width_);
   }
   
   // resize() resizes the image, preserving the image data where possible.
@@ -57,12 +53,12 @@ public class BIPixelBuffer extends PlatformPixelBuffer implements ImageObserver
     image = gc.createCompatibleImage(w, h, Transparency.OPAQUE);
     image.setAccelerationPriority(1);
     image.createGraphics();
-    data = new int[width() * height()];
-    source = new MemoryImageSource(w, h, cm, data, 0, w);
-    source.setAnimated(true);
-    source.setFullBufferUpdates(false);
-    source.newPixels(data, cm, 0, width_);
-    sourceImage = tk.createImage(source);
+    WritableRaster wr = image.getRaster();
+    SinglePixelPackedSampleModel sm =
+      (SinglePixelPackedSampleModel)image.getSampleModel();
+    stride_ = sm.getScanlineStride();
+    DataBufferInt db = (DataBufferInt)wr.getDataBuffer();
+    data = db.getData();
   }
 
   public void fillRect(int x, int y, int w, int h, int pix) {
@@ -99,22 +95,12 @@ public class BIPixelBuffer extends PlatformPixelBuffer implements ImageObserver
     } else {
       for (int j = 0; j < h; j++)
         System.arraycopy(pix, (w*j), data, width_ * (y + j) + x, w);
-      damageRect(x, y, w, h);
     }
   }
 
   public void copyRect(int x, int y, int w, int h, int srcX, int srcY) {
     Graphics2D graphics = (Graphics2D)image.getGraphics();
     graphics.copyArea(srcX, srcY, w, h, x - srcX, y - srcY);
-    graphics.dispose();
-  }
-
-  public void damageRect(int x, int y, int w, int h) {
-    source.newPixels(x, y, w, h, true);
-    Graphics2D graphics = (Graphics2D)image.getGraphics();
-    graphics.setClip(x, y, w, h);
-    graphics.drawImage(sourceImage, 0, 0, null);
-    graphics.setClip(0, 0, width(), height());
     graphics.dispose();
   }
 
@@ -141,8 +127,6 @@ public class BIPixelBuffer extends PlatformPixelBuffer implements ImageObserver
   }
 
   BufferedImage image;
-  MemoryImageSource source;
-  Image sourceImage;
   Rectangle clip;
 
   static LogWriter vlog = new LogWriter("BIPixelBuffer");

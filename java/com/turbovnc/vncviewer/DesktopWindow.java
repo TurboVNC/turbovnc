@@ -256,7 +256,6 @@ class DesktopWindow extends JPanel implements
   }
 
   final public void releaseRawPixels(Rect r) {
-    im.damageRect(r.tl.x, r.tl.y, r.width(), r.height());
     damageRect(r);
   }
 
