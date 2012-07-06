@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009 Pierre Ossman for Cendio AB
- * Copyright (C) 2011 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2012 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  * 
  * This is free software; you can redistribute it and/or modify
@@ -174,6 +174,59 @@ public class PixelFormat {
 
         bufferFromPixel(dst, j, p);
         j += bpp/8;
+      }
+    }
+  }
+
+  public void bufferFromRGB(int[] dst, int x, int y, byte[] src, int w,
+                            int stride, int h, ColorModel cm) {
+    int dstPtr = y * stride + x, srcPtr = 0;
+
+    if (is888()) {
+      // Optimised common case
+      int rindex, gindex, bindex;
+
+      if (bigEndian) {
+        rindex = (24 - redShift)/8;
+        gindex = (24 - greenShift)/8;
+        bindex = (24 - blueShift)/8;
+      } else {
+        rindex = redShift/8;
+        gindex = greenShift/8;
+        bindex = blueShift/8;
+      }
+
+      int dstPad = stride - w;
+      while (h > 0) {
+        int dstEndOfRow = dstPtr + w;
+        while (dstPtr < dstEndOfRow) {
+          dst[dstPtr + rindex] = src[srcPtr++];
+          dst[dstPtr + gindex] = src[srcPtr++];
+          dst[dstPtr + bindex] = src[srcPtr++];
+          dstPtr++;
+        }
+        dstPtr += dstPad;
+        h--;
+      }
+    } else {
+      // Generic code
+      int p, r, g, b;
+
+      int dstPad = stride - w;
+      while (h > 0) {
+        int dstEndOfRow = dstPtr + w;
+        while (dstPtr < dstEndOfRow) {
+          r = src[srcPtr++];
+          g = src[srcPtr++];
+          b = src[srcPtr++];
+
+          p = pixelFromRGB(r, g, b, cm);
+
+          bufferFromPixel(dst, dstPtr, p);
+          dstPtr++;
+        }
+        dstPtr += dstPad;
+        h--;
       }
     }
   }

@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman for Cendio AB
- * Copyright (C) 2011 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2012 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  * 
  * This is free software; you can redistribute it and/or modify
@@ -94,6 +94,9 @@ abstract public class CMsgHandler {
   public void fillRect(Rect r, int pix) {}
   public void imageRect(Rect r, Object pixels) {}
   public void copyRect(Rect r, int srcX, int srcY) {}
+
+  abstract public int[] getRawPixelsRW(int[] stride);
+  abstract public void releaseRawPixels(Rect r);
 
   abstract public PixelFormat getPreferredPF();
   abstract public CSecurity getCurrentCSecurity();

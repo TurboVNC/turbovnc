@@ -98,6 +98,11 @@ public class PixelBuffer {
     }
   }
 
+  public int[] getRawPixelsRW(int[] stride) {
+    stride[0] = width_;
+    return data;
+  }
+
   public void maskRect(int x, int y, int w, int h, int[] pix, byte[] mask) {
     int maskBytesPerRow = (w + 7) / 8;
     

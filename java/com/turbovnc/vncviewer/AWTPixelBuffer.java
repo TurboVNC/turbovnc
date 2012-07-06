@@ -1,4 +1,5 @@
 /* Copyright (C) 2012 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,6 +89,10 @@ public class AWTPixelBuffer extends PlatformPixelBuffer
 
   public void copyRect(int x, int y, int w, int h, int srcX, int srcY) {
     super.copyRect(x, y, w, h, srcX, srcY);
+    source.newPixels(x, y, w, h, true);
+  }
+
+  public void damageRect(int x, int y, int w, int h) {
     source.newPixels(x, y, w, h, true);
   }
 

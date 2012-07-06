@@ -1,6 +1,6 @@
 /* Copyright (C) 2000-2003 Constantin Kaplinsky.  All Rights Reserved.
  * Copyright 2004-2005 Cendio AB.
- * Copyright (C) 2011 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2012 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
  *    
  * This is free software; you can redistribute it and/or modify
@@ -26,7 +26,9 @@ import com.turbovnc.rdr.ZlibInStream;
 import java.util.ArrayList;
 import java.io.InputStream;
 import java.awt.image.*;
+import java.util.Arrays;
 import java.awt.*;
+import org.libjpegturbo.turbojpeg.*;
 
 public class TightDecoder extends Decoder {
 
@@ -51,6 +53,22 @@ public class TightDecoder extends Decoder {
     zis = new ZlibInStream[4];
     for (int i = 0; i < 4; i++)
       zis[i] = new ZlibInStream();
+    try {
+      tjd = new TJDecompressor();
+    } catch (java.lang.NoClassDefFoundError e) {
+      vlog.info("WARNING: Could not initialize libjpeg-turbo:");
+      vlog.info("  Class not found: "+e.getMessage());
+      vlog.info("  Using unaccelerated JPEG decompressor.");
+    } catch (java.lang.UnsatisfiedLinkError e) {
+      vlog.info("WARNING: Could not find TurboJPEG JNI library.  If it is in a");
+      vlog.info("  non-standard location, then add -Djava.library.path=<dir>");
+      vlog.info("  to the Java command line to specify its location.");
+      vlog.info("  Using unaccelerated JPEG decompressor.");
+    } catch (java.lang.Exception e) {
+      vlog.info("WARNING: Could not initialize libjpeg-turbo:");
+      vlog.info("  "+e.getMessage());
+      vlog.info("  Using unaccelerated JPEG decompressor.");
+    }
   }
 
   public void readRect(Rect r, CMsgHandler handler) 
@@ -95,7 +113,7 @@ public class TightDecoder extends Decoder {
 
     // "JPEG" compression type.
     if (comp_ctl == rfbTightJpeg) {
-      DECOMPRESS_JPEG_RECT(r, is, handler);
+      decompressJpegRect(r, is, handler);
       return;
     }
 
@@ -166,9 +184,9 @@ public class TightDecoder extends Decoder {
       // Truecolor data.
       if (useGradient) {
         if (bpp == 32 && cutZeros) {
-          FilterGradient24(netbuf, buf, stride, r);
+          filterGradient24(netbuf, buf, stride, r);
         } else {
-          FilterGradient(netbuf, buf, stride, r);
+          filterGradient(netbuf, buf, stride, r);
         }
       } else {
         // Copy
@@ -238,7 +256,8 @@ public class TightDecoder extends Decoder {
     }
   }
 
-  final private void DECOMPRESS_JPEG_RECT(Rect r, InStream is, CMsgHandler handler) 
+  final private void decompressJpegRect(Rect r, InStream is,
+                                        CMsgHandler handler)
   {
     // Read length
     int compressedLen = is.readCompactLength();
@@ -249,6 +268,57 @@ public class TightDecoder extends Decoder {
     byte[] netbuf = new byte[compressedLen];
     is.readBytes(netbuf, 0, compressedLen);
 
+    if (tjd != null) {
+
+      int[] stride = new int[1];
+      int[] data = handler.getRawPixelsRW(stride);
+      int tjpf = TJ.PF_RGB;
+      PixelFormat pf = handler.cp.pf();
+
+      try {
+        tjd.setJPEGImage(netbuf, compressedLen);
+
+        if (pf.is888()) {
+          int redShift, greenShift, blueShift;
+
+          if(pf.bigEndian) {
+            redShift = 24 - pf.redShift;
+            greenShift = 24 - pf.greenShift;
+            blueShift = 24 - pf.blueShift;
+          } else {
+            redShift = pf.redShift;
+            greenShift = pf.greenShift;
+            blueShift = pf.blueShift;
+          }
+
+          if(redShift == 0 && greenShift == 8 && blueShift == 16)
+            tjpf = TJ.PF_RGBX;
+          if(redShift == 16 && greenShift == 8 && blueShift == 0)
+            tjpf = TJ.PF_BGRX;
+          if(redShift == 24 && greenShift == 16 && blueShift == 8)
+            tjpf = TJ.PF_XBGR;
+          if(redShift == 8 && greenShift == 16 && blueShift == 24)
+            tjpf = TJ.PF_XRGB;
+
+          tjd.decompress(data, r.tl.x, r.tl.y, r.width(), stride[0], r.height(),
+                         tjpf, 0);
+        } else {
+          byte[] rgbBuf = new byte[r.width() * r.height() * 3];
+          tjd.decompress(rgbBuf, r.width(), 0, r.height(), TJ.PF_RGB, 0);
+          pf.bufferFromRGB(data, r.tl.x, r.tl.y, rgbBuf, r.width(), stride[0],
+                           r.height(), null);
+        }
+        handler.releaseRawPixels(r);
+        return;
+      } catch (java.lang.Exception e) {
+        throw new Exception(e.getMessage());
+      } catch (java.lang.UnsatisfiedLinkError e) {
+        vlog.info("WARNING: TurboJPEG JNI library is not new enough.");
+        vlog.info("  Using unaccelerated JPEG decompressor.");
+        tjd = null;
+      }
+    }
+
     // Create an Image object from the JPEG data.
     Image jpeg = tk.createImage(netbuf);
     jpeg.setAccelerationPriority(1);
@@ -256,7 +326,7 @@ public class TightDecoder extends Decoder {
     jpeg.flush();
   }
 
-  final private void FilterGradient24(byte[] netbuf, int[] buf, int stride, 
+  final private void filterGradient24(byte[] netbuf, int[] buf, int stride, 
                                       Rect r)
   {
 
@@ -297,7 +367,7 @@ public class TightDecoder extends Decoder {
     }
   }
 
-  final private void FilterGradient(byte[] netbuf, int[] buf, int stride, 
+  final private void filterGradient(byte[] netbuf, int[] buf, int stride, 
                                     Rect r)
   {
 
@@ -352,5 +422,6 @@ public class TightDecoder extends Decoder {
   private PixelFormat serverpf;
   private PixelFormat clientpf;
   static LogWriter vlog = new LogWriter("TightDecoder");
+  private TJDecompressor tjd;
 
 }

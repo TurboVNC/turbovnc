@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2006 Constantin Kaplinsky.  All Rights Reserved.
  * Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
- * Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2010, 2012 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
  * 
  * This is free software; you can redistribute it and/or modify
@@ -249,6 +249,15 @@ class DesktopWindow extends JPanel implements
       hideLocalCursor();
     im.copyRect(x, y, w, h, srcX, srcY);
     damageRect(new Rect(x, y, x+w, y+h));
+  }
+
+  final public int[] getRawPixelsRW(int[] stride) {
+    return im.getRawPixelsRW(stride);
+  }
+
+  final public void releaseRawPixels(Rect r) {
+    im.damageRect(r.tl.x, r.tl.y, r.width(), r.height());
+    damageRect(r);
   }
 
   // mutex MUST be held when overlapsCursor() is called

@@ -456,6 +456,14 @@ public class CConn extends CConnection
     desktop.copyRect(r.tl.x, r.tl.y, r.width(), r.height(), sx, sy);
   }
 
+  public int[] getRawPixelsRW(int[] stride) {
+    return desktop.getRawPixelsRW(stride);
+  }
+
+  public void releaseRawPixels(Rect r) {
+    desktop.releaseRawPixels(r);
+  }
+
   public void setCursor(int width, int height, Point hotspot,
                         int[] data, byte[] mask) {
     desktop.setCursor(width, height, hotspot, data, mask);

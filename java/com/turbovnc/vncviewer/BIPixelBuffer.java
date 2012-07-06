@@ -1,4 +1,5 @@
 /* Copyright (C) 2012 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -98,18 +99,22 @@ public class BIPixelBuffer extends PlatformPixelBuffer implements ImageObserver
     } else {
       for (int j = 0; j < h; j++)
         System.arraycopy(pix, (w*j), data, width_ * (y + j) + x, w);
-      source.newPixels(x, y, w, h, true);
-      Graphics2D graphics = (Graphics2D)image.getGraphics();
-      graphics.setClip(x, y, w, h);
-      graphics.drawImage(sourceImage, 0, 0, null);
-      graphics.setClip(0, 0, width(), height());
-      graphics.dispose();
+      damageRect(x, y, w, h);
     }
   }
 
   public void copyRect(int x, int y, int w, int h, int srcX, int srcY) {
     Graphics2D graphics = (Graphics2D)image.getGraphics();
     graphics.copyArea(srcX, srcY, w, h, x - srcX, y - srcY);
+    graphics.dispose();
+  }
+
+  public void damageRect(int x, int y, int w, int h) {
+    source.newPixels(x, y, w, h, true);
+    Graphics2D graphics = (Graphics2D)image.getGraphics();
+    graphics.setClip(x, y, w, h);
+    graphics.drawImage(sourceImage, 0, 0, null);
+    graphics.setClip(0, 0, width(), height());
     graphics.dispose();
   }
 
@@ -137,7 +142,6 @@ public class BIPixelBuffer extends PlatformPixelBuffer implements ImageObserver
 
   BufferedImage image;
   MemoryImageSource source;
-  int[] data;
   Image sourceImage;
   Rectangle clip;
 
