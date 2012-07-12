@@ -84,6 +84,15 @@ $defaultXStartup
        "      ;;\n".
        "  esac\n".
        "fi\n".
+       "if [ -f /usr/bin/gnome-session ]; then\n".
+       "  for SESSION in \"ubuntu-2d\" \"2d-gnome\"; do\n".
+       "    if [ -f /usr/share/gnome-session/sessions/\$SESSION.session ]; then\n".
+       "      DESKTOP_SESSION=\$SESSION; export DESKTOP_SESSION\n".
+       "      GDMSESSION=\$SESSION; export GDMSESSION\n".
+       "      STARTUP=\"/usr/bin/gnome-session --session=\$SESSION\"; export STARTUP\n".
+       "    fi\n".
+       "  done\n".
+       "fi\n".
        "if [ -x /etc/X11/xinit/xinitrc ]; then\n".
        "  exec /etc/X11/xinit/xinitrc\n".
        "fi\n".
