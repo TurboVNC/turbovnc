@@ -11,6 +11,17 @@ networks.
 
 
 ===============================================================================
+1.1.1
+===============================================================================
+[1]
+Modified the default xstartup.turbovnc script so that it loads the 2D rather
+than the 3D version of the window manager on recent Ubuntu systems.  This
+specifically fixes an issue whereby the Unity window manager in Ubuntu 12.04
+would not display its menus.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 1.1
 ===============================================================================
 [1]
