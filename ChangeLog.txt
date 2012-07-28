@@ -26,6 +26,12 @@ than the 3D version of the window manager on recent Ubuntu systems.  This
 specifically fixes an issue whereby the Unity window manager in Ubuntu 12.04
 would not display its menus.
 -------------------------------------------------------------------------------
+[2]
+Added a command line switch to Xvnc that can be used to disable the X RENDER
+extension.  This temporarily works around problems with recent applications
+that assume functionality from X RENDER 0.10 or later without checking the
+version of the extension (TurboVNC 1.1.x only implements 0.8.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
