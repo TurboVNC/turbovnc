@@ -2,6 +2,7 @@
 /***********************************************************
 
 Copyright 1987, 1998  The Open Group
+Copyright 2012  D. R. Commander
 
 Permission to use, copy, modify, distribute, and sell this software and its
 documentation for any purpose is hereby granted without fee, provided that
@@ -58,6 +59,9 @@ SOFTWARE.
 extern Bool noTestExtensions;
 #ifdef XKB
 extern Bool noXkbExtension;
+#endif
+#ifdef RENDER
+extern Bool noRenderExtension;
 #endif
 
 #if NeedFunctionPrototypes
@@ -282,7 +286,7 @@ InitExtensions(argc, argv)
 #endif
 #endif
 #ifdef RENDER
-    RenderExtensionInit();
+    if (!noRenderExtension) RenderExtensionInit();
 #endif
     vncExtensionInit();
 }

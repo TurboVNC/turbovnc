@@ -269,6 +269,9 @@ use a gray map of 13 color cells for the X render extension.
 .I color
 use a color cube of at most 4*4*4 colors (that is 64 color cells).
 .RE
+.TP 8
+.B \-norender
+disables the render extension altogether.
 .SH XDMCP OPTIONS
 X servers that support XDMCP have the following options.
 See the \fIX Display Manager Control Protocol\fP specification for more
