@@ -1,5 +1,5 @@
 /* $XConsortium: fbcmap.c,v 4.19 94/04/17 20:28:46 dpw Exp $ */
-/* $XFree86: xc/programs/Xserver/fb/fbcmap.c,v 1.6 2001/10/28 03:33:08 tsi Exp $ */
+/* $XFree86: xc/programs/Xserver/fb/fbcmap.c,v 1.5 2000/09/20 00:09:13 keithp Exp $ */
 /************************************************************
 Copyright 1987 by Sun Microsystems, Inc. Mountain View, CA.
 
@@ -30,8 +30,12 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ********************************************************/
 
 
-#include "X.h"
-#include "Xproto.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
+#include <X11/Xproto.h>
 #include "scrnintstr.h"
 #include "colormapst.h"
 #include "resource.h"

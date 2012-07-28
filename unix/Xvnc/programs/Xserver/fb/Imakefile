@@ -1,7 +1,17 @@
-XCOMM $XFree86: xc/programs/Xserver/fb/Imakefile,v 1.17 2002/06/02 01:21:17 dawes Exp $
+XCOMM $XFree86: xc/programs/Xserver/fb/Imakefile,v 1.16 2002/05/31 16:12:17 dawes Exp $
 XCOMM 
 XCOMM 
 XCOMM Id: Imakefile,v 1.1 1999/11/02 03:54:44 keithp Exp $
+
+MMXOPTIONS= -mmmx -msse -Winline --param inline-unit-growth=10000 \
+	--param large-function-growth=10000 -DUSE_MMX
+USEMMXOPTIONS= -DUSE_MMX
+#if defined(i386Architecture) || defined(AMD64Architecture)
+SpecialCObjectRule(fbmmx,fbmmx.c,$(MMXOPTIONS))
+SpecialCObjectRule(fbpict,fbpict.c,$(USEMMXOPTIONS))
+SpecialCObjectRule(fbfill,fbfill.c,$(USEMMXOPTIONS))
+SpecialCObjectRule(fbcopy,fbcopy.c,$(USEMMXOPTIONS))
+#endif
 
 #if DoLoadableServer
 #if !BuildModuleInSubdir
@@ -18,10 +28,15 @@ DEFINES=-DFB_OLD_GC -DFB_OLD_SCREEN
 #ifdef FbNoPixelAddrCode
 DEFINES=-DFBNOPIXADDR -DFBNO24BIT
 #endif
-  
+
 #if defined(IHaveModules)
 XFMODSRC = fbmodule.c
 XFMODOBJ = fbmodule.o
+#endif
+
+#if BuildRender
+RENDERSRC = fbcompose.c
+RENDEROBJ = fbcompose.o
 #endif
 
 SRCS =	$(XFMODSRC) \
@@ -31,8 +46,9 @@ SRCS =	$(XFMODSRC) \
 	fbbltone.c \
 	fbbstore.c \
 	fbcmap.c \
-	fbcompose.c \
+	$(RENDERSRC) \
 	fbcopy.c \
+	fbedge.c \
 	fbfill.c \
 	fbfillrect.c \
 	fbfillsp.c \
@@ -55,7 +71,8 @@ SRCS =	$(XFMODSRC) \
 	fbutil.c \
 	fbwindow.c \
 	fb24_32.c \
-	fbpict.c
+	fbpict.c \
+	fbmmx.c
 
 OBJS =	$(XFMODOBJ) \
 	fbarc.o \
@@ -65,8 +82,9 @@ OBJS =	$(XFMODOBJ) \
 	fbbltone.o \
 	fbbstore.o \
 	fbcmap.o \
-	fbcompose.o \
+	$(RENDEROBJ) \
 	fbcopy.o \
+	fbedge.o \
 	fbfill.o \
 	fbfillrect.o \
 	fbfillsp.o \
@@ -89,8 +107,9 @@ OBJS =	$(XFMODOBJ) \
 	fbutil.o \
 	fbwindow.o \
 	fb24_32.o \
-	fbpict.o
-	
+	fbpict.o \
+	fbmmx.o
+
    INCLUDES = -I$(SERVERSRC)/fb -I$(SERVERSRC)/mi -I$(SERVERSRC)/include \
 	      -I$(XINCLUDESRC) \
 	      -I$(FONTINCSRC) -I$(XF86SRC)/common $(EXTRAINCLUDES) \
@@ -130,7 +149,9 @@ LinkSourceFile(fbblt.c,LinkDirectory)
 LinkSourceFile(fbbltone.c,LinkDirectory)
 LinkSourceFile(fbbstore.c,LinkDirectory)
 LinkSourceFile(fbcmap.c,LinkDirectory)
+#if BuildRender
 LinkSourceFile(fbcompose.c,LinkDirectory)
+#endif
 LinkSourceFile(fbcopy.c,LinkDirectory)
 LinkSourceFile(fbfill.c,LinkDirectory)
 LinkSourceFile(fbfillrect.c,LinkDirectory)
@@ -155,6 +176,7 @@ LinkSourceFile(fbtile.c,LinkDirectory)
 LinkSourceFile(fbtrap.c,LinkDirectory)
 LinkSourceFile(fbutil.c,LinkDirectory)
 LinkSourceFile(fbwindow.c,LinkDirectory)
+LinkSourceFile(fbmmx.c,LinkDirectory)
 #endif
 
 InstallDriverSDKLibraryModule(fb,$(DRIVERSDKMODULEDIR),.)

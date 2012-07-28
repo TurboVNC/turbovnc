@@ -1,7 +1,7 @@
 /*
- * $XFree86: xc/programs/Xserver/fb/fb.h,v 1.37 2003/11/03 05:11:00 tsi Exp $
+ * $XFree86: xc/programs/Xserver/fb/fb.h,v 1.36tsi Exp $
  *
- * Copyright © 1998 Keith Packard
+ * Copyright Â© 1998 Keith Packard
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -22,10 +22,12 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+/* $XdotOrg: xc/programs/Xserver/fb/fb.h,v 1.12 2005/08/24 11:18:33 daniels Exp $ */
+
 #ifndef _FB_H_
 #define _FB_H_
 
-#include "X.h"
+#include <X11/X.h>
 #include "scrnintstr.h"
 #include "pixmap.h"
 #include "pixmapstr.h"
@@ -103,9 +105,10 @@ typedef unsigned __int64    FbBits;
 # else
 #  if defined(__alpha__) || defined(__alpha) || \
       defined(ia64) || defined(__ia64__) || \
-      defined(__sparc64__) || \
+      defined(__sparc64__) || defined(_LP64) || \
       defined(__s390x__) || \
-      defined(AMD64) || defined (__AMD64__) || \
+      defined(amd64) || defined (__amd64__) || \
+      defined (__powerpc64__) || \
       (defined(sgi) && (_MIPS_SZLONG == 64))
 typedef unsigned long	    FbBits;
 #  else
@@ -562,9 +565,13 @@ extern void fbSetBits (FbStip *bits, int stride, FbStip data);
     }							    \
 }
 
+/* XXX fb*PrivateIndex should be static, but it breaks the ABI */
+
 extern int	fbGCPrivateIndex;
+extern int	fbGetGCPrivateIndex(void);
 #ifndef FB_NO_WINDOW_PIXMAPS
 extern int	fbWinPrivateIndex;
+extern int	fbGetWinPrivateIndex(void);
 #endif
 extern const GCOps	fbGCOps;
 extern const GCFuncs	fbGCFuncs;
@@ -575,6 +582,7 @@ extern const GCFuncs	fbGCFuncs;
 #endif
 
 #ifdef FB_OLD_SCREEN
+# define FB_OLD_MISCREENINIT	/* miScreenInit requires 14 args, not 13 */
 extern WindowPtr    *WindowTable;
 #endif
 
@@ -584,6 +592,7 @@ extern WindowPtr    *WindowTable;
 
 #ifdef FB_SCREEN_PRIVATE
 extern int	fbScreenPrivateIndex;
+extern int	fbGetScreenPrivateIndex(void);
 
 /* private field of a screen */
 typedef struct {
@@ -592,7 +601,7 @@ typedef struct {
 } FbScreenPrivRec, *FbScreenPrivPtr;
 
 #define fbGetScreenPrivate(pScreen) ((FbScreenPrivPtr) \
-				     (pScreen)->devPrivates[fbScreenPrivateIndex].ptr)
+				     (pScreen)->devPrivates[fbGetScreenPrivateIndex()].ptr)
 #endif
 
 /* private field of GC */
@@ -616,7 +625,7 @@ typedef struct {
 } FbGCPrivRec, *FbGCPrivPtr;
 
 #define fbGetGCPrivate(pGC)	((FbGCPrivPtr)\
-	(pGC)->devPrivates[fbGCPrivateIndex].ptr)
+	(pGC)->devPrivates[fbGetGCPrivateIndex()].ptr)
 
 #ifdef FB_OLD_GC
 #define fbGetCompositeClip(pGC) (fbGetGCPrivate(pGC)->pCompositeClip)
@@ -635,41 +644,57 @@ typedef struct {
 #define fbGetWindowPixmap(d)	fbGetScreenPixmap(((DrawablePtr) (d))->pScreen)
 #else
 #define fbGetWindowPixmap(pWin)	((PixmapPtr)\
-	((WindowPtr) (pWin))->devPrivates[fbWinPrivateIndex].ptr)
+	((WindowPtr) (pWin))->devPrivates[fbGetWinPrivateIndex()].ptr)
 #endif
 
-#ifdef __DARWIN__
-#define __fbPixOriginX(pPix)	((pPix)->drawable.x)
-#define __fbPixOriginY(pPix)	((pPix)->drawable.y)
+#ifdef ROOTLESS
+#define __fbPixDrawableX(pPix)	((pPix)->drawable.x)
+#define __fbPixDrawableY(pPix)	((pPix)->drawable.y)
 #else
-#define __fbPixOriginX(pPix)	0
-#define __fbPixOriginY(pPix)	0
+#define __fbPixDrawableX(pPix)	0
+#define __fbPixDrawableY(pPix)	0
 #endif
+
+#ifdef COMPOSITE
+#define __fbPixOffXWin(pPix)	(__fbPixDrawableX(pPix) - (pPix)->screen_x)
+#define __fbPixOffYWin(pPix)	(__fbPixDrawableY(pPix) - (pPix)->screen_y)
+#else
+#define __fbPixOffXWin(pPix)	(__fbPixDrawableX(pPix))
+#define __fbPixOffYWin(pPix)	(__fbPixDrawableY(pPix))
+#endif
+#define __fbPixOffXPix(pPix)	(__fbPixDrawableX(pPix))
+#define __fbPixOffYPix(pPix)	(__fbPixDrawableY(pPix))
 
 #define fbGetDrawable(pDrawable, pointer, stride, bpp, xoff, yoff) { \
     PixmapPtr   _pPix; \
-    if ((pDrawable)->type != DRAWABLE_PIXMAP) \
+    if ((pDrawable)->type != DRAWABLE_PIXMAP) { \
 	_pPix = fbGetWindowPixmap(pDrawable); \
-    else \
+	(xoff) = __fbPixOffXWin(_pPix); \
+	(yoff) = __fbPixOffYWin(_pPix); \
+    } else { \
 	_pPix = (PixmapPtr) (pDrawable); \
+	(xoff) = __fbPixOffXPix(_pPix); \
+	(yoff) = __fbPixOffYPix(_pPix); \
+    } \
     (pointer) = (FbBits *) _pPix->devPrivate.ptr; \
     (stride) = ((int) _pPix->devKind) / sizeof (FbBits); (void)(stride); \
     (bpp) = _pPix->drawable.bitsPerPixel;  (void)(bpp); \
-    (xoff) = __fbPixOriginX(_pPix); (void)(xoff); \
-    (yoff) = __fbPixOriginY(_pPix); (void)(yoff); \
 }
 
 #define fbGetStipDrawable(pDrawable, pointer, stride, bpp, xoff, yoff) { \
     PixmapPtr   _pPix; \
-    if ((pDrawable)->type != DRAWABLE_PIXMAP) \
+    if ((pDrawable)->type != DRAWABLE_PIXMAP) { \
 	_pPix = fbGetWindowPixmap(pDrawable); \
-    else \
+	(xoff) = __fbPixOffXWin(_pPix); \
+	(yoff) = __fbPixOffYWin(_pPix); \
+    } else { \
 	_pPix = (PixmapPtr) (pDrawable); \
+	(xoff) = __fbPixOffXPix(_pPix); \
+	(yoff) = __fbPixOffYPix(_pPix); \
+    } \
     (pointer) = (FbStip *) _pPix->devPrivate.ptr; \
     (stride) = ((int) _pPix->devKind) / sizeof (FbStip); (void)(stride); \
     (bpp) = _pPix->drawable.bitsPerPixel; (void)(bpp); \
-    (xoff) = __fbPixOriginX(_pPix); (void)(xoff); \
-    (yoff) = __fbPixOriginY(_pPix); (void)(yoff); \
 }
 
 /*
@@ -827,6 +852,8 @@ fbDots8 (FbBits	    *dst,
 	 BoxPtr	    pBox,
 	 xPoint	    *pts,
 	 int	    npt,
+	 int	    xorg,
+	 int	    yorg,
 	 int	    xoff,
 	 int	    yoff,
 	 FbBits	    and,
@@ -899,6 +926,8 @@ fbDots16(FbBits	    *dst,
 	 BoxPtr	    pBox,
 	 xPoint	    *pts,
 	 int	    npt,
+	 int	    xorg,
+	 int	    yorg,
 	 int	    xoff,
 	 int	    yoff,
 	 FbBits	    and,
@@ -972,6 +1001,8 @@ fbDots24(FbBits	    *dst,
 	 BoxPtr	    pBox,
 	 xPoint	    *pts,
 	 int	    npt,
+	 int	    xorg,
+	 int	    yorg,
 	 int	    xoff,
 	 int	    yoff,
 	 FbBits	    and,
@@ -1045,6 +1076,8 @@ fbDots32(FbBits	    *dst,
 	 BoxPtr	    pBox,
 	 xPoint	    *pts,
 	 int	    npt,
+	 int	    xorg,
+	 int	    yorg,
 	 int	    xoff,
 	 int	    yoff,
 	 FbBits	    and,
@@ -1591,6 +1624,8 @@ fbDots (FbBits	    *dstOrig,
 	BoxPtr	    pBox,
 	xPoint	    *pts,
 	int	    npt,
+	int	    xorg,
+	int	    yorg,
 	int	    xoff,
 	int	    yoff,
 	FbBits	    andOrig,

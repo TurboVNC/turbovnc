@@ -8,6 +8,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -1917,7 +1918,7 @@ rfbSpritePictureOverlap (PicturePtr  pPict,
 			CARD16	    w,
 			CARD16	    h)
 {
-    if (pPict->pDrawable->type == DRAWABLE_WINDOW)
+    if (pPict->pDrawable && pPict->pDrawable->type == DRAWABLE_WINDOW)
     {
 	WindowPtr		pWin = (WindowPtr) (pPict->pDrawable);
 	rfbSpriteScreenPtr	pScreenPriv = (rfbSpriteScreenPtr)

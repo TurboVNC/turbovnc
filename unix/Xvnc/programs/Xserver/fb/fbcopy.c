@@ -1,7 +1,7 @@
 /*
  * Id: fbcopy.c,v 1.1 1999/11/02 03:54:45 keithp Exp $
  *
- * Copyright © 1998 Keith Packard
+ * Copyright Â© 1998 Keith Packard
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -23,10 +23,14 @@
  */
 /* $XFree86: xc/programs/Xserver/fb/fbcopy.c,v 1.13 2003/11/10 18:21:47 tsi Exp $ */
 
-#include "fb.h"
-#ifdef IN_MODULE
-#include "xf86_ansic.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
 #endif
+
+#include <stdlib.h>
+
+#include "fb.h"
+#include "fbmmx.h"
 
 void
 fbCopyNtoN (DrawablePtr	pSrcDrawable,
@@ -54,28 +58,52 @@ fbCopyNtoN (DrawablePtr	pSrcDrawable,
     
     fbGetDrawable (pSrcDrawable, src, srcStride, srcBpp, srcXoff, srcYoff);
     fbGetDrawable (pDstDrawable, dst, dstStride, dstBpp, dstXoff, dstYoff);
-    
+
     while (nbox--)
     {
+#ifdef USE_MMX
+	if (pm == FB_ALLONES && alu == GXcopy && !reverse &&
+	    !upsidedown && fbHaveMMX())
+	{
+	    if (!fbCopyAreammx (pSrcDrawable,
+				pDstDrawable,
+				
+				(pbox->x1 + dx),
+				(pbox->y1 + dy),
+				
+				(pbox->x1),
+				(pbox->y1),
+				
+				(pbox->x2 - pbox->x1),
+				(pbox->y2 - pbox->y1)))
+		goto fallback;
+	    else
+		goto next;
+	}
+    fallback:
+#endif
 	fbBlt (src + (pbox->y1 + dy + srcYoff) * srcStride,
 	       srcStride,
 	       (pbox->x1 + dx + srcXoff) * srcBpp,
-    
+	       
 	       dst + (pbox->y1 + dstYoff) * dstStride,
 	       dstStride,
 	       (pbox->x1 + dstXoff) * dstBpp,
-    
+	       
 	       (pbox->x2 - pbox->x1) * dstBpp,
 	       (pbox->y2 - pbox->y1),
-    
+	       
 	       alu,
 	       pm,
 	       dstBpp,
-    
+	       
 	       reverse,
 	       upsidedown);
+#ifdef USE_MMX
+    next:
+#endif
 	pbox++;
-    }
+    }    
 }
 
 void
@@ -398,7 +426,10 @@ fbDoCopy (DrawablePtr	pSrcDrawable,
     int		dx;
     int		dy;
     int		numRects;
-    BoxRec	box;
+    int         box_x1;
+    int         box_y1;
+    int         box_x2;
+    int         box_y2;
     Bool	fastSrc = FALSE;    /* for fast clipping with pixmap source */
     Bool	fastDst = FALSE;    /* for fast clipping with one rect dest */
     Bool	fastExpose = FALSE; /* for fast exposures with pixmap source */
@@ -466,10 +497,10 @@ fbDoCopy (DrawablePtr	pSrcDrawable,
     xOut += pDstDrawable->x;
     yOut += pDstDrawable->y;
 
-    box.x1 = xIn;
-    box.y1 = yIn;
-    box.x2 = xIn + widthSrc;
-    box.y2 = yIn + heightSrc;
+    box_x1 = xIn;
+    box_y1 = yIn;
+    box_x2 = xIn + widthSrc;
+    box_y2 = yIn + heightSrc;
 
     dx = xIn - xOut;
     dy = yIn - yOut;
@@ -484,32 +515,32 @@ fbDoCopy (DrawablePtr	pSrcDrawable,
 	 * clip the source; if regions extend beyond the source size,
  	 * make sure exposure events get sent
 	 */
-	if (box.x1 < pSrcDrawable->x)
+	if (box_x1 < pSrcDrawable->x)
 	{
-	    box.x1 = pSrcDrawable->x;
+	    box_x1 = pSrcDrawable->x;
 	    fastExpose = FALSE;
 	}
-	if (box.y1 < pSrcDrawable->y)
+	if (box_y1 < pSrcDrawable->y)
 	{
-	    box.y1 = pSrcDrawable->y;
+	    box_y1 = pSrcDrawable->y;
 	    fastExpose = FALSE;
 	}
-	if (box.x2 > pSrcDrawable->x + (int) pSrcDrawable->width)
+	if (box_x2 > pSrcDrawable->x + (int) pSrcDrawable->width)
 	{
-	    box.x2 = pSrcDrawable->x + (int) pSrcDrawable->width;
+	    box_x2 = pSrcDrawable->x + (int) pSrcDrawable->width;
 	    fastExpose = FALSE;
 	}
-	if (box.y2 > pSrcDrawable->y + (int) pSrcDrawable->height)
+	if (box_y2 > pSrcDrawable->y + (int) pSrcDrawable->height)
 	{
-	    box.y2 = pSrcDrawable->y + (int) pSrcDrawable->height;
+	    box_y2 = pSrcDrawable->y + (int) pSrcDrawable->height;
 	    fastExpose = FALSE;
 	}
 	
 	/* Translate and clip the dst to the destination composite clip */
-        box.x1 -= dx;
-        box.x2 -= dx;
-        box.y1 -= dy;
-        box.y2 -= dy;
+        box_x1 -= dx;
+        box_x2 -= dx;
+        box_y1 -= dy;
+        box_y2 -= dy;
 
 	/* If the destination composite clip is one rectangle we can
 	   do the clip directly.  Otherwise we have to create a full
@@ -520,21 +551,26 @@ fbDoCopy (DrawablePtr	pSrcDrawable,
         {
 	    BoxPtr pBox = REGION_RECTS(cclip);
 
-	    if (box.x1 < pBox->x1) box.x1 = pBox->x1;
-	    if (box.x2 > pBox->x2) box.x2 = pBox->x2;
-	    if (box.y1 < pBox->y1) box.y1 = pBox->y1;
-	    if (box.y2 > pBox->y2) box.y2 = pBox->y2;
+	    if (box_x1 < pBox->x1) box_x1 = pBox->x1;
+	    if (box_x2 > pBox->x2) box_x2 = pBox->x2;
+	    if (box_y1 < pBox->y1) box_y1 = pBox->y1;
+	    if (box_y2 > pBox->y2) box_y2 = pBox->y2;
 	    fastDst = TRUE;
 	}
     }
     
     /* Check to see if the region is empty */
-    if (box.x1 >= box.x2 || box.y1 >= box.y2)
+    if (box_x1 >= box_x2 || box_y1 >= box_y2)
     {
 	REGION_NULL(pGC->pScreen, &rgnDst);
     }
     else
     {
+        BoxRec	box;
+	box.x1 = box_x1;
+	box.y1 = box_y1;
+	box.x2 = box_x2;
+	box.y2 = box_y2;
 	REGION_INIT(pGC->pScreen, &rgnDst, &box, 1);
     }
     
@@ -586,7 +622,7 @@ fbCopyArea (DrawablePtr	pSrcDrawable,
 	    int		yOut)
 {
     fbCopyProc	copy;
-    
+
 #ifdef FB_24_32BIT
     if (pSrcDrawable->bitsPerPixel != pDstDrawable->bitsPerPixel)
 	copy = fb24_32CopyMtoN;

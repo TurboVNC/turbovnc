@@ -1,7 +1,7 @@
 /*
  * $XFree86: xc/programs/Xserver/fb/fboverlay.c,v 1.7 2003/11/10 18:21:47 tsi Exp $
  *
- * Copyright © 2000 SuSE, Inc.
+ * Copyright Â© 2000 SuSE, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -23,11 +23,27 @@
  * Author:  Keith Packard, SuSE, Inc.
  */
 
+/* $XdotOrg: xserver/xorg/fb/fboverlay.c,v 1.7 2005/07/03 07:01:23 daniels Exp $ */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <stdlib.h>
+
 #include "fb.h"
 #include "fboverlay.h"
+#ifdef MITSHM
+#include "XShm.h"
+#endif
 
 int	fbOverlayGeneration;
 int	fbOverlayScreenPrivateIndex = -1;
+
+int fbOverlayGetScreenPrivateIndex(void)
+{
+    return fbOverlayScreenPrivateIndex;
+}
 
 /*
  * Replace this if you want something supporting
@@ -402,7 +418,7 @@ fbOverlayFinishScreenInit(ScreenPtr	pScreen,
     if (! miScreenInit(pScreen, 0, xsize, ysize, dpix, dpiy, 0,
 			depth1, ndepths, depths,
 			defaultVisual, nvisuals, visuals
-#ifdef FB_OLD_SCREEN
+#ifdef FB_OLD_MISCREENINIT
 		       , (miBSFuncPtr) 0
 #endif
 		       ))

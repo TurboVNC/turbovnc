@@ -1,7 +1,7 @@
 /*
- * $XFree86: xc/programs/Xserver/render/picture.h,v 1.21 2003/11/03 05:12:01 tsi Exp $
+ * $XFree86: xc/programs/Xserver/render/picture.h,v 1.20tsi Exp $
  *
- * Copyright © 2000 SuSE, Inc.
+ * Copyright Â© 2000 SuSE, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -86,9 +86,9 @@ typedef struct _Picture		*PicturePtr;
 #define PICT_a1b5g5r5	PICT_FORMAT(16,PICT_TYPE_ABGR,1,5,5,5)
 #define PICT_x1b5g5r5	PICT_FORMAT(16,PICT_TYPE_ABGR,0,5,5,5)
 #define PICT_a4r4g4b4	PICT_FORMAT(16,PICT_TYPE_ARGB,4,4,4,4)
-#define PICT_x4r4g4b4	PICT_FORMAT(16,PICT_TYPE_ARGB,4,4,4,4)
-#define PICT_a4b4g4r4	PICT_FORMAT(16,PICT_TYPE_ARGB,4,4,4,4)
-#define PICT_x4b4g4r4	PICT_FORMAT(16,PICT_TYPE_ARGB,4,4,4,4)
+#define PICT_x4r4g4b4	PICT_FORMAT(16,PICT_TYPE_ARGB,0,4,4,4)
+#define PICT_a4b4g4r4	PICT_FORMAT(16,PICT_TYPE_ABGR,4,4,4,4)
+#define PICT_x4b4g4r4	PICT_FORMAT(16,PICT_TYPE_ABGR,0,4,4,4)
 
 /* 8bpp formats */
 #define PICT_a8		PICT_FORMAT(8,PICT_TYPE_A,8,0,0,0)
@@ -99,6 +99,15 @@ typedef struct _Picture		*PicturePtr;
 
 #define PICT_c8		PICT_FORMAT(8,PICT_TYPE_COLOR,0,0,0,0)
 #define PICT_g8		PICT_FORMAT(8,PICT_TYPE_GRAY,0,0,0,0)
+
+#define PICT_x4a4	PICT_FORMAT(8,PICT_TYPE_A,4,0,0,0)
+#define PICT_x4r1g2b1	PICT_FORMAT(8,PICT_TYPE_ARGB,0,1,2,1)
+#define PICT_x4b1g2r1	PICT_FORMAT(8,PICT_TYPE_ABGR,0,1,2,1)
+#define PICT_x4a1r1g1b1	PICT_FORMAT(8,PICT_TYPE_ARGB,1,1,1,1)
+#define PICT_x4a1b1g1r1	PICT_FORMAT(8,PICT_TYPE_ABGR,1,1,1,1)
+				    
+#define PICT_x4c4	PICT_FORMAT(8,PICT_TYPE_COLOR,0,0,0,0)
+#define PICT_x4g4	PICT_FORMAT(8,PICT_TYPE_GRAY,0,0,0,0)
 
 /* 4bpp formats */
 #define PICT_a4		PICT_FORMAT(4,PICT_TYPE_A,4,0,0,0)
@@ -160,9 +169,12 @@ extern int  PictureCmapPolicy;
 
 int	PictureParseCmapPolicy (const char *name);
 
+extern int	RenderErrBase;
+extern int	RenderClientPrivateIndex;
+
 /* Fixed point updates from Carl Worth, USC, Information Sciences Institute */
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(__GNUC__)
 typedef __int64		xFixed_32_32;
 #else
 #  if defined (_LP64) || \
@@ -170,7 +182,7 @@ typedef __int64		xFixed_32_32;
       defined(ia64) || defined(__ia64__) || \
       defined(__sparc64__) || \
       defined(__s390x__) || \
-      defined(AMD64) || defined (__AMD64__) || \
+      defined(amd64) || defined (__amd64__) || \
       (defined(sgi) && (_MIPS_SZLONG == 64))
 typedef long		xFixed_32_32;
 # else
@@ -182,6 +194,11 @@ __extension__
 typedef long long int	xFixed_32_32;
 # endif
 #endif
+
+typedef xFixed_32_32	xFixed_48_16;
+
+#define MAX_FIXED_48_16	    ((xFixed_48_16) 0x7fffffff)
+#define MIN_FIXED_48_16	    (-((xFixed_48_16) 1 << 31))
 
 typedef CARD32		xFixed_1_31;
 typedef CARD32		xFixed_1_16;

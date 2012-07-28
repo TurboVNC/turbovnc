@@ -1,7 +1,8 @@
+/* $XdotOrg: xserver/xorg/fb/fbwindow.c,v 1.9 2005/10/02 08:28:26 anholt Exp $ */
 /*
  * Id: fbwindow.c,v 1.1 1999/11/02 03:54:45 keithp Exp $
  *
- * Copyright © 1998 Keith Packard
+ * Copyright Â© 1998 Keith Packard
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -21,12 +22,15 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-/* $XFree86: xc/programs/Xserver/fb/fbwindow.c,v 1.11 2003/11/10 18:21:47 tsi Exp $ */
+/* $XFree86: xc/programs/Xserver/fb/fbwindow.c,v 1.10tsi Exp $ */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <stdlib.h>
 
 #include "fb.h"
-#ifdef IN_MODULE
-#include "xf86_ansic.h"
-#endif
 
 Bool
 fbCreateWindow(WindowPtr pWin)
@@ -121,9 +125,9 @@ fbCopyWindow(WindowPtr	    pWin,
 {
     RegionRec	rgnDst;
     int		dx, dy;
-    WindowPtr	pwinRoot;
 
-    pwinRoot = WindowTable[pWin->drawable.pScreen->myNum];
+    PixmapPtr	pPixmap = fbGetWindowPixmap (pWin);
+    DrawablePtr	pDrawable = &pPixmap->drawable;
 
     dx = ptOldOrg.x - pWin->drawable.x;
     dy = ptOldOrg.y - pWin->drawable.y;
@@ -133,7 +137,13 @@ fbCopyWindow(WindowPtr	    pWin,
     
     REGION_INTERSECT(pWin->drawable.pScreen, &rgnDst, &pWin->borderClip, prgnSrc);
 
-    fbCopyRegion ((DrawablePtr)pwinRoot, (DrawablePtr)pwinRoot,
+#ifdef COMPOSITE
+    if (pPixmap->screen_x || pPixmap->screen_y)
+	REGION_TRANSLATE (pWin->drawable.pScreen, &rgnDst, 
+			  -pPixmap->screen_x, -pPixmap->screen_y);
+#endif
+
+    fbCopyRegion (pDrawable, pDrawable,
 		  0,
 		  &rgnDst, dx, dy, fbCopyWindowProc, 0, 0);
     
@@ -280,7 +290,7 @@ fbFillRegionTiled (DrawablePtr	pDrawable,
 		FB_ALLONES,
 		dstBpp,
 		xRot * dstBpp,
-		yRot - pbox->y1);
+		yRot - (pbox->y1 + dstYoff));
 	pbox++;
     }
 }

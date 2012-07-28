@@ -1,7 +1,7 @@
 /*
- * $XFree86: xc/programs/Xserver/render/miglyph.c,v 1.6 2000/12/05 03:13:31 keithp Exp $
+ * $XFree86: xc/programs/Xserver/render/miglyph.c,v 1.4 2000/11/20 07:13:13 keithp Exp $
  *
- * Copyright © 2000 SuSE, Inc.
+ * Copyright Â© 2000 SuSE, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -23,6 +23,10 @@
  * Author:  Keith Packard, SuSE, Inc.
  */
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #include "scrnintstr.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"
@@ -31,7 +35,20 @@
 #include "picturestr.h"
 #include "mipict.h"
 
+Bool
+miRealizeGlyph (ScreenPtr pScreen,
+		GlyphPtr  glyph)
+{
+    return TRUE;
+}
+
 void
+miUnrealizeGlyph (ScreenPtr pScreen,
+		  GlyphPtr  glyph)
+{
+}
+
+_X_EXPORT void
 miGlyphExtents (int		nlist,
 		GlyphListPtr	list,
 		GlyphPtr	*glyphs,
@@ -85,7 +102,7 @@ miGlyphExtents (int		nlist,
 
 #define NeedsComponent(f) (PICT_FORMAT_A(f) != 0 && PICT_FORMAT_RGB(f) != 0)
 
-void
+_X_EXPORT void
 miGlyphs (CARD8		op,
 	  PicturePtr	pSrc,
 	  PicturePtr	pDst,

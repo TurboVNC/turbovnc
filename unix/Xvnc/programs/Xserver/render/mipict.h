@@ -1,7 +1,7 @@
 /*
- * $XFree86: xc/programs/Xserver/render/mipict.h,v 1.13 2002/11/06 22:45:36 keithp Exp $
+ * $XFree86: xc/programs/Xserver/render/mipict.h,v 1.12 2002/11/05 05:34:40 keithp Exp $
  *
- * Copyright © 2000 SuSE, Inc.
+ * Copyright Â© 2000 SuSE, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -71,6 +71,15 @@ void
 miValidatePicture (PicturePtr pPicture,
 		   Mask       mask);
 
+int
+miChangePictureTransform (PicturePtr	pPicture,
+			  PictTransform *transform);
+
+int
+miChangePictureFilter (PicturePtr pPicture,
+		       int	  filter,
+		       xFixed     *params,
+		       int	  nparams);
 
 Bool
 miClipPicture (RegionPtr    pRegion,
@@ -96,6 +105,14 @@ miComputeCompositeRegion (RegionPtr	pRegion,
 
 Bool
 miPictureInit (ScreenPtr pScreen, PictFormatPtr formats, int nformats);
+
+Bool
+miRealizeGlyph (ScreenPtr pScreen,
+		GlyphPtr  glyph);
+
+void
+miUnrealizeGlyph (ScreenPtr pScreen,
+		  GlyphPtr  glyph);
 
 void
 miGlyphExtents (int		nlist,
@@ -123,6 +140,9 @@ void
 miRenderPixelToColor (PictFormatPtr pPict,
 		      CARD32	    pixel,
 		      xRenderColor  *color);
+
+Bool
+miIsSolidAlpha (PicturePtr pSrc);
 
 void
 miCompositeRects (CARD8		op,

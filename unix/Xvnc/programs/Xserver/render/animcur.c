@@ -1,7 +1,7 @@
 /*
- * $XFree86: xc/programs/Xserver/render/animcur.c,v 1.6 2003/11/03 05:12:01 tsi Exp $
+ * $XFree86: xc/programs/Xserver/render/animcur.c,v 1.5tsi Exp $
  *
- * Copyright © 2002 Keith Packard, member of The XFree86 Project, Inc.
+ * Copyright Â© 2002 Keith Packard, member of The XFree86 Project, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -32,8 +32,12 @@
  * delta times between each image.
  */
 
-#include "X.h"
-#include "Xmd.h"
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
+#include <X11/Xmd.h>
 #include "servermd.h"
 #include "scrnintstr.h"
 #include "dixstruct.h"

@@ -1,7 +1,7 @@
 /*
  * Id: fbrop.h,v 1.1 1999/11/02 03:54:45 keithp Exp $
  *
- * Copyright © 1998 Keith Packard
+ * Copyright Â© 1998 Keith Packard
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -21,7 +21,7 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-/* $XFree86: xc/programs/Xserver/fb/fbrop.h,v 1.4 2000/02/23 20:29:46 dawes Exp $ */
+/* $XFree86: xc/programs/Xserver/fb/fbrop.h,v 1.3 2000/02/14 19:20:30 dawes Exp $ */
 
 #ifndef _FBROP_H_
 #define _FBROP_H_

@@ -1,7 +1,7 @@
 /*
  * Id: fbarc.c,v 1.1 1999/11/02 03:54:45 keithp Exp $
  *
- * Copyright © 1998 Keith Packard
+ * Copyright Â© 1998 Keith Packard
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -21,13 +21,15 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-/* $XFree86: xc/programs/Xserver/fb/fbarc.c,v 1.8 2002/11/09 04:59:29 tsi Exp $ */
+/* $XFree86: xc/programs/Xserver/fb/fbarc.c,v 1.7tsi Exp $ */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
 #include "fb.h"
 #include "mizerarc.h"
-#ifdef IN_MODULE
-#include "xf86_ansic.h"
-#endif
+#include <limits.h>
 
 typedef void	(*FbArc) (FbBits    *dst, 
 			  FbStride  dstStride, 
@@ -96,7 +98,7 @@ fbPolyArc (DrawablePtr	pDrawable,
 		    box.x2 = x2;
 		    y2 = box.y1 + (int)parcs->height + 1;
 		    box.y2 = y2;
-		    if ( (x2 <= MAXSHORT) && (y2 <= MAXSHORT) &&
+		    if ( (x2 <= SHRT_MAX) && (y2 <= SHRT_MAX) &&
 			(RECT_IN_REGION(pDrawable->pScreen, cclip, &box) == rgnIN) )
 			(*arc) (dst, dstStride, dstBpp, 
 				parcs, pDrawable->x + dstXoff, pDrawable->y + dstYoff, 

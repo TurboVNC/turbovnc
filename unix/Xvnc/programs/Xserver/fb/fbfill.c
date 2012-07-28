@@ -1,7 +1,7 @@
 /*
  * Id: fbfill.c,v 1.1 1999/11/02 03:54:45 keithp Exp $
  *
- * Copyright © 1998 Keith Packard
+ * Copyright Â© 1998 Keith Packard
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -21,9 +21,14 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-/* $XFree86: xc/programs/Xserver/fb/fbfill.c,v 1.6 2003/01/31 00:01:45 torrey Exp $ */
+/* $XFree86: xc/programs/Xserver/fb/fbfill.c,v 1.5 2003/01/29 00:43:33 torrey Exp $ */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
 #include "fb.h"
+#include "fbmmx.h"
 
 void
 fbFill (DrawablePtr pDrawable,
@@ -43,6 +48,11 @@ fbFill (DrawablePtr pDrawable,
 
     switch (pGC->fillStyle) {
     case FillSolid:
+#ifdef USE_MMX
+	if (!pPriv->and && fbHaveMMX())
+	    if (fbSolidFillmmx (pDrawable, x, y, width, height, pPriv->xor))
+		return;
+#endif	    
 	fbSolid (dst + (y + dstYoff) * dstStride, 
 		 dstStride, 
 		 (x + dstXoff) * dstBpp,
@@ -82,7 +92,7 @@ fbFill (DrawablePtr pDrawable,
 		    dstBpp,
 		    
 		    (pGC->patOrg.x + pDrawable->x + dstXoff),
-		    pGC->patOrg.y + pDrawable->y + dstYoff - y);
+		    pGC->patOrg.y + pDrawable->y - y);
 	}
 	else
 	{
@@ -119,7 +129,7 @@ fbFill (DrawablePtr pDrawable,
 		       fgand, fgxor,
 		       bgand, bgxor,
 		       pGC->patOrg.x + pDrawable->x + dstXoff,
-		       pGC->patOrg.y + pDrawable->y + dstYoff - y);
+		       pGC->patOrg.y + pDrawable->y - y);
 	}
 	break;
     }
@@ -147,7 +157,7 @@ fbFill (DrawablePtr pDrawable,
 		pPriv->pm,
 		dstBpp,
 		(pGC->patOrg.x + pDrawable->x + dstXoff) * dstBpp,
-		pGC->patOrg.y + pDrawable->y + dstYoff - y);
+		pGC->patOrg.y + pDrawable->y - y);
 	break;
     }
     }

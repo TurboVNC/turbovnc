@@ -1,7 +1,7 @@
 /*
- * $XFree86: xc/programs/Xserver/fb/fbpict.h,v 1.11 2002/09/26 02:56:48 keithp Exp $
+ * $XFree86: xc/programs/Xserver/fb/fbpict.h,v 1.7 2001/07/18 10:15:02 keithp Exp $
  *
- * Copyright © 2000 Keith Packard, member of The XFree86 Project, Inc.
+ * Copyright Â© 2000 Keith Packard, member of The XFree86 Project, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -22,8 +22,14 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
 #ifndef _FBPICT_H_
 #define _FBPICT_H_
+
+#include "renderedge.h"
 
 #define FbIntMult(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
 #define FbIntDiv(a,b)	 (((CARD16) (a) * 255) / (b))
@@ -57,694 +63,298 @@
 			 (CARD32) ((CARD8) ((t) | (0 - ((t) >> 8)))) << (i))
 
 
-typedef void	(*CompositeFunc) (CARD8      op,
-				  PicturePtr pSrc,
-				  PicturePtr pMask,
-				  PicturePtr pDst,
-				  INT16      xSrc,
-				  INT16      ySrc,
-				  INT16      xMask,
-				  INT16      yMask,
-				  INT16      xDst,
-				  INT16      yDst,
-				  CARD16     width,
-				  CARD16     height);
+#define Alpha(x) ((x) >> 24)
+#define Red(x) (((x) >> 16) & 0xff)
+#define Green(x) (((x) >> 8) & 0xff)
+#define Blue(x) ((x) & 0xff)
 
-typedef struct _FbCompositeOperand FbCompositeOperand;
+#define fbComposeGetSolid(pict, bits, fmt) { \
+    FbBits	*__bits__; \
+    FbStride	__stride__; \
+    int		__bpp__; \
+    int		__xoff__,__yoff__; \
+\
+    fbGetDrawable((pict)->pDrawable,__bits__,__stride__,__bpp__,__xoff__,__yoff__); \
+    switch (__bpp__) { \
+    case 32: \
+	(bits) = *(CARD32 *) __bits__; \
+	break; \
+    case 24: \
+	(bits) = Fetch24 ((CARD8 *) __bits__); \
+	break; \
+    case 16: \
+	(bits) = *(CARD16 *) __bits__; \
+	(bits) = cvt0565to8888(bits); \
+	break; \
+    default: \
+	return; \
+    } \
+    /* If necessary, convert RGB <--> BGR. */ \
+    if (PICT_FORMAT_TYPE((pict)->format) != PICT_FORMAT_TYPE(fmt)) \
+    { \
+	(bits) = (((bits) & 0xff000000) | \
+		  (((bits) & 0x00ff0000) >> 16) | \
+		  (((bits) & 0x0000ff00) >>  0) | \
+		  (((bits) & 0x000000ff) << 16)); \
+    } \
+    /* manage missing src alpha */ \
+    if ((pict)->pFormat->direct.alphaMask == 0) \
+	(bits) |= 0xff000000; \
+}
 
-typedef CARD32 (*FbCompositeFetch)(FbCompositeOperand *op);
-typedef void (*FbCompositeStore) (FbCompositeOperand *op, CARD32 value);
+#define fbComposeGetStart(pict,x,y,type,stride,line,mul) {\
+    FbBits	*__bits__; \
+    FbStride	__stride__; \
+    int		__bpp__; \
+    int		__xoff__,__yoff__; \
+\
+    fbGetDrawable((pict)->pDrawable,__bits__,__stride__,__bpp__,__xoff__,__yoff__); \
+    (stride) = __stride__ * sizeof (FbBits) / sizeof (type); \
+    (line) = ((type *) __bits__) + (stride) * ((y) + __yoff__) + (mul) * ((x) + __xoff__); \
+}
+#define cvt8888to0565(s)    ((((s) >> 3) & 0x001f) | \
+			     (((s) >> 5) & 0x07e0) | \
+			     (((s) >> 8) & 0xf800))
+#define cvt0565to8888(s)    (((((s) << 3) & 0xf8) | (((s) >> 2) & 0x7)) | \
+			     ((((s) << 5) & 0xfc00) | (((s) >> 1) & 0x300)) | \
+			     ((((s) << 8) & 0xf80000) | (((s) << 3) & 0x70000)))
 
-typedef void (*FbCompositeStep) (FbCompositeOperand *op);
-typedef void (*FbCompositeSet) (FbCompositeOperand *op, int x, int y);
-
-struct _FbCompositeOperand {
-    union {
-	struct {
-	    FbBits		*top_line;
-	    int			left_offset;
-	    
-	    int			start_offset;
-	    FbBits		*line;
-	    CARD32		offset;
-	    FbStride		stride;
-	    int			bpp;
-	} drawable;
-	struct {
-	    int			alpha_dx;
-	    int			alpha_dy;
-	} external;
-	struct {
-	    int			top_y;
-	    int			left_x;
-	    int			start_x;
-	    int			x;
-	    int			y;
-	    PictTransformPtr	transform;
-	    int			filter;
-	} transform;
-    } u;
-    FbCompositeFetch	fetch;
-    FbCompositeFetch	fetcha;
-    FbCompositeStore	store;
-    FbCompositeStep	over;
-    FbCompositeStep	down;
-    FbCompositeSet	set;
-    miIndexedPtr	indexed;
-    RegionPtr		clip;
-};
-
-typedef void (*FbCombineFunc) (FbCompositeOperand	*src,
-			       FbCompositeOperand	*msk,
-			       FbCompositeOperand	*dst);
+#if IMAGE_BYTE_ORDER == MSBFirst
+#define Fetch24(a)  ((unsigned long) (a) & 1 ? \
+		     ((*(a) << 16) | *((CARD16 *) ((a)+1))) : \
+		     ((*((CARD16 *) (a)) << 8) | *((a)+2)))
+#define Store24(a,v) ((unsigned long) (a) & 1 ? \
+		      ((*(a) = (CARD8) ((v) >> 16)), \
+		       (*((CARD16 *) ((a)+1)) = (CARD16) (v))) : \
+		      ((*((CARD16 *) (a)) = (CARD16) ((v) >> 8)), \
+		       (*((a)+2) = (CARD8) (v))))
+#else
+#define Fetch24(a)  ((unsigned long) (a) & 1 ? \
+		     ((*(a)) | (*((CARD16 *) ((a)+1)) << 8)) : \
+		     ((*((CARD16 *) (a))) | (*((a)+2) << 16)))
+#define Store24(a,v) ((unsigned long) (a) & 1 ? \
+		      ((*(a) = (CARD8) (v)), \
+		       (*((CARD16 *) ((a)+1)) = (CARD16) ((v) >> 8))) : \
+		      ((*((CARD16 *) (a)) = (CARD16) (v)),\
+		       (*((a)+2) = (CARD8) ((v) >> 16))))
+#endif
+		      
+/*
+   The methods below use some tricks to be able to do two color
+   components at the same time.
+*/
 
 /*
- * indexed by op
- */
-extern FbCombineFunc	fbCombineFunc[];
-
-typedef struct _FbAccessMap {
-    CARD32		format;
-    FbCompositeFetch	fetch;
-    FbCompositeFetch	fetcha;
-    FbCompositeStore	store;
-} FbAccessMap;
+  x_c = (x_c * a) / 255
+*/
+#define FbByteMul(x, a) do {                                      \
+        CARD32 t = ((x & 0xff00ff) * a) + 0x800080;               \
+        t = (t + ((t >> 8) & 0xff00ff)) >> 8;                     \
+        t &= 0xff00ff;                                            \
+                                                                  \
+        x = (((x >> 8) & 0xff00ff) * a) + 0x800080;               \
+        x = (x + ((x >> 8) & 0xff00ff));                          \
+        x &= 0xff00ff00;                                          \
+        x += t;                                                   \
+    } while (0)
 
 /*
- * search on format
- */
-extern FbAccessMap  fbAccessMap[];
+  x_c = (x_c * a) / 255 + y
+*/
+#define FbByteMulAdd(x, a, y) do {                                \
+        CARD32 t = ((x & 0xff00ff) * a) + 0x800080;               \
+        t = (t + ((t >> 8) & 0xff00ff)) >> 8;                     \
+        t &= 0xff00ff;                                            \
+        t += y & 0xff00ff;                                        \
+        t |= 0x1000100 - ((t >> 8) & 0xff00ff);                   \
+        t &= 0xff00ff;                                            \
+                                                                  \
+        x = (((x >> 8) & 0xff00ff) * a) + 0x800080;                 \
+        x = (x + ((x >> 8) & 0xff00ff)) >> 8;                       \
+        x &= 0xff00ff;                                              \
+        x += (y >> 8) & 0xff00ff;                                   \
+        x |= 0x1000100 - ((x >> 8) & 0xff00ff);                     \
+        x &= 0xff00ff;                                              \
+        x <<= 8;                                                    \
+        x += t;                                                     \
+    } while (0)
+
+/*
+  x_c = (x_c * a + y_c * b) / 255
+*/
+#define FbByteAddMul(x, a, y, b) do {                                   \
+        CARD32 t;                                                       \
+        CARD32 r = (x >> 24) * a + (y >> 24) * b + 0x80;                \
+        r += (r >> 8);                                                  \
+        r >>= 8;                                                        \
+                                                                        \
+        t = (x & 0xff00) * a + (y & 0xff00) * b;                        \
+        t += (t >> 8) + 0x8000;                                         \
+        t >>= 16;                                                       \
+                                                                        \
+        t |= r << 16;                                                   \
+        t |= 0x1000100 - ((t >> 8) & 0xff00ff);                         \
+        t &= 0xff00ff;                                                  \
+        t <<= 8;                                                        \
+                                                                        \
+        r = ((x >> 16) & 0xff) * a + ((y >> 16) & 0xff) * b + 0x80;     \
+        r += (r >> 8);                                                  \
+        r >>= 8;                                                        \
+                                                                        \
+        x = (x & 0xff) * a + (y & 0xff) * b + 0x80;                     \
+        x += (x >> 8);                                                  \
+        x >>= 8;                                                        \
+        x |= r << 16;                                                   \
+        x |= 0x1000100 - ((x >> 8) & 0xff00ff);                         \
+        x &= 0xff00ff;                                                  \
+        x |= t;                                                         \
+} while (0)
+
+/*
+  x_c = (x_c * a + y_c *b) / 256
+*/
+#define FbByteAddMul_256(x, a, y, b) do {                               \
+        CARD32 t = (x & 0xff00ff) * a + (y & 0xff00ff) * b;             \
+        t >>= 8;                                                        \
+        t &= 0xff00ff;                                                  \
+                                                                        \
+        x = ((x >> 8) & 0xff00ff) * a + ((y >> 8) & 0xff00ff) * b;      \
+        x &= 0xff00ff00;                                                \
+        x += t;                                                         \
+} while (0)
+/*
+  x_c = (x_c * a_c) / 255
+*/
+#define FbByteMulC(x, a) do {                           \
+        CARD32 t;                                       \
+        CARD32 r = (x & 0xff) * (a & 0xff);             \
+        r |= (x & 0xff0000) * ((a >> 16) & 0xff);       \
+	r += 0x800080;					\
+        r = (r + ((r >> 8) & 0xff00ff)) >> 8;           \
+        r &= 0xff00ff;                                  \
+                                                        \
+        x >>= 8;                                        \
+        t = (x & 0xff) * ((a >> 8) & 0xff);             \
+        t |= (x & 0xff0000) * (a >> 24);                \
+        t += 0x800080;                                  \
+        t = t + ((t >> 8) & 0xff00ff);                  \
+        x = r | (t & 0xff00ff00);                       \
+                                                        \
+    } while (0)
+
+/*
+  x_c = (x_c * a) / 255 + y
+*/
+#define FbByteMulAddC(x, a, y) do {                                 \
+        CARD32 t;                                                   \
+        CARD32 r = (x & 0xff) * (a & 0xff);                         \
+        r |= (x & 0xff0000) * ((a >> 16) & 0xff);                   \
+	r += 0x800080;						    \
+	r = (r + ((r >> 8) & 0xff00ff)) >> 8;			    \
+        r &= 0xff00ff;                                              \
+        r += y & 0xff00ff;                                          \
+        r |= 0x1000100 - ((r >> 8) & 0xff00ff);                     \
+        r &= 0xff00ff;                                              \
+                                                                    \
+        x >>= 8;                                                       \
+        t = (x & 0xff) * ((a >> 8) & 0xff);                            \
+        t |= (x & 0xff0000) * (a >> 24);                               \
+	t += 0x800080;                                                 \
+        t = (t + ((t >> 8) & 0xff00ff)) >> 8;			       \
+        t &= 0xff00ff;                                                 \
+        t += (y >> 8) & 0xff00ff;                                      \
+        t |= 0x1000100 - ((t >> 8) & 0xff00ff);                        \
+        t &= 0xff00ff;                                                 \
+        x = r | (t << 8);                                              \
+    } while (0)
+
+/*
+  x_c = (x_c * a_c + y_c * b) / 255
+*/
+#define FbByteAddMulC(x, a, y, b) do {                                  \
+        CARD32 t;                                                       \
+        CARD32 r = (x >> 24) * (a >> 24) + (y >> 24) * b;               \
+        r += (r >> 8) + 0x80;                                           \
+        r >>= 8;                                                        \
+                                                                        \
+        t = (x & 0xff00) * ((a >> 8) & 0xff) + (y & 0xff00) * b;        \
+        t += (t >> 8) + 0x8000;                                         \
+        t >>= 16;                                                       \
+                                                                        \
+        t |= r << 16;                                                   \
+        t |= 0x1000100 - ((t >> 8) & 0xff00ff);                         \
+        t &= 0xff00ff;                                                  \
+        t <<= 8;                                                        \
+                                                                        \
+        r = ((x >> 16) & 0xff) * ((a >> 16) & 0xff) + ((y >> 16) & 0xff) * b + 0x80; \
+        r += (r >> 8);                                                  \
+        r >>= 8;                                                        \
+                                                                        \
+        x = (x & 0xff) * (a & 0xff) + (y & 0xff) * b + 0x80;            \
+        x += (x >> 8);                                                  \
+        x >>= 8;                                                        \
+        x |= r << 16;                                                   \
+        x |= 0x1000100 - ((x >> 8) & 0xff00ff);                         \
+        x &= 0xff00ff;                                                  \
+        x |= t;                                                         \
+    } while (0)
+ 
+/*
+  x_c = min(x_c + y_c, 255)
+*/
+#define FbByteAdd(x, y) do {                                            \
+        CARD32 t;                                                       \
+        CARD32 r = (x & 0xff00ff) + (y & 0xff00ff);                     \
+        r |= 0x1000100 - ((r >> 8) & 0xff00ff);                         \
+        r &= 0xff00ff;                                                  \
+                                                                        \
+        t = ((x >> 8) & 0xff00ff) + ((y >> 8) & 0xff00ff);              \
+        t |= 0x1000100 - ((t >> 8) & 0xff00ff);                         \
+        r |= (t & 0xff00ff) << 8;                                       \
+        x = r;                                                          \
+    } while (0)
+
+#define div_255(x) (((x) + 0x80 + (((x) + 0x80) >> 8)) >> 8)
+
+#if defined(__i386__) && defined(__GNUC__)
+#define FASTCALL __attribute__((regparm(3)))
+#else
+#define FASTCALL
+#endif
+
+#if defined(__GNUC__)
+#define INLINE __inline__
+#else
+#define INLINE
+#endif
+
+typedef struct _FbComposeData {
+    CARD8	op;
+    PicturePtr	src;
+    PicturePtr	mask;
+    PicturePtr	dest;
+    INT16	xSrc;
+    INT16	ySrc;
+    INT16	xMask;
+    INT16	yMask;
+    INT16	xDest;
+    INT16	yDest;
+    CARD16	width;
+    CARD16	height;
+} FbComposeData;
+
+typedef FASTCALL void (*CombineMaskU) (CARD32 *src, const CARD32 *mask, int width);
+typedef FASTCALL void (*CombineFuncU) (CARD32 *dest, const CARD32 *src, int width);
+typedef FASTCALL void (*CombineFuncC) (CARD32 *dest, CARD32 *src, CARD32 *mask, int width);
+
+typedef struct _FbComposeFunctions {
+    CombineFuncU *combineU;
+    CombineFuncC *combineC;
+    CombineMaskU combineMaskU;
+} FbComposeFunctions;
 
 /* fbcompose.c */
 
-typedef struct _fbCompSrc {
-    CARD32	value;
-    CARD32	alpha;
-} FbCompSrc;
-
-/*
- * All compositing operators *
- */
-
-CARD32
-fbCombineMaskU (FbCompositeOperand   *src,
-		FbCompositeOperand   *msk);
-
-FbCompSrc
-fbCombineMaskC (FbCompositeOperand   *src,
-		FbCompositeOperand   *msk);
-
-CARD32
-fbCombineMaskValueC (FbCompositeOperand   *src,
-		     FbCompositeOperand   *msk);
-
-CARD32
-fbCombineMaskAlphaU (FbCompositeOperand   *src,
-		     FbCompositeOperand   *msk);
-
-CARD32
-fbCombineMaskAlphaC (FbCompositeOperand   *src,
-		     FbCompositeOperand   *msk);
-
-
-#if 0
-CARD32
-FbCombineMask (FbCompositeOperand   *src,
-	       FbCompositeOperand   *msk);
-#endif
-
-void
-fbCombineClear (FbCompositeOperand   *src,
-		FbCompositeOperand   *msk,
-		FbCompositeOperand   *dst);
-
-void
-fbCombineSrcU (FbCompositeOperand    *src,
-	       FbCompositeOperand    *msk,
-	       FbCompositeOperand    *dst);
-
-void
-fbCombineSrcC (FbCompositeOperand    *src,
-	       FbCompositeOperand    *msk,
-	       FbCompositeOperand    *dst);
-
-void
-fbCombineDst (FbCompositeOperand    *src,
-	      FbCompositeOperand    *msk,
-	      FbCompositeOperand    *dst);
-
-void
-fbCombineOverU (FbCompositeOperand   *src,
-		FbCompositeOperand   *msk,
-		FbCompositeOperand   *dst);
-
-void
-fbCombineOverC (FbCompositeOperand   *src,
-		FbCompositeOperand   *msk,
-		FbCompositeOperand   *dst);
-
-void
-fbCombineOverReverseU (FbCompositeOperand    *src,
-		       FbCompositeOperand    *msk,
-		       FbCompositeOperand    *dst);
-
-void
-fbCombineOverReverseC (FbCompositeOperand    *src,
-		       FbCompositeOperand    *msk,
-		       FbCompositeOperand    *dst);
-
-void
-fbCombineInU (FbCompositeOperand	    *src,
-	      FbCompositeOperand	    *msk,
-	      FbCompositeOperand	    *dst);
-
-void
-fbCombineInC (FbCompositeOperand	    *src,
-	      FbCompositeOperand	    *msk,
-	      FbCompositeOperand	    *dst);
-
-void
-fbCombineInReverseU (FbCompositeOperand  *src,
-		     FbCompositeOperand  *msk,
-		     FbCompositeOperand  *dst);
-
-void
-fbCombineInReverseC (FbCompositeOperand  *src,
-		     FbCompositeOperand  *msk,
-		     FbCompositeOperand  *dst);
-
-void
-fbCombineOutU (FbCompositeOperand    *src,
-	       FbCompositeOperand    *msk,
-	       FbCompositeOperand    *dst);
-
-void
-fbCombineOutC (FbCompositeOperand    *src,
-	       FbCompositeOperand    *msk,
-	       FbCompositeOperand    *dst);
-
-void
-fbCombineOutReverseU (FbCompositeOperand *src,
-		      FbCompositeOperand *msk,
-		      FbCompositeOperand *dst);
-
-void
-fbCombineOutReverseC (FbCompositeOperand *src,
-		      FbCompositeOperand *msk,
-		      FbCompositeOperand *dst);
-
-void
-fbCombineAtopU (FbCompositeOperand   *src,
-		FbCompositeOperand   *msk,
-		FbCompositeOperand   *dst);
-
-
-void
-fbCombineAtopC (FbCompositeOperand   *src,
-		FbCompositeOperand   *msk,
-		FbCompositeOperand   *dst);
-
-void
-fbCombineAtopReverseU (FbCompositeOperand    *src,
-		       FbCompositeOperand    *msk,
-		       FbCompositeOperand    *dst);
-
-void
-fbCombineAtopReverseC (FbCompositeOperand    *src,
-		       FbCompositeOperand    *msk,
-		       FbCompositeOperand    *dst);
-
-void
-fbCombineXorU (FbCompositeOperand    *src,
-	       FbCompositeOperand    *msk,
-	       FbCompositeOperand    *dst);
-
-void
-fbCombineXorC (FbCompositeOperand    *src,
-	       FbCompositeOperand    *msk,
-	       FbCompositeOperand    *dst);
-
-
-void
-fbCombineAddU (FbCompositeOperand    *src,
-	       FbCompositeOperand    *msk,
-	       FbCompositeOperand    *dst);
-
-void
-fbCombineAddC (FbCompositeOperand    *src,
-	       FbCompositeOperand    *msk,
-	       FbCompositeOperand    *dst);
-
-void
-fbCombineSaturateU (FbCompositeOperand   *src,
-		    FbCompositeOperand   *msk,
-		    FbCompositeOperand   *dst);
-
-void
-fbCombineSaturateC (FbCompositeOperand   *src,
-		    FbCompositeOperand   *msk,
-		    FbCompositeOperand   *dst);
-
-CARD8
-fbCombineDisjointOutPart (CARD8 a, CARD8 b);
-
-CARD8
-fbCombineDisjointInPart (CARD8 a, CARD8 b);
-
-void
-fbCombineDisjointGeneralU (FbCompositeOperand   *src,
-			   FbCompositeOperand   *msk,
-			   FbCompositeOperand   *dst,
-			   CARD8		combine);
-
-void
-fbCombineDisjointGeneralC (FbCompositeOperand   *src,
-			   FbCompositeOperand   *msk,
-			   FbCompositeOperand   *dst,
-			   CARD8		combine);
-
-void
-fbCombineDisjointOverU (FbCompositeOperand   *src,
-			FbCompositeOperand   *msk,
-			FbCompositeOperand   *dst);
-
-void
-fbCombineDisjointOverC (FbCompositeOperand   *src,
-			FbCompositeOperand   *msk,
-			FbCompositeOperand   *dst);
-
-void
-fbCombineDisjointOverReverseU (FbCompositeOperand    *src,
-			       FbCompositeOperand    *msk,
-			       FbCompositeOperand    *dst);
-
-void
-fbCombineDisjointOverReverseC (FbCompositeOperand    *src,
-			       FbCompositeOperand    *msk,
-			       FbCompositeOperand    *dst);
-
-void
-fbCombineDisjointInU (FbCompositeOperand	    *src,
-		      FbCompositeOperand	    *msk,
-		      FbCompositeOperand	    *dst);
-
-void
-fbCombineDisjointInC (FbCompositeOperand	    *src,
-		      FbCompositeOperand	    *msk,
-		      FbCompositeOperand	    *dst);
-
-void
-fbCombineDisjointInReverseU (FbCompositeOperand  *src,
-                             FbCompositeOperand  *msk,
-                             FbCompositeOperand  *dst);
-
-void
-fbCombineDisjointInReverseC (FbCompositeOperand  *src,
-                             FbCompositeOperand  *msk,
-                             FbCompositeOperand  *dst);
-
-void
-fbCombineDisjointOutU (FbCompositeOperand    *src,
-                       FbCompositeOperand    *msk,
-                       FbCompositeOperand    *dst);
-
-void
-fbCombineDisjointOutC (FbCompositeOperand    *src,
-                       FbCompositeOperand    *msk,
-                       FbCompositeOperand    *dst);
-void
-fbCombineDisjointOutReverseU (FbCompositeOperand *src,
-                              FbCompositeOperand *msk,
-                              FbCompositeOperand *dst);
-
-void
-fbCombineDisjointOutReverseC (FbCompositeOperand *src,
-                              FbCompositeOperand *msk,
-                              FbCompositeOperand *dst);
-
-void
-fbCombineDisjointAtopU (FbCompositeOperand   *src,
-                        FbCompositeOperand   *msk,
-                        FbCompositeOperand   *dst);
-
-void
-fbCombineDisjointAtopC (FbCompositeOperand   *src,
-                        FbCompositeOperand   *msk,
-                        FbCompositeOperand   *dst);
-
-void
-fbCombineDisjointAtopReverseU (FbCompositeOperand    *src,
-                               FbCompositeOperand    *msk,
-                               FbCompositeOperand    *dst);
-
-void
-fbCombineDisjointAtopReverseC (FbCompositeOperand    *src,
-                               FbCompositeOperand    *msk,
-                               FbCompositeOperand    *dst);
-
-void
-fbCombineDisjointXorU (FbCompositeOperand    *src,
-                       FbCompositeOperand    *msk,
-                       FbCompositeOperand    *dst);
-
-void
-fbCombineDisjointXorC (FbCompositeOperand    *src,
-                       FbCompositeOperand    *msk,
-                       FbCompositeOperand    *dst);
-
-CARD8
-fbCombineConjointOutPart (CARD8 a, CARD8 b);
-
-CARD8
-fbCombineConjointInPart (CARD8 a, CARD8 b);
-
-
-void
-fbCombineConjointGeneralU (FbCompositeOperand   *src,
-                           FbCompositeOperand   *msk,
-                           FbCompositeOperand   *dst,
-                           CARD8                combine);
-
-void
-fbCombineConjointGeneralC (FbCompositeOperand   *src,
-                           FbCompositeOperand   *msk,
-                           FbCompositeOperand   *dst,
-                           CARD8                combine);
-
-void
-fbCombineConjointOverU (FbCompositeOperand   *src,
-                        FbCompositeOperand   *msk,
-                        FbCompositeOperand   *dst);
-
-void
-fbCombineConjointOverC (FbCompositeOperand   *src,
-                        FbCompositeOperand   *msk,
-                        FbCompositeOperand   *dst);
-void
-fbCombineConjointOverReverseU (FbCompositeOperand    *src,
-                               FbCompositeOperand    *msk,
-                               FbCompositeOperand    *dst);
-
-void
-fbCombineConjointOverReverseC (FbCompositeOperand    *src,
-                               FbCompositeOperand    *msk,
-                               FbCompositeOperand    *dst);
-
-void
-fbCombineConjointInU (FbCompositeOperand            *src,
-                      FbCompositeOperand            *msk,
-                      FbCompositeOperand            *dst);
-
-void
-fbCombineConjointInC (FbCompositeOperand            *src,
-                      FbCompositeOperand            *msk,
-                      FbCompositeOperand            *dst);
-
-void
-fbCombineConjointInReverseU (FbCompositeOperand  *src,
-                             FbCompositeOperand  *msk,
-                             FbCompositeOperand  *dst);
-
-
-void
-fbCombineConjointInReverseC (FbCompositeOperand  *src,
-                             FbCompositeOperand  *msk,
-                             FbCompositeOperand  *dst);
-
-void
-fbCombineConjointOutU (FbCompositeOperand    *src,
-                       FbCompositeOperand    *msk,
-                       FbCompositeOperand    *dst);
-
-void
-fbCombineConjointOutC (FbCompositeOperand    *src,
-                       FbCompositeOperand    *msk,
-                       FbCompositeOperand    *dst);
-
-void
-fbCombineConjointOutReverseU (FbCompositeOperand *src,
-                              FbCompositeOperand *msk,
-                              FbCompositeOperand *dst);
-
-void
-fbCombineConjointOutReverseC (FbCompositeOperand *src,
-                              FbCompositeOperand *msk,
-                              FbCompositeOperand *dst);
-
-void
-fbCombineConjointAtopU (FbCompositeOperand   *src,
-                        FbCompositeOperand   *msk,
-                        FbCompositeOperand   *dst);
-
-void
-fbCombineConjointAtopC (FbCompositeOperand   *src,
-                        FbCompositeOperand   *msk,
-                        FbCompositeOperand   *dst);
-
-void
-fbCombineConjointAtopReverseU (FbCompositeOperand    *src,
-                               FbCompositeOperand    *msk,
-                               FbCompositeOperand    *dst);
-void
-fbCombineConjointAtopReverseC (FbCompositeOperand    *src,
-                               FbCompositeOperand    *msk,
-                               FbCompositeOperand    *dst);
-
-void
-fbCombineConjointXorU (FbCompositeOperand    *src,
-                       FbCompositeOperand    *msk,
-                       FbCompositeOperand    *dst);
-
-void
-fbCombineConjointXorC (FbCompositeOperand    *src,
-                       FbCompositeOperand    *msk,
-                       FbCompositeOperand    *dst);
-
-/*
- * All fetch functions
- */
-
-CARD32
-fbFetch_a8r8g8b8 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_x8r8g8b8 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_a8b8g8r8 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_x8b8g8r8 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_r8g8b8 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_b8g8r8 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_r5g6b5 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_b5g6r5 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_a1r5g5b5 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_x1r5g5b5 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_a1b5g5r5 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_x1b5g5r5 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_a4r4g4b4 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_x4r4g4b4 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_a4b4g4r4 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_x4b4g4r4 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_a8 (FbCompositeOperand *op);
-
-CARD32
-fbFetcha_a8 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_r3g3b2 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_b2g3r3 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_a2r2g2b2 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_a2b2g2r2 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_c8 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_a4 (FbCompositeOperand *op);
-
-CARD32
-fbFetcha_a4 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_r1g2b1 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_b1g2r1 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_a1r1g1b1 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_a1b1g1r1 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_c4 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_a1 (FbCompositeOperand *op);
-
-CARD32
-fbFetcha_a1 (FbCompositeOperand *op);
-
-CARD32
-fbFetch_g1 (FbCompositeOperand *op);
-
-void
-fbStore_a8r8g8b8 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_x8r8g8b8 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_a8b8g8r8 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_x8b8g8r8 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_r8g8b8 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_b8g8r8 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_r5g6b5 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_b5g6r5 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_a1r5g5b5 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_x1r5g5b5 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_a1b5g5r5 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_x1b5g5r5 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_a4r4g4b4 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_x4r4g4b4 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_a4b4g4r4 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_x4b4g4r4 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_a8 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_r3g3b2 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_b2g3r3 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_a2r2g2b2 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_c8 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_g8 (FbCompositeOperand *op, CARD32 value);
-
-
-void
-fbStore_a4 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_r1g2b1 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_b1g2r1 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_a1r1g1b1 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_a1b1g1r1 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_c4 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_g4 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_a1 (FbCompositeOperand *op, CARD32 value);
-
-void
-fbStore_g1 (FbCompositeOperand *op, CARD32 value);
-
-CARD32
-fbFetch_external (FbCompositeOperand *op);
-
-CARD32
-fbFetch_transform (FbCompositeOperand *op);
-
-CARD32
-fbFetcha_transform (FbCompositeOperand *op);
-
-CARD32
-fbFetcha_external (FbCompositeOperand *op);
-
-void
-fbStore_external (FbCompositeOperand *op, CARD32 value);
-
-Bool
-fbBuildOneCompositeOperand (PicturePtr		pPict,
-			    FbCompositeOperand	*op,
-			    INT16		x,
-			    INT16		y);
-
-Bool
-fbBuildCompositeOperand (PicturePtr	    pPict,
-			 FbCompositeOperand *op,
-			 INT16		    x,
-			 INT16		    y,
-			 Bool		    transform,
-			 Bool		    alpha);
 void
 fbCompositeGeneral (CARD8	op,
 		    PicturePtr	pSrc,
@@ -759,6 +369,17 @@ fbCompositeGeneral (CARD8	op,
 		    CARD16	width,
 		    CARD16	height);
 
+
+/* fbedge.c */
+void
+fbRasterizeEdges (FbBits	*buf,
+		  int		bpp,
+		  int		width,
+		  int		stride,
+		  RenderEdge	*l,
+		  RenderEdge	*r,
+		  xFixed	t,
+		  xFixed	b);
 
 /* fbpict.c */
 CARD32
@@ -967,10 +588,25 @@ fbComposite (CARD8      op,
 	     CARD16     height);
 
 /* fbtrap.c */
+
+void
+fbAddTraps (PicturePtr	pPicture,
+	    INT16	xOff,
+	    INT16	yOff,
+	    int		ntrap,
+	    xTrap	*traps);
+
 void
 fbRasterizeTrapezoid (PicturePtr    alpha,
 		      xTrapezoid    *trap,
 		      int	    x_off,
 		      int	    y_off);
+
+void
+fbAddTriangles (PicturePtr  pPicture,
+		INT16	    xOff,
+		INT16	    yOff,
+		int	    ntri,
+		xTriangle   *tris);
 
 #endif /* _FBPICT_H_ */

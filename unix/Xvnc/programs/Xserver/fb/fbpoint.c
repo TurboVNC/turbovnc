@@ -1,7 +1,7 @@
 /*
  * Id: fbpoint.c,v 1.1 1999/11/02 03:54:45 keithp Exp $
  *
- * Copyright © 1998 Keith Packard
+ * Copyright Â© 1998 Keith Packard
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -21,7 +21,11 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-/* $XFree86: xc/programs/Xserver/fb/fbpoint.c,v 1.8 2001/05/29 04:54:09 keithp Exp $ */
+/* $XFree86: xc/programs/Xserver/fb/fbpoint.c,v 1.7 2000/09/22 05:58:01 keithp Exp $ */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
 #include "fb.h"
 
@@ -31,6 +35,8 @@ typedef void	(*FbDots)  (FbBits	*dst,
 			    BoxPtr	pBox,
 			    xPoint	*pts,
 			    int		npt,
+			    int		xorg,
+			    int		yorg,
 			    int		xoff,
 			    int		yoff,
 			    FbBits	and,
@@ -43,6 +49,8 @@ fbDots (FbBits	    *dstOrig,
 	BoxPtr	    pBox,
 	xPoint	    *pts,
 	int	    npt,
+	int	    xorg,
+	int	    yorg,
 	int	    xoff,
 	int	    yoff,
 	FbBits	    andOrig,
@@ -62,13 +70,13 @@ fbDots (FbBits	    *dstOrig,
     y2 = pBox->y2;
     while (npt--)
     {
-	x = pts->x + xoff;
-	y = pts->y + yoff;
+	x = pts->x + xorg;
+	y = pts->y + yorg;
 	pts++;
 	if (x1 <= x && x < x2 && y1 <= y && y < y2)
 	{
-	    x *= dstBpp;
-	    d = dst + (y * dstStride) + (x >> FB_STIP_SHIFT);
+	    x = (x + xoff) * dstBpp;
+	    d = dst + ((y + yoff) * dstStride) + (x >> FB_STIP_SHIFT);
 	    x &= FB_STIP_MASK;
 #ifdef FB_24BIT
 	    if (dstBpp == 24)
@@ -152,5 +160,5 @@ fbPolyPoint (DrawablePtr    pDrawable,
     for (nBox = REGION_NUM_RECTS (pClip), pBox = REGION_RECTS (pClip);
 	 nBox--; pBox++)
 	(*dots) (dst, dstStride, dstBpp, pBox, pptInit, nptInit, 
-		 pDrawable->x + dstXoff, pDrawable->y + dstYoff, and, xor);
+		 pDrawable->x, pDrawable->y, dstXoff, dstYoff, and, xor);
 }

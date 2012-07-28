@@ -1,7 +1,7 @@
-/*
- * $XFree86: xc/programs/Xserver/render/mipict.c,v 1.16 2003/11/10 18:22:52 tsi Exp $
+ /*
+ * $XFree86: xc/programs/Xserver/render/mipict.c,v 1.15tsi Exp $
  *
- * Copyright © 1999 Keith Packard
+ * Copyright Â© 1999 Keith Packard
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -21,6 +21,10 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
 #include "scrnintstr.h"
 #include "gcstruct.h"
@@ -125,9 +129,6 @@ miValidatePicture (PicturePtr pPicture,
 		   Mask       mask)
 {
     DrawablePtr	    pDrawable = pPicture->pDrawable;
-    ScreenPtr       pScreen;
-
-    pScreen = pDrawable->pScreen;
 
     if ((mask & (CPClipXOrigin|CPClipYOrigin|CPClipMask|CPSubwindowMode)) ||
 	(pDrawable->serialNumber != (pPicture->serialNumber & DRAWABLE_SERIAL_BITS)))
@@ -248,11 +249,26 @@ miValidatePicture (PicturePtr pPicture,
     }
 }
 
+int
+miChangePictureTransform (PicturePtr	pPicture,
+			  PictTransform *transform)
+{
+    return Success;
+}
+
+int
+miChangePictureFilter (PicturePtr pPicture,
+		       int	  filter,
+		       xFixed     *params,
+		       int	  nparams)
+{
+    return Success;
+}
+
 #define BOUND(v)	(INT16) ((v) < MINSHORT ? MINSHORT : (v) > MAXSHORT ? MAXSHORT : (v))
 
 static __inline Bool
-miClipPictureReg (ScreenPtr	pScreen,
-		  RegionPtr	pRegion,
+miClipPictureReg (RegionPtr	pRegion,
 		  RegionPtr	pClip,
 		  int		dx,
 		  int		dy)
@@ -278,25 +294,28 @@ miClipPictureReg (ScreenPtr	pScreen,
 	    REGION_EMPTY(pScreen, pRegion);
 	}
     }
+    else if (!REGION_NOTEMPTY (pScreen, pClip))
+	return FALSE;
     else
     {
-	REGION_TRANSLATE(pScreen, pRegion, dx, dy);
+	if (dx || dy)
+	    REGION_TRANSLATE(pScreen, pRegion, -dx, -dy);
 	if (!REGION_INTERSECT (pScreen, pRegion, pRegion, pClip))
 	    return FALSE;
-	REGION_TRANSLATE(pScreen, pRegion, -dx, -dy);
+	if (dx || dy)
+	    REGION_TRANSLATE(pScreen, pRegion, dx, dy);
     }
-    return TRUE;
+    return REGION_NOTEMPTY(pScreen, pRegion);
 }
 		  
 static __inline Bool
-miClipPictureSrc (ScreenPtr	pScreen,
-		  RegionPtr	pRegion,
+miClipPictureSrc (RegionPtr	pRegion,
 		  PicturePtr	pPicture,
 		  int		dx,
 		  int		dy)
 {
     /* XXX what to do with clipping from transformed pictures? */
-    if (pPicture->transform)
+    if (pPicture->transform || !pPicture->pDrawable)
 	return TRUE;
     if (pPicture->repeat)
     {
@@ -316,12 +335,76 @@ miClipPictureSrc (ScreenPtr	pScreen,
     }
     else
     {
-	return miClipPictureReg (pScreen, pRegion, pPicture->pCompositeClip,
-				 dx, dy);
+	return miClipPictureReg (pRegion,
+				 pPicture->pCompositeClip,
+				 dx,
+				 dy);
     }
 }
 
-Bool
+static void
+miCompositeSourceValidate (PicturePtr	pPicture,
+			   INT16	x,
+			   INT16	y,
+			   CARD16	width,
+			   CARD16	height)
+{
+    DrawablePtr	pDrawable = pPicture->pDrawable;
+    ScreenPtr	pScreen;
+
+    if (!pDrawable)
+        return;
+
+    pScreen = pDrawable->pScreen;
+    
+    if (pScreen->SourceValidate)
+    {
+        x -= pPicture->pDrawable->x;
+        y -= pPicture->pDrawable->y;
+	if (pPicture->transform)
+	{
+	    xPoint	    points[4];
+	    int		    i;
+	    int		    xmin, ymin, xmax, ymax;
+
+#define VectorSet(i,_x,_y) { points[i].x = _x; points[i].y = _y; }
+	    VectorSet (0, x, y);
+	    VectorSet (1, x + width, y);
+	    VectorSet (2, x, y + height);
+	    VectorSet (3, x + width, y + height);
+	    xmin = ymin = 32767;
+	    xmax = ymax = -32737;
+	    for (i = 0; i < 4; i++)
+	    {
+		PictVector  t;
+		t.vector[0] = IntToxFixed (points[i].x);
+		t.vector[1] = IntToxFixed (points[i].y);
+		t.vector[2] = xFixed1;
+		if (PictureTransformPoint (pPicture->transform, &t))
+		{
+		    int	tx = xFixedToInt (t.vector[0]);
+		    int ty = xFixedToInt (t.vector[1]);
+		    if (tx < xmin) xmin = tx;
+		    if (tx > xmax) xmax = tx;
+		    if (ty < ymin) ymin = ty;
+		    if (ty > ymax) ymax = ty;
+		}
+	    }
+	    x = xmin;
+	    y = ymin;
+	    width = xmax - xmin;
+	    height = ymax - ymin;
+	}
+	(*pScreen->SourceValidate) (pDrawable, x, y, width, height);
+    }
+}
+
+/*
+ * returns FALSE if the final region is empty.  Indistinguishable from
+ * an allocation failure, but rendering ignores those anyways.
+ */
+
+_X_EXPORT Bool
 miComputeCompositeRegion (RegionPtr	pRegion,
 			  PicturePtr	pSrc,
 			  PicturePtr	pMask,
@@ -335,7 +418,6 @@ miComputeCompositeRegion (RegionPtr	pRegion,
 			  CARD16	width,
 			  CARD16	height)
 {
-    ScreenPtr	pScreen = pSrc->pDrawable->pScreen;
     int		v;
 
     pRegion->extents.x1 = xDst;
@@ -349,18 +431,34 @@ miComputeCompositeRegion (RegionPtr	pRegion,
     if (pRegion->extents.x1 >= pRegion->extents.x2 ||
 	pRegion->extents.y1 >= pRegion->extents.y2)
     {
-	REGION_EMPTY (pScreen, pRegion);
-	return TRUE;
+	REGION_EMPTY (pDst->pDrawable->pScreen, pRegion);
+	return FALSE;
+    }
+    /* clip against dst */
+    if (!miClipPictureReg (pRegion, pDst->pCompositeClip, 0, 0))
+    {
+	REGION_UNINIT (pScreen, pRegion);
+	return FALSE;
+    }
+    if (pDst->alphaMap)
+    {
+	if (!miClipPictureReg (pRegion, pDst->alphaMap->pCompositeClip,
+			       -pDst->alphaOrigin.x,
+			       -pDst->alphaOrigin.y))
+	{
+	    REGION_UNINIT (pScreen, pRegion);
+	    return FALSE;
+	}
     }
     /* clip against src */
-    if (!miClipPictureSrc (pScreen, pRegion, pSrc, xDst - xSrc, yDst - ySrc))
+    if (!miClipPictureSrc (pRegion, pSrc, xDst - xSrc, yDst - ySrc))
     {
 	REGION_UNINIT (pScreen, pRegion);
 	return FALSE;
     }
     if (pSrc->alphaMap)
     {
-	if (!miClipPictureSrc (pScreen, pRegion, pSrc->alphaMap,
+	if (!miClipPictureSrc (pRegion, pSrc->alphaMap,
 			       xDst - (xSrc + pSrc->alphaOrigin.x),
 			       yDst - (ySrc + pSrc->alphaOrigin.y)))
 	{
@@ -371,15 +469,14 @@ miComputeCompositeRegion (RegionPtr	pRegion,
     /* clip against mask */
     if (pMask)
     {
-	if (!miClipPictureSrc (pScreen, pRegion, pMask,
-			       xDst - xMask, yDst - yMask))
+	if (!miClipPictureSrc (pRegion, pMask, xDst - xMask, yDst - yMask))
 	{
 	    REGION_UNINIT (pScreen, pRegion);
 	    return FALSE;
 	}	
 	if (pMask->alphaMap)
 	{
-	    if (!miClipPictureSrc (pScreen, pRegion, pMask->alphaMap,
+	    if (!miClipPictureSrc (pRegion, pMask->alphaMap,
 				   xDst - (xMask + pMask->alphaOrigin.x),
 				   yDst - (yMask + pMask->alphaOrigin.y)))
 	    {
@@ -388,22 +485,9 @@ miComputeCompositeRegion (RegionPtr	pRegion,
 	    }
 	}
     }
-    if (!miClipPictureReg (pScreen, pRegion, pDst->pCompositeClip, 0, 0))
-    {
-	REGION_UNINIT (pScreen, pRegion);
-	return FALSE;
-    }
-    if (pDst->alphaMap)
-    {
-	if (!miClipPictureReg (pScreen,
-			       pRegion, pDst->alphaMap->pCompositeClip,
-			       -pDst->alphaOrigin.x,
-			       -pDst->alphaOrigin.y))
-	{
-	    REGION_UNINIT (pScreen, pRegion);
-	    return FALSE;
-	}
-    }
+    miCompositeSourceValidate (pSrc, xSrc, ySrc, width, height);
+    if (pMask)
+	miCompositeSourceValidate (pMask, xMask, yMask, width, height);
     return TRUE;
 }
 
@@ -458,6 +542,40 @@ miFillColor (CARD32 pixel, int bits)
     return (CARD16) pixel;
 }
 
+Bool
+miIsSolidAlpha (PicturePtr pSrc)
+{
+    ScreenPtr	pScreen;
+    char	line[1];
+
+    if (!pSrc->pDrawable)
+        return FALSE;
+
+    pScreen = pSrc->pDrawable->pScreen;
+    
+    /* Alpha-only */
+    if (PICT_FORMAT_TYPE (pSrc->format) != PICT_TYPE_A)
+	return FALSE;
+    /* repeat */
+    if (!pSrc->repeat)
+	return FALSE;
+    /* 1x1 */
+    if (pSrc->pDrawable->width != 1 || pSrc->pDrawable->height != 1)
+	return FALSE;
+    line[0] = 1;
+    (*pScreen->GetImage) (pSrc->pDrawable, 0, 0, 1, 1, ZPixmap, ~0L, line);
+    switch (pSrc->pDrawable->bitsPerPixel) {
+    case 1:
+	return (CARD8) line[0] == 1 || (CARD8) line[0] == 0x80;
+    case 4:
+	return (CARD8) line[0] == 0xf || (CARD8) line[0] == 0xf0;
+    case 8:
+	return (CARD8) line[0] == 0xff;
+    default:
+	return FALSE;
+    }
+}
+
 void
 miRenderPixelToColor (PictFormatPtr format,
 		      CARD32	    pixel,
@@ -491,7 +609,7 @@ miRenderPixelToColor (PictFormatPtr format,
     }
 }
 
-Bool
+_X_EXPORT Bool
 miPictureInit (ScreenPtr pScreen, PictFormatPtr formats, int nformats)
 {
     PictureScreenPtr    ps;
@@ -508,6 +626,10 @@ miPictureInit (ScreenPtr pScreen, PictFormatPtr formats, int nformats)
     ps->InitIndexed = miInitIndexed;
     ps->CloseIndexed = miCloseIndexed;
     ps->UpdateIndexed = miUpdateIndexed;
+    ps->ChangePictureTransform = miChangePictureTransform;
+    ps->ChangePictureFilter = miChangePictureFilter;
+    ps->RealizeGlyph = miRealizeGlyph;
+    ps->UnrealizeGlyph = miUnrealizeGlyph;
 
     /* MI rendering routines */
     ps->Composite	= 0;			/* requires DDX support */
@@ -518,5 +640,9 @@ miPictureInit (ScreenPtr pScreen, PictFormatPtr formats, int nformats)
     ps->TriStrip	= miTriStrip;
     ps->TriFan		= miTriFan;
     
+    ps->RasterizeTrapezoid = 0;			/* requires DDX support */
+    ps->AddTraps	= 0;			/* requires DDX support */
+    ps->AddTriangles	= 0;			/* requires DDX support */
+
     return TRUE;
 }

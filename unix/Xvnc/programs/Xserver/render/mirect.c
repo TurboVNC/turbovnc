@@ -1,7 +1,7 @@
 /*
- * $XFree86: xc/programs/Xserver/render/mirect.c,v 1.4 2001/06/08 19:36:34 keithp Exp $
+ * $XFree86: xc/programs/Xserver/render/mirect.c,v 1.3 2000/12/08 07:52:05 keithp Exp $
  *
- * Copyright © 2000 Keith Packard, member of The XFree86 Project, Inc.
+ * Copyright Â© 2000 Keith Packard, member of The XFree86 Project, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -21,6 +21,10 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
 #include "scrnintstr.h"
 #include "gcstruct.h"
@@ -42,7 +46,7 @@ miColorRects (PicturePtr    pDst,
     ScreenPtr		pScreen = pDst->pDrawable->pScreen;
     CARD32		pixel;
     GCPtr		pGC;
-    CARD32		tmpval[4];
+    CARD32		tmpval[5];
     RegionPtr		pClip;
     unsigned long	mask;
 
@@ -53,12 +57,13 @@ miColorRects (PicturePtr    pDst,
 	return;
     tmpval[0] = GXcopy;
     tmpval[1] = pixel;
-    mask = GCFunction | GCForeground;
+    tmpval[2] = pDst->subWindowMode;
+    mask = GCFunction | GCForeground | GCSubwindowMode;
     if (pClipPict->clientClipType == CT_REGION)
     {
-	tmpval[2] = pDst->clipOrigin.x - xoff;
-	tmpval[3] = pDst->clipOrigin.y - yoff;
-	mask |= CPClipXOrigin|CPClipYOrigin;
+	tmpval[3] = pDst->clipOrigin.x - xoff;
+	tmpval[4] = pDst->clipOrigin.y - yoff;
+	mask |= GCClipXOrigin|GCClipYOrigin;
 	
 	pClip = REGION_CREATE (pScreen, NULL, 1);
 	REGION_COPY (pScreen, pClip,
@@ -90,7 +95,7 @@ miColorRects (PicturePtr    pDst,
     FreeScratchGC (pGC);
 }
 
-void
+_X_EXPORT void
 miCompositeRects (CARD8		op,
 		  PicturePtr	pDst,
 		  xRenderColor  *color,

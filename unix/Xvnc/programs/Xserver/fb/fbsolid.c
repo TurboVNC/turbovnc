@@ -1,7 +1,7 @@
 /*
- * $XFree86: xc/programs/Xserver/fb/fbsolid.c,v 1.8 2001/10/28 03:33:08 tsi Exp $
+ * $XFree86$
  *
- * Copyright © 1998 Keith Packard
+ * Copyright Â© 1998 Keith Packard
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -23,6 +23,10 @@
  */
 
 #define FbSelectPart(xor,o,t)    xor
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
 #include "fb.h"
 
@@ -49,7 +53,6 @@ fbSolid (FbBits	    *dst,
 	return;
     }
 #endif
-	
     dst += dstX >> FB_SHIFT;
     dstX &= FB_MASK;
     FbMaskBitsBytes(dstX, width, and == 0, startmask, startbyte, 

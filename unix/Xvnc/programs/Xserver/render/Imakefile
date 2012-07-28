@@ -1,4 +1,4 @@
-XCOMM $XFree86: xc/programs/Xserver/render/Imakefile,v 1.11 2003/04/21 12:32:14 sven Exp $
+XCOMM $XFree86: xc/programs/Xserver/render/Imakefile,v 1.10 2002/11/23 02:38:15 keithp Exp $
 #include <Server.tmpl>
 
        SRCS =   animcur.c \
@@ -11,7 +11,8 @@ XCOMM $XFree86: xc/programs/Xserver/render/Imakefile,v 1.11 2003/04/21 12:32:14 
                 mitrap.c \
                 mitri.c \
                 picture.c \
-                render.c
+                render.c \
+		renderedge.c
 
        OBJS =   animcur.o \
                 filter.o \
@@ -23,8 +24,10 @@ XCOMM $XFree86: xc/programs/Xserver/render/Imakefile,v 1.11 2003/04/21 12:32:14 
                 mitrap.o \
                 mitri.o \
                 picture.o \
-                render.o
+                render.o \
+		renderedge.o
 
+   DEFINES = -D_X_EXPORT=
    INCLUDES = -I. -I../include -I../mi -I../../../include/fonts \
                 -I../fb -I../hw/kdrive -I$(EXTINCSRC) -I$(XINCLUDESRC) \
                 -I$(FONTINCSRC) -I../Xext

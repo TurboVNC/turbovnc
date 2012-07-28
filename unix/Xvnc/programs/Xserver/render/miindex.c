@@ -1,7 +1,7 @@
 /*
- * $XFree86: xc/programs/Xserver/render/miindex.c,v 1.8 2002/11/06 22:45:36 keithp Exp $
+ * $XFree86: xc/programs/Xserver/render/miindex.c,v 1.7 2002/11/05 06:05:04 keithp Exp $
  *
- * Copyright © 2001 Keith Packard, member of The XFree86 Project, Inc.
+ * Copyright Â© 2001 Keith Packard, member of The XFree86 Project, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -21,6 +21,10 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
 #ifndef _MIINDEX_H_
 #define _MIINDEX_H_

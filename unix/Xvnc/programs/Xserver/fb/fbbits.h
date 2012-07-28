@@ -1,7 +1,7 @@
 /*
- * $XFree86: xc/programs/Xserver/fb/fbbits.h,v 1.14 2003/11/03 05:11:00 tsi Exp $
+ * $XFree86$
  *
- * Copyright © 1998 Keith Packard
+ * Copyright Â© 1998 Keith Packard
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -28,6 +28,10 @@
  */
 
 #define isClipped(c,ul,lr)  ((((c) - (ul)) | ((lr) - (c))) & 0x80008000)
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
 #ifdef BITSMUL
 #define MUL BITSMUL
@@ -270,6 +274,8 @@ DOTS (FbBits	    *dst,
       BoxPtr	    pBox,
       xPoint	    *ptsOrig,
       int	    npt,
+      int	    xorg,
+      int	    yorg,
       int	    xoff,
       int	    yoff,
       FbBits	    and,
@@ -284,10 +290,10 @@ DOTS (FbBits	    *dst,
     INT32    	ul, lr;
     INT32    	pt;
 
-    ul = coordToInt(pBox->x1 - xoff,     pBox->y1 - yoff);
-    lr = coordToInt(pBox->x2 - xoff - 1, pBox->y2 - yoff - 1);
+    ul = coordToInt(pBox->x1 - xorg,     pBox->y1 - yorg);
+    lr = coordToInt(pBox->x2 - xorg - 1, pBox->y2 - yorg - 1);
 
-    bits += bitsStride * yoff + xoff * MUL;
+    bits += bitsStride * (yorg + yoff) + (xorg + xoff) * MUL;
     
     if (and == 0)
     {

@@ -1,7 +1,7 @@
 /*
- * $XFree86: xc/include/extensions/renderproto.h,v 1.13 2002/11/23 02:34:45 keithp Exp $
+ * $XFree86: xc/include/extensions/renderproto.h,v 1.12 2002/09/26 02:56:48 keithp Exp $
  *
- * Copyright © 2000 SuSE, Inc.
+ * Copyright Â© 2000 SuSE, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -17,7 +17,7 @@
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL SuSE
  * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
+ * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  * Author:  Keith Packard, SuSE, Inc.
@@ -168,7 +168,19 @@ typedef struct {
 
 #define sz_xGlyphElt	8
 
-/* 
+typedef struct {
+    Fixed   l, r, y;
+} xSpanFix;
+
+#define sz_xSpanFix	12
+
+typedef struct {
+    xSpanFix	top, bot;
+} xTrap;
+
+#define sz_xTrap	24
+
+/*
  * requests and replies
  */
 typedef struct {
@@ -450,7 +462,7 @@ typedef struct {
     Glyphset    glyphset B32;
     INT16	xSrc B16;
     INT16	ySrc B16;
-} xRenderCompositeGlyphsReq, xRenderCompositeGlyphs8Req, 
+} xRenderCompositeGlyphsReq, xRenderCompositeGlyphs8Req,
 xRenderCompositeGlyphs16Req, xRenderCompositeGlyphs32Req;
 
 #define sz_xRenderCompositeGlyphs8Req		    28
@@ -549,7 +561,7 @@ typedef struct {
 } xRenderSetPictureFilterReq;
 
 #define sz_xRenderSetPictureFilterReq		    12
-    
+
 /* 0.8 and higher */
 
 typedef struct {
@@ -567,6 +579,69 @@ typedef struct {
 } xRenderCreateAnimCursorReq;
 
 #define sz_xRenderCreateAnimCursorReq		    8
+
+/* 0.9 and higher */
+
+typedef struct {
+    CARD8		reqType;
+    CARD8		renderReqType;
+    CARD16		length B16;
+    Picture		picture;
+    INT16		xOff B16;
+    INT16		yOff B16;
+} xRenderAddTrapsReq;
+
+#define sz_xRenderAddTrapsReq			    12
+
+/* 0.10 and higher */
+
+typedef struct {
+    CARD8	reqType;
+    CARD8	renderReqType;
+    CARD16	length B16;
+    Picture	pid B32;
+    xRenderColor color;
+} xRenderCreateSolidFillReq;
+
+#define sz_xRenderCreateSolidFillReq                 16
+
+typedef struct {
+    CARD8	reqType;
+    CARD8	renderReqType;
+    CARD16	length B16;
+    Picture	pid B32;
+    xPointFixed p1;
+    xPointFixed p2;
+    CARD32      nStops;
+} xRenderCreateLinearGradientReq;
+
+#define sz_xRenderCreateLinearGradientReq                 28
+
+typedef struct {
+    CARD8	reqType;
+    CARD8	renderReqType;
+    CARD16	length B16;
+    Picture	pid B32;
+    xPointFixed inner;
+    xPointFixed outer;
+    Fixed       inner_radius;
+    Fixed       outer_radius;
+    CARD32      nStops;
+} xRenderCreateRadialGradientReq;
+
+#define sz_xRenderCreateRadialGradientReq                 36
+
+typedef struct {
+    CARD8	reqType;
+    CARD8	renderReqType;
+    CARD16	length B16;
+    Picture	pid B32;
+    xPointFixed center;
+    Fixed       angle; /* in degrees */
+    CARD32      nStops;
+} xRenderCreateConicalGradientReq;
+
+#define sz_xRenderCreateConicalGradientReq                 24
 
 #undef Window
 #undef Drawable
