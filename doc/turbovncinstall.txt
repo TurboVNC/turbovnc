@@ -27,9 +27,9 @@ following error:
 		[[http://www.novell.com/linux/][SuSE]], or
 		[[http://www.debian.org/][Debian]] families that contain GLIBC 2.3.2
 		or later (including [[http://fedoraproject.org/][Fedora]],
-		[[http://www.centos.org/][CentOS]] 3 and later,
-		[[http://www.ubuntu.com/][Ubuntu Linux]] v6.0 or later,
-		and [[http://www.whiteboxlinux.org/][White Box]].)
+		[[http://www.centos.org/][CentOS]] 3 or later,
+		[[http://www.oracle.com/us/technologies/linux/][Oracle Linux]],
+		and [[http://www.ubuntu.com/][Ubuntu Linux]] v6.0 or later.)
 		{nl}
 
 	2. Log in as root, cd to the directory where you downloaded the binary
