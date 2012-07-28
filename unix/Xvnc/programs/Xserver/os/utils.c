@@ -2,6 +2,7 @@
 /*
 
 Copyright 1987, 1998  The Open Group
+Copyright 2012  D. R. Commander
 
 Permission to use, copy, modify, distribute, and sell this software and its
 documentation for any purpose is hereby granted without fee, provided that
@@ -143,6 +144,9 @@ extern char* protNoListen;
 
 Bool CoreDump;
 Bool noTestExtensions;
+#ifdef RENDER
+Bool noRenderExtension = FALSE;
+#endif
 
 int auditTrailLevel = 1;
 
@@ -575,6 +579,7 @@ void UseMsg()
     ErrorF("r                      turns on auto-repeat \n");
 #ifdef RENDER
     ErrorF("-render [default|mono|gray|color] set render color alloc policy\n");
+    ErrorF("-norender              disable render extension\n");
 #endif
     ErrorF("-s #                   screen-saver timeout (minutes)\n");
 #ifdef XCSECURITY
@@ -960,6 +965,10 @@ char	*argv[];
 	    }
 	    else
 		UseMsg ();
+	}
+	else if ( strcmp( argv[i], "-norender" ) == 0)
+	{
+	    noRenderExtension = TRUE;
 	}
 #endif
  	else
