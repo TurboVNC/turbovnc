@@ -452,7 +452,6 @@ extern void rfbInitSockets();
 extern void rfbDisconnectUDPSock();
 extern void rfbCloseSock();
 extern void rfbCheckFds();
-extern Bool rfbSockBusy(int sock);
 extern void rfbWaitForClient(int sock);
 extern int rfbConnect(char *host, int port);
 
