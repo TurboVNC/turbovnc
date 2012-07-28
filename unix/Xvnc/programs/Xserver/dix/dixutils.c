@@ -1,13 +1,13 @@
+/* $XFree86: xc/programs/Xserver/dix/dixutils.c,v 3.13 2003/01/12 02:44:26 dawes Exp $ */
 /***********************************************************
 
-Copyright (c) 1987  X Consortium
+Copyright 1987, 1998  The Open Group
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission to use, copy, modify, distribute, and sell this software and its
+documentation for any purpose is hereby granted without fee, provided that
+the above copyright notice appear in all copies and that both that
+copyright notice and this permission notice appear in supporting
+documentation.
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,13 +15,13 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of the X Consortium shall not be
+Except as contained in this notice, the name of The Open Group shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from the X Consortium.
+in this Software without prior written authorization from The Open Group.
 
 
 Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
@@ -82,12 +82,8 @@ Author:  Adobe Systems Incorporated
 
 */
 
-/* $TOG: dixutils.c /main/33 1997/05/22 10:02:20 kaleb $ */
+/* $Xorg: dixutils.c,v 1.4 2001/02/09 02:04:40 xorgcvs Exp $ */
 
-
-
-
-/* $XFree86: xc/programs/Xserver/dix/dixutils.c,v 3.1.2.1 1997/05/23 12:19:35 dawes Exp $ */
 
 #include "X.h"
 #include "Xmd.h"
@@ -157,25 +153,49 @@ ClientTimeToServerTime(c)
  * beware of too-small buffers
  */
 
+static unsigned char
+ISOLatin1ToLower (unsigned char source)
+{
+    unsigned char   dest;
+    if ((source >= XK_A) && (source <= XK_Z))
+       dest = source + (XK_a - XK_A);
+    else if ((source >= XK_Agrave) && (source <= XK_Odiaeresis))
+       dest = source + (XK_agrave - XK_Agrave);
+    else if ((source >= XK_Ooblique) && (source <= XK_Thorn))
+       dest = source + (XK_oslash - XK_Ooblique);
+    else
+       dest = source;
+    return dest;
+}
+
+
 void
-CopyISOLatin1Lowered(dest, source, length)
-    register unsigned char *dest, *source;
-    int length;
+CopyISOLatin1Lowered(unsigned char *dest, unsigned char *source, int length)
 {
     register int i;
 
     for (i = 0; i < length; i++, source++, dest++)
-    {
-	if ((*source >= XK_A) && (*source <= XK_Z))
-	    *dest = *source + (XK_a - XK_A);
-	else if ((*source >= XK_Agrave) && (*source <= XK_Odiaeresis))
-	    *dest = *source + (XK_agrave - XK_Agrave);
-	else if ((*source >= XK_Ooblique) && (*source <= XK_Thorn))
-	    *dest = *source + (XK_oslash - XK_Ooblique);
-	else
-	    *dest = *source;
-    }
+	*dest = ISOLatin1ToLower (*source);
     *dest = '\0';
+}
+
+int
+CompareISOLatin1Lowered(unsigned char *s1, int s1len, 
+			unsigned char *s2, int s2len)
+{
+    unsigned char   c1, c2;
+    
+    for (;;) 
+    {
+	/* note -- compare against zero so that -1 ignores len */
+	c1 = s1len-- ? *s1++ : '\0';
+	c2 = s2len-- ? *s2++ : '\0';
+	if (!c1 || 
+	    (c1 != c2 && 
+	     (c1 = ISOLatin1ToLower (c1)) != (c2 = ISOLatin1ToLower (c2))))
+	    break;
+    }
+    return (int) c1 - (int) c2;
 }
 
 #ifdef XCSECURITY
