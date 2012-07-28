@@ -1236,7 +1236,6 @@ bool ClientConnection::AuthenticateVNC(char *errBuf, int errBufSize)
 	ReadExact((char *)challenge, CHALLENGESIZE);
 
 	char passwd[MAXPWLEN + 1];
-	// Was the password already specified in a config file?
 	if (m_opts.m_autoPass) {
 		char *cstatus = fgets(passwd, sizeof(passwd), stdin);
 		size_t len    = strlen(passwd);
@@ -1248,6 +1247,7 @@ bool ClientConnection::AuthenticateVNC(char *errBuf, int errBufSize)
 			if (len > 0 && passwd[len-1] == '\n') passwd[len-1] = '\0';
 		}
 	}
+	// Was the password already specified in a config file?
 	else if (m_passwdSet) {
 		char *pw = vncDecryptPasswd(m_encPasswd);
 		strcpy(passwd, pw);
