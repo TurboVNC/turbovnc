@@ -1,0 +1,8 @@
+* Conventions Used in This Document
+#OPT: plain!
+
+This document assumes that TurboVNC will be installed in the default
+directory (''/opt/TurboVNC'' on Un*x and Mac systems and
+''c:\\Program Files\\TurboVNC'' on Windows systems.)  If your installation of
+TurboVNC resides in a different directory, then adjust the instructions
+accordingly.

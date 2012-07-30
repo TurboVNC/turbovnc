@@ -3,20 +3,21 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2012-07-28T06:18:53">
+<meta name="date" content="2012-07-29T19:24:09">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.2</title>
 <link rel="start" href="index.html" title="Frontpage">
-<link rel="chapter" href="index.html#hd001" title="1 Legal Information">
-<link rel="chapter" href="index.html#hd002" title="2 Overview">
-<link rel="chapter" href="index.html#hd003" title="3 System Requirements">
-<link rel="chapter" href="index.html#hd004" title="4 Obtaining and Installing TurboVNC">
-<link rel="chapter" href="index.html#hd005" title="5 Using TurboVNC">
-<link rel="chapter" href="index.html#hd006" title="6 TurboVNC Authentication Extensions">
-<link rel="chapter" href="index.html#hd007" title="7 Multithreading in TurboVNC">
-<link rel="chapter" href="index.html#hd008" title="8 Using TurboVNC with VirtualGL">
-<link rel="chapter" href="index.html#hd009" title="9 Compatibility Guide">
-<link rel="chapter" href="index.html#hd0010" title="10 Advanced Configuration">
+<link rel="chapter" href="index.html#hd001" title="Legal Information">
+<link rel="chapter" href="index.html#hd002" title="Conventions Used in This Document">
+<link rel="chapter" href="index.html#hd003" title="3 Overview">
+<link rel="chapter" href="index.html#hd004" title="4 System Requirements">
+<link rel="chapter" href="index.html#hd005" title="5 Obtaining and Installing TurboVNC">
+<link rel="chapter" href="index.html#hd006" title="6 Using TurboVNC">
+<link rel="chapter" href="index.html#hd007" title="7 TurboVNC Authentication Extensions">
+<link rel="chapter" href="index.html#hd008" title="8 Multithreading in TurboVNC">
+<link rel="chapter" href="index.html#hd009" title="9 Using TurboVNC with VirtualGL">
+<link rel="chapter" href="index.html#hd0010" title="10 Compatibility Guide">
+<link rel="chapter" href="index.html#hd0011" title="11 Advanced Configuration">
 <link rel="stylesheet" type="text/css" href="turbovnc.css" title="turbovnc">
 </head>
 <body >
@@ -29,131 +30,134 @@
 <h1 class="toc">Table of Contents</h1>
 <ul class="toc">
     <li class="Itemize-1 toc">
-        <a href="#hd001" class="toc">1 Legal Information</a>
+        <a href="#hd001" class="toc">Legal Information</a>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd002" class="toc">2 Overview</a>
+        <a href="#hd002" class="toc">Conventions Used in This Document</a>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd003" class="toc">3 System Requirements</a>
+        <a href="#hd003" class="toc">3 Overview</a>
+    </li>
+    <li class="Itemize-1 toc">
+        <a href="#hd004" class="toc">4 System Requirements</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a href="#hd003001" class="toc">3.1 Linux/x86 and Other x86 Un*x 
+                <a href="#hd004001" class="toc">4.1 Linux/x86 and Other x86 Un*x 
                 Operating Systems</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd003002" class="toc">3.2 Mac/x86</a>
+                <a href="#hd004002" class="toc">4.2 Mac/x86</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd003003" class="toc">3.3 Windows</a>
+                <a href="#hd004003" class="toc">4.3 Windows</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd004" class="toc">4 Obtaining and Installing TurboVNC</a>
+        <a href="#hd005" class="toc">5 Obtaining and Installing TurboVNC</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a href="#hd004001" class="toc">4.1 Installing TurboVNC on Linux</a>
+                <a href="#hd005001" class="toc">5.1 Installing TurboVNC on Linux</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd004002" class="toc">4.2 Installing the TurboVNC Viewer on OS 
+                <a href="#hd005002" class="toc">5.2 Installing the TurboVNC Viewer on OS 
                 X</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd004003" class="toc">4.3 Installing the TurboVNC Viewer on 
+                <a href="#hd005003" class="toc">5.3 Installing the TurboVNC Viewer on 
                 Windows</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd004004" class="toc">4.4 Installing TurboVNC from Source</a>
+                <a href="#hd005004" class="toc">5.4 Installing TurboVNC from Source</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd004005" class="toc">4.5 Uninstalling TurboVNC</a>
+                <a href="#hd005005" class="toc">5.5 Uninstalling TurboVNC</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd005" class="toc">5 Using TurboVNC</a>
+        <a href="#hd006" class="toc">6 Using TurboVNC</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a href="#hd005001" class="toc">5.1 Starting and Connecting to a 
+                <a href="#hd006001" class="toc">6.1 Starting and Connecting to a 
                 TurboVNC Session</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd005002" class="toc">5.2 Disconnecting and Killing a TurboVNC 
+                <a href="#hd006002" class="toc">6.2 Disconnecting and Killing a TurboVNC 
                 Session</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd005003" class="toc">5.3 Using TurboVNC in a Web Browser</a>
+                <a href="#hd006003" class="toc">6.3 Using TurboVNC in a Web Browser</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd005004" class="toc">5.4 Optimizing TurboVNC&rsquo;s 
+                <a href="#hd006004" class="toc">6.4 Optimizing TurboVNC&rsquo;s 
                 Performance for Different Network Types</a>
                 <ul class="toc">
                     <li class="Itemize-5 toc">
-                        <a href="#hd005004001" class="toc">5.4.1 Lossless Refresh</a>
+                        <a href="#hd006004001" class="toc">6.4.1 Lossless Refresh</a>
                     </li>
                     <li class="Itemize-5 toc">
-                        <a href="#hd005004002" class="toc">5.4.2 Automatic Lossless Refresh</a>
+                        <a href="#hd006004002" class="toc">6.4.2 Automatic Lossless Refresh</a>
                     </li>
                 </ul>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd005005" class="toc">5.5 Securing a TurboVNC Connection</a>
+                <a href="#hd006005" class="toc">6.5 Securing a TurboVNC Connection</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd005006" class="toc">5.6 Further Reading</a>
-            </li>
-        </ul>
-    </li>
-    <li class="Itemize-1 toc">
-        <a href="#hd006" class="toc">6 TurboVNC Authentication Extensions</a>
-        <ul class="toc">
-            <li class="Itemize-3 toc">
-                <a href="#hd006001" class="toc">6.1 Enabling Authentication Methods</a>
-            </li>
-            <li class="Itemize-3 toc">
-                <a href="#hd006002" class="toc">6.2 Further Reading</a>
+                <a href="#hd006006" class="toc">6.6 Further Reading</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd007" class="toc">7 Multithreading in TurboVNC</a>
-    </li>
-    <li class="Itemize-1 toc">
-        <a href="#hd008" class="toc">8 Using TurboVNC with VirtualGL</a>
+        <a href="#hd007" class="toc">7 TurboVNC Authentication Extensions</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a href="#hd008001" class="toc">8.1 Using TurboVNC and VirtualGL on the 
+                <a href="#hd007001" class="toc">7.1 Enabling Authentication Methods</a>
+            </li>
+            <li class="Itemize-3 toc">
+                <a href="#hd007002" class="toc">7.2 Further Reading</a>
+            </li>
+        </ul>
+    </li>
+    <li class="Itemize-1 toc">
+        <a href="#hd008" class="toc">8 Multithreading in TurboVNC</a>
+    </li>
+    <li class="Itemize-1 toc">
+        <a href="#hd009" class="toc">9 Using TurboVNC with VirtualGL</a>
+        <ul class="toc">
+            <li class="Itemize-3 toc">
+                <a href="#hd009001" class="toc">9.1 Using TurboVNC and VirtualGL on the 
                 Same Server</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd008002" class="toc">8.2 Using TurboVNC When VirtualGL Is 
+                <a href="#hd009002" class="toc">9.2 Using TurboVNC When VirtualGL Is 
                 Running on a Different Machine</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd009" class="toc">9 Compatibility Guide</a>
+        <a href="#hd0010" class="toc">10 Compatibility Guide</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a href="#hd009001" class="toc">9.1 TightVNC or TigerVNC Servers</a>
+                <a href="#hd0010001" class="toc">10.1 TightVNC or TigerVNC Servers</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd009002" class="toc">9.2 TightVNC or TigerVNC Viewers</a>
+                <a href="#hd0010002" class="toc">10.2 TightVNC or TigerVNC Viewers</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd009003" class="toc">9.3 RealVNC</a>
+                <a href="#hd0010003" class="toc">10.3 RealVNC</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a href="#hd0010" class="toc">10 Advanced Configuration</a>
+        <a href="#hd0011" class="toc">11 Advanced Configuration</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a href="#hd0010001" class="toc">10.1 Server Settings</a>
+                <a href="#hd0011001" class="toc">11.1 Server Settings</a>
             </li>
             <li class="Itemize-3 toc">
-                <a href="#hd0010002" class="toc">10.2 Client Settings</a>
+                <a href="#hd0011002" class="toc">11.2 Client Settings</a>
             </li>
         </ul>
     </li>
@@ -165,7 +169,7 @@
 <hr class="break" />
 
 
-<h1 id="hd001"><a name="file001"></a>1&nbsp;Legal Information</h1>
+<h1 id="hd001"><a name="file001"></a>Legal Information</h1>
 
 <p><img src="somerights20.png" alt="somerights20" class="inline" id="imgid_0" name="imgid_0"/></p>
 
@@ -190,7 +194,21 @@ License, v2</a><a name="idx004"></a>.</p>
 
 
 
-<h1 id="hd002"><a name="file002"></a>2&nbsp;Overview</h1>
+<h1 id="hd002"><a name="file002"></a>Conventions Used in This Document</h1>
+
+<p>This document assumes that TurboVNC will be installed in the default 
+directory (<code>/opt/TurboVNC</code> on Un*x and Mac systems and 
+<code>c:\Program&nbsp;Files\TurboVNC</code> on Windows systems.)  If 
+your installation of TurboVNC resides in a different directory, then 
+adjust the instructions accordingly.</p>
+
+<p><br /></p>
+
+<hr class="break" />
+
+
+
+<h1 id="hd003"><a name="file003"></a>3&nbsp;Overview</h1>
 
 <p><a name="Overview"></a></p>
 
@@ -301,7 +319,7 @@ image data over a 5 Megabit/second broadband connection at reduced (but
 usable) image quality.</p>
 
 <p>TurboVNC is compatible with other VNC distributions.  See Chapter 
-<a href="#Compatibility" class="ref">9</a> for more information.  
+<a href="#Compatibility" class="ref">10</a> for more information.  
 TurboVNC can be installed onto the same system as other VNC 
 distributions without interference.</p>
 
@@ -311,10 +329,10 @@ distributions without interference.</p>
 
 
 
-<h1 id="hd003"><a name="file003"></a>3&nbsp;System Requirements</h1>
+<h1 id="hd004"><a name="file004"></a>4&nbsp;System Requirements</h1>
 
 
-<h2 id="hd003001">3.1&nbsp;Linux/x86 and Other x86 Un*x Operating Systems</h2>
+<h2 id="hd004001">4.1&nbsp;Linux/x86 and Other x86 Un*x Operating Systems</h2>
 
 <div class="table">
 <table class="standard">
@@ -351,7 +369,7 @@ distributions without interference.</p>
 
 
 
-<h2 id="hd003002">3.2&nbsp;Mac/x86</h2>
+<h2 id="hd004002">4.2&nbsp;Mac/x86</h2>
 
 <div class="table">
 <table class="standard">
@@ -379,7 +397,7 @@ distributions without interference.</p>
 
 
 
-<h2 id="hd003003">3.3&nbsp;Windows</h2>
+<h2 id="hd004003">4.3&nbsp;Windows</h2>
 
 <div class="table">
 <table class="standard">
@@ -411,13 +429,13 @@ distributions without interference.</p>
 
 
 
-<h1 id="hd004"><a name="file004"></a>4&nbsp;Obtaining and Installing TurboVNC</h1>
+<h1 id="hd005"><a name="file005"></a>5&nbsp;Obtaining and Installing TurboVNC</h1>
 
 
-<h2 id="hd004001">4.1&nbsp;Installing TurboVNC on Linux</h2>
+<h2 id="hd005001">5.1&nbsp;Installing TurboVNC on Linux</h2>
 
 
-<h3 id="hd004001001">Font Dependencies</h3>
+<h3 id="hd005001001">Font Dependencies</h3>
 
 <p>On some Linux distributions, most notably Fedora 10 and later, the basic 
 X11 bitmap fonts are not installed by default.  Thus, it is necessary to 
@@ -432,7 +450,7 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
 
 
 
-<h3 id="hd004001002">Installing TurboVNC</h3>
+<h3 id="hd005001002">Installing TurboVNC</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered" value="1">
@@ -481,7 +499,7 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
 
 
 
-<h2 id="hd004002">4.2&nbsp;Installing the TurboVNC Viewer on OS X</h2>
+<h2 id="hd005002">5.2&nbsp;Installing the TurboVNC Viewer on OS X</h2>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
@@ -503,7 +521,7 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
 
 
 
-<h2 id="hd004003">4.3&nbsp;Installing the TurboVNC Viewer on Windows</h2>
+<h2 id="hd005003">5.3&nbsp;Installing the TurboVNC Viewer on Windows</h2>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
@@ -526,7 +544,7 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
 
 
 
-<h2 id="hd004004">4.4&nbsp;Installing TurboVNC from Source</h2>
+<h2 id="hd005004">5.4&nbsp;Installing TurboVNC from Source</h2>
 
 <p>If you are using a Unix platform for which there is not a pre-built 
 TurboVNC binary package available, then log in as root, download the 
@@ -542,10 +560,10 @@ for further instructions on how to build TurboVNC from source.</p>
 
 
 
-<h2 id="hd004005">4.5&nbsp;Uninstalling TurboVNC</h2>
+<h2 id="hd005005">5.5&nbsp;Uninstalling TurboVNC</h2>
 
 
-<h3 id="hd004005001">Linux</h3>
+<h3 id="hd005005001">Linux</h3>
 
 <p>As root, issue one of the following commands:</p>
 
@@ -568,7 +586,7 @@ dpkg&nbsp;-r&nbsp;turbovnc
 
 
 
-<h3 id="hd004005002">OS X</h3>
+<h3 id="hd005005002">OS X</h3>
 
 <p>Use the &ldquo;Uninstall TurboVNC&rdquo; application provided in the 
 TurboVNC disk image, or issue the following command from the Terminal:</p>
@@ -579,7 +597,7 @@ sudo&nbsp;/opt/TurboVNC/bin/uninstall
 
 
 
-<h3 id="hd004005003">Windows</h3>
+<h3 id="hd005005003">Windows</h3>
 
 <p>Use the &ldquo;Programs and Features&rdquo; applet in the Control Panel 
 (or the &ldquo;Add or Remove Programs&rdquo; applet if you are running 
@@ -592,15 +610,15 @@ Windows XP), or &ldquo;Uninstall TurboVNC&rdquo; in the
 
 
 
-<h1 id="hd005"><a name="file005"></a>5&nbsp;Using TurboVNC</h1>
+<h1 id="hd006"><a name="file006"></a>6&nbsp;Using TurboVNC</h1>
 
 <p><a name="TurboVNC_Usage"></a></p>
 
 
-<h2 id="hd005001">5.1&nbsp;Starting and Connecting to a TurboVNC Session</h2>
+<h2 id="hd006001">6.1&nbsp;Starting and Connecting to a TurboVNC Session</h2>
 
 
-<h3 id="hd005001001">Procedure</h3>
+<h3 id="hd006001001">Procedure</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
@@ -727,7 +745,7 @@ ssh&nbsp;{user}@{server}
 
 
 
-<h2 id="hd005002">5.2&nbsp;Disconnecting and Killing a TurboVNC Session</h2>
+<h2 id="hd006002">6.2&nbsp;Disconnecting and Killing a TurboVNC Session</h2>
 
 <p>Closing the TurboVNC Viewer disconnects from the TurboVNC session, but 
 the TurboVNC session will remain running on the TurboVNC server machine 
@@ -765,7 +783,7 @@ particular machine, type the following command:</p>
 
 
 
-<h2 id="hd005003">5.3&nbsp;Using TurboVNC in a Web Browser</h2>
+<h2 id="hd006003">6.3&nbsp;Using TurboVNC in a Web Browser</h2>
 
 <p>When a TurboVNC session is created, it automatically launches a 
 miniature web server that serves up a Java TurboVNC Viewer applet.  This 
@@ -792,7 +810,7 @@ connect.</p>
 
 
 
-<h2 id="hd005004">5.4&nbsp;Optimizing TurboVNC&rsquo;s Performance for Different Network Types</h2>
+<h2 id="hd006004">6.4&nbsp;Optimizing TurboVNC&rsquo;s Performance for Different Network Types</h2>
 
 <p>The level of image compression in TurboVNC can be adjusted to balance 
 the (sometimes conflicting) goals of high image quality and high 
@@ -934,7 +952,7 @@ encoding method <br /> <code>-losslesswan</code> = select the
 which you can select a different encoding method.</p>
 
 
-<h3 id="hd005004001">5.4.1&nbsp;Lossless Refresh</h3>
+<h3 id="hd006004001">6.4.1&nbsp;Lossless Refresh</h3>
 
 <p>Since both of TurboVNC&rsquo;s mathematically lossless encoding methods 
 have performance drawbacks, another option for image-quality-critical 
@@ -954,7 +972,7 @@ the viewer window.</p>
 
 
 
-<h3 id="hd005004002">5.4.2&nbsp;Automatic Lossless Refresh</h3>
+<h3 id="hd006004002">6.4.2&nbsp;Automatic Lossless Refresh</h3>
 
 <p><a name="ALR"></a></p>
 
@@ -1004,7 +1022,7 @@ prior to starting a TurboVNC session.</p>
 
 
 
-<h2 id="hd005005">5.5&nbsp;Securing a TurboVNC Connection</h2>
+<h2 id="hd006005">6.5&nbsp;Securing a TurboVNC Connection</h2>
 
 <p><a name="Secure_TurboVNC_Usage"></a></p>
 
@@ -1065,7 +1083,7 @@ TurboVNC Viewer and point it to
 (<code>localhost:1</code> in the above example.)</p>
 
 
-<h3 id="hd005005001">The <code>-via</code> Command-Line Option</h3>
+<h3 id="hd006005001">The <code>-via</code> Command-Line Option</h3>
 
 <p>If you are using the Unix/Linux TurboVNC Viewer, then you can simplify 
 the above by using the <code>-via</code> command-line option to 
@@ -1088,7 +1106,7 @@ details.</p>
 
 
 
-<h3 id="hd005005002">Forcing Secure Connections</h3>
+<h3 id="hd006005002">Forcing Secure Connections</h3>
 
 <p>Passing an argument of <code>-localhost</code> to <code>vncserver</code> 
 will force the TurboVNC Server session to accept inbound connections 
@@ -1108,7 +1126,7 @@ all new TurboVNC sessions that are started on the machine.</p>
 
 
 
-<h3 id="hd005005003">Performance Notes</h3>
+<h3 id="hd006005003">Performance Notes</h3>
 
 <p>For LAN connections and other high-speed networks, tunneling the 
 TurboVNC connection over SSH will reduce performance by as much as 
@@ -1117,7 +1135,7 @@ penalty for using SSH tunneling with TurboVNC.</p>
 
 
 
-<h2 id="hd005006">5.6&nbsp;Further Reading</h2>
+<h2 id="hd006006">6.6&nbsp;Further Reading</h2>
 
 <p>For more detailed instructions on the usage of TurboVNC:</p>
 
@@ -1143,7 +1161,7 @@ man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;{vncserver&nbsp;|&nbsp;Xvnc&nbsp;|&nbsp;
 
 
 
-<h1 id="hd006"><a name="file006"></a>6&nbsp;TurboVNC Authentication Extensions</h1>
+<h1 id="hd007"><a name="file007"></a>7&nbsp;TurboVNC Authentication Extensions</h1>
 
 <p>The TurboVNC Server supports four &ldquo;authentication methods&rdquo;, 
 which are used to validate authentication credentials sent from a VNC 
@@ -1192,7 +1210,7 @@ viewer:</p>
          recommended that this authentication method be enabled only if the 
          server is restricted to only allow loopback (SSH) connections and to 
          disallow reverse connections (see Section 
-         <a href="#Secure_TurboVNC_Usage" class="ref">5.5</a>.)
+         <a href="#Secure_TurboVNC_Usage" class="ref">6.5</a>.)
     </dd>
 </dl>
 
@@ -1218,12 +1236,12 @@ VNC server:</p>
          Both the username and password are sent to the server as plain text. 
          Thus, it is <em>strongly</em> recommended that this authentication 
          scheme be used only with an SSH-encrypted TurboVNC connection (see 
-         Section <a href="#Secure_TurboVNC_Usage" class="ref">5.5</a>.)
+         Section <a href="#Secure_TurboVNC_Usage" class="ref">6.5</a>.)
     </dd>
 </dl>
 
 
-<h2 id="hd006001">6.1&nbsp;Enabling Authentication Methods</h2>
+<h2 id="hd007001">7.1&nbsp;Enabling Authentication Methods</h2>
 
 <p>The default behavior of the TurboVNC Server is for all authentication 
 methods to be enabled and for VNC password authentication and OTP to be 
@@ -1265,7 +1283,7 @@ page for more details.</p>
 
 
 
-<h2 id="hd006002">6.2&nbsp;Further Reading</h2>
+<h2 id="hd007002">7.2&nbsp;Further Reading</h2>
 
 <p>For more detailed information about the TurboVNC authentication 
 extensions, refer to the TurboVNC man pages:</p>
@@ -1280,7 +1298,7 @@ man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;{vncserver&nbsp;|&nbsp;Xvnc&nbsp;|&nbsp;
 
 
 
-<h1 id="hd007"><a name="file007"></a>7&nbsp;Multithreading in TurboVNC</h1>
+<h1 id="hd008"><a name="file008"></a>8&nbsp;Multithreading in TurboVNC</h1>
 
 <p><a name="Multithreading"></a></p>
 
@@ -1309,7 +1327,7 @@ as there are cores on the server machine, but you can set the
 
 
 
-<h1 id="hd008"><a name="file008"></a>8&nbsp;Using TurboVNC with VirtualGL</h1>
+<h1 id="hd009"><a name="file009"></a>9&nbsp;Using TurboVNC with VirtualGL</h1>
 
 <p>Referring to the VirtualGL User&rsquo;s Guide, VirtualGL&rsquo;s X11 
 Transport draws 3D images onto an X display using standard X11 drawing 
@@ -1333,7 +1351,7 @@ from VirtualGL to a client machine without using VirtualGL&rsquo;s
 embedded VGL Transport.</p>
 
 
-<h3 id="hd008000001">Advantages of TurboVNC (when compared to the VGL Transport)</h3>
+<h3 id="hd009000001">Advantages of TurboVNC (when compared to the VGL Transport)</h3>
 
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
@@ -1392,7 +1410,7 @@ embedded VGL Transport.</p>
 
 
 
-<h3 id="hd008000002">Disadvantages of TurboVNC (when compared to the VGL transport)</h3>
+<h3 id="hd009000002">Disadvantages of TurboVNC (when compared to the VGL transport)</h3>
 
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
@@ -1414,7 +1432,7 @@ embedded VGL Transport.</p>
 
 
 
-<h2 id="hd008001">8.1&nbsp;Using TurboVNC and VirtualGL on the Same Server</h2>
+<h2 id="hd009001">9.1&nbsp;Using TurboVNC and VirtualGL on the Same Server</h2>
 
 <p><a name="TurboVNC_Usage_Local"></a></p>
 
@@ -1431,12 +1449,12 @@ sending them over a network.</p>
 this configuration.</p>
 
 
-<h3 id="hd008001001">Procedure</h3>
+<h3 id="hd009001001">Procedure</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
         Follow the procedure described in Chapter 
-        <a href="#TurboVNC_Usage" class="ref">5</a> for starting a TurboVNC 
+        <a href="#TurboVNC_Usage" class="ref">6</a> for starting a TurboVNC 
         session and connecting to it.
     </li>
     <li class="Ordered-1 Ordered">
@@ -1456,7 +1474,7 @@ this configuration.</p>
 
 
 
-<h2 id="hd008002">8.2&nbsp;Using TurboVNC When VirtualGL Is Running on a Different Machine</h2>
+<h2 id="hd009002">9.2&nbsp;Using TurboVNC When VirtualGL Is Running on a Different Machine</h2>
 
 <p><a name="TurboVNC_Usage_Remote"></a></p>
 
@@ -1476,12 +1494,12 @@ there needs to be a fast link between the VirtualGL server and the
 TurboVNC server for this procedure to perform well.</p>
 
 
-<h3 id="hd008002001">Procedure</h3>
+<h3 id="hd009002001">Procedure</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
         Follow the procedure described in Chapter 
-        <a href="#TurboVNC_Usage" class="ref">5</a> for starting a TurboVNC 
+        <a href="#TurboVNC_Usage" class="ref">6</a> for starting a TurboVNC 
         session and connecting to it.
     </li>
     <li class="Ordered-1 Ordered">
@@ -1521,7 +1539,7 @@ TurboVNC server for this procedure to perform well.</p>
 
 
 
-<h1 id="hd009"><a name="file009"></a>9&nbsp;Compatibility Guide</h1>
+<h1 id="hd0010"><a name="file010"></a>10&nbsp;Compatibility Guide</h1>
 
 <p><a name="Compatibility"></a></p>
 
@@ -1537,7 +1555,7 @@ this will generally result in some decrease in performance.</p>
 mixing TurboVNC with other VNC flavors.</p>
 
 
-<h2 id="hd009001">9.1&nbsp;TightVNC or TigerVNC Servers</h2>
+<h2 id="hd0010001">10.1&nbsp;TightVNC or TigerVNC Servers</h2>
 
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
@@ -1716,14 +1734,14 @@ mixing TurboVNC with other VNC flavors.</p>
 
 
 
-<h2 id="hd009002">9.2&nbsp;TightVNC or TigerVNC Viewers</h2>
+<h2 id="hd0010002">10.2&nbsp;TightVNC or TigerVNC Viewers</h2>
 
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
         The TurboVNC Server will attempt to emulate the behavior of a TigerVNC 
         server and will translate JPEG quality levels into actual JPEG quality 
         and subsampling as specified in Section 
-        <a href="#TigerVNC_JPEG_Qual" class="ref">9.1</a>. <br /><br />
+        <a href="#TigerVNC_JPEG_Qual" class="ref">10.1</a>. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
         When either a TightVNC or TigerVNC viewer is connected to a TurboVNC 
@@ -1752,7 +1770,7 @@ mixing TurboVNC with other VNC flavors.</p>
 
 
 
-<h2 id="hd009003">9.3&nbsp;RealVNC</h2>
+<h2 id="hd0010003">10.3&nbsp;RealVNC</h2>
 
 <p>The TurboVNC Viewer supports the Hextile and Raw encoding types, which 
 are compatible with RealVNC.  Neither of these encoding types can be 
@@ -1780,10 +1798,10 @@ available even when using these legacy encoding types.</p>
 
 
 
-<h1 id="hd0010"><a name="file010"></a>10&nbsp;Advanced Configuration</h1>
+<h1 id="hd0011"><a name="file011"></a>11&nbsp;Advanced Configuration</h1>
 
 
-<h2 id="hd0010001">10.1&nbsp;Server Settings</h2>
+<h2 id="hd0011001">11.1&nbsp;Server Settings</h2>
 
 <div class="table">
 <table class="standard">
@@ -1810,7 +1828,7 @@ available even when using these legacy encoding types.</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        See Section <a href="#ALR" class="ref">5.4.2</a>
+        See Section <a href="#ALR" class="ref">6.4.2</a>
     </dd>
 </dl>
 
@@ -1875,7 +1893,7 @@ available even when using these legacy encoding types.</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        See Chapter <a href="#Multithreading" class="ref">7</a>
+        See Chapter <a href="#Multithreading" class="ref">8</a>
     </dd>
 </dl>
 
@@ -1904,7 +1922,7 @@ available even when using these legacy encoding types.</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        See Chapter <a href="#Multithreading" class="ref">7</a>
+        See Chapter <a href="#Multithreading" class="ref">8</a>
     </dd>
 </dl>
 
@@ -1941,7 +1959,7 @@ available even when using these legacy encoding types.</p>
 
 
 
-<h2 id="hd0010002">10.2&nbsp;Client Settings</h2>
+<h2 id="hd0011002">11.2&nbsp;Client Settings</h2>
 
 <div class="table">
 <table class="standard">
