@@ -1,5 +1,4 @@
 * Legal Information
-#OPT: plain!
 
 {img: somerights20.png}
 
