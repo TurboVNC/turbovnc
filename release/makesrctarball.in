@@ -1,0 +1,35 @@
+#!/bin/sh
+
+set -u
+set -e
+trap onexit INT
+trap onexit TERM
+trap onexit EXIT
+
+TMPDIR=
+
+onexit()
+{
+	if [ ! "$TMPDIR" = "" ]; then
+		rm -rf $TMPDIR
+	fi
+}
+
+if [ -f @CMAKE_PROJECT_NAME_LC@-@VERSION@.tar.gz ]; then
+	rm -f @CMAKE_PROJECT_NAME_LC@-@VERSION@.tar.gz
+fi
+
+umask 022
+TMPDIR=`mktemp -d /tmp/@CMAKE_PROJECT_NAME_LC@-build.XXXXXX`
+
+pushd @CMAKE_SOURCE_DIR@
+svn export . $TMPDIR/@CMAKE_PROJECT_NAME_LC@-@VERSION@
+popd
+
+pushd $TMPDIR
+tar -z -cf @CMAKE_PROJECT_NAME_LC@-@VERSION@.tar.gz @CMAKE_PROJECT_NAME_LC@-@VERSION@
+popd
+
+mv $TMPDIR/@CMAKE_PROJECT_NAME_LC@-@VERSION@.tar.gz .
+
+exit

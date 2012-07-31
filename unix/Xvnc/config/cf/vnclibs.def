@@ -19,9 +19,9 @@ PTHREADLIBS = -lpthread
 #endif
 
 #ifdef SunArchitecture
-VNCSYSLIBS = JPEGLibraryFlags -lz $(PTHREADLIBS) $(VNCPAMLIBS)
+VNCSYSLIBS = JPEGLibraryFlags $(PTHREADLIBS) $(VNCPAMLIBS)
 #else
-VNCSYSLIBS = JPEGLibraryFlags -lz -lcrypt $(PTHREADLIBS) $(VNCPAMLIBS)
+VNCSYSLIBS = JPEGLibraryFlags -lcrypt $(PTHREADLIBS) $(VNCPAMLIBS)
 #endif
 
 VNCCPPFLAGS = VncIncludeDir $(VNCPAMDEFS) JPEGIncludeFlags

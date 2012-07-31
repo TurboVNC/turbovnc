@@ -20,6 +20,11 @@ Implemented v0.10 of the X RENDER extension, to address compatibility problems
 with newer applications that assumed v0.10 functionality was available without
 checking for it.
 -------------------------------------------------------------------------------
+[5]
+Overhauled the build and packaging system.  All platforms now use CMake, and
+the Java code can be built either as part of a Unix or Windows build or as
+a stand-alone project.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

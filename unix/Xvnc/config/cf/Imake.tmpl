@@ -307,11 +307,8 @@ XCOMM the platform-specific parameters - edit site.def to change
 #ifndef HasZlib
 #define HasZlib			NO
 #endif
-#if !HasZlib		/* GzipLibrary was valid only if HasZlib */
-#define GzipLibrary -L/usr/local/lib -lz
-#endif
-#ifndef GzipLibrary	/* if OS config didn't define it, assume it's -lz */
-#define GzipLibrary -lz
+#ifndef GzipLibrary
+#define GzipLibrary $(TOP)/../../common/zlib/libzlib.a
 #endif
 #if HasKrb5
 #ifndef Krb5Includes

@@ -1,0 +1,61 @@
+#!/bin/sh
+
+set -u
+set -e
+trap onexit INT
+trap onexit TERM
+trap onexit EXIT
+
+TMPDIR=
+
+onexit()
+{
+	if [ ! "$TMPDIR" = "" ]; then
+		sudo rm -rf $TMPDIR
+	fi
+}
+
+PACKAGE_NAME=@CMAKE_PROJECT_NAME_LC@
+VERSION=@VERSION@
+BUILD=@BUILD@
+DEBARCH=@DEBARCH@
+SRCDIR=@CMAKE_SOURCE_DIR@
+DOCDIR=@TVNC_DOCDIR@
+CONFDIR=@TVNC_CONFDIR@
+PREFIX=@CMAKE_INSTALL_PREFIX@
+
+umask 022
+rm -f $PACKAGE_NAME\_$DEBARCH.deb
+TMPDIR=`mktemp -d /tmp/$PACKAGE_NAME-build.XXXXXX`
+mkdir $TMPDIR/DEBIAN
+cp pkgscripts/deb-control $TMPDIR/DEBIAN/control
+
+make install DESTDIR=$TMPDIR
+make xserver-install DESTDIR=$TMPDIR
+
+mkdir -p $TMPDIR/usr/share/doc/$PACKAGE_NAME-$VERSION
+if [ ! "$DOCDIR" = "/usr/share/doc/$PACKAGE_NAME-$VERSION" ]; then
+  mv $TMPDIR/$DOCDIR $TMPDIR/__tmpdoc
+  mkdir -p $TMPDIR/usr/share/doc/$PACKAGE_NAME-$VERSION
+  mv $TMPDIR/__tmpdoc $TMPDIR/usr/share/doc/$PACKAGE_NAME-$VERSION
+fi
+if [ ! "$CONFDIR" = "/etc" ]; then
+  mv $TMPDIR/$CONFDIR $TMPDIR/__tmpconf
+  mv $TMPDIR/__tmpconf $TMPDIR/etc
+fi
+
+mkdir -p $TMPDIR/usr/share/applications
+cat > $TMPDIR/usr/share/applications/tvncviewer.desktop <<EOF
+[Desktop Entry]
+Name=TurboVNC Viewer
+Comment=TurboVNC client application
+Exec=$PREFIX/bin/vncviewer
+Terminal=0
+Type=Application
+Categories=Application;Utility;X-Red-Hat-Extra;
+EOF
+
+sudo chown -Rh root:root $TMPDIR/*
+dpkg -b $TMPDIR $PACKAGE_NAME\_$VERSION\_$DEBARCH.deb
+
+exit

@@ -903,7 +903,7 @@ sub SanityCheck
 	foreach $cmd ("Xvnc","vncpasswd") {
 	    for (split(/:/,$ENV{PATH})) {
 		if (-x "$_/$cmd") {
-		    $vncClasses = "$_/../vnc/classes";
+		    $vncClasses = "$_/../java";
 		    next cmd2;
 		}
 	    }
@@ -915,7 +915,7 @@ sub SanityCheck
 	foreach $cmd ($exedir."Xvnc",$exedir."vncpasswd") {
 	    for (split(/:/,$ENV{PATH})) {
 		if (-x "$cmd") {
-		    $vncClasses = $exedir."../vnc/classes";
+		    $vncClasses = $exedir."../java";
 		    next cmd3;
 		}
 	    }

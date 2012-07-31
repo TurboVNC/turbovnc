@@ -1,0 +1,30 @@
+#!/bin/sh
+
+set -u
+set -e
+trap onexit INT
+trap onexit TERM
+trap onexit EXIT
+
+TMPDIR=
+
+onexit()
+{
+	if [ ! "$TMPDIR" = "" ]; then
+		rm -rf $TMPDIR
+	fi
+}
+
+if [ -f @CMAKE_PROJECT_NAME_LC@-@VERSION@.@RPMARCH@.rpm ]; then
+	rm -f @CMAKE_PROJECT_NAME_LC@-@VERSION@.@RPMARCH@.rpm
+fi
+
+umask 022
+TMPDIR=`mktemp -d /tmp/@CMAKE_PROJECT_NAME_LC@-build.XXXXXX`
+
+mkdir -p $TMPDIR/RPMS
+ln -fs `pwd` $TMPDIR/BUILD
+rpmbuild -bb --define "_blddir $TMPDIR/buildroot" --define "_topdir $TMPDIR" \
+	--target @RPMARCH@ pkgscripts/@CMAKE_PROJECT_NAME_LC@.spec; \
+cp $TMPDIR/RPMS/@RPMARCH@/@CMAKE_PROJECT_NAME_LC@-@VERSION@-@BUILD@.@RPMARCH@.rpm \
+	@CMAKE_PROJECT_NAME_LC@-@VERSION@.@RPMARCH@.rpm

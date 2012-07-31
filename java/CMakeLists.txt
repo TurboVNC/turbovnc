@@ -10,6 +10,11 @@ set(JAVACFLAGS ${DEFAULT_JAVACFLAGS} CACHE STRING
   "Java compiler flags (Default: ${DEFAULT_JAVACFLAGS})")
 message(STATUS "Java compiler flags = ${JAVACFLAGS}")
 
+set(DEFAULT_TVNC_JAVADIR ${CMAKE_INSTALL_PREFIX}/java)
+set(TVNC_JAVADIR ${DEFAULT_TVNC_JAVADIR} CACHE PATH
+	"Directory into which Java viewer should be installed (default: ${DEFAULT_TVNC_JAVADIR})")
+message(STATUS "TVNC_JAVADIR = ${TVNC_JAVADIR}")
+
 set(CLASSPATH com/turbovnc/vncviewer)
 set(JAVA_SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/${CLASSPATH})
 set(JAVA_BINDIR ${CMAKE_CURRENT_BINARY_DIR}/${CLASSPATH})
@@ -183,11 +188,11 @@ add_custom_command(OUTPUT VncViewer.jar
 
 add_custom_target(java ALL DEPENDS VncViewer.jar)
 
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/VncViewer.jar
+	DESTINATION ${TVNC_JAVADIR})
 if(NOT WIN32)
   install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/VncViewer.jar
     ${JAVA_SRCDIR}/README
     ${JAVA_SRCDIR}/index.vnc
-    ${JAVA_SRCDIR}/favicon.ico
-    DESTINATION vnc/classes)
+    DESTINATION ${TVNC_JAVADIR})
 endif()

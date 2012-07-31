@@ -1,0 +1,315 @@
+*******************************************************************************
+**     Building TurboVNC
+*******************************************************************************
+
+
+==================
+Build Requirements
+==================
+
+
+All Systems
+-----------
+
+-- CMake (http://www.cmake.org) v2.8.4 or later
+
+-- libjpeg-turbo SDK v1.0.0 or later
+   * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"
+     area of http://sourceforge.net/projects/libjpeg-turbo/
+   * The TurboVNC build system will search for the TurboJPEG/OSS header and
+     library under /opt/libjpeg-turbo on Unix or c:\libjpeg-turbo[64] on
+     Windows, but you can override this by setting the TJPEG_INCLUDE_DIR CMake
+     variable to the directory containing turbojpeg.h and the TJPEG_LIBRARY
+     CMake variable to the full path of the TurboJPEG/OSS library against which
+     you want to link.
+
+
+Linux and other Un*x O/S's
+--------------------------
+
+-- rsync (if building the TurboVNC Server using an out-of-tree build)
+
+-- GCC
+
+-- X Intrinsics/Athena Widgets development kit
+   * libXaw, libXt, and all dependencies thereof
+
+-- PAM development kit (if building the TurboVNC Server)
+
+
+Mac
+---
+
+-- Xcode Tools
+   * Available on the OS X install discs or from:
+     http://developer.apple.com/tools/xcode
+   * With earlier versions of Xcode, you will need to specify a custom install
+     and select the following packages:
+     gcc 3.x (or later), X11 SDK, OpenGL SDK, Mac OS X SDK
+   * With Xcode 3.x and later, you can simply check "Unix Development Support"
+
+
+Windows
+-------
+
+-- Microsoft Visual C++ 2005 or later
+
+   If you don't already have Visual C++, then the easiest way to get it is by
+   installing the Windows SDK:
+
+   http://msdn.microsoft.com/en-us/windows/bb980924.aspx
+
+   The Windows SDK includes both 32-bit and 64-bit Visual C++ compilers and
+   everything necessary to build TurboVNC.
+
+   * For 32-bit builds, you can also use Microsoft Visual C++ Express
+     Edition.  Visual C++ Express Edition is a free download.
+   * If you intend to build TurboVNC from the command line, then add the
+     appropriate compiler and SDK directories to the INCLUDE, LIB, and PATH
+     environment variables.  This is generally accomplished by executing
+     vcvars32.bat or vcvars64.bat and SetEnv.cmd.  vcvars32.bat and
+     vcvars64.bat are part of Visual C++ and are located in the same directory
+     as the compiler.  SetEnv.cmd is part of the Windows SDK.  You can pass
+     optional arguments to SetEnv.cmd to specify a 32-bit or 64-bit build
+     environment.
+
+
+==================
+Out-of-Tree Builds
+==================
+
+Binary objects, libraries, and executables are generated in the same directory
+from which CMake was executed (the "binary directory"), and this directory need
+not necessarily be the same as the TurboVNC source directory.  You can create
+multiple independent binary directories, in which different versions of
+TurboVNC can be built from the same source tree using different compilers or
+settings.  In the sections below, {build_directory} refers to the binary
+directory, whereas {source_directory} refers to the TurboVNC source directory.
+For in-tree builds, these directories are the same.
+
+
+===============
+Build Procedure
+===============
+
+
+Unix/Mac
+--------
+
+The following procedure will build the TurboVNC Viewer.  On most 64-bit
+systems (Solaris being a notable exception), this will build a 64-bit version
+of TurboVNC.  See "Build Recipes" for specific instructions on how to build a
+32-bit or 64-bit version of TurboVNC on systems that support both.
+
+  cd {build_directory}
+  cmake -G "Unix Makefiles" [additional CMake flags] {source_directory}
+  make
+
+On supported platforms (Linux, Solaris, and FreeBSD, at the moment), the
+TurboVNC Server (Xvnc) can then be built by executing:
+
+  make xserver
+
+You can also run:
+
+  make xserver-clean
+
+to clean the Xvnc build, or
+
+  make xserver-rebuild
+
+to do a minimal rebuild of Xvnc without re-configuring it.
+
+
+Visual C++ (Command Line)
+-------------------------
+
+  cd {build_directory}
+  cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release [additional CMake flags] {source_directory}
+  nmake
+
+This will build either a 32-bit or a 64-bit version of TurboVNC, depending on
+which version of cl.exe is in the PATH.
+
+
+Visual C++ (IDE)
+----------------
+
+Choose the appropriate CMake generator option for your version of Visual Studio
+(run "cmake" with no arguments for a list of available generators.)  For
+instance:
+
+  cd {build_directory}
+  cmake -G "Visual Studio 9 2008" [additional CMake flags] {source_directory}
+
+You can then open ALL_BUILD.vcproj in Visual Studio and build one of the
+configurations in that project ("Debug", "Release", etc.) to generate a full
+build of TurboVNC.
+
+
+===========
+Debug Build
+===========
+
+Add "-DCMAKE_BUILD_TYPE=Debug" to the CMake command line.  Or, if building with
+NMake, remove "-DCMAKE_BUILD_TYPE=Release" (Debug builds are the default with
+NMake.)
+
+
+=============
+Build Recipes
+=============
+
+
+32-bit Build on 64-bit Linux/Unix (including OS X)
+--------------------------------------------------
+
+Use export/setenv to set the following environment variables before running
+CMake:
+
+  CFLAGS=-m32
+  LDFLAGS=-m32
+
+
+64-bit Backward-Compatible Build on 64-bit OS X
+-----------------------------------------------
+
+Add
+
+  -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.5.sdk \
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.5 
+
+to the CMake command line.  The OS X 10.5 SDK must be installed.
+
+
+32-bit Backward-Compatible Build on 64-bit OS X
+-----------------------------------------------
+
+Use export/setenv to set the following environment variables:
+
+  CC=gcc-4.0
+  CFLAGS=-m32
+  LDFLAGS=-m32
+
+and add
+
+  -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.4u.sdk \
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.4
+
+to the CMake command line.  The OS X 10.4 SDK must be installed.
+
+
+64-bit Build on Solaris
+-----------------------
+
+Use export/setenv to set the following environment variables before running
+CMake:
+
+  CFLAGS=-m64
+  LDFLAGS=-m64
+
+
+Compilers Other Than GCC
+------------------------
+
+On Un*x systems, prior to running CMake, you can set the CC environment
+variable to the command used to invoke the C compiler and the CXX environment
+variable to the command used to invoke the C++ compiler.
+
+
+*******************************************************************************
+**     Advanced CMake Options
+*******************************************************************************
+
+To list and configure other CMake options not specifically mentioned in this
+guide, run
+
+  ccmake {source_directory}
+
+or
+
+  cmake-gui {source_directory}
+
+after initially configuring the build.  CCMake is a text-based interactive
+version of CMake, and CMake-GUI is a GUI version.  Both will display all
+variables that are relevant to the VirtualGL build, their current values, and a
+help string describing what they do.
+
+
+*******************************************************************************
+**     Installing TurboVNC
+*******************************************************************************
+
+You can use the build system to install TurboVNC into a directory of your
+choosing.  To do this, add:
+
+  -DCMAKE_INSTALL_PREFIX={install_directory}
+
+to the CMake command line.  Then, you can run 'make install' or 'nmake install'
+(or build the "install" target in the Visual Studio IDE) to build and install
+the TurboVNC Viewer.  'make uninstall' or 'nmake uninstall' will uninstall the
+viewer.
+
+To install and uninstall the TurboVNC Server, run 'make xserver-install' and
+'make xserver-uninstall'.
+
+If you don't specify CMAKE_INSTALL_PREFIX, then the default is
+c:\Program Files\TurboVNC on Windows and /opt/TurboVNC on Unix.
+
+
+*******************************************************************************
+**     Creating Release Packages
+*******************************************************************************
+
+The following commands can be used to create various types of release packages:
+
+
+====
+Unix
+====
+
+make rpm
+
+  Create Red Hat-style binary RPM package.  Requires RPM v4 or later.
+
+make deb
+
+  Create Debian-style binary package.  Requires dpkg.
+
+make dmg
+
+  Create Macintosh package/disk image.  This requires the PackageMaker
+  application, which the build system looks for in
+  /Developer/Applications/Utilities by default.  You can override this by
+  setting the PACKAGEMAKER_PATH CMake variable.
+
+make udmg
+
+  On 64-bit OS X systems, this creates a version of the Macintosh package and
+  disk image that contains universal i386/x86-64 binaries.  You should first
+  configure a 32-bit out-of-tree build of TurboVNC, then configure a 64-bit
+  out-of-tree build, then run 'make udmg' from the 64-bit build directory.  The
+  build system will look for the 32-bit build under {source_directory}/osxx86
+  by default, but you can override this by setting the TVNC_32BIT_BUILD CMake
+  variable.
+
+
+=======
+Windows
+=======
+
+If using NMake:
+
+  cd {build_directory}
+  nmake installer
+
+If using the Visual Studio IDE, build the "installer" project.
+
+The installer package (TurboVNC[64]-{version}.exe) will be located under
+{build_directory}.  If building using the Visual Studio IDE, then the installer
+package will be located in a subdirectory with the same name as the
+configuration you built (such as {build_directory}\Debug\ or
+{build_directory}\Release\).
+
+Building a Windows installer requires Inno Setup
+(http://www.jrsoftware.org/isinfo.php).  iscc.exe should be in your PATH.

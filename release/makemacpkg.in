@@ -1,0 +1,98 @@
+#!/bin/sh
+
+set -u
+set -e
+trap onexit INT
+trap onexit TERM
+trap onexit EXIT
+
+TMPDIR=
+
+onexit()
+{
+	if [ ! "$TMPDIR" = "" ]; then
+		sudo rm -rf $TMPDIR
+	fi
+}
+
+usage()
+{
+	echo "$0 [universal]"
+	exit 1
+}
+
+UNIVERSAL=0
+
+PACKAGE_NAME=@CMAKE_PROJECT_NAME@
+VERSION=@VERSION@
+BUILD=@BUILD@
+SRCDIR=@CMAKE_SOURCE_DIR@
+BINDIR=@CMAKE_BINARY_DIR@
+PREFIX=@CMAKE_INSTALL_PREFIX@
+BUILDDIR32=@TVNC_32BIT_BUILD@
+if [ $# -gt 0 ]; then
+	if [ "$1" = "universal" ]; then
+		UNIVERSAL=1
+	fi
+fi
+PACKAGEMAKER=@PACKAGEMAKER_PATH@/PackageMaker.app/Contents/MacOS/PackageMaker
+
+if [ -f $PACKAGE_NAME-$VERSION.dmg ]; then
+	rm -f $PACKAGE_NAME-$VERSION.dmg
+fi
+
+umask 022
+TMPDIR=`mktemp -d /tmp/$PACKAGE_NAME-build.XXXXXX`
+PKGROOT=$TMPDIR/pkg/Package_Root
+mkdir -p $PKGROOT
+
+make install DESTDIR=$PKGROOT
+
+if [ $UNIVERSAL = 1 ]; then
+	if [ ! -d $BUILDDIR32 ]; then
+		echo ERROR: 32-bit build directory $BUILDDIR32 does not exist
+		exit 1
+	fi
+	if [ ! -f $BUILDDIR32/Makefile ]; then
+		echo ERROR: 32-bit build directory $BUILDDIR32 is not configured
+		exit 1
+	fi
+	pushd $BUILDDIR32
+	make
+	popd
+	lipo -create -arch i386 $BUILDDIR32/unix/vncviewer/vncviewer \
+		-arch x86_64 $PKGROOT$PREFIX/bin/vncviewer \
+		-output $PKGROOT$PREFIX/bin/vncviewer
+fi
+
+mkdir -p $PKGROOT/Library/Documentation/$PACKAGE_NAME
+chmod 1775 $PKGROOT/Library
+chmod 775 $PKGROOT/Library/Documentation
+mv $PKGROOT$PREFIX/doc/* $PKGROOT/Library/Documentation/$PACKAGE_NAME/
+rmdir $PKGROOT$PREFIX/doc
+
+mkdir -p $TMPDIR/pkg/Resources 
+cp $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.rtf $SRCDIR/release/ReadMe.rtf $TMPDIR/pkg/Resources/ 
+cp pkgscripts/Description.plist $TMPDIR/pkg/
+cp pkgscripts/Info.plist $TMPDIR/pkg/
+install -m 755 pkgscripts/uninstall $PKGROOT$PREFIX/bin/
+
+mkdir -p "$PKGROOT/Applications/$PACKAGE_NAME"
+chmod 775 $PKGROOT/Applications
+install -m 644 $SRCDIR/release/ReadMe-MacApp.txt "$PKGROOT/Applications/$PACKAGE_NAME/Read Me.txt"
+sudo ln -fs /Library/Documentation/$PACKAGE_NAME "$PKGROOT/Applications/$PACKAGE_NAME/Documentation"
+
+sudo chown -R root:admin $PKGROOT
+
+mkdir $TMPDIR/dmg
+$PACKAGEMAKER -build -v -p $TMPDIR/dmg/$PACKAGE_NAME.pkg \
+	-f $PKGROOT -r $TMPDIR/pkg/Resources \
+	-i $TMPDIR/pkg/Info.plist -d $TMPDIR/pkg/Description.plist
+install -m 644 $BINDIR/pkgscripts/uninstall.applescript $TMPDIR
+sudo osacompile -t APPL -o "$TMPDIR/dmg/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
+sudo chown -R $USER "$TMPDIR/dmg/Uninstall $PACKAGE_NAME.app"
+hdiutil create -fs HFS+ -volname $PACKAGE_NAME-$VERSION \
+	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PACKAGE_NAME-$VERSION.dmg
+cp $TMPDIR/$PACKAGE_NAME-$VERSION.dmg . 
+
+exit

@@ -1,0 +1,47 @@
+#!/bin/sh
+
+set -u
+set -e
+trap onexit INT
+trap onexit TERM
+trap onexit EXIT
+
+TMPDIR=
+
+onexit()
+{
+	if [ ! "$TMPDIR" = "" ]; then
+		rm -rf $TMPDIR
+	fi
+}
+
+PKGNAME=@CMAKE_PROJECT_NAME_LC@
+VERSION=@VERSION@
+BUILD=@BUILD@
+
+if [ -f $PKGNAME-$VERSION.src.rpm ]; then
+	rm -f $PKGNAME-$VERSION.src.rpm
+fi
+
+umask 022
+TMPDIR=`mktemp -d /tmp/$PKGNAME-build.XXXXXX`
+
+mkdir -p $TMPDIR/RPMS
+mkdir -p $TMPDIR/SRPMS
+mkdir -p $TMPDIR/BUILD
+mkdir -p $TMPDIR/SOURCES
+mkdir -p $TMPDIR/SPECS
+
+if [ ! -f $PKGNAME-$VERSION.tar.gz ]; then
+	echo "ERROR: $PKGNAME-$VERSION.tar.gz does not exist."
+fi
+
+cp $PKGNAME-$VERSION.tar.gz $TMPDIR/SOURCES/$PKGNAME-$VERSION.tar.gz
+
+cat pkgscripts/@CMAKE_PROJECT_NAME_LC@.spec | sed s/%{_blddir}/%{_tmppath}/g \
+	| sed s/#--\>//g > $TMPDIR/SPECS/@CMAKE_PROJECT_NAME_LC@.spec
+
+rpmbuild -bs --define "_topdir $TMPDIR" $TMPDIR/SPECS/@CMAKE_PROJECT_NAME_LC@.spec
+mv $TMPDIR/SRPMS/$PKGNAME-$VERSION-$BUILD.src.rpm $PKGNAME-$VERSION.src.rpm
+
+exit

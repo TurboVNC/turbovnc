@@ -1,0 +1,116 @@
+# This file is included from the top-level CMakeLists.txt.  We just store it
+# here to avoid cluttering up that file.
+
+
+#
+# Linux RPM and DEB
+#
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+
+set(RPMARCH ${CPU_TYPE})
+if(${CPU_TYPE} STREQUAL "x86_64")
+	set(DEBARCH amd64)
+else()
+	set(DEBARCH ${CPU_TYPE})
+endif()
+
+string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_PROJECT_NAME_LC)
+
+if(NOT TVNC_JAVADIR)
+	set(TVNC_JAVADIR ${CMAKE_INSTALL_PREFIX}/java)
+endif()
+
+configure_file(release/makerpm.in pkgscripts/makerpm)
+configure_file(release/${CMAKE_PROJECT_NAME_LC}.spec.in
+	pkgscripts/${CMAKE_PROJECT_NAME_LC}.spec @ONLY)
+
+add_custom_target(rpm sh pkgscripts/makerpm
+	SOURCES pkgscripts/makerpm)
+
+configure_file(release/makedpkg.in pkgscripts/makedpkg)
+configure_file(release/deb-control.in pkgscripts/deb-control)
+
+add_custom_target(deb sh pkgscripts/makedpkg
+	SOURCES pkgscripts/makedpkg)
+
+endif() # Linux
+
+
+#
+# Windows installer (NullSoft Installer)
+#
+
+if(WIN32)
+
+if(BITS EQUAL 64)
+	set(INST_NAME ${CMAKE_PROJECT_NAME}64-${VERSION})
+	set(WIN64DEF -DWIN64)
+else()
+  set(INST_NAME ${CMAKE_PROJECT_NAME}-${VERSION})
+endif()
+
+if(MSVC_IDE)
+	set(INSTALLERDIR "$(OutDir)")
+  set(BUILDDIRDEF ${INST_DEFS} "-DBUILDDIR=${INSTALLERDIR}\\")
+else()
+	set(INSTALLERDIR .)
+  set(BUILDDIRDEF ${INST_DEFS} "-DBUILDDIR=")
+endif()
+
+configure_file(release/@CMAKE_PROJECT_NAME@.iss.in pkgscripts/@CMAKE_PROJECT_NAME@.iss)
+
+add_custom_target(installer
+	iscc -o${INSTALLERDIR} ${WIN64DEF} ${BUILDDIRDEF} -F${INST_NAME}
+		pkgscripts/@CMAKE_PROJECT_NAME@.iss
+	DEPENDS vncviewer putty
+	SOURCES pkgscripts/@CMAKE_PROJECT_NAME@.iss)
+
+endif() # WIN32
+
+
+#
+# Mac DMG
+#
+
+if(APPLE)
+
+set(DEFAULT_PACKAGEMAKER_PATH /Developer/Applications/Utilities)
+set(PACKAGEMAKER_PATH ${DEFAULT_PACKAGEMAKER_PATH} CACHE PATH
+	"Directory containing PackageMaker.app (default: ${DEFAULT_PACKAGEMAKER_PATH})")
+
+set(DEFAULT_TVNC_32BIT_BUILD ${CMAKE_SOURCE_DIR}/osxx86)
+set(TVNC_32BIT_BUILD ${DEFAULT_TVNC_32BIT_BUILD} CACHE PATH
+  "Directory containing 32-bit OS X build to include in universal binaries (default: ${DEFAULT_TVNC_32BIT_BUILD})")
+
+string(REGEX REPLACE "/" ":" TVNC_MACPREFIX ${CMAKE_INSTALL_PREFIX})
+string(REGEX REPLACE "^:" "" TVNC_MACPREFIX ${TVNC_MACPREFIX})
+
+configure_file(release/makemacpkg.in pkgscripts/makemacpkg)
+configure_file(release/Info.plist.in pkgscripts/Info.plist)
+configure_file(release/Description.plist.in pkgscripts/Description.plist)
+configure_file(release/uninstall.in pkgscripts/uninstall)
+configure_file(release/uninstall.applescript.in pkgscripts/uninstall.applescript)
+
+add_custom_target(dmg sh pkgscripts/makemacpkg
+	SOURCES pkgscripts/makemacpkg)
+
+add_custom_target(udmg sh pkgscripts/makemacpkg universal
+  SOURCES pkgscripts/makemacpkg)
+
+endif() # APPLE
+
+
+#
+# Generic
+#
+
+configure_file(release/makesrctarball.in pkgscripts/makesrctarball)
+
+add_custom_target(srctarball sh pkgscripts/makesrctarball
+	SOURCES pkgscripts/makesrctarball)
+
+configure_file(release/makesrpm.in pkgscripts/makesrpm)
+
+add_custom_target(srpm sh pkgscripts/makesrpm
+	SOURCES pkgscripts/makesrpm)

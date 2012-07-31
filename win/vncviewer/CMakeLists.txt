@@ -1,12 +1,13 @@
 add_definitions(-D_WINSTATIC -D_WIN32_WINNT=0x0500 -DNTDDI_VERSION=0x05000100)
-include_directories(omnithread zlib ${CMAKE_SOURCE_DIR}
-	${CMAKE_CURRENT_BINARY_DIR}/res)
 
-if(CMAKE_CL_64)
+include_directories(omnithread ${CMAKE_SOURCE_DIR}/common
+	${CMAKE_SOURCE_DIR}/win ${CMAKE_CURRENT_BINARY_DIR}/res)
+
+if(BITS EQUAL 64)
 	set(APPNAME "TurboVNC Viewer 64-bit v${VERSION} (${BUILD})")
-else(CMAKE_CL_64)
+else()
 	set(APPNAME "TurboVNC Viewer v${VERSION} (${BUILD})")
-endif(CMAKE_CL_64)
+endif()
 
 configure_file(res/resdefs.h.in res/resdefs.h)
 
@@ -48,4 +49,4 @@ add_executable(vncviewer WIN32
 target_link_libraries(vncviewer zlib
 	ws2_32.lib winmm.lib htmlhelp.lib comctl32.lib ${TJPEG_LIBRARY})
 
-install(TARGETS vncviewer DESTINATION .)
+install(TARGETS vncviewer DESTINATION ${TVNC_BINDIR})

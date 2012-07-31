@@ -7,19 +7,13 @@
 #    Solaris 10 (SunOS 5.10)
 #    Linux 2.4 and 2.6
 
-CPU=@host_cpu@
-CC="@CC@"
-GCC=@GCC@
-CFLAGS="@CFLAGS@"
-LDFLAGS="@LDFLAGS@"
-MEDIALIB=@USE_MEDIALIB@
-if [ "$MEDIALIB" = "yes" ]; then
-  JPEGINC=-I@abs_top_srcdir@/turbojpeg
-  JPEGLINK="-lmlib `pwd`/../turbojpeg/libturbojpeg.a"
-else
-  JPEGINC="@JPEG_CFLAGS@"
-  JPEGLINK="@JPEG_LDFLAGS@"
-fi
+CPU=@CPU_TYPE@
+CC="@CMAKE_C_COMPILER@"
+GCC=@CMAKE_COMPILER_IS_GNUCC@
+CFLAGS="@EFFECTIVE_C_FLAGS@"
+LDFLAGS="@CMAKE_EXE_LINKER_FLAGS@"
+JPEGINC="-I@TJPEG_INCLUDE_DIR@"
+JPEGLINK="@TJPEG_LIBRARY@"
 
 SYSNAME=`uname -s`
 
@@ -51,7 +45,7 @@ echo "#define OSMajorVersion $MAJOR" >> config/cf/platform.def
 echo "#define OSMinorVersion $MINOR" >> config/cf/platform.def
 echo "#define OSTeenyVersion $TEENY" >> config/cf/platform.def
 echo "#define LinuxCLibMajorVersion 6" >> config/cf/platform.def
-if [ "$GCC" = "yes" ]; then
+if [ "$GCC" = "1" ]; then
     echo "#define HasGcc2 YES" >> config/cf/platform.def
 fi
 case "$CPU" in
@@ -69,7 +63,7 @@ fi
 if [ ! "$JPEGLINK" = "" ]; then
     echo "#define JPEGLibraryFlags $JPEGLINK" >>config/cf/platform.def
 fi
-echo '#define VncIncludeDir "-I@abs_top_srcdir@/include"' >>config/cf/platform.def
+echo '#define VncIncludeDir "-I@CMAKE_CURRENT_SOURCE_DIR@/include"' >>config/cf/platform.def
 
 if [ "$SYSNAME" = AIX ]
 then
@@ -90,11 +84,8 @@ else
     if [ "`uname -s`" = "SunOS" ]; then
         SVR4FLAGS=-DSVR4;
     fi
-    cd config/imake && if [ -f Makefile ]; then \
-        make CC="$CC" CDEBUGFLAGS="$CFLAGS $SVR4FLAGS" EXTRA_LDOPTIONS="$LDFLAGS"; \
-    else \
-        make -f Makefile.ini CC="$CC" CDEBUGFLAGS="$CFLAGS $SVR4FLAGS" EXTRA_LDOPTIONS="$LDFLAGS"; \
-    fi
+    cd config/imake
+    make -f Makefile.ini CC="$CC" CDEBUGFLAGS="$CFLAGS $SVR4FLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
     cd ../..
     config/imake/imake -I./config/cf -DTOPDIR=./ -DCURDIR=.
     make Makefiles CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"

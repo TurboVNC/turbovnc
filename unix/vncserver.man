@@ -143,11 +143,11 @@ can manually specify a font path by using the -fp argument to vncserver.
 If you prefer to use the X Font Server by default rather than a static font
 path, then you can run
 
-/opt/TurboVNC/bin/vncserver -fp unix/:7100
+{TurboVNC_directory}/bin/vncserver -fp unix/:7100
 
 on Linux systems or
 
-/opt/TurboVNC/bin/vncserver -fp inet/:7100
+{TurboVNC_directory}/bin/vncserver -fp inet/:7100
 
 on Solaris systems.
 .SH EXAMPLES
