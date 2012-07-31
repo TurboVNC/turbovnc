@@ -33,6 +33,7 @@
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
+#include <assert.h>
 
 #ifdef USE_MMX
 
