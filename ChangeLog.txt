@@ -15,6 +15,11 @@ Java viewer but which has numerous TurboVNC-specific enhancements.
 [3]
 IPv6 support
 -------------------------------------------------------------------------------
+[4]
+Implemented v0.10 of the X RENDER extension, to address compatibility problems
+with newer applications that assumed v0.10 functionality was available without
+checking for it.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
