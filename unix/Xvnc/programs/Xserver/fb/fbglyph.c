@@ -28,7 +28,7 @@
 #endif
 
 #include "fb.h"
-#include	<X11/fonts/fontstruct.h>
+#include	"fontstruct.h"
 #include	"dixfontstr.h"
 
 #define dummyScreen screenInfo.screens[0]
