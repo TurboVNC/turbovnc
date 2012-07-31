@@ -34,6 +34,8 @@ Linux and other Un*x O/S's
 -- X Intrinsics/Athena Widgets development kit
    * libXaw, libXt, and all dependencies thereof
 
+-- libXcursor development kit
+
 -- PAM development kit (if building the TurboVNC Server)
 
 
@@ -247,11 +249,12 @@ choosing.  To do this, add:
 
 to the CMake command line.  Then, you can run 'make install' or 'nmake install'
 (or build the "install" target in the Visual Studio IDE) to build and install
-the TurboVNC Viewer.  'make uninstall' or 'nmake uninstall' will uninstall the
+the TurboVNC Viewer.  Running 'make uninstall' or 'nmake uninstall' (or
+building the "uninstall" target in the Visual Studio IDE) will uninstall the
 viewer.
 
 To install and uninstall the TurboVNC Server, run 'make xserver-install' and
-'make xserver-uninstall'.
+'make xserver-uninstall', respectively.
 
 If you don't specify CMAKE_INSTALL_PREFIX, then the default is
 c:\Program Files\TurboVNC on Windows and /opt/TurboVNC on Unix.
