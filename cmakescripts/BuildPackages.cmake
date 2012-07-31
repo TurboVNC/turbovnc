@@ -45,23 +45,23 @@ if(WIN32)
 
 if(BITS EQUAL 64)
 	set(INST_NAME ${CMAKE_PROJECT_NAME}64-${VERSION})
-	set(WIN64DEF -DWIN64)
+	set(INST_DEFS -DWIN64)
 else()
-  set(INST_NAME ${CMAKE_PROJECT_NAME}-${VERSION})
+	set(INST_NAME ${CMAKE_PROJECT_NAME}-${VERSION})
 endif()
 
 if(MSVC_IDE)
-	set(INSTALLERDIR "$(OutDir)")
-  set(BUILDDIRDEF ${INST_DEFS} "-DBUILDDIR=${INSTALLERDIR}\\")
+	set(INSTALLERDIR ${CMAKE_CFG_INTDIR})
+	set(INST_DEFS ${INST_DEFS} "-DBUILDDIR=${INSTALLERDIR}\\")
 else()
 	set(INSTALLERDIR .)
-  set(BUILDDIRDEF ${INST_DEFS} "-DBUILDDIR=")
+	set(INST_DEFS ${INST_DEFS} "-DBUILDDIR=")
 endif()
 
 configure_file(release/@CMAKE_PROJECT_NAME@.iss.in pkgscripts/@CMAKE_PROJECT_NAME@.iss)
 
 add_custom_target(installer
-	iscc -o${INSTALLERDIR} ${WIN64DEF} ${BUILDDIRDEF} -F${INST_NAME}
+	iscc -o${INSTALLERDIR} ${INST_DEFS} -F${INST_NAME}
 		pkgscripts/@CMAKE_PROJECT_NAME@.iss
 	DEPENDS vncviewer putty
 	SOURCES pkgscripts/@CMAKE_PROJECT_NAME@.iss)
