@@ -3,14 +3,17 @@ XCOMM
 XCOMM 
 XCOMM Id: Imakefile,v 1.1 1999/11/02 03:54:44 keithp Exp $
 
+#if defined(HasGcc34) && HasGcc34
 MMXOPTIONS= -mmmx -msse -Winline --param inline-unit-growth=10000 \
 	--param large-function-growth=10000 -DUSE_MMX
 USEMMXOPTIONS= -DUSE_MMX
-#if defined(i386Architecture) || defined(AMD64Architecture)
+#if defined(i386Architecture) || defined(x86_64Architecture)
 SpecialCObjectRule(fbmmx,fbmmx.c,$(MMXOPTIONS))
 SpecialCObjectRule(fbpict,fbpict.c,$(USEMMXOPTIONS))
 SpecialCObjectRule(fbfill,fbfill.c,$(USEMMXOPTIONS))
 SpecialCObjectRule(fbcopy,fbcopy.c,$(USEMMXOPTIONS))
+#endif
+
 #endif
 
 #if DoLoadableServer

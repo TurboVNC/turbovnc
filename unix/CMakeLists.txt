@@ -1,3 +1,4 @@
+set(GCC34 0)
 if(CMAKE_COMPILER_IS_GNUCC)
 	# Use the maximum optimization level for release builds
 	foreach(var CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_RELWITHDEBINFO)
@@ -5,6 +6,11 @@ if(CMAKE_COMPILER_IS_GNUCC)
 			string(REGEX REPLACE "-O2" "-O3" ${var} "${${var}}")
 		endif()
 	endforeach()
+	execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
+		OUTPUT_VARIABLE GCC_VERSION)
+	if(GCC_VERSION VERSION_GREATER 3.4 OR GCC_VERSION VERSION_EQUAL 3.4)
+		set(GCC34 1)
+	endif()
 endif()
 
 if("${CMAKE_C_COMPILER_ID}" MATCHES SunPro)
