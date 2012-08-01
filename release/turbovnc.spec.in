@@ -1,22 +1,22 @@
 # Path under which TurboVNC should be installed
 %define prefix @CMAKE_INSTALL_PREFIX@
 
-# Path under which executables should be installed
+# Path under which executables and scripts should be installed
 %define bindir @TVNC_BINDIR@
 
 # Path under which configuration files should be installed
-%define confdir @TVNC_CONFDIR@
+%define confdir %{_sysconfdir}
 
 # Path under which docs should be installed
-%define docdir @TVNC_DOCDIR@
+%define docdir %{_defaultdocdir}/%{name}-%{version}
 
 # Path under which man pages should be installed
 %define mandir @TVNC_MANDIR@
 
-# Whether or not to include Java viewer
+# Whether or not to include the Java viewer
 %define java @BUILD_JAVA@
 
-# Path under which Java viewer should be installed
+# Path under which the Java viewer should be installed
 %define javadir @TVNC_JAVADIR@
 
 Summary:   A highly-optimized version of VNC that can be used with performance-critical applications
@@ -31,7 +31,6 @@ Requires:  bash >= 2.0
 Prereq:    /sbin/chkconfig %{_sysconfdir}/init.d
 BuildRoot: %{_blddir}/%{name}-%{version}-root
 BuildPrereq: /usr/bin/perl libjpeg-turbo
-BuildRequires: zlib-devel
 
 %description
 Virtual Network Computing (VNC) is a remote display system that allows you to
@@ -61,18 +60,49 @@ rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 make xserver-install DESTDIR=$RPM_BUILD_ROOT
 
-mkdir -p $RPM_BUILD_ROOT%{_defaultdocdir}
-if [ ! "%{docdir}" = "%{_defaultdocdir}/%{name}-%{version}" ]; then
-  mv $RPM_BUILD_ROOT/%{docdir} $RPM_BUILD_ROOT/__tmpdoc
-  mkdir -p $RPM_BUILD_ROOT%{_defaultdocdir}
-  mv $RPM_BUILD_ROOT/__tmpdoc $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}
-fi
-if [ ! "%{confdir}" = "%{_sysconfdir}" ]; then
-  mv $RPM_BUILD_ROOT/%{confdir} $RPM_BUILD_ROOT/__tmpconf
-  mv $RPM_BUILD_ROOT/__tmpconf $RPM_BUILD_ROOT%{_sysconfdir}
+#-->%if 0
+
+# This is only needed to support in-tree RPM generation via 'make rpm'.  When
+# building from a SRPM, we control where things are installed via CMake
+# variables.
+
+safedirmove ()
+{
+	if [ "$1" = "$2" ]; then
+		return 0
+	fi
+	if [ "$1" = "" -o ! -d "$1" ]; then
+		echo safedirmove: source dir $1 is not valid
+		return 1
+	fi
+	if [ "$2" = "" -o -e "$2" ]; then
+		echo safedirmove: dest dir $2 is not valid
+		return 1
+	fi
+	if [ "$3" = "" -o -e "$3" ]; then
+		echo safedirmove: tmp dir $3 is not valid
+		return 1
+	fi
+	mkdir -p $3
+	mv $1/* $3/
+	rmdir $1
+	mkdir -p $2
+	mv $3/* $2/
+	rmdir $3
+	return 0
+}
+
+TVNC_DOCDIR=@TVNC_DOCDIR@
+if [ ! "$TVNC_DOCDIR" = "%{docdir}" ]; then
+	safedirmove $RPM_BUILD_ROOT/$TVNC_DOCDIR $RPM_BUILD_ROOT/%{docdir} $RPM_BUILD_ROOT/__tmpdoc
 fi
 
+TVNC_CONFDIR=@TVNC_CONFDIR@
+if [ ! "$TVNC_CONFDIR" = "%{confdir}" ]; then
+	safedirmove $RPM_BUILD_ROOT/$TVNC_CONFDIR $RPM_BUILD_ROOT/%{confdir} $RPM_BUILD_ROOT/__tmpconf
+fi
 
+#-->%endif
 
 mkdir -p %{buildroot}/usr/share/applications
 cat > %{buildroot}/usr/share/applications/tvncviewer.desktop << EOF
@@ -106,13 +136,13 @@ fi
 
 %files
 %defattr(-,root,root)
-%attr(0755,root,root) %config %{_sysconfdir}/init.d/tvncserver
-%config(noreplace) %{_sysconfdir}/sysconfig/tvncservers
-%config(noreplace) %{_sysconfdir}/turbovncserver.conf
-%config(noreplace) %{_sysconfdir}/turbovncserver-auth.conf
+%attr(0755,root,root) %config %{confdir}/init.d/tvncserver
+%config(noreplace) %{confdir}/sysconfig/tvncservers
+%config(noreplace) %{confdir}/turbovncserver.conf
+%config(noreplace) %{confdir}/turbovncserver-auth.conf
 
-%dir %{_defaultdocdir}/%{name}-%{version}
-%doc %{_defaultdocdir}/%{name}-%{version}/*
+%dir %{docdir}
+%doc %{docdir}/*
 
 %dir %{prefix}
 %dir %{bindir}

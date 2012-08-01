@@ -15,6 +15,32 @@ onexit()
 	fi
 }
 
+safedirmove ()
+{
+	if [ "$1" = "$2" ]; then
+		return 0
+	fi
+	if [ "$1" = "" -o ! -d "$1" ]; then
+		echo safedirmove: source dir $1 is not valid
+		return 1
+	fi
+	if [ "$2" = "" -o -e "$2" ]; then
+		echo safedirmove: dest dir $2 is not valid
+		return 1
+	fi
+	if [ "$3" = "" -o -e "$3" ]; then
+		echo safedirmove: tmp dir $3 is not valid
+		return 1
+	fi
+	mkdir -p $3
+	mv $1/* $3/
+	rmdir $1
+	mkdir -p $2
+	mv $3/* $2/
+	rmdir $3
+	return 0
+}
+
 PACKAGE_NAME=@CMAKE_PROJECT_NAME_LC@
 VERSION=@VERSION@
 BUILD=@BUILD@
@@ -33,15 +59,11 @@ cp pkgscripts/deb-control $TMPDIR/DEBIAN/control
 make install DESTDIR=$TMPDIR
 make xserver-install DESTDIR=$TMPDIR
 
-mkdir -p $TMPDIR/usr/share/doc/$PACKAGE_NAME-$VERSION
 if [ ! "$DOCDIR" = "/usr/share/doc/$PACKAGE_NAME-$VERSION" ]; then
-  mv $TMPDIR/$DOCDIR $TMPDIR/__tmpdoc
-  mkdir -p $TMPDIR/usr/share/doc/$PACKAGE_NAME-$VERSION
-  mv $TMPDIR/__tmpdoc $TMPDIR/usr/share/doc/$PACKAGE_NAME-$VERSION
+	safedirmove $TMPDIR/$DOCDIR $TMPDIR/usr/share/doc/$PACKAGE_NAME-$VERSION $TMPDIR/__tmpdoc
 fi
 if [ ! "$CONFDIR" = "/etc" ]; then
-  mv $TMPDIR/$CONFDIR $TMPDIR/__tmpconf
-  mv $TMPDIR/__tmpconf $TMPDIR/etc
+	safedirmove $TMPDIR/$CONFDIR $TMPDIR/etc $TMPDIR/__tmpconf
 fi
 
 mkdir -p $TMPDIR/usr/share/applications
