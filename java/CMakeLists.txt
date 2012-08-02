@@ -21,12 +21,12 @@ set(JAVA_BINDIR ${CMAKE_CURRENT_BINARY_DIR}/${CLASSPATH})
 
 if(MSVC) 	 
   if(NOT BUILD)
-    execute_process(COMMAND "${CMAKE_SOURCE_DIR}/cmake/getdate.bat"
+    execute_process(COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/cmake/getdate.bat"
       OUTPUT_VARIABLE BUILD)    
   endif()
-  execute_process(COMMAND "${CMAKE_SOURCE_DIR}/cmake/getdate.bat" "javadate" 	 
+  execute_process(COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/cmake/getdate.bat" "javadate" 	 
     OUTPUT_VARIABLE JAVA_DATE) 	 
-  execute_process(COMMAND "${CMAKE_SOURCE_DIR}/cmake/getdate.bat" "javatime" 	 
+  execute_process(COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/cmake/getdate.bat" "javatime" 	 
 	  OUTPUT_VARIABLE JAVA_TIME) 	 
 else()
   if(NOT BUILD)
