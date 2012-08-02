@@ -8,7 +8,12 @@ if(CMAKE_COMPILER_IS_GNUCC)
 	endforeach()
 	execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
 		OUTPUT_VARIABLE GCC_VERSION)
-	if(GCC_VERSION VERSION_GREATER 3.4 OR GCC_VERSION VERSION_EQUAL 3.4)
+
+	# NOTE: Setting GCC34=1 enables MMX code in Xorg.  We can't enable it on
+	# Solaris because the version of GCC that ships with Solaris 10 doesn't put
+	# mmintrin.h in a sane place.
+	if((GCC_VERSION VERSION_GREATER 3.4 OR GCC_VERSION VERSION_EQUAL 3.4)
+		AND NOT CMAKE_SYSTEM_NAME STREQUAL "SunOS")
 		set(GCC34 1)
 	endif()
 endif()
