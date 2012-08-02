@@ -37,11 +37,18 @@ ChangesAssociations=yes
 
 [Components]
 Name: "viewer"; Description: "@CMAKE_PROJECT_NAME@ Viewer"; Types: full compact custom;
+#ifdef JAVA
+Name: "javaviewer"; Description: "@CMAKE_PROJECT_NAME@ Java Viewer"; Types: full compact custom;
+#endif
 Name: "doc";    Description: "Documentation";   Types: full custom;
 
 [Files]
 Source: "@CMAKE_BINARY_DIR@\win\vncviewer\{#BUILDDIR}vncviewer.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 Source: "@CMAKE_BINARY_DIR@\win\putty\{#BUILDDIR}putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
+#ifdef JAVA
+Source: "@CMAKE_BINARY_DIR@\java\{#BUILDDIR}VncViewer.jar"; DestDir: "{app}\java"; Flags: ignoreversion; Components: javaviewer
+Source: "@CMAKE_SOURCE_DIR@\java\com\turbovnc\vncviewer\README"; DestDir: "{app}\java"; DestName: "README.txt"; Flags: ignoreversion; Components: javaviewer
+#endif
 Source: "@CMAKE_SOURCE_DIR@\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "@CMAKE_SOURCE_DIR@\ChangeLog.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "@CMAKE_SOURCE_DIR@\win\TurboVNC.url"; DestDir: "{app}"; Flags: ignoreversion
@@ -55,9 +62,13 @@ Source: "@CMAKE_SOURCE_DIR@\doc\*.css"; DestDir: "{app}\doc"; Flags: ignoreversi
 Name: "{group}\@CMAKE_PROJECT_NAME@ Viewer";                      FileName: "{app}\vncviewer.exe";                                 WorkingDir: "{app}";     Components: viewer;
 Name: "{group}\@CMAKE_PROJECT_NAME@ Viewer (Listen Mode)";        FileName: "{app}\vncviewer.exe"; Parameters: "-listen";          WorkingDir: "{app}";     Components: viewer;
 Name: "{group}\@CMAKE_PROJECT_NAME@ Viewer (Listen Mode - IPv6)"; FileName: "{app}\vncviewer.exe"; Parameters: "-listen -ipv6";    WorkingDir: "{app}";     Components: viewer;
+#ifdef JAVA
+Name: "{group}\@CMAKE_PROJECT_NAME@ Java Viewer";                 FileName: "{app}\java\VncViewer.jar";                            WorkingDir: "{app}\java";
+Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ Java Viewer README"; FileName: "write.exe";      Parameters: "README.txt";       WorkingDir: "{app}\java"; Flags: "useapppaths"
+#endif
 Name: "{group}\Uninstall @CMAKE_PROJECT_NAME@";                   FileName: "{uninstallexe}";                                      WorkingDir: "{app}";                        
 Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ User's Guide";  FileName: "{app}\doc\index.html";                                WorkingDir: "{app}\doc"; Components: doc;
-Name: "{group}\Documentation\Licensing Terms";        FileName: "write.exe";           Parameters: "LICENCE.txt";      WorkingDir: "{app}";     Flags: "useapppaths"
+Name: "{group}\Documentation\Licensing Terms";                    FileName: "write.exe";           Parameters: "LICENCE.txt";      WorkingDir: "{app}";     Flags: "useapppaths"
 Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ Web Site";      FileName: "{app}\TurboVNC.url"
 Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ Change Log";    FileName: "write.exe";           Parameters: "ChangeLog.txt"; WorkingDir: "{app}"; Flags: "useapppaths"
 

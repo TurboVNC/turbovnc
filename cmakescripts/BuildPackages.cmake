@@ -58,7 +58,12 @@ else()
 	set(INST_DEFS ${INST_DEFS} "-DBUILDDIR=")
 endif()
 
-configure_file(release/@CMAKE_PROJECT_NAME@.iss.in pkgscripts/@CMAKE_PROJECT_NAME@.iss)
+if(TVNC_BUILDJAVA)
+	set(INST_DEFS ${INST_DEFS} "-DJAVA")
+endif()
+
+configure_file(release/@CMAKE_PROJECT_NAME@.iss.in
+	pkgscripts/@CMAKE_PROJECT_NAME@.iss)
 
 add_custom_target(installer
 	iscc -o${INSTALLERDIR} ${INST_DEFS} -F${INST_NAME}
