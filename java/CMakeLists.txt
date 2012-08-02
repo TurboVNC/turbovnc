@@ -40,16 +40,16 @@ string(REGEX REPLACE "\n" "" JAVA_TIME ${JAVA_TIME})
 string(REGEX REPLACE "\n" "" BUILD ${BUILD})
 
 if(WIN32)
-  set(DEFAULT_TURBOJPEG_JAR c:\\libjpeg-turbo\\classes\\turbojpeg.jar)
+  set(DEFAULT_TJPEG_JAR c:\\libjpeg-turbo\\classes\\turbojpeg.jar)
 else()
-  set(DEFAULT_TURBOJPEG_JAR /opt/libjpeg-turbo/classes/turbojpeg.jar)
+  set(DEFAULT_TJPEG_JAR /opt/libjpeg-turbo/classes/turbojpeg.jar)
 endif()
 
-set(TURBOJPEG_JAR ${DEFAULT_TURBOJPEG_JAR} CACHE PATH
-  "JAR file containing TurboJPEG Java classes (default: ${DEFAULT_TURBOJPEG_JAR})")
+set(TJPEG_JAR ${DEFAULT_TJPEG_JAR} CACHE PATH
+  "JAR file containing TurboJPEG Java classes (default: ${DEFAULT_TJPEG_JAR})")
 
-if(NOT EXISTS ${TURBOJPEG_JAR})
-  message(FATAL_ERROR "Could not find TurboJPEG JAR file at ${TURBOJPEG_JAR}.  Set TURBOJPEG_JAR to the full pathname of turbojpeg.jar or install the libjpeg-turbo SDK.")
+if(NOT EXISTS ${TJPEG_JAR})
+  message(FATAL_ERROR "Could not find TurboJPEG JAR file at ${TJPEG_JAR}.  Set TJPEG_JAR to the full pathname of turbojpeg.jar or install the libjpeg-turbo SDK.")
 endif()
 
 set(JAVA_CLASSNAMES
@@ -136,7 +136,7 @@ string(REGEX REPLACE " " ";" JAVACFLAGS "${JAVACFLAGS}")
 add_custom_command(OUTPUT ${JAVA_CLASSES_FULL}
   DEPENDS ${JAVA_SOURCES} ${DEPEND_SOURCES}
   COMMAND ${JAVA_COMPILE}
-  ARGS ${JAVACFLAGS} -cp ${TURBOJPEG_JAR}
+  ARGS ${JAVACFLAGS} -cp ${TJPEG_JAR}
     -sourcepath ${CMAKE_CURRENT_SOURCE_DIR}
     -d ${CMAKE_CURRENT_BINARY_DIR} ${JAVA_SOURCES})
 
@@ -162,7 +162,7 @@ add_custom_command(OUTPUT VncViewer.jar
     ${JAVA_BINDIR}/turbovnc.png
     ${JAVA_BINDIR}/turbovnc.ico
   COMMAND ${JAVA_ARCHIVE}
-  ARGS xf ${TURBOJPEG_JAR}
+  ARGS xf ${TJPEG_JAR}
     org/libjpegturbo/turbojpeg/TJ.class
     org/libjpegturbo/turbojpeg/TJDecompressor.class
     org/libjpegturbo/turbojpeg/TJLoader.class
