@@ -25,11 +25,6 @@ if("${CMAKE_C_COMPILER_ID}" MATCHES SunPro)
 	endforeach()
 endif()
 
-if(EXISTS /dev/urandom)
-	message(STATUS "Using /dev/urandom for random number generation")
-	add_definitions("-DUseDevUrandom")
-endif()
-
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	set(CMAKE_LIBRARY_PATH /usr/lib/${CPU_TYPE}-linux-gnu;/usr/lib${BITS};/usr/lib)
 endif()
@@ -79,15 +74,18 @@ include_directories(include)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/common ${CMAKE_BINARY_DIR}/common)
 add_subdirectory(libvncauth)
-add_subdirectory(tvncconfig)
-add_subdirectory(vncconnect)
-add_subdirectory(vncpasswd)
 add_subdirectory(vncviewer)
 
 
 #
 # Server build
 #
+
+if(TVNC_BUILDSERVER)
+
+add_subdirectory(tvncconfig)
+add_subdirectory(vncconnect)
+add_subdirectory(vncpasswd)
 
 string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_UC)
 
@@ -157,3 +155,5 @@ add_custom_target(xserver-uninstall
 		$ENV{DESTDIR}${TVNC_CONFDIR}/turbovncserver-auth.conf
 		$ENV{DESTDIR}${TVNC_CONFDIR}/init.d/tvncserver
 		$ENV{DESTDIR}${TVNC_CONFDIR}/sysconfig/tvncservers)
+
+endif() # TVNC_BUILDSERVER

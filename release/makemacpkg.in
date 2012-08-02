@@ -15,6 +15,32 @@ onexit()
 	fi
 }
 
+safedirmove ()
+{
+	if [ "$1" = "$2" ]; then
+		return 0
+	fi
+	if [ "$1" = "" -o ! -d "$1" ]; then
+		echo safedirmove: source dir $1 is not valid
+		return 1
+	fi
+	if [ "$2" = "" -o -e "$2" ]; then
+		echo safedirmove: dest dir $2 is not valid
+		return 1
+	fi
+	if [ "$3" = "" -o -e "$3" ]; then
+		echo safedirmove: tmp dir $3 is not valid
+		return 1
+	fi
+	mkdir -p $3
+	mv $1/* $3/
+	rmdir $1
+	mkdir -p $2
+	mv $3/* $2/
+	rmdir $3
+	return 0
+}
+
 usage()
 {
 	echo "$0 [universal]"
@@ -27,8 +53,10 @@ PACKAGE_NAME=@CMAKE_PROJECT_NAME@
 VERSION=@VERSION@
 BUILD=@BUILD@
 SRCDIR=@CMAKE_SOURCE_DIR@
-BINDIR=@CMAKE_BINARY_DIR@
 PREFIX=@CMAKE_INSTALL_PREFIX@
+BINDIR=@TVNC_BINDIR@
+DOCDIR=@TVNC_DOCDIR@
+JAVADIR=@TVNC_JAVADIR@
 BUILDDIR32=@TVNC_32BIT_BUILD@
 if [ $# -gt 0 ]; then
 	if [ "$1" = "universal" ]; then
@@ -61,21 +89,20 @@ if [ $UNIVERSAL = 1 ]; then
 	make
 	popd
 	lipo -create -arch i386 $BUILDDIR32/unix/vncviewer/vncviewer \
-		-arch x86_64 $PKGROOT$PREFIX/bin/vncviewer \
-		-output $PKGROOT$PREFIX/bin/vncviewer
+		-arch x86_64 $PKGROOT$BINDIR/vncviewer \
+		-output $PKGROOT$BINDIR/vncviewer
 fi
 
-mkdir -p $PKGROOT/Library/Documentation/$PACKAGE_NAME
+mkdir -p $PKGROOT/Library/Documentation
 chmod 1775 $PKGROOT/Library
 chmod 775 $PKGROOT/Library/Documentation
-mv $PKGROOT$PREFIX/doc/* $PKGROOT/Library/Documentation/$PACKAGE_NAME/
-rmdir $PKGROOT$PREFIX/doc
+safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PACKAGE_NAME $TMPDIR/__tmpdoc
 
 mkdir -p $TMPDIR/pkg/Resources 
 cp $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.rtf $SRCDIR/release/ReadMe.rtf $TMPDIR/pkg/Resources/ 
 cp pkgscripts/Description.plist $TMPDIR/pkg/
 cp pkgscripts/Info.plist $TMPDIR/pkg/
-install -m 755 pkgscripts/uninstall $PKGROOT$PREFIX/bin/
+install -m 755 pkgscripts/uninstall $PKGROOT$BINDIR/
 
 mkdir -p "$PKGROOT/Applications/$PACKAGE_NAME"
 chmod 775 $PKGROOT/Applications
@@ -88,7 +115,7 @@ mkdir $TMPDIR/dmg
 $PACKAGEMAKER -build -v -p $TMPDIR/dmg/$PACKAGE_NAME.pkg \
 	-f $PKGROOT -r $TMPDIR/pkg/Resources \
 	-i $TMPDIR/pkg/Info.plist -d $TMPDIR/pkg/Description.plist
-install -m 644 $BINDIR/pkgscripts/uninstall.applescript $TMPDIR
+install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
 sudo osacompile -t APPL -o "$TMPDIR/dmg/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
 sudo chown -R $USER "$TMPDIR/dmg/Uninstall $PACKAGE_NAME.app"
 hdiutil create -fs HFS+ -volname $PACKAGE_NAME-$VERSION \

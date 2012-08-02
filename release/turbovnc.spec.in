@@ -14,7 +14,7 @@
 %define mandir @TVNC_MANDIR@
 
 # Whether or not to include the Java viewer
-%define java @BUILD_JAVA@
+%define java @TVNC_BUILDJAVA@
 
 # Path under which the Java viewer should be installed
 %define javadir @TVNC_JAVADIR@
@@ -148,7 +148,7 @@ fi
 %dir %{bindir}
 %dir %{mandir}
 %dir %{mandir}/man1
-%if "%{java}" == "ON"
+%if "%{java}" == "1"
  %dir %{javadir}
 %endif
 
@@ -160,7 +160,7 @@ fi
 %{bindir}/vncserver
 %{bindir}/vncpasswd
 %{bindir}/vncconnect
-%if "%{java}" == "ON"
+%if "%{java}" == "1"
  %{javadir}/index.vnc
  %{javadir}/VncViewer.jar
  %{javadir}/README

@@ -73,15 +73,25 @@ include(cmakescripts/FindTurboJPEG.cmake)
 # Build
 #
 
+set(DEFAULT_TVNC_BUILDSERVER 0)
+if(UNIX AND NOT APPLE AND NOT CYGWIN)
+	set(DEFAULT_TVNC_BUILDSERVER 1)
+endif()
+option(TVNC_BUILDSERVER "Build TurboVNC server components"
+	${DEFAULT_TVNC_BUILDSERVER})
+
 if(WIN32)
   add_subdirectory(win)
 else()
   add_subdirectory(unix)
 endif()
 add_subdirectory(doc)
-option(BUILD_JAVA "Build Java version of the TurboVNC Viewer" FALSE)
-if(BUILD_JAVA)
-  add_subdirectory(java)
+option(TVNC_BUILDJAVA "Build Java version of the TurboVNC Viewer" 0)
+if(TVNC_BUILDJAVA)
+	set(TVNC_BUILDJAVA 1)
+	add_subdirectory(java)
+else()
+	set(TVNC_BUILDJAVA 0)
 endif()
 
 

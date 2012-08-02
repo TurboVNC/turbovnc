@@ -1,3 +1,8 @@
+if(EXISTS /dev/urandom)
+	message(STATUS "Using /dev/urandom for random number generation")
+	add_definitions("-DUseDevUrandom")
+endif()
+
 include_directories(${X11_INCLUDE_DIR})
 
 add_executable(vncpasswd vncpasswd.c)

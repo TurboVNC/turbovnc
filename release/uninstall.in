@@ -50,6 +50,7 @@ rmdir $PREFIX/bin 2>&1 || RETCODE=-1
 if [ -d $PREFIX/lib ]; then rmdir $PREFIX/lib 2>&1 || RETCODE=-1; fi
 rmdir $PREFIX/man/man1 2>&1 || RETCODE=-1
 rmdir $PREFIX/man 2>&1 || RETCODE=-1
+rmdir $PREFIX/java 2>&1
 rmdir $PREFIX 2>&1 || RETCODE=-1
 rmdir /Library/Documentation/$PKGNAME 2>&1 || RETCODE=-1
 rm /Applications/$PKGNAME/Documentation 2>&1 || RETCODE=-1

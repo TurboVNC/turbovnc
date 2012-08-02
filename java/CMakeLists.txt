@@ -191,8 +191,8 @@ add_custom_target(java ALL DEPENDS VncViewer.jar)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/VncViewer.jar
 	DESTINATION ${TVNC_JAVADIR})
 if(NOT WIN32)
-  install(FILES
-    ${JAVA_SRCDIR}/README
-    ${JAVA_SRCDIR}/index.vnc
-    DESTINATION ${TVNC_JAVADIR})
+	install(FILES ${JAVA_SRCDIR}/README DESTINATION ${TVNC_JAVADIR})
+endif()
+if(TVNC_BUILDSERVER)
+  install(FILES ${JAVA_SRCDIR}/index.vnc DESTINATION ${TVNC_JAVADIR})
 endif()
