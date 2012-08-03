@@ -55,11 +55,11 @@ There are three basic ways to use the Java TurboVNC Viewer:
      connect to a VNC server running on a different machine from the HTTP
      server.
 
-     One can install the Java TurboVNC Viewer by simply copying the .class and
-     .jar files into a directory that is under the control of the HTTP server.
-     Also, an HTML page should be created to act as a the base document for the
-     Java TurboVNC Viewer applet (an example named index.html is provided in
-     this directory.  Modify this file to suit your specific needs.)
+     One can install the Java TurboVNC Viewer by simply copying the .jar file
+     into a directory that is under the control of the HTTP server.  Also, an
+     HTML page should be created to act as a the base document for the Java
+     TurboVNC Viewer applet (see the "Parameters" section below for example
+     HTML code.)
 
   3. Running the viewer as a standalone application.
 
@@ -88,11 +88,11 @@ TurboVNC Viewer is used:
      document), parameters should be specified using the <PARAM> HTML tags
      within the appropriate <APPLET> section.  Example:
 
-    <APPLET CODE=com.turbovnc.vncviewer.VncViewer ARCHIVE=VncViewer.jar
-      WIDTH=400 HEIGHT=300>
-      <PARAM NAME="PORT" VALUE=5901>
-      <PARAM NAME="ScalingFactor" VALUE=50>
-    </APPLET>
+     <APPLET CODE=com.turbovnc.vncviewer.VncViewer ARCHIVE=VncViewer.jar
+       WIDTH=400 HEIGHT=300>
+       <PARAM NAME="PORT" VALUE=5901>
+       <PARAM NAME="ScalingFactor" VALUE=50>
+     </APPLET>
 
   2. When run as a standalone application, the Java TurboVNC Viewer reads
      parameters from the command line.  Example:
@@ -105,13 +105,6 @@ exception is the "Password" parameter, as VNC passwords are case-sensitive.
 For a complete list of parameters and their descriptions, run:
 
      java -jar VncViewer.jar -?
-
-
-HINTS
-=====
-
---> To refresh the remote desktop in the view-only mode, press "r" or "R"
-    on the keyboard.
 
 
 ACKNOWLEDGEMENTS

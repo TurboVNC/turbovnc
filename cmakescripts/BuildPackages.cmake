@@ -50,6 +50,12 @@ else()
 	set(INST_NAME ${CMAKE_PROJECT_NAME}-${VERSION})
 endif()
 
+set(INST_DEPENDS vncviewer putty)
+if(TVNC_BUILDJAVA)
+	set(INST_DEFS ${INST_DEFS} "-DJAVA")
+	set(INST_DEPENDS ${INST_DEPENDS} java)
+endif()
+
 if(MSVC_IDE)
 	set(INSTALLERDIR ${CMAKE_CFG_INTDIR})
 	set(INST_DEFS ${INST_DEFS} "-DBUILDDIR=${INSTALLERDIR}\\")
@@ -58,17 +64,13 @@ else()
 	set(INST_DEFS ${INST_DEFS} "-DBUILDDIR=")
 endif()
 
-if(TVNC_BUILDJAVA)
-	set(INST_DEFS ${INST_DEFS} "-DJAVA")
-endif()
-
 configure_file(release/@CMAKE_PROJECT_NAME@.iss.in
 	pkgscripts/@CMAKE_PROJECT_NAME@.iss)
 
 add_custom_target(installer
 	iscc -o${INSTALLERDIR} ${INST_DEFS} -F${INST_NAME}
 		pkgscripts/@CMAKE_PROJECT_NAME@.iss
-	DEPENDS vncviewer putty
+	DEPENDS ${INST_DEPENDS}
 	SOURCES pkgscripts/@CMAKE_PROJECT_NAME@.iss)
 
 endif() # WIN32

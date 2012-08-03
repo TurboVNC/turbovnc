@@ -16,17 +16,17 @@ set(TVNC_JAVADIR ${DEFAULT_TVNC_JAVADIR} CACHE PATH
 message(STATUS "TVNC_JAVADIR = ${TVNC_JAVADIR}")
 
 set(CLASSPATH com/turbovnc/vncviewer)
-set(JAVA_SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/${CLASSPATH})
-set(JAVA_BINDIR ${CMAKE_CURRENT_BINARY_DIR}/${CLASSPATH})
+set(SRCDIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(BINDIR ${CMAKE_CURRENT_BINARY_DIR})
 
 if(MSVC) 	 
 	if(NOT BUILD)
-		execute_process(COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/cmake/getdate.bat"
+		execute_process(COMMAND "${SRCDIR}/cmake/getdate.bat"
 			OUTPUT_VARIABLE BUILD)
 	endif()
-	execute_process(COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/cmake/getdate.bat" "javadate" 	 
+	execute_process(COMMAND "${SRCDIR}/cmake/getdate.bat" "javadate" 	 
 		OUTPUT_VARIABLE JAVA_DATE) 	 
-	execute_process(COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/cmake/getdate.bat" "javatime" 	 
+	execute_process(COMMAND "${SRCDIR}/cmake/getdate.bat" "javatime" 	 
 		OUTPUT_VARIABLE JAVA_TIME) 	 
 else()
 	if(NOT BUILD)
@@ -69,9 +69,9 @@ set(JAVA_CLASSNAMES
 set(JAVA_SOURCES "")
 set(JAVA_CLASSES_FULL "")
 foreach(class ${JAVA_CLASSNAMES})
-	set(JAVA_SOURCES ${JAVA_SOURCES} ${JAVA_SRCDIR}/${class}.java)
+	set(JAVA_SOURCES ${JAVA_SOURCES} ${SRCDIR}/${CLASSPATH}/${class}.java)
 	set(JAVA_CLASSES_FULL ${JAVA_CLASSES_FULL}
-		${CMAKE_CURRENT_BINARY_DIR}/${CLASSPATH}/${class}.class)
+		${BINDIR}/${CLASSPATH}/${class}.class)
 endforeach()
 
 set(JSCH_CLASSNAMES
@@ -116,51 +116,50 @@ set(JSCH_CLASSNAMES
 	jcraft/HMACMD5
 	jcraft/HMACSHA196
 	jcraft/HMACSHA1)
-set(JSCH_SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/com/jcraft/jsch)
+
 foreach(class ${JSCH_CLASSNAMES})
-	set(JAVA_SOURCES ${JAVA_SOURCES} ${JSCH_SRCDIR}/${class}.java)
+	set(JAVA_SOURCES ${JAVA_SOURCES} ${SRCDIR}/com/jcraft/jsch/${class}.java)
 	set(JAVA_CLASSES_FULL ${JAVA_CLASSES_FULL}
-		${CMAKE_CURRENT_BINARY_DIR}/com/jcraft/jsch/${class}.class)
+		${BINDIR}/com/jcraft/jsch/${class}.class)
 endforeach()
 
 file(GLOB DEPEND_SOURCES
-	${CMAKE_CURRENT_SOURCE_DIR}/com/turbovnc/rfb/*.java
-	${CMAKE_CURRENT_SOURCE_DIR}/com/turbovnc/rdr/*.java
-	${CMAKE_CURRENT_SOURCE_DIR}/com/turbovnc/network/*.java
-	${CMAKE_CURRENT_SOURCE_DIR}/com/jcraft/jsch/*.java
-	${CMAKE_CURRENT_SOURCE_DIR}/com/jcraft/jsch/jcraft/*.java
-	${CMAKE_CURRENT_SOURCE_DIR}/com/jcraft/jsch/jgss/*.java
-	${CMAKE_CURRENT_SOURCE_DIR}/com/jcraft/jzlib/*.java)
+	${SRCDIR}/com/turbovnc/rfb/*.java
+	${SRCDIR}/com/turbovnc/rdr/*.java
+	${SRCDIR}/com/turbovnc/network/*.java
+	${SRCDIR}/com/jcraft/jsch/*.java
+	${SRCDIR}/com/jcraft/jsch/jcraft/*.java
+	${SRCDIR}/com/jcraft/jsch/jgss/*.java
+	${SRCDIR}/com/jcraft/jzlib/*.java)
 
 string(REGEX REPLACE " " ";" JAVACFLAGS "${JAVACFLAGS}")
 add_custom_command(OUTPUT ${JAVA_CLASSES_FULL}
 	DEPENDS ${JAVA_SOURCES} ${DEPEND_SOURCES}
 	COMMAND ${JAVA_COMPILE}
-	ARGS ${JAVACFLAGS} -cp ${TJPEG_JAR}
-		-sourcepath ${CMAKE_CURRENT_SOURCE_DIR}
-		-d ${CMAKE_CURRENT_BINARY_DIR} ${JAVA_SOURCES})
+	ARGS ${JAVACFLAGS} -cp ${TJPEG_JAR} -sourcepath ${SRCDIR} -d ${BINDIR}
+		${JAVA_SOURCES})
 
 configure_file(${CLASSPATH}/timestamp.in ${CLASSPATH}/timestamp)
 
-add_custom_command(OUTPUT ${JAVA_BINDIR}/turbovnc.png
+add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc.png
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${JAVA_SRCDIR}/turbovnc.png ${JAVA_BINDIR}/turbovnc.png
-	DEPENDS ${JAVA_SRCDIR}/turbovnc.png)
+		${SRCDIR}/${CLASSPATH}/turbovnc.png ${BINDIR}/${CLASSPATH}/turbovnc.png
+	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc.png)
 
-add_custom_command(OUTPUT ${JAVA_BINDIR}/turbovnc.ico
+add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc.ico
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${JAVA_SRCDIR}/turbovnc.ico ${JAVA_BINDIR}/turbovnc.ico
-	DEPENDS ${JAVA_SRCDIR}/turbovnc.ico)
+		${SRCDIR}/${CLASSPATH}/turbovnc.ico ${BINDIR}/${CLASSPATH}/turbovnc.ico
+	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc.ico)
 
 string(REGEX REPLACE "jar" "" Java_PATH ${Java_JAR_EXECUTABLE})
 string(REGEX REPLACE ".exe" "" Java_PATH ${Java_PATH})
 
 add_custom_command(OUTPUT VncViewer.jar
 	DEPENDS ${JAVA_CLASSES_FULL}
-		${JAVA_SRCDIR}/MANIFEST.MF
-		${JAVA_BINDIR}/timestamp
-		${JAVA_BINDIR}/turbovnc.png
-		${JAVA_BINDIR}/turbovnc.ico
+		${SRCDIR}/${CLASSPATH}/MANIFEST.MF
+		${BINDIR}/${CLASSPATH}/timestamp
+		${BINDIR}/${CLASSPATH}/turbovnc.png
+		${BINDIR}/${CLASSPATH}/turbovnc.ico
 	COMMAND ${JAVA_ARCHIVE}
 	ARGS xf ${TJPEG_JAR}
 		org/libjpegturbo/turbojpeg/TJ.class
@@ -168,9 +167,9 @@ add_custom_command(OUTPUT VncViewer.jar
 		org/libjpegturbo/turbojpeg/TJLoader.class
 	COMMAND ${JAVA_ARCHIVE}
 	ARGS cfm VncViewer.jar
-		${JAVA_SRCDIR}/MANIFEST.MF
-		com/turbovnc/vncviewer/timestamp
-		com/turbovnc/vncviewer/*.class
+		${SRCDIR}/${CLASSPATH}/MANIFEST.MF
+		${CLASSPATH}/timestamp
+		${CLASSPATH}/*.class
 		com/turbovnc/rfb/*.class
 		com/turbovnc/rdr/*.class
 		com/turbovnc/network/*.class
@@ -179,20 +178,16 @@ add_custom_command(OUTPUT VncViewer.jar
 		com/jcraft/jsch/jce/*.class
 		com/jcraft/jsch/*.class
 		org/libjpegturbo/turbojpeg/*.class
-		com/turbovnc/vncviewer/turbovnc.png
-		com/turbovnc/vncviewer/turbovnc.ico
+		${CLASSPATH}/turbovnc.png
+		${CLASSPATH}/turbovnc.ico
 	COMMAND ${CMAKE_COMMAND}
-	ARGS -DJava_PATH=${Java_PATH}
-		-DJAR_FILE=${CMAKE_CURRENT_BINARY_DIR}/VncViewer.jar
-		-P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/SignJar.cmake)
+	ARGS -DJava_PATH=${Java_PATH} -DJAR_FILE=${BINDIR}/VncViewer.jar
+		-P ${SRCDIR}/cmake/SignJar.cmake)
 
 add_custom_target(java ALL DEPENDS VncViewer.jar)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/VncViewer.jar
-	DESTINATION ${TVNC_JAVADIR})
-if(NOT WIN32)
-	install(FILES ${JAVA_SRCDIR}/README DESTINATION ${TVNC_JAVADIR})
-endif()
+install(FILES ${BINDIR}/VncViewer.jar DESTINATION ${TVNC_JAVADIR})
+install(FILES ${SRCDIR}/${CLASSPATH}/README.txt DESTINATION ${TVNC_JAVADIR})
 if(TVNC_BUILDSERVER)
-	install(FILES ${JAVA_SRCDIR}/index.vnc DESTINATION ${TVNC_JAVADIR})
+	install(FILES ${SRCDIR}/${CLASSPATH}/index.vnc DESTINATION ${TVNC_JAVADIR})
 endif()

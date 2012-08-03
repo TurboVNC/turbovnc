@@ -163,7 +163,7 @@ fi
 %if "%{java}" == "1"
  %{javadir}/index.vnc
  %{javadir}/VncViewer.jar
- %{javadir}/README
+ %{javadir}/README.txt
 %endif
 %{mandir}/man1/Xvnc.1*
 %{mandir}/man1/Xserver.1*
