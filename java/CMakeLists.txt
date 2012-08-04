@@ -128,6 +128,7 @@ file(GLOB DEPEND_SOURCES
 	${SRCDIR}/com/turbovnc/rdr/*.java
 	${SRCDIR}/com/turbovnc/network/*.java
 	${SRCDIR}/com/jcraft/jsch/*.java
+	${SRCDIR}/com/jcraft/jsch/jce/*.java
 	${SRCDIR}/com/jcraft/jsch/jcraft/*.java
 	${SRCDIR}/com/jcraft/jsch/jgss/*.java
 	${SRCDIR}/com/jcraft/jzlib/*.java)
