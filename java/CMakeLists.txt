@@ -69,7 +69,7 @@ set(JAVA_CLASSNAMES
 set(JAVA_SOURCES "")
 set(JAVA_CLASSES_FULL "")
 foreach(class ${JAVA_CLASSNAMES})
-	set(JAVA_SOURCES ${JAVA_SOURCES} ${SRCDIR}/${CLASSPATH}/${class}.java)
+	set(JAVA_SOURCES ${JAVA_SOURCES} ${CLASSPATH}/${class}.java)
 	set(JAVA_CLASSES_FULL ${JAVA_CLASSES_FULL}
 		${BINDIR}/${CLASSPATH}/${class}.class)
 endforeach()
@@ -118,7 +118,7 @@ set(JSCH_CLASSNAMES
 	jcraft/HMACSHA1)
 
 foreach(class ${JSCH_CLASSNAMES})
-	set(JAVA_SOURCES ${JAVA_SOURCES} ${SRCDIR}/com/jcraft/jsch/${class}.java)
+	set(JAVA_SOURCES ${JAVA_SOURCES} com/jcraft/jsch/${class}.java)
 	set(JAVA_CLASSES_FULL ${JAVA_CLASSES_FULL}
 		${BINDIR}/com/jcraft/jsch/${class}.class)
 endforeach()
@@ -137,7 +137,8 @@ add_custom_command(OUTPUT ${JAVA_CLASSES_FULL}
 	DEPENDS ${JAVA_SOURCES} ${DEPEND_SOURCES}
 	COMMAND ${JAVA_COMPILE}
 	ARGS ${JAVACFLAGS} -cp ${TJPEG_JAR} -sourcepath ${SRCDIR} -d ${BINDIR}
-		${JAVA_SOURCES})
+		${JAVA_SOURCES}
+	WORKING_DIRECTORY ${SRCDIR})
 
 configure_file(${CLASSPATH}/timestamp.in ${CLASSPATH}/timestamp)
 
