@@ -112,7 +112,7 @@ sudo ln -fs /Library/Documentation/$PACKAGE_NAME "$PKGROOT/Applications/$PACKAGE
 sudo chown -R root:admin $PKGROOT
 
 mkdir $TMPDIR/dmg
-$PACKAGEMAKER -build -v -p $TMPDIR/dmg/$PACKAGE_NAME.pkg \
+$PACKAGEMAKER -build -v -p "$TMPDIR/dmg/$PACKAGE_NAME Viewer (X11).pkg" \
 	-f $PKGROOT -r $TMPDIR/pkg/Resources \
 	-i $TMPDIR/pkg/Info.plist -d $TMPDIR/pkg/Description.plist
 if [ $JAVA = 1 ]; then

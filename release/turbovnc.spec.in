@@ -152,6 +152,7 @@ fi
  %dir %{javadir}
 %endif
 
+%{prefix}/README.txt
 %{bindir}/vncviewer
 %config(noreplace) /usr/share/applications/tvncviewer.desktop
 %{mandir}/man1/vncviewer.1*
