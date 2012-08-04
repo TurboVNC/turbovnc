@@ -56,7 +56,7 @@ SRCDIR=@CMAKE_SOURCE_DIR@
 PREFIX=@CMAKE_INSTALL_PREFIX@
 BINDIR=@TVNC_BINDIR@
 DOCDIR=@TVNC_DOCDIR@
-JAVADIR=@TVNC_JAVADIR@
+JAVA=@TVNC_BUILDJAVA@
 BUILDDIR32=@TVNC_32BIT_BUILD@
 if [ $# -gt 0 ]; then
 	if [ "$1" = "universal" ]; then
@@ -115,6 +115,9 @@ mkdir $TMPDIR/dmg
 $PACKAGEMAKER -build -v -p $TMPDIR/dmg/$PACKAGE_NAME.pkg \
 	-f $PKGROOT -r $TMPDIR/pkg/Resources \
 	-i $TMPDIR/pkg/Info.plist -d $TMPDIR/pkg/Description.plist
+if [ $JAVA = 1 ]; then
+	cp -R "@CMAKE_PROJECT_NAME@ Viewer (Java).app" $TMPDIR/dmg/
+fi
 install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
 sudo osacompile -t APPL -o "$TMPDIR/dmg/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
 sudo chown -R $USER "$TMPDIR/dmg/Uninstall $PACKAGE_NAME.app"

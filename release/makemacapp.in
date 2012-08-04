@@ -1,0 +1,30 @@
+#!/bin/sh
+
+set -u
+set -e
+
+SRCDIR=@CMAKE_SOURCE_DIR@
+
+umask 022
+APP="@CMAKE_PROJECT_NAME@ Viewer (Java).app"
+
+if [ -d "$APP" ]; then
+	rm -rf "$APP"
+fi
+
+mkdir -p "$APP/Contents/MacOS"
+mkdir -p "$APP/Contents/Resources/Java"
+mkdir -p "$APP/Contents/Resources/TurboJPEG"
+
+cp pkgscripts/Info.plist.app "$APP/Contents/Info.plist"
+cp /System/Library/Frameworks/JavaVM.framework/Versions/Current/Resources/MacOS/JavaApplicationStub "$APP/Contents/MacOS/"
+echo "APPL????" >"$APP/Contents/PkgInfo"
+cp java/VncViewer.jar "$APP/Contents/Resources/Java/"
+cp $SRCDIR/java/com/turbovnc/vncviewer/README.txt "$APP/Contents/Resources/Java/"
+cp $SRCDIR/LICENSE.txt "$APP/Contents/Resources/Java/"
+cp $SRCDIR/release/turbovnc.icns "$APP/Contents/Resources/"
+cp $SRCDIR/release/vncviewer.icns "$APP/Contents/Resources/"
+cp /usr/lib/libturbojpeg.dylib "$APP/Contents/Resources/TurboJPEG/"
+cp /usr/lib/libturbojpeg.jnilib "$APP/Contents/Resources/TurboJPEG/"
+
+exit

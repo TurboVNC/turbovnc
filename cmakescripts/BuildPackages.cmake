@@ -77,7 +77,7 @@ endif() # WIN32
 
 
 #
-# Mac DMG
+# Mac DMG and app
 #
 
 if(APPLE)
@@ -104,6 +104,18 @@ add_custom_target(dmg sh pkgscripts/makemacpkg
 
 add_custom_target(udmg sh pkgscripts/makemacpkg universal
   SOURCES pkgscripts/makemacpkg)
+
+if(TVNC_BUILDJAVA)
+	configure_file(release/makemacapp.in pkgscripts/makemacapp)
+	configure_file(release/Info.plist.app.in pkgscripts/Info.plist.app)
+
+	add_custom_target(macapp sh pkgscripts/makemacapp
+		SOURCES pkgscripts/makemacapp)
+
+	add_dependencies(dmg macapp)
+	add_dependencies(udmg macapp)
+	add_dependencies(macapp java)
+endif()
 
 endif() # APPLE
 
