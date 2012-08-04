@@ -49,7 +49,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
 {
   public static final String about1 = "TurboVNC Viewer";
   public static final String about2 = "Copyright (C) 2000-2012 "+
-                                      "The VirtualGL Project and many others (see README)";
+                                      "The VirtualGL Project and many others (see README.txt)";
   public static final String about3 = "Visit http://www.virtualgl.org "+
                                       "for more information on TurboVNC.";
   public static String version = null;
