@@ -44,7 +44,7 @@ Linux and other Un*x O/S's
 Mac
 ---
 
--- Xcode Tools
+-- Xcode Tools (if building the native TurboVNC Viewer)
    * Available on the OS X install discs or from:
      http://developer.apple.com/tools/xcode
    * With earlier versions of Xcode, you will need to specify a custom install
@@ -76,6 +76,16 @@ Windows
      as the compiler.  SetEnv.cmd is part of the Windows SDK.  You can pass
      optional arguments to SetEnv.cmd to specify a 32-bit or 64-bit build
      environment.
+
+
+Java
+----
+
+-- JDK or OpenJDK 1.5 or later
+   * On OS X 10.5 and later, install the Java Developer Package, which can
+     be downloaded from http://connect.apple.com
+   * For systems that do not provide a JDK, download the Oracle Java
+     Development Kit from http://www.java.com
 
 
 ==================
@@ -149,6 +159,18 @@ instance:
 You can then open ALL_BUILD.vcproj in Visual Studio and build one of the
 configurations in that project ("Debug", "Release", etc.) to generate a full
 build of TurboVNC.
+
+
+Java
+----
+
+Passing -DTVNC_BUILDJAVA=1 to the command line will build the Java TurboVNC
+Viewer, as well as including it when installing or packaging the native
+TurboVNC Viewer.
+
+Additionally, you can build the Java TurboVNC Viewer without building the
+native code.  Simply use {source_directory}/java as the source directory for
+CMake.
 
 
 ===========
