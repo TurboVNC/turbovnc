@@ -71,6 +71,11 @@ public class TightDecoder extends Decoder {
     }
   }
 
+  public boolean isTurboJPEG()
+  {
+    return tjd != null;
+  }
+
   public void readRect(Rect r, CMsgHandler handler) 
   {
     InStream is = reader.getInStream();

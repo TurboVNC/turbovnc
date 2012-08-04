@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -158,6 +159,14 @@ abstract public class CMsgReader {
   public final int bpp() 
   {
     return handler.cp.pf().bpp; 
+  }
+
+  public final boolean isTurboJPEG()
+  {
+    Decoder d = decoders[Encodings.encodingTight];
+    if (d instanceof TightDecoder && d != null)
+      return ((TightDecoder)d).isTurboJPEG();
+    return false;
   }
 
   abstract public void readServerInit();

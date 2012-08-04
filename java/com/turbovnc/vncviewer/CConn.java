@@ -702,7 +702,8 @@ public class CConn extends CConnection
       +"Line speed estimate: "+sock.inStream().kbitsPerSecond()+" kbit/s"+"\n"
       +"Protocol version: "+cp.majorVersion+"."+cp.minorVersion+"\n"
       +"Security method: "+Security.secTypeName(csecurity.getType())
-       +" ["+csecurity.description()+"]",
+       +" ["+csecurity.description()+"]\n"
+      +"JPEG decompression: "+(reader_.isTurboJPEG()? "Turbo":"Unaccelerated"),
       "VNC connection info",
       JOptionPane.PLAIN_MESSAGE);
   }

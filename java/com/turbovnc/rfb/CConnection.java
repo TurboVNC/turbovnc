@@ -379,7 +379,7 @@ abstract public class CConnection extends CMsgHandler {
 
   InStream is;
   OutStream os;
-  CMsgReaderV3 reader_;
+  protected CMsgReaderV3 reader_;
   CMsgWriterV3 writer_;
   boolean shared;
   public CSecurity csecurity;
