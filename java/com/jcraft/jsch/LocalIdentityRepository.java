@@ -32,12 +32,21 @@ package com.jcraft.jsch;
 import java.util.Vector;
 
 class LocalIdentityRepository implements IdentityRepository {
+  private static final String name = "Local Identity Repository";
 
   private Vector identities = new Vector();
   private JSch jsch;
 
   LocalIdentityRepository(JSch jsch){
     this.jsch = jsch;
+  }
+
+  public String getName(){
+    return name;
+  }
+
+  public int getStatus(){
+    return RUNNING;
   }
 
   public synchronized Vector getIdentities() {

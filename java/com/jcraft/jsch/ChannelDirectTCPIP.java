@@ -69,6 +69,9 @@ public class ChannelDirectTCPIP extends Channel{
         }
         thread.start();
       }
+      else {
+        sendChannelOpen();
+      }
     }
     catch(Exception e){
       io.close();

@@ -177,7 +177,15 @@ public class ChannelSftp extends ChannelSession{
   private String fEncoding=UTF8;
   private boolean fEncoding_is_utf8=true;
 
-  private RequestQueue rq = new RequestQueue(10);
+  private RequestQueue rq = new RequestQueue(16);
+
+  /**
+   * Specify how many requests may be sent at any one time.
+   * Increasing this value may slightly improve file transfer speed but will
+   * increase memory usage.  The default is 16 requests.
+   *
+   * @param bulk_requests how many requests may be outstanding at any one time.
+   */
   public void setBulkRequests(int bulk_requests) throws JSchException {
     if(bulk_requests>0) 
       rq = new RequestQueue(bulk_requests);
@@ -185,6 +193,13 @@ public class ChannelSftp extends ChannelSession{
       throw new JSchException("setBulkRequests: "+ 
                               bulk_requests+" must be greater than 0.");
   }
+
+  /**
+   * This method will return the value how many requests may be
+   * sent at any one time.
+   *
+   * @return how many requests may be sent at any one time.
+   */
   public int getBulkRequests(){
     return rq.size();
   }
@@ -1192,6 +1207,8 @@ public class ChannelSftp extends ChannelSession{
 
       final byte[] handle=buf.getString();         // handle
 
+      rq.init();
+
       java.io.InputStream in=new java.io.InputStream(){
            long offset=skip;
            boolean closed=false;
@@ -1199,6 +1216,8 @@ public class ChannelSftp extends ChannelSession{
            byte[] _data=new byte[1];
            byte[] rest_byte=new byte[1024];
            Header header=new Header();
+           int request_max=1;
+           long request_offset=offset;
 
            public int read() throws java.io.IOException{
              if(closed)return -1;
@@ -1247,13 +1266,25 @@ public class ChannelSftp extends ChannelSession{
                len=1024; 
              }
 
-             try{sendREAD(handle, offset, len);}
-             catch(Exception e){ throw new IOException("error"); }
+             if(rq.count()==0) {
+               int request_len = buf.buffer.length-13;
+               if(server_version==0){ request_len=1024; }
+
+               while(rq.count() < request_max){
+                 try{
+                   sendREAD(handle, request_offset, request_len, rq);
+                 }
+                 catch(Exception e){ throw new IOException("error"); }
+                 request_offset += request_len;
+               }
+             }
 
              header=header(buf, header);
              rest_length=header.length;
              int type=header.type;
              int id=header.rid;
+
+             RequestQueue.Request rr = rq.get(header.rid);
 
              if(type!=SSH_FXP_STATUS && type!=SSH_FXP_DATA){ 
                throw new IOException("error");
@@ -1269,6 +1300,7 @@ public class ChannelSftp extends ChannelSession{
                //throwStatusError(buf, i);
                throw new IOException("error");
              }
+
              buf.rewind();
              fill(buf.buffer, 0, 4);
              int length_of_data = buf.getInt(); rest_length-=4;
@@ -1318,6 +1350,21 @@ public class ChannelSftp extends ChannelSession{
                  io_in.skip(optional_data);
                }
 
+               if(length_of_data<rr.length){  //
+                 rq.cancel(header, buf);
+                 try {
+                   sendREAD(handle,
+                            rr.offset+length_of_data,
+                            (int)(rr.length-length_of_data), rq);
+                 }
+                 catch(Exception e){ throw new IOException("error"); }
+                 request_offset=rr.offset+rr.length;
+               }
+
+               if(request_max < rq.size()){
+                 request_max++;
+               }
+
                if(monitor!=null){
                  if(!monitor.count(i)){
                    close();
@@ -1333,6 +1380,7 @@ public class ChannelSftp extends ChannelSession{
              if(closed)return;
              closed=true;
              if(monitor!=null)monitor.end();
+             rq.cancel(header, buf);
              try{_sendCLOSE(handle, header);}
              catch(Exception e){throw new IOException("error");}
            }
@@ -1348,6 +1396,28 @@ public class ChannelSftp extends ChannelSession{
    }
 
    public java.util.Vector ls(String path) throws SftpException{
+     final java.util.Vector v = new Vector();
+     LsEntrySelector selector = new LsEntrySelector(){
+       public int select(LsEntry entry){
+         v.addElement(entry);
+         return CONTINUE;
+       }
+     };
+     ls(path, selector);
+     return v;
+   }
+
+  /**
+   * List files specified by the remote <code>path</code>.
+   * Each files and directories will be passed to
+   * <code>LsEntrySelector#select(LsEntry)</code> method, and if that method
+   * returns <code>LsEntrySelector#BREAK</code>, the operation will be
+   * canceled immediately.
+   *
+   * @see #LsEntrySelector
+   * @since 0.1.47
+   */
+   public void ls(String path, LsEntrySelector selector) throws SftpException{
      //System.out.println("ls: "+path);
      try{
        ((MyPipedInputStream)io_in).updateReadSide();
@@ -1416,9 +1486,11 @@ public class ChannelSftp extends ChannelSession{
          throwStatusError(buf, i);
        }
 
+       int cancel = LsEntrySelector.CONTINUE;
        byte[] handle=buf.getString();         // handle
 
-       while(true){
+       while(cancel==LsEntrySelector.CONTINUE){
+
          sendREADDIR(handle);
 
          header=header(buf, header);
@@ -1460,6 +1532,11 @@ public class ChannelSftp extends ChannelSession{
            }
            SftpATTRS attrs=SftpATTRS.getATTR(buf);
 
+           if(cancel==LsEntrySelector.BREAK){
+             count--; 
+             continue;
+           }
+
            boolean find=false;
            String f=null;
            if(pattern==null){
@@ -1490,7 +1567,8 @@ public class ChannelSftp extends ChannelSession{
              else{
                l=Util.byte2str(longname, fEncoding);
              }
-             v.addElement(new LsEntry(f, l, attrs));
+
+             cancel = selector.select(new LsEntry(f, l, attrs));
            }
 
            count--; 
@@ -1515,7 +1593,6 @@ public class ChannelSftp extends ChannelSession{
        }
        */
 
-       return v;
      }
      catch(Exception e){
        if(e instanceof SftpException) throw (SftpException)e;
@@ -1524,6 +1601,7 @@ public class ChannelSftp extends ChannelSession{
        throw new SftpException(SSH_FX_FAILURE, "");
      }
    }
+
    public String readlink(String path) throws SftpException{
      try{
        if(server_version<3){
@@ -2647,5 +2725,27 @@ public class ChannelSftp extends ChannelSession{
       }
       throw new ClassCastException("a decendent of LsEntry must be given.");
     }
+  }
+
+  /**
+   * This interface will be passed as an arugment for <code>ls</code> method.
+   *
+   * @see #LsEntry
+   * @see #ls(String, LsEntrySelector)
+   * @since 0.1.47
+   */
+  public interface LsEntrySelector {
+    public final int CONTINUE = 0;
+    public final int BREAK = 1;
+
+    /**
+     * <p> The <code>select</code> method will be invoked in <code>ls</code>
+     * method for each file entry. If this method returns BREAK,
+     * <code>ls</code> will be canceled.
+     * 
+     * @param entry one of entry from ls
+     * @return if BREAK is returned, the 'ls' operation will be canceled.
+     */
+    public int select(LsEntry entry);
   }
 }

@@ -33,14 +33,15 @@ import java.io.InputStream;
 import java.util.Vector;
 
 public class JSch{
-  public static final String VERSION  = "0.1.46";
+  /**
+   * The version number.
+   */
+  public static final String VERSION  = "0.1.48";
 
   static java.util.Hashtable config=new java.util.Hashtable();
   static{
-//  config.put("kex", "diffie-hellman-group-exchange-sha1");
     config.put("kex", "diffie-hellman-group1-sha1,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1");
     config.put("server_host_key", "ssh-rsa,ssh-dss");
-//    config.put("server_host_key", "ssh-dss,ssh-rsa");
 
     config.put("cipher.s2c", 
                "aes128-ctr,aes128-cbc,3des-ctr,3des-cbc,blowfish-cbc,aes192-cbc,aes256-cbc");
@@ -50,9 +51,7 @@ public class JSch{
     config.put("mac.s2c", "hmac-md5,hmac-sha1,hmac-sha1-96,hmac-md5-96");
     config.put("mac.c2s", "hmac-md5,hmac-sha1,hmac-sha1-96,hmac-md5-96");
     config.put("compression.s2c", "none");
-    // config.put("compression.s2c", "zlib@openssh.com,zlib,none");
     config.put("compression.c2s", "none");
-    // config.put("compression.c2s", "zlib@openssh.com,zlib,none");
 
     config.put("lang.s2c", "");
     config.put("lang.c2s", "");
@@ -107,7 +106,7 @@ public class JSch{
 
     config.put("StrictHostKeyChecking",  "ask");
     config.put("HashKnownHosts",  "no");
-    //config.put("HashKnownHosts",  "yes");
+
     config.put("PreferredAuthentications", "gssapi-with-mic,publickey,keyboard-interactive,password");
 
     config.put("CheckCiphers", "aes256-ctr,aes192-ctr,aes128-ctr,aes256-cbc,aes192-cbc,aes128-cbc,3des-ctr,arcfour,arcfour128,arcfour256");
@@ -118,11 +117,27 @@ public class JSch{
 
   private java.util.Vector sessionPool = new java.util.Vector();
 
-  private IdentityRepository identityRepository =
+  private IdentityRepository defaultIdentityRepository =
     new LocalIdentityRepository(this);
 
+  private IdentityRepository identityRepository = defaultIdentityRepository;
+
+  /**
+   * Sets the <code>identityRepository</code>, which will be referred
+   * in the public key authentication.
+   *
+   * @param identityRepository if <code>null</code> is given,
+   * the default repository, which usually refers to ~/.ssh/, will be used.
+   *
+   * @see #getIdentityRepository()
+   */
   public synchronized void setIdentityRepository(IdentityRepository identityRepository){
-    this.identityRepository = identityRepository;
+    if(identityRepository == null){
+      this.identityRepository = defaultIdentityRepository;
+    }
+    else{
+      this.identityRepository = identityRepository;
+    }
   }
 
   synchronized IdentityRepository getIdentityRepository(){
@@ -153,7 +168,47 @@ public class JSch{
 
   }
 
-  public Session getSession(String username, String host) throws JSchException { return getSession(username, host, 22); }
+  /**
+   * Instantiates the <code>Session</code> object with
+   * <code>username</code> and <code>host</code>.
+   * The TCP port 22 will be used in making the connection.
+   * Note that the TCP connection must not be established
+   * until Session#connect().
+   *
+   * @param username user name
+   * @param host hostname
+   *
+   * @throws JSchException
+   *         if <code>username</code> or <code>host</code> are invalid.
+   *
+   * @return the instance of <code>Session</code> class.
+   *
+   * @see #getSession(String username, String host, int port)
+   * @see com.jcraft.jsch.Session
+   */
+  public Session getSession(String username, String host)
+     throws JSchException {
+    return getSession(username, host, 22);
+  }
+
+  /**
+   * Instantiates the <code>Session</code> object with given
+   * <code>username</code>, <code>host</code> and <code>port</code>.
+   * Note that the TCP connection must not be established
+   * until Session#connect().
+   *
+   * @param username user name
+   * @param host hostname
+   * @param post port number
+   *
+   * @throws JSchException
+   *         if <code>username</code> or <code>host</code> are invalid.
+   *
+   * @return the instance of <code>Session</code> class.
+   *
+   * @see #getSession(String username, String host, int port)
+   * @see com.jcraft.jsch.Session
+   */
   public Session getSession(String username, String host, int port) throws JSchException {
     if(username==null){
       throw new JSchException("username must not be null.");
@@ -179,10 +234,30 @@ public class JSch{
       return sessionPool.remove(session);
     }
   }
+
+  /**
+   * Sets the hostkey repository.
+   *
+   * @param hkrepo
+   *
+   * @see com.jcraft.jsch.HostKeyRepository
+   * @see com.jcraft.jsch.KnownHosts
+   */
   public void setHostKeyRepository(HostKeyRepository hkrepo){
     known_hosts=hkrepo;
   }
 
+  /**
+   * Sets the instance of <code>KnownHosts</code>, which refers
+   * to <code>filename</code>.
+   *
+   * @param filename filename of known_hosts file.
+   *
+   * @throws JSchException
+   *         if the given filename is invalid.
+   *
+   * @see com.jcraft.jsch.KnownHosts
+   */
   public void setKnownHosts(String filename) throws JSchException{
     if(known_hosts==null) known_hosts=new KnownHosts(this);
     if(known_hosts instanceof KnownHosts){
@@ -192,6 +267,17 @@ public class JSch{
     }
   }
 
+  /**
+   * Sets the instance of <code>KnownHosts</code> generated with
+   * <code>stream</code>.
+   *
+   * @param stream the instance of InputStream from known_hosts file.
+   *
+   * @throws JSchException
+   *         if an I/O error occurs.
+   *
+   * @see com.jcraft.jsch.KnownHosts
+   */
   public void setKnownHosts(InputStream stream) throws JSchException{ 
     if(known_hosts==null) known_hosts=new KnownHosts(this);
     if(known_hosts instanceof KnownHosts){
@@ -201,15 +287,47 @@ public class JSch{
     }
   }
 
+  /**
+   * Returns the current hostkey repository.
+   * By the default, this method will the instance of <code>KnownHosts</code>.
+   *
+   * @return current hostkey repository.
+   *
+   * @see com.jcraft.jsch.HostKeyRepository
+   * @see com.jcraft.jsch.KnownHosts
+   */
   public HostKeyRepository getHostKeyRepository(){ 
     if(known_hosts==null) known_hosts=new KnownHosts(this);
     return known_hosts; 
   }
 
+  /**
+   * Sets the private key, which will be referred in
+   * the public key authentication.
+   *
+   * @param prvkey filename of the private key.
+   *
+   * @throws JSchException if <code>prvkey</code> is invalid.
+   *
+   * @see #addIdentity(String prvkey, String passphrase)
+   */
   public void addIdentity(String prvkey) throws JSchException{
     addIdentity(prvkey, (byte[])null);
   }
 
+  /**
+   * Sets the private key, which will be referred in
+   * the public key authentication.
+   * Before registering it into identityRepository,
+   * it will be deciphered with <code>passphrase</code>.
+   *
+   * @param prvkey filename of the private key.
+   * @param passphrase passphrase for <code>prvkey</code>.
+   *
+   * @throws JSchException if <code>passphrase</code> is not right.
+   *
+   * @see #addIdentity(String prvkey, byte[] passphrase)
+   */
   public void addIdentity(String prvkey, String passphrase) throws JSchException{
     byte[] _passphrase=null;
     if(passphrase!=null){
@@ -220,20 +338,70 @@ public class JSch{
       Util.bzero(_passphrase);
   }
 
+  /**
+   * Sets the private key, which will be referred in
+   * the public key authentication.
+   * Before registering it into identityRepository,
+   * it will be deciphered with <code>passphrase</code>.
+   *
+   * @param prvkey filename of the private key.
+   * @param passphrase passphrase for <code>prvkey</code>.
+   *
+   * @throws JSchException if <code>passphrase</code> is not right.
+   *
+   * @see #addIdentity(String prvkey, String pubkey, byte[] passphrase)
+   */
   public void addIdentity(String prvkey, byte[] passphrase) throws JSchException{
     Identity identity=IdentityFile.newInstance(prvkey, null, this);
     addIdentity(identity, passphrase);
   }
+
+  /**
+   * Sets the private key, which will be referred in
+   * the public key authentication.
+   * Before registering it into identityRepository,
+   * it will be deciphered with <code>passphrase</code>.
+   *
+   * @param prvkey filename of the private key.
+   * @param pubkey filename of the public key.
+   * @param passphrase passphrase for <code>prvkey</code>.
+   *
+   * @throws JSchException if <code>passphrase</code> is not right.
+   */
   public void addIdentity(String prvkey, String pubkey, byte[] passphrase) throws JSchException{
     Identity identity=IdentityFile.newInstance(prvkey, pubkey, this);
     addIdentity(identity, passphrase);
   }
 
+  /**
+   * Sets the private key, which will be referred in
+   * the public key authentication.
+   * Before registering it into identityRepository,
+   * it will be deciphered with <code>passphrase</code>.
+   *
+   * @param name name of the identity to be used to
+                 retrieve it in the identityRepository.
+   * @param prvkey private key in byte array.
+   * @param pubkey public key in byte array.
+   * @param passphrase passphrase for <code>prvkey</code>.
+   *
+   */
   public void addIdentity(String name, byte[]prvkey, byte[]pubkey, byte[] passphrase) throws JSchException{
     Identity identity=IdentityFile.newInstance(name, prvkey, pubkey, this);
     addIdentity(identity, passphrase);
   }
 
+  /**
+   * Sets the private key, which will be referred in
+   * the public key authentication.
+   * Before registering it into identityRepository,
+   * it will be deciphered with <code>passphrase</code>.
+   *
+   * @param identity private key.
+   * @param passphrase passphrase for <code>identity</code>.
+   *
+   * @throws JSchException if <code>passphrase</code> is not right.
+   */
   public void addIdentity(Identity identity, byte[] passphrase) throws JSchException{
     if(passphrase!=null){
       try{ 
@@ -256,7 +424,7 @@ public class JSch{
   }
 
   /**
-   * @deprecated use JSch#removeIdentity(Identity identity)
+   * @deprecated use #removeIdentity(Identity identity)
    */
   public void removeIdentity(String name) throws JSchException{
     Vector identities = identityRepository.getIdentities();
@@ -269,10 +437,24 @@ public class JSch{
     }
   }
 
+  /**
+   * Removes the identity from identityRepository.
+   *
+   * @param identity the indentity to be removed.
+   *
+   * @throws JSchException if <code>identity</code> is invalid.
+   */
   public void removeIdentity(Identity identity) throws JSchException{
     identityRepository.remove(identity.getPublicKeyBlob());
   }
 
+  /**
+   * Lists names of identities included in the identityRepository.
+   *
+   * @return names of identities
+   *
+   * @throws JSchException if identityReposory has problems.
+   */
   public Vector getIdentityNames() throws JSchException{
     Vector foo=new Vector();
     Vector identities = identityRepository.getIdentities();
@@ -283,16 +465,32 @@ public class JSch{
     return foo;
   }
 
+  /**
+   * Removes all identities from identityRepository.
+   *
+   * @throws JSchException if identityReposory has problems.
+   */
   public void removeAllIdentity() throws JSchException{
     identityRepository.removeAll();
   }
 
+  /**
+   * Returns the config value for the specified key.
+   *
+   * @param key key for the configuration.
+   * @return config value
+   */
   public static String getConfig(String key){ 
     synchronized(config){
       return (String)(config.get(key));
     } 
   }
 
+  /**
+   * Sets or Overrides the configuration.
+   *
+   * @param newconf configurations
+   */
   public static void setConfig(java.util.Hashtable newconf){
     synchronized(config){
       for(java.util.Enumeration e=newconf.keys() ; e.hasMoreElements() ;) {
@@ -302,14 +500,28 @@ public class JSch{
     }
   }
 
+  /**
+   * Sets or Overrides the configuration.
+   *
+   * @param key key for the configuration
+   * @param value value for the configuration
+   */
   public static void setConfig(String key, String value){
     config.put(key, value);
   }
 
+  /**
+   * Sets the logger
+   *
+   * @param logger logger
+   *
+   * @see com.jcraft.jsch.Logger
+   */
   public static void setLogger(Logger logger){
     if(logger==null) logger=DEVNULL;
     JSch.logger=logger;
   }
+
   static Logger getLogger(){
     return logger;
   }

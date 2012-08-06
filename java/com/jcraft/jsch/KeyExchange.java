@@ -89,6 +89,19 @@ public abstract class KeyExchange{
     Buffer sb=new Buffer(I_S); sb.setOffSet(17);
     Buffer cb=new Buffer(I_C); cb.setOffSet(17);
 
+    if(JSch.getLogger().isEnabled(Logger.INFO)){
+      for(int i=0; i<PROPOSAL_MAX; i++){
+        JSch.getLogger().log(Logger.INFO,
+                             "kex: server: "+Util.byte2str(sb.getString()));
+      }
+      for(int i=0; i<PROPOSAL_MAX; i++){
+        JSch.getLogger().log(Logger.INFO,
+                             "kex: client: "+Util.byte2str(cb.getString()));
+      }
+      sb.setOffSet(17);
+      cb.setOffSet(17);
+    }
+
     for(int i=0; i<PROPOSAL_MAX; i++){
       byte[] sp=sb.getString();  // server proposal
       byte[] cp=cb.getString();  // client proposal
@@ -135,10 +148,6 @@ public abstract class KeyExchange{
                            " "+guess[PROPOSAL_MAC_ALGS_CTOS]+
                            " "+guess[PROPOSAL_COMP_ALGS_CTOS]);
     }
-
-//    for(int i=0; i<PROPOSAL_MAX; i++){
-//      System.err.println("guess: ["+guess[i]+"]");
-//    }
 
     return guess;
   }

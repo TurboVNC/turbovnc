@@ -1,8 +1,25 @@
 ChangeLog of JSch
 ====================================================================
-Last modified: Thu Feb  2 09:04:04 UTC 2012
+Last modified: Fri Apr 20 06:44:50 UTC 2012
 
-	
+
+Changes since version 0.1.47:
+- change: the file transfer speed with ChannelSftp#get(String src) has been
+          improved; sending multiple requests at any one time.
+- change: by the default, at most, 16 requests will be sent at any one time
+          in ChannelSftp.
+- feature: added Session#{setIdentityRepository(),getIdentityRepository()}
+
+
+Changes since version 0.1.46:
+- bugfix: failed to initialize channels for the stream forwarding.     FIXED
+- change: Session#getHostKey() will return the given hostkey
+	  even if session is not established.
+- change: Logger will record additional messages about algorithm negotiations.
+- feature: added ChannelSftp#ls(String path, LsEntrySelector selector) method.
+- feature: added IdentityRepository#{getName(),getStatus()} methods.
+
+
 Changes since version 0.1.45:
 - bugfix: in the agent forwarding mode, "ssh-add -l" on the remote
           will freeze.                                                 FIXED

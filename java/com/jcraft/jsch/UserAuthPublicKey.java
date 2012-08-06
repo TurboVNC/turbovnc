@@ -36,7 +36,7 @@ class UserAuthPublicKey extends UserAuth{
   public boolean start(Session session) throws Exception{
     super.start(session);
 
-    Vector identities=session.jsch.getIdentityRepository().getIdentities();
+    Vector identities=session.getIdentityRepository().getIdentities();
 
     byte[] passphrase=null;
     byte[] _username=null;

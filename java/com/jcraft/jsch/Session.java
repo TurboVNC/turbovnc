@@ -134,6 +134,8 @@ public class Session implements Runnable{
   private int serverAliveInterval=0;
   private int serverAliveCountMax=1;
 
+  private IdentityRepository identityRepository = null;
+
   protected boolean daemon_thread=false;
 
   private long kex_start_time=0L;
@@ -674,9 +676,16 @@ public class Session implements Runnable{
       chost=("["+chost+"]:"+port);
     }
 
-//    hostkey=new HostKey(chost, K_S);
-
     HostKeyRepository hkr=jsch.getHostKeyRepository();
+
+    String hkh=getConfig("HashKnownHosts");
+    if(hkh.equals("yes") && (hkr instanceof KnownHosts)){
+      hostkey=((KnownHosts)hkr).createHashedHostKey(chost, K_S);
+    }
+    else{
+      hostkey=new HostKey(chost, K_S);
+    }
+
     int i=0;
     synchronized(hkr){
       i=hkr.check(chost, K_S);
@@ -768,21 +777,11 @@ key_type+" key fingerprint is "+key_fprint+".\n"+
                            "Permanently added '"+host+"' ("+key_type+") to the list of known hosts.");
     }
 
-    String hkh=getConfig("HashKnownHosts");
-    if(hkh.equals("yes") && (hkr instanceof KnownHosts)){
-      hostkey=((KnownHosts)hkr).createHashedHostKey(chost, K_S);
-    }
-    else{
-      hostkey=new HostKey(chost, K_S);
-    }
-
     if(insert){
       synchronized(hkr){
 	hkr.add(hostkey, userinfo);
       }
-
     }
-
   }
 
 //public void start(){ (new Thread(this)).start();  }
@@ -2050,5 +2049,29 @@ break;
       return true;
     }
     catch(Exception e){ return false; }
+  }
+
+  /**
+   * Sets the identityRepository, which will be referred
+   * in the public key authentication.  The default value is null.
+   *
+   * @param identityRepository 
+   *
+   * @see #getIdentityRepository()
+   */
+  public void setIdentityRepository(IdentityRepository identityRepository){
+    this.identityRepository = identityRepository;
+  }
+
+  /**
+   * Gets the identityRepository.  If this.identityRepository is null,
+   * JSch#getIdentityRepository() will be invoked.
+   *
+   * @see JSch#getIdentityRepository()
+   */
+  IdentityRepository getIdentityRepository(){
+    if(identityRepository == null)
+      return jsch.getIdentityRepository();
+    return identityRepository;
   }
 }

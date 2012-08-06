@@ -121,7 +121,7 @@ class ChannelAgentForwarding extends Channel{
       throw new java.io.IOException(e.toString());
     }
 
-    IdentityRepository irepo = _session.jsch.getIdentityRepository();
+    IdentityRepository irepo = _session.getIdentityRepository();
     UserInfo userinfo=_session.getUserInfo();
 
     mbuf.reset();
