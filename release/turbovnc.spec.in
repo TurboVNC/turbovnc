@@ -163,6 +163,7 @@ fi
 %{bindir}/vncconnect
 %if "%{java}" == "1"
  %{javadir}/index.vnc
+ %{javadir}/favicon.ico
  %{javadir}/VncViewer.jar
  %{javadir}/README.txt
 %endif
