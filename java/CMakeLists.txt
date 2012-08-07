@@ -148,10 +148,11 @@ add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc.png
 		${SRCDIR}/${CLASSPATH}/turbovnc.png ${BINDIR}/${CLASSPATH}/turbovnc.png
 	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc.png)
 
-add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc.ico
+add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc-sm.png
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${SRCDIR}/${CLASSPATH}/turbovnc.ico ${BINDIR}/${CLASSPATH}/turbovnc.ico
-	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc.ico)
+		${SRCDIR}/${CLASSPATH}/turbovnc-sm.png
+		${BINDIR}/${CLASSPATH}/turbovnc-sm.png
+	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc-sm.png)
 
 string(REGEX REPLACE "jar" "" Java_PATH ${Java_JAR_EXECUTABLE})
 string(REGEX REPLACE ".exe" "" Java_PATH ${Java_PATH})
@@ -161,7 +162,7 @@ add_custom_command(OUTPUT VncViewer.jar
 		${SRCDIR}/${CLASSPATH}/MANIFEST.MF
 		${BINDIR}/${CLASSPATH}/timestamp
 		${BINDIR}/${CLASSPATH}/turbovnc.png
-		${BINDIR}/${CLASSPATH}/turbovnc.ico
+		${BINDIR}/${CLASSPATH}/turbovnc-sm.png
 	COMMAND ${JAVA_ARCHIVE}
 	ARGS xf ${TJPEG_JAR}
 		org/libjpegturbo/turbojpeg/TJ.class
@@ -181,7 +182,7 @@ add_custom_command(OUTPUT VncViewer.jar
 		com/jcraft/jsch/*.class
 		org/libjpegturbo/turbojpeg/*.class
 		${CLASSPATH}/turbovnc.png
-		${CLASSPATH}/turbovnc.ico
+		${CLASSPATH}/turbovnc-sm.png
 	COMMAND ${CMAKE_COMMAND}
 	ARGS -DJava_PATH=${Java_PATH} -DJAR_FILE=${BINDIR}/VncViewer.jar
 		-P ${SRCDIR}/cmake/SignJar.cmake)

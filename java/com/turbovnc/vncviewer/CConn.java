@@ -533,7 +533,7 @@ public class CConn extends CConnection
     viewport.setUndecorated(fullScreen);
     desktop.setViewport(viewport);
     ClassLoader loader = this.getClass().getClassLoader();
-    URL url = loader.getResource("com/turbovnc/vncviewer/turbovnc.ico");
+    URL url = loader.getResource("com/turbovnc/vncviewer/turbovnc-sm.png");
     ImageIcon icon = null;
     if (url != null) {
       icon = new ImageIcon(url);

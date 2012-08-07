@@ -56,7 +56,7 @@ class Dialog extends JFrame {
       setLocation(x, y);
     }
     ClassLoader cl = this.getClass().getClassLoader();
-    ImageIcon icon = new ImageIcon(cl.getResource("com/turbovnc/vncviewer/turbovnc.ico"));
+    ImageIcon icon = new ImageIcon(cl.getResource("com/turbovnc/vncviewer/turbovnc-sm.png"));
     setIconImage(icon.getImage());
     //setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     //setFont(new Font("SansSerif", Font.PLAIN, 11));
