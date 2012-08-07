@@ -15,7 +15,7 @@ file(REMOVE turbovnc.keystore)
 execute_process(COMMAND
   ${KEYTOOL} -genkey -alias TurboVNC -keystore turbovnc.keystore -keyalg RSA
     -storepass turbovnc -keypass turbovnc -validity 7300
-    -dname "CN=TurboVNC, OU=Software Development, O=The TurboVNC Project, L=Austin, S=Texas, C=US"
+    -dname "CN=TurboVNC, OU=Software Development, O=The VirtualGL Project, L=Austin, S=Texas, C=US"
   RESULT_VARIABLE RESULT OUTPUT_VARIABLE OUTPUT ERROR_VARIABLE ERROR)
 if(NOT RESULT EQUAL 0)
   message(FATAL_ERROR "${KEYTOOL} failed:\n${ERROR}")
