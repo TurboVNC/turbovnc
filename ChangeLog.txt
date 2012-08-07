@@ -22,6 +22,12 @@ Overhauled the build and packaging system.  All platforms now use CMake, and
 the Java code can be built either as part of a Unix or Windows build or as
 a stand-alone project.
 -------------------------------------------------------------------------------
+[5]
+Renamed the resource file for the Unix TurboVNC Viewer to "Tvncviewer" to avoid
+conflicts with TightVNC.  This specifically fixes an issue whereby the TurboVNC
+Viewer would display its menus and titlebar incorrectly when running on a
+system that had the TightVNC Viewer installed.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
