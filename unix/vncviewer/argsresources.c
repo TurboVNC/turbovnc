@@ -30,215 +30,275 @@
 #include "vncviewer.h"
 #include "vncauth.h"
 
+
 /*
  * fallback_resources - these are used if there is no app-defaults file
- * installed in one of the standard places.
+ * installed in one of the standard places.  Don't forget to 'make res'
+ * to regenerate Tvncviewer whenever you change these.
  */
 
 char *fallback_resources[] = {
+/*
+ * Application defaults file for the TurboVNC Viewer
+ */
 
-  "Vncviewer.title: TurboVNC: %s",
 
-  "Vncviewer.translations:\
-    <Enter>: SelectionToVNC()\\n\
-    <Leave>: SelectionFromVNC()",
+/*
+ * The title of the main window.  "%s" will be replaced by the desktop name.
+ */
 
-  "*form.background: black",
+"Tvncviewer.title: TurboVNC: %s",
 
-  "*viewport.allowHoriz: True",
-  "*viewport.allowVert: True",
-  "*viewport.useBottom: True",
-  "*viewport.useRight: True",
-  "*viewport*Scrollbar*thumb: None",
-  "*viewport*Scrollbar.translations: #override\\n\
-     <Btn1Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\\n\
-     <Btn1Motion>: MoveThumb() NotifyThumb()\\n\
-     <Btn3Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\\n\
-     <Btn3Motion>: MoveThumb() NotifyThumb()",
 
-  "*desktop.baseTranslations:\
-     <Key>F8: ShowPopup()\\n\
-     Ctrl Alt Shift <Key>F: ToggleFullScreen()\\n\
-     Ctrl Alt Shift <Key>L: LosslessRefresh()\\n\
-     Ctrl Alt Shift <Key>R: SendRFBEvent(fbupdate)\\n\
-     <ButtonPress>: SendRFBEvent()\\n\
-     <ButtonRelease>: SendRFBEvent()\\n\
-     <Motion>: SendRFBEvent()\\n\
-     <KeyPress>: SendRFBEvent()\\n\
-     <KeyRelease>: SendRFBEvent()",
+/*
+ * Translations on the main window
+ */
 
-  "*serverDialog.title: New TurboVNC Connection",
-  "*serverDialog.dialog.label: VNC server:",
-  "*serverDialog.dialog.value:",
-  "*serverDialog.dialog.value.translations: #override\\n\
-     <Key>Return: ServerDialogDone()",
+"Tvncviewer.translations:\
+  <Enter>: SelectionToVNC()\\n\
+  <Leave>: SelectionFromVNC()",
 
-  "*passwordDialog.title: Standard VNC Authentication",
-  "*passwordDialog.dialog.label: Password:",
-  "*passwordDialog.dialog.value:",
-  "*passwordDialog.dialog.value.AsciiSink.echo: False",
-  "*passwordDialog.dialog.value.translations: #override\\n\
-     <Key>Return: PasswordDialogDone()",
 
-  "*userPwdDialog.title: Unix Login Authentication",
-  "*userPwdDialog.form.background: grey",
-  "*userPwdDialog.form.resizable: true",
+/*
+ * Uncomment if you don't want the TurboVNC Viewer to grab the keyboard in
+ * full-screen mode.
+ */
 
-  "*userPwdDialog*userLabel.label: User:",
+/* Tvncviewer.grabKeyboard: False */
 
-  "*userPwdDialog*userField.editType: edit",
-  "*userPwdDialog*userField.fromHoriz: userLabel",
-  "*userPwdDialog*userField.resize: width",
-  "*userPwdDialog*userField.textSource.editType: edit",
-  "*userPwdDialog*userField.textSource.string: ",
-  "*userPwdDialog*userField.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: UserPwdSetFocus()\\n\
-     Ctrl<Key>O:    Nothing()\\n\
-     Meta<Key>I:    Nothing()\\n\
-     Ctrl<Key>N:    Nothing()\\n\
-     Ctrl<Key>P:    Nothing()\\n\
-     Ctrl<Key>Z:    Nothing()\\n\
-     Meta<Key>Z:    Nothing()\\n\
-     Ctrl<Key>V:    Nothing()\\n\
-     Meta<Key>V:    Nothing()\\n\
-     <Key>Tab: UserPwdNextField()\\n\
-     Ctrl<Key>J: UserPwdNextField()\\n\
-     Ctrl<Key>M: UserPwdNextField()\\n\
-     <Key>Linefeed: UserPwdNextField()\\n\
-     <Key>Return: UserPwdNextField()",
 
-  "*userPwdDialog*pwdLabel.label: Password:",
-  "*userPwdDialog*pwdLabel.fromVert: userLabel",
+/*
+ * Background color to use in full-screen mode if the remote desktop size is
+ * smaller than the local desktop size
+ */
 
-  "*userPwdDialog*pwdField.editType: edit",
-  "*userPwdDialog*pwdField.fromHoriz: pwdLabel",
-  "*userPwdDialog*pwdField.fromVert: userField",
-  "*userPwdDialog*pwdField.resize: width",
-  "*userPwdDialog*pwdField.textSink.echo: False",
-  "*userPwdDialog*pwdField.textSource.editType: edit",
-  "*userPwdDialog*pwdField.textSource.string: ",
-  "*userPwdDialog*pwdField.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: UserPwdSetFocus()\\n\
-     Ctrl<Key>O:    Nothing()\\n\
-     Meta<Key>I:    Nothing()\\n\
-     Ctrl<Key>N:    Nothing()\\n\
-     Ctrl<Key>P:    Nothing()\\n\
-     Ctrl<Key>Z:    Nothing()\\n\
-     Meta<Key>Z:    Nothing()\\n\
-     Ctrl<Key>V:    Nothing()\\n\
-     Meta<Key>V:    Nothing()\\n\
-     <Key>Tab: UserPwdNextField()\\n\
-     Ctrl<Key>J: UserPwdDialogDone()\\n\
-     Ctrl<Key>M: UserPwdDialogDone()\\n\
-     <Key>Linefeed: UserPwdDialogDone()\\n\
-     <Key>Return: UserPwdDialogDone()",
+"*form.background: black",
 
-  "*qualLabel.label: JPEG Image Quality",
-  "*qualBar.length: 100",
-  "*qualBar.width: 130",
-  "*qualBar.orientation: horizontal",
-  "*qualBar.translations: #override\\n\
-     <Btn1Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\\n\
-     <Btn1Motion>: MoveThumb() NotifyThumb()\\n\
-     <Btn3Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\\n\
-     <Btn3Motion>: MoveThumb() NotifyThumb()",
+
+/*
+ * If the remote desktop size exceeds the local desktop size, use scrollbars on
+ * the right and bottom of the window.
+ */
+
+"*viewport.allowHoriz: True",
+"*viewport.allowVert: True",
+"*viewport.useBottom: True",
+"*viewport.useRight: True",
+"*viewport*Scrollbar*thumb: None",
+"*viewport*Scrollbar.translations: #override\\n\
+  <Btn1Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\\n\
+  <Btn1Motion>: MoveThumb() NotifyThumb()\\n\
+  <Btn3Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\\n\
+  <Btn3Motion>: MoveThumb() NotifyThumb()",
+
+
+/*
+ * Default translations on desktop window
+ */
+
+"*desktop.baseTranslations:\
+  <Key>F8: ShowPopup()\\n\
+  Ctrl Alt Shift <Key>F: ToggleFullScreen()\\n\
+  Ctrl Alt Shift <Key>L: LosslessRefresh()\\n\
+  Ctrl Alt Shift <Key>R: SendRFBEvent(fbupdate)\\n\
+  <ButtonPress>: SendRFBEvent()\\n\
+  <ButtonRelease>: SendRFBEvent()\\n\
+  <Motion>: SendRFBEvent()\\n\
+  <KeyPress>: SendRFBEvent()\\n\
+  <KeyRelease>: SendRFBEvent()",
+
+
+/*
+ * Dialog boxes
+ */
+
+"*serverDialog.title: New TurboVNC Connection",
+"*serverDialog.dialog.label: VNC server:",
+"*serverDialog.dialog.value:",
+"*serverDialog.dialog.value.translations: #override\\n\
+  <Key>Return: ServerDialogDone()",
+
+"*passwordDialog.title: Standard VNC Authentication",
+"*passwordDialog.dialog.label: Password:",
+"*passwordDialog.dialog.value:",
+"*passwordDialog.dialog.value.AsciiSink.echo: False",
+"*passwordDialog.dialog.value.translations: #override\\n\
+  <Key>Return: PasswordDialogDone()",
+
+"*userPwdDialog.title: Unix Login Authentication",
+"*userPwdDialog.form.background: grey",
+"*userPwdDialog.form.resizable: true",
+
+"*userPwdDialog*userLabel.label: User:",
+
+"*userPwdDialog*userField.editType: edit",
+"*userPwdDialog*userField.fromHoriz: userLabel",
+"*userPwdDialog*userField.resize: width",
+"*userPwdDialog*userField.textSource.editType: edit",
+"*userPwdDialog*userField.textSource.string: ",
+"*userPwdDialog*userField.translations: #override\\n\
+  <Btn1Down>,<Btn1Up>: UserPwdSetFocus()\\n\
+  Ctrl<Key>O:    Nothing()\\n\
+  Meta<Key>I:    Nothing()\\n\
+  Ctrl<Key>N:    Nothing()\\n\
+  Ctrl<Key>P:    Nothing()\\n\
+  Ctrl<Key>Z:    Nothing()\\n\
+  Meta<Key>Z:    Nothing()\\n\
+  Ctrl<Key>V:    Nothing()\\n\
+  Meta<Key>V:    Nothing()\\n\
+  <Key>Tab: UserPwdNextField()\\n\
+  Ctrl<Key>J: UserPwdNextField()\\n\
+  Ctrl<Key>M: UserPwdNextField()\\n\
+  <Key>Linefeed: UserPwdNextField()\\n\
+  <Key>Return: UserPwdNextField()",
+
+"*userPwdDialog*pwdLabel.label: Password:",
+"*userPwdDialog*pwdLabel.fromVert: userLabel",
+
+"*userPwdDialog*pwdField.editType: edit",
+"*userPwdDialog*pwdField.fromHoriz: pwdLabel",
+"*userPwdDialog*pwdField.fromVert: userField",
+"*userPwdDialog*pwdField.resize: width",
+"*userPwdDialog*pwdField.textSink.echo: False",
+"*userPwdDialog*pwdField.textSource.editType: edit",
+"*userPwdDialog*pwdField.textSource.string: ",
+"*userPwdDialog*pwdField.translations: #override\\n\
+  <Btn1Down>,<Btn1Up>: UserPwdSetFocus()\\n\
+  Ctrl<Key>O:    Nothing()\\n\
+  Meta<Key>I:    Nothing()\\n\
+  Ctrl<Key>N:    Nothing()\\n\
+  Ctrl<Key>P:    Nothing()\\n\
+  Ctrl<Key>Z:    Nothing()\\n\
+  Meta<Key>Z:    Nothing()\\n\
+  Ctrl<Key>V:    Nothing()\\n\
+  Meta<Key>V:    Nothing()\\n\
+  <Key>Tab: UserPwdNextField()\\n\
+  Ctrl<Key>J: UserPwdDialogDone()\\n\
+  Ctrl<Key>M: UserPwdDialogDone()\\n\
+  <Key>Linefeed: UserPwdDialogDone()\\n\
+  <Key>Return: UserPwdDialogDone()",
+
+
+/*
+ * Popup window appearance
+ */
+
+"*qualLabel.label: JPEG Image Quality",
+"*qualBar.length: 100",
+"*qualBar.width: 130",
+"*qualBar.orientation: horizontal",
+"*qualBar.translations: #override\\n\
+  <Btn1Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\\n\
+  <Btn1Motion>: MoveThumb() NotifyThumb()\\n\
+  <Btn3Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\\n\
+  <Btn3Motion>: MoveThumb() NotifyThumb()",
     
-  "*qualText.label: 000",
+"*qualText.label: 000",
 
-  "*subsampLabel.label: JPEG Chrominance Subsampling\\n[4X = fastest]\\n[None = best quality]",
-  "*subsampGray.label: Grayscale",
-  "*subsamp4X.label: 4X",
-  "*subsamp2X.label: 2X",
-  "*subsamp1X.label: None",
+"*subsampLabel.label: JPEG Chrominance Subsampling\\n[4X = fastest]\\n[None = best quality]",
+"*subsampGray.label: Grayscale",
+"*subsamp4X.label: 4X",
+"*subsamp2X.label: 2X",
+"*subsamp1X.label: None",
   
-  "*viewOnly.label: View only",
+"*viewOnly.label: View only",
 
-  "*enableJPEG.label: Enable JPEG Compression",
+"*enableJPEG.label: Enable JPEG Compression",
 
-  "*enableZlib.label: Enable Zlib Compression",
+"*enableZlib.label: Enable Zlib Compression",
 
-  "*popup.title: TurboVNC popup",
-  "*popup*background: grey",
-  "*popup*font: -*-helvetica-bold-r-*-*-16-*-*-*-*-*-*-*",
-  "*popup.buttonForm.Command.borderWidth: 0",
-  "*popup.buttonForm.Toggle.borderWidth: 0",
+"*popup.title: TurboVNC popup",
+"*popup*background: grey",
+"*popup*font: -*-helvetica-bold-r-*-*-16-*-*-*-*-*-*-*",
+"*popup.buttonForm.Command.borderWidth: 0",
+"*popup.buttonForm.Toggle.borderWidth: 0",
 
-  "*popup.translations: #override <Message>WM_PROTOCOLS: HidePopup()",
-  "*popup.buttonForm.translations: #override\\n\
-     <KeyPress>: SendRFBEvent() HidePopup()",
 
-  "*popupButtonCount: 15",
+/*
+ * Translations on popup window
+ */
 
-  "*popup*button1.label: Dismiss popup",
-  "*popup*button1.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: HidePopup()",
+"*popup.translations: #override <Message>WM_PROTOCOLS: HidePopup()",
+"*popup.buttonForm.translations: #override\\n\
+  <KeyPress>: SendRFBEvent() HidePopup()",
 
-  "*popup*button2.label: Quit viewer",
-  "*popup*button2.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: Quit()",
 
-  "*popup*button3.label: Full screen (CTRL-ALT-SHIFT-F)",
-  "*popup*button3.type: toggle",
-  "*popup*button3.translations: #override\\n\
-     <Visible>: SetFullScreenState()\\n\
-     <Btn1Down>,<Btn1Up>: toggle() ToggleFullScreen() HidePopup()",
+/*
+ * Popup buttons
+ */
 
-  "*popup*button4.label: Clipboard: local -> remote",
-  "*popup*button4.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: SelectionToVNC(always) HidePopup()",
+"*popupButtonCount: 15",
 
-  "*popup*button5.label: Clipboard: local <- remote",
-  "*popup*button5.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: SelectionFromVNC(always) HidePopup()",
+"*popup*button1.label: Dismiss popup",
+"*popup*button1.translations: #override\\n\
+  <Btn1Down>,<Btn1Up>: HidePopup()",
 
-  "*popup*button6.label: Request refresh (CTRL-ALT-SHIFT-R)",
-  "*popup*button6.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: SendRFBEvent(fbupdate) HidePopup()",
+"*popup*button2.label: Quit viewer",
+"*popup*button2.translations: #override\\n\
+  <Btn1Down>,<Btn1Up>: Quit()",
 
-  "*popup*button7.label: Request lossless refresh (CTRL-ALT-SHIFT-L)",
-  "*popup*button7.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: LosslessRefresh() HidePopup()",
+"*popup*button3.label: Full screen (CTRL-ALT-SHIFT-F)",
+"*popup*button3.type: toggle",
+"*popup*button3.translations: #override\\n\
+  <Visible>: SetFullScreenState()\\n\
+  <Btn1Down>,<Btn1Up>: toggle() ToggleFullScreen() HidePopup()",
 
-  "*popup*button8.label: Send ctrl-alt-del",
-  "*popup*button8.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: SendRFBEvent(keydown,Control_L)\
-                          SendRFBEvent(keydown,Alt_L)\
-                          SendRFBEvent(key,Delete)\
-                          SendRFBEvent(keyup,Alt_L)\
-                          SendRFBEvent(keyup,Control_L)\
-                          HidePopup()",
+"*popup*button4.label: Clipboard: local -> remote",
+"*popup*button4.translations: #override\\n\
+  <Btn1Down>,<Btn1Up>: SelectionToVNC(always) HidePopup()",
 
-  "*popup*button9.label: Send F8",
-  "*popup*button9.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: SendRFBEvent(key,F8) HidePopup()",
+"*popup*button5.label: Clipboard: local <- remote",
+"*popup*button5.translations: #override\\n\
+  <Btn1Down>,<Btn1Up>: SelectionFromVNC(always) HidePopup()",
 
-  "*popup*button10.label: Continuous updates",
-  "*popup*button10.type: toggle",
-  "*popup*button10.translations: #override\\n\
-     <Visible>: SetCUState()\\n\
-     <Btn1Down>,<Btn1Up>: toggle() ToggleCU()",
+"*popup*button6.label: Request refresh (CTRL-ALT-SHIFT-R)",
+"*popup*button6.translations: #override\\n\
+  <Btn1Down>,<Btn1Up>: SendRFBEvent(fbupdate) HidePopup()",
 
-  "*popup*button11.label: Encoding method: Tight + Perceptually Lossless JPEG (LAN)",
-  "*popup*button11.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: QualHigh()",
+"*popup*button7.label: Request lossless refresh (CTRL-ALT-SHIFT-L)",
+"*popup*button7.translations: #override\\n\
+  <Btn1Down>,<Btn1Up>: LosslessRefresh() HidePopup()",
 
-  "*popup*button12.label: Encoding method: Tight + Medium Quality JPEG",
-  "*popup*button12.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: QualMed()",
+"*popup*button8.label: Send ctrl-alt-del",
+"*popup*button8.translations: #override\\n\
+  <Btn1Down>,<Btn1Up>: SendRFBEvent(keydown,Control_L)\
+                       SendRFBEvent(keydown,Alt_L)\
+                       SendRFBEvent(key,Delete)\
+                       SendRFBEvent(keyup,Alt_L)\
+                       SendRFBEvent(keyup,Control_L)\
+                       HidePopup()",
 
-  "*popup*button13.label: Encoding method: Tight + Low Quality JPEG (WAN)",
-  "*popup*button13.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: QualLow()",
+"*popup*button9.label: Send F8",
+"*popup*button9.translations: #override\\n\
+  <Btn1Down>,<Btn1Up>: SendRFBEvent(key,F8) HidePopup()",
 
-  "*popup*button14.label: Encoding method: Lossless Tight (Gigabit)",
-  "*popup*button14.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: QualLossless()",
+"*popup*button10.label: Continuous updates",
+"*popup*button10.type: toggle",
+"*popup*button10.translations: #override\\n\
+  <Visible>: SetCUState()\\n\
+  <Btn1Down>,<Btn1Up>: toggle() ToggleCU()",
 
-  "*popup*button15.label: Encoding method: Lossless Tight + Zlib (WAN)",
-  "*popup*button15.translations: #override\\n\
-     <Btn1Down>,<Btn1Up>: QualLosslessWAN()",
+"*popup*button11.label: Encoding method: Tight + Perceptually Lossless JPEG (LAN)",
+"*popup*button11.translations: #override\\n\
+  <Btn1Down>,<Btn1Up>: QualHigh()",
 
-  NULL
+"*popup*button12.label: Encoding method: Tight + Medium Quality JPEG",
+"*popup*button12.translations: #override\\n\
+  <Btn1Down>,<Btn1Up>: QualMed()",
+
+"*popup*button13.label: Encoding method: Tight + Low Quality JPEG (WAN)",
+"*popup*button13.translations: #override\\n\
+  <Btn1Down>,<Btn1Up>: QualLow()",
+
+"*popup*button14.label: Encoding method: Lossless Tight (Gigabit)",
+"*popup*button14.translations: #override\\n\
+  <Btn1Down>,<Btn1Up>: QualLossless()",
+
+"*popup*button15.label: Encoding method: Lossless Tight + Zlib (WAN)",
+"*popup*button15.translations: #override\\n\
+  <Btn1Down>,<Btn1Up>: QualLosslessWAN()",
+
+NULL
 };
 
 

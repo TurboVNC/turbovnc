@@ -70,7 +70,7 @@ main(int argc, char **argv)
      generating appropriate resource specs, and makes a connection to the X
      display. */
 
-  toplevel = XtVaAppInitialize(&appContext, "Vncviewer",
+  toplevel = XtVaAppInitialize(&appContext, "Tvncviewer",
 			       cmdLineOptions, numCmdLineOptions,
 			       &argc, argv, fallback_resources,
 			       XtNborderWidth, 0, NULL);

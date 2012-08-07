@@ -28,3 +28,8 @@ target_link_libraries(vncviewer ${X11_Xmu_LIB} ${X11_Xaw_LIB} ${X11_Xt_LIB}
 install(TARGETS vncviewer DESTINATION ${TVNC_BINDIR})
 
 install(FILES vncviewer.man DESTINATION ${TVNC_MANDIR}/man1 RENAME vncviewer.1)
+
+add_custom_target(res
+	COMMAND awk -f ./genres.awk ./argsresources.c >Tvncviewer
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	DEPENDS argsresources.c)
