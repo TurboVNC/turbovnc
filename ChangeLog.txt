@@ -28,6 +28,10 @@ conflicts with TightVNC.  This specifically fixes an issue whereby the TurboVNC
 Viewer would display its menus and titlebar incorrectly when running on a
 system that had the TightVNC Viewer installed.
 -------------------------------------------------------------------------------
+[6]
+The Windows TurboVNC Viewer now accepts a scaling factor of "auto" when using
+the /scale switch on the command line.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

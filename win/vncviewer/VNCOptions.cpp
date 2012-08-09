@@ -383,17 +383,24 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			m_noUnixLogin = true;
 		} else if ( SwitchMatch(args[j], _T("fitwindow") )) {
 			m_FitWindow = true;
+			m_scaling = true;
 		} else if ( SwitchMatch(args[j], _T("scale") )) {
 			if (++j == i) {
 				ArgError(_T("No scaling factor specified"));
 				continue;
 			}
-			int numscales = _stscanf(args[j], _T("%d"), &m_scale_num);
-			if (numscales < 1) {
-				ArgError(_T("Invalid scaling specified"));
-				continue;
-			}
+			if (_tcsicmp(args[j], _T("auto")) == 0) {
+				m_FitWindow = true;
+				m_scaling = true;
+			} else {
+				m_FitWindow = false;
+				int numscales = _stscanf(args[j], _T("%d"), &m_scale_num);
+				if (numscales < 1) {
+					ArgError(_T("Invalid scaling specified"));
+					continue;
+				}
 				m_scale_den = 100;					
+			}
 		} else if ( SwitchMatch(args[j], _T("emulate3timeout") )) {
 			if (++j == i) {
 				ArgError(_T("No timeout specified"));
