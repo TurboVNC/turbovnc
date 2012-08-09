@@ -1499,10 +1499,6 @@ HandleRFBServerMessage()
 	cr.srcX = Swap16IfLE(cr.srcX);
 	cr.srcY = Swap16IfLE(cr.srcY);
 
-	/* If RichCursor encoding is used, we should extend our
-	   "cursor lock area" (previously set to destination
-	   rectangle) to the source rectangle as well. */
-        
 	if (rfbProfile) tBlitStart = gettime();
 
 	if (appData.copyRectDelay != 0) {
