@@ -292,7 +292,8 @@ class DesktopWindow extends JPanel implements
 
   public void setScaledSize() {
     String scaleString = cc.viewer.scalingFactor.getValue();
-    if (!scaleString.equals("Auto") && !scaleString.equals("FixedRatio")) {
+    if (!scaleString.equalsIgnoreCase("Auto") &&
+        !scaleString.equalsIgnoreCase("FixedRatio")) {
       int scalingFactor = Integer.parseInt(scaleString);
       scaledWidth = 
         (int)Math.floor((float)cc.cp.width * (float)scalingFactor/100.0);
@@ -310,7 +311,7 @@ class DesktopWindow extends JPanel implements
                         vpSize.height - vpInsets.top - vpInsets.bottom);
         if (availableSize.width == 0 || availableSize.height == 0)
           availableSize = new Dimension(cc.cp.width, cc.cp.height);
-        if (scaleString.equals("FixedRatio")) {
+        if (scaleString.equalsIgnoreCase("FixedRatio")) {
           float widthRatio = (float)availableSize.width / (float)cc.cp.width;
           float heightRatio = (float)availableSize.height / (float)cc.cp.height;
           float ratio = Math.min(widthRatio, heightRatio);
