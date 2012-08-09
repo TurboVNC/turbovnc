@@ -330,6 +330,8 @@ class DesktopWindow extends JPanel implements
   public void paintComponent(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
     if (cc.cp.width != scaledWidth || cc.cp.height != scaledHeight) {
+      g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                          RenderingHints.VALUE_INTERPOLATION_BILINEAR);
       g2.drawImage(im.getImage(), 0, 0, scaledWidth, scaledHeight, null);  
     } else {
       g2.drawImage(im.getImage(), 0, 0, null);
