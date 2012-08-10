@@ -93,10 +93,10 @@ BEGIN
     CONTROL         "Disable clipboard transfer",IDC_DISABLECLIPBOARD,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,12,174,109,10
     GROUPBOX        "Display",IDC_STATIC_DISPLAY,186,4,160,80
-    LTEXT           "Scale by:",IDC_STATIC_SCALE,195,15,36,10,SS_CENTERIMAGE
-    COMBOBOX        IDC_SCALE_EDIT,231,14,36,85,CBS_DROPDOWN | 
+    LTEXT           "Scaling factor:",IDC_STATIC_SCALE,195,15,46,10,SS_CENTERIMAGE
+    COMBOBOX        IDC_SCALE_EDIT,246,14,81,85,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "%",IDC_STATIC_P,272,15,10,10,SS_CENTERIMAGE
+    LTEXT           "%",IDC_STATIC_P,332,15,10,10,SS_CENTERIMAGE
     CHECKBOX        "Double buffering",IDC_DBCHECK,195,29,145,10, WS_GROUP
     CONTROL         "Full-screen mode",IDC_FULLSCREEN,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,195,41,145,10
@@ -601,7 +601,7 @@ BEGIN
     ID_CLOSEDAEMON          "Stop listening for incoming connections"
     ID_SHOWWINDOW           "Display a connection window"
     ID_NEWCONN              "Make a manual connection"
-    IDS_HELP                "vncviewer [/8bit] [/no8bit] [/shared] [/noshared] [/swapmouse] \r\n      [/belldeiconify] [/listen [<port>]] [/fullscreen] [/restricted] [/viewonly] \r\n      [/emulate3] [/noemulate3] [/emulate3timeout <ms>] [/emulate3fuzz <pixels>] \r\n      [/notoolbar] [/scale <percentage> | auto] [/config <filename>] [/disableclipboard] \r\n      [/encoding <encname>] [/compresslevel <n>] [/samp gray | 1X | 2X | 4X] \r\n      [/quality <1-100>] [/copyrect] [/nocopyrect] [/loglevel <n>] [/logfile <filename>] \r\n      [/register] [/nocursor] [/dotcursor] [/smalldotcursor] [/normalcursor] [/help] \r\n      [/jpeg] [/nojpeg] [/nocursorshape] [/noremotecursor] [/singlebuffer] \r\n      [/doublebuffer] [/fsaltenter] [/nofsaltenter] [/span primary | all | auto]\r\n      [/cu] [/nocu] [/user <user name>] [/nounixlogin] [/autopass]\r\n      [/password <clear text password>] [<server>[:<display>]] \r\n\r\nFor more details, see the documentation."
+    IDS_HELP                "vncviewer [/8bit] [/no8bit] [/shared] [/noshared] [/swapmouse] \r\n      [/belldeiconify] [/listen [<port>]] [/fullscreen] [/restricted] [/viewonly] \r\n      [/emulate3] [/noemulate3] [/emulate3timeout <ms>] [/emulate3fuzz <pixels>] \r\n      [/notoolbar] [/scale <percentage> | fixedratio] [/config <filename>] [/disableclipboard] \r\n      [/encoding <encname>] [/compresslevel <n>] [/samp gray | 1X | 2X | 4X] \r\n      [/quality <1-100>] [/copyrect] [/nocopyrect] [/loglevel <n>] [/logfile <filename>] \r\n      [/register] [/nocursor] [/dotcursor] [/smalldotcursor] [/normalcursor] [/help] \r\n      [/jpeg] [/nojpeg] [/nocursorshape] [/noremotecursor] [/singlebuffer] \r\n      [/doublebuffer] [/fsaltenter] [/nofsaltenter] [/span primary | all | auto]\r\n      [/cu] [/nocu] [/user <user name>] [/nounixlogin] [/autopass]\r\n      [/password <clear text password>] [<server>[:<display>]] \r\n\r\nFor more details, see the documentation."
 END
 
 STRINGTABLE DISCARDABLE 

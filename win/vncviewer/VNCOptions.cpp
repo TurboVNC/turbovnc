@@ -388,7 +388,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 				ArgError(_T("No scaling factor specified"));
 				continue;
 			}
-			if (_tcsicmp(args[j], _T("auto")) == 0) {
+			if (_tcsicmp(args[j], _T("fixedratio")) == 0) {
 				m_FitWindow = true;
 			} else {
 				m_FitWindow = false;
@@ -963,8 +963,8 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 			
 			HWND hViewOnly = GetDlgItem(hwnd, IDC_VIEWONLY);
 			SendMessage(hViewOnly, BM_SETCHECK, _this->m_ViewOnly, 0);
-			char scalecombo[9][20] = {
-				"25","50","75","90","100","125","150","200","Auto"
+			char scalecombo[9][19] = {
+				"25","50","75","90","100","125","150","200","Fixed Aspect Ratio"
 			};
 			HWND hScalEdit = GetDlgItem(hwnd, IDC_SCALE_EDIT);
 			for (i = 0; i <= 8; i++) {
@@ -972,7 +972,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 							(LPARAM)(int FAR*)scalecombo[i]);
 			}
 			if (_this->m_FitWindow) {
-				SetDlgItemText(hwnd, IDC_SCALE_EDIT, "Auto");
+				SetDlgItemText(hwnd, IDC_SCALE_EDIT, "Fixed Aspect Ratio");
 			} else {	
 				SetDlgItemInt(hwnd, IDC_SCALE_EDIT, (( _this->m_scale_num*100) / _this->m_scale_den), FALSE);
 			}
@@ -1136,7 +1136,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 				} else {
 					TCHAR buf[20];
 					GetDlgItemText(hwnd, IDC_SCALE_EDIT, buf, 20);
-					if (strcmp(buf, "Auto") == 0) {
+					if (strcmp(buf, "Fixed Aspect Ratio") == 0) {
 						_this->m_FitWindow = true;
 						_this->m_scaling = true;
 					} else {

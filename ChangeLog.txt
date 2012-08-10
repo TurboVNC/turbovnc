@@ -29,8 +29,9 @@ Viewer would display its menus and titlebar incorrectly when running on a
 system that had the TightVNC Viewer installed.
 -------------------------------------------------------------------------------
 [6]
-The Windows TurboVNC Viewer now accepts a scaling factor of "auto" when using
-the /scale switch on the command line.
+The Windows TurboVNC Viewer now accepts a scaling factor of "fixedratio" when
+using the /scale switch on the command line.  This was previously called "Auto"
+in the GUI, but the name was changed to match the Java Viewer.
 -------------------------------------------------------------------------------
 
 
