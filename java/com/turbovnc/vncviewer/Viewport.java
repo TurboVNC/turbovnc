@@ -35,6 +35,8 @@ public class Viewport extends JFrame
     setTitle(name+" - TurboVNC");
     setFocusable(false);
     setFocusTraversalKeysEnabled(false);
+    UIManager.getDefaults().put("ScrollPane.ancestorInputMap", 
+      new UIDefaults.LazyInputMap(new Object[]{}));
     sp = new JScrollPane();
     sp.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
     getContentPane().add(sp);
