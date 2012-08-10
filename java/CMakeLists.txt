@@ -52,27 +52,8 @@ if(NOT EXISTS ${TJPEG_JAR})
 	message(FATAL_ERROR "Could not find TurboJPEG JAR file at ${TJPEG_JAR}.  Set TJPEG_JAR to the full pathname of turbojpeg.jar or install the libjpeg-turbo SDK.")
 endif()
 
-set(JAVA_CLASSNAMES
-	CConn
-	ClipboardDialog
-	DesktopWindow
-	Dialog
-	F8Menu
-	OptionsDialogCallback
-	PasswdDialog
-	PlatformPixelBuffer
-	OptionsDialog
-	ServerDialog
-	UserPrefs
-	VncViewer)
-
 set(JAVA_SOURCES "")
-set(JAVA_CLASSES_FULL "")
-foreach(class ${JAVA_CLASSNAMES})
-	set(JAVA_SOURCES ${JAVA_SOURCES} ${CLASSPATH}/${class}.java)
-	set(JAVA_CLASSES_FULL ${JAVA_CLASSES_FULL}
-		${BINDIR}/${CLASSPATH}/${class}.class)
-endforeach()
+set(JAVA_CLASSES "")
 
 set(JSCH_CLASSNAMES
 	DH
@@ -119,11 +100,12 @@ set(JSCH_CLASSNAMES
 
 foreach(class ${JSCH_CLASSNAMES})
 	set(JAVA_SOURCES ${JAVA_SOURCES} com/jcraft/jsch/${class}.java)
-	set(JAVA_CLASSES_FULL ${JAVA_CLASSES_FULL}
+	set(JAVA_CLASSES ${JAVA_CLASSES}
 		${BINDIR}/com/jcraft/jsch/${class}.class)
 endforeach()
 
 file(GLOB DEPEND_SOURCES
+	${SRCDIR}/${CLASSPATH}/*.java
 	${SRCDIR}/com/turbovnc/rfb/*.java
 	${SRCDIR}/com/turbovnc/rdr/*.java
 	${SRCDIR}/com/turbovnc/network/*.java
@@ -134,11 +116,11 @@ file(GLOB DEPEND_SOURCES
 	${SRCDIR}/com/jcraft/jzlib/*.java)
 
 string(REGEX REPLACE " " ";" JAVACFLAGS "${JAVACFLAGS}")
-add_custom_command(OUTPUT ${JAVA_CLASSES_FULL}
+add_custom_command(OUTPUT ${JAVA_CLASSES}
 	DEPENDS ${JAVA_SOURCES} ${DEPEND_SOURCES}
 	COMMAND ${JAVA_COMPILE}
 	ARGS ${JAVACFLAGS} -cp ${TJPEG_JAR} -sourcepath ${SRCDIR} -d ${BINDIR}
-		${JAVA_SOURCES}
+		${CLASSPATH}/VncViewer.java ${JAVA_SOURCES}
 	WORKING_DIRECTORY ${SRCDIR})
 
 configure_file(${CLASSPATH}/timestamp.in ${CLASSPATH}/timestamp)
@@ -158,7 +140,7 @@ string(REGEX REPLACE "jar" "" Java_PATH ${Java_JAR_EXECUTABLE})
 string(REGEX REPLACE ".exe" "" Java_PATH ${Java_PATH})
 
 add_custom_command(OUTPUT VncViewer.jar
-	DEPENDS ${JAVA_CLASSES_FULL}
+	DEPENDS ${JAVA_CLASSES}
 		${SRCDIR}/${CLASSPATH}/MANIFEST.MF
 		${BINDIR}/${CLASSPATH}/timestamp
 		${BINDIR}/${CLASSPATH}/turbovnc.png
