@@ -34,9 +34,8 @@
 
 package com.turbovnc.vncviewer;
 
+import java.awt.*;
 import java.awt.event.*;
-import java.awt.Dimension;
-import java.awt.Event;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,6 +52,7 @@ import java.util.*;
 
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
+import com.turbovnc.rfb.Point;
 import com.turbovnc.rfb.Exception;
 import com.turbovnc.network.Socket;
 import com.turbovnc.network.TcpSocket;
@@ -553,9 +553,14 @@ public class CConn extends CConnection
     desktop.setScaledSize();
     int w = desktop.scaledWidth;
     int h = desktop.scaledHeight;
+    GraphicsEnvironment ge =
+      GraphicsEnvironment.getLocalGraphicsEnvironment();
+    GraphicsDevice gd = ge.getDefaultScreenDevice();
     if (fullScreen) {
       viewport.setExtendedState(JFrame.MAXIMIZED_BOTH);
       viewport.setGeometry(0, 0, dpySize.width, dpySize.height, false);
+      if (gd.isFullScreenSupported())
+        gd.setFullScreenWindow(viewport);
     } else {
       int wmDecorationWidth = viewport.getInsets().left + viewport.getInsets().right;
       int wmDecorationHeight = viewport.getInsets().top + viewport.getInsets().bottom;
@@ -580,6 +585,8 @@ public class CConn extends CConnection
         viewport.setExtendedState(JFrame.NORMAL);
         viewport.setGeometry(x, y, w, h, pack);
       }
+      if (gd.isFullScreenSupported())
+        gd.setFullScreenWindow(null);
     }
   }
 
