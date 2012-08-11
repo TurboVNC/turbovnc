@@ -29,11 +29,10 @@ import java.util.Iterator;
 
 import com.turbovnc.rdr.Exception;
 
-public class SocketDescriptor extends SocketChannel 
-                              implements FileDescriptor {
+public class SocketDescriptor implements FileDescriptor {
 
   public SocketDescriptor() throws Exception {
-    super(DefaultSelectorProvider());
+    DefaultSelectorProvider();
     try {
       channel = SocketChannel.open();
       channel.configureBlocking(false);
@@ -47,6 +46,23 @@ public class SocketDescriptor extends SocketChannel
       channel.register(readSelector, SelectionKey.OP_READ);
     } catch (java.nio.channels.ClosedChannelException e) {
       throw new Exception(e.toString());
+    }
+  }
+
+  public void shutdown() throws IOException {
+    try {
+      channel.socket().shutdownInput();
+      channel.socket().shutdownOutput();
+    } catch(IOException e) {
+      throw new IOException(e.toString());
+    }
+  }
+
+  public void close() throws IOException {
+    try {
+      channel.close();
+    } catch(IOException e) {
+      throw new IOException(e.toString());
     }
   }
 
@@ -164,6 +180,18 @@ public class SocketDescriptor extends SocketChannel
 
   public java.net.Socket socket() {
     return channel.socket();
+  }
+ 
+  public SocketAddress getRemoteAddress() throws IOException {
+    if (isConnected())
+      return channel.socket().getRemoteSocketAddress();
+    return null;
+  }
+
+  public SocketAddress getLocalAddress() throws IOException {
+    if (isConnected())
+      return channel.socket().getLocalSocketAddress();
+    return null;
   }
 
   public boolean isConnectionPending() {
