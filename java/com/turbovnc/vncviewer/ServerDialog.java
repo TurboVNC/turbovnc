@@ -45,12 +45,8 @@ class ServerDialog extends Dialog implements
     setTitle("New TurboVNC Connection");
     addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
-        if (cc.viewer.firstApplet && cc.viewport == null) {
-          System.exit(1);
-        } else {
-          ok = false;
-          endDialog();
-        }
+        ok = false;
+        endDialog();
       }
     });
 
