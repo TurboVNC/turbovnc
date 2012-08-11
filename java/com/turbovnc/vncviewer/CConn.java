@@ -643,22 +643,16 @@ public class CConn extends CConnection
   ////////////////////////////////////////////////////////////////////
   // The following methods are all called from the GUI thread
 
-  // close() closes the socket, thus waking up the RFB thread.
-  public void close() { close(false); }
-
-  public void close(boolean exit) {
+  // close() shuts down the socket, thus waking up the RFB thread.
+  public void close() {
     deleteWindow();
     shuttingDown = true;
-    if (sock != null)
-      sock.shutdown();
     try {
       if (sock != null)
-        sock.close();
+        sock.shutdown();
     } catch (java.lang.Exception e) {
       throw new Exception(e.toString());
     }
-    if (exit)
-      viewer.exit(0);
   }
 
   // Menu callbacks.  These are guaranteed only to be called after serverInit()
