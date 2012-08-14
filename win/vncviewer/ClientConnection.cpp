@@ -21,12 +21,6 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
 //  USA.
-//
-// TightVNC distribution homepage on the Web: http://www.tightvnc.com/
-//
-// If the source code for the VNC system is not available from the place 
-// whence you received this file, check http://www.uk.research.att.com/vnc or contact
-// the authors on vnc@uk.research.att.com for information on obtaining it.
 
 
 // Many thanks to Randy Brown <rgb@inven.com> for providing the 3-button

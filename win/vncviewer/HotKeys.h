@@ -1,5 +1,5 @@
-// Copyright (C) 2010 D. R. Commander. All Rights Reserved.
-// Copyright (C) 2003 TightVNC Development Team. All Rights Reserved.
+//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2003 TightVNC Development Team. All Rights Reserved.
 //
 //  TightVNC is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
 //  USA.
-//
-// TightVNC homepage on the Web: http://www.tightvnc.com/
 
 // HotKeys.h: interface for the HotKeys class.
 
