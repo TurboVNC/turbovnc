@@ -1,4 +1,4 @@
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2012 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
 //  This file is part of the VNC system.
@@ -58,8 +58,11 @@ static LRESULT CALLBACK HelpDlgProc(HWND hwnd, UINT iMsg,
 	switch (iMsg) {
 	case WM_INITDIALOG: 
 		{
-			TCHAR buf [2048];
+			TCHAR buf [8192];
 			LoadString(pApp->m_instance, IDS_HELP, buf, sizeof(buf));
+			if (strlen(buf) < 8191)
+				LoadString(pApp->m_instance, IDS_HELP2, &buf[strlen(buf)],
+					sizeof(buf)-(int)strlen(buf));
 			SetDlgItemText(hwnd, IDC_EDIT_HELP, buf);
 			SetWindowText(hwnd, (LPTSTR)lParam);
 			CentreWindow(hwnd);
