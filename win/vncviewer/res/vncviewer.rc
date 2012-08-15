@@ -783,13 +783,13 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDC_TAB                 "Here you can choose whether to edit connection-specific options or global settings for the viewer."
     IDC_OPTIONBUTTON        "Edit connection-specific options for the specified VNC server or change the global configuration of the viewer."
-    IDC_DBCHECK             "If this option is checked, TurboVNC will wait until the window has finished redrawing on the server before it redraws the window on the client. This prevents tearing with 3D and video applications."
+    IDC_DBCHECK             "If this option is checked, TurboVNC will wait until all rectangles in a framebuffer update have been received and decoded before it draws the framebuffer update to the screen.  This reduces tearing artifacts when 3D or video applications switch frames."
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDC_OK                  "Connect to the specified VNC server."
-    IDC_LIST_MODE           "Switch to listen mode and close the dialog box. The listening viewer will wait for incoming connections from VNC servers. To connect to a listening viewer, choose ""Add New Client..."" from the TurboVNC Server's tray menu."
+    IDC_LIST_MODE           "Switch to listen mode and close the dialog box. The listening viewer will wait for incoming connections from VNC servers. To connect to a listening viewer from the Unix/Linux TurboVNC Server, use the vncconnect program."
     IDC_CHECK_MESSAGE       "If this option is set, the viewer will show a warning before switching to full-screen mode. The warning reminds you how to exit that mode."
     IDC_CHECK_TOOLBAR       "If this option is set, then new viewer windows will have a toolbar by default. You can always show/hide the toolbar using the system menu, but this option sets the default behavior."
     IDC_EDIT_AMOUNT_LIST    "The viewer automatically saves host names and settings for past connections. This option specifies how many connections to remember."
@@ -817,7 +817,7 @@ BEGIN
     IDC_SHARED              "Enable multiple simultaneous viewer connections to the same server desktop. If the session is not shared, then only one viewer can connect to the same session at the same time. Unlike some VNC flavors, TurboVNC uses shared sessions by default."
     IDC_CU                  "If enabled, the TurboVNC Server will immediately send framebuffer updates resulting from large PutImage or CopyArea operations without waiting for a framebuffer update request from a VNC viewer. This can improve performance on some high-latency networks."
     IDC_ENCODING            "Choose one of these encoding methods based on the type of network you are using and your desired image quality and performance."
-    IDC_SCALE_EDIT          "Reduce or enlarge the image of the remote dektop."
+    IDC_SCALE_EDIT          "Reduce or enlarge the image of the remote desktop by the specified percentage.  ""Fixed Aspect Ratio"" automatically scales the remote desktop image to the size of the viewer window, preserving the aspect ratio of the remote desktop."
     IDC_DOTCURSOR_RADIO     "Show local cursor position as a dot."
     IDC_NOCURSOR_RADIO      "Do not show local cursor position."
 END
