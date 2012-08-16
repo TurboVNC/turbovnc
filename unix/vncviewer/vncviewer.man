@@ -419,8 +419,7 @@ Equivalent of the \fB\-fsaltenter\fR/\fB\-nofsaltenter\fR options.  Default
 false.
 .TP
 .B grabKeyboard
-Grab keyboard in full-screen mode.  This can help to solve problems
-with losing keyboard focus.  Default true.
+Equivalent of the \fB\-grabkeyboard\fR option.  Default = fs.
 .TP
 .B doubleBuffer
 Equivalent of the \fB\-doublebuffer\fR/\fB\-singlebuffer\fR options.  Default
