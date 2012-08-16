@@ -320,12 +320,6 @@ int vncServerPort = 0;
 AppData appData;
 
 static XtResource appDataResourceList[] = {
-  {"userLogin", "UserLogin", XtRString, sizeof(String),
-   XtOffsetOf(AppData, userLogin), XtRImmediate, (XtPointer) 0},
-
-  {"noUnixLogin", "NoUnixLogin", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, noUnixLogin), XtRImmediate, (XtPointer) False},
-
   {"shareDesktop", "ShareDesktop", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, shareDesktop), XtRImmediate, (XtPointer) True},
 
@@ -338,17 +332,17 @@ static XtResource appDataResourceList[] = {
   {"fsAltEnter", "FSAltEnter", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, fsAltEnter), XtRImmediate, (XtPointer) False},
 
+  {"grabKeyboard", "GrabKeyboard", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, grabKeyboard), XtRImmediate, (XtPointer) True},
+
+  {"doubleBuffer", "DoubleBuffer", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, doubleBuffer), XtRImmediate, (XtPointer) True},
+
+  {"useSharedMemory", "UseSharedMemory", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, useShm), XtRImmediate, (XtPointer) True},
+
   {"raiseOnBeep", "RaiseOnBeep", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, raiseOnBeep), XtRImmediate, (XtPointer) True},
-
-  {"passwordFile", "PasswordFile", XtRString, sizeof(String),
-   XtOffsetOf(AppData, passwordFile), XtRImmediate, (XtPointer) 0},
-
-  {"passwordDialog", "PasswordDialog", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, passwordDialog), XtRImmediate, (XtPointer) False},
-
-  {"encodings", "Encodings", XtRString, sizeof(String),
-   XtOffsetOf(AppData, encodingsString), XtRImmediate, (XtPointer) 0},
 
   {"use8Bit", "Use8Bit", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, useBGR233), XtRImmediate, (XtPointer) False},
@@ -368,14 +362,59 @@ static XtResource appDataResourceList[] = {
   {"requestedDepth", "RequestedDepth", XtRInt, sizeof(int),
    XtOffsetOf(AppData, requestedDepth), XtRImmediate, (XtPointer) 0},
 
-  {"useSharedMemory", "UseSharedMemory", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, useShm), XtRImmediate, (XtPointer) True},
+  {"encodings", "Encodings", XtRString, sizeof(String),
+   XtOffsetOf(AppData, encodingsString), XtRImmediate, (XtPointer) 0},
+
+  {"enableJPEG", "EnableJPEG", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, enableJPEG), XtRImmediate, (XtPointer) True},
+
+  {"quality", "Quality", XtRInt, sizeof(int),
+   XtOffsetOf(AppData, qualityLevel), XtRImmediate, (XtPointer) 95},
+
+  {"subsampling", "Subsampling", XtRString, sizeof(String),
+   XtOffsetOf(AppData, subsampString), XtRImmediate, (XtPointer) "1x"},
+
+  {"compressLevel", "CompressionLevel", XtRInt, sizeof(int),
+   XtOffsetOf(AppData, compressLevel), XtRImmediate, (XtPointer) -1},
+
+  {"continuousUpdates", "ContinuousUpdates", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, continuousUpdates), XtRImmediate, (XtPointer) False},
+
+  {"useRemoteCursor", "UseRemoteCursor", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, useRemoteCursor), XtRImmediate, (XtPointer) True},
+
+  {"useRichCursor", "UseRichCursor", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, useRichCursor), XtRImmediate, (XtPointer) True},
+
+  {"userLogin", "UserLogin", XtRString, sizeof(String),
+   XtOffsetOf(AppData, userLogin), XtRImmediate, (XtPointer) 0},
+
+  {"noUnixLogin", "NoUnixLogin", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, noUnixLogin), XtRImmediate, (XtPointer) False},
+
+  {"passwordFile", "PasswordFile", XtRString, sizeof(String),
+   XtOffsetOf(AppData, passwordFile), XtRImmediate, (XtPointer) 0},
+
+  {"autoPass", "AutoPass", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, autoPass), XtRImmediate, (XtPointer) False},
+
+  {"passwordDialog", "PasswordDialog", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, passwordDialog), XtRImmediate, (XtPointer) False},
+
+  {"configFile", "ConfigFile", XtRString, sizeof(String),
+   XtOffsetOf(AppData, configFile), XtRImmediate, (XtPointer) 0},
 
   {"wmDecorationWidth", "WmDecorationWidth", XtRInt, sizeof(int),
    XtOffsetOf(AppData, wmDecorationWidth), XtRImmediate, (XtPointer) 4},
 
   {"wmDecorationHeight", "WmDecorationHeight", XtRInt, sizeof(int),
    XtOffsetOf(AppData, wmDecorationHeight), XtRImmediate, (XtPointer) 24},
+
+  {"bumpScrollTime", "BumpScrollTime", XtRInt, sizeof(int),
+   XtOffsetOf(AppData, bumpScrollTime), XtRImmediate, (XtPointer) 25},
+
+  {"bumpScrollPixels", "BumpScrollPixels", XtRInt, sizeof(int),
+   XtOffsetOf(AppData, bumpScrollPixels), XtRImmediate, (XtPointer) 20},
 
   {"popupButtonCount", "PopupButtonCount", XtRInt, sizeof(int),
    XtOffsetOf(AppData, popupButtonCount), XtRImmediate, (XtPointer) 0},
@@ -388,45 +427,6 @@ static XtResource appDataResourceList[] = {
 
   {"copyRectDelay", "CopyRectDelay", XtRInt, sizeof(int),
    XtOffsetOf(AppData, copyRectDelay), XtRImmediate, (XtPointer) 0},
-
-  {"bumpScrollTime", "BumpScrollTime", XtRInt, sizeof(int),
-   XtOffsetOf(AppData, bumpScrollTime), XtRImmediate, (XtPointer) 25},
-
-  {"bumpScrollPixels", "BumpScrollPixels", XtRInt, sizeof(int),
-   XtOffsetOf(AppData, bumpScrollPixels), XtRImmediate, (XtPointer) 20},
-
-  {"compressLevel", "CompressionLevel", XtRInt, sizeof(int),
-   XtOffsetOf(AppData, compressLevel), XtRImmediate, (XtPointer) -1},
-
-  {"subsampling", "Subsampling", XtRString, sizeof(String),
-   XtOffsetOf(AppData, subsampString), XtRImmediate, (XtPointer) "1x"},
-
-  {"quality", "Quality", XtRInt, sizeof(int),
-   XtOffsetOf(AppData, qualityLevel), XtRImmediate, (XtPointer) 95},
-
-  {"enableJPEG", "EnableJPEG", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, enableJPEG), XtRImmediate, (XtPointer) True},
-
-  {"useRemoteCursor", "UseRemoteCursor", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, useRemoteCursor), XtRImmediate, (XtPointer) True},
-
-  {"useRichCursor", "UseRichCursor", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, useRichCursor), XtRImmediate, (XtPointer) True},
-
-  {"grabKeyboard", "GrabKeyboard", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, grabKeyboard), XtRImmediate, (XtPointer) True},
-
-  {"doubleBuffer", "DoubleBuffer", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, doubleBuffer), XtRImmediate, (XtPointer) True},
-
-  {"autoPass", "AutoPass", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, autoPass), XtRImmediate, (XtPointer) False},
-
-  {"continuousUpdates", "ContinuousUpdates", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, continuousUpdates), XtRImmediate, (XtPointer) False},
-
-  {"configFile", "ConfigFile", XtRString, sizeof(String),
-   XtOffsetOf(AppData, configFile), XtRImmediate, (XtPointer) 0},
 };
 
 
@@ -545,12 +545,12 @@ usage(void)
 	  "<OPTIONS> are standard Xt options, or:\n"
 	  "        -ipv6\n"
 	  "        -shared (default) / -noshared\n"
-	  "        -viewonly / -noviewonly (default)\n"
+	  "        -viewonly / -fullcontrol (default)\n"
 	  "        -fullscreen / -nofullscreen (default)\n"
 	  "        -fsaltenter / -nofsaltenter (default)\n"
 	  "        -doublebuffer (default) / -singlebuffer\n"
 	  "        -raiseonbeep (default) / -noraiseonbeep\n"
-	  "        -bgr233 / -nobgr233 (default)\n"
+	  "        -8bit / -no8bit (default)\n"
 	  "        -owncmap\n"
 	  "        -truecolor\n"
 	  "        -depth <DEPTH>\n"
