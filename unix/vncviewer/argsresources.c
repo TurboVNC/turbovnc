@@ -350,19 +350,19 @@ static XtResource appDataResourceList[] = {
   {"encodings", "Encodings", XtRString, sizeof(String),
    XtOffsetOf(AppData, encodingsString), XtRImmediate, (XtPointer) 0},
 
-  {"useBGR233", "UseBGR233", XtRBool, sizeof(Bool),
+  {"use8Bit", "Use8Bit", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, useBGR233), XtRImmediate, (XtPointer) False},
 
-  {"nColours", "NColours", XtRInt, sizeof(int),
+  {"nColors", "NColors", XtRInt, sizeof(int),
    XtOffsetOf(AppData, nColours), XtRImmediate, (XtPointer) 256},
 
-  {"useSharedColours", "UseSharedColours", XtRBool, sizeof(Bool),
+  {"useSharedColors", "UseSharedColors", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, useSharedColours), XtRImmediate, (XtPointer) True},
 
   {"forceOwnCmap", "ForceOwnCmap", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, forceOwnCmap), XtRImmediate, (XtPointer) False},
 
-  {"forceTrueColour", "ForceTrueColour", XtRBool, sizeof(Bool),
+  {"forceTrueColor", "ForceTrueColor", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, forceTrueColour), XtRImmediate, (XtPointer) False},
 
   {"requestedDepth", "RequestedDepth", XtRInt, sizeof(int),
@@ -439,31 +439,41 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-shared",        "*shareDesktop",       XrmoptionNoArg,  "True"},
   {"-noshared",      "*shareDesktop",       XrmoptionNoArg,  "False"},
   {"-viewonly",      "*viewOnly",           XrmoptionNoArg,  "True"},
+  {"-fullcontrol",   "*viewOnly",           XrmoptionNoArg,  "False"},
   {"-fullscreen",    "*fullScreen",         XrmoptionNoArg,  "True"},
+  {"-nofullscreen",  "*fullScreen",         XrmoptionNoArg,  "False"},
   {"-fsaltenter",    "*fsAltEnter",         XrmoptionNoArg,  "True"},
+  {"-nofsaltenter",  "*fsAltEnter",         XrmoptionNoArg,  "False"},
+  {"-raiseonbeep",   "*raiseOnBeep",        XrmoptionNoArg,  "True"},
   {"-noraiseonbeep", "*raiseOnBeep",        XrmoptionNoArg,  "False"},
   {"-passwd",        "*passwordFile",       XrmoptionSepArg, 0},
   {"-encodings",     "*encodings",          XrmoptionSepArg, 0},
-  {"-bgr233",        "*useBGR233",          XrmoptionNoArg,  "True"},
+  {"-8bit",          "*use8Bit",            XrmoptionNoArg,  "True"},
+  {"-no8bit",        "*use8Bit",            XrmoptionNoArg,  "False"},
   {"-owncmap",       "*forceOwnCmap",       XrmoptionNoArg,  "True"},
   {"-truecolor",     "*forceTrueColour",    XrmoptionNoArg,  "True"},
-  {"-truecolour",    "*forceTrueColour",    XrmoptionNoArg,  "True"},
   {"-depth",         "*requestedDepth",     XrmoptionSepArg, 0},
   {"-samp",          "*subsampling",        XrmoptionSepArg, 0},
   {"-compresslevel", "*compressLevel",      XrmoptionSepArg, 0},
   {"-quality",       "*quality",            XrmoptionSepArg, 0},
+  {"-jpeg",          "*enableJPEG",         XrmoptionNoArg,  "True"},
   {"-nojpeg",        "*enableJPEG",         XrmoptionNoArg,  "False"},
+  {"-cursorshape",   "*useRemoteCursor",    XrmoptionNoArg,  "True"},
   {"-nocursorshape", "*useRemoteCursor",    XrmoptionNoArg,  "False"},
+  {"-richcursor",    "*useRichCursor",      XrmoptionNoArg,  "True"},
   {"-norichcursor",  "*useRichCursor",      XrmoptionNoArg,  "False"},
+  {"-doublebuffer",  "*doubleBuffer",       XrmoptionNoArg,  "True"},
   {"-singlebuffer",  "*doubleBuffer",       XrmoptionNoArg,  "False"},
   {"-lowqual",       "*quality",            XrmoptionNoArg,  "-1"},
   {"-medqual",       "*quality",            XrmoptionNoArg,  "-2"},
-  {"-lossless",      "*quality",            XrmoptionNoArg,  "-3"},
-  {"-losslesswan",   "*quality",            XrmoptionNoArg,  "-4"},
+  {"-highqual",      "*quality",            XrmoptionNoArg,  "-3"},
+  {"-lossless",      "*quality",            XrmoptionNoArg,  "-4"},
+  {"-losslesswan",   "*quality",            XrmoptionNoArg,  "-5"},
   {"-autopass",      "*autoPass",           XrmoptionNoArg,  "True"},
   {"-user",          "*userLogin",          XrmoptionSepArg,  0},
   {"-nounixlogin",   "*noUnixLogin",        XrmoptionNoArg,  "True"},
   {"-cu",            "*continuousUpdates",  XrmoptionNoArg,  "True"},
+  {"-nocu",          "*continuousUpdates",  XrmoptionNoArg,  "False"},
   {"-config",        "*configFile",         XrmoptionSepArg, 0}
 };
 
@@ -533,35 +543,35 @@ usage(void)
 	  "       %s -help\n"
 	  "\n"
 	  "<OPTIONS> are standard Xt options, or:\n"
-	  "        -via <GATEWAY>\n"
-	  "        -shared (set by default)\n"
-	  "        -noshared\n"
-	  "        -viewonly\n"
-	  "        -fullscreen\n"
-          "        -fsaltenter\n"
-	  "        -noraiseonbeep\n"
-	  "        -passwd <PASSWD-FILENAME> (standard VNC authentication)\n"
-	  "        -encodings <ENCODING-LIST> (example: \"tight copyrect\")\n"
-	  "        -bgr233\n"
+	  "        -ipv6\n"
+	  "        -shared (default) / -noshared\n"
+	  "        -viewonly / -noviewonly (default)\n"
+	  "        -fullscreen / -nofullscreen (default)\n"
+	  "        -fsaltenter / -nofsaltenter (default)\n"
+	  "        -doublebuffer (default) / -singlebuffer\n"
+	  "        -raiseonbeep (default) / -noraiseonbeep\n"
+	  "        -bgr233 / -nobgr233 (default)\n"
 	  "        -owncmap\n"
-	  "        -truecolour\n"
+	  "        -truecolor\n"
 	  "        -depth <DEPTH>\n"
-	  "        -compresslevel <ZLIB COMPRESSION LEVEL> (0..1: 0-fast, 1-best)\n"
-	  "        -samp <JPEG CHROMINANCE SUBSAMPLING> (1x | 2x | 4x | gray)\n"
+	  "        -encodings <ENCODING-LIST> (example: \"tight copyrect\")\n"
+	  "        -jpeg (default) / -nojpeg\n"
 	  "        -quality <JPEG IMAGE QUALITY> (1..100: 1-low, 100-high)\n"
-	  "        -nojpeg\n"
-	  "        -nocursorshape\n"
-	  "        -autopass\n"
-	  "        -singlebuffer\n"
+	  "        -samp <JPEG CHROMINANCE SUBSAMPLING> (1x | 2x | 4x | gray)\n"
+	  "        -compresslevel <ZLIB COMPRESSION LEVEL> (0..1: 0-fast, 1-best)\n"
 	  "        -lowqual (preset for -samp 4x -quality 30)\n"
 	  "        -medqual (preset for -samp 2x -quality 80)\n"
+	  "        -highqual (preset for -samp 1x -quality 95) (default)\n"
 	  "        -lossless (preset for -nojpeg -compresslevel 0)\n"
 	  "        -losslesswan (preset for -nojpeg -compresslevel 1)\n"
+	  "        -cu / -nocu (default)\n"
+	  "        -cursorshape (default) / -nocursorshape\n"
 	  "        -user <USER NAME> (Unix login authentication)\n"
 	  "        -nounixlogin\n"
-	  "        -cu\n"
+	  "        -passwd <PASSWD-FILENAME> (standard VNC authentication)\n"
+	  "        -autopass\n"
+	  "        -via <GATEWAY>\n"
 	  "        -config <CONFIG-FILENAME>\n"
-	  "        -ipv6\n"
 	  "\n"
 	  "Option names may be abbreviated, for example, -q instead of -quality.\n"
 	  "See the manual page for more information."
@@ -775,15 +785,22 @@ GetArgsAndResources(int argc, char **argv)
     appData.qualityLevel=80;
     appData.subsampLevel=TVNC_2X;
   }
+  /* -highqual switch was used */
+  else if(appData.qualityLevel==-3) {
+    appData.encodingsString="tight copyrect";
+    appData.enableJPEG=True;
+    appData.qualityLevel=95;
+    appData.subsampLevel=TVNC_1X;
+  }
   /* -lossless switch was used */
-  if(appData.qualityLevel==-3) {
+  else if(appData.qualityLevel==-4) {
     appData.encodingsString="tight copyrect";
     appData.enableJPEG=False;
     appData.qualityLevel=95;
     appData.compressLevel=0;
   }
   /* -losslesswan switch was used */
-  if(appData.qualityLevel==-4) {
+  else if(appData.qualityLevel==-5) {
     appData.encodingsString="tight copyrect";
     appData.enableJPEG=False;
     appData.qualityLevel=95;
