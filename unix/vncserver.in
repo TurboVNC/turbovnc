@@ -148,8 +148,10 @@ $defaultXStartup
 $xauthorityFile = "$ENV{XAUTHORITY}";
 
 $vncUserDirUnderTmp = ($vncUserDir =~ m|^/tmp/.+|) ? 1 : 0;
-$xstartup = ($vncUserDirUnderTmp) ?
-  "$ENV{HOME}/.turbovncstartup" : "$vncUserDir/xstartup.turbovnc";
+if (! $xstartup) {
+    $xstartup = ($vncUserDirUnderTmp) ?
+      "$ENV{HOME}/.turbovncstartup" : "$vncUserDir/xstartup.turbovnc";
+}
 unless ($xauthorityFile) {
     if ($vncUserDirUnderTmp) {
         $xauthorityFile = "$vncUserDir/.Xauthority";
@@ -217,7 +219,7 @@ if (-f "/usr/lib/X11/rgb.txt") {
 &ParseOptions("-geometry",1,"-depth",1,"-pixelformat",1,"-name",1,"-kill",1,
 	      "-help",0,"-h",0,"--help",0,"-fg",0,"-list",0,"-fp",1,"-otp",0,
 	      "-novncauth",0,"-nootp",0,"-nopam",0,"-noauth",0,"-nohttp",0,
-	      "-nohttpd",0,"-rfbauth",1,"-noxstartup",0);
+	      "-nohttpd",0,"-rfbauth",1,"-noxstartup",0,"-xstartup",1);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -247,6 +249,9 @@ if ($opt{'-nohttpd'}) {
 }
 if ($opt{'-noxstartup'}) {
     $skipxstartup = 1;
+}
+if ($opt{'-xstartup'}) {
+    $xstartup = $opt{'-xstartup'};
 }
 if ($opt{'-fp'}) {
     $fontPath = $opt{'-fp'};

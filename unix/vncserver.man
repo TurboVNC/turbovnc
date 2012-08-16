@@ -1,4 +1,4 @@
-'\" t
+\" t
 .\" ** The above line should force tbl to be a preprocessor **
 .\" Man page for vncserver
 .\"
@@ -21,7 +21,8 @@ vncserver \- a wrapper to launch an X server for VNC.
 [:\fIdisplay\fR] [\-geometry \fIwidth\fRx\fIheight\fR] [\-depth \fIdepth\fR]
 [\-pixelformat rgb\fINNN\fR|bgr\fINNN\fR] [\-fp \fIfont\-path\fR]
 [\-name \fIdesktop\-name\fR] [\-nohttpd] [\-novncauth] [\-nootp]
-[\-nopam] [\-noauth] [\-otp] [\-fg] [\-noxstartup] [\fIXvnc\-options\fR...]
+[\-nopam] [\-noauth] [\-otp] [\-fg] [\-noxstartup]
+[\-xstartup \fIscript\fR] [\fIXvnc\-options\fR...]
 .TP
 \fBvncserver\fR \-kill :\fIdisplay\fR
 .TP
@@ -140,6 +141,13 @@ when launching TurboVNC from within certain grid computing environments.
 Do not run the ~/.vnc/xstartup.turbovnc script after launching Xvnc.  This
 option allows you to manually start a window manager in your TurboVNC session
 or to run a full-screen application without a window manager.
+.TP
+\fB\-xstartup\fR \fIscript\fR
+Run a custom startup script, instead of xstartup.turbovnc, after launching
+Xvnc.  This is useful in conjunction with the \fB-fg\fR option, since it
+allows for running a full-screen application (such as a game or a
+virtualization solution) in TurboVNC without a window manager and causes the
+TurboVNC session to terminate whenever the application exits.
 .TP
 \fB\-kill\fR \fB:\fR\fIdisplay\fR
 Stops the VNC server which is currently running on the specified display.
