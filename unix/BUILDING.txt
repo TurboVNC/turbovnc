@@ -149,7 +149,7 @@ to the configure command line.
 
 Add
 
-  CFLAGS='-O3 -m32' LDFLAGS=-m32
+  --host i686-apple-darwin CFLAGS='-O3 -m32' LDFLAGS=-m32
 
 to the configure command line.
 
@@ -173,7 +173,8 @@ to the configure command line.  The OS X 10.5 SDK must be installed.
 
 Add
 
-  CFLAGS='-isysroot /Developer/SDKs/MacOSX10.4u.sdk \
+  --host i686-apple-darwin \
+    CFLAGS='-isysroot /Developer/SDKs/MacOSX10.4u.sdk \
     -mmacosx-version-min=10.4 -O3 -m32' \
     LDFLAGS='-isysroot /Developer/SDKs/MacOSX10.4u.sdk \
     -mmacosx-version-min=10.4 -m32'
