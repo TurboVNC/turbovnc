@@ -205,7 +205,7 @@ and CPU time.  The default quality level of 95, when used without chrominance
 subsampling, should produce compressed images whose compression artifacts are
 imperceptible to human vision ("perceptually lossless.")
 .TP
-\fB\-samp \fI1X | 2X | 4X | gray\fR
+\fB\-samp \fI1X\fR (default) | \fI2X\fR | \fI4X\fR | \fIgray\fR
 Specifies the level of chrominance subsampling to use when compressing JPEG
 images with the Tight+JPEG encoding methods.
 
@@ -244,7 +244,7 @@ workloads by typically 20-40% (with a commensurate increase in CPU usage.)
 .TP
 \fB\-lowqual\fR
 Select the "Tight + Low Quality JPEG" encoding method.  This is the
-equivalent of \fB\-samp 4X -quality 30\fR.
+equivalent of \fB\-jpeg -samp 4X -quality 30\fR.
 
 The Tight + Low Quality JPEG encoding method uses indexed color subencoding
 with Zlib compression level 1 to encode subrectangles with low numbers of
@@ -257,7 +257,7 @@ feature if you need to occasionally send a frame without compression artifacts.
 .TP
 \fB\-medqual\fR
 Select the "Tight + Medium Quality JPEG" encoding method.  This is the
-equivalent of \fB\-samp 2X -quality 80\fR.
+equivalent of \fB\-jpeg -samp 2X -quality 80\fR.
 
 The Tight + Medium Quality JPEG encoding method uses indexed color subencoding
 with Zlib compression level 1 to encode subrectangles with low numbers of
@@ -271,7 +271,7 @@ bandwidth of the Tight + Low Quality JPEG encoding method.
 .TP
 \fB\-highqual\fR
 Select the "Tight + Perceptually Lossless JPEG" encoding method.  This is the
-equivalent of \fB\-samp 1X -quality 95\fR.
+equivalent of \fB\-jpeg -samp 1X -quality 95\fR.
 
 The Tight + Perceptually Lossless JPEG encoding method uses indexed color
 subencoding with Zlib compression level 1 to encode subrectangles with low

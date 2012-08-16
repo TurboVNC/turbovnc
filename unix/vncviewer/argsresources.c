@@ -556,12 +556,13 @@ usage(void)
 	  "        -depth <DEPTH>\n"
 	  "        -encodings <ENCODING-LIST> (example: \"tight copyrect\")\n"
 	  "        -jpeg (default) / -nojpeg\n"
-	  "        -quality <JPEG IMAGE QUALITY> (1..100: 1-low, 100-high)\n"
-	  "        -samp <JPEG CHROMINANCE SUBSAMPLING> (1x | 2x | 4x | gray)\n"
-	  "        -compresslevel <ZLIB COMPRESSION LEVEL> (0..1: 0-fast, 1-best)\n"
-	  "        -lowqual (preset for -samp 4x -quality 30)\n"
-	  "        -medqual (preset for -samp 2x -quality 80)\n"
-	  "        -highqual (preset for -samp 1x -quality 95) (default)\n"
+	  "        -quality <JPEG IMAGE QUALITY> (1..100, 1=low, 100=high, default=95)\n"
+	  "        -samp <JPEG CHROMINANCE SUBSAMPLING> <1x | 2x | 4x | gray> (default=1x)\n"
+	  "        -compresslevel <ZLIB COMPRESSION LEVEL>\n"
+	  "                       (0..1, 0=fast, 1=best, default=1)\n"
+	  "        -lowqual (preset for -jpeg -samp 4x -quality 30)\n"
+	  "        -medqual (preset for -jpeg -samp 2x -quality 80)\n"
+	  "        -highqual (preset for -jpeg -samp 1x -quality 95)\n"
 	  "        -lossless (preset for -nojpeg -compresslevel 0)\n"
 	  "        -losslesswan (preset for -nojpeg -compresslevel 1)\n"
 	  "        -cu / -nocu (default)\n"
@@ -706,6 +707,7 @@ LoadConfigFile(char *filename)
     ReadConfigInt("subsampling=", appData.subsampLevel, 0, 3);
     ReadConfigInt("quality=", appData.qualityLevel, 1, 100);
     ReadConfigBool("nounixlogin=", appData.noUnixLogin);
+    ReadConfigBool("cursorshape=", appData.useRemoteCursor);
   }
 
   if (preferred_encoding >= 0 && preferred_encoding <= 16
