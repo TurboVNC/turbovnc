@@ -60,14 +60,6 @@ char *fallback_resources[] = {
 
 
 /*
- * Uncomment if you don't want the TurboVNC Viewer to grab the keyboard in
- * full-screen mode.
- */
-
-/* Tvncviewer.grabKeyboard: False */
-
-
-/*
  * Background color to use in full-screen mode if the remote desktop size is
  * smaller than the local desktop size
  */
@@ -99,6 +91,7 @@ char *fallback_resources[] = {
 "*desktop.baseTranslations:\
   <Key>F8: ShowPopup()\\n\
   Ctrl Alt Shift <Key>F: ToggleFullScreen()\\n\
+  Ctrl Alt Shift <Key>G: ToggleGrabKeyboard()\\n\
   Ctrl Alt Shift <Key>L: LosslessRefresh()\\n\
   Ctrl Alt Shift <Key>R: SendRFBEvent(fbupdate)\\n\
   <ButtonPress>: SendRFBEvent()\\n\
@@ -227,7 +220,7 @@ char *fallback_resources[] = {
  * Popup buttons
  */
 
-"*popupButtonCount: 15",
+"*popupButtonCount: 16",
 
 "*popup*button1.label: Dismiss popup",
 "*popup*button1.translations: #override\\n\
@@ -243,24 +236,30 @@ char *fallback_resources[] = {
   <Visible>: SetFullScreenState()\\n\
   <Btn1Down>,<Btn1Up>: toggle() ToggleFullScreen() HidePopup()",
 
-"*popup*button4.label: Clipboard: local -> remote",
+"*popup*button4.label: Grab Keyboard (CTRL-ALT-SHIFT-G)",
+"*popup*button4.type: toggle",
 "*popup*button4.translations: #override\\n\
+  <Visible>: SetGrabKeyboardState()\\n\
+  <Btn1Down>,<Btn1Up>: toggle() ToggleGrabKeyboard() HidePopup()",
+
+"*popup*button5.label: Clipboard: local -> remote",
+"*popup*button5.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: SelectionToVNC(always) HidePopup()",
 
-"*popup*button5.label: Clipboard: local <- remote",
-"*popup*button5.translations: #override\\n\
+"*popup*button6.label: Clipboard: local <- remote",
+"*popup*button6.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: SelectionFromVNC(always) HidePopup()",
 
-"*popup*button6.label: Request refresh (CTRL-ALT-SHIFT-R)",
-"*popup*button6.translations: #override\\n\
+"*popup*button7.label: Request refresh (CTRL-ALT-SHIFT-R)",
+"*popup*button7.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: SendRFBEvent(fbupdate) HidePopup()",
 
-"*popup*button7.label: Request lossless refresh (CTRL-ALT-SHIFT-L)",
-"*popup*button7.translations: #override\\n\
+"*popup*button8.label: Request lossless refresh (CTRL-ALT-SHIFT-L)",
+"*popup*button8.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: LosslessRefresh() HidePopup()",
 
-"*popup*button8.label: Send ctrl-alt-del",
-"*popup*button8.translations: #override\\n\
+"*popup*button9.label: Send ctrl-alt-del",
+"*popup*button9.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: SendRFBEvent(keydown,Control_L)\
                        SendRFBEvent(keydown,Alt_L)\
                        SendRFBEvent(key,Delete)\
@@ -268,34 +267,34 @@ char *fallback_resources[] = {
                        SendRFBEvent(keyup,Control_L)\
                        HidePopup()",
 
-"*popup*button9.label: Send F8",
-"*popup*button9.translations: #override\\n\
+"*popup*button10.label: Send F8",
+"*popup*button10.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: SendRFBEvent(key,F8) HidePopup()",
 
-"*popup*button10.label: Continuous updates",
-"*popup*button10.type: toggle",
+"*popup*button11.label: Continuous updates",
+"*popup*button11.type: toggle",
 "*popup*button10.translations: #override\\n\
   <Visible>: SetCUState()\\n\
   <Btn1Down>,<Btn1Up>: toggle() ToggleCU()",
 
-"*popup*button11.label: Encoding method: Tight + Perceptually Lossless JPEG (LAN)",
-"*popup*button11.translations: #override\\n\
+"*popup*button12.label: Encoding method: Tight + Perceptually Lossless JPEG (LAN)",
+"*popup*button12.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: QualHigh()",
 
-"*popup*button12.label: Encoding method: Tight + Medium Quality JPEG",
-"*popup*button12.translations: #override\\n\
+"*popup*button13.label: Encoding method: Tight + Medium Quality JPEG",
+"*popup*button13.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: QualMed()",
 
-"*popup*button13.label: Encoding method: Tight + Low Quality JPEG (WAN)",
-"*popup*button13.translations: #override\\n\
+"*popup*button14.label: Encoding method: Tight + Low Quality JPEG (WAN)",
+"*popup*button14.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: QualLow()",
 
-"*popup*button14.label: Encoding method: Lossless Tight (Gigabit)",
-"*popup*button14.translations: #override\\n\
+"*popup*button15.label: Encoding method: Lossless Tight (Gigabit)",
+"*popup*button15.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: QualLossless()",
 
-"*popup*button15.label: Encoding method: Lossless Tight + Zlib (WAN)",
-"*popup*button15.translations: #override\\n\
+"*popup*button16.label: Encoding method: Lossless Tight + Zlib (WAN)",
+"*popup*button16.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: QualLosslessWAN()",
 
 NULL
@@ -332,8 +331,8 @@ static XtResource appDataResourceList[] = {
   {"fsAltEnter", "FSAltEnter", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, fsAltEnter), XtRImmediate, (XtPointer) False},
 
-  {"grabKeyboard", "GrabKeyboard", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, grabKeyboard), XtRImmediate, (XtPointer) True},
+  {"grabKeyboard", "GrabKeyboard", XtRString, sizeof(String),
+   XtOffsetOf(AppData, grabKeyboardString), XtRImmediate, (XtPointer) "fs"},
 
   {"doubleBuffer", "DoubleBuffer", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, doubleBuffer), XtRImmediate, (XtPointer) True},
@@ -444,6 +443,7 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-nofullscreen",  "*fullScreen",         XrmoptionNoArg,  "False"},
   {"-fsaltenter",    "*fsAltEnter",         XrmoptionNoArg,  "True"},
   {"-nofsaltenter",  "*fsAltEnter",         XrmoptionNoArg,  "False"},
+  {"-grabkeyboard",  "*grabKeyboard",       XrmoptionSepArg, 0},
   {"-raiseonbeep",   "*raiseOnBeep",        XrmoptionNoArg,  "True"},
   {"-noraiseonbeep", "*raiseOnBeep",        XrmoptionNoArg,  "False"},
   {"-passwd",        "*passwordFile",       XrmoptionSepArg, 0},
@@ -496,6 +496,8 @@ static XtActionsRec actions[] = {
     {"HidePopup", HidePopup},
     {"ToggleFullScreen", ToggleFullScreen},
     {"SetFullScreenState", SetFullScreenState},
+    {"ToggleGrabKeyboard", ToggleGrabKeyboard},
+    {"SetGrabKeyboardState", SetGrabKeyboardState},
     {"SelectionFromVNC", SelectionFromVNC},
     {"SelectionToVNC", SelectionToVNC},
     {"ServerDialogDone", ServerDialogDone},
@@ -548,6 +550,7 @@ usage(void)
 	  "        -viewonly / -fullcontrol (default)\n"
 	  "        -fullscreen / -nofullscreen (default)\n"
 	  "        -fsaltenter / -nofsaltenter (default)\n"
+	  "        -grabkeyboard <fs | always | manual> (default=fs)\n"
 	  "        -doublebuffer (default) / -singlebuffer\n"
 	  "        -raiseonbeep (default) / -noraiseonbeep\n"
 	  "        -8bit / -no8bit (default)\n"
@@ -756,6 +759,8 @@ GetArgsAndResources(int argc, char **argv)
 			    XtNumber(appDataResourceList), 0, 0);
 
   appData.subsampLevel = -1;
+  appData.grabKeyboardFS = True;
+  appData.grabKeyboardAlways = False;
 
   if(appData.configFile) LoadConfigFile(appData.configFile);
   else if(argc > 1 && strlen(argv[1]) >= 4
@@ -764,12 +769,27 @@ GetArgsAndResources(int argc, char **argv)
     LoadConfigFile(appData.configFile);
   }
 
-  if (appData.subsampString && appData.subsampLevel < 0) {
+  if (appData.subsampString && strlen(appData.subsampString) > 0 &&
+      appData.subsampLevel < 0) {
     switch(toupper(appData.subsampString[0])) {
       case 'G': case '0':  appData.subsampLevel=TVNC_GRAY;  break;
       case '1':  appData.subsampLevel=TVNC_1X;  break;
       case '2':  appData.subsampLevel=TVNC_2X;  break;
       case '4':  appData.subsampLevel=TVNC_4X;  break;
+    }
+  }
+
+  if (appData.grabKeyboardString && strlen(appData.grabKeyboardString) > 0) {
+    char *s = appData.grabKeyboardString;
+    char first = toupper(s[0]);
+    if (first == 'A') {  // "always"
+      appData.grabKeyboardAlways = True;
+      appData.grabKeyboardFS = False;
+    } else if (first == '0' ||
+	       (first == 'F' && strlen(s) > 1 && toupper(s[1]) != 'S') ||
+	       first == 'M') {  // "0" or "false" or "manual"
+      appData.grabKeyboardFS = False;
+      appData.grabKeyboardAlways = False;
     }
   }
 

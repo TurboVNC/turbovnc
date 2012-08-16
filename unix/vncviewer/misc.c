@@ -344,6 +344,7 @@ Cleanup()
     ShmCleanup();
 #endif
   ShutdownThreads();
+  UngrabKeyboard();
 }
 
 static int

@@ -20,14 +20,6 @@ Tvncviewer.translations:\
 
 
 !
-! Uncomment if you don't want the TurboVNC Viewer to grab the keyboard in
-! full-screen mode.
-!
-
-! Tvncviewer.grabKeyboard: False
-
-
-!
 ! Background color to use in full-screen mode if the remote desktop size is
 ! smaller than the local desktop size
 !

@@ -128,6 +128,8 @@ main(int argc, char **argv)
 
   SetFormatAndEncodings();
 
+  if (appData.grabKeyboardAlways) GrabKeyboard();
+
   /* Now enter the main loop, processing VNC messages.  X events will
      automatically be processed whenever the VNC connection is idle. */
 

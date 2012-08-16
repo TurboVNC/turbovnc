@@ -1,5 +1,6 @@
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,6 +35,7 @@ static Bool scrollLeft, scrollRight, scrollUp, scrollDown;
 static Position desktopX, desktopY;
 static Dimension viewportWidth, viewportHeight;
 static Dimension scrollbarWidth, scrollbarHeight;
+static Bool keyboardGrabbed = False;
 
 
 
@@ -71,6 +73,49 @@ netwm_fullscreen(Display *dpy, Window win, int state)
     Atom _NET_WM_STATE_FULLSCREEN = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
     int op = state ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE;
     netwm_set_state(dpy, win, op, _NET_WM_STATE_FULLSCREEN);
+}
+
+
+/*
+ * Grab/ungrab keyboard
+ */
+
+void
+GrabKeyboard(void)
+{
+    if (keyboardGrabbed) return;
+    if (XtGrabKeyboard(toplevel, True, GrabModeAsync,
+		       GrabModeAsync, CurrentTime) != GrabSuccess) {
+	fprintf(stderr, "XtGrabKeyboard() failed.\n");
+    } else {
+	keyboardGrabbed = True;
+    }
+}
+
+void
+UngrabKeyboard(void)
+{
+    if (!keyboardGrabbed) return;
+    XtUngrabKeyboard(toplevel, CurrentTime);
+    keyboardGrabbed = False;
+}
+
+void
+ToggleGrabKeyboard(Widget w, XEvent *event, String *params,
+		   Cardinal *num_params)
+{
+    if (!keyboardGrabbed) GrabKeyboard();
+    else UngrabKeyboard();
+}
+
+void
+SetGrabKeyboardState(Widget w, XEvent *ev, String *params,
+		     Cardinal *num_params)
+{
+  if (keyboardGrabbed)
+    XtVaSetValues(w, XtNstate, True, NULL);
+  else
+    XtVaSetValues(w, XtNstate, False, NULL);
 }
 
 
@@ -212,11 +257,7 @@ FullScreenOn()
 
   /* Optionally, grab the keyboard. */
 
-  if (appData.grabKeyboard &&
-      XtGrabKeyboard(toplevel, True, GrabModeAsync,
-		     GrabModeAsync, CurrentTime) != GrabSuccess) {
-    fprintf(stderr, "XtGrabKeyboard() failed.\n");
-  }
+  if (appData.grabKeyboardFS) GrabKeyboard();
 }
 
 
@@ -243,8 +284,7 @@ FullScreenOff()
 
   appData.fullScreen = False;
 
-  if (appData.grabKeyboard)
-    XtUngrabKeyboard(toplevel, CurrentTime);
+  if (appData.grabKeyboardFS) UngrabKeyboard();
 
   XtVaSetValues(toplevel, XtNmaxWidth, si.framebufferWidth,
 		XtNmaxHeight, si.framebufferHeight, NULL);

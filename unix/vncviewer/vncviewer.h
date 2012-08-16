@@ -92,7 +92,9 @@ typedef struct {
   Bool viewOnly;
   Bool fullScreen;
   Bool fsAltEnter;
-  Bool grabKeyboard;
+  String grabKeyboardString;
+  Bool grabKeyboardFS;
+  Bool grabKeyboardAlways;
   Bool raiseOnBeep;
 
   String encodingsString;
@@ -218,8 +220,12 @@ extern void DoUserPwdDialog(char** user, char** password);
 
 extern void ToggleFullScreen(Widget w, XEvent *event, String *params,
 			     Cardinal *num_params);
+extern void ToggleGrabKeyboard(Widget w, XEvent *event, String *params,
+			     Cardinal *num_params);
 extern void SetFullScreenState(Widget w, XEvent *event, String *params,
 			       Cardinal *num_params);
+extern void SetGrabKeyboardState(Widget w, XEvent *event, String *params,
+				 Cardinal *num_params);
 extern Bool BumpScroll(XEvent *ev);
 extern void FullScreenOn();
 extern void FullScreenOff();
