@@ -3,8 +3,8 @@
 #
 # Uncomment the line below to start a VNC server on display :1 as 'myusername'
 # (adjust this to your own user name).  You will also need to configure a VNC
-# password (run 'man -M /opt/TurboVNC/man vncpasswd' for instructions on how
-# to set this) or another form of authentication.  See the TurboVNC User's
+# password (run 'man -M {TurboVNC_directory}/man vncpasswd' for instructions on
+# how to set this) or another form of authentication.  See the TurboVNC User's
 # Guide for more information about the authentication methods available in 
 # TurboVNC.
 #
