@@ -525,11 +525,8 @@ void ClientConnection::CreateDisplay()
 	m_opts.m_hWindow = m_hwnd;
 	hotkeys.SetWindow(m_hwnd1);
     ShowWindow(m_hwnd, SW_HIDE);
-	if (m_opts.m_GrabKeyboard == TVNC_ALWAYS) {
-		LowLevelHook::Activate(m_hwnd1);
-		CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE),
-					  ID_TOGGLE_GRAB, MF_BYCOMMAND|MF_CHECKED);
-	}
+	if (m_opts.m_GrabKeyboard == TVNC_ALWAYS)
+		GrabKeyboard();
 		
 	SetWindowLongPtr(m_hwnd, GWLP_USERDATA, (LONG_PTR) this);
 	SetWindowLongPtr(m_hwnd, GWLP_WNDPROC, (LONG_PTR)ClientConnection::WndProc);
@@ -2001,6 +1998,17 @@ LRESULT CALLBACK ClientConnection::ScrollProc(HWND hwnd, UINT iMsg, WPARAM wPara
 	}
 	return DefWindowProc(hwnd, iMsg, wParam, lParam);
 }
+
+#define COND_UNGRAB_KEYBOARD \
+	bool regrab = false; \
+	if (_this->isKeyboardGrabbed()) { \
+		_this->UngrabKeyboard(); \
+		regrab = true; \
+	}
+
+#define COND_REGRAB_KEYBOARD \
+	if (regrab) _this->GrabKeyboard();
+
 LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg, 
 					   WPARAM wParam, LPARAM lParam) 
 {
@@ -2077,8 +2085,12 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 			_this->SetDormant(false);
 			break;
 		case ID_NEWCONN:
+		{
+			COND_UNGRAB_KEYBOARD
 			_this->m_pApp->NewConnection();
+			COND_REGRAB_KEYBOARD
 			return 0;
+		}
 		case ID_DISCONNECT:
 			SendMessage(hwnd, WM_CLOSE, 0, 0);
 			return 0;
@@ -2094,8 +2106,12 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 			_this->SizeWindow(false);			
 			return 0;
 		case ID_CONN_SAVE_AS:			
+		{
+			COND_UNGRAB_KEYBOARD
 			_this->SaveConnection();
+			COND_REGRAB_KEYBOARD
 			return 0;			
+		}
 		case IDC_OPTIONBUTTON:
 			{
 				if (SetForegroundWindow(_this->m_opts.m_hParent) != 0) return 0;
@@ -2104,6 +2120,7 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 				bool prev_CU = _this->m_opts.m_CU;
 				bool prev_FullScreen = _this->m_opts.m_FullScreen;
 
+				COND_UNGRAB_KEYBOARD
 				if (_this->m_opts.DoDialog(true,
 					_this->m_clientMsgCaps.IsEnabled(rfbEnableContinuousUpdates))) {
 					_this->m_pendingFormatChange = true;
@@ -2133,22 +2150,35 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 										KEY_VNCVIEWER_HISTORI);
 				}
 				_this->EnableFullControlOptions();
+				COND_REGRAB_KEYBOARD
 				return 0;
 			}
 		case IDD_APP_ABOUT:
+		{
+			COND_UNGRAB_KEYBOARD
 			ShowAboutBox();
+			COND_REGRAB_KEYBOARD
 			return 0;
+		}
 		case IDD_FILETRANSFER:
+		{
+			COND_UNGRAB_KEYBOARD
 			if (_this->m_clientMsgCaps.IsEnabled(rfbFileListRequest)) {
 				if (!_this->m_fileTransferDialogShown) {
 					_this->m_fileTransferDialogShown = true;
 					_this->m_pFileTransfer->CreateFileTransferDialog();
 				}
 			}
+			COND_REGRAB_KEYBOARD
 			return 0;
+		}
 		case ID_CONN_ABOUT:
+		{
+			COND_UNGRAB_KEYBOARD
 			_this->ShowConnInfo();
+			COND_REGRAB_KEYBOARD
 			return 0;
+		}
 		case ID_FULLSCREEN:
 			// Toggle full screen mode
 			_this->SetFullScreenMode(!_this->InFullScreenMode());
@@ -2159,15 +2189,10 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 			return 0;
 		case ID_TOGGLE_GRAB:
 			// Toggle keyboard grab
-			if (LowLevelHook::isActive(_this->m_hwnd1)) {
-				LowLevelHook::Deactivate();
-				CheckMenuItem(GetSystemMenu(_this->m_hwnd1, FALSE),
-							  ID_TOGGLE_GRAB, MF_BYCOMMAND|MF_UNCHECKED);
-			} else {
-				LowLevelHook::Activate(_this->m_hwnd1);
-				CheckMenuItem(GetSystemMenu(_this->m_hwnd1, FALSE),
-							  ID_TOGGLE_GRAB, MF_BYCOMMAND|MF_CHECKED);
-			}
+			if (_this->isKeyboardGrabbed())
+				_this->UngrabKeyboard();
+			else
+				_this->GrabKeyboard();
 			return 0;
 		case ID_DEFAULT_WINDOW_SIZE:
 			// Reset window geometry to default (taking into account spanning option)
@@ -2834,6 +2859,28 @@ ClientConnection::SendKeyEvent(CARD32 key, bool down)
     WriteExact((char *)&ke, sz_rfbKeyEventMsg);
     vnclog.Print(6, _T("SendKeyEvent: key = x%04x status = %s\n"), key, 
         down ? _T("down") : _T("up"));
+}
+
+inline void
+ClientConnection::GrabKeyboard(void)
+{
+	LowLevelHook::Activate(m_hwnd1);
+	CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE),
+				  ID_TOGGLE_GRAB, MF_BYCOMMAND|MF_CHECKED);
+}
+
+inline void
+ClientConnection::UngrabKeyboard(void)
+{
+	LowLevelHook::Deactivate();
+	CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE),
+				  ID_TOGGLE_GRAB, MF_BYCOMMAND|MF_UNCHECKED);
+}
+
+inline bool
+ClientConnection::isKeyboardGrabbed(void)
+{
+	return LowLevelHook::isActive(m_hwnd1);
 }
 
 #ifndef UNDER_CE

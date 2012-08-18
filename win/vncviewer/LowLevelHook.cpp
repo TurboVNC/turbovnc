@@ -223,39 +223,6 @@ LRESULT CALLBACK LowLevelHook::VncLowLevelKbHookProc(INT nCode, WPARAM wParam,
 
 		} // if (ProcessID == g_VncProcesID && isActive(hwndCurrent))
 
-		if (ProcessID == g_VncProcessID) {
-
-			switch (pkbdllhook->vkCode)	{
-				// Hotkeys do not work if a dialog is raised on top of the
-				// VNC viewer window, so we have to intercept CTRL-ALT-SHIFT-G
-				// at the low level to ensure that the keyboard can still be
-				// ungrabbed in this case.  Otherwise, if the viewer is in
-				// full-screen mode and the user Alt-Tabs away from the dialog
-				// box back to the viewer window, they would be left with no
-				// way to exit, ungrab the keyboard, or leave full-screen mode.
-				case 'G':
-				{
-					static BOOL fCtrlAltShiftG = FALSE;
-					if (GetAsyncKeyState(VK_MENU) & 0x8000 &&
-						GetAsyncKeyState(VK_CONTROL) & 0x8000 &&
-						GetAsyncKeyState(VK_SHIFT) & 0x8000 && fKeyDown) {
-						fHandled = TRUE;
-						fCtrlAltShiftG = TRUE;
-					} else if (fCtrlAltShiftG) {
-						if (!fKeyDown) {
-							PostMessage(g_hwndVNCViewer, WM_SYSCOMMAND,
-								ID_TOGGLE_GRAB, 0);
-							fHandled = TRUE;
-						}
-						fCtrlAltShiftG = FALSE;
-					}
-					break;
-				}
-
-			} // switch(pkbdllhook->vkCode)
-
-		} // if (ProcessID == g_VncProcesID)
-
 	} // if (nCode == HT_ACTION)
 
 	// Call the next hook, if we didn't handle this message

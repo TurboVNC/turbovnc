@@ -139,6 +139,9 @@ private:
 	void SendKeyEvent(CARD32 key, bool down);
 	void SwitchOffKey();
 	void SendCUMessage(bool enable);
+	void GrabKeyboard();
+	void UngrabKeyboard();
+	bool isKeyboardGrabbed();
 
 	void ReadScreenUpdate();
 	void Update(RECT *pRect);
