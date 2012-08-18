@@ -383,8 +383,12 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 					ArgError(_T("Invalid keyboard grab mode specified"));
 					continue;
 			}
+		} else if ( SwitchMatch(args[j], _T("cursorshape") )) {
+			m_requestShapeUpdates = true;
+			m_ignoreShapeUpdates = false;
 		} else if ( SwitchMatch(args[j], _T("nocursorshape") )) {
 			m_requestShapeUpdates = false;
+			m_ignoreShapeUpdates = false;
 		} else if ( SwitchMatch(args[j], _T("noremotecursor") )) {
 			m_requestShapeUpdates = true;
 			m_ignoreShapeUpdates = true;

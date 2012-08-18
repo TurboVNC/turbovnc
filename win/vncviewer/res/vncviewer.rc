@@ -113,10 +113,10 @@ BEGIN
     CONTROL         "Swap mouse buttons 2 and 3",ID_SESSION_SWAPMOUSE,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,195,112,145,10
     GROUPBOX        "Mouse cursor",IDC_STATIC_MCURSOR,186,132,160,49
-    CONTROL         "Track remote cursor locally",IDC_CSHAPE_ENABLE_RADIO,
+    CONTROL         "Enable remote cursor shape updates",IDC_CSHAPE_ENABLE_RADIO,
                     "Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,195,
                     143,145,10
-    CONTROL         "Let remote server deal with mouse cursor",
+    CONTROL         "Draw remote cursor on the server",
                     IDC_CSHAPE_DISABLE_RADIO,"Button",BS_AUTORADIOBUTTON,195,
                     155,145,10
     CONTROL         "Don't show remote cursor",IDC_CSHAPE_IGNORE_RADIO,
@@ -648,6 +648,18 @@ dialog\r\n\
 /nocu\r\n\
 Equivalent of ""Connection-->Continuous Updates"" in the options dialog\r\n\
 \r\n\
+/cursorshape\r\n\
+Equivalent of ""Connection-->Mouse cursor-->Enable remote cursor shape updates""\r\n\
+in the options dialog\r\n\
+\r\n\
+/nocursorshape\r\n\
+Equivalent of ""Connection-->Mouse cursor-->Draw remote cursor on the server"" in\r\n\
+the options dialog\r\n\
+\r\n\
+/noremotecursor\r\n\
+Equivalent of ""Connection-->Mouse cursor-->Don't show remote cursor"" in the\r\n\
+options dialog\r\n\
+\r\n\
 /disableclipboard\r\n\
 Equivalent of ""Connection-->Restrictions-->Disable clipboard transfer"" in the\r\n\
 options dialog\r\n\
@@ -723,15 +735,6 @@ Equivalent of ""Globals-->Logging-->Verbosity level"" in the options dialog\r\n\
 \r\n\
 /logfile <filename>\r\n\
 Equivalent of ""Globals-->Logging-->Write log to a file"" in the options dialog\r\n\
-\r\n\
-/nocursorshape\r\n\
-Equivalent of\r\n\
-""Connection-->Mouse cursor-->Let remote server deal with mouse cursor"" in the\r\n\
-options dialog\r\n\
-\r\n\
-/noremotecursor\r\n\
-Equivalent of ""Connection-->Mouse cursor-->Don't show remote cursor"" in the\r\n\
-options dialog\r\n\
 \r\n\
 /notoolbar\r\n\
 Equivalent of ""Globals-->Interface options-->Show toolbars by default""\r\n\
@@ -840,7 +843,7 @@ BEGIN
     IDC_STATIC_SPAN         "This option specifies whether the viewer window should span all monitors, only the primary monitor, or whether it should span all monitors only if it cannot fit on the primary monitor (automatic.)"
     IDC_DISABLECLIPBOARD    "If this option is checked, the viewer will not send local clipboard changes to the server."
     IDC_CSHAPE_DISABLE_RADIO 
-                            "In this mode, the server draws the mouse cursor and sends it to the client as an image. Mouse movements can be painfully slow in this mode, so use it only if the default setting does not work."
+                            "In this mode, the server draws the mouse cursor and continuously sends it to the client as an image. This can create performance problems on slow networks, but it allows you to see mouse movements from other users in a shared session."
     IDC_QUALITYLEVEL        "Higher JPEG quality levels result in less compression but better image quality."
     IDC_SUBSAMPLEVEL        "Each pixel in a JPEG image is represented as a brightness (luminance) value and a color (chrominance) value. Chrominance subsampling discards some or all chrominance values to reduce the image size, but it can create visible artifacts."
     IDC_COMPRESSLEVEL       "Enabling Zlib compression will greatly reduce the bandwidth usage of the Lossless Tight encoding method, but Zlib requires a lot of server CPU time (more than JPEG, even.)  Thus, Zlib is only really useful on slow networks."
