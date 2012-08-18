@@ -692,7 +692,17 @@ Allow/disallow the Alt+Enter key sequence to activate/deactivate full-screen mod
 Equivalent of ""Connection-->Display-->Full-screen mode"" in the options dialog\r\n\
 \r\n"
 
-IDS_HELP2 "/ipv6\r\n\
+IDS_HELP2 "/grabkeyboard fs | always | manual\r\n\
+Grabbing the keyboard ensures that all special keystrokes, such as Alt-Tab,\r\n\
+Ctrl-Esc, the Windows and Menu keys, etc. will be passed to the server rather\r\n\
+than processed by Windows on the client.  ""fs"" (the default) causes the\r\n\
+keyboard to be grabbed when entering full-screen mode and ungrabbed when\r\n\
+leaving full-screen mode.  ""always"" causes the keyboard to be grabbed when the\r\n\
+application starts.  When ""manual"" is specified, then the keyboard is only\r\n\
+grabbed when Ctrl-Alt-Shift-G is pressed or when ""Grab keyboard"" is selected\r\n\
+from the System Menu.\r\n\
+\r\n\
+/ipv6\r\n\
 When used with /listen, this causes vncviewer to accept connections from\r\n\
 IPv6-enabled servers.  If your system supports IPv4-mapped IPv6 addresses,\r\n\
 then connections from IPv4 servers can also be accepted when this option is\r\n\
