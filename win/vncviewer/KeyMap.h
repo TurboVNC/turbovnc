@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "keysymdef.h"
+#include "keysym.h"
 
 #include "rfb.h"
 

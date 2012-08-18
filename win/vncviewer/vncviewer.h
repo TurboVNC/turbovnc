@@ -1,5 +1,6 @@
-//  Copyright (C) 2005 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
+//  Copyright (C) 2005 Sun Microsystems, Inc. All Rights Reserved.
+//  Copyright (C) 2012 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -34,11 +35,15 @@
 #define WM_TRAYNOTIFY WM_SOCKEVENT+1
 #define WM_REGIONUPDATED WM_TRAYNOTIFY+1
 #define WM_FBUPDATERECVD WM_REGIONUPDATED+1
+#define WM_SHUTDOWNLLKBHOOK WM_FBUPDATERECVD+1
 
 // The enum is ordered in this way so as to maintain backward compatibility
 // with TVNC 0.3.x
 #define TVNC_SAMPOPT 4
 enum {TVNC_1X=0, TVNC_4X, TVNC_2X, TVNC_GRAY};
+
+#define TVNC_GRABOPT 3
+enum {TVNC_FS=0, TVNC_ALWAYS, TVNC_MANUAL};
 
 // The Application
 extern VNCviewerApp *pApp;

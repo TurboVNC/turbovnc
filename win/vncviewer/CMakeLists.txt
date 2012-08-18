@@ -35,6 +35,7 @@ add_executable(vncviewer WIN32
 	KeyMap.cpp
 	Log.cpp
 	LoginAuthDialog.cpp
+	LowLevelHook.cpp
 	SessionDialog.cpp
 	stdhdrs.cpp
 	vncauth.c

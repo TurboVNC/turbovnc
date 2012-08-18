@@ -123,6 +123,7 @@ public:
 	int     m_port;
 
 	bool	m_FSAltEnter;
+	int	m_GrabKeyboard;
 	bool	m_noUnixLogin;
 	char	m_user[256];
 

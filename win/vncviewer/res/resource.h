@@ -25,7 +25,8 @@
 #define ID_REQUEST_LOSSLESS_REFRESH     112
 #define ID_FULLSCREEN_NODIALOG          113
 #define ID_CONN_ALTENTER                114
-#define ID_DEFAULT_WINDOW_SIZE          115 
+#define ID_DEFAULT_WINDOW_SIZE          115
+#define ID_TOGGLE_GRAB                  116
 #define IDD_SESSION_DLG                 135
 #define IDD_SERVINFO_DLG                137
 #define IDD_AUTH_DIALOG                 138
@@ -46,6 +47,8 @@
 #define IDI_FILERELOAD                  241
 #define IDC_SMALLDOT                    244
 #define IDD_CONNECTING_DIALOG           245
+#define ID_CONN_SENDKEYDOWN             300
+#define ID_CONN_SENDKEYUP               301
 #define IDC_HOSTNAME_EDIT               1000
 #define IDC_DPYNUM_EDIT                 1001
 #define IDC_BELLDEICONIFY               1002

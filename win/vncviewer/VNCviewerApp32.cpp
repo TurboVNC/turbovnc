@@ -22,6 +22,7 @@
 #include "VNCviewerApp32.h"
 #include "vncviewer.h"
 #include "Exception.h"
+#include "LowLevelHook.h"
 
 // --------------------------------------------------------------------------
 VNCviewerApp32::VNCviewerApp32(HINSTANCE hInstance, PSTR szCmdLine) :
@@ -51,6 +52,7 @@ VNCviewerApp32::VNCviewerApp32(HINSTANCE hInstance, PSTR szCmdLine) :
 	}
 
 	RegisterSounds();
+	LowLevelHook::Initialize(hInstance);
 }
 
 	
@@ -212,5 +214,6 @@ bool VNCviewerApp32::ProcessDialogMessage(MSG *pmsg)
 VNCviewerApp32::~VNCviewerApp32() {
 	// We don't need to clean up pcc if the thread has been joined.
 	if (m_pdaemon != NULL) delete m_pdaemon;
+	LowLevelHook::Release();
 }
 	

@@ -47,6 +47,10 @@ void HotKeys::Init(bool FSAltEnter)
 	accel[i++].cmd = ID_FULLSCREEN_NODIALOG;
 
 	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+	accel[i].key = 0x47;	// "G"
+	accel[i++].cmd = ID_TOGGLE_GRAB;
+
+	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
 	accel[i].key = 0x52;	// "R"
 	accel[i++].cmd = ID_REQUEST_REFRESH;
 

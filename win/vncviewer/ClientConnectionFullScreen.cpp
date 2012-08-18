@@ -24,6 +24,7 @@
 #include "stdhdrs.h"
 #include "vncviewer.h"
 #include "ClientConnection.h"
+#include "LowLevelHook.h"
 
 // Parameters for scrolling in full screen mode
 #define BUMPSCROLLBORDER 4
@@ -70,7 +71,11 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 			screenArea.right - screenArea.left,
 			screenArea.bottom - screenArea.top, SWP_FRAMECHANGED);
 		CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_FULLSCREEN, MF_BYCOMMAND|MF_CHECKED);
-		
+		if (m_opts.m_GrabKeyboard == TVNC_FS) {
+			LowLevelHook::Activate(m_hwnd1);
+			CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOGGLE_GRAB,
+						  MF_BYCOMMAND|MF_CHECKED);
+		}
 	} else {
 		ShowWindow(m_hToolbar, SW_SHOW);
 		EnableMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOOLBAR, MF_BYCOMMAND|MF_ENABLED);
@@ -86,7 +91,11 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
 			SetWindowPos(m_hwnd1, HWND_NOTOPMOST, 0, 0, 0, 0,
 				SWP_NOMOVE | SWP_NOSIZE);
 		CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_FULLSCREEN, MF_BYCOMMAND|MF_UNCHECKED);
-
+		if (m_opts.m_GrabKeyboard == TVNC_FS) {
+			LowLevelHook::Deactivate();
+			CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE), ID_TOGGLE_GRAB,
+						  MF_BYCOMMAND|MF_UNCHECKED);
+		}
 	}
 }
 

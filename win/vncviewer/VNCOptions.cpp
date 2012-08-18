@@ -48,6 +48,7 @@ VNCOptions::VNCOptions()
 	m_FullScreen = false;
 	m_Span = SPAN_AUTO;
 	m_FSAltEnter = false;
+	m_GrabKeyboard = TVNC_FS;
 	m_toolbar = true;
 	m_historyLimit = 32;
 	m_skipprompt = false;
@@ -132,6 +133,7 @@ VNCOptions& VNCOptions::operator=(VNCOptions& s)
 	m_FullScreen		= s.m_FullScreen;
 	m_Span				= s.m_Span;
 	m_FSAltEnter		= s.m_FSAltEnter;
+	m_GrabKeyboard		= s.m_GrabKeyboard;
 	m_Use8Bit			= s.m_Use8Bit;
 	m_DoubleBuffer      = s.m_DoubleBuffer;
 	m_PreferredEncoding = s.m_PreferredEncoding;
@@ -368,6 +370,19 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			m_FSAltEnter = true;
 		} else if ( SwitchMatch(args[j], _T("nofsaltenter") )) {
 			m_FSAltEnter = false;
+		} else if ( SwitchMatch(args[j], _T("grabkeyboard") )) {
+			if (++j == i) {
+				ArgError(_T("No keyboard grab mode specified"));
+				continue;
+			}
+			switch (_toupper(args[j][0])) {
+				case 'A':  m_GrabKeyboard = TVNC_ALWAYS;  break;
+				case 'M':  m_GrabKeyboard = TVNC_MANUAL;  break;
+				case 'F':  m_GrabKeyboard = TVNC_FS;  break;
+				default:
+					ArgError(_T("Invalid keyboard grab mode specified"));
+					continue;
+			}
 		} else if ( SwitchMatch(args[j], _T("nocursorshape") )) {
 			m_requestShapeUpdates = false;
 		} else if ( SwitchMatch(args[j], _T("noremotecursor") )) {
@@ -609,6 +624,7 @@ void VNCOptions::Save(char *fname)
 	saveInt("fullscreen",			m_FullScreen,		fname);
 	saveInt("span",					m_Span,				fname);
 	saveInt("fsaltenter",			m_FSAltEnter,		fname);
+	saveInt("grabkeyboard",			m_GrabKeyboard,		fname);
 	saveInt("8bit",					m_Use8Bit,			fname);
 	saveInt("doublebuffer",			m_DoubleBuffer,		fname);
 	saveInt("shared",				m_Shared,			fname);
@@ -647,6 +663,7 @@ void VNCOptions::Load(char *fname)
 	m_FullScreen =			readInt("fullscreen",		m_FullScreen,	fname) != 0;
 	m_Span =				readInt("span",				m_Span,			fname);
 	m_FSAltEnter =			readInt("fsaltenter",		m_FSAltEnter,	fname) != 0;
+	m_GrabKeyboard =		readInt("grabkeyboard",		m_GrabKeyboard,	fname);
 	m_Use8Bit =				readInt("8bit",				m_Use8Bit,		fname) != 0;
 	m_DoubleBuffer =		readInt("doublebuffer",		m_DoubleBuffer,	fname) != 0;
 	m_Shared =				readInt("shared",			m_Shared,		fname) != 0;
@@ -1693,6 +1710,7 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 	m_FullScreen =			read(RegKey, "fullscreen",        m_FullScreen           ) != 0;
 	m_Span =				read(RegKey, "span",              m_Span                 );
 	m_FSAltEnter =			read(RegKey, "fsaltenter",        m_FSAltEnter           ) != 0;
+	m_GrabKeyboard =		read(RegKey, "grabkeyboard",      m_GrabKeyboard         );
 //	m_Use8Bit =				read(RegKey, "8bit",	          m_Use8Bit              ) != 0;
 	m_DoubleBuffer =		read(RegKey, "doublebuffer",	  m_DoubleBuffer         ) != 0;
 	m_Shared =				read(RegKey, "shared",            m_Shared               ) != 0;
@@ -1770,6 +1788,7 @@ void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
 	save(RegKey, "fullscreen",			m_FullScreen		);
 	save(RegKey, "span",				m_Span				);
 	save(RegKey, "fsaltenter",			m_FSAltEnter		);
+	save(RegKey, "grabkeyboard",		m_GrabKeyboard		);
 	save(RegKey, "scaling",				m_scaling			);
 	save(RegKey, "8bit",				m_Use8Bit			);
 	save(RegKey, "doublebuffer",		m_DoubleBuffer		);

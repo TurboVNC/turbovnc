@@ -45,6 +45,7 @@
 #include "SessionDialog.h"
 #include "LoginAuthDialog.h"
 #include "AboutBox.h"
+#include "LowLevelHook.h"
 #include "FileTransfer.h"
 #include "commctrl.h"
 #include "Exception.h"
@@ -470,6 +471,8 @@ void ClientConnection::CreateDisplay()
 		AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
 		AppendMenu(hsysmenu, MF_STRING, ID_FULLSCREEN,
 				   _T("&Full screen\tCtrl-Alt-Shift-F"));
+		AppendMenu(hsysmenu, MF_STRING, ID_TOGGLE_GRAB,
+				   _T("&Grab keyboard\tCtrl-Alt-Shift-G"));
 		AppendMenu(hsysmenu, MF_STRING, ID_DEFAULT_WINDOW_SIZE,
 				   _T("Default window si&ze/position\tCtrl-Alt-Shift-Z"));
 		AppendMenu(hsysmenu, MF_STRING, ID_TOOLBAR,
@@ -522,6 +525,11 @@ void ClientConnection::CreateDisplay()
 	m_opts.m_hWindow = m_hwnd;
 	hotkeys.SetWindow(m_hwnd1);
     ShowWindow(m_hwnd, SW_HIDE);
+	if (m_opts.m_GrabKeyboard == TVNC_ALWAYS) {
+		LowLevelHook::Activate(m_hwnd1);
+		CheckMenuItem(GetSystemMenu(m_hwnd1, FALSE),
+					  ID_TOGGLE_GRAB, MF_BYCOMMAND|MF_CHECKED);
+	}
 		
 	SetWindowLongPtr(m_hwnd, GWLP_USERDATA, (LONG_PTR) this);
 	SetWindowLongPtr(m_hwnd, GWLP_WNDPROC, (LONG_PTR)ClientConnection::WndProc);
@@ -2149,6 +2157,18 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 			// Toggle full screen mode
 			_this->SetFullScreenMode(!_this->InFullScreenMode(), true);
 			return 0;
+		case ID_TOGGLE_GRAB:
+			// Toggle keyboard grab
+			if (LowLevelHook::isActive(_this->m_hwnd1)) {
+				LowLevelHook::Deactivate();
+				CheckMenuItem(GetSystemMenu(_this->m_hwnd1, FALSE),
+							  ID_TOGGLE_GRAB, MF_BYCOMMAND|MF_UNCHECKED);
+			} else {
+				LowLevelHook::Activate(_this->m_hwnd1);
+				CheckMenuItem(GetSystemMenu(_this->m_hwnd1, FALSE),
+							  ID_TOGGLE_GRAB, MF_BYCOMMAND|MF_CHECKED);
+			}
+			return 0;
 		case ID_DEFAULT_WINDOW_SIZE:
 			// Reset window geometry to default (taking into account spanning option)
 			ShowWindow(_this->m_hwnd1, SW_NORMAL);
@@ -2177,6 +2197,12 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 			_this->SetFormatAndEncodings();
 			return 0;
 		}
+		case ID_CONN_SENDKEYDOWN:
+			_this->SendKeyEvent((CARD32)lParam, true);
+			return 0;
+		case ID_CONN_SENDKEYUP:
+			_this->SendKeyEvent((CARD32)lParam, false);
+			return 0;
 		case ID_CONN_CTLESC:
 			_this->SendKeyEvent(XK_Control_L, true);
 			_this->SendKeyEvent(XK_Escape,     true);
@@ -2799,6 +2825,8 @@ inline void
 ClientConnection::SendKeyEvent(CARD32 key, bool down)
 {
     rfbKeyEventMsg ke;
+
+    if (m_opts.m_ViewOnly) return;
 
     ke.type = rfbKeyEvent;
     ke.down = down ? 1 : 0;
