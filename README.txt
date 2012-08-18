@@ -23,13 +23,13 @@ TurboVNC is
 
     Copyright (C) 1999 AT&T Laboratories Cambridge.
     Copyright (C) 2000 Tridia Corp.
+    Copyright (C) 2004 Landmark Graphics Corporation
     Copyright (C) 2002-2005 RealVNC Ltd.
     Copyright (C) 2000-2006 Constantin Kaplinsky
-    Copyright (C) 2000-2009 TightVNC Group
-    Copyright (C) 2004 Landmark Graphics Corporation
     Copyright (C) 2004-2008 Sun Microsystems, Inc.
-    Copyright (C) 2009-2012 D. R. Commander
+    Copyright (C) 2000-2009 TightVNC Group
     Copyright (C) 2010 University Corporation for Atmospheric Research
+    Copyright (C) 2009-2012 D. R. Commander
     All rights reserved.
 
 This software is distributed under the GNU General Public Licence as published
