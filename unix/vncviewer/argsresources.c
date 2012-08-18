@@ -711,6 +711,7 @@ LoadConfigFile(char *filename)
     ReadConfigInt("quality=", appData.qualityLevel, 1, 100);
     ReadConfigBool("nounixlogin=", appData.noUnixLogin);
     ReadConfigBool("cursorshape=", appData.useRemoteCursor);
+    ReadConfigInt("grabkeyboard=", appData.grabKeyboard, 0, 2);
   }
 
   if (preferred_encoding >= 0 && preferred_encoding <= 16
@@ -759,8 +760,7 @@ GetArgsAndResources(int argc, char **argv)
 			    XtNumber(appDataResourceList), 0, 0);
 
   appData.subsampLevel = -1;
-  appData.grabKeyboardFS = True;
-  appData.grabKeyboardAlways = False;
+  appData.grabKeyboard = TVNC_FS;
 
   if(appData.configFile) LoadConfigFile(appData.configFile);
   else if(argc > 1 && strlen(argv[1]) >= 4
@@ -782,15 +782,12 @@ GetArgsAndResources(int argc, char **argv)
   if (appData.grabKeyboardString && strlen(appData.grabKeyboardString) > 0) {
     char *s = appData.grabKeyboardString;
     char first = toupper(s[0]);
-    if (first == 'A') {  // "always"
-      appData.grabKeyboardAlways = True;
-      appData.grabKeyboardFS = False;
-    } else if (first == '0' ||
-	       (first == 'F' && strlen(s) > 1 && toupper(s[1]) != 'S') ||
-	       first == 'M') {  // "0" or "false" or "manual"
-      appData.grabKeyboardFS = False;
-      appData.grabKeyboardAlways = False;
-    }
+    if (first == 'A') // "always"
+      appData.grabKeyboard = TVNC_ALWAYS;
+    else if (first == '0' ||
+             (first == 'F' && strlen(s) > 1 && toupper(s[1]) != 'S') ||
+             first == 'M')  // "0" or "false" or "manual"
+      appData.grabKeyboard = TVNC_MANUAL;
   }
 
   /* -lowqual switch was used */

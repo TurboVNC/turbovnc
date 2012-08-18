@@ -257,7 +257,7 @@ FullScreenOn()
 
   /* Optionally, grab the keyboard. */
 
-  if (appData.grabKeyboardFS) GrabKeyboard();
+  if (appData.grabKeyboard == TVNC_FS) GrabKeyboard();
 }
 
 
@@ -284,7 +284,7 @@ FullScreenOff()
 
   appData.fullScreen = False;
 
-  if (appData.grabKeyboardFS) UngrabKeyboard();
+  if (appData.grabKeyboard == TVNC_FS) UngrabKeyboard();
 
   XtVaSetValues(toplevel, XtNmaxWidth, si.framebufferWidth,
 		XtNmaxHeight, si.framebufferHeight, NULL);

@@ -81,6 +81,9 @@ extern int endianTest;
 #define TVNC_SAMPOPT 4
 enum {TVNC_1X=0, TVNC_4X, TVNC_2X, TVNC_GRAY};
 
+#define TVNC_GRABOPT 3
+enum {TVNC_FS=0, TVNC_ALWAYS, TVNC_MANUAL};
+
 static const char *subsampLevel2str[TVNC_SAMPOPT] = {
   "1X", "4X", "2X", "Gray"
 };
@@ -93,8 +96,7 @@ typedef struct {
   Bool fullScreen;
   Bool fsAltEnter;
   String grabKeyboardString;
-  Bool grabKeyboardFS;
-  Bool grabKeyboardAlways;
+  int grabKeyboard;
   Bool raiseOnBeep;
 
   String encodingsString;
