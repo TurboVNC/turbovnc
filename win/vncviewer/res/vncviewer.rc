@@ -618,8 +618,9 @@ restarting the viewer.\r\n\
 /autopass\r\n\
 Bypass the authentication dialog and read the password from stdin\r\n\
 \r\n\
-/belldeiconify\r\n\
-Equivalent of ""Connection-->Display-->Deiconify on remote Bell event"" in the\r\n\
+/clipboard\r\n\
+/noclipboard\r\n\
+Equivalent of ""Connection-->Restrictions-->Disable clipboard transfer"" in the\r\n\
 options dialog\r\n\
 \r\n\
 /compresslevel <n>\r\n\
@@ -660,10 +661,6 @@ the options dialog\r\n\
 Equivalent of ""Connection-->Mouse cursor-->Don't show remote cursor"" in the\r\n\
 options dialog\r\n\
 \r\n\
-/disableclipboard\r\n\
-Equivalent of ""Connection-->Restrictions-->Disable clipboard transfer"" in the\r\n\
-options dialog\r\n\
-\r\n\
 /dotcursor\r\n\
 /smalldotcursor\r\n\
 /normalcursor\r\n\
@@ -701,6 +698,7 @@ connecting to other types of VNC servers, such as RealVNC.\r\n\
 Allow/disallow the Alt+Enter key sequence to activate/deactivate full-screen mode\r\n\
 \r\n\
 /fullscreen\r\n\
+/nofullscreen\r\n\
 Equivalent of ""Connection-->Display-->Full-screen mode"" in the options dialog\r\n\
 \r\n"
 
@@ -754,6 +752,11 @@ Bypass the authentication dialog and use the specified password\r\n\
 Equivalent of ""Connection-->Encoding-->JPEG image quality"" in the options\r\n\
 dialog\r\n\
 \r\n\
+/raiseonbeep\r\n\
+/noraiseonbeep\r\n\
+Equivalent of ""Connection-->Display-->Deiconify on remote Bell event"" in the\r\n\
+options dialog\r\n\
+\r\n\
 /register\r\n\
 Register the TurboVNC Viewer as the default application for opening .vnc\r\n\
 files\r\n\
@@ -782,6 +785,7 @@ authentication to be used, if an authentication method that supports it is\r\n\
 enabled in the VNC server.\r\n\
 \r\n\
 /viewonly\r\n\
+/fullcontrol\r\n\
 Equivalent of ""Connection-->Restrictions-->View only (inputs ignored)"" in the\r\n\
 options dialog\r\n\
 \r\n\

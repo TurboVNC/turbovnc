@@ -311,8 +311,12 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			m_restricted = true;
 		} else if ( SwitchMatch(args[j], _T("viewonly"))) {
 			m_ViewOnly = true;
+		} else if ( SwitchMatch(args[j], _T("fullcontrol"))) {
+			m_ViewOnly = false;
 		} else if ( SwitchMatch(args[j], _T("fullscreen"))) {
 			m_FullScreen = true;
+		} else if ( SwitchMatch(args[j], _T("nofullscreen"))) {
+			m_FullScreen = false;
 		} else if ( SwitchMatch(args[j], _T("span"))) {
 			if (++j == i) {
 				ArgError(_T("No monitor spanning mode specified"));
@@ -358,6 +362,10 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			m_localCursor= NORMALCURSOR;
 		} else if ( SwitchMatch(args[j], _T("belldeiconify") )) {
 			m_DeiconifyOnBell = true;
+		} else if ( SwitchMatch(args[j], _T("raiseonbeep") )) {
+			m_DeiconifyOnBell = true;
+		} else if ( SwitchMatch(args[j], _T("noraiseonbeep") )) {
+			m_DeiconifyOnBell = false;
 		} else if ( SwitchMatch(args[j], _T("emulate3") )) {
 			m_Emul3Buttons = true;
 		} else if ( SwitchMatch(args[j], _T("noemulate3") )) {
@@ -433,6 +441,10 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 			}
 			
 		} else if ( SwitchMatch(args[j], _T("disableclipboard") )) {
+			m_DisableClipboard = true;
+		} else if ( SwitchMatch(args[j], _T("clipboard") )) {
+			m_DisableClipboard = false;
+		} else if ( SwitchMatch(args[j], _T("noclipboard") )) {
 			m_DisableClipboard = true;
 		}
 #ifdef UNDER_CE
