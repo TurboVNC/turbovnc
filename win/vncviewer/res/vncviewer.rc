@@ -467,9 +467,9 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "Based on TightVNC by Constantin Kaplinsky; Based on VNC by AT&T Research Labs Cambridge, RealVNC Ltd.\0"
+            VALUE "Comments", "\0"
             VALUE "CompanyName", "The VirtualGL Project\0"
-            VALUE "FileDescription", "vncviewer\0"
+            VALUE "FileDescription", __APPNAME
             VALUE "FileVersion", __RCVERSIONSTR
             VALUE "InternalName", "vncviewer\0"
             VALUE "LegalCopyright", "Copyright © 1999-2012 [many holders]\0"

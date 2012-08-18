@@ -1,5 +1,9 @@
 enable_language(CXX)
 
+if(BITS EQUAL 64)
+	set(WIN64 1)
+endif()
+
 if(NOT MSVC)
 	message(FATAL_ERROR "TurboVNC requires Visual C++")
 endif()
