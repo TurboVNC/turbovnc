@@ -33,6 +33,21 @@ The Windows TurboVNC Viewer now accepts a scaling factor of "fixedratio" when
 using the /scale switch on the command line.  This was previously called "Auto"
 in the GUI, but the name was changed to match the Java Viewer.
 -------------------------------------------------------------------------------
+[7]
+All default options in the Unix TurboVNC Viewer now have a command-line
+equivalent, which is useful in case the defaults are overridden using a
+resource file.
+-------------------------------------------------------------------------------
+[8]
+Added a keyboard grabbing feature to the Windows TurboVNC Viewer so that it can
+optionally send special keystrokes (Alt-Tab, Ctrl-Esc, Menu key, etc.) to the
+VNC server.  The default behavior of this option is to enable grabbing only in
+full-screen mode (as the Unix TurboVNC Viewer already did), but a command-line
+switch (-grabkeyboard) can be used to configure keyboard grabbing to be always
+on or always off.  Additionally, grabbing can always be turned on/off by
+pressing CTRL-ALT-SHIFT-G.  The Unix TurboVNC Viewer has been extended to
+support the same functionality.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
