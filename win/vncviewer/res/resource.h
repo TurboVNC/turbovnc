@@ -171,6 +171,7 @@
 #define IDC_STATIC_PASSWD               1149
 #define IDC_CU                          1150
 #define IDC_SPAN                        1151
+#define IDC_STATIC_APPNAME              1152
 #define IDC_STATIC_SUBSAMP              5000
 #define IDC_STATIC_QUAL                 5001
 #define IDC_STATIC_COMPRESS             5002
