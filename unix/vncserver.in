@@ -718,19 +718,21 @@ sub Usage
 	"\n".
 	"<OPTIONS> are Xvnc options, or:\n".
 	"\n".
-	"        -name <DESKTOP-NAME>\n".
-	"        -depth <DEPTH>\n".
 	"        -geometry <WIDTH>x<HEIGHT>\n".
+	"        -depth <DEPTH>\n".
 	"        -pixelformat rgb<NNN>\n".
 	"        -pixelformat bgr<NNN>\n".
 	"        -fp <FONT-PATH>\n".
-	"        -fg\n".
-	"        -list\n".
-	"        -noxstartup\n".
+	"        -name <DESKTOP-NAME>\n".
+	"        -nohttpd\n".
 	"        -novncauth\n".
 	"        -nootp\n".
 	"        -nopam\n".
 	"        -noauth\n".
+	"        -otp\n".
+	"        -fg\n".
+	"        -noxstartup\n".
+	"        -xstartup <SCRIPT>\n".
 	"\n".
 	"See vncserver and Xvnc manual pages for more information.\n");
 }
