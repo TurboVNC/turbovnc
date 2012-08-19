@@ -26,6 +26,6 @@ all:: $(OBJS)
 
 NormalLibraryObjectRule()
 NormalLibraryTarget(vnc,$(OBJS))
-SpecialCObjectRule(init,$(ICONFIGFILES),-DXVNCRELEASE=XvncRelease)
+SpecialCObjectRule(init,${ICONFIGFILES},-I../../../../config/cf)
 
 DependTarget()

@@ -1,6 +1,8 @@
 include_directories(${X11_INCLUDE_DIR} .)
 
 add_definitions(-D__VERSION="${VERSION}" -D__BUILD="${BUILD}")
+add_definitions(-D__COPYRIGHT_YEAR="${COPYRIGHT_YEAR}")
+add_definitions(-D__COPYRIGHT="${COPYRIGHT}" -D__URLTEXT="${URLTEXT}")
 
 add_executable(vncviewer
 argsresources.c

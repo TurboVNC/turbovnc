@@ -537,7 +537,9 @@ void
 usage(void)
 {
   fprintf(stderr,
-	  "TurboVNC Viewer %d-bit v"__VERSION" (build "__BUILD")\n"
+	  "\nTurboVNC Viewer %d-bit v"__VERSION" (build "__BUILD")\n"
+	  "Copyright (C) "__COPYRIGHT_YEAR" "__COPYRIGHT"\n"
+	  __URLTEXT"\n"
 	  "\n"
 	  "Usage: %s [<OPTIONS>] [<HOST>][:<DISPLAY#>]\n"
 	  "       %s [<OPTIONS>] [<HOST>][::<PORT#>]\n"
@@ -577,8 +579,8 @@ usage(void)
 	  "        -via <GATEWAY>\n"
 	  "        -config <CONFIG-FILENAME>\n"
 	  "\n"
-	  "Option names may be abbreviated, for example, -q instead of -quality.\n"
-	  "See the manual page for more information."
+	  "Option names may be abbreviated (for example: -q instead of -quality.)\n"
+	  "See the manual page for more information.\n"
 	  "\n", (int)sizeof(size_t)*8, programName, programName, programName, programName);
   exit(1);
 }

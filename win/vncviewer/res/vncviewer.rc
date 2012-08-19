@@ -214,9 +214,9 @@ BEGIN
     CONTROL         106,IDC_STATIC_LOGO,"Static",SS_BITMAP | SS_NOTIFY | 
                     SS_SUNKEN,19,7,87,80
     LTEXT           __APPNAME,IDC_STATIC_APPNAME,122,7,190,9
-    LTEXT           "Copyright (C) 1999-2012 The VirtualGL Project and many others\n(see README.txt)",
+    LTEXT           __COPYRIGHT1,
                     IDC_STATIC_COPYRIGHTS,122,33,200,23
-    LTEXT           "Visit http://www.virtualgl.org for more information on TurboVNC.",
+    LTEXT           __URLTEXT,
                     IDC_STATIC_URL,122,54,200,9
     LTEXT           "[build time unknown]",IDC_BUILDTIME,122,20,190,9
 END
@@ -472,7 +472,7 @@ BEGIN
             VALUE "FileDescription", __APPNAME
             VALUE "FileVersion", __RCVERSIONSTR
             VALUE "InternalName", "vncviewer\0"
-            VALUE "LegalCopyright", "Copyright © 1999-2012 [many holders]\0"
+            VALUE "LegalCopyright", __COPYRIGHT2
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "vncviewer.exe\0"
             VALUE "PrivateBuild", "\0"

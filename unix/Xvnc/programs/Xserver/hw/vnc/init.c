@@ -90,6 +90,7 @@ from the X Consortium.
 #include "globals.h"
 #include "rfb.h"
 #include <time.h>
+#include "tvnc_version.h"
 
 #ifdef CORBA
 #include <vncserverctrl.h>
@@ -154,6 +155,16 @@ static char inetdDisplayNumStr[10];
 struct in_addr interface;
 struct in6_addr interface6;
 int family = -1;
+
+
+static void
+PrintVersion(void)
+{
+    fprintf(stderr, "TurboVNC Server (Xvnc) %d-bit v"__VERSION" (build "__BUILD")\n",
+	(int)sizeof(size_t)*8);
+    fprintf(stderr, "Copyright (C) "__COPYRIGHT_YEAR" "__COPYRIGHT"\n");
+    fprintf(stderr, __URLTEXT"\n\n");
+}
 
 
 /*
@@ -452,7 +463,7 @@ ddxProcessArgument (argc, argv, i)
     }
 
     if (strcmp(argv[i], "-version") == 0) {
-	ErrorF("Xvnc version %s\n", XVNCRELEASE);
+	PrintVersion();
 	exit(0);
     }
 
@@ -498,9 +509,6 @@ InitOutput(screenInfo, argc, argv)
     int i;
     initOutputCalled = TRUE;
 
-    rfbLog("Xvnc version %s\n", XVNCRELEASE);
-    rfbLog("Copyright (C) 1999-2012 The VirtualGL Project and many others (see README.txt)\n");
-    rfbLog("See http://www.virtualgl.org for more information\n");
     rfbLog("Desktop name '%s' (%s:%s)\n",desktopName,rfbThisHost,display);
     rfbLog("Protocol versions supported: 3.3, 3.7, 3.8, 3.7t, 3.8t\n");
 
@@ -1086,6 +1094,7 @@ AbortDDX()
 void
 OsVendorInit()
 {
+    PrintVersion();
     rfbAuthInit();
     if (rfbMaxIdleTimeout > 0 && (rfbIdleTimeout > rfbMaxIdleTimeout
         || rfbIdleTimeout == 0)) {
