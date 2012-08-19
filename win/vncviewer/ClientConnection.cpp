@@ -463,7 +463,7 @@ void ClientConnection::CreateDisplay()
 		AppendMenu(hsysmenu, MF_STRING, IDC_OPTIONBUTTON,
 				   _T("Connection &options...\tCtrl-Alt-Shift-O"));
 		AppendMenu(hsysmenu, MF_STRING, ID_CONN_ABOUT,
-				   _T("Connection &info\tCtrl-Alt-Shift-I"));
+				   _T("Connection &info...\tCtrl-Alt-Shift-I"));
 		AppendMenu(hsysmenu, MF_STRING, ID_REQUEST_REFRESH,
 				   _T("Request screen &refresh\tCtrl-Alt-Shift-R"));
 		AppendMenu(hsysmenu, MF_STRING, ID_REQUEST_LOSSLESS_REFRESH,
