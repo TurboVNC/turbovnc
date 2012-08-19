@@ -269,7 +269,8 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 		if ((*pos == ' ') && !inquote) {
 			*pos = '\0';
 			p = pos + 1;
-			args[++i] = p;
+			if (*p != '\0' && *p != ' ')
+				args[++i] = p;
 		}
 		if (*pos == '"') {  
 			if (!inquote) {      // Are we starting a quoted argument?
