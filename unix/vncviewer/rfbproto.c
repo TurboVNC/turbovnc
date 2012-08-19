@@ -1508,7 +1508,7 @@ HandleRFBServerMessage()
       switch (rect.encoding) {
 
       case rfbEncodingRaw:
-
+	SetLastEncoding(rect.encoding);
         NewNode(rect.r.x, rect.r.y, rect.r.w, rect.r.h, rect.encoding);
 
 	bytesPerLine = rect.r.w * myFormat.bitsPerPixel / 8;
@@ -1567,6 +1567,7 @@ HandleRFBServerMessage()
 
       case rfbEncodingHextile:
       {
+	SetLastEncoding(rect.encoding);
 	switch (myFormat.bitsPerPixel) {
 	case 8:
 	  if (!HandleHextile8(rect.r.x,rect.r.y,rect.r.w,rect.r.h))
@@ -1586,6 +1587,7 @@ HandleRFBServerMessage()
 
       case rfbEncodingTight:
       {
+	SetLastEncoding(rect.encoding);
         NewNode(rect.r.x, rect.r.y, rect.r.w, rect.r.h, rect.encoding);
 
 	switch (myFormat.bitsPerPixel) {

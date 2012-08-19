@@ -71,6 +71,26 @@ HasEncoding(const char *str)
 }
 
 
+static int lastEncoding = -1;
+
+void
+SetLastEncoding(int enc)
+{
+  char temps[80];
+  char *titleFormat, title[1024], *ptr;
+  char text[10];
+  if (enc != lastEncoding) {
+    lastEncoding = enc;
+    XtVaGetValues(toplevel, XtNtitle, &titleFormat, NULL);
+    strncpy(title, titleFormat, 1023);
+    if((ptr = strrchr(title, '[')) != NULL) {
+      UpdateTitleString(ptr, 1024 - (ptr - title));
+      XtVaSetValues(toplevel, XtNtitle, title, XtNiconName, title, NULL);
+    }
+  }
+}
+
+
 /*
  * Update window title
  */
@@ -78,7 +98,8 @@ HasEncoding(const char *str)
 void
 UpdateTitleString(char *str, int len)
 {
-  if (!appData.encodingsString || HasEncoding("tight")) {
+  if ((!appData.encodingsString || HasEncoding("tight")) &&
+      (lastEncoding < 0 || lastEncoding == rfbEncodingTight)) {
     char zlibstr[80];
     zlibstr[0] = 0;
     if (!appData.enableJPEG) {
@@ -95,8 +116,11 @@ UpdateTitleString(char *str, int len)
         subsampLevel2str[appData.subsampLevel], appData.qualityLevel,
         zlibstr);
     }
-  }
-  else snprintf(str, len, "[%s]", appData.encodingsString);
+  } else if (lastEncoding >= 0 && lastEncoding <= rfbEncodingHextile) {
+    char encStr[6][8] = {"Raw", "", "", "", "", "Hextile"};
+    snprintf(str, len, "[%s]", encStr[lastEncoding]);
+  } else
+    snprintf(str, len, "[%s]", appData.encodingsString);
 }
 
 

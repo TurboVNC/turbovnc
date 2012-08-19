@@ -47,7 +47,7 @@ char *fallback_resources[] = {
  * The title of the main window.  "%s" will be replaced by the desktop name.
  */
 
-"Tvncviewer.title: TurboVNC: %s",
+"Tvncviewer.title: %s",
 
 
 /*
@@ -200,7 +200,7 @@ char *fallback_resources[] = {
 
 "*enableZlib.label: Enable Zlib Compression",
 
-"*popup.title: TurboVNC popup",
+"*popup.title: TurboVNC Viewer Options",
 "*popup*background: grey",
 "*popup*font: -*-helvetica-bold-r-*-*-16-*-*-*-*-*-*-*",
 "*popup.buttonForm.Command.borderWidth: 0",
