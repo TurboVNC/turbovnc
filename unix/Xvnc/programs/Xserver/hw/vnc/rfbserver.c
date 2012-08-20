@@ -572,7 +572,6 @@ rfbProcessClientInitMessage(cl)
     rfbClientInitMsg ci;
     char buf[256];
     rfbServerInitMsg *si = (rfbServerInitMsg *)buf;
-    struct passwd *user;
     int len, n;
     rfbClientPtr otherCl, nextCl;
 
@@ -592,18 +591,11 @@ rfbProcessClientInitMessage(cl)
     si->format.greenMax = Swap16IfLE(si->format.greenMax);
     si->format.blueMax = Swap16IfLE(si->format.blueMax);
 
-    user = getpwuid(getuid());
-
     if (strlen(desktopName) > 128)	/* sanity check on desktop name len */
 	desktopName[128] = 0;
 
-    if (user) {
-	sprintf(buf + sz_rfbServerInitMsg, "%s's %s desktop (%s:%s)",
-		user->pw_name, desktopName, rfbThisHost, display);
-    } else {
-	sprintf(buf + sz_rfbServerInitMsg, "%s desktop (%s:%s)",
-		desktopName, rfbThisHost, display);
-    }
+    sprintf(buf + sz_rfbServerInitMsg, "%s", desktopName);
+
     len = strlen(buf + sz_rfbServerInitMsg);
     si->nameLength = Swap32IfLE(len);
 

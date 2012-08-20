@@ -5,7 +5,7 @@
 #                     All Rights Reserved.
 #  Copyright (C) 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
 #  Copyright (C) 2002-2009 Constantin Kaplinsky.  All Rights Reserved.
-#  Copyright (C) 2002-2003 RealVNC Ltd.  All Rights Reserved.
+#  Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
 #  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
 #
 #  This is free software; you can redistribute it and/or modify
@@ -46,7 +46,6 @@ $xauth = "xauth";
 
 $geometry = "1240x900";
 $depth = 24;
-$desktopName = "X";
 $vncUserDir = "$ENV{HOME}/.vnc";
 $passwdFile = "$vncUserDir/passwd";
 $authTypeVNC = 1;
@@ -314,10 +313,6 @@ if ($generateOTP && index($authType, "-otpauth") < 0) {
 
 &CheckGeometryAndDepth();
 
-if ($opt{'-name'}) {
-    $desktopName = $opt{'-name'};
-}
-
 # Create the user's vnc directory if necessary.
 
 unless (-e $vncUserDir) {
@@ -365,6 +360,12 @@ $vncPort = 5900 + $displayNumber;
 
 $desktopLog = "$vncUserDir/$host:$displayNumber.log";
 unlink($desktopLog);
+
+if ($opt{'-name'}) {
+    $desktopName = $opt{'-name'};
+} else {
+    $desktopName = "TurboVNC: $host:$displayNumber ($ENV{USER})";
+}
 
 # Make an X server cookie - use /dev/urandom on systems that have it,
 # otherwise use perl's random number generator, seeded with the sum
@@ -446,7 +447,7 @@ unless (kill 0, `cat $pidFile`) {
     die "\n";
 }
 
-warn "\nNew '$desktopName' desktop is $host:$displayNumber\n\n";
+warn "\nDesktop '$desktopName' started on display $host:$displayNumber\n\n";
 
 if ($generateOTP == 1) {
     warn "One-time password authentication enabled.  Generating initial OTP ...\n";
