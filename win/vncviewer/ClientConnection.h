@@ -46,8 +46,6 @@
 #define SETTINGS_KEY_NAME "Software\\TurboVNC\\VNCviewer\\Settings"
 #define MAX_HOST_NAME_LEN 250
 
-#define ZLIBHEX_DECOMP_UNINITED (-1)
-
 #define TIGHT_ZLIB_BUFFER_SIZE 512
 
 class ClientConnection;
@@ -194,18 +192,6 @@ private:
 	void FilterPalette24 (int srcx, int srcy, int numRows);
 	void DecompressJpegRect(int x, int y, int w, int h);
 
-	// ClientConnectionZlibHex.cpp
-	void HandleZlibHexEncoding8(int x, int y, int w, int h);
-	void HandleZlibHexEncoding16(int x, int y, int w, int h);
-	void HandleZlibHexEncoding32(int x, int y, int w, int h);
-	void HandleZlibHexSubencodingStream8(int x, int y, int w, int h, int subencoding);
-	void HandleZlibHexSubencodingStream16(int x, int y, int w, int h, int subencoding);
-	void HandleZlibHexSubencodingStream32(int x, int y, int w, int h, int subencoding);
-	void HandleZlibHexSubencodingBuf8(int x, int y, int w, int h, int subencoding, unsigned char * buffer);
-	void HandleZlibHexSubencodingBuf16(int x, int y, int w, int h, int subencoding, unsigned char * buffer);
-	void HandleZlibHexSubencodingBuf32(int x, int y, int w, int h, int subencoding, unsigned char * buffer);
-	void ReadZlibHexRect(rfbFramebufferUpdateRectHeader *pfburh);
-
 	bool zlibDecompress(unsigned char *from_buf, unsigned char *to_buf, unsigned int count, unsigned int size, z_stream *decompressor);
 
 	void ReadRBSRect(rfbFramebufferUpdateRectHeader *pfburh);
@@ -303,12 +289,6 @@ private:
 	void CheckZlibBufferSize(size_t bufsize);
 	unsigned char *m_zlibbuf;
 	size_t m_zlibbufsize;
-
-	// zlib decompression state
-	bool m_decompStreamInited;
-	z_stream m_decompStream;
-	z_stream m_decompStreamRaw;
-	z_stream m_decompStreamEncoded;
 
 	// Variables used by tight encoding:
 

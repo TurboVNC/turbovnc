@@ -166,11 +166,6 @@ void ClientConnection::Init(VNCviewerApp *pApp)
 	m_waitingOnEmulateTimer = false;
 	m_emulatingMiddleButton = false;
 
-	m_decompStreamInited = false;
-
-	m_decompStreamRaw.total_in = ZLIBHEX_DECOMP_UNINITED;
-	m_decompStreamEncoded.total_in = ZLIBHEX_DECOMP_UNINITED;
-
 	for (int i = 0; i < 4; i++)
 		m_tightZlibStreamActive[i] = false;
 
