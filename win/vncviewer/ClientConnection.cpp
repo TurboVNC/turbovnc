@@ -830,7 +830,7 @@ void ClientConnection::Connect()
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
-	_snprintf(portname, 10, "%d", m_port);
+	snprintf(portname, 10, "%d", m_port);
 	if (strlen(hostname) < 1)
 		hostname = NULL;
 	if (getaddrinfo(hostname, portname, &hints, &addr) != 0) {
@@ -1207,7 +1207,7 @@ void ClientConnection::Authenticate(CARD32 authScheme)
 		errorMsg = "Authentication failure, too many tries";
 		break;
 	default:
-		_snprintf(m_netbuf, 256, "Unknown authentication result (%d)",
+		snprintf(m_netbuf, 256, "Unknown authentication result (%d)",
 				 (int)authResult);
 		errorMsg = m_netbuf;
 		break;
@@ -1248,7 +1248,7 @@ bool ClientConnection::AuthenticateVNC(char *errBuf, int errBufSize)
 		size_t len    = strlen(passwd);
 		if ( (cstatus == NULL) || (len == 0) ) {
 			passwd[0] = '\0';
-			_snprintf(errBuf, errBufSize, "Empty password");
+			snprintf(errBuf, errBufSize, "Empty password");
 			return false;
 		} else {
 			if (len > 0 && passwd[len-1] == '\n') passwd[len-1] = '\0';
@@ -1280,7 +1280,7 @@ bool ClientConnection::AuthenticateVNC(char *errBuf, int errBufSize)
 		passwd[newlen]= '\0';
 #endif
 		if (strlen(passwd) == 0) {
-			_snprintf(errBuf, errBufSize, "Empty password");
+			snprintf(errBuf, errBufSize, "Empty password");
 			return false;
 		}
 		if (strlen(passwd) > 8) {
@@ -1317,7 +1317,7 @@ bool ClientConnection::AuthenticateUnixLogin(char *errBuf, int errBufSize)
 		size_t len    = strlen(passwd);
 		if ( (cstatus == NULL) || (len == 0) ) {
 			passwd[0] = '\0';
-			_snprintf(errBuf, errBufSize, "Empty password");
+			snprintf(errBuf, errBufSize, "Empty password");
 			return false;
 		} else {
 			if (len > 0 && passwd[len-1] == '\n') passwd[len-1] = '\0';
@@ -1328,7 +1328,7 @@ bool ClientConnection::AuthenticateUnixLogin(char *errBuf, int errBufSize)
 		strncpy(user, ad.m_username, 255);
 		user[255] = '\0';
 		if (strlen(user) == 0) {
-			_snprintf(errBuf, errBufSize, "Empty user name");
+			snprintf(errBuf, errBufSize, "Empty user name");
 			return false;
 		}
 		strncpy(m_opts.m_user, user, 255);
@@ -1337,7 +1337,7 @@ bool ClientConnection::AuthenticateUnixLogin(char *errBuf, int errBufSize)
 		strncpy(passwd, ad.m_passwd, 255);
 		passwd[255] = '\0';
 		if (strlen(passwd) == 0) {
-			_snprintf(errBuf, errBufSize, "Empty password");
+			snprintf(errBuf, errBufSize, "Empty password");
 			return false;
 		}
 	}
