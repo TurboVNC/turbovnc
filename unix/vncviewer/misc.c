@@ -76,9 +76,7 @@ static int lastEncoding = -1;
 void
 SetLastEncoding(int enc)
 {
-  char temps[80];
   char *titleFormat, title[1024], *ptr;
-  char text[10];
   if (enc != lastEncoding) {
     lastEncoding = enc;
     XtVaGetValues(toplevel, XtNtitle, &titleFormat, NULL);
