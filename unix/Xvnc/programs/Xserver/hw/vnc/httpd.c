@@ -120,7 +120,9 @@ httpCheckFds()
     struct timeval tv;
     struct sockaddr_storage addr;
     socklen_t addrlen = sizeof(addr);
+#if USE_LIBWRAP
     char addrStr[INET6_ADDRSTRLEN];
+#endif
 
     if (!httpDir)
 	return;

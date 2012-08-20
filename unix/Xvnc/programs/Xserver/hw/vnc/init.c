@@ -939,7 +939,6 @@ rfbRootPropertyChange(PropertyPtr pProp)
 	(pProp->propertyName == VNC_CONNECT) && (pProp->type == XA_STRING)
 	    && (pProp->format == 8)
     ) {
-	int i;
 	rfbClientPtr cl;
 	char *colonPos;
 	int port = 5500;
