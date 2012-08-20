@@ -350,6 +350,10 @@ private:
 	CapsContainer m_encodingCaps;	// known encodings besides Raw
 
 	TCHAR *m_desktopName;
+	int m_lastEncoding;
+	void SetWindowTitle(void);
+	void SetLastEncoding(int);
+
 	unsigned char m_encPasswd[8];
 	bool m_passwdSet;
 	int m_authScheme;

@@ -143,6 +143,7 @@ void ClientConnection::Init(VNCviewerApp *pApp)
 	m_hBitmap = NULL;
 	m_hPalette = NULL;
 	m_passwdSet = false;
+	m_lastEncoding = -1;
 
 	m_connDlg = NULL;
 
@@ -1396,16 +1397,72 @@ void ClientConnection::ReadServerInit()
 #else
     ReadString(m_desktopName, m_si.nameLength);
 #endif
-    
-	SetWindowText(m_hwnd1, m_desktopName);	
+
+	SetWindowTitle();
 
 	vnclog.Print(0, _T("Desktop name \"%s\"\n"),m_desktopName);
 	vnclog.Print(1, _T("Geometry %d x %d depth %d\n"),
-		m_si.framebufferWidth, m_si.framebufferHeight, m_si.format.depth );
-	SetWindowText(m_hwnd1, m_desktopName);	
+		m_si.framebufferWidth, m_si.framebufferHeight, m_si.format.depth);
 
 	SizeWindow(true);
 }
+
+
+void ClientConnection::SetLastEncoding(int enc)
+{
+	if (enc != m_lastEncoding) {
+		m_lastEncoding = enc;
+		SetWindowTitle();
+	}
+}
+
+
+static const char *sampopt2str[TVNC_SAMPOPT] = {
+	"1X", "4X", "2X", "Gray"
+};
+
+
+void ClientConnection::SetWindowTitle()
+{
+	char *title;
+	size_t len = strlen(m_desktopName) + 80;
+	title = new char[len];
+	snprintf(title, len, "%s ", m_desktopName);
+	if (m_opts.m_PreferredEncoding == rfbEncodingTight &&
+		(m_lastEncoding < 0 || m_lastEncoding == rfbEncodingTight)) {
+		char zlibstr[80];
+		zlibstr[0] = 0;
+		if (!m_opts.m_enableJpegCompression) {
+			if (m_opts.m_compressLevel == 1)
+				snprintf(zlibstr, 80, " + Zlib");
+			if (m_opts.m_compressLevel > 1)
+				snprintf(zlibstr, 80, " + CL %d", m_opts.m_compressLevel);
+			snprintf(&title[strlen(title)], len - strlen(title),
+				"[Lossless Tight%s]", zlibstr);
+		}
+		else {
+			if (m_opts.m_compressLevel > 1)
+				snprintf(zlibstr, 80, " + CL %d", m_opts.m_compressLevel);
+			snprintf(&title[strlen(title)], len - strlen(title),
+				"[Tight + JPEG %s Q%d%s]", sampopt2str[m_opts.m_subsampLevel],
+				m_opts.m_jpegQualityLevel, zlibstr);
+		}
+	} else {
+		int enc;
+		if (m_lastEncoding >= 0)
+			enc = m_lastEncoding;
+		else
+			enc = m_opts.m_PreferredEncoding;
+		if (enc >= 0 && enc <= rfbEncodingHextile) {
+			char encStr[6][8] = {"Raw", "", "", "", "", "Hextile"};
+			snprintf(&title[strlen(title)], len - strlen(title), "[%s]",
+				encStr[enc]);
+		}
+	}
+	SetWindowText(m_hwnd1, title);
+	delete [] title;
+}
+
 
 //
 // In protocols 3.7t/3.8t, the server informs us about supported
@@ -2150,6 +2207,7 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 										KEY_VNCVIEWER_HISTORI);
 				}
 				_this->EnableFullControlOptions();
+				_this->SetWindowTitle();
 				COND_REGRAB_KEYBOARD
 				return 0;
 			}
@@ -3288,15 +3346,18 @@ void ClientConnection::ReadScreenUpdate() {
 
 		switch (surh.encoding) {
 		case rfbEncodingRaw:
+			SetLastEncoding(surh.encoding);
 			ReadRawRect(&surh);
 			break;
 		case rfbEncodingCopyRect:
 			ReadCopyRect(&surh);
 			break;
 		case rfbEncodingHextile:
+			SetLastEncoding(surh.encoding);
 			ReadHextileRect(&surh);
 			break;
 		case rfbEncodingTight:
+			SetLastEncoding(surh.encoding);
 			ReadTightRect(&surh);
 			break;
 		default:
