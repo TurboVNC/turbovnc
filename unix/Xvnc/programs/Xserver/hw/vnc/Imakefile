@@ -18,7 +18,8 @@ PAMOBJS = authpam.o
 #include <vnclibs.def>
 INCLUDES = -I. -I$(XBUILDINCDIR) -I$(FONTINCSRC) -I$(XINCLUDESRC) \
 	   -I../../fb -I../../mfb -I../../mi -I../../include -I../../os \
-	   $(VNCCPPFLAGS) -I$(XINCLUDESRC)/extensions -I../../render
+	   $(VNCCPPFLAGS) -I$(XINCLUDESRC)/extensions -I../../render \
+	   -I../../../../config/cf
 
 DEFINES = ServerOSDefines
 
@@ -26,6 +27,5 @@ all:: $(OBJS)
 
 NormalLibraryObjectRule()
 NormalLibraryTarget(vnc,$(OBJS))
-SpecialCObjectRule(init,${ICONFIGFILES},-I../../../../config/cf)
 
 DependTarget()
