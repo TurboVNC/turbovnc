@@ -1,4 +1,4 @@
-include_directories(${X11_INCLUDE_DIR} .)
+include_directories(${X11_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/common/rfb .)
 
 add_definitions(-D__VERSION="${VERSION}" -D__BUILD="${BUILD}")
 add_definitions(-D__COPYRIGHT_YEAR="${COPYRIGHT_YEAR}")

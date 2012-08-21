@@ -67,7 +67,7 @@ fi
 if [ ! "$JPEGLINK" = "" ]; then
     echo "#define JPEGLibraryFlags $JPEGLINK" >>config/cf/platform.def
 fi
-echo '#define VncIncludeDir "-I@CMAKE_CURRENT_SOURCE_DIR@/include"' >>config/cf/platform.def
+echo '#define VncIncludeDir -I@CMAKE_SOURCE_DIR@/unix/include -I@CMAKE_SOURCE_DIR@/common/rfb' >>config/cf/platform.def
 
 if [ "$SYSNAME" = AIX ]
 then
