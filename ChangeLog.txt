@@ -2,12 +2,13 @@
 1.2 pre-beta
 ===============================================================================
 [1]
-All-new Java viewer code base, which is based roughly upon the TigerVNC 1.2
-Java viewer but which has numerous TurboVNC-specific enhancements.  The Java
-TurboVNC Viewer can use libjpeg-turbo via JNI to decompress JPEG images, giving
-it levels of performance in line with the native viewers.  It is also packaged
-as an app bundle on Mac systems, to provide a more user-friendly alternative to
-the X11 viewer.
+The Java TurboVNC Viewer has been completely rewritten and now supports most of
+the features of the TurboVNC native viewers, as well as all of the features of,
+and a rich GUI inspired by, the TigerVNC 1.2 Java viewer.  In addition, the new
+Java TurboVNC Viewer has the ability to use libjpeg-turbo via JNI to decompress
+JPEG images, giving it levels of performance in line with the native viewers.
+The new Java viewer is also packaged as an app bundle on Mac systems, to
+provide a more user-friendly alternative to the Unix TurboVNC Viewer.
 -------------------------------------------------------------------------------
 [2]
 IPv6 support
@@ -43,7 +44,7 @@ Added a keyboard grabbing feature to the Windows TurboVNC Viewer so that it can
 optionally send special keystrokes (Alt-Tab, Ctrl-Esc, Menu key, etc.) to the
 VNC server.  The default behavior of this option is to enable grabbing only in
 full-screen mode (as the Unix TurboVNC Viewer already did), but a command-line
-switch (-grabkeyboard) can be used to configure keyboard grabbing to be always
+option (-grabkeyboard) can be used to configure keyboard grabbing to be always
 on or always off.  Additionally, grabbing can always be turned on/off by
 pressing CTRL-ALT-SHIFT-G.  The Unix TurboVNC Viewer has been extended to
 support the same functionality.
@@ -67,7 +68,7 @@ checking the version of the extension (TurboVNC 1.1.x only implements X RENDER
 0.8.)
 -------------------------------------------------------------------------------
 [3]
-Added a command-line switch (-xstartup) to vncserver that allows a custom
+Added a command-line option (-xstartup) to vncserver that allows a custom
 startup script to be specified.  This is useful along with the -fg switch,
 because it allows a full-screen application to be launched without a window
 manager and causes the TurboVNC session to terminate when the application
