@@ -290,14 +290,6 @@ KbdAddEvent(down, keySym, cl)
     Bool shiftMustBeReleased = FALSE;
     Bool shiftMustBePressed = FALSE;
 
-#ifdef CORBA
-    if (cl) {
-	CARD32 clientId = cl->sock;
-	ChangeWindowProperty(WindowTable[0], VNC_LAST_CLIENT_ID, XA_INTEGER,
-			     32, PropModeReplace, 1, (pointer)&clientId, TRUE);
-    }
-#endif
-
     if (down) {
 	ev.u.u.type = KeyPress;
     } else {
@@ -464,14 +456,6 @@ PtrAddEvent(buttonMask, x, y, cl)
     int i;
     unsigned long time;
     static int oldButtonMask = 0;
-
-#ifdef CORBA
-    if (cl) {
-	CARD32 clientId = cl->sock;
-	ChangeWindowProperty(WindowTable[0], VNC_LAST_CLIENT_ID, XA_INTEGER,
-			     32, PropModeReplace, 1, (pointer)&clientId, TRUE);
-    }
-#endif
 
     time = GetTimeInMillis();
 

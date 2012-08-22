@@ -28,8 +28,6 @@
  *  USA.
  */
 
-/* Use ``#define CORBA'' to enable CORBA control interface */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -44,10 +42,6 @@
 #include "input.h"
 #include "mipointer.h"
 #include "sprite.h"
-
-#ifdef CORBA
-#include <vncserverctrl.h>
-#endif
 
 char updateBuf[UPDATE_BUF_SIZE];
 int ublen;
@@ -195,17 +189,12 @@ rfbNewClientConnection(sock)
     rfbClientPtr cl;
 
     cl = rfbNewClient(sock);
-
-#ifdef CORBA
-    if (cl != NULL)
-	newConnection(cl, (KEYBOARD_DEVICE|POINTER_DEVICE), 1, 1, 1);
-#endif
 }
 
 
 /*
- * rfbReverseConnection is called by the CORBA stuff to make an outward
- * connection to a "listening" RFB client.
+ * rfbReverseConnection is called to make an outward connection to a
+ * "listening" RFB client.
  */
 
 rfbClientPtr
@@ -420,10 +409,6 @@ rfbClientConnectionGone(sock)
     if (pointerClient == cl)
 	pointerClient = NULL;
 
-#ifdef CORBA
-    destroyConnection(cl);
-#endif
-
     if (prev)
 	prev->next = cl->next;
     else
@@ -470,14 +455,6 @@ rfbProcessClientMessage(sock)
 	rfbCloseSock(sock);
 	return;
     }
-
-#ifdef CORBA
-    if (isClosePending(cl)) {
-	rfbLog("Closing connection to client %s\n", cl->host);
-	rfbCloseSock(sock);
-	return;
-    }
-#endif
 
     switch (cl->state) {
     case RFB_PROTOCOL_VERSION:
@@ -984,10 +961,6 @@ rfbProcessClientNormalMessage(cl)
 	RegionRec tmpRegion;
 	BoxRec box;
 
-#ifdef CORBA
-	addCapability(cl, DISPLAY_DEVICE);
-#endif
-
 	if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
 			   sz_rfbFramebufferUpdateRequestMsg-1)) <= 0) {
 	    if (n != 0)
@@ -1046,12 +1019,6 @@ rfbProcessClientNormalMessage(cl)
 	    return;
 	}
 
-#ifdef CORBA
-	addCapability(cl, KEYBOARD_DEVICE);
-
-	if (!isKeyboardEnabled(cl))
-	    return;
-#endif
 	if (!rfbViewOnly && !cl->viewOnly) {
 	    KbdAddEvent(msg.ke.down, (KeySym)Swap32IfLE(msg.ke.key), cl);
 	}
@@ -1069,13 +1036,6 @@ rfbProcessClientNormalMessage(cl)
 	    rfbCloseSock(cl->sock);
 	    return;
 	}
-
-#ifdef CORBA
-	addCapability(cl, POINTER_DEVICE);
-
-	if (!isPointerEnabled(cl))
-	    return;
-#endif
 
 	if (pointerClient && (pointerClient != cl))
 	    return;

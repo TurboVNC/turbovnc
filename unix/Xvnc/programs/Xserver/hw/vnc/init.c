@@ -57,8 +57,6 @@ from the X Consortium.
 
 */
 
-/* Use ``#define CORBA'' to enable CORBA control interface */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -91,10 +89,6 @@ from the X Consortium.
 #include "rfb.h"
 #include <time.h>
 #include "tvnc_version.h"
-
-#ifdef CORBA
-#include <vncserverctrl.h>
-#endif
 
 #define RFB_DEFAULT_WIDTH  1024
 #define RFB_DEFAULT_HEIGHT 768
@@ -202,10 +196,6 @@ ddxProcessArgument (argc, argv, i)
 	    ErrorF("Invalid geometry %s\n", argv[i+1]);
 	    UseMsg();
 	}
-#ifdef CORBA
-	screenWidth= rfbScreen.width;
-	screenHeight= rfbScreen.height;
-#endif
 	return 2;
     }
 
@@ -213,9 +203,6 @@ ddxProcessArgument (argc, argv, i)
     {
 	if (i + 1 >= argc) UseMsg();
 	rfbScreen.depth = atoi(argv[i+1]);
-#ifdef CORBA
-	screenDepth= rfbScreen.depth;
-#endif
 	return 2;
     }
 
@@ -527,11 +514,6 @@ InitOutput(screenInfo, argc, argv)
     if (inetdSock == -1)
 	httpInitSockets();
    
-
-#ifdef CORBA
-    initialiseCORBA(argc, argv, desktopName);
-#endif
-
     /* initialize pixmap formats */
 
     screenInfo->imageByteOrder = IMAGE_BYTE_ORDER;
@@ -863,9 +845,6 @@ ProcessInputEvents()
 {
     rfbCheckFds();
     httpCheckFds();
-#ifdef CORBA
-    corbaCheckFds();
-#endif
     if (*mieqCheckForInput[0] != *mieqCheckForInput[1]) {
 	mieqProcessInputEvents();
 	miPointerUpdate();
@@ -953,10 +932,6 @@ rfbRootPropertyChange(PropertyPtr pProp)
 
 	cl = rfbReverseConnection(host, port);
 
-#ifdef CORBA
-	if (cl != NULL)
-	    newConnection(cl, (KEYBOARD_DEVICE|POINTER_DEVICE), 1, 1, 1);
-#endif
 	free(host);
     }
 
@@ -1078,9 +1053,6 @@ ddxGiveUp()
 	char unixSocketName[32];
 	sprintf(unixSocketName,"/tmp/.X11-unix/X%s",display);
 	unlink(unixSocketName);
-#ifdef CORBA
-	shutdownCORBA();
-#endif
     }
 }
 
