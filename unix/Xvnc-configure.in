@@ -1,11 +1,7 @@
 #!/bin/sh
-# configure
+# Xvnc-configure
 #
-# This script sets up for a build.  It has been tested on the following
-# Operating System versions (uname outputs):
-#
-#    Solaris 10 (SunOS 5.10)
-#    Linux 2.4 and 2.6
+# This script interfaces the XFree86 build system with CMake
 
 CPU=@CPU_TYPE@
 CC="@CMAKE_C_COMPILER@"
@@ -18,28 +14,16 @@ JPEGLINK="@TJPEG_LIBRARY@"
 
 SYSNAME=`uname -s`
 
-if [ "$SYSNAME" = AIX ]
+REV=`uname -r`
+
+if [ "$SYSNAME" != Darwin ]
 then
-    MAJOR=`uname -v`
-    MINOR=`uname -r`
-    TEENY=0
-else
-    REV=`uname -r`
-
-    if [ "$SYSNAME" = HP-UX ]
-    then
-        REV=`echo $REV | sed -e 's/^[^.]*\.//'`
-    else
-        if [ "$SYSNAME" != Darwin ]
-        then
-            REV=`echo $REV | sed -e 's/^V//' -e 's/-.*$//'`
-        fi
-    fi
-
-    MAJOR=`echo $REV | awk -F. 'NF < 1 {print "0"} {print $1}'`
-    MINOR=`echo $REV | awk -F. 'NF < 2 {print "0"} {print $2}'`
-    TEENY=`echo $REV | awk -F. 'NF < 3 {print "0"} {print $3}'`
+    REV=`echo $REV | sed -e 's/^V//' -e 's/-.*$//'`
 fi
+
+MAJOR=`echo $REV | awk -F. 'NF < 1 {print "0"} {print $1}'`
+MINOR=`echo $REV | awk -F. 'NF < 2 {print "0"} {print $2}'`
+TEENY=`echo $REV | awk -F. 'NF < 3 {print "0"} {print $3}'`
 
 echo "#define OSName $SYSNAME" > config/cf/platform.def
 echo "#define OSMajorVersion $MAJOR" >> config/cf/platform.def
@@ -69,38 +53,22 @@ if [ ! "$JPEGLINK" = "" ]; then
 fi
 echo '#define VncIncludeDir -I@CMAKE_SOURCE_DIR@/unix/include -I@CMAKE_SOURCE_DIR@/common/rfb' >>config/cf/platform.def
 
-if [ "$SYSNAME" = AIX ]
-then
-#  xmkmf and imake are broken on AIX
-    cd config/imake
-    imake -I../cf -DTOPDIR=../.. -DCURDIR=.
-    make Makefiles
-    make includes
-    make depend
-    make
-    cd ../..
-    imake -I./config/cf -DTOPDIR=./ -DCURDIR=.
-    make Makefiles
-    make includes
-    make depend
-else
-    SVR4FLAGS=
-    if [ "`uname -s`" = "SunOS" ]; then
-        SVR4FLAGS=-DSVR4;
-    fi
-    cd config/imake
-    make -f Makefile.ini CC="$CC" CDEBUGFLAGS="$CFLAGS $SVR4FLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
-    cd ../..
-    config/imake/imake -I./config/cf -DTOPDIR=./ -DCURDIR=.
-    make Makefiles CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
-    make includes CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
-    cd config/makedepend
-    make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
-    cd ../..
-    cd config/util
-    make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
-    cd ../..
-    make depend CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
+SVR4FLAGS=
+if [ "`uname -s`" = "SunOS" ]; then
+    SVR4FLAGS=-DSVR4;
 fi
+cd config/imake
+make -f Makefile.ini CC="$CC" CDEBUGFLAGS="$CFLAGS $SVR4FLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
+cd ../..
+config/imake/imake -I./config/cf -DTOPDIR=./ -DCURDIR=.
+make Makefiles CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
+make includes CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
+cd config/makedepend
+make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
+cd ../..
+cd config/util
+make CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
+cd ../..
+make depend CC="$CC" CDEBUGFLAGS="$CFLAGS" EXTRA_LDOPTIONS="$LDFLAGS"
 
 exit 0
