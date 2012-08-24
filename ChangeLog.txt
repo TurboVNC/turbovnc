@@ -21,6 +21,13 @@ because it allows a full-screen application to be launched without a window
 manager and causes the TurboVNC session to terminate when the application
 exits.
 -------------------------------------------------------------------------------
+[4]
+Fixed a variety of key mapping issues in the Java TurboVNC Viewer.
+-------------------------------------------------------------------------------
+[5]
+Fixed ArrayIndexOutOfBoundsException in the Java TurboVNC Viewer that occurred
+with certain client platforms when using the scroll wheel.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
