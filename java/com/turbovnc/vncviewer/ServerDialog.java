@@ -57,7 +57,7 @@ class ServerDialog extends Dialog implements
     options = options_;
     getContentPane().setLayout(new GridBagLayout());
 
-    JLabel serverLabel = new JLabel("Server:", JLabel.RIGHT);
+    JLabel serverLabel = new JLabel("VNC server:", JLabel.RIGHT);
     if (defaultServerName != null) {
       String [] s = new String[1];
       s[0] = defaultServerName;
@@ -85,18 +85,18 @@ class ServerDialog extends Dialog implements
 
     addGBComponent(new JLabel(cc.logo),topPanel, 0, 0, 1, 1, 0, 0, 0, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.LINE_START, new Insets(5,5,5,15));
     addGBComponent(serverLabel,topPanel, 1, 0, 1, 1, 0, 0, 0, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.LINE_END, new Insets(10,0,5,5));
-    addGBComponent(server,topPanel, 2, 0, 1, 1, 0, 0, 1, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(10,0,5,40));
+    addGBComponent(server,topPanel, 2, 0, 1, 1, 0, 0, 1, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(10,0,5,20));
 
     optionsButton = new JButton("Options...");
     aboutButton = new JButton("About...");
-    okButton = new JButton("OK");
+    okButton = new JButton("Connect");
     cancelButton = new JButton("Cancel");
     JPanel buttonPanel = new JPanel(new GridBagLayout());
     buttonPanel.setPreferredSize(new Dimension(340, 40));
-    addGBComponent(aboutButton,buttonPanel, 0, 3, 1, 1, 0, 0, 0.2, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(0,5,0,5));
-    addGBComponent(optionsButton,buttonPanel, 1, 3, 1, 1, 0, 0, 0, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(0,5,0,5));
-    addGBComponent(okButton,buttonPanel, 2, 3, 1, 1, 0, 0, 0.8, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(0,5,0,5));
-    addGBComponent(cancelButton,buttonPanel, 3, 3, 1, 1, 0, 0, 0.5, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(0,5,0,5));
+    addGBComponent(aboutButton,buttonPanel, 0, 3, 1, 1, 0, 0, 0.2, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(0,2,0,5));
+    addGBComponent(optionsButton,buttonPanel, 1, 3, 1, 1, 0, 0, 0, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(0,2,0,5));
+    addGBComponent(okButton,buttonPanel, 2, 3, 1, 1, 0, 0, 0.5, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(0,2,0,5));
+    addGBComponent(cancelButton,buttonPanel, 3, 3, 1, 1, 0, 0, 0.5, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(0,2,0,5));
 
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.anchor = GridBagConstraints.LINE_START;
