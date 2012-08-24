@@ -1692,7 +1692,9 @@ class VncCanvas extends Canvas
   public void mouseEntered(MouseEvent evt) {}
   public void mouseExited(MouseEvent evt) {}
 
-  public void focusLost(FocusEvent e) {}
+  public void focusLost(FocusEvent e) {
+    rfb.releaseModifiers();
+  }
 
   //
   // Reset update statistics.

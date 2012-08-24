@@ -1,6 +1,6 @@
 //
 //  Copyright (C) 2012 Secure Mission Solutions, Inc.  All Rights Reserved.
-//  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2009-2010, 2012 D. R. Commander.  All Rights Reserved.
 //  Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
 //  Copyright (C) 2001-2004 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 2001-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -1122,9 +1122,6 @@ class RfbProto {
     int wheelMask = 0, wheelClicks = 0;
 
     int eventId = evt.getID();
-    // Be careful to account for the fact that
-    // InputEvent.BUTTON2_MASK == InputEvent.ALT_MASK and
-    // InputEvent.BUTTON3_MASK == InputEvent.META_MASK
     int modifiers = evt.getModifiers();
 
     if (eventId == MouseEvent.MOUSE_PRESSED) {
@@ -1133,10 +1130,8 @@ class RfbProto {
         pointerMask |= MASK1;
       } else if ((modifiers & InputEvent.BUTTON2_MASK) != 0) {
         pointerMask |= mask2;
-        modifiers &= ~ALT_MASK;
       } else if ((modifiers & InputEvent.BUTTON3_MASK) != 0) {
         pointerMask |= mask3;
-        modifiers &= ~META_MASK;
       } else {
         // In Java 1.1, AWT does not set BUTTON1_MASK on left button presses,
         // so we must assume a left button press if no button modifiers are set
@@ -1149,10 +1144,8 @@ class RfbProto {
         pointerMask &= ~MASK1;
       } else if ((modifiers & InputEvent.BUTTON2_MASK) != 0) {
         pointerMask &= ~mask2;
-        modifiers &= ~ALT_MASK;
       } else if ((modifiers & InputEvent.BUTTON3_MASK) != 0) {
         pointerMask &= ~mask3;
-        modifiers &= ~META_MASK;
       } else {
         // MOUSE_RELEASED event for unhandled button.
         return;
@@ -1175,16 +1168,9 @@ class RfbProto {
         // Unhandled eventId.
         return;
       }
-      // Clear the ALT and META modifiers if we have received MOUSE_PRESSED
-      // events for BUTTON2 or BUTTON3.
-      if ((pointerMask & mask2) != 0)
-        modifiers &= ~ALT_MASK;
-      if ((pointerMask & mask3) != 0)
-        modifiers &= ~META_MASK;
     }
 
     eventBufLen = 0;
-    writeModifierKeyEvents(modifiers);
 
     int x = evt.getX();
     int y = evt.getY();
@@ -1216,14 +1202,11 @@ class RfbProto {
       }
     }
 
-    // Always release all modifiers after all buttons have been released.
-    if (pointerMask == 0) {
-      writeModifierKeyEvents(0);
-    }
-
     os.write(eventBuf, 0, eventBufLen);
   }
 
+
+  int modifiers;
 
   //
   // Write a key event message.  We may need to send modifier key events
@@ -1243,13 +1226,6 @@ class RfbProto {
     if (keyChar == 0)
       keyChar = KeyEvent.CHAR_UNDEFINED;
 
-    if (keyChar == KeyEvent.CHAR_UNDEFINED) {
-      int code = evt.getKeyCode();
-      if (code == KeyEvent.VK_CONTROL || code == KeyEvent.VK_SHIFT ||
-          code == KeyEvent.VK_META || code == KeyEvent.VK_ALT)
-        return;
-    }
-
     //
     // Key press or key release?
     //
@@ -1265,27 +1241,44 @@ class RfbProto {
       //
 
       switch(evt.getKeyCode()) {
-      case KeyEvent.VK_HOME:      key = 0xff50; break;
-      case KeyEvent.VK_LEFT:      key = 0xff51; break;
-      case KeyEvent.VK_UP:        key = 0xff52; break;
-      case KeyEvent.VK_RIGHT:     key = 0xff53; break;
-      case KeyEvent.VK_DOWN:      key = 0xff54; break;
-      case KeyEvent.VK_PAGE_UP:   key = 0xff55; break;
-      case KeyEvent.VK_PAGE_DOWN: key = 0xff56; break;
-      case KeyEvent.VK_END:       key = 0xff57; break;
-      case KeyEvent.VK_INSERT:    key = 0xff63; break;
-      case KeyEvent.VK_F1:        key = 0xffbe; break;
-      case KeyEvent.VK_F2:        key = 0xffbf; break;
-      case KeyEvent.VK_F3:        key = 0xffc0; break;
-      case KeyEvent.VK_F4:        key = 0xffc1; break;
-      case KeyEvent.VK_F5:        key = 0xffc2; break;
-      case KeyEvent.VK_F6:        key = 0xffc3; break;
-      case KeyEvent.VK_F7:        key = 0xffc4; break;
-      case KeyEvent.VK_F8:        key = 0xffc5; break;
-      case KeyEvent.VK_F9:        key = 0xffc6; break;
-      case KeyEvent.VK_F10:       key = 0xffc7; break;
-      case KeyEvent.VK_F11:       key = 0xffc8; break;
-      case KeyEvent.VK_F12:       key = 0xffc9; break;
+      case KeyEvent.VK_HOME:         key = 0xff50; break;
+      case KeyEvent.VK_LEFT:         key = 0xff51; break;
+      case KeyEvent.VK_UP:           key = 0xff52; break;
+      case KeyEvent.VK_RIGHT:        key = 0xff53; break;
+      case KeyEvent.VK_DOWN:         key = 0xff54; break;
+      case KeyEvent.VK_PAGE_UP:      key = 0xff55; break;
+      case KeyEvent.VK_PAGE_DOWN:    key = 0xff56; break;
+      case KeyEvent.VK_END:          key = 0xff57; break;
+      case KeyEvent.VK_INSERT:       key = 0xff63; break;
+      case KeyEvent.VK_F1:           key = 0xffbe; break;
+      case KeyEvent.VK_F2:           key = 0xffbf; break;
+      case KeyEvent.VK_F3:           key = 0xffc0; break;
+      case KeyEvent.VK_F4:           key = 0xffc1; break;
+      case KeyEvent.VK_F5:           key = 0xffc2; break;
+      case KeyEvent.VK_F6:           key = 0xffc3; break;
+      case KeyEvent.VK_F7:           key = 0xffc4; break;
+      case KeyEvent.VK_F8:           key = 0xffc5; break;
+      case KeyEvent.VK_F9:           key = 0xffc6; break;
+      case KeyEvent.VK_F10:          key = 0xffc7; break;
+      case KeyEvent.VK_F11:          key = 0xffc8; break;
+      case KeyEvent.VK_F12:          key = 0xffc9; break;
+      case KeyEvent.VK_KP_DOWN:      key = 0xff99; break;
+      case KeyEvent.VK_KP_LEFT:      key = 0xff96; break;
+      case KeyEvent.VK_KP_RIGHT:     key = 0xff98; break;
+      case KeyEvent.VK_KP_UP:        key = 0xff97; break;
+      case KeyEvent.VK_NUM_LOCK:     key = 0xff7f; break;
+      case KeyEvent.VK_WINDOWS:      key = 0xffeb; break;
+      case KeyEvent.VK_CONTEXT_MENU: key = 0xff67; break;
+      case KeyEvent.VK_PRINTSCREEN:  key = 0xff61; break;
+      case KeyEvent.VK_SCROLL_LOCK:  key = 0xff14; break;
+      case KeyEvent.VK_CAPS_LOCK:    key = 0xffe5; break;
+      case KeyEvent.VK_PAUSE:
+        if (evt.isControlDown())
+          key = 0xff6b;
+        else
+          key = 0xff13;
+        break;
+      case KeyEvent.VK_BEGIN:        key = 0xff58; break;
       default:
         return;
       }
@@ -1301,28 +1294,45 @@ class RfbProto {
 
       key = keyChar;
 
-      if (key < 0x20) {
-        if (evt.isControlDown()) {
-          key += 0x60;
-        } else {
-          switch(key) {
-          case KeyEvent.VK_BACK_SPACE: key = 0xff08; break;
-          case KeyEvent.VK_TAB:        key = 0xff09; break;
-          case KeyEvent.VK_ENTER:      key = 0xff0d; break;
-          case KeyEvent.VK_ESCAPE:     key = 0xff1b; break;
-          }
-        }
-      } else if (key == 0x7f) {
-	// Delete
-	key = 0xffff;
-      } else if (key > 0xff) {
-	// JDK1.1 on X incorrectly passes some keysyms straight through,
-	// so we do too.  JDK1.1.4 seems to have fixed this.
-	// The keysyms passed are 0xff00 .. XK_BackSpace .. XK_Delete
-	// Also, we pass through foreign currency keysyms (0x20a0..0x20af).
-	if ((key < 0xff00 || key > 0xffff) &&
-	    !(key >= 0x20a0 && key <= 0x20af))
-	  return;
+      switch(evt.getKeyCode()) {
+      case KeyEvent.VK_BACK_SPACE: key = 0xff08; break;
+      case KeyEvent.VK_TAB:        key = 0xff09; break;
+      case KeyEvent.VK_ENTER:      key = 0xff0d; break;
+      case KeyEvent.VK_ESCAPE:     key = 0xff1b; break;
+      case KeyEvent.VK_NUMPAD0:    key = 0xffb0; break;
+      case KeyEvent.VK_NUMPAD1:    key = 0xffb1; break;
+      case KeyEvent.VK_NUMPAD2:    key = 0xffb2; break;
+      case KeyEvent.VK_NUMPAD3:    key = 0xffb3; break;
+      case KeyEvent.VK_NUMPAD4:    key = 0xffb4; break;
+      case KeyEvent.VK_NUMPAD5:    key = 0xffb5; break;
+      case KeyEvent.VK_NUMPAD6:    key = 0xffb6; break;
+      case KeyEvent.VK_NUMPAD7:    key = 0xffb7; break;
+      case KeyEvent.VK_NUMPAD8:    key = 0xffb8; break;
+      case KeyEvent.VK_NUMPAD9:    key = 0xffb9; break;
+      case KeyEvent.VK_DECIMAL:    key = 0xffae; break;
+      case KeyEvent.VK_ADD:        key = 0xffab; break;
+      case KeyEvent.VK_SUBTRACT:   key = 0xffad; break;
+      case KeyEvent.VK_MULTIPLY:   key = 0xffaa; break;
+      case KeyEvent.VK_DIVIDE:     key = 0xffaf; break;
+      case KeyEvent.VK_CONTROL:
+        if (down)
+          modifiers |= CTRL_MASK;
+        else
+          modifiers &= ~CTRL_MASK;
+        key = 0xffe3; break;
+      case KeyEvent.VK_ALT:
+        if (down)
+          modifiers |= ALT_MASK;
+        else
+          modifiers &= ~ALT_MASK;
+        key = 0xffe9; break;
+      case KeyEvent.VK_SHIFT:
+        if (down)
+          modifiers |= SHIFT_MASK;
+        else
+          modifiers &= ~SHIFT_MASK;
+        key = 0xffe1; break;
+      case KeyEvent.VK_DELETE:     key = 0xffff; break;
       }
     }
 
@@ -1342,9 +1352,7 @@ class RfbProto {
 	// We've got a release event for this key, but haven't received
         // a press. Fake it. 
 	eventBufLen = 0;
-	writeModifierKeyEvents(evt.getModifiers());
 	writeKeyEvent(key, true);
-	os.write(eventBuf, 0, eventBufLen);
       }
 
       if (!down)
@@ -1352,14 +1360,26 @@ class RfbProto {
     }
 
     eventBufLen = 0;
-    writeModifierKeyEvents(evt.getModifiers());
     writeKeyEvent(key, down);
+  }
 
-    // Always release all modifiers after an "up" event
-    if (!down)
-      writeModifierKeyEvents(0);
+  //
+  // Send KeyRelease events for any modifiers that are pressed
+  //
 
-    os.write(eventBuf, 0, eventBufLen);
+  void releaseModifiers() {
+    try {
+      if ((modifiers & CTRL_MASK) != 0)
+        writeKeyEvent(0xffe3, false);
+      if ((modifiers & SHIFT_MASK) != 0)
+        writeKeyEvent(0xffe1, false);
+      if ((modifiers & ALT_MASK) != 0)
+        writeKeyEvent(0xffe9, false);
+      modifiers = 0;
+    } catch (IOException e) {
+      System.out.println("ERROR: Could not send key release events for modifiers:\n       "+
+        e.getMessage());
+    }
   }
 
 
@@ -1367,7 +1387,7 @@ class RfbProto {
   // Add a raw key event with the given X keysym to eventBuf.
   //
 
-  void writeKeyEvent(int keysym, boolean down) {
+  void writeKeyEvent(int keysym, boolean down) throws IOException {
     eventBuf[eventBufLen++] = (byte) KeyboardEvent;
     eventBuf[eventBufLen++] = (byte) (down ? 1 : 0);
     eventBuf[eventBufLen++] = (byte) 0;
@@ -1376,30 +1396,9 @@ class RfbProto {
     eventBuf[eventBufLen++] = (byte) ((keysym >> 16) & 0xff);
     eventBuf[eventBufLen++] = (byte) ((keysym >> 8) & 0xff);
     eventBuf[eventBufLen++] = (byte) (keysym & 0xff);
+    os.write(eventBuf, 0, eventBufLen);
   }
 
-
-  //
-  // Write key events to set the correct modifier state.
-  //
-
-  int oldModifiers = 0;
-
-  void writeModifierKeyEvents(int newModifiers) {
-    if ((newModifiers & CTRL_MASK) != (oldModifiers & CTRL_MASK))
-      writeKeyEvent(0xffe3, (newModifiers & CTRL_MASK) != 0);
-
-    if ((newModifiers & SHIFT_MASK) != (oldModifiers & SHIFT_MASK))
-      writeKeyEvent(0xffe1, (newModifiers & SHIFT_MASK) != 0);
-
-    if ((newModifiers & META_MASK) != (oldModifiers & META_MASK))
-      writeKeyEvent(0xffe7, (newModifiers & META_MASK) != 0);
-
-    if ((newModifiers & ALT_MASK) != (oldModifiers & ALT_MASK))
-      writeKeyEvent(0xffe9, (newModifiers & ALT_MASK) != 0);
-
-    oldModifiers = newModifiers;
-  }
 
   //
   // Compress and write the data into the recorded session file. This
