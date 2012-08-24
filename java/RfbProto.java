@@ -1263,6 +1263,7 @@ class RfbProto {
       case KeyEvent.VK_F10:          key = 0xffc7; break;
       case KeyEvent.VK_F11:          key = 0xffc8; break;
       case KeyEvent.VK_F12:          key = 0xffc9; break;
+      case KeyEvent.VK_F13:          key = 0xffca; break;
       case KeyEvent.VK_KP_DOWN:      key = 0xff99; break;
       case KeyEvent.VK_KP_LEFT:      key = 0xff96; break;
       case KeyEvent.VK_KP_RIGHT:     key = 0xff98; break;
@@ -1315,6 +1316,8 @@ class RfbProto {
       case KeyEvent.VK_SUBTRACT:   key = 0xffad; break;
       case KeyEvent.VK_MULTIPLY:   key = 0xffaa; break;
       case KeyEvent.VK_DIVIDE:     key = 0xffaf; break;
+      case KeyEvent.VK_DELETE:     key = 0xffff; break;
+      case KeyEvent.VK_CLEAR:      key = 0xff0b; break;
       case KeyEvent.VK_CONTROL:
         if (down)
           modifiers |= CTRL_MASK;
@@ -1333,7 +1336,12 @@ class RfbProto {
         else
           modifiers &= ~SHIFT_MASK;
         key = 0xffe1; break;
-      case KeyEvent.VK_DELETE:     key = 0xffff; break;
+      case KeyEvent.VK_META:
+        if (down)
+          modifiers |= META_MASK;
+        else
+          modifiers &= ~META_MASK;
+        key = 0xffe7; break;
       }
     }
 
@@ -1376,6 +1384,8 @@ class RfbProto {
         writeKeyEvent(0xffe1, false);
       if ((modifiers & ALT_MASK) != 0)
         writeKeyEvent(0xffe9, false);
+      if ((modifiers & META_MASK) != 0)
+        writeKeyEvent(0xffe7, false);
       modifiers = 0;
     } catch (IOException e) {
       System.out.println("ERROR: Could not send key release events for modifiers:\n       "+
