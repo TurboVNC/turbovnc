@@ -1184,6 +1184,7 @@ class RfbProto {
       eventBuf[eventBufLen++] = (byte) (x & 0xff);
       eventBuf[eventBufLen++] = (byte) ((y >> 8) & 0xff);
       eventBuf[eventBufLen++] = (byte) (y & 0xff);
+      os.write(eventBuf, 0, eventBufLen);
     } else {
       // Send press/release events for each unit of wheel rotation.
       for (int i = 0; i < wheelClicks; i++) {
@@ -1199,10 +1200,10 @@ class RfbProto {
         eventBuf[eventBufLen++] = (byte) (x & 0xff);
         eventBuf[eventBufLen++] = (byte) ((y >> 8) & 0xff);
         eventBuf[eventBufLen++] = (byte) (y & 0xff);
+        os.write(eventBuf, 0, eventBufLen);
+        eventBufLen = 0;
       }
     }
-
-    os.write(eventBuf, 0, eventBufLen);
   }
 
 
