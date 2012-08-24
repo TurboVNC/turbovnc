@@ -245,6 +245,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
 
   public void run() {
     CConn cc = null;
+    int exitStatus = 0;
 
     if (listenMode.getValue()) {
       int port = 5500;
@@ -288,8 +289,9 @@ public class VncViewer extends java.applet.Applet implements Runnable
           vlog.info(e.toString());
         cc = null;
       }
+      exitStatus = 1;
     }
-    exit(0);
+    exit(exitStatus);
   }
 
   StringParameter vncServerName

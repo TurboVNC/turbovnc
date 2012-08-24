@@ -130,8 +130,12 @@ class ServerDialog extends Dialog implements
       ok = true;
       endDialog();
     } else if (s instanceof JButton && (JButton)s == cancelButton) {
-      ok = false;
-      endDialog();
+      if (cc.viewer.nViewers == 1) {
+        cc.viewer.exit(1);
+      } else {
+        ok = false;
+        endDialog();
+      }
     } else if (s instanceof JButton && (JButton)s == optionsButton) {
       options.showDialog(this);
     } else if (s instanceof JButton && (JButton)s == aboutButton) {
