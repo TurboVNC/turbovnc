@@ -680,7 +680,8 @@ public class CConn extends CConnection
       pkgTime = attributes.getValue("Package-Time");
     } catch (IOException e) { }
     JOptionPane.showMessageDialog((viewport != null ? viewport : null),
-      VncViewer.about1+" v"+VncViewer.version+" ("+VncViewer.build+")\n"
+      VncViewer.about1+" v"+VncViewer.version+" ("+VncViewer.build+") "
+      +"[JVM: "+System.getProperty("os.arch")+"]\n"
       +"Built on "+pkgDate+" at "+pkgTime+"\n"
       +VncViewer.about2+"\n"
       +VncViewer.about3,
