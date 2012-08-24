@@ -80,10 +80,11 @@ session.  Similarly, if the server prefers an authentication method that
 supports Unix login authentication, then the user can force the use of standard
 VNC authentication by passing an argument of ''-nounixlogin'' to ''vncviewer''.
 Both of these command-line options work with both the Unix and Windows versions
-of ''vncviewer''.  Note that if using the Java TurboVNC Viewer, the same thing
-can be accomplished by setting the ''USER'' parameter or setting the
-''No Unix Login'' parameter to ''Yes'' in
-''/opt/TurboVNC/vnc/classes/index.vnc''.
+of ''vncviewer'', as well as the Java TurboVNC Viewer (when it is run as a
+stand-alone app.)  When using the Java TurboVNC Viewer, you can also
+accomplish the same thing by unchecking "Unix Login" or "Standard VNC" in the
+"Security" tab of the Options dialog, or by setting the ''User'' or
+''NoUnixLogin'' parameters in ''/opt/TurboVNC/java/index.vnc''.
 
 	!!! Because of the way that the Windows TurboVNC Viewer caches settings for
 	each connection, the ''-user'' and ''-nounixlogin'' options may not work

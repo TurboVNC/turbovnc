@@ -15,9 +15,10 @@
 			{item:Dual processors or dual cores recommended}} \
 	| Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent) \
 	|
-| Other Software \
+| Other \
 	| {:} | {:} \
-	| X server configured to export True Color (24-bit or 32-bit) visuals \
+	| For best performance, the X server should be configured to export True \
+		Color (24-bit or 32-bit) visuals. \
 	|
 #OPT: hiCol=first
 
@@ -31,8 +32,12 @@
 	| OS X 10.4 ("Tiger") or later \
 	|
 | Other Software \
-	| Mac X11 application (in the "Optional Installs" package on the OS X \
-		install discs) \
+	| {list type=ul: \
+			{item:If installing the X11 TurboVNC Viewer, then the Mac X11 \
+				application (in the "Optional Installs" package on the OS X install \
+				discs) or [[http://xquartz.macosforge.org/][XQuartz]] is required.} \
+			{item:If installing the Java TurboVNC Viewer app, then Java 1.5 or \
+				later is required.}} \
 	|
 #OPT: hiCol=first
 
