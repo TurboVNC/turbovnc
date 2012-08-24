@@ -135,7 +135,7 @@ typedef struct {
   int qualityLevel;
   int subsampLevel;
   Bool enableJPEG;
-  Bool useRemoteCursor;
+  Bool cursorShape;
   Bool useX11Cursor;
   Bool useRichCursor;
   Bool autoPass;

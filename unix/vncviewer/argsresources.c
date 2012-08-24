@@ -319,7 +319,7 @@ int vncServerPort = 0;
 AppData appData;
 
 static XtResource appDataResourceList[] = {
-  {"shareDesktop", "ShareDesktop", XtRBool, sizeof(Bool),
+  {"shared", "Shared", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, shareDesktop), XtRImmediate, (XtPointer) True},
 
   {"viewOnly", "ViewOnly", XtRBool, sizeof(Bool),
@@ -337,19 +337,19 @@ static XtResource appDataResourceList[] = {
   {"doubleBuffer", "DoubleBuffer", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, doubleBuffer), XtRImmediate, (XtPointer) True},
 
-  {"useSharedMemory", "UseSharedMemory", XtRBool, sizeof(Bool),
+  {"sharedMemory", "SharedMemory", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, useShm), XtRImmediate, (XtPointer) True},
 
   {"raiseOnBeep", "RaiseOnBeep", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, raiseOnBeep), XtRImmediate, (XtPointer) True},
 
-  {"use8Bit", "Use8Bit", XtRBool, sizeof(Bool),
+  {"8Bit", "8Bit", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, useBGR233), XtRImmediate, (XtPointer) False},
 
   {"nColors", "NColors", XtRInt, sizeof(int),
    XtOffsetOf(AppData, nColours), XtRImmediate, (XtPointer) 256},
 
-  {"useSharedColors", "UseSharedColors", XtRBool, sizeof(Bool),
+  {"SharedColors", "SharedColors", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, useSharedColours), XtRImmediate, (XtPointer) True},
 
   {"forceOwnCmap", "ForceOwnCmap", XtRBool, sizeof(Bool),
@@ -364,7 +364,7 @@ static XtResource appDataResourceList[] = {
   {"encodings", "Encodings", XtRString, sizeof(String),
    XtOffsetOf(AppData, encodingsString), XtRImmediate, (XtPointer) 0},
 
-  {"enableJPEG", "EnableJPEG", XtRBool, sizeof(Bool),
+  {"JPEG", "JPEG", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, enableJPEG), XtRImmediate, (XtPointer) True},
 
   {"quality", "Quality", XtRInt, sizeof(int),
@@ -373,16 +373,16 @@ static XtResource appDataResourceList[] = {
   {"subsampling", "Subsampling", XtRString, sizeof(String),
    XtOffsetOf(AppData, subsampString), XtRImmediate, (XtPointer) "1x"},
 
-  {"compressLevel", "CompressionLevel", XtRInt, sizeof(int),
+  {"compressLevel", "CompressLevel", XtRInt, sizeof(int),
    XtOffsetOf(AppData, compressLevel), XtRImmediate, (XtPointer) -1},
 
   {"continuousUpdates", "ContinuousUpdates", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, continuousUpdates), XtRImmediate, (XtPointer) False},
 
-  {"useRemoteCursor", "UseRemoteCursor", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, useRemoteCursor), XtRImmediate, (XtPointer) True},
+  {"cursorShape", "CursorShape", XtRBool, sizeof(Bool),
+   XtOffsetOf(AppData, cursorShape), XtRImmediate, (XtPointer) True},
 
-  {"useRichCursor", "UseRichCursor", XtRBool, sizeof(Bool),
+  {"richCursor", "RichCursor", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, useRichCursor), XtRImmediate, (XtPointer) True},
 
   {"userLogin", "UserLogin", XtRString, sizeof(String),
@@ -458,8 +458,8 @@ XrmOptionDescRec cmdLineOptions[] = {
   {"-quality",       "*quality",            XrmoptionSepArg, 0},
   {"-jpeg",          "*enableJPEG",         XrmoptionNoArg,  "True"},
   {"-nojpeg",        "*enableJPEG",         XrmoptionNoArg,  "False"},
-  {"-cursorshape",   "*useRemoteCursor",    XrmoptionNoArg,  "True"},
-  {"-nocursorshape", "*useRemoteCursor",    XrmoptionNoArg,  "False"},
+  {"-cursorshape",   "*cursorShape",        XrmoptionNoArg,  "True"},
+  {"-nocursorshape", "*cursorShape",        XrmoptionNoArg,  "False"},
   {"-richcursor",    "*useRichCursor",      XrmoptionNoArg,  "True"},
   {"-norichcursor",  "*useRichCursor",      XrmoptionNoArg,  "False"},
   {"-doublebuffer",  "*doubleBuffer",       XrmoptionNoArg,  "True"},
@@ -712,7 +712,7 @@ LoadConfigFile(char *filename)
     ReadConfigInt("subsampling=", appData.subsampLevel, 0, 3);
     ReadConfigInt("quality=", appData.qualityLevel, 1, 100);
     ReadConfigBool("nounixlogin=", appData.noUnixLogin);
-    ReadConfigBool("cursorshape=", appData.useRemoteCursor);
+    ReadConfigBool("cursorshape=", appData.cursorShape);
     ReadConfigInt("grabkeyboard=", appData.grabKeyboard, 0, 2);
   }
 

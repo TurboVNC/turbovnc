@@ -1079,7 +1079,7 @@ SetFormatAndEncodings()
 					  rfbEncodingSubsamp1X);
     }
 
-    if (appData.useRemoteCursor) {
+    if (appData.cursorShape) {
       if (se->nEncodings < MAX_ENCODINGS && appData.useRichCursor)
 	encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRichCursor);
       if (se->nEncodings < MAX_ENCODINGS)
@@ -1133,7 +1133,7 @@ SetFormatAndEncodings()
 					    rfbEncodingSubsamp1X);
     }
 
-    if (appData.useRemoteCursor) {
+    if (appData.cursorShape) {
       if (appData.useRichCursor)
         encs[se->nEncodings++] = Swap32IfLE(rfbEncodingRichCursor);
       encs[se->nEncodings++] = Swap32IfLE(rfbEncodingXCursor);

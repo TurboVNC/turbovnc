@@ -404,7 +404,7 @@ For instance,
 X resources that \fBvncviewer\fR knows about, aside from the
 normal Xt resources, are as follows:
 .TP
-.B shareDesktop
+.B shared
 Equivalent of the \fB\-shared\fR/\fB\-noshared\fR options.  Default true.
 .TP
 .B viewOnly
@@ -425,7 +425,7 @@ Equivalent of the \fB\-grabkeyboard\fR option.  Default = fs.
 Equivalent of the \fB\-doublebuffer\fR/\fB\-singlebuffer\fR options.  Default
 true.
 .TP
-.B useSharedMemory
+.B sharedMemory
 Use the MIT shared memory extension if the viewer is running on the same
 machine as the X server.  Default true.
 .TP
@@ -433,7 +433,7 @@ machine as the X server.  Default true.
 Equivalent of the \fB\-raiseonbeep\fR/\fB-noraiseonbeep\fR options.  Default
 true.
 .TP
-.B use8Bit
+.B 8Bit
 Equivalent of the \fB\-8bit\fR/\fB\-no8bit\fR options.  Default false.
 .TP
 .B nColors
@@ -442,7 +442,7 @@ BGR233 color cube.  When using a shared colormap, setting this resource
 lower leaves more colors for other X clients.  Irrelevant when using
 truecolor.  Default is 256 (i.e. all of them).
 .TP
-.B useSharedColors
+.B sharedColors
 If the number of "exact" BGR233 colors successfully allocated is less
 than 256, then the rest are filled in using the "nearest" colors
 available.  This resource says whether to only use the "exact" BGR233
@@ -461,7 +461,7 @@ Equivalent of the \fB\-depth\fR option.
 .B encodings
 Equivalent of the \fB\-encodings\fR option.
 .TP
-.B enableJPEG
+.B JPEG
 Equivalent of the \fB\-jpeg\fR/\fB\-nojpeg\fR options.  Default true.
 .TP
 .B quality
@@ -476,7 +476,7 @@ Equivalent of the \fB\-compresslevel\fR option
 .B continuousUpdates
 Equivalent of the \fB\-cu\fR/\fB\-nocu\fR options.  Default false.
 .TP
-.B useRemoteCursor
+.B cursorShape
 Equivalent of the \fB\-cursorshape\fR/\fB\-nocursorshape\fR options.  Default
 true.
 .TP
