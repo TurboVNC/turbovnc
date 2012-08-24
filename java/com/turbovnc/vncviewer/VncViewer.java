@@ -284,12 +284,14 @@ public class VncViewer extends java.applet.Applet implements Runnable
           e.toString(),
           "VNC Viewer : Error",
           JOptionPane.ERROR_MESSAGE);
+        exitStatus = 1;
       } else {
-        if (!cc.shuttingDown)
+        if (!cc.shuttingDown) {
           vlog.info(e.toString());
+          exitStatus = 1;
+        }
         cc = null;
       }
-      exitStatus = 1;
     }
     exit(exitStatus);
   }
