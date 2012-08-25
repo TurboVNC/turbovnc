@@ -1289,12 +1289,22 @@ class RfbProto {
 
       //
       // A "normal" key press.  Ordinary ASCII characters go straight through.
-      // For CTRL-<letter>, CTRL is sent separately so just send <letter>.
       // Backspace, tab, return, escape and delete have special keysyms.
       // Anything else we ignore.
       //
 
       key = keyChar;
+      if (evt.isControlDown()) {
+        // For CTRL-<letter>, CTRL is sent separately, so just send <letter>.      
+        if ((key >= 1 && key <= 26 && !evt.isShiftDown()) ||
+            // CTRL-{, CTRL-|, CTRL-} also map to ASCII 96-127
+            (key > 26 && key < 31 && evt.isShiftDown()))
+          key += 96;
+        // For CTRL-SHIFT-<letter>, send capital <letter> to emulate behavior
+        // of Linux.  For CTRL-@, send @.  For CTRL-_, send _.
+        else if (key < 32)
+          key += 64;
+      }
 
       switch(evt.getKeyCode()) {
       case KeyEvent.VK_BACK_SPACE: key = 0xff08; break;
