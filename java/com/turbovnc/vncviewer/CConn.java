@@ -1027,65 +1027,89 @@ public class CConn extends CConnection
   }
 
   public void writeKeyEvent(KeyEvent ev) {
-    if (ev.getID() != KeyEvent.KEY_PRESSED && !ev.isActionKey())
-      return;
+    int keysym = 0, keycode, key;
 
-    int keysym, keycode, currentModifiers;
+    boolean down = (ev.getID() == KeyEvent.KEY_PRESSED);
 
-    currentModifiers = ev.getModifiers();
     keycode = ev.getKeyCode();
+    key = ev.getKeyChar();
+
+    vlog.debug((ev.isActionKey()? "action ":"") + "key " +
+               (down ? "PRESS":"release") + " code " + keycode + " ASCII " +
+                key);
 
     if (!ev.isActionKey()) {
-      vlog.debug("key press "+ev.getKeyChar());
-      if (ev.getKeyChar() < 32) {
-        // if the ctrl modifier key is down, send the equivalent ASCII since we
-        // will send the ctrl modifier anyway
-
-        if ((currentModifiers & KeyEvent.CTRL_MASK) != 0) {
-          if ((currentModifiers & KeyEvent.SHIFT_MASK) != 0) {
-            keysym = ev.getKeyChar() + 64;
-            if (keysym == -1)
-              return;
-          } else { 
-            keysym = ev.getKeyChar() + 96;
-            if (keysym == 127) keysym = 95;
-          }
-        } else {
-          switch (keycode) {
-          case KeyEvent.VK_BACK_SPACE: keysym = Keysyms.BackSpace; break;
-          case KeyEvent.VK_TAB:        keysym = Keysyms.Tab; break;
-          case KeyEvent.VK_ENTER:      keysym = Keysyms.Return; break;
-          case KeyEvent.VK_ESCAPE:     keysym = Keysyms.Escape; break;
-          default: return;
-          }
+      switch (keycode) {
+      case KeyEvent.VK_BACK_SPACE: keysym = Keysyms.BackSpace; break;
+      case KeyEvent.VK_TAB:        keysym = Keysyms.Tab; break;
+      case KeyEvent.VK_ENTER:      keysym = Keysyms.Return; break;
+      case KeyEvent.VK_ESCAPE:     keysym = Keysyms.Escape; break;
+      case KeyEvent.VK_NUMPAD0:    keysym = Keysyms.KP_0; break;
+      case KeyEvent.VK_NUMPAD1:    keysym = Keysyms.KP_1; break;
+      case KeyEvent.VK_NUMPAD2:    keysym = Keysyms.KP_2; break;
+      case KeyEvent.VK_NUMPAD3:    keysym = Keysyms.KP_3; break;
+      case KeyEvent.VK_NUMPAD4:    keysym = Keysyms.KP_4; break;
+      case KeyEvent.VK_NUMPAD5:    keysym = Keysyms.KP_5; break;
+      case KeyEvent.VK_NUMPAD6:    keysym = Keysyms.KP_6; break;
+      case KeyEvent.VK_NUMPAD7:    keysym = Keysyms.KP_7; break;
+      case KeyEvent.VK_NUMPAD8:    keysym = Keysyms.KP_8; break;
+      case KeyEvent.VK_NUMPAD9:    keysym = Keysyms.KP_9; break;
+      case KeyEvent.VK_DECIMAL:    keysym = Keysyms.KP_Decimal; break;
+      case KeyEvent.VK_ADD:        keysym = Keysyms.KP_Add; break;
+      case KeyEvent.VK_SUBTRACT:   keysym = Keysyms.KP_Subtract; break;
+      case KeyEvent.VK_MULTIPLY:   keysym = Keysyms.KP_Multiply; break;
+      case KeyEvent.VK_DIVIDE:     keysym = Keysyms.KP_Divide; break;
+      case KeyEvent.VK_DELETE:     keysym = Keysyms.Delete; break;
+      case KeyEvent.VK_CLEAR:      keysym = Keysyms.Clear; break;
+      case KeyEvent.VK_CONTROL:
+        if (down)
+          modifiers |= Event.CTRL_MASK;
+        else
+          modifiers &= ~Event.CTRL_MASK;
+        keysym = Keysyms.Control_L; break;
+      case KeyEvent.VK_ALT:
+        if (down)
+          modifiers |= Event.ALT_MASK;
+        else
+          modifiers &= ~Event.ALT_MASK;
+        keysym = Keysyms.Alt_L; break;
+      case KeyEvent.VK_SHIFT:
+        if (down)
+          modifiers |= Event.SHIFT_MASK;
+        else
+          modifiers &= ~Event.SHIFT_MASK;
+        keysym = Keysyms.Shift_L; break;
+      case KeyEvent.VK_META:
+        if (down)
+          modifiers |= Event.META_MASK;
+        else
+          modifiers &= ~Event.META_MASK;
+        keysym = Keysyms.Meta_L; break;
+      default:
+        if (ev.isControlDown()) {
+          // For CTRL-<letter>, CTRL is sent separately, so just send <letter>.      
+          if ((key >= 1 && key <= 26 && !ev.isShiftDown()) ||
+              // CTRL-{, CTRL-|, CTRL-} also map to ASCII 96-127
+              (key >= 27 && key <= 29 && ev.isShiftDown()))
+            key += 96;
+          // For CTRL-SHIFT-<letter>, send capital <letter> to emulate behavior
+          // of Linux.  For CTRL-@, send @.  For CTRL-_, send _.  For CTRL-^,
+          // send ^.
+          else if (key < 32)
+            key += 64;
+          // Windows and Mac sometimes return CHAR_UNDEFINED with CTRL-SHIFT
+          // combinations, so best we can do is send the key code if it is
+          // a valid ASCII symbol.
+          else if (key == KeyEvent.CHAR_UNDEFINED && keycode >= 0 &&
+                   keycode <= 127)
+            key = keycode;
         }
-
-      } else if (ev.getKeyChar() == 127) {
-        keysym = Keysyms.Delete;
-
-      } else {
-        keysym = UnicodeToKeysym.translate(ev.getKeyChar());
+        keysym = UnicodeToKeysym.translate(key);
         if (keysym == -1)
           return;
-
-        // Windows 7 or some Java version send key events that require the
-        // following special treatment with the German Alt-Gr Key. They send
-        // ALT + CTRL before the normal key event. They should be suppressed
-        if ((currentModifiers & KeyEvent.CTRL_MASK) != 0
-		&& (currentModifiers & KeyEvent.ALT_MASK) != 0
-		&& ((keysym == 0x5c) || (keysym == 0x7c)	// backslash bar
-		 || (keysym == 0x5b) || (keysym == 0x5d)	// [ ]
-		 || (keysym == 0x7b) || (keysym == 0x7d)	// { }
-		 || (keysym == 0x7e) || (keysym == 0x40)	// ~ @
-		 || (keysym == 0x20ac) || (keysym == 0xb5)	// Euro Micro
-		 || (keysym == 0xb2) || (keysym == 0xb3))	// ^2 ^3
-	           )
-          currentModifiers &= (~ KeyEvent.CTRL_MASK) & (~ KeyEvent.ALT_MASK);
       }
-
     } else {
       // KEY_ACTION
-      vlog.debug("key action " + keycode);
       switch (keycode) {
       case KeyEvent.VK_HOME:         keysym = Keysyms.Home; break;
       case KeyEvent.VK_END:          keysym = Keysyms.End; break;
@@ -1107,17 +1131,30 @@ public class CConn extends CConnection
       case KeyEvent.VK_F10:          keysym = Keysyms.F10; break;
       case KeyEvent.VK_F11:          keysym = Keysyms.F11; break;
       case KeyEvent.VK_F12:          keysym = Keysyms.F12; break;
+      case KeyEvent.VK_F13:          keysym = Keysyms.F13; break;
       case KeyEvent.VK_PRINTSCREEN:  keysym = Keysyms.Print; break;
-      case KeyEvent.VK_PAUSE:        keysym = Keysyms.Pause; break;
+      case KeyEvent.VK_PAUSE:
+        if (ev.isControlDown())
+          keysym = Keysyms.Break;
+        else
+          keysym = Keysyms.Pause;
+        break;
       case KeyEvent.VK_INSERT:       keysym = Keysyms.Insert; break;
+      case KeyEvent.VK_KP_DOWN:      keysym = Keysyms.KP_Down; break;
+      case KeyEvent.VK_KP_LEFT:      keysym = Keysyms.KP_Left; break;
+      case KeyEvent.VK_KP_RIGHT:     keysym = Keysyms.KP_Right; break;
+      case KeyEvent.VK_KP_UP:        keysym = Keysyms.KP_Up; break;
+      case KeyEvent.VK_NUM_LOCK:     keysym = Keysyms.Num_Lock; break;
+      case KeyEvent.VK_WINDOWS:      keysym = Keysyms.Super_L; break;
+      case KeyEvent.VK_CONTEXT_MENU: keysym = Keysyms.Menu; break;
+      case KeyEvent.VK_SCROLL_LOCK:  keysym = Keysyms.Scroll_Lock; break;
+      case KeyEvent.VK_CAPS_LOCK:    keysym = Keysyms.Caps_Lock; break;
+      case KeyEvent.VK_BEGIN:        keysym = Keysyms.Begin; break;
       default: return;
       }
     }
 
-    writeModifiers(currentModifiers);
-    writeKeyEvent(keysym, true);
-    writeKeyEvent(keysym, false);
-    writeModifiers(0);
+    writeKeyEvent(keysym, down);
   }
 
 
@@ -1135,8 +1172,6 @@ public class CConn extends CConnection
       break;
     }
 
-    writeModifiers(ev.getModifiers() & ~KeyEvent.ALT_MASK & ~KeyEvent.META_MASK);
-
     if (cp.width != desktop.scaledWidth || 
         cp.height != desktop.scaledHeight) {
       int sx = (desktop.scaleWidthRatio == 1.00) 
@@ -1147,8 +1182,6 @@ public class CConn extends CConnection
     }
     
     writer().writePointerEvent(new Point(ev.getX(),ev.getY()), buttonMask);
-
-    if (buttonMask == 0) writeModifiers(0);
   }
 
 
@@ -1161,7 +1194,6 @@ public class CConn extends CConnection
     } else {
       buttonMask = 16;
     }
-    writeModifiers(ev.getModifiers() & ~KeyEvent.ALT_MASK & ~KeyEvent.META_MASK);
     for (int i=0;i<Math.abs(clicks);i++) {
       x = ev.getX();
       y = ev.getY();
@@ -1169,21 +1201,20 @@ public class CConn extends CConnection
       buttonMask = 0;
       writer().writePointerEvent(new Point(x, y), buttonMask);
     }
-    writeModifiers(0);
 
   }
 
 
-  synchronized void writeModifiers(int m) {
-    if ((m & Event.SHIFT_MASK) != (pressedModifiers & Event.SHIFT_MASK))
-      writeKeyEvent(Keysyms.Shift_L, (m & Event.SHIFT_MASK) != 0);
-    if ((m & Event.CTRL_MASK) != (pressedModifiers & Event.CTRL_MASK))
-      writeKeyEvent(Keysyms.Control_L, (m & Event.CTRL_MASK) != 0);
-    if ((m & Event.ALT_MASK) != (pressedModifiers & Event.ALT_MASK))
-      writeKeyEvent(Keysyms.Alt_L, (m & Event.ALT_MASK) != 0);
-    if ((m & Event.META_MASK) != (pressedModifiers & Event.META_MASK))
-      writeKeyEvent(Keysyms.Meta_L, (m & Event.META_MASK) != 0);
-    pressedModifiers = m;
+  synchronized void releaseModifiers() {
+    if ((modifiers & Event.SHIFT_MASK) != 0)
+      writeKeyEvent(Keysyms.Shift_L, false);
+    if ((modifiers & Event.CTRL_MASK) != 0)
+      writeKeyEvent(Keysyms.Control_L, false);
+    if ((modifiers & Event.ALT_MASK) != 0)
+      writeKeyEvent(Keysyms.Alt_L, false);
+    if ((modifiers & Event.META_MASK) != 0)
+      writeKeyEvent(Keysyms.Meta_L, false);
+    modifiers = 0;
   }
 
 
@@ -1236,7 +1267,6 @@ public class CConn extends CConnection
 
   // the following are only ever accessed by the GUI thread:
   int buttonMask;
-  int pressedModifiers;
 
   private String serverHost;
   private int serverPort;
@@ -1265,9 +1295,10 @@ public class CConn extends CConnection
   private boolean supportsSyncFence;
 
   public int menuKeyCode;
+  int modifiers;
   Viewport viewport;
   private boolean fullColour;
   boolean fullScreen;
-  
+
   static LogWriter vlog = new LogWriter("CConn");
 }

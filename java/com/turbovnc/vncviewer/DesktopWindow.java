@@ -81,6 +81,9 @@ class DesktopWindow extends JPanel implements
       public void focusGained(FocusEvent e) {
         checkClipboard();
       }
+      public void focusLost(FocusEvent e) {
+        cc.releaseModifiers();
+      }
     });
     setFocusTraversalKeysEnabled(false);
     setFocusable(true);
@@ -415,7 +418,10 @@ class DesktopWindow extends JPanel implements
   /** Handle the key-typed event. */
   public void keyTyped(KeyEvent e) {}
   /** Handle the key-released event. */
-  public void keyReleased(KeyEvent e) {}
+  public void keyReleased(KeyEvent e) {
+    if (!cc.viewer.viewOnly.getValue())
+      cc.writeKeyEvent(e);
+  }
   /** Handle the key-pressed event. */
   public void keyPressed(KeyEvent e) {
     if (e.getKeyCode() == MenuKey.getMenuKeyCode()) {
