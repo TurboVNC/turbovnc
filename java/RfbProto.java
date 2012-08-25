@@ -1294,19 +1294,27 @@ class RfbProto {
       //
 
       key = keyChar;
+      int keycode = evt.getKeyCode();
       if (evt.isControlDown()) {
         // For CTRL-<letter>, CTRL is sent separately, so just send <letter>.      
         if ((key >= 1 && key <= 26 && !evt.isShiftDown()) ||
             // CTRL-{, CTRL-|, CTRL-} also map to ASCII 96-127
-            (key > 26 && key < 31 && evt.isShiftDown()))
+            (key >= 27 && key <= 29 && evt.isShiftDown()))
           key += 96;
         // For CTRL-SHIFT-<letter>, send capital <letter> to emulate behavior
-        // of Linux.  For CTRL-@, send @.  For CTRL-_, send _.
+        // of Linux.  For CTRL-@, send @.  For CTRL-_, send _.  For CTRL-^,
+        // send ^.
         else if (key < 32)
           key += 64;
+        // Windows and Mac sometimes return CHAR_UNDEFINED with CTRL-SHIFT
+        // combinations, so best we can do is send the key code if it is
+        // a valid ASCII symbol.
+        else if (key == KeyEvent.CHAR_UNDEFINED && keycode >= 0 &&
+                 keycode <= 127)
+          key = keycode;
       }
 
-      switch(evt.getKeyCode()) {
+      switch(keycode) {
       case KeyEvent.VK_BACK_SPACE: key = 0xff08; break;
       case KeyEvent.VK_TAB:        key = 0xff09; break;
       case KeyEvent.VK_ENTER:      key = 0xff0d; break;
