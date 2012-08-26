@@ -31,6 +31,11 @@ public class Configuration {
   public static boolean setParam(String name, String value) {
     VoidParameter param = getParam(name);
     if (param == null) return false;
+    if (param instanceof BoolParameter && ((BoolParameter)param).reverse) {
+      ((BoolParameter)param).reverse = false;
+      ((BoolParameter)param).setParam(value, true);
+      return true;
+    }
     return param.setParam(value);
   }
 
@@ -50,6 +55,11 @@ public class Configuration {
     } else if (hyphen) {
       VoidParameter param = getParam(config);
       if (param == null) return false;
+      if (param instanceof BoolParameter && ((BoolParameter)param).reverse) {  
+        ((BoolParameter)param).reverse = false;
+        ((BoolParameter)param).setParam(false);
+        return true;
+      }
       return param.setParam();
     }
     return false;
@@ -61,6 +71,15 @@ public class Configuration {
     while (current != null) {
       if (name.equalsIgnoreCase(current.getName()))
         return current;
+      if (current instanceof BoolParameter) {
+        if (name.length() > 2 && name.substring(0, 2).equalsIgnoreCase("no")) {
+          String name2 = name.substring(2);
+          if (name2.equalsIgnoreCase(current.getName())) {
+            ((BoolParameter)current).reverse = true;
+            return current;
+          }
+        }
+      }
       current = current.next;
     }
     return null;

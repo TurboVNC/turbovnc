@@ -94,7 +94,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
       if (argv[i].length() == 0)
         continue;
 
-      if (argv[i].equalsIgnoreCase("-log")) {
+      if (argv[i].equalsIgnoreCase("-loglevel")) {
         if (++i >= argv.length) usage();
         System.err.println("Log setting: "+argv[i]);
         LogWriter.setLogParams(argv[i]);
@@ -139,14 +139,14 @@ public class VncViewer extends java.applet.Applet implements Runnable
                     "       vncviewer [options/parameters] -listen [port] [options/parameters]\n"+
                     "\n"+
                     "Options:\n"+
-                    "  -log <level>    configure logging level\n"+
-                    "                  0 = errors only\n"+
-                    "                  10 = status messages\n"+
-                    "                  30 = informational messages (default)\n"+
-                    "                  100 = debugging messages\n"+
+                    "  -loglevel <level>   configure logging level\n"+
+                    "                      0 = errors only\n"+
+                    "                      10 = status messages\n"+
+                    "                      30 = informational messages (default)\n"+
+                    "                      100 = debugging messages\n"+
                     "\n"+
                     "Parameters can be turned on with -<param> or off with "+
-                    "-<param>=0\n"+
+                    "-<param>=0 or -no<param>\n"+
                     "Parameters that take a value can be specified as "+
                     "-<param> <value>\n"+
                     "Other valid forms are <param>=<value> -<param>=<value> "+
@@ -391,7 +391,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "Tight", "Tight, ZRLE, Hextile, Raw");
 
   BoolParameter allowJpeg
-  = new BoolParameter("AllowJPEG",
+  = new BoolParameter("JPEG",
   "Enable the JPEG subencoding type when using Tight encoding.  This causes "+
   "the Tight encoder to use JPEG compression for subrectangles that have a "+
   "high number of unique colors and indexed color subencoding for "+
@@ -464,7 +464,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "usually true color (8 bits per component.)", -1);
 
   BoolParameter useLocalCursor
-  = new BoolParameter("UseLocalCursor",
+  = new BoolParameter("CursorShape",
   "Normally, TurboVNC and compatible servers will send only changes to the "+
   "remote mouse cursor's shape and position.  This results in the best mouse "+
   "responsiveness.  Disabling this option causes the server to instead draw "+

@@ -27,12 +27,16 @@ public class BoolParameter extends VoidParameter {
   }
 
   public boolean setParam(String v) {
+    return setParam(v, false);
+  }
+
+  public boolean setParam(String v, boolean reverse) {
     if (v.equals("1") || v.equalsIgnoreCase("on") ||
         v.equalsIgnoreCase("true") || v.equalsIgnoreCase("yes"))
-      value = true;
+      value = reverse ? false : true;
     else if (v.equals("0") || v.equalsIgnoreCase("off") ||
         v.equalsIgnoreCase("false") || v.equalsIgnoreCase("no"))
-      value = false;
+      value = reverse ? true : false;
     else
       return false;
     return true;
@@ -48,6 +52,7 @@ public class BoolParameter extends VoidParameter {
 
   final public boolean getValue() { return value; }
 
+  public boolean reverse;
   protected boolean value;
   protected boolean defValue;
 }
