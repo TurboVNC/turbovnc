@@ -234,13 +234,13 @@ char *fallback_resources[] = {
 "*popup*button3.type: toggle",
 "*popup*button3.translations: #override\\n\
   <Visible>: SetFullScreenState()\\n\
-  <Btn1Down>,<Btn1Up>: toggle() ToggleFullScreen() HidePopup()",
+  <Btn1Down>,<Btn1Up>: ToggleFullScreen() HidePopup()",
 
 "*popup*button4.label: Grab Keyboard (CTRL-ALT-SHIFT-G)",
 "*popup*button4.type: toggle",
 "*popup*button4.translations: #override\\n\
   <Visible>: SetGrabKeyboardState()\\n\
-  <Btn1Down>,<Btn1Up>: toggle() ToggleGrabKeyboard() HidePopup()",
+  <Btn1Down>,<Btn1Up>: ToggleGrabKeyboard() HidePopup()",
 
 "*popup*button5.label: Clipboard: local -> remote",
 "*popup*button5.translations: #override\\n\
@@ -275,7 +275,7 @@ char *fallback_resources[] = {
 "*popup*button11.type: toggle",
 "*popup*button10.translations: #override\\n\
   <Visible>: SetCUState()\\n\
-  <Btn1Down>,<Btn1Up>: toggle() ToggleCU()",
+  <Btn1Down>,<Btn1Up>: ToggleCU()",
 
 "*popup*button12.label: Encoding method: Tight + Perceptually Lossless JPEG (LAN)",
 "*popup*button12.translations: #override\\n\
