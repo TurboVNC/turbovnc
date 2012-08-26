@@ -1266,6 +1266,17 @@ ToggleCU(Widget w, XEvent *ev, String *params, Cardinal *num_params)
 
 
 /*
+ * ToggleViewOnly is an action which toggles in and out of view-only mode.
+ */
+
+void
+ToggleViewOnly(Widget w, XEvent *ev, String *params, Cardinal *num_params)
+{
+  appData.viewOnly = !appData.viewOnly;
+}
+
+
+/*
  * QualHigh
  */
 void

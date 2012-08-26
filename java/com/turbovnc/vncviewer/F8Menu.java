@@ -34,33 +34,37 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     super("VNC Menu");
     setLightWeightPopupEnabled(false);
     cc = cc_;
-    restore    = addMenuItem("Restore",KeyEvent.VK_R);
+    restore    = addMenuItem("Restore");
     move       = addMenuItem("Move");
     move.setEnabled(false);
     size       = addMenuItem("Size");
     size.setEnabled(false);
-    minimize   = addMenuItem("Minimize", KeyEvent.VK_N);
-    maximize   = addMenuItem("Maximize", KeyEvent.VK_X);
+    minimize   = addMenuItem("Minimize");
+    maximize   = addMenuItem("Maximize");
     addSeparator();
-    exit       = addMenuItem("Close Viewer", KeyEvent.VK_C);
+    exit       = addMenuItem("Close viewer", KeyEvent.VK_C);
     addSeparator();
-    fullScreen = new JCheckBoxMenuItem("Full Screen");
+    options    = addMenuItem("Options...", KeyEvent.VK_O);
+    info       = addMenuItem("Connection Info...", KeyEvent.VK_I);
+    addSeparator();
+    refresh    = addMenuItem("Request screen refresh", KeyEvent.VK_R);
+    addSeparator();
+    fullScreen = new JCheckBoxMenuItem("Full screen");
     fullScreen.setMnemonic(KeyEvent.VK_F);
     fullScreen.setSelected(cc.fullScreen);
     fullScreen.addActionListener(this);
     add(fullScreen);
     addSeparator();
+    f8 = addMenuItem("Send " + 
+      KeyEvent.getKeyText(MenuKey.getMenuKeyCode()), MenuKey.getMenuKeyCode());
+    ctrlAltDel = addMenuItem("Send Ctrl-Alt-Del");
+    ctrlEsc = addMenuItem("Send Ctrl-Esc");
+    addSeparator();
     clipboard  = addMenuItem("Clipboard...");
     addSeparator();
-    f8 = addMenuItem("Send "+KeyEvent.getKeyText(MenuKey.getMenuKeyCode()), MenuKey.getMenuKeyCode());
-    ctrlAltDel = addMenuItem("Send Ctrl-Alt-Del");
+    newConn    = addMenuItem("New connection...", KeyEvent.VK_N);
     addSeparator();
-    refresh    = addMenuItem("Refresh Screen", KeyEvent.VK_H);
-    addSeparator();
-    newConn    = addMenuItem("New connection...", KeyEvent.VK_W);
-    options    = addMenuItem("Options...", KeyEvent.VK_O);
-    info       = addMenuItem("Connection info...", KeyEvent.VK_I);
-    about      = addMenuItem("About VncViewer...", KeyEvent.VK_A);
+    about      = addMenuItem("About TurboVNC Viewer...", KeyEvent.VK_A);
     addSeparator();
     dismiss    = addMenuItem("Dismiss menu");
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -110,6 +114,11 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       cc.writeKeyEvent(Keysyms.Delete, false);
       cc.writeKeyEvent(Keysyms.Alt_L, false);
       cc.writeKeyEvent(Keysyms.Control_L, false);
+    } else if (actionMatch(ev, ctrlEsc)) {
+      cc.writeKeyEvent(Keysyms.Control_L, true);
+      cc.writeKeyEvent(Keysyms.Escape, true);
+      cc.writeKeyEvent(Keysyms.Escape, false);
+      cc.writeKeyEvent(Keysyms.Control_L, false);
     } else if (actionMatch(ev, refresh)) {
       cc.refresh();
     } else if (actionMatch(ev, newConn)) {
@@ -127,7 +136,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
 
   CConn cc;
   JMenuItem restore, move, size, minimize, maximize;
-  JMenuItem exit, clipboard, ctrlAltDel, refresh;
+  JMenuItem exit, clipboard, ctrlAltDel, ctrlEsc, refresh;
   JMenuItem newConn, options, info, about, dismiss;
   static JMenuItem f8;
   JCheckBoxMenuItem fullScreen;

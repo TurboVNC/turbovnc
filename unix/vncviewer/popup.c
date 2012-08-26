@@ -35,7 +35,7 @@
 extern Bool HasEncoding(const char *);
 
 Widget popup, fullScreenToggle, button4X, button2X, button1X, buttonGray,
-  qualtext, qualslider, buttonZlib, buttonJPEG, buttonViewOnly;
+  qualtext, qualslider, buttonZlib, buttonJPEG;
 
 
 void
@@ -165,15 +165,6 @@ buttonJPEGProc(Widget w, XtPointer client, XtPointer p)
 }
 
 void
-buttonViewOnlyProc(Widget w, XtPointer client, XtPointer p)
-{
-  if((long)p==1) {
-    appData.viewOnly=True;
-  }
-  else appData.viewOnly=False;
-}
-
-void
 buttonGrayProc(Widget w, XtPointer client, XtPointer p)
 {
   if((long)p==1) appData.subsampLevel=TVNC_GRAY;
@@ -209,6 +200,16 @@ void
 SetCUState(Widget w, XEvent *ev, String *params, Cardinal *num_params)
 {
   if (appData.continuousUpdates)
+    XtVaSetValues(w, XtNstate, True, NULL);
+  else
+    XtVaSetValues(w, XtNstate, False, NULL);
+}
+
+
+void
+SetViewOnlyState(Widget w, XEvent *ev, String *params, Cardinal *num_params)
+{
+  if (appData.viewOnly)
     XtVaSetValues(w, XtNstate, True, NULL);
   else
     XtVaSetValues(w, XtNstate, False, NULL);
@@ -255,15 +256,9 @@ CreatePopup()
     prevButton = button;
   }
 
-  buttonViewOnly = XtCreateManagedWidget("viewOnly", toggleWidgetClass, buttonForm,
-    NULL, 0);
-  XtVaSetValues(buttonViewOnly, XtNfromVert, prevButton, XtNleft, XawChainLeft,
-    XtNstate, appData.viewOnly);
-  XtAddCallback(buttonViewOnly, XtNcallback, buttonViewOnlyProc, NULL);
-
   buttonJPEG = XtCreateManagedWidget("enableJPEG", toggleWidgetClass, buttonForm,
     NULL, 0);
-  XtVaSetValues(buttonJPEG, XtNfromVert, buttonViewOnly, XtNleft, XawChainLeft,
+  XtVaSetValues(buttonJPEG, XtNfromVert, prevButton, XtNleft, XawChainLeft,
     NULL);
   XtAddCallback(buttonJPEG, XtNcallback, buttonJPEGProc, NULL);
 

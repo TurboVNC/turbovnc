@@ -457,9 +457,10 @@ void ClientConnection::CreateDisplay()
 		bool save_item_flags = (m_serverInitiated) ? MF_GRAYED : 0;
 		AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
 		AppendMenu(hsysmenu, MF_STRING, IDC_OPTIONBUTTON,
-				   _T("Connection &options...\tCtrl-Alt-Shift-O"));
+				   _T("&Options...\tCtrl-Alt-Shift-O"));
 		AppendMenu(hsysmenu, MF_STRING, ID_CONN_ABOUT,
 				   _T("Connection &info...\tCtrl-Alt-Shift-I"));
+		AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
 		AppendMenu(hsysmenu, MF_STRING, ID_REQUEST_REFRESH,
 				   _T("Request screen &refresh\tCtrl-Alt-Shift-R"));
 		AppendMenu(hsysmenu, MF_STRING, ID_REQUEST_LOSSLESS_REFRESH,
@@ -467,13 +468,13 @@ void ClientConnection::CreateDisplay()
 		AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
 		AppendMenu(hsysmenu, MF_STRING, ID_FULLSCREEN,
 				   _T("&Full screen\tCtrl-Alt-Shift-F"));
-		AppendMenu(hsysmenu, MF_STRING, ID_TOGGLE_GRAB,
-				   _T("&Grab keyboard\tCtrl-Alt-Shift-G"));
 		AppendMenu(hsysmenu, MF_STRING, ID_DEFAULT_WINDOW_SIZE,
 				   _T("Default window si&ze/position\tCtrl-Alt-Shift-Z"));
 		AppendMenu(hsysmenu, MF_STRING, ID_TOOLBAR,
 				   _T("Show &toolbar\tCtrl-Alt-Shift-T"));
 		AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
+		AppendMenu(hsysmenu, MF_STRING, ID_TOGGLE_GRAB,
+				   _T("&Grab keyboard\tCtrl-Alt-Shift-G"));
 		AppendMenu(hsysmenu, MF_STRING, ID_CONN_CTLALTDEL,
 				   _T("Send Ctrl-Alt-&Del"));
 		AppendMenu(hsysmenu, MF_STRING, ID_CONN_CTLESC,
@@ -2079,10 +2080,10 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
 
 		switch (TTStr->hdr.idFrom) {
 		case IDC_OPTIONBUTTON:
-			TTStr->lpszText = "Connection options...";
+			TTStr->lpszText = "Options...";
 			break;
 		case ID_CONN_ABOUT:
-			TTStr->lpszText = "Connection info";
+			TTStr->lpszText = "Connection info...";
 			break;
 		case ID_FULLSCREEN:
 			TTStr->lpszText = "Full screen";

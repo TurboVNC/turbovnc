@@ -263,6 +263,8 @@ extern void HidePopup(Widget w, XEvent *event, String *params,
 extern void CreatePopup();
 extern void SetCUState(Widget w, XEvent *ev, String *params,
 		       Cardinal *num_params);
+extern void SetViewOnlyState(Widget w, XEvent *ev, String *params,
+		       Cardinal *num_params);
 
 /* rfbproto.c */
 
@@ -289,6 +291,8 @@ extern Bool HandleRFBServerMessage();
 extern void PrintPixelFormat(rfbPixelFormat *format);
 
 extern void ToggleCU(Widget w, XEvent *ev, String *params,
+		     Cardinal *num_params);
+extern void ToggleViewOnly(Widget w, XEvent *ev, String *params,
 		     Cardinal *num_params);
 
 typedef struct _UpdateList {
