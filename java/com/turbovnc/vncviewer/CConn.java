@@ -731,7 +731,6 @@ public class CConn extends CConnection
   }
 
   public void setOptions() {
-    int digit;
     options.allowJpeg.setSelected(viewer.allowJpeg.getValue());
     options.subsamplingLevel.setValue(cp.getSubsamplingOrdinal());
     options.jpegQualityLevel.setValue(cp.quality);
@@ -860,15 +859,17 @@ public class CConn extends CConnection
     } else if(scaleString.equalsIgnoreCase("FixedRatio")) {
       options.scalingFactor.setSelectedItem("Fixed Aspect Ratio");
     } else { 
-      digit = Integer.parseInt(scaleString);
-      if (digit >= 1 && digit <= 1000) {
-        options.scalingFactor.setSelectedItem(digit+"%");
+      scaleString = scaleString.replaceAll("[^\\d]", "");
+      int scalingFactor = -1;
+      try {
+        scalingFactor = Integer.parseInt(scaleString);
+      } catch(NumberFormatException e) {};
+      if (scalingFactor >= 1 && scalingFactor <= 1000) {
+        options.scalingFactor.setSelectedItem(scalingFactor+"%");
       } else {
-        digit = Integer.parseInt(viewer.scalingFactor.getDefaultStr());
-        options.scalingFactor.setSelectedItem(digit+"%");
+        scalingFactor = Integer.parseInt(viewer.scalingFactor.getDefaultStr());
+        options.scalingFactor.setSelectedItem(scalingFactor+"%");
       }
-      int scaleFactor = 
-        Integer.parseInt(scaleString.substring(0, scaleString.length()));
       if (desktop != null)
         desktop.setScaledSize();
     }
@@ -917,9 +918,14 @@ public class CConn extends CConnection
         if (desktop != null)
           reconfigureViewport();
       }
-    } else { 
-      scaleString=scaleString.substring(0, scaleString.length()-1);
-      if (!oldScaleFactor.equals(scaleString)) {
+    } else {
+      scaleString = scaleString.replaceAll("[^\\d]", "");
+      int scalingFactor = -1;
+      try {
+         scalingFactor = Integer.parseInt(scaleString);
+      } catch(NumberFormatException e) {};
+      if (!oldScaleFactor.equals(scaleString) && scalingFactor >= 1 &&
+          scalingFactor <= 1000) {
         viewer.scalingFactor.setParam(scaleString);
         if ((desktop != null) && (!oldScaleFactor.equalsIgnoreCase("Auto") ||
             !oldScaleFactor.equalsIgnoreCase("FixedRatio"))) {
