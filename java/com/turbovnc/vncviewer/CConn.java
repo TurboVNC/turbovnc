@@ -95,7 +95,6 @@ public class CConn extends CConnection
       fullColour = false;
     formatChange = false; encodingChange = false;
     fullScreen = viewer.fullScreen.getValue();
-    menuKeyCode = MenuKey.getMenuKeyCode();
     options = new OptionsDialog(this);
     options.initDialog();
     clipboardDialog = new ClipboardDialog(this);
@@ -1300,7 +1299,6 @@ public class CConn extends CConnection
 
   private boolean supportsSyncFence;
 
-  public int menuKeyCode;
   int modifiers;
   Viewport viewport;
   private boolean fullColour;

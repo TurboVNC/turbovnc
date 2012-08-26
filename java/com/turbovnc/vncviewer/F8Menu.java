@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,8 +101,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     } else if (actionMatch(ev, clipboard)) {
       cc.clipboardDialog.showDialog(cc.viewport);
     } else if (actionMatch(ev, f8)) {
-      cc.writeKeyEvent(cc.menuKeyCode, true);
-      cc.writeKeyEvent(cc.menuKeyCode, false);
+      cc.writeKeyEvent(MenuKey.getMenuKeySym(), true);
+      cc.writeKeyEvent(MenuKey.getMenuKeySym(), false);
     } else if (actionMatch(ev, ctrlAltDel)) {
       cc.writeKeyEvent(Keysyms.Control_L, true);
       cc.writeKeyEvent(Keysyms.Alt_L, true);
