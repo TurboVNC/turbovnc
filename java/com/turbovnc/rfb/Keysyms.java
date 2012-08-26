@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,6 +77,7 @@ public class Keysyms {
   public static final int F10 = 0xFFC7;
   public static final int F11 = 0xFFC8;
   public static final int F12 = 0xFFC9;
+  public static final int F13 = 0xFFCA;
 
   public static final int Shift_L = 0xFFE1;
   public static final int Shift_R = 0xFFE2;
@@ -85,4 +87,27 @@ public class Keysyms {
   public static final int Meta_R = 0xFFE8;
   public static final int Alt_L = 0xFFE9;
   public static final int Alt_R = 0xFFEA;
+
+  public static final int KP_Down = 0xFF99;
+  public static final int KP_Left = 0xFF96;
+  public static final int KP_Right = 0xFF98;
+  public static final int KP_Up = 0xFF97;
+  public static final int Super_L = 0xFFEB;
+  public static final int Caps_Lock = 0xFFE5;
+
+  public static final int KP_0 = 0xFFB0;
+  public static final int KP_1 = 0xFFB1;
+  public static final int KP_2 = 0xFFB2;
+  public static final int KP_3 = 0xFFB3;
+  public static final int KP_4 = 0xFFB4;
+  public static final int KP_5 = 0xFFB5;
+  public static final int KP_6 = 0xFFB6;
+  public static final int KP_7 = 0xFFB7;
+  public static final int KP_8 = 0xFFB8;
+  public static final int KP_9 = 0xFFB9;
+  public static final int KP_Decimal = 0xFFAE;
+  public static final int KP_Add = 0xFFAB;
+  public static final int KP_Subtract = 0xFFAD;
+  public static final int KP_Multiply = 0xFFAA;
+  public static final int KP_Divide = 0xFFAF;
 }
