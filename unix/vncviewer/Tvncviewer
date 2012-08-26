@@ -188,21 +188,21 @@ Tvncviewer.translations:\
 *popup*button2.translations: #override\n\
   <Btn1Down>,<Btn1Up>: Quit()
 
-*popup*button3.label: Request refresh (CTRL-ALT-SHIFT-R)
+*popup*button3.label: Request refresh (Ctrl-Alt-Shift-R)
 *popup*button3.translations: #override\n\
   <Btn1Down>,<Btn1Up>: SendRFBEvent(fbupdate) HidePopup()
 
-*popup*button4.label: Request lossless refresh (CTRL-ALT-SHIFT-L)
+*popup*button4.label: Request lossless refresh (Ctrl-Alt-Shift-L)
 *popup*button4.translations: #override\n\
   <Btn1Down>,<Btn1Up>: LosslessRefresh() HidePopup()
 
-*popup*button5.label: Full screen (CTRL-ALT-SHIFT-F)
+*popup*button5.label: Full screen (Ctrl-Alt-Shift-F)
 *popup*button5.type: toggle
 *popup*button5.translations: #override\n\
   <Visible>: SetFullScreenState()\n\
   <Btn1Down>,<Btn1Up>: ToggleFullScreen() HidePopup()
 
-*popup*button6.label: Grab Keyboard (CTRL-ALT-SHIFT-G)
+*popup*button6.label: Grab keyboard (Ctrl-Alt-Shift-G)
 *popup*button6.type: toggle
 *popup*button6.translations: #override\n\
   <Visible>: SetGrabKeyboardState()\n\
