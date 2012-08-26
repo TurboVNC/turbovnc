@@ -83,6 +83,7 @@ netwm_fullscreen(Display *dpy, Window win, int state)
 void
 GrabKeyboard(void)
 {
+#ifndef __APPLE__
     if (keyboardGrabbed) return;
     if (XtGrabKeyboard(toplevel, True, GrabModeAsync,
 		       GrabModeAsync, CurrentTime) != GrabSuccess) {
@@ -90,14 +91,17 @@ GrabKeyboard(void)
     } else {
 	keyboardGrabbed = True;
     }
+#endif
 }
 
 void
 UngrabKeyboard(void)
 {
+#ifndef __APPLE__
     if (!keyboardGrabbed) return;
     XtUngrabKeyboard(toplevel, CurrentTime);
     keyboardGrabbed = False;
+#endif
 }
 
 void
