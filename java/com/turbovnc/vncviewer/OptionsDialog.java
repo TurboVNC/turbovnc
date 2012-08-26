@@ -225,7 +225,7 @@ class OptionsDialog extends Dialog implements
     acceptClipboard.addItemListener(this);
     sendClipboard = new JCheckBox("Send clipboard to server");
     sendClipboard.addItemListener(this);
-    JLabel menuKeyLabel = new JLabel("Menu Key");
+    JLabel menuKeyLabel = new JLabel("Menu Key:");
     String[] menuKeys = new String[MenuKey.getMenuKeySymbolCount()]; 
     for (int i = 0; i < MenuKey.getMenuKeySymbolCount(); i++)
       menuKeys[i] = MenuKey.getMenuKeySymbols()[i].name;
@@ -242,13 +242,13 @@ class OptionsDialog extends Dialog implements
 
     fullScreen = new JCheckBox("Full-screen mode");
     fullScreen.addItemListener(this);
-    shared = new JCheckBox("Shared connection");
+    shared = new JCheckBox("Request shared session");
     shared.addItemListener(this);
-    useLocalCursor = new JCheckBox("Render cursor locally");
+    useLocalCursor = new JCheckBox("Render cursor locally (enable remote cursor shape updates)");
     useLocalCursor.addItemListener(this);
     acceptBell = new JCheckBox("Beep when requested by the server");
     acceptBell.addItemListener(this);
-    JLabel scalingFactorLabel = new JLabel("Scaling Factor");
+    JLabel scalingFactorLabel = new JLabel("Scaling Factor:");
     Object[] scalingFactors = { 
       "Auto", "Fixed Aspect Ratio", "50%", "75%", "95%", "100%", "105%", 
       "125%", "150%", "175%", "200%", "250%", "300%", "350%", "400%" };
