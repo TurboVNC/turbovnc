@@ -1,9 +1,9 @@
-Xt-based TurboVNC Viewer
-========================
+X11 TurboVNC Viewer
+===================
 
-
-Resources
----------
+The X11 TurboVNC Viewer is written using Xt (X Toolkit Intrinsics.)  Although
+a somewhat primitive system, one of the benefits of Xt is that it allows
+applications to be heavily customized through the use of X resources.
 
 You can set X resources by any of the usual means:  in an app-defaults file,
 such as .Xresources, or on the command line with the '-xrm' option
@@ -12,7 +12,8 @@ such as .Xresources, or on the command line with the '-xrm' option
 The file Tvncviewer contains the same resource settings as the "fallback
 resources" embedded in the executable.  You can copy this file into
 /usr/lib/X11/app-defaults (or equivalent) and edit it for site-wide
-customizations.
+customizations.  You can also place it in your home directory end edit it for
+per-user customizations.
 
 The application resources are described in the vncviewer man page.
 
@@ -159,6 +160,8 @@ These are the actions that you can use in translations:
 
     Used with the User/Password dialog box.
 
+  Other TurboVNC-specific actions are available.  See the default resource
+  file (Tvncviewer) for examples of their use.
 
 Widget hierarchy
 ----------------
