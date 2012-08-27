@@ -1502,6 +1502,8 @@ void ClientConnection::ReadCapabilityList(CapsContainer *caps, int count)
 
 void ClientConnection::SizeWindow(bool centered)
 {
+	if (InFullScreenMode()) return;
+
 	// Find how large the desktop work area is
 	RECT screenArea, workrect;
 	GetFullScreenMetrics(screenArea, workrect);
