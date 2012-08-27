@@ -323,11 +323,13 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 				ArgError(_T("No monitor spanning mode specified"));
 				continue;
 			}
-			if (_tcsicmp(args[j], _T("primary")) == 0) {
+			if (_toupper(args[j][0]) == 'P') {
 				m_Span = SPAN_PRIMARY;
-			} else if (_tcsicmp(args[j], _T("all")) == 0) {
+			} else if (_toupper(args[j][0]) == 'A' &&
+					   _toupper(args[j][1]) == 'L') {
 				m_Span = SPAN_ALL;
-			} else if (_tcsicmp(args[j], _T("auto")) == 0) {
+			} else if (_toupper(args[j][0]) == 'A' &&
+					   _toupper(args[j][1]) == 'U') {
 				m_Span = SPAN_AUTO;
 			} else {
 				ArgError(_T("Invalid monitor spanning mode specified"));
@@ -410,7 +412,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine) {
 				ArgError(_T("No scaling factor specified"));
 				continue;
 			}
-			if (_tcsicmp(args[j], _T("fixedratio")) == 0) {
+			if (_toupper(args[j][0]) == 'F') {
 				m_FitWindow = true;
 			} else {
 				m_FitWindow = false;
