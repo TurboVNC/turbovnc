@@ -69,6 +69,9 @@ public class CConn extends CConnection
   static final PixelFormat mediumColourPF = 
     new PixelFormat(8, 8, false, false, 7, 7, 3, 0, 3, 6);
 
+  public static final int SCALE_AUTO = -1;
+  public static final int SCALE_FIXEDRATIO = -2;
+
   ////////////////////////////////////////////////////////////////////
   // The following methods are all called from the RFB thread
 
@@ -100,9 +103,10 @@ public class CConn extends CConnection
     clipboardDialog = new ClipboardDialog(this);
     firstUpdate = true; pendingUpdate = false; continuousUpdates = false; 
     forceNonincremental = true; supportsSyncFence = false;
-    
 
     setShared(viewer.shared.getValue());
+    scalingFactor = Integer.parseInt(viewer.scalingFactor.getDefaultStr());
+    setScalingFactor(viewer.scalingFactor.getValue());
     upg = this;
     msg = this;
 
@@ -852,23 +856,12 @@ public class CConn extends CConnection
     options.fullScreen.setSelected(fullScreen);
     options.useLocalCursor.setSelected(viewer.useLocalCursor.getValue());
     options.acceptBell.setSelected(viewer.acceptBell.getValue());
-    String scaleString = viewer.scalingFactor.getValue();
-    if (scaleString.equalsIgnoreCase("Auto")) {
+    if (scalingFactor == SCALE_AUTO) {
       options.scalingFactor.setSelectedItem("Auto");
-    } else if(scaleString.equalsIgnoreCase("FixedRatio")) {
+    } else if(scalingFactor == SCALE_FIXEDRATIO) {
       options.scalingFactor.setSelectedItem("Fixed Aspect Ratio");
     } else { 
-      scaleString = scaleString.replaceAll("[^\\d]", "");
-      int scalingFactor = -1;
-      try {
-        scalingFactor = Integer.parseInt(scaleString);
-      } catch(NumberFormatException e) {};
-      if (scalingFactor >= 1 && scalingFactor <= 1000) {
-        options.scalingFactor.setSelectedItem(scalingFactor+"%");
-      } else {
-        scalingFactor = Integer.parseInt(viewer.scalingFactor.getDefaultStr());
-        options.scalingFactor.setSelectedItem(scalingFactor+"%");
-      }
+      options.scalingFactor.setSelectedItem(scalingFactor+"%");
       if (desktop != null)
         desktop.setScaledSize();
     }
@@ -902,34 +895,18 @@ public class CConn extends CConnection
     viewer.acceptClipboard.setParam(options.acceptClipboard.isSelected());
     viewer.sendClipboard.setParam(options.sendClipboard.isSelected());
     viewer.acceptBell.setParam(options.acceptBell.isSelected());
-    String scaleString =
-      options.scalingFactor.getSelectedItem().toString();
-    String oldScaleFactor = viewer.scalingFactor.getValue();
-    if (scaleString.equalsIgnoreCase("Auto")) {
-      if (!oldScaleFactor.equals(scaleString)) {
-      viewer.scalingFactor.setParam("Auto");
-        if (desktop != null)
-          reconfigureViewport();
-      }
-    } else if(scaleString.equalsIgnoreCase("Fixed Aspect Ratio")) {
-      if (!oldScaleFactor.equalsIgnoreCase("FixedRatio")) {
-        viewer.scalingFactor.setParam("FixedRatio");
+    int oldScalingFactor = scalingFactor;
+    setScalingFactor(options.scalingFactor.getSelectedItem().toString());
+    if (scalingFactor == SCALE_AUTO || scalingFactor == SCALE_FIXEDRATIO) {
+      if (scalingFactor != oldScalingFactor) {
         if (desktop != null)
           reconfigureViewport();
       }
     } else {
-      scaleString = scaleString.replaceAll("[^\\d]", "");
-      int scalingFactor = -1;
-      try {
-         scalingFactor = Integer.parseInt(scaleString);
-      } catch(NumberFormatException e) {};
-      if (!oldScaleFactor.equals(scaleString) && scalingFactor >= 1 &&
-          scalingFactor <= 1000) {
-        viewer.scalingFactor.setParam(scaleString);
-        if ((desktop != null) && (!oldScaleFactor.equalsIgnoreCase("Auto") ||
-            !oldScaleFactor.equalsIgnoreCase("FixedRatio"))) {
+      if (oldScalingFactor != scalingFactor) {
+        if (desktop != null && oldScalingFactor != SCALE_AUTO &&
+            oldScalingFactor != SCALE_FIXEDRATIO)
           reconfigureViewport();
-        }
       }
     }
 
@@ -1011,6 +988,23 @@ public class CConn extends CConnection
 
       CSecurityTLS.x509ca.setParam(options.ca.getText());
       CSecurityTLS.x509crl.setParam(options.crl.getText());
+    }
+  }
+
+  public void setScalingFactor(String scaleString) {
+    if (scaleString.toUpperCase().charAt(0) == 'A') {
+      scalingFactor = SCALE_AUTO;
+    } else if(scaleString.toUpperCase().charAt(0) == 'F') {
+      scalingFactor = SCALE_FIXEDRATIO;
+    } else { 
+      scaleString = scaleString.replaceAll("[^\\d]", "");
+      int sf = -1;
+      try {
+        sf = Integer.parseInt(scaleString);
+      } catch(NumberFormatException e) {};
+      if (sf >= 1 && sf <= 1000) {
+        scalingFactor = sf;
+      }
     }
   }
 
@@ -1304,6 +1298,7 @@ public class CConn extends CConnection
   Viewport viewport;
   private boolean fullColour;
   boolean fullScreen;
+  int scalingFactor;
 
   static LogWriter vlog = new LogWriter("CConn");
 }

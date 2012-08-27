@@ -59,9 +59,8 @@ public class Viewport extends JFrame
             cc.fullScreen) {
           cc.toggleFullScreen();
         }
-        String scaleString = cc.viewer.scalingFactor.getValue();
-        if (scaleString.equalsIgnoreCase("Auto") ||
-            scaleString.equalsIgnoreCase("FixedRatio")) {
+        if (cc.scalingFactor == CConn.SCALE_AUTO ||
+            cc.scalingFactor == CConn.SCALE_FIXEDRATIO) {
           if ((sp.getSize().width != cc.desktop.scaledWidth) ||
               (sp.getSize().height != cc.desktop.scaledHeight)) {
             int policy = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
@@ -71,7 +70,7 @@ public class Viewport extends JFrame
                                      cc.desktop.scaledHeight));
             sp.validate();
             if (getExtendedState() != JFrame.MAXIMIZED_BOTH &&
-                scaleString.equalsIgnoreCase("FixedRatio")) {
+                cc.scalingFactor == CConn.SCALE_FIXEDRATIO) {
               int w = cc.desktop.scaledWidth + getInsets().left + getInsets().right;
               int h = cc.desktop.scaledHeight + getInsets().top + getInsets().bottom;
               setSize(w, h);
