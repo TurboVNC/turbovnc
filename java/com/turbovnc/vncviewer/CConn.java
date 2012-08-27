@@ -1017,6 +1017,7 @@ public class CConn extends CConnection
   public void toggleFullScreen() {
     fullScreen = !fullScreen;
     if (!fullScreen) menu.fullScreen.setSelected(false);
+    else menu.fullScreen.setSelected(true);
     recreateViewport();
   }
 
