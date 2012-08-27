@@ -8,7 +8,7 @@ and a rich GUI inspired by, the TigerVNC 1.2 Java viewer.  In addition, the new
 Java TurboVNC Viewer has the ability to use libjpeg-turbo via JNI to decompress
 JPEG images, giving it levels of performance in line with the native viewers.
 The new Java viewer is also packaged as an app bundle on Mac systems, to
-provide a more user-friendly alternative to the Unix TurboVNC Viewer.
+provide a more user-friendly alternative to the X11 TurboVNC Viewer.
 -------------------------------------------------------------------------------
 [2]
 IPv6 support
@@ -24,7 +24,7 @@ the Java code can be built either as part of a Unix or Windows build or as
 a stand-alone project.
 -------------------------------------------------------------------------------
 [5]
-Renamed the resource file for the Unix TurboVNC Viewer to "Tvncviewer" to avoid
+Renamed the resource file for the X11 TurboVNC Viewer to "Tvncviewer" to avoid
 conflicts with TightVNC.  This specifically fixes an issue whereby the TurboVNC
 Viewer would display its menus and titlebar incorrectly when running on a
 system that had the TightVNC Viewer installed.
@@ -32,10 +32,10 @@ system that had the TightVNC Viewer installed.
 [6]
 The Windows TurboVNC Viewer now accepts a scaling factor of "fixedratio" when
 using the /scale switch on the command line.  This was previously called "Auto"
-in the GUI, but the name was changed to match the Java Viewer.
+in the GUI, but the name was changed to match the Java TurboVNC Viewer.
 -------------------------------------------------------------------------------
 [7]
-All default options in the Unix TurboVNC Viewer now have a command-line
+All default options in the X11 TurboVNC Viewer now have a command-line
 equivalent, which is useful in case the defaults are overridden using a
 resource file.
 -------------------------------------------------------------------------------
@@ -43,11 +43,20 @@ resource file.
 Added a keyboard grabbing feature to the Windows TurboVNC Viewer so that it can
 optionally send special keystrokes (Alt-Tab, Ctrl-Esc, Menu key, etc.) to the
 VNC server.  The default behavior of this option is to enable grabbing only in
-full-screen mode (as the Unix TurboVNC Viewer already did), but a command-line
+full-screen mode (as the X11 TurboVNC Viewer already did), but a command-line
 option (-grabkeyboard) can be used to configure keyboard grabbing to be always
 on or always off.  Additionally, grabbing can always be turned on/off by
-pressing CTRL-ALT-SHIFT-G.  The Unix TurboVNC Viewer has been extended to
+pressing CTRL-ALT-SHIFT-G.  The X11 TurboVNC Viewer has been extended to
 support the same functionality.
+-------------------------------------------------------------------------------
+[9]
+Where possible, the naming of command-line options, resources, menu options,
+and parameters has been reconciled among the Windows, X11, and Java TurboVNC
+Viewers.
+-------------------------------------------------------------------------------
+[10]
+The window spanning feature in the Windows TurboVNC Viewer should now behave
+properly when fixed-ratio scaling is used.
 -------------------------------------------------------------------------------
 
 
@@ -91,7 +100,7 @@ and this caused some VNC viewers (notably, TigerVNC) to render a system default
 cursor instead of the empty cursor.  This has been fixed.
 -------------------------------------------------------------------------------
 [3]
-Fixed the rendering of empty cursors in the Unix TurboVNC Viewer.  This also
+Fixed the rendering of empty cursors in the X11 TurboVNC Viewer.  This also
 fixed an issue whereby the viewer would crash when opening recent versions of
 xterm in the TurboVNC Server session.
 -------------------------------------------------------------------------------
@@ -120,7 +129,7 @@ menu to manually resize and reposition the window to default values (taking
 into account the spanning option.)
 -------------------------------------------------------------------------------
 [8]
-Added Ctrl-Alt-Shift-F and Ctrl-Alt-Shift-R hotkeys to the Unix TurboVNC
+Added Ctrl-Alt-Shift-F and Ctrl-Alt-Shift-R hotkeys to the X11 TurboVNC
 Viewer to toggle full-screen mode and request a refresh (respectively.)  These
 emulate the behavior of the Windows TurboVNC Viewer.
 -------------------------------------------------------------------------------
@@ -159,7 +168,7 @@ display and compatibility.
 -------------------------------------------------------------------------------
 [3]
 Replaced the broken "software cursor" implementation of rich (full-color)
-cursor rendering in the Unix TurboVNC Viewer with a proper implementation that
+cursor rendering in the X11 TurboVNC Viewer with a proper implementation that
 uses the Xcursor library.  This specifically fixes pointer issues that occurred
 when connecting to the Unix TigerVNC 1.2 Server.
 -------------------------------------------------------------------------------
@@ -185,7 +194,7 @@ occasionally run TurboVNC without a window manager.
 -------------------------------------------------------------------------------
 [8]
 Fixed image corruption that occurred when using the Lossless Tight or Lossless
-Tight + Zlib protocols with the Unix TurboVNC Viewer running on a
+Tight + Zlib protocols with the X11 TurboVNC Viewer running on a
 16-bit-per-pixel X server.
 -------------------------------------------------------------------------------
 [9]
@@ -213,15 +222,15 @@ file to allow users to override this behavior and force full-screen windows to
 always occupy one monitor or all monitors.
 -------------------------------------------------------------------------------
 [14]
-Fixed numerous issues with full-screen mode in the Unix TurboVNC Viewer.
+Fixed numerous issues with full-screen mode in the X11 TurboVNC Viewer.
 -------------------------------------------------------------------------------
 [15]
 Implemented -autopass option in the Windows TurboVNC Viewer, which works the
-same as the equivalent option in the Unix TurboVNC Viewer.  In both viewers,
+same as the equivalent option in the X11 TurboVNC Viewer.  In both viewers,
 -autopass can now be used with Unix Login Authentication as well.
 -------------------------------------------------------------------------------
 [16]
-Added an option to the F8 menu in the Unix TurboVNC Viewer that allows
+Added an option to the F8 menu in the X11 TurboVNC Viewer that allows
 view-only mode to be enabled/disabled on an active VNC connection.
 -------------------------------------------------------------------------------
 [17]
@@ -280,7 +289,7 @@ Numerous build system changes, including the use of CMake for Windows builds
 and support for out-of-tree Xvnc builds.
 -------------------------------------------------------------------------------
 [6]
-Added a '-config' option to the Unix TurboVNC Viewer which allows it to read
+Added a '-config' option to the X11 TurboVNC Viewer which allows it to read
 .vnc connection info files saved by the Windows TurboVNC Viewer.
 -------------------------------------------------------------------------------
 
@@ -301,7 +310,7 @@ vncserver arguments can now be specified in the /etc/sysconfig/tvncservers file
 using an array called VNCSERVERARGS.  This works the same as in RealVNC 4.
 -------------------------------------------------------------------------------
 [4]
-The -via option in the Unix TurboVNC Viewer now uses ephemeral ports to bind
+The -via option in the X11 TurboVNC Viewer now uses ephemeral ports to bind
 the client side of the SSH tunnel.  This should prevent port conflicts that
 could occur when multiple vncviewer instances tried to use the -via option
 simultaneously.
@@ -545,7 +554,7 @@ available.  If the script fails to figure out an appropriate font path, then
 it will fall back to using xfs.
 -------------------------------------------------------------------------------
 [13]
-Changed the scrollbar behavior in the Unix TurboVNC Viewer to more closely
+Changed the scrollbar behavior in the X11 TurboVNC Viewer to more closely
 match that of "modern" windowing systems, in which the left mouse button is
 used to scroll in both directions.
 -------------------------------------------------------------------------------
@@ -619,7 +628,7 @@ for reducing CPU usage on the server and client (at the expense of increased
 network usage) when connecting over a gigabit (or faster) network.
 -------------------------------------------------------------------------------
 [5]
-Added a "Medium Quality" connection profile to the Windows, Unix, and Java
+Added a "Medium Quality" connection profile to the Windows, X11, and Java
 TurboVNC Viewers (and subsequently removed the "Broadband (favor image
 quality)" profile, which is no longer necessary due to [3].)  The "Medium
 Quality" profile sets the JPEG quality to 80 with 2X chrominance subsampling,
