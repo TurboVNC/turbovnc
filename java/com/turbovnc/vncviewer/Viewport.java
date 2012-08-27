@@ -41,6 +41,8 @@ public class Viewport extends JFrame
     sp = new JScrollPane();
     sp.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
     getContentPane().add(sp);
+    if (cc.viewer.os.startsWith("mac os x"))
+      setJMenuBar(new MacMenuBar(cc));
     addWindowFocusListener(new WindowAdapter() {
       public void windowGainedFocus(WindowEvent e) {
         sp.getViewport().getView().requestFocusInWindow();

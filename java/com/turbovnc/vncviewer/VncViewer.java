@@ -55,10 +55,11 @@ public class VncViewer extends java.applet.Applet implements Runnable
   public static String version = null;
   public static String build = null;
 
+  public static final String os = System.getProperty("os.name").toLowerCase();
+
   public static void setLookAndFeel() {
     try {
-      String os = System.getProperty("os.name");
-      if (os.startsWith("Windows")) {
+      if (os.startsWith("windows")) {
         String laf = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
         UIManager.setLookAndFeel(laf);
       } else {
@@ -74,6 +75,8 @@ public class VncViewer extends java.applet.Applet implements Runnable
         }
       }
       UIManager.put("TitledBorder.titleColor",Color.blue);
+      if (os.startsWith("mac os x"))
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
     } catch (java.lang.Exception e) { 
       vlog.info(e.toString());
     }
