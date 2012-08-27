@@ -1400,7 +1400,7 @@ void ClientConnection::ReadServerInit()
 	vnclog.Print(1, _T("Geometry %d x %d depth %d\n"),
 		m_si.framebufferWidth, m_si.framebufferHeight, m_si.format.depth);
 
-	SizeWindow(true);
+	SizeWindow(true, true);
 }
 
 
@@ -1500,9 +1500,9 @@ void ClientConnection::ReadCapabilityList(CapsContainer *caps, int count)
 	}
 }
 
-void ClientConnection::SizeWindow(bool centered)
+void ClientConnection::SizeWindow(bool centered, bool initial)
 {
-	if (InFullScreenMode()) return;
+	if (InFullScreenMode() && !initial) return;
 
 	// Find how large the desktop work area is
 	RECT screenArea, workrect;
@@ -1514,7 +1514,7 @@ void ClientConnection::SizeWindow(bool centered)
 
 	RECT fullwinrect;
 	
-	if (m_opts.m_scaling) {
+	if (m_opts.m_scaling && !m_opts.m_FitWindow) {
 		SetRect(&fullwinrect, 0, 0,
 				m_si.framebufferWidth * m_opts.m_scale_num / m_opts.m_scale_den,
 				m_si.framebufferHeight * m_opts.m_scale_num / m_opts.m_scale_den);

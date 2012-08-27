@@ -165,6 +165,11 @@ void ClientConnection::GetFullScreenMetrics(RECT &screenArea, RECT &workArea)
 		m_opts.m_scale_den;
 	int scaledHeight = m_si.framebufferHeight * m_opts.m_scale_num /
 		m_opts.m_scale_den;
+
+	if (m_opts.m_FitWindow) {
+		scaledWidth = m_si.framebufferWidth;
+		scaledHeight = m_si.framebufferHeight;
+	}
 	fsm.equal = 1;
 	fsm.screenArea.top = fsm.screenArea.left = 0;
 	fsm.screenArea.right = primaryWidth;

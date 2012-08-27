@@ -1,4 +1,4 @@
-//  Copyright (C) 2010 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010, 2012 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
@@ -143,7 +143,7 @@ private:
 
 	void ReadScreenUpdate();
 	void Update(RECT *pRect);
-	void SizeWindow(bool centered);
+	void SizeWindow(bool centered, bool initial=false);
 	void PositionChildWindow();
 	bool ScrollScreen(int dx, int dy);
 	void UpdateScrollbars();
