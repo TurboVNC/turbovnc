@@ -67,6 +67,9 @@ public class MacMenuBar extends JMenuBar implements ActionListener
     connMenu.add(fullScreen);
     fullScreen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,
                                                      acceleratorMask));
+    defaultSize = addMenuItem(connMenu, "Default window size/position");
+    defaultSize.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
+                                                  acceleratorMask));
     connMenu.addSeparator();
     ctrlAltDel = addMenuItem(connMenu, "Send Ctrl-Alt-Del");
     ctrlEsc = addMenuItem(connMenu, "Send Ctrl-Esc");
@@ -101,6 +104,8 @@ public class MacMenuBar extends JMenuBar implements ActionListener
     System.out.println(ev.getActionCommand());
     if (actionMatch(ev, fullScreen)) {
       cc.toggleFullScreen();
+    } else if (actionMatch(ev, defaultSize)) {
+      cc.sizeWindow();
     } else if (actionMatch(ev, clipboard)) {
       cc.clipboardDialog.showDialog(cc.viewport);
     } else if (actionMatch(ev, ctrlAltDel)) {
@@ -129,6 +134,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener
   }
 
   CConn cc;
+  JMenuItem defaultSize;
   JMenuItem clipboard, ctrlAltDel, ctrlEsc, refresh;
   JMenuItem newConn, options, info, about;
   JCheckBoxMenuItem fullScreen;

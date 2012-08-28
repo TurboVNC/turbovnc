@@ -520,9 +520,19 @@ public class CConn extends CConnection
   // better than attempting to resize the existing window, at least with
   // various X window managers.
 
+  static Rectangle savedRect = new Rectangle(-1, -1, 0, 0);
+  static int savedState = -1;
+
   private void recreateViewport()
   {
-    if (viewport != null) viewport.dispose();
+    if (viewport != null) {
+      if (fullScreen) {
+        savedState = viewport.getExtendedState();
+        viewport.setExtendedState(JFrame.NORMAL);
+        savedRect = viewport.getBounds();
+      }
+      viewport.dispose();
+    }
     viewport = new Viewport(cp.name(), this);
     viewport.setUndecorated(fullScreen);
     desktop.setViewport(viewport);
@@ -539,48 +549,125 @@ public class CConn extends CConnection
     desktop.requestFocusInWindow();
   }
 
-  private void reconfigureViewport()
+  private Rectangle getSpannedSize()
   {
-    //viewport.setMaxSize(cp.width, cp.height);
+    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    GraphicsDevice[] gsList = ge.getScreenDevices();
+    Dimension dpySize = viewport.getToolkit().getScreenSize();
+    Rectangle s0 = new Rectangle(0, 0, dpySize.width, dpySize.height);
+    Rectangle span = new Rectangle(s0);
+    int tLeft = 0, tTop = 0;
+    int tRight = s0.x + s0.width, tBottom = s0.y + s0.height;
+    boolean equal = true;
+    int sw = desktop.scaledWidth;
+    int sh = desktop.scaledHeight;
+
+    if (scalingFactor == SCALE_AUTO || scalingFactor == SCALE_FIXEDRATIO) {
+      sw = cp.width;
+      sh = cp.height;
+    }
+
+    for(GraphicsDevice gs : gsList) {
+      GraphicsConfiguration[] gcList = gs.getConfigurations();
+      for(GraphicsConfiguration gc : gcList) {
+        Rectangle s = gc.getBounds();
+        tLeft = Math.min(tLeft, s.x);
+        tRight = Math.max(tRight, s.x + s.width);
+        tTop = Math.min(tTop, s.y);
+        tBottom = Math.max(tBottom, s.y + s.height);
+
+        // If any monitors aren't equal in resolution to and evenly offset from
+        // the primary, then we can't use the simple path.
+        if (s.width != s0.width ||
+            s.height != s0.height ||
+            (Math.abs(s.y - s0.y) % s0.height) != 0 ||
+            (Math.abs(s.x - s0.x) % s0.width) != 0)
+            equal = false;
+
+        // If the screen areas of the primary monitor and this monitor overlap
+        // vertically, then allow the full-screen window to extend horizontally
+        // to this monitor, and constrain it vertically, if necessary, to fit
+        // within this monitor's dimensions.
+        if (Math.min(s.y + s.height, s0.y + s0.height) -
+            Math.max(s.y, s0.y) > 0) {
+          span.x = Math.min(s.x, span.x);
+          span.y = Math.max(s.y, span.y);
+          int right = Math.max(s.x + s.width, span.x + span.width);
+          span.width = span.x + right;
+          int bottom = Math.min(s.y + s.height, span.y + span.height);
+          span.height = span.y + bottom;
+        }
+      }
+    }
+
+    if (viewer.span.getValue().toLowerCase().charAt(0) == 'p' ||
+        (viewer.span.getValue().substring(0, 2).equalsIgnoreCase("au") &&
+         sw <= s0.width && sh <= s0.height))
+      return s0;
+    else {
+      if (equal)
+        return new Rectangle(tLeft, tTop, tRight - tLeft, tBottom - tTop);
+      else
+        return span;
+    }
+  }
+
+  // Resize non-full-screen window based on the spanning option
+  public void sizeWindow()
+  {
     boolean pack = true;
     Dimension dpySize = viewport.getToolkit().getScreenSize();
-    desktop.setScaledSize();
     int w = desktop.scaledWidth;
     int h = desktop.scaledHeight;
+    Rectangle span = getSpannedSize();
     GraphicsEnvironment ge =
       GraphicsEnvironment.getLocalGraphicsEnvironment();
-    GraphicsDevice gd = ge.getDefaultScreenDevice();
-    if (fullScreen) {
-      viewport.setExtendedState(JFrame.MAXIMIZED_BOTH);
-      viewport.setGeometry(0, 0, dpySize.width, dpySize.height, false);
-      if (gd.isFullScreenSupported())
-        gd.setFullScreenWindow(viewport);
-    } else {
-      int wmDecorationWidth = viewport.getInsets().left + viewport.getInsets().right;
-      int wmDecorationHeight = viewport.getInsets().top + viewport.getInsets().bottom;
-      if (w + wmDecorationWidth >= dpySize.width) {
-        w = dpySize.width - wmDecorationWidth;
-        pack = false;
-      }
-      if (h + wmDecorationHeight >= dpySize.height) {
-        h = dpySize.height - wmDecorationHeight;
-        pack = false;
-      }
+    Rectangle maxWinSize = ge.getMaximumWindowBounds();
+    int wmDecorationWidth = dpySize.width - maxWinSize.width;
+    int wmDecorationHeight = dpySize.height - maxWinSize.height;
 
-      if (viewport.getExtendedState() == JFrame.MAXIMIZED_BOTH) {
-        w = viewport.getSize().width;
-        h = viewport.getSize().height;
-        int x = viewport.getLocation().x;
-        int y = viewport.getLocation().y;
-        viewport.setGeometry(x, y, w, h, pack);
+    if (fullScreen) return;
+
+    if (scalingFactor == SCALE_AUTO || scalingFactor == SCALE_FIXEDRATIO) {
+      w = cp.width;
+      h = cp.height;
+      pack = false;
+    }
+
+    if (w + wmDecorationWidth >= span.width) {
+      w = span.width - wmDecorationWidth;
+      pack = false;
+    }
+    if (h + wmDecorationHeight >= span.height) {
+      h = span.height - wmDecorationHeight;
+      pack = false;
+    }
+
+    viewport.setExtendedState(JFrame.NORMAL);
+    int x = (span.width - w - wmDecorationWidth) / 2;
+    int y = (span.height - h - wmDecorationHeight) / 2;
+    viewport.setGeometry(x, y, w, h, pack);
+  }
+
+  private void reconfigureViewport()
+  {
+    desktop.setScaledSize();
+    if (fullScreen) {
+      Rectangle span = getSpannedSize();
+      viewport.setExtendedState(JFrame.NORMAL);
+      viewport.setGeometry(span.x, span.y, span.width,
+                           span.height, false);
+      viewport.setAlwaysOnTop(true);
+    } else {
+      if (savedRect.width > 0 && savedRect.height > 0) {
+        if (savedState >= 0)
+          viewport.setExtendedState(savedState);
+        viewport.setGeometry(savedRect.x, savedRect.y, savedRect.width,
+                             savedRect.height, false);
       } else {
-        int x = (dpySize.width - w - wmDecorationWidth) / 2;
-        int y = (dpySize.height - h - wmDecorationHeight)/2;
-        viewport.setExtendedState(JFrame.NORMAL);
-        viewport.setGeometry(x, y, w, h, pack);
+        sizeWindow();
       }
-      if (gd.isFullScreenSupported())
-        gd.setFullScreenWindow(null);
+      viewport.setAlwaysOnTop(false);
     }
   }
 

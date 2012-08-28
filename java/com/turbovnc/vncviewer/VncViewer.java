@@ -345,6 +345,13 @@ public class VncViewer extends java.applet.Applet implements Runnable
   = new BoolParameter("FullScreen",
   "Start the viewer in full-screen mode.", false);
 
+  StringParameter span
+  = new StringParameter("Span",
+  "This option specifies whether the viewer window should span all monitors, "+
+  "only the primary monitor, or whether it should span all monitors only if it "+
+  "cannot fit on the primary monitor (Auto.)", "Auto",
+  "Primary, All, Auto");
+
   StringParameter menuKey
   = new StringParameter("MenuKey",
   "The key used to display the popup menu", "F8",

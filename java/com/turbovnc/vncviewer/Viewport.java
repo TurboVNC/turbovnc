@@ -20,14 +20,13 @@
 
 package com.turbovnc.vncviewer;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.event.*;
-import java.awt.Dimension;
-import java.awt.Event;
 import javax.swing.*;
 
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
+import com.turbovnc.rfb.Cursor;
 
 public class Viewport extends JFrame
 {
@@ -55,10 +54,6 @@ public class Viewport extends JFrame
     });
     addComponentListener(new ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
-        if ((getExtendedState() != JFrame.MAXIMIZED_BOTH) &&
-            cc.fullScreen) {
-          cc.toggleFullScreen();
-        }
         if (cc.scalingFactor == CConn.SCALE_AUTO ||
             cc.scalingFactor == CConn.SCALE_FIXEDRATIO) {
           if ((sp.getSize().width != cc.desktop.scaledWidth) ||
@@ -66,14 +61,15 @@ public class Viewport extends JFrame
             int policy = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
             sp.setHorizontalScrollBarPolicy(policy);
             cc.desktop.setScaledSize();
-            sp.setSize(new Dimension(cc.desktop.scaledWidth,
-                                     cc.desktop.scaledHeight));
             sp.validate();
             if (getExtendedState() != JFrame.MAXIMIZED_BOTH &&
-                cc.scalingFactor == CConn.SCALE_FIXEDRATIO) {
+                !cc.fullScreen) {
+              sp.setSize(new Dimension(cc.desktop.scaledWidth,
+                                       cc.desktop.scaledHeight));
               int w = cc.desktop.scaledWidth + getInsets().left + getInsets().right;
               int h = cc.desktop.scaledHeight + getInsets().top + getInsets().bottom;
-              setSize(w, h);
+              if (cc.scalingFactor == CConn.SCALE_FIXEDRATIO)
+                setSize(w, h);
             }
             if (cc.desktop.cursor != null) {
               Cursor cursor = cc.desktop.cursor;
@@ -100,8 +96,7 @@ public class Viewport extends JFrame
     } else {
       setSize(w, h);
     }
-    if (!cc.fullScreen)
-      setLocation(x, y);
+    setLocation(x, y);
     setBackground(Color.BLACK);
   }
 
