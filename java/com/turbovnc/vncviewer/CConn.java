@@ -549,15 +549,14 @@ public class CConn extends CConnection
     desktop.requestFocusInWindow();
   }
 
-  private Rectangle getSpannedSize()
+  private Rectangle getSpannedSize(boolean fullScreen)
   {
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     GraphicsDevice[] gsList = ge.getScreenDevices();
-    Dimension dpySize = viewport.getToolkit().getScreenSize();
-    Rectangle s0 = new Rectangle(0, 0, dpySize.width, dpySize.height);
-    Rectangle span = new Rectangle(s0);
-    int tLeft = 0, tTop = 0;
-    int tRight = s0.x + s0.width, tBottom = s0.y + s0.height;
+    Rectangle primary = null, s0 = null;
+    Rectangle span = new Rectangle(-1, -1, 0, 0);
+    Insets in = new Insets(0, 0, 0, 0);
+    int tLeft = 0, tTop = 0, tRight = 0, tBottom = 0;
     boolean equal = true;
     int sw = desktop.scaledWidth;
     int sh = desktop.scaledHeight;
@@ -567,10 +566,30 @@ public class CConn extends CConnection
       sh = cp.height;
     }
 
+    Toolkit tk = Toolkit.getDefaultToolkit();
+
     for(GraphicsDevice gs : gsList) {
       GraphicsConfiguration[] gcList = gs.getConfigurations();
       for(GraphicsConfiguration gc : gcList) {
         Rectangle s = gc.getBounds();
+        if (!fullScreen) {
+          if (gc == gcList[0])
+            in = tk.getScreenInsets(gc);
+          s.setBounds(s.x + in.left, s.y + in.top,
+                      s.width - in.left - in.right,
+                      s.height - in.top - in.bottom);
+        }
+        if (s0 == null) {
+          s0 = s;
+          span.setBounds(s);
+          tLeft = s.x;  tTop = s.y;
+          tRight = s.x + s.width;  tBottom = s.y + s.height;
+        }
+        if (primary == null || (gc == gcList[0] &&
+                                (s.x < primary.x || s.y < primary.y))) {
+          primary = s;
+        }
+
         tLeft = Math.min(tLeft, s.x);
         tRight = Math.max(tRight, s.x + s.width);
         tTop = Math.min(tTop, s.y);
@@ -590,22 +609,23 @@ public class CConn extends CConnection
         // within this monitor's dimensions.
         if (Math.min(s.y + s.height, s0.y + s0.height) -
             Math.max(s.y, s0.y) > 0) {
+          int right = Math.max(s.x + s.width, span.x + span.width);
+          int bottom = Math.min(s.y + s.height, span.y + span.height);
           span.x = Math.min(s.x, span.x);
           span.y = Math.max(s.y, span.y);
-          int right = Math.max(s.x + s.width, span.x + span.width);
-          span.width = span.x + right;
-          int bottom = Math.min(s.y + s.height, span.y + span.height);
-          span.height = span.y + bottom;
+          span.width = right - span.x;
+          span.height = bottom - span.y;
         }
       }
     }
 
     if (viewer.span.getValue().toLowerCase().charAt(0) == 'p' ||
         (viewer.span.getValue().substring(0, 2).equalsIgnoreCase("au") &&
-         sw <= s0.width && sh <= s0.height))
-      return s0;
+         (sw <= primary.width || span.width <= primary.width) &&
+         (sh <= primary.height || span.height <= primary.height)))
+      return primary;
     else {
-      if (equal)
+      if (equal && fullScreen)
         return new Rectangle(tLeft, tTop, tRight - tLeft, tBottom - tTop);
       else
         return span;
@@ -616,15 +636,9 @@ public class CConn extends CConnection
   public void sizeWindow()
   {
     boolean pack = true;
-    Dimension dpySize = viewport.getToolkit().getScreenSize();
     int w = desktop.scaledWidth;
     int h = desktop.scaledHeight;
-    Rectangle span = getSpannedSize();
-    GraphicsEnvironment ge =
-      GraphicsEnvironment.getLocalGraphicsEnvironment();
-    Rectangle maxWinSize = ge.getMaximumWindowBounds();
-    int wmDecorationWidth = dpySize.width - maxWinSize.width;
-    int wmDecorationHeight = dpySize.height - maxWinSize.height;
+    Rectangle span = getSpannedSize(false);
 
     if (fullScreen) return;
 
@@ -634,18 +648,18 @@ public class CConn extends CConnection
       pack = false;
     }
 
-    if (w + wmDecorationWidth >= span.width) {
-      w = span.width - wmDecorationWidth;
+    if (w >= span.width) {
+      w = span.width;
       pack = false;
     }
-    if (h + wmDecorationHeight >= span.height) {
-      h = span.height - wmDecorationHeight;
+    if (h >= span.height) {
+      h = span.height;
       pack = false;
     }
 
     viewport.setExtendedState(JFrame.NORMAL);
-    int x = (span.width - w - wmDecorationWidth) / 2;
-    int y = (span.height - h - wmDecorationHeight) / 2;
+    int x = (span.width - w) / 2;
+    int y = (span.height - h) / 2;
     viewport.setGeometry(x, y, w, h, pack);
   }
 
@@ -653,7 +667,9 @@ public class CConn extends CConnection
   {
     desktop.setScaledSize();
     if (fullScreen) {
-      Rectangle span = getSpannedSize();
+      // NOTE: We have to use the work area on OS X, because there is no way
+      // to hide the menu bar in full-screen mode.
+      Rectangle span = getSpannedSize(!viewer.os.startsWith("mac os x"));
       viewport.setExtendedState(JFrame.NORMAL);
       viewport.setGeometry(span.x, span.y, span.width,
                            span.height, false);
