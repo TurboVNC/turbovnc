@@ -137,6 +137,7 @@ final class Inflate{
     return Z_OK;
   }
 
+  @SuppressWarnings("fallthrough")
   int inflate(ZStream z, int f){
     int r;
     int b;

@@ -426,6 +426,7 @@ public class JSch{
   /**
    * @deprecated use #removeIdentity(Identity identity)
    */
+  @Deprecated
   public void removeIdentity(String name) throws JSchException{
     Vector identities = identityRepository.getIdentities();
     for(int i=0; i<identities.size(); i++){

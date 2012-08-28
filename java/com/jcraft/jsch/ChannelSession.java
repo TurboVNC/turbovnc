@@ -77,6 +77,7 @@ class ChannelSession extends Channel{
    * @see #setEnv(String, String)
    * @see #setEnv(byte[], byte[])
    */
+  @Deprecated
   public void setEnv(Hashtable env){ 
     synchronized(this){
       this.env=env; 

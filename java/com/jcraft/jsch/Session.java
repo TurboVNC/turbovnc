@@ -162,6 +162,7 @@ public class Session implements Runnable{
     connect(timeout);
   }
 
+  @SuppressWarnings("fallthrough")
   public void connect(int connectTimeout) throws JSchException{
     if(isConnected){
       throw new JSchException("session is already connected");
@@ -1269,6 +1270,8 @@ key_type+" key fingerprint is "+key_fprint+".\n"+
   }
 
   Runnable thread;
+
+  @SuppressWarnings("fallthrough")
   public void run(){
     thread=this;
 

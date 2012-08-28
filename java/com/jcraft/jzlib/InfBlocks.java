@@ -123,6 +123,7 @@ final class InfBlocks{
       z.adler=check=z._adler.adler32(0L, null, 0, 0);
   }
 
+  @SuppressWarnings("fallthrough")
   int proc(ZStream z, int r){
     int t;              // temporary storage
     int b;              // bit buffer

@@ -104,6 +104,7 @@ final class InfCodes{
     tree=null;
   }
 
+  @SuppressWarnings("fallthrough")
   int proc(InfBlocks s, ZStream z, int r){ 
     int j;              // temporary storage
     int[] t;            // temporary pointer
