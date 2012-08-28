@@ -58,6 +58,12 @@ Viewers.
 The window spanning feature in the Windows TurboVNC Viewer should now behave
 properly when fixed-ratio scaling is used.
 -------------------------------------------------------------------------------
+[11]
+Fixed a logic error in the "automatic" spanning mode of the Windows TurboVNC
+Viewer, whereby it would try to extend the remote desktop window horizontally
+across multiple screens if the remote desktop height was taller than the local
+screen but the width was the same.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
