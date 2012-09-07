@@ -1,4 +1,5 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
+//  Copyright (C) 2012 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -25,9 +26,9 @@ class VNCviewerApp32 : public VNCviewerApp {
 public:
 	VNCviewerApp32(HINSTANCE hInstance, PSTR szCmdLine);
 	void ListenMode();
-	void NewConnection();
-	void NewConnection(TCHAR *host, int port);
-	void NewConnection(SOCKET sock);
+	int NewConnection();
+	int NewConnection(TCHAR *host, int port);
+	int NewConnection(SOCKET sock);
 	Daemon  *m_pdaemon;
 	~VNCviewerApp32();
 private:

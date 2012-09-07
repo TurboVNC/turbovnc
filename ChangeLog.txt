@@ -64,6 +64,11 @@ Viewer, whereby it would try to extend the remote desktop window horizontally
 across multiple screens if the remote desktop height was taller than the local
 screen but the width was the same.
 -------------------------------------------------------------------------------
+[12]
+The Windows TurboVNC Viewer will now return a non-zero exit status if it
+encounters an error.  This allows batch scripts to start the viewer with
+'start /wait' and check its exit status.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

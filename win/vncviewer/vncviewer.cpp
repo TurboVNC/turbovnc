@@ -40,6 +40,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR szCmdLin
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)
 #endif
 {
+	int retval = 0;
+
 	// The state of the application as a whole is contained in the one app object
 	#ifdef _WIN32_WCE
 		VNCviewerApp app(hInstance, szCmdLine);
@@ -51,10 +53,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	// or if not in listening mode
 	
 	if (app.m_options.m_connectionSpecified) {
-		app.NewConnection(app.m_options.m_host, app.m_options.m_port);
+		retval = app.NewConnection(app.m_options.m_host, app.m_options.m_port);
 	} else if (!app.m_options.m_listening) {
 		// This one will also read from config file if specified
-		app.NewConnection();
+		retval = app.NewConnection();
 	}
 
 	MSG msg;
@@ -68,11 +70,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
+			if (msg.message == WM_CLOSE) retval = (int)msg.wParam;
 		}
 	} catch (WarningException &e) {
 		e.Report();
+		retval = 1;
 	} catch (QuietException &e) {
 		e.Report();
+		retval = 1;
 	}
 	
 	// Clean up winsock
@@ -80,7 +85,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 
 	vnclog.Print(3, _T("Exiting\n"));
 
-	return (int)msg.wParam;
+	return retval;
 }
 
 

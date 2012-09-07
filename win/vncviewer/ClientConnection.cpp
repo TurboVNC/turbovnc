@@ -2772,7 +2772,7 @@ ClientConnection::SubProcessPointerEvent(int x, int y, DWORD keyflags)
 		}
 	} catch (Exception &e) {
 		e.Report();
-		PostMessage(m_hwnd1, WM_CLOSE, 0, 0);
+		PostMessage(m_hwnd1, WM_CLOSE, 1, 0);
 	}
 }
 
@@ -2893,7 +2893,7 @@ inline void ClientConnection::ProcessKeyEvent(int virtkey, DWORD keyData)
 		}
 	} catch (Exception &e) {
 		e.Report();
-		PostMessage(m_hwnd1, WM_CLOSE, 0, 0);
+		PostMessage(m_hwnd1, WM_CLOSE, 1, 0);
 	}
 
 }
@@ -3159,18 +3159,19 @@ void* ClientConnection::run_undetached(void* arg) {
 
 	} catch (WarningException &e) {
 		m_running = false;
-		PostMessage(m_hwnd1, WM_CLOSE, 0, 0);
 		if (!m_bKillThread) {
+			PostMessage(m_hwnd1, WM_CLOSE, 1, 0);
 			e.Report();
 		}
+		else PostMessage(m_hwnd1, WM_CLOSE, 0, 0);
 	} catch (ErrorException &e) {
 		m_running = false;
 		e.Report();
-		PostMessage(m_hwnd1, WM_CLOSE, 0, 0);
+		PostMessage(m_hwnd1, WM_CLOSE, 1, 0);
 	} catch (QuietException &e) {
 		m_running = false;
 		e.Report();
-		PostMessage(m_hwnd1, WM_CLOSE, 0, 0);
+		PostMessage(m_hwnd1, WM_CLOSE, 1, 0);
 	} 
 	return this;
 }

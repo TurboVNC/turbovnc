@@ -1,5 +1,6 @@
-//  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
+//  Copyright (C) 2000 Tridia Corporation. All Rights Reserved.
+//  Copyright (C) 2012 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -37,9 +38,9 @@ class VNCviewerApp {
 public:
 	VNCviewerApp(HINSTANCE hInstance, LPTSTR szCmdLine);
 	virtual void ListenMode()=0;
-	virtual void NewConnection() = 0;
-	virtual void NewConnection(TCHAR *host, int port) = 0;
-	virtual void NewConnection(SOCKET sock) = 0;
+	virtual int NewConnection() = 0;
+	virtual int NewConnection(TCHAR *host, int port) = 0;
+	virtual int NewConnection(SOCKET sock) = 0;
 		
 	~VNCviewerApp();
 

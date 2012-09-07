@@ -59,8 +59,8 @@ VNCviewerApp32::VNCviewerApp32(HINSTANCE hInstance, PSTR szCmdLine) :
 // These should maintain a list of connections.
 // FIXME: Eliminate duplicated code, see the following three functions.
 
-void VNCviewerApp32::NewConnection() {
-	int retries = 0;
+int VNCviewerApp32::NewConnection() {
+	int retries = 0, retval = 0;
 	ClientConnection *pcc;
 	ClientConnection *old_pcc;
 
@@ -68,7 +68,7 @@ void VNCviewerApp32::NewConnection() {
 	while (retries < MAX_AUTH_RETRIES) {
 		try {
 			pcc->Run();
-			return;
+			return retval;
 		} catch (AuthException &e) {
 			e.Report();
 			pcc->UnloadConnection();
@@ -78,17 +78,20 @@ void VNCviewerApp32::NewConnection() {
 			// Get the previous options for the next try.
 			pcc->CopyOptions(old_pcc);
 			delete old_pcc;
+			retval = 1;
 		} catch (Exception &e) {
 			e.Report();
+			retval = 1;
 			break;
 		}
 		retries++;
 	}
 	delete pcc;
+	return retval;
 }
 
-void VNCviewerApp32::NewConnection(TCHAR *host, int port) {
-	int retries = 0;
+int VNCviewerApp32::NewConnection(TCHAR *host, int port) {
+	int retries = 0, retval = 0;
 	ClientConnection *pcc;
 	ClientConnection *old_pcc;
 
@@ -96,7 +99,7 @@ void VNCviewerApp32::NewConnection(TCHAR *host, int port) {
 	while (retries < MAX_AUTH_RETRIES) {
 		try {
 			pcc->Run();
-			return;
+			return retval;
 		} catch (AuthException &e) {
 			e.Report();
 			// If the connection count drops to zero, the app exits.
@@ -105,17 +108,20 @@ void VNCviewerApp32::NewConnection(TCHAR *host, int port) {
 			// Get the previous options for the next try.
 			pcc->CopyOptions(old_pcc);
 			delete old_pcc;
+			retval = 1;
 		} catch (Exception &e) {
 			e.Report();	
+			retval = 1;
 			break;
 		}
 		retries++;
 	}
 	delete pcc;
+	return retval;
 }
 
-void VNCviewerApp32::NewConnection(SOCKET sock) {
-	int retries = 0;
+int VNCviewerApp32::NewConnection(SOCKET sock) {
+	int retries = 0, retval = 0;
 	ClientConnection *pcc;
 	ClientConnection *old_pcc;
 
@@ -123,7 +129,7 @@ void VNCviewerApp32::NewConnection(SOCKET sock) {
 	while (retries < MAX_AUTH_RETRIES) {
 		try {
 			pcc->Run();
-			return;
+			return retval;
 		} catch (AuthException &e) {
 			e.Report();
 			// If the connection count drops to zero, the app exits.
@@ -132,13 +138,16 @@ void VNCviewerApp32::NewConnection(SOCKET sock) {
 			// Get the previous options for the next try.
 			pcc->CopyOptions(old_pcc);
 			delete old_pcc;
+			retval = 1;
 		} catch (Exception &e) {
 			e.Report();
+			retval = 1;
 			break;
 		}
 		retries++;
 	}
 	delete pcc;
+	return retval;
 }
 
 void VNCviewerApp32::ListenMode() {
