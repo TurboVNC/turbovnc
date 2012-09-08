@@ -22,12 +22,14 @@
  * vncviewer.c - the Xt-based VNC viewer.
  */
 
+#include <stdio.h>
 #include <sys/socket.h>
 #include "vncviewer.h"
 
 char *programName;
 XtAppContext appContext;
 Display* dpy;
+FILE *benchFile = NULL;
 
 Widget toplevel;
 
@@ -64,6 +66,12 @@ main(int argc, char **argv)
 	exit(1);
       break;
     }
+    if (strcmp(argv[i], "-bench") == 0 && i < argc - 1) {
+      if ((benchFile = fopen(argv[++i], "rb")) == NULL) {
+	perror("Could not open session capture");
+	exit(1);
+      }
+    }
   }
 
   /* Call the main Xt initialisation function.  It parses command-line options,
@@ -79,21 +87,27 @@ main(int argc, char **argv)
 
   /* Interpret resource specs and process any remaining command-line arguments
      (i.e. the VNC server name).  If the server name isn't specified on the
-     command line, getArgsAndResources() will pop up a dialog box and wait
+     command line, GetArgsAndResources() will pop up a dialog box and wait
      for one to be entered. */
 
   GetArgsAndResources(argc, argv);
 
-  /* Unless we accepted an incoming connection, make a TCP connection to the
-     given VNC server */
+  if (!benchFile) {
 
-  if (!listenSpecified) {
-    if (!ConnectToRFBServer(vncServerHost, vncServerPort)) exit(1);
+    /* Unless we accepted an incoming connection, make a TCP connection to the
+       given VNC server */
+
+    if (!listenSpecified) {
+      if (!ConnectToRFBServer(vncServerHost, vncServerPort)) exit(1);
+    }
+
+    /* Initialise the VNC connection, including reading the password */
+
+    if (!InitialiseRFBConnection()) exit(1);
+
+  } else {
+    if (!ReadServerInitMessage()) exit(1);
   }
-
-  /* Initialise the VNC connection, including reading the password */
-
-  if (!InitialiseRFBConnection()) exit(1);
 
   /* Create the "popup" widget - this won't actually appear on the screen until
      some user-defined event causes the "ShowPopup" action to be invoked */
@@ -123,6 +137,13 @@ main(int argc, char **argv)
   ToplevelInitAfterRealization();
 
   DesktopInitAfterRealization();
+
+  /* Run benchmark */
+
+  if (benchFile) {
+    if (!RunBenchmark()) exit(1);
+    exit(0);
+  }
 
   /* Tell the VNC server which pixel format and encodings we want to use */
 

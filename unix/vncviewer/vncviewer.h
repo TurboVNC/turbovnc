@@ -252,6 +252,7 @@ extern void Quit(Widget w, XEvent *event, String *params,
 extern void Cleanup();
 extern void UpdateTitleString(char *str, int len);
 extern void SetLastEncoding(int enc);
+extern double tReadTime;
 
 /* popup.c */
 
@@ -345,3 +346,4 @@ extern char *programName;
 extern XtAppContext appContext;
 extern Display* dpy;
 extern Widget toplevel;
+extern FILE *benchFile;

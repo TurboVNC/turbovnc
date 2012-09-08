@@ -36,6 +36,7 @@ static Bool IconifyNamedWindow(Window w, char *name, Bool undo);
 
 Dimension dpyWidth, dpyHeight;
 Atom wmDeleteWindow, wmState;
+double tReadTime = 0.0;
 
 static Bool xloginIconified = False;
 static XErrorHandler defaultXErrorHandler;
@@ -43,6 +44,7 @@ static XIOErrorHandler defaultXIOErrorHandler;
 static XtErrorHandler defaultXtErrorHandler;
 
 extern void ShutdownThreads(void);
+extern double gettime(void);
 
 /*
  * HasEncoding returns True if the encodings string contains the given
@@ -450,4 +452,21 @@ IconifyNamedWindow(Window w, char *name, Bool undo)
   }
   if (children) XFree ((char *)children);
   return False;
+}
+
+/*
+ * Measure how long it takes to decode and display a pre-encoded RFB session
+ * capture.
+ */
+
+Bool
+RunBenchmark(void)
+{
+  double tStart = gettime(), tTotal;
+  printf("Benchmarking ...\n", tStart, tTotal);
+  while (HandleRFBServerMessage()) {
+  }
+  tTotal = gettime() - tStart - tReadTime;
+  printf("Total time:  %f seconds\n",  tTotal);
+  return TRUE;
 }

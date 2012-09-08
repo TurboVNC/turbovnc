@@ -375,6 +375,38 @@ ConnectToRFBServer(const char *hostname, int port)
 }
 
 
+Bool
+ReadServerInitMessage(void)
+{
+  if (!ReadFromRFBServer((char *)&si, sz_rfbServerInitMsg))
+    return False;
+
+  si.framebufferWidth = Swap16IfLE(si.framebufferWidth);
+  si.framebufferHeight = Swap16IfLE(si.framebufferHeight);
+  si.format.redMax = Swap16IfLE(si.format.redMax);
+  si.format.greenMax = Swap16IfLE(si.format.greenMax);
+  si.format.blueMax = Swap16IfLE(si.format.blueMax);
+  si.nameLength = Swap32IfLE(si.nameLength);
+
+  /* FIXME: Check arguments to malloc() calls. */
+  desktopName = malloc(si.nameLength + 1);
+  if (!desktopName) {
+    fprintf(stderr, "Error allocating memory for desktop name, %lu bytes\n",
+            (unsigned long)si.nameLength);
+    return False;
+  }
+
+  if (!ReadFromRFBServer(desktopName, si.nameLength)) return False;
+
+  desktopName[si.nameLength] = 0;
+
+  fprintf(stderr,"Desktop name \"%s\"\n",desktopName);
+
+  fprintf(stderr,"VNC server default format:\n");
+  PrintPixelFormat(&si.format);
+}
+
+
 /*
  * InitialiseRFBConnection.
  */
@@ -463,32 +495,8 @@ InitialiseRFBConnection(void)
   if (!WriteExact(rfbsock, (char *)&ci, sz_rfbClientInitMsg))
     return False;
 
-  if (!ReadFromRFBServer((char *)&si, sz_rfbServerInitMsg))
+  if (!ReadServerInitMessage())
     return False;
-
-  si.framebufferWidth = Swap16IfLE(si.framebufferWidth);
-  si.framebufferHeight = Swap16IfLE(si.framebufferHeight);
-  si.format.redMax = Swap16IfLE(si.format.redMax);
-  si.format.greenMax = Swap16IfLE(si.format.greenMax);
-  si.format.blueMax = Swap16IfLE(si.format.blueMax);
-  si.nameLength = Swap32IfLE(si.nameLength);
-
-  /* FIXME: Check arguments to malloc() calls. */
-  desktopName = malloc(si.nameLength + 1);
-  if (!desktopName) {
-    fprintf(stderr, "Error allocating memory for desktop name, %lu bytes\n",
-            (unsigned long)si.nameLength);
-    return False;
-  }
-
-  if (!ReadFromRFBServer(desktopName, si.nameLength)) return False;
-
-  desktopName[si.nameLength] = 0;
-
-  fprintf(stderr,"Desktop name \"%s\"\n",desktopName);
-
-  fprintf(stderr,"VNC server default format:\n");
-  PrintPixelFormat(&si.format);
 
   if (tightVncProtocol) {
     /* Read interaction capabilities (protocol 3.7t, 3.8t) */

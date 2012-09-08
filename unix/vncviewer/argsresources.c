@@ -845,6 +845,7 @@ GetArgsAndResources(int argc, char **argv)
      resource specs */
 
   XtAppAddActions(appContext, actions, XtNumber(actions));
+  if (benchFile) return;
 
   /* Check any remaining command-line arguments.  If -listen was specified
      there should be none.  Otherwise the only argument should be the VNC
