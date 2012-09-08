@@ -134,8 +134,8 @@ static char buffer[BUFFER_SIZE];
  */
 
 /* Four independent compression streams for zlib library. */
-static z_stream zlibStream[4];
-static Bool zlibStreamActive[4] = {
+z_stream zlibStream[4];
+Bool zlibStreamActive[4] = {
   False, False, False, False
 };
 
@@ -404,6 +404,8 @@ ReadServerInitMessage(void)
 
   fprintf(stderr,"VNC server default format:\n");
   PrintPixelFormat(&si.format);
+
+  if (benchFile) benchFileStart = ftell(benchFile);
 }
 
 

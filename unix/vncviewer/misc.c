@@ -27,6 +27,7 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <sys/wait.h>
+#include <zlib.h>
 
 static void CleanupSignalHandler(int sig);
 static int CleanupXErrorHandler(Display *dpy, XErrorEvent *error);
@@ -45,6 +46,8 @@ static XtErrorHandler defaultXtErrorHandler;
 
 extern void ShutdownThreads(void);
 extern double gettime(void);
+extern z_stream zlibStream[4];
+extern Bool zlibStreamActive[4];
 
 /*
  * HasEncoding returns True if the encodings string contains the given
@@ -462,11 +465,31 @@ IconifyNamedWindow(Window w, char *name, Bool undo)
 Bool
 RunBenchmark(void)
 {
-  double tStart = gettime(), tTotal;
-  printf("Benchmarking ...\n", tStart, tTotal);
-  while (HandleRFBServerMessage()) {
+  int i, stream_id;
+  double tStart, tTotal, tAvg = 0.0;
+
+  for (i = 0; i < benchIter; i++) {
+    tStart = gettime();
+    printf("Benchmark run %3d:  ", i + 1);
+    while (HandleRFBServerMessage()) {
+    }
+    tTotal = gettime() - tStart - tReadTime;
+    printf("%f seconds\n", tTotal);
+    tAvg += tTotal;
+    ShutdownThreads();
+    for (stream_id = 0; stream_id < 4; stream_id++) {
+      if (zlibStreamActive[stream_id]) {
+        if (inflateEnd (&zlibStream[stream_id]) != Z_OK &&
+	    zlibStream[stream_id].msg != NULL) {
+	  fprintf(stderr, "inflateEnd: %s\n", zlibStream[stream_id].msg);
+	  return False;
+        }
+      }
+      zlibStreamActive[stream_id] = False;
+    }
+    fseek(benchFile, benchFileStart, SEEK_SET);
   }
-  tTotal = gettime() - tStart - tReadTime;
-  printf("Total time:  %f seconds\n",  tTotal);
+  if (benchIter > 1)
+    printf("Average          :  %f seconds\n", tAvg / (double)benchIter);
   return TRUE;
 }

@@ -30,6 +30,8 @@ char *programName;
 XtAppContext appContext;
 Display* dpy;
 FILE *benchFile = NULL;
+int benchIter = 1;
+long benchFileStart = -1;
 
 Widget toplevel;
 
@@ -71,6 +73,10 @@ main(int argc, char **argv)
 	perror("Could not open session capture");
 	exit(1);
       }
+    }
+    if (strcmp(argv[i], "-benchiter") == 0 && i < argc -1) {
+      int iter = atoi(argv[++i]);
+      if (iter > 0) benchIter = iter;
     }
   }
 
@@ -141,7 +147,9 @@ main(int argc, char **argv)
   /* Run benchmark */
 
   if (benchFile) {
-    if (!RunBenchmark()) exit(1);
+    Bool status = RunBenchmark();
+    Cleanup();
+    if (!status) exit(1);
     exit(0);
   }
 
