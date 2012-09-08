@@ -583,6 +583,7 @@ usage(void)
 	  "        -passwd <PASSWD-FILENAME> (standard VNC authentication)\n"
 	  "        -autopass\n"
 	  "        -via <GATEWAY>\n"
+	  "        -tunnel\n"
 	  "        -config <CONFIG-FILENAME>\n"
 	  "\n"
 	  "Option names may be abbreviated (for example: -q instead of -quality.)\n"
