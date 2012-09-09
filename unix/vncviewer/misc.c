@@ -476,6 +476,7 @@ RunBenchmark(void)
     tTotal = gettime() - tStart - tReadTime;
     printf("%f seconds\n", tTotal);
     tAvg += tTotal;
+    tReadTime = 0.0;
     ShutdownThreads();
     for (stream_id = 0; stream_id < 4; stream_id++) {
       if (zlibStreamActive[stream_id]) {

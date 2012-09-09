@@ -90,13 +90,17 @@ ReadFromRFBServer(char *out, unsigned int n)
   double tRecvStart = 0.0, tReadStart = 0.0;
 
   if (benchFile) {
+    Bool status = True;
     tReadStart = gettime();
     if (fread(out, n, 1, benchFile) < 1) {
-      if (errno != 0) perror("Cannot read from session capture");
-      return False;
+      if (ferror(benchFile)) {
+	perror("Cannot read from session capture");
+	clearerr(benchFile);
+      }
+      status = False;
     }
     tReadTime += gettime() - tReadStart;
-    return True;
+    return status;
   }
 
   if (rfbProfile) tRecvStart = gettime();
