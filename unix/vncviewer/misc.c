@@ -37,7 +37,7 @@ static Bool IconifyNamedWindow(Window w, char *name, Bool undo);
 
 Dimension dpyWidth, dpyHeight;
 Atom wmDeleteWindow, wmState;
-double tReadTime = 0.0;
+double tRead = 0.0;
 
 static Bool xloginIconified = False;
 static XErrorHandler defaultXErrorHandler;
@@ -473,10 +473,10 @@ RunBenchmark(void)
     printf("Benchmark run %3d:  ", i + 1);
     while (HandleRFBServerMessage()) {
     }
-    tTotal = gettime() - tStart - tReadTime;
+    tTotal = gettime() - tStart - tRead;
     printf("%f seconds\n", tTotal);
     tAvg += tTotal;
-    tReadTime = 0.0;
+    tRead = 0.0;
     ShutdownThreads();
     for (stream_id = 0; stream_id < 4; stream_id++) {
       if (zlibStreamActive[stream_id]) {

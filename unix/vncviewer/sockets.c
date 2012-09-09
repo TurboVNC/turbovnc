@@ -99,7 +99,7 @@ ReadFromRFBServer(char *out, unsigned int n)
       }
       status = False;
     }
-    tReadTime += gettime() - tReadStart;
+    tRead += gettime() - tReadStart;
     return status;
   }
 

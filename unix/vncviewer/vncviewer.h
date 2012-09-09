@@ -252,7 +252,7 @@ extern void Quit(Widget w, XEvent *event, String *params,
 extern void Cleanup();
 extern void UpdateTitleString(char *str, int len);
 extern void SetLastEncoding(int enc);
-extern double tReadTime;
+extern double tRead;
 
 /* popup.c */
 
