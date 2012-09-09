@@ -144,7 +144,7 @@ public class CConn extends CConnection
     if (sock != null) {
       String name = sock.getPeerEndpoint();
       vlog.info("Accepted connection from "+name);
-    } else {
+    } else if (viewer.benchFile == null) {
       if (vncServerName != null &&
           !viewer.alwaysShowConnectionDialog.getValue()) {
         serverHost = Hostname.getHost(vncServerName);
@@ -169,10 +169,16 @@ public class CConn extends CConnection
       vlog.info("connected to host "+serverHost+" port "+serverPort);
     }
 
-    sock.inStream().setBlockCallback(this);
-    setServerName(serverHost);
-    setStreams(sock.inStream(), sock.outStream());
-    initialiseProtocol();
+    if (viewer.benchFile != null) {
+      state_ = RFBSTATE_INITIALISATION;
+      reader_ = new CMsgReaderV3(this, new FdInStream(viewer.benchFile));
+      writer_ = new CMsgWriterV3(cp, new NullOutStream());
+    } else {
+      sock.inStream().setBlockCallback(this);
+      setServerName(serverHost);
+      setStreams(sock.inStream(), sock.outStream());
+      initialiseProtocol();
+    }
   }
 
   public void refreshFramebuffer()
@@ -428,14 +434,14 @@ public class CConn extends CConnection
   // avoid skewing the bandwidth estimation as a result of the server
   // being slow or the network having high latency
   public void beginRect(Rect r, int encoding) {
-    sock.inStream().startTiming();
+    if (viewer.benchFile == null) sock.inStream().startTiming();
     if (encoding != Encodings.encodingCopyRect) {
       lastServerEncoding = encoding;
     }
   }
 
   public void endRect(Rect r, int encoding) {
-    sock.inStream().stopTiming();
+    if (viewer.benchFile == null) sock.inStream().stopTiming();
   }
 
   public void fillRect(Rect r, int p) {

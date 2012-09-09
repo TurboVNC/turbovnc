@@ -169,7 +169,7 @@ abstract public class CMsgReader {
     return false;
   }
 
-  abstract public void readServerInit();
+  abstract public void readServerInit(boolean benchmark);
 
   // readMsg() reads a message, calling the handler as appropriate.
   abstract public void readMsg();

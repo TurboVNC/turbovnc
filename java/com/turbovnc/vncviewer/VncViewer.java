@@ -104,6 +104,26 @@ public class VncViewer extends java.applet.Applet implements Runnable
         continue;
       }
 
+      if (argv[i].equalsIgnoreCase("-bench")) {
+        if (i < argv.length - 1) {
+          try {
+            benchFile = new FileInStream(argv[++i]);
+          } catch (java.lang.Exception e) {
+            System.out.println("Could not open session capture:\n"+e.toString());
+            exit(1);
+          }
+        }
+        continue;
+      }
+
+      if (argv[i].equalsIgnoreCase("-benchiter")) {
+        if (i < argv.length - 1) {
+          int iter = Integer.parseInt(argv[++i]);
+          if (iter > 0) benchIter = iter;
+        }
+        continue;
+      }
+
       if (Configuration.setParam(argv[i]))
         continue;
 
@@ -244,6 +264,10 @@ public class VncViewer extends java.applet.Applet implements Runnable
     g.drawString(about3, 0, h);
   }
 
+  double getTime() {
+    return (double)System.nanoTime() / 1.0e9;
+  }
+
   public void run() {
     CConn cc = null;
     int exitStatus = 0;
@@ -274,26 +298,54 @@ public class VncViewer extends java.applet.Applet implements Runnable
       }
     }
 
-    try {
-      cc = new CConn(this, sock, vncServerName.getValue());
-      while (!cc.shuttingDown)
-        cc.processMsg();
-    } catch (java.lang.Exception e) {
-      if (cc == null || !cc.shuttingDown) {
-        e.printStackTrace();
-        JOptionPane.showMessageDialog(null,
-          e.toString(),
-          "VNC Viewer : Error",
-          JOptionPane.ERROR_MESSAGE);
-        exitStatus = 1;
-      } else {
-        if (!cc.shuttingDown) {
-          vlog.info(e.toString());
-          exitStatus = 1;
+    double tAvg = 0.0;
+    if (benchFile == null) benchIter = 1;
+
+    for (int i = 0; i < benchIter; i++) {
+      double tStart = 0.0, tTotal;
+
+      try {
+        cc = new CConn(this, sock, vncServerName.getValue());
+        if (benchFile != null) {
+          System.out.format("Benchmark run %d:\n", i + 1);
+          tStart = getTime();
+          try {
+            while (!cc.shuttingDown)
+              cc.processMsg(true);
+          } catch (com.turbovnc.rdr.Exception e) {
+            if (!e.getMessage().equalsIgnoreCase("Timed out")) throw e;
+          }
+          tTotal = getTime() - tStart - benchFile.getReadTime();
+          System.out.format("%f seconds\n", tTotal);
+          tAvg += tTotal;
+          benchFile.reset();
+          benchFile.resetReadTime();
+        } else {
+          while (!cc.shuttingDown)
+            cc.processMsg(false);
         }
-        cc = null;
+      } catch (java.lang.Exception e) {
+        if (cc == null || !cc.shuttingDown) {
+          e.printStackTrace();
+          JOptionPane.showMessageDialog(null,
+            e.toString(),
+            "VNC Viewer : Error",
+            JOptionPane.ERROR_MESSAGE);
+          exitStatus = 1;
+        } else {
+          if (!cc.shuttingDown) {
+            vlog.info(e.toString());
+            exitStatus = 1;
+          }
+          cc = null;
+        }
       }
     }
+
+    if (benchFile != null && benchIter > 1)
+      System.out.format("Average          :  %f seconds\n",
+                        tAvg / (double)benchIter);
+
     exit(exitStatus);
   }
 
@@ -542,4 +594,6 @@ public class VncViewer extends java.applet.Applet implements Runnable
   Image logo;
   static int nViewers;
   static LogWriter vlog = new LogWriter("main");
+  FileInStream benchFile;
+  int benchIter = 1;
 }

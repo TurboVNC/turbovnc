@@ -1,6 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman for Cendio AB
  * Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +32,7 @@ public class CMsgReaderV3 extends CMsgReader {
     nUpdateRectsLeft = 0;
   }
 
-  public void readServerInit() 
+  public void readServerInit(boolean benchmark) 
   {
     int width = is.readU16();
     int height = is.readU16();
@@ -41,7 +42,7 @@ public class CMsgReaderV3 extends CMsgReader {
     handler.setPixelFormat(pf);
     String name = is.readString();
     handler.setName(name);
-    if (handler.getCurrentCSecurity().getType() == Security.secTypeTight) {
+    if (!benchmark && handler.getCurrentCSecurity().getType() == Security.secTypeTight) {
       int nServerMsg = is.readU16();
       int nClientMsg = is.readU16();
       int nEncodings = is.readU16();

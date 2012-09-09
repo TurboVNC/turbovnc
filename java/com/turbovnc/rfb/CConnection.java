@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +56,7 @@ abstract public class CConnection extends CMsgHandler {
 
   // processMsg() should be called whenever there is data to read on the
   // InStream.  You must have called initialiseProtocol() first.
-  public void processMsg() 
+  public void processMsg(boolean benchmark) 
   {
     switch (state_) {
 
@@ -63,7 +64,7 @@ abstract public class CConnection extends CMsgHandler {
     case RFBSTATE_SECURITY_TYPES:   processSecurityTypesMsg();  break;
     case RFBSTATE_SECURITY:         processSecurityMsg();       break;
     case RFBSTATE_SECURITY_RESULT:  processSecurityResultMsg(); break;
-    case RFBSTATE_INITIALISATION:   processInitMsg();           break;
+    case RFBSTATE_INITIALISATION:   processInitMsg(benchmark);  break;
     case RFBSTATE_NORMAL:           reader_.readMsg();          break;
     case RFBSTATE_UNINITIALISED:
       throw new Exception("CConnection.processMsg: not initialised yet?");
@@ -231,9 +232,9 @@ abstract public class CConnection extends CMsgHandler {
     throw new AuthFailureException(reason);
   }
 
-  private void processInitMsg() {
+  private void processInitMsg(boolean benchmark) {
     vlog.debug("reading server initialisation");
-    reader_.readServerInit();
+    reader_.readServerInit(benchmark);
   }
 
   private void throwConnFailedException() {
@@ -380,14 +381,14 @@ abstract public class CConnection extends CMsgHandler {
   InStream is;
   OutStream os;
   protected CMsgReaderV3 reader_;
-  CMsgWriterV3 writer_;
+  protected CMsgWriterV3 writer_;
   boolean shared;
   public CSecurity csecurity;
   public SecurityClient security;
   public static final int maxSecTypes = 8;
   int nSecTypes;
   int[] secTypes;
-  int state_ = RFBSTATE_UNINITIALISED;
+  protected int state_ = RFBSTATE_UNINITIALISED;
   String serverName;
   int serverPort;
   boolean useProtocol3_3;
