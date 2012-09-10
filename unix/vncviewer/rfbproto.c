@@ -1647,27 +1647,27 @@ HandleRFBServerMessage()
 
     if (appData.doubleBuffer) {
       if (rfbProfile || benchFile) tBlitStart = gettime();
-        while (list != NULL) {
-          rfbFramebufferUpdateRectHeader* r1;
-          node = list;
-          r1 = &node->region;
+      while (list != NULL) {
+        rfbFramebufferUpdateRectHeader* r1;
+        node = list;
+        r1 = &node->region;
 
-          if (r1->encoding == rfbEncodingTight ||
-              r1->encoding == rfbEncodingRaw ||
-              r1->encoding == rfbEncodingHextile) {
-            if (node->isFill) {
-              XChangeGC(dpy, gc, GCForeground, &node->gcv);
-              XFillRectangle(dpy, desktopWin, gc,
-                             r1->r.x, r1->r.y, r1->r.w, r1->r.h);
+        if (r1->encoding == rfbEncodingTight ||
+            r1->encoding == rfbEncodingRaw ||
+            r1->encoding == rfbEncodingHextile) {
+          if (node->isFill) {
+            XChangeGC(dpy, gc, GCForeground, &node->gcv);
+            XFillRectangle(dpy, desktopWin, gc,
+                           r1->r.x, r1->r.y, r1->r.w, r1->r.h);
 
-            } else
-              CopyImageToScreen(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
-          }
-
-          list = list->next;
-          free(node);
+          } else
+            CopyImageToScreen(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
         }
-        if (rfbProfile || benchFile) tBlit += gettime() - tBlitStart;
+
+        list = list->next;
+        free(node);
+      }
+      if (rfbProfile || benchFile) tBlit += gettime() - tBlitStart;
     }
 
 #ifdef MITSHM
