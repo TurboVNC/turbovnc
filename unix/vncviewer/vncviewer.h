@@ -84,10 +84,6 @@ enum {TVNC_1X = 0, TVNC_4X, TVNC_2X, TVNC_GRAY};
 #define TVNC_GRABOPT 3
 enum {TVNC_FS = 0, TVNC_ALWAYS, TVNC_MANUAL};
 
-static const char *subsampLevel2str[TVNC_SAMPOPT] = {
-  "1X", "4X", "2X", "Gray"
-};
-
 /* argsresources.c */
 
 typedef struct {

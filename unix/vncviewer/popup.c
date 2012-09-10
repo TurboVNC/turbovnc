@@ -116,7 +116,7 @@ void
 qualScrollProc(Widget w, XtPointer client, XtPointer p)
 {
   float size, val;  int qual;  long pos = (long)p;
-  XtVaGetValues(w, XtNshown, &size, XtNtopOfThumb, &val, 0);
+  XtVaGetValues(w, XtNshown, &size, XtNtopOfThumb, &val, NULL);
   if (pos < 0) val -= .1;  else val += .1;
   qual = (int)(val * 100.);
   if (qual < 1) qual = 1;  if (qual > 100) qual = 100;

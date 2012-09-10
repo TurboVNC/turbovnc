@@ -49,6 +49,10 @@ extern double gettime(void);
 extern z_stream zlibStream[4];
 extern Bool zlibStreamActive[4];
 
+static const char *subsampLevel2str[TVNC_SAMPOPT] = {
+  "1X", "4X", "2X", "Gray"
+};
+
 /*
  * HasEncoding returns True if the encodings string contains the given
  * substring.
