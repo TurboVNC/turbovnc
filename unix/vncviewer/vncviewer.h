@@ -55,9 +55,9 @@ extern int endianTest;
 
 #define Swap32IfLE(l) \
     (*(char *)&endianTest ? ((((l) & 0xff000000) >> 24) | \
-			     (((l) & 0x00ff0000) >> 8)  | \
-			     (((l) & 0x0000ff00) << 8)  | \
-			     (((l) & 0x000000ff) << 24))  : (l))
+                             (((l) & 0x00ff0000) >> 8)  | \
+                             (((l) & 0x0000ff00) << 8)  | \
+                             (((l) & 0x000000ff) << 24))  : (l))
 
 #define MAX_ENCODINGS 20
 
@@ -79,10 +79,10 @@ extern int endianTest;
  * with TVNC 0.3.x
  */
 #define TVNC_SAMPOPT 4
-enum {TVNC_1X=0, TVNC_4X, TVNC_2X, TVNC_GRAY};
+enum {TVNC_1X = 0, TVNC_4X, TVNC_2X, TVNC_GRAY};
 
 #define TVNC_GRABOPT 3
-enum {TVNC_FS=0, TVNC_ALWAYS, TVNC_MANUAL};
+enum {TVNC_FS = 0, TVNC_ALWAYS, TVNC_MANUAL};
 
 static const char *subsampLevel2str[TVNC_SAMPOPT] = {
   "1X", "4X", "2X", "Gray"
@@ -190,7 +190,7 @@ extern Dimension dpyWidth, dpyHeight;
 extern void DesktopInitBeforeRealization();
 extern void DesktopInitAfterRealization();
 extern void SendRFBEvent(Widget w, XEvent *event, String *params,
-			 Cardinal *num_params);
+                         Cardinal *num_params);
 extern void CopyDataToImage(char *buf, int x, int y, int width, int height);
 extern void CopyImageToScreen(int x, int y, int width, int height);
 extern void SynchroniseScreen();
@@ -204,30 +204,30 @@ extern void LosslessRefresh(Widget, XEvent *, String *, Cardinal *);
 /* dialogs.c */
 
 extern void ServerDialogDone(Widget w, XEvent *event, String *params,
-			     Cardinal *num_params);
+                             Cardinal *num_params);
 extern char *DoServerDialog();
 extern void PasswordDialogDone(Widget w, XEvent *event, String *params,
-			     Cardinal *num_params);
+                             Cardinal *num_params);
 extern char *DoPasswordDialog();
 
 extern void UserPwdSetFocus(Widget w, XEvent *event, String *params,
-			     Cardinal *num_params);
+                             Cardinal *num_params);
 extern void UserPwdNextField(Widget w, XEvent *event, String *params,
-			     Cardinal *num_params);
+                             Cardinal *num_params);
 extern void UserPwdDialogDone(Widget w, XEvent *event, String *params,
-			     Cardinal *num_params);
+                             Cardinal *num_params);
 extern void DoUserPwdDialog(char** user, char** password);
 
 /* fullscreen.c */
 
 extern void ToggleFullScreen(Widget w, XEvent *event, String *params,
-			     Cardinal *num_params);
+                             Cardinal *num_params);
 extern void ToggleGrabKeyboard(Widget w, XEvent *event, String *params,
-			     Cardinal *num_params);
+                             Cardinal *num_params);
 extern void SetFullScreenState(Widget w, XEvent *event, String *params,
-			       Cardinal *num_params);
+                               Cardinal *num_params);
 extern void SetGrabKeyboardState(Widget w, XEvent *event, String *params,
-				 Cardinal *num_params);
+                                 Cardinal *num_params);
 extern Bool BumpScroll(XEvent *ev);
 extern void FullScreenOn();
 extern void FullScreenOff();
@@ -244,11 +244,11 @@ extern void ToplevelInitBeforeRealization();
 extern void ToplevelInitAfterRealization();
 extern Time TimeFromEvent(XEvent *ev);
 extern void Pause(Widget w, XEvent *event, String *params,
-		  Cardinal *num_params);
+                  Cardinal *num_params);
 extern void RunCommand(Widget w, XEvent *event, String *params,
-		       Cardinal *num_params);
+                       Cardinal *num_params);
 extern void Quit(Widget w, XEvent *event, String *params,
-		 Cardinal *num_params);
+                 Cardinal *num_params);
 extern void Cleanup();
 extern void UpdateTitleString(char *str, int len);
 extern void SetLastEncoding(int enc);
@@ -258,14 +258,14 @@ extern double tRead;
 
 extern Widget popup;
 extern void ShowPopup(Widget w, XEvent *event, String *params,
-		      Cardinal *num_params);
+                      Cardinal *num_params);
 extern void HidePopup(Widget w, XEvent *event, String *params,
-		      Cardinal *num_params);
+                      Cardinal *num_params);
 extern void CreatePopup();
 extern void SetCUState(Widget w, XEvent *ev, String *params,
-		       Cardinal *num_params);
+                       Cardinal *num_params);
 extern void SetViewOnlyState(Widget w, XEvent *ev, String *params,
-		       Cardinal *num_params);
+                       Cardinal *num_params);
 
 /* rfbproto.c */
 
@@ -283,7 +283,7 @@ extern Bool InitialiseRFBConnection();
 extern Bool SetFormatAndEncodings();
 extern Bool SendIncrementalFramebufferUpdateRequest();
 extern Bool SendFramebufferUpdateRequest(int x, int y, int w, int h,
-					 Bool incremental);
+                                         Bool incremental);
 extern Bool SendPointerEvent(int x, int y, int buttonMask);
 extern Bool SendKeyEvent(CARD32 key, Bool down);
 extern Bool SendClientCutText(char *str, int len);
@@ -292,9 +292,9 @@ extern Bool HandleRFBServerMessage();
 extern void PrintPixelFormat(rfbPixelFormat *format);
 
 extern void ToggleCU(Widget w, XEvent *ev, String *params,
-		     Cardinal *num_params);
+                     Cardinal *num_params);
 extern void ToggleViewOnly(Widget w, XEvent *ev, String *params,
-		     Cardinal *num_params);
+                     Cardinal *num_params);
 
 typedef struct _UpdateList {
    rfbFramebufferUpdateRectHeader region;
@@ -309,9 +309,9 @@ extern UpdateList *list, *node, *tail;
 
 extern void InitialiseSelection();
 extern void SelectionToVNC(Widget w, XEvent *event, String *params,
-			   Cardinal *num_params);
+                           Cardinal *num_params);
 extern void SelectionFromVNC(Widget w, XEvent *event, String *params,
-			     Cardinal *num_params);
+                             Cardinal *num_params);
 
 /* shm.c */
 

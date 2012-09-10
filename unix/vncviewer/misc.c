@@ -63,10 +63,10 @@ HasEncoding(const char *str)
     do {
       char *nextEncStr = strchr(encStr, ' ');
       if (nextEncStr) {
-	encStrLen = nextEncStr - encStr;
-	nextEncStr++;
+        encStrLen = nextEncStr - encStr;
+        nextEncStr++;
       } else {
-	encStrLen = strlen(encStr);
+        encStrLen = strlen(encStr);
       }
       if (strncasecmp(encStr, str, encStrLen) == 0) return True;
       encStr = nextEncStr;
@@ -86,7 +86,7 @@ SetLastEncoding(int enc)
     lastEncoding = enc;
     XtVaGetValues(toplevel, XtNtitle, &titleFormat, NULL);
     strncpy(title, titleFormat, 1023);
-    if((ptr = strrchr(title, '[')) != NULL) {
+    if ((ptr = strrchr(title, '[')) != NULL) {
       UpdateTitleString(ptr, 1024 - (ptr - title));
       XtVaSetValues(toplevel, XtNtitle, title, XtNiconName, title, NULL);
     }
@@ -141,7 +141,7 @@ ToplevelInitBeforeRealization()
   char temps[80];
 
   XtVaGetValues(toplevel, XtNtitle, &titleFormat, NULL);
-  temps[0]=' ';
+  temps[0] = ' ';
   UpdateTitleString(&temps[1], 79);
 
   title = XtMalloc(strlen(titleFormat) + strlen(desktopName)
@@ -152,7 +152,7 @@ ToplevelInitBeforeRealization()
   XtFree(title);
 
   XtVaSetValues(toplevel, XtNmaxWidth, si.framebufferWidth,
-		XtNmaxHeight, si.framebufferHeight, NULL);
+                XtNmaxHeight, si.framebufferHeight, NULL);
 
   dpyWidth = WidthOfScreen(DefaultScreenOfDisplay(dpy));
   dpyHeight = HeightOfScreen(DefaultScreenOfDisplay(dpy));
@@ -183,7 +183,7 @@ ToplevelInitBeforeRealization()
     geometry = XtMalloc(256);
 
     sprintf(geometry, "%dx%d+%d+%d",
-	    toplevelWidth, toplevelHeight, toplevelX, toplevelY);
+            toplevelWidth, toplevelHeight, toplevelX, toplevelY);
     XtVaSetValues(toplevel, XtNgeometry, geometry, NULL);
   }
 
@@ -191,7 +191,7 @@ ToplevelInitBeforeRealization()
      XDM login window is up, so try iconifying it to release the grab */
 
   if (XGrabKeyboard(dpy, DefaultRootWindow(dpy), False, GrabModeSync,
-		    GrabModeSync, CurrentTime) == GrabSuccess) {
+                    GrabModeSync, CurrentTime) == GrabSuccess) {
     XUngrabKeyboard(dpy, CurrentTime);
   } else {
     wmState = XInternAtom(dpy, "WM_STATE", False);
@@ -211,7 +211,7 @@ ToplevelInitBeforeRealization()
   defaultXErrorHandler = XSetErrorHandler(CleanupXErrorHandler);
   defaultXIOErrorHandler = XSetIOErrorHandler(CleanupXIOErrorHandler);
   defaultXtErrorHandler = XtAppSetErrorHandler(appContext,
-					       CleanupXtErrorHandler);
+                                               CleanupXtErrorHandler);
 }
 
 
@@ -315,18 +315,18 @@ RunCommand(Widget w, XEvent *event, String *params, Cardinal *num_params)
       /* Child 1. Fork again. */
       switch (fork()) {
       case -1:
-	  perror("fork");
-	  break;
+          perror("fork");
+          break;
 
       case 0:
-	  /* Child 2. Do some work. */
-	  execvp(params[0], params);
-	  perror("exec");
-	  exit(1);
-	  break;  
+          /* Child 2. Do some work. */
+          execvp(params[0], params);
+          perror("exec");
+          exit(1);
+          break;  
 
       default:
-	  break;
+          break;
       }
 
       /* Child 1. Exit, and let init adopt our child */
@@ -377,7 +377,7 @@ Cleanup()
 static int
 CleanupXErrorHandler(Display *dpy, XErrorEvent *error)
 {
-  fprintf(stderr,"CleanupXErrorHandler called\n");
+  fprintf(stderr, "CleanupXErrorHandler called\n");
   Cleanup();
   return (*defaultXErrorHandler)(dpy, error);
 }
@@ -385,7 +385,7 @@ CleanupXErrorHandler(Display *dpy, XErrorEvent *error)
 static int
 CleanupXIOErrorHandler(Display *dpy)
 {
-  fprintf(stderr,"CleanupXIOErrorHandler called\n");
+  fprintf(stderr, "CleanupXIOErrorHandler called\n");
   Cleanup();
   return (*defaultXIOErrorHandler)(dpy);
 }
@@ -393,7 +393,7 @@ CleanupXIOErrorHandler(Display *dpy)
 static void
 CleanupXtErrorHandler(String message)
 {
-  fprintf(stderr,"CleanupXtErrorHandler called\n");
+  fprintf(stderr, "CleanupXtErrorHandler called\n");
   Cleanup();
   (*defaultXtErrorHandler)(message);
 }
@@ -401,7 +401,7 @@ CleanupXtErrorHandler(String message)
 static void
 CleanupSignalHandler(int sig)
 {
-  fprintf(stderr,"CleanupSignalHandler called\n");
+  fprintf(stderr, "CleanupSignalHandler called\n");
   Cleanup();
   exit(1);
 }
@@ -426,9 +426,9 @@ IconifyNamedWindow(Window w, char *name, Bool undo)
   if (XFetchName(dpy, w, &window_name)) {
     if (strcmp(window_name, name) == 0) {
       if (undo) {
-	XMapWindow(dpy, w);
+        XMapWindow(dpy, w);
       } else {
-	XIconifyWindow(dpy, w, DefaultScreen(dpy));
+        XIconifyWindow(dpy, w, DefaultScreen(dpy));
       }
       XFree(window_name);
       return True;
@@ -437,8 +437,8 @@ IconifyNamedWindow(Window w, char *name, Bool undo)
   }
 
   XGetWindowProperty(dpy, w, wmState, 0, 0, False,
-		     AnyPropertyType, &type, &format, &nitems,
-		     &after, &data);
+                     AnyPropertyType, &type, &format, &nitems,
+                     &after, &data);
   if (type != None) {
     XFree(data);
     return False;
@@ -481,9 +481,9 @@ RunBenchmark(void)
     for (stream_id = 0; stream_id < 4; stream_id++) {
       if (zlibStreamActive[stream_id]) {
         if (inflateEnd (&zlibStream[stream_id]) != Z_OK &&
-	    zlibStream[stream_id].msg != NULL) {
-	  fprintf(stderr, "inflateEnd: %s\n", zlibStream[stream_id].msg);
-	  return False;
+            zlibStream[stream_id].msg != NULL) {
+          fprintf(stderr, "inflateEnd: %s\n", zlibStream[stream_id].msg);
+          return False;
         }
       }
       zlibStreamActive[stream_id] = False;

@@ -40,9 +40,10 @@ static Bool modifierPressed[256];
 XImage *image = NULL;
 
 static Cursor CreateDotCursor();
-static void CopyBGR233ToScreen(CARD8 *buf, int x, int y, int width,int height);
+static void CopyBGR233ToScreen(CARD8 *buf, int x, int y, int width,
+                               int height);
 static void HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev,
-				    Boolean *cont);
+                                    Boolean *cont);
 
 static XtResource desktopBackingStoreResources[] = {
   {
@@ -63,22 +64,22 @@ DesktopInitBeforeRealization()
   int i;
 
   form = XtVaCreateManagedWidget("form", formWidgetClass, toplevel,
-				 XtNborderWidth, 0,
-				 XtNdefaultDistance, 0, NULL);
+                                 XtNborderWidth, 0,
+                                 XtNdefaultDistance, 0, NULL);
 
   viewport = XtVaCreateManagedWidget("viewport", viewportWidgetClass, form,
-				     XtNborderWidth, 0,
-				     NULL);
+                                     XtNborderWidth, 0,
+                                     NULL);
 
   desktop = XtVaCreateManagedWidget("desktop", coreWidgetClass, viewport,
-				    XtNborderWidth, 0,
-				    NULL);
+                                    XtNborderWidth, 0,
+                                    NULL);
 
   XtVaSetValues(desktop, XtNwidth, si.framebufferWidth,
-		XtNheight, si.framebufferHeight, NULL);
+                XtNheight, si.framebufferHeight, NULL);
 
   XtAddEventHandler(desktop, LeaveWindowMask|ExposureMask,
-		    True, HandleBasicDesktopEvent, NULL);
+                    True, HandleBasicDesktopEvent, NULL);
 
   for (i = 0; i < 256; i++)
     modifierPressed[i] = False;
@@ -95,12 +96,12 @@ DesktopInitBeforeRealization()
 
   if (!image) {
     image = XCreateImage(dpy, vis, visdepth, ZPixmap, 0, NULL,
-			 si.framebufferWidth, si.framebufferHeight,
-			 BitmapPad(dpy), 0);
+                         si.framebufferWidth, si.framebufferHeight,
+                         BitmapPad(dpy), 0);
 
     image->data = malloc(image->bytes_per_line * image->height);
     if (!image->data) {
-      fprintf(stderr,"malloc failed\n");
+      fprintf(stderr, "malloc failed\n");
       exit(1);
     }
   }
@@ -121,19 +122,19 @@ DesktopInitAfterRealization()
 
   desktopWin = XtWindow(desktop);
 
-  gc = XCreateGC(dpy,desktopWin,0,NULL);
+  gc = XCreateGC(dpy, desktopWin, 0, NULL);
 
   gcv.function = GXxor;
   gcv.foreground = 0x0f0f0f0f;
-  srcGC = XCreateGC(dpy,desktopWin,GCFunction|GCForeground,&gcv);
+  srcGC = XCreateGC(dpy, desktopWin, GCFunction | GCForeground, &gcv);
   gcv.foreground = 0xf0f0f0f0;
-  dstGC = XCreateGC(dpy,desktopWin,GCFunction|GCForeground,&gcv);
+  dstGC = XCreateGC(dpy, desktopWin, GCFunction | GCForeground, &gcv);
 
   XtAddConverter(XtRString, XtRBackingStore, XmuCvtStringToBackingStore,
-		 NULL, 0);
+                 NULL, 0);
 
   XtVaGetApplicationResources(desktop, (XtPointer)&attr.backing_store,
-			      desktopBackingStoreResources, 1, NULL);
+                              desktopBackingStoreResources, 1, NULL);
   valuemask = CWBackingStore;
 
   if (!appData.useX11Cursor) {
@@ -143,7 +144,7 @@ DesktopInitAfterRealization()
   }
 
 
-  if(appData.fsAltEnter)
+  if (appData.fsAltEnter)
     XtOverrideTranslations (desktop,
       XtParseTranslationTable ("Alt <Key>Return: ToggleFullScreen()"));
 
@@ -179,22 +180,22 @@ HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev, Boolean *cont)
     }
 
     SendFramebufferUpdateRequest(ev->xexpose.x, ev->xexpose.y,
-				 ev->xexpose.width, ev->xexpose.height, False);
+                                 ev->xexpose.width, ev->xexpose.height, False);
     break;
 
   case LeaveNotify:
     if (ev->xcrossing.mode == NotifyNormal) {
       for (i = 0; i < 256; i++) {
-	if (modifierPressed[i]) {
-	  SendKeyEvent(XKeycodeToKeysym(dpy, i, 0), False);
-	  modifierPressed[i] = False;
-	}
+        if (modifierPressed[i]) {
+          SendKeyEvent(XKeycodeToKeysym(dpy, i, 0), False);
+          modifierPressed[i] = False;
+        }
       }
     }
     break;
 
   case ClientMessage:
-    if(ev->xclient.window == XtWindow(desktop)
+    if (ev->xclient.window == XtWindow(desktop)
       && ev->xclient.message_type == XA_INTEGER
       && ev->xclient.format == 8
       && !strcmp(ev->xclient.data.b, "SendRFBUpdate"))
@@ -215,8 +216,8 @@ FakeMouseCallback(XtPointer clientData, XtIntervalId *id)
     if (!fakeMouseEnabled) return;
     fakeMousePending = FALSE;
     SendPointerEvent(x, y, rfbButton1Mask | rfbButton3Mask);
-    if(x == 100) x = 101;  else x = 100;
-    if(y == 100) y = 101;  else y = 100;
+    if (x == 100) x = 101;  else x = 100;
+    if (y == 100) y = 101;  else y = 100;
     XtAppAddTimeOut(appContext, fakeMouseTimeout, FakeMouseCallback, NULL);
 }
 
@@ -249,71 +250,72 @@ SendRFBEvent(Widget w, XEvent *ev, String *params, Cardinal *num_params)
   if (appData.viewOnly) return;
 
   if (*num_params != 0) {
-    if (strncasecmp(params[0],"key",3) == 0) {
+    if (strncasecmp(params[0], "key", 3) == 0) {
       if (*num_params != 2) {
-	fprintf(stderr,
-		"Invalid params: SendRFBEvent(key|keydown|keyup,<keysym>)\n");
-	return;
+        fprintf(stderr,
+                "Invalid params: SendRFBEvent(key|keydown|keyup, <keysym>)\n");
+        return;
       }
       ks = XStringToKeysym(params[1]);
       if (ks == NoSymbol) {
-	fprintf(stderr,"Invalid keysym '%s' passed to SendRFBEvent\n",
-		params[1]);
-	return;
+        fprintf(stderr, "Invalid keysym '%s' passed to SendRFBEvent\n",
+                params[1]);
+        return;
       }
-      if (strcasecmp(params[0],"keydown") == 0) {
-	SendKeyEvent(ks, 1);
-      } else if (strcasecmp(params[0],"keyup") == 0) {
-	SendKeyEvent(ks, 0);
-      } else if (strcasecmp(params[0],"key") == 0) {
-	SendKeyEvent(ks, 1);
-	SendKeyEvent(ks, 0);
+      if (strcasecmp(params[0], "keydown") == 0) {
+        SendKeyEvent(ks, 1);
+      } else if (strcasecmp(params[0], "keyup") == 0) {
+        SendKeyEvent(ks, 0);
+      } else if (strcasecmp(params[0], "key") == 0) {
+        SendKeyEvent(ks, 1);
+        SendKeyEvent(ks, 0);
       } else {
-	fprintf(stderr,"Invalid event '%s' passed to SendRFBEvent\n",
-		params[0]);
-	return;
+        fprintf(stderr, "Invalid event '%s' passed to SendRFBEvent\n",
+                params[0]);
+        return;
       }
-    } else if (strcasecmp(params[0],"fbupdate") == 0) {
+    } else if (strcasecmp(params[0], "fbupdate") == 0) {
       if (*num_params != 1) {
-	fprintf(stderr, "Invalid params: SendRFBEvent(fbupdate)\n");
-	return;
+        fprintf(stderr, "Invalid params: SendRFBEvent(fbupdate)\n");
+        return;
       }
       SendFramebufferUpdateRequest(0, 0, si.framebufferWidth,
-				   si.framebufferHeight, False);
-    } else if (strcasecmp(params[0],"ptr") == 0) {
+                                   si.framebufferHeight, False);
+    } else if (strcasecmp(params[0], "ptr") == 0) {
       if (*num_params == 4) {
-	x = atoi(params[1]);
-	y = atoi(params[2]);
-	buttonMask = atoi(params[3]);
-	SendPointerEvent(x, y, buttonMask);
+        x = atoi(params[1]);
+        y = atoi(params[2]);
+        buttonMask = atoi(params[3]);
+        SendPointerEvent(x, y, buttonMask);
       } else if (*num_params == 2) {
-	switch (ev->type) {
-	case ButtonPress:
-	case ButtonRelease:
-	  x = ev->xbutton.x;
-	  y = ev->xbutton.y;
-	  break;
-	case KeyPress:
-	case KeyRelease:
-	  x = ev->xkey.x;
-	  y = ev->xkey.y;
-	  break;
-	default:
-	  fprintf(stderr,
-		  "Invalid event caused SendRFBEvent(ptr,<buttonMask>)\n");
-	  return;
-	}
-	buttonMask = atoi(params[1]);
-	SendPointerEvent(x, y, buttonMask);
+        switch (ev->type) {
+        case ButtonPress:
+        case ButtonRelease:
+          x = ev->xbutton.x;
+          y = ev->xbutton.y;
+          break;
+        case KeyPress:
+        case KeyRelease:
+          x = ev->xkey.x;
+          y = ev->xkey.y;
+          break;
+        default:
+          fprintf(stderr,
+                  "Invalid event caused SendRFBEvent(ptr, <buttonMask>)\n");
+          return;
+        }
+        buttonMask = atoi(params[1]);
+        SendPointerEvent(x, y, buttonMask);
       } else {
-	fprintf(stderr,
-		"Invalid params: SendRFBEvent(ptr,<x>,<y>,<buttonMask>)\n"
-		"             or SendRFBEvent(ptr,<buttonMask>)\n");
-	return;
+        fprintf(stderr,
+                "Invalid params: SendRFBEvent(ptr, <x>, <y>, <buttonMask>)\n"
+                "             or SendRFBEvent(ptr, <buttonMask>)\n");
+        return;
       }
 
     } else {
-      fprintf(stderr,"Invalid event '%s' passed to SendRFBEvent\n", params[0]);
+      fprintf(stderr, "Invalid event '%s' passed to SendRFBEvent\n",
+              params[0]);
     }
     return;
   }
@@ -322,19 +324,19 @@ SendRFBEvent(Widget w, XEvent *ev, String *params, Cardinal *num_params)
 
   case MotionNotify:
     while (XCheckTypedWindowEvent(dpy, desktopWin, MotionNotify, ev))
-      ;	/* discard all queued motion notify events */
+      ; /* discard all queued motion notify events */
 
     SendPointerEvent(ev->xmotion.x, ev->xmotion.y,
-		     (ev->xmotion.state & 0x1f00) >> 8);
+                     (ev->xmotion.state & 0x1f00) >> 8);
     return;
 
   case ButtonPress:
     SendPointerEvent(ev->xbutton.x, ev->xbutton.y,
-		     (((ev->xbutton.state & 0x1f00) >> 8) |
-		      (1 << (ev->xbutton.button - 1))));
-    if((env = getenv("TVNC_FAKEMOUSE")) != NULL && !strcmp(env, "1") &&
-       ((ev->xbutton.button == Button1 && (ev->xbutton.state & Button3Mask)) ||
-        (ev->xbutton.button == Button3 && (ev->xbutton.state & Button1Mask)))) {
+                     (((ev->xbutton.state & 0x1f00) >> 8) |
+                      (1 << (ev->xbutton.button - 1))));
+    if ((env = getenv("TVNC_FAKEMOUSE")) != NULL && !strcmp(env, "1") &&
+        ((ev->xbutton.button == Button1 && (ev->xbutton.state & Button3Mask)) ||
+         (ev->xbutton.button == Button3 && (ev->xbutton.state & Button1Mask)))) {
       fakeMouseEnabled = !fakeMouseEnabled;
       if (fakeMouseEnabled && !fakeMousePending) {
         XtAppAddTimeOut(appContext, fakeMouseTimeout, FakeMouseCallback, NULL);
@@ -345,8 +347,8 @@ SendRFBEvent(Widget w, XEvent *ev, String *params, Cardinal *num_params)
 
   case ButtonRelease:
     SendPointerEvent(ev->xbutton.x, ev->xbutton.y,
-		     (((ev->xbutton.state & 0x1f00) >> 8) &
-		      ~(1 << (ev->xbutton.button - 1))));
+                     (((ev->xbutton.state & 0x1f00) >> 8) &
+                      ~(1 << (ev->xbutton.button - 1))));
     return;
 
   case KeyPress:
@@ -362,7 +364,7 @@ SendRFBEvent(Widget w, XEvent *ev, String *params, Cardinal *num_params)
     return;
 
   default:
-    fprintf(stderr,"Invalid event passed to SendRFBEvent\n");
+    fprintf(stderr, "Invalid event passed to SendRFBEvent\n");
   }
 }
 
@@ -373,22 +375,22 @@ SendRFBEvent(Widget w, XEvent *ev, String *params, Cardinal *num_params)
 void
 LosslessRefresh(Widget w, XEvent *ev, String *params, Cardinal *num_params)
 {
-	String encodings = appData.encodingsString;
-	int compressLevel = appData.compressLevel;
-	int qual = appData.qualityLevel;
-	Bool enableJPEG = appData.enableJPEG;
-	appData.qualityLevel = -1;
-	appData.enableJPEG = False;
-	appData.encodingsString = "tight copyrect";
-	appData.compressLevel = 1;
-	SetFormatAndEncodings();
-	SendFramebufferUpdateRequest(0, 0, si.framebufferWidth,
-				     si.framebufferHeight, False);
-	appData.qualityLevel = qual;
-	appData.enableJPEG = enableJPEG;
-	appData.encodingsString = encodings;
-	appData.compressLevel = compressLevel;
-	SetFormatAndEncodings();
+        String encodings = appData.encodingsString;
+        int compressLevel = appData.compressLevel;
+        int qual = appData.qualityLevel;
+        Bool enableJPEG = appData.enableJPEG;
+        appData.qualityLevel = -1;
+        appData.enableJPEG = False;
+        appData.encodingsString = "tight copyrect";
+        appData.compressLevel = 1;
+        SetFormatAndEncodings();
+        SendFramebufferUpdateRequest(0, 0, si.framebufferWidth,
+                                     si.framebufferHeight, False);
+        appData.qualityLevel = qual;
+        appData.enableJPEG = enableJPEG;
+        appData.encodingsString = encodings;
+        appData.compressLevel = compressLevel;
+        SetFormatAndEncodings();
 }
 
 
@@ -401,16 +403,16 @@ CreateDotCursor()
 {
   Cursor cursor;
   Pixmap src, msk;
-  static char srcBits[] = { 0, 14,14,14, 0 };
-  static char mskBits[] = { 14,31,31,31,14 };
+  static char srcBits[] = { 0,  14, 14, 14,  0 };
+  static char mskBits[] = { 14, 31, 31, 31, 14 };
   XColor fg, bg;
 
   src = XCreateBitmapFromData(dpy, DefaultRootWindow(dpy), srcBits, 5, 5);
   msk = XCreateBitmapFromData(dpy, DefaultRootWindow(dpy), mskBits, 5, 5);
-  XAllocNamedColor(dpy, DefaultColormap(dpy,DefaultScreen(dpy)), "black",
-		   &fg, &fg);
-  XAllocNamedColor(dpy, DefaultColormap(dpy,DefaultScreen(dpy)), "white",
-		   &bg, &bg);
+  XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "black",
+                   &fg, &fg);
+  XAllocNamedColor(dpy, DefaultColormap(dpy, DefaultScreen(dpy)), "white",
+                   &bg, &bg);
   cursor = XCreatePixmapCursor(dpy, src, msk, &fg, &bg, 2, 2);
   XFreePixmap(dpy, src);
   XFreePixmap(dpy, msk);
@@ -429,7 +431,7 @@ CopyDataToImage(char *buf, int x, int y, int width, int height)
   if (appData.rawDelay != 0) {
     XFillRectangle(dpy, desktopWin, gc, x, y, width, height);
 
-    XSync(dpy,False);
+    XSync(dpy, False);
 
     usleep(appData.rawDelay * 1000);
   }
@@ -440,7 +442,7 @@ CopyDataToImage(char *buf, int x, int y, int width, int height)
     int scrWidthInBytes = si.framebufferWidth * myFormat.bitsPerPixel / 8;
 
     char *scr = (image->data + y * scrWidthInBytes
-		 + x * myFormat.bitsPerPixel / 8);
+                 + x * myFormat.bitsPerPixel / 8);
 
     for (h = 0; h < height; h++) {
       memcpy(scr, buf, widthInBytes);
@@ -499,13 +501,13 @@ CopyBGR233ToScreen(CARD8 *buf, int x, int y, int width, int height)
       xcur = xoff;
       scrt = scr1;
       for (p = 0; p < width; p++) {
-	*scrt = ((*scrt & ~(1 << xcur))
-		 | (BGR233ToPixel[*(buf++)] << xcur));
+        *scrt = ((*scrt & ~(1 << xcur))
+                 | (BGR233ToPixel[*(buf++)] << xcur));
 
-	if (xcur-- == 0) {
-	  xcur = 7;
-	  scrt++;
-	}
+        if (xcur-- == 0) {
+          xcur = 7;
+          scrt++;
+        }
       }
       scr1 += fbwb;
     }
@@ -514,7 +516,7 @@ CopyBGR233ToScreen(CARD8 *buf, int x, int y, int width, int height)
   case 8:
     for (q = 0; q < height; q++) {
       for (p = 0; p < width; p++) {
-	*(scr8++) = BGR233ToPixel[*(buf++)];
+        *(scr8++) = BGR233ToPixel[*(buf++)];
       }
       scr8 += si.framebufferWidth - width;
     }
@@ -523,7 +525,7 @@ CopyBGR233ToScreen(CARD8 *buf, int x, int y, int width, int height)
   case 16:
     for (q = 0; q < height; q++) {
       for (p = 0; p < width; p++) {
-	*(scr16++) = BGR233ToPixel[*(buf++)];
+        *(scr16++) = BGR233ToPixel[*(buf++)];
       }
       scr16 += si.framebufferWidth - width;
     }
@@ -532,7 +534,7 @@ CopyBGR233ToScreen(CARD8 *buf, int x, int y, int width, int height)
   case 32:
     for (q = 0; q < height; q++) {
       for (p = 0; p < width; p++) {
-	*(scr32++) = BGR233ToPixel[*(buf++)];
+        *(scr32++) = BGR233ToPixel[*(buf++)];
       }
       scr32 += si.framebufferWidth - width;
     }

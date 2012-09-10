@@ -46,11 +46,11 @@ DoServerDialog()
   char *valueString;
 
   pshell = XtVaCreatePopupShell("serverDialog", transientShellWidgetClass,
-				toplevel, NULL);
+                                toplevel, NULL);
   dialog = XtVaCreateManagedWidget("dialog", dialogWidgetClass, pshell, NULL);
 
-  XtMoveWidget(pshell, WidthOfScreen(XtScreen(pshell))*2/5,
-	       HeightOfScreen(XtScreen(pshell))*2/5);
+  XtMoveWidget(pshell, WidthOfScreen(XtScreen(pshell)) * 2 / 5,
+               HeightOfScreen(XtScreen(pshell)) * 2 / 5);
   XtPopup(pshell, XtGrabNonexclusive);
   XtRealizeWidget(pshell);
 
@@ -69,7 +69,7 @@ DoServerDialog()
 
 void
 PasswordDialogDone(Widget w, XEvent *event, String *params,
-		   Cardinal *num_params)
+                   Cardinal *num_params)
 {
   passwordDialogDone = True;
 }
@@ -82,11 +82,11 @@ DoPasswordDialog()
   char *valueString;
 
   pshell = XtVaCreatePopupShell("passwordDialog", transientShellWidgetClass,
-				toplevel, NULL);
+                                toplevel, NULL);
   dialog = XtVaCreateManagedWidget("dialog", dialogWidgetClass, pshell, NULL);
 
-  XtMoveWidget(pshell, WidthOfScreen(XtScreen(pshell))*2/5,
-	       HeightOfScreen(XtScreen(pshell))*2/5);
+  XtMoveWidget(pshell, WidthOfScreen(XtScreen(pshell)) * 2 / 5,
+               HeightOfScreen(XtScreen(pshell)) * 2 / 5);
   XtPopup(pshell, XtGrabNonexclusive);
   XtRealizeWidget(pshell);
 
@@ -107,106 +107,106 @@ static Bool userPwdDialogDone = False;
 
 void
 UserPwdDialogDone(Widget w, XEvent *event, String *params,
-		   Cardinal *num_params)
+                   Cardinal *num_params)
 {
   userPwdDialogDone = True;
 }
 
-static Widget	userPwdForm;
-static Widget	pwdField;
-static Widget	userField;
+static Widget userPwdForm;
+static Widget pwdField;
+static Widget userField;
 
 void
 UserPwdNextField(Widget w, XEvent *event, String *params,
-		   Cardinal *num_params)
+                 Cardinal *num_params)
 {
-	if (userPwdForm == NULL)
-		return;
+  if (userPwdForm == NULL)
+    return;
 
-	if ((w == userField) && (pwdField != NULL)) {
-		XtSetKeyboardFocus(userPwdForm, pwdField);
-		return;
-	}
+  if ((w == userField) && (pwdField != NULL)) {
+    XtSetKeyboardFocus(userPwdForm, pwdField);
+    return;
+  }
 
-	if ((w == pwdField) && (userField != NULL)) {
-		XtSetKeyboardFocus(userPwdForm, userField);
-		return;
-	}
+  if ((w == pwdField) && (userField != NULL)) {
+    XtSetKeyboardFocus(userPwdForm, userField);
+    return;
+  }
 }
 
 void
 UserPwdSetFocus(Widget w, XEvent *event, String *params,
-		   Cardinal *num_params)
+                Cardinal *num_params)
 {
-	if (userPwdForm == NULL)
-		return;
+  if (userPwdForm == NULL)
+    return;
 
-	if (w == userField) {
-		XtSetKeyboardFocus(userPwdForm, userField);
-		return;
-	}
+  if (w == userField) {
+    XtSetKeyboardFocus(userPwdForm, userField);
+    return;
+  }
 
-	if (w == pwdField) {
-		XtSetKeyboardFocus(userPwdForm, pwdField);
-		return;
-	}
+  if (w == pwdField) {
+    XtSetKeyboardFocus(userPwdForm, pwdField);
+    return;
+  }
 }
 
 void
 DoUserPwdDialog(char** user, char** password)
 {
-	Widget		pshell;
-	Widget		userLabel;
-	Widget		pwdLabel;
-	String		string;
-	Arg		args[] = {{XtNstring, (XtArgVal) ""}};
-	struct passwd	pwbuf;
-	struct passwd*	pw;
-	char		buf[256];
+        Widget                pshell;
+        Widget                userLabel;
+        Widget                pwdLabel;
+        String                string;
+        Arg                args[] = {{XtNstring, (XtArgVal) ""}};
+        struct passwd        pwbuf;
+        struct passwd*        pw;
+        char                buf[256];
 
-	pshell = XtVaCreatePopupShell("userPwdDialog", transientShellWidgetClass, toplevel, NULL);
-	userPwdForm = XtVaCreateManagedWidget("form", formWidgetClass, pshell, NULL);
-	userLabel = XtVaCreateManagedWidget("userLabel", labelWidgetClass, userPwdForm, NULL);
-	userField = XtVaCreateManagedWidget("userField", asciiTextWidgetClass, userPwdForm, NULL);
-	pwdLabel = XtVaCreateManagedWidget("pwdLabel", labelWidgetClass, userPwdForm, NULL);
-	pwdField = XtVaCreateManagedWidget("pwdField", asciiTextWidgetClass, userPwdForm, NULL);
+        pshell = XtVaCreatePopupShell("userPwdDialog", transientShellWidgetClass, toplevel, NULL);
+        userPwdForm = XtVaCreateManagedWidget("form", formWidgetClass, pshell, NULL);
+        userLabel = XtVaCreateManagedWidget("userLabel", labelWidgetClass, userPwdForm, NULL);
+        userField = XtVaCreateManagedWidget("userField", asciiTextWidgetClass, userPwdForm, NULL);
+        pwdLabel = XtVaCreateManagedWidget("pwdLabel", labelWidgetClass, userPwdForm, NULL);
+        pwdField = XtVaCreateManagedWidget("pwdField", asciiTextWidgetClass, userPwdForm, NULL);
 
-	XtMoveWidget(pshell, WidthOfScreen(XtScreen(pshell))*2/5,
-		       HeightOfScreen(XtScreen(pshell))*2/5);
-	XtPopup(pshell, XtGrabNonexclusive);
+        XtMoveWidget(pshell, WidthOfScreen(XtScreen(pshell)) * 2 / 5,
+                       HeightOfScreen(XtScreen(pshell)) * 2 / 5);
+        XtPopup(pshell, XtGrabNonexclusive);
 
-	if (*user != NULL) {
-		args[0].value = (XtArgVal) *user;
-		XtSetValues(userField, args, XtNumber(args));
-		XawTextSetInsertionPoint(userField, strlen(*user));
+        if (*user != NULL) {
+                args[0].value = (XtArgVal) *user;
+                XtSetValues(userField, args, XtNumber(args));
+                XawTextSetInsertionPoint(userField, strlen(*user));
 
-	} else if (getpwuid_r(getuid(), &pwbuf, buf, sizeof(buf), &pw) == 0) {
-		args[0].value = (XtArgVal) pwbuf.pw_name;
-		XtSetValues(userField, args, XtNumber(args));
-		XawTextSetInsertionPoint(userField, strlen(pwbuf.pw_name));
-	}
+        } else if (getpwuid_r(getuid(), &pwbuf, buf, sizeof(buf), &pw) == 0) {
+                args[0].value = (XtArgVal) pwbuf.pw_name;
+                XtSetValues(userField, args, XtNumber(args));
+                XawTextSetInsertionPoint(userField, strlen(pwbuf.pw_name));
+        }
 
-	XtRealizeWidget(pshell);
-	XtSetKeyboardFocus(userPwdForm, userField);
+        XtRealizeWidget(pshell);
+        XtSetKeyboardFocus(userPwdForm, userField);
 
-	userPwdDialogDone = False;
+        userPwdDialogDone = False;
 
-	while (!userPwdDialogDone) {
-		XtAppProcessEvent(appContext, XtIMAll);
-	}
+        while (!userPwdDialogDone) {
+                XtAppProcessEvent(appContext, XtIMAll);
+        }
 
-	args[0].value = (XtArgVal) &string;
-	XtGetValues(userField, args, XtNumber(args));
-	*user = XtNewString(string);
+        args[0].value = (XtArgVal) &string;
+        XtGetValues(userField, args, XtNumber(args));
+        *user = XtNewString(string);
 
-	XtGetValues(pwdField, args, XtNumber(args));
-	*password = XtNewString(string);
-	while (*string != '\0')
-		*string++ = '\0';
+        XtGetValues(pwdField, args, XtNumber(args));
+        *password = XtNewString(string);
+        while (*string != '\0')
+                *string++ = '\0';
 
-	XtPopdown(pshell);
-	userField = NULL;
-	pwdField = NULL;
-	userPwdForm = NULL;
-	XtDestroyWidget(pshell);
+        XtPopdown(pshell);
+        userField = NULL;
+        pwdField = NULL;
+        userPwdForm = NULL;
+        XtDestroyWidget(pshell);
 }

@@ -53,15 +53,15 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
   listenSpecified = True;
 
   for (i = 1; i < *argc; i++) {
-    if (strcmp(argv[i], "-display") == 0 && i+1 < *argc) {
-      displayname = argv[i+1];
+    if (strcmp(argv[i], "-display") == 0 && i + 1 < *argc) {
+      displayname = argv[i + 1];
     }
   }
 
-  if (listenArgIndex+1 < *argc && argv[listenArgIndex+1][0] >= '0' &&
-					    argv[listenArgIndex+1][0] <= '9') {
+  if (listenArgIndex + 1 < *argc && argv[listenArgIndex + 1][0] >= '0' &&
+      argv[listenArgIndex + 1][0] <= '9') {
 
-    listenPort = (LISTEN_PORT_OFFSET + atoi(argv[listenArgIndex+1])) & 0xFFFF;
+    listenPort = (LISTEN_PORT_OFFSET + atoi(argv[listenArgIndex + 1])) & 0xFFFF;
     removeArgs(argc, argv, listenArgIndex, 2);
 
   } else {
@@ -78,22 +78,22 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
     uname(&hostinfo);
 
     if (colonPos && ((colonPos == display) ||
-		     (strncmp(hostinfo.nodename, display,
-			      strlen(hostinfo.nodename)) == 0))) {
+                     (strncmp(hostinfo.nodename, display,
+                              strlen(hostinfo.nodename)) == 0))) {
 
-      listenPort = LISTEN_PORT_OFFSET + atoi(colonPos+1);
+      listenPort = LISTEN_PORT_OFFSET + atoi(colonPos + 1);
 
     } else {
-      fprintf(stderr,"%s: cannot work out which display number to "
-	      "listen on.\n", programName);
-      fprintf(stderr,"Please specify explicitly with -listen <num>\n");
+      fprintf(stderr, "%s: cannot work out which display number to "
+              "listen on.\n", programName);
+      fprintf(stderr, "Please specify explicitly with -listen <num>\n");
       exit(1);
     }
   }
 
   if (!(d = XOpenDisplay(displayname))) {
-    fprintf(stderr,"%s: unable to open display %s\n",
-	    programName, XDisplayName(displayname));
+    fprintf(stderr, "%s: unable to open display %s\n",
+            programName, XDisplayName(displayname));
     exit(1);
   }
 
@@ -101,10 +101,10 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
 
   if (listenSocket < 0) exit(1);
 
-  fprintf(stderr,"%s -listen: Listening on port %d\n",
-	  programName, listenPort);
-  fprintf(stderr,"%s -listen: Command line errors are not reported until "
-	  "a connection comes in.\n", programName);
+  fprintf(stderr, "%s -listen: Listening on port %d\n",
+          programName, listenPort);
+  fprintf(stderr, "%s -listen: Command line errors are not reported until "
+          "a connection comes in.\n", programName);
 
   while (True) {
 
@@ -135,23 +135,23 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
       switch (fork()) {
 
       case -1: 
-	perror("fork"); 
-	exit(1);
+        perror("fork"); 
+        exit(1);
 
       case 0:
-	/* child - return to caller */
-	close(listenSocket);
-	return;
+        /* child - return to caller */
+        close(listenSocket);
+        return;
 
       default:
-	/* parent - go round and listen again */
-	close(rfbsock); 
-	if (!(d = XOpenDisplay(displayname))) {
-	  fprintf(stderr,"%s: unable to open display %s\n",
-		  programName, XDisplayName(displayname));
-	  exit(1);
-	}
-	break;
+        /* parent - go round and listen again */
+        close(rfbsock); 
+        if (!(d = XOpenDisplay(displayname))) {
+          fprintf(stderr, "%s: unable to open display %s\n",
+                  programName, XDisplayName(displayname));
+          exit(1);
+        }
+        break;
       }
     }
   }

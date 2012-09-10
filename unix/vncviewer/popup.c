@@ -46,9 +46,8 @@ UpdateQual(void)
   SetFormatAndEncodings();
   XtVaGetValues(toplevel, XtNtitle, &titleFormat, NULL);
   strncpy(title, titleFormat, 1023);
-  if((ptr=strrchr(title, '['))!=NULL)
-  {
-    UpdateTitleString(ptr, 1024-(ptr-title));
+  if ((ptr = strrchr(title, '[')) != NULL) {
+    UpdateTitleString(ptr, 1024 - (ptr - title));
     XtVaSetValues(toplevel, XtNtitle, title, XtNiconName, title, NULL);
   }
   XawScrollbarSetThumb(qualslider, (float)appData.qualityLevel/100., 0.);
@@ -65,29 +64,22 @@ UpdateQual(void)
   else
     XtVaSetValues(buttonJPEG, XtNstate, 0, NULL);
 
-  if(appData.subsampLevel==TVNC_1X)
-  {
+  if (appData.subsampLevel == TVNC_1X) {
     XtVaSetValues(buttonGray, XtNstate, 0, NULL);
     XtVaSetValues(button4X, XtNstate, 0, NULL);
     XtVaSetValues(button2X, XtNstate, 0, NULL);
     XtVaSetValues(button1X, XtNstate, 1, NULL);
-  }
-  else if(appData.subsampLevel==TVNC_4X)
-  {
+  } else if (appData.subsampLevel == TVNC_4X) {
     XtVaSetValues(buttonGray, XtNstate, 0, NULL);
     XtVaSetValues(button4X, XtNstate, 1, NULL);
     XtVaSetValues(button2X, XtNstate, 0, NULL);
     XtVaSetValues(button1X, XtNstate, 0, NULL);
-  }
-  else if(appData.subsampLevel==TVNC_2X)
-  {
+  } else if (appData.subsampLevel == TVNC_2X) {
     XtVaSetValues(buttonGray, XtNstate, 0, NULL);
     XtVaSetValues(button4X, XtNstate, 0, NULL);
     XtVaSetValues(button2X, XtNstate, 1, NULL);
     XtVaSetValues(button1X, XtNstate, 0, NULL);
-  }
-  else if(appData.subsampLevel==TVNC_GRAY)
-  {
+  } else if (appData.subsampLevel == TVNC_GRAY) {
     XtVaSetValues(buttonGray, XtNstate, 1, NULL);
     XtVaSetValues(button4X, XtNstate, 0, NULL);
     XtVaSetValues(button2X, XtNstate, 0, NULL);
@@ -123,12 +115,13 @@ static XtResource resources[] = {
 void
 qualScrollProc(Widget w, XtPointer client, XtPointer p)
 {
-  float	size, val;  int qual;  long pos=(long)p;
+  float size, val;  int qual;  long pos = (long)p;
   XtVaGetValues(w, XtNshown, &size, XtNtopOfThumb, &val, 0);
-  if(pos<0) val-=.1;  else val+=.1;
-  qual=(int)(val*100.);  if(qual<1) qual=1;  if(qual>100) qual=100;
+  if (pos < 0) val -= .1;  else val += .1;
+  qual = (int)(val * 100.);
+  if (qual < 1) qual = 1;  if (qual > 100) qual = 100;
   XawScrollbarSetThumb(w, val, 0.);
-  appData.qualityLevel=qual;
+  appData.qualityLevel = qual;
   UpdateQual();
 }
 
@@ -136,9 +129,10 @@ qualScrollProc(Widget w, XtPointer client, XtPointer p)
 void
 qualJumpProc(Widget w, XtPointer client, XtPointer p)
 {
-  float val=*(float *)p;  int qual;
-  qual=(int)(val*100.);  if(qual<1) qual=1;  if(qual>100) qual=100;
-  appData.qualityLevel=qual;
+  float val = *(float *)p;  int qual;
+  qual = (int)(val * 100.);
+  if (qual < 1) qual = 1;  if (qual > 100) qual = 100;
+  appData.qualityLevel = qual;
   UpdateQual();
 }
 
@@ -146,8 +140,8 @@ qualJumpProc(Widget w, XtPointer client, XtPointer p)
 void
 buttonZlibProc(Widget w, XtPointer client, XtPointer p)
 {
-  if((long)p==1) appData.compressLevel=1;
-  else appData.compressLevel=0;
+  if ((long)p == 1) appData.compressLevel = 1;
+  else appData.compressLevel = 0;
   UpdateQual();
 }
 
@@ -155,19 +149,19 @@ buttonZlibProc(Widget w, XtPointer client, XtPointer p)
 void
 buttonJPEGProc(Widget w, XtPointer client, XtPointer p)
 {
-  if((long)p==1) {
-    if(appData.useBGR233)
+  if ((long)p == 1) {
+    if (appData.useBGR233)
       fprintf(stderr, "WARNING: Cannot enable JPEG because BGR233 is enabled.\n");
-    else appData.enableJPEG=True;
+    else appData.enableJPEG = True;
   }
-  else appData.enableJPEG=False;
+  else appData.enableJPEG = False;
   UpdateQual();
 }
 
 void
 buttonGrayProc(Widget w, XtPointer client, XtPointer p)
 {
-  if((long)p==1) appData.subsampLevel=TVNC_GRAY;
+  if ((long)p == 1) appData.subsampLevel = TVNC_GRAY;
   UpdateQual();
 }
 
@@ -175,7 +169,7 @@ buttonGrayProc(Widget w, XtPointer client, XtPointer p)
 void
 button4XProc(Widget w, XtPointer client, XtPointer p)
 {
-  if((long)p==1) appData.subsampLevel=TVNC_4X;
+  if ((long)p == 1) appData.subsampLevel = TVNC_4X;
   UpdateQual();
 }
 
@@ -183,7 +177,7 @@ button4XProc(Widget w, XtPointer client, XtPointer p)
 void
 button2XProc(Widget w, XtPointer client, XtPointer p)
 {
-  if((long)p==1) appData.subsampLevel=TVNC_2X;
+  if ((long)p == 1) appData.subsampLevel = TVNC_2X;
   UpdateQual();
 }
 
@@ -191,7 +185,7 @@ button2XProc(Widget w, XtPointer client, XtPointer p)
 void
 button1XProc(Widget w, XtPointer client, XtPointer p)
 {
-  if((long)p==1) appData.subsampLevel=TVNC_1X;
+  if ((long)p == 1) appData.subsampLevel = TVNC_1X;
   UpdateQual();
 }
 
@@ -225,33 +219,33 @@ CreatePopup()
   String buttonType;
 
   popup = XtVaCreatePopupShell("popup", transientShellWidgetClass, toplevel,
-			       NULL);
+                               NULL);
 
   buttonForm = XtVaCreateManagedWidget("buttonForm", formWidgetClass, popup,
-				       NULL);
+                                       NULL);
 
   if (appData.popupButtonCount > 100) {
-    fprintf(stderr,"Too many popup buttons\n");
+    fprintf(stderr, "Too many popup buttons\n");
     exit(1);
   }
 
   for (i = 1; i <= appData.popupButtonCount; i++) {
     sprintf(buttonName, "button%d", i);
     XtVaGetSubresources(buttonForm, (XtPointer)&buttonType, buttonName,
-			"Button", resources, 1, NULL);
+                        "Button", resources, 1, NULL);
 
     if (strcmp(buttonType, "command") == 0) {
       button = XtVaCreateManagedWidget(buttonName, commandWidgetClass,
-				       buttonForm, NULL);
+                                       buttonForm, NULL);
       XtVaSetValues(button, XtNfromVert, prevButton,
-		    XtNleft, XawChainLeft, XtNright, XawChainRight, NULL);
+                    XtNleft, XawChainLeft, XtNright, XawChainRight, NULL);
     } else if (strcmp(buttonType, "toggle") == 0) {
       button = XtVaCreateManagedWidget(buttonName, toggleWidgetClass,
-				       buttonForm, NULL);
+                                       buttonForm, NULL);
       XtVaSetValues(button, XtNfromVert, prevButton,
-		    XtNleft, XawChainLeft, XtNright, XawChainRight, NULL);
+                    XtNleft, XawChainLeft, XtNright, XawChainRight, NULL);
     } else {
-      fprintf(stderr,"unknown button type '%s'\n",buttonType);
+      fprintf(stderr, "unknown button type '%s'\n", buttonType);
     }
     prevButton = button;
   }

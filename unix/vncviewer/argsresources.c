@@ -528,9 +528,9 @@ void
 removeArgs(int *argc, char** argv, int idx, int nargs)
 {
   int i;
-  if ((idx+nargs) > *argc) return;
-  for (i = idx+nargs; i < *argc; i++) {
-    argv[i-nargs] = argv[i];
+  if ((idx + nargs) > *argc) return;
+  for (i = idx + nargs; i < *argc; i++) {
+    argv[i - nargs] = argv[i];
   }
   *argc -= nargs;
 }
@@ -543,52 +543,53 @@ void
 usage(void)
 {
   fprintf(stderr,
-	  "\nTurboVNC Viewer %d-bit v"__VERSION" (build "__BUILD")\n"
-	  "Copyright (C) "__COPYRIGHT_YEAR" "__COPYRIGHT"\n"
-	  __URLTEXT"\n"
-	  "\n"
-	  "Usage: %s [<OPTIONS>] [<HOST>][:<DISPLAY#>]\n"
-	  "       %s [<OPTIONS>] [<HOST>][::<PORT#>]\n"
-	  "       %s [<OPTIONS>] -listen [<DISPLAY#>]\n"
-	  "       %s -help\n"
-	  "\n"
-	  "<OPTIONS> are standard Xt options, or:\n"
-	  "        -ipv6\n"
-	  "        -shared (default) / -noshared\n"
-	  "        -viewonly / -fullcontrol (default)\n"
-	  "        -fullscreen / -nofullscreen (default)\n"
-	  "        -fsaltenter / -nofsaltenter (default)\n"
-	  "        -grabkeyboard <fs | always | manual> (default=fs)\n"
-	  "        -doublebuffer (default) / -singlebuffer\n"
-	  "        -raiseonbeep (default) / -noraiseonbeep\n"
-	  "        -8bit / -no8bit (default)\n"
-	  "        -owncmap\n"
-	  "        -truecolor\n"
-	  "        -depth <DEPTH>\n"
-	  "        -encodings <ENCODING-LIST> (example: \"tight copyrect\")\n"
-	  "        -jpeg (default) / -nojpeg\n"
-	  "        -quality <JPEG IMAGE QUALITY> (1..100, 1=low, 100=high, default=95)\n"
-	  "        -samp <JPEG CHROMINANCE SUBSAMPLING> <1x | 2x | 4x | gray> (default=1x)\n"
-	  "        -compresslevel <ZLIB COMPRESSION LEVEL>\n"
-	  "                       (0..1, 0=fast, 1=best, default=1)\n"
-	  "        -lowqual (preset for -jpeg -samp 4x -quality 30)\n"
-	  "        -medqual (preset for -jpeg -samp 2x -quality 80)\n"
-	  "        -highqual (preset for -jpeg -samp 1x -quality 95)\n"
-	  "        -lossless (preset for -nojpeg -compresslevel 0)\n"
-	  "        -losslesswan (preset for -nojpeg -compresslevel 1)\n"
-	  "        -cu / -nocu (default)\n"
-	  "        -cursorshape (default) / -nocursorshape\n"
-	  "        -user <USER NAME> (Unix login authentication)\n"
-	  "        -nounixlogin\n"
-	  "        -passwd <PASSWD-FILENAME> (standard VNC authentication)\n"
-	  "        -autopass\n"
-	  "        -via <GATEWAY>\n"
-	  "        -tunnel\n"
-	  "        -config <CONFIG-FILENAME>\n"
-	  "\n"
-	  "Option names may be abbreviated (for example: -q instead of -quality.)\n"
-	  "See the manual page for more information.\n"
-	  "\n", (int)sizeof(size_t)*8, programName, programName, programName, programName);
+          "\nTurboVNC Viewer %d-bit v"__VERSION" (build "__BUILD")\n"
+          "Copyright (C) "__COPYRIGHT_YEAR" "__COPYRIGHT"\n"
+          __URLTEXT"\n"
+          "\n"
+          "Usage: %s [<OPTIONS>] [<HOST>][:<DISPLAY#>]\n"
+          "       %s [<OPTIONS>] [<HOST>][::<PORT#>]\n"
+          "       %s [<OPTIONS>] -listen [<DISPLAY#>]\n"
+          "       %s -help\n"
+          "\n"
+          "<OPTIONS> are standard Xt options, or:\n"
+          "        -ipv6\n"
+          "        -shared (default) / -noshared\n"
+          "        -viewonly / -fullcontrol (default)\n"
+          "        -fullscreen / -nofullscreen (default)\n"
+          "        -fsaltenter / -nofsaltenter (default)\n"
+          "        -grabkeyboard <fs | always | manual> (default=fs)\n"
+          "        -doublebuffer (default) / -singlebuffer\n"
+          "        -raiseonbeep (default) / -noraiseonbeep\n"
+          "        -8bit / -no8bit (default)\n"
+          "        -owncmap\n"
+          "        -truecolor\n"
+          "        -depth <DEPTH>\n"
+          "        -encodings <ENCODING-LIST> (example: \"tight copyrect\")\n"
+          "        -jpeg (default) / -nojpeg\n"
+          "        -quality <JPEG IMAGE QUALITY> (1..100, 1=low, 100=high, default=95)\n"
+          "        -samp <JPEG CHROMINANCE SUBSAMPLING> <1x | 2x | 4x | gray> (default=1x)\n"
+          "        -compresslevel <ZLIB COMPRESSION LEVEL>\n"
+          "                       (0..1, 0=fast, 1=best, default=1)\n"
+          "        -lowqual (preset for -jpeg -samp 4x -quality 30)\n"
+          "        -medqual (preset for -jpeg -samp 2x -quality 80)\n"
+          "        -highqual (preset for -jpeg -samp 1x -quality 95)\n"
+          "        -lossless (preset for -nojpeg -compresslevel 0)\n"
+          "        -losslesswan (preset for -nojpeg -compresslevel 1)\n"
+          "        -cu / -nocu (default)\n"
+          "        -cursorshape (default) / -nocursorshape\n"
+          "        -user <USER NAME> (Unix login authentication)\n"
+          "        -nounixlogin\n"
+          "        -passwd <PASSWD-FILENAME> (standard VNC authentication)\n"
+          "        -autopass\n"
+          "        -via <GATEWAY>\n"
+          "        -tunnel\n"
+          "        -config <CONFIG-FILENAME>\n"
+          "\n"
+          "Option names may be abbreviated (for example: -q instead of -quality.)\n"
+          "See the manual page for more information.\n"
+          "\n", (int)sizeof(size_t) * 8, programName, programName, programName,
+          programName);
   exit(1);
 }
 
@@ -663,7 +664,7 @@ LoadConfigFile(char *filename)
         fprintf(stderr, "ERROR reading host name from %s\n", filename);
         exit(1);
       }
-      strncpy(vncServerHost, &buf2[n], 255-n);
+      strncpy(vncServerHost, &buf2[n], 255 - n);
       continue;
     }
 
@@ -684,7 +685,7 @@ LoadConfigFile(char *filename)
     n = 9;
     if (!strncmp(buf2, "password=", n)) {
       if (buf2[n] != '\0') {
-        strncpy(passwordString, &buf2[n], 255-n);
+        strncpy(passwordString, &buf2[n], 255 - n);
         passwordString[16] = 0;
         for (i = 0; i < strlen(passwordString); i += 2) {
           char temps[3];  int temp;
@@ -766,13 +767,13 @@ GetArgsAndResources(int argc, char **argv)
      program to use */
 
   XtGetApplicationResources(toplevel, &appData, appDataResourceList,
-			    XtNumber(appDataResourceList), 0, 0);
+                            XtNumber(appDataResourceList), 0, 0);
 
   appData.subsampLevel = -1;
   appData.grabKeyboard = TVNC_FS;
 
-  if(appData.configFile) LoadConfigFile(appData.configFile);
-  else if(argc > 1 && strlen(argv[1]) >= 4
+  if (appData.configFile) LoadConfigFile(appData.configFile);
+  else if (argc > 1 && strlen(argv[1]) >= 4
     && !strncmp(&argv[1][strlen(argv[1])-4], ".vnc", 4)) {
     appData.configFile = argv[1];
     LoadConfigFile(appData.configFile);
@@ -781,10 +782,10 @@ GetArgsAndResources(int argc, char **argv)
   if (appData.subsampString && strlen(appData.subsampString) > 0 &&
       appData.subsampLevel < 0) {
     switch(toupper(appData.subsampString[0])) {
-      case 'G': case '0':  appData.subsampLevel=TVNC_GRAY;  break;
-      case '1':  appData.subsampLevel=TVNC_1X;  break;
-      case '2':  appData.subsampLevel=TVNC_2X;  break;
-      case '4':  appData.subsampLevel=TVNC_4X;  break;
+      case 'G': case '0':  appData.subsampLevel = TVNC_GRAY;  break;
+      case '1':  appData.subsampLevel = TVNC_1X;  break;
+      case '2':  appData.subsampLevel = TVNC_2X;  break;
+      case '4':  appData.subsampLevel = TVNC_4X;  break;
     }
   }
 
@@ -800,45 +801,45 @@ GetArgsAndResources(int argc, char **argv)
   }
 
   /* -lowqual switch was used */
-  if(appData.qualityLevel==-1) {
-    appData.encodingsString="tight copyrect";
-    appData.enableJPEG=True;
-    appData.qualityLevel=30;
-    appData.subsampLevel=TVNC_4X;
+  if (appData.qualityLevel == -1) {
+    appData.encodingsString = "tight copyrect";
+    appData.enableJPEG = True;
+    appData.qualityLevel = 30;
+    appData.subsampLevel = TVNC_4X;
   }
   /* -medqual switch was used */
-  else if(appData.qualityLevel==-2) {
-    appData.encodingsString="tight copyrect";
-    appData.enableJPEG=True;
-    appData.qualityLevel=80;
-    appData.subsampLevel=TVNC_2X;
+  else if (appData.qualityLevel == -2) {
+    appData.encodingsString = "tight copyrect";
+    appData.enableJPEG = True;
+    appData.qualityLevel = 80;
+    appData.subsampLevel = TVNC_2X;
   }
   /* -highqual switch was used */
-  else if(appData.qualityLevel==-3) {
-    appData.encodingsString="tight copyrect";
-    appData.enableJPEG=True;
-    appData.qualityLevel=95;
-    appData.subsampLevel=TVNC_1X;
+  else if (appData.qualityLevel == -3) {
+    appData.encodingsString = "tight copyrect";
+    appData.enableJPEG = True;
+    appData.qualityLevel = 95;
+    appData.subsampLevel = TVNC_1X;
   }
   /* -lossless switch was used */
-  else if(appData.qualityLevel==-4) {
-    appData.encodingsString="tight copyrect";
-    appData.enableJPEG=False;
-    appData.qualityLevel=95;
-    appData.compressLevel=0;
+  else if (appData.qualityLevel == -4) {
+    appData.encodingsString = "tight copyrect";
+    appData.enableJPEG = False;
+    appData.qualityLevel = 95;
+    appData.compressLevel = 0;
   }
   /* -losslesswan switch was used */
-  else if(appData.qualityLevel==-5) {
-    appData.encodingsString="tight copyrect";
-    appData.enableJPEG=False;
-    appData.qualityLevel=95;
-    appData.compressLevel=1;
+  else if (appData.qualityLevel == -5) {
+    appData.encodingsString = "tight copyrect";
+    appData.enableJPEG = False;
+    appData.qualityLevel = 95;
+    appData.compressLevel = 1;
   }
 
-  if(appData.useBGR233) {
-    if(appData.enableJPEG)
+  if (appData.useBGR233) {
+    if (appData.enableJPEG)
       fprintf(stderr, "WARNING: Disabling JPEG encoding because BGR233 is enabled.\n");
-    appData.enableJPEG=False;
+    appData.enableJPEG = False;
   }
 
   /* Add our actions to the actions table so they can be used in widget
@@ -854,8 +855,8 @@ GetArgsAndResources(int argc, char **argv)
 
   if (listenSpecified) {
     if (argc != 1) {
-      fprintf(stderr,"\n%s -listen: invalid command line argument: %s\n",
-	      programName, argv[1]);
+      fprintf(stderr, "\n%s -listen: invalid command line argument: %s\n",
+              programName, argv[1]);
       usage();
     }
     return;
@@ -878,7 +879,7 @@ GetArgsAndResources(int argc, char **argv)
     }
 
     if (strlen(vncServerName) > 255) {
-      fprintf(stderr,"VNC server name too long\n");
+      fprintf(stderr, "VNC server name too long\n");
       exit(1);
     }
 

@@ -48,7 +48,7 @@ int family = AF_INET;
  */
 
 extern BOOL rfbProfile;
-extern double tRecvTime;
+extern double tRecv;
 extern double gettime(void);
 
 /*
@@ -78,7 +78,7 @@ ProcessXtEvents()
 {
   rfbsockReady = False;
   XtAppAddInput(appContext, rfbsock, (XtPointer)XtInputReadMask,
-		rfbsockReadyCallback, NULL);
+                rfbsockReadyCallback, NULL);
   while (!rfbsockReady) {
     XtAppProcessEvent(appContext, XtIMAll);
   }
@@ -94,8 +94,8 @@ ReadFromRFBServer(char *out, unsigned int n)
     tReadStart = gettime();
     if (fread(out, n, 1, benchFile) < 1) {
       if (ferror(benchFile)) {
-	perror("Cannot read from session capture");
-	clearerr(benchFile);
+        perror("Cannot read from session capture");
+        clearerr(benchFile);
       }
       status = False;
     }
@@ -125,21 +125,21 @@ ReadFromRFBServer(char *out, unsigned int n)
     while (buffered < n) {
       int i = read(rfbsock, buf + buffered, BUF_SIZE - buffered);
       if (i <= 0) {
-	if (i < 0) {
-	  if (errno == EWOULDBLOCK || errno == EAGAIN) {
-	    ProcessXtEvents();
-	    i = 0;
-	  } else {
-	    fprintf(stderr,"%s",programName);
-	    perror(": read");
-	    return False;
-	  }
-	} else {
-	  if (errorMessageOnReadFailure) {
-	    fprintf(stderr,"%s: VNC server closed connection\n",programName);
-	  }
-	  return False;
-	}
+        if (i < 0) {
+          if (errno == EWOULDBLOCK || errno == EAGAIN) {
+            ProcessXtEvents();
+            i = 0;
+          } else {
+            fprintf(stderr, "%s", programName);
+            perror(": read");
+            return False;
+          }
+        } else {
+          if (errorMessageOnReadFailure) {
+            fprintf(stderr, "%s: VNC server closed connection\n", programName);
+          }
+          return False;
+        }
       }
       buffered += i;
     }
@@ -153,28 +153,28 @@ ReadFromRFBServer(char *out, unsigned int n)
     while (n > 0) {
       int i = read(rfbsock, out, n);
       if (i <= 0) {
-	if (i < 0) {
-	  if (errno == EWOULDBLOCK || errno == EAGAIN) {
-	    ProcessXtEvents();
-	    i = 0;
-	  } else {
-	    fprintf(stderr,"%s",programName);
-	    perror(": read");
-	    return False;
-	  }
-	} else {
-	  if (errorMessageOnReadFailure) {
-	    fprintf(stderr,"%s: VNC server closed connection\n",programName);
-	  }
-	  return False;
-	}
+        if (i < 0) {
+          if (errno == EWOULDBLOCK || errno == EAGAIN) {
+            ProcessXtEvents();
+            i = 0;
+          } else {
+            fprintf(stderr, "%s", programName);
+            perror(": read");
+            return False;
+          }
+        } else {
+          if (errorMessageOnReadFailure) {
+            fprintf(stderr, "%s: VNC server closed connection\n", programName);
+          }
+          return False;
+        }
       }
       out += i;
       n -= i;
     }
   }
 
-  if (rfbProfile) tRecvTime += gettime() - tRecvStart;
+  if (rfbProfile) tRecv += gettime() - tRecvStart;
 
   return True;
 }
@@ -195,24 +195,24 @@ WriteExact(int sock, char *buf, int n)
     j = write(sock, buf + i, (n - i));
     if (j <= 0) {
       if (j < 0) {
-	if (errno == EWOULDBLOCK || errno == EAGAIN) {
-	  FD_ZERO(&fds);
-	  FD_SET(rfbsock,&fds);
+        if (errno == EWOULDBLOCK || errno == EAGAIN) {
+          FD_ZERO(&fds);
+          FD_SET(rfbsock, &fds);
 
-	  if (select(rfbsock+1, NULL, &fds, NULL, NULL) <= 0) {
-	    fprintf(stderr,"%s",programName);
-	    perror(": select");
-	    return False;
-	  }
-	  j = 0;
-	} else {
-	  fprintf(stderr,"%s",programName);
-	  perror(": write");
-	  return False;
-	}
+          if (select(rfbsock + 1, NULL, &fds, NULL, NULL) <= 0) {
+            fprintf(stderr, "%s", programName);
+            perror(": select");
+            return False;
+          }
+          j = 0;
+        } else {
+          fprintf(stderr, "%s", programName);
+          perror(": write");
+          return False;
+        }
       } else {
-	fprintf(stderr,"%s: write failed\n",programName);
-	return False;
+        fprintf(stderr, "%s: write failed\n", programName);
+        return False;
       }
     }
     i += j;
@@ -240,20 +240,20 @@ ConnectToTcpAddr(const char *hostname, int port)
   if (strlen(hostname) < 1)
     hostname = NULL;
   if (getaddrinfo(hostname, portname, &hints, &addr) != 0) {
-    fprintf(stderr,"Couldn't convert '%s' to host address\n", hostname);
+    fprintf(stderr, "Couldn't convert '%s' to host address\n", hostname);
     return -1;
   }
 
   sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
   if (sock < 0) {
-    fprintf(stderr,"%s",programName);
+    fprintf(stderr, "%s", programName);
     perror(": ConnectToTcpAddr: socket");
     freeaddrinfo(addr);
     return -1;
   }
 
   if (connect(sock, addr->ai_addr, addr->ai_addrlen) < 0) {
-    fprintf(stderr,"%s",programName);
+    fprintf(stderr, "%s", programName);
     perror(": ConnectToTcpAddr: connect");
     close(sock);
     freeaddrinfo(addr);
@@ -263,8 +263,8 @@ ConnectToTcpAddr(const char *hostname, int port)
   freeaddrinfo(addr);
 
   if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
-		 (char *)&one, sizeof(one)) < 0) {
-    fprintf(stderr,"%s",programName);
+                 (char *)&one, sizeof(one)) < 0) {
+    fprintf(stderr, "%s", programName);
     perror(": ConnectToTcpAddr: setsockopt");
     close(sock);
     return -1;
@@ -293,7 +293,7 @@ FindFreeTcpPort(void)
 
   sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0) {
-    fprintf(stderr,"%s",programName);
+    fprintf(stderr, "%s", programName);
     perror(": FindFreeTcpPort: unable to create socket");
     return 0;
   }
@@ -301,14 +301,14 @@ FindFreeTcpPort(void)
   addr.sin_port = 0;
   if (bind (sock, (struct sockaddr *)&addr, sizeof (addr)) < 0) {
     close(sock);
-    fprintf(stderr,"%s",programName);
+    fprintf(stderr, "%s", programName);
     perror(": FindFreeTcpPort: unable to find free port");
   }
 
   n = sizeof(addr);
   if (getsockname (sock, (struct sockaddr *)&addr, &n) < 0) {
     close(sock);
-    fprintf(stderr,"%s",programName);
+    fprintf(stderr, "%s", programName);
     perror(": FindFreeTcpPort: unable to get port number");
   }
 
@@ -346,28 +346,28 @@ ListenAtTcpPort(int port)
 
   sock = socket(family, SOCK_STREAM, 0);
   if (sock < 0) {
-    fprintf(stderr,"%s",programName);
+    fprintf(stderr, "%s", programName);
     perror(": ListenAtTcpPort: socket");
     return -1;
   }
 
   if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-		 (const char *)&one, sizeof(one)) < 0) {
-    fprintf(stderr,"%s",programName);
+                 (const char *)&one, sizeof(one)) < 0) {
+    fprintf(stderr, "%s", programName);
     perror(": ListenAtTcpPort: setsockopt");
     close(sock);
     return -1;
   }
 
   if (bind(sock, (struct sockaddr *)&addr, addrlen) < 0) {
-    fprintf(stderr,"%s",programName);
+    fprintf(stderr, "%s", programName);
     perror(": ListenAtTcpPort: bind");
     close(sock);
     return -1;
   }
 
   if (listen(sock, 5) < 0) {
-    fprintf(stderr,"%s",programName);
+    fprintf(stderr, "%s", programName);
     perror(": ListenAtTcpPort: listen");
     close(sock);
     return -1;
@@ -391,14 +391,14 @@ AcceptTcpConnection(int listenSock)
 
   sock = accept(listenSock, (struct sockaddr *) &addr, &addrlen);
   if (sock < 0) {
-    fprintf(stderr,"%s",programName);
+    fprintf(stderr, "%s", programName);
     perror(": AcceptTcpConnection: accept");
     return -1;
   }
 
   if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
-		 (char *)&one, sizeof(one)) < 0) {
-    fprintf(stderr,"%s",programName);
+                 (char *)&one, sizeof(one)) < 0) {
+    fprintf(stderr, "%s", programName);
     perror(": AcceptTcpConnection: setsockopt");
     close(sock);
     return -1;
@@ -416,7 +416,7 @@ Bool
 SetNonBlocking(int sock)
 {
   if (fcntl(sock, F_SETFL, O_NONBLOCK) < 0) {
-    fprintf(stderr,"%s",programName);
+    fprintf(stderr, "%s", programName);
     perror(": AcceptTcpConnection: fcntl");
     return False;
   }
@@ -461,33 +461,27 @@ PrintInHex(char *buf, int len)
 
   str[16] = 0;
 
-  fprintf(stderr,"ReadExact: ");
+  fprintf(stderr, "ReadExact: ");
 
-  for (i = 0; i < len; i++)
-    {
-      if ((i % 16 == 0) && (i != 0)) {
-	fprintf(stderr,"           ");
-      }
-      c = buf[i];
-      str[i % 16] = (((c > 31) && (c < 127)) ? c : '.');
-      fprintf(stderr,"%02x ",(unsigned char)c);
-      if ((i % 4) == 3)
-	fprintf(stderr," ");
-      if ((i % 16) == 15)
-	{
-	  fprintf(stderr,"%s\n",str);
-	}
+  for (i = 0; i < len; i++) {
+    if ((i % 16 == 0) && (i != 0))
+      fprintf(stderr, "           ");
+    c = buf[i];
+    str[i % 16] = (((c > 31) && (c < 127)) ? c : '.');
+    fprintf(stderr, "%02x ", (unsigned char)c);
+    if ((i % 4) == 3)
+      fprintf(stderr, " ");
+    if ((i % 16) == 15)
+      fprintf(stderr, "%s\n", str);
+  }
+  if ((i % 16) != 0) {
+    for (j = i % 16; j < 16; j++) {
+      fprintf(stderr, "   ");
+      if ((j % 4) == 3) fprintf(stderr, " ");
     }
-  if ((i % 16) != 0)
-    {
-      for (j = i % 16; j < 16; j++)
-	{
-	  fprintf(stderr,"   ");
-	  if ((j % 4) == 3) fprintf(stderr," ");
-	}
-      str[i % 16] = 0;
-      fprintf(stderr,"%s\n",str);
-    }
+    str[i % 16] = 0;
+    fprintf(stderr, "%s\n", str);
+  }
 
   fflush(stderr);
 }

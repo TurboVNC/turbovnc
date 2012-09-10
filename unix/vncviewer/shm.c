@@ -35,7 +35,7 @@ static Bool needShmCleanup = False;
 void
 ShmCleanup()
 {
-  fprintf(stderr,"ShmCleanup called\n");
+  fprintf(stderr, "ShmCleanup called\n");
   if (needShmCleanup) {
     shmdt(shminfo.shmaddr);
     shmctl(shminfo.shmid, IPC_RMID, 0);
@@ -60,12 +60,12 @@ CreateShmImage()
     return NULL;
 
   image = XShmCreateImage(dpy, vis, visdepth, ZPixmap, NULL, &shminfo,
-			  si.framebufferWidth, si.framebufferHeight);
+                          si.framebufferWidth, si.framebufferHeight);
   if (!image) return NULL;
 
   shminfo.shmid = shmget(IPC_PRIVATE,
-			 image->bytes_per_line * image->height,
-			 IPC_CREAT|0777);
+                         image->bytes_per_line * image->height,
+                         IPC_CREAT|0777);
 
   if (shminfo.shmid == -1) {
     XDestroyImage(image);
@@ -96,7 +96,7 @@ CreateShmImage()
 
   needShmCleanup = True;
 
-  fprintf(stderr,"Using shared memory PutImage\n");
+  fprintf(stderr, "Using shared memory PutImage\n");
 
   return image;
 }

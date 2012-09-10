@@ -86,10 +86,10 @@ GrabKeyboard(void)
 #ifndef __APPLE__
     if (keyboardGrabbed) return;
     if (XtGrabKeyboard(toplevel, True, GrabModeAsync,
-		       GrabModeAsync, CurrentTime) != GrabSuccess) {
-	fprintf(stderr, "XtGrabKeyboard() failed.\n");
+                       GrabModeAsync, CurrentTime) != GrabSuccess) {
+        fprintf(stderr, "XtGrabKeyboard() failed.\n");
     } else {
-	keyboardGrabbed = True;
+        keyboardGrabbed = True;
     }
 #endif
 }
@@ -106,7 +106,7 @@ UngrabKeyboard(void)
 
 void
 ToggleGrabKeyboard(Widget w, XEvent *event, String *params,
-		   Cardinal *num_params)
+                   Cardinal *num_params)
 {
     if (!keyboardGrabbed) GrabKeyboard();
     else UngrabKeyboard();
@@ -114,7 +114,7 @@ ToggleGrabKeyboard(Widget w, XEvent *event, String *params,
 
 void
 SetGrabKeyboardState(Widget w, XEvent *ev, String *params,
-		     Cardinal *num_params)
+                     Cardinal *num_params)
 {
   if (keyboardGrabbed)
     XtVaSetValues(w, XtNstate, True, NULL);
@@ -177,9 +177,9 @@ FullScreenOn()
 
     XtVaSetValues(viewport, XtNforceBars, True, NULL);
     XtVaGetValues(viewport, XtNwidth, &oldViewportWidth,
-		  XtNheight, &oldViewportHeight, NULL);
+                  XtNheight, &oldViewportHeight, NULL);
     XtVaGetValues(XtNameToWidget(viewport, "clip"),
-		  XtNwidth, &clipWidth, XtNheight, &clipHeight, NULL);
+                  XtNwidth, &clipWidth, XtNheight, &clipHeight, NULL);
 
     scrollbarWidth = oldViewportWidth - clipWidth;
     scrollbarHeight = oldViewportHeight - clipHeight;
@@ -205,7 +205,7 @@ FullScreenOn()
   viewportY = (toplevelHeight - viewportHeight) / 2;
 
   XtVaSetValues(toplevel, XtNmaxWidth, toplevelWidth,
-		XtNmaxHeight, toplevelHeight, NULL);
+                XtNmaxHeight, toplevelHeight, NULL);
   netwm_fullscreen(dpy, XtWindow(toplevel), True);
   XSync(dpy, False);
 
@@ -236,13 +236,13 @@ FullScreenOn()
   XtUnmanageChild(viewport);
 
   XtVaSetValues(viewport,
-		XtNhorizDistance, viewportX,
-		XtNvertDistance, viewportY,
-		XtNleft, XtChainLeft,
-		XtNright, XtChainLeft,
-		XtNtop, XtChainTop,
-		XtNbottom, XtChainTop,
-		NULL);
+                XtNhorizDistance, viewportX,
+                XtNvertDistance, viewportY,
+                XtNleft, XtChainLeft,
+                XtNright, XtChainLeft,
+                XtNtop, XtChainTop,
+                XtNbottom, XtChainTop,
+                NULL);
 
   XtManageChild(viewport);
 
@@ -257,7 +257,7 @@ FullScreenOn()
   /* Try to get the input focus. */
 
   XSetInputFocus(dpy, DefaultRootWindow(dpy), RevertToPointerRoot,
-		 CurrentTime);
+                 CurrentTime);
 
   /* Optionally, grab the keyboard. */
 
@@ -291,27 +291,27 @@ FullScreenOff()
   if (appData.grabKeyboard == TVNC_FS) UngrabKeyboard();
 
   XtVaSetValues(toplevel, XtNmaxWidth, si.framebufferWidth,
-		XtNmaxHeight, si.framebufferHeight, NULL);
+                XtNmaxHeight, si.framebufferHeight, NULL);
 
   XtResizeWidget(toplevel,
-		 viewportWidth - scrollbarWidth,
-		 viewportHeight - scrollbarHeight, 0);
+                 viewportWidth - scrollbarWidth,
+                 viewportHeight - scrollbarHeight, 0);
   XtResizeWidget(viewport,
-		 viewportWidth - scrollbarWidth,
-		 viewportHeight - scrollbarHeight, 0);
+                 viewportWidth - scrollbarWidth,
+                 viewportHeight - scrollbarHeight, 0);
 
   XtVaSetValues(viewport, XtNforceBars, False, NULL);
 
   XtUnmanageChild(viewport);
 
   XtVaSetValues(viewport,
-		XtNhorizDistance, 0,
-		XtNvertDistance, 0,
-		XtNleft, XtChainLeft,
-		XtNright, XtChainRight,
-		XtNtop, XtChainTop,
-		XtNbottom, XtChainBottom,
-		NULL);
+                XtNhorizDistance, 0,
+                XtNvertDistance, 0,
+                XtNleft, XtChainLeft,
+                XtNright, XtChainRight,
+                XtNtop, XtChainTop,
+                XtNbottom, XtChainBottom,
+                NULL);
 
   XtManageChild(viewport);
 
@@ -413,13 +413,13 @@ DoBumpScroll()
     if (desktopX < si.framebufferWidth - dpyWidth) {
       desktopX += appData.bumpScrollPixels;
       if (desktopX > si.framebufferWidth - dpyWidth)
-	desktopX = si.framebufferWidth - dpyWidth;
+        desktopX = si.framebufferWidth - dpyWidth;
     }
   } else if (scrollLeft) {
     if (desktopX > 0) {
       desktopX -= appData.bumpScrollPixels;
       if (desktopX < 0)
-	desktopX = 0;
+        desktopX = 0;
     }
   }
 
@@ -427,20 +427,20 @@ DoBumpScroll()
     if (desktopY < si.framebufferHeight - dpyHeight) {
       desktopY += appData.bumpScrollPixels;
       if (desktopY > si.framebufferHeight - dpyHeight)
-	desktopY = si.framebufferHeight - dpyHeight;
+        desktopY = si.framebufferHeight - dpyHeight;
     }
   } else if (scrollUp) {
     if (desktopY > 0) {
       desktopY -= appData.bumpScrollPixels;
       if (desktopY < 0)
-	desktopY = 0;
+        desktopY = 0;
     }
   }
 
   if (oldx != desktopX || oldy != desktopY) {
     XawViewportSetCoordinates(viewport, desktopX, desktopY);
     timer = XtAppAddTimeOut(appContext, appData.bumpScrollTime,
-			    BumpScrollTimerCallback, NULL);
+                            BumpScrollTimerCallback, NULL);
     timerSet = True;
     return True;
   }

@@ -65,13 +65,13 @@ main(int argc, char **argv)
     }
     if (strcmp(argv[i], "-tunnel") == 0 || strcmp(argv[i], "-via") == 0) {
       if (!createTunnel(&argc, argv, i))
-	exit(1);
+        exit(1);
       break;
     }
     if (strcmp(argv[i], "-bench") == 0 && i < argc - 1) {
       if ((benchFile = fopen(argv[++i], "rb")) == NULL) {
-	perror("Could not open session capture");
-	exit(1);
+        perror("Could not open session capture");
+        exit(1);
       }
     }
     if (strcmp(argv[i], "-benchiter") == 0 && i < argc -1) {
@@ -85,9 +85,9 @@ main(int argc, char **argv)
      display. */
 
   toplevel = XtVaAppInitialize(&appContext, "Tvncviewer",
-			       cmdLineOptions, numCmdLineOptions,
-			       &argc, argv, fallback_resources,
-			       XtNborderWidth, 0, NULL);
+                               cmdLineOptions, numCmdLineOptions,
+                               &argc, argv, fallback_resources,
+                               XtNborderWidth, 0, NULL);
 
   dpy = XtDisplay(toplevel);
 

@@ -24,23 +24,23 @@
 #include <vncviewer.h>
 
 static void GetInitialSelectionTimeCallback(Widget w, XtPointer clientData,
-					    Atom* selection, Atom* type,
-					    XtPointer value,
-					    unsigned long* length,
-					    int* format);
+                                            Atom* selection, Atom* type,
+                                            XtPointer value,
+                                            unsigned long* length,
+                                            int* format);
 static void GetSelectionCallback(Widget w, XtPointer clientData,
-				 Atom* selection, Atom* type, XtPointer value,
-				 unsigned long* length, int* format);
+                                 Atom* selection, Atom* type, XtPointer value,
+                                 unsigned long* length, int* format);
 static void GetSelectionTimeCallback(Widget w, XtPointer clientData,
-				     Atom* selection, Atom* type,
-				     XtPointer value, unsigned long* length,
-				     int* format);
+                                     Atom* selection, Atom* type,
+                                     XtPointer value, unsigned long* length,
+                                     int* format);
 static void SendCutBuffer();
 static void CutBufferChange(Widget w, XtPointer ptr, XEvent *ev,
-			    Boolean *cont);
+                            Boolean *cont);
 static Boolean ConvertSelection(Widget w, Atom* selection, Atom* target,
-				Atom* type, XtPointer* value,
-				unsigned long* length, int* format);
+                                Atom* type, XtPointer* value,
+                                unsigned long* length, int* format);
 static void LoseSelection(Widget w, Atom *selection);
 
 static Bool iAmSelectionOwner = False;
@@ -73,11 +73,11 @@ InitialiseSelection()
   XSelectInput(dpy, DefaultRootWindow(dpy), PropertyChangeMask);
 
   XtAddRawEventHandler(toplevel, PropertyChangeMask, False, CutBufferChange,
-		       NULL);
+                       NULL);
 
   XtGetSelectionValue(toplevel, XA_PRIMARY,
-		      XInternAtom(dpy, "TIMESTAMP", False),
-		      GetInitialSelectionTimeCallback, NULL, CurrentTime);
+                      XInternAtom(dpy, "TIMESTAMP", False),
+                      GetInitialSelectionTimeCallback, NULL, CurrentTime);
 }
 
 
@@ -90,8 +90,8 @@ InitialiseSelection()
 
 static void
 GetInitialSelectionTimeCallback(Widget w, XtPointer clientData,
-				Atom* selection, Atom* type, XtPointer value,
-				unsigned long* length, int* format)
+                                Atom* selection, Atom* type, XtPointer value,
+                                unsigned long* length, int* format)
 {
   if (value && *format == 32 && *length == 1)
     prevSelectionTime = *(CARD32 *)value;
@@ -124,22 +124,22 @@ SelectionToVNC(Widget w, XEvent *event, String *params, Cardinal *num_params)
   Bool always = False;
 
   if (*num_params != 0) {
-    if (strcmp(params[0],"always") == 0) {
+    if (strcmp(params[0], "always") == 0) {
       always = True;
-    } else if (strcmp(params[0],"new") == 0) {
+    } else if (strcmp(params[0], "new") == 0) {
       always = False;
     } else {
-      fprintf(stderr,"Invalid params: SelectionToVNC(always|new)\n");
+      fprintf(stderr, "Invalid params: SelectionToVNC(always|new)\n");
       return;
     }
   }
 
   if (always) {
     XtGetSelectionValue(w, XA_PRIMARY, XA_STRING, GetSelectionCallback, NULL,
-			TimeFromEvent(event));
+                        TimeFromEvent(event));
   } else {
     XtGetSelectionValue(w, XA_PRIMARY, XInternAtom(dpy, "TIMESTAMP", False),
-			GetSelectionTimeCallback, NULL, TimeFromEvent(event));
+                        GetSelectionTimeCallback, NULL, TimeFromEvent(event));
   }
 }
 
@@ -152,8 +152,8 @@ SelectionToVNC(Widget w, XEvent *event, String *params, Cardinal *num_params)
 
 static void
 GetSelectionCallback(Widget w, XtPointer clientData, Atom* selection,
-		     Atom* type, XtPointer value, unsigned long* length,
-		     int* format)
+                     Atom* type, XtPointer value, unsigned long* length,
+                     int* format)
 {
   int len = *length;
   char *str = (char *)value;
@@ -177,8 +177,8 @@ GetSelectionCallback(Widget w, XtPointer clientData, Atom* selection,
 
 static void
 GetSelectionTimeCallback(Widget w, XtPointer clientData, Atom* selection,
-			 Atom* type, XtPointer value, unsigned long* length,
-			 int* format)
+                         Atom* type, XtPointer value, unsigned long* length,
+                         int* format)
 {
   if (value && *format == 32 && *length == 1) {
 
@@ -187,7 +187,7 @@ GetSelectionTimeCallback(Widget w, XtPointer clientData, Atom* selection,
     if (TIME_LATER(t, prevSelectionTime)) {
       prevSelectionTime = t;
       XtGetSelectionValue(w, XA_PRIMARY, XA_STRING, GetSelectionCallback, NULL,
-			  CurrentTime);
+                          CurrentTime);
     }
 
   } else {
@@ -253,19 +253,19 @@ SelectionFromVNC(Widget w, XEvent *event, String *params, Cardinal *num_params)
   Time t = TimeFromEvent(event);
 
   if (*num_params != 0) {
-    if (strcmp(params[0],"always") == 0) {
+    if (strcmp(params[0], "always") == 0) {
       always = True;
-    } else if (strcmp(params[0],"new") == 0) {
+    } else if (strcmp(params[0], "new") == 0) {
       always = False;
     } else {
-      fprintf(stderr,"Invalid params: SelectionFromVNC(always|new)\n");
+      fprintf(stderr, "Invalid params: SelectionFromVNC(always|new)\n");
       return;
     }
   }
 
   if (t == CurrentTime) {
-    fprintf(stderr,"Error in translations: SelectionFromVNC() must act on "
-	    "event with time field\n");
+    fprintf(stderr, "Error in translations: SelectionFromVNC() must act on "
+            "event with time field\n");
     return;
   }
 
@@ -276,7 +276,7 @@ SelectionFromVNC(Widget w, XEvent *event, String *params, Cardinal *num_params)
 
   XStoreBytes(dpy, serverCutText, strlen(serverCutText));
   if (XtOwnSelection(desktop, XA_PRIMARY, t, ConvertSelection, LoseSelection,
-		     NULL)) {
+                     NULL)) {
     iAmSelectionOwner = True;
   }
 }
@@ -290,7 +290,7 @@ SelectionFromVNC(Widget w, XEvent *event, String *params, Cardinal *num_params)
 
 static Boolean
 ConvertSelection(Widget w, Atom* selection, Atom* target, Atom* type,
-		 XtPointer* value, unsigned long* length, int* format)
+                 XtPointer* value, unsigned long* length, int* format)
 {
 
   if (*target == XA_STRING && serverCutText != NULL) {
@@ -303,7 +303,7 @@ ConvertSelection(Widget w, Atom* selection, Atom* target, Atom* type,
   }
 
   if (XmuConvertStandardSelection(w, CurrentTime, selection, target, type,
-				  (XPointer*)value, length, format)) {
+                                  (XPointer*)value, length, format)) {
     if (*target == XInternAtom(dpy, "TARGETS", False)) {
       /* add STRING to list of standard targets */
       Atom* targetP;
@@ -311,10 +311,10 @@ ConvertSelection(Widget w, Atom* selection, Atom* target, Atom* type,
       unsigned long std_length = *length;
 
       *length = std_length + 1;
-      *value = (XtPointer)XtMalloc(sizeof(Atom)*(*length));
+      *value = (XtPointer)XtMalloc(sizeof(Atom) * (*length));
       targetP = *(Atom**)value;
       *targetP++ = XA_STRING;
-      memmove((char*)targetP, (char*)std_targets, sizeof(Atom)*std_length);
+      memmove((char*)targetP, (char*)std_targets, sizeof(Atom) * std_length);
       XtFree((char*)std_targets);
       *type = XA_ATOM;
       *format = 32;

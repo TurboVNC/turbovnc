@@ -77,25 +77,25 @@ SetVisualAndCmap()
   if (appData.forceOwnCmap) {
     if (!si.format.trueColour) {
       if (GetPseudoColorVisualAndCmap(si.format.depth))
-	return;
+        return;
     }
     if (GetPseudoColorVisualAndCmap(8))
       return;
-    fprintf(stderr,"Couldn't find a matching PseudoColor visual.\n");
+    fprintf(stderr, "Couldn't find a matching PseudoColor visual.\n");
   }
 
   if (appData.forceTrueColour) {
     if (GetTrueColorVisualAndCmap(appData.requestedDepth))
       return;
-    fprintf(stderr,"Couldn't find a matching TrueColor visual.\n");
+    fprintf(stderr, "Couldn't find a matching TrueColor visual.\n");
   }
 
   /* just use default visual and colormap */
 
-  vis = DefaultVisual(dpy,DefaultScreen(dpy));
-  visdepth = DefaultDepth(dpy,DefaultScreen(dpy));
+  vis = DefaultVisual(dpy, DefaultScreen(dpy));
+  visdepth = DefaultDepth(dpy, DefaultScreen(dpy));
   visbpp = GetBPPForDepth(visdepth);
-  cmap = DefaultColormap(dpy,DefaultScreen(dpy));
+  cmap = DefaultColormap(dpy, DefaultScreen(dpy));
 
   if (!appData.useBGR233 && (vis->class == TrueColor)) {
 
@@ -111,7 +111,7 @@ SetVisualAndCmap()
     myFormat.blueMax = vis->blue_mask >> myFormat.blueShift;
 
     fprintf(stderr,
-	    "Using default colormap which is TrueColor.  Pixel format:\n");
+            "Using default colormap which is TrueColor.  Pixel format:\n");
     PrintPixelFormat(&myFormat);
     return;
   }
@@ -156,9 +156,9 @@ GetPseudoColorVisualAndCmap(int depth)
   tmpl.colormap_size = (1 << depth);
 
   vinfo = XGetVisualInfo(dpy,
-			 VisualScreenMask|VisualDepthMask|
-			 VisualClassMask|VisualColormapSizeMask,
-			 &tmpl, &nvis);
+                         VisualScreenMask|VisualDepthMask|
+                         VisualClassMask|VisualColormapSizeMask,
+                         &tmpl, &nvis);
 
   if (vinfo) {
     vis = vinfo[0].visual;
@@ -175,14 +175,14 @@ GetPseudoColorVisualAndCmap(int depth)
     cmap = XCreateColormap(dpy, DefaultRootWindow(dpy), vis, AllocAll);
 
     XtVaSetValues(toplevel, XtNcolormap, cmap, XtNdepth, visdepth,
-		  XtNvisual, vis, NULL);
+                  XtNvisual, vis, NULL);
 
     if (appData.fullScreen) {
       XInstallColormap(dpy, cmap);
     }
 
-    fprintf(stderr,"Using PseudoColor visual, depth %d.  Pixel format:\n",
-	    visdepth);
+    fprintf(stderr, "Using PseudoColor visual, depth %d.  Pixel format:\n",
+            visdepth);
     PrintPixelFormat(&myFormat);
 
     return True;
@@ -235,14 +235,14 @@ GetTrueColorVisualAndCmap(int depth)
     cmap = XCreateColormap(dpy, DefaultRootWindow(dpy), vis, AllocNone);
 
     XtVaSetValues(toplevel, XtNcolormap, cmap, XtNdepth, visdepth,
-		  XtNvisual, vis, NULL);
+                  XtNvisual, vis, NULL);
 
     if (appData.fullScreen) {
       XInstallColormap(dpy, cmap);
     }
 
-    fprintf(stderr,"Using TrueColor visual, depth %d.  Pixel format:\n",
-	    visdepth);
+    fprintf(stderr, "Using TrueColor visual, depth %d.  Pixel format:\n",
+            visdepth);
     PrintPixelFormat(&myFormat);
 
     return True;
@@ -273,7 +273,7 @@ GetBPPForDepth(int depth)
   }
 
   if (i == nformats) {
-    fprintf(stderr,"no pixmap format for depth %d???\n", depth);
+    fprintf(stderr, "no pixmap format for depth %d???\n", depth);
     exit(1);
   }
 
@@ -282,7 +282,7 @@ GetBPPForDepth(int depth)
   XFree(format);
 
   if (bpp != 1 && bpp != 8 && bpp != 16 && bpp != 32) {
-    fprintf(stderr,"Can't cope with %d bits-per-pixel.  Sorry.\n", bpp);
+    fprintf(stderr, "Can't cope with %d bits-per-pixel.  Sorry.\n", bpp);
     exit(1);
   }
 
@@ -326,14 +326,14 @@ SetupBGR233Map()
 
   AllocateExactBGR233Colours();
 
-  fprintf(stderr,"Got %d exact BGR233 colours out of %d\n",
-	  nBGR233ColoursAllocated, appData.nColours);
+  fprintf(stderr, "Got %d exact BGR233 colours out of %d\n",
+          nBGR233ColoursAllocated, appData.nColours);
 
   if (nBGR233ColoursAllocated < BGR233_SIZE) {
 
     if (visdepth > 8) { /* shouldn't get here */
-      fprintf(stderr,"Error: couldn't allocate BGR233 colours even though "
-	      "depth is %d\n", visdepth);
+      fprintf(stderr, "Error: couldn't allocate BGR233 colours even though "
+              "depth is %d\n", visdepth);
       exit(1);
     }
 
@@ -352,40 +352,40 @@ SetupBGR233Map()
 
     for (i = 0; i < BGR233_SIZE; i++) {
       if (BGR233ToPixel[i] != INVALID_PIXEL)
-	exactBGR233[BGR233ToPixel[i]] = True;
+        exactBGR233[BGR233ToPixel[i]] = True;
     }
 
     if (appData.useSharedColours) {
 
       /* Try to find existing shared colours.  This is harder than it sounds
-	 because XQueryColors doesn't tell us whether colours are shared,
-	 private or unallocated.  What we do is go through the colormap and for
-	 each pixel try to allocate exactly its RGB values.  If this returns a
-	 different pixel then it's definitely either a private or unallocated
-	 pixel, so no use to us.  If it returns us the same pixel again, then
-	 it's likely that it's a shared colour - however, it is possible that
-	 it was actually an unallocated pixel, which we've now allocated.  We
-	 minimise this possibility by going through the pixels in reverse order
-	 - this helps becuse the X server allocates new pixels from the lowest
-	 number up, so it should only be a problem for the lowest unallocated
-	 pixel.  Got that? */
+         because XQueryColors doesn't tell us whether colours are shared,
+         private or unallocated.  What we do is go through the colormap and for
+         each pixel try to allocate exactly its RGB values.  If this returns a
+         different pixel then it's definitely either a private or unallocated
+         pixel, so no use to us.  If it returns us the same pixel again, then
+         it's likely that it's a shared colour - however, it is possible that
+         it was actually an unallocated pixel, which we've now allocated.  We
+         minimise this possibility by going through the pixels in reverse order
+         - this helps becuse the X server allocates new pixels from the lowest
+         number up, so it should only be a problem for the lowest unallocated
+         pixel.  Got that? */
 
       for (i = cmapSize-1; i >= 0; i--) {
-	if (!exactBGR233[i] &&
-	    XAllocColor(dpy, cmap, &cmapEntry[i])) {
+        if (!exactBGR233[i] &&
+            XAllocColor(dpy, cmap, &cmapEntry[i])) {
 
-	  if (cmapEntry[i].pixel == i) {
+          if (cmapEntry[i].pixel == i) {
 
-	    shared[i] = True; /* probably shared */
+            shared[i] = True; /* probably shared */
 
-	  } else {
+          } else {
 
-	    /* "i" is either unallocated or private.  We have now unnecessarily
-	       allocated cmapEntry[i].pixel.  Free it. */
+            /* "i" is either unallocated or private.  We have now unnecessarily
+               allocated cmapEntry[i].pixel.  Free it. */
 
-	    XFreeColors(dpy, cmap, &cmapEntry[i].pixel, 1, 0);
-	  }
-	}
+            XFreeColors(dpy, cmap, &cmapEntry[i].pixel, 1, 0);
+          }
+        }
       }
     }
 
@@ -393,31 +393,31 @@ SetupBGR233Map()
 
     for (r = 0; r < 8; r++) {
       for (g = 0; g < 8; g++) {
-	for (b = 0; b < 4; b++) {
-	  if (BGR233ToPixel[(b<<6) | (g<<3) | r] == INVALID_PIXEL) {
+        for (b = 0; b < 4; b++) {
+          if (BGR233ToPixel[(b<<6) | (g<<3) | r] == INVALID_PIXEL) {
 
-	    unsigned long minDistance = ULONG_MAX;
+            unsigned long minDistance = ULONG_MAX;
 
-	    for (i = 0; i < cmapSize; i++) {
-	      if (exactBGR233[i] || shared[i]) {
-		unsigned long distance
-		  = (abs(cmapEntry[i].red - r * 65535 / 7)
-		     + abs(cmapEntry[i].green - g * 65535 / 7)
-		     + abs(cmapEntry[i].blue - b * 65535 / 3));
+            for (i = 0; i < cmapSize; i++) {
+              if (exactBGR233[i] || shared[i]) {
+                unsigned long distance
+                  = (abs(cmapEntry[i].red - r * 65535 / 7)
+                     + abs(cmapEntry[i].green - g * 65535 / 7)
+                     + abs(cmapEntry[i].blue - b * 65535 / 3));
 
-		if (distance < minDistance) {
-		  minDistance = distance;
-		  nearestPixel = i;
-		}
-	      }
-	    }
+                if (distance < minDistance) {
+                  minDistance = distance;
+                  nearestPixel = i;
+                }
+              }
+            }
 
-	    BGR233ToPixel[(b<<6) | (g<<3) | r] = nearestPixel;
-	    if (shared[nearestPixel] && !usedAsNearest[nearestPixel])
-	      nSharedUsed++;
-	    usedAsNearest[nearestPixel] = True;
-	  }
-	}
+            BGR233ToPixel[(b<<6) | (g<<3) | r] = nearestPixel;
+            if (shared[nearestPixel] && !usedAsNearest[nearestPixel])
+              nSharedUsed++;
+            usedAsNearest[nearestPixel] = True;
+          }
+        }
       }
     }
 
@@ -425,11 +425,11 @@ SetupBGR233Map()
 
     for (i = 0; i < cmapSize; i++) {
       if (shared[i] && !usedAsNearest[i]) {
-	  XFreeColors(dpy, cmap, (unsigned long *)&i, 1, 0);
+          XFreeColors(dpy, cmap, (unsigned long *)&i, 1, 0);
       }
     }
 
-    fprintf(stderr,"Using %d existing shared colours\n", nSharedUsed);
+    fprintf(stderr, "Using %d existing shared colours\n", nSharedUsed);
   }
 }
 
@@ -454,9 +454,9 @@ SetupBGR233Map()
  * b=3                 r=0       g=0,7                      r0 g0 b3
  *                                                          r0 g7 b3
  * r=7                 g=0,7     b=0,3                      r7 g0 b0
- * 		       		 			    r7 g0 b3
- * 							    r7 g7 b0
- *							    r7 g7 b3
+ *                                                          r7 g0 b3
+ *                                                          r7 g7 b0
+ *                                                          r7 g7 b3
  * g=3                 r=0,7     b=0,3                      r0 g3 b0
  *                                                          r0 g3 b3
  *                                                          r7 g3 b0
@@ -467,9 +467,9 @@ SetupBGR233Map()
 static void
 AllocateExactBGR233Colours()
 {
-  int rv[] = {0,7,3,5,1,6,2,4};
-  int gv[] = {0,7,3,5,1,6,2,4};
-  int bv[] = {0,3,1,2};
+  int rv[] = {0, 7, 3, 5, 1, 6, 2, 4};
+  int gv[] = {0, 7, 3, 5, 1, 6, 2, 4};
+  int bv[] = {0, 3, 1, 2};
   int rn = 0;
   int gn = 1;
   int bn = 1;
@@ -484,8 +484,8 @@ AllocateExactBGR233Colours()
     ri = rn;
     for (gi = 0; gi < gn; gi++) {
       for (bi = 0; bi < bn; bi++) {
-	if (!AllocateBGR233Colour(rv[ri], gv[gi], bv[bi]))
-	  return;
+        if (!AllocateBGR233Colour(rv[ri], gv[gi], bv[bi]))
+          return;
       }
     }
     rn++;
@@ -496,8 +496,8 @@ AllocateExactBGR233Colours()
     gi = gn;
     for (ri = 0; ri < rn; ri++) {
       for (bi = 0; bi < bn; bi++) {
-	if (!AllocateBGR233Colour(rv[ri], gv[gi], bv[bi]))
-	  return;
+        if (!AllocateBGR233Colour(rv[ri], gv[gi], bv[bi]))
+          return;
       }
     }
     gn++;
@@ -506,10 +506,10 @@ AllocateExactBGR233Colours()
 
       bi = bn;
       for (ri = 0; ri < rn; ri++) {
-	for (gi = 0; gi < gn; gi++) {
-	  if (!AllocateBGR233Colour(rv[ri], gv[gi], bv[bi]))
-	    return;
-	}
+        for (gi = 0; gi < gn; gi++) {
+          if (!AllocateBGR233Colour(rv[ri], gv[gi], bv[bi]))
+            return;
+        }
       }
       bn++;
     }
