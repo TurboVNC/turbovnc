@@ -37,7 +37,6 @@ static Bool IconifyNamedWindow(Window w, char *name, Bool undo);
 
 Dimension dpyWidth, dpyHeight;
 Atom wmDeleteWindow, wmState;
-double tRead = 0.0;
 
 static Bool xloginIconified = False;
 static XErrorHandler defaultXErrorHandler;
@@ -48,6 +47,7 @@ extern void ShutdownThreads(void);
 extern double gettime(void);
 extern z_stream zlibStream[4];
 extern Bool zlibStreamActive[4];
+extern double tRecv, tDecode, tBlit;
 
 static const char *subsampLevel2str[TVNC_SAMPOPT] = {
   "1X", "4X", "2X", "Gray"
@@ -470,17 +470,19 @@ Bool
 RunBenchmark(void)
 {
   int i, stream_id;
-  double tStart, tTotal, tAvg = 0.0;
+  double tStart, tTotal, tAvg = 0.0, tAvgDecode = 0.0, tAvgBlit = 0.0;
 
   for (i = 0; i < benchIter; i++) {
     tStart = gettime();
     printf("Benchmark run %3d:  ", i + 1);
     while (HandleRFBServerMessage()) {
     }
-    tTotal = gettime() - tStart - tRead;
-    printf("%f seconds\n", tTotal);
+    tTotal = gettime() - tStart - tRecv;
+    printf("%f s (Decode = %f, Blit = %f)\n", tTotal, tDecode, tBlit);
     tAvg += tTotal;
-    tRead = 0.0;
+    tAvgDecode += tDecode;
+    tAvgBlit += tBlit;
+    tRecv = tDecode = tBlit = 0.0;
     ShutdownThreads();
     for (stream_id = 0; stream_id < 4; stream_id++) {
       if (zlibStreamActive[stream_id]) {
@@ -495,6 +497,8 @@ RunBenchmark(void)
     fseek(benchFile, benchFileStart, SEEK_SET);
   }
   if (benchIter > 1)
-    printf("Average          :  %f seconds\n", tAvg / (double)benchIter);
+    printf("Average          :  %f s (Decode = %f, Blit = %f)\n",
+           tAvg / (double)benchIter, tAvgDecode / (double)benchIter,
+           tAvgBlit / (double)benchIter);
   return TRUE;
 }

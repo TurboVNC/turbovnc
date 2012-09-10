@@ -92,10 +92,9 @@ Bool newServerCutText = False;
  */
 
 BOOL rfbProfile = FALSE;
-static double tUpdate = 0., tDecode = 0., tBlit = 0., tStart = -1.,
-  tElapsed;
-double tRecv = 0.;
-static unsigned long iter = 0; 
+static double tUpdate = 0., tStart = -1., tElapsed;
+double tRecv = 0., tDecode = 0., tBlit = 0.;
+static unsigned long iter = 0;
 static double mpixels = 0.;
 
 double gettime(void)
@@ -1463,7 +1462,7 @@ HandleRFBServerMessage()
           pthread_mutex_lock(&tparam[i].done);
           pthread_mutex_unlock(&tparam[i].done);
         }
-        if (rfbProfile) tBlitStart = gettime();
+        if (rfbProfile || benchFile) tBlitStart = gettime();
         while (appData.doubleBuffer && list != NULL) {
           rfbFramebufferUpdateRectHeader* r1;
           node = list;
@@ -1484,7 +1483,7 @@ HandleRFBServerMessage()
           list = list->next;
           free(node);
         }
-        if (rfbProfile) tBlit += gettime() - tBlitStart;
+        if (rfbProfile || benchFile) tBlit += gettime() - tBlitStart;
         break;
       }
 
@@ -1525,7 +1524,7 @@ HandleRFBServerMessage()
         continue;
       }
 
-      if (rfbProfile) tDecodeStart = gettime();
+      if (rfbProfile || benchFile) tDecodeStart = gettime();
 
       switch (rect.encoding) {
 
@@ -1564,7 +1563,7 @@ HandleRFBServerMessage()
         cr.srcX = Swap16IfLE(cr.srcX);
         cr.srcY = Swap16IfLE(cr.srcY);
 
-        if (rfbProfile) tBlitStart = gettime();
+        if (rfbProfile || benchFile) tBlitStart = gettime();
 
         if (appData.copyRectDelay != 0) {
           XFillRectangle(dpy, desktopWin, srcGC, cr.srcX, cr.srcY,
@@ -1582,7 +1581,7 @@ HandleRFBServerMessage()
         XCopyArea(dpy, desktopWin, desktopWin, gc, cr.srcX, cr.srcY,
                   rect.r.w, rect.r.h, rect.r.x, rect.r.y);
 
-        if (rfbProfile) tBlit += gettime() - tBlitStart;
+        if (rfbProfile || benchFile) tBlit += gettime() - tBlitStart;
 
         break;
       }
@@ -1635,7 +1634,7 @@ HandleRFBServerMessage()
         return False;
       }
 
-      if (rfbProfile) tDecode += gettime() - tDecodeStart;
+      if (rfbProfile || benchFile) tDecode += gettime() - tDecodeStart;
     }
 
     for (i = 1; i < nt; i++) {
@@ -1647,7 +1646,7 @@ HandleRFBServerMessage()
     }
 
     if (appData.doubleBuffer) {
-      if (rfbProfile) tBlitStart = gettime();
+      if (rfbProfile || benchFile) tBlitStart = gettime();
         while (list != NULL) {
           rfbFramebufferUpdateRectHeader* r1;
           node = list;
@@ -1668,7 +1667,7 @@ HandleRFBServerMessage()
           list = list->next;
           free(node);
         }
-        if (rfbProfile) tBlit += gettime() - tBlitStart;
+        if (rfbProfile || benchFile) tBlit += gettime() - tBlitStart;
     }
 
 #ifdef MITSHM
@@ -1681,7 +1680,7 @@ HandleRFBServerMessage()
       XSync(dpy, False);
 #endif
 
-    if (rfbProfile) {
+    if (rfbProfile && !benchFile) {
       tUpdate += gettime() - tUpdateStart;
       iter++;
       tElapsed = gettime() - tStart;

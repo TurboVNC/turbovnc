@@ -87,11 +87,11 @@ ProcessXtEvents()
 Bool
 ReadFromRFBServer(char *out, unsigned int n)
 {
-  double tRecvStart = 0.0, tReadStart = 0.0;
+  double tRecvStart = 0.0;
 
   if (benchFile) {
     Bool status = True;
-    tReadStart = gettime();
+    tRecvStart = gettime();
     if (fread(out, n, 1, benchFile) < 1) {
       if (ferror(benchFile)) {
         perror("Cannot read from session capture");
@@ -99,7 +99,7 @@ ReadFromRFBServer(char *out, unsigned int n)
       }
       status = False;
     }
-    tRead += gettime() - tReadStart;
+    tRecv += gettime() - tRecvStart;
     return status;
   }
 

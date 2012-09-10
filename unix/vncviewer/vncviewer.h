@@ -249,7 +249,6 @@ extern void Cleanup();
 extern void UpdateTitleString(char *str, int len);
 extern void SetLastEncoding(int enc);
 extern Bool RunBenchmark(void);
-extern double tRead;
 
 /* popup.c */
 
