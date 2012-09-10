@@ -406,6 +406,8 @@ ReadServerInitMessage(void)
   PrintPixelFormat(&si.format);
 
   if (benchFile) benchFileStart = ftell(benchFile);
+
+  return True;
 }
 
 

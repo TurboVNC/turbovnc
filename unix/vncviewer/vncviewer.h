@@ -252,6 +252,7 @@ extern void Quit(Widget w, XEvent *event, String *params,
 extern void Cleanup();
 extern void UpdateTitleString(char *str, int len);
 extern void SetLastEncoding(int enc);
+extern Bool RunBenchmark(void);
 extern double tRead;
 
 /* popup.c */
@@ -295,6 +296,7 @@ extern void ToggleCU(Widget w, XEvent *ev, String *params,
                      Cardinal *num_params);
 extern void ToggleViewOnly(Widget w, XEvent *ev, String *params,
                      Cardinal *num_params);
+extern Bool ReadServerInitMessage(void);
 
 typedef struct _UpdateList {
    rfbFramebufferUpdateRectHeader region;
