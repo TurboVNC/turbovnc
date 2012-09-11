@@ -1035,16 +1035,13 @@ public class CConn extends CConnection
     int oldScalingFactor = scalingFactor;
     setScalingFactor(options.scalingFactor.getSelectedItem().toString());
     if (scalingFactor == SCALE_AUTO || scalingFactor == SCALE_FIXEDRATIO) {
-      if (scalingFactor != oldScalingFactor) {
-        if (desktop != null)
-          reconfigureViewport();
-      }
+      if (desktop != null && scalingFactor != oldScalingFactor)
+        reconfigureViewport();
     } else {
-      if (oldScalingFactor != scalingFactor) {
-        if (desktop != null && oldScalingFactor != SCALE_AUTO &&
-            oldScalingFactor != SCALE_FIXEDRATIO)
-          reconfigureViewport();
-      }
+      if (desktop != null && scalingFactor != oldScalingFactor &&
+          oldScalingFactor != SCALE_AUTO &&
+          oldScalingFactor != SCALE_FIXEDRATIO)
+        reconfigureViewport();
     }
 
     clipboardDialog.setSendingEnabled(viewer.sendClipboard.getValue());
@@ -1126,6 +1123,8 @@ public class CConn extends CConnection
       CSecurityTLS.x509ca.setParam(options.ca.getText());
       CSecurityTLS.x509crl.setParam(options.crl.getText());
     }
+    if (options.fullScreen.isSelected() ^ fullScreen)
+      toggleFullScreen();
   }
 
   public void setScalingFactor(String scaleString) {
@@ -1147,9 +1146,9 @@ public class CConn extends CConnection
 
   public void toggleFullScreen() {
     fullScreen = !fullScreen;
-    if (!fullScreen) menu.fullScreen.setSelected(false);
-    else menu.fullScreen.setSelected(true);
-    recreateViewport();
+    menu.fullScreen.setSelected(fullScreen);
+    if (viewport != null)
+      recreateViewport();
   }
 
   // writeClientCutText() is called from the clipboard dialog
