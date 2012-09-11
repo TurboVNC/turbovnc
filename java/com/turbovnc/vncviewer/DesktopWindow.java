@@ -83,7 +83,7 @@ class DesktopWindow extends JPanel implements
     addKeyListener(this);
     addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) {
-        checkClipboard();
+        if (cc.viewer.benchFile == null) checkClipboard();
       }
       public void focusLost(FocusEvent e) {
         cc.releaseModifiers();
@@ -215,11 +215,13 @@ class DesktopWindow extends JPanel implements
   // Update the actual window with the changed parts of the framebuffer.
   public void updateWindow()
   {
+    double tBlitStart = getTime();
     Rect r = damage;
     if (!r.is_empty()) {
       paintImmediately(r.tl.x, r.tl.y, r.width(), r.height());
       damage.clear();
     }
+    cc.tBlit += getTime() - tBlitStart;
   }
 
   // resize() is called when the desktop has changed size
@@ -333,7 +335,6 @@ class DesktopWindow extends JPanel implements
   }
 
   public void paintComponent(Graphics g) {
-    double tBlitStart = getTime();
     Graphics2D g2 = (Graphics2D) g;
     if (cc.cp.width != scaledWidth || cc.cp.height != scaledHeight) {
       g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
@@ -343,7 +344,6 @@ class DesktopWindow extends JPanel implements
       g2.drawImage(im.getImage(), 0, 0, null);
     }
     g2.dispose();
-    cc.tBlit += getTime() - tBlitStart;
   }
   
   String oldContents = "";

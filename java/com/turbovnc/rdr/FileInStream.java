@@ -19,17 +19,19 @@
 package com.turbovnc.rdr;
 
 import java.io.*;
-import com.turbovnc.network.FileDescriptor;
-import com.turbovnc.rfb.Exception;
 
-public class FileInStream extends FileInputStream implements FileDescriptor {
+public class FileInStream extends InStream {
+
+  static final int BUFSIZE = 131072;
 
   static final double getTime() {
     return (double)System.nanoTime() / 1.0e9;
   }
 
   public FileInStream(String fileName) throws FileNotFoundException {
-    super(fileName);
+    fis = new FileInputStream(fileName);
+    b = new byte[BUFSIZE];
+    ptr = end = offset = 0;
   }
 
   public double getReadTime() { return tRead; }
@@ -37,35 +39,51 @@ public class FileInStream extends FileInputStream implements FileDescriptor {
 
   public void reset() {
     try {
-      super.getChannel().position(0);
+      fis.getChannel().position(0);
     } catch(IOException e) {}
+    ptr = end = offset = 0;
   }
 
-  public int read(byte[] buf, int bufPtr, int length) throws Exception {
-    int retval = 0;
-    try {
-      double tStart = getTime();
-      retval = super.read(buf, bufPtr, length);
-      tRead += getTime() - tStart;
-    } catch(IOException e) {
-      throw new Exception(e.getMessage());
+  protected int overrun(int itemSize, int nItems, boolean wait) 
+  {
+    if (itemSize > BUFSIZE)
+      throw new Exception("FileInStream overrun: max itemSize exceeded");
+
+    double tReadStart = getTime();
+
+    if (end - ptr != 0)
+      System.arraycopy(b, ptr, b, 0, end - ptr);
+
+    offset += ptr;
+    end -= ptr;
+    ptr = 0;
+
+    while (end < itemSize) {
+      int n = 0;
+      try {
+        n = fis.read(b, end, BUFSIZE - end);
+      } catch(IOException e) {
+        throw new Exception(e.getMessage());
+      }
+      if (n < 1) {
+        tRead += getTime() - tReadStart;
+        if (n < 0) {  throw new EndOfStream(); }
+        if (n == 0) { return 0; }
+      }
+      end += n;
     }
-    return retval;
+
+    if (itemSize * nItems > end - ptr)
+      nItems = (end - ptr) / itemSize;
+
+    tRead += getTime() - tReadStart;
+
+    return nItems;
   }
 
-  public int write(byte[] buf, int bufPtr, int length) { return 0; }
+  public final int pos() { return offset + ptr; }
 
-  public int select(int interestOps, Integer timeout) throws Exception {
-    try {
-      return available();
-    } catch(IOException e) {
-      throw new Exception(e.getMessage());
-    }
-  }
-
-  public void close() throws IOException {
-    super.close();
-  }
-
+  FileInputStream fis;
   double tRead;
+  int offset;
 };

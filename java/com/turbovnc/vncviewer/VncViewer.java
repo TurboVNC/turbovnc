@@ -128,6 +128,14 @@ public class VncViewer extends java.applet.Applet implements Runnable
         continue;
       }
 
+      if (argv[i].equalsIgnoreCase("-benchwarmup")) {
+        if (i < argv.length - 1) {
+          int warmup = Integer.parseInt(argv[++i]);
+          if (warmup > 0) benchWarmup = warmup;
+        }
+        continue;
+      }
+
       if (Configuration.setParam(argv[i]))
         continue;
 
@@ -299,28 +307,31 @@ public class VncViewer extends java.applet.Applet implements Runnable
     }
 
     double tAvg = 0.0, tAvgDecode = 0.0, tAvgBlit = 0.0;
-    if (benchFile == null) benchIter = 1;
+    if (benchFile == null) { benchIter = 1;  benchWarmup = 0; }
 
-    for (int i = 0; i < benchIter; i++) {
+    for (int i = 0; i < benchIter + benchWarmup; i++) {
       double tStart = 0.0, tTotal;
 
       try {
         cc = new CConn(this, sock, vncServerName.getValue());
         if (benchFile != null) {
-          System.out.format("Benchmark run %d:\n", i + 1);
+          if (i < benchWarmup)
+            System.out.format("Benchmark warmup run %d\n", i + 1);
+          else
+            System.out.format("Benchmark run %d:\n", i + 1 - benchWarmup);
           tStart = getTime();
           try {
             while (!cc.shuttingDown)
               cc.processMsg(true);
-          } catch (com.turbovnc.rdr.Exception e) {
-            if (!e.getMessage().equalsIgnoreCase("Timed out")) throw e;
-          }
+          } catch (EndOfStream e) {}
           tTotal = getTime() - tStart - benchFile.getReadTime();
-          System.out.format("%f s (Decode = %f, Blit = %f)\n", tTotal,
-                            cc.tDecode, cc.tBlit);
-          tAvg += tTotal;
-          tAvgDecode += cc.tDecode;
-          tAvgBlit += cc.tBlit;
+          if (i >= benchWarmup) {
+            System.out.format("%f s (Decode = %f, Blit = %f)\n", tTotal,
+                              cc.tDecode, cc.tBlit);
+            tAvg += tTotal;
+            tAvgDecode += cc.tDecode;
+            tAvgBlit += cc.tBlit;
+          }
           cc.tDecode = cc.tBlit = 0.0;
           benchFile.reset();
           benchFile.resetReadTime();
@@ -347,8 +358,10 @@ public class VncViewer extends java.applet.Applet implements Runnable
     }
 
     if (benchFile != null && benchIter > 1)
-      System.out.format("Average          :  %f seconds\n",
-                        tAvg / (double)benchIter);
+      System.out.format("Average          :  %f s (Decode = %f, Blit = %f)\n",
+                        tAvg / (double)benchIter,
+                        tAvgDecode / (double)benchIter,
+                        tAvgBlit / (double)benchIter);
 
     exit(exitStatus);
   }
@@ -600,4 +613,5 @@ public class VncViewer extends java.applet.Applet implements Runnable
   static LogWriter vlog = new LogWriter("main");
   FileInStream benchFile;
   int benchIter = 1;
+  int benchWarmup = 0;
 }

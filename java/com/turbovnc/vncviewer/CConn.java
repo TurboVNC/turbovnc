@@ -83,6 +83,7 @@ public class CConn extends CConnection
                String vncServerName) 
   {
     serverHost = null; serverPort = 0; sock = sock_; viewer = viewer_; 
+    benchmark = viewer.benchFile != null;
     pendingPFChange = false;
     currentEncoding = Encodings.encodingTight; lastServerEncoding = -1;
     fullColour = true;
@@ -148,7 +149,7 @@ public class CConn extends CConnection
     if (sock != null) {
       String name = sock.getPeerEndpoint();
       vlog.info("Accepted connection from "+name);
-    } else if (viewer.benchFile == null) {
+    } else if (!benchmark) {
       if (vncServerName != null &&
           !viewer.alwaysShowConnectionDialog.getValue()) {
         serverHost = Hostname.getHost(vncServerName);
@@ -173,10 +174,9 @@ public class CConn extends CConnection
       vlog.info("connected to host "+serverHost+" port "+serverPort);
     }
 
-    if (viewer.benchFile != null) {
+    if (benchmark) {
       state_ = RFBSTATE_INITIALISATION;
-      reader_ = new CMsgReaderV3(this, new FdInStream(viewer.benchFile));
-      writer_ = new CMsgWriterV3(cp, new NullOutStream());
+      reader_ = new CMsgReaderV3(this, viewer.benchFile);
     } else {
       sock.inStream().setBlockCallback(this);
       setServerName(serverHost);
@@ -288,7 +288,22 @@ public class CConn extends CConnection
     formatChange = true; encodingChange = true;
 
     // And kick off the update cycle
-    requestNewUpdate();
+    if (!benchmark)
+      requestNewUpdate();
+    else {
+      if (fullColour) {
+        pendingPF = fullColourPF;
+      } else {
+        if (lowColourLevel == 0) {
+          pendingPF = verylowColourPF;
+        } else if (lowColourLevel == 1) {
+          pendingPF = lowColourPF;
+        } else {
+          pendingPF = mediumColourPF;
+        }
+      }
+      pendingPFChange = true;
+    }
 
     // This initial update request is a bit of a corner case, so we need
     // to help out setting the correct format here.
@@ -353,7 +368,7 @@ public class CConn extends CConnection
     // Note: This might not be true if sync fences are supported
     pendingUpdate = false;
 
-    requestNewUpdate();
+    if (!benchmark) requestNewUpdate();
   }
 
   // framebufferUpdateEnd() is called at the end of an update.
@@ -438,12 +453,11 @@ public class CConn extends CConnection
   // avoid skewing the bandwidth estimation as a result of the server
   // being slow or the network having high latency
   public void beginRect(Rect r, int encoding) {
-    if (viewer.benchFile == null)
+    if (!benchmark)
       sock.inStream().startTiming();
     else {
       tDecodeStart = getTime();
       tReadOld = viewer.benchFile.getReadTime();
-      tBlitOld = tBlit;
     }
     if (encoding != Encodings.encodingCopyRect) {
       lastServerEncoding = encoding;
@@ -451,30 +465,23 @@ public class CConn extends CConnection
   }
 
   public void endRect(Rect r, int encoding) {
-    if (viewer.benchFile == null)
+    if (!benchmark)
       sock.inStream().stopTiming();
     else
       tDecode += getTime() - tDecodeStart -
-                 (viewer.benchFile.getReadTime() - tReadOld) -
-                 (tBlit - tBlitOld);
+                 (viewer.benchFile.getReadTime() - tReadOld);
   }
 
   public void fillRect(Rect r, int p) {
-    double tBlitStart = getTime();
     desktop.fillRect(r.tl.x, r.tl.y, r.width(), r.height(), p);
-    tBlit += getTime() - tBlitStart;
   }
 
   public void imageRect(Rect r, Object p) {
-    double tBlitStart = getTime();
     desktop.imageRect(r.tl.x, r.tl.y, r.width(), r.height(), p);
-    tBlit += getTime() - tBlitStart;
   }
 
   public void copyRect(Rect r, int sx, int sy) {
-    double tBlitStart = getTime();
     desktop.copyRect(r.tl.x, r.tl.y, r.width(), r.height(), sx, sy);
-    tBlit += getTime() - tBlitStart;
   }
 
   public int[] getRawPixelsRW(int[] stride) {
@@ -1431,7 +1438,8 @@ public class CConn extends CConnection
   int scalingFactor;
 
   public double tDecode, tBlit;
-  double tDecodeStart, tReadOld, tBlitOld;
+  double tDecodeStart, tReadOld;
+  boolean benchmark;
 
   static LogWriter vlog = new LogWriter("CConn");
 }
