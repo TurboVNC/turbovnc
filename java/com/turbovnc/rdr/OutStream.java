@@ -49,13 +49,13 @@ abstract public class OutStream {
 
   // writeU/SN() methods write unsigned and signed N-bit integers.
 
-  public void writeU8( int u) { check(1); b[ptr++] = (byte)u; }
-  public void writeU16(int u) { check(2); b[ptr++] = (byte)(u >> 8);
-                                b[ptr++] = (byte)u; }
-  public void writeU32(int u) { check(4); b[ptr++] = (byte)(u >> 24);
-                                b[ptr++] = (byte)(u >> 16);
-                                b[ptr++] = (byte)(u >> 8);
-                                b[ptr++] = (byte)u; }
+  public final void writeU8( int u) { check(1); b[ptr++] = (byte)u; }
+  public final void writeU16(int u) { check(2); b[ptr++] = (byte)(u >> 8);
+                                      b[ptr++] = (byte)u; }
+  public final void writeU32(int u) { check(4); b[ptr++] = (byte)(u >> 24);
+                                      b[ptr++] = (byte)(u >> 16);
+                                      b[ptr++] = (byte)(u >> 8);
+                                      b[ptr++] = (byte)u; }
 
   public final void writeS8( int s) { writeU8( s); }
   public final void writeS16(int s) { writeU16(s); }
@@ -123,14 +123,14 @@ abstract public class OutStream {
   public final void writeOpaque8( int u) { writeU8( u); }
   public final void writeOpaque16(int u) { writeU16(u); }
   public final void writeOpaque32(int u) { writeU32(u); }
-  public void writeOpaque24A(int u) { check(3);
-                                      b[ptr++] = (byte)(u >> 24);
-                                      b[ptr++] = (byte)(u >> 16);
-                                      b[ptr++] = (byte)(u >> 8); }
-  public void writeOpaque24B(int u) { check(3);
-                                      b[ptr++] = (byte)(u >> 16);
-                                      b[ptr++] = (byte)(u >> 8);
-                                      b[ptr++] = (byte)u; }
+  public final void writeOpaque24A(int u) { check(3);
+                                            b[ptr++] = (byte)(u >> 24);
+                                            b[ptr++] = (byte)(u >> 16);
+                                            b[ptr++] = (byte)(u >> 8); }
+  public final void writeOpaque24B(int u) { check(3);
+                                            b[ptr++] = (byte)(u >> 16);
+                                            b[ptr++] = (byte)(u >> 8);
+                                            b[ptr++] = (byte)u; }
 
   // length() returns the length of the stream.
 
