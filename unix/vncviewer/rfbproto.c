@@ -1423,7 +1423,8 @@ HandleRFBServerMessage()
     int bytesPerLine;
     int i;
     XEvent ev;
-    double tDecodeStart = 0., tBlitStart = 0., tUpdateStart = 0.;
+    double tDecodeStart = 0., tBlitStart = 0., tUpdateStart = 0.,
+      tRecvOld = 0.;
 
     if (rfbProfile) {
       tUpdateStart = gettime();
@@ -1524,7 +1525,10 @@ HandleRFBServerMessage()
         continue;
       }
 
-      if (rfbProfile || benchFile) tDecodeStart = gettime();
+      if (rfbProfile || benchFile) {
+        tDecodeStart = gettime();
+        tRecvOld = tRecv;
+      }
 
       switch (rect.encoding) {
 
@@ -1563,7 +1567,11 @@ HandleRFBServerMessage()
         cr.srcX = Swap16IfLE(cr.srcX);
         cr.srcY = Swap16IfLE(cr.srcY);
 
-        if (rfbProfile || benchFile) tBlitStart = gettime();
+        if (rfbProfile || benchFile) {
+          double t = gettime();
+          tDecode += t - tDecodeStart;
+          tBlitStart = t;
+        }
 
         if (appData.copyRectDelay != 0) {
           XFillRectangle(dpy, desktopWin, srcGC, cr.srcX, cr.srcY,
@@ -1581,7 +1589,10 @@ HandleRFBServerMessage()
         XCopyArea(dpy, desktopWin, desktopWin, gc, cr.srcX, cr.srcY,
                   rect.r.w, rect.r.h, rect.r.x, rect.r.y);
 
-        if (rfbProfile || benchFile) tBlit += gettime() - tBlitStart;
+        if (rfbProfile || benchFile) {
+          tBlit += gettime() - tBlitStart;
+          tDecodeStart = gettime();
+        }
 
         break;
       }
@@ -1634,7 +1645,8 @@ HandleRFBServerMessage()
         return False;
       }
 
-      if (rfbProfile || benchFile) tDecode += gettime() - tDecodeStart;
+      if (rfbProfile || benchFile)
+        tDecode += gettime() - tDecodeStart - (tRecv - tRecvOld);
     }
 
     for (i = 1; i < nt; i++) {
@@ -1676,8 +1688,11 @@ HandleRFBServerMessage()
        mainly to avoid copyrect using invalid screen contents - not sure
        if we'd need it otherwise. */
 
-    if (appData.useShm)
+    if (appData.useShm) {
+      if (rfbProfile || benchFile) tBlitStart = gettime();
       XSync(dpy, False);
+      if (rfbProfile || benchFile) tBlit += gettime() - tBlitStart;
+    }
 #endif
 
     if (rfbProfile && !benchFile) {
