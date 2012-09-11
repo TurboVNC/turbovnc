@@ -24,16 +24,16 @@ import com.turbovnc.rfb.Exception;
 
 public class FileInStream extends FileInputStream implements FileDescriptor {
 
+  static final double getTime() {
+    return (double)System.nanoTime() / 1.0e9;
+  }
+
   public FileInStream(String fileName) throws FileNotFoundException {
     super(fileName);
   }
 
   public double getReadTime() { return tRead; }
   public void resetReadTime() { tRead = 0.0; }
-
-  double getTime() {
-    return (double)System.nanoTime() / 1.0e9;
-  }
 
   public void reset() {
     try {

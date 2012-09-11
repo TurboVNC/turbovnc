@@ -69,6 +69,10 @@ public class CConn extends CConnection
   static final PixelFormat mediumColourPF = 
     new PixelFormat(8, 8, false, false, 7, 7, 3, 0, 3, 6);
 
+  static final double getTime() {
+    return (double)System.nanoTime() / 1.0e9;
+  }
+
   public static final int SCALE_AUTO = -1;
   public static final int SCALE_FIXEDRATIO = -2;
 
@@ -434,26 +438,43 @@ public class CConn extends CConnection
   // avoid skewing the bandwidth estimation as a result of the server
   // being slow or the network having high latency
   public void beginRect(Rect r, int encoding) {
-    if (viewer.benchFile == null) sock.inStream().startTiming();
+    if (viewer.benchFile == null)
+      sock.inStream().startTiming();
+    else {
+      tDecodeStart = getTime();
+      tReadOld = viewer.benchFile.getReadTime();
+      tBlitOld = tBlit;
+    }
     if (encoding != Encodings.encodingCopyRect) {
       lastServerEncoding = encoding;
     }
   }
 
   public void endRect(Rect r, int encoding) {
-    if (viewer.benchFile == null) sock.inStream().stopTiming();
+    if (viewer.benchFile == null)
+      sock.inStream().stopTiming();
+    else
+      tDecode += getTime() - tDecodeStart -
+                 (viewer.benchFile.getReadTime() - tReadOld) -
+                 (tBlit - tBlitOld);
   }
 
   public void fillRect(Rect r, int p) {
+    double tBlitStart = getTime();
     desktop.fillRect(r.tl.x, r.tl.y, r.width(), r.height(), p);
+    tBlit += getTime() - tBlitStart;
   }
 
   public void imageRect(Rect r, Object p) {
+    double tBlitStart = getTime();
     desktop.imageRect(r.tl.x, r.tl.y, r.width(), r.height(), p);
+    tBlit += getTime() - tBlitStart;
   }
 
   public void copyRect(Rect r, int sx, int sy) {
+    double tBlitStart = getTime();
     desktop.copyRect(r.tl.x, r.tl.y, r.width(), r.height(), sx, sy);
+    tBlit += getTime() - tBlitStart;
   }
 
   public int[] getRawPixelsRW(int[] stride) {
@@ -1408,6 +1429,9 @@ public class CConn extends CConnection
   private boolean fullColour;
   boolean fullScreen;
   int scalingFactor;
+
+  public double tDecode, tBlit;
+  double tDecodeStart, tReadOld, tBlitOld;
 
   static LogWriter vlog = new LogWriter("CConn");
 }

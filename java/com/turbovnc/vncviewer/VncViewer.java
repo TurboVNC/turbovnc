@@ -55,6 +55,10 @@ public class VncViewer extends java.applet.Applet implements Runnable
   public static String version = null;
   public static String build = null;
 
+  static final double getTime() {
+    return (double)System.nanoTime() / 1.0e9;
+  }
+
   public static final String os = System.getProperty("os.name").toLowerCase();
 
   public static void setLookAndFeel() {
@@ -264,10 +268,6 @@ public class VncViewer extends java.applet.Applet implements Runnable
     g.drawString(about3, 0, h);
   }
 
-  double getTime() {
-    return (double)System.nanoTime() / 1.0e9;
-  }
-
   public void run() {
     CConn cc = null;
     int exitStatus = 0;
@@ -298,7 +298,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
       }
     }
 
-    double tAvg = 0.0;
+    double tAvg = 0.0, tAvgDecode = 0.0, tAvgBlit = 0.0;
     if (benchFile == null) benchIter = 1;
 
     for (int i = 0; i < benchIter; i++) {
@@ -316,8 +316,12 @@ public class VncViewer extends java.applet.Applet implements Runnable
             if (!e.getMessage().equalsIgnoreCase("Timed out")) throw e;
           }
           tTotal = getTime() - tStart - benchFile.getReadTime();
-          System.out.format("%f seconds\n", tTotal);
+          System.out.format("%f s (Decode = %f, Blit = %f)\n", tTotal,
+                            cc.tDecode, cc.tBlit);
           tAvg += tTotal;
+          tAvgDecode += cc.tDecode;
+          tAvgBlit += cc.tBlit;
+          cc.tDecode = cc.tBlit = 0.0;
           benchFile.reset();
           benchFile.resetReadTime();
         } else {
