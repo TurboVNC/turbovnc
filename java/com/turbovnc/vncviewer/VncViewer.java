@@ -465,7 +465,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "should be no reason to use an encoding type other than Tight when "+
   "connecting to a TurboVNC server, but this option can be useful when "+
   "connecting to other types of VNC servers, such as RealVNC.",
-  "Tight", "Tight, ZRLE, Hextile, Raw");
+  "Tight", "Tight, ZRLE, Hextile, Raw, RRE");
 
   BoolParameter allowJpeg
   = new BoolParameter("JPEG",
