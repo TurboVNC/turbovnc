@@ -101,6 +101,12 @@ public class VncViewer extends java.applet.Applet implements Runnable
       if (argv[i].length() == 0)
         continue;
 
+      if (argv[i].equalsIgnoreCase("-config")) {
+        if (++i >= argv.length) usage();
+          Configuration.load(argv[i]);
+        continue;
+      }
+
       if (argv[i].equalsIgnoreCase("-loglevel")) {
         if (++i >= argv.length) usage();
         System.err.println("Log setting: "+argv[i]);
@@ -147,6 +153,11 @@ public class VncViewer extends java.applet.Applet implements Runnable
           }
         }
         usage();
+      }
+
+      if (argv[i].toLowerCase().endsWith(".vnc")) {
+        Configuration.load(argv[i]);
+        continue;
       }
 
       if (vncServerName.getValue() != null)
@@ -604,6 +615,12 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "server host, so you do not need to specify it separately.  The VNC server "+
   "must be specified on the command line or in the \"Server\" parameter when "+
   "using the Tunnel parameter.", false);
+
+  StringParameter config
+  = new StringParameter("Config",
+  "File from which to read connection information.  This file can be generated "+
+  "by selecting \"Save connection info as...\" in the system menu of the Windows "+
+  "TurboVNC Viewer.", null);
 
   Thread thread;
   Socket sock;

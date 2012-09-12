@@ -25,6 +25,10 @@
 
 package com.turbovnc.rfb;
 
+import java.io.FileInputStream;
+import java.io.PrintWriter;
+import java.util.*;
+
 public class Configuration {
 
   // - Set named parameter to value
@@ -134,6 +138,132 @@ public class Configuration {
     }
   }
 
+  public static void load(String filename) {
+    if (filename == null)
+      return;
+
+    /* Read parameters from file */
+    Properties props = new Properties();
+    try {
+      props.load(new FileInputStream(filename));
+    } catch(java.security.AccessControlException e) {
+      vlog.error("Cannot access connection info file:" + e.getMessage());
+      return;
+    } catch (java.lang.Exception e) {
+      vlog.error("Error opening connection info file:" + e.getMessage());
+      return;
+    }
+
+    int scale_num = -1, scale_den = -1, fitwindow = -1;
+
+    for (Iterator i = props.stringPropertyNames().iterator(); i.hasNext();) {
+      String name = (String)i.next();
+
+      if (name.startsWith("[")) {
+        // skip the section delimiters
+        continue;
+      } else if (name.equals("host")) {
+        setParam("Server", props.getProperty(name));
+      } else if (name.equals("port")) {
+        setParam("Port", props.getProperty(name));
+      } else if (name.equals("preferred_encoding")) {
+        int encoding = -1;
+        try {
+          encoding = Integer.parseInt(props.getProperty(name));
+        } catch (NumberFormatException e) {}
+        if (encoding >= 0 && encoding <= Encodings.LASTENCODING)
+          setParam("Encoding", Encodings.encodingName(encoding));
+      } else if (name.equals("viewonly")) {
+        setParam("ViewOnly", props.getProperty(name));
+      } else if (name.equals("fullscreen")) {
+        setParam("FullScreen", props.getProperty(name));
+      } else if (name.equals("span")) {
+        int span = -1;
+        try {
+          span = Integer.parseInt(props.getProperty(name));
+        } catch (NumberFormatException e) {}
+        if (span == 0) setParam("Span", "Primary");
+        else if (span == 1) setParam("Span", "All");
+        else if (span == 2) setParam("Span", "Auto");
+      } else if (name.equals("8bit")) {
+        int _8bit = -1;
+        try {
+          _8bit = Integer.parseInt(props.getProperty(name));
+        } catch (NumberFormatException e) {}
+        if (_8bit >= 1)
+          setParam("Colors", "256");
+        else if (_8bit == 0)
+          setParam("Colors", "-1");
+      } else if (name.equals("shared")) {
+        setParam("Shared", props.getProperty(name));
+      } else if (name.equals("disableclipboard")) {
+        int disableclipboard = -1;
+        try {
+          disableclipboard = Integer.parseInt(props.getProperty(name));
+        } catch (NumberFormatException e) {}
+        if (disableclipboard >= 1) {
+          setParam("RecvClipboard", "0");
+          setParam("SendClipboard", "0");
+        } else if (disableclipboard == 0) {
+          setParam("RecvClipboard", "1");
+          setParam("SendClipboard", "1");
+        }
+      } else if (name.equals("fitwindow")) {
+        try {
+          fitwindow = Integer.parseInt(props.getProperty(name));
+        } catch (NumberFormatException e) {}
+      } else if (name.equals("scale_num")) {
+        int temp = -1;
+        try {
+          temp = Integer.parseInt(props.getProperty(name));
+        } catch (NumberFormatException e) {}
+        if (temp >= 1) scale_num = temp;
+      } else if (name.equals("scale_den")) {
+        int temp = -1;
+        try {
+          temp = Integer.parseInt(props.getProperty(name));
+        } catch (NumberFormatException e) {}
+        if (temp >= 1) scale_den = temp;
+      } else if (name.equals("cursorshape")) {
+        setParam("CursorShape", props.getProperty(name));
+      } else if (name.equals("compresslevel")) {
+        setParam("CompressLevel", props.getProperty(name));
+      } else if (name.equals("subsampling")) {
+        int subsampling = -1;
+        try {
+          subsampling = Integer.parseInt(props.getProperty(name));
+        } catch (NumberFormatException e) {}
+        switch (subsampling) {
+        case 0:  setParam("Subsampling", "1X");  break;
+        case 1:  setParam("Subsampling", "4X");  break;
+        case 2:  setParam("Subsampling", "2X");  break;
+        case 3:  setParam("Subsampling", "Gray");  break;
+        }
+      } else if (name.equals("quality")) {
+        int quality = -2;
+        try {
+          quality = Integer.parseInt(props.getProperty(name));
+        } catch (NumberFormatException e) {}
+        if (quality == -1) setParam("JPEG", "0");
+        else if (quality >= 1 && quality <= 100) {
+          setParam("Quality", props.getProperty(name));
+        }
+      } else if (name.equals("nounixlogin")) {
+        setParam("NoUnixLogin", props.getProperty(name));
+      }
+    }
+
+    if ((scale_num >= 1 || scale_den >= 1) && fitwindow < 1) {
+      if (scale_num < 1) scale_num = 1;
+      if (scale_den < 1) scale_den = 1;
+      int scalingFactor = scale_num * 100 / scale_den;
+      setParam("Scale", Integer.toString(scalingFactor));
+    } else if (fitwindow >= 1) {
+      setParam("Scale", "FixedRatio");
+    }
+  }
+
   public static VoidParameter head;
   public static VoidParameter tail;
+  static LogWriter vlog = new LogWriter("Configuration");
 }

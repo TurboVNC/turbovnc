@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2012 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
  * 
  * This is free software; you can redistribute it and/or modify
@@ -29,6 +29,7 @@ public class Encodings {
   public static final int encodingHextile = 5;
   public static final int encodingTight = 7;
   public static final int encodingZRLE = 16;
+  public static final int LASTENCODING = encodingTight;
 
   public static final int encodingMax = 255;
 
