@@ -464,7 +464,7 @@ if ($generateOTP == 1) {
 # Create the user's xstartup script if necessary.
 
 if (! $skipxstartup) {
-    unless (-e "$xstartup") {
+    unless (-e "$xstartup" or $opt{'-xstartup'}) {
         warn "Creating default startup script $xstartup\n";
         open(XSTARTUP, ">$xstartup");
         print XSTARTUP $defaultXStartup;
