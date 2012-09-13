@@ -41,7 +41,7 @@ class ServerDialog extends Dialog implements
     cc = cc_;
     setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
     setResizable(false);
-    setSize(new Dimension(340, 135));
+    setSize(new Dimension(350, 135));
     setTitle("New TurboVNC Connection");
     addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
@@ -83,20 +83,48 @@ class ServerDialog extends Dialog implements
 
     JPanel topPanel = new JPanel(new GridBagLayout());
 
-    addGBComponent(new JLabel(cc.logo),topPanel, 0, 0, 1, 1, 0, 0, 0, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.LINE_START, new Insets(5,5,5,15));
-    addGBComponent(serverLabel,topPanel, 1, 0, 1, 1, 0, 0, 0, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.LINE_END, new Insets(10,0,5,5));
-    addGBComponent(server,topPanel, 2, 0, 1, 1, 0, 0, 1, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(10,0,5,20));
+    addGBComponent(new JLabel(cc.logo), topPanel,
+                   0, 0, 1, 1, 0, 0, 0, 1,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.LINE_START,
+                   new Insets(5,5,5,15));
+    addGBComponent(serverLabel, topPanel,
+                   1, 0, 1, 1, 0, 0, 0, 1,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.LINE_END,
+                   new Insets(10,0,5,5));
+    addGBComponent(server, topPanel,
+                   2, 0, 1, 1, 0, 0, 1, 1,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.CENTER,
+                   new Insets(10,0,5,20));
 
     optionsButton = new JButton("Options...");
     aboutButton = new JButton("About...");
     okButton = new JButton("Connect");
     cancelButton = new JButton("Cancel");
     JPanel buttonPanel = new JPanel(new GridBagLayout());
-    buttonPanel.setPreferredSize(new Dimension(340, 40));
-    addGBComponent(aboutButton,buttonPanel, 0, 3, 1, 1, 0, 0, 0.2, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(0,2,0,5));
-    addGBComponent(optionsButton,buttonPanel, 1, 3, 1, 1, 0, 0, 0, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(0,2,0,5));
-    addGBComponent(okButton,buttonPanel, 2, 3, 1, 1, 0, 0, 0.5, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(0,2,0,5));
-    addGBComponent(cancelButton,buttonPanel, 3, 3, 1, 1, 0, 0, 0.5, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(0,2,0,5));
+    buttonPanel.setPreferredSize(new Dimension(350, 40));
+    addGBComponent(aboutButton, buttonPanel,
+                   0, 3, 1, 1, 0, 0, 0.8, 1,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.CENTER,
+                   new Insets(0,2,0,5));
+    addGBComponent(optionsButton, buttonPanel,
+                   1, 3, 1, 1, 0, 0, 1, 1,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.CENTER,
+                   new Insets(0,2,0,5));
+    addGBComponent(okButton, buttonPanel,
+                   2, 3, 1, 1, 0, 0, 0.7, 1,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.CENTER,
+                   new Insets(0,2,0,5));
+    addGBComponent(cancelButton, buttonPanel,
+                   3, 3, 1, 1, 0, 0, 0.6, 1,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.CENTER,
+                   new Insets(0,2,0,5));
 
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.anchor = GridBagConstraints.LINE_START;
