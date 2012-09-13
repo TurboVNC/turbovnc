@@ -166,6 +166,21 @@ public class Configuration {
         setParam("Server", props.getProperty(name));
       } else if (name.equals("port")) {
         setParam("Port", props.getProperty(name));
+      } else if (name.equals("password")) {
+        byte encryptedPassword[] = new byte[8];
+        String passwordString = props.getProperty(name);
+        if (passwordString.length() > 0) {
+          for (int c = 0; c < Math.min(passwordString.length(), 16); c += 2) {
+            int temp = -1;
+            try {
+              temp = Integer.parseInt(passwordString.substring(c, c + 2), 16);
+            } catch (NumberFormatException e) {}
+            if (temp >= 0)
+              encryptedPassword[c / 2] = (byte)temp;
+            else break;
+          }
+        }
+        setParam("Password", VncAuth.unobfuscatePasswd(encryptedPassword));
       } else if (name.equals("preferred_encoding")) {
         int encoding = -1;
         try {

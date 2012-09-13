@@ -228,9 +228,16 @@ public class CConn extends CConnection
     String title = ((user==null? "Standard VNC Authentication":"Unix Login Authentication")
                     + " [" + csecurity.description() + "]");
     String passwordFileStr = viewer.passwordFile.getValue();
-    PasswdDialog dlg;    
+    PasswdDialog dlg = null;
+    String autoPass = viewer.password.getValue();
 
-    if (user == null && passwordFileStr != null) {
+    if (autoPass != null && passwd != null) {
+      passwd.append(autoPass);
+      passwd.setLength(autoPass.length());
+      viewer.password.setParam(null);
+    }
+
+    if (user == null && passwordFileStr != null && autoPass == null) {
       InputStream fp = null;
       try {
         fp = new FileInputStream(passwordFileStr);
@@ -244,15 +251,15 @@ public class CConn extends CConnection
       } catch(IOException e) {
         throw new Exception("Failed to read VncPasswd file");
       }
-      String PlainPasswd =
-        VncAuth.unobfuscatePasswd(obfPwd);
+      String PlainPasswd = VncAuth.unobfuscatePasswd(obfPwd);
       passwd.append(PlainPasswd);
       passwd.setLength(PlainPasswd.length());
       return true;
     }
-
+     
     if (user == null) {
-      dlg = new PasswdDialog(title, (user == null), null, (passwd == null));
+      if (autoPass == null)
+        dlg = new PasswdDialog(title, (user == null), null, (passwd == null));
     } else {
       String userName = viewer.user.getValue();
       if (viewer.sendLocalUsername.getValue()) {
@@ -260,14 +267,18 @@ public class CConn extends CConnection
         if (passwd == null)
           return true;
       }
-      dlg = new PasswdDialog(title, (userName != null), userName,
-            (passwd == null));
+      if (autoPass == null)
+        dlg = new PasswdDialog(title, (userName != null), userName,
+                               (passwd == null));
     }
-    if (!dlg.showDialog()) return false;
-    if (user != null)
+
+    if (dlg != null) {
+      if (!dlg.showDialog()) return false;
+      if (user != null)
         user.append(dlg.userEntry.getText());
-    if (passwd != null)
-      passwd.append(dlg.passwdEntry.getPassword());
+      if (passwd != null)
+        passwd.append(dlg.passwdEntry.getPassword());
+    }
     return true;
   }
 

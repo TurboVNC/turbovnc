@@ -599,6 +599,12 @@ public class VncViewer extends java.applet.Applet implements Runnable
   = new AliasParameter("passwd",
   "Alias for PasswordFile", passwordFile);
 
+  StringParameter password
+  = new StringParameter("Password",
+  "Plain-text password to use when authenticating with the VNC server.  It is "+
+  "strongly recommended that this parameter be used only in conjunction with a "+
+  "one-time password or other disposable token.", null);
+
   StringParameter via
   = new StringParameter("Via",
   "This parameter specifies an SSH server (\"gateway\") through which the VNC "+
