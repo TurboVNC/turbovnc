@@ -1060,12 +1060,14 @@ public class CConn extends CConnection
     int oldScalingFactor = scalingFactor;
     setScalingFactor(options.scalingFactor.getSelectedItem().toString());
     if (scalingFactor == SCALE_AUTO || scalingFactor == SCALE_FIXEDRATIO) {
-      if (desktop != null && scalingFactor != oldScalingFactor)
+      if (desktop != null && scalingFactor != oldScalingFactor &&
+        options.fullScreen.isSelected() == fullScreen)
         reconfigureViewport();
     } else {
       if (desktop != null && scalingFactor != oldScalingFactor &&
           oldScalingFactor != SCALE_AUTO &&
-          oldScalingFactor != SCALE_FIXEDRATIO)
+          oldScalingFactor != SCALE_FIXEDRATIO &&
+          options.fullScreen.isSelected() == fullScreen)
         reconfigureViewport();
     }
 
@@ -1145,7 +1147,7 @@ public class CConn extends CConnection
           Security.EnableSecType(Security.secTypeX509Ident);
       }
     }
-    if (options.fullScreen.isSelected() ^ fullScreen)
+    if (options.fullScreen.isSelected() != fullScreen)
       toggleFullScreen();
   }
 
