@@ -72,11 +72,6 @@ public class SecurityClient extends Security {
   
   }
 
-  public static void setDefaults()
-  {
-      CSecurityTLS.setDefaults();
-  }
-
   String msg = null;
 
   public static StringParameter secTypes 

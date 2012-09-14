@@ -63,6 +63,9 @@ public class Security {
 
   public Security(StringParameter secTypes)
   {
+    if (setInUserPrefs && secTypes.isDefault) return;
+
+    System.out.println("Setting security types from parameter");
     String secTypesStr;
 
     secTypesStr = secTypes.getData();
@@ -126,7 +129,9 @@ public class Security {
     return false;
   }
 
-  public static void DisableSecType(int secType) { enabledSecTypes.remove((Object)secType); }
+  public static void DisableSecType(int secType) {
+    enabledSecTypes.remove((Object)secType);
+  }
 
   public static int secTypeNum(String name) {
     if (name.equalsIgnoreCase("None"))      return secTypeNone;
@@ -195,7 +200,11 @@ public class Security {
     return (result);
   }
 
-  public final void SetSecTypes(List<Integer> secTypes) { enabledSecTypes = secTypes; }
+  public final void SetSecTypes(List<Integer> secTypes) {
+    enabledSecTypes = secTypes;
+  }
+
+  public static boolean setInUserPrefs;
 
   static LogWriter vlog = new LogWriter("Security");
 }

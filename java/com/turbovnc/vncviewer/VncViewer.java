@@ -96,6 +96,9 @@ public class VncViewer extends java.applet.Applet implements Runnable
   public VncViewer(String[] argv) {
     applet = false;
     
+    // load user preferences
+    UserPreferences.load("global");
+
     // Override defaults with command-line options
     for (int i = 0; i < argv.length; i++) {
       if (argv[i].length() == 0)
@@ -206,6 +209,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
 
   public VncViewer() {
     applet = true;
+    UserPreferences.load("global");
   }
 
   public static void newViewer(VncViewer oldViewer, Socket sock, boolean close) {

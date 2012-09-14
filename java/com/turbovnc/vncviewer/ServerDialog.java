@@ -58,12 +58,14 @@ class ServerDialog extends Dialog implements
     getContentPane().setLayout(new GridBagLayout());
 
     JLabel serverLabel = new JLabel("VNC server:", JLabel.RIGHT);
+    String valueStr = null;
     if (defaultServerName != null) {
       String [] s = new String[1];
       s[0] = defaultServerName;
       server = new JComboBox(s);
-    } else if (options.defaults.getString("server") != null) {
-      server = new JComboBox(options.defaults.getString("server").split(","));
+    } else if ((valueStr = UserPreferences.get("ServerDialog", "history"))
+               != null) {
+      server = new JComboBox(valueStr.split(","));
     } else {
       server = new JComboBox();
     }
@@ -156,6 +158,11 @@ class ServerDialog extends Dialog implements
     Object s = e.getSource();
     if (s instanceof JButton && (JButton)s == okButton) {
       ok = true;
+      String serverName = (String)server.getSelectedItem();
+      if (serverName != null) {
+        Configuration.setParam("Server", Hostname.getHost(serverName));
+        Configuration.setParam("Port", Integer.toString(Hostname.getPort(serverName)));
+      }
       endDialog();
     } else if (s instanceof JButton && (JButton)s == cancelButton) {
       if (cc.viewer.nViewers == 1) {
@@ -180,27 +187,24 @@ class ServerDialog extends Dialog implements
   
   public void endDialog() {
     if (ok) {
-      try {
-        if (!server.getSelectedItem().toString().equals("")) {
-          String t = (options.defaults.getString("server")==null) ? "" : options.defaults.getString("server");
-          StringTokenizer st = new StringTokenizer(t, ",");
-          StringBuffer sb = new StringBuffer().append((String)server.getSelectedItem());
-          while (st.hasMoreTokens()) {
-            String s = st.nextToken();
-            if (!s.equals((String)server.getSelectedItem()) && !s.equals("")) {
-              sb.append(',');
-              sb.append(s);
-            }
+      Object item = server.getSelectedItem();
+      if (item != null && !item.toString().equals("")) {
+        String valueStr = UserPreferences.get("ServerDialog", "history");
+        String t = (valueStr == null) ? "" : valueStr;
+        StringTokenizer st = new StringTokenizer(t, ",");
+        StringBuffer sb = new StringBuffer().append((String)server.getSelectedItem());
+        while (st.hasMoreTokens()) {
+          String s = st.nextToken();
+          if (!s.equals((String)server.getSelectedItem()) && !s.equals("")) {
+            sb.append(',');
+            sb.append(s);
           }
-          options.defaults.setPref("server", sb.toString());
         }
-        options.defaults.Save();
-      } catch (java.io.IOException e) {
-        System.out.println(e.toString());
-      } catch(java.security.AccessControlException e) {
-        System.out.println(e.toString());
-		  }
+        UserPreferences.set("ServerDialog", "history", sb.toString());
+        UserPreferences.save("ServerDialog");
+      }
     }
+
     done = true;
     if (modal) {
       synchronized (this) {

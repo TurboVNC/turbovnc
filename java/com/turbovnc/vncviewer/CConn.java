@@ -156,12 +156,14 @@ public class CConn extends CConnection
         serverPort = Hostname.getPort(vncServerName);
       } else {
         ServerDialog dlg = new ServerDialog(options, vncServerName, this);
-        if (!dlg.showDialog() || dlg.server.getSelectedItem().equals("")) {
+        boolean status = dlg.showDialog();
+        Object item = dlg.server.getSelectedItem();
+        if (!status || item == null || item.toString().equals("")) {
           vlog.info("No server name specified!");
           close();
           return;
         }
-        vncServerName = (String)dlg.server.getSelectedItem();
+        vncServerName = (String)item;
         serverHost = Hostname.getHost(vncServerName);
         serverPort = Hostname.getPort(vncServerName);
       }
@@ -920,14 +922,15 @@ public class CConn extends CConnection
       options.shared.setSelected(viewer.shared.getValue());
       options.sendLocalUsername.setSelected(viewer.sendLocalUsername.getValue());
       options.secUnixLogin.setSelected(!viewer.noUnixLogin.getValue());
-      
+
       /* Process non-VeNCrypt sectypes */
       java.util.List<Integer> secTypes = new ArrayList<Integer>();
       secTypes = Security.GetEnabledSecTypes();
+      boolean enableVeNCrypt = false;
       for (Iterator i = secTypes.iterator(); i.hasNext();) {
         switch ((Integer)i.next()) {
         case Security.secTypeVeNCrypt:
-          options.secVeNCrypt.setSelected(true);
+          enableVeNCrypt = true;
           break;
         case Security.secTypeNone:
           options.secNone.setSelected(true);
@@ -939,54 +942,65 @@ public class CConn extends CConnection
       }
 
       /* Process VeNCrypt subtypes */
-      if (options.secVeNCrypt.isSelected()) {
+      if (enableVeNCrypt) {
         java.util.List<Integer> secTypesExt = new ArrayList<Integer>();
         secTypesExt = Security.GetEnabledExtSecTypes();
         for (Iterator iext = secTypesExt.iterator(); iext.hasNext();) {
           switch ((Integer)iext.next()) {
           case Security.secTypePlain:
+            options.secVeNCrypt.setSelected(true);
             options.encNone.setSelected(true);
             options.secPlain.setSelected(true);
             break;
           case Security.secTypeIdent:
+            options.secVeNCrypt.setSelected(true);
             options.encNone.setSelected(true);
             options.secIdent.setSelected(true);
             break;
           case Security.secTypeTLSNone:
+            options.secVeNCrypt.setSelected(true);
             options.encTLS.setSelected(true);
             options.secNone.setSelected(true);
             break;
           case Security.secTypeTLSVnc:
+            options.secVeNCrypt.setSelected(true);
             options.encTLS.setSelected(true);
             options.secVnc.setSelected(true);
             break;
           case Security.secTypeTLSPlain:
+            options.secVeNCrypt.setSelected(true);
             options.encTLS.setSelected(true);
             options.secPlain.setSelected(true);
             break;
           case Security.secTypeTLSIdent:
+            options.secVeNCrypt.setSelected(true);
             options.encTLS.setSelected(true);
             options.secIdent.setSelected(true);
             break;
           case Security.secTypeX509None:
+            options.secVeNCrypt.setSelected(true);
             options.encX509.setSelected(true);
             options.secNone.setSelected(true);
             break;
           case Security.secTypeX509Vnc:
+            options.secVeNCrypt.setSelected(true);
             options.encX509.setSelected(true);
             options.secVnc.setSelected(true);
             break;
           case Security.secTypeX509Plain:
+            options.secVeNCrypt.setSelected(true);
             options.encX509.setSelected(true);
             options.secPlain.setSelected(true);
             break;
           case Security.secTypeX509Ident:
+            options.secVeNCrypt.setSelected(true);
             options.encX509.setSelected(true);
             options.secIdent.setSelected(true);
             break;
           }
         }
-      } else {
+      }
+      if (!options.secVeNCrypt.isSelected()) {
         options.encNone.setEnabled(false);
         options.encTLS.setEnabled(false);
         options.encX509.setEnabled(false);

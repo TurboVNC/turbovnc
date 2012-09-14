@@ -22,6 +22,7 @@ package com.turbovnc.vncviewer;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.util.Hashtable;
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
@@ -30,10 +31,8 @@ import javax.swing.border.*;
 
 import com.turbovnc.rfb.*;
 
-class OptionsDialog extends Dialog implements
-                            ActionListener,
-                            ChangeListener,
-                            ItemListener
+class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
+                                              ItemListener
 {
 
   // Constants
@@ -41,29 +40,28 @@ class OptionsDialog extends Dialog implements
   static LogWriter vlog = new LogWriter("OptionsDialog");
 
   OptionsDialogCallback cb;
-  JPanel EncodingPanel, InputsPanel, MiscPanel, DefaultsPanel, SecPanel;
+  JPanel EncodingPanel, InputsPanel, MiscPanel, SecPanel;
   JCheckBox allowJpeg;
   JComboBox menuKey, compressLevel, scalingFactor, encMethodComboBox;
   JSlider jpegQualityLevel, subsamplingLevel, zlibCompressionLevel;
   JCheckBox viewOnly, acceptClipboard, sendClipboard, acceptBell;
   JCheckBox fullScreen, shared, useLocalCursor;
   JCheckBox secVeNCrypt, encNone, encTLS, encX509;
-  JCheckBox secNone, secVnc, secUnixLogin, secPlain, secIdent, sendLocalUsername;
+  JCheckBox secNone, secVnc, secUnixLogin, secPlain, secIdent,
+    sendLocalUsername;
   JButton okButton, cancelButton;
   JButton ca, crl;
-  JButton defSaveButton;
+  JButton defSaveButton, defClearButton;
   JLabel jpegQualityLabel, subsamplingLabel, zlibCompressionLabel;
   String jpegQualityLabelString, subsamplingLabelString;
   String zlibCompressionLabelString;
   Hashtable<Integer, String> subsamplingLabelTable;
-  UserPrefs defaults;
 
   public OptionsDialog(OptionsDialogCallback cb_) { 
     super(false);
     cb = cb_;
     setResizable(false);
     setTitle("TurboVNC Viewer Options");
-    defaults = new UserPrefs("vncviewer");
 
     getContentPane().setLayout(
       new BoxLayout(getContentPane(), BoxLayout.PAGE_AXIS));
@@ -214,7 +212,11 @@ class OptionsDialog extends Dialog implements
                    GridBagConstraints.LINE_START, 
                    new Insets(2,2,2,2));
 
-    addGBComponent(ImagePanel,EncodingPanel, 0, 0, 1, GridBagConstraints.REMAINDER, 0, 0, 1, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.PAGE_START, new Insets(4,4,4,4));
+    addGBComponent(ImagePanel, EncodingPanel,
+                   0, 0, 1, GridBagConstraints.REMAINDER, 0, 0, 1, 1,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.PAGE_START,
+                   new Insets(4,4,4,4));
 
     // Inputs tab
     InputsPanel=new JPanel(new GridBagLayout());
@@ -231,11 +233,31 @@ class OptionsDialog extends Dialog implements
       menuKeys[i] = MenuKey.getMenuKeySymbols()[i].name;
     menuKey  = new JComboBox(menuKeys);
     menuKey.addItemListener(this);
-    addGBComponent(viewOnly,InputsPanel,        0, 0, 2, 1, 2, 2, 1, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.LINE_START, new Insets(4,5,0,5));
-    addGBComponent(acceptClipboard,InputsPanel, 0, 1, 2, 1, 2, 2, 1, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.LINE_START, new Insets(4,5,0,5));
-    addGBComponent(sendClipboard,InputsPanel,   0, 2, 2, 1, 2, 2, 1, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.LINE_START, new Insets(4,5,0,5));
-    addGBComponent(menuKeyLabel,InputsPanel,    0, 3, 1, GridBagConstraints.REMAINDER, 2, 2, 1, 1, GridBagConstraints.NONE, GridBagConstraints.FIRST_LINE_START, new Insets(8,8,0,5));
-    addGBComponent(menuKey,InputsPanel,         1, 3, 1, GridBagConstraints.REMAINDER, 2, 2, 25, 1, GridBagConstraints.NONE, GridBagConstraints.FIRST_LINE_START, new Insets(4,5,0,5));
+    addGBComponent(viewOnly, InputsPanel,
+                   0, 0, 2, 1, 2, 2, 1, 0,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.LINE_START,
+                   new Insets(4,5,0,5));
+    addGBComponent(acceptClipboard, InputsPanel,
+                   0, 1, 2, 1, 2, 2, 1, 0,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.LINE_START,
+                   new Insets(4,5,0,5));
+    addGBComponent(sendClipboard, InputsPanel,
+                   0, 2, 2, 1, 2, 2, 1, 0,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.LINE_START,
+                   new Insets(4,5,0,5));
+    addGBComponent(menuKeyLabel, InputsPanel,
+                   0, 3, 1, GridBagConstraints.REMAINDER, 2, 2, 1, 1,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(8,8,0,5));
+    addGBComponent(menuKey, InputsPanel,
+                   1, 3, 1, GridBagConstraints.REMAINDER, 2, 2, 25, 1,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(4,5,0,5));
 
     // Misc tab
     MiscPanel=new JPanel(new GridBagLayout());
@@ -255,53 +277,73 @@ class OptionsDialog extends Dialog implements
     scalingFactor = new JComboBox(scalingFactors);
     scalingFactor.setEditable(true);
     scalingFactor.addItemListener(this);
-    addGBComponent(fullScreen,MiscPanel,     0, 0, 2, 1, 2, 2, 1, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.LINE_START, new Insets(4,5,0,5));
-    addGBComponent(shared,MiscPanel,         0, 1, 2, 1, 2, 2, 1, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.LINE_START, new Insets(4,5,0,5));
-    addGBComponent(useLocalCursor,MiscPanel, 0, 2, 2, 1, 2, 2, 1, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.LINE_START, new Insets(4,5,0,5));
-    addGBComponent(acceptBell,MiscPanel,     0, 3, 2, 1, 2, 2, 1, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.FIRST_LINE_START, new Insets(4,5,0,5));
-    addGBComponent(scalingFactorLabel,MiscPanel, 0, 4, 1, GridBagConstraints.REMAINDER, 2, 2, 1, 1, GridBagConstraints.NONE, GridBagConstraints.FIRST_LINE_START, new Insets(8,8,0,5));
-    addGBComponent(scalingFactor,MiscPanel, 1, 4, 1, GridBagConstraints.REMAINDER, 2, 2, 25, 1, GridBagConstraints.NONE, GridBagConstraints.FIRST_LINE_START, new Insets(4,5,0,5));
-
-    // load/save tab
-    DefaultsPanel=new JPanel(new GridBagLayout());
-
-    JPanel configPanel = new JPanel(new GridBagLayout());
-    configPanel.setBorder(BorderFactory.createTitledBorder("Configuration File"));
-    JButton cfReloadButton = new JButton("Reload");
-    cfReloadButton.addActionListener(this);
-    addGBComponent(cfReloadButton,configPanel, 0, 0, 1, 1, 0, 0, 0, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(4,8,4,8));
-    JButton cfSaveButton = new JButton("Save");
-    cfSaveButton.addActionListener(this);
-    addGBComponent(cfSaveButton,configPanel, 0, 1, 1, 1, 0, 0, 0, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(4,8,4,8));
-    JButton cfSaveAsButton = new JButton("Save As...");
-    cfSaveAsButton.addActionListener(this);
-    addGBComponent(cfSaveAsButton,configPanel, 0, 2, 1, 1, 0, 0, 1, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(4,8,4,8));
-    cfReloadButton.setEnabled(false);
-    cfSaveButton.setEnabled(false);
-    //cfSaveAsButton.setEnabled(!applet);
+    addGBComponent(fullScreen, MiscPanel,
+                   0, 0, 2, 1, 2, 2, 1, 0,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(4,5,0,5));
+    addGBComponent(shared, MiscPanel,
+                   0, 1, 2, 1, 2, 2, 1, 0,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(4,5,0,5));
+    addGBComponent(useLocalCursor, MiscPanel,
+                   0, 2, 2, 1, 2, 2, 1, 0,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(4,5,0,5));
+    addGBComponent(acceptBell, MiscPanel,
+                   0, 3, 2, 1, 2, 2, 1, 0,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(4,5,0,5));
+    addGBComponent(scalingFactorLabel, MiscPanel,
+                   0, 4, 1, 1, 2, 2, 1, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(8,8,0,5));
+    addGBComponent(scalingFactor, MiscPanel,
+                   1, 4, 1, 1, 2, 2, 25, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(4,5,0,5));
 
     JPanel defaultsPanel = new JPanel(new GridBagLayout());
     defaultsPanel.setBorder(BorderFactory.createTitledBorder("Defaults"));
-    JButton defReloadButton = new JButton("Reload");
-    defReloadButton.addActionListener(this);
-    addGBComponent(defReloadButton,defaultsPanel, 0, 0, 1, 1, 0, 0, 1, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(4,8,4,8));
     defSaveButton = new JButton("Save");
     defSaveButton.addActionListener(this);
-    addGBComponent(defSaveButton,defaultsPanel, 0, 1, 1, 1, 0, 0, 0, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.CENTER, new Insets(4,8,4,8));
+    addGBComponent(defSaveButton, defaultsPanel,
+                   0, 0, 1, 1, 2, 2, 1, 0,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(2,2,2,2));
+    defClearButton = new JButton("Clear");
+    defClearButton.addActionListener(this);
+    addGBComponent(defClearButton, defaultsPanel,
+                   1, 0, 1, 1, 2, 2, 1, 0,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(2,2,2,2));
 
-    addGBComponent(configPanel,DefaultsPanel, 0, 0, 1, GridBagConstraints.REMAINDER, 0, 0, 1, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.PAGE_START, new Insets(4,5,4,5));
-    addGBComponent(defaultsPanel,DefaultsPanel, 1, 0, 1, GridBagConstraints.REMAINDER, 0, 0, 1, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.PAGE_START, new Insets(4,0,4,5));
-    //defReloadButton.setEnabled(!applet);
-    //defSaveButton.setEnabled(!applet);
+    addGBComponent(defaultsPanel, MiscPanel,
+                   0, 5, 2, GridBagConstraints.REMAINDER, 2, 2, 1, 1,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(25,5,4,5));
 
     // security tab
-    SecPanel=new JPanel(new GridBagLayout());
+    SecPanel = new JPanel(new GridBagLayout());
 
     JPanel encryptionPanel = new JPanel(new GridBagLayout());
     encryptionPanel.setBorder(BorderFactory.createTitledBorder("Session Encryption"));
     encNone = addCheckbox("None", null, encryptionPanel);
     encTLS = addCheckbox("Anonymous TLS", null, encryptionPanel);
-    encX509 = addJCheckBox("TLS with X.509 certificates", null, encryptionPanel, new GridBagConstraints(0,2,1,1,1,1,GridBagConstraints.LINE_START,GridBagConstraints.REMAINDER,new Insets(0,0,0,60),0,0));
+    encX509 = addJCheckBox("TLS with X.509 certificates", null,
+                           encryptionPanel,
+                           new GridBagConstraints(0, 2, 1, 1, 1, 1,
+                             GridBagConstraints.LINE_START,
+                             GridBagConstraints.REMAINDER,
+                             new Insets(0,0,0,60), 0, 0));
 
     JPanel x509Panel = new JPanel(new GridBagLayout());
     x509Panel.setBorder(BorderFactory.createTitledBorder("X.509 certificates"));
@@ -309,36 +351,75 @@ class OptionsDialog extends Dialog implements
     ca.addActionListener(this);
     crl = new JButton("Load CRL certificate");
     crl.addActionListener(this);
-    addGBComponent(ca, x509Panel,  0, 0, 1, 1, 2, 2, 1, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.FIRST_LINE_START, new Insets(2,2,2,2));
-    addGBComponent(crl, x509Panel, 1, 0, 1, 1, 2, 2, 1, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.LINE_START, new Insets(2,2,2,2));
+    addGBComponent(ca, x509Panel,
+                   0, 0, 1, 1, 2, 2, 1, 0,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(2,2,2,2));
+    addGBComponent(crl, x509Panel,
+                   1, 0, 1, 1, 2, 2, 1, 0,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.LINE_START,
+                   new Insets(2,2,2,2));
 
     JPanel authPanel = new JPanel(new GridBagLayout());
     authPanel.setBorder(BorderFactory.createTitledBorder("Authentication Schemes"));
     secNone = addCheckbox("None", null, authPanel);
     secVnc = addCheckbox("Standard VNC", null, authPanel);
-    secUnixLogin = addJCheckBox("Unix login (TightVNC/TurboVNC)", null, authPanel, new GridBagConstraints(0,2,1,1,1,1,GridBagConstraints.LINE_START,GridBagConstraints.NONE,new Insets(0,0,0,5),0,0));
-    secPlain = addJCheckBox("Plain (VeNCrypt)", null, authPanel, new GridBagConstraints(0,3,1,1,1,1,GridBagConstraints.LINE_START,GridBagConstraints.NONE,new Insets(0,0,0,5),0,0));
-    secIdent = addJCheckBox("Ident (VeNCrypt)", null, authPanel, new GridBagConstraints(0,4,1,1,1,1,GridBagConstraints.LINE_START,GridBagConstraints.NONE,new Insets(0,0,0,5),0,0));
+    secUnixLogin = addJCheckBox("Unix login (TightVNC/TurboVNC)", null,
+                                authPanel,
+                                new GridBagConstraints(0, 2, 1, 1, 1, 1,
+                                  GridBagConstraints.LINE_START,
+                                  GridBagConstraints.NONE, new Insets(0,0,0,5),
+                                  0, 0));
+    secPlain = addJCheckBox("Plain (VeNCrypt)", null, authPanel,
+                            new GridBagConstraints(0, 3, 1, 1, 1, 1,
+                              GridBagConstraints.LINE_START,
+                              GridBagConstraints.NONE, new Insets(0,0,0,5),
+                              0, 0));
+    secIdent = addJCheckBox("Ident (VeNCrypt)", null, authPanel,
+                            new GridBagConstraints(0, 4, 1, 1, 1, 1, 
+                              GridBagConstraints.LINE_START,
+                              GridBagConstraints.NONE, new Insets(0,0,0,5),
+                              0, 0));
     sendLocalUsername = new JCheckBox("Send Local Username");
     sendLocalUsername.addItemListener(this);
-    addGBComponent(sendLocalUsername, authPanel, 1, 3, 1, 2, 0, 0, 2, 1, GridBagConstraints.HORIZONTAL, GridBagConstraints.LINE_START, new Insets(0,20,0,0));
+    addGBComponent(sendLocalUsername, authPanel,
+                   1, 3, 1, 2, 0, 0, 2, 1,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.LINE_START,
+                   new Insets(0,20,0,0));
 
     secVeNCrypt = new JCheckBox("Extended encryption and authentication (VeNCrypt)");
     secVeNCrypt.addItemListener(this);
-    addGBComponent(secVeNCrypt,SecPanel,     0, 0, 1, 1, 2, 2, 1, 0, GridBagConstraints.HORIZONTAL, GridBagConstraints.FIRST_LINE_START, new Insets(4,5,0,30));
-    addGBComponent(encryptionPanel,SecPanel, 0, 1, 1, 1, 2, 2, 1, 0, GridBagConstraints.NONE, GridBagConstraints.LINE_START, new Insets(0,10,2,5));
-    addGBComponent(x509Panel,SecPanel,       0, 2, 1, 1, 2, 2, 1, 0, GridBagConstraints.NONE, GridBagConstraints.LINE_START, new Insets(2,10,2,5));
-    addGBComponent(authPanel,SecPanel,       0, 3, 1, 1, 2, 2, 1, 1, GridBagConstraints.NONE, GridBagConstraints.FIRST_LINE_START, new Insets(2,10,2,5));
+    addGBComponent(secVeNCrypt, SecPanel,
+                   0, 0, 1, 1, 2, 2, 1, 0,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(4,5,0,30));
+    addGBComponent(encryptionPanel, SecPanel,
+                   0, 1, 1, 1, 2, 2, 1, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.LINE_START,
+                   new Insets(0,10,2,5));
+    addGBComponent(x509Panel, SecPanel,
+                   0, 2, 1, 1, 2, 2, 1, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.LINE_START,
+                   new Insets(2,10,2,5));
+    addGBComponent(authPanel, SecPanel,
+                   0, 3, 1, 1, 2, 2, 1, 1,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(2,10,2,5));
 
     tabPane.add(EncodingPanel);
     tabPane.add(InputsPanel);
     tabPane.add(MiscPanel);
-    tabPane.add(DefaultsPanel);
     tabPane.add(SecPanel);
     tabPane.addTab("Encoding", EncodingPanel);
     tabPane.addTab("Inputs", InputsPanel);
     tabPane.addTab("Misc", MiscPanel);
-    tabPane.addTab("Load / Save", DefaultsPanel);
     tabPane.addTab("Security", SecPanel);
     tabPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
 
@@ -369,6 +450,58 @@ class OptionsDialog extends Dialog implements
   public void initDialog() {
     if (cb != null) cb.setOptions();
     //encMethodComboBox.setSelectedItem("Tight + Perceptually Lossless JPEG (LAN)");
+  }
+  
+  private void updatePreferences() {
+    UserPreferences.set("global", "JPEG", allowJpeg.isSelected());
+    String subsamplingStr = 
+      subsamplingLabelTable.get(subsamplingLevel.getValue());
+    UserPreferences.set("global", "Subsampling", subsamplingStr);
+    UserPreferences.set("global", "Quality", jpegQualityLevel.getValue());
+    UserPreferences.set("global", "CompressLevel",
+                        zlibCompressionLevel.getValue());
+    UserPreferences.set("global", "ViewOnly", viewOnly.isSelected());
+    UserPreferences.set("global", "RecvClipboard",
+                        acceptClipboard.isSelected());
+    UserPreferences.set("global", "SendClipboard", sendClipboard.isSelected());
+    String menuKeyStr =
+      MenuKey.getMenuKeySymbols()[menuKey.getSelectedIndex()].name;
+    UserPreferences.set("global", "MenuKey", menuKeyStr);
+    UserPreferences.set("global", "FullScreen", fullScreen.isSelected());
+    UserPreferences.set("global", "Shared", shared.isSelected());
+    UserPreferences.set("global", "CursorShape", useLocalCursor.isSelected());
+    UserPreferences.set("global", "AcceptBell", acceptBell.isSelected());
+    String scaleString = scalingFactor.getSelectedItem().toString();
+    if (scaleString.equalsIgnoreCase("Auto")) {
+      UserPreferences.set("global", "Scale", "Auto");
+    } else if(scaleString.equalsIgnoreCase("Fixed Aspect Ratio")) {
+      UserPreferences.set("global", "Scale", "FixedRatio");
+    } else { 
+      scaleString = scaleString.replaceAll("[^\\d]", "");
+      int sf = -1;
+      try {
+        sf = Integer.parseInt(scaleString);
+      } catch(NumberFormatException e) {};
+      if (sf >= 1 && sf <= 1000)
+        UserPreferences.set("global", "Scale", Integer.toString(sf));
+    }
+    UserPreferences.set("global", "secVeNCrypt", secVeNCrypt.isSelected());
+    UserPreferences.set("global", "encNone", encNone.isSelected());
+    UserPreferences.set("global", "encTLS", encTLS.isSelected());
+    UserPreferences.set("global", "encX509", encX509.isSelected());
+    UserPreferences.set("global", "secNone", secNone.isSelected());
+    UserPreferences.set("global", "secVnc", secVnc.isSelected());
+    UserPreferences.set("global", "NoUnixLogin", !secUnixLogin.isSelected());
+    UserPreferences.set("global", "secPlain", secPlain.isSelected());
+    UserPreferences.set("global", "secIdent", secIdent.isSelected());
+    UserPreferences.set("global", "SendLocalUsername",
+                        sendLocalUsername.isSelected());
+    if (!CSecurityTLS.x509ca.isDefault)
+      UserPreferences.set("global", "x509ca",
+                          CSecurityTLS.x509ca.getValue());
+    if (!CSecurityTLS.x509crl.isDefault)
+      UserPreferences.set("global", "x509crl",
+                          CSecurityTLS.x509crl.getValue());
   }
 
   JRadioButton addRadioCheckbox(String str, ButtonGroup group, JPanel panel) {
@@ -419,18 +552,27 @@ class OptionsDialog extends Dialog implements
       ok = false;
       endDialog();
     } else if (s instanceof JButton && (JButton)s == defSaveButton) {
-      try {
-        defaults.Save();
-      } catch (java.lang.Exception x) { }
+      updatePreferences();
+      UserPreferences.save();
+    } else if (s instanceof JButton && (JButton)s == defClearButton) {
+      UserPreferences.clear();
     } else if (s instanceof JButton && (JButton)s == ca) {
-      JFileChooser fc = new JFileChooser();
+      File file = new File(CSecurityTLS.x509ca.getValue());
+      JFileChooser fc = new JFileChooser(file.getParent());
+      fc.setSelectedFile(file);
       fc.setDialogTitle("Path to X509 CA certificate");
+      fc.setApproveButtonText("OK");
+      fc.setFileHidingEnabled(false);
       int ret = fc.showOpenDialog(this);
       if (ret == JFileChooser.APPROVE_OPTION)
         CSecurityTLS.x509ca.setParam(fc.getSelectedFile().toString());
     } else if (s instanceof JButton && (JButton)s == crl) {
-      JFileChooser fc = new JFileChooser();
+      File file = new File(CSecurityTLS.x509crl.getValue());
+      JFileChooser fc = new JFileChooser(file.getParent());
+      fc.setSelectedFile(file);
       fc.setDialogTitle("Path to X509 CRL file");
+      fc.setApproveButtonText("OK");
+      fc.setFileHidingEnabled(false);
       int ret = fc.showOpenDialog(this);
       if (ret == JFileChooser.APPROVE_OPTION)
         CSecurityTLS.x509crl.setParam(fc.getSelectedFile().toString());
@@ -476,9 +618,6 @@ class OptionsDialog extends Dialog implements
         zlibCompressionLevel.setEnabled(true);
       }
       setEncMethodComboBox();
-    }
-    if (s instanceof JCheckBox && (JCheckBox)s == sendLocalUsername) {
-      defaults.setPref("sendLocalUsername",(sendLocalUsername.isSelected()) ? "on" : "off");
     }
     if (s instanceof JCheckBox && (JCheckBox)s == secVeNCrypt) {
       encNone.setEnabled(secVeNCrypt.isSelected());

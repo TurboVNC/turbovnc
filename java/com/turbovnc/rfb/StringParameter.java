@@ -34,6 +34,7 @@ public class StringParameter extends VoidParameter {
 
   public boolean setParam(String v) {
     value = v;
+    isDefault = false;
     return value != null;
   }
 
@@ -48,6 +49,8 @@ public class StringParameter extends VoidParameter {
 
   public String getValue() { return value; }
   public String getData() { return value; }
+
+  public boolean isDefault = true;
 
   protected String value;
   protected String defValue;

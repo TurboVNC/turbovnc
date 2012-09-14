@@ -35,20 +35,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import javax.swing.JOptionPane;
 
-import com.turbovnc.vncviewer.UserPrefs;
 import com.turbovnc.rdr.*;
 import com.turbovnc.network.*;
-import java.util.concurrent.Executors;
-import java.nio.channels.SelectionKey;
+import com.turbovnc.vncviewer.*;
 
 public class CSecurityTLS extends CSecurity {
 
   public static StringParameter x509ca
   = new StringParameter("x509ca",
-                        "X509 CA certificate", "");
+    "X509 CA certificate", FileUtils.getVncHomeDir() + "x509_ca.pem");
   public static StringParameter x509crl
   = new StringParameter("x509crl",
-                        "X509 CRL file", "");
+    "X509 CRL file", FileUtils.getVncHomeDir() + "x509_crl.pem");
 
   private void initGlobal() 
   {
@@ -69,30 +67,6 @@ public class CSecurityTLS extends CSecurity {
   {
     anon = _anon;
     session = null;
-    
-    setDefaults();
-    cafile = x509ca.getData(); 
-    crlfile = x509crl.getData(); 
-  }
-
-  public static void setDefaults()
-  {
-    String homeDir = null;
-    
-    if ((homeDir=UserPrefs.getHomeDir()) == null) {
-      vlog.error("Could not obtain VNC home directory path");
-      return;
-    }
-
-    String vnchomedir = homeDir+UserPrefs.getFileSeparator()+".vnc"+
-                        UserPrefs.getFileSeparator();
-    String caDefault = new String(vnchomedir+"x509_ca.pem");
-    String crlDefault = new String(vnchomedir+"x509_crl.pem");
-
-    if (new File(caDefault).exists())
-      x509ca.setDefaultStr(caDefault);
-    if (new File(crlDefault).exists())
-      x509crl.setDefaultStr(crlDefault);
   }
 
 // FIXME:
@@ -184,7 +158,7 @@ public class CSecurityTLS extends CSecurity {
       engine.setEnabledCipherSuites(engine.getSupportedCipherSuites());
     }
 
-    engine.setEnabledProtocols(new String[]{"SSLv3","TLSv1"});
+    engine.setEnabledProtocols(new String[]{"SSLv3", "TLSv1"});
   }
 
   class MyHandshakeListener implements HandshakeCompletedListener {
@@ -207,18 +181,19 @@ public class CSecurityTLS extends CSecurity {
       CertificateFactory cf = CertificateFactory.getInstance("X.509");
       try {
         ks.load(null, null);
-        File cacert = new File(cafile);
+        File cacert = new File(x509ca.getValue());
         if (!cacert.exists() || !cacert.canRead())
           return;
-        InputStream caStream = new FileInputStream(cafile);
+        InputStream caStream = new FileInputStream(x509ca.getValue());
         X509Certificate ca = (X509Certificate)cf.generateCertificate(caStream);
         ks.setCertificateEntry("CA", ca);
-        PKIXBuilderParameters params = new PKIXBuilderParameters(ks, new X509CertSelector());
-        File crlcert = new File(crlfile);
+        PKIXBuilderParameters params =
+          new PKIXBuilderParameters(ks, new X509CertSelector());
+        File crlcert = new File(x509crl.getValue());
         if (!crlcert.exists() || !crlcert.canRead()) {
           params.setRevocationEnabled(false);
         } else {
-          InputStream crlStream = new FileInputStream(crlfile);
+          InputStream crlStream = new FileInputStream(x509crl.getValue());
           Collection<? extends CRL> crls = cf.generateCRLs(crlStream);
           CertStoreParameters csp = new CollectionCertStoreParameters(crls);
           CertStore store = CertStore.getInstance("Collection", csp);
@@ -248,7 +223,7 @@ public class CSecurityTLS extends CSecurity {
       } catch (CertificateException e) {
         Object[] answer = {"Proceed", "Exit"};
         int ret = JOptionPane.showOptionDialog(null,
-          e.getCause().getLocalizedMessage()+"\n"+
+          e.getCause().getLocalizedMessage()+"\n" +
           "Continue connecting to this host?",
           "Confirm certificate exception?",
           JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
@@ -266,14 +241,15 @@ public class CSecurityTLS extends CSecurity {
     }
   }
 
-  public final int getType() { return anon ? Security.secTypeTLSNone : Security.secTypeX509None; }
+  public final int getType() {
+    return anon ? Security.secTypeTLSNone : Security.secTypeX509None;
+  }
+
   public final String description() 
     { return anon ? "TLSNone" : "X509None"; }
 
   //protected void checkSession();
   protected CConnection client;
-
-
 
   private SSLContext ctx;
   private SSLSession session;
@@ -281,7 +257,6 @@ public class CSecurityTLS extends CSecurity {
   private SSLEngineManager manager;
   private boolean anon;
 
-  private String cafile, crlfile;
   private FdInStream is;
   private FdOutStream os;
 
