@@ -64,7 +64,6 @@ public class UserPreferences {
   public static void save() {
     try {
       root.sync();
-			System.out.println(root.absolutePath());
       String[] keys = root.keys();
       for (int i = 0; i < keys.length; i++)
         vlog.debug(keys[i] + " = " + root.get(keys[i], null));
@@ -76,7 +75,6 @@ public class UserPreferences {
   public static void save(String nName) {
     try {
       Preferences node = root.node(nName);
-			System.out.println(node.absolutePath());
       node.sync();
       String[] keys = root.keys();
       for (int i = 0; i < keys.length; i++)
