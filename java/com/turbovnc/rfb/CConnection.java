@@ -83,12 +83,12 @@ abstract public class CConnection extends CMsgHandler {
     if (!cp.done) return;
 
     vlog.info("Server supports RFB protocol version "
-              +cp.majorVersion+"."+ cp.minorVersion);
+              + cp.majorVersion + "." + cp.minorVersion);
 
     // The only official RFB protocol versions are currently 3.3, 3.7 and 3.8
     if (cp.beforeVersion(3,3)) {
-      String msg = ("Server gave unsupported RFB protocol version "+
-                    cp.majorVersion+"."+cp.minorVersion);
+      String msg = ("Server gave unsupported RFB protocol version " +
+                    cp.majorVersion + "." + cp.minorVersion);
       vlog.error(msg);
       state_ = RFBSTATE_INVALID;
       throw new Exception(msg);
@@ -101,8 +101,8 @@ abstract public class CConnection extends CMsgHandler {
     cp.writeVersion(os);
     state_ = RFBSTATE_SECURITY_TYPES;
 
-    vlog.info("Using RFB protocol version "+
-              cp.majorVersion+"."+cp.minorVersion);
+    vlog.info("Using RFB protocol version " +
+              cp.majorVersion + "." + cp.minorVersion);
   }
 
   private void processSecurityTypesMsg() 
@@ -122,7 +122,8 @@ abstract public class CConnection extends CMsgHandler {
       if (secType == Security.secTypeInvalid) {
         throwConnFailedException();
 
-      } else if (secType == Security.secTypeNone || secType == Security.secTypeVncAuth) {
+      } else if (secType == Security.secTypeNone ||
+                 secType == Security.secTypeVncAuth) {
         Iterator i;
         for (i = secTypes.iterator(); i.hasNext(); ) {
           int refType = (Integer)i.next();
@@ -135,7 +136,7 @@ abstract public class CConnection extends CMsgHandler {
         if (!secTypes.contains(secType))
           secType = Security.secTypeInvalid;
       } else {
-        vlog.error("Unknown 3.3 security type "+secType);
+        vlog.error("Unknown 3.3 security type " + secType);
         throw new Exception("Unknown 3.3 security type");
       }
 
@@ -149,8 +150,9 @@ abstract public class CConnection extends CMsgHandler {
 
       for (int i = 0; i < nServerSecTypes; i++) {
         int serverSecType = is.readU8();
-        vlog.debug("Server offers security type "+
-                   Security.secTypeName(serverSecType)+"("+serverSecType+")");
+        vlog.debug("Server offers security type " +
+                   Security.secTypeName(serverSecType) +
+                   "(" + serverSecType + ")");
 
         /*
          * TurboVNC specific - use secTypeTight if the server supports it.
@@ -162,7 +164,8 @@ abstract public class CConnection extends CMsgHandler {
          * Use the first type sent by server which matches client's type.
          * It means server's order specifies priority.
          */
-        if (secType == Security.secTypeInvalid && secType != Security.secTypeTight) {
+        if (secType == Security.secTypeInvalid &&
+            secType != Security.secTypeTight) {
           for (Iterator j = secTypes.iterator(); j.hasNext(); ) {
             int refType = (Integer)j.next();
             if (refType == serverSecType) {
@@ -177,8 +180,8 @@ abstract public class CConnection extends CMsgHandler {
       if (secType != Security.secTypeInvalid) {
         os.writeU8(secType);
         os.flush();
-        vlog.debug("Choosing security type "+Security.secTypeName(secType)+
-                   "("+secType+")");
+        vlog.debug("Choosing security type " + Security.secTypeName(secType) +
+                   "(" + secType + ")");
       }
     }
 
@@ -367,7 +370,8 @@ abstract public class CConnection extends CMsgHandler {
 
   private void throwAuthFailureException() {
     String reason;
-    vlog.debug("state="+state()+", ver="+cp.majorVersion+"."+cp.minorVersion);
+    vlog.debug("state=" + state() + ", ver=" + cp.majorVersion + "." +
+               cp.minorVersion);
     if (state() == RFBSTATE_SECURITY_RESULT && !cp.beforeVersion(3,8)) {
       reason = is.readString();
     } else {
