@@ -34,14 +34,6 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     super("VNC Menu");
     setLightWeightPopupEnabled(false);
     cc = cc_;
-    restore    = addMenuItem("Restore");
-    move       = addMenuItem("Move");
-    move.setEnabled(false);
-    size       = addMenuItem("Size");
-    size.setEnabled(false);
-    minimize   = addMenuItem("Minimize");
-    maximize   = addMenuItem("Maximize");
-    addSeparator();
     exit       = addMenuItem("Close viewer", KeyEvent.VK_C);
     addSeparator();
     options    = addMenuItem("Options...", KeyEvent.VK_O);
@@ -96,15 +88,6 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       cc.toggleFullScreen();
     } else if (actionMatch(ev, defaultSize)) {
       cc.sizeWindow();
-    } else if (actionMatch(ev, restore)) {
-      if (cc.fullScreen) cc.toggleFullScreen();
-      cc.viewport.setExtendedState(JFrame.NORMAL);
-    } else if (actionMatch(ev, minimize)) {
-      if (cc.fullScreen) cc.toggleFullScreen();
-      cc.viewport.setExtendedState(JFrame.ICONIFIED);
-    } else if (actionMatch(ev, maximize)) {
-      if (cc.fullScreen) cc.toggleFullScreen();
-      cc.viewport.setExtendedState(JFrame.MAXIMIZED_BOTH);
     } else if (actionMatch(ev, clipboard)) {
       cc.clipboardDialog.showDialog(cc.viewport);
     } else if (actionMatch(ev, f8)) {
@@ -138,7 +121,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
   }
 
   CConn cc;
-  JMenuItem restore, move, size, minimize, maximize, defaultSize;
+  JMenuItem defaultSize;
   JMenuItem exit, clipboard, ctrlAltDel, ctrlEsc, refresh;
   JMenuItem newConn, options, info, about, dismiss;
   static JMenuItem f8;
