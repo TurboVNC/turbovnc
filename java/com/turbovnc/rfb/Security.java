@@ -65,7 +65,6 @@ public class Security {
   {
     if (setInUserPrefs && secTypes.isDefault) return;
 
-    System.out.println("Setting security types from parameter");
     String secTypesStr;
 
     secTypesStr = secTypes.getData();
