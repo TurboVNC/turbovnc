@@ -156,16 +156,13 @@ public class CConn extends CConnection
         serverPort = Hostname.getPort(vncServerName);
       } else {
         ServerDialog dlg = new ServerDialog(options, vncServerName, this);
-        boolean status = dlg.showDialog();
-        Object item = dlg.server.getSelectedItem();
-        if (!status || item == null || item.toString().equals("")) {
-          vlog.info("No server name specified!");
+        boolean ret = dlg.showDialog();
+        if (!ret) {
           close();
           return;
         }
-        vncServerName = (String)item;
-        serverHost = Hostname.getHost(vncServerName);
-        serverPort = Hostname.getPort(vncServerName);
+        serverHost = viewer.vncServerName.getValueStr();
+        serverPort = viewer.vncServerPort.getValue();
       }
 
       try {
