@@ -36,7 +36,6 @@ class PasswdDialog extends Dialog implements KeyListener,
     setTitle(title);
     addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
-        ok=false;
         endDialog();
       }
     });
@@ -82,12 +81,10 @@ class PasswdDialog extends Dialog implements KeyListener,
     Object s = event.getSource();
     if (s instanceof JTextField && (JTextField)s == userEntry) {
        if (event.getKeyCode() == KeyEvent.VK_ENTER) {
-         ok = true;
          endDialog();
         }
     } else if (s instanceof JPasswordField && (JPasswordField)s == passwdEntry) {
         if (event.getKeyCode() == KeyEvent.VK_ENTER) {
-         ok = true;
          endDialog();
         }
     }

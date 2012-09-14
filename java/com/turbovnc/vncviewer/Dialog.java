@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2011-2012 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,25 +30,23 @@
 package com.turbovnc.vncviewer;
 
 import java.awt.*;
+import java.awt.Dialog.*;
 import javax.swing.*;
 
-//class Dialog extends JFrame implements WindowListener {
-class Dialog extends JFrame {
+class Dialog extends JDialog {
 
-  protected boolean ok, done;
-  boolean modal;
-
-  public Dialog(boolean modal_) {
-    modal = modal_;
-    //addWindowListener(this);
+  public Dialog(boolean modal) {
+    if (modal) {
+      setModalityType(ModalityType.APPLICATION_MODAL);
+    } else {
+      setModalityType(ModalityType.MODELESS);
+    }
   }
 
-  public boolean showDialog(Component c) {
-    ok = false;
-    done = false;
+  public boolean showDialog(Window w) {
     initDialog();
-    if (c != null) {
-      setLocationRelativeTo(c);
+    if (w != null) {
+      setLocationRelativeTo(w);
     } else {
       Dimension dpySize = getToolkit().getScreenSize();
       Dimension mySize = getSize();
@@ -58,20 +57,18 @@ class Dialog extends JFrame {
     ClassLoader cl = this.getClass().getClassLoader();
     ImageIcon icon = new ImageIcon(cl.getResource("com/turbovnc/vncviewer/turbovnc-sm.png"));
     setIconImage(icon.getImage());
-    //setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-    //setFont(new Font("SansSerif", Font.PLAIN, 11));
+
+    if (w != null && w.isAlwaysOnTop()) {
+      // We must be in full-screen mode.  Temporarily prevent the viewport from
+      // being always on top until we close the dialog
+      w.setAlwaysOnTop(false);
+      window = w;
+    }
 
     setVisible(true);
     setFocusable(true);
-    if (!modal) return true;
-    synchronized(this) {
-      try {
-        while (!done)
-          wait();
-      } catch (InterruptedException e) {
-      }
-    }
-    return ok;
+    setAlwaysOnTop(true);
+    return ret;
   }
 
   public boolean showDialog() {
@@ -79,13 +76,12 @@ class Dialog extends JFrame {
   }
 
   public void endDialog() {
-    done = true;
     setVisible(false);
     setFocusable(false);
-    if (modal) {
-      synchronized (this) {
-        notify();
-      }
+    setAlwaysOnTop(false);
+    if (window != null) {
+      window.setAlwaysOnTop(true);
+      window = null;
     }
   }
 
@@ -93,23 +89,6 @@ class Dialog extends JFrame {
   // to make sure that checkboxes have the right state, etc.
   public void initDialog() {
   }
-
-  //------------------------------------------------------------------ 
-  //   implemented blank methods
-  //public void windowClosed(WindowEvent event){}
-  //public void windowDeiconified(WindowEvent event){}
-  //public void windowIconified(WindowEvent event){}
-  //public void windowActivated(WindowEvent event){}
-  //public void windowDeactivated(WindowEvent event){}
-  //public void windowOpened(WindowEvent event){}
-
-  //------------------------------------------------------------------
-
-  // method to check which window was closing
-  //public void windowClosing(WindowEvent event) {
-  //  ok = false;
-  //  endDialog();
-  //}
 
   public void addGBComponent(JComponent c, JComponent cp,
                              int gx, int gy, 
@@ -134,14 +113,8 @@ class Dialog extends JFrame {
       cp.add(c, gbc);
   }
 
-  final public String getFileSeperator() {
-    String seperator = System.getProperties().get("file.separator").toString();
-    return seperator;
-  }
+  protected boolean ret = true;
 
-  final public String getUserName() {
-    String userName = (String)System.getProperties().get("user.name");
-    return userName;
-  }
+  Window window;
 
 }

@@ -58,7 +58,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   Hashtable<Integer, String> subsamplingLabelTable;
 
   public OptionsDialog(OptionsDialogCallback cb_) { 
-    super(false);
+    super(true);
     cb = cb_;
     setResizable(false);
     setTitle("TurboVNC Viewer Options");
@@ -545,11 +545,9 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   public void actionPerformed(ActionEvent e) {
     Object s = e.getSource();
     if (s instanceof JButton && (JButton)s == okButton) {
-      ok = true;
       if (cb != null) cb.getOptions();
       endDialog();
     } else if (s instanceof JButton && (JButton)s == cancelButton) {
-      ok = false;
       endDialog();
     } else if (s instanceof JButton && (JButton)s == defSaveButton) {
       updatePreferences();

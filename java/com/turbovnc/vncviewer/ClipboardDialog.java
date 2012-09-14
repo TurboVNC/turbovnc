@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2011-2012 Brian P. Hinz
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,12 +99,10 @@ class ClipboardDialog extends Dialog implements ActionListener {
       current = "";
       textArea.setText(current);
     } else if (s instanceof JButton && (JButton)s == sendButton) {
-      ok = true;
       current = textArea.getText();
       cc.writeClientCutText(current, current.length());
       endDialog();
     } else if (s instanceof JButton && (JButton)s == cancelButton) {
-      ok = false;
       endDialog();
     }
   }
