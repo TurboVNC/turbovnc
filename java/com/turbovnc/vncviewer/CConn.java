@@ -567,7 +567,9 @@ public class CConn extends CConnection
   static Rectangle savedRect = new Rectangle(-1, -1, 0, 0);
   static int savedState = -1;
 
-  private void recreateViewport()
+  private void recreateViewport() { recreateViewport(false); }
+
+  private void recreateViewport(boolean restore)
   {
     if (viewport != null) {
       if (fullScreen) {
@@ -587,7 +589,7 @@ public class CConn extends CConnection
       icon = new ImageIcon(url);
       viewport.setIconImage(icon.getImage());
     }
-    reconfigureViewport();
+    reconfigureViewport(restore);
     if ((cp.width > 0) && (cp.height > 0))
       viewport.setVisible(true);
     desktop.requestFocusInWindow();
@@ -707,7 +709,9 @@ public class CConn extends CConnection
     viewport.setGeometry(x, y, w, h, pack);
   }
 
-  private void reconfigureViewport()
+  private void reconfigureViewport() { reconfigureViewport(false); }
+
+  private void reconfigureViewport(boolean restore)
   {
     desktop.setScaledSize();
     if (fullScreen) {
@@ -719,7 +723,7 @@ public class CConn extends CConnection
                            span.height, false);
       viewport.setAlwaysOnTop(true);
     } else {
-      if (savedRect.width > 0 && savedRect.height > 0) {
+      if (savedRect.width > 0 && savedRect.height > 0 && restore) {
         if (savedState >= 0)
           viewport.setExtendedState(savedState);
         viewport.setGeometry(savedRect.x, savedRect.y, savedRect.width,
@@ -1169,7 +1173,7 @@ public class CConn extends CConnection
     fullScreen = !fullScreen;
     menu.fullScreen.setSelected(fullScreen);
     if (viewport != null)
-      recreateViewport();
+      recreateViewport(true);
   }
 
   // writeClientCutText() is called from the clipboard dialog
