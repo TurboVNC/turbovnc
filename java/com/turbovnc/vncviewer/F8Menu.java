@@ -47,6 +47,11 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     fullScreen.addActionListener(this);
     add(fullScreen);
     defaultSize = addMenuItem("Default window size/position", KeyEvent.VK_Z);
+    showToolbar = new JCheckBoxMenuItem("Show toolbar");
+    showToolbar.setMnemonic(KeyEvent.VK_T);
+    showToolbar.setSelected(cc.showToolbar);
+    showToolbar.addActionListener(this);
+    add(showToolbar);
     addSeparator();
     f8 = addMenuItem("Send " + 
       KeyEvent.getKeyText(MenuKey.getMenuKeyCode()), MenuKey.getMenuKeyCode());
@@ -86,6 +91,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       cc.close();
     } else if (actionMatch(ev, fullScreen)) {
       cc.toggleFullScreen();
+    } else if (actionMatch(ev, showToolbar)) {
+      cc.toggleToolBar();
     } else if (actionMatch(ev, defaultSize)) {
       cc.sizeWindow();
     } else if (actionMatch(ev, clipboard)) {
@@ -125,6 +132,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
   JMenuItem exit, clipboard, ctrlAltDel, ctrlEsc, refresh;
   JMenuItem newConn, options, info, about, dismiss;
   static JMenuItem f8;
-  JCheckBoxMenuItem fullScreen;
+  JCheckBoxMenuItem fullScreen, showToolbar;
+
   static LogWriter vlog = new LogWriter("F8Menu");
 }

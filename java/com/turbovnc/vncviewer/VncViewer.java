@@ -74,6 +74,9 @@ public class VncViewer extends java.applet.Applet implements Runnable
         while (keys.hasMoreElements()) {
           Object key = keys.nextElement();
           Object value = UIManager.get (key);
+          // To ensure that JButtons placed on toolbar match
+          if (key.toString().equals("Button.gradient"))
+            UIManager.put("MenuBar.gradient", value);
           if (value instanceof javax.swing.plaf.FontUIResource)
             UIManager.put(key, f);
         }
@@ -435,6 +438,10 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "only the primary monitor, or whether it should span all monitors only if it "+
   "cannot fit on the primary monitor (Auto.)", "Auto",
   "Primary, All, Auto");
+
+  BoolParameter showToolbar
+  = new BoolParameter("Toolbar",
+  "Show the toolbar by default.", true);
 
   StringParameter menuKey
   = new StringParameter("MenuKey",

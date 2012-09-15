@@ -45,7 +45,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   JComboBox menuKey, compressLevel, scalingFactor, encMethodComboBox;
   JSlider jpegQualityLevel, subsamplingLevel, zlibCompressionLevel;
   JCheckBox viewOnly, acceptClipboard, sendClipboard, acceptBell;
-  JCheckBox fullScreen, shared, useLocalCursor;
+  JCheckBox fullScreen, shared, useLocalCursor, showToolbar;
   JCheckBox secVeNCrypt, encNone, encTLS, encX509;
   JCheckBox secNone, secVnc, secUnixLogin, secPlain, secIdent,
     sendLocalUsername;
@@ -270,6 +270,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     useLocalCursor.addItemListener(this);
     acceptBell = new JCheckBox("Beep when requested by the server");
     acceptBell.addItemListener(this);
+    showToolbar = new JCheckBox("Show toolbar by default");
+    showToolbar.addItemListener(this);
     JLabel scalingFactorLabel = new JLabel("Scaling Factor:");
     Object[] scalingFactors = { 
       "Auto", "Fixed Aspect Ratio", "50%", "75%", "95%", "100%", "105%", 
@@ -297,13 +299,18 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
                    new Insets(4,5,0,5));
+    addGBComponent(showToolbar, MiscPanel,
+                   0, 4, 2, 1, 2, 2, 1, 0,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(4,5,0,5));
     addGBComponent(scalingFactorLabel, MiscPanel,
-                   0, 4, 1, 1, 2, 2, 1, 0,
+                   0, 5, 1, 1, 2, 2, 1, 0,
                    GridBagConstraints.NONE,
                    GridBagConstraints.FIRST_LINE_START,
                    new Insets(8,8,0,5));
     addGBComponent(scalingFactor, MiscPanel,
-                   1, 4, 1, 1, 2, 2, 25, 0,
+                   1, 5, 1, 1, 2, 2, 25, 0,
                    GridBagConstraints.NONE,
                    GridBagConstraints.FIRST_LINE_START,
                    new Insets(4,5,0,5));
@@ -326,7 +333,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                    new Insets(2,2,2,2));
 
     addGBComponent(defaultsPanel, MiscPanel,
-                   0, 5, 2, GridBagConstraints.REMAINDER, 2, 2, 1, 1,
+                   0, 6, 2, GridBagConstraints.REMAINDER, 2, 2, 1, 1,
                    GridBagConstraints.NONE,
                    GridBagConstraints.FIRST_LINE_START,
                    new Insets(25,5,4,5));
@@ -471,6 +478,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "Shared", shared.isSelected());
     UserPreferences.set("global", "CursorShape", useLocalCursor.isSelected());
     UserPreferences.set("global", "AcceptBell", acceptBell.isSelected());
+    UserPreferences.set("global", "Toolbar", showToolbar.isSelected());
     String scaleString = scalingFactor.getSelectedItem().toString();
     if (scaleString.equalsIgnoreCase("Auto")) {
       UserPreferences.set("global", "Scale", "Auto");

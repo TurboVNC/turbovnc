@@ -22,6 +22,10 @@ package com.turbovnc.vncviewer;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Window;
 import javax.swing.*;
 
 import com.turbovnc.rdr.*;
@@ -39,6 +43,9 @@ public class Viewport extends JFrame
       new UIDefaults.LazyInputMap(new Object[]{}));
     sp = new JScrollPane();
     sp.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+    tb = new Toolbar(cc);
+    setJMenuBar(tb);
+    showToolbar(cc.showToolbar);
     getContentPane().add(sp);
     if (cc.viewer.os.startsWith("mac os x"))
       setJMenuBar(new MacMenuBar(cc));
@@ -100,9 +107,13 @@ public class Viewport extends JFrame
     setBackground(Color.BLACK);
   }
 
+  public void showToolbar(boolean show) {
+    tb.setVisible(show && !cc.fullScreen);
+  }
 
   CConn cc;
   JScrollPane sp;
+  public Toolbar tb;
   static LogWriter vlog = new LogWriter("Viewport");
 }
 

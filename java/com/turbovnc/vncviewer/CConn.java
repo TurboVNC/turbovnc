@@ -103,6 +103,7 @@ public class CConn extends CConnection
       fullColour = false;
     formatChange = false; encodingChange = false;
     fullScreen = viewer.fullScreen.getValue();
+    showToolbar = viewer.showToolbar.getValue();
     options = new OptionsDialog(this);
     options.initDialog();
     clipboardDialog = new ClipboardDialog(this);
@@ -1019,6 +1020,7 @@ public class CConn extends CConnection
     options.fullScreen.setSelected(fullScreen);
     options.useLocalCursor.setSelected(viewer.useLocalCursor.getValue());
     options.acceptBell.setSelected(viewer.acceptBell.getValue());
+    options.showToolbar.setSelected(viewer.showToolbar.getValue());
     if (scalingFactor == SCALE_AUTO) {
       options.scalingFactor.setSelectedItem("Auto");
     } else if(scalingFactor == SCALE_FIXEDRATIO) {
@@ -1058,6 +1060,7 @@ public class CConn extends CConnection
     viewer.acceptClipboard.setParam(options.acceptClipboard.isSelected());
     viewer.sendClipboard.setParam(options.sendClipboard.isSelected());
     viewer.acceptBell.setParam(options.acceptBell.isSelected());
+    viewer.showToolbar.setParam(options.showToolbar.isSelected());
     int oldScalingFactor = scalingFactor;
     setScalingFactor(options.scalingFactor.getSelectedItem().toString());
     if (scalingFactor == SCALE_AUTO || scalingFactor == SCALE_FIXEDRATIO) {
@@ -1150,6 +1153,16 @@ public class CConn extends CConnection
     }
     if (options.fullScreen.isSelected() != fullScreen)
       toggleFullScreen();
+  }
+
+  public void toggleToolBar() {
+    if (viewport == null)
+      return;
+    showToolbar = !showToolbar;
+    if (!fullScreen)
+      reconfigureViewport();
+    viewport.showToolbar(showToolbar);
+    menu.showToolbar.setSelected(showToolbar);
   }
 
   public void setScalingFactor(String scaleString) {
@@ -1458,7 +1471,7 @@ public class CConn extends CConnection
   int modifiers;
   Viewport viewport;
   private boolean fullColour;
-  boolean fullScreen;
+  boolean fullScreen, showToolbar;
   int scalingFactor;
 
   public double tDecode, tBlit;
