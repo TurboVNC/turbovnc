@@ -125,6 +125,11 @@ add_custom_command(OUTPUT ${JAVA_CLASSES}
 
 configure_file(${CLASSPATH}/timestamp.in ${CLASSPATH}/timestamp)
 
+add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/toolbar.png
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${SRCDIR}/${CLASSPATH}/toolbar.png ${BINDIR}/${CLASSPATH}/toolbar.png
+	DEPENDS ${SRCDIR}/${CLASSPATH}/toolbar.png)
+
 add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc.png
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${SRCDIR}/${CLASSPATH}/turbovnc.png ${BINDIR}/${CLASSPATH}/turbovnc.png
@@ -143,6 +148,7 @@ add_custom_command(OUTPUT VncViewer.jar
 	DEPENDS ${JAVA_CLASSES}
 		${SRCDIR}/${CLASSPATH}/MANIFEST.MF
 		${BINDIR}/${CLASSPATH}/timestamp
+		${BINDIR}/${CLASSPATH}/toolbar.png
 		${BINDIR}/${CLASSPATH}/turbovnc.png
 		${BINDIR}/${CLASSPATH}/turbovnc-sm.png
 	COMMAND ${JAVA_ARCHIVE}
@@ -163,6 +169,7 @@ add_custom_command(OUTPUT VncViewer.jar
 		com/jcraft/jsch/jce/*.class
 		com/jcraft/jsch/*.class
 		org/libjpegturbo/turbojpeg/*.class
+		${CLASSPATH}/toolbar.png
 		${CLASSPATH}/turbovnc.png
 		${CLASSPATH}/turbovnc-sm.png
 	COMMAND ${CMAKE_COMMAND}
