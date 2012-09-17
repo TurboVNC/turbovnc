@@ -35,10 +35,11 @@ class ServerDialog extends Dialog implements
 {
 
   public ServerDialog(OptionsDialog options_,
-                      String defaultServerName, CConn cc_) {
+                      Options opts_, CConn cc_) {
     
     super(true);
     cc = cc_;
+    opts = opts_;
     setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
     setResizable(false);
     setSize(new Dimension(350, 135));
@@ -59,9 +60,9 @@ class ServerDialog extends Dialog implements
 
     JLabel serverLabel = new JLabel("VNC server:", JLabel.RIGHT);
     String valueStr = null;
-    if (defaultServerName != null) {
+    if (opts.serverName != null) {
       String [] s = new String[1];
-      s[0] = defaultServerName;
+      s[0] = opts.serverName;
       server = new JComboBox(s);
     } else if ((valueStr = UserPreferences.get("ServerDialog", "history"))
                != null) {
@@ -189,8 +190,8 @@ class ServerDialog extends Dialog implements
     }
 
     // set params
-    Configuration.setParam("Server", Hostname.getHost(serverName));
-    Configuration.setParam("Port", Integer.toString(Hostname.getPort(serverName)));
+    opts.serverName = Hostname.getHost(serverName);
+    opts.port = Hostname.getPort(serverName);
 
     // Update the history list
     String valueStr = UserPreferences.get("ServerDialog", "history");
@@ -229,6 +230,7 @@ class ServerDialog extends Dialog implements
 
   Window win;
   CConn cc;
+  Options opts;
   JComboBox server;
   ComboBoxEditor editor;
   JButton aboutButton, optionsButton, okButton, cancelButton;

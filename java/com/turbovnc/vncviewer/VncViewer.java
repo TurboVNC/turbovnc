@@ -171,11 +171,13 @@ public class VncViewer extends java.applet.Applet implements Runnable
       vncServerName.setParam(argv[i]);
     }
 
-    if (via.getValue() != null || tunnel.getValue()) {
-      if (vncServerName.getValue() == null)
+    setGlobalOptions();
+
+    if (opts.via != null || opts.tunnel) {
+      if (opts.serverName == null)
         usage();
       try {
-        Tunnel.createTunnel(this);
+        Tunnel.createTunnel(opts);
       } catch (java.lang.Exception e) {
         System.out.println("Could not create SSH tunnel:\n"+e.toString());
         exit(1);
@@ -213,6 +215,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
   public VncViewer() {
     applet = true;
     UserPreferences.load("global");
+    setGlobalOptions();
   }
 
   public static void newViewer(VncViewer oldViewer, Socket sock, boolean close) {
@@ -257,16 +260,15 @@ public class VncViewer extends java.applet.Applet implements Runnable
     if (applet && nViewers == 0) {
       alwaysShowConnectionDialog.setParam(true);
       Configuration.readAppletParams(this);
+      setGlobalOptions();
       host = getCodeBase().getHost();
     }
     else if (!applet)
-      host = vncServerName.getValue();
+      host = opts.serverName;
     if (host != null && host.indexOf(':') < 0 &&
-        vncServerPort.getValue() > 0) {
-      int port = vncServerPort.getValue();
-      vncServerName.setParam(host + ((port >= 5900 && port <= 5999)
-                                     ? (":"+(port-5900))
-                                     : ("::"+port)));
+        opts.port > 0) {
+      opts.serverName = host + ((opts.port >= 5900 && opts.port <= 5999) ?
+                         (":" + (opts.port - 5900)) : ("::" + opts.port));
     }
     nViewers++;
     thread = new Thread(this);
@@ -331,7 +333,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
       double tStart = 0.0, tTotal;
 
       try {
-        cc = new CConn(this, sock, vncServerName.getValue());
+        cc = new CConn(this, sock);
         if (benchFile != null) {
           if (i < benchWarmup)
             System.out.format("Benchmark warmup run %d\n", i + 1);
@@ -384,7 +386,76 @@ public class VncViewer extends java.applet.Applet implements Runnable
     exit(exitStatus);
   }
 
-  StringParameter vncServerName
+  void setGlobalOptions() {
+    if (opts == null) opts = new Options();
+
+    if (vncServerName.getValue() != null)
+      opts.serverName = new String(vncServerName.getValue());
+    vncServerName.setParam(null);
+    opts.port = vncServerPort.getValue();
+    vncServerPort.setValue(-1);
+
+    opts.shared = shared.getValue();
+    opts.viewOnly = viewOnly.getValue();
+    opts.fullScreen = fullScreen.getValue();
+
+    if (span.getValue().toLowerCase().startsWith("p"))
+      opts.span = Options.SPAN_PRIMARY;
+    else if (span.getValue().toLowerCase().startsWith("al"))
+      opts.span = Options.SPAN_ALL;
+    else
+      opts.span = Options.SPAN_AUTO;
+
+    opts.scalingFactor = Integer.parseInt(scalingFactor.getDefaultStr());
+    opts.setScalingFactor(scalingFactor.getValue());
+
+    opts.acceptClipboard = acceptClipboard.getValue();
+    opts.sendClipboard = sendClipboard.getValue();
+    opts.acceptBell = acceptBell.getValue();
+
+    String encStr = preferredEncoding.getValue();
+    int encNum = Encodings.encodingNum(encStr);
+    if (encNum != -1)
+      opts.preferredEncoding = encNum;
+    else
+      opts.preferredEncoding =
+        Encodings.encodingNum(preferredEncoding.getDefaultStr());
+
+    opts.allowJpeg = allowJpeg.getValue();
+    opts.quality = quality.getValue();
+
+    opts.subsampling = Options.SUBSAMP_NONE;
+    switch (subsampling.getValue().toUpperCase().charAt(0)) {
+      case '2':
+        opts.subsampling = Options.SUBSAMP_2X;
+        break;
+      case '4':
+        opts.subsampling = Options.SUBSAMP_4X;
+        break;
+      case 'G':
+        opts.subsampling = Options.SUBSAMP_GRAY;
+        break;
+    }
+
+    opts.compressLevel = compressLevel.getValue();
+
+    opts.colors = -1;
+    switch (colors.getValue()) {
+      case 8:  case 64:  case 256:
+        opts.colors = colors.getValue();
+        break;
+    }
+
+    opts.cursorShape = cursorShape.getValue();
+    if (user.getValue() != null) opts.user = new String(user.getValue());
+    opts.noUnixLogin = noUnixLogin.getValue();
+    opts.sendLocalUsername = sendLocalUsername.getValue();
+
+    if (via.getValue() != null) opts.via = new String(via.getValue());
+    opts.tunnel = tunnel.getValue();
+  }
+
+  static StringParameter vncServerName
   = new StringParameter("Server",
   "The VNC server to which to connect.  This can be specified in the format "+
   "<host>[:<display number>] or <host>::<port>, where <host> is the host name "+
@@ -392,12 +463,12 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "<display number> is an optional X display number (default: 0), and <port> "+
   "is a TCP port.", null);
 
-  BoolParameter alwaysShowConnectionDialog
+  static BoolParameter alwaysShowConnectionDialog
   = new BoolParameter("AlwaysShowConnectionDialog",
   "Always show the \"New TurboVNC Connection\" dialog even if the server has "+
   "been specified in an applet parameter or on the command line.", false);
 
-  IntParameter vncServerPort
+  static IntParameter vncServerPort
   = new IntParameter("Port",
   "The TCP port number on which the VNC server session is listening.  For Unix "+
   "VNC servers, this is typically 5900 + the X display number of the VNC "+
@@ -407,14 +478,14 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "the viewer will listen for connections from a VNC server.  (default = 5500)",
   -1);
 
-  BoolParameter listenMode
+  static BoolParameter listenMode
   = new BoolParameter("Listen",
   "Start the viewer in \"listen mode.\"  The viewer will listen on port 5500 "+
   "(or on the port specified by the Port parameter) for reverse connections "+
   "from a VNC server.  To connect to a listening viewer from the Unix/Linux "+
   "TurboVNC Server, use the vncconnect program.", false);
 
-  BoolParameter shared
+  static BoolParameter shared
   = new BoolParameter("Shared",
   "When connecting, request a shared session.  When the session is shared, "+
   "other users can connect to the session (assuming they have the correct "+
@@ -423,32 +494,32 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "default settings, then you will only be able to connect to the server if "+
   "no one else is already connected.", true);
 
-  BoolParameter viewOnly
+  static BoolParameter viewOnly
   = new BoolParameter("ViewOnly",
   "Ignore all keyboard and mouse events in the viewer window and do not pass "+
   "these events to the VNC server.", false);
 
-  BoolParameter fullScreen
+  static BoolParameter fullScreen
   = new BoolParameter("FullScreen",
   "Start the viewer in full-screen mode.", false);
 
-  StringParameter span
+  static StringParameter span
   = new StringParameter("Span",
   "This option specifies whether the viewer window should span all monitors, "+
   "only the primary monitor, or whether it should span all monitors only if it "+
   "cannot fit on the primary monitor (Auto.)", "Auto",
   "Primary, All, Auto");
 
-  BoolParameter showToolbar
+  static BoolParameter showToolbar
   = new BoolParameter("Toolbar",
   "Show the toolbar by default.", true);
 
-  StringParameter menuKey
+  static StringParameter menuKey
   = new StringParameter("MenuKey",
   "The key used to display the popup menu", "F8",
   MenuKey.getMenuKeyValueStr());
 
-  StringParameter scalingFactor
+  static StringParameter scalingFactor
   = new StringParameter("Scale",
   "Reduce or enlarge the remote desktop image.  The value is interpreted as a "+
   "scaling factor in percent.  The default value of 100% corresponds to the "+
@@ -460,27 +531,27 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "\"FixedRatio\", then automatic scaling is performed, but the original aspect "+
   "ratio is preserved.", "100", "1-1000, Auto, or FixedRatio");
 
-  StringParameter desktopSize
+  static StringParameter desktopSize
   = new StringParameter("DesktopSize",
   "If the VNC server supports desktop resizing, attempt to resize the remote "+
   "desktop to the specified size (example: 1920x1200).", null);
 
-  BoolParameter acceptClipboard
+  static BoolParameter acceptClipboard
   = new BoolParameter("RecvClipboard",
   "Synchronize the local clipboard with the clipboard of the TurboVNC session "+
   "whenever the latter changes.", true);
 
-  BoolParameter sendClipboard
+  static BoolParameter sendClipboard
   = new BoolParameter("SendClipboard",
   "Synchronize the TurboVNC session clipboard with the local clipboard "+
   "whenever the latter changes.", true);
 
-  BoolParameter acceptBell
+  static BoolParameter acceptBell
   = new BoolParameter("AcceptBell",
   "Produce a system beep when a \"bell\" event is received from the server.",
   true);
 
-  StringParameter preferredEncoding
+  static StringParameter preferredEncoding
   = new StringParameter("Encoding",
   "Preferred encoding type to use.  If the server does not support the "+
   "preferred encoding type, then the next best one will be chosen.  There "+
@@ -489,7 +560,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "connecting to other types of VNC servers, such as RealVNC.",
   "Tight", "Tight, ZRLE, Hextile, Raw, RRE");
 
-  BoolParameter allowJpeg
+  static BoolParameter allowJpeg
   = new BoolParameter("JPEG",
   "Enable the JPEG subencoding type when using Tight encoding.  This causes "+
   "the Tight encoder to use JPEG compression for subrectangles that have a "+
@@ -499,17 +570,17 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "subencoding, depending on the size of the subrectangle and its color count.",
   true);
 
-  IntParameter quality
+  static IntParameter quality
   = new IntParameter("Quality",
   "Specifies the JPEG quality to use when compressing JPEG images with the "+
   "Tight+JPEG encoding methods.  Lower quality values produce grainier JPEG "+
   "images with more noticeable compression artifacts, but lower quality "+
   "values also use less network bandwidth and CPU time.  The default value of "+
-  "" + ConnParams.DEFQUAL + " should be perceptually lossless (that is, any image compression "+
+  "" + Options.DEFQUAL + " should be perceptually lossless (that is, any image compression "+
   "artifacts it produces should be imperceptible to the human eye under most "+
-  "viewing conditions.)", ConnParams.DEFQUAL, 1, 100);
+  "viewing conditions.)", Options.DEFQUAL, 1, 100);
 
-  StringParameter subsampling
+  static StringParameter subsampling
   = new StringParameter("Subsampling",
   "When compressing an image using JPEG, the RGB pixels are first converted "+
   "to the YUV colorspace, a colorspace in which each pixel is represented as a "+
@@ -528,11 +599,11 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "content, it may be difficult to detect any difference between 1X, 2X, and "+
   "4X.", "1X", "1X, 2X, 4X, Gray");
 
-  AliasParameter samp
+  static AliasParameter samp
   = new AliasParameter("Samp",
   "Alias for Subsampling", subsampling);
 
-  IntParameter compressLevel
+  static IntParameter compressLevel
   = new IntParameter("CompressLevel",
   "When Tight encoding is used, the compression level specifies the amount of "+
   "Zlib compression to apply to subrectangles encoded using the indexed color, "+
@@ -550,7 +621,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "certain types of low-color workloads by typically 20-40% (with a "+
   "commensurate increase in CPU usage.)", 1, 0, 9);
 
-  IntParameter colors
+  static IntParameter colors
   = new IntParameter("Colors",
   "The color depth to use for the viewer's window.  Specifying 8 will use a "+
   "BGR111 pixel format (1 bit for each red, green, and blue component.) "+
@@ -562,7 +633,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "native color depth of the display on which the viewer is running, which is "+
   "usually true color (8 bits per component.)", -1);
 
-  BoolParameter useLocalCursor
+  static BoolParameter cursorShape
   = new BoolParameter("CursorShape",
   "Normally, TurboVNC and compatible servers will send only changes to the "+
   "remote mouse cursor's shape and position.  This results in the best mouse "+
@@ -574,9 +645,9 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "advantageous with shared sessions, since it will allow you to see the "+
   "cursor movements of other connected users.", true);
 
-  StringParameter secTypes = SecurityClient.secTypes;
+  static StringParameter secTypes = SecurityClient.secTypes;
 
-  StringParameter user
+  static StringParameter user
   = new StringParameter("User",
   "The user name to use for Unix Login authentication (TurboVNC and TightVNC "+
   "servers) or for Plain and Ident authentication (VeNCrypt-compatible "+
@@ -584,7 +655,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "Unix login authentication to be used, if an authentication method that "+
   "supports it is enabled in the VNC server.", null);
 
-  BoolParameter noUnixLogin
+  static BoolParameter noUnixLogin
   = new BoolParameter("NoUnixLogin",
   "When connecting to TightVNC/TurboVNC servers, this disables the use of "+
   "Unix login authentication.  This is useful if the server is configured to "+
@@ -592,7 +663,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "you want to override this preference for a particular connection (for "+
   "instance, to use a one-time password.)", false);
 
-  BoolParameter sendLocalUsername
+  static BoolParameter sendLocalUsername
   = new BoolParameter("SendLocalUsername",
   "Send the local username when using user/password authentication schemes "+
   "(Unix login, Plain, Ident) rather than prompting for it.  If connecting to "+
@@ -600,23 +671,23 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "be used, if an authentication method that supports it is enabled in the VNC "+
   "server.", false);
 
-  StringParameter passwordFile
+  static StringParameter passwordFile
   = new StringParameter("PasswordFile",
   "Password file from which to read the password for Standard VNC "+
   "authentication.  This is useful if your home directory is shared between "+
   "the client and server machines.", null);
 
-  AliasParameter passwd
+  static AliasParameter passwd
   = new AliasParameter("passwd",
   "Alias for PasswordFile", passwordFile);
 
-  StringParameter password
+  static StringParameter password
   = new StringParameter("Password",
   "Plain-text password to use when authenticating with the VNC server.  It is "+
   "strongly recommended that this parameter be used only in conjunction with a "+
   "one-time password or other disposable token.", null);
 
-  StringParameter via
+  static StringParameter via
   = new StringParameter("Via",
   "This parameter specifies an SSH server (\"gateway\") through which the VNC "+
   "connection should be tunneled.  Note that when using the \"Via\" parameter, "+
@@ -626,14 +697,14 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "specified on the command line or in the \"Server\" parameter when using the "+
   "Via parameter.", null);
 
-  BoolParameter tunnel
+  static BoolParameter tunnel
   = new BoolParameter("Tunnel",
   "Same as Via, except that the gateway is assumed to be the same as the VNC "+
   "server host, so you do not need to specify it separately.  The VNC server "+
   "must be specified on the command line or in the \"Server\" parameter when "+
   "using the Tunnel parameter.", false);
 
-  StringParameter config
+  static StringParameter config
   = new StringParameter("Config",
   "File from which to read connection information.  This file can be generated "+
   "by selecting \"Save connection info as...\" in the system menu of the Windows "+
@@ -648,4 +719,5 @@ public class VncViewer extends java.applet.Applet implements Runnable
   FileInStream benchFile;
   int benchIter = 1;
   int benchWarmup = 0;
+  Options opts;
 }

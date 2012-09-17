@@ -73,105 +73,61 @@ public class CConn extends CConnection
     return (double)System.nanoTime() / 1.0e9;
   }
 
-  public static final int SCALE_AUTO = -1;
-  public static final int SCALE_FIXEDRATIO = -2;
-
   ////////////////////////////////////////////////////////////////////
   // The following methods are all called from the RFB thread
 
-  public CConn(VncViewer viewer_, Socket sock_, 
-               String vncServerName) 
+  public CConn(VncViewer viewer_, Socket sock_) 
   {
-    serverHost = null; serverPort = 0; sock = sock_; viewer = viewer_; 
+    sock = sock_;  viewer = viewer_; 
     benchmark = viewer.benchFile != null;
     pendingPFChange = false;
-    currentEncoding = Encodings.encodingTight; lastServerEncoding = -1;
-    fullColour = true;
-    lowColourLevel = -1;
-    switch (viewer.colors.getValue()) {
-      case 8:
-        lowColourLevel = 0;
-        break;
-      case 64:
-        lowColourLevel = 1;
-        break;
-      case 256:
-        lowColourLevel = 2;
-        break;
-    }
-    if (lowColourLevel >= 0)
-      fullColour = false;
+    lastServerEncoding = -1;
+
+    opts = new Options(viewer.opts);
+
     formatChange = false; encodingChange = false;
-    fullScreen = viewer.fullScreen.getValue();
-    showToolbar = viewer.showToolbar.getValue();
+    currentEncoding = opts.preferredEncoding;
     options = new OptionsDialog(this);
     options.initDialog();
     clipboardDialog = new ClipboardDialog(this);
     firstUpdate = true; pendingUpdate = false; continuousUpdates = false; 
     forceNonincremental = true; supportsSyncFence = false;
 
-    setShared(viewer.shared.getValue());
-    scalingFactor = Integer.parseInt(viewer.scalingFactor.getDefaultStr());
-    setScalingFactor(viewer.scalingFactor.getValue());
+    setShared(opts.shared);
     upg = this;
     msg = this;
 
-    String encStr = viewer.preferredEncoding.getValue();
-    int encNum = Encodings.encodingNum(encStr);
-    if (encNum != -1) {
-      currentEncoding = encNum;
-    }
     cp.supportsDesktopResize = true;
     cp.supportsExtendedDesktopSize = true;
     cp.supportsSetDesktopSize = true;
     cp.supportsClientRedirect = true;
     cp.supportsDesktopRename = true;
-    cp.supportsLocalCursor = viewer.useLocalCursor.getValue();
-    cp.compressLevel = viewer.compressLevel.getValue();
-    cp.allowJpeg = viewer.allowJpeg.getValue();
-    cp.quality = viewer.quality.getValue();
-    switch (viewer.subsampling.getValue().toUpperCase().charAt(0)) {
-      case '1':
-      case 'N':
-        cp.subsampling = ConnParams.SUBSAMP_NONE;
-        break;
-      case '2':
-        cp.subsampling = ConnParams.SUBSAMP_422;
-        break;
-      case '4':
-        cp.subsampling = ConnParams.SUBSAMP_420;
-        break;
-      case 'G':
-        cp.subsampling = ConnParams.SUBSAMP_GRAY;
-        break;
-    }
     initMenu();
 
     if (sock != null) {
       String name = sock.getPeerEndpoint();
-      vlog.info("Accepted connection from "+name);
+      vlog.info("Accepted connection from " + name);
     } else if (!benchmark) {
-      if (vncServerName != null &&
+      if (opts.serverName != null &&
           !viewer.alwaysShowConnectionDialog.getValue()) {
-        serverHost = Hostname.getHost(vncServerName);
-        serverPort = Hostname.getPort(vncServerName);
+        opts.port = Hostname.getPort(opts.serverName);
+        opts.serverName = Hostname.getHost(opts.serverName);
       } else {
-        ServerDialog dlg = new ServerDialog(options, vncServerName, this);
+        ServerDialog dlg = new ServerDialog(options, opts, this);
         boolean ret = dlg.showDialog();
         if (!ret) {
           close();
           return;
         }
-        serverHost = viewer.vncServerName.getValueStr();
-        serverPort = viewer.vncServerPort.getValue();
       }
 
       try {
-        sock = new TcpSocket(serverHost, serverPort);
+        sock = new TcpSocket(opts.serverName, opts.port);
       } catch (java.lang.Exception e) {
         throw new Exception(e.toString());
       }
-      vlog.info("connected to host "+serverHost+" port "+serverPort);
+      vlog.info("connected to host " + opts.serverName + " port " +
+                opts.port);
     }
 
     if (benchmark) {
@@ -179,7 +135,7 @@ public class CConn extends CConnection
       reader_ = new CMsgReaderV3(this, viewer.benchFile);
     } else {
       sock.inStream().setBlockCallback(this);
-      setServerName(serverHost);
+      setServerName(opts.serverName);
       setStreams(sock.inStream(), sock.outStream());
       initialiseProtocol();
     }
@@ -261,8 +217,8 @@ public class CConn extends CConnection
       if (autoPass == null)
         dlg = new PasswdDialog(title, (user == null), null, (passwd == null));
     } else {
-      String userName = viewer.user.getValue();
-      if (viewer.sendLocalUsername.getValue()) {
+      String userName = opts.user;
+      if (opts.sendLocalUsername) {
         userName = (String)System.getProperties().get("user.name");
         if (passwd == null)
           return true;
@@ -302,12 +258,12 @@ public class CConn extends CConnection
     if (!benchmark)
       requestNewUpdate();
     else {
-      if (fullColour) {
+      if (opts.colors < 0) {
         pendingPF = fullColourPF;
       } else {
-        if (lowColourLevel == 0) {
+        if (opts.colors == 8) {
           pendingPF = verylowColourPF;
-        } else if (lowColourLevel == 1) {
+        } else if (opts.colors == 64) {
           pendingPF = lowColourPF;
         } else {
           pendingPF = mediumColourPF;
@@ -451,12 +407,12 @@ public class CConn extends CConnection
   }
 
   public void bell() { 
-    if (viewer.acceptBell.getValue())
+    if (opts.acceptBell)
       desktop.getToolkit().beep(); 
   }
 
   public void serverCutText(String str, int len) {
-    if (viewer.acceptClipboard.getValue())
+    if (opts.acceptClipboard)
       clipboardDialog.serverCutText(str, len);
   }
 
@@ -573,7 +529,7 @@ public class CConn extends CConnection
   private void recreateViewport(boolean restore)
   {
     if (viewport != null) {
-      if (fullScreen) {
+      if (opts.fullScreen) {
         savedState = viewport.getExtendedState();
         viewport.setExtendedState(JFrame.NORMAL);
         savedRect = viewport.getBounds();
@@ -581,7 +537,7 @@ public class CConn extends CConnection
       viewport.dispose();
     }
     viewport = new Viewport(cp.name(), this);
-    viewport.setUndecorated(fullScreen);
+    viewport.setUndecorated(opts.fullScreen);
     desktop.setViewport(viewport);
     ClassLoader loader = this.getClass().getClassLoader();
     URL url = loader.getResource("com/turbovnc/vncviewer/turbovnc-sm.png");
@@ -608,7 +564,8 @@ public class CConn extends CConnection
     int sw = desktop.scaledWidth;
     int sh = desktop.scaledHeight;
 
-    if (scalingFactor == SCALE_AUTO || scalingFactor == SCALE_FIXEDRATIO) {
+    if (opts.scalingFactor == Options.SCALE_AUTO ||
+        opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
       sw = cp.width;
       sh = cp.height;
     }
@@ -666,8 +623,8 @@ public class CConn extends CConnection
       }
     }
 
-    if (viewer.span.getValue().toLowerCase().charAt(0) == 'p' ||
-        (viewer.span.getValue().substring(0, 2).equalsIgnoreCase("au") &&
+    if (opts.span == Options.SPAN_PRIMARY ||
+        (opts.span == Options.SPAN_AUTO &&
          (sw <= primary.width || span.width <= primary.width) &&
          (sh <= primary.height || span.height <= primary.height)))
       return primary;
@@ -687,9 +644,10 @@ public class CConn extends CConnection
     int h = desktop.scaledHeight;
     Rectangle span = getSpannedSize(false);
 
-    if (fullScreen) return;
+    if (opts.fullScreen) return;
 
-    if (scalingFactor == SCALE_AUTO || scalingFactor == SCALE_FIXEDRATIO) {
+    if (opts.scalingFactor == Options.SCALE_AUTO ||
+        opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
       w = cp.width;
       h = cp.height;
       pack = false;
@@ -715,7 +673,7 @@ public class CConn extends CConnection
   private void reconfigureViewport(boolean restore)
   {
     desktop.setScaledSize();
-    if (fullScreen) {
+    if (opts.fullScreen) {
       // NOTE: We have to use the work area on OS X, because there is no way
       // to hide the menu bar in full-screen mode.
       Rectangle span = getSpannedSize(!viewer.os.startsWith("mac os x"));
@@ -746,12 +704,12 @@ public class CConn extends CConnection
       /* Catch incorrect requestNewUpdate calls */
       assert(!pendingUpdate || supportsSyncFence);
 
-      if (fullColour) {
+      if (opts.colors < 0) {
         pf = fullColourPF;
       } else {
-        if (lowColourLevel == 0) {
+        if (opts.colors == 8) {
           pf = verylowColourPF;
-        } else if (lowColourLevel == 1) {
+        } else if (opts.colors == 64) {
           pf = lowColourPF;
         } else {
           pf = mediumColourPF;
@@ -881,15 +839,14 @@ public class CConn extends CConnection
   }
 
   public boolean isUnixLoginForced() {
-    return (viewer.user.getValue() != null ||
-            viewer.sendLocalUsername.getValue());
+    return (opts.user != null || opts.sendLocalUsername);
   }
 
   public void setOptions() {
-    options.allowJpeg.setSelected(viewer.allowJpeg.getValue());
-    options.subsamplingLevel.setValue(cp.getSubsamplingOrdinal());
-    options.jpegQualityLevel.setValue(cp.quality);
-    options.zlibCompressionLevel.setValue(cp.compressLevel);
+    options.allowJpeg.setSelected(opts.allowJpeg);
+    options.subsamplingLevel.setValue(opts.getSubsamplingOrdinal());
+    options.jpegQualityLevel.setValue(opts.quality);
+    options.zlibCompressionLevel.setValue(opts.compressLevel);
 
     if (currentEncoding != Encodings.encodingTight) {
       options.allowJpeg.setEnabled(false);
@@ -901,9 +858,9 @@ public class CConn extends CConnection
       options.encMethodComboBox.setEnabled(false);
     }
 
-    options.viewOnly.setSelected(viewer.viewOnly.getValue());
-    options.acceptClipboard.setSelected(viewer.acceptClipboard.getValue());
-    options.sendClipboard.setSelected(viewer.sendClipboard.getValue());
+    options.viewOnly.setSelected(opts.viewOnly);
+    options.acceptClipboard.setSelected(opts.acceptClipboard);
+    options.sendClipboard.setSelected(opts.sendClipboard);
     options.menuKey.setSelectedItem(KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
 
     if (state() == RFBSTATE_NORMAL) {
@@ -921,9 +878,9 @@ public class CConn extends CConnection
       options.secPlain.setEnabled(false);
       options.sendLocalUsername.setEnabled(false);
     } else {
-      options.shared.setSelected(viewer.shared.getValue());
-      options.sendLocalUsername.setSelected(viewer.sendLocalUsername.getValue());
-      options.secUnixLogin.setSelected(!viewer.noUnixLogin.getValue());
+      options.shared.setSelected(opts.shared);
+      options.sendLocalUsername.setSelected(opts.sendLocalUsername);
+      options.secUnixLogin.setSelected(!opts.noUnixLogin);
 
       /* Process non-VeNCrypt sectypes */
       java.util.List<Integer> secTypes = new ArrayList<Integer>();
@@ -1017,76 +974,77 @@ public class CConn extends CConnection
         (options.secUnixLogin.isSelected() && options.secUnixLogin.isEnabled()));
     }
 
-    options.fullScreen.setSelected(fullScreen);
-    options.useLocalCursor.setSelected(viewer.useLocalCursor.getValue());
-    options.acceptBell.setSelected(viewer.acceptBell.getValue());
+    options.fullScreen.setSelected(opts.fullScreen);
+    options.cursorShape.setSelected(opts.cursorShape);
+    options.acceptBell.setSelected(opts.acceptBell);
     options.showToolbar.setSelected(viewer.showToolbar.getValue());
-    if (scalingFactor == SCALE_AUTO) {
+    if (opts.scalingFactor == Options.SCALE_AUTO) {
       options.scalingFactor.setSelectedItem("Auto");
-    } else if(scalingFactor == SCALE_FIXEDRATIO) {
+    } else if(opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
       options.scalingFactor.setSelectedItem("Fixed Aspect Ratio");
     } else { 
-      options.scalingFactor.setSelectedItem(scalingFactor+"%");
+      options.scalingFactor.setSelectedItem(opts.scalingFactor + "%");
       if (desktop != null)
         desktop.setScaledSize();
     }
   }
 
   public void getOptions() {
-    if (fullColour != true)
+    if (opts.colors > 0)
       formatChange = true;
-    fullColour = true;
-    viewer.allowJpeg.setParam(options.allowJpeg.isSelected());
-    if (cp.allowJpeg != viewer.allowJpeg.getValue()) {
-      cp.allowJpeg = viewer.allowJpeg.getValue();
-      encodingChange = true;
-    }
-    if (cp.quality != options.jpegQualityLevel.getValue()) {
-      cp.quality = options.jpegQualityLevel.getValue();
-      encodingChange = true;
-    }
-    if (cp.compressLevel != options.zlibCompressionLevel.getValue()) {
-      cp.compressLevel = options.zlibCompressionLevel.getValue();
-      encodingChange = true;
-    }
-    int subsampling = options.getSubsamplingLevel();
-    if (cp.subsampling != subsampling) {
-      cp.subsampling = subsampling;
-      encodingChange = true;
-    }
-    viewer.sendLocalUsername.setParam(options.sendLocalUsername.isSelected());
+    opts.colors = -1;
 
-    viewer.viewOnly.setParam(options.viewOnly.isSelected());
-    viewer.acceptClipboard.setParam(options.acceptClipboard.isSelected());
-    viewer.sendClipboard.setParam(options.sendClipboard.isSelected());
-    viewer.acceptBell.setParam(options.acceptBell.isSelected());
+    if (opts.allowJpeg != options.allowJpeg.isSelected())
+      encodingChange = true;
+    opts.allowJpeg = options.allowJpeg.isSelected();
+
+    if (opts.quality != options.jpegQualityLevel.getValue())
+      encodingChange = true;
+    opts.quality = options.jpegQualityLevel.getValue();
+
+    if (opts.compressLevel != options.zlibCompressionLevel.getValue())
+      encodingChange = true;
+    opts.compressLevel = options.zlibCompressionLevel.getValue();
+
+    if (opts.subsampling != options.getSubsamplingLevel())
+      encodingChange = true;
+    opts.subsampling = options.getSubsamplingLevel();
+
+    opts.sendLocalUsername = options.sendLocalUsername.isSelected();
+    opts.viewOnly = options.viewOnly.isSelected();
+    opts.acceptClipboard = options.acceptClipboard.isSelected();
+    opts.sendClipboard = options.sendClipboard.isSelected();
+    opts.acceptBell = options.acceptBell.isSelected();
     viewer.showToolbar.setParam(options.showToolbar.isSelected());
-    int oldScalingFactor = scalingFactor;
-    setScalingFactor(options.scalingFactor.getSelectedItem().toString());
-    if (scalingFactor == SCALE_AUTO || scalingFactor == SCALE_FIXEDRATIO) {
-      if (desktop != null && scalingFactor != oldScalingFactor &&
-        options.fullScreen.isSelected() == fullScreen)
+
+    int oldScalingFactor = opts.scalingFactor;
+    opts.setScalingFactor(options.scalingFactor.getSelectedItem().toString());
+    if (opts.scalingFactor == Options.SCALE_AUTO ||
+        opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
+      if (desktop != null && opts.scalingFactor != oldScalingFactor &&
+        options.fullScreen.isSelected() == opts.fullScreen)
         reconfigureViewport();
     } else {
-      if (desktop != null && scalingFactor != oldScalingFactor &&
-          oldScalingFactor != SCALE_AUTO &&
-          oldScalingFactor != SCALE_FIXEDRATIO &&
-          options.fullScreen.isSelected() == fullScreen)
+      if (desktop != null && opts.scalingFactor != oldScalingFactor &&
+          oldScalingFactor != Options.SCALE_AUTO &&
+          oldScalingFactor != Options.SCALE_FIXEDRATIO &&
+          options.fullScreen.isSelected() == opts.fullScreen)
         reconfigureViewport();
     }
 
-    clipboardDialog.setSendingEnabled(viewer.sendClipboard.getValue());
-    viewer.menuKey.setParam(MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].name);
-    F8Menu.f8.setText("Send "+KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
+    clipboardDialog.setSendingEnabled(opts.sendClipboard);
+    viewer.menuKey.setParam(
+      MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].name);
+    F8Menu.f8.setText("Send " + KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
 
-    setShared(options.shared.isSelected());
-    viewer.useLocalCursor.setParam(options.useLocalCursor.isSelected());
-    if (cp.supportsLocalCursor != viewer.useLocalCursor.getValue()) {
-      cp.supportsLocalCursor = viewer.useLocalCursor.getValue();
+    opts.shared = options.shared.isSelected();
+    setShared(opts.shared);
+    if (opts.cursorShape != options.cursorShape.isSelected()) {
       encodingChange = true;
       if (desktop != null)
         desktop.resetLocalCursor();
     }
+    opts.cursorShape = options.cursorShape.isSelected();
     
     checkEncodings();
   
@@ -1151,7 +1109,7 @@ public class CConn extends CConnection
           Security.EnableSecType(Security.secTypeX509Ident);
       }
     }
-    if (options.fullScreen.isSelected() != fullScreen)
+    if (options.fullScreen.isSelected() != opts.fullScreen)
       toggleFullScreen();
   }
 
@@ -1159,32 +1117,15 @@ public class CConn extends CConnection
     if (viewport == null)
       return;
     showToolbar = !showToolbar;
-    if (!fullScreen)
+    if (!opts.fullScreen)
       reconfigureViewport();
     viewport.showToolbar(showToolbar);
     menu.showToolbar.setSelected(showToolbar);
   }
 
-  public void setScalingFactor(String scaleString) {
-    if (scaleString.toUpperCase().charAt(0) == 'A') {
-      scalingFactor = SCALE_AUTO;
-    } else if(scaleString.toUpperCase().charAt(0) == 'F') {
-      scalingFactor = SCALE_FIXEDRATIO;
-    } else { 
-      scaleString = scaleString.replaceAll("[^\\d]", "");
-      int sf = -1;
-      try {
-        sf = Integer.parseInt(scaleString);
-      } catch(NumberFormatException e) {};
-      if (sf >= 1 && sf <= 1000) {
-        scalingFactor = sf;
-      }
-    }
-  }
-
   public void toggleFullScreen() {
-    fullScreen = !fullScreen;
-    menu.fullScreen.setSelected(fullScreen);
+    opts.fullScreen = !opts.fullScreen;
+    menu.fullScreen.setSelected(opts.fullScreen);
     if (viewport != null)
       recreateViewport(true);
   }
@@ -1398,8 +1339,9 @@ public class CConn extends CConnection
   // checkEncodings() sends a setEncodings message if one is needed.
   private void checkEncodings() {
     if (encodingChange && (writer() != null)) {
-      vlog.info("Requesting "+Encodings.encodingName(currentEncoding)+" encoding");
-      writer().writeSetEncodings(currentEncoding, true);
+      vlog.info("Requesting " + Encodings.encodingName(currentEncoding) + 
+        " encoding");
+      writer().writeSetEncodings(currentEncoding, opts);
       encodingChange = false;
     }
   }
@@ -1425,12 +1367,6 @@ public class CConn extends CConnection
   // thread after the window has been destroyed.
   boolean shuttingDown = false;
 
-  // reading and writing int and boolean is atomic in java, so no
-  // synchronization of the following flags is needed:
-  
-  int lowColourLevel;
-
-
   // All menu, options, about and info stuff is done in the GUI thread (apart
   // from when constructed).
   F8Menu menu;
@@ -1439,11 +1375,11 @@ public class CConn extends CConnection
   // clipboard sync issues?
   ClipboardDialog clipboardDialog;
 
+  Options opts;
+
   // the following are only ever accessed by the GUI thread:
   int buttonMask;
 
-  private String serverHost;
-  private int serverPort;
   private Socket sock;
 
   protected DesktopWindow desktop;
@@ -1470,9 +1406,7 @@ public class CConn extends CConnection
 
   int modifiers;
   Viewport viewport;
-  private boolean fullColour;
-  boolean fullScreen, showToolbar;
-  int scalingFactor;
+  boolean showToolbar;
 
   public double tDecode, tBlit;
   double tDecodeStart, tReadOld;

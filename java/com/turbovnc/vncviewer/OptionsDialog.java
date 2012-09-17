@@ -45,7 +45,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   JComboBox menuKey, compressLevel, scalingFactor, encMethodComboBox;
   JSlider jpegQualityLevel, subsamplingLevel, zlibCompressionLevel;
   JCheckBox viewOnly, acceptClipboard, sendClipboard, acceptBell;
-  JCheckBox fullScreen, shared, useLocalCursor, showToolbar;
+  JCheckBox fullScreen, shared, cursorShape, showToolbar;
   JCheckBox secVeNCrypt, encNone, encTLS, encX509;
   JCheckBox secNone, secVnc, secUnixLogin, secPlain, secIdent,
     sendLocalUsername;
@@ -88,7 +88,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       new String("JPEG chrominance subsampling: ");
     subsamplingLabel = new JLabel();
     subsamplingLevel = 
-      new JSlider(JSlider.HORIZONTAL, 0, ConnParams.NUMSUBSAMPOPT - 1, 0);
+      new JSlider(JSlider.HORIZONTAL, 0, Options.NUMSUBSAMPOPT - 1, 0);
     subsamplingLevel.addChangeListener(this);
     subsamplingLevel.setMajorTickSpacing(1);
     subsamplingLevel.setSnapToTicks(true);
@@ -109,7 +109,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       new String("JPEG image quality: ");
     jpegQualityLabel = new JLabel();
     jpegQualityLevel = 
-      new JSlider(JSlider.HORIZONTAL, 1, 100, ConnParams.DEFQUAL);
+      new JSlider(JSlider.HORIZONTAL, 1, 100, Options.DEFQUAL);
     jpegQualityLevel.addChangeListener(this);
     jpegQualityLevel.setMajorTickSpacing(10);
     jpegQualityLevel.setMinorTickSpacing(5);
@@ -266,8 +266,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     fullScreen.addItemListener(this);
     shared = new JCheckBox("Request shared session");
     shared.addItemListener(this);
-    useLocalCursor = new JCheckBox("Render cursor locally (enable remote cursor shape updates)");
-    useLocalCursor.addItemListener(this);
+    cursorShape = new JCheckBox("Render cursor locally (enable remote cursor shape updates)");
+    cursorShape.addItemListener(this);
     acceptBell = new JCheckBox("Beep when requested by the server");
     acceptBell.addItemListener(this);
     showToolbar = new JCheckBox("Show toolbar by default");
@@ -289,7 +289,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
                    new Insets(4,5,0,5));
-    addGBComponent(useLocalCursor, MiscPanel,
+    addGBComponent(cursorShape, MiscPanel,
                    0, 2, 2, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
@@ -476,7 +476,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "MenuKey", menuKeyStr);
     UserPreferences.set("global", "FullScreen", fullScreen.isSelected());
     UserPreferences.set("global", "Shared", shared.isSelected());
-    UserPreferences.set("global", "CursorShape", useLocalCursor.isSelected());
+    UserPreferences.set("global", "CursorShape", cursorShape.isSelected());
     UserPreferences.set("global", "AcceptBell", acceptBell.isSelected());
     UserPreferences.set("global", "Toolbar", showToolbar.isSelected());
     String scaleString = scalingFactor.getSelectedItem().toString();
@@ -692,13 +692,13 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   public int getSubsamplingLevel() {
     switch (subsamplingLevel.getValue()) {
       case 1:
-        return ConnParams.SUBSAMP_422;
+        return Options.SUBSAMP_2X;
       case 2:
-        return ConnParams.SUBSAMP_420;
+        return Options.SUBSAMP_4X;
       case 3:
-        return ConnParams.SUBSAMP_GRAY;
+        return Options.SUBSAMP_GRAY;
     }
-    return ConnParams.SUBSAMP_NONE;
+    return Options.SUBSAMP_NONE;
   }
 
 }

@@ -39,7 +39,7 @@ public class Tunnel
   private final static Integer SERVER_PORT_OFFSET = 5900;
 
   public static void
-  createTunnel(VncViewer viewer) throws java.lang.Exception
+  createTunnel(Options opts) throws java.lang.Exception
   {
     int localPort;
     int remotePort;
@@ -50,14 +50,14 @@ public class Tunnel
     if (localPort == 0)
       throw new java.lang.Exception("Could not obtain free TCP port");
   
-    if (viewer.tunnel.getValue()) {
-      gatewayHost = Hostname.getHost(viewer.vncServerName.getValue());
+    if (opts.tunnel) {
+      gatewayHost = Hostname.getHost(opts.serverName);
       remoteHost = "localhost";
     } else {
-      gatewayHost = viewer.via.getValue();
-      remoteHost = Hostname.getHost(viewer.vncServerName.getValue());
+      gatewayHost = opts.via;
+      remoteHost = Hostname.getHost(opts.serverName);
     }
-    remotePort = Hostname.getPort(viewer.vncServerName.getValue());
+    remotePort = Hostname.getPort(opts.serverName);
   
     JSch jsch = new JSch();
     String homeDir = new String("");
@@ -96,7 +96,7 @@ public class Tunnel
     vlog.debug("Forwarding local port " + localPort + " to " + remoteHost
                + ":" + remotePort + " (relative to gateway)");
     session.setPortForwardingL(localPort, remoteHost, remotePort);
-    viewer.vncServerName.setParam("localhost::" + localPort);
+    opts.serverName = "localhost::" + localPort;
   }
   
   static LogWriter vlog = new LogWriter("Tunnel");

@@ -22,7 +22,10 @@ package com.turbovnc.rfb;
 public class IntParameter extends VoidParameter {
 
   public IntParameter(String name_, String desc_, int v) {
-    this(name_, desc_, v, 0, -1);
+    super(name_, desc_);
+    value = v;
+    defValue = v;
+    useMinMax = false;
   }
 
   public IntParameter(String name_, String desc_, int v, int minValue_,
@@ -32,14 +35,23 @@ public class IntParameter extends VoidParameter {
     defValue = v;
     maxValue = maxValue_;
     minValue = minValue_;
+    useMinMax = true;
   }
 
   public boolean setParam(String v) {
+    int i;
     try {
-      value = Integer.parseInt(v);
+      i = Integer.parseInt(v);
     } catch (NumberFormatException e) {
       return false;
     }
+    return setValue(i);
+  }
+
+  public boolean setValue(int v) {
+    if (useMinMax && (v < minValue || v > maxValue))
+      return false;
+    value = v;
     return true;
   }
 
@@ -50,7 +62,7 @@ public class IntParameter extends VoidParameter {
   }
   public String getValueStr() { return Integer.toString(value); }
   public String getValues() {
-    if (maxValue >= minValue) {
+    if (useMinMax) {
       return minValue + "-" + maxValue;
     }
     return null;
@@ -62,4 +74,5 @@ public class IntParameter extends VoidParameter {
   protected int defValue;
   protected int minValue;
   protected int maxValue;
+  boolean useMinMax;
 }

@@ -24,29 +24,18 @@ import com.turbovnc.rdr.*;
 
 public class ConnParams {
 
-  public final static int NUMSUBSAMPOPT = 4;
-  public final static int SUBSAMP_NONE  = 0;
-  public final static int SUBSAMP_420   = 1;
-  public final static int SUBSAMP_422   = 2;
-  public final static int SUBSAMP_GRAY  = 3;
-
-  public final static int DEFQUAL       = 95;
-  public final static int DEFSUBSAMP    = SUBSAMP_NONE;
-
   static LogWriter vlog = new LogWriter("ConnParams");
 
   public ConnParams() {
     majorVersion = 0; minorVersion = 0;
-    width = 0; height = 0; useCopyRect = false;
-    supportsLocalCursor = false; supportsLocalXCursor = false;
-    supportsDesktopResize = false; supportsExtendedDesktopSize = false;
-    supportsDesktopRename = false; supportsLastRect = false;
-    supportsSetDesktopSize = false; supportsFence = false;
+    width = 0;  height = 0;
+    supportsDesktopResize = false;  supportsExtendedDesktopSize = false;
+    supportsDesktopRename = false;  supportsLastRect = false;
+    supportsSetDesktopSize = false;  supportsFence = false;
     supportsContinuousUpdates = false;
     supportsClientRedirect = false;
-    compressLevel = 1;  allowJpeg = true;  quality = -1;  subsampling = -1;
-    name_ = null; nEncodings_ = 0; encodings_ = null;
-    currentEncoding_ = Encodings.encodingRaw; verStrPos = 0;
+    name_ = null;  nEncodings_ = 0;  encodings_ = null;
+    verStrPos = 0;
     screenLayout = new ScreenSet();
 
     setName("");
@@ -117,27 +106,11 @@ public class ConnParams {
     name_ = name;
   }
 
-  public int getSubsamplingOrdinal() {
-    switch (subsampling) {
-      case ConnParams.SUBSAMP_422:
-        return 1;
-      case ConnParams.SUBSAMP_420:
-        return 2;
-      case ConnParams.SUBSAMP_GRAY:
-        return 3;
-    }
-    return 0;
-  }
-
-  public int currentEncoding() { return currentEncoding_; }
   public int nEncodings() { return nEncodings_; }
   public int[] encodings() { return encodings_; }
 
   public boolean done;
-  public boolean useCopyRect;
 
-  public boolean supportsLocalCursor;
-  public boolean supportsLocalXCursor;
   public boolean supportsDesktopResize;
   public boolean supportsExtendedDesktopSize;
   public boolean supportsDesktopRename;
@@ -148,16 +121,10 @@ public class ConnParams {
 
   public boolean supportsSetDesktopSize;
 
-  public int compressLevel;
-  public boolean allowJpeg;
-  public int quality;
-  public int subsampling;
-
   private PixelFormat pf_;
   private String name_;
   private int nEncodings_;
   private int[] encodings_;
-  private int currentEncoding_;
   private StringBuilder verStr;
   private int verStrPos;
 }

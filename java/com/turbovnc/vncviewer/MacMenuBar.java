@@ -62,7 +62,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener
                                                   acceleratorMask));
     connMenu.addSeparator();
     fullScreen = new JCheckBoxMenuItem("Full Screen");
-    fullScreen.setSelected(cc.fullScreen);
+    fullScreen.setSelected(cc.opts.fullScreen);
     fullScreen.addActionListener(this);
     connMenu.add(fullScreen);
     fullScreen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,

@@ -112,15 +112,9 @@ class DesktopWindow extends JPanel implements
   // wherever they access data shared with the GUI thread.
 
   public void setCursor(int w, int h, Point hotspot,
-                                     int[] data, byte[] mask) {
-    // strictly we should use a mutex around this test since useLocalCursor
-    // might be being altered by the GUI thread.  However it's only a single
-    // boolean and it doesn't matter if we get the wrong value anyway.
-
-    synchronized(cc.viewer.useLocalCursor) {
-      if (!cc.viewer.useLocalCursor.getValue())
-        return;
-    }
+                        int[] data, byte[] mask) {
+    if (!cc.opts.cursorShape)
+      return;
 
     hideLocalCursor();
 
@@ -300,12 +294,12 @@ class DesktopWindow extends JPanel implements
   }
 
   public void setScaledSize() {
-    if (cc.scalingFactor != CConn.SCALE_AUTO &&
-        cc.scalingFactor != CConn.SCALE_FIXEDRATIO) {
-      scaledWidth = 
-        (int)Math.floor((float)cc.cp.width * (float)cc.scalingFactor/100.0);
-      scaledHeight = 
-        (int)Math.floor((float)cc.cp.height * (float)cc.scalingFactor/100.0);
+    if (cc.opts.scalingFactor != Options.SCALE_AUTO &&
+        cc.opts.scalingFactor != Options.SCALE_FIXEDRATIO) {
+      scaledWidth = (int)Math.floor((float)cc.cp.width *
+                                    (float)cc.opts.scalingFactor / 100.0);
+      scaledHeight = (int)Math.floor((float)cc.cp.height *
+                                     (float)cc.opts.scalingFactor / 100.0);
     } else {
       if (cc.viewport == null) {
         scaledWidth = cc.cp.width;
@@ -318,7 +312,7 @@ class DesktopWindow extends JPanel implements
                         vpSize.height - vpInsets.top - vpInsets.bottom);
         if (availableSize.width == 0 || availableSize.height == 0)
           availableSize = new Dimension(cc.cp.width, cc.cp.height);
-        if (cc.scalingFactor == CConn.SCALE_FIXEDRATIO) {
+        if (cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
           float widthRatio = (float)availableSize.width / (float)cc.cp.width;
           float heightRatio = (float)availableSize.height / (float)cc.cp.height;
           float ratio = Math.min(widthRatio, heightRatio);

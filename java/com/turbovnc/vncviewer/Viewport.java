@@ -61,8 +61,8 @@ public class Viewport extends JFrame
     });
     addComponentListener(new ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
-        if (cc.scalingFactor == CConn.SCALE_AUTO ||
-            cc.scalingFactor == CConn.SCALE_FIXEDRATIO) {
+        if (cc.opts.scalingFactor == Options.SCALE_AUTO ||
+            cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
           if ((sp.getSize().width != cc.desktop.scaledWidth) ||
               (sp.getSize().height != cc.desktop.scaledHeight)) {
             int policy = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
@@ -70,12 +70,12 @@ public class Viewport extends JFrame
             cc.desktop.setScaledSize();
             sp.validate();
             if (getExtendedState() != JFrame.MAXIMIZED_BOTH &&
-                !cc.fullScreen) {
+                !cc.opts.fullScreen) {
               sp.setSize(new Dimension(cc.desktop.scaledWidth,
                                        cc.desktop.scaledHeight));
               int w = cc.desktop.scaledWidth + getInsets().left + getInsets().right;
               int h = cc.desktop.scaledHeight + getInsets().top + getInsets().bottom;
-              if (cc.scalingFactor == CConn.SCALE_FIXEDRATIO)
+              if (cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO)
                 setSize(w, h);
             }
             if (cc.desktop.cursor != null) {
@@ -108,7 +108,7 @@ public class Viewport extends JFrame
   }
 
   public void showToolbar(boolean show) {
-    tb.setVisible(show && !cc.fullScreen);
+    tb.setVisible(show && !cc.opts.fullScreen);
   }
 
   CConn cc;

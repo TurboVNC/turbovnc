@@ -48,11 +48,12 @@ abstract public class CMsgWriter {
   // Ask for encodings based on which decoders are supported.  Assumes higher
   // encoding numbers are more desirable.
 
-  synchronized public void writeSetEncodings(int preferredEncoding, boolean useCopyRect) 
+  synchronized public void writeSetEncodings(int preferredEncoding,
+                                             Options opts)
   {
     int nEncodings = 0;
     int[] encodings = new int[Encodings.encodingMax+3];
-    if (cp.supportsLocalCursor)
+    if (opts.cursorShape)
       encodings[nEncodings++] = Encodings.pseudoEncodingCursor;
     if (cp.supportsDesktopResize)
       encodings[nEncodings++] = Encodings.pseudoEncodingDesktopSize;
@@ -72,7 +73,7 @@ abstract public class CMsgWriter {
       encodings[nEncodings++] = preferredEncoding;
     }
 
-    if (useCopyRect) {
+    if (opts.copyRect) {
       encodings[nEncodings++] = Encodings.encodingCopyRect;
     }
 
@@ -108,24 +109,18 @@ abstract public class CMsgWriter {
     }
 
     encodings[nEncodings++] = Encodings.pseudoEncodingLastRect;
-    if (cp.compressLevel >= 0 && cp.compressLevel <= 9)
+    if (opts.compressLevel >= 0 && opts.compressLevel <= 9)
       encodings[nEncodings++] = Encodings.pseudoEncodingCompressLevel0
-        + cp.compressLevel;
-    if (cp.allowJpeg && preferredEncoding == Encodings.encodingTight) {
-      int quality = cp.quality;
-      if (quality < 1 || quality > 100)
-        quality = ConnParams.DEFQUAL;
-      int qualityLevel = quality / 10;
+        + opts.compressLevel;
+    if (opts.allowJpeg && opts.preferredEncoding == Encodings.encodingTight) {
+      int qualityLevel = opts.quality / 10;
       if (qualityLevel > 9) qualityLevel = 9;
       encodings[nEncodings++] = Encodings.pseudoEncodingQualityLevel0
         + qualityLevel;
       encodings[nEncodings++] = Encodings.pseudoEncodingFineQualityLevel0
-        + quality;
-      int subsampling = cp.subsampling;
-      if (subsampling < 0 || subsampling >= ConnParams.NUMSUBSAMPOPT)
-        subsampling = ConnParams.DEFSUBSAMP;
+        + opts.quality;
       encodings[nEncodings++] = Encodings.pseudoEncodingSubsamp1X
-        + subsampling;
+        + opts.subsampling;
     }
 
     writeSetEncodings(nEncodings, encodings);
@@ -188,9 +183,13 @@ abstract public class CMsgWriter {
   ConnParams getConnParams() { return cp; }
   OutStream getOutStream() { return os; }
 
-  protected CMsgWriter(ConnParams cp_, OutStream os_) {cp = cp_; os = os_;}
+  protected CMsgWriter(ConnParams cp_, OutStream os_) {
+    cp = cp_;  os = os_;
+  }
 
   ConnParams cp;
+  Options opts;
   OutStream os;
+
   static LogWriter vlog = new LogWriter("CMsgWriter");
 }
