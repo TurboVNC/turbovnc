@@ -87,6 +87,7 @@ public class CConn extends CConnection
 
     formatChange = false; encodingChange = false;
     currentEncoding = opts.preferredEncoding;
+    showToolbar = viewer.showToolbar.getValue();
     options = new OptionsDialog(this);
     options.initDialog();
     clipboardDialog = new ClipboardDialog(this);
