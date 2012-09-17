@@ -42,7 +42,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   OptionsDialogCallback cb;
   JPanel EncodingPanel, ConnPanel, GlobalPanel, SecPanel;
   JCheckBox allowJpeg;
-  JComboBox menuKey, compressLevel, scalingFactor, encMethodComboBox;
+  JComboBox menuKey, compressLevel, scalingFactor, encMethodComboBox, span;
   JSlider jpegQualityLevel, subsamplingLevel, zlibCompressionLevel;
   JCheckBox viewOnly, acceptClipboard, sendClipboard, acceptBell;
   JCheckBox fullScreen, shared, cursorShape, showToolbar;
@@ -232,6 +232,13 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     fullScreen = new JCheckBox("Full-screen mode");
     fullScreen.addItemListener(this);
+
+    Object[] spanOptions = {
+      "Primary monitor only", "All monitors", "Automatic" };
+    JLabel spanLabel = new JLabel("Span mode:");
+    span = new JComboBox(spanOptions);
+    span.addItemListener(this);
+
     shared = new JCheckBox("Request shared session");
     shared.addItemListener(this);
     viewOnly = new JCheckBox("View Only (ignore mouse & keyboard)");
@@ -260,33 +267,43 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
                    new Insets(4,5,0,5));
+    addGBComponent(spanLabel, ConnPanel,
+                   0, 2, 1, 1, 2, 2, 1, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(8,8,0,5));
+    addGBComponent(span, ConnPanel,
+                   1, 2, 1, 1, 2, 2, 25, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(4,5,0,5));
     addGBComponent(shared, ConnPanel,
-                   0, 2, 2, 1, 2, 2, 1, 0,
+                   0, 3, 2, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
                    new Insets(4,5,0,5));
     addGBComponent(viewOnly, ConnPanel,
-                   0, 3, 2, 1, 2, 2, 1, 0,
+                   0, 4, 2, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.LINE_START,
                    new Insets(4,5,0,5));
     addGBComponent(cursorShape, ConnPanel,
-                   0, 4, 2, 1, 2, 2, 1, 0,
+                   0, 5, 2, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
                    new Insets(4,5,0,5));
     addGBComponent(acceptClipboard, ConnPanel,
-                   0, 5, 2, 1, 2, 2, 1, 0,
-                   GridBagConstraints.HORIZONTAL,
-                   GridBagConstraints.LINE_START,
-                   new Insets(4,5,0,5));
-    addGBComponent(sendClipboard, ConnPanel,
                    0, 6, 2, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.LINE_START,
                    new Insets(4,5,0,5));
+    addGBComponent(sendClipboard, ConnPanel,
+                   0, 7, 2, 1, 2, 2, 1, 0,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.LINE_START,
+                   new Insets(4,5,0,5));
     addGBComponent(acceptBell, ConnPanel,
-                   0, 7, 2, 1, 2, 2, 1, 1,
+                   0, 8, 2, 1, 2, 2, 1, 1,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
                    new Insets(4,5,0,5));

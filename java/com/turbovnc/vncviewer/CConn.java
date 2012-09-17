@@ -975,6 +975,7 @@ public class CConn extends CConnection
     }
 
     options.fullScreen.setSelected(opts.fullScreen);
+    options.span.setSelectedIndex(opts.span);
     options.cursorShape.setSelected(opts.cursorShape);
     options.acceptBell.setSelected(opts.acceptBell);
     options.showToolbar.setSelected(viewer.showToolbar.getValue());
@@ -1031,6 +1032,10 @@ public class CConn extends CConnection
           options.fullScreen.isSelected() == opts.fullScreen)
         reconfigureViewport();
     }
+
+    int index = options.span.getSelectedIndex();
+    if (index >= 0 && index < Options.NUMSPANOPT)
+      opts.span = index;
 
     clipboardDialog.setSendingEnabled(opts.sendClipboard);
     viewer.menuKey.setParam(

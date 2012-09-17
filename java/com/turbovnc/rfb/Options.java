@@ -23,6 +23,7 @@ public class Options
   public static final int SCALE_AUTO = -1;
   public static final int SCALE_FIXEDRATIO = -2;
 
+  public static final int NUMSPANOPT = 3;
   public static final int SPAN_PRIMARY = 0;
   public static final int SPAN_ALL = 1;
   public static final int SPAN_AUTO = 2;
