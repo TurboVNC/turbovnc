@@ -40,7 +40,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   static LogWriter vlog = new LogWriter("OptionsDialog");
 
   OptionsDialogCallback cb;
-  JPanel EncodingPanel, InputsPanel, MiscPanel, SecPanel;
+  JPanel EncodingPanel, ConnPanel, GlobalPanel, SecPanel;
   JCheckBox allowJpeg;
   JComboBox menuKey, compressLevel, scalingFactor, encMethodComboBox;
   JSlider jpegQualityLevel, subsamplingLevel, zlibCompressionLevel;
@@ -68,9 +68,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 	
     JTabbedPane tabPane = new JTabbedPane();
 
-    // Connection tab
-    EncodingPanel=new JPanel(new GridBagLayout());
-    JPanel ImagePanel=new JPanel(new GridBagLayout());
+    // Encoding tab
+    EncodingPanel = new JPanel(new GridBagLayout());
+    JPanel ImagePanel = new JPanel(new GridBagLayout());
+
     JLabel encMethodLabel = new JLabel("Encoding method:");
     Object[] encMethod = { 
       "Tight + Perceptually Lossless JPEG (LAN)",
@@ -218,60 +219,9 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                    GridBagConstraints.PAGE_START,
                    new Insets(4,4,4,4));
 
-    // Inputs tab
-    InputsPanel=new JPanel(new GridBagLayout());
+    // Connection tab
+    ConnPanel = new JPanel(new GridBagLayout());
 
-    viewOnly = new JCheckBox("View Only (ignore mouse & keyboard)");
-    viewOnly.addItemListener(this);
-    acceptClipboard = new JCheckBox("Accept clipboard from server");
-    acceptClipboard.addItemListener(this);
-    sendClipboard = new JCheckBox("Send clipboard to server");
-    sendClipboard.addItemListener(this);
-    JLabel menuKeyLabel = new JLabel("Menu Key:");
-    String[] menuKeys = new String[MenuKey.getMenuKeySymbolCount()]; 
-    for (int i = 0; i < MenuKey.getMenuKeySymbolCount(); i++)
-      menuKeys[i] = MenuKey.getMenuKeySymbols()[i].name;
-    menuKey  = new JComboBox(menuKeys);
-    menuKey.addItemListener(this);
-    addGBComponent(viewOnly, InputsPanel,
-                   0, 0, 2, 1, 2, 2, 1, 0,
-                   GridBagConstraints.HORIZONTAL,
-                   GridBagConstraints.LINE_START,
-                   new Insets(4,5,0,5));
-    addGBComponent(acceptClipboard, InputsPanel,
-                   0, 1, 2, 1, 2, 2, 1, 0,
-                   GridBagConstraints.HORIZONTAL,
-                   GridBagConstraints.LINE_START,
-                   new Insets(4,5,0,5));
-    addGBComponent(sendClipboard, InputsPanel,
-                   0, 2, 2, 1, 2, 2, 1, 0,
-                   GridBagConstraints.HORIZONTAL,
-                   GridBagConstraints.LINE_START,
-                   new Insets(4,5,0,5));
-    addGBComponent(menuKeyLabel, InputsPanel,
-                   0, 3, 1, GridBagConstraints.REMAINDER, 2, 2, 1, 1,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.FIRST_LINE_START,
-                   new Insets(8,8,0,5));
-    addGBComponent(menuKey, InputsPanel,
-                   1, 3, 1, GridBagConstraints.REMAINDER, 2, 2, 25, 1,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.FIRST_LINE_START,
-                   new Insets(4,5,0,5));
-
-    // Misc tab
-    MiscPanel=new JPanel(new GridBagLayout());
-
-    fullScreen = new JCheckBox("Full-screen mode");
-    fullScreen.addItemListener(this);
-    shared = new JCheckBox("Request shared session");
-    shared.addItemListener(this);
-    cursorShape = new JCheckBox("Render cursor locally (enable remote cursor shape updates)");
-    cursorShape.addItemListener(this);
-    acceptBell = new JCheckBox("Beep when requested by the server");
-    acceptBell.addItemListener(this);
-    showToolbar = new JCheckBox("Show toolbar by default");
-    showToolbar.addItemListener(this);
     JLabel scalingFactorLabel = new JLabel("Scaling Factor:");
     Object[] scalingFactors = { 
       "Auto", "Fixed Aspect Ratio", "50%", "75%", "95%", "100%", "105%", 
@@ -279,38 +229,93 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     scalingFactor = new JComboBox(scalingFactors);
     scalingFactor.setEditable(true);
     scalingFactor.addItemListener(this);
-    addGBComponent(fullScreen, MiscPanel,
-                   0, 0, 2, 1, 2, 2, 1, 0,
-                   GridBagConstraints.HORIZONTAL,
+
+    fullScreen = new JCheckBox("Full-screen mode");
+    fullScreen.addItemListener(this);
+    shared = new JCheckBox("Request shared session");
+    shared.addItemListener(this);
+    viewOnly = new JCheckBox("View Only (ignore mouse & keyboard)");
+    viewOnly.addItemListener(this);
+    cursorShape = new JCheckBox("Render cursor locally (enable remote cursor shape updates)");
+    cursorShape.addItemListener(this);
+    acceptClipboard = new JCheckBox("Accept clipboard from server");
+    acceptClipboard.addItemListener(this);
+    sendClipboard = new JCheckBox("Send clipboard to server");
+    sendClipboard.addItemListener(this);
+    acceptBell = new JCheckBox("Beep when requested by the server");
+    acceptBell.addItemListener(this);
+
+    addGBComponent(scalingFactorLabel, ConnPanel,
+                   0, 0, 1, 1, 2, 2, 1, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(8,8,0,5));
+    addGBComponent(scalingFactor, ConnPanel,
+                   1, 0, 1, 1, 2, 2, 25, 0,
+                   GridBagConstraints.NONE,
                    GridBagConstraints.FIRST_LINE_START,
                    new Insets(4,5,0,5));
-    addGBComponent(shared, MiscPanel,
+    addGBComponent(fullScreen, ConnPanel,
                    0, 1, 2, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
                    new Insets(4,5,0,5));
-    addGBComponent(cursorShape, MiscPanel,
+    addGBComponent(shared, ConnPanel,
                    0, 2, 2, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
                    new Insets(4,5,0,5));
-    addGBComponent(acceptBell, MiscPanel,
+    addGBComponent(viewOnly, ConnPanel,
                    0, 3, 2, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
-                   GridBagConstraints.FIRST_LINE_START,
+                   GridBagConstraints.LINE_START,
                    new Insets(4,5,0,5));
-    addGBComponent(showToolbar, MiscPanel,
+    addGBComponent(cursorShape, ConnPanel,
                    0, 4, 2, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
                    new Insets(4,5,0,5));
-    addGBComponent(scalingFactorLabel, MiscPanel,
-                   0, 5, 1, 1, 2, 2, 1, 0,
+    addGBComponent(acceptClipboard, ConnPanel,
+                   0, 5, 2, 1, 2, 2, 1, 0,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.LINE_START,
+                   new Insets(4,5,0,5));
+    addGBComponent(sendClipboard, ConnPanel,
+                   0, 6, 2, 1, 2, 2, 1, 0,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.LINE_START,
+                   new Insets(4,5,0,5));
+    addGBComponent(acceptBell, ConnPanel,
+                   0, 7, 2, 1, 2, 2, 1, 1,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(4,5,0,5));
+
+    // Global tab
+    GlobalPanel = new JPanel(new GridBagLayout());
+
+    showToolbar = new JCheckBox("Show toolbar by default");
+    showToolbar.addItemListener(this);
+
+    JLabel menuKeyLabel = new JLabel("Menu Key:");
+    String[] menuKeys = new String[MenuKey.getMenuKeySymbolCount()]; 
+    for (int i = 0; i < MenuKey.getMenuKeySymbolCount(); i++)
+      menuKeys[i] = MenuKey.getMenuKeySymbols()[i].name;
+    menuKey  = new JComboBox(menuKeys);
+    menuKey.addItemListener(this);
+
+    addGBComponent(showToolbar, GlobalPanel,
+                   0, 1, 2, 1, 2, 2, 1, 0,
+                   GridBagConstraints.HORIZONTAL,
+                   GridBagConstraints.FIRST_LINE_START,
+                   new Insets(4,5,0,5));
+    addGBComponent(menuKeyLabel, GlobalPanel,
+                   0, 2, 1, 1, 2, 2, 1, 0,
                    GridBagConstraints.NONE,
                    GridBagConstraints.FIRST_LINE_START,
                    new Insets(8,8,0,5));
-    addGBComponent(scalingFactor, MiscPanel,
-                   1, 5, 1, 1, 2, 2, 25, 0,
+    addGBComponent(menuKey, GlobalPanel,
+                   1, 2, 1, 1, 2, 2, 25, 0,
                    GridBagConstraints.NONE,
                    GridBagConstraints.FIRST_LINE_START,
                    new Insets(4,5,0,5));
@@ -332,8 +337,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                    GridBagConstraints.FIRST_LINE_START,
                    new Insets(2,2,2,2));
 
-    addGBComponent(defaultsPanel, MiscPanel,
-                   0, 6, 2, GridBagConstraints.REMAINDER, 2, 2, 1, 1,
+    addGBComponent(defaultsPanel, GlobalPanel,
+                   0, 3, 2, GridBagConstraints.REMAINDER, 2, 2, 1, 1,
                    GridBagConstraints.NONE,
                    GridBagConstraints.FIRST_LINE_START,
                    new Insets(25,5,4,5));
@@ -421,12 +426,12 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                    new Insets(2,10,2,5));
 
     tabPane.add(EncodingPanel);
-    tabPane.add(InputsPanel);
-    tabPane.add(MiscPanel);
+    tabPane.add(ConnPanel);
+    tabPane.add(GlobalPanel);
     tabPane.add(SecPanel);
     tabPane.addTab("Encoding", EncodingPanel);
-    tabPane.addTab("Inputs", InputsPanel);
-    tabPane.addTab("Misc", MiscPanel);
+    tabPane.addTab("Connection", ConnPanel);
+    tabPane.addTab("Global", GlobalPanel);
     tabPane.addTab("Security", SecPanel);
     tabPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
 
