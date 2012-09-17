@@ -271,6 +271,7 @@ void ClientConnection::Run()
 	if (strlen((const char *) m_pApp->m_options.m_encPasswd) > 0) {
 		memcpy(m_encPasswd, m_pApp->m_options.m_encPasswd, 8);
 		memset(m_pApp->m_options.m_encPasswd, 0, 8);
+		m_passwdSet = true;
 	}
 
 
