@@ -208,15 +208,31 @@ class ServerDialog extends Dialog implements
     UserPreferences.save("ServerDialog");
   }
   
-  public void endDialog() {
-    super.endDialog();
+  public boolean showDialog() {
+    Frame[] frames = Frame.getFrames();
+    for (int i = 0; i < frames.length; i++) {
+      if (frames[i].isAlwaysOnTop()) {
+        frames[i].setAlwaysOnTop(false);
+        if (frames[i].isFocused()) win = (Window)frames[i];
+      }
+    }
+    return super.showDialog(null);
   }
 
+  public void endDialog() {
+    super.endDialog();
+    if (ret == false && win != null) {
+      win.setAlwaysOnTop(true);
+      win = null;
+    }
+  }
+
+  Window win;
   CConn cc;
   JComboBox server;
   ComboBoxEditor editor;
   JButton aboutButton, optionsButton, okButton, cancelButton;
   OptionsDialog options;
-  static LogWriter vlog = new LogWriter("ServerDialog");
 
+  static LogWriter vlog = new LogWriter("ServerDialog");
 }
