@@ -44,11 +44,15 @@ public class Viewport extends JFrame
     sp = new JScrollPane();
     sp.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
     tb = new Toolbar(cc);
-    setJMenuBar(tb);
+    add(tb, BorderLayout.PAGE_START);
     showToolbar(cc.showToolbar);
     getContentPane().add(sp);
-    if (cc.viewer.os.startsWith("mac os x"))
+    if (cc.viewer.os.startsWith("mac os x")) {
       setJMenuBar(new MacMenuBar(cc));
+      // NOTE: not sure why this is necessary, but the toolbar appears with a
+      // black background otherwise.
+      tb.setBackground(new Color(240, 240, 240, 255));
+    }
     addWindowFocusListener(new WindowAdapter() {
       public void windowGainedFocus(WindowEvent e) {
         sp.getViewport().getView().requestFocusInWindow();

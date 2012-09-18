@@ -35,7 +35,7 @@ import javax.swing.border.*;
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 
-public class Toolbar extends JMenuBar implements ActionListener
+public class Toolbar extends JToolBar implements ActionListener
 {
 
   final static String[] buttons = {
@@ -60,6 +60,7 @@ public class Toolbar extends JMenuBar implements ActionListener
     g.drawImage(toolbarImage, 0, 0, 176, 16, null);
     setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
     setAlignmentY(java.awt.Component.CENTER_ALIGNMENT);
+    setFloatable(false);
     setBorder(new EmptyBorder(1, 2, 1, 0));
     for (int i = 0; i < 11; i++) {
       ImageIcon icon = 

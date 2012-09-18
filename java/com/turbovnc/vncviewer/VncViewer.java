@@ -74,9 +74,6 @@ public class VncViewer extends java.applet.Applet implements Runnable
         while (keys.hasMoreElements()) {
           Object key = keys.nextElement();
           Object value = UIManager.get (key);
-          // To ensure that JButtons placed on toolbar match
-          if (key.toString().equals("Button.gradient"))
-            UIManager.put("MenuBar.gradient", value);
           if (value instanceof javax.swing.plaf.FontUIResource)
             UIManager.put(key, f);
         }
