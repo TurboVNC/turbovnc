@@ -1138,17 +1138,22 @@ public class CConn extends CConnection
 
   // writeClientCutText() is called from the clipboard dialog
   public void writeClientCutText(String str, int len) {
-    if (state() != RFBSTATE_NORMAL) return;
+    if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
+      return;
     writer().writeClientCutText(str,len);
   }
 
   public void writeKeyEvent(int keysym, boolean down) {
-    if (state() != RFBSTATE_NORMAL) return;
+    if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
+      return;
     writer().writeKeyEvent(keysym, down);
   }
 
   public void writeKeyEvent(KeyEvent ev) {
     int keysym = 0, keycode, key;
+
+    if (shuttingDown || benchmark)
+      return;
 
     boolean down = (ev.getID() == KeyEvent.KEY_PRESSED);
 
@@ -1280,7 +1285,8 @@ public class CConn extends CConnection
 
 
   public void writePointerEvent(MouseEvent ev) {
-    if (state() != RFBSTATE_NORMAL) return;
+    if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
+      return;
 
     switch (ev.getID()) {
     case MouseEvent.MOUSE_PRESSED:
@@ -1307,7 +1313,8 @@ public class CConn extends CConnection
 
 
   public void writeWheelEvent(MouseWheelEvent ev) {
-    if (state() != RFBSTATE_NORMAL) return;
+    if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
+      return;
     int x, y;
     int clicks = ev.getWheelRotation();
     if (clicks < 0) {
