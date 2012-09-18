@@ -347,7 +347,7 @@ class DesktopWindow extends JPanel implements
     try {
       if (sm != null) sm.checkSystemClipboardAccess();
       Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
-      if (cb != null && cc.viewer.sendClipboard.getValue()) {
+      if (cb != null && cc.opts.sendClipboard) {
         Transferable t = cb.getContents(null);
         if ((t != null) && t.isDataFlavorSupported(DataFlavor.stringFlavor)) {
           try {
@@ -369,7 +369,7 @@ class DesktopWindow extends JPanel implements
 
   /** Mouse-Motion callback function */
   private void mouseMotionCB(MouseEvent e) {
-    if (!cc.viewer.viewOnly.getValue())
+    if (!cc.opts.viewOnly)
       cc.writePointerEvent(e);
     // - If local cursor rendering is enabled then use it
     if (cursorAvailable) {
@@ -393,7 +393,7 @@ class DesktopWindow extends JPanel implements
 
   /** Mouse callback function */
   private void mouseCB(MouseEvent e) {
-    if (!cc.viewer.viewOnly.getValue())
+    if (!cc.opts.viewOnly)
       cc.writePointerEvent(e);
     lastX = e.getX();
     lastY = e.getY();
@@ -406,7 +406,7 @@ class DesktopWindow extends JPanel implements
   
   /** MouseWheel callback function */
   private void mouseWheelCB(MouseWheelEvent e) {
-    if (!cc.viewer.viewOnly.getValue())
+    if (!cc.opts.viewOnly)
       cc.writeWheelEvent(e);
   }
   public void mouseWheelMoved(MouseWheelEvent e){ 
@@ -417,7 +417,7 @@ class DesktopWindow extends JPanel implements
   public void keyTyped(KeyEvent e) {}
   /** Handle the key-released event. */
   public void keyReleased(KeyEvent e) {
-    if (!cc.viewer.viewOnly.getValue())
+    if (!cc.opts.viewOnly)
       cc.writeKeyEvent(e);
   }
   /** Handle the key-pressed event. */
@@ -432,7 +432,7 @@ class DesktopWindow extends JPanel implements
       cc.showMenu((int)ev.getX(), (int)ev.getY());
       return;
     }
-    if (!cc.viewer.viewOnly.getValue())
+    if (!cc.opts.viewOnly)
       cc.writeKeyEvent(e);
   }
 
