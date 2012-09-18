@@ -1124,7 +1124,7 @@ public class CConn extends CConnection
       return;
     showToolbar = !showToolbar;
     if (!opts.fullScreen)
-      reconfigureViewport();
+      recreateViewport();
     viewport.showToolbar(showToolbar);
     menu.showToolbar.setSelected(showToolbar);
   }
