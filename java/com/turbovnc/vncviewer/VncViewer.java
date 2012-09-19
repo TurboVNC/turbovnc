@@ -505,6 +505,13 @@ public class VncViewer extends java.applet.Applet implements Runnable
   = new BoolParameter("FullScreen",
   "Start the viewer in full-screen mode.", false);
 
+  static BoolParameter fsAltEnter
+  = new BoolParameter("FSAltEnter",
+  "Normally, the viewer will switch into and out of full-screen mode when "+
+  "Ctrl-Alt-Shift-F is pressed or \"Full screen\" is selected from the popup "+
+  "menu.  Setting this parameter will additionally cause the viewer to switch "+
+  "into and out of full-screen mode when Alt-Enter is pressed.", false);
+
   static StringParameter span
   = new StringParameter("Span",
   "This option specifies whether the viewer window should span all monitors, "+
