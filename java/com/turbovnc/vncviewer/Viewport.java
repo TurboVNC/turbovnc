@@ -34,9 +34,9 @@ import com.turbovnc.rfb.Cursor;
 
 public class Viewport extends JFrame
 {
-  public Viewport(String name, CConn cc_) {
+  public Viewport(CConn cc_) {
     cc = cc_;
-    setTitle(name+" - TurboVNC");
+    updateTitle();
     setFocusable(false);
     setFocusTraversalKeysEnabled(false);
     UIManager.getDefaults().put("ScrollPane.ancestorInputMap", 
@@ -126,6 +126,28 @@ public class Viewport extends JFrame
   public void showToolbar(boolean show) {
     tb.setVisible(show && !cc.opts.fullScreen);
   }
+
+  public void updateTitle() {
+    int enc = cc.lastServerEncoding;
+    if (enc < 0) enc = cc.currentEncoding;
+    if (enc == Encodings.encodingTight) {
+      if (cc.opts.allowJpeg) {
+        String subsampStr[] = { "1X", "4X", "2X", "Gray" };
+        setTitle(cc.cp.name() + " [Tight + JPEG " +
+                 subsampStr[cc.opts.subsampling] + " Q" + cc.opts.quality +
+                 (cc.opts.compressLevel > 1 ? " + CL " + cc.opts.compressLevel : "") +
+                 "]");
+      } else {
+        setTitle(cc.cp.name() + " [Lossless Tight" +
+                 (cc.opts.compressLevel == 1 ? " + Zlib" : "") +
+                 (cc.opts.compressLevel > 1 ? " + CL " + cc.opts.compressLevel : "") +
+                 "]");
+      }
+    } else {
+      setTitle(cc.cp.name() + " [" + Encodings.encodingName(enc) + "]");
+    }
+  }
+
 
   CConn cc;
   JScrollPane sp;

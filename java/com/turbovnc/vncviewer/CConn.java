@@ -428,7 +428,12 @@ public class CConn extends CConnection
       tReadOld = viewer.benchFile.getReadTime();
     }
     if (encoding != Encodings.encodingCopyRect) {
+      boolean updateTitle = false;
+      if (encoding != lastServerEncoding)
+        updateTitle = true;
       lastServerEncoding = encoding;
+      if (updateTitle && viewport != null)
+        viewport.updateTitle();
     }
   }
 
@@ -537,7 +542,7 @@ public class CConn extends CConnection
       }
       viewport.dispose();
     }
-    viewport = new Viewport(cp.name(), this);
+    viewport = new Viewport(this);
     viewport.setUndecorated(opts.fullScreen);
     desktop.setViewport(viewport);
     ClassLoader loader = this.getClass().getClassLoader();
@@ -1386,6 +1391,8 @@ public class CConn extends CConnection
         " encoding");
       writer().writeSetEncodings(currentEncoding, opts);
       encodingChange = false;
+      if (viewport != null)
+        viewport.updateTitle();
     }
   }
 
@@ -1434,7 +1441,7 @@ public class CConn extends CConnection
   private boolean pendingPFChange;
   private PixelFormat pendingPF;
 
-  private int currentEncoding, lastServerEncoding;
+  public int currentEncoding, lastServerEncoding;
 
   private boolean formatChange;
   private boolean encodingChange;
