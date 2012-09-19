@@ -41,8 +41,6 @@ public class MacMenuBar extends JMenuBar implements ActionListener
     // Macify is not GPL-compatible.  :(
     JMenu mainMenu = new JMenu("TurboVNC Viewer");
     about = addMenuItem(mainMenu, "About TurboVNC Viewer");
-    about.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,
-                                                acceleratorMask));
     mainMenu.addSeparator();
     options = addMenuItem(mainMenu, "Preferences");
     options.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA,
@@ -52,10 +50,14 @@ public class MacMenuBar extends JMenuBar implements ActionListener
     newConn = addMenuItem(connMenu, "New Connection...");
     newConn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
                                                   acceleratorMask));
+    closeConn = addMenuItem(connMenu, "Close Connection");
+    closeConn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
+                                                    acceleratorMask));
     connMenu.addSeparator();
     info = addMenuItem(connMenu, "Connection Info...");
     info.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I,
                                                acceleratorMask));
+
     connMenu.addSeparator();
     refresh = addMenuItem(connMenu, "Request Screen Refresh");
     refresh.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
@@ -69,7 +71,13 @@ public class MacMenuBar extends JMenuBar implements ActionListener
                                                      acceleratorMask));
     defaultSize = addMenuItem(connMenu, "Default window size/position");
     defaultSize.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
-                                                  acceleratorMask));
+                                                      acceleratorMask));
+    showToolbar = new JCheckBoxMenuItem("Show toolbar");
+    showToolbar.setSelected(cc.showToolbar);
+    showToolbar.addActionListener(this);
+    connMenu.add(showToolbar);
+    showToolbar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,
+                                                      acceleratorMask));
     connMenu.addSeparator();
     ctrlAltDel = addMenuItem(connMenu, "Send Ctrl-Alt-Del");
     ctrlEsc = addMenuItem(connMenu, "Send Ctrl-Esc");
@@ -101,11 +109,12 @@ public class MacMenuBar extends JMenuBar implements ActionListener
   }
 
   public void actionPerformed(ActionEvent ev) {
-    System.out.println(ev.getActionCommand());
     if (actionMatch(ev, fullScreen)) {
       cc.toggleFullScreen();
     } else if (actionMatch(ev, defaultSize)) {
       cc.sizeWindow();
+    } else if (actionMatch(ev, showToolbar)) {
+      cc.toggleToolbar();
     } else if (actionMatch(ev, clipboard)) {
       cc.clipboardDialog.showDialog(cc.viewport);
     } else if (actionMatch(ev, ctrlAltDel)) {
@@ -124,6 +133,8 @@ public class MacMenuBar extends JMenuBar implements ActionListener
       cc.refresh();
     } else if (actionMatch(ev, newConn)) {
       VncViewer.newViewer(cc.viewer);
+    } else if (actionMatch(ev, closeConn)) {
+      cc.close();
     } else if (actionMatch(ev, options)) {
       cc.options.showDialog(cc.viewport);
     } else if (actionMatch(ev, info)) {
@@ -136,6 +147,6 @@ public class MacMenuBar extends JMenuBar implements ActionListener
   CConn cc;
   JMenuItem defaultSize;
   JMenuItem clipboard, ctrlAltDel, ctrlEsc, refresh;
-  JMenuItem newConn, options, info, about;
+  JMenuItem newConn, closeConn, options, info, about, showToolbar;
   JCheckBoxMenuItem fullScreen;
 }

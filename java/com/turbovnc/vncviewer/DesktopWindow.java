@@ -432,6 +432,32 @@ class DesktopWindow extends JPanel implements
       cc.showMenu((int)ev.getX(), (int)ev.getY());
       return;
     }
+    int ctrlAltShiftMask = Event.SHIFT_MASK | Event.CTRL_MASK | Event.ALT_MASK;
+    if ((e.getModifiers() & ctrlAltShiftMask) == ctrlAltShiftMask) {
+      switch (e.getKeyCode()) {
+        case KeyEvent.VK_F:
+          cc.toggleFullScreen();
+          return;
+        case KeyEvent.VK_I:
+          cc.showInfo();
+          return;
+        case KeyEvent.VK_N:
+          VncViewer.newViewer(cc.viewer);
+          return;
+        case KeyEvent.VK_O:
+          cc.options.showDialog(cc.viewport);
+          return;
+        case KeyEvent.VK_R:
+          cc.refresh();
+          return;
+        case KeyEvent.VK_T:
+          cc.toggleToolbar();
+          return;
+        case KeyEvent.VK_Z:
+          cc.sizeWindow();
+          return;
+      }
+    }
     if (!cc.opts.viewOnly)
       cc.writeKeyEvent(e);
   }

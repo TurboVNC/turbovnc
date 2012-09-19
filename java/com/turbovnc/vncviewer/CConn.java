@@ -1119,7 +1119,7 @@ public class CConn extends CConnection
       toggleFullScreen();
   }
 
-  public void toggleToolBar() {
+  public void toggleToolbar() {
     if (viewport == null)
       return;
     showToolbar = !showToolbar;

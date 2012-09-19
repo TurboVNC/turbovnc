@@ -22,10 +22,7 @@ package com.turbovnc.vncviewer;
 
 import java.awt.Cursor;
 import java.awt.event.*;
-import javax.swing.JFrame;
-import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JCheckBoxMenuItem;
+import javax.swing.*;
 
 import com.turbovnc.rfb.*;
 
@@ -34,20 +31,20 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     super("VNC Menu");
     setLightWeightPopupEnabled(false);
     cc = cc_;
-    exit       = addMenuItem("Close viewer", KeyEvent.VK_C);
+    exit       = addMenuItem("Close connection", KeyEvent.VK_C);
     addSeparator();
-    options    = addMenuItem("Options...", KeyEvent.VK_O);
-    info       = addMenuItem("Connection Info...", KeyEvent.VK_I);
+    options    = addMenuItem("Options...   (Ctrl-Alt-Shift-O)", KeyEvent.VK_O);
+    info       = addMenuItem("Connection Info...  (Ctrl-Alt-Shift-I)", KeyEvent.VK_I);
     addSeparator();
-    refresh    = addMenuItem("Request screen refresh", KeyEvent.VK_R);
+    refresh    = addMenuItem("Request screen refresh   (Ctrl-Alt-Shift-R)", KeyEvent.VK_R);
     addSeparator();
-    fullScreen = new JCheckBoxMenuItem("Full screen");
+    fullScreen = new JCheckBoxMenuItem("Full screen   (Ctrl-Alt-Shift-F)");
     fullScreen.setMnemonic(KeyEvent.VK_F);
     fullScreen.setSelected(cc.opts.fullScreen);
     fullScreen.addActionListener(this);
     add(fullScreen);
-    defaultSize = addMenuItem("Default window size/position", KeyEvent.VK_Z);
-    showToolbar = new JCheckBoxMenuItem("Show toolbar");
+    defaultSize = addMenuItem("Default window size/position   (Ctrl-Alt-Shift-Z)", KeyEvent.VK_Z);
+    showToolbar = new JCheckBoxMenuItem("Show toolbar   (Ctrl-Alt-Shift-T)");
     showToolbar.setMnemonic(KeyEvent.VK_T);
     showToolbar.setSelected(cc.showToolbar);
     showToolbar.addActionListener(this);
@@ -60,7 +57,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     addSeparator();
     clipboard  = addMenuItem("Clipboard...");
     addSeparator();
-    newConn    = addMenuItem("New connection...", KeyEvent.VK_N);
+    newConn    = addMenuItem("New connection...   (Ctrl-Alt-Shift-N)", KeyEvent.VK_N);
     addSeparator();
     about      = addMenuItem("About TurboVNC Viewer...", KeyEvent.VK_A);
     addSeparator();
@@ -92,7 +89,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     } else if (actionMatch(ev, fullScreen)) {
       cc.toggleFullScreen();
     } else if (actionMatch(ev, showToolbar)) {
-      cc.toggleToolBar();
+      cc.toggleToolbar();
     } else if (actionMatch(ev, defaultSize)) {
       cc.sizeWindow();
     } else if (actionMatch(ev, clipboard)) {
