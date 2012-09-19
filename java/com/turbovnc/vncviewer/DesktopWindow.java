@@ -441,6 +441,9 @@ class DesktopWindow extends JPanel implements
         case KeyEvent.VK_I:
           cc.showInfo();
           return;
+        case KeyEvent.VK_L:
+          cc.losslessRefresh();
+          return;
         case KeyEvent.VK_N:
           VncViewer.newViewer(cc.viewer);
           return;

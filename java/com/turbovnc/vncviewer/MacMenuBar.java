@@ -62,6 +62,9 @@ public class MacMenuBar extends JMenuBar implements ActionListener
     refresh = addMenuItem(connMenu, "Request Screen Refresh");
     refresh.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
                                                   acceleratorMask));
+    losslessRefresh = addMenuItem(connMenu, "Request Lossless Refresh");
+    losslessRefresh.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L,
+                                                          acceleratorMask));
     connMenu.addSeparator();
     fullScreen = new JCheckBoxMenuItem("Full Screen");
     fullScreen.setSelected(cc.opts.fullScreen);
@@ -131,6 +134,8 @@ public class MacMenuBar extends JMenuBar implements ActionListener
       cc.writeKeyEvent(Keysyms.Control_L, false);
     } else if (actionMatch(ev, refresh)) {
       cc.refresh();
+    } else if (actionMatch(ev, losslessRefresh)) {
+      cc.losslessRefresh();
     } else if (actionMatch(ev, newConn)) {
       VncViewer.newViewer(cc.viewer);
     } else if (actionMatch(ev, closeConn)) {
@@ -146,7 +151,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener
 
   CConn cc;
   JMenuItem defaultSize;
-  JMenuItem clipboard, ctrlAltDel, ctrlEsc, refresh;
+  JMenuItem clipboard, ctrlAltDel, ctrlEsc, refresh, losslessRefresh;
   JMenuItem newConn, closeConn, options, info, about, showToolbar;
   JCheckBoxMenuItem fullScreen;
 }

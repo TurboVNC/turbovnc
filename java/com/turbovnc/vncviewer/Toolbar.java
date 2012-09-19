@@ -76,7 +76,6 @@ public class Toolbar extends JToolBar implements ActionListener
       default:
         button = new JButton(icon);
         button.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
-        if (i == 4) button.setEnabled(false);
       }
       button.setName(buttons[i]);
       button.setToolTipText(buttons[i]);
@@ -110,6 +109,8 @@ public class Toolbar extends JToolBar implements ActionListener
       cc.toggleFullScreen();
     } else if (((AbstractButton)s).getName() == buttons[3]) {
       cc.refresh();
+    } else if (((AbstractButton)s).getName() == buttons[4]) {
+      cc.losslessRefresh();
     } else if (((AbstractButton)s).getName() == buttons[5]) {
       cc.writeKeyEvent(Keysyms.Control_L, true);
       cc.writeKeyEvent(Keysyms.Alt_L, true);

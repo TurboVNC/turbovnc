@@ -827,6 +827,36 @@ public class CConn extends CConnection
     pendingUpdate = true;
   }
 
+  public void losslessRefresh() {
+    int currentEncodingSave = currentEncoding;
+    int compressLevelSave = opts.compressLevel;
+    int qualitySave = opts.quality;
+    boolean allowJpegSave = opts.allowJpeg;
+    boolean alreadyLossless = false;
+
+    if (currentEncoding == Encodings.encodingTight &&
+        opts.compressLevel == 1 && opts.quality == -1 && !opts.allowJpeg)
+      alreadyLossless = true;
+
+    if (!alreadyLossless) {
+      currentEncoding = Encodings.encodingTight;
+      opts.compressLevel = 1;
+      opts.quality = -1;
+      opts.allowJpeg = false;
+      encodingChange = true;
+      checkEncodings();
+    }
+    refresh();
+    if (!alreadyLossless) {
+      currentEncoding = currentEncodingSave;
+      opts.compressLevel = compressLevelSave;
+      opts.quality = qualitySave;
+      opts.allowJpeg = allowJpegSave;
+      encodingChange = true;
+      checkEncodings();
+    }
+  }
+
 
   // OptionsDialogCallback.  setOptions() sets the options dialog's checkboxes
   // etc to reflect our flags.  getOptions() sets our flags according to the

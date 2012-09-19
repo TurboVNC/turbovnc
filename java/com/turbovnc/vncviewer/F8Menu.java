@@ -31,12 +31,14 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     super("VNC Menu");
     setLightWeightPopupEnabled(false);
     cc = cc_;
-    exit       = addMenuItem("Close connection", KeyEvent.VK_C);
+
+    exit = addMenuItem("Close connection", KeyEvent.VK_C);
     addSeparator();
-    options    = addMenuItem("Options...   (Ctrl-Alt-Shift-O)", KeyEvent.VK_O);
-    info       = addMenuItem("Connection Info...  (Ctrl-Alt-Shift-I)", KeyEvent.VK_I);
+    options = addMenuItem("Options...   (Ctrl-Alt-Shift-O)", KeyEvent.VK_O);
+    info = addMenuItem("Connection Info...  (Ctrl-Alt-Shift-I)", KeyEvent.VK_I);
     addSeparator();
-    refresh    = addMenuItem("Request screen refresh   (Ctrl-Alt-Shift-R)", KeyEvent.VK_R);
+    refresh = addMenuItem("Request screen refresh   (Ctrl-Alt-Shift-R)", KeyEvent.VK_R);
+    losslessRefresh = addMenuItem("Request lossless refresh   (Ctrl-Alt-Shift-L)", KeyEvent.VK_L);
     addSeparator();
     fullScreen = new JCheckBoxMenuItem("Full screen   (Ctrl-Alt-Shift-F)");
     fullScreen.setMnemonic(KeyEvent.VK_F);
@@ -55,13 +57,13 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     ctrlAltDel = addMenuItem("Send Ctrl-Alt-Del");
     ctrlEsc = addMenuItem("Send Ctrl-Esc");
     addSeparator();
-    clipboard  = addMenuItem("Clipboard...");
+    clipboard = addMenuItem("Clipboard...");
     addSeparator();
-    newConn    = addMenuItem("New connection...   (Ctrl-Alt-Shift-N)", KeyEvent.VK_N);
+    newConn = addMenuItem("New connection...   (Ctrl-Alt-Shift-N)", KeyEvent.VK_N);
     addSeparator();
-    about      = addMenuItem("About TurboVNC Viewer...", KeyEvent.VK_A);
+    about = addMenuItem("About TurboVNC Viewer...", KeyEvent.VK_A);
     addSeparator();
-    dismiss    = addMenuItem("Dismiss menu");
+    dismiss = addMenuItem("Dismiss menu");
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
   }
 
@@ -111,6 +113,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       cc.writeKeyEvent(Keysyms.Control_L, false);
     } else if (actionMatch(ev, refresh)) {
       cc.refresh();
+    } else if (actionMatch(ev, losslessRefresh)) {
+      cc.losslessRefresh();
     } else if (actionMatch(ev, newConn)) {
       VncViewer.newViewer(cc.viewer);
     } else if (actionMatch(ev, options)) {
@@ -126,7 +130,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
 
   CConn cc;
   JMenuItem defaultSize;
-  JMenuItem exit, clipboard, ctrlAltDel, ctrlEsc, refresh;
+  JMenuItem exit, clipboard, ctrlAltDel, ctrlEsc, refresh, losslessRefresh;
   JMenuItem newConn, options, info, about, dismiss;
   static JMenuItem f8;
   JCheckBoxMenuItem fullScreen, showToolbar;
