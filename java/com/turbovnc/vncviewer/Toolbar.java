@@ -81,6 +81,7 @@ public class Toolbar extends JToolBar implements ActionListener
       button.setToolTipText(buttons[i]);
       button.setBorderPainted(false);
       button.setFocusPainted(false);
+      button.setFocusable(false);
       button.addActionListener(this);
       button.addMouseListener(new ButtonListener(button));
       button.setContentAreaFilled(false);
