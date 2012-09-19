@@ -300,11 +300,12 @@ public class VncViewer extends java.applet.Applet implements Runnable
     if (listenMode.getValue()) {
       int port = 5500;
 
-      if (vncServerName.getValue() != null && 
-          Character.isDigit(vncServerName.getValue().charAt(0)))
-        port = Integer.parseInt(vncServerName.getValue());
-      else if (vncServerPort.getValue() > 0)
-        port = vncServerPort.getValue();
+      listenMode.setParam(false);
+      if (opts.serverName != null && 
+          Character.isDigit(opts.serverName.charAt(0)))
+        port = Integer.parseInt(opts.serverName);
+      else if (opts.port > 0)
+        port = opts.port;
 
       TcpListener listener = null;
       try {
@@ -384,7 +385,9 @@ public class VncViewer extends java.applet.Applet implements Runnable
   }
 
   void setGlobalOptions() {
-    if (opts == null) opts = new Options();
+    if (opts != null) return;
+
+    opts = new Options();
 
     if (vncServerName.getValue() != null)
       opts.serverName = new String(vncServerName.getValue());
