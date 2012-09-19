@@ -43,6 +43,18 @@ public class Viewport extends JFrame
       new UIDefaults.LazyInputMap(new Object[]{}));
     sp = new JScrollPane();
     sp.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+    InputMap im = sp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    int ctrlAltShiftMask = Event.SHIFT_MASK | Event.CTRL_MASK | Event.ALT_MASK;
+    if (im != null) {
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, ctrlAltShiftMask),
+             "unitScrollUp");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, ctrlAltShiftMask),
+             "unitScrollDown");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, ctrlAltShiftMask),
+             "unitScrollLeft");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, ctrlAltShiftMask),
+             "unitScrollRight");
+    }
     tb = new Toolbar(cc);
     add(tb, BorderLayout.PAGE_START);
     showToolbar(cc.showToolbar);
