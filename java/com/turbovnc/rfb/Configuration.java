@@ -192,6 +192,8 @@ public class Configuration {
         setParam("ViewOnly", props.getProperty(name));
       } else if (name.equals("fullscreen")) {
         setParam("FullScreen", props.getProperty(name));
+      } else if (name.equals("fsaltenter")) {
+        setParam("FSAltEnter", props.getProperty(name));
       } else if (name.equals("span")) {
         int span = -1;
         try {

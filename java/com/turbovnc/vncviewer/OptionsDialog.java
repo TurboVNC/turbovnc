@@ -532,6 +532,17 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     if (!CSecurityTLS.x509crl.isDefault)
       UserPreferences.set("global", "x509crl",
                           CSecurityTLS.x509crl.getValue());
+
+    // Options with no GUI equivalent
+    UserPreferences.set("global", "AlwaysShowConnectionDialog",
+                        VncViewer.alwaysShowConnectionDialog.getValue());
+    UserPreferences.set("global", "FSAltEnter",
+                        VncViewer.fsAltEnter.getValue());
+    if (VncViewer.preferredEncoding.getValue() != null)
+      UserPreferences.set("global", "Encoding",
+                          VncViewer.preferredEncoding.getValue());
+    if (VncViewer.colors.getValue() != -1)
+      UserPreferences.set("global", "Colors", VncViewer.colors.getValue());
   }
 
   JRadioButton addRadioCheckbox(String str, ButtonGroup group, JPanel panel) {
