@@ -91,6 +91,8 @@ public class Viewport extends JFrame
                                        cc.desktop.scaledHeight));
               int w = cc.desktop.scaledWidth + getInsets().left + getInsets().right;
               int h = cc.desktop.scaledHeight + getInsets().top + getInsets().bottom;
+              if (tb.isVisible())
+                h += tb.getHeight();
               if (cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO)
                 setSize(w, h);
             }

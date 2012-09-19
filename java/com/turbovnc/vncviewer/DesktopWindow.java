@@ -307,9 +307,12 @@ class DesktopWindow extends JPanel implements
       } else {
         Dimension vpSize = cc.viewport.getSize();
         Insets vpInsets = cc.viewport.getInsets();
+        int availableHeight = vpSize.height - vpInsets.top - vpInsets.bottom;
+        if (cc.viewport.tb.isVisible())
+          availableHeight -= cc.viewport.tb.getHeight();
         Dimension availableSize = 
           new Dimension(vpSize.width - vpInsets.left - vpInsets.right,
-                        vpSize.height - vpInsets.top - vpInsets.bottom);
+                        availableHeight);
         if (availableSize.width == 0 || availableSize.height == 0)
           availableSize = new Dimension(cc.cp.width, cc.cp.height);
         if (cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
