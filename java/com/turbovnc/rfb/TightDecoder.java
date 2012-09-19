@@ -57,6 +57,11 @@ public class TightDecoder extends Decoder {
       zis[i] = new ZlibInStream();
     try {
       tjd = new TJDecompressor();
+      String prop = System.getProperty("tvnc.turbojpeg");
+      if (prop != null && prop.startsWith("0")) {
+        vlog.info("Disabling TurboJPEG");
+        tjd = null;
+      }
     } catch (java.lang.NoClassDefFoundError e) {
       vlog.info("WARNING: Could not initialize libjpeg-turbo:");
       vlog.info("  Class not found: "+e.getMessage());
