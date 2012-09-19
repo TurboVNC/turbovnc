@@ -201,7 +201,9 @@ public class VncViewer extends java.applet.Applet implements Runnable
                     "  Off:  -<param>=0 or -no<param>\n"+
                     "Parameters that take a value can be specified as:\n"+
                     "  -<param> <value> or <param>=<value> or -<param>=<value> or --<param>=<value>\n"+
-                    "Parameter names and values are case-insensitive.  The parameters are:\n\n");
+                    "Parameter names and values are case-insensitive (except for the value of\n"+
+                    "Password.)\n\n"+
+                    "The parameters are:\n\n");
     System.err.print(usage);
     Configuration.listParams(80);
     // Technically, we shouldn't use System.exit here but if there is a parameter
