@@ -46,6 +46,8 @@ public class TightDecoder extends Decoder {
   final static int rfbTightFilterGradient = 0x02;
   final static int rfbTightMinToCompress = 12;
 
+  final static int rfbTightNoZlib = 0x0A;
+
   final static Toolkit tk = Toolkit.getDefaultToolkit();
 
   public TightDecoder(CMsgReader reader_) { 
@@ -100,6 +102,12 @@ public class TightDecoder extends Decoder {
         zis[i].reset();
       }
       comp_ctl >>= 1;
+    }
+
+    boolean readUncompressed = false;
+    if ((comp_ctl & rfbTightNoZlib) == rfbTightNoZlib) {
+      comp_ctl &= ~(rfbTightNoZlib);
+      readUncompressed = true;
     }
 
     // "Fill" compression type.
@@ -169,7 +177,7 @@ public class TightDecoder extends Decoder {
     int dataSize = r.height() * rowSize;
     int streamId = -1;
     InStream input;
-    if (dataSize < rfbTightMinToCompress) {
+    if (dataSize < rfbTightMinToCompress || readUncompressed) {
       input = is;
     } else {
       int length = is.readCompactLength();
@@ -177,6 +185,9 @@ public class TightDecoder extends Decoder {
       zis[streamId].setUnderlying(is, length);
       input = (ZlibInStream)zis[streamId];
     }
+
+    if (readUncompressed && dataSize >= rfbTightMinToCompress)
+      dataSize = is.readCompactLength();
 
     // Allocate netbuf and read in data
     byte[] netbuf = new byte[dataSize];
