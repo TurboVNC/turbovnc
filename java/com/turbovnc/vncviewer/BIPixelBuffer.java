@@ -55,23 +55,20 @@ public class BIPixelBuffer extends PlatformPixelBuffer implements ImageObserver
   private void createImage(int w, int h) {
     if (w == 0 || h == 0) return;
     WritableRaster wr;
-    if (cm instanceof IndexColorModel) {
+    if (cm instanceof IndexColorModel)
       wr = ((IndexColorModel)cm).createCompatibleWritableRaster(w, h);
-    } else {
-      wr = ((DirectColorModel)cm).createCompatibleWritableRaster(w, h);
-    }
-    image = new BufferedImage(cm, wr, true, null);
-    SampleModel sm = image.getSampleModel();
-    if (sm instanceof SinglePixelPackedSampleModel)
-      stride_ = ((SinglePixelPackedSampleModel)sm).getScanlineStride();
     else
-      throw new Exception("Unsupported pixel type");
+      wr = ((DirectColorModel)cm).createCompatibleWritableRaster(w, h);
+    image = new BufferedImage(cm, wr, true, null);
+    SinglePixelPackedSampleModel sm =
+      (SinglePixelPackedSampleModel)image.getSampleModel();
+    stride_ = sm.getScanlineStride();
     db = wr.getDataBuffer();
-    if (sm.getTransferType() == DataBuffer.TYPE_INT) {
+    if (sm.getTransferType() == DataBuffer.TYPE_INT)
       data = (Object)((DataBufferInt)db).getData();
-    } else if (sm.getTransferType() == DataBuffer.TYPE_BYTE) {
+    else if (sm.getTransferType() == DataBuffer.TYPE_BYTE)
       data = (Object)((DataBufferByte)db).getData();
-    } else
+    else
       throw new Exception("Unsupported pixel type");
   }
 

@@ -84,7 +84,6 @@ public class PixelBuffer {
   }
 
   public void copyRect(int x, int y, int w, int h, int srcX, int srcY) {
-    assert data instanceof int[];
     int dest = (width_ * y) + x;
     int src = (width_ * srcY) + srcX;
     int inc = width_;
