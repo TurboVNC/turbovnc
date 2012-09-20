@@ -45,19 +45,20 @@ public class PixelBuffer {
       int rmask = pf.redMax << pf.redShift;
       int gmask = pf.greenMax << pf.greenShift;
       int bmask = pf.blueMax << pf.blueShift;
-      cm = new DirectColorModel(8, rmask, gmask, bmask);
-      if (!pf.trueColour)
+      if (pf.trueColour)
+        cm = new DirectColorModel(8, rmask, gmask, bmask);
+      else
         cm = new IndexColorModel(8, 256, new byte[256], new byte[256], new byte[256]);
       break;
     case 16: 
-      cm = new DirectColorModel(32, 0xF800, 0x07C0, 0x003E, (0xff << 24));
+      cm = new DirectColorModel(32, 0xF800, 0x07C0, 0x003E);
       break;
     case 24: 
-      cm = new DirectColorModel(32, (0xff << 16), (0xff << 8), 0xff, (0xff << 24));
+      cm = new DirectColorModel(32, (0xff << 16), (0xff << 8), 0xff);
       break;
     case 32: 
       cm = new DirectColorModel(32, (0xff << pf.redShift), 
-        (0xff << pf.greenShift), (0xff << pf.blueShift), (0xff << 24));
+        (0xff << pf.greenShift), (0xff << pf.blueShift));
       break;
     default:
       throw new Exception("Unsupported color depth ("+pf.depth+")");
@@ -70,17 +71,20 @@ public class PixelBuffer {
   public final int area() { return width_ * height_; }
 
   public void fillRect(int x, int y, int w, int h, int pix) {
+    assert data instanceof int[];
     for (int ry = y; ry < y + h; ry++)
       for (int rx = x; rx < x + w; rx++)
-        data[ry * width_ + rx] = pix;
+        ((int[])data)[ry * width_ + rx] = pix;
   }
 
   public void imageRect(int x, int y, int w, int h, int[] pix) {
+    assert data instanceof int[];
     for (int j = 0; j < h; j++)
       System.arraycopy(pix, (w * j), data, width_ * (y + j) + x, w);
   }
 
   public void copyRect(int x, int y, int w, int h, int srcX, int srcY) {
+    assert data instanceof int[];
     int dest = (width_ * y) + x;
     int src = (width_ * srcY) + srcX;
     int inc = width_;
@@ -99,7 +103,7 @@ public class PixelBuffer {
     }
   }
 
-  public int[] getRawPixelsRW(int[] stride) {
+  public Object getRawPixelsRW(int[] stride) {
     if (stride_ > 0)
       stride[0] = stride_;
     else
@@ -108,6 +112,7 @@ public class PixelBuffer {
   }
 
   public void maskRect(int x, int y, int w, int h, int[] pix, byte[] mask) {
+    assert data instanceof int[];
     int maskBytesPerRow = (w + 7) / 8;
     
     for (int j = 0; j < h; j++) {
@@ -126,12 +131,12 @@ public class PixelBuffer {
         int bit = 7 - i % 8;
 
         if ((mask[byte_] & (1 << bit)) != 0)
-         data[cy * width_ + cx] = pix[j * w + i];
+         ((int[])data)[cy * width_ + cx] = pix[j * w + i];
       }     
     }
   }
 
-  public int[] data;
+  public Object data;
   public int stride_;
   public ColorModel cm;
 

@@ -95,7 +95,7 @@ abstract public class CMsgHandler {
   public void imageRect(Rect r, Object pixels) {}
   public void copyRect(Rect r, int srcX, int srcY) {}
 
-  abstract public int[] getRawPixelsRW(int[] stride);
+  abstract public Object getRawPixelsRW(int[] stride);
   abstract public void releaseRawPixels(Rect r);
 
   abstract public PixelFormat getPreferredPF();

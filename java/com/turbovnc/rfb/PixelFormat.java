@@ -109,9 +109,9 @@ public class PixelFormat {
   public int pixelFromRGB(int red, int green, int blue, ColorModel cm) 
   {
     if (trueColour) {
-      int r = (red   * redMax     + 32767) / 65535;
-      int g = (green * greenMax   + 32767) / 65535;
-      int b = (blue  * blueMax    + 32767) / 65535;
+      int r = (red   * redMax     + 127) / 255;
+      int g = (green * greenMax   + 127) / 255;
+      int b = (blue  * blueMax    + 127) / 255;
 
       return (r << redShift) | (g << greenShift) | (b << blueShift);
     } else if (cm != null) {
@@ -143,68 +143,53 @@ public class PixelFormat {
                             int srcPtr, int pixels) {
     if (is888()) {
       // Optimised common case
-      int r, g, b;
+      int rshift = redShift, gshift = greenShift, bshift = blueShift;
 
-      for (int i=srcPtr; i < pixels; i++) {
-        if (bigEndian) {
-          r = (src[3*i+0] & 0xff) << (24 - redShift);
-          g = (src[3*i+1] & 0xff) << (24 - greenShift);
-          b = (src[3*i+2] & 0xff) << (24 - blueShift);
-          dst[dstPtr+i] = r | g | b | 0xff;
-        } else {
-          r = (src[3*i+0] & 0xff) << redShift;
-          g = (src[3*i+1] & 0xff) << greenShift;
-          b = (src[3*i+2] & 0xff) << blueShift;
-          dst[dstPtr+i] = (0xff << 24) | r | g | b;
-        }
+      if (bigEndian) {
+        rshift = 24 - redShift;
+        gshift = 24 - greenShift;
+        bshift = 24 - blueShift;
       }
+
+      while (pixels-- != 0)
+        dst[dstPtr++] = ((src[srcPtr++] & 0xff) << rshift) |
+                        ((src[srcPtr++] & 0xff) << gshift) |
+                        ((src[srcPtr++] & 0xff) << bshift);
     } else {
       // Generic code
       int p, r, g, b;
-      int[] rgb = new int[4];
-      
-      int i = srcPtr; int j = dstPtr;
-      while (i < pixels) {
-        r = src[i++] & 0xff;
-        g = src[i++] & 0xff;
-        b = src[i++] & 0xff;
 
-        //p = pixelFromRGB(r, g, b, cm);
-        p = ColorModel.getRGBdefault().getDataElement(new int[] {0xff, r, g, b}, 0);
+      while (pixels-- != 0) {
+        r = src[srcPtr++] & 0xff;
+        g = src[srcPtr++] & 0xff;
+        b = src[srcPtr++] & 0xff;
 
-        bufferFromPixel(dst, j, p);
-        j += bpp/8;
+        dst[dstPtr++] = pixelFromRGB(r, g, b, null);
       }
     }
   }
 
-  public void bufferFromRGB(int[] dst, int x, int y, byte[] src, int w,
-                            int stride, int h, ColorModel cm) {
+  public void bufferFromRGB(int[] dst, int x, int y, int stride,
+                            byte[] src, int w, int h) {
     int dstPtr = y * stride + x, srcPtr = 0;
 
     if (is888()) {
       // Optimised common case
-      int rindex, gindex, bindex;
+      int rshift = redShift, gshift = greenShift, bshift = blueShift;
 
       if (bigEndian) {
-        rindex = (24 - redShift)/8;
-        gindex = (24 - greenShift)/8;
-        bindex = (24 - blueShift)/8;
-      } else {
-        rindex = redShift/8;
-        gindex = greenShift/8;
-        bindex = blueShift/8;
+        rshift = 24 - redShift;
+        gshift = 24 - greenShift;
+        bshift = 24 - blueShift;
       }
 
       int dstPad = stride - w;
       while (h > 0) {
         int dstEndOfRow = dstPtr + w;
-        while (dstPtr < dstEndOfRow) {
-          dst[dstPtr + rindex] = src[srcPtr++];
-          dst[dstPtr + gindex] = src[srcPtr++];
-          dst[dstPtr + bindex] = src[srcPtr++];
-          dstPtr++;
-        }
+        while (dstPtr < dstEndOfRow)
+          dst[dstPtr++] = ((src[srcPtr++] & 0xff) << rshift) |
+                          ((src[srcPtr++] & 0xff) << gshift) |
+                          ((src[srcPtr++] & 0xff) << bshift);
         dstPtr += dstPad;
         h--;
       }
@@ -215,15 +200,13 @@ public class PixelFormat {
       int dstPad = stride - w;
       while (h > 0) {
         int dstEndOfRow = dstPtr + w;
+
         while (dstPtr < dstEndOfRow) {
-          r = src[srcPtr++];
-          g = src[srcPtr++];
-          b = src[srcPtr++];
+          r = src[srcPtr++] & 0xff;
+          g = src[srcPtr++] & 0xff;
+          b = src[srcPtr++] & 0xff;
 
-          p = pixelFromRGB(r, g, b, cm);
-
-          bufferFromPixel(dst, dstPtr, p);
-          dstPtr++;
+          dst[dstPtr++] = pixelFromRGB(r, g, b, null);
         }
         dstPtr += dstPad;
         h--;
@@ -231,51 +214,27 @@ public class PixelFormat {
     }
   }
 
-  public void rgbFromBuffer(byte[] dst, int dstPtr, byte[] src, int srcPtr, int pixels, ColorModel cm)
-  {
-    int p;
-    byte r, g, b;
-  
-    for (int i=0; i < pixels; i++) {
-      p = pixelFromBuffer(src, srcPtr); 
-      srcPtr += bpp/8;
-  
-      dst[dstPtr++] = (byte)cm.getRed(p);
-      dst[dstPtr++] = (byte)cm.getGreen(p);
-      dst[dstPtr++] = (byte)cm.getBlue(p);
-    }
-  }
+  public void bufferFromRGB(byte[] dst, int x, int y, int stride,
+                            byte[] src, int w, int h) {
+    int dstPtr = y * stride + x, srcPtr = 0;
 
-  public int pixelFromBuffer(byte[] buffer, int bufferPtr)
-  {
-    int p;
-  
-    p = 0;
-  
-    if (bigEndian) {
-      switch (bpp) {
-      case 32:
-        p = (buffer[0] & 0xff) << 24 | (buffer[1] & 0xff) << 16 | (buffer[2] & 0xff) << 8 | 0xff;
-        break;
-      case 16:
-        p = (buffer[0] & 0xff) << 8 | (buffer[1] & 0xff);
-        break;
-      case 8:
-        p = (buffer[0] & 0xff);
-        break;
+    // Generic code
+    int p, r, g, b;
+
+    int dstPad = stride - w;
+    while (h > 0) {
+      int dstEndOfRow = dstPtr + w;
+
+      while (dstPtr < dstEndOfRow) {
+        r = src[srcPtr++] & 0xff;
+        g = src[srcPtr++] & 0xff;
+        b = src[srcPtr++] & 0xff;
+
+        dst[dstPtr++] = (byte)(pixelFromRGB(r, g, b, null) & 0xff);
       }
-    } else {
-      p = (buffer[0] & 0xff);
-      if (bpp >= 16) {
-        p |= (buffer[1] & 0xff) << 8;
-        if (bpp == 32) {
-          p |= (buffer[2] & 0xff) << 16;
-          p |= (buffer[3] & 0xff) << 24;
-        }
-      }
+      dstPtr += dstPad;
+      h--;
     }
-  
-    return p;
   }
 
   public String print() {
@@ -315,34 +274,6 @@ public class PixelFormat {
              ","+greenShift+","+blueShift);
     return s.toString();
   }
-
-  public void bufferFromPixel(int[] buffer, int bufPtr, int p)
-  {
-    if (bigEndian) {
-      switch (bpp) {
-        case 32:
-          buffer[bufPtr++] = (p >> 24) & 0xff;
-          buffer[bufPtr++] = (p >> 16) & 0xff;
-          break;
-        case 16:
-          buffer[bufPtr++] = (p >> 8) & 0xff;
-          break;
-        case 8:
-          buffer[bufPtr++] = (p >> 0) & 0xff;
-          break;
-      }
-    } else {
-      buffer[0] = (p >> 0) & 0xff;
-      if (bpp >= 16) {
-        buffer[1] = (p >> 8) & 0xff;
-        if (bpp == 32) {
-          buffer[2] = (p >> 16) & 0xff;
-          buffer[3] = (p >> 24) & 0xff;
-        }
-      }
-    }
-  }
-          
 
   public int bpp;
   public int depth;

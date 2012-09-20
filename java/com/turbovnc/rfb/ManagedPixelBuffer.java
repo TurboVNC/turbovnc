@@ -32,7 +32,7 @@ public class ManagedPixelBuffer extends PixelBuffer {
   public int dataLen() { return area(); }
 
   final void checkDataSize() {
-    if (data == null || data.length < dataLen())
+    if (data == null || ((int[])data).length < dataLen())
       data = new int[dataLen()];
   }
 }

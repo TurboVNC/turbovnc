@@ -634,13 +634,13 @@ public class VncViewer extends java.applet.Applet implements Runnable
   = new IntParameter("Colors",
   "The color depth to use for the viewer's window.  Specifying 8 will use a "+
   "BGR111 pixel format (1 bit for each red, green, and blue component.) "+
-  "Specifying 64 will use a BGR222 pixel format, and specifying 256 will use "+
-  "an 8-bit indexed color pixel format.  Lowering the color depth can "+
-  "significantly reduce bandwidth, particularly when using encoding types "+
-  "other than Tight or when using Tight encoding without JPEG.  However, "+
-  "colors will not be represented accurately.  The default is to use the "+
-  "native color depth of the display on which the viewer is running, which is "+
-  "usually true color (8 bits per component.)", -1);
+  "Specifying 64 will use a BGR222 pixel format, and specifying 256 will use a "+
+  "BGR332 pixel format.  Lowering the color depth can significantly reduce "+
+  "bandwidth when using encoding types other than Tight or when using Tight "+
+  "encoding without JPEG.  However, colors will not be represented accurately, "+
+  "and CPU usage will increase substantially.  The default is to use the native "+
+  "color depth of the display on which the viewer is running, which is usually "+
+  "true color (8 bits per component.)", -1);
 
   static BoolParameter cursorShape
   = new BoolParameter("CursorShape",

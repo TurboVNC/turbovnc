@@ -292,7 +292,7 @@ public class TightDecoder extends Decoder {
     if (tjd != null) {
 
       int[] stride = new int[1];
-      int[] data = handler.getRawPixelsRW(stride);
+      Object data = handler.getRawPixelsRW(stride);
       int tjpf = TJ.PF_RGB;
       PixelFormat pf = handler.cp.pf();
 
@@ -321,13 +321,18 @@ public class TightDecoder extends Decoder {
           if(redShift == 8 && greenShift == 16 && blueShift == 24)
             tjpf = TJ.PF_XRGB;
 
-          tjd.decompress(data, r.tl.x, r.tl.y, r.width(), stride[0], r.height(),
-                         tjpf, 0);
+          tjd.decompress((int[])data, r.tl.x, r.tl.y, r.width(), stride[0],
+                         r.height(), tjpf, 0);
         } else {
           byte[] rgbBuf = new byte[r.width() * r.height() * 3];
           tjd.decompress(rgbBuf, r.width(), 0, r.height(), TJ.PF_RGB, 0);
-          pf.bufferFromRGB(data, r.tl.x, r.tl.y, rgbBuf, r.width(), stride[0],
-                           r.height(), null);
+          if (data instanceof byte[])
+            pf.bufferFromRGB((byte[])data, r.tl.x, r.tl.y, stride[0], rgbBuf,
+                             r.width(), r.height());
+          else
+            pf.bufferFromRGB((int[])data, r.tl.x, r.tl.y, stride[0], rgbBuf,
+                             r.width(), r.height());
+
         }
         handler.releaseRawPixels(r);
         return;

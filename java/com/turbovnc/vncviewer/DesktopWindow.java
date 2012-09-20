@@ -132,7 +132,7 @@ class DesktopWindow extends JPanel implements
     cursorBacking.setSize(cursor.width(), cursor.height());
     cursorBacking.setPF(getPF());
 
-    cursor.data = new int[cursor.width() * cursor.height()];
+    cursor.data = (Object)(new int[cursor.width() * cursor.height()]);
     cursor.mask = new byte[cursor.maskLen()];
 
     int maskBytesPerRow = (w + 7) / 8;
@@ -141,7 +141,7 @@ class DesktopWindow extends JPanel implements
         int byte_ = y * maskBytesPerRow + x / 8;
         int bit = 7 - x % 8;
         if ((mask[byte_] & (1 << bit)) > 0) {
-          cursor.data[y * cursor.width() + x] = (0xff << 24) |
+          ((int[])cursor.data)[y * cursor.width() + x] = (0xff << 24) |
             (im.cm.getRed(data[y * w + x]) << 16) |
             (im.cm.getGreen(data[y * w + x]) << 8) |
             (im.cm.getBlue(data[y * w + x]));
@@ -152,8 +152,9 @@ class DesktopWindow extends JPanel implements
     }
 
     MemoryImageSource bitmap = 
-      new MemoryImageSource(cursor.width(), cursor.height(), ColorModel.getRGBdefault(),
-                            cursor.data, 0, cursor.width());
+      new MemoryImageSource(cursor.width(), cursor.height(),
+                            ColorModel.getRGBdefault(), (int[])cursor.data, 0,
+                            cursor.width());
     int cw = (int)Math.floor((float)cursor.width() * scaleWidthRatio);
     int ch = (int)Math.floor((float)cursor.height() * scaleHeightRatio);
     int hint = java.awt.Image.SCALE_DEFAULT;
@@ -253,7 +254,7 @@ class DesktopWindow extends JPanel implements
     damageRect(new Rect(x, y, x+w, y+h));
   }
 
-  final public int[] getRawPixelsRW(int[] stride) {
+  final public Object getRawPixelsRW(int[] stride) {
     return im.getRawPixelsRW(stride);
   }
 
@@ -516,7 +517,7 @@ class DesktopWindow extends JPanel implements
                          cursorBacking.data, j*w, w);
 
       im.maskRect(cursorLeft, cursorTop, cursor.width(), cursor.height(),
-                  cursor.data, cursor.mask);
+                  (int[])cursor.data, cursor.mask);
     }
   }
 

@@ -67,7 +67,7 @@ public class CConn extends CConnection
   static final PixelFormat lowColourPF = 
     new PixelFormat(8, 6, false, true, 3, 3, 3, 4, 2, 0);
   static final PixelFormat mediumColourPF = 
-    new PixelFormat(8, 8, false, false, 7, 7, 3, 0, 3, 6);
+    new PixelFormat(8, 8, false, true, 7, 7, 3, 5, 2, 0);
 
   static final double getTime() {
     return (double)System.nanoTime() / 1.0e9;
@@ -457,7 +457,7 @@ public class CConn extends CConnection
     desktop.copyRect(r.tl.x, r.tl.y, r.width(), r.height(), sx, sy);
   }
 
-  public int[] getRawPixelsRW(int[] stride) {
+  public Object getRawPixelsRW(int[] stride) {
     return desktop.getRawPixelsRW(stride);
   }
 
@@ -1027,10 +1027,6 @@ public class CConn extends CConnection
   }
 
   public void getOptions() {
-    if (opts.colors > 0)
-      formatChange = true;
-    opts.colors = -1;
-
     if (opts.allowJpeg != options.allowJpeg.isSelected())
       encodingChange = true;
     opts.allowJpeg = options.allowJpeg.isSelected();

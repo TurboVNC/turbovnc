@@ -99,7 +99,7 @@ public class Viewport extends JFrame
             if (cc.desktop.cursor != null) {
               Cursor cursor = cc.desktop.cursor;
               cc.setCursor(cursor.width(),cursor.height(),cursor.hotspot, 
-                           cursor.data, cursor.mask);
+                           (int[])cursor.data, cursor.mask);
             }
           }
         } else {
