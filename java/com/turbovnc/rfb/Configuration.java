@@ -46,7 +46,7 @@ public class Configuration {
   // - Set parameter to value (separated by "=")
   public static boolean setParam(String config) {
     boolean hyphen = false;
-    if (config.charAt(0) == '-') {
+    if (config.charAt(0) == '-' && config.length() > 1) {
       hyphen = true;
       if (config.charAt(1) == '-')
         config = config.substring(2); // allow gnu-style --<option>
