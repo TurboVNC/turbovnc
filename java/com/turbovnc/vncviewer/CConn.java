@@ -1052,18 +1052,9 @@ public class CConn extends CConnection
 
     int oldScalingFactor = opts.scalingFactor;
     opts.setScalingFactor(options.scalingFactor.getSelectedItem().toString());
-    if (opts.scalingFactor == Options.SCALE_AUTO ||
-        opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
-      if (desktop != null && opts.scalingFactor != oldScalingFactor &&
-        options.fullScreen.isSelected() == opts.fullScreen)
-        reconfigureViewport();
-    } else {
-      if (desktop != null && opts.scalingFactor != oldScalingFactor &&
-          oldScalingFactor != Options.SCALE_AUTO &&
-          oldScalingFactor != Options.SCALE_FIXEDRATIO &&
-          options.fullScreen.isSelected() == opts.fullScreen)
-        reconfigureViewport();
-    }
+    if (desktop != null && opts.scalingFactor != oldScalingFactor &&
+      options.fullScreen.isSelected() == opts.fullScreen)
+      recreateViewport();
 
     int index = options.span.getSelectedIndex();
     if (index >= 0 && index < Options.NUMSPANOPT)
