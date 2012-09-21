@@ -128,23 +128,84 @@ abstract public class InStream {
     readBytes(pix, 0, bytesPerPixel);
 
     if (bigEndian) {
-      return 0xff000000 | (pix[0] & 0xff)<<16 | (pix[1] & 0xff)<<8 | (pix[2] & 0xff);
+      return 0x000000ff | (pix[0] & 0xff)<<24 | (pix[1] & 0xff)<<16 | (pix[2] & 0xff)<<8;
     } else {
       return 0xff000000 | (pix[2] & 0xff)<<16 | (pix[1] & 0xff)<<8 | (pix[0] & 0xff);
     }
   }
 
-  public final void readPixels(int[] buf, int length, int bytesPerPixel, boolean bigEndian) {
-    int npixels = length*bytesPerPixel;
-    byte[] pixels = new byte[npixels];
-    readBytes(pixels, 0, npixels);
-    for (int i = 0; i < length; i++) {
-      byte[] pix = new byte[4];
-      System.arraycopy(pixels, i*bytesPerPixel, pix, 0, bytesPerPixel);
+  public final void readPixels(Object buf, int length, int bytesPerPixel,
+                               boolean bigEndian) {
+    int nbytes = length * bytesPerPixel;
+    int ptr = 0, srcPtr = 0;
+    byte[] pixels = new byte[nbytes];
+
+    readBytes(pixels, 0, nbytes);
+
+    if (bytesPerPixel == 1 && buf instanceof byte[]) {
+      System.arraycopy(pixels, 0, (byte[])buf, 0, length);
+    } else if (bytesPerPixel == 2 && buf instanceof short[]) {
       if (bigEndian) {
-        buf[i] = 0xff000000 | (pix[0] & 0xff)<<16 | (pix[1] & 0xff)<<8 | (pix[2] & 0xff);
+        while (length-- > 0) {
+          ((short[])buf)[ptr] = (short)((pixels[srcPtr++] & 0xff) << 8);
+          ((short[])buf)[ptr++] |= (pixels[srcPtr++] & 0xff);
+        }
       } else {
-        buf[i] = 0xff000000 | (pix[2] & 0xff)<<16 | (pix[1] & 0xff)<<8 | (pix[0] & 0xff);
+        while (length-- > 0) {
+          ((short[])buf)[ptr] = (short)(pixels[srcPtr++] & 0xff);
+          ((short[])buf)[ptr++] |= (pixels[srcPtr++] & 0xff) << 8;
+        }
+      }
+    } else if (bytesPerPixel == 3 && buf instanceof int[]) {
+      if (bigEndian) {
+        while (length-- > 0)
+          ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) << 24 |
+                                (pixels[srcPtr++] & 0xff) << 16 |
+                                (pixels[srcPtr++] & 0xff) << 8 |
+                                0x000000ff;
+      } else {
+        while (length-- > 0)
+          ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) |
+                                (pixels[srcPtr++] & 0xff) << 8 |
+                                (pixels[srcPtr++] & 0xff) << 16 |
+                                0xff000000;
+      }
+    } else if (bytesPerPixel == 4 && buf instanceof int[]) {
+      if (bigEndian) {
+        while (length-- > 0)
+          ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) << 24 |
+                                (pixels[srcPtr++] & 0xff) << 16 |
+                                (pixels[srcPtr++] & 0xff) << 8 |
+                                (pixels[srcPtr++] & 0xff);
+      } else {
+        while (length-- > 0)
+          ((int[])buf)[ptr++] = (pixels[srcPtr++] & 0xff) |
+                                (pixels[srcPtr++] & 0xff) << 8 |
+                                (pixels[srcPtr++] & 0xff) << 16 |
+                                (pixels[srcPtr++] & 0xff) << 24;
+      }
+    } else {
+      assert buf instanceof int[];
+      if (bigEndian) {
+        while (length-- > 0) {
+          byte[] pix = new byte[4];
+          System.arraycopy(pixels, srcPtr, pix, 0, bytesPerPixel);
+          ((int[])buf)[ptr++] = (pix[0] & 0xff) << 24 |
+                                (pix[1] & 0xff) << 16 |
+                                (pix[2] & 0xff) << 8 |
+                                0x000000ff;
+          srcPtr += bytesPerPixel;
+        }
+      } else {
+        while (length-- > 0) {
+          byte[] pix = new byte[4];
+          System.arraycopy(pixels, srcPtr, pix, 0, bytesPerPixel);
+          ((int[])buf)[ptr++] = (pix[0] & 0xff) |
+                                (pix[1] & 0xff) << 8 |
+                                (pix[2] & 0xff) << 16 |
+                                0xff000000;
+          srcPtr += bytesPerPixel;
+        }
       }
     }
   }

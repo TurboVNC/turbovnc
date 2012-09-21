@@ -83,6 +83,11 @@ public class TightDecoder extends Decoder {
     return tjd != null;
   }
 
+  short getShort(byte[] src, int srcPtr) {
+    return (short)((src[srcPtr++] & 0xff) |
+                   (src[srcPtr] & 0xff) << 8);
+  }
+
   public void readRect(Rect r, CMsgHandler handler) 
   {
     InStream is = reader.getInStream();
@@ -91,11 +96,8 @@ public class TightDecoder extends Decoder {
     serverpf = handler.cp.pf();
     int bpp = serverpf.bpp;
     cutZeros = false;
-    if (bpp == 32) {
-      if (serverpf.is888()) {
-        cutZeros = true;
-      }
-    }
+    if (bpp == 32 && serverpf.is888())
+      cutZeros = true;
 
     int comp_ctl = is.readU8();
 
@@ -140,9 +142,15 @@ public class TightDecoder extends Decoder {
       throw new Exception("TightDecoder: bad subencoding value received");
     }
 
+    int w = r.width(), h = r.height();
+    int stride[] = { w };
+    Object buf = handler.getRawPixelsRW(stride);
+    int pad = stride[0] - w;
+    int ptr = r.tl.y * stride[0] + r.tl.x;
+
     // "Basic" compression type.
     int palSize = 0;
-    int[] palette = new int[256];
+    Object palette = null;
     boolean useGradient = false;
 
     if ((comp_ctl & rfbTightExplicitFilter) != 0) {
@@ -155,8 +163,15 @@ public class TightDecoder extends Decoder {
         if (cutZeros) {
           tightPalette = new byte[256 * 3];
           is.readBytes(tightPalette, 0, palSize * 3);
-          serverpf.bufferFromRGB(palette, 0, tightPalette, 0, palSize);
+          palette = new int[256];
+          serverpf.bufferFromRGB((int[])palette, 0, tightPalette, 0, palSize);
         } else {
+          if (bpp == 8)
+            palette = new byte[256];
+          else if (bpp == 16)
+            palette = new short[256];
+          else
+            palette = new int[256];
           is.readPixels(palette, palSize, serverpf.bpp/8, serverpf.bigEndian);
         }
         break;
@@ -198,89 +213,137 @@ public class TightDecoder extends Decoder {
     byte[] netbuf = new byte[dataSize];
     input.readBytes(netbuf, 0, dataSize);
 
-    int w = r.width(), h = r.height();
-    int stride = w;
-    int pad = stride - w;
-    int[] buf = reader.getImageBuf(r.area());
+    int srcPtr = 0;
 
     if (palSize == 0) {
       // Truecolor data.
       if (useGradient) {
-        if (bpp == 32 && cutZeros) {
-          filterGradient24(netbuf, buf, stride, r);
+        if (cutZeros) {
+          filterGradient24(netbuf, (int[])buf, stride[0], r);
+        } else if (bpp == 16) {
+          filterGradient16(netbuf, (short[])buf, stride[0], r);
         } else {
-          filterGradient(netbuf, buf, stride, r);
+          // We should never get here
+          throw new Exception("Unsupported pixel type");
         }
       } else {
         // Copy
-        int ptr = 0;
-        int srcPtr = 0;
         if (cutZeros) {
-          serverpf.bufferFromRGB(buf, ptr, netbuf, srcPtr, w*h);
-        } else if (bpp == 8) {
+          serverpf.bufferFromRGB((int[])buf, r.tl.x, r.tl.y, stride[0], netbuf,
+                                 w, h);
+        } else if (buf instanceof byte[]) {
           while (h > 0) {
-            int endOfRow = ptr + w;
-            while (ptr < endOfRow)
-              buf[ptr++] = netbuf[srcPtr++] & 0xff;
-            ptr += pad;
+            System.arraycopy(netbuf, srcPtr, (byte[])buf, ptr, w);
+            ptr += stride[0];
+            srcPtr += w;
             h--;
           }
-        } else {
-          int pixelSize = bpp >= 24 ? 3 : bpp/8;
-          int maxShift = (pixelSize - 1) * 8;
+        } else if (buf instanceof short[]) {
           while (h > 0) {
             int endOfRow = ptr + w;
             while (ptr < endOfRow) {
-              buf[ptr] = (netbuf[srcPtr++] & 0xff);
-              int shift = 8;
-              while (shift <= maxShift) {
-                buf[ptr] |= (netbuf[srcPtr++] & 0xff) << shift;
-                shift += 8;
-              }
-              ptr++;
+              ((short[])buf)[ptr++] = getShort(netbuf, srcPtr);
+              srcPtr += 2;
             }
             ptr += pad;
             h--;
           }
+        } else {
+          // We should never get here
+          throw new Exception("Unsupported pixel type");
         }
       }
     } else {
       // Indexed color
-      int x, b;
-      int ptr = 0; 
-      int srcPtr = 0, bits;
+      int x, b, bits;
       if (palSize <= 2) {
         // 2-color palette
-        while (h > 0) {
-          for (x = 0; x < w / 8; x++) {
-            bits = netbuf[srcPtr++];
-            for(b = 7; b >= 0; b--) {
-              buf[ptr++] = palette[bits >> b & 1];
+        if (buf instanceof byte[]) {
+          while (h > 0) {
+            for (x = 0; x < w / 8; x++) {
+              bits = netbuf[srcPtr++];
+              for(b = 7; b >= 0; b--) {
+                ((byte[])buf)[ptr++] = ((byte[])palette)[bits >> b & 1];
+              }
             }
-          }
-          if (w % 8 != 0) {
-            bits = netbuf[srcPtr++];
-            for (b = 7; b >= 8 - w % 8; b--) {
-              buf[ptr++] = palette[bits >> b & 1];
+            if (w % 8 != 0) {
+              bits = netbuf[srcPtr++];
+              for (b = 7; b >= 8 - w % 8; b--) {
+                ((byte[])buf)[ptr++] = ((byte[])palette)[bits >> b & 1];
+              }
             }
+            ptr += pad;
+            h--;
           }
-          ptr += pad;
-          h--;
+        } else if (buf instanceof short[]) {
+          while (h > 0) {
+            for (x = 0; x < w / 8; x++) {
+              bits = netbuf[srcPtr++];
+              for(b = 7; b >= 0; b--) {
+                ((short[])buf)[ptr++] = ((short[])palette)[bits >> b & 1];
+              }
+            }
+            if (w % 8 != 0) {
+              bits = netbuf[srcPtr++];
+              for (b = 7; b >= 8 - w % 8; b--) {
+                ((short[])buf)[ptr++] = ((short[])palette)[bits >> b & 1];
+              }
+            }
+            ptr += pad;
+            h--;
+          }
+        } else {
+          while (h > 0) {
+            for (x = 0; x < w / 8; x++) {
+              bits = netbuf[srcPtr++];
+              for(b = 7; b >= 0; b--) {
+                ((int[])buf)[ptr++] = ((int[])palette)[bits >> b & 1];
+              }
+            }
+            if (w % 8 != 0) {
+              bits = netbuf[srcPtr++];
+              for (b = 7; b >= 8 - w % 8; b--) {
+                ((int[])buf)[ptr++] = ((int[])palette)[bits >> b & 1];
+              }
+            }
+            ptr += pad;
+            h--;
+          }
         }
       } else {
         // 256-color palette
-        while (h > 0) {
-          int endOfRow = ptr + w;
-          while (ptr < endOfRow) {
-            buf[ptr++] = palette[netbuf[srcPtr++] & 0xff];
+        if (buf instanceof byte[]) {
+          while (h > 0) {
+            int endOfRow = ptr + w;
+            while (ptr < endOfRow) {
+              ((byte[])buf)[ptr++] = ((byte[])palette)[netbuf[srcPtr++] & 0xff];
+            }
+            ptr += pad;
+            h--;
           }
-          ptr += pad;
-          h--;
+        } else if (buf instanceof short[]) {
+          while (h > 0) {
+            int endOfRow = ptr + w;
+            while (ptr < endOfRow) {
+              ((short[])buf)[ptr++] = ((short[])palette)[netbuf[srcPtr++] & 0xff];
+            }
+            ptr += pad;
+            h--;
+          }
+        } else {
+          while (h > 0) {
+            int endOfRow = ptr + w;
+            while (ptr < endOfRow) {
+              ((int[])buf)[ptr++] = ((int[])palette)[netbuf[srcPtr++] & 0xff];
+            }
+            ptr += pad;
+            h--;
+          }
         }
       }
     } 
 
-    handler.imageRect(r, buf);
+    handler.releaseRawPixels(r);
 
     if (streamId != -1) {
       zis[streamId].reset();
@@ -336,16 +399,8 @@ public class TightDecoder extends Decoder {
         } else {
           byte[] rgbBuf = new byte[r.width() * r.height() * 3];
           tjd.decompress(rgbBuf, r.width(), 0, r.height(), TJ.PF_RGB, 0);
-          if (data instanceof byte[])
-            pf.bufferFromRGB((byte[])data, r.tl.x, r.tl.y, stride[0], rgbBuf,
-                             r.width(), r.height());
-          else if (data instanceof short[])
-            pf.bufferFromRGB((short[])data, r.tl.x, r.tl.y, stride[0], rgbBuf,
-                             r.width(), r.height());
-          else
-            pf.bufferFromRGB((int[])data, r.tl.x, r.tl.y, stride[0], rgbBuf,
-                             r.width(), r.height());
-
+          pf.bufferFromRGB(data, r.tl.x, r.tl.y, stride[0], rgbBuf,
+                           r.width(), r.height());
         }
         handler.releaseRawPixels(r);
         return;
@@ -365,14 +420,18 @@ public class TightDecoder extends Decoder {
     jpeg.flush();
   }
 
+  /* NOTE: we support gradient encoding only for backward compatibility with
+     TightVNC 1.3.x.  It is decidedly non-optimal. */
+
   final private void filterGradient24(byte[] netbuf, int[] buf, int stride, 
                                       Rect r)
   {
 
     int x, y, c;
-    byte[] prevRow = new byte[TIGHT_MAX_WIDTH*3];
-    byte[] thisRow = new byte[TIGHT_MAX_WIDTH*3];
-    byte[] pix = new byte[3];
+    int ptr = r.tl.y * stride + r.tl.x;
+    int[] prevRow = new int[TIGHT_MAX_WIDTH * 3];
+    int[] thisRow = new int[TIGHT_MAX_WIDTH * 3];
+    int[] pix = new int[3];
     int[] est = new int[3];
 
     // Set up shortcut variables
@@ -382,39 +441,46 @@ public class TightDecoder extends Decoder {
     for (y = 0; y < rectHeight; y++) {
       /* First pixel in a row */
       for (c = 0; c < 3; c++) {
-        pix[c] = (byte)(netbuf[y*rectWidth*3+c] + prevRow[c]);
+        pix[c] = (netbuf[y * rectWidth * 3 + c] + prevRow[c]) & 0xff;
         thisRow[c] = pix[c];
       }
-      serverpf.bufferFromRGB(buf, y*stride, pix, 0, 1);
+      buf[ptr + y * stride] = serverpf.pixelFromRGB(pix[0], pix[1], pix[2],
+                                                    null);
 
       /* Remaining pixels of a row */
       for (x = 1; x < rectWidth; x++) {
         for (c = 0; c < 3; c++) {
-          est[c] = (int)(prevRow[x*3+c] + pix[c] - prevRow[(x-1)*3+c]);
+          est[c] = prevRow[x * 3 + c] + pix[c] - prevRow[(x - 1) * 3 + c];
           if (est[c] > 0xFF) {
             est[c] = 0xFF;
           } else if (est[c] < 0) {
             est[c] = 0;
           }
-          pix[c] = (byte)(netbuf[(y*rectWidth+x)*3+c] + est[c]);
-          thisRow[x*3+c] = pix[c];
+          pix[c] = (netbuf[(y * rectWidth + x) * 3 + c] + est[c]) & 0xff;
+          thisRow[x * 3 + c] = pix[c];
         }
-        serverpf.bufferFromRGB(buf, y*stride+x, pix, 0, 1);
+        buf[ptr + y * stride + x] = serverpf.pixelFromRGB(pix[0], pix[1],
+                                                          pix[2], null);
       }
 
       System.arraycopy(thisRow, 0, prevRow, 0, prevRow.length);
     }
   }
 
-  final private void filterGradient(byte[] netbuf, int[] buf, int stride, 
-                                    Rect r)
+  final private void filterGradient16(byte[] netbuf, short[] buf, int stride, 
+                                      Rect r)
   {
 
-    int x, y, c;
-    byte[] prevRow = new byte[TIGHT_MAX_WIDTH];
-    byte[] thisRow = new byte[TIGHT_MAX_WIDTH];
-    byte[] pix = new byte[3];
+    int x, y, c, p;
+    int ptr = r.tl.y * stride + r.tl.x;
+    int[] prevRow = new int[TIGHT_MAX_WIDTH * 3];
+    int[] thisRow = new int[TIGHT_MAX_WIDTH * 3];
+    int[] pix = new int[3];
     int[] est = new int[3];
+    int max[] = new int[] { serverpf.redMax, serverpf.greenMax,
+                            serverpf.blueMax };
+    int shift[] = new int[] { serverpf.redShift, serverpf.greenShift,
+                              serverpf.blueShift };
 
     // Set up shortcut variables
     int rectHeight = r.height();
@@ -422,34 +488,31 @@ public class TightDecoder extends Decoder {
 
     for (y = 0; y < rectHeight; y++) {
       /* First pixel in a row */
-      // FIXME
-      //serverpf.rgbFromBuffer(pix, 0, netbuf, y*rectWidth, 1, cm);
-      for (c = 0; c < 3; c++)
-        pix[c] += prevRow[c];
+      p = getShort(netbuf, y * rectWidth * 2);
+      for (c = 0; c < 3; c++) {
+        pix[c] = ((p >> shift[c]) + prevRow[c]) & max[c];
+        thisRow[c] = pix[c];
+      }
+      buf[ptr + y * stride] = (short)((pix[0] << shift[0]) |
+                                      (pix[1] << shift[1]) |
+                                      (pix[2] << shift[2]));
 
-      System.arraycopy(pix, 0, thisRow, 0, pix.length);
-
-      serverpf.bufferFromRGB(buf, y*stride, pix, 0, 1);
-      
       /* Remaining pixels of a row */
       for (x = 1; x < rectWidth; x++) {
+        p = getShort(netbuf, (y * rectWidth + x) * 2);
         for (c = 0; c < 3; c++) {
-          est[c] = (int)(prevRow[x*3+c] + pix[c] - prevRow[(x-1)*3+c]);
-          if (est[c] > 0xff) {
-            est[c] = 0xff;
+          est[c] = prevRow[x * 3 + c] + pix[c] - prevRow[(x - 1) * 3 + c];
+          if (est[c] > max[c]) {
+            est[c] = max[c];
           } else if (est[c] < 0) {
             est[c] = 0;
           }
+          pix[c] = ((p >> shift[c]) + est[c]) & max[c];
+          thisRow[x * 3 + c] = pix[c];
         }
-
-        // FIXME
-        //serverpf.rgbFromBuffer(pix, 0, netbuf, y*rectWidth+x, 1, cm);
-        for (c = 0; c < 3; c++)
-          pix[c] += est[c];
-
-        System.arraycopy(pix, 0, thisRow, x*3, pix.length);
-
-        serverpf.bufferFromRGB(buf, y*stride+x, pix, 0, 1);
+        buf[ptr + y * stride + x] = (short)((pix[0] << shift[0]) |
+                                            (pix[1] << shift[1]) |
+                                            (pix[2] << shift[2]));
       }
 
       System.arraycopy(thisRow, 0, prevRow, 0, prevRow.length);
@@ -460,7 +523,7 @@ public class TightDecoder extends Decoder {
   private ZlibInStream[] zis;
   private PixelFormat serverpf;
   private PixelFormat clientpf;
-  static LogWriter vlog = new LogWriter("TightDecoder");
   private TJDecompressor tjd;
 
+  static LogWriter vlog = new LogWriter("TightDecoder");
 }

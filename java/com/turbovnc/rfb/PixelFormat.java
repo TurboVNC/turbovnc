@@ -108,7 +108,9 @@ public class PixelFormat {
 
   public int pixelFromRGB(int red, int green, int blue, ColorModel cm) 
   {
-    if (trueColour) {
+    if (is888()) {
+      return (red << redShift) | (green << greenShift) | (blue << blueShift);
+    } else if (trueColour) {
       int r = (red   * redMax     + 127) / 255;
       int g = (green * greenMax   + 127) / 255;
       int b = (blue  * blueMax    + 127) / 255;
@@ -167,6 +169,16 @@ public class PixelFormat {
         dst[dstPtr++] = pixelFromRGB(r, g, b, null);
       }
     }
+  }
+
+  public void bufferFromRGB(Object dst, int x, int y, int stride,
+                            byte[] src, int w, int h) {
+    if (dst instanceof byte[])
+      bufferFromRGB((byte[])dst, x, y, stride, src, w, h);
+    else if (dst instanceof short[])
+      bufferFromRGB((short[])dst, x, y, stride, src, w, h);
+    else
+      bufferFromRGB((int[])dst, x, y, stride, src, w, h);
   }
 
   public void bufferFromRGB(int[] dst, int x, int y, int stride,
