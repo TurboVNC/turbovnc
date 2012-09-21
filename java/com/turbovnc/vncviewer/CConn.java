@@ -68,6 +68,8 @@ public class CConn extends CConnection
     new PixelFormat(8, 6, false, true, 3, 3, 3, 4, 2, 0);
   static final PixelFormat mediumColourPF = 
     new PixelFormat(8, 8, false, true, 7, 7, 3, 5, 2, 0);
+  static final PixelFormat highColourPF = 
+    new PixelFormat(16, 16, false, true, 31, 63, 31, 11, 5, 0);
 
   static final double getTime() {
     return (double)System.nanoTime() / 1.0e9;
@@ -266,8 +268,10 @@ public class CConn extends CConnection
           pendingPF = verylowColourPF;
         } else if (opts.colors == 64) {
           pendingPF = lowColourPF;
-        } else {
+        } else if (opts.colors == 256) {
           pendingPF = mediumColourPF;
+        } else {
+          pendingPF = highColourPF;
         }
       }
       pendingPFChange = true;
@@ -717,8 +721,10 @@ public class CConn extends CConnection
           pf = verylowColourPF;
         } else if (opts.colors == 64) {
           pf = lowColourPF;
-        } else {
+        } else if (opts.colors == 256) {
           pf = mediumColourPF;
+        } else {
+          pf = highColourPF;
         }
       }
 

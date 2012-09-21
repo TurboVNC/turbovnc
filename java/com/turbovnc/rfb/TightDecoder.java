@@ -198,7 +198,9 @@ public class TightDecoder extends Decoder {
     byte[] netbuf = new byte[dataSize];
     input.readBytes(netbuf, 0, dataSize);
 
-    int stride = r.width();
+    int w = r.width(), h = r.height();
+    int stride = w;
+    int pad = stride - w;
     int[] buf = reader.getImageBuf(r.area());
 
     if (palSize == 0) {
@@ -211,32 +213,40 @@ public class TightDecoder extends Decoder {
         }
       } else {
         // Copy
-        int h = r.height();
         int ptr = 0;
         int srcPtr = 0;
-        int w = r.width();
         if (cutZeros) {
           serverpf.bufferFromRGB(buf, ptr, netbuf, srcPtr, w*h);
-        } else {
-          int pixelSize = (bpp >= 24) ? 3 : bpp/8;
+        } else if (bpp == 8) {
           while (h > 0) {
-            for (int i = 0; i < w; i++) {
-              if (bpp == 8) {
-                buf[ptr+i] = netbuf[srcPtr+i] & 0xff;
-              } else {
-                for (int j = pixelSize-1; j >= 0; j--)
-                  buf[ptr+i] |= ((netbuf[srcPtr+i+j] & 0xff) << j*8);
+            int endOfRow = ptr + w;
+            while (ptr < endOfRow)
+              buf[ptr++] = netbuf[srcPtr++] & 0xff;
+            ptr += pad;
+            h--;
+          }
+        } else {
+          int pixelSize = bpp >= 24 ? 3 : bpp/8;
+          int maxShift = (pixelSize - 1) * 8;
+          while (h > 0) {
+            int endOfRow = ptr + w;
+            while (ptr < endOfRow) {
+              buf[ptr] = (netbuf[srcPtr++] & 0xff);
+              int shift = 8;
+              while (shift <= maxShift) {
+                buf[ptr] |= (netbuf[srcPtr++] & 0xff) << shift;
+                shift += 8;
               }
+              ptr++;
             }
-            ptr += stride;
-            srcPtr += w * pixelSize;
+            ptr += pad;
             h--;
           }
         }
       }
     } else {
       // Indexed color
-      int x, h = r.height(), w = r.width(), b, pad = stride - w;
+      int x, b;
       int ptr = 0; 
       int srcPtr = 0, bits;
       if (palSize <= 2) {
@@ -328,6 +338,9 @@ public class TightDecoder extends Decoder {
           tjd.decompress(rgbBuf, r.width(), 0, r.height(), TJ.PF_RGB, 0);
           if (data instanceof byte[])
             pf.bufferFromRGB((byte[])data, r.tl.x, r.tl.y, stride[0], rgbBuf,
+                             r.width(), r.height());
+          else if (data instanceof short[])
+            pf.bufferFromRGB((short[])data, r.tl.x, r.tl.y, stride[0], rgbBuf,
                              r.width(), r.height());
           else
             pf.bufferFromRGB((int[])data, r.tl.x, r.tl.y, stride[0], rgbBuf,

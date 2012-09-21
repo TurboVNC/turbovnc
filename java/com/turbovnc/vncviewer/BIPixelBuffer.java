@@ -68,6 +68,8 @@ public class BIPixelBuffer extends PlatformPixelBuffer implements ImageObserver
       data = (Object)((DataBufferInt)db).getData();
     else if (sm.getTransferType() == DataBuffer.TYPE_BYTE)
       data = (Object)((DataBufferByte)db).getData();
+    else if (sm.getTransferType() == DataBuffer.TYPE_USHORT)
+      data = (Object)((DataBufferUShort)db).getData();
     else
       throw new Exception("Unsupported pixel type");
   }
@@ -109,6 +111,12 @@ public class BIPixelBuffer extends PlatformPixelBuffer implements ImageObserver
         for (int i = 0; i < bytes.length; i++)
           bytes[i] = (byte)((int[])pix)[i];
         pix = bytes;
+      } else if (image.getSampleModel().getTransferType() ==
+                 DataBuffer.TYPE_USHORT) {
+        short[] shorts = new short[((int[])pix).length];
+        for (int i = 0; i < shorts.length; i++)
+          shorts[i] = (short)((int[])pix)[i];
+        pix = shorts;
       }
       image.getSampleModel().setDataElements(x, y, w, h, pix, db);
     }

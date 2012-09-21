@@ -52,13 +52,17 @@ abstract public class PlatformPixelBuffer extends PixelBuffer
       ByteOrder byteOrder = ByteOrder.nativeOrder();
       boolean bigEndian = (byteOrder == ByteOrder.BIG_ENDIAN ? true : false);
       boolean trueColour = (depth > 8 ? true : false);
-      int redShift    = cm.getComponentSize()[0] + cm.getComponentSize()[1];
-      int greenShift  = cm.getComponentSize()[0];
+      int rgb[] = cm.getComponentSize();
+      int redShift    = rgb[0] + rgb[1];
+      int greenShift  = rgb[0];
       int blueShift   = 0;
+      int redMax = (1 << rgb[0]) - 1;
+      int greenMax = (1 << rgb[1]) - 1;
+      int blueMax = (1 << rgb[2]) - 1;
       pf = new PixelFormat(bpp, depth, bigEndian, trueColour,
-        (depth > 8 ? 0xff : 0),
-        (depth > 8 ? 0xff : 0),
-        (depth > 8 ? 0xff : 0),
+        (depth > 8 ? redMax : 0),
+        (depth > 8 ? greenMax : 0),
+        (depth > 8 ? blueMax : 0),
         (depth > 8 ? redShift : 0),
         (depth > 8 ? greenShift : 0),
         (depth > 8 ? blueShift : 0));

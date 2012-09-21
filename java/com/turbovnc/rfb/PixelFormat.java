@@ -157,7 +157,7 @@ public class PixelFormat {
                         ((src[srcPtr++] & 0xff) << bshift);
     } else {
       // Generic code
-      int p, r, g, b;
+      int r, g, b;
 
       while (pixels-- != 0) {
         r = src[srcPtr++] & 0xff;
@@ -195,7 +195,7 @@ public class PixelFormat {
       }
     } else {
       // Generic code
-      int p, r, g, b;
+      int r, g, b;
 
       int dstPad = stride - w;
       while (h > 0) {
@@ -219,7 +219,7 @@ public class PixelFormat {
     int dstPtr = y * stride + x, srcPtr = 0;
 
     // Generic code
-    int p, r, g, b;
+    int r, g, b;
 
     int dstPad = stride - w;
     while (h > 0) {
@@ -230,7 +230,30 @@ public class PixelFormat {
         g = src[srcPtr++] & 0xff;
         b = src[srcPtr++] & 0xff;
 
-        dst[dstPtr++] = (byte)(pixelFromRGB(r, g, b, null) & 0xff);
+        dst[dstPtr++] = (byte)pixelFromRGB(r, g, b, null);
+      }
+      dstPtr += dstPad;
+      h--;
+    }
+  }
+
+  public void bufferFromRGB(short[] dst, int x, int y, int stride,
+                            byte[] src, int w, int h) {
+    int dstPtr = y * stride + x, srcPtr = 0;
+
+    // Generic code
+    int r, g, b;
+
+    int dstPad = stride - w;
+    while (h > 0) {
+      int dstEndOfRow = dstPtr + w;
+
+      while (dstPtr < dstEndOfRow) {
+        r = src[srcPtr++] & 0xff;
+        g = src[srcPtr++] & 0xff;
+        b = src[srcPtr++] & 0xff;
+
+        dst[dstPtr++] = (short)pixelFromRGB(r, g, b, null);
       }
       dstPtr += dstPad;
       h--;

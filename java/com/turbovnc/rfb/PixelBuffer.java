@@ -51,7 +51,7 @@ public class PixelBuffer {
         cm = new IndexColorModel(8, 256, new byte[256], new byte[256], new byte[256]);
       break;
     case 16: 
-      cm = new DirectColorModel(32, 0xF800, 0x07C0, 0x003E);
+      cm = new DirectColorModel(16, 0xF800, 0x07E0, 0x001F);
       break;
     case 24: 
       cm = new DirectColorModel(32, (0xff << 16), (0xff << 8), 0xff);
