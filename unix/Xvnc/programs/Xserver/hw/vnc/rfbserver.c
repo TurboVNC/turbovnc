@@ -116,8 +116,8 @@ alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
     int tightCompressLevelSave, tightQualityLevelSave, copyDXSave, copyDYSave,
         tightSubsampLevelSave;
 
-    if(!cl->firstUpdate && REGION_NOTEMPTY(pScreen, &cl->lossyRegion)
-        && (!putImageOnly || cl->alrTrigger)) {
+    if (!cl->firstUpdate && REGION_NOTEMPTY(pScreen, &cl->lossyRegion) &&
+        (!putImageOnly || cl->alrTrigger)) {
 
         tightCompressLevelSave = cl->tightCompressLevel;
         tightQualityLevelSave = cl->tightQualityLevel;
@@ -206,17 +206,17 @@ rfbReverseConnection(host, port)
     rfbClientPtr cl;
 
     if (rfbAuthDisableRevCon) {
-    	rfbLog("Reverse connections disabled\n");
-	return (rfbClientPtr)NULL;
+        rfbLog("Reverse connections disabled\n");
+        return (rfbClientPtr)NULL;
     }
 
     if ((sock = rfbConnect(host, port)) < 0)
-	return (rfbClientPtr)NULL;
+        return (rfbClientPtr)NULL;
 
     cl = rfbNewClient(sock);
 
     if (cl) {
-	cl->reverseConnection = TRUE;
+        cl->reverseConnection = TRUE;
     }
 
     return cl;
@@ -242,21 +242,21 @@ rfbNewClient(sock)
     char *env = NULL;
 
     if (rfbClientHead == NULL) {
-	/* no other clients - make sure we don't think any keys are pressed */
-	KbdReleaseAllKeys();
+        /* no other clients - make sure we don't think any keys are pressed */
+        KbdReleaseAllKeys();
     } else {
-	rfbLog("  (other clients");
-	for (cl = rfbClientHead; cl; cl = cl->next) {
-	    fprintf(stderr," %s",cl->host);
-	}
-	fprintf(stderr,")\n");
+        rfbLog("  (other clients");
+        for (cl = rfbClientHead; cl; cl = cl->next) {
+            fprintf(stderr, " %s", cl->host);
+        }
+        fprintf(stderr, ")\n");
     }
 
     cl = (rfbClientPtr)xalloc(sizeof(rfbClientRec));
     if (cl == NULL) {
-	rfbLog("rfbNewClient: out of memory");
-	rfbCloseSock(cl->sock);
-	return NULL;
+        rfbLog("rfbNewClient: out of memory");
+        rfbCloseSock(cl->sock);
+        return NULL;
     }
 
     cl->sock = sock;
@@ -278,16 +278,16 @@ rfbNewClient(sock)
     cl->paletteHelper = NULL;
     cl->zrleBeforeBuf = NULL;
 
-    REGION_INIT(pScreen,&cl->copyRegion,NullBox,0);
+    REGION_INIT(pScreen, &cl->copyRegion, NullBox, 0);
     cl->copyDX = 0;
     cl->copyDY = 0;
 
     box.x1 = box.y1 = 0;
     box.x2 = rfbScreen.width;
     box.y2 = rfbScreen.height;
-    REGION_INIT(pScreen,&cl->modifiedRegion,&box,0);
+    REGION_INIT(pScreen, &cl->modifiedRegion, &box, 0);
 
-    REGION_INIT(pScreen,&cl->requestedRegion,NullBox,0);
+    REGION_INIT(pScreen, &cl->requestedRegion, NullBox, 0);
 
     cl->deferredUpdateScheduled = FALSE;
     cl->deferredUpdateTimer = NULL;
@@ -327,22 +327,22 @@ rfbNewClient(sock)
     sprintf(pv, rfbProtocolVersionFormat, 3, 8);
 
     if (WriteExact(sock, pv, sz_rfbProtocolVersionMsg) < 0) {
-	rfbLogPerror("rfbNewClient: write");
-	rfbCloseSock(sock);
-	return NULL;
+        rfbLogPerror("rfbNewClient: write");
+        rfbCloseSock(sock);
+        return NULL;
     }
 
-    if((env = getenv("TVNC_PROFILE"))!=NULL && !strcmp(env, "1"))
+    if ((env = getenv("TVNC_PROFILE")) != NULL && !strcmp(env, "1"))
         rfbProfile = TRUE;
-    if((env = getenv("TVNC_CUCOPYAREA"))!=NULL && !strcmp(env, "1"))
+    if ((env = getenv("TVNC_CUCOPYAREA")) != NULL && !strcmp(env, "1"))
         cuCopyArea = TRUE;
 
     cl->firstUpdate = TRUE;
     cl->alrTimer = NULL;
 
-    if(rfbAutoLosslessRefresh > 0.0) {
+    if (rfbAutoLosslessRefresh > 0.0) {
         REGION_INIT(pScreen, &cl->lossyRegion, NullBox, 0);
-        if((env = getenv("TVNC_ALRALL"))!=NULL && !strcmp(env, "1"))
+        if ((env = getenv("TVNC_ALRALL")) != NULL && !strcmp(env, "1"))
             putImageOnly = FALSE;
         cl->putImageTrigger = cl->alrTrigger = FALSE;
     }
@@ -371,51 +371,51 @@ rfbClientConnectionGone(sock)
     int i;
 
     for (prev = NULL, cl = rfbClientHead; cl; prev = cl, cl = cl->next) {
-	if (sock == cl->sock)
-	    break;
+        if (sock == cl->sock)
+            break;
     }
 
     if (!cl) {
-	rfbLog("rfbClientConnectionGone: unknown socket %d\n",sock);
-	return;
+        rfbLog("rfbClientConnectionGone: unknown socket %d\n", sock);
+        return;
     }
 
     TimerFree(cl->alrTimer);
     TimerFree(cl->deferredUpdateTimer);
 
     if (cl->login != NULL) {
-	rfbLog("Client %s (%s) gone\n", cl->login, cl->host);
-	free(cl->login);
+        rfbLog("Client %s (%s) gone\n", cl->login, cl->host);
+        free(cl->login);
     } else {
-	rfbLog("Client %s gone\n", cl->host);
+        rfbLog("Client %s gone\n", cl->host);
     }
     free(cl->host);
 
     ShutdownTightThreads();
 
-    if(rfbAutoLosslessRefresh > 0.0)
-	REGION_UNINIT(pScreen,&cl->lossyRegion);
+    if (rfbAutoLosslessRefresh > 0.0)
+        REGION_UNINIT(pScreen, &cl->lossyRegion);
 
     /* Release the compression state structures if any. */
     if ( cl->compStreamInited == TRUE ) {
-	deflateEnd( &(cl->compStream) );
+        deflateEnd( &(cl->compStream) );
     }
 
     for (i = 0; i < 4; i++) {
-	if (cl->zsActive[i])
-	    deflateEnd(&cl->zsStruct[i]);
+        if (cl->zsActive[i])
+            deflateEnd(&cl->zsStruct[i]);
     }
 
     if (pointerClient == cl)
-	pointerClient = NULL;
+        pointerClient = NULL;
 
     if (prev)
-	prev->next = cl->next;
+        prev->next = cl->next;
     else
-	rfbClientHead = cl->next;
+        rfbClientHead = cl->next;
 
-    REGION_UNINIT(pScreen,&cl->copyRegion);
-    REGION_UNINIT(pScreen,&cl->modifiedRegion);
+    REGION_UNINIT(pScreen, &cl->copyRegion);
+    REGION_UNINIT(pScreen, &cl->modifiedRegion);
 
     rfbPrintStats(cl);
 
@@ -424,7 +424,7 @@ rfbClientConnectionGone(sock)
     rfbFreeZrleData(cl);
 
     if (cl->cutText)
-	xfree(cl->cutText);
+        xfree(cl->cutText);
 
     xfree(cl);
 
@@ -446,37 +446,37 @@ rfbProcessClientMessage(sock)
     rfbClientPtr cl;
 
     for (cl = rfbClientHead; cl; cl = cl->next) {
-	if (sock == cl->sock)
-	    break;
+        if (sock == cl->sock)
+            break;
     }
 
     if (!cl) {
-	rfbLog("rfbProcessClientMessage: unknown socket %d\n",sock);
-	rfbCloseSock(sock);
-	return;
+        rfbLog("rfbProcessClientMessage: unknown socket %d\n", sock);
+        rfbCloseSock(sock);
+        return;
     }
 
     switch (cl->state) {
     case RFB_PROTOCOL_VERSION:
-	rfbProcessClientProtocolVersion(cl);
-	break;
-    case RFB_SECURITY_TYPE:	/* protocol versions 3.7 and above */
-	rfbProcessClientSecurityType(cl);
-	break;
-    case RFB_TUNNELING_TYPE:	/* protocol versions 3.7t, 3.8t */
-	rfbProcessClientTunnelingType(cl);
-	break;
-    case RFB_AUTH_TYPE:		/* protocol versions 3.7t, 3.8t */
-	rfbProcessClientAuthType(cl);
-	break;
+        rfbProcessClientProtocolVersion(cl);
+        break;
+    case RFB_SECURITY_TYPE:     /* protocol versions 3.7 and above */
+        rfbProcessClientSecurityType(cl);
+        break;
+    case RFB_TUNNELING_TYPE:    /* protocol versions 3.7t, 3.8t */
+        rfbProcessClientTunnelingType(cl);
+        break;
+    case RFB_AUTH_TYPE:         /* protocol versions 3.7t, 3.8t */
+        rfbProcessClientAuthType(cl);
+        break;
     case RFB_AUTHENTICATION:
-	rfbAuthProcessResponse(cl);
-	break;
+        rfbAuthProcessResponse(cl);
+        break;
     case RFB_INITIALISATION:
-	rfbProcessClientInitMessage(cl);
-	break;
+        rfbProcessClientInitMessage(cl);
+        break;
     default:
-	rfbProcessClientNormalMessage(cl);
+        rfbProcessClientNormalMessage(cl);
     }
 }
 
@@ -494,40 +494,40 @@ rfbProcessClientProtocolVersion(cl)
     int n, major, minor;
 
     if ((n = ReadExact(cl->sock, pv, sz_rfbProtocolVersionMsg)) <= 0) {
-	if (n == 0)
-	    rfbLog("rfbProcessClientProtocolVersion: client gone\n");
-	else
-	    rfbLogPerror("rfbProcessClientProtocolVersion: read");
-	rfbCloseSock(cl->sock);
-	return;
+        if (n == 0)
+            rfbLog("rfbProcessClientProtocolVersion: client gone\n");
+        else
+            rfbLogPerror("rfbProcessClientProtocolVersion: read");
+        rfbCloseSock(cl->sock);
+        return;
     }
 
     pv[sz_rfbProtocolVersionMsg] = 0;
-    if (sscanf(pv,rfbProtocolVersionFormat,&major,&minor) != 2) {
-	rfbLog("rfbProcessClientProtocolVersion: not a valid RFB client\n");
-	rfbCloseSock(cl->sock);
-	return;
+    if (sscanf(pv, rfbProtocolVersionFormat, &major, &minor) != 2) {
+        rfbLog("rfbProcessClientProtocolVersion: not a valid RFB client\n");
+        rfbCloseSock(cl->sock);
+        return;
     }
     if (major != 3) {
-	rfbLog("Unsupported protocol version %d.%d\n", major, minor);
-	rfbCloseSock(cl->sock);
-	return;
+        rfbLog("Unsupported protocol version %d.%d\n", major, minor);
+        rfbCloseSock(cl->sock);
+        return;
     }
 
     /* Always use one of the three standard versions of the RFB protocol. */
     cl->protocol_minor_ver = minor;
-    if (minor > 8) {		/* buggy client */
-	cl->protocol_minor_ver = 8;
+    if (minor > 8) {            /* buggy client */
+        cl->protocol_minor_ver = 8;
     } else if (minor > 3 && minor < 7) { /* non-standard client */
-	cl->protocol_minor_ver = 3;
-    } else if (minor < 3) {	/* ancient client */
-	cl->protocol_minor_ver = 3;
+        cl->protocol_minor_ver = 3;
+    } else if (minor < 3) {     /* ancient client */
+        cl->protocol_minor_ver = 3;
     }
     if (cl->protocol_minor_ver != minor) {
-	rfbLog("Non-standard protocol version 3.%d, using 3.%d instead\n",
-	       minor, cl->protocol_minor_ver);
+        rfbLog("Non-standard protocol version 3.%d, using 3.%d instead\n",
+               minor, cl->protocol_minor_ver);
     } else {
-	rfbLog("Using protocol version 3.%d\n", cl->protocol_minor_ver);
+        rfbLog("Using protocol version 3.%d\n", cl->protocol_minor_ver);
     }
 
     /* TightVNC protocol extensions are not enabled yet. */
@@ -552,13 +552,13 @@ rfbProcessClientInitMessage(cl)
     int len, n;
     rfbClientPtr otherCl, nextCl;
 
-    if ((n = ReadExact(cl->sock, (char *)&ci,sz_rfbClientInitMsg)) <= 0) {
-	if (n == 0)
-	    rfbLog("rfbProcessClientInitMessage: client gone\n");
-	else
-	    rfbLogPerror("rfbProcessClientInitMessage: read");
-	rfbCloseSock(cl->sock);
-	return;
+    if ((n = ReadExact(cl->sock, (char *)&ci, sz_rfbClientInitMsg)) <= 0) {
+        if (n == 0)
+            rfbLog("rfbProcessClientInitMessage: client gone\n");
+        else
+            rfbLogPerror("rfbProcessClientInitMessage: read");
+        rfbCloseSock(cl->sock);
+        return;
     }
 
     si->framebufferWidth = Swap16IfLE(rfbScreen.width);
@@ -568,8 +568,8 @@ rfbProcessClientInitMessage(cl)
     si->format.greenMax = Swap16IfLE(si->format.greenMax);
     si->format.blueMax = Swap16IfLE(si->format.blueMax);
 
-    if (strlen(desktopName) > 128)	/* sanity check on desktop name len */
-	desktopName[128] = 0;
+    if (strlen(desktopName) > 128)      /* sanity check on desktop name len */
+        desktopName[128] = 0;
 
     sprintf(buf + sz_rfbServerInitMsg, "%s", desktopName);
 
@@ -577,39 +577,39 @@ rfbProcessClientInitMessage(cl)
     si->nameLength = Swap32IfLE(len);
 
     if (WriteExact(cl->sock, buf, sz_rfbServerInitMsg + len) < 0) {
-	rfbLogPerror("rfbProcessClientInitMessage: write");
-	rfbCloseSock(cl->sock);
-	return;
+        rfbLogPerror("rfbProcessClientInitMessage: write");
+        rfbCloseSock(cl->sock);
+        return;
     }
 
     if (cl->protocol_tightvnc)
-	rfbSendInteractionCaps(cl); /* protocol 3.7t */
+        rfbSendInteractionCaps(cl); /* protocol 3.7t */
 
     /* Dispatch client input to rfbProcessClientNormalMessage(). */
     cl->state = RFB_NORMAL;
 
     if (!cl->reverseConnection &&
-			(rfbNeverShared || (!rfbAlwaysShared && !ci.shared))) {
+                        (rfbNeverShared || (!rfbAlwaysShared && !ci.shared))) {
 
-	if (rfbDontDisconnect) {
-	    for (otherCl = rfbClientHead; otherCl; otherCl = otherCl->next) {
-		if ((otherCl != cl) && (otherCl->state == RFB_NORMAL)) {
-		    rfbLog("-dontdisconnect: Not shared & existing client\n");
-		    rfbLog("  refusing new client %s\n", cl->host);
-		    rfbCloseSock(cl->sock);
-		    return;
-		}
-	    }
-	} else {
-	    for (otherCl = rfbClientHead; otherCl; otherCl = nextCl) {
-		nextCl = otherCl->next;
-		if ((otherCl != cl) && (otherCl->state == RFB_NORMAL)) {
-		    rfbLog("Not shared - closing connection to client %s\n",
-			   otherCl->host);
-		    rfbCloseSock(otherCl->sock);
-		}
-	    }
-	}
+        if (rfbDontDisconnect) {
+            for (otherCl = rfbClientHead; otherCl; otherCl = otherCl->next) {
+                if ((otherCl != cl) && (otherCl->state == RFB_NORMAL)) {
+                    rfbLog("-dontdisconnect: Not shared & existing client\n");
+                    rfbLog("  refusing new client %s\n", cl->host);
+                    rfbCloseSock(cl->sock);
+                    return;
+                }
+            }
+        } else {
+            for (otherCl = rfbClientHead; otherCl; otherCl = nextCl) {
+                nextCl = otherCl->next;
+                if ((otherCl != cl) && (otherCl->state == RFB_NORMAL)) {
+                    rfbLog("Not shared - closing connection to client %s\n",
+                           otherCl->host);
+                    rfbCloseSock(otherCl->sock);
+                }
+            }
+        }
     }
 }
 
@@ -649,9 +649,9 @@ rfbSendInteractionCaps(cl)
     SetCapInfo(&smsg_list[i++], rfbFileUploadCancel,       rfbTightVncVendor);
     SetCapInfo(&smsg_list[i++], rfbFileDownloadFailed,     rfbTightVncVendor);
     if (i != N_SMSG_CAPS) {
-	rfbLog("rfbSendInteractionCaps: assertion failed, i != N_SMSG_CAPS\n");
-	rfbCloseSock(cl->sock);
-	return;
+        rfbLog("rfbSendInteractionCaps: assertion failed, i != N_SMSG_CAPS\n");
+        rfbCloseSock(cl->sock);
+        return;
     }
     */
 
@@ -667,9 +667,9 @@ rfbSendInteractionCaps(cl)
     */
     SetCapInfo(&cmsg_list[i++], rfbEnableContinuousUpdates, rfbTightVncVendor);
     if (i != N_CMSG_CAPS) {
-	rfbLog("rfbSendInteractionCaps: assertion failed, i != N_CMSG_CAPS\n");
-	rfbCloseSock(cl->sock);
-	return;
+        rfbLog("rfbSendInteractionCaps: assertion failed, i != N_CMSG_CAPS\n");
+        rfbCloseSock(cl->sock);
+        return;
     }
 
     /* Encoding types. */
@@ -691,21 +691,21 @@ rfbSendInteractionCaps(cl)
     SetCapInfo(&enc_list[i++],  rfbEncodingPointerPos,     rfbTightVncVendor);
     SetCapInfo(&enc_list[i++],  rfbEncodingLastRect,       rfbTightVncVendor);
     if (i != N_ENC_CAPS) {
-	rfbLog("rfbSendInteractionCaps: assertion failed, i != N_ENC_CAPS\n");
-	rfbCloseSock(cl->sock);
-	return;
+        rfbLog("rfbSendInteractionCaps: assertion failed, i != N_ENC_CAPS\n");
+        rfbCloseSock(cl->sock);
+        return;
     }
 
     /* Send header and capability lists */
     if (WriteExact(cl->sock, (char *)&intr_caps,
-		   sz_rfbInteractionCapsMsg) < 0 ||
-	WriteExact(cl->sock, (char *)&cmsg_list[0],
-		   sz_rfbCapabilityInfo * N_CMSG_CAPS) < 0 ||
-	WriteExact(cl->sock, (char *)&enc_list[0],
-		   sz_rfbCapabilityInfo * N_ENC_CAPS) < 0) {
-	rfbLogPerror("rfbSendInteractionCaps: write");
-	rfbCloseSock(cl->sock);
-	return;
+                   sz_rfbInteractionCapsMsg) < 0 ||
+        WriteExact(cl->sock, (char *)&cmsg_list[0],
+                   sz_rfbCapabilityInfo * N_CMSG_CAPS) < 0 ||
+        WriteExact(cl->sock, (char *)&enc_list[0],
+                   sz_rfbCapabilityInfo * N_ENC_CAPS) < 0) {
+        rfbLogPerror("rfbSendInteractionCaps: write");
+        rfbCloseSock(cl->sock);
+        return;
     }
 
     /* Dispatch client input to rfbProcessClientNormalMessage(). */
@@ -727,396 +727,396 @@ rfbProcessClientNormalMessage(cl)
     char *str;
 
     if ((n = ReadExact(cl->sock, (char *)&msg, 1)) <= 0) {
-	if (n != 0)
-	    rfbLogPerror("rfbProcessClientNormalMessage: read");
-	rfbCloseSock(cl->sock);
-	return;
+        if (n != 0)
+            rfbLogPerror("rfbProcessClientNormalMessage: read");
+        rfbCloseSock(cl->sock);
+        return;
     }
 
     switch (msg.type) {
 
     case rfbSetPixelFormat:
 
-	if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
-			   sz_rfbSetPixelFormatMsg - 1)) <= 0) {
-	    if (n != 0)
-		rfbLogPerror("rfbProcessClientNormalMessage: read");
-	    rfbCloseSock(cl->sock);
-	    return;
-	}
+        if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
+                           sz_rfbSetPixelFormatMsg - 1)) <= 0) {
+            if (n != 0)
+                rfbLogPerror("rfbProcessClientNormalMessage: read");
+            rfbCloseSock(cl->sock);
+            return;
+        }
 
-	cl->format.bitsPerPixel = msg.spf.format.bitsPerPixel;
-	cl->format.depth = msg.spf.format.depth;
-	cl->format.bigEndian = (msg.spf.format.bigEndian ? 1 : 0);
-	cl->format.trueColour = (msg.spf.format.trueColour ? 1 : 0);
-	cl->format.redMax = Swap16IfLE(msg.spf.format.redMax);
-	cl->format.greenMax = Swap16IfLE(msg.spf.format.greenMax);
-	cl->format.blueMax = Swap16IfLE(msg.spf.format.blueMax);
-	cl->format.redShift = msg.spf.format.redShift;
-	cl->format.greenShift = msg.spf.format.greenShift;
-	cl->format.blueShift = msg.spf.format.blueShift;
+        cl->format.bitsPerPixel = msg.spf.format.bitsPerPixel;
+        cl->format.depth = msg.spf.format.depth;
+        cl->format.bigEndian = (msg.spf.format.bigEndian ? 1 : 0);
+        cl->format.trueColour = (msg.spf.format.trueColour ? 1 : 0);
+        cl->format.redMax = Swap16IfLE(msg.spf.format.redMax);
+        cl->format.greenMax = Swap16IfLE(msg.spf.format.greenMax);
+        cl->format.blueMax = Swap16IfLE(msg.spf.format.blueMax);
+        cl->format.redShift = msg.spf.format.redShift;
+        cl->format.greenShift = msg.spf.format.greenShift;
+        cl->format.blueShift = msg.spf.format.blueShift;
 
-	cl->readyForSetColourMapEntries = TRUE;
+        cl->readyForSetColourMapEntries = TRUE;
 
-	rfbSetTranslateFunction(cl);
-	return;
+        rfbSetTranslateFunction(cl);
+        return;
 
 
     case rfbFixColourMapEntries:
-	if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
-			   sz_rfbFixColourMapEntriesMsg - 1)) <= 0) {
-	    if (n != 0)
-		rfbLogPerror("rfbProcessClientNormalMessage: read");
-	    rfbCloseSock(cl->sock);
-	    return;
-	}
-	rfbLog("rfbProcessClientNormalMessage: %s",
-		"FixColourMapEntries unsupported\n");
-	rfbCloseSock(cl->sock);
-	return;
+        if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
+                           sz_rfbFixColourMapEntriesMsg - 1)) <= 0) {
+            if (n != 0)
+                rfbLogPerror("rfbProcessClientNormalMessage: read");
+            rfbCloseSock(cl->sock);
+            return;
+        }
+        rfbLog("rfbProcessClientNormalMessage: %s",
+                "FixColourMapEntries unsupported\n");
+        rfbCloseSock(cl->sock);
+        return;
 
 
     case rfbSetEncodings:
     {
-	int i;
-	CARD32 enc;
+        int i;
+        CARD32 enc;
 
-	if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
-			   sz_rfbSetEncodingsMsg - 1)) <= 0) {
-	    if (n != 0)
-		rfbLogPerror("rfbProcessClientNormalMessage: read");
-	    rfbCloseSock(cl->sock);
-	    return;
-	}
+        if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
+                           sz_rfbSetEncodingsMsg - 1)) <= 0) {
+            if (n != 0)
+                rfbLogPerror("rfbProcessClientNormalMessage: read");
+            rfbCloseSock(cl->sock);
+            return;
+        }
 
-	msg.se.nEncodings = Swap16IfLE(msg.se.nEncodings);
+        msg.se.nEncodings = Swap16IfLE(msg.se.nEncodings);
 
-	cl->preferredEncoding = -1;
-	cl->useCopyRect = FALSE;
-	cl->enableCursorShapeUpdates = FALSE;
-	cl->enableCursorPosUpdates = FALSE;
-	cl->enableLastRectEncoding = FALSE;
-	cl->tightCompressLevel = TIGHT_DEFAULT_COMPRESSION;
-	cl->tightSubsampLevel = TIGHT_DEFAULT_SUBSAMP;
-	cl->tightQualityLevel = -1;
-	cl->imageQualityLevel = -1;
+        cl->preferredEncoding = -1;
+        cl->useCopyRect = FALSE;
+        cl->enableCursorShapeUpdates = FALSE;
+        cl->enableCursorPosUpdates = FALSE;
+        cl->enableLastRectEncoding = FALSE;
+        cl->tightCompressLevel = TIGHT_DEFAULT_COMPRESSION;
+        cl->tightSubsampLevel = TIGHT_DEFAULT_SUBSAMP;
+        cl->tightQualityLevel = -1;
+        cl->imageQualityLevel = -1;
 
-	for (i = 0; i < msg.se.nEncodings; i++) {
-	    if ((n = ReadExact(cl->sock, (char *)&enc, 4)) <= 0) {
-		if (n != 0)
-		    rfbLogPerror("rfbProcessClientNormalMessage: read");
-		rfbCloseSock(cl->sock);
-		return;
-	    }
-	    enc = Swap32IfLE(enc);
+        for (i = 0; i < msg.se.nEncodings; i++) {
+            if ((n = ReadExact(cl->sock, (char *)&enc, 4)) <= 0) {
+                if (n != 0)
+                    rfbLogPerror("rfbProcessClientNormalMessage: read");
+                rfbCloseSock(cl->sock);
+                return;
+            }
+            enc = Swap32IfLE(enc);
 
-	    switch (enc) {
+            switch (enc) {
 
-	    case rfbEncodingCopyRect:
-		cl->useCopyRect = TRUE;
-		break;
-	    case rfbEncodingRaw:
-		if (cl->preferredEncoding == -1) {
-		    cl->preferredEncoding = enc;
-		    rfbLog("Using raw encoding for client %s\n",
-			   cl->host);
-		}
-		break;
-	    case rfbEncodingRRE:
-		if (cl->preferredEncoding == -1) {
-		    cl->preferredEncoding = enc;
-		    rfbLog("Using rre encoding for client %s\n",
-			   cl->host);
-		}
-		break;
-	    case rfbEncodingCoRRE:
-		if (cl->preferredEncoding == -1) {
-		    cl->preferredEncoding = enc;
-		    rfbLog("Using CoRRE encoding for client %s\n",
-			   cl->host);
-		}
-		break;
-	    case rfbEncodingHextile:
-		if (cl->preferredEncoding == -1) {
-		    cl->preferredEncoding = enc;
-		    rfbLog("Using hextile encoding for client %s\n",
-			   cl->host);
-		}
-		break;
-	    case rfbEncodingZlib:
-		if (cl->preferredEncoding == -1) {
-		    cl->preferredEncoding = enc;
-		    rfbLog("Using zlib encoding for client %s\n",
-			   cl->host);
-		}
+            case rfbEncodingCopyRect:
+                cl->useCopyRect = TRUE;
+                break;
+            case rfbEncodingRaw:
+                if (cl->preferredEncoding == -1) {
+                    cl->preferredEncoding = enc;
+                    rfbLog("Using raw encoding for client %s\n",
+                           cl->host);
+                }
+                break;
+            case rfbEncodingRRE:
+                if (cl->preferredEncoding == -1) {
+                    cl->preferredEncoding = enc;
+                    rfbLog("Using rre encoding for client %s\n",
+                           cl->host);
+                }
+                break;
+            case rfbEncodingCoRRE:
+                if (cl->preferredEncoding == -1) {
+                    cl->preferredEncoding = enc;
+                    rfbLog("Using CoRRE encoding for client %s\n",
+                           cl->host);
+                }
+                break;
+            case rfbEncodingHextile:
+                if (cl->preferredEncoding == -1) {
+                    cl->preferredEncoding = enc;
+                    rfbLog("Using hextile encoding for client %s\n",
+                           cl->host);
+                }
+                break;
+            case rfbEncodingZlib:
+                if (cl->preferredEncoding == -1) {
+                    cl->preferredEncoding = enc;
+                    rfbLog("Using zlib encoding for client %s\n",
+                           cl->host);
+                }
               break;
-	    case rfbEncodingZRLE:
-		if (cl->preferredEncoding == -1) {
-		    cl->preferredEncoding = enc;
-		    rfbLog("Using ZRLE encoding for client %s\n",
-			   cl->host);
-		}
+            case rfbEncodingZRLE:
+                if (cl->preferredEncoding == -1) {
+                    cl->preferredEncoding = enc;
+                    rfbLog("Using ZRLE encoding for client %s\n",
+                           cl->host);
+                }
               break;
-	    case rfbEncodingZYWRLE:
-		if (cl->preferredEncoding == -1) {
-		    cl->preferredEncoding = enc;
-		    rfbLog("Using ZYWRLE encoding for client %s\n",
-			   cl->host);
-		}
+            case rfbEncodingZYWRLE:
+                if (cl->preferredEncoding == -1) {
+                    cl->preferredEncoding = enc;
+                    rfbLog("Using ZYWRLE encoding for client %s\n",
+                           cl->host);
+                }
               break;
-	    case rfbEncodingTight:
-		if (cl->preferredEncoding == -1) {
-		    cl->preferredEncoding = enc;
-		    rfbLog("Using tight encoding for client %s\n",
-			   cl->host);
-		}
-		break;
-	    case rfbEncodingXCursor:
-		if (!cl->enableCursorShapeUpdates) {
-		    rfbLog("Enabling X-style cursor updates for client %s\n",
-			   cl->host);
-		    cl->enableCursorShapeUpdates = TRUE;
-		    cl->useRichCursorEncoding = FALSE;
-		    cl->cursorWasChanged = TRUE;
-		    break;
-		}
-	    case rfbEncodingRichCursor:
-		if (!cl->enableCursorShapeUpdates) {
-		    rfbLog("Enabling full-color cursor updates for client "
-			   "%s\n", cl->host);
-		    cl->enableCursorShapeUpdates = TRUE;
-		    cl->useRichCursorEncoding = TRUE;
-		    cl->cursorWasChanged = TRUE;
-		}
-		break;
-	    case rfbEncodingPointerPos:
-		if (!cl->enableCursorPosUpdates) {
-		    rfbLog("Enabling cursor position updates for client %s\n",
-			   cl->host);
-		    cl->enableCursorPosUpdates = TRUE;
-		    cl->cursorWasMoved = TRUE;
-		    cl->cursorX = -1;
-		    cl->cursorY = -1;
-		}
-	        break;
-	    case rfbEncodingLastRect:
-		if (!cl->enableLastRectEncoding) {
-		    rfbLog("Enabling LastRect protocol extension for client "
-			   "%s\n", cl->host);
-		    cl->enableLastRectEncoding = TRUE;
-		}
-		break;
-	    default:
-		if ( enc >= (CARD32)rfbEncodingCompressLevel0 &&
-		     enc <= (CARD32)rfbEncodingCompressLevel9 ) {
-		    cl->zlibCompressLevel = enc & 0x0F;
-		    cl->tightCompressLevel = enc & 0x0F;
-		    rfbLog("Using compression level %d for client %s\n",
-			   cl->tightCompressLevel, cl->host);
-		} else if ( enc >= (CARD32)rfbEncodingSubsamp1X &&
-			 enc <= (CARD32)rfbEncodingSubsampGray ) {
-		    cl->tightSubsampLevel = enc & 0xFF;
-		    rfbLog("Using JPEG subsampling %d for client %s\n",
-			   cl->tightSubsampLevel, cl->host);
-		} else if ( enc >= (CARD32)rfbEncodingQualityLevel0 &&
-			    enc <= (CARD32)rfbEncodingQualityLevel9 ) {
-		    cl->tightQualityLevel = JPEG_QUAL[enc & 0x0F];
-		    cl->tightSubsampLevel = JPEG_SUBSAMP[enc & 0x0F];
-		    cl->imageQualityLevel = enc & 0x0F;
-		    if (cl->preferredEncoding == rfbEncodingTight)
-			rfbLog("Using JPEG subsampling %d, Q%d for client %s\n",
-			    cl->tightSubsampLevel, cl->tightQualityLevel,
-			    cl->host);
-		    else
-			rfbLog("Using image quality level %d for client %s\n",
-			    cl->imageQualityLevel, cl->host);
-		} else if ( enc >= (CARD32)rfbEncodingFineQualityLevel0 + 1 &&
-			    enc <= (CARD32)rfbEncodingFineQualityLevel100 ) {
-		    cl->tightQualityLevel = enc & 0xFF;
-		    rfbLog("Using JPEG quality level %d for client %s\n",
-			   cl->tightQualityLevel, cl->host);
-		} else {
-		    rfbLog("rfbProcessClientNormalMessage: ignoring unknown "
-			   "encoding %d\n", (int)enc);
-		}
-	    }
-	}
+            case rfbEncodingTight:
+                if (cl->preferredEncoding == -1) {
+                    cl->preferredEncoding = enc;
+                    rfbLog("Using tight encoding for client %s\n",
+                           cl->host);
+                }
+                break;
+            case rfbEncodingXCursor:
+                if (!cl->enableCursorShapeUpdates) {
+                    rfbLog("Enabling X-style cursor updates for client %s\n",
+                           cl->host);
+                    cl->enableCursorShapeUpdates = TRUE;
+                    cl->useRichCursorEncoding = FALSE;
+                    cl->cursorWasChanged = TRUE;
+                    break;
+                }
+            case rfbEncodingRichCursor:
+                if (!cl->enableCursorShapeUpdates) {
+                    rfbLog("Enabling full-color cursor updates for client "
+                           "%s\n", cl->host);
+                    cl->enableCursorShapeUpdates = TRUE;
+                    cl->useRichCursorEncoding = TRUE;
+                    cl->cursorWasChanged = TRUE;
+                }
+                break;
+            case rfbEncodingPointerPos:
+                if (!cl->enableCursorPosUpdates) {
+                    rfbLog("Enabling cursor position updates for client %s\n",
+                           cl->host);
+                    cl->enableCursorPosUpdates = TRUE;
+                    cl->cursorWasMoved = TRUE;
+                    cl->cursorX = -1;
+                    cl->cursorY = -1;
+                }
+                break;
+            case rfbEncodingLastRect:
+                if (!cl->enableLastRectEncoding) {
+                    rfbLog("Enabling LastRect protocol extension for client "
+                           "%s\n", cl->host);
+                    cl->enableLastRectEncoding = TRUE;
+                }
+                break;
+            default:
+                if ( enc >= (CARD32)rfbEncodingCompressLevel0 &&
+                     enc <= (CARD32)rfbEncodingCompressLevel9 ) {
+                    cl->zlibCompressLevel = enc & 0x0F;
+                    cl->tightCompressLevel = enc & 0x0F;
+                    rfbLog("Using compression level %d for client %s\n",
+                           cl->tightCompressLevel, cl->host);
+                } else if ( enc >= (CARD32)rfbEncodingSubsamp1X &&
+                         enc <= (CARD32)rfbEncodingSubsampGray ) {
+                    cl->tightSubsampLevel = enc & 0xFF;
+                    rfbLog("Using JPEG subsampling %d for client %s\n",
+                           cl->tightSubsampLevel, cl->host);
+                } else if ( enc >= (CARD32)rfbEncodingQualityLevel0 &&
+                            enc <= (CARD32)rfbEncodingQualityLevel9 ) {
+                    cl->tightQualityLevel = JPEG_QUAL[enc & 0x0F];
+                    cl->tightSubsampLevel = JPEG_SUBSAMP[enc & 0x0F];
+                    cl->imageQualityLevel = enc & 0x0F;
+                    if (cl->preferredEncoding == rfbEncodingTight)
+                        rfbLog("Using JPEG subsampling %d, Q%d for client %s\n",
+                            cl->tightSubsampLevel, cl->tightQualityLevel,
+                            cl->host);
+                    else
+                        rfbLog("Using image quality level %d for client %s\n",
+                            cl->imageQualityLevel, cl->host);
+                } else if ( enc >= (CARD32)rfbEncodingFineQualityLevel0 + 1 &&
+                            enc <= (CARD32)rfbEncodingFineQualityLevel100 ) {
+                    cl->tightQualityLevel = enc & 0xFF;
+                    rfbLog("Using JPEG quality level %d for client %s\n",
+                           cl->tightQualityLevel, cl->host);
+                } else {
+                    rfbLog("rfbProcessClientNormalMessage: ignoring unknown "
+                           "encoding %d\n", (int)enc);
+                }
+            }
+        }
 
-	if (cl->preferredEncoding == -1) {
-	    cl->preferredEncoding = rfbEncodingTight;
-	}
+        if (cl->preferredEncoding == -1) {
+            cl->preferredEncoding = rfbEncodingTight;
+        }
 
-	if (cl->enableCursorPosUpdates && !cl->enableCursorShapeUpdates) {
-	    rfbLog("Disabling cursor position updates for client %s\n",
-		   cl->host);
-	    cl->enableCursorPosUpdates = FALSE;
-	}
+        if (cl->enableCursorPosUpdates && !cl->enableCursorShapeUpdates) {
+            rfbLog("Disabling cursor position updates for client %s\n",
+                   cl->host);
+            cl->enableCursorPosUpdates = FALSE;
+        }
 
-	return;
+        return;
     }
 
 
     case rfbFramebufferUpdateRequest:
     {
-	RegionRec tmpRegion;
-	BoxRec box;
+        RegionRec tmpRegion;
+        BoxRec box;
 
-	if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
-			   sz_rfbFramebufferUpdateRequestMsg-1)) <= 0) {
-	    if (n != 0)
-		rfbLogPerror("rfbProcessClientNormalMessage: read");
-	    rfbCloseSock(cl->sock);
-	    return;
-	}
+        if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
+                           sz_rfbFramebufferUpdateRequestMsg-1)) <= 0) {
+            if (n != 0)
+                rfbLogPerror("rfbProcessClientNormalMessage: read");
+            rfbCloseSock(cl->sock);
+            return;
+        }
 
-	box.x1 = Swap16IfLE(msg.fur.x);
-	box.y1 = Swap16IfLE(msg.fur.y);
-	box.x2 = box.x1 + Swap16IfLE(msg.fur.w);
-	box.y2 = box.y1 + Swap16IfLE(msg.fur.h);
-	SAFE_REGION_INIT(pScreen,&tmpRegion,&box,0);
+        box.x1 = Swap16IfLE(msg.fur.x);
+        box.y1 = Swap16IfLE(msg.fur.y);
+        box.x2 = box.x1 + Swap16IfLE(msg.fur.w);
+        box.y2 = box.y1 + Swap16IfLE(msg.fur.h);
+        SAFE_REGION_INIT(pScreen, &tmpRegion, &box, 0);
 
-	REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
-		     &tmpRegion);
+        REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
+                     &tmpRegion);
 
-	if (!cl->readyForSetColourMapEntries) {
-	    /* client hasn't sent a SetPixelFormat so is using server's */
-	    cl->readyForSetColourMapEntries = TRUE;
-	    if (!cl->format.trueColour) {
-		if (!rfbSetClientColourMap(cl, 0, 0)) {
-		    REGION_UNINIT(pScreen,&tmpRegion);
-		    return;
-		}
-	    }
-	}
+        if (!cl->readyForSetColourMapEntries) {
+            /* client hasn't sent a SetPixelFormat so is using server's */
+            cl->readyForSetColourMapEntries = TRUE;
+            if (!cl->format.trueColour) {
+                if (!rfbSetClientColourMap(cl, 0, 0)) {
+                    REGION_UNINIT(pScreen, &tmpRegion);
+                    return;
+                }
+            }
+        }
 
-	if (!msg.fur.incremental) {
-	    REGION_UNION(pScreen,&cl->modifiedRegion,&cl->modifiedRegion,
-			 &tmpRegion);
-	    REGION_SUBTRACT(pScreen,&cl->copyRegion,&cl->copyRegion,
-			    &tmpRegion);
-	}
+        if (!msg.fur.incremental) {
+            REGION_UNION(pScreen, &cl->modifiedRegion, &cl->modifiedRegion,
+                         &tmpRegion);
+            REGION_SUBTRACT(pScreen, &cl->copyRegion, &cl->copyRegion,
+                            &tmpRegion);
+        }
 
-	if (FB_UPDATE_PENDING(cl) &&
-	    (!cl->deferredUpdateScheduled || rfbDeferUpdateTime == 0 ||
-	     gettime() - cl->deferredUpdateStart >= (double)rfbDeferUpdateTime)) {
-	    rfbSendFramebufferUpdate(cl);
-	    cl->deferredUpdateScheduled = FALSE;
-	}
+        if (FB_UPDATE_PENDING(cl) &&
+            (!cl->deferredUpdateScheduled || rfbDeferUpdateTime == 0 ||
+             gettime() - cl->deferredUpdateStart >= (double)rfbDeferUpdateTime)) {
+            rfbSendFramebufferUpdate(cl);
+            cl->deferredUpdateScheduled = FALSE;
+        }
 
-	REGION_UNINIT(pScreen,&tmpRegion);
-	return;
+        REGION_UNINIT(pScreen, &tmpRegion);
+        return;
     }
 
     case rfbKeyEvent:
 
-	cl->rfbKeyEventsRcvd++;
+        cl->rfbKeyEventsRcvd++;
 
-	if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
-			   sz_rfbKeyEventMsg - 1)) <= 0) {
-	    if (n != 0)
-		rfbLogPerror("rfbProcessClientNormalMessage: read");
-	    rfbCloseSock(cl->sock);
-	    return;
-	}
+        if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
+                           sz_rfbKeyEventMsg - 1)) <= 0) {
+            if (n != 0)
+                rfbLogPerror("rfbProcessClientNormalMessage: read");
+            rfbCloseSock(cl->sock);
+            return;
+        }
 
-	if (!rfbViewOnly && !cl->viewOnly) {
-	    KbdAddEvent(msg.ke.down, (KeySym)Swap32IfLE(msg.ke.key), cl);
-	}
-	return;
+        if (!rfbViewOnly && !cl->viewOnly) {
+            KbdAddEvent(msg.ke.down, (KeySym)Swap32IfLE(msg.ke.key), cl);
+        }
+        return;
 
 
     case rfbPointerEvent:
 
-	cl->rfbPointerEventsRcvd++;
+        cl->rfbPointerEventsRcvd++;
 
-	if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
-			   sz_rfbPointerEventMsg - 1)) <= 0) {
-	    if (n != 0)
-		rfbLogPerror("rfbProcessClientNormalMessage: read");
-	    rfbCloseSock(cl->sock);
-	    return;
-	}
+        if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
+                           sz_rfbPointerEventMsg - 1)) <= 0) {
+            if (n != 0)
+                rfbLogPerror("rfbProcessClientNormalMessage: read");
+            rfbCloseSock(cl->sock);
+            return;
+        }
 
-	if (pointerClient && (pointerClient != cl))
-	    return;
+        if (pointerClient && (pointerClient != cl))
+            return;
 
-	if (msg.pe.buttonMask == 0)
-	    pointerClient = NULL;
-	else
-	    pointerClient = cl;
+        if (msg.pe.buttonMask == 0)
+            pointerClient = NULL;
+        else
+            pointerClient = cl;
 
-	if (!rfbViewOnly && !cl->viewOnly) {
-	    cl->cursorX = (int)Swap16IfLE(msg.pe.x);
+        if (!rfbViewOnly && !cl->viewOnly) {
+            cl->cursorX = (int)Swap16IfLE(msg.pe.x);
             cl->cursorY = (int)Swap16IfLE(msg.pe.y);
-	    PtrAddEvent(msg.pe.buttonMask, cl->cursorX, cl->cursorY, cl);
-	}
-	return;
+            PtrAddEvent(msg.pe.buttonMask, cl->cursorX, cl->cursorY, cl);
+        }
+        return;
 
 
     case rfbClientCutText:
 
-	if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
-			   sz_rfbClientCutTextMsg - 1)) <= 0) {
-	    if (n != 0)
-		rfbLogPerror("rfbProcessClientNormalMessage: read");
-	    rfbCloseSock(cl->sock);
-	    return;
-	}
-
-	msg.cct.length = Swap32IfLE(msg.cct.length);
-	if (msg.cct.length > MAX_CUTTEXT_LEN) {
-	    rfbLogPerror("rfbProcessClientNormalMessage: rfbClientCutText length excessive");
-	    rfbCloseSock(cl->sock);
-	    return;
-	}
-
-	if (msg.cct.length <= 0) return;
-	str = (char *)xalloc(msg.cct.length);
-	if (str == NULL) {
-	    rfbLogPerror("rfbProcessClientNormalMessage: rfbClientCutText out of memory");
-	    rfbCloseSock(cl->sock);
-	    return;
-	}
-
-	if ((n = ReadExact(cl->sock, str, msg.cct.length)) <= 0) {
-	    if (n != 0)
-		rfbLogPerror("rfbProcessClientNormalMessage: read");
-	    xfree(str);
-	    rfbCloseSock(cl->sock);
-	    return;
-	}
-
-	/* NOTE: We do not accept cut text from a view-only client */
-	if (!rfbViewOnly && !cl->viewOnly && !rfbAuthDisableCBRecv) {
-	    vncClientCutText(str, msg.cct.length);
-	    if (rfbSyncCutBuffer) rfbSetXCutText(str, msg.cct.length);
+        if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
+                           sz_rfbClientCutTextMsg - 1)) <= 0) {
+            if (n != 0)
+                rfbLogPerror("rfbProcessClientNormalMessage: read");
+            rfbCloseSock(cl->sock);
+            return;
         }
 
-	xfree(str);
-	return;
+        msg.cct.length = Swap32IfLE(msg.cct.length);
+        if (msg.cct.length > MAX_CUTTEXT_LEN) {
+            rfbLogPerror("rfbProcessClientNormalMessage: rfbClientCutText length excessive");
+            rfbCloseSock(cl->sock);
+            return;
+        }
+
+        if (msg.cct.length <= 0) return;
+        str = (char *)xalloc(msg.cct.length);
+        if (str == NULL) {
+            rfbLogPerror("rfbProcessClientNormalMessage: rfbClientCutText out of memory");
+            rfbCloseSock(cl->sock);
+            return;
+        }
+
+        if ((n = ReadExact(cl->sock, str, msg.cct.length)) <= 0) {
+            if (n != 0)
+                rfbLogPerror("rfbProcessClientNormalMessage: read");
+            xfree(str);
+            rfbCloseSock(cl->sock);
+            return;
+        }
+
+        /* NOTE: We do not accept cut text from a view-only client */
+        if (!rfbViewOnly && !cl->viewOnly && !rfbAuthDisableCBRecv) {
+            vncClientCutText(str, msg.cct.length);
+            if (rfbSyncCutBuffer) rfbSetXCutText(str, msg.cct.length);
+        }
+
+        xfree(str);
+        return;
 
     case rfbEnableContinuousUpdates:
 
-	if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
-			   sz_rfbEnableContinuousUpdatesMsg-1)) <= 0) {
-	    if (n != 0)
-		rfbLogPerror("rfbProcessClientNormalMessage: read");
-	    rfbCloseSock(cl->sock);
-	    return;
-	}
+        if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
+                           sz_rfbEnableContinuousUpdatesMsg-1)) <= 0) {
+            if (n != 0)
+                rfbLogPerror("rfbProcessClientNormalMessage: read");
+            rfbCloseSock(cl->sock);
+            return;
+        }
 
-	cl->continuousUpdates = msg.fencu.enable;
-	rfbLog("Continuous updates %s\n", cl->continuousUpdates? "enabled":
-		"disabled");
-	return;
+        cl->continuousUpdates = msg.fencu.enable;
+        rfbLog("Continuous updates %s\n", cl->continuousUpdates? "enabled":
+                "disabled");
+        return;
 
     default:
 
-	rfbLog("rfbProcessClientNormalMessage: unknown message type %d\n",
-		msg.type);
-	rfbLog(" ... closing connection\n");
-	rfbCloseSock(cl->sock);
-	return;
+        rfbLog("rfbProcessClientNormalMessage: unknown message type %d\n",
+                msg.type);
+        rfbLog(" ... closing connection\n");
+        rfbCloseSock(cl->sock);
+        return;
     }
 }
 
@@ -1142,8 +1142,8 @@ rfbSendFramebufferUpdate(cl)
     double tUpdateStart = 0.0;
 
     if (rfbProfile) {
-	tUpdateStart = gettime();
-	if (tStart < 0.) tStart = tUpdateStart;
+        tUpdateStart = gettime();
+        if (tStart < 0.) tStart = tUpdateStart;
     }
 
     /*
@@ -1152,13 +1152,13 @@ rfbSendFramebufferUpdate(cl)
      */
 
     if (cl->enableCursorShapeUpdates) {
-	if (rfbScreen.cursorIsDrawn)
-	    rfbSpriteRemoveCursor(pScreen);
-	if (!rfbScreen.cursorIsDrawn && cl->cursorWasChanged)
-	    sendCursorShape = TRUE;
+        if (rfbScreen.cursorIsDrawn)
+            rfbSpriteRemoveCursor(pScreen);
+        if (!rfbScreen.cursorIsDrawn && cl->cursorWasChanged)
+            sendCursorShape = TRUE;
     } else {
-	if (!rfbScreen.cursorIsDrawn)
-	    rfbSpriteRestoreCursor(pScreen);
+        if (!rfbScreen.cursorIsDrawn)
+            rfbSpriteRestoreCursor(pScreen);
     }
 
     /*
@@ -1166,7 +1166,7 @@ rfbSendFramebufferUpdate(cl)
      */
 
     if (cl->enableCursorPosUpdates && cl->cursorWasMoved)
-	sendCursorPos = TRUE;
+        sendCursorPos = TRUE;
 
     /*
      * The modifiedRegion may overlap the destination copyRegion.  We remove
@@ -1175,7 +1175,7 @@ rfbSendFramebufferUpdate(cl)
      */
 
     REGION_SUBTRACT(pScreen, &cl->copyRegion, &cl->copyRegion,
-		    &cl->modifiedRegion);
+                    &cl->modifiedRegion);
 
     /*
      * The client is interested in the region requestedRegion.  The region
@@ -1184,16 +1184,16 @@ rfbSendFramebufferUpdate(cl)
      * no update is needed.
      */
 
-    REGION_INIT(pScreen,&updateRegion,NullBox,0);
+    REGION_INIT(pScreen, &updateRegion, NullBox, 0);
     REGION_UNION(pScreen, &updateRegion, &cl->copyRegion,
-		 &cl->modifiedRegion);
+                 &cl->modifiedRegion);
     REGION_INTERSECT(pScreen, &updateRegion, &cl->requestedRegion,
-		     &updateRegion);
+                     &updateRegion);
 
-    if ( !REGION_NOTEMPTY(pScreen,&updateRegion) &&
-	 !sendCursorShape && !sendCursorPos ) {
-	REGION_UNINIT(pScreen,&updateRegion);
-	return TRUE;
+    if ( !REGION_NOTEMPTY(pScreen, &updateRegion) &&
+         !sendCursorShape && !sendCursorPos ) {
+        REGION_UNINIT(pScreen, &updateRegion);
+        return TRUE;
     }
 
     /*
@@ -1205,12 +1205,12 @@ rfbSendFramebufferUpdate(cl)
      * updateCopyRegion to this.
      */
 
-    REGION_INIT(pScreen,&updateCopyRegion,NullBox,0);
+    REGION_INIT(pScreen, &updateCopyRegion, NullBox, 0);
     REGION_INTERSECT(pScreen, &updateCopyRegion, &cl->copyRegion,
-		     &cl->requestedRegion);
+                     &cl->requestedRegion);
     REGION_TRANSLATE(pScreen, &cl->requestedRegion, cl->copyDX, cl->copyDY);
     REGION_INTERSECT(pScreen, &updateCopyRegion, &updateCopyRegion,
-		     &cl->requestedRegion);
+                     &cl->requestedRegion);
     dx = cl->copyDX;
     dy = cl->copyDY;
 
@@ -1230,11 +1230,11 @@ rfbSendFramebufferUpdate(cl)
      */
 
     REGION_UNION(pScreen, &cl->modifiedRegion, &cl->modifiedRegion,
-		 &cl->copyRegion);
+                 &cl->copyRegion);
     REGION_SUBTRACT(pScreen, &cl->modifiedRegion, &cl->modifiedRegion,
-		    &updateRegion);
+                    &updateRegion);
     REGION_SUBTRACT(pScreen, &cl->modifiedRegion, &cl->modifiedRegion,
-		    &updateCopyRegion);
+                    &updateCopyRegion);
 
     REGION_EMPTY(pScreen, &cl->requestedRegion);
     REGION_EMPTY(pScreen, &cl->copyRegion);
@@ -1248,168 +1248,168 @@ rfbSendFramebufferUpdate(cl)
     cl->rfbFramebufferUpdateMessagesSent++;
 
     if (REGION_NUM_RECTS(&updateRegion) > 100) {
-	RegionRec combinedUpdateRegion;
-	REGION_INIT(pScreen, &combinedUpdateRegion,
-		    REGION_EXTENTS(pScreen, &updateRegion), 1);
-	REGION_UNINIT(pScreen, &updateRegion);
-	REGION_INIT(pScreen, &updateRegion,
-		    REGION_EXTENTS(pScreen, &combinedUpdateRegion), 1);
-	REGION_UNINIT(pScreen, &combinedUpdateRegion);
+        RegionRec combinedUpdateRegion;
+        REGION_INIT(pScreen, &combinedUpdateRegion,
+                    REGION_EXTENTS(pScreen, &updateRegion), 1);
+        REGION_UNINIT(pScreen, &updateRegion);
+        REGION_INIT(pScreen, &updateRegion,
+                    REGION_EXTENTS(pScreen, &combinedUpdateRegion), 1);
+        REGION_UNINIT(pScreen, &combinedUpdateRegion);
     }
 
     if (cl->preferredEncoding == rfbEncodingCoRRE) {
-	nUpdateRegionRects = 0;
+        nUpdateRegionRects = 0;
 
-	for (i = 0; i < REGION_NUM_RECTS(&updateRegion); i++) {
-	    int x = REGION_RECTS(&updateRegion)[i].x1;
-	    int y = REGION_RECTS(&updateRegion)[i].y1;
-	    int w = REGION_RECTS(&updateRegion)[i].x2 - x;
-	    int h = REGION_RECTS(&updateRegion)[i].y2 - y;
-	    nUpdateRegionRects += (((w-1) / cl->correMaxWidth + 1)
-				     * ((h-1) / cl->correMaxHeight + 1));
-	}
+        for (i = 0; i < REGION_NUM_RECTS(&updateRegion); i++) {
+            int x = REGION_RECTS(&updateRegion)[i].x1;
+            int y = REGION_RECTS(&updateRegion)[i].y1;
+            int w = REGION_RECTS(&updateRegion)[i].x2 - x;
+            int h = REGION_RECTS(&updateRegion)[i].y2 - y;
+            nUpdateRegionRects += (((w-1) / cl->correMaxWidth + 1)
+                                     * ((h-1) / cl->correMaxHeight + 1));
+        }
     } else if (cl->preferredEncoding == rfbEncodingZlib) {
-	nUpdateRegionRects = 0;
+        nUpdateRegionRects = 0;
 
-	for (i = 0; i < REGION_NUM_RECTS(&updateRegion); i++) {
-	    int x = REGION_RECTS(&updateRegion)[i].x1;
-	    int y = REGION_RECTS(&updateRegion)[i].y1;
-	    int w = REGION_RECTS(&updateRegion)[i].x2 - x;
-	    int h = REGION_RECTS(&updateRegion)[i].y2 - y;
-	    nUpdateRegionRects += (((h-1) / (ZLIB_MAX_SIZE( w ) / w)) + 1);
-	}
+        for (i = 0; i < REGION_NUM_RECTS(&updateRegion); i++) {
+            int x = REGION_RECTS(&updateRegion)[i].x1;
+            int y = REGION_RECTS(&updateRegion)[i].y1;
+            int w = REGION_RECTS(&updateRegion)[i].x2 - x;
+            int h = REGION_RECTS(&updateRegion)[i].y2 - y;
+            nUpdateRegionRects += (((h-1) / (ZLIB_MAX_SIZE( w ) / w)) + 1);
+        }
     } else if (cl->preferredEncoding == rfbEncodingTight) {
-	nUpdateRegionRects = 0;
+        nUpdateRegionRects = 0;
 
-	for (i = 0; i < REGION_NUM_RECTS(&updateRegion); i++) {
-	    int x = REGION_RECTS(&updateRegion)[i].x1;
-	    int y = REGION_RECTS(&updateRegion)[i].y1;
-	    int w = REGION_RECTS(&updateRegion)[i].x2 - x;
-	    int h = REGION_RECTS(&updateRegion)[i].y2 - y;
-	    int n = rfbNumCodedRectsTight(cl, x, y, w, h);
-	    if (n == 0) {
-		nUpdateRegionRects = 0xFFFF;
-		break;
-	    }
-	    nUpdateRegionRects += n;
-	}
+        for (i = 0; i < REGION_NUM_RECTS(&updateRegion); i++) {
+            int x = REGION_RECTS(&updateRegion)[i].x1;
+            int y = REGION_RECTS(&updateRegion)[i].y1;
+            int w = REGION_RECTS(&updateRegion)[i].x2 - x;
+            int h = REGION_RECTS(&updateRegion)[i].y2 - y;
+            int n = rfbNumCodedRectsTight(cl, x, y, w, h);
+            if (n == 0) {
+                nUpdateRegionRects = 0xFFFF;
+                break;
+            }
+            nUpdateRegionRects += n;
+        }
     } else {
-	nUpdateRegionRects = REGION_NUM_RECTS(&updateRegion);
+        nUpdateRegionRects = REGION_NUM_RECTS(&updateRegion);
     }
 
     fu->type = rfbFramebufferUpdate;
     if (nUpdateRegionRects != 0xFFFF) {
-	fu->nRects = Swap16IfLE(REGION_NUM_RECTS(&updateCopyRegion) +
-				nUpdateRegionRects +
-				!!sendCursorShape + !!sendCursorPos);
+        fu->nRects = Swap16IfLE(REGION_NUM_RECTS(&updateCopyRegion) +
+                                nUpdateRegionRects +
+                                !!sendCursorShape + !!sendCursorPos);
     } else {
-	fu->nRects = 0xFFFF;
+        fu->nRects = 0xFFFF;
     }
     ublen = sz_rfbFramebufferUpdateMsg;
 
     if (sendCursorShape) {
-	cl->cursorWasChanged = FALSE;
-	if (!rfbSendCursorShape(cl, pScreen))
-	    return FALSE;
+        cl->cursorWasChanged = FALSE;
+        if (!rfbSendCursorShape(cl, pScreen))
+            return FALSE;
     }
 
     if (sendCursorPos) {
-	cl->cursorWasMoved = FALSE;
-	if (!rfbSendCursorPos(cl, pScreen))
- 	    return FALSE;
+        cl->cursorWasMoved = FALSE;
+        if (!rfbSendCursorPos(cl, pScreen))
+            return FALSE;
     }
 
-    if (REGION_NOTEMPTY(pScreen,&updateCopyRegion)) {
-	if (!rfbSendCopyRegion(cl,&updateCopyRegion,dx,dy)) {
-	    REGION_UNINIT(pScreen,&updateRegion);
-	    REGION_UNINIT(pScreen,&updateCopyRegion);
-	    return FALSE;
-	}
+    if (REGION_NOTEMPTY(pScreen, &updateCopyRegion)) {
+        if (!rfbSendCopyRegion(cl, &updateCopyRegion, dx, dy)) {
+            REGION_UNINIT(pScreen, &updateRegion);
+            REGION_UNINIT(pScreen, &updateCopyRegion);
+            return FALSE;
+        }
     }
 
-    REGION_UNINIT(pScreen,&updateCopyRegion);
+    REGION_UNINIT(pScreen, &updateCopyRegion);
 
     for (i = 0; i < REGION_NUM_RECTS(&updateRegion); i++) {
-	int x = REGION_RECTS(&updateRegion)[i].x1;
-	int y = REGION_RECTS(&updateRegion)[i].y1;
-	int w = REGION_RECTS(&updateRegion)[i].x2 - x;
-	int h = REGION_RECTS(&updateRegion)[i].y2 - y;
+        int x = REGION_RECTS(&updateRegion)[i].x1;
+        int y = REGION_RECTS(&updateRegion)[i].y1;
+        int w = REGION_RECTS(&updateRegion)[i].x2 - x;
+        int h = REGION_RECTS(&updateRegion)[i].y2 - y;
 
-	cl->rfbRawBytesEquivalent += (sz_rfbFramebufferUpdateRectHeader
-				      + w * (cl->format.bitsPerPixel / 8) * h);
+        cl->rfbRawBytesEquivalent += (sz_rfbFramebufferUpdateRectHeader
+                                      + w * (cl->format.bitsPerPixel / 8) * h);
 
-	if (rfbProfile) mpixels += (double)w * (double)h / 1000000.;
+        if (rfbProfile) mpixels += (double)w * (double)h / 1000000.;
 
-	switch (cl->preferredEncoding) {
-	case rfbEncodingRaw:
-	    if (!rfbSendRectEncodingRaw(cl, x, y, w, h)) {
-		REGION_UNINIT(pScreen,&updateRegion);
-		return FALSE;
-	    }
-	    break;
-	case rfbEncodingRRE:
-	    if (!rfbSendRectEncodingRRE(cl, x, y, w, h)) {
-		REGION_UNINIT(pScreen,&updateRegion);
-		return FALSE;
-	    }
-	    break;
-	case rfbEncodingCoRRE:
-	    if (!rfbSendRectEncodingCoRRE(cl, x, y, w, h)) {
-		REGION_UNINIT(pScreen,&updateRegion);
-		return FALSE;
-	    }
-	    break;
-	case rfbEncodingHextile:
-	    if (!rfbSendRectEncodingHextile(cl, x, y, w, h)) {
-		REGION_UNINIT(pScreen,&updateRegion);
-		return FALSE;
-	    }
-	    break;
-	case rfbEncodingZlib:
-	    if (!rfbSendRectEncodingZlib(cl, x, y, w, h)) {
-		REGION_UNINIT(pScreen,&updateRegion);
-		return FALSE;
-	    }
-	    break;
-	case rfbEncodingZRLE:
-	case rfbEncodingZYWRLE:
-	    if (!rfbSendRectEncodingZRLE(cl, x, y, w, h)) {
-		REGION_UNINIT(pScreen,&updateRegion);
-		return FALSE;
-	    }
-	    break;
-	case rfbEncodingTight:
-	    if (!rfbSendRectEncodingTight(cl, x, y, w, h)) {
-		REGION_UNINIT(pScreen,&updateRegion);
-		return FALSE;
-	    }
-	    break;
-	}
+        switch (cl->preferredEncoding) {
+        case rfbEncodingRaw:
+            if (!rfbSendRectEncodingRaw(cl, x, y, w, h)) {
+                REGION_UNINIT(pScreen, &updateRegion);
+                return FALSE;
+            }
+            break;
+        case rfbEncodingRRE:
+            if (!rfbSendRectEncodingRRE(cl, x, y, w, h)) {
+                REGION_UNINIT(pScreen, &updateRegion);
+                return FALSE;
+            }
+            break;
+        case rfbEncodingCoRRE:
+            if (!rfbSendRectEncodingCoRRE(cl, x, y, w, h)) {
+                REGION_UNINIT(pScreen, &updateRegion);
+                return FALSE;
+            }
+            break;
+        case rfbEncodingHextile:
+            if (!rfbSendRectEncodingHextile(cl, x, y, w, h)) {
+                REGION_UNINIT(pScreen, &updateRegion);
+                return FALSE;
+            }
+            break;
+        case rfbEncodingZlib:
+            if (!rfbSendRectEncodingZlib(cl, x, y, w, h)) {
+                REGION_UNINIT(pScreen, &updateRegion);
+                return FALSE;
+            }
+            break;
+        case rfbEncodingZRLE:
+        case rfbEncodingZYWRLE:
+            if (!rfbSendRectEncodingZRLE(cl, x, y, w, h)) {
+                REGION_UNINIT(pScreen, &updateRegion);
+                return FALSE;
+            }
+            break;
+        case rfbEncodingTight:
+            if (!rfbSendRectEncodingTight(cl, x, y, w, h)) {
+                REGION_UNINIT(pScreen, &updateRegion);
+                return FALSE;
+            }
+            break;
+        }
     }
 
-    REGION_UNINIT(pScreen,&updateRegion);
+    REGION_UNINIT(pScreen, &updateRegion);
 
     if (nUpdateRegionRects == 0xFFFF && !rfbSendLastRectMarker(cl))
-	return FALSE;
+        return FALSE;
 
     if (!rfbSendUpdateBuf(cl))
-	return FALSE;
+        return FALSE;
 
     if (rfbProfile) {
-	tUpdateTime += gettime() - tUpdateStart;
-	tElapsed = gettime() - tStart;
-	iter++;
+        tUpdateTime += gettime() - tUpdateStart;
+        tElapsed = gettime() - tStart;
+        iter++;
 
-	if (tElapsed > 5.) {
-	    rfbLog("Updates/sec: %.2f  Mpixels/sec: %.2f  Encode time/update: %.3f ms  Other time/update: %.3f ms\n",
-		(double)iter / tElapsed, mpixels / tElapsed,
-		tUpdateTime / (double)iter * 1000.,
-		(tElapsed - tUpdateTime) / (double)iter * 1000.);
-	    tUpdateTime = 0.;
-	    iter = 0;
-	    mpixels = 0.;
-	    tStart = gettime();
-	}
+        if (tElapsed > 5.) {
+            rfbLog("Updates/sec: %.2f  Mpixels/sec: %.2f  Encode time/update: %.3f ms  Other time/update: %.3f ms\n",
+                (double)iter / tElapsed, mpixels / tElapsed,
+                tUpdateTime / (double)iter * 1000.,
+                (tElapsed - tUpdateTime) / (double)iter * 1000.);
+            tUpdateTime = 0.;
+            iter = 0;
+            mpixels = 0.;
+            tStart = gettime();
+        }
     }
 
     if (rfbAutoLosslessRefresh > 0.0 &&
@@ -1447,75 +1447,75 @@ rfbSendCopyRegion(cl, reg, dx, dy)
     nrects = REGION_NUM_RECTS(reg);
 
     if (dx <= 0) {
-	x_inc = 1;
+        x_inc = 1;
     } else {
-	x_inc = -1;
+        x_inc = -1;
     }
 
     if (dy <= 0) {
-	thisRect = 0;
-	y_inc = 1;
+        thisRect = 0;
+        y_inc = 1;
     } else {
-	thisRect = nrects - 1;
-	y_inc = -1;
+        thisRect = nrects - 1;
+        y_inc = -1;
     }
 
     while (nrects > 0) {
 
-	firstInNextBand = thisRect;
-	nrectsInBand = 0;
+        firstInNextBand = thisRect;
+        nrectsInBand = 0;
 
-	while ((nrects > 0) &&
-	       (REGION_RECTS(reg)[firstInNextBand].y1
-		== REGION_RECTS(reg)[thisRect].y1))
-	{
-	    firstInNextBand += y_inc;
-	    nrects--;
-	    nrectsInBand++;
-	}
+        while ((nrects > 0) &&
+               (REGION_RECTS(reg)[firstInNextBand].y1
+                == REGION_RECTS(reg)[thisRect].y1))
+        {
+            firstInNextBand += y_inc;
+            nrects--;
+            nrectsInBand++;
+        }
 
-	if (x_inc != y_inc) {
-	    thisRect = firstInNextBand - y_inc;
-	}
+        if (x_inc != y_inc) {
+            thisRect = firstInNextBand - y_inc;
+        }
 
-	while (nrectsInBand > 0) {
-	    if ((ublen + sz_rfbFramebufferUpdateRectHeader
-		 + sz_rfbCopyRect) > UPDATE_BUF_SIZE)
-	    {
-		if (!rfbSendUpdateBuf(cl))
-		    return FALSE;
-	    }
+        while (nrectsInBand > 0) {
+            if ((ublen + sz_rfbFramebufferUpdateRectHeader
+                 + sz_rfbCopyRect) > UPDATE_BUF_SIZE)
+            {
+                if (!rfbSendUpdateBuf(cl))
+                    return FALSE;
+            }
 
-	    x = REGION_RECTS(reg)[thisRect].x1;
-	    y = REGION_RECTS(reg)[thisRect].y1;
-	    w = REGION_RECTS(reg)[thisRect].x2 - x;
-	    h = REGION_RECTS(reg)[thisRect].y2 - y;
+            x = REGION_RECTS(reg)[thisRect].x1;
+            y = REGION_RECTS(reg)[thisRect].y1;
+            w = REGION_RECTS(reg)[thisRect].x2 - x;
+            h = REGION_RECTS(reg)[thisRect].y2 - y;
 
-	    rect.r.x = Swap16IfLE(x);
-	    rect.r.y = Swap16IfLE(y);
-	    rect.r.w = Swap16IfLE(w);
-	    rect.r.h = Swap16IfLE(h);
-	    rect.encoding = Swap32IfLE(rfbEncodingCopyRect);
+            rect.r.x = Swap16IfLE(x);
+            rect.r.y = Swap16IfLE(y);
+            rect.r.w = Swap16IfLE(w);
+            rect.r.h = Swap16IfLE(h);
+            rect.encoding = Swap32IfLE(rfbEncodingCopyRect);
 
-	    memcpy(&updateBuf[ublen], (char *)&rect,
-		   sz_rfbFramebufferUpdateRectHeader);
-	    ublen += sz_rfbFramebufferUpdateRectHeader;
+            memcpy(&updateBuf[ublen], (char *)&rect,
+                   sz_rfbFramebufferUpdateRectHeader);
+            ublen += sz_rfbFramebufferUpdateRectHeader;
 
-	    cr.srcX = Swap16IfLE(x - dx);
-	    cr.srcY = Swap16IfLE(y - dy);
+            cr.srcX = Swap16IfLE(x - dx);
+            cr.srcY = Swap16IfLE(y - dy);
 
-	    memcpy(&updateBuf[ublen], (char *)&cr, sz_rfbCopyRect);
-	    ublen += sz_rfbCopyRect;
+            memcpy(&updateBuf[ublen], (char *)&cr, sz_rfbCopyRect);
+            ublen += sz_rfbCopyRect;
 
-	    cl->rfbRectanglesSent[rfbEncodingCopyRect]++;
-	    cl->rfbBytesSent[rfbEncodingCopyRect]
-		+= sz_rfbFramebufferUpdateRectHeader + sz_rfbCopyRect;
+            cl->rfbRectanglesSent[rfbEncodingCopyRect]++;
+            cl->rfbBytesSent[rfbEncodingCopyRect]
+                += sz_rfbFramebufferUpdateRectHeader + sz_rfbCopyRect;
 
-	    thisRect += x_inc;
-	    nrectsInBand--;
-	}
+            thisRect += x_inc;
+            nrectsInBand--;
+        }
 
-	thisRect = firstInNextBand;
+        thisRect = firstInNextBand;
     }
 
     return TRUE;
@@ -1535,12 +1535,12 @@ rfbSendRectEncodingRaw(cl, x, y, w, h)
     int nlines;
     int bytesPerLine = w * (cl->format.bitsPerPixel / 8);
     char *fbptr = (rfbScreen.pfbMemory + (rfbScreen.paddedWidthInBytes * y)
-		   + (x * (rfbScreen.bitsPerPixel / 8)));
+                   + (x * (rfbScreen.bitsPerPixel / 8)));
 
     /* Flush the buffer to guarantee correct alignment for translateFn(). */
     if (ublen > 0) {
-	if (!rfbSendUpdateBuf(cl))
-	    return FALSE;
+        if (!rfbSendUpdateBuf(cl))
+            return FALSE;
     }
 
     rect.r.x = Swap16IfLE(x);
@@ -1549,43 +1549,44 @@ rfbSendRectEncodingRaw(cl, x, y, w, h)
     rect.r.h = Swap16IfLE(h);
     rect.encoding = Swap32IfLE(rfbEncodingRaw);
 
-    memcpy(&updateBuf[ublen], (char *)&rect,sz_rfbFramebufferUpdateRectHeader);
+    memcpy(&updateBuf[ublen], (char *)&rect,
+           sz_rfbFramebufferUpdateRectHeader);
     ublen += sz_rfbFramebufferUpdateRectHeader;
 
     cl->rfbRectanglesSent[rfbEncodingRaw]++;
     cl->rfbBytesSent[rfbEncodingRaw]
-	+= sz_rfbFramebufferUpdateRectHeader + bytesPerLine * h;
+        += sz_rfbFramebufferUpdateRectHeader + bytesPerLine * h;
 
     nlines = (UPDATE_BUF_SIZE - ublen) / bytesPerLine;
 
     while (TRUE) {
-	if (nlines > h)
-	    nlines = h;
+        if (nlines > h)
+            nlines = h;
 
-	(*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
-			   &cl->format, fbptr, &updateBuf[ublen],
-			   rfbScreen.paddedWidthInBytes, w, nlines);
+        (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
+                           &cl->format, fbptr, &updateBuf[ublen],
+                           rfbScreen.paddedWidthInBytes, w, nlines);
 
-	ublen += nlines * bytesPerLine;
-	h -= nlines;
+        ublen += nlines * bytesPerLine;
+        h -= nlines;
 
-	if (h == 0)	/* rect fitted in buffer, do next one */
-	    return TRUE;
+        if (h == 0)     /* rect fitted in buffer, do next one */
+            return TRUE;
 
-	/* buffer full - flush partial rect and do another nlines */
+        /* buffer full - flush partial rect and do another nlines */
 
-	if (!rfbSendUpdateBuf(cl))
-	    return FALSE;
+        if (!rfbSendUpdateBuf(cl))
+            return FALSE;
 
-	fbptr += (rfbScreen.paddedWidthInBytes * nlines);
+        fbptr += (rfbScreen.paddedWidthInBytes * nlines);
 
-	nlines = (UPDATE_BUF_SIZE - ublen) / bytesPerLine;
-	if (nlines == 0) {
-	    rfbLog("rfbSendRectEncodingRaw: send buffer too small for %d "
-		   "bytes per line\n", bytesPerLine);
-	    rfbCloseSock(cl->sock);
-	    return FALSE;
-	}
+        nlines = (UPDATE_BUF_SIZE - ublen) / bytesPerLine;
+        if (nlines == 0) {
+            rfbLog("rfbSendRectEncodingRaw: send buffer too small for %d "
+                   "bytes per line\n", bytesPerLine);
+            rfbCloseSock(cl->sock);
+            return FALSE;
+        }
     }
 }
 
@@ -1604,8 +1605,8 @@ rfbSendLastRectMarker(cl)
     rfbFramebufferUpdateRectHeader rect;
 
     if (ublen + sz_rfbFramebufferUpdateRectHeader > UPDATE_BUF_SIZE) {
-	if (!rfbSendUpdateBuf(cl))
-	    return FALSE;
+        if (!rfbSendUpdateBuf(cl))
+            return FALSE;
     }
 
     rect.encoding = Swap32IfLE(rfbEncodingLastRect);
@@ -1614,7 +1615,8 @@ rfbSendLastRectMarker(cl)
     rect.r.w = 0;
     rect.r.h = 0;
 
-    memcpy(&updateBuf[ublen], (char *)&rect,sz_rfbFramebufferUpdateRectHeader);
+    memcpy(&updateBuf[ublen], (char *)&rect,
+           sz_rfbFramebufferUpdateRectHeader);
     ublen += sz_rfbFramebufferUpdateRectHeader;
 
     cl->rfbLastRectMarkersSent++;
@@ -1636,15 +1638,15 @@ rfbSendUpdateBuf(cl)
     /*
     int i;
     for (i = 0; i < ublen; i++) {
-	fprintf(stderr,"%02x ",((unsigned char *)updateBuf)[i]);
+        fprintf(stderr, "%02x ", ((unsigned char *)updateBuf)[i]);
     }
-    fprintf(stderr,"\n");
+    fprintf(stderr, "\n");
     */
 
     if (ublen > 0 && WriteExact(cl->sock, updateBuf, ublen) < 0) {
-	rfbLogPerror("rfbSendUpdateBuf: write");
-	rfbCloseSock(cl->sock);
-	return FALSE;
+        rfbLogPerror("rfbSendUpdateBuf: write");
+        rfbCloseSock(cl->sock);
+        return FALSE;
     }
 
     ublen = 0;
@@ -1679,24 +1681,24 @@ rfbSendSetColourMapEntries(cl, firstColour, nColours)
 
     pent = (EntryPtr)&rfbInstalledColormap->red[firstColour];
     for (i = 0; i < nColours; i++) {
-	if (pent->fShared) {
-	    rgb[i*3] = Swap16IfLE(pent->co.shco.red->color);
-	    rgb[i*3+1] = Swap16IfLE(pent->co.shco.green->color);
-	    rgb[i*3+2] = Swap16IfLE(pent->co.shco.blue->color);
-	} else {
-	    rgb[i*3] = Swap16IfLE(pent->co.local.red);
-	    rgb[i*3+1] = Swap16IfLE(pent->co.local.green);
-	    rgb[i*3+2] = Swap16IfLE(pent->co.local.blue);
-	}
-	pent++;
+        if (pent->fShared) {
+            rgb[i * 3] = Swap16IfLE(pent->co.shco.red->color);
+            rgb[i * 3 + 1] = Swap16IfLE(pent->co.shco.green->color);
+            rgb[i * 3 + 2] = Swap16IfLE(pent->co.shco.blue->color);
+        } else {
+            rgb[i * 3] = Swap16IfLE(pent->co.local.red);
+            rgb[i * 3 + 1] = Swap16IfLE(pent->co.local.green);
+            rgb[i * 3 + 2] = Swap16IfLE(pent->co.local.blue);
+        }
+        pent++;
     }
 
     len += nColours * 3 * 2;
 
     if (WriteExact(cl->sock, buf, len) < 0) {
-	rfbLogPerror("rfbSendSetColourMapEntries: write");
-	rfbCloseSock(cl->sock);
-	return FALSE;
+        rfbLogPerror("rfbSendSetColourMapEntries: write");
+        rfbCloseSock(cl->sock);
+        return FALSE;
     }
     return TRUE;
 }
@@ -1713,14 +1715,14 @@ rfbSendBell()
     rfbBellMsg b;
 
     for (cl = rfbClientHead; cl; cl = nextCl) {
-	nextCl = cl->next;
-	if (cl->state != RFB_NORMAL)
-	  continue;
-	b.type = rfbBell;
-	if (WriteExact(cl->sock, (char *)&b, sz_rfbBellMsg) < 0) {
-	    rfbLogPerror("rfbSendBell: write");
-	    rfbCloseSock(cl->sock);
-	}
+        nextCl = cl->next;
+        if (cl->state != RFB_NORMAL)
+          continue;
+        b.type = rfbBell;
+        if (WriteExact(cl->sock, (char *)&b, sz_rfbBellMsg) < 0) {
+            rfbLogPerror("rfbSendBell: write");
+            rfbCloseSock(cl->sock);
+        }
     }
 }
 
@@ -1736,30 +1738,30 @@ rfbSendServerCutText(char *str, int len)
     rfbServerCutTextMsg sct;
 
     if (rfbViewOnly || rfbAuthDisableCBSend || !str || len <= 0)
-	return;
+        return;
 
     for (cl = rfbClientHead; cl; cl = nextCl) {
-	nextCl = cl->next;
-	if (cl->state != RFB_NORMAL || cl->viewOnly)
-	    continue;
-	if (cl->cutTextLen == len && cl->cutText && !memcmp(cl->cutText, str, len))
-	    continue;
-	if (cl->cutText)
-	    xfree(cl->cutText);
-	cl->cutText = strdup(str);
-	cl->cutTextLen = len;
-	sct.type = rfbServerCutText;
-	sct.length = Swap32IfLE(len);
-	if (WriteExact(cl->sock, (char *)&sct,
-		       sz_rfbServerCutTextMsg) < 0) {
-	    rfbLogPerror("rfbSendServerCutText: write");
-	    rfbCloseSock(cl->sock);
-	    continue;
-	}
-	if (WriteExact(cl->sock, str, len) < 0) {
-	    rfbLogPerror("rfbSendServerCutText: write");
-	    rfbCloseSock(cl->sock);
-	}
+        nextCl = cl->next;
+        if (cl->state != RFB_NORMAL || cl->viewOnly)
+            continue;
+        if (cl->cutTextLen == len && cl->cutText && !memcmp(cl->cutText, str, len))
+            continue;
+        if (cl->cutText)
+            xfree(cl->cutText);
+        cl->cutText = strdup(str);
+        cl->cutTextLen = len;
+        sct.type = rfbServerCutText;
+        sct.length = Swap32IfLE(len);
+        if (WriteExact(cl->sock, (char *)&sct,
+                       sz_rfbServerCutTextMsg) < 0) {
+            rfbLogPerror("rfbSendServerCutText: write");
+            rfbCloseSock(cl->sock);
+            continue;
+        }
+        if (WriteExact(cl->sock, str, len) < 0) {
+            rfbLogPerror("rfbSendServerCutText: write");
+            rfbCloseSock(cl->sock);
+        }
     }
 }
 
@@ -1779,7 +1781,7 @@ rfbNewUDPConnection(sock)
     int sock;
 {
     if (write(sock, &ptrAcceleration, 1) < 0) {
-	rfbLogPerror("rfbNewUDPConnection: write");
+        rfbLogPerror("rfbNewUDPConnection: write");
     }
 }
 
@@ -1798,41 +1800,41 @@ rfbProcessUDPInput(sock)
     rfbClientToServerMsg msg;
 
     if ((n = read(sock, (char *)&msg, sizeof(msg))) <= 0) {
-	if (n < 0) {
-	    rfbLogPerror("rfbProcessUDPInput: read");
-	}
-	rfbDisconnectUDPSock();
-	return;
+        if (n < 0) {
+            rfbLogPerror("rfbProcessUDPInput: read");
+        }
+        rfbDisconnectUDPSock();
+        return;
     }
 
     switch (msg.type) {
 
     case rfbKeyEvent:
-	if (n != sz_rfbKeyEventMsg) {
-	    rfbLog("rfbProcessUDPInput: key event incorrect length\n");
-	    rfbDisconnectUDPSock();
-	    return;
-	}
-	if (!rfbViewOnly) {
-	    KbdAddEvent(msg.ke.down, (KeySym)Swap32IfLE(msg.ke.key), 0);
-	}
-	break;
+        if (n != sz_rfbKeyEventMsg) {
+            rfbLog("rfbProcessUDPInput: key event incorrect length\n");
+            rfbDisconnectUDPSock();
+            return;
+        }
+        if (!rfbViewOnly) {
+            KbdAddEvent(msg.ke.down, (KeySym)Swap32IfLE(msg.ke.key), 0);
+        }
+        break;
 
     case rfbPointerEvent:
-	if (n != sz_rfbPointerEventMsg) {
-	    rfbLog("rfbProcessUDPInput: ptr event incorrect length\n");
-	    rfbDisconnectUDPSock();
-	    return;
-	}
-	if (!rfbViewOnly) {
-	    PtrAddEvent(msg.pe.buttonMask,
-			Swap16IfLE(msg.pe.x), Swap16IfLE(msg.pe.y), 0);
-	}
-	break;
+        if (n != sz_rfbPointerEventMsg) {
+            rfbLog("rfbProcessUDPInput: ptr event incorrect length\n");
+            rfbDisconnectUDPSock();
+            return;
+        }
+        if (!rfbViewOnly) {
+            PtrAddEvent(msg.pe.buttonMask,
+                        Swap16IfLE(msg.pe.x), Swap16IfLE(msg.pe.y), 0);
+        }
+        break;
 
     default:
-	rfbLog("rfbProcessUDPInput: unknown message type %d\n",
-	       msg.type);
-	rfbDisconnectUDPSock();
+        rfbLog("rfbProcessUDPInput: unknown message type %d\n",
+               msg.type);
+        rfbDisconnectUDPSock();
     }
 }

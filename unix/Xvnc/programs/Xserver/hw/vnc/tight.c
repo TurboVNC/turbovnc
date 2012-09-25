@@ -300,7 +300,7 @@ ShutdownTightThreads(void)
     if (!threadInit) return;
     if (_nt > 1) {
         for (i = 1; i < _nt; i++) {
-            if(thnd[i]) {
+            if (thnd[i]) {
                 tparam[i].deadyet = TRUE;
                 pthread_mutex_unlock(&tparam[i].ready);
                 pthread_join(thnd[i], NULL);
@@ -404,8 +404,8 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
        uses, on average, twice as much CPU time. */
     if (cl->tightCompressLevel == 9) compressLevel = 3;
 
-    if ( cl->format.depth == 24 && cl->format.redMax == 0xFF &&
-         cl->format.greenMax == 0xFF && cl->format.blueMax == 0xFF ) {
+    if (cl->format.depth == 24 && cl->format.redMax == 0xFF &&
+        cl->format.greenMax == 0xFF && cl->format.blueMax == 0xFF) {
         usePixelFormat24 = TRUE;
     } else {
         usePixelFormat24 = FALSE;
@@ -426,7 +426,7 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
             REGION_INIT(pScreen, &tparam[i].lossyRegion, NullBox, 0);
             REGION_INIT(pScreen, &tparam[i].losslessRegion, NullBox, 0);
         }
-        if(i < 4) {
+        if (i < 4) {
             int n = min(nt, 4);
             tparam[i].baseStreamId = 4 / n * i;
             if (i == n - 1) tparam[i].nStreams = 4 - tparam[i].baseStreamId;
@@ -470,7 +470,7 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
     }
 
     if (rfbAutoLosslessRefresh > 0.0) {
-        for(i = 0; i < nt; i++) {
+        for (i = 0; i < nt; i++) {
             REGION_UNION(pScreen, &cl->lossyRegion, &cl->lossyRegion,
                          &tparam[i].lossyRegion);
             REGION_UNINIT(pScreen, &tparam[i].lossyRegion);
@@ -563,8 +563,8 @@ SendRectEncodingTight(t, x, y, w, h)
                 /* Make sure a solid rectangle is large enough
                    (or the whole rectangle is of the same color). */
 
-                if ( w_best * h_best != w * h &&
-                     w_best * h_best < MIN_SOLID_SUBRECT_SIZE )
+                if (w_best * h_best != w * h &&
+                    w_best * h_best < MIN_SOLID_SUBRECT_SIZE)
                     continue;
 
                 /* Try to extend solid rectangle to maximum size. */
@@ -575,12 +575,12 @@ SendRectEncodingTight(t, x, y, w, h)
 
                 /* Send rectangles at top and left to solid-color area. */
 
-                if ( y_best != y &&
-                     !SendRectSimple(t, x, y, w, y_best-y) )
+                if (y_best != y &&
+                    !SendRectSimple(t, x, y, w, y_best - y))
                     return FALSE;
-                if ( x_best != x &&
-                     !SendRectEncodingTight(t, x, y_best,
-                                            x_best-x, h_best) )
+                if (x_best != x &&
+                    !SendRectEncodingTight(t, x, y_best,
+                                           x_best - x, h_best))
                     return FALSE;
 
                 /* Send solid-color rectangle. */
@@ -602,13 +602,13 @@ SendRectEncodingTight(t, x, y, w, h)
 
                 /* Send remaining rectangles (at right and bottom). */
 
-                if ( x_best + w_best != x + w &&
-                     !SendRectEncodingTight(t, x_best + w_best, y_best,
-                                            w - (x_best-x) - w_best, h_best) )
+                if (x_best + w_best != x + w &&
+                    !SendRectEncodingTight(t, x_best + w_best, y_best,
+                                           w - (x_best - x) - w_best, h_best))
                     return FALSE;
-                if ( y_best + h_best != y + h &&
-                     !SendRectEncodingTight(t, x, y_best + h_best,
-                                            w, h - (y_best-y) - h_best) )
+                if (y_best + h_best != y + h &&
+                    !SendRectEncodingTight(t, x, y_best + h_best,
+                                           w, h - (y_best - y) - h_best))
                     return FALSE;
 
                 /* Return after all recursive calls are done. */
@@ -677,31 +677,31 @@ ExtendSolidArea(x, y, w, h, colorValue, x_ptr, y_ptr, w_ptr, h_ptr)
     int cx, cy;
 
     /* Try to extend the area upwards. */
-    for ( cy = *y_ptr - 1;
-          cy >= y && CheckSolidTile(*x_ptr, cy, *w_ptr, 1, &colorValue, TRUE);
-          cy-- );
+    for (cy = *y_ptr - 1;
+         cy >= y && CheckSolidTile(*x_ptr, cy, *w_ptr, 1, &colorValue, TRUE);
+         cy--);
     *h_ptr += *y_ptr - (cy + 1);
     *y_ptr = cy + 1;
 
     /* ... downwards. */
-    for ( cy = *y_ptr + *h_ptr;
-          cy < y + h &&
-              CheckSolidTile(*x_ptr, cy, *w_ptr, 1, &colorValue, TRUE);
-          cy++ );
+    for (cy = *y_ptr + *h_ptr;
+         cy < y + h &&
+             CheckSolidTile(*x_ptr, cy, *w_ptr, 1, &colorValue, TRUE);
+         cy++);
     *h_ptr += cy - (*y_ptr + *h_ptr);
 
     /* ... to the left. */
-    for ( cx = *x_ptr - 1;
-          cx >= x && CheckSolidTile(cx, *y_ptr, 1, *h_ptr, &colorValue, TRUE);
-          cx-- );
+    for (cx = *x_ptr - 1;
+         cx >= x && CheckSolidTile(cx, *y_ptr, 1, *h_ptr, &colorValue, TRUE);
+         cx--);
     *w_ptr += *x_ptr - (cx + 1);
     *x_ptr = cx + 1;
 
     /* ... to the right. */
-    for ( cx = *x_ptr + *w_ptr;
-          cx < x + w &&
-              CheckSolidTile(cx, *y_ptr, 1, *h_ptr, &colorValue, TRUE);
-          cx++ );
+    for (cx = *x_ptr + *w_ptr;
+         cx < x + w &&
+             CheckSolidTile(cx, *y_ptr, 1, *h_ptr, &colorValue, TRUE);
+         cx++);
     *w_ptr += cx - (*x_ptr + *w_ptr);
 }
 
@@ -850,10 +850,10 @@ SendSubrect(t, x, y, w, h)
         return SendJpegRect(t, x, y, w, h, qualityLevel);
 
     t->paletteMaxColors = w * h / tightConf[compressLevel].idxMaxColorsDivisor;
-    if(qualityLevel != -1)
+    if (qualityLevel != -1)
         t->paletteMaxColors = tightConf[compressLevel].palMaxColorsWithJPEG;
-    if ( t->paletteMaxColors < 2 &&
-         w * h >= tightConf[compressLevel].monoMinRectSize ) {
+    if (t->paletteMaxColors < 2 &&
+        w * h >= tightConf[compressLevel].monoMinRectSize) {
         t->paletteMaxColors = 2;
     }
 
@@ -875,7 +875,7 @@ SendSubrect(t, x, y, w, h)
                               rfbScreen.paddedWidthInBytes/4, h);
         }
 
-        if(t->paletteNumColors != 0 || qualityLevel == -1) {
+        if (t->paletteNumColors != 0 || qualityLevel == -1) {
             (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
                                &cl->format, fbptr, t->tightBeforeBuf,
                                rfbScreen.paddedWidthInBytes, w, h);
@@ -997,7 +997,7 @@ SendMonoRect(t, w, h)
                         2 * cl->format.bitsPerPixel / 8))
         return FALSE;
 
-    if(t->nStreams > 0) {
+    if (t->nStreams > 0) {
         t->streamId++;
         if (t->streamId >= t->baseStreamId + t->nStreams)
             t->streamId = t->baseStreamId;
@@ -1068,11 +1068,11 @@ SendIndexedRect(t, w, h)
     int i, entryLen;
     rfbClientPtr cl = t->cl;
 
-    if( !CheckUpdateBuf(t, TIGHT_MIN_TO_COMPRESS + 6 +
+    if (!CheckUpdateBuf(t, TIGHT_MIN_TO_COMPRESS + 6 +
         t->paletteNumColors * cl->format.bitsPerPixel / 8))
         return FALSE;
 
-    if(t->nStreams > 0) {
+    if (t->nStreams > 0) {
         t->streamId++;
         if (t->streamId >= t->baseStreamId + t->nStreams)
             t->streamId = t->baseStreamId;
@@ -1145,7 +1145,7 @@ SendFullColorRect(t, w, h)
     if (!CheckUpdateBuf(t, TIGHT_MIN_TO_COMPRESS + 1))
         return FALSE;
 
-    if(t->nStreams > 0) {
+    if (t->nStreams > 0) {
         t->streamId++;
         if (t->streamId >= t->baseStreamId + t->nStreams)
             t->streamId = t->baseStreamId;
@@ -1204,8 +1204,8 @@ CompressData(t, streamId, dataLen, zlibLevel, zlibStrategy)
         pz->zfree = Z_NULL;
         pz->opaque = Z_NULL;
 
-        err = deflateInit2 (pz, zlibLevel, Z_DEFLATED, MAX_WBITS,
-                            MAX_MEM_LEVEL, zlibStrategy);
+        err = deflateInit2(pz, zlibLevel, Z_DEFLATED, MAX_WBITS,
+                           MAX_MEM_LEVEL, zlibStrategy);
         if (err != Z_OK)
             return FALSE;
 
@@ -1221,7 +1221,7 @@ CompressData(t, streamId, dataLen, zlibLevel, zlibStrategy)
 
     /* Change compression parameters if needed. */
     if (zlibLevel != cl->zsLevel[streamId]) {
-        if (deflateParams (pz, zlibLevel, zlibStrategy) != Z_OK) {
+        if (deflateParams(pz, zlibLevel, zlibStrategy) != Z_OK) {
             return FALSE;
         }
         cl->zsLevel[streamId] = zlibLevel;
@@ -1370,8 +1370,8 @@ FillPalette##bpp(t, count)                                              \
     }                                                                   \
                                                                         \
     PaletteReset(t);                                                    \
-    PaletteInsert (t, c0, (CARD32)n0, bpp);                             \
-    PaletteInsert (t, c1, (CARD32)n1, bpp);                             \
+    PaletteInsert(t, c0, (CARD32)n0, bpp);                              \
+    PaletteInsert(t, c1, (CARD32)n1, bpp);                              \
                                                                         \
     ni = 1;                                                             \
     for (i++; i < count; i++) {                                         \
@@ -1384,7 +1384,7 @@ FillPalette##bpp(t, count)                                              \
             ni = 1;                                                     \
         }                                                               \
     }                                                                   \
-    PaletteInsert (t, ci, (CARD32)ni, bpp);                             \
+    PaletteInsert(t, ci, (CARD32)ni, bpp);                              \
 }
 
 DEFINE_FILL_PALETTE_FUNCTION(16)
@@ -1462,8 +1462,8 @@ FastFillPalette##bpp(t, data, w, pitch, h)                              \
     }                                                                   \
                                                                         \
     PaletteReset(t);                                                    \
-    PaletteInsert (t, c0t, (CARD32)n0, bpp);                            \
-    PaletteInsert (t, c1t, (CARD32)n1, bpp);                            \
+    PaletteInsert(t, c0t, (CARD32)n0, bpp);                             \
+    PaletteInsert(t, c1t, (CARD32)n1, bpp);                             \
                                                                         \
     ni = 1;                                                             \
     i2++;  if (i2 >= w) {i2 = 0;  j2++;}                                \
@@ -1488,7 +1488,7 @@ FastFillPalette##bpp(t, data, w, pitch, h)                              \
     (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,      \
                        &cl->format, (char *)&ci, (char *)&cit, bpp/8,   \
                        1, 1);                                           \
-    PaletteInsert (t, cit, (CARD32)ni, bpp);                            \
+    PaletteInsert(t, cit, (CARD32)ni, bpp);                             \
 }
 
 DEFINE_FAST_FILL_PALETTE_FUNCTION(16)
@@ -1558,9 +1558,9 @@ PaletteInsert(t, rgb, numPixels, bpp)
     }
 
     /* Move palette entries with lesser pixel counts. */
-    for ( idx = t->paletteNumColors;
-          idx > 0 && t->palette.entry[idx-1].numPixels < numPixels;
-          idx-- ) {
+    for (idx = t->paletteNumColors;
+         idx > 0 && t->palette.entry[idx-1].numPixels < numPixels;
+         idx--) {
         t->palette.entry[idx] = t->palette.entry[idx-1];
         t->palette.entry[idx].listNode->idx = idx;
     }
@@ -1772,14 +1772,14 @@ SendJpegRect(t, x, y, w, h, quality)
         unsigned char *dst;
         int inRed, inGreen, inBlue, i, j;
 
-        if((tmpbuf = (unsigned char *)malloc(w * h * 3)) == NULL) {
+        if ((tmpbuf = (unsigned char *)malloc(w * h * 3)) == NULL) {
             rfbLog("Memory allocation failure!\n");
             return 0;
         }
         srcptr = (CARD16 *)
             &rfbScreen.pfbMemory[y * rfbScreen.paddedWidthInBytes + x * ps];
         dst = tmpbuf;
-        for(j = 0; j < h; j++) {
+        for (j = 0; j < h; j++) {
             CARD16 *srcptr2 = srcptr;
             unsigned char *dst2 = dst;
             for (i = 0; i < w; i++) {
@@ -1807,25 +1807,25 @@ SendJpegRect(t, x, y, w, h, quality)
         pitch = w * 3;
         ps = 3;
     } else {
-        if(rfbServerFormat.bigEndian && ps == 4) flags |= TJ_ALPHAFIRST;
-        if(rfbServerFormat.redShift == 16 && rfbServerFormat.blueShift == 0)
+        if (rfbServerFormat.bigEndian && ps == 4) flags |= TJ_ALPHAFIRST;
+        if (rfbServerFormat.redShift == 16 && rfbServerFormat.blueShift == 0)
             flags |= TJ_BGR;
-        if(rfbServerFormat.bigEndian) flags ^= TJ_BGR;
+        if (rfbServerFormat.bigEndian) flags ^= TJ_BGR;
         srcbuf = (unsigned char *)
             &rfbScreen.pfbMemory[y * rfbScreen.paddedWidthInBytes + x * ps];
         pitch = rfbScreen.paddedWidthInBytes;
     }
 
-    if(tjCompress(t->j, srcbuf, w, pitch, h, ps,
-                  (unsigned char *)t->tightAfterBuf, &size, subsamp, quality,
-                  flags) == -1) {
+    if (tjCompress(t->j, srcbuf, w, pitch, h, ps,
+                   (unsigned char *)t->tightAfterBuf, &size, subsamp, quality,
+                   flags) == -1) {
       rfbLog("JPEG Error: %s\n", tjGetErrorStr());
-      if(tmpbuf) { free(tmpbuf);  tmpbuf = NULL; }
+      if (tmpbuf) { free(tmpbuf);  tmpbuf = NULL; }
       return 0;
     }
     jpegDstDataLen = (int)size;
 
-    if(tmpbuf) { free(tmpbuf);  tmpbuf = NULL; }
+    if (tmpbuf) { free(tmpbuf);  tmpbuf = NULL; }
 
     if (!CheckUpdateBuf(t, TIGHT_MIN_TO_COMPRESS + 1))
         return FALSE;

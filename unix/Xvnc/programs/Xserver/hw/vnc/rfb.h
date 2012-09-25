@@ -112,21 +112,21 @@ typedef struct
        dontSendFramebufferUpdate to TRUE, and all the drawing routines check
        this before calling rfbSendFramebufferUpdate. */
 
-    Bool cursorIsDrawn;		    /* TRUE if the cursor is currently drawn */
+    Bool cursorIsDrawn;             /* TRUE if the cursor is currently drawn */
     Bool dontSendFramebufferUpdate; /* TRUE while removing or drawing the
-				       cursor */
+                                       cursor */
 
     /* wrapped screen functions */
 
-    CloseScreenProcPtr			CloseScreen;
-    CreateGCProcPtr			CreateGC;
-    PaintWindowBackgroundProcPtr	PaintWindowBackground;
-    PaintWindowBorderProcPtr		PaintWindowBorder;
-    CopyWindowProcPtr			CopyWindow;
-    ClearToBackgroundProcPtr		ClearToBackground;
-    RestoreAreasProcPtr			RestoreAreas;
+    CloseScreenProcPtr                  CloseScreen;
+    CreateGCProcPtr                     CreateGC;
+    PaintWindowBackgroundProcPtr        PaintWindowBackground;
+    PaintWindowBorderProcPtr            PaintWindowBorder;
+    CopyWindowProcPtr                   CopyWindow;
+    ClearToBackgroundProcPtr            ClearToBackground;
+    RestoreAreasProcPtr                 RestoreAreas;
 #ifdef RENDER
-    CompositeProcPtr			Composite;
+    CompositeProcPtr                    Composite;
 #endif
 
 } rfbScreenInfo, *rfbScreenInfoPtr;
@@ -138,10 +138,10 @@ typedef struct
 
 struct rfbClientRec;
 typedef void (*rfbTranslateFnType)(char *table, rfbPixelFormat *in,
-				   rfbPixelFormat *out,
-				   char *iptr, char *optr,
-				   int bytesBetweenInputLines,
-				   int width, int height);
+                                   rfbPixelFormat *out,
+                                   char *iptr, char *optr,
+                                   int bytesBetweenInputLines,
+                                   int width, int height);
 
 
 /*
@@ -154,22 +154,22 @@ typedef struct rfbClientRec {
     char *host;
     char *login;
 
-    int protocol_minor_ver;	/* RFB protocol minor version in use */
+    int protocol_minor_ver;     /* RFB protocol minor version in use */
     Bool protocol_tightvnc;     /* TightVNC protocol extensions enabled */
 
     /* Possible client states: */
 
     enum {
-	RFB_PROTOCOL_VERSION,	/* establishing protocol version */
-	RFB_SECURITY_TYPE,	/* negotiating security (RFB v.3.7) */
-	RFB_TUNNELING_TYPE,	/* establishing tunneling (RFB v.3.7t) */
-	RFB_AUTH_TYPE,		/* negotiating authentication (RFB v.3.7t) */
-	RFB_AUTHENTICATION,	/* authenticating (VNC authentication) */
-	RFB_INITIALISATION,	/* sending initialisation messages */
-	RFB_NORMAL		/* normal protocol messages */
+        RFB_PROTOCOL_VERSION,   /* establishing protocol version */
+        RFB_SECURITY_TYPE,      /* negotiating security (RFB v.3.7) */
+        RFB_TUNNELING_TYPE,     /* establishing tunneling (RFB v.3.7t) */
+        RFB_AUTH_TYPE,          /* negotiating authentication (RFB v.3.7t) */
+        RFB_AUTHENTICATION,     /* authenticating (VNC authentication) */
+        RFB_INITIALISATION,     /* sending initialisation messages */
+        RFB_NORMAL              /* normal protocol messages */
     } state;
 
-    Bool viewOnly;		/* Do not accept input from this client. */
+    Bool viewOnly;              /* Do not accept input from this client. */
 
     Bool reverseConnection;
 
@@ -223,11 +223,11 @@ typedef struct rfbClientRec {
        the destination copyRegion.  Just before an update is sent we remove
        from the copyRegion anything in the modifiedRegion. */
 
-    RegionRec copyRegion;	/* the destination region of the copy */
-    int copyDX, copyDY;		/* the translation by which the copy happens */
+    RegionRec copyRegion;       /* the destination region of the copy */
+    int copyDX, copyDY;         /* the translation by which the copy happens */
 
-    RegionRec modifiedRegion;	/* the region of the screen modified in any
-				   other way */
+    RegionRec modifiedRegion;   /* the region of the screen modified in any
+                                   other way */
 
     /* As part of the FramebufferUpdateRequest, a client can express interest
        in a subrectangle of the whole framebuffer.  This is stored in the
@@ -329,8 +329,8 @@ typedef struct rfbClientRec {
     ((!(cl)->enableCursorShapeUpdates && !rfbScreen.cursorIsDrawn) ||   \
      ((cl)->enableCursorShapeUpdates && (cl)->cursorWasChanged) ||      \
      ((cl)->enableCursorPosUpdates && (cl)->cursorWasMoved) ||          \
-     REGION_NOTEMPTY((pScreen),&(cl)->copyRegion) ||                    \
-     REGION_NOTEMPTY((pScreen),&(cl)->modifiedRegion))
+     REGION_NOTEMPTY((pScreen), &(cl)->copyRegion) ||                   \
+     REGION_NOTEMPTY((pScreen), &(cl)->modifiedRegion))
 
 /*
  * This macro creates an empty region (ie. a region with no areas) if it is
@@ -343,10 +343,10 @@ typedef struct rfbClientRec {
 {                                                            \
       if ( ( (rect) ) &&                                     \
            ( ( (rect)->x2 == (rect)->x1 ) ||                 \
-	     ( (rect)->y2 == (rect)->y1 ) ) ) {              \
-	  REGION_INIT( (pscreen), (preg), NullBox, 0 );      \
+             ( (rect)->y2 == (rect)->y1 ) ) ) {              \
+          REGION_INIT( (pscreen), (preg), NullBox, 0 );      \
       } else {                                               \
-	  REGION_INIT( (pscreen), (preg), (rect), (size) );  \
+          REGION_INIT( (pscreen), (preg), (rect), (size) );  \
       }                                                      \
 }
 
@@ -369,9 +369,9 @@ typedef struct {
 #define Swap16(s) ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff))
 
 #define Swap32(l) (((l) >> 24) | \
-		   (((l) & 0x00ff0000) >> 8)  | \
-		   (((l) & 0x0000ff00) << 8)  | \
-		   ((l) << 24))
+                   (((l) & 0x00ff0000) >> 8)  | \
+                   (((l) & 0x0000ff00) << 8)  | \
+                   ((l) << 24))
 
 static const int rfbEndianTest = 1;
 
@@ -387,15 +387,15 @@ static const int rfbEndianTest = 1;
  * Note that "code_sym" argument should be a single symbol, not an expression.
  */
 
-#define SetCapInfo(cap_ptr, code_sym, vendor)		\
-{							\
-    rfbCapabilityInfo *pcap;				\
-    pcap = (cap_ptr);					\
-    pcap->code = Swap32IfLE(code_sym);			\
-    memcpy(pcap->vendorSignature, (vendor),		\
-	   sz_rfbCapabilityInfoVendor);			\
-    memcpy(pcap->nameSignature, sig_##code_sym,		\
-	   sz_rfbCapabilityInfoName);			\
+#define SetCapInfo(cap_ptr, code_sym, vendor)           \
+{                                                       \
+    rfbCapabilityInfo *pcap;                            \
+    pcap = (cap_ptr);                                   \
+    pcap->code = Swap32IfLE(code_sym);                  \
+    memcpy(pcap->vendorSignature, (vendor),             \
+           sz_rfbCapabilityInfoVendor);                 \
+    memcpy(pcap->nameSignature, sig_##code_sym,         \
+           sz_rfbCapabilityInfoName);                   \
 }
 
 
@@ -466,7 +466,7 @@ extern int ListenOnUDPPort(int port);
 extern int ConnectToTcpAddr(char *host, int port);
 
 extern const char *sockaddr_string(struct sockaddr_storage *addr, char *buf,
-				   int len);
+                                   int len);
 
 
 /* cmap.c */
@@ -501,13 +501,13 @@ rfbComposite(
 );
 #endif
 
-extern Bool rfbCloseScreen(int,ScreenPtr);
+extern Bool rfbCloseScreen(int, ScreenPtr);
 extern Bool rfbCreateGC(GCPtr);
 extern void rfbPaintWindowBackground(WindowPtr, RegionPtr, int what);
 extern void rfbPaintWindowBorder(WindowPtr, RegionPtr, int what);
 extern void rfbCopyWindow(WindowPtr, DDXPointRec, RegionPtr);
 extern void rfbClearToBackground(WindowPtr, int x, int y, int w,
-				 int h, Bool generateExposures);
+                                 int h, Bool generateExposures);
 extern RegionPtr rfbRestoreAreas(WindowPtr, RegionPtr);
 
 /* dispcur.c */
@@ -580,10 +580,11 @@ extern void rfbProcessClientMessage(int sock);
 extern void rfbNewUDPConnection(int sock);
 extern void rfbProcessUDPInput(int sock);
 extern Bool rfbSendFramebufferUpdate(rfbClientPtr cl);
-extern Bool rfbSendRectEncodingRaw(rfbClientPtr cl, int x,int y,int w,int h);
+extern Bool rfbSendRectEncodingRaw(rfbClientPtr cl, int x, int y, int w,
+                                   int h);
 extern Bool rfbSendUpdateBuf(rfbClientPtr cl);
 extern Bool rfbSendSetColourMapEntries(rfbClientPtr cl, int firstColour,
-				       int nColours);
+                                       int nColours);
 extern void rfbSendBell();
 extern void rfbSendServerCutText(char *str, int len);
 
@@ -599,14 +600,14 @@ extern Bool rfbEconomicTranslate;
 extern rfbPixelFormat rfbServerFormat;
 
 extern void rfbTranslateNone(char *table, rfbPixelFormat *in,
-			     rfbPixelFormat *out,
-			     char *iptr, char *optr,
-			     int bytesBetweenInputLines,
-			     int width, int height);
+                             rfbPixelFormat *out,
+                             char *iptr, char *optr,
+                             int bytesBetweenInputLines,
+                             int width, int height);
 extern Bool rfbSetTranslateFunction(rfbClientPtr cl);
 extern void rfbSetClientColourMaps(int firstColour, int nColours);
 extern Bool rfbSetClientColourMap(rfbClientPtr cl, int firstColour,
-				  int nColours);
+                                  int nColours);
 
 
 /* httpd.c */
@@ -660,18 +661,20 @@ extern Bool rfbAuthIsBlocked(void);
 
 /* rre.c */
 
-extern Bool rfbSendRectEncodingRRE(rfbClientPtr cl, int x,int y,int w,int h);
+extern Bool rfbSendRectEncodingRRE(rfbClientPtr cl, int x, int y, int w,
+                                   int h);
 
 
 /* corre.c */
 
-extern Bool rfbSendRectEncodingCoRRE(rfbClientPtr cl, int x,int y,int w,int h);
+extern Bool rfbSendRectEncodingCoRRE(rfbClientPtr cl, int x, int y, int w,
+                                     int h);
 
 
 /* hextile.c */
 
 extern Bool rfbSendRectEncodingHextile(rfbClientPtr cl, int x, int y, int w,
-				       int h);
+                                       int h);
 
 
 /* zlib.c */
@@ -686,28 +689,29 @@ extern Bool rfbSendRectEncodingHextile(rfbClientPtr cl, int x, int y, int w,
  */
 #define ZLIB_MAX_RECT_SIZE (128*256)
 #define ZLIB_MAX_SIZE(min) ((( min * 2 ) > ZLIB_MAX_RECT_SIZE ) ? \
-			    ( min * 2 ) : ZLIB_MAX_RECT_SIZE )
+                            ( min * 2 ) : ZLIB_MAX_RECT_SIZE )
 
 extern Bool rfbSendRectEncodingZlib(rfbClientPtr cl, int x, int y, int w,
-				    int h);
+                                    int h);
 
 
 /* zrle.c */
 extern Bool rfbSendRectEncodingZRLE(rfbClientPtr cl, int x, int y, int w,
-				    int h);
+                                    int h);
 void rfbFreeZrleData(rfbClientPtr cl);
 
 
 /* tight.c */
 
 #define TVNC_SAMPOPT 4
-enum {TVNC_1X=0, TVNC_4X, TVNC_2X, TVNC_GRAY};
+enum { TVNC_1X = 0, TVNC_4X, TVNC_2X, TVNC_GRAY };
 #define TIGHT_DEFAULT_COMPRESSION  1
 #define TIGHT_DEFAULT_SUBSAMP      TVNC_1X
 #define TIGHT_DEFAULT_QUALITY      95
 
-extern int rfbNumCodedRectsTight(rfbClientPtr cl, int x,int y,int w,int h);
-extern Bool rfbSendRectEncodingTight(rfbClientPtr cl, int x,int y,int w,int h);
+extern int rfbNumCodedRectsTight(rfbClientPtr cl, int x, int y, int w, int h);
+extern Bool rfbSendRectEncodingTight(rfbClientPtr cl, int x, int y, int w,
+                                     int h);
 extern void ShutdownTightThreads(void);
 
 

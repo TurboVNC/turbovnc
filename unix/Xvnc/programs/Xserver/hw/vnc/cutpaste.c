@@ -49,8 +49,8 @@ rfbSetXCutText(char *str, int len)
 {
     inSetXCutText = TRUE;
     ChangeWindowProperty(WindowTable[0], XA_CUT_BUFFER0, XA_STRING,
-			 8, PropModeReplace, len,
-			 (pointer)str, TRUE);
+                         8, PropModeReplace, len,
+                         (pointer)str, TRUE);
     inSetXCutText = FALSE;
 }
 
@@ -58,5 +58,5 @@ rfbSetXCutText(char *str, int len)
 void rfbGotXCutText(char *str, int len)
 {
     if (!inSetXCutText)
-	rfbSendServerCutText(str, len);
+        rfbSendServerCutText(str, len);
 }

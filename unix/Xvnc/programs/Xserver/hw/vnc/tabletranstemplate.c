@@ -37,12 +37,12 @@
 #error "It is included as part of translate.c"
 #endif
 
-#define IN_T CONCAT2E(CARD,IN)
-#define OUT_T CONCAT2E(CARD,OUT)
-#define rfbTranslateWithSingleTableINtoOUT \
-				CONCAT4E(rfbTranslateWithSingleTable,IN,to,OUT)
-#define rfbTranslateWithRGBTablesINtoOUT \
-				CONCAT4E(rfbTranslateWithRGBTables,IN,to,OUT)
+#define IN_T CONCAT2E(CARD, IN)
+#define OUT_T CONCAT2E(CARD, OUT)
+#define rfbTranslateWithSingleTableINtoOUT  \
+    CONCAT4E(rfbTranslateWithSingleTable, IN, to, OUT)
+#define rfbTranslateWithRGBTablesINtoOUT  \
+    CONCAT4E(rfbTranslateWithRGBTables, IN, to, OUT)
 
 /*
  * rfbTranslateWithSingleTableINtoOUT translates a rectangle of pixel data
@@ -51,10 +51,10 @@
 
 static void
 rfbTranslateWithSingleTableINtoOUT (char *table, rfbPixelFormat *in,
-				    rfbPixelFormat *out,
-				    char *iptr, char *optr,
-				    int bytesBetweenInputLines,
-				    int width, int height)
+                                    rfbPixelFormat *out,
+                                    char *iptr, char *optr,
+                                    int bytesBetweenInputLines,
+                                    int width, int height)
 {
     IN_T *ip = (IN_T *)iptr;
     OUT_T *op = (OUT_T *)optr;
@@ -63,14 +63,14 @@ rfbTranslateWithSingleTableINtoOUT (char *table, rfbPixelFormat *in,
     OUT_T *t = (OUT_T *)table;
 
     while (height > 0) {
-	opLineEnd = op + width;
+        opLineEnd = op + width;
 
-	while (op < opLineEnd) {
-	    *(op++) = t[*(ip++)];
-	}
+        while (op < opLineEnd) {
+            *(op++) = t[*(ip++)];
+        }
 
-	ip += ipextra;
-	height--;
+        ip += ipextra;
+        height--;
     }
 }
 
@@ -82,10 +82,10 @@ rfbTranslateWithSingleTableINtoOUT (char *table, rfbPixelFormat *in,
 
 static void
 rfbTranslateWithRGBTablesINtoOUT (char *table, rfbPixelFormat *in,
-				  rfbPixelFormat *out,
-				  char *iptr, char *optr,
-				  int bytesBetweenInputLines,
-				  int width, int height)
+                                  rfbPixelFormat *out,
+                                  char *iptr, char *optr,
+                                  int bytesBetweenInputLines,
+                                  int width, int height)
 {
     IN_T *ip = (IN_T *)iptr;
     OUT_T *op = (OUT_T *)optr;
@@ -96,16 +96,16 @@ rfbTranslateWithRGBTablesINtoOUT (char *table, rfbPixelFormat *in,
     OUT_T *blueTable = greenTable + in->greenMax + 1;
 
     while (height > 0) {
-	opLineEnd = op + width;
+        opLineEnd = op + width;
 
-	while (op < opLineEnd) {
-	    *(op++) = (redTable[(*ip >> in->redShift) & in->redMax] |
-		       greenTable[(*ip >> in->greenShift) & in->greenMax] |
-		       blueTable[(*ip >> in->blueShift) & in->blueMax]);
-	    ip++;
-	}
-	ip += ipextra;
-	height--;
+        while (op < opLineEnd) {
+            *(op++) = (redTable[(*ip >> in->redShift) & in->redMax] |
+                       greenTable[(*ip >> in->greenShift) & in->greenMax] |
+                       blueTable[(*ip >> in->blueShift) & in->blueMax]);
+            ip++;
+        }
+        ip += ipextra;
+        height--;
     }
 }
 

@@ -73,62 +73,62 @@ in this Software without prior written authorization from the X Consortium.
 #ifdef RENDER
 # include   "mipict.h"
 #endif
-#include "rfb.h"
+#include    "rfb.h"
 
 /*
  * screen wrappers
  */
 
-static int  rfbSpriteScreenIndex;
+static int           rfbSpriteScreenIndex;
 static unsigned long rfbSpriteGeneration = 0;
 
-static Bool	    rfbSpriteCloseScreen();
-static void	    rfbSpriteGetImage();
-static void	    rfbSpriteGetSpans();
-static void	    rfbSpriteSourceValidate();
-static Bool	    rfbSpriteCreateGC();
-static void	    rfbSpriteInstallColormap();
-static void	    rfbSpriteStoreColors();
+static Bool         rfbSpriteCloseScreen();
+static void         rfbSpriteGetImage();
+static void         rfbSpriteGetSpans();
+static void         rfbSpriteSourceValidate();
+static Bool         rfbSpriteCreateGC();
+static void         rfbSpriteInstallColormap();
+static void         rfbSpriteStoreColors();
 
-static void	    rfbSpritePaintWindowBackground();
-static void	    rfbSpritePaintWindowBorder();
-static void	    rfbSpriteCopyWindow();
-static void	    rfbSpriteClearToBackground();
+static void         rfbSpritePaintWindowBackground();
+static void         rfbSpritePaintWindowBorder();
+static void         rfbSpriteCopyWindow();
+static void         rfbSpriteClearToBackground();
 
 #ifdef RENDER
-static void	    rfbSpriteComposite(CARD8	op,
-				      PicturePtr pSrc,
-				      PicturePtr pMask,
-				      PicturePtr pDst,
-				      INT16	xSrc,
-				      INT16	ySrc,
-				      INT16	xMask,
-				      INT16	yMask,
-				      INT16	xDst,
-				      INT16	yDst,
-				      CARD16	width,
-				      CARD16	height);
+static void         rfbSpriteComposite(CARD8      op,
+                                       PicturePtr pSrc,
+                                       PicturePtr pMask,
+                                       PicturePtr pDst,
+                                       INT16      xSrc,
+                                       INT16      ySrc,
+                                       INT16      xMask,
+                                       INT16      yMask,
+                                       INT16      xDst,
+                                       INT16      yDst,
+                                       CARD16     width,
+                                       CARD16     height);
 
-static void	    rfbSpriteGlyphs(CARD8	op,
-				   PicturePtr	pSrc,
-				   PicturePtr	pDst,
-				   PictFormatPtr maskFormat,
-				   INT16	xSrc,
-				   INT16	ySrc,
-				   int		nlist,
-				   GlyphListPtr	list,
-				   GlyphPtr	*glyphs);
+static void         rfbSpriteGlyphs(CARD8         op,
+                                    PicturePtr    pSrc,
+                                    PicturePtr    pDst,
+                                    PictFormatPtr maskFormat,
+                                    INT16         xSrc,
+                                    INT16         ySrc,
+                                    int           nlist,
+                                    GlyphListPtr  list,
+                                    GlyphPtr      *glyphs);
 #endif
 
-static void	    rfbSpriteSaveDoomedAreas();
+static void         rfbSpriteSaveDoomedAreas();
 static RegionPtr    rfbSpriteRestoreAreas();
-static void	    rfbSpriteComputeSaved();
+static void         rfbSpriteComputeSaved();
 
-#define SCREEN_PROLOGUE(pScreen, field)\
-  ((pScreen)->field = \
-   ((rfbSpriteScreenPtr) (pScreen)->devPrivates[rfbSpriteScreenIndex].ptr)->field)
+#define SCREEN_PROLOGUE(pScreen, field)  \
+  ((pScreen)->field =  \
+   ((rfbSpriteScreenPtr)(pScreen)->devPrivates[rfbSpriteScreenIndex].ptr)->field)
 
-#define SCREEN_EPILOGUE(pScreen, field, wrapper)\
+#define SCREEN_EPILOGUE(pScreen, field, wrapper)  \
     ((pScreen)->field = wrapper)
 
 /*
@@ -137,12 +137,12 @@ static void	    rfbSpriteComputeSaved();
 
 static int  rfbSpriteGCIndex;
 
-static void rfbSpriteValidateGC (),  rfbSpriteCopyGC ();
+static void rfbSpriteValidateGC(),   rfbSpriteCopyGC();
 static void rfbSpriteDestroyGC(),    rfbSpriteChangeGC();
 static void rfbSpriteChangeClip(),   rfbSpriteDestroyClip();
 static void rfbSpriteCopyClip();
 
-static GCFuncs	rfbSpriteGCFuncs = {
+static GCFuncs  rfbSpriteGCFuncs = {
     rfbSpriteValidateGC,
     rfbSpriteChangeGC,
     rfbSpriteCopyGC,
@@ -152,48 +152,48 @@ static GCFuncs	rfbSpriteGCFuncs = {
     rfbSpriteCopyClip,
 };
 
-#define GC_FUNC_PROLOGUE(pGC)					\
-    rfbSpriteGCPtr   pGCPriv =					\
-	(rfbSpriteGCPtr) (pGC)->devPrivates[rfbSpriteGCIndex].ptr;\
-    (pGC)->funcs = pGCPriv->wrapFuncs;				\
-    if (pGCPriv->wrapOps)					\
-	(pGC)->ops = pGCPriv->wrapOps;
+#define GC_FUNC_PROLOGUE(pGC)                                      \
+    rfbSpriteGCPtr pGCPriv =                                       \
+        (rfbSpriteGCPtr)(pGC)->devPrivates[rfbSpriteGCIndex].ptr;  \
+    (pGC)->funcs = pGCPriv->wrapFuncs;                             \
+    if (pGCPriv->wrapOps)                                          \
+        (pGC)->ops = pGCPriv->wrapOps;
 
-#define GC_FUNC_EPILOGUE(pGC)					\
-    pGCPriv->wrapFuncs = (pGC)->funcs;				\
-    (pGC)->funcs = &rfbSpriteGCFuncs;				\
-    if (pGCPriv->wrapOps)					\
-    {								\
-	pGCPriv->wrapOps = (pGC)->ops;				\
-	(pGC)->ops = &rfbSpriteGCOps;				\
+#define GC_FUNC_EPILOGUE(pGC)                                      \
+    pGCPriv->wrapFuncs = (pGC)->funcs;                             \
+    (pGC)->funcs = &rfbSpriteGCFuncs;                              \
+    if (pGCPriv->wrapOps)                                          \
+    {                                                              \
+        pGCPriv->wrapOps = (pGC)->ops;                             \
+        (pGC)->ops = &rfbSpriteGCOps;                              \
     }
 
 /*
  * GC op wrappers
  */
 
-static void	    rfbSpriteFillSpans(),	rfbSpriteSetSpans();
-static void	    rfbSpritePutImage();
-static RegionPtr    rfbSpriteCopyArea(),		rfbSpriteCopyPlane();
-static void	    rfbSpritePolyPoint(),	rfbSpritePolylines();
-static void	    rfbSpritePolySegment(),	rfbSpritePolyRectangle();
-static void	    rfbSpritePolyArc(),		rfbSpriteFillPolygon();
-static void	    rfbSpritePolyFillRect(),	rfbSpritePolyFillArc();
-static int	    rfbSpritePolyText8(),	rfbSpritePolyText16();
-static void	    rfbSpriteImageText8(),	rfbSpriteImageText16();
-static void	    rfbSpriteImageGlyphBlt(),	rfbSpritePolyGlyphBlt();
-static void	    rfbSpritePushPixels();
+static void         rfbSpriteFillSpans(),       rfbSpriteSetSpans();
+static void         rfbSpritePutImage();
+static RegionPtr    rfbSpriteCopyArea(),        rfbSpriteCopyPlane();
+static void         rfbSpritePolyPoint(),       rfbSpritePolylines();
+static void         rfbSpritePolySegment(),     rfbSpritePolyRectangle();
+static void         rfbSpritePolyArc(),         rfbSpriteFillPolygon();
+static void         rfbSpritePolyFillRect(),    rfbSpritePolyFillArc();
+static int          rfbSpritePolyText8(),       rfbSpritePolyText16();
+static void         rfbSpriteImageText8(),      rfbSpriteImageText16();
+static void         rfbSpriteImageGlyphBlt(),   rfbSpritePolyGlyphBlt();
+static void         rfbSpritePushPixels();
 #ifdef NEED_LINEHELPER
-static void	    rfbSpriteLineHelper();
+static void         rfbSpriteLineHelper();
 #endif
 
 static GCOps rfbSpriteGCOps = {
-    rfbSpriteFillSpans,	    rfbSpriteSetSpans,	    rfbSpritePutImage,	
-    rfbSpriteCopyArea,	    rfbSpriteCopyPlane,	    rfbSpritePolyPoint,
-    rfbSpritePolylines,	    rfbSpritePolySegment,    rfbSpritePolyRectangle,
-    rfbSpritePolyArc,	    rfbSpriteFillPolygon,    rfbSpritePolyFillRect,
-    rfbSpritePolyFillArc,    rfbSpritePolyText8,	    rfbSpritePolyText16,
-    rfbSpriteImageText8,	    rfbSpriteImageText16,    rfbSpriteImageGlyphBlt,
+    rfbSpriteFillSpans,      rfbSpriteSetSpans,      rfbSpritePutImage,  
+    rfbSpriteCopyArea,       rfbSpriteCopyPlane,     rfbSpritePolyPoint,
+    rfbSpritePolylines,      rfbSpritePolySegment,   rfbSpritePolyRectangle,
+    rfbSpritePolyArc,        rfbSpriteFillPolygon,   rfbSpritePolyFillRect,
+    rfbSpritePolyFillArc,    rfbSpritePolyText8,     rfbSpritePolyText16,
+    rfbSpriteImageText8,     rfbSpriteImageText16,   rfbSpriteImageGlyphBlt,
     rfbSpritePolyGlyphBlt,   rfbSpritePushPixels
 #ifdef NEED_LINEHELPER
     , rfbSpriteLineHelper
@@ -206,53 +206,53 @@ static GCOps rfbSpriteGCOps = {
  * the saved cursor area
  */
 
-#define GC_SETUP_CHEAP(pDrawable)				    \
-    rfbSpriteScreenPtr	pScreenPriv = (rfbSpriteScreenPtr)	    \
-	(pDrawable)->pScreen->devPrivates[rfbSpriteScreenIndex].ptr; \
+#define GC_SETUP_CHEAP(pDrawable)                                    \
+    rfbSpriteScreenPtr  pScreenPriv = (rfbSpriteScreenPtr)           \
+        (pDrawable)->pScreen->devPrivates[rfbSpriteScreenIndex].ptr; \
 
-#define GC_SETUP(pDrawable, pGC)				    \
-    GC_SETUP_CHEAP(pDrawable)					    \
-    rfbSpriteGCPtr	pGCPrivate = (rfbSpriteGCPtr)		    \
-	(pGC)->devPrivates[rfbSpriteGCIndex].ptr;		    \
+#define GC_SETUP(pDrawable, pGC)                                    \
+    GC_SETUP_CHEAP(pDrawable)                                       \
+    rfbSpriteGCPtr      pGCPrivate = (rfbSpriteGCPtr)               \
+        (pGC)->devPrivates[rfbSpriteGCIndex].ptr;                   \
     GCFuncs *oldFuncs = pGC->funcs;
 
-#define GC_SETUP_AND_CHECK(pDrawable, pGC)			    \
-    GC_SETUP(pDrawable, pGC);					    \
-    if (GC_CHECK((WindowPtr)pDrawable))				    \
-	rfbSpriteRemoveCursor (pDrawable->pScreen);
+#define GC_SETUP_AND_CHECK(pDrawable, pGC)                          \
+    GC_SETUP(pDrawable, pGC);                                       \
+    if (GC_CHECK((WindowPtr)pDrawable))                             \
+        rfbSpriteRemoveCursor(pDrawable->pScreen);
     
-#define GC_CHECK(pWin)						    \
-    (rfbScreen.cursorIsDrawn &&					    \
-        (pScreenPriv->pCacheWin == pWin ?			    \
-	    pScreenPriv->isInCacheWin : (			    \
-	    (pScreenPriv->pCacheWin = (pWin)) ,			    \
-	    (pScreenPriv->isInCacheWin =			    \
-		(pWin)->drawable.x < pScreenPriv->saved.x2 &&	    \
-		pScreenPriv->saved.x1 < (pWin)->drawable.x +	    \
-				    (int) (pWin)->drawable.width && \
-		(pWin)->drawable.y < pScreenPriv->saved.y2 &&	    \
-		pScreenPriv->saved.y1 < (pWin)->drawable.y +	    \
-				    (int) (pWin)->drawable.height &&\
-		RECT_IN_REGION((pWin)->drawable.pScreen, &(pWin)->borderClip, \
-			&pScreenPriv->saved) != rgnOUT))))
+#define GC_CHECK(pWin)                                                        \
+    (rfbScreen.cursorIsDrawn &&                                               \
+        (pScreenPriv->pCacheWin == pWin ?                                     \
+            pScreenPriv->isInCacheWin : (                                     \
+            (pScreenPriv->pCacheWin = (pWin)) ,                               \
+            (pScreenPriv->isInCacheWin =                                      \
+                (pWin)->drawable.x < pScreenPriv->saved.x2 &&                 \
+                pScreenPriv->saved.x1 < (pWin)->drawable.x +                  \
+                                    (int)(pWin)->drawable.width &&            \
+                (pWin)->drawable.y < pScreenPriv->saved.y2 &&                 \
+                pScreenPriv->saved.y1 < (pWin)->drawable.y +                  \
+                                    (int)(pWin)->drawable.height &&           \
+                RECT_IN_REGION((pWin)->drawable.pScreen, &(pWin)->borderClip, \
+                        &pScreenPriv->saved) != rgnOUT))))
 
-#define GC_OP_PROLOGUE(pGC) { \
-    (pGC)->funcs = pGCPrivate->wrapFuncs; \
-    (pGC)->ops = pGCPrivate->wrapOps; \
-    }
+#define GC_OP_PROLOGUE(pGC) {  \
+    (pGC)->funcs = pGCPrivate->wrapFuncs;  \
+    (pGC)->ops = pGCPrivate->wrapOps;  \
+}
 
-#define GC_OP_EPILOGUE(pGC) { \
-    pGCPrivate->wrapOps = (pGC)->ops; \
-    (pGC)->funcs = oldFuncs; \
-    (pGC)->ops = &rfbSpriteGCOps; \
-    }
+#define GC_OP_EPILOGUE(pGC) {  \
+    pGCPrivate->wrapOps = (pGC)->ops;  \
+    (pGC)->funcs = oldFuncs;  \
+    (pGC)->ops = &rfbSpriteGCOps;  \
+}
 
 /*
  * pointer-sprite method table
  */
 
-static Bool rfbSpriteRealizeCursor (),	rfbSpriteUnrealizeCursor ();
-static void rfbSpriteSetCursor (),	rfbSpriteMoveCursor ();
+static Bool rfbSpriteRealizeCursor(),   rfbSpriteUnrealizeCursor();
+static void rfbSpriteSetCursor(),       rfbSpriteMoveCursor();
 
 miPointerSpriteFuncRec rfbSpritePointerFuncs = {
     rfbSpriteRealizeCursor,
@@ -265,7 +265,7 @@ miPointerSpriteFuncRec rfbSpritePointerFuncs = {
  * other misc functions
  */
 
-static Bool rfbDisplayCursor (ScreenPtr pScreen, CursorPtr pCursor);
+static Bool rfbDisplayCursor(ScreenPtr pScreen, CursorPtr pCursor);
 
 
 /*
@@ -275,39 +275,40 @@ static Bool rfbDisplayCursor (ScreenPtr pScreen, CursorPtr pCursor);
  */
 
 Bool
-rfbSpriteInitialize (pScreen, cursorFuncs, screenFuncs)
-    ScreenPtr		    pScreen;
-    rfbSpriteCursorFuncPtr   cursorFuncs;
+rfbSpriteInitialize(pScreen, cursorFuncs, screenFuncs)
+    ScreenPtr               pScreen;
+    rfbSpriteCursorFuncPtr  cursorFuncs;
     miPointerScreenFuncPtr  screenFuncs;
 {
-    rfbSpriteScreenPtr	pPriv;
-    VisualPtr		pVisual;
+    rfbSpriteScreenPtr  pPriv;
+    VisualPtr           pVisual;
 #ifdef RENDER
-    PictureScreenPtr	ps = GetPictureScreenIfSet(pScreen);
+    PictureScreenPtr    ps = GetPictureScreenIfSet(pScreen);
 #endif
     
     if (rfbSpriteGeneration != serverGeneration)
     {
-	rfbSpriteScreenIndex = AllocateScreenPrivateIndex ();
-	if (rfbSpriteScreenIndex < 0)
-	    return FALSE;
-	rfbSpriteGeneration = serverGeneration;
-	rfbSpriteGCIndex = AllocateGCPrivateIndex ();
+        rfbSpriteScreenIndex = AllocateScreenPrivateIndex();
+        if (rfbSpriteScreenIndex < 0)
+            return FALSE;
+        rfbSpriteGeneration = serverGeneration;
+        rfbSpriteGCIndex = AllocateGCPrivateIndex();
     }
     if (!AllocateGCPrivate(pScreen, rfbSpriteGCIndex, sizeof(rfbSpriteGCRec)))
-	return FALSE;
-    pPriv = (rfbSpriteScreenPtr) xalloc (sizeof (rfbSpriteScreenRec));
+        return FALSE;
+    pPriv = (rfbSpriteScreenPtr)xalloc(sizeof(rfbSpriteScreenRec));
     if (!pPriv)
-	return FALSE;
-    if (!miPointerInitialize (pScreen, &rfbSpritePointerFuncs, screenFuncs,TRUE))
+        return FALSE;
+    if (!miPointerInitialize(pScreen, &rfbSpritePointerFuncs, screenFuncs,
+                             TRUE))
     {
-	xfree ((pointer) pPriv);
-	return FALSE;
+        xfree((pointer) pPriv);
+        return FALSE;
     }
     for (pVisual = pScreen->visuals;
-	 pVisual->vid != pScreen->rootVisual;
-	 pVisual++)
-	;
+         pVisual->vid != pScreen->rootVisual;
+         pVisual++)
+        ;
     pPriv->pVisual = pVisual;
     pPriv->CloseScreen = pScreen->CloseScreen;
     pPriv->GetImage = pScreen->GetImage;
@@ -328,8 +329,8 @@ rfbSpriteInitialize (pScreen, cursorFuncs, screenFuncs)
 #ifdef RENDER
     if (ps)
     {
-	pPriv->Composite = ps->Composite;
-	pPriv->Glyphs = ps->Glyphs;
+        pPriv->Composite = ps->Composite;
+        pPriv->Glyphs = ps->Glyphs;
     }
 #endif
 
@@ -348,7 +349,7 @@ rfbSpriteInitialize (pScreen, cursorFuncs, screenFuncs)
     pPriv->colors[MASK_COLOR].red = 0;
     pPriv->colors[MASK_COLOR].green = 0;
     pPriv->colors[MASK_COLOR].blue = 0;
-    pScreen->devPrivates[rfbSpriteScreenIndex].ptr = (pointer) pPriv;
+    pScreen->devPrivates[rfbSpriteScreenIndex].ptr = (pointer)pPriv;
     pScreen->CloseScreen = rfbSpriteCloseScreen;
     pScreen->GetImage = rfbSpriteGetImage;
     pScreen->GetSpans = rfbSpriteGetSpans;
@@ -369,8 +370,8 @@ rfbSpriteInitialize (pScreen, cursorFuncs, screenFuncs)
 #ifdef RENDER
     if (ps)
     {
-	ps->Composite = rfbSpriteComposite;
-	ps->Glyphs = rfbSpriteGlyphs;
+        ps->Composite = rfbSpriteComposite;
+        ps->Glyphs = rfbSpriteGlyphs;
     }
 #endif
 
@@ -387,16 +388,17 @@ rfbSpriteInitialize (pScreen, cursorFuncs, screenFuncs)
  */
 
 static Bool
-rfbSpriteCloseScreen (i, pScreen)
-    int		i;
-    ScreenPtr	pScreen;
+rfbSpriteCloseScreen(i, pScreen)
+    int        i;
+    ScreenPtr  pScreen;
 {
-    rfbSpriteScreenPtr   pScreenPriv;
+    rfbSpriteScreenPtr  pScreenPriv;
 #ifdef RENDER
-    PictureScreenPtr	ps = GetPictureScreenIfSet(pScreen);
+    PictureScreenPtr    ps = GetPictureScreenIfSet(pScreen);
 #endif
 
-    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    pScreenPriv =
+        (rfbSpriteScreenPtr)pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
 
     pScreen->CloseScreen = pScreenPriv->CloseScreen;
     pScreen->GetImage = pScreenPriv->GetImage;
@@ -416,269 +418,275 @@ rfbSpriteCloseScreen (i, pScreen)
 #ifdef RENDER
     if (ps)
     {
-	ps->Composite = pScreenPriv->Composite;
-	ps->Glyphs = pScreenPriv->Glyphs;
+        ps->Composite = pScreenPriv->Composite;
+        ps->Glyphs = pScreenPriv->Glyphs;
     }
 #endif
 
-    xfree ((pointer) pScreenPriv);
+    xfree(pointer) pScreenPriv);
 
-    return (*pScreen->CloseScreen) (i, pScreen);
+    return (*pScreen->CloseScreen)(i, pScreen);
 }
 
 static void
-rfbSpriteGetImage (pDrawable, sx, sy, w, h, format, planemask, pdstLine)
-    DrawablePtr	    pDrawable;
-    int		    sx, sy, w, h;
-    unsigned int    format;
-    unsigned long   planemask;
-    char	    *pdstLine;
+rfbSpriteGetImage(pDrawable, sx, sy, w, h, format, planemask, pdstLine)
+    DrawablePtr    pDrawable;
+    int            sx, sy, w, h;
+    unsigned int   format;
+    unsigned long  planemask;
+    char           *pdstLine;
 {
-    ScreenPtr	    pScreen = pDrawable->pScreen;
-    rfbSpriteScreenPtr    pScreenPriv;
+    ScreenPtr           pScreen = pDrawable->pScreen;
+    rfbSpriteScreenPtr  pScreenPriv;
     
-    SCREEN_PROLOGUE (pScreen, GetImage);
+    SCREEN_PROLOGUE(pScreen, GetImage);
 
-    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    pScreenPriv =
+        (rfbSpriteScreenPtr)pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
 
     if (pDrawable->type == DRAWABLE_WINDOW &&
         rfbScreen.cursorIsDrawn &&
-	ORG_OVERLAP(&pScreenPriv->saved,pDrawable->x,pDrawable->y, sx, sy, w, h))
+        ORG_OVERLAP(&pScreenPriv->saved, pDrawable->x,pDrawable->y, sx, sy,
+                    w, h))
     {
-	rfbSpriteRemoveCursor (pScreen);
+        rfbSpriteRemoveCursor(pScreen);
     }
 
-    (*pScreen->GetImage) (pDrawable, sx, sy, w, h,
-			  format, planemask, pdstLine);
+    (*pScreen->GetImage)(pDrawable, sx, sy, w, h,
+                         format, planemask, pdstLine);
 
-    SCREEN_EPILOGUE (pScreen, GetImage, rfbSpriteGetImage);
+    SCREEN_EPILOGUE(pScreen, GetImage, rfbSpriteGetImage);
 }
 
 static void
-rfbSpriteGetSpans (pDrawable, wMax, ppt, pwidth, nspans, pdstStart)
-    DrawablePtr	pDrawable;
-    int		wMax;
-    DDXPointPtr	ppt;
-    int		*pwidth;
-    int		nspans;
-    char	*pdstStart;
+rfbSpriteGetSpans(pDrawable, wMax, ppt, pwidth, nspans, pdstStart)
+    DrawablePtr  pDrawable;
+    int          wMax;
+    DDXPointPtr  ppt;
+    int          *pwidth;
+    int          nspans;
+    char         *pdstStart;
 {
-    ScreenPtr		    pScreen = pDrawable->pScreen;
-    rfbSpriteScreenPtr	    pScreenPriv;
+    ScreenPtr           pScreen = pDrawable->pScreen;
+    rfbSpriteScreenPtr  pScreenPriv;
     
-    SCREEN_PROLOGUE (pScreen, GetSpans);
+    SCREEN_PROLOGUE(pScreen, GetSpans);
 
-    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    pScreenPriv =
+        (rfbSpriteScreenPtr)pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
 
     if (pDrawable->type == DRAWABLE_WINDOW && rfbScreen.cursorIsDrawn)
     {
-	register DDXPointPtr    pts;
-	register int    	*widths;
-	register int    	nPts;
-	register int    	xorg,
-				yorg;
+        register DDXPointPtr  pts;
+        register int          *widths;
+        register int          nPts;
+        register int          xorg,
+                              yorg;
 
-	xorg = pDrawable->x;
-	yorg = pDrawable->y;
+        xorg = pDrawable->x;
+        yorg = pDrawable->y;
 
-	for (pts = ppt, widths = pwidth, nPts = nspans;
-	     nPts--;
-	     pts++, widths++)
- 	{
-	    if (SPN_OVERLAP(&pScreenPriv->saved,pts->y+yorg,
-			     pts->x+xorg,*widths))
-	    {
-		rfbSpriteRemoveCursor (pScreen);
-		break;
-	    }
-	}
+        for (pts = ppt, widths = pwidth, nPts = nspans;
+             nPts--;
+             pts++, widths++)
+        {
+            if (SPN_OVERLAP(&pScreenPriv->saved,pts->y+yorg,
+                             pts->x+xorg,*widths))
+            {
+                rfbSpriteRemoveCursor(pScreen);
+                break;
+            }
+        }
     }
 
-    (*pScreen->GetSpans) (pDrawable, wMax, ppt, pwidth, nspans, pdstStart);
+    (*pScreen->GetSpans)(pDrawable, wMax, ppt, pwidth, nspans, pdstStart);
 
-    SCREEN_EPILOGUE (pScreen, GetSpans, rfbSpriteGetSpans);
+    SCREEN_EPILOGUE(pScreen, GetSpans, rfbSpriteGetSpans);
 }
 
 static void
-rfbSpriteSourceValidate (pDrawable, x, y, width, height)
-    DrawablePtr	pDrawable;
-    int		x, y, width, height;
+rfbSpriteSourceValidate(pDrawable, x, y, width, height)
+    DrawablePtr  pDrawable;
+    int          x, y, width, height;
 {
-    ScreenPtr		    pScreen = pDrawable->pScreen;
-    rfbSpriteScreenPtr	    pScreenPriv;
+    ScreenPtr           pScreen = pDrawable->pScreen;
+    rfbSpriteScreenPtr  pScreenPriv;
     
-    SCREEN_PROLOGUE (pScreen, SourceValidate);
+    SCREEN_PROLOGUE(pScreen, SourceValidate);
 
-    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    pScreenPriv =
+        (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
 
     if (pDrawable->type == DRAWABLE_WINDOW && rfbScreen.cursorIsDrawn &&
-	ORG_OVERLAP(&pScreenPriv->saved, pDrawable->x, pDrawable->y,
-		    x, y, width, height))
+        ORG_OVERLAP(&pScreenPriv->saved, pDrawable->x, pDrawable->y,
+                    x, y, width, height))
     {
-	rfbSpriteRemoveCursor (pScreen);
+        rfbSpriteRemoveCursor(pScreen);
     }
 
     if (pScreen->SourceValidate)
-	(*pScreen->SourceValidate) (pDrawable, x, y, width, height);
+        (*pScreen->SourceValidate)(pDrawable, x, y, width, height);
 
-    SCREEN_EPILOGUE (pScreen, SourceValidate, rfbSpriteSourceValidate);
+    SCREEN_EPILOGUE(pScreen, SourceValidate, rfbSpriteSourceValidate);
 }
 
 static Bool
-rfbSpriteCreateGC (pGC)
-    GCPtr   pGC;
+rfbSpriteCreateGC(pGC)
+    GCPtr pGC;
 {
-    ScreenPtr	    pScreen = pGC->pScreen;
-    Bool	    ret;
-    rfbSpriteGCPtr   pPriv;
+    ScreenPtr       pScreen = pGC->pScreen;
+    Bool            ret;
+    rfbSpriteGCPtr  pPriv;
 
-    SCREEN_PROLOGUE (pScreen, CreateGC);
+    SCREEN_PROLOGUE(pScreen, CreateGC);
     
     pPriv = (rfbSpriteGCPtr)pGC->devPrivates[rfbSpriteGCIndex].ptr;
 
-    ret = (*pScreen->CreateGC) (pGC);
+    ret = (*pScreen->CreateGC)(pGC);
 
     pPriv->wrapOps = NULL;
     pPriv->wrapFuncs = pGC->funcs;
     pGC->funcs = &rfbSpriteGCFuncs;
 
-    SCREEN_EPILOGUE (pScreen, CreateGC, rfbSpriteCreateGC);
+    SCREEN_EPILOGUE(pScreen, CreateGC, rfbSpriteCreateGC);
 
     return ret;
 }
 
 static void
-rfbSpriteInstallColormap (pMap)
-    ColormapPtr	pMap;
+rfbSpriteInstallColormap(pMap)
+    ColormapPtr pMap;
 {
-    ScreenPtr		pScreen = pMap->pScreen;
-    rfbSpriteScreenPtr	pPriv;
+    ScreenPtr           pScreen = pMap->pScreen;
+    rfbSpriteScreenPtr  pPriv;
 
-    pPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    pPriv =
+        (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
 
     SCREEN_PROLOGUE(pScreen, InstallColormap);
     
-    (*pScreen->InstallColormap) (pMap);
+    (*pScreen->InstallColormap)(pMap);
 
     SCREEN_EPILOGUE(pScreen, InstallColormap, rfbSpriteInstallColormap);
 
     pPriv->pInstalledMap = pMap;
     if (pPriv->pColormap != pMap)
     {
-    	pPriv->checkPixels = TRUE;
-	if (rfbScreen.cursorIsDrawn)
-	    rfbSpriteRemoveCursor (pScreen);
+        pPriv->checkPixels = TRUE;
+        if (rfbScreen.cursorIsDrawn)
+            rfbSpriteRemoveCursor(pScreen);
     }
 }
 
 static void
-rfbSpriteStoreColors (pMap, ndef, pdef)
-    ColormapPtr	pMap;
-    int		ndef;
-    xColorItem	*pdef;
+rfbSpriteStoreColors(pMap, ndef, pdef)
+    ColormapPtr  pMap;
+    int          ndef;
+    xColorItem   *pdef;
 {
-    ScreenPtr		pScreen = pMap->pScreen;
-    rfbSpriteScreenPtr	pPriv;
-    int			i;
-    int			updated;
-    VisualPtr		pVisual;
+    ScreenPtr           pScreen = pMap->pScreen;
+    rfbSpriteScreenPtr  pPriv;
+    int                 i;
+    int                 updated;
+    VisualPtr           pVisual;
 
-    pPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    pPriv =
+        (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
 
     SCREEN_PROLOGUE(pScreen, StoreColors);
     
-    (*pScreen->StoreColors) (pMap, ndef, pdef);
+    (*pScreen->StoreColors)(pMap, ndef, pdef);
 
     SCREEN_EPILOGUE(pScreen, StoreColors, rfbSpriteStoreColors);
 
     if (pPriv->pColormap == pMap)
     {
-	updated = 0;
-	pVisual = pMap->pVisual;
-	if (pVisual->class == DirectColor)
-	{
-	    /* Direct color - match on any of the subfields */
+        updated = 0;
+        pVisual = pMap->pVisual;
+        if (pVisual->class == DirectColor)
+        {
+            /* Direct color - match on any of the subfields */
 
 #define MaskMatch(a,b,mask) ((a) & ((pVisual->mask) == (b)) & (pVisual->mask))
 
-#define UpdateDAC(plane,dac,mask) {\
-    if (MaskMatch (pPriv->colors[plane].pixel,pdef[i].pixel,mask)) {\
-	pPriv->colors[plane].dac = pdef[i].dac; \
-	updated = 1; \
-    } \
+#define UpdateDAC(plane,dac,mask) {  \
+    if (MaskMatch(pPriv->colors[plane].pixel,pdef[i].pixel,mask)) {  \
+        pPriv->colors[plane].dac = pdef[i].dac;  \
+        updated = 1;  \
+    }  \
 }
 
-#define CheckDirect(plane) \
-	    UpdateDAC(plane,red,redMask) \
-	    UpdateDAC(plane,green,greenMask) \
-	    UpdateDAC(plane,blue,blueMask)
+#define CheckDirect(plane)  \
+    UpdateDAC(plane,red,redMask)  \
+    UpdateDAC(plane,green,greenMask)  \
+    UpdateDAC(plane,blue,blueMask)
 
-	    for (i = 0; i < ndef; i++)
-	    {
-		CheckDirect (SOURCE_COLOR)
-		CheckDirect (MASK_COLOR)
-	    }
-	}
-	else
-	{
-	    /* PseudoColor/GrayScale - match on exact pixel */
-	    for (i = 0; i < ndef; i++)
-	    {
-	    	if (pdef[i].pixel == pPriv->colors[SOURCE_COLOR].pixel)
-	    	{
-		    pPriv->colors[SOURCE_COLOR] = pdef[i];
-		    if (++updated == 2)
-		    	break;
-	    	}
-	    	if (pdef[i].pixel == pPriv->colors[MASK_COLOR].pixel)
-	    	{
-		    pPriv->colors[MASK_COLOR] = pdef[i];
-		    if (++updated == 2)
-		    	break;
-	    	}
-	    }
-	}
-    	if (updated)
-    	{
-	    pPriv->checkPixels = TRUE;
-	    if (rfbScreen.cursorIsDrawn)
-	    	rfbSpriteRemoveCursor (pScreen);
-    	}
+            for (i = 0; i < ndef; i++)
+            {
+                CheckDirect(SOURCE_COLOR)
+                CheckDirect(MASK_COLOR)
+            }
+        }
+        else
+        {
+            /* PseudoColor/GrayScale - match on exact pixel */
+            for (i = 0; i < ndef; i++)
+            {
+                if (pdef[i].pixel == pPriv->colors[SOURCE_COLOR].pixel)
+                {
+                    pPriv->colors[SOURCE_COLOR] = pdef[i];
+                    if (++updated == 2)
+                        break;
+                }
+                if (pdef[i].pixel == pPriv->colors[MASK_COLOR].pixel)
+                {
+                    pPriv->colors[MASK_COLOR] = pdef[i];
+                    if (++updated == 2)
+                        break;
+                }
+            }
+        }
+        if (updated)
+        {
+            pPriv->checkPixels = TRUE;
+            if (rfbScreen.cursorIsDrawn)
+                rfbSpriteRemoveCursor(pScreen);
+        }
     }
 }
 
 static void
-rfbSpriteFindColors (pScreen)
-    ScreenPtr	pScreen;
+rfbSpriteFindColors(pScreen)
+    ScreenPtr pScreen;
 {
-    rfbSpriteScreenPtr	pScreenPriv = (rfbSpriteScreenPtr)
-			    pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
-    CursorPtr		pCursor;
-    xColorItem		*sourceColor, *maskColor;
+    rfbSpriteScreenPtr  pScreenPriv =
+        (rfbSpriteScreenPtr)pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    CursorPtr           pCursor;
+    xColorItem          *sourceColor, *maskColor;
 
     pCursor = pScreenPriv->pCursor;
     sourceColor = &pScreenPriv->colors[SOURCE_COLOR];
     maskColor = &pScreenPriv->colors[MASK_COLOR];
     if (pScreenPriv->pColormap != pScreenPriv->pInstalledMap ||
-	!(pCursor->foreRed == sourceColor->red &&
-	  pCursor->foreGreen == sourceColor->green &&
+        !(pCursor->foreRed == sourceColor->red &&
+          pCursor->foreGreen == sourceColor->green &&
           pCursor->foreBlue == sourceColor->blue &&
-	  pCursor->backRed == maskColor->red &&
-	  pCursor->backGreen == maskColor->green &&
-	  pCursor->backBlue == maskColor->blue))
+          pCursor->backRed == maskColor->red &&
+          pCursor->backGreen == maskColor->green &&
+          pCursor->backBlue == maskColor->blue))
     {
-	pScreenPriv->pColormap = pScreenPriv->pInstalledMap;
-	sourceColor->red = pCursor->foreRed;
-	sourceColor->green = pCursor->foreGreen;
-	sourceColor->blue = pCursor->foreBlue;
-	FakeAllocColor (pScreenPriv->pColormap, sourceColor);
-	maskColor->red = pCursor->backRed;
-	maskColor->green = pCursor->backGreen;
-	maskColor->blue = pCursor->backBlue;
-	FakeAllocColor (pScreenPriv->pColormap, maskColor);
-	/* "free" the pixels right away, don't let this confuse you */
-	FakeFreeColor(pScreenPriv->pColormap, sourceColor->pixel);
-	FakeFreeColor(pScreenPriv->pColormap, maskColor->pixel);
+        pScreenPriv->pColormap = pScreenPriv->pInstalledMap;
+        sourceColor->red = pCursor->foreRed;
+        sourceColor->green = pCursor->foreGreen;
+        sourceColor->blue = pCursor->foreBlue;
+        FakeAllocColor (pScreenPriv->pColormap, sourceColor);
+        maskColor->red = pCursor->backRed;
+        maskColor->green = pCursor->backGreen;
+        maskColor->blue = pCursor->backBlue;
+        FakeAllocColor (pScreenPriv->pColormap, maskColor);
+        /* "free" the pixels right away, don't let this confuse you */
+        FakeFreeColor(pScreenPriv->pColormap, sourceColor->pixel);
+        FakeFreeColor(pScreenPriv->pColormap, maskColor->pixel);
     }
     pScreenPriv->checkPixels = FALSE;
 }
@@ -688,63 +696,65 @@ rfbSpriteFindColors (pScreen)
  */
 
 static void
-rfbSpriteSaveDoomedAreas (pWin, pObscured, dx, dy)
-    WindowPtr	pWin;
-    RegionPtr	pObscured;
-    int		dx, dy;
+rfbSpriteSaveDoomedAreas(pWin, pObscured, dx, dy)
+    WindowPtr  pWin;
+    RegionPtr  pObscured;
+    int        dx, dy;
 {
-    ScreenPtr		pScreen;
-    rfbSpriteScreenPtr   pScreenPriv;
-    BoxRec		cursorBox;
+    ScreenPtr           pScreen;
+    rfbSpriteScreenPtr  pScreenPriv;
+    BoxRec              cursorBox;
 
     pScreen = pWin->drawable.pScreen;
     
-    SCREEN_PROLOGUE (pScreen, SaveDoomedAreas);
+    SCREEN_PROLOGUE(pScreen, SaveDoomedAreas);
 
-    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    pScreenPriv =
+        (rfbSpriteScreenPtr)pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
     if (rfbScreen.cursorIsDrawn)
     {
-	cursorBox = pScreenPriv->saved;
+        cursorBox = pScreenPriv->saved;
 
-	if (dx || dy)
- 	{
-	    cursorBox.x1 += dx;
-	    cursorBox.y1 += dy;
-	    cursorBox.x2 += dx;
-	    cursorBox.y2 += dy;
-	}
-	if (RECT_IN_REGION( pScreen, pObscured, &cursorBox) != rgnOUT)
-	    rfbSpriteRemoveCursor (pScreen);
+        if (dx || dy)
+        {
+            cursorBox.x1 += dx;
+            cursorBox.y1 += dy;
+            cursorBox.x2 += dx;
+            cursorBox.y2 += dy;
+        }
+        if (RECT_IN_REGION(pScreen, pObscured, &cursorBox) != rgnOUT)
+            rfbSpriteRemoveCursor(pScreen);
     }
 
-    (*pScreen->SaveDoomedAreas) (pWin, pObscured, dx, dy);
+    (*pScreen->SaveDoomedAreas)(pWin, pObscured, dx, dy);
 
-    SCREEN_EPILOGUE (pScreen, SaveDoomedAreas, rfbSpriteSaveDoomedAreas);
+    SCREEN_EPILOGUE(pScreen, SaveDoomedAreas, rfbSpriteSaveDoomedAreas);
 }
 
 static RegionPtr
-rfbSpriteRestoreAreas (pWin, prgnExposed)
-    WindowPtr	pWin;
-    RegionPtr	prgnExposed;
+rfbSpriteRestoreAreas(pWin, prgnExposed)
+    WindowPtr  pWin;
+    RegionPtr  prgnExposed;
 {
-    ScreenPtr		pScreen;
-    rfbSpriteScreenPtr   pScreenPriv;
-    RegionPtr		result;
+    ScreenPtr           pScreen;
+    rfbSpriteScreenPtr  pScreenPriv;
+    RegionPtr           result;
 
     pScreen = pWin->drawable.pScreen;
     
-    SCREEN_PROLOGUE (pScreen, RestoreAreas);
+    SCREEN_PROLOGUE(pScreen, RestoreAreas);
 
-    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    pScreenPriv =
+        (rfbSpriteScreenPtr)pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
     if (rfbScreen.cursorIsDrawn)
     {
-	if (RECT_IN_REGION( pScreen, prgnExposed, &pScreenPriv->saved) != rgnOUT)
-	    rfbSpriteRemoveCursor (pScreen);
+        if (RECT_IN_REGION(pScreen, prgnExposed, &pScreenPriv->saved) != rgnOUT)
+            rfbSpriteRemoveCursor(pScreen);
     }
 
-    result = (*pScreen->RestoreAreas) (pWin, prgnExposed);
+    result = (*pScreen->RestoreAreas)(pWin, prgnExposed);
 
-    SCREEN_EPILOGUE (pScreen, RestoreAreas, rfbSpriteRestoreAreas);
+    SCREEN_EPILOGUE(pScreen, RestoreAreas, rfbSpriteRestoreAreas);
 
     return result;
 }
@@ -754,135 +764,140 @@ rfbSpriteRestoreAreas (pWin, prgnExposed)
  */
 
 static void
-rfbSpritePaintWindowBackground (pWin, pRegion, what)
-    WindowPtr	pWin;
-    RegionPtr	pRegion;
-    int		what;
+rfbSpritePaintWindowBackground(pWin, pRegion, what)
+    WindowPtr  pWin;
+    RegionPtr  pRegion;
+    int        what;
 {
-    ScreenPtr	    pScreen;
-    rfbSpriteScreenPtr    pScreenPriv;
+    ScreenPtr           pScreen;
+    rfbSpriteScreenPtr  pScreenPriv;
 
     pScreen = pWin->drawable.pScreen;
 
-    SCREEN_PROLOGUE (pScreen, PaintWindowBackground);
+    SCREEN_PROLOGUE(pScreen, PaintWindowBackground);
 
-    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    pScreenPriv =
+        (rfbSpriteScreenPtr)pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
     if (rfbScreen.cursorIsDrawn)
     {
-	/*
-	 * If the cursor is on the same screen as the window, check the
-	 * region to paint for the cursor and remove it as necessary
-	 */
-	if (RECT_IN_REGION( pScreen, pRegion, &pScreenPriv->saved) != rgnOUT)
-	    rfbSpriteRemoveCursor (pScreen);
+        /*
+         * If the cursor is on the same screen as the window, check the
+         * region to paint for the cursor and remove it as necessary
+         */
+        if (RECT_IN_REGION(pScreen, pRegion, &pScreenPriv->saved) != rgnOUT)
+            rfbSpriteRemoveCursor(pScreen);
     }
 
-    (*pScreen->PaintWindowBackground) (pWin, pRegion, what);
+    (*pScreen->PaintWindowBackground)(pWin, pRegion, what);
 
-    SCREEN_EPILOGUE (pScreen, PaintWindowBackground, rfbSpritePaintWindowBackground);
+    SCREEN_EPILOGUE(pScreen, PaintWindowBackground,
+                    rfbSpritePaintWindowBackground);
 }
 
 static void
-rfbSpritePaintWindowBorder (pWin, pRegion, what)
-    WindowPtr	pWin;
-    RegionPtr	pRegion;
-    int		what;
+rfbSpritePaintWindowBorder(pWin, pRegion, what)
+    WindowPtr  pWin;
+    RegionPtr  pRegion;
+    int        what;
 {
-    ScreenPtr	    pScreen;
-    rfbSpriteScreenPtr    pScreenPriv;
+    ScreenPtr           pScreen;
+    rfbSpriteScreenPtr  pScreenPriv;
 
     pScreen = pWin->drawable.pScreen;
 
-    SCREEN_PROLOGUE (pScreen, PaintWindowBorder);
+    SCREEN_PROLOGUE(pScreen, PaintWindowBorder);
 
-    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    pScreenPriv =
+        (rfbSpriteScreenPtr)pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
     if (rfbScreen.cursorIsDrawn)
     {
-	/*
-	 * If the cursor is on the same screen as the window, check the
-	 * region to paint for the cursor and remove it as necessary
-	 */
-	if (RECT_IN_REGION( pScreen, pRegion, &pScreenPriv->saved) != rgnOUT)
-	    rfbSpriteRemoveCursor (pScreen);
+        /*
+         * If the cursor is on the same screen as the window, check the
+         * region to paint for the cursor and remove it as necessary
+         */
+        if (RECT_IN_REGION(pScreen, pRegion, &pScreenPriv->saved) != rgnOUT)
+            rfbSpriteRemoveCursor(pScreen);
     }
 
-    (*pScreen->PaintWindowBorder) (pWin, pRegion, what);
+    (*pScreen->PaintWindowBorder)(pWin, pRegion, what);
 
-    SCREEN_EPILOGUE (pScreen, PaintWindowBorder, rfbSpritePaintWindowBorder);
+    SCREEN_EPILOGUE(pScreen, PaintWindowBorder, rfbSpritePaintWindowBorder);
 }
 
 static void
-rfbSpriteCopyWindow (pWin, ptOldOrg, pRegion)
-    WindowPtr	pWin;
-    DDXPointRec	ptOldOrg;
-    RegionPtr	pRegion;
+rfbSpriteCopyWindow(pWin, ptOldOrg, pRegion)
+    WindowPtr    pWin;
+    DDXPointRec  ptOldOrg;
+    RegionPtr    pRegion;
 {
-    ScreenPtr	    pScreen;
-    rfbSpriteScreenPtr    pScreenPriv;
-    BoxRec	    cursorBox;
-    int		    dx, dy;
+    ScreenPtr           pScreen;
+    rfbSpriteScreenPtr  pScreenPriv;
+    BoxRec              cursorBox;
+    int                 dx, dy;
 
     pScreen = pWin->drawable.pScreen;
 
-    SCREEN_PROLOGUE (pScreen, CopyWindow);
+    SCREEN_PROLOGUE(pScreen, CopyWindow);
 
-    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    pScreenPriv =
+        (rfbSpriteScreenPtr)pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
     if (rfbScreen.cursorIsDrawn)
     {
-	/*
-	 * check both the source and the destination areas.  The given
-	 * region is source relative, so offset the cursor box by
-	 * the delta position
-	 */
-	cursorBox = pScreenPriv->saved;
-	dx = pWin->drawable.x - ptOldOrg.x;
-	dy = pWin->drawable.y - ptOldOrg.y;
-	cursorBox.x1 -= dx;
-	cursorBox.x2 -= dx;
-	cursorBox.y1 -= dy;
-	cursorBox.y2 -= dy;
-	if (RECT_IN_REGION( pScreen, pRegion, &pScreenPriv->saved) != rgnOUT ||
-	    RECT_IN_REGION( pScreen, pRegion, &cursorBox) != rgnOUT)
-	    rfbSpriteRemoveCursor (pScreen);
+        /*
+         * check both the source and the destination areas.  The given
+         * region is source relative, so offset the cursor box by
+         * the delta position
+         */
+        cursorBox = pScreenPriv->saved;
+        dx = pWin->drawable.x - ptOldOrg.x;
+        dy = pWin->drawable.y - ptOldOrg.y;
+        cursorBox.x1 -= dx;
+        cursorBox.x2 -= dx;
+        cursorBox.y1 -= dy;
+        cursorBox.y2 -= dy;
+        if (RECT_IN_REGION(pScreen, pRegion, &pScreenPriv->saved) != rgnOUT ||
+            RECT_IN_REGION(pScreen, pRegion, &cursorBox) != rgnOUT)
+            rfbSpriteRemoveCursor(pScreen);
     }
 
-    (*pScreen->CopyWindow) (pWin, ptOldOrg, pRegion);
+    (*pScreen->CopyWindow)(pWin, ptOldOrg, pRegion);
 
-    SCREEN_EPILOGUE (pScreen, CopyWindow, rfbSpriteCopyWindow);
+    SCREEN_EPILOGUE(pScreen, CopyWindow, rfbSpriteCopyWindow);
 }
 
 static void
-rfbSpriteClearToBackground (pWin, x, y, w, h, generateExposures)
-    WindowPtr pWin;
-    short x,y;
-    unsigned short w,h;
-    Bool generateExposures;
+rfbSpriteClearToBackground(pWin, x, y, w, h, generateExposures)
+    WindowPtr       pWin;
+    short           x, y;
+    unsigned short  w, h;
+    Bool            generateExposures;
 {
-    ScreenPtr		pScreen;
-    rfbSpriteScreenPtr	pScreenPriv;
-    int			realw, realh;
+    ScreenPtr           pScreen;
+    rfbSpriteScreenPtr  pScreenPriv;
+    int                 realw, realh;
 
     pScreen = pWin->drawable.pScreen;
 
-    SCREEN_PROLOGUE (pScreen, ClearToBackground);
+    SCREEN_PROLOGUE(pScreen, ClearToBackground);
 
-    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    pScreenPriv =
+        (rfbSpriteScreenPtr)pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
     if (GC_CHECK(pWin))
     {
-	if (!(realw = w))
-	    realw = (int) pWin->drawable.width - x;
-	if (!(realh = h))
-	    realh = (int) pWin->drawable.height - y;
-	if (ORG_OVERLAP(&pScreenPriv->saved, pWin->drawable.x, pWin->drawable.y,
-			x, y, realw, realh))
-	{
-	    rfbSpriteRemoveCursor (pScreen);
-	}
+        if (!(realw = w))
+            realw = (int)pWin->drawable.width - x;
+        if (!(realh = h))
+            realh = (int)pWin->drawable.height - y;
+        if (ORG_OVERLAP(&pScreenPriv->saved, pWin->drawable.x,
+                        pWin->drawable.y, x, y, realw, realh))
+        {
+            rfbSpriteRemoveCursor(pScreen);
+        }
     }
 
-    (*pScreen->ClearToBackground) (pWin, x, y, w, h, generateExposures);
+    (*pScreen->ClearToBackground)(pWin, x, y, w, h, generateExposures);
 
-    SCREEN_EPILOGUE (pScreen, ClearToBackground, rfbSpriteClearToBackground);
+    SCREEN_EPILOGUE(pScreen, ClearToBackground, rfbSpriteClearToBackground);
 }
 
 /*
@@ -890,101 +905,102 @@ rfbSpriteClearToBackground (pWin, x, y, w, h, generateExposures)
  */
 
 static void
-rfbSpriteValidateGC (pGC, changes, pDrawable)
-    GCPtr	pGC;
-    Mask	changes;
-    DrawablePtr	pDrawable;
+rfbSpriteValidateGC(pGC, changes, pDrawable)
+    GCPtr        pGC;
+    Mask         changes;
+    DrawablePtr  pDrawable;
 {
-    GC_FUNC_PROLOGUE (pGC);
+    GC_FUNC_PROLOGUE(pGC);
 
-    (*pGC->funcs->ValidateGC) (pGC, changes, pDrawable);
+    (*pGC->funcs->ValidateGC)(pGC, changes, pDrawable);
     
     pGCPriv->wrapOps = NULL;
-    if (pDrawable->type == DRAWABLE_WINDOW && ((WindowPtr) pDrawable)->viewable)
+    if (pDrawable->type == DRAWABLE_WINDOW &&
+        ((WindowPtr) pDrawable)->viewable)
     {
-	WindowPtr   pWin;
-	RegionPtr   pRegion;
+        WindowPtr  pWin;
+        RegionPtr  pRegion;
 
-	pWin = (WindowPtr) pDrawable;
-	pRegion = &pWin->clipList;
-	if (pGC->subWindowMode == IncludeInferiors)
-	    pRegion = &pWin->borderClip;
-	if (REGION_NOTEMPTY(pDrawable->pScreen, pRegion))
-	    pGCPriv->wrapOps = pGC->ops;
+        pWin = (WindowPtr)pDrawable;
+        pRegion = &pWin->clipList;
+        if (pGC->subWindowMode == IncludeInferiors)
+            pRegion = &pWin->borderClip;
+        if (REGION_NOTEMPTY(pDrawable->pScreen, pRegion))
+            pGCPriv->wrapOps = pGC->ops;
     }
 
-    GC_FUNC_EPILOGUE (pGC);
+    GC_FUNC_EPILOGUE(pGC);
 }
 
 static void
-rfbSpriteChangeGC (pGC, mask)
-    GCPtr	    pGC;
-    unsigned long   mask;
+rfbSpriteChangeGC(pGC, mask)
+    GCPtr          pGC;
+    unsigned long  mask;
 {
-    GC_FUNC_PROLOGUE (pGC);
+    GC_FUNC_PROLOGUE(pGC);
 
-    (*pGC->funcs->ChangeGC) (pGC, mask);
+    (*pGC->funcs->ChangeGC)(pGC, mask);
     
-    GC_FUNC_EPILOGUE (pGC);
+    GC_FUNC_EPILOGUE(pGC);
 }
 
 static void
-rfbSpriteCopyGC (pGCSrc, mask, pGCDst)
-    GCPtr	    pGCSrc, pGCDst;
-    unsigned long   mask;
+rfbSpriteCopyGC(pGCSrc, mask, pGCDst)
+    GCPtr          pGCSrc, pGCDst;
+    unsigned long  mask;
 {
-    GC_FUNC_PROLOGUE (pGCDst);
+    GC_FUNC_PROLOGUE(pGCDst);
 
-    (*pGCDst->funcs->CopyGC) (pGCSrc, mask, pGCDst);
+    (*pGCDst->funcs->CopyGC)(pGCSrc, mask, pGCDst);
     
-    GC_FUNC_EPILOGUE (pGCDst);
+    GC_FUNC_EPILOGUE(pGCDst);
 }
 
 static void
-rfbSpriteDestroyGC (pGC)
-    GCPtr   pGC;
+rfbSpriteDestroyGC(pGC)
+    GCPtr pGC;
 {
-    GC_FUNC_PROLOGUE (pGC);
+    GC_FUNC_PROLOGUE(pGC);
 
-    (*pGC->funcs->DestroyGC) (pGC);
+    (*pGC->funcs->DestroyGC)(pGC);
     
-    GC_FUNC_EPILOGUE (pGC);
+    GC_FUNC_EPILOGUE(pGC);
 }
 
 static void
-rfbSpriteChangeClip (pGC, type, pvalue, nrects)
-    GCPtr   pGC;
-    int		type;
-    pointer	pvalue;
-    int		nrects;
+rfbSpriteChangeClip(pGC, type, pvalue, nrects)
+    GCPtr    pGC;
+    int      type;
+    pointer  pvalue;
+    int      nrects;
 {
-    GC_FUNC_PROLOGUE (pGC);
+    GC_FUNC_PROLOGUE(pGC);
 
-    (*pGC->funcs->ChangeClip) (pGC, type, pvalue, nrects);
+    (*pGC->funcs->ChangeClip)(pGC, type, pvalue, nrects);
 
-    GC_FUNC_EPILOGUE (pGC);
+    GC_FUNC_EPILOGUE(pGC);
 }
 
 static void
 rfbSpriteCopyClip(pgcDst, pgcSrc)
     GCPtr pgcDst, pgcSrc;
 {
-    GC_FUNC_PROLOGUE (pgcDst);
+    GC_FUNC_PROLOGUE(pgcDst);
 
-    (* pgcDst->funcs->CopyClip)(pgcDst, pgcSrc);
+    (*pgcDst->funcs->CopyClip)(pgcDst, pgcSrc);
 
-    GC_FUNC_EPILOGUE (pgcDst);
+    GC_FUNC_EPILOGUE(pgcDst);
 }
 
 static void
 rfbSpriteDestroyClip(pGC)
-    GCPtr	pGC;
+    GCPtr pGC;
 {
-    GC_FUNC_PROLOGUE (pGC);
+    GC_FUNC_PROLOGUE(pGC);
 
-    (* pGC->funcs->DestroyClip)(pGC);
+    (*pGC->funcs->DestroyClip)(pGC);
 
-    GC_FUNC_EPILOGUE (pGC);
+    GC_FUNC_EPILOGUE(pGC);
 }
 
 /*
@@ -993,119 +1009,119 @@ rfbSpriteDestroyClip(pGC)
 
 static void
 rfbSpriteFillSpans(pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted)
-    DrawablePtr pDrawable;
-    GCPtr	pGC;
-    int		nInit;			/* number of spans to fill */
-    DDXPointPtr pptInit;		/* pointer to list of start points */
-    int		*pwidthInit;		/* pointer to list of n widths */
-    int 	fSorted;
+    DrawablePtr  pDrawable;
+    GCPtr        pGC;
+    int          nInit;                  /* number of spans to fill */
+    DDXPointPtr  pptInit;                /* pointer to list of start points */
+    int          *pwidthInit;            /* pointer to list of n widths */
+    int          fSorted;
 {
     GC_SETUP(pDrawable, pGC);
 
-    if (GC_CHECK((WindowPtr) pDrawable))
+    if (GC_CHECK((WindowPtr)pDrawable))
     {
-	register DDXPointPtr    pts;
-	register int    	*widths;
-	register int    	nPts;
+        register DDXPointPtr  pts;
+        register int          *widths;
+        register int          nPts;
 
-	for (pts = pptInit, widths = pwidthInit, nPts = nInit;
-	     nPts--;
-	     pts++, widths++)
- 	{
-	     if (SPN_OVERLAP(&pScreenPriv->saved,pts->y,pts->x,*widths))
-	     {
-		 rfbSpriteRemoveCursor (pDrawable->pScreen);
-		 break;
-	     }
-	}
+        for (pts = pptInit, widths = pwidthInit, nPts = nInit;
+             nPts--;
+             pts++, widths++)
+        {
+             if (SPN_OVERLAP(&pScreenPriv->saved, pts->y, pts->x, *widths))
+             {
+                 rfbSpriteRemoveCursor(pDrawable->pScreen);
+                 break;
+             }
+        }
     }
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    (*pGC->ops->FillSpans) (pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted);
+    (*pGC->ops->FillSpans)(pDrawable, pGC, nInit, pptInit, pwidthInit, fSorted);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 }
 
 static void
 rfbSpriteSetSpans(pDrawable, pGC, psrc, ppt, pwidth, nspans, fSorted)
-    DrawablePtr		pDrawable;
-    GCPtr		pGC;
-    char		*psrc;
-    register DDXPointPtr ppt;
-    int			*pwidth;
-    int			nspans;
-    int			fSorted;
+    DrawablePtr           pDrawable;
+    GCPtr                 pGC;
+    char                  *psrc;
+    register DDXPointPtr  ppt;
+    int                   *pwidth;
+    int                   nspans;
+    int                   fSorted;
 {
     GC_SETUP(pDrawable, pGC);
 
-    if (GC_CHECK((WindowPtr) pDrawable))
+    if (GC_CHECK((WindowPtr)pDrawable)
     {
-	register DDXPointPtr    pts;
-	register int    	*widths;
-	register int    	nPts;
+        register DDXPointPtr  pts;
+        register int          *widths;
+        register int          nPts;
 
-	for (pts = ppt, widths = pwidth, nPts = nspans;
-	     nPts--;
-	     pts++, widths++)
- 	{
-	     if (SPN_OVERLAP(&pScreenPriv->saved,pts->y,pts->x,*widths))
-	     {
-		 rfbSpriteRemoveCursor(pDrawable->pScreen);
-		 break;
-	     }
-	}
+        for (pts = ppt, widths = pwidth, nPts = nspans;
+             nPts--;
+             pts++, widths++)
+        {
+             if (SPN_OVERLAP(&pScreenPriv->saved, pts->y, pts->x, *widths))
+             {
+                 rfbSpriteRemoveCursor(pDrawable->pScreen);
+                 break;
+             }
+        }
     }
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    (*pGC->ops->SetSpans) (pDrawable, pGC, psrc, ppt, pwidth, nspans, fSorted);
+    (*pGC->ops->SetSpans)(pDrawable, pGC, psrc, ppt, pwidth, nspans, fSorted);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 }
 
 static void
 rfbSpritePutImage(pDrawable, pGC, depth, x, y, w, h, leftPad, format, pBits)
-    DrawablePtr	  pDrawable;
-    GCPtr   	  pGC;
-    int		  depth;
-    int	    	  x;
-    int	    	  y;
-    int	    	  w;
-    int	    	  h;
-    int           leftPad;
-    int	    	  format;
-    char    	  *pBits;
+    DrawablePtr  pDrawable;
+    GCPtr        pGC;
+    int          depth;
+    int          x;
+    int          y;
+    int          w;
+    int          h;
+    int          leftPad;
+    int          format;
+    char         *pBits;
 {
     GC_SETUP(pDrawable, pGC);
 
-    if (GC_CHECK((WindowPtr) pDrawable))
+    if (GC_CHECK((WindowPtr)pDrawable)
     {
-	if (ORG_OVERLAP(&pScreenPriv->saved,pDrawable->x,pDrawable->y,
-			x,y,w,h))
- 	{
-	    rfbSpriteRemoveCursor (pDrawable->pScreen);
-	}
+        if (ORG_OVERLAP(&pScreenPriv->saved, pDrawable->x, pDrawable->y,
+                        x, y, w, h))
+        {
+            rfbSpriteRemoveCursor(pDrawable->pScreen);
+        }
     }
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    (*pGC->ops->PutImage) (pDrawable, pGC, depth, x, y, w, h, leftPad, format, pBits);
+    (*pGC->ops->PutImage)(pDrawable, pGC, depth, x, y, w, h, leftPad, format, pBits);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 }
 
 static RegionPtr
-rfbSpriteCopyArea (pSrc, pDst, pGC, srcx, srcy, w, h, dstx, dsty)
-    DrawablePtr	  pSrc;
-    DrawablePtr	  pDst;
-    GCPtr   	  pGC;
-    int	    	  srcx;
-    int	    	  srcy;
-    int	    	  w;
-    int	    	  h;
-    int	    	  dstx;
-    int	    	  dsty;
+rfbSpriteCopyArea(pSrc, pDst, pGC, srcx, srcy, w, h, dstx, dsty)
+    DrawablePtr  pSrc;
+    DrawablePtr  pDst;
+    GCPtr        pGC;
+    int          srcx;
+    int          srcy;
+    int          w;
+    int          h;
+    int          dstx;
+    int          dsty;
 {
     RegionPtr rgn;
 
@@ -1113,35 +1129,35 @@ rfbSpriteCopyArea (pSrc, pDst, pGC, srcx, srcy, w, h, dstx, dsty)
 
     /* check destination/source overlap. */
     if (GC_CHECK((WindowPtr) pDst) &&
-	 (ORG_OVERLAP(&pScreenPriv->saved,pDst->x,pDst->y,dstx,dsty,w,h) ||
-	  ((pDst == pSrc) &&
-	   ORG_OVERLAP(&pScreenPriv->saved,pSrc->x,pSrc->y,srcx,srcy,w,h))))
+         (ORG_OVERLAP(&pScreenPriv->saved,pDst->x,pDst->y,dstx,dsty,w,h) ||
+          ((pDst == pSrc) &&
+           ORG_OVERLAP(&pScreenPriv->saved,pSrc->x,pSrc->y,srcx,srcy,w,h))))
     {
-	rfbSpriteRemoveCursor (pDst->pScreen);
+        rfbSpriteRemoveCursor(pDst->pScreen);
     }
  
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    rgn = (*pGC->ops->CopyArea) (pSrc, pDst, pGC, srcx, srcy, w, h,
-				 dstx, dsty);
+    rgn = (*pGC->ops->CopyArea)(pSrc, pDst, pGC, srcx, srcy, w, h,
+                                dstx, dsty);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 
     return rgn;
 }
 
 static RegionPtr
-rfbSpriteCopyPlane (pSrc, pDst, pGC, srcx, srcy, w, h, dstx, dsty, plane)
-    DrawablePtr	  pSrc;
-    DrawablePtr	  pDst;
-    register GCPtr pGC;
-    int     	  srcx,
-		  srcy;
-    int     	  w,
-		  h;
-    int     	  dstx,
-		  dsty;
-    unsigned long  plane;
+rfbSpriteCopyPlane(pSrc, pDst, pGC, srcx, srcy, w, h, dstx, dsty, plane)
+    DrawablePtr     pSrc;
+    DrawablePtr     pDst;
+    register GCPtr  pGC;
+    int             srcx,
+                    srcy;
+    int             w,
+                    h;
+    int             dstx,
+                    dsty;
+    unsigned long   plane;
 {
     RegionPtr rgn;
 
@@ -1151,421 +1167,421 @@ rfbSpriteCopyPlane (pSrc, pDst, pGC, srcx, srcy, w, h, dstx, dsty, plane)
      * check destination/source for overlap.
      */
     if (GC_CHECK((WindowPtr) pDst) &&
-	(ORG_OVERLAP(&pScreenPriv->saved,pDst->x,pDst->y,dstx,dsty,w,h) ||
-	 ((pDst == pSrc) &&
-	  ORG_OVERLAP(&pScreenPriv->saved,pSrc->x,pSrc->y,srcx,srcy,w,h))))
+        (ORG_OVERLAP(&pScreenPriv->saved,pDst->x,pDst->y,dstx,dsty,w,h) ||
+         ((pDst == pSrc) &&
+          ORG_OVERLAP(&pScreenPriv->saved,pSrc->x,pSrc->y,srcx,srcy,w,h))))
     {
-	rfbSpriteRemoveCursor (pDst->pScreen);
+        rfbSpriteRemoveCursor(pDst->pScreen);
     }
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    rgn = (*pGC->ops->CopyPlane) (pSrc, pDst, pGC, srcx, srcy, w, h,
-				  dstx, dsty, plane);
+    rgn = (*pGC->ops->CopyPlane)(pSrc, pDst, pGC, srcx, srcy, w, h,
+                                 dstx, dsty, plane);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 
     return rgn;
 }
 
 static void
-rfbSpritePolyPoint (pDrawable, pGC, mode, npt, pptInit)
-    DrawablePtr pDrawable;
-    GCPtr	pGC;
-    int		mode;		/* Origin or Previous */
-    int		npt;
-    xPoint 	*pptInit;
+rfbSpritePolyPoint(pDrawable, pGC, mode, npt, pptInit)
+    DrawablePtr  pDrawable;
+    GCPtr        pGC;
+    int          mode;           /* Origin or Previous */
+    int          npt;
+    xPoint       *pptInit;
 {
-    xPoint	t;
-    int		n;
-    BoxRec	cursor;
-    register xPoint *pts;
+    xPoint           t;
+    int              n;
+    BoxRec           cursor;
+    register xPoint  *pts;
 
-    GC_SETUP (pDrawable, pGC);
+    GC_SETUP(pDrawable, pGC);
 
-    if (npt && GC_CHECK((WindowPtr) pDrawable))
+    if (npt && GC_CHECK((WindowPtr)pDrawable)
     {
-	cursor.x1 = pScreenPriv->saved.x1 - pDrawable->x;
-	cursor.y1 = pScreenPriv->saved.y1 - pDrawable->y;
-	cursor.x2 = pScreenPriv->saved.x2 - pDrawable->x;
-	cursor.y2 = pScreenPriv->saved.y2 - pDrawable->y;
+        cursor.x1 = pScreenPriv->saved.x1 - pDrawable->x;
+        cursor.y1 = pScreenPriv->saved.y1 - pDrawable->y;
+        cursor.x2 = pScreenPriv->saved.x2 - pDrawable->x;
+        cursor.y2 = pScreenPriv->saved.y2 - pDrawable->y;
 
-	if (mode == CoordModePrevious)
-	{
-	    t.x = 0;
-	    t.y = 0;
-	    for (pts = pptInit, n = npt; n--; pts++)
-	    {
-		t.x += pts->x;
-		t.y += pts->y;
-		if (cursor.x1 <= t.x && t.x <= cursor.x2 &&
-		    cursor.y1 <= t.y && t.y <= cursor.y2)
-		{
-		    rfbSpriteRemoveCursor (pDrawable->pScreen);
-		    break;
-		}
-	    }
-	}
-	else
-	{
-	    for (pts = pptInit, n = npt; n--; pts++)
-	    {
-		if (cursor.x1 <= pts->x && pts->x <= cursor.x2 &&
-		    cursor.y1 <= pts->y && pts->y <= cursor.y2)
-		{
-		    rfbSpriteRemoveCursor (pDrawable->pScreen);
-		    break;
-		}
-	    }
-	}
+        if (mode == CoordModePrevious)
+        {
+            t.x = 0;
+            t.y = 0;
+            for (pts = pptInit, n = npt; n--; pts++)
+            {
+                t.x += pts->x;
+                t.y += pts->y;
+                if (cursor.x1 <= t.x && t.x <= cursor.x2 &&
+                    cursor.y1 <= t.y && t.y <= cursor.y2)
+                {
+                    rfbSpriteRemoveCursor(pDrawable->pScreen);
+                    break;
+                }
+            }
+        }
+        else
+        {
+            for (pts = pptInit, n = npt; n--; pts++)
+            {
+                if (cursor.x1 <= pts->x && pts->x <= cursor.x2 &&
+                    cursor.y1 <= pts->y && pts->y <= cursor.y2)
+                {
+                    rfbSpriteRemoveCursor(pDrawable->pScreen);
+                    break;
+                }
+            }
+        }
     }
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    (*pGC->ops->PolyPoint) (pDrawable, pGC, mode, npt, pptInit);
+    (*pGC->ops->PolyPoint)(pDrawable, pGC, mode, npt, pptInit);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 }
 
 static void
-rfbSpritePolylines (pDrawable, pGC, mode, npt, pptInit)
-    DrawablePtr	  pDrawable;
-    GCPtr   	  pGC;
-    int	    	  mode;
-    int	    	  npt;
-    DDXPointPtr	  pptInit;
+rfbSpritePolylines(pDrawable, pGC, mode, npt, pptInit)
+    DrawablePtr  pDrawable;
+    GCPtr        pGC;
+    int          mode;
+    int          npt;
+    DDXPointPtr  pptInit;
 {
-    BoxPtr  cursor;
-    register DDXPointPtr pts;
-    int	    n;
-    int	    x, y, x1, y1, x2, y2;
-    int	    lw;
-    int	    extra;
+    BoxPtr                cursor;
+    register DDXPointPtr  pts;
+    int                   n;
+    int                   x, y, x1, y1, x2, y2;
+    int                   lw;
+    int                   extra;
 
-    GC_SETUP (pDrawable, pGC);
+    GC_SETUP(pDrawable, pGC);
 
-    if (npt && GC_CHECK((WindowPtr) pDrawable))
+    if (npt && GC_CHECK((WindowPtr)pDrawable)
     {
-	cursor = &pScreenPriv->saved;
-	lw = pGC->lineWidth;
-	x = pptInit->x + pDrawable->x;
-	y = pptInit->y + pDrawable->y;
+        cursor = &pScreenPriv->saved;
+        lw = pGC->lineWidth;
+        x = pptInit->x + pDrawable->x;
+        y = pptInit->y + pDrawable->y;
 
-	if (npt == 1)
-	{
-	    extra = lw >> 1;
-	    if (LINE_OVERLAP(cursor, x, y, x, y, extra))
-		rfbSpriteRemoveCursor (pDrawable->pScreen);
-	}
-	else
-	{
-	    extra = lw >> 1;
-	    /*
-	     * mitered joins can project quite a way from
-	     * the line end; the 11 degree miter limit limits
-	     * this extension to 10.43 * lw / 2, rounded up
-	     * and converted to int yields 6 * lw
-	     */
-	    if (pGC->joinStyle == JoinMiter)
-		extra = 6 * lw;
-	    else if (pGC->capStyle == CapProjecting)
-		extra = lw;
-	    for (pts = pptInit + 1, n = npt - 1; n--; pts++)
-	    {
-		x1 = x;
-		y1 = y;
-		if (mode == CoordModeOrigin)
-		{
-		    x2 = pDrawable->x + pts->x;
-		    y2 = pDrawable->y + pts->y;
-		}
-		else
-		{
-		    x2 = x + pts->x;
-		    y2 = y + pts->y;
-		}
-		x = x2;
-		y = y2;
-		LINE_SORT(x1, y1, x2, y2);
-		if (LINE_OVERLAP(cursor, x1, y1, x2, y2, extra))
-		{
-		    rfbSpriteRemoveCursor (pDrawable->pScreen);
-		    break;
-		}
-	    }
-	}
+        if (npt == 1)
+        {
+            extra = lw >> 1;
+            if (LINE_OVERLAP(cursor, x, y, x, y, extra))
+                rfbSpriteRemoveCursor(pDrawable->pScreen);
+        }
+        else
+        {
+            extra = lw >> 1;
+            /*
+             * mitered joins can project quite a way from
+             * the line end; the 11 degree miter limit limits
+             * this extension to 10.43 * lw / 2, rounded up
+             * and converted to int yields 6 * lw
+             */
+            if (pGC->joinStyle == JoinMiter)
+                extra = 6 * lw;
+            else if (pGC->capStyle == CapProjecting)
+                extra = lw;
+            for (pts = pptInit + 1, n = npt - 1; n--; pts++)
+            {
+                x1 = x;
+                y1 = y;
+                if (mode == CoordModeOrigin)
+                {
+                    x2 = pDrawable->x + pts->x;
+                    y2 = pDrawable->y + pts->y;
+                }
+                else
+                {
+                    x2 = x + pts->x;
+                    y2 = y + pts->y;
+                }
+                x = x2;
+                y = y2;
+                LINE_SORT(x1, y1, x2, y2);
+                if (LINE_OVERLAP(cursor, x1, y1, x2, y2, extra))
+                {
+                    rfbSpriteRemoveCursor(pDrawable->pScreen);
+                    break;
+                }
+            }
+        }
     }
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    (*pGC->ops->Polylines) (pDrawable, pGC, mode, npt, pptInit);
+    (*pGC->ops->Polylines)(pDrawable, pGC, mode, npt, pptInit);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 }
 
 static void
 rfbSpritePolySegment(pDrawable, pGC, nseg, pSegs)
-    DrawablePtr pDrawable;
-    GCPtr 	pGC;
-    int		nseg;
-    xSegment	*pSegs;
+    DrawablePtr  pDrawable;
+    GCPtr        pGC;
+    int          nseg;
+    xSegment     *pSegs;
 {
-    int	    n;
-    register xSegment *segs;
-    BoxPtr  cursor;
-    int	    x1, y1, x2, y2;
-    int	    extra;
+    int                n;
+    register xSegment  *segs;
+    BoxPtr             cursor;
+    int                x1, y1, x2, y2;
+    int                extra;
 
     GC_SETUP(pDrawable, pGC);
 
-    if (nseg && GC_CHECK((WindowPtr) pDrawable))
+    if (nseg && GC_CHECK((WindowPtr)pDrawable)
     {
-	cursor = &pScreenPriv->saved;
-	extra = pGC->lineWidth >> 1;
-	if (pGC->capStyle == CapProjecting)
-	    extra = pGC->lineWidth;
-	for (segs = pSegs, n = nseg; n--; segs++)
-	{
-	    x1 = segs->x1 + pDrawable->x;
-	    y1 = segs->y1 + pDrawable->y;
-	    x2 = segs->x2 + pDrawable->x;
-	    y2 = segs->y2 + pDrawable->y;
-	    LINE_SORT(x1, y1, x2, y2);
-	    if (LINE_OVERLAP(cursor, x1, y1, x2, y2, extra))
-	    {
-		rfbSpriteRemoveCursor (pDrawable->pScreen);
-		break;
-	    }
-	}
+        cursor = &pScreenPriv->saved;
+        extra = pGC->lineWidth >> 1;
+        if (pGC->capStyle == CapProjecting)
+            extra = pGC->lineWidth;
+        for (segs = pSegs, n = nseg; n--; segs++)
+        {
+            x1 = segs->x1 + pDrawable->x;
+            y1 = segs->y1 + pDrawable->y;
+            x2 = segs->x2 + pDrawable->x;
+            y2 = segs->y2 + pDrawable->y;
+            LINE_SORT(x1, y1, x2, y2);
+            if (LINE_OVERLAP(cursor, x1, y1, x2, y2, extra))
+            {
+                rfbSpriteRemoveCursor(pDrawable->pScreen);
+                break;
+            }
+        }
     }
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    (*pGC->ops->PolySegment) (pDrawable, pGC, nseg, pSegs);
+    (*pGC->ops->PolySegment)(pDrawable, pGC, nseg, pSegs);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 }
 
 static void
 rfbSpritePolyRectangle(pDrawable, pGC, nrects, pRects)
-    DrawablePtr	pDrawable;
-    GCPtr	pGC;
-    int		nrects;
-    xRectangle	*pRects;
+    DrawablePtr  pDrawable;
+    GCPtr        pGC;
+    int          nrects;
+    xRectangle   *pRects;
 {
-    register xRectangle *rects;
-    BoxPtr  cursor;
-    int	    lw;
-    int	    n;
-    int     x1, y1, x2, y2;
+    register xRectangle  *rects;
+    BoxPtr               cursor;
+    int                  lw;
+    int                  n;
+    int                  x1, y1, x2, y2;
     
-    GC_SETUP (pDrawable, pGC);
+    GC_SETUP(pDrawable, pGC);
 
-    if (GC_CHECK((WindowPtr) pDrawable))
+    if (GC_CHECK((WindowPtr)pDrawable)
     {
-	lw = pGC->lineWidth >> 1;
-	cursor = &pScreenPriv->saved;
-	for (rects = pRects, n = nrects; n--; rects++)
-	{
-	    x1 = rects->x + pDrawable->x;
-	    y1 = rects->y + pDrawable->y;
-	    x2 = x1 + (int)rects->width;
-	    y2 = y1 + (int)rects->height;
-	    if (LINE_OVERLAP(cursor, x1, y1, x2, y1, lw) ||
-		LINE_OVERLAP(cursor, x2, y1, x2, y2, lw) ||
-		LINE_OVERLAP(cursor, x1, y2, x2, y2, lw) ||
-		LINE_OVERLAP(cursor, x1, y1, x1, y2, lw))
-	    {
-		rfbSpriteRemoveCursor (pDrawable->pScreen);
-		break;
-	    }
-	}
+        lw = pGC->lineWidth >> 1;
+        cursor = &pScreenPriv->saved;
+        for (rects = pRects, n = nrects; n--; rects++)
+        {
+            x1 = rects->x + pDrawable->x;
+            y1 = rects->y + pDrawable->y;
+            x2 = x1 + (int)rects->width;
+            y2 = y1 + (int)rects->height;
+            if (LINE_OVERLAP(cursor, x1, y1, x2, y1, lw) ||
+                LINE_OVERLAP(cursor, x2, y1, x2, y2, lw) ||
+                LINE_OVERLAP(cursor, x1, y2, x2, y2, lw) ||
+                LINE_OVERLAP(cursor, x1, y1, x1, y2, lw))
+            {
+                rfbSpriteRemoveCursor(pDrawable->pScreen);
+                break;
+            }
+        }
     }
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    (*pGC->ops->PolyRectangle) (pDrawable, pGC, nrects, pRects);
+    (*pGC->ops->PolyRectangle)(pDrawable, pGC, nrects, pRects);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 }
 
 static void
 rfbSpritePolyArc(pDrawable, pGC, narcs, parcs)
-    DrawablePtr	pDrawable;
-    register GCPtr	pGC;
-    int		narcs;
-    xArc	*parcs;
+    DrawablePtr     pDrawable;
+    register GCPtr  pGC;
+    int             narcs;
+    xArc            *parcs;
 {
-    BoxPtr  cursor;
-    int	    lw;
-    int	    n;
-    register xArc *arcs;
+    BoxPtr         cursor;
+    int            lw;
+    int            n;
+    register xArc  *arcs;
     
-    GC_SETUP (pDrawable, pGC);
+    GC_SETUP(pDrawable, pGC);
 
-    if (GC_CHECK((WindowPtr) pDrawable))
+    if (GC_CHECK((WindowPtr)pDrawable)
     {
-	lw = pGC->lineWidth >> 1;
-	cursor = &pScreenPriv->saved;
-	for (arcs = parcs, n = narcs; n--; arcs++)
-	{
-	    if (ORG_OVERLAP (cursor, pDrawable->x, pDrawable->y,
-			     arcs->x - lw, arcs->y - lw,
-			     (int) arcs->width + pGC->lineWidth,
- 			     (int) arcs->height + pGC->lineWidth))
-	    {
-		rfbSpriteRemoveCursor (pDrawable->pScreen);
-		break;
-	    }
-	}
+        lw = pGC->lineWidth >> 1;
+        cursor = &pScreenPriv->saved;
+        for (arcs = parcs, n = narcs; n--; arcs++)
+        {
+            if (ORG_OVERLAP (cursor, pDrawable->x, pDrawable->y,
+                             arcs->x - lw, arcs->y - lw,
+                             (int)arcs->width + pGC->lineWidth,
+                             (int)arcs->height + pGC->lineWidth))
+            {
+                rfbSpriteRemoveCursor(pDrawable->pScreen);
+                break;
+            }
+        }
     }
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    (*pGC->ops->PolyArc) (pDrawable, pGC, narcs, parcs);
+    (*pGC->ops->PolyArc)(pDrawable, pGC, narcs, parcs);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 }
 
 static void
 rfbSpriteFillPolygon(pDrawable, pGC, shape, mode, count, pPts)
-    register DrawablePtr pDrawable;
-    register GCPtr	pGC;
-    int			shape, mode;
-    int			count;
-    DDXPointPtr		pPts;
+    register DrawablePtr  pDrawable;
+    register GCPtr        pGC;
+    int                   shape, mode;
+    int                   count;
+    DDXPointPtr           pPts;
 {
-    int x, y, minx, miny, maxx, maxy;
-    register DDXPointPtr pts;
-    int n;
+    int                   x, y, minx, miny, maxx, maxy;
+    register DDXPointPtr  pts;
+    int                   n;
 
-    GC_SETUP (pDrawable, pGC);
+    GC_SETUP(pDrawable, pGC);
 
-    if (count && GC_CHECK((WindowPtr) pDrawable))
+    if (count && GC_CHECK((WindowPtr)pDrawable)
     {
-	x = pDrawable->x;
-	y = pDrawable->y;
-	pts = pPts;
-	minx = maxx = pts->x;
-	miny = maxy = pts->y;
-	pts++;
-	n = count - 1;
+        x = pDrawable->x;
+        y = pDrawable->y;
+        pts = pPts;
+        minx = maxx = pts->x;
+        miny = maxy = pts->y;
+        pts++;
+        n = count - 1;
 
-	if (mode == CoordModeOrigin)
-	{
-	    for (; n--; pts++)
-	    {
-		if (pts->x < minx)
-		    minx = pts->x;
-		else if (pts->x > maxx)
-		    maxx = pts->x;
-		if (pts->y < miny)
-		    miny = pts->y;
-		else if (pts->y > maxy)
-		    maxy = pts->y;
-	    }
-	    minx += x;
-	    miny += y;
-	    maxx += x;
-	    maxy += y;
-	}
-	else
-	{
-	    x += minx;
-	    y += miny;
-	    minx = maxx = x;
-	    miny = maxy = y;
-	    for (; n--; pts++)
-	    {
-		x += pts->x;
-		y += pts->y;
-		if (x < minx)
-		    minx = x;
-		else if (x > maxx)
-		    maxx = x;
-		if (y < miny)
-		    miny = y;
-		else if (y > maxy)
-		    maxy = y;
-	    }
-	}
-	if (BOX_OVERLAP(&pScreenPriv->saved,minx,miny,maxx,maxy))
-	    rfbSpriteRemoveCursor (pDrawable->pScreen);
+        if (mode == CoordModeOrigin)
+        {
+            for (; n--; pts++)
+            {
+                if (pts->x < minx)
+                    minx = pts->x;
+                else if (pts->x > maxx)
+                    maxx = pts->x;
+                if (pts->y < miny)
+                    miny = pts->y;
+                else if (pts->y > maxy)
+                    maxy = pts->y;
+            }
+            minx += x;
+            miny += y;
+            maxx += x;
+            maxy += y;
+        }
+        else
+        {
+            x += minx;
+            y += miny;
+            minx = maxx = x;
+            miny = maxy = y;
+            for (; n--; pts++)
+            {
+                x += pts->x;
+                y += pts->y;
+                if (x < minx)
+                    minx = x;
+                else if (x > maxx)
+                    maxx = x;
+                if (y < miny)
+                    miny = y;
+                else if (y > maxy)
+                    maxy = y;
+            }
+        }
+        if (BOX_OVERLAP(&pScreenPriv->saved,minx,miny,maxx,maxy))
+            rfbSpriteRemoveCursor(pDrawable->pScreen);
     }
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    (*pGC->ops->FillPolygon) (pDrawable, pGC, shape, mode, count, pPts);
+    (*pGC->ops->FillPolygon)(pDrawable, pGC, shape, mode, count, pPts);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 }
 
 static void
 rfbSpritePolyFillRect(pDrawable, pGC, nrectFill, prectInit)
-    DrawablePtr pDrawable;
-    GCPtr	pGC;
-    int		nrectFill; 	/* number of rectangles to fill */
-    xRectangle	*prectInit;  	/* Pointer to first rectangle to fill */
+    DrawablePtr  pDrawable;
+    GCPtr        pGC;
+    int          nrectFill;      /* number of rectangles to fill */
+    xRectangle   *prectInit;     /* Pointer to first rectangle to fill */
 {
     GC_SETUP(pDrawable, pGC);
 
-    if (GC_CHECK((WindowPtr) pDrawable))
+    if (GC_CHECK((WindowPtr)pDrawable)
     {
-	register int	    nRect;
-	register xRectangle *pRect;
-	register int	    xorg, yorg;
+        register int         nRect;
+        register xRectangle  *pRect;
+        register int         xorg, yorg;
 
-	xorg = pDrawable->x;
-	yorg = pDrawable->y;
+        xorg = pDrawable->x;
+        yorg = pDrawable->y;
 
-	for (nRect = nrectFill, pRect = prectInit; nRect--; pRect++) {
-	    if (ORGRECT_OVERLAP(&pScreenPriv->saved,xorg,yorg,pRect)){
-		rfbSpriteRemoveCursor(pDrawable->pScreen);
-		break;
-	    }
-	}
+        for (nRect = nrectFill, pRect = prectInit; nRect--; pRect++) {
+            if (ORGRECT_OVERLAP(&pScreenPriv->saved, xorg, yorg, pRect)){
+                rfbSpriteRemoveCursor(pDrawable->pScreen);
+                break;
+            }
+        }
     }
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    (*pGC->ops->PolyFillRect) (pDrawable, pGC, nrectFill, prectInit);
+    (*pGC->ops->PolyFillRect)(pDrawable, pGC, nrectFill, prectInit);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 }
 
 static void
 rfbSpritePolyFillArc(pDrawable, pGC, narcs, parcs)
-    DrawablePtr	pDrawable;
-    GCPtr	pGC;
-    int		narcs;
-    xArc	*parcs;
+    DrawablePtr  pDrawable;
+    GCPtr        pGC;
+    int          narcs;
+    xArc         *parcs;
 {
     GC_SETUP(pDrawable, pGC);
 
-    if (GC_CHECK((WindowPtr) pDrawable))
+    if (GC_CHECK((WindowPtr)pDrawable)
     {
-	register int	n;
-	BoxPtr		cursor;
-	register xArc *arcs;
+        register int   n;
+        BoxPtr         cursor;
+        register xArc  *arcs;
 
-	cursor = &pScreenPriv->saved;
+        cursor = &pScreenPriv->saved;
 
-	for (arcs = parcs, n = narcs; n--; arcs++)
-	{
-	    if (ORG_OVERLAP(cursor, pDrawable->x, pDrawable->y,
-			    arcs->x, arcs->y,
- 			    (int) arcs->width, (int) arcs->height))
-	    {
-		rfbSpriteRemoveCursor (pDrawable->pScreen);
-		break;
-	    }
-	}
+        for (arcs = parcs, n = narcs; n--; arcs++)
+        {
+            if (ORG_OVERLAP(cursor, pDrawable->x, pDrawable->y,
+                            arcs->x, arcs->y,
+                            (int)arcs->width, (int)arcs->height))
+            {
+                rfbSpriteRemoveCursor(pDrawable->pScreen);
+                break;
+            }
+        }
     }
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    (*pGC->ops->PolyFillArc) (pDrawable, pGC, narcs, parcs);
+    (*pGC->ops->PolyFillArc)(pDrawable, pGC, narcs, parcs);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 }
 
 /*
@@ -1576,13 +1592,13 @@ rfbSpritePolyFillArc(pDrawable, pGC, narcs, parcs)
 static Bool
 rfbSpriteTextOverlap (pDraw, font, x, y, n, charinfo, imageblt, w, cursorBox)
     DrawablePtr   pDraw;
-    FontPtr	  font;
-    int		  x, y;
+    FontPtr       font;
+    int           x, y;
     unsigned int  n;
     CharInfoPtr   *charinfo;
-    Bool	  imageblt;
+    Bool          imageblt;
     unsigned int  w;
-    BoxPtr	  cursorBox;
+    BoxPtr        cursorBox;
 {
     ExtentInfoRec extents;
 
@@ -1591,60 +1607,60 @@ rfbSpriteTextOverlap (pDraw, font, x, y, n, charinfo, imageblt, w, cursorBox)
 
     if (FONTMINBOUNDS(font,characterWidth) >= 0)
     {
-	/* compute an approximate (but covering) bounding box */
-	if (!imageblt || (charinfo[0]->metrics.leftSideBearing < 0))
-	    extents.overallLeft = charinfo[0]->metrics.leftSideBearing;
-	else
-	    extents.overallLeft = 0;
-	if (w)
-	    extents.overallRight = w - charinfo[n-1]->metrics.characterWidth;
-	else
-	    extents.overallRight = FONTMAXBOUNDS(font,characterWidth)
-				    * (n - 1);
-	if (imageblt && (charinfo[n-1]->metrics.characterWidth >
-			 charinfo[n-1]->metrics.rightSideBearing))
-	    extents.overallRight += charinfo[n-1]->metrics.characterWidth;
-	else
-	    extents.overallRight += charinfo[n-1]->metrics.rightSideBearing;
-	if (imageblt && FONTASCENT(font) > FONTMAXBOUNDS(font,ascent))
-	    extents.overallAscent = FONTASCENT(font);
-	else
-	    extents.overallAscent = FONTMAXBOUNDS(font, ascent);
-	if (imageblt && FONTDESCENT(font) > FONTMAXBOUNDS(font,descent))
-	    extents.overallDescent = FONTDESCENT(font);
-	else
-	    extents.overallDescent = FONTMAXBOUNDS(font,descent);
-	if (!BOX_OVERLAP(cursorBox,
-			 x + extents.overallLeft,
-			 y - extents.overallAscent,
-			 x + extents.overallRight,
-			 y + extents.overallDescent))
-	    return FALSE;
-	else if (imageblt && w)
-	    return TRUE;
-	/* if it does overlap, fall through and compute exactly, because
-	 * taking down the cursor is expensive enough to make this worth it
-	 */
+        /* compute an approximate (but covering) bounding box */
+        if (!imageblt || (charinfo[0]->metrics.leftSideBearing < 0))
+            extents.overallLeft = charinfo[0]->metrics.leftSideBearing;
+        else
+            extents.overallLeft = 0;
+        if (w)
+            extents.overallRight = w - charinfo[n-1]->metrics.characterWidth;
+        else
+            extents.overallRight = FONTMAXBOUNDS(font,characterWidth)
+                                    * (n - 1);
+        if (imageblt && (charinfo[n-1]->metrics.characterWidth >
+                         charinfo[n-1]->metrics.rightSideBearing))
+            extents.overallRight += charinfo[n-1]->metrics.characterWidth;
+        else
+            extents.overallRight += charinfo[n-1]->metrics.rightSideBearing;
+        if (imageblt && FONTASCENT(font) > FONTMAXBOUNDS(font,ascent))
+            extents.overallAscent = FONTASCENT(font);
+        else
+            extents.overallAscent = FONTMAXBOUNDS(font, ascent);
+        if (imageblt && FONTDESCENT(font) > FONTMAXBOUNDS(font,descent))
+            extents.overallDescent = FONTDESCENT(font);
+        else
+            extents.overallDescent = FONTMAXBOUNDS(font,descent);
+        if (!BOX_OVERLAP(cursorBox,
+                         x + extents.overallLeft,
+                         y - extents.overallAscent,
+                         x + extents.overallRight,
+                         y + extents.overallDescent))
+            return FALSE;
+        else if (imageblt && w)
+            return TRUE;
+        /* if it does overlap, fall through and compute exactly, because
+         * taking down the cursor is expensive enough to make this worth it
+         */
     }
     QueryGlyphExtents(font, charinfo, n, &extents);
     if (imageblt)
     {
-	if (extents.overallWidth > extents.overallRight)
-	    extents.overallRight = extents.overallWidth;
-	if (extents.overallWidth < extents.overallLeft)
-	    extents.overallLeft = extents.overallWidth;
-	if (extents.overallLeft > 0)
-	    extents.overallLeft = 0;
-	if (extents.fontAscent > extents.overallAscent)
-	    extents.overallAscent = extents.fontAscent;
-	if (extents.fontDescent > extents.overallDescent)
-	    extents.overallDescent = extents.fontDescent;
+        if (extents.overallWidth > extents.overallRight)
+            extents.overallRight = extents.overallWidth;
+        if (extents.overallWidth < extents.overallLeft)
+            extents.overallLeft = extents.overallWidth;
+        if (extents.overallLeft > 0)
+            extents.overallLeft = 0;
+        if (extents.fontAscent > extents.overallAscent)
+            extents.overallAscent = extents.fontAscent;
+        if (extents.fontDescent > extents.overallDescent)
+            extents.overallDescent = extents.fontDescent;
     }
     return (BOX_OVERLAP(cursorBox,
-			x + extents.overallLeft,
-			y - extents.overallAscent,
-			x + extents.overallRight,
-			y + extents.overallDescent));
+                        x + extents.overallLeft,
+                        y - extents.overallAscent,
+                        x + extents.overallRight,
+                        y + extents.overallDescent));
 }
 
 /*
@@ -1656,76 +1672,78 @@ rfbSpriteTextOverlap (pDraw, font, x, y, n, charinfo, imageblt, w, cursorBox)
 #define TT_IMAGE16 3
 
 static int 
-rfbSpriteText (pDraw, pGC, x, y, count, chars, fontEncoding, textType, cursorBox)
-    DrawablePtr	    pDraw;
-    GCPtr	    pGC;
-    int		    x,
-		    y;
-    unsigned long    count;
-    char	    *chars;
-    FontEncoding    fontEncoding;
-    Bool	    textType;
-    BoxPtr	    cursorBox;
+rfbSpriteText (pDraw, pGC, x, y, count, chars, fontEncoding, textType,
+               cursorBox)
+    DrawablePtr    pDraw;
+    GCPtr          pGC;
+    int            x,
+                   y;
+    unsigned long  count;
+    char           *chars;
+    FontEncoding   fontEncoding;
+    Bool           textType;
+    BoxPtr         cursorBox;
 {
-    CharInfoPtr *charinfo;
-    register CharInfoPtr *info;
-    unsigned long i;
-    unsigned int  n;
-    int		  w;
-    void   	  (*drawFunc)() = 0;
+    CharInfoPtr           *charinfo;
+    register CharInfoPtr  *info;
+    unsigned long         i;
+    unsigned int          n;
+    int                   w;
+    void                  (*drawFunc)() = 0;
 
     Bool imageblt;
 
     imageblt = (textType == TT_IMAGE8) || (textType == TT_IMAGE16);
 
-    charinfo = (CharInfoPtr *) ALLOCATE_LOCAL(count * sizeof(CharInfoPtr));
+    charinfo = (CharInfoPtr *)ALLOCATE_LOCAL(count * sizeof(CharInfoPtr));
     if (!charinfo)
-	return x;
+        return x;
 
     GetGlyphs(pGC->font, count, (unsigned char *)chars,
-	      fontEncoding, &i, charinfo);
+              fontEncoding, &i, charinfo);
     n = (unsigned int)i;
     w = 0;
     if (!imageblt)
-	for (info = charinfo; i--; info++)
-	    w += (*info)->metrics.characterWidth;
+        for (info = charinfo; i--; info++)
+            w += (*info)->metrics.characterWidth;
 
     if (n != 0) {
-	if (rfbSpriteTextOverlap(pDraw, pGC->font, x, y, n, charinfo, imageblt, w, cursorBox))
-	    rfbSpriteRemoveCursor(pDraw->pScreen);
+        if (rfbSpriteTextOverlap(pDraw, pGC->font, x, y, n, charinfo, imageblt,
+                                 w, cursorBox))
+            rfbSpriteRemoveCursor(pDraw->pScreen);
 
 #ifdef AVOID_GLYPHBLT
-	/*
-	 * On displays like Apollos, which do not optimize the GlyphBlt functions because they
-	 * convert fonts to their internal form in RealizeFont and optimize text directly, we
-	 * want to invoke the text functions here, not the GlyphBlt functions.
-	 */
-	switch (textType)
-	{
-	case TT_POLY8:
-	    drawFunc = (void (*)())pGC->ops->PolyText8;
-	    break;
-	case TT_IMAGE8:
-	    drawFunc = pGC->ops->ImageText8;
-	    break;
-	case TT_POLY16:
-	    drawFunc = (void (*)())pGC->ops->PolyText16;
-	    break;
-	case TT_IMAGE16:
-	    drawFunc = pGC->ops->ImageText16;
-	    break;
+        /*
+         * On displays like Apollos, which do not optimize the GlyphBlt functions because they
+         * convert fonts to their internal form in RealizeFont and optimize text directly, we
+         * want to invoke the text functions here, not the GlyphBlt functions.
+         */
+        switch (textType)
+        {
+        case TT_POLY8:
+            drawFunc = (void (*)())pGC->ops->PolyText8;
+            break;
+        case TT_IMAGE8:
+            drawFunc = pGC->ops->ImageText8;
+            break;
+        case TT_POLY16:
+            drawFunc = (void (*)())pGC->ops->PolyText16;
+            break;
+        case TT_IMAGE16:
+            drawFunc = pGC->ops->ImageText16;
+            break;
         default:
             FatalError("Unhandled text type in rfbSpriteText()\n");
-	}
-	(*drawFunc) (pDraw, pGC, x, y, (int) count, chars);
+        }
+        (*drawFunc)(pDraw, pGC, x, y, (int)count, chars);
 #else /* don't AVOID_GLYPHBLT */
-	/*
-	 * On the other hand, if the device does use GlyphBlt ultimately to do text, we
-	 * don't want to slow it down by invoking the text functions and having them call
-	 * GetGlyphs all over again, so we go directly to the GlyphBlt functions here.
-	 */
-	drawFunc = imageblt ? pGC->ops->ImageGlyphBlt : pGC->ops->PolyGlyphBlt;
-	(*drawFunc) (pDraw, pGC, x, y, n, charinfo, FONTGLYPHS(pGC->font));
+        /*
+         * On the other hand, if the device does use GlyphBlt ultimately to do text, we
+         * don't want to slow it down by invoking the text functions and having them call
+         * GetGlyphs all over again, so we go directly to the GlyphBlt functions here.
+         */
+        drawFunc = imageblt ? pGC->ops->ImageGlyphBlt : pGC->ops->PolyGlyphBlt;
+        (*drawFunc)(pDraw, pGC, x, y, n, charinfo, FONTGLYPHS(pGC->font));
 #endif /* AVOID_GLYPHBLT */
     }
     DEALLOCATE_LOCAL(charinfo);
@@ -1734,164 +1752,170 @@ rfbSpriteText (pDraw, pGC, x, y, count, chars, fontEncoding, textType, cursorBox
 
 static int
 rfbSpritePolyText8(pDrawable, pGC, x, y, count, chars)
-    DrawablePtr pDrawable;
-    GCPtr	pGC;
-    int		x, y;
-    int 	count;
-    char	*chars;
+    DrawablePtr  pDrawable;
+    GCPtr        pGC;
+    int          x, y;
+    int          count;
+    char         *chars;
 {
-    int	ret;
+    int ret;
 
-    GC_SETUP (pDrawable, pGC);
+    GC_SETUP(pDrawable, pGC);
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    if (GC_CHECK((WindowPtr) pDrawable))
-	ret = rfbSpriteText (pDrawable, pGC, x, y, (unsigned long)count, chars,
-			    Linear8Bit, TT_POLY8, &pScreenPriv->saved);
+    if (GC_CHECK((WindowPtr)pDrawable))
+        ret = rfbSpriteText(pDrawable, pGC, x, y, (unsigned long)count, chars,
+                            Linear8Bit, TT_POLY8, &pScreenPriv->saved);
     else
-	ret = (*pGC->ops->PolyText8) (pDrawable, pGC, x, y, count, chars);
+        ret = (*pGC->ops->PolyText8)(pDrawable, pGC, x, y, count, chars);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
     return ret;
 }
 
 static int
 rfbSpritePolyText16(pDrawable, pGC, x, y, count, chars)
-    DrawablePtr pDrawable;
-    GCPtr	pGC;
-    int		x, y;
-    int		count;
-    unsigned short *chars;
+    DrawablePtr     pDrawable;
+    GCPtr           pGC;
+    int             x, y;
+    int             count;
+    unsigned short  *chars;
 {
-    int	ret;
+    int ret;
 
     GC_SETUP(pDrawable, pGC);
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    if (GC_CHECK((WindowPtr) pDrawable))
-	ret = rfbSpriteText (pDrawable, pGC, x, y, (unsigned long)count,
-			    (char *)chars,
-			    FONTLASTROW(pGC->font) == 0 ?
-			    Linear16Bit : TwoD16Bit, TT_POLY16, &pScreenPriv->saved);
+    if (GC_CHECK((WindowPtr)pDrawable))
+        ret = rfbSpriteText(pDrawable, pGC, x, y, (unsigned long)count,
+                            (char *)chars,
+                            FONTLASTROW(pGC->font) == 0 ?
+                                Linear16Bit : TwoD16Bit,
+                            TT_POLY16, &pScreenPriv->saved);
     else
-	ret = (*pGC->ops->PolyText16) (pDrawable, pGC, x, y, count, chars);
+        ret = (*pGC->ops->PolyText16)(pDrawable, pGC, x, y, count, chars);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
     return ret;
 }
 
 static void
 rfbSpriteImageText8(pDrawable, pGC, x, y, count, chars)
-    DrawablePtr pDrawable;
-    GCPtr	pGC;
-    int		x, y;
-    int		count;
-    char	*chars;
+    DrawablePtr  pDrawable;
+    GCPtr        pGC;
+    int          x, y;
+    int          count;
+    char         *chars;
 {
     GC_SETUP(pDrawable, pGC);
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    if (GC_CHECK((WindowPtr) pDrawable))
-	(void) rfbSpriteText (pDrawable, pGC, x, y, (unsigned long)count,
-			     chars, Linear8Bit, TT_IMAGE8, &pScreenPriv->saved);
+    if (GC_CHECK((WindowPtr)pDrawable))
+        (void) rfbSpriteText(pDrawable, pGC, x, y, (unsigned long)count,
+                             chars, Linear8Bit, TT_IMAGE8,
+                             &pScreenPriv->saved);
     else
-	(*pGC->ops->ImageText8) (pDrawable, pGC, x, y, count, chars);
+        (*pGC->ops->ImageText8)(pDrawable, pGC, x, y, count, chars);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 }
 
 static void
 rfbSpriteImageText16(pDrawable, pGC, x, y, count, chars)
-    DrawablePtr pDrawable;
-    GCPtr	pGC;
-    int		x, y;
-    int		count;
-    unsigned short *chars;
+    DrawablePtr     pDrawable;
+    GCPtr           pGC;
+    int             x, y;
+    int             count;
+    unsigned short  *chars;
 {
     GC_SETUP(pDrawable, pGC);
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    if (GC_CHECK((WindowPtr) pDrawable))
-	(void) rfbSpriteText (pDrawable, pGC, x, y, (unsigned long)count,
-			     (char *)chars,
-			    FONTLASTROW(pGC->font) == 0 ?
-			    Linear16Bit : TwoD16Bit, TT_IMAGE16, &pScreenPriv->saved);
+    if (GC_CHECK((WindowPtr)pDrawable))
+        (void) rfbSpriteText(pDrawable, pGC, x, y, (unsigned long)count,
+                             (char *)chars,
+                             FONTLASTROW(pGC->font) == 0 ?
+                                 Linear16Bit : TwoD16Bit,
+                             TT_IMAGE16, &pScreenPriv->saved);
     else
-	(*pGC->ops->ImageText16) (pDrawable, pGC, x, y, count, chars);
+        (*pGC->ops->ImageText16)(pDrawable, pGC, x, y, count, chars);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 }
 
 static void
 rfbSpriteImageGlyphBlt(pDrawable, pGC, x, y, nglyph, ppci, pglyphBase)
-    DrawablePtr pDrawable;
-    GCPtr 	pGC;
-    int 	x, y;
-    unsigned int nglyph;
-    CharInfoPtr *ppci;		/* array of character info */
-    pointer 	pglyphBase;	/* start of array of glyphs */
+    DrawablePtr   pDrawable;
+    GCPtr         pGC;
+    int           x, y;
+    unsigned int  nglyph;
+    CharInfoPtr   *ppci;          /* array of character info */
+    pointer       pglyphBase;     /* start of array of glyphs */
 {
     GC_SETUP(pDrawable, pGC);
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    if (GC_CHECK((WindowPtr) pDrawable) &&
-	rfbSpriteTextOverlap (pDrawable, pGC->font, x, y, nglyph, ppci, TRUE, 0, &pScreenPriv->saved))
+    if (GC_CHECK((WindowPtr)pDrawable) &&
+        rfbSpriteTextOverlap(pDrawable, pGC->font, x, y, nglyph, ppci, TRUE,
+                             0, &pScreenPriv->saved))
     {
-	rfbSpriteRemoveCursor(pDrawable->pScreen);
+        rfbSpriteRemoveCursor(pDrawable->pScreen);
     }
-    (*pGC->ops->ImageGlyphBlt) (pDrawable, pGC, x, y, nglyph, ppci, pglyphBase);
+    (*pGC->ops->ImageGlyphBlt)(pDrawable, pGC, x, y, nglyph, ppci, pglyphBase);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 }
 
 static void
 rfbSpritePolyGlyphBlt(pDrawable, pGC, x, y, nglyph, ppci, pglyphBase)
-    DrawablePtr pDrawable;
-    GCPtr	pGC;
-    int 	x, y;
-    unsigned int nglyph;
-    CharInfoPtr *ppci;		/* array of character info */
-    pointer	pglyphBase;	/* start of array of glyphs */
+    DrawablePtr   pDrawable;
+    GCPtr         pGC;
+    int           x, y;
+    unsigned int  nglyph;
+    CharInfoPtr   *ppci;          /* array of character info */
+    pointer       pglyphBase;     /* start of array of glyphs */
 {
-    GC_SETUP (pDrawable, pGC);
+    GC_SETUP(pDrawable, pGC);
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    if (GC_CHECK((WindowPtr) pDrawable) &&
-	rfbSpriteTextOverlap (pDrawable, pGC->font, x, y, nglyph, ppci, FALSE, 0, &pScreenPriv->saved))
+    if (GC_CHECK((WindowPtr)pDrawable) &&
+        rfbSpriteTextOverlap(pDrawable, pGC->font, x, y, nglyph, ppci, FALSE,
+                             0, &pScreenPriv->saved))
     {
-	rfbSpriteRemoveCursor(pDrawable->pScreen);
+        rfbSpriteRemoveCursor(pDrawable->pScreen);
     }
-    (*pGC->ops->PolyGlyphBlt) (pDrawable, pGC, x, y, nglyph, ppci, pglyphBase);
+    (*pGC->ops->PolyGlyphBlt)(pDrawable, pGC, x, y, nglyph, ppci, pglyphBase);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 }
 
 static void
 rfbSpritePushPixels(pGC, pBitMap, pDrawable, w, h, x, y)
-    GCPtr	pGC;
-    PixmapPtr	pBitMap;
-    DrawablePtr pDrawable;
-    int		w, h, x, y;
+    GCPtr        pGC;
+    PixmapPtr    pBitMap;
+    DrawablePtr  pDrawable;
+    int          w, h, x, y;
 {
     GC_SETUP(pDrawable, pGC);
 
-    if (GC_CHECK((WindowPtr) pDrawable) &&
-	ORG_OVERLAP(&pScreenPriv->saved,pDrawable->x,pDrawable->y,x,y,w,h))
+    if (GC_CHECK((WindowPtr)pDrawable) &&
+        ORG_OVERLAP(&pScreenPriv->saved, pDrawable->x, pDrawable->y, x, y,
+                    w, h))
     {
-	rfbSpriteRemoveCursor (pDrawable->pScreen);
+        rfbSpriteRemoveCursor(pDrawable->pScreen);
     }
 
-    GC_OP_PROLOGUE (pGC);
+    GC_OP_PROLOGUE(pGC);
 
-    (*pGC->ops->PushPixels) (pGC, pBitMap, pDrawable, w, h, x, y);
+    (*pGC->ops->PushPixels)(pGC, pBitMap, pDrawable, w, h, x, y);
 
-    GC_OP_EPILOGUE (pGC);
+    GC_OP_EPILOGUE(pGC);
 }
 
 #ifdef NEED_LINEHELPER
@@ -1909,31 +1933,31 @@ rfbSpriteLineHelper()
 
 #ifdef RENDER
 
-# define mod(a,b)	((b) == 1 ? 0 : (a) >= 0 ? (a) % (b) : (b) - (-a) % (b))
+# define mod(a,b) ((b) == 1 ? 0 : (a) >= 0 ? (a) % (b) : (b) - (-a) % (b))
 
 static void
 rfbSpritePictureOverlap (PicturePtr  pPict,
-			INT16	    x,
-			INT16	    y,
-			CARD16	    w,
-			CARD16	    h)
+                         INT16       x,
+                         INT16       y,
+                         CARD16      w,
+                         CARD16      h)
 {
     if (pPict->pDrawable && pPict->pDrawable->type == DRAWABLE_WINDOW)
     {
-	WindowPtr		pWin = (WindowPtr) (pPict->pDrawable);
-	rfbSpriteScreenPtr	pScreenPriv = (rfbSpriteScreenPtr)
-	    pPict->pDrawable->pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
-	if (GC_CHECK(pWin))
-	{
-	    if (pPict->repeat)
-	    {
-		x = mod(x,pWin->drawable.width);
-		y = mod(y,pWin->drawable.height);
-	    }
-	    if (ORG_OVERLAP (&pScreenPriv->saved, pWin->drawable.x, pWin->drawable.y,
-			     x, y, w, h))
-		rfbSpriteRemoveCursor (pWin->drawable.pScreen);
-	}
+        WindowPtr               pWin = (WindowPtr)(pPict->pDrawable);
+        rfbSpriteScreenPtr      pScreenPriv = (rfbSpriteScreenPtr)
+            pPict->pDrawable->pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+        if (GC_CHECK(pWin))
+        {
+            if (pPict->repeat)
+            {
+                x = mod(x, pWin->drawable.width);
+                y = mod(y, pWin->drawable.height);
+            }
+            if (ORG_OVERLAP(&pScreenPriv->saved, pWin->drawable.x,
+                            pWin->drawable.y, x, y, w, h))
+                rfbSpriteRemoveCursor(pWin->drawable.pScreen);
+        }
     }
 }
 
@@ -1944,93 +1968,95 @@ rfbSpritePictureOverlap (PicturePtr  pPict,
     ps->field = wrap
 
 static void
-rfbSpriteComposite(CARD8	op,
-		  PicturePtr pSrc,
-		  PicturePtr pMask,
-		  PicturePtr pDst,
-		  INT16	xSrc,
-		  INT16	ySrc,
-		  INT16	xMask,
-		  INT16	yMask,
-		  INT16	xDst,
-		  INT16	yDst,
-		  CARD16	width,
-		  CARD16	height)
+rfbSpriteComposite(CARD8       op,
+                   PicturePtr  pSrc,
+                   PicturePtr  pMask,
+                   PicturePtr  pDst,
+                   INT16       xSrc,
+                   INT16       ySrc,
+                   INT16       xMask,
+                   INT16       yMask,
+                   INT16       xDst,
+                   INT16       yDst,
+                   CARD16      width,
+                   CARD16      height)
 {
-    ScreenPtr		pScreen = pDst->pDrawable->pScreen;
-    PictureScreenPtr	ps = GetPictureScreen(pScreen);
-    rfbSpriteScreenPtr	pScreenPriv;
+    ScreenPtr           pScreen = pDst->pDrawable->pScreen;
+    PictureScreenPtr    ps = GetPictureScreen(pScreen);
+    rfbSpriteScreenPtr  pScreenPriv;
 
-    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    pScreenPriv =
+        (rfbSpriteScreenPtr)pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
     PICTURE_PROLOGUE(ps, pScreenPriv, Composite);
-    rfbSpritePictureOverlap (pSrc, xSrc, ySrc, width, height);
+    rfbSpritePictureOverlap(pSrc, xSrc, ySrc, width, height);
     if (pMask)
-	rfbSpritePictureOverlap (pMask, xMask, yMask, width, height);
-    rfbSpritePictureOverlap (pDst, xDst, yDst, width, height);
+        rfbSpritePictureOverlap(pMask, xMask, yMask, width, height);
+    rfbSpritePictureOverlap(pDst, xDst, yDst, width, height);
 
-    (*ps->Composite) (op,
-		       pSrc,
-		       pMask,
-		       pDst,
-		       xSrc,
-		       ySrc,
-		       xMask,
-		       yMask,
-		       xDst,
-		       yDst,
-		       width,
-		       height);
+    (*ps->Composite)(op,
+                     pSrc,
+                     pMask,
+                     pDst,
+                     xSrc,
+                     ySrc,
+                     xMask,
+                     yMask,
+                     xDst,
+                     yDst,
+                     width,
+                     height);
     
     PICTURE_EPILOGUE(ps, Composite, rfbSpriteComposite);
 }
 
 static void
-rfbSpriteGlyphs(CARD8		op,
-	       PicturePtr	pSrc,
-	       PicturePtr	pDst,
-	       PictFormatPtr	maskFormat,
-	       INT16		xSrc,
-	       INT16		ySrc,
-	       int		nlist,
-	       GlyphListPtr	list,
-	       GlyphPtr		*glyphs)
+rfbSpriteGlyphs(CARD8         op,
+               PicturePtr     pSrc,
+               PicturePtr     pDst,
+               PictFormatPtr  maskFormat,
+               INT16          xSrc,
+               INT16          ySrc,
+               int            nlist,
+               GlyphListPtr   list,
+               GlyphPtr       *glyphs)
 {
-    ScreenPtr		pScreen = pDst->pDrawable->pScreen;
-    PictureScreenPtr	ps = GetPictureScreen(pScreen);
-    rfbSpriteScreenPtr	pScreenPriv;
+    ScreenPtr           pScreen = pDst->pDrawable->pScreen;
+    PictureScreenPtr    ps = GetPictureScreen(pScreen);
+    rfbSpriteScreenPtr  pScreenPriv;
 
-    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    pScreenPriv =
+        (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
     PICTURE_PROLOGUE(ps, pScreenPriv, Glyphs);
     if (pSrc->pDrawable->type == DRAWABLE_WINDOW)
     {
-	WindowPtr   pSrcWin = (WindowPtr) (pSrc->pDrawable);
+        WindowPtr   pSrcWin = (WindowPtr)(pSrc->pDrawable);
 
-	if (GC_CHECK(pSrcWin))
-	    rfbSpriteRemoveCursor (pScreen);
+        if (GC_CHECK(pSrcWin))
+            rfbSpriteRemoveCursor(pScreen);
     }
     if (pDst->pDrawable->type == DRAWABLE_WINDOW)
     {
-	WindowPtr   pDstWin = (WindowPtr) (pDst->pDrawable);
+        WindowPtr   pDstWin = (WindowPtr)(pDst->pDrawable);
 
-	if (GC_CHECK(pDstWin))
-	{
-	    BoxRec  extents;
+        if (GC_CHECK(pDstWin))
+        {
+            BoxRec  extents;
 
-	    miGlyphExtents (nlist, list, glyphs, &extents);
-	    if (BOX_OVERLAP(&pScreenPriv->saved,
-			    extents.x1 + pDstWin->drawable.x,
-			    extents.y1 + pDstWin->drawable.y,
-			    extents.x2 + pDstWin->drawable.x,
-			    extents.y2 + pDstWin->drawable.y))
-	    {
-		rfbSpriteRemoveCursor (pScreen);
-	    }
-	}
+            miGlyphExtents (nlist, list, glyphs, &extents);
+            if (BOX_OVERLAP(&pScreenPriv->saved,
+                            extents.x1 + pDstWin->drawable.x,
+                            extents.y1 + pDstWin->drawable.y,
+                            extents.x2 + pDstWin->drawable.x,
+                            extents.y2 + pDstWin->drawable.y))
+            {
+                rfbSpriteRemoveCursor(pScreen);
+            }
+        }
     }
     
-    (*ps->Glyphs) (op, pSrc, pDst, maskFormat, xSrc, ySrc, nlist, list, glyphs);
+    (*ps->Glyphs)(op, pSrc, pDst, maskFormat, xSrc, ySrc, nlist, list, glyphs);
     
-    PICTURE_EPILOGUE (ps, Glyphs, rfbSpriteGlyphs);
+    PICTURE_EPILOGUE(ps, Glyphs, rfbSpriteGlyphs);
 }
 #endif
 
@@ -2040,80 +2066,83 @@ rfbSpriteGlyphs(CARD8		op,
 
 static Bool
 rfbSpriteRealizeCursor (pScreen, pCursor)
-    ScreenPtr	pScreen;
-    CursorPtr	pCursor;
+    ScreenPtr  pScreen;
+    CursorPtr  pCursor;
 {
-    rfbSpriteScreenPtr	pScreenPriv;
+    rfbSpriteScreenPtr pScreenPriv;
 
-    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    pScreenPriv =
+        (rfbSpriteScreenPtr)pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
     if (pCursor == pScreenPriv->pCursor)
-	pScreenPriv->checkPixels = TRUE;
-    return (*pScreenPriv->funcs->RealizeCursor) (pScreen, pCursor);
+        pScreenPriv->checkPixels = TRUE;
+    return (*pScreenPriv->funcs->RealizeCursor)(pScreen, pCursor);
 }
 
 static Bool
 rfbSpriteUnrealizeCursor (pScreen, pCursor)
-    ScreenPtr	pScreen;
-    CursorPtr	pCursor;
+    ScreenPtr  pScreen;
+    CursorPtr  pCursor;
 {
-    rfbSpriteScreenPtr	pScreenPriv;
+    rfbSpriteScreenPtr pScreenPriv;
 
-    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
-    return (*pScreenPriv->funcs->UnrealizeCursor) (pScreen, pCursor);
+    pScreenPriv =
+        (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    return (*pScreenPriv->funcs->UnrealizeCursor)(pScreen, pCursor);
 }
 
 static void
-rfbSpriteSetCursor (ScreenPtr pScreen, CursorPtr pCursor, int x, int y)
+rfbSpriteSetCursor(ScreenPtr pScreen, CursorPtr pCursor, int x, int y)
 {
-    rfbSpriteScreenPtr	pScreenPriv;
-    rfbClientPtr cl, nextCl;
+    rfbSpriteScreenPtr  pScreenPriv;
+    rfbClientPtr        cl, nextCl;
 
     pScreenPriv
-	= (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+        = (rfbSpriteScreenPtr)pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
 
     if (pScreenPriv->x == x &&
-	pScreenPriv->y == y &&
-	pScreenPriv->pCursor == pCursor &&
-	!pScreenPriv->checkPixels)
+        pScreenPriv->y == y &&
+        pScreenPriv->pCursor == pCursor &&
+        !pScreenPriv->checkPixels)
     {
-	return;
+        return;
     }
 
     if (rfbScreen.cursorIsDrawn)
-	rfbSpriteRemoveCursor (pScreen);
+        rfbSpriteRemoveCursor(pScreen);
 
     pScreenPriv->x = x;
     pScreenPriv->y = y;
     pScreenPriv->pCursor = pCursor;
 
     for (cl = rfbClientHead; cl; cl = nextCl) {
-	nextCl = cl->next;
-	if (cl->enableCursorPosUpdates) {
-	    if (x == cl->cursorX && y == cl->cursorY) {
-		cl->cursorWasMoved = FALSE;
-		continue;
-	    }
-	    cl->cursorWasMoved = TRUE;
-	}
-	if ( !cl->deferredUpdateScheduled &&
-	     REGION_NOTEMPTY(pScreen,&cl->requestedRegion) ) {
-	    /* cursorIsDrawn is guaranteed to be FALSE here, so we definitely
-	       want to send a screen update to the client, even if that's only
-	       putting up the cursor */
-	    rfbSendFramebufferUpdate(cl);
-	}
+        nextCl = cl->next;
+        if (cl->enableCursorPosUpdates) {
+            if (x == cl->cursorX && y == cl->cursorY) {
+                cl->cursorWasMoved = FALSE;
+                continue;
+            }
+            cl->cursorWasMoved = TRUE;
+        }
+        if (!cl->deferredUpdateScheduled &&
+            REGION_NOTEMPTY(pScreen, &cl->requestedRegion)) {
+            /* cursorIsDrawn is guaranteed to be FALSE here, so we definitely
+               want to send a screen update to the client, even if that's only
+               putting up the cursor */
+            rfbSendFramebufferUpdate(cl);
+        }
     }
 }
 
 static void
-rfbSpriteMoveCursor (pScreen, x, y)
-    ScreenPtr	pScreen;
-    int		x, y;
+rfbSpriteMoveCursor(pScreen, x, y)
+    ScreenPtr  pScreen;
+    int        x, y;
 {
-    rfbSpriteScreenPtr	pScreenPriv;
+    rfbSpriteScreenPtr pScreenPriv;
 
-    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
-    rfbSpriteSetCursor (pScreen, pScreenPriv->pCursor, x, y);
+    pScreenPriv =
+        (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    rfbSpriteSetCursor(pScreen, pScreenPriv->pCursor, x, y);
 }
 
 /*
@@ -2121,46 +2150,45 @@ rfbSpriteMoveCursor (pScreen, x, y)
  */
 
 void
-rfbSpriteRemoveCursor (pScreen)
-    ScreenPtr	pScreen;
+rfbSpriteRemoveCursor(pScreen)
+    ScreenPtr pScreen;
 {
-    rfbSpriteScreenPtr   pScreenPriv;
+    rfbSpriteScreenPtr pScreenPriv;
 
     if (!rfbScreen.cursorIsDrawn)
-	return;
+        return;
 
     pScreenPriv
-	= (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+        = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
 
     rfbScreen.dontSendFramebufferUpdate = TRUE;
     rfbScreen.cursorIsDrawn = FALSE;
     pScreenPriv->pCacheWin = NullWindow;
-    if (!(*pScreenPriv->funcs->RestoreUnderCursor) (pScreen,
-					 pScreenPriv->saved.x1,
-					 pScreenPriv->saved.y1,
-					 pScreenPriv->saved.x2 - pScreenPriv->saved.x1,
-					 pScreenPriv->saved.y2 - pScreenPriv->saved.y1))
+    if (!(*pScreenPriv->funcs->RestoreUnderCursor)(pScreen,
+        pScreenPriv->saved.x1, pScreenPriv->saved.y1,
+        pScreenPriv->saved.x2 - pScreenPriv->saved.x1,
+        pScreenPriv->saved.y2 - pScreenPriv->saved.y1))
     {
-	rfbScreen.cursorIsDrawn = TRUE;
+        rfbScreen.cursorIsDrawn = TRUE;
     }
     rfbScreen.dontSendFramebufferUpdate = FALSE;
 }
 
 
 void
-rfbSpriteRestoreCursor (pScreen)
-    ScreenPtr	pScreen;
+rfbSpriteRestoreCursor(pScreen)
+    ScreenPtr pScreen;
 {
-    rfbSpriteScreenPtr   pScreenPriv;
-    int			x, y;
-    CursorPtr		pCursor;
+    rfbSpriteScreenPtr  pScreenPriv;
+    int                 x, y;
+    CursorPtr           pCursor;
 
     pScreenPriv
-	= (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+        = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
     pCursor = pScreenPriv->pCursor;
 
     if (rfbScreen.cursorIsDrawn || !pCursor)
-	return;
+        return;
 
     rfbScreen.dontSendFramebufferUpdate = TRUE;
 
@@ -2168,18 +2196,17 @@ rfbSpriteRestoreCursor (pScreen)
 
     x = pScreenPriv->x - (int)pCursor->bits->xhot;
     y = pScreenPriv->y - (int)pCursor->bits->yhot;
-    if ((*pScreenPriv->funcs->SaveUnderCursor) (pScreen,
-				      pScreenPriv->saved.x1,
-				      pScreenPriv->saved.y1,
-				      pScreenPriv->saved.x2 - pScreenPriv->saved.x1,
-				      pScreenPriv->saved.y2 - pScreenPriv->saved.y1))
+    if ((*pScreenPriv->funcs->SaveUnderCursor)(pScreen,
+        pScreenPriv->saved.x1,  pScreenPriv->saved.y1,
+        pScreenPriv->saved.x2 - pScreenPriv->saved.x1,
+        pScreenPriv->saved.y2 - pScreenPriv->saved.y1))
     {
-	if (pScreenPriv->checkPixels)
-	    rfbSpriteFindColors (pScreen);
-	if ((*pScreenPriv->funcs->PutUpCursor) (pScreen, pCursor, x, y,
-				  pScreenPriv->colors[SOURCE_COLOR].pixel,
-				  pScreenPriv->colors[MASK_COLOR].pixel))
-	    rfbScreen.cursorIsDrawn = TRUE;
+        if (pScreenPriv->checkPixels)
+            rfbSpriteFindColors(pScreen);
+        if ((*pScreenPriv->funcs->PutUpCursor)(pScreen, pCursor, x, y,
+            pScreenPriv->colors[SOURCE_COLOR].pixel,
+            pScreenPriv->colors[MASK_COLOR].pixel))
+            rfbScreen.cursorIsDrawn = TRUE;
     }
 
     rfbScreen.dontSendFramebufferUpdate = FALSE;
@@ -2190,14 +2217,15 @@ rfbSpriteRestoreCursor (pScreen)
  */
 
 static void
-rfbSpriteComputeSaved (pScreen)
-    ScreenPtr	pScreen;
+rfbSpriteComputeSaved(pScreen)
+    ScreenPtr pScreen;
 {
-    rfbSpriteScreenPtr   pScreenPriv;
-    int		    x, y, w, h;
-    CursorPtr	    pCursor;
+    rfbSpriteScreenPtr  pScreenPriv;
+    int                 x, y, w, h;
+    CursorPtr           pCursor;
 
-    pScreenPriv = (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+    pScreenPriv =
+        (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
     pCursor = pScreenPriv->pCursor;
     x = pScreenPriv->x - (int)pCursor->bits->xhot;
     y = pScreenPriv->y - (int)pCursor->bits->yhot;
@@ -2216,24 +2244,24 @@ rfbSpriteComputeSaved (pScreen)
 
 static Bool
 rfbDisplayCursor(pScreen, pCursor)
-    ScreenPtr pScreen;
-    CursorPtr pCursor;
+    ScreenPtr  pScreen;
+    CursorPtr  pCursor;
 {
-    rfbClientPtr cl;
-    rfbSpriteScreenPtr pPriv;
-    Bool result;
+    rfbClientPtr        cl;
+    rfbSpriteScreenPtr  pPriv;
+    Bool                result;
 
     pPriv = (rfbSpriteScreenPtr)pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
     result = (*pPriv->DisplayCursor)(pScreen, pCursor);
 
     for (cl = rfbClientHead; cl; cl = cl->next) {
-	if (cl->enableCursorShapeUpdates) {
-	    cl->cursorWasChanged = TRUE;
-	    if ( !cl->deferredUpdateScheduled &&
-		 REGION_NOTEMPTY(pScreen,&cl->requestedRegion) ) {
-		rfbSendFramebufferUpdate(cl);
-	    }
-	}
+        if (cl->enableCursorShapeUpdates) {
+            cl->cursorWasChanged = TRUE;
+            if (!cl->deferredUpdateScheduled &&
+                REGION_NOTEMPTY(pScreen,&cl->requestedRegion)) {
+                rfbSendFramebufferUpdate(cl);
+            }
+        }
     }
 
     return result;
@@ -2245,13 +2273,13 @@ rfbDisplayCursor(pScreen, pCursor)
  */
 
 CursorPtr
-rfbSpriteGetCursorPtr (pScreen)
+rfbSpriteGetCursorPtr(pScreen)
     ScreenPtr pScreen;
 {
     rfbSpriteScreenPtr pScreenPriv;
 
     pScreenPriv = (rfbSpriteScreenPtr)
-	pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+        pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
 
     return pScreenPriv->pCursor;
 }
@@ -2261,14 +2289,14 @@ rfbSpriteGetCursorPtr (pScreen)
  */
 
 void
-rfbSpriteGetCursorPos (pScreen, px, py)
-    ScreenPtr pScreen;
-    int *px, *py;
+rfbSpriteGetCursorPos(pScreen, px, py)
+    ScreenPtr  pScreen;
+    int        *px, *py;
 {
     rfbSpriteScreenPtr pScreenPriv;
 
     pScreenPriv = (rfbSpriteScreenPtr)
-	pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
+        pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
 
     *px = pScreenPriv->x;
     *py = pScreenPriv->y;

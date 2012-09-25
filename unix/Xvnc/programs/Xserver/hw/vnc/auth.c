@@ -65,7 +65,7 @@ Bool  rfbAuthDisableCBSend = FALSE;
 Bool  rfbAuthDisableCBRecv = FALSE;
 
 static int nAuthMethodsEnabled = 0;
-static int preferenceLimit = 1;	/* Force once through the loop in rfbSendAuthCaps */
+static int preferenceLimit = 1; /* Force once through the loop in rfbSendAuthCaps */
 
 Bool  rfbOptNoauth = FALSE;
 Bool  rfbOptOtpauth = FALSE;
@@ -113,7 +113,8 @@ rfbAuthAddUser(const char* name, Bool viewOnly)
         FatalError("rfbAuthAddUser: out of memory");
     }
 
-    rfbLog("Adding user '%s' to ACL with %s privileges\n", name, viewOnly ? " view-only" : "full control");
+    rfbLog("Adding user '%s' to ACL with %s privileges\n", name,
+           viewOnly ? " view-only" : "full control");
     p->next = userACL;
     p->name = name;
     p->viewOnly = viewOnly;
@@ -216,7 +217,8 @@ AuthPAMUserPwdRspFunc(rfbClientPtr cl)
         }
 
         if (p == NULL) {
-            rfbLog("User '%s' is not in the ACL and has been denied access\n", userBuf);
+            rfbLog("User '%s' is not in the ACL and has been denied access\n",
+                   userBuf);
             rfbClientAuthFailed(cl, "User denied access");
             return;
         }
@@ -316,10 +318,10 @@ setMethods(char* buf)
 
     preferenceLimit = 0;
     for (a = authMethods; a->name != NULL; a++) {
-	a->permitted = FALSE;
+        a->permitted = FALSE;
         a->enabled = FALSE;
         a->preference = -1;
-	a->secType->advertise = FALSE;
+        a->secType->advertise = FALSE;
     }
 
     while (TRUE) {
@@ -356,22 +358,26 @@ ReadConfigFile()
         return;
 
     if (fstat(fileno(fp), &sb) == -1) {
-        FatalError("rfbAuthInit: ERROR: fstat %s: %s", rfbAuthConfigFile, strerror(errno));
+        FatalError("rfbAuthInit: ERROR: fstat %s: %s", rfbAuthConfigFile,
+                   strerror(errno));
     }
 
     if ((sb.st_uid != 0) && (sb.st_uid != getuid())) {
-        FatalError("ERROR: %s must be owned by you or by root\n", rfbAuthConfigFile);
+        FatalError("ERROR: %s must be owned by you or by root\n",
+                   rfbAuthConfigFile);
     }
 
     if (sb.st_mode & (S_IWGRP | S_IWOTH)) {
-        FatalError("ERROR: %s cannot have group or global write permissions\n", rfbAuthConfigFile);
+        FatalError("ERROR: %s cannot have group or global write permissions\n",
+                   rfbAuthConfigFile);
     }
 
     rfbLog("Using auth configuration file %s\n", rfbAuthConfigFile);
     for (line = 0; fgets(buf, sizeof(buf), fp) != NULL; line++) {
         len = strlen(buf) - 1;
         if (buf[len] != '\n' && strlen(buf) == 256) {
-            FatalError("ERROR in %s: line %d is too long!\n", rfbAuthConfigFile, line+1);
+            FatalError("ERROR in %s: line %d is too long!\n",
+                       rfbAuthConfigFile, line + 1);
         }
         
         buf[len] = '\0';
@@ -414,7 +420,8 @@ ReadConfigFile()
         n = 17;
         if (!strncmp(buf2, "pam-service-name=", n)) {
             if (buf2[n] == '\0') {
-                FatalError("ERROR in %s: pam-service-name is empty!", rfbAuthConfigFile);
+                FatalError("ERROR in %s: pam-service-name is empty!",
+                           rfbAuthConfigFile);
             }
 
             if ((pamServiceName = strdup(&buf2[n])) == NULL) {
@@ -428,7 +435,8 @@ ReadConfigFile()
         n = 23;
         if (!strncmp(buf2, "permitted-auth-methods=", n)) {
             if (buf2[n] == '\0') {
-                FatalError("ERROR in %s: permitted-auth-methods is empty!", rfbAuthConfigFile);
+                FatalError("ERROR in %s: permitted-auth-methods is empty!",
+                           rfbAuthConfigFile);
             }
 
             setMethods(&buf2[n]);
@@ -440,11 +448,13 @@ ReadConfigFile()
             int t;
 
             if (buf2[n] == '\0') {
-                FatalError("ERROR in %s: max-idle-timeout is empty!", rfbAuthConfigFile);
+                FatalError("ERROR in %s: max-idle-timeout is empty!",
+                           rfbAuthConfigFile);
             }
 
             if (sscanf(&buf2[n], "%d", &t) < 1 || t <= 0) {
-                FatalError("ERROR in %s: max-idle-timeout value must be > 0!", rfbAuthConfigFile);
+                FatalError("ERROR in %s: max-idle-timeout value must be > 0!",
+                           rfbAuthConfigFile);
             }
 
             rfbMaxIdleTimeout = (CARD32)t;
@@ -487,7 +497,8 @@ rfbAuthInit()
             rfbLog("Enabled authentication method '%s'\n", a->name);
             if (!a->secType->advertise) {
                 a->secType->advertise = TRUE;
-                rfbLog("Advertising security type '%s' to viewers\n", a->secType->name);
+                rfbLog("Advertising security type '%s' to viewers\n",
+                       a->secType->name);
             }
         }
     }
@@ -501,7 +512,8 @@ rfbAuthInit()
                     a->enabled = TRUE;
                     a->secType->advertise = TRUE;
                     rfbLog("Enabled authentication method '%s'\n", a->name);
-                    rfbLog("Advertising security type '%s' to viewers\n", a->secType->name);
+                    rfbLog("Advertising security type '%s' to viewers\n",
+                           a->secType->name);
                 }
             } else {
                 a->secType->advertise = FALSE;
@@ -623,25 +635,25 @@ rfbSendSecurityType(cl, securityType)
     /* Send the value. */
     value32 = Swap32IfLE(securityType);
     if (WriteExact(cl->sock, (char *)&value32, 4) < 0) {
-	rfbLogPerror("rfbSendSecurityType: write");
-	rfbCloseSock(cl->sock);
-	return;
+        rfbLogPerror("rfbSendSecurityType: write");
+        rfbCloseSock(cl->sock);
+        return;
     }
 
     /* Decide what to do next. */
     switch (securityType) {
     case rfbSecTypeNone:
-	/* Dispatch client input to rfbProcessClientInitMessage. */
-	cl->state = RFB_INITIALISATION;
-	break;
+        /* Dispatch client input to rfbProcessClientInitMessage. */
+        cl->state = RFB_INITIALISATION;
+        break;
     case rfbSecTypeVncAuth:
-	/* Begin the standard VNC authentication procedure. */
-	rfbVncAuthSendChallenge(cl);
-	break;
+        /* Begin the standard VNC authentication procedure. */
+        rfbVncAuthSendChallenge(cl);
+        break;
     default:
-	/* Impossible case (hopefully). */
-	rfbLogPerror("rfbSendSecurityType: assertion failed");
-	rfbCloseSock(cl->sock);
+        /* Impossible case (hopefully). */
+        rfbLogPerror("rfbSendSecurityType: assertion failed");
+        rfbCloseSock(cl->sock);
     }
 }
 
@@ -714,52 +726,52 @@ rfbProcessClientSecurityType(cl)
     /* Read the security type. */
     n = ReadExact(cl->sock, (char *)&chosenType, 1);
     if (n <= 0) {
-	if (n == 0)
-	    rfbLog("rfbProcessClientSecurityType: client gone\n");
-	else
-	    rfbLogPerror("rfbProcessClientSecurityType: read");
-	rfbCloseSock(cl->sock);
-	return;
+        if (n == 0)
+            rfbLog("rfbProcessClientSecurityType: client gone\n");
+        else
+            rfbLogPerror("rfbProcessClientSecurityType: read");
+        rfbCloseSock(cl->sock);
+        return;
     }
 
     /* Make sure it was present in the list sent by the server. */
     count = (int)cl->securityTypes[0];
     for (i = 1; i <= count; i++) {
-	if (chosenType == cl->securityTypes[i])
-	    break;
+        if (chosenType == cl->securityTypes[i])
+            break;
     }
     if (i > count) {
-	rfbLog("rfbProcessClientSecurityType: "
-	       "wrong security type requested\n");
-	rfbCloseSock(cl->sock);
-	return;
+        rfbLog("rfbProcessClientSecurityType: "
+               "wrong security type requested\n");
+        rfbCloseSock(cl->sock);
+        return;
     }
 
     cl->selectedAuthType = chosenType;
     /* Now go to the proper authentication procedure. */
     switch (chosenType) {
     case rfbSecTypeNone:
-	/* No authentication needed. */
-	rfbClientAuthSucceeded(cl, rfbAuthNone);
-	break;
+        /* No authentication needed. */
+        rfbClientAuthSucceeded(cl, rfbAuthNone);
+        break;
     case rfbSecTypeVncAuth:
-	/* Begin the standard VNC authentication procedure. */
-	rfbVncAuthSendChallenge(cl);
-	break;
+        /* Begin the standard VNC authentication procedure. */
+        rfbVncAuthSendChallenge(cl);
+        break;
     case rfbSecTypeTight:
-	/* We are lucky: the viewer supports TightVNC extensions. */
-	rfbLog("Enabling TightVNC protocol extensions\n");
-	/* Switch to the protocol 3.7t/3.8t. */
-	cl->protocol_tightvnc = TRUE;
-	/* Advertise our tunneling capabilities. */
-	rfbSendTunnelingCaps(cl);
-	break;
+        /* We are lucky: the viewer supports TightVNC extensions. */
+        rfbLog("Enabling TightVNC protocol extensions\n");
+        /* Switch to the protocol 3.7t/3.8t. */
+        cl->protocol_tightvnc = TRUE;
+        /* Advertise our tunneling capabilities. */
+        rfbSendTunnelingCaps(cl);
+        break;
     default:
-	/* Impossible case (hopefully). */
-	rfbLog("rfbProcessClientSecurityType: "
-	       "unknown authentication scheme\n");
-	rfbCloseSock(cl->sock);
-	break;
+        /* Impossible case (hopefully). */
+        rfbLog("rfbProcessClientSecurityType: "
+               "unknown authentication scheme\n");
+        rfbCloseSock(cl->sock);
+        break;
     }
 }
 
@@ -773,20 +785,20 @@ rfbSendTunnelingCaps(cl)
     rfbClientPtr cl;
 {
     rfbTunnelingCapsMsg caps;
-    CARD32 nTypes = 0;		/* we don't support tunneling yet */
+    CARD32 nTypes = 0;          /* we don't support tunneling yet */
 
     caps.nTunnelTypes = Swap32IfLE(nTypes);
     if (WriteExact(cl->sock, (char *)&caps, sz_rfbTunnelingCapsMsg) < 0) {
-	rfbLogPerror("rfbSendTunnelingCaps: write");
-	rfbCloseSock(cl->sock);
-	return;
+        rfbLogPerror("rfbSendTunnelingCaps: write");
+        rfbCloseSock(cl->sock);
+        return;
     }
 
     if (nTypes) {
-	/* Dispatch client input to rfbProcessClientTunnelingType(). */
-	cl->state = RFB_TUNNELING_TYPE;
+        /* Dispatch client input to rfbProcessClientTunnelingType(). */
+        cl->state = RFB_TUNNELING_TYPE;
     } else {
-	rfbSendAuthCaps(cl);
+        rfbSendAuthCaps(cl);
     }
 }
 
@@ -874,24 +886,24 @@ rfbSendAuthCaps(cl)
     cl->nAuthCaps = count;
     caps.nAuthTypes = Swap32IfLE((CARD32)count);
     if (WriteExact(cl->sock, (char *)&caps, sz_rfbAuthenticationCapsMsg) < 0) {
-	rfbLogPerror("rfbSendAuthCaps: write");
-	rfbCloseSock(cl->sock);
-	return;
+        rfbLogPerror("rfbSendAuthCaps: write");
+        rfbCloseSock(cl->sock);
+        return;
     }
 
     if (count) {
-	if (WriteExact(cl->sock, (char *)&caplist[0],
-		       count * sz_rfbCapabilityInfo) < 0) {
-	    rfbLogPerror("rfbSendAuthCaps: write");
-	    rfbCloseSock(cl->sock);
-	    return;
-	}
-	/* Dispatch client input to rfbProcessClientAuthType. */
-	cl->state = RFB_AUTH_TYPE;
+        if (WriteExact(cl->sock, (char *)&caplist[0],
+                       count * sz_rfbCapabilityInfo) < 0) {
+            rfbLogPerror("rfbSendAuthCaps: write");
+            rfbCloseSock(cl->sock);
+            return;
+        }
+        /* Dispatch client input to rfbProcessClientAuthType. */
+        cl->state = RFB_AUTH_TYPE;
     } else {
-	/* No authentication needed. */
+        /* No authentication needed. */
         rfbClientAuthSucceeded(cl, rfbAuthNone);
-	cl->state = RFB_INITIALISATION;
+        cl->state = RFB_INITIALISATION;
     }
 }
 
@@ -912,25 +924,25 @@ rfbProcessClientAuthType(cl)
     /* Read authentication type selected by the client. */
     n = ReadExact(cl->sock, (char *)&auth_type, sizeof(auth_type));
     if (n <= 0) {
-	if (n == 0)
-	    rfbLog("rfbProcessClientAuthType: client gone\n");
-	else
-	    rfbLogPerror("rfbProcessClientAuthType: read");
-	rfbCloseSock(cl->sock);
-	return;
+        if (n == 0)
+            rfbLog("rfbProcessClientAuthType: client gone\n");
+        else
+            rfbLogPerror("rfbProcessClientAuthType: read");
+        rfbCloseSock(cl->sock);
+        return;
     }
     auth_type = Swap32IfLE(auth_type);
 
     /* Make sure it was present in the list sent by the server. */
     for (i = 0; i < cl->nAuthCaps; i++) {
-	if (auth_type == cl->authCaps[i])
-	    break;
+        if (auth_type == cl->authCaps[i])
+            break;
     }
     if (i >= cl->nAuthCaps) {
-	rfbLog("rfbProcessClientAuthType: "
-	       "wrong authentication type requested\n");
-	rfbCloseSock(cl->sock);
-	return;
+        rfbLog("rfbProcessClientAuthType: "
+               "wrong authentication type requested\n");
+        rfbCloseSock(cl->sock);
+        return;
     }
 
     for (p = authCaps; *p != NULL; p++) {
@@ -957,9 +969,9 @@ rfbVncAuthSendChallenge(cl)
 {
     vncRandomBytes(cl->authChallenge);
     if (WriteExact(cl->sock, (char *)cl->authChallenge, CHALLENGESIZE) < 0) {
-	rfbLogPerror("rfbVncAuthSendChallenge: write");
-	rfbCloseSock(cl->sock);
-	return;
+        rfbLogPerror("rfbVncAuthSendChallenge: write");
+        rfbCloseSock(cl->sock);
+        return;
     }
 
     /* Dispatch client input to rfbVncAuthProcessResponse. */
@@ -1016,10 +1028,10 @@ rfbVncAuthProcessResponse(cl)
 
     n = ReadExact(cl->sock, (char *)response, CHALLENGESIZE);
     if (n <= 0) {
-	if (n != 0)
-	    rfbLogPerror("rfbVncAuthProcessResponse: read");
-	rfbCloseSock(cl->sock);
-	return;
+        if (n != 0)
+            rfbLogPerror("rfbVncAuthProcessResponse: read");
+        rfbCloseSock(cl->sock);
+        return;
     }
 
     ok = FALSE;
@@ -1039,7 +1051,8 @@ rfbVncAuthProcessResponse(cl)
                 passwdViewOnly[MAXPWLEN] = '\0';
             }
 
-            ok = CheckResponse(cl, numPasswords, passwdFullControl, passwdViewOnly, response);
+            ok = CheckResponse(cl, numPasswords, passwdFullControl,
+                               passwdViewOnly, response);
             if (ok) {
                 memset(rfbAuthOTPValue, 0, rfbAuthOTPValueLen);
                 xfree(rfbAuthOTPValue);
@@ -1066,16 +1079,16 @@ rfbVncAuthProcessResponse(cl)
     }
 
     if (ok) {
-	rfbAuthUnblock();
-	rfbClientAuthSucceeded(cl, rfbAuthVNC);
+        rfbAuthUnblock();
+        rfbClientAuthSucceeded(cl, rfbAuthVNC);
     } else {
-	rfbLog("rfbVncAuthProcessResponse: authentication failed from %s\n",
-	       cl->host);
-	if (rfbAuthConsiderBlocking()) {
-	    rfbClientAuthFailed(cl, "Authentication failed, too many tries");
-	} else {
-	    rfbClientAuthFailed(cl, "Authentication failed");
-	}
+        rfbLog("rfbVncAuthProcessResponse: authentication failed from %s\n",
+               cl->host);
+        if (rfbAuthConsiderBlocking()) {
+            rfbClientAuthFailed(cl, "Authentication failed, too many tries");
+        } else {
+            rfbClientAuthFailed(cl, "Authentication failed");
+        }
     }
 }
 
@@ -1099,9 +1112,9 @@ rfbClientConnFailed(cl, reason)
     ((CARD32 *)buf)[1] = Swap32IfLE(reasonLen);
 
     if ( WriteExact(cl->sock, buf, headerLen) < 0 ||
-	 WriteExact(cl->sock, buf + 4, 4) < 0 ||
-	 WriteExact(cl->sock, reason, reasonLen) < 0 ) {
-	rfbLogPerror("rfbClientConnFailed: write");
+         WriteExact(cl->sock, buf + 4, 4) < 0 ||
+         WriteExact(cl->sock, reason, reasonLen) < 0 ) {
+        rfbLogPerror("rfbClientConnFailed: write");
     }
 
     rfbCloseSock(cl->sock);
@@ -1122,21 +1135,21 @@ rfbClientAuthFailed(cl, reason)
     char buf[8];
 
     if (cl->protocol_minor_ver < 8)
-	reason = NULL;		/* invalidate the pointer */
+        reason = NULL;          /* invalidate the pointer */
 
     reasonLen = (reason == NULL) ? 0 : strlen(reason);
     ((CARD32 *)buf)[0] = Swap32IfLE(rfbAuthFailed);
     ((CARD32 *)buf)[1] = Swap32IfLE(reasonLen);
 
     if (reasonLen == 0) {
-	if (WriteExact(cl->sock, buf, 4) < 0) {
-	    rfbLogPerror("rfbClientAuthFailed: write");
-	}
+        if (WriteExact(cl->sock, buf, 4) < 0) {
+            rfbLogPerror("rfbClientAuthFailed: write");
+        }
     } else {
-	if ( WriteExact(cl->sock, buf, 8) < 0 ||
-	     WriteExact(cl->sock, reason, reasonLen) < 0 ) {
-	    rfbLogPerror("rfbClientAuthFailed: write");
-	}
+        if ( WriteExact(cl->sock, buf, 8) < 0 ||
+             WriteExact(cl->sock, reason, reasonLen) < 0 ) {
+            rfbLogPerror("rfbClientAuthFailed: write");
+        }
     }
 
     rfbCloseSock(cl->sock);
@@ -1212,12 +1225,12 @@ rfbAuthConsiderBlocking(void)
     rfbAuthTries++;
 
     if (rfbAuthTries >= MAX_AUTH_TRIES) {
-	CARD32 delay = AUTH_TOO_MANY_BASE_DELAY;
-	for (i = MAX_AUTH_TRIES; i < rfbAuthTries; i++)
-	    delay *= 2;
-	timer = TimerSet(timer, 0, delay, rfbAuthReenable, NULL);
-	rfbAuthTooManyTries = TRUE;
-	return TRUE;
+        CARD32 delay = AUTH_TOO_MANY_BASE_DELAY;
+        for (i = MAX_AUTH_TRIES; i < rfbAuthTries; i++)
+            delay *= 2;
+        timer = TimerSet(timer, 0, delay, rfbAuthReenable, NULL);
+        rfbAuthTooManyTries = TRUE;
+        return TRUE;
     }
 
     return FALSE;

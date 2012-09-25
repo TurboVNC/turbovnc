@@ -64,7 +64,7 @@ rfbSendOneRectEncodingZlib(cl, x, y, w, h)
     int previousOut;
     int i;
     char *fbptr = (rfbScreen.pfbMemory + (rfbScreen.paddedWidthInBytes * y)
-    	   + (x * (rfbScreen.bitsPerPixel / 8)));
+           + (x * (rfbScreen.bitsPerPixel / 8)));
 
     int maxRawSize;
     int maxCompSize;
@@ -73,11 +73,11 @@ rfbSendOneRectEncodingZlib(cl, x, y, w, h)
                   * (cl->format.bitsPerPixel / 8));
 
     if (zlibBeforeBufSize < maxRawSize) {
-	zlibBeforeBufSize = maxRawSize;
-	if (zlibBeforeBuf == NULL)
-	    zlibBeforeBuf = (char *)xalloc(zlibBeforeBufSize);
-	else
-	    zlibBeforeBuf = (char *)xrealloc(zlibBeforeBuf, zlibBeforeBufSize);
+        zlibBeforeBufSize = maxRawSize;
+        if (zlibBeforeBuf == NULL)
+            zlibBeforeBuf = (char *)xalloc(zlibBeforeBufSize);
+        else
+            zlibBeforeBuf = (char *)xrealloc(zlibBeforeBuf, zlibBeforeBufSize);
     }
 
     /* zlib compression is not useful for very small data sets.
@@ -113,19 +113,19 @@ rfbSendOneRectEncodingZlib(cl, x, y, w, h)
     maxCompSize = maxRawSize + (( maxRawSize + 99 ) / 100 ) + 12;
 
     if (zlibAfterBufSize < maxCompSize) {
-	zlibAfterBufSize = maxCompSize;
-	if (zlibAfterBuf == NULL)
-	    zlibAfterBuf = (char *)xalloc(zlibAfterBufSize);
-	else
-	    zlibAfterBuf = (char *)xrealloc(zlibAfterBuf, zlibAfterBufSize);
+        zlibAfterBufSize = maxCompSize;
+        if (zlibAfterBuf == NULL)
+            zlibAfterBuf = (char *)xalloc(zlibAfterBufSize);
+        else
+            zlibAfterBuf = (char *)xrealloc(zlibAfterBuf, zlibAfterBufSize);
     }
 
     /* 
      * Convert pixel data to client format.
      */
     (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,
-		       &cl->format, fbptr, zlibBeforeBuf,
-		       rfbScreen.paddedWidthInBytes, w, h);
+                       &cl->format, fbptr, zlibBeforeBuf,
+                       rfbScreen.paddedWidthInBytes, w, h);
 
     cl->compStream.next_in = ( Bytef * )zlibBeforeBuf;
     cl->compStream.avail_in = w * h * (cl->format.bitsPerPixel / 8);
@@ -177,13 +177,13 @@ rfbSendOneRectEncodingZlib(cl, x, y, w, h)
     /* Update statics */
     cl->rfbRectanglesSent[rfbEncodingZlib]++;
     cl->rfbBytesSent[rfbEncodingZlib] += (sz_rfbFramebufferUpdateRectHeader
-					 + sz_rfbZlibHeader + zlibAfterBufLen);
+                                         + sz_rfbZlibHeader + zlibAfterBufLen);
 
     if (ublen + sz_rfbFramebufferUpdateRectHeader + sz_rfbZlibHeader
-	> UPDATE_BUF_SIZE)
+        > UPDATE_BUF_SIZE)
     {
-	if (!rfbSendUpdateBuf(cl))
-	    return FALSE;
+        if (!rfbSendUpdateBuf(cl))
+            return FALSE;
     }
 
     rect.r.x = Swap16IfLE(x);
@@ -193,7 +193,7 @@ rfbSendOneRectEncodingZlib(cl, x, y, w, h)
     rect.encoding = Swap32IfLE(rfbEncodingZlib);
 
     memcpy(&updateBuf[ublen], (char *)&rect,
-	   sz_rfbFramebufferUpdateRectHeader);
+           sz_rfbFramebufferUpdateRectHeader);
     ublen += sz_rfbFramebufferUpdateRectHeader;
 
     hdr.nBytes = Swap32IfLE(zlibAfterBufLen);
@@ -203,21 +203,21 @@ rfbSendOneRectEncodingZlib(cl, x, y, w, h)
 
     for (i = 0; i < zlibAfterBufLen;) {
 
-	int bytesToCopy = UPDATE_BUF_SIZE - ublen;
+        int bytesToCopy = UPDATE_BUF_SIZE - ublen;
 
-	if (i + bytesToCopy > zlibAfterBufLen) {
-	    bytesToCopy = zlibAfterBufLen - i;
-	}
+        if (i + bytesToCopy > zlibAfterBufLen) {
+            bytesToCopy = zlibAfterBufLen - i;
+        }
 
-	memcpy(&updateBuf[ublen], &zlibAfterBuf[i], bytesToCopy);
+        memcpy(&updateBuf[ublen], &zlibAfterBuf[i], bytesToCopy);
 
-	ublen += bytesToCopy;
-	i += bytesToCopy;
+        ublen += bytesToCopy;
+        i += bytesToCopy;
 
-	if (ublen == UPDATE_BUF_SIZE) {
-	    if (!rfbSendUpdateBuf(cl))
-		return FALSE;
-	}
+        if (ublen == UPDATE_BUF_SIZE) {
+            if (!rfbSendUpdateBuf(cl))
+                return FALSE;
+        }
     }
 
     return TRUE;

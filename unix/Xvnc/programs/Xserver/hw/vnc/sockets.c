@@ -63,8 +63,8 @@ int deny_severity = LOG_WARNING;
 #include "rfb.h"
 
 
-int rfbMaxClientWait = 20000;	/* time (ms) after which we decide client has
-				   gone away - needed to stop us hanging */
+int rfbMaxClientWait = 20000;   /* time (ms) after which we decide client has
+                                   gone away - needed to stop us hanging */
 
 int rfbPort = 0;
 int rfbListenSock = -1;
@@ -87,16 +87,16 @@ sockaddr_string(struct sockaddr_storage *addr, char *buf, int len)
 {
     const char *string = NULL;
     if (!addr || !buf || len < 1)
-	return "Invalid argument";
+        return "Invalid argument";
     if (addr->ss_family == AF_INET6)
-	string = inet_ntop(addr->ss_family,
-			   &((struct sockaddr_in6 *)addr)->sin6_addr, buf,
-			   len);
+        string = inet_ntop(addr->ss_family,
+                           &((struct sockaddr_in6 *)addr)->sin6_addr, buf,
+                           len);
     else
-	string = inet_ntop(addr->ss_family,
-			   &((struct sockaddr_in *)addr)->sin_addr, buf, len);
+        string = inet_ntop(addr->ss_family,
+                           &((struct sockaddr_in *)addr)->sin_addr, buf, len);
     if (!string)
-	return strerror(errno);
+        return strerror(errno);
     return string;
 }
 
@@ -112,40 +112,40 @@ rfbInitSockets()
     static Bool done = FALSE;
 
     if (done)
-	return;
+        return;
 
     done = TRUE;
 
     if (inetdSock != -1) {
-	const int one = 1;
+        const int one = 1;
 
-	if (fcntl(inetdSock, F_SETFL, O_NONBLOCK) < 0) {
-	    rfbLogPerror("fcntl");
-	    exit(1);
-	}
+        if (fcntl(inetdSock, F_SETFL, O_NONBLOCK) < 0) {
+            rfbLogPerror("fcntl");
+            exit(1);
+        }
 
-	if (setsockopt(inetdSock, IPPROTO_TCP, TCP_NODELAY,
-		       (char *)&one, sizeof(one)) < 0) {
-	    rfbLogPerror("setsockopt");
-	    exit(1);
-	}
+        if (setsockopt(inetdSock, IPPROTO_TCP, TCP_NODELAY,
+                       (char *)&one, sizeof(one)) < 0) {
+            rfbLogPerror("setsockopt");
+            exit(1);
+        }
 
-    	AddEnabledDevice(inetdSock);
-    	FD_ZERO(&allFds);
-    	FD_SET(inetdSock, &allFds);
-    	maxFd = inetdSock;
-	return;
+        AddEnabledDevice(inetdSock);
+        FD_ZERO(&allFds);
+        FD_SET(inetdSock, &allFds);
+        maxFd = inetdSock;
+        return;
     }
 
     if (rfbPort == 0) {
-	rfbPort = 5900 + atoi(display);
+        rfbPort = 5900 + atoi(display);
     }
 
     rfbLog("Listening for VNC connections on TCP port %d\n", rfbPort);
 
     if ((rfbListenSock = ListenOnTCPPort(rfbPort)) < 0) {
-	rfbLogPerror("ListenOnTCPPort");
-	exit(1);
+        rfbLogPerror("ListenOnTCPPort");
+        exit(1);
     }
 
     AddEnabledDevice(rfbListenSock);
@@ -155,15 +155,16 @@ rfbInitSockets()
     maxFd = rfbListenSock;
 
     if (udpPort != 0) {
-	rfbLog("rfbInitSockets: listening for input on UDP port %d\n",udpPort);
+        rfbLog("rfbInitSockets: listening for input on UDP port %d\n",
+               udpPort);
 
-	if ((udpSock = ListenOnUDPPort(udpPort)) < 0) {
-	    rfbLogPerror("ListenOnUDPPort");
-	    exit(1);
-	}
-	AddEnabledDevice(udpSock);
-	FD_SET(udpSock, &allFds);
-	maxFd = max(udpSock,maxFd);
+        if ((udpSock = ListenOnUDPPort(udpPort)) < 0) {
+            rfbLogPerror("ListenOnUDPPort");
+            exit(1);
+        }
+        AddEnabledDevice(udpSock);
+        FD_SET(udpSock, &allFds);
+        maxFd = max(udpSock, maxFd);
     }
 }
 
@@ -190,8 +191,8 @@ rfbCheckFds()
     static Bool inetdInitDone = FALSE;
 
     if (!inetdInitDone && inetdSock != -1) {
-	rfbNewClientConnection(inetdSock); 
-	inetdInitDone = TRUE;
+        rfbNewClientConnection(inetdSock); 
+        inetdInitDone = TRUE;
     }
 
     memcpy((char *)&fds, (char *)&allFds, sizeof(fd_set));
@@ -199,35 +200,35 @@ rfbCheckFds()
     tv.tv_usec = 0;
     nfds = select(maxFd + 1, &fds, NULL, NULL, &tv);
     if (nfds == 0) {
-	return;
+        return;
     }
     if (nfds < 0) {
-	rfbLogPerror("rfbCheckFds: select");
-	return;
+        rfbLogPerror("rfbCheckFds: select");
+        return;
     }
 
     if (rfbListenSock != -1 && FD_ISSET(rfbListenSock, &fds)) {
 
-	if ((sock = accept(rfbListenSock,
-			   (struct sockaddr *)&addr, &addrlen)) < 0) {
-	    rfbLogPerror("rfbCheckFds: accept");
-	    return;
-	}
+        if ((sock = accept(rfbListenSock,
+                           (struct sockaddr *)&addr, &addrlen)) < 0) {
+            rfbLogPerror("rfbCheckFds: accept");
+            return;
+        }
 
-	if (fcntl(sock, F_SETFL, O_NONBLOCK) < 0) {
-	    rfbLogPerror("rfbCheckFds: fcntl");
-	    close(sock);
-	    return;
-	}
+        if (fcntl(sock, F_SETFL, O_NONBLOCK) < 0) {
+            rfbLogPerror("rfbCheckFds: fcntl");
+            close(sock);
+            return;
+        }
 
-	if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
-		       (char *)&one, sizeof(one)) < 0) {
-	    rfbLogPerror("rfbCheckFds: setsockopt");
-	    close(sock);
-	    return;
-	}
+        if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
+                       (char *)&one, sizeof(one)) < 0) {
+            rfbLogPerror("rfbCheckFds: setsockopt");
+            close(sock);
+            return;
+        }
 
-	fprintf(stderr,"\n");
+        fprintf(stderr, "\n");
 
 #if USE_LIBWRAP
         if (!hosts_ctl("Xvnc", STRING_UNKNOWN,
@@ -240,61 +241,61 @@ rfbCheckFds()
         }
 #endif
 
-	rfbLog("Got connection from client %s\n",
-	       sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
+        rfbLog("Got connection from client %s\n",
+               sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
 
-	AddEnabledDevice(sock);
-	FD_SET(sock, &allFds);
-	maxFd = max(sock,maxFd);
+        AddEnabledDevice(sock);
+        FD_SET(sock, &allFds);
+        maxFd = max(sock, maxFd);
 
-	rfbNewClientConnection(sock);
+        rfbNewClientConnection(sock);
 
-	FD_CLR(rfbListenSock, &fds);
-	if (--nfds == 0)
-	    return;
+        FD_CLR(rfbListenSock, &fds);
+        if (--nfds == 0)
+            return;
     }
 
     if ((udpSock != -1) && FD_ISSET(udpSock, &fds)) {
 
-	if (recvfrom(udpSock, buf, 1, MSG_PEEK,
-		     (struct sockaddr *)&addr, &addrlen) < 0) {
+        if (recvfrom(udpSock, buf, 1, MSG_PEEK,
+                     (struct sockaddr *)&addr, &addrlen) < 0) {
 
-	    rfbLogPerror("rfbCheckFds: UDP: recvfrom");
-	    rfbDisconnectUDPSock();
+            rfbLogPerror("rfbCheckFds: UDP: recvfrom");
+            rfbDisconnectUDPSock();
 
-	} else {
+        } else {
 
-	    if (!udpSockConnected ||
-		(memcmp(&addr, &udpRemoteAddr, addrlen) != 0))
-	    {
-		/* new remote end */
-		rfbLog("rfbCheckFds: UDP: got connection\n");
+            if (!udpSockConnected ||
+                (memcmp(&addr, &udpRemoteAddr, addrlen) != 0))
+            {
+                /* new remote end */
+                rfbLog("rfbCheckFds: UDP: got connection\n");
 
-		memcpy(&udpRemoteAddr, &addr, addrlen);
-		udpSockConnected = TRUE;
+                memcpy(&udpRemoteAddr, &addr, addrlen);
+                udpSockConnected = TRUE;
 
-		if (connect(udpSock,
-			    (struct sockaddr *)&addr, addrlen) < 0) {
-		    rfbLogPerror("rfbCheckFds: UDP: connect");
-		    rfbDisconnectUDPSock();
-		    return;
-		}
+                if (connect(udpSock,
+                            (struct sockaddr *)&addr, addrlen) < 0) {
+                    rfbLogPerror("rfbCheckFds: UDP: connect");
+                    rfbDisconnectUDPSock();
+                    return;
+                }
 
-		rfbNewUDPConnection(udpSock);
-	    }
+                rfbNewUDPConnection(udpSock);
+            }
 
-	    rfbProcessUDPInput(udpSock);
-	}
+            rfbProcessUDPInput(udpSock);
+        }
 
-	FD_CLR(udpSock, &fds);
-	if (--nfds == 0)
-	    return;
+        FD_CLR(udpSock, &fds);
+        if (--nfds == 0)
+            return;
     }
 
     for (sock = 0; sock <= maxFd; sock++) {
-	if (FD_ISSET(sock, &fds) && FD_ISSET(sock, &allFds)) {
-	    rfbProcessClientMessage(sock);
-	}
+        if (FD_ISSET(sock, &fds) && FD_ISSET(sock, &allFds)) {
+            rfbProcessClientMessage(sock);
+        }
     }
 }
 
@@ -313,8 +314,8 @@ rfbSockBusy(sock)
     tv.tv_usec = 0;
     nfds = select(sock + 1, NULL, &fds, NULL, &tv);
     if (nfds < 0) {
-	rfbLogPerror("rfbIsBusy: select");
-	return FALSE;
+        rfbLogPerror("rfbIsBusy: select");
+        return FALSE;
     }
     return (nfds == 0);
 }
@@ -336,7 +337,7 @@ rfbCloseSock(sock)
     FD_CLR(sock, &allFds);
     rfbClientConnectionGone(sock);
     if (sock == inetdSock)
-	GiveUp(0);
+        GiveUp(0);
 }
 
 
@@ -358,14 +359,14 @@ rfbWaitForClient(sock)
     FD_SET(sock, &fds);
     tv.tv_sec = rfbMaxClientWait / 1000;
     tv.tv_usec = (rfbMaxClientWait % 1000) * 1000;
-    n = select(sock+1, &fds, NULL, NULL, &tv);
+    n = select(sock + 1, &fds, NULL, NULL, &tv);
     if (n < 0) {
-	rfbLogPerror("rfbWaitForClient: select");
-	exit(1);
+        rfbLogPerror("rfbWaitForClient: select");
+        exit(1);
     }
     if (n == 0) {
-	rfbCloseSock(sock);
-	return;
+        rfbCloseSock(sock);
+        return;
     }
 
     rfbProcessClientMessage(sock);
@@ -384,31 +385,31 @@ rfbConnect(host, port)
     int sock;
     int one = 1;
 
-    fprintf(stderr,"\n");
+    fprintf(stderr, "\n");
     rfbLog("Making connection to client on host %s port %d\n",
-	   host,port);
+           host, port);
 
     if ((sock = ConnectToTcpAddr(host, port)) < 0) {
-	rfbLogPerror("connection failed");
-	return -1;
+        rfbLogPerror("connection failed");
+        return -1;
     }
 
     if (fcntl(sock, F_SETFL, O_NONBLOCK) < 0) {
-	rfbLogPerror("fcntl failed");
-	close(sock);
-	return -1;
+        rfbLogPerror("fcntl failed");
+        close(sock);
+        return -1;
     }
 
     if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
-		   (char *)&one, sizeof(one)) < 0) {
-	rfbLogPerror("setsockopt failed");
-	close(sock);
-	return -1;
+                   (char *)&one, sizeof(one)) < 0) {
+        rfbLogPerror("setsockopt failed");
+        close(sock);
+        return -1;
     }
 
     AddEnabledDevice(sock);
     FD_SET(sock, &allFds);
-    maxFd = max(sock,maxFd);
+    maxFd = max(sock, maxFd);
 
     return sock;
 }
@@ -433,36 +434,36 @@ ReadExact(sock, buf, len)
     struct timeval tv;
 
     while (len > 0) {
-	n = read(sock, buf, len);
+        n = read(sock, buf, len);
 
-	if (n > 0) {
+        if (n > 0) {
 
-	    buf += n;
-	    len -= n;
+            buf += n;
+            len -= n;
 
-	} else if (n == 0) {
+        } else if (n == 0) {
 
-	    return 0;
+            return 0;
 
-	} else {
-	    if (errno != EWOULDBLOCK && errno != EAGAIN) {
-		return n;
-	    }
+        } else {
+            if (errno != EWOULDBLOCK && errno != EAGAIN) {
+                return n;
+            }
 
-	    FD_ZERO(&fds);
-	    FD_SET(sock, &fds);
-	    tv.tv_sec = rfbMaxClientWait / 1000;
-	    tv.tv_usec = (rfbMaxClientWait % 1000) * 1000;
-	    n = select(sock+1, &fds, NULL, NULL, &tv);
-	    if (n < 0) {
-		rfbLogPerror("ReadExact: select");
-		return n;
-	    }
-	    if (n == 0) {
-		errno = ETIMEDOUT;
-		return -1;
-	    }
-	}
+            FD_ZERO(&fds);
+            FD_SET(sock, &fds);
+            tv.tv_sec = rfbMaxClientWait / 1000;
+            tv.tv_usec = (rfbMaxClientWait % 1000) * 1000;
+            n = select(sock + 1, &fds, NULL, NULL, &tv);
+            if (n < 0) {
+                rfbLogPerror("ReadExact: select");
+                return n;
+            }
+            if (n == 0) {
+                errno = ETIMEDOUT;
+                return -1;
+            }
+        }
     }
     return 1;
 }
@@ -488,46 +489,46 @@ WriteExact(sock, buf, len)
 
 
     while (len > 0) {
-	n = write(sock, buf, len);
+        n = write(sock, buf, len);
 
-	if (n > 0) {
+        if (n > 0) {
 
-	    buf += n;
-	    len -= n;
+            buf += n;
+            len -= n;
 
-	} else if (n == 0) {
+        } else if (n == 0) {
 
-	    rfbLog("WriteExact: write returned 0?\n");
-	    exit(1);
+            rfbLog("WriteExact: write returned 0?\n");
+            exit(1);
 
-	} else {
-	    if (errno != EWOULDBLOCK && errno != EAGAIN && errno != 0) {
-		return n;
-	    }
+        } else {
+            if (errno != EWOULDBLOCK && errno != EAGAIN && errno != 0) {
+                return n;
+            }
 
-	    /* Retry every 5 seconds until we exceed rfbMaxClientWait.  We
-	       need to do this because select doesn't necessarily return
-	       immediately when the other end has gone away */
+            /* Retry every 5 seconds until we exceed rfbMaxClientWait.  We
+               need to do this because select doesn't necessarily return
+               immediately when the other end has gone away */
 
-	    FD_ZERO(&fds);
-	    FD_SET(sock, &fds);
-	    tv.tv_sec = 5;
-	    tv.tv_usec = 0;
-	    n = select(sock+1, NULL, &fds, NULL, &tv);
-	    if (n < 0) {
-		rfbLogPerror("WriteExact: select");
-		return n;
-	    }
-	    if (n == 0) {
-		totalTimeWaited += 5000;
-		if (totalTimeWaited >= rfbMaxClientWait) {
-		    errno = ETIMEDOUT;
-		    return -1;
-		}
-	    } else {
-		totalTimeWaited = 0;
-	    }
-	}
+            FD_ZERO(&fds);
+            FD_SET(sock, &fds);
+            tv.tv_sec = 5;
+            tv.tv_usec = 0;
+            n = select(sock + 1, NULL, &fds, NULL, &tv);
+            if (n < 0) {
+                rfbLogPerror("WriteExact: select");
+                return n;
+            }
+            if (n == 0) {
+                totalTimeWaited += 5000;
+                if (totalTimeWaited >= rfbMaxClientWait) {
+                    errno = ETIMEDOUT;
+                    return -1;
+                }
+            } else {
+                totalTimeWaited = 0;
+            }
+        }
     }
     return 1;
 }
@@ -547,38 +548,38 @@ ListenOnTCPPort(port)
 
     memset(&addr, 0, sizeof(addr));
     if (family == AF_INET6) {
-	addr6->sin6_family = family;
-	addr6->sin6_port = htons(port);
-	addr6->sin6_addr = interface6;
-	addrlen = sizeof(struct sockaddr_in6);
+        addr6->sin6_family = family;
+        addr6->sin6_port = htons(port);
+        addr6->sin6_addr = interface6;
+        addrlen = sizeof(struct sockaddr_in6);
     } else {
-	family = AF_INET;
-	addr4->sin_family = family;
-	addr4->sin_port = htons(port);
-	addr4->sin_addr.s_addr = interface.s_addr;
-	addrlen = sizeof(struct sockaddr_in);
+        family = AF_INET;
+        addr4->sin_family = family;
+        addr4->sin_port = htons(port);
+        addr4->sin_addr.s_addr = interface.s_addr;
+        addrlen = sizeof(struct sockaddr_in);
     }
 
     if ((sock = socket(family, SOCK_STREAM, 0)) < 0) {
-	return -1;
+        return -1;
     }
 
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-		   (char *)&one, sizeof(one)) < 0) {
-	close(sock);
-	return -1;
+                   (char *)&one, sizeof(one)) < 0) {
+        close(sock);
+        return -1;
     }
     if (bind(sock, (struct sockaddr *)&addr, addrlen) < 0) {
-	close(sock);
-	return -1;
+        close(sock);
+        return -1;
     }
     if (listen(sock, 5) < 0) {
-	close(sock);
-	return -1;
+        close(sock);
+        return -1;
     }
 
     if (getnameinfo((struct sockaddr *)&addr, addrlen, hostname,
-		    NI_MAXHOST, NULL, 0, NI_NUMERICHOST) == 0) {
+                    NI_MAXHOST, NULL, 0, NI_NUMERICHOST) == 0) {
         rfbLog("  Interface %s\n", hostname);
     }
     return sock;
@@ -599,17 +600,17 @@ ConnectToTcpAddr(host, port)
     hints.ai_socktype = SOCK_STREAM;
     snprintf(portname, 10, "%d", port);
     if (getaddrinfo(host, portname, &hints, &addr) != 0)
-	return -1;
+        return -1;
 
     if ((sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol)) < 0) {
-	freeaddrinfo(addr);
-	return -1;
+        freeaddrinfo(addr);
+        return -1;
     }
 
     if (connect(sock, addr->ai_addr, addr->ai_addrlen) < 0) {
-	close(sock);
-	freeaddrinfo(addr);
-	return -1;
+        close(sock);
+        freeaddrinfo(addr);
+        return -1;
     }
 
     freeaddrinfo(addr);
@@ -630,28 +631,28 @@ ListenOnUDPPort(port)
 
     memset(&addr, 0, sizeof(addr));
     if (family == AF_INET6) {
-	addr6->sin6_family = family;
-	addr6->sin6_port = htons(port);
-	addr6->sin6_addr = interface6;
-	addrlen = sizeof(struct sockaddr_in6);
+        addr6->sin6_family = family;
+        addr6->sin6_port = htons(port);
+        addr6->sin6_addr = interface6;
+        addrlen = sizeof(struct sockaddr_in6);
     } else {
-	family = AF_INET;
-	addr4->sin_family = family;
-	addr4->sin_port = htons(port);
-	addr4->sin_addr.s_addr = interface.s_addr;
-	addrlen = sizeof(struct sockaddr_in);
+        family = AF_INET;
+        addr4->sin_family = family;
+        addr4->sin_port = htons(port);
+        addr4->sin_addr.s_addr = interface.s_addr;
+        addrlen = sizeof(struct sockaddr_in);
     }
 
     if ((sock = socket(family, SOCK_DGRAM, 0)) < 0) {
-	return -1;
+        return -1;
     }
 
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-		   (char *)&one, sizeof(one)) < 0) {
-	return -1;
+                   (char *)&one, sizeof(one)) < 0) {
+        return -1;
     }
     if (bind(sock, (struct sockaddr *)&addr, addrlen) < 0) {
-	return -1;
+        return -1;
     }
 
     return sock;

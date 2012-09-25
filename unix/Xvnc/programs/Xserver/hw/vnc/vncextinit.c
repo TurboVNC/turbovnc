@@ -179,7 +179,7 @@ static int ProcVncExtSetServerCutText(ClientPtr client)
   char *str;
   REQUEST(xVncExtSetServerCutTextReq);
   REQUEST_FIXED_SIZE(xVncExtSetServerCutTextReq, stuff->textLen);
-  str = (char *)xalloc(stuff->textLen+1);
+  str = (char *)xalloc(stuff->textLen + 1);
   if (!str)
     FatalError("ProcVncExtSetServerCutText(): Memory allocation failure\n");
   strncpy(str, (char*)&stuff[1], stuff->textLen);
