@@ -1,9 +1,9 @@
 X11 TurboVNC Viewer
 ===================
 
-The X11 TurboVNC Viewer is written using Xt (X Toolkit Intrinsics.)  Although
-a somewhat primitive system, one of the benefits of Xt is that it allows
-applications to be heavily customized through the use of X resources.
+The X11 TurboVNC Viewer is written using Xt (X Toolkit Intrinsics), and thus
+the behavior of the application can be heavily customized through the use of X
+resources.
 
 You can set X resources by any of the usual means:  in an app-defaults file,
 such as .Xresources, or on the command line with the '-xrm' option
