@@ -423,7 +423,7 @@ rfbSpriteCloseScreen(i, pScreen)
     }
 #endif
 
-    xfree(pointer) pScreenPriv);
+    xfree((pointer)pScreenPriv);
 
     return (*pScreen->CloseScreen)(i, pScreen);
 }
@@ -1055,7 +1055,7 @@ rfbSpriteSetSpans(pDrawable, pGC, psrc, ppt, pwidth, nspans, fSorted)
 {
     GC_SETUP(pDrawable, pGC);
 
-    if (GC_CHECK((WindowPtr)pDrawable)
+    if (GC_CHECK((WindowPtr)pDrawable))
     {
         register DDXPointPtr  pts;
         register int          *widths;
@@ -1095,7 +1095,7 @@ rfbSpritePutImage(pDrawable, pGC, depth, x, y, w, h, leftPad, format, pBits)
 {
     GC_SETUP(pDrawable, pGC);
 
-    if (GC_CHECK((WindowPtr)pDrawable)
+    if (GC_CHECK((WindowPtr)pDrawable))
     {
         if (ORG_OVERLAP(&pScreenPriv->saved, pDrawable->x, pDrawable->y,
                         x, y, w, h))
@@ -1199,7 +1199,7 @@ rfbSpritePolyPoint(pDrawable, pGC, mode, npt, pptInit)
 
     GC_SETUP(pDrawable, pGC);
 
-    if (npt && GC_CHECK((WindowPtr)pDrawable)
+    if (npt && GC_CHECK((WindowPtr)pDrawable))
     {
         cursor.x1 = pScreenPriv->saved.x1 - pDrawable->x;
         cursor.y1 = pScreenPriv->saved.y1 - pDrawable->y;
@@ -1260,7 +1260,7 @@ rfbSpritePolylines(pDrawable, pGC, mode, npt, pptInit)
 
     GC_SETUP(pDrawable, pGC);
 
-    if (npt && GC_CHECK((WindowPtr)pDrawable)
+    if (npt && GC_CHECK((WindowPtr)pDrawable))
     {
         cursor = &pScreenPriv->saved;
         lw = pGC->lineWidth;
@@ -1333,7 +1333,7 @@ rfbSpritePolySegment(pDrawable, pGC, nseg, pSegs)
 
     GC_SETUP(pDrawable, pGC);
 
-    if (nseg && GC_CHECK((WindowPtr)pDrawable)
+    if (nseg && GC_CHECK((WindowPtr)pDrawable))
     {
         cursor = &pScreenPriv->saved;
         extra = pGC->lineWidth >> 1;
@@ -1376,7 +1376,7 @@ rfbSpritePolyRectangle(pDrawable, pGC, nrects, pRects)
     
     GC_SETUP(pDrawable, pGC);
 
-    if (GC_CHECK((WindowPtr)pDrawable)
+    if (GC_CHECK((WindowPtr)pDrawable))
     {
         lw = pGC->lineWidth >> 1;
         cursor = &pScreenPriv->saved;
@@ -1418,7 +1418,7 @@ rfbSpritePolyArc(pDrawable, pGC, narcs, parcs)
     
     GC_SETUP(pDrawable, pGC);
 
-    if (GC_CHECK((WindowPtr)pDrawable)
+    if (GC_CHECK((WindowPtr)pDrawable))
     {
         lw = pGC->lineWidth >> 1;
         cursor = &pScreenPriv->saved;
@@ -1456,7 +1456,7 @@ rfbSpriteFillPolygon(pDrawable, pGC, shape, mode, count, pPts)
 
     GC_SETUP(pDrawable, pGC);
 
-    if (count && GC_CHECK((WindowPtr)pDrawable)
+    if (count && GC_CHECK((WindowPtr)pDrawable))
     {
         x = pDrawable->x;
         y = pDrawable->y;
@@ -1524,7 +1524,7 @@ rfbSpritePolyFillRect(pDrawable, pGC, nrectFill, prectInit)
 {
     GC_SETUP(pDrawable, pGC);
 
-    if (GC_CHECK((WindowPtr)pDrawable)
+    if (GC_CHECK((WindowPtr)pDrawable))
     {
         register int         nRect;
         register xRectangle  *pRect;
@@ -1557,7 +1557,7 @@ rfbSpritePolyFillArc(pDrawable, pGC, narcs, parcs)
 {
     GC_SETUP(pDrawable, pGC);
 
-    if (GC_CHECK((WindowPtr)pDrawable)
+    if (GC_CHECK((WindowPtr)pDrawable))
     {
         register int   n;
         BoxPtr         cursor;
