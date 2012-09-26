@@ -478,7 +478,7 @@ Error(str)
 }
 
 #ifndef DDXTIME
-CARD32
+CARD64
 GetTimeInMillis()
 {
 #ifndef AMOEBA

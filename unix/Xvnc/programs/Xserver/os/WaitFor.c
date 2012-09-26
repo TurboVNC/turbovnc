@@ -1,6 +1,7 @@
 /***********************************************************
 
 Copyright (c) 1987  X Consortium
+Copyright (c) 2012  D. R. Commander
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -116,7 +117,7 @@ extern int playback_on;
 
 struct _OsTimerRec {
     OsTimerPtr		next;
-    CARD32		expires;
+    CARD64		expires;
     OsTimerCallback	callback;
     pointer		arg;
 };
@@ -161,7 +162,7 @@ WaitForSomething(pClientsReady)
     int selecterr;
     int nready;
     fd_set devicesReadable;
-    CARD32 now = 0;
+    CARD64 now = 0;
 
     FD_ZERO(&clientsReadable);
 
@@ -658,10 +659,10 @@ WaitForSomething(pClientsReady)
 static void
 DoTimer(timer, now, prev)
     register OsTimerPtr timer;
-    CARD32 now;
+    CARD64 now;
     OsTimerPtr *prev;
 {
-    CARD32 newTime;
+    CARD64 newTime;
 
     *prev = timer->next;
     timer->next = NULL;
@@ -674,12 +675,12 @@ OsTimerPtr
 TimerSet(timer, flags, millis, func, arg)
     register OsTimerPtr timer;
     int flags;
-    CARD32 millis;
+    CARD64 millis;
     OsTimerCallback func;
     pointer arg;
 {
     register OsTimerPtr *prev;
-    CARD32 now = GetTimeInMillis();
+    CARD64 now = GetTimeInMillis();
 
     if (!timer)
     {
@@ -772,7 +773,7 @@ TimerFree(timer)
 void
 TimerCheck()
 {
-    register CARD32 now = GetTimeInMillis();
+    register CARD64 now = GetTimeInMillis();
 
     while (timers && timers->expires <= now)
 	DoTimer(timers, now, &timers);

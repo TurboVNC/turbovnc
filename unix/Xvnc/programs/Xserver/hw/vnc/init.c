@@ -1075,7 +1075,7 @@ OsVendorInit()
     }
     if (rfbIdleTimeout > 0) {
         idleTimer = TimerSet(idleTimer, 0, rfbIdleTimeout * 1000,
-            idleTimeoutCallback, NULL);
+                             idleTimeoutCallback, NULL);
     }
 }
 

@@ -1899,8 +1899,8 @@ rfbCopyRegion(pScreen, cl, src, dst, dx, dy)
  * goes off.
  */
 
-static CARD32
-rfbDeferredUpdateCallback(OsTimerPtr timer, CARD32 now, pointer arg)
+static CARD64
+rfbDeferredUpdateCallback(OsTimerPtr timer, CARD64 now, pointer arg)
 {
     rfbClientPtr cl = (rfbClientPtr)arg;
     BOOL status = TRUE;

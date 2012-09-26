@@ -1205,8 +1205,8 @@ static OsTimerPtr timer = NULL;
  * setting a timer in rfbAuthConsiderBlocking().
  */
 
-static CARD32
-rfbAuthReenable(OsTimerPtr timer, CARD32 now, pointer arg)
+static CARD64
+rfbAuthReenable(OsTimerPtr timer, CARD64 now, pointer arg)
 {
     rfbAuthTooManyTries = FALSE;
     return 0;

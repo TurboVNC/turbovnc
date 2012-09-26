@@ -1,6 +1,7 @@
 /***********************************************************
 
 Copyright (c) 1987  X Consortium
+Copyright (c) 2012  D. R. Commander
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -142,6 +143,7 @@ typedef char           INT8;
 typedef unsigned long CARD64;
 typedef unsigned int CARD32;
 #else
+typedef unsigned long long CARD64;
 typedef unsigned long CARD32;
 #endif
 typedef unsigned short CARD16;

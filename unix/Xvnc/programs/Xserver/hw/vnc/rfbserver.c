@@ -77,11 +77,11 @@ CARD32 rfbMaxIdleTimeout = 0;
 CARD32 rfbIdleTimeout = 0;
 OsTimerPtr idleTimer;
 
-CARD32
-idleTimeoutCallback(OsTimerPtr timer, CARD32 time, pointer arg)
+CARD64
+idleTimeoutCallback(OsTimerPtr timer, CARD64 time, pointer arg)
 {
     FatalError("TurboVNC server has been idle for %d seconds.  Exiting.\n",
-        rfbIdleTimeout);
+               rfbIdleTimeout);
     return 0;
 }
 
@@ -108,8 +108,8 @@ double gettime(void)
 
 static Bool putImageOnly = TRUE;
 
-CARD32
-alrCallback(OsTimerPtr timer, CARD32 time, pointer arg)
+CARD64
+alrCallback(OsTimerPtr timer, CARD64 time, pointer arg)
 {
     RegionRec copyRegionSave, modifiedRegionSave, requestedRegionSave;
     rfbClientPtr cl = (rfbClientPtr)arg;
@@ -430,7 +430,7 @@ rfbClientConnectionGone(sock)
 
     if (rfbClientHead == NULL && rfbIdleTimeout > 0) {
         idleTimer = TimerSet(idleTimer, 0, rfbIdleTimeout * 1000,
-            idleTimeoutCallback, NULL);
+                             idleTimeoutCallback, NULL);
     }
 }
 
@@ -1415,7 +1415,7 @@ rfbSendFramebufferUpdate(cl)
     if (rfbAutoLosslessRefresh > 0.0 &&
         (!putImageOnly || cl->putImageTrigger || cl->firstUpdate)) {
         cl->alrTimer = TimerSet(cl->alrTimer, 0,
-            (CARD32)(rfbAutoLosslessRefresh * 1000.0), alrCallback, cl);
+            (CARD64)(rfbAutoLosslessRefresh * 1000.0), alrCallback, cl);
         cl->alrTrigger = TRUE;
         cl->putImageTrigger = FALSE;
     }

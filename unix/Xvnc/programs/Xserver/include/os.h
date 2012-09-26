@@ -1,6 +1,7 @@
 /***********************************************************
 
 Copyright (c) 1987  X Consortium
+Copyright (c) 2012  D. R. Commander
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -290,10 +291,10 @@ extern void AdjustWaitForDelay(
 
 typedef	struct _OsTimerRec *OsTimerPtr;
 
-typedef CARD32 (*OsTimerCallback)(
+typedef CARD64 (*OsTimerCallback)(
 #if NeedFunctionPrototypes
     OsTimerPtr /* timer */,
-    CARD32 /* time */,
+    CARD64 /* time */,
     pointer /* arg */
 #endif
 );
@@ -317,7 +318,7 @@ extern OsTimerPtr TimerSet(
 #if NeedFunctionPrototypes
     OsTimerPtr /* timer */,
     int /* flags */,
-    CARD32 /* millis */,
+    CARD64 /* millis */,
     OsTimerCallback /* func */,
     pointer /* arg */
 #endif

@@ -72,6 +72,16 @@ encounters an error.  This allows batch scripts to start the viewer with
 [13]
 The /password option in the Windows TurboVNC Viewer should now work again.
 -------------------------------------------------------------------------------
+[14]
+Fixed an intermittent failure with the idle timeout feature in the TurboVNC
+Server.  This failure was caused by the fact that the X server used a 32-bit
+value to store the number of milliseconds since 1970, and this value was
+wrapping around to 0 every 49 days.  If a TurboVNC Server session was started
+near the end of one of these 49-day cycles and the idle timeout was set for
+several days into the future, the expiration value for the timer would wrap
+around and become lower than the current time, thus causing the TurboVNC Server
+to exit.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
