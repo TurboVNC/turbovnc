@@ -232,7 +232,7 @@ class DesktopWindow extends JPanel implements
   {
     if (overlapsCursor(x, y, w, h)) hideLocalCursor();
     im.fillRect(x, y, w, h, pix);
-    damageRect(new Rect(x, y, x+w, y+h));
+    damageRect(x, y, w, h);
     if (softCursor == null)
       showLocalCursor();
   }
@@ -241,7 +241,7 @@ class DesktopWindow extends JPanel implements
                                            Object pix) {
     if (overlapsCursor(x, y, w, h)) hideLocalCursor();
     im.imageRect(x, y, w, h, pix);
-    damageRect(new Rect(x, y, x+w, y+h));
+    damageRect(x, y, w, h);
     if (softCursor == null)
       showLocalCursor();
   }
@@ -251,7 +251,7 @@ class DesktopWindow extends JPanel implements
     if (overlapsCursor(x, y, w, h) || overlapsCursor(srcX, srcY, w, h))
       hideLocalCursor();
     im.copyRect(x, y, w, h, srcX, srcY);
-    damageRect(new Rect(x, y, x+w, y+h));
+    damageRect(x, y, w, h);
   }
 
   final public Object getRawPixelsRW(int[] stride) {
@@ -259,7 +259,7 @@ class DesktopWindow extends JPanel implements
   }
 
   final public void releaseRawPixels(Rect r) {
-    damageRect(r);
+    damageRect(r.tl.x, r.tl.y, r.width(), r.height());
   }
 
   // mutex MUST be held when overlapsCursor() is called
@@ -521,12 +521,15 @@ class DesktopWindow extends JPanel implements
     }
   }
 
-  void damageRect(Rect r) {
+  void damageRect(int x, int y, int w, int h) {
     if (damage.is_empty()) {
-      damage.setXYWH(r.tl.x, r.tl.y, r.width(), r.height());
-    } else {
-      r = damage.union_boundary(r);
-      damage.setXYWH(r.tl.x, r.tl.y, r.width(), r.height());
+      damage.setXYWH(x, y, w, h);
+    } else if (x >= 0 && y >= 0 && w > 0 && h > 0) {
+      int x1 = Math.min(damage.tl.x, x);
+      int y1 = Math.min(damage.tl.y, y);
+      int x2 = Math.max(damage.br.x, x + w);
+      int y2 = Math.max(damage.br.y, y + h);
+      damage.setXYWH(x1, y1, x2 - x1, y2 - y1);
     }
   }
 

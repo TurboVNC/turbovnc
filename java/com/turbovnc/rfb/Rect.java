@@ -47,27 +47,6 @@ public class Rect {
   public final void setXYWH(int x, int y, int w, int h) {
     tl.x = x; tl.y = y; br.x = x+w; br.y = y+h;
   }
-  public final Rect intersect(Rect r) {
-    Rect result = new Rect();
-    result.tl.x = Math.max(tl.x, r.tl.x);
-    result.tl.y = Math.max(tl.y, r.tl.y);
-    result.br.x = Math.max(Math.min(br.x, r.br.x), result.tl.x);
-    result.br.y = Math.max(Math.min(br.y, r.br.y), result.tl.y);
-    return result;
-  }
-  public final Rect union_boundary(Rect r) {
-    if (r.is_empty()) return this;
-    if (is_empty()) return r;
-    Rect result = new Rect();
-    result.tl.x = Math.min(tl.x, r.tl.x);
-    result.tl.y = Math.min(tl.y, r.tl.y);
-    result.br.x = Math.max(br.x, r.br.x);
-    result.br.y = Math.max(br.y, r.br.y);
-    return result;
-  }
-  public final Rect translate(Point p) {
-    return new Rect(tl.translate(p), br.translate(p));
-  }
   public final boolean equals(Rect r) {return r.tl.equals(tl) && r.br.equals(br);}
   public final boolean is_empty() {return (tl.x >= br.x) || (tl.y >= br.y);}
   public final void clear() {tl = new Point(); br = new Point();}
