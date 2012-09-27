@@ -58,25 +58,30 @@ In addition to high performance, other notable features of TurboVNC include:
 	* Double buffering on the client side to reduce tearing artifacts in 3D and
 		video applications
 
+	* Flexible and configurable full-screen/multi-screen support
+
+	* Full support for IPv6
+
 	* TurboVNC has the ability to hide network latency by decompressing and
 		drawing a frame on the client while the next frame is being fetched from
 		the server.  This can improve performance dramatically on high-latency
 		connections.
 
-	* TurboVNC supports authentication with one-time passwords or Unix login
-		credentials.  Access control lists can be used to share VNC sessions with
-		only certain users.
+	* Authentication with one-time passwords or Unix login credentials.  Access
+		control lists can be used to share VNC sessions with only certain users.
 
 	* TurboVNC allows security/authentication policies to be set globally for a
 		particular server machine.
 
-	* TurboVNC provides a "lossless refresh" feature, which sends a
-		lossless copy of the current screen image.  This is useful in situations in
-		which image quality is critical but the network is too slow to support
-		sending a high-quality image for every frame.  Lossless refreshes can be
-		performed manually when a certain hotkey is pressed, or the TurboVNC Server
-		can be configured to send a lossless refresh automatically if the user
-		stops interacting with the application for a certain period of time.
+	* Multithreaded Tight encoding
+
+	* "Lossless refresh" allows a viewer to request a lossless copy of the
+		current screen image.  This is useful in situations in which image quality
+		is critical but the network is too slow to support sending a high-quality
+		image for every frame.  Lossless refreshes can be performed manually when a
+		certain hotkey is pressed, or the TurboVNC Server can be configured to send
+		a lossless refresh automatically if the user stops interacting with the
+		application for a certain period of time.
 
 TurboVNC, when used with VirtualGL, provides a highly performant and robust
 solution for remotely displaying 3D applications over all types of networks.
