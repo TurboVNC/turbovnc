@@ -92,7 +92,6 @@ public class TightDecoder extends Decoder {
   {
     InStream is = reader.getInStream();
     boolean cutZeros = false;
-    clientpf = handler.getPreferredPF();
     serverpf = handler.cp.pf();
     int bpp = serverpf.bpp;
     cutZeros = false;
@@ -117,20 +116,6 @@ public class TightDecoder extends Decoder {
       readUncompressed = true;
     }
 
-    // "Fill" compression type.
-    if (comp_ctl == rfbTightFill) {
-      int[] pix = new int[1];
-      if (cutZeros) {
-        byte[] bytebuf = new byte[3];
-        is.readBytes(bytebuf, 0, 3);
-        serverpf.bufferFromRGB(pix, 0, bytebuf, 0, 1);
-      } else {
-        pix[0] = is.readPixel(serverpf.bpp/8, serverpf.bigEndian);
-      }
-      handler.fillRect(r, pix[0]);
-      return;
-    }
-
     // "JPEG" compression type.
     if (comp_ctl == rfbTightJpeg) {
       decompressJpegRect(r, is, handler);
@@ -147,6 +132,41 @@ public class TightDecoder extends Decoder {
     Object buf = handler.getRawPixelsRW(stride);
     int pad = stride[0] - w;
     int ptr = r.tl.y * stride[0] + r.tl.x;
+
+    // "Fill" compression type.
+    if (comp_ctl == rfbTightFill) {
+      if (cutZeros) {
+        byte[] bytebuf = new byte[3];
+        is.readBytes(bytebuf, 0, 3);
+        int pix = (bytebuf[0] & 0xff) << serverpf.redShift |
+                  (bytebuf[1] & 0xff) << serverpf.greenShift |
+                  (bytebuf[2] & 0xff) << serverpf.blueShift;
+        while (h > 0) {
+          Arrays.fill((int[])buf, ptr, ptr + w, pix);
+          ptr += stride[0];
+          h--;
+        }
+      } else if (buf instanceof byte[]) {
+        int pix = is.readU8();
+        while (h > 0) {
+          Arrays.fill((byte[])buf, ptr, ptr + w, (byte)pix);
+          ptr += stride[0];
+          h--;
+        }
+      } else if (buf instanceof short[]) {
+        int pix = is.readPixel(bpp / 8, serverpf.bigEndian);
+        while (h > 0) {
+          Arrays.fill((short[])buf, ptr, ptr + w, (short)pix);
+          ptr += stride[0];
+          h--;
+        }
+      } else {
+        // We should never get here
+        throw new Exception("Unsupported pixel type");
+      }
+      handler.releaseRawPixels(r);
+      return;
+    }
 
     // "Basic" compression type.
     int palSize = 0;
@@ -522,7 +542,6 @@ public class TightDecoder extends Decoder {
   private CMsgReader reader;
   private ZlibInStream[] zis;
   private PixelFormat serverpf;
-  private PixelFormat clientpf;
   private TJDecompressor tjd;
 
   static LogWriter vlog = new LogWriter("TightDecoder");
