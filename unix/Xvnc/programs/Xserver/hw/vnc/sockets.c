@@ -300,24 +300,53 @@ rfbCheckFds()
 }
 
 
-Bool
-rfbSockBusy(sock)
+/*
+ * rfbCorkSock enables the TCP cork functionality on Linux to inform the TCP
+ * layer to send only complete packets
+ */
+
+void
+rfbCorkSock(sock)
     int sock;
 {
-    int nfds;
-    fd_set fds;
-    struct timeval tv;
-
-    FD_ZERO(&fds);
-    FD_SET(sock, &fds);
-    tv.tv_sec = 0;
-    tv.tv_usec = 0;
-    nfds = select(sock + 1, NULL, &fds, NULL, &tv);
-    if (nfds < 0) {
-        rfbLogPerror("rfbIsBusy: select");
-        return FALSE;
+    static int alreadywarned = 0;
+#ifdef TCP_CORK
+    int one = 1;
+    if (setsockopt(sock, IPPROTO_TCP, TCP_CORK, (char *)&one,
+        sizeof(one)) < 0) {
+        if (!alreadywarned) {
+            rfbLogPerror("Could not enable TCP corking");
+            alreadywarned = 1;
+        }
     }
-    return (nfds == 0);
+#else
+    if (!alreadywarned) {
+        rfbLogPerror("TCP corking not available on this system.");
+        alreadywarned = 1;
+    }
+#endif
+}
+
+
+/*
+ * rfbUncorkSock disables corking and sends all partially-complete packets
+ */
+
+void
+rfbUncorkSock(sock)
+    int sock;
+{
+#ifdef TCP_CORK
+    static int alreadywarned = 0;
+    int zero = 0;
+    if (setsockopt(sock, IPPROTO_TCP, TCP_CORK, (char *)&zero,
+        sizeof(zero)) < 0) {
+        if (!alreadywarned) {
+            rfbLogPerror("Could not disable TCP corking");
+            alreadywarned = 1;
+        }
+    }
+#endif
 }
 
 
@@ -482,10 +511,11 @@ WriteExact(sock, buf, len)
     char *buf;
     int len;
 {
-    int n;
+    int n, bytesWritten = 0;
     fd_set fds;
     struct timeval tv;
     int totalTimeWaited = 0;
+    rfbClientPtr cl;
 
 
     while (len > 0) {
@@ -495,6 +525,7 @@ WriteExact(sock, buf, len)
 
             buf += n;
             len -= n;
+            bytesWritten += n;
 
         } else if (n == 0) {
 
@@ -530,6 +561,14 @@ WriteExact(sock, buf, len)
             }
         }
     }
+
+    for (cl = rfbClientHead; cl; cl = cl->next) {
+        if (sock == cl->sock) {
+            gettimeofday(&cl->lastWrite, NULL);
+            cl->sockOffset += bytesWritten;
+        }
+    }
+
     return 1;
 }
 

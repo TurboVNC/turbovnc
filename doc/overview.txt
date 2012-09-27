@@ -62,10 +62,9 @@ In addition to high performance, other notable features of TurboVNC include:
 
 	* Full support for IPv6
 
-	* TurboVNC has the ability to hide network latency by decompressing and
-		drawing a frame on the client while the next frame is being fetched from
-		the server.  This can improve performance dramatically on high-latency
-		connections.
+	* Advanced flow control and continuous updates.  This allows clients
+		to receive framebuffer updates without specifically requesting them, which
+		can improve performance dramatically on high-latency connections.
 
 	* Authentication with one-time passwords or Unix login credentials.  Access
 		control lists can be used to share VNC sessions with only certain users.

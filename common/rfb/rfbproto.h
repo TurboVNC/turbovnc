@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2009-2010 D. R. Commander. All Rights Reserved.
+ *  Copyright (C) 2009-2010, 2012 D. R. Commander. All Rights Reserved.
  *  Copyright (C) 2004-2008 Sun Microsystems, Inc. All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
  *  Copyright (C) 2000-2006 Constantin Kaplinsky. All Rights Reserved.
@@ -421,6 +421,18 @@ typedef struct _rfbInteractionCapsMsg {
 #define rfbFileCreateDirRequest 136
 
 #define rfbEnableContinuousUpdates 150
+#define rfbEndOfContinuousUpdates 150
+#define rfbFence 248
+
+/* fence flags */
+#define rfbFenceFlagBlockBefore 1
+#define rfbFenceFlagBlockAfter 2
+#define rfbFenceFlagSyncNext 4
+#define rfbFenceFlagRequest 0x80000000
+#define rfbFenceFlagsSupported (rfbFenceFlagBlockBefore | \
+                                rfbFenceFlagBlockAfter | \
+                                rfbFenceFlagSyncNext | \
+                                rfbFenceFlagRequest)
 
 /* signatures for non-standard messages */
 #define sig_rfbFileListRequest "FTC_LSRQ"
@@ -463,8 +475,9 @@ typedef struct _rfbInteractionCapsMsg {
 
 /*
  * Special encoding numbers:
- *   0xFFFFFD00 .. 0xFFFFFD05 -- subsampling level
- *   0xFFFFFE00 .. 0xFFFFFE64 -- fine-grained quality level (0-100 scale)
+ *   0xFFFFFD00 .. 0xFFFFFD05 -- subsampling level;
+ *   0xFFFFFE00 .. 0xFFFFFE64 -- fine-grained quality level (0-100 scale);
+ *   0xFFFFFEC7 .. 0xFFFFFEC8 -- flow control extensions;
  *   0xFFFFFF00 .. 0xFFFFFF0F -- encoding-specific compression levels;
  *   0xFFFFFF10 .. 0xFFFFFF1F -- mouse cursor shape data;
  *   0xFFFFFF20 .. 0xFFFFFF2F -- various protocol extensions;
@@ -481,6 +494,9 @@ typedef struct _rfbInteractionCapsMsg {
 #define rfbEncodingSubsampGray         0xFFFFFD03
 #define rfbEncodingSubsamp8X           0xFFFFFD04
 #define rfbEncodingSubsamp16X          0xFFFFFD05
+
+#define rfbEncodingContinuousUpdates   0xFFFFFEC7
+#define rfbEncodingFence               0xFFFFFEC8
 
 #define rfbEncodingCompressLevel0  0xFFFFFF00
 #define rfbEncodingCompressLevel1  0xFFFFFF01
@@ -1288,6 +1304,20 @@ typedef struct _rfbEnableContinuousUpdatesMsg {
 #define sz_rfbEnableContinuousUpdatesMsg 10
 
 /*-----------------------------------------------------------------------------
+ * Fence
+ */
+
+typedef struct _rfbFenceMsg {
+    CARD8 type;			/* always rfbFence */
+    CARD8 pad[3];
+    CARD32 flags;
+    CARD8 length;
+    /* Followed by char data[length] */
+} rfbFenceMsg;
+
+#define sz_rfbFenceMsg 9
+
+/*-----------------------------------------------------------------------------
  * Union of all client->server messages.
  */
 
@@ -1307,5 +1337,6 @@ typedef union _rfbClientToServerMsg {
     rfbFileDownloadCancelMsg fdc;
     rfbFileUploadFailedMsg fuf;
     rfbFileCreateDirRequestMsg fcdr;
-    rfbEnableContinuousUpdatesMsg fencu;
+    rfbEnableContinuousUpdatesMsg ecu;
+    rfbFenceMsg f;
 } rfbClientToServerMsg;

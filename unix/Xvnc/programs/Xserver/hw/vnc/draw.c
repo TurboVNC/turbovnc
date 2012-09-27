@@ -69,7 +69,6 @@ in this Software without prior written authorization from the X Consortium.
 extern WindowPtr *WindowTable; /* Why isn't this in a header file? */
 
 int rfbDeferUpdateTime = 40; /* ms */
-Bool cuCopyArea = FALSE;
 
 
 /****************************************************************************/
@@ -107,30 +106,6 @@ Bool cuCopyArea = FALSE;
           nextCl = cl->next;                                            \
           if (!cl->deferredUpdateScheduled && FB_UPDATE_PENDING(cl))    \
           {                                                             \
-              cl->putImageTrigger = trigger;                            \
-              rfbScheduleDeferredUpdate(cl);                            \
-          }                                                             \
-      }                                                                 \
-  }
-
-#define _SCHEDULE_FB_UPDATE_CU(pScreen, prfb, trigger)                  \
-  if (!prfb->dontSendFramebufferUpdate) {                               \
-      rfbClientPtr cl, nextCl;                                          \
-      for (cl = rfbClientHead; cl; cl = nextCl) {                       \
-          nextCl = cl->next;                                            \
-          if (cl->continuousUpdates && !cl->firstUpdate) {              \
-              BoxRec box;  RegionRec tmpRegion;                         \
-              box.x1 = x;  box.y1 = y;                                  \
-              box.x2 = x + w;  box.y2 = y + h;                          \
-              REGION_INIT(pScreen, &tmpRegion, &box, 0);                \
-              REGION_UNION(pScreen, &cl->requestedRegion,               \
-                  &cl->requestedRegion, &tmpRegion);                    \
-              REGION_UNINIT(pScreen, &tmpRegion);                       \
-              cl->putImageTrigger = trigger;                            \
-              rfbSendFramebufferUpdate(cl);                             \
-          }                                                             \
-          else if (!cl->deferredUpdateScheduled &&                      \
-              FB_UPDATE_PENDING(cl)) {                                  \
               cl->putImageTrigger = trigger;                            \
               rfbScheduleDeferredUpdate(cl);                            \
           }                                                             \
@@ -690,7 +665,7 @@ rfbPutImage(pDrawable, pGC, depth, x, y, w, h, leftPad, format, pBits)
     (*pGC->ops->PutImage) (pDrawable, pGC, depth, x, y, w, h,
                            leftPad, format, pBits);
 
-    _SCHEDULE_FB_UPDATE_CU(pDst->pScreen, prfb, TRUE);
+    _SCHEDULE_FB_UPDATE(pDrawable->pScreen, prfb, TRUE);
 
     GC_OP_EPILOGUE(pGC);
 }
@@ -719,7 +694,6 @@ rfbCopyArea (pSrc, pDst, pGC, srcx, srcy, w, h, dstx, dsty)
     RegionPtr rgn;
     RegionRec srcRegion, dstRegion;
     BoxRec box;
-    int x, y;
     GC_OP_PROLOGUE(pDst, pGC);
 
     TRC((stderr, "rfbCopyArea called\n"));
@@ -768,11 +742,6 @@ rfbCopyArea (pSrc, pDst, pGC, srcx, srcy, w, h, dstx, dsty)
     rgn = (*pGC->ops->CopyArea) (pSrc, pDst, pGC, srcx, srcy, w, h,
                                  dstx, dsty);
 
-    if (cuCopyArea) {
-        x = dstx;  y = dsty;
-        _SCHEDULE_FB_UPDATE_CU(pDst->pScreen, prfb, FALSE);
-    }
-    else
         SCHEDULE_FB_UPDATE(pDst->pScreen, prfb);
 
     GC_OP_EPILOGUE(pGC);
@@ -1906,7 +1875,7 @@ rfbDeferredUpdateCallback(OsTimerPtr timer, CARD64 now, pointer arg)
     BOOL status = TRUE;
 
     if (cl->deferredUpdateScheduled && FB_UPDATE_PENDING(cl))
-            status = rfbSendFramebufferUpdate(cl);
+        status = rfbSendFramebufferUpdate(cl);
 
     if (status) cl->deferredUpdateScheduled = FALSE;
     return 0;

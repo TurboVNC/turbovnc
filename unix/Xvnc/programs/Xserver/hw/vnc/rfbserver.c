@@ -58,8 +58,6 @@ double rfbAutoLosslessRefresh = 0.0;
 int rfbALRQualityLevel = -1;
 int rfbALRSubsampLevel = TVNC_1X;
 
-extern Bool cuCopyArea;
-
 static rfbClientPtr rfbNewClient(int sock);
 static void rfbProcessClientProtocolVersion(rfbClientPtr cl);
 static void rfbProcessClientInitMessage(rfbClientPtr cl);
@@ -163,6 +161,15 @@ alrCallback(OsTimerPtr timer, CARD64 time, pointer arg)
 }
 
 
+static CARD64
+updateCallback(OsTimerPtr timer, CARD64 time, pointer arg)
+{
+    rfbClientPtr cl = (rfbClientPtr)arg;
+    rfbSendFramebufferUpdate(cl);
+    return 0;
+}
+
+
 /*
  * Map of quality levels to provide compatibility with TightVNC/TigerVNC
  * clients
@@ -238,7 +245,6 @@ rfbNewClient(sock)
     struct sockaddr_storage addr;
     socklen_t addrlen = sizeof(struct sockaddr_storage);
     char addrStr[INET6_ADDRSTRLEN];
-    int i;
     char *env = NULL;
 
     if (rfbClientHead == NULL) {
@@ -259,28 +265,20 @@ rfbNewClient(sock)
         return NULL;
     }
 
+    memset(cl, 0, sizeof(rfbClientRec));
+
     cl->sock = sock;
     getpeername(sock, (struct sockaddr *)&addr, &addrlen);
     cl->host = strdup(sockaddr_string(&addr, addrStr, INET6_ADDRSTRLEN));
-    cl->login = NULL;
 
     /* Dispatch client input to rfbProcessClientProtocolVersion(). */
     cl->state = RFB_PROTOCOL_VERSION;
 
-    cl->viewOnly = FALSE;
-    cl->reverseConnection = FALSE;
-    cl->readyForSetColourMapEntries = FALSE;
-    cl->useCopyRect = FALSE;
     cl->preferredEncoding = rfbEncodingTight;
     cl->correMaxWidth = 48;
     cl->correMaxHeight = 48;
-    cl->zrleData = NULL;
-    cl->paletteHelper = NULL;
-    cl->zrleBeforeBuf = NULL;
 
     REGION_INIT(pScreen, &cl->copyRegion, NullBox, 0);
-    cl->copyDX = 0;
-    cl->copyDY = 0;
 
     box.x1 = box.y1 = 0;
     box.x2 = rfbScreen.width;
@@ -289,40 +287,22 @@ rfbNewClient(sock)
 
     REGION_INIT(pScreen, &cl->requestedRegion, NullBox, 0);
 
-    cl->deferredUpdateScheduled = FALSE;
-    cl->deferredUpdateTimer = NULL;
     cl->deferredUpdateStart = gettime();
 
     cl->format = rfbServerFormat;
     cl->translateFn = rfbTranslateNone;
-    cl->translateLookupTable = NULL;
 
     cl->tightCompressLevel = TIGHT_DEFAULT_COMPRESSION;
     cl->tightSubsampLevel = TIGHT_DEFAULT_SUBSAMP;
     cl->tightQualityLevel = -1;
     cl->imageQualityLevel = -1;
-    for (i = 0; i < 4; i++)
-        cl->zsActive[i] = FALSE;
-
-    cl->enableCursorShapeUpdates = FALSE;
-    cl->enableCursorPosUpdates = FALSE;
-    cl->enableLastRectEncoding = FALSE;
 
     cl->next = rfbClientHead;
     rfbClientHead = cl;
 
     rfbResetStats(cl);
 
-    cl->compStreamInited = FALSE;
-    cl->compStream.total_in = 0;
-    cl->compStream.total_out = 0;
-    cl->compStream.zalloc = Z_NULL;
-    cl->compStream.zfree = Z_NULL;
-    cl->compStream.opaque = Z_NULL;
-
     cl->zlibCompressLevel = 5;
-
-    cl->continuousUpdates = FALSE;
 
     sprintf(pv, rfbProtocolVersionFormat, 3, 8);
 
@@ -334,11 +314,8 @@ rfbNewClient(sock)
 
     if ((env = getenv("TVNC_PROFILE")) != NULL && !strcmp(env, "1"))
         rfbProfile = TRUE;
-    if ((env = getenv("TVNC_CUCOPYAREA")) != NULL && !strcmp(env, "1"))
-        cuCopyArea = TRUE;
 
     cl->firstUpdate = TRUE;
-    cl->alrTimer = NULL;
 
     if (rfbAutoLosslessRefresh > 0.0) {
         REGION_INIT(pScreen, &cl->lossyRegion, NullBox, 0);
@@ -351,8 +328,9 @@ rfbNewClient(sock)
         TimerCancel(idleTimer);
     }
 
-    cl->cutText = NULL;
-    cl->cutTextLen = 0;
+    cl->baseRTT = cl->minRTT = (unsigned)-1;
+    gettimeofday(&cl->lastWrite, NULL);
+    REGION_INIT(pScreen, &cl->cuRegion, NullBox, 0);
 
     return cl;
 }
@@ -382,6 +360,8 @@ rfbClientConnectionGone(sock)
 
     TimerFree(cl->alrTimer);
     TimerFree(cl->deferredUpdateTimer);
+    TimerFree(cl->updateTimer);
+    TimerFree(cl->congestionTimer);
 
     if (cl->login != NULL) {
         rfbLog("Client %s (%s) gone\n", cl->login, cl->host);
@@ -456,6 +436,13 @@ rfbProcessClientMessage(sock)
         return;
     }
 
+    rfbCorkSock(sock);
+
+    if (cl->pendingSyncFence) {
+      cl->syncFence = TRUE;
+      cl->pendingSyncFence = FALSE;
+    }
+
     switch (cl->state) {
     case RFB_PROTOCOL_VERSION:
         rfbProcessClientProtocolVersion(cl);
@@ -473,11 +460,19 @@ rfbProcessClientMessage(sock)
         rfbAuthProcessResponse(cl);
         break;
     case RFB_INITIALISATION:
+        rfbInitFlowControl(cl);
         rfbProcessClientInitMessage(cl);
         break;
     default:
         rfbProcessClientNormalMessage(cl);
     }
+
+    if (cl->syncFence) {
+      rfbSendFence(cl, cl->fenceFlags, cl->fenceDataLen, cl->fenceData);
+      cl->syncFence = FALSE;
+    }
+
+    rfbUncorkSock(sock);
 }
 
 
@@ -589,7 +584,7 @@ rfbProcessClientInitMessage(cl)
     cl->state = RFB_NORMAL;
 
     if (!cl->reverseConnection &&
-                        (rfbNeverShared || (!rfbAlwaysShared && !ci.shared))) {
+        (rfbNeverShared || (!rfbAlwaysShared && !ci.shared))) {
 
         if (rfbDontDisconnect) {
             for (otherCl = rfbClientHead; otherCl; otherCl = otherCl->next) {
@@ -623,7 +618,7 @@ rfbProcessClientInitMessage(cl)
 
 /* Update these constants on changing capability lists below! */
 #define N_SMSG_CAPS  0
-#define N_CMSG_CAPS  1
+#define N_CMSG_CAPS  0
 #define N_ENC_CAPS  16
 
 void
@@ -632,7 +627,6 @@ rfbSendInteractionCaps(cl)
 {
     rfbInteractionCapsMsg intr_caps;
     rfbCapabilityInfo enc_list[N_ENC_CAPS];
-    rfbCapabilityInfo cmsg_list[N_CMSG_CAPS];
     int i;
 
     /* Fill in the header structure sent prior to capability lists. */
@@ -656,21 +650,20 @@ rfbSendInteractionCaps(cl)
     */
 
     /* Supported client->server message types. */
-    i = 0;
     /* For future file transfer support:
+    i = 0;
     SetCapInfo(&cmsg_list[i++], rfbFileListRequest,        rfbTightVncVendor);
     SetCapInfo(&cmsg_list[i++], rfbFileDownloadRequest,    rfbTightVncVendor);
     SetCapInfo(&cmsg_list[i++], rfbFileUploadRequest,      rfbTightVncVendor);
     SetCapInfo(&cmsg_list[i++], rfbFileUploadData,         rfbTightVncVendor);
     SetCapInfo(&cmsg_list[i++], rfbFileDownloadCancel,     rfbTightVncVendor);
     SetCapInfo(&cmsg_list[i++], rfbFileUploadFailed,       rfbTightVncVendor);
-    */
-    SetCapInfo(&cmsg_list[i++], rfbEnableContinuousUpdates, rfbTightVncVendor);
     if (i != N_CMSG_CAPS) {
         rfbLog("rfbSendInteractionCaps: assertion failed, i != N_CMSG_CAPS\n");
         rfbCloseSock(cl->sock);
         return;
     }
+    */
 
     /* Encoding types. */
     i = 0;
@@ -699,8 +692,6 @@ rfbSendInteractionCaps(cl)
     /* Send header and capability lists */
     if (WriteExact(cl->sock, (char *)&intr_caps,
                    sz_rfbInteractionCapsMsg) < 0 ||
-        WriteExact(cl->sock, (char *)&cmsg_list[0],
-                   sz_rfbCapabilityInfo * N_CMSG_CAPS) < 0 ||
         WriteExact(cl->sock, (char *)&enc_list[0],
                    sz_rfbCapabilityInfo * N_ENC_CAPS) < 0) {
         rfbLogPerror("rfbSendInteractionCaps: write");
@@ -780,6 +771,8 @@ rfbProcessClientNormalMessage(cl)
     {
         int i;
         CARD32 enc;
+        Bool firstFence = !cl->enableFence;
+        Bool firstCU = !cl->enableCU;
 
         if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
                            sz_rfbSetEncodingsMsg - 1)) <= 0) {
@@ -906,6 +899,20 @@ rfbProcessClientNormalMessage(cl)
                     cl->enableLastRectEncoding = TRUE;
                 }
                 break;
+            case rfbEncodingFence:
+                if (!cl->enableFence) {
+                    rfbLog("Enabling Fence protocol extension for client "
+                           "%s\n", cl->host);
+                    cl->enableFence = TRUE;
+                }
+                break;
+            case rfbEncodingContinuousUpdates:
+                if (!cl->enableCU) {
+                    rfbLog("Enabling Continuous Updates protocol extension for client "
+                           "%s\n", cl->host);
+                    cl->enableCU = TRUE;
+                }
+                break;
             default:
                 if ( enc >= (CARD32)rfbEncodingCompressLevel0 &&
                      enc <= (CARD32)rfbEncodingCompressLevel9 ) {
@@ -952,6 +959,12 @@ rfbProcessClientNormalMessage(cl)
             cl->enableCursorPosUpdates = FALSE;
         }
 
+        if (cl->enableFence && firstFence)
+            rfbSendFence(cl, rfbFenceFlagRequest, 0, NULL);
+
+        if (cl->enableCU && cl->enableFence && firstCU)
+            rfbSendEndOfCU(cl);
+
         return;
     }
 
@@ -975,8 +988,9 @@ rfbProcessClientNormalMessage(cl)
         box.y2 = box.y1 + Swap16IfLE(msg.fur.h);
         SAFE_REGION_INIT(pScreen, &tmpRegion, &box, 0);
 
-        REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
-                     &tmpRegion);
+        if (!msg.fur.incremental || !cl->continuousUpdates)
+            REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
+                         &tmpRegion);
 
         if (!cl->readyForSetColourMapEntries) {
             /* client hasn't sent a SetPixelFormat so is using server's */
@@ -1096,19 +1110,70 @@ rfbProcessClientNormalMessage(cl)
         return;
 
     case rfbEnableContinuousUpdates:
+    {
+        BoxRec box;
 
         if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
-                           sz_rfbEnableContinuousUpdatesMsg-1)) <= 0) {
+                           sz_rfbEnableContinuousUpdatesMsg - 1)) <= 0) {
             if (n != 0)
                 rfbLogPerror("rfbProcessClientNormalMessage: read");
             rfbCloseSock(cl->sock);
             return;
         }
 
-        cl->continuousUpdates = msg.fencu.enable;
-        rfbLog("Continuous updates %s\n", cl->continuousUpdates? "enabled":
+        if (!cl->enableFence || !cl->enableCU) {
+            rfbLog("Ignoring request to enable continuous updates because the client does not\n");
+            rfbLog("support the flow control extensions.\n");
+            return;
+        }
+
+        box.x1 = Swap16IfLE(msg.ecu.x);
+        box.y1 = Swap16IfLE(msg.ecu.y);
+        box.x2 = box.x1 + Swap16IfLE(msg.ecu.w);
+        box.y2 = box.y1 + Swap16IfLE(msg.ecu.h);
+        SAFE_REGION_INIT(pScreen, &cl->cuRegion, &box, 0);
+
+        cl->continuousUpdates = msg.ecu.enable;
+        if (cl->continuousUpdates) {
+            REGION_EMPTY(pScreen, &cl->requestedRegion);
+            rfbSendFramebufferUpdate(cl);
+        } else
+            rfbSendEndOfCU(cl);
+
+        rfbLog("Continuous updates %s\n", cl->continuousUpdates ? "enabled":
                 "disabled");
         return;
+    }
+
+    case rfbFence:
+    {
+        CARD32 flags;
+        char data[64];
+
+        if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
+                           sz_rfbFenceMsg - 1)) <= 0) {
+            if (n != 0)
+                rfbLogPerror("rfbProcessClientNormalMessage: read");
+            rfbCloseSock(cl->sock);
+            return;
+        }
+
+        flags = Swap32IfLE(msg.f.flags);
+
+        if ((n = ReadExact(cl->sock, data, msg.f.length)) <= 0) {
+            if (n != 0)
+                rfbLogPerror("rfbProcessClientNormalMessage: read");
+            rfbCloseSock(cl->sock);
+            return;
+        }
+
+        if (msg.f.length > sizeof(data))
+            rfbLog("Ignoring fence.  Payload of %d bytes is too large.\n",
+                   msg.f.length);
+        else
+            HandleFence(cl, flags, msg.f.length, data);
+        return;
+    }
 
     default:
 
@@ -1140,6 +1205,10 @@ rfbSendFramebufferUpdate(cl)
     Bool sendCursorShape = FALSE;
     Bool sendCursorPos = FALSE;
     double tUpdateStart = 0.0;
+
+    TimerCancel(cl->updateTimer);
+
+    if (cl->syncFence) return TRUE;
 
     if (rfbProfile) {
         tUpdateStart = gettime();
@@ -1187,14 +1256,33 @@ rfbSendFramebufferUpdate(cl)
     REGION_INIT(pScreen, &updateRegion, NullBox, 0);
     REGION_UNION(pScreen, &updateRegion, &cl->copyRegion,
                  &cl->modifiedRegion);
+
+    if (cl->continuousUpdates)
+        REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
+                     &cl->cuRegion);
+
     REGION_INTERSECT(pScreen, &updateRegion, &cl->requestedRegion,
                      &updateRegion);
 
-    if ( !REGION_NOTEMPTY(pScreen, &updateRegion) &&
-         !sendCursorShape && !sendCursorPos ) {
+    if (!REGION_NOTEMPTY(pScreen, &updateRegion) &&
+        !sendCursorShape && !sendCursorPos) {
         REGION_UNINIT(pScreen, &updateRegion);
         return TRUE;
     }
+
+    /* Check that we actually have some space on the link and retry in a
+       bit if things are congested. */
+
+    if (rfbIsCongested(cl)) {
+        cl->updateTimer = TimerSet(cl->updateTimer, 0, 50, updateCallback, cl);
+        return TRUE;
+    }
+
+    /* In continuous mode, we will be outputting at least three distinct
+       messages.  We need to aggregate these in order to not clog up TCP's
+       congestion window. */
+
+    rfbCorkSock(cl->sock);
 
     /*
      * We assume that the client doesn't have any pixel data outside the
@@ -1329,6 +1417,8 @@ rfbSendFramebufferUpdate(cl)
 
     REGION_UNINIT(pScreen, &updateCopyRegion);
 
+    rfbSendRTTPing(cl);
+
     for (i = 0; i < REGION_NUM_RECTS(&updateRegion); i++) {
         int x = REGION_RECTS(&updateRegion)[i].x1;
         int y = REGION_RECTS(&updateRegion)[i].y1;
@@ -1395,6 +1485,8 @@ rfbSendFramebufferUpdate(cl)
     if (!rfbSendUpdateBuf(cl))
         return FALSE;
 
+    rfbSendRTTPing(cl);
+
     if (rfbProfile) {
         tUpdateTime += gettime() - tUpdateStart;
         tElapsed = gettime() - tStart;
@@ -1421,6 +1513,7 @@ rfbSendFramebufferUpdate(cl)
     }
     if (cl->firstUpdate) cl->firstUpdate = FALSE;
 
+    rfbUncorkSock(cl->sock);
     return TRUE;
 }
 

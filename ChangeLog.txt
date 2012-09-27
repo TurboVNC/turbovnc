@@ -87,6 +87,13 @@ Worked around a bug in the version of TigerVNC Server that ships with
 Red Hat/CentOS 6, whereby dragging links from Firefox (running on the remote
 desktop) to the remote desktop would cause the X11 TurboVNC Viewer to crash.
 -------------------------------------------------------------------------------
+[16]
+Added support for the RFB flow control extensions developed by the TigerVNC
+Project.  Clients that support these extensions (including TurboVNC 1.2 and
+later and TigerVNC 1.2 and later) can receive updates from the server without
+having to explicitly request them, which improves performance on high-latency
+networks.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

@@ -298,6 +298,8 @@ typedef struct rfbClientRec {
     Bool enableLastRectEncoding;   /* client supports LastRect encoding */
     Bool enableCursorShapeUpdates; /* client supports cursor shape updates */
     Bool enableCursorPosUpdates;   /* client supports PointerPos updates */
+    Bool enableCU;                 /* client supports Continuous Updates */
+    Bool enableFence;              /* client supports fence extension */
     Bool useRichCursorEncoding;    /* rfbEncodingRichCursor is preferred */
     Bool cursorWasChanged;         /* cursor shape update should be sent */
     Bool cursorWasMoved;           /* cursor position update should be sent */
@@ -312,10 +314,29 @@ typedef struct rfbClientRec {
 
     struct rfbClientRec *next;
 
-    Bool continuousUpdates;
-
     char *cutText;
     int cutTextLen;
+
+    /* flow control extensions */
+
+    Bool continuousUpdates;
+    RegionRec cuRegion;
+
+    Bool pendingSyncFence, syncFence;
+    CARD32 fenceFlags;
+    unsigned fenceDataLen;
+    char fenceData[64];
+
+    unsigned baseRTT;
+    unsigned congWindow;
+    int ackedOffset, sentOffset, sockOffset;
+    unsigned minRTT;
+    Bool seenCongestion;
+    unsigned pingCounter;
+    OsTimerPtr updateTimer;
+    OsTimerPtr congestionTimer;
+    Bool congestionTimerRunning;
+    struct timeval lastWrite;
 
 } rfbClientRec, *rfbClientPtr;
 
@@ -455,9 +476,10 @@ extern void rfbInitSockets();
 extern void rfbDisconnectUDPSock();
 extern void rfbCloseSock();
 extern void rfbCheckFds();
-extern Bool rfbSockBusy(int sock);
 extern void rfbWaitForClient(int sock);
 extern int rfbConnect(char *host, int port);
+extern void rfbCorkSock(int sock);
+extern void rfbUncorkSock(int sock);
 
 extern int ReadExact(int sock, char *buf, int len);
 extern int WriteExact(int sock, char *buf, int len);
@@ -587,6 +609,18 @@ extern Bool rfbSendSetColourMapEntries(rfbClientPtr cl, int firstColour,
                                        int nColours);
 extern void rfbSendBell();
 extern void rfbSendServerCutText(char *str, int len);
+
+
+/* flowcontrol.c */
+
+extern void HandleFence(rfbClientPtr cl, CARD32 flags, unsigned len,
+                        const char *data);
+extern void rfbInitFlowControl(rfbClientPtr cl);
+extern Bool rfbIsCongested(rfbClientPtr cl);
+extern void rfbSendEndOfCU(rfbClientPtr cl);
+extern void rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,
+                         const char *data);
+extern void rfbSendRTTPing(rfbClientPtr cl);
 
 
 /* vncextinit.c */
