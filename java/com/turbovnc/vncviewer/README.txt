@@ -3,8 +3,13 @@ Java TurboVNC Viewer
 ====================
 
 The Java TurboVNC Viewer is based largely on the Java TigerVNC Viewer, but it
-contains additional features and GUI modifications that make it behave as much
-like the TurboVNC native viewers as possible.
+contains additional features and GUI modifications that make it behave and
+perform as much like the TurboVNC native viewers as possible.  One of the
+most notable of these features is the ability to use the libjpeg-turbo library
+(through JNI) to accelerate JPEG decoding, giving the Java TurboVNC Viewer
+near-native levels of performance.
+
+The Java TurboVNC Viewer is:
 
         Copyright (C) 2000-2003 Constantin Kaplinsky
         Copyright (C) 2004 Red Hat, Inc.
@@ -42,8 +47,8 @@ There are three basic ways to use the Java TurboVNC Viewer:
      The Unix TurboVNC Server (Xvnc) is able to serve up any set of files that
      are present in a particular directory, which is specified in the -httpd
      argument to Xvnc.  In the default version of the vncserver script, this
-     argument is set to ../vnc/classes, relative to the directory containing
-     the vncserver script.  Thus, one can easily deploy a modified version of
+     argument is set to ../java, relative to the directory containing the
+     vncserver script.  Thus, one can easily deploy a modified version of
      the Java TurboVNC Viewer by simply copying a new JAR file into this
      directory.
 
@@ -91,13 +96,17 @@ TurboVNC Viewer is used:
      <APPLET CODE=com.turbovnc.vncviewer.VncViewer ARCHIVE=VncViewer.jar
        WIDTH=400 HEIGHT=300>
        <PARAM NAME="PORT" VALUE=5901>
-       <PARAM NAME="ScalingFactor" VALUE=50>
+       <PARAM NAME="Scale" VALUE=50>
      </APPLET>
 
   2. When run as a standalone application, the Java TurboVNC Viewer reads
      parameters from the command line.  Example:
 
-     java -jar VncViewer.jar Port=5901 ScalingFactor=50
+     java -jar VncViewer.jar Port=5901 Scale=50
+
+     or
+
+     java -jar VncViewer.jar -port 5901 -scale 50
 
 Both parameter names and their values are case-insensitive.  The only
 exception is the "Password" parameter, as VNC passwords are case-sensitive.
