@@ -76,6 +76,7 @@ public class TightDecoder extends Decoder {
       vlog.info("  "+e.getMessage());
       vlog.info("  Using unaccelerated JPEG decompressor.");
     }
+    tightPalette = new byte[256 * 3];
   }
 
   public boolean isTurboJPEG()
@@ -83,9 +84,40 @@ public class TightDecoder extends Decoder {
     return tjd != null;
   }
 
-  short getShort(byte[] src, int srcPtr) {
+  short getShort(byte[] src, int srcPtr)
+  {
     return (short)((src[srcPtr++] & 0xff) |
                    (src[srcPtr] & 0xff) << 8);
+  }
+
+  void checkPalette(int bpp, boolean cutZeros)
+  {
+    if (cutZeros || bpp > 16) {
+      if (palette != null && palette instanceof int[])
+        return;
+      palette = new int[256];
+    } else if (bpp == 8) {
+      if (palette != null && palette instanceof byte[])
+        return;
+      palette = new byte[256];
+    } else if (bpp == 16) {
+      if (palette != null && palette instanceof short[])
+        return;
+      palette = new short[256];
+    } else {
+      // We should never get here
+      throw new Exception("Unsupported pixel format");
+    }
+  }
+
+  void checkNetbuf(int size)
+  {
+    if (netbufSize < size || netbuf == null) {
+      if (netbuf != null)
+        netbuf = null;
+      netbuf = new byte[size];
+      netbufSize = size;
+    }
   }
 
   public void readRect(Rect r, CMsgHandler handler) 
@@ -170,7 +202,6 @@ public class TightDecoder extends Decoder {
 
     // "Basic" compression type.
     int palSize = 0;
-    Object palette = null;
     boolean useGradient = false;
 
     if ((comp_ctl & rfbTightExplicitFilter) != 0) {
@@ -179,21 +210,12 @@ public class TightDecoder extends Decoder {
       switch (filterId) {
       case rfbTightFilterPalette:
         palSize = is.readU8() + 1;
-        byte[] tightPalette;
+        checkPalette(bpp, cutZeros);
         if (cutZeros) {
-          tightPalette = new byte[256 * 3];
           is.readBytes(tightPalette, 0, palSize * 3);
-          palette = new int[256];
           serverpf.bufferFromRGB((int[])palette, 0, tightPalette, 0, palSize);
-        } else {
-          if (bpp == 8)
-            palette = new byte[256];
-          else if (bpp == 16)
-            palette = new short[256];
-          else
-            palette = new int[256];
+        } else
           is.readPixels(palette, palSize, serverpf.bpp/8, serverpf.bigEndian);
-        }
         break;
       case rfbTightFilterGradient:
         useGradient = true;
@@ -230,7 +252,7 @@ public class TightDecoder extends Decoder {
       dataSize = is.readCompactLength();
 
     // Allocate netbuf and read in data
-    byte[] netbuf = new byte[dataSize];
+    checkNetbuf(dataSize);
     input.readBytes(netbuf, 0, dataSize);
 
     int srcPtr = 0;
@@ -379,7 +401,7 @@ public class TightDecoder extends Decoder {
       vlog.info("Incorrect data received from the server.");
 
     // Allocate netbuf and read in data
-    byte[] netbuf = new byte[compressedLen];
+    checkNetbuf(compressedLen);
     is.readBytes(netbuf, 0, compressedLen);
 
     if (tjd != null) {
@@ -543,6 +565,10 @@ public class TightDecoder extends Decoder {
   private ZlibInStream[] zis;
   private PixelFormat serverpf;
   private TJDecompressor tjd;
+  private Object palette;
+  private byte[] tightPalette;
+  private byte[] netbuf;
+  private int netbufSize;
 
   static LogWriter vlog = new LogWriter("TightDecoder");
 }
