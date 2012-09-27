@@ -82,6 +82,11 @@ several days into the future, the expiration value for the timer would wrap
 around and become lower than the current time, thus causing the TurboVNC Server
 to exit.
 -------------------------------------------------------------------------------
+[15]
+Worked around a bug in the version of TigerVNC Server that ships with
+Red Hat/CentOS 6, whereby dragging links from Firefox (running on the remote
+desktop) to the remote desktop would cause the X11 TurboVNC Viewer to crash.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
