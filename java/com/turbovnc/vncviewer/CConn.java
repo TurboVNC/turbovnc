@@ -464,7 +464,7 @@ public class CConn extends CConnection
   }
 
   public void copyRect(Rect r, int sx, int sy) {
-    tBlitStart = getTime();
+    double tBlitStart = getTime();
     desktop.copyRect(r.tl.x, r.tl.y, r.width(), r.height(), sx, sy);
     tBlit += getTime() - tBlitStart;
   }
