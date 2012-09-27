@@ -99,6 +99,7 @@ static Bool HandleXCursor(int xhot, int yhot, int width, int height)
 
   if (width * height == 0 || wret < width || hret < height) {
     width = height = bytesPerRow = bytesData = 1;
+    xhot = yhot = 0;
     buf = (char *)malloc(2);
     if (buf == NULL)
       return False;
