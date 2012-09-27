@@ -32,7 +32,7 @@ abstract public class PlatformPixelBuffer extends PixelBuffer
     cc = cc_;
     desktop = desktop_;
     PixelFormat nativePF = getNativePF();
-    if (nativePF.depth > cc.serverPF.depth) {
+    if (cc != null && nativePF.depth > cc.serverPF.depth) {
       setPF(cc.serverPF);
     } else {
       setPF(nativePF);

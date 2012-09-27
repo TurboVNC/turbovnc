@@ -121,6 +121,9 @@ add_custom_command(OUTPUT ${JAVA_CLASSES}
 	COMMAND ${JAVA_COMPILE}
 	ARGS ${JAVACFLAGS} -cp ${TJPEG_JAR} -sourcepath ${SRCDIR} -d ${BINDIR}
 		${CLASSPATH}/VncViewer.java ${JAVA_SOURCES}
+	COMMAND ${JAVA_COMPILE}
+	ARGS ${JAVACFLAGS} -cp ${TJPEG_JAR} -sourcepath ${SRCDIR} -d ${BINDIR}
+		${CLASSPATH}/ImageDrawTest.java ${JAVA_SOURCES}
 	WORKING_DIRECTORY ${SRCDIR})
 
 configure_file(${CLASSPATH}/timestamp.in ${CLASSPATH}/timestamp)
