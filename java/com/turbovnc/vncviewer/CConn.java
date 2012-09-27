@@ -421,16 +421,25 @@ public class CConn extends CConnection
       clipboardDialog.serverCutText(str, len);
   }
 
+  public void startDecodeTimer() {
+    if (benchmark) {
+      tDecodeStart = getTime();
+      tReadOld = viewer.benchFile.getReadTime();
+    }
+  }
+
+  public void stopDecodeTimer() {
+    if (benchmark)
+      tDecode += getTime() - tDecodeStart -
+                 (viewer.benchFile.getReadTime() - tReadOld);
+  }
+
   // We start timing on beginRect and stop timing on endRect, to
   // avoid skewing the bandwidth estimation as a result of the server
   // being slow or the network having high latency
   public void beginRect(Rect r, int encoding) {
     if (!benchmark)
       sock.inStream().startTiming();
-    else {
-      tDecodeStart = getTime();
-      tReadOld = viewer.benchFile.getReadTime();
-    }
     if (encoding != Encodings.encodingCopyRect) {
       boolean updateTitle = false;
       if (encoding != lastServerEncoding)
@@ -444,9 +453,6 @@ public class CConn extends CConnection
   public void endRect(Rect r, int encoding) {
     if (!benchmark)
       sock.inStream().stopTiming();
-    else
-      tDecode += getTime() - tDecodeStart -
-                 (viewer.benchFile.getReadTime() - tReadOld);
   }
 
   public void fillRect(Rect r, int p) {
@@ -458,7 +464,9 @@ public class CConn extends CConnection
   }
 
   public void copyRect(Rect r, int sx, int sy) {
+    tBlitStart = getTime();
     desktop.copyRect(r.tl.x, r.tl.y, r.width(), r.height(), sx, sy);
+    tBlit += getTime() - tBlitStart;
   }
 
   public Object getRawPixelsRW(int[] stride) {

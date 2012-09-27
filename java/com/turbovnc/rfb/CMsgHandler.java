@@ -85,6 +85,8 @@ abstract public class CMsgHandler {
   public void framebufferUpdateEnd() {}
   public void beginRect(Rect r, int encoding) {}
   public void endRect(Rect r, int encoding) {}
+  public void startDecodeTimer() {}
+  public void stopDecodeTimer() {}
 
   public void setColourMapEntries(int firstColour, int nColours, 
     int[] rgbs) { }

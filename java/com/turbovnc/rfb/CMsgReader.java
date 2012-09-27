@@ -109,7 +109,9 @@ abstract public class CMsgReader {
           throw new Exception("Unknown rect encoding");
         }
       }
+      handler.startDecodeTimer();
       decoders[encoding].readRect(r, handler);
+      handler.stopDecodeTimer();
     }
 
     handler.endRect(r, encoding);

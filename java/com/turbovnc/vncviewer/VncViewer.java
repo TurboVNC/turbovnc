@@ -355,6 +355,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
           cc.tDecode = cc.tBlit = 0.0;
           benchFile.reset();
           benchFile.resetReadTime();
+          System.gc();
         } else {
           while (!cc.shuttingDown)
             cc.processMsg(false);
