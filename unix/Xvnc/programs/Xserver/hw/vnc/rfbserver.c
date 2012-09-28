@@ -1329,6 +1329,8 @@ rfbSendFramebufferUpdate(cl)
     cl->copyDX = 0;
     cl->copyDY = 0;
 
+    rfbSendRTTPing(cl);
+
     /*
      * Now send the update.
      */
@@ -1416,8 +1418,6 @@ rfbSendFramebufferUpdate(cl)
     }
 
     REGION_UNINIT(pScreen, &updateCopyRegion);
-
-    rfbSendRTTPing(cl);
 
     for (i = 0; i < REGION_NUM_RECTS(&updateRegion); i++) {
         int x = REGION_RECTS(&updateRegion)[i].x1;
