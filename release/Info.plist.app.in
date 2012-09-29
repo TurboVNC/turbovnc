@@ -46,7 +46,7 @@
 		<key>ClassPath</key>
 		<string>$JAVAROOT/VncViewer.jar</string>
 		<key>VMOptions</key>
-		<string>-Djava.library.path=$APP_PACKAGE/Contents/Resources/TurboJPEG</string>
+		<string>-server -d64 -Djava.library.path=$APP_PACKAGE/Contents/Resources/TurboJPEG</string>
 	</dict>
 </dict>
 </plist>
