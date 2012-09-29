@@ -188,7 +188,7 @@ ddxProcessArgument (argc, argv, i)
         firstTime = FALSE;
     }
 
-    if (strcmp (argv[i], "-geometry") == 0)     /* -geometry WxH */
+    if (strcasecmp (argv[i], "-geometry") == 0)     /* -geometry WxH */
     {
         if (i + 1 >= argc) UseMsg();
         if (sscanf(argv[i + 1], "%dx%d",
@@ -199,14 +199,14 @@ ddxProcessArgument (argc, argv, i)
         return 2;
     }
 
-    if (strcmp (argv[i], "-depth") == 0)        /* -depth D */
+    if (strcasecmp (argv[i], "-depth") == 0)        /* -depth D */
     {
         if (i + 1 >= argc) UseMsg();
         rfbScreen.depth = atoi(argv[i + 1]);
         return 2;
     }
 
-    if (strcmp (argv[i], "-pixelformat") == 0) {
+    if (strcasecmp (argv[i], "-pixelformat") == 0) {
         if (i + 1 >= argc) UseMsg();
         if (sscanf(argv[i + 1], "%3s%1d%1d%1d", primaryOrder,
                    &redBits, &greenBits, &blueBits) < 4) {
@@ -226,117 +226,117 @@ ddxProcessArgument (argc, argv, i)
         return 2;
     }
 
-    if (strcmp (argv[i], "-blackpixel") == 0) { /* -blackpixel n */
+    if (strcasecmp (argv[i], "-blackpixel") == 0) { /* -blackpixel n */
         if (i + 1 >= argc) UseMsg();
         rfbScreen.blackPixel = atoi(argv[i + 1]);
         return 2;
     }
 
-    if (strcmp (argv[i], "-whitepixel") == 0) { /* -whitepixel n */
+    if (strcasecmp (argv[i], "-whitepixel") == 0) { /* -whitepixel n */
         if (i + 1 >= argc) UseMsg();
         rfbScreen.whitePixel = atoi(argv[i + 1]);
         return 2;
     }
 
-    if (strcmp(argv[i], "-udpinputport") == 0) { /* -udpinputport port */
+    if (strcasecmp(argv[i], "-udpinputport") == 0) { /* -udpinputport port */
         if (i + 1 >= argc) UseMsg();
         udpPort = atoi(argv[i + 1]);
         return 2;
     }
 
-    if (strcmp(argv[i], "-rfbport") == 0) {     /* -rfbport port */
+    if (strcasecmp(argv[i], "-rfbport") == 0) {     /* -rfbport port */
         if (i + 1 >= argc) UseMsg();
         rfbPort = atoi(argv[i + 1]);
         return 2;
     }
 
-    if (strcmp(argv[i], "-rfbwait") == 0) {     /* -rfbwait ms */
+    if (strcasecmp(argv[i], "-rfbwait") == 0) {     /* -rfbwait ms */
         if (i + 1 >= argc) UseMsg();
         rfbMaxClientWait = atoi(argv[i + 1]);
         return 2;
     }
 
-    if (strcmp(argv[i], "-nocursor") == 0) {
+    if (strcasecmp(argv[i], "-nocursor") == 0) {
         noCursor = TRUE;
         return 1;
     }
 
-    if (strcmp(argv[i], "-rfbauth") == 0) {     /* -rfbauth passwd-file */
+    if (strcasecmp(argv[i], "-rfbauth") == 0) {     /* -rfbauth passwd-file */
         if (i + 1 >= argc) UseMsg();
         rfbOptRfbauth = TRUE;
         rfbAuthPasswdFile = argv[i + 1];
         return 2;
     }
 
-    if (strcmp(argv[i], "-otpauth") == 0) {
+    if (strcasecmp(argv[i], "-otpauth") == 0) {
         rfbOptOtpauth = TRUE;
         return 1;
     }
 
-    if (strcmp(argv[i], "-pamauth") == 0) {
+    if (strcasecmp(argv[i], "-pamauth") == 0) {
         rfbOptPamauth = TRUE;
         return 1;
     }
 
-    if (strcmp(argv[i], "-noreverse") == 0) {
+    if (strcasecmp(argv[i], "-noreverse") == 0) {
         rfbAuthDisableRevCon = TRUE;
         return 1;
     }
 
-    if (strcmp(argv[i], "-noclipboardsend") == 0) {
+    if (strcasecmp(argv[i], "-noclipboardsend") == 0) {
         rfbAuthDisableCBSend = TRUE;
         return 1;
     }
 
-    if (strcmp(argv[i], "-noclipboardrecv") == 0) {
+    if (strcasecmp(argv[i], "-noclipboardrecv") == 0) {
         rfbAuthDisableCBRecv = TRUE;
         return 1;
     }
 
-    if (strcmp(argv[i], "-nocutbuffersync") == 0) {
+    if (strcasecmp(argv[i], "-nocutbuffersync") == 0) {
         rfbSyncCutBuffer = FALSE;
         return 1;
     }
 
-    if (strcmp(argv[i], "-idletimeout") == 0) { /* -idletimeout sec */
+    if (strcasecmp(argv[i], "-idletimeout") == 0) { /* -idletimeout sec */
         if (i + 1 >= argc) UseMsg();
         rfbIdleTimeout = atoi(argv[i + 1]);
         return 2;
     }
 
-    if (strcmp(argv[i], "-httpd") == 0) {
+    if (strcasecmp(argv[i], "-httpd") == 0) {
         if (i + 1 >= argc) UseMsg();
         httpDir = argv[i + 1];
         return 2;
     }
 
-    if (strcmp(argv[i], "-httpport") == 0) {
+    if (strcasecmp(argv[i], "-httpport") == 0) {
         if (i + 1 >= argc) UseMsg();
         httpPort = atoi(argv[i + 1]);
         return 2;
     }
 
-    if (strcmp(argv[i], "-deferupdate") == 0) { /* -deferupdate ms */
+    if (strcasecmp(argv[i], "-deferupdate") == 0) { /* -deferupdate ms */
         if (i + 1 >= argc) UseMsg();
         rfbDeferUpdateTime = atoi(argv[i + 1]);
         return 2;
     }
 
-    if (strcmp(argv[i], "-alr") == 0) {
+    if (strcasecmp(argv[i], "-alr") == 0) {
         if (i + 1 >= argc) UseMsg();
         rfbAutoLosslessRefresh = atof(argv[i + 1]);
         if (rfbAutoLosslessRefresh <= 0.0) UseMsg();
         return 2;
     }
 
-    if (strcmp(argv[i], "-alrqual") == 0) {
+    if (strcasecmp(argv[i], "-alrqual") == 0) {
         if (i + 1 >= argc) UseMsg();
         rfbALRQualityLevel = atoi(argv[i + 1]);
         if (rfbALRQualityLevel < 1 || rfbALRQualityLevel > 100) UseMsg();
         return 2;
     }
 
-    if (strcmp(argv[i], "-alrsamp") == 0) {
+    if (strcasecmp(argv[i], "-alrsamp") == 0) {
         if (i + 1 >= argc) UseMsg();
         switch(toupper(argv[i + 1][0])) {
             case 'G': case '0':  rfbALRSubsampLevel = TVNC_GRAY;  break;
@@ -348,50 +348,50 @@ ddxProcessArgument (argc, argv, i)
         return 2;
     }
 
-    if (strcmp(argv[i], "-economictranslate") == 0) {
+    if (strcasecmp(argv[i], "-economictranslate") == 0) {
         rfbEconomicTranslate = TRUE;
         return 1;
     }
 
-    if (strcmp(argv[i], "-desktop") == 0) {     /* -desktop desktop-name */
+    if (strcasecmp(argv[i], "-desktop") == 0) {     /* -desktop desktop-name */
         if (i + 1 >= argc) UseMsg();
         desktopName = argv[i + 1];
         return 2;
     }
 
-    if (strcmp(argv[i], "-alwaysshared") == 0) {
+    if (strcasecmp(argv[i], "-alwaysshared") == 0) {
         rfbAlwaysShared = TRUE;
         return 1;
     }
 
-    if (strcmp(argv[i], "-nevershared") == 0) {
+    if (strcasecmp(argv[i], "-nevershared") == 0) {
         rfbNeverShared = TRUE;
         return 1;
     }
 
-    if (strcmp(argv[i], "-dontdisconnect") == 0) {
+    if (strcasecmp(argv[i], "-dontdisconnect") == 0) {
         rfbDontDisconnect = TRUE;
         return 1;
     }
 
     /* Run server in view-only mode - Ehud Karni SW */
-    if (strcmp(argv[i], "-viewonly") == 0) {
+    if (strcasecmp(argv[i], "-viewonly") == 0) {
         rfbViewOnly = TRUE;
         return 1;
     }
 
-    if (strcmp(argv[i], "-localhost") == 0) {
+    if (strcasecmp(argv[i], "-localhost") == 0) {
         interface.s_addr = htonl (INADDR_LOOPBACK);
         interface6 = in6addr_loopback;
         return 1;
     }
 
-    if (strcmp(argv[i], "-ipv6") == 0) {
+    if (strcasecmp(argv[i], "-ipv6") == 0) {
         if (family == -1) family = AF_INET6;
         return 1;
     }
 
-    if (strcmp(argv[i], "-interface") == 0) {   /* -interface ipaddr */
+    if (strcasecmp(argv[i], "-interface") == 0) {   /* -interface ipaddr */
         struct addrinfo hints, *addr;
         if (i + 1 >= argc) {
             UseMsg();
@@ -418,7 +418,7 @@ ddxProcessArgument (argc, argv, i)
         return 2;
     }
 
-    if (strcmp(argv[i], "-inetd") == 0) {       /* -inetd */ 
+    if (strcasecmp(argv[i], "-inetd") == 0) {       /* -inetd */ 
         int n;
         for (n = 1; n < 100; n++) {
             if (CheckDisplayNumber(n))
@@ -444,12 +444,12 @@ ddxProcessArgument (argc, argv, i)
         return 1;
     }
 
-    if (strcmp(argv[i], "-compatiblekbd") == 0) {
+    if (strcasecmp(argv[i], "-compatiblekbd") == 0) {
         compatibleKbd = TRUE;
         return 1;
     }
 
-    if (strcmp(argv[i], "-version") == 0) {
+    if (strcasecmp(argv[i], "-version") == 0) {
         PrintVersion();
         exit(0);
     }
