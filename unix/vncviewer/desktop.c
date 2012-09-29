@@ -383,14 +383,14 @@ LosslessRefresh(Widget w, XEvent *ev, String *params, Cardinal *num_params)
         appData.enableJPEG = False;
         appData.encodingsString = "tight copyrect";
         appData.compressLevel = 1;
-        SetFormatAndEncodings();
+        encodingChange = True;
         SendFramebufferUpdateRequest(0, 0, si.framebufferWidth,
                                      si.framebufferHeight, False);
         appData.qualityLevel = qual;
         appData.enableJPEG = enableJPEG;
         appData.encodingsString = encodings;
         appData.compressLevel = compressLevel;
-        SetFormatAndEncodings();
+        encodingChange = True;
 }
 
 

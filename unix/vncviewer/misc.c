@@ -44,10 +44,8 @@ static XIOErrorHandler defaultXIOErrorHandler;
 static XtErrorHandler defaultXtErrorHandler;
 
 extern void ShutdownThreads(void);
-extern double gettime(void);
 extern z_stream zlibStream[4];
 extern Bool zlibStreamActive[4];
-extern double tRecv, tDecode, tBlit;
 
 static const char *subsampLevel2str[TVNC_SAMPOPT] = {
   "1X", "4X", "2X", "Gray"

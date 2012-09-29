@@ -218,7 +218,7 @@ char *fallback_resources[] = {
  * Popup buttons
  */
 
-"*popupButtonCount: 17",
+"*popupButtonCount: 16",
 
 "*popup*button1.label: Dismiss menu",
 "*popup*button1.translations: #override\\n\
@@ -275,30 +275,24 @@ char *fallback_resources[] = {
 "*popup*button11.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: SelectionFromVNC(always) HidePopup()",
 
-"*popup*button12.label: Continuous updates",
-"*popup*button12.type: toggle",
+"*popup*button12.label: Encoding method: Tight + Perceptually Lossless JPEG (LAN)",
 "*popup*button12.translations: #override\\n\
-  <Visible>: SetCUState()\\n\
-  <Btn1Down>,<Btn1Up>: toggle() ToggleCU()",
-
-"*popup*button13.label: Encoding method: Tight + Perceptually Lossless JPEG (LAN)",
-"*popup*button13.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: QualHigh()",
 
-"*popup*button14.label: Encoding method: Tight + Medium Quality JPEG",
-"*popup*button14.translations: #override\\n\
+"*popup*button13.label: Encoding method: Tight + Medium Quality JPEG",
+"*popup*button13.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: QualMed()",
 
-"*popup*button15.label: Encoding method: Tight + Low Quality JPEG (WAN)",
-"*popup*button15.translations: #override\\n\
+"*popup*button14.label: Encoding method: Tight + Low Quality JPEG (WAN)",
+"*popup*button14.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: QualLow()",
 
-"*popup*button16.label: Encoding method: Lossless Tight (Gigabit)",
-"*popup*button16.translations: #override\\n\
+"*popup*button15.label: Encoding method: Lossless Tight (Gigabit)",
+"*popup*button15.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: QualLossless()",
 
-"*popup*button17.label: Encoding method: Lossless Tight + Zlib (WAN)",
-"*popup*button17.translations: #override\\n\
+"*popup*button16.label: Encoding method: Lossless Tight + Zlib (WAN)",
+"*popup*button16.translations: #override\\n\
   <Btn1Down>,<Btn1Up>: QualLosslessWAN()",
 
 NULL
@@ -381,7 +375,7 @@ static XtResource appDataResourceList[] = {
    XtOffsetOf(AppData, compressLevel), XtRImmediate, (XtPointer) -1},
 
   {"continuousUpdates", "ContinuousUpdates", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, continuousUpdates), XtRImmediate, (XtPointer) False},
+   XtOffsetOf(AppData, continuousUpdates), XtRImmediate, (XtPointer) True},
 
   {"cursorShape", "CursorShape", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, cursorShape), XtRImmediate, (XtPointer) True},
@@ -513,8 +507,6 @@ static XtActionsRec actions[] = {
     {"Pause", Pause},
     {"RunCommand", RunCommand},
     {"Quit", Quit},
-    {"SetCUState", SetCUState},
-    {"ToggleCU", ToggleCU},
     {"SetViewOnlyState", SetViewOnlyState},
     {"ToggleViewOnly", ToggleViewOnly}
 };
@@ -576,7 +568,6 @@ usage(void)
           "        -highqual (preset for -jpeg -samp 1x -quality 95)\n"
           "        -lossless (preset for -nojpeg -compresslevel 0)\n"
           "        -losslesswan (preset for -nojpeg -compresslevel 1)\n"
-          "        -cu / -nocu (default)\n"
           "        -cursorshape (default) / -nocursorshape\n"
           "        -user <USER NAME> (Unix login authentication)\n"
           "        -nounixlogin\n"

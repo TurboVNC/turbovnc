@@ -2,6 +2,7 @@
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
                        All Rights Reserved.
  *  Copyright (C) 2009-2012 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2011 Pierre Ossman for Cendio AB.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  *  Copyright (C) 2000-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -74,8 +75,6 @@ static Bool HandleTight32(int rx, int ry, int rw, int rh);
 static void ReadConnFailedReason(void);
 static long ReadCompactLen (void);
 
-static void SendContinuousUpdatesMessage(Bool enable);
-
 extern void UpdateQual(void);
 extern Bool HandleCursorPos(int, int);
 
@@ -85,6 +84,7 @@ rfbPixelFormat myFormat;
 rfbServerInitMsg si;
 char *serverCutText = NULL;
 Bool newServerCutText = False;
+Bool encodingChange = False;
 
 
 /*
@@ -323,10 +323,6 @@ InitCapabilities(void)
   CapsAdd(authCaps, rfbAuthUnixLogin, rfbTightVncVendor, sig_rfbAuthUnixLogin,
           "Unix login authentication");
 
-  /* Supported non-standard client-to-server messages */
-  CapsAdd(clientMsgCaps, rfbEnableContinuousUpdates, rfbTightVncVendor,
-          sig_rfbEnableContinuousUpdates, "Enable/disable continuous updates");
-
   /* Supported encoding types */
   CapsAdd(encodingCaps, rfbEncodingCopyRect, rfbStandardVendor,
           sig_rfbEncodingCopyRect, "Standard CopyRect encoding");
@@ -509,8 +505,6 @@ InitialiseRFBConnection(void)
 
   if ((env = getenv("TVNC_PROFILE")) != NULL && !strcmp(env, "1"))
     rfbProfile = TRUE;
-
-  if (appData.continuousUpdates) SendContinuousUpdatesMessage(True);
 
   return True;
 }
@@ -1007,7 +1001,7 @@ ReadCapabilityList(CapsContainer *caps, int count)
  * SetFormatAndEncodings.
  */
 
-Bool
+static Bool
 SetFormatAndEncodings()
 {
   rfbSetPixelFormatMsg spf;
@@ -1153,6 +1147,9 @@ SetFormatAndEncodings()
     encs[se->nEncodings++] = Swap32IfLE(rfbEncodingLastRect);
   }
 
+  encs[se->nEncodings++] = Swap32IfLE(rfbEncodingContinuousUpdates);
+  encs[se->nEncodings++] = Swap32IfLE(rfbEncodingFence);
+
   len = sz_rfbSetEncodingsMsg + se->nEncodings * 4;
 
   se->nEncodings = Swap16IfLE(se->nEncodings);
@@ -1183,6 +1180,13 @@ Bool
 SendFramebufferUpdateRequest(int x, int y, int w, int h, Bool incremental)
 {
   rfbFramebufferUpdateRequestMsg fur;
+
+  if (encodingChange) {
+    SetFormatAndEncodings();
+    encodingChange = False;
+  }
+  if (incremental && continuousUpdates)
+    return True;
 
   fur.type = rfbFramebufferUpdateRequest;
   fur.incremental = incremental ? 1 : 0;
@@ -1231,47 +1235,6 @@ SendKeyEvent(CARD32 key, Bool down)
   ke.down = down ? 1 : 0;
   ke.key = Swap32IfLE(key);
   return WriteExact(rfbsock, (char *)&ke, sz_rfbKeyEventMsg);
-}
-
-
-/*
- * SendContinuousUpdatesMessage.
- */
-
-static void
-SendContinuousUpdatesMessage(Bool enable)
-{
-  rfbEnableContinuousUpdatesMsg fencu;
-
-  if (!CapsIsEnabled(clientMsgCaps, rfbEnableContinuousUpdates)) {
-    fprintf(stderr, "WARNING: Continuous updates not supported by the server.\n");
-    return;
-  }
-
-  fencu.type = rfbEnableContinuousUpdates;
-  fencu.enable = enable ? 1 : 0;
-  fencu.x = 0;
-  fencu.y = 0;
-  fencu.w = Swap16IfLE(si.framebufferWidth);
-  fencu.h = Swap16IfLE(si.framebufferHeight);
-
-  fprintf(stderr, "%s continuous updates\n", enable? "Enabling":"Disabling");
-
-  WriteExact(rfbsock, (char *)&fencu, sz_rfbEnableContinuousUpdatesMsg);
-
-  return;
-}
-
-
-/*
- * ToggleCU is an action which toggles in and out of continuous updates mode.
- */
-
-void
-ToggleCU(Widget w, XEvent *ev, String *params, Cardinal *num_params)
-{
-  appData.continuousUpdates = !appData.continuousUpdates;
-  SendContinuousUpdatesMessage(appData.continuousUpdates);
 }
 
 
@@ -1425,6 +1388,7 @@ HandleRFBServerMessage()
     XEvent ev;
     double tDecodeStart = 0., tBlitStart = 0., tUpdateStart = 0.,
       tRecvOld = 0.;
+    static Bool firstUpdate = True;
 
     if (rfbProfile) {
       tUpdateStart = gettime();
@@ -1695,6 +1659,15 @@ HandleRFBServerMessage()
     }
 #endif
 
+    if (firstUpdate) {
+      /* We need fences in order to make extra update requests and continuous
+         updates "safe".  See HandleFence() for the next step. */
+      if (supportsFence && appData.continuousUpdates)
+        SendFence(rfbFenceFlagRequest | rfbFenceFlagSyncNext, 0, NULL);
+
+      firstUpdate = False;
+    }
+
     if (rfbProfile && !benchFile) {
       tUpdate += gettime() - tUpdateStart;
       iter++;
@@ -1757,6 +1730,35 @@ HandleRFBServerMessage()
 
     break;
   }
+
+  case rfbFence:
+  {
+    CARD32 flags;
+    char data[64];
+
+    if (!ReadFromRFBServer(((char *)&msg.f) + 1, sz_rfbFenceMsg - 1))
+      return False;
+
+    flags = Swap32IfLE(msg.f.flags);
+
+    if (msg.f.length > 0 && !ReadFromRFBServer(data, msg.f.length))
+      return False;
+
+    supportsFence = True;
+
+    if (msg.f.length > sizeof(data))
+      fprintf(stderr, "Ignoring fence.  Payload of %d bytes is too large.\n",
+              msg.f.length);
+    else
+      if (!HandleFence(flags, msg.f.length, data))
+        return False;
+
+    break;
+  }
+
+  case rfbEndOfContinuousUpdates:
+    supportsCU = True;
+    break;
 
   default:
     fprintf(stderr, "Unknown message type %d from VNC server\n", msg.type);

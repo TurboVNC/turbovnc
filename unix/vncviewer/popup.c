@@ -43,7 +43,7 @@ UpdateQual(void)
 {
   char *titleFormat, title[1024], *ptr;
   char text[10];
-  SetFormatAndEncodings();
+  encodingChange = True;
   XtVaGetValues(toplevel, XtNtitle, &titleFormat, NULL);
   strncpy(title, titleFormat, 1023);
   if ((ptr = strrchr(title, '[')) != NULL) {
@@ -187,16 +187,6 @@ button1XProc(Widget w, XtPointer client, XtPointer p)
 {
   if ((long)p == 1) appData.subsampLevel = TVNC_1X;
   UpdateQual();
-}
-
-
-void
-SetCUState(Widget w, XEvent *ev, String *params, Cardinal *num_params)
-{
-  if (appData.continuousUpdates)
-    XtVaSetValues(w, XtNstate, True, NULL);
-  else
-    XtVaSetValues(w, XtNstate, False, NULL);
 }
 
 

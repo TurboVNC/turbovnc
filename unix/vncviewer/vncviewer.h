@@ -214,6 +214,18 @@ extern void UserPwdDialogDone(Widget w, XEvent *event, String *params,
                              Cardinal *num_params);
 extern void DoUserPwdDialog(char** user, char** password);
 
+/* flowcontrol.c */
+
+extern Bool supportsCU;
+extern Bool supportsFence;
+extern Bool supportsSyncFence;
+extern Bool continuousUpdates;
+
+extern Bool HandleFence(CARD32 flags, unsigned len, const char *data);
+extern Bool SendEnableContinuousUpdates(Bool enable, int x, int y, int w,
+                                        int h);
+extern Bool SendFence(CARD32 flags, unsigned len, const char data[]);
+
 /* fullscreen.c */
 
 extern void ToggleFullScreen(Widget w, XEvent *event, String *params,
@@ -273,10 +285,10 @@ extern rfbPixelFormat myFormat;
 extern rfbServerInitMsg si;
 extern char *serverCutText;
 extern Bool newServerCutText;
+extern Bool encodingChange;
 
 extern Bool ConnectToRFBServer(const char *hostname, int port);
 extern Bool InitialiseRFBConnection();
-extern Bool SetFormatAndEncodings();
 extern Bool SendIncrementalFramebufferUpdateRequest();
 extern Bool SendFramebufferUpdateRequest(int x, int y, int w, int h,
                                          Bool incremental);
@@ -292,6 +304,10 @@ extern void ToggleCU(Widget w, XEvent *ev, String *params,
 extern void ToggleViewOnly(Widget w, XEvent *ev, String *params,
                      Cardinal *num_params);
 extern Bool ReadServerInitMessage(void);
+
+extern BOOL rfbProfile;
+extern double tRecv, tDecode, tBlit;
+extern double gettime(void);
 
 typedef struct _UpdateList {
    rfbFramebufferUpdateRectHeader region;
@@ -320,6 +336,7 @@ extern void ShmCleanup();
 extern Bool errorMessageOnReadFailure;
 
 extern Bool ReadFromRFBServer(char *out, unsigned int n);
+
 extern Bool WriteExact(int sock, char *buf, int n);
 extern int FindFreeTcpPort(void);
 extern int ListenAtTcpPort(int port);

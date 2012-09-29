@@ -11,6 +11,7 @@ colour.c
 cursor.c
 desktop.c
 dialogs.c
+flowcontrol.c
 fullscreen.c
 listen.c
 misc.c

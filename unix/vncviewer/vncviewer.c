@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <sys/socket.h>
+#include <X11/Intrinsic.h>
 #include "vncviewer.h"
 
 char *programName;
@@ -40,6 +41,7 @@ main(int argc, char **argv)
 {
   int i;
   programName = argv[0];
+  double tStart;
 
   /* The -listen option is used to make us a daemon process which listens for
      incoming connections from servers, rather than actively connecting to a
@@ -155,16 +157,29 @@ main(int argc, char **argv)
 
   /* Tell the VNC server which pixel format and encodings we want to use */
 
-  SetFormatAndEncodings();
+  encodingChange = True;
 
   if (appData.grabKeyboard == TVNC_ALWAYS) GrabKeyboard();
 
   /* Now enter the main loop, processing VNC messages.  X events will
      automatically be processed whenever the VNC connection is idle. */
 
+  tStart = gettime();
   while (1) {
+    double tNew;
+    XtInputMask mask;
     if (!HandleRFBServerMessage())
       break;
+    if ((tNew = gettime()) - tStart >= 0.1) {
+      /* Normally, Xt events are only processed when the socket is idle, which
+         will be practically never if CU is enabled.  Thus, we have to check
+         for new events periodically in that case. */
+      if (continuousUpdates) {
+        while ((mask = XtAppPending(appContext)) != 0)
+          XtAppProcessEvent(appContext, mask);
+      }
+      tStart = tNew;
+    }
   }
 
   Cleanup();

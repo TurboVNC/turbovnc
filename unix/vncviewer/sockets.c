@@ -44,14 +44,6 @@ static int buffered = 0;
 int family = AF_INET;
 
 /*
- * Profiling stuff
- */
-
-extern BOOL rfbProfile;
-extern double tRecv;
-extern double gettime(void);
-
-/*
  * ReadFromRFBServer is called whenever we want to read some data from the RFB
  * server.  It is non-trivial for two reasons:
  *

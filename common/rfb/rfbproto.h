@@ -1022,6 +1022,20 @@ typedef struct _rfbFileDownloadFailedMsg {
 #define sz_rfbFileDownloadFailedMsg 4
 
 /*-----------------------------------------------------------------------------
+ * Fence
+ */
+
+typedef struct _rfbFenceMsg {
+    CARD8 type;			/* always rfbFence */
+    CARD8 pad[3];
+    CARD32 flags;
+    CARD8 length;
+    /* Followed by char data[length] */
+} rfbFenceMsg;
+
+#define sz_rfbFenceMsg 9
+
+/*-----------------------------------------------------------------------------
  * Union of all server->client messages.
  */
 
@@ -1035,6 +1049,7 @@ typedef union _rfbServerToClientMsg {
     rfbFileDownloadDataMsg fdd;
     rfbFileUploadCancelMsg fuc;
     rfbFileDownloadFailedMsg fdf;
+    rfbFenceMsg f;
 } rfbServerToClientMsg;
 
 
@@ -1302,20 +1317,6 @@ typedef struct _rfbEnableContinuousUpdatesMsg {
 } rfbEnableContinuousUpdatesMsg;
 
 #define sz_rfbEnableContinuousUpdatesMsg 10
-
-/*-----------------------------------------------------------------------------
- * Fence
- */
-
-typedef struct _rfbFenceMsg {
-    CARD8 type;			/* always rfbFence */
-    CARD8 pad[3];
-    CARD32 flags;
-    CARD8 length;
-    /* Followed by char data[length] */
-} rfbFenceMsg;
-
-#define sz_rfbFenceMsg 9
 
 /*-----------------------------------------------------------------------------
  * Union of all client->server messages.
