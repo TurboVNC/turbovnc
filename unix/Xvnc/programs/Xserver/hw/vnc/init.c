@@ -322,6 +322,11 @@ ddxProcessArgument (argc, argv, i)
         return 2;
     }
 
+    if (strcasecmp(argv[i], "-noflowcontrol") == 0) {
+        rfbCongestionControl = FALSE;
+        return 1;
+    }
+
     if (strcasecmp(argv[i], "-alr") == 0) {
         if (i + 1 >= argc) UseMsg();
         rfbAutoLosslessRefresh = atof(argv[i + 1]);
@@ -1116,26 +1121,23 @@ ddxUseMsg()
     ErrorF("-idletimeout S         exit if S seconds elapse with no VNC viewer connections\n");
     ErrorF("-httpd dir             serve files via HTTP from here\n");
     ErrorF("-httpport port         port for HTTP\n");
-    ErrorF("-deferupdate time      time in ms to defer updates "
-                                                             "(default 40)\n");
+    ErrorF("-deferupdate time      time in ms to defer updates (default 40)\n");
+    ErrorF("-noflowcontrol         when continuous updates are enabled, send updates whether\n");
+    ErrorF("                       or not the client is ready to receive them\n");
     ErrorF("-alr S                 enable automatic lossless refresh and set timer to S\n");
     ErrorF("                       seconds (S is floating point)\n");
     ErrorF("-economictranslate     less memory-hungry translation\n");
     ErrorF("-desktop name          VNC desktop name (default x11)\n");
     ErrorF("-alwaysshared          always treat new clients as shared\n");
     ErrorF("-nevershared           never treat new clients as shared\n");
-    ErrorF("-dontdisconnect        don't disconnect existing clients when a "
-                                                             "new non-shared\n"
-           "                       connection comes in (refuse new connection "
-                                                                 "instead)\n");
+    ErrorF("-dontdisconnect        don't disconnect existing clients when a new non-shared\n"
+           "                       connection comes in (refuse new connection instead)\n");
     ErrorF("-viewonly              let clients only to view the desktop\n");
     ErrorF("-localhost             only allow connections from localhost\n");
-    ErrorF("-interface ipaddr      only bind to specified interface "
-                                                                "address\n");
+    ErrorF("-interface ipaddr      only bind to specified interface address\n");
     ErrorF("-ipv6                  enable IPv6 support\n");
     ErrorF("-inetd                 Xvnc is launched by inetd\n");
-    ErrorF("-compatiblekbd         set META key = ALT key as in the original "
-                                                                "VNC\n");
+    ErrorF("-compatiblekbd         set META key = ALT key as in the original VNC\n");
     ErrorF("-version               report Xvnc version on stderr\n");
     exit(1);
 }

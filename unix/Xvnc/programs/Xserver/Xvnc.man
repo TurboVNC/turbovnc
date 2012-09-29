@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "May 2012" "" "TurboVNC"
+.TH Xvnc 1 "Sep 2012" "" "TurboVNC"
 .SH NAME
 Xvnc \- an X server providing VNC connectivity
 .SH SYNOPSIS
@@ -26,7 +26,8 @@ Xvnc \- an X server providing VNC connectivity
 [\-rfbauth \fIpasswd-file\fR] [\-otpauth] [\-pamauth]
 [\-noreverse] [\-noclipboardsend] [\-noclipboardrecv]
 [\-idletimeout \fItime\fR] [\-httpd \fIdir\fR]
-[\-httpport \fIport\fR] [\-deferupdate \fItime\fR] [\-alr \fItime\fR]
+[\-httpport \fIport\fR] [\-deferupdate \fItime\fR] [\-noflowcontrol]
+[\-alr \fItime\fR]
 [\-alrqual \fIlevel\fR] [\-alrsamp \fI1X | 2X | 4X | gray\fR]
 [\-economictranslate] [\-desktop \fIname\fR] [\-alwaysshared]
 [\-nevershared] [\-dontdisconnect] [\-viewonly] [\-localhost]
@@ -143,6 +144,19 @@ Java-enabled web browsers.
 Time, in milliseconds, for which to defer screen updates (default: 40).
 Deferring updates helps to coalesce many small desktop changes into a few
 larger updates, thus saving network bandwidth.
+.TP
+\fB\-noflowcontrol\fR
+Normally, the TurboVNC Server will use the RFB flow control extensions
+(Continuous Updates and Fence) with any connected viewers that support them.
+These extensions allow the server to send framebuffer updates at the maximum
+rate that the network connection and the viewer can handle, instead of waiting
+for viewers to explicitly request updates.  Disabling flow control causes the
+TurboVNC Server to send framebuffer updates at the maximum rate that the
+network connection can handle, irrespective of the viewer.  For full-screen
+video and 3D applications, this may produce smoother animation on high-latency
+networks, although it will almost certainly also produce a noticeable lag
+between mouse movement and application response, since the TCP buffers will be
+100% full.
 .TP
 \fB\-alr\fR \fItime\fR
 Enable the automatic lossless refresh (ALR) feature for this Xvnc session and

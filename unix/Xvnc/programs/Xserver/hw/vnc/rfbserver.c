@@ -54,6 +54,7 @@ Bool rfbNeverShared = FALSE;
 Bool rfbDontDisconnect = FALSE;
 Bool rfbViewOnly = FALSE; /* run server in view only mode - Ehud Karni SW */
 Bool rfbSyncCutBuffer = TRUE;
+Bool rfbCongestionControl = TRUE;
 double rfbAutoLosslessRefresh = 0.0;
 int rfbALRQualityLevel = -1;
 int rfbALRSubsampLevel = TVNC_1X;
@@ -1273,7 +1274,7 @@ rfbSendFramebufferUpdate(cl)
     /* Check that we actually have some space on the link and retry in a
        bit if things are congested. */
 
-    if (rfbIsCongested(cl)) {
+    if (rfbCongestionControl && rfbIsCongested(cl)) {
         cl->updateTimer = TimerSet(cl->updateTimer, 0, 50, updateCallback, cl);
         return TRUE;
     }

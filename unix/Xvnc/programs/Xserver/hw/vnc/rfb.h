@@ -587,6 +587,7 @@ extern Bool rfbNeverShared;
 extern Bool rfbDontDisconnect;
 extern Bool rfbViewOnly; /* run server in view-only mode - Ehud Karni SW */
 extern Bool rfbSyncCutBuffer;
+extern Bool rfbCongestionControl;
 extern double rfbAutoLosslessRefresh;
 extern int rfbALRQualityLevel;
 extern int rfbALRSubsampLevel;
