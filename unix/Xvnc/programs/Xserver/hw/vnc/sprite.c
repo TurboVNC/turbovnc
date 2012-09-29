@@ -2257,10 +2257,8 @@ rfbDisplayCursor(pScreen, pCursor)
     for (cl = rfbClientHead; cl; cl = cl->next) {
         if (cl->enableCursorShapeUpdates) {
             cl->cursorWasChanged = TRUE;
-            if (!cl->deferredUpdateScheduled &&
-                REGION_NOTEMPTY(pScreen,&cl->requestedRegion)) {
+            if (!cl->deferredUpdateScheduled)
                 rfbSendFramebufferUpdate(cl);
-            }
         }
     }
 
