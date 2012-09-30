@@ -149,12 +149,10 @@ buttonZlibProc(Widget w, XtPointer client, XtPointer p)
 void
 buttonJPEGProc(Widget w, XtPointer client, XtPointer p)
 {
-  if ((long)p == 1) {
-    if (appData.useBGR233)
-      fprintf(stderr, "WARNING: Cannot enable JPEG because BGR233 is enabled.\n");
-    else appData.enableJPEG = True;
-  }
-  else appData.enableJPEG = False;
+  if ((long)p == 1)
+    appData.enableJPEG = True;
+  else
+    appData.enableJPEG = False;
   UpdateQual();
 }
 

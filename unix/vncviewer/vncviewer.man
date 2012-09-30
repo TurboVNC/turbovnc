@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TurboVNC distribution.
 .\"
-.TH vncviewer 1 "August 2012" "" "TurboVNC"
+.TH vncviewer 1 "September 2012" "" "TurboVNC"
 .SH NAME
 vncviewer \- an X11 viewer/client for TurboVNC
 .SH SYNOPSIS
@@ -171,9 +171,7 @@ remote bell events.
 Use/don't use the BGR233 format to encode pixel data.  BGR233 may reduce
 network bandwidth for certain types of workloads, but colors will be
 represented inaccurately.  The BGR233 format is an 8\-bit "true color" format,
-with 2 bits of blue, 3 bits of green, and 3 bits of red.  If BGR233 is enabled
-along with Tight encoding, then JPEG subencoding is automatically disabled and
-cannot be re-enabled without restarting the viewer.
+with 2 bits of blue, 3 bits of green, and 3 bits of red.
 .TP
 \fB\-owncmap\fR
 Try to use a PseudoColor visual and a private colormap for the VNC viewer.  This

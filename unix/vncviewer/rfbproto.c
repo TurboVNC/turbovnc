@@ -1276,9 +1276,7 @@ void
 QualHigh(Widget w, XEvent *e, String *s, Cardinal *c)
 {
   appData.encodingsString = "tight copyrect";
-  if (appData.useBGR233)
-    fprintf(stderr, "WARNING: Cannot enable JPEG because BGR233 is enabled.\n");
-  else appData.enableJPEG = True;
+  appData.enableJPEG = True;
   appData.subsampLevel = TVNC_1X;
   appData.qualityLevel = 95;
   UpdateQual();
@@ -1291,9 +1289,7 @@ void
 QualMed(Widget w, XEvent *e, String *s, Cardinal *c)
 {
   appData.encodingsString = "tight copyrect";
-  if (appData.useBGR233)
-    fprintf(stderr, "WARNING: Cannot enable JPEG because BGR233 is enabled.\n");
-  else appData.enableJPEG = True;
+  appData.enableJPEG = True;
   appData.subsampLevel = TVNC_2X;
   appData.qualityLevel = 80;
   UpdateQual();
@@ -1306,9 +1302,7 @@ void
 QualLow(Widget w, XEvent *e, String *s, Cardinal *c)
 {
   appData.encodingsString = "tight copyrect";
-  if (appData.useBGR233)
-    fprintf(stderr, "WARNING: Cannot enable JPEG because BGR233 is enabled.\n");
-  else appData.enableJPEG = True;
+  appData.enableJPEG = True;
   appData.subsampLevel = TVNC_4X;
   appData.qualityLevel = 30;
   UpdateQual();

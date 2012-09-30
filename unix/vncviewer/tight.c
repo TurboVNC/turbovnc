@@ -43,9 +43,7 @@
 #define FilterPaletteBPP CONCAT2E(FilterPalette, BPP)
 #define FilterGradientBPP CONCAT2E(FilterGradient, BPP)
 
-#if BPP != 8
 #define DecompressJpegRectBPP CONCAT2E(DecompressJpegRect, BPP)
-#endif
 #define DecompressZlibRectBPP CONCAT2E(DecompressZlibRect, BPP)
 
 #ifndef RGB_TO_PIXEL
@@ -85,9 +83,7 @@ static Bool FilterCopyBPP (threadparam *t, int srcx, int srcy, int rectWidth, in
 static Bool FilterPaletteBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRows);
 static Bool FilterGradientBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRows);
 
-#if BPP != 8
 static Bool DecompressJpegRectBPP(threadparam *t, int x, int y, int w, int h);
-#endif
 static Bool DecompressZlibRectBPP(threadparam *t, int x, int y, int w, int h);
 
 
@@ -156,12 +152,6 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
     return True;
   }
 
-#if BPP == 8
-  if (comp_ctl == rfbTightJpeg) {
-    fprintf(stderr, "Tight encoding: JPEG is not supported in 8 bpp mode.\n");
-    return False;
-  }
-#else
   if (comp_ctl == rfbTightJpeg) {
     t = &tparam[curthread];
     curthread = (curthread + 1) % nt;
@@ -199,7 +189,6 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
       return DecompressJpegRectBPP(t, rx, ry, rw, rh);
     }
   }
-#endif
 
   /* Quit on unsupported subencoding value. */
   if (comp_ctl > rfbTightMaxSubencoding) {
@@ -410,13 +399,10 @@ InitFilterCopyBPP (void)
 static Bool
 FilterCopyBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRows)
 {
-  CARDBPP *dst = (CARDBPP *)&image->data[srcy * image->bytes_per_line
-                                         + srcx * image->bits_per_pixel/8];
-  int dstw = image->bytes_per_line / (image->bits_per_pixel / 8);
-  int y;
-#if BPP == 32
-  int x;
-#endif
+  CARDBPP *dst = (CARDBPP *)&image->data[srcy * image->bytes_per_line +
+                                         srcx * image->bits_per_pixel / 8];
+  CARD8 *src = (CARD8 *)t->uncompressedData;
+  int stride = image->bytes_per_line * 8 / image->bits_per_pixel;
 
   if (appData.useBGR233) {
     t->buffer = (char *)realloc(t->buffer, rectWidth * numRows);
@@ -425,26 +411,31 @@ FilterCopyBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRows)
       return False;
     }
     dst = (CARDBPP *)t->buffer;
-    dstw = rectWidth;
+    stride = rectWidth;
   }
 
 #if BPP == 32
   if (cutZeros) {
-    for (y = 0; y < numRows; y++) {
-      for (x = 0; x < rectWidth; x++) {
-        dst[y * dstw + x] =
-          RGB24_TO_PIXEL32(t->uncompressedData[(y * rectWidth + x) * 3],
-                           t->uncompressedData[(y * rectWidth + x) * 3 + 1],
-                           t->uncompressedData[(y * rectWidth + x) * 3 + 2]);
+    int pad = stride - rectWidth;
+    while (numRows > 0) {
+      CARDBPP *endOfRow = dst + rectWidth;
+      while (dst < endOfRow) {
+        *dst++ = RGB24_TO_PIXEL32(src[0], src[1], src[2]);
+        src += 3;
       }
+      dst += pad;
+      numRows--;
     }
     return True;
   }
 #endif
 
-  for (y = 0; y < numRows; y++)
-    memcpy (&dst[y * dstw], &t->uncompressedData[y * rectWidth * (BPP / 8)],
-      rectWidth * (BPP / 8));
+  while (numRows > 0) {
+    memcpy(dst, src, rectWidth * sizeof(CARDBPP));
+    dst += stride;
+    src += rectWidth * sizeof(CARDBPP);
+    numRows--;
+  }
 
   return True;
 }
@@ -524,8 +515,8 @@ static Bool
 FilterGradientBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRows)
 {
   int x, y, c;
-  CARDBPP *dst = (CARDBPP *)&image->data[srcy * image->bytes_per_line
-                                         + srcx * image->bits_per_pixel/8];
+  CARDBPP *dst = (CARDBPP *)&image->data[srcy * image->bytes_per_line +
+                                         srcx * image->bits_per_pixel / 8];
   int dstw = image->bytes_per_line / (image->bits_per_pixel / 8);
   CARDBPP *src = (CARDBPP *)t->uncompressedData;
   CARD16 *thatRow = (CARD16 *)tightPrevRow;
@@ -631,12 +622,13 @@ InitFilterPaletteBPP (char *tightPalette, int *rectColors)
 static Bool
 FilterPaletteBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRows)
 {
-  int x, y, b, w;
-  CARDBPP *dst = (CARDBPP *)&image->data[srcy * image->bytes_per_line
-                                         + srcx * image->bits_per_pixel/8];
-  int dstw = image->bytes_per_line / (image->bits_per_pixel / 8);
-  CARD8 *src = (CARD8 *)t->uncompressedData;
+  int x, b;
+  CARDBPP *dst = (CARDBPP *)&image->data[srcy * image->bytes_per_line +
+                                         srcx * image->bits_per_pixel / 8];
+  int stride = image->bytes_per_line * 8 / image->bits_per_pixel;
+  CARD8 *src = (CARD8 *)t->uncompressedData, bits;
   CARDBPP *palette = (CARDBPP *)t->tightPalette;
+  int pad = stride - rectWidth;
 
   if (appData.useBGR233) {
     t->buffer = (char *)realloc(t->buffer, rectWidth * numRows);
@@ -645,30 +637,39 @@ FilterPaletteBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRows
       return False;
     }
     dst = (CARDBPP *)t->buffer;
-    dstw = rectWidth;
+    stride = rectWidth;
+    pad = 0;
   }
 
   if (t->rectColors == 2) {
-    w = (rectWidth + 7) / 8;
-    for (y = 0; y < numRows; y++) {
+    while (numRows > 0) {
       for (x = 0; x < rectWidth / 8; x++) {
+        bits = *src++;
         for (b = 7; b >= 0; b--)
-          dst[y * dstw + x * 8 + 7 - b] = palette[src[y * w + x] >> b & 1];
+          *dst++ = palette[bits >> b & 1];
       }
-      for (b = 7; b >= 8 - rectWidth % 8; b--) {
-        dst[y * dstw + x * 8 + 7 - b] = palette[src[y * w + x] >> b & 1];
+      if (rectWidth % 8 != 0) {
+        bits = *src++;
+        for (b = 7; b >= 8 - rectWidth % 8; b--)
+          *dst++ = palette[bits >> b & 1];
       }
+      dst += pad;
+      numRows--;
     }
   } else {
-    for (y = 0; y < numRows; y++)
-      for (x = 0; x < rectWidth; x++)
-        dst[y * dstw + x] = palette[(int)src[y * rectWidth + x]];
+    while (numRows > 0) {
+      CARDBPP *endOfRow = dst + rectWidth;
+      while (dst < endOfRow) {
+        *dst++ = palette[*src++];
+      }
+      dst += pad;
+      numRows--;
+    }
   }
 
   return True;
 }
 
-#if BPP != 8
 
 /*----------------------------------------------------------------------------
  *
@@ -697,13 +698,13 @@ DecompressJpegRectBPP(threadparam *t, int x, int y, int w, int h)
     }
   }     
 
-  ps = image->bits_per_pixel/8;
+  ps = BPP / 8;
   if (myFormat.bigEndian && ps == 4) flags |= TJ_ALPHAFIRST;
   if (myFormat.redShift == 16 && myFormat.blueShift == 0)
     flags |= TJ_BGR;
   if (myFormat.bigEndian) flags ^= TJ_BGR;
 
-  if (ps == 2) {
+  if (ps < 3) {
     flags = 0;
     ps = 3;
     pitch = w * ps;
@@ -726,28 +727,42 @@ DecompressJpegRectBPP(threadparam *t, int x, int y, int w, int h)
     return False;
   }
 
-  ps = image->bits_per_pixel / 8;
+  ps = BPP / 8;
   pitch = image->bytes_per_line;
   dstptr = &image->data[pitch * y + x * ps];
 
-  if (ps == 2) {
-    CARD16 *dst = (CARD16 *)dstptr, *dst2;
+  if (ps < 3) {
+    CARDBPP *dst = (CARDBPP *)dstptr;
     char *src = t->uncompressedData;
-    int i, j;
+    int stride = pitch / ps, pad = stride - w, numRows = h;
 
-    for(j = 0; j < h; j++) {
-      for(i = 0, dst2 = dst; i < w; i++, dst2++, src += 3) {
-        *dst2 = RGB24_TO_PIXEL(BPP, src[0], src[1], src[2]);
+    if (appData.useBGR233) {
+      t->buffer = (char *)realloc(t->buffer, w * h);
+      if (!t->buffer) {
+        fprintf(stderr, "Memory allocation error\n");
+        return False;
       }
-      dst += pitch / ps;
+      dst = (CARDBPP *)t->buffer;
+      stride = w;
+      pad = 0;
+    }
+
+    while (numRows > 0) {
+      CARDBPP *endOfRow = dst + w;
+      while (dst < endOfRow) {
+        *dst++ = RGB24_TO_PIXEL(BPP, src[0], src[1], src[2]);
+        src += 3;
+      }
+      dst += pad;
+      numRows--;
     }
   }
 
+  if (appData.useBGR233)
+    CopyDataToImage(t->buffer, x, y, w, h);
   if (!appData.doubleBuffer)
     CopyImageToScreen(x, y, w, h);
 
   return True;
 }
-
-#endif
 
