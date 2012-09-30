@@ -314,6 +314,8 @@ typedef struct _UpdateList {
    XGCValues gcv;
    struct _UpdateList *next;
    Bool isFill;
+   Bool isCopyRect;
+   int crx, cry;
 } UpdateList;
 
 extern UpdateList *list, *node, *tail;

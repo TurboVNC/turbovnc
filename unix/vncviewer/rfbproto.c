@@ -269,8 +269,7 @@ NewNode(int x, int y, int w, int h, int encoding)
 {
   if (appData.doubleBuffer) {
     node = (UpdateList *)malloc(sizeof(UpdateList));
-    node->next = NULL;
-    node->isFill = 0;
+    memset(node, 0, sizeof(UpdateList));
     node->region.r.x = x;
     node->region.r.y = y;
     node->region.r.w = w;
@@ -289,6 +288,7 @@ NewNode(int x, int y, int w, int h, int encoding)
 /*
  * FillRectangle.
  */
+
 static void
 FillRectangle(XGCValues *gcv, int x, int y, int w, int h)
 {
@@ -299,6 +299,26 @@ FillRectangle(XGCValues *gcv, int x, int y, int w, int h)
     XChangeGC(dpy, gc, GCForeground, gcv);
     XFillRectangle(dpy, desktopWin, gc, x, y, w, h);
   }
+}
+
+
+/*
+ * CopyRectangle.
+ */
+
+static void
+CopyRectangle(int src_x, int src_y, int w, int h, int dest_x, int dest_y)
+{
+  if (appData.copyRectDelay != 0) {
+    XFillRectangle(dpy, desktopWin, srcGC, src_x, src_y, w, h);
+    XFillRectangle(dpy, desktopWin, dstGC, dest_x, dest_y, w, h);
+    XSync(dpy, False);
+    usleep(appData.copyRectDelay * 1000);
+    XFillRectangle(dpy, desktopWin, dstGC, dest_x, dest_y, w, h);
+    XFillRectangle(dpy, desktopWin, srcGC, src_x, src_y, w, h);
+  }
+  XCopyArea(dpy, desktopWin, desktopWin, gc, src_x, src_y, w, h, dest_x,
+            dest_y);
 }
 
 
@@ -1435,12 +1455,15 @@ HandleRFBServerMessage()
 
           if (r1->encoding == rfbEncodingTight ||
               r1->encoding == rfbEncodingRaw ||
-              r1->encoding == rfbEncodingHextile) {
+              r1->encoding == rfbEncodingHextile ||
+              r1->encoding == rfbEncodingCopyRect) {
             if (node->isFill) {
               XChangeGC(dpy, gc, GCForeground, &node->gcv);
               XFillRectangle(dpy, desktopWin, gc,
                              r1->r.x, r1->r.y, r1->r.w, r1->r.h);
-
+            } else if (node->isCopyRect) {
+              CopyRectangle(node->crx, node->cry, r1->r.w, r1->r.h, r1->r.x,
+                            r1->r.y);
             } else
               CopyImageToScreen(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
           }
@@ -1524,39 +1547,19 @@ HandleRFBServerMessage()
         rfbCopyRect cr;
 
         NewNode(rect.r.x, rect.r.y, rect.r.w, rect.r.h, rect.encoding);
-
         if (!ReadFromRFBServer((char *)&cr, sz_rfbCopyRect))
           return False;
 
         cr.srcX = Swap16IfLE(cr.srcX);
         cr.srcY = Swap16IfLE(cr.srcY);
 
-        if (rfbProfile || benchFile) {
-          double t = gettime();
-          tDecode += t - tDecodeStart;
-          tBlitStart = t;
-        }
-
-        if (appData.copyRectDelay != 0) {
-          XFillRectangle(dpy, desktopWin, srcGC, cr.srcX, cr.srcY,
-                         rect.r.w, rect.r.h);
-          XFillRectangle(dpy, desktopWin, dstGC, rect.r.x, rect.r.y,
-                         rect.r.w, rect.r.h);
-          XSync(dpy, False);
-          usleep(appData.copyRectDelay * 1000);
-          XFillRectangle(dpy, desktopWin, dstGC, rect.r.x, rect.r.y,
-                         rect.r.w, rect.r.h);
-          XFillRectangle(dpy, desktopWin, srcGC, cr.srcX, cr.srcY,
-                         rect.r.w, rect.r.h);
-        }
-
-        XCopyArea(dpy, desktopWin, desktopWin, gc, cr.srcX, cr.srcY,
-                  rect.r.w, rect.r.h, rect.r.x, rect.r.y);
-
-        if (rfbProfile || benchFile) {
-          tBlit += gettime() - tBlitStart;
-          tDecodeStart = gettime();
-        }
+        if (appData.doubleBuffer) {
+          node->isCopyRect = True;
+          node->crx = cr.srcX;
+          node->cry = cr.srcY;
+        } else
+          CopyRectangle(cr.srcX, cr.srcY, rect.r.w, rect.r.h, rect.r.x,
+                        rect.r.y);
 
         break;
       }
@@ -1630,12 +1633,15 @@ HandleRFBServerMessage()
 
         if (r1->encoding == rfbEncodingTight ||
             r1->encoding == rfbEncodingRaw ||
-            r1->encoding == rfbEncodingHextile) {
+            r1->encoding == rfbEncodingHextile ||
+            r1->encoding == rfbEncodingCopyRect) {
           if (node->isFill) {
             XChangeGC(dpy, gc, GCForeground, &node->gcv);
             XFillRectangle(dpy, desktopWin, gc,
                            r1->r.x, r1->r.y, r1->r.w, r1->r.h);
-
+          } else if (node->isCopyRect) {
+            CopyRectangle(node->crx, node->cry, r1->r.w, r1->r.h, r1->r.x,
+                          r1->r.y);
           } else
             CopyImageToScreen(r1->r.x, r1->r.y, r1->r.w, r1->r.h);
         }
