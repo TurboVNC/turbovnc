@@ -55,6 +55,7 @@ $generateOTP = 0;
 $enableHTTP = 1;
 $skipxstartup = 0;
 $autoLosslessRefresh = 0.0;
+$deferUpdate = 1;
 
 # Read configuration from the system-wide and user files if present.
 
@@ -255,6 +256,9 @@ if ($opt{'-xstartup'}) {
 if ($opt{'-fp'}) {
     $fontPath = $opt{'-fp'};
 }
+if ($opt{'-deferupdate'}) {
+    $deferUpdate = $opt{'-deferupdate'};
+}
 $authTypeVNCPermitted = $authTypeVNC;
 if ($opt{'-novncauth'}) {
     if ($authTypeVNC) {
@@ -414,7 +418,7 @@ $cmd .= " -fp $fontPath" if ($fontPath);
 $cmd .= " -co $colorPath" if ($colorPath);
 $cmd .= " -alr ".$autoLosslessRefresh if ($autoLosslessRefresh > 0.0);
 #$cmd .= " -nolisten local" if ($os eq "SunOS");
-$cmd .= " -deferupdate 1";
+$cmd .= " -deferupdate $deferUpdate";
 
 foreach $arg (@ARGV) {
     $cmd .= " " . &quotedString($arg);
