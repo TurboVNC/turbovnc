@@ -17,8 +17,6 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
 //  USA.
 
-
-// KeyMap.h
 // mapping of windows virtual key codes to X keysyms.
 
 #ifndef KEYMAP_H__
@@ -27,19 +25,20 @@
 #pragma once
 
 #include "keysym.h"
-
 #include "rfb.h"
 
-// A single key press on the client may result in more than one 
-// going to the server.
+
+// A single key press on the client may result in more than one key event being
+// sent to the server.
 
 const unsigned int MaxKeysPerKey = 4;
 const CARD32 VoidKeyCode = XK_VoidSymbol;
 
-// keycodes contains the keysyms terminated by an VoidKeyCode.
-// The releaseModifiers is a set of ORed flags indicating whether 
-// particular modifier-up messages should be sent before the keys 
-// and modifier-down after.
+
+// keycodes contains the keysyms terminated by a VoidKeyCode.  releaseModifiers
+// is a set of OR'ed flags indicating whether particular modifier release
+// events should be sent before the key event and modifier press events should
+// be sent after it.
 
 const CARD32 KEYMAP_LCONTROL = 0x0001;
 const CARD32 KEYMAP_RCONTROL = 0x0002;
@@ -54,14 +53,13 @@ typedef struct {
 
 
 class KeyMap {
-public:
-	KeyMap();
-	KeyActionSpec PCtoX(UINT virtkey, DWORD keyData);
-private:
-	// CARD32 keymap[256];
-	unsigned char buf[4]; // lots of space for now
-	BYTE keystate[256];
+  public:
+    KeyMap();
+    KeyActionSpec PCtoX(UINT virtkey, DWORD keyData);
+  private:
+    // CARD32 keymap[256];
+    unsigned char buf[4]; // lots of space for now
+    BYTE keystate[256];
 };
 
 #endif // KEYMAP_H__
-

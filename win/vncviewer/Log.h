@@ -17,17 +17,17 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
 //  USA.
 
-// This is an object and macros which provide general logging and debugging functions.
-// It can log to a file, to a new console, and/or to debug - others maybe to follow.
-// Every log object has a logging level (which can be changed).
-// Only log requests with a high enough level attached get logged. So the
-// level can be thought of as 'amount of detail'.
+// This is an object and macros that provide general logging and debugging
+// functionality.  The class can log to a file, to a new console, and/or to
+// the debug console.  Every log object has a logging level (which can be
+// changed.)  Only log requests whose level is >= the logging level will
+// actually be logged, so the level can be thought of as an 'amount of detail'.
 // We use Unicode-portable stuff here for compatibility with WinCE.
 //
 // Typical use:
 //
 //       Log vnclog;
-//       vnclog.SetFile( _T("myapp.log") );
+//       vnclog.SetFile(_T("myapp.log"));
 //       ...
 //       vnclog.Print(2, _T("x = %d\n"), x);
 //
@@ -39,9 +39,10 @@
 
 #include <stdarg.h>
 
-class Log  
+
+class Log
 {
-public:
+  public:
     // Logging mode flags:
     static const int ToDebug;
     static const int ToFile;
@@ -56,16 +57,17 @@ public:
     //               a filename must be specified here.
     //    append   - if logging to a file, whether or not to append to any
     //               existing log.
-	Log(int mode = ToDebug, int level = 1, LPTSTR filename = NULL, bool append = false);
+    Log(int mode = ToDebug, int level = 1, LPTSTR filename = NULL,
+        bool append = false);
 
     inline void Print(int level, LPTSTR format, ...) {
-        if (level > m_level) return;
-        va_list ap;
-        va_start(ap, format);
-        ReallyPrint(format, ap);
-        va_end(ap);
+      if (level > m_level) return;
+      va_list ap;
+      va_start(ap, format);
+      ReallyPrint(format, ap);
+      va_end(ap);
     }
-    
+
     // Change the log level
     void SetLevel(int level);
 
@@ -76,9 +78,9 @@ public:
     // not already enabled.
     void SetFile(LPTSTR filename, bool append = false);
 
-	virtual ~Log();
+    virtual ~Log();
 
-private:
+  private:
     void ReallyPrint(LPTSTR format, va_list ap);
     void CloseFile();
     bool m_tofile, m_todebug, m_toconsole;
@@ -87,4 +89,3 @@ private:
 };
 
 #endif // LOG_H__
-

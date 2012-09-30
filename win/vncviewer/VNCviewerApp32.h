@@ -22,28 +22,44 @@
 #include "Daemon.h"
 #include <list>
 
-class VNCviewerApp32 : public VNCviewerApp {
-public:
-	VNCviewerApp32(HINSTANCE hInstance, PSTR szCmdLine);
-	void ListenMode();
-	int NewConnection();
-	int NewConnection(TCHAR *host, int port);
-	int NewConnection(SOCKET sock);
-	Daemon  *m_pdaemon;
-	~VNCviewerApp32();
-private:
-	// Set up registry for program's sounds
-	void RegisterSounds();
 
-// The list of modeless dialogs is maintained for proper message dispatching
-public:
-	// Functions to operate on the m_dialogs list
-	void AddModelessDialog(HWND hwnd) { omni_mutex_lock l(m_dialogsMutex); m_dialogs.push_back(hwnd); }
-	void RemoveModelessDialog(HWND hwnd) { omni_mutex_lock l(m_dialogsMutex); m_dialogs.remove(hwnd); }
-	bool ProcessDialogMessage(MSG *pmsg);
-private:
-	// List of open modeless dialogs
-	std::list<HWND> m_dialogs;
-	omni_mutex m_dialogsMutex;
+class VNCviewerApp32 : public VNCviewerApp
+{
+  public:
+
+    VNCviewerApp32(HINSTANCE hInstance, PSTR szCmdLine);
+    void ListenMode();
+    int NewConnection();
+    int NewConnection(TCHAR *host, int port);
+    int NewConnection(SOCKET sock);
+    Daemon  *m_pdaemon;
+    ~VNCviewerApp32();
+
+  private:
+
+    // Set up registry for program's sounds
+    void RegisterSounds();
+
+  // The list of modeless dialogs is maintained for proper message dispatching
+  public:
+
+    // Functions to operate on the m_dialogs list
+    void AddModelessDialog(HWND hwnd)
+    {
+      omni_mutex_lock l(m_dialogsMutex);  m_dialogs.push_back(hwnd);
+    }
+
+    void RemoveModelessDialog(HWND hwnd)
+    {
+      omni_mutex_lock l(m_dialogsMutex);  m_dialogs.remove(hwnd);
+    }
+
+    bool ProcessDialogMessage(MSG *pmsg);
+
+  private:
+
+    // List of open modeless dialogs
+    std::list<HWND> m_dialogs;
+    omni_mutex m_dialogsMutex;
+
 };
-

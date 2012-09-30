@@ -21,10 +21,6 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
 //  USA.
 
-// Tight Encoding
-//
-// The bits of the ClientConnection object to do with Tight.
-
 #include "stdhdrs.h"
 #include "vncviewer.h"
 #include "ClientConnection.h"
@@ -32,6 +28,7 @@
 
 #define TIGHT_MIN_TO_COMPRESS 12
 #define TIGHT_BUFFER_SIZE (2048 * 200)
+
 
 void ClientConnection::ReadTightRect(rfbFramebufferUpdateRectHeader *pfburh)
 {
@@ -46,7 +43,7 @@ void ClientConnection::ReadTightRect(rfbFramebufferUpdateRectHeader *pfburh)
   CARD8 comp_ctl;
   ReadExact((char *)&comp_ctl, 1);
 
-  /* Flush zlib streams if we are told by the server to do so. */
+  // Flush Zlib streams if we are told by the server to do so
   for (int i = 0; i < 4; i++) {
     if ((comp_ctl & 1) && m_tightZlibStreamActive[i]) {
       int err = inflateEnd (&m_tightZlibStream[i]);
@@ -70,42 +67,42 @@ void ClientConnection::ReadTightRect(rfbFramebufferUpdateRectHeader *pfburh)
      readUncompressed = true;
   }
 
-  /* Handle solid rectangles. */
+  // Handle solid subrectangles
   if (comp_ctl == rfbTightFill) {
-    COLORREF fillColour;
+    COLORREF fillColor;
     if (m_myFormat.depth == 24 && m_myFormat.redMax == 0xFF &&
         m_myFormat.greenMax == 0xFF && m_myFormat.blueMax == 0xFF) {
-      CARD8 fillColourBuf[3];
-      ReadExact((char *)&fillColourBuf, 3);
-      fillColour = COLOR_FROM_PIXEL24_ADDRESS(fillColourBuf);
+      CARD8 fillColorBuf[3];
+      ReadExact((char *)&fillColorBuf, 3);
+      fillColor = COLOR_FROM_PIXEL24_ADDRESS(fillColorBuf);
     } else {
-      CARD32 fillColourBuf;
-      ReadExact((char *)&fillColourBuf, m_myFormat.bitsPerPixel / 8);
+      CARD32 fillColorBuf;
+      ReadExact((char *)&fillColorBuf, m_myFormat.bitsPerPixel / 8);
 
       SETUP_COLOR_SHORTCUTS;
 
       switch (m_myFormat.bitsPerPixel) {
-      case 8:
-        fillColour = COLOR_FROM_PIXEL8_ADDRESS(&fillColourBuf);
-        break;
-      case 16:
-        fillColour = COLOR_FROM_PIXEL16_ADDRESS(&fillColourBuf);
-        break;
-      default:
-        fillColour = COLOR_FROM_PIXEL32_ADDRESS(&fillColourBuf);
+        case 8:
+          fillColor = COLOR_FROM_PIXEL8_ADDRESS(&fillColorBuf);
+          break;
+        case 16:
+          fillColor = COLOR_FROM_PIXEL16_ADDRESS(&fillColorBuf);
+          break;
+        default:
+          fillColor = COLOR_FROM_PIXEL32_ADDRESS(&fillColorBuf);
       }
     }
 
     if (m_opts.m_DoubleBuffer) {
-        node->isFill = 1;
-        node->fillColour = fillColour;
+      node->isFill = 1;
+      node->fillColor = fillColor;
     }
     else {
-        omni_mutex_lock l(m_bitmapdcMutex);
-        ObjectSelector b(m_hBitmapDC, m_hBitmap);
-        PaletteSelector p(m_hBitmapDC, m_hPalette);
-        FillSolidRect(pfburh->r.x, pfburh->r.y, pfburh->r.w, pfburh->r.h,
-                      fillColour);
+      omni_mutex_lock l(m_bitmapdcMutex);
+      ObjectSelector b(m_hBitmapDC, m_hBitmap);
+      PaletteSelector p(m_hBitmapDC, m_hPalette);
+      FillSolidRect(pfburh->r.x, pfburh->r.y, pfburh->r.w, pfburh->r.h,
+                    fillColor);
     }
     return;
   }
@@ -115,56 +112,50 @@ void ClientConnection::ReadTightRect(rfbFramebufferUpdateRectHeader *pfburh)
     return;
   }
 
-
-  /* Quit on unsupported subencoding value. */
+  // Quit on unsupported subencoding value
   if (comp_ctl >= rfbTightMaxSubencoding) {
     vnclog.Print(0, _T("Tight encoding: bad subencoding value received.\n"));
     return;
   }
 
-  /*
-   * Here primary compression mode handling begins.
-   * Data was processed with optional filter + zlib compression.
-   */
+  // If we get here, then the subrectangle was encoded using indexed color,
+  // raw, or mono subencoding with optional Zlib compression.
 
-  /* First, we should identify a filter to use. */
+  // First, we should identify a filter to use
   int bitsPixel;
   if ((comp_ctl & rfbTightExplicitFilter) != 0) {
     CARD8 filter_id;
     ReadExact((char *)&filter_id, 1);
 
     switch (filter_id) {
-    case rfbTightFilterCopy:
-      bitsPixel = InitFilterCopy(pfburh->r.w, pfburh->r.h);
-      break;
-    case rfbTightFilterPalette:
-      bitsPixel = InitFilterPalette(pfburh->r.w, pfburh->r.h);
-      break;
-    case rfbTightFilterGradient:
-      bitsPixel = InitFilterGradient(pfburh->r.w, pfburh->r.h);
-      break;
-    default:
-      vnclog.Print(0, _T("Tight encoding: unknown filter code received.\n"));
-      return;
+      case rfbTightFilterCopy:
+        bitsPixel = InitFilterCopy(pfburh->r.w, pfburh->r.h);
+        break;
+      case rfbTightFilterPalette:
+        bitsPixel = InitFilterPalette(pfburh->r.w, pfburh->r.h);
+        break;
+      case rfbTightFilterGradient:
+        bitsPixel = InitFilterGradient(pfburh->r.w, pfburh->r.h);
+        break;
+      default:
+        vnclog.Print(0, _T("Tight encoding: unknown filter code received.\n"));
+        return;
     }
-  } else {
+  } else
     bitsPixel = InitFilterCopy(pfburh->r.w, pfburh->r.h);
-  }
   if (bitsPixel == 0) {
     vnclog.Print(0, _T("Tight encoding: error receiving palette.\n"));
     return;
   }
 
-  /* Determine if the data should be decompressed or just copied. */
+  // Determine if the data should be decompressed or just copied
   int rowSize = (pfburh->r.w * bitsPixel + 7) / 8;
   int bufsize = -1;
 
-  if (pfburh->r.h * rowSize < TIGHT_MIN_TO_COMPRESS) {
+  if (pfburh->r.h * rowSize < TIGHT_MIN_TO_COMPRESS)
     bufsize = pfburh->r.h * rowSize;
-  }
-  else if (readUncompressed) {
+  else if (readUncompressed)
     bufsize = ReadCompactLen();
-  }
 
   if (bufsize != -1) {
     CheckBufferSize(bufsize);
@@ -173,15 +164,14 @@ void ClientConnection::ReadTightRect(rfbFramebufferUpdateRectHeader *pfburh)
     return;
   }
 
-  /* Read the length (1..3 bytes) of compressed data following. */
-
+  // Read the length of the compressed data that follows
   int compressedLen = ReadCompactLen();
   if (compressedLen <= 0) {
     vnclog.Print(0, _T("Tight encoding: bad data received from server.\n"));
     return;
   }
 
-  /* Now let's initialize compression stream if needed. */
+  // Initialize compression stream, if needed
   int stream_id = comp_ctl & 0x03;
   z_streamp zs = &m_tightZlibStream[stream_id];
   if (!m_tightZlibStreamActive[stream_id]) {
@@ -190,39 +180,41 @@ void ClientConnection::ReadTightRect(rfbFramebufferUpdateRectHeader *pfburh)
     zs->opaque = Z_NULL;
     int err = inflateInit(zs);
     if (err != Z_OK) {
-      if (zs->msg != NULL) {
+      if (zs->msg != NULL)
         vnclog.Print(0, _T("zlib inflateInit() error: %s.\n"), zs->msg);
-      } else {
+      else
         vnclog.Print(0, _T("zlib inflateInit() error: %d.\n"), err);
-      }
       return;
     }
     m_tightZlibStreamActive[stream_id] = TRUE;
   }
 
-  /* Read, decode and draw actual pixel data in a loop. */
+  // Read, decode, and draw actual pixel data in a loop
+  CheckZlibBufferSize(compressedLen);
+  CheckBufferSize(pfburh->r.h * rowSize);
 
-	CheckZlibBufferSize(compressedLen);
-	CheckBufferSize(pfburh->r.h * rowSize);
+  ReadExact((char *)m_zlibbuf, compressedLen);
+  zs->next_in = (Bytef *)m_zlibbuf;
+  zs->avail_in = compressedLen;
+  zs->next_out = (Bytef *)m_netbuf;
+  zs->avail_out = pfburh->r.h * rowSize;
 
-	ReadExact((char *)m_zlibbuf, compressedLen);
-	zs->next_in = (Bytef *)m_zlibbuf;
-	zs->avail_in = compressedLen;
-	zs->next_out = (Bytef *)m_netbuf;
-	zs->avail_out = pfburh->r.h * rowSize;
-
-	int err = inflate(zs, Z_SYNC_FLUSH);
-	if (err != Z_OK && err != Z_STREAM_END) {
-		if (zs->msg != NULL) {
-			vnclog.Print(0, _T("zlib inflate() error: %s.\n"), zs->msg);
-		} else {
-			vnclog.Print(0, _T("zlib inflate() error: %d.\n"), err);
-		}
-		return;
-	}
+  int err = inflate(zs, Z_SYNC_FLUSH);
+  if (err != Z_OK && err != Z_STREAM_END) {
+    if (zs->msg != NULL)
+      vnclog.Print(0, _T("zlib inflate() error: %s.\n"), zs->msg);
+    else
+      vnclog.Print(0, _T("zlib inflate() error: %d.\n"), err);
+    return;
+  }
 
   (this->*m_tightCurrentFilter)(pfburh->r.x, pfburh->r.y, pfburh->r.h);
 }
+
+
+// The length of compressed data is transmitted as 1-3 bytes, in which each
+// byte contains 7 bits of actual data, and the 8th bit is set to indicate
+// that an additional byte should be read.
 
 int ClientConnection::ReadCompactLen() {
   CARD8 len_byte;
@@ -239,6 +231,7 @@ int ClientConnection::ReadCompactLen() {
   return compressedLen;
 }
 
+
 //----------------------------------------------------------------------------
 //
 // Filter stuff.
@@ -249,17 +242,15 @@ int ClientConnection::ReadCompactLen() {
 //   Bool m_tightCutZeros;
 //   int m_tightRectWidth, m_tightRectColors;
 //   COLORREF m_tightPalette[256];
-//   CARD8 m_tightPrevRow[2048*3*sizeof(CARD16)];
+//   CARD8 m_tightPrevRow[2048 * 3 * sizeof(CARD16)];
 
 int ClientConnection::InitFilterCopy (int rw, int rh)
 {
-  tightFilterFunc funcArray[3] = {
-    &ClientConnection::FilterCopy8,
-    &ClientConnection::FilterCopy16,
-    &ClientConnection::FilterCopy32
-  };
+  tightFilterFunc funcArray[3] = { &ClientConnection::FilterCopy8,
+                                   &ClientConnection::FilterCopy16,
+                                   &ClientConnection::FilterCopy32 };
 
-  m_tightCurrentFilter = funcArray[m_myFormat.bitsPerPixel/16];
+  m_tightCurrentFilter = funcArray[m_myFormat.bitsPerPixel / 16];
   m_tightRectWidth = rw;
 
   if (m_myFormat.depth == 24 && m_myFormat.redMax == 0xFF &&
@@ -273,15 +264,14 @@ int ClientConnection::InitFilterCopy (int rw, int rh)
   return m_myFormat.bitsPerPixel;
 }
 
-int ClientConnection::InitFilterGradient (int rw, int rh)
+
+int ClientConnection::InitFilterGradient(int rw, int rh)
 {
   int bits = InitFilterCopy(rw, rh);
 
-  tightFilterFunc funcArray[3] = {
-    &ClientConnection::FilterGradient8,
-    &ClientConnection::FilterGradient16,
-    &ClientConnection::FilterGradient32
-  };
+  tightFilterFunc funcArray[3] = { &ClientConnection::FilterGradient8,
+                                   &ClientConnection::FilterGradient16,
+                                   &ClientConnection::FilterGradient32 };
 
   m_tightCurrentFilter = funcArray[m_myFormat.bitsPerPixel/16];
 
@@ -294,7 +284,8 @@ int ClientConnection::InitFilterGradient (int rw, int rh)
   return bits;
 }
 
-int ClientConnection::InitFilterPalette (int rw, int rh)
+
+int ClientConnection::InitFilterPalette(int rw, int rh)
 {
   m_tightCurrentFilter = &ClientConnection::FilterPalette;
   m_tightRectWidth = rw;
@@ -317,10 +308,10 @@ int ClientConnection::InitFilterPalette (int rw, int rh)
     ReadExact(m_netbuf, m_tightRectColors * 3);
 
     CARD8 *p = (CARD8 *)m_netbuf;
-    for (int i = 0; i < m_tightRectColors; i++, p+=3)
-      m_tightPalette[i] = ((CARD32)p[0] << drs)
-                        | ((CARD32)p[1] << dgs)
-                        | ((CARD32)p[2] << dbs);
+    for (int i = 0; i < m_tightRectColors; i++, p += 3)
+      m_tightPalette[i] = ((CARD32)p[0] << drs) |
+                          ((CARD32)p[1] << dgs) |
+                          ((CARD32)p[2] << dbs);
 
     m_tightCurrentFilter = &ClientConnection::FilterPalette24;
   } else {
@@ -331,77 +322,80 @@ int ClientConnection::InitFilterPalette (int rw, int rh)
 
     int i;
     switch (m_myFormat.bitsPerPixel) {
-    case 8:
-    {
-      CARD8 *p = (CARD8 *)m_netbuf;
-      for (i = 0; i < m_tightRectColors; i++, p++)
-        m_tightPalette[i] = (((((CARD32)(*p) >> rs) & rm) * 255 / rm) << drs)
-                          | (((((CARD32)(*p) >> gs) & gm) * 255 / gm) << dgs)
-                          | (((((CARD32)(*p) >> bs) & bm) * 255 / bm) << dbs);
-      break;
-    }
-    case 16:
-    {
-      CARD16 *p = (CARD16 *)m_netbuf;
-      for (i = 0; i < m_tightRectColors; i++, p++)
-        m_tightPalette[i] = (((((CARD32)(*p) >> rs) & rm) * 255 / rm) << drs)
-                          | (((((CARD32)(*p) >> gs) & gm) * 255 / gm) << dgs)
-                          | (((((CARD32)(*p) >> bs) & bm) * 255 / bm) << dbs);
-      break;
-    }
-    default:
-    {
-      CARD32 *p = (CARD32 *)m_netbuf;
-      for (i = 0; i < m_tightRectColors; i++, p++)
-        m_tightPalette[i] = (((((CARD32)(*p) >> rs) & rm) * 255 / rm) << drs)
-                          | (((((CARD32)(*p) >> gs) & gm) * 255 / gm) << dgs)
-                          | (((((CARD32)(*p) >> bs) & bm) * 255 / bm) << dbs);
-    }
+      case 8:
+      {
+        CARD8 *p = (CARD8 *)m_netbuf;
+        for (i = 0; i < m_tightRectColors; i++, p++)
+          m_tightPalette[i] =
+            (((((CARD32)(*p) >> rs) & rm) * 255 / rm) << drs) |
+            (((((CARD32)(*p) >> gs) & gm) * 255 / gm) << dgs) |
+            (((((CARD32)(*p) >> bs) & bm) * 255 / bm) << dbs);
+        break;
+      }
+      case 16:
+      {
+        CARD16 *p = (CARD16 *)m_netbuf;
+        for (i = 0; i < m_tightRectColors; i++, p++)
+          m_tightPalette[i] =
+            (((((CARD32)(*p) >> rs) & rm) * 255 / rm) << drs) |
+            (((((CARD32)(*p) >> gs) & gm) * 255 / gm) << dgs) |
+            (((((CARD32)(*p) >> bs) & bm) * 255 / bm) << dbs);
+        break;
+      }
+      default:
+      {
+        CARD32 *p = (CARD32 *)m_netbuf;
+        for (i = 0; i < m_tightRectColors; i++, p++)
+          m_tightPalette[i] =
+            (((((CARD32)(*p) >> rs) & rm) * 255 / rm) << drs) |
+            (((((CARD32)(*p) >> gs) & gm) * 255 / gm) << dgs) |
+            (((((CARD32)(*p) >> bs) & bm) * 255 / bm) << dbs);
+      }
     }
   }
 
   return (m_tightRectColors == 2) ? 1 : 8;
 }
 
-//
-// Actual filtering code follows.
-//
+
+// Actual filtering code follows
 
 #define DEFINE_TIGHT_FILTER_COPY(bpp)                                         \
                                                                               \
-void ClientConnection::FilterCopy##bpp (int srcx, int srcy, int numRows)      \
+void ClientConnection::FilterCopy##bpp(int srcx, int srcy, int numRows)       \
 {                                                                             \
-  CARD32 *dst = (CARD32 *)&fb.bits[srcy*fb.pitch + srcx*fbx_ps[fb.format]];   \
+  CARD32 *dst =                                                               \
+    (CARD32 *)&fb.bits[srcy * fb.pitch + srcx * fbx_ps[fb.format]];           \
   int dstw = fb.pitch / fbx_ps[fb.format];                                    \
   CARD##bpp *p = (CARD##bpp *)m_netbuf;                                       \
                                                                               \
   SETUP_COLOR_SHORTCUTS;                                                      \
-  CARD32 drs = fbx_roffset[fb.format]*8;                                      \
-  CARD32 dgs = fbx_goffset[fb.format]*8;                                      \
-  CARD32 dbs = fbx_boffset[fb.format]*8;                                      \
+  CARD32 drs = fbx_roffset[fb.format] * 8;                                    \
+  CARD32 dgs = fbx_goffset[fb.format] * 8;                                    \
+  CARD32 dbs = fbx_boffset[fb.format] * 8;                                    \
                                                                               \
   int x;                                                                      \
   if (rm == 0xFF && gm == 0xFF && bm == 0xFF && bpp == 32) {                  \
     if (rs == drs && gs == dgs && bs == dbs) {                                \
       for (int y = 0; y < numRows; y++, p += m_tightRectWidth)                \
-        memcpy(&dst[y*dstw], (char *)p, m_tightRectWidth*bpp/8);              \
+        memcpy(&dst[y * dstw], (char *)p, m_tightRectWidth * bpp / 8);        \
     }                                                                         \
     else {                                                                    \
       for (int y = 0; y < numRows; y++) {                                     \
         for (x = 0; x < m_tightRectWidth; x++, p++)                           \
-          dst[y*dstw+x] = ((((CARD32)(*p) >> rs) & rm) << drs)                \
-                        | ((((CARD32)(*p) >> gs) & gm) << dgs)                \
-                        | ((((CARD32)(*p) >> bs) & bm) << dbs);               \
+          dst[y * dstw + x] = ((((CARD32)(*p) >> rs) & rm) << drs) |          \
+                              ((((CARD32)(*p) >> gs) & gm) << dgs) |          \
+                              ((((CARD32)(*p) >> bs) & bm) << dbs);           \
       }                                                                       \
     }                                                                         \
   }                                                                           \
   else {                                                                      \
     for (int y = 0; y < numRows; y++) {                                       \
       for (x = 0; x < m_tightRectWidth; x++, p++)                             \
-        dst[y*dstw+x] =                                                       \
-            (((((CARD32)(*p) >> rs) & rm) * 255 / rm) << drs)                 \
-          | (((((CARD32)(*p) >> gs) & gm) * 255 / gm) << dgs)                 \
-          | (((((CARD32)(*p) >> bs) & bm) * 255 / bm) << dbs);                \
+        dst[y * dstw + x] =                                                   \
+          (((((CARD32)(*p) >> rs) & rm) * 255 / rm) << drs) |                 \
+          (((((CARD32)(*p) >> gs) & gm) * 255 / gm) << dgs) |                 \
+          (((((CARD32)(*p) >> bs) & bm) * 255 / bm) << dbs);                  \
     }                                                                         \
   }                                                                           \
 }
@@ -410,23 +404,25 @@ DEFINE_TIGHT_FILTER_COPY(8)
 DEFINE_TIGHT_FILTER_COPY(16)
 DEFINE_TIGHT_FILTER_COPY(32)
 
-void ClientConnection::FilterCopy24 (int srcx, int srcy, int numRows)
+
+void ClientConnection::FilterCopy24(int srcx, int srcy, int numRows)
 {
   int dstps = fbx_ps[fb.format];
-  CARD8 *dst = (CARD8 *)&fb.bits[srcy*fb.pitch + srcx*dstps];
+  CARD8 *dst = (CARD8 *)&fb.bits[srcy * fb.pitch + srcx * dstps];
   CARD8 *src = (CARD8 *)m_netbuf;
   CARD8 *srcptr, *dstptr, *srcptr2, *dstptr2;
-  int srcpitch = m_tightRectWidth*3;
+  int srcpitch = m_tightRectWidth * 3;
 
   int rindex = fbx_roffset[fb.format];
   int gindex = fbx_goffset[fb.format];
   int bindex = fbx_boffset[fb.format];
 
-  for (srcptr = src, dstptr = dst; srcptr < &src[numRows*srcpitch] &&
-    dstptr < &dst[numRows*fb.pitch]; srcptr += srcpitch, dstptr += fb.pitch) {
+  for (srcptr = src, dstptr = dst; srcptr < &src[numRows * srcpitch] &&
+       dstptr < &dst[numRows * fb.pitch]; srcptr += srcpitch,
+       dstptr += fb.pitch) {
     for (srcptr2 = srcptr, dstptr2 = dstptr; srcptr2 < &srcptr[srcpitch] &&
-      dstptr2 < &dstptr[m_tightRectWidth*dstps]; srcptr2 += 3,
-      dstptr2 += dstps) {
+         dstptr2 < &dstptr[m_tightRectWidth * dstps]; srcptr2 += 3,
+         dstptr2 += dstps) {
       dstptr2[rindex] = srcptr2[0];
       dstptr2[gindex] = srcptr2[1];
       dstptr2[bindex] = srcptr2[2];
@@ -434,24 +430,26 @@ void ClientConnection::FilterCopy24 (int srcx, int srcy, int numRows)
   }
 }
 
+
 #define DEFINE_TIGHT_FILTER_GRADIENT(bpp)                                     \
                                                                               \
 void ClientConnection::FilterGradient##bpp (int srcx, int srcy, int numRows)  \
 {                                                                             \
   int x, y, c;                                                                \
   CARD##bpp *src = (CARD##bpp *)m_netbuf;                                     \
-  CARD32 *dst = (CARD32 *)&fb.bits[srcy*fb.pitch + srcx*fbx_ps[fb.format]];   \
+  CARD32 *dst =                                                               \
+    (CARD32 *)&fb.bits[srcy * fb.pitch + srcx * fbx_ps[fb.format]];           \
   int dstw = fb.pitch / fbx_ps[fb.format];                                    \
   CARD16 *thatRow = (CARD16 *)m_tightPrevRow;                                 \
-  CARD16 thisRow[2048*3];                                                     \
+  CARD16 thisRow[2048 * 3];                                                   \
   CARD16 pix[3];                                                              \
   CARD16 max[3];                                                              \
   int shift[3];                                                               \
   int est[3];                                                                 \
                                                                               \
-  CARD32 drs = fbx_roffset[fb.format]*8;                                      \
-  CARD32 dgs = fbx_goffset[fb.format]*8;                                      \
-  CARD32 dbs = fbx_boffset[fb.format]*8;                                      \
+  CARD32 drs = fbx_roffset[fb.format] * 8;                                    \
+  CARD32 dgs = fbx_goffset[fb.format] * 8;                                    \
+  CARD32 dbs = fbx_boffset[fb.format] * 8;                                    \
                                                                               \
   max[0] = m_myFormat.redMax;                                                 \
   max[1] = m_myFormat.greenMax;                                               \
@@ -465,30 +463,31 @@ void ClientConnection::FilterGradient##bpp (int srcx, int srcy, int numRows)  \
                                                                               \
     /* First pixel in a row */                                                \
     for (c = 0; c < 3; c++) {                                                 \
-      pix[c] = (CARD16)((src[y*m_tightRectWidth] >> shift[c]) +               \
+      pix[c] = (CARD16)((src[y * m_tightRectWidth] >> shift[c]) +             \
                         thatRow[c] & max[c]);                                 \
       thisRow[c] = pix[c];                                                    \
     }                                                                         \
-    dst[y*dstw] = (((CARD32)pix[0] * 255 / max[0]) << drs)                    \
-                | (((CARD32)pix[1] * 255 / max[1]) << dgs)                    \
-                | (((CARD32)pix[2] * 255 / max[2]) << dbs);                   \
+    dst[y * dstw] = (((CARD32)pix[0] * 255 / max[0]) << drs) |                \
+                    (((CARD32)pix[1] * 255 / max[1]) << dgs) |                \
+                    (((CARD32)pix[2] * 255 / max[2]) << dbs);                 \
                                                                               \
-    /* Remaining pixels of a row */                                           \
+    /* Remaining pixels in the row */                                         \
     for (x = 1; x < m_tightRectWidth; x++) {                                  \
       for (c = 0; c < 3; c++) {                                               \
-        est[c] = (int)thatRow[x*3+c] + (int)pix[c]-(int)thatRow[(x-1)*3 + c]; \
+        est[c] = (int)thatRow[x * 3 + c] + (int)pix[c] -                      \
+                 (int)thatRow[(x - 1) * 3 + c];                               \
         if (est[c] > (int)max[c]) {                                           \
           est[c] = (int)max[c];                                               \
         } else if (est[c] < 0) {                                              \
           est[c] = 0;                                                         \
         }                                                                     \
-        pix[c] = (CARD16)((src[y*m_tightRectWidth+x] >> shift[c]) +           \
+        pix[c] = (CARD16)((src[y * m_tightRectWidth + x] >> shift[c]) +       \
                           est[c] & max[c]);                                   \
-        thisRow[x*3+c] = pix[c];                                              \
+        thisRow[x * 3 + c] = pix[c];                                          \
       }                                                                       \
-      dst[y*dstw+x] = (((CARD32)pix[0] * 255 / max[0]) << drs)                \
-                    | (((CARD32)pix[1] * 255 / max[1]) << dgs)                \
-                    | (((CARD32)pix[2] * 255 / max[2]) << dbs);               \
+      dst[y * dstw + x] = (((CARD32)pix[0] * 255 / max[0]) << drs) |          \
+                          (((CARD32)pix[1] * 255 / max[1]) << dgs) |          \
+                          (((CARD32)pix[2] * 255 / max[2]) << dbs);           \
     }                                                                         \
     memcpy(thatRow, thisRow, m_tightRectWidth * 3 * sizeof(CARD16));          \
   }                                                                           \
@@ -498,14 +497,15 @@ DEFINE_TIGHT_FILTER_GRADIENT(8)
 DEFINE_TIGHT_FILTER_GRADIENT(16)
 DEFINE_TIGHT_FILTER_GRADIENT(32)
 
+
 void ClientConnection::FilterGradient24 (int srcx, int srcy, int numRows)
 {
-  CARD8 thisRow[2048*3];
+  CARD8 thisRow[2048 * 3];
   CARD8 pix[3];
   int est[3];
 
   int ps = fbx_ps[fb.format];
-  CARD8 *dst = (CARD8 *)&fb.bits[srcy*fb.pitch + srcx*ps];
+  CARD8 *dst = (CARD8 *)&fb.bits[srcy * fb.pitch + srcx * ps];
 
   int rindex = fbx_roffset[fb.format];
   int gindex = fbx_goffset[fb.format];
@@ -515,40 +515,40 @@ void ClientConnection::FilterGradient24 (int srcx, int srcy, int numRows)
 
     // First pixel in a row
     for (int c = 0; c < 3; c++) {
-      pix[c] = m_tightPrevRow[c] + m_netbuf[y*m_tightRectWidth*3+c];
+      pix[c] = m_tightPrevRow[c] + m_netbuf[y * m_tightRectWidth * 3 + c];
       thisRow[c] = pix[c];
     }
-    dst[y*fb.pitch + rindex] = pix[0];
-    dst[y*fb.pitch + gindex] = pix[1];
-    dst[y*fb.pitch + bindex] = pix[2];
+    dst[y * fb.pitch + rindex] = pix[0];
+    dst[y * fb.pitch + gindex] = pix[1];
+    dst[y * fb.pitch + bindex] = pix[2];
 
-    // Remaining pixels of a row
+    // Remaining pixels in the row
     for (int x = 1; x < m_tightRectWidth; x++) {
       for (int c = 0; c < 3; c++) {
-        est[c] = (int)m_tightPrevRow[x*3+c] + (int)pix[c] -
-                 (int)m_tightPrevRow[(x-1)*3+c];
-        if (est[c] > 0xFF) {
+        est[c] = (int)m_tightPrevRow[x * 3 + c] + (int)pix[c] -
+                 (int)m_tightPrevRow[(x - 1) * 3 + c];
+        if (est[c] > 0xFF)
           est[c] = 0xFF;
-        } else if (est[c] < 0x00) {
+        else if (est[c] < 0x00)
           est[c] = 0x00;
-        }
-        pix[c] = (CARD8)est[c] + m_netbuf[(y*m_tightRectWidth+x)*3+c];
-        thisRow[x*3+c] = pix[c];
+        pix[c] = (CARD8)est[c] + m_netbuf[(y * m_tightRectWidth + x) * 3 + c];
+        thisRow[x * 3 + c] = pix[c];
       }
-      dst[y*fb.pitch + x*ps + rindex] = pix[0];
-      dst[y*fb.pitch + x*ps + gindex] = pix[1];
-      dst[y*fb.pitch + x*ps + bindex] = pix[2];
+      dst[y * fb.pitch + x * ps + rindex] = pix[0];
+      dst[y * fb.pitch + x * ps + gindex] = pix[1];
+      dst[y * fb.pitch + x * ps + bindex] = pix[2];
     }
 
     memcpy(m_tightPrevRow, thisRow, m_tightRectWidth * 3);
   }
 }
 
-void ClientConnection::FilterPalette (int srcx, int srcy, int numRows)
+
+void ClientConnection::FilterPalette(int srcx, int srcy, int numRows)
 {
   int x, y, b, w;
   CARD8 *src = (CARD8 *)m_netbuf;
-  CARD32 *dst = (CARD32 *)&fb.bits[srcy*fb.pitch + srcx*fbx_ps[fb.format]];
+  CARD32 *dst = (CARD32 *)&fb.bits[srcy * fb.pitch + srcx * fbx_ps[fb.format]];
   int dstw = fb.pitch / fbx_ps[fb.format];
 
   if (m_tightRectColors == 2) {
@@ -556,50 +556,47 @@ void ClientConnection::FilterPalette (int srcx, int srcy, int numRows)
     for (y = 0; y < numRows; y++) {
       for (x = 0; x < m_tightRectWidth / 8; x++) {
         for (b = 7; b >= 0; b--)
-          dst[y*dstw+x*8+7-b] = m_tightPalette[src[y*w+x] >> b & 1];
+          dst[y * dstw + x * 8 + 7 - b] =
+            m_tightPalette[src[y * w + x] >> b & 1];
       }
       for (b = 7; b >= 8 - m_tightRectWidth % 8; b--) {
-        dst[y*dstw+x*8+7-b] = m_tightPalette[src[y*w+x] >> b & 1];
+        dst[y * dstw + x * 8 + 7 - b] =
+          m_tightPalette[src[y * w + x] >> b & 1];
       }
     }
   } else {
     for (y = 0; y < numRows; y++)
       for (x = 0; x < m_tightRectWidth; x++)
-        dst[y*dstw+x] = m_tightPalette[(int)src[y*m_tightRectWidth+x]];
+        dst[y * dstw + x] = m_tightPalette[(int)src[y * m_tightRectWidth + x]];
   }
 }
 
+
 void ClientConnection::FilterPalette24 (int srcx, int srcy, int numRows)
 {
-	int x, y, b, w, dstps = fbx_ps[fb.format];
-	CARD8 *src = (CARD8 *)m_netbuf;
-	CARD8 *dst = (CARD8 *)&fb.bits[srcy*fb.pitch + srcx*fbx_ps[fb.format]];
+  int x, y, b, w, dstps = fbx_ps[fb.format];
+  CARD8 *src = (CARD8 *)m_netbuf;
+  CARD8 *dst = (CARD8 *)&fb.bits[srcy * fb.pitch + srcx * fbx_ps[fb.format]];
 
   if (m_tightRectColors == 2) {
     w = (m_tightRectWidth + 7) / 8;
     for (y = 0; y < numRows; y++) {
-      for (x = 0; x < m_tightRectWidth / 8; x++) {
-        for (b = 7; b >= 0; b--) {
-          memcpy(&dst[y*fb.pitch + (x*8+7-b)*dstps],
-            &m_tightPalette[src[y*w+x] >> b & 1], 3);
-        }
-      }
-      for (b = 7; b >= 8 - m_tightRectWidth % 8; b--) {
-        memcpy(&dst[y*fb.pitch + (x*8+7-b)*dstps],
-          &m_tightPalette[src[y*w+x] >> b & 1], 3);
-      }
+      for (x = 0; x < m_tightRectWidth / 8; x++)
+        for (b = 7; b >= 0; b--)
+          memcpy(&dst[y * fb.pitch + (x * 8 + 7 - b) * dstps],
+                 &m_tightPalette[src[y * w + x] >> b & 1], 3);
+      for (b = 7; b >= 8 - m_tightRectWidth % 8; b--)
+        memcpy(&dst[y * fb.pitch + (x * 8 + 7 - b) * dstps],
+               &m_tightPalette[src[y * w + x] >> b & 1], 3);
     }
   } else {
     for (y = 0; y < numRows; y++)
       for (x = 0; x < m_tightRectWidth; x++)
-        memcpy(&dst[y*fb.pitch + x*dstps],
-          &m_tightPalette[(int)src[y*m_tightRectWidth+x]], 3);
+        memcpy(&dst[y * fb.pitch + x * dstps],
+               &m_tightPalette[(int)src[y * m_tightRectWidth + x]], 3);
   }
 }
 
-//
-// JPEG decompression code.
-//
 
 void ClientConnection::DecompressJpegRect(int x, int y, int w, int h)
 {
@@ -615,8 +612,8 @@ void ClientConnection::DecompressJpegRect(int x, int y, int w, int h)
   omni_mutex_lock l(m_bitmapdcMutex);
   ObjectSelector b(m_hBitmapDC, m_hBitmap);
 
-  if((tjDecompress(j, (unsigned char *)m_netbuf, (unsigned long)compressedLen,
-    (unsigned char *)&fb.bits[y*fb.pitch+x*fbx_ps[fb.format]], w, fb.pitch, h,
-    fbx_ps[fb.format], fbx_bgr[fb.format] ? TJ_BGR : 0))==-1)
-    throw(ErrorException(tjGetErrorStr()));
+  if ((tjDecompress(j, (unsigned char *)m_netbuf, (unsigned long)compressedLen,
+     (unsigned char *)&fb.bits[y * fb.pitch + x * fbx_ps[fb.format]], w,
+     fb.pitch, h, fbx_ps[fb.format], fbx_bgr[fb.format] ? TJ_BGR : 0)) == -1)
+     throw(ErrorException(tjGetErrorStr()));
 }

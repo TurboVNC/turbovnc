@@ -17,8 +17,6 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
 //  USA.
 
-// vncCapsContainer.h
-
 #if (!defined(_VNC_CAPSCONTAINER))
 #define _VNC_CAPSCONTAINER
 
@@ -32,32 +30,31 @@
 
 class CapsContainer
 {
-public:
-	CapsContainer(int maxCaps = 64);
-	~CapsContainer();
+  public:
+    CapsContainer(int maxCaps = 64);
+    ~CapsContainer();
 
-	void Add(const rfbCapabilityInfo *capinfo, const char *desc = NULL);
-	void Add(CARD32 code, const char *vendor, const char *name,
-			 const char *desc = NULL);
+    void Add(const rfbCapabilityInfo *capinfo, const char *desc = NULL);
+    void Add(CARD32 code, const char *vendor, const char *name,
+             const char *desc = NULL);
 
-	bool IsKnown(CARD32 code);
-	bool GetInfo(CARD32 code, rfbCapabilityInfo *capinfo);
-	char *GetDescription(CARD32 code);
+    bool IsKnown(CARD32 code);
+    bool GetInfo(CARD32 code, rfbCapabilityInfo *capinfo);
+    char *GetDescription(CARD32 code);
 
-	bool Enable(const rfbCapabilityInfo *capinfo);
-	bool IsEnabled(CARD32 code);
-	int NumEnabled() { return listSize; }
-	CARD32 GetByOrder(int idx);
+    bool Enable(const rfbCapabilityInfo *capinfo);
+    bool IsEnabled(CARD32 code);
+    int NumEnabled() { return listSize; }
+    CARD32 GetByOrder(int idx);
 
-private:
-	std::map<CARD32,rfbCapabilityInfo> infoMap;
-	std::map<CARD32,char*> descMap;
-	std::map<CARD32,bool> enableMap;
+  private:
+    std::map<CARD32, rfbCapabilityInfo> infoMap;
+    std::map<CARD32, char*> descMap;
+    std::map<CARD32, bool> enableMap;
 
-	int maxSize;
-	int listSize;
-	CARD32 *plist;
+    int maxSize;
+    int listSize;
+    CARD32 *plist;
 };
 
 #endif // _VNC_CAPSCONTAINER
-

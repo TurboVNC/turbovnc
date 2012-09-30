@@ -22,39 +22,42 @@
 
 #define rfbMAX_PATH 255
 
+
 typedef struct tagFTITEMINFO
 {
-    char Name[rfbMAX_PATH];
-    char Size[16];
-	unsigned int Data;
+  char Name[rfbMAX_PATH];
+  char Size[16];
+  unsigned int Data;
 } FTITEMINFO;
+
 
 typedef struct tagFTSIZEDATA
 {
-	unsigned int size;
-	unsigned int data;
+  unsigned int size;
+  unsigned int data;
 } FTSIZEDATA;
 
-class FileTransferItemInfo  
-{
-public:
-	int GetIntSizeAt(int Number);
-	static const char folderText[];
-	int GetNumEntries();
-	char * GetSizeAt(int Number);
-	char * GetNameAt(int Number);
-	unsigned int GetDataAt(int Number);
-    bool IsFile(int Number);    
-	void Sort();
-	void Free();
-	void Add(char *Name, char *Size, unsigned int Data);
-	FileTransferItemInfo();
-	virtual ~FileTransferItemInfo();
 
-private:
-	int ConvertCharToInt(char *pStr);
-	FTITEMINFO * m_pEntries;
-	int m_NumEntries;
+class FileTransferItemInfo
+{
+  public:
+    int GetIntSizeAt(int Number);
+    static const char folderText[];
+    int GetNumEntries();
+    char * GetSizeAt(int Number);
+    char * GetNameAt(int Number);
+    unsigned int GetDataAt(int Number);
+    bool IsFile(int Number);
+    void Sort();
+    void Free();
+    void Add(char *Name, char *Size, unsigned int Data);
+    FileTransferItemInfo();
+    virtual ~FileTransferItemInfo();
+
+  private:
+    int ConvertCharToInt(char *pStr);
+    FTITEMINFO * m_pEntries;
+    int m_NumEntries;
 };
 
 #endif // !defined(FILETRANSFERITEMINFO_H)

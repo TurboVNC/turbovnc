@@ -27,27 +27,28 @@
 
 #include "vncviewer.h"
 
+
 class LowLevelHook
 {
-public:
-	static void Initialize(HINSTANCE);
-	static void Activate(HWND);
-	static bool isActive(HWND);
-	static void Deactivate();
-	static void Release();
+  public:
+    static void Initialize(HINSTANCE);
+    static void Activate(HWND);
+    static bool isActive(HWND);
+    static void Deactivate();
+    static void Release();
 
-	static DWORD WINAPI HookThreadProc(LPVOID);
+    static DWORD WINAPI HookThreadProc(LPVOID);
 
-private:
-	static LRESULT CALLBACK VncLowLevelKbHookProc(INT, WPARAM, LPARAM);
+  private:
+    static LRESULT CALLBACK VncLowLevelKbHookProc(INT, WPARAM, LPARAM);
 
-	static HWND g_hwndVNCViewer;
-	static DWORD g_VncProcessID;
-	static HHOOK g_HookID;
+    static HWND g_hwndVNCViewer;
+    static DWORD g_VncProcessID;
+    static HHOOK g_HookID;
 
-	// adzm 2009-09-25 - Hook installed on separate thread
-	static HANDLE g_hThread;
-	static DWORD g_nThreadID;
+    // adzm 2009-09-25 - Hook installed on separate thread
+    static HANDLE g_hThread;
+    static DWORD g_nThreadID;
 
-	static omni_mutex g_Mutex;
+    static omni_mutex g_Mutex;
 };

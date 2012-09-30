@@ -17,8 +17,6 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
 //  USA.
 
-// ConnectingDialog
-
 #if (!defined(_VNC_CONNECTINGDIALOG))
 #define _VNC_CONNECTINGDIALOG
 
@@ -26,15 +24,14 @@ class ConnDialogThread;
 
 class ConnectingDialog
 {
-public:
-	ConnectingDialog(HINSTANCE hInst, const char *vnchost);
-	~ConnectingDialog();
+  public:
+    ConnectingDialog(HINSTANCE hInst, const char *vnchost);
+    ~ConnectingDialog();
 
-	void SetStatus(const char *msg);
+    void SetStatus(const char *msg);
 
-private:
-	ConnDialogThread *m_thread;
+  private:
+    ConnDialogThread *m_thread;
 };
 
 #endif
-

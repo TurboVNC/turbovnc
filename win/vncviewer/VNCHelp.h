@@ -22,14 +22,17 @@
 
 #pragma once
 
-class VNCHelp  
+
+class VNCHelp
 {
-	DWORD m_dwCookie;
-public:
-	VNCHelp();
-	void VNCHelp::Popup(LPARAM lParam);
-	BOOL VNCHelp::TranslateMsg(MSG *pmsg);
-	virtual ~VNCHelp();
+  public:
+    VNCHelp();
+    void VNCHelp::Popup(LPARAM lParam);
+    BOOL VNCHelp::TranslateMsg(MSG *pmsg);
+    virtual ~VNCHelp();
+
+  private:
+    DWORD m_dwCookie;
 };
 
 #endif 

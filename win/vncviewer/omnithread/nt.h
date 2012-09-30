@@ -1,5 +1,5 @@
-//				Package : omnithread
-// omnithread/nt.h		Created : 6/95 tjr
+//                              Package : omnithread
+// omnithread/nt.h              Created : 6/95 tjr
 //
 //    Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
@@ -34,27 +34,27 @@
 
 extern "C" OMNI_THREAD_WRAPPER;
 
-#define OMNI_MUTEX_IMPLEMENTATION			\
+#define OMNI_MUTEX_IMPLEMENTATION                       \
     CRITICAL_SECTION crit;
 
-#define OMNI_CONDITION_IMPLEMENTATION			\
-    CRITICAL_SECTION crit;				\
-    omni_thread* waiting_head;				\
+#define OMNI_CONDITION_IMPLEMENTATION                   \
+    CRITICAL_SECTION crit;                              \
+    omni_thread* waiting_head;                          \
     omni_thread* waiting_tail;
 
-#define OMNI_SEMAPHORE_IMPLEMENTATION			\
+#define OMNI_SEMAPHORE_IMPLEMENTATION                   \
     HANDLE nt_sem;
 
-#define OMNI_THREAD_IMPLEMENTATION			\
-    HANDLE handle;					\
-    DWORD nt_id;					\
-    void* return_val;					\
-    HANDLE cond_semaphore;				\
-    omni_thread* cond_next;				\
-    omni_thread* cond_prev;				\
-    BOOL cond_waiting;					\
-    static int nt_priority(priority_t);			\
-    friend class omni_condition;			\
+#define OMNI_THREAD_IMPLEMENTATION                      \
+    HANDLE handle;                                      \
+    DWORD nt_id;                                        \
+    void* return_val;                                   \
+    HANDLE cond_semaphore;                              \
+    omni_thread* cond_next;                             \
+    omni_thread* cond_prev;                             \
+    BOOL cond_waiting;                                  \
+    static int nt_priority(priority_t);                 \
+    friend class omni_condition;                        \
     friend OMNI_THREAD_WRAPPER;
 
 #endif

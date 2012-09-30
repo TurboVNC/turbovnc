@@ -17,16 +17,9 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
 //  USA.
 
-
-/* 
- * vncauth.h - describes the functions provided by the vncauth library.
- */
-
 #define MAXPWLEN 8
 #define CHALLENGESIZE 16
 
 void vncEncryptBytes(unsigned char *bytes, char *passwd);
 void vncEncryptPasswd(unsigned char *encryptedPasswd, char *passwd);
 char *vncDecryptPasswd(const unsigned char *encryptedPasswd);
-
-

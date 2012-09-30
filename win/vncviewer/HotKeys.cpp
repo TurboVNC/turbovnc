@@ -16,95 +16,98 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
 //  USA.
 
-// HotKeys.cpp: implementation of the HotKeys class.
-
 #include "stdhdrs.h"
 #include "vncviewer.h"
 #include "HotKeys.h"
 
+
 HotKeys::HotKeys()
 {
-	m_hwnd = 0;
-	Init(false);
+  m_hwnd = 0;
+  Init(false);
 }
+
 
 void HotKeys::Init(bool FSAltEnter)
 {
-	const int MAX_ACCELS = 16;
-	ACCEL accel[MAX_ACCELS];
-	int i = 0;
+  const int MAX_ACCELS = 16;
+  ACCEL accel[MAX_ACCELS];
+  int i = 0;
 
-	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
-	accel[i].key = 0x4f;	// "O"
-	accel[i++].cmd = IDC_OPTIONBUTTON;
+  accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+  accel[i].key = 0x4f;  // "O"
+  accel[i++].cmd = IDC_OPTIONBUTTON;
 
-	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
-	accel[i].key = 0x49;	// "I"
-	accel[i++].cmd = ID_CONN_ABOUT;
+  accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+  accel[i].key = 0x49;  // "I"
+  accel[i++].cmd = ID_CONN_ABOUT;
 
-	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
-	accel[i].key = 0x46;	// "F"
-	accel[i++].cmd = ID_FULLSCREEN_NODIALOG;
+  accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+  accel[i].key = 0x46;  // "F"
+  accel[i++].cmd = ID_FULLSCREEN_NODIALOG;
 
-	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
-	accel[i].key = 0x47;	// "G"
-	accel[i++].cmd = ID_TOGGLE_GRAB;
+  accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+  accel[i].key = 0x47;  // "G"
+  accel[i++].cmd = ID_TOGGLE_GRAB;
 
-	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
-	accel[i].key = 0x52;	// "R"
-	accel[i++].cmd = ID_REQUEST_REFRESH;
+  accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+  accel[i].key = 0x52;  // "R"
+  accel[i++].cmd = ID_REQUEST_REFRESH;
 
-	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
-	accel[i].key = 0x4C;	// "L"
-	accel[i++].cmd = ID_REQUEST_LOSSLESS_REFRESH;
+  accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+  accel[i].key = 0x4C;  // "L"
+  accel[i++].cmd = ID_REQUEST_LOSSLESS_REFRESH;
 
-	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
-	accel[i].key = 0x4e;	// "N"
-	accel[i++].cmd = ID_NEWCONN;
+  accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+  accel[i].key = 0x4e;  // "N"
+  accel[i++].cmd = ID_NEWCONN;
 
-	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
-	accel[i].key = 0x53;	// "S"
-	accel[i++].cmd = ID_CONN_SAVE_AS;
+  accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+  accel[i].key = 0x53;  // "S"
+  accel[i++].cmd = ID_CONN_SAVE_AS;
 
-	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
-	accel[i].key = 0x54;	// "T"
-	accel[i++].cmd = ID_TOOLBAR;
+  accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+  accel[i].key = 0x54;  // "T"
+  accel[i++].cmd = ID_TOOLBAR;
 
-	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
-	accel[i].key = 0x45;	// "E"
-	accel[i++].cmd = IDD_FILETRANSFER;
+  accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+  accel[i].key = 0x45;  // "E"
+  accel[i++].cmd = IDD_FILETRANSFER;
 
-	accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
-	accel[i].key = 0x5A;	// "Z"
-	accel[i++].cmd = ID_DEFAULT_WINDOW_SIZE;
+  accel[i].fVirt = FVIRTKEY | FALT | FCONTROL | FSHIFT | FNOINVERT;
+  accel[i].key = 0x5A;  // "Z"
+  accel[i++].cmd = ID_DEFAULT_WINDOW_SIZE;
 
-	if(FSAltEnter) {
-		accel[i].fVirt = FVIRTKEY | FALT | FNOINVERT;
-		accel[i].key = VK_RETURN;	// Enter
-		accel[i++].cmd = ID_FULLSCREEN_NODIALOG;
-	}
+  if (FSAltEnter) {
+    accel[i].fVirt = FVIRTKEY | FALT | FNOINVERT;
+    accel[i].key = VK_RETURN; // Enter
+    accel[i++].cmd = ID_FULLSCREEN_NODIALOG;
+  }
 
-	int numKeys = i;
-	assert(numKeys <= MAX_ACCELS);
+  int numKeys = i;
+  assert(numKeys <= MAX_ACCELS);
 
-	Destroy();
-	m_hAccel = CreateAcceleratorTable((LPACCEL)accel, numKeys);
+  Destroy();
+  m_hAccel = CreateAcceleratorTable((LPACCEL)accel, numKeys);
 }
+
 
 bool HotKeys::TranslateAccel(MSG *pmsg)
 {
-	return (TranslateAccelerator(m_hwnd, m_hAccel, pmsg) != 0);
+  return (TranslateAccelerator(m_hwnd, m_hAccel, pmsg) != 0);
 }
+
 
 void HotKeys::Destroy(void)
 {
-	if(m_hAccel) {
-		DestroyAcceleratorTable(m_hAccel);
-		m_hAccel = 0;
-	}
+  if (m_hAccel) {
+    DestroyAcceleratorTable(m_hAccel);
+    m_hAccel = 0;
+  }
 }
+
 
 HotKeys::~HotKeys()
 {
-	Destroy();
+  Destroy();
 }

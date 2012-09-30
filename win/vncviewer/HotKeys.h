@@ -25,15 +25,17 @@
 
 class HotKeys
 {
-	HWND m_hwnd;
-	HACCEL m_hAccel;
-public:
-	HotKeys();
-	void SetWindow(HWND hwnd) { m_hwnd = hwnd; }
-	bool TranslateAccel(MSG *pmsg);
-	void Init(bool);
-	void Destroy(void);
-	virtual ~HotKeys();	
+  public:
+    HotKeys();
+    void SetWindow(HWND hwnd) { m_hwnd = hwnd; }
+    bool TranslateAccel(MSG *pmsg);
+    void Init(bool);
+    void Destroy(void);
+    virtual ~HotKeys();
+
+  private:
+    HWND m_hwnd;
+    HACCEL m_hAccel;
 };
 
-#endif 
+#endif

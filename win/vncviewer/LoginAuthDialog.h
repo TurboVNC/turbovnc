@@ -25,22 +25,23 @@
 
 #pragma once
 
-class LoginAuthDialog  
+
+class LoginAuthDialog
 {
-public:
-	TCHAR m_username[256];
-	TCHAR m_passwd[256];
+  public:
+    TCHAR m_username[256];
+    TCHAR m_passwd[256];
 
-	LoginAuthDialog(char *vnchost, char *title = NULL, char *username = NULL);
-	virtual ~LoginAuthDialog();
-	INT_PTR DoDialog();
+    LoginAuthDialog(char *vnchost, char *title = NULL, char *username = NULL);
+    virtual ~LoginAuthDialog();
+    INT_PTR DoDialog();
 
-	static BOOL CALLBACK DlgProc(HWND hwndDlg, UINT uMsg,
-								 WPARAM wParam, LPARAM lParam);
-private:
-	char m_title[256];
-	char *m_vnchost;
-	bool m_username_disabled;
+    static BOOL CALLBACK DlgProc(HWND hwndDlg, UINT uMsg,
+                                 WPARAM wParam, LPARAM lParam);
+  private:
+    char m_title[256];
+    char *m_vnchost;
+    bool m_username_disabled;
 };
 
 #endif // LOGINAUTHDIALOG_H__
