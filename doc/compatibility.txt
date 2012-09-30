@@ -63,13 +63,13 @@ TurboVNC with other VNC flavors.
 		{nl}{nl}
 
 	* TurboVNC supports an extension to the TightVNC protocol that allows the
-		server to tell the viewer not to use Zlib to decompress a particular
-		rectangle.  Zlib introduces a tremendous amount of performance overhead,
+		server to tell the viewer not to use zlib to decompress a particular
+		rectangle.  zlib introduces a tremendous amount of performance overhead,
 		even when compression level 0 (no compression) is used.  Thus, when a
-		TurboVNC viewer requests Zlib compression level 0 from the TurboVNC Server,
-		the TurboVNC Server bypasses Zlib altogether.  TightVNC and TigerVNC
-		servers do not support this extension, and thus they will still use Zlib to
-		"compress" data even if you request no Zlib compression using the TurboVNC
+		TurboVNC viewer requests zlib compression level 0 from the TurboVNC Server,
+		the TurboVNC Server bypasses zlib altogether.  TightVNC and TigerVNC
+		servers do not support this extension, and thus they will still use zlib to
+		"compress" data even if you request no zlib compression using the TurboVNC
 		Viewer.
 		{nl}{nl}
 
@@ -95,14 +95,14 @@ TurboVNC with other VNC flavors.
 		server, setting the compression level to 0 in the viewer will, in certain
 		cases, cause the connection to abort with a "bad subencoding value" error.
 		This is because the TurboVNC Server is attempting to send the image tiles
-		with no Zlib compression, and the TightVNC and TigerVNC viewers don't
+		with no zlib compression, and the TightVNC and TigerVNC viewers don't
 		support this.
 		{nl}{nl}
 
 	* The TurboVNC Server only supports compression levels 1-2 if JPEG encoding
 		is enabled, and compression levels 0-1 if JPEG encoding is disabled.
 		Extensive experimentation has shown that TurboVNC's encoding methods cannot
-		produce significantly tighter output by increasing the Zlib compression
+		produce significantly tighter output by increasing the zlib compression
 		level beyond this, except on rare corner cases (such as the console output
 		of a large compilation) that are not performance-critical to begin with.
 		In general, increasing the Compression Level from 1 to 2 with JPEG enabled

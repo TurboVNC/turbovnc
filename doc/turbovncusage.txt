@@ -197,10 +197,10 @@ images:
 		any difference between 1X, 2X, and 4X.
 
 	Zlib compression level :: {:}
-		If Zlib compression is enabled, then indexed color, mono, and raw-encoded
-		subrectangles will be compressed with Zlib prior to transmission.  This
+		If zlib compression is enabled, then indexed color, mono, and raw-encoded
+		subrectangles will be compressed with zlib prior to transmission.  This
 		decreases network bandwidth usage at the expense of increased CPU usage.
-		If JPEG compression is enabled, then Zlib compression is always used with
+		If JPEG compression is enabled, then zlib compression is always used with
 		non-JPEG subrectangles.
 
 In the Windows and Java TurboVNC Viewers, these parameters can be adjusted by
@@ -244,7 +244,7 @@ above:
 | "Lossless Tight + Zlib" | No | N/A | N/A | 1 | \
 	This encoding method uses indexed color subencoding for subrectangles with \
 	a low number of unique colors and raw subencoding for subrectangles with a \
-	high number of unique colors.  It compresses all subrectangles using Zlib \
+	high number of unique colors.  It compresses all subrectangles using zlib \
 	with compression level 1.  For certain types of low-color workloads (CAD \
 	applications, in particular), this encoding method may use less network \
 	bandwidth than the "Tight + Perceptually Lossless JPEG" encoding method, \

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2012-09-27T18:18:16">
+<meta name="date" content="2012-09-30T18:34:16">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -247,7 +247,7 @@ as a color palette and an indexed bitmap containing 8 index bits per
 pixel (&ldquo;Indexed color subencoding&rdquo;), and subrectangles with 
 high numbers of unique colors are encoded using either JPEG or arrays of 
 RGB pixels (&ldquo;Raw subencoding&rdquo;), depending on the encoding 
-method.  Zlib can optionally be used to compress the indexed color, mono 
+method.  zlib can optionally be used to compress the indexed color, mono 
 and raw subrectangles.</p>
 
 <p>Part of TurboVNC&rsquo;s speedup comes from the use of libjpeg-turbo, 
@@ -258,7 +258,7 @@ good candidate for JPEG compression, and TurboVNC&rsquo;s encoding
 methods tend to favor the use of JPEG more, since it is now generally 
 the fastest subencoding type.  Furthermore, TurboVNC eliminates buffer 
 copies, it maximizes network efficiency by splitting framebuffer updates 
-into relatively large subrectangles, and it uses only the Zlib 
+into relatively large subrectangles, and it uses only the zlib 
 compression levels that can be shown to have a measurable performance 
 benefit.  TurboVNC can compress 3D and video workloads somewhat better 
 and many times faster than any mode that TightVNC 1.3.x provided, and 
@@ -914,10 +914,10 @@ TurboVNC compresses images:</p>
     </dd>
     <dt class="Description-1 Description">Zlib compression level</dt>
     <dd class="Description-1 Description">
-         If Zlib compression is enabled, then indexed color, mono, and 
-         raw-encoded subrectangles will be compressed with Zlib prior to 
+         If zlib compression is enabled, then indexed color, mono, and 
+         raw-encoded subrectangles will be compressed with zlib prior to 
          transmission.  This decreases network bandwidth usage at the expense of 
-         increased CPU usage. If JPEG compression is enabled, then Zlib 
+         increased CPU usage. If JPEG compression is enabled, then zlib 
          compression is always used with non-JPEG subrectangles.
     </dd>
 </dl>
@@ -984,7 +984,7 @@ options described above:</p>
     <td class="standard">N/A</td>
     <td class="standard">N/A</td>
     <td class="standard">1</td>
-    <td class="standard">This encoding method uses indexed color subencoding for subrectangles with a low number of unique colors and raw subencoding for subrectangles with a high number of unique colors.  It compresses all subrectangles using Zlib with compression level 1.  For certain types of low-color workloads (CAD applications, in particular), this encoding method may use less network bandwidth than the &ldquo;Tight + Perceptually Lossless JPEG&rdquo; encoding method, but it also uses significantly more CPU time than any of the JPEG-based encoding methods.</td>
+    <td class="standard">This encoding method uses indexed color subencoding for subrectangles with a low number of unique colors and raw subencoding for subrectangles with a high number of unique colors.  It compresses all subrectangles using zlib with compression level 1.  For certain types of low-color workloads (CAD applications, in particular), this encoding method may use less network bandwidth than the &ldquo;Tight + Perceptually Lossless JPEG&rdquo; encoding method, but it also uses significantly more CPU time than any of the JPEG-based encoding methods.</td>
   </tr>
 </table>
 </div>
@@ -1785,13 +1785,13 @@ mixing TurboVNC with other VNC flavors.</p>
     </li>
     <li class="Itemize-1 Itemize asterisk">
         TurboVNC supports an extension to the TightVNC protocol that allows the 
-        server to tell the viewer not to use Zlib to decompress a particular 
-        rectangle.  Zlib introduces a tremendous amount of performance overhead, 
+        server to tell the viewer not to use zlib to decompress a particular 
+        rectangle.  zlib introduces a tremendous amount of performance overhead, 
         even when compression level 0 (no compression) is used.  Thus, when a 
-        TurboVNC viewer requests Zlib compression level 0 from the TurboVNC 
-        Server, the TurboVNC Server bypasses Zlib altogether.  TightVNC and 
+        TurboVNC viewer requests zlib compression level 0 from the TurboVNC 
+        Server, the TurboVNC Server bypasses zlib altogether.  TightVNC and 
         TigerVNC servers do not support this extension, and thus they will still 
-        use Zlib to &ldquo;compress&rdquo; data even if you request no Zlib 
+        use zlib to &ldquo;compress&rdquo; data even if you request no zlib 
         compression using the TurboVNC Viewer. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -1825,7 +1825,7 @@ mixing TurboVNC with other VNC flavors.</p>
         server, setting the compression level to 0 in the viewer will, in 
         certain cases, cause the connection to abort with a &ldquo;bad 
         subencoding value&rdquo; error. This is because the TurboVNC Server is 
-        attempting to send the image tiles with no Zlib compression, and the 
+        attempting to send the image tiles with no zlib compression, and the 
         TightVNC and TigerVNC viewers don&rsquo;t support this. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
@@ -1833,7 +1833,7 @@ mixing TurboVNC with other VNC flavors.</p>
         encoding is enabled, and compression levels 0-1 if JPEG encoding is 
         disabled. Extensive experimentation has shown that TurboVNC&rsquo;s 
         encoding methods cannot produce significantly tighter output by 
-        increasing the Zlib compression level beyond this, except on rare corner 
+        increasing the zlib compression level beyond this, except on rare corner 
         cases (such as the console output of a large compilation) that are not 
         performance-critical to begin with. In general, increasing the 
         Compression Level from 1 to 2 with JPEG enabled will increase the CPU 
