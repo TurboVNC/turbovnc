@@ -29,6 +29,7 @@
 #include <sys/wait.h>
 #include <zlib.h>
 
+
 static void CleanupSignalHandler(int sig);
 static int CleanupXErrorHandler(Display *dpy, XErrorEvent *error);
 static int CleanupXIOErrorHandler(Display *dpy);
@@ -51,13 +52,13 @@ static const char *subsampLevel2str[TVNC_SAMPOPT] = {
   "1X", "4X", "2X", "Gray"
 };
 
+
 /*
  * HasEncoding returns True if the encodings string contains the given
  * substring.
  */
 
-Bool
-HasEncoding(const char *str)
+Bool HasEncoding(const char *str)
 {
   if (appData.encodingsString) {
     char *encStr = appData.encodingsString;
@@ -80,8 +81,7 @@ HasEncoding(const char *str)
 
 static int lastEncoding = -1;
 
-void
-SetLastEncoding(int enc)
+void SetLastEncoding(int enc)
 {
   char *titleFormat, title[1024], *ptr;
   if (enc != lastEncoding) {
@@ -100,8 +100,7 @@ SetLastEncoding(int enc)
  * Update window title
  */
 
-void
-UpdateTitleString(char *str, int len)
+void UpdateTitleString(char *str, int len)
 {
   if ((!appData.encodingsString || HasEncoding("tight")) &&
       (lastEncoding < 0 || lastEncoding == rfbEncodingTight)) {
@@ -130,12 +129,11 @@ UpdateTitleString(char *str, int len)
 
 
 /*
- * ToplevelInitBeforeRealization sets the title, geometry and other resources
- * on the toplevel window.
+ * ToplevelInitBeforeRealization() sets the title, geometry, and other
+ * resources on the toplevel window.
  */
 
-void
-ToplevelInitBeforeRealization()
+void ToplevelInitBeforeRealization()
 {
   char *titleFormat;
   char *title;
@@ -159,9 +157,8 @@ ToplevelInitBeforeRealization()
   dpyWidth = WidthOfScreen(DefaultScreenOfDisplay(dpy));
   dpyHeight = HeightOfScreen(DefaultScreenOfDisplay(dpy));
 
-  /* not full screen - work out geometry for middle of screen unless
+  /* not full-screen - work out geometry for middle of screen, unless
      specified by user */
-
   XtVaGetValues(toplevel, XtNgeometry, &geometry, NULL);
 
   if (geometry == NULL) {
@@ -179,9 +176,8 @@ ToplevelInitBeforeRealization()
 
     toplevelY = (dpyHeight - toplevelHeight - appData.wmDecorationHeight) /2;
 
-    /* set position via "geometry" so that window manager thinks it's a
-       user-specified position and therefore honours it */
-
+    /* set position via "geometry" so that the window manager thinks it's a
+       user-specified position and therefore honors it */
     geometry = XtMalloc(256);
 
     sprintf(geometry, "%dx%d+%d+%d",
@@ -191,7 +187,6 @@ ToplevelInitBeforeRealization()
 
   /* Test if the keyboard is grabbed.  If so, it's probably because the
      XDM login window is up, so try iconifying it to release the grab */
-
   if (XGrabKeyboard(dpy, DefaultRootWindow(dpy), False, GrabModeSync,
                     GrabModeSync, CurrentTime) == GrabSuccess) {
     XUngrabKeyboard(dpy, CurrentTime);
@@ -206,7 +201,6 @@ ToplevelInitBeforeRealization()
   }
 
   /* Set handlers for signals and X errors to perform cleanup */
-
   signal(SIGHUP, CleanupSignalHandler);
   signal(SIGINT, CleanupSignalHandler);
   signal(SIGTERM, CleanupSignalHandler);
@@ -218,22 +212,20 @@ ToplevelInitBeforeRealization()
 
 
 /*
- * ToplevelInitAfterRealization initialises things which require the X windows
+ * ToplevelInitAfterRealization() initialises things that require the X windows
  * to exist.  It goes into full-screen mode if appropriate, and tells the
- * window manager we accept the "delete window" message.
+ * window manager that we accept the "delete window" message.
  */
 
-void
-ToplevelInitAfterRealization()
+void ToplevelInitAfterRealization()
 {
-  if (appData.fullScreen) {
+  if (appData.fullScreen)
     FullScreenOn();
-  }
 
   wmDeleteWindow = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
   XSetWMProtocols(dpy, XtWindow(toplevel), &wmDeleteWindow, 1);
   XtOverrideTranslations
-      (toplevel, XtParseTranslationTable ("<Message>WM_PROTOCOLS: Quit()"));
+    (toplevel, XtParseTranslationTable ("<Message>WM_PROTOCOLS: Quit()"));
 }
 
 
@@ -242,51 +234,48 @@ ToplevelInitAfterRealization()
  * CurrentTime if the event has no time field.
  */
 
-Time
-TimeFromEvent(XEvent *ev)
+Time TimeFromEvent(XEvent *ev)
 {
   switch (ev->type) {
-  case KeyPress:
-  case KeyRelease:
-    return ev->xkey.time;
-  case ButtonPress:
-  case ButtonRelease:
-    return ev->xbutton.time;
-  case MotionNotify:
-    return ev->xmotion.time;
-  case EnterNotify:
-  case LeaveNotify:
-    return ev->xcrossing.time;
-  case PropertyNotify:
-    return ev->xproperty.time;
-  case SelectionClear:
-    return ev->xselectionclear.time;
-  case SelectionRequest:
-    return ev->xselectionrequest.time;
-  case SelectionNotify:
-    return ev->xselection.time;
-  default:
-    return CurrentTime;
+    case KeyPress:
+    case KeyRelease:
+      return ev->xkey.time;
+    case ButtonPress:
+    case ButtonRelease:
+      return ev->xbutton.time;
+    case MotionNotify:
+      return ev->xmotion.time;
+    case EnterNotify:
+    case LeaveNotify:
+      return ev->xcrossing.time;
+    case PropertyNotify:
+      return ev->xproperty.time;
+    case SelectionClear:
+      return ev->xselectionclear.time;
+    case SelectionRequest:
+      return ev->xselectionrequest.time;
+    case SelectionNotify:
+      return ev->xselection.time;
+    default:
+      return CurrentTime;
   }
 }
 
 
 /*
- * Pause is an action which pauses for a number of milliseconds (100 by
+ * Pause() is an action that pauses for a number of milliseconds (100 by
  * default).  It is sometimes useful to space out "fake" pointer events
  * generated by SendRFBEvent.
  */
 
-void
-Pause(Widget w, XEvent *event, String *params, Cardinal *num_params)
+void Pause(Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
   int msec;
 
-  if (*num_params == 0) {
+  if (*num_params == 0)
     msec = 100;
-  } else {
+  else
     msec = atoi(params[0]);
-  }
 
   usleep(msec * 1000);
 }
@@ -295,52 +284,55 @@ Pause(Widget w, XEvent *event, String *params, Cardinal *num_params)
 /*
  * Run an arbitrary command via execvp()
  */
-void
-RunCommand(Widget w, XEvent *event, String *params, Cardinal *num_params)
+
+void RunCommand(Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
   int childstatus;
 
   if (*num_params == 0)
     return;
 
-  if (fcntl (ConnectionNumber (dpy), F_SETFD, 1L) == -1)
-      fprintf(stderr, "warning: file descriptor %d unusable for spawned program", ConnectionNumber(dpy));
-  
-  if (fcntl (rfbsock, F_SETFD, 1L) == -1)
-      fprintf(stderr, "warning: file descriptor %d unusable for spawned program", rfbsock);
+  if (fcntl(ConnectionNumber (dpy), F_SETFD, 1L) == -1)
+      fprintf(stderr, "warning: file descriptor %d unusable for spawned program",
+              ConnectionNumber(dpy));
+
+  if (fcntl(rfbsock, F_SETFD, 1L) == -1)
+      fprintf(stderr, "warning: file descriptor %d unusable for spawned program",
+              rfbsock);
 
   switch (fork()) {
-  case -1: 
-    perror("fork"); 
-    break;
-  case 0:
+    case -1:
+      perror("fork");
+      break;
+
+    case 0:
       /* Child 1. Fork again. */
       switch (fork()) {
-      case -1:
+        case -1:
           perror("fork");
           break;
 
-      case 0:
+        case 0:
           /* Child 2. Do some work. */
           execvp(params[0], params);
           perror("exec");
           exit(1);
-          break;  
+          break;
 
-      default:
+        default:
           break;
       }
 
       /* Child 1. Exit, and let init adopt our child */
       exit(0);
 
-  default:
-    break;
+    default:
+      break;
   }
 
   /* Wait for Child 1 to die */
   wait(&childstatus);
-  
+
   return;
 }
 
@@ -349,8 +341,7 @@ RunCommand(Widget w, XEvent *event, String *params, Cardinal *num_params)
  * Quit action - called when we get a "delete window" message.
  */
 
-void
-Quit(Widget w, XEvent *event, String *params, Cardinal *num_params)
+void Quit(Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
   Cleanup();
   exit(0);
@@ -361,8 +352,7 @@ Quit(Widget w, XEvent *event, String *params, Cardinal *num_params)
  * Cleanup - perform any cleanup operations prior to exiting.
  */
 
-void
-Cleanup()
+void Cleanup()
 {
   if (xloginIconified) {
     IconifyNamedWindow(DefaultRootWindow(dpy), "xlogin", True);
@@ -376,32 +366,28 @@ Cleanup()
   UngrabKeyboard();
 }
 
-static int
-CleanupXErrorHandler(Display *dpy, XErrorEvent *error)
+static int CleanupXErrorHandler(Display *dpy, XErrorEvent *error)
 {
   fprintf(stderr, "CleanupXErrorHandler called\n");
   Cleanup();
   return (*defaultXErrorHandler)(dpy, error);
 }
 
-static int
-CleanupXIOErrorHandler(Display *dpy)
+static int CleanupXIOErrorHandler(Display *dpy)
 {
   fprintf(stderr, "CleanupXIOErrorHandler called\n");
   Cleanup();
   return (*defaultXIOErrorHandler)(dpy);
 }
 
-static void
-CleanupXtErrorHandler(String message)
+static void CleanupXtErrorHandler(String message)
 {
   fprintf(stderr, "CleanupXtErrorHandler called\n");
   Cleanup();
   (*defaultXtErrorHandler)(message);
 }
 
-static void
-CleanupSignalHandler(int sig)
+static void CleanupSignalHandler(int sig)
 {
   fprintf(stderr, "CleanupSignalHandler called\n");
   Cleanup();
@@ -413,8 +399,7 @@ CleanupSignalHandler(int sig)
  * IconifyNamedWindow iconifies another client's window with the given name.
  */
 
-static Bool
-IconifyNamedWindow(Window w, char *name, Bool undo)
+static Bool IconifyNamedWindow(Window w, char *name, Bool undo)
 {
   Window *children, dummy;
   unsigned int nchildren;
@@ -459,13 +444,13 @@ IconifyNamedWindow(Window w, char *name, Bool undo)
   return False;
 }
 
+
 /*
  * Measure how long it takes to decode and display a pre-encoded RFB session
  * capture.
  */
 
-Bool
-RunBenchmark(void)
+Bool RunBenchmark(void)
 {
   int i, stream_id;
   double tStart, tTotal, tAvg = 0.0, tAvgDecode = 0.0, tAvgBlit = 0.0;

@@ -33,6 +33,7 @@
 #include <assert.h>
 #include <vncviewer.h>
 
+
 void PrintInHex(char *buf, int len);
 
 Bool errorMessageOnReadFailure = True;
@@ -43,30 +44,32 @@ static char *bufoutptr = buf;
 static int buffered = 0;
 int family = AF_INET;
 
+
 /*
  * ReadFromRFBServer is called whenever we want to read some data from the RFB
  * server.  It is non-trivial for two reasons:
  *
- * 1. For efficiency it performs some intelligent buffering, avoiding invoking
+ * 1. For efficiency, it performs some intelligent buffering, avoiding invoking
  *    the read() system call too often.  For small chunks of data, it simply
- *    copies the data out of an internal buffer.  For large amounts of data it
+ *    copies the data out of an internal buffer.  For large amounts of data, it
  *    reads directly into the buffer provided by the caller.
  *
  * 2. Whenever read() would block, it invokes the Xt event dispatching
- *    mechanism to process X events.  In fact, this is the only place these
- *    events are processed, as there is no XtAppMainLoop in the program.
+ *    mechanism to process X events.  In fact, this is the only place where
+ *    these events are processed, as there is no XtAppMainLoop() in the
+ *    program.
  */
 
 static Bool rfbsockReady = False;
-static void
-rfbsockReadyCallback(XtPointer clientData, int *fd, XtInputId *id)
+
+static void rfbsockReadyCallback(XtPointer clientData, int *fd, XtInputId *id)
 {
   rfbsockReady = True;
   XtRemoveInput(*id);
 }
 
-static void
-ProcessXtEvents()
+
+static void ProcessXtEvents()
 {
   rfbsockReady = False;
   XtAppAddInput(appContext, rfbsock, (XtPointer)XtInputReadMask,
@@ -76,8 +79,8 @@ ProcessXtEvents()
   }
 }
 
-Bool
-ReadFromRFBServer(char *out, unsigned int n)
+
+Bool ReadFromRFBServer(char *out, unsigned int n)
 {
   double tRecvStart = 0.0;
 
@@ -176,8 +179,7 @@ ReadFromRFBServer(char *out, unsigned int n)
  * Write an exact number of bytes, and don't return until you've sent them.
  */
 
-Bool
-WriteExact(int sock, char *buf, int n)
+Bool WriteExact(int sock, char *buf, int n)
 {
   fd_set fds;
   int i = 0;
@@ -213,12 +215,7 @@ WriteExact(int sock, char *buf, int n)
 }
 
 
-/*
- * ConnectToTcpAddr connects to the given TCP port.
- */
-
-int
-ConnectToTcpAddr(const char *hostname, int port)
+int ConnectToTcpAddr(const char *hostname, int port)
 {
   char portname[10];
   int sock;
@@ -266,14 +263,12 @@ ConnectToTcpAddr(const char *hostname, int port)
 }
 
 
-
 /*
- * FindFreeTcpPort tries to find unused TCP port in the range
- * (TUNNEL_PORT_OFFSET, TUNNEL_PORT_OFFSET + 99]. Returns 0 on failure.
+ * FindFreeTcpPort() tries to find an unused TCP port in the range
+ * (TUNNEL_PORT_OFFSET, TUNNEL_PORT_OFFSET + 99].  Returns 0 on failure.
  */
 
-int
-FindFreeTcpPort(void)
+int FindFreeTcpPort(void)
 {
   int sock;
   struct sockaddr_in addr;
@@ -309,12 +304,7 @@ FindFreeTcpPort(void)
 }
 
 
-/*
- * ListenAtTcpPort starts listening at the given TCP port.
- */
-
-int
-ListenAtTcpPort(int port)
+int ListenAtTcpPort(int port)
 {
   int sock;
   struct sockaddr_storage addr;
@@ -369,12 +359,7 @@ ListenAtTcpPort(int port)
 }
 
 
-/*
- * AcceptTcpConnection accepts a TCP connection.
- */
-
-int
-AcceptTcpConnection(int listenSock)
+int AcceptTcpConnection(int listenSock)
 {
   int sock;
   struct sockaddr_storage addr;
@@ -400,12 +385,7 @@ AcceptTcpConnection(int listenSock)
 }
 
 
-/*
- * SetNonBlocking sets a socket into non-blocking mode.
- */
-
-Bool
-SetNonBlocking(int sock)
+Bool SetNonBlocking(int sock)
 {
   if (fcntl(sock, F_SETFL, O_NONBLOCK) < 0) {
     fprintf(stderr, "%s", programName);
@@ -416,12 +396,7 @@ SetNonBlocking(int sock)
 }
 
 
-/*
- * Test if the other end of a socket is on the same machine.
- */
-
-Bool
-SameMachine(int sock)
+Bool SameMachine(int sock)
 {
   struct sockaddr_storage peeraddr, myaddr;
   struct sockaddr_in *peeraddr4 = (struct sockaddr_in *)&peeraddr;
@@ -445,8 +420,7 @@ SameMachine(int sock)
  * Print out the contents of a packet for debugging.
  */
 
-void
-PrintInHex(char *buf, int len)
+void PrintInHex(char *buf, int len)
 {
   int i, j;
   char c, str[17];

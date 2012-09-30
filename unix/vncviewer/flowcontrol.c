@@ -28,8 +28,7 @@ Bool supportsSyncFence = False;
 Bool pendingSyncFence = False;
 
 
-Bool
-HandleFence(CARD32 flags, unsigned len, const char *data)
+Bool HandleFence(CARD32 flags, unsigned len, const char *data)
 {
   if (flags & rfbFenceFlagRequest) {
     /* We handle everything synchronously, so we trivially honor these modes */
@@ -60,8 +59,7 @@ HandleFence(CARD32 flags, unsigned len, const char *data)
 }
 
 
-Bool
-SendEnableContinuousUpdates(Bool enable, int x, int y, int w, int h)
+Bool SendEnableContinuousUpdates(Bool enable, int x, int y, int w, int h)
 {
   rfbEnableContinuousUpdatesMsg ecu;
 
@@ -85,8 +83,7 @@ SendEnableContinuousUpdates(Bool enable, int x, int y, int w, int h)
 }
 
 
-Bool
-SendFence(CARD32 flags, unsigned len, const char *data)
+Bool SendFence(CARD32 flags, unsigned len, const char *data)
 {
   rfbFenceMsg f;
 

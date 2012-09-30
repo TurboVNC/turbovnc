@@ -22,10 +22,6 @@
  *  USA.
  */
 
-/*
- * argsresources.c - deal with command-line args and resources.
- */
-
 #include <ctype.h>
 #include "vncviewer.h"
 #include "vncauth.h"
@@ -185,7 +181,7 @@ char *fallback_resources[] = {
   <Btn1Motion>: MoveThumb() NotifyThumb()\\n\
   <Btn3Down>: StartScroll(Continuous) MoveThumb() NotifyThumb()\\n\
   <Btn3Motion>: MoveThumb() NotifyThumb()",
-    
+
 "*qualText.label: 000",
 
 "*subsampLabel.label: JPEG Chrominance Subsampling\\n[4X = fastest]\\n[None = best quality]",
@@ -193,7 +189,7 @@ char *fallback_resources[] = {
 "*subsamp4X.label: 4X",
 "*subsamp2X.label: 2X",
 "*subsamp1X.label: None",
-  
+
 "*enableJPEG.label: Enable JPEG Compression",
 
 "*enableZlib.label: Enable Zlib Compression",
@@ -345,16 +341,16 @@ static XtResource appDataResourceList[] = {
    XtOffsetOf(AppData, useBGR233), XtRImmediate, (XtPointer) False},
 
   {"nColors", "NColors", XtRInt, sizeof(int),
-   XtOffsetOf(AppData, nColours), XtRImmediate, (XtPointer) 256},
+   XtOffsetOf(AppData, nColors), XtRImmediate, (XtPointer) 256},
 
   {"SharedColors", "SharedColors", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, useSharedColours), XtRImmediate, (XtPointer) True},
+   XtOffsetOf(AppData, useSharedColors), XtRImmediate, (XtPointer) True},
 
   {"forceOwnCmap", "ForceOwnCmap", XtRBool, sizeof(Bool),
    XtOffsetOf(AppData, forceOwnCmap), XtRImmediate, (XtPointer) False},
 
   {"forceTrueColor", "ForceTrueColor", XtRBool, sizeof(Bool),
-   XtOffsetOf(AppData, forceTrueColour), XtRImmediate, (XtPointer) False},
+   XtOffsetOf(AppData, forceTrueColor), XtRImmediate, (XtPointer) False},
 
   {"requestedDepth", "RequestedDepth", XtRInt, sizeof(int),
    XtOffsetOf(AppData, requestedDepth), XtRImmediate, (XtPointer) 0},
@@ -483,41 +479,40 @@ int numCmdLineOptions = XtNumber(cmdLineOptions);
  */
 
 static XtActionsRec actions[] = {
-    {"SendRFBEvent", SendRFBEvent},
-    {"QualHigh", QualHigh},
-    {"QualLow", QualLow},
-    {"QualMed", QualMed},
-    {"QualLossless", QualLossless},
-    {"QualLosslessWAN", QualLosslessWAN},
-    {"LosslessRefresh", LosslessRefresh},
-    {"ShowPopup", ShowPopup},
-    {"HidePopup", HidePopup},
-    {"ToggleFullScreen", ToggleFullScreen},
-    {"SetFullScreenState", SetFullScreenState},
-    {"ToggleGrabKeyboard", ToggleGrabKeyboard},
-    {"SetGrabKeyboardState", SetGrabKeyboardState},
-    {"SelectionFromVNC", SelectionFromVNC},
-    {"SelectionToVNC", SelectionToVNC},
-    {"ServerDialogDone", ServerDialogDone},
-    {"PasswordDialogDone", PasswordDialogDone},
-    {"Nothing", NULL},
-    {"UserPwdDialogDone", UserPwdDialogDone},
-    {"UserPwdNextField", UserPwdNextField},
-    {"UserPwdSetFocus", UserPwdSetFocus},
-    {"Pause", Pause},
-    {"RunCommand", RunCommand},
-    {"Quit", Quit},
-    {"SetViewOnlyState", SetViewOnlyState},
-    {"ToggleViewOnly", ToggleViewOnly}
+  {"SendRFBEvent", SendRFBEvent},
+  {"QualHigh", QualHigh},
+  {"QualLow", QualLow},
+  {"QualMed", QualMed},
+  {"QualLossless", QualLossless},
+  {"QualLosslessWAN", QualLosslessWAN},
+  {"LosslessRefresh", LosslessRefresh},
+  {"ShowPopup", ShowPopup},
+  {"HidePopup", HidePopup},
+  {"ToggleFullScreen", ToggleFullScreen},
+  {"SetFullScreenState", SetFullScreenState},
+  {"ToggleGrabKeyboard", ToggleGrabKeyboard},
+  {"SetGrabKeyboardState", SetGrabKeyboardState},
+  {"SelectionFromVNC", SelectionFromVNC},
+  {"SelectionToVNC", SelectionToVNC},
+  {"ServerDialogDone", ServerDialogDone},
+  {"PasswordDialogDone", PasswordDialogDone},
+  {"Nothing", NULL},
+  {"UserPwdDialogDone", UserPwdDialogDone},
+  {"UserPwdNextField", UserPwdNextField},
+  {"UserPwdSetFocus", UserPwdSetFocus},
+  {"Pause", Pause},
+  {"RunCommand", RunCommand},
+  {"Quit", Quit},
+  {"SetViewOnlyState", SetViewOnlyState},
+  {"ToggleViewOnly", ToggleViewOnly}
 };
 
 
 /*
- * removeArgs() is used to remove some of command line arguments.
+ * removeArgs() is used to remove some of the command-line arguments.
  */
 
-void
-removeArgs(int *argc, char** argv, int idx, int nargs)
+void removeArgs(int *argc, char** argv, int idx, int nargs)
 {
   int i;
   if ((idx + nargs) > *argc) return;
@@ -527,12 +522,8 @@ removeArgs(int *argc, char** argv, int idx, int nargs)
   *argc -= nargs;
 }
 
-/*
- * usage() prints out the usage message.
- */
 
-void
-usage(void)
+void usage(void)
 {
   fprintf(stderr,
           "\nTurboVNC Viewer %d-bit v"__VERSION" (build "__BUILD")\n"
@@ -619,8 +610,7 @@ static const char *encodingString[17] = {
 
 char encryptedPassword[9] = "";
 
-void
-LoadConfigFile(char *filename)
+void LoadConfigFile(char *filename)
 {
   FILE *fp;
   char buf[256], buf2[256];
@@ -747,8 +737,7 @@ LoadConfigFile(char *filename)
  * vncServerPort and all the fields in appData.
  */
 
-void
-GetArgsAndResources(int argc, char **argv)
+void GetArgsAndResources(int argc, char **argv)
 {
   char *vncServerName, *colonPos;
   int len, portOffset;
@@ -833,9 +822,9 @@ GetArgsAndResources(int argc, char **argv)
   XtAppAddActions(appContext, actions, XtNumber(actions));
   if (benchFile) return;
 
-  /* Check any remaining command-line arguments.  If -listen was specified
-     there should be none.  Otherwise the only argument should be the VNC
-     server name.  If not given then pop up a dialog box and wait for the
+  /* Check any remaining command-line arguments.  If -listen was specified,
+     there should be none.  Otherwise, the only argument should be the VNC
+     server name.  If not given, then pop up a dialog box and wait for the
      server name to be entered. */
 
   if (listenSpecified) {

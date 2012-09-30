@@ -19,27 +19,25 @@
  *  USA.
  */
 
-/*
- * dialog.c - code to deal with dialog boxes.
- */
-
 #include "vncviewer.h"
 #include <X11/Xaw/Dialog.h>
 #include <X11/Xaw/Form.h>
 #include <X11/Xaw/Label.h>
 #include <X11/Xaw/AsciiText.h>
 
+
 static Bool serverDialogDone = False;
 static Bool passwordDialogDone = False;
 
-void
-ServerDialogDone(Widget w, XEvent *event, String *params, Cardinal *num_params)
+
+void ServerDialogDone(Widget w, XEvent *event, String *params,
+                      Cardinal *num_params)
 {
   serverDialogDone = True;
 }
 
-char *
-DoServerDialog()
+
+char *DoServerDialog()
 {
   Widget pshell, dialog;
   char *vncServerName;
@@ -56,9 +54,8 @@ DoServerDialog()
 
   serverDialogDone = False;
 
-  while (!serverDialogDone) {
+  while (!serverDialogDone)
     XtAppProcessEvent(appContext, XtIMAll);
-  }
 
   valueString = XawDialogGetValueString(dialog);
   vncServerName = XtNewString(valueString);
@@ -67,15 +64,15 @@ DoServerDialog()
   return vncServerName;
 }
 
-void
-PasswordDialogDone(Widget w, XEvent *event, String *params,
-                   Cardinal *num_params)
+
+void PasswordDialogDone(Widget w, XEvent *event, String *params,
+                        Cardinal *num_params)
 {
   passwordDialogDone = True;
 }
 
-char *
-DoPasswordDialog()
+
+char *DoPasswordDialog()
 {
   Widget pshell, dialog;
   char *password;
@@ -103,22 +100,22 @@ DoPasswordDialog()
   return password;
 }
 
+
 static Bool userPwdDialogDone = False;
 
-void
-UserPwdDialogDone(Widget w, XEvent *event, String *params,
-                   Cardinal *num_params)
+void UserPwdDialogDone(Widget w, XEvent *event, String *params,
+                       Cardinal *num_params)
 {
   userPwdDialogDone = True;
 }
+
 
 static Widget userPwdForm;
 static Widget pwdField;
 static Widget userField;
 
-void
-UserPwdNextField(Widget w, XEvent *event, String *params,
-                 Cardinal *num_params)
+void UserPwdNextField(Widget w, XEvent *event, String *params,
+                      Cardinal *num_params)
 {
   if (userPwdForm == NULL)
     return;
@@ -134,9 +131,9 @@ UserPwdNextField(Widget w, XEvent *event, String *params,
   }
 }
 
-void
-UserPwdSetFocus(Widget w, XEvent *event, String *params,
-                Cardinal *num_params)
+
+void UserPwdSetFocus(Widget w, XEvent *event, String *params,
+                     Cardinal *num_params)
 {
   if (userPwdForm == NULL)
     return;
@@ -152,8 +149,8 @@ UserPwdSetFocus(Widget w, XEvent *event, String *params,
   }
 }
 
-void
-DoUserPwdDialog(char** user, char** password)
+
+void DoUserPwdDialog(char** user, char** password)
 {
   Widget pshell;
   Widget userLabel;

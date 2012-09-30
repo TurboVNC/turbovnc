@@ -21,13 +21,10 @@
  */
 
 /*
- * tight.c - handle ``tight'' encoding.
- *
- * This file shouldn't be compiled directly. It is included multiple
- * times by rfbproto.c, each time with a different definition of the
- * macro BPP. For each value of BPP, this file defines a function
- * which handles a tight-encoded rectangle with BPP bits per pixel.
- *
+ * This file shouldn't be compiled directly.  It is included multiple times by
+ * rfbproto.c, each time with a different definition of the macro BPP.  For
+ * each value of BPP, this file defines a function that handles a tight-encoded
+ * rectangle with BPP bits per pixel.
  */
 
 #define TIGHT_MIN_TO_COMPRESS 12
@@ -68,6 +65,7 @@
 
 #endif
 
+
 extern XImage *image;
 
 /* Type declarations */
@@ -79,20 +77,20 @@ typedef Bool (*filterPtrBPP)(threadparam *, int, int, int, int);
 static int InitFilterCopyBPP (void);
 static int InitFilterPaletteBPP (char *tightPalette, int *);
 static int InitFilterGradientBPP (int rw);
-static Bool FilterCopyBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRows);
-static Bool FilterPaletteBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRows);
-static Bool FilterGradientBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRows);
+static Bool FilterCopyBPP(threadparam *t, int srcx, int srcy, int rectWidth,
+                          int numRows);
+static Bool FilterPaletteBPP(threadparam *t, int srcx, int srcy, int rectWidth,
+                             int numRows);
+static Bool FilterGradientBPP(threadparam *t, int srcx, int srcy,
+                              int rectWidth, int numRows);
 
 static Bool DecompressJpegRectBPP(threadparam *t, int x, int y, int w, int h);
 static Bool DecompressZlibRectBPP(threadparam *t, int x, int y, int w, int h);
 
 
-/* Definitions */
-
-static Bool
-HandleTightBPP (int rx, int ry, int rw, int rh)
+static Bool HandleTightBPP (int rx, int ry, int rw, int rh)
 {
-  CARDBPP fill_colour;
+  CARDBPP fill_color;
   XGCValues gcv;
   CARD8 comp_ctl;
   CARD8 filter_id;
@@ -131,21 +129,21 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
         myFormat.greenMax == 0xFF && myFormat.blueMax == 0xFF) {
       if (!ReadFromRFBServer(buffer, 3))
         return False;
-      fill_colour = RGB24_TO_PIXEL32(buffer[0], buffer[1], buffer[2]);
+      fill_color = RGB24_TO_PIXEL32(buffer[0], buffer[1], buffer[2]);
     } else {
-      if (!ReadFromRFBServer((char*)&fill_colour, sizeof(fill_colour)))
+      if (!ReadFromRFBServer((char*)&fill_color, sizeof(fill_color)))
         return False;
     }
 #else
-    if (!ReadFromRFBServer((char*)&fill_colour, sizeof(fill_colour)))
+    if (!ReadFromRFBServer((char*)&fill_color, sizeof(fill_color)))
         return False;
 #endif
 
 #if (BPP == 8)
     gcv.foreground = (appData.useBGR233) ?
-      BGR233ToPixel[fill_colour] : fill_colour;
+      BGR233ToPixel[fill_color] : fill_color;
 #else
-    gcv.foreground = fill_colour;
+    gcv.foreground = fill_color;
 #endif
 
     FillRectangle(&gcv, rx, ry, rw, rh);
@@ -342,6 +340,7 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
   }
 }
 
+
 /*----------------------------------------------------------------------------
  *
  * Filter stuff.
@@ -356,8 +355,7 @@ HandleTightBPP (int rx, int ry, int rw, int rh)
      static CARD8 tightPrevRow[2048 * 3 * sizeof(CARD16)];
 */
 
-static Bool
-DecompressZlibRectBPP(threadparam *t, int x, int y, int w, int h)
+static Bool DecompressZlibRectBPP(threadparam *t, int x, int y, int w, int h)
 {
   int err;
   z_streamp zs = t->zs;
@@ -380,8 +378,8 @@ DecompressZlibRectBPP(threadparam *t, int x, int y, int w, int h)
   return True;
 }
 
-static int
-InitFilterCopyBPP (void)
+
+static int InitFilterCopyBPP(void)
 {
 #if BPP == 32
   if (myFormat.depth == 24 && myFormat.redMax == 0xFF &&
@@ -396,8 +394,9 @@ InitFilterCopyBPP (void)
   return BPP;
 }
 
-static Bool
-FilterCopyBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRows)
+
+static Bool FilterCopyBPP(threadparam *t, int srcx, int srcy, int rectWidth,
+                          int numRows)
 {
   CARDBPP *dst = (CARDBPP *)&image->data[srcy * image->bytes_per_line +
                                          srcx * image->bits_per_pixel / 8];
@@ -440,8 +439,8 @@ FilterCopyBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRows)
   return True;
 }
 
-static int
-InitFilterGradientBPP (int rw)
+
+static int InitFilterGradientBPP (int rw)
 {
   int bits;
 
@@ -454,10 +453,11 @@ InitFilterGradientBPP (int rw)
   return bits;
 }
 
+
 #if BPP == 32
 
-static Bool
-FilterGradient24 (threadparam *t, int srcx, int srcy, int rectWidth, int numRows)
+static Bool FilterGradient24(threadparam *t, int srcx, int srcy, int rectWidth,
+                             int numRows)
 {
   CARDBPP *dst = (CARDBPP *)&image->data[srcy * image->bytes_per_line
                                          + srcx * image->bits_per_pixel/8];
@@ -511,8 +511,9 @@ FilterGradient24 (threadparam *t, int srcx, int srcy, int rectWidth, int numRows
 
 #endif
 
-static Bool
-FilterGradientBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRows)
+
+static Bool FilterGradientBPP(threadparam *t, int srcx, int srcy,
+                              int rectWidth, int numRows)
 {
   int x, y, c;
   CARDBPP *dst = (CARDBPP *)&image->data[srcy * image->bytes_per_line +
@@ -583,8 +584,8 @@ FilterGradientBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRow
   return True;
 }
 
-static int
-InitFilterPaletteBPP (char *tightPalette, int *rectColors)
+
+static int InitFilterPaletteBPP(char *tightPalette, int *rectColors)
 {
   CARD8 numColors;
 #if BPP == 32
@@ -619,8 +620,9 @@ InitFilterPaletteBPP (char *tightPalette, int *rectColors)
   return (*rectColors == 2) ? 1 : 8;
 }
 
-static Bool
-FilterPaletteBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRows)
+
+static Bool FilterPaletteBPP(threadparam *t, int srcx, int srcy, int rectWidth,
+                             int numRows)
 {
   int x, b;
   CARDBPP *dst = (CARDBPP *)&image->data[srcy * image->bytes_per_line +
@@ -685,8 +687,7 @@ FilterPaletteBPP (threadparam *t, int srcx, int srcy, int rectWidth, int numRows
      static size_t *jpegBufferLen;
 */
 
-static Bool
-DecompressJpegRectBPP(threadparam *t, int x, int y, int w, int h)
+static Bool DecompressJpegRectBPP(threadparam *t, int x, int y, int w, int h)
 {
   char *dstptr;
   int ps, pitch, flags = 0;
@@ -696,7 +697,7 @@ DecompressJpegRectBPP(threadparam *t, int x, int y, int w, int h)
       fprintf(stderr, "TurboJPEG error: %s\n", tjGetErrorStr());
       return False;
     }
-  }     
+  }
 
   ps = BPP / 8;
   if (myFormat.bigEndian && ps == 4) flags |= TJ_ALPHAFIRST;
@@ -765,4 +766,3 @@ DecompressJpegRectBPP(threadparam *t, int x, int y, int w, int h)
 
   return True;
 }
-

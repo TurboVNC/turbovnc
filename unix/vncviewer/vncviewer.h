@@ -23,10 +23,6 @@
  *  USA.
  */
 
-/*
- * vncviewer.h
- */
-
 #ifndef _POSIX_PTHREAD_SEMANTICS
 #define _POSIX_PTHREAD_SEMANTICS
 #endif
@@ -47,6 +43,7 @@
 #include <X11/Xmu/StdSel.h>
 #include "rfbproto.h"
 #include "caps.h"
+
 
 extern int endianTest;
 
@@ -84,6 +81,7 @@ enum {TVNC_1X = 0, TVNC_4X, TVNC_2X, TVNC_GRAY};
 #define TVNC_GRABOPT 3
 enum {TVNC_FS = 0, TVNC_ALWAYS, TVNC_MANUAL};
 
+
 /* argsresources.c */
 
 typedef struct {
@@ -99,10 +97,10 @@ typedef struct {
   String subsampString;
 
   Bool useBGR233;
-  int nColours;
-  Bool useSharedColours;
+  int nColors;
+  Bool useSharedColors;
   Bool forceOwnCmap;
-  Bool forceTrueColour;
+  Bool forceTrueColor;
   int requestedDepth;
 
   Bool useShm;
@@ -158,7 +156,8 @@ extern void removeArgs(int *argc, char** argv, int idx, int nargs);
 extern void usage(void);
 extern void GetArgsAndResources(int argc, char **argv);
 
-/* colour.c */
+
+/* color.c */
 
 extern unsigned long BGR233ToPixel[];
 
@@ -168,10 +167,12 @@ extern unsigned int visdepth, visbpp;
 
 extern void SetVisualAndCmap();
 
+
 /* cursor.c */
 
 extern Bool HandleCursorShape(int xhot, int yhot, int width, int height,
                               CARD32 enc);
+
 
 /* desktop.c */
 
@@ -197,6 +198,7 @@ extern void QualLossless(Widget, XEvent *, String *, Cardinal *);
 extern void QualLosslessWAN(Widget, XEvent *, String *, Cardinal *);
 extern void LosslessRefresh(Widget, XEvent *, String *, Cardinal *);
 
+
 /* dialogs.c */
 
 extern void ServerDialogDone(Widget w, XEvent *event, String *params,
@@ -214,6 +216,7 @@ extern void UserPwdDialogDone(Widget w, XEvent *event, String *params,
                              Cardinal *num_params);
 extern void DoUserPwdDialog(char** user, char** password);
 
+
 /* flowcontrol.c */
 
 extern Bool supportsCU;
@@ -225,6 +228,7 @@ extern Bool HandleFence(CARD32 flags, unsigned len, const char *data);
 extern Bool SendEnableContinuousUpdates(Bool enable, int x, int y, int w,
                                         int h);
 extern Bool SendFence(CARD32 flags, unsigned len, const char data[]);
+
 
 /* fullscreen.c */
 
@@ -242,9 +246,11 @@ extern void FullScreenOff();
 extern void GrabKeyboard();
 extern void UngrabKeyboard();
 
+
 /* listen.c */
 
 extern void listenForIncomingConnections();
+
 
 /* misc.c */
 
@@ -262,6 +268,7 @@ extern void UpdateTitleString(char *str, int len);
 extern void SetLastEncoding(int enc);
 extern Bool RunBenchmark(void);
 
+
 /* popup.c */
 
 extern Widget popup;
@@ -273,7 +280,8 @@ extern void CreatePopup();
 extern void SetCUState(Widget w, XEvent *ev, String *params,
                        Cardinal *num_params);
 extern void SetViewOnlyState(Widget w, XEvent *ev, String *params,
-                       Cardinal *num_params);
+                             Cardinal *num_params);
+
 
 /* rfbproto.c */
 
@@ -320,6 +328,7 @@ typedef struct _UpdateList {
 
 extern UpdateList *list, *node, *tail;
 
+
 /* selection.c */
 
 extern void InitialiseSelection();
@@ -328,10 +337,12 @@ extern void SelectionToVNC(Widget w, XEvent *event, String *params,
 extern void SelectionFromVNC(Widget w, XEvent *event, String *params,
                              Cardinal *num_params);
 
+
 /* shm.c */
 
 extern XImage *CreateShmImage();
 extern void ShmCleanup();
+
 
 /* sockets.c */
 
@@ -350,11 +361,13 @@ extern Bool SameMachine(int sock);
 
 extern int family;
 
+
 /* tunnel.c */
 
 extern Bool tunnelSpecified;
 
 extern Bool createTunnel(int *argc, char **argv, int tunnelArgIndex);
+
 
 /* vncviewer.c */
 

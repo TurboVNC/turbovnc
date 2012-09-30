@@ -7,7 +7,7 @@ add_definitions(-D__COPYRIGHT="${COPYRIGHT}" -D__URLTEXT="${URLTEXT}")
 add_executable(vncviewer
 argsresources.c
 caps.c
-colour.c
+color.c
 cursor.c
 desktop.c
 dialogs.c

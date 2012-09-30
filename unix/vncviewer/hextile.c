@@ -19,11 +19,9 @@
  */
 
 /*
- * hextile.c - handle hextile encoding.
- *
  * This file shouldn't be compiled directly.  It is included multiple times by
  * rfbproto.c, each time with a different definition of the macro BPP.  For
- * each value of BPP, this file defines a function which handles a hextile
+ * each value of BPP, this file defines a function that handles a Hextile-
  * encoded rectangle with BPP bits per pixel.
  */
 
@@ -31,8 +29,8 @@
 #define CARDBPP CONCAT2E(CARD, BPP)
 #define GET_PIXEL CONCAT2E(GET_PIXEL, BPP)
 
-static Bool
-HandleHextileBPP (int rx, int ry, int rw, int rh)
+
+static Bool HandleHextileBPP (int rx, int ry, int rw, int rh)
 {
   CARDBPP bg, fg;
   XGCValues gcv;

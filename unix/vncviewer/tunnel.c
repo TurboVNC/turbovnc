@@ -27,6 +27,7 @@
 #include <sys/stat.h>
 #include <vncviewer.h>
 
+
 /* True if there was -tunnel or -via option in the command line. */
 Bool tunnelSpecified = False;
 
@@ -51,8 +52,7 @@ static Bool fillCmdPattern(char *result, char *pattern,
 static Bool runCommand(char *cmd);
 
 
-Bool
-createTunnel(int *pargc, char **argv, int tunnelArgIndex)
+Bool createTunnel(int *pargc, char **argv, int tunnelArgIndex)
 {
   char *pattern;
   char cmd[1024];
@@ -95,9 +95,10 @@ createTunnel(int *pargc, char **argv, int tunnelArgIndex)
   return True;
 }
 
-static void
-processTunnelArgs(char **remoteHost, int *remotePort, int localPort,
-                  int *pargc, char **argv, int tunnelArgIndex)
+
+static void processTunnelArgs(char **remoteHost, int *remotePort,
+                              int localPort, int *pargc, char **argv,
+                              int tunnelArgIndex)
 {
   char *pdisplay;
 
@@ -124,10 +125,10 @@ processTunnelArgs(char **remoteHost, int *remotePort, int localPort,
   removeArgs(pargc, argv, tunnelArgIndex, 1);
 }
 
-static void
-processViaArgs(char **gatewayHost, char **remoteHost,
-               int *remotePort, int localPort,
-               int *pargc, char **argv, int tunnelArgIndex)
+
+static void processViaArgs(char **gatewayHost, char **remoteHost,
+                           int *remotePort, int localPort,
+                           int *pargc, char **argv, int tunnelArgIndex)
 {
   char *colonPos;
   int len, portOffset;
@@ -171,16 +172,16 @@ processViaArgs(char **gatewayHost, char **remoteHost,
   removeArgs(pargc, argv, tunnelArgIndex, 2);
 }
 
-static char *
-getCmdPattern(void)
+
+static char *getCmdPattern(void)
 {
   struct stat st;
   char *pattern;
 
   pattern = getenv((tunnelOption) ? "VNC_TUNNEL_CMD" : "VNC_VIA_CMD");
   if (pattern == NULL) {
-    if ( stat(DEFAULT_SSH_CMD, &st) != 0 ||
-         !(S_ISREG(st.st_mode) || S_ISLNK(st.st_mode)) ) {
+    if (stat(DEFAULT_SSH_CMD, &st) != 0 ||
+        !(S_ISREG(st.st_mode) || S_ISLNK(st.st_mode))) {
       fprintf(stderr, "%s: Cannot establish SSH tunnel: missing %s binary.\n",
               programName, DEFAULT_SSH_CMD);
       return NULL;
@@ -191,12 +192,12 @@ getCmdPattern(void)
   return pattern;
 }
 
-/* Note: in fillCmdPattern() result points to a 1024-byte buffer */
 
-static Bool
-fillCmdPattern(char *result, char *pattern,
-               char *gatewayHost, char *remoteHost,
-               char *remotePort, char *localPort)
+/* Note: in fillCmdPattern(), result points to a 1024-byte buffer */
+
+static Bool fillCmdPattern(char *result, char *pattern,
+                           char *gatewayHost, char *remoteHost,
+                           char *remotePort, char *localPort)
 {
   int i, j;
   Bool H_found = False, G_found = False, R_found = False, L_found = False;
@@ -204,29 +205,29 @@ fillCmdPattern(char *result, char *pattern,
   for (i = 0, j = 0; pattern[i] && j < 1023; i++, j++) {
     if (pattern[i] == '%') {
       switch (pattern[++i]) {
-      case 'H':
-        strncpy(&result[j], remoteHost, 1024 - j);
-        j += strlen(remoteHost) - 1;
-        H_found = True;
-        continue;
-      case 'G':
-        strncpy(&result[j], gatewayHost, 1024 - j);
-        j += strlen(gatewayHost) - 1;
-        G_found = True;
-        continue;
-      case 'R':
-        strncpy(&result[j], remotePort, 1024 - j);
-        j += strlen(remotePort) - 1;
-        R_found = True;
-        continue;
-      case 'L':
-        strncpy(&result[j], localPort, 1024 - j);
-        j += strlen(localPort) - 1;
-        L_found = True;
-        continue;
-      case '\0':
-        i--;
-        continue;
+        case 'H':
+          strncpy(&result[j], remoteHost, 1024 - j);
+          j += strlen(remoteHost) - 1;
+          H_found = True;
+          continue;
+        case 'G':
+          strncpy(&result[j], gatewayHost, 1024 - j);
+          j += strlen(gatewayHost) - 1;
+          G_found = True;
+          continue;
+        case 'R':
+          strncpy(&result[j], remotePort, 1024 - j);
+          j += strlen(remotePort) - 1;
+          R_found = True;
+          continue;
+        case 'L':
+          strncpy(&result[j], localPort, 1024 - j);
+          j += strlen(localPort) - 1;
+          L_found = True;
+          continue;
+        case '\0':
+          i--;
+          continue;
       }
     }
     result[j] = pattern[i];
@@ -252,8 +253,8 @@ fillCmdPattern(char *result, char *pattern,
   return True;
 }
 
-static Bool
-runCommand(char *cmd)
+
+static Bool runCommand(char *cmd)
 {
   if (system(cmd) != 0) {
     fprintf(stderr, "%s: Tunneling command failed: %s.\n",
@@ -262,4 +263,3 @@ runCommand(char *cmd)
   }
   return True;
 }
-

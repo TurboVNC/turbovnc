@@ -29,11 +29,12 @@
 #include <X11/extensions/XShm.h>
 static XShmSegmentInfo shminfo;
 
+
 static Bool caughtShmError = False;
 static Bool needShmCleanup = False;
 
-void
-ShmCleanup()
+
+void ShmCleanup()
 {
   fprintf(stderr, "ShmCleanup called\n");
   if (needShmCleanup) {
@@ -43,15 +44,15 @@ ShmCleanup()
   }
 }
 
-static int
-ShmCreationXErrorHandler(Display *dpy, XErrorEvent *error)
+
+static int ShmCreationXErrorHandler(Display *dpy, XErrorEvent *error)
 {
   caughtShmError = True;
   return 0;
 }
 
-XImage *
-CreateShmImage()
+
+XImage *CreateShmImage()
 {
   XImage *image;
   XErrorHandler oldXErrorHandler;
@@ -65,7 +66,7 @@ CreateShmImage()
 
   shminfo.shmid = shmget(IPC_PRIVATE,
                          image->bytes_per_line * image->height,
-                         IPC_CREAT|0777);
+                         IPC_CREAT | 0777);
 
   if (shminfo.shmid == -1) {
     XDestroyImage(image);

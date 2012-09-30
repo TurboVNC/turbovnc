@@ -27,6 +27,7 @@
 #include <X11/Intrinsic.h>
 #include "vncviewer.h"
 
+
 char *programName;
 XtAppContext appContext;
 Display* dpy;
@@ -36,20 +37,21 @@ long benchFileStart = -1;
 
 Widget toplevel;
 
-int
-main(int argc, char **argv)
+
+int main(int argc, char **argv)
 {
   int i;
   programName = argv[0];
   double tStart;
 
-  /* The -listen option is used to make us a daemon process which listens for
+  /* The -listen option is used to start a daemon process that listens for
      incoming connections from servers, rather than actively connecting to a
-     given server. The -tunnel and -via options are useful to create
-     connections tunneled via SSH port forwarding. We must test for the
-     -listen option before invoking any Xt functions - this is because we use
-     forking, and Xt doesn't seem to cope with forking very well. For -listen
-     option, when a successful incoming connection has been accepted,
+     given server.  The -tunnel and -via options are useful for creating
+     connections tunneled via SSH port forwarding.  We must test for the
+     -listen option before invoking any Xt functions - this is because listen
+     mode uses forking, and Xt doesn't seem to cope with forking very well
+     (you might say it's forking clueless.)  When -listen is specified and a
+     successful incoming connection has been accepted,
      listenForIncomingConnections() returns, setting the listenSpecified
      flag. */
 
@@ -85,7 +87,6 @@ main(int argc, char **argv)
   /* Call the main Xt initialisation function.  It parses command-line options,
      generating appropriate resource specs, and makes a connection to the X
      display. */
-
   toplevel = XtVaAppInitialize(&appContext, "Tvncviewer",
                                cmdLineOptions, numCmdLineOptions,
                                &argc, argv, fallback_resources,
@@ -94,23 +95,20 @@ main(int argc, char **argv)
   dpy = XtDisplay(toplevel);
 
   /* Interpret resource specs and process any remaining command-line arguments
-     (i.e. the VNC server name).  If the server name isn't specified on the
+     (i.e. the VNC server name.)  If the server name isn't specified on the
      command line, GetArgsAndResources() will pop up a dialog box and wait
      for one to be entered. */
-
   GetArgsAndResources(argc, argv);
 
   if (!benchFile) {
 
     /* Unless we accepted an incoming connection, make a TCP connection to the
        given VNC server */
-
     if (!listenSpecified) {
       if (!ConnectToRFBServer(vncServerHost, vncServerPort)) exit(1);
     }
 
     /* Initialise the VNC connection, including reading the password */
-
     if (!InitialiseRFBConnection()) exit(1);
 
   } else {
@@ -119,27 +117,22 @@ main(int argc, char **argv)
 
   /* Create the "popup" widget - this won't actually appear on the screen until
      some user-defined event causes the "ShowPopup" action to be invoked */
-
   CreatePopup();
 
   /* Find the best pixel format and X visual/colormap to use */
-
   SetVisualAndCmap();
 
-  /* Create the "desktop" widget, and perform initialisation which needs doing
-     before the widgets are realized */
-
+  /* Create the "desktop" widget and perform initialisation that has to be
+     done before the widgets are realized */
   ToplevelInitBeforeRealization();
 
   DesktopInitBeforeRealization();
 
   /* "Realize" all the widgets, i.e. actually create and map their X windows */
-
   XtRealizeWidget(toplevel);
 
-  /* Perform initialisation that needs doing after realization, now that the X
-     windows exist */
-
+  /* Perform initialisation that needs to be done after realization, now that
+     the X windows exist */
   InitialiseSelection();
 
   ToplevelInitAfterRealization();
@@ -147,7 +140,6 @@ main(int argc, char **argv)
   DesktopInitAfterRealization();
 
   /* Run benchmark */
-
   if (benchFile) {
     Bool status = RunBenchmark();
     Cleanup();
@@ -156,14 +148,12 @@ main(int argc, char **argv)
   }
 
   /* Tell the VNC server which pixel format and encodings we want to use */
-
   encodingChange = True;
 
   if (appData.grabKeyboard == TVNC_ALWAYS) GrabKeyboard();
 
   /* Now enter the main loop, processing VNC messages.  X events will
      automatically be processed whenever the VNC connection is idle. */
-
   tStart = gettime();
   while (1) {
     double tNew;

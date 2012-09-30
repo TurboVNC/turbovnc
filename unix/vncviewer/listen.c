@@ -17,10 +17,6 @@
  *  USA.
  */
 
-/*
- * listen.c - listen for incoming connections
- */
-
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -28,20 +24,21 @@
 #include <sys/utsname.h>
 #include <vncviewer.h>
 
+
 Bool listenSpecified = False;
 int listenPort = 0;
 
 static Bool AllXEventsPredicate(Display *d, XEvent *ev, char *arg);
 
+
 /*
  * listenForIncomingConnections() - listen for incoming connections from
- * servers, and fork a new process to deal with each connection.  We must do
- * all this before invoking any Xt functions - this is because Xt doesn't
+ * servers and fork a new process to deal with each connection.  We must do
+ * all of this before invoking any Xt functions - this is because Xt doesn't
  * cope with forking very well.
  */
 
-void
-listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
+void listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
 {
   Display *d;
   XEvent ev;
@@ -131,27 +128,26 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
       XCloseDisplay(d);
 
       /* Now fork off a new process to deal with it... */
-
       switch (fork()) {
 
-      case -1: 
-        perror("fork"); 
-        exit(1);
-
-      case 0:
-        /* child - return to caller */
-        close(listenSocket);
-        return;
-
-      default:
-        /* parent - go round and listen again */
-        close(rfbsock); 
-        if (!(d = XOpenDisplay(displayname))) {
-          fprintf(stderr, "%s: unable to open display %s\n",
-                  programName, XDisplayName(displayname));
+        case -1: 
+          perror("fork"); 
           exit(1);
-        }
-        break;
+
+        case 0:
+          /* child - return to caller */
+          close(listenSocket);
+          return;
+
+        default:
+          /* parent - go round and listen again */
+          close(rfbsock); 
+          if (!(d = XOpenDisplay(displayname))) {
+            fprintf(stderr, "%s: unable to open display %s\n",
+                    programName, XDisplayName(displayname));
+            exit(1);
+          }
+          break;
       }
     }
   }
@@ -162,8 +158,7 @@ listenForIncomingConnections(int *argc, char **argv, int listenArgIndex)
  * AllXEventsPredicate is needed to make XCheckIfEvent return all events.
  */
 
-static Bool
-AllXEventsPredicate(Display *d, XEvent *ev, char *arg)
+static Bool AllXEventsPredicate(Display *d, XEvent *ev, char *arg)
 {
   return True;
 }

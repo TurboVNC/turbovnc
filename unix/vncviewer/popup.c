@@ -19,10 +19,6 @@
  *  USA.
  */
 
-/*
- * popup.c - functions to deal with popup window.
- */
-
 #include "vncviewer.h"
 
 #include <X11/Xaw/Form.h>
@@ -38,8 +34,7 @@ Widget popup, fullScreenToggle, button4X, button2X, button1X, buttonGray,
   qualtext, qualslider, buttonZlib, buttonJPEG;
 
 
-void
-UpdateQual(void)
+void UpdateQual(void)
 {
   char *titleFormat, title[1024], *ptr;
   char text[10];
@@ -88,8 +83,7 @@ UpdateQual(void)
 }
 
 
-void
-ShowPopup(Widget w, XEvent *event, String *params, Cardinal *num_params)
+void ShowPopup(Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
   XtMoveWidget(popup, event->xbutton.x_root, event->xbutton.y_root);
   XtPopup(popup, XtGrabNone);
@@ -97,8 +91,8 @@ ShowPopup(Widget w, XEvent *event, String *params, Cardinal *num_params)
   UpdateQual();
 }
 
-void
-HidePopup(Widget w, XEvent *event, String *params, Cardinal *num_params)
+
+void HidePopup(Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
   XtPopdown(popup);
 }
@@ -112,8 +106,7 @@ static XtResource resources[] = {
 };
 
 
-void
-qualScrollProc(Widget w, XtPointer client, XtPointer p)
+void qualScrollProc(Widget w, XtPointer client, XtPointer p)
 {
   float size, val;  int qual;  long pos = (long)p;
   XtVaGetValues(w, XtNshown, &size, XtNtopOfThumb, &val, NULL);
@@ -126,8 +119,7 @@ qualScrollProc(Widget w, XtPointer client, XtPointer p)
 }
 
 
-void
-qualJumpProc(Widget w, XtPointer client, XtPointer p)
+void qualJumpProc(Widget w, XtPointer client, XtPointer p)
 {
   float val = *(float *)p;  int qual;
   qual = (int)(val * 100.);
@@ -137,8 +129,7 @@ qualJumpProc(Widget w, XtPointer client, XtPointer p)
 }
 
 
-void
-buttonZlibProc(Widget w, XtPointer client, XtPointer p)
+void buttonZlibProc(Widget w, XtPointer client, XtPointer p)
 {
   if ((long)p == 1) appData.compressLevel = 1;
   else appData.compressLevel = 0;
@@ -146,8 +137,7 @@ buttonZlibProc(Widget w, XtPointer client, XtPointer p)
 }
 
 
-void
-buttonJPEGProc(Widget w, XtPointer client, XtPointer p)
+void buttonJPEGProc(Widget w, XtPointer client, XtPointer p)
 {
   if ((long)p == 1)
     appData.enableJPEG = True;
@@ -156,40 +146,37 @@ buttonJPEGProc(Widget w, XtPointer client, XtPointer p)
   UpdateQual();
 }
 
-void
-buttonGrayProc(Widget w, XtPointer client, XtPointer p)
+
+void buttonGrayProc(Widget w, XtPointer client, XtPointer p)
 {
   if ((long)p == 1) appData.subsampLevel = TVNC_GRAY;
   UpdateQual();
 }
 
 
-void
-button4XProc(Widget w, XtPointer client, XtPointer p)
+void button4XProc(Widget w, XtPointer client, XtPointer p)
 {
   if ((long)p == 1) appData.subsampLevel = TVNC_4X;
   UpdateQual();
 }
 
 
-void
-button2XProc(Widget w, XtPointer client, XtPointer p)
+void button2XProc(Widget w, XtPointer client, XtPointer p)
 {
   if ((long)p == 1) appData.subsampLevel = TVNC_2X;
   UpdateQual();
 }
 
 
-void
-button1XProc(Widget w, XtPointer client, XtPointer p)
+void button1XProc(Widget w, XtPointer client, XtPointer p)
 {
   if ((long)p == 1) appData.subsampLevel = TVNC_1X;
   UpdateQual();
 }
 
 
-void
-SetViewOnlyState(Widget w, XEvent *ev, String *params, Cardinal *num_params)
+void SetViewOnlyState(Widget w, XEvent *ev, String *params,
+                      Cardinal *num_params)
 {
   if (appData.viewOnly)
     XtVaSetValues(w, XtNstate, True, NULL);
@@ -198,8 +185,7 @@ SetViewOnlyState(Widget w, XEvent *ev, String *params, Cardinal *num_params)
 }
 
 
-void
-CreatePopup()
+void CreatePopup()
 {
   Widget buttonForm, button = NULL, prevButton = NULL, label;
   int i;
@@ -238,58 +224,58 @@ CreatePopup()
     prevButton = button;
   }
 
-  buttonJPEG = XtCreateManagedWidget("enableJPEG", toggleWidgetClass, buttonForm,
-    NULL, 0);
+  buttonJPEG = XtCreateManagedWidget("enableJPEG", toggleWidgetClass,
+                                     buttonForm, NULL, 0);
   XtVaSetValues(buttonJPEG, XtNfromVert, prevButton, XtNleft, XawChainLeft,
     NULL);
   XtAddCallback(buttonJPEG, XtNcallback, buttonJPEGProc, NULL);
 
-  label = XtCreateManagedWidget("qualLabel", labelWidgetClass, buttonForm, NULL, 0);
-  XtVaSetValues(label, XtNfromVert, buttonJPEG, XtNleft, XawChainLeft, XtNright,
-    XawChainRight, NULL);
+  label = XtCreateManagedWidget("qualLabel", labelWidgetClass, buttonForm,
+                                NULL, 0);
+  XtVaSetValues(label, XtNfromVert, buttonJPEG, XtNleft, XawChainLeft,
+                XtNright, XawChainRight, NULL);
 
-  qualslider = XtCreateManagedWidget("qualBar", scrollbarWidgetClass, buttonForm,
-    NULL, 0);
+  qualslider = XtCreateManagedWidget("qualBar", scrollbarWidgetClass,
+                                     buttonForm, NULL, 0);
   XtVaSetValues(qualslider, XtNfromVert, label, XtNleft, XawChainLeft, NULL);
   XtAddCallback(qualslider, XtNscrollProc, qualScrollProc, NULL) ;
   XtAddCallback(qualslider, XtNjumpProc, qualJumpProc, NULL) ;
 
   qualtext = XtCreateManagedWidget("qualText", labelWidgetClass, buttonForm,
-    NULL, 0);
-  XtVaSetValues(qualtext, XtNfromVert, label, XtNfromHoriz, qualslider, XtNright,
-    XawChainRight, NULL);
+                                   NULL, 0);
+  XtVaSetValues(qualtext, XtNfromVert, label, XtNfromHoriz, qualslider,
+                XtNright, XawChainRight, NULL);
 
   label = XtCreateManagedWidget("subsampLabel", labelWidgetClass, buttonForm,
-    NULL, 0);
+                                NULL, 0);
   XtVaSetValues(label, XtNfromVert, qualslider, XtNleft, XawChainLeft,
-    XtNright, XawChainRight, NULL);
+                XtNright, XawChainRight, NULL);
 
-  buttonGray = XtCreateManagedWidget("subsampGray", toggleWidgetClass, buttonForm,
-    NULL, 0);
+  buttonGray = XtCreateManagedWidget("subsampGray", toggleWidgetClass,
+                                     buttonForm, NULL, 0);
   XtVaSetValues(buttonGray, XtNfromVert, label, XtNleft, XawChainLeft, NULL);
   XtAddCallback(buttonGray, XtNcallback, buttonGrayProc, NULL);
 
   button4X = XtCreateManagedWidget("subsamp4X", toggleWidgetClass, buttonForm,
-    NULL, 0);
+                                   NULL, 0);
   XtVaSetValues(button4X, XtNfromVert, label, XtNfromHoriz, buttonGray, NULL);
   XtAddCallback(button4X, XtNcallback, button4XProc, NULL);
 
   button2X = XtCreateManagedWidget("subsamp2X", toggleWidgetClass, buttonForm,
-    NULL, 0);
-  XtVaSetValues(button2X, XtNfromVert, label, XtNfromHoriz, button4X, 
-    XtNradioGroup, buttonGray, NULL);
+                                   NULL, 0);
+  XtVaSetValues(button2X, XtNfromVert, label, XtNfromHoriz, button4X,
+                XtNradioGroup, buttonGray, NULL);
   XtAddCallback(button2X, XtNcallback, button2XProc, NULL);
 
   button1X = XtCreateManagedWidget("subsamp1X", toggleWidgetClass, buttonForm,
-    NULL, 0);
+                                   NULL, 0);
   XtVaSetValues(button1X, XtNfromVert, label, XtNfromHoriz, button2X,
-    XtNradioGroup, buttonGray, NULL);
+                XtNradioGroup, buttonGray, NULL);
   XtAddCallback(button1X, XtNcallback, button1XProc, NULL);
 
-  buttonZlib = XtCreateManagedWidget("enableZlib", toggleWidgetClass, buttonForm,
-    NULL, 0);
+  buttonZlib = XtCreateManagedWidget("enableZlib", toggleWidgetClass,
+                                     buttonForm, NULL, 0);
   XtVaSetValues(buttonZlib, XtNfromVert, buttonGray, XtNleft, XawChainLeft,
-    NULL);
+                NULL);
   XtAddCallback(buttonZlib, XtNcallback, buttonZlibProc, NULL);
-
 }

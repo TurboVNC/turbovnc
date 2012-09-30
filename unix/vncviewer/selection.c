@@ -23,6 +23,7 @@
 
 #include <vncviewer.h>
 
+
 static void GetInitialSelectionTimeCallback(Widget w, XtPointer clientData,
                                             Atom* selection, Atom* type,
                                             XtPointer value,
@@ -47,23 +48,23 @@ static Bool iAmSelectionOwner = False;
 static Time prevSelectionTime = 0L;
 static Time cutBufferTime = 0L;
 
+
 #define TIME_LATER(a, b) ((a) != 0 && ((b) == 0 || (INT32)((a) - (b)) > 0))
 
 
 /*
  * InitialiseSelection() must be called after realizing widgets (because
  * otherwise XtGetSelectionValue() fails).  We register events on the root
- * window to appear as if on the toplevel window, and catch cut buffer
+ * window to appear as if on the toplevel window and catch cut buffer
  * PropertyNotify events.  Then we try to get the timestamp of any existing
  * selection by calling XtGetSelectionValue() with target "TIMESTAMP".  In the
- * normal case we won't send this selection to the VNC server, but we need to
+ * normal case, we won't send this selection to the VNC server, but we need to
  * know its timestamp so that we can tell when a new selection has been made.
  * GetInitialSelectionTimeCallback() will be invoked when the timestamp is
  * available.
  */
 
-void
-InitialiseSelection()
+void InitialiseSelection()
 {
 #if XtSpecificationRelease >= 6
   XtRegisterDrawable(dpy, DefaultRootWindow(dpy), toplevel);
@@ -88,10 +89,10 @@ InitialiseSelection()
  * CurrentTime) if there is no selection.
  */
 
-static void
-GetInitialSelectionTimeCallback(Widget w, XtPointer clientData,
-                                Atom* selection, Atom* type, XtPointer value,
-                                unsigned long* length, int* format)
+static void GetInitialSelectionTimeCallback(Widget w, XtPointer clientData,
+                                            Atom* selection, Atom* type,
+                                            XtPointer value,
+                                            unsigned long* length, int* format)
 {
   if (value && *format == 32 && *length == 1)
     prevSelectionTime = *(CARD32 *)value;
@@ -104,22 +105,22 @@ GetInitialSelectionTimeCallback(Widget w, XtPointer clientData,
 
 
 /*
- * SelectionToVNC() is an action which is usually invoked when the mouse enters
- * the viewer window.  With the "always" argument we always transfer the
- * current selection to the VNC server.  With no argument or the "new" argument
- * we transfer the selection only if it is "new" i.e. its timestamp is later
- * than the previously transferred selection.
+ * SelectionToVNC() is an action that is usually invoked when the mouse enters
+ * the viewer window.  With the "always" argument, we always transfer the
+ * current selection to the VNC server.  With no argument or the "new"
+ * argument, we transfer the selection only if it is "new" (i.e. its timestamp
+ * is later than the previously transferred selection.)
  *
- * In the former case we call XtGetSelectionValue() with target "STRING" to get
- * the selection.  GetSelectionCallback() will be invoked when the selection is
- * available.
+ * In the former case, we call XtGetSelectionValue() with target "STRING" to
+ * get the selection.  GetSelectionCallback() will be invoked when the
+ * selection is available.
  *
- * In the latter case we call XtGetSelectionValue() with target "TIMESTAMP".
+ * In the latter case, we call XtGetSelectionValue() with target "TIMESTAMP".
  * GetSelectionTimeCallback() will be invoked when the timestamp is available.
  */
 
-void
-SelectionToVNC(Widget w, XEvent *event, String *params, Cardinal *num_params)
+void SelectionToVNC(Widget w, XEvent *event, String *params,
+                    Cardinal *num_params)
 {
   Bool always = False;
 
@@ -168,17 +169,17 @@ GetSelectionCallback(Widget w, XtPointer clientData, Atom* selection,
 /*
  * GetSelectionTimeCallback() is invoked when the selection owner has told us
  * the timestamp of the selection.  If the timestamp is later than that of the
- * previous selection then we call XtGetSelectionValue() with target "STRING"
+ * previous selection, then we call XtGetSelectionValue() with target "STRING"
  * to get the selection.  GetSelectionCallback() will be invoked when the
- * selection is available.  If there is no selection we see if the time
+ * selection is available.  If there is no selection, we see if the time
  * CUT_BUFFER0 was last changed is later than that of the previous selection,
  * and if so, send it.
  */
 
-static void
-GetSelectionTimeCallback(Widget w, XtPointer clientData, Atom* selection,
-                         Atom* type, XtPointer value, unsigned long* length,
-                         int* format)
+static void GetSelectionTimeCallback(Widget w, XtPointer clientData,
+                                     Atom* selection, Atom* type,
+                                     XtPointer value, unsigned long* length,
+                                     int* format)
 {
   if (value && *format == 32 && *length == 1) {
 
@@ -204,12 +205,11 @@ GetSelectionTimeCallback(Widget w, XtPointer clientData, Atom* selection,
 
 
 /*
- * SendCutBuffer gets the CUT_BUFFER0 property from the root window and sends
+ * SendCutBuffer() gets the CUT_BUFFER0 property from the root window and sends
  * it to the VNC server.
  */
 
-static void
-SendCutBuffer()
+static void SendCutBuffer()
 {
   char *str;
   int len;
@@ -223,12 +223,11 @@ SendCutBuffer()
 
 
 /*
- * CutBufferChange - check PropertyNotify events on the root window to see if
+ * CutBufferChange() - check PropertyNotify events on the root window to see if
  * the cut buffer has changed.  If so, record its timestamp.
  */
 
-static void
-CutBufferChange(Widget w, XtPointer ptr, XEvent *ev, Boolean *cont)
+static void CutBufferChange(Widget w, XtPointer ptr, XEvent *ev, Boolean *cont)
 {
   if (ev->type != PropertyNotify || ev->xproperty.atom != XA_CUT_BUFFER0)
     return;
@@ -238,16 +237,16 @@ CutBufferChange(Widget w, XtPointer ptr, XEvent *ev, Boolean *cont)
 
 
 /*
- * SelectionFromVNC() is an action which is usually invoked when the mouse
- * leaves the viewer window.  With the "always" argument we always set the
+ * SelectionFromVNC() is an action that is usually invoked when the mouse
+ * leaves the viewer window.  With the "always" argument, we always set the
  * PRIMARY selection and CUT_BUFFER0 to the current value of the VNC server
- * "cut text".  With no argument or the "new" argument we set the selection
- * only if it is "new" i.e. there has been new "cut text" since the last time
- * it was called.
+ * "cut text".  With no argument or the "new" argument, we set the selection
+ * only if it is "new" (i.e. there has been new "cut text" since the last time
+ * it was called.)
  */
 
-void
-SelectionFromVNC(Widget w, XEvent *event, String *params, Cardinal *num_params)
+void SelectionFromVNC(Widget w, XEvent *event, String *params,
+                      Cardinal *num_params)
 {
   Bool always = False;
   Time t = TimeFromEvent(event);
@@ -283,14 +282,14 @@ SelectionFromVNC(Widget w, XEvent *event, String *params, Cardinal *num_params)
 
 
 /*
- * ConvertSelection is called when another X client requests the selection.
+ * ConvertSelection() is called when another X client requests the selection.
  * Simply send the "server cut text" for a STRING target, or do a standard
- * conversion for anything else. 
+ * conversion for anything else.
  */
 
-static Boolean
-ConvertSelection(Widget w, Atom* selection, Atom* target, Atom* type,
-                 XtPointer* value, unsigned long* length, int* format)
+static Boolean ConvertSelection(Widget w, Atom* selection, Atom* target,
+                                Atom* type, XtPointer* value,
+                                unsigned long* length, int* format)
 {
 
   if (*target == XA_STRING && serverCutText != NULL) {

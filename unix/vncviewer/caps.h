@@ -17,15 +17,12 @@
  *  USA.
  */
 
-/*
- * caps.h
- */
-
 #ifndef _VNC_CAPSCONTAINER
 #define _VNC_CAPSCONTAINER
 
 /* FIXME: Don't limit the number of capabilities. */
 #define TIGHTVNC_MAX_CAPS  64
+
 
 typedef struct _CapsContainer
 {
@@ -35,11 +32,12 @@ typedef struct _CapsContainer
   char *descriptions[TIGHTVNC_MAX_CAPS];
   char enable_flags[TIGHTVNC_MAX_CAPS];
 
-  /* These are redundant, but improve the performance. */
+  /* These are redundant but improve the performance. */
   int enabled_count;
   CARD32 enabled_list[TIGHTVNC_MAX_CAPS];
 
 } CapsContainer;
+
 
 CapsContainer *CapsNewContainer(void);
 void CapsDeleteContainer(CapsContainer *pcaps);
@@ -60,4 +58,3 @@ int CapsNumEnabled(CapsContainer *pcaps);
 CARD32 CapsGetByOrder(CapsContainer *pcaps, int idx);
 
 #endif /* _VNC_CAPSCONTAINER */
-
