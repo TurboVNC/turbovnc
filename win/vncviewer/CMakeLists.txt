@@ -1,7 +1,7 @@
 add_definitions(-D_WINSTATIC -D_WIN32_WINNT=0x0500 -DNTDDI_VERSION=0x05000100)
 
 include_directories(omnithread ${CMAKE_SOURCE_DIR}/common
-	${CMAKE_CURRENT_BINARY_DIR}/res)
+	${CMAKE_SOURCE_DIR}/common/d3des ${CMAKE_CURRENT_BINARY_DIR}/res)
 
 if(BITS EQUAL 64)
 	set(APPNAME "TurboVNC Viewer 64-bit v${VERSION} (${BUILD})")
@@ -25,7 +25,7 @@ add_executable(vncviewer WIN32
 	ClientConnectionRaw.cpp
 	ClientConnectionTight.cpp
 	ConnectingDialog.cpp
-	d3des.c
+	${CMAKE_SOURCE_DIR}/common/d3des/d3des.c
 	Daemon.cpp
 	Exception.cpp
 	fbx.c

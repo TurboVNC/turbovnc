@@ -5,7 +5,7 @@
  * key is ignored, not the least significant.
  *
  * These changes are
- * Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
+ * Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -34,12 +34,6 @@ static void desfunc(unsigned long *, unsigned long *);
 static void cookey(unsigned long *);
 
 static unsigned long KnL[32] = { 0L };
-static unsigned long KnR[32] = { 0L };
-static unsigned long Kn3[32] = { 0L };
-static unsigned char Df_Key[24] = {
-        0x01,0x23,0x45,0x67,0x89,0xab,0xcd,0xef,
-        0xfe,0xdc,0xba,0x98,0x76,0x54,0x32,0x10,
-        0x89,0xab,0xcd,0xef,0x01,0x23,0x45,0x67 };
 
 static unsigned short bytebit[8]        = {
         01, 02, 04, 010, 020, 040, 0100, 0200 };
@@ -71,7 +65,7 @@ static unsigned char pc2[48] = {
 
 void deskey(key, edf)   /* Thanks to James Gillogly & Phil Karn! */
 unsigned char *key;
-short edf;
+int edf;
 {
         register int i, j, l, m, n;
         unsigned char pc1m[56], pcr[56];
@@ -179,14 +173,14 @@ static void unscrun(outof, into)
 register unsigned long *outof;
 register unsigned char *into;
 {
-        *into++ = (unsigned char) ((*outof >> 24) & 0xffL);
-        *into++ = (unsigned char) ((*outof >> 16) & 0xffL);
-        *into++ = (unsigned char) ((*outof >>  8) & 0xffL);
-        *into++ = (unsigned char)  (*outof++      & 0xffL);
-        *into++ = (unsigned char) ((*outof >> 24) & 0xffL);
-        *into++ = (unsigned char) ((*outof >> 16) & 0xffL);
-        *into++ = (unsigned char) ((*outof >>  8) & 0xffL);
-        *into   = (unsigned char)  (*outof        & 0xffL);
+        *into++ = (*outof >> 24) & 0xffL;
+        *into++ = (*outof >> 16) & 0xffL;
+        *into++ = (*outof >>  8) & 0xffL;
+        *into++ =  *outof++      & 0xffL;
+        *into++ = (*outof >> 24) & 0xffL;
+        *into++ = (*outof >> 16) & 0xffL;
+        *into++ = (*outof >>  8) & 0xffL;
+        *into   =  *outof        & 0xffL;
         return;
         }
 
