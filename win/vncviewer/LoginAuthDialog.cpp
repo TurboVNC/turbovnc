@@ -59,7 +59,7 @@ LoginAuthDialog::~LoginAuthDialog()
 INT_PTR LoginAuthDialog::DoDialog()
 {
   return DialogBoxParam(pApp->m_instance,
-                        DIALOG_MAKEINTRESOURCE(IDD_LOGIN_AUTH_DIALOG),
+                        MAKEINTRESOURCE(IDD_LOGIN_AUTH_DIALOG),
                         NULL, (DLGPROC)DlgProc, (LONG)this);
 }
 

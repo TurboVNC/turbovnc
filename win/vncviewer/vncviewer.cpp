@@ -22,12 +22,8 @@
 #include "stdhdrs.h"
 #include "vncviewer.h"
 #include "Exception.h"
-#ifdef UNDER_CE
-#include "omnithreadce.h"
-#else
 #include "omnithread.h"
 #include "VNCviewerApp32.h"
-#endif
 
 
 // All logging is done via the log object
@@ -35,22 +31,13 @@ Log vnclog;
 VNCHelp help;
 HotKeys hotkeys;
 
-#ifdef UNDER_CE
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-                   LPTSTR szCmdLine, int iCmdShow)
-#else
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                    PSTR szCmdLine, int iCmdShow)
-#endif
 {
   int retval = 0;
 
   // The state of the application as a whole is contained in the one app object
-  #ifdef _WIN32_WCE
-  VNCviewerApp app(hInstance, szCmdLine);
-  #else
   VNCviewerApp32 app(hInstance, szCmdLine);
-  #endif
 
   // Start a new connection if one if specified on the command line or if
   // listening mode is not specified

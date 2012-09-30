@@ -23,10 +23,6 @@
 #include "Exception.h"
 
 
-// For WinCE Palm, you might want to use this for debugging, since it
-// seems impossible to give the command some arguments.
-// #define PALM_LOG 1
-
 VNCviewerApp *pApp;
 
 
@@ -46,13 +42,6 @@ VNCviewerApp::VNCviewerApp(HINSTANCE hInstance, LPTSTR szCmdLine)
   if (m_options.m_logToFile) {
     vnclog.SetFile(m_options.m_logFilename);
   }
-
-#ifdef PALM_LOG
-  // Hack override for WinCE Palm developers who can't give
-  // options to commands, not even via shortcuts.
-  vnclog.SetLevel(20);
-  vnclog.SetFile(_T("\\Temp\\log"));
-#endif
 
   // Clear connection list
   for (int i = 0; i < MAX_CONNECTIONS; i++)

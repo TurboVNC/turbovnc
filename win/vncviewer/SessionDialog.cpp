@@ -51,7 +51,7 @@ SessionDialog::~SessionDialog()
 INT_PTR SessionDialog::DoDialog()
 {
   return DialogBoxParam(pApp->m_instance,
-                        DIALOG_MAKEINTRESOURCE(IDD_SESSION_DLG), NULL,
+                        MAKEINTRESOURCE(IDD_SESSION_DLG), NULL,
                         (DLGPROC) SessDlgProc, (LONG) this);
 }
 

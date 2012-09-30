@@ -27,11 +27,7 @@
 #pragma once
 
 #include "stdhdrs.h"
-#ifdef UNDER_CE
-#include "omnithreadce.h"
-#else
 #include "omnithread.h"
-#endif
 #include "CapsContainer.h"
 #include "VNCOptions.h"
 #include "VNCviewerApp.h"
@@ -260,7 +256,6 @@ class ClientConnection : public omni_thread
 
     // These draw a solid rectangle on the bitmap.  They assume that the bitmap
     // is already selected into the DC and that the DC is locked, if necessary.
-#ifndef UNDER_CE
     // Normally, this is an inline call to a GDI method.
     inline void FillSolidRect(RECT *pRect, COLORREF color)
     {
@@ -268,11 +263,6 @@ class ClientConnection : public omni_thread
       // This is the call MFC uses for FillSolidRect.  Who am I to argue?
       ExtTextOut(m_hBitmapDC, 0, 0, ETO_OPAQUE, pRect, NULL, 0, NULL);
     };
-#else
-    // Under WinCE this is a manual insert into a pixmap,
-    // and is a little too complicated for an inline.
-    void FillSolidRect(RECT *pRect, COLORREF color);
-#endif // UNDER_CE
 
     inline void FillSolidRect(int x, int y, int w, int h, COLORREF color) {
       RECT r;
@@ -317,11 +307,6 @@ class ClientConnection : public omni_thread
     HDC m_hBitmapDC;
     HPALETTE m_hPalette;
 
-#ifdef UNDER_CE
-    // Under WinCE this points to the DIB pixels.
-    BYTE* m_bits;
-#endif
-
     // Keyboard mapper
     KeyMap m_keymap;
 
@@ -364,8 +349,6 @@ class ClientConnection : public omni_thread
     // The size of a window needed to hold entire screen without scrollbars
     int m_fullwinwidth, m_fullwinheight;
     int m_winwidth, m_winheight;
-    // The size of the CE CommandBar
-    int m_barheight;
 
     // Dormant basically means minimized;  updates will not be requested
     // while dormant.
@@ -495,11 +478,7 @@ class TempDC
               (int) (((p >> bs) & bm) * 255 / bm) ))
 
 
-#ifdef UNDER_CE
-#define SETPIXEL(b, x, y, c) SetPixel((b), (x), (y), (c))
-#else
 #define SETPIXEL(b, x, y, c) SetPixelV((b), (x), (y), (c))
-#endif
 
 #define SETPIXELS(buffer, bpp, x, y, w, h)  \
   (this->*setPixels)((char *)buffer, x, y, w, h);

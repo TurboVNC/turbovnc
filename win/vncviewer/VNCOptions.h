@@ -135,13 +135,6 @@ class VNCOptions
     // for debugging purposes
     int   m_delay;
 
-  #ifdef UNDER_CE
-    // WinCE screen format for dialogs (Palm vs HPC)
-    int   m_palmpc;
-    // Use slow GDI rendering, but more accurate colors.
-    int   m_slowgdi;
-  #endif
-
     INT_PTR DoDialog(bool running, bool CUSupported);
     BOOL RaiseDialog();
     void CloseDialog();

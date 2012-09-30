@@ -104,21 +104,6 @@ VNCOptions::VNCOptions()
   LoadGenOpt();
 
   m_hParent = 0;
-
-#ifdef UNDER_CE
-  m_palmpc = false;
-
-  // Check for PalmPC aspect
-  HDC temp_hdc = GetDC(NULL);
-  int screen_width = GetDeviceCaps(temp_hdc, HORZRES);
-  if (screen_width < 320)
-  {
-    m_palmpc = true;
-  }
-  ReleaseDC(NULL, temp_hdc);
-
-  m_slowgdi = false;
-#endif
 }
 
 
@@ -183,10 +168,6 @@ VNCOptions& VNCOptions::operator = (VNCOptions& s)
 
   m_autoPass              = s.m_autoPass;
 
-#ifdef UNDER_CE
-  m_palmpc                = s.m_palmpc;
-  m_slowgdi               = s.m_slowgdi;
-#endif
   return *this;
 }
 
@@ -458,16 +439,6 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
     } else if (SwitchMatch(args[j], _T("noclipboard"))) {
       m_DisableClipboard = true;
     }
-#ifdef UNDER_CE
-    // Manual setting of palm vs hpc aspect ratio for dialog boxes.
-    else if (SwitchMatch(args[j], _T("hpc"))) {
-      m_palmpc = false;
-    } else if (SwitchMatch(args[j], _T("palm"))) {
-      m_palmpc = true;
-    } else if (SwitchMatch(args[j], _T("slow"))) {
-      m_slowgdi = true;
-    }
-#endif
     else if (SwitchMatch(args[j], _T("delay"))) {
       if (++j == i) {
         ArgError(_T("No delay specified"));
@@ -793,7 +764,7 @@ INT_PTR VNCOptions::DoDialog(bool running, bool CUSupported)
 {
   m_running = running;
   m_CUSupported = CUSupported;
-  return DialogBoxParam(pApp->m_instance, DIALOG_MAKEINTRESOURCE(IDD_PARENT),
+  return DialogBoxParam(pApp->m_instance, MAKEINTRESOURCE(IDD_PARENT),
                         NULL, (DLGPROC) DlgProc, (LONG) this);
 }
 
@@ -1001,10 +972,8 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
       HWND hDeiconify = GetDlgItem(hwnd, IDC_BELLDEICONIFY);
       SendMessage(hDeiconify, BM_SETCHECK, _this->m_DeiconifyOnBell, 0);
 
-#ifndef UNDER_CE
       HWND hDisableClip = GetDlgItem(hwnd, IDC_DISABLECLIPBOARD);
       SendMessage(hDisableClip, BM_SETCHECK, _this->m_DisableClipboard, 0);
-#endif
 
       HWND hDB = GetDlgItem(hwnd, IDC_DBCHECK);
       SendMessage(hDB, BM_SETCHECK, _this->m_DoubleBuffer, 0);
@@ -1033,7 +1002,6 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
         SetDlgItemInt(hwnd, IDC_SCALE_EDIT,
                       ((_this->m_scale_num*100) / _this->m_scale_den), FALSE);
 
-#ifndef UNDER_CE
       HWND hFullScreen = GetDlgItem(hwnd, IDC_FULLSCREEN);
       SendMessage(hFullScreen, BM_SETCHECK, _this->m_FullScreen, 0);
 
@@ -1048,7 +1016,6 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
 
       HWND hEmulate = GetDlgItem(hwnd, IDC_EMULATECHECK);
       SendMessage(hEmulate, BM_SETCHECK, _this->m_Emul3Buttons, 0);
-#endif
 
       EnableWindow(hSwap, !_this->m_ViewOnly);
       EnableWindow(hEmulate, !_this->m_ViewOnly);
@@ -1211,11 +1178,10 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
           HWND hDeiconify = GetDlgItem(hwnd, IDC_BELLDEICONIFY);
           _this->m_DeiconifyOnBell =
             (SendMessage(hDeiconify, BM_GETCHECK, 0, 0) == BST_CHECKED);
-#ifndef UNDER_CE
+
           HWND hDisableClip = GetDlgItem(hwnd, IDC_DISABLECLIPBOARD);
           _this->m_DisableClipboard =
             (SendMessage(hDisableClip, BM_GETCHECK, 0, 0) == BST_CHECKED);
-#endif
 
           HWND hDB = GetDlgItem(hwnd, IDC_DBCHECK);
           _this->m_DoubleBuffer =
@@ -1232,7 +1198,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
           HWND hViewOnly = GetDlgItem(hwnd, IDC_VIEWONLY);
           _this->m_ViewOnly =
             (SendMessage(hViewOnly, BM_GETCHECK, 0, 0) == BST_CHECKED);
-#ifndef UNDER_CE
+
           HWND hFullScreen = GetDlgItem(hwnd, IDC_FULLSCREEN);
           _this->m_FullScreen =
             (SendMessage(hFullScreen, BM_GETCHECK, 0, 0) == BST_CHECKED);
@@ -1245,7 +1211,6 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
           HWND hEmulate = GetDlgItem(hwnd, IDC_EMULATECHECK);
           _this->m_Emul3Buttons =
             (SendMessage(hEmulate, BM_GETCHECK, 0, 0) == BST_CHECKED);
-#endif
 
           HWND hCompressLevel = GetDlgItem(hwnd, IDC_COMPRESSLEVEL);
           _this->m_compressLevel =

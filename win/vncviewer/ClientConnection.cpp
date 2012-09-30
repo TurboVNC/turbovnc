@@ -34,12 +34,7 @@
 
 #include "vncviewer.h"
 
-#ifdef UNDER_CE
-#include "omnithreadce.h"
-#define SD_BOTH 0x02
-#else
 #include "omnithread.h"
-#endif
 
 #include "ClientConnection.h"
 #include "SessionDialog.h"
@@ -524,13 +519,11 @@ void ClientConnection::CreateDisplay()
   SaveConnectionHistory();
   // record which client created this window
 
-#ifndef _WIN32_WCE
   // We want to know when the clipboard changes, so insert ourselves into the
   // viewer chain.  But doing this will cause us to be notified immediately of
   // the current state.   We don't want to send that.
   m_initialClipboardSeen = false;
   m_hwndNextViewer = SetClipboardViewer(m_hwnd);
-#endif
 }
 
 
@@ -792,13 +785,12 @@ void ClientConnection::GetConnectDetails()
   m_pApp->m_options.m_port = -1;
   m_pApp->m_options.m_connectionSpecified = false;
   m_pApp->m_options.m_configSpecified = false;
-#ifndef _WIN32_WCE
+
   // We want to know when the clipboard changes, so insert ourselves into the
   // viewer chain.  But doing this will cause us to be notified immediately of
   // the current state.  We don't want to send that.
   m_initialClipboardSeen = false;
   m_hwndNextViewer = SetClipboardViewer(m_hwnd);
-#endif
 }
 
 
@@ -867,12 +859,6 @@ void ClientConnection::NegotiateProtocolVersion()
   if (m_connDlg != NULL)
     m_connDlg->SetStatus("Server protocol version received");
 
-  // XXX This is a hack.  Under CE we just return to the server the
-  // version number it gives us without parsing it.
-  // Too much hassle replacing sscanf for now. Fix this!
-#ifdef UNDER_CE
-  m_minorVersion = 8;
-#else
   int majorVersion, minorVersion;
   if (sscanf(pv, rfbProtocolVersionFormat, &majorVersion, &minorVersion) != 2) {
     throw WarningException(_T("Invalid protocol"));
@@ -891,7 +877,6 @@ void ClientConnection::NegotiateProtocolVersion()
   m_tightVncProtocol = false;
 
   sprintf(pv, rfbProtocolVersionFormat, 3, m_minorVersion);
-#endif
 
   WriteExact(pv, sz_rfbProtocolVersionMsg);
 
@@ -1244,23 +1229,8 @@ bool ClientConnection::AuthenticateVNC(char *errBuf, int errBufSize)
   } else {
     LoginAuthDialog ad(m_opts.m_display, "Standard VNC Authentication");
     ad.DoDialog();
-#ifndef UNDER_CE
     strncpy(passwd, ad.m_passwd, MAXPWLEN);
     passwd[MAXPWLEN]= '\0';
-#else
-    // FIXME: Move wide-character translations to a separate class
-    int origlen = _tcslen(ad.m_passwd);
-    int newlen = WideCharToMultiByte(
-      CP_ACP,    // code page
-      0,         // performance and mapping flags
-      ad.m_passwd, // address of wide-character string
-      origlen,   // number of characters in string
-      passwd,    // address of buffer for new string
-      255,       // size of buffer
-      NULL, NULL);
-
-    passwd[newlen]= '\0';
-#endif
     if (strlen(passwd) == 0) {
       snprintf(errBuf, errBufSize, "Empty password");
       return false;
@@ -1360,27 +1330,16 @@ void ClientConnection::ReadServerInit()
   if (m_connDlg != NULL)
     m_connDlg->SetStatus("Server initialization message received");
 
-    m_si.framebufferWidth = Swap16IfLE(m_si.framebufferWidth);
-    m_si.framebufferHeight = Swap16IfLE(m_si.framebufferHeight);
-    m_si.format.redMax = Swap16IfLE(m_si.format.redMax);
-    m_si.format.greenMax = Swap16IfLE(m_si.format.greenMax);
-    m_si.format.blueMax = Swap16IfLE(m_si.format.blueMax);
-    m_si.nameLength = Swap32IfLE(m_si.nameLength);
+  m_si.framebufferWidth = Swap16IfLE(m_si.framebufferWidth);
+  m_si.framebufferHeight = Swap16IfLE(m_si.framebufferHeight);
+  m_si.format.redMax = Swap16IfLE(m_si.format.redMax);
+  m_si.format.greenMax = Swap16IfLE(m_si.format.greenMax);
+  m_si.format.blueMax = Swap16IfLE(m_si.format.blueMax);
+  m_si.nameLength = Swap32IfLE(m_si.nameLength);
 
-    m_desktopName = new TCHAR[m_si.nameLength + 2];
+  m_desktopName = new TCHAR[m_si.nameLength + 2];
 
-#ifdef UNDER_CE
-    char *deskNameBuf = new char[m_si.nameLength + 2];
-
-    ReadString(deskNameBuf, m_si.nameLength);
-
-    MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED,
-                        deskNameBuf, m_si.nameLength,
-                        m_desktopName, m_si.nameLength + 1);
-    delete deskNameBuf;
-#else
-    ReadString(m_desktopName, m_si.nameLength);
-#endif
+  ReadString(m_desktopName, m_si.nameLength);
 
   SetWindowTitle();
 
@@ -2328,10 +2287,8 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
       DestroyWindow(hwnd);
       return 0;
     case WM_DESTROY:
-#ifndef UNDER_CE
       // Remove us from the clipboard viewer chain
       BOOL res = ChangeClipboardChain(_this->m_hwnd, _this->m_hwndNextViewer);
-#endif
       if (_this->m_serverInitiated)
         _this->m_opts.SaveOpt(".listen", KEY_VNCVIEWER_HISTORY);
       else
@@ -2486,25 +2443,6 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
     }
     case WM_CHAR:
     case WM_SYSCHAR:
-#ifdef UNDER_CE
-    {
-        int key = wParam;
-        vnclog.Print(4, _T("CHAR msg : %02x\n"), key);
-        // Control keys that are in the Keymap table will already
-        // have been handled.
-        if (key == 0x0D ||   // return
-            key == 0x20 ||   // space
-            key == 0x08)     // backspace
-            return 0;
-
-        if (key < 32) key += 64;  // map ctrl keys onto alphabet
-        if (key > 32 && key < 127) {
-            _this->SendKeyEvent(wParam & 0xff, true);
-            _this->SendKeyEvent(wParam & 0xff, false);
-        }
-        return 0;
-    }
-#endif
     case WM_DEADCHAR:
     case WM_SYSDEADCHAR:
       return 0;
@@ -2558,17 +2496,9 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
         // UpdateColors can be called because it is faster than
         // redrawing the client area (even though the results are
         // not as good)
-          #ifndef UNDER_CE
-          UpdateColors(hDC);
-          #else
-          InvalidateRect(hwnd, NULL, FALSE);
-          UpdateWindow(hwnd);
-          #endif
-
+        UpdateColors(hDC);
       }
       break;
-
-#ifndef UNDER_CE
 
     case WM_SETCURSOR:
     {
@@ -2600,7 +2530,6 @@ LRESULT CALLBACK ClientConnection::WndProc(HWND hwnd, UINT iMsg,
       return 0;
     }
 
-#endif
   }
 
   return DefWindowProc(hwnd, iMsg, wParam, lParam);
@@ -2795,13 +2724,9 @@ inline void ClientConnection::ProcessKeyEvent(int virtkey, DWORD keyData)
   //      send that
 
 #ifdef _DEBUG
-#ifdef UNDER_CE
-  char *keyname = "";
-#else
   char keyname[32];
   if (GetKeyNameText(keyData, keyname, 31))
     vnclog.Print(4, _T("Process key: %s (keyData %04x): "), keyname, keyData);
-#endif
 #endif
 
   try {
@@ -2891,7 +2816,6 @@ inline bool ClientConnection::isKeyboardGrabbed(void)
 }
 
 
-#ifndef UNDER_CE
 void ClientConnection::SendClientCutText(char *str, size_t len)
 {
   rfbClientCutTextMsg cct;
@@ -2902,7 +2826,6 @@ void ClientConnection::SendClientCutText(char *str, size_t len)
   WriteExact(str, (int)len);
   vnclog.Print(6, _T("Sent %d bytes of clipboard\n"), len);
 }
-#endif
 
 
 // Copy any updated areas from the bitmap onto the screen.
@@ -3013,12 +2936,8 @@ inline void ClientConnection::UpdateScrollbars()
 void ClientConnection::ShowConnInfo()
 {
   TCHAR buf[2048];
-#ifndef UNDER_CE
   char kbdname[9];
   GetKeyboardLayoutName(kbdname);
-#else
-  TCHAR *kbdname = _T("(n/a)");
-#endif
   _stprintf(buf,
             _T("Connected to: %s\n\r")
             _T("Host: %s port: %d\n\r\n\r")
@@ -3408,20 +3327,17 @@ void ClientConnection::ReadBell()
   rfbBellMsg bm;
   ReadExact((char *) &bm, sz_rfbBellMsg);
 
-  #ifdef UNDER_CE
-  MessageBeep(MB_OK);
-  #else
-
   if (!PlaySound("VNCViewerBell", NULL,
                  SND_APPLICATION | SND_ALIAS | SND_NODEFAULT | SND_ASYNC))
     Beep(440, 125);
-  #endif
+
   if (m_opts.m_DeiconifyOnBell) {
     if (IsIconic(m_hwnd1)) {
       SetDormant(false);
       ShowWindow(m_hwnd1, SW_SHOWNORMAL);
     }
   }
+
   vnclog.Print(6, _T("Bell!\n"));
 }
 

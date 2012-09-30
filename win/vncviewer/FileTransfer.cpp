@@ -61,10 +61,10 @@ void FileTransfer::CreateFileTransferDialog()
   m_hwndFileTransfer = CreateDialog(m_pApp->m_instance,
                                     MAKEINTRESOURCE(IDD_FILETRANSFER_DLG),
                                     NULL, (DLGPROC)FileTransferDlgProc);
-#ifndef _WIN32_WCE
+
   VNCviewerApp32 *pApp = (VNCviewerApp32 *)(m_clientconn->m_pApp);
   pApp->AddModelessDialog(m_hwndFileTransfer);
-#endif
+
   ShowWindow(m_hwndFileTransfer, SW_SHOW);
   UpdateWindow(m_hwndFileTransfer);
   SetWindowLongPtr(m_hwndFileTransfer, GWLP_USERDATA, (LONG_PTR) this);
@@ -329,14 +329,13 @@ LRESULT CALLBACK FileTransfer::FileTransferDlgProc(HWND hwnd, UINT uMsg,
       _this->m_clientconn->m_fileTransferDialogShown = false;
       _this->m_FTClientItemInfo.Free();
       _this->m_FTServerItemInfo.Free();
-#ifndef _WIN32_WCE
       {
         VNCviewerApp32 *pApp = (VNCviewerApp32 *)(_this->m_clientconn->m_pApp);
         pApp->RemoveModelessDialog(hwnd);
       }
-#endif
       DestroyWindow(hwnd);
       return TRUE;
+
   }
   return 0;
 }

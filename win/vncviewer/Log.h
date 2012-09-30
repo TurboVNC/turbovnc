@@ -22,7 +22,6 @@
 // the debug console.  Every log object has a logging level (which can be
 // changed.)  Only log requests whose level is >= the logging level will
 // actually be logged, so the level can be thought of as an 'amount of detail'.
-// We use Unicode-portable stuff here for compatibility with WinCE.
 //
 // Typical use:
 //
@@ -51,7 +50,7 @@ class Log
     // Create a new log object.
     // Parameters as follows:
     //    mode     - specifies where output should go, using combination
-    //               of flags above. ToConsole won't do anything on CE.
+    //               of flags above.
     //    level    - the default level
     //    filename - if flag Log::ToFile is specified in the type,
     //               a filename must be specified here.

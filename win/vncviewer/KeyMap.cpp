@@ -169,11 +169,6 @@ KeyActionSpec KeyMap::PCtoX(UINT virtkey, DWORD keyData)
     // not found in table
     vnclog.Print(8, _T("not in special keymap, "));
 
-    // Under CE, we're not so concerned about this bit, because we handle a
-    // WM_CHAR message later
-
-#ifndef UNDER_CE
-
     // Try a simple conversion to ASCII, using the current keyboard mapping
     GetKeyboardState(keystate);
 
@@ -261,7 +256,6 @@ KeyActionSpec KeyMap::PCtoX(UINT virtkey, DWORD keyData)
         }
       }
     }
-#endif
   }
 
   kas.keycodes[numkeys] = VoidKeyCode;

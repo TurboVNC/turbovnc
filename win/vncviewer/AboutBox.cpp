@@ -44,7 +44,7 @@ static LRESULT CALLBACK AboutDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam,
 void ShowAboutBox()
 {
   INT_PTR res = DialogBox(pApp->m_instance,
-                          DIALOG_MAKEINTRESOURCE(IDD_APP_ABOUT),
+                          MAKEINTRESOURCE(IDD_APP_ABOUT),
                           NULL, (DLGPROC)AboutDlgProc);
 }
 
@@ -79,6 +79,6 @@ static LRESULT CALLBACK HelpDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam,
 void ShowHelpBox(LPTSTR title)
 {
   INT_PTR res = DialogBoxParam(pApp->m_instance,
-                               DIALOG_MAKEINTRESOURCE(IDD_HELP), NULL,
+                               MAKEINTRESOURCE(IDD_HELP), NULL,
                                (DLGPROC)HelpDlgProc, (LPARAM)title);
 }
