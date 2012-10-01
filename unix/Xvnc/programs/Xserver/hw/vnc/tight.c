@@ -846,7 +846,8 @@ SendSubrect(t, x, y, w, h)
     fbptr = (rfbScreen.pfbMemory + (rfbScreen.paddedWidthInBytes * y)
              + (x * (rfbScreen.bitsPerPixel / 8)));
 
-    if (subsampLevel == TJ_GRAYSCALE && qualityLevel != -1)
+    if (subsampLevel == TJ_GRAYSCALE && qualityLevel != -1 &&
+        rfbScreen.bitsPerPixel > 8)
         return SendJpegRect(t, x, y, w, h, qualityLevel);
 
     t->paletteMaxColors = w * h / tightConf[compressLevel].idxMaxColorsDivisor;
