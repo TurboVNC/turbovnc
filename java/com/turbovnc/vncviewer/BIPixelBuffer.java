@@ -60,9 +60,12 @@ public class BIPixelBuffer extends PlatformPixelBuffer implements ImageObserver
     else
       wr = ((DirectColorModel)cm).createCompatibleWritableRaster(w, h);
     image = new BufferedImage(cm, wr, true, null);
-    SinglePixelPackedSampleModel sm =
-      (SinglePixelPackedSampleModel)image.getSampleModel();
-    stride_ = sm.getScanlineStride();
+    SampleModel sm = image.getSampleModel();
+    if (sm instanceof SinglePixelPackedSampleModel) {
+      stride_ = ((SinglePixelPackedSampleModel)sm).getScanlineStride();
+    } else {
+      stride_ = sm.getWidth();
+    }
     db = wr.getDataBuffer();
     if (sm.getTransferType() == DataBuffer.TYPE_INT)
       data = (Object)((DataBufferInt)db).getData();
