@@ -131,11 +131,11 @@ static Bool HandleTightBPP (int rx, int ry, int rw, int rh)
         return False;
       fill_color = RGB24_TO_PIXEL32(buffer[0], buffer[1], buffer[2]);
     } else {
-      if (!ReadFromRFBServer((char*)&fill_color, sizeof(fill_color)))
+      if (!ReadFromRFBServer((char *)&fill_color, sizeof(fill_color)))
         return False;
     }
 #else
-    if (!ReadFromRFBServer((char*)&fill_color, sizeof(fill_color)))
+    if (!ReadFromRFBServer((char *)&fill_color, sizeof(fill_color)))
         return False;
 #endif
 
@@ -205,21 +205,21 @@ static Bool HandleTightBPP (int rx, int ry, int rw, int rh)
       return False;
 
     switch (filter_id) {
-    case rfbTightFilterCopy:
-      filterFn = FilterCopyBPP;
-      bitsPixel = InitFilterCopyBPP();
-      break;
-    case rfbTightFilterPalette:
-      filterFn = FilterPaletteBPP;
-      bitsPixel = InitFilterPaletteBPP(tightPalette, &rectColors);
-      break;
-    case rfbTightFilterGradient:
-      filterFn = FilterGradientBPP;
-      bitsPixel = InitFilterGradientBPP(rw);
-      break;
-    default:
-      fprintf(stderr, "Tight encoding: unknown filter code received.\n");
-      return False;
+      case rfbTightFilterCopy:
+        filterFn = FilterCopyBPP;
+        bitsPixel = InitFilterCopyBPP();
+        break;
+      case rfbTightFilterPalette:
+        filterFn = FilterPaletteBPP;
+        bitsPixel = InitFilterPaletteBPP(tightPalette, &rectColors);
+        break;
+      case rfbTightFilterGradient:
+        filterFn = FilterGradientBPP;
+        bitsPixel = InitFilterGradientBPP(rw);
+        break;
+      default:
+        fprintf(stderr, "Tight encoding: unknown filter code received.\n");
+        return False;
     }
   } else {
     filterFn = FilterCopyBPP;
