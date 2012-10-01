@@ -1,16 +1,16 @@
 /* Copyright (C) 2011 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -35,6 +35,7 @@
 #include <X11/Xutil.h>
 #include "vncExt.h"
 
+
 char* programName = "tvncconfig";
 Display* dpy;
 char* displayname;
@@ -55,6 +56,7 @@ inline const char *selectionName(Atom sel) {
   return "unknown";
 }
 
+
 #define selectionOwner(a) selectionOwner_[a == XA_PRIMARY ? 0 : 1]
 #define selectionOwnTime(a) selectionOwnTime_[a == XA_PRIMARY ? 0 : 1]
 
@@ -63,6 +65,7 @@ inline void ownSelection(Atom sel, Window win, Time time) {
   selectionOwner(sel) = win;
   selectionOwnTime(sel) = time;
 }
+
 
 void FatalError(const char *format, ...)
 {
@@ -75,6 +78,7 @@ void FatalError(const char *format, ...)
   exit(1);
 }
 
+
 void debugprint(const char *format, ...)
 {
   if (!debug) return;
@@ -84,6 +88,7 @@ void debugprint(const char *format, ...)
   fprintf(stderr, "\n");
   va_end(arglist);
 }
+
 
 // selectionNotify() is called when we have requested the selection from the
 // selection owner.
@@ -114,12 +119,13 @@ void selectionNotify(XSelectionEvent* ev, Atom type, int format,
     cutTextLen = nitems;
     if (syncPrimary || ev->selection != XA_PRIMARY) {
       debugprint("sending %s selection as server cut text: '%.*s%s'",
-                 selectionName(ev->selection), cutTextLen<9?cutTextLen:8,
-                 cutText, cutTextLen<9?"":"...");
+                 selectionName(ev->selection), cutTextLen < 9 ? cutTextLen : 8,
+                 cutText, cutTextLen < 9 ? "" : "...");
       XVncExtSetServerCutText(dpy, cutText, cutTextLen);
     }
   }
 }
+
 
 // handleEvent(). If we get a ClientCutTextNotify event from Xvnc, set the
 // primary and clipboard selections to the clientCutText. If we get a
@@ -200,8 +206,8 @@ void handleEvent(XEvent* ev)
     cutText = 0;
     if (XVncExtGetClientCutText(dpy, &cutText, &cutTextLen)) {
       debugprint("Got client cut text: '%.*s%s'",
-                 cutTextLen<9?cutTextLen:8, cutText,
-                 cutTextLen<9?"":"...");
+                 cutTextLen < 9 ? cutTextLen : 8, cutText,
+                 cutTextLen < 9 ? "" : "...");
       if (syncPrimary) ownSelection(XA_PRIMARY, win, cutEv->time);
       ownSelection(xaCLIPBOARD, win, cutEv->time);
       free(selection[0]);
@@ -221,6 +227,7 @@ void handleEvent(XEvent* ev)
   }
 }
 
+
 void usage(char *progName)
 {
   fprintf(stderr, "\nUSAGE: %s [-display <d>] [-debug] [-noprimary]\n\n",
@@ -231,6 +238,7 @@ void usage(char *progName)
   fprintf(stderr, "-noprimary = Do not sync PRIMARY selection with client machine's clipboard\n\n");
   exit(1);
 }
+
 
 int main(int argc, char** argv)
 {
@@ -261,10 +269,11 @@ int main(int argc, char** argv)
                             BlackPixel(dpy, DefaultScreen(dpy)));
   if (!win) FatalError("Unable to create window");
 
-  XVncExtSelectInput(dpy, win, VncExtClientCutTextMask|
+  XVncExtSelectInput(dpy, win, VncExtClientCutTextMask |
                                VncExtSelectionChangeMask);
-  if (syncPrimary) XConvertSelection(dpy, XA_PRIMARY, XA_STRING,
-                    XA_PRIMARY, win, CurrentTime);
+  if (syncPrimary)
+    XConvertSelection(dpy, XA_PRIMARY, XA_STRING,
+                      XA_PRIMARY, win, CurrentTime);
   XConvertSelection(dpy, xaCLIPBOARD, XA_STRING,
                     xaCLIPBOARD, win, CurrentTime);
 
@@ -279,13 +288,13 @@ int main(int argc, char** argv)
       handleEvent(&ev);
     }
 
-    // If there are X requests pending then poll, don't wait!
+    // If there are X requests pending, then poll, don't wait!
     if (XPending(dpy)) {
       tv.tv_usec = tv.tv_sec = 0;
       tvp = &tv;
     }
-      
-    // Wait for X events, VNC traffic, or the next timer expiry
+
+    // Wait for X events, VNC traffic, or the next timer expiration
     fd_set rfds;
     FD_ZERO(&rfds);
     FD_SET(ConnectionNumber(dpy), &rfds);

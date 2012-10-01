@@ -22,7 +22,7 @@
  */
 
 /*
- *  vncpasswd:  A standalone program which gets and verifies a password, 
+ *  vncpasswd:  A standalone program that gets and verifies a password, 
  *              encrypts it, and stores it to a file.  Optionally, it does
  *              the same for a second (view-only) password.  Always ignore
  *              anything after 8 characters, since this is what Solaris
@@ -64,8 +64,8 @@ int otp;
 int otpClear;
 char* displayname;
 
-int
-DoOTP()
+
+int DoOTP()
 {
   unsigned int full;
   unsigned int view = 0;
@@ -79,7 +79,8 @@ DoOTP()
 #endif
 
   if ((dpy = XOpenDisplay(displayname)) == NULL) {
-    fprintf(stderr, "unable to open display \"%s\"\n", XDisplayName(displayname));
+    fprintf(stderr, "unable to open display \"%s\"\n",
+            XDisplayName(displayname));
     return(1);
   }
 
@@ -122,7 +123,8 @@ DoOTP()
 
     snprintf(buf, sizeof(buf), "%08u", full);
     memcpy(&bytes[0], buf, MAXPWLEN);
-    fprintf(stderr, "Full control one-time password: %.*s\n", MAXPWLEN, &bytes[0]);
+    fprintf(stderr, "Full control one-time password: %.*s\n", MAXPWLEN,
+            &bytes[0]);
     len = MAXPWLEN;
     if (alsoView) {
       snprintf(buf, sizeof(buf), "%08u", view);
@@ -148,14 +150,14 @@ DoOTP()
   return(0);
 }
 
+
 int addUser;
 int userList;
 char* user;
 
 #define MAXUSERLEN  63
 
-int
-DoUserList()
+int DoUserList()
 {
   Display* dpy;
   Atom prop;
@@ -173,7 +175,8 @@ DoUserList()
   }
 
   if ((dpy = XOpenDisplay(displayname)) == NULL) {
-    fprintf(stderr, "unable to open display \"%s\"\n", XDisplayName(displayname));
+    fprintf(stderr, "unable to open display \"%s\"\n",
+            XDisplayName(displayname));
     return(1);
   }
 
@@ -191,6 +194,7 @@ DoUserList()
   XCloseDisplay(dpy);
   return(0);
 }
+
 
 int main(int argc, char *argv[])
 {
@@ -213,64 +217,64 @@ int main(int argc, char *argv[])
       break;
 
     switch (argv[i][1]) {
-    case 'd':
-      if (strcmp("-display", argv[i]))
+      case 'd':
+        if (strcmp("-display", argv[i]))
+          usage(argv);
+
+        if (++i >= argc)
+          usage(argv);
+
+        displayname = argv[i];
+        break;
+
+      case 'c':
+        otp = 1;  otpClear = 1;
+        break;
+
+      case 'o':
+        otp = 1;
+        break;
+
+      case 'a':
+        if (++i >= argc)
+          usage(argv);
+
+        user = argv[i];
+        userList = 1;
+        addUser = 1;
+        break;
+
+      case 'r':
+        if (++i >= argc)
+          usage(argv);
+
+        user = argv[i];
+        userList = 1;
+        addUser = 0;
+        break;
+
+      case 'f':
+        strcpy(passwdFile, "-");
+        read_from_stdin = 1;
+        make_directory = 0;
+        check_strictly = 0;
+        break;
+
+      case 't':
+        sprintf(passwdDir, "/tmp/%s-vnc", getenv_safe("USER", 32));
+        sprintf(passwdFile, "%s/passwd", passwdDir);
+        read_from_stdin = 0;
+        make_directory = 1;
+        check_strictly = 1;
+        break;
+
+      case 'v':
+        alsoView = 1;
+        break;
+
+      default:
         usage(argv);
-
-      if (++i >= argc)
-        usage(argv);
-
-      displayname = argv[i];
-      break;
-
-    case 'c':
-      otp = 1;  otpClear = 1;
-      break;
-
-    case 'o':
-      otp = 1;
-      break;
-
-    case 'a':
-      if (++i >= argc)
-        usage(argv);
-
-      user = argv[i];
-      userList = 1;
-      addUser = 1;
-      break;
-
-    case 'r':
-      if (++i >= argc)
-        usage(argv);
-
-      user = argv[i];
-      userList = 1;
-      addUser = 0;
-      break;
-
-    case 'f':
-      strcpy(passwdFile, "-");
-      read_from_stdin = 1;
-      make_directory = 0;
-      check_strictly = 0;
-      break;
-
-    case 't':
-      sprintf(passwdDir, "/tmp/%s-vnc", getenv_safe("USER", 32));
-      sprintf(passwdFile, "%s/passwd", passwdDir);
-      read_from_stdin = 0;
-      make_directory = 1;
-      check_strictly = 1;
-      break;
-
-    case 'v':
-      alsoView = 1;
-      break;
-
-    default:
-      usage(argv);
-      break;
+        break;
     }
   }
 
@@ -382,6 +386,7 @@ int main(int argc, char *argv[])
   return 0;
 }
 
+
 static void usage(char *argv[])
 {
   fprintf(stderr, "usage: %s [-v] [FILE]\n", argv[0]);
@@ -393,6 +398,7 @@ static void usage(char *argv[])
   fprintf(stderr, "       %s -r USER [-display VNC-DISPLAY]\n", argv[0]);
   exit(1);
 }
+
 
 static char *getenv_safe(char *name, size_t maxlen)
 {
@@ -409,6 +415,7 @@ static char *getenv_safe(char *name, size_t maxlen)
   }
   return result;
 }
+
 
 /*
  * Check if the specified vnc directory exists, create it if
@@ -450,9 +457,10 @@ static void mkdir_and_check(char *dirname, int be_strict)
   }
 }
 
+
 /*
- * Read a password from stdin. The password is terminated either by an
- * end of line, or by the end of stdin data. Return 1 on success, 0 on
+ * Read a password from stdin.  The password is terminated either by an
+ * end of line, or by the end of stdin data.  Return 1 on success, 0 on
  * error. On success, the password will be stored in the specified
  * 9-byte buffer.
  */
@@ -484,9 +492,10 @@ static int read_password(char *result)
   return 1;
 }
 
+
 /*
  * Ask a password, check its length and ask to confirm it once more. 
- * Return 1 on success, 0 on error. On success, the password will be
+ * Return 1 on success, 0 on error.  On success, the password will be
  * stored in the specified 9-byte buffer.
  */
 
