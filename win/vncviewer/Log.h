@@ -16,13 +16,7 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
 //  USA.
-//
-// TightVNC distribution homepage on the Web: http://www.tightvnc.com/
-//
-// If the source code for the VNC system is not available from the place 
-// whence you received this file, check http://www.uk.research.att.com/vnc or 
-// contact the authors on vnc@uk.research.att.com for information on obtaining it.
-//
+
 // This is an object and macros which provide general logging and debugging functions.
 // It can log to a file, to a new console, and/or to debug - others maybe to follow.
 // Every log object has a logging level (which can be changed).
