@@ -1426,10 +1426,8 @@ Bool HandleRFBServerMessage()
           return False;
         }
 
-        if (rect.r.h * rect.r.w == 0) {
-          fprintf(stderr, "Zero size rect - ignoring\n");
-          continue;
-        }
+        if (rect.r.h * rect.r.w == 0)
+          fprintf(stderr, "WARNING: Zero size rect\n");
 
         if (rfbProfile || benchFile) {
           tDecodeStart = gettime();
