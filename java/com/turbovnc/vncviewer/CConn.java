@@ -813,32 +813,34 @@ public class CConn extends CConnection
       pkgTime = attributes.getValue("Package-Time");
     } catch (IOException e) { }
     JOptionPane.showMessageDialog((viewport != null ? viewport : null),
-      VncViewer.about1+" v"+VncViewer.version+" ("+VncViewer.build+") "
-      +"[JVM: "+System.getProperty("os.arch")+"]\n"
-      +"Built on "+pkgDate+" at "+pkgTime+"\n"
-      +VncViewer.about2+"\n"
-      +VncViewer.about3,
-      "About TurboVNC Viewer",
-      JOptionPane.INFORMATION_MESSAGE,
-      logo);
+      VncViewer.about1 + " v" + VncViewer.version +
+        " (" + VncViewer.build + ") " +
+        "[JVM: " + System.getProperty("os.arch") + "]\n" +
+      "Built on " + pkgDate + " at " + pkgTime + "\n" +
+      VncViewer.about2 + "\n" +
+      VncViewer.about3,
+      "About TurboVNC Viewer", JOptionPane.INFORMATION_MESSAGE, logo);
   }
 
   void showInfo() {
     JOptionPane.showMessageDialog(viewport,
-      "Desktop name: "+cp.name()+"\n"
-      +"Host: "+sock.getPeerName()+":"+sock.getPeerPort()+"\n"
-      +"Size: "+cp.width+"x"+cp.height+"\n"
-      +"Pixel format: "+desktop.getPF().print()+"\n"
-      +"(server default "+serverPF.print()+")\n"
-      +"Requested encoding: "+Encodings.encodingName(currentEncoding)+"\n"
-      +"Last used encoding: "+Encodings.encodingName(lastServerEncoding)+"\n"
-      +"Line speed estimate: "+sock.inStream().kbitsPerSecond()+" kbit/s"+"\n"
-      +"Protocol version: "+cp.majorVersion+"."+cp.minorVersion+"\n"
-      +"Security method: "+Security.secTypeName(csecurity.getType())
-       +" ["+csecurity.description()+"]\n"
-      +"JPEG decompression: "+(reader_.isTurboJPEG()? "Turbo":"Unaccelerated"),
-      "VNC connection info",
-      JOptionPane.PLAIN_MESSAGE);
+      "Desktop name:  " + cp.name() + "\n" +
+      "Host:  " + sock.getPeerName() + ":" + sock.getPeerPort() + "\n" +
+      "Size:  " + cp.width + "x" + cp.height + "\n" +
+      "Pixel format:  " + desktop.getPF().print() + "\n" +
+      "(server default " + serverPF.print() + ")\n" +
+      "Requested encoding:  " + Encodings.encodingName(currentEncoding) +
+        "\n" +
+      "Last used encoding:  " + Encodings.encodingName(lastServerEncoding) +
+        "\n" +
+      "Line speed estimate:  " + sock.inStream().kbitsPerSecond() + " kbit/s" +
+        "\n" +
+      "Protocol version:  " + cp.majorVersion + "." + cp.minorVersion + "\n" +
+      "Security method:  " + Security.secTypeName(csecurity.getType()) +
+        " [" + csecurity.description() + "]\n" +
+      "JPEG decompression:  " +
+        (reader_.isTurboJPEG() ? "Turbo" : "Unaccelerated"),
+      "VNC connection info", JOptionPane.PLAIN_MESSAGE);
   }
 
   public void refresh() {
