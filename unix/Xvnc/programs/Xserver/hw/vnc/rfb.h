@@ -619,9 +619,9 @@ extern void HandleFence(rfbClientPtr cl, CARD32 flags, unsigned len,
 extern void rfbInitFlowControl(rfbClientPtr cl);
 extern Bool rfbIsCongested(rfbClientPtr cl);
 extern void rfbSendEndOfCU(rfbClientPtr cl);
-extern void rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,
+extern Bool rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,
                          const char *data);
-extern void rfbSendRTTPing(rfbClientPtr cl);
+extern Bool rfbSendRTTPing(rfbClientPtr cl);
 
 
 /* vncextinit.c */

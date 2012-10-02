@@ -175,12 +175,12 @@ static void HandleRTTPong(rfbClientPtr cl, RTTInfo *rttInfo)
 }
 
 
-void rfbSendRTTPing(rfbClientPtr cl)
+Bool rfbSendRTTPing(rfbClientPtr cl)
 {
     RTTInfo rttInfo;
 
     if (!cl->enableFence)
-        return;
+        return TRUE;
 
     memset(&rttInfo, 0, sizeof(RTTInfo));
 
@@ -191,8 +191,9 @@ void rfbSendRTTPing(rfbClientPtr cl)
     /* We need to make sure that any old updates are already processed by the
        time we get the response back.  This allows us to reliably throttle
        back if the client or the network overloads. */
-    rfbSendFence(cl, rfbFenceFlagRequest | rfbFenceFlagBlockBefore,
-                 sizeof(RTTInfo), (const char*)&rttInfo);
+    if (!rfbSendFence(cl, rfbFenceFlagRequest | rfbFenceFlagBlockBefore,
+                      sizeof(RTTInfo), (const char*)&rttInfo))
+        return FALSE;
 
     cl->pingCounter++;
 
@@ -204,6 +205,7 @@ void rfbSendRTTPing(rfbClientPtr cl)
                  congestionCallback, cl);
         cl->congestionTimerRunning = TRUE;
     }
+    return TRUE;
 }
 
 
@@ -263,22 +265,22 @@ static void UpdateCongestion(rfbClientPtr cl)
 /*
  * rfbSendFence sends a fence message to a specific client
  */
-void rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,
+Bool rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,
                   const char *data)
 {
     rfbFenceMsg f;
 
     if (!cl->enableFence) {
         rfbLog("ERROR in rfbSendFence: Client does not support fence extension\n");
-        return;
+        return FALSE;
     }
     if (len > 64) {
         rfbLog("ERROR in rfbSendFence: Fence payload is too large\n");
-        return;
+        return FALSE;
     }
     if ((flags & ~rfbFenceFlagsSupported) != 0) {
         rfbLog("ERROR in rfbSendFence: Unknown fence flags\n");
-        return;
+        return FALSE;
     }
 
     f.type = rfbFence;
@@ -288,14 +290,15 @@ void rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,
     if (WriteExact(cl->sock, (char *)&f, sz_rfbFenceMsg) < 0) {
         rfbLogPerror("rfbSendFence: write");
         rfbCloseSock(cl->sock);
-        return;
+        return FALSE;
     }
 
     if (WriteExact(cl->sock, (char *)data, len) < 0) {
         rfbLogPerror("rfbSendFence: write");
         rfbCloseSock(cl->sock);
-        return;
+        return FALSE;
     }
+    return TRUE;
 }
 
 

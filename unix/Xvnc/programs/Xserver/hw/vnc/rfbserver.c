@@ -1330,7 +1330,8 @@ rfbSendFramebufferUpdate(cl)
     cl->copyDX = 0;
     cl->copyDY = 0;
 
-    rfbSendRTTPing(cl);
+    if (!rfbSendRTTPing(cl))
+        return FALSE;
 
     /*
      * Now send the update.
@@ -1486,7 +1487,8 @@ rfbSendFramebufferUpdate(cl)
     if (!rfbSendUpdateBuf(cl))
         return FALSE;
 
-    rfbSendRTTPing(cl);
+    if (!rfbSendRTTPing(cl))
+        return FALSE;
 
     if (rfbProfile) {
         tUpdateTime += gettime() - tUpdateStart;
