@@ -89,10 +89,12 @@ int rfbDeferUpdateTime = 40; /* ms */
 #define ADD_TO_MODIFIED_REGION(pScreen, reg)                                  \
   {                                                                           \
       rfbClientPtr cl;                                                        \
-      for (cl = rfbClientHead; cl; cl = cl->next) {                           \
-          REGION_UNION((pScreen), &cl->modifiedRegion,                        \
-                       &cl->modifiedRegion, reg);                             \
-      }                                                                       \
+      BoxRec *box = REGION_EXTENTS(pScreen, reg);                             \
+      if ((box->x2 - box->x1) * (box->y2 - box->y1) != 0)                     \
+          for (cl = rfbClientHead; cl; cl = cl->next) {                       \
+              REGION_UNION((pScreen), &cl->modifiedRegion,                    \
+                           &cl->modifiedRegion, reg);                         \
+          }                                                                   \
   }
 
 /* SCHEDULE_FB_UPDATE is used at the end of each drawing routine to schedule an
