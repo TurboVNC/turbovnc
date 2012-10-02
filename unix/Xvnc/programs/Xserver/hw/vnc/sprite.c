@@ -2123,8 +2123,7 @@ rfbSpriteSetCursor(ScreenPtr pScreen, CursorPtr pCursor, int x, int y)
             }
             cl->cursorWasMoved = TRUE;
         }
-        if (!cl->deferredUpdateScheduled &&
-            REGION_NOTEMPTY(pScreen, &cl->requestedRegion)) {
+        if (!cl->deferredUpdateScheduled)
             /* cursorIsDrawn is guaranteed to be FALSE here, so we definitely
                want to send a screen update to the client, even if that's only
                putting up the cursor */
