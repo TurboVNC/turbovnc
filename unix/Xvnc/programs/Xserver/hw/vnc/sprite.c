@@ -2128,7 +2128,6 @@ rfbSpriteSetCursor(ScreenPtr pScreen, CursorPtr pCursor, int x, int y)
                want to send a screen update to the client, even if that's only
                putting up the cursor */
             rfbSendFramebufferUpdate(cl);
-        }
     }
 }
 
