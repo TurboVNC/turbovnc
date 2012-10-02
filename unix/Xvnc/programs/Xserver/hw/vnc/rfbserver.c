@@ -1209,6 +1209,12 @@ rfbSendFramebufferUpdate(cl)
 
     TimerCancel(cl->updateTimer);
 
+    /*
+     * We're in the middle of processing a command that's supposed to be
+     * synchronised. Allowing an update to slip out right now might violate
+     * that synchronisation.
+     */
+
     if (cl->syncFence) return TRUE;
 
     if (rfbProfile) {
