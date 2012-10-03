@@ -65,9 +65,10 @@ abstract public class CMsgWriter {
       encodings[nEncodings++] = Encodings.pseudoEncodingClientRedirect;
 
     encodings[nEncodings++] = Encodings.pseudoEncodingLastRect;
-    encodings[nEncodings++] = Encodings.pseudoEncodingContinuousUpdates;
-    encodings[nEncodings++] = Encodings.pseudoEncodingFence;
-    
+    if (opts.continuousUpdates) {
+      encodings[nEncodings++] = Encodings.pseudoEncodingContinuousUpdates;
+      encodings[nEncodings++] = Encodings.pseudoEncodingFence;
+    }
 
     if (Decoder.supported(preferredEncoding)) {
       encodings[nEncodings++] = preferredEncoding;

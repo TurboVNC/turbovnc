@@ -450,6 +450,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
     }
 
     opts.cursorShape = cursorShape.getValue();
+    opts.continuousUpdates = continuousUpdates.getValue();
     if (user.getValue() != null) opts.user = new String(user.getValue());
     opts.noUnixLogin = noUnixLogin.getValue();
     opts.sendLocalUsername = sendLocalUsername.getValue();
@@ -656,6 +657,9 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "problems on slow networks.  However, using a remote cursor can be "+
   "advantageous with shared sessions, since it will allow you to see the "+
   "cursor movements of other connected users.", true);
+
+  static BoolParameter continuousUpdates
+  = new BoolParameter("CU", null, true);
 
   static StringParameter secTypes = SecurityClient.secTypes;
 

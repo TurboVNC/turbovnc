@@ -56,6 +56,7 @@ public class Options
     compressLevel = old.compressLevel;
     colors = old.colors;
     cursorShape = old.cursorShape;
+    continuousUpdates = old.continuousUpdates;
     if (old.user != null) user = new String(old.user);
     noUnixLogin = old.noUnixLogin;
     sendLocalUsername = old.sendLocalUsername;
@@ -123,6 +124,7 @@ public class Options
     printOpt("compressLevel", compressLevel);
     printOpt("colors", colors);
     printOpt("cursorShape", cursorShape);
+    printOpt("continuousUpdates", continuousUpdates);
     printOpt("user", user);
     printOpt("noUnixLogin", noUnixLogin);
     printOpt("sendLocalUsername", sendLocalUsername);
@@ -148,6 +150,7 @@ public class Options
   public int compressLevel;
   public int colors;
   public boolean cursorShape;
+  public boolean continuousUpdates;
   public String user;
   public boolean noUnixLogin;
   public boolean sendLocalUsername;

@@ -93,7 +93,12 @@ public class Configuration {
     VoidParameter current = head;
 
     while (current != null) {
-      String desc = current.getDescription().trim();
+      String desc = current.getDescription();
+      if (desc == null) {
+        current = current.next;
+        continue;
+      }
+      desc = desc.trim();
       System.err.print("--> " + current.getName() + "\n    ");
       if (current.getValues() != null)
         System.err.print("Values: " + current.getValues() + " ");
