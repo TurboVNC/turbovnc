@@ -54,8 +54,13 @@
 		/opt/TurboVNC/bin/vncviewer
 		---
 
-		Java TurboVNC Viewer app on Mac :: {:}
-		Open __TurboVNC Viewer (Java).app__ in the Applications folder.
+		Java TurboVNC Viewer :: {:}
+		On Mac, open __TurboVNC Viewer (Java).app__ in the Applications folder.  On
+		Windows, select __Java TurboVNC Viewer__ in the __TurboVNC__ Start Menu
+		group.  On Linux, open a new terminal/xterm and type
+		#Verb: <<---
+		java -server -jar /opt/TurboVNC/java/VncViewer.jar
+		---
 
 		Windows TurboVNC Viewer :: {:}
 		Select __TurboVNC Viewer__ in the __TurboVNC__ Start Menu group.
@@ -148,8 +153,8 @@ The Java TurboVNC Viewer can use the libjpeg-turbo JNI library to accelerate
 JPEG decoding, if the library is installed on the client machine.  v1.3 or
 later of [[http://www.sourceforge.net/projects/libjpeg-turbo/files][libjpeg-turbo]],
 built with Java support, is required (the official SDK's from the libjpeg-turbo
-Project provide the necessary files.)  Note that applets cannot load JNI
-libraries, so if you wish to take advantage of this functionality, you will
+Project provide the necessary functionality.)  Note that applets cannot load
+JNI libraries, so if you wish to take advantage of this functionality, you will
 need to launch the Java TurboVNC Viewer as a stand-alone Java app on the client
 machine or use JavaWebStart to deploy the JAR from a web server.  How to do
 the latter is, for the moment, left as an exercise for the reader.
@@ -364,15 +369,21 @@ After the SSH connection has been established, you can then launch the
 TurboVNC Viewer and point it to ''localhost:''__''{n}''__ (''localhost:1'' in the
 above example.)
 
-*** The ''-via'' Command-Line Option
+*** The ''-via'' and ''-tunnel'' Command-Line Options
 #OPT: noList! plain!
 
 If you are using the X11 and Java TurboVNC Viewers, then you can simplify the
-above by using the ''-via'' command-line option to ''vncviewer''.  For
-instance, running
+above by using the ''-via'' and ''-tunnel'' command-line options to
+''vncviewer''.  For instance, running
 
 	#Verb: <<---
 	{vncviewer} -via {user}@{server} localhost:{n}
+	---
+
+or
+
+	#Verb: <<---
+	{vncviewer} -tunnel {user}@{server}
 	---
 
 is the equivalent of running
@@ -387,7 +398,13 @@ X11 TurboVNC Viewer.  If using the Java TurboVNC Viewer app on OS X, replace
 __''{vncviewer}''__ with
 ''/Applications/TurboVNC\\ Viewer\\ \\(Java\\).app/Contents/MacOS/JavaApplicationStub''.
 If launching the Java TurboVNC Viewer directly, replace __''{vncviewer}''__
-with ''java -jar /opt/TurboVNC/java/VncViewer.jar''.
+with ''java -jar {TurboVNC_install_directory}/java/VncViewer.jar''.
+
+''-tunnel'' can be used as a shortcut whenever the SSH and VNC servers are the
+same machine.  ''-via'' is more flexible, since it allows you to specify the
+VNC server to which to connect.  The VNC server is specified from the point of
+view of the SSH server, which is why we used ''localhost'' in the above
+example.
 
 With the X11 TurboVNC Viewer, the command used to establish the SSH tunnel is
 configurable by way of environment variables.  See the ''vncviewer'' man page

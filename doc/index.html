@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2012-10-01T06:00:13">
+<meta name="date" content="2012-10-03T06:29:23">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -712,9 +712,16 @@ ssh&nbsp;{user}@{server}
 </pre>
 
             </dd>
-            <dt class="Description-3 Description">Java TurboVNC Viewer app on Mac</dt>
+            <dt class="Description-3 Description">Java TurboVNC Viewer</dt>
             <dd class="Description-3 Description">
-                 Open <em>TurboVNC Viewer (Java).app</em> in the Applications folder.
+                 On Mac, open <em>TurboVNC Viewer (Java).app</em> in the Applications 
+                 folder.  On Windows, select <em>Java TurboVNC Viewer</em> in the 
+                 <em>TurboVNC</em> Start Menu group.  On Linux, open a new 
+                 terminal/xterm and type
+<pre class="verbatim">
+java&nbsp;-server&nbsp;-jar&nbsp;/opt/TurboVNC/java/VncViewer.jar
+</pre>
+
             </dd>
             <dt class="Description-3 Description">Windows TurboVNC Viewer</dt>
             <dd class="Description-3 Description">
@@ -859,12 +866,12 @@ accelerate JPEG decoding, if the library is installed on the client
 machine.  v1.3 or later of 
 <span class="remote"><a class="remote" href="http://www.sourceforge.net/projects/libjpeg-turbo/files">libjpeg-turbo</a></span><a name="idx0024"></a>, 
 built with Java support, is required (the official SDK&rsquo;s from the 
-libjpeg-turbo Project provide the necessary files.)  Note that applets 
-cannot load JNI libraries, so if you wish to take advantage of this 
-functionality, you will need to launch the Java TurboVNC Viewer as a 
-stand-alone Java app on the client machine or use JavaWebStart to deploy 
-the JAR from a web server.  How to do the latter is, for the moment, 
-left as an exercise for the reader.</p>
+libjpeg-turbo Project provide the necessary functionality.)  Note that 
+applets cannot load JNI libraries, so if you wish to take advantage of 
+this functionality, you will need to launch the Java TurboVNC Viewer as 
+a stand-alone Java app on the client machine or use JavaWebStart to 
+deploy the JAR from a web server.  How to do the latter is, for the 
+moment, left as an exercise for the reader.</p>
 
 <p>Note that no additional installation is required if using the Java 
 TurboVNC Viewer app for OS X, since it has the appropriate JNI library 
@@ -1145,14 +1152,21 @@ TurboVNC Viewer and point it to
 (<code>localhost:1</code> in the above example.)</p>
 
 
-<h3 id="hd006006001">The <code>-via</code> Command-Line Option</h3>
+<h3 id="hd006006001">The <code>-via</code> and <code>-tunnel</code> Command-Line Options</h3>
 
 <p>If you are using the X11 and Java TurboVNC Viewers, then you can 
-simplify the above by using the <code>-via</code> command-line option to 
-<code>vncviewer</code>.  For instance, running</p>
+simplify the above by using the <code>-via</code> and 
+<code>-tunnel</code> command-line options to <code>vncviewer</code>.  
+For instance, running</p>
 
 <pre class="verbatim">
 {vncviewer}&nbsp;-via&nbsp;{user}@{server}&nbsp;localhost:{n}
+</pre>
+
+<p>or</p>
+
+<pre class="verbatim">
+{vncviewer}&nbsp;-tunnel&nbsp;{user}@{server}
 </pre>
 
 <p>is the equivalent of running</p>
@@ -1169,7 +1183,13 @@ Viewer.  If using the Java TurboVNC Viewer app on OS X, replace
 <code>/Applications/TurboVNC\&nbsp;Viewer\&nbsp;\(Java\).app/Contents/MacOS/JavaApplicationStub</code>. 
 If launching the Java TurboVNC Viewer directly, replace 
 <em><code>{vncviewer}</code></em> with 
-<code>java&nbsp;-jar&nbsp;/opt/TurboVNC/java/VncViewer.jar</code>.</p>
+<code>java&nbsp;-jar&nbsp;{TurboVNC_install_directory}/java/VncViewer.jar</code>.</p>
+
+<p><code>-tunnel</code> can be used as a shortcut whenever the SSH and VNC 
+servers are the same machine.  <code>-via</code> is more flexible, since 
+it allows you to specify the VNC server to which to connect.  The VNC 
+server is specified from the point of view of the SSH server, which is 
+why we used <code>localhost</code> in the above example.</p>
 
 <p>With the X11 TurboVNC Viewer, the command used to establish the SSH 
 tunnel is configurable by way of environment variables.  See the 
@@ -1483,8 +1503,8 @@ embedded VGL Transport.</p>
         deployment complexity for Windows clients.
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        Any web browser or PDA can be used as a TurboVNC client (with reduced 
-        performance.)
+        Any web browser or mobile device can be used as a TurboVNC client (with 
+        reduced performance.)
     </li>
 </ul>
 
@@ -1909,42 +1929,6 @@ available even when using these legacy encoding types.</p>
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
         See Section <a href="#ALR" class="ref">6.5.2</a>
-    </dd>
-</dl>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Environment Variable</td>
-    <td class="standard"><code>TVNC_CUCOPYAREA&nbsp;=&nbsp;</code><em><code>0&nbsp;|&nbsp;1</code></em></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">Disable/Enable continuous updates for large regions drawn using <code>XCopyArea()</code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Platforms</td>
-    <td class="standard">Unix</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">Disabled</td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        Normally, when the continuous updates feature is enabled, continuous 
-        updates are only sent for image regions drawn using 
-        <code>X[Shm]PutImage()</code>.  When <code>TVNC_CUCOPYAREA</code> is set 
-        to <code>1</code>, continuous updates are also sent for regions drawn 
-        using <code>XCopyArea()</code>.  This may be necessary in order to make 
-        the continuous updates feature work properly with some applications.  
-        <code>man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;vncviewer</code> for more 
-        information about the continuous updates feature.
     </dd>
 </dl>
 

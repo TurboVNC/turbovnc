@@ -63,8 +63,8 @@ client machine without using VirtualGL's embedded VGL Transport.
 	* No X server is required on the client machine.  This reduces the deployment
 		complexity for Windows clients.
 
-	* Any web browser or PDA can be used as a TurboVNC client (with reduced
-		performance.)
+	* Any web browser or mobile device can be used as a TurboVNC client (with
+		reduced performance.)
 
 *** Disadvantages of TurboVNC (when compared to the VGL transport)
 #OPT: noList! plain!
