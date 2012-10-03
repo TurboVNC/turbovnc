@@ -167,11 +167,11 @@ public class Configuration {
       if (name.startsWith("[")) {
         // skip the section delimiters
         continue;
-      } else if (name.equals("host")) {
+      } else if (name.equalsIgnoreCase("host")) {
         setParam("Server", props.getProperty(name));
-      } else if (name.equals("port")) {
+      } else if (name.equalsIgnoreCase("port")) {
         setParam("Port", props.getProperty(name));
-      } else if (name.equals("password")) {
+      } else if (name.equalsIgnoreCase("password")) {
         byte encryptedPassword[] = new byte[8];
         String passwordString = props.getProperty(name);
         if (passwordString.length() > 0) {
@@ -186,20 +186,20 @@ public class Configuration {
           }
         }
         setParam("Password", VncAuth.unobfuscatePasswd(encryptedPassword));
-      } else if (name.equals("preferred_encoding")) {
+      } else if (name.equalsIgnoreCase("preferred_encoding")) {
         int encoding = -1;
         try {
           encoding = Integer.parseInt(props.getProperty(name));
         } catch (NumberFormatException e) {}
         if (encoding >= 0 && encoding <= Encodings.LASTENCODING)
           setParam("Encoding", Encodings.encodingName(encoding));
-      } else if (name.equals("viewonly")) {
+      } else if (name.equalsIgnoreCase("viewonly")) {
         setParam("ViewOnly", props.getProperty(name));
-      } else if (name.equals("fullscreen")) {
+      } else if (name.equalsIgnoreCase("fullscreen")) {
         setParam("FullScreen", props.getProperty(name));
-      } else if (name.equals("fsaltenter")) {
+      } else if (name.equalsIgnoreCase("fsaltenter")) {
         setParam("FSAltEnter", props.getProperty(name));
-      } else if (name.equals("span")) {
+      } else if (name.equalsIgnoreCase("span")) {
         int span = -1;
         try {
           span = Integer.parseInt(props.getProperty(name));
@@ -207,7 +207,7 @@ public class Configuration {
         if (span == 0) setParam("Span", "Primary");
         else if (span == 1) setParam("Span", "All");
         else if (span == 2) setParam("Span", "Auto");
-      } else if (name.equals("8bit")) {
+      } else if (name.equalsIgnoreCase("8bit")) {
         int _8bit = -1;
         try {
           _8bit = Integer.parseInt(props.getProperty(name));
@@ -216,9 +216,9 @@ public class Configuration {
           setParam("Colors", "256");
         else if (_8bit == 0)
           setParam("Colors", "-1");
-      } else if (name.equals("shared")) {
+      } else if (name.equalsIgnoreCase("shared")) {
         setParam("Shared", props.getProperty(name));
-      } else if (name.equals("disableclipboard")) {
+      } else if (name.equalsIgnoreCase("disableclipboard")) {
         int disableclipboard = -1;
         try {
           disableclipboard = Integer.parseInt(props.getProperty(name));
@@ -230,27 +230,27 @@ public class Configuration {
           setParam("RecvClipboard", "1");
           setParam("SendClipboard", "1");
         }
-      } else if (name.equals("fitwindow")) {
+      } else if (name.equalsIgnoreCase("fitwindow")) {
         try {
           fitwindow = Integer.parseInt(props.getProperty(name));
         } catch (NumberFormatException e) {}
-      } else if (name.equals("scale_num")) {
+      } else if (name.equalsIgnoreCase("scale_num")) {
         int temp = -1;
         try {
           temp = Integer.parseInt(props.getProperty(name));
         } catch (NumberFormatException e) {}
         if (temp >= 1) scale_num = temp;
-      } else if (name.equals("scale_den")) {
+      } else if (name.equalsIgnoreCase("scale_den")) {
         int temp = -1;
         try {
           temp = Integer.parseInt(props.getProperty(name));
         } catch (NumberFormatException e) {}
         if (temp >= 1) scale_den = temp;
-      } else if (name.equals("cursorshape")) {
+      } else if (name.equalsIgnoreCase("cursorshape")) {
         setParam("CursorShape", props.getProperty(name));
-      } else if (name.equals("compresslevel")) {
+      } else if (name.equalsIgnoreCase("compresslevel")) {
         setParam("CompressLevel", props.getProperty(name));
-      } else if (name.equals("subsampling")) {
+      } else if (name.equalsIgnoreCase("subsampling")) {
         int subsampling = -1;
         try {
           subsampling = Integer.parseInt(props.getProperty(name));
@@ -261,7 +261,7 @@ public class Configuration {
         case 2:  setParam("Subsampling", "2X");  break;
         case 3:  setParam("Subsampling", "Gray");  break;
         }
-      } else if (name.equals("quality")) {
+      } else if (name.equalsIgnoreCase("quality")) {
         int quality = -2;
         try {
           quality = Integer.parseInt(props.getProperty(name));
@@ -270,9 +270,9 @@ public class Configuration {
         else if (quality >= 1 && quality <= 100) {
           setParam("Quality", props.getProperty(name));
         }
-      } else if (name.equals("continuousupdates")) {
+      } else if (name.equalsIgnoreCase("continuousupdates")) {
         setParam("CU", props.getProperty(name));
-      } else if (name.equals("nounixlogin")) {
+      } else if (name.equalsIgnoreCase("nounixlogin")) {
         setParam("NoUnixLogin", props.getProperty(name));
       }
     }
