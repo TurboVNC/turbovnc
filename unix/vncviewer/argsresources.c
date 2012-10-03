@@ -582,7 +582,7 @@ void usage(void)
 
 #define ReadConfigBool(str, var) {  \
   n = strlen(str);  \
-  if (!strncmp(buf2, str, n)) {  \
+  if (!strncasecmp(buf2, str, n)) {  \
     int temp = 0;  \
     if (sscanf(&buf2[n], "%d", &temp) == 1) {  \
       if (temp) var = True;  \
@@ -594,7 +594,7 @@ void usage(void)
 
 #define ReadConfigInt(str, var, min, max) {  \
   n = strlen(str);  \
-  if (!strncmp(buf2, str, n)) {  \
+  if (!strncasecmp(buf2, str, n)) {  \
     int temp = -1;  \
     if (sscanf(&buf2[n], "%d", &temp) == 1 && temp >= min && temp <= max)  \
       var = temp;  \
@@ -640,7 +640,7 @@ void LoadConfigFile(char *filename)
     if (len < 1) continue;
 
     n = 5;
-    if (!strncmp(buf2, "host=", n)) {
+    if (!strncasecmp(buf2, "host=", n)) {
       if (buf2[n] == '\0') {
         fprintf(stderr, "ERROR reading host name from %s\n", filename);
         exit(1);
@@ -650,7 +650,7 @@ void LoadConfigFile(char *filename)
     }
 
     n = 5;
-    if (!strncmp(buf2, "port=", n)) {
+    if (!strncasecmp(buf2, "port=", n)) {
       if (buf2[n] == '\0' || sscanf(&buf2[n], "%d", &vncServerPort) < 1) {
         fprintf(stderr, "ERROR reading port number from %s\n", filename);
         exit(1);
@@ -664,7 +664,7 @@ void LoadConfigFile(char *filename)
     }
 
     n = 9;
-    if (!strncmp(buf2, "password=", n)) {
+    if (!strncasecmp(buf2, "password=", n)) {
       if (buf2[n] != '\0') {
         strncpy(passwordString, &buf2[n], 255 - n);
         passwordString[16] = 0;
