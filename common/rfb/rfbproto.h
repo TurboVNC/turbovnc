@@ -442,7 +442,6 @@ typedef struct _rfbInteractionCapsMsg {
 #define sig_rfbFileDownloadCancel "FTC_DNCN"
 #define sig_rfbFileUploadFailed "FTC_UPFL"
 #define sig_rfbFileCreateDirRequest "FTC_FCDR"
-#define sig_rfbEnableContinuousUpdates "CUC_ENCU"
 
 /*****************************************************************************
  *

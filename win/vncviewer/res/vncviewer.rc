@@ -57,7 +57,7 @@ BEGIN
     PUSHBUTTON      "&Cancel",IDCANCEL,77,61,50,14
 END
 
-IDD_OPTIONDIALOG DIALOG DISCARDABLE  0, 0, 350, 214
+IDD_OPTIONDIALOG DIALOG DISCARDABLE  0, 0, 350, 207
 STYLE DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
@@ -123,8 +123,6 @@ BEGIN
                     "Button",BS_AUTORADIOBUTTON,195,167,145,10
     CONTROL         "Request shared session",IDC_SHARED,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,195,188,145,10
-    CONTROL         "Continuous Updates",IDC_CU,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,195,200,145,10
 END
 
 IDD_FTBROWSE_DLG DIALOGEX 0, 0, 183, 196
@@ -276,15 +274,15 @@ BEGIN
                     WS_VSCROLL | WS_HSCROLL
 END
 
-IDD_PARENT DIALOGEX 0, 0, 366, 259
+IDD_PARENT DIALOGEX 0, 0, 366, 252
 STYLE DS_MODALFRAME | DS_CONTEXTHELP | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTEXTHELP | WS_EX_CONTROLPARENT
 CAPTION "TurboVNC Viewer Options"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    PUSHBUTTON      "&OK",IDOK,256,241,50,14
-    PUSHBUTTON      "&Cancel",IDCANCEL,311,241,50,14
-    CONTROL         "Tab1",IDC_TAB,"SysTabControl32",WS_TABSTOP,5,5,356,232
+    PUSHBUTTON      "&OK",IDOK,256,234,50,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,311,234,50,14
+    CONTROL         "Tab1",IDC_TAB,"SysTabControl32",WS_TABSTOP,5,5,356,225
 END
 
 IDD_CONNECTING_DIALOG DIALOG DISCARDABLE  0, 0, 210, 61
@@ -643,10 +641,6 @@ Open a console that displays logging information in real time\r\n\
 Equivalent of ""Connection-->Encoding-->Allow CopyRect encoding"" in the options\r\n\
 dialog\r\n\
 \r\n\
-/cu\r\n\
-/nocu\r\n\
-Equivalent of ""Connection-->Continuous Updates"" in the options dialog\r\n\
-\r\n\
 /cursorshape\r\n\
 Equivalent of ""Connection-->Mouse cursor-->Enable remote cursor shape updates""\r\n\
 in the options dialog\r\n\
@@ -830,7 +824,6 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDC_EDIT_LOG_LEVEL      "Specifies the level of detail to include in the log file. Level 0 causes the viewer to log only the most important events, whereas Level 12 generates a lot of debugging output."
     IDC_SHARED              "Enable multiple simultaneous viewer connections to the same server desktop. If the session is not shared, then only one viewer can connect to the same session at the same time. Unlike some VNC flavors, TurboVNC uses shared sessions by default."
-    IDC_CU                  "If enabled, the TurboVNC Server will immediately send framebuffer updates resulting from large PutImage or CopyArea operations without waiting for a framebuffer update request from a VNC viewer. This can improve performance on some high-latency networks."
     IDC_ENCODING            "Choose one of these encoding methods based on the type of network you are using and your desired image quality and performance."
     IDC_SCALE_EDIT          "Reduce or enlarge the image of the remote desktop by the specified percentage.  ""Fixed Aspect Ratio"" automatically scales the remote desktop image to the size of the viewer window, preserving the aspect ratio of the remote desktop."
     IDC_DOTCURSOR_RADIO     "Show local cursor position as a dot."

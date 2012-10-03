@@ -135,7 +135,7 @@ class VNCOptions
     // for debugging purposes
     int   m_delay;
 
-    INT_PTR DoDialog(bool running, bool CUSupported);
+    INT_PTR DoDialog(bool running = false);
     BOOL RaiseDialog();
     void CloseDialog();
 
@@ -166,7 +166,7 @@ class VNCOptions
     void SetComboBox(HWND hwnd);
 
     // Just for temporary use
-    bool m_running, m_CUSupported;
+    bool m_running;
 
     void setHistoryLimit(int newLimit);
   };

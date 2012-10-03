@@ -212,7 +212,7 @@ LRESULT CALLBACK Daemon::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam,
           pApp->NewConnection();
           break;
         case IDC_OPTIONBUTTON:
-          pApp->m_options.DoDialog(false, true);
+          pApp->m_options.DoDialog();
           pApp->m_options.SaveOpt(".listen", KEY_VNCVIEWER_HISTORY);
           break;
         case ID_CLOSEDAEMON:

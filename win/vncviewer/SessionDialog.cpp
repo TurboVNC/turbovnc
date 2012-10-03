@@ -190,7 +190,7 @@ BOOL CALLBACK SessionDialog::SessDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam,
           if (_this->m_pOpt->RaiseDialog())
             return TRUE;  // Options dialog already shown
           HWND hOptionButton = GetDlgItem(hwnd, IDC_OPTIONBUTTON);
-          _this->m_pOpt->DoDialog(false, true);
+          _this->m_pOpt->DoDialog();
           GetDlgItemText(hwnd, IDC_HOSTNAME_EDIT,
                          _this->m_pOpt->m_display, 256);
           SendMessage(hcombo, CB_RESETCONTENT, 0, 0);

@@ -24,6 +24,7 @@ add_executable(vncviewer WIN32
 	ClientConnectionHextile.cpp
 	ClientConnectionRaw.cpp
 	ClientConnectionTight.cpp
+	ClientConnectionFlowControl.cpp
 	ConnectingDialog.cpp
 	${CMAKE_SOURCE_DIR}/common/d3des/d3des.c
 	Daemon.cpp

@@ -760,10 +760,9 @@ void VNCOptions::Register()
 
 // The dialog box allows you to change the session-specific parameters
 
-INT_PTR VNCOptions::DoDialog(bool running, bool CUSupported)
+INT_PTR VNCOptions::DoDialog(bool running)
 {
   m_running = running;
-  m_CUSupported = CUSupported;
   return DialogBoxParam(pApp->m_instance, MAKEINTRESOURCE(IDD_PARENT),
                         NULL, (DLGPROC) DlgProc, (LONG) this);
 }
@@ -982,10 +981,6 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
       SendMessage(hShared, BM_SETCHECK, _this->m_Shared, 0);
       EnableWindow(hShared, !_this->m_running);
 
-      HWND hCU = GetDlgItem(hwnd, IDC_CU);
-      SendMessage(hCU, BM_SETCHECK, _this->m_CU, 0);
-      EnableWindow(hCU, _this->m_CUSupported);
-
       HWND hViewOnly = GetDlgItem(hwnd, IDC_VIEWONLY);
       SendMessage(hViewOnly, BM_SETCHECK, _this->m_ViewOnly, 0);
       char scalecombo[9][19] = {
@@ -1190,10 +1185,6 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
           HWND hShared = GetDlgItem(hwnd, IDC_SHARED);
           _this->m_Shared =
             (SendMessage(hShared, BM_GETCHECK, 0, 0) == BST_CHECKED);
-
-          HWND hCU = GetDlgItem(hwnd, IDC_CU);
-          _this->m_CU =
-            (SendMessage(hCU, BM_GETCHECK, 0, 0) == BST_CHECKED);
 
           HWND hViewOnly = GetDlgItem(hwnd, IDC_VIEWONLY);
           _this->m_ViewOnly =

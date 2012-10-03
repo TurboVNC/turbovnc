@@ -138,7 +138,6 @@ class ClientConnection : public omni_thread
     void ProcessKeyEvent(int virtkey, DWORD keyData);
     void SendKeyEvent(CARD32 key, bool down);
     void SwitchOffKey();
-    void SendCUMessage(bool enable);
     void GrabKeyboard();
     void UngrabKeyboard();
     bool isKeyboardGrabbed();
@@ -248,6 +247,20 @@ class ClientConnection : public omni_thread
     void WriteExact(char *buf, int bytes);
     char *ReadFailureReason();
 
+    // ClientConnectionFlowControl.cpp
+    bool supportsCU;
+    bool continuousUpdates;
+    bool supportsFence;
+    bool supportsSyncFence;
+    bool pendingSyncFence;
+
+    void ClientConnection::HandleFence(CARD32 flags, unsigned len,
+                                       const char *data);
+    void ClientConnection::SendEnableContinuousUpdates(bool enable, int x,
+                                                       int y, int w, int h);
+    void SendFence(CARD32 flags, unsigned len, const char *data);
+    void ReadFence(void);
+
     // This is what controls the thread
     void * run_undetached(void* arg);
     bool m_bKillThread;
@@ -336,8 +349,7 @@ class ClientConnection : public omni_thread
     bool m_threadStarted, m_running;
     // mid-connection format change requested
     bool m_pendingFormatChange;
-    // CU enable/disable requested
-    bool m_pendingCUChange;
+    bool m_pendingEncodingChange;
     // Display connection info;
     void ShowConnInfo();
 

@@ -157,7 +157,7 @@ void ClientConnection::Init(VNCviewerApp *pApp)
   m_threadStarted = true;
   m_running = false;
   m_pendingFormatChange = false;
-  m_pendingCUChange = false;
+  m_pendingEncodingChange = false;
 
   m_hScrollPos = 0; m_vScrollPos = 0;
 
@@ -180,6 +180,12 @@ void ClientConnection::Init(VNCviewerApp *pApp)
   if ((j = tjInitDecompress()) == NULL) throw(ErrorException(tjGetErrorStr()));
 
   node = list = tail = NULL;
+
+  supportsCU = false;
+  continuousUpdates = false;
+  supportsFence = false;
+  supportsSyncFence = false;
+  pendingSyncFence = false;
 }
 
 
@@ -219,9 +225,6 @@ void ClientConnection::InitCapabilities()
   m_clientMsgCaps.Add(rfbFileUploadFailed, rfbTightVncVendor,
                       sig_rfbFileUploadFailed,
                       "File upload failure notification");
-  m_clientMsgCaps.Add(rfbEnableContinuousUpdates, rfbTightVncVendor,
-                      sig_rfbEnableContinuousUpdates,
-                      "Enable/disable continuous updates");
 
   // Supported encoding types
   m_encodingCaps.Add(rfbEncodingCopyRect, rfbStandardVendor,
@@ -309,8 +312,6 @@ void ClientConnection::Run()
     }
   }
 
-  if (m_opts.m_CU) SendCUMessage(true);
-
   // Close the "Connecting..." dialog box if not closed yet.
   if (m_connDlg != NULL) {
     delete m_connDlg;
@@ -323,7 +324,7 @@ void ClientConnection::Run()
 
   SetupPixelFormat();
 
-  SetFormatAndEncodings();
+  m_pendingEncodingChange = true;
 
   hotkeys.Init(m_opts.m_FSAltEnter);
 
@@ -1152,7 +1153,7 @@ void ClientConnection::Authenticate(CARD32 authScheme)
     // special case - no "security result" is sent by the server.
     authResult = rfbAuthOK;
   } else {
-    ReadExact((char *) &authResult, 4);
+    ReadExact((char *)&authResult, 4);
     authResult = Swap32IfLE(authResult);
   }
 
@@ -1751,6 +1752,8 @@ void ClientConnection::SetupPixelFormat()
 
 void ClientConnection::SetFormatAndEncodings()
 {
+  m_pendingEncodingChange = false;
+
   // Set pixel format to myFormat
   rfbSetPixelFormatMsg spf;
 
@@ -1843,12 +1846,16 @@ void ClientConnection::SetFormatAndEncodings()
   // Notify the server that we support LastRect and NewFBSize encodings
   encs[se->nEncodings++] = Swap32IfLE(rfbEncodingLastRect);
   encs[se->nEncodings++] = Swap32IfLE(rfbEncodingNewFBSize);
+  if (m_opts.m_CU) {
+    encs[se->nEncodings++] = Swap32IfLE(rfbEncodingContinuousUpdates);
+    encs[se->nEncodings++] = Swap32IfLE(rfbEncodingFence);
+  }
 
   len = sz_rfbSetEncodingsMsg + se->nEncodings * 4;
 
   se->nEncodings = Swap16IfLE(se->nEncodings);
 
-  WriteExact((char *) buf, len);
+  WriteExact((char *)buf, len);
 }
 
 
@@ -2104,15 +2111,11 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
           if (SetForegroundWindow(_this->m_opts.m_hParent) != 0) return 0;
           int prev_scale_num = _this->m_opts.m_scale_num;
           int prev_scale_den = _this->m_opts.m_scale_den;
-          bool prev_CU = _this->m_opts.m_CU;
           bool prev_FullScreen = _this->m_opts.m_FullScreen;
 
           COND_UNGRAB_KEYBOARD
-          if (_this->m_opts.DoDialog(true,
-              _this->m_clientMsgCaps.IsEnabled(rfbEnableContinuousUpdates))) {
+          if (_this->m_opts.DoDialog(true)) {
             _this->m_pendingFormatChange = true;
-            if (prev_CU != _this->m_opts.m_CU)
-              _this->m_pendingCUChange = true;
             if (_this->m_opts.m_FitWindow) {
               _this->m_opts.m_scaling = true;
               _this->PositionChildWindow();
@@ -2195,13 +2198,13 @@ LRESULT CALLBACK ClientConnection::WndProc1(HWND hwnd, UINT iMsg,
           _this->m_opts.m_enableJpegCompression = false;
           _this->m_opts.m_PreferredEncoding = rfbEncodingTight;
           _this->m_opts.m_compressLevel = 1;
-          _this->SetFormatAndEncodings();
+          _this->m_pendingEncodingChange = true;
           _this->SendFullFramebufferUpdateRequest();
           _this->m_opts.m_jpegQualityLevel = qual;
           _this->m_opts.m_enableJpegCompression = enablejpeg;
           _this->m_opts.m_PreferredEncoding = encoding;
           _this->m_opts.m_compressLevel = compressLevel;
-          _this->SetFormatAndEncodings();
+          _this->m_pendingEncodingChange = true;
           return 0;
         }
         case ID_CONN_SENDKEYDOWN:
@@ -2939,14 +2942,16 @@ void ClientConnection::ShowConnInfo()
   char kbdname[9];
   GetKeyboardLayoutName(kbdname);
   _stprintf(buf,
-            _T("Connected to: %s\n\r")
-            _T("Host: %s port: %d\n\r\n\r")
-            _T("Desktop geometry: %d x %d x %d\n\r")
-            _T("Using depth: %d\n\r")
-            _T("Current protocol version: 3.%d%s\n\r\n\r")
-            _T("Current keyboard name: %s\n\r"),
+            _T("Connected to:  %s\n\r")
+            _T("Host:  %s  port:  %d\n\r\n\r")
+            _T("Desktop geometry:  %d x %d x %d\n\r")
+            _T("Using depth:  %d\n\r")
+            _T("Continuous updates:  %s\n\r")
+            _T("Current protocol version:  3.%d%s\n\r\n\r")
+            _T("Current keyboard name:  %s\n\r"),
             m_desktopName, m_host, m_port, m_si.framebufferWidth,
             m_si.framebufferHeight, m_si.format.depth, m_myFormat.depth,
+            continuousUpdates ? "Enabled" : "Disabled",
             m_minorVersion, (m_tightVncProtocol ? "tight" : ""), kbdname);
   MessageBox(NULL, buf, _T("VNC connection info"), MB_ICONINFORMATION | MB_OK);
 }
@@ -2978,7 +2983,7 @@ void* ClientConnection::run_undetached(void* arg) {
       CARD8 msgType;
       {
         omni_mutex_lock l(m_readMutex);  // we need this if we're not using ReadExact
-        int bytes = recv(m_sock, (char *) &msgType, 1, MSG_PEEK);
+        int bytes = recv(m_sock, (char *)&msgType, 1, MSG_PEEK);
         if (bytes == 0) {
                 m_pFileTransfer->CloseUndoneFileTransfers();
           vnclog.Print(0, _T("Connection closed\n"));
@@ -3017,6 +3022,17 @@ void* ClientConnection::run_undetached(void* arg) {
         case rfbFileDownloadFailed:
           m_pFileTransfer->ReadDownloadFailed();
           break;
+        case rfbFence:
+          ReadFence();
+          break;
+        case rfbEndOfContinuousUpdates:
+        {
+          // Consume the message type byte
+          char dummy;
+          ReadExact(&dummy, 1);
+          supportsCU = true;
+          break;
+        }
 
         default:
           vnclog.Print(3, _T("Unknown message type x%02x\n"), msgType);
@@ -3053,6 +3069,14 @@ inline void ClientConnection::SendFramebufferUpdateRequest(int x, int y,
 {
   rfbFramebufferUpdateRequestMsg fur;
 
+  if (incremental && continuousUpdates)
+    return;
+
+  if (m_pendingEncodingChange) {
+    SetFormatAndEncodings();
+    m_pendingEncodingChange = false;
+  }
+
   fur.type = rfbFramebufferUpdateRequest;
   fur.incremental = incremental ? 1 : 0;
   fur.x = Swap16IfLE(x);
@@ -3082,10 +3106,6 @@ inline void ClientConnection::SendFullFramebufferUpdateRequest()
 
 void ClientConnection::SendAppropriateFramebufferUpdateRequest()
 {
-  if (m_pendingCUChange) {
-    SendCUMessage(m_opts.m_CU);
-    m_pendingCUChange = false;
-  }
   if (m_pendingFormatChange) {
     vnclog.Print(3, _T("Requesting new pixel format\n"));
     rfbPixelFormat oldFormat = m_myFormat;
@@ -3105,31 +3125,11 @@ void ClientConnection::SendAppropriateFramebufferUpdateRequest()
 }
 
 
-void ClientConnection::SendCUMessage(bool enable)
-{
-  rfbEnableContinuousUpdatesMsg fencu;
-
-  if (!m_clientMsgCaps.IsEnabled(rfbEnableContinuousUpdates))
-      return;
-
-  fencu.type = rfbEnableContinuousUpdates;
-  fencu.enable = enable ? 1 : 0;
-  fencu.x = 0;
-  fencu.y = 0;
-  fencu.w = Swap16IfLE(m_si.framebufferWidth);
-  fencu.h = Swap16IfLE(m_si.framebufferHeight);
-
-  vnclog.Print(2, "%s continuous updates\n",
-               enable ? "Enabling" : "Disabling");
-
-  WriteExact((char *)&fencu, sz_rfbEnableContinuousUpdatesMsg);
-}
-
-
 void ClientConnection::ReadScreenUpdate()
 {
+  static bool firstUpdate = true;
   rfbFramebufferUpdateMsg sut;
-  ReadExact((char *) &sut, sz_rfbFramebufferUpdateMsg);
+  ReadExact((char *)&sut, sz_rfbFramebufferUpdateMsg);
   sut.nRects = Swap16IfLE(sut.nRects);
   if (sut.nRects == 0) return;
 
@@ -3140,7 +3140,7 @@ void ClientConnection::ReadScreenUpdate()
   for (int i = 0; i < sut.nRects; i++) {
 
     rfbFramebufferUpdateRectHeader surh;
-    ReadExact((char *) &surh, sz_rfbFramebufferUpdateRectHeader);
+    ReadExact((char *)&surh, sz_rfbFramebufferUpdateRectHeader);
 
     surh.encoding = Swap32IfLE(surh.encoding);
     surh.r.x = Swap16IfLE(surh.r.x);
@@ -3274,6 +3274,15 @@ void ClientConnection::ReadScreenUpdate()
 
   // Inform the other thread that an update is needed.
   PostMessage(m_hwnd, WM_REGIONUPDATED, NULL, NULL);
+
+  if (firstUpdate) {
+    // We need fences in order to make extra update requests and continuous
+    // updates "safe".  See HandleFence() for the next step.
+    if (supportsFence)
+      SendFence(rfbFenceFlagRequest | rfbFenceFlagSyncNext, 0, NULL);
+
+    firstUpdate = false;
+  }
 }
 
 
@@ -3294,7 +3303,7 @@ void ClientConnection::ReadServerCutText()
 {
   rfbServerCutTextMsg sctm;
   vnclog.Print(6, _T("Read remote clipboard change\n"));
-  ReadExact((char *) &sctm, sz_rfbServerCutTextMsg);
+  ReadExact((char *)&sctm, sz_rfbServerCutTextMsg);
   size_t len = Swap32IfLE(sctm.length);
 
   CheckBufferSize(len);
@@ -3325,7 +3334,7 @@ void ClientConnection::ReadSetColorMapEntries()
 void ClientConnection::ReadBell()
 {
   rfbBellMsg bm;
-  ReadExact((char *) &bm, sz_rfbBellMsg);
+  ReadExact((char *)&bm, sz_rfbBellMsg);
 
   if (!PlaySound("VNCViewerBell", NULL,
                  SND_APPLICATION | SND_ALIAS | SND_NODEFAULT | SND_ASYNC))
