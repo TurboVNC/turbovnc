@@ -270,6 +270,8 @@ public class Configuration {
         else if (quality >= 1 && quality <= 100) {
           setParam("Quality", props.getProperty(name));
         }
+      } else if (name.equals("continuousupdates")) {
+        setParam("CU", props.getProperty(name));
       } else if (name.equals("nounixlogin")) {
         setParam("NoUnixLogin", props.getProperty(name));
       }
