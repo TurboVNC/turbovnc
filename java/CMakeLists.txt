@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 project(turbovnc-java Java)
-set(VERSION 1.1.80)
+set(VERSION 1.1.81)
 
 find_package(Java)
 
