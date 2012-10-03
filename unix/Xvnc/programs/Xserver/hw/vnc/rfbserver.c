@@ -1222,6 +1222,14 @@ rfbSendFramebufferUpdate(cl)
         if (tStart < 0.) tStart = tUpdateStart;
     }
 
+    /* Check that we actually have some space on the link and retry in a
+       bit if things are congested. */
+
+    if (rfbCongestionControl && rfbIsCongested(cl)) {
+        cl->updateTimer = TimerSet(cl->updateTimer, 0, 50, updateCallback, cl);
+        return TRUE;
+    }
+
     /*
      * If this client understands cursor shape updates, cursor should be
      * removed from the framebuffer. Otherwise, make sure it's put up.
@@ -1274,14 +1282,6 @@ rfbSendFramebufferUpdate(cl)
     if (!REGION_NOTEMPTY(pScreen, &updateRegion) &&
         !sendCursorShape && !sendCursorPos) {
         REGION_UNINIT(pScreen, &updateRegion);
-        return TRUE;
-    }
-
-    /* Check that we actually have some space on the link and retry in a
-       bit if things are congested. */
-
-    if (rfbCongestionControl && rfbIsCongested(cl)) {
-        cl->updateTimer = TimerSet(cl->updateTimer, 0, 50, updateCallback, cl);
         return TRUE;
     }
 
