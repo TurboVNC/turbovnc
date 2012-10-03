@@ -1116,8 +1116,10 @@ static Bool SetFormatAndEncodings()
     encs[se->nEncodings++] = Swap32IfLE(rfbEncodingLastRect);
   }
 
-  encs[se->nEncodings++] = Swap32IfLE(rfbEncodingContinuousUpdates);
-  encs[se->nEncodings++] = Swap32IfLE(rfbEncodingFence);
+  if (appData.continuousUpdates) {
+    encs[se->nEncodings++] = Swap32IfLE(rfbEncodingContinuousUpdates);
+    encs[se->nEncodings++] = Swap32IfLE(rfbEncodingFence);
+  }
 
   len = sz_rfbSetEncodingsMsg + se->nEncodings * 4;
 
@@ -1585,7 +1587,7 @@ Bool HandleRFBServerMessage()
       if (firstUpdate) {
         /* We need fences in order to make extra update requests and continuous
            updates "safe".  See HandleFence() for the next step. */
-        if (supportsFence && appData.continuousUpdates)
+        if (supportsFence)
           SendFence(rfbFenceFlagRequest | rfbFenceFlagSyncNext, 0, NULL);
 
         firstUpdate = False;
