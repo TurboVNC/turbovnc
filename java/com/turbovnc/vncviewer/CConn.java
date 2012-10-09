@@ -813,12 +813,13 @@ public class CConn extends CConnection
       pkgTime = attributes.getValue("Package-Time");
     } catch (IOException e) { }
     JOptionPane.showMessageDialog((viewport != null ? viewport : null),
-      VncViewer.about1 + " v" + VncViewer.version +
+      VncViewer.product_name + " v" + VncViewer.version +
         " (" + VncViewer.build + ") " +
         "[JVM: " + System.getProperty("os.arch") + "]\n" +
       "Built on " + pkgDate + " at " + pkgTime + "\n" +
-      VncViewer.about2 + "\n" +
-      VncViewer.about3,
+      "Copyright (C) " + VncViewer.copyright_year + " " + VncViewer.copyright +
+        "\n" +
+      VncViewer.url,
       "About TurboVNC Viewer", JOptionPane.INFORMATION_MESSAGE, logo);
   }
 

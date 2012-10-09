@@ -47,11 +47,10 @@ import com.turbovnc.network.*;
 
 public class VncViewer extends java.applet.Applet implements Runnable
 {
-  public static final String about1 = "TurboVNC Viewer";
-  public static final String about2 = "Copyright (C) 2000-2012 "+
-                                      "The VirtualGL Project and many others (see README.txt)";
-  public static final String about3 = "Visit http://www.virtualgl.org "+
-                                      "for more information on TurboVNC.";
+  public static final String product_name = "TurboVNC Viewer";
+  public static String copyright_year = null;
+  public static String copyright = null;
+  public static String url = null;
   public static String version = null;
   public static String build = null;
 
@@ -98,6 +97,21 @@ public class VncViewer extends java.applet.Applet implements Runnable
     
     // load user preferences
     UserPreferences.load("global");
+
+    if (version == null || build == null || copyright_year == null ||
+        copyright == null) {
+      ClassLoader cl = this.getClass().getClassLoader();
+      InputStream stream = cl.getResourceAsStream("com/turbovnc/vncviewer/timestamp");
+      try {
+        Manifest manifest = new Manifest(stream);
+        Attributes attributes = manifest.getMainAttributes();
+        version = attributes.getValue("Version");
+        build = attributes.getValue("Build");
+        copyright_year = attributes.getValue("Copyright-Year");
+        copyright = attributes.getValue("Copyright");
+        url = attributes.getValue("URL");
+      } catch (java.io.IOException e) { }
+    }
 
     // Override defaults with command-line options
     for (int i = 0; i < argv.length; i++) {
@@ -185,9 +199,9 @@ public class VncViewer extends java.applet.Applet implements Runnable
 
   public static void usage() {
     String usage = ("\n"+
-                    "USAGE: vncviewer [options/parameters] [host:displayNum] [options/parameters]\n"+
-                    "       vncviewer [options/parameters] [host::port] [options/parameters]\n"+
-                    "       vncviewer [options/parameters] -listen [port] [options/parameters]\n"+
+                    "USAGE: VncViewer [options/parameters] [host:displayNum] [options/parameters]\n"+
+                    "       VncViewer [options/parameters] [host::port] [options/parameters]\n"+
+                    "       VncViewer [options/parameters] -listen [port] [options/parameters]\n"+
                     "\n"+
                     "Options:\n"+
                     "  -loglevel <level>   configure logging level\n"+
@@ -204,6 +218,10 @@ public class VncViewer extends java.applet.Applet implements Runnable
                     "Parameter names and values are case-insensitive (except for the value of\n"+
                     "Password.)\n\n"+
                     "The parameters are:\n\n");
+    System.err.println("\nTurboVNC Viewer v " + version + " (build " + build +
+                       ") [JVM: " + System.getProperty("os.arch") + "]");
+    System.err.println("Copyright (C) " + copyright_year + " " + copyright);
+    System.err.println(url);
     System.err.print(usage);
     Configuration.listParams(80);
     // Technically, we shouldn't use System.exit here but if there is a parameter
@@ -245,16 +263,6 @@ public class VncViewer extends java.applet.Applet implements Runnable
 
   public void start() {
     vlog.debug("start called");
-    if (version == null || build == null) {
-      ClassLoader cl = this.getClass().getClassLoader();
-      InputStream stream = cl.getResourceAsStream("com/turbovnc/vncviewer/timestamp");
-      try {
-        Manifest manifest = new Manifest(stream);
-        Attributes attributes = manifest.getMainAttributes();
-        version = attributes.getValue("Version");
-        build = attributes.getValue("Build");
-      } catch (java.io.IOException e) { }
-    }
     String host = null;
     if (applet && nViewers == 0) {
       alwaysShowConnectionDialog.setParam(true);
@@ -288,11 +296,11 @@ public class VncViewer extends java.applet.Applet implements Runnable
   public void paint(Graphics g) {
     g.drawImage(logo, 0, 0, this);
     int h = logo.getHeight(this)+20;
-    g.drawString(about1+" v"+version+" ("+build+")", 0, h);
+    g.drawString(product_name + " v" + version + " (" + build + ")", 0, h);
     h += g.getFontMetrics().getHeight();
-    g.drawString(about2, 0, h);
+    g.drawString("Copyright (C) " + copyright_year + " " + copyright, 0, h);
     h += g.getFontMetrics().getHeight();
-    g.drawString(about3, 0, h);
+    g.drawString(url, 0, h);
   }
 
   public void run() {
