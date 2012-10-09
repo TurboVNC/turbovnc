@@ -1096,11 +1096,11 @@ public class CConn extends CConnection
     opts.shared = options.shared.isSelected();
     setShared(opts.shared);
     if (opts.cursorShape != options.cursorShape.isSelected()) {
+      opts.cursorShape = options.cursorShape.isSelected();
       encodingChange = true;
       if (desktop != null)
         desktop.resetLocalCursor();
     }
-    opts.cursorShape = options.cursorShape.isSelected();
     
     checkEncodings();
   

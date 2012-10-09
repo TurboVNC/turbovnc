@@ -77,6 +77,11 @@ class DesktopWindow extends JPanel implements
 
     cursor = new Cursor();
     cursorBacking = new ManagedPixelBuffer();
+    BufferedImage cursorImage = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+    noCursor = tk.createCustomCursor(cursorImage, new java.awt.Point(0,0), "noCursor");
+    cursorImage.flush();
+    if (!cc.opts.cursorShape)
+      setCursor(noCursor);
     addMouseListener(this);
     addMouseWheelListener(this);
     addMouseMotionListener(this);
@@ -479,6 +484,8 @@ class DesktopWindow extends JPanel implements
   // are called.
 
   synchronized private void hideLocalCursor() {
+    if (!cc.opts.cursorShape)
+      setCursor(noCursor); 
     // - Blit the cursor backing store over the cursor
     if (cursorVisible) {
       cursorVisible = false;
@@ -556,7 +563,7 @@ class DesktopWindow extends JPanel implements
   int cursorPosX, cursorPosY;
   ManagedPixelBuffer cursorBacking;
   int cursorBackingX, cursorBackingY;
-  java.awt.Cursor softCursor;
+  java.awt.Cursor softCursor, noCursor;
   static Toolkit tk = Toolkit.getDefaultToolkit();
 
   public int scaledWidth = 0, scaledHeight = 0;
