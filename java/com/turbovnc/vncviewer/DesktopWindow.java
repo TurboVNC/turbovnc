@@ -218,7 +218,20 @@ class DesktopWindow extends JPanel implements
     double tBlitStart = getTime();
     Rect r = damage;
     if (!r.is_empty()) {
-      paintImmediately(r.tl.x, r.tl.y, r.width(), r.height());
+      if (cc.cp.width != scaledWidth || cc.cp.height != scaledHeight) {
+        int x = (int)Math.floor(r.tl.x * scaleWidthRatio);
+        int y = (int)Math.floor(r.tl.y * scaleHeightRatio);
+        // Need one extra pixel to account for rounding.
+        int width = (int)Math.ceil(r.width() * scaleWidthRatio) + 1;
+        int height = (int)Math.ceil(r.height() * scaleHeightRatio) + 1;
+        if (x + width > scaledWidth)
+          width = scaledWidth - x;
+        if (y + height > scaledHeight)
+          height = scaledHeight - y;
+        paintImmediately(x, y, width, height);
+      } else {
+        paintImmediately(r.tl.x, r.tl.y, r.width(), r.height());
+      }
       damage.clear();
     }
     cc.tBlit += getTime() - tBlitStart;
