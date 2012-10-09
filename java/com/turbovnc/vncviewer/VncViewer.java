@@ -54,6 +54,25 @@ public class VncViewer extends java.applet.Applet implements Runnable
   public static String version = null;
   public static String build = null;
 
+  void setVersion()
+  {
+    if (version == null || build == null || copyright_year == null ||
+        copyright == null) {
+      ClassLoader cl = this.getClass().getClassLoader();
+      InputStream stream =
+        cl.getResourceAsStream("com/turbovnc/vncviewer/timestamp");
+      try {
+        Manifest manifest = new Manifest(stream);
+        Attributes attributes = manifest.getMainAttributes();
+        version = attributes.getValue("Version");
+        build = attributes.getValue("Build");
+        copyright_year = attributes.getValue("Copyright-Year");
+        copyright = attributes.getValue("Copyright");
+        url = attributes.getValue("URL");
+      } catch (java.io.IOException e) { }
+    }
+  }
+
   static final double getTime() {
     return (double)System.nanoTime() / 1.0e9;
   }
@@ -98,20 +117,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
     // load user preferences
     UserPreferences.load("global");
 
-    if (version == null || build == null || copyright_year == null ||
-        copyright == null) {
-      ClassLoader cl = this.getClass().getClassLoader();
-      InputStream stream = cl.getResourceAsStream("com/turbovnc/vncviewer/timestamp");
-      try {
-        Manifest manifest = new Manifest(stream);
-        Attributes attributes = manifest.getMainAttributes();
-        version = attributes.getValue("Version");
-        build = attributes.getValue("Build");
-        copyright_year = attributes.getValue("Copyright-Year");
-        copyright = attributes.getValue("Copyright");
-        url = attributes.getValue("URL");
-      } catch (java.io.IOException e) { }
-    }
+    setVersion();
 
     // Override defaults with command-line options
     for (int i = 0; i < argv.length; i++) {
@@ -232,6 +238,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
   public VncViewer() {
     applet = true;
     UserPreferences.load("global");
+    setVersion();
     setGlobalOptions();
   }
 
