@@ -81,9 +81,9 @@ public class Viewport extends JFrame
             cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
           if ((sp.getSize().width != cc.desktop.scaledWidth) ||
               (sp.getSize().height != cc.desktop.scaledHeight)) {
-            int policy = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
-            sp.setHorizontalScrollBarPolicy(policy);
             cc.desktop.setScaledSize();
+            sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             sp.validate();
             if (getExtendedState() != JFrame.MAXIMIZED_BOTH &&
                 !cc.opts.fullScreen) {
@@ -103,8 +103,12 @@ public class Viewport extends JFrame
             }
           }
         } else {
-          int policy = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
-          sp.setHorizontalScrollBarPolicy(policy);
+          sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+          sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+          if (sp.getSize().width >= cc.desktop.scaledWidth)
+            sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+          if (sp.getSize().height >= cc.desktop.scaledHeight)
+            sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
           sp.validate();
         }
       }
