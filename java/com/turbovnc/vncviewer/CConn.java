@@ -37,10 +37,7 @@ package com.turbovnc.vncviewer;
 import java.awt.*;
 import java.awt.event.*;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import javax.swing.*;
@@ -188,7 +185,18 @@ public class CConn extends CConnection
                     + " [" + csecurity.description() + "]");
     String passwordFileStr = viewer.passwordFile.getValue();
     PasswdDialog dlg = null;
-    String autoPass = viewer.password.getValue();
+    String autoPass;
+
+    if (viewer.autoPass.getValue()) {
+      BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+      try {
+        autoPass = in.readLine();
+      } catch (IOException e) {
+        throw new Exception(e.getMessage());
+      }
+      viewer.autoPass.setParam("0");
+    } else
+      autoPass = viewer.password.getValue();
 
     if (autoPass != null && passwd != null) {
       passwd.append(autoPass);
@@ -229,6 +237,8 @@ public class CConn extends CConnection
       if (autoPass == null)
         dlg = new PasswdDialog(title, (userName != null), userName,
                                (passwd == null));
+      else
+        user.append(userName);
     }
 
     if (dlg != null) {
@@ -238,6 +248,7 @@ public class CConn extends CConnection
       if (passwd != null)
         passwd.append(dlg.passwdEntry.getPassword());
     }
+
     return true;
   }
 
