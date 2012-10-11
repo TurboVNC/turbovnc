@@ -138,6 +138,7 @@ public class TightDecoder extends Decoder {
     }
   }
 
+  @SuppressWarnings("fallthrough")
   public void readRect(Rect r, CMsgHandler handler) 
   {
     InStream is = reader.getInStream();
@@ -318,20 +319,28 @@ public class TightDecoder extends Decoder {
       }
     } else {
       // Indexed color
-      int x, b, bits;
+      int x, bits;
       if (palSize <= 2) {
         // 2-color palette
+        int remainder = w % 8;
+        int w8 = w - remainder;
         if (buf instanceof byte[]) {
           while (h > 0) {
-            for (x = 0; x < w / 8; x++) {
+            int endOfRow = ptr + w8;
+            while (ptr < endOfRow) {
               bits = decodebuf[srcPtr++];
-              for(b = 7; b >= 0; b--) {
-                ((byte[])buf)[ptr++] = ((byte[])palette)[bits >> b & 1];
-              }
+              ((byte[])buf)[ptr++] = ((byte[])palette)[bits >> 7 & 1];
+              ((byte[])buf)[ptr++] = ((byte[])palette)[bits >> 6 & 1];
+              ((byte[])buf)[ptr++] = ((byte[])palette)[bits >> 5 & 1];
+              ((byte[])buf)[ptr++] = ((byte[])palette)[bits >> 4 & 1];
+              ((byte[])buf)[ptr++] = ((byte[])palette)[bits >> 3 & 1];
+              ((byte[])buf)[ptr++] = ((byte[])palette)[bits >> 2 & 1];
+              ((byte[])buf)[ptr++] = ((byte[])palette)[bits >> 1 & 1];
+              ((byte[])buf)[ptr++] = ((byte[])palette)[bits & 1];
             }
-            if (w % 8 != 0) {
+            if (remainder != 0) {
               bits = decodebuf[srcPtr++];
-              for (b = 7; b >= 8 - w % 8; b--) {
+              for (int b = 7; b >= 8 - remainder; b--) {
                 ((byte[])buf)[ptr++] = ((byte[])palette)[bits >> b & 1];
               }
             }
@@ -340,15 +349,21 @@ public class TightDecoder extends Decoder {
           }
         } else if (buf instanceof short[]) {
           while (h > 0) {
-            for (x = 0; x < w / 8; x++) {
+            int endOfRow = ptr + w8;
+            while (ptr < endOfRow) {
               bits = decodebuf[srcPtr++];
-              for(b = 7; b >= 0; b--) {
-                ((short[])buf)[ptr++] = ((short[])palette)[bits >> b & 1];
-              }
+              ((short[])buf)[ptr++] = ((short[])palette)[bits >> 7 & 1];
+              ((short[])buf)[ptr++] = ((short[])palette)[bits >> 6 & 1];
+              ((short[])buf)[ptr++] = ((short[])palette)[bits >> 5 & 1];
+              ((short[])buf)[ptr++] = ((short[])palette)[bits >> 4 & 1];
+              ((short[])buf)[ptr++] = ((short[])palette)[bits >> 3 & 1];
+              ((short[])buf)[ptr++] = ((short[])palette)[bits >> 2 & 1];
+              ((short[])buf)[ptr++] = ((short[])palette)[bits >> 1 & 1];
+              ((short[])buf)[ptr++] = ((short[])palette)[bits & 1];
             }
-            if (w % 8 != 0) {
+            if (remainder != 0) {
               bits = decodebuf[srcPtr++];
-              for (b = 7; b >= 8 - w % 8; b--) {
+              for (int b = 7; b >= 8 - remainder; b--) {
                 ((short[])buf)[ptr++] = ((short[])palette)[bits >> b & 1];
               }
             }
@@ -357,15 +372,21 @@ public class TightDecoder extends Decoder {
           }
         } else {
           while (h > 0) {
-            for (x = 0; x < w / 8; x++) {
+            int endOfRow = ptr + w8;
+            while (ptr < endOfRow) {
               bits = decodebuf[srcPtr++];
-              for(b = 7; b >= 0; b--) {
-                ((int[])buf)[ptr++] = ((int[])palette)[bits >> b & 1];
-              }
+              ((int[])buf)[ptr++] = ((int[])palette)[bits >> 7 & 1];
+              ((int[])buf)[ptr++] = ((int[])palette)[bits >> 6 & 1];
+              ((int[])buf)[ptr++] = ((int[])palette)[bits >> 5 & 1];
+              ((int[])buf)[ptr++] = ((int[])palette)[bits >> 4 & 1];
+              ((int[])buf)[ptr++] = ((int[])palette)[bits >> 3 & 1];
+              ((int[])buf)[ptr++] = ((int[])palette)[bits >> 2 & 1];
+              ((int[])buf)[ptr++] = ((int[])palette)[bits >> 1 & 1];
+              ((int[])buf)[ptr++] = ((int[])palette)[bits & 1];
             }
-            if (w % 8 != 0) {
+            if (remainder != 0) {
               bits = decodebuf[srcPtr++];
-              for (b = 7; b >= 8 - w % 8; b--) {
+              for (int b = 7; b >= 8 - remainder; b--) {
                 ((int[])buf)[ptr++] = ((int[])palette)[bits >> b & 1];
               }
             }
