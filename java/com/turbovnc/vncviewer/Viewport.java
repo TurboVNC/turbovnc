@@ -111,6 +111,10 @@ public class Viewport extends JFrame
             sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
           sp.validate();
         }
+        if ((sp.getSize().width > cc.desktop.scaledWidth) ||
+            (sp.getSize().height > cc.desktop.scaledHeight)) {
+          repaint();
+        }
       }
     });
   }
