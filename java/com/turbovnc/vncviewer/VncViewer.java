@@ -348,7 +348,8 @@ public class VncViewer extends java.applet.Applet implements Runnable
       double tStart = 0.0, tTotal;
 
       try {
-        cc = new CConn(this, sock);
+        if (cc == null)
+          cc = new CConn(this, sock);
         if (benchFile != null) {
           if (i < benchWarmup)
             System.out.format("Benchmark warmup run %d\n", i + 1);
@@ -370,6 +371,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
           cc.tDecode = cc.tBlit = 0.0;
           benchFile.reset();
           benchFile.resetReadTime();
+          cc.reset();
           System.gc();
         } else {
           while (!cc.shuttingDown)

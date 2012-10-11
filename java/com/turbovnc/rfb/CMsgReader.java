@@ -171,6 +171,14 @@ abstract public class CMsgReader {
     return false;
   }
 
+  public final void reset()
+  {
+    for (int i = 0; i < Encodings.encodingMax; i++) {
+      if (decoders[i] != null)
+        decoders[i].reset();
+    }
+  }
+
   abstract public void readServerInit(boolean benchmark);
 
   // readMsg() reads a message, calling the handler as appropriate.

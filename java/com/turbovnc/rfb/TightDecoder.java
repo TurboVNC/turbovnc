@@ -79,6 +79,17 @@ public class TightDecoder extends Decoder {
     tightPalette = new byte[256 * 3];
   }
 
+  public void reset()
+  {
+    for (int i = 0; i < 4; i++) {
+      if (zis[i] != null) {
+        zis[i].finalize();
+        zis[i] = null;
+      }
+      zis[i] = new ZlibInStream();
+    }
+  }
+
   public boolean isTurboJPEG()
   {
     return tjd != null;

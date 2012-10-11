@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +25,8 @@
 package com.turbovnc.rdr;
 import com.jcraft.jzlib.*;
 
-public class ZlibInStream extends InStream {
-
+public class ZlibInStream extends InStream
+{
   static final int defaultBufSize = 16384;
 
   public ZlibInStream(int bufSize_) 
@@ -46,12 +47,17 @@ public class ZlibInStream extends InStream {
 
   public ZlibInStream() { this(defaultBufSize); }
 
-  protected void finalize() throws Throwable {
+  public void finalize()
+  {
     try {
       b = null;
       zs.inflateEnd();
     } finally {
-      super.finalize();
+      try {
+        super.finalize();
+      } catch (Throwable e) {
+        throw new Exception(e.getMessage());
+      }
     }
   }
 

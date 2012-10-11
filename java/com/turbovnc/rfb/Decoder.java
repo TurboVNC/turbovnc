@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +19,11 @@
 
 package com.turbovnc.rfb;
 
-abstract public class Decoder {
-
+abstract public class Decoder
+{
   abstract public void readRect(Rect r, CMsgHandler handler);
+
+  public void reset() {}
 
   static public boolean supported(int encoding) 
   {
@@ -33,18 +36,20 @@ abstract public class Decoder {
             encoding == Encodings.encodingTight ||
             encoding == Encodings.encodingZRLE);
   }
-  static public Decoder createDecoder(int encoding, CMsgReader reader) {
+
+  static public Decoder createDecoder(int encoding, CMsgReader reader)
+  {
 /*
     if (encoding <= Encodings.encodingMax && createFns[encoding])
       return (createFns[encoding])(reader);
     return 0;
 */
     switch(encoding) {
-    case Encodings.encodingRaw:     return new RawDecoder(reader);
-    case Encodings.encodingRRE:     return new RREDecoder(reader);
-    case Encodings.encodingHextile: return new HextileDecoder(reader);
-    case Encodings.encodingTight:   return new TightDecoder(reader);
-    case Encodings.encodingZRLE:    return new ZRLEDecoder(reader);
+      case Encodings.encodingRaw:     return new RawDecoder(reader);
+      case Encodings.encodingRRE:     return new RREDecoder(reader);
+      case Encodings.encodingHextile: return new HextileDecoder(reader);
+      case Encodings.encodingTight:   return new TightDecoder(reader);
+      case Encodings.encodingZRLE:    return new ZRLEDecoder(reader);
     }
     return null;
   }

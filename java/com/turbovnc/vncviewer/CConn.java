@@ -141,6 +141,13 @@ public class CConn extends CConnection
     }
   }
 
+  public void reset()
+  {
+    if (reader_ != null)
+      reader_.reset();
+    state_ = RFBSTATE_INITIALISATION;
+  }
+
   public void refreshFramebuffer()
   {
     forceNonincremental = true;
