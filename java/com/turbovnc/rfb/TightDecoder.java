@@ -22,12 +22,12 @@
 package com.turbovnc.rfb;
 
 import com.turbovnc.rdr.InStream;
-import com.turbovnc.rdr.ZlibInStream;
 import java.util.ArrayList;
 import java.io.InputStream;
 import java.awt.image.*;
 import java.util.Arrays;
 import java.awt.*;
+import java.util.zip.*;
 import org.libjpegturbo.turbojpeg.*;
 
 public class TightDecoder extends Decoder {
@@ -52,9 +52,9 @@ public class TightDecoder extends Decoder {
 
   public TightDecoder(CMsgReader reader_) { 
     reader = reader_; 
-    zis = new ZlibInStream[4];
+    inflater = new Inflater[4];
     for (int i = 0; i < 4; i++)
-      zis[i] = new ZlibInStream();
+      inflater[i] = new Inflater();
     try {
       tjd = new TJDecompressor();
       String prop = System.getProperty("tvnc.turbojpeg");
@@ -82,11 +82,8 @@ public class TightDecoder extends Decoder {
   public void reset()
   {
     for (int i = 0; i < 4; i++) {
-      if (zis[i] != null) {
-        zis[i].finalize();
-        zis[i] = null;
-      }
-      zis[i] = new ZlibInStream();
+      if (inflater[i] != null)
+        inflater[i].reset();
     }
   }
 
@@ -131,6 +128,16 @@ public class TightDecoder extends Decoder {
     }
   }
 
+  void checkDecodebuf(int size)
+  {
+    if (decodebufSize < size || decodebuf == null) {
+      if (decodebuf != null)
+        decodebuf = null;
+      decodebuf = new byte[size];
+      decodebufSize = size;
+    }
+  }
+
   public void readRect(Rect r, CMsgHandler handler) 
   {
     InStream is = reader.getInStream();
@@ -147,9 +154,8 @@ public class TightDecoder extends Decoder {
 
     // Flush zlib streams if we are told by the server to do so.
     for (int i = 0; i < 4; i++) {
-      if ((comp_ctl & 1) != 0) {
-        zis[i].reset();
-      }
+      if ((comp_ctl & 1) != 0)
+        inflater[i].end();
       comp_ctl >>= 1;
     }
 
@@ -249,22 +255,26 @@ public class TightDecoder extends Decoder {
     int rowSize = (r.width() * bppp + 7) / 8;
     int dataSize = r.height() * rowSize;
     int streamId = -1;
-    InStream input;
-    if (dataSize < rfbTightMinToCompress || readUncompressed) {
-      input = is;
-    } else {
-      int length = is.readCompactLength();
-      streamId = comp_ctl & 0x03;
-      zis[streamId].setUnderlying(is, length);
-      input = (ZlibInStream)zis[streamId];
-    }
-
-    if (readUncompressed && dataSize >= rfbTightMinToCompress)
-      dataSize = is.readCompactLength();
 
     // Allocate netbuf and read in data
-    checkNetbuf(dataSize);
-    input.readBytes(netbuf, 0, dataSize);
+    if (dataSize < rfbTightMinToCompress || readUncompressed) {
+      if (dataSize >= rfbTightMinToCompress)
+        dataSize = is.readCompactLength();
+      checkDecodebuf(dataSize);
+      is.readBytes(decodebuf, 0, dataSize);
+    } else {
+      int length = is.readCompactLength();
+      checkNetbuf(length);
+      is.readBytes(netbuf, 0, length);
+      streamId = comp_ctl & 0x03;
+      checkDecodebuf(dataSize);
+      inflater[streamId].setInput(netbuf, 0, length);
+      try {
+        inflater[streamId].inflate(decodebuf, 0, dataSize);
+      } catch(java.util.zip.DataFormatException e) {
+        throw new Exception(e.getMessage());
+      }
+    }
 
     int srcPtr = 0;
 
@@ -272,9 +282,9 @@ public class TightDecoder extends Decoder {
       // Truecolor data.
       if (useGradient) {
         if (cutZeros) {
-          filterGradient24(netbuf, (int[])buf, stride[0], r);
+          filterGradient24(decodebuf, (int[])buf, stride[0], r);
         } else if (bpp == 16) {
-          filterGradient16(netbuf, (short[])buf, stride[0], r);
+          filterGradient16(decodebuf, (short[])buf, stride[0], r);
         } else {
           // We should never get here
           throw new Exception("Unsupported pixel type");
@@ -282,11 +292,11 @@ public class TightDecoder extends Decoder {
       } else {
         // Copy
         if (cutZeros) {
-          serverpf.bufferFromRGB((int[])buf, r.tl.x, r.tl.y, stride[0], netbuf,
+          serverpf.bufferFromRGB((int[])buf, r.tl.x, r.tl.y, stride[0], decodebuf,
                                  w, h);
         } else if (buf instanceof byte[]) {
           while (h > 0) {
-            System.arraycopy(netbuf, srcPtr, (byte[])buf, ptr, w);
+            System.arraycopy(decodebuf, srcPtr, (byte[])buf, ptr, w);
             ptr += stride[0];
             srcPtr += w;
             h--;
@@ -295,7 +305,7 @@ public class TightDecoder extends Decoder {
           while (h > 0) {
             int endOfRow = ptr + w;
             while (ptr < endOfRow) {
-              ((short[])buf)[ptr++] = getShort(netbuf, srcPtr);
+              ((short[])buf)[ptr++] = getShort(decodebuf, srcPtr);
               srcPtr += 2;
             }
             ptr += pad;
@@ -314,13 +324,13 @@ public class TightDecoder extends Decoder {
         if (buf instanceof byte[]) {
           while (h > 0) {
             for (x = 0; x < w / 8; x++) {
-              bits = netbuf[srcPtr++];
+              bits = decodebuf[srcPtr++];
               for(b = 7; b >= 0; b--) {
                 ((byte[])buf)[ptr++] = ((byte[])palette)[bits >> b & 1];
               }
             }
             if (w % 8 != 0) {
-              bits = netbuf[srcPtr++];
+              bits = decodebuf[srcPtr++];
               for (b = 7; b >= 8 - w % 8; b--) {
                 ((byte[])buf)[ptr++] = ((byte[])palette)[bits >> b & 1];
               }
@@ -331,13 +341,13 @@ public class TightDecoder extends Decoder {
         } else if (buf instanceof short[]) {
           while (h > 0) {
             for (x = 0; x < w / 8; x++) {
-              bits = netbuf[srcPtr++];
+              bits = decodebuf[srcPtr++];
               for(b = 7; b >= 0; b--) {
                 ((short[])buf)[ptr++] = ((short[])palette)[bits >> b & 1];
               }
             }
             if (w % 8 != 0) {
-              bits = netbuf[srcPtr++];
+              bits = decodebuf[srcPtr++];
               for (b = 7; b >= 8 - w % 8; b--) {
                 ((short[])buf)[ptr++] = ((short[])palette)[bits >> b & 1];
               }
@@ -348,13 +358,13 @@ public class TightDecoder extends Decoder {
         } else {
           while (h > 0) {
             for (x = 0; x < w / 8; x++) {
-              bits = netbuf[srcPtr++];
+              bits = decodebuf[srcPtr++];
               for(b = 7; b >= 0; b--) {
                 ((int[])buf)[ptr++] = ((int[])palette)[bits >> b & 1];
               }
             }
             if (w % 8 != 0) {
-              bits = netbuf[srcPtr++];
+              bits = decodebuf[srcPtr++];
               for (b = 7; b >= 8 - w % 8; b--) {
                 ((int[])buf)[ptr++] = ((int[])palette)[bits >> b & 1];
               }
@@ -369,7 +379,7 @@ public class TightDecoder extends Decoder {
           while (h > 0) {
             int endOfRow = ptr + w;
             while (ptr < endOfRow) {
-              ((byte[])buf)[ptr++] = ((byte[])palette)[netbuf[srcPtr++] & 0xff];
+              ((byte[])buf)[ptr++] = ((byte[])palette)[decodebuf[srcPtr++] & 0xff];
             }
             ptr += pad;
             h--;
@@ -378,7 +388,7 @@ public class TightDecoder extends Decoder {
           while (h > 0) {
             int endOfRow = ptr + w;
             while (ptr < endOfRow) {
-              ((short[])buf)[ptr++] = ((short[])palette)[netbuf[srcPtr++] & 0xff];
+              ((short[])buf)[ptr++] = ((short[])palette)[decodebuf[srcPtr++] & 0xff];
             }
             ptr += pad;
             h--;
@@ -387,7 +397,7 @@ public class TightDecoder extends Decoder {
           while (h > 0) {
             int endOfRow = ptr + w;
             while (ptr < endOfRow) {
-              ((int[])buf)[ptr++] = ((int[])palette)[netbuf[srcPtr++] & 0xff];
+              ((int[])buf)[ptr++] = ((int[])palette)[decodebuf[srcPtr++] & 0xff];
             }
             ptr += pad;
             h--;
@@ -397,10 +407,6 @@ public class TightDecoder extends Decoder {
     } 
 
     handler.releaseRawPixels(r);
-
-    if (streamId != -1) {
-      zis[streamId].reset();
-    }
   }
 
   final private void decompressJpegRect(Rect r, InStream is,
@@ -573,13 +579,15 @@ public class TightDecoder extends Decoder {
   }
 
   private CMsgReader reader;
-  private ZlibInStream[] zis;
+  private Inflater[] inflater;
   private PixelFormat serverpf;
   private TJDecompressor tjd;
   private Object palette;
   private byte[] tightPalette;
   private byte[] netbuf;
   private int netbufSize;
+  private byte[] decodebuf;
+  private int decodebufSize;
 
   static LogWriter vlog = new LogWriter("TightDecoder");
 }
