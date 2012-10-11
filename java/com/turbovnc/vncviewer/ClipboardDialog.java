@@ -36,13 +36,13 @@ class ClipboardDialog extends Dialog implements ActionListener {
     JPanel pt = new JPanel();
     pt.setLayout(new BoxLayout(pt, BoxLayout.LINE_AXIS));
     pt.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    textArea = new JTextArea(5,50);
-    textArea.setBorder(BorderFactory.createLineBorder(Color.gray));
+    textArea = new JTextArea();
     textArea.setLineWrap(false);
     textArea.setWrapStyleWord(false);
     JScrollPane sp = new JScrollPane(textArea);
+    sp.setPreferredSize(new Dimension(300, 250));
     pt.add(sp);
-    getContentPane().add("North", pt);
+    getContentPane().add("Center", pt);
 
     JPanel pb = new JPanel();
     clearButton = new JButton("Clear");
@@ -57,6 +57,7 @@ class ClipboardDialog extends Dialog implements ActionListener {
     getContentPane().add("South", pb);
 
     pack();
+    setMinimumSize(getSize());
   }
 
   public void initDialog() {
