@@ -32,7 +32,7 @@ char *programName;
 XtAppContext appContext;
 Display* dpy;
 FILE *benchFile = NULL;
-int benchIter = 1;
+int benchIter = 1, benchWarmup = 0;
 long benchFileStart = -1;
 
 Widget toplevel;
@@ -81,6 +81,10 @@ int main(int argc, char **argv)
     if (strcmp(argv[i], "-benchiter") == 0 && i < argc -1) {
       int iter = atoi(argv[++i]);
       if (iter > 0) benchIter = iter;
+    }
+    if (strcmp(argv[i], "-benchwarmup") == 0 && i < argc -1) {
+      int warmup = atoi(argv[++i]);
+      if (warmup > 0) benchWarmup = warmup;
     }
   }
 

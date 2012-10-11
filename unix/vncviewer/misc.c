@@ -455,16 +455,22 @@ Bool RunBenchmark(void)
   int i, stream_id;
   double tStart, tTotal, tAvg = 0.0, tAvgDecode = 0.0, tAvgBlit = 0.0;
 
-  for (i = 0; i < benchIter; i++) {
+  for (i = 0; i < benchIter + benchWarmup; i++) {
     tStart = gettime();
-    printf("Benchmark run %3d:  ", i + 1);
+    
+    if (i < benchWarmup)
+      printf("Benchmark warmup run %d\n", i + 1);
+    else
+      printf("Benchmark run %3d:  ", i + 1 - benchWarmup);
     while (HandleRFBServerMessage()) {
     }
     tTotal = gettime() - tStart - tRecv;
-    printf("%f s (Decode = %f, Blit = %f)\n", tTotal, tDecode, tBlit);
-    tAvg += tTotal;
-    tAvgDecode += tDecode;
-    tAvgBlit += tBlit;
+    if (i >= benchWarmup) {
+      printf("%f s (Decode = %f, Blit = %f)\n", tTotal, tDecode, tBlit);
+      tAvg += tTotal;
+      tAvgDecode += tDecode;
+      tAvgBlit += tBlit;
+    }
     tRecv = tDecode = tBlit = 0.0;
     ShutdownThreads();
     for (stream_id = 0; stream_id < 4; stream_id++) {

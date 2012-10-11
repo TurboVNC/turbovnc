@@ -377,4 +377,5 @@ extern Display* dpy;
 extern Widget toplevel;
 extern FILE *benchFile;
 extern int benchIter;
+extern int benchWarmup;
 extern long benchFileStart;
