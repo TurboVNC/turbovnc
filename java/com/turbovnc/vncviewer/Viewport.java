@@ -105,10 +105,6 @@ public class Viewport extends JFrame
         } else {
           sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
           sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-          if (sp.getSize().width >= cc.desktop.scaledWidth)
-            sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-          if (sp.getSize().height >= cc.desktop.scaledHeight)
-            sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
           sp.validate();
         }
         if ((sp.getSize().width > cc.desktop.scaledWidth) ||
