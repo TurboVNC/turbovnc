@@ -497,6 +497,8 @@ public class CConn extends CConnection
 
   public void setCursor(int width, int height, Point hotspot,
                         int[] data, byte[] mask) {
+    if (viewport != null && (viewport.dx > 0 || viewport.dy > 0))
+      hotspot.translate(new Point(viewport.dx, viewport.dy));
     desktop.setCursor(width, height, hotspot, data, mask);
   }
 
@@ -817,6 +819,10 @@ public class CConn extends CConnection
     String os = System.getProperty("os.name");
     if (os.startsWith("Windows"))
       com.sun.java.swing.plaf.windows.WindowsLookAndFeel.setMnemonicHidden(false);
+    if (viewport != null && (viewport.dx > 0 || viewport.dy > 0)) {
+      x += viewport.dx;
+      y += viewport.dy;
+    }
     menu.show(desktop, x, y);
   }
 
@@ -1359,10 +1365,15 @@ public class CConn extends CConnection
     if (cp.width != desktop.scaledWidth || 
         cp.height != desktop.scaledHeight) {
       int sx = (desktop.scaleWidthRatio == 1.00) 
-        ? ev.getX() : (int)Math.floor(ev.getX()/desktop.scaleWidthRatio);
+        ? ev.getX() : (int)Math.floor(ev.getX() / desktop.scaleWidthRatio);
       int sy = (desktop.scaleHeightRatio == 1.00) 
-        ? ev.getY() : (int)Math.floor(ev.getY()/desktop.scaleHeightRatio);
+        ? ev.getY() : (int)Math.floor(ev.getY() / desktop.scaleHeightRatio);
       ev.translatePoint(sx - ev.getX(), sy - ev.getY());
+    }
+    if (viewport != null && (viewport.dx > 0 || viewport.dy > 0)) {
+      int dx = (int)Math.floor(viewport.dx / desktop.scaleWidthRatio);
+      int dy = (int)Math.floor(viewport.dy / desktop.scaleHeightRatio);
+      ev.translatePoint(-dx, -dy);
     }
     
     writer().writePointerEvent(new Point(ev.getX(),ev.getY()), buttonMask);
@@ -1378,6 +1389,11 @@ public class CConn extends CConnection
       buttonMask = 8;
     } else {
       buttonMask = 16;
+    }
+    if (viewport != null && (viewport.dx > 0 || viewport.dy > 0)) {
+      int dx = (int)Math.floor(viewport.dx / desktop.scaleWidthRatio);
+      int dy = (int)Math.floor(viewport.dy / desktop.scaleHeightRatio);
+      ev.translatePoint(-dx, -dy);
     }
     for (int i=0;i<Math.abs(clicks);i++) {
       x = ev.getX();

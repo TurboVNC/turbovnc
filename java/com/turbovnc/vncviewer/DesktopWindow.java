@@ -220,17 +220,23 @@ class DesktopWindow extends JPanel implements
     if (!r.is_empty()) {
       if (cc.cp.width != scaledWidth || cc.cp.height != scaledHeight) {
         int x = (int)Math.floor(r.tl.x * scaleWidthRatio);
+        if (cc.viewport.dx > 0)
+          x += cc.viewport.dx;
         int y = (int)Math.floor(r.tl.y * scaleHeightRatio);
+        if (cc.viewport.dy > 0)
+          y += cc.viewport.dy;
         // Need one extra pixel to account for rounding.
         int width = (int)Math.ceil(r.width() * scaleWidthRatio) + 1;
         int height = (int)Math.ceil(r.height() * scaleHeightRatio) + 1;
-        if (x + width > scaledWidth)
-          width = scaledWidth - x;
-        if (y + height > scaledHeight)
-          height = scaledHeight - y;
+        if (x + width > scaledWidth + cc.viewport.dx)
+          width = scaledWidth + cc.viewport.dx - x;
+        if (y + height > scaledHeight + cc.viewport.dy)
+          height = scaledHeight + cc.viewport.dy - y;
         paintImmediately(x, y, width, height);
       } else {
-        paintImmediately(r.tl.x, r.tl.y, r.width(), r.height());
+        int x = (cc.viewport.dx > 0) ? cc.viewport.dx + r.tl.x : r.tl.x;
+        int y = (cc.viewport.dy > 0) ? cc.viewport.dy + r.tl.y : r.tl.y;
+        paintImmediately(x, y, r.width(), r.height());
       }
       damage.clear();
     }
@@ -352,6 +358,8 @@ class DesktopWindow extends JPanel implements
 
   public void paintComponent(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
+    if (cc.viewport.dx > 0 || cc.viewport.dy > 0)
+      g2.translate(cc.viewport.dx, cc.viewport.dy);
     if (cc.cp.width != scaledWidth || cc.cp.height != scaledHeight) {
       g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
                           RenderingHints.VALUE_INTERPOLATION_BILINEAR);

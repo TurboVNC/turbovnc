@@ -113,8 +113,14 @@ public class Viewport extends JFrame
         }
         if ((sp.getSize().width > cc.desktop.scaledWidth) ||
             (sp.getSize().height > cc.desktop.scaledHeight)) {
-          repaint();
+          dx = (sp.getSize().width <= cc.desktop.scaledWidth) ? 0 :
+            (int)Math.floor((sp.getSize().width - cc.desktop.scaledWidth) / 2);
+          dy = (sp.getSize().height <= cc.desktop.scaledHeight) ? 0 :
+            (int)Math.floor((sp.getSize().height - cc.desktop.scaledHeight) / 2);
+        } else {
+          dx = dy = 0;
         }
+        repaint();
       }
     });
   }
@@ -162,6 +168,7 @@ public class Viewport extends JFrame
   CConn cc;
   JScrollPane sp;
   public Toolbar tb;
+  public int dx, dy = 0;
   static LogWriter vlog = new LogWriter("Viewport");
 }
 
