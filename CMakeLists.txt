@@ -80,6 +80,7 @@ option(TVNC_BUILDJAVA "Build Java version of the TurboVNC Viewer"
 
 # Detect CPU type and word size
 if(TVNC_BUILDNATIVE)
+	enable_language(C)
 	math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8")
 	if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64"
 		OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "amd64"

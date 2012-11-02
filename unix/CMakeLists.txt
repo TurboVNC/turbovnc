@@ -1,5 +1,3 @@
-enable_language(C)
-
 set(GCC34 0)
 if(CMAKE_COMPILER_IS_GNUCC)
 	# Use the maximum optimization level for release builds
