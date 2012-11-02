@@ -35,16 +35,33 @@ else()
 endif()
 string(REGEX REPLACE "\n" "" BUILD ${BUILD})
 
-if(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE Release)
+if(APPLE)
+	set(DEFAULT_TVNC_BUILDJAVA 1)
+	set(DEFAULT_TVNC_BUILDNATIVE 0)
+else()
+	set(DEFAULT_TVNC_BUILDJAVA 0)
+	set(DEFAULT_TVNC_BUILDNATIVE 1)
 endif()
+option(TVNC_BUILDNATIVE "Build native version of the TurboVNC Viewer"
+	${DEFAULT_TVNC_BUILDNATIVE})
+option(TVNC_BUILDJAVA "Build Java version of the TurboVNC Viewer"
+	${DEFAULT_TVNC_BUILDJAVA})
 
-message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
+if(TVNC_BUILDNATIVE)
+	enable_language(C)
 
-# This only works if building from the command line.  There is currently no way
-# to set a variable's value based on the build type when using the MSVC IDE.
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	set(BUILD "${BUILD}d")
+	if(NOT CMAKE_BUILD_TYPE)
+		set(CMAKE_BUILD_TYPE Release)
+	endif()
+
+	message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
+
+	# This only works if building from the command line.  There is currently no
+	# way to set a variable's value based on the build type when using the MSVC
+	# IDE.
+	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+		set(BUILD "${BUILD}d")
+	endif()
 endif()
 
 message(STATUS "VERSION = ${VERSION}, BUILD = ${BUILD}")
@@ -66,21 +83,8 @@ set(TVNC_DOCDIR ${DEFAULT_TVNC_DOCDIR} CACHE PATH
 message(STATUS "TVNC_BINDIR = ${TVNC_BINDIR}")
 message(STATUS "TVNC_DOCDIR = ${TVNC_DOCDIR}")
 
-if(APPLE)
-	set(DEFAULT_TVNC_BUILDJAVA 1)
-	set(DEFAULT_TVNC_BUILDNATIVE 0)
-else()
-	set(DEFAULT_TVNC_BUILDJAVA 0)
-	set(DEFAULT_TVNC_BUILDNATIVE 1)
-endif()
-option(TVNC_BUILDNATIVE "Build native version of the TurboVNC Viewer"
-	${DEFAULT_TVNC_BUILDNATIVE})
-option(TVNC_BUILDJAVA "Build Java version of the TurboVNC Viewer"
-	${DEFAULT_TVNC_BUILDJAVA})
-
 # Detect CPU type and word size
 if(TVNC_BUILDNATIVE)
-	enable_language(C)
 	math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8")
 	if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64"
 		OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "amd64"
