@@ -20,7 +20,7 @@ set(URLTEXT "Visit http://www.virtualgl.org for more information on TurboVNC")
 if(UNIX)
 	execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)
 	string(REGEX REPLACE "\n" "" BUILD ${BUILD})
-elseif(MSVC)
+elseif(WIN32 AND NOT MINGW)
 	execute_process(COMMAND "wmic.exe" "os" "get" "LocalDateTime" OUTPUT_VARIABLE
 		BUILD)
 	string(REGEX REPLACE "[^0-9]" "" BUILD "${BUILD}")
