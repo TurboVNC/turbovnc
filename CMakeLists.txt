@@ -9,7 +9,7 @@ if(UNIX)
 		"Install path prefix, prepended onto install directories.")
 endif()
 
-project(TurboVNC C)
+project(TurboVNC NONE)
 set(VERSION 1.1.81)
 set(RCVERSION 1,1,81,0)
 set(XVENDORRELEASE 10181000)
@@ -66,22 +66,37 @@ set(TVNC_DOCDIR ${DEFAULT_TVNC_DOCDIR} CACHE PATH
 message(STATUS "TVNC_BINDIR = ${TVNC_BINDIR}")
 message(STATUS "TVNC_DOCDIR = ${TVNC_DOCDIR}")
 
-# Detect CPU type and word size
-math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8")
-if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64"
-	OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "amd64"
-	OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "i[0-9]86")
-	if(BITS EQUAL 64)
-		set(CPU_TYPE x86_64)
-	else()
-		set(CPU_TYPE i386)
-	endif()
+if(APPLE)
+	set(DEFAULT_TVNC_BUILDJAVA 1)
+	set(DEFAULT_TVNC_BUILDNATIVE 0)
 else()
-	string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} CPU_TYPE)
+	set(DEFAULT_TVNC_BUILDJAVA 0)
+	set(DEFAULT_TVNC_BUILDNATIVE 1)
 endif()
-message(STATUS "${BITS}-bit build (${CPU_TYPE})")
+option(TVNC_BUILDNATIVE "Build native version of the TurboVNC Viewer"
+	${DEFAULT_TVNC_BUILDNATIVE})
+option(TVNC_BUILDJAVA "Build Java version of the TurboVNC Viewer"
+	${DEFAULT_TVNC_BUILDJAVA})
 
-include(cmakescripts/FindTurboJPEG.cmake)
+# Detect CPU type and word size
+if(TVNC_BUILDNATIVE)
+	math(EXPR BITS "${CMAKE_SIZEOF_VOID_P} * 8")
+	if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64"
+		OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "amd64"
+		OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "i[0-9]86")
+		if(BITS EQUAL 64)
+			set(CPU_TYPE x86_64)
+		else()
+			set(CPU_TYPE i386)
+		endif()
+	else()
+		string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} CPU_TYPE)
+	endif()
+	message(STATUS "${BITS}-bit build (${CPU_TYPE})")
+
+	include(cmakescripts/FindTurboJPEG.cmake)
+endif()
+
 
 #
 # Build
@@ -94,18 +109,16 @@ endif()
 option(TVNC_BUILDSERVER "Build TurboVNC server components"
 	${DEFAULT_TVNC_BUILDSERVER})
 
-if(WIN32)
-  add_subdirectory(win)
-else()
-  add_subdirectory(unix)
+if(TVNC_BUILDNATIVE)
+	if(WIN32)
+		add_subdirectory(win)
+	else()
+		add_subdirectory(unix)
+	endif()
 endif()
 add_subdirectory(doc)
-option(TVNC_BUILDJAVA "Build Java version of the TurboVNC Viewer" 0)
 if(TVNC_BUILDJAVA)
-	set(TVNC_BUILDJAVA 1)
 	add_subdirectory(java)
-else()
-	set(TVNC_BUILDJAVA 0)
 endif()
 
 

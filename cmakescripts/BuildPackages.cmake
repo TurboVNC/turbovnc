@@ -77,45 +77,28 @@ endif() # WIN32
 
 
 #
-# Mac DMG and app
+# Mac DMG
 #
 
-if(APPLE)
+if(APPLE AND TVNC_BUILDJAVA)
 
 set(DEFAULT_PACKAGEMAKER_PATH /Developer/Applications/Utilities)
 set(PACKAGEMAKER_PATH ${DEFAULT_PACKAGEMAKER_PATH} CACHE PATH
 	"Directory containing PackageMaker.app (default: ${DEFAULT_PACKAGEMAKER_PATH})")
 
-set(DEFAULT_TVNC_32BIT_BUILD ${CMAKE_SOURCE_DIR}/osxx86)
-set(TVNC_32BIT_BUILD ${DEFAULT_TVNC_32BIT_BUILD} CACHE PATH
-  "Directory containing 32-bit OS X build to include in universal binaries (default: ${DEFAULT_TVNC_32BIT_BUILD})")
-
 string(REGEX REPLACE "/" ":" TVNC_MACPREFIX ${CMAKE_INSTALL_PREFIX})
 string(REGEX REPLACE "^:" "" TVNC_MACPREFIX ${TVNC_MACPREFIX})
 
-configure_file(release/makemacpkg.in pkgscripts/makemacpkg)
+configure_file(release/makemacpkg.in pkgscripts/makemacpkg @ONLY)
+configure_file(release/makemacapp.in pkgscripts/makemacapp)
 configure_file(release/Info.plist.in pkgscripts/Info.plist)
+configure_file(release/Info.plist.app.in pkgscripts/Info.plist.app)
 configure_file(release/Description.plist.in pkgscripts/Description.plist)
 configure_file(release/uninstall.in pkgscripts/uninstall)
 configure_file(release/uninstall.applescript.in pkgscripts/uninstall.applescript)
 
 add_custom_target(dmg sh pkgscripts/makemacpkg
 	SOURCES pkgscripts/makemacpkg)
-
-add_custom_target(udmg sh pkgscripts/makemacpkg universal
-  SOURCES pkgscripts/makemacpkg)
-
-if(TVNC_BUILDJAVA)
-	configure_file(release/makemacapp.in pkgscripts/makemacapp)
-	configure_file(release/Info.plist.app.in pkgscripts/Info.plist.app)
-
-	add_custom_target(macapp sh pkgscripts/makemacapp
-		SOURCES pkgscripts/makemacapp)
-
-	add_dependencies(dmg macapp)
-	add_dependencies(udmg macapp)
-	add_dependencies(macapp java)
-endif()
 
 endif() # APPLE
 

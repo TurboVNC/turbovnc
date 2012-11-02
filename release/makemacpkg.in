@@ -56,13 +56,7 @@ SRCDIR=@CMAKE_SOURCE_DIR@
 PREFIX=@CMAKE_INSTALL_PREFIX@
 BINDIR=@TVNC_BINDIR@
 DOCDIR=@TVNC_DOCDIR@
-JAVA=@TVNC_BUILDJAVA@
-BUILDDIR32=@TVNC_32BIT_BUILD@
-if [ $# -gt 0 ]; then
-	if [ "$1" = "universal" ]; then
-		UNIVERSAL=1
-	fi
-fi
+JAVADIR=@TVNC_JAVADIR@
 PACKAGEMAKER=@PACKAGEMAKER_PATH@/PackageMaker.app/Contents/MacOS/PackageMaker
 
 if [ -f $PACKAGE_NAME-$VERSION.dmg ]; then
@@ -75,22 +69,9 @@ PKGROOT=$TMPDIR/pkg/Package_Root
 mkdir -p $PKGROOT
 
 make install DESTDIR=$PKGROOT
-
-if [ $UNIVERSAL = 1 ]; then
-	if [ ! -d $BUILDDIR32 ]; then
-		echo ERROR: 32-bit build directory $BUILDDIR32 does not exist
-		exit 1
-	fi
-	if [ ! -f $BUILDDIR32/Makefile ]; then
-		echo ERROR: 32-bit build directory $BUILDDIR32 is not configured
-		exit 1
-	fi
-	pushd $BUILDDIR32
-	make
-	popd
-	lipo -create -arch i386 $BUILDDIR32/unix/vncviewer/vncviewer \
-		-arch x86_64 $PKGROOT$BINDIR/vncviewer \
-		-output $PKGROOT$BINDIR/vncviewer
+if [ -d $PKGROOT$JAVADIR ]; then
+	rm $PKGROOT$JAVADIR/*
+	rmdir $PKGROOT$JAVADIR
 fi
 
 mkdir -p $PKGROOT/Library/Documentation
@@ -102,24 +83,26 @@ mkdir -p $TMPDIR/pkg/Resources
 cp $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.rtf $SRCDIR/release/ReadMe.rtf $TMPDIR/pkg/Resources/ 
 cp pkgscripts/Description.plist $TMPDIR/pkg/
 cp pkgscripts/Info.plist $TMPDIR/pkg/
+mkdir -p $PKGROOT$BINDIR/
 install -m 755 pkgscripts/uninstall $PKGROOT$BINDIR/
 
 mkdir -p "$PKGROOT/Applications/$PACKAGE_NAME"
 chmod 775 $PKGROOT/Applications
-install -m 644 $SRCDIR/release/ReadMe-MacApp.txt "$PKGROOT/Applications/$PACKAGE_NAME/Read Me.txt"
-sudo ln -fs /Library/Documentation/$PACKAGE_NAME "$PKGROOT/Applications/$PACKAGE_NAME/Documentation"
-
+sh pkgscripts/makemacapp
+ln -fs /Library/Documentation/$PACKAGE_NAME/index.html "$PKGROOT/Applications/$PACKAGE_NAME/$PACKAGE_NAME User's Guide.html"
+install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
+osacompile -t APPL -o "$TMPDIR/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
+cp -R "$PACKAGE_NAME Viewer.app" "$PKGROOT/Applications/$PACKAGE_NAME/"
+cp -R "$TMPDIR/Uninstall $PACKAGE_NAME.app" "$PKGROOT/Applications/$PACKAGE_NAME/"
+echo "\"/Applications/$PACKAGE_NAME/$PACKAGE_NAME Viewer.app/Contents/MacOS/JavaApplicationStub\" \${1+\"\$@\"}" >$PKGROOT$BINDIR/vncviewer
+chmod 755 $PKGROOT$BINDIR/vncviewer
 sudo chown -R root:admin $PKGROOT
 
 mkdir $TMPDIR/dmg
-$PACKAGEMAKER -build -v -p "$TMPDIR/dmg/$PACKAGE_NAME Viewer (X11).pkg" \
-	-f $PKGROOT -r $TMPDIR/pkg/Resources \
-	-i $TMPDIR/pkg/Info.plist -d $TMPDIR/pkg/Description.plist
-if [ $JAVA = 1 ]; then
-	cp -R "@CMAKE_PROJECT_NAME@ Viewer (Java).app" $TMPDIR/dmg/
-fi
-install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
-sudo osacompile -t APPL -o "$TMPDIR/dmg/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
+$PACKAGEMAKER -build -v -p "$TMPDIR/dmg/$PACKAGE_NAME.pkg" -f $PKGROOT \
+	-r $TMPDIR/pkg/Resources -i $TMPDIR/pkg/Info.plist \
+	-d $TMPDIR/pkg/Description.plist
+mv "$TMPDIR/Uninstall $PACKAGE_NAME.app" $TMPDIR/dmg/
 sudo chown -R $USER "$TMPDIR/dmg/Uninstall $PACKAGE_NAME.app"
 hdiutil create -fs HFS+ -volname $PACKAGE_NAME-$VERSION \
 	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PACKAGE_NAME-$VERSION.dmg

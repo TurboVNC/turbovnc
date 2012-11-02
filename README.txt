@@ -46,13 +46,14 @@ All Platforms
 
 All versions of TurboVNC contain the following programs:
 
-  vncviewer - the TurboVNC Viewer.  On Unix platforms (including Mac), this is
-              an X Windows application and requires an X Windows server.
+  vncviewer - the TurboVNC Viewer.  On Unix platforms (except Mac), this is an
+              X Windows application and requires an X Windows server.  On Mac
+              platforms, it is a script that launches the Mac TurboVNC Viewer
+              app, which is simply a packaged version of the Java TurboVNC
+              Viewer and the libjpeg-turbo JNI library.
+
               vncviewer connects to a VNC server and allows you to interact
               with the remote desktop being displayed by the VNC server.
-
-  VncViewer.jar - the Java TurboVNC Viewer (see README.txt in the same
-                  directory as VncViewer.jar for more information.)
 
 
 Windows-Specific

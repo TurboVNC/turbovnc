@@ -52,10 +52,8 @@ following error:
 		[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
 
-	#. Open the disk image.  If you wish to install the X11 TurboVNC Viewer, then
-		open ''TurboVNC Viewer (X11).pkg'' inside the disk image and follow the
-		instructions.  If you wish to install the Java TurboVNC Viewer app, then
-		drag ''TurboVNC Viewer (Java).app'' into your Applications folder.
+	#. Open the disk image, then open ''TurboVNC.pkg'' inside the
+		disk image.  Follow the instructions to install the Mac TurboVNC Viewer.
 
 ** Installing the TurboVNC Viewer on Windows
 
@@ -99,20 +97,16 @@ As root, issue one of the following commands:
 *** OS X
 #OPT: noList! plain!
 
-If you have installed the X11 TurboVNC Viewer, then use the "Uninstall
-TurboVNC" application provided in the TurboVNC disk image, or issue the
-following command from the Terminal:
+Open the "Uninstall TurboVNC" application, located in the "TurboVNC"
+Applications folder.  You can also open a terminal and execute:
 
 #Verb: <<---
 sudo /opt/TurboVNC/bin/uninstall
 ---
 
-If you have installed the Java TurboVNC Viewer app, then simply drag the app
-from your Applications folder to the Trash.
-
 *** Windows
 #OPT: noList! plain!
 
 Use the "Programs and Features" applet in the Control Panel (or the
-"Add or Remove Programs" applet if you are running Windows XP), or
+"Add or Remove Programs" applet if you are running Windows XP), or select
 "Uninstall TurboVNC" in the "TurboVNC" Start Menu group.

@@ -6,7 +6,7 @@ set -e
 SRCDIR=@CMAKE_SOURCE_DIR@
 
 umask 022
-APP="@CMAKE_PROJECT_NAME@ Viewer (Java).app"
+APP="@CMAKE_PROJECT_NAME@ Viewer.app"
 
 if [ -d "$APP" ]; then
 	rm -rf "$APP"

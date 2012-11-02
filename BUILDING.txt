@@ -26,8 +26,8 @@ All Systems
      you want to link.
 
 
-Linux and other Un*x O/S's
---------------------------
+Linux and other Un*x O/S's (except Mac)
+---------------------------------------
 
 -- rsync (if building the TurboVNC Server using an out-of-tree build)
 
@@ -39,18 +39,6 @@ Linux and other Un*x O/S's
 -- libXcursor development kit
 
 -- PAM development kit (if building the TurboVNC Server)
-
-
-Mac
----
-
--- Xcode Tools (if building the native TurboVNC Viewer)
-   * Available on the OS X install discs or from:
-     http://developer.apple.com/tools/xcode
-   * With earlier versions of Xcode, you will need to specify a custom install
-     and select the following packages:
-     gcc 3.x (or later), X11 SDK, OpenGL SDK, Mac OS X SDK
-   * With Xcode 3.x and later, you can simply check "Unix Development Support"
 
 
 Windows
@@ -78,8 +66,8 @@ Windows
      environment.
 
 
-Java
-----
+Mac/Java
+--------
 
 -- JDK or OpenJDK 1.5 or later
    * On OS X 10.5 and later, install the Java Developer Package, which can
@@ -107,13 +95,17 @@ Build Procedure
 ===============
 
 
-Unix/Mac
---------
+Unix (including Mac)
+--------------------
 
 The following procedure will build the TurboVNC Viewer.  On most 64-bit
 systems (Solaris being a notable exception), this will build a 64-bit version
 of TurboVNC.  See "Build Recipes" for specific instructions on how to build a
 32-bit or 64-bit version of TurboVNC on systems that support both.
+
+On Mac, this builds the Java TurboVNC Viewer by default.  If you want to build
+the native (X11) TurboVNC Viewer instead, then pass -DTVNC_BUILDNATIVE=1 to
+CMake.
 
   cd {build_directory}
   cmake -G "Unix Makefiles" [additional CMake flags] {source_directory}
@@ -166,7 +158,7 @@ Java
 
 Passing -DTVNC_BUILDJAVA=1 to the command line will build the Java TurboVNC
 Viewer, as well as including it when installing or packaging the native
-TurboVNC Viewer.
+TurboVNC Viewer.  This is the default on Mac platforms.
 
 Additionally, you can build the Java TurboVNC Viewer without building the
 native code.  Simply use {source_directory}/java as the source directory for
@@ -177,9 +169,9 @@ CMake.
 Debug Build
 ===========
 
-Add "-DCMAKE_BUILD_TYPE=Debug" to the CMake command line.  Or, if building with
-NMake, remove "-DCMAKE_BUILD_TYPE=Release" (Debug builds are the default with
-NMake.)
+When building the native TurboVNC Viewer, add "-DCMAKE_BUILD_TYPE=Debug" to the
+CMake command line.  Or, if building with NMake, remove
+"-DCMAKE_BUILD_TYPE=Release" (Debug builds are the default with NMake.)
 
 
 =============
@@ -187,42 +179,14 @@ Build Recipes
 =============
 
 
-32-bit Build on 64-bit Linux/Unix (including OS X)
---------------------------------------------------
+32-bit Build on 64-bit Linux/Unix
+---------------------------------
 
 Use export/setenv to set the following environment variables before running
 CMake:
 
   CFLAGS=-m32
   LDFLAGS=-m32
-
-
-64-bit Backward-Compatible Build on 64-bit OS X
------------------------------------------------
-
-Add
-
-  -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.5.sdk \
-    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.5 
-
-to the CMake command line.  The OS X 10.5 SDK must be installed.
-
-
-32-bit Backward-Compatible Build on 64-bit OS X
------------------------------------------------
-
-Use export/setenv to set the following environment variables:
-
-  CC=gcc-4.0
-  CFLAGS=-m32
-  LDFLAGS=-m32
-
-and add
-
-  -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.4u.sdk \
-    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.4
-
-to the CMake command line.  The OS X 10.4 SDK must be installed.
 
 
 64-bit Build on Solaris
@@ -309,16 +273,6 @@ make dmg
   application, which the build system looks for in
   /Developer/Applications/Utilities by default.  You can override this by
   setting the PACKAGEMAKER_PATH CMake variable.
-
-make udmg
-
-  On 64-bit OS X systems, this creates a version of the Macintosh package and
-  disk image that contains universal i386/x86-64 binaries.  You should first
-  configure a 32-bit out-of-tree build of TurboVNC, then configure a 64-bit
-  out-of-tree build, then run 'make udmg' from the 64-bit build directory.  The
-  build system will look for the 32-bit build under {source_directory}/osxx86
-  by default, but you can override this by setting the TVNC_32BIT_BUILD CMake
-  variable.
 
 
 =======

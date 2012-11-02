@@ -32,12 +32,7 @@
 	| OS X 10.4 ("Tiger") or later \
 	|
 | Other Software \
-	| {list type=ul: \
-			{item:If installing the X11 TurboVNC Viewer, then the Mac X11 \
-				application (in the "Optional Installs" package on the OS X install \
-				discs) or [[http://xquartz.macosforge.org/][XQuartz]] is required.} \
-			{item:If installing the Java TurboVNC Viewer app, then Java 1.5 or \
-				later is required.}} \
+	| Java 1.5 or later \
 	|
 #OPT: hiCol=first
 

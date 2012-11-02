@@ -1,3 +1,4 @@
+enable_language(C)
 enable_language(CXX)
 
 if(BITS EQUAL 64)

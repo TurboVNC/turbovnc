@@ -6,13 +6,9 @@
 *** Procedure
 #OPT: noList! plain!
 
-	#. __Mac X11:__ Start the Mac X11 application or XQuartz.
-
 	#. Open a new Command Prompt/terminal window on your client machine.
-		(__Mac X11:__ in the X11 application, start a new xterm [Command-N] if
-		one isn't already started.)
 
-	#. In the new Command Prompt/terminal/xterm window, open a Secure Shell (SSH)
+	#. In the new Command Prompt/terminal window, open a Secure Shell (SSH)
 		session into the TurboVNC server machine:
 
 		Linux/Unix/Mac clients :: {:}
@@ -54,36 +50,32 @@
 		/opt/TurboVNC/bin/vncviewer
 		---
 
-		Java TurboVNC Viewer :: {:}
-		On Mac, open __TurboVNC Viewer (Java).app__ in the Applications folder.  On
-		Windows, select __Java TurboVNC Viewer__ in the __TurboVNC__ Start Menu
-		group.  On Linux, open a new terminal/xterm and type
-		#Verb: <<---
-		java -server -jar /opt/TurboVNC/java/VncViewer.jar
-		---
+		Mac TurboVNC Viewer :: {:}
+		Open the "TurboVNC Viewer" application, located in the "TurboVNC"
+		Applications folder.
 
 		Windows TurboVNC Viewer :: {:}
-		Select __TurboVNC Viewer__ in the __TurboVNC__ Start Menu group.
+		Select "TurboVNC Viewer" in the "TurboVNC" Start Menu group.
 
 	#. A small dialog box will appear.
 		{nl}{nl}
-		|| Windows TurboVNC Viewer || X11 TurboVNC Viewer || Java TurboVNC Viewer ||
+		|| Windows TurboVNC Viewer || X11 TurboVNC Viewer || Mac TurboVNC Viewer ||
 		| {img:newconn-win.png} | {img:newconn-x11.png} | {img:newconn-java.png} |
 		{nl}
 		Enter the X display name (hostname/IP address and display number) of the
 		TurboVNC session in the "VNC server" field, then click "Connect"
-		(Windows/Java) or press Enter (X11.)
+		(Windows/Mac) or press Enter (X11.)
 
 	#. Another dialog box appears, prompting for the password (if standard
 		VNC authentication is being used) or for the username and password (if
 		Unix login authentication is being used.)
 		{nl}{nl}
-		|| || Windows TurboVNC Viewer || X11 TurboVNC Viewer || Java TurboVNC Viewer ||
+		|| || Windows TurboVNC Viewer || X11 TurboVNC Viewer || Mac TurboVNC Viewer ||
 		| Standard VNC Authentication Dialog | {img:vncauth-win.png} | {img:vncauth-x11.png} | {img:vncauth-java.png} |
 		| Unix Login Authentication Dialog   | {img:unixauth-win.png} | {img:unixauth-x11.png} | {img:unixauth-java.png} |
 		{nl}
 		Enter the VNC session password or the Unix username/password and click
-		"OK" (Windows) or press Enter (X11/Java.)
+		"OK" (Windows) or press Enter (X11/Mac.)
 		{nl}{nl}
 		A TurboVNC desktop window should appear on your client machine.  This
 		window contains a virtual desktop with which you can interact to launch
@@ -147,22 +139,6 @@ web browser to:
 
 ''http://my_server:5801''
 
-** Accelerating JPEG Decoding in the Java TurboVNC Viewer
-
-The Java TurboVNC Viewer can use the libjpeg-turbo JNI library to accelerate
-JPEG decoding, if the library is installed on the client machine.  v1.3 or
-later of [[http://www.sourceforge.net/projects/libjpeg-turbo/files][libjpeg-turbo]],
-built with Java support, is required (the official SDK's from the libjpeg-turbo
-Project provide the necessary functionality.)  Note that applets cannot load
-JNI libraries, so if you wish to take advantage of this functionality, you will
-need to launch the Java TurboVNC Viewer as a stand-alone Java app on the client
-machine or use JavaWebStart to deploy the JAR from a web server.  How to do
-the latter is, for the moment, left as an exercise for the reader.
-
-Note that no additional installation is required if using the Java TurboVNC
-Viewer app for OS X, since it has the appropriate JNI library embedded
-in its app bundle.
-
 ** Optimizing TurboVNC's Performance for Different Network Types
 
 The level of image compression in TurboVNC can be adjusted to balance the
@@ -208,11 +184,12 @@ images:
 		If JPEG compression is enabled, then zlib compression is always used with
 		non-JPEG subrectangles.
 
-In the Windows and Java TurboVNC Viewers, these parameters can be adjusted by
-accessing the TurboVNC Viewer Options dialog box (click on the "Options" button
-in the "TurboVNC Connection" dialog box or, after connecting to the server,
-click on the Connection Options button in the toolbar.)  In the X11 TurboVNC
-Viewer, press F8 after connecting to bring up the TurboVNC Viewer Options menu.
+In the Windows and Mac/Java TurboVNC Viewers, these parameters can be adjusted
+by accessing the TurboVNC Viewer Options dialog box (click on the "Options"
+button in the "TurboVNC Connection" dialog box or, after connecting to the
+server, click on the Connection Options button in the toolbar.)  In the X11
+TurboVNC Viewer, press F8 after connecting to bring up the TurboVNC Viewer
+Options menu.
 
 The TurboVNC Viewer provides five "encoding methods", corresponding
 to the most useful combinations of the image compression options described
@@ -256,13 +233,13 @@ above:
 	but it also uses significantly more CPU time than any of the JPEG-based \
 	encoding methods. |
 
-In the Windows and Java TurboVNC Viewers, the encoding method can be set using
-the TurboVNC Viewer Options dialog box (click on the "Options" button in the
-"TurboVNC Connection" dialog box or, after connecting to the server, click on
-the Connection Options button in the toolbar.)  With the X11 TurboVNC Viewer,
-the "Perceptually Lossless" encoding method is the default (unless it has been
-overridden using a resource file), and you can use the following command-line
-switches to select an encoding method:
+In the Windows and Java/Mac TurboVNC Viewers, the encoding method can be set
+using the TurboVNC Viewer Options dialog box (click on the "Options" button in
+the "TurboVNC Connection" dialog box or, after connecting to the server, click
+on the Connection Options button in the toolbar.)  With the X11 TurboVNC
+Viewer, the "Perceptually Lossless" encoding method is the default (unless it
+has been overridden using a resource file), and you can use the following
+command-line switches to select an encoding method:
 
 ''-highqual'' = select the "Tight + Perceptually Lossless Quality JPEG" encoding method {nl}
 ''-medqual'' = select the "Tight + Medium Quality JPEG" encoding method {nl}
@@ -284,8 +261,9 @@ can rotate/pan/zoom an object in their 3D application using a very low-quality
 JPEG setting, then when that user is ready to interpret or analyze the object,
 they can request a lossless refresh of TurboVNC's virtual screen.
 
-To perform a lossless refresh, press CTRL-ALT-SHIFT-L (in the Windows and Java
-TurboVNC Viewers, you can also click on the Lossless Refresh toolbar icon.)
+To perform a lossless refresh, press CTRL-ALT-SHIFT-L (in the Windows and
+Java/Mac TurboVNC Viewers, you can also click on the Lossless Refresh toolbar
+icon.)
 
 *** Automatic Lossless Refresh
 {anchor: ALR}
@@ -372,33 +350,26 @@ above example.)
 *** The ''-via'' and ''-tunnel'' Command-Line Options
 #OPT: noList! plain!
 
-If you are using the X11 and Java TurboVNC Viewers, then you can simplify the
-above by using the ''-via'' and ''-tunnel'' command-line options to
+If you are using the X11 and Mac TurboVNC Viewers, then you can simplify
+the above by using the ''-via'' and ''-tunnel'' command-line options to
 ''vncviewer''.  For instance, running
 
 	#Verb: <<---
-	{vncviewer} -via {user}@{server} localhost:{n}
+	/opt/TurboVNC/bin/vncviewer -via {user}@{server} localhost:{n}
 	---
 
 or
 
 	#Verb: <<---
-	{vncviewer} -tunnel {user}@{server}
+	/opt/TurboVNC/bin/vncviewer -tunnel {user}@{server}
 	---
 
 is the equivalent of running
 
 	#Verb: <<---
 	/usr/bin/ssh -L {5900+n}:localhost:{5900+n} {user}@{server}
-	{vncviewer} localhost:{n}
+	/opt/TurboVNC/bin/vncviewer localhost:{n}
 	---
-
-Replace __''{vncviewer}''__ with ''/opt/TurboVNC/bin/vncviewer'' if using the
-X11 TurboVNC Viewer.  If using the Java TurboVNC Viewer app on OS X, replace
-__''{vncviewer}''__ with
-''/Applications/TurboVNC\\ Viewer\\ \\(Java\\).app/Contents/MacOS/JavaApplicationStub''.
-If launching the Java TurboVNC Viewer directly, replace __''{vncviewer}''__
-with ''java -jar {TurboVNC_install_directory}/java/VncViewer.jar''.
 
 ''-tunnel'' can be used as a shortcut whenever the SSH and VNC servers are the
 same machine.  ''-via'' is more flexible, since it allows you to specify the
@@ -447,6 +418,9 @@ For more detailed instructions on the usage of TurboVNC:
 	Windows TurboVNC Viewer :: Use the embedded help feature (the question mark
 	button in the upper right of the TurboVNC Viewer dialogs.)
 
-  Java TurboVNC Viewer :: Run ''java -jar /opt/TurboVNC/java/VncViewer.jar -?''
-	to display a full list of supported options/parameters and their
-	descriptions.
+	Mac TurboVNC Viewer :: Run
+	#Verb: <<---
+	/opt/TurboVNC/bin/vncviewer -?
+	---
+	to display a full list of supported command-line options/parameters and
+	their descriptions.

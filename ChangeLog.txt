@@ -7,9 +7,8 @@ the features of the TurboVNC native viewers, as well as all of the features of,
 and a rich GUI inspired by, the TigerVNC 1.2 Java viewer.  In addition, the new
 Java TurboVNC Viewer has the ability to use libjpeg-turbo via JNI to decompress
 JPEG images, giving it levels of performance approaching the native viewers.
-The new Java viewer is also packaged as an app bundle on Mac systems, to
-provide a more user-friendly (but unfortunately not as performant) alternative
-to the X11 TurboVNC Viewer.
+The new Java viewer now replaces the X11 TurboVNC Viewer on Mac systems, since
+it has higher overall performance and much better usability.
 -------------------------------------------------------------------------------
 [2]
 IPv6 support
