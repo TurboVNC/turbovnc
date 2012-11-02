@@ -487,7 +487,8 @@ public class VncViewer extends java.applet.Applet implements Runnable
   static BoolParameter alwaysShowConnectionDialog
   = new BoolParameter("AlwaysShowConnectionDialog",
   "Always show the \"New TurboVNC Connection\" dialog even if the server has "+
-  "been specified in an applet parameter or on the command line.", false);
+  "been specified in an applet parameter or on the command line.  This defaults "+
+  "to 1 if the viewer is being run as an applet.", false);
 
   static IntParameter vncServerPort
   = new IntParameter("Port",
