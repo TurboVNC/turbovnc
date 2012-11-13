@@ -496,6 +496,20 @@ class DesktopWindow extends JPanel implements
           return;
       }
     }
+    if ((e.getModifiers() & Event.META_MASK) == Event.META_MASK) {
+      switch (e.getKeyCode()) {
+        case KeyEvent.VK_COMMA:
+        case KeyEvent.VK_N:
+        case KeyEvent.VK_W:
+        case KeyEvent.VK_I:
+        case KeyEvent.VK_R:
+        case KeyEvent.VK_L:
+        case KeyEvent.VK_F:
+        case KeyEvent.VK_Z:
+        case KeyEvent.VK_T:
+          return;
+      }
+    }
     if ((e.getModifiers() & Event.ALT_MASK) == Event.ALT_MASK &&
         e.getKeyCode() == KeyEvent.VK_ENTER && cc.viewer.fsAltEnter.getValue())
       cc.toggleFullScreen();
