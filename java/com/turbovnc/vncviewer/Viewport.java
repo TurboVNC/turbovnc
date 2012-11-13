@@ -59,7 +59,7 @@ public class Viewport extends JFrame
     add(tb, BorderLayout.PAGE_START);
     showToolbar(cc.showToolbar);
     getContentPane().add(sp);
-    if (cc.viewer.os.startsWith("mac os x")) {
+    if (VncViewer.os.startsWith("mac os x")) {
       setJMenuBar(new MacMenuBar(cc));
       // NOTE: not sure why this is necessary, but the toolbar appears with a
       // black background otherwise.

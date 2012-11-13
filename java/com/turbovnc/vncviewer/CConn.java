@@ -86,7 +86,7 @@ public class CConn extends CConnection
 
     formatChange = false; encodingChange = false;
     currentEncoding = opts.preferredEncoding;
-    showToolbar = viewer.showToolbar.getValue();
+    showToolbar = VncViewer.showToolbar.getValue();
     options = new OptionsDialog(this);
     options.initDialog();
     clipboardDialog = new ClipboardDialog(this);
@@ -109,7 +109,7 @@ public class CConn extends CConnection
       vlog.info("Accepted connection from " + name);
     } else if (!benchmark) {
       if (opts.serverName != null &&
-          !viewer.alwaysShowConnectionDialog.getValue()) {
+          !VncViewer.alwaysShowConnectionDialog.getValue()) {
         opts.port = Hostname.getPort(opts.serverName);
         opts.serverName = Hostname.getHost(opts.serverName);
       } else {
@@ -190,25 +190,25 @@ public class CConn extends CConnection
   public final boolean getUserPasswd(StringBuffer user, StringBuffer passwd) {
     String title = ((user==null? "Standard VNC Authentication":"Unix Login Authentication")
                     + " [" + csecurity.description() + "]");
-    String passwordFileStr = viewer.passwordFile.getValue();
+    String passwordFileStr = VncViewer.passwordFile.getValue();
     PasswdDialog dlg = null;
     String autoPass;
 
-    if (viewer.autoPass.getValue()) {
+    if (VncViewer.autoPass.getValue()) {
       BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
       try {
         autoPass = in.readLine();
       } catch (IOException e) {
         throw new Exception(e.getMessage());
       }
-      viewer.autoPass.setParam("0");
+      VncViewer.autoPass.setParam("0");
     } else
-      autoPass = viewer.password.getValue();
+      autoPass = VncViewer.password.getValue();
 
     if (autoPass != null && passwd != null) {
       passwd.append(autoPass);
       passwd.setLength(autoPass.length());
-      viewer.password.setParam(null);
+      VncViewer.password.setParam(null);
     }
 
     if (user == null && passwordFileStr != null && autoPass == null) {
@@ -334,7 +334,7 @@ public class CConn extends CConnection
       setServerPort(port);
       sock = new TcpSocket(host, port);
       vlog.info("Redirected to "+host+":"+port);
-      viewer.newViewer(viewer, sock, true);
+      VncViewer.newViewer(viewer, sock, true);
     } catch (java.lang.Exception e) {
       throw new Exception(e.toString());
     }
@@ -379,10 +379,10 @@ public class CConn extends CConnection
         writer().writeFence(fenceTypes.fenceFlagRequest | fenceTypes.fenceFlagSyncNext, 0, null);
 
       if (cp.supportsSetDesktopSize &&
-          viewer.desktopSize.getValueStr() != null &&
-          viewer.desktopSize.getValueStr().split("x").length == 2) {
-        width = Integer.parseInt(viewer.desktopSize.getValue().split("x")[0]);
-        height = Integer.parseInt(viewer.desktopSize.getValue().split("x")[1]);
+          VncViewer.desktopSize.getValueStr() != null &&
+          VncViewer.desktopSize.getValueStr().split("x").length == 2) {
+        width = Integer.parseInt(VncViewer.desktopSize.getValue().split("x")[0]);
+        height = Integer.parseInt(VncViewer.desktopSize.getValue().split("x")[1]);
         ScreenSet layout;
 
         layout = cp.screenLayout;
@@ -392,7 +392,7 @@ public class CConn extends CConnection
         else if (layout.num_screens() != 1) {
 
           while (true) {
-            Iterator iter = layout.screens.iterator(); 
+            Iterator<Screen> iter = layout.screens.iterator(); 
             Screen screen = (Screen)iter.next();
         
             if (!iter.hasNext())
@@ -714,7 +714,7 @@ public class CConn extends CConnection
     if (opts.fullScreen) {
       // NOTE: We have to use the work area on OS X, because there is no way
       // to hide the menu bar in full-screen mode.
-      Rectangle span = getSpannedSize(!viewer.os.startsWith("mac os x"));
+      Rectangle span = getSpannedSize(!VncViewer.os.startsWith("mac os x"));
       viewport.setExtendedState(JFrame.NORMAL);
       viewport.setGeometry(span.x, span.y, span.width,
                            span.height, false);
@@ -963,7 +963,7 @@ public class CConn extends CConnection
       java.util.List<Integer> secTypes = new ArrayList<Integer>();
       secTypes = Security.GetEnabledSecTypes();
       boolean enableVeNCrypt = false;
-      for (Iterator i = secTypes.iterator(); i.hasNext();) {
+      for (Iterator<Integer> i = secTypes.iterator(); i.hasNext();) {
         switch ((Integer)i.next()) {
         case Security.secTypeVeNCrypt:
           enableVeNCrypt = true;
@@ -981,7 +981,7 @@ public class CConn extends CConnection
       if (enableVeNCrypt) {
         java.util.List<Integer> secTypesExt = new ArrayList<Integer>();
         secTypesExt = Security.GetEnabledExtSecTypes();
-        for (Iterator iext = secTypesExt.iterator(); iext.hasNext();) {
+        for (Iterator<Integer> iext = secTypesExt.iterator(); iext.hasNext();) {
           switch ((Integer)iext.next()) {
           case Security.secTypePlain:
             options.secVeNCrypt.setSelected(true);
@@ -1055,7 +1055,7 @@ public class CConn extends CConnection
     options.span.setSelectedIndex(opts.span);
     options.cursorShape.setSelected(opts.cursorShape);
     options.acceptBell.setSelected(opts.acceptBell);
-    options.showToolbar.setSelected(viewer.showToolbar.getValue());
+    options.showToolbar.setSelected(VncViewer.showToolbar.getValue());
     if (opts.scalingFactor == Options.SCALE_AUTO) {
       options.scalingFactor.setSelectedItem("Auto");
     } else if(opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
@@ -1089,7 +1089,7 @@ public class CConn extends CConnection
     opts.acceptClipboard = options.acceptClipboard.isSelected();
     opts.sendClipboard = options.sendClipboard.isSelected();
     opts.acceptBell = options.acceptBell.isSelected();
-    viewer.showToolbar.setParam(options.showToolbar.isSelected());
+    VncViewer.showToolbar.setParam(options.showToolbar.isSelected());
 
     int oldScalingFactor = opts.scalingFactor;
     opts.setScalingFactor(options.scalingFactor.getSelectedItem().toString());
@@ -1102,7 +1102,7 @@ public class CConn extends CConnection
       opts.span = index;
 
     clipboardDialog.setSendingEnabled(opts.sendClipboard);
-    viewer.menuKey.setParam(
+    VncViewer.menuKey.setParam(
       MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].name);
     F8Menu.f8.setText("Send " + KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
 

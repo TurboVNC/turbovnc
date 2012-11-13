@@ -88,7 +88,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
         UIManager.put("swing.boldMetal", Boolean.FALSE);
         javax.swing.plaf.FontUIResource f = new
           javax.swing.plaf.FontUIResource("SansSerif", Font.PLAIN, 11);
-        java.util.Enumeration keys = UIManager.getDefaults().keys();
+        java.util.Enumeration<Object> keys = UIManager.getDefaults().keys();
         while (keys.hasMoreElements()) {
           Object key = keys.nextElement();
           Object value = UIManager.get (key);

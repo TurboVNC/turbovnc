@@ -36,7 +36,7 @@ public class ScreenSet {
 
   public final void add_screen(Screen screen) { screens.add(screen); }
   public final void remove_screen(int id) { 
-    for (Iterator iter = screens.iterator(); iter.hasNext(); ) {
+    for (Iterator<Screen> iter = screens.iterator(); iter.hasNext(); ) {
       Screen refScreen = (Screen)iter.next();
       if (refScreen.id == id)
         iter.remove();
@@ -54,7 +54,7 @@ public class ScreenSet {
 
       fb_rect.setXYWH(0, 0, fb_width, fb_height);
 
-      for (Iterator iter = screens.iterator(); iter.hasNext(); ) {
+      for (Iterator<Screen> iter = screens.iterator(); iter.hasNext(); ) {
         Screen refScreen = (Screen)iter.next();
         if (refScreen.dimensions.is_empty())
           return false;
@@ -69,7 +69,7 @@ public class ScreenSet {
   }
 
   public final void debug_print() {
-    for (Iterator iter = screens.iterator(); iter.hasNext(); ) {
+    for (Iterator<Screen> iter = screens.iterator(); iter.hasNext(); ) {
       Screen refScreen = (Screen)iter.next();
       vlog.error("    "+refScreen.id+" (0x"+refScreen.id+"): "+
                 refScreen.dimensions.width()+"x"+refScreen.dimensions.height()+

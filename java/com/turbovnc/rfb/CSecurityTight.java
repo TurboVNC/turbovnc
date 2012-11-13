@@ -114,7 +114,7 @@ public class CSecurityTight extends CSecurity {
     if (SupportedAuthTypes.isEmpty())
       throw new Exception("No supported auth types!");
 
-    for (Iterator i = SupportedAuthTypes.iterator(); i.hasNext(); ) {
+    for (Iterator<Integer> i = SupportedAuthTypes.iterator(); i.hasNext(); ) {
       int authType = (Integer)i.next();
       switch (authType) {
       case CODE_ULGNAUTH: 

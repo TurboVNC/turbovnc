@@ -81,7 +81,7 @@ public class Security {
 
     result.add(secTypeVeNCrypt);
     result.add(secTypeTight);
-    for (Iterator i = enabledSecTypes.iterator(); i.hasNext(); ) {
+    for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext(); ) {
       int refType = (Integer)i.next();
       if (refType < 0x100 && refType != secTypeTight)
         result.add(refType);
@@ -94,7 +94,7 @@ public class Security {
   {
     List<Integer> result = new ArrayList<Integer>();
 
-    for (Iterator i = enabledSecTypes.iterator(); i.hasNext(); ) {
+    for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext(); ) {
       int refType = (Integer)i.next();
       if (refType != secTypeVeNCrypt) /* Do not include VeNCrypt to avoid loops */
         result.add(refType);
@@ -106,7 +106,7 @@ public class Security {
   public static final void EnableSecType(int secType)
   {
 
-    for (Iterator i = enabledSecTypes.iterator(); i.hasNext(); )
+    for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext(); )
       if ((Integer)i.next() == secType)
         return;
 
@@ -115,7 +115,7 @@ public class Security {
 
   public boolean IsSupported(int secType)
   {
-    Iterator i;
+    Iterator<Integer> i;
   
     for (i = enabledSecTypes.iterator(); i.hasNext(); )
      if ((Integer)i.next() == secType)

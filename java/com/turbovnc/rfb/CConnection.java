@@ -124,7 +124,7 @@ abstract public class CConnection extends CMsgHandler {
 
       } else if (secType == Security.secTypeNone ||
                  secType == Security.secTypeVncAuth) {
-        Iterator i;
+        Iterator<Integer> i;
         for (i = secTypes.iterator(); i.hasNext(); ) {
           int refType = (Integer)i.next();
           if (refType == secType) {
@@ -166,7 +166,7 @@ abstract public class CConnection extends CMsgHandler {
          */
         if (secType == Security.secTypeInvalid &&
             secType != Security.secTypeTight) {
-          for (Iterator j = secTypes.iterator(); j.hasNext(); ) {
+          for (Iterator<Integer> j = secTypes.iterator(); j.hasNext(); ) {
             int refType = (Integer)j.next();
             if (refType == serverSecType) {
               secType = refType;

@@ -46,7 +46,7 @@ class ServerDialog extends Dialog implements
     setTitle("New TurboVNC Connection");
     addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
-        if (cc.viewer.nViewers == 1) {
+        if (VncViewer.nViewers == 1) {
           cc.viewer.exit(1);
         } else {
           ret = false;
@@ -161,7 +161,7 @@ class ServerDialog extends Dialog implements
       commit();
       endDialog();
     } else if (s instanceof JButton && (JButton)s == cancelButton) {
-      if (cc.viewer.nViewers == 1)
+      if (VncViewer.nViewers == 1)
         cc.viewer.exit(1);
       ret = false;
       endDialog();
@@ -183,7 +183,7 @@ class ServerDialog extends Dialog implements
     String serverName = (String)server.getSelectedItem();
     if (serverName == null || serverName.equals("")) {
       vlog.error("No server name specified!");
-      if (cc.viewer.nViewers == 1)
+      if (VncViewer.nViewers == 1)
         cc.viewer.exit(1);
       ret = false;
       endDialog();

@@ -161,7 +161,7 @@ public class Configuration {
 
     int scale_num = -1, scale_den = -1, fitwindow = -1;
 
-    for (Iterator i = props.stringPropertyNames().iterator(); i.hasNext();) {
+    for (Iterator<String> i = props.stringPropertyNames().iterator(); i.hasNext();) {
       String name = (String)i.next();
 
       if (name.startsWith("[")) {
