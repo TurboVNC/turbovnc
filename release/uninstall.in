@@ -48,12 +48,17 @@ cd $PWD
 echo Removing directories ...
 rmdir $PREFIX/bin 2>&1 || RETCODE=-1
 if [ -d $PREFIX/lib ]; then rmdir $PREFIX/lib 2>&1 || RETCODE=-1; fi
+if [ -f $PREFIX/man/man1/vncviewer.1 ]; then
+	rm $PREFIX/man/man1/vncviewer.1 2>&1 || RETCODE=-1;
+fi
 if [ -d $PREFIX/man/man1 ]; then rmdir $PREFIX/man/man1 2>&1 || RETCODE=-1; fi
 if [ -d $PREFIX/man ]; then rmdir $PREFIX/man 2>&1 || RETCODE=-1; fi
 if [ -d $PREFIX/java ]; then rmdir $PREFIX/java 2>&1 || RETCODE=-1; fi
 rmdir $PREFIX 2>&1 || RETCODE=-1
-rmdir /Library/Documentation/$PKGNAME 2>&1 || RETCODE=-1
-if [ -f /Applications/$PKGNAME/Documentation ]; then
+if [ -d /Library/Documentation/$PKGNAME ]; then
+	rm -rf /Library/Documentation/$PKGNAME 2>&1 || RETCODE=-1
+fi
+if [ -h /Applications/$PKGNAME/Documentation ]; then
 	rm /Applications/$PKGNAME/Documentation 2>&1 || RETCODE=-1
 fi
 if [ -d "/Applications/$PKGNAME/$PKGNAME Viewer.app" ]; then
