@@ -489,6 +489,11 @@ class DesktopWindow extends JPanel implements
         case KeyEvent.VK_Z:
           cc.sizeWindow();
           return;
+        case KeyEvent.VK_LEFT:
+        case KeyEvent.VK_RIGHT:
+        case KeyEvent.VK_UP:
+        case KeyEvent.VK_DOWN:
+          return;
       }
     }
     if ((e.getModifiers() & Event.ALT_MASK) == Event.ALT_MASK &&
