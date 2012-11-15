@@ -774,6 +774,7 @@ rfbProcessClientNormalMessage(cl)
         CARD32 enc;
         Bool firstFence = !cl->enableFence;
         Bool firstCU = !cl->enableCU;
+        Bool logTightCompressLevel = FALSE;
 
         if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
                            sz_rfbSetEncodingsMsg - 1)) <= 0) {
@@ -919,8 +920,11 @@ rfbProcessClientNormalMessage(cl)
                      enc <= (CARD32)rfbEncodingCompressLevel9 ) {
                     cl->zlibCompressLevel = enc & 0x0F;
                     cl->tightCompressLevel = enc & 0x0F;
-                    rfbLog("Using compression level %d for client %s\n",
-                           cl->tightCompressLevel, cl->host);
+                    if (cl->preferredEncoding == rfbEncodingTight)
+                        logTightCompressLevel = TRUE;
+                    else
+                        rfbLog("Using compression level %d for client %s\n",
+                               cl->tightCompressLevel, cl->host);
                 } else if ( enc >= (CARD32)rfbEncodingSubsamp1X &&
                          enc <= (CARD32)rfbEncodingSubsampGray ) {
                     cl->tightSubsampLevel = enc & 0xFF;
@@ -941,7 +945,7 @@ rfbProcessClientNormalMessage(cl)
                 } else if ( enc >= (CARD32)rfbEncodingFineQualityLevel0 + 1 &&
                             enc <= (CARD32)rfbEncodingFineQualityLevel100 ) {
                     cl->tightQualityLevel = enc & 0xFF;
-                    rfbLog("Using JPEG quality level %d for client %s\n",
+                    rfbLog("Using JPEG quality %d for client %s\n",
                            cl->tightQualityLevel, cl->host);
                 } else {
                     rfbLog("rfbProcessClientNormalMessage: ignoring unknown "
@@ -953,6 +957,11 @@ rfbProcessClientNormalMessage(cl)
         if (cl->preferredEncoding == -1) {
             cl->preferredEncoding = rfbEncodingTight;
         }
+
+        if (cl->preferredEncoding == rfbEncodingTight &&
+            logTightCompressLevel)
+            rfbLog("Using Tight compression level %d for client %s\n",
+                   rfbTightCompressLevel(cl), cl->host);
 
         if (cl->enableCursorPosUpdates && !cl->enableCursorShapeUpdates) {
             rfbLog("Disabling cursor position updates for client %s\n",

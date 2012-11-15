@@ -241,6 +241,46 @@ rfbNumCodedRectsTight(cl, x, y, w, h)
 }
 
 
+/*
+ * Translate compression level into Tight compression level
+ */
+
+int
+rfbTightCompressLevel(cl)
+    rfbClientPtr cl;
+{
+    int compressLevel = cl->tightCompressLevel;
+
+    /* We only allow compression levels that have a demonstrable performance
+       benefit.  CL 0 with JPEG reduces CPU usage for workloads that have low
+       numbers of unique colors, but the same thing can be accomplished by
+       using CL 0 without JPEG (AKA "Lossless Tight.")  For those same
+       low-color workloads, CL 2 with JPEG can provide typically 20-40% better
+       compression than CL 1 (with a commensurate increase in CPU usage.)  For
+       high-color workloads, CL 1 should always be used, as higher compression
+       levels increase CPU usage for these workloads without providing any
+       significant reduction in bandwidth. */
+    if (cl->tightQualityLevel != -1) {
+        if (compressLevel < 1) compressLevel = 1;
+        if (compressLevel > 2) compressLevel = 2;
+    }
+
+    /* With JPEG disabled, CL 2 offers no significant bandwidth savings over
+       CL 1, so we don't include it. */
+    else if (compressLevel > 1) compressLevel = 1;
+
+    /* CL 9 (which maps internally to CL 3) is included mainly for backward
+       compatibility with TightVNC Compression Levels 5-9.  It should be used
+       only in extremely low-bandwidth cases in which it can be shown to have a
+       benefit.  For low-color workloads, it provides typically only 10-20%
+       better compression than CL 2 with JPEG and CL 1 without JPEG, and it
+       uses, on average, twice as much CPU time. */
+    if (cl->tightCompressLevel == 9) compressLevel = 3;
+
+    return compressLevel;
+}
+
+
 static int
 nthreads(void)
 {
@@ -374,35 +414,9 @@ rfbSendRectEncodingTight(cl, x, y, w, h)
         if (!threadInit) return FALSE;
     }
 
-    compressLevel = cl->tightCompressLevel;
+    compressLevel = rfbTightCompressLevel(cl);
     qualityLevel = cl->tightQualityLevel;
     subsampLevel = cl->tightSubsampLevel;
-
-    /* We only allow compression levels that have a demonstrable performance
-       benefit.  CL 0 with JPEG reduces CPU usage for workloads that have low
-       numbers of unique colors, but the same thing can be accomplished by
-       using CL 0 without JPEG (AKA "Lossless Tight.")  For those same
-       low-color workloads, CL 2 can provide typically 20-40% better
-       compression than CL 1 (with a commensurate increase in CPU usage.)  For
-       high-color workloads, CL 1 should always be used, as higher compression
-       levels increase CPU usage for these workloads without providing any
-       significant reduction in bandwidth. */
-    if (qualityLevel != -1) {
-        if (compressLevel < 1) compressLevel = 1;
-        if (compressLevel > 2) compressLevel = 2;
-    }
-
-    /* With JPEG disabled, CL 2 offers no significant bandwidth savings over
-       CL 1, so we don't include it. */
-    else if (compressLevel > 1) compressLevel = 1;
-
-    /* CL 9 (which maps internally to CL 3) is included mainly for backward
-       compatibility with TightVNC Compression Levels 5-9.  It should be used
-       only in extremely low-bandwidth cases in which it can be shown to have a
-       benefit.  For low-color workloads, it provides typically only 10-20%
-       better compression than CL 2 with JPEG and CL 1 without JPEG, and it
-       uses, on average, twice as much CPU time. */
-    if (cl->tightCompressLevel == 9) compressLevel = 3;
 
     if (cl->format.depth == 24 && cl->format.redMax == 0xFF &&
         cl->format.greenMax == 0xFF && cl->format.blueMax == 0xFF) {

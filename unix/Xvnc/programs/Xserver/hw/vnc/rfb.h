@@ -747,6 +747,7 @@ enum { TVNC_1X = 0, TVNC_4X, TVNC_2X, TVNC_GRAY };
 extern int rfbNumCodedRectsTight(rfbClientPtr cl, int x, int y, int w, int h);
 extern Bool rfbSendRectEncodingTight(rfbClientPtr cl, int x, int y, int w,
                                      int h);
+extern int rfbTightCompressLevel(rfbClientPtr cl);
 extern void ShutdownTightThreads(void);
 
 
