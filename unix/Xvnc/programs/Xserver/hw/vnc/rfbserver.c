@@ -949,7 +949,7 @@ rfbProcessClientNormalMessage(cl)
                            cl->tightQualityLevel, cl->host);
                 } else {
                     rfbLog("rfbProcessClientNormalMessage: ignoring unknown "
-                           "encoding %d\n", (int)enc);
+                           "encoding %d (%x)\n", (int)enc, (int)enc);
                 }
             }
         }
