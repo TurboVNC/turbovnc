@@ -919,21 +919,57 @@ public class CConn extends CConnection
     return (opts.user != null || opts.sendLocalUsername);
   }
 
+  public void setTightOptions() {
+    int encoding = currentEncoding;
+    if (lastServerEncoding != Encodings.encodingTight &&
+        lastServerEncoding >= 0)
+      encoding = lastServerEncoding;
+
+    if (encoding != Encodings.encodingTight) {
+      options.allowJpeg.setEnabled(false);
+      options.subsamplingLevel.setEnabled(false);
+      options.subsamplingLabel.setEnabled(false);
+      options.subsamplingLabelLo.setEnabled(false);
+      options.subsamplingLabelHi.setEnabled(false);
+      options.jpegQualityLevel.setMinimum(0);
+      options.jpegQualityLevel.setMaximum(9);
+      options.jpegQualityLevel.setMajorTickSpacing(1);
+      options.jpegQualityLevel.setMinorTickSpacing(0);
+      options.jpegQualityLevel.setSnapToTicks(true);
+      options.jpegQualityLevel.setEnabled(true);
+      options.jpegQualityLabelString = new String("Image quality level: ");
+      options.jpegQualityLabel.setText(options.jpegQualityLabelString + 
+        options.jpegQualityLevel.getValue());
+      options.jpegQualityLabel.setEnabled(true);
+      options.jpegQualityLabelLo.setEnabled(true);
+      options.jpegQualityLabelHi.setEnabled(true);
+      options.encMethodComboBox.setEnabled(false);
+      options.encMethodComboBox.removeItemAt(5);
+      options.encMethodComboBox.insertItemAt(Encodings.encodingName(encoding), 5);
+      options.encMethodComboBox.setSelectedItem(Encodings.encodingName(encoding));
+      options.encMethodLabel.setText("Encoding type:");
+      options.encMethodLabel.setEnabled(false);
+    }
+    if (encoding != Encodings.encodingTight ||
+        VncViewer.compressLevel.getValue() > 1) {
+      options.compressionLevel.setMaximum(9);
+      options.compressionLevel.setEnabled(true);
+      options.compressionLabel.setEnabled(true);
+      options.compressionLabelLo.setEnabled(true);
+      options.compressionLabelHi.setEnabled(true);
+      options.compressionLabelString = new String("Compression level: ");
+      options.compressionLabel.setText(options.compressionLabelString + 
+        options.compressionLevel.getValue());
+    }
+  }
+
   public void setOptions() {
     options.allowJpeg.setSelected(opts.allowJpeg);
     options.subsamplingLevel.setValue(opts.getSubsamplingOrdinal());
     options.jpegQualityLevel.setValue(opts.quality);
-    options.zlibCompressionLevel.setValue(opts.compressLevel);
+    options.compressionLevel.setValue(opts.compressLevel);
 
-    if (currentEncoding != Encodings.encodingTight) {
-      options.allowJpeg.setEnabled(false);
-      options.subsamplingLevel.setEnabled(false);
-      options.jpegQualityLevel.setEnabled(false);
-      options.zlibCompressionLevel.setEnabled(false);
-      options.encMethodComboBox.insertItemAt(Encodings.encodingName(currentEncoding), 0);
-      options.encMethodComboBox.setSelectedItem(Encodings.encodingName(currentEncoding));
-      options.encMethodComboBox.setEnabled(false);
-    }
+    setTightOptions();
 
     options.viewOnly.setSelected(opts.viewOnly);
     options.acceptClipboard.setSelected(opts.acceptClipboard);
@@ -1076,9 +1112,9 @@ public class CConn extends CConnection
       encodingChange = true;
     opts.quality = options.jpegQualityLevel.getValue();
 
-    if (opts.compressLevel != options.zlibCompressionLevel.getValue())
+    if (opts.compressLevel != options.compressionLevel.getValue())
       encodingChange = true;
-    opts.compressLevel = options.zlibCompressionLevel.getValue();
+    opts.compressLevel = options.compressionLevel.getValue();
 
     if (opts.subsampling != options.getSubsamplingLevel())
       encodingChange = true;
@@ -1427,7 +1463,7 @@ public class CConn extends CConnection
     if (encodingChange && (writer() != null)) {
       vlog.info("Requesting " + Encodings.encodingName(currentEncoding) + 
         " encoding");
-      writer().writeSetEncodings(currentEncoding, opts);
+      writer().writeSetEncodings(currentEncoding, lastServerEncoding, opts);
       encodingChange = false;
       if (viewport != null)
         viewport.updateTitle();

@@ -49,7 +49,7 @@ abstract public class CMsgWriter {
   // encoding numbers are more desirable.
 
   synchronized public void writeSetEncodings(int preferredEncoding,
-                                             Options opts)
+                                             int lastEncoding, Options opts)
   {
     int nEncodings = 0;
     int[] encodings = new int[Encodings.encodingMax+3];
@@ -122,6 +122,13 @@ abstract public class CMsgWriter {
         + opts.quality;
       encodings[nEncodings++] = Encodings.pseudoEncodingSubsamp1X
         + opts.subsampling;
+    } else if (opts.preferredEncoding != Encodings.encodingTight ||
+               (lastEncoding >= 0 &&
+                lastEncoding != Encodings.encodingTight)) {
+      int qualityLevel = opts.quality;
+      if (qualityLevel > 9) qualityLevel = 9;
+      encodings[nEncodings++] = Encodings.pseudoEncodingQualityLevel0
+        + qualityLevel;
     }
 
     writeSetEncodings(nEncodings, encodings);

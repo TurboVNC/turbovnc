@@ -43,7 +43,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   JPanel EncodingPanel, ConnPanel, GlobalPanel, SecPanel;
   JCheckBox allowJpeg;
   JComboBox menuKey, compressLevel, scalingFactor, encMethodComboBox, span;
-  JSlider jpegQualityLevel, subsamplingLevel, zlibCompressionLevel;
+  JSlider jpegQualityLevel, subsamplingLevel, compressionLevel;
   JCheckBox viewOnly, acceptClipboard, sendClipboard, acceptBell;
   JCheckBox fullScreen, shared, cursorShape, showToolbar;
   JCheckBox secVeNCrypt, encNone, encTLS, encX509;
@@ -52,9 +52,12 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   JButton okButton, cancelButton;
   JButton ca, crl;
   JButton defSaveButton, defClearButton;
-  JLabel jpegQualityLabel, subsamplingLabel, zlibCompressionLabel;
+  JLabel encMethodLabel;
+  JLabel jpegQualityLabel, jpegQualityLabelLo, jpegQualityLabelHi;
+  JLabel subsamplingLabel, subsamplingLabelLo, subsamplingLabelHi;
+  JLabel compressionLabel, compressionLabelLo, compressionLabelHi;
   String jpegQualityLabelString, subsamplingLabelString;
-  String zlibCompressionLabelString;
+  String compressionLabelString;
   Hashtable<Integer, String> subsamplingLabelTable;
 
   public OptionsDialog(OptionsDialogCallback cb_) { 
@@ -72,7 +75,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     EncodingPanel = new JPanel(new GridBagLayout());
     JPanel ImagePanel = new JPanel(new GridBagLayout());
 
-    JLabel encMethodLabel = new JLabel("Encoding method:");
+    encMethodLabel = new JLabel("Encoding method:");
     Object[] encMethod = { 
       "Tight + Perceptually Lossless JPEG (LAN)",
       "Tight + Medium-Quality JPEG",
@@ -101,8 +104,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     subsamplingLabelTable.put(2, new String("4X"));
     subsamplingLabelTable.put(3, new String("Grayscale"));
     subsamplingLevel.setPaintLabels(false);
-    JLabel subsamplingLevelLabelLo = new JLabel("fast");
-    JLabel subsamplingLevelLabelHi = new JLabel("best");
+    subsamplingLabelLo = new JLabel("fast");
+    subsamplingLabelHi = new JLabel("best");
     subsamplingLabel.setText(subsamplingLabelString + 
       subsamplingLabelTable.get(subsamplingLevel.getValue()));
 
@@ -117,25 +120,25 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     jpegQualityLevel.setSnapToTicks(false);
     jpegQualityLevel.setPaintTicks(true);
     jpegQualityLevel.setPaintLabels(false);
-    JLabel jpegQualityLevelLabelLo = new JLabel("poor");
-    JLabel jpegQualityLevelLabelHi = new JLabel("best");
+    jpegQualityLabelLo = new JLabel("poor");
+    jpegQualityLabelHi = new JLabel("best");
     jpegQualityLabel.setText(jpegQualityLabelString + 
       jpegQualityLevel.getValue());
 
-    zlibCompressionLabelString = 
+    compressionLabelString = 
       new String("Zlib compression level: ");
-    zlibCompressionLabel = new JLabel();
-    zlibCompressionLevel = 
+    compressionLabel = new JLabel();
+    compressionLevel = 
       new JSlider(JSlider.HORIZONTAL, 0, 1, 1);
-    zlibCompressionLevel.addChangeListener(this);
-    zlibCompressionLevel.setMajorTickSpacing(1);
-    zlibCompressionLevel.setSnapToTicks(true);
-    zlibCompressionLevel.setPaintTicks(true);
-    zlibCompressionLevel.setPaintLabels(false);
-    JLabel zlibCompressionLevelLabelLo = new JLabel("fast");
-    JLabel zlibCompressionLevelLabelHi = new JLabel("best");
-    zlibCompressionLabel.setText(zlibCompressionLabelString + 
-      zlibCompressionLevel.getValue());
+    compressionLevel.addChangeListener(this);
+    compressionLevel.setMajorTickSpacing(1);
+    compressionLevel.setSnapToTicks(true);
+    compressionLevel.setPaintTicks(true);
+    compressionLevel.setPaintLabels(false);
+    compressionLabelLo = new JLabel("fast");
+    compressionLabelHi = new JLabel("best");
+    compressionLabel.setText(compressionLabelString + 
+      compressionLevel.getValue());
 
     addGBComponent(encMethodLabel, ImagePanel, 
                    0, 0, 3, 1, 2, 2, 0, 0, 
@@ -157,7 +160,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                    GridBagConstraints.NONE, 
                    GridBagConstraints.LINE_START, 
                    new Insets(2,2,2,2));
-    addGBComponent(subsamplingLevelLabelLo, ImagePanel, 
+    addGBComponent(subsamplingLabelLo, ImagePanel, 
                    0, 4, 1, 1, 2, 2, 0, 0, 
                    GridBagConstraints.NONE, 
                    GridBagConstraints.LINE_START, 
@@ -167,7 +170,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                    GridBagConstraints.NONE, 
                    GridBagConstraints.LINE_START, 
                    new Insets(2,2,2,2));
-    addGBComponent(subsamplingLevelLabelHi, ImagePanel, 
+    addGBComponent(subsamplingLabelHi, ImagePanel, 
                    2, 4, 1, 1, 2, 2, 0, 0, 
                    GridBagConstraints.NONE, 
                    GridBagConstraints.LINE_START, 
@@ -177,7 +180,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                    GridBagConstraints.NONE, 
                    GridBagConstraints.LINE_START, 
                    new Insets(2,2,2,2));
-    addGBComponent(jpegQualityLevelLabelLo, ImagePanel, 
+    addGBComponent(jpegQualityLabelLo, ImagePanel, 
                    0, 6, 1, 1, 2, 2, 0, 0, 
                    GridBagConstraints.NONE, 
                    GridBagConstraints.LINE_START, 
@@ -187,27 +190,27 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                    GridBagConstraints.NONE, 
                    GridBagConstraints.LINE_START, 
                    new Insets(2,2,2,2));
-    addGBComponent(jpegQualityLevelLabelHi, ImagePanel, 
+    addGBComponent(jpegQualityLabelHi, ImagePanel, 
                    2, 6, 1, 1, 2, 2, 0, 0, 
                    GridBagConstraints.NONE, 
                    GridBagConstraints.LINE_START, 
                    new Insets(2,2,2,2));
-    addGBComponent(zlibCompressionLabel, ImagePanel, 
+    addGBComponent(compressionLabel, ImagePanel, 
                    0, 7, 3, 1, 2, 2, 0, 0, 
                    GridBagConstraints.NONE, 
                    GridBagConstraints.LINE_START, 
                    new Insets(2,2,2,2));
-    addGBComponent(zlibCompressionLevelLabelLo, ImagePanel, 
+    addGBComponent(compressionLabelLo, ImagePanel, 
                    0, 8, 1, 1, 2, 2, 0, 0, 
                    GridBagConstraints.NONE, 
                    GridBagConstraints.LINE_START, 
                    new Insets(2,12,2,2));
-    addGBComponent(zlibCompressionLevel, ImagePanel, 
+    addGBComponent(compressionLevel, ImagePanel, 
                    1, 8, 1, 1, 2, 2, 0, 0, 
                    GridBagConstraints.NONE, 
                    GridBagConstraints.LINE_START, 
                    new Insets(2,2,2,2));
-    addGBComponent(zlibCompressionLevelLabelHi, ImagePanel, 
+    addGBComponent(compressionLabelHi, ImagePanel, 
                    2, 8, 1, 1, 2, 2, 1, 1, 
                    GridBagConstraints.NONE, 
                    GridBagConstraints.LINE_START, 
@@ -473,12 +476,16 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     encMethodComboBox.setSelectedItem("Tight + Perceptually Lossless JPEG (LAN)");
 
     pack();
-	
+
+    addWindowListener(new WindowAdapter() {
+      public void windowActivated(WindowEvent e) {
+        if (cb != null) cb.setTightOptions();
+      }
+    });
   }
 
   public void initDialog() {
     if (cb != null) cb.setOptions();
-    //encMethodComboBox.setSelectedItem("Tight + Perceptually Lossless JPEG (LAN)");
   }
   
   private void updatePreferences() {
@@ -488,7 +495,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     UserPreferences.set("global", "Subsampling", subsamplingStr);
     UserPreferences.set("global", "Quality", jpegQualityLevel.getValue());
     UserPreferences.set("global", "CompressLevel",
-                        zlibCompressionLevel.getValue());
+                        compressionLevel.getValue());
     UserPreferences.set("global", "ViewOnly", viewOnly.isSelected());
     UserPreferences.set("global", "RecvClipboard",
                         acceptClipboard.isSelected());
@@ -618,27 +625,28 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     } else if (s instanceof JComboBox && (JComboBox)s == encMethodComboBox) {
       JComboBox cb = (JComboBox)e.getSource();
       String encMethod = (String)cb.getSelectedItem();
+      if (!encMethodComboBox.isEnabled()) return;
       if (encMethod.equals("Tight + Perceptually Lossless JPEG (LAN)")) {
         allowJpeg.setSelected(true);
         subsamplingLevel.setValue(0);
         jpegQualityLevel.setValue(95);
-        zlibCompressionLevel.setValue(1);
+        compressionLevel.setValue(1);
       } else if (encMethod.equals("Tight + Medium-Quality JPEG")) {
         allowJpeg.setSelected(true);
         subsamplingLevel.setValue(1);
         jpegQualityLevel.setValue(80);
-        zlibCompressionLevel.setValue(1);
+        compressionLevel.setValue(1);
       } else if (encMethod.equals("Tight + Low-Quality JPEG (WAN)")) {
         allowJpeg.setSelected(true);
         subsamplingLevel.setValue(2);
         jpegQualityLevel.setValue(30);
-        zlibCompressionLevel.setValue(1);
+        compressionLevel.setValue(1);
       } else if (encMethod.equals("Lossless Tight (Gigabit)")) {
         allowJpeg.setSelected(false);
-        zlibCompressionLevel.setValue(0);
+        compressionLevel.setValue(0);
       } else if (encMethod.equals("Lossless Tight + Zlib (WAN)")) {
         allowJpeg.setSelected(false);
-        zlibCompressionLevel.setValue(1);
+        compressionLevel.setValue(1);
       }
     }
   }
@@ -648,13 +656,33 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     if (s instanceof JCheckBox && (JCheckBox)s == allowJpeg) {
       if (allowJpeg.isSelected()) {
         jpegQualityLevel.setEnabled(true);
+        jpegQualityLabel.setEnabled(true);
+        jpegQualityLabelLo.setEnabled(true);
+        jpegQualityLabelHi.setEnabled(true);
         subsamplingLevel.setEnabled(true);
-        zlibCompressionLevel.setEnabled(false);
-        zlibCompressionLevel.setValue(1);
+        subsamplingLabel.setEnabled(true);
+        subsamplingLabelLo.setEnabled(true);
+        subsamplingLabelHi.setEnabled(true);
+        if (compressionLevel.getMaximum() == 1) {
+          compressionLevel.setEnabled(false);
+          compressionLabel.setEnabled(false);
+          compressionLabelLo.setEnabled(false);
+          compressionLabelHi.setEnabled(false);
+          compressionLevel.setValue(1);
+        }
       } else {
         jpegQualityLevel.setEnabled(false);
+        jpegQualityLabel.setEnabled(false);
+        jpegQualityLabelLo.setEnabled(false);
+        jpegQualityLabelHi.setEnabled(false);
         subsamplingLevel.setEnabled(false);
-        zlibCompressionLevel.setEnabled(true);
+        subsamplingLabel.setEnabled(false);
+        subsamplingLabelLo.setEnabled(false);
+        subsamplingLabelHi.setEnabled(false);
+        compressionLevel.setEnabled(true);
+        compressionLabel.setEnabled(true);
+        compressionLabelLo.setEnabled(true);
+        compressionLabelHi.setEnabled(true);
       }
       setEncMethodComboBox();
     }
@@ -679,26 +707,29 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   }
 
   private void setEncMethodComboBox() {
+    if (!encMethodComboBox.isEnabled()) return;
     if (subsamplingLevel.getValue() == 0 &&
-        zlibCompressionLevel.getValue() == 1 &&
+        compressionLevel.getValue() == 1 &&
         jpegQualityLevel.getValue() == 95 && allowJpeg.isSelected()) {
         encMethodComboBox.setSelectedItem("Tight + Perceptually Lossless JPEG (LAN)");
     } else if (subsamplingLevel.getValue() == 1 &&
-        zlibCompressionLevel.getValue() == 1 &&
+        compressionLevel.getValue() == 1 &&
         jpegQualityLevel.getValue() == 80 && allowJpeg.isSelected()) {
         encMethodComboBox.setSelectedItem("Tight + Medium-Quality JPEG");
     } else if (subsamplingLevel.getValue() == 2 &&
-        zlibCompressionLevel.getValue() == 1 &&
+        compressionLevel.getValue() == 1 &&
         jpegQualityLevel.getValue() == 30 && allowJpeg.isSelected()) {
         encMethodComboBox.setSelectedItem("Tight + Low-Quality JPEG (WAN)");
     } else if (!allowJpeg.isSelected()) {
-      switch (zlibCompressionLevel.getValue()) {
+      switch (compressionLevel.getValue()) {
       case 0:
         encMethodComboBox.setSelectedItem("Lossless Tight (Gigabit)");
         break;
       case 1:
         encMethodComboBox.setSelectedItem("Lossless Tight + Zlib (WAN)");
         break;
+      default:
+        encMethodComboBox.setSelectedItem("Custom");
       }
     } else {
       encMethodComboBox.setSelectedItem("Custom");
@@ -715,9 +746,9 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       jpegQualityLabel.setText(jpegQualityLabelString + 
         jpegQualityLevel.getValue());
       setEncMethodComboBox();
-    } else if (s instanceof JSlider && (JSlider)s == zlibCompressionLevel) {
-      zlibCompressionLabel.setText(zlibCompressionLabelString + 
-        zlibCompressionLevel.getValue());
+    } else if (s instanceof JSlider && (JSlider)s == compressionLevel) {
+      compressionLabel.setText(compressionLabelString + 
+        compressionLevel.getValue());
       setEncMethodComboBox();
     }
   }
