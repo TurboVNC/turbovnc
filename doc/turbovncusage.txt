@@ -227,7 +227,7 @@ above:
 	This encoding method uses indexed color subencoding for subrectangles with \
 	a low number of unique colors and raw subencoding for subrectangles with a \
 	high number of unique colors.  It compresses all subrectangles using zlib \
-	with compression level 1.  For certain types of low-color workloads (CAD \
+	with zlib compression level 1.  For certain types of low-color workloads (CAD \
 	applications, in particular), this encoding method may use less network \
 	bandwidth than the "Tight + Perceptually Lossless JPEG" encoding method, \
 	but it also uses significantly more CPU time than any of the JPEG-based \
