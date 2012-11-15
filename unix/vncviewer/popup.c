@@ -31,13 +31,14 @@
 extern Bool HasEncoding(const char *);
 
 Widget popup, fullScreenToggle, button4X, button2X, button1X, buttonGray,
-  qualtext, qualslider, buttonZlib, buttonJPEG;
+  qualtext, qualslider, buttonCompress[10], buttonJPEG;
 
 
 void UpdateQual(void)
 {
   char *titleFormat, title[1024], *ptr;
-  char text[10];
+  char text[10];  int i;
+
   encodingChange = True;
   XtVaGetValues(toplevel, XtNtitle, &titleFormat, NULL);
   strncpy(title, titleFormat, 1023);
@@ -49,14 +50,19 @@ void UpdateQual(void)
   sprintf(text, "%d", appData.qualityLevel);
   XtVaSetValues(qualtext, XtNlabel, text, NULL);
 
-  if (appData.compressLevel > 0)
-    XtVaSetValues(buttonZlib, XtNstate, 1, NULL);
-  else
-    XtVaSetValues(buttonZlib, XtNstate, 0, NULL);
-
-  if (appData.enableJPEG)
+  for (i = 0; i <= 9; i++) {
+    if (buttonCompress[i]) {
+      if (appData.compressLevel == i)
+        XtVaSetValues(buttonCompress[i], XtNstate, 1, NULL);
+      else
+        XtVaSetValues(buttonCompress[i], XtNstate, 0, NULL);
+    }
+  }
+  if (appData.enableJPEG) {
+    if (appData.compressLevel < 0)
+      XtVaSetValues(buttonCompress[1], XtNstate, 1, NULL);
     XtVaSetValues(buttonJPEG, XtNstate, 1, NULL);
-  else
+  } else
     XtVaSetValues(buttonJPEG, XtNstate, 0, NULL);
 
   if (appData.subsampLevel == TVNC_1X) {
@@ -129,10 +135,12 @@ void qualJumpProc(Widget w, XtPointer client, XtPointer p)
 }
 
 
-void buttonZlibProc(Widget w, XtPointer client, XtPointer p)
+void buttonCompressProc(Widget w, XtPointer client, XtPointer p)
 {
-  if ((long)p == 1) appData.compressLevel = 1;
-  else appData.compressLevel = 0;
+  int i;
+  for (i = 0; i <= 9; i++)
+    if (buttonCompress[i] && w == buttonCompress[i] && (long)p == 1)
+      appData.compressLevel = i;
   UpdateQual();
 }
 
@@ -187,9 +195,9 @@ void SetViewOnlyState(Widget w, XEvent *ev, String *params,
 
 void CreatePopup()
 {
-  Widget buttonForm, button = NULL, prevButton = NULL, label;
-  int i;
-  char buttonName[12];
+  Widget buttonForm, button = NULL, prevButton = NULL, label, labelLo, labelHi;
+  int i, compressLevelMax;
+  char buttonName[15];
   String buttonType;
 
   popup = XtVaCreatePopupShell("popup", transientShellWidgetClass, toplevel,
@@ -235,25 +243,38 @@ void CreatePopup()
   XtVaSetValues(label, XtNfromVert, buttonJPEG, XtNleft, XawChainLeft,
                 XtNright, XawChainRight, NULL);
 
+  labelLo = XtCreateManagedWidget("qualLabelLo", labelWidgetClass, buttonForm,
+                                  NULL, 0);
+  XtVaSetValues(labelLo, XtNfromVert, label, XtNleft, XawChainLeft,
+                XtNright, XawChainRight, NULL);
+
   qualslider = XtCreateManagedWidget("qualBar", scrollbarWidgetClass,
                                      buttonForm, NULL, 0);
-  XtVaSetValues(qualslider, XtNfromVert, label, XtNleft, XawChainLeft, NULL);
+  XtVaSetValues(qualslider, XtNfromVert, label, XtNfromHoriz, labelLo, NULL);
   XtAddCallback(qualslider, XtNscrollProc, qualScrollProc, NULL) ;
   XtAddCallback(qualslider, XtNjumpProc, qualJumpProc, NULL) ;
 
   qualtext = XtCreateManagedWidget("qualText", labelWidgetClass, buttonForm,
                                    NULL, 0);
-  XtVaSetValues(qualtext, XtNfromVert, label, XtNfromHoriz, qualslider,
-                XtNright, XawChainRight, NULL);
+  XtVaSetValues(qualtext, XtNfromVert, label, XtNfromHoriz, qualslider, NULL);
+
+  labelHi = XtCreateManagedWidget("qualLabelHi", labelWidgetClass, buttonForm,
+                                  NULL, 0);
+  XtVaSetValues(labelHi, XtNfromVert, label, XtNfromHoriz, qualtext, NULL);
 
   label = XtCreateManagedWidget("subsampLabel", labelWidgetClass, buttonForm,
                                 NULL, 0);
-  XtVaSetValues(label, XtNfromVert, qualslider, XtNleft, XawChainLeft,
+  XtVaSetValues(label, XtNfromVert, qualtext, XtNleft, XawChainLeft,
+                XtNright, XawChainRight, NULL);
+
+  labelLo = XtCreateManagedWidget("subsampLabelLo", labelWidgetClass,
+                                  buttonForm, NULL, 0);
+  XtVaSetValues(labelLo, XtNfromVert, label, XtNleft, XawChainLeft,
                 XtNright, XawChainRight, NULL);
 
   buttonGray = XtCreateManagedWidget("subsampGray", toggleWidgetClass,
                                      buttonForm, NULL, 0);
-  XtVaSetValues(buttonGray, XtNfromVert, label, XtNleft, XawChainLeft, NULL);
+  XtVaSetValues(buttonGray, XtNfromVert, label, XtNfromHoriz, labelLo, NULL);
   XtAddCallback(buttonGray, XtNcallback, buttonGrayProc, NULL);
 
   button4X = XtCreateManagedWidget("subsamp4X", toggleWidgetClass, buttonForm,
@@ -273,9 +294,49 @@ void CreatePopup()
                 XtNradioGroup, buttonGray, NULL);
   XtAddCallback(button1X, XtNcallback, button1XProc, NULL);
 
-  buttonZlib = XtCreateManagedWidget("enableZlib", toggleWidgetClass,
-                                     buttonForm, NULL, 0);
-  XtVaSetValues(buttonZlib, XtNfromVert, buttonGray, XtNleft, XawChainLeft,
-                NULL);
-  XtAddCallback(buttonZlib, XtNcallback, buttonZlibProc, NULL);
+  labelHi = XtCreateManagedWidget("subsampLabelHi", labelWidgetClass,
+                                  buttonForm, NULL, 0);
+  XtVaSetValues(labelHi, XtNfromVert, label, XtNfromHoriz, button1X, NULL);
+
+  compressLevelMax = 1;
+  if (appData.compressLevel > 1 ||
+      (appData.encodingsString && !HasEncoding("tight")))
+    compressLevelMax = 9;
+
+  if (compressLevelMax == 9)
+    label = XtCreateManagedWidget("compressLabel", labelWidgetClass, buttonForm,
+                                  NULL, 0);
+  else
+    label = XtCreateManagedWidget("zlibCompressLabel", labelWidgetClass,
+                                  buttonForm, NULL, 0);
+  XtVaSetValues(label, XtNfromVert, buttonGray, XtNleft, XawChainLeft,
+                XtNright, XawChainRight, NULL);
+
+  labelLo = XtCreateManagedWidget("compressLabelLo", labelWidgetClass,
+                                  buttonForm, NULL, 0);
+  XtVaSetValues(labelLo, XtNfromVert, label, XtNleft, XawChainLeft,
+                XtNright, XawChainRight, NULL);
+
+  for (i = 0; i <= compressLevelMax; i++) {
+    char text[2];
+    snprintf(buttonName, 15, "compressButton%d", i);
+    buttonCompress[i] = XtCreateManagedWidget(buttonName, toggleWidgetClass,
+                                              buttonForm, NULL, 0);
+    XtVaSetValues(buttonCompress[i], XtNfromVert, label, NULL);
+    if (i == 0)
+      XtVaSetValues(buttonCompress[i], XtNfromHoriz, labelLo, NULL);
+    else
+      XtVaSetValues(buttonCompress[i], XtNfromHoriz, buttonCompress[i - 1],
+                    NULL);
+    snprintf(text, 2, "%d", i);
+    XtVaSetValues(buttonCompress[i], XtNlabel, text, NULL);
+    XtAddCallback(buttonCompress[i], XtNcallback, buttonCompressProc, NULL);
+    if (appData.compressLevel == i)
+      XtVaSetValues(buttonCompress[i], XtNstate, 1, NULL);
+  }
+
+  labelHi = XtCreateManagedWidget("compressLabelHi", labelWidgetClass,
+                                  buttonForm, NULL, 0);
+  XtVaSetValues(labelHi, XtNfromVert, label, XtNfromHoriz,
+                buttonCompress[i - 1], NULL);
 }

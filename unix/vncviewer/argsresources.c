@@ -173,6 +173,8 @@ char *fallback_resources[] = {
  */
 
 "*qualLabel.label: JPEG Image Quality",
+"*qualLabelLo.label: poor",
+"*qualLabelHi.label: best",
 "*qualBar.length: 100",
 "*qualBar.width: 130",
 "*qualBar.orientation: horizontal",
@@ -184,7 +186,9 @@ char *fallback_resources[] = {
 
 "*qualText.label: 000",
 
-"*subsampLabel.label: JPEG Chrominance Subsampling\\n[4X = fastest]\\n[None = best quality]",
+"*subsampLabel.label: JPEG Chrominance Subsampling",
+"*subsampLabelLo.label: fast",
+"*subsampLabelHi.label: best",
 "*subsampGray.label: Grayscale",
 "*subsamp4X.label: 4X",
 "*subsamp2X.label: 2X",
@@ -192,7 +196,10 @@ char *fallback_resources[] = {
 
 "*enableJPEG.label: Enable JPEG Compression",
 
-"*enableZlib.label: Enable Zlib Compression",
+"*zlibCompressLabel.label: Zlib Compression Level",
+"*compressLabel.label: Compression Level",
+"*compressLabelLo.label: fast",
+"*compressLabelHi.label: best",
 
 "*popup.title: TurboVNC Viewer Options",
 "*popup*background: grey",

@@ -1210,6 +1210,7 @@ void QualHigh(Widget w, XEvent *e, String *s, Cardinal *c)
   appData.enableJPEG = True;
   appData.subsampLevel = TVNC_1X;
   appData.qualityLevel = 95;
+  appData.compressLevel = 1;
   UpdateQual();
 }
 
@@ -1225,6 +1226,7 @@ void QualMed(Widget w, XEvent *e, String *s, Cardinal *c)
   appData.enableJPEG = True;
   appData.subsampLevel = TVNC_2X;
   appData.qualityLevel = 80;
+  appData.compressLevel = 1;
   UpdateQual();
 }
 
@@ -1240,6 +1242,7 @@ void QualLow(Widget w, XEvent *e, String *s, Cardinal *c)
   appData.enableJPEG = True;
   appData.subsampLevel = TVNC_4X;
   appData.qualityLevel = 30;
+  appData.compressLevel = 1;
   UpdateQual();
 }
 
