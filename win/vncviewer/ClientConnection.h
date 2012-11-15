@@ -334,7 +334,6 @@ class ClientConnection : public omni_thread
     CapsContainer m_encodingCaps;   // known encodings besides Raw
 
     TCHAR *m_desktopName;
-    int m_lastEncoding;
     void SetWindowTitle(void);
     void SetLastEncoding(int);
 

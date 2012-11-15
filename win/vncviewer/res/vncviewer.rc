@@ -841,7 +841,7 @@ BEGIN
                             "In this mode, the server draws the mouse cursor and continuously sends it to the client as an image. This can create performance problems on slow networks, but it allows you to see mouse movements from other users in a shared session."
     IDC_QUALITYLEVEL        "Higher JPEG quality levels result in less compression but better image quality."
     IDC_SUBSAMPLEVEL        "Each pixel in a JPEG image is represented as a brightness (luminance) value and a color (chrominance) value. Chrominance subsampling discards some or all chrominance values to reduce the image size, but it can create visible artifacts."
-    IDC_COMPRESSLEVEL       "Enabling Zlib compression will greatly reduce the bandwidth usage of the Lossless Tight encoding method, but Zlib requires a lot of server CPU time (more than JPEG, even.)  Thus, Zlib is only really useful on slow networks."
+    IDC_COMPRESSLEVEL       "Enabling zlib compression will greatly reduce the bandwidth usage of the Lossless Tight encoding method, but zlib requires a lot of server CPU time (more than JPEG, even.)  Thus, zlib is only really useful on slow networks."
     IDC_CSHAPE_ENABLE_RADIO "In this mode, the server sends only changes to the remote cursor's shape and position. This results in the best mouse responsiveness."
     IDC_CSHAPE_IGNORE_RADIO "In this mode, the remote mouse cursor will not be shown at all. Cursor shape updates and new coordinates received from the server will be ignored."
 END

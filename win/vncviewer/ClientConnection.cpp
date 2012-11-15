@@ -141,7 +141,6 @@ void ClientConnection::Init(VNCviewerApp *pApp)
   m_hBitmap = NULL;
   m_hPalette = NULL;
   m_passwdSet = false;
-  m_lastEncoding = -1;
 
   m_connDlg = NULL;
 
@@ -1355,8 +1354,8 @@ void ClientConnection::ReadServerInit()
 
 void ClientConnection::SetLastEncoding(int enc)
 {
-  if (enc != m_lastEncoding) {
-    m_lastEncoding = enc;
+  if (enc != m_opts.m_LastEncoding) {
+    m_opts.m_LastEncoding = enc;
     SetWindowTitle();
   }
 }
@@ -1374,7 +1373,8 @@ void ClientConnection::SetWindowTitle()
   title = new char[len];
   snprintf(title, len, "%s ", m_desktopName);
   if (m_opts.m_PreferredEncoding == rfbEncodingTight &&
-      (m_lastEncoding < 0 || m_lastEncoding == rfbEncodingTight)) {
+      (m_opts.m_LastEncoding < 0 ||
+       m_opts.m_LastEncoding == rfbEncodingTight)) {
     char zlibstr[80];
     zlibstr[0] = 0;
     if (!m_opts.m_enableJpegCompression) {
@@ -1394,8 +1394,8 @@ void ClientConnection::SetWindowTitle()
     }
   } else {
     int enc;
-    if (m_lastEncoding >= 0)
-      enc = m_lastEncoding;
+    if (m_opts.m_LastEncoding >= 0)
+      enc = m_opts.m_LastEncoding;
     else
       enc = m_opts.m_PreferredEncoding;
     if (enc >= 0 && enc <= rfbEncodingHextile) {
@@ -1807,8 +1807,6 @@ void ClientConnection::SetFormatAndEncodings()
       if (i == rfbEncodingZlib || i == rfbEncodingTight ||
           i == rfbEncodingZlibHex)
         useCompressLevel = true;
-      if (i == rfbEncodingTight)
-        useSubsampLevel = true;
     }
   }
 
@@ -1827,7 +1825,8 @@ void ClientConnection::SetFormatAndEncodings()
   }
 
   // Request JPEG quality level, if JPEG compression was enabled by user
-  if (m_opts.m_enableJpegCompression && m_opts.m_jpegQualityLevel >= 1 &&
+  if (m_opts.m_PreferredEncoding == rfbEncodingTight &&
+      m_opts.m_enableJpegCompression && m_opts.m_jpegQualityLevel >= 1 &&
       m_opts.m_jpegQualityLevel <= 100) {
     int tightQualityLevel = m_opts.m_jpegQualityLevel / 10;
     if (tightQualityLevel > 9) tightQualityLevel = 9;
@@ -1835,11 +1834,19 @@ void ClientConnection::SetFormatAndEncodings()
                                         tightQualityLevel);
     encs[se->nEncodings++] = Swap32IfLE(rfbEncodingFineQualityLevel0 +
                                         m_opts.m_jpegQualityLevel);
+  } else if (m_opts.m_PreferredEncoding != rfbEncodingTight ||
+             (m_opts.m_LastEncoding >= 0 &&
+              m_opts.m_LastEncoding != rfbEncodingTight)) {
+    int qualityLevel = m_opts.m_jpegQualityLevel;
+    if (qualityLevel > 9) qualityLevel = 9;
+    encs[se->nEncodings++] = Swap32IfLE(rfbEncodingQualityLevel0 +
+                                        qualityLevel);
   }
 
   // Request desired subsampling level, if applicable
-  if (useSubsampLevel && m_opts.m_subsampLevel >= 0 &&
-      m_opts.m_subsampLevel <= TVNC_SAMPOPT-1)
+  if (useSubsampLevel && m_opts.m_enableJpegCompression &&
+      m_opts.m_subsampLevel >= 0 &&
+      m_opts.m_subsampLevel <= TVNC_SAMPOPT - 1)
     encs[se->nEncodings++] = Swap32IfLE(rfbEncodingSubsamp1X +
                                         m_opts.m_subsampLevel);
 

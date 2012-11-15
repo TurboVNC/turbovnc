@@ -89,6 +89,7 @@ class VNCOptions
     bool  m_Use8Bit;
     bool  m_DoubleBuffer;
     int   m_PreferredEncoding;
+    int   m_LastEncoding;
     bool  m_SwapMouse;
     bool  m_Emul3Buttons;
     int   m_Emul3Timeout;
@@ -157,7 +158,7 @@ class VNCOptions
   private:
     void BrowseLogFile();
     void EnableCompress(HWND hwnd, bool enable);
-    void EnableJpeg(HWND hwnd, bool enable);
+    void EnableQuality(HWND hwnd, bool enable);
     void EnableSubsamp(HWND hwnd, bool enable);
     void EnableLog(HWND hwnd, bool enable);
     void SetSubsampSlider(HWND hwnd, int subsamp);
