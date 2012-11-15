@@ -944,7 +944,8 @@ public class CConn extends CConnection
       options.jpegQualityLabelLo.setEnabled(true);
       options.jpegQualityLabelHi.setEnabled(true);
       options.encMethodComboBox.setEnabled(false);
-      options.encMethodComboBox.removeItemAt(5);
+      if (options.encMethodComboBox.getItemCount() > 5)
+        options.encMethodComboBox.removeItemAt(5);
       options.encMethodComboBox.insertItemAt(Encodings.encodingName(encoding), 5);
       options.encMethodComboBox.setSelectedItem(Encodings.encodingName(encoding));
       options.encMethodLabel.setText("Encoding type:");

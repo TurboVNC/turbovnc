@@ -81,8 +81,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       "Tight + Medium-Quality JPEG",
       "Tight + Low-Quality JPEG (WAN)",
       "Lossless Tight (Gigabit)",
-      "Lossless Tight + Zlib (WAN)",
-      "Custom" };
+      "Lossless Tight + Zlib (WAN)"};
     encMethodComboBox = new JComboBox(encMethod);
     encMethodComboBox.addActionListener(this);
     allowJpeg = new JCheckBox("Allow JPEG Compression");
@@ -712,26 +711,40 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         compressionLevel.getValue() == 1 &&
         jpegQualityLevel.getValue() == 95 && allowJpeg.isSelected()) {
         encMethodComboBox.setSelectedItem("Tight + Perceptually Lossless JPEG (LAN)");
+        if (encMethodComboBox.getItemCount() > 5)
+          encMethodComboBox.removeItem("Custom");
     } else if (subsamplingLevel.getValue() == 1 &&
         compressionLevel.getValue() == 1 &&
         jpegQualityLevel.getValue() == 80 && allowJpeg.isSelected()) {
         encMethodComboBox.setSelectedItem("Tight + Medium-Quality JPEG");
+        if (encMethodComboBox.getItemCount() > 5)
+          encMethodComboBox.removeItem("Custom");
     } else if (subsamplingLevel.getValue() == 2 &&
         compressionLevel.getValue() == 1 &&
         jpegQualityLevel.getValue() == 30 && allowJpeg.isSelected()) {
         encMethodComboBox.setSelectedItem("Tight + Low-Quality JPEG (WAN)");
+        if (encMethodComboBox.getItemCount() > 5)
+          encMethodComboBox.removeItem("Custom");
     } else if (!allowJpeg.isSelected()) {
       switch (compressionLevel.getValue()) {
       case 0:
         encMethodComboBox.setSelectedItem("Lossless Tight (Gigabit)");
+        if (encMethodComboBox.getItemCount() > 5)
+          encMethodComboBox.removeItem("Custom");
         break;
       case 1:
         encMethodComboBox.setSelectedItem("Lossless Tight + Zlib (WAN)");
+        if (encMethodComboBox.getItemCount() > 5)
+          encMethodComboBox.removeItem("Custom");
         break;
       default:
+        if (encMethodComboBox.getItemCount() <= 5)
+          encMethodComboBox.addItem("Custom");
         encMethodComboBox.setSelectedItem("Custom");
       }
     } else {
+      if (encMethodComboBox.getItemCount() <= 5)
+        encMethodComboBox.addItem("Custom");
       encMethodComboBox.setSelectedItem("Custom");
     }
   }
