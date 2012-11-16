@@ -30,11 +30,11 @@
 
 
 #define GET_IMAGE_INTO_BUF(tx,ty,tw,th,buf)                                \
-{  char *fbptr = (rfbScreen.pfbMemory                                   \
-		 + (rfbScreen.paddedWidthInBytes * ty)                   \
-                 + (tx * (rfbScreen.bitsPerPixel / 8)));                 \
+{  char *fbptr = (cl->fb                                                   \
+                 + (rfbScreen.paddedWidthInBytes * ty)                     \
+                 + (tx * (rfbScreen.bitsPerPixel / 8)));                   \
                                                                            \
-  (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,\
+  (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,           \
                      &cl->format, fbptr, (char*)buf,                       \
                      rfbScreen.paddedWidthInBytes, tw, th); }
 
@@ -110,22 +110,23 @@ Bool rfbSendRectEncodingZRLE(rfbClientPtr cl, int x, int y, int w, int h)
   char *zrleBeforeBuf;
 
   if (cl->zrleBeforeBuf == NULL) {
-	cl->zrleBeforeBuf = (char *) malloc(rfbZRLETileWidth * rfbZRLETileHeight * 4 + 4);
+    cl->zrleBeforeBuf = (char *) malloc(rfbZRLETileWidth * rfbZRLETileHeight *
+                                        4 + 4);
   }
   zrleBeforeBuf = cl->zrleBeforeBuf;
 
   if (cl->preferredEncoding == rfbEncodingZYWRLE) {
-	  if (cl->imageQualityLevel < 0) {
-		  cl->zywrleLevel = 1;
-	  } else if (cl->imageQualityLevel < 3) {
-		  cl->zywrleLevel = 3;
-	  } else if (cl->imageQualityLevel < 6) {
-		  cl->zywrleLevel = 2;
-	  } else {
-		  cl->zywrleLevel = 1;
-	  }
+    if (cl->imageQualityLevel < 0) {
+      cl->zywrleLevel = 1;
+    } else if (cl->imageQualityLevel < 3) {
+      cl->zywrleLevel = 3;
+    } else if (cl->imageQualityLevel < 6) {
+      cl->zywrleLevel = 2;
+    } else {
+      cl->zywrleLevel = 1;
+    }
   } else
-	  cl->zywrleLevel = 0;
+    cl->zywrleLevel = 0;
 
   if (!cl->zrleData)
     cl->zrleData = zrleOutStreamNew();
@@ -135,56 +136,56 @@ Bool rfbSendRectEncodingZRLE(rfbClientPtr cl, int x, int y, int w, int h)
 
   switch (cl->format.bitsPerPixel) {
 
-  case 8:
-    zrleEncode8NE(x, y, w, h, zos, zrleBeforeBuf, cl);
-    break;
+    case 8:
+      zrleEncode8NE(x, y, w, h, zos, zrleBeforeBuf, cl);
+      break;
 
-  case 16:
-	if (cl->format.greenMax > 0x1F) {
-		if (cl->format.bigEndian)
-		  zrleEncode16BE(x, y, w, h, zos, zrleBeforeBuf, cl);
-		else
-		  zrleEncode16LE(x, y, w, h, zos, zrleBeforeBuf, cl);
-	} else {
-		if (cl->format.bigEndian)
-		  zrleEncode15BE(x, y, w, h, zos, zrleBeforeBuf, cl);
-		else
-		  zrleEncode15LE(x, y, w, h, zos, zrleBeforeBuf, cl);
-	}
-    break;
+    case 16:
+      if (cl->format.greenMax > 0x1F) {
+        if (cl->format.bigEndian)
+          zrleEncode16BE(x, y, w, h, zos, zrleBeforeBuf, cl);
+        else
+          zrleEncode16LE(x, y, w, h, zos, zrleBeforeBuf, cl);
+      } else {
+        if (cl->format.bigEndian)
+          zrleEncode15BE(x, y, w, h, zos, zrleBeforeBuf, cl);
+        else
+          zrleEncode15LE(x, y, w, h, zos, zrleBeforeBuf, cl);
+      }
+      break;
 
-  case 32: {
-    Bool fitsInLS3Bytes
-      = ((cl->format.redMax   << cl->format.redShift)   < (1<<24) &&
-         (cl->format.greenMax << cl->format.greenShift) < (1<<24) &&
-         (cl->format.blueMax  << cl->format.blueShift)  < (1<<24));
+    case 32: {
+      Bool fitsInLS3Bytes
+        = ((cl->format.redMax   << cl->format.redShift)   < (1<<24) &&
+           (cl->format.greenMax << cl->format.greenShift) < (1<<24) &&
+           (cl->format.blueMax  << cl->format.blueShift)  < (1<<24));
 
-    Bool fitsInMS3Bytes = (cl->format.redShift   > 7  &&
-                           cl->format.greenShift > 7  &&
-                           cl->format.blueShift  > 7);
+      Bool fitsInMS3Bytes = (cl->format.redShift   > 7  &&
+                             cl->format.greenShift > 7  &&
+                             cl->format.blueShift  > 7);
 
-    if ((fitsInLS3Bytes && !cl->format.bigEndian) ||
-        (fitsInMS3Bytes && cl->format.bigEndian)) {
-	if (cl->format.bigEndian)
-		zrleEncode24ABE(x, y, w, h, zos, zrleBeforeBuf, cl);
-	else
-		zrleEncode24ALE(x, y, w, h, zos, zrleBeforeBuf, cl);
+      if ((fitsInLS3Bytes && !cl->format.bigEndian) ||
+          (fitsInMS3Bytes && cl->format.bigEndian)) {
+        if (cl->format.bigEndian)
+          zrleEncode24ABE(x, y, w, h, zos, zrleBeforeBuf, cl);
+        else
+          zrleEncode24ALE(x, y, w, h, zos, zrleBeforeBuf, cl);
+      }
+      else if ((fitsInLS3Bytes && cl->format.bigEndian) ||
+               (fitsInMS3Bytes && !cl->format.bigEndian)) {
+        if (cl->format.bigEndian)
+          zrleEncode24BBE(x, y, w, h, zos, zrleBeforeBuf, cl);
+        else
+          zrleEncode24BLE(x, y, w, h, zos, zrleBeforeBuf, cl);
+      }
+      else {
+        if (cl->format.bigEndian)
+          zrleEncode32BE(x, y, w, h, zos, zrleBeforeBuf, cl);
+        else
+          zrleEncode32LE(x, y, w, h, zos, zrleBeforeBuf, cl);
+      }
+      break;
     }
-    else if ((fitsInLS3Bytes && cl->format.bigEndian) ||
-             (fitsInMS3Bytes && !cl->format.bigEndian)) {
-	if (cl->format.bigEndian)
-		zrleEncode24BBE(x, y, w, h, zos, zrleBeforeBuf, cl);
-	else
-		zrleEncode24BLE(x, y, w, h, zos, zrleBeforeBuf, cl);
-    }
-    else {
-	if (cl->format.bigEndian)
-		zrleEncode32BE(x, y, w, h, zos, zrleBeforeBuf, cl);
-	else
-		zrleEncode32LE(x, y, w, h, zos, zrleBeforeBuf, cl);
-    }
-  }
-    break;
   }
 
   cl->rfbBytesSent[rfbEncodingZRLE] += sz_rfbFramebufferUpdateRectHeader
@@ -192,11 +193,10 @@ Bool rfbSendRectEncodingZRLE(rfbClientPtr cl, int x, int y, int w, int h)
   cl->rfbRectanglesSent[rfbEncodingZRLE]++;
 
   if (ublen + sz_rfbFramebufferUpdateRectHeader + sz_rfbZRLEHeader
-      > UPDATE_BUF_SIZE)
-    {
-      if (!rfbSendUpdateBuf(cl))
-        return FALSE;
-    }
+      > UPDATE_BUF_SIZE) {
+    if (!rfbSendUpdateBuf(cl))
+      return FALSE;
+  }
 
   rect.r.x = Swap16IfLE(x);
   rect.r.y = Swap16IfLE(y);
@@ -204,13 +204,13 @@ Bool rfbSendRectEncodingZRLE(rfbClientPtr cl, int x, int y, int w, int h)
   rect.r.h = Swap16IfLE(h);
   rect.encoding = Swap32IfLE(cl->preferredEncoding);
 
-  memcpy(updateBuf+ublen, (char *)&rect,
+  memcpy(updateBuf + ublen, (char *)&rect,
          sz_rfbFramebufferUpdateRectHeader);
   ublen += sz_rfbFramebufferUpdateRectHeader;
 
   hdr.length = Swap32IfLE(ZRLE_BUFFER_LENGTH(&zos->out));
 
-  memcpy(updateBuf+ublen, (char *)&hdr, sz_rfbZRLEHeader);
+  memcpy(updateBuf + ublen, (char *)&hdr, sz_rfbZRLEHeader);
   ublen += sz_rfbZRLEHeader;
 
   /* copy into updateBuf and send from there.  Maybe should send directly? */
@@ -223,7 +223,7 @@ Bool rfbSendRectEncodingZRLE(rfbClientPtr cl, int x, int y, int w, int h)
       bytesToCopy = ZRLE_BUFFER_LENGTH(&zos->out) - i;
     }
 
-    memcpy(updateBuf+ublen, (CARD8*)zos->out.start + i, bytesToCopy);
+    memcpy(updateBuf + ublen, (CARD8*)zos->out.start + i, bytesToCopy);
 
     ublen += bytesToCopy;
     i += bytesToCopy;
@@ -240,19 +240,19 @@ Bool rfbSendRectEncodingZRLE(rfbClientPtr cl, int x, int y, int w, int h)
 
 void rfbFreeZrleData(rfbClientPtr cl)
 {
-	if (cl->zrleData) {
-		zrleOutStreamFree(cl->zrleData);
-	}
-	cl->zrleData = NULL;
+  if (cl->zrleData) {
+    zrleOutStreamFree(cl->zrleData);
+  }
+  cl->zrleData = NULL;
 
-	if (cl->zrleBeforeBuf) {
-		xfree(cl->zrleBeforeBuf);
-	}
-	cl->zrleBeforeBuf = NULL;
+  if (cl->zrleBeforeBuf) {
+    xfree(cl->zrleBeforeBuf);
+  }
+  cl->zrleBeforeBuf = NULL;
 
-	if (cl->paletteHelper) {
-		xfree(cl->paletteHelper);
-	}
-	cl->paletteHelper = NULL;
+  if (cl->paletteHelper) {
+    xfree(cl->paletteHelper);
+  }
+  cl->paletteHelper = NULL;
 }
 

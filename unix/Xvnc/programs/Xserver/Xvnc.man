@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "Sep 2012" "" "TurboVNC"
+.TH Xvnc 1 "Nov 2012" "" "TurboVNC"
 .SH NAME
 Xvnc \- an X server providing VNC connectivity
 .SH SYNOPSIS
@@ -29,6 +29,7 @@ Xvnc \- an X server providing VNC connectivity
 [\-httpport \fIport\fR] [\-deferupdate \fItime\fR] [\-noflowcontrol]
 [\-alr \fItime\fR]
 [\-alrqual \fIlevel\fR] [\-alrsamp \fI1X | 2X | 4X | gray\fR]
+[\-interframe] [\-nointerframe]
 [\-economictranslate] [\-desktop \fIname\fR] [\-alwaysshared]
 [\-nevershared] [\-dontdisconnect] [\-viewonly] [\-localhost]
 [\-interface ipaddr] [\-ipv6] [\-inetd] [\-compatiblekbd]
@@ -183,6 +184,25 @@ preset.)
 Specify the level of chrominance subsampling to be used when sending an
 automatic lossless refresh (default: 1X.)  This has no effect unless
 \fI-alrqual\fR is also specified.
+.TP
+\fB\-interframe\fR
+Normally, the TurboVNC Server will enable interframe comparison whenever
+Compression Level 5 or above is requested (if using Tight encoding, compression
+levels 5-7 are equivalent to compression levels 0-2 with interframe comparison
+enabled.)  Specifying \fB-interframe\fR will enable interframe comparison all
+the time, regardless of the compression level that was requested by the viewer.
+Interframe comparison maintains a copy of the remote framebuffer for each
+connected viewer and compares each framebuffer update with the copy to ensure
+that the pixels have actually changed before the framebuffer update is sent.
+Certain ill-behaved 2D apps will redraw their entire GUI even if only a small
+portion of it has changed, so enabling interframe comparison prevents such apps
+from generating unnecessary network traffic.  However, enabling interframe
+comparison causes the TurboVNC Server to use more CPU time and much more
+memory, and thus it is recommended that this feature be used only when needed.
+.TP
+\fB\-nointerframe\fR
+Specifying this option will disable interframe comparison, regardless of the
+compression level that was requested by the viewer.
 .TP
 \fB\-economictranslate\fR
 Use less memory-hungry pixel format translation.

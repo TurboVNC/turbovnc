@@ -101,6 +101,14 @@ encoding received from the server rather than the requested encoding.  This is
 useful when connecting to RealVNC and other servers that do not support Tight
 encoding.
 -------------------------------------------------------------------------------
+[18]
+Implemented an interframe comparison engine (ICE) in the TurboVNC Server,
+which prevents duplicate framebuffer updates from being sent as a result of
+an application drawing the same thing over and over again.  The ICE will
+normally be enabled when Compression Level 5 or above is requested by a VNC
+viewer, but you can also enable/disable it manually by passing command line
+arguments to Xvnc.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

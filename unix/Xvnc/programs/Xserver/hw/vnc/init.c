@@ -353,6 +353,16 @@ ddxProcessArgument (argc, argv, i)
         return 2;
     }
 
+    if (strcasecmp(argv[i], "-interframe") == 0) {
+        rfbInterframe = 1;
+        return 1;
+    }
+
+    if (strcasecmp(argv[i], "-nointerframe") == 0) {
+        rfbInterframe = 0;
+        return 1;
+    }
+
     if (strcasecmp(argv[i], "-economictranslate") == 0) {
         rfbEconomicTranslate = TRUE;
         return 1;
@@ -1126,6 +1136,8 @@ ddxUseMsg()
     ErrorF("                       or not the client is ready to receive them\n");
     ErrorF("-alr S                 enable automatic lossless refresh and set timer to S\n");
     ErrorF("                       seconds (S is floating point)\n");
+    ErrorF("-interframe            always use interframe comparison\n");
+    ErrorF("-nointerframe          never use interframe comparison\n");
     ErrorF("-economictranslate     less memory-hungry translation\n");
     ErrorF("-desktop name          VNC desktop name (default x11)\n");
     ErrorF("-alwaysshared          always treat new clients as shared\n");

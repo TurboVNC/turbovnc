@@ -6,6 +6,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -125,7 +126,7 @@ sendHextiles##bpp(cl, rx, ry, rw, rh)					      \
 		    return FALSE;					      \
 	    }								      \
 									      \
-	    fbptr = (rfbScreen.pfbMemory + (rfbScreen.paddedWidthInBytes * y) \
+	    fbptr = (cl->fb + (rfbScreen.paddedWidthInBytes * y)              \
 		     + (x * (rfbScreen.bitsPerPixel / 8)));		      \
 									      \
 	    (*cl->translateFn)(cl->translateLookupTable, &rfbServerFormat,    \

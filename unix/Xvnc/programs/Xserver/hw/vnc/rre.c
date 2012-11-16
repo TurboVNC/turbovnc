@@ -7,6 +7,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+ *  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -61,7 +62,7 @@ rfbSendRectEncodingRRE(cl, x, y, w, h)
     rfbRREHeader hdr;
     int nSubrects;
     int i;
-    char *fbptr = (rfbScreen.pfbMemory + (rfbScreen.paddedWidthInBytes * y)
+    char *fbptr = (cl->fb + (rfbScreen.paddedWidthInBytes * y)
 		   + (x * (rfbScreen.bitsPerPixel / 8)));
 
     int maxRawSize = (rfbScreen.width * rfbScreen.height

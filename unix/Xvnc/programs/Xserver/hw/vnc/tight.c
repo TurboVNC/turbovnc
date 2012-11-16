@@ -153,18 +153,18 @@ static threadparam tparam[TVNC_MAXTHREADS];
 
 /* Prototypes for static functions. */
 
-static void FindBestSolidArea (int x, int y, int w, int h,
+static void FindBestSolidArea (rfbClientPtr cl, int x, int y, int w, int h,
                                CARD32 colorValue, int *w_ptr, int *h_ptr);
-static void ExtendSolidArea   (int x, int y, int w, int h,
+static void ExtendSolidArea   (rfbClientPtr cl, int x, int y, int w, int h,
                                CARD32 colorValue,
                                int *x_ptr, int *y_ptr, int *w_ptr, int *h_ptr);
-static Bool CheckSolidTile    (int x, int y, int w, int h,
+static Bool CheckSolidTile    (rfbClientPtr cl, int x, int y, int w, int h,
                                CARD32 *colorPtr, Bool needSameColor);
-static Bool CheckSolidTile8   (int x, int y, int w, int h,
+static Bool CheckSolidTile8   (rfbClientPtr cl, int x, int y, int w, int h,
                                CARD32 *colorPtr, Bool needSameColor);
-static Bool CheckSolidTile16  (int x, int y, int w, int h,
+static Bool CheckSolidTile16  (rfbClientPtr cl, int x, int y, int w, int h,
                                CARD32 *colorPtr, Bool needSameColor);
-static Bool CheckSolidTile32  (int x, int y, int w, int h,
+static Bool CheckSolidTile32  (rfbClientPtr cl, int x, int y, int w, int h,
                                CARD32 *colorPtr, Bool needSameColor);
 
 static Bool SendRectSimple    (threadparam *t, int x, int y, int w, int h);
@@ -251,6 +251,14 @@ rfbTightCompressLevel(cl)
 {
     int compressLevel = cl->tightCompressLevel;
 
+    /* If the interframe comparison engine is set to automatic, then
+       interframe comparison will be enabled for compression levels 5 and
+       above.  Thus, we map 5-8 internally to 0-4 so that we can get
+       interframe-enabled equivalents of all of the documented TurboVNC modes.
+       */
+    if (compressLevel >= 5 && compressLevel <= 8)
+        compressLevel -= 5;
+
     /* We only allow compression levels that have a demonstrable performance
        benefit.  CL 0 with JPEG reduces CPU usage for workloads that have low
        numbers of unique colors, but the same thing can be accomplished by
@@ -274,7 +282,8 @@ rfbTightCompressLevel(cl)
        only in extremely low-bandwidth cases in which it can be shown to have a
        benefit.  For low-color workloads, it provides typically only 10-20%
        better compression than CL 2 with JPEG and CL 1 without JPEG, and it
-       uses, on average, twice as much CPU time. */
+       uses, on average, twice as much CPU time.  Interframe comparison is
+       always enabled with this mode. */
     if (cl->tightCompressLevel == 9) compressLevel = 3;
 
     return compressLevel;
@@ -558,7 +567,7 @@ SendRectEncodingTight(t, x, y, w, h)
             dw = (dx + MAX_SPLIT_TILE_SIZE <= x + w) ?
                  MAX_SPLIT_TILE_SIZE : (x + w - dx);
 
-            if (CheckSolidTile(dx, dy, dw, dh, &colorValue, FALSE)) {
+            if (CheckSolidTile(cl, dx, dy, dw, dh, &colorValue, FALSE)) {
 
                 if (subsampLevel == TJ_GRAYSCALE && qualityLevel != -1) {
                     CARD32 r = (colorValue >> 16) & 0xFF;
@@ -571,7 +580,7 @@ SendRectEncodingTight(t, x, y, w, h)
 
                 /* Get dimensions of solid-color area. */
 
-                FindBestSolidArea(dx, dy, w - (dx - x), h - (dy - y),
+                FindBestSolidArea(cl, dx, dy, w - (dx - x), h - (dy - y),
                                   colorValue, &w_best, &h_best);
 
                 /* Make sure a solid rectangle is large enough
@@ -584,7 +593,7 @@ SendRectEncodingTight(t, x, y, w, h)
                 /* Try to extend solid rectangle to maximum size. */
 
                 x_best = dx; y_best = dy;
-                ExtendSolidArea(x, y, w, h, colorValue,
+                ExtendSolidArea(cl, x, y, w, h, colorValue,
                                 &x_best, &y_best, &w_best, &h_best);
 
                 /* Send rectangles at top and left to solid-color area. */
@@ -602,7 +611,7 @@ SendRectEncodingTight(t, x, y, w, h)
                 if (!SendTightHeader(t, x_best, y_best, w_best, h_best))
                     return FALSE;
 
-                fbptr = (rfbScreen.pfbMemory +
+                fbptr = (cl->fb +
                          (rfbScreen.paddedWidthInBytes * y_best) +
                          (x_best * (rfbScreen.bitsPerPixel / 8)));
 
@@ -641,7 +650,8 @@ SendRectEncodingTight(t, x, y, w, h)
 
 
 static void
-FindBestSolidArea(x, y, w, h, colorValue, w_ptr, h_ptr)
+FindBestSolidArea(cl, x, y, w, h, colorValue, w_ptr, h_ptr)
+    rfbClientPtr cl;
     int x, y, w, h;
     CARD32 colorValue;
     int *w_ptr, *h_ptr;
@@ -659,13 +669,13 @@ FindBestSolidArea(x, y, w, h, colorValue, w_ptr, h_ptr)
         dw = (w_prev > MAX_SPLIT_TILE_SIZE) ?
              MAX_SPLIT_TILE_SIZE : w_prev;
 
-        if (!CheckSolidTile(x, dy, dw, dh, &colorValue, TRUE))
+        if (!CheckSolidTile(cl, x, dy, dw, dh, &colorValue, TRUE))
             break;
 
         for (dx = x + dw; dx < x + w_prev;) {
             dw = (dx + MAX_SPLIT_TILE_SIZE <= x + w_prev) ?
                  MAX_SPLIT_TILE_SIZE : (x + w_prev - dx);
-            if (!CheckSolidTile(dx, dy, dw, dh, &colorValue, TRUE))
+            if (!CheckSolidTile(cl, dx, dy, dw, dh, &colorValue, TRUE))
                 break;
             dx += dw;
         }
@@ -683,7 +693,8 @@ FindBestSolidArea(x, y, w, h, colorValue, w_ptr, h_ptr)
 
 
 static void
-ExtendSolidArea(x, y, w, h, colorValue, x_ptr, y_ptr, w_ptr, h_ptr)
+ExtendSolidArea(cl, x, y, w, h, colorValue, x_ptr, y_ptr, w_ptr, h_ptr)
+    rfbClientPtr cl;
     int x, y, w, h;
     CARD32 colorValue;
     int *x_ptr, *y_ptr, *w_ptr, *h_ptr;
@@ -692,7 +703,8 @@ ExtendSolidArea(x, y, w, h, colorValue, x_ptr, y_ptr, w_ptr, h_ptr)
 
     /* Try to extend the area upwards. */
     for (cy = *y_ptr - 1;
-         cy >= y && CheckSolidTile(*x_ptr, cy, *w_ptr, 1, &colorValue, TRUE);
+         cy >= y && CheckSolidTile(cl, *x_ptr, cy, *w_ptr, 1, &colorValue,
+                                   TRUE);
          cy--);
     *h_ptr += *y_ptr - (cy + 1);
     *y_ptr = cy + 1;
@@ -700,13 +712,14 @@ ExtendSolidArea(x, y, w, h, colorValue, x_ptr, y_ptr, w_ptr, h_ptr)
     /* ... downwards. */
     for (cy = *y_ptr + *h_ptr;
          cy < y + h &&
-             CheckSolidTile(*x_ptr, cy, *w_ptr, 1, &colorValue, TRUE);
+             CheckSolidTile(cl, *x_ptr, cy, *w_ptr, 1, &colorValue, TRUE);
          cy++);
     *h_ptr += cy - (*y_ptr + *h_ptr);
 
     /* ... to the left. */
     for (cx = *x_ptr - 1;
-         cx >= x && CheckSolidTile(cx, *y_ptr, 1, *h_ptr, &colorValue, TRUE);
+         cx >= x && CheckSolidTile(cl, cx, *y_ptr, 1, *h_ptr, &colorValue,
+                                   TRUE);
          cx--);
     *w_ptr += *x_ptr - (cx + 1);
     *x_ptr = cx + 1;
@@ -714,7 +727,7 @@ ExtendSolidArea(x, y, w, h, colorValue, x_ptr, y_ptr, w_ptr, h_ptr)
     /* ... to the right. */
     for (cx = *x_ptr + *w_ptr;
          cx < x + w &&
-             CheckSolidTile(cx, *y_ptr, 1, *h_ptr, &colorValue, TRUE);
+             CheckSolidTile(cl, cx, *y_ptr, 1, *h_ptr, &colorValue, TRUE);
          cx++);
     *w_ptr += cx - (*x_ptr + *w_ptr);
 }
@@ -728,18 +741,19 @@ ExtendSolidArea(x, y, w, h, colorValue, x_ptr, y_ptr, w_ptr, h_ptr)
  */
 
 static Bool
-CheckSolidTile(x, y, w, h, colorPtr, needSameColor)
+CheckSolidTile(cl, x, y, w, h, colorPtr, needSameColor)
+    rfbClientPtr cl;
     int x, y, w, h;
     CARD32 *colorPtr;
     Bool needSameColor;
 {
     switch(rfbServerFormat.bitsPerPixel) {
     case 32:
-        return CheckSolidTile32(x, y, w, h, colorPtr, needSameColor);
+        return CheckSolidTile32(cl, x, y, w, h, colorPtr, needSameColor);
     case 16:
-        return CheckSolidTile16(x, y, w, h, colorPtr, needSameColor);
+        return CheckSolidTile16(cl, x, y, w, h, colorPtr, needSameColor);
     default:
-        return CheckSolidTile8(x, y, w, h, colorPtr, needSameColor);
+        return CheckSolidTile8(cl, x, y, w, h, colorPtr, needSameColor);
     }
 }
 
@@ -747,7 +761,8 @@ CheckSolidTile(x, y, w, h, colorPtr, needSameColor)
 #define DEFINE_CHECK_SOLID_FUNCTION(bpp)                                      \
                                                                               \
 static Bool                                                                   \
-CheckSolidTile##bpp(x, y, w, h, colorPtr, needSameColor)                      \
+CheckSolidTile##bpp(cl, x, y, w, h, colorPtr, needSameColor)                  \
+    rfbClientPtr cl;                                                          \
     int x, y, w, h;                                                           \
     CARD32 *colorPtr;                                                         \
     Bool needSameColor;                                                       \
@@ -757,7 +772,7 @@ CheckSolidTile##bpp(x, y, w, h, colorPtr, needSameColor)                      \
     int dx, dy;                                                               \
                                                                               \
     fbptr = (CARD##bpp *)                                                     \
-        &rfbScreen.pfbMemory[y * rfbScreen.paddedWidthInBytes + x * (bpp/8)]; \
+        &cl->fb[y * rfbScreen.paddedWidthInBytes + x * (bpp/8)];              \
                                                                               \
     colorValue = *fbptr;                                                      \
     if (needSameColor && (CARD32)colorValue != *colorPtr)                     \
@@ -857,7 +872,7 @@ SendSubrect(t, x, y, w, h)
     if (!SendTightHeader(t, x, y, w, h))
         return FALSE;
 
-    fbptr = (rfbScreen.pfbMemory + (rfbScreen.paddedWidthInBytes * y)
+    fbptr = (cl->fb + (rfbScreen.paddedWidthInBytes * y)
              + (x * (rfbScreen.bitsPerPixel / 8)));
 
     if (subsampLevel == TJ_GRAYSCALE && qualityLevel != -1 &&
@@ -1752,6 +1767,7 @@ SendJpegRect(t, x, y, w, h, quality)
     int flags = 0, pitch;
     unsigned char *tmpbuf = NULL;
     unsigned long jpegDstDataLen;
+    rfbClientPtr cl = t->cl;
 
     if (rfbServerFormat.bitsPerPixel == 8) {
         ADD_TO_LOSSLESS_REGION(x, y, w, h);
@@ -1792,7 +1808,7 @@ SendJpegRect(t, x, y, w, h, quality)
             return 0;
         }
         srcptr = (CARD16 *)
-            &rfbScreen.pfbMemory[y * rfbScreen.paddedWidthInBytes + x * ps];
+            &cl->fb[y * rfbScreen.paddedWidthInBytes + x * ps];
         dst = tmpbuf;
         for (j = 0; j < h; j++) {
             CARD16 *srcptr2 = srcptr;
@@ -1827,7 +1843,7 @@ SendJpegRect(t, x, y, w, h, quality)
             flags |= TJ_BGR;
         if (rfbServerFormat.bigEndian) flags ^= TJ_BGR;
         srcbuf = (unsigned char *)
-            &rfbScreen.pfbMemory[y * rfbScreen.paddedWidthInBytes + x * ps];
+            &cl->fb[y * rfbScreen.paddedWidthInBytes + x * ps];
         pitch = rfbScreen.paddedWidthInBytes;
     }
 

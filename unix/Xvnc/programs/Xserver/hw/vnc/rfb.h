@@ -312,6 +312,8 @@ typedef struct rfbClientRec {
     Bool alrTrigger;
     Bool putImageTrigger;
 
+    char *compareFB, *fb;
+
     struct rfbClientRec *next;
 
     char *cutText;
@@ -591,6 +593,7 @@ extern Bool rfbCongestionControl;
 extern double rfbAutoLosslessRefresh;
 extern int rfbALRQualityLevel;
 extern int rfbALRSubsampLevel;
+extern int rfbInterframe;
 
 #define debugregion(r, m) \
     rfbLog(m" %d, %d %d x %d\n", (r).extents.x1, (r).extents.y1, \
