@@ -328,8 +328,12 @@ void CreatePopup()
     else
       XtVaSetValues(buttonCompress[i], XtNfromHoriz, buttonCompress[i - 1],
                     NULL);
-    snprintf(text, 2, "%d", i);
-    XtVaSetValues(buttonCompress[i], XtNlabel, text, NULL);
+    if (compressLevelMax == 1 && i == 0)
+      XtVaSetValues(buttonCompress[i], XtNlabel, "None", NULL);
+    else {
+      snprintf(text, 2, "%d", i);
+      XtVaSetValues(buttonCompress[i], XtNlabel, text, NULL);
+    }
     XtAddCallback(buttonCompress[i], XtNcallback, buttonCompressProc, NULL);
     if (appData.compressLevel == i)
       XtVaSetValues(buttonCompress[i], XtNstate, 1, NULL);

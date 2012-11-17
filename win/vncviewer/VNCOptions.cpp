@@ -1299,7 +1299,12 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
       HWND hJpeg = GetDlgItem(hwnd, IDC_QUALITYLEVEL);
       if (HWND(lParam) == hCompressLevel) {
         dwPos = (DWORD)SendMessage(hCompressLevel, TBM_GETPOS, 0, 0);
-        SetDlgItemInt(hwnd, IDC_STATIC_LEVEL, dwPos, FALSE);
+        DWORD slidermax = (DWORD)SendMessage(hCompressLevel, TBM_GETRANGEMAX,
+                                             0, 0);
+        if (slidermax == 1 && dwPos == 0)
+          SetDlgItemText(hwnd, IDC_STATIC_LEVEL, "None"); 	 
+        else
+          SetDlgItemInt(hwnd, IDC_STATIC_LEVEL, dwPos, FALSE);
       }
       if (HWND(lParam) == hSubsampLevel) {
         dwPos = (DWORD)SendMessage(hSubsampLevel, TBM_GETPOS, 0, 0);
@@ -1402,7 +1407,11 @@ void VNCOptions::SetCompressSlider(HWND hwnd, int compress)
 {
   HWND hCompress = GetDlgItem(hwnd, IDC_COMPRESSLEVEL);
   SendMessage(hCompress, TBM_SETPOS, TRUE, compress);
-  SetDlgItemInt(hwnd, IDC_STATIC_LEVEL, compress, FALSE);
+  DWORD slidermax = (DWORD)SendMessage(hCompress, TBM_GETRANGEMAX, 0, 0);
+  if (slidermax == 1 && compress == 0)
+    SetDlgItemText(hwnd, IDC_STATIC_LEVEL, "None"); 	 
+  else
+    SetDlgItemInt(hwnd, IDC_STATIC_LEVEL, compress, FALSE);
 }
 
 

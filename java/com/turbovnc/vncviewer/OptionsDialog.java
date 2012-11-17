@@ -137,7 +137,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     compressionLabelLo = new JLabel("fast");
     compressionLabelHi = new JLabel("best");
     compressionLabel.setText(compressionLabelString + 
-      compressionLevel.getValue());
+      (compressionLevel.getValue() == 0 ? "None" :
+        compressionLevel.getValue()));
 
     addGBComponent(encMethodLabel, ImagePanel, 
                    0, 0, 3, 1, 2, 2, 0, 0, 
@@ -760,8 +761,11 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         jpegQualityLevel.getValue());
       setEncMethodComboBox();
     } else if (s instanceof JSlider && (JSlider)s == compressionLevel) {
-      compressionLabel.setText(compressionLabelString + 
-        compressionLevel.getValue());
+      int value = compressionLevel.getValue();
+      if (compressionLevel.getMaximum() == 1 && value == 0)
+        compressionLabel.setText(compressionLabelString + "None");
+      else
+        compressionLabel.setText(compressionLabelString + value);
       setEncMethodComboBox();
     }
   }
