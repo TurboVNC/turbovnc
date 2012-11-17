@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2012-11-15T16:15:21">
+<meta name="date" content="2012-11-17T16:52:28">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -13,8 +13,8 @@
 <link rel="chapter" href="index.html#hd004" title="4 System Requirements">
 <link rel="chapter" href="index.html#hd005" title="5 Obtaining and Installing TurboVNC">
 <link rel="chapter" href="index.html#hd006" title="6 Using TurboVNC">
-<link rel="chapter" href="index.html#hd007" title="7 TurboVNC Authentication Extensions">
-<link rel="chapter" href="index.html#hd008" title="8 Multithreading in TurboVNC">
+<link rel="chapter" href="index.html#hd007" title="7 Performance and Image Quality">
+<link rel="chapter" href="index.html#hd008" title="8 TurboVNC Authentication Extensions">
 <link rel="chapter" href="index.html#hd009" title="9 Using TurboVNC with VirtualGL">
 <link rel="chapter" href="index.html#hd0010" title="10 Compatibility Guide">
 <link rel="chapter" href="index.html#hd0011" title="11 Advanced Configuration">
@@ -30,134 +30,139 @@
 <h1 class="toc">Table of Contents</h1>
 <ul class="toc">
     <li class="Itemize-1 toc">
-        <a class="toc" href="#hd001">1 Legal Information</a>
+        <a href="#hd001" class="toc">1 Legal Information</a>
     </li>
     <li class="Itemize-1 toc">
-        <a class="toc" href="#hd002">2 Conventions Used in This Document</a>
+        <a href="#hd002" class="toc">2 Conventions Used in This Document</a>
     </li>
     <li class="Itemize-1 toc">
-        <a class="toc" href="#hd003">3 Overview</a>
+        <a href="#hd003" class="toc">3 Overview</a>
     </li>
     <li class="Itemize-1 toc">
-        <a class="toc" href="#hd004">4 System Requirements</a>
+        <a href="#hd004" class="toc">4 System Requirements</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd004001">4.1 Linux/x86 and Other x86 Un*x 
+                <a href="#hd004001" class="toc">4.1 Linux/x86 and Other x86 Un*x 
                 Operating Systems</a>
             </li>
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd004002">4.2 Mac/x86</a>
+                <a href="#hd004002" class="toc">4.2 Mac/x86</a>
             </li>
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd004003">4.3 Windows</a>
+                <a href="#hd004003" class="toc">4.3 Windows</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a class="toc" href="#hd005">5 Obtaining and Installing TurboVNC</a>
+        <a href="#hd005" class="toc">5 Obtaining and Installing TurboVNC</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd005001">5.1 Installing TurboVNC on Linux</a>
+                <a href="#hd005001" class="toc">5.1 Installing TurboVNC on Linux</a>
             </li>
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd005002">5.2 Installing the TurboVNC Viewer on OS 
+                <a href="#hd005002" class="toc">5.2 Installing the TurboVNC Viewer on OS 
                 X</a>
             </li>
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd005003">5.3 Installing the TurboVNC Viewer on 
+                <a href="#hd005003" class="toc">5.3 Installing the TurboVNC Viewer on 
                 Windows</a>
             </li>
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd005004">5.4 Installing TurboVNC from Source</a>
+                <a href="#hd005004" class="toc">5.4 Installing TurboVNC from Source</a>
             </li>
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd005005">5.5 Uninstalling TurboVNC</a>
+                <a href="#hd005005" class="toc">5.5 Uninstalling TurboVNC</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a class="toc" href="#hd006">6 Using TurboVNC</a>
+        <a href="#hd006" class="toc">6 Using TurboVNC</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd006001">6.1 Starting and Connecting to a 
+                <a href="#hd006001" class="toc">6.1 Starting and Connecting to a 
                 TurboVNC Session</a>
             </li>
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd006002">6.2 Disconnecting and Killing a TurboVNC 
+                <a href="#hd006002" class="toc">6.2 Disconnecting and Killing a TurboVNC 
                 Session</a>
             </li>
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd006003">6.3 Using TurboVNC in a Web Browser</a>
+                <a href="#hd006003" class="toc">6.3 Using TurboVNC in a Web Browser</a>
             </li>
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd006004">6.4 Optimizing TurboVNC&rsquo;s 
-                Performance for Different Network Types</a>
-                <ul class="toc">
-                    <li class="Itemize-5 toc">
-                        <a class="toc" href="#hd006004001">6.4.1 Lossless Refresh</a>
-                    </li>
-                    <li class="Itemize-5 toc">
-                        <a class="toc" href="#hd006004002">6.4.2 Automatic Lossless Refresh</a>
-                    </li>
-                </ul>
+                <a href="#hd006004" class="toc">6.4 Securing a TurboVNC Connection</a>
             </li>
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd006005">6.5 Securing a TurboVNC Connection</a>
-            </li>
-            <li class="Itemize-3 toc">
-                <a class="toc" href="#hd006006">6.6 Further Reading</a>
+                <a href="#hd006005" class="toc">6.5 Further Reading</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a class="toc" href="#hd007">7 TurboVNC Authentication Extensions</a>
+        <a href="#hd007" class="toc">7 Performance and Image Quality</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd007001">7.1 Enabling Authentication Methods</a>
+                <a href="#hd007001" class="toc">7.1 Interframe Comparison</a>
             </li>
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd007002">7.2 Further Reading</a>
+                <a href="#hd007002" class="toc">7.2 Advanced Compression Options</a>
+            </li>
+            <li class="Itemize-3 toc">
+                <a href="#hd007003" class="toc">7.3 Lossless Refresh</a>
+            </li>
+            <li class="Itemize-3 toc">
+                <a href="#hd007004" class="toc">7.4 Automatic Lossless Refresh</a>
+            </li>
+            <li class="Itemize-3 toc">
+                <a href="#hd007005" class="toc">7.5 Multithreading</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a class="toc" href="#hd008">8 Multithreading in TurboVNC</a>
-    </li>
-    <li class="Itemize-1 toc">
-        <a class="toc" href="#hd009">9 Using TurboVNC with VirtualGL</a>
+        <a href="#hd008" class="toc">8 TurboVNC Authentication Extensions</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd009001">9.1 Using TurboVNC and VirtualGL on the 
+                <a href="#hd008001" class="toc">8.1 Enabling Authentication Methods</a>
+            </li>
+            <li class="Itemize-3 toc">
+                <a href="#hd008002" class="toc">8.2 Further Reading</a>
+            </li>
+        </ul>
+    </li>
+    <li class="Itemize-1 toc">
+        <a href="#hd009" class="toc">9 Using TurboVNC with VirtualGL</a>
+        <ul class="toc">
+            <li class="Itemize-3 toc">
+                <a href="#hd009001" class="toc">9.1 Using TurboVNC and VirtualGL on the 
                 Same Server</a>
             </li>
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd009002">9.2 Using TurboVNC When VirtualGL Is 
+                <a href="#hd009002" class="toc">9.2 Using TurboVNC When VirtualGL Is 
                 Running on a Different Machine</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a class="toc" href="#hd0010">10 Compatibility Guide</a>
+        <a href="#hd0010" class="toc">10 Compatibility Guide</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd0010001">10.1 TightVNC or TigerVNC Servers</a>
+                <a href="#hd0010001" class="toc">10.1 TightVNC or TigerVNC Servers</a>
             </li>
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd0010002">10.2 TightVNC or TigerVNC Viewers</a>
+                <a href="#hd0010002" class="toc">10.2 TightVNC or TigerVNC Viewers</a>
             </li>
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd0010003">10.3 RealVNC</a>
+                <a href="#hd0010003" class="toc">10.3 RealVNC</a>
             </li>
         </ul>
     </li>
     <li class="Itemize-1 toc">
-        <a class="toc" href="#hd0011">11 Advanced Configuration</a>
+        <a href="#hd0011" class="toc">11 Advanced Configuration</a>
         <ul class="toc">
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd0011001">11.1 Server Settings</a>
+                <a href="#hd0011001" class="toc">11.1 Server Settings</a>
             </li>
             <li class="Itemize-3 toc">
-                <a class="toc" href="#hd0011002">11.2 Client Settings</a>
+                <a href="#hd0011002" class="toc">11.2 Client Settings</a>
             </li>
         </ul>
     </li>
@@ -174,7 +179,7 @@
 <p><img src="somerights20.png" alt="somerights20" class="inline" id="imgid_0" name="imgid_0"/></p>
 
 <p>This document and all associated illustrations are licensed under the 
-<span class="remote"><a class="remote" href="http://creativecommons.org/licenses/by/2.5/">Creative 
+<span class="remote"><a href="http://creativecommons.org/licenses/by/2.5/" class="remote">Creative 
 Commons Attribution 2.5 License</a></span><a name="idx001"></a>.  Any 
 works that contain material derived from this document must cite The 
 VirtualGL Project as the source of the material and list the current URL 
@@ -184,7 +189,7 @@ for the VirtualGL web site.</p>
 part on the work of the Independent JPEG Group.</p>
 
 <p>The TurboVNC Windows packages include 
-<span class="remote"><a class="remote" href="http://www.chiark.greenend.org.uk/~sgtatham/putty/">PuTTY</a></span><a name="idx002"></a>, 
+<span class="remote"><a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/" class="remote">PuTTY</a></span><a name="idx002"></a>, 
 which is released under <a href="LICENSE-PuTTY.txt">this 
 license</a><a name="idx003"></a>.</p>
 
@@ -218,9 +223,9 @@ adjust the instructions accordingly.</p>
 <p>TurboVNC is a derivative of VNC (Virtual Network Computing) that is 
 tuned to provide peak performance for full-screen video and 3D 
 workloads.  TurboVNC was originally based on the 
-<span class="remote"><a class="remote" href="http://www.tightvnc.com">TightVNC</a></span><a name="idx005"></a> 
+<span class="remote"><a href="http://www.tightvnc.com" class="remote">TightVNC</a></span><a name="idx005"></a> 
 1.3.x and 
-<span class="remote"><a class="remote" href="http://xf4vnc.sourceforge.net/">xf4vnc</a></span><a name="idx006"></a> 
+<span class="remote"><a href="http://xf4vnc.sourceforge.net/" class="remote">xf4vnc</a></span><a name="idx006"></a> 
 code bases, and on the surface, it behaves similarly to its parents.  
 However, TurboVNC compresses 3D and video workloads better than the 
 &ldquo;tightest&rdquo; compression mode of TightVNC 1.3.x while using 
@@ -269,7 +274,7 @@ permutations of the TightVNC encoder were benchmarked at the low level
 against a variety of captured RFB sessions that simulated real-world 
 application workloads, both 2D and 3D.  For more information on the 
 research leading to TurboVNC&rsquo;s encoder design, see 
-<span class="remote"><a class="remote" href="http://www.virtualgl.org/pmwiki/uploads/About/tighttoturbo.pdf">this 
+<span class="remote"><a href="http://www.virtualgl.org/pmwiki/uploads/About/tighttoturbo.pdf" class="remote">this 
 report</a></span><a name="idx007"></a>.</p>
 
 <p>In addition to high performance, other notable features of TurboVNC 
@@ -466,23 +471,23 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
     <li class="Ordered-1 Ordered" value="1">
         Download the appropriate TurboVNC binary package for your system from 
         the 
-        <span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/">Files 
+        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
         area</a></span><a name="idx008"></a> of the 
-        <span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl">VirtualGL 
+        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
         SourceForge project page</a></span><a name="idx009"></a>. Packages are 
         provided for Linux distributions in the 
-        <span class="remote"><a class="remote" href="http://www.redhat.com/">Red 
+        <span class="remote"><a href="http://www.redhat.com/" class="remote">Red 
         Hat</a></span><a name="idx0010"></a>, 
-        <span class="remote"><a class="remote" href="http://www.novell.com/linux/">SuSE</a></span><a name="idx0011"></a>, 
+        <span class="remote"><a href="http://www.novell.com/linux/" class="remote">SuSE</a></span><a name="idx0011"></a>, 
         or 
-        <span class="remote"><a class="remote" href="http://www.debian.org/">Debian</a></span><a name="idx0012"></a> 
+        <span class="remote"><a href="http://www.debian.org/" class="remote">Debian</a></span><a name="idx0012"></a> 
         families that contain GLIBC 2.3.2 or later (including 
-        <span class="remote"><a class="remote" href="http://fedoraproject.org/">Fedora</a></span><a name="idx0013"></a>, 
-        <span class="remote"><a class="remote" href="http://www.centos.org/">CentOS</a></span><a name="idx0014"></a> 
+        <span class="remote"><a href="http://fedoraproject.org/" class="remote">Fedora</a></span><a name="idx0013"></a>, 
+        <span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0014"></a> 
         3 or later, 
-        <span class="remote"><a class="remote" href="http://www.oracle.com/us/technologies/linux/">Oracle 
+        <span class="remote"><a href="http://www.oracle.com/us/technologies/linux/" class="remote">Oracle 
         Linux</a></span><a name="idx0015"></a>, and 
-        <span class="remote"><a class="remote" href="http://www.ubuntu.com/">Ubuntu 
+        <span class="remote"><a href="http://www.ubuntu.com/" class="remote">Ubuntu 
         Linux</a></span><a name="idx0016"></a> v6.0 or later.) <br />
     </li>
     <li class="Ordered-1 Ordered" value="2">
@@ -516,9 +521,9 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
         Download the TurboVNC Mac disk image 
         (<code>TurboVNC-</code><em><code>{version}</code></em><code>.dmg</code>) 
         from the 
-        <span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/">Files 
+        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
         area</a></span><a name="idx0017"></a> of the 
-        <span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl">VirtualGL 
+        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
         SourceForge project page</a></span><a name="idx0018"></a>.
     </li>
     <li class="Ordered-1 Ordered">
@@ -538,9 +543,9 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
         for 32-bit systems or 
         <code>TurboVNC64-</code><em><code>{version}</code></em><code>.exe</code> 
         for 64-bit systems) from the 
-        <span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/">Files 
+        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
         area</a></span><a name="idx0019"></a> of the 
-        <span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl">VirtualGL 
+        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
         SourceForge project page</a></span><a name="idx0020"></a>.
     </li>
     <li class="Ordered-1 Ordered">
@@ -559,9 +564,9 @@ TurboVNC binary package available, then log in as root, download the
 TurboVNC source tarball 
 (<code>turbovnc-</code><em><code>{version}</code></em><code>.tar.gz</code>) 
 from the 
-<span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/">Files 
+<span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
 area</a></span><a name="idx0021"></a> of the 
-<span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl">VirtualGL 
+<span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
 SourceForge project page</a></span><a name="idx0022"></a>, uncompress 
 it, <code>cd&nbsp;turbovnc-</code><em><code>{version}</code></em>, and 
 read <code>BUILDING.txt</code> for further instructions on how to build 
@@ -827,219 +832,7 @@ connect.</p>
 
 
 
-<h2 id="hd006004">6.4&nbsp;Optimizing TurboVNC&rsquo;s Performance for Different Network Types</h2>
-
-<p>The level of image compression in TurboVNC can be adjusted to balance 
-the (sometimes conflicting) goals of high image quality and high 
-performance. There are four options that control the manner in which 
-TurboVNC compresses images:</p>
-
-<dl class="Description">
-    <dt class="Description-1 Description">Allow JPEG compression</dt>
-    <dd class="Description-1 Description">
-         If this option is enabled, then TurboVNC will use JPEG compression for 
-         subrectangles that have a high number of unique colors and indexed 
-         color subencoding for subrectangles that have a low number of unique 
-         colors.  If this option is disabled, then TurboVNC will select between 
-         indexed color or raw subencoding, depending on the size of the 
-         subrectangle and its color count.
-    </dd>
-    <dt class="Description-1 Description">JPEG image quality</dt>
-    <dd class="Description-1 Description">
-         Lower quality levels produce grainier JPEG images with more noticeable 
-         compression artifacts, but lower quality levels also use less network 
-         bandwidth and CPU time.
-    </dd>
-    <dt class="Description-1 Description">JPEG chrominance subsampling</dt>
-    <dd class="Description-1 Description">
-         When compressing an image using JPEG, the RGB pixels are first 
-         converted to the YUV colorspace, a colorspace in which each pixel is 
-         represented as a brightness (Y, or &ldquo;luminance&rdquo;) value and a 
-         pair of color (U &amp; V, or &ldquo;chrominance&rdquo;) values.  After 
-         this colorspace conversion, chrominance subsampling can be used to 
-         discard some of the chrominance components in order to save bandwidth.  
-         1X subsampling (the default in TurboVNC) retains the chrominance 
-         components for all pixels, and thus it provides the best image quality 
-         but also uses the most network bandwidth and CPU time.  2X subsampling 
-         retains the chrominance components for every other pixel, and 4X 
-         subsampling retains the chrominance components for every fourth pixel 
-         (this is typically implemented as 2X subsampling in both X and Y 
-         directions.)  Grayscale throws out all of the chrominance components, 
-         leaving only luminance.  2X and 4X subsampling will typically produce 
-         noticeable aliasing of lines and other sharp features, but with 
-         photographic or other &ldquo;smooth&rdquo; image content, it may be 
-         difficult to detect any difference between 1X, 2X, and 4X.
-    </dd>
-    <dt class="Description-1 Description">Zlib compression level</dt>
-    <dd class="Description-1 Description">
-         If zlib compression is enabled, then indexed color, mono, and 
-         raw-encoded subrectangles will be compressed with zlib prior to 
-         transmission.  This decreases network bandwidth usage at the expense of 
-         increased CPU usage. If JPEG compression is enabled, then zlib 
-         compression is always used with non-JPEG subrectangles.
-    </dd>
-</dl>
-
-<p>In the Windows and Mac/Java TurboVNC Viewers, these parameters can be 
-adjusted by accessing the TurboVNC Viewer Options dialog box (click on 
-the &ldquo;Options&rdquo; button in the &ldquo;TurboVNC 
-Connection&rdquo; dialog box or, after connecting to the server, click 
-on the Connection Options button in the toolbar.)  In the X11 TurboVNC 
-Viewer, press F8 after connecting to bring up the TurboVNC Viewer 
-Options menu.</p>
-
-<p>The TurboVNC Viewer provides five &ldquo;encoding methods&rdquo;, 
-corresponding to the most useful combinations of the image compression 
-options described above:</p>
-
-<div class="table">
-<table class="standard">
-  <thead class="standard">
-  <tr class="head ">
-    <th class="head standard">Encoding method</th>
-    <th class="head standard">Allow JPEG</th>
-    <th class="head standard">JPEG image quality</th>
-    <th class="head standard">JPEG chrominance subsampling</th>
-    <th class="head standard">Zlib compression level</th>
-    <th class="head standard">Notes</th>
-  </tr>
-  </thead>
-  <tr class="standard">
-    <td class="standard">&ldquo;Tight + Perceptually Lossless JPEG&rdquo;</td>
-    <td class="standard">Yes</td>
-    <td class="standard">95</td>
-    <td class="standard">1x</td>
-    <td class="standard">N/A</td>
-    <td class="standard">This encoding method should be perceptually lossless (that is, any image compression artifacts it produces should be imperceptible to the human eye under most viewing conditions.)  This encoding method requires a great deal of network bandwidth, however, and is generally not recommended except on 50 Megabit/second and faster networks.</td>
-  </tr>
-  <tr class="standard">
-    <td class="standard">&ldquo;Tight + Medium Quality JPEG&rdquo;</td>
-    <td class="standard">Yes</td>
-    <td class="standard">80</td>
-    <td class="standard">2x</td>
-    <td class="standard">N/A</td>
-    <td class="standard">For subrectangles with a high number of unique colors, this encoding method produces some minor, but generally not very noticeable, image compression artifacts.  All else being equal, this encoding method typically uses about twice the network bandwidth of the &ldquo;Tight + Low Quality JPEG&rdquo; encoding method and about half the bandwidth of the &ldquo;Tight + Perceptually Lossless JPEG&rdquo; encoding method, making it appropriate for medium-speed networks such as 10 Megabit Ethernet.</td>
-  </tr>
-  <tr class="standard">
-    <td class="standard">&ldquo;Tight + Low Quality JPEG&rdquo;</td>
-    <td class="standard">Yes</td>
-    <td class="standard">30</td>
-    <td class="standard">4x</td>
-    <td class="standard">N/A</td>
-    <td class="standard">For subrectangles with a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the Lossless Refresh feature.</td>
-  </tr>
-  <tr class="standard">
-    <td class="standard">&ldquo;Lossless Tight&rdquo;</td>
-    <td class="standard">No</td>
-    <td class="standard">N/A</td>
-    <td class="standard">N/A</td>
-    <td class="standard">0</td>
-    <td class="standard">This encoding method uses indexed color subencoding for subrectangles with a low number of unique colors but otherwise does not perform any image compression at all.  It is thus suitable only for gigabit and faster networks.  This encoding method uses significantly less CPU time than any of the JPEG-based encoding methods.</td>
-  </tr>
-  <tr class="standard">
-    <td class="standard">&ldquo;Lossless Tight + Zlib&rdquo;</td>
-    <td class="standard">No</td>
-    <td class="standard">N/A</td>
-    <td class="standard">N/A</td>
-    <td class="standard">1</td>
-    <td class="standard">This encoding method uses indexed color subencoding for subrectangles with a low number of unique colors and raw subencoding for subrectangles with a high number of unique colors.  It compresses all subrectangles using zlib with zlib compression level 1.  For certain types of low-color workloads (CAD applications, in particular), this encoding method may use less network bandwidth than the &ldquo;Tight + Perceptually Lossless JPEG&rdquo; encoding method, but it also uses significantly more CPU time than any of the JPEG-based encoding methods.</td>
-  </tr>
-</table>
-</div>
-
-
-<p>In the Windows and Java/Mac TurboVNC Viewers, the encoding method can be 
-set using the TurboVNC Viewer Options dialog box (click on the 
-&ldquo;Options&rdquo; button in the &ldquo;TurboVNC Connection&rdquo; 
-dialog box or, after connecting to the server, click on the Connection 
-Options button in the toolbar.)  With the X11 TurboVNC Viewer, the 
-&ldquo;Perceptually Lossless&rdquo; encoding method is the default 
-(unless it has been overridden using a resource file), and you can use 
-the following command-line switches to select an encoding method:</p>
-
-<p><code>-highqual</code> = select the &ldquo;Tight + Perceptually Lossless 
-Quality JPEG&rdquo; encoding method <br /> <code>-medqual</code> = 
-select the &ldquo;Tight + Medium Quality JPEG&rdquo; encoding method 
-<br /> <code>-lowqual</code> = select the &ldquo;Tight + Low Quality 
-JPEG&rdquo; encoding method <br /> <code>-lossless</code> = select the 
-&ldquo;Lossless Tight&rdquo; encoding method <br /> 
-<code>-losslesswan</code> = select the &ldquo;Lossless Tight + 
-Zlib&rdquo; encoding method <br /></p>
-
-<p>You can also press the F8 key after connecting to pop up the TurboVNC 
-Viewer Options menu, from which you can select a different encoding 
-method.</p>
-
-
-<h3 id="hd006004001">6.4.1&nbsp;Lossless Refresh</h3>
-
-<p>Since both of TurboVNC&rsquo;s mathematically lossless encoding methods 
-have performance drawbacks, another option for image-quality-critical 
-applications is the &ldquo;Lossless Refresh&rdquo; feature.  When a 
-lossless refresh is requested by a TurboVNC viewer, the server will send 
-a mathematically lossless image of the current TurboVNC desktop to the 
-requesting viewer.  So, for instance, a user can rotate/pan/zoom an 
-object in their 3D application using a very low-quality JPEG setting, 
-then when that user is ready to interpret or analyze the object, they 
-can request a lossless refresh of TurboVNC&rsquo;s virtual screen.</p>
-
-<p>To perform a lossless refresh, press CTRL-ALT-SHIFT-L (in the Windows 
-and Java/Mac TurboVNC Viewers, you can also click on the Lossless 
-Refresh toolbar icon.)</p>
-
-
-
-<h3 id="hd006004002">6.4.2&nbsp;Automatic Lossless Refresh</h3>
-
-<p><a name="ALR"></a></p>
-
-<p>Passing an argument of 
-<code>-alr&nbsp;</code><em><code>{timeout}</code></em> to 
-<code>vncserver</code> will enable the automatic lossless refresh (ALR) 
-feature for the TurboVNC session.  ALR will monitor all of the VNC 
-viewer connections, and if more than <em><code>{timeout}</code></em> 
-seconds have elapsed since the last framebuffer update was sent to a 
-given viewer, then the TurboVNC Server will send to that viewer a 
-mathematically lossless copy of screen regions that have been affected 
-by lossy compression.  You can also pass arguments of 
-<code>-alrqual</code> and <code>-alrsamp</code> to 
-<code>vncserver</code> to specify that automatic lossless refreshes 
-should be sent using JPEG instead (see the <code>Xvnc</code> man page 
-for details.)</p>
-
-<p>The ALR feature is designed mainly for use by interactive visualization 
-applications.  The idea is that, on a low-bandwidth connection, 
-low-quality JPEG can be used while the user is rotating/panning/zooming 
-a 3D scene, but when the user stops manipulating the scene, then a fully 
-lossless copy of the 3D image is sent for them to study in detail.</p>
-
-<p>The default ALR behavior is to monitor and send lossless copies of only 
-the screen regions that were drawn using <code>X[Shm]PutImage()</code>.  
-When used with VirtualGL, this means that ALRs will mainly be sent for 
-just the 3D screen regions.  This should be fine for most 3D 
-applications, since the 3D regions are the ones that are 
-quality-critical.  The default ALR behavior also prevents what might 
-best be termed the &ldquo;blinking cursor dilemma.&rdquo;  Certain 
-ill-behaved window managers update a small region of the taskbar 
-continuously, even though none of the pixels in that region have 
-changed.  Also, certain programs have a blinking cursor that may update 
-more frequently than the ALR timeout.  Since an ALR is triggered based 
-on a period of inactivity relative to the last framebuffer update, these 
-continuous updates prevent an ALR from ever being sent.  Fortunately, 
-these ill-behaved window managers and blinking cursors do not typically 
-use <code>X[Shm]PutImage()</code> to perform their continuous updates, 
-so the problem can be worked around by limiting the regions that are 
-&ldquo;eligible&rdquo; for ALR to just the subset of regions that were 
-drawn with the <code>X[Shm]PutImage()</code> functions.</p>
-
-<p>You can override the default ALR behavior, thus making all screen 
-regions eligible for ALR, by setting the <code>TVNC_ALRALL</code> 
-environment variable to <code>1</code> on the TurboVNC server machine 
-prior to starting a TurboVNC session.</p>
-
-
-
-<h2 id="hd006005">6.5&nbsp;Securing a TurboVNC Connection</h2>
+<h2 id="hd006004">6.4&nbsp;Securing a TurboVNC Connection</h2>
 
 <p><a name="Secure_TurboVNC_Usage"></a></p>
 
@@ -1100,7 +893,7 @@ TurboVNC Viewer and point it to
 (<code>localhost:1</code> in the above example.)</p>
 
 
-<h3 id="hd006005001">The <code>-via</code> and <code>-tunnel</code> Command-Line Options</h3>
+<h3 id="hd006004001">The <code>-via</code> and <code>-tunnel</code> Command-Line Options</h3>
 
 <p>If you are using the X11 and Mac TurboVNC Viewers, then you can simplify 
 the above by using the <code>-via</code> and <code>-tunnel</code> 
@@ -1135,7 +928,7 @@ tunnel is configurable by way of environment variables.  See the
 
 
 
-<h3 id="hd006005002">Forcing Secure Connections</h3>
+<h3 id="hd006004002">Forcing Secure Connections</h3>
 
 <p>Passing an argument of <code>-localhost</code> to <code>vncserver</code> 
 will force the TurboVNC Server session to accept inbound connections 
@@ -1155,7 +948,7 @@ all new TurboVNC sessions that are started on the machine.</p>
 
 
 
-<h3 id="hd006005003">Performance Notes</h3>
+<h3 id="hd006004003">Performance Notes</h3>
 
 <p>For LAN connections and other high-speed networks, tunneling the 
 TurboVNC connection over SSH will reduce performance by as much as 
@@ -1164,7 +957,7 @@ penalty for using SSH tunneling with TurboVNC.</p>
 
 
 
-<h2 id="hd006006">6.6&nbsp;Further Reading</h2>
+<h2 id="hd006005">6.5&nbsp;Further Reading</h2>
 
 <p>For more detailed instructions on the usage of TurboVNC:</p>
 
@@ -1200,7 +993,433 @@ man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;{vncserver&nbsp;|&nbsp;Xvnc&nbsp;|&nbsp;
 
 
 
-<h1 id="hd007"><a name="file007"></a>7&nbsp;TurboVNC Authentication Extensions</h1>
+<h1 id="hd007"><a name="file007"></a>7&nbsp;Performance and Image Quality</h1>
+
+<p>The level of image compression in TurboVNC can be adjusted to balance 
+the (sometimes conflicting) goals of high image quality and high 
+performance. There are four options that control the manner in which 
+TurboVNC compresses images:</p>
+
+<dl class="Description">
+    <dt class="Description-1 Description">Allow JPEG compression</dt>
+    <dd class="Description-1 Description">
+         If this option is enabled, then TurboVNC will use JPEG compression for 
+         subrectangles that have a high number of unique colors and indexed 
+         color subencoding for subrectangles that have a low number of unique 
+         colors.  If this option is disabled, then TurboVNC will select between 
+         indexed color or raw subencoding, depending on the size of the 
+         subrectangle and its color count.
+    </dd>
+    <dt class="Description-1 Description">JPEG image quality</dt>
+    <dd class="Description-1 Description">
+         Lower quality levels produce grainier JPEG images with more noticeable 
+         compression artifacts, but lower quality levels also use less network 
+         bandwidth and CPU time.
+    </dd>
+    <dt class="Description-1 Description">JPEG chrominance subsampling</dt>
+    <dd class="Description-1 Description">
+         When compressing an image using JPEG, the RGB pixels are first 
+         converted to the YUV colorspace, a colorspace in which each pixel is 
+         represented as a brightness (Y, or &ldquo;luminance&rdquo;) value and a 
+         pair of color (U &amp; V, or &ldquo;chrominance&rdquo;) values.  After 
+         this colorspace conversion, chrominance subsampling can be used to 
+         discard some of the chrominance components in order to save bandwidth.  
+         1X subsampling (the default in TurboVNC) retains the chrominance 
+         components for all pixels, and thus it provides the best image quality 
+         but also uses the most network bandwidth and CPU time.  2X subsampling 
+         retains the chrominance components for every other pixel, and 4X 
+         subsampling retains the chrominance components for every fourth pixel 
+         (this is typically implemented as 2X subsampling in both X and Y 
+         directions.)  Grayscale throws out all of the chrominance components, 
+         leaving only luminance.  2X and 4X subsampling will typically produce 
+         noticeable blurring of lines and other sharp features, but with 
+         photographic or other &ldquo;smooth&rdquo; image content, it may be 
+         difficult to detect any difference between 1X, 2X, and 4X.
+    </dd>
+    <dt class="Description-1 Description">Zlib compression level</dt>
+    <dd class="Description-1 Description">
+         If zlib compression is enabled, then indexed color, mono, and 
+         raw-encoded subrectangles will be compressed with zlib prior to 
+         transmission.  This decreases network bandwidth usage at the expense of 
+         increased CPU usage. If JPEG compression is enabled, then zlib 
+         compression is always used with non-JPEG subrectangles.
+    </dd>
+</dl>
+
+<p>In the Windows and Mac/Java TurboVNC Viewers, these parameters can be 
+adjusted by accessing the TurboVNC Viewer Options dialog box (click on 
+the &ldquo;Options&rdquo; button in the &ldquo;TurboVNC 
+Connection&rdquo; dialog box or, after connecting to the server, click 
+on the Connection Options button in the toolbar.)  In the X11 TurboVNC 
+Viewer, press F8 after connecting to bring up the TurboVNC Viewer 
+Options menu.</p>
+
+<p>The TurboVNC Viewer provides five &ldquo;encoding methods&rdquo;, 
+corresponding to the most useful combinations of the image compression 
+options described above:</p>
+
+<a name="tab007001"></a>
+<div class="table">
+<table class="standard" summary="TurboVNC Encoding Methods">
+<caption>Table 7.1: TurboVNC Encoding Methods</caption>
+  <thead class="standard">
+  <tr class="head ">
+    <th class="head standard">Encoding method</th>
+    <th class="head standard">Allow JPEG</th>
+    <th class="head standard">JPEG image quality</th>
+    <th class="head standard">JPEG chrominance subsampling</th>
+    <th class="head standard">Zlib compression level</th>
+    <th class="head standard">Notes</th>
+  </tr>
+  </thead>
+  <tr class="standard">
+    <td class="standard">&ldquo;Tight + Perceptually Lossless JPEG&rdquo;</td>
+    <td class="standard">Yes</td>
+    <td class="standard">95</td>
+    <td class="standard">1x</td>
+    <td class="standard">1</td>
+    <td class="standard">This encoding method should be perceptually lossless (that is, any image compression artifacts it produces should be imperceptible to the human eye under most viewing conditions.)  This encoding method requires a great deal of network bandwidth, however, and is generally not recommended except on 50 Megabit/second and faster networks.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">&ldquo;Tight + Medium Quality JPEG&rdquo;</td>
+    <td class="standard">Yes</td>
+    <td class="standard">80</td>
+    <td class="standard">2x</td>
+    <td class="standard">1</td>
+    <td class="standard">For subrectangles with a high number of unique colors, this encoding method produces some minor, but generally not very noticeable, image compression artifacts.  All else being equal, this encoding method typically uses about twice the network bandwidth of the &ldquo;Tight + Low Quality JPEG&rdquo; encoding method and about half the bandwidth of the &ldquo;Tight + Perceptually Lossless JPEG&rdquo; encoding method, making it appropriate for medium-speed networks such as 10 Megabit Ethernet.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">&ldquo;Tight + Low Quality JPEG&rdquo;</td>
+    <td class="standard">Yes</td>
+    <td class="standard">30</td>
+    <td class="standard">4x</td>
+    <td class="standard">1</td>
+    <td class="standard">For subrectangles with a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0023"></a>.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">&ldquo;Lossless Tight&rdquo;</td>
+    <td class="standard">No</td>
+    <td class="standard">N/A</td>
+    <td class="standard">N/A</td>
+    <td class="standard">None</td>
+    <td class="standard">This encoding method uses indexed color subencoding for subrectangles with a low number of unique colors but otherwise does not perform any image compression at all.  It is thus suitable only for gigabit and faster networks.  This encoding method uses significantly less CPU time than any of the JPEG-based encoding methods.  Lossless Tight requires an RFB protocol extension that is, as of this writing, only supported by the TurboVNC Viewer.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">&ldquo;Lossless Tight + Zlib&rdquo;</td>
+    <td class="standard">No</td>
+    <td class="standard">N/A</td>
+    <td class="standard">N/A</td>
+    <td class="standard">1</td>
+    <td class="standard">This encoding method uses indexed color subencoding for subrectangles with a low number of unique colors and raw subencoding for subrectangles with a high number of unique colors.  It compresses all subrectangles using zlib with zlib compression level 1.  For certain types of low-color workloads (CAD applications, in particular), this encoding method may use less network bandwidth than the &ldquo;Tight + Perceptually Lossless JPEG&rdquo; encoding method, but it also uses significantly more CPU time than any of the JPEG-based encoding methods.</td>
+  </tr>
+</table>
+</div>
+
+
+<p>In the Windows and Java/Mac TurboVNC Viewers, the encoding method can be 
+set using the TurboVNC Viewer Options dialog box (click on the 
+&ldquo;Options&rdquo; button in the &ldquo;TurboVNC Connection&rdquo; 
+dialog box or, after connecting to the server, click on the Connection 
+Options button in the toolbar.)</p>
+
+<p>With the X11 TurboVNC Viewer, the &ldquo;Perceptually Lossless&rdquo; 
+encoding method is the default (unless it has been overridden using a 
+resource file), but the following command-line switches can be used to 
+specify the encoding method:</p>
+
+<p><code>-highqual</code> = select the &ldquo;Tight + Perceptually Lossless 
+Quality JPEG&rdquo; encoding method <br /> <code>-medqual</code> = 
+select the &ldquo;Tight + Medium Quality JPEG&rdquo; encoding method 
+<br /> <code>-lowqual</code> = select the &ldquo;Tight + Low Quality 
+JPEG&rdquo; encoding method <br /> <code>-lossless</code> = select the 
+&ldquo;Lossless Tight&rdquo; encoding method <br /> 
+<code>-losslesswan</code> = select the &ldquo;Lossless Tight + 
+Zlib&rdquo; encoding method <br /></p>
+
+<p>After connecting, you can also press the F8 key to pop up the TurboVNC 
+Viewer Options menu, from which you can select a different encoding 
+method.</p>
+
+
+<h2 id="hd007001">7.1&nbsp;Interframe Comparison</h2>
+
+<p>Certain ill-behaved applications can sometimes draw the same thing over 
+and over again, and this can cause redundant framebuffer updates to be 
+sent to the VNC viewer.  The TurboVNC Server can guard against this by 
+maintaining a copy of the remote framebuffer for each connected viewer, 
+comparing each new framebuffer update against the pixels in the 
+framebuffer copy to determine whether the framebuffer update is 
+redundant, and discarding any redundant updates before they are sent to 
+the viewer.</p>
+
+<p>Enabling interframe comparison significantly increases the memory and 
+CPU usage of the TurboVNC Server.  Further, duplicate framebuffer 
+updates are not typically a problem for 3D and video applications, and 
+the effects of these duplicate updates, even when they exist, are not 
+typically noticeable on high-speed networks.  Thus, interframe 
+comparison is not enabled by default and should not generally be enabled 
+except on low-bandwidth networks and with applications for which it can 
+be shown to be beneficial.</p>
+
+<p>Interframe comparison can be enabled by either passing an argument of 
+<code>-interframe</code> to <code>vncserver</code> when starting a 
+TurboVNC Server session or by requesting a compression level of 5 or 
+higher from the viewer (see below.)</p>
+
+
+
+<h2 id="hd007002">7.2&nbsp;Advanced Compression Options</h2>
+
+<p><a name="AdvancedCompression"></a></p>
+
+<p>One of the underlying principles of TurboVNC&rsquo;s design is to expose 
+only the options that provide the best performance &ldquo;bang for the 
+buck.&rdquo;  Thus, the TurboVNC Viewer GUI does not normally provide 
+any way of requesting a compression level greater than 1.  Compression 
+levels 2-9 can, however, be specified on the command line, and doing so 
+will enable an advanced mode in the TurboVNC Viewer GUI that allows any 
+compression level from 0 to 9 to be requested.</p>
+
+<p>When connecting to a TurboVNC server, requesting a particular 
+compression level has the following effect:</p>
+
+<a name="tab007002"></a>
+<div class="table">
+<table class="standard" summary="Compression Levels Supported by the TurboVNC Server (JPEG Enabled)">
+<caption>Table 7.2: Compression Levels Supported by the TurboVNC Server (JPEG Enabled)</caption>
+  <thead class="standard">
+  <tr class="head ">
+    <th class="head standard">Compression level</th>
+    <th class="head standard">Zlib compression level (non-JPEG subrectangles)</th>
+    <th class="head standard">Palette threshold</th>
+    <th class="head standard">Interframe comparison</th>
+    <th class="head standard">Notes</th>
+  </tr>
+  </thead>
+  <tr class="standard">
+    <td class="standard">0</td>
+    <td class="standard">1</td>
+    <td class="standard">24</td>
+    <td class="standard">No</td>
+    <td class="standard">Same as Compression Level 1.  Bypassing zlib when JPEG is enabled would only reduce the CPU usage for non-JPEG subrectangles, which is of limited usefulness.  Further, bypassing zlib requires an RFB protocol extension that is not supported by non-TurboVNC viewers.  It is presumed that, if one wants to reduce the CPU usage, then one wants to do so for all subrectangles, so CL 0 without JPEG (AKA &ldquo;Lossless Tight&rdquo;) should be used.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">1</td>
+    <td class="standard">1</td>
+    <td class="standard">24</td>
+    <td class="standard">No</td>
+    <td class="standard">See the description of the &ldquo;Tight + JPEG&rdquo; encoding methods above.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">2</td>
+    <td class="standard">3</td>
+    <td class="standard">96</td>
+    <td class="standard">No</td>
+    <td class="standard">A higher palette threshold causes indexed color subencoding to be used more often than with CL 1, and indexed color subrectangles are compressed using a higher zlib compression level.  This can provide typically 20-40% better compression than CL 1 (with a commensurate increase in CPU usage) for workloads with low numbers of unique colors.  However, Compression Level 2 will increase the CPU usage for high-color workloads without providing significantly better compression.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">3-4</td>
+    <td class="standard">3</td>
+    <td class="standard">96</td>
+    <td class="standard">No</td>
+    <td class="standard">Same as Compression Level 2</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">5-6</td>
+    <td class="standard">1</td>
+    <td class="standard">24</td>
+    <td class="standard">Yes</td>
+    <td class="standard">Same as Compression Level 1, but with interframe comparison enabled</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">7-8</td>
+    <td class="standard">3</td>
+    <td class="standard">96</td>
+    <td class="standard">Yes</td>
+    <td class="standard">Same as Compression Level 2, but with interframe comparison enabled</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">9</td>
+    <td class="standard">7</td>
+    <td class="standard">256</td>
+    <td class="standard">Yes</td>
+    <td class="standard">This mode is included only for backward compatibility with TightVNC.  It provides approximately the same level of compression for 2D applications as Compression Level 9 in TightVNC, while using much less CPU time.  It also provides much better compression than TightVNC for 3D and video applications.  However, relative to Compression Level 2, this mode uses approximately twice as much CPU time and only achieves about 10-20% better average compression for 2D apps (and has no noticeable benefit for 3D and video apps.)  Thus, its usefulness is generally very limited.</td>
+  </tr>
+</table>
+</div>
+
+
+<p></p>
+
+<a name="tab007003"></a>
+<div class="table">
+<table class="standard" summary="Compression Levels Supported by the TurboVNC Server (JPEG Disabled)">
+<caption>Table 7.3: Compression Levels Supported by the TurboVNC Server (JPEG Disabled)</caption>
+  <thead class="standard">
+  <tr class="head ">
+    <th class="head standard">Compression Level</th>
+    <th class="head standard">Zlib compression level (indexed color subrectangles)</th>
+    <th class="head standard">Zlib compression level (raw subrectangles)</th>
+    <th class="head standard">Palette threshold</th>
+    <th class="head standard">Interframe comparison</th>
+    <th class="head standard">Notes</th>
+  </tr>
+  </thead>
+  <tr class="standard">
+    <td class="standard">0</td>
+    <td class="standard">None</td>
+    <td class="standard">None</td>
+    <td class="standard">Subrectangle size / 4</td>
+    <td class="standard">No</td>
+    <td class="standard">See the description of the &ldquo;Lossless Tight&rdquo; encoding method above.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">1</td>
+    <td class="standard">1</td>
+    <td class="standard">1</td>
+    <td class="standard">Subrectangle size / 96</td>
+    <td class="standard">No</td>
+    <td class="standard">See the description of the &ldquo;Lossless Tight + Zlib&rdquo; encoding method above.</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">2-4</td>
+    <td class="standard">1</td>
+    <td class="standard">1</td>
+    <td class="standard">Subrectangle size / 96</td>
+    <td class="standard">No</td>
+    <td class="standard">Same as Compression Level 1</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">5</td>
+    <td class="standard">None</td>
+    <td class="standard">None</td>
+    <td class="standard">Subrectangle size / 4</td>
+    <td class="standard">Yes</td>
+    <td class="standard">Same as Compression Level 0, but with interframe comparison enabled</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">6-8</td>
+    <td class="standard">1</td>
+    <td class="standard">1</td>
+    <td class="standard">Subrectangle size / 96</td>
+    <td class="standard">Yes</td>
+    <td class="standard">Same as Compression Level 1, but with interframe comparison enabled</td>
+  </tr>
+  <tr class="standard">
+    <td class="standard">9</td>
+    <td class="standard">7</td>
+    <td class="standard">5</td>
+    <td class="standard">Subrectangle size / 96</td>
+    <td class="standard">Yes</td>
+    <td class="standard">This mode is included only for backward compatibility with TightVNC.  It provides approximately the same level of compression for 2D applications as Compression Level 9 in TightVNC, while using much less CPU time.  It also provides much better compression than TightVNC for 3D and video applications.  However, relative to Compression Level 1, this mode uses approximately twice as much CPU time and only achieves about 10% better average compression for 2D apps (and has no noticeable benefit for 3D and video apps.)  Thus, its usefulness is generally very limited.</td>
+  </tr>
+</table>
+</div>
+
+
+
+
+<h2 id="hd007003">7.3&nbsp;Lossless Refresh</h2>
+
+<p><a name="LR"></a></p>
+
+<p>Since both of TurboVNC&rsquo;s mathematically lossless encoding methods 
+have performance drawbacks, another option for image-quality-critical 
+applications is the &ldquo;Lossless Refresh&rdquo; feature.  When a 
+lossless refresh is requested by a TurboVNC viewer, the server will send 
+a mathematically lossless image of the current TurboVNC desktop to the 
+requesting viewer.  So, for instance, a user can rotate/pan/zoom an 
+object in their 3D application using a very low-quality JPEG setting, 
+then when that user is ready to interpret or analyze the object, they 
+can request a lossless refresh of TurboVNC&rsquo;s virtual screen.</p>
+
+<p>To perform a lossless refresh, press CTRL-ALT-SHIFT-L (in the Windows 
+and Java/Mac TurboVNC Viewers, you can also click on the Lossless 
+Refresh toolbar icon.)</p>
+
+
+
+<h2 id="hd007004">7.4&nbsp;Automatic Lossless Refresh</h2>
+
+<p><a name="ALR"></a></p>
+
+<p>Passing an argument of 
+<code>-alr&nbsp;</code><em><code>{timeout}</code></em> to 
+<code>vncserver</code> will enable the automatic lossless refresh (ALR) 
+feature for the TurboVNC session.  ALR will monitor all of the VNC 
+viewer connections, and if more than <em><code>{timeout}</code></em> 
+seconds have elapsed since the last framebuffer update was sent to a 
+given viewer, then the TurboVNC Server will send to that viewer a 
+mathematically lossless copy of any screen regions that have been 
+affected by lossy compression.  You can also pass arguments of 
+<code>-alrqual</code> and <code>-alrsamp</code> to 
+<code>vncserver</code> to specify that automatic lossless refreshes 
+should be sent using JPEG instead (see the <code>Xvnc</code> man page 
+for details.)</p>
+
+<p>The ALR feature is designed mainly for use with interactive 
+visualization applications.  The idea is that, on a low-bandwidth 
+connection, low-quality JPEG can be used while the user is 
+rotating/panning/zooming a 3D scene, but when the user stops 
+manipulating the scene, then a fully lossless copy of the 3D image is 
+sent for them to study in detail.</p>
+
+<p>The default ALR behavior is to monitor and send lossless copies of only 
+the screen regions that were drawn using <code>X[Shm]PutImage()</code>.  
+When used with VirtualGL, this means that ALRs will mainly be sent for 
+just the 3D screen regions.  This should be fine for most 3D 
+applications, since the 3D regions are the ones that are 
+quality-critical.  The default ALR behavior also prevents what might 
+best be called the &ldquo;blinking cursor dilemma.&rdquo;  Certain 
+ill-behaved window managers update a small region of the taskbar 
+continuously, even though none of the pixels in that region have 
+changed.  Also, certain programs have a blinking cursor that may update 
+more frequently than the ALR timeout.  Since an ALR is triggered based 
+on a period of inactivity relative to the last framebuffer update, these 
+continuous updates prevent an ALR from ever being sent.  Fortunately, 
+these ill-behaved window managers and blinking cursors do not typically 
+use <code>X[Shm]PutImage()</code> to perform their updates, so the 
+problem can be worked around by limiting the regions that are 
+&ldquo;eligible&rdquo; for ALR to just the subset of regions that were 
+drawn with the <code>X[Shm]PutImage()</code> functions.</p>
+
+<p>You can override the default ALR behavior, thus making all screen 
+regions eligible for ALR, by setting the <code>TVNC_ALRALL</code> 
+environment variable to <code>1</code> on the TurboVNC server machine 
+prior to starting a TurboVNC session.</p>
+
+
+
+<h2 id="hd007005">7.5&nbsp;Multithreading</h2>
+
+<p><a name="Multithreading"></a></p>
+
+<p>The TurboVNC Server can use multiple threads to perform image encoding 
+and compression, thus allowing it to take advantage of multi-core or 
+multi-processor systems.  The server splits the screen vertically into N 
+tiles, where N is the number of threads, and assigns each tile to a 
+separate thread. The scalability of this algorithm is nearly linear when 
+used with demanding 3D or video applications that fill most of the 
+screen.  However, whether or not multithreading improves the overall 
+performance of TurboVNC depends largely on the performance of the viewer 
+and the network.  If either the viewer or the network is the primary 
+performance bottleneck, then multithreading the server will not help.  
+It will almost certainly have no effect on networks slower than 100 
+Megabit Ethernet or when using the Java TurboVNC Viewer as an applet.</p>
+
+<p>To enable server-side multithreading, set the <code>TVNC_MT</code> 
+environment variable to <code>1</code> on the server prior to starting 
+<code>vncserver</code>.  The default behavior is to use as many threads 
+as there are cores on the server machine, but you can set the 
+<code>TVNC_NTHREADS</code> environment variable to override this.</p>
+
+<p><br /></p>
+
+<hr class="break" />
+
+
+
+<h1 id="hd008"><a name="file008"></a>8&nbsp;TurboVNC Authentication Extensions</h1>
 
 <p>The TurboVNC Server supports four &ldquo;authentication methods&rdquo;, 
 which are used to validate authentication credentials sent from a VNC 
@@ -1249,7 +1468,7 @@ viewer:</p>
          recommended that this authentication method be enabled only if the 
          server is restricted to only allow loopback (SSH) connections and to 
          disallow reverse connections (see Section 
-         <a href="#Secure_TurboVNC_Usage" class="ref">6.5</a>.)
+         <a href="#Secure_TurboVNC_Usage" class="ref">6.4</a>.)
     </dd>
 </dl>
 
@@ -1275,12 +1494,12 @@ VNC server:</p>
          Both the username and password are sent to the server as plain text. 
          Thus, it is <em>strongly</em> recommended that this authentication 
          scheme be used only with an SSH-encrypted TurboVNC connection (see 
-         Section <a href="#Secure_TurboVNC_Usage" class="ref">6.5</a>.)
+         Section <a href="#Secure_TurboVNC_Usage" class="ref">6.4</a>.)
     </dd>
 </dl>
 
 
-<h2 id="hd007001">7.1&nbsp;Enabling Authentication Methods</h2>
+<h2 id="hd008001">8.1&nbsp;Enabling Authentication Methods</h2>
 
 <p>The default behavior of the TurboVNC Server is for all authentication 
 methods to be enabled and for VNC password authentication and OTP to be 
@@ -1324,7 +1543,7 @@ page for more details.</p>
 
 
 
-<h2 id="hd007002">7.2&nbsp;Further Reading</h2>
+<h2 id="hd008002">8.2&nbsp;Further Reading</h2>
 
 <p>For more detailed information about the TurboVNC authentication 
 extensions, refer to the TurboVNC man pages:</p>
@@ -1332,35 +1551,6 @@ extensions, refer to the TurboVNC man pages:</p>
 <pre class="verbatim">
 man&nbsp;-M&nbsp;/opt/TurboVNC/man&nbsp;{vncserver&nbsp;|&nbsp;Xvnc&nbsp;|&nbsp;vncviewer&nbsp;|&nbsp;vncpasswd}
 </pre>
-
-<p><br /></p>
-
-<hr class="break" />
-
-
-
-<h1 id="hd008"><a name="file008"></a>8&nbsp;Multithreading in TurboVNC</h1>
-
-<p><a name="Multithreading"></a></p>
-
-<p>The TurboVNC Server can use multiple threads to perform image encoding 
-and compression, thus allowing it to take advantage of multi-core or 
-multi-processor systems.  The server splits the screen vertically into N 
-tiles, where N is the number of threads, and assigns each tile to a 
-separate thread. The scalability of this algorithm is nearly linear when 
-used with demanding 3D or video applications that fill most of the 
-screen.  However, whether or not multithreading improves the overall 
-performance of TurboVNC depends largely on the performance of the client 
-and the network.  If either the client or the network are the primary 
-performance bottlenecks, then multithreading the server will not help.  
-It will almost certainly have no effect on networks slower than 100 
-Megabit Ethernet or when using the Java TurboVNC Viewer.</p>
-
-<p>To enable server-side multithreading, set the <code>TVNC_MT</code> 
-environment variable to <code>1</code> on the server prior to starting 
-<code>vncserver</code>.  The default behavior is to use as many threads 
-as there are cores on the server machine, but you can set the 
-<code>TVNC_NTHREADS</code> environment variable to override this.</p>
 
 <p><br /></p>
 
@@ -1587,7 +1777,7 @@ TurboVNC server for this procedure to perform well.</p>
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a class="remote" href="http://www.tigervnc.com">TigerVNC</a></span><a name="idx0023"></a>, 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0024"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>
@@ -1793,19 +1983,9 @@ mixing TurboVNC with other VNC flavors.</p>
         TightVNC and TigerVNC viewers don&rsquo;t support this. <br /><br />
     </li>
     <li class="Itemize-1 Itemize asterisk">
-        The TurboVNC Server only supports compression levels 1-2 if JPEG 
-        subencoding is enabled and compression levels 0-1 if JPEG subencoding is 
-        disabled.  Extensive experimentation has shown that TurboVNC&rsquo;s 
-        encoding methods cannot produce significantly tighter output by 
-        increasing the zlib compression beyond this, except on rare corner cases 
-        (such as the console output of a large compilation) that are not 
-        performance-critical to begin with.  In general, increasing the 
-        compression level from 1 to 2 with JPEG enabled will increase the CPU 
-        usage for most 3D and video workloads without providing any significant 
-        bandwidth savings.  However, Compression Level 2 can be shown to reduce 
-        bandwidth by 20-40% (with a commensurate increase in CPU usage) for 
-        certain types of workloads that have low numbers of unique colors. 
-        <br /><br />
+        Refer to Section <a href="#AdvancedCompression" class="ref">7.2</a> for 
+        a description of how the TurboVNC Server responds to requests for 
+        compression levels 0-9. <br /><br />
     </li>
 </ul>
 
@@ -1866,7 +2046,7 @@ when using these legacy encoding types.</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        See Section <a href="#ALR" class="ref">6.4.2</a>
+        See Section <a href="#ALR" class="ref">7.4</a>
     </dd>
 </dl>
 
@@ -1891,7 +2071,7 @@ when using these legacy encoding types.</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        See Chapter <a href="#Multithreading" class="ref">8</a>
+        See Chapter <a href="#Multithreading" class="ref">7.5</a>
     </dd>
 </dl>
 
@@ -1916,7 +2096,7 @@ when using these legacy encoding types.</p>
 <dl class="Description">
     <dt class="Description-1 Description">Description</dt>
     <dd class="Description-1 Description">
-        See Chapter <a href="#Multithreading" class="ref">8</a>
+        See Chapter <a href="#Multithreading" class="ref">7.5</a>
     </dd>
 </dl>
 

@@ -187,6 +187,7 @@
 #define ID_NEWCONN                      40006
 #define IDS_HELP                        40007
 #define IDS_HELP2                       40008
+#define IDS_HELP3                       40009
 #define IDD_FILETRANSFER                40010
 
 // Next default values for new objects

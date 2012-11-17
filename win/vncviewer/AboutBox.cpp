@@ -60,6 +60,9 @@ static LRESULT CALLBACK HelpDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam,
       if (strlen(buf) < 8191)
         LoadString(pApp->m_instance, IDS_HELP2, &buf[strlen(buf)],
           sizeof(buf)-(int)strlen(buf));
+      if (strlen(buf) < 8191)
+        LoadString(pApp->m_instance, IDS_HELP3, &buf[strlen(buf)],
+          sizeof(buf)-(int)strlen(buf));
       SetDlgItemText(hwnd, IDC_EDIT_HELP, buf);
       SetWindowText(hwnd, (LPTSTR)lParam);
       CenterWindow(hwnd);

@@ -635,7 +635,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
   static IntParameter compressLevel
   = new IntParameter("CompressLevel",
   "When Tight encoding is used, the compression level specifies the amount of "+
-  "Zlib compression to apply to subrectangles encoded using the indexed color, "+
+  "zlib compression to apply to subrectangles encoded using the indexed color, "+
   "mono, and raw subencoding types.  If the JPEG subencoding type is enabled, "+
   "then the compression level also defines the \"palette threshold\", or the "+
   "minimum number of colors that a subrectangle must have before it is encoded "+
@@ -648,7 +648,16 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "later of the TurboVNC Server also supports Compression Level 2 when JPEG is "+
   "enabled.  Compression Level 2 can be shown to reduce the bandwidth of "+
   "certain types of low-color workloads by typically 20-40% (with a "+
-  "commensurate increase in CPU usage.)", 1, 0, 9);
+  "commensurate increase in CPU usage.)\n "+
+  "In v1.2 or later of the TurboVNC Server, compression levels 5-7 map to "+
+  "compression levels 0-2, but they also enable the interframe comparison engine "+
+  "in the server.  Interframe comparison maintains a copy of the remote "+
+  "framebuffer for each connected viewer and compares each framebuffer update "+
+  "with the copy to ensure that redundant updates are not sent to the viewer.  "+
+  "This prevents unnecessary network traffic if an ill-behaved application "+
+  "draws the same thing over and over again, but interframe comparison also "+
+  "causes the TurboVNC Server to use more CPU time and much more memory.",
+  1, 0, 9);
 
   static IntParameter colors
   = new IntParameter("Colors",

@@ -99,18 +99,8 @@ TurboVNC with other VNC flavors.
 		viewers don't support this.
 		{nl}{nl}
 
-	* The TurboVNC Server only supports compression levels 1-2 if JPEG
-		subencoding is enabled and compression levels 0-1 if JPEG subencoding is
-		disabled.  Extensive experimentation has shown that TurboVNC's encoding
-		methods cannot produce significantly tighter output by increasing the zlib
-		compression beyond this, except on rare corner cases (such as the
-		console output of a large compilation) that are not performance-critical to
-		begin with.  In general, increasing the compression level from 1 to 2 with
-		JPEG enabled will increase the CPU usage for most 3D and video workloads
-		without providing any significant bandwidth savings.  However, Compression
-		Level 2 can be shown to reduce bandwidth by 20-40% (with a commensurate
-		increase in CPU usage) for certain types of workloads that have low numbers
-		of unique colors.
+	* Refer to {ref prefix="Section ": AdvancedCompression} for a description of
+		how the TurboVNC Server responds to requests for compression levels 0-9.
 		{nl}{nl}
 
 ** RealVNC

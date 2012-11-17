@@ -23,10 +23,10 @@
 #INCLUDE: turbovncusage.txt
 {nl}
 ----8<--------------
-#INCLUDE: turbovncauth.txt
+#INCLUDE: performance.txt
 {nl}
 ----8<--------------
-#INCLUDE: multithread.txt
+#INCLUDE: turbovncauth.txt
 {nl}
 ----8<--------------
 #INCLUDE: vglusage.txt
