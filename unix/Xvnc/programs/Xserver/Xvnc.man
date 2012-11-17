@@ -193,12 +193,11 @@ enabled.)  Specifying \fB-interframe\fR will enable interframe comparison all
 the time, regardless of the compression level that was requested by the viewer.
 Interframe comparison maintains a copy of the remote framebuffer for each
 connected viewer and compares each framebuffer update with the copy to ensure
-that the pixels have actually changed before the framebuffer update is sent.
-Certain ill-behaved 2D apps will redraw their entire GUI even if only a small
-portion of it has changed, so enabling interframe comparison prevents such apps
-from generating unnecessary network traffic.  However, enabling interframe
-comparison causes the TurboVNC Server to use more CPU time and much more
-memory, and thus it is recommended that this feature be used only when needed.
+that redundant updates are not sent to the viewer.  This prevents unnecessary
+network traffic if an ill-behaved application draws the same thing over and
+over again, but interframe comparison also causes the TurboVNC Server to use
+more CPU time and much more memory, and thus it is recommended that this
+feature be used only when needed.
 .TP
 \fB\-nointerframe\fR
 Specifying this option will disable interframe comparison, regardless of the
