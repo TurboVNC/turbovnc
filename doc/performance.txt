@@ -136,6 +136,10 @@ Interframe comparison can be enabled by either passing an argument of
 ''-interframe'' to ''vncserver'' when starting a TurboVNC Server session or by
 requesting a compression level of 5 or higher from the viewer (see below.)
 
+	!!! If interframe comparison is forced on by using ''-interframe'', the
+	Lossless Refresh feature will not work.  Automatic Lossless Refresh will
+	still work, however.
+
 ** Advanced Compression Options
 {anchor: AdvancedCompression}
 
