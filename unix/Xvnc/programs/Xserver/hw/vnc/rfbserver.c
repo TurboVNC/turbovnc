@@ -67,7 +67,6 @@ static void rfbSendInteractionCaps(rfbClientPtr cl);
 static void rfbProcessClientNormalMessage(rfbClientPtr cl);
 static Bool rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy);
 static Bool rfbSendLastRectMarker(rfbClientPtr cl);
-static Bool _rfbSendFramebufferUpdate(rfbClientPtr cl, Bool force);
 
 
 /*
@@ -113,7 +112,8 @@ static Bool putImageOnly = TRUE;
 CARD64
 alrCallback(OsTimerPtr timer, CARD64 time, pointer arg)
 {
-    RegionRec copyRegionSave, modifiedRegionSave, requestedRegionSave;
+    RegionRec copyRegionSave, modifiedRegionSave, requestedRegionSave,
+        ifRegionSave;
     rfbClientPtr cl = (rfbClientPtr)arg;
     int tightCompressLevelSave, tightQualityLevelSave, copyDXSave, copyDYSave,
         tightSubsampLevelSave;
@@ -132,6 +132,8 @@ alrCallback(OsTimerPtr timer, CARD64 time, pointer arg)
         REGION_COPY(pScreen, &modifiedRegionSave, &cl->modifiedRegion);
         REGION_INIT(pScreen, &requestedRegionSave, NullBox, 0);
         REGION_COPY(pScreen, &requestedRegionSave, &cl->requestedRegion);
+        REGION_INIT(pScreen, &ifRegionSave, NullBox, 0);
+        REGION_COPY(pScreen, &ifRegionSave, &cl->ifRegion);
 
         cl->tightCompressLevel = 1;
         cl->tightQualityLevel = rfbALRQualityLevel;
@@ -140,12 +142,17 @@ alrCallback(OsTimerPtr timer, CARD64 time, pointer arg)
         REGION_EMPTY(pScreen, &cl->copyRegion);
         REGION_EMPTY(pScreen, &cl->modifiedRegion);
         REGION_UNION(pScreen, &cl->modifiedRegion, &cl->modifiedRegion,
-            &cl->lossyRegion);
+                     &cl->lossyRegion);
         REGION_EMPTY(pScreen, &cl->requestedRegion);
         REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
-            &cl->lossyRegion);
+                     &cl->lossyRegion);
+        if (cl->compareFB) {
+            REGION_EMPTY(pScreen, &cl->ifRegion);
+            REGION_UNION(pScreen, &cl->ifRegion, &cl->ifRegion,
+                         &cl->lossyRegion);
+        }
 
-        if (!_rfbSendFramebufferUpdate(cl, TRUE)) return 0;
+        if (!rfbSendFramebufferUpdate(cl)) return 0;
         cl->alrTrigger = FALSE;
 
         REGION_EMPTY(pScreen, &cl->lossyRegion);
@@ -160,6 +167,10 @@ alrCallback(OsTimerPtr timer, CARD64 time, pointer arg)
         REGION_UNINIT(pScreen, &copyRegionSave);
         REGION_UNINIT(pScreen, &modifiedRegionSave);
         REGION_UNINIT(pScreen, &requestedRegionSave);
+        if (cl->compareFB) {
+            REGION_COPY(pScreen, &cl->ifRegion, &ifRegionSave);
+            REGION_UNINIT(pScreen, &ifRegionSave);
+        }
     }
     return 0;
 }
@@ -191,6 +202,8 @@ InterframeOn(rfbClientPtr cl)
         }
         memset(cl->compareFB, 0, rfbScreen.paddedWidthInBytes *
                rfbScreen.height);
+        REGION_INIT(pScreen, &cl->ifRegion, NullBox, 0);
+        cl->firstCompare = TRUE;
         rfbLog("Interframe comparison enabled\n");
     }
     cl->fb = cl->compareFB;
@@ -202,6 +215,7 @@ InterframeOff(rfbClientPtr cl)
 {
     if (cl->compareFB) {
         xfree(cl->compareFB);
+        REGION_UNINIT(pScreen, &cl->ifRegion);
         rfbLog("Interframe comparison disabled\n");
     }
     cl->compareFB = NULL;
@@ -1081,6 +1095,7 @@ rfbProcessClientNormalMessage(cl)
                          &tmpRegion);
             REGION_SUBTRACT(pScreen, &cl->copyRegion, &cl->copyRegion,
                             &tmpRegion);
+            REGION_UNION(pScreen, &cl->ifRegion, &cl->ifRegion, &tmpRegion);
         }
 
         if (FB_UPDATE_PENDING(cl) &&
@@ -1269,20 +1284,11 @@ Bool
 rfbSendFramebufferUpdate(cl)
     rfbClientPtr cl;
 {
-    return _rfbSendFramebufferUpdate(cl, FALSE);
-}
-
-static Bool
-_rfbSendFramebufferUpdate(cl, force)
-    rfbClientPtr cl;
-    Bool force;
-{
     ScreenPtr pScreen = screenInfo.screens[0];
     int i;
     int nUpdateRegionRects;
     rfbFramebufferUpdateMsg *fu = (rfbFramebufferUpdateMsg *)updateBuf;
-    RegionRec _updateRegion, *updateRegion = &_updateRegion, ifRegion,
-        updateCopyRegion;
+    RegionRec _updateRegion, *updateRegion = &_updateRegion, updateCopyRegion;
     int dx, dy;
     Bool sendCursorShape = FALSE;
     Bool sendCursorPos = FALSE;
@@ -1431,9 +1437,8 @@ _rfbSendFramebufferUpdate(cl, force)
         REGION_UNINIT(pScreen, &combinedUpdateRegion);
     }
 
-    if (cl->compareFB && !force) {
-        REGION_INIT(pScreen, &ifRegion, NullBox, 0);
-        updateRegion = &ifRegion;
+    if (cl->compareFB) {
+        updateRegion = &cl->ifRegion;
         for (i = 0; i < REGION_NUM_RECTS(&_updateRegion); i++) {
             int x = REGION_RECTS(&_updateRegion)[i].x1;
             int y = REGION_RECTS(&_updateRegion)[i].y1;
@@ -1446,7 +1451,7 @@ _rfbSendFramebufferUpdate(cl, force)
             Bool different = FALSE;
             rows = h;
             while (rows--) {
-                if (memcmp(src, dst, w * ps)) {
+                if (cl->firstCompare || memcmp(src, dst, w * ps)) {
                     memcpy(dst, src, w * ps);
                     different = TRUE;
                 }
@@ -1457,17 +1462,15 @@ _rfbSendFramebufferUpdate(cl, force)
                 RegionRec tmpRegion;
                 REGION_INIT(pScreen, &tmpRegion,
                             &REGION_RECTS(&_updateRegion)[i], 1);
-                REGION_UNION(pScreen, &ifRegion, &ifRegion, &tmpRegion);
+                REGION_UNION(pScreen, &cl->ifRegion, &cl->ifRegion,
+                             &tmpRegion);
                 REGION_UNINIT(pScreen, &tmpRegion);
             } else if (rfbProfile) {
                 idmpixels += (double)(w * h) / 1000000.;
             }
         }
         REGION_UNINIT(pScreen, &_updateRegion);
-        if (REGION_NUM_RECTS(updateRegion) == 0) {
-            rfbUncorkSock(cl->sock);
-            return TRUE;
-        }
+        cl->firstCompare = FALSE;
     }
 
     if (!rfbSendRTTPing(cl))
@@ -1539,7 +1542,11 @@ _rfbSendFramebufferUpdate(cl, force)
 
     if (REGION_NOTEMPTY(pScreen, &updateCopyRegion)) {
         if (!rfbSendCopyRegion(cl, &updateCopyRegion, dx, dy)) {
-            REGION_UNINIT(pScreen, updateRegion);
+            if (cl->compareFB) {
+                REGION_EMPTY(pScreen, updateRegion);
+            } else {
+                REGION_UNINIT(pScreen, updateRegion);
+            }
             REGION_UNINIT(pScreen, &updateCopyRegion);
             return FALSE;
         }
@@ -1561,51 +1568,83 @@ _rfbSendFramebufferUpdate(cl, force)
         switch (cl->preferredEncoding) {
         case rfbEncodingRaw:
             if (!rfbSendRectEncodingRaw(cl, x, y, w, h)) {
-                REGION_UNINIT(pScreen, updateRegion);
+                if (cl->compareFB) {
+                    REGION_EMPTY(pScreen, updateRegion);
+                } else {
+                    REGION_UNINIT(pScreen, updateRegion);
+                }
                 return FALSE;
             }
             break;
         case rfbEncodingRRE:
             if (!rfbSendRectEncodingRRE(cl, x, y, w, h)) {
-                REGION_UNINIT(pScreen, updateRegion);
+                if (cl->compareFB) {
+                    REGION_EMPTY(pScreen, updateRegion);
+                } else {
+                    REGION_UNINIT(pScreen, updateRegion);
+                }
                 return FALSE;
             }
             break;
         case rfbEncodingCoRRE:
             if (!rfbSendRectEncodingCoRRE(cl, x, y, w, h)) {
-                REGION_UNINIT(pScreen, updateRegion);
+                if (cl->compareFB) {
+                    REGION_EMPTY(pScreen, updateRegion);
+                } else {
+                    REGION_UNINIT(pScreen, updateRegion);
+                }
                 return FALSE;
             }
             break;
         case rfbEncodingHextile:
             if (!rfbSendRectEncodingHextile(cl, x, y, w, h)) {
-                REGION_UNINIT(pScreen, updateRegion);
+                if (cl->compareFB) {
+                    REGION_EMPTY(pScreen, updateRegion);
+                } else {
+                    REGION_UNINIT(pScreen, updateRegion);
+                }
                 return FALSE;
             }
             break;
         case rfbEncodingZlib:
             if (!rfbSendRectEncodingZlib(cl, x, y, w, h)) {
-                REGION_UNINIT(pScreen, updateRegion);
+                if (cl->compareFB) {
+                    REGION_EMPTY(pScreen, updateRegion);
+                } else {
+                    REGION_UNINIT(pScreen, updateRegion);
+                }
                 return FALSE;
             }
             break;
         case rfbEncodingZRLE:
         case rfbEncodingZYWRLE:
             if (!rfbSendRectEncodingZRLE(cl, x, y, w, h)) {
-                REGION_UNINIT(pScreen, updateRegion);
+                if (cl->compareFB) {
+                    REGION_EMPTY(pScreen, updateRegion);
+                } else {
+                    REGION_UNINIT(pScreen, updateRegion);
+                }
                 return FALSE;
             }
             break;
         case rfbEncodingTight:
             if (!rfbSendRectEncodingTight(cl, x, y, w, h)) {
-                REGION_UNINIT(pScreen, updateRegion);
+                if (cl->compareFB) {
+                    REGION_EMPTY(pScreen, updateRegion);
+                } else {
+                    REGION_UNINIT(pScreen, updateRegion);
+                }
                 return FALSE;
             }
             break;
         }
     }
 
-    REGION_UNINIT(pScreen, updateRegion);
+    if (cl->compareFB) {
+        REGION_EMPTY(pScreen, updateRegion);
+    } else {
+        REGION_UNINIT(pScreen, updateRegion);
+    }
 
     if (nUpdateRegionRects == 0xFFFF && !rfbSendLastRectMarker(cl))
         return FALSE;

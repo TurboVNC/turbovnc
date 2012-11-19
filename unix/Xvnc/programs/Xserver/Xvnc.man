@@ -198,9 +198,6 @@ network traffic if an ill-behaved application draws the same thing over and
 over again, but interframe comparison also causes the TurboVNC Server to use
 more CPU time and much more memory, and thus it is recommended that this
 feature be used only when needed.
-
-NOTE: Specifying this option will prevent any connected viewers from requesting
-a Lossless Refresh.
 .TP
 \fB\-nointerframe\fR
 Specifying this option will disable interframe comparison, regardless of the

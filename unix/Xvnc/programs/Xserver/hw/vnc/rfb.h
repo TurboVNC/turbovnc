@@ -312,7 +312,10 @@ typedef struct rfbClientRec {
     Bool alrTrigger;
     Bool putImageTrigger;
 
+    /* Interframe comparison */
     char *compareFB, *fb;
+    Bool firstCompare;
+    RegionRec ifRegion;
 
     struct rfbClientRec *next;
 
