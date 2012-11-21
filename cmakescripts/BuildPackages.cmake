@@ -1,6 +1,8 @@
 # This file is included from the top-level CMakeLists.txt.  We just store it
 # here to avoid cluttering up that file.
 
+string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_PROJECT_NAME_LC)
+
 
 #
 # Linux RPM and DEB
@@ -14,8 +16,6 @@ if(${CPU_TYPE} STREQUAL "x86_64")
 else()
 	set(DEBARCH ${CPU_TYPE})
 endif()
-
-string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_PROJECT_NAME_LC)
 
 if(NOT TVNC_JAVADIR)
 	set(TVNC_JAVADIR ${CMAKE_INSTALL_PREFIX}/java)

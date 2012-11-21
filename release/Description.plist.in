@@ -5,7 +5,7 @@
 	<key>IFPkgDescriptionDescription</key>
 	<string>A highly-optimized version of VNC that can be used with performance-critical applications</string>
 	<key>IFPkgDescriptionTitle</key>
-	<string>@CMAKE_PACKAGE_NAME@</string>
+	<string>@CMAKE_PROJECT_NAME@</string>
 	<key>IFPkgDescriptionVersion</key>
 	<string>@VERSION@</string>
 </dict>

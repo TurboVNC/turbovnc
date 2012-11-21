@@ -5,7 +5,7 @@
 	<key>CFBundleGetInfoString</key>
 	<string>@VERSION@, The VirtualGL Project</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.virtualgl.@CMAKE_PACKAGE_NAME_LC@</string>
+	<string>com.virtualgl.@CMAKE_PROJECT_NAME_LC@</string>
 	<key>CFBundleShortVersionString</key>
 	<string>@VERSION@</string>
 	<key>IFMajorVersion</key>
