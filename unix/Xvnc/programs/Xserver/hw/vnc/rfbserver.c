@@ -1469,9 +1469,9 @@ rfbSendFramebufferUpdate(cl)
                 RegionRec tmpRegion;
                 REGION_INIT(pScreen, &tmpRegion,
                             &REGION_RECTS(&_updateRegion)[i], 1);
-                REGION_UNION(pScreen, &cl->ifRegion, &cl->ifRegion,
-                             &tmpRegion);
-                if (!different && rfbInterframeDebug) {
+                if (!different && rfbInterframeDebug &&
+                    !RECT_IN_REGION(pScreen, &cl->ifRegion,
+                                    &REGION_RECTS(&_updateRegion)[i])) {
                     int pad = pitch - w * ps;
                     REGION_UNION(pScreen, &idRegion, &idRegion, &tmpRegion);
                     dst = &cl->compareFB[y * pitch + x * ps];
@@ -1483,6 +1483,8 @@ rfbSendFramebufferUpdate(cl)
                         dst += pad;
                     }
                 }
+                REGION_UNION(pScreen, &cl->ifRegion, &cl->ifRegion,
+                             &tmpRegion);
                 REGION_UNINIT(pScreen, &tmpRegion);
             }
             if (!different && rfbProfile) {
