@@ -1495,6 +1495,19 @@ rfbSendFramebufferUpdate(cl)
         }
         REGION_UNINIT(pScreen, &_updateRegion);
         cl->firstCompare = FALSE;
+
+        /* The Windows TurboVNC Viewer (and probably some other VNC viewers as
+           well) will ignore any empty FBUs and stop sending FBURs when it
+           receives one.  If CU is not active, then this causes the viewer to
+           stop receiving updates until something else, such as a mouse cursor
+           change, triggers a new FBUR. */
+        if (REGION_NUM_RECTS(updateRegion) == 0) {
+            BoxRec box;
+            box.x1 = box.y1 = 0;
+            box.x2 = box.y2 = 1;
+            REGION_UNINIT(pScreen, updateRegion);
+            REGION_INIT(pScreen, updateRegion, &box, 1);
+        }
     }
 
     if (!rfbSendRTTPing(cl))
@@ -1784,7 +1797,6 @@ rfbSendCopyRegion(cl, reg, dx, dy)
                     src += pitch;
                     dst += pitch;
                 }
-
             }
 
             rect.r.x = Swap16IfLE(x);
