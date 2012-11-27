@@ -59,7 +59,7 @@ VNCOptions::VNCOptions()
   m_Emul3Timeout = 100; // milliseconds
   m_Emul3Fuzz = 4;      // pixels away before emulation is cancelled
   m_Shared = true;
-  m_CU = false;
+  m_CU = true;
   m_DeiconifyOnBell = false;
   m_DisableClipboard = false;
   m_localCursor = DOTCURSOR;
@@ -1768,7 +1768,6 @@ void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 //m_Use8Bit =             read(RegKey, "8bit", m_Use8Bit) != 0;
   m_DoubleBuffer =        read(RegKey, "doublebuffer", m_DoubleBuffer) != 0;
   m_Shared =              read(RegKey, "shared", m_Shared) != 0;
-  m_CU =                  read(RegKey, "continuousupdates", m_CU) != 0;
   m_SwapMouse =           read(RegKey, "swapmouse", m_SwapMouse) != 0;
   m_DeiconifyOnBell =     read(RegKey, "belldeiconify", m_DeiconifyOnBell) != 0;
   m_Emul3Buttons =        read(RegKey, "emulate3", m_Emul3Buttons) != 0;
@@ -1854,7 +1853,6 @@ void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
   save(RegKey, "8bit", m_Use8Bit);
   save(RegKey, "doublebuffer", m_DoubleBuffer);
   save(RegKey, "shared", m_Shared);
-  save(RegKey, "continuousupdates", m_CU);
   save(RegKey, "swapmouse", m_SwapMouse);
   save(RegKey, "belldeiconify", m_DeiconifyOnBell);
   save(RegKey, "emulate3", m_Emul3Buttons);
