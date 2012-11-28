@@ -115,6 +115,7 @@ After connecting, you can also press the F8 key to pop up the TurboVNC Viewer
 Options menu, from which you can select a different encoding method.
 
 ** Interframe Comparison
+{anchor: InterframeComparison}
 
 Certain ill-behaved applications can sometimes draw the same thing over and
 over again, and this can cause redundant framebuffer updates to be sent to the

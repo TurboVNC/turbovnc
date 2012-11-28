@@ -10,19 +10,51 @@ drawn using methods other than ''X[Shm]PutImage()'' |
 
 	Description :: See {ref prefix="Section ": ALR}
 
+| Environment Variable | ''TVNC_COMBINERECT = ''__''{c}''__ |
+| Summary | Combine framebuffer updates with more than __''{c}''__ rectangles \
+into a single rectangle spanning the bounding box of all of the constituent \
+rectangles |
+| Default Value | 100 |
+#OPT: hiCol=first
+
+	Description :: Applications can sometimes draw many thousands of points or
+	tiny lines using individual X11 calls, and this can cause the VNC server to
+	send many	thousands of tiny rectangles to the VNC viewer.  The overhead
+	associated with this can bog down the viewer, and in extreme cases, the
+	number of rectangles may even exceed the maximum number that is allowed in a
+	single framebuffer update (65534.)  Thus, if a framebuffer update contains
+	more than __''{c}''__ rectangles, TurboVNC will coalesce it into a single
+	rectangle that covers all of the rectangles in the update.  For applications
+	that generate many tiny rectangles, increasing ''TVNC_COMBINERECT'' may
+	significantly increase the number of pixels sent to the viewer, which will
+	increase network usage.  However, for those same applications, lowering
+	''TVNC_COMBINERECT'' will increase the number of rectangles sent to the
+	viewer, which will increase the CPU usage of both the server and the viewer.
+
+| Environment Variable | ''TVNC_IFDEBUG = ''__''0 \| 1''__ |
+| Summary | Disable/Enable the ICE debugger |
+| Default Value | Disabled |
+#OPT: hiCol=first
+
+	Description :: If interframe comparison is enabled (see
+	{ref prefix="Section ": InterframeComparison}), then setting this environment
+	variable to 1 will cause the ICE to change the color of duplicate updates
+	without culling them from the update stream.  This allows you to easily see
+	which applications are generating duplicate updates.
+
 | Environment Variable | ''TVNC_MT = ''__''0 \| 1''__ |
 | Summary | Disable/Enable multithreaded image encoding |
 | Default Value | Disabled |
 #OPT: hiCol=first
 
-	Description :: See {ref prefix="Chapter ": Multithreading}
+	Description :: See {ref prefix="Section ": Multithreading}
 
 | Environment Variable | ''VGL_NTHREADS = ''__''{n}''__ |
 | Summary | Use __''{n}''__ threads to perform image encoding |
 | Default Value | __''{n}''__ = the number of CPU cores in the system |
 #OPT: hiCol=first
 
-	Description :: See {ref prefix="Chapter ": Multithreading}
+	Description :: See {ref prefix="Section ": Multithreading}
 
 | Environment Variable | ''TVNC_PROFILE = ''__''0 \| 1''__ |
 | Summary | Disable/enable profiling output |
