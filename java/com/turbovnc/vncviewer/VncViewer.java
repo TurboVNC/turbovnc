@@ -276,6 +276,14 @@ public class VncViewer extends java.applet.Applet implements Runnable
       Configuration.readAppletParams(this);
       setGlobalOptions();
       host = getCodeBase().getHost();
+      if ((opts.via != null || opts.tunnel) && opts.serverName != null) {
+        try {
+          Tunnel.createTunnel(opts);
+        } catch (java.lang.Exception e) {
+          System.out.println("Could not create SSH tunnel:\n"+e.toString());
+          exit(1);
+        }
+      }
     }
     else if (!applet)
       host = opts.serverName;
@@ -405,9 +413,8 @@ public class VncViewer extends java.applet.Applet implements Runnable
   }
 
   void setGlobalOptions() {
-    if (opts != null) return;
-
-    opts = new Options();
+    if (opts == null)
+      opts = new Options();
 
     if (vncServerName.getValue() != null)
       opts.serverName = new String(vncServerName.getValue());
