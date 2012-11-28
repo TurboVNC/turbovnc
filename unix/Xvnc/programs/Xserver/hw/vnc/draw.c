@@ -1713,23 +1713,29 @@ rfbComposite(
     BoxRec box;
     PictureScreenPtr ps = GetPictureScreen(pScreen);
 
-    box.x1 = pDst->pDrawable->x + xDst;
-    box.y1 = pDst->pDrawable->y + yDst;
-    box.x2 = box.x1 + width;
-    box.y2 = box.y1 + height;
+    if (pDst->pDrawable->type == DRAWABLE_WINDOW &&
+        ((WindowPtr)pDst->pDrawable)->viewable) {
+        box.x1 = pDst->pDrawable->x + xDst;
+        box.y1 = pDst->pDrawable->y + yDst;
+        box.x2 = box.x1 + width;
+        box.y2 = box.y1 + height;
 
-    REGION_INIT(pScreen, &tmpRegion, &box, 0);
+        REGION_INIT(pScreen, &tmpRegion, &box, 0);
 
-    ADD_TO_MODIFIED_REGION(pScreen, &tmpRegion);
+        ADD_TO_MODIFIED_REGION(pScreen, &tmpRegion);
+    }
 
     ps->Composite = prfb->Composite;
     (*ps->Composite)(op, pSrc, pMask, pDst, xSrc, ySrc,
                      xMask, yMask, xDst, yDst, width, height);
     ps->Composite = rfbComposite;
 
-    SCHEDULE_FB_UPDATE(pScreen, prfb);
+    if (pDst->pDrawable->type == DRAWABLE_WINDOW &&
+        ((WindowPtr)pDst->pDrawable)->viewable) {
+        SCHEDULE_FB_UPDATE(pScreen, prfb);
 
-    REGION_UNINIT(pScreen, &tmpRegion);
+        REGION_UNINIT(pScreen, &tmpRegion);
+    }
 }
 #endif /* RENDER */
 
