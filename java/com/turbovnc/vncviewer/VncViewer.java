@@ -768,6 +768,12 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "When using the Via or Tunnel options, this parameter specifies the TCP "+
   "port on which the SSH server is listening.", 22);
 
+  static StringParameter sshKey
+  = new StringParameter("SSHKey",
+  "When using the Via or Tunnel options, this parameter specifies the text "+
+  "of the SSH private key to use when authenticating with the SSH server.  "+
+  "You can use \\n within the string to specify a new line.", null);
+
   static StringParameter sshKeyFile
   = new StringParameter("SSHKeyFile",
   "When using the Via or Tunnel options, this parameter specifies a file "+

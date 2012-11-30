@@ -75,7 +75,16 @@ public class Tunnel
       jsch.setKnownHosts(knownHosts.getAbsolutePath());
     ArrayList<File> privateKeys = new ArrayList<File>();
     String sshKeyFile = VncViewer.sshKeyFile.getValue();
-    if (sshKeyFile != null) {
+    String sshKey = VncViewer.sshKey.getValue();
+    if (sshKey != null) {
+      String sshKeyPass = VncViewer.sshKeyPass.getValue();
+      byte[] keyPass = null, key;
+      if (sshKeyPass != null)
+        keyPass = sshKeyPass.getBytes();
+      sshKey = sshKey.replaceAll("\\\\n", "\n");
+      key = sshKey.getBytes();
+      jsch.addIdentity("TurboVNC", key, null, keyPass);
+    } else if (sshKeyFile != null) {
       File f = new File(sshKeyFile);
       if (!f.exists() || !f.canRead())
         throw new java.lang.Exception("Cannot access private SSH key file " +
@@ -108,7 +117,7 @@ public class Tunnel
       try {
         session.connect();
       } catch(com.jcraft.jsch.JSchException e) {
-        System.out.println("Could not authenticate using SSH key.  Falling back to user/password.");
+        System.out.println("Could not authenticate using SSH private key.  Falling back to user/password.");
         jsch.removeAllIdentity();
         session = null;
       }
