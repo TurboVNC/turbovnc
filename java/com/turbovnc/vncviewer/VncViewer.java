@@ -761,6 +761,31 @@ public class VncViewer extends java.applet.Applet implements Runnable
   "must be specified on the command line or in the \"Server\" parameter when "+
   "using the Tunnel parameter.", false);
 
+  static IntParameter sshPort
+  = new IntParameter("SSHPort",
+  "When using the Via or Tunnel options, this parameter specifies the TCP "+
+  "port on which the SSH server is listening.", 22);
+
+  static StringParameter sshKeyFile
+  = new StringParameter("SSHKeyFile",
+  "When using the Via or Tunnel options, this parameter specifies a file "+
+  "that contains an SSH private key (or keys) to use when authenticating "+
+  "with the SSH server.  If not specified, then the built-in SSH client will "+
+  "attempt to read private keys from ~/.ssh/id_dsa and ~/.ssh/id_rsa.  It "+
+  "will fall back to asking for an SSH password if private key "+
+  "authentication fails.", null);
+
+  static StringParameter sshKeyPass
+  = new StringParameter("SSHKeyPass",
+  "When using the Via or Tunnel options, this parameter specifies the "+
+  "passphrase for the SSH key.", null);
+
+  static StringParameter sshUser
+  = new StringParameter("SSHUser",
+  "When using the Via or Tunnel options, this parameter specifies the "+
+  "username to use when authenticating with the SSH server.  If unspecified, "+
+  "then the local username will be used.", null);
+
   static StringParameter config
   = new StringParameter("Config",
   "File from which to read connection information.  This file can be generated "+

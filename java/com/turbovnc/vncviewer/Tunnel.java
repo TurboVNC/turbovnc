@@ -25,8 +25,7 @@
 package com.turbovnc.vncviewer;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 
 import com.turbovnc.rfb.*;
 import com.turbovnc.network.*;
@@ -75,24 +74,54 @@ public class Tunnel
     if (knownHosts.exists() && knownHosts.canRead())
       jsch.setKnownHosts(knownHosts.getAbsolutePath());
     ArrayList<File> privateKeys = new ArrayList<File>();
-    privateKeys.add(new File(homeDir + "/.ssh/id_rsa"));
-    privateKeys.add(new File(homeDir + "/.ssh/id_dsa"));
+    String sshKeyFile = VncViewer.sshKeyFile.getValue();
+    if (sshKeyFile != null) {
+      File f = new File(sshKeyFile);
+      if (!f.exists() || !f.canRead())
+        throw new java.lang.Exception("Cannot access private SSH key file " +
+                                      sshKeyFile);
+      privateKeys.add(f);
+    } else {
+      privateKeys.add(new File(homeDir + "/.ssh/id_rsa"));
+      privateKeys.add(new File(homeDir + "/.ssh/id_dsa"));
+    }
     for (Iterator<File> i = privateKeys.iterator(); i.hasNext();) {
       File privateKey = (File)i.next();
-      if (privateKey.exists() && privateKey.canRead())
-        jsch.addIdentity(privateKey.getAbsolutePath());
+      if (privateKey.exists() && privateKey.canRead()) {
+        if (VncViewer.sshKeyPass.getValue() != null)
+          jsch.addIdentity(privateKey.getAbsolutePath(),
+                           VncViewer.sshKeyPass.getValue());
+        else
+          jsch.addIdentity(privateKey.getAbsolutePath());
+      }
     }
 
     // username and passphrase will be given via UserInfo interface.
     vlog.debug("Opening SSH tunnel through gateway " + gatewayHost);
-    PasswdDialog dlg = new PasswdDialog(new String("SSH Authentication"),
-                                        false, null, false);
-    dlg.promptPassword(new String("SSH Authentication"));
-
-    Session session = jsch.getSession(dlg.userEntry.getText(), gatewayHost,
-                                      22);
-    session.setPassword(new String(dlg.passwdEntry.getPassword()));
-    session.connect();
+    String user = VncViewer.sshUser.getValue();
+    if (user == null)
+      user = (String)System.getProperties().get("user.name");
+    Session session = null;
+    if (user != null && jsch.getIdentityNames().size() > 0) {
+      session = jsch.getSession(user, gatewayHost,
+                                VncViewer.sshPort.getValue());
+      try {
+        session.connect();
+      } catch(com.jcraft.jsch.JSchException e) {
+        System.out.println("Could not authenticate using SSH key.  Falling back to user/password.");
+        jsch.removeAllIdentity();
+        session = null;
+      }
+    }
+    if (session == null) {
+      PasswdDialog dlg = new PasswdDialog(new String("SSH Authentication"),
+                                          false, user, false);
+      dlg.promptPassword(new String("SSH Authentication"));
+      session = jsch.getSession(dlg.userEntry.getText(), gatewayHost,
+                                VncViewer.sshPort.getValue());
+      session.setPassword(new String(dlg.passwdEntry.getPassword()));
+      session.connect();
+    }
     vlog.debug("Forwarding local port " + localPort + " to " + remoteHost
                + ":" + remotePort + " (relative to gateway)");
     session.setPortForwardingL(localPort, remoteHost, remotePort);

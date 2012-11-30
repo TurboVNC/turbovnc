@@ -65,7 +65,7 @@ class PasswdDialog extends Dialog implements KeyListener,
     getContentPane().add(p1);
     getContentPane().add(p2);
     pack();
-    if (userEntry.isEnabled()) {
+    if (userEntry.isEnabled() && userName == null) {
       userEntry.requestFocus();
     } else {
       passwdEntry.requestFocus();
