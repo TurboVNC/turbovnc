@@ -282,7 +282,9 @@ public class VncViewer extends java.applet.Applet implements Runnable
         } catch (java.lang.Exception e) {
           System.out.println("Could not create SSH tunnel:\n"+e.toString());
           exit(1);
+          return;
         }
+        host = null;
       }
     }
     else if (!applet)
