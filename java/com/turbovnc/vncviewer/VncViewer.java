@@ -224,7 +224,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
                     "Parameter names and values are case-insensitive (except for the value of\n"+
                     "Password.)\n\n"+
                     "The parameters are:\n\n");
-    System.err.println("\nTurboVNC Viewer v " + version + " (build " + build +
+    System.err.println("\nTurboVNC Viewer v" + version + " (build " + build +
                        ") [JVM: " + System.getProperty("os.arch") + "]");
     System.err.println("Copyright (C) " + copyright_year + " " + copyright);
     System.err.println(url);
