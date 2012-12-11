@@ -1494,13 +1494,16 @@ rfbSendFramebufferUpdate(cl)
             }
         }
         REGION_UNINIT(pScreen, &_updateRegion);
+        REGION_NULL(pScreen, &_updateRegion);
         cl->firstCompare = FALSE;
 
         /* The Windows TurboVNC Viewer (and probably some other VNC viewers as
            well) will ignore any empty FBUs and stop sending FBURs when it
            receives one.  If CU is not active, then this causes the viewer to
            stop receiving updates until something else, such as a mouse cursor
-           change, triggers a new FBUR. */
+           change, triggers a new FBUR.  Thus, if the ICE culls all of the
+           pixels in this update, we send a 1-pixel FBU rather than an empty
+           one. */
         if (REGION_NUM_RECTS(updateRegion) == 0) {
             BoxRec box;
             box.x1 = box.y1 = 0;
@@ -1706,8 +1709,8 @@ rfbSendFramebufferUpdate(cl)
         REGION_UNINIT(pScreen, &idRegion);
     if (cl->compareFB) {
         REGION_EMPTY(pScreen, updateRegion);
-    } else if (!REGION_NIL(updateRegion)) {
-        REGION_UNINIT(pScreen, updateRegion);
+    } else if (!REGION_NIL(&_updateRegion)) {
+        REGION_UNINIT(pScreen, &_updateRegion);
     }
     return FALSE;
 }
