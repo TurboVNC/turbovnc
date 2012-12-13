@@ -67,9 +67,9 @@ abstract public class CConnection extends CMsgHandler {
     case RFBSTATE_INITIALISATION:   processInitMsg(benchmark);  break;
     case RFBSTATE_NORMAL:           reader_.readMsg();          break;
     case RFBSTATE_UNINITIALISED:
-      throw new Exception("CConnection.processMsg: not initialised yet?");
+      throw new ErrorException("CConnection.processMsg: not initialised yet?");
     default:
-      throw new Exception("CConnection.processMsg: invalid state");
+      throw new ErrorException("CConnection.processMsg: invalid state");
     }
   }
 
@@ -78,7 +78,7 @@ abstract public class CConnection extends CMsgHandler {
     vlog.debug("reading protocol version");
     if (!cp.readVersion(is)) {
       state_ = RFBSTATE_INVALID;
-      throw new Exception("reading version failed: not an RFB server?");
+      throw new ErrorException("Reading version failed: not an RFB server?");
     }
     if (!cp.done) return;
 
@@ -91,7 +91,7 @@ abstract public class CConnection extends CMsgHandler {
                     cp.majorVersion + "." + cp.minorVersion);
       vlog.error(msg);
       state_ = RFBSTATE_INVALID;
-      throw new Exception(msg);
+      throw new ErrorException(msg);
     } else if (useProtocol3_3 || cp.beforeVersion(3,7)) {
       cp.setVersion(3,3);
     } else if (cp.afterVersion(3,8)) {
@@ -136,8 +136,8 @@ abstract public class CConnection extends CMsgHandler {
         if (!secTypes.contains(secType))
           secType = Security.secTypeInvalid;
       } else {
-        vlog.error("Unknown 3.3 security type " + secType);
-        throw new Exception("Unknown 3.3 security type");
+        vlog.error("Unknown RFB 3.3 security type " + secType);
+        throw new ErrorException("Unknown RFB 3.3 security type " + secType);
       }
 
     } else {
@@ -188,7 +188,7 @@ abstract public class CConnection extends CMsgHandler {
     if (secType == Security.secTypeInvalid) {
       state_ = RFBSTATE_INVALID;
       vlog.error("No matching security types");
-      throw new Exception("No matching security types");
+      throw new ErrorException("No matching security types");
     }
 
     state_ = RFBSTATE_SECURITY;
@@ -224,7 +224,7 @@ abstract public class CConnection extends CMsgHandler {
       vlog.debug("auth failed - too many tries");
       break;
     default:
-      throw new Exception("Unknown security result from server");
+      throw new ErrorException("Unknown security result from server");
     }
     String reason;
     if (cp.beforeVersion(3,8))

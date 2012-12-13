@@ -1,4 +1,5 @@
 /* Copyright (C) 2012 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,42 +28,42 @@ import java.nio.channels.spi.SelectorProvider;
 import java.util.Set;
 import java.util.Iterator;
 
-import com.turbovnc.rdr.Exception;
+import com.turbovnc.rdr.*;
 
 public class SocketDescriptor implements FileDescriptor {
 
-  public SocketDescriptor() throws Exception {
+  public SocketDescriptor() {
     DefaultSelectorProvider();
     try {
       channel = SocketChannel.open();
       channel.configureBlocking(false);
       writeSelector = Selector.open();
       readSelector = Selector.open();
-    } catch (IOException e) {
-      throw new Exception(e.toString());
+    } catch(IOException e) {
+      throw new SystemException(e.toString());
     }
     try {
       channel.register(writeSelector, SelectionKey.OP_WRITE);
       channel.register(readSelector, SelectionKey.OP_READ);
-    } catch (java.nio.channels.ClosedChannelException e) {
-      throw new Exception(e.toString());
+    } catch(java.nio.channels.ClosedChannelException e) {
+      throw new SystemException(e.toString());
     }
   }
 
-  public void shutdown() throws IOException {
+  public void shutdown() {
     try {
       channel.socket().shutdownInput();
       channel.socket().shutdownOutput();
     } catch(IOException e) {
-      throw new IOException(e.toString());
+      throw new SystemException(e.toString());
     }
   }
 
-  public void close() throws IOException {
+  public void close() {
     try {
       channel.close();
     } catch(IOException e) {
-      throw new IOException(e.toString());
+      throw new SystemException(e.toString());
     }
   }
 
@@ -74,13 +75,13 @@ public class SocketDescriptor implements FileDescriptor {
     return SelectorProvider.provider();
   }
 
-  synchronized public int read(byte[] buf, int bufPtr, int length) throws Exception {
+  synchronized public int read(byte[] buf, int bufPtr, int length) {
     int n;
     ByteBuffer b = ByteBuffer.allocate(length);
     try {
       n = channel.read(b);
-    } catch (java.io.IOException e) {
-      throw new Exception(e.toString());
+    } catch(IOException e) {
+      throw new WarningException("Read error: " + e.getMessage());
     }
     if (n <= 0)
       return (n == 0) ? -1 : 0;
@@ -91,21 +92,21 @@ public class SocketDescriptor implements FileDescriptor {
 
   }
 
-  synchronized public int write(byte[] buf, int bufPtr, int length) throws Exception {
+  synchronized public int write(byte[] buf, int bufPtr, int length) {
     int n;
     ByteBuffer b = ByteBuffer.allocate(length);
     b.put(buf, bufPtr, length);
     b.flip();
     try {
       n = channel.write(b);
-    } catch (java.io.IOException e) {
-      throw new Exception(e.toString());
+    } catch(IOException e) {
+      throw new ErrorException("Write error: " + e.getMessage());
     }
     b.clear();
     return n;
   }
 
-  synchronized public int select(int interestOps, Integer timeout) throws Exception {
+  synchronized public int select(int interestOps, Integer timeout) {
     int n;
     Selector selector;
     if ((interestOps & SelectionKey.OP_READ) != 0) {
@@ -128,52 +129,48 @@ public class SocketDescriptor implements FileDescriptor {
           break;
         }
       }
-    } catch (java.io.IOException e) {
-      throw new Exception(e.toString());
+    } catch(IOException e) {
+      throw new SystemException(e.toString());
     }
     return n;
   }
 
-  public int write(ByteBuffer buf) throws Exception {
+  public int write(ByteBuffer buf) {
     int n = 0;
     try {
       n = channel.write(buf);
-    } catch (java.io.IOException e) {
-      throw new Exception(e.toString());
+    } catch(IOException e) {
+      throw new ErrorException("Write error: " + e.getMessage());
     }
     return n;
   }
 
-  public long write(ByteBuffer[] buf, int offset, int length) 
-        throws IOException
-  {
+  public long write(ByteBuffer[] buf, int offset, int length) {
     long n = 0;
     try {
       n = channel.write(buf, offset, length);
-    } catch (java.io.IOException e) {
-      throw new Exception(e.toString());
+    } catch(IOException e) {
+      throw new ErrorException("Write error: " + e.getMessage());
     }
     return n;
   }
 
-  public int read(ByteBuffer buf) throws IOException {
+  public int read(ByteBuffer buf) {
     int n = 0;
     try {
       n = channel.read(buf);
-    } catch (java.io.IOException e) {
-      throw new Exception(e.toString());
+    } catch(IOException e) {
+      throw new WarningException("Read error: " + e.getMessage());
     }
     return n;
   }
 
-  public long read(ByteBuffer[] buf, int offset, int length) 
-        throws IOException
-  {
+  public long read(ByteBuffer[] buf, int offset, int length) {
     long n = 0;
     try {
       n = channel.read(buf, offset, length);
-    } catch (java.io.IOException e) {
-      throw new Exception(e.toString());
+    } catch(IOException e) {
+      throw new WarningException("Read error: " + e.getMessage());
     }
     return n;
   }
@@ -182,13 +179,13 @@ public class SocketDescriptor implements FileDescriptor {
     return channel.socket();
   }
  
-  public SocketAddress getRemoteAddress() throws IOException {
+  public SocketAddress getRemoteAddress() {
     if (isConnected())
       return channel.socket().getRemoteSocketAddress();
     return null;
   }
 
-  public SocketAddress getLocalAddress() throws IOException {
+  public SocketAddress getLocalAddress() {
     if (isConnected())
       return channel.socket().getLocalSocketAddress();
     return null;
@@ -198,25 +195,24 @@ public class SocketDescriptor implements FileDescriptor {
     return channel.isConnectionPending();
   }
 
-  public boolean connect(SocketAddress remote) throws IOException {
-    return channel.connect(remote);
+  public boolean connect(SocketAddress remote) {
+    try {
+      return channel.connect(remote);
+    } catch(IOException e) {
+      throw new WarningException("Could not connect: " + e.getMessage());
+    }
   }
 
-  public boolean finishConnect() throws IOException {
-    return channel.finishConnect();
+  public boolean finishConnect() {
+    try {
+      return channel.finishConnect();
+    } catch(IOException e) {
+      throw new WarningException("Could not connect: " + e.getMessage());
+    }
   }
 
   public boolean isConnected() {
     return channel.isConnected();
-  }
-
-  protected void implConfigureBlocking(boolean block) throws IOException {
-    channel.configureBlocking(block);
-  }
-
-  protected synchronized void implCloseSelectableChannel() throws IOException {
-    channel.close();
-    notifyAll();
   }
 
   protected void setChannel(SocketChannel channel_) {
@@ -231,13 +227,13 @@ public class SocketDescriptor implements FileDescriptor {
       channel.configureBlocking(false);
       writeSelector = Selector.open();
       readSelector = Selector.open();
-    } catch (java.io.IOException e) {
-      throw new Exception(e.toString());
+    } catch(IOException e) {
+      throw new SystemException(e.toString());
     }
     try {
       channel.register(writeSelector, SelectionKey.OP_WRITE);
       channel.register(readSelector, SelectionKey.OP_READ);
-    } catch (java.nio.channels.ClosedChannelException e) {
+    } catch(java.nio.channels.ClosedChannelException e) {
       System.out.println(e.toString());
     }
   }

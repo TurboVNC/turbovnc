@@ -68,7 +68,7 @@ public class UserPreferences {
       String[] keys = root.keys();
       for (int i = 0; i < keys.length; i++)
         vlog.debug(keys[i] + " = " + root.get(keys[i], null));
-    } catch (BackingStoreException e) {
+    } catch(BackingStoreException e) {
       vlog.error(e.getMessage());
     }
   }
@@ -80,7 +80,7 @@ public class UserPreferences {
       String[] keys = root.keys();
       for (int i = 0; i < keys.length; i++)
         vlog.debug(keys[i] + " = " + node.get(keys[i], null));
-    } catch (BackingStoreException e) {
+    } catch(BackingStoreException e) {
       vlog.error(e.getMessage());
     }
   }
@@ -94,7 +94,7 @@ public class UserPreferences {
         node.removeNode();
       }
       root.sync();
-    } catch (BackingStoreException e) {
+    } catch(BackingStoreException e) {
       vlog.error(e.getMessage());
     }
   }
@@ -156,7 +156,7 @@ public class UserPreferences {
         if (valueStr != null)
           Configuration.setParam(key, valueStr);
       }
-    } catch (BackingStoreException e) {
+    } catch(BackingStoreException e) {
       vlog.error(e.getMessage());
     }
     if ((setEncX509 || setEncTLS || setEncNone) &&

@@ -56,7 +56,7 @@ public class CSecurityTLS extends CSecurity {
       try {
         ctx = SSLContext.getInstance("TLS");
       } catch(NoSuchAlgorithmException e) {
-        throw new Exception(e.toString());
+        throw new ErrorException(e.getMessage());
       }
 
       globalInitDone = true;
@@ -109,8 +109,8 @@ public class CSecurityTLS extends CSecurity {
 
     try {
       manager.doHandshake();
-    } catch (java.lang.Exception e) {
-      throw new Exception(e.toString());
+    } catch(java.lang.Exception e) {
+      throw new SystemException(e.toString());
     }
 
     //checkSession();
@@ -126,7 +126,7 @@ public class CSecurityTLS extends CSecurity {
       try {
         ctx.init(null, null, null);
       } catch(KeyManagementException e) {
-        throw new AuthFailureException(e.toString());
+        throw new AuthFailureException(e.getMessage());
       }
     } else {
       try {
@@ -134,8 +134,8 @@ public class CSecurityTLS extends CSecurity {
           new MyX509TrustManager() 
         };
         ctx.init (null, myTM, null);
-      } catch (java.security.GeneralSecurityException e) {
-        throw new AuthFailureException(e.toString());
+      } catch(java.security.GeneralSecurityException e) {
+        throw new AuthFailureException(e.getMessage());
       }
     }
     SSLSocketFactory sslfactory = ctx.getSocketFactory();
@@ -201,9 +201,9 @@ public class CSecurityTLS extends CSecurity {
           params.setRevocationEnabled(true);
         }
         tmf.init(new CertPathTrustManagerParameters(params));
-      } catch (java.io.FileNotFoundException e) { 
+      } catch(java.io.FileNotFoundException e) { 
         vlog.error(e.toString());
-      } catch (java.io.IOException e) {
+      } catch(java.io.IOException e) {
         vlog.error(e.toString());
       }
       tm = (X509TrustManager)tmf.getTrustManagers()[0];
@@ -220,7 +220,7 @@ public class CSecurityTLS extends CSecurity {
     {
       try {
 	      tm.checkServerTrusted(chain, authType);
-      } catch (CertificateException e) {
+      } catch(CertificateException e) {
         Object[] answer = {"Proceed", "Exit"};
         int ret = JOptionPane.showOptionDialog(null,
           e.getCause().getLocalizedMessage()+"\n" +
@@ -230,8 +230,8 @@ public class CSecurityTLS extends CSecurity {
           null, answer, answer[0]);
         if (ret == JOptionPane.NO_OPTION)
           System.exit(1);
-      } catch (java.lang.Exception e) {
-        throw new Exception(e.toString());
+      } catch(java.lang.Exception e) {
+        throw new SystemException(e.toString());
       }
     }
 

@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,8 +110,8 @@ public class ZRLEDecoder extends Decoder {
               } while (b == 255);
 
               if (!(len <= end - ptr))
-                throw new Exception("ZRLEDecoder: assertion (len <= end - ptr)"
-                                    +" failed");
+                throw new ErrorException(
+                  "ZRLEDecoder: assertion (len <= end - ptr) failed");
 
               while (len-- > 0) buf[ptr++] = pix;
             }
@@ -131,8 +132,8 @@ public class ZRLEDecoder extends Decoder {
                 } while (b == 255);
 
                 if (!(len <= end - ptr))
-                  throw new Exception("ZRLEDecoder: assertion "
-                                      +"(len <= end - ptr) failed");
+                  throw new ErrorException(
+                    "ZRLEDecoder: assertion (len <= end - ptr) failed");
               }
 
               index &= 127;

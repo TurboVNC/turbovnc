@@ -47,7 +47,7 @@ public class FileInStream extends InStream {
   protected int overrun(int itemSize, int nItems, boolean wait) 
   {
     if (itemSize > BUFSIZE)
-      throw new Exception("FileInStream overrun: max itemSize exceeded");
+      throw new ErrorException("FileInStream overrun: max itemSize exceeded");
 
     double tReadStart = getTime();
 
@@ -63,7 +63,7 @@ public class FileInStream extends InStream {
       try {
         n = fis.read(b, end, BUFSIZE - end);
       } catch(IOException e) {
-        throw new Exception(e.getMessage());
+        throw new ErrorException("Read error: " + e.getMessage());
       }
       if (n < 1) {
         tRead += getTime() - tReadStart;

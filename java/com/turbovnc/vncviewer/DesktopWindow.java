@@ -387,8 +387,8 @@ class DesktopWindow extends JPanel implements
               oldContents = newContents;
               cc.clipboardDialog.setContents(newContents);
             }
-          } catch (java.lang.Exception e) {
-            System.out.println("Exception getting clipboard data: " + e.getMessage());
+          } catch(Exception e) {
+            System.out.println("Error getting clipboard data: " + e.getMessage());
           }
         }
       }
@@ -585,7 +585,7 @@ class DesktopWindow extends JPanel implements
   synchronized public void run() {
     try {
       Thread.sleep(100);
-    } catch (InterruptedException e) {}
+    } catch(InterruptedException e) {}
     im.updateColourMap();
     setColourMapEntriesTimerThread = null;
   }

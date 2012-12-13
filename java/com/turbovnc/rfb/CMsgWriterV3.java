@@ -1,6 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman for Cendio AB
  * Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +45,7 @@ public class CMsgWriterV3 extends CMsgWriter {
                                   ScreenSet layout)
 	{
 	  if (!cp.supportsSetDesktopSize)
-	    throw new Exception("Server does not support SetDesktopSize");
+	    throw new ErrorException("Server does not support SetDesktopSize");
 	
 	  startMsg(MsgTypes.msgTypeSetDesktopSize);
 	  os.pad(1);
@@ -71,11 +72,11 @@ public class CMsgWriterV3 extends CMsgWriter {
   synchronized public void writeFence(int flags, int len, byte[] data)
   {
     if (!cp.supportsFence)
-      throw new Exception("Server does not support fences");
+      throw new ErrorException("Server does not support fences");
     if (len > 64)
-      throw new Exception("Too large fence payload");
+      throw new ErrorException("Fence payload too large");
     if ((flags & ~fenceTypes.fenceFlagsSupported) != 0)
-      throw new Exception("Unknown fence flags");
+      throw new ErrorException("Unknown fence flags");
   
     startMsg(MsgTypes.msgTypeClientFence);
     os.pad(3);
@@ -92,7 +93,7 @@ public class CMsgWriterV3 extends CMsgWriter {
                                            int x, int y, int w, int h)
   {
     if (!cp.supportsContinuousUpdates)
-      throw new Exception("Server does not support continuous updates");
+      throw new ErrorException("Server does not support continuous updates");
   
     startMsg(MsgTypes.msgTypeEnableContinuousUpdates);
   

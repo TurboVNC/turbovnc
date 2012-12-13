@@ -2,6 +2,7 @@
  * Copyright (C) 2005 Martin Koegler
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011-2012 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,7 +64,7 @@ public class TLSInStream extends InStream {
 
   protected final int overrun(int itemSize, int nItems, boolean wait) {
     if (itemSize > bufSize)
-      throw new Exception("TLSInStream overrun: max itemSize exceeded");
+      throw new ErrorException("TLSInStream overrun: max itemSize exceeded");
 
     if (end - ptr != 0)
       System.arraycopy(b, ptr, b, 0, end - ptr);
@@ -95,11 +96,11 @@ public class TLSInStream extends InStream {
 
     try {
       n = manager.read(buf, bufPtr, len);
-    } catch (java.io.IOException e) {
-      e.printStackTrace();
+    } catch(java.io.IOException e) {
+      throw new ErrorException("TLS read error: " + e.getMessage());
     }
 
-    if (n < 0) throw new TLSException("readTLS", n);
+    if (n < 0) throw new ErrorException("TLS read error");
 
     return n;
   }

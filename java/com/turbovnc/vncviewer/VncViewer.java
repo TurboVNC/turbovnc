@@ -69,7 +69,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
         copyright_year = attributes.getValue("Copyright-Year");
         copyright = attributes.getValue("Copyright");
         url = attributes.getValue("URL");
-      } catch (java.io.IOException e) { }
+      } catch(IOException e) { }
     }
   }
 
@@ -99,7 +99,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
       UIManager.put("TitledBorder.titleColor",Color.blue);
       if (os.startsWith("mac os x"))
         System.setProperty("apple.laf.useScreenMenuBar", "true");
-    } catch (java.lang.Exception e) { 
+    } catch(Exception e) { 
       vlog.info(e.toString());
     }
   }
@@ -141,7 +141,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
         if (i < argv.length - 1) {
           try {
             benchFile = new FileInStream(argv[++i]);
-          } catch (java.lang.Exception e) {
+          } catch(Exception e) {
             System.out.println("Could not open session capture:\n"+e.toString());
             exit(1);
           }
@@ -195,7 +195,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
         usage();
       try {
         Tunnel.createTunnel(opts);
-      } catch (java.lang.Exception e) {
+      } catch(Exception e) {
         System.out.println("Could not create SSH tunnel:\n"+e.toString());
         exit(1);
       }
@@ -279,7 +279,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
       if ((opts.via != null || opts.tunnel) && opts.serverName != null) {
         try {
           Tunnel.createTunnel(opts);
-        } catch (java.lang.Exception e) {
+        } catch(Exception e) {
           System.out.println("Could not create SSH tunnel:\n"+e.toString());
           exit(1);
           return;
@@ -320,6 +320,23 @@ public class VncViewer extends java.applet.Applet implements Runnable
     g.drawString(url, 0, h);
   }
 
+  void reportException(Exception e) {
+    String title, msg = e.getMessage();
+    int msgType = JOptionPane.ERROR_MESSAGE;
+    if (e instanceof WarningException) {
+      msgType = JOptionPane.WARNING_MESSAGE;
+      title = "TurboVNC Viewer";
+    } else if (e instanceof ErrorException) {
+      title = "TurboVNC Viewer : Error";
+    } else {
+      if (!(e instanceof SystemException))
+        msg = e.toString();
+      title = "TurboVNC Viewer : Unexpected Error";
+      e.printStackTrace();
+    }
+    JOptionPane.showMessageDialog(null, msg, title, msgType);
+  }
+
   public void run() {
     CConn cc = null;
     int exitStatus = 0;
@@ -337,8 +354,8 @@ public class VncViewer extends java.applet.Applet implements Runnable
       TcpListener listener = null;
       try {
         listener = new TcpListener(null, port);
-      } catch (java.lang.Exception e) {
-        System.out.println(e.toString());
+      } catch(Exception e) {
+        reportException(e);
         exit(1);
       }
 
@@ -369,7 +386,7 @@ public class VncViewer extends java.applet.Applet implements Runnable
           try {
             while (!cc.shuttingDown)
               cc.processMsg(true);
-          } catch (EndOfStream e) {}
+          } catch(EndOfStream e) {}
           tTotal = getTime() - tStart - benchFile.getReadTime();
           if (i >= benchWarmup) {
             System.out.format("%f s (Decode = %f, Blit = %f)\n", tTotal,
@@ -387,13 +404,9 @@ public class VncViewer extends java.applet.Applet implements Runnable
           while (!cc.shuttingDown)
             cc.processMsg(false);
         }
-      } catch (java.lang.Exception e) {
+      } catch(Exception e) {
         if (cc == null || !cc.shuttingDown) {
-          e.printStackTrace();
-          JOptionPane.showMessageDialog(null,
-            e.toString(),
-            "VNC Viewer : Error",
-            JOptionPane.ERROR_MESSAGE);
+          reportException(e);
           exitStatus = 1;
         } else {
           if (!cc.shuttingDown) {

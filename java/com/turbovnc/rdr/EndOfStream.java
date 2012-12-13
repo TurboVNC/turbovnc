@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +20,8 @@
 
 package com.turbovnc.rdr;
 
-public class EndOfStream extends Exception {
+public class EndOfStream extends WarningException {
   public EndOfStream() {
-    super("EndOfStream");
+    super("Connection closed");
   }
 }

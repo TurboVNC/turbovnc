@@ -26,6 +26,8 @@ package com.turbovnc.rfb;
 
 import java.awt.image.*;
 
+import com.turbovnc.rdr.ErrorException;
+
 public class PixelBuffer {
 
   public PixelBuffer() {
@@ -34,7 +36,8 @@ public class PixelBuffer {
 
   public void setPF(PixelFormat pf) {
     if (!(pf.bpp == 32) && !(pf.bpp == 16) && !(pf.bpp == 8))
-      throw new Exception("Internal error: bpp must be 8, 16, or 32 in PixelBuffer ("+pf.bpp+")");
+      throw new ErrorException("setPF() called with incorrect pixel format (bpp = " +
+                               pf.bpp + ")");
     format = pf;
     switch (pf.depth) {
     case  3: 
@@ -61,7 +64,7 @@ public class PixelBuffer {
         (0xff << pf.greenShift), (0xff << pf.blueShift));
       break;
     default:
-      throw new Exception("Unsupported color depth ("+pf.depth+")");
+      throw new ErrorException("Unsupported color depth (" + pf.depth + ")");
     }
   }
   public PixelFormat getPF() { return format; }

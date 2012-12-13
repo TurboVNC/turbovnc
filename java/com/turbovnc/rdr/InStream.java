@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
 /* Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,13 +73,13 @@ abstract public class InStream {
   public final String readString() {
     int len = readU32();
     if (len > maxStringLength)
-      throw new Exception("InStream max string length exceeded");
+      throw new ErrorException("InStream max string length exceeded");
 
     byte[] str = new byte[len];
     readBytes(str, 0, len);
     String utf8string = new String();
     try {
-      utf8string = new String(str,"UTF8");
+      utf8string = new String(str, "UTF8");
     } catch(java.io.UnsupportedEncodingException e) {
       e.printStackTrace();
     }

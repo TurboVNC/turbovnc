@@ -2,6 +2,7 @@
  * Copyright (C) 2004 Red Hat Inc.
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2012 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,11 +20,13 @@
  * USA.
  */
 
+/* This is used solely to pass Java exceptions up to the main viewer class,
+   so we don't have to declare them to be thrown everywhere. */
+
 package com.turbovnc.rdr;
 
-public class SystemException extends Exception {
+public class SystemException extends RuntimeException {
   public SystemException(String s) {
     super(s);
   }
 }
-

@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +19,8 @@
 
 package com.turbovnc.rfb;
 
-public class ConnFailedException extends Exception {
+import com.turbovnc.rdr.ErrorException;
+
+public class ConnFailedException extends ErrorException {
   public ConnFailedException(String s) { super(s); }
 }

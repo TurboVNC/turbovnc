@@ -21,7 +21,7 @@
 
 package com.turbovnc.rfb;
 
-import com.turbovnc.rdr.InStream;
+import com.turbovnc.rdr.*;
 import java.util.ArrayList;
 import java.io.InputStream;
 import java.awt.image.*;
@@ -62,16 +62,16 @@ public class TightDecoder extends Decoder {
         vlog.info("Disabling TurboJPEG");
         tjd = null;
       }
-    } catch (java.lang.NoClassDefFoundError e) {
+    } catch(java.lang.NoClassDefFoundError e) {
       vlog.info("WARNING: Could not initialize libjpeg-turbo:");
       vlog.info("  Class not found: "+e.getMessage());
       vlog.info("  Using unaccelerated JPEG decompressor.");
-    } catch (java.lang.UnsatisfiedLinkError e) {
+    } catch(java.lang.UnsatisfiedLinkError e) {
       vlog.info("WARNING: Could not find TurboJPEG JNI library.  If it is in a");
       vlog.info("  non-standard location, then add -Djava.library.path=<dir>");
       vlog.info("  to the Java command line to specify its location.");
       vlog.info("  Using unaccelerated JPEG decompressor.");
-    } catch (java.lang.Exception e) {
+    } catch(java.lang.Exception e) {
       vlog.info("WARNING: Could not initialize libjpeg-turbo:");
       vlog.info("  "+e.getMessage());
       vlog.info("  Using unaccelerated JPEG decompressor.");
@@ -114,7 +114,7 @@ public class TightDecoder extends Decoder {
       palette = new short[256];
     } else {
       // We should never get here
-      throw new Exception("Unsupported pixel format");
+      throw new ErrorException("Unsupported pixel format");
     }
   }
 
@@ -174,7 +174,7 @@ public class TightDecoder extends Decoder {
 
     // Quit on unsupported compression type.
     if (comp_ctl > rfbTightMaxSubencoding) {
-      throw new Exception("TightDecoder: bad subencoding value received");
+      throw new ErrorException("TightDecoder: bad subencoding value received");
     }
 
     int w = r.width(), h = r.height();
@@ -212,7 +212,7 @@ public class TightDecoder extends Decoder {
         }
       } else {
         // We should never get here
-        throw new Exception("Unsupported pixel type");
+        throw new ErrorException("Unsupported pixel type");
       }
       handler.releaseRawPixels(r);
       return;
@@ -241,7 +241,7 @@ public class TightDecoder extends Decoder {
       case rfbTightFilterCopy:
         break;
       default:
-        throw new Exception("TightDecoder: unknown filter code recieved");
+        throw new ErrorException("TightDecoder: unknown filter code recieved");
       }
     }
 
@@ -273,7 +273,7 @@ public class TightDecoder extends Decoder {
       try {
         inflater[streamId].inflate(decodebuf, 0, dataSize);
       } catch(java.util.zip.DataFormatException e) {
-        throw new Exception(e.getMessage());
+        throw new ErrorException(e.getMessage());
       }
     }
 
@@ -288,7 +288,7 @@ public class TightDecoder extends Decoder {
           filterGradient16(decodebuf, (short[])buf, stride[0], r);
         } else {
           // We should never get here
-          throw new Exception("Unsupported pixel type");
+          throw new ErrorException("Unsupported pixel type");
         }
       } else {
         // Copy
@@ -314,7 +314,7 @@ public class TightDecoder extends Decoder {
           }
         } else {
           // We should never get here
-          throw new Exception("Unsupported pixel type");
+          throw new ErrorException("Unsupported pixel type");
         }
       }
     } else {
@@ -484,9 +484,9 @@ public class TightDecoder extends Decoder {
         }
         handler.releaseRawPixels(r);
         return;
-      } catch (java.lang.Exception e) {
-        throw new Exception(e.getMessage());
-      } catch (java.lang.UnsatisfiedLinkError e) {
+      } catch(java.lang.Exception e) {
+        throw new ErrorException(e.getMessage());
+      } catch(java.lang.UnsatisfiedLinkError e) {
         vlog.info("WARNING: TurboJPEG JNI library is not new enough.");
         vlog.info("  Using unaccelerated JPEG decompressor.");
         tjd = null;

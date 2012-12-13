@@ -25,8 +25,7 @@ import javax.net.ssl.SSLEngineResult.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import com.turbovnc.rdr.FdInStream;
-import com.turbovnc.rdr.FdOutStream;
+import com.turbovnc.rdr.*;
 
 public class SSLEngineManager {
 
@@ -243,7 +242,7 @@ public class SSLEngineManager {
       // In SSL v2, the version is part of the handshake
       sslVersion = header[headerBytes + 1] & 0xFF;
       if (sslVersion < 2 || sslVersion > 3 || sslDataLength == 0)
-        throw new IOException("not an SSL/TLS record");
+        throw new ErrorException("Not an SSL/TLS record");
 
       // The number of bytes left to read
       sslDataLength -= (5 - headerBytes);

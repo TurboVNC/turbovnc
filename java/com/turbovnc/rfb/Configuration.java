@@ -154,7 +154,7 @@ public class Configuration {
     } catch(java.security.AccessControlException e) {
       vlog.error("Cannot access connection info file:" + e.getMessage());
       return;
-    } catch (java.lang.Exception e) {
+    } catch(java.lang.Exception e) {
       vlog.error("Error opening connection info file:" + e.getMessage());
       return;
     }
@@ -179,7 +179,7 @@ public class Configuration {
             int temp = -1;
             try {
               temp = Integer.parseInt(passwordString.substring(c, c + 2), 16);
-            } catch (NumberFormatException e) {}
+            } catch(NumberFormatException e) {}
             if (temp >= 0)
               encryptedPassword[c / 2] = (byte)temp;
             else break;
@@ -190,7 +190,7 @@ public class Configuration {
         int encoding = -1;
         try {
           encoding = Integer.parseInt(props.getProperty(name));
-        } catch (NumberFormatException e) {}
+        } catch(NumberFormatException e) {}
         if (encoding >= 0 && encoding <= Encodings.LASTENCODING)
           setParam("Encoding", Encodings.encodingName(encoding));
       } else if (name.equalsIgnoreCase("viewonly")) {
@@ -203,7 +203,7 @@ public class Configuration {
         int span = -1;
         try {
           span = Integer.parseInt(props.getProperty(name));
-        } catch (NumberFormatException e) {}
+        } catch(NumberFormatException e) {}
         if (span == 0) setParam("Span", "Primary");
         else if (span == 1) setParam("Span", "All");
         else if (span == 2) setParam("Span", "Auto");
@@ -211,7 +211,7 @@ public class Configuration {
         int _8bit = -1;
         try {
           _8bit = Integer.parseInt(props.getProperty(name));
-        } catch (NumberFormatException e) {}
+        } catch(NumberFormatException e) {}
         if (_8bit >= 1)
           setParam("Colors", "256");
         else if (_8bit == 0)
@@ -222,7 +222,7 @@ public class Configuration {
         int disableclipboard = -1;
         try {
           disableclipboard = Integer.parseInt(props.getProperty(name));
-        } catch (NumberFormatException e) {}
+        } catch(NumberFormatException e) {}
         if (disableclipboard >= 1) {
           setParam("RecvClipboard", "0");
           setParam("SendClipboard", "0");
@@ -233,18 +233,18 @@ public class Configuration {
       } else if (name.equalsIgnoreCase("fitwindow")) {
         try {
           fitwindow = Integer.parseInt(props.getProperty(name));
-        } catch (NumberFormatException e) {}
+        } catch(NumberFormatException e) {}
       } else if (name.equalsIgnoreCase("scale_num")) {
         int temp = -1;
         try {
           temp = Integer.parseInt(props.getProperty(name));
-        } catch (NumberFormatException e) {}
+        } catch(NumberFormatException e) {}
         if (temp >= 1) scale_num = temp;
       } else if (name.equalsIgnoreCase("scale_den")) {
         int temp = -1;
         try {
           temp = Integer.parseInt(props.getProperty(name));
-        } catch (NumberFormatException e) {}
+        } catch(NumberFormatException e) {}
         if (temp >= 1) scale_den = temp;
       } else if (name.equalsIgnoreCase("cursorshape")) {
         setParam("CursorShape", props.getProperty(name));
@@ -254,7 +254,7 @@ public class Configuration {
         int subsampling = -1;
         try {
           subsampling = Integer.parseInt(props.getProperty(name));
-        } catch (NumberFormatException e) {}
+        } catch(NumberFormatException e) {}
         switch (subsampling) {
         case 0:  setParam("Subsampling", "1X");  break;
         case 1:  setParam("Subsampling", "4X");  break;
@@ -265,7 +265,7 @@ public class Configuration {
         int quality = -2;
         try {
           quality = Integer.parseInt(props.getProperty(name));
-        } catch (NumberFormatException e) {}
+        } catch(NumberFormatException e) {}
         if (quality == -1) setParam("JPEG", "0");
         else if (quality >= 1 && quality <= 100) {
           setParam("Quality", props.getProperty(name));

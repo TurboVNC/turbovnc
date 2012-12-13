@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +22,7 @@ package com.turbovnc.network;
 
 import com.turbovnc.rdr.FdInStream;
 import com.turbovnc.rdr.FdOutStream;
-import com.turbovnc.rdr.Exception;
+import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.LogWriter;
 
 import java.io.IOException;
@@ -53,7 +54,7 @@ public class TcpSocket extends Socket {
     this(sock, true);
   }
 
-  public TcpSocket(String host, int port) throws Exception {
+  public TcpSocket(String host, int port) {
     closeFd = true;
     SocketDescriptor sock = null;
     InetAddress addr = null;
@@ -65,34 +66,22 @@ public class TcpSocket extends Socket {
     try {
       addr = java.net.InetAddress.getByName(host);
     } catch(UnknownHostException e) {
-      throw new Exception("unable to resolve host by name: "+e.toString());
+      throw new WarningException("Could not resolve hostname: " + 
+                                 e.getMessage());
     }
 
-    try {
-      sock = new SocketDescriptor();
-    } catch(Exception e) {
-      throw new SocketException("unable to create socket: "+e.toString());
-    }
+    sock = new SocketDescriptor();
 
     /* Attempt to connect to the remote host */
-    try {
-      result = sock.connect(new InetSocketAddress(addr, port));
-    } catch(java.io.IOException e) {
-      throw new SocketException("unable to connect:"+e.getMessage());
-    }
+    result = sock.connect(new InetSocketAddress(addr, port));
 
     if (!result && sock.isConnectionPending()) {
-      while (!result) {
-        try {
-          result = sock.finishConnect();
-        } catch(java.io.IOException e) {
-          throw new Exception(e.getMessage());
-        }
-      }
+      while (!result)
+        result = sock.finishConnect();
     }
 
     if (!result)
-      throw new SocketException("unable connect to socket");
+      throw new WarningException("Could not connect");
 
     // Disable Nagle's algorithm, to reduce latency
     enableNagles(sock, false);
@@ -103,13 +92,9 @@ public class TcpSocket extends Socket {
     ownStreams = true;
   }
 
-  protected void finalize() throws Exception {
+  protected void finalize() {
     if (closeFd)
-      try {
-        ((SocketDescriptor)getFd()).close();
-      } catch (IOException e) {
-        throw new Exception(e.toString());
-      }
+      ((SocketDescriptor)getFd()).close();
   }
 
   public int getMyPort() {
@@ -142,26 +127,18 @@ public class TcpSocket extends Socket {
     return address+"::"+port;
   }
 
-  public boolean sameMachine() throws Exception {
-    try {
-      SocketAddress peeraddr = ((SocketDescriptor)getFd()).getRemoteAddress();
-      SocketAddress myaddr = ((SocketDescriptor)getFd()).getLocalAddress();
-      return myaddr.equals(peeraddr);
-    } catch (IOException e) {
-      throw new Exception(e.toString());
-    }
+  public boolean sameMachine() {
+    SocketAddress peeraddr = ((SocketDescriptor)getFd()).getRemoteAddress();
+    SocketAddress myaddr = ((SocketDescriptor)getFd()).getLocalAddress();
+    return myaddr.equals(peeraddr);
   }
 
-  public void shutdown() throws Exception {
+  public void shutdown() {
     super.shutdown();
-    try {
-      ((SocketDescriptor)getFd()).shutdown();
-    } catch (IOException e) {
-      throw new Exception(e.toString());
-    }
+    ((SocketDescriptor)getFd()).shutdown();
   }
   
-  public void close() throws IOException {
+  public void close() {
     ((SocketDescriptor)getFd()).close();
   }
   
@@ -169,7 +146,8 @@ public class TcpSocket extends Socket {
     try {
       sock.channel.socket().setTcpNoDelay(!enable);
     } catch(java.net.SocketException e) {
-      vlog.error("unable to setsockopt TCP_NODELAY: "+e.getMessage());
+      vlog.error("Could not " + (enable ? "enable" : "disable") +
+                 " Nagle's algorithm: " + e.getMessage());
       return false;
     }
     return true;
@@ -195,8 +173,8 @@ public class TcpSocket extends Socket {
       sock = new java.net.ServerSocket(0);
       port = sock.getLocalPort();
       sock.close();
-    } catch (java.io.IOException e) {
-      throw new SocketException("unable to create socket: "+e.toString());
+    } catch(java.io.IOException e) {
+      throw new SystemException(e.toString());
     }
     return port;
   }

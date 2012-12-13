@@ -22,6 +22,7 @@
 package com.turbovnc.rfb;
 
 import com.turbovnc.vncviewer.CConn;
+import com.turbovnc.rdr.ErrorException;
 
 public class SecurityClient extends Security {
 
@@ -33,7 +34,7 @@ public class SecurityClient extends Security {
     assert (msg != null);
   
     if (!IsSupported(secType))
-      throw new Exception("Security type not supported");
+      throw new ErrorException("Security type not supported");
   
     switch (secType) {
     case Security.secTypeNone: return (new CSecurityNone());
@@ -67,7 +68,7 @@ public class SecurityClient extends Security {
       return (new CSecurityStack(secTypeX509Ident, "X509Ident",
   			      new CSecurityTLS(false), new CSecurityIdent()));
     default:
-      throw new Exception("Security type not supported");
+      throw new ErrorException("Security type not supported");
     }
   
   }

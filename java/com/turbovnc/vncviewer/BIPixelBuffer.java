@@ -23,7 +23,7 @@ import java.awt.*;
 import java.awt.image.*;
 
 import com.turbovnc.rfb.*;
-import com.turbovnc.rfb.Exception;
+import com.turbovnc.rdr.ErrorException;
 
 public class BIPixelBuffer extends PlatformPixelBuffer implements ImageObserver
 {
@@ -74,7 +74,7 @@ public class BIPixelBuffer extends PlatformPixelBuffer implements ImageObserver
     else if (sm.getTransferType() == DataBuffer.TYPE_USHORT)
       data = (Object)((DataBufferUShort)db).getData();
     else
-      throw new Exception("Unsupported pixel type");
+      throw new ErrorException("Unsupported pixel type");
   }
 
   public void fillRect(int x, int y, int w, int h, int pix) {
@@ -102,8 +102,8 @@ public class BIPixelBuffer extends PlatformPixelBuffer implements ImageObserver
         tk.prepareImage(img, -1, -1, this);
         try {
           clip.wait(1000);
-        } catch (InterruptedException e) {
-          throw new Exception("Error decoding JPEG data");
+        } catch(InterruptedException e) {
+          throw new ErrorException("Error decoding JPEG data");
         }
       } 
       clip = null;

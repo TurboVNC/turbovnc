@@ -1,4 +1,6 @@
-/* Copyright (C) 2012 Brian P. Hinz
+/* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+ * Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,13 +18,16 @@
  * USA.
  */
 
-package com.turbovnc.network;
+package com.turbovnc.rdr;
 
-import com.turbovnc.rdr.SystemException;
-
-public class SocketException extends SystemException {
-  public SocketException(String s) {
+public class ErrorException extends RuntimeException {
+  public ErrorException(String s) {
     super(s);
   }
 }
 
+class TimedOut extends ErrorException {
+  public TimedOut() {
+    super("Timed out");
+  }
+}

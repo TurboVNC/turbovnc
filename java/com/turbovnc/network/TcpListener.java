@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,12 +31,14 @@ import java.net.UnknownHostException;
 import java.util.Set;
 import java.util.Iterator;
 
+import com.turbovnc.rdr.ErrorException;
+
 public class TcpListener extends SocketListener  {
 
   public static boolean socketsInitialised = false;
 
   public TcpListener(String listenaddr, int port, boolean localhostOnly,
-			               SocketDescriptor sock, boolean close_) throws Exception {
+                     SocketDescriptor sock, boolean close_) {
     closeFd = close_;
     if (sock != null) {
       fd = sock;
@@ -47,7 +50,8 @@ public class TcpListener extends SocketListener  {
       channel = ServerSocketChannel.open();
       channel.configureBlocking(false);
     } catch(IOException e) {
-      throw new Exception("unable to create listening socket: "+e.toString());
+      throw new ErrorException("Could not create listening socket: " +
+                               e.getMessage());
     }
 
     // - Bind it to the desired port
@@ -61,26 +65,28 @@ public class TcpListener extends SocketListener  {
       } else {
         addr = InetAddress.getByName("0.0.0.0");
       }
-    } catch (UnknownHostException e) {
-      throw new Exception(e.toString());
+    } catch(UnknownHostException e) {
+      throw new ErrorException(e.getMessage());
     }
   
     try {
       channel.socket().bind(new InetSocketAddress(addr, port));
-    } catch (IOException e) {
-      throw new Exception("unable to bind listening socket: "+e.toString());
+    } catch(IOException e) {
+      throw new ErrorException("Could not bind listening socket: " + 
+                               e.getMessage());
     }
   
     // - Set it to be a listening socket
     try {
       selector = Selector.open();
       channel.register(selector, SelectionKey.OP_ACCEPT);
-    } catch (IOException e) {
-      throw new Exception("unable to set socket to listening mode: "+e.toString());
+    } catch(IOException e) {
+      throw new ErrorException("Could not enable listening mode for socket: " +
+                               e.getMessage());
     }
   }
 
-  public TcpListener(String listenaddr, int port) throws Exception {
+  public TcpListener(String listenaddr, int port) {
     this(listenaddr, port, false, null, true);
   }
 
@@ -112,24 +118,22 @@ public class TcpListener extends SocketListener  {
         if (new_sock == null)
           return null;
       }
-    } catch (IOException e) {
-      throw new SocketException("unable to accept new connection: "+e.toString());
+    } catch(IOException e) {
+      throw new ErrorException("Could not accept new connection: " + 
+                               e.getMessage());
     }
 
     // Disable Nagle's algorithm, to reduce latency
     try {
       new_sock.socket().setTcpNoDelay(true);
-    } catch (java.net.SocketException e) {
-      throw new SocketException(e.toString());
+    } catch(java.net.SocketException e) {
+      throw new ErrorException("Could not disable Nagle's algorithm: " +
+                               e.getMessage());
     }
 
     // Create the socket object & check connection is allowed
     SocketDescriptor fd = null;
-    try {
-      fd = new SocketDescriptor();
-    } catch (java.lang.Exception e) {
-      throw new SocketException(e.toString());
-    }
+    fd = new SocketDescriptor();
     fd.setChannel(new_sock);
     TcpSocket s = new TcpSocket(fd);
     //if (filter && !filter->verifyConnection(s)) {

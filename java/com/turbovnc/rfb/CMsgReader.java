@@ -90,7 +90,7 @@ abstract public class CMsgReader {
       vlog.error("Rect too big: "+r.width()+"x"+r.height()+" at "+
                   r.tl.x+","+r.tl.y+" exceeds "+handler.cp.width+"x"+
                   handler.cp.height);
-      throw new Exception("Rect too big");
+      throw new ErrorException("Rect too big");
     }
 
     if (r.is_empty())
@@ -105,8 +105,8 @@ abstract public class CMsgReader {
       if (decoders[encoding] == null) {
         decoders[encoding] = Decoder.createDecoder(encoding, this);
         if (decoders[encoding] == null) {
-          vlog.error("Unknown rect encoding "+encoding);
-          throw new Exception("Unknown rect encoding");
+          vlog.error("Unknown rect encoding " + encoding);
+          throw new ErrorException("Unknown rect encoding" + encoding);
         }
       }
       handler.startDecodeTimer();

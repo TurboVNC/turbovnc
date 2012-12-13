@@ -42,7 +42,7 @@ public class IntParameter extends VoidParameter {
     int i;
     try {
       i = Integer.parseInt(v);
-    } catch (NumberFormatException e) {
+    } catch(NumberFormatException e) {
       return false;
     }
     return setValue(i);

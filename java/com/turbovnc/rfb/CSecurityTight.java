@@ -112,7 +112,7 @@ public class CSecurityTight extends CSecurity {
     }
 
     if (SupportedAuthTypes.isEmpty())
-      throw new Exception("No supported auth types!");
+      throw new WarningException("No supported auth types!");
 
     for (Iterator<Integer> i = SupportedAuthTypes.iterator(); i.hasNext(); ) {
       int authType = (Integer)i.next();

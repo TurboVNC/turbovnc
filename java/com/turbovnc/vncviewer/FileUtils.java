@@ -50,7 +50,7 @@ public class FileUtils {
             vlog.error("Cannot access system property:" + e.getMessage());
           }
         }
-      } catch (java.lang.Exception e) {
+      } catch(java.lang.Exception e) {
         e.printStackTrace();
       }
     } catch(java.security.AccessControlException e) {

@@ -1,4 +1,5 @@
 /* Copyright (C) 2012 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,16 +16,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
  * USA.
  */
-package com.turbovnc.network;
 
-import java.io.IOException;
-import com.turbovnc.rdr.Exception;
+package com.turbovnc.network;
 
 public interface FileDescriptor {
     
-  public int read(byte[] buf, int bufPtr, int length) throws Exception;
-  public int write(byte[] buf, int bufPtr, int length) throws Exception;
-  public int select(int interestOps, Integer timeout) throws Exception;
-  public void close() throws IOException;
+  public int read(byte[] buf, int bufPtr, int length);
+  public int write(byte[] buf, int bufPtr, int length);
+  public int select(int interestOps, Integer timeout);
+  public void close();
 
 }

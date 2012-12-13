@@ -1,6 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2011 Pierre Ossman for Cendio AB
  * Copyright (C) 2012 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,22 +104,13 @@ public class FdOutStream extends OutStream {
         tv = null;
       }
 
-      try {
-        n = fd.select(SelectionKey.OP_WRITE, tv);
-      } catch (java.lang.Exception e) {
-        System.out.println(e.toString());
-        throw new Exception(e.toString());
-      }
+      n = fd.select(SelectionKey.OP_WRITE, tv);
           
     } while (n < 0);
 
     if (n == 0) return 0;
 
-    try {
-      n = fd.write(data, dataPtr, length);
-    } catch (java.lang.Exception e) {
-      throw new Exception(e.toString());
-    }
+    n = fd.write(data, dataPtr, length);
     
     return n;
   }
@@ -126,7 +118,7 @@ public class FdOutStream extends OutStream {
   protected int overrun(int itemSize, int nItems) 
   {
     if (itemSize > bufSize)
-      throw new Exception("FdOutStream overrun: max itemSize exceeded");
+      throw new ErrorException("FdOutStream overrun: max itemSize exceeded");
 
     // First try to get rid of the data we have
     flush();

@@ -3,6 +3,7 @@
  * Copyright (C) 2006 OCCAM Financial Technology
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,7 +82,7 @@ public class CSecurityVeNCrypt extends CSecurity {
         os.writeU8(majorVersion);
         os.writeU8(minorVersion);
         os.flush();
-	      throw new Exception("Server reported an unsupported VeNCrypt version");
+        throw new ErrorException("Server reported an unsupported VeNCrypt version");
       }
     
       haveSentVersion = true;
@@ -91,7 +92,7 @@ public class CSecurityVeNCrypt extends CSecurity {
     /* Check that the server is OK */
     if (!haveAgreedVersion) {
       if (is.readU8() != 0)
-	      throw new Exception("Server reported it could not support the VeNCrypt version");
+        throw new ErrorException("Server reported it could not support the VeNCrypt version");
 
       haveAgreedVersion = true;
       return false;
@@ -103,7 +104,7 @@ public class CSecurityVeNCrypt extends CSecurity {
       iAvailableType = 0;
   
       if (nAvailableTypes <= 0)
-	      throw new Exception("The server reported no VeNCrypt sub-types");
+        throw new ErrorException("Server reported no VeNCrypt sub-types");
 
       availableTypes = new int[nAvailableTypes];
       haveNumberOfTypes = true;

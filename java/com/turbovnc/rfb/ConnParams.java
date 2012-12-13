@@ -96,7 +96,7 @@ public class ConnParams {
   public void setPF(PixelFormat pf) {
     pf_ = pf;
     if (pf.bpp != 8 && pf.bpp != 16 && pf.bpp != 32) {
-      throw new Exception("setPF: not 8, 16 or 32 bpp?");
+      throw new ErrorException("setPF(): not 8, 16, or 32 bpp?");
     }
   }
 

@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +44,7 @@ abstract public class Socket {
 
   // if shutdown() is overridden then the override MUST call on to here
   public void shutdown() {isShutdown_ = true;}
-  public void close() throws IOException {getFd().close();}
+  public void close() {getFd().close();}
   public final boolean isShutdown() {return isShutdown_;}
 
   // information about this end of the socket

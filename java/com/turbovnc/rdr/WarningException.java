@@ -1,4 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+ * Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +18,13 @@
  * USA.
  */
 
-package com.turbovnc.rfb;
+package com.turbovnc.rdr;
 
-public class Exception extends com.turbovnc.rdr.Exception {
-  public Exception(String s) { super(s); }
+/* We use this to communicate exceptions that are generally the result of user
+   actions. */
+
+public class WarningException extends RuntimeException {
+  public WarningException(String s) {
+    super(s);
+  }
 }

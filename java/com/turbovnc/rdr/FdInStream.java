@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,7 +119,7 @@ public class FdInStream extends InStream {
   protected int overrun(int itemSize, int nItems, boolean wait) 
   {
     if (itemSize > bufSize)
-      throw new Exception("FdInStream overrun: max itemSize exceeded");
+      throw new ErrorException("FdInStream overrun: max itemSize exceeded");
 
     if (end - ptr != 0)
       System.arraycopy(b, ptr, b, 0, end - ptr);
@@ -168,11 +169,7 @@ public class FdInStream extends InStream {
           tv = null;
         }
 
-        try {
-          n = fd.select(SelectionKey.OP_READ, tv);
-        } catch (Exception e) {
-          throw new SystemException("select:"+e.toString());
-        }
+        n = fd.select(SelectionKey.OP_READ, tv);
       } while (n < 0);
         
           
@@ -183,11 +180,7 @@ public class FdInStream extends InStream {
       blockCallback.blockCallback();
     }
 
-    try {
-      n = fd.read(buf, bufPtr, len);
-    } catch (Exception e) {
-      throw new SystemException("read:"+e.toString());
-    }
+    n = fd.read(buf, bufPtr, len);
 
     if (n == 0) throw new EndOfStream();
 

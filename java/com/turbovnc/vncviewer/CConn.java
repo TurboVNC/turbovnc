@@ -50,7 +50,6 @@ import java.util.*;
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 import com.turbovnc.rfb.Point;
-import com.turbovnc.rfb.Exception;
 import com.turbovnc.network.Socket;
 import com.turbovnc.network.TcpSocket;
 
@@ -121,11 +120,7 @@ public class CConn extends CConnection
         }
       }
 
-      try {
-        sock = new TcpSocket(opts.serverName, opts.port);
-      } catch (java.lang.Exception e) {
-        throw new Exception(e.toString());
-      }
+      sock = new TcpSocket(opts.serverName, opts.port);
       vlog.info("connected to host " + opts.serverName + " port " +
                 opts.port);
     }
@@ -179,8 +174,8 @@ public class CConn extends CConnection
       synchronized(this) {
         wait(0,50000);
       }
-    } catch (java.lang.InterruptedException e) {
-      throw new Exception(e.toString());
+    } catch(InterruptedException e) {
+      throw new SystemException(e.toString());
     }
   }  
 
@@ -198,8 +193,8 @@ public class CConn extends CConnection
       BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
       try {
         autoPass = in.readLine();
-      } catch (IOException e) {
-        throw new Exception(e.getMessage());
+      } catch(IOException e) {
+        throw new SystemException(e.toString());
       }
       VncViewer.autoPass.setParam("0");
     } else
@@ -216,14 +211,14 @@ public class CConn extends CConnection
       try {
         fp = new FileInputStream(passwordFileStr);
       } catch(FileNotFoundException e) {
-        throw new Exception("Opening password file failed");
+        throw new ErrorException("Could not open password file");
       }
       byte[] obfPwd = new byte[256];
       try {
         fp.read(obfPwd);
         fp.close();
       } catch(IOException e) {
-        throw new Exception("Failed to read VncPasswd file");
+        throw new ErrorException("Could not read password file");
       }
       String PlainPasswd = VncAuth.unobfuscatePasswd(obfPwd);
       passwd.append(PlainPasswd);
@@ -329,15 +324,11 @@ public class CConn extends CConnection
   // clientRedirect() migrates the client to another host/port
   public void clientRedirect(int port, String host, 
                              String x509subject) {
-    try {
-      sock.close();
-      setServerPort(port);
-      sock = new TcpSocket(host, port);
-      vlog.info("Redirected to "+host+":"+port);
-      VncViewer.newViewer(viewer, sock, true);
-    } catch (java.lang.Exception e) {
-      throw new Exception(e.toString());
-    }
+    sock.close();
+    setServerPort(port);
+    sock = new TcpSocket(host, port);
+    vlog.info("Redirected to "+host+":"+port);
+    VncViewer.newViewer(viewer, sock, true);
   }
 
   // setName() is called when the desktop name changes
@@ -800,12 +791,8 @@ public class CConn extends CConnection
   public void close() {
     deleteWindow();
     shuttingDown = true;
-    try {
-      if (sock != null)
-        sock.shutdown();
-    } catch (java.lang.Exception e) {
-      throw new Exception(e.toString());
-    }
+    if (sock != null)
+      sock.shutdown();
   }
 
   // Menu callbacks.  These are guaranteed only to be called after serverInit()
@@ -835,7 +822,7 @@ public class CConn extends CConnection
       Attributes attributes = manifest.getMainAttributes();
       pkgDate = attributes.getValue("Package-Date");
       pkgTime = attributes.getValue("Package-Time");
-    } catch (IOException e) { }
+    } catch(IOException e) { }
     JOptionPane.showMessageDialog((viewport != null ? viewport : null),
       VncViewer.product_name + " v" + VncViewer.version +
         " (" + VncViewer.build + ") " +

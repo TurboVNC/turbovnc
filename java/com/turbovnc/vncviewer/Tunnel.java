@@ -28,6 +28,7 @@ import java.io.File;
 import java.util.*;
 
 import com.turbovnc.rfb.*;
+import com.turbovnc.rdr.*;
 import com.turbovnc.network.*;
 
 import com.jcraft.jsch.JSch;
@@ -37,8 +38,7 @@ public class Tunnel
 {
   private final static Integer SERVER_PORT_OFFSET = 5900;
 
-  public static void
-  createTunnel(Options opts) throws java.lang.Exception
+  public static void createTunnel(Options opts) throws Exception
   {
     int localPort;
     int remotePort;
@@ -47,7 +47,7 @@ public class Tunnel
   
     localPort = TcpSocket.findFreeTcpPort();
     if (localPort == 0)
-      throw new java.lang.Exception("Could not obtain free TCP port");
+      throw new ErrorException("Could not obtain free TCP port");
   
     if (opts.tunnel) {
       gatewayHost = Hostname.getHost(opts.serverName);
@@ -87,8 +87,8 @@ public class Tunnel
     } else if (sshKeyFile != null) {
       File f = new File(sshKeyFile);
       if (!f.exists() || !f.canRead())
-        throw new java.lang.Exception("Cannot access private SSH key file " +
-                                      sshKeyFile);
+        throw new ErrorException("Cannot access private SSH key file " +
+                                 sshKeyFile);
       privateKeys.add(f);
     } else {
       privateKeys.add(new File(homeDir + "/.ssh/id_rsa"));

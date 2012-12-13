@@ -82,8 +82,8 @@ public class CMsgReaderV3 extends CMsgReader {
       case MsgTypes.msgTypeServerFence:         readFence(); break;
       case MsgTypes.msgTypeEndOfContinuousUpdates:  readEndOfContinuousUpdates(); break;
       default:
-        vlog.error("unknown message type "+type);
-        throw new Exception("unknown message type");
+        vlog.error("Unknown message type " + type);
+        throw new ErrorException("Unknown message type " + type);
       }
 
     } else {

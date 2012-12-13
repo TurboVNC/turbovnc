@@ -2,6 +2,7 @@
  * Copyright (C) 2005 Martin Koegler
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011-2012 Brian P. Hinz
+ * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,7 +63,7 @@ public class TLSOutStream extends OutStream {
   protected int overrun(int itemSize, int nItems) 
   {
     if (itemSize > bufSize)
-      throw new Exception("TLSOutStream overrun: max itemSize exceeded");
+      throw new ErrorException("TLSOutStream overrun: max itemSize exceeded");
 
     flush();
 
@@ -78,8 +79,8 @@ public class TLSOutStream extends OutStream {
 
     try {
       n = manager.write(data, dataPtr, length);
-    } catch (java.io.IOException e) {
-      throw new Exception(e.toString());
+    } catch(java.io.IOException e) {
+      throw new ErrorException("TLS write error: " + e.getMessage());
     }
     //if (n == GNUTLS_E_INTERRUPTED || n == GNUTLS_E_AGAIN)
     //  return 0;

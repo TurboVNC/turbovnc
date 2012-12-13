@@ -40,7 +40,7 @@ public class ZlibInStream extends InStream
     zs.avail_in = 0;
     if (zs.inflateInit() != JZlib.Z_OK) {
       zs = null;
-      throw new Exception("ZlinInStream: inflateInit failed");
+      throw new ErrorException("ZlibInStream: inflateInit failed");
     }
     ptr = end = start = 0;
   }
@@ -55,8 +55,8 @@ public class ZlibInStream extends InStream
     } finally {
       try {
         super.finalize();
-      } catch (Throwable e) {
-        throw new Exception(e.getMessage());
+      } catch(Throwable e) {
+        throw new SystemException(e.toString());
       }
     }
   }
@@ -88,9 +88,9 @@ public class ZlibInStream extends InStream
   protected int overrun(int itemSize, int nItems, boolean wait) 
   {
     if (itemSize > bufSize)
-      throw new Exception("ZlibInStream overrun: max itemSize exceeded");
+      throw new ErrorException("ZlibInStream overrun: max itemSize exceeded");
     if (underlying == null)
-      throw new Exception("ZlibInStream overrun: no underlying stream");
+      throw new ErrorException("ZlibInStream overrun: no underlying stream");
 
     if (end - ptr != 0)
       System.arraycopy(b, ptr, b, start, end - ptr);
@@ -131,7 +131,7 @@ public class ZlibInStream extends InStream
 
     int rc = zs.inflate(JZlib.Z_SYNC_FLUSH);   
     if (rc != JZlib.Z_OK) {
-      throw new Exception("ZlibInStream: inflate failed");
+      throw new ErrorException("ZlibInStream: inflate failed");
     }
 
     bytesIn -= zs.next_in_index - underlying.getptr();
