@@ -1,17 +1,17 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -25,12 +25,11 @@
 package com.turbovnc.rdr;
 import com.jcraft.jzlib.*;
 
-public class ZlibInStream extends InStream
-{
-  static final int defaultBufSize = 16384;
+public class ZlibInStream extends InStream {
 
-  public ZlibInStream(int bufSize_) 
-  {
+  static final int DEFAULT_BUF_SIZE = 16384;
+
+  public ZlibInStream(int bufSize_) {
     bufSize = bufSize_;
     b = new byte[bufSize];
     bytesIn = offset = 0;
@@ -45,10 +44,9 @@ public class ZlibInStream extends InStream
     ptr = end = start = 0;
   }
 
-  public ZlibInStream() { this(defaultBufSize); }
+  public ZlibInStream() { this(DEFAULT_BUF_SIZE); }
 
-  public void finalize()
-  {
+  public void finalize() {
     try {
       b = null;
       zs.inflateEnd();
@@ -61,20 +59,17 @@ public class ZlibInStream extends InStream
     }
   }
 
-  public void setUnderlying(InStream is, int bytesIn_)
-  {
+  public void setUnderlying(InStream is, int bytesIn_) {
     underlying = is;
     bytesIn = bytesIn_;
     ptr = end = start;
   }
 
-  public int pos() 
-  {
+  public int pos() {
     return offset + ptr - start;
   }
 
-  public void reset() 
-  {
+  public void reset() {
     ptr = end = start;
     if (underlying == null) return;
 
@@ -85,8 +80,7 @@ public class ZlibInStream extends InStream
     underlying = null;
   }
 
-  protected int overrun(int itemSize, int nItems, boolean wait) 
-  {
+  protected int overrun(int itemSize, int nItems, boolean wait) {
     if (itemSize > bufSize)
       throw new ErrorException("ZlibInStream overrun: max itemSize exceeded");
     if (underlying == null)
@@ -115,8 +109,7 @@ public class ZlibInStream extends InStream
   // data.  Returns false if wait is false and we would block on the underlying
   // stream.
 
-  private boolean decompress(boolean wait) 
-  {
+  private boolean decompress(boolean wait) {
     zs.next_out = b;
     zs.next_out_index = end;
     zs.avail_out = start + bufSize - end;
@@ -129,7 +122,7 @@ public class ZlibInStream extends InStream
     if (zs.avail_in > bytesIn)
       zs.avail_in = bytesIn;
 
-    int rc = zs.inflate(JZlib.Z_SYNC_FLUSH);   
+    int rc = zs.inflate(JZlib.Z_SYNC_FLUSH);
     if (rc != JZlib.Z_OK) {
       throw new ErrorException("ZlibInStream: inflate failed");
     }

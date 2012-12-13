@@ -2,17 +2,17 @@
  * Copyright 2011 Pierre Ossman for Cendio AB
  * Copyright (C) 2012 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -27,10 +27,10 @@ import java.nio.channels.SelectionKey;
 public class FdOutStream extends OutStream {
 
   static final int DEFAULT_BUF_SIZE = 16384;
-  static final int minBulkSize = 1024;
+  static final int MIN_BULK_SIZE = 1024;
 
-  public FdOutStream(FileDescriptor fd_, boolean blocking_, int timeoutms_, int bufSize_)
-  {
+  public FdOutStream(FileDescriptor fd_, boolean blocking_, int timeoutms_,
+                     int bufSize_) {
     fd = fd_; blocking = blocking_; timeoutms = timeoutms_;
     bufSize = ((bufSize_ > 0) ? bufSize_ : DEFAULT_BUF_SIZE);
     b = new byte[bufSize];
@@ -49,13 +49,11 @@ public class FdOutStream extends OutStream {
     blocking = blocking_;
   }
 
-  public int length() 
-  { 
-    return offset + ptr - sentUpTo; 
+  public int length() {
+    return offset + ptr - sentUpTo;
   }
 
-  public void flush() 
-  {
+  public void flush() {
     int timeoutms_;
 
     if (blocking)
@@ -91,12 +89,12 @@ public class FdOutStream extends OutStream {
       ptr = sentUpTo = start;
   }
 
-  private int writeWithTimeout(byte[] data, int dataPtr, int length, int timeoutms)
-  {
+  private int writeWithTimeout(byte[] data, int dataPtr, int length,
+                               int timeoutms) {
     int n;
 
     do {
-    
+
       Integer tv;
       if (timeoutms != -1) {
         tv = new Integer(timeoutms);
@@ -105,18 +103,17 @@ public class FdOutStream extends OutStream {
       }
 
       n = fd.select(SelectionKey.OP_WRITE, tv);
-          
+
     } while (n < 0);
 
     if (n == 0) return 0;
 
     n = fd.write(data, dataPtr, length);
-    
+
     return n;
   }
 
-  protected int overrun(int itemSize, int nItems) 
-  {
+  protected int overrun(int itemSize, int nItems) {
     if (itemSize > bufSize)
       throw new ErrorException("FdOutStream overrun: max itemSize exceeded");
 

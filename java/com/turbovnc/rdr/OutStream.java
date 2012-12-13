@@ -1,16 +1,16 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -26,7 +26,7 @@ package com.turbovnc.rdr;
 
 import com.turbovnc.network.*;
 
-abstract public class OutStream {
+public abstract class OutStream {
 
   // check() ensures there is buffer space for at least one item of size
   // itemSize bytes.  Returns the number of items which fit (up to a maximum
@@ -49,15 +49,15 @@ abstract public class OutStream {
 
   // writeU/SN() methods write unsigned and signed N-bit integers.
 
-  public final void writeU8( int u) { check(1); b[ptr++] = (byte)u; }
-  public final void writeU16(int u) { check(2); b[ptr++] = (byte)(u >> 8);
+  public final void writeU8(int u)  { check(1);  b[ptr++] = (byte)u; }
+  public final void writeU16(int u) { check(2);  b[ptr++] = (byte)(u >> 8);
                                       b[ptr++] = (byte)u; }
-  public final void writeU32(int u) { check(4); b[ptr++] = (byte)(u >> 24);
+  public final void writeU32(int u) { check(4);  b[ptr++] = (byte)(u >> 24);
                                       b[ptr++] = (byte)(u >> 16);
                                       b[ptr++] = (byte)(u >> 8);
                                       b[ptr++] = (byte)u; }
 
-  public final void writeS8( int s) { writeU8( s); }
+  public final void writeS8(int s)  { writeU8(s); }
   public final void writeS16(int s) { writeU16(s); }
   public final void writeS32(int s) { writeU32(s); }
 
@@ -120,7 +120,7 @@ abstract public class OutStream {
   // writeOpaqueN() writes a quantity without byte-swapping.  Because java has
   // no byte-ordering, we just use big-endian.
 
-  public final void writeOpaque8( int u) { writeU8( u); }
+  public final void writeOpaque8(int u)  { writeU8(u); }
   public final void writeOpaque16(int u) { writeU16(u); }
   public final void writeOpaque32(int u) { writeU32(u); }
   public final void writeOpaque24A(int u) { check(3);
@@ -134,7 +134,7 @@ abstract public class OutStream {
 
   // length() returns the length of the stream.
 
-  abstract public int length();
+  public abstract int length();
 
   // flush() requests that the stream be flushed.
 
@@ -154,7 +154,7 @@ abstract public class OutStream {
   // the number of items which fit (up to a maximum of nItems).  itemSize is
   // supposed to be "small" (a few bytes).
 
-  abstract protected int overrun(int itemSize, int nItems);
+  protected abstract int overrun(int itemSize, int nItems);
 
   protected OutStream() {}
   protected byte[] b;

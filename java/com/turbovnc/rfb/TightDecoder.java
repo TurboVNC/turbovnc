@@ -2,17 +2,17 @@
  * Copyright 2004-2005 Cendio AB.
  * Copyright (C) 2011-2012 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
- *    
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -22,8 +22,6 @@
 package com.turbovnc.rfb;
 
 import com.turbovnc.rdr.*;
-import java.util.ArrayList;
-import java.io.InputStream;
 import java.awt.image.*;
 import java.util.Arrays;
 import java.awt.*;
@@ -32,26 +30,26 @@ import org.libjpegturbo.turbojpeg.*;
 
 public class TightDecoder extends Decoder {
 
-  final static int TIGHT_MAX_WIDTH = 2048;
+  static final int TIGHT_MAX_WIDTH = 2048;
 
   // Compression control
-  final static int rfbTightExplicitFilter = 0x04;
-  final static int rfbTightFill = 0x08;
-  final static int rfbTightJpeg = 0x09;
-  final static int rfbTightMaxSubencoding = 0x09;
+  static final int rfbTightExplicitFilter = 0x04;
+  static final int rfbTightFill = 0x08;
+  static final int rfbTightJpeg = 0x09;
+  static final int rfbTightMaxSubencoding = 0x09;
 
   // Filters to improve compression efficiency
-  final static int rfbTightFilterCopy = 0x00;
-  final static int rfbTightFilterPalette = 0x01;
-  final static int rfbTightFilterGradient = 0x02;
-  final static int rfbTightMinToCompress = 12;
+  static final int rfbTightFilterCopy = 0x00;
+  static final int rfbTightFilterPalette = 0x01;
+  static final int rfbTightFilterGradient = 0x02;
+  static final int rfbTightMinToCompress = 12;
 
-  final static int rfbTightNoZlib = 0x0A;
+  static final int rfbTightNoZlib = 0x0A;
 
-  final static Toolkit tk = Toolkit.getDefaultToolkit();
+  static final Toolkit tk = Toolkit.getDefaultToolkit();
 
-  public TightDecoder(CMsgReader reader_) { 
-    reader = reader_; 
+  public TightDecoder(CMsgReader reader_) {
+    reader = reader_;
     inflater = new Inflater[4];
     for (int i = 0; i < 4; i++)
       inflater[i] = new Inflater();
@@ -64,7 +62,7 @@ public class TightDecoder extends Decoder {
       }
     } catch(java.lang.NoClassDefFoundError e) {
       vlog.info("WARNING: Could not initialize libjpeg-turbo:");
-      vlog.info("  Class not found: "+e.getMessage());
+      vlog.info("  Class not found: " + e.getMessage());
       vlog.info("  Using unaccelerated JPEG decompressor.");
     } catch(java.lang.UnsatisfiedLinkError e) {
       vlog.info("WARNING: Could not find TurboJPEG JNI library.  If it is in a");
@@ -73,33 +71,29 @@ public class TightDecoder extends Decoder {
       vlog.info("  Using unaccelerated JPEG decompressor.");
     } catch(java.lang.Exception e) {
       vlog.info("WARNING: Could not initialize libjpeg-turbo:");
-      vlog.info("  "+e.getMessage());
+      vlog.info("  " + e.getMessage());
       vlog.info("  Using unaccelerated JPEG decompressor.");
     }
     tightPalette = new byte[256 * 3];
   }
 
-  public void reset()
-  {
+  public void reset() {
     for (int i = 0; i < 4; i++) {
       if (inflater[i] != null)
         inflater[i].reset();
     }
   }
 
-  public boolean isTurboJPEG()
-  {
+  public boolean isTurboJPEG() {
     return tjd != null;
   }
 
-  short getShort(byte[] src, int srcPtr)
-  {
+  short getShort(byte[] src, int srcPtr) {
     return (short)((src[srcPtr++] & 0xff) |
                    (src[srcPtr] & 0xff) << 8);
   }
 
-  void checkPalette(int bpp, boolean cutZeros)
-  {
+  void checkPalette(int bpp, boolean cutZeros) {
     if (cutZeros || bpp > 16) {
       if (palette != null && palette instanceof int[])
         return;
@@ -118,8 +112,7 @@ public class TightDecoder extends Decoder {
     }
   }
 
-  void checkNetbuf(int size)
-  {
+  void checkNetbuf(int size) {
     if (netbufSize < size || netbuf == null) {
       if (netbuf != null)
         netbuf = null;
@@ -128,8 +121,7 @@ public class TightDecoder extends Decoder {
     }
   }
 
-  void checkDecodebuf(int size)
-  {
+  void checkDecodebuf(int size) {
     if (decodebufSize < size || decodebuf == null) {
       if (decodebuf != null)
         decodebuf = null;
@@ -139,8 +131,7 @@ public class TightDecoder extends Decoder {
   }
 
   @SuppressWarnings("fallthrough")
-  public void readRect(Rect r, CMsgHandler handler) 
-  {
+  public void readRect(Rect r, CMsgHandler handler) {
     InStream is = reader.getInStream();
     boolean cutZeros = false;
     serverpf = handler.cp.pf();
@@ -149,42 +140,42 @@ public class TightDecoder extends Decoder {
     if (bpp == 32 && serverpf.is888())
       cutZeros = true;
 
-    int comp_ctl = is.readU8();
+    int compCtl = is.readU8();
 
     boolean bigEndian = handler.cp.pf().bigEndian;
 
     // Flush zlib streams if we are told by the server to do so.
     for (int i = 0; i < 4; i++) {
-      if ((comp_ctl & 1) != 0)
+      if ((compCtl & 1) != 0)
         inflater[i].end();
-      comp_ctl >>= 1;
+      compCtl >>= 1;
     }
 
     boolean readUncompressed = false;
-    if ((comp_ctl & rfbTightNoZlib) == rfbTightNoZlib) {
-      comp_ctl &= ~(rfbTightNoZlib);
+    if ((compCtl & rfbTightNoZlib) == rfbTightNoZlib) {
+      compCtl &= ~(rfbTightNoZlib);
       readUncompressed = true;
     }
 
     // "JPEG" compression type.
-    if (comp_ctl == rfbTightJpeg) {
+    if (compCtl == rfbTightJpeg) {
       decompressJpegRect(r, is, handler);
       return;
     }
 
     // Quit on unsupported compression type.
-    if (comp_ctl > rfbTightMaxSubencoding) {
+    if (compCtl > rfbTightMaxSubencoding) {
       throw new ErrorException("TightDecoder: bad subencoding value received");
     }
 
     int w = r.width(), h = r.height();
-    int stride[] = { w };
+    int[] stride = { w };
     Object buf = handler.getRawPixelsRW(stride);
     int pad = stride[0] - w;
     int ptr = r.tl.y * stride[0] + r.tl.x;
 
     // "Fill" compression type.
-    if (comp_ctl == rfbTightFill) {
+    if (compCtl == rfbTightFill) {
       if (cutZeros) {
         byte[] bytebuf = new byte[3];
         is.readBytes(bytebuf, 0, 3);
@@ -222,7 +213,7 @@ public class TightDecoder extends Decoder {
     int palSize = 0;
     boolean useGradient = false;
 
-    if ((comp_ctl & rfbTightExplicitFilter) != 0) {
+    if ((compCtl & rfbTightExplicitFilter) != 0) {
       int filterId = is.readU8();
 
       switch (filterId) {
@@ -233,7 +224,8 @@ public class TightDecoder extends Decoder {
           is.readBytes(tightPalette, 0, palSize * 3);
           serverpf.bufferFromRGB((int[])palette, 0, tightPalette, 0, palSize);
         } else
-          is.readPixels(palette, palSize, serverpf.bpp/8, serverpf.bigEndian);
+          is.readPixels(palette, palSize, serverpf.bpp / 8,
+                        serverpf.bigEndian);
         break;
       case rfbTightFilterGradient:
         useGradient = true;
@@ -267,7 +259,7 @@ public class TightDecoder extends Decoder {
       int length = is.readCompactLength();
       checkNetbuf(length);
       is.readBytes(netbuf, 0, length);
-      streamId = comp_ctl & 0x03;
+      streamId = compCtl & 0x03;
       checkDecodebuf(dataSize);
       inflater[streamId].setInput(netbuf, 0, length);
       try {
@@ -293,8 +285,8 @@ public class TightDecoder extends Decoder {
       } else {
         // Copy
         if (cutZeros) {
-          serverpf.bufferFromRGB((int[])buf, r.tl.x, r.tl.y, stride[0], decodebuf,
-                                 w, h);
+          serverpf.bufferFromRGB((int[])buf, r.tl.x, r.tl.y, stride[0],
+                                 decodebuf, w, h);
         } else if (buf instanceof byte[]) {
           while (h > 0) {
             System.arraycopy(decodebuf, srcPtr, (byte[])buf, ptr, w);
@@ -425,14 +417,13 @@ public class TightDecoder extends Decoder {
           }
         }
       }
-    } 
+    }
 
     handler.releaseRawPixels(r);
   }
 
-  final private void decompressJpegRect(Rect r, InStream is,
-                                        CMsgHandler handler)
-  {
+  private void decompressJpegRect(Rect r, InStream is,
+                                  CMsgHandler handler) {
     // Read length
     int compressedLen = is.readCompactLength();
     if (compressedLen <= 0)
@@ -455,7 +446,7 @@ public class TightDecoder extends Decoder {
         if (pf.is888()) {
           int redShift, greenShift, blueShift;
 
-          if(pf.bigEndian) {
+          if (pf.bigEndian) {
             redShift = 24 - pf.redShift;
             greenShift = 24 - pf.greenShift;
             blueShift = 24 - pf.blueShift;
@@ -465,13 +456,13 @@ public class TightDecoder extends Decoder {
             blueShift = pf.blueShift;
           }
 
-          if(redShift == 0 && greenShift == 8 && blueShift == 16)
+          if (redShift == 0 && greenShift == 8 && blueShift == 16)
             tjpf = TJ.PF_RGBX;
-          if(redShift == 16 && greenShift == 8 && blueShift == 0)
+          if (redShift == 16 && greenShift == 8 && blueShift == 0)
             tjpf = TJ.PF_BGRX;
-          if(redShift == 24 && greenShift == 16 && blueShift == 8)
+          if (redShift == 24 && greenShift == 16 && blueShift == 8)
             tjpf = TJ.PF_XBGR;
-          if(redShift == 8 && greenShift == 16 && blueShift == 24)
+          if (redShift == 8 && greenShift == 16 && blueShift == 24)
             tjpf = TJ.PF_XRGB;
 
           tjd.decompress((int[])data, r.tl.x, r.tl.y, r.width(), stride[0],
@@ -503,9 +494,8 @@ public class TightDecoder extends Decoder {
   /* NOTE: we support gradient encoding only for backward compatibility with
      TightVNC 1.3.x.  It is decidedly non-optimal. */
 
-  final private void filterGradient24(byte[] netbuf, int[] buf, int stride, 
-                                      Rect r)
-  {
+  private void filterGradient24(byte[] netbuf, int[] buf, int stride,
+                                Rect r) {
 
     int x, y, c;
     int ptr = r.tl.y * stride + r.tl.x;
@@ -547,9 +537,8 @@ public class TightDecoder extends Decoder {
     }
   }
 
-  final private void filterGradient16(byte[] netbuf, short[] buf, int stride, 
-                                      Rect r)
-  {
+  private void filterGradient16(byte[] netbuf, short[] buf, int stride,
+                                Rect r) {
 
     int x, y, c, p;
     int ptr = r.tl.y * stride + r.tl.x;
@@ -557,9 +546,9 @@ public class TightDecoder extends Decoder {
     int[] thisRow = new int[TIGHT_MAX_WIDTH * 3];
     int[] pix = new int[3];
     int[] est = new int[3];
-    int max[] = new int[] { serverpf.redMax, serverpf.greenMax,
+    int[] max = new int[] { serverpf.redMax, serverpf.greenMax,
                             serverpf.blueMax };
-    int shift[] = new int[] { serverpf.redShift, serverpf.greenShift,
+    int[] shift = new int[] { serverpf.redShift, serverpf.greenShift,
                               serverpf.blueShift };
 
     // Set up shortcut variables

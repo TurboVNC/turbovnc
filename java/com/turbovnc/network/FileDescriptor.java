@@ -1,16 +1,16 @@
 /* Copyright (C) 2012 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -20,10 +20,10 @@
 package com.turbovnc.network;
 
 public interface FileDescriptor {
-    
-  public int read(byte[] buf, int bufPtr, int length);
-  public int write(byte[] buf, int bufPtr, int length);
-  public int select(int interestOps, Integer timeout);
-  public void close();
+
+  int read(byte[] buf, int bufPtr, int length);
+  int write(byte[] buf, int bufPtr, int length);
+  int select(int interestOps, Integer timeout);
+  void close();
 
 }

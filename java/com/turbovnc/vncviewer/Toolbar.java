@@ -1,16 +1,16 @@
 /* Copyright (C) 2011-2012 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -19,14 +19,10 @@
 
 package com.turbovnc.vncviewer;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.event.*;
 import java.awt.Dimension;
-import java.awt.Event;
 import java.awt.image.BufferedImage;
 import java.awt.Image;
-import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.Graphics2D;
 import javax.swing.*;
@@ -35,26 +31,25 @@ import javax.swing.border.*;
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 
-public class Toolbar extends JToolBar implements ActionListener
-{
+public class Toolbar extends JToolBar implements ActionListener {
 
-  final static String[] buttons = {
+  static final String[] buttons = {
     "Connection options...", "Connection info...", "Full screen",
-    "Request screen refresh", "Request lossless refresh", 
-    "Send Ctrl-Alt-Del", "Send Ctrl-Esc", 
+    "Request screen refresh", "Request lossless refresh",
+    "Send Ctrl-Alt-Del", "Send Ctrl-Esc",
     "Send Ctrl key press/release", "Send Alt key press/release",
     "New Connection...", "Disconnect"
   };
 
   private final ClassLoader cl = this.getClass().getClassLoader();
-  private final ImageIcon toolbarIcons = 
+  private final ImageIcon toolbarIcons =
     new ImageIcon(cl.getResource("com/turbovnc/vncviewer/toolbar.png"));
   private final Image toolbarImage = toolbarIcons.getImage();
 
   public Toolbar(CConn cc_) {
     super();
     cc = cc_;
-    BufferedImage bi = 
+    BufferedImage bi =
       new BufferedImage(176, 16, BufferedImage.TYPE_INT_ARGB);
     Graphics2D g = bi.createGraphics();
     g.drawImage(toolbarImage, 0, 0, 176, 16, null);
@@ -63,19 +58,19 @@ public class Toolbar extends JToolBar implements ActionListener
     setFloatable(false);
     setBorder(new EmptyBorder(1, 2, 1, 0));
     for (int i = 0; i < 11; i++) {
-      ImageIcon icon = 
-        new ImageIcon(tk.createImage(bi.getSubimage(i*16, 0, 16, 16).getSource()));
+      ImageIcon icon =
+        new ImageIcon(tk.createImage(bi.getSubimage(i * 16, 0, 16, 16).getSource()));
       AbstractButton button;
       switch (i) {
       case 7:
         // fallthrough
-      case 8: 
+      case 8:
         button = new JToggleButton(icon);
         button.setBorder(BorderFactory.createLoweredBevelBorder());
         break;
       default:
         button = new JButton(icon);
-        button.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
+        button.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
       }
       button.setName(buttons[i]);
       button.setToolTipText(buttons[i]);
@@ -146,11 +141,11 @@ public class Toolbar extends JToolBar implements ActionListener
   public class ButtonListener implements MouseListener {
     Border raised = new BevelBorder(BevelBorder.RAISED);
     Border lowered = new BevelBorder(BevelBorder.LOWERED);
-    Border inactive = new EmptyBorder(2,2,2,2);
+    Border inactive = new EmptyBorder(2, 2, 2, 2);
     AbstractButton b;
     public ButtonListener(javax.swing.AbstractButton button) {
       b = button;
-    } 
+    }
     public void mousePressed(MouseEvent e) {
       if (!b.isEnabled()) return;
       if (b instanceof javax.swing.JToggleButton) {

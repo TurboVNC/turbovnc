@@ -2,17 +2,17 @@
  * Copyright (C) 2010 TigerVNC Team
  * Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -61,8 +61,7 @@ public class Security {
   public static final int secResultFailed = 1;
   public static final int secResultTooMany = 2; // deprecated
 
-  public Security(StringParameter secTypes)
-  {
+  public Security(StringParameter secTypes) {
     if (setInUserPrefs && secTypes.isDefault) return;
 
     String secTypesStr;
@@ -75,26 +74,24 @@ public class Security {
 
   public static List<Integer> enabledSecTypes = new ArrayList<Integer>();
 
-  public static final List<Integer> GetEnabledSecTypes()
-  {
+  public static final List<Integer> getEnabledSecTypes() {
     List<Integer> result = new ArrayList<Integer>();
 
     result.add(secTypeVeNCrypt);
     result.add(secTypeTight);
-    for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext(); ) {
+    for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
       int refType = (Integer)i.next();
       if (refType < 0x100 && refType != secTypeTight)
         result.add(refType);
     }
-    
+
     return (result);
   }
 
-  public static final List<Integer> GetEnabledExtSecTypes()
-  {
+  public static final List<Integer> getEnabledExtSecTypes() {
     List<Integer> result = new ArrayList<Integer>();
 
-    for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext(); ) {
+    for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();) {
       int refType = (Integer)i.next();
       if (refType != secTypeVeNCrypt) /* Do not include VeNCrypt to avoid loops */
         result.add(refType);
@@ -103,56 +100,53 @@ public class Security {
     return (result);
   }
 
-  public static final void EnableSecType(int secType)
-  {
-
-    for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext(); )
+  public static final void enableSecType(int secType) {
+    for (Iterator<Integer> i = enabledSecTypes.iterator(); i.hasNext();)
       if ((Integer)i.next() == secType)
         return;
 
     enabledSecTypes.add(secType);
   }
 
-  public boolean IsSupported(int secType)
-  {
+  public boolean isSupported(int secType) {
     Iterator<Integer> i;
-  
-    for (i = enabledSecTypes.iterator(); i.hasNext(); )
+
+    for (i = enabledSecTypes.iterator(); i.hasNext();)
      if ((Integer)i.next() == secType)
        return true;
     if (secType == secTypeVeNCrypt)
      return true;
     if (secType == secTypeTight)
      return true;
-  
+
     return false;
   }
 
-  public static void DisableSecType(int secType) {
+  public static void disableSecType(int secType) {
     enabledSecTypes.remove((Object)secType);
   }
 
   public static int secTypeNum(String name) {
     if (name.equalsIgnoreCase("None"))      return secTypeNone;
     if (name.equalsIgnoreCase("VncAuth"))   return secTypeVncAuth;
-    if (name.equalsIgnoreCase("Tight"))	    return secTypeTight;
+    if (name.equalsIgnoreCase("Tight"))     return secTypeTight;
     if (name.equalsIgnoreCase("RA2"))       return secTypeRA2;
-    if (name.equalsIgnoreCase("RA2ne"))	    return secTypeRA2ne;
+    if (name.equalsIgnoreCase("RA2ne"))     return secTypeRA2ne;
     if (name.equalsIgnoreCase("SSPI"))      return secTypeSSPI;
-    if (name.equalsIgnoreCase("SSPIne"))	  return secTypeSSPIne;
-    //if (name.equalsIgnoreCase("ultra"))	    return secTypeUltra;
-    //if (name.equalsIgnoreCase("TLS"))	      return secTypeTLS;
+    if (name.equalsIgnoreCase("SSPIne"))    return secTypeSSPIne;
+    //if (name.equalsIgnoreCase("ultra"))    return secTypeUltra;
+    //if (name.equalsIgnoreCase("TLS"))      return secTypeTLS;
     if (name.equalsIgnoreCase("VeNCrypt"))  return secTypeVeNCrypt;
 
     /* VeNCrypt subtypes */
-    if (name.equalsIgnoreCase("Plain"))	    return secTypePlain;
-    if (name.equalsIgnoreCase("Ident"))	    return secTypeIdent;
-    if (name.equalsIgnoreCase("TLSNone"))	  return secTypeTLSNone;
-    if (name.equalsIgnoreCase("TLSVnc"))	  return secTypeTLSVnc;
-    if (name.equalsIgnoreCase("TLSPlain"))	return secTypeTLSPlain;
-    if (name.equalsIgnoreCase("TLSIdent"))	return secTypeTLSIdent;
-    if (name.equalsIgnoreCase("X509None"))	return secTypeX509None;
-    if (name.equalsIgnoreCase("X509Vnc"))	  return secTypeX509Vnc;
+    if (name.equalsIgnoreCase("Plain"))     return secTypePlain;
+    if (name.equalsIgnoreCase("Ident"))     return secTypeIdent;
+    if (name.equalsIgnoreCase("TLSNone"))   return secTypeTLSNone;
+    if (name.equalsIgnoreCase("TLSVnc"))    return secTypeTLSVnc;
+    if (name.equalsIgnoreCase("TLSPlain"))  return secTypeTLSPlain;
+    if (name.equalsIgnoreCase("TLSIdent"))  return secTypeTLSIdent;
+    if (name.equalsIgnoreCase("X509None"))  return secTypeX509None;
+    if (name.equalsIgnoreCase("X509Vnc"))   return secTypeX509Vnc;
     if (name.equalsIgnoreCase("X509Plain")) return secTypeX509Plain;
     if (name.equalsIgnoreCase("X509Ident")) return secTypeX509Ident;
 
@@ -187,8 +181,7 @@ public class Security {
     }
   }
 
-  public final static List<Integer> parseSecTypes(String types_)
-  {
+  public static final List<Integer> parseSecTypes(String types_) {
     List<Integer> result = new ArrayList<Integer>();
     String[] types = types_.split(",");
     for (int i = 0; i < types.length; i++) {
@@ -199,7 +192,7 @@ public class Security {
     return (result);
   }
 
-  public final void SetSecTypes(List<Integer> secTypes) {
+  public final void setSecTypes(List<Integer> secTypes) {
     enabledSecTypes = secTypes;
   }
 

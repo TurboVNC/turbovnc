@@ -48,8 +48,7 @@ public class CSecurityTLS extends CSecurity {
   = new StringParameter("x509crl",
     "X509 CRL file", FileUtils.getVncHomeDir() + "x509_crl.pem");
 
-  private void initGlobal() 
-  {
+  private void initGlobal() {
     boolean globalInitDone = false;
 
     if (!globalInitDone) {
@@ -63,9 +62,8 @@ public class CSecurityTLS extends CSecurity {
     }
   }
 
-  public CSecurityTLS(boolean _anon) 
-  {
-    anon = _anon;
+  public CSecurityTLS(boolean anon_) {
+    anon = anon_;
     session = null;
   }
 
@@ -96,7 +94,7 @@ public class CSecurityTLS extends CSecurity {
           reason = new String("Authentication failure (protocol error)");
         throw new AuthFailureException(reason);
       }
-      
+
       setParam();
 
     }
@@ -116,7 +114,7 @@ public class CSecurityTLS extends CSecurity {
     //checkSession();
 
     cc.setStreams(new TLSInStream(is, manager),
-		              new TLSOutStream(os, manager));
+                  new TLSOutStream(os, manager));
     return true;
   }
 
@@ -130,10 +128,10 @@ public class CSecurityTLS extends CSecurity {
       }
     } else {
       try {
-        TrustManager[] myTM = new TrustManager[] { 
-          new MyX509TrustManager() 
+        TrustManager[] myTM = new TrustManager[] {
+          new MyX509TrustManager()
         };
-        ctx.init (null, myTM, null);
+        ctx.init(null, myTM, null);
       } catch(java.security.GeneralSecurityException e) {
         throw new AuthFailureException(e.getMessage());
       }
@@ -151,7 +149,7 @@ public class CSecurityTLS extends CSecurity {
 
       for (int i = 0; i < supported.length; i++)
         if (supported[i].matches("TLS_DH_anon.*"))
-	          enabled.add(supported[i]);
+          enabled.add(supported[i]);
 
       engine.setEnabledCipherSuites(enabled.toArray(new String[0]));
     } else {
@@ -168,13 +166,11 @@ public class CSecurityTLS extends CSecurity {
    }
   }
 
-  class MyX509TrustManager implements X509TrustManager
-  {
+  class MyX509TrustManager implements X509TrustManager {
 
     X509TrustManager tm;
 
-    MyX509TrustManager() throws java.security.GeneralSecurityException
-    {
+    MyX509TrustManager() throws java.security.GeneralSecurityException {
       TrustManagerFactory tmf =
         TrustManagerFactory.getInstance("PKIX");
       KeyStore ks = KeyStore.getInstance("JKS");
@@ -201,7 +197,7 @@ public class CSecurityTLS extends CSecurity {
           params.setRevocationEnabled(true);
         }
         tmf.init(new CertPathTrustManagerParameters(params));
-      } catch(java.io.FileNotFoundException e) { 
+      } catch(java.io.FileNotFoundException e) {
         vlog.error(e.toString());
       } catch(java.io.IOException e) {
         vlog.error(e.toString());
@@ -209,21 +205,19 @@ public class CSecurityTLS extends CSecurity {
       tm = (X509TrustManager)tmf.getTrustManagers()[0];
     }
 
-    public void checkClientTrusted(X509Certificate[] chain, String authType) 
-      throws CertificateException
-    {
+    public void checkClientTrusted(X509Certificate[] chain, String authType)
+      throws CertificateException {
       tm.checkClientTrusted(chain, authType);
     }
 
     public void checkServerTrusted(X509Certificate[] chain, String authType)
-      throws CertificateException
-    {
+      throws CertificateException {
       try {
-	      tm.checkServerTrusted(chain, authType);
+        tm.checkServerTrusted(chain, authType);
       } catch(CertificateException e) {
         Object[] answer = {"Proceed", "Exit"};
         int ret = JOptionPane.showOptionDialog(null,
-          e.getCause().getLocalizedMessage()+"\n" +
+          e.getCause().getLocalizedMessage() + "\n" +
           "Continue connecting to this host?",
           "Confirm certificate exception?",
           JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
@@ -235,8 +229,7 @@ public class CSecurityTLS extends CSecurity {
       }
     }
 
-    public X509Certificate[] getAcceptedIssuers ()
-    {
+    public X509Certificate[] getAcceptedIssuers() {
       return tm.getAcceptedIssuers();
     }
   }
@@ -245,8 +238,9 @@ public class CSecurityTLS extends CSecurity {
     return anon ? Security.secTypeTLSNone : Security.secTypeX509None;
   }
 
-  public final String description() 
-    { return anon ? "TLSNone" : "X509None"; }
+  public final String description() {
+    return anon ? "TLSNone" : "X509None";
+  }
 
   //protected void checkSession();
   protected CConnection client;

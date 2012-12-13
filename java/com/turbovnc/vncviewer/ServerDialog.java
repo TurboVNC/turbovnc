@@ -1,17 +1,17 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -29,14 +29,11 @@ import java.util.*;
 
 import com.turbovnc.rfb.*;
 
-class ServerDialog extends Dialog implements
-                           ActionListener,
-                           ItemListener
-{
+class ServerDialog extends Dialog implements ActionListener, ItemListener {
 
   public ServerDialog(OptionsDialog options_,
                       Options opts_, CConn cc_) {
-    
+
     super(true);
     cc = cc_;
     opts = opts_;
@@ -74,11 +71,12 @@ class ServerDialog extends Dialog implements
     // Hack to set the left inset on editable JComboBox
     if (UIManager.getLookAndFeel().getID() == "Windows") {
       server.setBorder(BorderFactory.createCompoundBorder(server.getBorder(),
-        BorderFactory.createEmptyBorder(0,2,0,0)));
+        BorderFactory.createEmptyBorder(0, 2, 0, 0)));
     } else if (UIManager.getLookAndFeel().getID() == "Metal") {
       ComboBoxEditor editor = server.getEditor();
       JTextField jtf = (JTextField)editor.getEditorComponent();
-      jtf.setBorder(new CompoundBorder(jtf.getBorder(), new EmptyBorder(0,2,0,0)));
+      jtf.setBorder(new CompoundBorder(jtf.getBorder(),
+                                       new EmptyBorder(0, 2, 0, 0)));
     }
 
     server.setEditable(true);
@@ -90,17 +88,17 @@ class ServerDialog extends Dialog implements
                    0, 0, 1, 1, 0, 0, 0, 1,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.LINE_START,
-                   new Insets(5,5,5,15));
+                   new Insets(5, 5, 5, 15));
     addGBComponent(serverLabel, topPanel,
                    1, 0, 1, 1, 0, 0, 0, 1,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.LINE_END,
-                   new Insets(10,0,5,5));
+                   new Insets(10, 0, 5, 5));
     addGBComponent(server, topPanel,
                    2, 0, 1, 1, 0, 0, 1, 1,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.CENTER,
-                   new Insets(10,0,5,20));
+                   new Insets(10, 0, 5, 20));
 
     optionsButton = new JButton("Options...");
     aboutButton = new JButton("About...");
@@ -112,34 +110,34 @@ class ServerDialog extends Dialog implements
                    0, 3, 1, 1, 0, 0, 0.8, 1,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.CENTER,
-                   new Insets(0,2,0,5));
+                   new Insets(0, 2, 0, 5));
     addGBComponent(optionsButton, buttonPanel,
                    1, 3, 1, 1, 0, 0, 1, 1,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.CENTER,
-                   new Insets(0,2,0,5));
+                   new Insets(0, 2, 0, 5));
     addGBComponent(okButton, buttonPanel,
                    2, 3, 1, 1, 0, 0, 0.7, 1,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.CENTER,
-                   new Insets(0,2,0,5));
+                   new Insets(0, 2, 0, 5));
     addGBComponent(cancelButton, buttonPanel,
                    3, 3, 1, 1, 0, 0, 0.6, 1,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.CENTER,
-                   new Insets(0,2,0,5));
+                   new Insets(0, 2, 0, 5));
 
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.anchor = GridBagConstraints.LINE_START;
     gbc.fill = GridBagConstraints.BOTH;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridheight = 1;
-    gbc.insets = new Insets(0,0,0,0);
+    gbc.insets = new Insets(0, 0, 0, 0);
     gbc.ipadx = 0;
     gbc.ipady = 0;
     gbc.weightx = 1;
     gbc.weighty = 1;
-    getContentPane().add(topPanel,gbc);
+    getContentPane().add(topPanel, gbc);
     getContentPane().add(buttonPanel);
 
     server.addActionListener(this);
@@ -147,7 +145,7 @@ class ServerDialog extends Dialog implements
     aboutButton.addActionListener(this);
     okButton.addActionListener(this);
     cancelButton.addActionListener(this);
-    
+
     pack();
   }
 
@@ -208,7 +206,7 @@ class ServerDialog extends Dialog implements
     UserPreferences.set("ServerDialog", "history", sb.toString());
     UserPreferences.save("ServerDialog");
   }
-  
+
   public boolean showDialog() {
     Frame[] frames = Frame.getFrames();
     for (int i = 0; i < frames.length; i++) {

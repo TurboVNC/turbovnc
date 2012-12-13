@@ -2,17 +2,17 @@
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright (C) 2011-2012 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -42,9 +42,7 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import javax.swing.*;
 import javax.swing.ImageIcon;
-import java.net.InetSocketAddress;
 import java.net.URL;
-import java.net.SocketException;
 import java.util.*;
 
 import com.turbovnc.rdr.*;
@@ -53,18 +51,17 @@ import com.turbovnc.rfb.Point;
 import com.turbovnc.network.Socket;
 import com.turbovnc.network.TcpSocket;
 
-public class CConn extends CConnection
-  implements UserPasswdGetter, UserMsgBox, OptionsDialogCallback, FdInStreamBlockCallback
-{
+public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
+  OptionsDialogCallback, FdInStreamBlockCallback {
 
   public final PixelFormat getPreferredPF() { return fullColourPF; }
-  static final PixelFormat verylowColourPF = 
+  static final PixelFormat VERY_LOW_COLOR_PF =
     new PixelFormat(8, 3, false, true, 1, 1, 1, 2, 1, 0);
-  static final PixelFormat lowColourPF = 
+  static final PixelFormat LOW_COLOR_PF =
     new PixelFormat(8, 6, false, true, 3, 3, 3, 4, 2, 0);
-  static final PixelFormat mediumColourPF = 
+  static final PixelFormat MEDIUM_COLOR_PF =
     new PixelFormat(8, 8, false, true, 7, 7, 3, 5, 2, 0);
-  static final PixelFormat highColourPF = 
+  static final PixelFormat HIGH_COLOR_PF =
     new PixelFormat(16, 16, false, true, 31, 63, 31, 11, 5, 0);
 
   static final double getTime() {
@@ -74,9 +71,8 @@ public class CConn extends CConnection
   ////////////////////////////////////////////////////////////////////
   // The following methods are all called from the RFB thread
 
-  public CConn(VncViewer viewer_, Socket sock_) 
-  {
-    sock = sock_;  viewer = viewer_; 
+  public CConn(VncViewer viewer_, Socket sock_) {
+    sock = sock_;  viewer = viewer_;
     benchmark = viewer.benchFile != null;
     pendingPFChange = false;
     lastServerEncoding = -1;
@@ -89,7 +85,7 @@ public class CConn extends CConnection
     options = new OptionsDialog(this);
     options.initDialog();
     clipboardDialog = new ClipboardDialog(this);
-    firstUpdate = true; pendingUpdate = false; continuousUpdates = false; 
+    firstUpdate = true; pendingUpdate = false; continuousUpdates = false;
     forceNonincremental = true; supportsSyncFence = false;
 
     setShared(opts.shared);
@@ -136,15 +132,13 @@ public class CConn extends CConnection
     }
   }
 
-  public void reset()
-  {
+  public void reset() {
     if (reader_ != null)
       reader_.reset();
     state_ = RFBSTATE_INITIALISATION;
   }
 
-  public void refreshFramebuffer()
-  {
+  public void refreshFramebuffer() {
     forceNonincremental = true;
 
     // Without fences, we cannot safely trigger an update request directly
@@ -152,10 +146,8 @@ public class CConn extends CConnection
     if (supportsSyncFence)
       requestNewUpdate();
   }
-  
 
-  public boolean showMsgBox(int flags, String title, String text)
-  {
+  public boolean showMsgBox(int flags, String title, String text) {
     //StringBuffer titleText = new StringBuffer("VNC Viewer: "+title);
     return true;
   }
@@ -166,25 +158,26 @@ public class CConn extends CConnection
     if (viewport != null)
       viewport.dispose();
     viewport = null;
-  } 
+  }
 
   // blockCallback() is called when reading from the socket would block.
   public void blockCallback() {
     try {
       synchronized(this) {
-        wait(0,50000);
+        wait(0, 50000);
       }
     } catch(InterruptedException e) {
       throw new SystemException(e.toString());
     }
-  }  
+  }
 
   // getUserPasswd() is called by the CSecurity object when it needs us to read
   // a password from the user.
 
   public final boolean getUserPasswd(StringBuffer user, StringBuffer passwd) {
-    String title = ((user==null? "Standard VNC Authentication":"Unix Login Authentication")
-                    + " [" + csecurity.description() + "]");
+    String title = ((user == null ? "Standard VNC Authentication" :
+                                    "Unix Login Authentication") +
+                    " [" + csecurity.description() + "]");
     String passwordFileStr = VncViewer.passwordFile.getValue();
     PasswdDialog dlg = null;
     String autoPass;
@@ -220,12 +213,12 @@ public class CConn extends CConnection
       } catch(IOException e) {
         throw new ErrorException("Could not read password file");
       }
-      String PlainPasswd = VncAuth.unobfuscatePasswd(obfPwd);
-      passwd.append(PlainPasswd);
-      passwd.setLength(PlainPasswd.length());
+      String plainPasswd = VncAuth.unobfuscatePasswd(obfPwd);
+      passwd.append(plainPasswd);
+      passwd.setLength(plainPasswd.length());
       return true;
     }
-     
+
     if (user == null) {
       if (autoPass == null)
         dlg = new PasswdDialog(title, (user == null), null, (passwd == null));
@@ -278,13 +271,13 @@ public class CConn extends CConnection
         pendingPF = fullColourPF;
       } else {
         if (opts.colors == 8) {
-          pendingPF = verylowColourPF;
+          pendingPF = VERY_LOW_COLOR_PF;
         } else if (opts.colors == 64) {
-          pendingPF = lowColourPF;
+          pendingPF = LOW_COLOR_PF;
         } else if (opts.colors == 256) {
-          pendingPF = mediumColourPF;
+          pendingPF = MEDIUM_COLOR_PF;
         } else {
-          pendingPF = highColourPF;
+          pendingPF = HIGH_COLOR_PF;
         }
       }
       pendingPFChange = true;
@@ -303,7 +296,7 @@ public class CConn extends CConnection
   // setDesktopSize() is called when the desktop size changes (including when
   // it is set initially).
   public void setDesktopSize(int w, int h) {
-    super.setDesktopSize(w,h);
+    super.setDesktopSize(w, h);
     resizeFramebuffer();
   }
 
@@ -314,7 +307,7 @@ public class CConn extends CConnection
 
     if ((reason == screenTypes.reasonClient) &&
         (result != screenTypes.resultSuccess)) {
-      vlog.error("SetDesktopSize failed: "+result);
+      vlog.error("SetDesktopSize failed: " + result);
       return;
     }
 
@@ -322,30 +315,29 @@ public class CConn extends CConnection
   }
 
   // clientRedirect() migrates the client to another host/port
-  public void clientRedirect(int port, String host, 
+  public void clientRedirect(int port, String host,
                              String x509subject) {
     sock.close();
     setServerPort(port);
     sock = new TcpSocket(host, port);
-    vlog.info("Redirected to "+host+":"+port);
+    vlog.info("Redirected to " + host + ":" + port);
     VncViewer.newViewer(viewer, sock, true);
   }
 
   // setName() is called when the desktop name changes
   public void setName(String name) {
     super.setName(name);
-  
+
     if (viewport != null) {
-      viewport.setTitle(name+" - TurboVNC");
+      viewport.setTitle(name + " - TurboVNC");
     }
   }
 
   // framebufferUpdateStart() is called at the beginning of an update.
   // Here we try to send out a new framebuffer update request so that the
   // next update can be sent out in parallel with us decoding the current
-  // one. 
-  public void framebufferUpdateStart() 
-  {
+  // one.
+  public void framebufferUpdateStart() {
     // Note: This might not be true if sync fences are supported
     pendingUpdate = false;
 
@@ -356,18 +348,18 @@ public class CConn extends CConnection
   // For each rectangle, the FdInStream will have timed the speed
   // of the connection, allowing us to select format and encoding
   // appropriately, and then request another incremental update.
-  public void framebufferUpdateEnd() 
-  {
+  public void framebufferUpdateEnd() {
 
     desktop.updateWindow();
 
     if (firstUpdate) {
       int width, height;
-      
+
       // We need fences to make extra update requests and continuous
       // updates "safe". See fence() for the next step.
       if (cp.supportsFence)
-        writer().writeFence(fenceTypes.fenceFlagRequest | fenceTypes.fenceFlagSyncNext, 0, null);
+        writer().writeFence(
+          fenceTypes.fenceFlagRequest | fenceTypes.fenceFlagSyncNext, 0, null);
 
       if (cp.supportsSetDesktopSize &&
           VncViewer.desktopSize.getValueStr() != null &&
@@ -378,18 +370,18 @@ public class CConn extends CConnection
 
         layout = cp.screenLayout;
 
-        if (layout.num_screens() == 0)
-          layout.add_screen(new Screen());
-        else if (layout.num_screens() != 1) {
+        if (layout.numScreens() == 0)
+          layout.addScreen(new Screen());
+        else if (layout.numScreens() != 1) {
 
           while (true) {
-            Iterator<Screen> iter = layout.screens.iterator(); 
+            Iterator<Screen> iter = layout.screens.iterator();
             Screen screen = (Screen)iter.next();
-        
+
             if (!iter.hasNext())
               break;
 
-            layout.remove_screen(screen.id);
+            layout.removeScreen(screen.id);
           }
         }
 
@@ -420,9 +412,9 @@ public class CConn extends CConnection
     desktop.setColourMapEntries(firstColour, nColours, rgbs);
   }
 
-  public void bell() { 
+  public void bell() {
     if (opts.acceptBell)
-      desktop.getToolkit().beep(); 
+      desktop.getToolkit().beep();
   }
 
   public void serverCutText(String str, int len) {
@@ -493,44 +485,43 @@ public class CConn extends CConnection
     desktop.setCursor(width, height, hotspot, data, mask);
   }
 
-  public void fence(int flags, int len, byte[] data)
-  {
+  public void fence(int flags, int len, byte[] data) {
     // can't call super.super.fence(flags, len, data);
     cp.supportsFence = true;
-  
+
     if ((flags & fenceTypes.fenceFlagRequest) != 0) {
       // We handle everything synchronously so we trivially honor these modes
       flags = flags & (fenceTypes.fenceFlagBlockBefore | fenceTypes.fenceFlagBlockAfter);
-  
+
       writer().writeFence(flags, len, data);
       return;
     }
-  
+
     if (len == 0) {
       // Initial probe
       if ((flags & fenceTypes.fenceFlagSyncNext) != 0) {
         supportsSyncFence = true;
-  
+
         if (cp.supportsContinuousUpdates) {
           vlog.info("Enabling continuous updates");
           continuousUpdates = true;
-          writer().writeEnableContinuousUpdates(true, 0, 0, cp.width, cp.height);
+          writer().writeEnableContinuousUpdates(true, 0, 0, cp.width,
+                                                cp.height);
         }
       }
     } else {
       // Pixel format change
       MemInStream memStream = new MemInStream(data, 0, len);
       PixelFormat pf = new PixelFormat();
-  
+
       pf.read(memStream);
-  
+
       desktop.setServerPF(pf);
       cp.setPF(pf);
     }
   }
 
-  private void resizeFramebuffer()
-  {
+  private void resizeFramebuffer() {
     if (desktop == null)
       return;
 
@@ -541,7 +532,7 @@ public class CConn extends CConnection
       return;
     if ((desktop.width() == cp.width) && (desktop.height() == cp.height))
       return;
-    
+
     desktop.resize();
     recreateViewport();
   }
@@ -555,8 +546,7 @@ public class CConn extends CConnection
 
   private void recreateViewport() { recreateViewport(false); }
 
-  private void recreateViewport(boolean restore)
-  {
+  private void recreateViewport(boolean restore) {
     if (viewport != null) {
       if (opts.fullScreen) {
         savedState = viewport.getExtendedState();
@@ -581,8 +571,7 @@ public class CConn extends CConnection
     desktop.requestFocusInWindow();
   }
 
-  private Rectangle getSpannedSize(boolean fullScreen)
-  {
+  private Rectangle getSpannedSize(boolean fullScreen) {
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     GraphicsDevice[] gsList = ge.getScreenDevices();
     Rectangle primary = null, s0 = null;
@@ -601,9 +590,9 @@ public class CConn extends CConnection
 
     Toolkit tk = Toolkit.getDefaultToolkit();
 
-    for(GraphicsDevice gs : gsList) {
+    for (GraphicsDevice gs : gsList) {
       GraphicsConfiguration[] gcList = gs.getConfigurations();
-      for(GraphicsConfiguration gc : gcList) {
+      for (GraphicsConfiguration gc : gcList) {
         Rectangle s = gc.getBounds();
         if (!fullScreen) {
           if (gc == gcList[0])
@@ -666,8 +655,7 @@ public class CConn extends CConnection
   }
 
   // Resize non-full-screen window based on the spanning option
-  public void sizeWindow()
-  {
+  public void sizeWindow() {
     boolean pack = true;
     int w = desktop.scaledWidth;
     int h = desktop.scaledHeight;
@@ -699,8 +687,7 @@ public class CConn extends CConnection
 
   private void reconfigureViewport() { reconfigureViewport(false); }
 
-  private void reconfigureViewport(boolean restore)
-  {
+  private void reconfigureViewport(boolean restore) {
     desktop.setScaledSize();
     if (opts.fullScreen) {
       // NOTE: We have to use the work area on OS X, because there is no way
@@ -725,8 +712,7 @@ public class CConn extends CConnection
 
   // requestNewUpdate() requests an update from the server, having set the
   // format and encoding appropriately.
-  private void requestNewUpdate()
-  {
+  private void requestNewUpdate() {
     if (formatChange) {
       PixelFormat pf;
 
@@ -737,13 +723,13 @@ public class CConn extends CConnection
         pf = fullColourPF;
       } else {
         if (opts.colors == 8) {
-          pf = verylowColourPF;
+          pf = VERY_LOW_COLOR_PF;
         } else if (opts.colors == 64) {
-          pf = lowColourPF;
+          pf = LOW_COLOR_PF;
         } else if (opts.colors == 256) {
-          pf = mediumColourPF;
+          pf = MEDIUM_COLOR_PF;
         } else {
-          pf = highColourPF;
+          pf = HIGH_COLOR_PF;
         }
       }
 
@@ -752,9 +738,9 @@ public class CConn extends CConnection
         // get the response back. That way we will be synchronised with
         // when the server switches.
         MemOutStream memStream = new MemOutStream();
-  
+
         pf.write(memStream);
-  
+
         writer().writeFence(fenceTypes.fenceFlagRequest | fenceTypes.fenceFlagSyncNext,
                             memStream.length(), (byte[])memStream.data());
       } else {
@@ -766,7 +752,7 @@ public class CConn extends CConnection
       }
 
       String str = pf.print();
-      vlog.info("Using pixel format "+str);
+      vlog.info("Using pixel format " + str);
       writer().writeSetPixelFormat(pf);
 
       formatChange = false;
@@ -776,8 +762,8 @@ public class CConn extends CConnection
 
     if (forceNonincremental || !continuousUpdates) {
       pendingUpdate = true;
-      writer().writeFramebufferUpdateRequest(new Rect(0,0,cp.width,cp.height),
-                                                 !formatChange && !forceNonincremental);
+      writer().writeFramebufferUpdateRequest(new Rect(0, 0, cp.width, cp.height),
+                                             !formatChange && !forceNonincremental);
     }
 
     forceNonincremental = false;
@@ -824,11 +810,11 @@ public class CConn extends CConnection
       pkgTime = attributes.getValue("Package-Time");
     } catch(IOException e) { }
     JOptionPane.showMessageDialog((viewport != null ? viewport : null),
-      VncViewer.product_name + " v" + VncViewer.version +
+      VncViewer.PRODUCT_NAME + " v" + VncViewer.version +
         " (" + VncViewer.build + ") " +
         "[JVM: " + System.getProperty("os.arch") + "]\n" +
       "Built on " + pkgDate + " at " + pkgTime + "\n" +
-      "Copyright (C) " + VncViewer.copyright_year + " " + VncViewer.copyright +
+      "Copyright (C) " + VncViewer.copyrightYear + " " + VncViewer.copyright +
         "\n" +
       VncViewer.url,
       "About TurboVNC Viewer", JOptionPane.INFORMATION_MESSAGE, logo);
@@ -856,7 +842,8 @@ public class CConn extends CConnection
   }
 
   public void refresh() {
-    writer().writeFramebufferUpdateRequest(new Rect(0,0,cp.width,cp.height), false);
+    writer().writeFramebufferUpdateRequest(new Rect(0, 0, cp.width, cp.height),
+                                           false);
     pendingUpdate = true;
   }
 
@@ -925,7 +912,7 @@ public class CConn extends CConnection
       options.jpegQualityLevel.setSnapToTicks(true);
       options.jpegQualityLevel.setEnabled(true);
       options.jpegQualityLabelString = new String("Image quality level: ");
-      options.jpegQualityLabel.setText(options.jpegQualityLabelString + 
+      options.jpegQualityLabel.setText(options.jpegQualityLabelString +
         options.jpegQualityLevel.getValue());
       options.jpegQualityLabel.setEnabled(true);
       options.jpegQualityLabelLo.setEnabled(true);
@@ -946,7 +933,7 @@ public class CConn extends CConnection
       options.compressionLabelLo.setEnabled(true);
       options.compressionLabelHi.setEnabled(true);
       options.compressionLabelString = new String("Compression level: ");
-      options.compressionLabel.setText(options.compressionLabelString + 
+      options.compressionLabel.setText(options.compressionLabelString +
         options.compressionLevel.getValue());
     }
   }
@@ -985,7 +972,7 @@ public class CConn extends CConnection
 
       /* Process non-VeNCrypt sectypes */
       java.util.List<Integer> secTypes = new ArrayList<Integer>();
-      secTypes = Security.GetEnabledSecTypes();
+      secTypes = Security.getEnabledSecTypes();
       boolean enableVeNCrypt = false;
       for (Iterator<Integer> i = secTypes.iterator(); i.hasNext();) {
         switch ((Integer)i.next()) {
@@ -1004,7 +991,7 @@ public class CConn extends CConnection
       /* Process VeNCrypt subtypes */
       if (enableVeNCrypt) {
         java.util.List<Integer> secTypesExt = new ArrayList<Integer>();
-        secTypesExt = Security.GetEnabledExtSecTypes();
+        secTypesExt = Security.getEnabledExtSecTypes();
         for (Iterator<Integer> iext = secTypesExt.iterator(); iext.hasNext();) {
           switch ((Integer)iext.next()) {
           case Security.secTypePlain:
@@ -1082,9 +1069,9 @@ public class CConn extends CConnection
     options.showToolbar.setSelected(VncViewer.showToolbar.getValue());
     if (opts.scalingFactor == Options.SCALE_AUTO) {
       options.scalingFactor.setSelectedItem("Auto");
-    } else if(opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
+    } else if (opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
       options.scalingFactor.setSelectedItem("Fixed Aspect Ratio");
-    } else { 
+    } else {
       options.scalingFactor.setSelectedItem(opts.scalingFactor + "%");
       if (desktop != null)
         desktop.setScaledSize();
@@ -1138,68 +1125,68 @@ public class CConn extends CConnection
       if (desktop != null)
         desktop.resetLocalCursor();
     }
-    
+
     checkEncodings();
-  
+
     if (state() != RFBSTATE_NORMAL) {
-      Security.DisableSecType(Security.secTypeNone);
-      Security.DisableSecType(Security.secTypeVncAuth);
-      Security.DisableSecType(Security.secTypePlain);
-      Security.DisableSecType(Security.secTypeIdent);
-      Security.DisableSecType(Security.secTypeTLSNone);
-      Security.DisableSecType(Security.secTypeTLSVnc);
-      Security.DisableSecType(Security.secTypeTLSPlain);
-      Security.DisableSecType(Security.secTypeTLSIdent);
-      Security.DisableSecType(Security.secTypeX509None);
-      Security.DisableSecType(Security.secTypeX509Vnc);
-      Security.DisableSecType(Security.secTypeX509Plain);
-      Security.DisableSecType(Security.secTypeX509Ident);
+      Security.disableSecType(Security.secTypeNone);
+      Security.disableSecType(Security.secTypeVncAuth);
+      Security.disableSecType(Security.secTypePlain);
+      Security.disableSecType(Security.secTypeIdent);
+      Security.disableSecType(Security.secTypeTLSNone);
+      Security.disableSecType(Security.secTypeTLSVnc);
+      Security.disableSecType(Security.secTypeTLSPlain);
+      Security.disableSecType(Security.secTypeTLSIdent);
+      Security.disableSecType(Security.secTypeX509None);
+      Security.disableSecType(Security.secTypeX509Vnc);
+      Security.disableSecType(Security.secTypeX509Plain);
+      Security.disableSecType(Security.secTypeX509Ident);
 
       /* Process security types which don't use encryption */
       if (options.encNone.isSelected() || !options.secVeNCrypt.isSelected()) {
         if (options.secNone.isSelected())
-          Security.EnableSecType(Security.secTypeNone);
- 
+          Security.enableSecType(Security.secTypeNone);
+
         if (options.secVnc.isSelected())
-          Security.EnableSecType(Security.secTypeVncAuth);
+          Security.enableSecType(Security.secTypeVncAuth);
       }
 
       if (options.encNone.isSelected() && options.secVeNCrypt.isSelected()) {
         if (options.secPlain.isSelected())
-          Security.EnableSecType(Security.secTypePlain);
- 
+          Security.enableSecType(Security.secTypePlain);
+
         if (options.secIdent.isSelected())
-          Security.EnableSecType(Security.secTypeIdent);
+          Security.enableSecType(Security.secTypeIdent);
       }
 
       /* Process security types which use TLS encryption */
       if (options.encTLS.isSelected() && options.secVeNCrypt.isSelected()) {
         if (options.secNone.isSelected())
-          Security.EnableSecType(Security.secTypeTLSNone);
+          Security.enableSecType(Security.secTypeTLSNone);
 
         if (options.secVnc.isSelected())
-          Security.EnableSecType(Security.secTypeTLSVnc);
+          Security.enableSecType(Security.secTypeTLSVnc);
 
         if (options.secPlain.isSelected())
-          Security.EnableSecType(Security.secTypeTLSPlain);
+          Security.enableSecType(Security.secTypeTLSPlain);
 
         if (options.secIdent.isSelected())
-          Security.EnableSecType(Security.secTypeTLSIdent);
+          Security.enableSecType(Security.secTypeTLSIdent);
       }
 
       /* Process security types which use X509 encryption */
       if (options.encX509.isSelected() && options.secVeNCrypt.isSelected()) {
         if (options.secNone.isSelected())
-          Security.EnableSecType(Security.secTypeX509None);
+          Security.enableSecType(Security.secTypeX509None);
 
         if (options.secVnc.isSelected())
-          Security.EnableSecType(Security.secTypeX509Vnc);
+          Security.enableSecType(Security.secTypeX509Vnc);
 
         if (options.secPlain.isSelected())
-          Security.EnableSecType(Security.secTypeX509Plain);
+          Security.enableSecType(Security.secTypeX509Plain);
 
         if (options.secIdent.isSelected())
-          Security.EnableSecType(Security.secTypeX509Ident);
+          Security.enableSecType(Security.secTypeX509Ident);
       }
     }
     if (options.fullScreen.isSelected() != opts.fullScreen)
@@ -1227,7 +1214,7 @@ public class CConn extends CConnection
   public void writeClientCutText(String str, int len) {
     if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
       return;
-    writer().writeClientCutText(str,len);
+    writer().writeClientCutText(str, len);
   }
 
   public void writeKeyEvent(int keysym, boolean down) {
@@ -1247,8 +1234,8 @@ public class CConn extends CConnection
     keycode = ev.getKeyCode();
     key = ev.getKeyChar();
 
-    vlog.debug((ev.isActionKey()? "action ":"") + "key " +
-               (down ? "PRESS":"release") + " code " + keycode + " ASCII " +
+    vlog.debug((ev.isActionKey() ? "action " : "") + "key " +
+               (down ? "PRESS" : "release") + " code " + keycode + " ASCII " +
                 key);
 
     if (!ev.isActionKey()) {
@@ -1300,7 +1287,7 @@ public class CConn extends CConnection
         keysym = Keysyms.Meta_L; break;
       default:
         if (ev.isControlDown()) {
-          // For CTRL-<letter>, CTRL is sent separately, so just send <letter>.      
+          // For CTRL-<letter>, CTRL is sent separately, so just send <letter>.
           if ((key >= 1 && key <= 26 && !ev.isShiftDown()) ||
               // CTRL-{, CTRL-|, CTRL-} also map to ASCII 96-127
               (key >= 27 && key <= 29 && ev.isShiftDown()))
@@ -1386,12 +1373,12 @@ public class CConn extends CConnection
       break;
     }
 
-    if (cp.width != desktop.scaledWidth || 
+    if (cp.width != desktop.scaledWidth ||
         cp.height != desktop.scaledHeight) {
-      int sx = (desktop.scaleWidthRatio == 1.00) 
-        ? ev.getX() : (int)Math.floor(ev.getX() / desktop.scaleWidthRatio);
-      int sy = (desktop.scaleHeightRatio == 1.00) 
-        ? ev.getY() : (int)Math.floor(ev.getY() / desktop.scaleHeightRatio);
+      int sx = (desktop.scaleWidthRatio == 1.00) ?
+        ev.getX() : (int)Math.floor(ev.getX() / desktop.scaleWidthRatio);
+      int sy = (desktop.scaleHeightRatio == 1.00) ?
+        ev.getY() : (int)Math.floor(ev.getY() / desktop.scaleHeightRatio);
       ev.translatePoint(sx - ev.getX(), sy - ev.getY());
     }
     if (viewport != null && (viewport.dx > 0 || viewport.dy > 0)) {
@@ -1399,8 +1386,8 @@ public class CConn extends CConnection
       int dy = (int)Math.floor(viewport.dy / desktop.scaleHeightRatio);
       ev.translatePoint(-dx, -dy);
     }
-    
-    writer().writePointerEvent(new Point(ev.getX(),ev.getY()), buttonMask);
+
+    writer().writePointerEvent(new Point(ev.getX(), ev.getY()), buttonMask);
   }
 
 
@@ -1419,7 +1406,7 @@ public class CConn extends CConnection
       int dy = (int)Math.floor(viewport.dy / desktop.scaleHeightRatio);
       ev.translatePoint(-dx, -dy);
     }
-    for (int i=0;i<Math.abs(clicks);i++) {
+    for (int i = 0; i < Math.abs(clicks); i++) {
       x = ev.getX();
       y = ev.getY();
       writer().writePointerEvent(new Point(x, y), buttonMask);
@@ -1449,7 +1436,7 @@ public class CConn extends CConnection
   // checkEncodings() sends a setEncodings message if one is needed.
   private void checkEncodings() {
     if (encodingChange && (writer() != null)) {
-      vlog.info("Requesting " + Encodings.encodingName(currentEncoding) + 
+      vlog.info("Requesting " + Encodings.encodingName(currentEncoding) +
         " encoding");
       writer().writeSetEncodings(currentEncoding, lastServerEncoding, opts);
       encodingChange = false;

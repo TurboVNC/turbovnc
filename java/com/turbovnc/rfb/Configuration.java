@@ -2,17 +2,17 @@
  * Copyright 2004-2005 Cendio AB.
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  * Copyright 2012 Brian P. Hinz
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -26,7 +26,6 @@
 package com.turbovnc.rfb;
 
 import java.io.FileInputStream;
-import java.io.PrintWriter;
 import java.util.*;
 
 public class Configuration {
@@ -55,11 +54,11 @@ public class Configuration {
     }
     int equal = config.indexOf('=');
     if (equal != -1) {
-      return setParam(config.substring(0, equal), config.substring(equal+1));
+      return setParam(config.substring(0, equal), config.substring(equal + 1));
     } else if (hyphen) {
       VoidParameter param = getParam(config);
       if (param == null) return false;
-      if (param instanceof BoolParameter && ((BoolParameter)param).reverse) {  
+      if (param instanceof BoolParameter && ((BoolParameter)param).reverse) {
         ((BoolParameter)param).reverse = false;
         ((BoolParameter)param).setParam(false);
         return true;
@@ -113,7 +112,7 @@ public class Configuration {
         int wordLen;
         if (s > -1) wordLen = s;
         else wordLen = desc.length();
-  
+
         if (column + wordLen + 1 > width) {
           System.err.print("\n   ");
           column = 4;
@@ -126,7 +125,7 @@ public class Configuration {
         }
 
         if (s == -1) break;
-        desc = desc.substring(wordLen+1);
+        desc = desc.substring(wordLen + 1);
       }
       current = current.next;
       System.err.print("\n\n");
@@ -159,9 +158,10 @@ public class Configuration {
       return;
     }
 
-    int scale_num = -1, scale_den = -1, fitwindow = -1;
+    int scaleNum = -1, scaleDenom = -1, fitWindow = -1;
 
-    for (Iterator<String> i = props.stringPropertyNames().iterator(); i.hasNext();) {
+    for (Iterator<String> i = props.stringPropertyNames().iterator();
+         i.hasNext();) {
       String name = (String)i.next();
 
       if (name.startsWith("[")) {
@@ -172,7 +172,7 @@ public class Configuration {
       } else if (name.equalsIgnoreCase("port")) {
         setParam("Port", props.getProperty(name));
       } else if (name.equalsIgnoreCase("password")) {
-        byte encryptedPassword[] = new byte[8];
+        byte[] encryptedPassword = new byte[8];
         String passwordString = props.getProperty(name);
         if (passwordString.length() > 0) {
           for (int c = 0; c < Math.min(passwordString.length(), 16); c += 2) {
@@ -232,20 +232,20 @@ public class Configuration {
         }
       } else if (name.equalsIgnoreCase("fitwindow")) {
         try {
-          fitwindow = Integer.parseInt(props.getProperty(name));
+          fitWindow = Integer.parseInt(props.getProperty(name));
         } catch(NumberFormatException e) {}
       } else if (name.equalsIgnoreCase("scale_num")) {
         int temp = -1;
         try {
           temp = Integer.parseInt(props.getProperty(name));
         } catch(NumberFormatException e) {}
-        if (temp >= 1) scale_num = temp;
+        if (temp >= 1) scaleNum = temp;
       } else if (name.equalsIgnoreCase("scale_den")) {
         int temp = -1;
         try {
           temp = Integer.parseInt(props.getProperty(name));
         } catch(NumberFormatException e) {}
-        if (temp >= 1) scale_den = temp;
+        if (temp >= 1) scaleDenom = temp;
       } else if (name.equalsIgnoreCase("cursorshape")) {
         setParam("CursorShape", props.getProperty(name));
       } else if (name.equalsIgnoreCase("compresslevel")) {
@@ -277,12 +277,12 @@ public class Configuration {
       }
     }
 
-    if ((scale_num >= 1 || scale_den >= 1) && fitwindow < 1) {
-      if (scale_num < 1) scale_num = 1;
-      if (scale_den < 1) scale_den = 1;
-      int scalingFactor = scale_num * 100 / scale_den;
+    if ((scaleNum >= 1 || scaleDenom >= 1) && fitWindow < 1) {
+      if (scaleNum < 1) scaleNum = 1;
+      if (scaleDenom < 1) scaleDenom = 1;
+      int scalingFactor = scaleNum * 100 / scaleDenom;
       setParam("Scale", Integer.toString(scalingFactor));
-    } else if (fitwindow >= 1) {
+    } else if (fitWindow >= 1) {
       setParam("Scale", "FixedRatio");
     }
   }

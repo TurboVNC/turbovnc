@@ -1,17 +1,17 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -32,15 +32,14 @@ import javax.swing.border.*;
 import com.turbovnc.rfb.*;
 
 class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
-                                              ItemListener
-{
+  ItemListener {
 
   // Constants
   // Static variables
   static LogWriter vlog = new LogWriter("OptionsDialog");
 
   OptionsDialogCallback cb;
-  JPanel EncodingPanel, ConnPanel, GlobalPanel, SecPanel;
+  JPanel encodingPanel, connPanel, globalPanel, secPanel;
   JCheckBox allowJpeg;
   JComboBox menuKey, compressLevel, scalingFactor, encMethodComboBox, span;
   JSlider jpegQualityLevel, subsamplingLevel, compressionLevel;
@@ -60,7 +59,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   String compressionLabelString;
   Hashtable<Integer, String> subsamplingLabelTable;
 
-  public OptionsDialog(OptionsDialogCallback cb_) { 
+  public OptionsDialog(OptionsDialogCallback cb_) {
     super(true);
     cb = cb_;
     setResizable(false);
@@ -68,15 +67,15 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     getContentPane().setLayout(
       new BoxLayout(getContentPane(), BoxLayout.PAGE_AXIS));
-	
+
     JTabbedPane tabPane = new JTabbedPane();
 
     // Encoding tab
-    EncodingPanel = new JPanel(new GridBagLayout());
-    JPanel ImagePanel = new JPanel(new GridBagLayout());
+    encodingPanel = new JPanel(new GridBagLayout());
+    JPanel imagePanel = new JPanel(new GridBagLayout());
 
     encMethodLabel = new JLabel("Encoding method:");
-    Object[] encMethod = { 
+    Object[] encMethod = {
       "Tight + Perceptually Lossless JPEG (LAN)",
       "Tight + Medium-Quality JPEG",
       "Tight + Low-Quality JPEG (WAN)",
@@ -87,10 +86,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     allowJpeg = new JCheckBox("Allow JPEG Compression");
     allowJpeg.addItemListener(this);
 
-    subsamplingLabelString = 
+    subsamplingLabelString =
       new String("JPEG chrominance subsampling: ");
     subsamplingLabel = new JLabel();
-    subsamplingLevel = 
+    subsamplingLevel =
       new JSlider(JSlider.HORIZONTAL, 0, Options.NUMSUBSAMPOPT - 1, 0);
     subsamplingLevel.addChangeListener(this);
     subsamplingLevel.setMajorTickSpacing(1);
@@ -105,13 +104,13 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     subsamplingLevel.setPaintLabels(false);
     subsamplingLabelLo = new JLabel("fast");
     subsamplingLabelHi = new JLabel("best");
-    subsamplingLabel.setText(subsamplingLabelString + 
+    subsamplingLabel.setText(subsamplingLabelString +
       subsamplingLabelTable.get(subsamplingLevel.getValue()));
 
-    jpegQualityLabelString = 
+    jpegQualityLabelString =
       new String("JPEG image quality: ");
     jpegQualityLabel = new JLabel();
-    jpegQualityLevel = 
+    jpegQualityLevel =
       new JSlider(JSlider.HORIZONTAL, 1, 100, Options.DEFQUAL);
     jpegQualityLevel.addChangeListener(this);
     jpegQualityLevel.setMajorTickSpacing(10);
@@ -121,13 +120,13 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     jpegQualityLevel.setPaintLabels(false);
     jpegQualityLabelLo = new JLabel("poor");
     jpegQualityLabelHi = new JLabel("best");
-    jpegQualityLabel.setText(jpegQualityLabelString + 
+    jpegQualityLabel.setText(jpegQualityLabelString +
       jpegQualityLevel.getValue());
 
-    compressionLabelString = 
+    compressionLabelString =
       new String("Zlib compression level: ");
     compressionLabel = new JLabel();
-    compressionLevel = 
+    compressionLevel =
       new JSlider(JSlider.HORIZONTAL, 0, 1, 1);
     compressionLevel.addChangeListener(this);
     compressionLevel.setMajorTickSpacing(1);
@@ -136,98 +135,98 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     compressionLevel.setPaintLabels(false);
     compressionLabelLo = new JLabel("fast");
     compressionLabelHi = new JLabel("best");
-    compressionLabel.setText(compressionLabelString + 
+    compressionLabel.setText(compressionLabelString +
       (compressionLevel.getValue() == 0 ? "None" :
         compressionLevel.getValue()));
 
-    addGBComponent(encMethodLabel, ImagePanel, 
-                   0, 0, 3, 1, 2, 2, 0, 0, 
-                   GridBagConstraints.NONE, 
-                   GridBagConstraints.LINE_START, 
-                   new Insets(2,2,2,2));
-    addGBComponent(encMethodComboBox, ImagePanel, 
-                   0, 1, 3, 1, 2, 2, 0, 0, 
-                   GridBagConstraints.NONE, 
-                   GridBagConstraints.LINE_START, 
-                   new Insets(2,20,2,2));
-    addGBComponent(allowJpeg, ImagePanel, 
-                   0, 2, 3, 1, 0, 2, 0, 0, 
-                   GridBagConstraints.NONE, 
-                   GridBagConstraints.LINE_START, 
-                   new Insets(2,0,2,2));
-    addGBComponent(subsamplingLabel, ImagePanel, 
-                   0, 3, 3, 1, 2, 2, 0, 0, 
-                   GridBagConstraints.NONE, 
-                   GridBagConstraints.LINE_START, 
-                   new Insets(2,2,2,2));
-    addGBComponent(subsamplingLabelLo, ImagePanel, 
-                   0, 4, 1, 1, 2, 2, 0, 0, 
-                   GridBagConstraints.NONE, 
-                   GridBagConstraints.LINE_START, 
-                   new Insets(2,12,2,2));
-    addGBComponent(subsamplingLevel, ImagePanel, 
-                   1, 4, 1, 1, 2, 2, 0, 0, 
-                   GridBagConstraints.NONE, 
-                   GridBagConstraints.LINE_START, 
-                   new Insets(2,2,2,2));
-    addGBComponent(subsamplingLabelHi, ImagePanel, 
-                   2, 4, 1, 1, 2, 2, 0, 0, 
-                   GridBagConstraints.NONE, 
-                   GridBagConstraints.LINE_START, 
-                   new Insets(2,2,2,2));
-    addGBComponent(jpegQualityLabel, ImagePanel, 
-                   0, 5, 3, 1, 2, 2, 0, 0, 
-                   GridBagConstraints.NONE, 
-                   GridBagConstraints.LINE_START, 
-                   new Insets(2,2,2,2));
-    addGBComponent(jpegQualityLabelLo, ImagePanel, 
-                   0, 6, 1, 1, 2, 2, 0, 0, 
-                   GridBagConstraints.NONE, 
-                   GridBagConstraints.LINE_START, 
-                   new Insets(2,12,2,2));
-    addGBComponent(jpegQualityLevel, ImagePanel, 
-                   1, 6, 1, 1, 2, 2, 0, 0, 
-                   GridBagConstraints.NONE, 
-                   GridBagConstraints.LINE_START, 
-                   new Insets(2,2,2,2));
-    addGBComponent(jpegQualityLabelHi, ImagePanel, 
-                   2, 6, 1, 1, 2, 2, 0, 0, 
-                   GridBagConstraints.NONE, 
-                   GridBagConstraints.LINE_START, 
-                   new Insets(2,2,2,2));
-    addGBComponent(compressionLabel, ImagePanel, 
-                   0, 7, 3, 1, 2, 2, 0, 0, 
-                   GridBagConstraints.NONE, 
-                   GridBagConstraints.LINE_START, 
-                   new Insets(2,2,2,2));
-    addGBComponent(compressionLabelLo, ImagePanel, 
-                   0, 8, 1, 1, 2, 2, 0, 0, 
-                   GridBagConstraints.NONE, 
-                   GridBagConstraints.LINE_START, 
-                   new Insets(2,12,2,2));
-    addGBComponent(compressionLevel, ImagePanel, 
-                   1, 8, 1, 1, 2, 2, 0, 0, 
-                   GridBagConstraints.NONE, 
-                   GridBagConstraints.LINE_START, 
-                   new Insets(2,2,2,2));
-    addGBComponent(compressionLabelHi, ImagePanel, 
-                   2, 8, 1, 1, 2, 2, 1, 1, 
-                   GridBagConstraints.NONE, 
-                   GridBagConstraints.LINE_START, 
-                   new Insets(2,2,2,2));
+    addGBComponent(encMethodLabel, imagePanel,
+                   0, 0, 3, 1, 2, 2, 0, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.LINE_START,
+                   new Insets(2, 2, 2, 2));
+    addGBComponent(encMethodComboBox, imagePanel,
+                   0, 1, 3, 1, 2, 2, 0, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.LINE_START,
+                   new Insets(2, 20, 2, 2));
+    addGBComponent(allowJpeg, imagePanel,
+                   0, 2, 3, 1, 0, 2, 0, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.LINE_START,
+                   new Insets(2, 0, 2, 2));
+    addGBComponent(subsamplingLabel, imagePanel,
+                   0, 3, 3, 1, 2, 2, 0, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.LINE_START,
+                   new Insets(2, 2, 2, 2));
+    addGBComponent(subsamplingLabelLo, imagePanel,
+                   0, 4, 1, 1, 2, 2, 0, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.LINE_START,
+                   new Insets(2, 12, 2, 2));
+    addGBComponent(subsamplingLevel, imagePanel,
+                   1, 4, 1, 1, 2, 2, 0, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.LINE_START,
+                   new Insets(2, 2, 2, 2));
+    addGBComponent(subsamplingLabelHi, imagePanel,
+                   2, 4, 1, 1, 2, 2, 0, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.LINE_START,
+                   new Insets(2, 2, 2, 2));
+    addGBComponent(jpegQualityLabel, imagePanel,
+                   0, 5, 3, 1, 2, 2, 0, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.LINE_START,
+                   new Insets(2, 2, 2, 2));
+    addGBComponent(jpegQualityLabelLo, imagePanel,
+                   0, 6, 1, 1, 2, 2, 0, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.LINE_START,
+                   new Insets(2, 12, 2, 2));
+    addGBComponent(jpegQualityLevel, imagePanel,
+                   1, 6, 1, 1, 2, 2, 0, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.LINE_START,
+                   new Insets(2, 2, 2, 2));
+    addGBComponent(jpegQualityLabelHi, imagePanel,
+                   2, 6, 1, 1, 2, 2, 0, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.LINE_START,
+                   new Insets(2, 2, 2, 2));
+    addGBComponent(compressionLabel, imagePanel,
+                   0, 7, 3, 1, 2, 2, 0, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.LINE_START,
+                   new Insets(2, 2, 2, 2));
+    addGBComponent(compressionLabelLo, imagePanel,
+                   0, 8, 1, 1, 2, 2, 0, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.LINE_START,
+                   new Insets(2, 12, 2, 2));
+    addGBComponent(compressionLevel, imagePanel,
+                   1, 8, 1, 1, 2, 2, 0, 0,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.LINE_START,
+                   new Insets(2, 2, 2, 2));
+    addGBComponent(compressionLabelHi, imagePanel,
+                   2, 8, 1, 1, 2, 2, 1, 1,
+                   GridBagConstraints.NONE,
+                   GridBagConstraints.LINE_START,
+                   new Insets(2, 2, 2, 2));
 
-    addGBComponent(ImagePanel, EncodingPanel,
+    addGBComponent(imagePanel, encodingPanel,
                    0, 0, 1, GridBagConstraints.REMAINDER, 0, 0, 1, 1,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.PAGE_START,
-                   new Insets(4,4,4,4));
+                   new Insets(4, 4, 4, 4));
 
     // Connection tab
-    ConnPanel = new JPanel(new GridBagLayout());
+    connPanel = new JPanel(new GridBagLayout());
 
     JLabel scalingFactorLabel = new JLabel("Scaling Factor:");
-    Object[] scalingFactors = { 
-      "Auto", "Fixed Aspect Ratio", "50%", "75%", "95%", "100%", "105%", 
+    Object[] scalingFactors = {
+      "Auto", "Fixed Aspect Ratio", "50%", "75%", "95%", "100%", "105%",
       "125%", "150%", "175%", "200%", "250%", "300%", "350%", "400%" };
     scalingFactor = new JComboBox(scalingFactors);
     scalingFactor.setEditable(true);
@@ -255,90 +254,90 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     acceptBell = new JCheckBox("Beep when requested by the server");
     acceptBell.addItemListener(this);
 
-    addGBComponent(scalingFactorLabel, ConnPanel,
+    addGBComponent(scalingFactorLabel, connPanel,
                    0, 0, 1, 1, 2, 2, 1, 0,
                    GridBagConstraints.NONE,
                    GridBagConstraints.FIRST_LINE_START,
-                   new Insets(8,8,0,5));
-    addGBComponent(scalingFactor, ConnPanel,
+                   new Insets(8, 8, 0, 5));
+    addGBComponent(scalingFactor, connPanel,
                    1, 0, 1, 1, 2, 2, 25, 0,
                    GridBagConstraints.NONE,
                    GridBagConstraints.FIRST_LINE_START,
-                   new Insets(4,5,0,5));
-    addGBComponent(fullScreen, ConnPanel,
+                   new Insets(4, 5, 0, 5));
+    addGBComponent(fullScreen, connPanel,
                    0, 1, 2, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
-                   new Insets(4,5,0,5));
-    addGBComponent(spanLabel, ConnPanel,
+                   new Insets(4, 5, 0, 5));
+    addGBComponent(spanLabel, connPanel,
                    0, 2, 1, 1, 2, 2, 1, 0,
                    GridBagConstraints.NONE,
                    GridBagConstraints.FIRST_LINE_START,
-                   new Insets(8,8,0,5));
-    addGBComponent(span, ConnPanel,
+                   new Insets(8, 8, 0, 5));
+    addGBComponent(span, connPanel,
                    1, 2, 1, 1, 2, 2, 25, 0,
                    GridBagConstraints.NONE,
                    GridBagConstraints.FIRST_LINE_START,
-                   new Insets(4,5,0,5));
-    addGBComponent(shared, ConnPanel,
+                   new Insets(4, 5, 0, 5));
+    addGBComponent(shared, connPanel,
                    0, 3, 2, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
-                   new Insets(4,5,0,5));
-    addGBComponent(viewOnly, ConnPanel,
+                   new Insets(4, 5, 0, 5));
+    addGBComponent(viewOnly, connPanel,
                    0, 4, 2, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.LINE_START,
-                   new Insets(4,5,0,5));
-    addGBComponent(cursorShape, ConnPanel,
+                   new Insets(4, 5, 0, 5));
+    addGBComponent(cursorShape, connPanel,
                    0, 5, 2, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
-                   new Insets(4,5,0,5));
-    addGBComponent(acceptClipboard, ConnPanel,
+                   new Insets(4, 5, 0, 5));
+    addGBComponent(acceptClipboard, connPanel,
                    0, 6, 2, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.LINE_START,
-                   new Insets(4,5,0,5));
-    addGBComponent(sendClipboard, ConnPanel,
+                   new Insets(4, 5, 0, 5));
+    addGBComponent(sendClipboard, connPanel,
                    0, 7, 2, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.LINE_START,
-                   new Insets(4,5,0,5));
-    addGBComponent(acceptBell, ConnPanel,
+                   new Insets(4, 5, 0, 5));
+    addGBComponent(acceptBell, connPanel,
                    0, 8, 2, 1, 2, 2, 1, 1,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
-                   new Insets(4,5,0,5));
+                   new Insets(4, 5, 0, 5));
 
     // Global tab
-    GlobalPanel = new JPanel(new GridBagLayout());
+    globalPanel = new JPanel(new GridBagLayout());
 
     showToolbar = new JCheckBox("Show toolbar by default");
     showToolbar.addItemListener(this);
 
     JLabel menuKeyLabel = new JLabel("Menu Key:");
-    String[] menuKeys = new String[MenuKey.getMenuKeySymbolCount()]; 
+    String[] menuKeys = new String[MenuKey.getMenuKeySymbolCount()];
     for (int i = 0; i < MenuKey.getMenuKeySymbolCount(); i++)
       menuKeys[i] = MenuKey.getMenuKeySymbols()[i].name;
     menuKey  = new JComboBox(menuKeys);
     menuKey.addItemListener(this);
 
-    addGBComponent(showToolbar, GlobalPanel,
+    addGBComponent(showToolbar, globalPanel,
                    0, 1, 2, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
-                   new Insets(4,5,0,5));
-    addGBComponent(menuKeyLabel, GlobalPanel,
+                   new Insets(4, 5, 0, 5));
+    addGBComponent(menuKeyLabel, globalPanel,
                    0, 2, 1, 1, 2, 2, 1, 0,
                    GridBagConstraints.NONE,
                    GridBagConstraints.FIRST_LINE_START,
-                   new Insets(8,8,0,5));
-    addGBComponent(menuKey, GlobalPanel,
+                   new Insets(8, 8, 0, 5));
+    addGBComponent(menuKey, globalPanel,
                    1, 2, 1, 1, 2, 2, 25, 0,
                    GridBagConstraints.NONE,
                    GridBagConstraints.FIRST_LINE_START,
-                   new Insets(4,5,0,5));
+                   new Insets(4, 5, 0, 5));
 
     JPanel defaultsPanel = new JPanel(new GridBagLayout());
     defaultsPanel.setBorder(BorderFactory.createTitledBorder("Defaults"));
@@ -348,23 +347,23 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                    0, 0, 1, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
-                   new Insets(2,2,2,2));
+                   new Insets(2, 2, 2, 2));
     defClearButton = new JButton("Clear");
     defClearButton.addActionListener(this);
     addGBComponent(defClearButton, defaultsPanel,
                    1, 0, 1, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
-                   new Insets(2,2,2,2));
+                   new Insets(2, 2, 2, 2));
 
-    addGBComponent(defaultsPanel, GlobalPanel,
+    addGBComponent(defaultsPanel, globalPanel,
                    0, 3, 2, GridBagConstraints.REMAINDER, 2, 2, 1, 1,
                    GridBagConstraints.NONE,
                    GridBagConstraints.FIRST_LINE_START,
-                   new Insets(25,5,4,5));
+                   new Insets(25, 5, 4, 5));
 
     // security tab
-    SecPanel = new JPanel(new GridBagLayout());
+    secPanel = new JPanel(new GridBagLayout());
 
     JPanel encryptionPanel = new JPanel(new GridBagLayout());
     encryptionPanel.setBorder(BorderFactory.createTitledBorder("Session Encryption"));
@@ -375,7 +374,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                            new GridBagConstraints(0, 2, 1, 1, 1, 1,
                              GridBagConstraints.LINE_START,
                              GridBagConstraints.REMAINDER,
-                             new Insets(0,0,0,60), 0, 0));
+                             new Insets(0, 0, 0, 60), 0, 0));
 
     JPanel x509Panel = new JPanel(new GridBagLayout());
     x509Panel.setBorder(BorderFactory.createTitledBorder("X.509 certificates"));
@@ -387,12 +386,12 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                    0, 0, 1, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
-                   new Insets(2,2,2,2));
+                   new Insets(2, 2, 2, 2));
     addGBComponent(crl, x509Panel,
                    1, 0, 1, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.LINE_START,
-                   new Insets(2,2,2,2));
+                   new Insets(2, 2, 2, 2));
 
     JPanel authPanel = new JPanel(new GridBagLayout());
     authPanel.setBorder(BorderFactory.createTitledBorder("Authentication Schemes"));
@@ -402,74 +401,74 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                                 authPanel,
                                 new GridBagConstraints(0, 2, 1, 1, 1, 1,
                                   GridBagConstraints.LINE_START,
-                                  GridBagConstraints.NONE, new Insets(0,0,0,5),
-                                  0, 0));
+                                  GridBagConstraints.NONE,
+                                  new Insets(0, 0, 0, 5), 0, 0));
     secPlain = addJCheckBox("Plain (VeNCrypt)", null, authPanel,
                             new GridBagConstraints(0, 3, 1, 1, 1, 1,
                               GridBagConstraints.LINE_START,
-                              GridBagConstraints.NONE, new Insets(0,0,0,5),
-                              0, 0));
+                              GridBagConstraints.NONE,
+                              new Insets(0, 0, 0, 5), 0, 0));
     secIdent = addJCheckBox("Ident (VeNCrypt)", null, authPanel,
-                            new GridBagConstraints(0, 4, 1, 1, 1, 1, 
+                            new GridBagConstraints(0, 4, 1, 1, 1, 1,
                               GridBagConstraints.LINE_START,
-                              GridBagConstraints.NONE, new Insets(0,0,0,5),
-                              0, 0));
+                              GridBagConstraints.NONE,
+                              new Insets(0, 0, 0, 5), 0, 0));
     sendLocalUsername = new JCheckBox("Send Local Username");
     sendLocalUsername.addItemListener(this);
     addGBComponent(sendLocalUsername, authPanel,
                    1, 3, 1, 2, 0, 0, 2, 1,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.LINE_START,
-                   new Insets(0,20,0,0));
+                   new Insets(0, 20, 0, 0));
 
     secVeNCrypt = new JCheckBox("Extended encryption and authentication (VeNCrypt)");
     secVeNCrypt.addItemListener(this);
-    addGBComponent(secVeNCrypt, SecPanel,
+    addGBComponent(secVeNCrypt, secPanel,
                    0, 0, 1, 1, 2, 2, 1, 0,
                    GridBagConstraints.HORIZONTAL,
                    GridBagConstraints.FIRST_LINE_START,
-                   new Insets(4,5,0,30));
-    addGBComponent(encryptionPanel, SecPanel,
+                   new Insets(4, 5, 0, 30));
+    addGBComponent(encryptionPanel, secPanel,
                    0, 1, 1, 1, 2, 2, 1, 0,
                    GridBagConstraints.NONE,
                    GridBagConstraints.LINE_START,
-                   new Insets(0,10,2,5));
-    addGBComponent(x509Panel, SecPanel,
+                   new Insets(0, 10, 2, 5));
+    addGBComponent(x509Panel, secPanel,
                    0, 2, 1, 1, 2, 2, 1, 0,
                    GridBagConstraints.NONE,
                    GridBagConstraints.LINE_START,
-                   new Insets(2,10,2,5));
-    addGBComponent(authPanel, SecPanel,
+                   new Insets(2, 10, 2, 5));
+    addGBComponent(authPanel, secPanel,
                    0, 3, 1, 1, 2, 2, 1, 1,
                    GridBagConstraints.NONE,
                    GridBagConstraints.FIRST_LINE_START,
-                   new Insets(2,10,2,5));
+                   new Insets(2, 10, 2, 5));
 
-    tabPane.add(EncodingPanel);
-    tabPane.add(ConnPanel);
-    tabPane.add(GlobalPanel);
-    tabPane.add(SecPanel);
-    tabPane.addTab("Encoding", EncodingPanel);
-    tabPane.addTab("Connection", ConnPanel);
-    tabPane.addTab("Global", GlobalPanel);
-    tabPane.addTab("Security", SecPanel);
-    tabPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+    tabPane.add(encodingPanel);
+    tabPane.add(connPanel);
+    tabPane.add(globalPanel);
+    tabPane.add(secPanel);
+    tabPane.addTab("Encoding", encodingPanel);
+    tabPane.addTab("Connection", connPanel);
+    tabPane.addTab("Global", globalPanel);
+    tabPane.addTab("Security", secPanel);
+    tabPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
     okButton = new JButton("OK");
-    okButton.setPreferredSize(new Dimension(90,30));
+    okButton.setPreferredSize(new Dimension(90, 30));
     okButton.addActionListener(this);
     cancelButton = new JButton("Cancel");
-    cancelButton.setPreferredSize(new Dimension(90,30));
+    cancelButton.setPreferredSize(new Dimension(90, 30));
     cancelButton.addActionListener(this);
 
     JPanel buttonPane = new JPanel();
     buttonPane.setLayout(new BoxLayout(buttonPane, BoxLayout.LINE_AXIS));
-    buttonPane.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+    buttonPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     buttonPane.add(Box.createHorizontalGlue());
     buttonPane.add(okButton);
-    buttonPane.add(Box.createRigidArea(new Dimension(5,0)));
+    buttonPane.add(Box.createRigidArea(new Dimension(5, 0)));
     buttonPane.add(cancelButton);
-    buttonPane.add(Box.createRigidArea(new Dimension(5,0)));
+    buttonPane.add(Box.createRigidArea(new Dimension(5, 0)));
 
     this.getContentPane().add(tabPane);
     this.getContentPane().add(buttonPane);
@@ -487,10 +486,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   public void initDialog() {
     if (cb != null) cb.setOptions();
   }
-  
+
   private void updatePreferences() {
     UserPreferences.set("global", "JPEG", allowJpeg.isSelected());
-    String subsamplingStr = 
+    String subsamplingStr =
       subsamplingLabelTable.get(subsamplingLevel.getValue());
     UserPreferences.set("global", "Subsampling", subsamplingStr);
     UserPreferences.set("global", "Quality", jpegQualityLevel.getValue());
@@ -511,9 +510,9 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     String scaleString = scalingFactor.getSelectedItem().toString();
     if (scaleString.equalsIgnoreCase("Auto")) {
       UserPreferences.set("global", "Scale", "Auto");
-    } else if(scaleString.equalsIgnoreCase("Fixed Aspect Ratio")) {
+    } else if (scaleString.equalsIgnoreCase("Fixed Aspect Ratio")) {
       UserPreferences.set("global", "Scale", "FixedRatio");
-    } else { 
+    } else {
       scaleString = scaleString.replaceAll("[^\\d]", "");
       int sf = -1;
       try {
@@ -559,7 +558,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.weightx = 1;
     gbc.weighty = 1;
-    panel.add(c,gbc);
+    panel.add(c, gbc);
     group.add(c);
     c.addItemListener(this);
     return c;
@@ -572,7 +571,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.weightx = 1;
     gbc.weighty = 1;
-    panel.add(c,gbc);
+    panel.add(c, gbc);
     if (group != null)
       group.add(c);
     c.addItemListener(this);
@@ -582,11 +581,11 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   JCheckBox addJCheckBox(String str, ButtonGroup group, JPanel panel,
       GridBagConstraints gbc) {
     JCheckBox c = new JCheckBox(str);
-    panel.add(c,gbc);
+    panel.add(c, gbc);
     if (group != null)
       group.add(c);
     c.addItemListener(this);
-    
+
     return c;
   }
 
@@ -753,11 +752,11 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   public void stateChanged(ChangeEvent e) {
     Object s = e.getSource();
     if (s instanceof JSlider && (JSlider)s == subsamplingLevel) {
-      subsamplingLabel.setText(subsamplingLabelString + 
+      subsamplingLabel.setText(subsamplingLabelString +
         subsamplingLabelTable.get(subsamplingLevel.getValue()));
       setEncMethodComboBox();
     } else if (s instanceof JSlider && (JSlider)s == jpegQualityLevel) {
-      jpegQualityLabel.setText(jpegQualityLabelString + 
+      jpegQualityLabel.setText(jpegQualityLabelString +
         jpegQualityLevel.getValue());
       setEncMethodComboBox();
     } else if (s instanceof JSlider && (JSlider)s == compressionLevel) {

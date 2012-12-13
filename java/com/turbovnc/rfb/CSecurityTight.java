@@ -1,16 +1,16 @@
 /* Copyright (C) 2012 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -25,31 +25,30 @@ import com.turbovnc.vncviewer.*;
 
 public class CSecurityTight extends CSecurity {
 
-  final static String VENDOR_STDV = "STDV";
-  final static String VENDOR_VENC = "VENC";
-  final static String VENDOR_GTKV = "GTKV";
-  final static String VENDOR_TGHT = "TGHT";
-  final static int NOTUNNEL = 0;
-  final static int CODE_NOAUTH = 1;
-  final static int CODE_VNCAUTH = 2;
-  final static int CODE_VENCRYPT = 19;
-  final static int CODE_SASL = 20;
-  final static int CODE_ULGNAUTH = 129;
-  final static String SIG_NOAUTH = "NOAUTH__";
-  final static String SIG_VNCAUTH = "VNCAUTH_";
-  final static String SIG_VENCRYPT = "VENCRYPT";
-  final static String SIG_SASL = "SASL____";
-  final static String SIG_ULGNAUTH = "ULGNAUTH";
+  static final String VENDOR_STDV = "STDV";
+  static final String VENDOR_VENC = "VENC";
+  static final String VENDOR_GTKV = "GTKV";
+  static final String VENDOR_TGHT = "TGHT";
+  static final int NOTUNNEL = 0;
+  static final int CODE_NOAUTH = 1;
+  static final int CODE_VNCAUTH = 2;
+  static final int CODE_VENCRYPT = 19;
+  static final int CODE_SASL = 20;
+  static final int CODE_ULGNAUTH = 129;
+  static final String SIG_NOAUTH = "NOAUTH__";
+  static final String SIG_VNCAUTH = "VNCAUTH_";
+  static final String SIG_VENCRYPT = "VENCRYPT";
+  static final String SIG_SASL = "SASL____";
+  static final String SIG_ULGNAUTH = "ULGNAUTH";
 
-  public CSecurityTight(SecurityClient sec) { 
-    security = sec;  
+  public CSecurityTight(SecurityClient sec) {
+    security = sec;
   }
 
-  public boolean processMsg(CConnection cc) 
-  {
+  public boolean processMsg(CConnection cc) {
     InStream is = cc.getInStream();
     OutStream os = cc.getOutStream();
-    List<Integer> SupportedAuthTypes = new ArrayList<Integer>();
+    List<Integer> supportedAuthTypes = new ArrayList<Integer>();
 
     int nTunnels = is.readU32();
 
@@ -57,13 +56,13 @@ public class CSecurityTight extends CSecurity {
       vlog.info("Tunneling not supported!");
       os.writeU32(NOTUNNEL);
     }
-    
+
     int nAuthTypes = is.readU32();
     if (nAuthTypes == 0) {
       cs = new CSecurityNone();
       return (cs.processMsg(cc));
     }
-  
+
     for (int i = 0; i < nAuthTypes; i++) {
       int code = is.readS32();
       byte[] v = new byte[4];
@@ -73,20 +72,20 @@ public class CSecurityTight extends CSecurity {
       is.readBytes(s, 0, 8);
       String signature = new String(s);
       // FIXME:
-      // Add functions comparable to GetEnabledSecTypes for checking
+      // Add functions comparable to getEnabledSecTypes for checking
       // Tight auth caps.
       switch (code) {
       case CODE_NOAUTH:
-        if (!Security.GetEnabledSecTypes().contains(Security.secTypeNone))
+        if (!Security.getEnabledSecTypes().contains(Security.secTypeNone))
           break;
         if (vendor.equals(VENDOR_STDV) && signature.equals(SIG_NOAUTH))
-          SupportedAuthTypes.add(code);
+          supportedAuthTypes.add(code);
         break;
       case CODE_VNCAUTH:
-        if (!Security.GetEnabledSecTypes().contains(Security.secTypeVncAuth))
+        if (!Security.getEnabledSecTypes().contains(Security.secTypeVncAuth))
           break;
         if (vendor.equals(VENDOR_STDV) && signature.equals(SIG_VNCAUTH))
-          SupportedAuthTypes.add(code);
+          supportedAuthTypes.add(code);
         break;
       case CODE_ULGNAUTH:
         if (!((CConn)cc).isUnixLoginSelected())
@@ -94,37 +93,38 @@ public class CSecurityTight extends CSecurity {
 
         if (vendor.equals(VENDOR_TGHT) && signature.equals(SIG_ULGNAUTH)) {
           if (((CConn)cc).isUnixLoginForced())
-            SupportedAuthTypes.add(0, code);
+            supportedAuthTypes.add(0, code);
           else
-            SupportedAuthTypes.add(code);
+            supportedAuthTypes.add(code);
         }
         break;
       case CODE_VENCRYPT:
-        if (!Security.GetEnabledSecTypes().contains(Security.secTypeVeNCrypt))
+        if (!Security.getEnabledSecTypes().contains(Security.secTypeVeNCrypt))
           break;
         if (vendor.equals(VENDOR_VENC) && signature.equals(SIG_VENCRYPT))
-          SupportedAuthTypes.add(code);
+          supportedAuthTypes.add(code);
         break;
       default:
-        vlog.info("Unsupported auth type: "+code+" "+vendor+" "+signature);
+        vlog.info("Unsupported auth type: " + code + " " + vendor + " " +
+                  signature);
         break;
       }
     }
 
-    if (SupportedAuthTypes.isEmpty())
+    if (supportedAuthTypes.isEmpty())
       throw new WarningException("No supported auth types!");
 
-    for (Iterator<Integer> i = SupportedAuthTypes.iterator(); i.hasNext(); ) {
+    for (Iterator<Integer> i = supportedAuthTypes.iterator(); i.hasNext();) {
       int authType = (Integer)i.next();
       switch (authType) {
-      case CODE_ULGNAUTH: 
+      case CODE_ULGNAUTH:
         os.writeU32(CODE_ULGNAUTH);
-  
+
         StringBuffer username = new StringBuffer();
         StringBuffer password = new StringBuffer();
-  
+
         CConn.upg.getUserPasswd(username, password);
-  
+
         // Return the response to the server
         os.writeU32(username.length());
         os.writeU32(password.length());
@@ -139,17 +139,17 @@ public class CSecurityTight extends CSecurity {
         }
         os.flush();
         return true;
-      case CODE_NOAUTH: 
+      case CODE_NOAUTH:
         os.writeU32(CODE_NOAUTH);
         os.flush();
         cs = new CSecurityNone();
         return (cs.processMsg(cc));
-      case CODE_VNCAUTH: 
+      case CODE_VNCAUTH:
         os.writeU32(CODE_VNCAUTH);
         os.flush();
         cs = new CSecurityVncAuth();
         return (cs.processMsg(cc));
-      case CODE_VENCRYPT: 
+      case CODE_VENCRYPT:
         os.writeU32(CODE_VENCRYPT);
         os.flush();
         cs = new CSecurityVeNCrypt(security);
@@ -162,10 +162,10 @@ public class CSecurityTight extends CSecurity {
   SecurityClient security;
   CSecurity cs;
   public int getType() { return Security.secTypeTight; }
-  public String description() { 
+  public String description() {
     if (cs != null)
       return cs.description();
-    return "Tight"; 
+    return "Tight";
   }
 
   static LogWriter vlog = new LogWriter("Tight");

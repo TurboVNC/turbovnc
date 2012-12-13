@@ -1,17 +1,17 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -25,7 +25,6 @@ import com.turbovnc.rdr.FdOutStream;
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.LogWriter;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -62,11 +61,11 @@ public class TcpSocket extends Socket {
 
     // - Create a socket
     initSockets();
-    
+
     try {
       addr = java.net.InetAddress.getByName(host);
     } catch(UnknownHostException e) {
-      throw new WarningException("Could not resolve hostname: " + 
+      throw new WarningException("Could not resolve hostname: " +
                                  e.getMessage());
     }
 
@@ -124,7 +123,7 @@ public class TcpSocket extends Socket {
   public String getPeerEndpoint() {
     String address = getPeerAddress();
     int port = getPeerPort();
-    return address+"::"+port;
+    return address + "::" + port;
   }
 
   public boolean sameMachine() {
@@ -137,11 +136,11 @@ public class TcpSocket extends Socket {
     super.shutdown();
     ((SocketDescriptor)getFd()).shutdown();
   }
-  
+
   public void close() {
     ((SocketDescriptor)getFd()).close();
   }
-  
+
   public static boolean enableNagles(SocketDescriptor sock, boolean enable) {
     try {
       sock.channel.socket().setTcpNoDelay(!enable);

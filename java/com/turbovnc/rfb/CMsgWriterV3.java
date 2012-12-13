@@ -2,17 +2,17 @@
  * Copyright 2009-2011 Pierre Ossman for Cendio AB
  * Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -46,16 +46,16 @@ public class CMsgWriterV3 extends CMsgWriter {
 	{
 	  if (!cp.supportsSetDesktopSize)
 	    throw new ErrorException("Server does not support SetDesktopSize");
-	
+
 	  startMsg(MsgTypes.msgTypeSetDesktopSize);
 	  os.pad(1);
-	
+
 	  os.writeU16(width);
 	  os.writeU16(height);
-	
-	  os.writeU8(layout.num_screens());
+
+	  os.writeU8(layout.numScreens());
 	  os.pad(1);
-	
+
     for (Iterator<Screen> iter = layout.screens.iterator(); iter.hasNext(); ) {
       Screen refScreen = (Screen)iter.next();
 	    os.writeU32(refScreen.id);
@@ -65,7 +65,7 @@ public class CMsgWriterV3 extends CMsgWriter {
 	    os.writeU16(refScreen.dimensions.height());
 	    os.writeU32(refScreen.flags);
 	  }
-	
+
 	  endMsg();
 	}
 
@@ -77,33 +77,33 @@ public class CMsgWriterV3 extends CMsgWriter {
       throw new ErrorException("Fence payload too large");
     if ((flags & ~fenceTypes.fenceFlagsSupported) != 0)
       throw new ErrorException("Unknown fence flags");
-  
+
     startMsg(MsgTypes.msgTypeClientFence);
     os.pad(3);
-  
+
     os.writeU32(flags);
-  
+
     os.writeU8(len);
     os.writeBytes(data, 0, len);
-  
+
     endMsg();
   }
-  
+
   synchronized public void writeEnableContinuousUpdates(boolean enable,
                                            int x, int y, int w, int h)
   {
     if (!cp.supportsContinuousUpdates)
       throw new ErrorException("Server does not support continuous updates");
-  
+
     startMsg(MsgTypes.msgTypeEnableContinuousUpdates);
-  
+
     os.writeU8((enable?1:0));
-  
+
     os.writeU16(x);
     os.writeU16(y);
     os.writeU16(w);
     os.writeU16(h);
-  
+
     endMsg();
   }
 }

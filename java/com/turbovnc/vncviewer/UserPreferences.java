@@ -1,16 +1,16 @@
 /* Copyright (C) 2012 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -161,86 +161,86 @@ public class UserPreferences {
     }
     if ((setEncX509 || setEncTLS || setEncNone) &&
         (setSecPlain || setSecIdent || setSecVnc || setSecNone)) {
-      Security.DisableSecType(Security.secTypeNone);
-      Security.DisableSecType(Security.secTypeVncAuth);
-      Security.DisableSecType(Security.secTypePlain);
-      Security.DisableSecType(Security.secTypeIdent);
-      Security.DisableSecType(Security.secTypeTLSNone);
-      Security.DisableSecType(Security.secTypeTLSVnc);
-      Security.DisableSecType(Security.secTypeTLSPlain);
-      Security.DisableSecType(Security.secTypeTLSIdent);
-      Security.DisableSecType(Security.secTypeX509None);
-      Security.DisableSecType(Security.secTypeX509Vnc);
-      Security.DisableSecType(Security.secTypeX509Plain);
-      Security.DisableSecType(Security.secTypeX509Ident);
+      Security.disableSecType(Security.secTypeNone);
+      Security.disableSecType(Security.secTypeVncAuth);
+      Security.disableSecType(Security.secTypePlain);
+      Security.disableSecType(Security.secTypeIdent);
+      Security.disableSecType(Security.secTypeTLSNone);
+      Security.disableSecType(Security.secTypeTLSVnc);
+      Security.disableSecType(Security.secTypeTLSPlain);
+      Security.disableSecType(Security.secTypeTLSIdent);
+      Security.disableSecType(Security.secTypeX509None);
+      Security.disableSecType(Security.secTypeX509Vnc);
+      Security.disableSecType(Security.secTypeX509Plain);
+      Security.disableSecType(Security.secTypeX509Ident);
     }
 
     if (setSecVeNCrypt) {
-      if (secVeNCrypt) Security.EnableSecType(Security.secTypeVeNCrypt);
+      if (secVeNCrypt) Security.enableSecType(Security.secTypeVeNCrypt);
       else {
-        Security.DisableSecType(Security.secTypeVeNCrypt);
+        Security.disableSecType(Security.secTypeVeNCrypt);
         encX509 = encTLS = secPlain = secIdent = false;
       }
       Security.setInUserPrefs = true;
     }
     if (setEncX509 && setSecPlain) {
-      if (encX509 && secPlain) Security.EnableSecType(Security.secTypeX509Plain);
-      else Security.DisableSecType(Security.secTypeX509Plain);
+      if (encX509 && secPlain) Security.enableSecType(Security.secTypeX509Plain);
+      else Security.disableSecType(Security.secTypeX509Plain);
       Security.setInUserPrefs = true;
     }
     if (setEncX509 && setSecIdent) {
-      if (encX509 && secIdent) Security.EnableSecType(Security.secTypeX509Ident);
-      else Security.DisableSecType(Security.secTypeX509Ident);
+      if (encX509 && secIdent) Security.enableSecType(Security.secTypeX509Ident);
+      else Security.disableSecType(Security.secTypeX509Ident);
       Security.setInUserPrefs = true;
     }
     if (setEncX509 && setSecVnc) {
-      if (encX509 && secVnc) Security.EnableSecType(Security.secTypeX509Vnc);
-      else Security.DisableSecType(Security.secTypeX509Vnc);
+      if (encX509 && secVnc) Security.enableSecType(Security.secTypeX509Vnc);
+      else Security.disableSecType(Security.secTypeX509Vnc);
       Security.setInUserPrefs = true;
     }
     if (setEncX509 && setSecNone) {
-      if (encX509 && secNone) Security.EnableSecType(Security.secTypeX509None);
-      else Security.DisableSecType(Security.secTypeX509None);
+      if (encX509 && secNone) Security.enableSecType(Security.secTypeX509None);
+      else Security.disableSecType(Security.secTypeX509None);
       Security.setInUserPrefs = true;
     }
     if (setEncTLS && setSecPlain) {
-      if (encTLS && secPlain) Security.EnableSecType(Security.secTypeTLSPlain);
-      else Security.DisableSecType(Security.secTypeTLSPlain);
+      if (encTLS && secPlain) Security.enableSecType(Security.secTypeTLSPlain);
+      else Security.disableSecType(Security.secTypeTLSPlain);
       Security.setInUserPrefs = true;
     }
     if (setEncTLS && setSecIdent) {
-      if (encTLS && secIdent) Security.EnableSecType(Security.secTypeTLSIdent);
-      else Security.DisableSecType(Security.secTypeTLSIdent);
+      if (encTLS && secIdent) Security.enableSecType(Security.secTypeTLSIdent);
+      else Security.disableSecType(Security.secTypeTLSIdent);
       Security.setInUserPrefs = true;
     }
     if (setEncTLS && setSecVnc) {
-      if (encTLS && secVnc) Security.EnableSecType(Security.secTypeTLSVnc);
-      else Security.DisableSecType(Security.secTypeTLSVnc);
+      if (encTLS && secVnc) Security.enableSecType(Security.secTypeTLSVnc);
+      else Security.disableSecType(Security.secTypeTLSVnc);
       Security.setInUserPrefs = true;
     }
     if (setEncTLS && setSecNone) {
-      if (encTLS && secNone) Security.EnableSecType(Security.secTypeTLSNone);
-      else Security.DisableSecType(Security.secTypeTLSNone);
+      if (encTLS && secNone) Security.enableSecType(Security.secTypeTLSNone);
+      else Security.disableSecType(Security.secTypeTLSNone);
       Security.setInUserPrefs = true;
     }
     if (setEncNone && setSecPlain) {
-      if (encNone && secPlain) Security.EnableSecType(Security.secTypePlain);
-      else Security.DisableSecType(Security.secTypePlain);
+      if (encNone && secPlain) Security.enableSecType(Security.secTypePlain);
+      else Security.disableSecType(Security.secTypePlain);
       Security.setInUserPrefs = true;
     }
     if (setEncNone && setSecIdent) {
-      if (encNone && secIdent) Security.EnableSecType(Security.secTypeIdent);
-      else Security.DisableSecType(Security.secTypeIdent);
+      if (encNone && secIdent) Security.enableSecType(Security.secTypeIdent);
+      else Security.disableSecType(Security.secTypeIdent);
       Security.setInUserPrefs = true;
     }
     if (setSecVnc) {
-      if (secVnc) Security.EnableSecType(Security.secTypeVncAuth);
-      else Security.DisableSecType(Security.secTypeVncAuth);
+      if (secVnc) Security.enableSecType(Security.secTypeVncAuth);
+      else Security.disableSecType(Security.secTypeVncAuth);
       Security.setInUserPrefs = true;
     }
     if (setSecNone) {
-      if (secNone) Security.EnableSecType(Security.secTypeNone);
-      else Security.DisableSecType(Security.secTypeNone);
+      if (secNone) Security.enableSecType(Security.secTypeNone);
+      else Security.disableSecType(Security.secTypeNone);
       Security.setInUserPrefs = true;
     }
   }

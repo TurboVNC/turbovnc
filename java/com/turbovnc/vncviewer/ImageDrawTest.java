@@ -1,16 +1,16 @@
 /* Copyright (C) 2011-2012 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -28,22 +28,22 @@ import java.awt.image.*;
 
 import com.turbovnc.rfb.*;
 
-public class ImageDrawTest extends JFrame
-{
-  static final PixelFormat verylowColorPF = 
+public class ImageDrawTest extends JFrame {
+
+  static final PixelFormat VERY_LOW_COLOR_PF =
     new PixelFormat(8, 3, false, true, 1, 1, 1, 2, 1, 0);
-  static final PixelFormat lowColorPF = 
+  static final PixelFormat LOW_COLOR_PF =
     new PixelFormat(8, 6, false, true, 3, 3, 3, 4, 2, 0);
-  static final PixelFormat mediumColorPF = 
+  static final PixelFormat MEDIUM_COLOR_PF =
     new PixelFormat(8, 8, false, true, 7, 7, 3, 5, 2, 0);
-  static final PixelFormat highColorPF = 
+  static final PixelFormat HIGH_COLOR_PF =
     new PixelFormat(16, 16, false, true, 31, 63, 31, 11, 5, 0);
 
   public static final int DEFAULT_WIDTH = 1240;
   public static final int DEFAULT_HEIGHT = 900;
 
-  public class MyPanel extends JPanel
-  {
+  public class MyPanel extends JPanel {
+
     public MyPanel(int w, int h, int colors) {
       GraphicsEnvironment ge =
         GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -61,29 +61,29 @@ public class ImageDrawTest extends JFrame
       width = w;  height = h;
       im = new BIPixelBuffer(width, height, null, null);
       if (colors == 8)
-        im.setPF(verylowColorPF);
+        im.setPF(VERY_LOW_COLOR_PF);
       else if (colors == 64)
-        im.setPF(lowColorPF);
+        im.setPF(LOW_COLOR_PF);
       else if (colors == 256)
-        im.setPF(mediumColorPF);
+        im.setPF(MEDIUM_COLOR_PF);
       else if (colors == 65536)
-        im.setPF(highColorPF);
+        im.setPF(HIGH_COLOR_PF);
     }
 
     public Dimension getPreferredSize() {
       return new Dimension(width, height);
     }
 
-    public void initImage(int width, int height, int offset) {
+    public void initImage(int w, int h, int offset) {
       int i, j;
       PixelFormat pf = im.getPF();
-      int[] stride = new int[]{width};
+      int[] stride = new int[]{w};
       Object data_ = im.getRawPixelsRW(stride);
 
       if (pf.is888() && data_ instanceof int[]) {
         int[] data = (int[])data_;
-        for(j = 0; j < height; j++) {
-          for(i = 0; i < width; i++) {
+        for (j = 0; j < h; j++) {
+          for (i = 0; i < w; i++) {
             data[j * stride[0] + i] = ((i + offset) % 256) << pf.redShift;
             data[j * stride[0] + i] |= ((j + offset) % 256) << pf.greenShift;
             data[j * stride[0] + i] |= ((i + j + offset) % 256) << pf.blueShift;
@@ -91,15 +91,15 @@ public class ImageDrawTest extends JFrame
         }
       } else {
         if (rgbBuf == null)
-          rgbBuf = new byte[width * height * 3];
-        for(j = 0; j < height; j++) {
-          for(i = 0; i < width; i++) {
-            rgbBuf[(j * width + i) * 3] = (byte)((i + offset) % 256);
-            rgbBuf[(j * width + i) * 3 + 1] = (byte)((j + offset) % 256);
-            rgbBuf[(j * width + i) * 3 + 2] = (byte)((i + j + offset) % 256);
+          rgbBuf = new byte[w * h * 3];
+        for (j = 0; j < h; j++) {
+          for (i = 0; i < w; i++) {
+            rgbBuf[(j * w + i) * 3] = (byte)((i + offset) % 256);
+            rgbBuf[(j * w + i) * 3 + 1] = (byte)((j + offset) % 256);
+            rgbBuf[(j * w + i) * 3 + 2] = (byte)((i + j + offset) % 256);
           }
         }
-        pf.bufferFromRGB(data_, 0, 0, stride[0], rgbBuf, width, height);
+        pf.bufferFromRGB(data_, 0, 0, stride[0], rgbBuf, w, h);
       }
     }
 
@@ -109,8 +109,7 @@ public class ImageDrawTest extends JFrame
       g2.dispose();
     }
 
-    public void display()
-    {
+    public void display() {
       int iter = 0, seed = 0;
       double tStart, t1, t2, paintTime = 0.;
       tStart = getTime();
@@ -142,13 +141,11 @@ public class ImageDrawTest extends JFrame
     int preferredWidth, preferredHeight, width, height;
   }
 
-  private static double getTime()
-  {
+  private static double getTime() {
     return (double)System.nanoTime() / 1.0e9;
   }
 
-  public ImageDrawTest(int width, int height, int colors)
-  {
+  public ImageDrawTest(int width, int height, int colors) {
     setTitle("Image drawing benchmark");
     setSize(width, height);
     MyPanel panel = new MyPanel(width, height, colors);
@@ -160,8 +157,7 @@ public class ImageDrawTest extends JFrame
     panel.display();
   }
 
-  public static void main(String[] arg)
-  {
+  public static void main(String[] arg) {
     int colors = -1, width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT;
 
     for (int i = 0; i < arg.length; i++) {

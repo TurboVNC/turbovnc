@@ -1,16 +1,16 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -18,8 +18,8 @@
  */
 
 //
-// PixelBuffer - note that this code is only written for the 8, 16, and 32 bpp cases at the
-// moment.
+// PixelBuffer - note that this code is only written for the 8, 16, and 32 bpp
+// cases at the moment.
 //
 
 package com.turbovnc.rfb;
@@ -40,27 +40,28 @@ public class PixelBuffer {
                                pf.bpp + ")");
     format = pf;
     switch (pf.depth) {
-    case  3: 
+    case  3:
       // Fall-through to depth 8
-    case  6: 
+    case  6:
       // Fall-through to depth 8
-    case  8: 
+    case  8:
       int rmask = pf.redMax << pf.redShift;
       int gmask = pf.greenMax << pf.greenShift;
       int bmask = pf.blueMax << pf.blueShift;
       if (pf.trueColour)
         cm = new DirectColorModel(8, rmask, gmask, bmask);
       else
-        cm = new IndexColorModel(8, 256, new byte[256], new byte[256], new byte[256]);
+        cm = new IndexColorModel(8, 256, new byte[256], new byte[256],
+                                 new byte[256]);
       break;
-    case 16: 
+    case 16:
       cm = new DirectColorModel(16, 0xF800, 0x07E0, 0x001F);
       break;
-    case 24: 
+    case 24:
       cm = new DirectColorModel(32, (0xff << 16), (0xff << 8), 0xff);
       break;
-    case 32: 
-      cm = new DirectColorModel(32, (0xff << pf.redShift), 
+    case 32:
+      cm = new DirectColorModel(32, (0xff << pf.redShift),
         (0xff << pf.greenShift), (0xff << pf.blueShift));
       break;
     default:
@@ -92,8 +93,8 @@ public class PixelBuffer {
     int inc = width_;
 
     if (y > srcY) {
-      src += (h-1) * inc;
-      dest += (h-1) * inc;
+      src += (h - 1) * inc;
+      dest += (h - 1) * inc;
       inc = -inc;
     }
     int destEnd = dest + h * inc;
@@ -116,10 +117,10 @@ public class PixelBuffer {
   public void maskRect(int x, int y, int w, int h, int[] pix, byte[] mask) {
     assert data instanceof int[];
     int maskBytesPerRow = (w + 7) / 8;
-    
+
     for (int j = 0; j < h; j++) {
       int cy = y + j;
-      
+
       if (cy < 0 || cy >= height_)
         continue;
 
@@ -134,7 +135,7 @@ public class PixelBuffer {
 
         if ((mask[byte_] & (1 << bit)) != 0)
          ((int[])data)[cy * width_ + cx] = pix[j * w + i];
-      }     
+      }
     }
   }
 

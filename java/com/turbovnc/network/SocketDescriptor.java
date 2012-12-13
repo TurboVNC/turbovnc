@@ -1,16 +1,16 @@
 /* Copyright (C) 2012 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -25,15 +25,12 @@ import java.nio.*;
 import java.nio.channels.*;
 import java.nio.channels.spi.SelectorProvider;
 
-import java.util.Set;
-import java.util.Iterator;
-
 import com.turbovnc.rdr.*;
 
 public class SocketDescriptor implements FileDescriptor {
 
   public SocketDescriptor() {
-    DefaultSelectorProvider();
+    defaultSelectorProvider();
     try {
       channel = SocketChannel.open();
       channel.configureBlocking(false);
@@ -67,15 +64,17 @@ public class SocketDescriptor implements FileDescriptor {
     }
   }
 
-  private static SelectorProvider DefaultSelectorProvider() {
-    // kqueue() selector provider on OS X is not working, fall back to select() for now
+  private static SelectorProvider defaultSelectorProvider() {
+    // kqueue() selector provider on OS X is not working, fall back to select()
+    // for now
     String os = System.getProperty("os.name");
     if (os.startsWith("Mac OS X"))
-      System.setProperty("java.nio.channels.spi.SelectorProvider","sun.nio.ch.PollSelectorProvider");
+      System.setProperty("java.nio.channels.spi.SelectorProvider",
+                         "sun.nio.ch.PollSelectorProvider");
     return SelectorProvider.provider();
   }
 
-  synchronized public int read(byte[] buf, int bufPtr, int length) {
+  public synchronized int read(byte[] buf, int bufPtr, int length) {
     int n;
     ByteBuffer b = ByteBuffer.allocate(length);
     try {
@@ -92,7 +91,7 @@ public class SocketDescriptor implements FileDescriptor {
 
   }
 
-  synchronized public int write(byte[] buf, int bufPtr, int length) {
+  public synchronized int write(byte[] buf, int bufPtr, int length) {
     int n;
     ByteBuffer b = ByteBuffer.allocate(length);
     b.put(buf, bufPtr, length);
@@ -106,7 +105,7 @@ public class SocketDescriptor implements FileDescriptor {
     return n;
   }
 
-  synchronized public int select(int interestOps, Integer timeout) {
+  public synchronized int select(int interestOps, Integer timeout) {
     int n;
     Selector selector;
     if ((interestOps & SelectionKey.OP_READ) != 0) {
@@ -178,7 +177,7 @@ public class SocketDescriptor implements FileDescriptor {
   public java.net.Socket socket() {
     return channel.socket();
   }
- 
+
   public SocketAddress getRemoteAddress() {
     if (isConnected())
       return channel.socket().getRemoteSocketAddress();
@@ -237,7 +236,7 @@ public class SocketDescriptor implements FileDescriptor {
       System.out.println(e.toString());
     }
   }
-  
+
   protected SocketChannel channel;
   protected Selector writeSelector;
   protected Selector readSelector;

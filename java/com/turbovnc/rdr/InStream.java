@@ -1,17 +1,17 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
 /* Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -27,7 +27,7 @@ package com.turbovnc.rdr;
 
 import com.turbovnc.network.*;
 
-abstract public class InStream {
+public abstract class InStream {
 
   // check() ensures there is buffer data for at least one item of size
   // itemSize bytes.  Returns the number of items in the buffer (up to a
@@ -44,21 +44,27 @@ abstract public class InStream {
     return nItems;
   }
 
-  public int check(int itemSize, int nItems) { return check(itemSize, nItems, true); }
+  public int check(int itemSize, int nItems) {
+    return check(itemSize, nItems, true);
+  }
+
   public int check(int itemSize) { return check(itemSize, 1); }
 
   // checkNoWait() tries to make sure that the given number of bytes can
   // be read without blocking.  It returns true if this is the case, false
   // otherwise.  The length must be "small" (less than the buffer size).
 
-  public final boolean checkNoWait(int length) { return check(length, 1, false)!=0; }
+  public final boolean checkNoWait(int length) {
+    return check(length, 1, false) != 0;
+  }
 
   // readU/SN() methods read unsigned and signed N-bit integers.
 
-  public final int readS8()  { check(1,1,true); return b[ptr++]; }
-  public final int readS16() { check(2,1,true); int b0 = b[ptr++];
-                               int b1 = b[ptr++] & 0xff; return b0 << 8 | b1; }
-  public final int readS32() { check(4,1,true); int b0 = b[ptr++];
+  public final int readS8()  { check(1, 1, true);  return b[ptr++]; }
+  public final int readS16() { check(2, 1, true);  int b0 = b[ptr++];
+                               int b1 = b[ptr++] & 0xff;
+                               return b0 << 8 | b1; }
+  public final int readS32() { check(4, 1, true);  int b0 = b[ptr++];
                                int b1 = b[ptr++] & 0xff;
                                int b2 = b[ptr++] & 0xff;
                                int b3 = b[ptr++] & 0xff;
@@ -117,11 +123,11 @@ abstract public class InStream {
   public final int readOpaque8()  { return readU8(); }
   public final int readOpaque16() { return readU16(); }
   public final int readOpaque32() { return readU32(); }
-  public final int readOpaque24A() { check(3, 1, true); int b0 = b[ptr++];
-                                     int b1 = b[ptr++]; int b2 = b[ptr++];
+  public final int readOpaque24A() { check(3, 1, true);  int b0 = b[ptr++];
+                                     int b1 = b[ptr++];  int b2 = b[ptr++];
                                      return b0 << 24 | b1 << 16 | b2 << 8; }
-  public final int readOpaque24B() { check(3, 1, true); int b0 = b[ptr++];
-                                     int b1 = b[ptr++]; int b2 = b[ptr++];
+  public final int readOpaque24B() { check(3, 1, true);  int b0 = b[ptr++];
+                                     int b1 = b[ptr++];  int b2 = b[ptr++];
                                      return b0 << 16 | b1 << 8 | b2; }
 
   public final int readPixel(int bytesPerPixel, boolean bigEndian) {
@@ -129,9 +135,11 @@ abstract public class InStream {
     readBytes(pix, 0, bytesPerPixel);
 
     if (bigEndian) {
-      return 0x000000ff | (pix[0] & 0xff)<<24 | (pix[1] & 0xff)<<16 | (pix[2] & 0xff)<<8;
+      return 0x000000ff | (pix[0] & 0xff) << 24 |
+             (pix[1] & 0xff) << 16 | (pix[2] & 0xff) << 8;
     } else {
-      return 0xff000000 | (pix[2] & 0xff)<<16 | (pix[1] & 0xff)<<8 | (pix[0] & 0xff);
+      return 0xff000000 | (pix[2] & 0xff) << 16 |
+             (pix[1] & 0xff) << 8 | (pix[0] & 0xff);
     }
   }
 
@@ -224,10 +232,10 @@ abstract public class InStream {
     }
     return result;
   }
-  
+
   // pos() returns the position in the stream.
 
-  abstract public int pos();
+  public abstract int pos();
 
   // bytesAvailable() returns true if at least one byte can be read from the
   // stream without blocking.  i.e. if false is returned then readU8() would
@@ -249,7 +257,7 @@ abstract public class InStream {
   // the number of items in the buffer (up to a maximum of nItems).  itemSize
   // is supposed to be "small" (a few bytes).
 
-  abstract protected int overrun(int itemSize, int nItems, boolean wait);
+  protected abstract int overrun(int itemSize, int nItems, boolean wait);
 
   protected InStream() {}
   protected byte[] b;

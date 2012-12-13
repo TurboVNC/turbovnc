@@ -34,21 +34,20 @@ import com.turbovnc.network.*;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
-public class Tunnel 
-{
-  private final static Integer SERVER_PORT_OFFSET = 5900;
+public class Tunnel {
 
-  public static void createTunnel(Options opts) throws Exception
-  {
+  private static final Integer SERVER_PORT_OFFSET = 5900;
+
+  public static void createTunnel(Options opts) throws Exception {
     int localPort;
     int remotePort;
     String gatewayHost;
     String remoteHost;
-  
+
     localPort = TcpSocket.findFreeTcpPort();
     if (localPort == 0)
       throw new ErrorException("Could not obtain free TCP port");
-  
+
     if (opts.tunnel) {
       gatewayHost = Hostname.getHost(opts.serverName);
       remoteHost = "localhost";
@@ -57,7 +56,7 @@ public class Tunnel
       remoteHost = Hostname.getHost(opts.serverName);
     }
     remotePort = Hostname.getPort(opts.serverName);
-  
+
     JSch jsch = new JSch();
     String homeDir = new String("");
     try {
@@ -131,11 +130,11 @@ public class Tunnel
       session.setPassword(new String(dlg.passwdEntry.getPassword()));
       session.connect();
     }
-    vlog.debug("Forwarding local port " + localPort + " to " + remoteHost
-               + ":" + remotePort + " (relative to gateway)");
+    vlog.debug("Forwarding local port " + localPort + " to " + remoteHost +
+               ":" + remotePort + " (relative to gateway)");
     session.setPortForwardingL(localPort, remoteHost, remotePort);
     opts.serverName = "localhost::" + localPort;
   }
-  
+
   static LogWriter vlog = new LogWriter("Tunnel");
 }

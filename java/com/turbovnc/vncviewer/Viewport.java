@@ -1,17 +1,17 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -22,27 +22,23 @@ package com.turbovnc.vncviewer;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Window;
 import javax.swing.*;
 
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 import com.turbovnc.rfb.Cursor;
 
-public class Viewport extends JFrame
-{
+public class Viewport extends JFrame {
+
   public Viewport(CConn cc_) {
     cc = cc_;
     updateTitle();
     setFocusable(false);
     setFocusTraversalKeysEnabled(false);
-    UIManager.getDefaults().put("ScrollPane.ancestorInputMap", 
+    UIManager.getDefaults().put("ScrollPane.ancestorInputMap",
       new UIDefaults.LazyInputMap(new Object[]{}));
     sp = new JScrollPane();
-    sp.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+    sp.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
     InputMap im = sp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
     int ctrlAltShiftMask = Event.SHIFT_MASK | Event.CTRL_MASK | Event.ALT_MASK;
     if (im != null) {
@@ -89,8 +85,10 @@ public class Viewport extends JFrame
                 !cc.opts.fullScreen) {
               sp.setSize(new Dimension(cc.desktop.scaledWidth,
                                        cc.desktop.scaledHeight));
-              int w = cc.desktop.scaledWidth + getInsets().left + getInsets().right;
-              int h = cc.desktop.scaledHeight + getInsets().top + getInsets().bottom;
+              int w = cc.desktop.scaledWidth + getInsets().left +
+                      getInsets().right;
+              int h = cc.desktop.scaledHeight + getInsets().top +
+                      getInsets().bottom;
               if (tb.isVisible())
                 h += tb.getHeight();
               if (cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO)
@@ -98,7 +96,7 @@ public class Viewport extends JFrame
             }
             if (cc.desktop.cursor != null) {
               Cursor cursor = cc.desktop.cursor;
-              cc.setCursor(cursor.width(),cursor.height(),cursor.hotspot, 
+              cc.setCursor(cursor.width(), cursor.height(), cursor.hotspot,
                            (int[])cursor.data, cursor.mask);
             }
           }
@@ -144,7 +142,7 @@ public class Viewport extends JFrame
     if (enc < 0) enc = cc.currentEncoding;
     if (enc == Encodings.encodingTight) {
       if (cc.opts.allowJpeg) {
-        String subsampStr[] = { "1X", "4X", "2X", "Gray" };
+        String[] subsampStr = { "1X", "4X", "2X", "Gray" };
         setTitle(cc.cp.name() + " [Tight + JPEG " +
                  subsampStr[cc.opts.subsampling] + " Q" + cc.opts.quality +
                  (cc.opts.compressLevel > 1 ? " + CL " + cc.opts.compressLevel : "") +

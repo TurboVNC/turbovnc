@@ -1,15 +1,15 @@
 /* Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
@@ -18,8 +18,8 @@
 
 package com.turbovnc.rfb;
 
-public class Options
-{
+public class Options {
+
   public static final int SCALE_AUTO = -1;
   public static final int SCALE_FIXEDRATIO = -2;
 
@@ -34,12 +34,13 @@ public class Options
   public static final int SUBSAMP_2X = 2;
   public static final int SUBSAMP_GRAY = 3;
 
-  public final static int DEFQUAL = 95;
+  public static final int DEFQUAL = 95;
 
   public Options() {}
 
   public Options(Options old) {
-    if (old.serverName != null) serverName = new String(old.serverName);
+    if (old.serverName != null)
+      serverName = new String(old.serverName);
     port = old.port;
     shared = old.shared;
     viewOnly = old.viewOnly;
@@ -67,7 +68,7 @@ public class Options
   public void setScalingFactor(String scaleString) {
     if (scaleString.toLowerCase().startsWith("a"))
       scalingFactor = SCALE_AUTO;
-    else if(scaleString.toLowerCase().startsWith("f"))
+    else if (scaleString.toLowerCase().startsWith("f"))
       scalingFactor = SCALE_FIXEDRATIO;
     else {
       scaleString = scaleString.replaceAll("[^\\d]", "");
@@ -94,7 +95,7 @@ public class Options
   }
 
   void printOpt(String name, boolean val) {
-    System.out.println(name + " = " + (val ? "true":"false"));
+    System.out.println(name + " = " + (val ? "true" : "false"));
   }
 
   void printOpt(String name, int val) {
