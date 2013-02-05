@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,12 +56,8 @@ public class Viewport extends JFrame {
     add(tb, BorderLayout.PAGE_START);
     showToolbar(cc.showToolbar);
     getContentPane().add(sp);
-    if (VncViewer.os.startsWith("mac os x")) {
+    if (VncViewer.os.startsWith("mac os x"))
       setJMenuBar(new MacMenuBar(cc));
-      // NOTE: not sure why this is necessary, but the toolbar appears with a
-      // black background otherwise.
-      tb.setBackground(new Color(240, 240, 240, 255));
-    }
     addWindowFocusListener(new WindowAdapter() {
       public void windowGainedFocus(WindowEvent e) {
         sp.getViewport().getView().requestFocusInWindow();
