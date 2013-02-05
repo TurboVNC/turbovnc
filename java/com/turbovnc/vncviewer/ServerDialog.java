@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -166,7 +166,7 @@ class ServerDialog extends Dialog implements ActionListener, ItemListener {
     } else if (s instanceof JButton && (JButton)s == optionsButton) {
       options.showDialog(this);
     } else if (s instanceof JButton && (JButton)s == aboutButton) {
-      cc.showAbout();
+      cc.showAbout(this);
     } else if (s instanceof JComboBox && (JComboBox)s == server) {
       if (e.getActionCommand().equals("comboBoxEdited")) {
         server.insertItemAt(editor.getItem(), 0);
