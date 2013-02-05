@@ -39,6 +39,7 @@ public class Viewport extends JFrame {
       new UIDefaults.LazyInputMap(new Object[]{}));
     sp = new JScrollPane();
     sp.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    sp.setBackground(Color.BLACK);
     InputMap im = sp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
     int ctrlAltShiftMask = Event.SHIFT_MASK | Event.CTRL_MASK | Event.ALT_MASK;
     if (im != null) {
