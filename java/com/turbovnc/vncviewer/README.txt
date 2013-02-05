@@ -20,7 +20,7 @@ The Java TurboVNC Viewer is:
         Copyright (C) 2009-2011 Pierre Ossman for Cendio AB
         Copyright (C) 2010-2012 TigerVNC Team
         Copyright (C) 2010 m-privacy GmbH
-        Copyright (C) 2011-2012 Brian P. Hinz
+        Copyright (C) 2011-2013 Brian P. Hinz
         Copyright (C) 2011-2012 D. R. Commander
         All rights reserved.
 

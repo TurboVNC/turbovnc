@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011-2012 Brian P. Hinz
+ * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -130,7 +130,7 @@ public class Viewport extends JFrame {
       setSize(w, h);
     }
     setLocation(x, y);
-    setBackground(Color.BLACK);
+    getContentPane().setBackground(Color.BLACK);
   }
 
   public void showToolbar(boolean show) {
