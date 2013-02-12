@@ -264,8 +264,7 @@ int ConnectToTcpAddr(const char *hostname, int port)
 
 
 /*
- * FindFreeTcpPort() tries to find an unused TCP port in the range
- * (TUNNEL_PORT_OFFSET, TUNNEL_PORT_OFFSET + 99].  Returns 0 on failure.
+ * FindFreeTcpPort() tries to find an unused TCP port.  Returns 0 on failure.
  */
 
 int FindFreeTcpPort(void)
