@@ -103,8 +103,8 @@ of TurboVNC.  See "Build Recipes" for specific instructions on how to build a
 32-bit or 64-bit version of TurboVNC on systems that support both.
 
 On Mac, this builds the Java TurboVNC Viewer by default.  If you want to build
-the native (X11) TurboVNC Viewer instead, then pass -DTVNC_BUILDNATIVE=1 to
-CMake.
+the native (X11) TurboVNC Viewer instead, then pass
+'-DTVNC_BUILDNATIVE=1 -DTVNC_BUILDJAVA=0' to CMake.
 
   cd {build_directory}
   cmake -G "Unix Makefiles" [additional CMake flags] {source_directory}
