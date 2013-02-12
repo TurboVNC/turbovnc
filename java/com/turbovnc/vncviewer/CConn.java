@@ -831,8 +831,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         "\n" +
       "Last used encoding:  " + Encodings.encodingName(lastServerEncoding) +
         "\n" +
-      "Line speed estimate:  " + sock.inStream().kbitsPerSecond() + " kbit/s" +
-        "\n" +
       "Protocol version:  " + cp.majorVersion + "." + cp.minorVersion + "\n" +
       "Security method:  " + Security.secTypeName(csecurity.getType()) +
         " [" + csecurity.description() + "]\n" +
