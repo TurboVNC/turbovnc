@@ -44,7 +44,7 @@ class VNCviewerApp
     VNCviewerApp(HINSTANCE hInstance, LPTSTR szCmdLine);
     virtual void ListenMode() = 0;
     virtual int NewConnection() = 0;
-    virtual int NewConnection(TCHAR *host, int port) = 0;
+    virtual int NewConnection(char *host, int port) = 0;
     virtual int NewConnection(SOCKET sock) = 0;
 
     ~VNCviewerApp();

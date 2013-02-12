@@ -35,14 +35,14 @@ class SessionDialog
     SessionDialog(VNCOptions *pOpt, ClientConnection *cc);
     INT_PTR DoDialog();
     int m_port;
-    TCHAR m_host[256];
+    char m_host[256];
     virtual ~SessionDialog();
     HKEY m_hRegKey;
 
   private:
     ClientConnection *m_cc;
     VNCOptions *m_pOpt;
-    TCHAR keyname[40];
+    char keyname[40];
 
     static BOOL CALLBACK SessDlgProc(HWND hwndDlg,  UINT uMsg,
                                      WPARAM wParam, LPARAM lParam);

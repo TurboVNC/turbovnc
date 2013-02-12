@@ -72,7 +72,7 @@ class ClientConnection : public omni_thread
     int  LoadConnection(char *fname, bool sess);
     void UnloadConnection() { m_opts.m_configSpecified = false; }
     int m_port;
-    TCHAR m_host[MAX_HOST_NAME_LEN];
+    char m_host[MAX_HOST_NAME_LEN];
     HWND m_hSess;
 
   private:
@@ -333,7 +333,7 @@ class ClientConnection : public omni_thread
     CapsContainer m_clientMsgCaps;  // known non-standard client messages
     CapsContainer m_encodingCaps;   // known encodings besides Raw
 
-    TCHAR *m_desktopName;
+    char *m_desktopName;
     void SetWindowTitle(void);
     void SetLastEncoding(int);
 

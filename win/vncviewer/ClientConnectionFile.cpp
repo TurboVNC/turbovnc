@@ -45,7 +45,7 @@ static void ofnInit()
 
 void ClientConnection::SaveConnection()
 {
-  vnclog.Print(2, _T("Saving connection info\n"));  
+  vnclog.Print(2, "Saving connection info\n");
   char tname[_MAX_FNAME + _MAX_EXT];
   ofnInit();
 

@@ -67,8 +67,8 @@ BOOL CALLBACK SessionDialog::SessDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam,
     (SessionDialog *)GetWindowLongPtr(hwnd, GWLP_USERDATA);
 
   int i;
-  TCHAR tmphost[256];
-  TCHAR buffer[256];
+  char tmphost[256];
+  char buffer[256];
   HWND hListMode = GetDlgItem(hwnd, IDC_LIST_MODE);
   HWND hcombo = GetDlgItem(hwnd, IDC_HOSTNAME_EDIT);
 
@@ -84,9 +84,9 @@ BOOL CALLBACK SessionDialog::SessDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam,
       const int maxEntries = pApp->m_options.m_historyLimit;
       int listIndex = 0;
       for (i = 0; i < maxEntries; i++) {
-        TCHAR keyName[256];
+        char keyName[256];
         itoa(i, keyName, 10);
-        TCHAR buf[256];
+        char buf[256];
         int dwbuflen = 255;
         if (RegQueryValueEx(_this->m_hRegKey, keyName, NULL, NULL, (LPBYTE)buf,
                             (LPDWORD)&dwbuflen) == ERROR_SUCCESS) {
@@ -144,7 +144,7 @@ BOOL CALLBACK SessionDialog::SessDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam,
           return TRUE;
         case IDC_LOAD:
         {
-          TCHAR buf[80];
+          char buf[80];
           buf[0] = '\0';
           if (_this->m_cc->LoadConnection(buf, true) != -1) {
             FormatDisplay(_this->m_cc->m_port, _this->m_pOpt->m_display,
@@ -163,19 +163,19 @@ BOOL CALLBACK SessionDialog::SessDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam,
           EndDialog(hwnd, FALSE);
           return TRUE;
         case IDC_OK:
-          TCHAR display[256];
+          char display[256];
           GetDlgItemText(hwnd, IDC_HOSTNAME_EDIT, display, 256);
-          if (_tcslen(display) == 0)
+          if (strlen(display) == 0)
             return TRUE;
           if (!ParseDisplay(display, tmphost, 255, &_this->m_cc->m_port)) {
             MessageBox(NULL,
-                _T("Invalid VNC server specified.\n\r")
-                _T("Server should be of the form host:display."),
-                _T("Connection setup"), MB_OK | MB_ICONEXCLAMATION);
+                "Invalid VNC server specified.\n\r"
+                "Server should be of the form host:display.",
+                "Connection setup", MB_OK | MB_ICONEXCLAMATION);
             return TRUE;
           } else {
-            _tcscpy(_this->m_cc->m_host, tmphost);
-            _tcscpy(_this->m_pOpt->m_display, display);
+            strcpy(_this->m_cc->m_host, tmphost);
+            strcpy(_this->m_pOpt->m_display, display);
           }
 
           _this->m_pOpt->CloseDialog();
@@ -195,8 +195,8 @@ BOOL CALLBACK SessionDialog::SessDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam,
                          _this->m_pOpt->m_display, 256);
           SendMessage(hcombo, CB_RESETCONTENT, 0, 0);
           int dwbuflen = 255;
-          TCHAR valname[256];
-          TCHAR buf[256];
+          char valname[256];
+          char buf[256];
           int maxEntries = pApp->m_options.m_historyLimit;
           for (i = 0; i < maxEntries; i++) {
             itoa(i, valname, 10);

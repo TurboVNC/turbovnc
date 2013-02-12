@@ -43,7 +43,7 @@ LoginAuthDialog::LoginAuthDialog(char *vnchost, char *title, char *username)
   if (username == NULL || username[0] == '\0') {
     m_username[0] = TEXT('\0');
   } else {
-    _tcsncpy(m_username, username, 255);
+    strncpy(m_username, username, 255);
     m_username[255] = TEXT('\0');
   }
   m_passwd[0] = TEXT('\0');

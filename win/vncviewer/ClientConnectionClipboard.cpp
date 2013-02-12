@@ -33,13 +33,13 @@
 
 void ClientConnection::ProcessLocalClipboardChange()
 {
-  vnclog.Print(2, _T("Clipboard changed\n"));
+  vnclog.Print(2, "Clipboard changed\n");
 
   HWND hOwner = GetClipboardOwner();
   if (hOwner == m_hwnd) {
-    vnclog.Print(2, _T("We changed it - ignore!\n"));
+    vnclog.Print(2, "We changed it - ignore!\n");
   } else if (!m_initialClipboardSeen) {
-    vnclog.Print(2, _T("Don't send initial clipboard!\n"));
+    vnclog.Print(2, "Don't send initial clipboard!\n");
     m_initialClipboardSeen = true;
   } else if (!m_opts.m_DisableClipboard) {
 
@@ -69,7 +69,7 @@ void ClientConnection::ProcessLocalClipboardChange()
         try {
           SendClientCutText(unixcontents, strlen(unixcontents));
         } catch (WarningException &e) {
-          vnclog.Print(0, _T("Exception while sending clipboard text : %s\n"),
+          vnclog.Print(0, "Exception while sending clipboard text : %s\n",
                        e.m_info);
           DestroyWindow(m_hwnd1);
         }
@@ -108,25 +108,25 @@ void ClientConnection::UpdateLocalClipboard(char *buf, size_t len) {
     omni_mutex_lock l(m_clipMutex);
 
     if (!OpenClipboard(m_hwnd)) {
-      vnclog.Print(0, _T("Failed to open clipboard (error = %d)\n"),
+      vnclog.Print(0, "Failed to open clipboard (error = %d)\n",
                    GetLastError());
       delete [] wincontents;
       return;
     }
     if (!EmptyClipboard()) {
-      vnclog.Print(0, _T("Failed to empty clipboard (error = %d)\n"),
+      vnclog.Print(0, "Failed to empty clipboard (error = %d)\n",
                    GetLastError());
       delete [] wincontents;
       return;
     }
 
     // Allocate a global memory object for the text.
-    HGLOBAL hglbCopy = GlobalAlloc(GMEM_DDESHARE, (len +1) * sizeof(TCHAR));
+    HGLOBAL hglbCopy = GlobalAlloc(GMEM_DDESHARE, (len +1) * sizeof(char));
     if (hglbCopy != NULL) {
       // Lock the handle and copy the text to the buffer.
       LPTSTR lptstrCopy = (LPTSTR) GlobalLock(hglbCopy);
-      memcpy(lptstrCopy, wincontents, len * sizeof(TCHAR));
-      lptstrCopy[len] = (TCHAR) 0;    // null character
+      memcpy(lptstrCopy, wincontents, len * sizeof(char));
+      lptstrCopy[len] = (char) 0;    // null character
       GlobalUnlock(hglbCopy);         // Place the handle on the clipboard.
       SetClipboardData(CF_TEXT, hglbCopy);
     }
@@ -134,7 +134,7 @@ void ClientConnection::UpdateLocalClipboard(char *buf, size_t len) {
     delete [] wincontents;
 
     if (!CloseClipboard()) {
-      vnclog.Print(0, _T("Failed to close clipboard (error = %d)\n"),
+      vnclog.Print(0, "Failed to close clipboard (error = %d)\n",
                    GetLastError());
       return;
     }

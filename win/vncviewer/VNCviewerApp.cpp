@@ -51,11 +51,11 @@ VNCviewerApp::VNCviewerApp(HINSTANCE hInstance, LPTSTR szCmdLine)
   WORD wVersionRequested = MAKEWORD(2, 0);
   WSADATA wsaData;
   if (WSAStartup(wVersionRequested, &wsaData) != 0) {
-    MessageBox(NULL, _T("Error initialising sockets library"), _T("VNC info"),
+    MessageBox(NULL, "Error initialising sockets library", "VNC info",
                MB_OK | MB_ICONSTOP);
     PostQuitMessage(1);
   }
-  vnclog.Print(3, _T("Started and Winsock (v %d) initialised\n"),
+  vnclog.Print(3, "Started and Winsock (v %d) initialised\n",
                wsaData.wVersion);
 }
 
@@ -70,13 +70,13 @@ void VNCviewerApp::RegisterConnection(ClientConnection *pConn)
   for (i = 0; i < MAX_CONNECTIONS; i++) {
     if (m_clilist[i] == NULL) {
       m_clilist[i] = pConn;
-      vnclog.Print(4, _T("Registered connection with app\n"));
+      vnclog.Print(4, "Registered connection with app\n");
       return;
     }
   }
   // If we've reached this point, something is wrong
-  vnclog.Print(-1, _T("Client list overflow!\n"));
-  MessageBox(NULL, _T("Client list overflow!"), _T("VNC error"),
+  vnclog.Print(-1, "Client list overflow!\n");
+  MessageBox(NULL, "Client list overflow!", "VNC error",
              MB_OK | MB_ICONSTOP);
   PostQuitMessage(1);
 
@@ -93,7 +93,7 @@ void VNCviewerApp::DeregisterConnection(ClientConnection *pConn)
       for (int j = i; m_clilist[j] && j < MAX_CONNECTIONS-1 ; j++)
         m_clilist[j] = m_clilist[j + 1];
       m_clilist[MAX_CONNECTIONS-1] = NULL;
-      vnclog.Print(4, _T("Deregistered connection from app\n"));
+      vnclog.Print(4, "Deregistered connection from app\n");
 
       // No clients left?  Then we should finish, unless we're in
       // listening mode
@@ -104,7 +104,7 @@ void VNCviewerApp::DeregisterConnection(ClientConnection *pConn)
     }
   }
   // If we've reached this point, something is wrong
-  vnclog.Print(-1, _T("Client not found for deregistering!\n"));
+  vnclog.Print(-1, "Client not found for deregistering!\n");
   PostQuitMessage(1);
 }
 
@@ -113,5 +113,5 @@ VNCviewerApp::~VNCviewerApp()
 {
   WSACleanup();
 
-  vnclog.Print(2, _T("VNC viewer closing down\n"));
+  vnclog.Print(2, "VNC viewer closing down\n");
 }

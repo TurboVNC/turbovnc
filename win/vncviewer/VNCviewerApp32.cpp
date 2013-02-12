@@ -35,15 +35,15 @@ VNCviewerApp32::VNCviewerApp32(HINSTANCE hInstance, PSTR szCmdLine) :
     HKL hkl = LoadKeyboardLayout(m_options.m_kbdname,
                                  KLF_ACTIVATE | KLF_REPLACELANG | KLF_REORDER);
     if (hkl == NULL) {
-      MessageBox(NULL, _T("Error loading specified keyboard layout"),
-                 _T("VNC info"), MB_OK | MB_ICONSTOP);
+      MessageBox(NULL, "Error loading specified keyboard layout",
+                 "VNC info", MB_OK | MB_ICONSTOP);
       exit(1);
     }
   }
 
   // Start listening daemons, if requested
   if (m_options.m_listening && FindWindow("VNCviewer Daemon", 0) == NULL) {
-    vnclog.Print(3, _T("In listening mode - starting daemons\n"));
+    vnclog.Print(3, "In listening mode - starting daemons\n");
     ListenMode();
   } else
     m_options.m_listening = false;
@@ -89,7 +89,7 @@ int VNCviewerApp32::NewConnection()
 }
 
 
-int VNCviewerApp32::NewConnection(TCHAR *host, int port)
+int VNCviewerApp32::NewConnection(char *host, int port)
 {
   int retries = 0, retval = 0;
   ClientConnection *pcc;

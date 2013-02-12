@@ -121,16 +121,16 @@ Daemon::Daemon(int port, bool ipv6)
 
 void Daemon::AddTrayIcon()
 {
-  vnclog.Print(4, _T("Adding tray icon\n"));
+  vnclog.Print(4, "Adding tray icon\n");
   SendTrayMsg(NIM_ADD);
 }
 
 
 void Daemon::CheckTrayIcon()
 {
-  vnclog.Print(8, _T("Checking tray icon\n"));
+  vnclog.Print(8, "Checking tray icon\n");
   if (!SendTrayMsg(NIM_MODIFY)) {
-    vnclog.Print(4, _T("Tray icon not there - reinstalling\n"));
+    vnclog.Print(4, "Tray icon not there - reinstalling\n");
     AddTrayIcon();
   };
 }
@@ -138,7 +138,7 @@ void Daemon::CheckTrayIcon()
 
 void Daemon::RemoveTrayIcon()
 {
-  vnclog.Print(4, _T("Deleting tray icon\n"));
+  vnclog.Print(4, "Deleting tray icon\n");
   SendTrayMsg(NIM_DELETE);
 }
 
@@ -199,7 +199,7 @@ LRESULT CALLBACK Daemon::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam,
           break;
         }
         case FD_CLOSE:
-          vnclog.Print(5, _T("Daemon connection closed\n"));
+          vnclog.Print(5, "Daemon connection closed\n");
           DestroyWindow(hwnd);
           break;
       }
@@ -233,7 +233,7 @@ LRESULT CALLBACK Daemon::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam,
                     0);
       } else if (lParam == WM_RBUTTONUP) {
         if (hSubMenu == NULL) {
-          vnclog.Print(2, _T("No systray submenu\n"));
+          vnclog.Print(2, "No systray submenu\n");
           return 0;
         }
         // Make first menu item the default (bold font)

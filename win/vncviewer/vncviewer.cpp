@@ -72,7 +72,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   // Clean up winsock
   WSACleanup();
 
-  vnclog.Print(3, _T("Exiting\n"));
+  vnclog.Print(3, "Exiting\n");
 
   return retval;
 }
@@ -113,28 +113,28 @@ void CenterWindow(HWND hwnd)
 
 bool ParseDisplay(LPTSTR display, LPTSTR phost, int hostlen, int *pport)
 {
-  if (hostlen < (int)_tcslen(display))
+  if (hostlen < (int)strlen(display))
       return false;
 
   int tmp_port;
-  TCHAR *colonpos = _tcsrchr(display, L':');
+  char *colonpos = strrchr(display, ':');
 
-  while (colonpos > display && *(colonpos - 1) == L':')
+  while (colonpos > display && *(colonpos - 1) == ':')
     colonpos--;
   if (colonpos == NULL) {
     // No colon -- use default port number
     tmp_port = RFB_PORT_OFFSET;
-    _tcsncpy(phost, display, MAX_HOST_NAME_LEN);
+    strncpy(phost, display, MAX_HOST_NAME_LEN);
   } else {
-    _tcsncpy(phost, display, colonpos - display);
-    phost[colonpos - display] = L'\0';
-    if (colonpos[1] == L':') {
+    strncpy(phost, display, colonpos - display);
+    phost[colonpos - display] = '\0';
+    if (colonpos[1] == ':') {
       // Two colons -- interpret as a port number
-      if (_stscanf(colonpos + 2, TEXT("%d"), &tmp_port) != 1)
+      if (sscanf(colonpos + 2, TEXT("%d"), &tmp_port) != 1)
         return false;
     } else {
       // One colon -- interpret as a display or port number
-      if (_stscanf(colonpos + 1, TEXT("%d"), &tmp_port) != 1)
+      if (sscanf(colonpos + 1, TEXT("%d"), &tmp_port) != 1)
         return false;
       if (tmp_port < 100)
         tmp_port += RFB_PORT_OFFSET;
@@ -153,10 +153,10 @@ bool ParseDisplay(LPTSTR display, LPTSTR phost, int hostlen, int *pport)
 void FormatDisplay(int port, LPTSTR display, LPTSTR host)
 {
   if (port == 5900) {
-    _tcscpy(display, host);
+    strcpy(display, host);
   } else if (port > 5900 && port <= 5999) {
-    _stprintf(display, TEXT("%s:%d"), host, port - 5900);
+    sprintf(display, TEXT("%s:%d"), host, port - 5900);
   } else {
-    _stprintf(display, TEXT("%s::%d"), host, port);
+    sprintf(display, TEXT("%s::%d"), host, port);
   }
 }

@@ -37,11 +37,11 @@
 #define SPAN_OPTS 3
 enum { SPAN_PRIMARY = 0, SPAN_ALL, SPAN_AUTO };
 
-#define KEY_VNCVIEWER_HISTORY _T("Software\\TurboVNC\\VNCviewer\\History")
+#define KEY_VNCVIEWER_HISTORY "Software\\TurboVNC\\VNCviewer\\History"
 
 
 struct COMBOSTRING {
-  TCHAR NameString[41];
+  char NameString[41];
   int rfbEncoding;
   bool enableJpeg;
   int subsampLevel;
@@ -72,13 +72,13 @@ class VNCOptions
     bool  m_listening;
     bool  m_ipv6;
     int   m_listenPort;
-    TCHAR m_display[256];
+    char m_display[256];
     bool  m_toolbar;
     bool  m_skipprompt;
     int   m_historyLimit;
     bool  m_connectionSpecified;
     bool  m_configSpecified;
-    TCHAR m_configFilename[_MAX_PATH];
+    char m_configFilename[_MAX_PATH];
     unsigned char m_encPasswd[8];
     bool  m_restricted;
 
@@ -110,7 +110,7 @@ class VNCOptions
     bool  m_ignoreShapeUpdates;
 
     // Keyboard can be specified on command line as 8-digit hex
-    TCHAR m_kbdname[9];
+    char m_kbdname[9];
     bool  m_kbdSpecified;
 
     // Connection options that can't be set through the dialog
@@ -118,7 +118,7 @@ class VNCOptions
     // Which encodings do we allow?
     bool  m_UseEnc[LASTENCODING + 1];
 
-    TCHAR m_host[256];
+    char m_host[256];
     int   m_port;
 
     bool  m_FSAltEnter;
@@ -131,7 +131,7 @@ class VNCOptions
     // Logging
     int   m_logLevel;
     bool  m_logToFile, m_logToConsole;
-    TCHAR m_logFilename[_MAX_PATH];
+    char m_logFilename[_MAX_PATH];
 
     // for debugging purposes
     int   m_delay;

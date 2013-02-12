@@ -87,7 +87,7 @@ void Log::SetFile(LPTSTR filename, bool append)
     // We should throw an exception here
     m_todebug = true;
     m_tofile = false;
-    Print(0, _T("Error opening log file %s\n"), filename);
+    Print(0, "Error opening log file %s\n", filename);
   }
   if (append)
     SetFilePointer(hlogfile, 0, NULL, FILE_END);
@@ -108,16 +108,16 @@ void Log::CloseFile()
 
 void Log::ReallyPrint(LPTSTR format, va_list ap)
 {
-  TCHAR line[LINE_BUFFER_SIZE];
-  _vsntprintf(line, sizeof(line) - 2 * sizeof(TCHAR), format, ap);
-  line[LINE_BUFFER_SIZE-2] = (TCHAR)'\0';
-  int len = (int)_tcslen(line);
-  if (len > 0 && len <= sizeof(line) - 2 * sizeof(TCHAR) &&
-      line[len-1] == (TCHAR)'\n') {
+  char line[LINE_BUFFER_SIZE];
+  _vsntprintf(line, sizeof(line) - 2 * sizeof(char), format, ap);
+  line[LINE_BUFFER_SIZE-2] = (char)'\0';
+  int len = (int)strlen(line);
+  if (len > 0 && len <= sizeof(line) - 2 * sizeof(char) &&
+      line[len-1] == (char)'\n') {
     // Replace trailing '\n' with MS-DOS style end-of-line.
-    line[len - 1] = (TCHAR)'\r';
-    line[len]     = (TCHAR)'\n';
-    line[len + 1] = (TCHAR)'\0';
+    line[len - 1] = (char)'\r';
+    line[len]     = (char)'\n';
+    line[len + 1] = (char)'\0';
   }
 
   if (m_todebug) OutputDebugString(line);
@@ -125,12 +125,12 @@ void Log::ReallyPrint(LPTSTR format, va_list ap)
   if (m_toconsole) {
     DWORD byteswritten;
     WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), line,
-                 (DWORD)(_tcslen(line) * sizeof(TCHAR)), &byteswritten, NULL);
+                 (DWORD)(strlen(line) * sizeof(char)), &byteswritten, NULL);
   }
 
   if (m_tofile && (hlogfile != NULL)) {
     DWORD byteswritten;
-    WriteFile(hlogfile, line, (DWORD)(_tcslen(line) * sizeof(TCHAR)),
+    WriteFile(hlogfile, line, (DWORD)(strlen(line) * sizeof(char)),
               &byteswritten, NULL);
   }
 }

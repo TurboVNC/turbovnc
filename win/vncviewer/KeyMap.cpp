@@ -128,10 +128,10 @@ KeyActionSpec KeyMap::PCtoX(UINT virtkey, DWORD keyData)
   kas.releaseModifiers = 0;
 
   bool extended = ((keyData & 0x1000000) != 0);
-  vnclog.Print(8, _T(" keyData %04x "), keyData);
+  vnclog.Print(8, " keyData %04x ", keyData);
 
   if (extended) {
-    vnclog.Print(8, _T(" (extended) "));
+    vnclog.Print(8, " (extended) ");
     switch (virtkey) {
       case VK_MENU :
         virtkey = VK_RMENU; break;
@@ -163,11 +163,11 @@ KeyActionSpec KeyMap::PCtoX(UINT virtkey, DWORD keyData)
       else
         kas.keycodes[numkeys-1] = XK_Meta_R;
     }
-    vnclog.Print(8, _T("keymap gives %u (%x) "), key, key);
+    vnclog.Print(8, "keymap gives %u (%x) ", key, key);
 
   } else {
     // not found in table
-    vnclog.Print(8, _T("not in special keymap, "));
+    vnclog.Print(8, "not in special keymap, ");
 
     // Try a simple conversion to ASCII, using the current keyboard mapping
     GetKeyboardState(keystate);
@@ -203,13 +203,13 @@ KeyActionSpec KeyMap::PCtoX(UINT virtkey, DWORD keyData)
         if (kas.releaseModifiers == 0)
           kas.releaseModifiers = KEYMAP_LCONTROL | KEYMAP_LALT | KEYMAP_RALT;
 
-        vnclog.Print(8, _T("Ctrl-Alt pressed: ToAscii (without modifiers) returns %d byte(s): "),
+        vnclog.Print(8, "Ctrl-Alt pressed: ToAscii (without modifiers) returns %d byte(s): ",
                      ret);
         for (int i = 0; i < ret; i++) {
           kas.keycodes[numkeys++] = *(buf + i);
-          vnclog.Print(8, _T("%02x (%c) "), *(buf + i) , *(buf + i));
+          vnclog.Print(8, "%02x (%c) ", *(buf + i) , *(buf + i));
         }
-        vnclog.Print(8, _T("\n"));
+        vnclog.Print(8, "\n");
       }
     }
 
@@ -248,11 +248,11 @@ KeyActionSpec KeyMap::PCtoX(UINT virtkey, DWORD keyData)
       // If this works, and it's a regular printable character, we just send
       // that
       if (ret >= 1) {
-        vnclog.Print(8, _T("ToAscii (without ctrl) returns %d byte(s): "),
+        vnclog.Print(8, "ToAscii (without ctrl) returns %d byte(s): ",
                      ret);
         for (int i = 0; i < ret; i++) {
           kas.keycodes[numkeys++] = *(buf + i);
-          vnclog.Print(8, _T("%02x (%c) "), *(buf + i) , *(buf + i));
+          vnclog.Print(8, "%02x (%c) ", *(buf + i) , *(buf + i));
         }
       }
     }

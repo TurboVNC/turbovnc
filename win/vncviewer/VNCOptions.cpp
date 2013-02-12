@@ -182,13 +182,13 @@ VNCOptions::~VNCOptions()
 inline bool SwitchMatch(LPCTSTR arg, LPCTSTR swtch)
 {
   return (arg[0] == '-' || arg[0] == '/') &&
-          (_tcsicmp(&arg[1], swtch) == 0);
+          (stricmp(&arg[1], swtch) == 0);
 }
 
 
 static void ArgError(LPTSTR msg)
 {
-    MessageBox(NULL,  msg, _T("Argument error"),
+    MessageBox(NULL,  msg, "Argument error",
                MB_OK | MB_TOPMOST | MB_ICONSTOP);
 }
 
@@ -205,8 +205,8 @@ int gcd(int a, int b)
 void VNCOptions::FixScaling()
 {
   if (m_scale_num < 1 || m_scale_den < 1) {
-    MessageBox(NULL,  _T("Invalid scale factor - resetting to normal scale"),
-               _T("Argument error"), MB_OK | MB_TOPMOST | MB_ICONWARNING);
+    MessageBox(NULL, "Invalid scale factor - resetting to normal scale",
+               "Argument error", MB_OK | MB_TOPMOST | MB_ICONWARNING);
     m_scale_num = 1;
     m_scale_den = 1;
     m_scaling = false;
@@ -220,36 +220,36 @@ void VNCOptions::FixScaling()
 void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
 {
   // Copy the command line - we don't know what might happen to the original
-  int cmdlinelen = (int)_tcslen(szCmdLine);
+  int cmdlinelen = (int)strlen(szCmdLine);
 
   if (cmdlinelen == 0) return;
 
-  TCHAR CommLine[256] ;
+  char CommLine[256] ;
   int f = 0;
-  _tcscpy(CommLine, szCmdLine);
+  strcpy(CommLine, szCmdLine);
 
-  if (_tcsstr(CommLine, "/listen") != NULL ||
-      _tcsstr(CommLine, "-listen") != NULL) {
+  if (strstr(CommLine, "/listen") != NULL ||
+      strstr(CommLine, "-listen") != NULL) {
     LoadOpt(".listen", KEY_VNCVIEWER_HISTORY);
     f = 1;
   }
-  TCHAR *cmd = new TCHAR[cmdlinelen + 1];
-  _tcscpy(cmd, szCmdLine);
+  char *cmd = new char[cmdlinelen + 1];
+  strcpy(cmd, szCmdLine);
 
   // Count the number of spaces
   // This may be more than the number of arguments, but that doesn't matter.
   int nspaces = 0;
-  TCHAR *p = cmd;
-  TCHAR *pos = cmd;
-  while ((pos = _tcschr(p, ' ')) != NULL) {
+  char *p = cmd;
+  char *pos = cmd;
+  while ((pos = strchr(p, ' ')) != NULL) {
     nspaces ++;
     p = pos + 1;
   }
 
   // Create the array to hold pointers for each token
-  TCHAR **args = new LPTSTR[nspaces + 1];
+  char **args = new LPTSTR[nspaces + 1];
 
-  // Replace spaces with nulls and create an array of TCHAR*'s that points to
+  // Replace spaces with nulls and create an array of char*'s that points to
   // each token.
   pos = cmd;
   int i = 0;
@@ -274,43 +274,43 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
   i++;
   int j;
   for (j = 0; j < i; j++) {
-    TCHAR phost[256];
+    char phost[256];
     if (ParseDisplay(args[j], phost, 255, &m_port) && f == 0 &&
-        _tcsstr(args[j], "/") == NULL)
+        strstr(args[j], "/") == NULL)
       LoadOpt(args[j], KEY_VNCVIEWER_HISTORY);
   }
   bool hostGiven = false, portGiven = false;
   // take in order.
   for (j = 0; j < i; j++) {
-    if (SwitchMatch(args[j], _T("help")) ||
-      SwitchMatch(args[j], _T("?")) ||
-      SwitchMatch(args[j], _T("h"))) {
-      ShowHelpBox(_T("TurboVNC Usage Help"));
+    if (SwitchMatch(args[j], "help") ||
+      SwitchMatch(args[j], "?") ||
+      SwitchMatch(args[j], "h")) {
+      ShowHelpBox("TurboVNC Usage Help");
       exit(1);
-    } else if (SwitchMatch(args[j], _T("listen"))) {
+    } else if (SwitchMatch(args[j], "listen")) {
       m_listening = true;
       if (j + 1 < i && args[j + 1][0] >= '0' && args[j + 1][0] <= '9') {
-        if (_stscanf(args[j + 1], _T("%d"), &m_listenPort) != 1) {
-          ArgError(_T("Invalid listen port specified"));
+        if (sscanf(args[j + 1], "%d", &m_listenPort) != 1) {
+          ArgError("Invalid listen port specified");
           continue;
         }
         j++;
       }
-    } else if (SwitchMatch(args[j], _T("ipv6"))) {
+    } else if (SwitchMatch(args[j], "ipv6")) {
       m_ipv6 = true;
-    } else if (SwitchMatch(args[j], _T("restricted"))) {
+    } else if (SwitchMatch(args[j], "restricted")) {
       m_restricted = true;
-    } else if (SwitchMatch(args[j], _T("viewonly"))) {
+    } else if (SwitchMatch(args[j], "viewonly")) {
       m_ViewOnly = true;
-    } else if (SwitchMatch(args[j], _T("fullcontrol"))) {
+    } else if (SwitchMatch(args[j], "fullcontrol")) {
       m_ViewOnly = false;
-    } else if (SwitchMatch(args[j], _T("fullscreen"))) {
+    } else if (SwitchMatch(args[j], "fullscreen")) {
       m_FullScreen = true;
-    } else if (SwitchMatch(args[j], _T("nofullscreen"))) {
+    } else if (SwitchMatch(args[j], "nofullscreen")) {
       m_FullScreen = false;
-    } else if (SwitchMatch(args[j], _T("span"))) {
+    } else if (SwitchMatch(args[j], "span")) {
       if (++j == i) {
-        ArgError(_T("No monitor spanning mode specified"));
+        ArgError("No monitor spanning mode specified");
         continue;
       }
       if (_toupper(args[j][0]) == 'P') {
@@ -322,58 +322,58 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
              _toupper(args[j][1]) == 'U') {
         m_Span = SPAN_AUTO;
       } else {
-        ArgError(_T("Invalid monitor spanning mode specified"));
+        ArgError("Invalid monitor spanning mode specified");
         continue;
       }
-    } else if (SwitchMatch(args[j], _T("notoolbar"))) {
+    } else if (SwitchMatch(args[j], "notoolbar")) {
       m_toolbar = false;
-    } else if (SwitchMatch(args[j], _T("8bit"))) {
+    } else if (SwitchMatch(args[j], "8bit")) {
       m_Use8Bit = true;
-    } else if (SwitchMatch(args[j], _T("no8bit"))) {
+    } else if (SwitchMatch(args[j], "no8bit")) {
       m_Use8Bit = false;
-    } else if (SwitchMatch(args[j], _T("singlebuffer"))) {
+    } else if (SwitchMatch(args[j], "singlebuffer")) {
       m_DoubleBuffer = false;
-    } else if (SwitchMatch(args[j], _T("doublebuffer"))) {
+    } else if (SwitchMatch(args[j], "doublebuffer")) {
       m_DoubleBuffer = true;
-    } else if (SwitchMatch(args[j], _T("shared"))) {
+    } else if (SwitchMatch(args[j], "shared")) {
       m_Shared = true;
-    } else if (SwitchMatch(args[j], _T("noshared"))) {
+    } else if (SwitchMatch(args[j], "noshared")) {
       m_Shared = false;
-    } else if (SwitchMatch(args[j], _T("cu"))) {
+    } else if (SwitchMatch(args[j], "cu")) {
       m_CU = true;
-    } else if (SwitchMatch(args[j], _T("nocu"))) {
+    } else if (SwitchMatch(args[j], "nocu")) {
       m_CU = false;
-    } else if (SwitchMatch(args[j], _T("swapmouse"))) {
+    } else if (SwitchMatch(args[j], "swapmouse")) {
       m_SwapMouse = true;
-    } else if (SwitchMatch(args[j], _T("nocursor"))) {
+    } else if (SwitchMatch(args[j], "nocursor")) {
       m_localCursor = NOCURSOR;
-    } else if (SwitchMatch(args[j], _T("dotcursor"))) {
+    } else if (SwitchMatch(args[j], "dotcursor")) {
       m_localCursor = DOTCURSOR;
-    } else if (SwitchMatch(args[j], _T("smalldotcursor"))) {
+    } else if (SwitchMatch(args[j], "smalldotcursor")) {
       m_localCursor = SMALLCURSOR;
-    } else if (SwitchMatch(args[j], _T("normalcursor"))) {
+    } else if (SwitchMatch(args[j], "normalcursor")) {
       m_localCursor= NORMALCURSOR;
-    } else if (SwitchMatch(args[j], _T("belldeiconify"))) {
+    } else if (SwitchMatch(args[j], "belldeiconify")) {
       m_DeiconifyOnBell = true;
-    } else if (SwitchMatch(args[j], _T("raiseonbeep"))) {
+    } else if (SwitchMatch(args[j], "raiseonbeep")) {
       m_DeiconifyOnBell = true;
-    } else if (SwitchMatch(args[j], _T("noraiseonbeep"))) {
+    } else if (SwitchMatch(args[j], "noraiseonbeep")) {
       m_DeiconifyOnBell = false;
-    } else if (SwitchMatch(args[j], _T("emulate3"))) {
+    } else if (SwitchMatch(args[j], "emulate3")) {
       m_Emul3Buttons = true;
-    } else if (SwitchMatch(args[j], _T("noemulate3"))) {
+    } else if (SwitchMatch(args[j], "noemulate3")) {
       m_Emul3Buttons = false;
-    } else if (SwitchMatch(args[j], _T("jpeg"))) {
+    } else if (SwitchMatch(args[j], "jpeg")) {
       m_enableJpegCompression = true;
-    } else if (SwitchMatch(args[j], _T("nojpeg"))) {
+    } else if (SwitchMatch(args[j], "nojpeg")) {
       m_enableJpegCompression = false;
-    } else if (SwitchMatch(args[j], _T("fsaltenter"))) {
+    } else if (SwitchMatch(args[j], "fsaltenter")) {
       m_FSAltEnter = true;
-    } else if (SwitchMatch(args[j], _T("nofsaltenter"))) {
+    } else if (SwitchMatch(args[j], "nofsaltenter")) {
       m_FSAltEnter = false;
-    } else if (SwitchMatch(args[j], _T("grabkeyboard"))) {
+    } else if (SwitchMatch(args[j], "grabkeyboard")) {
       if (++j == i) {
-        ArgError(_T("No keyboard grab mode specified"));
+        ArgError("No keyboard grab mode specified");
         continue;
       }
       switch (_toupper(args[j][0])) {
@@ -381,151 +381,151 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         case 'M':  m_GrabKeyboard = TVNC_MANUAL;  break;
         case 'F':  m_GrabKeyboard = TVNC_FS;  break;
         default:
-          ArgError(_T("Invalid keyboard grab mode specified"));
+          ArgError("Invalid keyboard grab mode specified");
           continue;
       }
-    } else if (SwitchMatch(args[j], _T("cursorshape"))) {
+    } else if (SwitchMatch(args[j], "cursorshape")) {
       m_requestShapeUpdates = true;
       m_ignoreShapeUpdates = false;
-    } else if (SwitchMatch(args[j], _T("nocursorshape"))) {
+    } else if (SwitchMatch(args[j], "nocursorshape")) {
       m_requestShapeUpdates = false;
       m_ignoreShapeUpdates = false;
-    } else if (SwitchMatch(args[j], _T("noremotecursor"))) {
+    } else if (SwitchMatch(args[j], "noremotecursor")) {
       m_requestShapeUpdates = true;
       m_ignoreShapeUpdates = true;
-    } else if (SwitchMatch(args[j], _T("nounixlogin"))) {
+    } else if (SwitchMatch(args[j], "nounixlogin")) {
       m_noUnixLogin = true;
-    } else if (SwitchMatch(args[j], _T("fitwindow"))) {
+    } else if (SwitchMatch(args[j], "fitwindow")) {
       m_FitWindow = true;
-    } else if (SwitchMatch(args[j], _T("scale"))) {
+    } else if (SwitchMatch(args[j], "scale")) {
       if (++j == i) {
-        ArgError(_T("No scaling factor specified"));
+        ArgError("No scaling factor specified");
         continue;
       }
       if (_toupper(args[j][0]) == 'F') {
         m_FitWindow = true;
       } else {
         m_FitWindow = false;
-        int numscales = _stscanf(args[j], _T("%d"), &m_scale_num);
+        int numscales = sscanf(args[j], "%d", &m_scale_num);
         if (numscales < 1) {
-          ArgError(_T("Invalid scaling specified"));
+          ArgError("Invalid scaling specified");
           continue;
         }
         m_scale_den = 100;
       }
-    } else if (SwitchMatch(args[j], _T("emulate3timeout"))) {
+    } else if (SwitchMatch(args[j], "emulate3timeout")) {
       if (++j == i) {
-        ArgError(_T("No timeout specified"));
+        ArgError("No timeout specified");
         continue;
       }
-      if (_stscanf(args[j], _T("%d"), &m_Emul3Timeout) != 1) {
-        ArgError(_T("Invalid timeout specified"));
+      if (sscanf(args[j], "%d", &m_Emul3Timeout) != 1) {
+        ArgError("Invalid timeout specified");
         continue;
       }
 
-    } else if (SwitchMatch(args[j], _T("emulate3fuzz"))) {
+    } else if (SwitchMatch(args[j], "emulate3fuzz")) {
       if (++j == i) {
-        ArgError(_T("No fuzz specified"));
+        ArgError("No fuzz specified");
         continue;
       }
-      if (_stscanf(args[j], _T("%d"), &m_Emul3Fuzz) != 1) {
-        ArgError(_T("Invalid fuzz specified"));
+      if (sscanf(args[j], "%d", &m_Emul3Fuzz) != 1) {
+        ArgError("Invalid fuzz specified");
         continue;
       }
 
-    } else if (SwitchMatch(args[j], _T("disableclipboard"))) {
+    } else if (SwitchMatch(args[j], "disableclipboard")) {
       m_DisableClipboard = true;
-    } else if (SwitchMatch(args[j], _T("clipboard"))) {
+    } else if (SwitchMatch(args[j], "clipboard")) {
       m_DisableClipboard = false;
-    } else if (SwitchMatch(args[j], _T("noclipboard"))) {
+    } else if (SwitchMatch(args[j], "noclipboard")) {
       m_DisableClipboard = true;
     }
-    else if (SwitchMatch(args[j], _T("delay"))) {
+    else if (SwitchMatch(args[j], "delay")) {
       if (++j == i) {
-        ArgError(_T("No delay specified"));
+        ArgError("No delay specified");
         continue;
       }
-      if (_stscanf(args[j], _T("%d"), &m_delay) != 1) {
-        ArgError(_T("Invalid delay specified"));
+      if (sscanf(args[j], "%d", &m_delay) != 1) {
+        ArgError("Invalid delay specified");
         continue;
       }
 
-    } else if (SwitchMatch(args[j], _T("loglevel"))) {
+    } else if (SwitchMatch(args[j], "loglevel")) {
       if (++j == i) {
-        ArgError(_T("No loglevel specified"));
+        ArgError("No loglevel specified");
         continue;
       }
-      if (_stscanf(args[j], _T("%d"), &m_logLevel) != 1) {
-        ArgError(_T("Invalid loglevel specified"));
+      if (sscanf(args[j], "%d", &m_logLevel) != 1) {
+        ArgError("Invalid loglevel specified");
         continue;
       }
 
-    } else if (SwitchMatch(args[j], _T("console"))) {
+    } else if (SwitchMatch(args[j], "console")) {
       m_logToConsole = true;
-    } else if (SwitchMatch(args[j], _T("logfile"))) {
+    } else if (SwitchMatch(args[j], "logfile")) {
       if (++j == i) {
-        ArgError(_T("No logfile specified"));
+        ArgError("No logfile specified");
         continue;
       }
-      if (_stscanf(args[j], _T("%s"), &m_logFilename) != 1) {
-        ArgError(_T("Invalid logfile specified"));
+      if (sscanf(args[j], "%s", &m_logFilename) != 1) {
+        ArgError("Invalid logfile specified");
         continue;
       } else {
         m_logToFile = true;
       }
-    } else if (SwitchMatch(args[j], _T("config"))) {
+    } else if (SwitchMatch(args[j], "config")) {
       if (++j == i) {
-        ArgError(_T("No config file specified"));
+        ArgError("No config file specified");
         continue;
       }
       // The GetPrivateProfile* stuff seems not to like some relative paths
       _fullpath(m_configFilename, args[j], _MAX_PATH);
       if (_access(m_configFilename, 04)) {
-        ArgError(_T("Can't open specified config file for reading."));
+        ArgError("Can't open specified config file for reading.");
         continue;
       } else {
         Load(m_configFilename);
         m_configSpecified = true;
       }
-    } else if (SwitchMatch(args[j], _T("copyrect"))) {
+    } else if (SwitchMatch(args[j], "copyrect")) {
       m_UseEnc[rfbEncodingCopyRect] = true;
-    } else if (SwitchMatch(args[j], _T("nocopyrect"))) {
+    } else if (SwitchMatch(args[j], "nocopyrect")) {
       m_UseEnc[rfbEncodingCopyRect] = false;
-    } else if (SwitchMatch(args[j], _T("encoding"))) {
+    } else if (SwitchMatch(args[j], "encoding")) {
       if (++j == i) {
-        ArgError(_T("No encoding specified"));
+        ArgError("No encoding specified");
         continue;
       }
       int enc = -1;
-      if (_tcsicmp(args[j], _T("raw")) == 0) {
+      if (stricmp(args[j], "raw") == 0) {
         enc = rfbEncodingRaw;
-      } else if (_tcsicmp(args[j], _T("hextile")) == 0) {
+      } else if (stricmp(args[j], "hextile") == 0) {
         enc = rfbEncodingHextile;
-      } else if (_tcsicmp(args[j], _T("tight")) == 0) {
+      } else if (stricmp(args[j], "tight") == 0) {
         enc = rfbEncodingTight;
       } else {
-        ArgError(_T("Invalid encoding specified"));
+        ArgError("Invalid encoding specified");
         continue;
       }
       if (enc != -1) {
         m_UseEnc[enc] = true;
         m_PreferredEncoding = enc;
       }
-    } else if (SwitchMatch(args[j], _T("compresslevel"))) {
+    } else if (SwitchMatch(args[j], "compresslevel")) {
       if (++j == i) {
-        ArgError(_T("No compression level specified"));
+        ArgError("No compression level specified");
         continue;
       }
       int level = -1;
-      if (_stscanf(args[j], _T("%d"), &level) != 1
+      if (sscanf(args[j], "%d", &level) != 1
         || level < 0 || level > 9) {
-        ArgError(_T("Invalid compression level specified"));
+        ArgError("Invalid compression level specified");
         continue;
       }
       m_compressLevel = level;
-    } else if (SwitchMatch(args[j], _T("samp"))) {
+    } else if (SwitchMatch(args[j], "samp")) {
       if (++j == i) {
-        ArgError(_T("No subsampling specified"));
+        ArgError("No subsampling specified");
         continue;
       }
       int subsamp = -1;
@@ -536,25 +536,25 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
         case '4':  subsamp = TVNC_4X;  break;
       }
       if (subsamp == -1) {
-        ArgError(_T("Invalid subsampling specified"));
+        ArgError("Invalid subsampling specified");
         continue;
       }
       m_subsampLevel = subsamp;
-    } else if (SwitchMatch(args[j], _T("quality"))) {
+    } else if (SwitchMatch(args[j], "quality")) {
       if (++j == i) {
-        ArgError(_T("No image quality level specified"));
+        ArgError("No image quality level specified");
         continue;
       }
       int quality = -1;
-      if (_stscanf(args[j], _T("%d"), &quality) != 1 ||
+      if (sscanf(args[j], "%d", &quality) != 1 ||
           quality < 1 || quality > 100) {
-        ArgError(_T("Invalid image quality level specified"));
+        ArgError("Invalid image quality level specified");
         continue;
       }
       m_jpegQualityLevel = quality;
-    } else if (SwitchMatch(args[j], _T("password"))) {
+    } else if (SwitchMatch(args[j], "password")) {
       if (++j == i) {
-        ArgError(_T("No password specified"));
+        ArgError("No password specified");
         continue;
       }
       char passwd[MAXPWLEN + 1];
@@ -563,27 +563,27 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
       if (strlen(passwd) > 8) passwd[8] = '\0';
       vncEncryptPasswd(m_encPasswd, passwd);
       memset(passwd, 0, MAXPWLEN);
-    } else if (SwitchMatch(args[j], _T("user"))) {
+    } else if (SwitchMatch(args[j], "user")) {
       if (++j == i) {
-        ArgError(_T("No username specified"));
+        ArgError("No username specified");
         continue;
       }
       strncpy(m_user, args[j], 255);
       m_user[255] = '\0';
       m_noUnixLogin = false;
-    } else if (SwitchMatch(args[j], _T("autopass"))) {
+    } else if (SwitchMatch(args[j], "autopass")) {
       m_autoPass = true;
-    } else if (SwitchMatch(args[j], _T("register"))) {
+    } else if (SwitchMatch(args[j], "register")) {
       Register();
       exit(1);
     } else {
-      TCHAR phost[256];
+      char phost[256];
       if (!ParseDisplay(args[j], phost, 255, &m_port)) {
-        ArgError(_T("Invalid VNC server specified."));
+        ArgError("Invalid VNC server specified.");
         continue;
       } else {
-        _tcscpy(m_host, phost);
-        _tcscpy(m_display, args[j]);
+        strcpy(m_host, phost);
+        strcpy(m_display, args[j]);
         m_connectionSpecified = true;
       }
     }
@@ -924,7 +924,7 @@ static const int sampopt2sliderpos[TVNC_SAMPOPT] = {
 };
 
 
-static const TCHAR *encodingString[17] = {
+static const char *encodingString[17] = {
   "Raw", "CopyRect", "RRE", "", "CoRRE", "Hextile", "Zlib", "Tight", "ZlibHex",
   "", "", "", "", "", "", "", "ZRLE"
 };
@@ -1168,7 +1168,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
             _this->m_scaling = (_this->m_scale_num > 1) ||
                                (_this->m_scale_den > 1);
           } else {
-            TCHAR buf[20];
+            char buf[20];
             GetDlgItemText(hwnd, IDC_SCALE_EDIT, buf, 20);
             if (strcmp(buf, "Fixed Aspect Ratio") == 0) {
               _this->m_FitWindow = true;
@@ -1561,8 +1561,8 @@ BOOL CALLBACK VNCOptions::DlgProcGlobalOptions(HWND hwnd, UINT uMsg,
         case IDC_BUTTON_CLEAR_LIST:
         {
           HKEY hRegKey;
-          TCHAR value[80];
-          TCHAR data[80];
+          char value[80];
+          char data[80];
           DWORD valuesize = 80;
           DWORD datasize = 80;
           DWORD index = 0;
@@ -1741,11 +1741,11 @@ void VNCOptions::Lim(HWND hwnd, int control, DWORD min, DWORD max)
 void VNCOptions::LoadOpt(char subkey[256], char keyname[256])
 {
   HKEY RegKey;
-  TCHAR key[80];
+  char key[80];
 
-  _tcscpy(key, keyname);
-  _tcscat(key, "\\");
-  _tcscat(key, subkey);
+  strcpy(key, keyname);
+  strcat(key, "\\");
+  strcat(key, subkey);
    RegOpenKeyEx(HKEY_CURRENT_USER, key, 0, KEY_ALL_ACCESS, &RegKey);
 
   for (int i = rfbEncodingRaw; i <= LASTENCODING; i++) {
@@ -1828,11 +1828,11 @@ void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
 {
   DWORD dispos;
   HKEY RegKey;
-  TCHAR key[80];
+  char key[80];
 
-  _tcscpy(key, keyname);
-  _tcscat(key, "\\");
-  _tcscat(key, subkey);
+  strcpy(key, keyname);
+  strcat(key, "\\");
+  strcat(key, subkey);
   RegCreateKeyEx(HKEY_CURRENT_USER, key, 0, NULL, REG_OPTION_NON_VOLATILE,
                  KEY_ALL_ACCESS, NULL, &RegKey, &dispos);
 
@@ -1877,10 +1877,10 @@ void VNCOptions::SaveOpt(char subkey[256], char keyname[256])
 
 void VNCOptions::delkey(char subkey[256], char keyname[256])
 {
-  TCHAR key[80];
-  _tcscpy(key, keyname);
-  _tcscat(key, "\\");
-  _tcscat(key, subkey);
+  char key[80];
+  strcpy(key, keyname);
+  strcat(key, "\\");
+  strcat(key, subkey);
   RegDeleteKey(HKEY_CURRENT_USER, key);
 }
 
@@ -1931,7 +1931,7 @@ void VNCOptions::LoadGenOpt()
       m_listenPort = buffer;
     }
 
-    TCHAR buf[_MAX_PATH];
+    char buf[_MAX_PATH];
     buffersize = _MAX_PATH;
     if (RegQueryValueEx(hRegKey, "LogFileName", NULL, &valtype,
                         (LPBYTE) &buf, &buffersize) == ERROR_SUCCESS) {
@@ -1946,7 +1946,7 @@ void VNCOptions::SaveGenOpt()
 {
   HKEY hRegKey;
   DWORD buffer;
-  TCHAR buf[80];
+  char buf[80];
 
   RegCreateKey(HKEY_CURRENT_USER, SETTINGS_KEY_NAME, &hRegKey);
   RegSetValueEx(hRegKey, "LocalCursor", NULL, REG_DWORD,
@@ -1960,7 +1960,7 @@ void VNCOptions::SaveGenOpt()
 
   strcpy(buf, m_logFilename);
   RegSetValueEx(hRegKey, "LogFileName", NULL, REG_SZ, (CONST BYTE *)buf,
-                (DWORD)(_tcslen(buf) + 1));
+                (DWORD)(strlen(buf) + 1));
 
   RegSetValueEx(hRegKey, "ListenPort", NULL, REG_DWORD,
                 (CONST BYTE *)&m_listenPort, 4);
@@ -2044,12 +2044,12 @@ void VNCOptions::setHistoryLimit(int newLimit)
     // the new limit
     int numRead = 0;
     for (int i = 0; i < oldLimit; i++) {
-      TCHAR valueName[16];
+      char valueName[16];
       _sntprintf(valueName, 16, "%d", i);
-      TCHAR valueData[256];
-      memset(valueData, 0, 256 * sizeof(TCHAR));
+      char valueData[256];
+      memset(valueData, 0, 256 * sizeof(char));
       LPBYTE bufPtr = (LPBYTE)valueData;
-      DWORD bufSize = 255 * sizeof(TCHAR);
+      DWORD bufSize = 255 * sizeof(char);
       LONG err = RegQueryValueEx(hKey, valueName, 0, 0, bufPtr, &bufSize);
       if (err == ERROR_SUCCESS) {
         if (valueData[0] != '\0')

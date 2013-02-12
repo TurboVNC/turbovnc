@@ -30,7 +30,7 @@ class VNCviewerApp32 : public VNCviewerApp
     VNCviewerApp32(HINSTANCE hInstance, PSTR szCmdLine);
     void ListenMode();
     int NewConnection();
-    int NewConnection(TCHAR *host, int port);
+    int NewConnection(char *host, int port);
     int NewConnection(SOCKET sock);
     Daemon  *m_pdaemon;
     ~VNCviewerApp32();

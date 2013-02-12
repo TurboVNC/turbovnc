@@ -29,8 +29,8 @@
 class LoginAuthDialog
 {
   public:
-    TCHAR m_username[256];
-    TCHAR m_passwd[256];
+    char m_username[256];
+    char m_passwd[256];
 
     LoginAuthDialog(char *vnchost, char *title = NULL, char *username = NULL);
     virtual ~LoginAuthDialog();

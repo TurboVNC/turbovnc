@@ -26,9 +26,9 @@
 // Typical use:
 //
 //       Log vnclog;
-//       vnclog.SetFile(_T("myapp.log"));
+//       vnclog.SetFile("myapp.log");
 //       ...
-//       vnclog.Print(2, _T("x = %d\n"), x);
+//       vnclog.Print(2, "x = %d\n", x);
 //
 
 #ifndef LOG_H__

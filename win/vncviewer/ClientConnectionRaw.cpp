@@ -56,7 +56,7 @@ void ClientConnection::ReadRawRect(rfbFramebufferUpdateRectHeader *pfburh)
                   pfburh->r.h)
         break;
       default:
-        vnclog.Print(0, _T("Invalid number of bits per pixel: %d\n"),
+        vnclog.Print(0, "Invalid number of bits per pixel: %d\n",
                      m_myFormat.bitsPerPixel);
         return;
     }

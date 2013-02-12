@@ -47,7 +47,7 @@ void ClientConnection::HandleFence(CARD32 flags, unsigned len,
     /* Pixel format change */
     rfbPixelFormat pf;
     ReadExact((char *)&pf, sz_rfbPixelFormat);
-    vnclog.Print(0, _T("Ignoring pixel format change request from server.\n"));
+    vnclog.Print(0, "Ignoring pixel format change request from server.\n");
   }
 }
 
@@ -67,7 +67,7 @@ void ClientConnection::SendEnableContinuousUpdates(bool enable, int x, int y,
   ecu.w = Swap16IfLE(w);
   ecu.h = Swap16IfLE(h);
 
-  vnclog.Print(0, _T("%s continuous updates\n"),
+  vnclog.Print(0, "%s continuous updates\n",
                enable ? "Enabling" : "Disabling");
 
   WriteExact((char *)&ecu, sz_rfbEnableContinuousUpdatesMsg);
@@ -113,7 +113,7 @@ void ClientConnection::ReadFence(void)
   supportsFence = true;
 
   if (f.length > sizeof(data))
-    vnclog.Print(0, _T("Ignoring fence.  Payload of %d bytes is too large.\n"),
+    vnclog.Print(0, "Ignoring fence.  Payload of %d bytes is too large.\n",
                  f.length);
   else
     HandleFence(flags, f.length, data);

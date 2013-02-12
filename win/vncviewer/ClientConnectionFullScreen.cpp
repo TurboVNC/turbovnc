@@ -56,10 +56,10 @@ void ClientConnection::RealiseFullScreenMode(bool suppressPrompt)
   if (m_opts.m_FullScreen) {
     if (!suppressPrompt && !pApp->m_options.m_skipprompt) {
       MessageBox(m_hwnd1,
-        _T("To exit from full-screen mode, press Ctrl-Alt-Shift-F.\r\n"
+        "To exit from full-screen mode, press Ctrl-Alt-Shift-F.\r\n"
         "Alternatively, press Ctrl-Esc Esc and then right-click\r\n"
-        "on the vncviewer taskbar icon to see the menu."),
-        _T("VNCviewer full-screen mode"),
+        "on the vncviewer taskbar icon to see the menu.",
+        "VNCviewer full-screen mode",
         MB_OK | MB_ICONINFORMATION | MB_TOPMOST | MB_SETFOREGROUND);
     }
     ShowWindow(m_hToolbar, SW_HIDE);
