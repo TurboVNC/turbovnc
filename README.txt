@@ -30,7 +30,7 @@ TurboVNC is
     Copyright (C) 2000-2009 TightVNC Group
     Copyright (C) 2010 University Corporation for Atmospheric Research
     Copyright (C) 2011 Pierre Ossman for Cendio AB
-    Copyright (C) 2009-2012 D. R. Commander
+    Copyright (C) 2009-2013 D. R. Commander
     All rights reserved.
 
 This software is distributed under the GNU General Public Licence as published

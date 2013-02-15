@@ -1,4 +1,4 @@
-//  Copyright (C) 2009-2012 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2009-2013 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2008 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 2003-2006 Constantin Kaplinsky. All Rights Reserved.
@@ -799,6 +799,9 @@ void ClientConnection::Connect()
   ADDRINFOA hints, *addr;
   char portname[10], *hostname = m_host;
   int res;
+
+  if (m_opts.m_tunnel)
+    SetupSSHTunnel();
 
   if (m_connDlg != NULL)
     m_connDlg->SetStatus("Connection initiated");

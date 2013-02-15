@@ -1,4 +1,4 @@
-//  Copyright (C) 2010-2012 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2013 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -89,6 +89,9 @@ VNCOptions::VNCOptions()
   m_ipv6 = false;
   m_restricted = false;
 
+  m_tunnel = false;
+  m_gatewayHost[0] = '\0';
+
   m_subsampLevel = TVNC_1X;
   m_compressLevel = 1;
   m_enableJpegCompression = true;
@@ -157,6 +160,9 @@ VNCOptions& VNCOptions::operator = (VNCOptions& s)
   m_listenPort            = s.m_listenPort;
   m_ipv6                  = s.m_ipv6;
   m_restricted            = s.m_restricted;
+
+  m_tunnel                = s.m_tunnel;
+  strcpy(m_gatewayHost, s.m_gatewayHost);
 
   m_subsampLevel          = s.m_subsampLevel;
   m_compressLevel         = s.m_compressLevel;
@@ -576,6 +582,15 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
     } else if (SwitchMatch(args[j], "register")) {
       Register();
       exit(1);
+    } else if (SwitchMatch(args[j], "via")) {
+      if (++j == i) {
+        ArgError("No SSH host specified");
+        continue;
+      }
+      strncpy(m_gatewayHost, args[j], 255);
+      m_tunnel = true;
+    } else if (SwitchMatch(args[j], "tunnel")) {
+      m_tunnel = true;
     } else {
       char phost[256];
       if (!ParseDisplay(args[j], phost, 255, &m_port)) {

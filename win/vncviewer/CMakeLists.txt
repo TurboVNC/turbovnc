@@ -20,11 +20,12 @@ add_executable(vncviewer WIN32
 	ClientConnectionCopyRect.cpp
 	ClientConnectionCursor.cpp
 	ClientConnectionFile.cpp
+	ClientConnectionFlowControl.cpp
 	ClientConnectionFullScreen.cpp
 	ClientConnectionHextile.cpp
 	ClientConnectionRaw.cpp
 	ClientConnectionTight.cpp
-	ClientConnectionFlowControl.cpp
+	ClientConnectionTunnel.cpp
 	ConnectingDialog.cpp
 	${CMAKE_SOURCE_DIR}/common/d3des/d3des.c
 	Daemon.cpp

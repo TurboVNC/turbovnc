@@ -109,6 +109,13 @@ normally be enabled when Compression Level 5 or above is requested by a VNC
 viewer, but you can also enable/disable it manually by passing command line
 arguments to Xvnc.
 -------------------------------------------------------------------------------
+[19]
+Added experimental (and currently undocumented) support for the -via and
+-tunnel command-line options to the Windows TurboVNC Viewer.  These work the
+same way as the equivalent options in the X11 TurboVNC Viewer.  Currently, they
+require Cygwin SSH, since PLink does not have the ability to detach its process
+after authentication.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

@@ -1,4 +1,4 @@
-//  Copyright (C) 2010-2012 D. R. Commander. All Rights Reserved.
+//  Copyright (C) 2010-2013 D. R. Commander. All Rights Reserved.
 //  Copyright (C) 2005-2006 Sun Microsystems, Inc. All Rights Reserved.
 //  Copyright (C) 2000 Tridia Corporation All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
@@ -81,6 +81,8 @@ class VNCOptions
     char m_configFilename[_MAX_PATH];
     unsigned char m_encPasswd[8];
     bool  m_restricted;
+    bool m_tunnel;
+    char m_gatewayHost[256];
 
     // default connection options - can be set through Dialog
     bool  m_ViewOnly;
