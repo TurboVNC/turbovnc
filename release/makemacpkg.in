@@ -70,6 +70,7 @@ mkdir -p $PKGROOT
 
 make install DESTDIR=$PKGROOT
 if [ -d $PKGROOT$JAVADIR ]; then
+	mv -f $PKGROOT$JAVADIR/README.txt $PKGROOT$PREFIX/
 	rm $PKGROOT$JAVADIR/*
 	rmdir $PKGROOT$JAVADIR
 fi

@@ -138,4 +138,6 @@ configure_file("${CMAKE_SOURCE_DIR}/cmakescripts/cmake_uninstall.cmake.in"
 
 add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P cmake_uninstall.cmake)
 
-install(FILES README.txt DESTINATION .)
+if(TVNC_BUILDNATIVE)
+	install(FILES README.txt DESTINATION .)
+endif()

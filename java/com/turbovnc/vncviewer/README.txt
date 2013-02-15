@@ -7,7 +7,7 @@ contains additional features and GUI modifications that make it behave and
 perform as much like the TurboVNC native viewers as possible.  One of the
 most notable of these features is the ability to use the libjpeg-turbo library
 (through JNI) to accelerate JPEG decoding, giving the Java TurboVNC Viewer
-near-native levels of performance.
+near-native levels of performance when run as a standalone application.
 
 The Java TurboVNC Viewer is:
 
@@ -30,6 +30,13 @@ conditions under which this software is made available.  TurboVNC also
 contains code from other sources.  See the Acknowledgements section below and
 the individual files for details of the conditions under which they are made
 available.
+
+
+NOTE: On Mac platforms, the Java TurboVNC Viewer is bundled as a self-contained
+app and can be launched by opening the "TurboVNC Viewer" app located in the
+"TurboVNC" Applications folder or by running /opt/TurboVNC/bin/vncviewer from a
+shell.  If using the Java TurboVNC Viewer in this manner, then the instructions
+below do not apply.  See the TurboVNC User's Guide for more information.
 
 
 Installation
