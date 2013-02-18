@@ -91,16 +91,16 @@ public class Viewport extends JFrame {
               if (cc.opts.scalingFactor == Options.SCALE_FIXEDRATIO)
                 setSize(w, h);
             }
-            if (cc.desktop.cursor != null) {
-              Cursor cursor = cc.desktop.cursor;
-              cc.setCursor(cursor.width(), cursor.height(), cursor.hotspot,
-                           (int[])cursor.data, cursor.mask);
-            }
           }
         } else {
           sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
           sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
           sp.validate();
+        }
+        if (cc.desktop.cursor != null) {
+          Cursor cursor = cc.desktop.cursor;
+          cc.setCursor(cursor.width(), cursor.height(), cursor.hotspot,
+                       (int[])cursor.data, cursor.mask);
         }
         if ((sp.getSize().width > cc.desktop.scaledWidth) ||
             (sp.getSize().height > cc.desktop.scaledHeight)) {
