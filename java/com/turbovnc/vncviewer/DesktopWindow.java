@@ -2,7 +2,7 @@
  * Copyright (C) 2006 Constantin Kaplinsky.  All Rights Reserved.
  * Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
  * Copyright (C) 2010, 2012 D. R. Commander.  All Rights Reserved.
- * Copyright (C) 2011-2012 Brian P. Hinz
+ * Copyright (C) 2011-2013 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -395,7 +395,11 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   // Mouse-Motion callback function
   private void mouseMotionCB(MouseEvent e) {
-    if (!cc.opts.viewOnly)
+    if (!cc.opts.viewOnly &&
+        e.getX() >= cc.viewport.dx && 
+        e.getY() >= cc.viewport.dy && 
+        e.getX() <= cc.viewport.dx + scaledWidth &&
+        e.getY() <= cc.viewport.dy + scaledHeight)
       cc.writePointerEvent(e);
     // - If local cursor rendering is enabled then use it
     if (cursorAvailable) {
@@ -419,7 +423,11 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   // Mouse callback function
   private void mouseCB(MouseEvent e) {
-    if (!cc.opts.viewOnly)
+    if (!cc.opts.viewOnly &&
+        e.getX() >= cc.viewport.dx && 
+        e.getY() >= cc.viewport.dy && 
+        e.getX() <= cc.viewport.dx + scaledWidth &&
+        e.getY() <= cc.viewport.dy + scaledHeight)
       cc.writePointerEvent(e);
     lastX = e.getX();
     lastY = e.getY();
