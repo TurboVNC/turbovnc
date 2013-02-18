@@ -55,8 +55,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
                        CConn cc_) {
     cc = cc_;
     setSize(width, height);
-    setBackground(Color.BLACK);
-    setOpaque(true);
+    setOpaque(false);
     GraphicsEnvironment ge =
       GraphicsEnvironment.getLocalGraphicsEnvironment();
     GraphicsDevice gd = ge.getDefaultScreenDevice();
