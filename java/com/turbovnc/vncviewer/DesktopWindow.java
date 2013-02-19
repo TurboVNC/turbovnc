@@ -72,12 +72,14 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
     cursor = new Cursor();
     cursorBacking = new ManagedPixelBuffer();
+    Dimension bestSize = tk.getBestCursorSize(16, 16);
     BufferedImage cursorImage =
-      new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+      new BufferedImage(bestSize.width, bestSize.height,
+                        BufferedImage.TYPE_INT_ARGB);
     noCursor = tk.createCustomCursor(cursorImage, new java.awt.Point(0, 0),
                                      "noCursor");
     cursorImage.flush();
-    if (!cc.opts.cursorShape)
+    if (!cc.opts.cursorShape && !bestSize.equals(new Dimension(0, 0)))
       setCursor(noCursor);
     addMouseListener(this);
     addMouseWheelListener(this);
@@ -124,10 +126,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
     cursor.hotspot = hotspot;
 
-    Dimension bsc = tk.getBestCursorSize(w, h);
-
-    cursor.setSize(((int)bsc.getWidth() > w ? (int)bsc.getWidth() : w),
-                   ((int)bsc.getHeight() > h ? (int)bsc.getHeight() : h));
+    cursor.setSize(w, h);
     cursor.setPF(getPF());
 
     cursorBacking.setSize(cursor.width(), cursor.height());
@@ -152,19 +151,33 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         y * ((cursor.width() + 7) / 8), maskBytesPerRow);
     }
 
-    MemoryImageSource bitmap =
+    MemoryImageSource cursorSrc =
       new MemoryImageSource(cursor.width(), cursor.height(),
                             ColorModel.getRGBdefault(), (int[])cursor.data, 0,
                             cursor.width());
     int cw = (int)Math.floor((float)cursor.width() * scaleWidthRatio);
     int ch = (int)Math.floor((float)cursor.height() * scaleHeightRatio);
-    int hint = java.awt.Image.SCALE_DEFAULT;
-    hotspot = new Point((int)Math.floor((float)hotspot.x * scaleWidthRatio),
-                        (int)Math.floor((float)hotspot.y * scaleHeightRatio));
-    Image cursorImage = (cw <= 0 || ch <= 0) ? tk.createImage(bitmap) :
-      tk.createImage(bitmap).getScaledInstance(cw, ch, hint);
-    softCursor = tk.createCustomCursor(cursorImage,
-                  new java.awt.Point(hotspot.x, hotspot.y), "Cursor");
+    Dimension bestSize = tk.getBestCursorSize(cw, ch);
+    Image srcImage = tk.createImage(cursorSrc);
+    BufferedImage cursorImage =
+      new BufferedImage(bestSize.width, bestSize.height, 
+                        BufferedImage.TYPE_INT_ARGB);
+    Graphics2D g2 = cursorImage.createGraphics();
+    g2.setRenderingHint(RenderingHints.KEY_RENDERING,
+                        RenderingHints.VALUE_RENDER_SPEED);
+    g2.drawImage(srcImage, 0, 0, (int)Math.min(cw, bestSize.width),
+                 (int)Math.min(ch, bestSize.height), 0, 0, cursor.width(),
+                 cursor.height(), null);
+    g2.dispose();
+    srcImage.flush();
+
+    int x = (int)Math.floor((float)hotspot.x * scaleWidthRatio);
+    int y = (int)Math.floor((float)hotspot.y * scaleHeightRatio);
+    x = (int)Math.min(x, Math.max(bestSize.width - 1, 0));
+    y = (int)Math.min(y, Math.max(bestSize.height - 1, 0));
+    java.awt.Point hs = new java.awt.Point(x, y);
+    if (!bestSize.equals(new Dimension(0, 0)))
+      softCursor = tk.createCustomCursor(cursorImage, hs, "softCursor");
     cursorImage.flush();
 
     if (softCursor != null) {
