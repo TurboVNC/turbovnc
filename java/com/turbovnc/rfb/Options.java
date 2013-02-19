@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,6 +63,7 @@ public class Options {
     sendLocalUsername = old.sendLocalUsername;
     if (old.via != null) via = new String(old.via);
     tunnel = old.tunnel;
+    if (old.sshUser != null) sshUser = new String(old.sshUser);
   }
 
   public void setScalingFactor(String scaleString) {
@@ -131,6 +132,7 @@ public class Options {
     printOpt("sendLocalUsername", sendLocalUsername);
     printOpt("via", via);
     printOpt("tunnel", tunnel);
+    printOpt("sshUser", sshUser);
   }
 
   public String serverName;
@@ -157,4 +159,5 @@ public class Options {
   public boolean sendLocalUsername;
   public String via;
   public boolean tunnel;
+  public String sshUser;
 }

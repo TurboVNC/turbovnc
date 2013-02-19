@@ -1,6 +1,6 @@
 /*
  *  Copyright (C) 2012 Brian P. Hinz.  All Rights Reserved.
- *  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -106,7 +106,7 @@ public class Tunnel {
 
     // username and passphrase will be given via UserInfo interface.
     vlog.debug("Opening SSH tunnel through gateway " + gatewayHost);
-    String user = VncViewer.sshUser.getValue();
+    String user = opts.sshUser;
     if (user == null)
       user = (String)System.getProperties().get("user.name");
     Session session = null;

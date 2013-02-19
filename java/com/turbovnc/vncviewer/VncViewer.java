@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2013 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -428,9 +428,6 @@ public class VncViewer extends java.applet.Applet implements Runnable {
     if (opts == null)
       opts = new Options();
 
-    if (vncServerName.getValue() != null)
-      opts.serverName = new String(vncServerName.getValue());
-    vncServerName.setParam(null);
     opts.port = vncServerPort.getValue();
     vncServerPort.setValue(-1);
 
@@ -491,8 +488,29 @@ public class VncViewer extends java.applet.Applet implements Runnable {
     opts.noUnixLogin = noUnixLogin.getValue();
     opts.sendLocalUsername = sendLocalUsername.getValue();
 
-    if (via.getValue() != null) opts.via = new String(via.getValue());
+    String v = via.getValue();
+    if (v != null) {
+      int atIndex = v.indexOf('@');
+      if (atIndex >= 0) {
+        opts.via = v.substring(atIndex + 1);
+        opts.sshUser = v.substring(0, atIndex);
+      } else {
+        opts.via = new String(v);
+      }
+    }
     opts.tunnel = tunnel.getValue();
+    String s = vncServerName.getValue();
+    if (s != null) {
+      int atIndex = s.indexOf('@');
+      if (atIndex >= 0 && opts.tunnel) {
+        opts.serverName = s.substring(atIndex + 1);
+        opts.sshUser = s.substring(0, atIndex);
+      } else {
+        opts.serverName = new String(s);
+      }
+    }
+    vncServerName.setParam(null);
+      
   }
 
   static StringParameter vncServerName
@@ -727,7 +745,7 @@ public class VncViewer extends java.applet.Applet implements Runnable {
 
   static BoolParameter sendLocalUsername
   = new BoolParameter("SendLocalUsername",
-  "Send the local username when using user/password authentication schemes " +
+  "Send the local user name when using user/password authentication schemes " +
   "(Unix login, Plain, Ident) rather than prompting for it.  If connecting to " +
   "a TightVNC/TurboVNC server, this also forces Unix login authentication to " +
   "be used, if an authentication method that supports it is enabled in the VNC " +
@@ -759,19 +777,24 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   static StringParameter via
   = new StringParameter("Via",
   "This parameter specifies an SSH server (\"gateway\") through which the VNC " +
-  "connection should be tunneled.  Note that when using the \"Via\" parameter, " +
+  "connection should be tunneled.  Note that when using the Via parameter, " +
   "the VNC server host should be specified from the point of view of the " +
   "gateway.  For example, specifying Via=gateway_machine Server=localhost:1 " +
   "will connect to display :1 on gateway_machine.  The VNC server must be " +
-  "specified on the command line or in the \"Server\" parameter when using the " +
-  "Via parameter.", null);
+  "specified on the command line or in the Server parameter when using the " +
+  "Via parameter.  The Via parameter can be prefixed by <user>@ to indicate " +
+  "that user name <user> (default = local user name) should be used when " +
+  "authenticating with the SSH server.", null);
 
   static BoolParameter tunnel
   = new BoolParameter("Tunnel",
   "Same as Via, except that the gateway is assumed to be the same as the VNC " +
   "server host, so you do not need to specify it separately.  The VNC server " +
-  "must be specified on the command line or in the \"Server\" parameter when " +
-  "using the Tunnel parameter.", false);
+  "must be specified on the command line or in the Server parameter when " +
+  "using the Tunnel parameter.  When using the Tunnel parameter, the VNC server " +
+  "host can be prefixed by <user>@ to indicate that user name <user> " +
+  "(default = local user name) should be used when authenticating with the SSH " +
+  "server.", false);
 
   static IntParameter sshPort
   = new IntParameter("SSHPort",
@@ -797,12 +820,6 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   = new StringParameter("SSHKeyPass",
   "When using the Via or Tunnel options, this parameter specifies the " +
   "passphrase for the SSH key.", null);
-
-  static StringParameter sshUser
-  = new StringParameter("SSHUser",
-  "When using the Via or Tunnel options, this parameter specifies the " +
-  "username to use when authenticating with the SSH server.  If unspecified, " +
-  "then the local username will be used.", null);
 
   static StringParameter config
   = new StringParameter("Config",
