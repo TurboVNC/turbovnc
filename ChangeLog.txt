@@ -56,8 +56,8 @@ and parameters has been reconciled among the Windows, X11, and Java TurboVNC
 Viewers.
 -------------------------------------------------------------------------------
 [10]
-The window spanning feature in the Windows TurboVNC Viewer should now behave
-properly when fixed-ratio scaling is used.
+The multi-screen window spanning feature in the Windows TurboVNC Viewer should
+now behave properly when fixed-ratio scaling is used.
 -------------------------------------------------------------------------------
 [11]
 Fixed a logic error in the "automatic" spanning mode of the Windows TurboVNC
@@ -106,7 +106,7 @@ Implemented an interframe comparison engine (ICE) in the TurboVNC Server,
 which prevents duplicate framebuffer updates from being sent as a result of
 an application drawing the same thing over and over again.  The ICE will
 normally be enabled when Compression Level 5 or above is requested by a VNC
-viewer, but you can also enable/disable it manually by passing command line
+viewer, but you can also enable/disable it manually by passing command-line
 arguments to Xvnc.
 -------------------------------------------------------------------------------
 [19]
