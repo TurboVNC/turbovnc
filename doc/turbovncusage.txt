@@ -201,9 +201,12 @@ or
 is the equivalent of running
 
 	#Verb: <<---
-	/usr/bin/ssh -L {5900+n}:localhost:{5900+n} {user}@{server}
-	/opt/TurboVNC/bin/vncviewer localhost:{n}
+	/usr/bin/ssh -L {fp}:localhost:{5900+n} {user}@{server}
+	/opt/TurboVNC/bin/vncviewer localhost::{fp}
 	---
+
+where __''{fp}''__ is a free TCP port on the client machine (this is
+automatically determined by ''vncviewer''.)
 
 ''-tunnel'' can be used as a shortcut whenever the SSH and VNC servers are the
 same machine.  ''-via'' is more flexible, since it allows you to specify the
