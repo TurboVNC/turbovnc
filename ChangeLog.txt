@@ -2,6 +2,23 @@
 1.2 beta1
 ===============================================================================
 [1]
+Modified the default xstartup.turbovnc script so that it loads the 2D rather
+than the 3D version of the window manager on recent Ubuntu systems.  This
+specifically fixes an issue whereby the Unity window manager in Ubuntu 12.04
+would not display its menus.
+-------------------------------------------------------------------------------
+[2]
+Added a command-line switch (-norender) to Xvnc that can be used to disable the
+X RENDER extension.
+-------------------------------------------------------------------------------
+[3]
+Added a command-line option (-xstartup) to vncserver that allows a custom
+startup script to be specified.  This is useful along with the -fg switch,
+because it allows a full-screen application to be launched without a window
+manager and causes the TurboVNC session to terminate when the application
+exits.
+-------------------------------------------------------------------------------
+[4]
 The Java TurboVNC Viewer has been completely rewritten and now supports most of
 the features of the TurboVNC native viewers, as well as all of the features of,
 and a rich GUI inspired by, the TigerVNC 1.2 Java viewer.  In addition, the new
@@ -11,36 +28,36 @@ The new Java viewer now replaces the X11 TurboVNC Viewer on Mac systems, since
 it has higher overall performance on that platform (due to performance
 limitations of XQuartz) and much better usability.
 -------------------------------------------------------------------------------
-[2]
+[5]
 IPv6 support
 -------------------------------------------------------------------------------
-[3]
+[6]
 Implemented v0.10 of the X RENDER extension, to address compatibility problems
 with newer applications that assumed v0.10 functionality was available without
 checking for it.
 -------------------------------------------------------------------------------
-[4]
+[7]
 Overhauled the build and packaging system.  All platforms now use CMake, and
 the Java code can be built either as part of a Unix or Windows build or as
 a stand-alone project.
 -------------------------------------------------------------------------------
-[5]
+[8]
 Renamed the resource file for the X11 TurboVNC Viewer to "Tvncviewer" to avoid
 conflicts with TightVNC.  This specifically fixes an issue whereby the TurboVNC
 Viewer would display its menus and titlebar incorrectly when running on a
 system that had the TightVNC Viewer installed.
 -------------------------------------------------------------------------------
-[6]
+[9]
 The Windows TurboVNC Viewer now accepts a scaling factor of "fixedratio" when
 using the /scale switch on the command line.  This was previously called "Auto"
 in the GUI, but the name was changed to match the Java TurboVNC Viewer.
 -------------------------------------------------------------------------------
-[7]
+[10]
 All default options in the X11 TurboVNC Viewer now have a command-line
 equivalent, which is useful in case the defaults are overridden using a
 resource file.
 -------------------------------------------------------------------------------
-[8]
+[11]
 Added a keyboard grabbing feature to the Windows TurboVNC Viewer so that it can
 optionally send special keystrokes (Alt-Tab, Ctrl-Esc, Menu key, etc.) to the
 VNC server.  The default behavior of this option is to enable grabbing only in
@@ -50,30 +67,30 @@ on or always off.  Additionally, grabbing can always be turned on/off by
 pressing CTRL-ALT-SHIFT-G.  The X11 TurboVNC Viewer has been extended to
 support the same functionality.
 -------------------------------------------------------------------------------
-[9]
+[12]
 Where possible, the naming of command-line options, resources, menu options,
 and parameters has been reconciled among the Windows, X11, and Java TurboVNC
 Viewers.
 -------------------------------------------------------------------------------
-[10]
+[13]
 The multi-screen window spanning feature in the Windows TurboVNC Viewer should
 now behave properly when fixed-ratio scaling is used.
 -------------------------------------------------------------------------------
-[11]
+[14]
 Fixed a logic error in the "automatic" spanning mode of the Windows TurboVNC
 Viewer, whereby it would try to extend the remote desktop window horizontally
 across multiple screens if the remote desktop height was taller than the local
 screen but the width was the same.
 -------------------------------------------------------------------------------
-[12]
+[15]
 The Windows TurboVNC Viewer will now return a non-zero exit status if it
 encounters an error.  This allows batch scripts to start the viewer with
 'start /wait' and check its exit status.
 -------------------------------------------------------------------------------
-[13]
+[16]
 The /password option in the Windows TurboVNC Viewer should now work again.
 -------------------------------------------------------------------------------
-[14]
+[17]
 Fixed an intermittent failure with the idle timeout feature in the TurboVNC
 Server.  This failure was caused by the fact that the X server used a 32-bit
 value to store the number of milliseconds since 1970, and this value was
@@ -83,25 +100,25 @@ several days into the future, the expiration value for the timer would wrap
 around and become lower than the current time, thus causing the TurboVNC Server
 to exit.
 -------------------------------------------------------------------------------
-[15]
+[18]
 Worked around a bug in the version of TigerVNC Server that ships with
 Red Hat/CentOS 6, whereby dragging links from Firefox (running on the remote
 desktop) to the remote desktop would cause the X11 TurboVNC Viewer to crash.
 -------------------------------------------------------------------------------
-[16]
+[19]
 Added support for the RFB flow control extensions developed by the TigerVNC
 Project.  Clients that support these extensions (including TurboVNC 1.2 and
 later and TigerVNC 1.2 and later) can receive updates from the server without
 having to explicitly request them, which improves performance on high-latency
 networks.
 -------------------------------------------------------------------------------
-[17]
+[20]
 The titlebar of all flavors of the TurboVNC Viewer now displays the last
 encoding received from the server rather than the requested encoding.  This is
 useful when connecting to RealVNC and other servers that do not support Tight
 encoding.
 -------------------------------------------------------------------------------
-[18]
+[21]
 Implemented an interframe comparison engine (ICE) in the TurboVNC Server,
 which prevents duplicate framebuffer updates from being sent as a result of
 an application drawing the same thing over and over again.  The ICE will
@@ -109,37 +126,12 @@ normally be enabled when Compression Level 5 or above is requested by a VNC
 viewer, but you can also enable/disable it manually by passing command-line
 arguments to Xvnc.
 -------------------------------------------------------------------------------
-[19]
+[22]
 Added experimental (and currently undocumented) support for the -via and
 -tunnel command-line options to the Windows TurboVNC Viewer.  These work the
 same way as the equivalent options in the X11 TurboVNC Viewer.  Currently, they
 require Cygwin SSH, since PLink does not have the ability to detach its process
 after authentication.
--------------------------------------------------------------------------------
-
-
-===============================================================================
-1.1.1
-===============================================================================
-[1]
-Modified the default xstartup.turbovnc script so that it loads the 2D rather
-than the 3D version of the window manager on recent Ubuntu systems.  This
-specifically fixes an issue whereby the Unity window manager in Ubuntu 12.04
-would not display its menus.
--------------------------------------------------------------------------------
-[2]
-Added a command-line switch (-norender) to Xvnc that can be used to disable the
-X RENDER extension.  This temporarily works around problems with recent
-applications that assume functionality from X RENDER 0.10 or later without
-checking the version of the extension (TurboVNC 1.1.x only implements X RENDER
-0.8.)
--------------------------------------------------------------------------------
-[3]
-Added a command-line option (-xstartup) to vncserver that allows a custom
-startup script to be specified.  This is useful along with the -fg switch,
-because it allows a full-screen application to be launched without a window
-manager and causes the TurboVNC session to terminate when the application
-exits.
 -------------------------------------------------------------------------------
 
 
