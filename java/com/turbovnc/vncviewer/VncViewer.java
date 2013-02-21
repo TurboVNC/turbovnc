@@ -34,11 +34,12 @@ import java.awt.*;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.io.InputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.List;
 import javax.swing.*;
+import java.lang.reflect.*;
 
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
@@ -76,7 +77,56 @@ public class VncViewer extends java.applet.Applet implements Runnable {
 
   public static final String os = System.getProperty("os.name").toLowerCase();
 
-  public static void setLookAndFeel() {
+  // This allows the Mac app to handle .vnc files opened or dragged onto its
+  // icon from the Finder.
+
+  static String fileName;
+
+  static class MyInvocationHandler implements InvocationHandler {
+    public Object invoke(Object proxy, Method method, Object[] args) {
+      try {
+        if (method.getName().equals("openFiles") && args[0] != null) {
+          synchronized(VncViewer.class) {
+            Class ofEventClass =
+              Class.forName("com.apple.eawt.AppEvent$OpenFilesEvent");
+            Method getFiles = ofEventClass.getMethod("getFiles",
+                                                     (Class[])null);
+            List<File> files =(List<File>)getFiles.invoke(args[0]);
+            String fName = files.iterator().next().getAbsolutePath();
+            if (nViewers == 0)
+              fileName = fName;
+            else {
+              VncViewer viewer = new VncViewer(new String[]{});
+              Configuration.load(fName);
+              viewer.setGlobalOptions();
+              viewer.start();
+            }
+          }
+        }
+      } catch(Exception e) {
+        vlog.info(e.getMessage());
+      }
+      return null;
+    }
+  }
+
+  static void enableFileHandler() throws Exception {
+    Class appClass = Class.forName("com.apple.eawt.Application");
+    Method getApplication = appClass.getMethod("getApplication",
+                                               (Class[])null);
+    Object app = getApplication.invoke(appClass);
+
+    Class fileHandlerClass = Class.forName("com.apple.eawt.OpenFilesHandler");
+    InvocationHandler handler = new MyInvocationHandler();
+    Object proxy = Proxy.newProxyInstance(fileHandlerClass.getClassLoader(),
+                                          new Class[]{fileHandlerClass},
+                                          handler);
+    Method setOpenFileHandler =
+      appClass.getMethod("setOpenFileHandler", fileHandlerClass);
+    setOpenFileHandler.invoke(app, new Object[]{proxy});
+  }
+
+  static void setLookAndFeel() {
     try {
       if (os.startsWith("windows")) {
         String laf = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
@@ -94,16 +144,27 @@ public class VncViewer extends java.applet.Applet implements Runnable {
         }
       }
       UIManager.put("TitledBorder.titleColor", Color.blue);
-      if (os.startsWith("mac os x"))
+      if (os.startsWith("mac os x")) {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
+        enableFileHandler();
+      }
     } catch(Exception e) {
-      vlog.info(e.toString());
+      vlog.info(e.getMessage());
     }
   }
 
   public static void main(String[] argv) {
     setLookAndFeel();
     VncViewer viewer = new VncViewer(argv);
+    if (os.startsWith("mac os x")) {
+      synchronized(VncViewer.class) {
+        if (fileName != null) {
+          Configuration.load(fileName);
+          viewer.setGlobalOptions();
+          fileName = null;
+        }
+      }
+    }
     viewer.start();
   }
 

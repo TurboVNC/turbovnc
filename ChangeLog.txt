@@ -6,6 +6,10 @@ The Mac TurboVNC Viewer no longer has a separate menu for the "About" and
 "Preferences" options.  These are now accessed from the application menu, as is
 the case for other Mac applications.
 -------------------------------------------------------------------------------
+[2]
+Opening .vnc files in the OS X Finder or dragging and dropping them onto the
+Mac TurboVNC Viewer icon now works properly.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
