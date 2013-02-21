@@ -7,8 +7,14 @@ The Mac TurboVNC Viewer no longer has a separate menu for the "About" and
 the case for other Mac applications.
 -------------------------------------------------------------------------------
 [2]
-Opening .vnc files in the OS X Finder or dragging and dropping them onto the
-Mac TurboVNC Viewer icon now works properly.
+Opening VNC viewer config (.vnc) files in the OS X Finder or dragging and
+dropping them onto the Mac TurboVNC Viewer icon now works properly.
+Additionally, if a connection is already open, dragging and dropping a .vnc
+file onto the Mac TurboVNC Viewer icon will now open a new connection.
+-------------------------------------------------------------------------------
+[3]
+VNC viewer config (.vnc) files can now be opened in Windows by dragging and
+dropping them onto the Windows TurboVNC Viewer icon.
 -------------------------------------------------------------------------------
 
 

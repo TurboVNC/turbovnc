@@ -280,10 +280,13 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
   i++;
   int j;
   for (j = 0; j < i; j++) {
-    char phost[256];
-    if (ParseDisplay(args[j], phost, 255, &m_port) && f == 0 &&
-        strstr(args[j], "/") == NULL)
-      LoadOpt(args[j], KEY_VNCVIEWER_HISTORY);
+    if (strlen(args[j]) < 4 ||
+        strnicmp(&args[j][strlen(args[j]) - 4], ".vnc", 4)) {
+      char phost[256];
+      if (ParseDisplay(args[j], phost, 255, &m_port) && f == 0 &&
+          strstr(args[j], "/") == NULL)
+        LoadOpt(args[j], KEY_VNCVIEWER_HISTORY);
+    }
   }
   bool hostGiven = false, portGiven = false;
   // take in order.
@@ -592,14 +595,27 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
     } else if (SwitchMatch(args[j], "tunnel")) {
       m_tunnel = true;
     } else {
-      char phost[256];
-      if (!ParseDisplay(args[j], phost, 255, &m_port)) {
-        ArgError("Invalid VNC server specified.");
-        continue;
+      if (strlen(args[j]) >= 4 && 
+          !strnicmp(&args[j][strlen(args[j]) - 4], ".vnc", 4)) {
+        // The GetPrivateProfile* stuff seems not to like some relative paths
+        _fullpath(m_configFilename, args[j], _MAX_PATH);
+        if (_access(m_configFilename, 04)) {
+          ArgError("Can't open specified config file for reading.");
+          continue;
+        } else {
+          Load(m_configFilename);
+          m_configSpecified = true;
+        }
       } else {
-        strcpy(m_host, phost);
-        strcpy(m_display, args[j]);
-        m_connectionSpecified = true;
+        char phost[256];
+        if (!ParseDisplay(args[j], phost, 255, &m_port)) {
+          ArgError("Invalid VNC server specified.");
+          continue;
+        } else {
+          strcpy(m_host, phost);
+          strcpy(m_display, args[j]);
+          m_connectionSpecified = true;
+        }
       }
     }
   }
