@@ -5,7 +5,7 @@
 	<key>CFBundleGetInfoString</key>
 	<string>@VERSION@, The VirtualGL Project</string>
 	<key>CFBundleName</key>
-	<string>@CMAKE_PROJECT_NAME@ Viewer (Java)</string>
+	<string>@CMAKE_PROJECT_NAME@ Viewer</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.turbovnc.vncviewer.VncViewer</string>
 	<key>CFBundleShortVersionString</key>
