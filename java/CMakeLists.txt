@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 project(turbovnc-java Java)
-set(VERSION 1.1.90)
+set(VERSION 1.1.91)
 set(COPYRIGHT_YEAR "2000-2013")
 set(COPYRIGHT "The VirtualGL Project and many others (see README.txt)")
 set(URLTEXT "Visit http://www.virtualgl.org for more information on TurboVNC")
