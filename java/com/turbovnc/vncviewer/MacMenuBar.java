@@ -26,26 +26,66 @@ package com.turbovnc.vncviewer;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.lang.reflect.*;
 
 import com.turbovnc.rfb.*;
 
 public class MacMenuBar extends JMenuBar implements ActionListener {
 
+  // The following code allows us to pop up our own dialogs whenever "About"
+  // and "Preferences" are selected from the application menu.
+
+  class MyInvocationHandler implements InvocationHandler {
+    MyInvocationHandler(CConn cc_) { cc = cc_; }
+
+    public Object invoke(Object proxy, Method method, Object[] args) {
+      if (method.getName().equals("handleAbout")) {
+        cc.showAbout(null);
+      } else if (method.getName().equals("handlePreferences")) {
+        cc.options.showDialog(cc.viewport);
+      }
+      return null;
+    }
+
+    CConn cc;
+  }
+
+  void setupAppMenu() {
+    try {
+      Class appClass = Class.forName("com.apple.eawt.Application");
+      Method getApplication = appClass.getMethod("getApplication",
+                                                 (Class[])null);
+      Object app = getApplication.invoke(appClass);
+
+      Class aboutHandlerClass = Class.forName("com.apple.eawt.AboutHandler");
+      InvocationHandler aboutHandler = new MyInvocationHandler(cc);
+      Object proxy = Proxy.newProxyInstance(aboutHandlerClass.getClassLoader(),
+                                            new Class[]{aboutHandlerClass},
+                                            aboutHandler);
+      Method setAboutHandler =
+        appClass.getMethod("setAboutHandler", aboutHandlerClass);
+      setAboutHandler.invoke(app, new Object[]{proxy});
+
+      Class prefsHandlerClass =
+        Class.forName("com.apple.eawt.PreferencesHandler");
+      InvocationHandler prefsHandler = new MyInvocationHandler(cc);
+      proxy = Proxy.newProxyInstance(prefsHandlerClass.getClassLoader(),
+                                     new Class[]{prefsHandlerClass},
+                                     prefsHandler);
+      Method setPreferencesHandler =
+        appClass.getMethod("setPreferencesHandler", prefsHandlerClass);
+      setPreferencesHandler.invoke(app, new Object[]{proxy});
+    } catch (Exception e) {
+      vlog.info("Could not override About/Preferences menu items: " +
+                e.getMessage());
+    }
+  }
+
   public MacMenuBar(CConn cc_) {
     cc = cc_;
     int acceleratorMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
-    // Theoretically, we should be able to add this to the actual Mac app menu,
-    // but doing so requires using com.apple.eawt, which is not cross-platform.
-    // The Macify wrapper enables the use of com.apple.eawt in a cross-platform
-    // manner (by dynamically loading it with Reflection), but unfortunately
-    // Macify is not GPL-compatible.  :(
-    JMenu mainMenu = new JMenu("TurboVNC Viewer");
-    about = addMenuItem(mainMenu, "About TurboVNC Viewer");
-    mainMenu.addSeparator();
-    options = addMenuItem(mainMenu, "Preferences");
-    options.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA,
-                                                  acceleratorMask));
+    setupAppMenu();
 
     JMenu connMenu = new JMenu("Connection");
     newConn = addMenuItem(connMenu, "New Connection...");
@@ -88,7 +128,6 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     connMenu.addSeparator();
     clipboard = addMenuItem(connMenu, "Clipboard ...");
 
-    add(mainMenu);
     add(connMenu);
   }
 
@@ -139,18 +178,15 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       VncViewer.newViewer(cc.viewer);
     } else if (actionMatch(ev, closeConn)) {
       cc.close();
-    } else if (actionMatch(ev, options)) {
-      cc.options.showDialog(cc.viewport);
     } else if (actionMatch(ev, info)) {
       cc.showInfo();
-    } else if (actionMatch(ev, about)) {
-      cc.showAbout(null);
     }
   }
 
   CConn cc;
   JMenuItem defaultSize;
   JMenuItem clipboard, ctrlAltDel, ctrlEsc, refresh, losslessRefresh;
-  JMenuItem newConn, closeConn, options, info, about, showToolbar;
+  JMenuItem newConn, closeConn, info, showToolbar;
   JCheckBoxMenuItem fullScreen;
+  static LogWriter vlog = new LogWriter("MacMenuBar");
 }
