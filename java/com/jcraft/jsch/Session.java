@@ -1880,7 +1880,7 @@ break;
       foo=config.get(key);
       if(foo instanceof String) return (String)foo;
     }
-    foo=jsch.getConfig(key);
+    foo=JSch.getConfig(key);
     if(foo instanceof String) return (String)foo;
     return null;
   }

@@ -185,11 +185,11 @@ class IdentityFile implements Identity{
      */
     try{
       Class c;
-      c=Class.forName((String)jsch.getConfig("3des-cbc"));
+      c=Class.forName((String)JSch.getConfig("3des-cbc"));
       cipher=(Cipher)(c.newInstance());
       key=new byte[cipher.getBlockSize()];   // 24
       iv=new byte[cipher.getIVSize()];       // 8
-      c=Class.forName((String)jsch.getConfig("md5"));
+      c=Class.forName((String)JSch.getConfig("md5"));
       hash=(HASH)(c.newInstance());
       hash.init();
 
@@ -226,8 +226,8 @@ class IdentityFile implements Identity{
         if(buf[i]=='A'&& i+7<len && buf[i+1]=='E'&& buf[i+2]=='S'&& buf[i+3]=='-' && 
            buf[i+4]=='2'&& buf[i+5]=='5'&& buf[i+6]=='6'&& buf[i+7]=='-'){
           i+=8;
-          if(Session.checkCipher((String)jsch.getConfig("aes256-cbc"))){
-            c=Class.forName((String)jsch.getConfig("aes256-cbc"));
+          if(Session.checkCipher((String)JSch.getConfig("aes256-cbc"))){
+            c=Class.forName((String)JSch.getConfig("aes256-cbc"));
             cipher=(Cipher)(c.newInstance());
             key=new byte[cipher.getBlockSize()];
             iv=new byte[cipher.getIVSize()];
@@ -240,8 +240,8 @@ class IdentityFile implements Identity{
         if(buf[i]=='A'&& i+7<len && buf[i+1]=='E'&& buf[i+2]=='S'&& buf[i+3]=='-' && 
            buf[i+4]=='1'&& buf[i+5]=='9'&& buf[i+6]=='2'&& buf[i+7]=='-'){
           i+=8;
-          if(Session.checkCipher((String)jsch.getConfig("aes192-cbc"))){
-            c=Class.forName((String)jsch.getConfig("aes192-cbc"));
+          if(Session.checkCipher((String)JSch.getConfig("aes192-cbc"))){
+            c=Class.forName((String)JSch.getConfig("aes192-cbc"));
             cipher=(Cipher)(c.newInstance());
             key=new byte[cipher.getBlockSize()];
             iv=new byte[cipher.getIVSize()];
@@ -254,8 +254,8 @@ class IdentityFile implements Identity{
         if(buf[i]=='A'&& i+7<len && buf[i+1]=='E'&& buf[i+2]=='S'&& buf[i+3]=='-' && 
            buf[i+4]=='1'&& buf[i+5]=='2'&& buf[i+6]=='8'&& buf[i+7]=='-'){
           i+=8;
-          if(Session.checkCipher((String)jsch.getConfig("aes128-cbc"))){
-            c=Class.forName((String)jsch.getConfig("aes128-cbc"));
+          if(Session.checkCipher((String)JSch.getConfig("aes128-cbc"))){
+            c=Class.forName((String)JSch.getConfig("aes128-cbc"));
             cipher=(Cipher)(c.newInstance());
             key=new byte[cipher.getBlockSize()];
             iv=new byte[cipher.getIVSize()];
@@ -527,7 +527,7 @@ class IdentityFile implements Identity{
 
   byte[] getSignature_rsa(byte[] data){
     try{      
-      Class c=Class.forName((String)jsch.getConfig("signature.rsa"));
+      Class c=Class.forName((String)JSch.getConfig("signature.rsa"));
       SignatureRSA rsa=(SignatureRSA)(c.newInstance());
 
       rsa.init();
@@ -571,7 +571,7 @@ class IdentityFile implements Identity{
 */
 
     try{      
-      Class c=Class.forName((String)jsch.getConfig("signature.dss"));
+      Class c=Class.forName((String)JSch.getConfig("signature.dss"));
       SignatureDSA dsa=(SignatureDSA)(c.newInstance());
       dsa.init();
       dsa.setPrvKey(prv_array, P_array, Q_array, G_array);

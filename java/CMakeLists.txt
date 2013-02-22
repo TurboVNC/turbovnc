@@ -8,7 +8,7 @@ set(URLTEXT "Visit http://www.virtualgl.org for more information on TurboVNC")
 
 find_package(Java)
 
-set(DEFAULT_JAVACFLAGS "-source 1.5 -target 1.5 -Xlint:all,-serial,-cast,-unchecked")
+set(DEFAULT_JAVACFLAGS "-source 1.5 -target 1.5 -Xlint:all,-serial,-cast,-unchecked,-rawtypes")
 set(JAVACFLAGS ${DEFAULT_JAVACFLAGS} CACHE STRING
 	"Java compiler flags (Default: ${DEFAULT_JAVACFLAGS})")
 message(STATUS "Java compiler flags = ${JAVACFLAGS}")
