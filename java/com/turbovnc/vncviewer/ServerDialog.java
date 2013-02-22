@@ -29,7 +29,8 @@ import java.util.*;
 
 import com.turbovnc.rfb.*;
 
-class ServerDialog extends Dialog implements ActionListener, ItemListener {
+class ServerDialog extends Dialog implements ActionListener, ItemListener,
+  KeyListener {
 
   public ServerDialog(OptionsDialog options_,
                       Options opts_, CConn cc_) {
@@ -140,6 +141,7 @@ class ServerDialog extends Dialog implements ActionListener, ItemListener {
     getContentPane().add(topPanel, gbc);
     getContentPane().add(buttonPanel);
 
+    server.getEditor().getEditorComponent().addKeyListener(this);
     server.addActionListener(this);
     optionsButton.addActionListener(this);
     aboutButton.addActionListener(this);
@@ -169,6 +171,21 @@ class ServerDialog extends Dialog implements ActionListener, ItemListener {
       cc.showAbout(this);
     } else if (s instanceof JComboBox && (JComboBox)s == server) {
       if (e.getActionCommand().equals("comboBoxEdited")) {
+        server.insertItemAt(editor.getItem(), 0);
+        server.setSelectedIndex(0);
+      }
+    }
+  }
+
+  public void keyTyped(KeyEvent event) { }
+
+  public void keyReleased(KeyEvent event) { }
+
+  public void keyPressed(KeyEvent event) {
+    Object s = event.getSource();
+    if (s instanceof Component &&
+        (Component)s == server.getEditor().getEditorComponent()) {
+      if (event.getKeyCode() == KeyEvent.VK_ENTER) {
         server.insertItemAt(editor.getItem(), 0);
         server.setSelectedIndex(0);
         commit();
