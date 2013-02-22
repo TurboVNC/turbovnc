@@ -3,8 +3,8 @@
 ===============================================================================
 [1]
 The Mac TurboVNC Viewer no longer has a separate menu for the "About" and
-"Preferences" options.  These are now accessed from the application menu, as is
-the case for other Mac applications.
+"Preferences" options.  As is the case with most Mac applications, these
+options are now accessed from the application menu.
 -------------------------------------------------------------------------------
 [2]
 Opening VNC viewer config (.vnc) files in the OS X Finder or dragging and
@@ -15,6 +15,11 @@ file onto the Mac TurboVNC Viewer icon will now open a new connection.
 [3]
 VNC viewer config (.vnc) files can now be opened in Windows by dragging and
 dropping them onto the Windows TurboVNC Viewer icon.
+-------------------------------------------------------------------------------
+[4]
+The Java TurboVNC Viewer can now be built and run with Java 1.5.  Consequently,
+the Mac TurboVNC Viewer now works with the version of Java shipped with OS X
+10.4 and 10.5
 -------------------------------------------------------------------------------
 
 
