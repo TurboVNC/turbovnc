@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2004-2005 Cendio AB.
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  * Copyright 2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -159,10 +159,8 @@ public class Configuration {
     }
 
     int scaleNum = -1, scaleDenom = -1, fitWindow = -1;
-
-    for (Iterator<String> i = props.stringPropertyNames().iterator();
-         i.hasNext();) {
-      String name = (String)i.next();
+    for (Enumeration<?> i = props.propertyNames();  i.hasMoreElements();) {
+      String name = (String)i.nextElement();
 
       if (name.startsWith("[")) {
         // skip the section delimiters
