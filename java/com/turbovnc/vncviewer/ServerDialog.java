@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011-2012 Brian P. Hinz
+ * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -29,8 +29,7 @@ import java.util.*;
 
 import com.turbovnc.rfb.*;
 
-class ServerDialog extends Dialog implements ActionListener, ItemListener,
-  KeyListener {
+class ServerDialog extends Dialog implements ActionListener {
 
   public ServerDialog(OptionsDialog options_,
                       Options opts_, CConn cc_) {
@@ -82,6 +81,18 @@ class ServerDialog extends Dialog implements ActionListener, ItemListener,
 
     server.setEditable(true);
     editor = server.getEditor();
+    editor.getEditorComponent().addKeyListener(new KeyListener() {
+      public void keyTyped(KeyEvent e) {}
+      public void keyReleased(KeyEvent e) {}
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+          server.insertItemAt(editor.getItem(), 0);
+          server.setSelectedIndex(0);
+          commit();
+          endDialog();
+        }
+      }
+    });
 
     JPanel topPanel = new JPanel(new GridBagLayout());
 
@@ -141,7 +152,6 @@ class ServerDialog extends Dialog implements ActionListener, ItemListener,
     getContentPane().add(topPanel, gbc);
     getContentPane().add(buttonPanel);
 
-    server.getEditor().getEditorComponent().addKeyListener(this);
     server.addActionListener(this);
     optionsButton.addActionListener(this);
     aboutButton.addActionListener(this);
@@ -149,10 +159,6 @@ class ServerDialog extends Dialog implements ActionListener, ItemListener,
     cancelButton.addActionListener(this);
 
     pack();
-  }
-
-  public void itemStateChanged(ItemEvent e) {
-    return;
   }
 
   public void actionPerformed(ActionEvent e) {
@@ -173,23 +179,6 @@ class ServerDialog extends Dialog implements ActionListener, ItemListener,
       if (e.getActionCommand().equals("comboBoxEdited")) {
         server.insertItemAt(editor.getItem(), 0);
         server.setSelectedIndex(0);
-      }
-    }
-  }
-
-  public void keyTyped(KeyEvent event) { }
-
-  public void keyReleased(KeyEvent event) { }
-
-  public void keyPressed(KeyEvent event) {
-    Object s = event.getSource();
-    if (s instanceof Component &&
-        (Component)s == server.getEditor().getEditorComponent()) {
-      if (event.getKeyCode() == KeyEvent.VK_ENTER) {
-        server.insertItemAt(editor.getItem(), 0);
-        server.setSelectedIndex(0);
-        commit();
-        endDialog();
       }
     }
   }
