@@ -183,6 +183,10 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     }
   }
 
+  void updateFullScreen() {
+    fullScreen.setSelected(cc.opts.fullScreen);
+  }
+
   CConn cc;
   JMenuItem defaultSize;
   JMenuItem clipboard, ctrlAltDel, ctrlEsc, refresh, losslessRefresh;

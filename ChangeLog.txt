@@ -21,6 +21,13 @@ The Java TurboVNC Viewer can now be built and run with Java 1.5.  Consequently,
 the Mac TurboVNC Viewer now works with the version of Java shipped with OS X
 10.4 and 10.5
 -------------------------------------------------------------------------------
+[5]
+Normally, when using the Java TurboVNC Viewer on Mac platforms, the menu bar is
+still visible in full-screen mode, and the dock is still visible if it is not
+set to auto-hide.  The Java/Mac TurboVNC Viewer now takes advantage of the OS X
+Lion full-screen feature, if available, to provide a "true" full-screen mode on
+OS X 10.7 and later.  On OS X 10.6 and earlier, the behavior is unchanged.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

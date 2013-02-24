@@ -23,6 +23,7 @@ package com.turbovnc.vncviewer;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.lang.reflect.*;
 
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
@@ -56,8 +57,11 @@ public class Viewport extends JFrame {
     add(tb, BorderLayout.PAGE_START);
     showToolbar(cc.showToolbar);
     getContentPane().add(sp);
-    if (VncViewer.os.startsWith("mac os x"))
-      setJMenuBar(new MacMenuBar(cc));
+    if (VncViewer.os.startsWith("mac os x")) {
+      macMenu = new MacMenuBar(cc);
+      setJMenuBar(macMenu);
+      enableLionFS();
+    }
     addWindowFocusListener(new WindowAdapter() {
       public void windowGainedFocus(WindowEvent e) {
         sp.getViewport().getView().requestFocusInWindow();
@@ -116,6 +120,86 @@ public class Viewport extends JFrame {
     });
   }
 
+  boolean lionFSSupported() { return canDoLionFS; }
+
+  class MyInvocationHandler implements InvocationHandler {
+    MyInvocationHandler(CConn cc_) { cc = cc_; }
+
+    public Object invoke(Object proxy, Method method, Object[] args) {
+      boolean fullScreen = cc.opts.fullScreen;
+      if (method.getName().equals("windowEnteringFullScreen")) {
+        cc.opts.fullScreen = true;
+      } else if (method.getName().equals("windowExitingFullScreen")) {
+        cc.opts.fullScreen = false;
+      }
+      if (fullScreen != cc.opts.fullScreen) {
+        cc.menu.fullScreen.setSelected(cc.opts.fullScreen);
+        updateMacMenuFS();
+        showToolbar(cc.showToolbar);
+      }
+      return null;
+    }
+
+    CConn cc;
+  }
+
+  void enableLionFS() {
+    try {
+      String version = System.getProperty("os.version");
+      int firstDot = version.indexOf('.');
+      int lastDot = version.lastIndexOf('.');
+      if (lastDot > firstDot && lastDot >= 0) {
+        version = version.substring(0, version.indexOf('.', firstDot + 1));
+      }
+      double v = Double.parseDouble(version);
+      if (v < 10.7)
+        throw new Exception("Operating system version is " + v);
+
+      Class fsuClass = Class.forName("com.apple.eawt.FullScreenUtilities");
+      Class argClasses[] = new Class[]{Window.class, Boolean.TYPE};
+      Method setWindowCanFullScreen =
+        fsuClass.getMethod("setWindowCanFullScreen", argClasses);
+      setWindowCanFullScreen.invoke(fsuClass, this, true);
+
+      Class fsListenerClass =
+        Class.forName("com.apple.eawt.FullScreenListener");
+      InvocationHandler fsHandler = new MyInvocationHandler(cc);
+      Object proxy = Proxy.newProxyInstance(fsListenerClass.getClassLoader(),
+                                            new Class[]{fsListenerClass},
+                                            fsHandler);
+      argClasses = new Class[]{Window.class, fsListenerClass};
+      Method addFullScreenListenerTo =
+        fsuClass.getMethod("addFullScreenListenerTo", argClasses);
+      addFullScreenListenerTo.invoke(fsuClass, this, proxy);
+
+      canDoLionFS = true;
+    } catch (Exception e) {
+      vlog.debug("Could not enable OS X 10.7+ full-screen mode: " +
+                 e.getMessage());
+      
+    }
+  }
+
+  public void toggleLionFS() {
+    try {
+      Class appClass = Class.forName("com.apple.eawt.Application");
+      Method getApplication = appClass.getMethod("getApplication",
+                                                 (Class[])null);
+      Object app = getApplication.invoke(appClass);
+      Method requestToggleFullScreen =
+        appClass.getMethod("requestToggleFullScreen", Window.class);
+      requestToggleFullScreen.invoke(app, this);
+    } catch (Exception e) {
+      vlog.debug("Could not toggle OS X 10.7+ full-screen mode: " +
+                 e.getMessage());
+    }
+  }
+
+  public void updateMacMenuFS() {
+    if (macMenu != null)
+      macMenu.updateFullScreen();
+  }
+
   public void setChild(DesktopWindow child) {
     sp.getViewport().setView(child);
   }
@@ -159,6 +243,8 @@ public class Viewport extends JFrame {
   JScrollPane sp;
   public Toolbar tb;
   public int dx, dy = 0;
+  MacMenuBar macMenu;
+  boolean canDoLionFS;
   static LogWriter vlog = new LogWriter("Viewport");
 }
 

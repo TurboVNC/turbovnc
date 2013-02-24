@@ -1204,8 +1204,14 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   public void toggleFullScreen() {
     opts.fullScreen = !opts.fullScreen;
     menu.fullScreen.setSelected(opts.fullScreen);
-    if (viewport != null)
-      recreateViewport(true);
+    if (!viewport.lionFSSupported()) {
+      if (viewport != null)
+        recreateViewport(true);
+    } else {
+      viewport.showToolbar(showToolbar);
+      viewport.updateMacMenuFS();
+      viewport.toggleLionFS();
+    }
   }
 
   // writeClientCutText() is called from the clipboard dialog
