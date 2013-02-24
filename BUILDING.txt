@@ -271,7 +271,10 @@ make dmg
   Create Macintosh package/disk image.  This requires the PackageMaker
   application, which the build system looks for in
   /Developer/Applications/Utilities by default.  You can override this by
-  setting the PACKAGEMAKER_PATH CMake variable.
+  setting the PACKAGEMAKER_PATH CMake variable.  Note that PackageMaker is not
+  included in recent releases of Xcode, but it can be obtained by downloading
+  the "Auxiliary Tools for Xcode" package from
+  http://developer.apple.com/downloads.
 
 
 =======
