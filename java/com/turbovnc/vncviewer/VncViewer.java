@@ -582,6 +582,10 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   "<display number> is an optional X display number (default: 0), and <port> " +
   "is a TCP port.", null);
 
+  static AliasParameter host
+  = new AliasParameter("Host",
+  "Alias for Server", vncServerName);
+
   static BoolParameter alwaysShowConnectionDialog
   = new BoolParameter("AlwaysShowConnectionDialog",
   "Always show the \"New TurboVNC Connection\" dialog even if the server has " +
