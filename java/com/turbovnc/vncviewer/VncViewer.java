@@ -334,7 +334,7 @@ public class VncViewer extends java.applet.Applet implements Runnable {
       alwaysShowConnectionDialog.setParam(true);
       Configuration.readAppletParams(this);
       setGlobalOptions();
-      host = getCodeBase().getHost();
+      host = opts.serverName;
       if ((opts.via != null || opts.tunnel) && opts.serverName != null) {
         try {
           Tunnel.createTunnel(opts);
