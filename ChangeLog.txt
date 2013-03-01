@@ -48,6 +48,10 @@ keyboards.  A minor issue was also fixed in the Windows TurboVNC Viewer
 whereby it would trigger an Alt keypress on the remote desktop whenever an
 AltGr key symbol was typed repeatedly.
 -------------------------------------------------------------------------------
+[10]
+Added LSB headers to the TurboVNC Server init.d script (tvncserver) in order
+to avoid insserv errors/warnings with recent Debian releases.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
