@@ -1231,7 +1231,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
   public void writeKeyEvent(KeyEvent ev) {
-    int keysym = 0, keycode, key;
+    int keysym = 0, keycode, key, location;
 
     if (shuttingDown || benchmark)
       return;
@@ -1240,16 +1240,25 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
     keycode = ev.getKeyCode();
     key = ev.getKeyChar();
+    location = ev.getKeyLocation();
 
     vlog.debug((ev.isActionKey() ? "action " : "") + "key " +
-               (down ? "PRESS" : "release") + " code " + keycode + " ASCII " +
-                key);
+               (down ? "PRESS" : "release") + " code " + keycode +
+                " location " + location + " ASCII " + key);
 
     if (!ev.isActionKey()) {
+      if (keycode >= KeyEvent.VK_0 && keycode <= KeyEvent.VK_9 &&
+        location == KeyEvent.KEY_LOCATION_NUMPAD)
+        keysym = Keysyms.KP_0 + keycode - KeyEvent.VK_0;
+
       switch (keycode) {
       case KeyEvent.VK_BACK_SPACE: keysym = Keysyms.BackSpace; break;
       case KeyEvent.VK_TAB:        keysym = Keysyms.Tab; break;
-      case KeyEvent.VK_ENTER:      keysym = Keysyms.Return; break;
+      case KeyEvent.VK_ENTER:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          keysym = Keysyms.KP_Enter;
+        else
+          keysym = Keysyms.Return;  break;
       case KeyEvent.VK_ESCAPE:     keysym = Keysyms.Escape; break;
       case KeyEvent.VK_NUMPAD0:    keysym = Keysyms.KP_0; break;
       case KeyEvent.VK_NUMPAD1:    keysym = Keysyms.KP_1; break;
@@ -1266,32 +1275,52 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       case KeyEvent.VK_SUBTRACT:   keysym = Keysyms.KP_Subtract; break;
       case KeyEvent.VK_MULTIPLY:   keysym = Keysyms.KP_Multiply; break;
       case KeyEvent.VK_DIVIDE:     keysym = Keysyms.KP_Divide; break;
-      case KeyEvent.VK_DELETE:     keysym = Keysyms.Delete; break;
-      case KeyEvent.VK_CLEAR:      keysym = Keysyms.Clear; break;
+      case KeyEvent.VK_DELETE:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          keysym = Keysyms.KP_Delete;
+        else
+          keysym = Keysyms.Delete;  break;
+      case KeyEvent.VK_CLEAR:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          keysym = Keysyms.KP_Begin;
+        else
+          keysym = Keysyms.Clear;  break;
       case KeyEvent.VK_CONTROL:
         if (down)
           modifiers |= Event.CTRL_MASK;
         else
           modifiers &= ~Event.CTRL_MASK;
-        keysym = Keysyms.Control_L; break;
+        if (location == KeyEvent.KEY_LOCATION_RIGHT)
+          keysym = Keysyms.Control_R;
+        else
+          keysym = Keysyms.Control_L;  break;
       case KeyEvent.VK_ALT:
         if (down)
           modifiers |= Event.ALT_MASK;
         else
           modifiers &= ~Event.ALT_MASK;
-        keysym = Keysyms.Alt_L; break;
+        if (location == KeyEvent.KEY_LOCATION_RIGHT)
+          keysym = Keysyms.Alt_R;
+        else
+          keysym = Keysyms.Alt_L;  break;
       case KeyEvent.VK_SHIFT:
         if (down)
           modifiers |= Event.SHIFT_MASK;
         else
           modifiers &= ~Event.SHIFT_MASK;
-        keysym = Keysyms.Shift_L; break;
+        if (location == KeyEvent.KEY_LOCATION_RIGHT)
+          keysym = Keysyms.Shift_R;
+        else
+          keysym = Keysyms.Shift_L;  break;
       case KeyEvent.VK_META:
         if (down)
           modifiers |= Event.META_MASK;
         else
           modifiers &= ~Event.META_MASK;
-        keysym = Keysyms.Meta_L; break;
+        if (location == KeyEvent.KEY_LOCATION_RIGHT)
+          keysym = Keysyms.Meta_R;
+        else
+          keysym = Keysyms.Meta_L;  break;
       default:
         if (ev.isControlDown()) {
           // For CTRL-<letter>, CTRL is sent separately, so just send <letter>.
@@ -1318,14 +1347,46 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     } else {
       // KEY_ACTION
       switch (keycode) {
-      case KeyEvent.VK_HOME:         keysym = Keysyms.Home; break;
-      case KeyEvent.VK_END:          keysym = Keysyms.End; break;
-      case KeyEvent.VK_PAGE_UP:      keysym = Keysyms.Page_Up; break;
-      case KeyEvent.VK_PAGE_DOWN:    keysym = Keysyms.Page_Down; break;
-      case KeyEvent.VK_UP:           keysym = Keysyms.Up; break;
-      case KeyEvent.VK_DOWN:         keysym = Keysyms.Down; break;
-      case KeyEvent.VK_LEFT:         keysym = Keysyms.Left; break;
-      case KeyEvent.VK_RIGHT:        keysym = Keysyms.Right; break;
+      case KeyEvent.VK_HOME:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          keysym = Keysyms.KP_Home;
+        else
+          keysym = Keysyms.Home;  break;
+      case KeyEvent.VK_END:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          keysym = Keysyms.KP_End;
+        else
+          keysym = Keysyms.End;  break;
+      case KeyEvent.VK_PAGE_UP:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          keysym = Keysyms.KP_Page_Up;
+        else
+          keysym = Keysyms.Page_Up;  break;
+      case KeyEvent.VK_PAGE_DOWN:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          keysym = Keysyms.KP_Page_Down;
+        else
+          keysym = Keysyms.Page_Down;  break;
+      case KeyEvent.VK_UP:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          keysym = Keysyms.KP_Up;
+        else
+          keysym = Keysyms.Up;  break;
+      case KeyEvent.VK_DOWN:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          keysym = Keysyms.KP_Down;
+        else
+         keysym = Keysyms.Down;  break;
+      case KeyEvent.VK_LEFT:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          keysym = Keysyms.KP_Left;
+        else
+         keysym = Keysyms.Left;  break;
+      case KeyEvent.VK_RIGHT:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          keysym = Keysyms.KP_Right;
+        else
+          keysym = Keysyms.Right;  break;
       case KeyEvent.VK_F1:           keysym = Keysyms.F1; break;
       case KeyEvent.VK_F2:           keysym = Keysyms.F2; break;
       case KeyEvent.VK_F3:           keysym = Keysyms.F3; break;
@@ -1346,7 +1407,11 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         else
           keysym = Keysyms.Pause;
         break;
-      case KeyEvent.VK_INSERT:       keysym = Keysyms.Insert; break;
+      case KeyEvent.VK_INSERT:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          keysym = Keysyms.KP_Insert;
+        else
+          keysym = Keysyms.Insert;  break;
       case KeyEvent.VK_KP_DOWN:      keysym = Keysyms.KP_Down; break;
       case KeyEvent.VK_KP_LEFT:      keysym = Keysyms.KP_Left; break;
       case KeyEvent.VK_KP_RIGHT:     keysym = Keysyms.KP_Right; break;
@@ -1356,7 +1421,11 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       case KeyEvent.VK_CONTEXT_MENU: keysym = Keysyms.Menu; break;
       case KeyEvent.VK_SCROLL_LOCK:  keysym = Keysyms.Scroll_Lock; break;
       case KeyEvent.VK_CAPS_LOCK:    keysym = Keysyms.Caps_Lock; break;
-      case KeyEvent.VK_BEGIN:        keysym = Keysyms.Begin; break;
+      case KeyEvent.VK_BEGIN:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          keysym = Keysyms.KP_Begin;
+        else
+          keysym = Keysyms.Begin;  break;
       default: return;
       }
     }

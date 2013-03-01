@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,13 +88,21 @@ public class Keysyms {
   public static final int Alt_L = 0xFFE9;
   public static final int Alt_R = 0xFFEA;
 
-  public static final int KP_Down = 0xFF99;
-  public static final int KP_Left = 0xFF96;
-  public static final int KP_Right = 0xFF98;
-  public static final int KP_Up = 0xFF97;
   public static final int Super_L = 0xFFEB;
   public static final int Caps_Lock = 0xFFE5;
 
+  public static final int KP_Enter = 0xFF8D;
+  public static final int KP_Home = 0xFF95;
+  public static final int KP_Left = 0xFF96;
+  public static final int KP_Up = 0xFF97;
+  public static final int KP_Right = 0xFF98;
+  public static final int KP_Down = 0xFF99;
+  public static final int KP_Page_Up = 0xFF9A;
+  public static final int KP_Page_Down = 0xFF9B;
+  public static final int KP_End = 0xFF9C;
+  public static final int KP_Begin = 0xFF9D;
+  public static final int KP_Insert = 0xFF9E;
+  public static final int KP_Delete = 0xFF9F;
   public static final int KP_0 = 0xFFB0;
   public static final int KP_1 = 0xFFB1;
   public static final int KP_2 = 0xFFB2;
