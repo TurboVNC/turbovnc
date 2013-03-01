@@ -1,6 +1,6 @@
 //
 //  Copyright (C) 2012 Secure Mission Solutions, Inc.  All Rights Reserved.
-//  Copyright (C) 2009-2010, 2012 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2009-2010, 2012-2013 D. R. Commander.  All Rights Reserved.
 //  Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
 //  Copyright (C) 2001-2004 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 2001-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -1182,7 +1182,7 @@ class RfbProto {
       }
     }
 
-    eventBufLen = 0;
+    int eventBufLen = 0;
 
     int x = evt.getX();
     int y = evt.getY();
@@ -1230,6 +1230,7 @@ class RfbProto {
   void writeKeyEvent(KeyEvent evt) throws IOException {
 
     int keyChar = evt.getKeyChar();
+    int location = evt.getKeyLocation();
 
     //
     // Ignore event if only modifiers were pressed.
@@ -1245,7 +1246,7 @@ class RfbProto {
 
     boolean down = (evt.getID() == KeyEvent.KEY_PRESSED);
 
-    int key;
+    int key, fakeModifiers = 0;
     if (evt.isActionKey()) {
 
       //
@@ -1254,45 +1255,85 @@ class RfbProto {
       //
 
       switch(evt.getKeyCode()) {
-      case KeyEvent.VK_HOME:         key = 0xff50; break;
-      case KeyEvent.VK_LEFT:         key = 0xff51; break;
-      case KeyEvent.VK_UP:           key = 0xff52; break;
-      case KeyEvent.VK_RIGHT:        key = 0xff53; break;
-      case KeyEvent.VK_DOWN:         key = 0xff54; break;
-      case KeyEvent.VK_PAGE_UP:      key = 0xff55; break;
-      case KeyEvent.VK_PAGE_DOWN:    key = 0xff56; break;
-      case KeyEvent.VK_END:          key = 0xff57; break;
-      case KeyEvent.VK_INSERT:       key = 0xff63; break;
-      case KeyEvent.VK_F1:           key = 0xffbe; break;
-      case KeyEvent.VK_F2:           key = 0xffbf; break;
-      case KeyEvent.VK_F3:           key = 0xffc0; break;
-      case KeyEvent.VK_F4:           key = 0xffc1; break;
-      case KeyEvent.VK_F5:           key = 0xffc2; break;
-      case KeyEvent.VK_F6:           key = 0xffc3; break;
-      case KeyEvent.VK_F7:           key = 0xffc4; break;
-      case KeyEvent.VK_F8:           key = 0xffc5; break;
-      case KeyEvent.VK_F9:           key = 0xffc6; break;
-      case KeyEvent.VK_F10:          key = 0xffc7; break;
-      case KeyEvent.VK_F11:          key = 0xffc8; break;
-      case KeyEvent.VK_F12:          key = 0xffc9; break;
-      case KeyEvent.VK_F13:          key = 0xffca; break;
-      case KeyEvent.VK_KP_DOWN:      key = 0xff99; break;
-      case KeyEvent.VK_KP_LEFT:      key = 0xff96; break;
-      case KeyEvent.VK_KP_RIGHT:     key = 0xff98; break;
-      case KeyEvent.VK_KP_UP:        key = 0xff97; break;
-      case KeyEvent.VK_NUM_LOCK:     key = 0xff7f; break;
-      case KeyEvent.VK_WINDOWS:      key = 0xffeb; break;
-      case KeyEvent.VK_CONTEXT_MENU: key = 0xff67; break;
-      case KeyEvent.VK_PRINTSCREEN:  key = 0xff61; break;
-      case KeyEvent.VK_SCROLL_LOCK:  key = 0xff14; break;
-      case KeyEvent.VK_CAPS_LOCK:    key = 0xffe5; break;
+      case KeyEvent.VK_HOME:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          key = Keysyms.KP_Home;
+        else
+          key = Keysyms.Home;  break;
+      case KeyEvent.VK_LEFT:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          key = Keysyms.KP_Left;
+        else
+         key = Keysyms.Left;  break;
+      case KeyEvent.VK_UP:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          key = Keysyms.KP_Up;
+        else
+          key = Keysyms.Up;  break;
+      case KeyEvent.VK_RIGHT:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          key = Keysyms.KP_Right;
+        else
+          key = Keysyms.Right;  break;
+      case KeyEvent.VK_DOWN:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          key = Keysyms.KP_Down;
+        else
+         key = Keysyms.Down;  break;
+      case KeyEvent.VK_PAGE_UP:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          key = Keysyms.KP_Page_Up;
+        else
+          key = Keysyms.Page_Up;  break;
+      case KeyEvent.VK_PAGE_DOWN:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          key = Keysyms.KP_Page_Down;
+        else
+          key = Keysyms.Page_Down;  break;
+      case KeyEvent.VK_END:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          key = Keysyms.KP_End;
+        else
+          key = Keysyms.End;  break;
+      case KeyEvent.VK_INSERT:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          key = Keysyms.KP_Insert;
+        else
+          key = Keysyms.Insert;  break;
+      case KeyEvent.VK_F1:           key = Keysyms.F1;  break;
+      case KeyEvent.VK_F2:           key = Keysyms.F2;  break;
+      case KeyEvent.VK_F3:           key = Keysyms.F3;  break;
+      case KeyEvent.VK_F4:           key = Keysyms.F4;  break;
+      case KeyEvent.VK_F5:           key = Keysyms.F5;  break;
+      case KeyEvent.VK_F6:           key = Keysyms.F6;  break;
+      case KeyEvent.VK_F7:           key = Keysyms.F7;  break;
+      case KeyEvent.VK_F8:           key = Keysyms.F8;  break;
+      case KeyEvent.VK_F9:           key = Keysyms.F9;  break;
+      case KeyEvent.VK_F10:          key = Keysyms.F10;  break;
+      case KeyEvent.VK_F11:          key = Keysyms.F11;  break;
+      case KeyEvent.VK_F12:          key = Keysyms.F12;  break;
+      case KeyEvent.VK_F13:          key = Keysyms.F13;  break;
+      case KeyEvent.VK_KP_DOWN:      key = Keysyms.KP_Down;  break;
+      case KeyEvent.VK_KP_LEFT:      key = Keysyms.KP_Left;  break;
+      case KeyEvent.VK_KP_RIGHT:     key = Keysyms.KP_Right;  break;
+      case KeyEvent.VK_KP_UP:        key = Keysyms.KP_Up;  break;
+      case KeyEvent.VK_NUM_LOCK:     key = Keysyms.Num_Lock;  break;
+      case KeyEvent.VK_WINDOWS:      key = Keysyms.Super_L;  break;
+      case KeyEvent.VK_CONTEXT_MENU: key = Keysyms.Menu;  break;
+      case KeyEvent.VK_PRINTSCREEN:  key = Keysyms.Print; break;
+      case KeyEvent.VK_SCROLL_LOCK:  key = Keysyms.Scroll_Lock;  break;
+      case KeyEvent.VK_CAPS_LOCK:    key = Keysyms.Caps_Lock;  break;
       case KeyEvent.VK_PAUSE:
         if (evt.isControlDown())
-          key = 0xff6b;
+          key = Keysyms.Break;
         else
-          key = 0xff13;
+          key = Keysyms.Pause;
         break;
-      case KeyEvent.VK_BEGIN:        key = 0xff58; break;
+      case KeyEvent.VK_BEGIN:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          key = Keysyms.KP_Begin;
+        else
+          key = Keysyms.Begin;  break;
       default:
         return;
       }
@@ -1307,7 +1348,7 @@ class RfbProto {
 
       key = keyChar;
       int keycode = evt.getKeyCode();
-      if (evt.isControlDown()) {
+      if (evt.isControlDown() && !evt.isAltDown()) {
         // For CTRL-<letter>, CTRL is sent separately, so just send <letter>.      
         if ((key >= 1 && key <= 26 && !evt.isShiftDown()) ||
             // CTRL-{, CTRL-|, CTRL-} also map to ASCII 96-127
@@ -1327,51 +1368,83 @@ class RfbProto {
       }
 
       switch(keycode) {
-      case KeyEvent.VK_BACK_SPACE: key = 0xff08; break;
-      case KeyEvent.VK_TAB:        key = 0xff09; break;
-      case KeyEvent.VK_ENTER:      key = 0xff0d; break;
-      case KeyEvent.VK_ESCAPE:     key = 0xff1b; break;
-      case KeyEvent.VK_NUMPAD0:    key = 0xffb0; break;
-      case KeyEvent.VK_NUMPAD1:    key = 0xffb1; break;
-      case KeyEvent.VK_NUMPAD2:    key = 0xffb2; break;
-      case KeyEvent.VK_NUMPAD3:    key = 0xffb3; break;
-      case KeyEvent.VK_NUMPAD4:    key = 0xffb4; break;
-      case KeyEvent.VK_NUMPAD5:    key = 0xffb5; break;
-      case KeyEvent.VK_NUMPAD6:    key = 0xffb6; break;
-      case KeyEvent.VK_NUMPAD7:    key = 0xffb7; break;
-      case KeyEvent.VK_NUMPAD8:    key = 0xffb8; break;
-      case KeyEvent.VK_NUMPAD9:    key = 0xffb9; break;
-      case KeyEvent.VK_DECIMAL:    key = 0xffae; break;
-      case KeyEvent.VK_ADD:        key = 0xffab; break;
-      case KeyEvent.VK_SUBTRACT:   key = 0xffad; break;
-      case KeyEvent.VK_MULTIPLY:   key = 0xffaa; break;
-      case KeyEvent.VK_DIVIDE:     key = 0xffaf; break;
-      case KeyEvent.VK_DELETE:     key = 0xffff; break;
-      case KeyEvent.VK_CLEAR:      key = 0xff0b; break;
+      case KeyEvent.VK_BACK_SPACE: key = Keysyms.BackSpace; break;
+      case KeyEvent.VK_TAB:        key = Keysyms.Tab; break;
+      case KeyEvent.VK_ENTER:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          key = Keysyms.KP_Enter;
+        else
+          key = Keysyms.Return;  break;
+      case KeyEvent.VK_ESCAPE:     key = Keysyms.Escape; break;
+      case KeyEvent.VK_NUMPAD0:    key = Keysyms.KP_0; break;
+      case KeyEvent.VK_NUMPAD1:    key = Keysyms.KP_1; break;
+      case KeyEvent.VK_NUMPAD2:    key = Keysyms.KP_2; break;
+      case KeyEvent.VK_NUMPAD3:    key = Keysyms.KP_3; break;
+      case KeyEvent.VK_NUMPAD4:    key = Keysyms.KP_4; break;
+      case KeyEvent.VK_NUMPAD5:    key = Keysyms.KP_5; break;
+      case KeyEvent.VK_NUMPAD6:    key = Keysyms.KP_6; break;
+      case KeyEvent.VK_NUMPAD7:    key = Keysyms.KP_7; break;
+      case KeyEvent.VK_NUMPAD8:    key = Keysyms.KP_8; break;
+      case KeyEvent.VK_NUMPAD9:    key = Keysyms.KP_9; break;
+      case KeyEvent.VK_DECIMAL:    key = Keysyms.KP_Decimal; break;
+      case KeyEvent.VK_ADD:        key = Keysyms.KP_Add; break;
+      case KeyEvent.VK_SUBTRACT:   key = Keysyms.KP_Subtract; break;
+      case KeyEvent.VK_MULTIPLY:   key = Keysyms.KP_Multiply; break;
+      case KeyEvent.VK_DIVIDE:     key = Keysyms.KP_Divide; break;
+      case KeyEvent.VK_DELETE:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          key = Keysyms.KP_Delete;
+        else
+          key = Keysyms.Delete;  break;
+      case KeyEvent.VK_CLEAR:
+        if (location == KeyEvent.KEY_LOCATION_NUMPAD)
+          key = Keysyms.KP_Begin;
+        else
+          key = Keysyms.Clear;  break;
       case KeyEvent.VK_CONTROL:
         if (down)
           modifiers |= CTRL_MASK;
         else
           modifiers &= ~CTRL_MASK;
-        key = 0xffe3; break;
+        if (location == KeyEvent.KEY_LOCATION_RIGHT)
+          key = Keysyms.Control_R;
+        else
+          key = Keysyms.Control_L;  break;
       case KeyEvent.VK_ALT:
         if (down)
           modifiers |= ALT_MASK;
         else
           modifiers &= ~ALT_MASK;
-        key = 0xffe9; break;
+        if (location == KeyEvent.KEY_LOCATION_RIGHT)
+          key = Keysyms.Alt_R;
+        else
+          key = Keysyms.Alt_L;  break;
       case KeyEvent.VK_SHIFT:
         if (down)
           modifiers |= SHIFT_MASK;
         else
           modifiers &= ~SHIFT_MASK;
-        key = 0xffe1; break;
+        if (location == KeyEvent.KEY_LOCATION_RIGHT)
+          key = Keysyms.Shift_R;
+        else
+          key = Keysyms.Shift_L;  break;
       case KeyEvent.VK_META:
         if (down)
           modifiers |= META_MASK;
         else
           modifiers &= ~META_MASK;
-        key = 0xffe7; break;
+        if (location == KeyEvent.KEY_LOCATION_RIGHT)
+          key = Keysyms.Meta_R;
+        else
+          key = Keysyms.Meta_L;  break;
+      default:
+        if (evt.isControlDown() && evt.isAltDown()) {
+          // Handle AltGr key on international keyboards
+          if ((keycode >= 32 && keycode <= 126) ||
+              (keycode >= 160 && keycode <= 255))
+            key = keycode;
+          fakeModifiers |= ALT_MASK | CTRL_MASK;
+        }
       }
     }
 
@@ -1390,7 +1463,6 @@ class RfbProto {
       if (!down && !brokenKeyPressed) {
 	// We've got a release event for this key, but haven't received
         // a press. Fake it. 
-	eventBufLen = 0;
 	writeKeyEvent(key, true);
       }
 
@@ -1398,8 +1470,19 @@ class RfbProto {
 	brokenKeyPressed = false;  
     }
 
-    eventBufLen = 0;
+    if (fakeModifiers != 0) {
+      if ((fakeModifiers & CTRL_MASK) != 0)
+        writeKeyEvent(Keysyms.Control_L, false);
+      if ((modifiers & ALT_MASK) != 0)
+        writeKeyEvent(Keysyms.Alt_R, false);
+    }
     writeKeyEvent(key, down);
+    if (fakeModifiers != 0) {
+      if ((fakeModifiers & CTRL_MASK) != 0)
+        writeKeyEvent(Keysyms.Control_L, true);
+      if ((modifiers & ALT_MASK) != 0)
+        writeKeyEvent(Keysyms.Alt_R, true);
+    }
   }
 
   //
@@ -1409,13 +1492,13 @@ class RfbProto {
   void releaseModifiers() {
     try {
       if ((modifiers & CTRL_MASK) != 0)
-        writeKeyEvent(0xffe3, false);
+        writeKeyEvent(Keysyms.Control_L, false);
       if ((modifiers & SHIFT_MASK) != 0)
-        writeKeyEvent(0xffe1, false);
+        writeKeyEvent(Keysyms.Shift_L, false);
       if ((modifiers & ALT_MASK) != 0)
-        writeKeyEvent(0xffe9, false);
+        writeKeyEvent(Keysyms.Alt_L, false);
       if ((modifiers & META_MASK) != 0)
-        writeKeyEvent(0xffe7, false);
+        writeKeyEvent(Keysyms.Meta_L, false);
       modifiers = 0;
     } catch (IOException e) {
       System.out.println("ERROR: Could not send key release events for modifiers:\n       "+
@@ -1429,6 +1512,7 @@ class RfbProto {
   //
 
   void writeKeyEvent(int keysym, boolean down) throws IOException {
+    int eventBufLen = 0;
     eventBuf[eventBufLen++] = (byte) KeyboardEvent;
     eventBuf[eventBufLen++] = (byte) (down ? 1 : 0);
     eventBuf[eventBufLen++] = (byte) 0;

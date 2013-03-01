@@ -25,6 +25,18 @@ extension.  This temporarily works around problems with recent applications
 that assume functionality from X RENDER 0.10 or later without checking the
 version of the extension (TurboVNC 1.1.x only implements 0.8.)
 -------------------------------------------------------------------------------
+[3]
+Fixed a variety of key mapping issues in the Java TurboVNC Viewer, including:
+-- Lack of support for additional keys found on Mac keyboards
+-- Improper handling of certain Ctrl sequences
+-- Inability to differentiate between the numeric keypad versions of the
+   navigation keys (Home, End, etc.) and their equivalents on the main
+   keyboard.
+-- Inability to differentiate between the left and right versions of the
+   modifier keys (Alt, Ctrl, etc.)
+-- The viewer was not properly handling the AltGr key on international
+   keyboards.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
