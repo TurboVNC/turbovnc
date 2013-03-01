@@ -20,10 +20,11 @@ specifically fixes an issue whereby the Unity window manager in Ubuntu 12.04
 would not display its menus.
 -------------------------------------------------------------------------------
 [2]
-Added a command line switch to Xvnc that can be used to disable the X RENDER
-extension.  This temporarily works around problems with recent applications
-that assume functionality from X RENDER 0.10 or later without checking the
-version of the extension (TurboVNC 1.1.x only implements 0.8.)
+Added a command-line switch (-norender) to Xvnc that can be used to disable the
+X RENDER extension.  This temporarily works around problems with recent
+applications that assume functionality from X RENDER 0.10 or later without
+checking the version of the extension (TurboVNC 1.1.x only implements X RENDER
+0.8.)
 -------------------------------------------------------------------------------
 [3]
 Fixed a variety of key mapping issues in the Java TurboVNC Viewer, including:
@@ -36,6 +37,10 @@ Fixed a variety of key mapping issues in the Java TurboVNC Viewer, including:
    modifier keys (Alt, Ctrl, etc.)
 -- The viewer was not properly handling the AltGr key on international
    keyboards.
+-------------------------------------------------------------------------------
+[4]
+Fixed ArrayIndexOutOfBoundsException in the Java TurboVNC Viewer that occurred
+with certain client platforms when using the scroll wheel.
 -------------------------------------------------------------------------------
 
 
