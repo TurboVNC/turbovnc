@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010, 2012 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010, 2012-2013 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -315,6 +315,7 @@ extern Bool ReadServerInitMessage(void);
 
 extern BOOL rfbProfile;
 extern double tRecv, tDecode, tBlit;
+extern unsigned long tBlitPixels, tBlitRect;
 extern double gettime(void);
 
 typedef struct _UpdateList {

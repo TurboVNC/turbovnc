@@ -1515,6 +1515,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   boolean showToolbar;
 
   public double tDecode, tBlit;
+  public long tBlitPixels, tBlitRect;
   double tDecodeStart, tReadOld;
   boolean benchmark;
 

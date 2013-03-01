@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -461,17 +461,24 @@ Bool RunBenchmark(void)
     if (i < benchWarmup)
       printf("Benchmark warmup run %d\n", i + 1);
     else
-      printf("Benchmark run %3d:  ", i + 1 - benchWarmup);
+      printf("Benchmark run %d:\n", i + 1 - benchWarmup);
     while (HandleRFBServerMessage()) {
     }
     tTotal = gettime() - tStart - tRecv;
     if (i >= benchWarmup) {
       printf("%f s (Decode = %f, Blit = %f)\n", tTotal, tDecode, tBlit);
+      printf("     Blit statistics:\n");
+      printf("     %.3f Mpixels, %.3f Mpixels/sec, %lu rect, %.0f pixels/rect\n",
+             (double)tBlitPixels / 1000000.,
+             (double)tBlitPixels / 1000000. / tBlit, tBlitRect,
+             (double)tBlitPixels / (double)tBlitRect);
       tAvg += tTotal;
       tAvgDecode += tDecode;
       tAvgBlit += tBlit;
     }
+    printf("\n");
     tRecv = tDecode = tBlit = 0.0;
+    tBlitPixels = tBlitRect = 0;
     ShutdownThreads();
     for (stream_id = 0; stream_id < 4; stream_id++) {
       if (zlibStreamActive[stream_id]) {

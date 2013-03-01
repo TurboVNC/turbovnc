@@ -1,7 +1,7 @@
 /*
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
                        All Rights Reserved.
- *  Copyright (C) 2009-2012 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2013 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2009-2011 Pierre Ossman for Cendio AB.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
@@ -92,6 +92,7 @@ Bool encodingChange = False;
 BOOL rfbProfile = FALSE;
 static double tUpdate = 0., tStart = -1., tElapsed;
 double tRecv = 0., tDecode = 0., tBlit = 0.;
+unsigned long tBlitPixels = 0, tBlitRect = 0;
 static unsigned long iter = 0;
 static double mpixels = 0.;
 
@@ -1396,6 +1397,7 @@ Bool HandleRFBServerMessage()
 
             list = list->next;
             free(node);
+            tBlitRect += 1;
           }
           if (rfbProfile || benchFile) tBlit += gettime() - tBlitStart;
           break;
@@ -1405,6 +1407,7 @@ Bool HandleRFBServerMessage()
         rect.r.y = Swap16IfLE(rect.r.y);
         rect.r.w = Swap16IfLE(rect.r.w);
         rect.r.h = Swap16IfLE(rect.r.h);
+        tBlitPixels += rect.r.w * rect.r.h;
 
         if (rfbProfile) {
           mpixels += (double)rect.r.w * (double)rect.r.h / 1000000.;
