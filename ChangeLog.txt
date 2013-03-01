@@ -35,7 +35,7 @@ had no effect.
 -------------------------------------------------------------------------------
 [7]
 Both the Java and Windows TurboVNC Viewers now properly differentiate between
-the keypad versions of the navigation keys (Home, End, etc.) and their
+the numeric keypad versions of the navigation keys (Home, End, etc.) and their
 equivalents on the main keyboard.
 -------------------------------------------------------------------------------
 [8]
