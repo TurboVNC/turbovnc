@@ -28,6 +28,19 @@ Fixed a variety of key mapping issues in the Java TurboVNC Viewer.
 Fixed ArrayIndexOutOfBoundsException in the Java TurboVNC Viewer that occurred
 with certain client platforms when using the scroll wheel.
 -------------------------------------------------------------------------------
+[6]
+The Java TurboVNC Viewer now properly differentiates between the numeric keypad
+versions of the navigation keys (Home, End, etc.) and their equivalents on the
+main keyboard.
+-------------------------------------------------------------------------------
+[7]
+The Java TurboVNC Viewer now properly differentiates between the left and right
+versions of the modifier keys (Alt, Ctrl, etc.)
+-------------------------------------------------------------------------------
+[9]
+The Java TurboVNC Viewer now properly handles the AltGr key on international
+keyboards.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
