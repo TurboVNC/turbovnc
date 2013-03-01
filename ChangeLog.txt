@@ -33,6 +33,15 @@ Fixed a regression in the new Java TurboVNC Viewer whereby, when used as an
 applet, specifying a host other than the VNC server in the "Server" parameter
 had no effect.
 -------------------------------------------------------------------------------
+[7]
+Both the Java and Windows TurboVNC Viewers now properly differentiate between
+the keypad versions of the navigation keys (Home, End, etc.) and their
+equivalents on the main keyboard.
+-------------------------------------------------------------------------------
+[8]
+The Java TurboVNC Viewer now properly differentiates between the left and right
+versions of the modifier keys (Alt, Ctrl, etc.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

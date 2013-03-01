@@ -1,4 +1,5 @@
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
+//  Copyright (C) 2013 D. R. Commander. All Rights Reserved.
 //
 //  This file is part of the VNC system.
 //
@@ -34,7 +35,18 @@ typedef struct vncKeymapping_struct {
 
 
 // Make up a VK for Enter - I think anything outside the range 0-255 will do
-static const UINT VK_KEYPAD_ENTER = 0x1234;
+static const UINT VK_KEYPAD_ENTER  = 0x1000;
+static const UINT VK_KEYPAD_HOME   = 0x1001;
+static const UINT VK_KEYPAD_LEFT   = 0x1002;
+static const UINT VK_KEYPAD_UP     = 0x1003;
+static const UINT VK_KEYPAD_RIGHT  = 0x1004;
+static const UINT VK_KEYPAD_DOWN   = 0x1005;
+static const UINT VK_KEYPAD_PRIOR  = 0x1006;
+static const UINT VK_KEYPAD_NEXT   = 0x1007;
+static const UINT VK_KEYPAD_END    = 0x1008;
+static const UINT VK_KEYPAD_BEGIN  = 0x1009;
+static const UINT VK_KEYPAD_INSERT = 0x100A;
+static const UINT VK_KEYPAD_DELETE = 0x100B;
 
 static const vncKeymapping keymap[] = {
   {VK_BACK,         XK_BackSpace},
@@ -111,6 +123,17 @@ static const vncKeymapping keymap[] = {
   {VK_NUMLOCK,      XK_Num_Lock},
   {VK_SCROLL,       XK_Scroll_Lock},
   {VK_KEYPAD_ENTER, XK_KP_Enter},
+  {VK_KEYPAD_HOME,  XK_KP_Home},
+  {VK_KEYPAD_LEFT,  XK_KP_Left},
+  {VK_KEYPAD_UP,    XK_KP_Up},
+  {VK_KEYPAD_RIGHT, XK_KP_Right},
+  {VK_KEYPAD_DOWN,  XK_KP_Down},
+  {VK_KEYPAD_PRIOR, XK_KP_Prior},
+  {VK_KEYPAD_NEXT,  XK_KP_Next},
+  {VK_KEYPAD_END,   XK_KP_End},
+  {VK_KEYPAD_BEGIN, XK_KP_Begin},
+  {VK_KEYPAD_INSERT, XK_KP_Insert},
+  {VK_KEYPAD_DELETE, XK_KP_Delete},
   {VK_CANCEL,       XK_Break}
 };
 
@@ -134,11 +157,36 @@ KeyActionSpec KeyMap::PCtoX(UINT virtkey, DWORD keyData)
     vnclog.Print(8, " (extended) ");
     switch (virtkey) {
       case VK_MENU :
-        virtkey = VK_RMENU; break;
+        virtkey = VK_RMENU;  break;
       case VK_CONTROL:
-        virtkey = VK_RCONTROL; break;
+        virtkey = VK_RCONTROL;  break;
       case VK_RETURN:
-        virtkey = VK_KEYPAD_ENTER; break;
+        virtkey = VK_KEYPAD_ENTER;  break;
+    }
+  } else {
+    switch (virtkey) {
+      case VK_HOME:
+        virtkey = VK_KEYPAD_HOME;  break;
+      case VK_LEFT:
+        virtkey = VK_KEYPAD_LEFT;  break;
+      case VK_UP:
+        virtkey = VK_KEYPAD_UP;  break;
+      case VK_RIGHT:
+        virtkey = VK_KEYPAD_RIGHT;  break;
+      case VK_DOWN:
+        virtkey = VK_KEYPAD_DOWN;  break;
+      case VK_PRIOR:
+        virtkey = VK_KEYPAD_PRIOR;  break;
+      case VK_NEXT:
+        virtkey = VK_KEYPAD_NEXT;  break;
+      case VK_END:
+        virtkey = VK_KEYPAD_END;  break;
+      case VK_CLEAR:
+        virtkey = VK_KEYPAD_BEGIN;  break;
+      case VK_INSERT:
+        virtkey = VK_KEYPAD_INSERT;  break;
+      case VK_DELETE:
+        virtkey = VK_KEYPAD_DELETE;  break;
     }
   }
 
