@@ -1327,7 +1327,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
           if ((keycode >= 32 && keycode <= 126) ||
               (keycode >= 160 && keycode <= 255))
             key = keycode;
-            fakeModifiers |= Event.ALT_MASK | Event.CTRL_MASK;
+          fakeModifiers |= Event.ALT_MASK | Event.CTRL_MASK;
         } else if (ev.isControlDown()) {
           // For CTRL-<letter>, CTRL is sent separately, so just send <letter>.
           if ((key >= 1 && key <= 26 && !ev.isShiftDown()) ||
