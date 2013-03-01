@@ -1231,7 +1231,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
   public void writeKeyEvent(KeyEvent ev) {
-    int keysym = 0, keycode, key, location;
+    int keysym = 0, keycode, key, location, fakeModifiers = 0;
 
     if (shuttingDown || benchmark)
       return;
@@ -1322,7 +1322,13 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         else
           keysym = Keysyms.Meta_L;  break;
       default:
-        if (ev.isControlDown()) {
+        if (ev.isControlDown() && ev.isAltDown()) {
+          // Handle AltGr key on international keyboards
+          if ((keycode >= 32 && keycode <= 126) ||
+              (keycode >= 160 && keycode <= 255))
+            key = keycode;
+            fakeModifiers |= Event.ALT_MASK | Event.CTRL_MASK;
+        } else if (ev.isControlDown()) {
           // For CTRL-<letter>, CTRL is sent separately, so just send <letter>.
           if ((key >= 1 && key <= 26 && !ev.isShiftDown()) ||
               // CTRL-{, CTRL-|, CTRL-} also map to ASCII 96-127
@@ -1430,7 +1436,28 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       }
     }
 
+    if (fakeModifiers != 0) {
+      if ((fakeModifiers & Event.CTRL_MASK) != 0) {
+        vlog.debug("Fake L Ctrl raised");
+        writeKeyEvent(Keysyms.Control_L, false);
+      }
+      if ((modifiers & Event.ALT_MASK) != 0) {
+        vlog.debug("Fake R Alt raised");
+        writeKeyEvent(Keysyms.Alt_R, false);
+      }
+    }
     writeKeyEvent(keysym, down);
+    if (fakeModifiers != 0) {
+      if ((fakeModifiers & Event.CTRL_MASK) != 0) {
+        vlog.debug("Fake L Ctrl pressed");
+        writeKeyEvent(Keysyms.Control_L, true);
+      }
+      if ((modifiers & Event.ALT_MASK) != 0) {
+        vlog.debug("Fake R Alt pressed");
+        writeKeyEvent(Keysyms.Alt_R, true);
+      }
+      fakeModifiers = 0;
+    }
   }
 
 

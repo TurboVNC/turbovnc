@@ -42,6 +42,12 @@ equivalents on the main keyboard.
 The Java TurboVNC Viewer now properly differentiates between the left and right
 versions of the modifier keys (Alt, Ctrl, etc.)
 -------------------------------------------------------------------------------
+[9]
+The Java TurboVNC Viewer now properly handles the AltGr key on international
+keyboards.  A minor issue was also fixed in the Windows TurboVNC Viewer
+whereby it would trigger an Alt keypress on the remote desktop whenever an
+AltGr key symbol was typed repeatedly.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

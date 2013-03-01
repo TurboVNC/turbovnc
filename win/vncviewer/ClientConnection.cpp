@@ -2778,11 +2778,11 @@ inline void ClientConnection::ProcessKeyEvent(int virtkey, DWORD keyData)
       vnclog.Print(5, "fake R Ctrl pressed\n");
     }
     if (kas.releaseModifiers & KEYMAP_LALT) {
-      SendKeyEvent(XK_Alt_L, false);
+      SendKeyEvent(XK_Alt_L, true);
       vnclog.Print(5, "fake L Alt pressed\n");
     }
     if (kas.releaseModifiers & KEYMAP_LCONTROL) {
-      SendKeyEvent(XK_Control_L, false);
+      SendKeyEvent(XK_Control_L, true);
       vnclog.Print(5, "fake L Ctrl pressed\n");
     }
   } catch (Exception &e) {
