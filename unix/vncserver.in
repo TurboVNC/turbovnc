@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  Copyright (C) 2009-2012 D. R. Commander.  All Rights Reserved.
+#  Copyright (C) 2009-2013 D. R. Commander.  All Rights Reserved.
 #  Copyright (C) 2010 University Corporation for Atmospheric Research.
 #                     All Rights Reserved.
 #  Copyright (C) 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
@@ -163,6 +163,10 @@ unless ($xauthorityFile) {
 chop($host = `uname -n`);
 chop($os = `uname`);
 
+if (-d "/etc/X11/fontpath.d") {
+    $fontPath = "catalogue:/etc/X11/fontpath.d";
+}
+
 @fontpaths = ('/usr/share/X11/fonts', '/usr/share/fonts', '/usr/share/fonts/X11/', '/usr/local/lib/X11/fonts');
 if (! -l "/usr/lib/X11") {push(@fontpaths, '/usr/lib/X11/fonts');}
 if (! -l "/usr/X11") {push(@fontpaths, '/usr/X11/lib/X11/fonts');}
@@ -175,7 +179,9 @@ push(@fontpaths, '/usr/share/fonts/default');
              '75dpi',
              '100dpi',
              'Speedo',
-             'Type1');
+             'Type1',
+             'ghostscript',
+             'liberation');
 
 if (($fontPath eq "")) {
     foreach $_fpath (@fontpaths) {

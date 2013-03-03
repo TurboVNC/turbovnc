@@ -57,11 +57,11 @@ FONTENCDEFS = -DFONT_ENCODINGS_DIRECTORY=\"$(FONTDIR)/encodings/encodings.dir\"
 	      $(FREETYPE_DEFINES) $(XTRUETYPE_DEFINES) $(FONTENCDEFS) \
               $(GZIP_DEFS)
 
-       SRCS = dirfile.c fontdir.c fontfile.c fileio.c fontscale.c \
+       SRCS = catalogue.c dirfile.c fontdir.c fontfile.c fileio.c fontscale.c \
               defaults.c bitsource.c register.c renderers.c bufio.c \
               decompress.c filewr.c printerfont.c ffcheck.c \
 	      fontenc.c encparse.c $(COMPAT_SRC) $(GUNZIP_SRC)
-       OBJS = dirfile.o fontdir.o fontfile.o fileio.o fontscale.o \
+       OBJS = catalogue.o dirfile.o fontdir.o fontfile.o fileio.o fontscale.o \
               defaults.o bitsource.o register.o renderers.o bufio.o \
               decompress.o filewr.o printerfont.o ffcheck.o \
               fontenc.o encparse.o $(COMPAT_OBJ) $(GUNZIP_OBJ)

@@ -52,6 +52,14 @@ AltGr key symbol was typed repeatedly.
 Added LSB headers to the TurboVNC Server init.d script (tvncserver) in order
 to avoid insserv errors/warnings with recent Debian releases.
 -------------------------------------------------------------------------------
+[11]
+The TurboVNC Server can now build its font path from a font catalogue, on
+systems that support them (such as RHEL 6.)  vncserver will now check for the
+existence of a font catalogue at /etc/X11/fontpath.d and use it if it exists.
+For systems that do not support font catalogues, vncserver will now check for
+the existence of the Liberation fonts (used by LibreOffice) and the Ghostscript
+fonts and add them to the fontpath.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
