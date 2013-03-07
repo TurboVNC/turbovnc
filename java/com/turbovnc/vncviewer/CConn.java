@@ -1230,8 +1230,42 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     writer().writeKeyEvent(keysym, down);
   }
 
+  // KeyEvent.getKeyModifiersText() is unfortunately broken on some platforms.
+  String getKeyModifiersText(int lmodifiers, int rmodifiers) {
+    String str = "";
+    if ((lmodifiers & Event.SHIFT_MASK) != 0)
+      str += "LShift ";
+    if ((rmodifiers & Event.SHIFT_MASK) != 0)
+      str += "RShift ";
+    if ((lmodifiers & Event.CTRL_MASK) != 0)
+      str += "LCtrl ";
+    if ((rmodifiers & Event.CTRL_MASK) != 0)
+      str += "RCtrl ";
+    if ((lmodifiers & Event.ALT_MASK) != 0)
+      str += "LAlt ";
+    if ((rmodifiers & Event.ALT_MASK) != 0)
+      str += "RAlt ";
+    if ((lmodifiers & Event.META_MASK) != 0)
+      str += "LMeta ";
+    if ((rmodifiers & Event.META_MASK) != 0)
+      str += "RMeta ";
+    return str;
+  }
+
+  String getLocationText(int location) {
+    switch (location) {
+      case KeyEvent.KEY_LOCATION_LEFT:      return "LEFT";
+      case KeyEvent.KEY_LOCATION_NUMPAD:    return "NUMPAD";
+      case KeyEvent.KEY_LOCATION_RIGHT:     return "RIGHT";
+      case KeyEvent.KEY_LOCATION_STANDARD:  return "STANDARD";
+      case KeyEvent.KEY_LOCATION_UNKNOWN:   return "UNKNOWN";
+      default:                              return Integer.toString(location);
+    }
+  }
+
   public void writeKeyEvent(KeyEvent ev) {
-    int keysym = 0, keycode, key, location, fakeModifiers = 0;
+    int keysym = 0, keycode, key, location;
+    int lFakeModifiers = 0, rFakeModifiers = 0;
 
     if (shuttingDown || benchmark)
       return;
@@ -1243,8 +1277,13 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     location = ev.getKeyLocation();
 
     vlog.debug((ev.isActionKey() ? "action " : "") + "key " +
-               (down ? "PRESS" : "release") + " code " + keycode +
-                " location " + location + " ASCII " + key);
+                 (down ? "PRESS" : "release") +
+               ", code " + KeyEvent.getKeyText(keycode) + " (" + keycode + ")" +
+               ", loc " + getLocationText(location) +
+               ", char " +
+                 (key >= 32 && key <= 126 ? "'" + (char)key + "'" : key) +
+               " " + getKeyModifiersText(lmodifiers, rmodifiers) +
+               (ev.isAltGraphDown() ? "AltGr":""));
 
     if (!ev.isActionKey()) {
       if (keycode >= KeyEvent.VK_0 && keycode <= KeyEvent.VK_9 &&
@@ -1252,29 +1291,29 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         keysym = Keysyms.KP_0 + keycode - KeyEvent.VK_0;
 
       switch (keycode) {
-      case KeyEvent.VK_BACK_SPACE: keysym = Keysyms.BackSpace; break;
-      case KeyEvent.VK_TAB:        keysym = Keysyms.Tab; break;
+      case KeyEvent.VK_BACK_SPACE: keysym = Keysyms.BackSpace;  break;
+      case KeyEvent.VK_TAB:        keysym = Keysyms.Tab;  break;
       case KeyEvent.VK_ENTER:
         if (location == KeyEvent.KEY_LOCATION_NUMPAD)
           keysym = Keysyms.KP_Enter;
         else
           keysym = Keysyms.Return;  break;
-      case KeyEvent.VK_ESCAPE:     keysym = Keysyms.Escape; break;
-      case KeyEvent.VK_NUMPAD0:    keysym = Keysyms.KP_0; break;
-      case KeyEvent.VK_NUMPAD1:    keysym = Keysyms.KP_1; break;
-      case KeyEvent.VK_NUMPAD2:    keysym = Keysyms.KP_2; break;
-      case KeyEvent.VK_NUMPAD3:    keysym = Keysyms.KP_3; break;
-      case KeyEvent.VK_NUMPAD4:    keysym = Keysyms.KP_4; break;
-      case KeyEvent.VK_NUMPAD5:    keysym = Keysyms.KP_5; break;
-      case KeyEvent.VK_NUMPAD6:    keysym = Keysyms.KP_6; break;
-      case KeyEvent.VK_NUMPAD7:    keysym = Keysyms.KP_7; break;
-      case KeyEvent.VK_NUMPAD8:    keysym = Keysyms.KP_8; break;
-      case KeyEvent.VK_NUMPAD9:    keysym = Keysyms.KP_9; break;
-      case KeyEvent.VK_DECIMAL:    keysym = Keysyms.KP_Decimal; break;
-      case KeyEvent.VK_ADD:        keysym = Keysyms.KP_Add; break;
-      case KeyEvent.VK_SUBTRACT:   keysym = Keysyms.KP_Subtract; break;
-      case KeyEvent.VK_MULTIPLY:   keysym = Keysyms.KP_Multiply; break;
-      case KeyEvent.VK_DIVIDE:     keysym = Keysyms.KP_Divide; break;
+      case KeyEvent.VK_ESCAPE:     keysym = Keysyms.Escape;  break;
+      case KeyEvent.VK_NUMPAD0:    keysym = Keysyms.KP_0;  break;
+      case KeyEvent.VK_NUMPAD1:    keysym = Keysyms.KP_1;  break;
+      case KeyEvent.VK_NUMPAD2:    keysym = Keysyms.KP_2;  break;
+      case KeyEvent.VK_NUMPAD3:    keysym = Keysyms.KP_3;  break;
+      case KeyEvent.VK_NUMPAD4:    keysym = Keysyms.KP_4;  break;
+      case KeyEvent.VK_NUMPAD5:    keysym = Keysyms.KP_5;  break;
+      case KeyEvent.VK_NUMPAD6:    keysym = Keysyms.KP_6;  break;
+      case KeyEvent.VK_NUMPAD7:    keysym = Keysyms.KP_7;  break;
+      case KeyEvent.VK_NUMPAD8:    keysym = Keysyms.KP_8;  break;
+      case KeyEvent.VK_NUMPAD9:    keysym = Keysyms.KP_9;  break;
+      case KeyEvent.VK_DECIMAL:    keysym = Keysyms.KP_Decimal;  break;
+      case KeyEvent.VK_ADD:        keysym = Keysyms.KP_Add;  break;
+      case KeyEvent.VK_SUBTRACT:   keysym = Keysyms.KP_Subtract;  break;
+      case KeyEvent.VK_MULTIPLY:   keysym = Keysyms.KP_Multiply;  break;
+      case KeyEvent.VK_DIVIDE:     keysym = Keysyms.KP_Divide;  break;
       case KeyEvent.VK_DELETE:
         if (location == KeyEvent.KEY_LOCATION_NUMPAD)
           keysym = Keysyms.KP_Delete;
@@ -1286,48 +1325,81 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         else
           keysym = Keysyms.Clear;  break;
       case KeyEvent.VK_CONTROL:
-        if (down)
-          modifiers |= Event.CTRL_MASK;
-        else
-          modifiers &= ~Event.CTRL_MASK;
-        if (location == KeyEvent.KEY_LOCATION_RIGHT)
+        if (location == KeyEvent.KEY_LOCATION_RIGHT) {
           keysym = Keysyms.Control_R;
-        else
-          keysym = Keysyms.Control_L;  break;
+          if (down)
+            rmodifiers |= Event.CTRL_MASK;
+          else
+            rmodifiers &= ~Event.CTRL_MASK;
+        } else {
+          keysym = Keysyms.Control_L;
+          if (down)
+            lmodifiers |= Event.CTRL_MASK;
+          else
+            lmodifiers &= ~Event.CTRL_MASK;
+        }  break;
       case KeyEvent.VK_ALT:
-        if (down)
-          modifiers |= Event.ALT_MASK;
-        else
-          modifiers &= ~Event.ALT_MASK;
-        if (location == KeyEvent.KEY_LOCATION_RIGHT)
+        if (location == KeyEvent.KEY_LOCATION_RIGHT) {
+          // Mac has no AltGr key, but the Option/Alt keys serve the same
+          // purpose.  Thus, we allow RAlt to be used as AltGr by simply
+          // ignoring the modifier and sending only the modified key.  We allow
+          // LAlt to trigger an Alt key event on the server.
+          if (VncViewer.os.startsWith("mac os x"))
+            return;
           keysym = Keysyms.Alt_R;
-        else
-          keysym = Keysyms.Alt_L;  break;
+          if (down)
+            rmodifiers |= Event.ALT_MASK;
+          else
+            rmodifiers &= ~Event.ALT_MASK;
+        } else {
+          keysym = Keysyms.Alt_L;
+          if (down)
+            lmodifiers |= Event.ALT_MASK;
+          else
+            lmodifiers &= ~Event.ALT_MASK;
+        }
+        break;
       case KeyEvent.VK_SHIFT:
-        if (down)
-          modifiers |= Event.SHIFT_MASK;
-        else
-          modifiers &= ~Event.SHIFT_MASK;
-        if (location == KeyEvent.KEY_LOCATION_RIGHT)
+        if (location == KeyEvent.KEY_LOCATION_RIGHT) {
           keysym = Keysyms.Shift_R;
-        else
-          keysym = Keysyms.Shift_L;  break;
+          if (down)
+            rmodifiers |= Event.SHIFT_MASK;
+          else
+            rmodifiers &= ~Event.SHIFT_MASK;
+        } else {
+          keysym = Keysyms.Shift_L;
+          if (down)
+            lmodifiers |= Event.SHIFT_MASK;
+          else
+            lmodifiers &= ~Event.SHIFT_MASK;
+        }  break;
       case KeyEvent.VK_META:
-        if (down)
-          modifiers |= Event.META_MASK;
-        else
-          modifiers &= ~Event.META_MASK;
-        if (location == KeyEvent.KEY_LOCATION_RIGHT)
+        if (location == KeyEvent.KEY_LOCATION_RIGHT) {
           keysym = Keysyms.Meta_R;
-        else
-          keysym = Keysyms.Meta_L;  break;
+          if (down)
+            rmodifiers |= Event.META_MASK;
+          else
+            rmodifiers &= ~Event.META_MASK;
+        } else {
+          keysym = Keysyms.Meta_L;
+          if (down)
+            lmodifiers |= Event.META_MASK;
+          else
+            lmodifiers &= ~Event.META_MASK;
+        }  break;
+      case KeyEvent.VK_ALT_GRAPH:
+        keysym = Keysyms.ISO_Level3_Shift;  break;
       default:
-        if (ev.isControlDown() && ev.isAltDown()) {
-          // Handle AltGr key on international keyboards
-          if ((keycode >= 32 && keycode <= 126) ||
-              (keycode >= 160 && keycode <= 255))
-            key = keycode;
-          fakeModifiers |= Event.ALT_MASK | Event.CTRL_MASK;
+        // On Windows, pressing AltGr has the same effect as pressing LCtrl +
+        // RAlt, so we have to send fake key release events for those
+        // modifiers (and any other Ctrl and Alt modifiers that are pressed),
+        // then the key event for the modified key, then fake key press events
+        // for the same modifiers.
+        if ((rmodifiers & Event.ALT_MASK) != 0 &&
+            (lmodifiers & Event.CTRL_MASK) != 0 &&
+            VncViewer.os.startsWith("windows")) {
+          rFakeModifiers = rmodifiers & (Event.ALT_MASK | Event.CTRL_MASK);
+          lFakeModifiers = lmodifiers & (Event.ALT_MASK | Event.CTRL_MASK);
         } else if (ev.isControlDown()) {
           // For CTRL-<letter>, CTRL is sent separately, so just send <letter>.
           if ((key >= 1 && key <= 26 && !ev.isShiftDown()) ||
@@ -1393,20 +1465,20 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
           keysym = Keysyms.KP_Right;
         else
           keysym = Keysyms.Right;  break;
-      case KeyEvent.VK_F1:           keysym = Keysyms.F1; break;
-      case KeyEvent.VK_F2:           keysym = Keysyms.F2; break;
-      case KeyEvent.VK_F3:           keysym = Keysyms.F3; break;
-      case KeyEvent.VK_F4:           keysym = Keysyms.F4; break;
-      case KeyEvent.VK_F5:           keysym = Keysyms.F5; break;
-      case KeyEvent.VK_F6:           keysym = Keysyms.F6; break;
-      case KeyEvent.VK_F7:           keysym = Keysyms.F7; break;
-      case KeyEvent.VK_F8:           keysym = Keysyms.F8; break;
-      case KeyEvent.VK_F9:           keysym = Keysyms.F9; break;
-      case KeyEvent.VK_F10:          keysym = Keysyms.F10; break;
-      case KeyEvent.VK_F11:          keysym = Keysyms.F11; break;
-      case KeyEvent.VK_F12:          keysym = Keysyms.F12; break;
-      case KeyEvent.VK_F13:          keysym = Keysyms.F13; break;
-      case KeyEvent.VK_PRINTSCREEN:  keysym = Keysyms.Print; break;
+      case KeyEvent.VK_F1:           keysym = Keysyms.F1;  break;
+      case KeyEvent.VK_F2:           keysym = Keysyms.F2;  break;
+      case KeyEvent.VK_F3:           keysym = Keysyms.F3;  break;
+      case KeyEvent.VK_F4:           keysym = Keysyms.F4;  break;
+      case KeyEvent.VK_F5:           keysym = Keysyms.F5;  break;
+      case KeyEvent.VK_F6:           keysym = Keysyms.F6;  break;
+      case KeyEvent.VK_F7:           keysym = Keysyms.F7;  break;
+      case KeyEvent.VK_F8:           keysym = Keysyms.F8;  break;
+      case KeyEvent.VK_F9:           keysym = Keysyms.F9;  break;
+      case KeyEvent.VK_F10:          keysym = Keysyms.F10;  break;
+      case KeyEvent.VK_F11:          keysym = Keysyms.F11;  break;
+      case KeyEvent.VK_F12:          keysym = Keysyms.F12;  break;
+      case KeyEvent.VK_F13:          keysym = Keysyms.F13;  break;
+      case KeyEvent.VK_PRINTSCREEN:  keysym = Keysyms.Print;  break;
       case KeyEvent.VK_PAUSE:
         if (ev.isControlDown())
           keysym = Keysyms.Break;
@@ -1418,15 +1490,15 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
           keysym = Keysyms.KP_Insert;
         else
           keysym = Keysyms.Insert;  break;
-      case KeyEvent.VK_KP_DOWN:      keysym = Keysyms.KP_Down; break;
-      case KeyEvent.VK_KP_LEFT:      keysym = Keysyms.KP_Left; break;
-      case KeyEvent.VK_KP_RIGHT:     keysym = Keysyms.KP_Right; break;
-      case KeyEvent.VK_KP_UP:        keysym = Keysyms.KP_Up; break;
-      case KeyEvent.VK_NUM_LOCK:     keysym = Keysyms.Num_Lock; break;
-      case KeyEvent.VK_WINDOWS:      keysym = Keysyms.Super_L; break;
-      case KeyEvent.VK_CONTEXT_MENU: keysym = Keysyms.Menu; break;
-      case KeyEvent.VK_SCROLL_LOCK:  keysym = Keysyms.Scroll_Lock; break;
-      case KeyEvent.VK_CAPS_LOCK:    keysym = Keysyms.Caps_Lock; break;
+      case KeyEvent.VK_KP_DOWN:      keysym = Keysyms.KP_Down;  break;
+      case KeyEvent.VK_KP_LEFT:      keysym = Keysyms.KP_Left;  break;
+      case KeyEvent.VK_KP_RIGHT:     keysym = Keysyms.KP_Right;  break;
+      case KeyEvent.VK_KP_UP:        keysym = Keysyms.KP_Up;  break;
+      case KeyEvent.VK_NUM_LOCK:     keysym = Keysyms.Num_Lock;  break;
+      case KeyEvent.VK_WINDOWS:      keysym = Keysyms.Super_L;  break;
+      case KeyEvent.VK_CONTEXT_MENU: keysym = Keysyms.Menu;  break;
+      case KeyEvent.VK_SCROLL_LOCK:  keysym = Keysyms.Scroll_Lock;  break;
+      case KeyEvent.VK_CAPS_LOCK:    keysym = Keysyms.Caps_Lock;  break;
       case KeyEvent.VK_BEGIN:
         if (location == KeyEvent.KEY_LOCATION_NUMPAD)
           keysym = Keysyms.KP_Begin;
@@ -1436,27 +1508,38 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       }
     }
 
-    if (fakeModifiers != 0) {
-      if ((fakeModifiers & Event.CTRL_MASK) != 0) {
-        vlog.debug("Fake L Ctrl raised");
-        writeKeyEvent(Keysyms.Control_L, false);
-      }
-      if ((modifiers & Event.ALT_MASK) != 0) {
-        vlog.debug("Fake R Alt raised");
-        writeKeyEvent(Keysyms.Alt_R, false);
-      }
+    if ((lFakeModifiers & Event.CTRL_MASK) != 0) {
+      vlog.debug("Fake L Ctrl raised");
+      writeKeyEvent(Keysyms.Control_L, false);
+    }	
+    if ((lFakeModifiers & Event.ALT_MASK) != 0) {
+      vlog.debug("Fake L Alt raised");
+      writeKeyEvent(Keysyms.Alt_L, false);
+    }
+    if ((rFakeModifiers & Event.CTRL_MASK) != 0) {
+      vlog.debug("Fake R Ctrl raised");
+      writeKeyEvent(Keysyms.Control_R, false);
+    }	
+    if ((rFakeModifiers & Event.ALT_MASK) != 0) {
+      vlog.debug("Fake R Alt raised");
+      writeKeyEvent(Keysyms.Alt_R, false);
     }
     writeKeyEvent(keysym, down);
-    if (fakeModifiers != 0) {
-      if ((fakeModifiers & Event.CTRL_MASK) != 0) {
-        vlog.debug("Fake L Ctrl pressed");
-        writeKeyEvent(Keysyms.Control_L, true);
-      }
-      if ((modifiers & Event.ALT_MASK) != 0) {
-        vlog.debug("Fake R Alt pressed");
-        writeKeyEvent(Keysyms.Alt_R, true);
-      }
-      fakeModifiers = 0;
+    if ((lFakeModifiers & Event.CTRL_MASK) != 0) {
+      vlog.debug("Fake L Ctrl pressed");
+      writeKeyEvent(Keysyms.Control_L, true);
+    }
+    if ((lFakeModifiers & Event.ALT_MASK) != 0) {
+      vlog.debug("Fake L Alt pressed");
+      writeKeyEvent(Keysyms.Alt_L, true);
+    }
+    if ((rFakeModifiers & Event.CTRL_MASK) != 0) {
+      vlog.debug("Fake R Ctrl pressed");
+      writeKeyEvent(Keysyms.Control_R, true);
+    }
+    if ((rFakeModifiers & Event.ALT_MASK) != 0) {
+      vlog.debug("Fake R Alt pressed");
+      writeKeyEvent(Keysyms.Alt_R, true);
     }
   }
 
@@ -1521,15 +1604,23 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
 
   synchronized void releaseModifiers() {
-    if ((modifiers & Event.SHIFT_MASK) != 0)
+    if ((lmodifiers & Event.SHIFT_MASK) != 0)
       writeKeyEvent(Keysyms.Shift_L, false);
-    if ((modifiers & Event.CTRL_MASK) != 0)
+    if ((rmodifiers & Event.SHIFT_MASK) != 0)
+      writeKeyEvent(Keysyms.Shift_R, false);
+    if ((lmodifiers & Event.CTRL_MASK) != 0)
       writeKeyEvent(Keysyms.Control_L, false);
-    if ((modifiers & Event.ALT_MASK) != 0)
+    if ((rmodifiers & Event.CTRL_MASK) != 0)
+      writeKeyEvent(Keysyms.Control_R, false);
+    if ((lmodifiers & Event.ALT_MASK) != 0)
       writeKeyEvent(Keysyms.Alt_L, false);
-    if ((modifiers & Event.META_MASK) != 0)
+    if ((rmodifiers & Event.ALT_MASK) != 0)
+      writeKeyEvent(Keysyms.Alt_R, false);
+    if ((lmodifiers & Event.META_MASK) != 0)
       writeKeyEvent(Keysyms.Meta_L, false);
-    modifiers = 0;
+    if ((rmodifiers & Event.META_MASK) != 0)
+      writeKeyEvent(Keysyms.Meta_R, false);
+    lmodifiers = rmodifiers = 0;
   }
 
 
@@ -1606,7 +1697,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
   private boolean supportsSyncFence;
 
-  int modifiers;
+  int lmodifiers, rmodifiers;
   Viewport viewport;
   boolean showToolbar;
 
