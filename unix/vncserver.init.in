@@ -73,6 +73,7 @@ start() {
 
 stop() {
     echo -n $"Shutting down $prog: "
+    RETVAL=0
     for display in ${VNCSERVERS}
     do
         echo -n "${display} "

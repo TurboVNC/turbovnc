@@ -60,6 +60,10 @@ For systems that do not support font catalogues, vncserver will now check for
 the existence of the Liberation fonts (used by LibreOffice) and the Ghostscript
 fonts and add them to the fontpath.
 -------------------------------------------------------------------------------
+[12]
+Fixed an error that occurred when running '/etc/init.d/tvncserver stop' with
+an empty /etc/sysconfig/tvncservers file.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
