@@ -1,6 +1,6 @@
 //
 //  Copyright (C) 2012 Secure Mission Solutions, Inc.  All Rights Reserved.
-//  Copyright (C) 2009-2010 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2009-2010, 2013 D. R. Commander.  All Rights Reserved.
 //  Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
 //  Copyright (C) 2001-2004 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
@@ -39,6 +39,8 @@ public class VncViewer extends java.applet.Applet
 
   boolean inAnApplet = true;
   boolean inSeparateFrame = false;
+
+  public static final String os = System.getProperty("os.name").toLowerCase();
 
   //
   // main() is called when run as a java program from the command line.
