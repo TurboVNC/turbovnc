@@ -25,6 +25,7 @@
 
 public class Keysyms {
 
+  public static final int ISO_Level3_Shift = 0xFE03;
   public static final int BackSpace = 0xFF08;
   public static final int Tab = 0xFF09;
   public static final int Linefeed = 0xFF0A;

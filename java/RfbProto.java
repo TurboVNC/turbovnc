@@ -1207,7 +1207,40 @@ class RfbProto {
   }
 
 
-  int modifiers;
+  int lmodifiers, rmodifiers;
+
+  // KeyEvent.getKeyModifiersText() is unfortunately broken on some platforms.
+  String getKeyModifiersText(int lmodifiers, int rmodifiers) {
+    String str = "";
+    if ((lmodifiers & SHIFT_MASK) != 0)
+      str += "LShift ";
+    if ((rmodifiers & SHIFT_MASK) != 0)
+      str += "RShift ";
+    if ((lmodifiers & CTRL_MASK) != 0)
+      str += "LCtrl ";
+    if ((rmodifiers & CTRL_MASK) != 0)
+      str += "RCtrl ";
+    if ((lmodifiers & ALT_MASK) != 0)
+      str += "LAlt ";
+    if ((rmodifiers & ALT_MASK) != 0)
+      str += "RAlt ";
+    if ((lmodifiers & META_MASK) != 0)
+      str += "LMeta ";
+    if ((rmodifiers & META_MASK) != 0)
+      str += "RMeta ";
+    return str;
+  }
+
+  String getLocationText(int location) {
+    switch (location) {
+      case KeyEvent.KEY_LOCATION_LEFT:      return "LEFT";
+      case KeyEvent.KEY_LOCATION_NUMPAD:    return "NUMPAD";
+      case KeyEvent.KEY_LOCATION_RIGHT:     return "RIGHT";
+      case KeyEvent.KEY_LOCATION_STANDARD:  return "STANDARD";
+      case KeyEvent.KEY_LOCATION_UNKNOWN:   return "UNKNOWN";
+      default:                              return Integer.toString(location);
+    }
+  }
 
   //
   // Write a key event message.  We may need to send modifier key events
@@ -1218,6 +1251,7 @@ class RfbProto {
   void writeKeyEvent(KeyEvent evt) throws IOException {
 
     int keyChar = evt.getKeyChar();
+    int keyCode = evt.getKeyCode();
     int location = evt.getKeyLocation();
 
     //
@@ -1234,7 +1268,17 @@ class RfbProto {
 
     boolean down = (evt.getID() == KeyEvent.KEY_PRESSED);
 
-    int key, fakeModifiers = 0;
+//    System.out.println((evt.isActionKey() ? "action " : "") + "key " +
+//                         (down ? "PRESS" : "release") +
+//                       ", code " + KeyEvent.getKeyText(keyCode) +
+//                         " (" + keyCode + ")" +
+//                       ", loc " + getLocationText(location) +
+//                       ", char " + (keyChar >= 32 && keyChar <= 126 ?
+//                         "'" + (char)keyChar + "'" : Integer.toString(keyChar)) +
+//                       " " + getKeyModifiersText(lmodifiers, rmodifiers) +
+//                         (evt.isAltGraphDown() ? "AltGr":""));
+
+    int key, lFakeModifiers = 0, rFakeModifiers = 0;
     if (evt.isActionKey()) {
 
       //
@@ -1242,7 +1286,7 @@ class RfbProto {
       // If not then just ignore the event.
       //
 
-      switch(evt.getKeyCode()) {
+      switch(keyCode) {
       case KeyEvent.VK_HOME:
         if (location == KeyEvent.KEY_LOCATION_NUMPAD)
           key = Keysyms.KP_Home;
@@ -1335,7 +1379,6 @@ class RfbProto {
       //
 
       key = keyChar;
-      int keycode = evt.getKeyCode();
       if (evt.isControlDown() && !evt.isAltDown()) {
         // For CTRL-<letter>, CTRL is sent separately, so just send <letter>.      
         if ((key >= 1 && key <= 26 && !evt.isShiftDown()) ||
@@ -1350,12 +1393,12 @@ class RfbProto {
         // Windows and Mac sometimes return CHAR_UNDEFINED with CTRL-SHIFT
         // combinations, so best we can do is send the key code if it is
         // a valid ASCII symbol.
-        else if (key == KeyEvent.CHAR_UNDEFINED && keycode >= 0 &&
-                 keycode <= 127)
-          key = keycode;
+        else if (key == KeyEvent.CHAR_UNDEFINED && keyCode >= 0 &&
+                 keyCode <= 127)
+          key = keyCode;
       }
 
-      switch(keycode) {
+      switch(keyCode) {
       case KeyEvent.VK_BACK_SPACE: key = Keysyms.BackSpace; break;
       case KeyEvent.VK_TAB:        key = Keysyms.Tab; break;
       case KeyEvent.VK_ENTER:
@@ -1390,48 +1433,81 @@ class RfbProto {
         else
           key = Keysyms.Clear;  break;
       case KeyEvent.VK_CONTROL:
-        if (down)
-          modifiers |= CTRL_MASK;
-        else
-          modifiers &= ~CTRL_MASK;
-        if (location == KeyEvent.KEY_LOCATION_RIGHT)
+        if (location == KeyEvent.KEY_LOCATION_RIGHT) {
           key = Keysyms.Control_R;
-        else
-          key = Keysyms.Control_L;  break;
+          if (down)
+            rmodifiers |= CTRL_MASK;
+          else
+            rmodifiers &= ~CTRL_MASK;
+        } else {
+          key = Keysyms.Control_L;
+          if (down)
+            lmodifiers |= CTRL_MASK;
+          else
+            lmodifiers &= ~CTRL_MASK;
+        }  break;
       case KeyEvent.VK_ALT:
-        if (down)
-          modifiers |= ALT_MASK;
-        else
-          modifiers &= ~ALT_MASK;
-        if (location == KeyEvent.KEY_LOCATION_RIGHT)
+        if (location == KeyEvent.KEY_LOCATION_RIGHT) {
+          // Mac has no AltGr key, but the Option/Alt keys serve the same
+          // purpose.  Thus, we allow RAlt to be used as AltGr by simply
+          // ignoring the modifier and sending only the modified key.  We allow
+          // LAlt to trigger an Alt key event on the server.
+          if (VncViewer.os.startsWith("mac os x"))
+            return;
           key = Keysyms.Alt_R;
-        else
-          key = Keysyms.Alt_L;  break;
+          if (down)
+            rmodifiers |= ALT_MASK;
+          else
+            rmodifiers &= ~ALT_MASK;
+        } else {
+          key = Keysyms.Alt_L;
+          if (down)
+            lmodifiers |= ALT_MASK;
+          else
+            lmodifiers &= ~ALT_MASK;
+        }
+        break;
       case KeyEvent.VK_SHIFT:
-        if (down)
-          modifiers |= SHIFT_MASK;
-        else
-          modifiers &= ~SHIFT_MASK;
-        if (location == KeyEvent.KEY_LOCATION_RIGHT)
+        if (location == KeyEvent.KEY_LOCATION_RIGHT) {
           key = Keysyms.Shift_R;
-        else
-          key = Keysyms.Shift_L;  break;
+          if (down)
+            rmodifiers |= SHIFT_MASK;
+          else
+            rmodifiers &= ~SHIFT_MASK;
+        } else {
+          key = Keysyms.Shift_L;
+          if (down)
+            lmodifiers |= SHIFT_MASK;
+          else
+            lmodifiers &= ~SHIFT_MASK;
+        }  break;
       case KeyEvent.VK_META:
-        if (down)
-          modifiers |= META_MASK;
-        else
-          modifiers &= ~META_MASK;
-        if (location == KeyEvent.KEY_LOCATION_RIGHT)
+        if (location == KeyEvent.KEY_LOCATION_RIGHT) {
           key = Keysyms.Meta_R;
-        else
-          key = Keysyms.Meta_L;  break;
+          if (down)
+            rmodifiers |= META_MASK;
+          else
+            rmodifiers &= ~META_MASK;
+        } else {
+          key = Keysyms.Meta_L;
+          if (down)
+            lmodifiers |= META_MASK;
+          else
+            lmodifiers &= ~META_MASK;
+        }  break;
+      case KeyEvent.VK_ALT_GRAPH:
+        key = Keysyms.ISO_Level3_Shift;  break;
       default:
-        if (evt.isControlDown() && evt.isAltDown()) {
-          // Handle AltGr key on international keyboards
-          if ((keycode >= 32 && keycode <= 126) ||
-              (keycode >= 160 && keycode <= 255))
-            key = keycode;
-          fakeModifiers |= ALT_MASK | CTRL_MASK;
+        // On Windows, pressing AltGr has the same effect as pressing LCtrl +
+        // RAlt, so we have to send fake key release events for those
+        // modifiers (and any other Ctrl and Alt modifiers that are pressed),
+        // then the key event for the modified key, then fake key press events
+        // for the same modifiers.
+        if ((rmodifiers & ALT_MASK) != 0 &&
+            (lmodifiers & CTRL_MASK) != 0 &&
+            VncViewer.os.startsWith("windows")) {
+          rFakeModifiers = rmodifiers & (ALT_MASK | CTRL_MASK);
+          lFakeModifiers = lmodifiers & (ALT_MASK | CTRL_MASK);
         }
       }
     }
@@ -1458,19 +1534,23 @@ class RfbProto {
 	brokenKeyPressed = false;  
     }
 
-    if (fakeModifiers != 0) {
-      if ((fakeModifiers & CTRL_MASK) != 0)
-        writeKeyEvent(Keysyms.Control_L, false);
-      if ((modifiers & ALT_MASK) != 0)
-        writeKeyEvent(Keysyms.Alt_R, false);
-    }
+    if ((lFakeModifiers & CTRL_MASK) != 0)
+      writeKeyEvent(Keysyms.Control_L, false);
+    if ((lFakeModifiers & ALT_MASK) != 0)
+      writeKeyEvent(Keysyms.Alt_L, false);
+    if ((rFakeModifiers & CTRL_MASK) != 0)
+      writeKeyEvent(Keysyms.Control_R, false);
+    if ((rFakeModifiers & ALT_MASK) != 0)
+      writeKeyEvent(Keysyms.Alt_R, false);
     writeKeyEvent(key, down);
-    if (fakeModifiers != 0) {
-      if ((fakeModifiers & CTRL_MASK) != 0)
-        writeKeyEvent(Keysyms.Control_L, true);
-      if ((modifiers & ALT_MASK) != 0)
-        writeKeyEvent(Keysyms.Alt_R, true);
-    }
+    if ((lFakeModifiers & CTRL_MASK) != 0)
+      writeKeyEvent(Keysyms.Control_L, true);
+    if ((lFakeModifiers & ALT_MASK) != 0)
+      writeKeyEvent(Keysyms.Alt_L, true);
+    if ((rFakeModifiers & CTRL_MASK) != 0)
+      writeKeyEvent(Keysyms.Control_R, true);
+    if ((rFakeModifiers & ALT_MASK) != 0)
+      writeKeyEvent(Keysyms.Alt_R, true);
   }
 
   //
@@ -1479,15 +1559,23 @@ class RfbProto {
 
   void releaseModifiers() {
     try {
-      if ((modifiers & CTRL_MASK) != 0)
-        writeKeyEvent(Keysyms.Control_L, false);
-      if ((modifiers & SHIFT_MASK) != 0)
+      if ((lmodifiers & SHIFT_MASK) != 0)
         writeKeyEvent(Keysyms.Shift_L, false);
-      if ((modifiers & ALT_MASK) != 0)
+      if ((rmodifiers & SHIFT_MASK) != 0)
+        writeKeyEvent(Keysyms.Shift_R, false);
+      if ((lmodifiers & CTRL_MASK) != 0)
+        writeKeyEvent(Keysyms.Control_L, false);
+      if ((rmodifiers & CTRL_MASK) != 0)
+        writeKeyEvent(Keysyms.Control_R, false);
+      if ((lmodifiers & ALT_MASK) != 0)
         writeKeyEvent(Keysyms.Alt_L, false);
-      if ((modifiers & META_MASK) != 0)
+      if ((rmodifiers & ALT_MASK) != 0)
+        writeKeyEvent(Keysyms.Alt_R, false);
+      if ((lmodifiers & META_MASK) != 0)
         writeKeyEvent(Keysyms.Meta_L, false);
-      modifiers = 0;
+      if ((rmodifiers & META_MASK) != 0)
+        writeKeyEvent(Keysyms.Meta_R, false);
+      lmodifiers = rmodifiers = 0;
     } catch (IOException e) {
       System.out.println("ERROR: Could not send key release events for modifiers:\n       "+
         e.getMessage());
@@ -1501,6 +1589,8 @@ class RfbProto {
 
   void writeKeyEvent(int keysym, boolean down) throws IOException {
     int eventBufLen = 0;
+//    System.out.println("  writeKeyEvent " + keysym + " " +
+//                       (down ? "PRESS" : "release"));
     eventBuf[eventBufLen++] = (byte) KeyboardEvent;
     eventBuf[eventBufLen++] = (byte) (down ? 1 : 0);
     eventBuf[eventBufLen++] = (byte) 0;
