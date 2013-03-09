@@ -1112,6 +1112,7 @@ class RfbProto {
   final static int SHIFT_MASK = InputEvent.SHIFT_MASK;
   final static int META_MASK  = InputEvent.META_MASK;
   final static int ALT_MASK   = InputEvent.ALT_MASK;
+  final static int ALT_GRAPH_MASK = InputEvent.ALT_GRAPH_MASK;
   final static int MASK1      = 1 << 0;
   final static int MASK2      = 1 << 1;
   final static int MASK3      = 1 << 2;
@@ -1461,16 +1462,21 @@ class RfbProto {
       case KeyEvent.VK_ALT:
         if (location == KeyEvent.KEY_LOCATION_RIGHT) {
           // Mac has no AltGr key, but the Option/Alt keys serve the same
-          // purpose.  Thus, we allow RAlt to be used as AltGr by simply
-          // ignoring the modifier and sending only the modified key.  We allow
-          // LAlt to trigger an Alt key event on the server.
-          if (VncViewer.os.startsWith("mac os x"))
-            return;
-          key = Keysyms.Alt_R;
-          if (down)
-            rmodifiers |= ALT_MASK;
-          else
-            rmodifiers &= ~ALT_MASK;
+          // purpose.  Thus, we allow RAlt to be used as AltGr and LAlt to be
+          // used as a regular Alt key.
+          if (VncViewer.os.startsWith("mac os x")) {
+            key = Keysyms.ISO_Level3_Shift;
+            if (down)
+              lmodifiers |= ALT_GRAPH_MASK;
+            else
+              lmodifiers &= ~ALT_GRAPH_MASK;
+          } else {
+            key = Keysyms.Alt_R;
+            if (down)
+              rmodifiers |= ALT_MASK;
+            else
+              rmodifiers &= ~ALT_MASK;
+          }
         } else {
           key = Keysyms.Alt_L;
           if (down)
@@ -1508,7 +1514,12 @@ class RfbProto {
             lmodifiers &= ~META_MASK;
         }  break;
       case KeyEvent.VK_ALT_GRAPH:
-        key = Keysyms.ISO_Level3_Shift;  break;
+        key = Keysyms.ISO_Level3_Shift;
+        if (down)
+          lmodifiers |= ALT_GRAPH_MASK;
+        else
+          lmodifiers &= ~ALT_GRAPH_MASK;
+        break;
       default:
         // On Windows, pressing AltGr has the same effect as pressing LCtrl +
         // RAlt, so we have to send fake key release events for those
@@ -1520,6 +1531,16 @@ class RfbProto {
             VncViewer.os.startsWith("windows")) {
           rFakeModifiers = rmodifiers & (ALT_MASK | CTRL_MASK);
           lFakeModifiers = lmodifiers & (ALT_MASK | CTRL_MASK);
+        } else if ((lmodifiers & ALT_MASK) != 0) {
+          // This is mainly for the benefit of OS X.  Un*x and Windows servers
+          // expect that, if Alt + an ASCII key is pressed, the key event for
+          // the ASCII key will be the same as if Alt had not been pressed.  On
+          // OS X, however, the Alt/Option keys act like AltGr keys, so if
+          // Alt + an ASCII key is pressed, the key code is the ASCII key
+          // symbol but the key char is the code for the alternate graphics
+          // symbol.
+          if (keyCode >= 32 && keyCode <= 126)
+            key = keyCode;
         }
       }
     }
@@ -1587,6 +1608,8 @@ class RfbProto {
         writeKeyEvent(Keysyms.Meta_L, false);
       if ((rmodifiers & META_MASK) != 0)
         writeKeyEvent(Keysyms.Meta_R, false);
+      if ((lmodifiers & ALT_GRAPH_MASK) != 0)
+        writeKeyEvent(Keysyms.ISO_Level3_Shift, false);
       lmodifiers = rmodifiers = 0;
     } catch (IOException e) {
       System.out.println("ERROR: Could not send key release events for modifiers:\n       "+
