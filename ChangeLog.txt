@@ -34,19 +34,26 @@ applet, specifying a host other than the VNC server in the "Server" parameter
 had no effect.
 -------------------------------------------------------------------------------
 [7]
-Both the Java and Windows TurboVNC Viewers now properly differentiate between
-the numeric keypad versions of the navigation keys (Home, End, etc.) and their
-equivalents on the main keyboard.
+Fixed several key mapping issues in the Java TurboVNC Viewer:
+-- Inability to differentiate between the numeric keypad versions of the
+   navigation keys (Home, End, etc.) and their equivalents on the main
+   keyboard.
+-- Inability to differentiate between the left and right versions of the
+   modifier keys (Alt, Ctrl, etc.)
+-- The viewer was not properly handling the AltGr key on international
+   keyboards.
+-- Inability to use left Alt key sequences on Mac clients to activate
+   pull-down menus on Linux/Windows servers.
 -------------------------------------------------------------------------------
 [8]
-The Java TurboVNC Viewer now properly differentiates between the left and right
-versions of the modifier keys (Alt, Ctrl, etc.)
+The Windows TurboVNC Viewer now properly differentiates between the numeric
+keypad versions of the navigation keys (Home, End, etc.) and their equivalents
+on the main keyboard.
 -------------------------------------------------------------------------------
 [9]
-The Java TurboVNC Viewer now properly handles the AltGr key on international
-keyboards.  A minor issue was also fixed in the Windows TurboVNC Viewer
-whereby it would trigger an Alt keypress on the remote desktop whenever an
-AltGr key symbol was typed repeatedly.
+Fixed a minor issue in the Windows TurboVNC Viewer whereby it would trigger an
+Alt keypress on the remote desktop whenever an AltGr key symbol was typed
+repeatedly.
 -------------------------------------------------------------------------------
 [10]
 Added LSB headers to the TurboVNC Server init.d script (tvncserver) in order
