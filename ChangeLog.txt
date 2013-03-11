@@ -32,6 +32,8 @@ Fixed a variety of key mapping issues in the Java TurboVNC Viewer, including:
    modifier keys (Alt, Ctrl, etc.)
 -- The viewer was not properly handling the AltGr key on international
    keyboards.
+-- Inability to use left Alt key sequences on Mac clients to activate
+   pull-down menus on Linux/Windows servers.
 -------------------------------------------------------------------------------
 [5]
 Fixed ArrayIndexOutOfBoundsException in the Java TurboVNC Viewer that occurred
