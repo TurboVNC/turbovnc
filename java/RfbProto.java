@@ -1101,6 +1101,7 @@ class RfbProto {
   final static int META_MASK  = InputEvent.META_MASK;
   final static int ALT_MASK   = InputEvent.ALT_MASK;
   final static int ALT_GRAPH_MASK = InputEvent.ALT_GRAPH_MASK;
+  final static int SUPER_MASK = 1 << 16;
   final static int MASK1      = 1 << 0;
   final static int MASK2      = 1 << 1;
   final static int MASK3      = 1 << 2;
@@ -1229,6 +1230,10 @@ class RfbProto {
       str += "LMeta ";
     if ((rmodifiers & META_MASK) != 0)
       str += "RMeta ";
+    if ((lmodifiers & SUPER_MASK) != 0)
+      str += "LSuper ";
+    if ((rmodifiers & SUPER_MASK) != 0)
+      str += "RSuper ";
     return str;
   }
 
@@ -1351,7 +1356,20 @@ class RfbProto {
       case KeyEvent.VK_KP_RIGHT:     key = Keysyms.KP_Right;  break;
       case KeyEvent.VK_KP_UP:        key = Keysyms.KP_Up;  break;
       case KeyEvent.VK_NUM_LOCK:     key = Keysyms.Num_Lock;  break;
-      case KeyEvent.VK_WINDOWS:      key = Keysyms.Super_L;  break;
+      case KeyEvent.VK_WINDOWS:
+        if (location == KeyEvent.KEY_LOCATION_RIGHT) {
+          key = Keysyms.Super_R;
+          if (down)
+            rmodifiers |= SUPER_MASK;
+          else
+            rmodifiers &= ~SUPER_MASK;
+        } else {
+          key = Keysyms.Super_L;
+          if (down)
+            lmodifiers |= SUPER_MASK;
+          else
+            lmodifiers &= ~SUPER_MASK;
+        }  break;
       case KeyEvent.VK_CONTEXT_MENU: key = Keysyms.Menu;  break;
       case KeyEvent.VK_PRINTSCREEN:  key = Keysyms.Print; break;
       case KeyEvent.VK_SCROLL_LOCK:  key = Keysyms.Scroll_Lock;  break;
@@ -1489,17 +1507,17 @@ class RfbProto {
         }  break;
       case KeyEvent.VK_META:
         if (location == KeyEvent.KEY_LOCATION_RIGHT) {
-          key = Keysyms.Meta_R;
+          key = Keysyms.Super_R;
           if (down)
-            rmodifiers |= META_MASK;
+            rmodifiers |= SUPER_MASK;
           else
-            rmodifiers &= ~META_MASK;
+            rmodifiers &= ~SUPER_MASK;
         } else {
-          key = Keysyms.Meta_L;
+          key = Keysyms.Super_L;
           if (down)
-            lmodifiers |= META_MASK;
+            lmodifiers |= SUPER_MASK;
           else
-            lmodifiers &= ~META_MASK;
+            lmodifiers &= ~SUPER_MASK;
         }  break;
       case KeyEvent.VK_ALT_GRAPH:
         key = Keysyms.ISO_Level3_Shift;
@@ -1598,6 +1616,10 @@ class RfbProto {
         writeKeyEvent(Keysyms.Meta_R, false);
       if ((lmodifiers & ALT_GRAPH_MASK) != 0)
         writeKeyEvent(Keysyms.ISO_Level3_Shift, false);
+      if ((lmodifiers & SUPER_MASK) != 0)
+        writeKeyEvent(Keysyms.Super_L, false);
+      if ((rmodifiers & SUPER_MASK) != 0)
+        writeKeyEvent(Keysyms.Super_R, false);
       lmodifiers = rmodifiers = 0;
     } catch (IOException e) {
       System.out.println("ERROR: Could not send key release events for modifiers:\n       "+

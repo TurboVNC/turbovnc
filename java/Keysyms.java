@@ -88,6 +88,7 @@ public class Keysyms {
   public static final int Alt_R = 0xFFEA;
 
   public static final int Super_L = 0xFFEB;
+  public static final int Super_R = 0xFFEC;
   public static final int Caps_Lock = 0xFFE5;
 
   public static final int KP_Enter = 0xFF8D;
