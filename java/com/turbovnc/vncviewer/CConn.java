@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright (C) 2011-2013 D. R. Commander.  All Rights Reserved.
- * Copyright (C) 2011-2012 Brian P. Hinz
+ * Copyright (C) 2011-2013 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,6 +63,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     new PixelFormat(8, 8, false, true, 7, 7, 3, 5, 2, 0);
   static final PixelFormat HIGH_COLOR_PF =
     new PixelFormat(16, 16, false, true, 31, 63, 31, 11, 5, 0);
+  static final int SUPER_MASK = 1<<16;
 
   static final double getTime() {
     return (double)System.nanoTime() / 1.0e9;
@@ -1249,6 +1250,10 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       str += "LMeta ";
     if ((rmodifiers & Event.META_MASK) != 0)
       str += "RMeta ";
+    if ((lmodifiers & SUPER_MASK) != 0)
+      str += "LSuper ";
+    if ((rmodifiers & SUPER_MASK) != 0)
+      str += "RSuper ";
     return str;
   }
 
@@ -1380,17 +1385,17 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         }  break;
       case KeyEvent.VK_META:
         if (location == KeyEvent.KEY_LOCATION_RIGHT) {
-          keysym = Keysyms.Meta_R;
+          keysym = Keysyms.Super_R;
           if (down)
-            rmodifiers |= Event.META_MASK;
+            rmodifiers |= SUPER_MASK;
           else
-            rmodifiers &= ~Event.META_MASK;
+            rmodifiers &= ~SUPER_MASK;
         } else {
-          keysym = Keysyms.Meta_L;
+          keysym = Keysyms.Super_L;
           if (down)
-            lmodifiers |= Event.META_MASK;
+            lmodifiers |= SUPER_MASK;
           else
-            lmodifiers &= ~Event.META_MASK;
+            lmodifiers &= ~SUPER_MASK;
         }  break;
       case KeyEvent.VK_ALT_GRAPH:
         keysym = Keysyms.ISO_Level3_Shift;
@@ -1515,7 +1520,20 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       case KeyEvent.VK_KP_RIGHT:     keysym = Keysyms.KP_Right;  break;
       case KeyEvent.VK_KP_UP:        keysym = Keysyms.KP_Up;  break;
       case KeyEvent.VK_NUM_LOCK:     keysym = Keysyms.Num_Lock;  break;
-      case KeyEvent.VK_WINDOWS:      keysym = Keysyms.Super_L;  break;
+      case KeyEvent.VK_WINDOWS:
+        if (location == KeyEvent.KEY_LOCATION_RIGHT) {
+          keysym = Keysyms.Super_R;
+          if (down)
+            rmodifiers |= SUPER_MASK;
+          else
+            rmodifiers &= ~SUPER_MASK;
+        } else {
+          keysym = Keysyms.Super_L;
+          if (down)
+            lmodifiers |= SUPER_MASK;
+          else
+            lmodifiers &= ~SUPER_MASK;
+        }  break;
       case KeyEvent.VK_CONTEXT_MENU: keysym = Keysyms.Menu;  break;
       case KeyEvent.VK_SCROLL_LOCK:  keysym = Keysyms.Scroll_Lock;  break;
       case KeyEvent.VK_CAPS_LOCK:    keysym = Keysyms.Caps_Lock;  break;
@@ -1642,6 +1660,10 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       writeKeyEvent(Keysyms.Meta_R, false);
     if ((lmodifiers & KeyEvent.ALT_GRAPH_MASK) != 0)
       writeKeyEvent(Keysyms.ISO_Level3_Shift, false);
+    if ((lmodifiers & SUPER_MASK) != 0)
+      writeKeyEvent(Keysyms.Super_L, false);
+    if ((rmodifiers & SUPER_MASK) != 0)
+      writeKeyEvent(Keysyms.Super_R, false);
     lmodifiers = rmodifiers = 0;
   }
 

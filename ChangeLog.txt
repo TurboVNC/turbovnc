@@ -34,7 +34,7 @@ applet, specifying a host other than the VNC server in the "Server" parameter
 had no effect.
 -------------------------------------------------------------------------------
 [7]
-Fixed several key mapping issues in the Java TurboVNC Viewer:
+Fixed various key mapping issues in the Java TurboVNC Viewer:
 -- Inability to differentiate between the numeric keypad versions of the
    navigation keys (Home, End, etc.) and their equivalents on the main
    keyboard.
@@ -44,6 +44,8 @@ Fixed several key mapping issues in the Java TurboVNC Viewer:
    keyboards.
 -- Inability to use left Alt key sequences on Mac clients to activate
    pull-down menus on Linux/Windows servers.
+-- The Apple keys on Macintosh keyboards can now be used as Windows keys when
+   connecting to Linux and Windows servers.
 -------------------------------------------------------------------------------
 [8]
 The Windows TurboVNC Viewer now properly differentiates between the numeric
