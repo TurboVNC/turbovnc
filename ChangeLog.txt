@@ -39,6 +39,8 @@ Fixed a variety of key mapping issues in the Java TurboVNC Viewer, including:
    keyboards.
 -- Inability to use left Alt key sequences on Mac clients to activate
    pull-down menus on Linux/Windows servers.
+-- The Apple keys on Macintosh keyboards can now be used as Windows keys when
+   connecting to Linux and Windows servers.
 -------------------------------------------------------------------------------
 [4]
 Fixed ArrayIndexOutOfBoundsException in the Java TurboVNC Viewer that occurred
