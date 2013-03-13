@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2009-2012 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2013 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
                        All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -675,7 +675,11 @@ void LoadConfigFile(char *filename)
       if (buf2[n] != '\0') {
         strncpy(passwordString, &buf2[n], 255 - n);
         passwordString[16] = 0;
-        for (i = 0; i < strlen(passwordString); i += 2) {
+        if (strlen(passwordString) != 16) {
+          fprintf(stderr, "Password stored in connection info file is invalid.\n");
+          exit(1);
+        }
+        for (i = 0; i < 16; i += 2) {
           char temps[3];  int temp;
           strncpy(temps, &passwordString[i], 2);
           temps[2] = 0;

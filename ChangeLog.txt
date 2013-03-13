@@ -73,6 +73,11 @@ fonts and add them to the fontpath.
 Fixed an error that occurred when running '/etc/init.d/tvncserver stop' with
 an empty /etc/sysconfig/tvncservers file.
 -------------------------------------------------------------------------------
+[13]
+Fixed an issue whereby the X11 TurboVNC Viewer would fail with an error message
+of "Password stored in connection info file is invalid" when loading a
+connection info file in which the encrypted password contained "00".
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

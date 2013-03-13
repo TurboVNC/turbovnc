@@ -1,6 +1,6 @@
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010, 2013 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -200,7 +200,7 @@ int vncDecryptPasswdFromFile2(char *fname,
 
 int vncDecryptPasswd(char *encryptedPasswd, char *decryptedPasswd)
 {
-  if (!encryptedPasswd || !decryptedPasswd || strlen(encryptedPasswd) < 8)
+  if (!encryptedPasswd || !decryptedPasswd)
     return 0;
 
   deskey(s_fixedkey, DE1);
