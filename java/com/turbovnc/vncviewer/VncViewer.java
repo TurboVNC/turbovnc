@@ -97,7 +97,12 @@ public class VncViewer extends java.applet.Applet implements Runnable {
               fileName = fName;
             else {
               VncViewer viewer = new VncViewer(new String[]{});
-              Configuration.load(fName);
+              try {
+                Configuration.load(fName);
+              } catch (Exception e) {
+                viewer.reportException(e);
+                return null;
+              }
               viewer.setGlobalOptions();
               viewer.start();
             }
@@ -159,7 +164,12 @@ public class VncViewer extends java.applet.Applet implements Runnable {
     if (os.startsWith("mac os x")) {
       synchronized(VncViewer.class) {
         if (fileName != null) {
-          Configuration.load(fileName);
+          try {
+            Configuration.load(fileName);
+          } catch(Exception e) {
+            viewer.reportException(e);
+            return;
+          }
           viewer.setGlobalOptions();
           fileName = null;
         }
@@ -183,7 +193,12 @@ public class VncViewer extends java.applet.Applet implements Runnable {
 
       if (argv[i].equalsIgnoreCase("-config")) {
         if (++i >= argv.length) usage();
+        try {
           Configuration.load(argv[i]);
+        } catch (Exception e) {
+          System.out.println(e.getMessage());
+          exit(1);
+        }
         continue;
       }
 
@@ -237,7 +252,12 @@ public class VncViewer extends java.applet.Applet implements Runnable {
       }
 
       if (argv[i].toLowerCase().endsWith(".vnc")) {
-        Configuration.load(argv[i]);
+        try {
+          Configuration.load(argv[i]);
+        } catch (Exception e) {
+          System.out.println(e.getMessage());
+          exit(1);
+        }
         continue;
       }
 
