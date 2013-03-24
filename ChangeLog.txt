@@ -78,6 +78,13 @@ Fixed an issue whereby the X11 TurboVNC Viewer would fail with an error message
 of "Password stored in connection info file is invalid" when loading a
 connection info file in which the encrypted password contained "00".
 -------------------------------------------------------------------------------
+[14]
+Fixed an issue with the multi-monitor spanning feature in the Mac/Java TurboVNC
+Viewer whereby the remote desktop would appear on the secondary monitor instead
+of the primary monitor when the span mode was set to "Primary" (or when the
+span mode was set to "Auto" and the remote desktop area was less than the
+primary monitor area.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
