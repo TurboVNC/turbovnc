@@ -60,7 +60,8 @@ public class Viewport extends JFrame {
     if (VncViewer.os.startsWith("mac os x")) {
       macMenu = new MacMenuBar(cc);
       setJMenuBar(macMenu);
-      enableLionFS();
+      if (!VncViewer.noLionFS.getValue())
+        enableLionFS();
     }
     addWindowFocusListener(new WindowAdapter() {
       public void windowGainedFocus(WindowEvent e) {

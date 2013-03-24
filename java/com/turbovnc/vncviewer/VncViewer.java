@@ -665,6 +665,13 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   "cannot fit on the primary monitor (Auto.)", "Auto",
   "Primary, All, Auto");
 
+  static BoolParameter noLionFS
+  = new BoolParameter("NoLionFS",
+  "On Mac systems, setting this parameter will force the use of the old " +
+  "(pre-Lion) full-screen mode, even if the viewer is running on OS X 10.7 " +
+  "\"Lion\" or later.  This is included primarily because the Lion " +
+  "full-screen feature does not yet support multi-monitor spanning.", false);
+
   static BoolParameter showToolbar
   = new BoolParameter("Toolbar",
   "Show the toolbar by default.", true);
