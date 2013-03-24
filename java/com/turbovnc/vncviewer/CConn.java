@@ -610,10 +610,12 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
           tLeft = s.x;  tTop = s.y;
           tRight = s.x + s.width;  tBottom = s.y + s.height;
         }
-        if (primary == null || (gc == gcList[0] &&
-                                (s.x < primary.x || s.y < primary.y))) {
+        if (primary == null ||
+            (gc == gcList[0] && ((s.y < primary.y &&
+                                  s.x < primary.x + primary.width) || 
+                                 (s.x < primary.x &&
+                                  s.y < primary.y + primary.height))))
           primary = s;
-        }
 
         tLeft = Math.min(tLeft, s.x);
         tRight = Math.max(tRight, s.x + s.width);
