@@ -55,7 +55,6 @@ public class Viewport extends JFrame {
     }
     tb = new Toolbar(cc);
     add(tb, BorderLayout.PAGE_START);
-    showToolbar(cc.showToolbar);
     getContentPane().add(sp);
     if (VncViewer.os.startsWith("mac os x")) {
       macMenu = new MacMenuBar(cc);
@@ -63,6 +62,10 @@ public class Viewport extends JFrame {
       if (!VncViewer.noLionFS.getValue())
         enableLionFS();
     }
+    // NOTE: If Lion FS mode is enabled, then the viewport is only created once
+    // as a non-full-screen viewport, so we tell showToolbar() to ignore the
+    // full-screen state.
+    showToolbar(cc.showToolbar, canDoLionFS);
     addWindowFocusListener(new WindowAdapter() {
       public void windowGainedFocus(WindowEvent e) {
         sp.getViewport().getView().requestFocusInWindow();
@@ -127,16 +130,19 @@ public class Viewport extends JFrame {
     MyInvocationHandler(CConn cc_) { cc = cc_; }
 
     public Object invoke(Object proxy, Method method, Object[] args) {
-      boolean fullScreen = cc.opts.fullScreen;
       if (method.getName().equals("windowEnteringFullScreen")) {
         cc.opts.fullScreen = true;
-      } else if (method.getName().equals("windowExitingFullScreen")) {
-        cc.opts.fullScreen = false;
-      }
-      if (fullScreen != cc.opts.fullScreen) {
         cc.menu.fullScreen.setSelected(cc.opts.fullScreen);
         updateMacMenuFS();
         showToolbar(cc.showToolbar);
+      } else if (method.getName().equals("windowExitingFullScreen")) {
+        cc.opts.fullScreen = false;
+        cc.menu.fullScreen.setSelected(cc.opts.fullScreen);
+        updateMacMenuFS();
+        showToolbar(cc.showToolbar);
+      } else if (method.getName().equals("windowEnteredFullScreen")) {
+        Rectangle span = cc.getSpannedSize(true);
+        setGeometry(span.x, span.y, span.width, span.height, false);
       }
       return null;
     }
@@ -214,8 +220,10 @@ public class Viewport extends JFrame {
     setLocation(x, y);
   }
 
-  public void showToolbar(boolean show) {
-    tb.setVisible(show && !cc.opts.fullScreen);
+  public void showToolbar(boolean show) { showToolbar(show, false); }
+
+  private void showToolbar(boolean show, boolean force) {
+    tb.setVisible(show && (!cc.opts.fullScreen || force));
   }
 
   public void updateTitle() {

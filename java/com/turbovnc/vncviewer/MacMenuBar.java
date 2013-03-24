@@ -156,6 +156,7 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       cc.sizeWindow();
     } else if (actionMatch(ev, showToolbar)) {
       cc.toggleToolbar();
+      showToolbar.setSelected(cc.showToolbar);
     } else if (actionMatch(ev, clipboard)) {
       cc.clipboardDialog.showDialog(cc.viewport);
     } else if (actionMatch(ev, ctrlAltDel)) {

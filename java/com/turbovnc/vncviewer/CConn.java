@@ -548,8 +548,9 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   private void recreateViewport() { recreateViewport(false); }
 
   private void recreateViewport(boolean restore) {
+    boolean fullScreen = opts.fullScreen;
     if (viewport != null) {
-      if (opts.fullScreen && !viewport.lionFSSupported()) {
+      if (opts.fullScreen) {
         savedState = viewport.getExtendedState();
         viewport.setExtendedState(JFrame.NORMAL);
         savedRect = viewport.getBounds();
@@ -557,7 +558,13 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       viewport.dispose();
     }
     viewport = new Viewport(this);
-    viewport.setUndecorated(opts.fullScreen && !viewport.lionFSSupported());
+    if (opts.fullScreen && viewport.lionFSSupported()) {
+      // If we get here, it means that the viewer was started in Lion
+      // full-screen mode, so we need to create the viewport as if full-screen
+      // mode was disabled.
+      opts.fullScreen = false;
+    }
+    viewport.setUndecorated(opts.fullScreen);
     desktop.setViewport(viewport);
     ClassLoader loader = this.getClass().getClassLoader();
     URL url = loader.getResource("com/turbovnc/vncviewer/turbovnc-sm.png");
@@ -569,12 +576,14 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     reconfigureViewport(restore);
     if ((cp.width > 0) && (cp.height > 0))
       viewport.setVisible(true);
-    if (opts.fullScreen && viewport.lionFSSupported())
+    if (fullScreen && viewport.lionFSSupported()) {
+      opts.fullScreen = fullScreen;
       viewport.toggleLionFS();
+    }
     desktop.requestFocusInWindow();
   }
 
-  private Rectangle getSpannedSize(boolean fullScreen) {
+  public Rectangle getSpannedSize(boolean fullScreen) {
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     GraphicsDevice[] gsList = ge.getScreenDevices();
     Rectangle primary = null, s0 = null;
@@ -666,7 +675,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     int h = desktop.scaledHeight;
     Rectangle span = getSpannedSize(false);
 
-    if (opts.fullScreen && !viewport.lionFSSupported()) return;
+    if (opts.fullScreen) return;
 
     if (opts.scalingFactor == Options.SCALE_AUTO ||
         opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
@@ -694,7 +703,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
   private void reconfigureViewport(boolean restore) {
     desktop.setScaledSize();
-    if (opts.fullScreen && !viewport.lionFSSupported()) {
+    if (opts.fullScreen) {
       // NOTE: We have to use the work area on OS X, because there is no way
       // to hide the menu bar in full-screen mode.
       Rectangle span = getSpannedSize(!VncViewer.os.startsWith("mac os x"));
@@ -1197,11 +1206,10 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
   public void toggleToolbar() {
-    if (viewport == null)
+    if (viewport == null || opts.fullScreen)
       return;
     showToolbar = !showToolbar;
-    if (!opts.fullScreen)
-      recreateViewport();
+    recreateViewport();
     viewport.showToolbar(showToolbar);
     menu.showToolbar.setSelected(showToolbar);
   }
@@ -1213,8 +1221,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       if (!viewport.lionFSSupported()) {
         recreateViewport(true);
       } else {
-        viewport.showToolbar(showToolbar);
-        viewport.updateMacMenuFS();
         viewport.toggleLionFS();
       }
     }

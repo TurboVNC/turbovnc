@@ -92,6 +92,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       cc.toggleFullScreen();
     } else if (actionMatch(ev, showToolbar)) {
       cc.toggleToolbar();
+      showToolbar.setSelected(cc.showToolbar);
     } else if (actionMatch(ev, defaultSize)) {
       cc.sizeWindow();
     } else if (actionMatch(ev, clipboard)) {
