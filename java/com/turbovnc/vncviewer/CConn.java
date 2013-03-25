@@ -577,7 +577,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   public Rectangle getSpannedSize(boolean fullScreen) {
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     GraphicsDevice[] gsList = ge.getScreenDevices();
-    Rectangle s0 = null;
+    Rectangle primary = null, s0 = null;
     Rectangle span = new Rectangle(-1, -1, 0, 0);
     Insets in = new Insets(0, 0, 0, 0);
     int tLeft = 0, tTop = 0, tRight = 0, tBottom = 0;
@@ -593,9 +593,9 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
     Toolkit tk = Toolkit.getDefaultToolkit();
 
+    int i = 0;
     for (GraphicsDevice gs : gsList) {
       GraphicsConfiguration[] gcList = gs.getConfigurations();
-      int i = 0;
       for (GraphicsConfiguration gc : gcList) {
         Rectangle s = gc.getBounds();
         if (!fullScreen) {
@@ -611,6 +611,13 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
           tLeft = s.x;  tTop = s.y;
           tRight = s.x + s.width;  tBottom = s.y + s.height;
         }
+        if (s.x >= 0 && s.y >= 0 &&
+            (primary == null ||
+             (gc == gcList[0] && ((s.y < primary.y &&
+                                   s.x < primary.x + primary.width) || 
+                                  (s.x < primary.x &&
+                                   s.y < primary.y + primary.height)))))
+          primary = s;
         if (gc == gcList[0])
           vlog.debug("Screen " + i++ + (fullScreen ? " FS " : " work ") +
                      "area: " + s.x + ", " + s.y + " " + s.width + " x " +
@@ -647,9 +654,9 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
     if (opts.span == Options.SPAN_PRIMARY ||
         (opts.span == Options.SPAN_AUTO &&
-         (sw <= s0.width || span.width <= s0.width) &&
-         (sh <= s0.height || span.height <= s0.height)))
-      span = s0;
+         (sw <= primary.width || span.width <= primary.width) &&
+         (sh <= primary.height || span.height <= primary.height)))
+      span = primary;
     else if (equal && fullScreen)
       span = new Rectangle(tLeft, tTop, tRight - tLeft, tBottom - tTop);
 
