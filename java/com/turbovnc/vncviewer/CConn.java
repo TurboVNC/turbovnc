@@ -612,7 +612,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
           tRight = s.x + s.width;  tBottom = s.y + s.height;
         }
         if (gc == gcList[0])
-          vlog.debug("Screen " + i++ + (fullScreen ? "FS " : " work ") +
+          vlog.debug("Screen " + i++ + (fullScreen ? " FS " : " work ") +
                      "area: " + s.x + ", " + s.y + " " + s.width + " x " +
                      s.height);
 
