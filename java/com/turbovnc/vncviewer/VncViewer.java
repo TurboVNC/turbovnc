@@ -361,6 +361,9 @@ public class VncViewer extends java.applet.Applet implements Runnable {
     if (applet && nViewers == 0) {
       alwaysShowConnectionDialog.setParam(true);
       Configuration.readAppletParams(this);
+      String str = getParameter("LogLevel");
+      if (str != null)
+        LogWriter.setLogParams(str);
       setGlobalOptions();
       host = opts.serverName;
       if ((opts.via != null || opts.tunnel) && opts.serverName != null) {
