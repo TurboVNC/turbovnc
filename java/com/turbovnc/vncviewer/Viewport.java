@@ -36,6 +36,7 @@ public class Viewport extends JFrame {
     updateTitle();
     setFocusable(false);
     setFocusTraversalKeysEnabled(false);
+    setIconImage(VncViewer.frameImage);
     UIManager.getDefaults().put("ScrollPane.ancestorInputMap",
       new UIDefaults.LazyInputMap(new Object[]{}));
     sp = new JScrollPane();

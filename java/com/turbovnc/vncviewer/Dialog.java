@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011-2012 Brian P. Hinz
+ * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -50,9 +50,7 @@ class Dialog extends JDialog {
       int y = (dpySize.height - mySize.height) / 2;
       setLocation(x, y);
     }
-    ClassLoader cl = this.getClass().getClassLoader();
-    ImageIcon icon = new ImageIcon(cl.getResource("com/turbovnc/vncviewer/turbovnc-sm.png"));
-    ((Frame)this.getOwner()).setIconImage(icon.getImage());
+    ((Frame)this.getOwner()).setIconImage(VncViewer.frameImage);
 
     if (w != null && w.isAlwaysOnTop()) {
       // We must be in full-screen mode.  Temporarily prevent the viewport from

@@ -41,8 +41,6 @@ import java.io.*;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import javax.swing.*;
-import javax.swing.ImageIcon;
-import java.net.URL;
 import java.util.*;
 
 import com.turbovnc.rdr.*;
@@ -566,13 +564,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     }
     viewport.setUndecorated(opts.fullScreen);
     desktop.setViewport(viewport);
-    ClassLoader loader = this.getClass().getClassLoader();
-    URL url = loader.getResource("com/turbovnc/vncviewer/turbovnc-sm.png");
-    ImageIcon icon = null;
-    if (url != null) {
-      icon = new ImageIcon(url);
-      viewport.setIconImage(icon.getImage());
-    }
     reconfigureViewport(restore);
     if ((cp.width > 0) && (cp.height > 0))
       viewport.setVisible(true);
@@ -814,24 +805,16 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
   void showAbout(Component comp) {
-    InputStream stream = cl.getResourceAsStream("com/turbovnc/vncviewer/timestamp");
-    String pkgDate = "";
-    String pkgTime = "";
-    try {
-      Manifest manifest = new Manifest(stream);
-      Attributes attributes = manifest.getMainAttributes();
-      pkgDate = attributes.getValue("Package-Date");
-      pkgTime = attributes.getValue("Package-Time");
-    } catch(IOException e) { }
     JOptionPane.showMessageDialog((viewport != null ? viewport : comp),
       VncViewer.PRODUCT_NAME + " v" + VncViewer.version +
         " (" + VncViewer.build + ") " +
         "[JVM: " + System.getProperty("os.arch") + "]\n" +
-      "Built on " + pkgDate + " at " + pkgTime + "\n" +
+      "Built on " + VncViewer.pkgDate + " at " + VncViewer.pkgTime + "\n" +
       "Copyright (C) " + VncViewer.copyrightYear + " " + VncViewer.copyright +
         "\n" +
       VncViewer.url,
-      "About TurboVNC Viewer", JOptionPane.INFORMATION_MESSAGE, logo);
+      "About TurboVNC Viewer", JOptionPane.INFORMATION_MESSAGE,
+      VncViewer.logoIcon);
   }
 
   void showInfo() {
@@ -1703,8 +1686,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
   // the following need no synchronization:
 
-  ClassLoader cl = this.getClass().getClassLoader();
-  ImageIcon logo = new ImageIcon(cl.getResource("com/turbovnc/vncviewer/turbovnc.png"));
   public static UserPasswdGetter upg;
   public UserMsgBox msg;
 

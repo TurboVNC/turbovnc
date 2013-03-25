@@ -1,7 +1,7 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright (C) 2011-2013 D. R. Commander.  All Rights Reserved.
- * Copyright (C) 2011-2012 Brian P. Hinz
+ * Copyright (C) 2011-2013 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,6 +52,15 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   public static String url = null;
   public static String version = null;
   public static String build = null;
+  public static String pkgDate = null;
+  public static String pkgTime = null;
+
+  private static final ImageIcon frameIcon = 
+    new ImageIcon(VncViewer.class.getResource("turbovnc-sm.png"));
+  public static final Image frameImage = frameIcon.getImage();
+  public static final ImageIcon logoIcon = 
+    new ImageIcon(VncViewer.class.getResource("turbovnc.png"));
+  public static final Image logoImage = logoIcon.getImage();
 
   void setVersion() {
     if (version == null || build == null || copyrightYear == null ||
@@ -67,6 +76,8 @@ public class VncViewer extends java.applet.Applet implements Runnable {
         copyrightYear = attributes.getValue("Copyright-Year");
         copyright = attributes.getValue("Copyright");
         url = attributes.getValue("URL");
+        pkgDate = attributes.getValue("Package-Date");
+        pkgTime = attributes.getValue("Package-Time");
       } catch(IOException e) {}
     }
   }
@@ -342,9 +353,6 @@ public class VncViewer extends java.applet.Applet implements Runnable {
     vlog.debug("init called");
     setLookAndFeel();
     setBackground(Color.white);
-    ClassLoader cl = this.getClass().getClassLoader();
-    ImageIcon icon = new ImageIcon(cl.getResource("com/turbovnc/vncviewer/turbovnc.png"));
-    logo = icon.getImage();
   }
 
   public void start() {
@@ -389,8 +397,8 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   }
 
   public void paint(Graphics g) {
-    g.drawImage(logo, 0, 0, this);
-    int h = logo.getHeight(this) + 20;
+    g.drawImage(logoImage, 0, 0, this);
+    int h = logoImage.getHeight(this) + 20;
     g.drawString(PRODUCT_NAME + " v" + version + " (" + build + ")", 0, h);
     h += g.getFontMetrics().getHeight();
     g.drawString("Copyright (C) " + copyrightYear + " " + copyright, 0, h);
@@ -925,7 +933,6 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   Thread thread;
   Socket sock;
   boolean applet;
-  Image logo;
   static int nViewers;
   static LogWriter vlog = new LogWriter("main");
   FileInStream benchFile;
