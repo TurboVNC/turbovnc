@@ -215,8 +215,10 @@ public class Viewport extends JFrame {
   public void setGeometry(int x, int y, int w, int h, boolean pack) {
     if (pack) {
       pack();
+      vlog.debug("Set geometry to " + x + ", " + y + " (pack)");
     } else {
       setSize(w, h);
+      vlog.debug("Set geometry to " + x + ", " + y + " " + w + " x " + h);
     }
     setLocation(x, y);
   }

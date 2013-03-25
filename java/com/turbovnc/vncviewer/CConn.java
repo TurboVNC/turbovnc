@@ -577,7 +577,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   public Rectangle getSpannedSize(boolean fullScreen) {
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     GraphicsDevice[] gsList = ge.getScreenDevices();
-    Rectangle primary = null, s0 = null;
+    Rectangle s0 = null;
     Rectangle span = new Rectangle(-1, -1, 0, 0);
     Insets in = new Insets(0, 0, 0, 0);
     int tLeft = 0, tTop = 0, tRight = 0, tBottom = 0;
@@ -595,6 +595,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
     for (GraphicsDevice gs : gsList) {
       GraphicsConfiguration[] gcList = gs.getConfigurations();
+      int i = 0;
       for (GraphicsConfiguration gc : gcList) {
         Rectangle s = gc.getBounds();
         if (!fullScreen) {
@@ -610,12 +611,10 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
           tLeft = s.x;  tTop = s.y;
           tRight = s.x + s.width;  tBottom = s.y + s.height;
         }
-        if (primary == null ||
-            (gc == gcList[0] && ((s.y < primary.y &&
-                                  s.x < primary.x + primary.width) || 
-                                 (s.x < primary.x &&
-                                  s.y < primary.y + primary.height))))
-          primary = s;
+        if (gc == gcList[0])
+          vlog.debug("Screen " + i++ + (fullScreen ? "FS " : " work ") +
+                     "area: " + s.x + ", " + s.y + " " + s.width + " x " +
+                     s.height);
 
         tLeft = Math.min(tLeft, s.x);
         tRight = Math.max(tRight, s.x + s.width);
@@ -648,15 +647,16 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
     if (opts.span == Options.SPAN_PRIMARY ||
         (opts.span == Options.SPAN_AUTO &&
-         (sw <= primary.width || span.width <= primary.width) &&
-         (sh <= primary.height || span.height <= primary.height)))
-      return primary;
-    else {
-      if (equal && fullScreen)
-        return new Rectangle(tLeft, tTop, tRight - tLeft, tBottom - tTop);
-      else
-        return span;
-    }
+         (sw <= s0.width || span.width <= s0.width) &&
+         (sh <= s0.height || span.height <= s0.height)))
+      span = s0;
+    else if (equal && fullScreen)
+      span = new Rectangle(tLeft, tTop, tRight - tLeft, tBottom - tTop);
+
+    vlog.debug("Spanned " + (fullScreen ? "FS " : "work ") + "area: " +
+               span.x + ", " + span.y + " " + span.width + " x " +
+               span.height);
+    return span;
   }
 
   // Resize non-full-screen window based on the spanning option
@@ -685,8 +685,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     }
 
     viewport.setExtendedState(JFrame.NORMAL);
-    int x = (span.width - w) / 2;
-    int y = (span.height - h) / 2;
+    int x = (span.width - w) / 2 + span.x;
+    int y = (span.height - h) / 2 + span.y;
     viewport.setGeometry(x, y, w, h, pack);
   }
 
