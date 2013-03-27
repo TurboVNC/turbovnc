@@ -59,22 +59,31 @@ public class ImageDrawTest extends JFrame {
       }
 
       width = w;  height = h;
-      im = new BIPixelBuffer(width, height, null, null);
+      im1 = new BIPixelBuffer(width, height, null, null);
       if (colors == 8)
-        im.setPF(VERY_LOW_COLOR_PF);
+        im1.setPF(VERY_LOW_COLOR_PF);
       else if (colors == 64)
-        im.setPF(LOW_COLOR_PF);
+        im1.setPF(LOW_COLOR_PF);
       else if (colors == 256)
-        im.setPF(MEDIUM_COLOR_PF);
+        im1.setPF(MEDIUM_COLOR_PF);
       else if (colors == 65536)
-        im.setPF(HIGH_COLOR_PF);
+        im1.setPF(HIGH_COLOR_PF);
+      im2 = new BIPixelBuffer(width, height, null, null);
+      if (colors == 8)
+        im2.setPF(VERY_LOW_COLOR_PF);
+      else if (colors == 64)
+        im2.setPF(LOW_COLOR_PF);
+      else if (colors == 256)
+        im2.setPF(MEDIUM_COLOR_PF);
+      else if (colors == 65536)
+        im2.setPF(HIGH_COLOR_PF);
     }
 
     public Dimension getPreferredSize() {
       return new Dimension(width, height);
     }
 
-    public void initImage(int w, int h, int offset) {
+    public void initImage(BIPixelBuffer im, int w, int h, int offset) {
       int i, j;
       PixelFormat pf = im.getPF();
       int[] stride = new int[]{w};
@@ -105,22 +114,24 @@ public class ImageDrawTest extends JFrame {
 
     public void paintComponent(Graphics g) {
       Graphics2D g2 = (Graphics2D) g;
-      g2.drawImage(im.getImage(), 0, 0, null);
+      g2.drawImage((iter % 2 == 0 ? im2.getImage() : im1.getImage()), 0, 0,
+                   null);
       g2.dispose();
     }
 
     public void display() {
-      int iter = 0, seed = 0;
       double tStart, t1, t2, paintTime = 0.;
       tStart = getTime();
       if (width != getWidth() || height != getHeight()) {
-        im.resize(getWidth(), getHeight());
+        im1.resize(getWidth(), getHeight());
+        im2.resize(getWidth(), getHeight());
         width = getWidth();  height = getHeight();
       }
       System.out.format("Window size: %d x %d\n", width, height);
 
+      initImage(im1, width, height, 0);
+      initImage(im2, width, height, 1);
       while (true) {
-        initImage(width, height, seed++);
         t1 = getTime();
         paintImmediately(0, 0, width, height);
         t2 = getTime();
@@ -136,9 +147,9 @@ public class ImageDrawTest extends JFrame {
       }
     }
 
-    BIPixelBuffer im;
+    BIPixelBuffer im1, im2;
     byte[] rgbBuf;
-    int preferredWidth, preferredHeight, width, height;
+    int preferredWidth, preferredHeight, width, height, iter;
   }
 
   private static double getTime() {
