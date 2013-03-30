@@ -276,7 +276,7 @@ extern void Error(
 #endif
 );
 
-extern CARD32 GetTimeInMillis(
+extern CARD64 GetTimeInMillis(
 #if NeedFunctionPrototypes
     void
 #endif
