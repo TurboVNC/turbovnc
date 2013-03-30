@@ -85,6 +85,9 @@ of the primary monitor when the span mode was set to "Primary" (or when the
 span mode was set to "Auto" and the remote desktop area was less than the
 primary monitor area.)
 -------------------------------------------------------------------------------
+[15]
+Fix Xvnc build errors on Solaris and FreeBSD.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
