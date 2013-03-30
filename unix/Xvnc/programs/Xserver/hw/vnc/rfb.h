@@ -42,6 +42,7 @@
 #include <stdarg.h>
 #include <pthread.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #ifdef RENDER
 #include "picturestr.h"
 #endif
