@@ -120,8 +120,7 @@ public class ImageDrawTest extends JFrame {
     }
 
     public void display() {
-      double tStart, t1, t2, paintTime = 0.;
-      tStart = getTime();
+      double t0, t1;
       if (width != getWidth() || height != getHeight()) {
         im1.resize(getWidth(), getHeight());
         im2.resize(getWidth(), getHeight());
@@ -131,17 +130,15 @@ public class ImageDrawTest extends JFrame {
 
       initImage(im1, width, height, 0);
       initImage(im2, width, height, 1);
+      t0 = getTime();
       while (true) {
-        t1 = getTime();
         paintImmediately(0, 0, width, height);
-        t2 = getTime();
-        paintTime += t2 - t1;
         iter++;
-        if (t2 - tStart > 5.0) {
+        t1 = getTime();
+        if (t1 - t0 > 5.0) {
           System.out.format("%f Mpixels/sec\n",
-            (double)iter * (double)(width * height) / (1000000. * paintTime));
-          paintTime = 0.;
-          tStart = getTime();
+            (double)iter * (double)(width * height) / (1000000. * (t1 - t0)));
+          t0 = t1;
           iter = 0;
         }
       }
