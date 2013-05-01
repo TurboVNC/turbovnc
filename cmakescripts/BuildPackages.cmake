@@ -17,6 +17,12 @@ else()
 	set(DEBARCH ${CPU_TYPE})
 endif()
 
+if(TVNC_BUILDJAVA)
+	set(TVNC_BUILDJAVA 1)
+else()
+	set(TVNC_BUILDJAVA 0)
+endif()
+
 if(NOT TVNC_JAVADIR)
 	set(TVNC_JAVADIR ${CMAKE_INSTALL_PREFIX}/java)
 endif()
