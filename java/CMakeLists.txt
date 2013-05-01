@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 
+if(UNIX)
+	set(CMAKE_INSTALL_PREFIX /opt/TurboVNC CACHE PATH
+		"Install path prefix, prepended onto install directories.")
+endif()
+
 project(turbovnc-java Java)
 set(VERSION 1.2)
 set(COPYRIGHT_YEAR "2000-2013")
