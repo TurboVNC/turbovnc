@@ -1,6 +1,6 @@
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ static Bool scrollLeft, scrollRight, scrollUp, scrollDown;
 static Position desktopX, desktopY;
 static Dimension viewportWidth, viewportHeight;
 static Dimension scrollbarWidth, scrollbarHeight;
-static Bool keyboardGrabbed = False;
+Bool keyboardGrabbed = False;
 
 
 /*
@@ -244,7 +244,6 @@ void FullScreenOn()
   XtVaSetValues(popup, XtNoverrideRedirect, True, NULL);
 
   /* Try to get the input focus. */
-
   XSetInputFocus(dpy, DefaultRootWindow(dpy), RevertToPointerRoot,
                  CurrentTime);
 
@@ -320,6 +319,9 @@ void FullScreenOff()
   XtVaSetValues(popup, XtNoverrideRedirect, False, NULL);
 
   netwm_fullscreen(dpy, XtWindow(toplevel), False);
+
+  /* Restore input focus */
+  XSetInputFocus(dpy, XtWindow(toplevel), RevertToPointerRoot, CurrentTime);
 }
 
 
