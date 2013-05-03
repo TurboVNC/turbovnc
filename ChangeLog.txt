@@ -88,6 +88,12 @@ primary monitor area.)
 [15]
 Fixed Xvnc build errors on Solaris and FreeBSD.
 -------------------------------------------------------------------------------
+[16]
+The X11 TurboVNC Viewer will now temporarily ungrab the keyboard if the viewer
+window loses focus while the keyboard is grabbed (when not in full-screen mode,
+this can happen if the user clicks on another window, or if a notification
+dialog from the window manager pops up.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

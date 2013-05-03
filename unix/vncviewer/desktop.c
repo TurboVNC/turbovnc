@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2013 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -37,6 +38,9 @@ Cursor dotCursor;
 Widget form, viewport, desktop;
 
 static Bool modifierPressed[256];
+
+extern Bool keyboardGrabbed;
+Bool keyboardTempUngrabbed = FALSE;
 
 XImage *image = NULL;
 
@@ -80,6 +84,9 @@ void DesktopInitBeforeRealization()
 
   XtAddEventHandler(desktop, LeaveWindowMask|ExposureMask,
                     True, HandleBasicDesktopEvent, NULL);
+
+  XtAddEventHandler(toplevel, FocusChangeMask, True, HandleBasicDesktopEvent,
+                    NULL);
 
   for (i = 0; i < 256; i++)
     modifierPressed[i] = False;
@@ -180,6 +187,25 @@ static void HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev,
 
       SendFramebufferUpdateRequest(ev->xexpose.x, ev->xexpose.y,
                                  ev->xexpose.width, ev->xexpose.height, False);
+      break;
+
+    case FocusIn:
+      if (keyboardGrabbed && keyboardTempUngrabbed) {
+        fprintf(stderr, "Keyboard focus regained.  Re-grabbing keyboard.\n");
+        if (XtGrabKeyboard(toplevel, True, GrabModeAsync,
+                           GrabModeAsync, CurrentTime) != GrabSuccess)
+          fprintf(stderr, "XtGrabKeyboard() failed.\n");
+        keyboardTempUngrabbed = FALSE;
+      }
+      break;
+
+    case FocusOut:
+      if (keyboardGrabbed && ev->xfocus.mode == NotifyWhileGrabbed &&
+          ev->xfocus.detail == NotifyNonlinear) {
+        fprintf(stderr, "Keyboard focus lost.  Temporarily ungrabbing keyboard.\n");
+        XtUngrabKeyboard(toplevel, CurrentTime);
+        keyboardTempUngrabbed = TRUE;
+      }
       break;
 
     case LeaveNotify:
