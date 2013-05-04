@@ -8,7 +8,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -2027,14 +2027,14 @@ rfbSpriteGlyphs(CARD8         op,
     pScreenPriv =
         (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
     PICTURE_PROLOGUE(ps, pScreenPriv, Glyphs);
-    if (pSrc->pDrawable->type == DRAWABLE_WINDOW)
+    if (pSrc && pSrc->pDrawable && pSrc->pDrawable->type == DRAWABLE_WINDOW)
     {
         WindowPtr   pSrcWin = (WindowPtr)(pSrc->pDrawable);
 
         if (GC_CHECK(pSrcWin))
             rfbSpriteRemoveCursor(pScreen);
     }
-    if (pDst->pDrawable->type == DRAWABLE_WINDOW)
+    if (pDst && pDst->pDrawable && pDst->pDrawable->type == DRAWABLE_WINDOW)
     {
         WindowPtr   pDstWin = (WindowPtr)(pDst->pDrawable);
 
