@@ -108,10 +108,6 @@ the "gnome-session-fallback" package is installed.  TurboVNC cannot use Unity
 Fixed a segfault that occurred when starting the TurboVNC Server on Ubuntu
 13.04 and Fedora 18 (and possibly other new distros.)
 -------------------------------------------------------------------------------
-[20]
-The TurboVNC Server will now properly find and use the font catalogue on recent
-Fedora systems.
--------------------------------------------------------------------------------
 
 
 ===============================================================================
