@@ -94,6 +94,20 @@ window loses focus while the keyboard is grabbed (when not in full-screen mode,
 this can happen if the user clicks on another window, or if a notification
 dialog from the window manager pops up.)
 -------------------------------------------------------------------------------
+[17]
+Fixed TurboVNC Server build issues that occurred under Ubuntu 13.04 (and
+possibly other new Linux distros.)
+-------------------------------------------------------------------------------
+[18]
+The default xstartup.turbovnc script that the TurboVNC Server creates will now
+use the Gnome fallback window manager on Ubuntu 12.10 and later, assuming that
+the "gnome-session-fallback" package is installed.  TurboVNC cannot use Unity
+3D (yet), and Unity 2D was removed in Ubuntu 12.10 and later.
+-------------------------------------------------------------------------------
+[19]
+Fixed a segfault that occurred when starting the TurboVNC Server on Ubuntu
+13.04 and Fedora 18 (and possibly other new distros.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
