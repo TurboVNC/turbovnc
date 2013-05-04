@@ -70,7 +70,7 @@ set(TVNC_MANDIR ${DEFAULT_TVNC_MANDIR} CACHE PATH
 	"Directory into which man pages should be installed (default: ${DEFAULT_TVNC_MANDIR})")
 message(STATUS "TVNC_MANDIR = ${TVNC_MANDIR}")
 
-include_directories(include)
+include_directories(include ${CMAKE_SOURCE_DIR}/common/zlib)
 
 
 #

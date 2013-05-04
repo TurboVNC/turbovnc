@@ -51,7 +51,8 @@ fi
 if [ ! "$JPEGLINK" = "" ]; then
     echo "#define JPEGLibraryFlags $JPEGLINK" >>config/cf/platform.def
 fi
-echo '#define VncIncludeDir -I@CMAKE_SOURCE_DIR@/unix/include -I@CMAKE_SOURCE_DIR@/common/rfb' >>config/cf/platform.def
+echo '#define ZlibIncludeDir -I@CMAKE_SOURCE_DIR@/common/zlib' >>config/cf/platform.def
+echo '#define VncIncludeDir -I@CMAKE_SOURCE_DIR@/unix/include -I@CMAKE_SOURCE_DIR@/common/rfb ZlibIncludeDir' >>config/cf/platform.def
 
 SVR4FLAGS=
 if [ "`uname -s`" = "SunOS" ]; then

@@ -14,7 +14,7 @@ SUBDIRS = module
 #endif
 
    INCLUDES = -I$(FONTINCSRC) -I../include -I$(SERVERSRC)/include \
-	      -I$(INCLUDESRC)
+	      -I$(INCLUDESRC) ZlibIncludeDir
     HEADERS = 
 #ifdef FontFormatDefines
 FORMAT_DEFS = FontFormatDefines
