@@ -85,7 +85,7 @@ $defaultXStartup
        "  esac\n".
        "fi\n".
        "if [ -f /usr/bin/gnome-session ]; then\n".
-       "  for SESSION in \"ubuntu-2d\" \"2d-gnome\"; do\n".
+       "  for SESSION in \"gnome-fallback\" \"ubuntu-2d\" \"2d-gnome\"; do\n".
        "    if [ -f /usr/share/gnome-session/sessions/\$SESSION.session ]; then\n".
        "      DESKTOP_SESSION=\$SESSION; export DESKTOP_SESSION\n".
        "      GDMSESSION=\$SESSION; export GDMSESSION\n".
