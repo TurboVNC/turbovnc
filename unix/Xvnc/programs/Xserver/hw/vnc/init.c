@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2012 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2013 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
@@ -1100,7 +1100,7 @@ OsVendorFatalError()
 }
 
 #ifdef DDXTIME /* from ServerOSDefines */
-CARD32
+CARD64
 GetTimeInMillis()
 {
     struct timeval  tp;
