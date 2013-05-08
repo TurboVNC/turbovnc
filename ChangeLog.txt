@@ -22,11 +22,12 @@ the Mac TurboVNC Viewer now works with the version of Java shipped with OS X
 10.4 and 10.5.
 -------------------------------------------------------------------------------
 [5]
-Normally, when using the Java TurboVNC Viewer on Mac platforms, the menu bar is
-still visible in full-screen mode, and the dock is still visible if it is not
-set to auto-hide.  The Java/Mac TurboVNC Viewer now takes advantage of the OS X
-Lion full-screen feature, if available, to provide a "true" full-screen mode on
-OS X 10.7 and later.  On OS X 10.6 and earlier, the behavior is unchanged.
+Previously, when using the Java TurboVNC Viewer on Mac platforms, the menu bar
+was still visible in full-screen mode, and the dock was still visible if it was
+not set to auto-hide.  The Java/Mac TurboVNC Viewer now takes advantage of the
+OS X Lion full-screen feature, if available, to provide a "true" full-screen
+mode on OS X 10.7 and later.  On OS X 10.6 and earlier, the behavior is
+unchanged.
 -------------------------------------------------------------------------------
 [6]
 Fixed a regression in the new Java TurboVNC Viewer whereby, when used as an
@@ -35,15 +36,14 @@ had no effect.
 -------------------------------------------------------------------------------
 [7]
 Fixed various key mapping issues in the Java TurboVNC Viewer:
--- Inability to differentiate between the numeric keypad versions of the
+-- The viewer now differentiates between the numeric keypad versions of the
    navigation keys (Home, End, etc.) and their equivalents on the main
    keyboard.
--- Inability to differentiate between the left and right versions of the
+-- The viewer now differentiates between the left and right versions of the
    modifier keys (Alt, Ctrl, etc.)
--- The viewer was not properly handling the AltGr key on international
-   keyboards.
--- Inability to use left Alt key sequences on Mac clients to activate
-   pull-down menus on Linux/Windows servers.
+-- The viewer now properly handles the AltGr key on international keyboards.
+-- Left Alt key sequences on Mac clients can now be used to activate pull-down
+   menus on Linux/Windows servers.
 -- The Apple keys on Macintosh keyboards can now be used as Windows keys when
    connecting to Linux and Windows servers.
 -------------------------------------------------------------------------------
@@ -106,7 +106,7 @@ the "gnome-session-fallback" package is installed.  TurboVNC cannot use Unity
 -------------------------------------------------------------------------------
 [19]
 Fixed a segfault that occurred when starting the TurboVNC Server on Ubuntu
-13.04 and Fedora 18 (and possibly other new distros.)
+13.04 and Fedora 18 (and possibly other new Linux distros.)
 -------------------------------------------------------------------------------
 
 
