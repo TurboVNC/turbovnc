@@ -113,6 +113,10 @@ The X11 TurboVNC Viewer will now automatically release the modifier keys if
 the viewer window loses focus.  This fixes an issue whereby using Alt-Tab to
 switch windows would leave the Alt key in a pressed state on the server.
 -------------------------------------------------------------------------------
+[21]
+The Java TurboVNC Viewer was ignoring the PORT parameter when SSH tunneling was
+enabled.  This has been fixed.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
