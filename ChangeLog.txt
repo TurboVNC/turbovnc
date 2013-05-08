@@ -108,6 +108,11 @@ the "gnome-session-fallback" package is installed.  TurboVNC cannot use Unity
 Fixed a segfault that occurred when starting the TurboVNC Server on Ubuntu
 13.04 and Fedora 18 (and possibly other new Linux distros.)
 -------------------------------------------------------------------------------
+[20]
+The X11 TurboVNC Viewer will now automatically release the modifier keys if
+the viewer window loses focus.  This fixes an issue whereby using Alt-Tab to
+switch windows would leave the Alt key in a pressed state on the server.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

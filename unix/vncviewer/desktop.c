@@ -49,6 +49,8 @@ static void CopyBGR233ToScreen(CARD8 *buf, int x, int y, int width,
                                int height);
 static void HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev,
                                     Boolean *cont);
+static void HandleTopLevelEvent(Widget w, XtPointer ptr, XEvent *ev,
+                                Boolean *cont);
 
 static XtResource desktopBackingStoreResources[] = {
   {
@@ -82,10 +84,10 @@ void DesktopInitBeforeRealization()
   XtVaSetValues(desktop, XtNwidth, si.framebufferWidth,
                 XtNheight, si.framebufferHeight, NULL);
 
-  XtAddEventHandler(desktop, LeaveWindowMask|ExposureMask,
+  XtAddEventHandler(desktop, LeaveWindowMask|ExposureMask|FocusChangeMask,
                     True, HandleBasicDesktopEvent, NULL);
 
-  XtAddEventHandler(toplevel, FocusChangeMask, True, HandleBasicDesktopEvent,
+  XtAddEventHandler(toplevel, FocusChangeMask, True, HandleTopLevelEvent,
                     NULL);
 
   for (i = 0; i < 256; i++)
@@ -189,22 +191,14 @@ static void HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev,
                                  ev->xexpose.width, ev->xexpose.height, False);
       break;
 
-    case FocusIn:
-      if (keyboardGrabbed && keyboardTempUngrabbed) {
-        fprintf(stderr, "Keyboard focus regained.  Re-grabbing keyboard.\n");
-        if (XtGrabKeyboard(toplevel, True, GrabModeAsync,
-                           GrabModeAsync, CurrentTime) != GrabSuccess)
-          fprintf(stderr, "XtGrabKeyboard() failed.\n");
-        keyboardTempUngrabbed = FALSE;
-      }
-      break;
-
     case FocusOut:
-      if (keyboardGrabbed && ev->xfocus.mode == NotifyWhileGrabbed &&
-          ev->xfocus.detail == NotifyNonlinear) {
-        fprintf(stderr, "Keyboard focus lost.  Temporarily ungrabbing keyboard.\n");
-        XtUngrabKeyboard(toplevel, CurrentTime);
-        keyboardTempUngrabbed = TRUE;
+      if (ev->xfocus.mode == NotifyNormal) {
+        for (i = 0; i < 256; i++) {
+          if (modifierPressed[i]) {
+            SendKeyEvent(XKeycodeToKeysym(dpy, i, 0), False);
+            modifierPressed[i] = False;
+          }
+        }
       }
       break;
 
@@ -225,6 +219,39 @@ static void HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev,
           ev->xclient.format == 8 &&
           !strcmp(ev->xclient.data.b, "SendRFBUpdate"))
         SendIncrementalFramebufferUpdateRequest();
+      break;
+  }
+}
+
+
+/*
+ * HandleTopLevelEvent() - we have to monitor keyboard focus at the top level
+ * to determine whether the window has lost focus while the keyboard is
+ * grabbed.
+ */
+
+static void HandleTopLevelEvent(Widget w, XtPointer ptr, XEvent *ev,
+                                Boolean *cont)
+{
+  switch (ev->type) {
+
+    case FocusIn:
+      if (keyboardGrabbed && keyboardTempUngrabbed) {
+        fprintf(stderr, "Keyboard focus regained.  Re-grabbing keyboard.\n");
+        if (XtGrabKeyboard(toplevel, True, GrabModeAsync,
+                           GrabModeAsync, CurrentTime) != GrabSuccess)
+          fprintf(stderr, "XtGrabKeyboard() failed.\n");
+        keyboardTempUngrabbed = FALSE;
+      }
+      break;
+
+    case FocusOut:
+      if (keyboardGrabbed && ev->xfocus.mode == NotifyWhileGrabbed &&
+          ev->xfocus.detail == NotifyNonlinear) {
+        fprintf(stderr, "Keyboard focus lost.  Temporarily ungrabbing keyboard.\n");
+        XtUngrabKeyboard(toplevel, CurrentTime);
+        keyboardTempUngrabbed = TRUE;
+      }
       break;
   }
 }
