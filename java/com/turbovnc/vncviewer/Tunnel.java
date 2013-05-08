@@ -55,7 +55,11 @@ public class Tunnel {
       gatewayHost = opts.via;
       remoteHost = Hostname.getHost(opts.serverName);
     }
-    remotePort = Hostname.getPort(opts.serverName);
+    if (opts.serverName != null && opts.serverName.indexOf(':') < 0 &&
+        opts.port > 0)
+      remotePort = opts.port;
+    else
+      remotePort = Hostname.getPort(opts.serverName);
 
     JSch jsch = new JSch();
     String homeDir = new String("");
