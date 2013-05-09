@@ -117,6 +117,11 @@ switch windows would leave the Alt key in a pressed state on the server.
 The Java TurboVNC Viewer was ignoring the PORT parameter when SSH tunneling was
 enabled.  This has been fixed.
 -------------------------------------------------------------------------------
+[22]
+Fixed an issue whereby the Java TurboVNC Viewer window would not close if the
+server disconnected and the viewer was either running in listen mode or it had
+more than one connection open.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
