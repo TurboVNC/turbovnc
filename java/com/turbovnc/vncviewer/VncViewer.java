@@ -505,11 +505,8 @@ public class VncViewer extends java.applet.Applet implements Runnable {
         if (cc == null || !cc.shuttingDown) {
           reportException(e);
           exitStatus = 1;
+          if (cc != null) cc.deleteWindow();
         } else {
-          if (!cc.shuttingDown) {
-            vlog.info(e.toString());
-            exitStatus = 1;
-          }
           cc = null;
         }
       }
