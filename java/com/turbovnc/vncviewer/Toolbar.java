@@ -1,5 +1,5 @@
 /* Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,6 +58,8 @@ public class Toolbar extends JToolBar implements ActionListener {
     setFloatable(false);
     setBorder(new EmptyBorder(1, 2, 1, 0));
     for (int i = 0; i < 11; i++) {
+      if (i == 9 && VncViewer.noNewConn.getValue())
+        continue;
       ImageIcon icon =
         new ImageIcon(tk.createImage(bi.getSubimage(i * 16, 0, 16, 16).getSource()));
       AbstractButton button;

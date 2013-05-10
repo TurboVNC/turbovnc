@@ -346,7 +346,8 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   }
 
   public static void newViewer(VncViewer oldViewer) {
-    newViewer(oldViewer, null);
+    if (!noNewConn.getValue())
+      newViewer(oldViewer, null);
   }
 
   public void init() {
@@ -453,7 +454,7 @@ public class VncViewer extends java.applet.Applet implements Runnable {
       while (true) {
         Socket newSock = listener.accept();
         if (newSock != null)
-          newViewer(this, newSock);
+          newViewer(this, newSock, noNewConn.getValue());
       }
     }
 
@@ -654,6 +655,13 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   = new BoolParameter("ViewOnly",
   "Ignore all keyboard and mouse events in the viewer window and do not pass " +
   "these events to the VNC server.", false);
+
+  static BoolParameter noNewConn
+  = new BoolParameter("NoNewConn",
+  "Always exit after the first connection closes, and do not allow new " +
+  "connections to be made without restarting the viewer.  This is useful in " +
+  "portal environments that need to control when and how the viewer is " +
+  "launched.", false);
 
   static BoolParameter fullScreen
   = new BoolParameter("FullScreen",

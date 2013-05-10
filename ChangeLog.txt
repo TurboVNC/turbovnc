@@ -1,4 +1,15 @@
 ===============================================================================
+1.3 pre-beta
+===============================================================================
+[1]
+Added a security option to the Java TurboVNC Viewer that, when enabled, will
+prevent the user from opening any new VNC connections from within the same
+viewer instance.  In listen mode, this will further cause the viewer to exit
+after the first connection is closed.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 1.2
 ===============================================================================
 [1]
