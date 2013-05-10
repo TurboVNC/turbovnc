@@ -110,7 +110,7 @@ public class VncViewer extends java.applet.Applet implements Runnable {
               VncViewer viewer = new VncViewer(new String[]{});
               try {
                 Configuration.load(fName);
-              } catch (Exception e) {
+              } catch(Exception e) {
                 viewer.reportException(e);
                 return null;
               }
@@ -206,8 +206,8 @@ public class VncViewer extends java.applet.Applet implements Runnable {
         if (++i >= argv.length) usage();
         try {
           Configuration.load(argv[i]);
-        } catch (Exception e) {
-          System.out.println(e.getMessage());
+        } catch(Exception e) {
+          reportException(e);
           exit(1);
         }
         continue;
@@ -225,8 +225,8 @@ public class VncViewer extends java.applet.Applet implements Runnable {
           try {
             benchFile = new FileInStream(argv[++i]);
           } catch(Exception e) {
-            System.out.println("Could not open session capture:\n" +
-                               e.toString());
+            reportException(new WarningException("Could not open session capture:\n" +
+                                                 e.getMessage()));
             exit(1);
           }
         }
@@ -265,8 +265,8 @@ public class VncViewer extends java.applet.Applet implements Runnable {
       if (argv[i].toLowerCase().endsWith(".vnc")) {
         try {
           Configuration.load(argv[i]);
-        } catch (Exception e) {
-          System.out.println(e.getMessage());
+        } catch(Exception e) {
+          reportException(e);
           exit(1);
         }
         continue;
@@ -285,7 +285,8 @@ public class VncViewer extends java.applet.Applet implements Runnable {
       try {
         Tunnel.createTunnel(opts);
       } catch(Exception e) {
-        System.out.println("Could not create SSH tunnel:\n" + e.toString());
+        reportException(new WarningException("Could not create SSH tunnel:\n" +
+                                             e.getMessage()));
         exit(1);
       }
     }
@@ -370,7 +371,8 @@ public class VncViewer extends java.applet.Applet implements Runnable {
         try {
           Tunnel.createTunnel(opts);
         } catch(Exception e) {
-          System.out.println("Could not create SSH tunnel:\n" + e.toString());
+          reportException(new WarningException("Could not create SSH tunnel:\n" +
+                                               e.getMessage()));
           exit(1);
           return;
         }
@@ -415,8 +417,10 @@ public class VncViewer extends java.applet.Applet implements Runnable {
     if (e instanceof WarningException) {
       msgType = JOptionPane.WARNING_MESSAGE;
       title = "TurboVNC Viewer";
+      System.out.println(msg);
     } else if (e instanceof ErrorException) {
       title = "TurboVNC Viewer : Error";
+      System.out.println(msg);
     } else {
       if (!(e instanceof SystemException))
         msg = e.toString();
@@ -607,7 +611,6 @@ public class VncViewer extends java.applet.Applet implements Runnable {
       }
     }
     vncServerName.setParam(null);
-      
   }
 
   static StringParameter vncServerName

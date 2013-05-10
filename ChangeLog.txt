@@ -122,6 +122,13 @@ Fixed an issue whereby the Java TurboVNC Viewer window would not close if the
 server disconnected and the viewer was either running in listen mode or it had
 more than one connection open.
 -------------------------------------------------------------------------------
+[23]
+Since there is no way to see the console output in a Java Web Start environment
+or when starting the Java TurboVNC Viewer from an icon, it is difficult or
+impossible in such cases to debug errors that are only displayed to the
+console.  Thus, the Java TurboVNC Viewer now displays all errors both to the
+console and in an error dialog.  
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.Iterator;
 
 import com.turbovnc.rdr.ErrorException;
+import com.turbovnc.rdr.WarningException;
 
 public class TcpListener extends SocketListener  {
 
@@ -70,8 +71,8 @@ public class TcpListener extends SocketListener  {
     try {
       channel.socket().bind(new InetSocketAddress(addr, port));
     } catch(IOException e) {
-      throw new ErrorException("Could not bind listening socket: " +
-                               e.getMessage());
+      throw new WarningException("Could not bind listening socket: " +
+                                 e.getMessage());
     }
 
     // - Set it to be a listening socket
