@@ -192,7 +192,8 @@ static void HandleBasicDesktopEvent(Widget w, XtPointer ptr, XEvent *ev,
       break;
 
     case FocusOut:
-      if (ev->xfocus.mode == NotifyNormal) {
+      if (ev->xfocus.mode == NotifyNormal ||
+          ev->xfocus.mode == NotifyWhileGrabbed) {
         for (i = 0; i < 256; i++) {
           if (modifierPressed[i]) {
             SendKeyEvent(XKeycodeToKeysym(dpy, i, 0), False);
