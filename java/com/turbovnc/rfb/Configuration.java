@@ -152,11 +152,11 @@ public class Configuration {
     try {
       props.load(new FileInputStream(filename));
     } catch(java.security.AccessControlException e) {
-      vlog.error("Cannot access connection info file:" + e.getMessage());
-      return;
+      throw new WarningException("Cannot access connection info file:\n" +
+                                 e.getMessage());
     } catch(java.lang.Exception e) {
-      vlog.error("Error opening connection info file:" + e.getMessage());
-      return;
+      throw new WarningException("Cannot open connection info file:\n" +
+                                 e.getMessage());
     }
 
     int scaleNum = -1, scaleDenom = -1, fitWindow = -1;

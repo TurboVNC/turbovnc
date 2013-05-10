@@ -203,7 +203,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       try {
         fp = new FileInputStream(passwordFileStr);
       } catch(FileNotFoundException e) {
-        throw new ErrorException("Could not open password file");
+        throw new WarningException("Could not open password file");
       }
       byte[] obfPwd = new byte[256];
       try {
