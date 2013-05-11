@@ -129,6 +129,14 @@ impossible in such cases to debug errors that are only displayed to the
 console.  Thus, the Java TurboVNC Viewer now displays all errors both to the
 console and in an error dialog.  
 -------------------------------------------------------------------------------
+[24]
+Fixed an issue in the Java TurboVNC Viewer whereby pressing Alt-Tab would
+change the keyboard focus to another window but would not bring the other
+window to the top.  This was originally a feature, not a bug, and was meant to
+be a stopgap substitute for a proper keyboard grabbing feature, but the
+behavior causes confusion and does not achieve the primary goal that a keyboard
+grabber should achieve (sending special keystrokes to the server.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
