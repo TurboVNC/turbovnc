@@ -708,7 +708,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       viewport.setExtendedState(JFrame.NORMAL);
       viewport.setGeometry(span.x, span.y, span.width,
                            span.height, false);
-      viewport.setAlwaysOnTop(true);
     } else {
       if (savedRect.width > 0 && savedRect.height > 0 && restore) {
         if (savedState >= 0)
@@ -718,7 +717,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       } else {
         sizeWindow();
       }
-      viewport.setAlwaysOnTop(false);
     }
   }
 
