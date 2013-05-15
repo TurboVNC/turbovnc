@@ -119,7 +119,6 @@
 #define IDC_FTBROWSEEDIT                1092
 #define IDC_LOAD                        1093
 #define IDC_SERVERRELOAD                1094
-#define IDC_CONN_PROF                   1095
 #define IDC_STATIC_TEXT_LEVEL           1096
 #define IDC_STATIC_FAST                 1097
 #define IDC_STATIC_BEST                 1098

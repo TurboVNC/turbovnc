@@ -175,22 +175,21 @@ BEGIN
     PUSHBUTTON      "&Close",IDC_EXIT,359,261,50,14
 END
 
-IDD_SESSION_DLG DIALOGEX 0, 0, 253, 85
+IDD_SESSION_DLG DIALOGEX 0, 0, 238, 61
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTEXTHELP
 CAPTION "New TurboVNC Connection"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    COMBOBOX        IDC_HOSTNAME_EDIT,51,7,109,66,CBS_DROPDOWN | 
+    COMBOBOX        IDC_HOSTNAME_EDIT,91,12,109,66,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "...",IDC_LOAD,164,7,16,13
-    DEFPUSHBUTTON   "&Connect",IDC_OK,189,7,57,14,WS_GROUP
-    PUSHBUTTON      "&Options...",IDC_OPTIONBUTTON,189,25,57,14
-    PUSHBUTTON      "Cancel",IDCANCEL,189,43,57,14
-    PUSHBUTTON      "&Listening mode",IDC_LIST_MODE,189,64,57,14
-    LTEXT           "VNC server:",IDC_STATIC_SERVER,7,9,39,8
-    LTEXT           "NOTE:  To set connection profile, click on 'Options' and select an encoding method",IDC_CONN_PROF,51,28,129,54
-    CONTROL         108,IDC_STATIC_PICTURE,"Static",SS_BITMAP,9,28,32,30
+    PUSHBUTTON      "...",IDC_LOAD,204,12,16,13
+    PUSHBUTTON      "&Listen mode",IDC_LIST_MODE,5,42,57,14,WS_GROUP
+    PUSHBUTTON      "&Options...",IDC_OPTIONBUTTON,72,42,47,14
+    DEFPUSHBUTTON   "&Connect",IDC_OK,129,42,47,14
+    PUSHBUTTON      "Cancel",IDCANCEL,186,42,47,14
+    LTEXT           "VNC server:",IDC_STATIC_SERVER,47,14,39,8
+    CONTROL         108,IDC_STATIC_PICTURE,"Static",SS_BITMAP,5,5,32,30
 END
 
 IDD_SERVINFO_DLG DIALOG DISCARDABLE  0, 0, 224, 170
@@ -246,7 +245,7 @@ BEGIN
                     BS_AUTORADIOBUTTON,189,48,99,10
     CONTROL         "No local cursor",IDC_NOCURSOR_RADIO,"Button",
                     BS_AUTORADIOBUTTON,189,63,99,10
-    GROUPBOX        "Listening mode",IDC_STATIC_LMODE,4,86,292,33
+    GROUPBOX        "Listen mode",IDC_STATIC_LMODE,4,86,292,33
     LTEXT           "Accept reverse VNC connections on TCP port:",
                     IDC_STATIC_PORT,13,100,158,10
     EDITTEXT        IDC_LISTEN_PORT,176,98,36,14,ES_AUTOHSCROLL | ES_NUMBER | 
@@ -725,8 +724,8 @@ Equivalent of ""Connection-->Encoding-->Allow JPEG compression"" in the options\
 dialog\r\n\
 \r\n\
 /listen [<port>]\r\n\
-Equivalent of the ""Listening mode"" button in the new connection dialog and\r\n\
-""Globals-->Listening mode-->Accept reverse VNC connections on TCP port"" in the\r\n\
+Equivalent of the ""Listen mode"" button in the new connection dialog and\r\n\
+""Globals-->Listen mode-->Accept reverse VNC connections on TCP port"" in the\r\n\
 options dialog\r\n\
 \r\n\
 /loglevel <n>\r\n\
@@ -915,7 +914,7 @@ BEGIN
     IDC_STATIC_IOPTIONS     "Options affecting the viewer's user interface."
     IDC_STATIC_LOGGING      "The viewer can log its activity in a text file. Logging options allow you to customize this facility."
     IDC_STATIC_LCURSOR      "Sometimes, the local mouse cursor and the remote pointer are at different screen locations. Customizing the shape of the local cursor can make it easier to track."
-    IDC_STATIC_LMODE        "Options specific to the listening mode, which is used for ""reverse"" server-to-client connections."
+    IDC_STATIC_LMODE        "Options specific to the listen mode, which is used for ""reverse"" server-to-client connections."
     IDC_STATIC_PICTURE      "TurboVNC is an enhanced version of VNC. Visit http://www.virtualgl.org/ for more information."
 END
 
