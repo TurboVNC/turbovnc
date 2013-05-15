@@ -80,7 +80,7 @@ public class TcpListener extends SocketListener  {
       selector = Selector.open();
       channel.register(selector, SelectionKey.OP_ACCEPT);
     } catch(IOException e) {
-      throw new ErrorException("Could not enable listening mode for socket: " +
+      throw new ErrorException("Could not enable listen mode for socket: " +
                                e.getMessage());
     }
   }

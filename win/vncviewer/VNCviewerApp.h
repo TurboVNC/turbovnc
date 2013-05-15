@@ -51,7 +51,7 @@ class VNCviewerApp
 
     // This should be used by Connections to register and deregister
     // themselves.  When the last connection is deregistered, the app
-    // will close unless in listening mode.
+    // will close unless in listen mode.
     void RegisterConnection(ClientConnection *pConn);
     void DeregisterConnection(ClientConnection *pConn);
 

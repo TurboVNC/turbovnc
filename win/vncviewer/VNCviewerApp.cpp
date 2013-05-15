@@ -96,7 +96,7 @@ void VNCviewerApp::DeregisterConnection(ClientConnection *pConn)
       vnclog.Print(4, "Deregistered connection from app\n");
 
       // No clients left?  Then we should finish, unless we're in
-      // listening mode
+      // listen mode
       if ((m_clilist[0] == NULL) && (!pApp->m_options.m_listening)){
         PostQuitMessage(0);}
 
