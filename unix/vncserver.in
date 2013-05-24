@@ -374,7 +374,7 @@ unlink($desktopLog);
 if ($opt{'-name'}) {
     $desktopName = $opt{'-name'};
 } else {
-    $desktopName = "TurboVNC: $host:$displayNumber ($ENV{USER})";
+    $desktopName = "TurboVNC: $host:$displayNumber ($ENV{USER})" unless($desktopName);
 }
 
 # Make an X server cookie - use /dev/urandom on systems that have it,
