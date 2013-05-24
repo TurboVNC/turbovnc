@@ -137,6 +137,10 @@ be a stopgap substitute for a proper keyboard grabbing feature, but the
 behavior causes confusion and does not achieve the primary goal that a keyboard
 grabber should achieve (sending special keystrokes to the server.)
 -------------------------------------------------------------------------------
+[25]
+Fixed an issue in the TurboVNC Server whereby the value of $desktopName was
+being ignored if it was present in the TurboVNC config file.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
