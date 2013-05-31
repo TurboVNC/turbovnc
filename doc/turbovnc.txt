@@ -1,5 +1,5 @@
 #VAR: css=turbovnc.css
-#TITLE: User's Guide for TurboVNC 1.2
+#TITLE: User's Guide for TurboVNC 1.2.1
 #MAKETITLE
 
 #LIST: contents
