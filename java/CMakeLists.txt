@@ -6,7 +6,7 @@ if(UNIX)
 endif()
 
 project(turbovnc-java Java)
-set(VERSION 1.2)
+set(VERSION 1.2.1)
 set(COPYRIGHT_YEAR "2000-2013")
 set(COPYRIGHT "The VirtualGL Project and many others (see README.txt)")
 set(URLTEXT "Visit http://www.virtualgl.org for more information on TurboVNC")
