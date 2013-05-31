@@ -1,4 +1,15 @@
 ===============================================================================
+1.2.1
+===============================================================================
+[1]
+Fixed two regressions introduced in TurboVNC 1.0, one of which prevented older
+(RFB <= 3.3) VNC clients from connecting successfully to the TurboVNC Server
+and the other of which prevented clients other than TurboVNC and TightVNC from
+connecting to the TurboVNC Server using no authentication.
+-------------------------------------------------------------------------------
+
+
+===============================================================================
 1.2
 ===============================================================================
 [1]

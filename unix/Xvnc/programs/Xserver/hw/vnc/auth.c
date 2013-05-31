@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2010, 2012 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2010, 2012-2013 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2003-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -534,7 +534,11 @@ rfbAuthInit()
 
         FatalError("ERROR: no authentication methods enabled!\n");
     } else {
-        secTypeNone.advertise = FALSE;
+        /* Do not advertise rfbAuthNone if any other auth method is enabled. */
+        for (a = authMethods; a->name != NULL; a++) {
+            if (a->enabled && strcmp(a->name, "none"))
+                secTypeNone.advertise = FALSE;
+        }
     }
 
 #ifdef XVNC_AuthPAM
@@ -1171,7 +1175,7 @@ rfbClientAuthSucceeded(cl, authType)
 {
     CARD32 authResult;
 
-    if (cl->protocol_minor_ver >= 8) {
+    if (cl->protocol_minor_ver >= 8 || authType == rfbAuthVNC) {
         authResult = Swap32IfLE(rfbAuthOK);
         if (WriteExact(cl->sock, (char *)&authResult, 4) < 0) {
             rfbLogPerror("rfbClientAuthSucceeded: write");
