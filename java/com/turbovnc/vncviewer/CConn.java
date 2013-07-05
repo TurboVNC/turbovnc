@@ -181,7 +181,22 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     PasswdDialog dlg = null;
     String autoPass;
 
-    if (VncViewer.autoPass.getValue()) {
+    if (VncViewer.encPassword.getValue() != null) {
+      byte[] encryptedPassword = new byte[8];
+      String passwordString = VncViewer.encPassword.getValue();
+      if (passwordString.length() != 16)
+        throw new ErrorException("Password specified in EncPassword parameter is invalid.");
+      for (int c = 0; c < 16; c += 2) {
+        int temp = -1;
+        try {
+          temp = Integer.parseInt(passwordString.substring(c, c + 2), 16);
+        } catch(NumberFormatException e) {}
+        if (temp >= 0)
+          encryptedPassword[c / 2] = (byte)temp;
+        else break;
+      }
+      autoPass = VncAuth.unobfuscatePasswd(encryptedPassword);
+    } else if (VncViewer.autoPass.getValue()) {
       BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
       try {
         autoPass = in.readLine();
