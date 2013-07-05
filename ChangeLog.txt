@@ -7,6 +7,10 @@ Fixed two regressions introduced in TurboVNC 1.0, one of which prevented older
 and the other of which prevented clients other than TurboVNC and TightVNC from
 connecting to the TurboVNC Server using no authentication.
 -------------------------------------------------------------------------------
+[2]
+Added a new parameter (EncPassword) to the Java TurboVNC Viewer that allows
+the password to be specified in encrypted ASCII hex.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

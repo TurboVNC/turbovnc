@@ -880,6 +880,22 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   "parameter be used only in conjunction with a one-time password or other " +
   "disposable token.", false);
 
+  static StringParameter encPassword
+  = new StringParameter("EncPassword",
+  "Encrypted password to use when authenticating with the VNC server.  The " +
+  "encrypted password should be in the same ASCII hex format used by " +
+  "TurboVNC connection info (.vnc) files.  For instance, you can generate " +
+  "an ASCII hex VNC password on the TurboVNC server machine by executing\n " +
+  "'cat {VNC_password_file} | xxd -c 256 -ps' or\n " +
+  "'echo {unencrypted_password} | /opt/TurboVNC/bin/vncpasswd -f | xxd -c 256 -ps'\n " +
+  "This parameter is provided mainly so that web portals can embed a " +
+  "password in automatically-generated Java Web Start (JNLP) files without " +
+  "exposing the password as plain text.  However, the encryption scheme " +
+  "(DES3) used for VNC passwords is not particularly strong, so encrypting " +
+  "the password guards against only the most casual of attacks.  It is thus " +
+  "recommended that this parameter be used only in conjunction with a " +
+  "one-time password or other disposable token.", null);
+
   static StringParameter via
   = new StringParameter("Via",
   "This parameter specifies an SSH server (\"gateway\") through which the VNC " +
