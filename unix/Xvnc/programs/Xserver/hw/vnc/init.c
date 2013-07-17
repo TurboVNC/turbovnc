@@ -1119,7 +1119,7 @@ ddxUseMsg()
     ErrorF("-udpinputport port     UDP port for keyboard/pointer data\n");
     ErrorF("-rfbport port          TCP port for RFB protocol\n");
     ErrorF("-rfbwait time          max time in ms to wait for RFB client\n");
-    ErrorF("-nocursor              don't put up a cursor\n");
+    ErrorF("-nocursor              don't display a cursor\n");
     ErrorF("-rfbauth passwd-file   enable VNC password authentication\n");
     ErrorF("-otpauth               enable one-time password (OTP) authentication\n");
     ErrorF("-pamauth               enable PAM user/password authentication\n");
@@ -1129,8 +1129,8 @@ ddxUseMsg()
     ErrorF("-nocutbuffersync       disable clipboard synchronization for applications\n");
     ErrorF("                       that use the (obsolete) X cut buffer\n");
     ErrorF("-idletimeout S         exit if S seconds elapse with no VNC viewer connections\n");
-    ErrorF("-httpd dir             serve files via HTTP from here\n");
-    ErrorF("-httpport port         port for HTTP\n");
+    ErrorF("-httpd dir             serve files from the specified directory using HTTP\n");
+    ErrorF("-httpport port         port for HTTP server\n");
     ErrorF("-deferupdate time      time in ms to defer updates (default 40)\n");
     ErrorF("-noflowcontrol         when continuous updates are enabled, send updates whether\n");
     ErrorF("                       or not the client is ready to receive them\n");
@@ -1138,13 +1138,13 @@ ddxUseMsg()
     ErrorF("                       seconds (S is floating point)\n");
     ErrorF("-interframe            always use interframe comparison\n");
     ErrorF("-nointerframe          never use interframe comparison\n");
-    ErrorF("-economictranslate     less memory-hungry translation\n");
+    ErrorF("-economictranslate     less memory hungry translation\n");
     ErrorF("-desktop name          VNC desktop name (default x11)\n");
     ErrorF("-alwaysshared          always treat new clients as shared\n");
     ErrorF("-nevershared           never treat new clients as shared\n");
     ErrorF("-dontdisconnect        don't disconnect existing clients when a new non-shared\n"
            "                       connection comes in (refuse new connection instead)\n");
-    ErrorF("-viewonly              let clients only to view the desktop\n");
+    ErrorF("-viewonly              only let clients view the remote desktop\n");
     ErrorF("-localhost             only allow connections from localhost\n");
     ErrorF("-interface ipaddr      only bind to specified interface address\n");
     ErrorF("-ipv6                  enable IPv6 support\n");
