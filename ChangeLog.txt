@@ -11,6 +11,10 @@ connecting to the TurboVNC Server using no authentication.
 Added a new parameter (EncPassword) to the Java TurboVNC Viewer that allows
 the password to be specified in encrypted ASCII hex.
 -------------------------------------------------------------------------------
+[3]
+The toolbar buttons that send keystrokes are now disabled when view-only mode
+is selected.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
