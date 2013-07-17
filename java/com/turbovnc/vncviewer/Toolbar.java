@@ -58,6 +58,8 @@ public class Toolbar extends JToolBar implements ActionListener {
     setFloatable(false);
     setBorder(new EmptyBorder(1, 2, 1, 0));
     for (int i = 0; i < 11; i++) {
+      if (i >= 5 && i <= 8 && cc.opts.viewOnly)
+        continue;
       if (i == 9 && VncViewer.noNewConn.getValue())
         continue;
       ImageIcon icon =
@@ -84,7 +86,7 @@ public class Toolbar extends JToolBar implements ActionListener {
       button.setContentAreaFilled(false);
       add(button);
       add(Box.createHorizontalStrut(2));
-      if (i == 1 || i == 4 || i == 8) {
+      if (i == 1 || i == 4 || (i == 8 && !cc.opts.viewOnly)) {
         // ref http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4346610
         add(new JSeparator(JSeparator.VERTICAL) {
               public Dimension getMaximumSize() {

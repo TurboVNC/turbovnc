@@ -1094,6 +1094,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
   public void getOptions() {
+    boolean recreate = false;
+
     if (opts.allowJpeg != options.allowJpeg.isSelected())
       encodingChange = true;
     opts.allowJpeg = options.allowJpeg.isSelected();
@@ -1111,6 +1113,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     opts.subsampling = options.getSubsamplingLevel();
 
     opts.sendLocalUsername = options.sendLocalUsername.isSelected();
+    if (opts.viewOnly != options.viewOnly.isSelected() && showToolbar)
+      recreate = true;
     opts.viewOnly = options.viewOnly.isSelected();
     opts.acceptClipboard = options.acceptClipboard.isSelected();
     opts.sendClipboard = options.sendClipboard.isSelected();
@@ -1119,9 +1123,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
     int oldScalingFactor = opts.scalingFactor;
     opts.setScalingFactor(options.scalingFactor.getSelectedItem().toString());
-    if (desktop != null && opts.scalingFactor != oldScalingFactor &&
-      options.fullScreen.isSelected() == opts.fullScreen)
-      recreateViewport();
+    if (desktop != null && opts.scalingFactor != oldScalingFactor)
+      recreate = true;
 
     int index = options.span.getSelectedIndex();
     if (index >= 0 && index < Options.NUMSPANOPT)
@@ -1206,6 +1209,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     }
     if (options.fullScreen.isSelected() != opts.fullScreen)
       toggleFullScreen();
+    else if (recreate)
+      recreateViewport();
   }
 
   public void toggleToolbar() {
