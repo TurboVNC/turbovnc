@@ -111,25 +111,29 @@ public class Toolbar extends JToolBar implements ActionListener {
       cc.refresh();
     } else if (((AbstractButton)s).getName() == buttons[4]) {
       cc.losslessRefresh();
-    } else if (((AbstractButton)s).getName() == buttons[5]) {
+    } else if (((AbstractButton)s).getName() == buttons[5] &&
+               !cc.opts.viewOnly) {
       cc.writeKeyEvent(Keysyms.Control_L, true);
       cc.writeKeyEvent(Keysyms.Alt_L, true);
       cc.writeKeyEvent(Keysyms.Delete, true);
       cc.writeKeyEvent(Keysyms.Delete, false);
       cc.writeKeyEvent(Keysyms.Alt_L, false);
       cc.writeKeyEvent(Keysyms.Control_L, false);
-    } else if (((AbstractButton)s).getName() == buttons[6]) {
+    } else if (((AbstractButton)s).getName() == buttons[6] &&
+               !cc.opts.viewOnly) {
       cc.writeKeyEvent(Keysyms.Control_L, true);
       cc.writeKeyEvent(Keysyms.Escape, true);
       cc.writeKeyEvent(Keysyms.Control_L, false);
       cc.writeKeyEvent(Keysyms.Escape, false);
-    } else if (((AbstractButton)s).getName() == buttons[7]) {
+    } else if (((AbstractButton)s).getName() == buttons[7] &&
+               !cc.opts.viewOnly) {
       if (((AbstractButton)s).isSelected()) {
         cc.writeKeyEvent(Keysyms.Control_L, true);
       } else {
         cc.writeKeyEvent(Keysyms.Control_L, false);
       }
-    } else if (((AbstractButton)s).getName() == buttons[8]) {
+    } else if (((AbstractButton)s).getName() == buttons[8] &&
+               !cc.opts.viewOnly) {
       if (((AbstractButton)s).isSelected()) {
         cc.writeKeyEvent(Keysyms.Alt_L, true);
       } else {

@@ -159,14 +159,14 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
       showToolbar.setSelected(cc.showToolbar);
     } else if (actionMatch(ev, clipboard)) {
       cc.clipboardDialog.showDialog(cc.viewport);
-    } else if (actionMatch(ev, ctrlAltDel)) {
+    } else if (actionMatch(ev, ctrlAltDel) && !cc.opts.viewOnly) {
       cc.writeKeyEvent(Keysyms.Control_L, true);
       cc.writeKeyEvent(Keysyms.Alt_L, true);
       cc.writeKeyEvent(Keysyms.Delete, true);
       cc.writeKeyEvent(Keysyms.Delete, false);
       cc.writeKeyEvent(Keysyms.Alt_L, false);
       cc.writeKeyEvent(Keysyms.Control_L, false);
-    } else if (actionMatch(ev, ctrlEsc)) {
+    } else if (actionMatch(ev, ctrlEsc) && !cc.opts.viewOnly) {
       cc.writeKeyEvent(Keysyms.Control_L, true);
       cc.writeKeyEvent(Keysyms.Escape, true);
       cc.writeKeyEvent(Keysyms.Escape, false);
