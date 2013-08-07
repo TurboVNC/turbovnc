@@ -15,6 +15,11 @@ the password to be specified in encrypted ASCII hex.
 The toolbar buttons that send keystrokes are now disabled when view-only mode
 is selected.
 -------------------------------------------------------------------------------
+[4]
+Enabled the MIT-SCREEN-SAVER X extension.  Modern screen savers don't actually
+use this extension, but it provides an easy way for applications to query the
+idle time of the X server.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

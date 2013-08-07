@@ -23,7 +23,7 @@
 #define BuildFontServer		NO
 #define BuildFonts		NO
 #define BuildXInputExt		YES
-#define BuildScreenSaverExt	NO
+#define BuildScreenSaverExt	YES
 #define BuildPexExt		NO
 #define BuildXIE		NO
 #define BuildXIElib		NO
