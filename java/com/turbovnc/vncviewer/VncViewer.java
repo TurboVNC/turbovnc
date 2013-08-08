@@ -486,17 +486,17 @@ public class VncViewer extends java.applet.Applet implements Runnable {
                               cc.tDecode, cc.tBlit);
             System.out.println("     Blit statistics:");
             System.out.format("     %.3f Mpixels, %.3f Mpixels/sec, %d rect, %.0f pixels/rect\n",
-                              (double)cc.tBlitPixels / 1000000.,
-                              (double)cc.tBlitPixels / 1000000. / cc.tBlit,
-                              cc.tBlitRect,
-                              (double)cc.tBlitPixels / (double)cc.tBlitRect);
+                              (double)cc.blitPixels / 1000000.,
+                              (double)cc.blitPixels / 1000000. / cc.tBlit,
+                              cc.blitRect,
+                              (double)cc.blitPixels / (double)cc.blitRect);
             tAvg += tTotal;
             tAvgDecode += cc.tDecode;
             tAvgBlit += cc.tBlit;
           }
           System.out.print("\n");
           cc.tDecode = cc.tBlit = 0.0;
-          cc.tBlitPixels = cc.tBlitRect = 0;
+          cc.blitPixels = cc.blitRect = 0;
           benchFile.reset();
           benchFile.resetReadTime();
           cc.reset();

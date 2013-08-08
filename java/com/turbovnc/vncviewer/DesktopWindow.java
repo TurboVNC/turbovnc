@@ -225,7 +225,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   public void updateWindow() {
     double tBlitStart = getTime();
     Rect r = damage;
-    cc.tBlitPixels += r.width() * r.height();
+    cc.blitPixels += r.width() * r.height();
     if (!r.isEmpty()) {
       if (cc.cp.width != scaledWidth || cc.cp.height != scaledHeight) {
         int x = (int)Math.floor(r.tl.x * scaleWidthRatio);
@@ -250,7 +250,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
       damage.clear();
     }
     cc.tBlit += getTime() - tBlitStart;
-    cc.tBlitRect += 1;
+    cc.blitRect += 1;
   }
 
   // resize() is called when the desktop has changed size
