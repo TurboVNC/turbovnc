@@ -1345,7 +1345,7 @@ Bool HandleRFBServerMessage()
       int i;
       XEvent ev;
       double tDecodeStart = 0., tBlitStart = 0., tUpdateStart = 0.,
-        tRecvOld = 0.;
+        tRecvOld = 0., tBlitOld = 0.;
       static Bool firstUpdate = True;
 
       if (rfbProfile) {
@@ -1450,6 +1450,7 @@ Bool HandleRFBServerMessage()
         if (rfbProfile || benchFile) {
           tDecodeStart = gettime();
           tRecvOld = tRecv;
+          tBlitOld = tBlit;
         }
 
         decodePixels += (double)rect.r.w * (double)rect.r.h;
@@ -1551,7 +1552,8 @@ Bool HandleRFBServerMessage()
         }
 
         if (rfbProfile || benchFile)
-          tDecode += gettime() - tDecodeStart - (tRecv - tRecvOld);
+          tDecode += gettime() - tDecodeStart - (tRecv - tRecvOld) -
+                     (tBlit - tBlitOld);
       }
 
       for (i = 1; i < nt; i++) {
