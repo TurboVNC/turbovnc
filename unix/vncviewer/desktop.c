@@ -496,6 +496,9 @@ void CopyDataToImage(char *buf, int x, int y, int width, int height)
 
 void CopyImageToScreen(int x, int y, int width, int height)
 {
+  double tBlitStart = 0.0;
+  if (!appData.doubleBuffer && (rfbProfile || benchFile))
+    tBlitStart = gettime();
 #ifdef MITSHM
   if (appData.useShm) {
     XShmPutImage(dpy, desktopWin, gc, image, x, y, x, y, width, height, False);
@@ -503,6 +506,10 @@ void CopyImageToScreen(int x, int y, int width, int height)
   }
 #endif
   XPutImage(dpy, desktopWin, gc, image, x, y, x, y, width, height);
+  blitPixels += width * height;
+  blitRect++;
+  if (!appData.doubleBuffer && (rfbProfile || benchFile))
+    tBlit += gettime() - tBlitStart;
 }
 
 
