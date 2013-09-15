@@ -468,6 +468,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   public void endRect(Rect r, int encoding) {
     if (!benchmark)
       sock.inStream().stopTiming();
+    decodePixels += r.width() * r.height();
+    decodeRect++;
   }
 
   public void fillRect(Rect r, int p) {
@@ -479,9 +481,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
   public void copyRect(Rect r, int sx, int sy) {
-    double tBlitStart = getTime();
     desktop.copyRect(r.tl.x, r.tl.y, r.width(), r.height(), sx, sy);
-    tBlit += getTime() - tBlitStart;
   }
 
   public Object getRawPixelsRW(int[] stride) {
@@ -1760,7 +1760,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   boolean showToolbar;
 
   public double tDecode, tBlit;
-  public long blitPixels, blitRect;
+  public long decodePixels, decodeRect, blitPixels, blits;
   double tDecodeStart, tReadOld;
   boolean benchmark;
 
