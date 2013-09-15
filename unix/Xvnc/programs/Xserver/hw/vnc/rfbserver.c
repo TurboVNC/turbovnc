@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2012 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2013 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
@@ -92,9 +92,10 @@ idleTimeoutCallback(OsTimerPtr timer, CARD64 time, pointer arg)
  */
 
 static BOOL rfbProfile = FALSE;
-static double tUpdateTime = 0., tStart = -1., tElapsed, mpixels = 0.,
+static double tUpdate = 0., tStart = -1., tElapsed, mpixels = 0.,
     idmpixels = 0.;
 static unsigned long iter = 0; 
+unsigned long long sendBytes = 0;
 
 double gettime(void)
 {
@@ -1669,23 +1670,26 @@ rfbSendFramebufferUpdate(cl)
         goto abort;
 
     if (rfbProfile) {
-        tUpdateTime += gettime() - tUpdateStart;
+        tUpdate += gettime() - tUpdateStart;
         tElapsed = gettime() - tStart;
         iter++;
 
         if (tElapsed > 5.) {
-            rfbLog("Updates/sec: %.2f  Mpixels/sec: %.2f  Encode time/update: %.3f ms  Other time/update: %.3f ms\n",
+            rfbLog("%.2f updates/sec,  %.2f Mpixels/sec,  %.3f Mbits/sec\n",
                 (double)iter / tElapsed, mpixels / tElapsed,
-                tUpdateTime / (double)iter * 1000.,
-                (tElapsed - tUpdateTime) / (double)iter * 1000.);
+                (double)sendBytes / 125000. / tElapsed);
+            rfbLog("Time/update:  Encode = %.3f ms,  Other = %.3f ms\n",
+                tUpdate / (double)iter * 1000.,
+                (tElapsed - tUpdate) / (double)iter * 1000.);
             if (cl->compareFB) {
-                rfbLog("Identical Mpixels/sec: %.2f  (%f %%)\n",
+                rfbLog("Identical Mpixels/sec:  %.2f  (%f %%)\n",
                     (double)idmpixels / tElapsed, idmpixels / mpixels * 100.0);
                 idmpixels = 0.;
             }
-            tUpdateTime = 0.;
+            tUpdate = 0.;
             iter = 0;
             mpixels = 0.;
+            sendBytes = 0;
             tStart = gettime();
         }
     }

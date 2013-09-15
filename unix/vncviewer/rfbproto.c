@@ -92,7 +92,7 @@ Bool encodingChange = False;
 BOOL rfbProfile = FALSE;
 static double tUpdate = 0., tStart = -1., tElapsed;
 double tRecv = 0., tDecode = 0., tBlit = 0.;
-unsigned long long decodePixels = 0, blitPixels = 0;
+unsigned long long decodePixels = 0, blitPixels = 0, recvBytes = 0;
 unsigned long decodeRect = 0, blitRect = 0, updates = 0;
 
 double gettime(void)
@@ -1621,22 +1621,28 @@ Bool HandleRFBServerMessage()
         tElapsed = gettime() - tStart;
 
         if (tElapsed > 5.) {
-          printf("Updates/sec: %.2f  Mpixels/sec: %.2f  Time/update:  Total = %.3f ms  Recv = %.3f ms  Decode = %.3f ms  Blit = %.3f ms  Other = %.3f ms\n",
-            (double)updates / tElapsed,
-            (double)decodePixels / 1000000. / tElapsed,
-            tUpdate / (double)updates * 1000.,
-            tRecv / (double)updates * 1000.,
-            tDecode / (double)updates * 1000.,
-            tBlit / (double)updates * 1000.,
-            (tElapsed - tUpdate) / (double)updates * 1000.);
-          printf("Rectangles/update:  ");
-          for (i = 0; i < nt; i++) {
-            printf("T%d: %.2f  ", i, (double)tparam[i].rects / (double)updates);
-            tparam[i].rects = 0;
-          }
+          printf("-------------------------------------------------------------------------------\n");
+          printf("Total:   %.2f updates/sec,  %.2f Mpixels/sec,  %.3f Mbits/sec\n",
+                 (double)updates / tElapsed,
+                 (double)decodePixels / 1000000. / tElapsed,
+                 (double)recvBytes / 125000. / tElapsed);
+          printf("         %lu rect,  %.0f pixels/rect,  %.0f rect/update\n",
+                 decodeRect, (double)decodePixels / (double)decodeRect,
+                 (double)decodeRect / (double)updates);
+          printf("Decode:  %.2f Mpixels/sec      Blit:  %.2f Mpixels/sec\n",
+                 (double)decodePixels / 1000000. / tDecode,
+                 (double)blitPixels / 1000000. / tBlit);
+          printf("Time/update:  Recv = %.3f ms,  Decode = %.3f ms,  Blit = %.3f ms\n",
+                 tRecv / (double)updates * 1000.,
+                 tDecode / (double)updates * 1000.,
+                 tBlit / (double)updates * 1000.);
+          printf("              Other = %.3f ms,  Total = %.3f ms\n",
+                 (tElapsed - tUpdate) / (double)updates * 1000.,
+                 tUpdate / (double)updates * 1000.);
           printf("\n");
           tUpdate = tRecv = tDecode = tBlit = 0.;
-          decodePixels = updates = 0;
+          decodePixels = blitPixels = recvBytes = 0;
+          updates = decodeRect = 0;
           tStart = gettime();
         }
       }

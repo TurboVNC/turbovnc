@@ -104,6 +104,7 @@ Bool ReadFromRFBServer(char *out, unsigned int n)
     memcpy(out, bufoutptr, n);
     bufoutptr += n;
     buffered -= n;
+    if (rfbProfile) tRecv += gettime() - tRecvStart;
     return True;
   }
 
@@ -137,6 +138,7 @@ Bool ReadFromRFBServer(char *out, unsigned int n)
         }
       }
       buffered += i;
+      recvBytes += i;
     }
 
     memcpy(out, bufoutptr, n);
@@ -165,6 +167,7 @@ Bool ReadFromRFBServer(char *out, unsigned int n)
         }
       }
       out += i;
+      recvBytes += i;
       n -= i;
     }
   }
