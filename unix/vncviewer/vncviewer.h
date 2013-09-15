@@ -315,7 +315,8 @@ extern Bool ReadServerInitMessage(void);
 
 extern BOOL rfbProfile;
 extern double tRecv, tDecode, tBlit;
-extern unsigned long tBlitPixels, tBlitRect;
+extern unsigned long long decodePixels, blitPixels;
+extern unsigned long decodeRect, blitRect, updates;
 extern double gettime(void);
 
 typedef struct _UpdateList {

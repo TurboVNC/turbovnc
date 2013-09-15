@@ -92,9 +92,8 @@ Bool encodingChange = False;
 BOOL rfbProfile = FALSE;
 static double tUpdate = 0., tStart = -1., tElapsed;
 double tRecv = 0., tDecode = 0., tBlit = 0.;
-unsigned long tBlitPixels = 0, tBlitRect = 0;
-static unsigned long iter = 0;
-static double mpixels = 0.;
+unsigned long long decodePixels = 0, blitPixels = 0;
+unsigned long decodeRect = 0, blitRect = 0, updates = 0;
 
 double gettime(void)
 {
@@ -280,8 +279,13 @@ static void FillRectangle(XGCValues *gcv, int x, int y, int w, int h)
     node->isFill = 1;
     memcpy(&node->gcv, gcv, sizeof(XGCValues));
   } else {
+    double tBlitStart = 0.0;
+    if (rfbProfile || benchFile) tBlitStart = gettime();
     XChangeGC(dpy, gc, GCForeground, gcv);
     XFillRectangle(dpy, desktopWin, gc, x, y, w, h);
+    blitPixels += w * h;
+    blitRect++;
+    if (rfbProfile || benchFile) tBlit += gettime() - tBlitStart;
   }
 }
 
@@ -289,6 +293,9 @@ static void FillRectangle(XGCValues *gcv, int x, int y, int w, int h)
 static void CopyRectangle(int src_x, int src_y, int w, int h, int dest_x,
                           int dest_y)
 {
+  double tBlitStart = 0.0;
+  if (!appData.doubleBuffer && (rfbProfile || benchFile))
+    tBlitStart = gettime();
   if (appData.copyRectDelay != 0) {
     XFillRectangle(dpy, desktopWin, srcGC, src_x, src_y, w, h);
     XFillRectangle(dpy, desktopWin, dstGC, dest_x, dest_y, w, h);
@@ -299,6 +306,10 @@ static void CopyRectangle(int src_x, int src_y, int w, int h, int dest_x,
   }
   XCopyArea(dpy, desktopWin, desktopWin, gc, src_x, src_y, w, h, dest_x,
             dest_y);
+  blitPixels += w * h;
+  blitRect++;
+  if (!appData.doubleBuffer && (rfbProfile || benchFile))
+    tBlit += gettime() - tBlitStart;
 }
 
 
@@ -1364,6 +1375,8 @@ Bool HandleRFBServerMessage()
         if (!threadInit) return False;
       }
 
+      updates++;
+
       for (i = 0; i < msg.fu.nRects; i++) {
         if (!ReadFromRFBServer((char *)&rect, sz_rfbFramebufferUpdateRectHeader))
           return False;
@@ -1388,6 +1401,8 @@ Bool HandleRFBServerMessage()
                 XChangeGC(dpy, gc, GCForeground, &node->gcv);
                 XFillRectangle(dpy, desktopWin, gc,
                                r1->r.x, r1->r.y, r1->r.w, r1->r.h);
+                blitPixels += r1->r.w * r1->r.h;
+                blitRect++;
               } else if (node->isCopyRect) {
                 CopyRectangle(node->crx, node->cry, r1->r.w, r1->r.h, r1->r.x,
                               r1->r.y);
@@ -1397,7 +1412,6 @@ Bool HandleRFBServerMessage()
 
             list = list->next;
             free(node);
-            tBlitRect += 1;
           }
           if (rfbProfile || benchFile) tBlit += gettime() - tBlitStart;
           break;
@@ -1407,11 +1421,7 @@ Bool HandleRFBServerMessage()
         rect.r.y = Swap16IfLE(rect.r.y);
         rect.r.w = Swap16IfLE(rect.r.w);
         rect.r.h = Swap16IfLE(rect.r.h);
-        tBlitPixels += rect.r.w * rect.r.h;
 
-        if (rfbProfile) {
-          mpixels += (double)rect.r.w * (double)rect.r.h / 1000000.;
-        }
         if (rect.encoding == rfbEncodingXCursor ||
             rect.encoding == rfbEncodingRichCursor) {
           if (!HandleCursorShape(rect.r.x, rect.r.y, rect.r.w, rect.r.h,
@@ -1441,6 +1451,9 @@ Bool HandleRFBServerMessage()
           tDecodeStart = gettime();
           tRecvOld = tRecv;
         }
+
+        decodePixels += (double)rect.r.w * (double)rect.r.h;
+        decodeRect++;
 
         switch (rect.encoding) {
 
@@ -1564,6 +1577,8 @@ Bool HandleRFBServerMessage()
               XChangeGC(dpy, gc, GCForeground, &node->gcv);
               XFillRectangle(dpy, desktopWin, gc,
                              r1->r.x, r1->r.y, r1->r.w, r1->r.h);
+              blitPixels += r1->r.w * r1->r.h;
+              blitRect++;
             } else if (node->isCopyRect) {
               CopyRectangle(node->crx, node->cry, r1->r.w, r1->r.h, r1->r.x,
                             r1->r.y);
@@ -1601,23 +1616,25 @@ Bool HandleRFBServerMessage()
 
       if (rfbProfile && !benchFile) {
         tUpdate += gettime() - tUpdateStart;
-        iter++;
         tElapsed = gettime() - tStart;
 
         if (tElapsed > 5.) {
           printf("Updates/sec: %.2f  Mpixels/sec: %.2f  Time/update:  Total = %.3f ms  Recv = %.3f ms  Decode = %.3f ms  Blit = %.3f ms  Other = %.3f ms\n",
-            (double)iter / tElapsed, mpixels / tElapsed,
-            tUpdate / (double)iter * 1000., tRecv / (double)iter * 1000.,
-            tDecode / (double)iter * 1000., tBlit / (double)iter * 1000.,
-            (tElapsed - tUpdate) / (double)iter * 1000.);
+            (double)updates / tElapsed,
+            (double)decodePixels / 1000000. / tElapsed,
+            tUpdate / (double)updates * 1000.,
+            tRecv / (double)updates * 1000.,
+            tDecode / (double)updates * 1000.,
+            tBlit / (double)updates * 1000.,
+            (tElapsed - tUpdate) / (double)updates * 1000.);
           printf("Rectangles/update:  ");
           for (i = 0; i < nt; i++) {
-            printf("T%d: %.2f  ", i, (double)tparam[i].rects / (double)iter);
+            printf("T%d: %.2f  ", i, (double)tparam[i].rects / (double)updates);
             tparam[i].rects = 0;
           }
           printf("\n");
           tUpdate = tRecv = tDecode = tBlit = 0.;
-          iter = 0;  mpixels = 0.;
+          decodePixels = updates = 0;
           tStart = gettime();
         }
       }

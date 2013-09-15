@@ -467,18 +467,26 @@ Bool RunBenchmark(void)
     tTotal = gettime() - tStart - tRecv;
     if (i >= benchWarmup) {
       printf("%f s (Decode = %f, Blit = %f)\n", tTotal, tDecode, tBlit);
+      printf("     Decode statistics:\n");
+      printf("     %.3f Mpixels, %.3f Mpixels/sec, %lu rect, %.0f pixels/rect,\n",
+             (double)decodePixels / 1000000.,
+             (double)decodePixels / 1000000. / tDecode,
+             decodeRect,
+             (double)decodePixels / (double)decodeRect);
+      printf("       %.0f rects/update\n",
+             (double)decodeRect / (double)updates);
       printf("     Blit statistics:\n");
       printf("     %.3f Mpixels, %.3f Mpixels/sec, %lu rect, %.0f pixels/rect\n",
-             (double)tBlitPixels / 1000000.,
-             (double)tBlitPixels / 1000000. / tBlit, tBlitRect,
-             (double)tBlitPixels / (double)tBlitRect);
+             (double)blitPixels / 1000000.,
+             (double)blitPixels / 1000000. / tBlit, blitRect,
+             (double)blitPixels / (double)blitRect);
       tAvg += tTotal;
       tAvgDecode += tDecode;
       tAvgBlit += tBlit;
     }
     printf("\n");
     tRecv = tDecode = tBlit = 0.0;
-    tBlitPixels = tBlitRect = 0;
+    decodePixels = decodeRect = blitPixels = blitRect = updates = 0;
     ShutdownThreads();
     for (stream_id = 0; stream_id < 4; stream_id++) {
       if (zlibStreamActive[stream_id]) {
