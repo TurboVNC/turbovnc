@@ -315,7 +315,7 @@ extern Bool ReadServerInitMessage(void);
 
 extern BOOL rfbProfile;
 extern double tRecv, tDecode, tBlit;
-extern unsigned long long decodePixels, blitPixels;
+extern unsigned long long decodePixels, blitPixels, recvBytes;
 extern unsigned long decodeRect, blitRect, updates;
 extern double gettime(void);
 

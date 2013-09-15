@@ -20,7 +20,7 @@
 
 /*
  *  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
- *  Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -77,6 +77,7 @@ static struct sockaddr_storage udpRemoteAddr;
 static fd_set allFds;
 static int maxFd = 0;
 
+extern unsigned long long sendBytes;
 
 /*
  * Convenience function to return a string from either an IPv4 or an IPv6
@@ -526,6 +527,7 @@ WriteExact(sock, buf, len)
             buf += n;
             len -= n;
             bytesWritten += n;
+            sendBytes += n;
 
         } else if (n == 0) {
 
