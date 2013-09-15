@@ -250,7 +250,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
       damage.clear();
     }
     cc.tBlit += getTime() - tBlitStart;
-    cc.blitRect += 1;
+    cc.blits += 1;
   }
 
   // resize() is called when the desktop has changed size
