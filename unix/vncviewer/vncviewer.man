@@ -66,9 +66,8 @@ VNC flavors and should not be used except when absolutely necessary.
 When an image rectangle has been moved from one location to another on the VNC
 server's desktop but has not otherwise changed, the CopyRect protocol
 sends only the new location of the rectangle and relies on the VNC viewer to
-copy the actual pixels.  This saves network bandwidth when a window is moved
-around on the VNC server or when an application sends the same image over and
-over again.
+copy the actual pixels.  This saves network bandwidth when, for instance, a
+window is moved around on the VNC server.
 .TP
 .B Tight
 The Tight encoder attempts to encode each rectangle in the most efficient way
