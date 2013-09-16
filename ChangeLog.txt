@@ -20,6 +20,10 @@ Enabled the MIT-SCREEN-SAVER X extension.  Modern screen savers don't actually
 use this extension, but it provides an easy way for applications to query the
 idle time of the X server.
 -------------------------------------------------------------------------------
+[5]
+Fixed a regression introduced in 1.2 beta1 whereby the TurboVNC Viewer desktop
+shortcut installed with the Linux RPM did not work properly.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
