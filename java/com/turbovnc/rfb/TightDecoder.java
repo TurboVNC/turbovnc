@@ -1,6 +1,6 @@
 /* Copyright (C) 2000-2003 Constantin Kaplinsky.  All Rights Reserved.
  * Copyright 2004-2005 Cendio AB.
- * Copyright (C) 2011-2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2013 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -469,7 +469,7 @@ public class TightDecoder extends Decoder {
                          r.height(), tjpf, 0);
         } else {
           byte[] rgbBuf = new byte[r.width() * r.height() * 3];
-          tjd.decompress(rgbBuf, r.width(), 0, r.height(), TJ.PF_RGB, 0);
+          tjd.decompress(rgbBuf, 0, 0, r.width(), 0, r.height(), TJ.PF_RGB, 0);
           pf.bufferFromRGB(data, r.tl.x, r.tl.y, stride[0], rgbBuf,
                            r.width(), r.height());
         }
