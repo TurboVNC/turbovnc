@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,10 @@ public class FdInStream extends InStream {
   static final int DEFAULT_BUF_SIZE = 131072;
   static final int MIN_BULK_SIZE = 1024;
 
+  static final double getTime() {
+    return (double)System.nanoTime() / 1.0e9;
+  }
+
   public FdInStream(FileDescriptor fd_, int timeoutms_, int bufSize_,
                     boolean closeWhenDone_) {
     fd = fd_;  closeWhenDone = closeWhenDone_;
@@ -37,6 +41,11 @@ public class FdInStream extends InStream {
     b = new byte[bufSize];
     ptr = end = offset = 0;
   }
+
+  public double getReadTime() { return tRead; }
+  public void resetReadTime() { tRead = 0.0; }
+  public double getBytesRead() { return bytesRead; }
+  public void resetBytesRead() { bytesRead = 0; }
 
   public FdInStream(FileDescriptor fd_) { this(fd_, -1, 0, false); }
 
@@ -55,8 +64,11 @@ public class FdInStream extends InStream {
   }
 
   public final void readBytes(byte[] data, int dataPtr, int length) {
+    double tReadStart = getTime();
+
     if (length < MIN_BULK_SIZE) {
       super.readBytes(data, dataPtr, length);
+      tRead += getTime() - tReadStart;
       return;
     }
 
@@ -73,7 +85,10 @@ public class FdInStream extends InStream {
       dataPtr += n;
       length -= n;
       offset += n;
+      bytesRead += n;
     }
+
+    tRead += getTime() - tReadStart;
   }
 
   public void setTimeout(int timeoutms_) {
@@ -114,6 +129,8 @@ public class FdInStream extends InStream {
     if (itemSize > bufSize)
       throw new ErrorException("FdInStream overrun: max itemSize exceeded");
 
+    double tReadStart = getTime();
+
     if (end - ptr != 0)
       System.arraycopy(b, ptr, b, 0, end - ptr);
 
@@ -134,12 +151,18 @@ public class FdInStream extends InStream {
         bytesToRead = Math.min(bytesToRead, Math.max(itemSize * nItems, 8));
       }
       int n = readWithTimeoutOrCallback(b, end, bytesToRead, wait);
-      if (n == 0) return 0;
+      if (n == 0) {
+        tRead += getTime() - tReadStart;
+        return 0;
+      }
+      bytesRead += n;
       end += n;
     }
 
     if (itemSize * nItems > end - ptr)
       nItems = (end - ptr) / itemSize;
+
+    tRead += getTime() - tReadStart;
 
     return nItems;
   }
@@ -220,4 +243,7 @@ public class FdInStream extends InStream {
   protected boolean timing;
   protected long timeWaitedIn100us;
   protected long timedKbits;
+
+  double tRead;
+  long bytesRead;
 }

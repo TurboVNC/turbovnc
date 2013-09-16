@@ -36,6 +36,11 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     addSeparator();
     options = addMenuItem("Options...   (Ctrl-Alt-Shift-O)", KeyEvent.VK_O);
     info = addMenuItem("Connection Info...  (Ctrl-Alt-Shift-I)", KeyEvent.VK_I);
+    profile = new JCheckBoxMenuItem("Performance Info...  (Ctrl-Alt-Shift-P)");
+    profile.setMnemonic(KeyEvent.VK_P);
+    profile.setSelected(cc.profileDialog.isVisible());
+    profile.addActionListener(this);
+    add(profile);
     addSeparator();
     refresh = addMenuItem("Request screen refresh   (Ctrl-Alt-Shift-R)", KeyEvent.VK_R);
     losslessRefresh = addMenuItem("Request lossless refresh   (Ctrl-Alt-Shift-L)", KeyEvent.VK_L);
@@ -125,7 +130,13 @@ public class F8Menu extends JPopupMenu implements ActionListener {
       cc.options.showDialog(cc.viewport);
     } else if (actionMatch(ev, info)) {
       cc.showInfo();
-    } else if (actionMatch(ev, about)) {
+    } else if (actionMatch(ev, profile)) {
+      if (cc.profileDialog.isVisible())
+        cc.profileDialog.endDialog();
+      else
+        cc.profileDialog.showDialog(cc.viewport);
+      cc.toggleProfile();
+     } else if (actionMatch(ev, about)) {
       cc.showAbout(null);
     } else if (actionMatch(ev, dismiss)) {
       firePopupMenuCanceled();
@@ -135,7 +146,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
   CConn cc;
   JMenuItem defaultSize;
   JMenuItem exit, clipboard, ctrlAltDel, ctrlEsc, refresh, losslessRefresh;
-  JMenuItem newConn, options, info, about, dismiss;
+  JMenuItem newConn, options, info, profile, about, dismiss;
   static JMenuItem f8;
   JCheckBoxMenuItem fullScreen, showToolbar;
 
