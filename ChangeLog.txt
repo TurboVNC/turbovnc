@@ -24,6 +24,10 @@ idle time of the X server.
 Fixed a regression introduced in 1.2 beta1 whereby the TurboVNC Viewer desktop
 shortcut installed with the Linux RPM did not work properly.
 -------------------------------------------------------------------------------
+[6]
+Fixed a bug in the Java viewer's RRE decoder that was causing pixels to be
+displayed incorrectly.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
