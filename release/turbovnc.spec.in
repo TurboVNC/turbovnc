@@ -109,7 +109,7 @@ cat > %{buildroot}/usr/share/applications/tvncviewer.desktop << EOF
 [Desktop Entry]
 Name=TurboVNC Viewer
 Comment=TurboVNC client application
-Exec=@prefix@/bin/vncviewer
+Exec=%{bindir}/vncviewer
 Terminal=0
 Type=Application
 Categories=Application;Utility;X-Red-Hat-Extra;

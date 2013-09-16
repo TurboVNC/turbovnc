@@ -46,9 +46,9 @@ VERSION=@VERSION@
 BUILD=@BUILD@
 DEBARCH=@DEBARCH@
 SRCDIR=@CMAKE_SOURCE_DIR@
+BINDIR=@TVNC_BINDIR@
 DOCDIR=@TVNC_DOCDIR@
 CONFDIR=@TVNC_CONFDIR@
-PREFIX=@CMAKE_INSTALL_PREFIX@
 
 umask 022
 rm -f $PACKAGE_NAME\_$DEBARCH.deb
@@ -71,7 +71,7 @@ cat > $TMPDIR/usr/share/applications/tvncviewer.desktop <<EOF
 [Desktop Entry]
 Name=TurboVNC Viewer
 Comment=TurboVNC client application
-Exec=$PREFIX/bin/vncviewer
+Exec=$BINDIR/vncviewer
 Terminal=0
 Type=Application
 Categories=Application;Utility;X-Red-Hat-Extra;
