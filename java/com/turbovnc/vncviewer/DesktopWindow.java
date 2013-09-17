@@ -481,6 +481,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
       java.awt.Point ev = new java.awt.Point(lastX, lastY);
       ev.translate(sx - lastX, sy - lastY);
       cc.showMenu((int)ev.getX(), (int)ev.getY());
+      e.consume();
       return;
     }
     int ctrlAltShiftMask = Event.SHIFT_MASK | Event.CTRL_MASK | Event.ALT_MASK;
