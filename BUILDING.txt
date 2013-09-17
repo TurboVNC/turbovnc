@@ -94,13 +94,15 @@ Build Procedure
 ===============
 
 
-Unix (including Mac)
+Un*x (including Mac)
 --------------------
 
-The following procedure will build the TurboVNC Viewer.  On most 64-bit
-systems (Solaris being a notable exception), this will build a 64-bit version
-of TurboVNC.  See "Build Recipes" for specific instructions on how to build a
-32-bit or 64-bit version of TurboVNC on systems that support both.
+The following procedure will build the TurboVNC Viewer and (if the TurboVNC
+Server build is enabled) a handful of C applications that are used to interface
+with the TurboVNC Server.  On most 64-bit systems (Solaris being a notable
+exception), this will build a 64-bit version of TurboVNC.  See "Build Recipes"
+for specific instructions on how to build a 32-bit or 64-bit version of
+TurboVNC on systems that support both.
 
 On Mac, this builds the Java TurboVNC Viewer by default.  If you want to build
 the native (X11) TurboVNC Viewer instead, then pass
@@ -157,7 +159,7 @@ Java
 
 Passing -DTVNC_BUILDJAVA=1 to the command line will build the Java TurboVNC
 Viewer, as well as including it when installing or packaging the native
-TurboVNC Viewer.  This is the default on Mac platforms.
+TurboVNC Viewer or the TurboVNC Server.  This is the default on Mac platforms.
 
 Additionally, you can build the Java TurboVNC Viewer without building the
 native code.  Simply use {source_directory}/java as the source directory for
@@ -168,9 +170,10 @@ CMake.
 Debug Build
 ===========
 
-When building the native TurboVNC Viewer, add "-DCMAKE_BUILD_TYPE=Debug" to the
-CMake command line.  Or, if building with NMake, remove
-"-DCMAKE_BUILD_TYPE=Release" (Debug builds are the default with NMake.)
+When building the native TurboVNC Viewer or the TurboVNC Server, add
+"-DCMAKE_BUILD_TYPE=Debug" to the CMake command line.  Or, if building with
+NMake, remove "-DCMAKE_BUILD_TYPE=Release" (Debug builds are the default with
+NMake.)
 
 
 =============
