@@ -25,4 +25,11 @@ endif()
 set(TJPEG_JNILIBRARY ${DEFAULT_TJPEG_JNILIBRARY} CACHE PATH
 	"Shared library containing TurboJPEG JNI functions (default: ${DEFAULT_TJPEG_JNILIBRARY})")
 
-install(PROGRAMS ${TJPEG_JNILIBRARY} DESTINATION ${TVNC_JAVADIR})
+get_filename_component(TJPEG_JNILIBRARY_RP ${TJPEG_JNILIBRARY} REALPATH)
+
+if(NOT EXISTS ${TJPEG_JNILIBRARY_RP})
+	message(FATAL_ERROR "Could not find TurboJPEG JNI library at ${TJPEG_JNILIBRARY}.  Set TJPEG_JNILIBRARY to the full pathname of libturbojpeg.so or install the libjpeg-turbo SDK.")
+endif()
+
+install(PROGRAMS ${TJPEG_JNILIBRARY_RP} DESTINATION ${TVNC_JAVADIR}
+	RENAME libturbojpeg.so)
