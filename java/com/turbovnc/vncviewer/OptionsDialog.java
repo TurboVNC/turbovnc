@@ -470,8 +470,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     buttonPane.add(cancelButton);
     buttonPane.add(Box.createRigidArea(new Dimension(5, 0)));
 
-    this.getContentPane().add(tabPane);
-    this.getContentPane().add(buttonPane);
+    getContentPane().add(tabPane);
+    getContentPane().add(buttonPane);
     encMethodComboBox.setSelectedItem("Tight + Perceptually Lossless JPEG (LAN)");
 
     pack();

@@ -50,7 +50,7 @@ class Dialog extends JDialog {
       int y = (dpySize.height - mySize.height) / 2;
       setLocation(x, y);
     }
-    ((Frame)this.getOwner()).setIconImage(VncViewer.frameImage);
+    ((Frame)getOwner()).setIconImage(VncViewer.frameImage);
 
     if (w != null && w.isAlwaysOnTop()) {
       // We must be in full-screen mode.  Temporarily prevent the viewport from

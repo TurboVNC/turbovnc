@@ -65,7 +65,7 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   void setVersion() {
     if (version == null || build == null || copyrightYear == null ||
         copyright == null) {
-      ClassLoader cl = this.getClass().getClassLoader();
+      ClassLoader cl = getClass().getClassLoader();
       InputStream stream =
         cl.getResourceAsStream("com/turbovnc/vncviewer/timestamp");
       try {
