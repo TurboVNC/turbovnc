@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TurboVNC distribution.
 .\"
-.TH vncviewer 1 "February 2013" "" "TurboVNC"
+.TH vncviewer 1 "September 2013" "" "TurboVNC"
 .SH NAME
 vncviewer \- an X11 viewer/client for TurboVNC
 .SH SYNOPSIS
@@ -32,7 +32,7 @@ Computing) system.  It can connect to any VNC server, allowing
 you to control the desktop environment of a different machine.
 
 Once connected, you can press F8 to display a pop\-up configuration dialog.
-Press F8 twice to send an F8 keystroke to the remote system.
+Press F8 twice to send an F8 keystroke to the VNC server.
 .SH ENCODINGS
 In order to simplify the implementation of the VNC viewer, the VNC protocol is
 designed such that the VNC server sends information in whatever format the
@@ -56,44 +56,44 @@ of the rectangle and how it was encoded.  The encoding types supported by the
 TurboVNC Viewer are listed below.
 .TP
 .B Raw
-Raw encoding sends the raw pixel values from the VNC server's desktop,
-after first translating them into the viewer's preferred pixel format.
+With Raw encoding, the server sends the raw pixel values from the remote
+desktop, after first translating them into the viewer's preferred pixel format.
 Raw encoding is used by default whenever the server and viewer are running on
 the same machine.  Otherwise, it is included only for compatibility with other
-VNC flavors and should not be used except when absolutely necessary.
+VNC flavors.  It should not be used on a remote connection except when
+absolutely necessary.
 .TP
 .B CopyRect
-When an image rectangle has been moved from one location to another on the VNC
-server's desktop but has not otherwise changed, the CopyRect protocol
-sends only the new location of the rectangle and relies on the VNC viewer to
+When a region of pixels has been moved from one location to another on the
+remote desktop but has not otherwise changed, the CopyRect protocol
+sends only the new location of the region and relies on the VNC viewer to
 copy the actual pixels.  This saves network bandwidth when, for instance, a
-window is moved around on the VNC server.
+window is moved around on the remote desktop.
 .TP
 .B Tight
-The Tight encoder attempts to encode each rectangle in the most efficient way
-possible by splitting it into \fIsubrectangles\fR and encoding the
-subrectangles using different \fIsubencoding types\fR.  The process by which it
-does this is referred to as an \fIencoding method\fR.  The Tight encoder first
-analyzes a rectangle to determine if any significant portion of it is solid,
-and if so, that portion is encoded as a bounding box and a fill color (\fISolid
-subencoding\fR.)  Of the remaining subrectangles, those with only two colors
-are encoded as a 1-bit-per-pixel bitmap with a 2-color palette (\fIMono
-subencoding\fR), those with low numbers of unique colors are encoded as a color
-palette and an indexed bitmap containing 8 index bits per pixel (\fIIndexed
-color subencoding\fR), and subrectangles with high numbers of unique colors are
-encoded using either JPEG or arrays of RGB pixels (\fIRaw subencoding\fR),
-depending on the encoding method.  zlib can optionally be used to compress the
-indexed color, mono and raw subrectangles.  TurboVNC uses a modified version of
-the TightVNC encoder that has been optimized for maximum performance with 3D
-and video workloads.
+The Tight encoder attempts to encode each framebuffer update rectangle in the
+most efficient way possible by splitting it into \fIsubrectangles\fR and
+encoding the subrectangles using different \fIsubencoding types\fR.  The
+process by which it does this is referred to as an \fIencoding method\fR.  The
+Tight encoder first analyzes a rectangle to determine if any significant
+portion of it is solid, and if so, that portion is encoded as a bounding box
+and a fill color (\fISolid subencoding\fR.)  Of the remaining subrectangles,
+those with only two colors are encoded as a 1-bit-per-pixel bitmap with a
+2-color palette (\fIMono subencoding\fR), those with low numbers of unique
+colors are encoded as a color palette and an indexed bitmap containing 8 index
+bits per pixel (\fIIndexed color subencoding\fR), and subrectangles with high
+numbers of unique colors are encoded using either JPEG or arrays of RGB pixels
+(\fIRaw subencoding\fR), depending on the encoding method.  zlib can optionally
+be used to compress the indexed color, mono and raw subrectangles.  TurboVNC
+uses a modified version of the TightVNC encoder that has been optimized for
+maximum performance with 3D and video workloads.
 .TP
 .B Hextile
-Hextile splits image rectangles into 16x16 tiles, which are sent in a
-predetermined order.  Each tile is encoded using either Raw encoding
-or a variant of RRE (Rise\-and\-Run\-length\-Encoding, a 2D version of
-RLE.)  Hextile is included only for compatibility with other VNC flavors.
-One can typically achieve the same compression with much less CPU time, or
-much better compression with the same CPU time, by using Tight encoding.
+Hextile splits rectangles into 16x16 tiles, which are sent in a predetermined
+order.  Each tile is encoded using either Raw encoding or a variant of RRE.
+Hextile is included only for compatibility with other VNC flavors.  One can
+typically achieve the same compression with much less CPU time, or much better
+compression with the same CPU time, by using Tight encoding.
 .SH OPTIONS
 .TP
 \fB\-help\fR
