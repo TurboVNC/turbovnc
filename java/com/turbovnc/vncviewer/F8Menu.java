@@ -32,21 +32,24 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     setLightWeightPopupEnabled(false);
     cc = cc_;
 
-    exit = addMenuItem("Close connection", KeyEvent.VK_C);
+    exit = addMenuItem("Close Connection", KeyEvent.VK_C);
     addSeparator();
     options = addMenuItem("Options...   (Ctrl-Alt-Shift-O)", KeyEvent.VK_O);
     info = addMenuItem("Connection Info...  (Ctrl-Alt-Shift-I)", KeyEvent.VK_I);
+    info.setDisplayedMnemonicIndex(11);
     addSeparator();
-    refresh = addMenuItem("Request screen refresh   (Ctrl-Alt-Shift-R)", KeyEvent.VK_R);
-    losslessRefresh = addMenuItem("Request lossless refresh   (Ctrl-Alt-Shift-L)", KeyEvent.VK_L);
+    refresh = addMenuItem("Request Screen Refresh   (Ctrl-Alt-Shift-R)", KeyEvent.VK_R);
+    refresh.setDisplayedMnemonicIndex(15);
+    losslessRefresh = addMenuItem("Request Lossless Refresh   (Ctrl-Alt-Shift-L)", KeyEvent.VK_L);
+    losslessRefresh.setDisplayedMnemonicIndex(8);
     addSeparator();
-    fullScreen = new JCheckBoxMenuItem("Full screen   (Ctrl-Alt-Shift-F)");
+    fullScreen = new JCheckBoxMenuItem("Full Screen   (Ctrl-Alt-Shift-F)");
     fullScreen.setMnemonic(KeyEvent.VK_F);
     fullScreen.setSelected(cc.opts.fullScreen);
     fullScreen.addActionListener(this);
     add(fullScreen);
-    defaultSize = addMenuItem("Default window size/position   (Ctrl-Alt-Shift-Z)", KeyEvent.VK_Z);
-    showToolbar = new JCheckBoxMenuItem("Show toolbar   (Ctrl-Alt-Shift-T)");
+    defaultSize = addMenuItem("Default Window Size/Position   (Ctrl-Alt-Shift-Z)", KeyEvent.VK_Z);
+    showToolbar = new JCheckBoxMenuItem("Show Toolbar   (Ctrl-Alt-Shift-T)");
     showToolbar.setMnemonic(KeyEvent.VK_T);
     showToolbar.setSelected(cc.showToolbar);
     showToolbar.addActionListener(this);
@@ -60,11 +63,11 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     addSeparator();
     clipboard = addMenuItem("Clipboard...");
     addSeparator();
-    newConn = addMenuItem("New connection...   (Ctrl-Alt-Shift-N)", KeyEvent.VK_N);
+    newConn = addMenuItem("New Connection...   (Ctrl-Alt-Shift-N)", KeyEvent.VK_N);
     addSeparator();
     about = addMenuItem("About TurboVNC Viewer...", KeyEvent.VK_A);
     addSeparator();
-    dismiss = addMenuItem("Dismiss menu");
+    dismiss = addMenuItem("Dismiss Menu");
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
   }
 

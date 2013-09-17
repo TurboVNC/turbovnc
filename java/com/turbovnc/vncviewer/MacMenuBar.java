@@ -113,10 +113,10 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
     connMenu.add(fullScreen);
     fullScreen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,
                                                      acceleratorMask));
-    defaultSize = addMenuItem(connMenu, "Default window size/position");
+    defaultSize = addMenuItem(connMenu, "Default Window Size/Position");
     defaultSize.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
                                                       acceleratorMask));
-    showToolbar = new JCheckBoxMenuItem("Show toolbar");
+    showToolbar = new JCheckBoxMenuItem("Show Toolbar");
     showToolbar.setSelected(cc.showToolbar);
     showToolbar.addActionListener(this);
     connMenu.add(showToolbar);
