@@ -85,7 +85,7 @@ abstract public class InStream {
     while (i < len) {
       int j = i + check(1, len - i);
       while (i < j) {
-	str[i++] = (char)b[ptr++];
+        str[i++] = (char)b[ptr++];
       }
     }
 

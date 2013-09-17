@@ -157,7 +157,7 @@ class OptionsFrame extends Frame
       choices[i].addItemListener(this);
 
       for (int j = 0; j < values[i].length; j++) {
-	choices[i].addItem(values[i][j]);
+        choices[i].addItem(values[i][j]);
       }
     }
 
@@ -192,11 +192,11 @@ class OptionsFrame extends Frame
     for (int i = 0; i < names.length; i++) {
       String s = viewer.readParameter(names[i], false);
       if (s != null) {
-	for (int j = 0; j < values[i].length; j++) {
-	  if (s.equalsIgnoreCase(values[i][j])) {
-	    choices[i].select(j);
-	  }
-	}
+        for (int j = 0; j < values[i].length; j++) {
+          if (s.equalsIgnoreCase(values[i][j])) {
+            choices[i].select(j);
+          }
+        }
       }
     }
 
@@ -235,27 +235,27 @@ class OptionsFrame extends Frame
     scalingFactor = 100;
     if (s != null) {
       if (s.equalsIgnoreCase("Auto")) {
-	autoScale = true;
+        autoScale = true;
       } else if (s.equalsIgnoreCase("Fixed Ratio")) {
-	fixedRatioScale = true;
+        fixedRatioScale = true;
       } else {
-	// Remove the '%' char at the end of string if present.
-	if (s.charAt(s.length() - 1) == '%') {
-	  s = s.substring(0, s.length() - 1);
-	}
-	// Convert to an integer.
-	try {
-	  scalingFactor = Integer.parseInt(s);
-	}
-	catch (NumberFormatException e) {
-	  scalingFactor = 100;
-	}
-	// Make sure scalingFactor is in the range of [1..1000].
-	if (scalingFactor < 1) {
-	  scalingFactor = 1;
-	} else if (scalingFactor > 1000) {
-	  scalingFactor = 1000;
-	}
+        // Remove the '%' char at the end of string if present.
+        if (s.charAt(s.length() - 1) == '%') {
+          s = s.substring(0, s.length() - 1);
+        }
+        // Convert to an integer.
+        try {
+          scalingFactor = Integer.parseInt(s);
+        }
+        catch (NumberFormatException e) {
+          scalingFactor = 100;
+        }
+        // Make sure scalingFactor is in the range of [1..1000].
+        if (scalingFactor < 1) {
+          scalingFactor = 1;
+        } else if (scalingFactor > 1000) {
+          scalingFactor = 1000;
+        }
       }
     }
   }
@@ -353,7 +353,7 @@ class OptionsFrame extends Frame
 
     if (requestCursorUpdates) {
       ignoreCursorUpdates =
-	choices[cursorUpdatesIndex].getSelectedItem().equals("Ignore");
+        choices[cursorUpdatesIndex].getSelectedItem().equals("Ignore");
     }
 
     viewer.setEncodings();
@@ -549,10 +549,10 @@ class OptionsFrame extends Frame
       setContinuousUpdates();
 
     } else if (source == choices[mouseButtonIndex] ||
-	       source == choices[shareDesktopIndex] ||
-	       source == choices[viewOnlyIndex] ||
-	       source == choices[scaleCursorIndex] ||
-	       source == choices[doubleBufferIndex]) {
+               source == choices[shareDesktopIndex] ||
+               source == choices[viewOnlyIndex] ||
+               source == choices[scaleCursorIndex] ||
+               source == choices[doubleBufferIndex]) {
 
       setOtherOptions();
 

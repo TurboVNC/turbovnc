@@ -48,13 +48,13 @@ class RecordingFrame extends Frame
     SecurityManager security = System.getSecurityManager();
     if (security != null) {
       try {
-	security.checkPropertyAccess("user.dir");
-	security.checkPropertyAccess("file.separator");
-	// Work around (rare) checkPropertyAccess bug
-	System.getProperty("user.dir");
+        security.checkPropertyAccess("user.dir");
+        security.checkPropertyAccess("file.separator");
+        // Work around (rare) checkPropertyAccess bug
+        System.getProperty("user.dir");
       } catch (SecurityException e) {
-	System.out.println("SecurityManager restricts session recording.");
-	return false;
+        System.out.println("SecurityManager restricts session recording.");
+        return false;
       }
     }
     return true;
@@ -73,8 +73,8 @@ class RecordingFrame extends Frame
     // FIXME: Check SecurityManager.
 
     String fname = nextNewFilename(System.getProperty("user.dir") +
-				   System.getProperty("file.separator") +
-				   "vncsession.fbs");
+                                   System.getProperty("file.separator") +
+                                   "vncsession.fbs");
 
     // Construct new panel with file name field and "Browse" button.
 
@@ -173,8 +173,8 @@ class RecordingFrame extends Frame
 
     if (len > 4 && fname.charAt(len - 4) == '.') {
       try {
-	suffixNum = Integer.parseInt(fname.substring(len - 3, len)) + 1;
-	suffixPos = len - 4;
+        suffixNum = Integer.parseInt(fname.substring(len - 3, len)) + 1;
+        suffixPos = len - 4;
       } catch (NumberFormatException e) { }
     }
 
@@ -196,8 +196,8 @@ class RecordingFrame extends Frame
     File f;
     try {
       do {
-	newName = nextFilename(newName);
-	f = new File(newName);
+        newName = nextFilename(newName);
+        f = new File(newName);
       } while (f.exists());
     } catch (SecurityException e) { }
 
@@ -219,13 +219,13 @@ class RecordingFrame extends Frame
       String newDir = fd.getDirectory();
       String sep = System.getProperty("file.separator");
       if (newDir.length() > 0) {
-	if (!sep.equals(newDir.substring(newDir.length() - sep.length())))
-	  newDir += sep;
+        if (!sep.equals(newDir.substring(newDir.length() - sep.length())))
+          newDir += sep;
       }
       String newFname = newDir + fd.getFile();
       if (newFname.equals(fnameField.getText())) {
-	fnameField.setText(newFname);
-	return true;
+        fnameField.setText(newFname);
+        return true;
       }
     }
     return false;
@@ -288,20 +288,20 @@ class RecordingFrame extends Frame
   public void actionPerformed(ActionEvent evt) {
     if (evt.getSource() == browseButton) {
       if (browseFile() && recording)
-	startRecording();
+        startRecording();
 
     } else if (evt.getSource() == recordButton) {
       if (!recording) {
-	startRecording();
+        startRecording();
       } else {
-	stopRecording();
+        stopRecording();
         fnameField.setText(nextNewFilename(fnameField.getText()));
       }
 
     } else if (evt.getSource() == nextButton) {
       fnameField.setText(nextNewFilename(fnameField.getText()));
       if (recording)
-	startRecording();
+        startRecording();
 
     } else if (evt.getSource() == closeButton) {
       setVisible(false);

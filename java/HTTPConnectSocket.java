@@ -30,7 +30,7 @@ import java.io.*;
 class HTTPConnectSocket extends Socket {
 
   public HTTPConnectSocket(String host, int port,
-			   String proxyHost, int proxyPort)
+                           String proxyHost, int proxyPort)
     throws IOException {
 
     // Connect to the specified HTTP proxy
@@ -38,7 +38,7 @@ class HTTPConnectSocket extends Socket {
 
     // Send the CONNECT request
     getOutputStream().write(("CONNECT " + host + ":" + port +
-			     " HTTP/1.0\r\n\r\n").getBytes());
+                             " HTTP/1.0\r\n\r\n").getBytes());
 
     // Read the first line of the response
     BufferedReader is = new BufferedReader(new InputStreamReader(getInputStream()));
@@ -47,7 +47,7 @@ class HTTPConnectSocket extends Socket {
     // Check the HTTP error code -- it should be "200" on success
     if (!str.startsWith("HTTP/1.0 200 ")) {
       if (str.startsWith("HTTP/1.0 "))
-	str = str.substring(9);
+        str = str.substring(9);
       throw new IOException("Proxy reports \"" + str + "\"");
     }
 

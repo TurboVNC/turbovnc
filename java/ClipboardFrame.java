@@ -115,7 +115,7 @@ class ClipboardFrame extends Frame
   void sendCutText(String text) {
     try {
       if (viewer.rfb != null && viewer.rfb.inNormalProtocol) {
-	viewer.rfb.writeClientCutText(text);
+        viewer.rfb.writeClientCutText(text);
       }
     } catch (Exception e) {
       e.printStackTrace();
