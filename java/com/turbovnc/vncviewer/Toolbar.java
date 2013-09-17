@@ -41,7 +41,7 @@ public class Toolbar extends JToolBar implements ActionListener {
     "New Connection...", "Disconnect"
   };
 
-  private final ClassLoader cl = this.getClass().getClassLoader();
+  private final ClassLoader cl = getClass().getClassLoader();
   private final ImageIcon toolbarIcons =
     new ImageIcon(cl.getResource("com/turbovnc/vncviewer/toolbar.png"));
   private final Image toolbarImage = toolbarIcons.getImage();

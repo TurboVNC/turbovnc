@@ -255,7 +255,7 @@ class ProfileDialog extends Dialog {
                    new Insets(2, 8, 2, 8));
 
     panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-    this.getContentPane().add(panel);
+    getContentPane().add(panel);
     pack();
 
     ActionListener actionListener = new ActionListener() {
@@ -265,16 +265,16 @@ class ProfileDialog extends Dialog {
       }
     };
     KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-    this.getRootPane().registerKeyboardAction(actionListener, ks,
+    getRootPane().registerKeyboardAction(actionListener, ks,
       JComponent.WHEN_IN_FOCUSED_WINDOW);
     ks = KeyStroke.getKeyStroke(KeyEvent.VK_P,
       KeyEvent.CTRL_MASK | KeyEvent.ALT_MASK | KeyEvent.SHIFT_MASK);
-    this.getRootPane().registerKeyboardAction(actionListener, ks,
+    getRootPane().registerKeyboardAction(actionListener, ks,
       JComponent.WHEN_IN_FOCUSED_WINDOW);
     if (VncViewer.os.startsWith("mac os x")) {
       int appleKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();     
       ks = KeyStroke.getKeyStroke(KeyEvent.VK_P, appleKey);
-      this.getRootPane().registerKeyboardAction(actionListener, ks,
+      getRootPane().registerKeyboardAction(actionListener, ks,
         JComponent.WHEN_IN_FOCUSED_WINDOW);
     }      
   }
