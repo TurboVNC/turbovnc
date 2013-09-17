@@ -136,13 +136,13 @@ class SessionRecorder {
     prepareWriting();
     while (len > 0) {
       if (bufferBytes > bufferSize - 4)
-	flush(false);
+        flush(false);
 
       int partLen;
       if (bufferBytes + len > bufferSize) {
-	partLen = bufferSize - bufferBytes;
+        partLen = bufferSize - bufferBytes;
       } else {
-	partLen = len;
+        partLen = len;
       }
       System.arraycopy(b, off, buffer, bufferBytes, partLen);
       bufferBytes += partLen;
@@ -169,7 +169,7 @@ class SessionRecorder {
       df.writeInt((int)lastTimeOffset);
       bufferBytes = 0;
       if (updateTimeOffset)
-	lastTimeOffset = -1;
+        lastTimeOffset = -1;
     }
   }
 

@@ -116,7 +116,7 @@ public class VncViewer extends java.applet.Applet
     if (inSeparateFrame) {
       vncFrame = new Frame("TurboVNC");
       if (!inAnApplet) {
-	vncFrame.add("Center", this);
+        vncFrame.add("Center", this);
       }
       vncContainer = vncFrame;
     } else {
@@ -217,19 +217,19 @@ public class VncViewer extends java.applet.Applet
       } catch (Exception e) {}
 
       if (inSeparateFrame) {
-	// Add the ScrollPane to the Frame window.
-	vncFrame.add(desktopScrollPane);
-	vncFrame.setTitle(rfb.desktopName);
-	// Set the initial window size, and Auto-Scale if needed.
-	vc.resizeWindowFrame();
+        // Add the ScrollPane to the Frame window.
+        vncFrame.add(desktopScrollPane);
+        vncFrame.setTitle(rfb.desktopName);
+        // Set the initial window size, and Auto-Scale if needed.
+        vc.resizeWindowFrame();
       } else {
-	// Add the ScrollPane to the Applet.
-	add(desktopScrollPane);
-	validate();
-	// Auto-Scale now that the window has been assembled.
-	if (options.autoScale || options.fixedRatioScale) {
-	  vc.setScaledSize();
-	}
+        // Add the ScrollPane to the Applet.
+        add(desktopScrollPane);
+        validate();
+        // Auto-Scale now that the window has been assembled.
+        if (options.autoScale || options.fixedRatioScale) {
+          vc.setScaledSize();
+        }
       }
 
       moveFocusToDesktop();
@@ -241,43 +241,43 @@ public class VncViewer extends java.applet.Applet
       fatalError("Network error: server name unknown: " + host, e);
     } catch (ConnectException e) {
       fatalError("Network error: could not connect to server: " +
-		 host + ":" + port, e);
+                 host + ":" + port, e);
     } catch (EOFException e) {
       if (showOfflineDesktop) {
-	e.printStackTrace();
-	System.out.println("Network error: remote side closed connection");
-	if (vc != null) {
-	  vc.enableInput(false);
-	}
-	if (inSeparateFrame) {
-	  vncFrame.setTitle(rfb.desktopName + " [disconnected]");
-	}
-	if (rfb != null && !rfb.closed())
-	  rfb.close();
-	if (showControls && buttonPanel != null) {
-	  buttonPanel.disableButtonsOnDisconnect();
-	  if (inSeparateFrame) {
-	    vncFrame.pack();
-	  } else {
-	    validate();
-	  }
-	}
+        e.printStackTrace();
+        System.out.println("Network error: remote side closed connection");
+        if (vc != null) {
+          vc.enableInput(false);
+        }
+        if (inSeparateFrame) {
+          vncFrame.setTitle(rfb.desktopName + " [disconnected]");
+        }
+        if (rfb != null && !rfb.closed())
+          rfb.close();
+        if (showControls && buttonPanel != null) {
+          buttonPanel.disableButtonsOnDisconnect();
+          if (inSeparateFrame) {
+            vncFrame.pack();
+          } else {
+            validate();
+          }
+        }
       } else {
-	fatalError("Network error: remote side closed connection", e);
+        fatalError("Network error: remote side closed connection", e);
       }
     } catch (IOException e) {
       String str = e.getMessage();
       if (str != null && str.length() != 0) {
-	fatalError("Network Error: " + str, e);
+        fatalError("Network Error: " + str, e);
       } else {
-	fatalError(e.toString(), e);
+        fatalError(e.toString(), e);
       }
     } catch (Exception e) {
       String str = e.getMessage();
       if (str != null && str.length() != 0) {
-	fatalError("Error: " + str, e);
+        fatalError("Error: " + str, e);
       } else {
-	fatalError(e.toString(), e);
+        fatalError(e.toString(), e);
       }
     }
     
@@ -295,10 +295,10 @@ public class VncViewer extends java.applet.Applet
       vc.processNormalProtocol();
     } catch (Exception e) {
       if (rfbThread == null) {
-	System.out.println("Ignoring RFB socket exceptions" +
-			   " because applet is stopping");
+        System.out.println("Ignoring RFB socket exceptions" +
+                           " because applet is stopping");
       } else {
-	throw e;
+        throw e;
       }
     }
   }
@@ -325,11 +325,11 @@ public class VncViewer extends java.applet.Applet
 
     rfb.readVersionMsg();
     showConnectionStatus("RFB server supports protocol version " +
-			 rfb.serverMajor + "." + rfb.serverMinor);
+                         rfb.serverMajor + "." + rfb.serverMinor);
 
     rfb.writeVersionMsg();
     showConnectionStatus("Using RFB protocol version " +
-			 rfb.clientMajor + "." + rfb.clientMinor);
+                         rfb.clientMajor + "." + rfb.clientMinor);
 
     int secType = rfb.negotiateSecurity();
     int authType;
@@ -390,7 +390,7 @@ public class VncViewer extends java.applet.Applet
   {
     if (msg == null) {
       if (vncContainer.isAncestorOf(connStatusLabel)) {
-	vncContainer.remove(connStatusLabel);
+        vncContainer.remove(connStatusLabel);
       }
       return;
     }
@@ -466,7 +466,7 @@ public class VncViewer extends java.applet.Applet
 
     System.out.println("Desktop name is " + rfb.desktopName);
     System.out.println("Desktop size is " + rfb.framebufferWidth + " x " +
-		       rfb.framebufferHeight);
+                       rfb.framebufferHeight);
 
     setEncodings();
 
@@ -569,7 +569,7 @@ public class VncViewer extends java.applet.Applet
       encodings[nEncodings++] = RfbProto.EncodingXCursor;
       encodings[nEncodings++] = RfbProto.EncodingRichCursor;
       if (!options.ignoreCursorUpdates)
-	encodings[nEncodings++] = RfbProto.EncodingPointerPos;
+        encodings[nEncodings++] = RfbProto.EncodingPointerPos;
     }
 
     encodings[nEncodings++] = RfbProto.EncodingLastRect;
@@ -622,13 +622,13 @@ public class VncViewer extends java.applet.Applet
   boolean checkRecordingStatus() throws IOException {
     synchronized(recordingSync) {
       if (recordingStatusChanged) {
-	recordingStatusChanged = false;
-	if (sessionFileName != null) {
-	  startRecording();
-	  return true;
-	} else {
-	  stopRecording();
-	}
+        recordingStatusChanged = false;
+        if (sessionFileName != null) {
+          startRecording();
+          return true;
+        } else {
+          stopRecording();
+        }
       }
     }
     return false;
@@ -641,15 +641,15 @@ public class VncViewer extends java.applet.Applet
   protected void startRecording() throws IOException {
     synchronized(recordingSync) {
       if (!recordingActive) {
-	// Save settings to restore them after recording the session.
-	cursorUpdatesDef =
-	  options.choices[options.cursorUpdatesIndex].getSelectedItem();
-	// Set options to values suitable for recording.
-	options.choices[options.cursorUpdatesIndex].select("Disable");
-	options.choices[options.cursorUpdatesIndex].setEnabled(false);
-	options.setEncodings();
+        // Save settings to restore them after recording the session.
+        cursorUpdatesDef =
+          options.choices[options.cursorUpdatesIndex].getSelectedItem();
+        // Set options to values suitable for recording.
+        options.choices[options.cursorUpdatesIndex].select("Disable");
+        options.choices[options.cursorUpdatesIndex].setEnabled(false);
+        options.setEncodings();
       } else {
-	rfb.closeSession();
+        rfb.closeSession();
       }
 
       System.out.println("Recording the session in " + sessionFileName);
@@ -665,13 +665,13 @@ public class VncViewer extends java.applet.Applet
   protected void stopRecording() throws IOException {
     synchronized(recordingSync) {
       if (recordingActive) {
-	// Restore options.
-	options.choices[options.cursorUpdatesIndex].select(cursorUpdatesDef);
-	options.choices[options.cursorUpdatesIndex].setEnabled(true);
-	options.setEncodings();
+        // Restore options.
+        options.choices[options.cursorUpdatesIndex].select(cursorUpdatesDef);
+        options.choices[options.cursorUpdatesIndex].setEnabled(true);
+        options.setEncodings();
 
-	rfb.closeSession();
-	System.out.println("Session recording stopped.");
+        rfb.closeSession();
+        System.out.println("Session recording stopped.");
       }
       sessionFileName = null;
       recordingActive = false;
@@ -691,7 +691,7 @@ public class VncViewer extends java.applet.Applet
     if (host == null) {
       host = getCodeBase().getHost();
       if (host.equals("")) {
-	fatalError("HOST parameter not specified");
+        fatalError("HOST parameter not specified");
       }
     }
 
@@ -702,7 +702,7 @@ public class VncViewer extends java.applet.Applet
     userParam = readParameter("USER", false);
     str = readParameter("No Unix Login", false);
     if (str != null && str.equalsIgnoreCase("Yes"))
-	  noUnixLogin = true;
+          noUnixLogin = true;
 
     // Read "ENCPASSWORD" or "PASSWORD" parameter if specified.
     readPasswordParameters();
@@ -710,7 +710,7 @@ public class VncViewer extends java.applet.Applet
     if (inAnApplet) {
       str = readParameter("Open New Window", false);
       if (str != null && str.equalsIgnoreCase("Yes"))
-	inSeparateFrame = true;
+        inSeparateFrame = true;
     }
 
     syncClipboards = true;
@@ -802,21 +802,21 @@ public class VncViewer extends java.applet.Applet
     if (inAnApplet) {
       String s = getParameter(name);
       if ((s == null) && required) {
-	fatalError(name + " parameter not specified");
+        fatalError(name + " parameter not specified");
       }
       return s;
     }
 
     for (int i = 0; i < mainArgs.length; i += 2) {
       if (mainArgs[i].equalsIgnoreCase(name)) {
-	try {
-	  return mainArgs[i+1];
-	} catch (Exception e) {
-	  if (required) {
-	    fatalError(name + " parameter not specified");
-	  }
-	  return null;
-	}
+        try {
+          return mainArgs[i+1];
+        } catch (Exception e) {
+          if (required) {
+            fatalError(name + " parameter not specified");
+          }
+          return null;
+        }
       }
     }
     if (required) {
@@ -830,7 +830,7 @@ public class VncViewer extends java.applet.Applet
     int result = defaultValue;
     if (str != null) {
       try {
-	result = Integer.parseInt(str);
+        result = Integer.parseInt(str);
       } catch (NumberFormatException e) { }
     }
     return result;
@@ -843,7 +843,7 @@ public class VncViewer extends java.applet.Applet
   void moveFocusToDesktop() {
     if (vncContainer != null) {
       if (vc != null && vncContainer.isAncestorOf(vc))
-	vc.requestFocus();
+        vc.requestFocus();
     }
   }
 

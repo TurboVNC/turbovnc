@@ -166,7 +166,7 @@ class VncCanvas extends Canvas
       int x0 = cursorX - hotX, y0 = cursorY - hotY;
       Rectangle r = new Rectangle(x0, y0, cursorWidth, cursorHeight);
       if (r.intersects(g.getClipBounds())) {
-	g.drawImage(softCursor, x0, y0, null);
+        g.drawImage(softCursor, x0, y0, null);
       }
     }
   }
@@ -183,21 +183,21 @@ class VncCanvas extends Canvas
   public boolean imageUpdate(Image img, int infoflags,
                              int x, int y, int width, int height) {
     if ((infoflags & (ALLBITS | ABORT)) == 0) {
-      return true;		// We need more image data.
+      return true;                // We need more image data.
     } else {
       // If the whole image is available, draw it now.
       if ((infoflags & ALLBITS) != 0) {
-	if (jpegRect != null) {
-	  synchronized(jpegRect) {
-	    memGraphics.drawImage(img, jpegRect.x, jpegRect.y, null);
-	    if (!viewer.options.doubleBuffer)
-	      scheduleRepaint(jpegRect.x, jpegRect.y,
-			      jpegRect.width, jpegRect.height);
-	    jpegRect.notify();
-	  }
-	}
+        if (jpegRect != null) {
+          synchronized(jpegRect) {
+            memGraphics.drawImage(img, jpegRect.x, jpegRect.y, null);
+            if (!viewer.options.doubleBuffer)
+              scheduleRepaint(jpegRect.x, jpegRect.y,
+                              jpegRect.width, jpegRect.height);
+            jpegRect.notify();
+          }
+        }
       }
-      return false;		// All image data was processed.
+      return false;                // All image data was processed.
     }
   }
 
@@ -213,17 +213,17 @@ class VncCanvas extends Canvas
       addMouseListener(this);
       addMouseMotionListener(this);
       if (viewer.showControls) {
-	viewer.buttonPanel.enableRemoteAccessControls(true);
+        viewer.buttonPanel.enableRemoteAccessControls(true);
       }
-      createSoftCursor();	// scaled cursor
+      createSoftCursor();        // scaled cursor
     } else if (!enable && inputEnabled) {
       inputEnabled = false;
       removeMouseListener(this);
       removeMouseMotionListener(this);
       if (viewer.showControls) {
-	viewer.buttonPanel.enableRemoteAccessControls(false);
+        viewer.buttonPanel.enableRemoteAccessControls(false);
       }
-      createSoftCursor();	// non-scaled cursor
+      createSoftCursor();        // non-scaled cursor
     }
   }
 
@@ -245,10 +245,10 @@ class VncCanvas extends Canvas
       memImage = viewer.vncContainer.createImage(fbWidth, fbHeight);
       memGraphics = memImage.getGraphics();
     } else if (memImage.getWidth(null) != fbWidth ||
-	       memImage.getHeight(null) != fbHeight) {
+               memImage.getHeight(null) != fbHeight) {
       synchronized(memImage) {
-	memImage = viewer.vncContainer.createImage(fbWidth, fbHeight);
-	memGraphics = memImage.getGraphics();
+        memImage = viewer.vncContainer.createImage(fbWidth, fbHeight);
+        memGraphics = memImage.getGraphics();
       }
     }
 
@@ -260,7 +260,7 @@ class VncCanvas extends Canvas
       pixels8 = new byte[fbWidth * fbHeight];
 
       pixelsSource =
-	new MemoryImageSource(fbWidth, fbHeight, cm8, pixels8, 0, fbWidth);
+        new MemoryImageSource(fbWidth, fbHeight, cm8, pixels8, 0, fbWidth);
 
       zrleTilePixels24 = null;
       zrleTilePixels8 = new byte[64 * 64];
@@ -271,7 +271,7 @@ class VncCanvas extends Canvas
       pixels24 = new int[fbWidth * fbHeight];
 
       pixelsSource =
-	new MemoryImageSource(fbWidth, fbHeight, cm24, pixels24, 0, fbWidth);
+        new MemoryImageSource(fbWidth, fbHeight, cm24, pixels24, 0, fbWidth);
 
       zrleTilePixels8 = null;
       zrleTilePixels24 = new int[64 * 64];
@@ -379,7 +379,7 @@ class VncCanvas extends Canvas
       insets.bottom -= viewer.desktopScrollPane.getHScrollbarHeight();
     }
     viewer.desktopScrollPane.setSize(scaledWidth + insets.left + insets.right,
-				     scaledHeight + insets.top + insets.bottom);
+                                     scaledHeight + insets.top + insets.bottom);
     viewer.desktopScrollPane.validate();
 
     // Pack the Frame around the ScrollPane.
@@ -426,7 +426,7 @@ class VncCanvas extends Canvas
     viewer.checkRecordingStatus();
 
     rfb.writeFramebufferUpdateRequest(0, 0, rfb.framebufferWidth,
-				      rfb.framebufferHeight, false);
+                                      rfb.framebufferHeight, false);
 
     resetStats();
     boolean statsRestarted = false;
@@ -444,7 +444,7 @@ class VncCanvas extends Canvas
       switch (msgType) {
       case RfbProto.FramebufferUpdate:
 
-	  dispatchEvent(new RFBUpdateEvent(this, RFBUpdateEvent.RFBUPDATE_FIRST));
+          dispatchEvent(new RFBUpdateEvent(this, RFBUpdateEvent.RFBUPDATE_FIRST));
 
         if (statNumUpdates == viewer.debugStatsExcludeUpdates &&
             !statsRestarted) {
@@ -455,96 +455,96 @@ class VncCanvas extends Canvas
           viewer.disconnect();
         }
 
-	rfb.readFramebufferUpdate();
-	statNumUpdates++;
+        rfb.readFramebufferUpdate();
+        statNumUpdates++;
 
-	int dbx = -1, dby = -1, dbw = -1, dbh = -1;
+        int dbx = -1, dby = -1, dbw = -1, dbh = -1;
 
-	boolean cursorPosReceived = false;
+        boolean cursorPosReceived = false;
 
-	for (int i = 0; i < rfb.updateNRects; i++) {
+        for (int i = 0; i < rfb.updateNRects; i++) {
 
-	  rfb.readFramebufferUpdateRectHdr();
-	  statNumTotalRects++;
-	  int rx = rfb.updateRectX, ry = rfb.updateRectY;
-	  int rw = rfb.updateRectW, rh = rfb.updateRectH;
+          rfb.readFramebufferUpdateRectHdr();
+          statNumTotalRects++;
+          int rx = rfb.updateRectX, ry = rfb.updateRectY;
+          int rw = rfb.updateRectW, rh = rfb.updateRectH;
 
-	  if (rfb.updateRectEncoding == rfb.EncodingLastRect) {
-	    if (viewer.options.doubleBuffer && dbx >= 0 && dby >= 0
-		&& dbw >= 1 && dbh >= 1) {
-	      scheduleRepaint(dbx, dby, dbw, dbh);
-	      dbx = dby = dbw = dbh = -1;
-	    }
-	    break;
-	  }
+          if (rfb.updateRectEncoding == rfb.EncodingLastRect) {
+            if (viewer.options.doubleBuffer && dbx >= 0 && dby >= 0
+                && dbw >= 1 && dbh >= 1) {
+              scheduleRepaint(dbx, dby, dbw, dbh);
+              dbx = dby = dbw = dbh = -1;
+            }
+            break;
+          }
 
-	  if (rfb.updateRectEncoding == rfb.EncodingNewFBSize) {
-	    rfb.setFramebufferSize(rw, rh);
-	    setFramebufferSize();
-	    break;
-	  }
+          if (rfb.updateRectEncoding == rfb.EncodingNewFBSize) {
+            rfb.setFramebufferSize(rw, rh);
+            setFramebufferSize();
+            break;
+          }
 
-	  if (rfb.updateRectEncoding == rfb.EncodingXCursor ||
-	      rfb.updateRectEncoding == rfb.EncodingRichCursor) {
-	    handleCursorShapeUpdate(rfb.updateRectEncoding, rx, ry, rw, rh);
-	    continue;
-	  }
+          if (rfb.updateRectEncoding == rfb.EncodingXCursor ||
+              rfb.updateRectEncoding == rfb.EncodingRichCursor) {
+            handleCursorShapeUpdate(rfb.updateRectEncoding, rx, ry, rw, rh);
+            continue;
+          }
 
-	  if (rfb.updateRectEncoding == rfb.EncodingPointerPos) {
-	    if (rfb.framebufferWidth == scaledWidth && rfb.framebufferHeight == scaledHeight) {
-	      softCursorMove(rx, ry);
-	    } else {
-	      int sx = (scaleWidthRatio == -1) ? rx : ((int)((float)rx * scaleWidthRatio));
-	      int sy = (scaleHeightRatio == -1) ? ry : ((int)((float)ry * scaleHeightRatio));
-	      softCursorMove(sx, sy);
-	    }
-	    cursorPosReceived = true;
-	    continue;
-	  }
+          if (rfb.updateRectEncoding == rfb.EncodingPointerPos) {
+            if (rfb.framebufferWidth == scaledWidth && rfb.framebufferHeight == scaledHeight) {
+              softCursorMove(rx, ry);
+            } else {
+              int sx = (scaleWidthRatio == -1) ? rx : ((int)((float)rx * scaleWidthRatio));
+              int sy = (scaleHeightRatio == -1) ? ry : ((int)((float)ry * scaleHeightRatio));
+              softCursorMove(sx, sy);
+            }
+            cursorPosReceived = true;
+            continue;
+          }
 
           long numBytesReadBefore = rfb.getNumBytesRead();
 
           rfb.startTiming();
 
-	  if (rx < dbx || dbx < 0) dbx = rx;
-	  if (ry < dby || dby < 0) dby = ry;
-	  if (rx + rw > dbx + dbw || dbw < 0) dbw = rx + rw - dbx;
-	  if (ry + rh > dby + dbh || dbh < 0) dbh = ry + rh - dby;
+          if (rx < dbx || dbx < 0) dbx = rx;
+          if (ry < dby || dby < 0) dby = ry;
+          if (rx + rw > dbx + dbw || dbw < 0) dbw = rx + rw - dbx;
+          if (ry + rh > dby + dbh || dbh < 0) dbh = ry + rh - dby;
 
-	  switch (rfb.updateRectEncoding) {
-	  case RfbProto.EncodingRaw:
-	    statNumRectsRaw++;
-	    handleRawRect(rx, ry, rw, rh);
-	    break;
-	  case RfbProto.EncodingCopyRect:
-	    statNumRectsCopy++;
-	    handleCopyRect(rx, ry, rw, rh);
-	    break;
-	  case RfbProto.EncodingRRE:
-	    handleRRERect(rx, ry, rw, rh);
-	    break;
-	  case RfbProto.EncodingCoRRE:
-	    handleCoRRERect(rx, ry, rw, rh);
-	    break;
-	  case RfbProto.EncodingHextile:
-	    statNumRectsHextile++;
-	    handleHextileRect(rx, ry, rw, rh);
-	    break;
-	  case RfbProto.EncodingZRLE:
-	    statNumRectsZRLE++;
-	    handleZRLERect(rx, ry, rw, rh);
-	    break;
-	  case RfbProto.EncodingZlib:
+          switch (rfb.updateRectEncoding) {
+          case RfbProto.EncodingRaw:
+            statNumRectsRaw++;
+            handleRawRect(rx, ry, rw, rh);
+            break;
+          case RfbProto.EncodingCopyRect:
+            statNumRectsCopy++;
+            handleCopyRect(rx, ry, rw, rh);
+            break;
+          case RfbProto.EncodingRRE:
+            handleRRERect(rx, ry, rw, rh);
+            break;
+          case RfbProto.EncodingCoRRE:
+            handleCoRRERect(rx, ry, rw, rh);
+            break;
+          case RfbProto.EncodingHextile:
+            statNumRectsHextile++;
+            handleHextileRect(rx, ry, rw, rh);
+            break;
+          case RfbProto.EncodingZRLE:
+            statNumRectsZRLE++;
+            handleZRLERect(rx, ry, rw, rh);
+            break;
+          case RfbProto.EncodingZlib:
             handleZlibRect(rx, ry, rw, rh);
-	    break;
-	  case RfbProto.EncodingTight:
-	    statNumRectsTight++;
-	    handleTightRect(rx, ry, rw, rh);
-	    break;
-	  default:
-	    throw new Exception("Unknown RFB rectangle encoding " +
-				rfb.updateRectEncoding);
-	  }
+            break;
+          case RfbProto.EncodingTight:
+            statNumRectsTight++;
+            handleTightRect(rx, ry, rw, rh);
+            break;
+          default:
+            throw new Exception("Unknown RFB rectangle encoding " +
+                                rfb.updateRectEncoding);
+          }
 
           rfb.stopTiming();
 
@@ -552,53 +552,53 @@ class VncCanvas extends Canvas
           statNumBytesDecoded += rw * rh * bytesPixel;
           statNumBytesEncoded +=
             (int)(rfb.getNumBytesRead() - numBytesReadBefore);
-	}
+        }
 
-	if (viewer.options.doubleBuffer && dbx >= 0 && dby >= 0
-	    && dbw >= 1 && dbh >= 1) {
-	    scheduleRepaint(dbx, dby, dbw, dbh);
-	    dbx = dby = dbw = dbh = -1;
-	}
+        if (viewer.options.doubleBuffer && dbx >= 0 && dby >= 0
+            && dbw >= 1 && dbh >= 1) {
+            scheduleRepaint(dbx, dby, dbw, dbh);
+            dbx = dby = dbw = dbh = -1;
+        }
 
-	boolean fullUpdateNeeded = false;
+        boolean fullUpdateNeeded = false;
 
-	// Start/stop session recording if necessary. Request full
-	// update if a new session file was opened.
-	if (viewer.checkRecordingStatus())
-	  fullUpdateNeeded = true;
+        // Start/stop session recording if necessary. Request full
+        // update if a new session file was opened.
+        if (viewer.checkRecordingStatus())
+          fullUpdateNeeded = true;
 
-	// Defer framebuffer update request if necessary. But wake up
-	// immediately on keyboard or mouse event. Also, don't sleep
-	// if there is some data to receive, or if the last update
-	// included a PointerPos message.
-	if (viewer.deferUpdateRequests > 0 &&
-	    rfb.available() == 0 && !cursorPosReceived) {
-	  synchronized(rfb) {
-	    try {
-	      rfb.wait(viewer.deferUpdateRequests);
-	    } catch (InterruptedException e) {
-	    }
-	  }
-	}
+        // Defer framebuffer update request if necessary. But wake up
+        // immediately on keyboard or mouse event. Also, don't sleep
+        // if there is some data to receive, or if the last update
+        // included a PointerPos message.
+        if (viewer.deferUpdateRequests > 0 &&
+            rfb.available() == 0 && !cursorPosReceived) {
+          synchronized(rfb) {
+            try {
+              rfb.wait(viewer.deferUpdateRequests);
+            } catch (InterruptedException e) {
+            }
+          }
+        }
 
         viewer.autoSelectEncodings();
 
-	break;
+        break;
 
       case RfbProto.SetColourMapEntries:
-	throw new Exception("Can't handle SetColourMapEntries message");
+        throw new Exception("Can't handle SetColourMapEntries message");
 
       case RfbProto.Bell:
         Toolkit.getDefaultToolkit().beep();
-	break;
+        break;
 
       case RfbProto.ServerCutText:
-	String s = rfb.readServerCutText();
-	viewer.clipboard.recvCutText(s);
-	break;
+        String s = rfb.readServerCutText();
+        viewer.clipboard.recvCutText(s);
+        break;
 
       default:
-	throw new Exception("Unknown RFB message type " + msgType);
+        throw new Exception("Unknown RFB message type " + msgType);
       }
     }
   }
@@ -618,26 +618,26 @@ class VncCanvas extends Canvas
 
     if (bytesPixel == 1) {
       for (int dy = y; dy < y + h; dy++) {
-	rfb.readFully(pixels8, dy * rfb.framebufferWidth + x, w);
-	if (rfb.rec != null) {
-	  rfb.rec.write(pixels8, dy * rfb.framebufferWidth + x, w);
-	}
+        rfb.readFully(pixels8, dy * rfb.framebufferWidth + x, w);
+        if (rfb.rec != null) {
+          rfb.rec.write(pixels8, dy * rfb.framebufferWidth + x, w);
+        }
       }
     } else {
       byte[] buf = new byte[w * 4];
       int i, offset;
       for (int dy = y; dy < y + h; dy++) {
-	rfb.readFully(buf);
-	if (rfb.rec != null) {
-	  rfb.rec.write(buf);
-	}
-	offset = dy * rfb.framebufferWidth + x;
-	for (i = 0; i < w; i++) {
-	  pixels24[offset + i] =
-	    (buf[i * 4 + 2] & 0xFF) << 16 |
-	    (buf[i * 4 + 1] & 0xFF) << 8 |
-	    (buf[i * 4] & 0xFF);
-	}
+        rfb.readFully(buf);
+        if (rfb.rec != null) {
+          rfb.rec.write(buf);
+        }
+        offset = dy * rfb.framebufferWidth + x;
+        for (i = 0; i < w; i++) {
+          pixels24[offset + i] =
+            (buf[i * 4 + 2] & 0xFF) << 16 |
+            (buf[i * 4 + 1] & 0xFF) << 8 |
+            (buf[i * 4] & 0xFF);
+        }
       }
     }
 
@@ -654,7 +654,7 @@ class VncCanvas extends Canvas
 
     rfb.readCopyRect();
     memGraphics.copyArea(rfb.copyRectSrcX, rfb.copyRectSrcY, w, h,
-			 x - rfb.copyRectSrcX, y - rfb.copyRectSrcY);
+                         x - rfb.copyRectSrcX, y - rfb.copyRectSrcY);
 
     if (!viewer.options.doubleBuffer) scheduleRepaint(x, y, w, h);
   }
@@ -692,12 +692,12 @@ class VncCanvas extends Canvas
 
     for (int j = 0; j < nSubrects; j++) {
       if (bytesPixel == 1) {
-	pixel = colors[ds.readUnsignedByte()];
+        pixel = colors[ds.readUnsignedByte()];
       } else {
-	ds.skip(4);
-	pixel = new Color(buf[j*12+2] & 0xFF,
-			  buf[j*12+1] & 0xFF,
-			  buf[j*12]   & 0xFF);
+        ds.skip(4);
+        pixel = new Color(buf[j*12+2] & 0xFF,
+                          buf[j*12+1] & 0xFF,
+                          buf[j*12]   & 0xFF);
       }
       sx = x + ds.readUnsignedShort();
       sy = y + ds.readUnsignedShort();
@@ -743,10 +743,10 @@ class VncCanvas extends Canvas
 
     for (int j = 0; j < nSubrects; j++) {
       if (bytesPixel == 1) {
-	pixel = colors[buf[i++] & 0xFF];
+        pixel = colors[buf[i++] & 0xFF];
       } else {
-	pixel = new Color(buf[i+2] & 0xFF, buf[i+1] & 0xFF, buf[i] & 0xFF);
-	i += 4;
+        pixel = new Color(buf[i+2] & 0xFF, buf[i+1] & 0xFF, buf[i] & 0xFF);
+        i += 4;
       }
       sx = x + (buf[i++] & 0xFF);
       sy = y + (buf[i++] & 0xFF);
@@ -775,14 +775,14 @@ class VncCanvas extends Canvas
     for (int ty = y; ty < y + h; ty += 16) {
       int th = 16;
       if (y + h - ty < 16)
-	th = y + h - ty;
+        th = y + h - ty;
 
       for (int tx = x; tx < x + w; tx += 16) {
-	int tw = 16;
-	if (x + w - tx < 16)
-	  tw = x + w - tx;
+        int tw = 16;
+        if (x + w - tx < 16)
+          tw = x + w - tx;
 
-	handleHextileSubrect(tx, ty, tw, th);
+        handleHextileSubrect(tx, ty, tw, th);
       }
 
       // Finished with a row of tiles, now let's show it.
@@ -813,12 +813,12 @@ class VncCanvas extends Canvas
     if ((subencoding & rfb.HextileBackgroundSpecified) != 0) {
       rfb.readFully(cbuf);
       if (bytesPixel == 1) {
-	hextile_bg = colors[cbuf[0] & 0xFF];
+        hextile_bg = colors[cbuf[0] & 0xFF];
       } else {
-	hextile_bg = new Color(cbuf[2] & 0xFF, cbuf[1] & 0xFF, cbuf[0] & 0xFF);
+        hextile_bg = new Color(cbuf[2] & 0xFF, cbuf[1] & 0xFF, cbuf[0] & 0xFF);
       }
       if (rfb.rec != null) {
-	rfb.rec.write(cbuf);
+        rfb.rec.write(cbuf);
       }
     }
     memGraphics.setColor(hextile_bg);
@@ -828,12 +828,12 @@ class VncCanvas extends Canvas
     if ((subencoding & rfb.HextileForegroundSpecified) != 0) {
       rfb.readFully(cbuf);
       if (bytesPixel == 1) {
-	hextile_fg = colors[cbuf[0] & 0xFF];
+        hextile_fg = colors[cbuf[0] & 0xFF];
       } else {
-	hextile_fg = new Color(cbuf[2] & 0xFF, cbuf[1] & 0xFF, cbuf[0] & 0xFF);
+        hextile_fg = new Color(cbuf[2] & 0xFF, cbuf[1] & 0xFF, cbuf[0] & 0xFF);
       }
       if (rfb.rec != null) {
-	rfb.rec.write(cbuf);
+        rfb.rec.write(cbuf);
       }
     }
 
@@ -861,45 +861,45 @@ class VncCanvas extends Canvas
       // Sub-rectangles are all of the same color.
       memGraphics.setColor(hextile_fg);
       for (int j = 0; j < nSubrects; j++) {
-	b1 = buf[i++] & 0xFF;
-	b2 = buf[i++] & 0xFF;
-	sx = tx + (b1 >> 4);
-	sy = ty + (b1 & 0xf);
-	sw = (b2 >> 4) + 1;
-	sh = (b2 & 0xf) + 1;
-	memGraphics.fillRect(sx, sy, sw, sh);
+        b1 = buf[i++] & 0xFF;
+        b2 = buf[i++] & 0xFF;
+        sx = tx + (b1 >> 4);
+        sy = ty + (b1 & 0xf);
+        sw = (b2 >> 4) + 1;
+        sh = (b2 & 0xf) + 1;
+        memGraphics.fillRect(sx, sy, sw, sh);
       }
     } else if (bytesPixel == 1) {
 
       // BGR233 (8-bit color) version for colored sub-rectangles.
       for (int j = 0; j < nSubrects; j++) {
-	hextile_fg = colors[buf[i++] & 0xFF];
-	b1 = buf[i++] & 0xFF;
-	b2 = buf[i++] & 0xFF;
-	sx = tx + (b1 >> 4);
-	sy = ty + (b1 & 0xf);
-	sw = (b2 >> 4) + 1;
-	sh = (b2 & 0xf) + 1;
-	memGraphics.setColor(hextile_fg);
-	memGraphics.fillRect(sx, sy, sw, sh);
+        hextile_fg = colors[buf[i++] & 0xFF];
+        b1 = buf[i++] & 0xFF;
+        b2 = buf[i++] & 0xFF;
+        sx = tx + (b1 >> 4);
+        sy = ty + (b1 & 0xf);
+        sw = (b2 >> 4) + 1;
+        sh = (b2 & 0xf) + 1;
+        memGraphics.setColor(hextile_fg);
+        memGraphics.fillRect(sx, sy, sw, sh);
       }
 
     } else {
 
       // Full-color (24-bit) version for colored sub-rectangles.
       for (int j = 0; j < nSubrects; j++) {
-	hextile_fg = new Color(buf[i+2] & 0xFF,
-			       buf[i+1] & 0xFF,
-			       buf[i] & 0xFF);
-	i += 4;
-	b1 = buf[i++] & 0xFF;
-	b2 = buf[i++] & 0xFF;
-	sx = tx + (b1 >> 4);
-	sy = ty + (b1 & 0xf);
-	sw = (b2 >> 4) + 1;
-	sh = (b2 & 0xf) + 1;
-	memGraphics.setColor(hextile_fg);
-	memGraphics.fillRect(sx, sy, sw, sh);
+        hextile_fg = new Color(buf[i+2] & 0xFF,
+                               buf[i+1] & 0xFF,
+                               buf[i] & 0xFF);
+        i += 4;
+        b1 = buf[i++] & 0xFF;
+        b2 = buf[i++] & 0xFF;
+        sx = tx + (b1 >> 4);
+        sy = ty + (b1 & 0xf);
+        sw = (b2 >> 4) + 1;
+        sh = (b2 & 0xf) + 1;
+        memGraphics.setColor(hextile_fg);
+        memGraphics.fillRect(sx, sy, sw, sh);
       }
 
     }
@@ -1163,24 +1163,24 @@ class VncCanvas extends Canvas
 
     if (bytesPixel == 1) {
       for (int dy = y; dy < y + h; dy++) {
-	zlibInflater.inflate(pixels8, dy * rfb.framebufferWidth + x, w);
-	if (rfb.rec != null && !rfb.recordFromBeginning)
-	  rfb.rec.write(pixels8, dy * rfb.framebufferWidth + x, w);
+        zlibInflater.inflate(pixels8, dy * rfb.framebufferWidth + x, w);
+        if (rfb.rec != null && !rfb.recordFromBeginning)
+          rfb.rec.write(pixels8, dy * rfb.framebufferWidth + x, w);
       }
     } else {
       byte[] buf = new byte[w * 4];
       int i, offset;
       for (int dy = y; dy < y + h; dy++) {
-	zlibInflater.inflate(buf);
-	offset = dy * rfb.framebufferWidth + x;
-	for (i = 0; i < w; i++) {
-	  pixels24[offset + i] =
-	    (buf[i * 4 + 2] & 0xFF) << 16 |
-	    (buf[i * 4 + 1] & 0xFF) << 8 |
-	    (buf[i * 4] & 0xFF);
-	}
-	if (rfb.rec != null && !rfb.recordFromBeginning)
-	  rfb.rec.write(buf);
+        zlibInflater.inflate(buf);
+        offset = dy * rfb.framebufferWidth + x;
+        for (i = 0; i < w; i++) {
+          pixels24[offset + i] =
+            (buf[i * 4 + 2] & 0xFF) << 16 |
+            (buf[i * 4 + 1] & 0xFF) << 8 |
+            (buf[i * 4] & 0xFF);
+        }
+        if (rfb.rec != null && !rfb.recordFromBeginning)
+          rfb.rec.write(buf);
       }
     }
 
@@ -1198,20 +1198,20 @@ class VncCanvas extends Canvas
     boolean readUncompressed = false;
     if (rfb.rec != null) {
       if (rfb.recordFromBeginning ||
-	  comp_ctl == (rfb.TightFill << 4) ||
-	  comp_ctl == (rfb.TightJpeg << 4)) {
-	// Send data exactly as received.
-	rfb.rec.writeByte(comp_ctl);
+          comp_ctl == (rfb.TightFill << 4) ||
+          comp_ctl == (rfb.TightJpeg << 4)) {
+        // Send data exactly as received.
+        rfb.rec.writeByte(comp_ctl);
       } else {
-	// Tell the decoder to flush each of the four zlib streams.
-	rfb.rec.writeByte(comp_ctl | 0x0F);
+        // Tell the decoder to flush each of the four zlib streams.
+        rfb.rec.writeByte(comp_ctl | 0x0F);
       }
     }
 
     // Flush zlib streams if we are told by the server to do so.
     for (int stream_id = 0; stream_id < 4; stream_id++) {
       if ((comp_ctl & 1) != 0 && tightInflaters[stream_id] != null) {
-	tightInflaters[stream_id] = null;
+        tightInflaters[stream_id] = null;
       }
       comp_ctl >>= 1;
     }
@@ -1230,20 +1230,20 @@ class VncCanvas extends Canvas
     if (comp_ctl == rfb.TightFill) {
 
       if (bytesPixel == 1) {
-	int idx = rfb.readU8();
-	memGraphics.setColor(colors[idx]);
-	if (rfb.rec != null) {
-	  rfb.rec.writeByte(idx);
-	}
+        int idx = rfb.readU8();
+        memGraphics.setColor(colors[idx]);
+        if (rfb.rec != null) {
+          rfb.rec.writeByte(idx);
+        }
       } else {
-	byte[] buf = new byte[3];
-	rfb.readFully(buf);
-	if (rfb.rec != null) {
-	  rfb.rec.write(buf);
-	}
-	Color bg = new Color(0xFF000000 | (buf[0] & 0xFF) << 16 |
-			     (buf[1] & 0xFF) << 8 | (buf[2] & 0xFF));
-	memGraphics.setColor(bg);
+        byte[] buf = new byte[3];
+        rfb.readFully(buf);
+        if (rfb.rec != null) {
+          rfb.rec.write(buf);
+        }
+        Color bg = new Color(0xFF000000 | (buf[0] & 0xFF) << 16 |
+                             (buf[1] & 0xFF) << 8 | (buf[2] & 0xFF));
+        memGraphics.setColor(bg);
       }
       memGraphics.fillRect(x, y, w, h);
       if (!viewer.options.doubleBuffer) scheduleRepaint(x, y, w, h);
@@ -1259,10 +1259,10 @@ class VncCanvas extends Canvas
       byte[] jpegData = new byte[rfb.readCompactLen()];
       rfb.readFully(jpegData);
       if (rfb.rec != null) {
-	if (!rfb.recordFromBeginning) {
-	  rfb.recordCompactLen(jpegData.length);
-	}
-	rfb.rec.write(jpegData);
+        if (!rfb.recordFromBeginning) {
+          rfb.recordCompactLen(jpegData.length);
+        }
+        rfb.rec.write(jpegData);
       }
 
       // Create an Image object from the JPEG data.
@@ -1274,13 +1274,13 @@ class VncCanvas extends Canvas
       // Let the imageUpdate() method do the actual drawing, here just
       // wait until the image is fully loaded and drawn.
       synchronized(jpegRect) {
-	Toolkit.getDefaultToolkit().prepareImage(jpegImage, -1, -1, this);
-	try {
-	  // Wait no longer than three seconds.
-	  jpegRect.wait(3000);
-	} catch (InterruptedException e) {
-	  throw new Exception("Interrupted while decoding JPEG image");
-	}
+        Toolkit.getDefaultToolkit().prepareImage(jpegImage, -1, -1, this);
+        try {
+          // Wait no longer than three seconds.
+          jpegRect.wait(3000);
+        } catch (InterruptedException e) {
+          throw new Exception("Interrupted while decoding JPEG image");
+        }
       }
 
       // Done, jpegRect is not needed any more.
@@ -1297,39 +1297,39 @@ class VncCanvas extends Canvas
     if ((comp_ctl & rfb.TightExplicitFilter) != 0) {
       int filter_id = rfb.readU8();
       if (rfb.rec != null) {
-	rfb.rec.writeByte(filter_id);
+        rfb.rec.writeByte(filter_id);
       }
       if (filter_id == rfb.TightFilterPalette) {
-	numColors = rfb.readU8() + 1;
-	if (rfb.rec != null) {
-	  rfb.rec.writeByte(numColors - 1);
-	}
+        numColors = rfb.readU8() + 1;
+        if (rfb.rec != null) {
+          rfb.rec.writeByte(numColors - 1);
+        }
         if (bytesPixel == 1) {
-	  if (numColors != 2) {
-	    throw new Exception("Incorrect tight palette size: " + numColors);
-	  }
-	  rfb.readFully(palette8);
-	  if (rfb.rec != null) {
-	    rfb.rec.write(palette8);
-	  }
-	} else {
-	  byte[] buf = new byte[numColors * 3];
-	  rfb.readFully(buf);
-	  if (rfb.rec != null) {
-	    rfb.rec.write(buf);
-	  }
-	  for (int i = 0; i < numColors; i++) {
-	    palette24[i] = ((buf[i * 3] & 0xFF) << 16 |
-			    (buf[i * 3 + 1] & 0xFF) << 8 |
-			    (buf[i * 3 + 2] & 0xFF));
-	  }
-	}
-	if (numColors == 2)
-	  rowSize = (w + 7) / 8;
+          if (numColors != 2) {
+            throw new Exception("Incorrect tight palette size: " + numColors);
+          }
+          rfb.readFully(palette8);
+          if (rfb.rec != null) {
+            rfb.rec.write(palette8);
+          }
+        } else {
+          byte[] buf = new byte[numColors * 3];
+          rfb.readFully(buf);
+          if (rfb.rec != null) {
+            rfb.rec.write(buf);
+          }
+          for (int i = 0; i < numColors; i++) {
+            palette24[i] = ((buf[i * 3] & 0xFF) << 16 |
+                            (buf[i * 3 + 1] & 0xFF) << 8 |
+                            (buf[i * 3 + 2] & 0xFF));
+          }
+        }
+        if (numColors == 2)
+          rowSize = (w + 7) / 8;
       } else if (filter_id == rfb.TightFilterGradient) {
-	useGradient = true;
+        useGradient = true;
       } else if (filter_id != rfb.TightFilterCopy) {
-	throw new Exception("Incorrect tight filter id: " + filter_id);
+        throw new Exception("Incorrect tight filter id: " + filter_id);
       }
     }
     if (numColors == 0 && bytesPixel == 4)
@@ -1343,76 +1343,76 @@ class VncCanvas extends Canvas
 
       // Data size is small - not compressed with zlib.
       if (numColors != 0) {
-	// Indexed colors.
+        // Indexed colors.
         if (readUncompressed) dataSize = rfb.readCompactLen();
-	byte[] indexedData = new byte[dataSize];
-	rfb.readFully(indexedData);
-	if (rfb.rec != null) {
-	  rfb.rec.write(indexedData);
-	}
-	if (numColors == 2) {
-	  // Two colors.
-	  if (bytesPixel == 1) {
-	    decodeMonoData(x, y, w, h, indexedData, palette8);
-	  } else {
-	    decodeMonoData(x, y, w, h, indexedData, palette24);
-	  }
-	} else {
-	  // 3..255 colors (assuming bytesPixel == 4).
-	  int i = 0;
-	  for (int dy = y; dy < y + h; dy++) {
-	    for (int dx = x; dx < x + w; dx++) {
-	      pixels24[dy * rfb.framebufferWidth + dx] =
-		palette24[indexedData[i++] & 0xFF];
-	    }
-	  }
-	}
+        byte[] indexedData = new byte[dataSize];
+        rfb.readFully(indexedData);
+        if (rfb.rec != null) {
+          rfb.rec.write(indexedData);
+        }
+        if (numColors == 2) {
+          // Two colors.
+          if (bytesPixel == 1) {
+            decodeMonoData(x, y, w, h, indexedData, palette8);
+          } else {
+            decodeMonoData(x, y, w, h, indexedData, palette24);
+          }
+        } else {
+          // 3..255 colors (assuming bytesPixel == 4).
+          int i = 0;
+          for (int dy = y; dy < y + h; dy++) {
+            for (int dx = x; dx < x + w; dx++) {
+              pixels24[dy * rfb.framebufferWidth + dx] =
+                palette24[indexedData[i++] & 0xFF];
+            }
+          }
+        }
       } else if (useGradient) {
-	// "Gradient"-processed data
+        // "Gradient"-processed data
         if (readUncompressed) dataSize = rfb.readCompactLen();
         else dataSize = w * h * 3;
-	byte[] buf = new byte[dataSize];
-	rfb.readFully(buf);
-	if (rfb.rec != null) {
-	  rfb.rec.write(buf);
-	}
-	decodeGradientData(x, y, w, h, buf);
+        byte[] buf = new byte[dataSize];
+        rfb.readFully(buf);
+        if (rfb.rec != null) {
+          rfb.rec.write(buf);
+        }
+        decodeGradientData(x, y, w, h, buf);
       } else {
-	// Raw truecolor data.
-	if (bytesPixel == 1) {
-	  if (readUncompressed) dataSize = rfb.readCompactLen();
-	  else dataSize = w * h;
-	  byte[] buf = new byte[dataSize];
+        // Raw truecolor data.
+        if (bytesPixel == 1) {
+          if (readUncompressed) dataSize = rfb.readCompactLen();
+          else dataSize = w * h;
+          byte[] buf = new byte[dataSize];
           rfb.readFully(buf);
-	  if (rfb.rec != null) {
-	    rfb.rec.write(buf);
-	  }
-	  int destOffset = y * rfb.framebufferWidth + x;
-	  for (int dy = 0; dy < h; dy++) {
-	    System.arraycopy(buf, dy * w, pixels8, destOffset, w);
-	    destOffset += rfb.framebufferWidth;
-	  }
-	} else {
-	  if (readUncompressed) dataSize = rfb.readCompactLen();
-	  else dataSize = w * h * 3;
-	  byte[] buf = new byte[dataSize];
-	  int srcOffset = 0;
-	  int destOffset, i;
+          if (rfb.rec != null) {
+            rfb.rec.write(buf);
+          }
+          int destOffset = y * rfb.framebufferWidth + x;
+          for (int dy = 0; dy < h; dy++) {
+            System.arraycopy(buf, dy * w, pixels8, destOffset, w);
+            destOffset += rfb.framebufferWidth;
+          }
+        } else {
+          if (readUncompressed) dataSize = rfb.readCompactLen();
+          else dataSize = w * h * 3;
+          byte[] buf = new byte[dataSize];
+          int srcOffset = 0;
+          int destOffset, i;
           rfb.readFully(buf);
-	  if (rfb.rec != null) {
-	    rfb.rec.write(buf);
-	  }
-	  for (int dy = 0; dy < h; dy++) {
-	    destOffset = (y + dy) * rfb.framebufferWidth + x;
-	    for (i = 0; i < w; i++) {
-	      pixels24[destOffset + i] =
-		(buf[srcOffset] & 0xFF) << 16 |
-		(buf[srcOffset + 1] & 0xFF) << 8 |
-		(buf[srcOffset + 2] & 0xFF);
-	      srcOffset += 3;
-	    }
-	  }
-	}
+          if (rfb.rec != null) {
+            rfb.rec.write(buf);
+          }
+          for (int dy = 0; dy < h; dy++) {
+            destOffset = (y + dy) * rfb.framebufferWidth + x;
+            for (i = 0; i < w; i++) {
+              pixels24[destOffset + i] =
+                (buf[srcOffset] & 0xFF) << 16 |
+                (buf[srcOffset + 1] & 0xFF) << 8 |
+                (buf[srcOffset + 2] & 0xFF);
+              srcOffset += 3;
+            }
+          }
+        }
       }
     } else {
       // Data was compressed with zlib.
@@ -1420,65 +1420,65 @@ class VncCanvas extends Canvas
       byte[] zlibData = new byte[zlibDataLen];
       rfb.readFully(zlibData);
       if (rfb.rec != null && rfb.recordFromBeginning) {
-	rfb.rec.write(zlibData);
+        rfb.rec.write(zlibData);
       }
       int stream_id = comp_ctl & 0x03;
       if (tightInflaters[stream_id] == null) {
-	tightInflaters[stream_id] = new Inflater();
+        tightInflaters[stream_id] = new Inflater();
       }
       Inflater myInflater = tightInflaters[stream_id];
       myInflater.setInput(zlibData);
       byte[] buf = new byte[dataSize];
       myInflater.inflate(buf);
       if (rfb.rec != null && !rfb.recordFromBeginning) {
-	rfb.recordCompressedData(buf);
+        rfb.recordCompressedData(buf);
       }
 
       if (numColors != 0) {
-	// Indexed colors.
-	if (numColors == 2) {
-	  // Two colors.
-	  if (bytesPixel == 1) {
-	    decodeMonoData(x, y, w, h, buf, palette8);
-	  } else {
-	    decodeMonoData(x, y, w, h, buf, palette24);
-	  }
-	} else {
-	  // More than two colors (assuming bytesPixel == 4).
-	  int i = 0;
-	  for (int dy = y; dy < y + h; dy++) {
-	    for (int dx = x; dx < x + w; dx++) {
-	      pixels24[dy * rfb.framebufferWidth + dx] =
-		palette24[buf[i++] & 0xFF];
-	    }
-	  }
-	}
+        // Indexed colors.
+        if (numColors == 2) {
+          // Two colors.
+          if (bytesPixel == 1) {
+            decodeMonoData(x, y, w, h, buf, palette8);
+          } else {
+            decodeMonoData(x, y, w, h, buf, palette24);
+          }
+        } else {
+          // More than two colors (assuming bytesPixel == 4).
+          int i = 0;
+          for (int dy = y; dy < y + h; dy++) {
+            for (int dx = x; dx < x + w; dx++) {
+              pixels24[dy * rfb.framebufferWidth + dx] =
+                palette24[buf[i++] & 0xFF];
+            }
+          }
+        }
       } else if (useGradient) {
-	// Compressed "Gradient"-filtered data (assuming bytesPixel == 4).
-	decodeGradientData(x, y, w, h, buf);
+        // Compressed "Gradient"-filtered data (assuming bytesPixel == 4).
+        decodeGradientData(x, y, w, h, buf);
       } else {
-	// Compressed truecolor data.
-	if (bytesPixel == 1) {
-	  int destOffset = y * rfb.framebufferWidth + x;
-	  for (int dy = 0; dy < h; dy++) {
-	    System.arraycopy(buf, dy * w, pixels8, destOffset, w);
-	    destOffset += rfb.framebufferWidth;
-	  }
-	} else {
-	  int srcOffset = 0;
-	  int destOffset, i;
-	  for (int dy = 0; dy < h; dy++) {
-	    myInflater.inflate(buf);
-	    destOffset = (y + dy) * rfb.framebufferWidth + x;
-	    for (i = 0; i < w; i++) {
-	      pixels24[destOffset + i] =
-		(buf[srcOffset] & 0xFF) << 16 |
-		(buf[srcOffset + 1] & 0xFF) << 8 |
-		(buf[srcOffset + 2] & 0xFF);
-	      srcOffset += 3;
-	    }
-	  }
-	}
+        // Compressed truecolor data.
+        if (bytesPixel == 1) {
+          int destOffset = y * rfb.framebufferWidth + x;
+          for (int dy = 0; dy < h; dy++) {
+            System.arraycopy(buf, dy * w, pixels8, destOffset, w);
+            destOffset += rfb.framebufferWidth;
+          }
+        } else {
+          int srcOffset = 0;
+          int destOffset, i;
+          for (int dy = 0; dy < h; dy++) {
+            myInflater.inflate(buf);
+            destOffset = (y + dy) * rfb.framebufferWidth + x;
+            for (i = 0; i < w; i++) {
+              pixels24[destOffset + i] =
+                (buf[srcOffset] & 0xFF) << 16 |
+                (buf[srcOffset + 1] & 0xFF) << 8 |
+                (buf[srcOffset + 2] & 0xFF);
+              srcOffset += 3;
+            }
+          }
+        }
       }
     }
 
@@ -1499,12 +1499,12 @@ class VncCanvas extends Canvas
 
     for (dy = 0; dy < h; dy++) {
       for (dx = 0; dx < w / 8; dx++) {
-	b = src[dy*rowBytes+dx];
-	for (n = 7; n >= 0; n--)
-	  pixels8[i++] = palette[b >> n & 1];
+        b = src[dy*rowBytes+dx];
+        for (n = 7; n >= 0; n--)
+          pixels8[i++] = palette[b >> n & 1];
       }
       for (n = 7; n >= 8 - w % 8; n--) {
-	pixels8[i++] = palette[src[dy*rowBytes+dx] >> n & 1];
+        pixels8[i++] = palette[src[dy*rowBytes+dx] >> n & 1];
       }
       i += (rfb.framebufferWidth - w);
     }
@@ -1519,12 +1519,12 @@ class VncCanvas extends Canvas
 
     for (dy = 0; dy < h; dy++) {
       for (dx = 0; dx < w / 8; dx++) {
-	b = src[dy*rowBytes+dx];
-	for (n = 7; n >= 0; n--)
-	  pixels24[i++] = palette[b >> n & 1];
+        b = src[dy*rowBytes+dx];
+        for (n = 7; n >= 0; n--)
+          pixels24[i++] = palette[b >> n & 1];
       }
       for (n = 7; n >= 8 - w % 8; n--) {
-	pixels24[i++] = palette[src[dy*rowBytes+dx] >> n & 1];
+        pixels24[i++] = palette[src[dy*rowBytes+dx] >> n & 1];
       }
       i += (rfb.framebufferWidth - w);
     }
@@ -1548,27 +1548,27 @@ class VncCanvas extends Canvas
 
       /* First pixel in a row */
       for (c = 0; c < 3; c++) {
-	pix[c] = (byte)(prevRow[c] + buf[dy * w * 3 + c]);
-	thisRow[c] = pix[c];
+        pix[c] = (byte)(prevRow[c] + buf[dy * w * 3 + c]);
+        thisRow[c] = pix[c];
       }
       pixels24[offset++] =
-	(pix[0] & 0xFF) << 16 | (pix[1] & 0xFF) << 8 | (pix[2] & 0xFF);
+        (pix[0] & 0xFF) << 16 | (pix[1] & 0xFF) << 8 | (pix[2] & 0xFF);
 
       /* Remaining pixels of a row */
       for (dx = 1; dx < w; dx++) {
-	for (c = 0; c < 3; c++) {
-	  est[c] = ((prevRow[dx * 3 + c] & 0xFF) + (pix[c] & 0xFF) -
-		    (prevRow[(dx-1) * 3 + c] & 0xFF));
-	  if (est[c] > 0xFF) {
-	    est[c] = 0xFF;
-	  } else if (est[c] < 0x00) {
-	    est[c] = 0x00;
-	  }
-	  pix[c] = (byte)(est[c] + buf[(dy * w + dx) * 3 + c]);
-	  thisRow[dx * 3 + c] = pix[c];
-	}
-	pixels24[offset++] =
-	  (pix[0] & 0xFF) << 16 | (pix[1] & 0xFF) << 8 | (pix[2] & 0xFF);
+        for (c = 0; c < 3; c++) {
+          est[c] = ((prevRow[dx * 3 + c] & 0xFF) + (pix[c] & 0xFF) -
+                    (prevRow[(dx-1) * 3 + c] & 0xFF));
+          if (est[c] > 0xFF) {
+            est[c] = 0xFF;
+          } else if (est[c] < 0x00) {
+            est[c] = 0x00;
+          }
+          pix[c] = (byte)(est[c] + buf[(dy * w + dx) * 3 + c]);
+          thisRow[dx * 3 + c] = pix[c];
+        }
+        pixels24[offset++] =
+          (pix[0] & 0xFF) << 16 | (pix[1] & 0xFF) << 8 | (pix[2] & 0xFF);
       }
 
       System.arraycopy(thisRow, 0, prevRow, 0, w * 3);
@@ -1632,26 +1632,26 @@ class VncCanvas extends Canvas
   public void processLocalKeyEvent(KeyEvent evt) {
     if (viewer.rfb != null && rfb.inNormalProtocol) {
       if (!inputEnabled) {
-	if ((evt.getKeyChar() == 'r' || evt.getKeyChar() == 'R') &&
-	    evt.getID() == KeyEvent.KEY_PRESSED ) {
-	  // Request screen update.
-	  try {
-	    rfb.writeFramebufferUpdateRequest(0, 0, rfb.framebufferWidth,
-					      rfb.framebufferHeight, false);
-	  } catch (IOException e) {
-	    e.printStackTrace();
-	  }
-	}
+        if ((evt.getKeyChar() == 'r' || evt.getKeyChar() == 'R') &&
+            evt.getID() == KeyEvent.KEY_PRESSED ) {
+          // Request screen update.
+          try {
+            rfb.writeFramebufferUpdateRequest(0, 0, rfb.framebufferWidth,
+                                              rfb.framebufferHeight, false);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
       } else {
-	// Input enabled.
-	synchronized(rfb) {
-	  try {
-	    rfb.writeKeyEvent(evt);
-	  } catch (Exception e) {
-	    e.printStackTrace();
-	  }
-	  rfb.notify();
-	}
+        // Input enabled.
+        synchronized(rfb) {
+          try {
+            rfb.writeKeyEvent(evt);
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          rfb.notify();
+        }
       }
     }
     // Don't ever pass keyboard events to AWT for default processing. 
@@ -1662,7 +1662,7 @@ class VncCanvas extends Canvas
   public void processLocalMouseEvent(MouseEvent evt, boolean moved) {
     if (viewer.rfb != null && rfb.inNormalProtocol) {
       if (moved) {
-	softCursorMove(evt.getX(), evt.getY());
+        softCursorMove(evt.getX(), evt.getY());
       }
       if (rfb.framebufferWidth != scaledWidth || rfb.framebufferHeight != scaledHeight) {
         int sx = (scaleWidthRatio == -1) ? evt.getX() : ((int)((float)evt.getX() / scaleWidthRatio + .5));
@@ -1670,12 +1670,12 @@ class VncCanvas extends Canvas
         evt.translatePoint(sx - evt.getX(), sy - evt.getY());
       }
       synchronized(rfb) {
-	try {
-	  rfb.writePointerEvent(evt);
-	} catch (Exception e) {
-	  e.printStackTrace();
-	}
-	rfb.notify();
+        try {
+          rfb.writePointerEvent(evt);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+        rfb.notify();
       }
     }
   }
@@ -1718,9 +1718,9 @@ class VncCanvas extends Canvas
   public void processEvent( AWTEvent evt ) {
     try {
       if (evt.paramString().equals("SendRFBUpdate")) {
-	rfb.writeFramebufferUpdateRequest(0, 0, rfb.framebufferWidth,
-					  rfb.framebufferHeight,
-					  true);
+        rfb.writeFramebufferUpdateRequest(0, 0, rfb.framebufferWidth,
+                                          rfb.framebufferHeight,
+                                          true);
       }
       super.processEvent(evt);
     } catch (IOException e) {
@@ -1750,7 +1750,7 @@ class VncCanvas extends Canvas
 
   synchronized void
     handleCursorShapeUpdate(int encodingType,
-			    int xhot, int yhot, int width, int height)
+                            int xhot, int yhot, int width, int height)
     throws IOException {
 
     softCursorFree();
@@ -1764,10 +1764,10 @@ class VncCanvas extends Canvas
       int bytesMaskData = bytesPerRow * height;
 
       if (encodingType == rfb.EncodingXCursor) {
-	rfb.skipBytes(6 + bytesMaskData * 2);
+        rfb.skipBytes(6 + bytesMaskData * 2);
       } else {
-	// rfb.EncodingRichCursor
-	rfb.skipBytes(width * height * bytesPixel + bytesMaskData);
+        // rfb.EncodingRichCursor
+        rfb.skipBytes(width * height * bytesPixel + bytesMaskData);
       }
       return;
     }
@@ -1787,7 +1787,7 @@ class VncCanvas extends Canvas
     // Show the cursor.
     showSoftCursor = true;
     repaint(viewer.deferCursorUpdates,
-	    cursorX - hotX, cursorY - hotY, cursorWidth, cursorHeight);
+            cursorX - hotX, cursorY - hotY, cursorWidth, cursorHeight);
   }
 
   //
@@ -1810,9 +1810,9 @@ class VncCanvas extends Canvas
       byte[] rgb = new byte[6];
       rfb.readFully(rgb);
       int[] colors = { (0xFF000000 | (rgb[3] & 0xFF) << 16 |
-			(rgb[4] & 0xFF) << 8 | (rgb[5] & 0xFF)),
-		       (0xFF000000 | (rgb[0] & 0xFF) << 16 |
-			(rgb[1] & 0xFF) << 8 | (rgb[2] & 0xFF)) };
+                        (rgb[4] & 0xFF) << 8 | (rgb[5] & 0xFF)),
+                       (0xFF000000 | (rgb[0] & 0xFF) << 16 |
+                        (rgb[1] & 0xFF) << 8 | (rgb[2] & 0xFF)) };
 
       // Read pixel and mask data.
       byte[] pixBuf = new byte[bytesMaskData];
@@ -1825,26 +1825,26 @@ class VncCanvas extends Canvas
       int x, y, n, result;
       int i = 0;
       for (y = 0; y < height; y++) {
-	for (x = 0; x < width / 8; x++) {
-	  pixByte = pixBuf[y * bytesPerRow + x];
-	  maskByte = maskBuf[y * bytesPerRow + x];
-	  for (n = 7; n >= 0; n--) {
-	    if ((maskByte >> n & 1) != 0) {
-	      result = colors[pixByte >> n & 1];
-	    } else {
-	      result = 0;	// Transparent pixel
-	    }
-	    softCursorPixels[i++] = result;
-	  }
-	}
-	for (n = 7; n >= 8 - width % 8; n--) {
-	  if ((maskBuf[y * bytesPerRow + x] >> n & 1) != 0) {
-	    result = colors[pixBuf[y * bytesPerRow + x] >> n & 1];
-	  } else {
-	    result = 0;		// Transparent pixel
-	  }
-	  softCursorPixels[i++] = result;
-	}
+        for (x = 0; x < width / 8; x++) {
+          pixByte = pixBuf[y * bytesPerRow + x];
+          maskByte = maskBuf[y * bytesPerRow + x];
+          for (n = 7; n >= 0; n--) {
+            if ((maskByte >> n & 1) != 0) {
+              result = colors[pixByte >> n & 1];
+            } else {
+              result = 0;        // Transparent pixel
+            }
+            softCursorPixels[i++] = result;
+          }
+        }
+        for (n = 7; n >= 8 - width % 8; n--) {
+          if ((maskBuf[y * bytesPerRow + x] >> n & 1) != 0) {
+            result = colors[pixBuf[y * bytesPerRow + x] >> n & 1];
+          } else {
+            result = 0;                // Transparent pixel
+          }
+          softCursorPixels[i++] = result;
+        }
       }
 
     } else {
@@ -1861,39 +1861,39 @@ class VncCanvas extends Canvas
       int x, y, n, result;
       int i = 0;
       for (y = 0; y < height; y++) {
-	for (x = 0; x < width / 8; x++) {
-	  maskByte = maskBuf[y * bytesPerRow + x];
-	  for (n = 7; n >= 0; n--) {
-	    if ((maskByte >> n & 1) != 0) {
-	      if (bytesPixel == 1) {
-		result = cm8.getRGB(pixBuf[i]);
-	      } else {
-		result = 0xFF000000 |
-		  (pixBuf[i * 4 + 2] & 0xFF) << 16 |
-		  (pixBuf[i * 4 + 1] & 0xFF) << 8 |
-		  (pixBuf[i * 4] & 0xFF);
-	      }
-	    } else {
-	      result = 0;	// Transparent pixel
-	    }
-	    softCursorPixels[i++] = result;
-	  }
-	}
-	for (n = 7; n >= 8 - width % 8; n--) {
-	  if ((maskBuf[y * bytesPerRow + x] >> n & 1) != 0) {
-	    if (bytesPixel == 1) {
-	      result = cm8.getRGB(pixBuf[i]);
-	    } else {
-	      result = 0xFF000000 |
-		(pixBuf[i * 4 + 2] & 0xFF) << 16 |
-		(pixBuf[i * 4 + 1] & 0xFF) << 8 |
-		(pixBuf[i * 4] & 0xFF);
-	    }
-	  } else {
-	    result = 0;		// Transparent pixel
-	  }
-	  softCursorPixels[i++] = result;
-	}
+        for (x = 0; x < width / 8; x++) {
+          maskByte = maskBuf[y * bytesPerRow + x];
+          for (n = 7; n >= 0; n--) {
+            if ((maskByte >> n & 1) != 0) {
+              if (bytesPixel == 1) {
+                result = cm8.getRGB(pixBuf[i]);
+              } else {
+                result = 0xFF000000 |
+                  (pixBuf[i * 4 + 2] & 0xFF) << 16 |
+                  (pixBuf[i * 4 + 1] & 0xFF) << 8 |
+                  (pixBuf[i * 4] & 0xFF);
+              }
+            } else {
+              result = 0;        // Transparent pixel
+            }
+            softCursorPixels[i++] = result;
+          }
+        }
+        for (n = 7; n >= 8 - width % 8; n--) {
+          if ((maskBuf[y * bytesPerRow + x] >> n & 1) != 0) {
+            if (bytesPixel == 1) {
+              result = cm8.getRGB(pixBuf[i]);
+            } else {
+              result = 0xFF000000 |
+                (pixBuf[i * 4 + 2] & 0xFF) << 16 |
+                (pixBuf[i * 4 + 1] & 0xFF) << 8 |
+                (pixBuf[i * 4] & 0xFF);
+            }
+          } else {
+            result = 0;                // Transparent pixel
+          }
+          softCursorPixels[i++] = result;
+        }
       }
 
     }
@@ -1930,7 +1930,7 @@ class VncCanvas extends Canvas
 
     if (scaleCursor != 100) {
       softCursor = softCursor.getScaledInstance(cursorWidth, cursorHeight,
-						Image.SCALE_SMOOTH);
+                                                Image.SCALE_SMOOTH);
     }
 
     if (showSoftCursor) {
@@ -1955,9 +1955,9 @@ class VncCanvas extends Canvas
     cursorY = y;
     if (showSoftCursor) {
       repaint(viewer.deferCursorUpdates,
-	      oldX - hotX, oldY - hotY, cursorWidth, cursorHeight);
+              oldX - hotX, oldY - hotY, cursorWidth, cursorHeight);
       repaint(viewer.deferCursorUpdates,
-	      cursorX - hotX, cursorY - hotY, cursorWidth, cursorHeight);
+              cursorX - hotX, cursorY - hotY, cursorWidth, cursorHeight);
     }
   }
 
@@ -1972,7 +1972,7 @@ class VncCanvas extends Canvas
       softCursorSource = null;
 
       repaint(viewer.deferCursorUpdates,
-	      cursorX - hotX, cursorY - hotY, cursorWidth, cursorHeight);
+              cursorX - hotX, cursorY - hotY, cursorWidth, cursorHeight);
     }
   }
 }

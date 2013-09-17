@@ -245,19 +245,19 @@ class RfbProto {
       sock.setTcpNoDelay(true);
     } else {
       try {
-	Class factoryClass = Class.forName(viewer.socketFactory);
-	SocketFactory factory = (SocketFactory)factoryClass.newInstance();
-	if (viewer.inAnApplet)
-	  sock = factory.createSocket(host, port, viewer);
-	else
-	  sock = factory.createSocket(host, port, viewer.mainArgs);
+        Class factoryClass = Class.forName(viewer.socketFactory);
+        SocketFactory factory = (SocketFactory)factoryClass.newInstance();
+        if (viewer.inAnApplet)
+          sock = factory.createSocket(host, port, viewer);
+        else
+          sock = factory.createSocket(host, port, viewer.mainArgs);
       } catch(Exception e) {
-	e.printStackTrace();
-	throw new IOException(e.getMessage());
+        e.printStackTrace();
+        throw new IOException(e.getMessage());
       }
     }
     is = new DataInputStream(new BufferedInputStream(sock.getInputStream(),
-						     16384));
+                                                     16384));
     os = sock.getOutputStream();
 
     timing = false;
@@ -272,8 +272,8 @@ class RfbProto {
       closed = true;
       System.out.println("RFB socket closed");
       if (rec != null) {
-	rec.close();
-	rec = null;
+        rec.close();
+        rec = null;
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -295,13 +295,13 @@ class RfbProto {
     readFully(b);
 
     if ((b[0] != 'R') || (b[1] != 'F') || (b[2] != 'B') || (b[3] != ' ')
-	|| (b[4] < '0') || (b[4] > '9') || (b[5] < '0') || (b[5] > '9')
-	|| (b[6] < '0') || (b[6] > '9') || (b[7] != '.')
-	|| (b[8] < '0') || (b[8] > '9') || (b[9] < '0') || (b[9] > '9')
-	|| (b[10] < '0') || (b[10] > '9') || (b[11] != '\n'))
+        || (b[4] < '0') || (b[4] > '9') || (b[5] < '0') || (b[5] > '9')
+        || (b[6] < '0') || (b[6] > '9') || (b[7] != '.')
+        || (b[8] < '0') || (b[8] > '9') || (b[9] < '0') || (b[9] > '9')
+        || (b[10] < '0') || (b[10] > '9') || (b[11] != '\n'))
     {
       throw new Exception("Host " + host + " port " + port +
-			  " is not an RFB server");
+                          " is not an RFB server");
     }
 
     serverMajor = (b[4] - '0') * 100 + (b[5] - '0') * 10 + (b[6] - '0');
@@ -353,7 +353,7 @@ class RfbProto {
     switch (secType) {
     case SecTypeInvalid:
       readConnFailedReason();
-      return SecTypeInvalid;	// should never be executed
+      return SecTypeInvalid;        // should never be executed
     case SecTypeNone:
     case SecTypeVncAuth:
       return secType;
@@ -373,7 +373,7 @@ class RfbProto {
     int nSecTypes = readU8();
     if (nSecTypes == 0) {
       readConnFailedReason();
-      return SecTypeInvalid;	// should never be executed
+      return SecTypeInvalid;        // should never be executed
     }
     byte[] secTypes = new byte[nSecTypes];
     readFully(secTypes);
@@ -381,17 +381,17 @@ class RfbProto {
     // Find out if the server supports TightVNC protocol extensions
     for (int i = 0; i < nSecTypes; i++) {
       if (secTypes[i] == SecTypeTight) {
-	protocolTightVNC = true;
-	os.write(SecTypeTight);
-	return SecTypeTight;
+        protocolTightVNC = true;
+        os.write(SecTypeTight);
+        return SecTypeTight;
       }
     }
 
     // Find first supported security type.
     for (int i = 0; i < nSecTypes; i++) {
       if (secTypes[i] == SecTypeNone || secTypes[i] == SecTypeVncAuth) {
-	secType = secTypes[i];
-	break;
+        secType = secTypes[i];
+        break;
       }
     }
 
@@ -422,7 +422,7 @@ class RfbProto {
     readFully(challenge);
 
     if (pw.length() > 8)
-      pw = pw.substring(0, 8);	// Truncate to 8 chars
+      pw = pw.substring(0, 8);        // Truncate to 8 chars
 
     // Truncate password on the first zero byte.
     int firstZero = pw.indexOf(0);
@@ -554,11 +554,11 @@ class RfbProto {
 
     // Supported authentication methods
     authCaps.add(AuthNone, StandardVendor, SigAuthNone,
-		 "No authentication");
+                 "No authentication");
     authCaps.add(AuthVNC, StandardVendor, SigAuthVNC,
-		 "Standard VNC authentication");
+                 "Standard VNC authentication");
     authCaps.add(AuthUnixLogin, TightVncVendor, SigAuthUnixLogin,
-		 "Unix login authentication");
+                 "Unix login authentication");
 
     // Supported non-standard server-to-client messages
     // [NONE]
@@ -568,27 +568,27 @@ class RfbProto {
 
     // Supported encoding types
     encodingCaps.add(EncodingCopyRect, StandardVendor,
-		     SigEncodingCopyRect, "Standard CopyRect encoding");
+                     SigEncodingCopyRect, "Standard CopyRect encoding");
     encodingCaps.add(EncodingHextile, StandardVendor,
-		     SigEncodingHextile, "Standard Hextile encoding");
+                     SigEncodingHextile, "Standard Hextile encoding");
     encodingCaps.add(EncodingTight, TightVncVendor,
-		     SigEncodingTight, "Tight encoding");
+                     SigEncodingTight, "Tight encoding");
 
     // Supported pseudo-encoding types
     encodingCaps.add(EncodingCompressLevel0, TightVncVendor,
-		     SigEncodingCompressLevel0, "Compression level");
+                     SigEncodingCompressLevel0, "Compression level");
     encodingCaps.add(EncodingQualityLevel0, TightVncVendor,
-		     SigEncodingQualityLevel0, "JPEG quality level");
+                     SigEncodingQualityLevel0, "JPEG quality level");
     encodingCaps.add(EncodingXCursor, TightVncVendor,
-		     SigEncodingXCursor, "X-style cursor shape update");
+                     SigEncodingXCursor, "X-style cursor shape update");
     encodingCaps.add(EncodingRichCursor, TightVncVendor,
-		     SigEncodingRichCursor, "Rich-color cursor shape update");
+                     SigEncodingRichCursor, "Rich-color cursor shape update");
     encodingCaps.add(EncodingPointerPos, TightVncVendor,
-		     SigEncodingPointerPos, "Pointer position update");
+                     SigEncodingPointerPos, "Pointer position update");
     encodingCaps.add(EncodingLastRect, TightVncVendor,
-		     SigEncodingLastRect, "LastRect protocol extension");
+                     SigEncodingLastRect, "LastRect protocol extension");
     encodingCaps.add(EncodingNewFBSize, TightVncVendor,
-		     SigEncodingNewFBSize, "Framebuffer size change");
+                     SigEncodingNewFBSize, "Framebuffer size change");
     encodingCaps.add(EncodingFineQualityLevel0, TurboVncVendor,
                      SigEncodingFineQualityLevel0, "TurboJPEG fine-grained quality level");
     encodingCaps.add(EncodingSubsamp1X, TurboVncVendor,
@@ -653,7 +653,7 @@ class RfbProto {
     if (authScheme == 0)
       throw new Exception("No suitable authentication scheme found");
 
-	writeInt(authScheme);
+        writeInt(authScheme);
     return authScheme;
   }
 
@@ -756,7 +756,7 @@ class RfbProto {
     rec.writeIntBE(SecTypeNone);
     rec.writeShortBE(framebufferWidth);
     rec.writeShortBE(framebufferHeight);
-    byte[] fbsServerInitMsg =	{
+    byte[] fbsServerInitMsg =        {
       32, 24, 0, 1, 0,
       (byte)0xFF, 0, (byte)0xFF, 0, (byte)0xFF,
       16, 8, 0, 0, 0, 0
@@ -809,10 +809,10 @@ class RfbProto {
 
     // If the session is being recorded:
     if (rec != null) {
-      if (msgType == Bell) {	// Save Bell messages in session files.
-	rec.writeByte(msgType);
-	if (numUpdatesInSession > 0)
-	  rec.flush();
+      if (msgType == Bell) {        // Save Bell messages in session files.
+        rec.writeByte(msgType);
+        if (numUpdatesInSession > 0)
+          rec.flush();
       }
     }
 
@@ -853,34 +853,34 @@ class RfbProto {
 
     if (updateRectEncoding == EncodingZlib ||
         updateRectEncoding == EncodingZRLE ||
-	updateRectEncoding == EncodingTight)
+        updateRectEncoding == EncodingTight)
       wereZlibUpdates = true;
 
     // If the session is being recorded:
     if (rec != null) {
       if (numUpdatesInSession > 1)
-	rec.flush();		// Flush the output on each rectangle.
+        rec.flush();                // Flush the output on each rectangle.
       rec.writeShortBE(updateRectX);
       rec.writeShortBE(updateRectY);
       rec.writeShortBE(updateRectW);
       rec.writeShortBE(updateRectH);
       if (updateRectEncoding == EncodingZlib && !recordFromBeginning) {
-	// Here we cannot write Zlib-encoded rectangles because the
-	// decoder won't be able to reproduce zlib stream state.
-	if (!zlibWarningShown) {
-	  System.out.println("Warning: Raw encoding will be used " +
-			     "instead of Zlib in recorded session.");
-	  zlibWarningShown = true;
-	}
-	rec.writeIntBE(EncodingRaw);
+        // Here we cannot write Zlib-encoded rectangles because the
+        // decoder won't be able to reproduce zlib stream state.
+        if (!zlibWarningShown) {
+          System.out.println("Warning: Raw encoding will be used " +
+                             "instead of Zlib in recorded session.");
+          zlibWarningShown = true;
+        }
+        rec.writeIntBE(EncodingRaw);
       } else {
-	rec.writeIntBE(updateRectEncoding);
-	if (updateRectEncoding == EncodingTight && !recordFromBeginning &&
-	    !tightWarningShown) {
-	  System.out.println("Warning: Re-compressing Tight-encoded " +
-			     "updates for session recording.");
-	  tightWarningShown = true;
-	}
+        rec.writeIntBE(updateRectEncoding);
+        if (updateRectEncoding == EncodingTight && !recordFromBeginning &&
+            !tightWarningShown) {
+          System.out.println("Warning: Re-compressing Tight-encoded " +
+                             "updates for session recording.");
+          tightWarningShown = true;
+        }
       }
     }
 
@@ -888,10 +888,10 @@ class RfbProto {
       return;
 
     if (updateRectX + updateRectW > framebufferWidth ||
-	updateRectY + updateRectH > framebufferHeight) {
+        updateRectY + updateRectH > framebufferHeight) {
       throw new Exception("Framebuffer update rectangle too large: " +
-			  updateRectW + "x" + updateRectH + " at (" +
-			  updateRectX + "," + updateRectY + ")");
+                          updateRectW + "x" + updateRectH + " at (" +
+                          updateRectX + "," + updateRectY + ")");
     }
   }
 
@@ -941,15 +941,15 @@ class RfbProto {
       byteCount++;
       len |= (portion[1] & 0x7F) << 7;
       if ((portion[1] & 0x80) != 0) {
-	portion[2] = readU8();
-	byteCount++;
-	len |= (portion[2] & 0xFF) << 14;
+        portion[2] = readU8();
+        byteCount++;
+        len |= (portion[2] & 0xFF) << 14;
       }
     }
 
     if (rec != null && recordFromBeginning)
       for (int i = 0; i < byteCount; i++)
-	rec.writeByte(portion[i]);
+        rec.writeByte(portion[i]);
 
     return len;
   }
@@ -960,7 +960,7 @@ class RfbProto {
   //
 
   void writeFramebufferUpdateRequest(int x, int y, int w, int h,
-				     boolean incremental)
+                                     boolean incremental)
        throws IOException
   {
     byte[] b = new byte[10];
@@ -985,9 +985,9 @@ class RfbProto {
   //
 
   void writeSetPixelFormat(int bitsPerPixel, int depth, boolean bigEndian,
-			   boolean trueColour,
-			   int redMax, int greenMax, int blueMax,
-			   int redShift, int greenShift, int blueShift)
+                           boolean trueColour,
+                           int redMax, int greenMax, int blueMax,
+                           int redShift, int greenShift, int blueShift)
        throws IOException
   {
     byte[] b = new byte[20];
@@ -1017,7 +1017,7 @@ class RfbProto {
   //
 
   void writeFixColourMapEntries(int firstColour, int nColours,
-				int[] red, int[] green, int[] blue)
+                                int[] red, int[] green, int[] blue)
        throws IOException
   {
     byte[] b = new byte[6 + nColours * 6];
@@ -1553,24 +1553,24 @@ class RfbProto {
 
     // Fake keyPresses for keys that only generates keyRelease events
     if ((key == 0xe5) || (key == 0xc5) || // XK_aring / XK_Aring
-	(key == 0xe4) || (key == 0xc4) || // XK_adiaeresis / XK_Adiaeresis
-	(key == 0xf6) || (key == 0xd6) || // XK_odiaeresis / XK_Odiaeresis
-	(key == 0xa7) || (key == 0xbd) || // XK_section / XK_onehalf
-	(key == 0xa3)) {                  // XK_sterling
+        (key == 0xe4) || (key == 0xc4) || // XK_adiaeresis / XK_Adiaeresis
+        (key == 0xf6) || (key == 0xd6) || // XK_odiaeresis / XK_Odiaeresis
+        (key == 0xa7) || (key == 0xbd) || // XK_section / XK_onehalf
+        (key == 0xa3)) {                  // XK_sterling
       // Make sure we do not send keypress events twice on platforms
       // with correct JVMs (those that actually report KeyPress for all
-      // keys)	
+      // keys)        
       if (down)
-	brokenKeyPressed = true;
+        brokenKeyPressed = true;
 
       if (!down && !brokenKeyPressed) {
-	// We've got a release event for this key, but haven't received
+        // We've got a release event for this key, but haven't received
         // a press. Fake it. 
-	writeKeyEvent(key, true);
+        writeKeyEvent(key, true);
       }
 
       if (!down)
-	brokenKeyPressed = false;  
+        brokenKeyPressed = false;  
     }
 
     if ((lFakeModifiers & CTRL_MASK) != 0)
@@ -1682,8 +1682,8 @@ class RfbProto {
       buf[bytes-1] |= 0x80;
       buf[bytes++] = (byte)(len >> 7 & 0x7F);
       if (len > 0x3FFF) {
-	buf[bytes-1] |= 0x80;
-	buf[bytes++] = (byte)(len >> 14 & 0xFF);
+        buf[bytes-1] |= 0x80;
+        buf[bytes++] = (byte)(len >> 14 & 0xFF);
       }
     }
     rec.write(buf, 0, bytes);
