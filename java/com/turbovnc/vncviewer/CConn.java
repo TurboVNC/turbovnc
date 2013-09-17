@@ -1133,7 +1133,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     clipboardDialog.setSendingEnabled(opts.sendClipboard);
     VncViewer.menuKey.setParam(
       MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].name);
-    F8Menu.f8.setText("Send " + KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
+    menu.updateMenuKey(MenuKey.getMenuKeyCode());
 
     opts.shared = options.shared.isSelected();
     setShared(opts.shared);

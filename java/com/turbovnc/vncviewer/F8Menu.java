@@ -52,8 +52,9 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     showToolbar.addActionListener(this);
     add(showToolbar);
     addSeparator();
-    f8 = addMenuItem("Send " +
-      KeyEvent.getKeyText(MenuKey.getMenuKeyCode()), MenuKey.getMenuKeyCode());
+    f8 = addMenuItem("Send " + KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
+    KeyStroke ks = KeyStroke.getKeyStroke(MenuKey.getMenuKeyCode(), 0);
+    f8.setAccelerator(ks);
     ctrlAltDel = addMenuItem("Send Ctrl-Alt-Del");
     ctrlEsc = addMenuItem("Send Ctrl-Esc");
     addSeparator();
@@ -79,6 +80,12 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     item.addActionListener(this);
     add(item);
     return item;
+  }
+
+  void updateMenuKey(int keyCode) {
+    f8.setText("Send " + KeyEvent.getKeyText(keyCode));
+    KeyStroke ks = KeyStroke.getKeyStroke(keyCode, 0);
+    f8.setAccelerator(ks);
   }
 
   boolean actionMatch(ActionEvent ev, JMenuItem item) {

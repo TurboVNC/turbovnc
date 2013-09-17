@@ -28,6 +28,11 @@ shortcut installed with the Linux RPM did not work properly.
 Fixed a bug in the Java TurboVNC Viewer's RRE decoder that was causing pixels
 to be displayed incorrectly.
 -------------------------------------------------------------------------------
+[7]
+Pressing F8 (or the chosen menu key) twice in the Java TurboVNC Viewer now
+sends that keystroke to the VNC server.  This emulates the behavior of the X11
+viewer.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
