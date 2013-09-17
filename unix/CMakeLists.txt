@@ -36,50 +36,23 @@ endif()
 
 find_package(X11 REQUIRED)
 
-macro(lib_check libname)
-	if(NOT X11_${libname}_LIB)
-		message(FATAL_ERROR "lib${libname} not found.  Try setting X11_${libname}_LIB to the location of lib${libname}.so.")
-	endif()
-endmacro()
-
-lib_check(Xt)
-lib_check(Xcursor)
-if(NOT X11_Xaw_LIB)
-	find_library(X11_Xaw_LIB Xaw7 "")
-	if(NOT X11_Xaw_LIB)
-		find_library(X11_Xaw_LIB Xaw "")
-		lib_check(Xaw)
-	endif()
-endif()
-if(NOT X11_Xmu_LIB)
-	find_library(X11_Xmu_LIB Xmu "")
-	lib_check(Xmu)
-endif()
-
 message(STATUS "X11_X11_LIB = ${X11_X11_LIB}")
-message(STATUS "X11_Xmu_LIB = ${X11_Xmu_LIB}")
-message(STATUS "X11_Xt_LIB = ${X11_Xt_LIB}")
-message(STATUS "X11_Xaw_LIB = ${X11_Xaw_LIB}")
-message(STATUS "X11_Xcursor_LIB = ${X11_Xcursor_LIB}")
-
-# MIT-SHM should be available on all modern Un*x O/S's
-add_definitions("-DMITSHM")
 
 set(DEFAULT_TVNC_MANDIR ${CMAKE_INSTALL_PREFIX}/man)
 set(TVNC_MANDIR ${DEFAULT_TVNC_MANDIR} CACHE PATH
 	"Directory into which man pages should be installed (default: ${DEFAULT_TVNC_MANDIR})")
 message(STATUS "TVNC_MANDIR = ${TVNC_MANDIR}")
 
-include_directories(include ${CMAKE_SOURCE_DIR}/common/zlib)
+include_directories(include)
 
 
 #
 # Viewer build
 #
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/common ${CMAKE_BINARY_DIR}/common)
-add_subdirectory(libvncauth)
-add_subdirectory(vncviewer)
+if(TVNC_BUILDJAVA)
+	add_subdirectory(vncviewer)
+endif()
 
 
 #
@@ -88,6 +61,8 @@ add_subdirectory(vncviewer)
 
 if(TVNC_BUILDSERVER)
 
+add_subdirectory(${CMAKE_SOURCE_DIR}/common ${CMAKE_BINARY_DIR}/common)
+add_subdirectory(libvncauth)
 add_subdirectory(tvncconfig)
 add_subdirectory(vncconnect)
 add_subdirectory(vncpasswd)

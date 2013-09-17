@@ -27,6 +27,12 @@ if(NOT TVNC_JAVADIR)
 	set(TVNC_JAVADIR ${CMAKE_INSTALL_PREFIX}/java)
 endif()
 
+if(TVNC_BUILDSERVER)
+	set(TVNC_BUILDSERVER 1)
+else()
+	set(TVNC_BUILDSERVER 0)
+endif()
+
 configure_file(release/makerpm.in pkgscripts/makerpm)
 configure_file(release/${CMAKE_PROJECT_NAME_LC}.spec.in
 	pkgscripts/${CMAKE_PROJECT_NAME_LC}.spec @ONLY)

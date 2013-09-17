@@ -46,11 +46,10 @@ All Platforms
 
 All versions of TurboVNC contain the following programs:
 
-  vncviewer - the TurboVNC Viewer.  On Unix platforms (except Mac), this is an
-              X Windows application and requires an X Windows server.  On Mac
-              platforms, it is a script that launches the Mac TurboVNC Viewer
-              app, which is simply a packaged version of the Java TurboVNC
-              Viewer and the libjpeg-turbo JNI library.
+  vncviewer - the TurboVNC Viewer.  On Un*x and Mac platforms, this is a
+              script that launches the Java TurboVNC Viewer.  On Mac platforms,
+              the Java TurboVNC Viewer is packaged in an app bundle along with
+              the libjpeg-turbo JNI library.
 
               vncviewer connects to a VNC server and allows you to interact
               with the remote desktop being displayed by the VNC server.
@@ -64,7 +63,7 @@ The Windows version of TurboVNC contains the following programs:
     putty - an open-source SSH client, which is bundled with vncviewer to
             simplify making secure connections to TurboVNC servers
 
-The Windows version of TurboVNC should work on Windows 2000 and later.
+The Windows version of TurboVNC should work with Windows 2000 and later.
 
 
 Unix/Linux-Specific (not Mac)

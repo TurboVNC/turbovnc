@@ -28,16 +28,18 @@ All Systems
 Linux and other Un*x O/S's (except Mac)
 ---------------------------------------
 
--- rsync (if building the TurboVNC Server using an out-of-tree build)
+-- rsync [if building the TurboVNC Server using an out-of-tree build]
 
 -- GCC
 
--- X Intrinsics/Athena Widgets development kit
-   * libXaw, libXt, and all dependencies thereof
+-- X11 development kit
 
--- libXcursor development kit
+-- PAM development kit [if building the TurboVNC Server]
 
--- PAM development kit (if building the TurboVNC Server)
+-- JDK or OpenJDK 1.5 or later (1.6 or later recommended) [if building the
+   TurboVNC Viewer]
+   * For systems that do not provide a JDK, download the Oracle Java
+     Development Kit from http://www.java.com
 
 
 Windows
@@ -94,17 +96,15 @@ Build Procedure
 ===============
 
 
-Unix (including Mac)
+Un*x (including Mac)
 --------------------
 
-The following procedure will build the TurboVNC Viewer.  On most 64-bit
-systems (Solaris being a notable exception), this will build a 64-bit version
-of TurboVNC.  See "Build Recipes" for specific instructions on how to build a
-32-bit or 64-bit version of TurboVNC on systems that support both.
-
-On Mac, this builds the Java TurboVNC Viewer by default.  If you want to build
-the native (X11) TurboVNC Viewer instead, then pass
-'-DTVNC_BUILDNATIVE=1 -DTVNC_BUILDJAVA=0' to CMake.
+The following procedure will build the Java TurboVNC Viewer, the C libraries
+and applications necessary to integrate it with Un*x systems, and (if the
+TurboVNC Server build is enabled) a handful of C applications that are used to
+interface with the TurboVNC Server.  See "Build Recipes" for specific
+instructions on how to build 32-bit or 64-bit versions of the C
+libraries/applications on systems that support both.
 
   cd {build_directory}
   cmake -G "Unix Makefiles" [additional CMake flags] {source_directory}
@@ -157,20 +157,18 @@ Java
 
 Passing -DTVNC_BUILDJAVA=1 to the command line will build the Java TurboVNC
 Viewer, as well as including it when installing or packaging the native
-TurboVNC Viewer.  This is the default on Mac platforms.
-
-Additionally, you can build the Java TurboVNC Viewer without building the
-native code.  Simply use {source_directory}/java as the source directory for
-CMake.
+TurboVNC Viewer or the TurboVNC Server.  This is the default on Un*x and Mac
+platforms.
 
 
 ===========
 Debug Build
 ===========
 
-When building the native TurboVNC Viewer, add "-DCMAKE_BUILD_TYPE=Debug" to the
-CMake command line.  Or, if building with NMake, remove
-"-DCMAKE_BUILD_TYPE=Release" (Debug builds are the default with NMake.)
+When building the native TurboVNC Viewer or the TurboVNC Server, add
+"-DCMAKE_BUILD_TYPE=Debug" to the CMake command line.  Or, if building with
+NMake, remove "-DCMAKE_BUILD_TYPE=Release" (Debug builds are the default with
+NMake.)
 
 
 =============

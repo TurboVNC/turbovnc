@@ -6,8 +6,9 @@ The Java TurboVNC Viewer is based largely on the Java TigerVNC Viewer, but it
 contains additional features and GUI modifications that make it behave and
 perform as much like the TurboVNC native viewers as possible.  One of the
 most notable of these features is the ability to use the libjpeg-turbo library
-(through JNI) to accelerate JPEG decoding, giving the Java TurboVNC Viewer
-near-native levels of performance when run as a standalone application.
+(through JNI) to accelerate JPEG decoding, giving the Java TurboVNC Viewer,
+when run as a standalone application, similar levels of performance to the
+native TurboVNC Viewer.
 
 The Java TurboVNC Viewer is:
 
@@ -34,9 +35,11 @@ available.
 
 NOTE: On Mac platforms, the Java TurboVNC Viewer is bundled as a self-contained
 app and can be launched by opening the "TurboVNC Viewer" app located in the
-"TurboVNC" Applications folder or by running /opt/TurboVNC/bin/vncviewer from a
-shell.  If using the Java TurboVNC Viewer in this manner, then the instructions
-below do not apply.  See the TurboVNC User's Guide for more information.
+"TurboVNC" Applications folder.  On Mac or Un*x platforms, the Java TurboVNC
+Viewer can be launched by running /opt/TurboVNC/bin/vncviewer from a command
+prompt.  If using the Java TurboVNC Viewer in this manner, then the
+instructions below do not apply.  See the TurboVNC User's Guide for more
+information.
 
 
 Installation
@@ -51,7 +54,7 @@ There are three basic ways to use the Java TurboVNC Viewer:
      remote desktop without the need to install any software on the client
      machine.
 
-     The Unix TurboVNC Server (Xvnc) is able to serve up any set of files that
+     The TurboVNC Server (Xvnc) is able to serve up any set of files that
      are present in a particular directory, which is specified in the -httpd
      argument to Xvnc.  In the default version of the vncserver script, this
      argument is set to ../java, relative to the directory containing the
@@ -118,7 +121,7 @@ TurboVNC Viewer is used:
 Both parameter names and their values are case-insensitive.  The only
 exception is the "Password" parameter, as VNC passwords are case-sensitive.
 
-For a complete list of parameters and their descriptions, run:
+For a complete list of parameters and their descriptions, execute:
 
      java -jar VncViewer.jar -?
 
