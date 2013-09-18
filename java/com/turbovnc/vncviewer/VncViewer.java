@@ -973,9 +973,9 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   "is activated by selecting \"Performance Info...\" in the F8 menu, which pops " +
   "up a dialog that displays the statistics.  Profiling can also be enabled on " +
   "the console only by setting the environment variable TVNC_PROFILE to 1.  The " +
-  "ProfileInterval parameter controls how often the performance statistics are " +
-  "updated in the dialog or on the console.  The statistics are averaged over " +
-  "this interval.", 5);
+  "ProfileInterval parameter specifies how often (in seconds) that the performance " +
+  "statistics are updated in the dialog or on the console.  The statistics are " +
+  "averaged over this interval.", 5);
 
   Thread thread;
   Socket sock;
