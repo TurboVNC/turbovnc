@@ -40,5 +40,7 @@ if(NOT TURBOJPEG_JNI_WORKS)
 	message(FATAL_ERROR "Could not link with TurboJPEG JNI library ${TJPEG_JNILIBRARY}.  This may be because it was not built with JNI support.")
 endif()
 
+message(STATUS "TJPEG_JNILIBRARY = ${TJPEG_JNILIBRARY}")
+
 install(PROGRAMS ${TJPEG_JNILIBRARY_RP} DESTINATION ${TVNC_JAVADIR}
 	RENAME libturbojpeg.so)

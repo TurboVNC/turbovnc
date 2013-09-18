@@ -155,10 +155,17 @@ build of TurboVNC.
 Java
 ----
 
-Passing -DTVNC_BUILDJAVA=1 to the command line will build the Java TurboVNC
-Viewer, as well as including it when installing or packaging the native
+Adding -DTVNC_BUILDJAVA=1 to the CMake command line will build the Java
+TurboVNC Viewer, as well as include it when installing or packaging the native
 TurboVNC Viewer or the TurboVNC Server.  This is the default on Un*x and Mac
 platforms.
+
+On Un*x systems, the default is to also build native/X11 infrastructure to
+support running the Java TurboVNC Viewer as a standalone application.  You can,
+however, disable this by adding -DTVNC_BUILDNATIVE=0 to the CMake command
+line.  This will build only the Java classes without the native infrastructure.
+You can add -DTVNC_BUILDNATIVE=0 -DTVNC_BUILDSERVER=0 to the CMake command
+line to disable building anything but the pure Java code.
 
 
 ===========

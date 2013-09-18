@@ -37,8 +37,13 @@ string(REGEX REPLACE "\n" "" BUILD ${BUILD})
 
 set(USEC 0)
 
-if(UNIX OR APPLE)
+if(APPLE)
 	set(DEFAULT_TVNC_BUILDJAVA 1)
+elseif(UNIX)
+	set(DEFAULT_TVNC_BUILDJAVA 1)
+	set(DEFAULT_TVNC_BUILDNATIVE 1)
+	option(TVNC_BUILDNATIVE "Build native/X11 support applications and libraries for the TurboVNC Java Viewer"
+		${DEFAULT_TVNC_BUILDNATIVE})
 else()
 	set(DEFAULT_TVNC_BUILDJAVA 0)
 	set(DEFAULT_TVNC_BUILDNATIVE 1)
@@ -48,6 +53,12 @@ endif()
 option(TVNC_BUILDJAVA "Build Java version of the TurboVNC Viewer"
 	${DEFAULT_TVNC_BUILDJAVA})
 
+if(UNIX AND TVNC_BUILDNATIVE)
+	# Doesn't make sense to build the support infrastructure for the Java viewer
+	# without also building the Java viewer.
+	set(TVNC_BUILDJAVA 1)
+endif()
+
 set(DEFAULT_TVNC_BUILDSERVER 0)
 if(UNIX AND NOT APPLE AND NOT CYGWIN)
 	set(DEFAULT_TVNC_BUILDSERVER 1)
@@ -55,7 +66,7 @@ endif()
 option(TVNC_BUILDSERVER "Build TurboVNC server components"
 	${DEFAULT_TVNC_BUILDSERVER})
 
-if(TVNC_BUILDNATIVE OR (UNIX AND NOT APPLE AND TVNC_BUILDJAVA) OR TVNC_BUILDSERVER)
+if(TVNC_BUILDNATIVE OR TVNC_BUILDSERVER)
 	set(USEC 1)
 endif()
 
@@ -123,11 +134,10 @@ endif()
 if(TVNC_BUILDJAVA)
 	add_subdirectory(java)
 endif()
-if(WIN32)
-	if(TVNC_BUILDNATIVE)
-		add_subdirectory(win)
-	endif()
-elseif(NOT APPLE)
+if(WIN32 AND TVNC_BUILDNATIVE)
+	add_subdirectory(win)
+endif()
+if(UNIX AND (TVNC_BUILDNATIVE OR TVNC_BUILDSERVER))
 	add_subdirectory(unix)
 endif()
 add_subdirectory(doc)

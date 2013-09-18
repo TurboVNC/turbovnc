@@ -16,6 +16,9 @@
 # Whether or not to include the Java viewer
 %define java @TVNC_BUILDJAVA@
 
+# Whether or not to include the native infrastructure for the Java viewer
+%define native @TVNC_BUILDNATIVE@
+
 # Whether or not to include the server
 %define server @TVNC_BUILDSERVER@
 
@@ -111,7 +114,7 @@ fi
 
 #-->%endif
 
-%if "%{java}" == "1"
+%if "%{native}" == "1"
 mkdir -p %{buildroot}/usr/share/applications
 cat > %{buildroot}/usr/share/applications/tvncviewer.desktop << EOF
 [Desktop Entry]
@@ -164,7 +167,7 @@ fi
 %endif
 
 %{prefix}/README.txt
-%if "%{java}" == "1"
+%if "%{native}" == "1"
  %{bindir}/checkshmpixmaps
  %{bindir}/vncviewer
  %config(noreplace) /usr/share/applications/tvncviewer.desktop

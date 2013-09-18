@@ -50,7 +50,7 @@ include_directories(include)
 # Viewer build
 #
 
-if(TVNC_BUILDJAVA)
+if(TVNC_BUILDNATIVE)
 	add_subdirectory(vncviewer)
 endif()
 
