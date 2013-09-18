@@ -36,7 +36,11 @@ if($slashndx>=0) {
     $exedir = substr($0, 0, $slashndx+1);
 }
 
-$vncClasses = "";
+# The script looks for the Java classes in $exedir/../java first, then if
+# it can't find them there, it looks in the directory specified by
+# $vncClasses.
+
+$vncClasses = "@TVNC_JAVADIR@";
 
 $xauth = "xauth";
 
@@ -916,30 +920,18 @@ sub SanityCheck
         }
     }
 
-    if($exedir eq "") {
-      cmd2:
-        foreach $cmd ("Xvnc","vncpasswd") {
-            for (split(/:/,$ENV{PATH})) {
-                if (-x "$_/$cmd") {
-                    $vncClasses = "$_/../java";
-                    next cmd2;
-                }
-            }
-            die "$prog: couldn't find \"$cmd\" on your PATH.\n";
-        }
-    }
-    else {
-      cmd3:
-        foreach $cmd ($exedir."Xvnc",$exedir."vncpasswd") {
-            for (split(/:/,$ENV{PATH})) {
-                if (-x "$cmd") {
-                    $vncClasses = $exedir."../java";
-                    next cmd3;
-                }
-            }
-            die "$prog: couldn't find \"$cmd\".\n";
-        }
-    }
+    cmd2:
+      foreach $cmd ($exedir."Xvnc", $exedir."vncpasswd") {
+          for (split(/:/,$ENV{PATH})) {
+              if (-x "$cmd") {
+                  if (-d "$exedir/../java") {
+                      $vncClasses = "$exedir/../java";
+                  }
+                  next cmd2;
+              }
+          }
+          die "$prog: couldn't find \"$cmd\".\n";
+      }
 
     #
     # Check the HOME and USER environment variables are both set.
