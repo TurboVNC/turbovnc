@@ -1,5 +1,5 @@
 //
-//  Copyright (C) 2010 D. R. Commander.  All Rights Reserved.
+//  Copyright (C) 2010, 2013 D. R. Commander.  All Rights Reserved.
 //  Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
 //  Copyright (C) 2006 Sun Microsystems, Inc.  All Rights Reserved.
 //  Copyright (C) 2004 Horizon Wimba.  All Rights Reserved.
@@ -95,6 +95,15 @@ class VncCanvas extends Canvas
 
   // True if we process keyboard and mouse events.
   boolean inputEnabled;
+
+  // Profiling stuff
+  public long decodePixels, decodeRect, blitPixels, blits;
+  double tStart = -1.0;
+  long updates, bytesRead;
+
+  static final double getTime() {
+    return (double)System.nanoTime() / 1.0e9;
+  }
 
   //
   // The constructors.
@@ -449,7 +458,9 @@ class VncCanvas extends Canvas
       switch (msgType) {
       case RfbProto.FramebufferUpdate:
 
-          dispatchEvent(new RFBUpdateEvent(this, RFBUpdateEvent.RFBUPDATE_FIRST));
+        if (tStart < 0.) tStart = getTime();
+
+        dispatchEvent(new RFBUpdateEvent(this, RFBUpdateEvent.RFBUPDATE_FIRST));
 
         if (statNumUpdates == viewer.debugStatsExcludeUpdates &&
             !statsRestarted) {
@@ -510,6 +521,8 @@ class VncCanvas extends Canvas
           long numBytesReadBefore = rfb.getNumBytesRead();
 
           rfb.startTiming();
+          decodePixels += (double)rw * (double)rh;
+          decodeRect++;
 
           if (rx < dbx || dbx < 0) dbx = rx;
           if (ry < dby || dby < 0) dby = ry;
@@ -552,6 +565,8 @@ class VncCanvas extends Canvas
           }
 
           rfb.stopTiming();
+          bytesRead +=
+            (int)(rfb.getNumBytesRead() - numBytesReadBefore);
 
           statNumPixelRects++;
           statNumBytesDecoded += rw * rh * bytesPixel;
@@ -597,6 +612,63 @@ class VncCanvas extends Canvas
           } else {
             rfb.tryDisableContinuousUpdates();
           }
+        }
+
+        updates++;
+        double tElapsed = getTime() - tStart;
+
+        if (tElapsed > (double)viewer.profileInt) {
+          if (viewer.profile.isVisible()) {
+            String str;
+            str = String.format("%.3f", (double)updates / tElapsed);
+            viewer.profile.upsVal.setText(str);
+            str = String.format("%.3f", (double)bytesRead /
+                                125000. / tElapsed);
+            viewer.profile.tpVal.setText(str);
+
+            str = String.format("%.3f", (double)decodePixels / 1000000.);
+            viewer.profile.mpDecodeVal.setText(str);
+            str = String.format("%.3f", (double)blitPixels / 1000000.);
+            viewer.profile.mpBlitVal.setText(str);
+
+            str = String.format("%.3f", (double)decodePixels / 1000000. /
+                                tElapsed);
+            viewer.profile.mpsTotalVal.setText(str);
+
+            str = String.format("%d", decodeRect);
+            viewer.profile.rectDecodeVal.setText(str);
+            str = String.format("%d", blits);
+            viewer.profile.rectBlitVal.setText(str);
+
+            str = String.format("%.0f", (double)decodePixels /
+                                (double)decodeRect);
+            viewer.profile.pprDecodeVal.setText(str);
+            str = String.format("%.0f", (double)blitPixels / (double)blits);
+            viewer.profile.pprBlitVal.setText(str);
+
+            str = String.format("%.0f", (double)decodeRect / (double)updates);
+            viewer.profile.rpuDecodeVal.setText(str);
+          }
+          if (viewer.profile.isVisible()) {
+            System.out.format("-------------------------------------------------------------------------------\n");
+            System.out.format("Total:   %.3f updates/sec,  %.3f Mpixels/sec,  %.3f Mbits/sec\n",
+                              (double)updates / tElapsed,
+                              (double)decodePixels / 1000000. / tElapsed,
+                              (double)bytesRead / 125000. / tElapsed);
+            System.out.format("Decode:  %.3f Mpixels,  %d rect,  %.0f pixels/rect\n",
+                              (double)decodePixels / 1000000.,
+                              decodeRect,
+                              (double)decodePixels / (double)decodeRect);
+            System.out.format("         %.0f rect/update\n",
+                              (double)decodeRect / (double)updates);
+            System.out.format("Blit:    %.3f Mpixels,  %d updates,  %.0f pixels/update\n",
+                              (double)blitPixels / 1000000.,
+                              blits,
+                              (double)blitPixels / (double)blits);
+          }
+          bytesRead = 0;
+          decodePixels = decodeRect = blitPixels = blits = updates = 0;
+          tStart = getTime();
         }
 
         break;
@@ -1630,8 +1702,11 @@ class VncCanvas extends Canvas
     int sy = (scaleHeightRatio == -1) ? y : ((int)((float)y * scaleHeightRatio));
     int sw = (scaleWidthRatio == -1) ? w : ((int)((float)(x+w) * scaleWidthRatio) - sx + 1);
     int sh = (scaleHeightRatio == -1) ? h : ((int)((float)(y+h) * scaleHeightRatio) - sy + 1);
-      repaint(viewer.deferScreenUpdates, sx, sy, sw, sh);
-    }
+    repaint(viewer.deferScreenUpdates, sx, sy, sw, sh);
+
+    blitPixels += w * h;
+    blits += 1;
+  }
 
   //
   // Handle events.

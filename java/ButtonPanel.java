@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2013 D. R. Commander.  All Rights Reserved.
 //  Copyright (C) 2007 Sun Microsystems, Inc.  All Rights Reserved.
 //  Copyright (C) 2001,2002 HorizonLive.com, Inc.  All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
@@ -38,6 +39,7 @@ class ButtonPanel extends Panel implements ActionListener {
   Button ctrlAltDelButton;
   Button refreshButton;
   Button losslessRefreshButton;
+  Button profileButton;
 
   ButtonPanel(VncViewer v) {
     viewer = v;
@@ -71,6 +73,10 @@ class ButtonPanel extends Panel implements ActionListener {
     losslessRefreshButton.setEnabled(false);
     add(losslessRefreshButton);
     losslessRefreshButton.addActionListener(this);
+    profileButton = new Button("Performance Info");
+    profileButton.setEnabled(false);
+    add(profileButton);
+    profileButton.addActionListener(this);
   }
 
   //
@@ -82,6 +88,7 @@ class ButtonPanel extends Panel implements ActionListener {
     clipboardButton.setEnabled(true);
     refreshButton.setEnabled(true);
     losslessRefreshButton.setEnabled(true);
+    profileButton.setEnabled(true);
   }
 
   //
@@ -100,6 +107,7 @@ class ButtonPanel extends Panel implements ActionListener {
     ctrlAltDelButton.setEnabled(false);
     refreshButton.setEnabled(false);
     losslessRefreshButton.setEnabled(false);
+    profileButton.setEnabled(false);
 
     validate();
   }
@@ -178,6 +186,8 @@ class ButtonPanel extends Panel implements ActionListener {
       } catch (IOException e) {
         e.printStackTrace();
       }
+    } else if (evt.getSource() == profileButton) {
+      viewer.profile.setVisible(!viewer.profile.isVisible());
     }
   }
 }

@@ -4,7 +4,7 @@
 
 CP = cp
 JC = javac
-JCFLAGS = -target 1.1 -source 1.2
+JCFLAGS = -target 1.5 -source 1.5
 JAR = jar
 ARCHIVE = VncViewer.jar
 MANIFEST = MANIFEST.MF
@@ -18,7 +18,7 @@ CLASSES = VncViewer.class RfbProto.class AuthPanel.class VncCanvas.class \
 	  DesCipher.class CapabilityInfo.class CapsContainer.class \
 	  RecordingFrame.class RFBUpdateEvent.class SessionRecorder.class \
 	  SocketFactory.class HTTPConnectSocketFactory.class \
-	  HTTPConnectSocket.class ReloginPanel.class \
+	  HTTPConnectSocket.class ReloginPanel.class ProfileFrame.class \
 	  InStream.class MemInStream.class ZlibInStream.class
 
 SOURCES = VncViewer.java RfbProto.java AuthPanel.java VncCanvas.java \
@@ -28,7 +28,7 @@ SOURCES = VncViewer.java RfbProto.java AuthPanel.java VncCanvas.java \
 	  DesCipher.java CapabilityInfo.java CapsContainer.java \
 	  RecordingFrame.java RFBUpdateEvent.java SessionRecorder.java \
 	  SocketFactory.java HTTPConnectSocketFactory.java \
-	  HTTPConnectSocket.java ReloginPanel.java \
+	  HTTPConnectSocket.java ReloginPanel.java ProfileFrame.java \
 	  InStream.java MemInStream.java ZlibInStream.java
 
 all: $(CLASSES) $(ARCHIVE)

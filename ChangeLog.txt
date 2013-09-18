@@ -8,6 +8,19 @@ than waiting for a framebuffer update request from a viewer.  This greatly
 improves the performance of video players and VirtualGL on high-latency
 networks.
 -------------------------------------------------------------------------------
+[2]
+Added a profiling feature to the Java TurboVNC Viewer.  This is back-ported
+from the TurboVNC 1.3 Java viewer, but not all of the statistics that TurboVNC
+1.3 reports could be back-ported to 1.1.  Specifically:
+-- The 1.1 viewer uses a much more fine-grained I/O system, so it was not
+possible to accurately measure the I/O time without interfering with it
+(Heisenberg.)
+-- Since it was not possible to accurately measure the I/O time, it was also
+not possible to accurately measure the decode time, since I/O and decode are
+interleaved.
+-- It was not possible to accurately measure the blit time, since blitting is
+asynchronous in the TurboVNC 1.1 Java viewer.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

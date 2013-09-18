@@ -72,6 +72,7 @@ public class VncViewer extends java.applet.Applet
   OptionsFrame options;
   ClipboardFrame clipboard;
   RecordingFrame rec;
+  ProfileFrame profile;
 
   // Control session recording.
   Object recordingSync;
@@ -96,7 +97,8 @@ public class VncViewer extends java.applet.Applet
   int deferUpdateRequests;
   int debugStatsExcludeUpdates;
   int debugStatsMeasureUpdates;
-  
+  public int profileInt;
+
   String authFactory  = null;
   AuthPlugin authPlugin = null;
 
@@ -129,6 +131,7 @@ public class VncViewer extends java.applet.Applet
     clipboard = new ClipboardFrame(this);
     if (RecordingFrame.checkSecurity())
       rec = new RecordingFrame(this);
+    profile = new ProfileFrame(this);
 
     sessionFileName = null;
     recordingActive = false;
@@ -767,6 +770,8 @@ public class VncViewer extends java.applet.Applet
         fatalError("Illegal access to AuthFactory '" + authFactory + "'.");
       }    
     }
+
+    profileInt = readIntParameter("ProfileInterval", 5);
   }
 
   //
@@ -890,6 +895,7 @@ public class VncViewer extends java.applet.Applet
       rfb.close();
     options.dispose();
     clipboard.dispose();
+    profile.dispose();
     if (rec != null)
       rec.dispose();
     if (authPlugin != null) 
@@ -993,6 +999,7 @@ public class VncViewer extends java.applet.Applet
     vncContainer.removeAll();
     options.dispose();
     clipboard.dispose();
+    profile.dispose();
     if (rec != null)
       rec.dispose();
     if (rfb != null && !rfb.closed())
