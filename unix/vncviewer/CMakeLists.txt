@@ -1,3 +1,5 @@
+include(CheckCSourceCompiles)
+
 include_directories(${X11_INCLUDE_DIR})
 
 add_executable(checkshmpixmaps
@@ -29,6 +31,13 @@ get_filename_component(TJPEG_JNILIBRARY_RP ${TJPEG_JNILIBRARY} REALPATH)
 
 if(NOT EXISTS ${TJPEG_JNILIBRARY_RP})
 	message(FATAL_ERROR "Could not find TurboJPEG JNI library at ${TJPEG_JNILIBRARY}.  Set TJPEG_JNILIBRARY to the full pathname of libturbojpeg.so or install the libjpeg-turbo SDK.")
+endif()
+
+set(CMAKE_REQUIRED_LIBRARIES ${TJPEG_JNILIBRARY})
+check_c_source_compiles("int main(void) { Java_org_libjpegturbo_turbojpeg_TJ_bufSize(0, 0, 1, 1, 0); return 0; }" TURBOJPEG_JNI_WORKS)
+set(CMAKE_REQUIRED_LIBRARIES)
+if(NOT TURBOJPEG_JNI_WORKS)
+	message(FATAL_ERROR "Could not link with TurboJPEG JNI library ${TJPEG_JNILIBRARY}.  This may be because it was not built with JNI support.")
 endif()
 
 install(PROGRAMS ${TJPEG_JNILIBRARY_RP} DESTINATION ${TVNC_JAVADIR}
