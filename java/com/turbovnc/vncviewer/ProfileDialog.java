@@ -143,7 +143,7 @@ class ProfileDialog extends Dialog {
                    GridBagConstraints.LINE_START,
                    new Insets(2, 8, 2, 8));
     addGBComponent(tpVal, panel,
-                   1, 2, 1, 1, 0, 0, 0, 0,
+                   4, 2, 1, 1, 0, 0, 0, 0,
                    GridBagConstraints.NONE,
                    GridBagConstraints.WEST,
                    new Insets(2, 8, 2, 8));
