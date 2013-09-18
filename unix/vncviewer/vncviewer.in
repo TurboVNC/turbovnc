@@ -2,4 +2,7 @@ set -e
 
 BINDIR=`dirname $0`
 $BINDIR/checkshmpixmaps
-exec java -server -d@BITS@ -Djava.library.path=@TVNC_JAVADIR@ -jar @TVNC_JAVADIR@/VncViewer.jar ${1+"$@"}
+if [ "$TVNC_JAVA" = "" ]; then
+	TVNC_JAVA=java
+fi
+exec $TVNC_JAVA -server -d@BITS@ -Djava.library.path=@TVNC_JAVADIR@ -jar @TVNC_JAVADIR@/VncViewer.jar ${1+"$@"}
