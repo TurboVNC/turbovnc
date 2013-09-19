@@ -96,15 +96,17 @@ Build Procedure
 ===============
 
 
-Un*x (including Mac)
---------------------
+Un*x (not Mac)
+--------------
 
-The following procedure will build the Java TurboVNC Viewer, the C libraries
-and applications necessary to integrate it with Un*x systems, and (if the
-TurboVNC Server build is enabled) a handful of C applications that are used to
-interface with the TurboVNC Server.  See "Build Recipes" for specific
-instructions on how to build 32-bit or 64-bit versions of the C
-libraries/applications on systems that support both.
+The following procedure will build the Java TurboVNC Viewer and some native/X11
+infrastructure to support running it as a standalone application.
+Additionally, if the TurboVNC Server build is enabled (which is the default),
+then this procedure will build a handful of C applications that are used to
+interface with the TurboVNC Server.  On most 64-bit systems (Solaris being a
+notable exception), this will build a 64-bit version of TurboVNC.  See "Build
+Recipes" for specific instructions on how to build a 32-bit or 64-bit version
+of TurboVNC on systems that support both.
 
   cd {build_directory}
   cmake -G "Unix Makefiles" [additional CMake flags] {source_directory}
@@ -124,6 +126,16 @@ to clean the Xvnc build, or
   make xserver-rebuild
 
 to do a minimal rebuild of Xvnc without re-configuring it.
+
+
+Mac
+---
+
+The following procedure will build the Java TurboVNC Viewer.
+
+  cd {build_directory}
+  cmake -G "Unix Makefiles" [additional CMake flags] {source_directory}
+  make
 
 
 Visual C++ (Command Line)
