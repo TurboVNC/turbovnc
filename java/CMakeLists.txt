@@ -136,6 +136,8 @@ add_custom_command(OUTPUT ${JAVA_CLASSES}
 
 configure_file(${CLASSPATH}/timestamp.in ${CLASSPATH}/timestamp)
 
+if(NOT "${SRCDIR}" STREQUAL "${BINDIR}")
+
 add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/toolbar.png
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${SRCDIR}/${CLASSPATH}/toolbar.png ${BINDIR}/${CLASSPATH}/toolbar.png
@@ -151,6 +153,8 @@ add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc-sm.png
 		${SRCDIR}/${CLASSPATH}/turbovnc-sm.png
 		${BINDIR}/${CLASSPATH}/turbovnc-sm.png
 	DEPENDS ${SRCDIR}/${CLASSPATH}/turbovnc-sm.png)
+
+endif()
 
 string(REGEX REPLACE "jar" "" Java_PATH ${Java_JAR_EXECUTABLE})
 string(REGEX REPLACE ".exe" "" Java_PATH ${Java_PATH})
