@@ -110,7 +110,6 @@ execute_process(COMMAND chmod +x vncserver
 configure_file(Xvnc/config/cf/tvnc_version.h.in Xvnc/config/cf/tvnc_version.h)
 configure_file(Xvnc-configure.in Xvnc-configure)
 configure_file(vncserver.init.in vncserver.init @ONLY)
-configure_file(cmake_xinstall.cmake.in cmake_xinstall.cmake)
 
 if(NOT "${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 	add_custom_target(xserver-syncsource
@@ -146,19 +145,23 @@ add_custom_target(xserver-clean
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Xvnc
 	DEPENDS xserver-syncsource)
 
-add_custom_target(xserver-install
-	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_xinstall.cmake)
-
-add_custom_target(xserver-uninstall
-	COMMAND ${CMAKE_COMMAND} -E remove -f
-		$ENV{DESTDIR}${TVNC_BINDIR}/vncserver
-		$ENV{DESTDIR}${TVNC_BINDIR}/Xvnc
-		$ENV{DESTDIR}${TVNC_MANDIR}/man1/vncserver.1
-		$ENV{DESTDIR}${TVNC_MANDIR}/man1/Xvnc.1
-		$ENV{DESTDIR}${TVNC_MANDIR}/man1/Xserver.1
-		$ENV{DESTDIR}${TVNC_CONFDIR}/turbovncserver.conf
-		$ENV{DESTDIR}${TVNC_CONFDIR}/turbovncserver-auth.conf
-		$ENV{DESTDIR}${TVNC_CONFDIR}/init.d/tvncserver
-		$ENV{DESTDIR}${TVNC_CONFDIR}/sysconfig/tvncservers)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/vncserver
+	DESTINATION ${TVNC_BINDIR})
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/Xvnc/programs/Xserver/Xvnc
+	DESTINATION ${TVNC_BINDIR})
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/vncserver.man
+	DESTINATION ${TVNC_MANDIR}/man1 RENAME vncserver.1)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Xvnc/programs/Xserver/Xvnc.man
+	DESTINATION ${TVNC_MANDIR}/man1 RENAME Xvnc.1)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Xvnc/programs/Xserver/Xserver.man
+	DESTINATION ${TVNC_MANDIR}/man1 RENAME Xserver.1)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver.conf
+	DESTINATION ${TVNC_CONFDIR})
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver-auth.conf
+	DESTINATION ${TVNC_CONFDIR})
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/vncserver.init
+	DESTINATION ${TVNC_CONFDIR}/init.d RENAME tvncserver)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/tvncservers
+	DESTINATION ${TVNC_CONFDIR}/sysconfig)
 
 endif() # TVNC_BUILDSERVER

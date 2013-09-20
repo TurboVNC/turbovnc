@@ -57,7 +57,6 @@ mkdir $TMPDIR/DEBIAN
 cp pkgscripts/deb-control $TMPDIR/DEBIAN/control
 
 make install DESTDIR=$TMPDIR
-make xserver-install DESTDIR=$TMPDIR
 
 if [ ! "$DOCDIR" = "/usr/share/doc/$PACKAGE_NAME-$VERSION" ]; then
 	safedirmove $TMPDIR/$DOCDIR $TMPDIR/usr/share/doc/$PACKAGE_NAME-$VERSION $TMPDIR/__tmpdoc

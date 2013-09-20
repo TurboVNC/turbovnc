@@ -58,7 +58,6 @@ solution for remotely displaying 3D applications with interactive performance.
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
-make xserver-install DESTDIR=$RPM_BUILD_ROOT
 
 #-->%if 0
 
