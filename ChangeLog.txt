@@ -10,6 +10,18 @@ after the first connection is closed.
 [2]
 Added a profiling feature to the Java TurboVNC Viewer.
 -------------------------------------------------------------------------------
+[3]
+The X11 TurboVNC Viewer has been retired and replaced with the Java TurboVNC
+Viewer.  The X11 viewer will continue to be maintained in the 1.2.x branch on
+a break/fix basis only.  The Java TurboVNC Viewer is now deployed in the Linux
+packages, along with the libjpeg-turbo JNI libraries necessary to make it
+perform similarly to the native viewer.
+-------------------------------------------------------------------------------
+[4]
+The libjpeg-turbo JNI libraries are now deployed with the Java TurboVNC Viewer
+on Windows, so it is no longer necessary to install the libjpeg-turbo SDK on
+Windows platforms in order to get accelerated JPEG decompression.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
