@@ -6,8 +6,9 @@ The Java TurboVNC Viewer is based largely on the Java TigerVNC Viewer, but it
 contains additional features and GUI modifications that make it behave and
 perform as much like the TurboVNC native viewers as possible.  One of the
 most notable of these features is the ability to use the libjpeg-turbo library
-(through JNI) to accelerate JPEG decoding, giving the Java TurboVNC Viewer
-near-native levels of performance when run as a standalone application.
+(through JNI) to accelerate JPEG decoding, giving the Java TurboVNC Viewer,
+when run as a standalone application, similar levels of performance to the
+native TurboVNC viewers.
 
 The Java TurboVNC Viewer is:
 
@@ -51,7 +52,7 @@ There are three basic ways to use the Java TurboVNC Viewer:
      remote desktop without the need to install any software on the client
      machine.
 
-     The Unix TurboVNC Server (Xvnc) is able to serve up any set of files that
+     The TurboVNC Server (Xvnc) is able to serve up any set of files that
      are present in a particular directory, which is specified in the -httpd
      argument to Xvnc.  In the default version of the vncserver script, this
      argument is set to ../java, relative to the directory containing the
@@ -118,7 +119,7 @@ TurboVNC Viewer is used:
 Both parameter names and their values are case-insensitive.  The only
 exception is the "Password" parameter, as VNC passwords are case-sensitive.
 
-For a complete list of parameters and their descriptions, run:
+For a complete list of parameters and their descriptions, execute:
 
      java -jar VncViewer.jar -?
 
