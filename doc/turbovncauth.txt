@@ -29,7 +29,7 @@ validate authentication credentials sent from a VNC viewer:
 
 	PAM User/Password Authentication :: {:}
 		The TurboVNC Server uses Pluggable Authentication Modules (PAM) to validate
-		a username and password received from a VNC viewer via the "Unix login"
+		a username and password received from a VNC viewer using the "Unix login"
 		authentication scheme (see below.)  The username and password received
 		from the VNC viewer need not necessarily be validated against Unix login
 		credentials.  Generally, the server can be configured to use any
@@ -48,7 +48,7 @@ protocols used to validate authentication credentials with a VNC server:
 
 	Standard VNC Authentication :: {:}
 		A password is sent to the server using a DES-encrypted
-		challenge-response scheme.  The password can be up to 8 characters long,
+		challenge/response scheme.  The password can be up to 8 characters long,
 		so the DES key length is 56 bits.  This is not a particularly strong form
 		of encryption by today's standards (56-bit DES was broken by brute force
 		attack in the late 90's.)
@@ -102,5 +102,8 @@ For more detailed information about the TurboVNC authentication extensions,
 refer to the TurboVNC man pages:
 
 	#Verb: <<---
-	man -M /opt/TurboVNC/man {vncserver | Xvnc | vncviewer | vncpasswd}
+	man -M /opt/TurboVNC/man vncserver
+	man -M /opt/TurboVNC/man Xvnc
+	man -M /opt/TurboVNC/man vncviewer
+	man -M /opt/TurboVNC/man vncpasswd
 	---

@@ -144,7 +144,7 @@ perform well.
 		/opt/VirtualGL/bin/vglconnect {user}@{server}
 		---
 
-		Replace __''{user}''__ with your user account name on the VirtualGL server and
+		Replace __''{user}''__ with your username on the VirtualGL server and
 		__''{server}''__ with the hostname or IP address of that server.  Refer to
 		the VirtualGL User's Guide for additional ''vglconnect'' options.
 

@@ -7,11 +7,11 @@ images:
 
 	Allow JPEG compression :: {:}
 		If this option is enabled, then TurboVNC will use JPEG compression for
-		subrectangles that have a high number of unique colors and indexed color
-		subencoding for subrectangles that have a low number of unique colors.  If
-		this option is disabled, then TurboVNC will select between indexed color or
-		raw subencoding, depending on the size of the subrectangle and its color
-		count.
+		subrectangles that have a high number of unique colors, and it will use
+		indexed color subencoding for subrectangles that have a low number of
+		unique colors.  If this option is disabled, then TurboVNC will select
+		between indexed color or raw subencoding, depending on the size of the
+		subrectangle and its color count.
 
 	JPEG image quality :: {:}
 		Lower quality levels produce grainier JPEG images with more noticeable
@@ -20,25 +20,27 @@ images:
 
 	JPEG chrominance subsampling :: {:}
 		When compressing an image using JPEG, the RGB pixels are first converted to
-		the YUV colorspace, a colorspace in which each pixel is represented as a
-		brightness (Y, or "luminance") value and a pair of color (U & V, or
+		the YCbCr colorspace, a colorspace in which each pixel is represented as a
+		brightness (Y, or "luminance") value and a pair of color (Cb & Cr, or
 		"chrominance") values.  After this colorspace conversion, chrominance
 		subsampling can be used to discard some of the chrominance components in
-		order to save bandwidth.  1X subsampling (the default in TurboVNC) retains
-		the chrominance components for all pixels, and thus it provides the best
-		image quality but also uses the most network bandwidth and CPU time.  2X
-		subsampling retains the chrominance components for every other pixel, and
-		4X subsampling retains the chrominance components for every fourth pixel
-		(this is typically implemented as 2X subsampling in both X and Y
-		directions.)  Grayscale throws out all of the chrominance components,
-		leaving only luminance.  2X and 4X subsampling will typically produce
-		noticeable blurring of lines and other sharp features, but with
-		photographic or other "smooth" image content, it may be difficult to detect
-		any difference between 1X, 2X, and 4X.
+		order to save bandwidth.  This works because the human eye is more
+		sensitive to changes in brightness than to changes in color.  1X
+		subsampling (the default in TurboVNC) retains the chrominance components
+		for all pixels, and thus it provides the best image quality but also uses
+		the most network bandwidth and CPU time.  2X subsampling retains the
+		chrominance components for every other pixel, and 4X subsampling retains
+		the chrominance components for every fourth pixel (this is typically
+		implemented as 2X subsampling in both X and Y directions.)  Grayscale
+		throws out all of the chrominance components, leaving only luminance.  2X
+		and 4X subsampling will typically produce noticeable blurring of lines and
+		other sharp features, but with photographic or other "smooth" image
+		content, it may be difficult to detect any difference between 1X, 2X, and
+		4X.
 
 	Zlib compression level :: {:}
 		If zlib compression is enabled, then indexed color, mono, and raw-encoded
-		subrectangles will be compressed with zlib prior to transmission.  This
+		subrectangles will be compressed using zlib prior to transmission.  This
 		decreases network bandwidth usage at the expense of increased CPU usage.
 		If JPEG compression is enabled, then zlib compression is always used with
 		non-JPEG subrectangles.
@@ -50,7 +52,7 @@ server, click on the Connection Options button in the toolbar.)  In the X11
 TurboVNC Viewer, press F8 after connecting to bring up the TurboVNC Viewer
 Options menu.
 
-The TurboVNC Viewer provides five "encoding methods", corresponding
+The TurboVNC Viewer provides five preset "encoding methods", corresponding
 to the most useful combinations of the image compression options described
 above:
 
@@ -58,35 +60,35 @@ above:
 	JPEG chrominance subsampling || Zlib compression level || Notes ||
 | "Tight + Perceptually Lossless JPEG" | Yes | 95 | 1x | 1 | \
 	This encoding method should be perceptually lossless (that is, any image \
-	compression artifacts it produces should be imperceptible to the human \
-	eye under most viewing conditions.)  This encoding method requires a great \
+	compression artifacts it produces should be imperceptible to human vision) \
+	under most viewing conditions.  This encoding method requires a great \
 	deal of network bandwidth, however, and is generally not recommended except \
 	on 50 Megabit/second and faster networks. |
-| "Tight + Medium Quality JPEG" | Yes | 80 | 2x | 1 | \
-	For subrectangles with a high number of unique colors, this encoding method \
+| "Tight + Medium-Quality JPEG" | Yes | 80 | 2x | 1 | \
+	For subrectangles that have a high number of unique colors, this encoding method \
 	produces some minor, but generally not very noticeable, image compression \
 	artifacts.  All else being equal, this encoding method typically uses about \
-	twice the network bandwidth of the "Tight + Low Quality JPEG" encoding \
+	twice the network bandwidth of the "Tight + Low-Quality JPEG" encoding \
 	method and about half the bandwidth of the "Tight + Perceptually Lossless \
 	JPEG" encoding method, making it appropriate for medium-speed networks such \
 	as 10 Megabit Ethernet. |
-| "Tight + Low Quality JPEG" | Yes | 30 | 4x | 1 | \
-	For subrectangles with a high number of unique colors, this encoding method \
+| "Tight + Low-Quality JPEG" | Yes | 30 | 4x | 1 | \
+	For subrectangles that have a high number of unique colors, this encoding method \
 	produces very noticeable image compression artifacts.  However, it performs \
 	optimally on low-bandwidth connections.  If image quality is more critical \
 	than performance, then use one of the other encoding methods or take \
 	advantage of the [[#LR][Lossless Refresh feature]]. |
 | "Lossless Tight" | No | N/A | N/A | None | \
-	This encoding method uses indexed color subencoding for subrectangles with \
-	a low number of unique colors but otherwise does not perform any image \
-	compression at all.  It is thus suitable only for gigabit and faster \
+	This encoding method uses indexed color subencoding for subrectangles that have \
+	a low number of unique colors, but it otherwise does not perform any image \
+	compression at all.  Lossless Tight is thus suitable only for gigabit and faster \
 	networks.  This encoding method uses significantly less CPU time than any \
 	of the JPEG-based encoding methods.  Lossless Tight requires an RFB \
 	protocol extension that is, as of this writing, only supported by the \
 	TurboVNC Viewer. |
 | "Lossless Tight + Zlib" | No | N/A | N/A | 1 | \
-	This encoding method uses indexed color subencoding for subrectangles with \
-	a low number of unique colors and raw subencoding for subrectangles with a \
+	This encoding method uses indexed color subencoding for subrectangles that have \
+	a low number of unique colors and raw subencoding for subrectangles that have a \
 	high number of unique colors.  It compresses all subrectangles using zlib \
 	with zlib compression level 1.  For certain types of low-color workloads (CAD \
 	applications, in particular), this encoding method may use less network \
@@ -96,7 +98,7 @@ above:
 #CAP: TurboVNC Encoding Methods
 
 In the Windows and Java/Mac TurboVNC Viewers, the encoding method can be set
-using the TurboVNC Viewer Options dialog box (click on the "Options" button in
+in the TurboVNC Viewer Options dialog box (click on the "Options" button in
 the "TurboVNC Connection" dialog box or, after connecting to the server, click
 on the Connection Options button in the toolbar.)
 
@@ -121,17 +123,18 @@ Certain ill-behaved applications can sometimes draw the same thing over and
 over again, and this can cause redundant framebuffer updates to be sent to the
 VNC viewer.  The TurboVNC Server can guard against this by maintaining a copy
 of the remote framebuffer for each connected viewer, comparing each new
-framebuffer update against the pixels in the framebuffer copy to determine
-whether the framebuffer update is redundant, and discarding any redundant
-updates before they are sent to the viewer.
+framebuffer update against the pixels in the framebuffer copy, and
+discarding any redundant updates before they are sent to the viewer.
 
-Enabling interframe comparison significantly increases the memory and CPU usage
-of the TurboVNC Server.  Further, duplicate framebuffer updates are not
-typically a problem for 3D and video applications, and the effects of these
-duplicate updates, even when they exist, are not typically noticeable on
-high-speed networks.  Thus, interframe comparison is not enabled by default and
-should not generally be enabled except on low-bandwidth networks and with
-applications for which it can be shown to be beneficial.
+Enabling interframe comparison increases the memory usage of the TurboVNC
+Server by a factor of N, where N is the number of connected clients, and
+interframe comparison increases the server CPU usage by about 10-15% as well.
+Further, duplicate framebuffer updates are not typically a problem for 3D and
+video applications, and the effects of these duplicate updates, even when they
+exist, are not typically noticeable on high-speed networks.  Thus, interframe
+comparison is not enabled by default and should not generally be enabled except
+on low-bandwidth networks and with applications for which it can be shown to be
+beneficial.
 
 Interframe comparison can be enabled by either passing an argument of
 ''-interframe'' to ''vncserver'' when starting a TurboVNC Server session or by
@@ -143,10 +146,10 @@ requesting a compression level of 5 or higher from the viewer (see below.)
 One of the underlying principles of TurboVNC's design is to expose only the
 options that provide the best performance "bang for the buck."  Thus, the
 TurboVNC Viewer GUI does not normally provide any way of requesting a
-compression level greater than 1.  Compression levels 2-9 can, however, be
-specified on the command line, and doing so will enable an advanced mode in the
-TurboVNC Viewer GUI that allows any compression level from 0 to 9 to be
-requested.
+compression level greater than 1.  Compression Levels 2-9 can, however, be
+specified on the command line (or as a parameter, if using the Java TurboVNC
+Viewer), and doing so will enable an advanced mode in the TurboVNC Viewer GUI
+that allows any compression level from 0 to 9 to be requested.
 
 When connecting to a TurboVNC server, requesting a particular compression level
 has the following effect:
@@ -165,18 +168,18 @@ has the following effect:
 	subencoding to be used more often than with CL 1, and indexed color \
 	subrectangles are compressed using a higher zlib compression level.  This \
 	can provide typically 20-40% better compression than CL 1 (with a \
-	commensurate increase in CPU usage) for workloads with low numbers of \
+	commensurate increase in CPU usage) for workloads that have a low number of \
 	unique colors.  However, Compression Level 2 will increase the CPU usage \
 	for high-color workloads without providing significantly better \
 	compression. |
-| 3-4 | 3 | 96 | No | Same as Compression Level 2 |
+| 3-4 | 3 | 96 | No | Same as Compression Level 2 (reserved for future expansion) |
 | 5-6 | 1 | 24 | Yes | Same as Compression Level 1, but with interframe \
 	comparison enabled |
 | 7-8 | 3 | 96 | Yes | Same as Compression Level 2, but with interframe \
 	comparison enabled |
 | 9 | 7 | 256 | Yes | This mode is included only for backward compatibility \
 	with TightVNC.  It provides approximately the same level of compression for \
-	2D applications as Compression Level 9 in TightVNC, while using much less \
+	2D applications as Compression Level 9 in TightVNC 1.3.x, while using much less \
 	CPU time.  It also provides much better compression than TightVNC for 3D \
 	and video applications.  However, relative to Compression Level 2, this \
 	mode uses approximately twice as much CPU time and only achieves about \
@@ -194,7 +197,7 @@ has the following effect:
 	of the "Lossless Tight" encoding method above. |
 | 1 | 1 | 1 | Subrectangle size / 96 | No | See the description of the \
 	"Lossless Tight + Zlib" encoding method above. |
-| 2-4 | 1 | 1 | Subrectangle size / 96 | No | Same as Compression Level 1 |
+| 2-4 | 1 | 1 | Subrectangle size / 96 | No | Same as Compression Level 1 (reserved for future expansion) |
 | 5 | None | None | Subrectangle size / 4 | Yes | Same as Compression Level \
 	0, but with interframe comparison enabled |
 | 6-8 | 1 | 1 | Subrectangle size / 96 | Yes | Same as Compression Level 1, \
@@ -202,7 +205,7 @@ has the following effect:
 | 9 | 7 | 5 | Subrectangle size / 96 | Yes | This mode is included only for \
 	backward compatibility with TightVNC.  It provides approximately the same \
 	level of compression for 2D applications as Compression Level 9 in \
-	TightVNC, while using much less CPU time.  It also provides much better \
+	TightVNC 1.3.x, while using much less CPU time.  It also provides much better \
 	compression than TightVNC for 3D and video applications.  However, relative \
 	to Compression Level 1, this mode uses approximately twice as much CPU time \
 	and only achieves about 10% better average compression for 2D apps (and \
@@ -258,7 +261,7 @@ an ALR is triggered based on a period of inactivity relative to the last
 framebuffer update, these continuous updates prevent an ALR from ever being
 sent.  Fortunately, these ill-behaved window managers and blinking cursors 
 do not typically use ''X[Shm]PutImage()'' to perform their updates,
-so the problem can be worked around by limiting the regions that are
+so the problem is effectively worked around by limiting the regions that are
 "eligible" for ALR to just the subset of regions that were drawn with the
 ''X[Shm]PutImage()'' functions.
 
@@ -294,7 +297,7 @@ set the ''TVNC_NTHREADS'' environment variable to override this.
 The Java TurboVNC Viewer can be used as a standalone app, in which case it
 provides most of the same features as the native TurboVNC viewers.  It can also
 load libjpeg-turbo through JNI to accelerate JPEG decoding, which gives the
-Java viewer approximately the same performance as the native viewers in most
+Java viewer similar performance to the native viewers in most
 cases.  If you are using the Mac TurboVNC Viewer (which is just the Java viewer
 packaged in a Mac app bundle), then libjpeg-turbo is embedded in the app
 bundle, so no further action is needed to accelerate it.  If you are using the
@@ -313,11 +316,11 @@ field says "Turbo".
 #OPT: noList! plain!
 
 When running the Java TurboVNC Viewer on Un*x platforms, it is necessary to
-enable MIT-SHM Pixmaps in order to achieve optimal blitting (image drawing)
-performance.  MIT-SHM Pixmaps are not always enabled by default on certain
-graphics cards (some nVidia cards, for instance), and in such cases, it may be
-necessary to add an entry to __xorg.conf__ in order to enable them.  You can
-verify whether X11 blitting is being accelerated by running
+enable MIT-SHM Pixmap support in order to achieve optimal blitting (image
+drawing) performance.  MIT-SHM Pixmaps are not always enabled by default on
+certain graphics cards (some nVidia cards, for instance), and in such cases, it
+may be necessary to add an entry to __xorg.conf__ in order to enable them.
+You can verify whether X11 blitting is being accelerated by running
 
 	#Verb: <<---
 	java -Dsun.java2d.trace=count -cp /opt/TurboVNC/java/VncViewer.jar com.turbovnc.vncviewer.ImageDrawTest
@@ -337,7 +340,7 @@ enabled.
 Even with accelerated X11 blitting, the Java TurboVNC Viewer may not be quite
 as fast as the X11 TurboVNC Viewer on older, slower systems.  This is because
 image drawing in Java 2D requires an extra memory copy that is not required
-when using raw X11 commands.  On newer systems with fast memory access
+when using raw X11 commands.  However, on newer systems with fast memory access
 (particularly systems with a large L2 or L3 cache), this overhead should have a
 negligible impact on overall performance.
 
@@ -356,8 +359,8 @@ TurboVNC Viewer app, then the Server VM is automatically enabled.
 
 Java Web Start can be used to deploy the Java TurboVNC Viewer and the
 associated libjpeg-turbo JNI libraries from a web server.  Deploying the viewer
-via JWS provides a fully-functional and performant TurboVNC Viewer environment
-without requiring the viewer to be installed on the client machine.  This
-mechanism is preferred over deploying the viewer as an applet, since JPEG
+using JWS provides a fully functional and performant TurboVNC Viewer
+environment without requiring the viewer to be installed on the client machine.
+This mechanism is preferred over deploying the viewer as an applet, since JPEG
 decoding cannot be accelerated when the Java TurboVNC Viewer is run as an
 applet.  See [[http://www.virtualgl.org/Documentation/JWS]] for more details.

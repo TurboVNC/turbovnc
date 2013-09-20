@@ -21,7 +21,7 @@
 		"c:\program files\turbovnc\putty" {user}@{server}
 		---
 
-		Replace __''{user}''__ with your user account name on the TurboVNC server
+		Replace __''{user}''__ with your username on the TurboVNC server
 		machine and __''{server}''__ with the hostname or IP address of that
 		machine.
 
@@ -85,16 +85,16 @@
 
 Closing the TurboVNC Viewer disconnects from the TurboVNC session, but the
 TurboVNC session will remain running on the TurboVNC server machine (as will
-any applications that you may have started in the session), and you can
+any applications that you may have started within the session), and you can
 reconnect to the session at any time.
 
 To kill a TurboVNC session:
 
 	#. Using SSH (''c:\\Program Files\\TurboVNC\\putty.exe'' on Windows clients),
-		log into the server that is running the TurboVNC session that you wish to
-		kill.{nl} \
+		log into the server machine that is running the TurboVNC session you want
+		to kill.{nl} \
 		... or ...{nl} \
-		Using the TurboVNC Viewer, connect to the TurboVNC session that you wish to
+		Using the TurboVNC Viewer, connect to the TurboVNC session that you want to
 		kill, and open a new terminal in that TurboVNC session.
 
 	#. Type the following command:
@@ -104,11 +104,11 @@ To kill a TurboVNC session:
 		---
 
 	Replace __''{n}''__ with the X display number of the TurboVNC session you
-	wish to kill.
+	want to kill.
 
-To list the X display numbers and process ID's of all TurboVNC sessions that
-are currently running under your user account on a particular machine, type the
-following command:
+To list the X display numbers and process ID's of all TurboVNC sessions
+currently running under your user account on a particular server machine, type
+the following command:
 
 	#Verb: <<---
 	/opt/TurboVNC/bin/vncserver -list
@@ -159,12 +159,12 @@ line:
 	"c:\program files\turbovnc\putty" -L {5900+n}:localhost:{5900+n} {user}@{server}
 	---
 
-Replace __''{user}''__ with your user account name on the TurboVNC server
+Replace __''{user}''__ with your username on the TurboVNC server
 machine and __''{server}''__ with the hostname or IP address of that machine.
 Replace __''n''__ with the X display number of the TurboVNC session to which
 you want to connect.
 
-For instance, if you wish to connect to display '':1'' on server ''my_server''
+For instance, if you want to connect to display '':1'' on server ''my_server''
 using user account ''my_user'', you would type:
 
 	Linux/Unix/Mac clients :: {:}
@@ -218,6 +218,10 @@ With the X11 TurboVNC Viewer, the command used to establish the SSH tunnel is
 configurable by way of environment variables.  See the ''vncviewer'' man page
 for more details.
 
+	!!! NOTE: Since the Java TurboVNC Viewer contains an embedded SSH client,
+	the ''-via'' and ''-tunnel'' parameters can also be used when the viewer
+	is run as an applet or deployed using Java Web Start.
+
 *** Forcing Secure Connections
 #OPT: noList! plain!
 
@@ -239,7 +243,7 @@ the machine.
 #OPT: noList! plain!
 
 For LAN connections and other high-speed networks, tunneling the TurboVNC
-connection over SSH will reduce performance by as much as 20-40%.  For
+connection through SSH will reduce performance by as much as 20-40%.  For
 wide-area networks, however, there is no performance penalty for using SSH
 tunneling with TurboVNC.
 
@@ -247,13 +251,23 @@ tunneling with TurboVNC.
 
 For more detailed instructions on the usage of TurboVNC:
 
-	X11 TurboVNC Viewer :: Refer to the TurboVNC man pages:
+	TurboVNC Server :: Refer to the TurboVNC man pages:
 	#Verb: <<---
-	man -M /opt/TurboVNC/man {vncserver | Xvnc | vncviewer | vncconnect | vncpasswd}
+	man -M /opt/TurboVNC/man vncserver
+	man -M /opt/TurboVNC/man Xvnc
+	man -M /opt/TurboVNC/man vncconnect
+	man -M /opt/TurboVNC/man vncpasswd
+	---
+
+	X11 TurboVNC Viewer :: Refer to the ''vncviewer'' man page:
+	#Verb: <<---
+	man -M /opt/TurboVNC/man vncviewer
 	---
 
 	Windows TurboVNC Viewer :: Use the embedded help feature (the question mark
-	button in the upper right of the TurboVNC Viewer dialogs.)
+	button in the upper right of the TurboVNC Viewer dialogs.)  You can also
+	run ''vncviewer.exe /?'' from a command prompt to get a full list of
+	supported command-line options and their descriptions.
 
 	Mac TurboVNC Viewer :: Run
 	#Verb: <<---

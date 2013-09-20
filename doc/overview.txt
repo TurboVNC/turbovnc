@@ -2,12 +2,15 @@
 {anchor: Overview}
 
 TurboVNC is a derivative of VNC (Virtual Network Computing) that is tuned to
-provide peak performance for full-screen video and 3D workloads.  TurboVNC was
-originally based on the [[http://www.tightvnc.com][TightVNC]] 1.3.x and
+provide peak performance for 3D and video workloads.  TurboVNC was originally
+based on the [[http://www.tightvnc.com][TightVNC]] 1.3.x and
 [[http://xf4vnc.sourceforge.net/][xf4vnc]] code bases, and on the surface, it
 behaves similarly to its parents.  However, TurboVNC compresses 3D and video
-workloads better than the "tightest" compression mode of TightVNC 1.3.x while
-using only typically 15-20% of the CPU time of the latter.
+workloads significantly better than the "tightest" compression mode in
+TightVNC 1.3.x while using only typically 15-20% of the CPU time of the latter.
+Using non-default settings, TurboVNC can also match the best compression ratios
+produced by TightVNC 1.3.x for 2D workloads (see
+{ref prefix="Section ": AdvancedCompression}.)
 
 All VNC implementations, including TurboVNC, use the RFB (remote framebuffer)
 protocol to send "framebuffer updates" from the
@@ -23,11 +26,11 @@ and if so, that portion is encoded as a bounding box and a fill color ("Solid
 subencoding.")  Of the remaining subrectangles, those with only two colors are
 encoded as a 1-bit-per-pixel bitmap with a 2-color palette ("Mono
 subencoding"), those with low numbers of unique colors are encoded as a color
-palette and an indexed bitmap containing 8 index bits per pixel ("Indexed color
-subencoding"), and subrectangles with high numbers of unique colors are encoded
-using either JPEG or arrays of RGB pixels ("Raw subencoding"), depending on the
-encoding method.  zlib can optionally be used to compress the indexed color,
-mono and raw subrectangles.
+palette and an 8-bit-per-pixel bitmap ("Indexed color subencoding"), and
+subrectangles with high numbers of unique colors are encoded using either JPEG
+or arrays of RGB pixels ("Raw subencoding"), depending on the encoding method.
+zlib can optionally be used to compress the indexed color, mono and raw
+subrectangles.
 
 Part of TurboVNC's speedup comes from the use of libjpeg-turbo, the same
 high-speed SIMD-optimized JPEG codec used by VirtualGL.  However, TurboVNC also
@@ -37,15 +40,11 @@ TurboVNC's encoding methods tend to favor the use of JPEG more, since it is now
 generally the fastest subencoding type.  Furthermore, TurboVNC eliminates
 buffer copies, it maximizes network efficiency by splitting framebuffer updates
 into relatively large subrectangles, and it uses only the zlib compression
-levels that can be shown to have a measurable performance benefit.  TurboVNC
-can compress 3D and video workloads somewhat better and many times faster than
-any mode that TightVNC 1.3.x provided, and (using non-default settings)
-TurboVNC can also compress 2D workloads nearly as well as TightVNC while using
-only half of the CPU time.
+levels that can be shown to have a measurable performance benefit.
 
 TurboVNC is the product of extensive research, in which many different
 permutations of the TightVNC encoder were benchmarked at the low level against
-a variety of captured RFB sessions that simulated real-world application
+a variety of captured RFB sessions that simulate real-world application
 workloads, both 2D and 3D.  For more information on the research leading to
 TurboVNC's encoder design, see
 [[http://www.virtualgl.org/pmwiki/uploads/About/tighttoturbo.pdf][this report]].
@@ -82,12 +81,16 @@ In addition to high performance, other notable features of TurboVNC include:
 		a lossless refresh automatically if the user stops interacting with the
 		application for a certain period of time.
 
+	* High-performance Java viewer, deployable using Java Web Start.  By calling
+		libjpeg-turbo through JNI, the Java TurboVNC Viewer achieves similar levels
+		of performance to the native TurboVNC Viewer.
+
 TurboVNC, when used with VirtualGL, provides a highly performant and robust
 solution for remotely displaying 3D applications over all types of networks.
 
-TurboVNC is capable of sending 50+ Megapixels/second of image data over a
-100 Megabit/second local area network with perceptually lossless image quality.
-TurboVNC can deliver between 10 and 12 Megapixels/second of image data over a 5
+On "modern" hardware, TurboVNC is capable of streaming 50+ Megapixels/second
+over a 100 Megabit/second local area network with perceptually lossless image
+quality.  TurboVNC can stream between 10 and 12 Megapixels/second over a 5
 Megabit/second broadband connection at reduced (but usable) image quality.
 
 TurboVNC is compatible with other VNC distributions.  See

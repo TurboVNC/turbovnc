@@ -24,7 +24,7 @@ following error:
 		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
 		Packages are provided for Linux distributions in the
 		[[http://www.redhat.com/][Red Hat]],
-		[[http://www.novell.com/linux/][SuSE]], or
+		[[http://www.suse.com/][SuSE]], or
 		[[http://www.debian.org/][Debian]] families that contain GLIBC 2.3.2
 		or later (including [[http://fedoraproject.org/][Fedora]],
 		[[http://www.centos.org/][CentOS]] 3 or later,
@@ -69,7 +69,7 @@ following error:
 
 ** Installing TurboVNC from Source
 
-If you are using a Unix platform for which there is not a pre-built TurboVNC
+If you are using a Un*x platform for which there is not a pre-built TurboVNC
 binary package available, then log in as root, download the TurboVNC source
 tarball (''turbovnc-''__''{version}''__''.tar.gz'') from the 
 [[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
