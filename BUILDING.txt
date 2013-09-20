@@ -157,8 +157,8 @@ build of TurboVNC.
 Java
 ----
 
-Passing -DTVNC_BUILDJAVA=1 to the command line will build the Java TurboVNC
-Viewer, as well as including it when installing or packaging the native
+Adding -DTVNC_BUILDJAVA=1 to the CMake command line will build the Java
+TurboVNC Viewer, as well as include it when installing or packaging the native
 TurboVNC Viewer or the TurboVNC Server.  This is the default on Mac platforms.
 
 Additionally, you can build the Java TurboVNC Viewer without building the
@@ -242,9 +242,6 @@ to the CMake command line.  Then, you can run 'make install' or 'nmake install'
 the TurboVNC Viewer.  Running 'make uninstall' or 'nmake uninstall' (or
 building the "uninstall" target in the Visual Studio IDE) will uninstall the
 viewer.
-
-To install and uninstall the TurboVNC Server, run 'make xserver-install' and
-'make xserver-uninstall', respectively.
 
 If you don't specify CMAKE_INSTALL_PREFIX, then the default is
 c:\Program Files\TurboVNC on Windows and /opt/TurboVNC on Unix.

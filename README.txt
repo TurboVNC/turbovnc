@@ -64,7 +64,7 @@ The Windows version of TurboVNC contains the following programs:
     putty - an open-source SSH client, which is bundled with vncviewer to
             simplify making secure connections to TurboVNC servers
 
-The Windows version of TurboVNC should work on Windows 2000 and later.
+The Windows version of TurboVNC should work with Windows 2000 and later.
 
 
 Unix/Linux-Specific (not Mac)
