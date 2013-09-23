@@ -70,7 +70,8 @@ Mac/Java
 
 -- JDK or OpenJDK 1.5 or later (1.6 or later recommended)
    * On OS X 10.5 and later, install the Java Developer Package, which can
-     be downloaded from http://connect.apple.com
+     be downloaded from http://developer.apple.com/downloads (Apple ID
+     required)
    * For systems that do not provide a JDK, download the Oracle Java
      Development Kit from http://www.java.com
 
