@@ -19,14 +19,14 @@ TurboVNC with other VNC flavors.
 		TightVNC JPEG Quality Levels :: {:}
 		|| JPEG quality level    || 0 || 1 || 2 || 3 || 4 || 5 || 6 || 7 || 8 || 9 ||
 		| Actual JPEG quality    |  5 | 10 | 15 | 25 | 37 | 50 | 60 | 70 | 75 | 80 |
-		| Actual YUV subsampling | 2X | 2X | 2X | 2X | 2X | 2X | 2X | 2X | 2X | 2X |
+		| Actual chrominance subsampling | 2X | 2X | 2X | 2X | 2X | 2X | 2X | 2X | 2X | 2X |
 		#OPT: hiCol=first
 
 		{anchor: TigerVNC_JPEG_Qual}
 		TigerVNC JPEG Quality Levels :: {:}
 		|| JPEG quality level         ||  0 || 1 || 2 || 3 || 4 || 5 || 6 || 7 || 8 ||  9 ||
 		| Actual JPEG quality         |  15 | 29 | 41 | 42 | 62 | 77 | 79 | 86 | 92 | 100 |
-		| Actual YUV subsampling      |  4X | 4X | 4X | 2X | 2X | 2X | 1X | 1X | 1X |  1X |
+		| Actual chrominance subsampling |  4X | 4X | 4X | 2X | 2X | 2X | 1X | 1X | 1X |  1X |
 		| Average compression ratio * | 100 | 80 | 70 | 60 | 50 | 40 | 30 | 25 | 20 |  10 |
 		#OPT: hiCol=first
 
