@@ -38,6 +38,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 import java.io.*;
+import java.lang.Exception;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import javax.swing.*;
@@ -1343,7 +1344,13 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   public void writeKeyEvent(int keysym, boolean down) {
     if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
       return;
-    writer().writeKeyEvent(keysym, down);
+    try {
+      writer().writeKeyEvent(keysym, down);
+    } catch (Exception e) {
+      if (!shuttingDown) {
+        System.out.println("Error writing key event: " + e.getMessage());
+      }
+    }
   }
 
   // KeyEvent.getKeyModifiersText() is unfortunately broken on some platforms.
@@ -1664,7 +1671,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     if ((lFakeModifiers & Event.CTRL_MASK) != 0) {
       vlog.debug("Fake L Ctrl raised");
       writeKeyEvent(Keysyms.Control_L, false);
-    }	
+    }
     if ((lFakeModifiers & Event.ALT_MASK) != 0) {
       vlog.debug("Fake L Alt raised");
       writeKeyEvent(Keysyms.Alt_L, false);
@@ -1672,7 +1679,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     if ((rFakeModifiers & Event.CTRL_MASK) != 0) {
       vlog.debug("Fake R Ctrl raised");
       writeKeyEvent(Keysyms.Control_R, false);
-    }	
+    }
     if ((rFakeModifiers & Event.ALT_MASK) != 0) {
       vlog.debug("Fake R Alt raised");
       writeKeyEvent(Keysyms.Alt_R, false);
@@ -1726,7 +1733,13 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       ev.translatePoint(-dx, -dy);
     }
 
-    writer().writePointerEvent(new Point(ev.getX(), ev.getY()), buttonMask);
+    try {
+      writer().writePointerEvent(new Point(ev.getX(), ev.getY()), buttonMask);
+    } catch (Exception e) {
+      if (!shuttingDown) {
+        System.out.println("Error writing pointer event: " + e.getMessage());
+      }
+    }
   }
 
 
@@ -1748,11 +1761,16 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     for (int i = 0; i < Math.abs(clicks); i++) {
       x = ev.getX();
       y = ev.getY();
-      writer().writePointerEvent(new Point(x, y), buttonMask);
-      buttonMask = 0;
-      writer().writePointerEvent(new Point(x, y), buttonMask);
+      try {
+        writer().writePointerEvent(new Point(x, y), buttonMask);
+        buttonMask = 0;
+        writer().writePointerEvent(new Point(x, y), buttonMask);
+      } catch (Exception e) {
+        if (!shuttingDown) {
+          System.out.println("Error writing wheel event: " + e.getMessage());
+        }
+      }
     }
-
   }
 
 
