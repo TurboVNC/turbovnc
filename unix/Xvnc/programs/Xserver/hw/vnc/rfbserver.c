@@ -120,7 +120,7 @@ alrCallback(OsTimerPtr timer, CARD64 time, pointer arg)
     int tightCompressLevelSave, tightQualityLevelSave, copyDXSave, copyDYSave,
         tightSubsampLevelSave;
 
-    if (!cl->firstUpdate && REGION_NOTEMPTY(pScreen, &cl->lossyRegion) &&
+    if (REGION_NOTEMPTY(pScreen, &cl->lossyRegion) &&
         (!putImageOnly || cl->alrTrigger)) {
 
         tightCompressLevelSave = cl->tightCompressLevel;
@@ -378,8 +378,6 @@ rfbNewClient(sock)
         int combine = atoi(env);
         if (combine > 0 && combine <= 65000) rfbCombineRect = combine;
     }
-
-    cl->firstUpdate = TRUE;
 
     if (rfbAutoLosslessRefresh > 0.0) {
         REGION_INIT(pScreen, &cl->lossyRegion, NullBox, 0);
@@ -1695,13 +1693,12 @@ rfbSendFramebufferUpdate(cl)
     }
 
     if (rfbAutoLosslessRefresh > 0.0 &&
-        (!putImageOnly || cl->putImageTrigger || cl->firstUpdate)) {
+        (!putImageOnly || cl->putImageTrigger)) {
         cl->alrTimer = TimerSet(cl->alrTimer, 0,
             (CARD64)(rfbAutoLosslessRefresh * 1000.0), alrCallback, cl);
         cl->alrTrigger = TRUE;
         cl->putImageTrigger = FALSE;
     }
-    if (cl->firstUpdate) cl->firstUpdate = FALSE;
 
     rfbUncorkSock(cl->sock);
     return TRUE;

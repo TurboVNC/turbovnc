@@ -22,6 +22,13 @@ The libjpeg-turbo JNI libraries are now deployed with the Java TurboVNC Viewer
 on Windows, so it is no longer necessary to install the libjpeg-turbo SDK on
 Windows platforms in order to get accelerated JPEG decompression.
 -------------------------------------------------------------------------------
+[5]
+Fixed an issue whereby, if the automatic lossless refresh feature was enabled
+in the server, the first framebuffer update to a particular client would always
+trigger an ALR, regardless of whether the update was in response to an
+"ALR-eligible" X function (only PutImage operations are ALR-eligible unless
+TVNC_ALRALL has been set to 1.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
