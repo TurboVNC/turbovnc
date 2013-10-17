@@ -763,8 +763,8 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   static StringParameter subsampling
   = new StringParameter("Subsampling",
   "When compressing an image using JPEG, the RGB pixels are first converted " +
-  "to the YUV colorspace, a colorspace in which each pixel is represented as a " +
-  "brightness (Y, or \"luminance\") value and a pair of color (U & V, or " +
+  "to the YCbCr colorspace, a colorspace in which each pixel is represented as a " +
+  "brightness (Y, or \"luminance\") value and a pair of color (Cb & Cr, or " +
   "\"chrominance\") values.  After this colorspace conversion, chrominance " +
   "subsampling can be used to discard some of the chrominance components in " +
   "order to save bandwidth.  1X subsampling retains the chrominance components " +
