@@ -29,6 +29,14 @@ trigger an ALR, regardless of whether the update was in response to an
 "ALR-eligible" X function (only PutImage operations are ALR-eligible unless
 TVNC_ALRALL has been set to 1.)
 -------------------------------------------------------------------------------
+[6]
+The Java TurboVNC Viewer, when run as an applet, can now be displayed to an
+embedded frame in a web page rather than a dedicated window.  This restores a
+feature of the TurboVNC 1.1 Java viewer that was lost in 1.2.  Full-screen
+mode, scaling, and the toolbar do not work when the viewer is run as an
+embedded applet.
+-------------------------------------------------------------------------------
+
 
 
 ===============================================================================

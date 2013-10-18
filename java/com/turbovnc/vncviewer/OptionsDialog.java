@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2013 Brian P. Hinz
+ * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -231,15 +231,25 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     scalingFactor = new JComboBox(scalingFactors);
     scalingFactor.setEditable(true);
     scalingFactor.addItemListener(this);
+    if (VncViewer.embed.getValue()) {
+      scalingFactor.setEnabled(false);
+    }
 
     fullScreen = new JCheckBox("Full-screen mode");
     fullScreen.addItemListener(this);
+    if (VncViewer.embed.getValue()) {
+      fullScreen.setEnabled(false);
+    }
 
     Object[] spanOptions = {
       "Primary monitor only", "All monitors", "Automatic" };
     JLabel spanLabel = new JLabel("Span mode:");
     span = new JComboBox(spanOptions);
     span.addItemListener(this);
+    if (VncViewer.embed.getValue()) {
+      spanLabel.setEnabled(false);
+      span.setEnabled(false);
+    }
 
     shared = new JCheckBox("Request shared session");
     shared.addItemListener(this);

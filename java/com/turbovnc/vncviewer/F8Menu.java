@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * Copyright (C) 2011 Brian P. Hinz
+ * Copyright (C) 2011, 2013 Brian P. Hinz
  * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -48,12 +48,14 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     losslessRefresh = addMenuItem("Request Lossless Refresh   (Ctrl-Alt-Shift-L)", KeyEvent.VK_L);
     losslessRefresh.setDisplayedMnemonicIndex(8);
     addSeparator();
-    fullScreen = new JCheckBoxMenuItem("Full Screen   (Ctrl-Alt-Shift-F)");
-    fullScreen.setMnemonic(KeyEvent.VK_F);
-    fullScreen.setSelected(cc.opts.fullScreen);
-    fullScreen.addActionListener(this);
-    add(fullScreen);
-    defaultSize = addMenuItem("Default Window Size/Position   (Ctrl-Alt-Shift-Z)", KeyEvent.VK_Z);
+    if (!VncViewer.embed.getValue()) {
+      fullScreen = new JCheckBoxMenuItem("Full Screen   (Ctrl-Alt-Shift-F)");
+      fullScreen.setMnemonic(KeyEvent.VK_F);
+      fullScreen.setSelected(cc.opts.fullScreen);
+      fullScreen.addActionListener(this);
+      add(fullScreen);
+      defaultSize = addMenuItem("Default Window Size/Position   (Ctrl-Alt-Shift-Z)", KeyEvent.VK_Z);
+    }
     showToolbar = new JCheckBoxMenuItem("Show Toolbar   (Ctrl-Alt-Shift-T)");
     showToolbar.setMnemonic(KeyEvent.VK_T);
     showToolbar.setSelected(cc.showToolbar);
@@ -100,6 +102,8 @@ public class F8Menu extends JPopupMenu implements ActionListener {
   }
 
   boolean actionMatch(ActionEvent ev, JMenuItem item) {
+    if (item == null)
+      return false;
     return ev.getActionCommand().equals(item.getActionCommand());
   }
 

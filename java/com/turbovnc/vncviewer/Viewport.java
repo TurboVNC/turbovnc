@@ -56,6 +56,18 @@ public class Viewport extends JFrame {
     }
     tb = new Toolbar(cc);
     add(tb, BorderLayout.PAGE_START);
+    if (VncViewer.embed.getValue()) {
+      cc.viewer.addFocusListener(new FocusAdapter() {
+        public void focusGained(FocusEvent e) {
+          if (cc.desktop.isAncestorOf(cc.viewer))
+            cc.desktop.requestFocus();
+        }
+        public void focusLost(FocusEvent e) {
+          cc.releaseModifiers();
+        }
+      });
+      return;
+    }
     getContentPane().add(sp);
     if (VncViewer.os.startsWith("mac os x")) {
       macMenu = new MacMenuBar(cc);
@@ -214,10 +226,17 @@ public class Viewport extends JFrame {
   }
 
   public void setChild(DesktopWindow child) {
-    sp.getViewport().setView(child);
+    if (VncViewer.embed.getValue()) {
+      cc.viewer.add(child);
+      cc.desktop.requestFocus();
+    } else {
+      sp.getViewport().setView(child);
+    }
   }
 
   public void setGeometry(int x, int y, int w, int h, boolean pack) {
+    if (VncViewer.embed.getValue())
+      return;
     if (pack) {
       pack();
       vlog.debug("Set geometry to " + x + ", " + y + " (pack)");

@@ -45,7 +45,7 @@ import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 import com.turbovnc.network.*;
 
-public class VncViewer extends java.applet.Applet implements Runnable {
+public class VncViewer extends javax.swing.JApplet implements Runnable {
   public static final String PRODUCT_NAME = "TurboVNC Viewer";
   public static String copyrightYear = null;
   public static String copyright = null;
@@ -366,6 +366,12 @@ public class VncViewer extends java.applet.Applet implements Runnable {
 
   public void init() {
     vlog.debug("init called");
+    Container parent = getParent();
+    while (!parent.isFocusCycleRoot()) {
+      parent = parent.getParent();
+    }
+    parent.setFocusable(false);
+    parent.setFocusTraversalKeysEnabled(false);
     setLookAndFeel();
     setBackground(Color.white);
   }
@@ -376,6 +382,12 @@ public class VncViewer extends java.applet.Applet implements Runnable {
     if (applet && nViewers == 0) {
       alwaysShowConnectionDialog.setParam(true);
       Configuration.readAppletParams(this);
+      if (embed.getValue()) {
+        fullScreen.setParam(false);
+        noNewConn.setParam(true);
+        scalingFactor.setParam("100");
+        showToolbar.setParam(false);
+      }
       String str = getParameter("LogLevel");
       if (str != null)
         LogWriter.setLogParams(str);
@@ -714,6 +726,13 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   static BoolParameter showToolbar
   = new BoolParameter("Toolbar",
   "Show the toolbar by default.", true);
+
+  static BoolParameter embed
+  = new BoolParameter("Embed",
+  "If the TurboVNC Viewer is being run as an applet, display its output to " +
+  "an embedded frame in the browser window rather than to a dedicated " +
+  "window.  This also has the effect of setting FullScreen=0, " +
+  "Toolbar=0, NoNewConn=1, and Scale=100.", false);
 
   static StringParameter menuKey
   = new StringParameter("MenuKey",

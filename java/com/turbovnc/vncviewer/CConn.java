@@ -674,7 +674,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     viewport.setUndecorated(opts.fullScreen);
     desktop.setViewport(viewport);
     reconfigureViewport(restore);
-    if ((cp.width > 0) && (cp.height > 0))
+    if ((cp.width > 0) && (cp.height > 0) && !VncViewer.embed.getValue())
       viewport.setVisible(true);
     if (fullScreen && viewport.lionFSSupported()) {
       opts.fullScreen = fullScreen;
