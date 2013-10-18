@@ -95,7 +95,7 @@ If adding a user to the user ACL, then the \fB\-v\fR option specifies that the
 user should be granted view-only access instead of full control.
 .TP
 \fB\-display\fR \fIVNC-display\fR
-This option specifies the name of the VNC server session to use when
+This option specifies the X display of the VNC server session to use when
 setting/clearing one-time passwords or adding users to/removing users from the
 ACL.  If \fIVNC-display\fR is not specified, then it defaults to the value of
 the \fBDISPLAY\fR environment variable.
