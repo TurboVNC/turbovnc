@@ -7,13 +7,13 @@
 .\" Copyright (C) 2000, 2001 Red Hat, Inc.
 .\" Copyright (C) 2001, 2002 Constantin Kaplinsky
 .\" Copyright (C) 2005-2006 Sun Microsystems, Inc.
-.\" Copyright (C) 2010-2012 D. R. Commander
+.\" Copyright (C) 2010-2013 D. R. Commander
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncserver 1 "August 2012" "" "TurboVNC"
+.TH vncserver 1 "October 2013" "" "TurboVNC"
 .SH NAME
 vncserver \- a wrapper to launch an X server for VNC.
 .SH SYNOPSIS
@@ -148,6 +148,10 @@ Xvnc.  This is useful in conjunction with the \fB-fg\fR option, since it
 allows for running a full-screen application (such as a game or a
 virtualization solution) in TurboVNC without a window manager and causes the
 TurboVNC session to terminate whenever the application exits.
+.TP
+\fB\-log\fR  \fIfile\fR
+Redirect the output of Xvnc to \fIfile\fR, rather than to
+~/.vnc/{hostname}{display}.log.
 .TP
 \fB\-kill\fR \fB:\fR\fIdisplay\fR
 Stops the VNC server which is currently running on the specified display.

@@ -33,6 +33,10 @@ Pressing F8 (or the chosen menu key) twice in the Java TurboVNC Viewer now
 sends that keystroke to the VNC server.  This emulates the behavior of the X11
 viewer.
 -------------------------------------------------------------------------------
+[8]
+Added an option to vncserver that allows the output of Xvnc to be redirected
+to an arbitrary file.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
