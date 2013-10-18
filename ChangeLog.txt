@@ -36,7 +36,14 @@ feature of the TurboVNC 1.1 Java viewer that was lost in 1.2.  Full-screen
 mode, scaling, and the toolbar do not work when the viewer is run as an
 embedded applet.
 -------------------------------------------------------------------------------
-
+[7]
+vncconnect now uses the VNC X extension to establish a reverse connection,
+rather than setting a root window property on the VNC X server.  This makes
+TurboVNC's implementation of vncconnect compatible with RealVNC and TigerVNC
+servers, and the return status of vncconnect now reflects whether the reverse
+connection was successfully made.  vncconnect also now has a -disconnect
+option, which can be used to disconnect all listening viewers.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

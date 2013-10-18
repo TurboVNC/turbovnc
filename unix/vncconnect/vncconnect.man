@@ -5,22 +5,44 @@
 .\" Copyright (C) 2000,2001 Red Hat, Inc.
 .\" Copyright (C) 2001-2003 Constantin Kaplinsky
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
-.\" Copyright (C) 2010 D. R. Commander.
+.\" Copyright (C) 2010, 2013 D. R. Commander.
 .\"
 .\" You may distribute under the terms of the GNU General Public
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH vncconnect 1 "June 2010" "" "TurboVNC"
+.TH vncconnect 1 "October 2013" "" "TurboVNC"
 .SH NAME
-vncconnect \- connect a VNC server to a VNC viewer
+vncconnect \- connect a VNC server to a listening VNC viewer
 .SH SYNOPSIS
 .nf
-\fBvncconnect\fR [\-display \fIXvnc-display\fR] \fIhost\fR[:\fIport\fR]
+\fBvncconnect\fR [\-display \fIVNC-display\fR] [\-disconnect] \fIhost\fR[:\fIport\fR]
 .fi
 .SH DESCRIPTION
-Tells \fBXvnc\fR(1) to connect to a listening VNC viewer on the given
-host and port.
+\fBvncconnect\fR can be used to initiate a "reverse connection" between a
+VNC server session and a VNC viewer that has been started in "listen mode."
+The viewer should be running on the machine specified by \fIhost\fR and
+listening on the port specified by \fIport\fR (if \fIport\fR is not specified,
+then the default of 5500 is used.)
+.SH OPTIONS
+.TP
+\fB\-display\fR \fIVNC-display\fR
+The X display of the VNC server session that you wish to connect to a listening
+viewer (default: read from the \fBDISPLAY\fR environment variable)
+.TP
+\fB\-disconnect\fR
+Disconnect all listening viewers from a particular VNC server session
+.SH EXIT CODES
+When used to initiate a reverse connection, \fBvncconnect\fR will exit with
+status 0 if the connection was successful.  It will exit with status 1 if the
+connection failed (which would be the case if there was no listening viewer
+running on the specified host and port, if a firewall prevented the
+connection, or if reverse connections had been disallowed in the TurboVNC
+Server's authentication configuration file.)
+
+When used to disconnect reverse connections, \fBvncconnect\fR will exit with
+status 0 if one or more listening viewers were successfully disconnected.
+Otherwise, it will exit with status 1.
 .SH SEE ALSO
 \fBvncviewer\fR(1), \fBvncserver\fR(1), \fBXvnc\fR(1), \fBvncpasswd\fR(1)
 .SH AUTHORS

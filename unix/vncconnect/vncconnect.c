@@ -1,5 +1,20 @@
-/*
- * vncconnect.c
+/* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+ * Copyright (C) 2013 D. R. Commander.  All Rights Reserved.
+ * 
+ * This is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this software; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
+ * USA.
  */
 
 #include <stdio.h>
@@ -14,10 +29,13 @@ static char *programName;
 
 static void usage()
 {
-  fprintf(stderr, "usage: %s [-display Xvnc-display] host[:port]\n"
-          "Tells Xvnc to connect to a listening VNC viewer on the given"
-          " host and port\n",
+  fprintf(stderr, "\nUSAGE: %s [-display <d>] [-disconnect] host[:port]\n\n",
           programName);
+  fprintf(stderr, "-display <d> = specify the X display of the VNC server session that you wish to\n"
+                  "               connect to a listening viewer (for instance, :1).  If this is\n"
+                  "               not specified, then the value of the DISPLAY environment\n"
+                  "               variable is used.\n");
+  fprintf(stderr, "-disconnect = disconnect all listening viewers\n\n");
   exit(1);
 }
 
@@ -26,7 +44,7 @@ int main(int argc, char **argv)
 {
   char *displayname = NULL;
   Display *dpy;
-  int i;
+  int i, disconnect = 0, status = 0;
   Atom prop;
 
   programName = argv[0];
@@ -35,17 +53,16 @@ int main(int argc, char **argv)
     if (argv[i][0] != '-')
       break;
 
-    switch (argv[i][1]) {
-      case 'd':             /* -display dpyname */
-        if (++i >= argc) usage();
-        displayname = argv[i];
-        break;
-      default:
-        usage();
+    if (!strncmp(argv[i], "-disp", 5)) {
+      if (++i >= argc) usage();
+      displayname = argv[i];
+    } else if (!strncmp(argv[i], "-disc", 5)) {
+      disconnect = 1;
     }
+    else usage();
   }
 
-  if (argc != i+1)
+  if (argc != i+1 && !disconnect)
     usage();
 
   if (!(dpy = XOpenDisplay(displayname))) {
@@ -54,13 +71,19 @@ int main(int argc, char **argv)
     exit(1);
   }
 
-  prop = XInternAtom(dpy, "VNC_CONNECT", False);
-
-  XChangeProperty(dpy, DefaultRootWindow(dpy), prop, XA_STRING, 8,
-                  PropModeReplace, (unsigned char *)argv[i],
-                  strlen(argv[i]));
+  if (disconnect) {
+    if (!XVncExtConnect(dpy, "")) {
+      fprintf(stderr, "Could not disconnect listening viewers (perhaps there are none)\n");
+      status = 1;
+    }
+  } else {
+    if (!XVncExtConnect(dpy, argv[i])) {
+      fprintf(stderr, "Reverse connection to %s failed\n", argv[i]);
+      status = 1;
+    }
+  }
 
   XCloseDisplay(dpy);
 
-  return 0;
+  return status;
 }

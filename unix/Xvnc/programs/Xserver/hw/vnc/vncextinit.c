@@ -1,6 +1,5 @@
-/* Copyright (C) 2011 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2011, 2013 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
- * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -272,6 +271,63 @@ static int SProcVncExtSelectInput(ClientPtr client)
   return ProcVncExtSelectInput(client);
 }
 
+static int ProcVncExtConnect(ClientPtr client)
+{
+  char *str;
+  REQUEST(xVncExtConnectReq);
+  REQUEST_FIXED_SIZE(xVncExtConnectReq, stuff->strLen);
+  str = (char *)xalloc(stuff->strLen + 1);
+  if (!str)
+    FatalError("ProcVncExtConnect(): Memory allocation failure\n");
+  strncpy(str, (char*)&stuff[1], stuff->strLen);
+  str[stuff->strLen] = 0;
+
+  xVncExtConnectReply rep;
+  rep.success = 0;
+  if (stuff->strLen == 0) {
+    rfbClientPtr cl, prev;
+    for (prev = NULL, cl = rfbClientHead; cl; prev = cl, cl = cl->next) {
+      if (cl->reverseConnection) {
+        rfbCloseSock(cl->sock);
+        rep.success = 1;
+      }
+    }
+  } else {
+    int port = 5500, i;
+    for (i = 0; i < stuff->strLen; i++) {
+      if (str[i] == ':') {
+        port = atoi(&str[i+1]);
+        str[i] = 0;
+        break;
+      }
+    }
+    if (!rfbReverseConnection(str, port))
+      rfbLog("Could not initiate reverse connection to %s:%d\n", str, port); 
+    else rep.success = 1;
+  }
+
+  rep.type = X_Reply;
+  rep.length = 0;
+  rep.sequenceNumber = client->sequence;
+  if (client->swapped) {
+    int n;
+    swaps(&rep.sequenceNumber, n);
+    swapl(&rep.length, n);
+  }
+  WriteToClient(client, sizeof(xVncExtConnectReply), (char *)&rep);
+  xfree (str);
+  return (client->noClientException);
+}
+
+static int SProcVncExtConnect(ClientPtr client)
+{
+  REQUEST(xVncExtConnectReq);
+  register char n;
+  swaps(&stuff->length, n);
+  REQUEST_AT_LEAST_SIZE(xVncExtConnectReq);
+  return ProcVncExtConnect(client);
+}
+
 static int ProcVncExtDispatch(ClientPtr client)
 {
   REQUEST(xReq);
@@ -282,6 +338,8 @@ static int ProcVncExtDispatch(ClientPtr client)
     return ProcVncExtGetClientCutText(client);
   case X_VncExtSelectInput:
     return ProcVncExtSelectInput(client);
+  case X_VncExtConnect:
+    return ProcVncExtConnect(client);
   default:
     return BadRequest;
   }
@@ -297,6 +355,8 @@ static int SProcVncExtDispatch(ClientPtr client)
     return SProcVncExtGetClientCutText(client);
   case X_VncExtSelectInput:
     return SProcVncExtSelectInput(client);
+  case X_VncExtConnect:
+    return SProcVncExtConnect(client);
   default:
     return BadRequest;
   }
