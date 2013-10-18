@@ -229,7 +229,8 @@ if (-f "/usr/lib/X11/rgb.txt") {
 &ParseOptions("-geometry",1,"-depth",1,"-pixelformat",1,"-name",1,"-kill",1,
               "-help",0,"-h",0,"--help",0,"-fg",0,"-list",0,"-fp",1,"-otp",0,
               "-novncauth",0,"-nootp",0,"-nopam",0,"-noauth",0,"-nohttp",0,
-              "-nohttpd",0,"-rfbauth",1,"-noxstartup",0,"-xstartup",1);
+              "-nohttpd",0,"-rfbauth",1,"-noxstartup",0,"-xstartup",1,
+              "-log",1);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -372,7 +373,11 @@ if ((@ARGV > 0) && ($ARGV[0] =~ /^:(\d+)$/)) {
 
 $vncPort = 5900 + $displayNumber;
 
-$desktopLog = "$vncUserDir/$host:$displayNumber.log";
+if ($opt{'-log'}) {
+    $desktopLog = $opt{'-log'};
+} else {
+    $desktopLog = "$vncUserDir/$host:$displayNumber.log";
+}
 unlink($desktopLog);
 
 if ($opt{'-name'}) {
@@ -748,6 +753,7 @@ sub Usage
         "        -fg\n".
         "        -noxstartup\n".
         "        -xstartup <SCRIPT>\n".
+        "        -log <FILE>\n".
         "\n".
         "See vncserver and Xvnc manual pages for more information.\n");
 }
