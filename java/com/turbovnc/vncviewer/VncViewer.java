@@ -60,7 +60,6 @@ public class VncViewer extends javax.swing.JApplet implements Runnable {
   public static final Image frameImage = frameIcon.getImage();
   public static final ImageIcon logoIcon = 
     new ImageIcon(VncViewer.class.getResource("turbovnc.png"));
-  public static final Image logoImage = logoIcon.getImage();
 
   void setVersion() {
     if (version == null || build == null || copyrightYear == null ||
@@ -425,16 +424,6 @@ public class VncViewer extends javax.swing.JApplet implements Runnable {
     } else {
       System.exit(n);
     }
-  }
-
-  public void paint(Graphics g) {
-    g.drawImage(logoImage, 0, 0, this);
-    int h = logoImage.getHeight(this) + 20;
-    g.drawString(PRODUCT_NAME + " v" + version + " (" + build + ")", 0, h);
-    h += g.getFontMetrics().getHeight();
-    g.drawString("Copyright (C) " + copyrightYear + " " + copyright, 0, h);
-    h += g.getFontMetrics().getHeight();
-    g.drawString(url, 0, h);
   }
 
   void reportException(Exception e) {
