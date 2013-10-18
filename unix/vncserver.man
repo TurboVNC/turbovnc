@@ -33,7 +33,7 @@ vncserver \- a wrapper to launch an X server for VNC.
 \fBvncserver\fR is a wrapper script for \fBXvnc\fR, the VNC (Virtual Network
 Computing) X server. Xvnc provides all of the capabilities of a standard X
 server, but it does not connect to a physical display. Instead, \fBXvnc\fR
-creates a virtual X display which you can view or control remotely using a VNC
+creates a virtual X display that you can view or control remotely using a VNC
 viewer.
 .SH OPTIONS
 You can add \fBXvnc\fR options to the \fBvncserver\fR command line. They will be
@@ -41,7 +41,7 @@ passed through to Xvnc without modification. The options provided by
 \fBvncserver\fR itself are as follows:
 .TP
 \fB:\fR\fIdisplay\fR
-The X display number which Xvnc should occupy. If omitted, the next free display number
+The X display number that Xvnc should occupy. If omitted, the next free display number
 is used.
 .TP
 \fB\-geometry\fR \fIwidth\fR\fBx\fR\fIheight\fR
@@ -154,7 +154,7 @@ Redirect the output of Xvnc to \fIfile\fR, rather than to
 ~/.vnc/{hostname}{display}.log.
 .TP
 \fB\-kill\fR \fB:\fR\fIdisplay\fR
-Stops the VNC server which is currently running on the specified display.
+Stops the VNC server that is currently running on the specified display.
 .TP
 \fB\-list\fR
 Lists the display numbers and process ID's of all VNC servers that are
