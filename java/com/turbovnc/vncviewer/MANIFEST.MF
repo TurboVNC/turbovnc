@@ -1,2 +1,5 @@
 Manifest-Version: 1.0
 Main-Class: com.turbovnc.vncviewer.VncViewer
+Application-Name: TurboVNC Viewer
+Permissions: all-permissions
+Codebase: *
