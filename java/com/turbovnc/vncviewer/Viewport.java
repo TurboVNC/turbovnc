@@ -53,6 +53,14 @@ public class Viewport extends JFrame {
              "unitScrollLeft");
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, ctrlAltShiftMask),
              "unitScrollRight");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, ctrlAltShiftMask),
+             "scrollUp");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, ctrlAltShiftMask),
+             "scrollDown");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, ctrlAltShiftMask),
+             "scrollLeft");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_END, ctrlAltShiftMask),
+             "scrollRight");
     }
     tb = new Toolbar(cc);
     add(tb, BorderLayout.PAGE_START);
