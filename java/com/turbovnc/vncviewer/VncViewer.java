@@ -31,6 +31,7 @@
 package com.turbovnc.vncviewer;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -45,7 +46,8 @@ import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 import com.turbovnc.network.*;
 
-public class VncViewer extends javax.swing.JApplet implements Runnable {
+public class VncViewer extends javax.swing.JApplet
+  implements Runnable, ActionListener {
   public static final String PRODUCT_NAME = "TurboVNC Viewer";
   public static String copyrightYear = null;
   public static String copyright = null;
@@ -417,13 +419,19 @@ public class VncViewer extends javax.swing.JApplet implements Runnable {
 
   public void exit(int n) {
     nViewers--;
-    if (nViewers > 0)
+    if (nViewers > 0 || embed.getValue())
       return;
     if (applet) {
       destroy();
     } else {
       System.exit(n);
     }
+  }
+
+  // If "Reconnect" button is pressed
+  public void actionPerformed(ActionEvent e) {
+    getContentPane().removeAll();
+    start();
   }
 
   void reportException(Exception e) {
@@ -442,7 +450,25 @@ public class VncViewer extends javax.swing.JApplet implements Runnable {
       title = "TurboVNC Viewer : Unexpected Error";
       e.printStackTrace();
     }
-    JOptionPane.showMessageDialog(null, msg, title, msgType);
+    if (embed.getValue()) {
+      getContentPane().removeAll();
+      JLabel label = new JLabel("<html><center><b>" + title + "</b><p><i>" +
+                                msg + "</i></center></html>", JLabel.CENTER);
+      label.setFont(new Font("Helvetica", Font.PLAIN, 24));
+      label.setMaximumSize(new Dimension(getSize().width, 100));
+      label.setVerticalAlignment(JLabel.CENTER);
+      label.setAlignmentX(Component.CENTER_ALIGNMENT);
+      JButton button = new JButton("Reconnect");
+      button.addActionListener(this);
+      button.setMaximumSize(new Dimension(200, 30));
+      button.setAlignmentX(Component.CENTER_ALIGNMENT);
+      setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+      add(label);
+      add(button);
+      validate();
+      repaint();
+    } else
+      JOptionPane.showMessageDialog(null, msg, title, msgType);
   }
 
   public void run() {
@@ -533,6 +559,8 @@ public class VncViewer extends javax.swing.JApplet implements Runnable {
           reportException(e);
           exitStatus = 1;
           if (cc != null) cc.deleteWindow();
+        } else if (cc.shuttingDown && embed.getValue()) {
+          reportException(new WarningException("Connection closed"));
         } else {
           cc = null;
         }
