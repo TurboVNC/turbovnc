@@ -134,11 +134,16 @@ XPFBLIBS = dix/LibraryTargetName(xpstubs)
       RENDERDIR = render
       RENDERLIB = $(RENDERDIR)/librender.a
 #endif
+#if BuildRandR
+      RANDRDIR = randr
+      RANDRLIB = $(RANDRDIR)/librandr.a
+#endif
       OTHEREXTS = Xext/LibraryTargetName(ext) $(XKBEXT) \
                   $(XIEEXT) $(LBXEXT) $(DBEEXT) $(RECORDEXT) $(SITEEXTS)
         EXTDIRS = Xext $(XKBDIR) $(XIDIR) $(XIEDIR) $(PEXDIR) $(GLXDIR) \
-                  $(LBXDIRS) $(DBEDIR) $(RECORDDIR) $(SITEEXTDIRS) $(RENDERDIR)
-     EXTENSIONS = $(OTHEREXTS) $(PEXLIBS) $(GLXLIB) $(RENDERLIB)
+                  $(LBXDIRS) $(DBEDIR) $(RECORDDIR) $(SITEEXTDIRS) \
+                  $(RANDRDIR) $(RENDERDIR)
+     EXTENSIONS = $(OTHEREXTS) $(PEXLIBS) $(GLXLIB) $(RANDRLIB) $(RENDERLIB)
          XAULIB = $(XAUTHSRC)/LibraryTargetName(Xau)
        XDMCPLIB = $(XDMCPLIBSRC)/LibraryTargetName(Xdmcp)
 #if BuildLBX || GzipFontCompression

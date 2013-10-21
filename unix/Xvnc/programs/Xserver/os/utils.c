@@ -147,6 +147,9 @@ Bool noTestExtensions;
 #ifdef RENDER
 Bool noRenderExtension = FALSE;
 #endif
+#ifdef RANDR
+Bool noRRExtension = FALSE;
+#endif
 
 int auditTrailLevel = 1;
 
