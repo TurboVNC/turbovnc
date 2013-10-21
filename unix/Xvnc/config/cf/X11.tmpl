@@ -229,6 +229,9 @@ XCOMM $XFree86: xc/config/cf/X11.tmpl,v 1.239 2003/12/12 03:20:32 dawes Exp $
 #ifndef BuildRender
 #define BuildRender		YES
 #endif
+#ifndef BuildRandR
+#define BuildRandR		YES
+#endif
 #ifndef BuildFreetype2Library
 #define BuildFreetype2Library	YES
 #endif
@@ -550,6 +553,14 @@ XCOMM $XFree86: xc/config/cf/X11.tmpl,v 1.239 2003/12/12 03:20:32 dawes Exp $
 #endif
 #endif
 
+#ifndef RandRDefines
+#if BuildRandR
+#define RandRDefines -DRANDR
+#else
+#define RandRDefines /**/
+#endif
+#endif
+
 #ifndef SitePervasiveExtensionDefines
 #define SitePervasiveExtensionDefines /**/
 #endif
@@ -557,8 +568,8 @@ XCOMM $XFree86: xc/config/cf/X11.tmpl,v 1.239 2003/12/12 03:20:32 dawes Exp $
 #define PervasiveExtensionDefines ShapeDefines XInputDefines XkbDefines \
 				  LbxDefines AppgroupDefines \
 				  XCSecurityDefines PervasiveDBEDefines \
-				  DPMSExtensionDefines \
-				  XprintDefines SitePervasiveExtensionDefines RenderDefines
+				  DPMSExtensionDefines XprintDefines \
+				  SitePervasiveExtensionDefines RenderDefines RandRDefines
 #endif
 #ifndef SiteExtensionDefines
 #define SiteExtensionDefines /**/

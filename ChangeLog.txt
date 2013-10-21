@@ -37,6 +37,12 @@ viewer.
 Added an option to vncserver that allows the output of Xvnc to be redirected
 to an arbitrary file.
 -------------------------------------------------------------------------------
+[9]
+Implemented the X RANDR extension in the TurboVNC Server.  The main purpose of
+this at the moment is to placate applications that check for the extension and
+refuse to start without it.  The extension currently can't be used to change
+the screen size (that feature will be in TurboVNC 1.3.)
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

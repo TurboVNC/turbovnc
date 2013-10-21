@@ -951,6 +951,11 @@ extern void WindowsRestructured(
 #endif
 );
 
+#ifdef RANDR
+void
+ScreenRestructured (ScreenPtr pScreen);
+#endif
+
 extern void ResetClientPrivates(
 #if NeedFunctionPrototypes
     void

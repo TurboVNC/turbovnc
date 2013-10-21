@@ -743,6 +743,10 @@ rfbScreenInit(index, pScreen, argc, argv)
 
     ret = fbCreateDefColormap(pScreen);
 
+#ifdef RANDR
+    miRandRInit(pScreen);
+#endif
+
     return ret;
 
 } /* end rfbScreenInit */

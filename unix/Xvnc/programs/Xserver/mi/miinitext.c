@@ -60,6 +60,9 @@ extern Bool noTestExtensions;
 #ifdef XKB
 extern Bool noXkbExtension;
 #endif
+#ifdef RANDR
+extern Bool noRRExtension;
+#endif
 #ifdef RENDER
 extern Bool noRenderExtension;
 #endif
@@ -171,6 +174,9 @@ InitExtension GlxExtensionInitPtr = NULL;
 #endif
 #ifdef RENDER
 extern void RenderExtensionInit(INITARGS);
+#endif
+#ifdef RANDR
+extern void RRExtensionInit(INITARGS);
 #endif
 extern void vncExtensionInit(INITARGS);
 
@@ -287,6 +293,9 @@ InitExtensions(argc, argv)
 #endif
 #ifdef RENDER
     if (!noRenderExtension) RenderExtensionInit();
+#endif
+#ifdef RANDR
+    if (!noRRExtension) RRExtensionInit();
 #endif
     vncExtensionInit();
 }
