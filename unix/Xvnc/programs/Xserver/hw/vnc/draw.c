@@ -744,7 +744,7 @@ rfbCopyArea (pSrc, pDst, pGC, srcx, srcy, w, h, dstx, dsty)
     rgn = (*pGC->ops->CopyArea) (pSrc, pDst, pGC, srcx, srcy, w, h,
                                  dstx, dsty);
 
-        SCHEDULE_FB_UPDATE(pDst->pScreen, prfb);
+    SCHEDULE_FB_UPDATE(pDst->pScreen, prfb);
 
     GC_OP_EPILOGUE(pGC);
 

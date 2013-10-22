@@ -174,8 +174,7 @@ ddxProcessArgument (argc, argv, i)
 {
     static Bool firstTime = TRUE;
 
-    if (firstTime)
-    {
+    if (firstTime) {
         rfbScreen.width  = RFB_DEFAULT_WIDTH;
         rfbScreen.height = RFB_DEFAULT_HEIGHT;
         rfbScreen.depth  = RFB_DEFAULT_DEPTH;
@@ -188,8 +187,7 @@ ddxProcessArgument (argc, argv, i)
         firstTime = FALSE;
     }
 
-    if (strcasecmp (argv[i], "-geometry") == 0)     /* -geometry WxH */
-    {
+    if (strcasecmp (argv[i], "-geometry") == 0) {   /* -geometry WxH */
         if (i + 1 >= argc) UseMsg();
         if (sscanf(argv[i + 1], "%dx%d",
                    &rfbScreen.width, &rfbScreen.height) != 2) {
@@ -199,8 +197,7 @@ ddxProcessArgument (argc, argv, i)
         return 2;
     }
 
-    if (strcasecmp (argv[i], "-depth") == 0)        /* -depth D */
-    {
+    if (strcasecmp (argv[i], "-depth") == 0) {      /* -depth D */
         if (i + 1 >= argc) UseMsg();
         rfbScreen.depth = atoi(argv[i + 1]);
         return 2;
@@ -519,7 +516,7 @@ InitOutput(screenInfo, argc, argv)
     VNC_CONNECT = MakeAtom("VNC_CONNECT", strlen("VNC_CONNECT"), TRUE);
 
     if (rfbOptOtpauth)
-            VNC_OTP = MakeAtom("VNC_OTP", strlen("VNC_OTP"), TRUE);
+        VNC_OTP = MakeAtom("VNC_OTP", strlen("VNC_OTP"), TRUE);
 
 #ifdef XVNC_AuthPAM
     VNC_ACL = MakeAtom("VNC_ACL", strlen("VNC_ACL"), TRUE);
@@ -591,7 +588,7 @@ rfbScreenInit(index, pScreen, argc, argv)
         defaultColorVisualClass = TrueColor;
 
     if (!miSetVisualTypes(prfb->depth, miGetDefaultVisualMask(prfb->depth), 8,
-                                                defaultColorVisualClass) )
+                          defaultColorVisualClass) )
         return FALSE;
 
     miSetPixmapDepths();
@@ -600,11 +597,11 @@ rfbScreenInit(index, pScreen, argc, argv)
     {
     case 8:
         ret = fbScreenInit(pScreen, pbits, prfb->width, prfb->height,
-                            dpix, dpiy, prfb->paddedWidthInBytes, 8);
+                           dpix, dpiy, prfb->paddedWidthInBytes, 8);
         break;
     case 16:
         ret = fbScreenInit(pScreen, pbits, prfb->width, prfb->height,
-                              dpix, dpiy, prfb->paddedWidthInBytes / 2, 16);
+                           dpix, dpiy, prfb->paddedWidthInBytes / 2, 16);
         if (prfb->depth == 15) {
             blueBits = 5; greenBits = 5; redBits = 5;
         } else {
@@ -613,7 +610,7 @@ rfbScreenInit(index, pScreen, argc, argv)
         break;
     case 32:
         ret = fbScreenInit(pScreen, pbits, prfb->width, prfb->height,
-                              dpix, dpiy, prfb->paddedWidthInBytes / 4, 32);
+                           dpix, dpiy, prfb->paddedWidthInBytes / 4, 32);
         blueBits = 8; greenBits = 8; redBits = 8;
         break;
     default:
@@ -629,10 +626,10 @@ rfbScreenInit(index, pScreen, argc, argv)
         if (strcasecmp(primaryOrder, "bgr") == 0) {
             if (bigEndian)
                 rfbLog("Framebuffer: XBGR %d/%d/%d/%d\n",
-                    xBits, blueBits, greenBits, redBits);
+                       xBits, blueBits, greenBits, redBits);
             else
                 rfbLog("Framebuffer: RGBX %d/%d/%d/%d\n",
-                    redBits, greenBits, blueBits, xBits);
+                       redBits, greenBits, blueBits, xBits);
             vis = pScreen->visuals + pScreen->numVisuals;
             while (--vis >= pScreen->visuals) {
                 if ((vis->class | DynamicClass) == DirectColor) {
@@ -647,10 +644,10 @@ rfbScreenInit(index, pScreen, argc, argv)
         } else {
             if (bigEndian)
                 rfbLog("Framebuffer: XRGB %d/%d/%d/%d\n",
-                    xBits, redBits, greenBits, blueBits);
+                       xBits, redBits, greenBits, blueBits);
             else
                 rfbLog("Framebuffer: BGRX %d/%d/%d/%d\n",
-                    blueBits, greenBits, redBits, xBits);
+                       blueBits, greenBits, redBits, xBits);
             vis = pScreen->visuals + pScreen->numVisuals;
             while (--vis >= pScreen->visuals) {
                 if ((vis->class | DynamicClass) == DirectColor) {
@@ -918,9 +915,9 @@ static Bool CheckDisplayNumber(int n)
 void
 rfbRootPropertyChange(PropertyPtr pProp)
 {
-    if ((pProp->propertyName == XA_CUT_BUFFER0) && (pProp->type == XA_STRING)
-        && (pProp->format == 8) && rfbSyncCutBuffer)
-    {
+    if ((pProp->propertyName == XA_CUT_BUFFER0) &&
+        (pProp->type == XA_STRING) && (pProp->format == 8) &&
+        rfbSyncCutBuffer) {
         char *str;
         str = (char *)xalloc(pProp->size + 1);
         if (!str)
@@ -932,11 +929,8 @@ rfbRootPropertyChange(PropertyPtr pProp)
         return;
     }
 
-    if (
-        !rfbAuthDisableRevCon &&
-        (pProp->propertyName == VNC_CONNECT) && (pProp->type == XA_STRING)
-            && (pProp->format == 8)
-    ) {
+    if (!rfbAuthDisableRevCon && (pProp->propertyName == VNC_CONNECT) &&
+        (pProp->type == XA_STRING) && (pProp->format == 8)) {
         rfbClientPtr cl;
         char *colonPos;
         int port = 5500;
@@ -954,11 +948,8 @@ rfbRootPropertyChange(PropertyPtr pProp)
         free(host);
     }
 
-    if (
-        rfbOptOtpauth &&
-        (pProp->propertyName == VNC_OTP) && (pProp->type == XA_STRING) &&
-        (pProp->format == 8)
-    ) {
+    if (rfbOptOtpauth && (pProp->propertyName == VNC_OTP) &&
+        (pProp->type == XA_STRING) && (pProp->format == 8)) {
         if (pProp->size == 0) {
             if (rfbAuthOTPValue != NULL) {
                 xfree(rfbAuthOTPValue);
@@ -966,7 +957,8 @@ rfbRootPropertyChange(PropertyPtr pProp)
                 rfbLog("One time password(s) disabled\n");
             }
 
-        } else if ((pProp->size == MAXPWLEN) || (pProp->size == (MAXPWLEN * 2))) {
+        } else if ((pProp->size == MAXPWLEN) ||
+                   (pProp->size == (MAXPWLEN * 2))) {
             if (rfbAuthOTPValue != NULL)
                 xfree(rfbAuthOTPValue);
 
@@ -981,8 +973,9 @@ rfbRootPropertyChange(PropertyPtr pProp)
 
 #ifdef XVNC_AuthPAM
     if ((pProp->propertyName == VNC_ACL) && (pProp->type == XA_STRING) &&
-        (pProp->format == 8) && (pProp->size > 1) && (pProp->size <= (MAXUSERLEN + 1))
-    ) {
+        (pProp->format == 8) && (pProp->size > 1) &&
+        (pProp->size <= (MAXUSERLEN + 1))) {
+
         /*
          * The first byte is a flag that selects revoke/add.
          * The remaining bytes are the name.
@@ -1086,8 +1079,8 @@ OsVendorInit()
 {
     PrintVersion();
     rfbAuthInit();
-    if (rfbMaxIdleTimeout > 0 && (rfbIdleTimeout > rfbMaxIdleTimeout
-        || rfbIdleTimeout == 0)) {
+    if (rfbMaxIdleTimeout > 0 && (rfbIdleTimeout > rfbMaxIdleTimeout ||
+        rfbIdleTimeout == 0)) {
         rfbIdleTimeout = rfbMaxIdleTimeout;
         rfbLog("NOTICE: idle timeout set to %d seconds per system policy\n",
             rfbIdleTimeout);
