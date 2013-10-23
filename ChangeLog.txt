@@ -23,11 +23,14 @@ on Windows, so it is no longer necessary to install the libjpeg-turbo SDK on
 Windows platforms in order to get accelerated JPEG decompression.
 -------------------------------------------------------------------------------
 [5]
-Fixed an issue whereby, if the automatic lossless refresh feature was enabled
-in the server, the first framebuffer update to a particular client would always
-trigger an ALR, regardless of whether the update was in response to an
-"ALR-eligible" X function (only PutImage operations are ALR-eligible unless
-TVNC_ALRALL has been set to 1.)
+Fixed a couple of cosmetic issues with the automatic lossless refresh feature:
+-- If the source of a CopyRect operation was affected by lossy compression
+(meaning that the destination of the operation will become lossy as well), then
+the destination region is now ALR-eligible.  This can be overridden by
+setting the environment variable TVNC_ALRCOPYRECT to 0.
+-- Previously, if TVNC_ALRALL=0, a PutImage operation would trigger an ALR on
+all lossy regions of the display, even those that weren't drawn using a
+PutImage operation.  This has been fixed.
 -------------------------------------------------------------------------------
 [6]
 The Java TurboVNC Viewer, when run as an applet, can now be displayed to an

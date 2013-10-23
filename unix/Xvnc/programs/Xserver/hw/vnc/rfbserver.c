@@ -109,7 +109,7 @@ double gettime(void)
  * Auto Lossless Refresh
  */
 
-static Bool putImageOnly = TRUE;
+static Bool putImageOnly = TRUE, alrCopyRect = TRUE;
 
 CARD64
 alrCallback(OsTimerPtr timer, CARD64 time, pointer arg)
@@ -395,6 +395,8 @@ rfbNewClient(sock)
         REGION_INIT(pScreen, &cl->lossyRegion, NullBox, 0);
         if ((env = getenv("TVNC_ALRALL")) != NULL && !strcmp(env, "1"))
             putImageOnly = FALSE;
+        if ((env = getenv("TVNC_ALRCOPYRECT")) != NULL && !strcmp(env, "0"))
+            alrCopyRect = FALSE;
         REGION_INIT(pScreen, &cl->alrRegion, NullBox, 0);
         REGION_INIT(pScreen, &cl->alrEligibleRegion, NullBox, 0);
     }
@@ -1769,6 +1771,24 @@ rfbSendCopyRegion(cl, reg, dx, dy)
     } else {
         thisRect = nrects - 1;
         y_inc = -1;
+    }
+
+    /* If the source region intersects the lossy region, then we know that the
+       destination region is about to become lossy, so we add it to the lossy
+       region. */
+    if (rfbAutoLosslessRefresh > 0.0 && alrCopyRect &&
+        REGION_NOTEMPTY(pScreen, reg)) {
+        RegionRec tmpRegion;
+        SAFE_REGION_INIT(pScreen, &tmpRegion, NullBox, 0);
+        REGION_COPY(pScreen, &tmpRegion, reg);
+        REGION_TRANSLATE(pScreen, &tmpRegion, -dx, -dy);
+        REGION_INTERSECT(pScreen, &tmpRegion, &cl->lossyRegion, &tmpRegion);
+        if (REGION_NOTEMPTY(pScreen, &tmpRegion)) {
+            REGION_UNION(pScreen, &cl->lossyRegion, &cl->lossyRegion, reg);
+            REGION_UNION(pScreen, &cl->alrEligibleRegion,
+                                  &cl->alrEligibleRegion, reg);
+        }
+        REGION_UNINIT(pScreen, &tmpRegion);
     }
 
     while (nrects > 0) {

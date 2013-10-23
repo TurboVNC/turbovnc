@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TightVNC distribution.
 .\"
-.TH Xvnc 1 "Nov 2012" "" "TurboVNC"
+.TH Xvnc 1 "October 2013" "" "TurboVNC"
 .SH NAME
 Xvnc \- an X server providing VNC connectivity
 .SH SYNOPSIS
@@ -168,11 +168,14 @@ since the last lossless refresh, then those areas of the screen are
 re-transmitted using mathematically lossless image compression (specifically,
 the Lossless Tight + Zlib encoding method.)
 
-The default ALR behavior is that only regions that were drawn using
-X[Shm]PutImage() are eligible for ALR.  This is designed to work in conjunction
-with VirtualGL and to prevent blinking cursors from confusing the ALR
+The default behavior is that only regions drawn using X[Shm]PutImage() or
+CopyRect are eligible for ALR.  This is designed such that mainly only the
+pixels drawn by VirtualGL will be ALR-eligible, and it also prevents blinking
+cursors (which are usually drawn using XCopyArea()) from confusing the ALR
 algorithm.  You can, however, set the \fBTVNC_ALRALL\fR environment variable to
-\fB1\fR to make all screen regions eligible for ALR.
+\fB1\fR to make all screen regions eligible for ALR.  You can also set
+\fBTVNC_ALRCOPYRECT\fR to \fB0\fR to make screen regions drawn with CopyRect
+ineligible for ALR (approximating the behavior of TurboVNC 1.2 and prior.)
 .TP
 \fB\-alrqual\fR \fIlevel\fR
 Instead of sending a mathematically lossless image for an automatic lossless
