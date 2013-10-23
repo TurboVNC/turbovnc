@@ -97,25 +97,33 @@ int rfbDeferUpdateTime = 40; /* ms */
           }                                                                   \
   }
 
+/* ADD_TO_ALR_REGION adds the given region to the ALR-eligible region for each
+   client */
+
+#define ADD_TO_ALR_REGION(pScreen, reg)                                       \
+  {                                                                           \
+      rfbClientPtr cl;                                                        \
+      BoxRec *box = REGION_EXTENTS(pScreen, reg);                             \
+      if ((box->x2 - box->x1) * (box->y2 - box->y1) != 0)                     \
+          for (cl = rfbClientHead; cl; cl = cl->next) {                       \
+              REGION_UNION((pScreen), &cl->alrEligibleRegion,                 \
+                           &cl->alrEligibleRegion, reg);                      \
+          }                                                                   \
+  }
+
 /* SCHEDULE_FB_UPDATE is used at the end of each drawing routine to schedule an
    update to be sent to each client if there is one pending and the client is
    ready for it.  */
 
-#define _SCHEDULE_FB_UPDATE(pScreen, prfb, trigger)                     \
+#define SCHEDULE_FB_UPDATE(pScreen, prfb)                               \
   if (!prfb->dontSendFramebufferUpdate) {                               \
       rfbClientPtr cl, nextCl;                                          \
       for (cl = rfbClientHead; cl; cl = nextCl) {                       \
           nextCl = cl->next;                                            \
           if (!cl->deferredUpdateScheduled && FB_UPDATE_PENDING(cl))    \
-          {                                                             \
-              cl->putImageTrigger = trigger;                            \
               rfbScheduleDeferredUpdate(cl);                            \
-          }                                                             \
       }                                                                 \
   }
-
-#define SCHEDULE_FB_UPDATE(pScreen, prfb)                               \
-  _SCHEDULE_FB_UPDATE(pScreen, prfb, FALSE)
 
 /* function prototypes */
 
@@ -661,13 +669,14 @@ rfbPutImage(pDrawable, pGC, depth, x, y, w, h, leftPad, format, pBits)
                      WINDOW_CLIP_REGION((WindowPtr)pDrawable, pGC));
 
     ADD_TO_MODIFIED_REGION(pDrawable->pScreen, &tmpRegion);
+    ADD_TO_ALR_REGION(pDrawable->pScreen, &tmpRegion);
 
     REGION_UNINIT(pDrawable->pScreen, &tmpRegion);
 
     (*pGC->ops->PutImage) (pDrawable, pGC, depth, x, y, w, h,
                            leftPad, format, pBits);
 
-    _SCHEDULE_FB_UPDATE(pDrawable->pScreen, prfb, TRUE);
+    SCHEDULE_FB_UPDATE(pDrawable->pScreen, prfb);
 
     GC_OP_EPILOGUE(pGC);
 }

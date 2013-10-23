@@ -119,9 +119,17 @@ alrCallback(OsTimerPtr timer, CARD64 time, pointer arg)
     rfbClientPtr cl = (rfbClientPtr)arg;
     int tightCompressLevelSave, tightQualityLevelSave, copyDXSave, copyDYSave,
         tightSubsampLevelSave;
+    RegionRec tmpRegion;
 
-    if (REGION_NOTEMPTY(pScreen, &cl->lossyRegion) &&
-        (!putImageOnly || cl->alrTrigger)) {
+    SAFE_REGION_INIT(pScreen, &tmpRegion, NullBox, 0);
+    if (putImageOnly && !cl->firstUpdate)
+        REGION_INTERSECT(pScreen, &tmpRegion, &cl->alrRegion,
+                         &cl->lossyRegion);
+    else
+        REGION_COPY(pScreen, &tmpRegion, &cl->lossyRegion);
+    if (cl->firstUpdate) cl->firstUpdate = FALSE;
+
+    if (REGION_NOTEMPTY(pScreen, &tmpRegion)) {
 
         tightCompressLevelSave = cl->tightCompressLevel;
         tightQualityLevelSave = cl->tightQualityLevel;
@@ -144,20 +152,20 @@ alrCallback(OsTimerPtr timer, CARD64 time, pointer arg)
         REGION_EMPTY(pScreen, &cl->copyRegion);
         REGION_EMPTY(pScreen, &cl->modifiedRegion);
         REGION_UNION(pScreen, &cl->modifiedRegion, &cl->modifiedRegion,
-                     &cl->lossyRegion);
+                     &tmpRegion);
         REGION_EMPTY(pScreen, &cl->requestedRegion);
         REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
-                     &cl->lossyRegion);
+                     &tmpRegion);
         if (cl->compareFB) {
             REGION_EMPTY(pScreen, &cl->ifRegion);
             REGION_UNION(pScreen, &cl->ifRegion, &cl->ifRegion,
-                         &cl->lossyRegion);
+                         &tmpRegion);
         }
 
         if (!rfbSendFramebufferUpdate(cl)) return 0;
-        cl->alrTrigger = FALSE;
 
         REGION_EMPTY(pScreen, &cl->lossyRegion);
+        REGION_EMPTY(pScreen, &cl->alrRegion);
         cl->tightCompressLevel = tightCompressLevelSave;
         cl->tightQualityLevel = tightQualityLevelSave;
         cl->tightSubsampLevel = tightSubsampLevelSave;
@@ -174,6 +182,8 @@ alrCallback(OsTimerPtr timer, CARD64 time, pointer arg)
             REGION_UNINIT(pScreen, &ifRegionSave);
         }
     }
+
+    REGION_UNINIT(pScreen, &tmpRegion);
     return 0;
 }
 
@@ -379,11 +389,14 @@ rfbNewClient(sock)
         if (combine > 0 && combine <= 65000) rfbCombineRect = combine;
     }
 
+    cl->firstUpdate = TRUE;
+
     if (rfbAutoLosslessRefresh > 0.0) {
         REGION_INIT(pScreen, &cl->lossyRegion, NullBox, 0);
         if ((env = getenv("TVNC_ALRALL")) != NULL && !strcmp(env, "1"))
             putImageOnly = FALSE;
-        cl->putImageTrigger = cl->alrTrigger = FALSE;
+        REGION_INIT(pScreen, &cl->alrRegion, NullBox, 0);
+        REGION_INIT(pScreen, &cl->alrEligibleRegion, NullBox, 0);
     }
 
     if (rfbIdleTimeout > 0) {
@@ -443,8 +456,11 @@ rfbClientConnectionGone(sock)
 
     ShutdownTightThreads();
 
-    if (rfbAutoLosslessRefresh > 0.0)
+    if (rfbAutoLosslessRefresh > 0.0) {
         REGION_UNINIT(pScreen, &cl->lossyRegion);
+        REGION_UNINIT(pScreen, &cl->alrRegion);
+        REGION_UNINIT(pScreen, &cl->alrEligibleRegion);
+    }
 
     /* Release the compression state structures if any. */
     if ( cl->compStreamInited == TRUE ) {
@@ -1693,11 +1709,14 @@ rfbSendFramebufferUpdate(cl)
     }
 
     if (rfbAutoLosslessRefresh > 0.0 &&
-        (!putImageOnly || cl->putImageTrigger)) {
+        (!putImageOnly || REGION_NOTEMPTY(pScreen, &cl->alrEligibleRegion) ||
+         cl->firstUpdate)) {
+        if (putImageOnly)
+            REGION_UNION(pScreen, &cl->alrRegion, &cl->alrRegion,
+                         &cl->alrEligibleRegion);
+        REGION_EMPTY(pScreen, &cl->alrEligibleRegion);
         cl->alrTimer = TimerSet(cl->alrTimer, 0,
             (CARD64)(rfbAutoLosslessRefresh * 1000.0), alrCallback, cl);
-        cl->alrTrigger = TRUE;
-        cl->putImageTrigger = FALSE;
     }
 
     rfbUncorkSock(cl->sock);
