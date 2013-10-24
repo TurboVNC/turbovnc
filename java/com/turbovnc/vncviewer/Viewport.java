@@ -65,6 +65,10 @@ public class Viewport extends JFrame {
     tb = new Toolbar(cc);
     add(tb, BorderLayout.PAGE_START);
     if (VncViewer.embed.getValue()) {
+      cc.viewer.add(sp);
+      sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+      sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+      sp.validate();
       cc.viewer.addFocusListener(new FocusAdapter() {
         public void focusGained(FocusEvent e) {
           if (cc.desktop.isAncestorOf(cc.viewer))
@@ -234,25 +238,25 @@ public class Viewport extends JFrame {
   }
 
   public void setChild(DesktopWindow child) {
+    sp.getViewport().setView(child);
     if (VncViewer.embed.getValue()) {
-      cc.viewer.add(child);
       cc.desktop.requestFocus();
-    } else {
-      sp.getViewport().setView(child);
     }
   }
 
   public void setGeometry(int x, int y, int w, int h, boolean pack) {
-    if (VncViewer.embed.getValue())
-      return;
-    if (pack) {
-      pack();
-      vlog.debug("Set geometry to " + x + ", " + y + " (pack)");
+    if (VncViewer.embed.getValue()) {
+      cc.viewer.validate();
     } else {
-      setSize(w, h);
-      vlog.debug("Set geometry to " + x + ", " + y + " " + w + " x " + h);
+      if (pack) {
+        pack();
+        vlog.debug("Set geometry to " + x + ", " + y + " (pack)");
+      } else {
+        setSize(w, h);
+        vlog.debug("Set geometry to " + x + ", " + y + " " + w + " x " + h);
+      }
+      setLocation(x, y);
     }
-    setLocation(x, y);
   }
 
   public void showToolbar(boolean show) { showToolbar(show, false); }
