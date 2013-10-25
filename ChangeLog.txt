@@ -43,6 +43,11 @@ this at the moment is to placate applications that check for the extension and
 refuse to start without it.  The extension currently can't be used to change
 the screen size (that feature will be in TurboVNC 1.3.)
 -------------------------------------------------------------------------------
+[10]
+Fixed an issue in the Java TurboVNC Viewer whereby, when a mouse button was
+pressed, pressing another button or activating the scroll wheel would cause the
+viewer to send a release event for the first button.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

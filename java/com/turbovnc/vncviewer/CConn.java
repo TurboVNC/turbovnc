@@ -1610,14 +1610,24 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
       return;
 
+    int modifiers = ev.getModifiers();
     switch (ev.getID()) {
     case MouseEvent.MOUSE_PRESSED:
-      buttonMask = 1;
-      if ((ev.getModifiers() & KeyEvent.ALT_MASK) != 0) buttonMask = 2;
-      if ((ev.getModifiers() & KeyEvent.META_MASK) != 0) buttonMask = 4;
+      if ((modifiers & MouseEvent.BUTTON1_MASK) != 0) buttonMask |= 1;
+      else if ((modifiers & MouseEvent.BUTTON2_MASK) != 0) buttonMask |= 2;
+      else if ((modifiers & MouseEvent.BUTTON3_MASK) != 0) buttonMask |= 4;
+      else {
+        // Java 1.1 doesn't set BUTTON1_MASK when the left button is pressed
+        // (fixed in 1.1.1-- see
+        // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4029201)
+        buttonMask = 1;
+      }
       break;
     case MouseEvent.MOUSE_RELEASED:
-      buttonMask = 0;
+      if ((modifiers & MouseEvent.BUTTON1_MASK) != 0) buttonMask &= ~1;
+      else if ((modifiers & MouseEvent.BUTTON2_MASK) != 0) buttonMask &= ~2;
+      else if ((modifiers & MouseEvent.BUTTON3_MASK) != 0) buttonMask &= ~4;
+      else return;
       break;
     }
 
@@ -1648,12 +1658,12 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   public void writeWheelEvent(MouseWheelEvent ev) {
     if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
       return;
-    int x, y;
+    int x, y, wheelMask;
     int clicks = ev.getWheelRotation();
     if (clicks < 0) {
-      buttonMask = 8;
+      wheelMask = buttonMask | 8;
     } else {
-      buttonMask = 16;
+      wheelMask = buttonMask | 16;
     }
     if (viewport != null && (viewport.dx > 0 || viewport.dy > 0)) {
       int dx = (int)Math.floor(viewport.dx / desktop.scaleWidthRatio);
@@ -1664,8 +1674,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       x = ev.getX();
       y = ev.getY();
       try {
-        writer().writePointerEvent(new Point(x, y), buttonMask);
-        buttonMask = 0;
+        writer().writePointerEvent(new Point(x, y), wheelMask);
         writer().writePointerEvent(new Point(x, y), buttonMask);
       } catch (Exception e) {
         if (!shuttingDown) {
