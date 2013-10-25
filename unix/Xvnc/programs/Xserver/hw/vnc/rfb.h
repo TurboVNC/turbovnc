@@ -301,6 +301,9 @@ typedef struct rfbClientRec {
     Bool enableCursorPosUpdates;   /* client supports PointerPos updates */
     Bool enableCU;                 /* client supports Continuous Updates */
     Bool enableFence;              /* client supports fence extension */
+    Bool enableDesktopSize;        /* client supports desktop size extension */
+    Bool enableExtDesktopSize;     /* client supports extended desktop size
+                                      extension */
     Bool useRichCursorEncoding;    /* rfbEncodingRichCursor is preferred */
     Bool cursorWasChanged;         /* cursor shape update should be sent */
     Bool cursorWasMoved;           /* cursor position update should be sent */
@@ -341,6 +344,8 @@ typedef struct rfbClientRec {
     OsTimerPtr congestionTimer;
     Bool congestionTimerRunning;
     struct timeval lastWrite;
+
+    Bool pendingDesktopResize;
 
 } rfbClientRec, *rfbClientPtr;
 

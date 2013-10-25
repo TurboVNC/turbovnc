@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2009-2010, 2012 D. R. Commander. All Rights Reserved.
+ *  Copyright (C) 2009-2010, 2012-2013 D. R. Commander. All Rights Reserved.
  *  Copyright (C) 2004-2008 Sun Microsystems, Inc. All Rights Reserved.
  *  Copyright (C) 2004 Landmark Graphics Corporation. All Rights Reserved.
  *  Copyright (C) 2000-2006 Constantin Kaplinsky. All Rights Reserved.
@@ -477,6 +477,7 @@ typedef struct _rfbInteractionCapsMsg {
  *   0xFFFFFD00 .. 0xFFFFFD05 -- subsampling level;
  *   0xFFFFFE00 .. 0xFFFFFE64 -- fine-grained quality level (0-100 scale);
  *   0xFFFFFEC7 .. 0xFFFFFEC8 -- flow control extensions;
+ *   0xFFFFFECC               -- extended desktop size;
  *   0xFFFFFF00 .. 0xFFFFFF0F -- encoding-specific compression levels;
  *   0xFFFFFF10 .. 0xFFFFFF1F -- mouse cursor shape data;
  *   0xFFFFFF20 .. 0xFFFFFF2F -- various protocol extensions;
@@ -496,6 +497,8 @@ typedef struct _rfbInteractionCapsMsg {
 
 #define rfbEncodingContinuousUpdates   0xFFFFFEC7
 #define rfbEncodingFence               0xFFFFFEC8
+
+#define rfbEncodingExtendedDesktopSize 0xFFFFFECC
 
 #define rfbEncodingCompressLevel0  0xFFFFFF00
 #define rfbEncodingCompressLevel1  0xFFFFFF01

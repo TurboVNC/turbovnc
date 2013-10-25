@@ -203,7 +203,7 @@ updateCallback(OsTimerPtr timer, CARD64 time, pointer arg)
 
 int rfbInterframe = -1;  /* -1 = auto (determined by compression level) */
 
-static Bool
+Bool
 InterframeOn(rfbClientPtr cl)
 {
     if (!cl->compareFB) {
@@ -222,7 +222,7 @@ InterframeOn(rfbClientPtr cl)
     return TRUE;
 }
 
-static void
+void
 InterframeOff(rfbClientPtr cl)
 {
     if (cl->compareFB) {
@@ -1004,6 +1004,20 @@ rfbProcessClientNormalMessage(cl)
                     cl->enableCU = TRUE;
                 }
                 break;
+            case rfbEncodingNewFBSize:
+                if (!cl->enableDesktopSize) {
+                    rfbLog("Enabling Desktop Size protocol extension for client "
+                           "%s\n", cl->host);
+                    cl->enableDesktopSize = TRUE;
+                }
+                break;
+            case rfbEncodingExtendedDesktopSize:
+                if (!cl->enableExtDesktopSize) {
+                    rfbLog("Enabling Extended Desktop Size protocol extension for client "
+                           "%s\n", cl->host);
+                    cl->enableExtDesktopSize = TRUE;
+                }
+                break;
             default:
                 if ( enc >= (CARD32)rfbEncodingCompressLevel0 &&
                      enc <= (CARD32)rfbEncodingCompressLevel9 ) {
@@ -1399,6 +1413,11 @@ rfbSendFramebufferUpdate(cl)
        congestion window. */
 
     rfbCorkSock(cl->sock);
+
+    if (cl->pendingDesktopResize) {
+        if (!rfbSendDesktopSize(cl)) return FALSE;
+        cl->pendingDesktopResize = FALSE;
+    }
 
     /*
      * We assume that the client doesn't have any pixel data outside the
@@ -2114,6 +2133,42 @@ rfbSendServerCutText(char *str, int len)
             rfbCloseSock(cl->sock);
         }
     }
+}
+
+
+/*
+ * rfbSendDesktopResize sends a DesktopSize message to all the clients.
+ */
+
+Bool
+rfbSendDesktopSize(rfbClientPtr cl)
+{
+    rfbFramebufferUpdateRectHeader rh;
+    rfbFramebufferUpdateMsg fu;
+
+    if (!cl->enableDesktopSize && !cl->enableExtDesktopSize)
+        return TRUE;
+
+    fu.type = rfbFramebufferUpdate;
+    fu.nRects = Swap16IfLE(1);
+    if (WriteExact(cl->sock, (char *)&fu, sz_rfbFramebufferUpdateMsg) < 0) {
+        rfbLogPerror("rfbSendDesktopSize: write");
+        rfbCloseSock(cl->sock);
+        return FALSE;
+    }
+
+    rh.encoding = Swap32IfLE(rfbEncodingNewFBSize);
+    rh.r.x = rh.r.y = 0;
+    rh.r.w = Swap16IfLE(rfbScreen.width);
+    rh.r.h = Swap16IfLE(rfbScreen.height);
+    if (WriteExact(cl->sock, (char *)&rh,
+        sz_rfbFramebufferUpdateRectHeader) < 0) {
+        rfbLogPerror("rfbSendDesktopSize: write");
+        rfbCloseSock(cl->sock);
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 

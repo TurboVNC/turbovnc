@@ -3,7 +3,6 @@
  *
  * Copyright © 2000, Compaq Computer Corporation, 
  * Copyright © 2002, Hewlett Packard, Inc.
- * Copyright © 2013, D. R. Commander
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -65,7 +64,6 @@ miRRGetInfo (ScreenPtr pScreen, Rotation *rotations)
 					pScreen->mmHeight);
 		if (!pSize)
 		    return FALSE;
-		RRRegisterRate (pScreen, pSize, 60);
 		if (!setConfig)
 		{
 		    RRSetCurrentConfig (pScreen, RR_Rotate_0, 0, pSize);

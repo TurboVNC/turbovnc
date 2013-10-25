@@ -47,6 +47,10 @@ servers, and the return status of vncconnect now reflects whether the reverse
 connection was successfully made.  vncconnect also now has a -disconnect
 option, which can be used to disconnect all listening viewers.
 -------------------------------------------------------------------------------
+[8]
+Added full support for the X RANDR extension, including the ability to resize
+the remote desktop.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

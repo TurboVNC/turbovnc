@@ -96,6 +96,10 @@ from the X Consortium.
 #define RFB_DEFAULT_WHITEPIXEL 0
 #define RFB_DEFAULT_BLACKPIXEL 1
 
+#ifdef RANDR
+extern Bool vncRRInit(ScreenPtr);
+#endif
+
 rfbScreenInfo rfbScreen;
 int rfbGCIndex;
 
@@ -129,7 +133,7 @@ static int rfbMouseProc(DeviceIntPtr pDevice, int onoff);
 static Bool CheckDisplayNumber(int n);
 
 static Bool rfbAlwaysTrue();
-static char *rfbAllocateFramebufferMemory(rfbScreenInfoPtr prfb);
+char *rfbAllocateFramebufferMemory(rfbScreenInfoPtr prfb);
 static Bool rfbCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y);
 static void rfbCrossScreen(ScreenPtr pScreen, Bool entering);
 static void rfbClientStateChange(CallbackListPtr *, pointer myData,
@@ -741,7 +745,7 @@ rfbScreenInit(index, pScreen, argc, argv)
     ret = fbCreateDefColormap(pScreen);
 
 #ifdef RANDR
-    miRandRInit(pScreen);
+    vncRRInit(pScreen);
 #endif
 
     return ret;
@@ -1018,7 +1022,7 @@ rfbAlwaysTrue()
 }
 
 
-static char *
+char *
 rfbAllocateFramebufferMemory(prfb)
     rfbScreenInfoPtr prfb;
 {
