@@ -616,6 +616,7 @@ static const char *encodingString[17] = {
 };
 
 char encryptedPassword[9] = "";
+Bool encryptedPasswordSet = FALSE;
 
 void LoadConfigFile(char *filename)
 {
@@ -687,7 +688,7 @@ void LoadConfigFile(char *filename)
             encryptedPassword[i/2] = (char)temp;
           else break;
         }
-        encryptedPassword[i/2] = 0;
+        if (i == 16) encryptedPasswordSet = TRUE;
       }
       continue;
     }

@@ -48,6 +48,10 @@ Fixed an issue in the Java TurboVNC Viewer whereby, when a mouse button was
 pressed, pressing another button or activating the scroll wheel would cause the
 viewer to send a release event for the first button.
 -------------------------------------------------------------------------------
+[11]
+Fixed an issue whereby the X11 TurboVNC Viewer would fail to authenticate if
+the encrypted password stored in the connection info file started with "00".
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

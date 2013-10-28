@@ -735,6 +735,7 @@ static Bool AuthenticateNone(void)
  */
 
 extern char encryptedPassword[9];
+extern Bool encryptedPasswordSet;
 
 static Bool AuthenticateVNC(void)
 {
@@ -749,7 +750,7 @@ static Bool AuthenticateVNC(void)
   if (!ReadFromRFBServer((char *)challenge, CHALLENGESIZE))
     return False;
 
-  if (strlen(encryptedPassword)) {
+  if (encryptedPasswordSet) {
     passwd = buffer;
     if (!vncDecryptPasswd(encryptedPassword, passwd)) {
       fprintf(stderr, "Password stored in connection info file is invalid.\n");
