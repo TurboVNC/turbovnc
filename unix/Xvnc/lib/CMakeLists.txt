@@ -1,0 +1,6 @@
+add_subdirectory(xtrans)
+add_subdirectory(Xau)
+add_subdirectory(Xdmcp)
+add_subdirectory(X11)
+add_subdirectory(freetype2)
+add_subdirectory(font)

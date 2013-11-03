@@ -1,0 +1,49 @@
+set(HEADERS
+	Xext.h
+	multibuf.h
+	shape.h
+	XShm.h
+	MITMisc.h
+	XI.h
+	XInput.h
+	XIproto.h
+	XTest.h
+	xtestext1.h
+	XIE.h
+	XIEproto.h
+	XIEprotost.h
+	sync.h
+	XKB.h
+	XKBgeom.h
+	XKBproto.h
+	XKBstr.h
+	XKBsrv.h
+	Xdbe.h
+	Xdbeproto.h
+	Xag.h
+	Xagstr.h
+	Xagsrv.h
+	record.h
+	recordstr.h
+	lbxbuf.h
+	lbxbufstr.h
+	lbxdeltastr.h
+	lbximage.h
+	lbxopts.h
+	lbxstr.h
+	lbxzlib.h
+	security.h
+	securstr.h
+	Print.h
+	Printstr.h
+	saver.h
+	saverproto.h
+	scrnsaver.h
+	render.h
+	renderproto.h
+	randr.h
+	randrproto.h)
+
+foreach(h ${HEADERS})
+	copy_X_header(${h} X11/extensions)
+endforeach()

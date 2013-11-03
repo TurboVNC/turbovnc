@@ -66,6 +66,7 @@ add_subdirectory(libvncauth)
 add_subdirectory(tvncconfig)
 add_subdirectory(vncconnect)
 add_subdirectory(vncpasswd)
+add_subdirectory(Xvnc)
 
 string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_UC)
 
@@ -79,57 +80,15 @@ set(TVNC_CONFDIR ${DEFAULT_TVNC_CONFDIR} CACHE PATH
 	"Directory into which configuration files should be installed (default: ${DEFAULT_TVNC_CONFDIR})")
 message(STATUS "TVNC_CONFDIR = ${TVNC_CONFDIR}")
 
-configure_file(vncserver.in vncserver @ONLY)
+configure_file(vncserver.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncserver @ONLY)
 execute_process(COMMAND chmod +x vncserver
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-configure_file(Xvnc/config/cf/tvnc_version.h.in Xvnc/config/cf/tvnc_version.h)
-configure_file(Xvnc-configure.in Xvnc-configure)
+	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 configure_file(vncserver.init.in vncserver.init @ONLY)
-
-if(NOT "${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
-	add_custom_target(xserver-syncsource
-		COMMAND rsync -avC ${CMAKE_CURRENT_SOURCE_DIR}/Xvnc
-			${CMAKE_CURRENT_BINARY_DIR}/)
-else()
-	add_custom_target(xserver-syncsource)
-endif()
-
-add_custom_target(xserver
-	COMMAND ${CMAKE_COMMAND} -E remove -f config/imake/imake config/imake/*.o
-		config/makedepend/makedepend config/makedepend/*.o config/util/lndir
-		config/util/*.o
-	COMMAND sh ${CMAKE_CURRENT_BINARY_DIR}/Xvnc-configure
-	COMMAND ${CMAKE_BUILD_TOOL} CC=${CMAKE_C_COMPILER}
-		CDEBUGFLAGS=${EFFECTIVE_C_FLAGS}
-		EXTRA_LDOPTIONS=${CMAKE_EXE_LINKER_FLAGS}
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Xvnc
-	DEPENDS vncauth zlib xserver-syncsource
-	SOURCES Xvnc-configure Xvnc/config/cf/tvnc_version.h)
-
-add_custom_target(xserver-rebuild
-	COMMAND ${CMAKE_BUILD_TOOL} CC=${CMAKE_C_COMPILER}
-		CDEBUGFLAGS=${EFFECTIVE_C_FLAGS}
-		EXTRA_LDOPTIONS=${CMAKE_EXE_LINKER_FLAGS}
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Xvnc
-	DEPENDS vncauth zlib xserver-syncsource)
-
-add_custom_target(xserver-clean
-	COMMAND ${CMAKE_BUILD_TOOL} CC=${CMAKE_C_COMPILER}
-		CDEBUGFLAGS=${EFFECTIVE_C_FLAGS}
-		EXTRA_LDOPTIONS=${CMAKE_EXE_LINKER_FLAGS} clean
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Xvnc
-	DEPENDS xserver-syncsource)
 
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/vncserver
 	DESTINATION ${TVNC_BINDIR})
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/Xvnc/programs/Xserver/Xvnc
-	DESTINATION ${TVNC_BINDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/vncserver.man
 	DESTINATION ${TVNC_MANDIR}/man1 RENAME vncserver.1)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Xvnc/programs/Xserver/Xvnc.man
-	DESTINATION ${TVNC_MANDIR}/man1 RENAME Xvnc.1)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Xvnc/programs/Xserver/Xserver.man
-	DESTINATION ${TVNC_MANDIR}/man1 RENAME Xserver.1)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver.conf
 	DESTINATION ${TVNC_CONFDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/turbovncserver-auth.conf
