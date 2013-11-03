@@ -2,21 +2,22 @@
 Xvnc - the VNC X server
 =======================
 
-This is the top level directory for Xvnc, the VNC X server (or the X VNC
+This is the top-level directory for Xvnc, the VNC X server (or the X VNC
 server, depending on how you look at it.)
 
-Xvnc is based on the XFree86 3.3.2 "server only" distribution, which in turn is
-based on the X11R6.3 distribution from the X consortium.
+TurboVNC's implementation of Xvnc was originally based on TightVNC 1.3.x, which
+was based on XFree86 3.3.x, which was based on the X11R6.3 distribution from
+the X consortium.  However, TurboVNC's X server also borrows significant code
+from xf4vnc (based on XFree86 4.x) and from Xorg 7.1, mainly for the purpose
+of implementing newer X extensions like RENDER and RANDR.
 
-The code specific to the TurboVNC/TightVNC X server is located in the
-programs/Xserver/hw/vnc directory.  The rest of the code is a cut-down
-version of the standard XFree86 distribution without many of the later
-X extensions or hardware-specific code.  See the file DIFFS for details
-of all changes made to files from the XFree86 distribution.
+The code specific to TurboVNC is located in the programs/Xserver/hw/vnc
+directory.  The rest of the code is a stripped-down version of the XFree86 and
+Xorg code, including only the features necessary to support Xvnc.
 
 Configurable Authentication
 ---------------------------
-This version of Xvnc incorporates code which allows different authentication
+This version of Xvnc incorporates code that allows different authentication
 methods to be selected at run time.  This code supports the standard "None" and
 "VNC" authentication methods as well as methods for using one-time passwords
 (OTP) and Pluggable Authentication Modules (PAM).
@@ -38,5 +39,5 @@ for your system.  The default PAM service name is "turbovnc".
 NOTE: interaction with PAM is limited to supplying a user name and password.
 The exchange of any additional information is not supported.
 
-See the Xvnc man page for details on the command-line options which control
+See the Xvnc man page for details on the command-line options that control
 configurable authentication.
