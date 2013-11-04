@@ -68,6 +68,7 @@ static void rfbSendInteractionCaps(rfbClientPtr cl);
 static void rfbProcessClientNormalMessage(rfbClientPtr cl);
 static Bool rfbSendCopyRegion(rfbClientPtr cl, RegionPtr reg, int dx, int dy);
 static Bool rfbSendLastRectMarker(rfbClientPtr cl);
+Bool rfbSendDesktopSize(rfbClientPtr cl);
 
 
 /*
