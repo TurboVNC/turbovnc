@@ -24,7 +24,7 @@ elseif(APPLE)
 	# Emulate Linux
 	add_definitions(-Dlinux)
 else()
-	message(ERROR TurboVNC Server build not supported on this platform.)
+	message(FATAL_ERROR "TurboVNC Server build not supported on this platform.")
 endif()
 
 add_definitions(-D_REENTRANT -DFUNCPROTO=15 -DNARROWPROTO)
