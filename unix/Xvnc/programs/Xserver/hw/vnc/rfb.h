@@ -48,7 +48,7 @@
 #endif
 
 /* It's a good idea to keep these values a bit greater than required. */
-#define MAX_ENCODINGS 10
+#define MAX_ENCODINGS 18
 #define MAX_SECURITY_TYPES 4
 #define MAX_TUNNELING_CAPS 16
 #define MAX_AUTH_CAPS 16
