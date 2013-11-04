@@ -52,6 +52,12 @@ viewer to send a release event for the first button.
 Fixed an issue whereby the X11 TurboVNC Viewer would fail to authenticate if
 the encrypted password stored in the connection info file started with "00".
 -------------------------------------------------------------------------------
+[12]
+Fixed an invalid memory access that occurred in the TurboVNC Server after a
+client disconnected.  This had the visible effect of causing an error
+("Could not disable TCP corking: Bad file descriptor") to be printed to the
+TurboVNC Server's log, but it was not known to cause any other issues.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

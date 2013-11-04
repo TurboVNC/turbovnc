@@ -497,7 +497,7 @@ void
 rfbProcessClientMessage(sock)
     int sock;
 {
-    rfbClientPtr cl;
+    rfbClientPtr cl, cl2;
 
     for (cl = rfbClientHead; cl; cl = cl->next) {
         if (sock == cl->sock)
@@ -540,6 +540,13 @@ rfbProcessClientMessage(sock)
     default:
         rfbProcessClientNormalMessage(cl);
     }
+
+    /* Make sure cl hasn't been freed */
+    for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
+        if (cl2 == cl)
+            break;
+    }
+    if (cl2 == NULL) return;
 
     if (cl->syncFence) {
       rfbSendFence(cl, cl->fenceFlags, cl->fenceDataLen, cl->fenceData);
