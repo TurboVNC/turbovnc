@@ -11,17 +11,25 @@ elseif(CPU_TYPE STREQUAL "arm")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	add_definitions(-Dlinux)
-	add_definitions(-D_POSIX_C_SOURCE=199309L -D_POSIX_SOURCE
+	add_definitions(-Dlinux -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199309L
 		-D_XOPEN_SOURCE=500L -D_BSD_SOURCE -D_SVID_SOURCE)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+	add_definitions(-Dsun -DSVR4 -D__EXTENSIONS__ -D_POSIX_SOURCE)
+	if(CPU_TYPE STREQUAL "i386" OR CPU_TYPE STREQUAL "x86_64")
+		add_definitions(-Di386)
+	endif()
+elseif(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+	add_definitions(-DCSRG_BASED)
+elseif(APPLE)
+	# Emulate Linux
+	add_definitions(-Dlinux)
+else()
+	message(ERROR TurboVNC Server build not supported on this platform.)
 endif()
 
 add_definitions(-D_REENTRANT -DFUNCPROTO=15 -DNARROWPROTO)
 
 set(ServerExtraDefines -DSTATIC_COLOR -DAVOID_GLYPHBLT -DPIXPRIV)
-if(CMAKE_COMPILER_IS_GNUCC)
-	set(ServerExtraDefines -DGCCUSESGAS ${ServerExtraDefines})
-endif()
 if(BITS EQUAL 64)
 	set(ServerExtraDefines ${ServerExtraDefines} -D_XSERVER64)
 endif()

@@ -1,6 +1,12 @@
 include_directories(../../extras/freetype2/include)
 
 add_definitions(-DXTHREADS -DXUSE_MTSAFE_API -DXFREE86_FT2)
+if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+	add_definitions(-DXUSE_NETDB_R_API)
+endif()
+if(APPLE)
+	add_definitions(-DDARWIN_NO_CARBON)
+endif()
 
 set(FTSRC ../../extras/freetype2/src/)
 

@@ -1,7 +1,7 @@
 include_directories(../mi ../render)
 
 add_definitions(-DFB_OLD_GC -DFB_OLD_SCREEN)
-if(CPU_TYPE STREQUAL "x86_64" OR CPU_TYPE STREQUAL "i386")
+if((CPU_TYPE STREQUAL "x86_64" OR CPU_TYPE STREQUAL "i386") AND GCC34)
 	add_definitions(-mmmx -msse -Winline --param inline-unit-growth=10000
 		--param large-function-growth=10000 -DUSE_MMX)
 endif()

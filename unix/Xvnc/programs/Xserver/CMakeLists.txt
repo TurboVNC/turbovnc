@@ -2,8 +2,10 @@ include_directories(include ../../include/fonts ../../include/extensions)
 
 add_definitions(-DSHAPE -DXINPUT -DRENDER -DRANDR ${ServerExtraDefines})
 
-set(ServerOSDefines -DDDXOSINIT -DSERVER_LOCK -DDDXOSFATALERROR -DDDXTIME
-	-DPART_NET)
+set(ServerOSDefines -DDDXOSINIT -DSERVER_LOCK -DDDXOSFATALERROR -DDDXTIME)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	set(ServerOSDefines ${ServerOSDefines} -DPART_NET)
+endif()
 set(EXT_DEFINES -DMITMISC -DXTEST -DXSYNC -DXCMISC -DMITSHM -DBIGREQS
 	-DSCREENSAVER)
 
@@ -22,9 +24,13 @@ set(PAM_LIB "")
 if(TVNC_USEPAM)
 	set(PAM_LIB pam)
 endif()
+set(EXTRA_LIB "")
+if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+	set(EXTRA_LIB "-lsocket -lnsl")
+endif()
 target_link_libraries(Xvnc Xfont dix os Xau Xdmcp Xfont freetype2 Xi vnc
 	vncauth fb xpstubs mi Xext randr render zlib m ${TJPEG_LIBRARY} pthread
-	${PAM_LIB})
+	${PAM_LIB} ${EXTRA_LIB})
 
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/Xvnc
 	DESTINATION ${TVNC_BINDIR})
