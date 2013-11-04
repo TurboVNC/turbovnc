@@ -109,6 +109,12 @@ Fixed an issue in the Java TurboVNC Viewer whereby, when a mouse button was
 pressed, pressing another button or activating the scroll wheel would cause the
 viewer to send a release event for the first button.
 -------------------------------------------------------------------------------
+[12]
+Fixed an invalid memory access that occurred in the TurboVNC Server after a
+client disconnected.  This had the visible effect of causing an error
+("Could not disable TCP corking: Bad file descriptor") to be printed to the
+TurboVNC Server's log, but it was not known to cause any other issues.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
