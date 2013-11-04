@@ -41,6 +41,8 @@ in this Software without prior written authorization from The Open Group.
 #include "fontmod.h"
 #endif
 
+extern void CatalogueRegisterLocalFpeFunctions(void);
+
 void
 FontFileRegisterFpeFunctions(void)
 {
