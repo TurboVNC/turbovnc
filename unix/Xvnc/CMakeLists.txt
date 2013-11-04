@@ -40,7 +40,8 @@ function(copy_X_header file dir)
 endfunction()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/X_include
-	${CMAKE_CURRENT_BINARY_DIR}/X_include/X11)
+	${CMAKE_CURRENT_BINARY_DIR}/X_include/X11
+	${CMAKE_SOURCE_DIR}/common/zlib)
 
 configure_file(include/tvnc_version.h.in include/tvnc_version.h)
 
