@@ -187,7 +187,8 @@ void handleEvent(XEvent* ev)
                             cutTextLen);
           else
             se.property = None;
-        }
+        } else
+          se.property = None;
       }
       XSendEvent(dpy, se.requestor, False, 0, (XEvent*)&se);
       return;
