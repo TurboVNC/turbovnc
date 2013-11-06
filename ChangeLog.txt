@@ -58,6 +58,11 @@ client disconnected.  This had the visible effect of causing an error
 ("Could not disable TCP corking: Bad file descriptor") to be printed to the
 TurboVNC Server's log, but it was not known to cause any other issues.
 -------------------------------------------------------------------------------
+[13]
+Fixed an issue that prevented clipboard transfer from working properly with
+applications that request the clipboard selection in a non-ASCII format.  This
+was specifically known to affect rxvt-unicode.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
