@@ -145,6 +145,16 @@ add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/turbovnc-sm.png
 
 endif()
 
+add_custom_command(OUTPUT ${BINDIR}/index.vnc
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${SRCDIR}/${CLASSPATH}/index.vnc ${BINDIR}/index.vnc
+	DEPENDS ${SRCDIR}/${CLASSPATH}/index.vnc)
+
+add_custom_command(OUTPUT ${BINDIR}/favicon.ico
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${SRCDIR}/${CLASSPATH}/favicon.ico ${BINDIR}/favicon.ico
+	DEPENDS ${SRCDIR}/${CLASSPATH}/favicon.ico)
+
 string(REGEX REPLACE "jar" "" Java_PATH ${Java_JAR_EXECUTABLE})
 string(REGEX REPLACE ".exe" "" Java_PATH ${Java_PATH})
 
@@ -155,6 +165,8 @@ add_custom_command(OUTPUT VncViewer.jar
 		${BINDIR}/${CLASSPATH}/toolbar.png
 		${BINDIR}/${CLASSPATH}/turbovnc.png
 		${BINDIR}/${CLASSPATH}/turbovnc-sm.png
+		${BINDIR}/index.vnc
+		${BINDIR}/favicon.ico
 	COMMAND ${JAVA_ARCHIVE}
 	ARGS xf ${TJPEG_JAR}
 		org/libjpegturbo/turbojpeg/TJ.class
