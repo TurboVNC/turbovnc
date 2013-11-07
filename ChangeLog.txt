@@ -63,6 +63,9 @@ Fixed an issue that prevented clipboard transfer from working properly with
 applications that request the clipboard selection in a non-ASCII format.  This
 was specifically known to affect rxvt-unicode.
 -------------------------------------------------------------------------------
+[14]
+The Windows TurboVNC Viewer should now build properly with Visual Studio 2012.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
