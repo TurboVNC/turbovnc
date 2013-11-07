@@ -56,13 +56,12 @@ static LRESULT CALLBACK HelpDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam,
     case WM_INITDIALOG:
     {
       char buf [8192];
-      LoadString(pApp->m_instance, IDS_HELP, buf, sizeof(buf));
-      if (strlen(buf) < 8191)
-        LoadString(pApp->m_instance, IDS_HELP2, &buf[strlen(buf)],
-          sizeof(buf)-(int)strlen(buf));
-      if (strlen(buf) < 8191)
-        LoadString(pApp->m_instance, IDS_HELP3, &buf[strlen(buf)],
-          sizeof(buf)-(int)strlen(buf));
+      buf[0] = 0;
+      for (int i = 0; i < IDS_NUMHELP; i++) {
+        if (strlen(buf) < 8191)
+          LoadString(pApp->m_instance, IDS_HELP + i, &buf[strlen(buf)],
+            sizeof(buf) - (int)strlen(buf));
+      }
       SetDlgItemText(hwnd, IDC_EDIT_HELP, buf);
       SetWindowText(hwnd, (LPTSTR)lParam);
       CenterWindow(hwnd);

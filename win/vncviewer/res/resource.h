@@ -184,10 +184,41 @@
 #define ID_CLOSEDAEMON                  40001
 #define ID_SHOWWINDOW                   40004
 #define ID_NEWCONN                      40006
-#define IDS_HELP                        40007
-#define IDS_HELP2                       40008
-#define IDS_HELP3                       40009
 #define IDD_FILETRANSFER                40010
+#define IDS_NUMHELP                     33
+#define IDS_HELP                        40101
+#define IDS_HELP2                       40102
+#define IDS_HELP3                       40103
+#define IDS_HELP4                       40104
+#define IDS_HELP5                       40105
+#define IDS_HELP6                       40106
+#define IDS_HELP7                       40107
+#define IDS_HELP8                       40108
+#define IDS_HELP9                       40109
+#define IDS_HELP10                      40110
+#define IDS_HELP11                      40111
+#define IDS_HELP12                      40112
+#define IDS_HELP13                      40113
+#define IDS_HELP14                      40114
+#define IDS_HELP15                      40115
+#define IDS_HELP16                      40116
+#define IDS_HELP17                      40117
+#define IDS_HELP18                      40118
+#define IDS_HELP19                      40119
+#define IDS_HELP20                      40120
+#define IDS_HELP21                      40121
+#define IDS_HELP22                      40122
+#define IDS_HELP23                      40123
+#define IDS_HELP24                      40124
+#define IDS_HELP25                      40125
+#define IDS_HELP26                      40126
+#define IDS_HELP27                      40127
+#define IDS_HELP28                      40128
+#define IDS_HELP29                      40129
+#define IDS_HELP30                      40130
+#define IDS_HELP31                      40131
+#define IDS_HELP32                      40132
+#define IDS_HELP33                      40133
 
 // Next default values for new objects
 // 
