@@ -32,7 +32,7 @@ target_link_libraries(Xvnc Xfont dix os Xau Xdmcp Xfont freetype2 Xi vnc
 	vncauth fb xpstubs mi Xext randr render zlib m ${TJPEG_LIBRARY} pthread
 	${PAM_LIB} ${EXTRA_LIB})
 
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/Xvnc
+install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Xvnc
 	DESTINATION ${TVNC_BINDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Xserver.man
 	DESTINATION ${TVNC_MANDIR}/man1 RENAME Xserver.1)

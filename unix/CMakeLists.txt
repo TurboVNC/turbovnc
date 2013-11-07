@@ -85,7 +85,7 @@ execute_process(COMMAND chmod +x vncserver
 	WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 configure_file(vncserver.init.in vncserver.init @ONLY)
 
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/vncserver
+install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncserver
 	DESTINATION ${TVNC_BINDIR})
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/vncserver.man
 	DESTINATION ${TVNC_MANDIR}/man1 RENAME vncserver.1)
