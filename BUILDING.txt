@@ -13,8 +13,8 @@ All Systems
 
 -- CMake (http://www.cmake.org) v2.8.4 or later
 
--- libjpeg-turbo SDK v1.0.0 or later (1.3 or later required to build the Java
-   viewer.)
+-- libjpeg-turbo SDK v1.0.0 or later (v1.3 or later required if building the
+   Java viewer.)
    * The libjpeg-turbo SDK binary packages can be downloaded from the "Files"
      area of http://sourceforge.net/projects/libjpeg-turbo/
    * The TurboVNC build system will search for the TurboJPEG header and
@@ -206,8 +206,7 @@ Compilers Other Than GCC
 ------------------------
 
 On Un*x systems, prior to running CMake, you can set the CC environment
-variable to the command used to invoke the C compiler and the CXX environment
-variable to the command used to invoke the C++ compiler.
+variable to the command used to invoke the C compiler.
 
 
 *******************************************************************************
@@ -225,7 +224,7 @@ or
 
 after initially configuring the build.  CCMake is a text-based interactive
 version of CMake, and CMake-GUI is a GUI version.  Both will display all
-variables that are relevant to the VirtualGL build, their current values, and a
+variables that are relevant to the TurboVNC build, their current values, and a
 help string describing what they do.
 
 
@@ -239,10 +238,10 @@ choosing.  To do this, add:
   -DCMAKE_INSTALL_PREFIX={install_directory}
 
 to the CMake command line.  Then, you can run 'make install' or 'nmake install'
-(or build the "install" target in the Visual Studio IDE) to build and install
-the TurboVNC Viewer.  Running 'make uninstall' or 'nmake uninstall' (or
-building the "uninstall" target in the Visual Studio IDE) will uninstall the
-viewer.
+(or build the "install" target in the Visual Studio IDE) to build the TurboVNC
+Viewer and install TurboVNC.  Running 'make uninstall' or 'nmake uninstall' (or
+building the "uninstall" target in the Visual Studio IDE) will uninstall
+TurboVNC.
 
 If you don't specify CMAKE_INSTALL_PREFIX, then the default is
 c:\Program Files\TurboVNC on Windows and /opt/TurboVNC on Unix.
