@@ -57,6 +57,15 @@ like the rest of TurboVNC.  This makes the build somewhat more intuitive (for
 instance, 'make xserver' is no longer necessary when building Xvnc), and it
 fixes various problems with cross-compiling.
 -------------------------------------------------------------------------------
+[10]
+The Mac packaging system has been reworked.  Packages are now built using
+pkgbuild and productbuild rather than PackageMaker (which is now obsolete and
+no longer supported.)  Further, since Apple is discontinuing their distribution
+of Java in favor of Oracle's (which doesn't work on Snow Leopard and earlier),
+we now provide two Mac packages-- one that works with Leopard and later and
+uses Apple's version of Java, and one that works with Lion and later and uses
+the Oracle Java plug-in.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
