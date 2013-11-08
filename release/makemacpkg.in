@@ -41,14 +41,6 @@ safedirmove ()
 	return 0
 }
 
-usage()
-{
-	echo "$0 [universal]"
-	exit 1
-}
-
-UNIVERSAL=0
-
 PACKAGE_NAME=@CMAKE_PROJECT_NAME@
 VERSION=@VERSION@
 BUILD=@BUILD@
