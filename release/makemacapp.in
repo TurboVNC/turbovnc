@@ -5,6 +5,19 @@ set -e
 
 SRCDIR=@CMAKE_SOURCE_DIR@
 
+COMPAT=0
+LAUNCHER=$SRCDIR/release/JavaAppLauncher/JavaAppLauncher
+INFO_PLIST=Info.plist
+JAVADIR=Contents/Java
+if [ $# -gt 0 ]; then
+	if [ "$1" = "compat" ]; then
+		COMPAT=1;
+		LAUNCHER=/System/Library/Frameworks/JavaVM.framework/Versions/Current/Resources/MacOS/JavaApplicationStub
+		INFO_PLIST=Info-compat.plist
+		JAVADIR=Contents/Resources/Java
+	fi
+fi
+
 umask 022
 APP="@CMAKE_PROJECT_NAME@ Viewer.app"
 
@@ -13,15 +26,15 @@ if [ -d "$APP" ]; then
 fi
 
 mkdir -p "$APP/Contents/MacOS"
-mkdir -p "$APP/Contents/Resources/Java"
+mkdir -p "$APP/$JAVADIR"
 mkdir -p "$APP/Contents/Resources/TurboJPEG"
 
-cp pkgscripts/Info.plist.app "$APP/Contents/Info.plist"
-cp /System/Library/Frameworks/JavaVM.framework/Versions/Current/Resources/MacOS/JavaApplicationStub "$APP/Contents/MacOS/"
+cp pkgscripts/$INFO_PLIST "$APP/Contents/Info.plist"
+cp $LAUNCHER "$APP/Contents/MacOS/"
 echo "APPL????" >"$APP/Contents/PkgInfo"
-cp java/VncViewer.jar "$APP/Contents/Resources/Java/"
-cp $SRCDIR/java/com/turbovnc/vncviewer/README.txt "$APP/Contents/Resources/Java/"
-cp $SRCDIR/LICENSE.txt "$APP/Contents/Resources/Java/"
+cp java/VncViewer.jar "$APP/$JAVADIR"
+cp $SRCDIR/java/com/turbovnc/vncviewer/README.txt "$APP/$JAVADIR"
+cp $SRCDIR/LICENSE.txt "$APP/$JAVADIR"
 cp $SRCDIR/release/turbovnc.icns "$APP/Contents/Resources/"
 cp $SRCDIR/release/vncviewer.icns "$APP/Contents/Resources/"
 cp /opt/libjpeg-turbo/lib/libturbojpeg.dylib "$APP/Contents/Resources/TurboJPEG/"

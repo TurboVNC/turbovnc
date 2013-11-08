@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <installer-gui-script minSpecVersion="1">
+	<script>
+	function installationCheck() {
+		if(!(system.compareVersions(system.version.ProductVersion, '@MINOSVER@') >= 0)) {
+			my.result.title = system.localizedString('Cannot install @CMAKE_PROJECT_NAME@');
+			my.result.message = system.localizedString('This package requires OS X @MINOSVER@ or higher.');
+			my.result.type = 'Fatal';
+			return false;
+		}
+	}
+	</script>
+
 	<title>@CMAKE_PROJECT_NAME@</title>
 	<welcome file="Welcome.txt" />
 	<readme file="ReadMe.txt" />
@@ -9,6 +20,7 @@
 		enable_currentUserHome="false"
 		enable_localSystem="true"
 	/>
+	<installation-check script="installationCheck()" />
 	<options customize="never" />
 	<choices-outline>
 		<line choice="default">

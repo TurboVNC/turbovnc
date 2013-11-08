@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleGetInfoString</key>
+	<string>@VERSION@, The VirtualGL Project</string>
+	<key>CFBundleName</key>
+	<string>@CMAKE_PROJECT_NAME@ Viewer</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.turbovnc.vncviewer.VncViewer</string>
+	<key>CFBundleShortVersionString</key>
+	<string>@VERSION@</string>
+	<key>CFBundleVersion</key>
+	<string>@BUILD@</string>
+	<key>CFBundleExecutable</key>
+	<string>JavaAppLauncher</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleIconFile</key>
+	<string>turbovnc.icns</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.7.0</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>vnc</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>vncviewer.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>VNCviewer Config File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+		</dict>
+	</array>
+	<key>JVMMainClassName</key>
+	<string>com.turbovnc.vncviewer.VncViewer</string>
+	<key>JVMOptions</key>
+	<array>
+		<string>-server</string>
+		<string>-d64</string>
+		<string>-Djava.library.path=$APP_PACKAGE/Contents/Resources/TurboJPEG</string>
+	</array>
+</dict>
+</plist>

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2013-11-07T23:06:19">
+<meta name="date" content="2013-11-08T04:21:17">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.3</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -390,7 +390,7 @@ other VNC distributions without interference.</p>
     Color (24-bit or 32-bit) visuals.
 </li>
 <li class="Itemize-0">
-    Java 1.5 or later (Java 1.6 recommended)
+    Java 1.5 or later (Java 1.6 or later recommended)
 </li></ul></td>
   </tr>
 </table>
@@ -419,7 +419,7 @@ other VNC distributions without interference.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Other Software</td>
-    <td class="standard">Java 1.5 or later (Java 1.6 recommended)</td>
+    <td class="standard">Java 1.5 or later (Java 1.6 or later recommended)</td>
   </tr>
 </table>
 </div>
@@ -534,12 +534,17 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
         Download the TurboVNC Mac disk image 
-        (<code>TurboVNC-</code><em><code>{version}</code></em><code>.dmg</code>) 
+        (<code>TurboVNC-</code><em><code>{version}</code></em><code>-Lion.dmg</code> 
+        or 
+        <code>TurboVNC-</code><em><code>{version}</code></em><code>-Leopard.dmg</code>) 
         from the 
         <span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/">Files 
         area</a></span><a name="idx0017"></a> of the 
         <span class="remote"><a class="remote" href="http://sourceforge.net/projects/virtualgl">VirtualGL 
         SourceForge project page</a></span><a name="idx0018"></a>.
+        <div class="important"><p class="important">
+        The &ldquo;Leopard&rdquo; package will work with OS X 10.5 or later.  It uses Apple&rsquo;s distribution of Java, which was pre-installed on versions of OS X prior to 10.7.  The &ldquo;Lion&rdquo; package will work with OS X 10.7 or later.  It uses the Oracle Java 7 plugin.
+        </p></div>
     </li>
     <li class="Ordered-1 Ordered">
         Open the disk image, then open <code>TurboVNC.pkg</code> inside the disk 
