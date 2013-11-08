@@ -44,13 +44,13 @@ safedirmove ()
 COMPAT=0
 LAUNCHER=JavaAppLauncher
 OS=Lion
-DISTRIBUTION_XML=Distribution.xml
+SUFFIX=
 if [ $# -gt 0 ]; then
 	if [ "$1" = "compat" ]; then
 		COMPAT=1;
 		LAUNCHER=JavaApplicationStub
 		OS=Leopard
-		DISTRIBUTION_XML=Distribution-compat.xml
+		SUFFIX=-compat
 	fi
 fi
 
@@ -84,7 +84,7 @@ safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PACKAGE_NAME $TMPDIR
 
 mkdir -p $TMPDIR/pkg/
 cp $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.txt $SRCDIR/release/ReadMe.txt $TMPDIR/pkg/ 
-cp pkgscripts/$DISTRIBUTION_XML $TMPDIR/pkg/Distribution.xml
+cp pkgscripts/Distribution$SUFFIX.xml $TMPDIR/pkg/Distribution.xml
 mkdir -p $PKGROOT$BINDIR/
 install -m 755 pkgscripts/uninstall $PKGROOT$BINDIR/
 
@@ -97,7 +97,7 @@ fi
 ln -fs /Library/Documentation/$PACKAGE_NAME/index.html "$PKGROOT/Applications/$PACKAGE_NAME/$PACKAGE_NAME User's Guide.html"
 install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
 osacompile -t APPL -a i386 -o "$TMPDIR/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
-cp -RX "$PACKAGE_NAME Viewer.app" "$PKGROOT/Applications/$PACKAGE_NAME/"
+cp -RX "$PACKAGE_NAME Viewer$SUFFIX.app" "$PKGROOT/Applications/$PACKAGE_NAME/$PACKAGE_NAME Viewer.app"
 cp -RX "$TMPDIR/Uninstall $PACKAGE_NAME.app" "$PKGROOT/Applications/$PACKAGE_NAME/"
 echo "\"/Applications/$PACKAGE_NAME/$PACKAGE_NAME Viewer.app/Contents/MacOS/$LAUNCHER\" \${1+\"\$@\"}" >$PKGROOT$BINDIR/vncviewer
 chmod 755 $PKGROOT$BINDIR/vncviewer

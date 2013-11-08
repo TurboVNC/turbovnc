@@ -7,17 +7,17 @@ SRCDIR=@CMAKE_SOURCE_DIR@
 
 COMPAT=0
 LAUNCHER=$SRCDIR/release/JavaAppLauncher/JavaAppLauncher
-INFO_PLIST=Info.plist
+SUFFIX=
 if [ $# -gt 0 ]; then
 	if [ "$1" = "compat" ]; then
 		COMPAT=1;
 		LAUNCHER=/System/Library/Frameworks/JavaVM.framework/Versions/Current/Resources/MacOS/JavaApplicationStub
-		INFO_PLIST=Info-compat.plist
+		SUFFIX=-compat
 	fi
 fi
 
 umask 022
-APP="@CMAKE_PROJECT_NAME@ Viewer.app"
+APP="@CMAKE_PROJECT_NAME@ Viewer$SUFFIX.app"
 
 if [ -d "$APP" ]; then
 	rm -rf "$APP"
@@ -27,7 +27,7 @@ mkdir -p "$APP/Contents/MacOS"
 mkdir -p "$APP/Contents/Resources/Java"
 mkdir -p "$APP/Contents/Resources/TurboJPEG"
 
-cp pkgscripts/$INFO_PLIST "$APP/Contents/Info.plist"
+cp pkgscripts/Info$SUFFIX.plist "$APP/Contents/Info.plist"
 cp $LAUNCHER "$APP/Contents/MacOS/"
 echo "APPL????" >"$APP/Contents/PkgInfo"
 cp java/VncViewer.jar "$APP/Contents/Resources/Java/"
