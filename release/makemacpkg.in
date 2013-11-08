@@ -92,7 +92,7 @@ chmod 775 $PKGROOT/Applications
 sh pkgscripts/makemacapp
 ln -fs /Library/Documentation/$PACKAGE_NAME/index.html "$PKGROOT/Applications/$PACKAGE_NAME/$PACKAGE_NAME User's Guide.html"
 install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
-osacompile -t APPL -o "$TMPDIR/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
+osacompile -t APPL -a i386 -o "$TMPDIR/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
 cp -R "$PACKAGE_NAME Viewer.app" "$PKGROOT/Applications/$PACKAGE_NAME/"
 cp -R "$TMPDIR/Uninstall $PACKAGE_NAME.app" "$PKGROOT/Applications/$PACKAGE_NAME/"
 echo "\"/Applications/$PACKAGE_NAME/$PACKAGE_NAME Viewer.app/Contents/MacOS/JavaApplicationStub\" \${1+\"\$@\"}" >$PKGROOT$BINDIR/vncviewer
