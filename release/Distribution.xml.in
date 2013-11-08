@@ -19,6 +19,6 @@
 	<choice id="com.virtualgl.@CMAKE_PROJECT_NAME_LC@" visible="false">
 		<pkg-ref id="com.virtualgl.@CMAKE_PROJECT_NAME_LC@"/>
 	</choice>
-	<pkg-ref
+	<pkg-ref auth="root"
 		id="com.virtualgl.@CMAKE_PROJECT_NAME_LC@">@CMAKE_PROJECT_NAME@.pkg</pkg-ref>
 </installer-gui-script>
