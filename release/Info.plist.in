@@ -45,7 +45,6 @@
 	<array>
 		<string>-server</string>
 		<string>-d64</string>
-		<string>-Djava.library.path=$APP_PACKAGE/Contents/Resources/TurboJPEG</string>
 	</array>
 </dict>
 </plist>

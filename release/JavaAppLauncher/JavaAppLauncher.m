@@ -132,7 +132,7 @@ int launch(char *commandName) {
 
     // Set the class path
     NSString *mainBundlePath = [mainBundle bundlePath];
-    NSString *javaPath = [mainBundlePath stringByAppendingString:@"/Contents/Java"];
+    NSString *javaPath = [mainBundlePath stringByAppendingString:@"/Contents/Resources/Java"];
     NSMutableString *classPath = [NSMutableString stringWithFormat:@"-Djava.class.path=%@/Classes", javaPath];
 
     NSFileManager *defaultFileManager = [NSFileManager defaultManager];
@@ -150,7 +150,7 @@ int launch(char *commandName) {
     }
 
     // Set the library path
-    NSString *libraryPath = [NSString stringWithFormat:@"-Djava.library.path=%@/Contents/MacOS", mainBundlePath];
+    NSString *libraryPath = [NSString stringWithFormat:@"-Djava.library.path=%@/Contents/Resources/TurboJPEG", mainBundlePath];
 
     // Get the VM options
     NSArray *options = [infoDictionary objectForKey:@JVM_OPTIONS_KEY];
