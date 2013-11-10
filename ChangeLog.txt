@@ -48,8 +48,9 @@ connection was successfully made.  vncconnect also now has a -disconnect
 option, which can be used to disconnect all listening viewers.
 -------------------------------------------------------------------------------
 [8]
-Added full support for the X RANDR extension, including the ability to resize
-the remote desktop.
+Added the ability to dynamically resize the remote desktop, either through the
+X RANDR extension on the server or remotely from a VNC client that supports the
+RFB desktop size extensions.
 -------------------------------------------------------------------------------
 [9]
 The Xvnc build system has been completely refactored and now uses CMake, just

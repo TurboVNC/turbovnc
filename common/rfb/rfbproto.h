@@ -434,6 +434,8 @@ typedef struct _rfbInteractionCapsMsg {
                                 rfbFenceFlagSyncNext | \
                                 rfbFenceFlagRequest)
 
+#define rfbSetDesktopSize 251
+
 /* signatures for non-standard messages */
 #define sig_rfbFileListRequest "FTC_LSRQ"
 #define sig_rfbFileDownloadRequest "FTC_DNRQ"
@@ -1321,6 +1323,31 @@ typedef struct _rfbEnableContinuousUpdatesMsg {
 #define sz_rfbEnableContinuousUpdatesMsg 10
 
 /*-----------------------------------------------------------------------------
+ * SetDesktopSize
+ */
+
+typedef struct _rfbScreenDesc {
+    CARD32 id;
+    CARD16 x;
+    CARD16 y;
+    CARD16 w;
+    CARD16 h;
+    CARD32 flags;
+} rfbScreenDesc;
+
+typedef struct _rfbSetDesktopSizeMsg {
+    CARD8 type;			/* always rfbSetDesktopSize */
+    CARD8 pad1;
+    CARD16 w;
+    CARD16 h;
+    CARD8 numScreens;
+    CARD8 pad2;
+    /* Followed by rfbScreenDesc screens[numScreens] */
+} rfbSetDesktopSizeMsg;
+
+#define sz_rfbSetDesktopSizeMsg 8
+
+/*-----------------------------------------------------------------------------
  * Union of all client->server messages.
  */
 
@@ -1342,4 +1369,5 @@ typedef union _rfbClientToServerMsg {
     rfbFileCreateDirRequestMsg fcdr;
     rfbEnableContinuousUpdatesMsg ecu;
     rfbFenceMsg f;
+    rfbSetDesktopSizeMsg sds;
 } rfbClientToServerMsg;

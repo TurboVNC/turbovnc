@@ -634,6 +634,11 @@ extern Bool rfbSendFence(rfbClientPtr cl, CARD32 flags, unsigned len,
 extern Bool rfbSendRTTPing(rfbClientPtr cl);
 
 
+/* randr.c */
+
+extern Bool DesktopResize(ScreenPtr pScreen, int w, int h);
+
+
 /* vncextinit.c */
 
 extern void vncClientCutText(const char* str, int len);

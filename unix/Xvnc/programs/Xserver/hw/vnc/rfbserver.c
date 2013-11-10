@@ -1306,6 +1306,42 @@ rfbProcessClientNormalMessage(cl)
         return;
     }
 
+    case rfbSetDesktopSize:
+    {
+        int w = 0, h = 0, numScreens = 0, i;
+        rfbScreenDesc screen;
+        ScreenPtr pScreen = screenInfo.screens[0];
+
+        if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
+                           sz_rfbSetDesktopSizeMsg - 1)) <= 0) {
+            if (n != 0)
+                rfbLogPerror("rfbProcessClientNormalMessage: read");
+            rfbCloseSock(cl->sock);
+            return;
+        }
+
+        numScreens = msg.sds.numScreens;
+        w = Swap16IfLE(msg.sds.w);
+        h = Swap16IfLE(msg.sds.h);
+
+        for (i = 0; i < numScreens; i++) {
+
+            if ((n = ReadExact(cl->sock, (char *)&screen,
+                               sizeof(rfbScreenDesc))) <= 0) {
+                if (n != 0)
+                    rfbLogPerror("rfbProcessClientNormalMessage: read");
+                rfbCloseSock(cl->sock);
+                return;
+            }
+        }
+
+        if (w > 0 && h > 0 && (pScreen->width != w || pScreen->height != h)) {
+            if (!ResizeDesktop(pScreen, w, h))
+                return;
+        }
+        return;
+    }
+
     default:
 
         rfbLog("rfbProcessClientNormalMessage: unknown message type %d\n",

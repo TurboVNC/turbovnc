@@ -245,9 +245,19 @@ static void xf86SetRootClip (ScreenPtr pScreen, Bool enable)
 }
 
 
+int mm(int dimension)
+{
+  int dpi = 75;
+  if (monitorResolution != 0) {
+    dpi = monitorResolution;
+  }
+  return (dimension * 254 + dpi * 5) / (dpi * 10);
+}
+
+
 Bool vncRRGetInfo(ScreenPtr pScreen, Rotation *rotations)
 {
-  int i, dpi = 75;
+  int i;
   Bool setConfig = FALSE;
   RRScreenSizePtr pSize;
 
@@ -269,15 +279,9 @@ Bool vncRRGetInfo(ScreenPtr pScreen, Rotation *rotations)
     }
   }
 
-  if (monitorResolution != 0) {
-    dpi = monitorResolution;
-  }
-
   for (i = 0; i < sizeof(vncRRResolutions) / sizeof(Res); i++) {
-    int mmWidth = (vncRRResolutions[i].w * 254 + dpi * 5) / (dpi * 10);
-    int mmHeight = (vncRRResolutions[i].h * 254 + dpi * 5) / (dpi * 10);
-    pSize = RRRegisterSize(pScreen, vncRRResolutions[i].w,
-                           vncRRResolutions[i].h, mmWidth, mmHeight);
+    int w = vncRRResolutions[i].w, h = vncRRResolutions[i].h;
+    pSize = RRRegisterSize(pScreen, w, h, mm(w), mm(h));
     if (!pSize) return FALSE;
     RRRegisterRate (pScreen, pSize, 60);
   }
@@ -331,7 +335,6 @@ Bool vncRRSetConfig(ScreenPtr pScreen, Rotation rotation, int rate,
 }
 
 
-
 Bool vncRRInit(ScreenPtr pScreen)
 {
   rrScrPrivPtr rp;
@@ -342,6 +345,55 @@ Bool vncRRInit(ScreenPtr pScreen)
   rp->rrGetInfo = vncRRGetInfo;
   rp->rrSetConfig = vncRRSetConfig;
   return TRUE;
+}
+
+
+Bool ResizeDesktop(ScreenPtr pScreen, int w, int h)
+{
+  int i;  Rotation rotation;  Bool found = FALSE, setConfig = FALSE;
+  RRScreenSize size;  RRScreenSizePtr pSize;
+  Bool ret;
+
+  memset(&size, 0, sizeof(size));
+  size.width = w;
+  size.height = h;
+  size.mmWidth = mm(w);
+  size.mmHeight = mm(h);
+
+  ret = vncRRSetConfig(pScreen, RR_Rotate_0, 0, &size);
+
+  for (i = 0; i < sizeof(vncRRResolutions) / sizeof(Res); i++) {
+    if (vncRRResolutions[i].w == w && vncRRResolutions[i].h == h) {
+      found = TRUE;
+      break;
+    }
+  }
+  for (i = 0; i < pScreen->numDepths; i++) {
+    if (pScreen->allowedDepths[i].numVids) {
+      if (!found) {
+        int w0 = vncRRResolutions[0].w, h0 = vncRRResolutions[0].h;
+        // Resolution 0 always represents the "custom" VNC resolution
+        pSize = RRRegisterSize(pScreen, w0, h0, mm(w0), mm(h0));
+        if (!pSize) return FALSE;
+        pSize->width = vncRRResolutions[0].w = size.width;
+        pSize->height = vncRRResolutions[0].h = size.height;
+        pSize->mmWidth = size.mmWidth;
+        pSize->mmHeight = size.mmHeight;
+      } else {
+        pSize = RRRegisterSize(pScreen, pScreen->width, pScreen->height,
+                               pScreen->mmWidth, pScreen->mmHeight);
+        if (!pSize) return FALSE;
+      }
+      RRRegisterRate (pScreen, pSize, 60);
+
+      if (!setConfig) {
+        RRSetCurrentConfig (pScreen, RR_Rotate_0, 0, pSize);
+        setConfig = TRUE;
+      }
+    }
+  }
+
+  return ret;
 }
 
 #endif
