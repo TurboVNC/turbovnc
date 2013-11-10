@@ -319,7 +319,10 @@ Bool vncRRSetConfig(ScreenPtr pScreen, Rotation rotation, int rate,
                                     rfbScreen.pfbMemory);
   xf86SetRootClip(pScreen, TRUE);
 
+  rfbLog("New desktop size: %d x %d\n", pScreen->width, pScreen->height);
+
   for (cl = rfbClientHead; cl; cl = cl->next) {
+    RegionRec tmpRegion;  BoxRec box;
     Bool reEnableInterframe = (cl->compareFB != NULL);
     InterframeOff(cl);
     if (reEnableInterframe) {
@@ -329,6 +332,32 @@ Bool vncRRSetConfig(ScreenPtr pScreen, Rotation rotation, int rate,
       }
     }
     cl->pendingDesktopResize = TRUE;
+    // Reset all of the regions, so the next FBU will behave as if it
+    // was the first.
+    box.x1 = box.y1 = 0;
+    box.x2 = pScreen->width;  box.y2 = pScreen->height;
+    SAFE_REGION_INIT(pScreen, &tmpRegion, &box, 0);
+    REGION_EMPTY(pScreen, &cl->modifiedRegion);
+    REGION_UNION(pScreen, &cl->modifiedRegion, &cl->modifiedRegion,
+                 &tmpRegion);
+    REGION_EMPTY(pScreen, &cl->copyRegion);
+    REGION_EMPTY(pScreen, &cl->ifRegion);
+    REGION_UNION(pScreen, &cl->ifRegion, &cl->ifRegion, &tmpRegion);
+    if (rfbAutoLosslessRefresh > 0.0) {
+        REGION_EMPTY(pScreen, &cl->alrRegion);
+        REGION_EMPTY(pScreen, &cl->alrEligibleRegion);
+        REGION_EMPTY(pScreen, &cl->lossyRegion);
+        cl->firstUpdate = TRUE;
+    }
+    if (cl->continuousUpdates) {
+        REGION_EMPTY(pScreen, &cl->cuRegion);
+        REGION_UNION(pScreen, &cl->cuRegion, &cl->cuRegion, &tmpRegion);
+    } else {
+        REGION_EMPTY(pScreen, &cl->requestedRegion);
+        REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
+                     &tmpRegion);
+    }
+    REGION_UNINIT(pScreen, &tmpRegion);    
   }
 
   return ret;
@@ -352,7 +381,6 @@ Bool ResizeDesktop(ScreenPtr pScreen, int w, int h)
 {
   int i;  Rotation rotation;  Bool found = FALSE, setConfig = FALSE;
   RRScreenSize size;  RRScreenSizePtr pSize;
-  Bool ret;
 
   memset(&size, 0, sizeof(size));
   size.width = w;
@@ -360,7 +388,8 @@ Bool ResizeDesktop(ScreenPtr pScreen, int w, int h)
   size.mmWidth = mm(w);
   size.mmHeight = mm(h);
 
-  ret = vncRRSetConfig(pScreen, RR_Rotate_0, 0, &size);
+  if (RRSetScreenConfig(pScreen, RR_Rotate_0, 0, &size) != Success)
+    return FALSE;
 
   for (i = 0; i < sizeof(vncRRResolutions) / sizeof(Res); i++) {
     if (vncRRResolutions[i].w == w && vncRRResolutions[i].h == h) {
@@ -393,7 +422,7 @@ Bool ResizeDesktop(ScreenPtr pScreen, int w, int h)
     }
   }
 
-  return ret;
+  return TRUE;
 }
 
 #endif
