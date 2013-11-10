@@ -60,6 +60,12 @@ if(NOT EXISTS ${TJPEG_JAR})
 	message(FATAL_ERROR "Could not find TurboJPEG JAR file at ${TJPEG_JAR}.  Set TJPEG_JAR to the full pathname of turbojpeg.jar or install the libjpeg-turbo SDK.")
 endif()
 
+if(APPLE)
+	set(DEFAULT_TJPEG_JNILIBRARY /opt/libjpeg-turbo/lib/libturbojpeg.dylib)
+	set(TJPEG_JNILIBRARY ${DEFAULT_TJPEG_JNILIBRARY} CACHE PATH
+		"Shared library containing TurboJPEG JNI functions (default: ${DEFAULT_TJPEG_JNILIBRARY})")
+endif()
+
 set(JAVA_SOURCES "")
 set(JAVA_CLASSES "")
 
