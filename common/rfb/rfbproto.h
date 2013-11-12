@@ -376,6 +376,19 @@ typedef struct _rfbInteractionCapsMsg {
  */
 
 
+/*-----------------------------------------------------------------------------
+ * Extended desktop size reason and result codes
+ */
+
+#define rfbEDSReasonServer 0
+#define rfbEDSReasonClient 1
+#define rfbEDSReasonOtherClient 2
+
+#define rfbEDSResultSuccess 0
+#define rfbEDSResultProhibited 1
+#define rfbEDSResultNoResources 2
+#define rfbEDSResultInvalid 3
+
 
 /*****************************************************************************
  *
@@ -1334,6 +1347,8 @@ typedef struct _rfbScreenDesc {
     CARD16 h;
     CARD32 flags;
 } rfbScreenDesc;
+
+#define sz_rfbScreenDesc 16
 
 typedef struct _rfbSetDesktopSizeMsg {
     CARD8 type;			/* always rfbSetDesktopSize */

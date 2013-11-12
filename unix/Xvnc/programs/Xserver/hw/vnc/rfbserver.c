@@ -391,6 +391,10 @@ rfbNewClient(sock)
     }
 
     cl->firstUpdate = TRUE;
+    /* The TigerVNC Viewer won't enable remote desktop resize until it receives
+       a desktop resize message from the server, so we give it one with the
+       first FBU. */
+    cl->pendingDesktopResize = TRUE;
 
     if (rfbAutoLosslessRefresh > 0.0) {
         REGION_INIT(pScreen, &cl->lossyRegion, NullBox, 0);
@@ -1311,6 +1315,7 @@ rfbProcessClientNormalMessage(cl)
         int w = 0, h = 0, numScreens = 0, i;
         rfbScreenDesc screen;
         ScreenPtr pScreen = screenInfo.screens[0];
+        rfbClientPtr cl2;
 
         if ((n = ReadExact(cl->sock, ((char *)&msg) + 1,
                            sz_rfbSetDesktopSizeMsg - 1)) <= 0) {
@@ -1338,6 +1343,12 @@ rfbProcessClientNormalMessage(cl)
         if (w > 0 && h > 0 && (pScreen->width != w || pScreen->height != h)) {
             if (!ResizeDesktop(pScreen, w, h))
                 return;
+            for (cl2 = rfbClientHead; cl2; cl2 = cl2->next) {
+                if (cl2 == cl)
+                    cl->reason = rfbEDSReasonClient;
+                else
+                    cl->reason = rfbEDSReasonOtherClient;
+            }
         }
         return;
     }
@@ -2201,8 +2212,17 @@ rfbSendDesktopSize(rfbClientPtr cl)
         return FALSE;
     }
 
-    rh.encoding = Swap32IfLE(rfbEncodingNewFBSize);
-    rh.r.x = rh.r.y = 0;
+    if (cl->enableExtDesktopSize) {
+        /* Send the ExtendedDesktopSize message, if the client supports it.
+           The TigerVNC Viewer, in particular, requires this, or it won't
+           enable remote desktop resize. */
+        rh.encoding = Swap32IfLE(rfbEncodingExtendedDesktopSize);
+        rh.r.x = Swap16IfLE(cl->reason);
+        rh.r.y = Swap16IfLE(rfbEDSResultSuccess);
+    } else {
+        rh.encoding = Swap32IfLE(rfbEncodingNewFBSize);
+        rh.r.x = rh.r.y = 0;
+    }
     rh.r.w = Swap16IfLE(rfbScreen.width);
     rh.r.h = Swap16IfLE(rfbScreen.height);
     if (WriteExact(cl->sock, (char *)&rh,
@@ -2210,6 +2230,25 @@ rfbSendDesktopSize(rfbClientPtr cl)
         rfbLogPerror("rfbSendDesktopSize: write");
         rfbCloseSock(cl->sock);
         return FALSE;
+    }
+
+    if (cl->enableExtDesktopSize) {
+        char numScreens[4] = {1, 0, 0, 0};
+        rfbScreenDesc screen;
+        if (WriteExact(cl->sock, numScreens, 4) < 0) {
+            rfbLogPerror("rfbSendDesktopSize: write");
+            rfbCloseSock(cl->sock);
+            return FALSE;
+        }
+        screen.id = screen.flags = 0;
+        screen.x = screen.y = 0;
+        screen.w = rh.r.w;
+        screen.h = rh.r.h;
+        if (WriteExact(cl->sock, (char *)&screen, sz_rfbScreenDesc) < 0) {
+            rfbLogPerror("rfbSendDesktopSize: write");
+            rfbCloseSock(cl->sock);
+            return FALSE;
+        }
     }
 
     return TRUE;

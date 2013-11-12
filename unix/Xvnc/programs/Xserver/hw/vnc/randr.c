@@ -332,6 +332,7 @@ Bool vncRRSetConfig(ScreenPtr pScreen, Rotation rotation, int rate,
       }
     }
     cl->pendingDesktopResize = TRUE;
+    cl->reason = rfbEDSReasonServer;
     // Reset all of the regions, so the next FBU will behave as if it
     // was the first.
     box.x1 = box.y1 = 0;
@@ -380,16 +381,7 @@ Bool vncRRInit(ScreenPtr pScreen)
 Bool ResizeDesktop(ScreenPtr pScreen, int w, int h)
 {
   int i;  Bool found = FALSE, setConfig = FALSE;
-  RRScreenSize size;  RRScreenSizePtr pSize;
-
-  memset(&size, 0, sizeof(size));
-  size.width = w;
-  size.height = h;
-  size.mmWidth = mm(w);
-  size.mmHeight = mm(h);
-
-  if (RRSetScreenConfig(pScreen, RR_Rotate_0, 0, &size) != Success)
-    return FALSE;
+  RRScreenSizePtr pSize = NULL;
 
   for (i = 0; i < sizeof(vncRRResolutions) / sizeof(Res); i++) {
     if (vncRRResolutions[i].w == w && vncRRResolutions[i].h == h) {
@@ -404,13 +396,12 @@ Bool ResizeDesktop(ScreenPtr pScreen, int w, int h)
         // Resolution 0 always represents the "custom" VNC resolution
         pSize = RRRegisterSize(pScreen, w0, h0, mm(w0), mm(h0));
         if (!pSize) return FALSE;
-        pSize->width = vncRRResolutions[0].w = size.width;
-        pSize->height = vncRRResolutions[0].h = size.height;
-        pSize->mmWidth = size.mmWidth;
-        pSize->mmHeight = size.mmHeight;
+        pSize->width = vncRRResolutions[0].w = w;
+        pSize->height = vncRRResolutions[0].h = h;
+        pSize->mmWidth = mm(w);
+        pSize->mmHeight = mm(h);
       } else {
-        pSize = RRRegisterSize(pScreen, pScreen->width, pScreen->height,
-                               pScreen->mmWidth, pScreen->mmHeight);
+        pSize = RRRegisterSize(pScreen, w, h, mm(w), mm(h));
         if (!pSize) return FALSE;
       }
       RRRegisterRate (pScreen, pSize, 60);
@@ -421,6 +412,9 @@ Bool ResizeDesktop(ScreenPtr pScreen, int w, int h)
       }
     }
   }
+
+  if (RRSetScreenConfig(pScreen, RR_Rotate_0, 0, pSize) != Success)
+    return FALSE;
 
   return TRUE;
 }

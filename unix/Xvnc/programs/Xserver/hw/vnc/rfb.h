@@ -346,6 +346,7 @@ typedef struct rfbClientRec {
     struct timeval lastWrite;
 
     Bool pendingDesktopResize;
+    int reason;
 
 } rfbClientRec, *rfbClientPtr;
 
