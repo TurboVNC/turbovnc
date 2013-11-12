@@ -267,11 +267,17 @@ static AuthCapData  authCapNone      = { rfbAuthNone, rfbStandardVendor, sig_rfb
 static AuthCapData  authCapVncauth   = { rfbAuthVNC, rfbStandardVendor, sig_rfbAuthVNC,
                                          rfbVncAuthSendChallenge, rfbVncAuthProcessResponse};
 
+#ifdef XVNC_AuthPAM
 static AuthCapData  authCapUnixLogin = { rfbAuthUnixLogin, rfbTightVncVendor, sig_rfbAuthUnixLogin,
                                          AuthPAMUserPwdStartFunc, AuthPAMUserPwdRspFunc};
+#endif
 
 static AuthCapData* authCaps[] = {
-    &authCapNone, &authCapVncauth, &authCapUnixLogin, NULL
+    &authCapNone, &authCapVncauth,
+#ifdef XVNC_AuthPAM
+    &authCapUnixLogin,
+#endif
+    NULL
 };
 
 typedef struct {
