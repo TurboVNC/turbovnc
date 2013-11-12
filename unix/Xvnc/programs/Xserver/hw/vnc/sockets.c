@@ -49,6 +49,7 @@
 #include <netdb.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <unistd.h>
 
 #ifndef USE_LIBWRAP
 #define USE_LIBWRAP 0

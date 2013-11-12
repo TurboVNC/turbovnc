@@ -1242,6 +1242,7 @@ RRRegisterSize (ScreenPtr	    pScreen,
     if (!pScrPriv)
 	return 0;
     
+    tmp.id = 0;
     tmp.width = width;
     tmp.height= height;
     tmp.mmWidth = mmWidth;

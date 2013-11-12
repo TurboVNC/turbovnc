@@ -96,6 +96,10 @@ from the X Consortium.
 #define RFB_DEFAULT_WHITEPIXEL 0
 #define RFB_DEFAULT_BLACKPIXEL 1
 
+#ifdef RANDR
+extern Bool miRandRInit(ScreenPtr);
+#endif
+
 rfbScreenInfo rfbScreen;
 int rfbGCIndex;
 
