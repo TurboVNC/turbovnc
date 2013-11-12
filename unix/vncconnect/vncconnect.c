@@ -46,7 +46,6 @@ int main(int argc, char **argv)
   char *displayname = NULL;
   Display *dpy;
   int i, disconnect = 0, status = 0;
-  Atom prop;
 
   programName = argv[0];
   

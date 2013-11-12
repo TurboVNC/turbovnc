@@ -636,7 +636,7 @@ extern Bool rfbSendRTTPing(rfbClientPtr cl);
 
 /* randr.c */
 
-extern Bool DesktopResize(ScreenPtr pScreen, int w, int h);
+extern Bool ResizeDesktop(ScreenPtr pScreen, int w, int h);
 
 
 /* vncextinit.c */

@@ -143,4 +143,5 @@ int main(void) {
   if (shminfo.shmid != -1) shmctl(shminfo.shmid, IPC_RMID, 0);
   if (win) XDestroyWindow(dpy, win);
   if (dpy) XCloseDisplay(dpy);
+  return 0;
 }

@@ -379,7 +379,7 @@ Bool vncRRInit(ScreenPtr pScreen)
 
 Bool ResizeDesktop(ScreenPtr pScreen, int w, int h)
 {
-  int i;  Rotation rotation;  Bool found = FALSE, setConfig = FALSE;
+  int i;  Bool found = FALSE, setConfig = FALSE;
   RRScreenSize size;  RRScreenSizePtr pSize;
 
   memset(&size, 0, sizeof(size));
