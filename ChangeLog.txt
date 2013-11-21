@@ -70,6 +70,12 @@ The Windows TurboVNC Viewer should now build properly with Visual Studio 2012.
 The "Uninstall TurboVNC" app should once again work on 32-bit OS X 10.5
 machines.
 -------------------------------------------------------------------------------
+[16]
+Added two new command-line options to PuTTY, -L4 and -L6.  These work just like
+-L, except that -L4 forces PuTTY to use an IPv4 interface for the client side
+of the SSH tunnel, and -L6 forces PuTTY to use an IPv6 interface for the client
+side of the SSH tunnel.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================

@@ -181,6 +181,9 @@ After the SSH connection has been established, you can then launch the
 TurboVNC Viewer and point it to ''localhost:''__''{n}''__ (''localhost:1'' in the
 above example.)
 
+	!!! You can force PuTTY to use an IPv6 interface for the local end of the
+	tunnel by replacing ''-L'' with ''-L6'' in the above command line.
+
 *** The ''-via'' and ''-tunnel'' Command-Line Options
 #OPT: noList! plain!
 
