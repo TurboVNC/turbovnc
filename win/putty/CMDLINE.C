@@ -203,7 +203,8 @@ int cmdline_process_param(char *p, char *value, int need_save, Config *cfg)
 	strncpy(cfg->username, value, sizeof(cfg->username));
 	cfg->username[sizeof(cfg->username) - 1] = '\0';
     }
-    if ((!strcmp(p, "-L") || !strcmp(p, "-R") || !strcmp(p, "-D"))) {
+    if ((!strcmp(p, "-L") || !strcmp(p, "-R") || !strcmp(p, "-D") ||
+         !strcmp(p, "-L6") || !strcmp(p, "-L4"))) {
 	char *fwd, *ptr, *q, *qq;
 	int dynamic, i=0;
 	RETURN(2);
@@ -219,6 +220,11 @@ int cmdline_process_param(char *p, char *value, int need_save, Config *cfg)
 	    ptr++;
 	}
 	i = (int)(ptr - cfg->portfwd);
+	if (!strcmp(p, "-L6")) {
+	    *ptr++ = '6';
+	} else if (!strcmp(p, "-L4")) {
+	    *ptr++ = '4';
+        }
 	ptr[0] = p[1];  /* insert a 'L', 'R' or 'D' at the start */
 	ptr++;
 	if (1 + strlen(fwd) + 2 > sizeof(cfg->portfwd) - i) {
