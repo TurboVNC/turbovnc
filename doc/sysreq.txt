@@ -4,20 +4,16 @@
 
 || || Server (x86) || Server (x86-64) || Client ||
 | Recommended CPU \
-	| Pentium 4, 1.7 GHz or faster (or equivalent) \
-		{list type=ul: \
-			{item:For optimal performance, the processor should support SSE2 \
+	| {list type=ul: \
+			{item:For optimal performance, the CPU should support SSE2 \
 				extensions.} \
 			{item:Dual processors or dual cores recommended}} \
-	| Pentium 4/Xeon with EM64T, or...{nl} \
-		AMD Opteron or Athlon64, 1.8 GHz or faster \
-		{list type=ul: \
-			{item:Dual processors or dual cores recommended}} \
-	| Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent) \
+	| Dual processors or dual cores recommended \
+	| For optimal performance, the CPU should support SSE2 extensions. \
 	|
 | Other \
 	| {:} | {:} \
-	| For best performance, the X server should be configured to export True \
+	| For optimal performance, the X server should be configured to export True \
 		Color (24-bit or 32-bit) visuals. \
 	|
 #OPT: hiCol=first
@@ -40,13 +36,13 @@
 
 || || Client ||
 | Recommended CPU \
-	| Pentium III or Pentium 4, 1.0 GHz or faster (or equivalent) \
+	| For optimal performance, the CPU should support SSE2 extensions. \
 	|
 | O/S \
 	| Windows 2000 SP1 or later \
 	|
 | Other \
-	| For best performance, client display should have a 24-bit or 32-bit (True \
+	| For optimal performance, the client display should have a 24-bit or 32-bit (True \
 		Color) color depth. \
 	|
 #OPT: hiCol=first
