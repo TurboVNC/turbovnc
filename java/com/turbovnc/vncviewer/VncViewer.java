@@ -1026,6 +1026,9 @@ public class VncViewer extends javax.swing.JApplet
   "statistics are updated in the dialog or on the console.  The statistics are " +
   "averaged over this interval.", 5);
 
+  static BoolParameter clientRedirect
+  = new BoolParameter("ClientRedirect", null, false);
+
   Thread thread;
   Socket sock;
   boolean applet;
