@@ -957,6 +957,9 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   "by selecting \"Save connection info as...\" in the system menu of the Windows " +
   "TurboVNC Viewer.", null);
 
+  static BoolParameter clientRedirect
+  = new BoolParameter("ClientRedirect", null, false);
+
   Thread thread;
   Socket sock;
   boolean applet;

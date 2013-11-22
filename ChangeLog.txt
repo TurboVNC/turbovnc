@@ -76,6 +76,15 @@ Added two new command-line options to PuTTY, -L4 and -L6.  These work just like
 of the SSH tunnel, and -L6 forces PuTTY to use an IPv6 interface for the client
 side of the SSH tunnel.
 -------------------------------------------------------------------------------
+[17]
+Worked around an issue whereby the Java/Mac TurboVNC Viewer would abort with
+"InStream max string length exceeded" when connecting to recent versions of the
+RealVNC Server.  This was due to a protocol conflict.  Apparently, RealVNC
+uses pseudo-encoding number -311 for their CursorWithAlpha extension, but
+TigerVNC uses -311 for ClientRedirect.  At least for now, ClientRedirect has
+been disabled in the Java TurboVNC Viewer by default, but there is a new hidden
+parameter (ClientRedirect) that can be set to 1 to re-enable it.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
