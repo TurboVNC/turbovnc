@@ -55,7 +55,7 @@ VNCOptions::VNCOptions()
   m_PreferredEncoding = rfbEncodingTight;
   m_LastEncoding = -1;
   m_SwapMouse = false;
-  m_Emul3Buttons = true;
+  m_Emul3Buttons = false;
   m_Emul3Timeout = 100; // milliseconds
   m_Emul3Fuzz = 4;      // pixels away before emulation is cancelled
   m_Shared = true;

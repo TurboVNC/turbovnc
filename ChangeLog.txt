@@ -85,6 +85,12 @@ TigerVNC uses -311 for ClientRedirect.  At least for now, ClientRedirect has
 been disabled in the Java TurboVNC Viewer by default, but there is a new hidden
 parameter (ClientRedirect) that can be set to 1 to re-enable it.
 -------------------------------------------------------------------------------
+[18]
+Due to an oversight, the 3-button mouse emulation feature in the Windows
+TurboVNC Viewer was being enabled by default.  This has been fixed.  3-button
+mouse emulation is largely unnecessary with modern systems, and the feature is
+known to cause issues with certain applications.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
