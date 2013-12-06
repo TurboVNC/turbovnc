@@ -279,6 +279,13 @@ class ProfileDialog extends Dialog {
     }      
   }
 
+  protected void processWindowEvent(WindowEvent e) {
+    if (e.getID() == WindowEvent.WINDOW_CLOSING) {
+      endDialog();
+      cc.toggleProfile();
+    }
+  }
+
   CConn cc;
   public JLabel upsVal, tpVal;
   public JLabel tpuRecvVal, tpuDecodeVal, tpuBlitVal, tpuTotalVal;
