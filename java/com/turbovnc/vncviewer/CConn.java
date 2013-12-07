@@ -782,7 +782,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     int h = desktop.scaledHeight;
     Rectangle span = getSpannedSize(false);
 
-    if (opts.fullScreen) return;
+    if (opts.fullScreen || VncViewer.embed.getValue())
+      return;
 
     if (opts.scalingFactor == Options.SCALE_AUTO ||
         opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
@@ -1309,7 +1310,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
   public void toggleToolbar() {
-    if (viewport == null || opts.fullScreen)
+    if (viewport == null || opts.fullScreen || VncViewer.embed.getValue())
       return;
     showToolbar = !showToolbar;
     recreateViewport();
@@ -1318,6 +1319,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
   public void toggleFullScreen() {
+    if (VncViewer.embed.getValue())
+      return;
     opts.fullScreen = !opts.fullScreen;
     menu.fullScreen.setSelected(opts.fullScreen);
     if (viewport != null) {
