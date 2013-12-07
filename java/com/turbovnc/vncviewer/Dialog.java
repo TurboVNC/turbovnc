@@ -52,13 +52,6 @@ class Dialog extends JDialog {
     }
     ((Frame)getOwner()).setIconImage(VncViewer.frameImage);
 
-    if (w != null && w.isAlwaysOnTop()) {
-      // We must be in full-screen mode.  Temporarily prevent the viewport from
-      // being always on top until we close the dialog
-      w.setAlwaysOnTop(false);
-      window = w;
-    }
-
     setVisible(true);
     setFocusable(true);
     setAlwaysOnTop(true);
@@ -73,10 +66,6 @@ class Dialog extends JDialog {
     setVisible(false);
     setFocusable(false);
     setAlwaysOnTop(false);
-    if (window != null) {
-      window.setAlwaysOnTop(true);
-      window = null;
-    }
   }
 
   // initDialog() can be overridden in a derived class.  Typically it is used
@@ -107,7 +96,5 @@ class Dialog extends JDialog {
   }
 
   protected boolean ret = true;
-
-  Window window;
 
 }
