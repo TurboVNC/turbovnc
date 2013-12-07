@@ -312,7 +312,6 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     if (VncViewer.embed.getValue()) {
       desktop.setScaledSize();
       setupEmbeddedFrame();
-      viewer.validate();
     } else {
       recreateViewport();
     }
@@ -347,7 +346,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
     sp.getViewport().setView(desktop);
-    desktop.requestFocus();
+    viewer.getContentPane().removeAll();
     viewer.add(sp);
     viewer.addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) {
@@ -358,6 +357,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         releaseModifiers();
       }
     });
+    viewer.validate();
+    desktop.requestFocus();
   }
 
   // setDesktopSize() is called when the desktop size changes (including when
@@ -700,7 +701,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     desktop.resize();
     if (VncViewer.embed.getValue()) {
       desktop.setScaledSize();
-      viewer.validate();
+      setupEmbeddedFrame();
     } else {
       recreateViewport();
     }
