@@ -229,22 +229,30 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     if (!r.isEmpty()) {
       if (cc.cp.width != scaledWidth || cc.cp.height != scaledHeight) {
         int x = (int)Math.floor(r.tl.x * scaleWidthRatio);
-        if (cc.viewport.dx > 0)
-          x += cc.viewport.dx;
         int y = (int)Math.floor(r.tl.y * scaleHeightRatio);
-        if (cc.viewport.dy > 0)
-          y += cc.viewport.dy;
         // Need one extra pixel to account for rounding.
         int width = (int)Math.ceil(r.width() * scaleWidthRatio) + 1;
         int height = (int)Math.ceil(r.height() * scaleHeightRatio) + 1;
-        if (x + width > scaledWidth + cc.viewport.dx)
-          width = scaledWidth + cc.viewport.dx - x;
-        if (y + height > scaledHeight + cc.viewport.dy)
-          height = scaledHeight + cc.viewport.dy - y;
+        if (cc.viewport != null) {
+          if (cc.viewport.dx > 0)
+            x += cc.viewport.dx;
+          if (cc.viewport.dy > 0)
+            y += cc.viewport.dy;
+          if (x + width > scaledWidth + cc.viewport.dx)
+            width = scaledWidth + cc.viewport.dx - x;
+          if (y + height > scaledHeight + cc.viewport.dy)
+            height = scaledHeight + cc.viewport.dy - y;
+        }
         paintImmediately(x, y, width, height);
       } else {
-        int x = (cc.viewport.dx > 0) ? cc.viewport.dx + r.tl.x : r.tl.x;
-        int y = (cc.viewport.dy > 0) ? cc.viewport.dy + r.tl.y : r.tl.y;
+        int x = r.tl.x;
+        int y = r.tl.y;
+        if (cc.viewport != null) {
+          if (cc.viewport.dx > 0)
+            x += cc.viewport.dx;
+          if (cc.viewport.dy > 0)
+            y += cc.viewport.dy;
+        }
         paintImmediately(x, y, r.width(), r.height());
       }
       damage.clear();
@@ -367,7 +375,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   public void paintComponent(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
-    if (cc.viewport.dx > 0 || cc.viewport.dy > 0)
+    if (cc.viewport != null && (cc.viewport.dx > 0 || cc.viewport.dy > 0))
       g2.translate(cc.viewport.dx, cc.viewport.dy);
     if (cc.cp.width != scaledWidth || cc.cp.height != scaledHeight) {
       g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
@@ -409,11 +417,13 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   // Mouse-Motion callback function
   private void mouseMotionCB(MouseEvent e) {
+    int x = (cc.viewport == null) ? 0 : cc.viewport.dx;
+    int y = (cc.viewport == null) ? 0 : cc.viewport.dy;
     if (!cc.opts.viewOnly &&
-        e.getX() >= cc.viewport.dx && 
-        e.getY() >= cc.viewport.dy && 
-        e.getX() <= cc.viewport.dx + scaledWidth &&
-        e.getY() <= cc.viewport.dy + scaledHeight)
+        e.getX() >= x && 
+        e.getY() >= y && 
+        e.getX() <= x + scaledWidth &&
+        e.getY() <= y + scaledHeight)
       cc.writePointerEvent(e);
     // - If local cursor rendering is enabled then use it
     if (cursorAvailable) {
@@ -437,11 +447,13 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
 
   // Mouse callback function
   private void mouseCB(MouseEvent e) {
+    int x = (cc.viewport == null) ? 0 : cc.viewport.dx;
+    int y = (cc.viewport == null) ? 0 : cc.viewport.dy;
     if (!cc.opts.viewOnly && (e.getID() == MouseEvent.MOUSE_RELEASED ||
-        (e.getX() >= cc.viewport.dx && 
-         e.getY() >= cc.viewport.dy && 
-         e.getX() <= cc.viewport.dx + scaledWidth &&
-         e.getY() <= cc.viewport.dy + scaledHeight)))
+        (e.getX() >= x && 
+         e.getY() >= y && 
+         e.getX() <= x + scaledWidth &&
+         e.getY() <= y + scaledHeight)))
       cc.writePointerEvent(e);
     lastX = e.getX();
     lastY = e.getY();

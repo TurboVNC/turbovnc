@@ -64,22 +64,6 @@ public class Viewport extends JFrame {
     }
     tb = new Toolbar(cc);
     add(tb, BorderLayout.PAGE_START);
-    if (VncViewer.embed.getValue()) {
-      cc.viewer.add(sp);
-      sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-      sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-      sp.validate();
-      cc.viewer.addFocusListener(new FocusAdapter() {
-        public void focusGained(FocusEvent e) {
-          if (cc.desktop.isAncestorOf(cc.viewer))
-            cc.desktop.requestFocus();
-        }
-        public void focusLost(FocusEvent e) {
-          cc.releaseModifiers();
-        }
-      });
-      return;
-    }
     getContentPane().add(sp);
     if (VncViewer.os.startsWith("mac os x")) {
       macMenu = new MacMenuBar(cc);
@@ -239,24 +223,17 @@ public class Viewport extends JFrame {
 
   public void setChild(DesktopWindow child) {
     sp.getViewport().setView(child);
-    if (VncViewer.embed.getValue()) {
-      cc.desktop.requestFocus();
-    }
   }
 
   public void setGeometry(int x, int y, int w, int h, boolean pack) {
-    if (VncViewer.embed.getValue()) {
-      cc.viewer.validate();
+    if (pack) {
+      pack();
+      vlog.debug("Set geometry to " + x + ", " + y + " (pack)");
     } else {
-      if (pack) {
-        pack();
-        vlog.debug("Set geometry to " + x + ", " + y + " (pack)");
-      } else {
-        setSize(w, h);
-        vlog.debug("Set geometry to " + x + ", " + y + " " + w + " x " + h);
-      }
-      setLocation(x, y);
+      setSize(w, h);
+      vlog.debug("Set geometry to " + x + ", " + y + " " + w + " x " + h);
     }
+    setLocation(x, y);
   }
 
   public void showToolbar(boolean show) { showToolbar(show, false); }

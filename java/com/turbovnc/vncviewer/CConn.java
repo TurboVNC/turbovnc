@@ -309,7 +309,55 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     cp.setPF(pendingPF);
     pendingPFChange = false;
 
-    recreateViewport();
+    if (VncViewer.embed.getValue()) {
+      desktop.setScaledSize();
+      setupEmbeddedFrame();
+      viewer.validate();
+    } else {
+      recreateViewport();
+    }
+  }
+
+  void setupEmbeddedFrame() {
+    UIManager.getDefaults().put("ScrollPane.ancestorInputMap",
+      new UIDefaults.LazyInputMap(new Object[]{}));
+    JScrollPane sp = new JScrollPane();
+    sp.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    sp.getViewport().setBackground(Color.BLACK);
+    InputMap im = sp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    int ctrlAltShiftMask = Event.SHIFT_MASK | Event.CTRL_MASK | Event.ALT_MASK;
+    if (im != null) {
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, ctrlAltShiftMask),
+             "unitScrollUp");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, ctrlAltShiftMask),
+             "unitScrollDown");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, ctrlAltShiftMask),
+             "unitScrollLeft");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, ctrlAltShiftMask),
+             "unitScrollRight");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, ctrlAltShiftMask),
+             "scrollUp");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, ctrlAltShiftMask),
+             "scrollDown");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, ctrlAltShiftMask),
+             "scrollLeft");
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_END, ctrlAltShiftMask),
+             "scrollRight");
+    }
+    sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+    sp.getViewport().setView(desktop);
+    desktop.requestFocus();
+    viewer.add(sp);
+    viewer.addFocusListener(new FocusAdapter() {
+      public void focusGained(FocusEvent e) {
+        if (desktop.isAncestorOf(viewer))
+          desktop.requestFocus();
+      }
+      public void focusLost(FocusEvent e) {
+        releaseModifiers();
+      }
+    });
   }
 
   // setDesktopSize() is called when the desktop size changes (including when
@@ -638,11 +686,24 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
     if ((cp.width == 0) && (cp.height == 0))
       return;
-    if ((desktop.width() == cp.width) && (desktop.height() == cp.height))
+    int w, h;
+    if (VncViewer.embed.getValue()) {
+      w = desktop.scaledWidth;
+      h = desktop.scaledHeight;
+    } else {
+      w = desktop.width();
+      h = desktop.height();
+    }
+    if ((w == cp.width) && (h == cp.height))
       return;
 
     desktop.resize();
-    recreateViewport();
+    if (VncViewer.embed.getValue()) {
+      desktop.setScaledSize();
+      viewer.validate();
+    } else {
+      recreateViewport();
+    }
   }
 
   // recreateViewport() recreates our top-level window.  This seems to be
@@ -656,6 +717,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
   private void recreateViewport(boolean restore) {
     boolean fullScreen = opts.fullScreen;
+    if (VncViewer.embed.getValue())
+      return;
     if (viewport != null) {
       if (opts.fullScreen) {
         savedState = viewport.getExtendedState();
@@ -674,7 +737,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     viewport.setUndecorated(opts.fullScreen);
     desktop.setViewport(viewport);
     reconfigureViewport(restore);
-    if ((cp.width > 0) && (cp.height > 0) && !VncViewer.embed.getValue())
+    if ((cp.width > 0) && (cp.height > 0))
       viewport.setVisible(true);
     if (fullScreen && viewport.lionFSSupported()) {
       opts.fullScreen = fullScreen;
@@ -782,7 +845,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     int h = desktop.scaledHeight;
     Rectangle span = getSpannedSize(false);
 
-    if (opts.fullScreen || VncViewer.embed.getValue())
+    if (opts.fullScreen)
       return;
 
     if (opts.scalingFactor == Options.SCALE_AUTO ||
@@ -1334,7 +1397,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
   public void toggleProfile() {
     menu.profile.setSelected(profileDialog.isVisible());
-    viewport.updateMacMenuProfile();
+    if (viewport != null)
+      viewport.updateMacMenuProfile();
   }
 
   // writeClientCutText() is called from the clipboard dialog
