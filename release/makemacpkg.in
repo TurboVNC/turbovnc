@@ -42,7 +42,7 @@ safedirmove ()
 }
 
 COMPAT=0
-LAUNCHER=JavaAppLauncher
+LAUNCHER="@CMAKE_PROJECT_NAME@ Viewer"
 OS=Lion
 SUFFIX=
 if [ $# -gt 0 ]; then

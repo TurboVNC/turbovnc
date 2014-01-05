@@ -13,7 +13,7 @@
 	<key>CFBundleVersion</key>
 	<string>@BUILD@</string>
 	<key>CFBundleExecutable</key>
-	<string>JavaAppLauncher</string>
+	<string>@CMAKE_PROJECT_NAME@ Viewer</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>

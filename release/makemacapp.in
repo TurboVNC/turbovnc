@@ -28,7 +28,11 @@ mkdir -p "$APP/Contents/Resources/Java"
 mkdir -p "$APP/Contents/Resources/TurboJPEG"
 
 cp pkgscripts/Info$SUFFIX.plist "$APP/Contents/Info.plist"
-cp $LAUNCHER "$APP/Contents/MacOS/"
+if [ $COMPAT = 1 ]; then
+  cp $LAUNCHER "$APP/Contents/MacOS/"
+else
+  cp $LAUNCHER "$APP/Contents/MacOS/@CMAKE_PROJECT_NAME@ Viewer"
+fi
 echo "APPL????" >"$APP/Contents/PkgInfo"
 cp java/VncViewer.jar "$APP/Contents/Resources/Java/"
 cp $SRCDIR/java/com/turbovnc/vncviewer/README.txt "$APP/Contents/Resources/Java/"
