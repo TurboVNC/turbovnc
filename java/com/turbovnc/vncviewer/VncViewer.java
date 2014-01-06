@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2013 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2014 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -391,7 +391,8 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   }
 
   public void exit(int n) {
-    nViewers--;
+    if (nViewers > 0)
+      nViewers--;
     if (nViewers > 0)
       return;
     if (applet) {

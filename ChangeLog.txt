@@ -6,6 +6,11 @@ Fixed an issue in the Java TurboVNC Viewer whereby the ability to control the
 Options dialog with the keyboard was lost after the first time the dialog was
 popped up and dismissed.
 -------------------------------------------------------------------------------
+[2]
+Fixed an issue in the Java TurboVNC Viewer whereby, when running in applet
+mode, it would not read the applet parameters if an SSH connection error was
+encountered and the applet was reloaded in the browser.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
