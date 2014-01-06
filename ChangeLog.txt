@@ -11,6 +11,13 @@ Fixed an issue in the Java TurboVNC Viewer whereby, when running in applet
 mode, it would not read the applet parameters if an SSH connection error was
 encountered and the applet was reloaded in the browser.
 -------------------------------------------------------------------------------
+[3]
+The AlwaysShowConnectionDialog parameter is now automatically disabled in the
+Java TurboVNC Viewer whenever SSH tunneling is enabled.  This prevents an issue
+whereby the "New TurboVNC Connection" dialog would pop up and display
+"localhost:{some random port}" after SSH authentication was completed, thus
+causing confusion.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
