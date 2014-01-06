@@ -18,6 +18,11 @@ whereby the "New TurboVNC Connection" dialog would pop up and display
 "localhost:{some random port}" after SSH authentication was completed, thus
 causing confusion.
 -------------------------------------------------------------------------------
+[4]
+The Java TurboVNC Viewer was not displaying dialogs from its built-in SSH
+client, which caused the SSH client to fail if the server was not in the known
+hosts file.  This has been fixed.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
