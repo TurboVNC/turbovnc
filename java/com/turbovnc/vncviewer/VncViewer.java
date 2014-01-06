@@ -310,6 +310,7 @@ public class VncViewer extends javax.swing.JApplet
     setGlobalOptions();
 
     if (opts.via != null || opts.tunnel) {
+      alwaysShowConnectionDialog.setParam(false);
       if (opts.serverName == null)
         usage();
       try {
@@ -411,6 +412,7 @@ public class VncViewer extends javax.swing.JApplet
       setGlobalOptions();
       host = opts.serverName;
       if ((opts.via != null || opts.tunnel) && opts.serverName != null) {
+        alwaysShowConnectionDialog.setParam(false);
         try {
           Tunnel.createTunnel(opts);
         } catch(Exception e) {
@@ -693,7 +695,9 @@ public class VncViewer extends javax.swing.JApplet
   = new BoolParameter("AlwaysShowConnectionDialog",
   "Always show the \"New TurboVNC Connection\" dialog even if the server has " +
   "been specified in an applet parameter or on the command line.  This defaults " +
-  "to 1 if the viewer is being run as an applet.", false);
+  "to 1 if the viewer is being run as an applet.  This parameter has no effect " +
+  "if SSH tunneling is enabled (the \"New TurboVNC Connection\" dialog is " +
+  "never shown in that case.)", false);
 
   static IntParameter vncServerPort
   = new IntParameter("Port",
