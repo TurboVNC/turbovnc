@@ -1,6 +1,6 @@
 /*
  *  Copyright (C) 2012 Brian P. Hinz.  All Rights Reserved.
- *  Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2012-2014 D. R. Commander.  All Rights Reserved.
  *
  *  This is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -118,6 +118,9 @@ public class Tunnel {
       session = jsch.getSession(user, gatewayHost,
                                 VncViewer.sshPort.getValue());
       try {
+        PasswdDialog dlg = new PasswdDialog(new String("SSH Authentication"),
+                                            false, user, false);
+        session.setUserInfo(dlg);
         session.connect();
       } catch(com.jcraft.jsch.JSchException e) {
         System.out.println("Could not authenticate using SSH private key.  Falling back to user/password.");
@@ -132,6 +135,7 @@ public class Tunnel {
       session = jsch.getSession(dlg.userEntry.getText(), gatewayHost,
                                 VncViewer.sshPort.getValue());
       session.setPassword(new String(dlg.passwdEntry.getPassword()));
+      session.setUserInfo(dlg);
       session.connect();
     }
     vlog.debug("Forwarding local port " + localPort + " to " + remoteHost +
