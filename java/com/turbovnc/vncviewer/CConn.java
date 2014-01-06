@@ -984,7 +984,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
   void showAbout(Component comp) {
-    JOptionPane.showMessageDialog((viewport != null ? viewport : comp),
+    JOptionPane pane = new JOptionPane(
       VncViewer.PRODUCT_NAME + " v" + VncViewer.version +
         " (" + VncViewer.build + ")\n" +
       "[JVM: " + System.getProperty("java.vm.name") + " " +
@@ -993,13 +993,17 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       "Built on " + VncViewer.pkgDate + " at " + VncViewer.pkgTime + "\n" +
       "Copyright (C) " + VncViewer.copyrightYear + " " + VncViewer.copyright +
         "\n" +
-      VncViewer.url,
-      "About TurboVNC Viewer", JOptionPane.INFORMATION_MESSAGE,
-      VncViewer.logoIcon);
+      VncViewer.url, JOptionPane.INFORMATION_MESSAGE);
+    pane.setIcon(VncViewer.logoIcon);
+    JDialog dlg = pane.createDialog((viewport != null ? viewport : comp),
+                                    "About TurboVNC Viewer");
+    if (VncViewer.embed.getValue())
+      dlg.setAlwaysOnTop(true);
+    dlg.setVisible(true);
   }
 
   void showInfo() {
-    JOptionPane.showMessageDialog(viewport,
+    JOptionPane pane = new JOptionPane(
       "Desktop name:  " + cp.name() + "\n" +
       "Host:  " + sock.getPeerName() + ":" + sock.getPeerPort() + "\n" +
       "Size:  " + cp.width + "x" + cp.height + "\n" +
@@ -1014,7 +1018,11 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         " [" + csecurity.description() + "]\n" +
       "JPEG decompression:  " +
         (reader_.isTurboJPEG() ? "Turbo" : "Unaccelerated"),
-      "VNC connection info", JOptionPane.PLAIN_MESSAGE);
+      JOptionPane.PLAIN_MESSAGE);
+    JDialog dlg = pane.createDialog(viewport, "VNC connection info");
+    if (VncViewer.embed.getValue())
+      dlg.setAlwaysOnTop(true);
+    dlg.setVisible(true);
   }
 
   public void refresh() {
