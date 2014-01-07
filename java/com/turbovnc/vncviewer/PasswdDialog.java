@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2014 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
 
   public PasswdDialog(String title, boolean userDisabled,
                       String userName, boolean passwdDisabled) {
-    super(true);
+    super((Frame)null, true);
     setResizable(false);
     setTitle(title);
     addWindowListener(new WindowAdapter() {
@@ -110,16 +110,21 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
   }
 
   public void showMessage(String message) {
-    JOptionPane.showMessageDialog(null, message);
+    JOptionPane pane = new JOptionPane(message);
+    JDialog dlg = pane.createDialog(null, "SSH Message");
+    dlg.setAlwaysOnTop(true);
+    dlg.setVisible(true);
   }
 
   public boolean promptYesNo(String str) {
-    Object[] options = { "yes", "no" };
-    int foo = JOptionPane.showOptionDialog(null, str, "Warning",
-                                           JOptionPane.DEFAULT_OPTION,
-                                           JOptionPane.WARNING_MESSAGE,
-                                           null, options, options[0]);
-     return foo == 0;
+    Object[] options = { "Yes", "No" };
+    JOptionPane pane = new JOptionPane(str, JOptionPane.WARNING_MESSAGE,
+                                       JOptionPane.DEFAULT_OPTION, null,
+                                       options, options[0]);
+    JDialog dlg = pane.createDialog(null, "SSH Message");
+    dlg.setAlwaysOnTop(true);
+    dlg.setVisible(true);
+    return (pane.getValue() == options[0]);
   }
 
   public String[] promptKeyboardInteractive(String destination,

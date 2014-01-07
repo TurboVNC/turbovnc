@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
+ * Copyright (C) 2014 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,15 +26,16 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import javax.swing.*;
 import javax.swing.border.*;
+
+import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.LogWriter;
 
-class ClipboardDialog extends Dialog implements ActionListener {
+class ClipboardDialog implements ActionListener {
 
   public ClipboardDialog(CConn cc_) {
-    super(false);
     cc = cc_;
-    setTitle("VNC clipboard");
-    JPanel pt = new JPanel();
+
+    pt = new JPanel();
     pt.setLayout(new BoxLayout(pt, BoxLayout.LINE_AXIS));
     pt.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     textArea = new JTextArea();
@@ -42,9 +44,8 @@ class ClipboardDialog extends Dialog implements ActionListener {
     JScrollPane sp = new JScrollPane(textArea);
     sp.setPreferredSize(new Dimension(300, 250));
     pt.add(sp);
-    getContentPane().add("Center", pt);
 
-    JPanel pb = new JPanel();
+    pb = new JPanel();
     clearButton = new JButton("Clear");
     pb.add(clearButton);
     clearButton.addActionListener(this);
@@ -54,10 +55,21 @@ class ClipboardDialog extends Dialog implements ActionListener {
     cancelButton = new JButton("Cancel");
     pb.add(cancelButton);
     cancelButton.addActionListener(this);
-    getContentPane().add("South", pb);
+  }
 
-    pack();
-    setMinimumSize(getSize());
+  public void showDialog(Window w) {
+    if (w instanceof Frame)
+      dlg = new Dialog((Frame)w, false);
+    else
+      throw new ErrorException("Unknown window type");
+
+    dlg.setTitle("VNC clipboard");
+    dlg.getContentPane().add("Center", pt);
+    dlg.getContentPane().add("South", pb);
+    dlg.pack();
+    dlg.setMinimumSize(dlg.getSize());
+
+    dlg.showDialog(w);
   }
 
   public void initDialog() {
@@ -94,6 +106,14 @@ class ClipboardDialog extends Dialog implements ActionListener {
     sendButton.setEnabled(b);
   }
 
+  private void endDialog() {
+    if (dlg != null) {
+      dlg.endDialog();
+      dlg.dispose();
+      dlg = null;
+    }
+  }
+
   public void actionPerformed(ActionEvent e) {
     Object s = e.getSource();
     if (s instanceof JButton && (JButton)s == clearButton) {
@@ -108,8 +128,10 @@ class ClipboardDialog extends Dialog implements ActionListener {
     }
   }
 
+  Dialog dlg;
   CConn cc;
   String current;
+  JPanel pt, pb;
   JTextArea textArea;
   JButton clearButton, sendButton, cancelButton;
   static LogWriter vlog = new LogWriter("ClipboardDialog");

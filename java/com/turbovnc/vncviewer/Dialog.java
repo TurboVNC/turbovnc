@@ -35,8 +35,16 @@ import javax.swing.*;
 
 class Dialog extends JDialog {
 
-  public Dialog(boolean modal) {
-    setModal(modal);
+  boolean modal;
+
+  public Dialog(Frame owner, boolean modal_) {
+    super(owner, modal_);
+    modal = modal_;
+  }
+
+  public Dialog(Dialog owner, boolean modal_) {
+    super(owner, modal_);
+    modal = modal_;
   }
 
   public boolean showDialog(Window w) {
@@ -50,10 +58,13 @@ class Dialog extends JDialog {
       int y = (dpySize.height - mySize.height) / 2;
       setLocation(x, y);
     }
-    ((Frame)getOwner()).setIconImage(VncViewer.frameImage);
+    Object owner = getOwner();
+    if (owner instanceof Frame)
+      ((Frame)owner).setIconImage(VncViewer.frameImage);
 
+    if (w == null || !modal)
+      setAlwaysOnTop(true);
     setVisible(true);
-    setAlwaysOnTop(true);
     return ret;
   }
 
@@ -71,13 +82,13 @@ class Dialog extends JDialog {
   public void initDialog() {
   }
 
-  public void addGBComponent(JComponent c, JComponent cp,
-                             int gx, int gy,
-                             int gw, int gh,
-                             int gipx, int gipy,
-                             double gwx, double gwy,
-                             int fill, int anchor,
-                             Insets insets) {
+  public static void addGBComponent(JComponent c, JComponent cp,
+                                    int gx, int gy,
+                                    int gw, int gh,
+                                    int gipx, int gipy,
+                                    double gwx, double gwy,
+                                    int fill, int anchor,
+                                    Insets insets) {
       GridBagConstraints gbc = new GridBagConstraints();
       gbc.anchor = anchor;
       gbc.fill = fill;

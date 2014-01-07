@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
- * Copyright (C) 2012-2013 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012-2014 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -133,7 +133,7 @@ public class F8Menu extends JPopupMenu implements ActionListener {
     } else if (actionMatch(ev, info)) {
       cc.showInfo();
     } else if (actionMatch(ev, about)) {
-      cc.showAbout(null);
+      cc.showAbout();
     } else if (actionMatch(ev, dismiss)) {
       firePopupMenuCanceled();
     }

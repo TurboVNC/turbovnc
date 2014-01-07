@@ -7,8 +7,8 @@ Options dialog with the keyboard was lost after the first time the dialog was
 popped up and dismissed.
 -------------------------------------------------------------------------------
 [2]
-Fixed an issue in the Java TurboVNC Viewer whereby, when running in applet
-mode, it would not read the applet parameters if an SSH connection error was
+Fixed an issue in the Java TurboVNC Viewer whereby, when running as an applet,
+it would not read the applet parameters if an SSH connection error was
 encountered and the applet was reloaded in the browser.
 -------------------------------------------------------------------------------
 [3]
@@ -22,6 +22,22 @@ causing confusion.
 The Java TurboVNC Viewer was not displaying dialogs from its built-in SSH
 client, which caused the SSH client to fail if the server was not in the known
 hosts file.  This has been fixed.
+-------------------------------------------------------------------------------
+[5]
+Fixed various issues related to the display of dialogs in the Java TurboVNC
+Viewer:
+-- When running as an applet, clicking away from some of the dialogs would, in
+   some cases, send the dialog to the back of the window stack, making it
+   difficult to recover.
+-- When running under Java 7 with certain Linux window managers, ownerless
+   dialogs (including the new connection, authentication, and SSH dialogs) do
+   not show up in the task switcher.  Thus, if a user accidentally clicks away
+   from one of those dialogs, it gets sent to the back of the window stack, and
+   Alt-Tab can't be used to recover it.  As a workaround, the dialogs in
+   question are now kept on top of other windows.
+-- When running in full-screen mode on Linux, popping up the Options or
+   Clipboard dialogs would, in some cases, cause the viewer to temporarily exit
+   full-screen mode.
 -------------------------------------------------------------------------------
 
 

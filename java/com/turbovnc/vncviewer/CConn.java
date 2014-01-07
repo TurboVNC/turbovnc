@@ -825,8 +825,12 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     menu.show(desktop, x, y);
   }
 
+  void showAbout() {
+    showAbout(viewport);
+  }
+
   void showAbout(Component comp) {
-    JOptionPane.showMessageDialog((viewport != null ? viewport : comp),
+    JOptionPane.showMessageDialog(comp,
       VncViewer.PRODUCT_NAME + " v" + VncViewer.version +
         " (" + VncViewer.build + ") " +
         "[JVM: " + System.getProperty("java.version") + " " +
