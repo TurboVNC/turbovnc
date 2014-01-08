@@ -32,14 +32,14 @@ import javax.swing.border.*;
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
 
-class OptionsDialog implements ActionListener, ChangeListener, ItemListener {
+class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
+  ItemListener {
 
   // Constants
   // Static variables
   static LogWriter vlog = new LogWriter("OptionsDialog");
 
   OptionsDialogCallback cb;
-  Dialog dlg;
   JTabbedPane tabPane;
   JPanel buttonPane, encodingPanel, connPanel, globalPanel, secPanel;
   JCheckBox allowJpeg;
@@ -62,6 +62,7 @@ class OptionsDialog implements ActionListener, ChangeListener, ItemListener {
   Hashtable<Integer, String> subsamplingLabelTable;
 
   public OptionsDialog(OptionsDialogCallback cb_) {
+    super(true);
     cb = cb_;
 
     tabPane = new JTabbedPane();
@@ -469,14 +470,7 @@ class OptionsDialog implements ActionListener, ChangeListener, ItemListener {
     encMethodComboBox.setSelectedItem("Tight + Perceptually Lossless JPEG (LAN)");
   }
 
-  public void showDialog(Window w) {
-    if (w instanceof Frame)
-      dlg = new Dialog((Frame)w, true);
-    else if (w instanceof Dialog)
-      dlg = new Dialog((Dialog)w, true);
-    else
-      throw new ErrorException("Unknown window type");
-
+  protected void populateDialog(JDialog dlg) {
     dlg.setResizable(false);
     dlg.setTitle("TurboVNC Viewer Options");
     dlg.getContentPane().setLayout(
@@ -490,8 +484,6 @@ class OptionsDialog implements ActionListener, ChangeListener, ItemListener {
         if (cb != null) cb.setTightOptions();
       }
     });
-
-    dlg.showDialog(w);
   }
 
   public void initDialog() {
@@ -600,14 +592,6 @@ class OptionsDialog implements ActionListener, ChangeListener, ItemListener {
     return c;
   }
 
-  private void endDialog() {
-    if (dlg != null) {
-      dlg.endDialog();
-      dlg.dispose();
-      dlg = null;
-    }
-  }
-
   public void actionPerformed(ActionEvent e) {
     Object s = e.getSource();
     if (s instanceof JButton && (JButton)s == okButton) {
@@ -627,7 +611,7 @@ class OptionsDialog implements ActionListener, ChangeListener, ItemListener {
       fc.setDialogTitle("Path to X509 CA certificate");
       fc.setApproveButtonText("OK");
       fc.setFileHidingEnabled(false);
-      int ret = fc.showOpenDialog(dlg);
+      int ret = fc.showOpenDialog(getJDialog());
       if (ret == JFileChooser.APPROVE_OPTION)
         CSecurityTLS.x509ca.setParam(fc.getSelectedFile().toString());
     } else if (s instanceof JButton && (JButton)s == crl) {
@@ -637,7 +621,7 @@ class OptionsDialog implements ActionListener, ChangeListener, ItemListener {
       fc.setDialogTitle("Path to X509 CRL file");
       fc.setApproveButtonText("OK");
       fc.setFileHidingEnabled(false);
-      int ret = fc.showOpenDialog(dlg);
+      int ret = fc.showOpenDialog(getJDialog());
       if (ret == JFileChooser.APPROVE_OPTION)
         CSecurityTLS.x509crl.setParam(fc.getSelectedFile().toString());
     } else if (s instanceof JComboBox && (JComboBox)s == encMethodComboBox) {

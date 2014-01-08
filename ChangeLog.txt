@@ -29,15 +29,14 @@ Viewer:
 -- When running as an applet, clicking away from some of the dialogs would, in
    some cases, send the dialog to the back of the window stack, making it
    difficult to recover.
--- When running under Java 7 with certain Linux window managers, ownerless
-   dialogs (including the new connection, authentication, and SSH dialogs) do
-   not show up in the task switcher.  Thus, if a user accidentally clicks away
-   from one of those dialogs, it gets sent to the back of the window stack, and
-   Alt-Tab can't be used to recover it.  As a workaround, the dialogs in
-   question are now kept on top of other windows.
--- When running in full-screen mode on Linux, popping up the Options or
-   Clipboard dialogs would, in some cases, cause the viewer to temporarily exit
-   full-screen mode.
+-- When running under Java 7 on Linux, dialogs that are not attached to a
+   window (including the New Connection, Authentication, and SSH dialogs) were
+   not showing up in the task switcher, so accidentally clicking away from one
+   of those dialogs would send it to the back of the window stack, and Alt-Tab
+   could not be used to recover it.
+-- When running in full-screen mode on Linux/Gnome, popping up the Options or
+   Clipboard dialogs would cause the viewer to temporarily exit full-screen
+   mode.
 -------------------------------------------------------------------------------
 
 

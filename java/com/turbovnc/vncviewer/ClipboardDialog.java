@@ -30,9 +30,10 @@ import javax.swing.border.*;
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.LogWriter;
 
-class ClipboardDialog implements ActionListener {
+class ClipboardDialog extends Dialog implements ActionListener {
 
   public ClipboardDialog(CConn cc_) {
+    super(false);
     cc = cc_;
 
     pt = new JPanel();
@@ -57,19 +58,12 @@ class ClipboardDialog implements ActionListener {
     cancelButton.addActionListener(this);
   }
 
-  public void showDialog(Window w) {
-    if (w instanceof Frame)
-      dlg = new Dialog((Frame)w, false);
-    else
-      throw new ErrorException("Unknown window type");
-
+  protected void populateDialog(JDialog dlg) {
     dlg.setTitle("VNC clipboard");
     dlg.getContentPane().add("Center", pt);
     dlg.getContentPane().add("South", pb);
     dlg.pack();
     dlg.setMinimumSize(dlg.getSize());
-
-    dlg.showDialog(w);
   }
 
   public void initDialog() {
@@ -106,14 +100,6 @@ class ClipboardDialog implements ActionListener {
     sendButton.setEnabled(b);
   }
 
-  private void endDialog() {
-    if (dlg != null) {
-      dlg.endDialog();
-      dlg.dispose();
-      dlg = null;
-    }
-  }
-
   public void actionPerformed(ActionEvent e) {
     Object s = e.getSource();
     if (s instanceof JButton && (JButton)s == clearButton) {
@@ -128,7 +114,6 @@ class ClipboardDialog implements ActionListener {
     }
   }
 
-  Dialog dlg;
   CConn cc;
   String current;
   JPanel pt, pb;

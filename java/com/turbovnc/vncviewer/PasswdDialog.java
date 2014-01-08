@@ -28,18 +28,12 @@ import com.jcraft.jsch.*;
 class PasswdDialog extends Dialog implements KeyListener, UserInfo,
   UIKeyboardInteractive {
 
-  public PasswdDialog(String title, boolean userDisabled,
+  public PasswdDialog(String title_, boolean userDisabled,
                       String userName, boolean passwdDisabled) {
-    super((Frame)null, true);
-    setResizable(false);
-    setTitle(title);
-    addWindowListener(new WindowAdapter() {
-      public void windowClosing(WindowEvent e) {
-        endDialog();
-      }
-    });
+    super(true);
+    title = title_;
 
-    JPanel p1 = new JPanel();
+    p1 = new JPanel();
     userLabel = new JLabel("User name:");
     p1.add(userLabel);
     userEntry = new JTextField(30);
@@ -50,7 +44,7 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
     p1.add(userEntry);
     userEntry.addKeyListener(this);
 
-    JPanel p2 = new JPanel();
+    p2 = new JPanel();
     passwdLabel = new JLabel("Password:");
     passwdLabel.setPreferredSize(userLabel.getPreferredSize());
     p2.add(passwdLabel);
@@ -60,16 +54,28 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
     p2.add(passwdEntry);
     passwdEntry.addKeyListener(this);
 
-    getContentPane().setLayout(new BoxLayout(getContentPane(),
-                                             BoxLayout.Y_AXIS));
-    getContentPane().add(p1);
-    getContentPane().add(p2);
-    pack();
     if (userEntry.isEnabled() && userName == null) {
       userEntry.requestFocus();
     } else {
       passwdEntry.requestFocus();
     }
+  }
+
+  protected void populateDialog(JDialog dlg) {
+    dlg.setResizable(false);
+    dlg.setTitle(title);
+
+    dlg.addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent e) {
+        endDialog();
+      }
+    });
+
+    dlg.getContentPane().setLayout(new BoxLayout(dlg.getContentPane(),
+                                                 BoxLayout.Y_AXIS));
+    dlg.getContentPane().add(p1);
+    dlg.getContentPane().add(p2);
+    dlg.pack();
   }
 
   /** Handle the key-typed event. */
@@ -102,8 +108,7 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
   public boolean promptPassphrase(String message) { return false; }
 
   public boolean promptPassword(String message) {
-    setTitle(message);
-    showDialog();
+    showDialog(message);
     if (passwdEntry != null)
       return true;
     return false;
@@ -181,8 +186,10 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
     }
   }
 
+  JPanel p1, p2;
   JLabel userLabel;
   JTextField userEntry;
   JLabel passwdLabel;
   JPasswordField passwdEntry;
+  String title;
 }

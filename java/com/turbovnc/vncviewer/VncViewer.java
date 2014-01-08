@@ -336,7 +336,6 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   public static void newViewer(VncViewer oldViewer, Socket sock,
                                boolean close) {
     VncViewer viewer = new VncViewer();
-    viewer.applet = oldViewer.applet;
     viewer.sock = sock;
     viewer.start();
     if (close)
@@ -967,7 +966,7 @@ public class VncViewer extends java.applet.Applet implements Runnable {
 
   Thread thread;
   Socket sock;
-  boolean applet;
+  static boolean applet;
   static int nViewers;
   static LogWriter vlog = new LogWriter("main");
   FileInStream benchFile;

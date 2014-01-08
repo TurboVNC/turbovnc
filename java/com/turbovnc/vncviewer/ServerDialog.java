@@ -34,26 +34,11 @@ class ServerDialog extends Dialog implements ActionListener {
   public ServerDialog(OptionsDialog options_,
                       Options opts_, CConn cc_) {
 
-    super((Frame)null, true);
+    super(true);
     cc = cc_;
     opts = opts_;
-    setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-    setResizable(false);
-    setSize(new Dimension(350, 135));
-    setTitle("New TurboVNC Connection");
-    addWindowListener(new WindowAdapter() {
-      public void windowClosing(WindowEvent e) {
-        if (VncViewer.nViewers == 1) {
-          cc.viewer.exit(1);
-        } else {
-          ret = false;
-          endDialog();
-        }
-      }
-    });
 
     options = options_;
-    getContentPane().setLayout(new GridBagLayout());
 
     JLabel serverLabel = new JLabel("VNC server:", JLabel.RIGHT);
     String valueStr = null;
@@ -94,51 +79,76 @@ class ServerDialog extends Dialog implements ActionListener {
       }
     });
 
-    JPanel topPanel = new JPanel(new GridBagLayout());
+    topPanel = new JPanel(new GridBagLayout());
 
-    addGBComponent(new JLabel(VncViewer.logoIcon), topPanel,
-                   0, 0, 1, 1, 0, 0, 0, 1,
-                   GridBagConstraints.HORIZONTAL,
-                   GridBagConstraints.LINE_START,
-                   new Insets(5, 5, 5, 15));
-    addGBComponent(serverLabel, topPanel,
-                   1, 0, 1, 1, 0, 0, 0, 1,
-                   GridBagConstraints.HORIZONTAL,
-                   GridBagConstraints.LINE_END,
-                   new Insets(10, 0, 5, 5));
-    addGBComponent(server, topPanel,
-                   2, 0, 1, 1, 0, 0, 1, 1,
-                   GridBagConstraints.HORIZONTAL,
-                   GridBagConstraints.CENTER,
-                   new Insets(10, 0, 5, 20));
+    Dialog.addGBComponent(new JLabel(VncViewer.logoIcon), topPanel,
+                          0, 0, 1, 1, 0, 0, 0, 1,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.LINE_START,
+                          new Insets(5, 5, 5, 15));
+    Dialog.addGBComponent(serverLabel, topPanel,
+                          1, 0, 1, 1, 0, 0, 0, 1,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.LINE_END,
+                          new Insets(10, 0, 5, 5));
+    Dialog.addGBComponent(server, topPanel,
+                          2, 0, 1, 1, 0, 0, 1, 1,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.CENTER,
+                          new Insets(10, 0, 5, 20));
 
     optionsButton = new JButton("Options...");
     aboutButton = new JButton("About...");
     okButton = new JButton("Connect");
     cancelButton = new JButton("Cancel");
-    JPanel buttonPanel = new JPanel(new GridBagLayout());
+    buttonPanel = new JPanel(new GridBagLayout());
     buttonPanel.setPreferredSize(new Dimension(350, 40));
-    addGBComponent(aboutButton, buttonPanel,
-                   0, 3, 1, 1, 0, 0, 0.8, 1,
-                   GridBagConstraints.HORIZONTAL,
-                   GridBagConstraints.CENTER,
-                   new Insets(0, 2, 0, 5));
-    addGBComponent(optionsButton, buttonPanel,
-                   1, 3, 1, 1, 0, 0, 1, 1,
-                   GridBagConstraints.HORIZONTAL,
-                   GridBagConstraints.CENTER,
-                   new Insets(0, 2, 0, 5));
-    addGBComponent(okButton, buttonPanel,
-                   2, 3, 1, 1, 0, 0, 0.7, 1,
-                   GridBagConstraints.HORIZONTAL,
-                   GridBagConstraints.CENTER,
-                   new Insets(0, 2, 0, 5));
-    addGBComponent(cancelButton, buttonPanel,
-                   3, 3, 1, 1, 0, 0, 0.6, 1,
-                   GridBagConstraints.HORIZONTAL,
-                   GridBagConstraints.CENTER,
-                   new Insets(0, 2, 0, 5));
+    Dialog.addGBComponent(aboutButton, buttonPanel,
+                          0, 3, 1, 1, 0, 0, 0.8, 1,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.CENTER,
+                          new Insets(0, 2, 0, 5));
+    Dialog.addGBComponent(optionsButton, buttonPanel,
+                          1, 3, 1, 1, 0, 0, 1, 1,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.CENTER,
+                          new Insets(0, 2, 0, 5));
+    Dialog.addGBComponent(okButton, buttonPanel,
+                          2, 3, 1, 1, 0, 0, 0.7, 1,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.CENTER,
+                          new Insets(0, 2, 0, 5));
+    Dialog.addGBComponent(cancelButton, buttonPanel,
+                          3, 3, 1, 1, 0, 0, 0.6, 1,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.CENTER,
+                          new Insets(0, 2, 0, 5));
 
+    server.addActionListener(this);
+    optionsButton.addActionListener(this);
+    aboutButton.addActionListener(this);
+    okButton.addActionListener(this);
+    cancelButton.addActionListener(this);
+  }
+
+  protected void populateDialog(JDialog dlg) {
+    dlg.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+    dlg.setResizable(false);
+    dlg.setSize(new Dimension(350, 135));
+    dlg.setTitle("New TurboVNC Connection");
+
+    dlg.addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent e) {
+        if (VncViewer.nViewers == 1) {
+          cc.viewer.exit(1);
+        } else {
+          ret = false;
+          endDialog();
+        }
+      }
+    });
+
+    dlg.getContentPane().setLayout(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.anchor = GridBagConstraints.LINE_START;
     gbc.fill = GridBagConstraints.BOTH;
@@ -149,16 +159,10 @@ class ServerDialog extends Dialog implements ActionListener {
     gbc.ipady = 0;
     gbc.weightx = 1;
     gbc.weighty = 1;
-    getContentPane().add(topPanel, gbc);
-    getContentPane().add(buttonPanel);
 
-    server.addActionListener(this);
-    optionsButton.addActionListener(this);
-    aboutButton.addActionListener(this);
-    okButton.addActionListener(this);
-    cancelButton.addActionListener(this);
-
-    pack();
+    dlg.getContentPane().add(topPanel, gbc);
+    dlg.getContentPane().add(buttonPanel);
+    dlg.pack();
   }
 
   public void actionPerformed(ActionEvent e) {
@@ -172,9 +176,9 @@ class ServerDialog extends Dialog implements ActionListener {
       ret = false;
       endDialog();
     } else if (s instanceof JButton && (JButton)s == optionsButton) {
-      options.showDialog(this);
+      options.showDialog(getJDialog());
     } else if (s instanceof JButton && (JButton)s == aboutButton) {
-      cc.showAbout(this);
+      cc.showAbout(getJDialog());
     } else if (s instanceof JComboBox && (JComboBox)s == server) {
       if (e.getActionCommand().equals("comboBoxEdited")) {
         server.insertItemAt(editor.getItem(), 0);
@@ -213,30 +217,12 @@ class ServerDialog extends Dialog implements ActionListener {
     UserPreferences.save("ServerDialog");
   }
 
-  public boolean showDialog() {
-    Frame[] frames = Frame.getFrames();
-    for (int i = 0; i < frames.length; i++) {
-      if (frames[i].isAlwaysOnTop()) {
-        frames[i].setAlwaysOnTop(false);
-        if (frames[i].isFocused()) win = (Window)frames[i];
-      }
-    }
-    return super.showDialog(null);
-  }
-
-  public void endDialog() {
-    super.endDialog();
-    if (ret == false && win != null) {
-      win.setAlwaysOnTop(true);
-      win = null;
-    }
-  }
-
   Window win;
   CConn cc;
   Options opts;
   JComboBox server;
   ComboBoxEditor editor;
+  JPanel topPanel, buttonPanel;
   JButton aboutButton, optionsButton, okButton, cancelButton;
   OptionsDialog options;
 

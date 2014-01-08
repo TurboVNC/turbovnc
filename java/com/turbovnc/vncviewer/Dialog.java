@@ -32,54 +32,117 @@ package com.turbovnc.vncviewer;
 import java.awt.*;
 import java.awt.Dialog.*;
 import javax.swing.*;
+import java.lang.reflect.*;
 
-class Dialog extends JDialog {
+import com.turbovnc.rdr.*;
+import com.turbovnc.rfb.LogWriter;
 
-  boolean modal;
+class Dialog {
 
-  public Dialog(Frame owner, boolean modal_) {
-    super(owner, modal_);
+  public Dialog(boolean modal_) {
     modal = modal_;
   }
 
-  public Dialog(Dialog owner, boolean modal_) {
-    super(owner, modal_);
-    modal = modal_;
-  }
-
-  public boolean showDialog(Window w) {
+  public boolean showDialog(Window w, String title) {
     initDialog();
-    if (w != null) {
-      setLocationRelativeTo(w);
+
+    if (w == null) {
+      // Try to give the dialog a null parent, so it will always appear in the
+      // taskbar and task switcher.
+      try {
+        dlg = new JDialog((java.awt.Dialog)null, modal);
+      } catch (Exception e) {
+      }
+      // That didn't work, perhaps because we're running under Java 1.5, so
+      // fall back to using a shared frame as the parent.  This is OK under
+      // Java 1.5, because it always registers ownerless dialogs with the task
+      // switcher.
+      if (dlg == null)
+        dlg = new JDialog((Frame)null, modal);
+    } else if (w instanceof Frame) {
+      dlg = new JDialog((Frame)w, modal);
+    } else if (w instanceof java.awt.Dialog) {
+      dlg = new JDialog((java.awt.Dialog)w, modal);
     } else {
-      Dimension dpySize = getToolkit().getScreenSize();
-      Dimension mySize = getSize();
+      throw new ErrorException("Unknown window type");
+    }
+
+    if (w != null) {
+      dlg.setLocationRelativeTo(w);
+    } else {
+      Dimension dpySize = dlg.getToolkit().getScreenSize();
+      Dimension mySize = dlg.getSize();
       int x = (dpySize.width - mySize.width) / 2;
       int y = (dpySize.height - mySize.height) / 2;
-      setLocation(x, y);
+      dlg.setLocation(x, y);
     }
-    Object owner = getOwner();
-    if (owner instanceof Frame)
-      ((Frame)owner).setIconImage(VncViewer.frameImage);
 
-    if (w == null || !modal)
-      setAlwaysOnTop(true);
-    setVisible(true);
+    setIcon();
+
+    populateDialog(dlg);
+    if (title != null)
+      dlg.setTitle(title);
+
+    if ((VncViewer.applet && w == null) || !modal)
+      dlg.setAlwaysOnTop(true);
+    dlg.setVisible(true);
     return ret;
   }
 
   public boolean showDialog() {
-    return showDialog(null);
+    return showDialog(null, null);
+  }
+
+  public boolean showDialog(Window w) {
+    return showDialog(w, null);
+  }
+
+  public boolean showDialog(String title) {
+    return showDialog(null, title);
+  }
+
+  private void setIcon() {
+    // Under Java 6 and later, ownerless JDialogs in the TurboVNC Viewer are
+    // created with a null parent to ensure that they appear in the task
+    // switcher on Linux.  However, this necessitates using
+    // JDialog.setIconImage() to set the icon image, and since that method is
+    // only available in Java 6 and later, we have to use reflect to invoke it.
+    try {
+      Class argClasses[] = new Class[]{Image.class};
+      Method setIconImage = Window.class.getMethod("setIconImage", argClasses);
+      setIconImage.invoke(dlg, VncViewer.frameImage);
+      return;
+    } catch (Exception e) {
+      vlog.debug("Could not set dialog icon:");
+      vlog.debug("  " + e.toString());
+    }
+
+    // We can't set the icon of the JDialog, so try to set the icon of the
+    // owner frame, if there is one.
+    Object owner = dlg.getOwner();
+    if (owner instanceof Frame && owner != null)
+      ((Frame)owner).setIconImage(VncViewer.frameImage);
   }
 
   public void endDialog() {
-    setVisible(false);
-    setAlwaysOnTop(false);
+    if (dlg != null) {
+      dlg.dispose();
+      dlg = null;
+    }
+  }
+
+  JDialog getJDialog() {
+    return dlg;
   }
 
   // initDialog() can be overridden in a derived class.  Typically it is used
   // to make sure that checkboxes have the right state, etc.
   public void initDialog() {
+  }
+
+  // populateDialog() can be overridden in a derived class.  Typically it is
+  // used to add pre-initialized components to the dialog instance.
+  protected void populateDialog(JDialog dlg) {
   }
 
   public static void addGBComponent(JComponent c, JComponent cp,
@@ -104,6 +167,10 @@ class Dialog extends JDialog {
       cp.add(c, gbc);
   }
 
-  protected boolean ret = true;
+  private JDialog dlg;
 
+  protected boolean ret = true;
+  boolean modal;
+
+  static LogWriter vlog = new LogWriter("Dialog");
 }
