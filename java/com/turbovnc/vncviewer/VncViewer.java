@@ -179,9 +179,18 @@ public class VncViewer extends javax.swing.JApplet
             new ImageIcon(VncViewer.class.getResource("turbovnc-128.png"));
           setDockIconImage.invoke(app, dockIcon.getImage());
         } catch (Exception e) {
-          vlog.debug("Could not set OS X dock icon: " + e.getMessage());
+          vlog.debug("Could not set OS X dock icon:");
+          vlog.debug("  " + e.toString());
         }
       }
+
+      // Set the shared frame's icon, which will be inherited by any ownerless
+      // dialogs that do not have a null parent.
+      JDialog dlg = new JDialog();
+      Object owner = dlg.getOwner();
+      if (owner instanceof Frame && owner != null)
+        ((Frame)owner).setIconImage(frameImage);
+      dlg.dispose();
     } catch(Exception e) {
       vlog.error("Could not set look & feel:");
       vlog.error("  " + e.toString());
@@ -368,7 +377,6 @@ public class VncViewer extends javax.swing.JApplet
   public static void newViewer(VncViewer oldViewer, Socket sock,
                                boolean close) {
     VncViewer viewer = new VncViewer();
-    viewer.applet = oldViewer.applet;
     viewer.sock = sock;
     viewer.start();
     if (close)
@@ -488,8 +496,12 @@ public class VncViewer extends javax.swing.JApplet
       add(button);
       validate();
       repaint();
-    } else
-      JOptionPane.showMessageDialog(null, msg, title, msgType);
+    } else {
+      JOptionPane pane = new JOptionPane(msg, msgType);
+      JDialog dlg = pane.createDialog(null, title);
+      dlg.setAlwaysOnTop(true);
+      dlg.setVisible(true);
+    }
   }
 
   public void run() {
@@ -1054,7 +1066,7 @@ public class VncViewer extends javax.swing.JApplet
 
   Thread thread;
   Socket sock;
-  boolean applet;
+  static boolean applet;
   static int nViewers;
   static LogWriter vlog = new LogWriter("main");
   FileInStream benchFile;

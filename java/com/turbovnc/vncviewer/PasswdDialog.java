@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
- * Copyright (C) 2012 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2012, 2014 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,18 +28,13 @@ import com.jcraft.jsch.*;
 class PasswdDialog extends Dialog implements KeyListener, UserInfo,
   UIKeyboardInteractive {
 
-  public PasswdDialog(String title, boolean userDisabled,
-                      String userName, boolean passwdDisabled) {
+  public PasswdDialog(String title_, boolean userDisabled,
+                      String userName_, boolean passwdDisabled) {
     super(true);
-    setResizable(false);
-    setTitle(title);
-    addWindowListener(new WindowAdapter() {
-      public void windowClosing(WindowEvent e) {
-        endDialog();
-      }
-    });
+    title = title_;
+    userName = userName_;
 
-    JPanel p1 = new JPanel();
+    p1 = new JPanel();
     userLabel = new JLabel("User name:");
     p1.add(userLabel);
     userEntry = new JTextField(30);
@@ -50,7 +45,7 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
     p1.add(userEntry);
     userEntry.addKeyListener(this);
 
-    JPanel p2 = new JPanel();
+    p2 = new JPanel();
     passwdLabel = new JLabel("Password:");
     passwdLabel.setPreferredSize(userLabel.getPreferredSize());
     p2.add(passwdLabel);
@@ -59,12 +54,24 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
     passwdLabel.setEnabled(!passwdDisabled);
     p2.add(passwdEntry);
     passwdEntry.addKeyListener(this);
+  }
 
-    getContentPane().setLayout(new BoxLayout(getContentPane(),
-                                             BoxLayout.Y_AXIS));
-    getContentPane().add(p1);
-    getContentPane().add(p2);
-    pack();
+  protected void populateDialog(JDialog dlg) {
+    dlg.setResizable(false);
+    dlg.setTitle(title);
+
+    dlg.addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent e) {
+        endDialog();
+      }
+    });
+
+    dlg.getContentPane().setLayout(new BoxLayout(dlg.getContentPane(),
+                                                 BoxLayout.Y_AXIS));
+    dlg.getContentPane().add(p1);
+    dlg.getContentPane().add(p2);
+    dlg.pack();
+
     if (userEntry.isEnabled() && userName == null) {
       userEntry.requestFocus();
     } else {
@@ -102,24 +109,28 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
   public boolean promptPassphrase(String message) { return false; }
 
   public boolean promptPassword(String message) {
-    setTitle(message);
-    showDialog();
+    showDialog(message);
     if (passwdEntry != null)
       return true;
     return false;
   }
 
   public void showMessage(String message) {
-    JOptionPane.showMessageDialog(null, message);
+    JOptionPane pane = new JOptionPane(message);
+    JDialog dlg = pane.createDialog(null, "SSH Message");
+    dlg.setAlwaysOnTop(true);
+    dlg.setVisible(true);
   }
 
   public boolean promptYesNo(String str) {
-    Object[] options = { "yes", "no" };
-    int foo = JOptionPane.showOptionDialog(null, str, "Warning",
-                                           JOptionPane.DEFAULT_OPTION,
-                                           JOptionPane.WARNING_MESSAGE,
-                                           null, options, options[0]);
-     return foo == 0;
+    Object[] options = { "Yes", "No" };
+    JOptionPane pane = new JOptionPane(str, JOptionPane.WARNING_MESSAGE,
+                                       JOptionPane.DEFAULT_OPTION, null,
+                                       options, options[0]);
+    JDialog dlg = pane.createDialog(null, "SSH Message");
+    dlg.setAlwaysOnTop(true);
+    dlg.setVisible(true);
+    return (pane.getValue() == options[0]);
   }
 
   public String[] promptKeyboardInteractive(String destination,
@@ -176,8 +187,10 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
     }
   }
 
+  JPanel p1, p2;
   JLabel userLabel;
   JTextField userEntry;
   JLabel passwdLabel;
   JPasswordField passwdEntry;
+  String title, userName;
 }

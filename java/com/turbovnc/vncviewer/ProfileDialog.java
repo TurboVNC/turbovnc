@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2013-2014 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,10 +27,8 @@ class ProfileDialog extends Dialog {
   public ProfileDialog(CConn cc_) {
     super(false);
     cc = cc_;
-    setTitle("TurboVNC profiling information");
-    setResizable(false);
 
-    JPanel panel = new JPanel(new GridBagLayout());
+    panel = new JPanel(new GridBagLayout());
 
     JLabel recvHeading = new JLabel("Recv");
     Font font = recvHeading.getFont();
@@ -105,158 +103,170 @@ class ProfileDialog extends Dialog {
     rpuHeading.setFont(boldFont);
     rpuDecodeVal = new JLabel("0000000");
 
-    addGBComponent(recvHeading, panel,
-                   1, 0, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(decodeHeading, panel,
-                   2, 0, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.WEST,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(blitHeading, panel,
-                   3, 0, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.WEST,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(totalHeading, panel,
-                   4, 0, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.WEST,
-                   new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(recvHeading, panel,
+                          1, 0, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(decodeHeading, panel,
+                          2, 0, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.WEST,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(blitHeading, panel,
+                          3, 0, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.WEST,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(totalHeading, panel,
+                          4, 0, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.WEST,
+                          new Insets(2, 8, 2, 8));
 
-    addGBComponent(upsHeading, panel,
-                   0, 1, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(upsVal, panel,
-                   4, 1, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.WEST,
-                   new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(upsHeading, panel,
+                          0, 1, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(upsVal, panel,
+                          4, 1, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.WEST,
+                          new Insets(2, 8, 2, 8));
 
-    addGBComponent(tpHeading, panel,
-                   0, 2, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(tpVal, panel,
-                   4, 2, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.WEST,
-                   new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(tpHeading, panel,
+                          0, 2, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(tpVal, panel,
+                          4, 2, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.WEST,
+                          new Insets(2, 8, 2, 8));
 
-    addGBComponent(tpuHeading, panel,
-                   0, 3, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(tpuRecvVal, panel,
-                   1, 3, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(tpuDecodeVal, panel,
-                   2, 3, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(tpuBlitVal, panel,
-                   3, 3, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(tpuTotalVal, panel,
-                   4, 3, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(tpuHeading, panel,
+                          0, 3, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(tpuRecvVal, panel,
+                          1, 3, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(tpuDecodeVal, panel,
+                          2, 3, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(tpuBlitVal, panel,
+                          3, 3, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(tpuTotalVal, panel,
+                          4, 3, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
 
-    addGBComponent(mpHeading, panel,
-                   0, 4, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(mpDecodeVal, panel,
-                   2, 4, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(mpBlitVal, panel,
-                   3, 4, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(mpHeading, panel,
+                          0, 4, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(mpDecodeVal, panel,
+                          2, 4, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(mpBlitVal, panel,
+                          3, 4, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
 
-    addGBComponent(mpsHeading, panel,
-                   0, 5, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(mpsDecodeVal, panel,
-                   2, 5, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(mpsBlitVal, panel,
-                   3, 5, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(mpsTotalVal, panel,
-                   4, 5, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(mpsHeading, panel,
+                          0, 5, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(mpsDecodeVal, panel,
+                          2, 5, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(mpsBlitVal, panel,
+                          3, 5, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(mpsTotalVal, panel,
+                          4, 5, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
 
-    addGBComponent(rectHeading, panel,
-                   0, 6, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(rectDecodeVal, panel,
-                   2, 6, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(rectBlitVal, panel,
-                   3, 6, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(rectHeading, panel,
+                          0, 6, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(rectDecodeVal, panel,
+                          2, 6, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(rectBlitVal, panel,
+                          3, 6, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
 
-    addGBComponent(pprHeading, panel,
-                   0, 7, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(pprDecodeVal, panel,
-                   2, 7, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(pprBlitVal, panel,
-                   3, 7, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(pprHeading, panel,
+                          0, 7, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(pprDecodeVal, panel,
+                          2, 7, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(pprBlitVal, panel,
+                          3, 7, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
 
-    addGBComponent(rpuHeading, panel,
-                   0, 8, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
-    addGBComponent(rpuDecodeVal, panel,
-                   2, 8, 1, 1, 0, 0, 0, 0,
-                   GridBagConstraints.NONE,
-                   GridBagConstraints.LINE_START,
-                   new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(rpuHeading, panel,
+                          0, 8, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
+    Dialog.addGBComponent(rpuDecodeVal, panel,
+                          2, 8, 1, 1, 0, 0, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 8, 2, 8));
 
     panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-    getContentPane().add(panel);
-    pack();
+  }
+
+  protected void populateDialog(JDialog dlg) {
+    dlg.setTitle("TurboVNC profiling information");
+    dlg.setResizable(false);
+    dlg.getContentPane().add(panel);
+    dlg.pack();
+
+    dlg.addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent e) {
+        endDialog();
+        cc.toggleProfile();
+      }
+    });
 
     ActionListener actionListener = new ActionListener() {
       public void actionPerformed(ActionEvent actionEvent) {
@@ -265,28 +275,28 @@ class ProfileDialog extends Dialog {
       }
     };
     KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-    getRootPane().registerKeyboardAction(actionListener, ks,
+    dlg.getRootPane().registerKeyboardAction(actionListener, ks,
       JComponent.WHEN_IN_FOCUSED_WINDOW);
     ks = KeyStroke.getKeyStroke(KeyEvent.VK_P,
       KeyEvent.CTRL_MASK | KeyEvent.ALT_MASK | KeyEvent.SHIFT_MASK);
-    getRootPane().registerKeyboardAction(actionListener, ks,
+    dlg.getRootPane().registerKeyboardAction(actionListener, ks,
       JComponent.WHEN_IN_FOCUSED_WINDOW);
     if (VncViewer.os.startsWith("mac os x")) {
       int appleKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();     
       ks = KeyStroke.getKeyStroke(KeyEvent.VK_P, appleKey);
-      getRootPane().registerKeyboardAction(actionListener, ks,
+      dlg.getRootPane().registerKeyboardAction(actionListener, ks,
         JComponent.WHEN_IN_FOCUSED_WINDOW);
-    }      
-  }
-
-  protected void processWindowEvent(WindowEvent e) {
-    if (e.getID() == WindowEvent.WINDOW_CLOSING) {
-      endDialog();
-      cc.toggleProfile();
     }
   }
 
+  public boolean isVisible() {
+    JDialog dlg = getJDialog();
+    System.out.println(dlg + " " + (dlg != null ? dlg.isVisible() : false));
+    return (dlg != null && dlg.isVisible());
+  }
+
   CConn cc;
+  JPanel panel;
   public JLabel upsVal, tpVal;
   public JLabel tpuRecvVal, tpuDecodeVal, tpuBlitVal, tpuTotalVal;
   public JLabel mpDecodeVal, mpBlitVal, mpsDecodeVal, mpsBlitVal, mpsTotalVal;

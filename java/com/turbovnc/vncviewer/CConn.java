@@ -983,6 +983,10 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     menu.show(desktop, x, y);
   }
 
+  void showAbout() {
+    showAbout(viewport);
+  }
+
   void showAbout(Component comp) {
     JOptionPane pane = new JOptionPane(
       VncViewer.PRODUCT_NAME + " v" + VncViewer.version +
@@ -995,8 +999,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         "\n" +
       VncViewer.url, JOptionPane.INFORMATION_MESSAGE);
     pane.setIcon(VncViewer.logoIcon);
-    JDialog dlg = pane.createDialog((viewport != null ? viewport : comp),
-                                    "About TurboVNC Viewer");
+    JDialog dlg = pane.createDialog(comp, "About TurboVNC Viewer");
     if (VncViewer.embed.getValue())
       dlg.setAlwaysOnTop(true);
     dlg.setVisible(true);
