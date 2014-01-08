@@ -164,6 +164,14 @@ public class VncViewer extends java.applet.Applet implements Runnable {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
         enableFileHandler();
       }
+
+      // Set the shared frame's icon, which will be inherited by any ownerless
+      // dialogs that do not have a null parent.
+      JDialog dlg = new JDialog();
+      Object owner = dlg.getOwner();
+      if (owner instanceof Frame && owner != null)
+        ((Frame)owner).setIconImage(frameImage);
+      dlg.dispose();
     } catch(Exception e) {
       vlog.info(e.getMessage());
     }

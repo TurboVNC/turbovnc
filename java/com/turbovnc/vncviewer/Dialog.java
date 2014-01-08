@@ -121,12 +121,6 @@ class Dialog {
       vlog.debug("Could not set dialog icon:");
       vlog.debug("  " + e.toString());
     }
-
-    // We can't set the icon of the JDialog, so try to set the icon of the
-    // owner frame, if there is one.
-    Object owner = dlg.getOwner();
-    if (owner instanceof Frame && owner != null)
-      ((Frame)owner).setIconImage(VncViewer.frameImage);
   }
 
   public void endDialog() {
