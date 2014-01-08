@@ -83,6 +83,11 @@ class Dialog {
     if (title != null)
       dlg.setTitle(title);
 
+    Window owner = dlg.getOwner();
+    if (owner instanceof java.awt.Dialog) {
+      if (owner.isAlwaysOnTop())
+        dlg.setAlwaysOnTop(true);
+    }
     if ((VncViewer.applet && w == null) || !modal)
       dlg.setAlwaysOnTop(true);
     dlg.setVisible(true);
