@@ -121,7 +121,8 @@ public class VncViewer extends javax.swing.JApplet
           }
         }
       } catch(Exception e) {
-        vlog.info(e.getMessage());
+        vlog.error("Invocation handler failed:");
+        vlog.error("  " + e.toString());
       }
       return null;
     }
@@ -182,7 +183,8 @@ public class VncViewer extends javax.swing.JApplet
         }
       }
     } catch(Exception e) {
-      vlog.info(e.getMessage());
+      vlog.error("Could not set look & feel:");
+      vlog.error("  " + e.toString());
     }
   }
 
