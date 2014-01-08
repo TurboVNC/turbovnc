@@ -185,7 +185,7 @@ public class VncViewer extends javax.swing.JApplet
       }
 
       // Set the shared frame's icon, which will be inherited by any ownerless
-      // dialogs that do not have a null parent.
+      // dialogs that do not have a null owner.
       JDialog dlg = new JDialog();
       Object owner = dlg.getOwner();
       if (owner instanceof Frame && owner != null)
