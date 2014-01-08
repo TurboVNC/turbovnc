@@ -437,7 +437,10 @@ public class VncViewer extends java.applet.Applet implements Runnable {
       title = "TurboVNC Viewer : Unexpected Error";
       e.printStackTrace();
     }
-    JOptionPane.showMessageDialog(null, msg, title, msgType);
+    JOptionPane pane = new JOptionPane(msg, msgType);
+    JDialog dlg = pane.createDialog(null, title);
+    dlg.setAlwaysOnTop(true);
+    dlg.setVisible(true);
   }
 
   public void run() {
