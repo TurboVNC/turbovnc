@@ -47,16 +47,16 @@ class Dialog {
     initDialog();
 
     if (w == null) {
-      // Try to give the dialog a null parent, so it will always appear in the
+      // Try to assign the dialog a null owner, so it will always appear in the
       // taskbar and task switcher.
       try {
         dlg = new JDialog((java.awt.Dialog)null, modal);
       } catch (Exception e) {
       }
       // That didn't work, perhaps because we're running under Java 1.5, so
-      // fall back to using a shared frame as the parent.  This is OK under
-      // Java 1.5, because it always registers ownerless dialogs with the task
-      // switcher.
+      // fall back to assigning the shared frame as the owner.  This is OK
+      // under Java 1.5, because Java 1.5 always registers ownerless dialogs
+      // with the task switcher.
       if (dlg == null)
         dlg = new JDialog((Frame)null, modal);
     } else if (w instanceof Frame) {
@@ -108,7 +108,7 @@ class Dialog {
 
   private void setIcon() {
     // Under Java 6 and later, ownerless JDialogs in the TurboVNC Viewer are
-    // created with a null parent to ensure that they appear in the task
+    // created with a null owner to ensure that they appear in the task
     // switcher on Linux.  However, this necessitates using
     // JDialog.setIconImage() to set the icon image, and since that method is
     // only available in Java 6 and later, we have to use reflect to invoke it.
