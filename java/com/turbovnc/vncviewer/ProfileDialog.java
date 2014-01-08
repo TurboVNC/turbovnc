@@ -291,7 +291,6 @@ class ProfileDialog extends Dialog {
 
   public boolean isVisible() {
     JDialog dlg = getJDialog();
-    System.out.println(dlg + " " + (dlg != null ? dlg.isVisible() : false));
     return (dlg != null && dlg.isVisible());
   }
 
