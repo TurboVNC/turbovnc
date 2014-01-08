@@ -120,7 +120,8 @@ public class VncViewer extends java.applet.Applet implements Runnable {
           }
         }
       } catch(Exception e) {
-        vlog.info(e.getMessage());
+        vlog.error("Invocation handler failed:");
+        vlog.error("  " + e.toString());
       }
       return null;
     }
@@ -173,7 +174,8 @@ public class VncViewer extends java.applet.Applet implements Runnable {
         ((Frame)owner).setIconImage(frameImage);
       dlg.dispose();
     } catch(Exception e) {
-      vlog.info(e.getMessage());
+      vlog.error("Could not set look & feel:");
+      vlog.error("  " + e.toString());
     }
   }
 

@@ -1254,7 +1254,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       writer().writeKeyEvent(keysym, down);
     } catch (Exception e) {
       if (!shuttingDown) {
-        System.out.println("Error writing key event: " + e.getMessage());
+        vlog.error("Error writing key event:");
+        vlog.error("  " + e.toString());
       }
     }
   }
@@ -1653,7 +1654,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       writer().writePointerEvent(new Point(ev.getX(), ev.getY()), buttonMask);
     } catch (Exception e) {
       if (!shuttingDown) {
-        System.out.println("Error writing pointer event: " + e.getMessage());
+        vlog.error("Error writing pointer event:");
+        vlog.error("  " + e.toString());
       }
     }
   }
@@ -1682,7 +1684,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
         writer().writePointerEvent(new Point(x, y), buttonMask);
       } catch (Exception e) {
         if (!shuttingDown) {
-          System.out.println("Error writing wheel event: " + e.getMessage());
+          vlog.error("Error writing wheel event:");
+          vlog.error("  " + e.toString());
         }
       }
     }

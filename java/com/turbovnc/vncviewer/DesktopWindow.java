@@ -397,8 +397,8 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
               cc.clipboardDialog.setContents(newContents);
             }
           } catch(Exception e) {
-            System.out.println("Error getting clipboard data: " +
-                               e.getMessage());
+            vlog.error("Error getting clipboard data:");
+            vlog.error("  " + e.toString());
           }
         }
       }

@@ -76,8 +76,8 @@ public class MacMenuBar extends JMenuBar implements ActionListener {
         appClass.getMethod("setPreferencesHandler", prefsHandlerClass);
       setPreferencesHandler.invoke(app, new Object[]{proxy});
     } catch (Exception e) {
-      vlog.info("Could not override About/Preferences menu items: " +
-                e.getMessage());
+      vlog.info("Could not override About/Preferences menu items:");
+      vlog.info("  " + e.toString());
     }
   }
 

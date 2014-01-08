@@ -69,7 +69,8 @@ public class UserPreferences {
       for (int i = 0; i < keys.length; i++)
         vlog.debug(keys[i] + " = " + root.get(keys[i], null));
     } catch(BackingStoreException e) {
-      vlog.error(e.getMessage());
+      vlog.error("Could not save preferences:");
+      vlog.error("  " + e.getMessage());
     }
   }
 
@@ -81,7 +82,8 @@ public class UserPreferences {
       for (int i = 0; i < keys.length; i++)
         vlog.debug(keys[i] + " = " + node.get(keys[i], null));
     } catch(BackingStoreException e) {
-      vlog.error(e.getMessage());
+      vlog.error("Could not save preferences:");
+      vlog.error("  " + e.getMessage());
     }
   }
 
@@ -95,7 +97,8 @@ public class UserPreferences {
       }
       root.sync();
     } catch(BackingStoreException e) {
-      vlog.error(e.getMessage());
+      vlog.error("Could not clear preferences:");
+      vlog.error("  " + e.getMessage());
     }
   }
 
@@ -157,7 +160,8 @@ public class UserPreferences {
           Configuration.setParam(key, valueStr);
       }
     } catch(BackingStoreException e) {
-      vlog.error(e.getMessage());
+      vlog.error("Could not get preferences:");
+      vlog.error("  " + e.getMessage());
     }
     if ((setEncX509 || setEncTLS || setEncNone) &&
         (setSecPlain || setSecIdent || setSecVnc || setSecNone)) {
