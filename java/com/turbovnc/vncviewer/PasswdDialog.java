@@ -29,9 +29,10 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
   UIKeyboardInteractive {
 
   public PasswdDialog(String title_, boolean userDisabled,
-                      String userName, boolean passwdDisabled) {
+                      String userName_, boolean passwdDisabled) {
     super(true);
     title = title_;
+    userName = userName_;
 
     p1 = new JPanel();
     userLabel = new JLabel("User name:");
@@ -53,12 +54,6 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
     passwdLabel.setEnabled(!passwdDisabled);
     p2.add(passwdEntry);
     passwdEntry.addKeyListener(this);
-
-    if (userEntry.isEnabled() && userName == null) {
-      userEntry.requestFocus();
-    } else {
-      passwdEntry.requestFocus();
-    }
   }
 
   protected void populateDialog(JDialog dlg) {
@@ -76,6 +71,12 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
     dlg.getContentPane().add(p1);
     dlg.getContentPane().add(p2);
     dlg.pack();
+
+    if (userEntry.isEnabled() && userName == null) {
+      userEntry.requestFocus();
+    } else {
+      passwdEntry.requestFocus();
+    }
   }
 
   /** Handle the key-typed event. */
@@ -191,5 +192,5 @@ class PasswdDialog extends Dialog implements KeyListener, UserInfo,
   JTextField userEntry;
   JLabel passwdLabel;
   JPasswordField passwdEntry;
-  String title;
+  String title, userName;
 }
