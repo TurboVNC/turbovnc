@@ -68,6 +68,18 @@ public class VncViewer extends java.applet.Applet implements Runnable {
       ClassLoader cl = getClass().getClassLoader();
       InputStream stream =
         cl.getResourceAsStream("com/turbovnc/vncviewer/timestamp");
+      if (stream == null) {
+        vlog.error("WARNING: Could not read JAR timestamp.  Version information will be");
+        vlog.error("         incorrect.");
+        version = "NOVERSION";
+        build = "NOBUILD";
+        copyrightYear = "NOYEAR";
+        copyright = "NOCOPYRIGHT";
+        url = "NOURL";
+        pkgDate = "NODATE";
+        pkgTime = "NOTIME";
+        return;
+      }
       try {
         Manifest manifest = new Manifest(stream);
         Attributes attributes = manifest.getMainAttributes();
