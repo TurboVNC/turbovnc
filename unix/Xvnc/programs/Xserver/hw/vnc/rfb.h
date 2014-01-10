@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2010-2013 D. R. Commander
+ *  Copyright (C) 2010-2014 D. R. Commander
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2000-2004 Const Kaplinsky.  All Rights Reserved.
@@ -492,6 +492,7 @@ extern void rfbCorkSock(int sock);
 extern void rfbUncorkSock(int sock);
 
 extern int ReadExact(int sock, char *buf, int len);
+extern int SkipExact(int sock, int len);
 extern int WriteExact(int sock, char *buf, int len);
 extern int ListenOnTCPPort(int port);
 extern int ListenOnUDPPort(int port);

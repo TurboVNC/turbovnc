@@ -101,6 +101,11 @@ The Java TurboVNC Viewer was not displaying dialogs from its built-in SSH
 client, which caused the SSH client to fail if the server was not in the known
 hosts file.  This has been fixed.
 -------------------------------------------------------------------------------
+[15]
+If the TurboVNC Server receives a clipboard update larger than 1 MB from a
+connected viewer, it will now ignore the update instead of disconnecting the
+viewer.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
