@@ -11,6 +11,21 @@
 	| Dual processors or dual cores recommended \
 	| For optimal performance, the CPU should support SSE2 extensions. \
 	|
+| O/S \
+	| TurboVNC should work with a variety of Linux distributions, \
+		[[http://www.freebsd.org][FreeBSD]], and \
+		[[http://www.oracle.com/us/products/servers-storage/solaris][Solaris]], \
+		but currently-supported versions of \
+		[[http://www.redhat.com/products/enterprise-linux/][Red Hat Enterprise Linux]] \
+		(and its work-alikes, including [[http://www.centos.org][CentOS]], \
+		[[http://www.oracle.com/us/technologies/linux][Oracle Linux]], and \
+		[[https://www.scientificlinux.org][Scientific Linux]]), \
+		[[http://www.ubuntu.com][Ubuntu]] LTS, and [[http://www.suse.com][SuSE]] \
+		Linux Enterprise tend to receive the most attention from the TurboVNC \
+		community. \
+	| < \
+	| < \
+	|
 | Other \
 	| {:} | {:} \
 	| For optimal performance, the X server should be configured to export True \

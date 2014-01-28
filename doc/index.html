@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2013-11-22T12:16:17">
+<meta name="date" content="2014-01-28T15:26:27">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.2.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -380,6 +380,10 @@ other VNC distributions without interference.</p>
     <td class="standard">For optimal performance, the CPU should support SSE2 extensions.</td>
   </tr>
   <tr class="standard">
+    <td class="high standard">O/S</td>
+    <td class="standard" colspan="3">TurboVNC should work with a variety of Linux distributions, <span class="remote"><a href="http://www.freebsd.org" class="remote">FreeBSD</a></span><a name="idx008"></a>, and <span class="remote"><a href="http://www.oracle.com/us/products/servers-storage/solaris" class="remote">Solaris</a></span><a name="idx009"></a>, but currently-supported versions of <span class="remote"><a href="http://www.redhat.com/products/enterprise-linux/" class="remote">Red Hat Enterprise Linux</a></span><a name="idx0010"></a> (and its work-alikes, including <span class="remote"><a href="http://www.centos.org" class="remote">CentOS</a></span><a name="idx0011"></a>, <span class="remote"><a href="http://www.oracle.com/us/technologies/linux" class="remote">Oracle Linux</a></span><a name="idx0012"></a>, and <span class="remote"><a href="https://www.scientificlinux.org" class="remote">Scientific Linux</a></span><a name="idx0013"></a>), <span class="remote"><a href="http://www.ubuntu.com" class="remote">Ubuntu</a></span><a name="idx0014"></a> LTS, and <span class="remote"><a href="http://www.suse.com" class="remote">SuSE</a></span><a name="idx0015"></a> Linux Enterprise tend to receive the most attention from the TurboVNC community.</td>
+  </tr>
+  <tr class="standard">
     <td class="high standard">Other</td>
     <td class="standard"></td>
     <td class="standard"></td>
@@ -475,29 +479,29 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
 <h3 id="hd005001002">Installing TurboVNC</h3>
 
 <ol class="Ordered numeric">
-    <li value="1" class="Ordered-1 Ordered">
+    <li class="Ordered-1 Ordered" value="1">
         Download the appropriate TurboVNC binary package for your system from 
         the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-        area</a></span><a name="idx008"></a> of the 
+        area</a></span><a name="idx0016"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx009"></a>. Packages are 
-        provided for Linux distributions in the 
-        <span class="remote"><a href="http://www.redhat.com/" class="remote">Red 
-        Hat</a></span><a name="idx0010"></a>, 
-        <span class="remote"><a href="http://www.suse.com/" class="remote">SuSE</a></span><a name="idx0011"></a>, 
-        or 
-        <span class="remote"><a href="http://www.debian.org/" class="remote">Debian</a></span><a name="idx0012"></a> 
-        families that contain GLIBC 2.3.2 or later (including 
-        <span class="remote"><a href="http://fedoraproject.org/" class="remote">Fedora</a></span><a name="idx0013"></a>, 
-        <span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0014"></a> 
-        3 or later, 
-        <span class="remote"><a href="http://www.oracle.com/us/technologies/linux/" class="remote">Oracle 
-        Linux</a></span><a name="idx0015"></a>, and 
-        <span class="remote"><a href="http://www.ubuntu.com/" class="remote">Ubuntu 
-        Linux</a></span><a name="idx0016"></a> v6.0 or later.) <br />
+        SourceForge project page</a></span><a name="idx0017"></a>. Packages are 
+        provided for RPM-based and Debian-based Linux distributions that contain 
+        GLIBC 2.3.4 or later (including 
+        <span class="remote"><a href="http://fedoraproject.org" class="remote">Fedora</a></span><a name="idx0018"></a> 
+        4 or later, 
+        <span class="remote"><a href="http://www.redhat.com/products/enterprise-linux" class="remote">Red 
+        Hat Enterprise 
+        Linux</a></span><a name="idx0019"></a>/<span class="remote"><a href="http://www.centos.org/" class="remote">CentOS</a></span><a name="idx0020"></a> 
+        4 or later, 
+        <span class="remote"><a href="http://www.suse.com" class="remote">SuSE</a></span><a name="idx0021"></a> 
+        Linux 
+        Enterprise/<span class="remote"><a href="http://www.opensuse.org" class="remote">openSUSE</a></span><a name="idx0022"></a> 
+        10 or later, and 
+        <span class="remote"><a href="http://www.ubuntu.com" class="remote">Ubuntu</a></span><a name="idx0023"></a> 
+        6.06 or later.) <br />
     </li>
-    <li value="2" class="Ordered-1 Ordered">
+    <li class="Ordered-1 Ordered" value="2">
         Log in as root, cd to the directory where you downloaded the binary 
         package, and issue one of the following commands:
         <dl class="Description">
@@ -529,9 +533,9 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
         (<code>TurboVNC-</code><em><code>{version}</code></em><code>.dmg</code>) 
         from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-        area</a></span><a name="idx0017"></a> of the 
+        area</a></span><a name="idx0024"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0018"></a>.
+        SourceForge project page</a></span><a name="idx0025"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Open the disk image, then open <code>TurboVNC.pkg</code> inside the disk 
@@ -551,9 +555,9 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
         <code>TurboVNC64-</code><em><code>{version}</code></em><code>.exe</code> 
         for 64-bit systems) from the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-        area</a></span><a name="idx0019"></a> of the 
+        area</a></span><a name="idx0026"></a> of the 
         <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-        SourceForge project page</a></span><a name="idx0020"></a>.
+        SourceForge project page</a></span><a name="idx0027"></a>.
     </li>
     <li class="Ordered-1 Ordered">
         Run the TurboVNC installer.  The installation of TurboVNC should be 
@@ -572,9 +576,9 @@ TurboVNC source tarball
 (<code>turbovnc-</code><em><code>{version}</code></em><code>.tar.gz</code>) 
 from the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
-area</a></span><a name="idx0021"></a> of the 
+area</a></span><a name="idx0028"></a> of the 
 <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
-SourceForge project page</a></span><a name="idx0022"></a>, uncompress 
+SourceForge project page</a></span><a name="idx0029"></a>, uncompress 
 it, <code>cd&nbsp;turbovnc-</code><em><code>{version}</code></em>, and 
 read <code>BUILDING.txt</code> for further instructions on how to build 
 TurboVNC from source.</p>
@@ -1126,7 +1130,7 @@ options described above:</p>
     <td class="standard">30</td>
     <td class="standard">4x</td>
     <td class="standard">1</td>
-    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0023"></a>.</td>
+    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0030"></a>.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Lossless Tight&rdquo;</td>
@@ -1466,7 +1470,7 @@ embedded in the app bundle, so no further action is needed to accelerate
 it.  If you are using the Java TurboVNC Viewer on Windows or Linux, then 
 you will need to install one of the 
 <span class="remote"><a href="http://www.sourceforge.net/projects/libjpeg-turbo/files" class="remote">official 
-libjpeg-turbo packages</a></span><a name="idx0024"></a> (version 1.3.0 
+libjpeg-turbo packages</a></span><a name="idx0031"></a> (version 1.3.0 
 or later) in order to accelerate JPEG decoding.  Install the appropriate 
 version of libjpeg-turbo (32-bit or 64-bit) to match your JRE.  If you 
 are launching the Java TurboVNC Viewer from the command line, then it 
@@ -1534,7 +1538,7 @@ Viewer environment without requiring the viewer to be installed on the
 client machine. This mechanism is preferred over deploying the viewer as 
 an applet, since JPEG decoding cannot be accelerated when the Java 
 TurboVNC Viewer is run as an applet.  See 
-<span class="remote"><a href="http://www.virtualgl.org/Documentation/JWS" class="remote">http://www.virtualgl.org/Documentation/JWS</a></span><a name="idx0025"></a> 
+<span class="remote"><a href="http://www.virtualgl.org/Documentation/JWS" class="remote">http://www.virtualgl.org/Documentation/JWS</a></span><a name="idx0032"></a> 
 for more details.</p>
 
 <p><br /></p>
@@ -1904,7 +1908,7 @@ TurboVNC server for this procedure to perform well.</p>
 <p>In order to realize the full performance benefits of TurboVNC, it is 
 necessary to use a TurboVNC server and a TurboVNC viewer in concert.  
 However, TurboVNC is fully compatible with 
-<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0026"></a>, 
+<span class="remote"><a href="http://www.tigervnc.com" class="remote">TigerVNC</a></span><a name="idx0033"></a>, 
 TightVNC, RealVNC, and other VNC flavors.  You can use the TurboVNC 
 Viewer to connect to a non-TurboVNC server (or vice versa), although 
 this will generally result in some decrease in performance.</p>
