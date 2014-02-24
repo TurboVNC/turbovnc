@@ -136,6 +136,9 @@ although those releases are EOL as of this writing) due to Ubuntu's inclusion
 of an experimental extension to the XFixes protocol that was never accepted
 upstream in X.org.
 
+23. Fixed a bug in the X.org code that prevented the TurboVNC Server from
+working properly on little endian PowerPC systems.
+
 
 2.1.1
 =====
