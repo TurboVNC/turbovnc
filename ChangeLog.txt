@@ -106,8 +106,7 @@ was specifically known to affect rxvt-unicode.
 The Windows TurboVNC Viewer should now build properly with Visual Studio 2012.
 -------------------------------------------------------------------------------
 [15]
-The "Uninstall TurboVNC" app should once again work on 32-bit OS X 10.5
-machines.
+The "Uninstall TurboVNC" app should once again work on OS X 10.5.
 -------------------------------------------------------------------------------
 [16]
 Added two new command-line options to PuTTY, -L4 and -L6.  These work just like

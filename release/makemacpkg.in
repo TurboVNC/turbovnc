@@ -72,8 +72,8 @@ chmod 1775 $PKGROOT/Library
 chmod 775 $PKGROOT/Library/Documentation
 safedirmove $PKGROOT$DOCDIR $PKGROOT/Library/Documentation/$PACKAGE_NAME $TMPDIR/__tmpdoc
 
-mkdir -p $TMPDIR/pkg/Resources 
-cp $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.rtf $SRCDIR/release/ReadMe.rtf $TMPDIR/pkg/Resources/ 
+mkdir -p $TMPDIR/pkg/Resources
+cp $SRCDIR/release/License.rtf $SRCDIR/release/Welcome.rtf $SRCDIR/release/ReadMe.rtf $TMPDIR/pkg/Resources/
 cp pkgscripts/Description.plist $TMPDIR/pkg/
 cp pkgscripts/Info.plist $TMPDIR/pkg/
 mkdir -p $PKGROOT$BINDIR/
@@ -99,6 +99,6 @@ mv "$TMPDIR/Uninstall $PACKAGE_NAME.app" $TMPDIR/dmg/
 sudo chown -R $USER "$TMPDIR/dmg/Uninstall $PACKAGE_NAME.app"
 hdiutil create -fs HFS+ -volname $PACKAGE_NAME-$VERSION \
 	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PACKAGE_NAME-$VERSION.dmg
-cp $TMPDIR/$PACKAGE_NAME-$VERSION.dmg . 
+cp $TMPDIR/$PACKAGE_NAME-$VERSION.dmg .
 
 exit
