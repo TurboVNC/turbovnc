@@ -18,7 +18,7 @@ else()
 	set(DEFAULT_TJPEG_JNILIBRARY "c:\\libjpeg-turbo\\bin\\turbojpeg.dll")
 endif()
 
-set(TJPEG_JNILIBRARY ${DEFAULT_TJPEG_JNILIBRARY} CACHE PATH
+set(TJPEG_JNILIBRARY ${DEFAULT_TJPEG_JNILIBRARY} CACHE FILEPATH
 	"Shared library containing TurboJPEG JNI functions (default: ${DEFAULT_TJPEG_JNILIBRARY})")
 
 if(NOT EXISTS ${TJPEG_JNILIBRARY})

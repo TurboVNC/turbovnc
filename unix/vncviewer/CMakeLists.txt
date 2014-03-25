@@ -24,7 +24,7 @@ else()
 	set(DEFAULT_TJPEG_JNILIBRARY /opt/libjpeg-turbo/lib32/libturbojpeg.so)
 endif()
 
-set(TJPEG_JNILIBRARY ${DEFAULT_TJPEG_JNILIBRARY} CACHE PATH
+set(TJPEG_JNILIBRARY ${DEFAULT_TJPEG_JNILIBRARY} CACHE FILEPATH
 	"Shared library containing TurboJPEG JNI functions (default: ${DEFAULT_TJPEG_JNILIBRARY})")
 
 get_filename_component(TJPEG_JNILIBRARY_RP ${TJPEG_JNILIBRARY} REALPATH)
