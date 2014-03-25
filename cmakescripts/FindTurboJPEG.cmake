@@ -36,7 +36,7 @@ else()
 	set(DEFAULT_TJPEG_LIBRARY /opt/libjpeg-turbo/lib${BITS}/libturbojpeg.a)
 endif()
 
-set(TJPEG_LIBRARY ${DEFAULT_TJPEG_LIBRARY} CACHE PATH
+set(TJPEG_LIBRARY ${DEFAULT_TJPEG_LIBRARY} CACHE FILEPATH
   "TurboJPEG library path (default: ${DEFAULT_TJPEG_LIBRARY})")
 
 if(WIN32)

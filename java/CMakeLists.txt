@@ -53,7 +53,7 @@ else()
 	set(DEFAULT_TJPEG_JAR /opt/libjpeg-turbo/classes/turbojpeg.jar)
 endif()
 
-set(TJPEG_JAR ${DEFAULT_TJPEG_JAR} CACHE PATH
+set(TJPEG_JAR ${DEFAULT_TJPEG_JAR} CACHE FILEPATH
 	"JAR file containing TurboJPEG Java classes (default: ${DEFAULT_TJPEG_JAR})")
 
 if(NOT EXISTS ${TJPEG_JAR})
@@ -62,7 +62,7 @@ endif()
 
 if(APPLE)
 	set(DEFAULT_TJPEG_JNILIBRARY /opt/libjpeg-turbo/lib/libturbojpeg.dylib)
-	set(TJPEG_JNILIBRARY ${DEFAULT_TJPEG_JNILIBRARY} CACHE PATH
+	set(TJPEG_JNILIBRARY ${DEFAULT_TJPEG_JNILIBRARY} CACHE FILEPATH
 		"Shared library containing TurboJPEG JNI functions (default: ${DEFAULT_TJPEG_JNILIBRARY})")
 endif()
 
