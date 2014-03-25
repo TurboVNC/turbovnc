@@ -45,6 +45,7 @@ Name: "doc";    Description: "Documentation";   Types: full custom;
 [Files]
 Source: "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@\{#BUILDDIR}vncviewer.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 Source: "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@\{#BUILDDIR}putty.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
+Source: "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@\{#BUILDDIR}tcbench.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace; Components: viewer
 #ifdef JAVA
 Source: "@CMAKE_BINARY_DIR@\java\VncViewer.jar"; DestDir: "{app}\java"; Flags: ignoreversion; Components: javaviewer
 Source: "@CMAKE_BINARY_DIR@\win\vncviewer.java\vncviewer-javaw.bat"; DestDir: "{app}"; Flags: ignoreversion; Components: javaviewer

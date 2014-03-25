@@ -1,7 +1,8 @@
 add_definitions(-D_WINSTATIC -D_WIN32_WINNT=0x0500 -DNTDDI_VERSION=0x05000100)
 
 include_directories(omnithread ${CMAKE_SOURCE_DIR}/common
-	${CMAKE_SOURCE_DIR}/common/d3des ${CMAKE_CURRENT_BINARY_DIR}/res)
+	${CMAKE_SOURCE_DIR}/common/d3des ${CMAKE_CURRENT_BINARY_DIR}/res
+	${CMAKE_SOURCE_DIR}/win/util)
 
 if(BITS EQUAL 64)
 	set(APPNAME "TurboVNC Viewer 64-bit v${VERSION} (${BUILD})")
@@ -30,7 +31,6 @@ add_executable(vncviewer WIN32
 	${CMAKE_SOURCE_DIR}/common/d3des/d3des.c
 	Daemon.cpp
 	Exception.cpp
-	fbx.c
 	FileTransfer.cpp
 	FileTransferItemInfo.cpp
 	HotKeys.cpp
@@ -49,7 +49,7 @@ add_executable(vncviewer WIN32
 	omnithread/nt.cpp
 	res/vncviewer.rc)
 
-target_link_libraries(vncviewer zlib
-	ws2_32.lib winmm.lib htmlhelp.lib comctl32.lib ${TJPEG_LIBRARY})
+target_link_libraries(vncviewer zlib ${TJPEG_LIBRARY} fbx
+	ws2_32.lib winmm.lib htmlhelp.lib comctl32.lib)
 
 install(TARGETS vncviewer DESTINATION ${TVNC_BINDIR})
