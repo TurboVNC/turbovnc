@@ -36,8 +36,8 @@ else()
 	set(DEFAULT_TJPEG_LIBRARY /opt/libjpeg-turbo/lib${BITS}/libturbojpeg.a)
 endif()
 
-set(TJPEG_LIBRARY ${DEFAULT_TJPEG_LIBRARY} CACHE FILEPATH
-  "TurboJPEG library path (default: ${DEFAULT_TJPEG_LIBRARY})")
+set(TJPEG_LIBRARY ${DEFAULT_TJPEG_LIBRARY} CACHE STRING
+	"Path to TurboJPEG library or flags necessary to link with it (default: ${DEFAULT_TJPEG_LIBRARY})")
 
 if(WIN32)
 	set(CMAKE_REQUIRED_DEFINITIONS -MT)

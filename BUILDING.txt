@@ -21,8 +21,9 @@ All Systems
      library under /opt/libjpeg-turbo on Unix or c:\libjpeg-turbo[64] on
      Windows, but you can override this by setting the TJPEG_INCLUDE_DIR CMake
      variable to the directory containing turbojpeg.h and the TJPEG_LIBRARY
-     CMake variable to the full path of the TurboJPEG library against which
-     you want to link.
+     CMake variable to either the full path of the TurboJPEG library against
+     which you want to link or a set of link flags needed to link with the
+     TurboJPEG library (for instance, -DTJPEG_LIBRARY="-L{dir} -lturbojpeg".)
 
 
 Linux and other Un*x O/S's (except Mac)
