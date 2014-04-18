@@ -74,11 +74,11 @@ void ClientConnection::SaveConnection()
 
   ofn.hwndOwner = m_hwnd;
   ofn.lpstrFile = fname;
-  ofn.lpstrFileTitle = tname; 
+  ofn.lpstrFileTitle = tname;
   ofn.Flags = OFN_HIDEREADONLY;
   if (!GetSaveFileName(&ofn)) {
     DWORD err = CommDlgExtendedError();
-    char msg[1024]; 
+    char msg[1024];
     switch(err) {
       case 0: // user cancelled
         break;
@@ -92,7 +92,7 @@ void ClientConnection::SaveConnection()
     }
     return;
   }
-  vnclog.Print(1, "Saving to %s\n", fname); 
+  vnclog.Print(1, "Saving to %s\n", fname);
   int ret = WritePrivateProfileString("connection", "host", m_host, fname);
   char buf[32];
   sprintf(buf, "%d", m_port);
@@ -102,9 +102,9 @@ void ClientConnection::SaveConnection()
     if (MessageBox(m_hwnd,
       "Do you want to save the password in this file?\n\r"
       "If you say Yes, anyone with access to this file could access your session\n\r"
-      "and (potentially) discover your VNC password.",  
-      "Security warning", 
-      MB_YESNO | MB_ICONWARNING) == IDYES) 
+      "and (potentially) discover your VNC password.",
+      "Security warning",
+      MB_YESNO | MB_ICONWARNING) == IDYES)
     {
       for (int i = 0; i < MAXPWLEN; i++)
         sprintf(buf+i*2, "%02x", (unsigned int) m_encPasswd[i]);
@@ -121,9 +121,9 @@ int ClientConnection::LoadConnection(char *fname, bool sess)
 {
   if (sess) {
     char tname[_MAX_FNAME + _MAX_EXT];
-    
+
     ofnInit();
-    
+
     ofn.hwndOwner = m_hSess;
     ofn.lpstrFile = fname;
     ofn.lpstrFileTitle = tname;

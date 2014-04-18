@@ -44,9 +44,9 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "TurboVNC Authentication"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    LTEXT           "VNC Host:",IDC_STATIC_HOST,7,8,36,10,SS_CENTERIMAGE | 
+    LTEXT           "VNC Host:",IDC_STATIC_HOST,7,8,36,10,SS_CENTERIMAGE |
                     NOT WS_GROUP
-    EDITTEXT        IDC_VNCHOST,46,7,95,12,ES_AUTOHSCROLL | ES_READONLY | 
+    EDITTEXT        IDC_VNCHOST,46,7,95,12,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_TABSTOP
     CONTROL         108,IDC_STATIC_LOGO,"Static",SS_BITMAP,7,23,32,30
     RTEXT           "User name:",IDC_STATIC_LOGIN,41,25,39,10,SS_CENTERIMAGE
@@ -64,7 +64,7 @@ BEGIN
     GROUPBOX        "Encoding",IDC_STATIC_FORMAT,4,4,173,144
     LTEXT           "Encoding method:",IDC_STATIC_ENCODING,12,15,109,10,
                     SS_CENTERIMAGE
-    COMBOBOX        IDC_ENCODING,20,27,150,79,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_ENCODING,20,27,150,79,CBS_DROPDOWNLIST |
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     CHECKBOX        "Allow JPEG compression",IDC_ALLOW_JPEG,12,43,109,10
     LTEXT           "JPEG chrominance subsampling:",IDC_STATIC_SUBSAMP,12,
@@ -94,7 +94,7 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,12,174,109,10
     GROUPBOX        "Display",IDC_STATIC_DISPLAY,186,4,160,80
     LTEXT           "Scaling factor:",IDC_STATIC_SCALE,195,15,46,10,SS_CENTERIMAGE
-    COMBOBOX        IDC_SCALE_EDIT,246,14,81,85,CBS_DROPDOWN | 
+    COMBOBOX        IDC_SCALE_EDIT,246,14,81,85,CBS_DROPDOWN |
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     LTEXT           "%",IDC_STATIC_P,332,15,10,10,SS_CENTERIMAGE
     CHECKBOX        "Double buffering",IDC_DBCHECK,195,29,145,10, WS_GROUP
@@ -102,13 +102,13 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,195,41,145,10
     LTEXT           "Span mode:",IDC_STATIC_SPAN,195,55,45,10,
                     SS_CENTERIMAGE
-    COMBOBOX        IDC_SPAN,240,53,90,50,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_SPAN,240,53,90,50,CBS_DROPDOWNLIST |
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Deiconify on remote Bell event",IDC_BELLDEICONIFY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,195,69,145,10
     GROUPBOX        "Mouse",IDC_STATIC_MOUSE,186,89,160,39
     CONTROL         "Emulate 3 buttons (with 2-button click)",
-                    IDC_EMULATECHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP | 
+                    IDC_EMULATECHECK,"Button",BS_AUTOCHECKBOX | WS_GROUP |
                     WS_TABSTOP,195,100,145,10
     CONTROL         "Swap mouse buttons 2 and 3",ID_SESSION_SWAPMOUSE,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,195,112,145,10
@@ -131,8 +131,8 @@ EXSTYLE WS_EX_CONTROLPARENT
 CAPTION "Choose Directory"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    CONTROL         "Tree1",IDC_FTBROWSETREE,"SysTreeView32",TVS_HASBUTTONS | 
-                    TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | 
+    CONTROL         "Tree1",IDC_FTBROWSETREE,"SysTreeView32",TVS_HASBUTTONS |
+                    TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP |
                     TVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,7,25,169,143
     DEFPUSHBUTTON   "&OK",IDC_FTBROWSEOK,38,175,50,14,WS_GROUP
     PUSHBUTTON      "&Cancel",IDC_FTBROWSECANCEL,95,175,50,14
@@ -145,32 +145,32 @@ EXSTYLE WS_EX_CONTEXTHELP
 CAPTION "TurboVNC File Transfers"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    CTEXT           "Local Computer",IDC_LOCAL_COMP_LABEL,7,7,180,10,NOT 
+    CTEXT           "Local Computer",IDC_LOCAL_COMP_LABEL,7,7,180,10,NOT
                     WS_GROUP
-    CTEXT           "TurboVNC Server",IDC_TVNC_SERV_LABEL,229,7,180,10,NOT 
+    CTEXT           "TurboVNC Server",IDC_TVNC_SERV_LABEL,229,7,180,10,NOT
                     WS_GROUP
-    EDITTEXT        IDC_CLIENTPATH,7,21,134,12,ES_AUTOHSCROLL | ES_READONLY | 
+    EDITTEXT        IDC_CLIENTPATH,7,21,134,12,ES_AUTOHSCROLL | ES_READONLY |
                     WS_GROUP
     PUSHBUTTON      "...",IDC_CLIENTBROWSE_BUT,145,21,14,12,WS_GROUP
     PUSHBUTTON      "",IDC_CLIENTUP,159,21,14,12,BS_ICON
     PUSHBUTTON      "",IDC_CLIENTRELOAD,173,21,14,12,BS_ICON
-    EDITTEXT        IDC_SERVERPATH,229,21,134,12,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_SERVERPATH,229,21,134,12,ES_AUTOHSCROLL |
                     ES_READONLY | WS_GROUP
     PUSHBUTTON      "...",IDC_SERVERBROWSE_BUT,367,21,14,12,WS_GROUP
     PUSHBUTTON      "",IDC_SERVERUP,381,21,14,12,BS_ICON
     PUSHBUTTON      "",IDC_SERVERRELOAD,395,21,14,12,BS_ICON
-    CONTROL         "List1",IDC_FTCLIENTLIST,"SysListView32",LVS_REPORT | 
-                    LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | 
+    CONTROL         "List1",IDC_FTCLIENTLIST,"SysListView32",LVS_REPORT |
+                    LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER |
                     WS_GROUP | WS_TABSTOP,7,40,180,196
     PUSHBUTTON      "<--->",IDC_FTCOPY,194,127,29,14,WS_DISABLED | WS_GROUP
-    CONTROL         "List2",IDC_FTSERVERLIST,"SysListView32",LVS_REPORT | 
-                    LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | 
+    CONTROL         "List2",IDC_FTSERVERLIST,"SysListView32",LVS_REPORT |
+                    LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER |
                     WS_GROUP | WS_TABSTOP,229,40,180,196
     CONTROL         "Progress1",IDC_FTPROGRESS,"msctls_progress32",WS_BORDER,
                     7,244,346,10
-    PUSHBUTTON      "Cancel",IDC_FTCANCEL,359,242,50,14,WS_DISABLED | 
+    PUSHBUTTON      "Cancel",IDC_FTCANCEL,359,242,50,14,WS_DISABLED |
                     WS_GROUP
-    LTEXT           "",IDC_FTSTATUS,7,261,346,14,SS_CENTERIMAGE | NOT 
+    LTEXT           "",IDC_FTSTATUS,7,261,346,14,SS_CENTERIMAGE | NOT
                     WS_GROUP
     PUSHBUTTON      "&Close",IDC_EXIT,359,261,50,14
 END
@@ -181,7 +181,7 @@ EXSTYLE WS_EX_CONTEXTHELP
 CAPTION "New TurboVNC Connection"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    COMBOBOX        IDC_HOSTNAME_EDIT,91,12,109,66,CBS_DROPDOWN | 
+    COMBOBOX        IDC_HOSTNAME_EDIT,91,12,109,66,CBS_DROPDOWN |
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "...",IDC_LOAD,204,12,16,13
     PUSHBUTTON      "&Listen mode",IDC_LIST_MODE,5,42,57,14,WS_GROUP
@@ -198,7 +198,7 @@ CAPTION "RFB Server Information"
 FONT 8, "MS Shell Dlg"
 BEGIN
     DEFPUSHBUTTON   "&OK",IDOK,87,149,50,14
-    EDITTEXT        IDC_SERVINFO_EDIT,7,7,210,134,ES_MULTILINE | 
+    EDITTEXT        IDC_SERVINFO_EDIT,7,7,210,134,ES_MULTILINE |
                     ES_AUTOHSCROLL | ES_READONLY
 END
 
@@ -208,7 +208,7 @@ CAPTION "About TurboVNC Viewer"
 FONT 8, "MS Shell Dlg"
 BEGIN
     DEFPUSHBUTTON   "&OK",IDOK,135,137,50,14
-    CONTROL         106,IDC_STATIC_LOGO,"Static",SS_BITMAP | SS_NOTIFY | 
+    CONTROL         106,IDC_STATIC_LOGO,"Static",SS_BITMAP | SS_NOTIFY |
                     SS_SUNKEN,19,7,87,80
     LTEXT           __APPNAME,IDC_STATIC_APPNAME,122,7,190,9
     LTEXT           __COPYRIGHT1,
@@ -230,9 +230,9 @@ BEGIN
                     12,30,152,10
     LTEXT           "Number of connections to remember:",IDC_STATIC_LIST,12,
                     46,121,10
-    EDITTEXT        IDC_EDIT_AMOUNT_LIST,137,44,27,14,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_EDIT_AMOUNT_LIST,137,44,27,14,ES_AUTOHSCROLL |
                     ES_NUMBER
-    CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_ALIGNRIGHT | 
+    CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_ALIGNRIGHT |
                     UDS_ARROWKEYS,164,44,10,14
     PUSHBUTTON      "Clear the list of saved connections",
                     IDC_BUTTON_CLEAR_LIST,12,60,119,14
@@ -248,9 +248,9 @@ BEGIN
     GROUPBOX        "Listen mode",IDC_STATIC_LMODE,4,86,292,33
     LTEXT           "Accept reverse VNC connections on TCP port:",
                     IDC_STATIC_PORT,13,100,158,10
-    EDITTEXT        IDC_LISTEN_PORT,176,98,36,14,ES_AUTOHSCROLL | ES_NUMBER | 
+    EDITTEXT        IDC_LISTEN_PORT,176,98,36,14,ES_AUTOHSCROLL | ES_NUMBER |
                     WS_GROUP
-    CONTROL         "Spin3",IDC_SPIN3,"msctls_updown32",UDS_ALIGNRIGHT | 
+    CONTROL         "Spin3",IDC_SPIN3,"msctls_updown32",UDS_ALIGNRIGHT |
                     UDS_ARROWKEYS,212,98,10,14
     GROUPBOX        "Logging",IDC_STATIC_LOGGING,4,124,292,51
     CHECKBOX        "Write log to a file:",IDC_CHECK_LOG_FILE,12,137,76,10
@@ -258,7 +258,7 @@ BEGIN
     PUSHBUTTON      "Browse...",IDC_LOG_BROWSE,240,136,48,14
     LTEXT           "Verbosity level:",IDC_STATIC_LOG_LEVEL,24,156,64,10
     EDITTEXT        IDC_EDIT_LOG_LEVEL,92,153,23,14,ES_AUTOHSCROLL
-    CONTROL         "Spin2",IDC_SPIN2,"msctls_updown32",UDS_ALIGNRIGHT | 
+    CONTROL         "Spin2",IDC_SPIN2,"msctls_updown32",UDS_ALIGNRIGHT |
                     UDS_ARROWKEYS,115,153,10,14
 END
 
@@ -268,8 +268,8 @@ CAPTION "TurboVNC Viewer Help"
 FONT 8, "MS Shell Dlg"
 BEGIN
     DEFPUSHBUTTON   "&OK",IDOK,122,186,50,14
-    EDITTEXT        IDC_EDIT_HELP,7,7,281,172,ES_MULTILINE | ES_AUTOVSCROLL | 
-                    ES_AUTOHSCROLL | ES_READONLY | ES_WANTRETURN | 
+    EDITTEXT        IDC_EDIT_HELP,7,7,281,172,ES_MULTILINE | ES_AUTOVSCROLL |
+                    ES_AUTOHSCROLL | ES_READONLY | ES_WANTRETURN |
                     WS_VSCROLL | WS_HSCROLL
 END
 
@@ -302,7 +302,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO DISCARDABLE
 BEGIN
     IDD_LOGIN_AUTH_DIALOG, DIALOG
     BEGIN
@@ -497,18 +497,18 @@ END
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE DISCARDABLE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE DISCARDABLE
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE DISCARDABLE
 BEGIN
     "\r\n"
     "\0"
@@ -534,7 +534,7 @@ IDI_FILERELOAD          ICON    DISCARDABLE     "filereload.ico"
 // Menu
 //
 
-IDR_TRAYMENU MENU DISCARDABLE 
+IDR_TRAYMENU MENU DISCARDABLE
 BEGIN
     POPUP "t"
     BEGIN
@@ -556,18 +556,18 @@ END
 IDD_SESSION_DLG DLGINIT
 BEGIN
     IDC_HOSTNAME_EDIT, 0x403, 1, 0
-"\000" 
+"\000"
     0
 END
 
 IDD_OPTIONDIALOG DLGINIT
 BEGIN
     IDC_ENCODING, 0x403, 1, 0
-"\000" 
+"\000"
     IDC_SCALE_EDIT, 0x403, 1, 0
-"\000" 
+"\000"
     IDC_SCALE_EDIT, 0x403, 1, 0
-"\000" 
+"\000"
     0
 END
 
@@ -586,12 +586,12 @@ IDC_SMALLDOT            CURSOR  DISCARDABLE     "smalldot.cur"
 // String Table
 //
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     IDR_TRAY                "TurboVNC Viewer"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     ID_CLOSEDAEMON          "Stop listening for incoming connections"
     ID_SHOWWINDOW           "Display a connection window"
@@ -828,14 +828,14 @@ Display this screen\r\n\
 For more details, see the TurboVNC User's Guide."
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     IDC_TAB                 "Here you can choose whether to edit connection-specific options or global settings for the viewer."
     IDC_OPTIONBUTTON        "Edit connection-specific options for the specified VNC server or change the global configuration of the viewer."
     IDC_DBCHECK             "If this option is checked, TurboVNC will wait until all rectangles in a framebuffer update have been received and decoded before it draws the framebuffer update to the screen.  This reduces tearing artifacts when 3D or video applications switch frames."
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     IDC_OK                  "Connect to the specified VNC server."
     IDC_LIST_MODE           "Switch to listen mode and close the dialog box. The listening viewer will wait for incoming connections from VNC servers. To connect to a listening viewer from the Unix/Linux TurboVNC Server, use the vncconnect program."
@@ -847,20 +847,20 @@ BEGIN
     IDC_EDIT_LOG_FILE       "Specify a location and a name for the log file."
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     IDC_HOSTNAME_EDIT       "The IP address or host name of the VNC server to which you want to connect. Append :<display number> or ::<port number> to the host name (for example, ""myhost:1"" or ""myhost::5901"") to connect to a specific display number or TCP port."
     IDC_BELLDEICONIFY       "If this option is checked, a minimized viewer window will be restored upon receiving a remote ""Bell"" event."
     IDC_VIEWONLY            "If this option is checked, you will be able to see but not control the remote desktop."
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     IDOK                    "Apply the changes and close the dialog box."
     IDCANCEL                "Cancel any input and close the dialog box."
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     IDC_EDIT_LOG_LEVEL      "Specifies the level of detail to include in the log file. Level 0 causes the viewer to log only the most important events, whereas Level 12 generates a lot of debugging output."
     IDC_SHARED              "Enable multiple simultaneous viewer connections to the same server desktop. If the session is not shared, then only one viewer can connect to the same session at the same time. Unlike some VNC flavors, TurboVNC uses shared sessions by default."
@@ -870,14 +870,14 @@ BEGIN
     IDC_NOCURSOR_RADIO      "Do not show local cursor position."
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     IDC_EMULATECHECK        "If this option is checked, pressing the left and right mouse buttons simultaneously will emulate a middle button click. This is useful if your mouse lacks a middle button."
     IDC_FULLSCREEN          "In full-screen mode, the viewer will show only the remote desktop. The local desktop, toolbar, and window decorations will not be shown."
     IDC_SPAN                "This option specifies whether the viewer window should span all monitors, only the primary monitor, or whether it should span all monitors only if it cannot fit on the primary monitor (automatic.)"
     IDC_STATIC_SPAN         "This option specifies whether the viewer window should span all monitors, only the primary monitor, or whether it should span all monitors only if it cannot fit on the primary monitor (automatic.)"
     IDC_DISABLECLIPBOARD    "If this option is checked, the viewer will not send local clipboard changes to the server."
-    IDC_CSHAPE_DISABLE_RADIO 
+    IDC_CSHAPE_DISABLE_RADIO
                             "In this mode, the server draws the mouse cursor and continuously sends it to the client as an image. This can create performance problems on slow networks, but it allows you to see mouse movements from other users in a shared session."
     IDC_QUALITYLEVEL        "Higher JPEG quality levels result in less compression but better image quality."
     IDC_SUBSAMPLEVEL        "Each pixel in a JPEG image is represented as a brightness (luminance) value and a color (chrominance) value. Chrominance subsampling discards some or all chrominance values to reduce the image size, but it can create visible artifacts."
@@ -886,18 +886,18 @@ BEGIN
     IDC_CSHAPE_IGNORE_RADIO "In this mode, the remote mouse cursor will not be shown at all. Cursor shape updates and new coordinates received from the server will be ignored."
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     ID_SESSION_SET_CRECT    "When a rectangular area on the server's display changes position (such as when a window is moved), CopyRect encoding allows the server to send only the coordinates of the new position rather than completely re-sending the rectangular area."
     IDC_ALLOW_JPEG          "TurboVNC can use JPEG to compress subrectangles that have a large number of unique colors, thus reducing bandwidth significantly.  JPEG is mathematically lossy, but if Perceptually Lossless JPEG is used, the loss should be imperceptible to human vision."
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     ID_SESSION_SWAPMOUSE    "If this option is checked, clicking the right mouse button will send a middle button click to the server, whereas clicking the middle mouse button will send a right button click."
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     IDC_FTCANCEL            "Cancel the file transfer in progress."
     IDC_EXIT                "Close the file transfer dialog box."
@@ -906,7 +906,7 @@ BEGIN
     IDC_SERVERRELOAD        "Reload server-side file list."
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     IDC_FTCOPY              "Use this button to transfer files. Select a file on the left to upload it to the remote server, or select a file on the right to download it. Arrows on this button show the direction for file transfers."
     IDC_SMALLDOTCURSOR_RADIO "Show local cursor position as a smaller dot."
@@ -917,14 +917,14 @@ BEGIN
     IDC_SERVERUP            "Up one level in remote filesystem."
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     IDC_CLIENTRELOAD        "Reload local file list."
     IDC_CLIENTUP            "Up one level in local filesystem."
     IDC_LOG_BROWSE          "Choose a location for the log file."
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     IDC_NORMALCURSOR_RADIO  "Show local cursor position as an arrow cursor."
     IDC_CLIENTPATH          "Local path."
@@ -935,7 +935,7 @@ BEGIN
     IDC_FTSERVERLIST        "Files and directories on remote server."
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     IDC_STATIC_FORMAT       "Protocol options affecting how pixels are transferred from server to client."
     IDC_STATIC_RESTRICTIONS "Disabling particular protocol features."

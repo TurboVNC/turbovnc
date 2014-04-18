@@ -38,7 +38,7 @@
 #include <tchar.h>
 #include <windows.h>
 #include <io.h>
- 
+
 #include "rfb.h"
 
 extern const char* g_buildTime;
