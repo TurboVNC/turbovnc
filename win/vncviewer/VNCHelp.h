@@ -35,4 +35,4 @@ class VNCHelp
     DWORD m_dwCookie;
 };
 
-#endif 
+#endif

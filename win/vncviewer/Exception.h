@@ -24,7 +24,7 @@
 #pragma once
 
 
-class Exception  
+class Exception
 {
   public:
     Exception(const char *info = NULL);

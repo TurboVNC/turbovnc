@@ -28,17 +28,17 @@
 
 class ClientConnection;
 
-class FileTransfer  
+class FileTransfer
 {
   private:
     static const char uploadText[];
     static const char downloadText[];
     static const char noactionText[];
-  
+
   public:
     FileTransfer(ClientConnection * pCC, VNCviewerApp * pApp);
     ~FileTransfer();
-  
+
     void FTInsertColumn(HWND hwnd, char *iText, int iOrder, int xWidth);
     void CreateFileTransferDialog();
     void ShowListViewItems(HWND hwnd, FileTransferItemInfo *ftii);
@@ -62,8 +62,8 @@ class FileTransfer
     char m_ClientFilename[rfbMAX_PATH];
     char m_UploadFilename[rfbMAX_PATH];
     char m_DownloadFilename[rfbMAX_PATH];
-    void OnGetDispClientInfo(NMLVDISPINFO *plvdi); 
-    void OnGetDispServerInfo(NMLVDISPINFO *plvdi); 
+    void OnGetDispClientInfo(NMLVDISPINFO *plvdi);
+    void OnGetDispServerInfo(NMLVDISPINFO *plvdi);
     static LRESULT CALLBACK FileTransferDlgProc(HWND hwnd, UINT uMsg,
                                                 WPARAM wParam, LPARAM lParam);
     static BOOL CALLBACK FTBrowseDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam,
@@ -71,16 +71,16 @@ class FileTransfer
     void FileTransferDownload();
     void FileTransferUpload();
     void CloseUndoneFileTransfers();
-  
+
     void ReadUploadCancel();
     void ReadDownloadFailed();
-  
+
     BOOL SendFileDownloadRequest();
     BOOL SendMultipleFileDownloadRequests();
-  
+
     ClientConnection * m_clientconn;
-    VNCviewerApp * m_pApp; 
-    
+    VNCviewerApp * m_pApp;
+
   private:
     DWORD m_dwDownloadRead;
     DWORD m_dwDownloadBlockSize;
@@ -106,7 +106,7 @@ class FileTransfer
     HWND m_hwndFTProgress;
     HWND m_hwndFTStatus;
     HWND m_hwndFTBrowse;
-    
+
     BOOL m_bFTCOPY;
     BOOL m_bUploadStarted;
     BOOL m_bDownloadStarted;
@@ -114,12 +114,12 @@ class FileTransfer
     BOOL m_bReportUploadCancel;
     BOOL m_bServerBrowseRequest;
     BOOL m_bFirstFileDownloadMsg;
-  
+
     HANDLE m_hFiletoWrite;
     HANDLE m_hFiletoRead;
     HTREEITEM m_hTreeItem;
     HINSTANCE m_FTInstance;
-  
+
     FileTransferItemInfo m_FTClientItemInfo;
     FileTransferItemInfo m_FTServerItemInfo;
 };

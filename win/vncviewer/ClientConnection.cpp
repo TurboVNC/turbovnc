@@ -421,8 +421,8 @@ void ClientConnection::CreateDisplay()
   // Set a suitable palette
   if (GetDeviceCaps(m_hBitmapDC, RASTERCAPS) & RC_PALETTE) {
     vnclog.Print(3, "Palette-based display - %d entries, %d reserved\n",
-      GetDeviceCaps(m_hBitmapDC, SIZEPALETTE),
-                    GetDeviceCaps(m_hBitmapDC, NUMRESERVED));
+                 GetDeviceCaps(m_hBitmapDC, SIZEPALETTE),
+                 GetDeviceCaps(m_hBitmapDC, NUMRESERVED));
     BYTE buf[sizeof(LOGPALETTE) + 216 * sizeof(PALETTEENTRY)];
     LOGPALETTE *plp = (LOGPALETTE *)buf;
     int pepos = 0;

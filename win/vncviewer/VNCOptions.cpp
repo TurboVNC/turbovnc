@@ -595,7 +595,7 @@ void VNCOptions::SetFromCommandLine(LPTSTR szCmdLine)
     } else if (SwitchMatch(args[j], "tunnel")) {
       m_tunnel = true;
     } else {
-      if (strlen(args[j]) >= 4 && 
+      if (strlen(args[j]) >= 4 &&
           !strnicmp(&args[j][strlen(args[j]) - 4], ".vnc", 4)) {
         // The GetPrivateProfile* stuff seems not to like some relative paths
         _fullpath(m_configFilename, args[j], _MAX_PATH);
@@ -1333,7 +1333,7 @@ BOOL CALLBACK VNCOptions::DlgProcConnOptions(HWND hwnd, UINT uMsg,
         DWORD slidermax = (DWORD)SendMessage(hCompressLevel, TBM_GETRANGEMAX,
                                              0, 0);
         if (slidermax == 1 && dwPos == 0)
-          SetDlgItemText(hwnd, IDC_STATIC_LEVEL, "None"); 	 
+          SetDlgItemText(hwnd, IDC_STATIC_LEVEL, "None");
         else
           SetDlgItemInt(hwnd, IDC_STATIC_LEVEL, dwPos, FALSE);
       }
@@ -1440,7 +1440,7 @@ void VNCOptions::SetCompressSlider(HWND hwnd, int compress)
   SendMessage(hCompress, TBM_SETPOS, TRUE, compress);
   DWORD slidermax = (DWORD)SendMessage(hCompress, TBM_GETRANGEMAX, 0, 0);
   if (slidermax == 1 && compress == 0)
-    SetDlgItemText(hwnd, IDC_STATIC_LEVEL, "None"); 	 
+    SetDlgItemText(hwnd, IDC_STATIC_LEVEL, "None");
   else
     SetDlgItemInt(hwnd, IDC_STATIC_LEVEL, compress, FALSE);
 }
