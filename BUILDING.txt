@@ -23,7 +23,9 @@ All Systems
      variable to the directory containing turbojpeg.h and the TJPEG_LIBRARY
      CMake variable to either the full path of the TurboJPEG library against
      which you want to link or a set of link flags needed to link with the
-     TurboJPEG library (for instance, -DTJPEG_LIBRARY="-L{dir} -lturbojpeg".)
+     TurboJPEG library (for instance,
+     -DTJPEG_LIBRARY="-L/opt/libjpeg-turbo/lib64 -lturbojpeg" or
+     -DTJPEG_LIBRARY="-libpath:c:/libjpeg-turbo64/lib turbojpeg.lib".)
 
 
 Linux and other Un*x O/S's (except Mac)
