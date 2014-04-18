@@ -56,8 +56,9 @@ Windows
    The Windows SDK includes both 32-bit and 64-bit Visual C++ compilers and
    everything necessary to build TurboVNC.
 
-   * For 32-bit builds, you can also use Microsoft Visual C++ Express
-     Edition.  Visual C++ Express Edition is a free download.
+   * You can also use Microsoft Visual Studio Express Edition, which is a free
+     download.  (NOTE: versions prior to 2012 can only be used to build 32-bit
+     code.)
    * If you intend to build TurboVNC from the command line, then add the
      appropriate compiler and SDK directories to the INCLUDE, LIB, and PATH
      environment variables.  This is generally accomplished by executing
@@ -151,7 +152,11 @@ Choose the appropriate CMake generator option for your version of Visual Studio
 instance:
 
   cd {build_directory}
-  cmake -G "Visual Studio 9 2008" [additional CMake flags] {source_directory}
+  cmake -G "Visual Studio 10" [additional CMake flags] {source_directory}
+
+NOTE:  Add "Win64" to the generator name (e.g. "Visual Studio 10 Win64") to
+build a 64-bit version of TurboVNC.  Recent versions of CMake no longer
+document that.
 
 You can then open ALL_BUILD.vcproj in Visual Studio and build one of the
 configurations in that project ("Debug", "Release", etc.) to generate a full
