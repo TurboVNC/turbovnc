@@ -15,7 +15,7 @@ set(RCVERSION 1,2,2,0)
 set(XVENDORRELEASE 10202000)
 set(COPYRIGHT_YEAR "1999-2014")
 set(COPYRIGHT "The VirtualGL Project and many others (see README.txt)")
-set(URLTEXT "Visit http://www.virtualgl.org for more information on TurboVNC")
+set(URLTEXT "Visit http://www.TurboVNC.org for more information on TurboVNC")
 
 if(UNIX)
 	execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)

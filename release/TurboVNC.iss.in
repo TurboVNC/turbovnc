@@ -12,9 +12,9 @@ AppVerName=@CMAKE_PROJECT_NAME@ v@VERSION@ (@BUILD@)
 #endif
 AppVersion=@VERSION@
 AppPublisher=The VirtualGL Project
-AppPublisherURL=http://www.virtualgl.org
-AppSupportURL=http://www.virtualgl.org
-AppUpdatesURL=http://www.virtualgl.org
+AppPublisherURL=http://www.TurboVNC.org
+AppSupportURL=http://www.TurboVNC.org
+AppUpdatesURL=http://www.TurboVNC.org
 DefaultDirName={pf}\@CMAKE_PROJECT_NAME@
 #ifdef WIN64
 DefaultGroupName=@CMAKE_PROJECT_NAME@ 64-bit
@@ -67,7 +67,7 @@ Name: "{group}\@CMAKE_PROJECT_NAME@ Viewer (Listen Mode - IPv6)"; FileName: "{ap
 Name: "{group}\Java @CMAKE_PROJECT_NAME@ Viewer";                 FileName: "{app}\java\VncViewer.jar";                            WorkingDir: "{app}\java";
 Name: "{group}\Documentation\Java @CMAKE_PROJECT_NAME@ Viewer README"; FileName: "write.exe";      Parameters: "README.txt";       WorkingDir: "{app}\java"; Flags: "useapppaths"
 #endif
-Name: "{group}\Uninstall @CMAKE_PROJECT_NAME@";                   FileName: "{uninstallexe}";                                      WorkingDir: "{app}";                        
+Name: "{group}\Uninstall @CMAKE_PROJECT_NAME@";                   FileName: "{uninstallexe}";                                      WorkingDir: "{app}";
 Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ README";        FileName: "write.exe";           Parameters: "README.txt";       WorkingDir: "{app}";      Flags: "useapppaths"
 Name: "{group}\Documentation\@CMAKE_PROJECT_NAME@ User's Guide";  FileName: "{app}\doc\index.html";                                WorkingDir: "{app}\doc";  Components: doc;
 Name: "{group}\Documentation\Licensing Terms";                    FileName: "write.exe";           Parameters: "LICENSE.txt";      WorkingDir: "{app}\doc";  Flags: "useapppaths"

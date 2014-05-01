@@ -259,7 +259,7 @@ none of the pixels in that region have changed.  Also, certain programs have a
 blinking cursor that may update more frequently than the ALR timeout.  Since
 an ALR is triggered based on a period of inactivity relative to the last
 framebuffer update, these continuous updates prevent an ALR from ever being
-sent.  Fortunately, these ill-behaved window managers and blinking cursors 
+sent.  Fortunately, these ill-behaved window managers and blinking cursors
 do not typically use ''X[Shm]PutImage()'' to perform their updates,
 so the problem is effectively worked around by limiting the regions that are
 "eligible" for ALR to just the subset of regions that were drawn with the
@@ -363,4 +363,4 @@ using JWS provides a fully functional and performant TurboVNC Viewer
 environment without requiring the viewer to be installed on the client machine.
 This mechanism is preferred over deploying the viewer as an applet, since JPEG
 decoding cannot be accelerated when the Java TurboVNC Viewer is run as an
-applet.  See [[http://www.virtualgl.org/Documentation/JWS]] for more details.
+applet.  See [[http://www.TurboVNC.org/Documentation/JWS]] for more details.

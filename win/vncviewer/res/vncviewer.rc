@@ -946,7 +946,7 @@ BEGIN
     IDC_STATIC_LOGGING      "The viewer can log its activity in a text file. Logging options allow you to customize this facility."
     IDC_STATIC_LCURSOR      "Sometimes, the local mouse cursor and the remote pointer are at different screen locations. Customizing the shape of the local cursor can make it easier to track."
     IDC_STATIC_LMODE        "Options specific to the listen mode, which is used for ""reverse"" server-to-client connections."
-    IDC_STATIC_PICTURE      "TurboVNC is an enhanced version of VNC. Visit http://www.virtualgl.org/ for more information."
+    IDC_STATIC_PICTURE      "TurboVNC is an enhanced version of VNC. Visit http://www.TurboVNC.org/ for more information."
 END
 
 #endif    // English (U.S.) resources

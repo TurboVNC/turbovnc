@@ -35,4 +35,4 @@ Tim Waugh <twaugh@redhat.com>
 .br
 Constantin Kaplinsky <const@tightvnc.com>
 .br
-D. R. Commander <information@virtualgl.org>
+D. R. Commander <information@turbovnc.org>

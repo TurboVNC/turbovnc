@@ -23,8 +23,8 @@ Summary:   A highly-optimized version of VNC that can be used with performance-c
 Name:      @CMAKE_PROJECT_NAME_LC@
 Version:   @VERSION@
 Release:   @BUILD@
-URL:       http://www.virtualgl.org
-#-->Source0: http://prdownloads.sourceforge.net/virtualgl/%{name}-%{version}.tar.gz
+URL:       http://www.TurboVNC.org
+#-->Source0: http://prdownloads.sourceforge.net/turbovnc/%{name}-%{version}.tar.gz
 License:   GPL
 Group:     User Interface/Desktops
 Requires:  bash >= 2.0

@@ -20,13 +20,13 @@ following error:
 #OPT: noList! plain!
 
 	1. Download the appropriate TurboVNC binary package for your system from the
-		[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
-		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
+		[[http://sourceforge.net/projects/turbovnc/files/][Files area]]
+		of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]].
 		Packages are provided for RPM-based and Debian-based Linux distributions
 		that contain GLIBC 2.3.4 or later (including
 		[[http://fedoraproject.org][Fedora]] 4 or later,
 		[[http://www.redhat.com/products/enterprise-linux][Red Hat Enterprise Linux]]/[[http://www.centos.org/][CentOS]] \
-		4 or later, 
+		4 or later,
 		[[http://www.suse.com][SuSE]] Linux Enterprise/[[http://www.opensuse.org][openSUSE]] 10 or later,
 		and [[http://www.ubuntu.com][Ubuntu]] 6.06 or later.)
 		{nl}
@@ -48,8 +48,8 @@ following error:
 
 	#. Download the TurboVNC Mac disk image
 		(''TurboVNC-''__''{version}''__''.dmg'') from the
-		[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
-		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
+		[[http://sourceforge.net/projects/turbovnc/files/][Files area]]
+		of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]].
 
 	#. Open the disk image, then open ''TurboVNC.pkg'' inside the
 		disk image.  Follow the instructions to install the Mac TurboVNC Viewer.
@@ -59,8 +59,8 @@ following error:
 	#. Download the TurboVNC Windows installer package
 		(''TurboVNC-''__''{version}''__''.exe'' for 32-bit systems or
 		''TurboVNC64-''__''{version}''__''.exe'' for 64-bit systems) from the
-		[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
-		of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]].
+		[[http://sourceforge.net/projects/turbovnc/files/][Files area]]
+		of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]].
 
 	#. Run the TurboVNC installer.  The installation of TurboVNC should be
 		self-explanatory.  The only configuration option is the directory into
@@ -70,9 +70,9 @@ following error:
 
 If you are using a Un*x platform for which there is not a pre-built TurboVNC
 binary package available, then log in as root, download the TurboVNC source
-tarball (''turbovnc-''__''{version}''__''.tar.gz'') from the 
-[[http://sourceforge.net/projects/virtualgl/files/TurboVNC/][Files area]]
-of the [[http://sourceforge.net/projects/virtualgl][VirtualGL SourceForge project page]],
+tarball (''turbovnc-''__''{version}''__''.tar.gz'') from the
+[[http://sourceforge.net/projects/turbovnc/files/][Files area]]
+of the [[http://sourceforge.net/projects/turbovnc][TurboVNC SourceForge project page]],
 uncompress it, ''cd turbovnc-''__''{version}''__, and read ''BUILDING.txt''
 for further instructions on how to build TurboVNC from source.
 

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2014-01-28T15:26:27">
+<meta name="date" content="2014-05-01T17:24:12">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 1.2.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -187,7 +187,7 @@
 Commons Attribution 2.5 License</a></span><a name="idx001"></a>.  Any 
 works that contain material derived from this document must cite The 
 VirtualGL Project as the source of the material and list the current URL 
-for the VirtualGL web site.</p>
+for the TurboVNC web site.</p>
 
 <p>The official TurboVNC binaries contain libjpeg-turbo, which is based in 
 part on the work of the Independent JPEG Group.</p>
@@ -278,7 +278,7 @@ permutations of the TightVNC encoder were benchmarked at the low level
 against a variety of captured RFB sessions that simulate real-world 
 application workloads, both 2D and 3D.  For more information on the 
 research leading to TurboVNC&rsquo;s encoder design, see 
-<span class="remote"><a href="http://www.virtualgl.org/pmwiki/uploads/About/tighttoturbo.pdf" class="remote">this 
+<span class="remote"><a href="http://www.TurboVNC.org/pmwiki/uploads/About/tighttoturbo.pdf" class="remote">this 
 report</a></span><a name="idx007"></a>.</p>
 
 <p>In addition to high performance, other notable features of TurboVNC 
@@ -479,12 +479,12 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
 <h3 id="hd005001002">Installing TurboVNC</h3>
 
 <ol class="Ordered numeric">
-    <li class="Ordered-1 Ordered" value="1">
+    <li value="1" class="Ordered-1 Ordered">
         Download the appropriate TurboVNC binary package for your system from 
         the 
-        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
+        <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
         area</a></span><a name="idx0016"></a> of the 
-        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
+        <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
         SourceForge project page</a></span><a name="idx0017"></a>. Packages are 
         provided for RPM-based and Debian-based Linux distributions that contain 
         GLIBC 2.3.4 or later (including 
@@ -501,7 +501,7 @@ could&nbsp;not&nbsp;open&nbsp;default&nbsp;font&nbsp;'fixed'
         <span class="remote"><a href="http://www.ubuntu.com" class="remote">Ubuntu</a></span><a name="idx0023"></a> 
         6.06 or later.) <br />
     </li>
-    <li class="Ordered-1 Ordered" value="2">
+    <li value="2" class="Ordered-1 Ordered">
         Log in as root, cd to the directory where you downloaded the binary 
         package, and issue one of the following commands:
         <dl class="Description">
@@ -532,9 +532,9 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
         Download the TurboVNC Mac disk image 
         (<code>TurboVNC-</code><em><code>{version}</code></em><code>.dmg</code>) 
         from the 
-        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
+        <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
         area</a></span><a name="idx0024"></a> of the 
-        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
+        <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
         SourceForge project page</a></span><a name="idx0025"></a>.
     </li>
     <li class="Ordered-1 Ordered">
@@ -554,9 +554,9 @@ dpkg&nbsp;-i&nbsp;turbovnc*.deb
         for 32-bit systems or 
         <code>TurboVNC64-</code><em><code>{version}</code></em><code>.exe</code> 
         for 64-bit systems) from the 
-        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
+        <span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
         area</a></span><a name="idx0026"></a> of the 
-        <span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
+        <span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
         SourceForge project page</a></span><a name="idx0027"></a>.
     </li>
     <li class="Ordered-1 Ordered">
@@ -575,9 +575,9 @@ TurboVNC binary package available, then log in as root, download the
 TurboVNC source tarball 
 (<code>turbovnc-</code><em><code>{version}</code></em><code>.tar.gz</code>) 
 from the 
-<span class="remote"><a href="http://sourceforge.net/projects/virtualgl/files/TurboVNC/" class="remote">Files 
+<span class="remote"><a href="http://sourceforge.net/projects/turbovnc/files/" class="remote">Files 
 area</a></span><a name="idx0028"></a> of the 
-<span class="remote"><a href="http://sourceforge.net/projects/virtualgl" class="remote">VirtualGL 
+<span class="remote"><a href="http://sourceforge.net/projects/turbovnc" class="remote">TurboVNC 
 SourceForge project page</a></span><a name="idx0029"></a>, uncompress 
 it, <code>cd&nbsp;turbovnc-</code><em><code>{version}</code></em>, and 
 read <code>BUILDING.txt</code> for further instructions on how to build 
@@ -1538,7 +1538,7 @@ Viewer environment without requiring the viewer to be installed on the
 client machine. This mechanism is preferred over deploying the viewer as 
 an applet, since JPEG decoding cannot be accelerated when the Java 
 TurboVNC Viewer is run as an applet.  See 
-<span class="remote"><a href="http://www.virtualgl.org/Documentation/JWS" class="remote">http://www.virtualgl.org/Documentation/JWS</a></span><a name="idx0032"></a> 
+<span class="remote"><a href="http://www.TurboVNC.org/Documentation/JWS" class="remote">http://www.TurboVNC.org/Documentation/JWS</a></span><a name="idx0032"></a> 
 for more details.</p>
 
 <p><br /></p>

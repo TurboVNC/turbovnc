@@ -9,7 +9,7 @@ project(turbovnc-java Java)
 set(VERSION 1.2.2)
 set(COPYRIGHT_YEAR "2000-2014")
 set(COPYRIGHT "The VirtualGL Project and many others (see README.txt)")
-set(URLTEXT "Visit http://www.virtualgl.org for more information on TurboVNC")
+set(URLTEXT "Visit http://www.TurboVNC.org for more information on TurboVNC")
 
 find_package(Java)
 
@@ -27,15 +27,15 @@ set(CLASSPATH com/turbovnc/vncviewer)
 set(SRCDIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(BINDIR ${CMAKE_CURRENT_BINARY_DIR})
 
-if(MSVC) 	 
+if(MSVC)
 	if(NOT BUILD)
 		execute_process(COMMAND "${SRCDIR}/cmake/getdate.bat"
 			OUTPUT_VARIABLE BUILD)
 	endif()
-	execute_process(COMMAND "${SRCDIR}/cmake/getdate.bat" "javadate" 	 
-		OUTPUT_VARIABLE JAVA_DATE) 	 
-	execute_process(COMMAND "${SRCDIR}/cmake/getdate.bat" "javatime" 	 
-		OUTPUT_VARIABLE JAVA_TIME) 	 
+	execute_process(COMMAND "${SRCDIR}/cmake/getdate.bat" "javadate"
+		OUTPUT_VARIABLE JAVA_DATE)
+	execute_process(COMMAND "${SRCDIR}/cmake/getdate.bat" "javatime"
+		OUTPUT_VARIABLE JAVA_TIME)
 else()
 	if(NOT BUILD)
 		execute_process(COMMAND "date" "+%Y%m%d" OUTPUT_VARIABLE BUILD)
