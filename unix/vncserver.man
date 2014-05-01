@@ -111,7 +111,7 @@ method.
 The default behavior of the \fBvncserver\fR script is to enable all of the
 supported authentication methods (VNC password, one-time password, and PAM
 user/password) in Xvnc.  Passing an argument of \-nopam to \fBvncserver\fR
-tells it not to enable the PAM user/password authentication method in Xvnc.  
+tells it not to enable the PAM user/password authentication method in Xvnc.
 Disabling this authentication method will prevent viewers from using Unix login
 authentication.  This command-line argument has no effect if
 \fIpermitted-auth-methods\fR is specified in the authentication configuration
@@ -200,4 +200,4 @@ Tim Waugh <twaugh@redhat.com>,
 .br
 Constantin Kaplinsky <const@tightvnc.com>
 .br
-D. R. Commander <information@virtualgl.org>
+D. R. Commander <information@turbovnc.org>

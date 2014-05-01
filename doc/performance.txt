@@ -361,4 +361,4 @@ using JWS provides a fully functional and performant TurboVNC Viewer
 environment without requiring the viewer to be installed on the client machine.
 This mechanism is preferred over deploying the viewer as an applet, since JPEG
 decoding cannot be accelerated when the Java TurboVNC Viewer is run as an
-applet.  See [[http://www.virtualgl.org/Documentation/JWS]] for more details.
+applet.  See [[http://www.TurboVNC.org/Documentation/JWS]] for more details.

@@ -1,4 +1,4 @@
-<!-- 
+<!--
      index.vnc - default HTML page for TurboVNC Java viewer applet, to be
      used with Xvnc. On any file ending in .vnc, the HTTP server embedded in
      Xvnc will substitute the following variables when preceded by a dollar:
@@ -17,5 +17,5 @@ $USER's $DESKTOP desktop ($DISPLAY)
 <param name=SERVER value=$DISPLAY>
 </APPLET>
 <BR>
-<A href="http://www.virtualgl.org/">TurboVNC site</A>
+<A href="http://www.TurboVNC.org/">TurboVNC web site</A>
 </HTML>

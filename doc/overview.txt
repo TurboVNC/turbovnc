@@ -47,7 +47,7 @@ permutations of the TightVNC encoder were benchmarked at the low level against
 a variety of captured RFB sessions that simulate real-world application
 workloads, both 2D and 3D.  For more information on the research leading to
 TurboVNC's encoder design, see
-[[http://www.virtualgl.org/pmwiki/uploads/About/tighttoturbo.pdf][this report]].
+[[http://www.TurboVNC.org/pmwiki/uploads/About/tighttoturbo.pdf][this report]].
 
 In addition to high performance, other notable features of TurboVNC include:
 

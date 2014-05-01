@@ -47,7 +47,7 @@ below.)  The \fB$HOME/.vnc/\fR directory will be created if it does not
 exist.
 
 Each password has to be longer than five characters (unless the
-\fB\-f\fR command line option was used-- see its description below.) 
+\fB\-f\fR command line option was used-- see its description below.)
 Only the first eight characters are significant.  If the primary
 password is too short, then vncpasswd will abort.  If the view-only
 password is too short, then only the primary password will be saved.
@@ -84,7 +84,7 @@ network (e.g. when using NFS.)
 \fB\-f\fR
 Filter mode.  Read plain-text passwords from stdin, and write encrypted
 versions to stdout.  One or two passwords (full-control and view-only)
-can be supplied in the input stream, with a new line terminating each password.  
+can be supplied in the input stream, with a new line terminating each password.
 Note that in filter mode, short or even empty passwords will be
 silently accepted.
 .TP
@@ -133,6 +133,6 @@ Tim Waugh <twaugh@redhat.com>
 .br
 Constantin Kaplinsky <const@tightvnc.com>
 .br
-D. R. Commander <information@virtualgl.org>
+D. R. Commander <information@turbovnc.org>
 .br
 Craig Ruff <cruff@ucar.edu>
