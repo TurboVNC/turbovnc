@@ -1008,7 +1008,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       "Copyright (C) " + VncViewer.copyrightYear + " " + VncViewer.copyright +
         "\n" +
       VncViewer.url, JOptionPane.INFORMATION_MESSAGE);
-    pane.setIcon(VncViewer.logoIcon);
+    pane.setIcon(VncViewer.logoIcon128);
     JDialog dlg = pane.createDialog(comp, "About TurboVNC Viewer");
     if (VncViewer.embed.getValue())
       dlg.setAlwaysOnTop(true);
