@@ -57,10 +57,10 @@ public class VncViewer extends javax.swing.JApplet
   public static String pkgDate = null;
   public static String pkgTime = null;
 
-  private static final ImageIcon frameIcon = 
+  private static final ImageIcon frameIcon =
     new ImageIcon(VncViewer.class.getResource("turbovnc-sm.png"));
   public static final Image frameImage = frameIcon.getImage();
-  public static final ImageIcon logoIcon = 
+  public static final ImageIcon logoIcon =
     new ImageIcon(VncViewer.class.getResource("turbovnc.png"));
 
   void setVersion() {
@@ -187,7 +187,7 @@ public class VncViewer extends javax.swing.JApplet
           paramTypes[0] = Image.class;
           Method setDockIconImage =
             appClass.getMethod("setDockIconImage", paramTypes);
-          ImageIcon dockIcon = 
+          ImageIcon dockIcon =
             new ImageIcon(VncViewer.class.getResource("turbovnc-128.png"));
           setDockIconImage.invoke(app, dockIcon.getImage());
         } catch (Exception e) {
@@ -332,7 +332,7 @@ public class VncViewer extends javax.swing.JApplet
 
     setGlobalOptions();
 
-    if (opts.via != null || opts.tunnel) {
+    if ((opts.via != null && opts.via.indexOf(':') < 0) || opts.tunnel) {
       alwaysShowConnectionDialog.setParam(false);
       if (opts.serverName == null)
         usage();
@@ -433,7 +433,8 @@ public class VncViewer extends javax.swing.JApplet
         LogWriter.setLogParams(str);
       setGlobalOptions();
       host = opts.serverName;
-      if ((opts.via != null || opts.tunnel) && opts.serverName != null) {
+      if (((opts.via != null && opts.via.indexOf(':') < 0) || opts.tunnel)
+          && opts.serverName != null) {
         alwaysShowConnectionDialog.setParam(false);
         try {
           Tunnel.createTunnel(opts);
@@ -1010,25 +1011,32 @@ public class VncViewer extends javax.swing.JApplet
 
   static StringParameter via
   = new StringParameter("Via",
-  "This parameter specifies an SSH server (\"gateway\") through which the VNC " +
-  "connection should be tunneled.  Note that when using the Via parameter, " +
-  "the VNC server host should be specified from the point of view of the " +
-  "gateway.  For example, specifying Via=gateway_machine Server=localhost:1 " +
-  "will connect to display :1 on gateway_machine.  The VNC server must be " +
-  "specified on the command line or in the Server parameter when using the " +
-  "Via parameter.  The Via parameter can be prefixed by <user>@ to indicate " +
-  "that user name <user> (default = local user name) should be used when " +
-  "authenticating with the SSH server.", null);
+  "This parameter specifies an SSH server or UltraVNC repeater " +
+  "(\"gateway\") through which the VNC connection should be tunneled.  Note " +
+  "that when using the Via parameter, the VNC server host should be " +
+  "specified from the point of view of the gateway.  For example, " +
+  "specifying Via=gateway_machine Server=localhost:1 will connect to " +
+  "display :1 on gateway_machine via the SSH server running on that same " +
+  "machine.  Similarly, specifying Via=gateway_machine:0 Server=localhost:1 " +
+  "will connect to display :1 on gateway_machine via the UltraVNC repeater " +
+  "running on that same machine and listening on port 5900 (VNC display " +
+  ":0.)  The VNC server must be specified on the command line or in the " +
+  "Server parameter when using the Via parameter.  If using the UltraVNC " +
+  "Repeater in \"Mode II\", then specify ID:xxxx as the VNC server name, " +
+  "where xxxx is the ID number of the VNC server to which you want to " +
+  "connect.  If using an SSH server, then the Via parameter can be prefixed " +
+  "by <user>@ to indicate that user name <user> (default = local user name) " +
+  "should be used when authenticating with the SSH server.", null);
 
   static BoolParameter tunnel
   = new BoolParameter("Tunnel",
-  "Same as Via, except that the gateway is assumed to be the same as the VNC " +
-  "server host, so you do not need to specify it separately.  The VNC server " +
-  "must be specified on the command line or in the Server parameter when " +
-  "using the Tunnel parameter.  When using the Tunnel parameter, the VNC server " +
-  "host can be prefixed by <user>@ to indicate that user name <user> " +
-  "(default = local user name) should be used when authenticating with the SSH " +
-  "server.", false);
+  "This is the same as using Via with an SSH gateway, except that the " +
+  "gateway is assumed to be the same as the VNC server host, so you do not " +
+  "need to specify it separately.  The VNC server must be specified on the " +
+  "command line or in the Server parameter when using the Tunnel parameter. " +
+  "When using the Tunnel parameter, the VNC server host can be prefixed by " +
+  "<user>@ to indicate that user name <user> (default = local user name) " +
+  "should be used when authenticating with the SSH server.", false);
 
   static IntParameter sshPort
   = new IntParameter("SSHPort",

@@ -111,6 +111,10 @@ Since VirtualGL no longer provides a native Windows client, the TCBench utility
 that was formerly included with that package is now included with the native
 Windows TurboVNC Viewer.
 -------------------------------------------------------------------------------
+[17]
+The Java TurboVNC Viewer can now be used to connect to UltraVNC Repeater
+instances.  Refer to the documentation for the Via parameter for more details.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
@@ -332,7 +336,7 @@ Since there is no way to see the console output in a Java Web Start environment
 or when starting the Java TurboVNC Viewer from an icon, it is difficult or
 impossible in such cases to debug errors that are only displayed to the
 console.  Thus, the Java TurboVNC Viewer now displays all errors both to the
-console and in an error dialog.  
+console and in an error dialog.
 -------------------------------------------------------------------------------
 [24]
 Fixed an issue in the Java TurboVNC Viewer whereby pressing Alt-Tab would
@@ -728,7 +732,7 @@ Citrix sessions.)
 -------------------------------------------------------------------------------
 [2]
 Eliminated the use of the dangerous alloca() (stack-based allocation) function
-in Xvnc and replaced it with heap-based allocation (malloc() and free().)  
+in Xvnc and replaced it with heap-based allocation (malloc() and free().)
 -------------------------------------------------------------------------------
 [3]
 Eliminated a segfault in pthread_join() which would occur under certain
