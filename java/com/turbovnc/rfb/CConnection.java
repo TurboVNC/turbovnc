@@ -86,7 +86,7 @@ public abstract class CConnection extends CMsgHandler {
     // a VNC server ID (Mode II).
     if (cp.majorVersion == 0 && cp.minorVersion == 0) {
       if (serverName == null)
-        throw new ErrorException("UltraVNC Repeater detected but ServerName parameter has not been set");
+        throw new ErrorException("UltraVNC Repeater detected but VNC server name has not been specified");
       vlog.info("Connecting to " + serverName + " via UltraVNC repeater");
       os.writeBytes(serverName.getBytes(), 0,
                     Math.min(serverName.length(), 250));

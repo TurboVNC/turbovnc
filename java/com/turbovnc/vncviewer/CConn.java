@@ -112,6 +112,8 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
       if (opts.via != null && opts.via.indexOf(':') >= 0 &&
           !VncViewer.alwaysShowConnectionDialog.getValue()) {
+        if (opts.serverName == null)
+          throw new ErrorException("The VNC server name must be specified when using the Via parameter");
         port = Hostname.getPort(opts.via);
         serverName = Hostname.getHost(opts.via);
       } else if (opts.serverName != null &&
