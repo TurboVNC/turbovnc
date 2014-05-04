@@ -22,6 +22,7 @@ package com.turbovnc.vncviewer;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.lang.reflect.*;
 
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
@@ -35,20 +36,47 @@ public class TrayMenu extends PopupMenu implements ActionListener {
     if (!VncViewer.noNewConn.getValue()) {
       newConn = addMenuItem("New connection...");
     }
-    options = addMenuItem("Default connection options...");
+    options = addMenuItem("Default options...");
     addSeparator();
     about = addMenuItem("About TurboVNC Viewer...");
     addSeparator();
-    exit = addMenuItem("Close listening daemon");
+    exit = addMenuItem("Close listening viewer");
 
-    trayIcon = new TrayIcon(VncViewer.frameImage);
-    trayIcon.setPopupMenu(this);
-    tray = SystemTray.getSystemTray();
-    try {
-      tray.add(trayIcon);
-    } catch(java.awt.AWTException e) {
-      throw new ErrorException(e.getMessage());
+    if (System.getProperty("os.name").startsWith("Mac OS X")) {
+      setDockMenu(this);
+    } else {
+      trayIcon = new TrayIcon(VncViewer.frameImage);
+      trayIcon.setPopupMenu(this);
+      tray = SystemTray.getSystemTray();
+      try {
+        tray.add(trayIcon);
+      } catch(java.awt.AWTException e) {
+        throw new ErrorException(e.getMessage());
+      }
     }
+  }
+
+  void setDockMenu(PopupMenu menu) {
+    try {
+      Class appClass = Class.forName("com.apple.eawt.Application");
+      Method getApplication =
+        appClass.getMethod("getApplication", (Class[])null);
+      Object app = getApplication.invoke(appClass);
+      Class paramTypes[] = new Class[1];
+      paramTypes[0] = PopupMenu.class;
+      Method setDockMenu =
+        appClass.getMethod("setDockMenu", paramTypes);
+      setDockMenu.invoke(app, menu);
+    } catch(Exception e) {
+      vlog.error("Could not modify dock menu:");
+      vlog.error("  " + e.toString());
+      e.printStackTrace();
+    }
+  }
+
+  static boolean isSupported() {
+    return (System.getProperty("os.name").startsWith("Mac OS X")
+            || SystemTray.isSupported());
   }
 
   MenuItem addMenuItem(String str) {
@@ -72,7 +100,10 @@ public class TrayMenu extends PopupMenu implements ActionListener {
     } else if (actionMatch(ev, about)) {
       VncViewer.showAbout(null);
     } else if (actionMatch(ev, exit)) {
-      tray.remove(trayIcon);
+      if (System.getProperty("os.name").startsWith("Mac OS X"))
+        setDockMenu(null);
+      else if (tray != null && trayIcon != null)
+        tray.remove(trayIcon);
       viewer.exit(0);
     }
   }
@@ -81,4 +112,6 @@ public class TrayMenu extends PopupMenu implements ActionListener {
   TrayIcon trayIcon;
   SystemTray tray;
   VncViewer viewer;
+
+  static LogWriter vlog = new LogWriter("Tray menu");
 }

@@ -620,7 +620,7 @@ public class VncViewer extends javax.swing.JApplet
       else if (opts.port > 0)
         port = opts.port;
 
-      if (SystemTray.isSupported()) {
+      if (TrayMenu.isSupported()) {
         try {
           trayMenu = new TrayMenu(this);
         } catch(Exception e) {
