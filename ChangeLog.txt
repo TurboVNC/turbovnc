@@ -115,6 +115,12 @@ Windows TurboVNC Viewer.
 The Java TurboVNC Viewer can now be used to connect to UltraVNC Repeater
 instances.  Refer to the documentation for the Via parameter for more details.
 -------------------------------------------------------------------------------
+[18]
+Fixed an issue in the Java TurboVNC Viewer whereby, if a connection was
+established using SSH tunneling and another connection was then opened, the
+viewer would fail to exit after all of these connections were subsequently
+closed.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
