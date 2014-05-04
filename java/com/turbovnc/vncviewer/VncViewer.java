@@ -55,10 +55,10 @@ public class VncViewer extends java.applet.Applet implements Runnable {
   public static String pkgDate = null;
   public static String pkgTime = null;
 
-  private static final ImageIcon frameIcon = 
+  private static final ImageIcon frameIcon =
     new ImageIcon(VncViewer.class.getResource("turbovnc-sm.png"));
   public static final Image frameImage = frameIcon.getImage();
-  public static final ImageIcon logoIcon = 
+  public static final ImageIcon logoIcon =
     new ImageIcon(VncViewer.class.getResource("turbovnc.png"));
   public static final Image logoImage = logoIcon.getImage();
 
@@ -355,10 +355,16 @@ public class VncViewer extends java.applet.Applet implements Runnable {
     setGlobalOptions();
   }
 
+  public VncViewer(Socket sock_) {
+    sock = sock_;
+    UserPreferences.load("global");
+    setVersion();
+    setGlobalOptions();
+  }
+
   public static void newViewer(VncViewer oldViewer, Socket sock,
                                boolean close) {
-    VncViewer viewer = new VncViewer();
-    viewer.sock = sock;
+    VncViewer viewer = new VncViewer(sock);
     viewer.start();
     if (close)
       oldViewer.exit(0);

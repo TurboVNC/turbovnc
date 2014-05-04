@@ -35,6 +35,12 @@ The Java TurboVNC Viewer was not displaying dialogs from its built-in SSH
 client, which caused the SSH client to fail if the server was not in the known
 hosts file.  This has been fixed.
 -------------------------------------------------------------------------------
+[5]
+Fixed an issue in the Java TurboVNC Viewer whereby, if a connection was
+established using SSH tunneling and another connection was then opened, the
+viewer would fail to exit after all of these connections were subsequently
+closed.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
@@ -260,7 +266,7 @@ Since there is no way to see the console output in a Java Web Start environment
 or when starting the Java TurboVNC Viewer from an icon, it is difficult or
 impossible in such cases to debug errors that are only displayed to the
 console.  Thus, the Java TurboVNC Viewer now displays all errors both to the
-console and in an error dialog.  
+console and in an error dialog.
 -------------------------------------------------------------------------------
 [24]
 Fixed an issue in the Java TurboVNC Viewer whereby pressing Alt-Tab would
@@ -656,7 +662,7 @@ Citrix sessions.)
 -------------------------------------------------------------------------------
 [2]
 Eliminated the use of the dangerous alloca() (stack-based allocation) function
-in Xvnc and replaced it with heap-based allocation (malloc() and free().)  
+in Xvnc and replaced it with heap-based allocation (malloc() and free().)
 -------------------------------------------------------------------------------
 [3]
 Eliminated a segfault in pthread_join() which would occur under certain
