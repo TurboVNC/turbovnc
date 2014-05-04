@@ -178,7 +178,7 @@ class ServerDialog extends Dialog implements ActionListener {
     } else if (s instanceof JButton && (JButton)s == optionsButton) {
       options.showDialog(getJDialog());
     } else if (s instanceof JButton && (JButton)s == aboutButton) {
-      cc.showAbout(getJDialog());
+      VncViewer.showAbout(getJDialog());
     } else if (s instanceof JComboBox && (JComboBox)s == server) {
       if (e.getActionCommand().equals("comboBoxEdited")) {
         server.insertItemAt(editor.getItem(), 0);

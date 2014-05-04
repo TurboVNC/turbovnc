@@ -47,7 +47,7 @@ import com.turbovnc.rfb.*;
 import com.turbovnc.network.*;
 
 public class VncViewer extends javax.swing.JApplet
-  implements Runnable, ActionListener {
+  implements Runnable, ActionListener, OptionsDialogCallback {
   public static final String PRODUCT_NAME = "TurboVNC Viewer";
   public static String copyrightYear = null;
   public static String copyright = null;
@@ -389,8 +389,6 @@ public class VncViewer extends javax.swing.JApplet
   public VncViewer(Socket sock_) {
     sock = sock_;
     UserPreferences.load("global");
-    setVersion();
-    setGlobalOptions();
   }
 
   public static void newViewer(VncViewer oldViewer, Socket sock,
@@ -401,13 +399,9 @@ public class VncViewer extends javax.swing.JApplet
       oldViewer.exit(0);
   }
 
-  public static void newViewer(VncViewer oldViewer, Socket sock) {
-    newViewer(oldViewer, sock, false);
-  }
-
   public static void newViewer(VncViewer oldViewer) {
     if (!noNewConn.getValue())
-      newViewer(oldViewer, null);
+      newViewer(oldViewer, null, false);
   }
 
   public void init() {
@@ -523,6 +517,95 @@ public class VncViewer extends javax.swing.JApplet
     }
   }
 
+  static void showAbout(Component comp) {
+    JOptionPane pane = new JOptionPane(
+      VncViewer.PRODUCT_NAME + " v" + VncViewer.version +
+        " (" + VncViewer.build + ")\n" +
+      "[JVM: " + System.getProperty("java.vm.name") + " " +
+        System.getProperty("java.version") + " " +
+        System.getProperty("os.arch") + "]\n" +
+      "Built on " + VncViewer.pkgDate + " at " + VncViewer.pkgTime + "\n" +
+      "Copyright (C) " + VncViewer.copyrightYear + " " + VncViewer.copyright +
+        "\n" +
+      VncViewer.url, JOptionPane.INFORMATION_MESSAGE);
+    pane.setIcon(VncViewer.logoIcon128);
+    JDialog dlg = pane.createDialog(comp, "About TurboVNC Viewer");
+    if (VncViewer.embed.getValue())
+      dlg.setAlwaysOnTop(true);
+    dlg.setVisible(true);
+  }
+
+  void showOptions() {
+    options = new OptionsDialog(this);
+    options.initDialog();
+    options.showDialog();
+  }
+
+  public void setTightOptions() {
+    options.setTightOptions(opts.preferredEncoding);
+  }
+
+  public void setOptions() {
+    options.allowJpeg.setSelected(opts.allowJpeg);
+    options.subsamplingLevel.setValue(opts.getSubsamplingOrdinal());
+    options.jpegQualityLevel.setValue(opts.quality);
+    options.compressionLevel.setValue(opts.compressLevel);
+
+    setTightOptions();
+
+    options.viewOnly.setSelected(opts.viewOnly);
+    options.acceptClipboard.setSelected(opts.acceptClipboard);
+    options.sendClipboard.setSelected(opts.sendClipboard);
+    options.menuKey.setSelectedItem(KeyEvent.getKeyText(MenuKey.getMenuKeyCode()));
+
+    options.shared.setSelected(opts.shared);
+    options.sendLocalUsername.setSelected(opts.sendLocalUsername);
+    options.secUnixLogin.setSelected(!opts.noUnixLogin);
+    options.setSecurityOptions();
+
+    options.fullScreen.setSelected(opts.fullScreen);
+    options.span.setSelectedIndex(opts.span);
+    options.cursorShape.setSelected(opts.cursorShape);
+    options.acceptBell.setSelected(opts.acceptBell);
+    options.showToolbar.setSelected(VncViewer.showToolbar.getValue());
+    if (opts.scalingFactor == Options.SCALE_AUTO) {
+      options.scalingFactor.setSelectedItem("Auto");
+    } else if (opts.scalingFactor == Options.SCALE_FIXEDRATIO) {
+      options.scalingFactor.setSelectedItem("Fixed Aspect Ratio");
+    } else {
+      options.scalingFactor.setSelectedItem(opts.scalingFactor + "%");
+    }
+  }
+
+  public void getOptions() {
+    opts.allowJpeg = options.allowJpeg.isSelected();
+    opts.quality = options.jpegQualityLevel.getValue();
+    opts.compressLevel = options.compressionLevel.getValue();
+    opts.subsampling = options.getSubsamplingLevel();
+    opts.sendLocalUsername = options.sendLocalUsername.isSelected();
+    opts.viewOnly = options.viewOnly.isSelected();
+    opts.acceptClipboard = options.acceptClipboard.isSelected();
+    opts.sendClipboard = options.sendClipboard.isSelected();
+    opts.acceptBell = options.acceptBell.isSelected();
+    VncViewer.showToolbar.setParam(options.showToolbar.isSelected());
+
+    int oldScalingFactor = opts.scalingFactor;
+    opts.setScalingFactor(options.scalingFactor.getSelectedItem().toString());
+
+    int index = options.span.getSelectedIndex();
+    if (index >= 0 && index < Options.NUMSPANOPT)
+      opts.span = index;
+
+    VncViewer.menuKey.setParam(
+      MenuKey.getMenuKeySymbols()[options.menuKey.getSelectedIndex()].name);
+
+    opts.shared = options.shared.isSelected();
+    opts.cursorShape = options.cursorShape.isSelected();
+
+    options.getSecurityOptions();
+    options = null;
+  }
+
   public void run() {
     CConn cc = null;
     int exitStatus = 0;
@@ -537,6 +620,14 @@ public class VncViewer extends javax.swing.JApplet
       else if (opts.port > 0)
         port = opts.port;
 
+      if (SystemTray.isSupported()) {
+        try {
+          trayMenu = new TrayMenu(this);
+        } catch(Exception e) {
+          reportException(e);
+          exit(1);
+        }
+      }
       TcpListener listener = null;
       try {
         listener = new TcpListener(null, port);
@@ -1098,5 +1189,7 @@ public class VncViewer extends javax.swing.JApplet
   FileInStream benchFile;
   int benchIter = 1;
   int benchWarmup = 0;
-  Options opts;
+  static Options opts;
+  OptionsDialog options;
+  TrayMenu trayMenu;
 }

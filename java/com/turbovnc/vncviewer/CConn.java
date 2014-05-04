@@ -994,25 +994,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
   }
 
   void showAbout() {
-    showAbout(viewport);
-  }
-
-  void showAbout(Component comp) {
-    JOptionPane pane = new JOptionPane(
-      VncViewer.PRODUCT_NAME + " v" + VncViewer.version +
-        " (" + VncViewer.build + ")\n" +
-      "[JVM: " + System.getProperty("java.vm.name") + " " +
-        System.getProperty("java.version") + " " +
-        System.getProperty("os.arch") + "]\n" +
-      "Built on " + VncViewer.pkgDate + " at " + VncViewer.pkgTime + "\n" +
-      "Copyright (C) " + VncViewer.copyrightYear + " " + VncViewer.copyright +
-        "\n" +
-      VncViewer.url, JOptionPane.INFORMATION_MESSAGE);
-    pane.setIcon(VncViewer.logoIcon128);
-    JDialog dlg = pane.createDialog(comp, "About TurboVNC Viewer");
-    if (VncViewer.embed.getValue())
-      dlg.setAlwaysOnTop(true);
-    dlg.setVisible(true);
+    VncViewer.showAbout(viewport);
   }
 
   void showInfo() {
@@ -1095,44 +1077,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     if (lastServerEncoding != Encodings.encodingTight &&
         lastServerEncoding >= 0)
       encoding = lastServerEncoding;
-
-    if (encoding != Encodings.encodingTight) {
-      options.allowJpeg.setEnabled(false);
-      options.subsamplingLevel.setEnabled(false);
-      options.subsamplingLabel.setEnabled(false);
-      options.subsamplingLabelLo.setEnabled(false);
-      options.subsamplingLabelHi.setEnabled(false);
-      options.jpegQualityLevel.setMinimum(0);
-      options.jpegQualityLevel.setMaximum(9);
-      options.jpegQualityLevel.setMajorTickSpacing(1);
-      options.jpegQualityLevel.setMinorTickSpacing(0);
-      options.jpegQualityLevel.setSnapToTicks(true);
-      options.jpegQualityLevel.setEnabled(true);
-      options.jpegQualityLabelString = new String("Image quality level: ");
-      options.jpegQualityLabel.setText(options.jpegQualityLabelString +
-        options.jpegQualityLevel.getValue());
-      options.jpegQualityLabel.setEnabled(true);
-      options.jpegQualityLabelLo.setEnabled(true);
-      options.jpegQualityLabelHi.setEnabled(true);
-      options.encMethodComboBox.setEnabled(false);
-      if (options.encMethodComboBox.getItemCount() > 5)
-        options.encMethodComboBox.removeItemAt(5);
-      options.encMethodComboBox.insertItemAt(Encodings.encodingName(encoding), 5);
-      options.encMethodComboBox.setSelectedItem(Encodings.encodingName(encoding));
-      options.encMethodLabel.setText("Encoding type:");
-      options.encMethodLabel.setEnabled(false);
-    }
-    if (encoding != Encodings.encodingTight ||
-        VncViewer.compressLevel.getValue() > 1) {
-      options.compressionLevel.setMaximum(9);
-      options.compressionLevel.setEnabled(true);
-      options.compressionLabel.setEnabled(true);
-      options.compressionLabelLo.setEnabled(true);
-      options.compressionLabelHi.setEnabled(true);
-      options.compressionLabelString = new String("Compression level: ");
-      options.compressionLabel.setText(options.compressionLabelString +
-        options.compressionLevel.getValue());
-    }
+    options.setTightOptions(encoding);
   }
 
   public void setOptions() {
@@ -1166,97 +1111,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
       options.shared.setSelected(opts.shared);
       options.sendLocalUsername.setSelected(opts.sendLocalUsername);
       options.secUnixLogin.setSelected(!opts.noUnixLogin);
-
-      /* Process non-VeNCrypt sectypes */
-      java.util.List<Integer> secTypes = new ArrayList<Integer>();
-      secTypes = Security.getEnabledSecTypes();
-      boolean enableVeNCrypt = false;
-      for (Iterator<Integer> i = secTypes.iterator(); i.hasNext();) {
-        switch ((Integer)i.next()) {
-        case Security.secTypeVeNCrypt:
-          enableVeNCrypt = true;
-          break;
-        case Security.secTypeNone:
-          options.secNone.setSelected(true);
-          break;
-        case Security.secTypeVncAuth:
-          options.secVnc.setSelected(true);
-          break;
-        }
-      }
-
-      /* Process VeNCrypt subtypes */
-      if (enableVeNCrypt) {
-        java.util.List<Integer> secTypesExt = new ArrayList<Integer>();
-        secTypesExt = Security.getEnabledExtSecTypes();
-        for (Iterator<Integer> iext = secTypesExt.iterator(); iext.hasNext();) {
-          switch ((Integer)iext.next()) {
-          case Security.secTypePlain:
-            options.secVeNCrypt.setSelected(true);
-            options.encNone.setSelected(true);
-            options.secPlain.setSelected(true);
-            break;
-          case Security.secTypeIdent:
-            options.secVeNCrypt.setSelected(true);
-            options.encNone.setSelected(true);
-            options.secIdent.setSelected(true);
-            break;
-          case Security.secTypeTLSNone:
-            options.secVeNCrypt.setSelected(true);
-            options.encTLS.setSelected(true);
-            options.secNone.setSelected(true);
-            break;
-          case Security.secTypeTLSVnc:
-            options.secVeNCrypt.setSelected(true);
-            options.encTLS.setSelected(true);
-            options.secVnc.setSelected(true);
-            break;
-          case Security.secTypeTLSPlain:
-            options.secVeNCrypt.setSelected(true);
-            options.encTLS.setSelected(true);
-            options.secPlain.setSelected(true);
-            break;
-          case Security.secTypeTLSIdent:
-            options.secVeNCrypt.setSelected(true);
-            options.encTLS.setSelected(true);
-            options.secIdent.setSelected(true);
-            break;
-          case Security.secTypeX509None:
-            options.secVeNCrypt.setSelected(true);
-            options.encX509.setSelected(true);
-            options.secNone.setSelected(true);
-            break;
-          case Security.secTypeX509Vnc:
-            options.secVeNCrypt.setSelected(true);
-            options.encX509.setSelected(true);
-            options.secVnc.setSelected(true);
-            break;
-          case Security.secTypeX509Plain:
-            options.secVeNCrypt.setSelected(true);
-            options.encX509.setSelected(true);
-            options.secPlain.setSelected(true);
-            break;
-          case Security.secTypeX509Ident:
-            options.secVeNCrypt.setSelected(true);
-            options.encX509.setSelected(true);
-            options.secIdent.setSelected(true);
-            break;
-          }
-        }
-      }
-      if (!options.secVeNCrypt.isSelected()) {
-        options.encNone.setEnabled(false);
-        options.encTLS.setEnabled(false);
-        options.encX509.setEnabled(false);
-        options.ca.setEnabled(false);
-        options.crl.setEnabled(false);
-        options.secIdent.setEnabled(false);
-        options.secPlain.setEnabled(false);
-      }
-      options.sendLocalUsername.setEnabled(
-        (options.secIdent.isSelected() && options.secIdent.isEnabled()) ||
-        (options.secPlain.isSelected() && options.secPlain.isEnabled()) ||
-        (options.secUnixLogin.isSelected() && options.secUnixLogin.isEnabled()));
+      options.setSecurityOptions();
     }
 
     options.fullScreen.setSelected(opts.fullScreen);
@@ -1328,67 +1183,9 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
 
     checkEncodings();
 
-    if (state() != RFBSTATE_NORMAL) {
-      Security.disableSecType(Security.secTypeNone);
-      Security.disableSecType(Security.secTypeVncAuth);
-      Security.disableSecType(Security.secTypePlain);
-      Security.disableSecType(Security.secTypeIdent);
-      Security.disableSecType(Security.secTypeTLSNone);
-      Security.disableSecType(Security.secTypeTLSVnc);
-      Security.disableSecType(Security.secTypeTLSPlain);
-      Security.disableSecType(Security.secTypeTLSIdent);
-      Security.disableSecType(Security.secTypeX509None);
-      Security.disableSecType(Security.secTypeX509Vnc);
-      Security.disableSecType(Security.secTypeX509Plain);
-      Security.disableSecType(Security.secTypeX509Ident);
+    if (state() != RFBSTATE_NORMAL)
+      options.getSecurityOptions();
 
-      /* Process security types which don't use encryption */
-      if (options.encNone.isSelected() || !options.secVeNCrypt.isSelected()) {
-        if (options.secNone.isSelected())
-          Security.enableSecType(Security.secTypeNone);
-
-        if (options.secVnc.isSelected())
-          Security.enableSecType(Security.secTypeVncAuth);
-      }
-
-      if (options.encNone.isSelected() && options.secVeNCrypt.isSelected()) {
-        if (options.secPlain.isSelected())
-          Security.enableSecType(Security.secTypePlain);
-
-        if (options.secIdent.isSelected())
-          Security.enableSecType(Security.secTypeIdent);
-      }
-
-      /* Process security types which use TLS encryption */
-      if (options.encTLS.isSelected() && options.secVeNCrypt.isSelected()) {
-        if (options.secNone.isSelected())
-          Security.enableSecType(Security.secTypeTLSNone);
-
-        if (options.secVnc.isSelected())
-          Security.enableSecType(Security.secTypeTLSVnc);
-
-        if (options.secPlain.isSelected())
-          Security.enableSecType(Security.secTypeTLSPlain);
-
-        if (options.secIdent.isSelected())
-          Security.enableSecType(Security.secTypeTLSIdent);
-      }
-
-      /* Process security types which use X509 encryption */
-      if (options.encX509.isSelected() && options.secVeNCrypt.isSelected()) {
-        if (options.secNone.isSelected())
-          Security.enableSecType(Security.secTypeX509None);
-
-        if (options.secVnc.isSelected())
-          Security.enableSecType(Security.secTypeX509Vnc);
-
-        if (options.secPlain.isSelected())
-          Security.enableSecType(Security.secTypeX509Plain);
-
-        if (options.secIdent.isSelected())
-          Security.enableSecType(Security.secTypeX509Ident);
-      }
-    }
     if (options.fullScreen.isSelected() != opts.fullScreen)
       toggleFullScreen();
     else if (recreate)

@@ -23,7 +23,7 @@ package com.turbovnc.vncviewer;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.util.Hashtable;
+import java.util.*;
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
@@ -792,6 +792,201 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         return Options.SUBSAMP_GRAY;
     }
     return Options.SUBSAMP_NONE;
+  }
+
+  void setTightOptions(int encoding) {
+    if (encoding != Encodings.encodingTight) {
+      allowJpeg.setEnabled(false);
+      subsamplingLevel.setEnabled(false);
+      subsamplingLabel.setEnabled(false);
+      subsamplingLabelLo.setEnabled(false);
+      subsamplingLabelHi.setEnabled(false);
+      jpegQualityLevel.setMinimum(0);
+      jpegQualityLevel.setMaximum(9);
+      jpegQualityLevel.setMajorTickSpacing(1);
+      jpegQualityLevel.setMinorTickSpacing(0);
+      jpegQualityLevel.setSnapToTicks(true);
+      jpegQualityLevel.setEnabled(true);
+      jpegQualityLabelString = new String("Image quality level: ");
+      jpegQualityLabel.setText(jpegQualityLabelString +
+        jpegQualityLevel.getValue());
+      jpegQualityLabel.setEnabled(true);
+      jpegQualityLabelLo.setEnabled(true);
+      jpegQualityLabelHi.setEnabled(true);
+      encMethodComboBox.setEnabled(false);
+      if (encMethodComboBox.getItemCount() > 5)
+        encMethodComboBox.removeItemAt(5);
+      encMethodComboBox.insertItemAt(Encodings.encodingName(encoding), 5);
+      encMethodComboBox.setSelectedItem(Encodings.encodingName(encoding));
+      encMethodLabel.setText("Encoding type:");
+      encMethodLabel.setEnabled(false);
+    }
+    if (encoding != Encodings.encodingTight ||
+        VncViewer.compressLevel.getValue() > 1) {
+      compressionLevel.setMaximum(9);
+      compressionLevel.setEnabled(true);
+      compressionLabel.setEnabled(true);
+      compressionLabelLo.setEnabled(true);
+      compressionLabelHi.setEnabled(true);
+      compressionLabelString = new String("Compression level: ");
+      compressionLabel.setText(compressionLabelString +
+        compressionLevel.getValue());
+    }
+  }
+
+  void setSecurityOptions() {
+    /* Process non-VeNCrypt sectypes */
+    java.util.List<Integer> secTypes = new ArrayList<Integer>();
+    secTypes = Security.getEnabledSecTypes();
+    boolean enableVeNCrypt = false;
+    for (Iterator<Integer> i = secTypes.iterator(); i.hasNext();) {
+      switch ((Integer)i.next()) {
+      case Security.secTypeVeNCrypt:
+        enableVeNCrypt = true;
+        break;
+      case Security.secTypeNone:
+        secNone.setSelected(true);
+        break;
+      case Security.secTypeVncAuth:
+        secVnc.setSelected(true);
+        break;
+      }
+    }
+
+    /* Process VeNCrypt subtypes */
+    if (enableVeNCrypt) {
+      java.util.List<Integer> secTypesExt = new ArrayList<Integer>();
+      secTypesExt = Security.getEnabledExtSecTypes();
+      for (Iterator<Integer> iext = secTypesExt.iterator(); iext.hasNext();) {
+        switch ((Integer)iext.next()) {
+        case Security.secTypePlain:
+          secVeNCrypt.setSelected(true);
+          encNone.setSelected(true);
+          secPlain.setSelected(true);
+          break;
+        case Security.secTypeIdent:
+          secVeNCrypt.setSelected(true);
+          encNone.setSelected(true);
+          secIdent.setSelected(true);
+          break;
+        case Security.secTypeTLSNone:
+          secVeNCrypt.setSelected(true);
+          encTLS.setSelected(true);
+          secNone.setSelected(true);
+          break;
+        case Security.secTypeTLSVnc:
+          secVeNCrypt.setSelected(true);
+          encTLS.setSelected(true);
+          secVnc.setSelected(true);
+          break;
+        case Security.secTypeTLSPlain:
+          secVeNCrypt.setSelected(true);
+          encTLS.setSelected(true);
+          secPlain.setSelected(true);
+          break;
+        case Security.secTypeTLSIdent:
+          secVeNCrypt.setSelected(true);
+          encTLS.setSelected(true);
+          secIdent.setSelected(true);
+          break;
+        case Security.secTypeX509None:
+          secVeNCrypt.setSelected(true);
+          encX509.setSelected(true);
+          secNone.setSelected(true);
+          break;
+        case Security.secTypeX509Vnc:
+          secVeNCrypt.setSelected(true);
+          encX509.setSelected(true);
+          secVnc.setSelected(true);
+          break;
+        case Security.secTypeX509Plain:
+          secVeNCrypt.setSelected(true);
+          encX509.setSelected(true);
+          secPlain.setSelected(true);
+          break;
+        case Security.secTypeX509Ident:
+          secVeNCrypt.setSelected(true);
+          encX509.setSelected(true);
+          secIdent.setSelected(true);
+          break;
+        }
+      }
+    }
+    if (!secVeNCrypt.isSelected()) {
+      encNone.setEnabled(false);
+      encTLS.setEnabled(false);
+      encX509.setEnabled(false);
+      ca.setEnabled(false);
+      crl.setEnabled(false);
+      secIdent.setEnabled(false);
+      secPlain.setEnabled(false);
+    }
+    sendLocalUsername.setEnabled(
+      (secIdent.isSelected() && secIdent.isEnabled()) ||
+      (secPlain.isSelected() && secPlain.isEnabled()) ||
+      (secUnixLogin.isSelected() && secUnixLogin.isEnabled()));
+  }
+
+  public void getSecurityOptions() {
+    Security.disableSecType(Security.secTypeNone);
+    Security.disableSecType(Security.secTypeVncAuth);
+    Security.disableSecType(Security.secTypePlain);
+    Security.disableSecType(Security.secTypeIdent);
+    Security.disableSecType(Security.secTypeTLSNone);
+    Security.disableSecType(Security.secTypeTLSVnc);
+    Security.disableSecType(Security.secTypeTLSPlain);
+    Security.disableSecType(Security.secTypeTLSIdent);
+    Security.disableSecType(Security.secTypeX509None);
+    Security.disableSecType(Security.secTypeX509Vnc);
+    Security.disableSecType(Security.secTypeX509Plain);
+    Security.disableSecType(Security.secTypeX509Ident);
+
+    /* Process security types which don't use encryption */
+    if (encNone.isSelected() || !secVeNCrypt.isSelected()) {
+      if (secNone.isSelected())
+        Security.enableSecType(Security.secTypeNone);
+
+      if (secVnc.isSelected())
+        Security.enableSecType(Security.secTypeVncAuth);
+    }
+
+    if (encNone.isSelected() && secVeNCrypt.isSelected()) {
+      if (secPlain.isSelected())
+        Security.enableSecType(Security.secTypePlain);
+
+      if (secIdent.isSelected())
+        Security.enableSecType(Security.secTypeIdent);
+    }
+
+    /* Process security types which use TLS encryption */
+    if (encTLS.isSelected() && secVeNCrypt.isSelected()) {
+      if (secNone.isSelected())
+        Security.enableSecType(Security.secTypeTLSNone);
+
+      if (secVnc.isSelected())
+        Security.enableSecType(Security.secTypeTLSVnc);
+
+      if (secPlain.isSelected())
+        Security.enableSecType(Security.secTypeTLSPlain);
+
+      if (secIdent.isSelected())
+        Security.enableSecType(Security.secTypeTLSIdent);
+    }
+
+    /* Process security types which use X509 encryption */
+    if (encX509.isSelected() && secVeNCrypt.isSelected()) {
+      if (secNone.isSelected())
+        Security.enableSecType(Security.secTypeX509None);
+
+      if (secVnc.isSelected())
+        Security.enableSecType(Security.secTypeX509Vnc);
+
+      if (secPlain.isSelected())
+        Security.enableSecType(Security.secTypeX509Plain);
+
+      if (secIdent.isSelected())
+        Security.enableSecType(Security.secTypeX509Ident);
+    }
   }
 
 }
