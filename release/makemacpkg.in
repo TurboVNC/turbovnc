@@ -97,7 +97,10 @@ fi
 ln -fs /Library/Documentation/$PACKAGE_NAME/index.html "$PKGROOT/Applications/$PACKAGE_NAME/$PACKAGE_NAME User's Guide.html"
 install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
 osacompile -t APPL -a i386 -o "$TMPDIR/Uninstall $PACKAGE_NAME.app" $TMPDIR/uninstall.applescript
+echo "do shell script \"@CMAKE_INSTALL_PREFIX@/bin/vncviewer -listen >/dev/null 2>&1 &\"" >$TMPDIR/listenmode.applescript
+osacompile -t APPL -a i386 -o "$TMPDIR/$PACKAGE_NAME Viewer (Listen Mode).app" $TMPDIR/listenmode.applescript
 cp -RX "$PACKAGE_NAME Viewer$SUFFIX.app" "$PKGROOT/Applications/$PACKAGE_NAME/$PACKAGE_NAME Viewer.app"
+cp -RX "$TMPDIR/$PACKAGE_NAME Viewer (Listen Mode).app" "$PKGROOT/Applications/$PACKAGE_NAME/"
 cp -RX "$TMPDIR/Uninstall $PACKAGE_NAME.app" "$PKGROOT/Applications/$PACKAGE_NAME/"
 echo "\"/Applications/$PACKAGE_NAME/$PACKAGE_NAME Viewer.app/Contents/MacOS/$LAUNCHER\" \${1+\"\$@\"}" >$PKGROOT$BINDIR/vncviewer
 chmod 755 $PKGROOT$BINDIR/vncviewer

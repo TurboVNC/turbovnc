@@ -69,6 +69,7 @@ Name: "{group}\@CMAKE_PROJECT_NAME@ Viewer (Listen Mode)";        FileName: "{ap
 Name: "{group}\@CMAKE_PROJECT_NAME@ Viewer (Listen Mode - IPv6)"; FileName: "{app}\vncviewer.exe"; Parameters: "-listen -ipv6";    WorkingDir: "{app}";      Components: viewer;
 #ifdef JAVA
 Name: "{group}\Java @CMAKE_PROJECT_NAME@ Viewer";                 FileName: "{app}\vncviewer-javaw.bat";                           WorkingDir: "{app}";      Flags: "runminimized"
+Name: "{group}\Java @CMAKE_PROJECT_NAME@ Viewer (Listen Mode)";   FileName: "{app}\vncviewer-javaw.bat"; Parameters: "-listen";    WorkingDir: "{app}";      Flags: "runminimized"
 Name: "{group}\Documentation\Java @CMAKE_PROJECT_NAME@ Viewer README"; FileName: "write.exe";      Parameters: "README.txt";       WorkingDir: "{app}\java"; Flags: "useapppaths"
 #endif
 Name: "{group}\Uninstall @CMAKE_PROJECT_NAME@";                   FileName: "{uninstallexe}";                                      WorkingDir: "{app}";

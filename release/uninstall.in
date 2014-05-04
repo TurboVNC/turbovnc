@@ -64,6 +64,9 @@ fi
 if [ -d "/Applications/$PKGNAME/$PKGNAME Viewer.app" ]; then
 	rm -rf "/Applications/$PKGNAME/$PKGNAME Viewer.app" 2>&1 || RETCODE=-1
 fi
+if [ -d "/Applications/$PKGNAME/$PKGNAME Viewer (Listen Mode).app" ]; then
+	rm -rf "/Applications/$PKGNAME/$PKGNAME Viewer (Listen Mode).app" 2>&1 || RETCODE=-1
+fi
 if [ -d "/Applications/$PKGNAME/Uninstall $PKGNAME.app" ]; then
 	rm -rf "/Applications/$PKGNAME/Uninstall $PKGNAME.app" 2>&1 || RETCODE=-1
 fi
