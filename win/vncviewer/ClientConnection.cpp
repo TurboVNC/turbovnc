@@ -493,7 +493,7 @@ void ClientConnection::CreateDisplay()
   if (m_opts.m_listening) {
     AppendMenu(hsysmenu, MF_SEPARATOR, NULL, NULL);
     AppendMenu(hsysmenu, MF_STRING, ID_CLOSEDAEMON,
-               "Close &listening daemon");
+               "Close &listener");
   }
   DrawMenuBar(m_hwnd1);
 

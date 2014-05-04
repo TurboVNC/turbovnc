@@ -539,11 +539,11 @@ BEGIN
     POPUP "t"
     BEGIN
         MENUITEM "&New connection...",          ID_NEWCONN
-        MENUITEM "Default connection &options...", IDC_OPTIONBUTTON
+        MENUITEM "Default &options...",         IDC_OPTIONBUTTON
         MENUITEM SEPARATOR
         MENUITEM "&About TurboVNC Viewer...",   IDD_APP_ABOUT
         MENUITEM SEPARATOR
-        MENUITEM "Close &listening daemon",     ID_CLOSEDAEMON
+        MENUITEM "Close &listener",             ID_CLOSEDAEMON
     END
 END
 

@@ -40,7 +40,7 @@ public class TrayMenu extends PopupMenu implements ActionListener {
     addSeparator();
     about = addMenuItem("About TurboVNC Viewer...");
     addSeparator();
-    exit = addMenuItem("Close listening viewer");
+    exit = addMenuItem("Close listener");
 
     if (System.getProperty("os.name").startsWith("Mac OS X")) {
       setDockMenu(this);
