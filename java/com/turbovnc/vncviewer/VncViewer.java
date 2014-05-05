@@ -650,7 +650,7 @@ public class VncViewer extends javax.swing.JApplet
           newViewer(this, newSock, noNewConn.getValue());
         else {
           listener.shutdown();
-          System.out.println("Listener exiting ...");
+          vlog.info("Listener exiting ...");
           return;
         }
       }
