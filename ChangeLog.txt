@@ -121,6 +121,13 @@ established using SSH tunneling and another connection was then opened, the
 viewer would fail to exit after all of these connections were subsequently
 closed.
 -------------------------------------------------------------------------------
+[19]
+When running in listen mode, the Java TurboVNC Viewer now displays a tray icon
+with a popup menu similar to that of the Windows native viewer.  This allows
+the listener to be shut down, for global options to be set for all
+connections, and for new forward connections to be made without using the
+command line or launching another viewer instance.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
