@@ -39,8 +39,10 @@ public class TrayMenu extends PopupMenu implements ActionListener {
     options = addMenuItem("Default options...");
     addSeparator();
     about = addMenuItem("About TurboVNC Viewer...");
-    addSeparator();
-    exit = addMenuItem("Close listener");
+    if (!VncViewer.noNewConn.getValue()) {
+      addSeparator();
+      exit = addMenuItem("Close listener");
+    }
 
     if (System.getProperty("os.name").startsWith("Mac OS X")) {
       setDockMenu(this);
@@ -51,7 +53,7 @@ public class TrayMenu extends PopupMenu implements ActionListener {
       try {
         tray.add(trayIcon);
       } catch(java.awt.AWTException e) {
-        throw new ErrorException(e.getMessage());
+        vlog.error(e.toString());
       }
     }
   }
@@ -70,7 +72,6 @@ public class TrayMenu extends PopupMenu implements ActionListener {
     } catch(Exception e) {
       vlog.error("Could not modify dock menu:");
       vlog.error("  " + e.toString());
-      e.printStackTrace();
     }
   }
 
@@ -104,6 +105,7 @@ public class TrayMenu extends PopupMenu implements ActionListener {
         setDockMenu(null);
       else if (tray != null && trayIcon != null)
         tray.remove(trayIcon);
+      viewer.killListener();
       viewer.exit(0);
     }
   }

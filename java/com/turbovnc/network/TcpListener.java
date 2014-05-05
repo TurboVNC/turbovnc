@@ -94,6 +94,12 @@ public class TcpListener extends SocketListener  {
 //  }
 
   public void shutdown() {
+    try {
+      channel.close();
+    } catch(IOException e) {
+      throw new ErrorException("Could not close listener: " +
+                               e.getMessage());
+    }
     //shutdown(getFd(), 2);
   }
 
@@ -121,6 +127,9 @@ public class TcpListener extends SocketListener  {
       throw new ErrorException("Could not accept new connection: " +
                                e.getMessage());
     }
+
+    if (newSock == null)
+      return null;
 
     // Disable Nagle's algorithm, to reduce latency
     try {

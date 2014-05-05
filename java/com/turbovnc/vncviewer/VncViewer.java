@@ -606,6 +606,11 @@ public class VncViewer extends javax.swing.JApplet
     options = null;
   }
 
+  public void killListener() {
+    if (listenThread != null)
+      listenThread.interrupt();
+  }
+
   public void run() {
     CConn cc = null;
     int exitStatus = 0;
@@ -635,6 +640,7 @@ public class VncViewer extends javax.swing.JApplet
         reportException(e);
         exit(1);
       }
+      listenThread = Thread.currentThread();
 
       vlog.info("Listening on port " + port);
 
@@ -642,6 +648,11 @@ public class VncViewer extends javax.swing.JApplet
         Socket newSock = listener.accept();
         if (newSock != null)
           newViewer(this, newSock, noNewConn.getValue());
+        else {
+          listener.shutdown();
+          System.out.println("Listener exiting ...");
+          return;
+        }
       }
     }
 
@@ -1192,4 +1203,5 @@ public class VncViewer extends javax.swing.JApplet
   static Options opts;
   OptionsDialog options;
   TrayMenu trayMenu;
+  Thread listenThread;
 }
