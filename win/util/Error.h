@@ -125,6 +125,7 @@ namespace vglutil
 	class UnixError : public Error
 	{
 		public:
+
 			UnixError(const char *method) : Error(method, strerror(errno)) {}
 			UnixError(const char *method, int line) :
 				Error(method, strerror(errno), line) {}

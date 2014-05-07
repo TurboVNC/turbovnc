@@ -31,10 +31,12 @@ namespace vglutil
 	class Runnable
 	{
 		public:
+
 			Runnable(void) {}
 			virtual ~Runnable(void) {}
 
 		protected:
+
 			virtual void run()=0;
 			unsigned long threadID;
 			Error lastError;
@@ -45,6 +47,7 @@ namespace vglutil
 	class Thread
 	{
 		public:
+
 			Thread(Runnable *obj_) : obj(obj_), handle(0), detached(false) {}
 			void start(void);
 			void stop(void);
@@ -63,6 +66,7 @@ namespace vglutil
 			}
 
 		protected:
+
 			Runnable *obj;
 			#ifdef _WIN32
 			static DWORD WINAPI threadFunc(void *param);

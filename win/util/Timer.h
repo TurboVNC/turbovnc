@@ -36,10 +36,10 @@ namespace vglutil
 			{
 				#ifdef _WIN32
 				highRes=false;  tick=0.001;
-				LARGE_INTEGER Frequency;
-				if(QueryPerformanceFrequency(&Frequency)!=0)
+				LARGE_INTEGER frequency;
+				if(QueryPerformanceFrequency(&frequency)!=0)
 				{
-					tick=(double)1.0/(double)(Frequency.QuadPart);
+					tick=(double)1.0/(double)(frequency.QuadPart);
 					highRes=true;
 				}
 				#endif
@@ -78,6 +78,7 @@ namespace vglutil
 			}
 
 		private:
+
 			#ifdef _WIN32
 			bool highRes;  double tick;
 			#endif
@@ -92,11 +93,11 @@ namespace vglutil
 
 __inline double getTime(void)
 {
-	LARGE_INTEGER Frequency, Time;
-	if(QueryPerformanceFrequency(&Frequency)!=0)
+	LARGE_INTEGER frequency, time;
+	if(QueryPerformanceFrequency(&frequency)!=0)
 	{
-		QueryPerformanceCounter(&Time);
-		return (double)Time.QuadPart/(double)Frequency.QuadPart;
+		QueryPerformanceCounter(&time);
+		return (double)time.QuadPart/(double)frequency.QuadPart;
 	}
 	else return (double)GetTickCount()*0.001;
 }
