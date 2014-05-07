@@ -128,6 +128,11 @@ the listener to be shut down, for global options to be set for all
 connections, and for new forward connections to be made without using the
 command line or launching another viewer instance.
 -------------------------------------------------------------------------------
+[20]
+Fixed an issue in the vncserver script whereby the TurboVNC Server would give
+an "Unrecognized option" error and fail to launch if the server was built
+without the optional Java viewer.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
