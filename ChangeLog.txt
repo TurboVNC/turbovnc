@@ -41,6 +41,11 @@ established using SSH tunneling and another connection was then opened, the
 viewer would fail to exit after all of these connections were subsequently
 closed.
 -------------------------------------------------------------------------------
+[6]
+Fixed an issue in the vncserver script whereby the TurboVNC Server would give
+an "Unrecognized option" error and fail to launch if the server was built
+without the optional Java viewer.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
