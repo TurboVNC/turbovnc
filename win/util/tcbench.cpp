@@ -20,29 +20,34 @@
 #include "vglutil.h"
 #include "Timer.h"
 #include "fbx.h"
+
 #ifndef _WIN32
- extern "C" {
-  #define NeedFunctionPrototypes 1
-  #include "dsimple.h"
- }
- #include <sys/signal.h>
- #include <sys/time.h>
- #include <sys/resource.h>
+extern "C" {
+#define NeedFunctionPrototypes 1
+#include "dsimple.h"
+}
+#include <sys/signal.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 #endif
 
 using namespace vglutil;
 
 
 #define _throw(f, l, m) {  \
-	fprintf(stderr, "%s (%d):\n%s\n", f, l, m);  fflush(stderr);  exit(1);}
-#define fbx(a) {if((a)==-1) _throw("fbx.c", fbx_geterrline(), fbx_geterrmsg());}
+	fprintf(stderr, "%s (%d):\n%s\n", f, l, m);  fflush(stderr);  exit(1);  \
+}
+#define _fbx(a) {  \
+	if((a)==-1) _throw("fbx.c", fbx_geterrline(), fbx_geterrmsg());  \
+}
+
 #ifdef _WIN32
-char _message[256];
+char errMsg[256];
 #define _throww32(f) {  \
 	if(!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),  \
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), _message, 255, NULL))  \
-		strncpy(_message, "Error in FormatMessage()", 256);  \
-	_throw(f, __LINE__, _message);  \
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), errMsg, 255, NULL))  \
+		strncpy(errMsg, "Error in FormatMessage()", 256);  \
+	_throw(f, __LINE__, errMsg);  \
  }
 #endif
 
@@ -52,7 +57,7 @@ char _message[256];
 
 
 #ifdef _WIN32
- char *program_name;
+char *program_name;
 #endif
 
 
@@ -69,7 +74,7 @@ void usage(void)
 		DEFSAMPLERATE);
 	printf("-wh = Explicitly specify a window (if auto-detect fails)\n");
 	printf("-x = x coordinate (relative to window) of the sampling block\n");
-	printf("-y = y coordinate (relative to window) of the sampling block\n");
+	printf("-y = y coordinate (relative to window) of the sampling block\n\n");
 	exit(1);
 }
 
@@ -77,8 +82,8 @@ void usage(void)
 int main(int argc, char **argv)
 {
 	int i;  fbx_wh wh;
-	double benchtime=DEFBENCHTIME, elapsed;  Timer timer;
-	int samplerate=DEFSAMPLERATE, xcoord=-1, ycoord=-1;
+	double benchTime=DEFBENCHTIME, elapsed;  Timer timer;
+	int sampleRate=DEFSAMPLERATE, x=-1, y=-1;
 
 	program_name=argv[0];
 	memset(&wh, 0, sizeof(wh));
@@ -89,19 +94,19 @@ int main(int argc, char **argv)
 		if(!stricmp(argv[i], "-h") || !stricmp(argv[i], "-?")) usage();
 		if(!stricmp(argv[i], "-t") && i<argc-1)
 		{
-			if((tempf=atof(argv[++i]))>0.) benchtime=tempf;
+			if((tempf=atof(argv[++i]))>0.) benchTime=tempf;
 		}
 		if(!stricmp(argv[i], "-s") && i<argc-1)
 		{
-			if((temp=atoi(argv[++i]))>1) samplerate=temp;
+			if((temp=atoi(argv[++i]))>1) sampleRate=temp;
 		}
 		if(!stricmp(argv[i], "-x") && i<argc-1)
 		{
-			if((temp=atoi(argv[++i]))>0) xcoord=temp;
+			if((temp=atoi(argv[++i]))>0) x=temp;
 		}
 		if(!stricmp(argv[i], "-y") && i<argc-1)
 		{
-			if((temp=atoi(argv[++i]))>0) ycoord=temp;
+			if((temp=atoi(argv[++i]))>0) y=temp;
 		}
 		if(!stricmp(argv[i], "-wh") && i<argc-1)
 		{
@@ -124,13 +129,13 @@ int main(int argc, char **argv)
 	{
 		printf("Click the mouse in the window that you wish to monitor ... ");
 		wh=GetForegroundWindow();
-		int t, oldt=-1;
+		int t, tOld=-1;
 		timer.start();
 		do
 		{
 			elapsed=timer.elapsed();
 			t=(int)(10.-elapsed);
-			if(t!=oldt) {oldt=t;  printf("%.2d\b\b", t);}
+			if(t!=tOld) { tOld=t;  printf("%.2d\b\b", t); }
 			Sleep(50);
 		} while(wh==GetForegroundWindow() && elapsed<10.);
 		if((wh=GetForegroundWindow())==0)
@@ -144,7 +149,11 @@ int main(int argc, char **argv)
 
 	#else
 
-	if(!XInitThreads()) {fprintf(stderr, "XInitThreads() failed\n");  exit(1);}
+	if(!XInitThreads())
+	{
+		fprintf(stderr, "XInitThreads() failed\n");
+		exit(1);
+	}
 	if(!(wh.dpy=XOpenDisplay(0)))
 	{
 		fprintf(stderr, "Could not open display %s\n", XDisplayName(0));
@@ -161,25 +170,27 @@ int main(int argc, char **argv)
 
 	fbx_struct fb;
 	memset(&fb, 0, sizeof(fb));
-	fbx(fbx_init(&fb, wh, 0, 0, 1));
+	_fbx(fbx_init(&fb, wh, 0, 0, 1));
 	int width=fb.width, height=fb.height;
 	fbx_term(&fb);
 	memset(&fb, 0, sizeof(fb));
-	fbx(fbx_init(&fb, wh, 32, 32, 1));
+	_fbx(fbx_init(&fb, wh, 32, 32, 1));
 
 	int frames=0, samples=0;
-	if(xcoord<0) xcoord=width/2-16;  if(xcoord<0) xcoord=0;
-	if(ycoord<0) ycoord=height/2-16;  if(ycoord<0) ycoord=0;
-	printf("Sample block location: %d, %d\n", xcoord, ycoord);
+	if(x<0) x=width/2-16;  if(x<0) x=0;
+	if(y<0) y=height/2-16;  if(y<0) y=0;
 	unsigned char buf[32*32*4];
 	int first=1;
+
+	printf("Sample block location: %d, %d\n", x, y);
 	#ifdef _WIN32
 	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 	#endif
+
 	timer.start();
 	do
 	{
-		fbx(fbx_read(&fb, xcoord, ycoord));
+		_fbx(fbx_read(&fb, x, y));
 		samples++;
 		if(first)
 		{
@@ -192,17 +203,19 @@ int main(int argc, char **argv)
 		memcpy(buf, fb.bits, fbx_ps[fb.format]*32*32);
 		elapsed=timer.elapsed();
 		#ifdef _WIN32
-		int sleeptime=(int)(1000.*((double)samples/(double)samplerate-elapsed));
-		if(sleeptime>0) Sleep(sleeptime);
+		int sleepTime=(int)(1000.*((double)samples/(double)sampleRate-elapsed));
+		if(sleepTime>0) Sleep(sleepTime);
 		#else
-		int sleeptime=(int)(1000000.*((double)samples/(double)samplerate-elapsed));
-		if(sleeptime>0) usleep(sleeptime);
+		int sleepTime=(int)(1000000.*((double)samples/(double)sampleRate-elapsed));
+		if(sleepTime>0) usleep(sleepTime);
 		#endif
-	} while((elapsed=timer.elapsed())<benchtime);
+	} while((elapsed=timer.elapsed())<benchTime);
 	#ifdef _WIN32
 	SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
 	#endif
+
 	printf("Samples: %d  Frames: %d  Time: %f s  Frames/sec: %f\n", samples,
 		frames, elapsed, (double)frames/elapsed);
+
 	return 0;
 }

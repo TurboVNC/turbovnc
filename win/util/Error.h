@@ -81,8 +81,8 @@ namespace vglutil
 #define __FUNCTION__ __FILE__
 #endif
 #define _throw(m) throw(vglutil::Error(__FUNCTION__, m, __LINE__))
-#define errifnot(f) { if(!(f)) _throw("Unexpected NULL condition"); }
-#define newcheck(f)  \
+#define _errifnot(f) { if(!(f)) _throw("Unexpected NULL condition"); }
+#define _newcheck(f)  \
 	try {  \
 		if(!(f)) _throw("Memory allocation error");  \
 	} catch(std::bad_alloc& e) { _throw(e.what()); }
@@ -115,7 +115,7 @@ namespace vglutil
 }
 
 #define _throww32() throw(vglutil::W32Error(__FUNCTION__, __LINE__))
-#define tryw32(f) { if(!(f)) _throww32(); }
+#define _w32(f) { if(!(f)) _throww32(); }
 
 #endif // _WIN32
 
@@ -133,18 +133,18 @@ namespace vglutil
 }
 
 #define _throwunix() throw(vglutil::UnixError(__FUNCTION__, __LINE__))
-#define tryunix(f) { if((f)==-1) _throwunix(); }
+#define _unix(f) { if((f)==-1) _throwunix(); }
 
 
-#define fbx(f) {  \
+#define _fbx(f) {  \
 	if((f)==-1)  \
 		throw(vglutil::Error("FBX", fbx_geterrmsg(), fbx_geterrline()));  \
 }
-#define fbxv(f) {  \
+#define _fbxv(f) {  \
 	if((f)==-1)  \
 		throw(vglutil::Error("FBXV", fbxv_geterrmsg(), fbxv_geterrline()));  \
 }
-#define tj(f) {  \
+#define _tj(f) {  \
 	if((f)==-1)  \
 		throw(vglutil::Error(__FUNCTION__, tjGetErrorStr(), __LINE__));  \
 }

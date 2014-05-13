@@ -51,7 +51,7 @@ typedef struct
   Display *dpy;  Drawable d;  Visual *v;
 } fbx_wh;
 
-#endif // _WIN32
+#endif /* _WIN32 */
 
 
 /* Pixel formats */
