@@ -77,7 +77,7 @@ public class CConn extends CConnection implements UserPasswdGetter, UserMsgBox,
     pendingPFChange = false;
     lastServerEncoding = -1;
 
-    opts = new Options(viewer.opts);
+    opts = new Options(VncViewer.opts);
 
     formatChange = false; encodingChange = false;
     currentEncoding = opts.preferredEncoding;
