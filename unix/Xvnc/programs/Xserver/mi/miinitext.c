@@ -66,6 +66,9 @@ extern Bool noRRExtension;
 #ifdef RENDER
 extern Bool noRenderExtension;
 #endif
+#ifdef XFIXES
+extern Bool noXFixesExtension;
+#endif
 
 #if NeedFunctionPrototypes
 #define INITARGS void
@@ -177,6 +180,9 @@ extern void RenderExtensionInit(INITARGS);
 #endif
 #ifdef RANDR
 extern void RRExtensionInit(INITARGS);
+#endif
+#ifdef XFIXES
+extern void XFixesExtensionInit(INITARGS);
 #endif
 extern void vncExtensionInit(INITARGS);
 
@@ -290,6 +296,10 @@ InitExtensions(argc, argv)
         (*GlxExtensionInitPtr)();
     }
 #endif
+#endif
+#ifdef XFIXES
+    /* must be before Render to layer DisplayCursor correctly */
+    if (!noXFixesExtension) XFixesExtensionInit();
 #endif
 #ifdef RENDER
     if (!noRenderExtension) RenderExtensionInit();

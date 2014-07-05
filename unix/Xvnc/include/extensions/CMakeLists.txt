@@ -2,6 +2,7 @@ set(HEADERS
 	Xext.h
 	multibuf.h
 	shape.h
+	shapestr.h
 	XShm.h
 	MITMisc.h
 	XI.h

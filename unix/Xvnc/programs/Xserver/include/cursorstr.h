@@ -76,6 +76,10 @@ typedef struct _Cursor {
     unsigned short backRed, backGreen, backBlue; /* device-independent color */
     int refcnt;
     pointer devPriv[MAXSCREENS];		/* set by pScr->RealizeCursor*/
+#ifdef XFIXES
+    CARD32 serialNumber;
+    Atom name;
+#endif
 } CursorRec;
 
 typedef struct _CursorMetric {

@@ -151,6 +151,10 @@ Bool noRenderExtension = FALSE;
 Bool noRRExtension = FALSE;
 #endif
 
+#ifdef XFIXES
+_X_EXPORT Bool noXFixesExtension = FALSE;
+#endif
+
 int auditTrailLevel = 1;
 
 void ddxUseMsg();

@@ -346,13 +346,11 @@ LookupClient(rid, client)
 
 
 int
-AlterSaveSetForClient(client, pWin, mode)
-    ClientPtr client;
-    WindowPtr pWin;
-    unsigned mode;
+AlterSaveSetForClient(ClientPtr client, WindowPtr pWin, unsigned mode,
+                      Bool toRoot, Bool remap)
 {
     int numnow;
-    pointer *pTmp = NULL;
+    SaveSetElt *pTmp = NULL;
     int j;
 
     numnow = client->numSaved;
@@ -360,7 +358,7 @@ AlterSaveSetForClient(client, pWin, mode)
     if (numnow)
     {
 	pTmp = client->saveSet;
-	while ((j < numnow) && (pTmp[j] != (pointer)pWin))
+	while ((j < numnow) && (SaveSetWindow(pTmp[j]) != (pointer)pWin))
 	    j++;
     }
     if (mode == SetModeInsert)
@@ -368,12 +366,14 @@ AlterSaveSetForClient(client, pWin, mode)
 	if (j < numnow)         /* duplicate */
 	   return(Success);
 	numnow++;
-	pTmp = (pointer *)xrealloc(client->saveSet, sizeof(pointer) * numnow);
+	pTmp = (SaveSetElt *)xrealloc(client->saveSet, sizeof(*pTmp) * numnow);
 	if (!pTmp)
 	    return(BadAlloc);
 	client->saveSet = pTmp;
        	client->numSaved = numnow;
-	client->saveSet[numnow - 1] = (pointer)pWin;
+	SaveSetAssignWindow(client->saveSet[numnow - 1], pWin);
+	SaveSetAssignToRoot(client->saveSet[numnow - 1], toRoot);
+	SaveSetAssignRemap(client->saveSet[numnow - 1], remap);
 	return(Success);
     }
     else if ((mode == SetModeDelete) && (j < numnow))
@@ -386,15 +386,14 @@ AlterSaveSetForClient(client, pWin, mode)
 	numnow--;
         if (numnow)
 	{
-    	    pTmp = (pointer *)xrealloc(client->saveSet,
-				       sizeof(pointer) * numnow);
+	    pTmp = (SaveSetElt *)xrealloc(client->saveSet, sizeof(*pTmp) * numnow);
 	    if (pTmp)
 		client->saveSet = pTmp;
 	}
         else
         {
             xfree(client->saveSet);
-	    client->saveSet = (pointer *)NULL;
+	    client->saveSet = (SaveSetElt *)NULL;
 	}
 	client->numSaved = numnow;
 	return(Success);
@@ -403,8 +402,7 @@ AlterSaveSetForClient(client, pWin, mode)
 }
 
 void
-DeleteWindowFromAnySaveSet(pWin)
-    WindowPtr pWin;
+DeleteWindowFromAnySaveSet(WindowPtr pWin)
 {
     register int i;
     register ClientPtr client;
@@ -413,7 +411,7 @@ DeleteWindowFromAnySaveSet(pWin)
     {    
 	client = clients[i];
 	if (client && client->numSaved)
-	    (void)AlterSaveSetForClient(client, pWin, SetModeDelete);
+	    (void)AlterSaveSetForClient(client, pWin, SetModeDelete, FALSE, TRUE);
     }
 }
 

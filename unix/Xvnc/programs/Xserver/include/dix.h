@@ -489,13 +489,12 @@ extern void NoopDDA(
 );
 
 extern int AlterSaveSetForClient(
-#if NeedFunctionPrototypes
     ClientPtr /*client*/,
     WindowPtr /*pWin*/,
-    unsigned /*mode*/
-#endif
-);
-
+    unsigned /*mode*/,
+    Bool /*toRoot*/,
+    Bool /*remap*/);
+  
 extern void DeleteWindowFromAnySaveSet(
 #if NeedFunctionPrototypes
     WindowPtr /*pWin*/
