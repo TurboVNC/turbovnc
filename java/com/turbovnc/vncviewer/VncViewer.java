@@ -389,6 +389,8 @@ public class VncViewer extends javax.swing.JApplet
   public VncViewer(Socket sock_) {
     sock = sock_;
     UserPreferences.load("global");
+    opts.serverName = null;
+    opts.port = -1;
   }
 
   public static void newViewer(VncViewer oldViewer, Socket sock,
