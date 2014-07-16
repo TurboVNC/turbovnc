@@ -68,10 +68,6 @@ typedef struct _GlyphShare {
 
 static GlyphSharePtr sharedGlyphs = (GlyphSharePtr)NULL;
 
-#ifdef XFIXES
-static CARD32	cursorSerial;
-#endif
-
 static void
 #if NeedFunctionPrototypes
 FreeCursorBits(CursorBitsPtr bits)
@@ -172,10 +168,6 @@ AllocCursorARGB(psrcbits, pmaskbits, argb, cm,
 
     pCurs->bits = bits;
     pCurs->refcnt = 1;		
-#ifdef XFIXES
-    pCurs->serialNumber = ++cursorSerial;
-    pCurs->name = None;
-#endif
 
     pCurs->foreRed = foreRed;
     pCurs->foreGreen = foreGreen;
@@ -365,10 +357,6 @@ AllocGlyphCursor(source, sourceChar, mask, maskChar,
     }
     pCurs->bits = bits;
     pCurs->refcnt = 1;
-#ifdef XFIXES
-    pCurs->serialNumber = ++cursorSerial;
-    pCurs->name = None;
-#endif
 
     pCurs->foreRed = foreRed;
     pCurs->foreGreen = foreGreen;

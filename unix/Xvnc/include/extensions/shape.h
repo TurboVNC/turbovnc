@@ -1,13 +1,13 @@
-/* $XFree86: xc/include/extensions/shape.h,v 1.3 2001/12/14 19:53:29 dawes Exp $ */
 /************************************************************
 
-Copyright 1989, 1998  The Open Group
+Copyright (c) 1989  X Consortium
 
-Permission to use, copy, modify, distribute, and sell this software and its
-documentation for any purpose is hereby granted without fee, provided that
-the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
@@ -15,17 +15,17 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Except as contained in this notice, the name of The Open Group shall not be
+Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
-in this Software without prior written authorization from The Open Group.
+in this Software without prior written authorization from the X Consortium.
 
 ********************************************************/
 
-/* $Xorg: shape.h,v 1.4 2001/02/09 02:03:24 xorgcvs Exp $ */
+/* $XConsortium: shape.h,v 1.17 94/04/17 20:11:23 rws Exp $ */
 
 #ifndef _SHAPE_H_
 #define _SHAPE_H_
@@ -50,7 +50,6 @@ in this Software without prior written authorization from The Open Group.
 
 #define ShapeBounding			0
 #define ShapeClip			1
-#define ShapeInput			2
 
 #define ShapeNotifyMask			(1L << 0)
 #define ShapeNotify			0
@@ -58,9 +57,6 @@ in this Software without prior written authorization from The Open Group.
 #define ShapeNumberEvents		(ShapeNotify + 1)
 
 #ifndef _SHAPE_SERVER_
-
-#include <X11/Xutil.h>
-
 typedef struct {
     int	type;		    /* of event */
     unsigned long serial;   /* # of last request processed by server */
@@ -77,18 +73,23 @@ typedef struct {
 _XFUNCPROTOBEGIN
 
 extern Bool XShapeQueryExtension (
+#if NeedFunctionPrototypes
     Display*	/* display */,
     int*	/* event_base */,
     int*	/* error_base */
+#endif
 );
 
 extern Status XShapeQueryVersion (
+#if NeedFunctionPrototypes
     Display*	/* display */,
     int*	/* major_version */,
     int*	/* minor_version */
+#endif
 );
 
 extern void XShapeCombineRegion (
+#if NeedFunctionPrototypes
     Display*	/* display */,
     Window	/* dest */,
     int		/* dest_kind */,
@@ -96,9 +97,11 @@ extern void XShapeCombineRegion (
     int		/* y_off */,
     Region	/* region */,
     int		/* op */
+#endif
 );
 
 extern void XShapeCombineRectangles (
+#if NeedFunctionPrototypes
     Display*	/* display */,
     Window	/* dest */,
     int		/* dest_kind */,
@@ -108,9 +111,11 @@ extern void XShapeCombineRectangles (
     int		/* n_rects */,
     int		/* op */,
     int		/* ordering */
+#endif
 );
 
 extern void XShapeCombineMask (
+#if NeedFunctionPrototypes
     Display*	/* display */,
     Window	/* dest */,
     int		/* dest_kind */,
@@ -118,9 +123,11 @@ extern void XShapeCombineMask (
     int		/* y_off */,
     Pixmap	/* src */,
     int		/* op */
+#endif
 );
 
 extern void XShapeCombineShape (
+#if NeedFunctionPrototypes
     Display*	/* display */,
     Window	/* dest */,
     int		/* dest_kind */,
@@ -129,17 +136,21 @@ extern void XShapeCombineShape (
     Window	/* src */,
     int		/* src_kind */,
     int		/* op */
+#endif
 );
 
 extern void XShapeOffsetShape (
+#if NeedFunctionPrototypes
     Display*	/* display */,
     Window	/* dest */,
     int		/* dest_kind */,
     int		/* x_off */,
     int		/* y_off */
+#endif
 );
 
 extern Status XShapeQueryExtents (
+#if NeedFunctionPrototypes
     Display*		/* display */,
     Window		/* window */,
     Bool*		/* bounding_shaped */,
@@ -152,25 +163,32 @@ extern Status XShapeQueryExtents (
     int*		/* y_clip */,
     unsigned int*	/* w_clip */,
     unsigned int*	/* h_clip */
+#endif
 );
 
 extern void XShapeSelectInput (
+#if NeedFunctionPrototypes
     Display*		/* display */,
     Window		/* window */,
     unsigned long	/* mask */
+#endif
 );
 
 extern unsigned long XShapeInputSelected (
+#if NeedFunctionPrototypes
     Display*	/* display */,
     Window	/* window */
+#endif
 );
 
 extern XRectangle *XShapeGetRectangles (
+#if NeedFunctionPrototypes
     Display*	/* display */,
     Window	/* window */,
     int		/* kind */,
     int*	/* count */,
     int*	/* ordering */
+#endif
 );
 
 _XFUNCPROTOEND

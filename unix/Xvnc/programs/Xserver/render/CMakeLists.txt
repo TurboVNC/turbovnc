@@ -1,5 +1,7 @@
 include_directories(. ../fb ../mi)
 
+add_definitions(-D_X_EXPORT=)
+
 add_library(render STATIC
 	animcur.c
 	filter.c
