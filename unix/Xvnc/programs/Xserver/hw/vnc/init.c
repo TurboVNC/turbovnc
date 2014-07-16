@@ -5,7 +5,7 @@
  */
 
 /*
- *  Copyright (C) 2009-2013 D. R. Commander.  All Rights Reserved.
+ *  Copyright (C) 2009-2014 D. R. Commander.  All Rights Reserved.
  *  Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                     All Rights Reserved.
  *  Copyright (C) 2005 Sun Microsystems, Inc.  All Rights Reserved.
@@ -566,7 +566,7 @@ rfbScreenInit(index, pScreen, argc, argv)
     char ** argv;
 {
     rfbScreenInfoPtr prfb = &rfbScreen;
-    int dpix = 75, dpiy = 75;
+    int dpix = 96, dpiy = 96;
     int ret;
     char *pbits;
     VisualPtr vis;

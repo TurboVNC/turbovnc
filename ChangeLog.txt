@@ -46,6 +46,11 @@ Fixed an issue in the vncserver script whereby the TurboVNC Server would give
 an "Unrecognized option" error and fail to launch if the server was built
 without the optional Java viewer.
 -------------------------------------------------------------------------------
+[7]
+The default DPI of the X server has been changed to 96, to match that of recent
+X.org releases and other VNC implementations.  Passing an argument of -dpi 75
+to vncserver restores the old behavior.
+-------------------------------------------------------------------------------
 
 
 ===============================================================================
