@@ -88,7 +88,7 @@ EmptyMask(CursorBitsPtr bits)
     unsigned char *mask = bits->mask;
     int n = BitmapBytePad(bits->width) * bits->height;
 
-    while (n--) 
+    while (n--)
         if (*mask++ != 0) return FALSE;
 #ifdef ARGB_CURSOR
     if (bits->argb) {

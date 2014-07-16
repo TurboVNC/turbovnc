@@ -434,7 +434,7 @@ ddxProcessArgument (argc, argv, i)
         return 2;
     }
 
-    if (strcasecmp(argv[i], "-inetd") == 0) {       /* -inetd */ 
+    if (strcasecmp(argv[i], "-inetd") == 0) {       /* -inetd */
         int n;
         for (n = 1; n < 100; n++) {
             if (CheckDisplayNumber(n))
@@ -529,7 +529,7 @@ InitOutput(screenInfo, argc, argv)
     rfbInitSockets();
     if (inetdSock == -1)
         httpInitSockets();
-   
+
     /* initialize pixmap formats */
 
     screenInfo->imageByteOrder = IMAGE_BYTE_ORDER;
@@ -626,7 +626,7 @@ rfbScreenInit(index, pScreen, argc, argv)
     fbInitializeBackingStore(pScreen);
 
     if (prfb->bitsPerPixel > 8) {
-        int xBits = prfb->bitsPerPixel - redBits - greenBits - blueBits;        
+        int xBits = prfb->bitsPerPixel - redBits - greenBits - blueBits;
         if (strcasecmp(primaryOrder, "bgr") == 0) {
             if (bigEndian)
                 rfbLog("Framebuffer: XBGR %d/%d/%d/%d\n",
@@ -735,10 +735,10 @@ rfbScreenInit(index, pScreen, argc, argv)
         rfbServerFormat.blueShift = vis->offsetBlue;
     } else {
         rfbServerFormat.redMax
-            = rfbServerFormat.greenMax 
+            = rfbServerFormat.greenMax
             = rfbServerFormat.blueMax = 0;
         rfbServerFormat.redShift
-            = rfbServerFormat.greenShift 
+            = rfbServerFormat.greenShift
             = rfbServerFormat.blueShift = 0;
     }
 
@@ -788,17 +788,17 @@ rfbKeybdProc(pDevice, onoff)
 
     switch (onoff)
     {
-    case DEVICE_INIT: 
+    case DEVICE_INIT:
         KbdDeviceInit(pDevice, &keySyms, modMap);
         InitKeyboardDeviceStruct(pDev, &keySyms, modMap,
                                  (BellProcPtr)rfbSendBell,
                                  (KbdCtrlProcPtr)NoopDDA);
             break;
-    case DEVICE_ON: 
+    case DEVICE_ON:
         pDev->on = TRUE;
         KbdDeviceOn();
         break;
-    case DEVICE_OFF: 
+    case DEVICE_OFF:
         pDev->on = FALSE;
         KbdDeviceOff();
         break;

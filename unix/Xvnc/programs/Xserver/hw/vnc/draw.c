@@ -170,7 +170,7 @@ static GCFuncs rfbGCFuncs = {
 
 
 static GCOps rfbGCOps = {
-    rfbFillSpans,       rfbSetSpans,    rfbPutImage,    
+    rfbFillSpans,       rfbSetSpans,    rfbPutImage,
     rfbCopyArea,        rfbCopyPlane,   rfbPolyPoint,
     rfbPolylines,       rfbPolySegment, rfbPolyRectangle,
     rfbPolyArc,         rfbFillPolygon, rfbPolyFillRect,
@@ -234,7 +234,7 @@ rfbCreateGC (pGC)
     rfbGCPtr pGCPriv;
 
     SCREEN_PROLOGUE(pGC->pScreen, CreateGC);
-    
+
     pGCPriv = (rfbGCPtr)pGC->devPrivates[rfbGCIndex].ptr;
 
     ret = (*pScreen->CreateGC) (pGC);
@@ -462,7 +462,7 @@ rfbValidateGC (pGC, changes, pDrawable)
     TRC((stderr, "rfbValidateGC called\n"));
 
     (*pGC->funcs->ValidateGC) (pGC, changes, pDrawable);
-    
+
     pGCPriv->wrapOps = NULL;
     if (pDrawable->type == DRAWABLE_WINDOW && ((WindowPtr)pDrawable)->viewable)
     {
@@ -1761,7 +1761,7 @@ rfbComposite(
  * to the modified region and we're done.  If the new copy is bigger, we add
  * the old copy region to the modified region and behave as though there is no
  * existing copy region.
- * 
+ *
  * At this stage we now know that either the two copies can be combined, or
  * that there is no existing copy.  We temporarily add both the existing copy
  * region and dst to the modified region (this is the entire area of the screen

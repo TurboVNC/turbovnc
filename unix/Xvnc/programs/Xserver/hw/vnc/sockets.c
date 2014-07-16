@@ -193,7 +193,7 @@ rfbCheckFds()
     static Bool inetdInitDone = FALSE;
 
     if (!inetdInitDone && inetdSock != -1) {
-        rfbNewClientConnection(inetdSock); 
+        rfbNewClientConnection(inetdSock);
         inetdInitDone = TRUE;
     }
 

@@ -889,7 +889,7 @@ SendSubrect(t, x, y, w, h)
 
     if (cl->format.bitsPerPixel == rfbServerFormat.bitsPerPixel &&
         cl->format.redMax == rfbServerFormat.redMax &&
-        cl->format.greenMax == rfbServerFormat.greenMax && 
+        cl->format.greenMax == rfbServerFormat.greenMax &&
         cl->format.blueMax == rfbServerFormat.blueMax &&
         cl->format.bitsPerPixel >= 16) {
 
@@ -1032,7 +1032,7 @@ SendMonoRect(t, w, h)
         if (t->streamId >= t->baseStreamId + t->nStreams)
             t->streamId = t->baseStreamId;
     }
-   
+
     /* Prepare tight encoding header. */
     dataLen = (w + 7) / 8;
     dataLen *= h;
@@ -1823,7 +1823,7 @@ SendJpegRect(t, x, y, w, h, quality)
                                  & rfbServerFormat.blueMax);
                 *dst2++ = (CARD8)
                     ((inRed * 255 + rfbServerFormat.redMax / 2)
-                     / rfbServerFormat.redMax);                          
+                     / rfbServerFormat.redMax);
                 *dst2++ = (CARD8)
                     ((inGreen * 255 + rfbServerFormat.greenMax / 2)
                      / rfbServerFormat.greenMax);

@@ -361,7 +361,7 @@ typedef struct rfbClientRec {
 
 /*
  * This macro creates an empty region (ie. a region with no areas) if it is
- * given a rectangle with a width or height of zero. It appears that 
+ * given a rectangle with a width or height of zero. It appears that
  * REGION_INTERSECT does not quite do the right thing with zero-width
  * rectangles, but it should with completely empty regions.
  */

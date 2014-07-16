@@ -146,12 +146,12 @@ rfbDCInitialize (pScreen, screenFuncs)
     pScreenPriv->pRootPicture = NULL;
     pScreenPriv->pTempPicture = NULL;
 #endif
-    
+
     pScreenPriv->pSave = NULL;
 
     pScreenPriv->CloseScreen = pScreen->CloseScreen;
     pScreen->CloseScreen = rfbDCCloseScreen;
-    
+
     pScreen->devPrivates[rfbDCScreenIndex].ptr = (pointer) pScreenPriv;
 
     if (!rfbSpriteInitialize (pScreen, &rfbDCFuncs, screenFuncs))
@@ -226,7 +226,7 @@ rfbDCMakePicture (PicturePtr *ppPicture, DrawablePtr pDraw, WindowPtr pWin)
     XID             subwindow_mode = IncludeInferiors;
     PicturePtr      pPicture;
     int             error;
-    
+
     pVisual = rfbDCGetWindowVisual (pWin);
     if (!pVisual)
         return 0;
@@ -259,14 +259,14 @@ rfbDCRealize (pScreen, pCursor)
         PixmapPtr       pPixmap;
         PictFormatPtr   pFormat;
         int             error;
-        
+
         pFormat = PictureMatchFormat (pScreen, 32, PICT_a8r8g8b8);
         if (!pFormat)
         {
             xfree ((pointer) pPriv);
             return (rfbDCCursorPtr)NULL;
         }
-        
+
         pPriv->sourceBits = 0;
         pPriv->maskBits = 0;
         pPixmap = (*pScreen->CreatePixmap) (pScreen, pCursor->bits->width,
@@ -457,8 +457,8 @@ rfbDCPutUpCursor (pScreen, pCursor, x, y, source, mask)
                           pPriv->pPicture,
                           NULL,
                           pScreenPriv->pRootPicture,
-                          0, 0, 0, 0, 
-                          x, y, 
+                          0, 0, 0, 0,
+                          x, y,
                           pCursor->bits->width,
                           pCursor->bits->height);
     }
