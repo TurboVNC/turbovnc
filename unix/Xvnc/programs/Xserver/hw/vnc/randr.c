@@ -41,7 +41,7 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  *
- * Copyright © 2000, Compaq Computer Corporation, 
+ * Copyright © 2000, Compaq Computer Corporation,
  * Copyright © 2002, Hewlett Packard, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
@@ -58,7 +58,7 @@
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL HP
  * BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN 
+ * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
@@ -160,7 +160,7 @@ static void xf86SetRootClip (ScreenPtr pScreen, Bool enable)
       pWin->valdata->before.resized = TRUE;
     }
   }
-    
+
   /*
    * Use REGION_BREAK to avoid optimizations in ValidateTree
    * that assume the root borderClip can't change well, normally
@@ -220,7 +220,7 @@ static void xf86SetRootClip (ScreenPtr pScreen, Bool enable)
       REGION_DESTROY(pScreen, pOldClip);
     if (bsExposed) {
       RegionPtr valExposed = NullRegion;
-    
+
       if (pWin->valdata)
         valExposed = &pWin->valdata->after.exposed;
       (*pScreen->WindowExposures)(pWin, valExposed, bsExposed);
@@ -358,7 +358,7 @@ Bool vncRRSetConfig(ScreenPtr pScreen, Rotation rotation, int rate,
         REGION_UNION(pScreen, &cl->requestedRegion, &cl->requestedRegion,
                      &tmpRegion);
     }
-    REGION_UNINIT(pScreen, &tmpRegion);    
+    REGION_UNINIT(pScreen, &tmpRegion);
   }
 
   return ret;

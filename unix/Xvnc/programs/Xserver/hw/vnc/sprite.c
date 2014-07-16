@@ -188,7 +188,7 @@ static void         rfbSpriteLineHelper();
 #endif
 
 static GCOps rfbSpriteGCOps = {
-    rfbSpriteFillSpans,      rfbSpriteSetSpans,      rfbSpritePutImage,  
+    rfbSpriteFillSpans,      rfbSpriteSetSpans,      rfbSpritePutImage,
     rfbSpriteCopyArea,       rfbSpriteCopyPlane,     rfbSpritePolyPoint,
     rfbSpritePolylines,      rfbSpritePolySegment,   rfbSpritePolyRectangle,
     rfbSpritePolyArc,        rfbSpriteFillPolygon,   rfbSpritePolyFillRect,
@@ -220,7 +220,7 @@ static GCOps rfbSpriteGCOps = {
     GC_SETUP(pDrawable, pGC);                                       \
     if (GC_CHECK((WindowPtr)pDrawable))                             \
         rfbSpriteRemoveCursor(pDrawable->pScreen);
-    
+
 #define GC_CHECK(pWin)                                                        \
     (rfbScreen.cursorIsDrawn &&                                               \
         (pScreenPriv->pCacheWin == pWin ?                                     \
@@ -285,7 +285,7 @@ rfbSpriteInitialize(pScreen, cursorFuncs, screenFuncs)
 #ifdef RENDER
     PictureScreenPtr    ps = GetPictureScreenIfSet(pScreen);
 #endif
-    
+
     if (rfbSpriteGeneration != serverGeneration)
     {
         rfbSpriteScreenIndex = AllocateScreenPrivateIndex();
@@ -438,7 +438,7 @@ rfbSpriteGetImage(pDrawable, sx, sy, w, h, format, planemask, pdstLine)
 {
     ScreenPtr           pScreen = pDrawable->pScreen;
     rfbSpriteScreenPtr  pScreenPriv;
-    
+
     SCREEN_PROLOGUE(pScreen, GetImage);
 
     pScreenPriv =
@@ -469,7 +469,7 @@ rfbSpriteGetSpans(pDrawable, wMax, ppt, pwidth, nspans, pdstStart)
 {
     ScreenPtr           pScreen = pDrawable->pScreen;
     rfbSpriteScreenPtr  pScreenPriv;
-    
+
     SCREEN_PROLOGUE(pScreen, GetSpans);
 
     pScreenPriv =
@@ -511,7 +511,7 @@ rfbSpriteSourceValidate(pDrawable, x, y, width, height)
 {
     ScreenPtr           pScreen = pDrawable->pScreen;
     rfbSpriteScreenPtr  pScreenPriv;
-    
+
     SCREEN_PROLOGUE(pScreen, SourceValidate);
 
     pScreenPriv =
@@ -539,7 +539,7 @@ rfbSpriteCreateGC(pGC)
     rfbSpriteGCPtr  pPriv;
 
     SCREEN_PROLOGUE(pScreen, CreateGC);
-    
+
     pPriv = (rfbSpriteGCPtr)pGC->devPrivates[rfbSpriteGCIndex].ptr;
 
     ret = (*pScreen->CreateGC)(pGC);
@@ -564,7 +564,7 @@ rfbSpriteInstallColormap(pMap)
         (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
 
     SCREEN_PROLOGUE(pScreen, InstallColormap);
-    
+
     (*pScreen->InstallColormap)(pMap);
 
     SCREEN_EPILOGUE(pScreen, InstallColormap, rfbSpriteInstallColormap);
@@ -594,7 +594,7 @@ rfbSpriteStoreColors(pMap, ndef, pdef)
         (rfbSpriteScreenPtr) pScreen->devPrivates[rfbSpriteScreenIndex].ptr;
 
     SCREEN_PROLOGUE(pScreen, StoreColors);
-    
+
     (*pScreen->StoreColors)(pMap, ndef, pdef);
 
     SCREEN_EPILOGUE(pScreen, StoreColors, rfbSpriteStoreColors);
@@ -706,7 +706,7 @@ rfbSpriteSaveDoomedAreas(pWin, pObscured, dx, dy)
     BoxRec              cursorBox;
 
     pScreen = pWin->drawable.pScreen;
-    
+
     SCREEN_PROLOGUE(pScreen, SaveDoomedAreas);
 
     pScreenPriv =
@@ -741,7 +741,7 @@ rfbSpriteRestoreAreas(pWin, prgnExposed)
     RegionPtr           result;
 
     pScreen = pWin->drawable.pScreen;
-    
+
     SCREEN_PROLOGUE(pScreen, RestoreAreas);
 
     pScreenPriv =
@@ -913,7 +913,7 @@ rfbSpriteValidateGC(pGC, changes, pDrawable)
     GC_FUNC_PROLOGUE(pGC);
 
     (*pGC->funcs->ValidateGC)(pGC, changes, pDrawable);
-    
+
     pGCPriv->wrapOps = NULL;
     if (pDrawable->type == DRAWABLE_WINDOW &&
         ((WindowPtr) pDrawable)->viewable)
@@ -940,7 +940,7 @@ rfbSpriteChangeGC(pGC, mask)
     GC_FUNC_PROLOGUE(pGC);
 
     (*pGC->funcs->ChangeGC)(pGC, mask);
-    
+
     GC_FUNC_EPILOGUE(pGC);
 }
 
@@ -952,7 +952,7 @@ rfbSpriteCopyGC(pGCSrc, mask, pGCDst)
     GC_FUNC_PROLOGUE(pGCDst);
 
     (*pGCDst->funcs->CopyGC)(pGCSrc, mask, pGCDst);
-    
+
     GC_FUNC_EPILOGUE(pGCDst);
 }
 
@@ -963,7 +963,7 @@ rfbSpriteDestroyGC(pGC)
     GC_FUNC_PROLOGUE(pGC);
 
     (*pGC->funcs->DestroyGC)(pGC);
-    
+
     GC_FUNC_EPILOGUE(pGC);
 }
 
@@ -1135,7 +1135,7 @@ rfbSpriteCopyArea(pSrc, pDst, pGC, srcx, srcy, w, h, dstx, dsty)
     {
         rfbSpriteRemoveCursor(pDst->pScreen);
     }
- 
+
     GC_OP_PROLOGUE(pGC);
 
     rgn = (*pGC->ops->CopyArea)(pSrc, pDst, pGC, srcx, srcy, w, h,
@@ -1373,7 +1373,7 @@ rfbSpritePolyRectangle(pDrawable, pGC, nrects, pRects)
     int                  lw;
     int                  n;
     int                  x1, y1, x2, y2;
-    
+
     GC_SETUP(pDrawable, pGC);
 
     if (GC_CHECK((WindowPtr)pDrawable))
@@ -1415,7 +1415,7 @@ rfbSpritePolyArc(pDrawable, pGC, narcs, parcs)
     int            lw;
     int            n;
     register xArc  *arcs;
-    
+
     GC_SETUP(pDrawable, pGC);
 
     if (GC_CHECK((WindowPtr)pDrawable))
@@ -1671,7 +1671,7 @@ rfbSpriteTextOverlap (pDraw, font, x, y, n, charinfo, imageblt, w, cursorBox)
 #define TT_POLY16  2
 #define TT_IMAGE16 3
 
-static int 
+static int
 rfbSpriteText (pDraw, pGC, x, y, count, chars, fontEncoding, textType,
                cursorBox)
     DrawablePtr    pDraw;
@@ -2005,7 +2005,7 @@ rfbSpriteComposite(CARD8       op,
                      yDst,
                      width,
                      height);
-    
+
     PICTURE_EPILOGUE(ps, Composite, rfbSpriteComposite);
 }
 
@@ -2053,9 +2053,9 @@ rfbSpriteGlyphs(CARD8         op,
             }
         }
     }
-    
+
     (*ps->Glyphs)(op, pSrc, pDst, maskFormat, xSrc, ySrc, nlist, list, glyphs);
-    
+
     PICTURE_EPILOGUE(ps, Glyphs, rfbSpriteGlyphs);
 }
 #endif

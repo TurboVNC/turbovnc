@@ -144,13 +144,13 @@ rfbAuthRevokeUser(const char* name)
 
 static void
 AuthPAMUserPwdStartFunc(rfbClientPtr cl)
-{       
+{
     cl->state = RFB_AUTHENTICATION;
 }
 
 static void
 AuthPAMUserPwdRspFunc(rfbClientPtr cl)
-{       
+{
     CARD32      userLen;
     CARD32      pwdLen;
     char        userBuf[MAX_USER_LEN + 1];
@@ -229,7 +229,7 @@ AuthPAMUserPwdRspFunc(rfbClientPtr cl)
 
     if (rfbPAMAuthenticate(pamServiceName, cl->host, userBuf, pwdBuf, &emsg)) {
         rfbClientAuthSucceeded(cl, rfbAuthUnixLogin);
-    
+
     } else {
         rfbClientAuthFailed(cl, (char*)emsg);
     }
@@ -386,7 +386,7 @@ ReadConfigFile()
             FatalError("ERROR in %s: line %d is too long!\n",
                        rfbAuthConfigFile, line + 1);
         }
-        
+
         buf[len] = '\0';
 
         for (i = 0, j = 0; i < len; i++) {

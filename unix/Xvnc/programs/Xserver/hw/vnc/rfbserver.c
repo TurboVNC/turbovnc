@@ -95,7 +95,7 @@ idleTimeoutCallback(OsTimerPtr timer, CARD64 time, pointer arg)
 static BOOL rfbProfile = FALSE;
 static double tUpdate = 0., tStart = -1., tElapsed, mpixels = 0.,
     idmpixels = 0.;
-static unsigned long iter = 0; 
+static unsigned long iter = 0;
 unsigned long long sendBytes = 0;
 
 double gettime(void)
