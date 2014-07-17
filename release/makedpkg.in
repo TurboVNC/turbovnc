@@ -54,7 +54,6 @@ umask 022
 rm -f $PACKAGE_NAME\_$DEBARCH.deb
 TMPDIR=`mktemp -d /tmp/$PACKAGE_NAME-build.XXXXXX`
 mkdir $TMPDIR/DEBIAN
-cp pkgscripts/deb-control $TMPDIR/DEBIAN/control
 
 make install DESTDIR=$TMPDIR
 
@@ -75,6 +74,9 @@ Terminal=0
 Type=Application
 Categories=Application;Utility;X-Red-Hat-Extra;
 EOF
+
+SIZE=`du -s $TMPDIR | cut -f1`
+cat pkgscripts/deb-control | sed s/{__SIZE}/$SIZE/g > $TMPDIR/DEBIAN/control
 
 sudo chown -Rh root:root $TMPDIR/*
 dpkg -b $TMPDIR $PACKAGE_NAME\_$VERSION\_$DEBARCH.deb

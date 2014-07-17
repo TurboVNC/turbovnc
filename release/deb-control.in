@@ -6,6 +6,7 @@ Architecture: @DEBARCH@
 Essential: no
 Maintainer: The VirtualGL Project <information@TurboVNC.org>
 Homepage: http://www.TurboVNC.org
+Installed-Size: {__SIZE}
 Description: A highly-optimized version of VNC that can be used with performance-critical applications
  Virtual Network Computing (VNC) is a remote display system that allows you to
  view and interact with a desktop environment that is running on a remote
