@@ -38,8 +38,7 @@ Linux and other Un*x O/S's (except Mac)
 
 -- PAM development kit [if building the TurboVNC Server]
 
--- JDK or OpenJDK 1.5 or later (1.6 or later recommended) [if building the
-   TurboVNC Viewer]
+-- JDK or OpenJDK 1.6 or later [if building the TurboVNC Viewer]
    * For systems that do not provide a JDK, download the Oracle Java
      Development Kit from http://www.java.com
 
@@ -73,11 +72,10 @@ Windows
 Mac/Java
 --------
 
--- JDK or OpenJDK 1.5 or later (1.6 or later recommended)
-   * On OS X 10.5 and later, install the Java Developer Package, which can
-     be downloaded from http://developer.apple.com/downloads (Apple ID
-     required)
-   * For systems that do not provide a JDK, download the Oracle Java
+-- JDK 1.6 or later
+   * To build with Java 1.6, install the Java Developer Package from
+     http://developer.apple.com/downloads (Apple ID required)
+   * To build with Java 1.7 or later, download the Oracle Java
      Development Kit from http://www.java.com
 
 
