@@ -25,4 +25,4 @@
 #endif
 #define FONT_t
 #define TRANS_CLIENT
-#include "../../Xtrans/transport.c"
+#include "../../xtrans/transport.c"
