@@ -69,7 +69,7 @@ else()
 	set(INST_NAME ${CMAKE_PROJECT_NAME}-${VERSION})
 endif()
 
-set(INST_DEPENDS vncviewer putty)
+set(INST_DEPENDS vncviewer putty tcbench)
 if(TVNC_BUILDJAVA)
 	set(INST_DEFS ${INST_DEFS} "-DJAVA")
 	set(INST_DEPENDS ${INST_DEPENDS} java)
